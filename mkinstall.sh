@@ -488,7 +488,7 @@ if [ \$? == 0 ] ; then
       fi
       if [ "\$?" != "0" ] ; then
 	echo "ERROR processing license."
-	\$DEBUG exit 1
+	exit 1
       fi
     done
     # Make sure the file is valid
@@ -498,7 +498,7 @@ if [ \$? == 0 ] ; then
 	echo "  Please remove \${AGENTDATADIR}/License.bsam.new"
 	echo "  and \${AGENTDATADIR}/License.bsam,"
 	echo "  then re-run the install"
-	\$DEBUG exit 1
+	exit 1
     fi
     \$DEBUG rm -f \${AGENTDATADIR}/License.bsam 2>/dev/null
     \$DEBUG mv \${AGENTDATADIR}/License.bsam.new \${AGENTDATADIR}/License.bsam 2>/dev/null
