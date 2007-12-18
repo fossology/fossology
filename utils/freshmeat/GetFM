@@ -1,27 +1,8 @@
 #!/bin/bash
-
-#***********************************************************
-# GetFM.php
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-#*************************************************************
-
 # Script to get latest FreshMeat RDF file and drive updating the DB
 #
 # Author: mark.donohoe@hp.com
-# Version: $Id: GetFM 1558 2007-12-11 00:14:55Z markd $
+# Version: $Id: GetFM 1437 2007-11-17 04:37:18Z markd $
 
 # TODO: need to source a file with the correct paths, not hard code them.
 # 
@@ -31,13 +12,13 @@
 URL="http://freshmeat.net/backend/fm-projects.rdf.bz2"
 #DIR="/srv/fossology/repository/happy/Freshmeat/Rdfs/"
 
-DIR="/srv/fossology/erpository/firenze/Freshmeat/"
+DIR="/srv/fossology/repository/firenze/Freshmeat/"
 RDIR="${DIR}Rdfs/"
 Wget_Log="${RDIR}wget.log"
 INPUTFILES="${DIR}Input-Files/"
 RLOGS="${DIR}Run-logs/"
 # is the mkdir needed?  ReadMe says to precreate....
-@mkdir -p $RLOGS
+mkdir -p $RLOGS
 
 Date=`date +"%Y-%m-%d"`
 Compressed_file="fm-projects.rdf-${Date}.bz2"
