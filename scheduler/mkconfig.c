@@ -129,6 +129,13 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
 
+  /** delagent -- host-less **/
+  memset(Cmd,'\0',sizeof(Cmd));
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/delagent -s",BINDIR);
+  fprintf(Fout,"agent=delagent %s| ",CmdHost);
+  fprintf(Fout,Rcmd,Cmd);
+  fprintf(Fout,"\n");
+
   /** sqlagent -- host-less **/
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,"%s/sqlagent",BINDIR);
