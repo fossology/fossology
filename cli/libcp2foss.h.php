@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
-libcp2foss.h.php
+ libcp2foss.h.php
  Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
@@ -15,28 +15,28 @@ libcp2foss.h.php
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************//**
+ ***********************************************************//**
 
 /**
- * Library of functions that help cp2* do their job.
- *
- * @package libcp2foss.h.php
- *
- * @author mark.donohoe@hp.com
- * @version $Id: libcp2foss.h.php 1520 2007-12-03 21:54:59Z danger $
- *
- */
+* Library of functions that help cp2* do their job.
+*
+* @package libcp2foss.h.php
+*
+* @author mark.donohoe@hp.com
+* @version $Id: libcp2foss.h.php 1589 2007-12-15 00:56:21Z markd $
+*
+*/
 
 /**
  * funciton: hash2bucket
- * 
- * Returns the folder name to place the archive in. 
+ *
+ * Returns the folder name to place the archive in.
  *
  * The folder name returned will be in the form x-x. For example, a-c.
  * If the name of the project does not start with an alpha, it will
  * be placed in the 'Other' directory.
  *
- * Both lower and upper case letters map to the same bucket. 
+ * Both lower and upper case letters map to the same bucket.
  * e.g. A => a-c, c => a-c
  *
  * @param string $name name of the project
@@ -50,7 +50,7 @@ function hash2bucket($name){
 
   $lc_name = strtolower($name);
 
-  $map = array('a' => 'a-c', 
+  $map = array('a' => 'a-c',
                'b' => 'a-c',
                'c' => 'a-c',
                'd' => 'd-f',
@@ -78,14 +78,14 @@ function hash2bucket($name){
                'z' => 'v-z'
                );
 
-  // return 'Other' if the name starts with a non-alpha char.
-  $dir = $map[substr($lc_name,0,1)];
-  if (isset($dir)){
-    return($dir);
-  }
-  else {
-    return('Other');
-  }
+               // return 'Other' if the name starts with a non-alpha char.
+               $dir = $map[substr($lc_name,0,1)];
+               if (isset($dir)){
+                 return($dir);
+               }
+               else {
+                 return('Other');
+               }
 
 }
 
@@ -94,19 +94,19 @@ function hash2bucket($name){
  *
  * print a debug message and optionally dump a structure
  *
- * prints the message prepended with a DBG-> as the prefix.   The string 
+ * prints the message prepended with a DBG-> as the prefix.   The string
  * will have a new-line added to the end so that the caller does not have
  *  to supply it.
  *
  * @param string $message the debug message to display
  * @param mixed  $dump    if not null, will be printed using print_r.
- * 
+ *
  * @return void
  *
  */
 
 function pdbg($message, $dump=''){
-  
+
   $dbg_msg = 'DBG->' . $message . "\n";
 
   echo $dbg_msg;
@@ -117,4 +117,98 @@ function pdbg($message, $dump=''){
     echo "\n";
   }
   return;
+}
+
+/**
+ * function: wget_url
+ *
+ * wget a url and check for erorrs.
+ *
+ * This function uses tmp files, that will be removed when the
+ * calling code exits.  The use of this fuction is for getting something
+ * that will be uploaded, hence no need to keep the files around.
+ *
+ * @param string $url the url to get.
+ * @return path to file(true) or false on wget failure
+ */
+
+function wget_url($url){
+
+  // items we need
+  $proxy = "export http_proxy='web-proxy.fc.hp.com:8088'; ";
+  $options = '--no-check-certificate';
+
+  // tmp files
+  if (!($wget_logfile = tempnam('/tmp', 'wgetlog-cp2-'))){
+    echo "ERROR! could not create tmp file, $php_errormsg\n";
+    return false;
+  }
+  if (!($archive_tmp = tempnam('/tmp', 'cp2-archive-'))){
+    echo "ERROR! could not create/tmp file, $php_errormsg\n";
+    return false;
+  }
+  
+  $wCmd .= "$proxy" . "wget $options -O $archive_tmp -o $wget_logfile '$url' ";
+  //pdbg ("\$wCmd is:\n$wCmd");
+  exec("$wCmd", $dummy, $retval);
+  //pdbg("Wget return code is:$retval");
+  if ($retval != 0){
+    echo "ERROR: wget returned non-zero:$retval\n";
+    echo "See the file /tmp$wget_tmpfile for details\n";
+    return false;
+  }
+  if(!ck4errors($wget_logfile)){
+    echo "ERROR: wgetreturned 0, but there were web errors\n";
+    echo "See the file /tmp/$wget_tmpfile for details\n";
+    return false;
+  }
+  return $archive_tmp;
+}
+/**
+ * function: ck4errors
+ *
+ * Check for errors in the wget log file
+ *
+ * This function checks for various types of errors in a wget log file.
+ * Wget can return a 0 status in the face of 404 web type errors.  This
+ * function checks for those.
+ *
+ * @param string $wget_logfile path to wget log file to examine.
+ *
+ * @return true if no errors false if errors are found
+ */
+function ck4errors ($wget_logfile){
+
+  $contents = file($wget_logfile);
+  $size = count($contents);
+  $stat_line = $contents[$size-2];
+  if(ereg('^Removed ',$stat_line)){
+    // adjust for a different case, if wget downloads a .listing file
+    // it adjusts it be an index.html file instead.
+    $stat_line = $contents[$size-1];
+  }
+  //pdbg("_GFMP: Stat line is:\n$stat_line");
+  // We shouldn't find errors like this in the file, wget is supposed to
+  // have returned with 0 status.
+  if (ereg('ERROR 404:', $stat_line)){
+    echo "ERROR 404 found in file $dir_entry\n";
+    echo "Line was:\n$stat_line\n";
+    return(false);
+  }
+  elseif (ereg('ERROR 502:', $stat_line)){
+    echo "ERROR 502 found in file $dir_entry\n$stat_line\n";
+    echo "Line was:\n$stat_line\n";
+    return(false);
+  }
+  elseif (ereg('ERROR 503:', $stat_line)){
+    echo "ERROR 503 found in file $dir_entry\n$stat_line\n";
+    echo "Line was:\n$stat_line\n";
+    return(false);
+  }
+  elseif (ereg('ERROR 400:', $stat_line)){
+    echo "ERROR 400 found in file $dir_entry\n$stat_line\n";
+    echo "Line was:\n$stat_line\n";
+    return(false);
+  }
+  return(true);
 }

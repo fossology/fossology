@@ -39,21 +39,20 @@
  *        directory tree loading all files and sub-directories under the tree.
  *        The -a <archive> option is used to specify the path to the directory
  *        tree to be consumed.
- * @param string $dash-A switch to indicate the alpha folders should be used.
+ * @param string $dash-A switch to indicate that alpha folders should be used.
  *        Alpha folders are folders that look like a-c and are used to group
  *        large uploads by the first character of the file folder name.  Using
  *        alpha folders can help keep the left navagation tree smaller.
  *
  * @package cp2foss
  * @author mark.donohoe@hp.com
- * @version $Id: cp2foss.php 1553 2007-12-10 18:58:44Z markd $
+ * @version $Id: cp2foss.php 1589 2007-12-15 00:56:21Z markd $
  *
  * @todo remove default 'parent folder'.
  * @todo Add in recursion
  * @todo finish parameter checks.
  * @todo Finsih doc'ing all functions etc...
  *
- * Defect: if the archive is a url, we can't deal with it.
  * Defect: No way to specify a parent folder description from the cli....
  *
  * Issue with recursion: the folder parameter doesn't make much sense in this
@@ -73,12 +72,12 @@ require_once("pathinclude.h.php");
 require_once("$WEBDIR/webcommon.h.php");
 require_once("$WEBDIR/jobs.h.php");
 require_once("$WEBDIR/db_postgres.h.php");
-require_once("$LIBDIR/libcp2foss.h.php");
-#require_once("./libcp2foss.h.php");
+//require_once("$LIBDIR/libcp2foss.h.php");
+require_once("./libcp2foss.h.php");
 
 $usage = <<< USAGE
 Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> \
-       -d "description" [-f <file-of-parameters>] [-A [n]]
+       -d "description" [-f <file-of-parameters>] [-A [n]] [-w]
    Where:
    <folder-path> is the folder path to store the upload under.
    <upload-name> is the name of the file folder to store this archive in
@@ -96,16 +95,14 @@ Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> \
    bar and randy would be placed under the parent folders.
    Mysrcs/foo, Mysrcs/bar, Othersrc/randy.
 
-   -A [n] turns on alpha bucket mode.  The archive is place in a folder 
-          corresponding to the first letter of the leaf folder (usually 
-          the same name as the archive).  For example archive folder ark
-          would be placed in the alpha bucket folder a-c. The optional 
-          argument 'n' is the letter-range of the bucket.  The default is
-          3.  For example, d-f. The 'remainder' letters form the last alpha
-          bucket.  This option is useful for large archives like freshmeat.
-          NOTE: due to a defect, -A should always be the last parameter
-          if used with the file input (-f).
-
+   -A  turns on alpha bucket mode.  The archive is place in a folder 
+       corresponding to the first letter of the leaf folder (usually 
+       the same name as the archive).  For example archive folder ark
+       would be placed in the alpha bucket folder a-c. The bucket size is
+       3.  For example, d-f. The 'remainder' letters form the last alpha
+       bucket.  This option is useful when downloading large number of archives
+       like from freshmeat.
+         
 USAGE;
 
 $parent_folder = 'Repository Directory';  // default if non given
@@ -128,20 +125,13 @@ $cap_a = false;
 for ($i = 1; $i < $argc; $i++) {
   switch ($argv[$i]) {
     case '-A':
-      $i++;
+      //$i++;
       $cap_a = true;
-      if (isset($argv[$i])) {
-        //      $bucket_size = $argv[$i];
-        echo "Sorry, this option has not yet been implimented\n";
-        echo "Using the default size of 3, continuing.....\n";
-      }
-      // default size
-      else {
-        $bucket_size = 3;
-      }
+      $bucket_size = 3;
       break;
     case '-a':
       $i++;
+      //pdbg("MAIN: processing -a");
       if (isset($argv[$i])) {
         $archive = $argv[$i];
       }
@@ -186,6 +176,9 @@ for ($i = 1; $i < $argc; $i++) {
         die("ERROR: Must specify a folder path after -p");
       }
       break;
+    case '-w':
+      $fetch_url = true;
+      break;
     case '-h':
       echo $usage;
       exit(0);
@@ -199,12 +192,8 @@ for ($i = 1; $i < $argc; $i++) {
 
 // BUG: need to parameter check, did we get all required parameters?
 
-#echo "PARAMETERS:\n";
-#echo "PF:$parent_folder\nN:$folder\nD:$description\nA:$archive\n\n";
-
-// check bucket size, it must be between the values of 1 and 26.
-// not implimented for now... as it reworks the function.... may turn some
-// of these functions into classes.
+//echo "PARAMETERS:\n";
+//echo "PF:$parent_folder\nN:$folder\nD:$description\nA:$archive\nFURL:$fetch_url\n\n";
 
 $path = "{$DATADIR}/dbconnect/{$PROJECT}";
 
@@ -220,13 +209,8 @@ if (!$_pg_conn) {
  1. default parent folder
  2. no description, create as needed
  3. any special setups needed for recursion?
-
- NOTE: the parent direcotry is always what is passed in.  Need a better
- name, 'project'? anywho, the point is:
-
- - Parent: e.g Fedora-8 or FreshMeat
- - folder: The name passed in, this folder will be placed in an alpha
- folder based on the 1st letter of the folder name.
+ - folder-path: e.g Fedora-8 or FreshMeat
+ - folder: The name passed in to use for the archive file folder
  - For example, if -p FreshMeat -n buzzard is passed in, the following
  folder structure will be created.
 
@@ -259,20 +243,24 @@ if($fflag){
  }
  */
 
+// It's either a url or an archive
+if($fetch_url){
+  //pdbg("MAIN: processing url \$archive is:\n$archive");
+  echo "Getting $archive with wget\n";
+  if(!($url_archive = wget_url($archive))){
+    echo "Error: wget failed, see previous messages and wget log\n";
+    echo "Due to this Fatal Error, no upload can be performed\n";
+    exit(1);
+  }
+  echo "wget done\n";
+}
 // if archive doesn't exist, stop.
-// this will break when the archive is a url....so must check after dertmining
-// that we have a file of some sort...
-
-if(!(ck_archive($archive))){
+elseif(!(ck_archive($archive))){
   echo "Stopping, can't find archive\n";
   exit(1);
 }
 
-
-// check for slashes and apppend $alpha folder to the folder path
-// Need to check 1st and last character, if /, strip off, explode
-// will return null entries if you don't.
-
+// check for slashes and append $alpha folder to the folder path
 // strip leading / if there is one, causes problems with explode
 $foldr_path = ltrim($fpath, '/');
 
@@ -280,7 +268,7 @@ $foldr_path = ltrim($fpath, '/');
 $len = strlen($foldr_path);
 $len--;
 if(($lc = substr($foldr_path,$len,1)) == '/'){
-  $foldr_path = ltrim($foldr_path, '/');
+  $foldr_path = rtrim($foldr_path, '/');
 }
 
 if($cap_a){
@@ -291,10 +279,6 @@ if($cap_a){
 
 //echo "DBG->MAIN:\$fpath is:$fpath\n";
 //echo "DBG->MAIN:\$foldr_path is:$foldr_path\n";
-
-// Add in the folder name passed in with -n
-
-//$foldr_path .= "/$folder";
 
 //$folder_cache = array();
 
@@ -329,10 +313,21 @@ if (ck_4_upload($folder_cache, $folder)){
 
 $folder_fk = end($folder_cache);
 
-//echo "DBG-Main: folder before upload:$folder\n";
-if (!(upload_archive($folder_fk, $folder, $description, $archive))){
-  echo "Unrecoverable error, during upload";
-  exit(1);
+//pdbg("Main: folder before upload:$folder");
+if($fetch_url){
+  if (!(upload_archive($folder_fk, $folder, $description, $url_archive))){
+    echo "Unrecoverable error, during upload\n";
+    exit(1);
+  }
+  else {
+    echo "The jobs for the archive\n$archive\nfound in $url_archive have been scheduled\n\n";
+  }
+}
+else{
+  if (!(upload_archive($folder_fk, $folder, $description, $archive))){
+    echo "Unrecoverable error, during upload\n";
+    exit(1);
+  }
 }
 
 // use the variable $foldr_path, as that has the alpha folder on the end of it.
@@ -390,7 +385,9 @@ function ck_4_upload($folder_cache, $folder_name){
   $folder_pk = end($folder_cache);
   //  pdbg("CK4U: \$folder_pk is:$folder_pk");
 
-  $sql_up = "select name, upload_pk from leftnav where parent=$folder_pk and foldercontents_mode=2";
+  $sql_up =
+  "select name, upload_pk from leftnav where parent=$folder_pk and foldercontents_mode=2";
+
   $uploaded  = db_queryall($sql_up);
   //  pdbg("CK4U: \$uploaded is:", $uploaded);
   $rows = count($uploaded);
@@ -475,17 +472,15 @@ function create_folder($parent_fk, $folder_name, $description){
  */
 function create_folders($folder_cache, $folder_path){
 
-
-  //  echo "DBG->CF: On entry, folder_cache is:\n";
-  //  print_r($folder_cache);
+  //pdbg("CF: On entry, folder_cache is:",$folder_cache);
 
   // used to determine if we are at the 1st folder.
   $cache_key = key($folder_cache);
 
   for ($fpi=0; $fpi<count($folder_cache); $fpi++){
     // top folder is a special case
-    //    echo "DBG:CF:\$folder_cache[$folder_path[$fpi]]:{$folder_cache[$folder_path[$fpi]]}\n";
-    //    echo "DBG->CF:\$folder_path[$fpi] is:$folder_path[$fpi]\n";
+    //pdbg("CF:\$folder_cache[$folder_path[$fpi]]:{$folder_cache[$folder_path[$fpi]]}");
+    //pdbg("CF:\$folder_path[$fpi] is:$folder_path[$fpi]");
     if ($folder_path[$fpi] == $cache_key){
       //      echo "DBG->CF: checking top folder $folder_path[$fpi]\n";
       //      print_r($folder_cache[$folder_path[$fpi]]);
@@ -688,8 +683,9 @@ function read_parms_file($parms_file){
 
   echo "Using file $parms_file for input\n";
 
-  // alpha buckets are off by default.
-  $cap_a = false;
+  // alpha buckets, urls are off by default.
+  $cap_a     = false;
+  $fetch_url = false;
 
   $INfile = fopen("$parms_file", 'r') or
   die("Can't open $parms_file, $php_errormsg\n");
@@ -704,32 +700,21 @@ function read_parms_file($parms_file){
     if(preg_match('/^#/', $line)){
       continue;
     }
-    // before splitting, check for a -A on the end of the line and process it.
-    // this is a special case that I haven't been able to create a pattern
-    //for yet
-    $matches = 0;
-    $matches = preg_match("/\s*?-A\s*?/", $line, $dash_A, PREG_OFFSET_CAPTURE);
-    //    pdbg("\$dash_A is:", $dash_A);
-    //    pdbg("\$matches is:$matches");
-    if($matches){
-      $cap_a = true;
-      $start = $dash_A[0][1];
-      $line = substr($line, $start, 3);
-      //      pdbg("\$line is: $line");
-    }
-    $parms = preg_split
-    ("/(-[a-zA-Z]) (\'|\")*?/", $line, -1, PREG_SPLIT_DELIM_CAPTURE);
-    //    pdbg("\$parms is:", $parms);
-    $pcount = count($parms);
+    // Parsing the line is very hard with reqx's. I give up.  So
+    // We use the shell to do it for us.... performance at this point
+    // is not an issue.
+    $dummy = exec("./p.sh $rline",$parms, $retval);
+    //pdbg("after shell call, \$parms is",$parms);
 
-    for($p=1; $p<$pcount; $p++){
+    $pcount = count($parms);
+    for($p=0; $p<$pcount; $p++){
       //    echo "\$parms[$p]is:$parms[$p]";
       $token = rtrim($parms[$p]);
       $token = ltrim($token);
-      //      print("\$token is:$token");
+      //pdbg("\$token is:$token \$p is:$p");
       switch($token){
         case '-A':
-          pdbg("Matched -A");
+          //pdbg("Matched -A");
           $cap_a = true;
           //	$p++;
           //	$bucket_size = rtrim($parms[$p]);
@@ -756,20 +741,39 @@ function read_parms_file($parms_file){
           $raw_name = rtrim($raw_name, '\'"');
           $fpath = ltrim($raw_name, '\'"');
           break;
+        case '-w':
+          $fetch_url = true;
+          break;
         default:
           echo "ERROR, unsupported option $token\n";
           break;
       }
     }
-    //    pdbg("FP:$fpath FN:$folder_name A:$archive AA:$cap_a D:$desc\n\n");
+    //pdbg("RFP: FP:$fpath FN:$folder_name\nA:$archive\nAA:$cap_a W:$fetch_url D:$desc\n\n");
     // verify input parameters
     // if the description is null (empty), put default in: Future enhancement
     //    pdbg("RPF: Out of while loop, checking archive");
 
+    // It's either a url or an archive
     // if archive doesn't exist, don't create folders, skip to next line in
-    // input file.
-    if(!(ck_archive($archive))){
-      $cap_a = false;
+    // input file. Same if the wget does not succeed.
+    if($fetch_url){
+      //pdbg("RP: processing url \$archive is:\n$archive");
+      echo "Getting $archive\nusing wget\n";
+      if(!($url_archive = wget_url($archive))){
+        echo "Error: wget failed, see previous messages and wget log\n";
+        echo "Due to this Fatal Error, no upload can be performed\n";
+        $cap_a     = false;
+        $fetch_url = false;
+        $parms = array();
+        continue;
+      }
+      echo "Archive sucessfully downloaded to $url_archive\n";
+    }
+    elseif(!(ck_archive($archive))){
+      $cap_a     = false;
+      $fetch_url = false;
+      $parms = array();
       echo "Warning: Errors with archive Skipping\n";
       continue;
     }
@@ -779,19 +783,15 @@ function read_parms_file($parms_file){
     // Need to check 1st and last character, if /, strip off, explode
     // will return null entries if you don't.
 
-
     // strip leading / if there is one
     $fldr_path = ltrim($fpath, '/');
-    //    echo "DBG->RPF:\$fldr_path is:$fldr_path\n";
 
     // strip last charcter if it's a /
     $len = strlen($fldr_path);
     $len--;
     if(($lc = substr($fldr_path,$len,1)) == '/'){
-      $fldr_path = ltrim($fldr_path, '/');
+      $fldr_path = rtrim($fldr_path, '/');
     }
-
-    //    pdbg("RPF: \$cap_a is:", $cap_a);
     // add in alpha folder?
     if($cap_a){
       // Determine the alpha bucket to use
@@ -817,22 +817,40 @@ function read_parms_file($parms_file){
     if (ck_4_upload($folder_cache, $folder_name)){
       echo
       "Warning: $folder_name has already been uploaded into the folder path\n$fldr_path, Skipping...\n\n";
-      $cap_a = false;
+      $cap_a     = false;
+      $fetch_url = false;
+      $parms = array();
       continue;
     }
 
     // get the folder fk to use in the upload
     $folder_fk = end($folder_cache);
 
-    if (!(upload_archive($folder_fk, $folder_name, $desc, $archive))){
-      echo "Unrecoverable error, stopping upload for $folder_name.";
-      $cap_a = false;
-      continue;
+    if($fetch_url){
+      if (!(upload_archive($folder_fk, $folder_name, $desc, $url_archive))){
+        echo "Unrecoverable error, Stopping Upload for $folder_name\n";
+        $cap_a     = false;
+        $fetch_url = false;
+        $parms = array();
+        continue;
+      }
+      echo "The jobs for the archive\n$archive\nfound in $url_archive have been scheduled\n\n";
     }
-
+    else{
+      if (!(upload_archive($folder_fk, $folder_name, $desc, $archive))){
+        echo "Unrecoverable error, Stopping Upload for $folder_name\n";
+        $cap_a     = false;
+        $fetch_url = false;
+        $parms = array();
+        continue;
+      }
+      echo "The jobs for the archive\n$archive\n have been scheduled\n\n";
+    }
     echo "Archive:\n$archive\nis scheduled to be loaded into folder: $fldr_path/$folder_name\n\n";
-    // reset cap_a for the next line read
-    $cap_a = false;
+    // reset for the next line read
+    $cap_a     = false;
+    $fetch_url = false;
+    $parms = array();
   }
 }
 
@@ -862,11 +880,13 @@ function upload_archive($folder_fk, $folder_name, $description, $archive){
   }
 
   $jobQ = job_create_unpack($upload_fk, $archive, '');
-
-  job_create_defaults($upload_fk, $jobQ);
-
-  echo "The jobs for\n$archive\nhave been scheduled\n\n";
-
+  if(isset($jobQ)){
+    job_create_defaults($upload_fk, $jobQ);
+  }
+  else {
+    echo "INTERNAL ERROR! job_create_unpack did not return a jobq:$jobQ\n";
+    return(false);
+  }
   return(true);
 }
 
