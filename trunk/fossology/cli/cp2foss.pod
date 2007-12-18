@@ -1,0 +1,106 @@
+# cp2foss.pod man page input file
+# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+#
+# VERSION: $Id: cp2foss.pod 1514 2007-12-01 01:06:14Z markd $
+
+=head1 cp2foss: load one or more files or archives into the fossology DB.
+
+=head1 SYNOPSIS
+
+cp2foss [-h] {-p <folder-path> -n <folder-name> -a <path-to-archive>
+        -d "description" | [-f <file-of-parameters>]} [-A]
+
+
+=head1 DESCRIPTION
+
+B<cp2foss> (copy to foss) will load a single file or tar'ed archive into the
+folder specificed by B<-n>, under the folder-path specified with B<-p>.
+The I<folder-path> and I<folder-name> do not need to exist. B<cp2foss> 
+will create them as needed.
+
+If more than a single archive needs to be loaded, a file of input
+parameters can be supplied using the B<-f> option.  If the B<-f>
+option is used all of the other options are ignored.
+
+=head2 Options
+
+=over
+
+=item B<-A>
+
+Turn on I<alpha-folders>.  Default is B<off>. When large amounts of
+archives are loaded, navigating through all the folders can be
+difficult.  This option will group packages under alpha folders based
+on the 1st letter of the package name.  For example, your folder path
+is I<ProjX/pass1>, and the folder name is I<abcd>.  Using alpha-folders the
+package abcd would end up under a folder path I<ProjX/pass/a-c/abcd>.
+
+=item B<-a> I<path-to-archive>
+
+Fully qualified path to the archive to load
+
+=item B<-d> I<description>
+
+A short meaningful description the captures what the folder will hold.
+Description must be quoted with either single or double quotes.
+
+=item B<-n> I<folder-name>
+
+The folder name that will be used to store the archive in the
+date-base.  Only one upload into a file folder is allowed to avoid
+storing dulicate uploads.  The file folder is checked to see if it has been 
+uploaded into.  If it has, no other uploads are allowed into that file folder.
+
+Use different folder paths or folder names to upload the same archive
+multiple times.  The underlying data will not be duplicated, it will be reused
+by the application software.  This helps preserve disk space.
+
+
+=item B<-p> I<folder-path>
+
+The name of the folder-path that will hold the I<folder_name>
+specified with B<-n>.  The folder path does not have to exist.  It
+will be created as needed.
+
+=item B<-f> I<file-of-input-parameters>
+
+I<file-of-input-parameters> is a file that contains the parameters
+needed to load an archive.  Typical usage is to load multiple
+archives.  For example, a file with the contents:
+
+=over
+
+     -p Mysrcs -n foo -a /tmp/mysrcs/foo.c -d "the foo program"
+
+     -p Mysrcs -n bar -a /tmp/mysrcs/bar.c -d "the bar program"
+
+     -p Othersrc -n randy /tmp/other/randy -d "somebodies randy program"
+
+=back
+
+The above file would load 3 archives, foo.c, bar.c and randy.  Folders
+I<Mysrcs> and I<Othersrc> would be created if they did not exist.  folders
+for I<foo> I<bar> and I<randy> would be placed under the parent folders.
+I<Mysrcs/foo, Mysrcs/bar, Othersrc/randy>.
+
+=back
+
+=head1 EXAMPLES
+
+C<cp2foss -p Mom -n son -d "Sonny program, for cher" -a /pub/archive/sonny>
+
+Would load the archive called I<sonny> in the folder I<son> under the folder
+path I<Mom>.
+
+C<cp2foss -f /pub/lotsOarchives>
+
+Would read the file /pub/lotsOarchives and process each line.  If
+there were no errors, each archive specified in each line would be
+uploaded into the data-base.
+
+=head1 AUTHOR
+
+Mark Donohoe for the Hewlett-Packard Company
+
+=head1 SEE ALSO
+

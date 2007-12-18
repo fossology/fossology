@@ -1,0 +1,17 @@
+With regards to md5.h and md5.c:
+== BEGIN QUOTE =================
+You're allowed to do whatever you like with this software (including
+re-distribution in source and/or binary form, with or without
+modification), provided that credit is given where it is due and any
+modified versions are marked as such.  There's absolutely no warranty.
+
+Note that you don't have to re-distribute this software under these
+same relaxed terms.  In particular, you're free to place modified
+versions under (L)GPL, thus disallowing further re-distribution in
+binary-only form.
+== END QUOTE =================
+
+Original license source:
+http://www.openwall.com/Owl/
+Owl source code, native/Owl/packages/popa3d/popa3d/LICENSE, March 20, 2002.
+
