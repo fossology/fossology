@@ -46,7 +46,7 @@
  *
  * @package cp2foss
  * @author mark.donohoe@hp.com
- * @version $Id: cp2foss.php 1591 2007-12-17 23:15:16Z markd $
+ * @version $Id: cp2foss.php 1553 2007-12-10 18:58:44Z markd $
  *
  * @todo remove default 'parent folder'.
  * @todo Add in recursion
@@ -250,6 +250,11 @@ if($fflag){
 // It's either a url or an archive
 if($fetch_url){
   //pdbg("MAIN: processing url \$archive is:\n$archive");
+  // Check to make sure it's a valid http/s request
+  if (!(preg_match('|^http[s]*?://|',$archive))){
+    echo "ERROR: archive is expected to be a url\n";
+    exit(1);
+  }
   echo "Getting $archive with wget\n";
   if(!($url_archive = wget_url($archive))){
     echo "Error: wget failed, see previous messages and wget log\n";
@@ -763,6 +768,10 @@ function read_parms_file($parms_file){
     // input file. Same if the wget does not succeed.
     if($fetch_url){
       //pdbg("RP: processing url \$archive is:\n$archive");
+      if (!(preg_match('|^http[s]*?://|',$archive))){
+        echo "ERROR: archive is expected to be a url\n";
+        exit(1);
+      }
       echo "Getting $archive\nusing wget\n";
       if(!($url_archive = wget_url($archive))){
         echo "Error: wget failed, see previous messages and wget log\n";
