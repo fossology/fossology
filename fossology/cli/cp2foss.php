@@ -46,7 +46,7 @@
  *
  * @package cp2foss
  * @author mark.donohoe@hp.com
- * @version $Id: cp2foss.php 1589 2007-12-15 00:56:21Z markd $
+ * @version $Id: cp2foss.php 1591 2007-12-17 23:15:16Z markd $
  *
  * @todo remove default 'parent folder'.
  * @todo Add in recursion
@@ -77,7 +77,7 @@ require_once("./libcp2foss.h.php");
 
 $usage = <<< USAGE
 Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> \
-       -d "description" [-f <file-of-parameters>] [-A [n]] [-w]
+       -d "description" [-f <file-of-parameters>] [-A] [-w]
    Where:
    <folder-path> is the folder path to store the upload under.
    <upload-name> is the name of the file folder to store this archive in
@@ -102,6 +102,10 @@ Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> \
        3.  For example, d-f. The 'remainder' letters form the last alpha
        bucket.  This option is useful when downloading large number of archives
        like from freshmeat.
+       
+    -w Indicates that the argument to -a is going to be a url.  cp2foss
+       will use the url supplied and the wget to get the archive before
+       uploading.
          
 USAGE;
 
