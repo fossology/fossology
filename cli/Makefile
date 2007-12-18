@@ -39,6 +39,7 @@ $(iPATHFILE): ../Makefile.conf
 
 MANpages:
 	echo "MANpages target"; \
+	chmod a+x ./mkpod
 	./mkpod $(MAN1SRC)
    
 InstallationCreate:
