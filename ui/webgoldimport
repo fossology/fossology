@@ -1,0 +1,67 @@
+#!/usr/bin/php -f
+<?php
+/***********************************************************
+ webgoldimport
+ Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+***********************************************************/
+// Usage: webgoldimport upload_pk tempfile username [keep]
+
+require_once("pathinclude.h.php");
+require_once("$WEBDIR/common.h.php");
+
+list($progname, $uploadpk, $tmpfile, $username, $keep) = $argv;
+//putenv("PATH=$ENVPATH" . getenv('PATH'));
+
+$checksum = exec("$AGENTDIR/checksum '" . escapeshellcmd($tmpfile) . "'")
+		or die("checksum failed");
+
+list($checksum, $dummy) = explode(" ", $checksum);
+
+list($sha1, $md5, $len) = explode('.', $checksum);
+
+echo "sha1=$sha1 md5=$md5 len=$len pfileid=$pfileid\n";
+
+exec("$LIBEXECDIR/repexist files $sha1.$md5.$len", $dummy, $r);
+if ($r == 0) {	// file in files, link to gold
+    $a = exec("$LIBEXECDIR/reppath files $sha1.$md5.$len");
+    exec("$LIBEXECDIR/repcopyin gold $a $sha1.$md5.$len") or die("$LIBEXECDIR/repcopyin");
+} else {
+    exec("$LIBEXECDIR/repcopyin gold $tmpfile $sha1.$md5.$len") or die("$LIBEXECDIR/repcopyin");
+}
+
+// XXX should probably use findorcreatepfile()
+// File is in the gold repo now
+$pfileid = db_query1("SELECT pfile_pk FROM pfile
+				WHERE pfile_sha1 = '$sha1'
+				AND pfile_md5 = '$md5'
+				AND pfile_size = $len");
+
+//log_write("debug", "pfileid is $pfileid", "webgoldimport");
+if (empty($pfileid)) {
+    db_query("INSERT INTO pfile (pfile_sha1, pfile_md5, pfile_size)
+				VALUES ('$sha1', '$md5', $len)");
+    $pfileid = db_query1("SELECT currval('pfile_pfile_pk_seq')");
+}
+
+// XXX THIS CAN FAIL!!! adjust exit status
+// get the ufile_pk from the upload rec
+$ufilepk = db_query1("select ufile_fk from upload where upload_pk=$uploadpk");
+//log_write("debug", "ufilepk is $ufilepk", "webgoldimport");
+db_query("UPDATE ufile SET pfile_fk = $pfileid WHERE ufile_pk = $ufilepk");
+
+if (empty($keep))
+    @unlink($tmpfile);
+?>
