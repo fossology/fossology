@@ -56,7 +56,7 @@ FOSSology Open Source Analysis Project
           <tr><td valign="top">
             <table cellpadding="5" cellspacing="0" border="0" bgcolor="#cccccc" width="100%">
               <tr><td valign="top" align="center">
-	        <strong>Fossology RELEASE: Version 1.0</strong>
+	        <strong>Fossology RELEASE: Version 0.6.0</strong>
               </td></tr>
             </table>
           </td></tr>
@@ -66,8 +66,9 @@ FOSSology Open Source Analysis Project
         <table cellpadding="10" cellspacing="0">
           <tr><td>
 	    <p>
-	    1.0 Features:
-	    <br>  License Analysis
+	    0.6.0 Features:
+	    <br>  Web-based GUI
+            <br>  License Analysis
 	    <p>
 	    Future Features - Coming Soon:
 	    <br>  Code Re-Use Detection
@@ -88,7 +89,7 @@ Copyright &copy; 2007 Hewlett-Packard Development Company, L.P.
 <br>
 <i>
 Last Modified 
-Fri, 30 Nov 2007 15:58:14 -0600
+Tue, 18 Dec 2007 15:58:14 -0600
 </i>
 </center>
 </small>
