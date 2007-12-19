@@ -56,7 +56,7 @@ read < "${RDIR}Previous-top1k" Previous_top1k
 current=`cat "${RDIR}Current-top1k"`
 previous=`cat "${RDIR}Previous-top1k"`
 echo  "Doing..."
-echo "$diffm $current $previous -o $INPUTFILES\n"
+echo "diffm $current $previous -o $INPUTFILES"
 diffm -f "$current" "$previous" -o "$INPUTFILES" > "${RLOGS}log.diffm.${Date}"
 drtn=$?
 #echo "diffm returned the following:$drtn"
