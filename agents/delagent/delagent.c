@@ -131,10 +131,8 @@ void	DeleteLicense	(long ProjectId)
   else
 	{
 	MyDBaccess(DB,"COMMIT;");
-	MyDBaccess(DB,"ANALYZE agent_lic_status;");
-	MyDBaccess(DB,"ANALYZE agent_lic_meta;");
-	MyDBaccess(DB,"VACCUUM agent_lic_status;");
-	MyDBaccess(DB,"VACCUUM agent_lic_meta;");
+	MyDBaccess(DB,"VACCUUM ANALYZE agent_lic_status;");
+	MyDBaccess(DB,"VACCUUM ANALYZE agent_lic_meta;");
 	}
 
   DBclose(VDB);
@@ -227,30 +225,17 @@ void	DeleteProject	(long ProjectId)
   else
 	{
 	MyDBaccess(DB,"COMMIT;");
-
-	MyDBaccess(DB,"ANALYZE agent_lic_status;");
-	MyDBaccess(DB,"ANALYZE agent_lic_meta;");
-	MyDBaccess(DB,"ANALYZE attrib;");
-	MyDBaccess(DB,"ANALYZE ufile;");
-	MyDBaccess(DB,"ANALYZE pfile;");
-	MyDBaccess(DB,"ANALYZE foldercontents;");
-	MyDBaccess(DB,"ANALYZE upload;");
-	MyDBaccess(DB,"ANALYZE uploadtree;");
-	MyDBaccess(DB,"ANALYZE jobdepends;");
-	MyDBaccess(DB,"ANALYZE jobqueue;");
-	MyDBaccess(DB,"ANALYZE job;");
-
-	MyDBaccess(DB,"VACCUUM agent_lic_status;");
-	MyDBaccess(DB,"VACCUUM agent_lic_meta;");
-	MyDBaccess(DB,"VACCUUM attrib;");
-	MyDBaccess(DB,"VACCUUM ufile;");
-	MyDBaccess(DB,"VACCUUM pfile;");
-	MyDBaccess(DB,"VACCUUM foldercontents;");
-	MyDBaccess(DB,"VACCUUM upload;");
-	MyDBaccess(DB,"VACCUUM uploadtree;");
-	MyDBaccess(DB,"VACCUUM jobdepends;");
-	MyDBaccess(DB,"VACCUUM jobqueue;");
-	MyDBaccess(DB,"VACCUUM job;");
+	MyDBaccess(DB,"VACCUUM ANALYZE agent_lic_status;");
+	MyDBaccess(DB,"VACCUUM ANALYZE agent_lic_meta;");
+	MyDBaccess(DB,"VACCUUM ANALYZE attrib;");
+	MyDBaccess(DB,"VACCUUM ANALYZE ufile;");
+	MyDBaccess(DB,"VACCUUM ANALYZE pfile;");
+	MyDBaccess(DB,"VACCUUM ANALYZE foldercontents;");
+	MyDBaccess(DB,"VACCUUM ANALYZE upload;");
+	MyDBaccess(DB,"VACCUUM ANALYZE uploadtree;");
+	MyDBaccess(DB,"VACCUUM ANALYZE jobdepends;");
+	MyDBaccess(DB,"VACCUUM ANALYZE jobqueue;");
+	MyDBaccess(DB,"VACCUUM ANALYZE job;");
 	}
 
   /***********************************************/
@@ -459,10 +444,8 @@ void	DeleteFolder	(long FolderId)
   VDB = DBmove(DB);
   ListFoldersRecurse(VDB,FolderId,0,-1,1);
   DBclose(VDB);
-  MyDBaccess(DB,"ANALYZE foldercontents;");
-  MyDBaccess(DB,"ANALYZE folder;");
-  MyDBaccess(DB,"VACCUUM foldercontents;");
-  MyDBaccess(DB,"VACCUUM folder;");
+  MyDBaccess(DB,"VACCUUM ANALYZE foldercontents;");
+  MyDBaccess(DB,"VACCUUM ANALYZE folder;");
 } /* DeleteFolder() */
 
 /**********************************************************************/
