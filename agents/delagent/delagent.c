@@ -1,5 +1,5 @@
 /********************************************************
- delagent: Remove a project from the DB and repository
+ delagent: Remove an upload from the DB and repository
 
  Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
  
@@ -48,9 +48,6 @@ char	SQL[MAXSQL];
 /* For heartbeats */
 long	ItemsProcessed=0;
 
-/* forward declarations */
-void	ProcessProject	(long Pid);
-
 /**************************************************
  ShowHeartbeat(): Given an alarm signal, display a
  heartbeat.
@@ -89,13 +86,13 @@ int	MyDBaccess	(void *V, char *S)
 } /* MyDBaccess() */
 
 /*********************************************
- DeleteLicense(): Given a project ID, delete all
+ DeleteLicense(): Given an upload ID, delete all
  licenses associated with it.
  The DoBegin flag determines whether BEGIN/COMMIT
  should be called.
  Do this if you want to reschedule license analysis.
  *********************************************/
-void	DeleteLicense	(long ProjectId)
+void	DeleteLicense	(long UploadId)
 {
   void *VDB;
   char *S;
@@ -105,7 +102,7 @@ void	DeleteLicense	(long ProjectId)
 
   /* Get the list of pfiles to process */
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_fk) FROM uptreeup WHERE upload_fk=%ld;",ProjectId);
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_fk) FROM uptreeup WHERE upload_fk=%ld;",UploadId);
   MyDBaccess(DB,SQL);
   VDB = DBmove(DB);
 
@@ -144,9 +141,9 @@ void	DeleteLicense	(long ProjectId)
 } /* DeleteLicense() */
 
 /*********************************************
- DeleteProject(): Given a project ID, delete it.
+ DeleteUpload(): Given an upload ID, delete it.
  *********************************************/
-void	DeleteProject	(long ProjectId)
+void	DeleteUpload	(long UploadId)
 {
   void *VDB;
   char *S;
@@ -156,38 +153,38 @@ void	DeleteProject	(long ProjectId)
 
   /* Get the list of pfiles to delete */
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_fk),pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile FROM uptreeup WHERE upload_fk=%ld EXCEPT SELECT DISTINCT(A.pfile_fk),A.pfile_sha1 || '.' || A.pfile_md5 || '.' || A.pfile_size FROM uptreeup AS A join uptreeup as B on B.pfile_pk = A.pfile_fk WHERE A.upload_fk = %ld AND B.upload_fk != %ld;",ProjectId,ProjectId,ProjectId);
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_fk),pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile FROM uptreeup WHERE upload_fk=%ld EXCEPT SELECT DISTINCT(A.pfile_fk),A.pfile_sha1 || '.' || A.pfile_md5 || '.' || A.pfile_size FROM uptreeup AS A join uptreeup as B on B.pfile_pk = A.pfile_fk WHERE A.upload_fk = %ld AND B.upload_fk != %ld;",UploadId,UploadId,UploadId);
   MyDBaccess(DB,SQL);
   VDB = DBmove(DB);
 
   /***********************************************/
   /* Blow away jobs */
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM jobdepends WHERE jdep_jq_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk IN (SELECT job_pk FROM job WHERE job_upload_fk = %ld));",ProjectId);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM jobdepends WHERE jdep_jq_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk IN (SELECT job_pk FROM job WHERE job_upload_fk = %ld));",UploadId);
   MyDBaccess(DB,SQL);
 
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM jobqueue WHERE jq_job_fk IN (SELECT job_pk FROM job WHERE job_upload_fk = %ld);",ProjectId);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM jobqueue WHERE jq_job_fk IN (SELECT job_pk FROM job WHERE job_upload_fk = %ld);",UploadId);
   MyDBaccess(DB,SQL);
 
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM job WHERE job_upload_fk = %ld;",ProjectId);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM job WHERE job_upload_fk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   /***********************************************/
   /* Blow upload tree */
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM uploadtree WHERE upload_fk = %ld;",ProjectId);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM uploadtree WHERE upload_fk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM upload WHERE upload_pk = %ld;",ProjectId);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM upload WHERE upload_pk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   /***********************************************/
   /* Delete the folder */
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE (foldercontents_mode & 1) != 0 AND child_id = %ld;",ProjectId);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE (foldercontents_mode & 1) != 0 AND child_id = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   /***********************************************/
@@ -268,11 +265,11 @@ void	DeleteProject	(long ProjectId)
 	/* use heartbeat to say how many are completed */
 	raise(SIGALRM);
 	}
-} /* DeleteProject() */
+} /* DeleteUpload() */
 
 /*********************************************
  ListFoldersRecurse(): Draw folder tree.
- if DelFlag is set, then all child projects are
+ if DelFlag is set, then all child uploads are
  deleted and the folders are deleted.
  *********************************************/
 void	ListFoldersRecurse	(void *VDB, long Parent, int Depth, int Row, int DelFlag)
@@ -309,7 +306,7 @@ void	ListFoldersRecurse	(void *VDB, long Parent, int Depth, int Row, int DelFlag
 		}
 	else
 		{
-		if (DelFlag) DeleteProject(atol(DBgetvalue(VDB,r,3)));
+		if (DelFlag) DeleteUpload(atol(DBgetvalue(VDB,r,3)));
 		else printf("%4s :: Contains: %s\n","--",DBgetvalue(VDB,r,2));
 		}
 	}
@@ -323,7 +320,7 @@ void	ListFoldersRecurse	(void *VDB, long Parent, int Depth, int Row, int DelFlag
 	  case 1:	/* skip default parent */
 		printf("INFO: Default folder not deleted.\n");
 		break;
-	  case 0:	/* it's a project */
+	  case 0:	/* it's an upload */
 		break;
 	  default:	/* it's a folder */
 		memset(SQL,'\0',sizeof(SQL));
@@ -380,7 +377,7 @@ void	ListFolders	()
 	}
       }
 
-  /* Find detached projects */
+  /* Find detached uploads */
   DetachFlag=0;
   for(i=0; i < MaxRow; i++)
       {
@@ -393,7 +390,7 @@ void	ListFolders	()
 	}
       if (!Match && atol(DBgetvalue(VDB,i,4)))
 	{
-	if (!DetachFlag) { printf("# Unlinked projects (projects without folders)\n"); DetachFlag=1; }
+	if (!DetachFlag) { printf("# Unlinked uploads (uploads without folders)\n"); DetachFlag=1; }
 	printf("%4s",DBgetvalue(VDB,i,4));
 	printf(" :: %s",DBgetvalue(VDB,i,2));
 	Desc = DBgetvalue(VDB,i,3);
@@ -406,14 +403,14 @@ void	ListFolders	()
 } /* ListFolders() */
 
 /*********************************************
- ListProjects(): List every project ID.
+ ListUploads(): List every upload ID.
  *********************************************/
-void	ListProjects	()
+void	ListUploads	()
 {
   int Row,MaxRow;
   long NewPid;
 
-  printf("# Projects\n");
+  printf("# Uploads\n");
   MyDBaccess(DB,"SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;");
 
   /* list each value */
@@ -430,12 +427,12 @@ void	ListProjects	()
 	printf("\n");
 	}
       }
-} /* ListProjects() */
+} /* ListUploads() */
 
 /*********************************************
  DeleteFolder(): Given a folder ID, delete it
  AND recursively delete everything below it!
- This includes project deletion!
+ This includes upload deletion!
  *********************************************/
 void	DeleteFolder	(long FolderId)
 {
@@ -529,7 +526,7 @@ int     ReadLine        (FILE *Fin)
   char *L;
   int rc=0;     /* assume no data */
   int Type=0;	/* 0=undefined; 1=delete; 2=list */
-  int Target=0;	/* 0=undefined; 1=project; 2=license; 3=folder */
+  int Target=0;	/* 0=undefined; 1=upload; 2=license; 3=folder */
   long Id;
 
   memset(FullLine,0,MAXLINE);
@@ -577,10 +574,10 @@ int     ReadLine        (FILE *Fin)
 	}
   while(isspace(L[0])) L++;
   /** Get the target **/
-  if (!strncasecmp(L,"PROJECT",7) && (isspace(L[7]) || !L[7]))
+  if (!strncasecmp(L,"UPLOAD",6) && (isspace(L[6]) || !L[6]))
 	{
-	Target=1; /* project */
-	L+=7;
+	Target=1; /* upload */
+	L+=6;
 	}
   else if (!strncasecmp(L,"LICENSE",7) && (isspace(L[7]) || !L[7]))
 	{
@@ -596,11 +593,11 @@ int     ReadLine        (FILE *Fin)
   Id = atol(L);
 
   /* Handle the request */
-  if ((Type==1) && (Target==1))	{ DeleteProject(Id); rc=1; }
+  if ((Type==1) && (Target==1))	{ DeleteUpload(Id); rc=1; }
   else if ((Type==1) && (Target==2))	{ DeleteLicense(Id); rc=1; }
   else if ((Type==1) && (Target==3))	{ DeleteFolder(Id); rc=1; }
-  else if ((Type==2) && (Target==1))	{ ListProjects(); rc=1; }
-  else if ((Type==2) && (Target==2))	{ ListProjects(); rc=1; }
+  else if ((Type==2) && (Target==1))	{ ListUploads(); rc=1; }
+  else if ((Type==2) && (Target==2))	{ ListUploads(); rc=1; }
   else if ((Type==2) && (Target==3))	{ ListFolders(); rc=1; }
   else
     {
@@ -660,17 +657,17 @@ void	GetAgentKey	()
  *********************************************/
 void	Usage	(char *Name)
 {
-  fprintf(stderr,"Usage: %s [options] [projects]\n",Name);
-  fprintf(stderr,"  List or delete projects.\n");
+  fprintf(stderr,"Usage: %s [options]\n",Name);
+  fprintf(stderr,"  List or delete uploads.\n");
   fprintf(stderr,"  Options\n");
   fprintf(stderr,"  -i   :: Initialize the DB, then exit.\n");
-  fprintf(stderr,"  -p   :: List project IDs.\n");
-  fprintf(stderr,"  -P # :: Delete project ID.\n");
-  fprintf(stderr,"  -L # :: ALL licenses associated with project ID.\n");
+  fprintf(stderr,"  -u   :: List uploads IDs.\n");
+  fprintf(stderr,"  -U # :: Delete upload ID.\n");
+  fprintf(stderr,"  -L # :: ALL licenses associated with upload ID.\n");
   fprintf(stderr,"  -f   :: List folder IDs.\n");
-  fprintf(stderr,"  -F # :: Delete folder ID and all projects under this folder.\n");
+  fprintf(stderr,"  -F # :: Delete folder ID and all uploads under this folder.\n");
   fprintf(stderr,"          Folder '1' is the default folder.  '-F 1' will delete\n");
-  fprintf(stderr,"          every project and folder in the navigation tree.\n");
+  fprintf(stderr,"          every upload and folder in the navigation tree.\n");
   fprintf(stderr,"  -s   :: Run from the scheduler.\n");
   fprintf(stderr,"  -T   :: TEST -- do not update the DB or delete any files (just pretend)\n");
   fprintf(stderr,"  -v   :: Verbose (-vv for more verbose)\n");
@@ -681,11 +678,11 @@ int	main	(int argc, char *argv[])
 {
   int c;
   int ListProj=0, ListFolder=0;
-  long DelProj=0, DelFolder=0, DelLicense=0;
+  long DelUpload=0, DelFolder=0, DelLicense=0;
   int Scheduler=0; /* should it run from the scheduler? */
   int GotArg=0;
 
-  while((c = getopt(argc,argv,"ifF:L:pP:sTv")) != -1)
+  while((c = getopt(argc,argv,"ifF:L:sTuU:v")) != -1)
     {
     switch(c)
       {
@@ -702,10 +699,10 @@ int	main	(int argc, char *argv[])
       case 'f': ListFolder=1; GotArg=1; break;
       case 'F': DelFolder=atol(optarg); GotArg=1; break;
       case 'L': DelLicense=atol(optarg); GotArg=1; break;
-      case 'p': ListProj=1; GotArg=1; break;
-      case 'P': DelProj=atol(optarg); GotArg=1; break;
       case 's': Scheduler=1; GotArg=1; break;
       case 'T': Test++; break;
+      case 'u': ListProj=1; GotArg=1; break;
+      case 'U': DelUpload=atol(optarg); GotArg=1; break;
       case 'v': Verbose++; break;
       default:	Usage(argv[0]); exit(-1);
       }
@@ -726,11 +723,11 @@ int	main	(int argc, char *argv[])
   GetAgentKey();
   signal(SIGALRM,ShowHeartbeat);
 
-  if (ListProj) ListProjects();
+  if (ListProj) ListUploads();
   if (ListFolder) ListFolders();
 
   alarm(60);  /* from this point on, handle the alarm */
-  if (DelProj) { DeleteProject(DelProj); }
+  if (DelUpload) { DeleteUpload(DelUpload); }
   if (DelFolder) { DeleteFolder(DelFolder); }
   if (DelLicense) { DeleteLicense(DelLicense); }
 
