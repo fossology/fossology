@@ -186,9 +186,9 @@ void	DeleteUpload	(long UploadId)
   MyDBaccess(DB,SQL);
 
   /***********************************************/
-  /* Delete the folder */
+  /* Delete the upload from the folder-contents table */
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE (foldercontents_mode & 1) != 0 AND child_id = %ld;",UploadId);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE (foldercontents_mode & 2) != 0 AND child_id = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   /***********************************************/
