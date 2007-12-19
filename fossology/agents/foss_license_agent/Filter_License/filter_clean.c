@@ -55,7 +55,7 @@ char	*Pfile_fk=NULL;
 int	Agent_pk=-1;	/* agent ID */
 
 /* forward declarations */
-void	ProcessProject	(long Pid);
+void	ProcessUpload	(long Pid);
 
 /**************************************************
  ShowHeartbeat(): Given an alarm signal, display a
@@ -94,109 +94,12 @@ void	RemoveCache	(char *PfileId, char *PfileName)
 } /* RemoveCache() */
 
 /*********************************************
- FlushProject(): Remove results for a project.
- *********************************************/
-void	FlushProject	(long Pid)
-{
-#if 0
-  char SQL[MAXSQL];
-  void *VDB=NULL;
-  int i;
-
-  DBaccess(DB,"BEGIN;");
-
-  /* Delete the project */
-
-  /* Delete every ufile that is not part of a project */
-  DBaccess(DB,"DELETE FROM ufile WHERE ufile_pk NOT IN (SELECT DISTINCT(ufile_fk) FROM uploadtree);");
-
-  /* Delete every pfile that is not part of a ufile */
-  DBaccess(DB,"DELETE FROM pfile WHERE pfile_pk NOT IN (SELECT DISTINCT(pfile_fk) FROM ufile);");
-
-  DBaccess(DB,"ROLLBACK;");
-#endif
-
-#if 0
-  /***
-   The list of files from this package:
-   SELECT DISTINCT(ufile.ufile_pk),pfile.pfile_pk FROM uploadtree
-	INNER JOIN ufile ON ufile_pk = uploadtree.ufile_fk
-	INNER JOIN pfile ON pfile_pk = ufile.pfile_fk
-	WHERE upload_fk = Pid
-   ***/
-
-  memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"SELECT DISTINCT(ufile.ufile_pk),pfile.pfile_pk FROM uploadtree INNER JOIN ufile ON ufile_pk = uploadtree.ufile_fk INNER JOIN pfile ON pfile_pk = ufile.pfile_fk WHERE upload_fk =%ld;", Pid);
-  if (Verbose) printf("SQL: %s\n",SQL);
-  DBaccess(DB,SQL);
-  VDB = DBmove(DB);
-  printf("Removing %d records\n",DBdatasize(VDB));
-  for(i=0; i<DBdatasize(VDB); i++)
-    {
-    if (Verbose)
-      {
-      printf("  ufile,pfile = %s",DBgetvalue(VDB,i,0));
-      printf(" %s\n",DBgetvalue(VDB,i,1));
-      }
-    /* Delete only ufile entries that are not used by other projects */
-    /***
-     DELETE uploadtree
-       WHERE upload_fk = %ld
-       EXCEPT
-       (SELECT A.uploadtree_pk FROM uploadtree as A
-       INNER JOIN uploadtree as B ON B.ufile_fk = A.ufile_fk
-       WHERE A.upload_fk = %ld
-       AND A.upload_fk != B.upload_fk);
-     ***/
-    memset(SQL,'\0',MAXSQL);
-    snprintf(SQL,MAXSQL,"DELETE uploadtree WHERE upload_fk = %ld EXCEPT (SELECT A.uploadtree_pk FROM uploadtree as A INNER JOIN uploadtree as B ON B.ufile_fk = A.ufile_fk WHERE A.upload_fk = %ld AND A.upload_fk != B.upload_fk);",
-	Pid,Pid);
-    DBaccess(DB,SQL);
-    }
-  DBclose(VDB);
-#endif
-
-
-#if 0
-
-  /***
-   SELECT DISTINCT(pfile_pk)
-                    FROM containers
-                    INNER JOIN ufile ON ufile_container_fk = contained_fk
-                    INNER JOIN pfile ON pfile_pk = pfile_fk
-                    WHERE ufile.pfile_fk IS NOT NULL
-                    AND container_fk = %ld;
-   ***/
-  memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"SELECT DISTINCT(pfile_pk) FROM containers INNER JOIN ufile ON ufile_container_fk = contained_fk INNER JOIN pfile ON pfile_pk = pfile_fk WHERE ufile.pfile_fk IS NOT NULL AND container_fk = '%ld';",
-	Pid);
-  DBaccess(DB,SQL);
-  printf("Removing %d records\n",DBdatasize(DB));
-  snprintf(SQL,MAXSQL,"DELETE FROM agent_lic_meta WHERE pfile_fk in (SELECT DISTINCT(pfile_pk) AS pfile_fk FROM containers INNER JOIN ufile ON ufile_container_fk = contained_fk INNER JOIN pfile ON pfile_pk = pfile_fk WHERE ufile.pfile_fk IS NOT NULL AND container_fk = '%ld');",
-    Pid);
-  if (Verbose) printf("SQL: %s\n",SQL);
-  DBaccess(DB,SQL);
-  snprintf(SQL,MAXSQL,"DELETE FROM agent_lic_status WHERE pfile_fk in (SELECT DISTINCT(pfile_pk) AS pfile_fk FROM containers INNER JOIN ufile ON ufile_container_fk = contained_fk INNER JOIN pfile ON pfile_pk = pfile_fk WHERE ufile.pfile_fk IS NOT NULL AND container_fk = '%ld');",
-    Pid);
-  if (Verbose) printf("SQL: %s\n",SQL);
-  DBaccess(DB,SQL);
-
-  printf("Cleaning DB (this might take a while)\n");
-  DBaccess(DB,"VACUUM agent_lic_meta;");
-  DBaccess(DB,"VACUUM agent_lic_status;");
-  DBaccess(DB,"ANALYZE agent_lic_meta;");
-  DBaccess(DB,"ANALYZE agent_lic_status;");
-  DBclose(VDB);
-#endif
-} /* FlushProject() */
-
-/*********************************************
- ListProjects(): List every project ID.
- If flag is set, then call ProcessProject().
+ ListUploads(): List every upload ID.
+ If flag is set, then call ProcessUpload().
  NOTE: This could have problems if there are
- millions of projects.
+ millions of uploads.
  *********************************************/
-void	ListProjects	(int ProcessFlag)
+void	ListUploads	(int ProcessFlag)
 {
   char SQL[MAXSQL];
   int rc;
@@ -222,7 +125,7 @@ void	ListProjects	(int ProcessFlag)
       NewPid = atol(DBgetvalue(VDB,Row,0));
       if (NewPid >= 0)
 	{
-	if (ProcessFlag) ProcessProject(NewPid);
+	if (ProcessFlag) ProcessUpload(NewPid);
 	else
 	  {
 	  char *S;
@@ -234,14 +137,14 @@ void	ListProjects	(int ProcessFlag)
 	}
       }
   DBclose(VDB);
-} /* ListProjects() */
+} /* ListUploads() */
 
 /*********************************************
- ProcessProject(): process every cache file related
- to this project.
- Project -1 == process all of them!
+ ProcessUpload(): process every cache file related
+ to this upload.
+ Upload -1 == process all of them!
  *********************************************/
-void	ProcessProject	(long Pid)
+void	ProcessUpload	(long Pid)
 {
   char SQL[MAXSQL];
   int rc;
@@ -253,13 +156,13 @@ void	ProcessProject	(long Pid)
   if (Pid == -1)
     {
     /* Don't select "everything" because that will take WAY too long */
-    /* Instead, iterate over every project. */
-    ListProjects(1);
+    /* Instead, iterate over every upload. */
+    ListUploads(1);
     return;
     }
 
 
-  /* if it gets here, then there is a real project ID (Pid) */
+  /* if it gets here, then there is a real upload ID (Pid) */
 /**
  SELECT DISTINCT(pfile_pk) AS Akey,
         pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
@@ -296,133 +199,7 @@ void	ProcessProject	(long Pid)
     if (Test) rc=0; /* only process the first set (no infinite loop) */
     }
   DBclose(VDB);
-} /* ProcessProject() */
-
-unsigned long StatTotal=0, StatStray=0, StatOk=0;
-/*********************************************
- Traverse(): Recursively process every directory "S".
- *********************************************/
-void	Traverse	(char *S, int RemoveDir, int Depth, int StartDepth)
-{
-  char NewS[FILENAME_MAX+1];
-  char SQL[FILENAME_MAX*2];
-  DIR *Dir;
-  struct dirent *Entry;
-  int rc;
-
-  if (Verbose > 1) fprintf(stderr,"Checking: '%s'\n",S);
-  Dir = opendir(S);
-  if (Dir)
-    {
-    /* process every dir entry */
-    Entry = readdir(Dir);
-    while(Entry != NULL)
-      {
-      if (!strcmp(Entry->d_name,".")) goto skip;
-      if (!strcmp(Entry->d_name,"..")) goto skip;
-      /* only process the license repository */
-      if ((StartDepth-Depth == 1) && strcmp(Entry->d_name,"license")) goto skip;
-      memset(NewS,'\0',sizeof(NewS));
-      strcpy(NewS,S);
-      strcat(NewS,"/");
-      strcat(NewS,Entry->d_name);
-      Traverse(NewS,RemoveDir,Depth+1,StartDepth);
-skip:
-      Entry = readdir(Dir);
-      }
-    closedir(Dir);
-    if (RemoveDir) rmdir(S); /* this could fail if it's not empty */
-    }
-  else if (Depth >= StartDepth)
-    {
-    /* it's a file! */
-    /** is it the right kind of file? **/
-    char *Sha1,*Md5,*Len;
-
-    /* NOTE: Sha1 is the start of the pfile name!, which happens to be sha1 */
-    Sha1 = strrchr(S,'/');
-    if (!Sha1) return;
-    Sha1++;
-    if (strlen(Sha1) < 40) return;
-    Md5 = Sha1+40;
-    if (Md5[0] != '.') return;
-    Md5++;
-    if (strlen(Md5) < 32) return;
-    Len = Md5+32;
-    if (Len[0] != '.') return;
-    Len++;
-
-    /* for the DB, all hex characters must be capitalized */
-    for(rc=0; Sha1[rc] != '\0'; rc++)
-      {
-      if (islower(Sha1[rc])) Sha1[rc] = toupper(Sha1[rc]);
-      }
-
-    /* process S as a file! */
-#if 0
-    fprintf(stderr,"File: SHA1='%.40s' MD5='%.32s' Len='%s'\n",Sha1,Md5,Len);
-#endif
-    /** Check if it exists in the DB *and* is processed **/
-    memset(SQL,'\0',sizeof(SQL));
-/***
- SELECT * FROM agent_lic_status INNER JOIN pfile on pfile_fk = pfile_pk
-   WHERE pfile_md5 = '%.32'
-   AND pfile_sha1 = '%.40'
-   AND pfile_size = '%s'
-   AND inrepository = TRUE;
- example:
- SELECT * FROM agent_lic_status INNER JOIN pfile on pfile_fk = pfile_pk
-   WHERE pfile_md5 = '3CFBC1F7D08DFBEF64D3DE5E0A4FB1AD'
-   AND pfile_sha1 = '04A1E15279A4E3BADF59A31A867BE2A5931EB2B7'
-   AND pfile_size = '7703'
-   AND inrepository = TRUE;
- ***/
-    sprintf(SQL,"SELECT * FROM agent_lic_status INNER JOIN pfile on pfile_fk = pfile_pk WHERE pfile_md5 = '%.32s' AND pfile_sha1 = '%.40s' AND pfile_size = '%s' AND inrepository = TRUE;",
-	Md5, Sha1, Len);
-#if 0
-fprintf(stderr,"Checking: %s\n",Sha1);
-fprintf(stderr,"  %s\n",SQL);
-#endif
-    StatTotal++;
-    if (Verbose && ((StatTotal % 10000) == 0))
-	{
-	time_t Now;
-	Now = time(NULL);
-	fprintf(stderr,"DEBUG: Total=%lu  Ok=%lu  Stray=%lu -- %s",
-		StatTotal,StatOk,StatStray,ctime(&Now));
-	}
-    rc = DBaccess(DB,SQL);
-    if (rc < 0)
-	{
-	fprintf(stderr,"ERROR pfile %s Database error.\n",Pfile_fk);
-	fprintf(stderr,"LOG pfile %s SQL '%s'\n",Pfile_fk,SQL);
-	}
-    if (DBdatasize(DB) < 1)
-      {
-      StatStray++;
-      if (Verbose > 1) fprintf(stderr,"STRAY: %s\n",Sha1);
-      if (!Test) RepRemove("license",Sha1);
-      }
-    else
-      {
-      StatOk++;
-      if (Verbose > 1) fprintf(stderr,"OK: %s\n",Sha1);
-      }
-    }
-} /* Traverse() */
-
-/*********************************************
- TraverseStart(): Process every repository record...
- *********************************************/
-void	TraverseStart	()
-{
-  char *Rep;
-  Rep = RepGetRepPath();
-  Traverse(Rep,0,0,2);
-  free(Rep);
-  if (Verbose) fprintf(stderr,"DEBUG: Total=%lu  Ok=%lu  Stray=%lu\n",
-	StatTotal,StatOk,StatStray);
-} /* TraverseStart() */
+} /* ProcessUpload() */
 
 /**********************************************************************/
 /**********************************************************************/
@@ -541,9 +318,9 @@ int     ReadLine        (FILE *Fin)
   switch(Mode)
     {
     case 1: /* line contains process ID */
-	ProcessProject(atol(FullLine));
+	ProcessUpload(atol(FullLine));
 	break;
-    case 2: /* line contains "field=value" pairs: Akey=projectkey A=pfile */
+    case 2: /* line contains "field=value" pairs: Akey=uploadkey A=pfile */
 	/** line format: field='value' **/
 	/** Known fields:
 	    Akey='pfile key for A'
@@ -622,21 +399,17 @@ void	Usage	(char *Name)
   fprintf(stderr,"  See source code or white paper for details, or contact Neal Krawetz.\n");
   fprintf(stderr,"  Patents submitted.\n");
 #else
-  fprintf(stderr,"Usage: %s [options] [projects]\n",Name);
+  fprintf(stderr,"Usage: %s [options] [uploads]\n",Name);
   fprintf(stderr,"  For each processed file, remove the cache.\n");
   fprintf(stderr,"  Options\n");
   fprintf(stderr,"  -i :: Initialize the DB, then exit.\n");
-  fprintf(stderr,"  -L :: List project IDs.\n");
-#if 0
-  fprintf(stderr,"  -C :: Check -- remove a filter file not found in the DB\n");
-  fprintf(stderr,"  -N projid :: Flush project results for project ID.\n");
-#endif
+  fprintf(stderr,"  -L :: List upload IDs.\n");
   fprintf(stderr,"  -s :: operate via the scheduler.  Stdin contains each record to process.\n");
-  fprintf(stderr,"  -S :: operate via the scheduler.  Stdin contains each project ID.\n");
+  fprintf(stderr,"  -S :: operate via the scheduler.  Stdin contains each upload ID.\n");
   fprintf(stderr,"  -v :: Verbose (-vv for more verbose)\n");
   fprintf(stderr,"  -T :: TEST -- do not update the DB or delete any files (just pretend)\n");
-  fprintf(stderr,"  You can also list one or more project IDs for processing.\n");
-  fprintf(stderr,"  Project ID of '-1' will process all projects.\n");
+  fprintf(stderr,"  You can also list one or more upload IDs for processing.\n");
+  fprintf(stderr,"  Upload ID of '-1' will process all uploads.\n");
 #endif
 } /* Usage() */
 
@@ -644,16 +417,13 @@ void	Usage	(char *Name)
 int	main	(int argc, char *argv[])
 {
   int c;
-  int CheckRep=0;
   int ListProj=0;
   int GotArg=0;
-  long ProjectArg=0;
 
-  while((c = getopt(argc,argv,"CiLN:SsTv")) != -1)
+  while((c = getopt(argc,argv,"iLSsTv")) != -1)
     {
     switch(c)
       {
-      case 'C': CheckRep=1; GotArg=1; break;
       case 'i':
 	DB = DBopen();
 	if (!DB)
@@ -665,7 +435,6 @@ int	main	(int argc, char *argv[])
 	DBclose(DB);
 	return(0);
       case 'L': ListProj=1; GotArg=1; break;
-      case 'N': ProjectArg = atol(optarg); GotArg=1; break;
       case 'S': Mode=1; GotArg=1; break;
       case 's': Mode=2; GotArg=1; break;
       case 'T': Test++; break;
@@ -688,17 +457,13 @@ int	main	(int argc, char *argv[])
 	}
   GetAgentKey();
 
-  if (ListProj) ListProjects(0);
-  if (ProjectArg > 0) FlushProject(ProjectArg);
+  if (ListProj) ListUploads(0);
 
   /* Process the command-line */
   for( ; optind < argc; optind++)
     {
-    ProcessProject(atol(argv[optind]));
+    ProcessUpload(atol(argv[optind]));
     }
-
-  /* cross-check the repository with the DB */
-  if (CheckRep) TraverseStart();
 
   /* process from the scheduler */
   if (Mode > 0)
