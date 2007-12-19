@@ -518,27 +518,28 @@ function showjobs()
         </td>
 	    <td bgcolor='$jcolor'>{$jq['jq_type']}</td>";
 
-    echo "<td> $jq[jq_itemsprocessed] items<br>";
+    echo "<td> $jq[jq_itemsprocessed] items";
 
     // skip the status if the depenency reports 0 items processed 
     // or this jq depends on another and that one report 0 items processed
         if (empty($jq['jdep_jq_depends_fk']))
         {
-            printf("elapsed: %s<br>", secs2dhms($jq[jq_elapsedtime]));
-            printf("run time %s</td>", secs2dhms($jq[jq_processedtime]));
+            printf("<br>&nbsp; elapsed: %s", secs2dhms($jq[jq_elapsedtime]));
+            printf("<br>run time: %s>", secs2dhms($jq[jq_processedtime]));
         }
         else
         {
             // jq has a dependency. Check if it reports 0 items processed
             $depfk = $jq[jdep_jq_depends_fk];
             if ($statdep[$depfk] == 0)
-                echo "<td> &nbsp; </td>";
+                echo " &nbsp; ";
             else
             {
-                printf("elapsed: %s<br>", secs2dhms($jq[jq_elapsedtime]));
-                printf("run time %s</td>", secs2dhms($jq[jq_processedtime]));
+                printf("<br>&nbsp;elapsed: %s", secs2dhms($jq[jq_elapsedtime]));
+                printf("<br>run time: %s</td>", secs2dhms($jq[jq_processedtime]));
             }
         }
+        echo "</td>";
 
 
     $starttime = substr($jq['jq_starttime'],0,16);
