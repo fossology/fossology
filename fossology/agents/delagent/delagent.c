@@ -153,6 +153,10 @@ void	DeleteUpload	(long UploadId)
 
   /* Get the list of pfiles to delete */
   memset(SQL,'\0',sizeof(SQL));
+  /** This SQL says: (1) Give me every pfile associated with the upload
+      (2) except where the pfile is used by some other upload.
+      The net result is the list of pfiles exclusively used by this
+      upload.  (Since there is no file reuse here, it can be deleted. **/
   snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_fk),pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile FROM uptreeup WHERE upload_fk=%ld EXCEPT SELECT DISTINCT(A.pfile_fk),A.pfile_sha1 || '.' || A.pfile_md5 || '.' || A.pfile_size FROM uptreeup AS A join uptreeup as B on B.pfile_pk = A.pfile_fk WHERE A.upload_fk = %ld AND B.upload_fk != %ld;",UploadId,UploadId,UploadId);
   MyDBaccess(DB,SQL);
   VDB = DBmove(DB);
@@ -190,6 +194,8 @@ void	DeleteUpload	(long UploadId)
   /***********************************************/
   /* Delete unused ufiles */
   memset(SQL,'\0',sizeof(SQL));
+  /** All of the project info has been deleted.  This simply deletes any
+      ufile that is no longer associated with any projects. **/
   snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE ufile_pk NOT IN (SELECT DISTINCT(ufile_fk) FROM uploadtree) AND ufile_pk NOT IN (SELECT DISTINCT(ufile_fk) FROM upload);");
   MyDBaccess(DB,SQL);
 
