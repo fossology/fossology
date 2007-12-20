@@ -98,6 +98,7 @@ void	DeleteLicense	(long UploadId)
   char *S;
   int Row,MaxRow;
 
+  DBaccess(DB,"SET statement_timeout = 0;"); /* no timeout */
   MyDBaccess(DB,"BEGIN;");
 
   /* Get the list of pfiles to process */
@@ -128,9 +129,10 @@ void	DeleteLicense	(long UploadId)
   else
 	{
 	MyDBaccess(DB,"COMMIT;");
-	MyDBaccess(DB,"VACCUUM ANALYZE agent_lic_status;");
-	MyDBaccess(DB,"VACCUUM ANALYZE agent_lic_meta;");
+	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
+	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
 	}
+  DBaccess(DB,"SET statement_timeout = 120000;");
 
   DBclose(VDB);
   if (ItemsProcessed > 0)
@@ -149,15 +151,13 @@ void	DeleteUpload	(long UploadId)
   char *S;
   int Row,MaxRow;
 
+  DBaccess(DB,"SET statement_timeout = 0;"); /* no timeout */
   MyDBaccess(DB,"BEGIN;");
 
   /* Get the list of pfiles to delete */
+  /** These are all pfiles in the upload_fk that only appear once. **/
   memset(SQL,'\0',sizeof(SQL));
-  /** This SQL says: (1) Give me every pfile associated with the upload
-      (2) except where the pfile is used by some other upload.
-      The net result is the list of pfiles exclusively used by this
-      upload.  (Since there is no file reuse here, it can be deleted. **/
-  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_fk),pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile FROM uptreeup WHERE upload_fk=%ld EXCEPT SELECT DISTINCT(A.pfile_fk),A.pfile_sha1 || '.' || A.pfile_md5 || '.' || A.pfile_size FROM uptreeup AS A join uptreeup as B on B.pfile_pk = A.pfile_fk WHERE A.upload_fk = %ld AND B.upload_fk != %ld;",UploadId,UploadId,UploadId);
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_fk),pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile FROM uptreeup WHERE upload_fk = %ld AND pfile_fk NOT IN (SELECT DISTINCT(pfile_fk) FROM uptreeup WHERE upload_fk != %ld) ORDER BY pfile_fk;",UploadId,UploadId);
   MyDBaccess(DB,SQL);
   VDB = DBmove(DB);
 
@@ -196,6 +196,7 @@ void	DeleteUpload	(long UploadId)
   memset(SQL,'\0',sizeof(SQL));
   /** All of the project info has been deleted.  This simply deletes any
       ufile that is no longer associated with any projects. **/
+  /** Delete any ufile not used by uploadtree AND not used by upload. **/
   snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE ufile_pk NOT IN (SELECT DISTINCT(ufile_fk) FROM uploadtree) AND ufile_pk NOT IN (SELECT DISTINCT(ufile_fk) FROM upload);");
   MyDBaccess(DB,SQL);
 
@@ -228,18 +229,19 @@ void	DeleteUpload	(long UploadId)
   else
 	{
 	MyDBaccess(DB,"COMMIT;");
-	MyDBaccess(DB,"VACCUUM ANALYZE agent_lic_status;");
-	MyDBaccess(DB,"VACCUUM ANALYZE agent_lic_meta;");
-	MyDBaccess(DB,"VACCUUM ANALYZE attrib;");
-	MyDBaccess(DB,"VACCUUM ANALYZE ufile;");
-	MyDBaccess(DB,"VACCUUM ANALYZE pfile;");
-	MyDBaccess(DB,"VACCUUM ANALYZE foldercontents;");
-	MyDBaccess(DB,"VACCUUM ANALYZE upload;");
-	MyDBaccess(DB,"VACCUUM ANALYZE uploadtree;");
-	MyDBaccess(DB,"VACCUUM ANALYZE jobdepends;");
-	MyDBaccess(DB,"VACCUUM ANALYZE jobqueue;");
-	MyDBaccess(DB,"VACCUUM ANALYZE job;");
+	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
+	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
+	MyDBaccess(DB,"VACUUM ANALYZE attrib;");
+	MyDBaccess(DB,"VACUUM ANALYZE ufile;");
+	MyDBaccess(DB,"VACUUM ANALYZE pfile;");
+	MyDBaccess(DB,"VACUUM ANALYZE foldercontents;");
+	MyDBaccess(DB,"VACUUM ANALYZE upload;");
+	MyDBaccess(DB,"VACUUM ANALYZE uploadtree;");
+	MyDBaccess(DB,"VACUUM ANALYZE jobdepends;");
+	MyDBaccess(DB,"VACUUM ANALYZE jobqueue;");
+	MyDBaccess(DB,"VACUUM ANALYZE job;");
 	}
+  DBaccess(DB,"SET statement_timeout = 120000;");
 
   /***********************************************/
   /* Whew!  Now to delete the actual pfiles from the repository. */
@@ -447,8 +449,8 @@ void	DeleteFolder	(long FolderId)
   VDB = DBmove(DB);
   ListFoldersRecurse(VDB,FolderId,0,-1,1);
   DBclose(VDB);
-  MyDBaccess(DB,"VACCUUM ANALYZE foldercontents;");
-  MyDBaccess(DB,"VACCUUM ANALYZE folder;");
+  MyDBaccess(DB,"VACUUM ANALYZE foldercontents;");
+  MyDBaccess(DB,"VACUUM ANALYZE folder;");
 } /* DeleteFolder() */
 
 /**********************************************************************/
