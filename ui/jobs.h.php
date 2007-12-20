@@ -525,7 +525,7 @@ function showjobs()
         if (empty($jq['jdep_jq_depends_fk']))
         {
             printf("<br>&nbsp; elapsed: %s", secs2dhms($jq[jq_elapsedtime]));
-            printf("<br>run time: %s>", secs2dhms($jq[jq_processedtime]));
+            printf("<br>run time: %s", secs2dhms($jq[jq_processedtime]));
         }
         else
         {
