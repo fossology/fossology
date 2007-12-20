@@ -21,7 +21,7 @@
  - Child :: a spawned process. Parent spawns children.
  - Agent :: a child that performs a task for the scheduler.
  In general, all children are agents and vice versa.
- The different in terms denotes the different levels of interaction.
+ The difference in terms denotes the different levels of interaction.
  In particular, Agents are high-level and denote functionality.
  Children are low-level and denote basic communication.
  *******************************************************/
