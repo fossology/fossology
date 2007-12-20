@@ -19,6 +19,11 @@ INPUTFILES="${DIR}Input-Files/"
 RLOGS="${DIR}Run-logs/"
 # is the mkdir needed?  ReadMe says to precreate....
 mkdir -p $RLOGS
+mkdir -p $INPUTFILES
+if [! -d $RDIR ]
+then
+   mkdir -l $RDIR
+fi
 
 Date=`date +"%Y-%m-%d"`
 Compressed_file="fm-projects.rdf-${Date}.bz2"
@@ -39,6 +44,8 @@ echo ""
 
 wget -o $Wget_Log -O ${RDIR}$Compressed_file $URL 
 
+
+# Set Current-top1k to todays run
 top1k="${RDIR}Top1k-${Date}"
 echo $top1k > "${RDIR}Current-top1k"
 #
@@ -46,12 +53,10 @@ echo $top1k > "${RDIR}Current-top1k"
 #
 echo "uncompressing $RDIR$Compressed_file"
 
-bunzip2 -qc $RDIR$Compressed_file > $RDIR$Uncompressed_file
-mktop1k -i $RDIR$Uncompressed_file -o $top1k
+echo "bunzip2 -qc $RDIR$Compressed_file > $RDIR$Uncompressed_file"
+echo "mktop1k -i $RDIR$Uncompressed_file -o $top1k"
 
 # Diff the current and previous top 1000 xml files
-
-read < "${RDIR}Previous-top1k" Previous_top1k
 
 current=`cat "${RDIR}Current-top1k"`
 previous=`cat "${RDIR}Previous-top1k"`
@@ -63,7 +68,8 @@ drtn=$?
 #
 # replace previous rdf with current for the next run.
 # May want to make a function cause you might want to clean up old rdf's and top1k's.....
-cp ${RDIR}Current-top1k ${RDIR}Previous-top1k
+current=`cat "${RDIR}Current-top1k"`
+echo $current > ${RDIR}Previous-top1k
 
 # if diffm returns 0 there is no projects to update, so clean up and stop
 if (( $drtn == 0 ))
@@ -75,9 +81,10 @@ else
   echo "Doing...\n"
   echo "get-projects -f ${INPUTFILES}Update.fm.rdf.${Date} > ${RLOGS}log.get-projects.${Date} 2>&1"
   get-projects -f "${INPUTFILES}Update.fm.rdf.${Date} > ${RLOGS}log.get-projects.${Date} 2>&1"
-  # upload the files with cp2foss 
+# upload the files with cp2foss 
   echo "Doing...\n"
   echo "cp2foss -f ${INPUTFILES}FM-projects2update.${Date} > ${RLOGS}log.cp2foss.${Date} 2>&1 &"
-#  cp2foss -f "{INPUTFILES}FM-projects2update.${Date} > ${RLOGS}log.cp2foss.${Date} 2>&1 &"
-  # echo check the following log files .....
+  cp2foss -f "{INPUTFILES}FM-projects2update.${Date} > ${RLOGS}log.cp2foss.${Date} 2>&1 &"
+# echo check the following log files .....
 fi
+exit 0
