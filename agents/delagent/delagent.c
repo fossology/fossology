@@ -280,7 +280,8 @@ void	DeleteUpload	(long UploadId)
  if DelFlag is set, then all child uploads are
  deleted and the folders are deleted.
  *********************************************/
-void	ListFoldersRecurse	(void *VDB, long Parent, int Depth, int Row, int DelFlag)
+void	ListFoldersRecurse	(void *VDB, long Parent, int Depth,
+				 int Row, int DelFlag)
 {
   int r,MaxRow;
   long Fid;
@@ -456,68 +457,6 @@ void	DeleteFolder	(long FolderId)
 /**********************************************************************/
 /**********************************************************************/
 /**********************************************************************/
-
-/**********************************************
- GetFieldValue(): Given a string that contains
- field='value' pairs, save the items.
- Returns: pointer to start of next field, or
- NULL at \0.
- **********************************************/
-char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
-                         char *Value, int ValueMax)
-{
-  int s,f,v;
-  int GotQuote;
-
-  memset(Field,0,FieldMax);
-  memset(Value,0,ValueMax);
-
-  while(isspace(Sin[0])) Sin++; /* skip initial spaces */
-  if (Sin[0]=='\0') return(NULL);
-  f=0; v=0;
-
-  for(s=0; (Sin[s] != '\0') && !isspace(Sin[s]) && (Sin[s] != '='); s++)
-    {
-    Field[f++] = Sin[s];
-    }
-  while(isspace(Sin[s])) s++; /* skip spaces after field name */
-  if (Sin[s] != '=') /* if it is not a field, then just return it. */
-    {
-    return(Sin+s);
-    }
-  if (Sin[s]=='\0') return(NULL);
-  s++; /* skip '=' */
-  while(isspace(Sin[s])) s++; /* skip spaces after '=' */
-  if (Sin[s]=='\0') return(NULL);
-
-  GotQuote='\0';
-  if ((Sin[s]=='\'') || (Sin[s]=='"'))
-    {
-    GotQuote = Sin[s];
-    s++; /* skip quote */
-    if (Sin[s]=='\0') return(NULL);
-    }
-  if (GotQuote)
-    {
-    for( ; (Sin[s] != '\0') && (Sin[s] != GotQuote); s++)
-      {
-      if (Sin[s]=='\\') Value[v++]=Sin[++s];
-      else Value[v++]=Sin[s];
-      }
-    s++; /* move past the quote */
-    }
-  else
-    {
-    /* if it gets here, then there is no quote */
-    for( ; (Sin[s] != '\0') && !isspace(Sin[s]); s++)
-      {
-      if (Sin[s]=='\\') Value[v++]=Sin[++s];
-      else Value[v++]=Sin[s];
-      }
-    }
-  while(isspace(Sin[s])) s++; /* skip spaces */
-  return(Sin+s);
-} /* GetFieldValue() */
 
 /**********************************************
  ReadLine(): Read a single line from a file.
