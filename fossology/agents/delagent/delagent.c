@@ -573,7 +573,7 @@ void	GetAgentKey	()
   if (DBdatasize(DB) <= 0)
       {
       /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('delagent','unknown','Remove unneeded bsam license cache files');");
+      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('delagent','unknown','Remove uploads and folders');");
       if (rc < 0)
 	{
 	printf("ERROR: unable to write to the database\n");
