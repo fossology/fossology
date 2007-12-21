@@ -1058,6 +1058,7 @@ void	DBSaveLicense	(int Flag1SL, char *Unique,
       BEGIN/END block.  If the insert fails, then everything fails.
       Solution: Construct a SELECT and INSERT at the same time.
       Test the SELECT, then do the INSERT.
+      And use SAVEPOINT to handle any race condition inserts.
    **/
   /* The DB insert */
   {
@@ -1151,8 +1152,14 @@ void	DBSaveLicense	(int Flag1SL, char *Unique,
 	if (rc < 0) ShowSQLERROR(SQL2,0);
 	else if (DBdatasize(DB) <= 0)
 	  {
+	  DBaccess(DB,"SAVEPOINT oops;");
 	  rc = MyDBaccess(DB,SQL);
-	  if (rc < 0) ShowSQLERROR(SQL,0);
+	  if (rc < 0)
+		{
+		ShowSQLERROR(SQL,0);
+		DBaccess(DB,"ROLLBACK TO SAVEPOINT oops;");
+		}
+	  DBaccess(DB,"RELEASE SAVEPOINT oops;");
 	  }
 	}
 } /* DBSaveLicense() */
