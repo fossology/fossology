@@ -262,6 +262,7 @@ function jobquery($select='', $where='', $orderbylimit='')
 	    job.job_name,
 	    job.job_upload_fk,
 	    ufile.ufile_name,
+        pfile.pfile_size,
 	    job.job_queued,
 	    jobqueue.jq_pk,
 	    jobqueue.jq_type,
@@ -290,6 +291,7 @@ function jobquery($select='', $where='', $orderbylimit='')
 	    LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk
 	    LEFT JOIN upload ON upload_pk = job.job_upload_fk
 	    LEFT JOIN ufile ON ufile_pk = upload.ufile_fk
+	    LEFT JOIN pfile ON pfile_pk = ufile.pfile_fk
 	WHERE $where
 	$orderbylimit";
 
@@ -467,6 +469,7 @@ function showjobs()
     echo "<th></th>";
     echo "</tr>";
 
+    $newgroup = false;
     foreach ($recs as $jq) {
         $job_pk = intval($jq['job_pk']);
 	$jq_pk = intval($jq['jq_pk']);
@@ -477,7 +480,9 @@ function showjobs()
     {
         $oldun = $un;
         //echo "<tr><td colspan=11 bgcolor='#ECF4FF'>&nbsp;</td></tr>";
+        // print border seperating job groups
         echo "<tr><td colspan=11 bgcolor='#ECF4FF'><hr></td></tr>";
+        $newgroup = true;
     }
 
 	if ($job_pk != $oldjob_pk) 
@@ -487,8 +492,16 @@ function showjobs()
 	     <a href=" . myname("o=job.$job_pk") . ">", $jq['job_name'], "</a>
 	     </td>
 	     <td style='border: 1px solid black;' colspan=3>
-	     <a href=" . myname("g=$u") . ">$un</a>
-	    </td>\n";
+	     <a href=" . myname("g=$u") . ">$un</a>";
+        if ($jq['pfile_size']  && $newgroup) 
+        {
+            $sql = "select count(*) from uploadtree where upload_fk=$jq[job_upload_fk]";
+            $filescount = db_query1($sql);
+            echo "<br>$jq[pfile_size] bytes";
+            echo "<br>$filescount files";
+            $newgroup = false;
+        }
+	    echo "</td>\n";
         $starttime = substr($jq['job_queued'],0,16);
 	    echo "<td style='border: 1px solid black;'>{$starttime}</td>";
 	    $oldjob_pk = $job_pk;
@@ -531,7 +544,7 @@ function showjobs()
         {
             // jq has a dependency. Check if it reports 0 items processed
             $depfk = $jq[jdep_jq_depends_fk];
-            if ($statdep[$depfk] == 0)
+            if (($statdep[$depfk] == 0) || ($jq['jq_itemsprocessed'] == 0))
                 echo " &nbsp; ";
             else
             {
