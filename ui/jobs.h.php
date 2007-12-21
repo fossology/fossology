@@ -497,8 +497,10 @@ function showjobs()
         {
             $sql = "select count(*) from uploadtree where upload_fk=$jq[job_upload_fk]";
             $filescount = db_query1($sql);
-            echo "<br>$jq[pfile_size] bytes";
-            echo "<br>$filescount files";
+            $num = number_format($jq['pfile_size']);
+            echo "<br>$num bytes";
+            $num = number_format($filescount);
+            echo "<br>$num files";
             $newgroup = false;
         }
 	    echo "</td>\n";
@@ -531,7 +533,8 @@ function showjobs()
         </td>
 	    <td bgcolor='$jcolor'>{$jq['jq_type']}</td>";
 
-    echo "<td> $jq[jq_itemsprocessed] items";
+    $num = number_format($jq['jq_itemsprocessed']);
+    echo "<td> $num items";
 
     // skip the status if the depenency reports 0 items processed 
     // or this jq depends on another and that one report 0 items processed
