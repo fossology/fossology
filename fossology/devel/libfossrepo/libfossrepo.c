@@ -186,12 +186,14 @@ int	RepHostExist	(char *Type, char *Host)
 } /* RepHostExist() */
 
 /***********************************************
- RepGetHost(): Determine the host for the tree.
+ _RepGetHost(): Determine the host for the tree.
  Type is the type of data.
  Filename is the filename to match.
+ MatchNum used to identify WHICH match to return.
+ (MatchNum permits fallback paths.)
  Allocates and returns string with hostname or NULL.
  ***********************************************/
-char *	RepGetHost	(char *Type, char *Filename)
+char *	_RepGetHost	(char *Type, char *Filename, int MatchNum)
 {
   char LineHost[MAXHOSTNAMELEN];
   char LineType[MAXHOSTNAMELEN];
@@ -206,7 +208,7 @@ char *	RepGetHost	(char *Type, char *Filename)
 	return(NULL);
 
   i=0;
-  while(!Match && (i < RepConfig->MmapSize))
+  while((Match != MatchNum) && (i < RepConfig->MmapSize))
     {
     memset(LineHost,0,sizeof(LineHost));
     memset(LineType,0,sizeof(LineType));
@@ -248,25 +250,39 @@ char *	RepGetHost	(char *Type, char *Filename)
 	if ((strncasecmp(LineStart,Filename,strlen(LineStart)) <= 0) &&
 	    (strncasecmp(LineEnd,Filename,strlen(LineEnd)) >= 0))
 		{
-		NewHost = (char *)calloc(strlen(LineHost)+1,1);
-		strcpy(NewHost,LineHost);
-		Match=1;
+		Match++;
+		if (Match == MatchNum)
+		  {
+		  NewHost = (char *)calloc(strlen(LineHost)+1,1);
+		  strcpy(NewHost,LineHost);
+		  }
 		}
 	}
     } /* while reading data */
 
   return(NewHost);
+} /* _RepGetHost() */
+
+/***********************************************
+ RepGetHost(): Determine the host for the tree.
+ Type is the type of data.
+ Filename is the filename to match.
+ Allocates and returns string with hostname or NULL.
+ ***********************************************/
+char *	RepGetHost	(char *Type, char *Filename)
+{
+  return(_RepGetHost(Type,Filename,0));
 } /* RepGetHost() */
 
 /***********************************************
- RepMkPath(): Given a filename, construct the full
+ _RepMkPath(): Given a filename, construct the full
  path to the file.
  Allocates and returns a string.
  This does NOT make the actual file or modify the file system!
  Ext is an optional extension (for making temporary files).
  Caller must free the string!
  ***********************************************/
-char *	RepMkPathTmp	(char *Type, char *Filename, char *Ext)
+char *	RepMkPathTmp	(char *Type, char *Filename, char *Ext, int Which)
 {
   char *Path;
   char *Host;
@@ -277,8 +293,9 @@ char *	RepMkPathTmp	(char *Type, char *Filename, char *Ext)
   if (!_RepCheckType(Type) || !_RepCheckString(Filename)) return(NULL);
 
   /* get the hostname */
-  Host=RepGetHost(Type,Filename);
+  Host=_RepGetHost(Type,Filename,Which);
   if (Host) { Len += strlen(Host)+1; }
+  if (!Host && (Which > 1)) { free(Host); return(NULL); }
   /* get the depth */
   if (Type) Len += strlen(Type)+1;
   /* save the path too */
@@ -342,9 +359,41 @@ char *	RepMkPathTmp	(char *Type, char *Filename, char *Ext)
     }
   return(Path);
 } /* RepMkPathTmp() */
+
+/***********************************************
+ RepMkPath(): Given a filename, construct the full
+ path to the file.
+ Allocates and returns a string.
+ This does NOT make the actual file or modify the file system!
+ Ext is an optional extension (for making temporary files).
+ Caller must free the string!
+ NOTE: This scans for alternate file locations, in case
+ the file exists.
+ ***********************************************/
 char *	RepMkPath	(char *Type, char *Filename)
 {
-  return(RepMkPathTmp(Type,Filename,NULL));
+  char *Path, *AltPath;
+  int i;
+  struct stat64 Stat;
+
+  Path = RepMkPathTmp(Type,Filename,NULL,1);
+  if (!Path) return(NULL);
+  /* if something exists, then return it! */
+  if (!stat64(Path,&Stat)) { return(Path); }
+
+  /* Check if it exists in an alternate path */
+  i=2;
+  while(1)
+    {
+    AltPath = RepMkPathTmp(Type,Filename,NULL,i);
+    if (!AltPath) return(Path); /* No alternate */
+    /* If there is an alternate, return it. */
+    if (!stat64(AltPath,&Stat)) { free(Path); return(AltPath); }
+    i++;
+    }
+
+  /* should never get here */
+  return(Path);
 } /* RepMkPath() */
 
 /***********************************************
@@ -411,7 +460,7 @@ int	RepRenameTmp	(char *Type, char *Filename, char *Ext)
   char *FnameOld, *Fname;
   int rc;
 
-  FnameOld = RepMkPathTmp(Type,Filename,Ext);
+  FnameOld = RepMkPathTmp(Type,Filename,Ext,1);
   Fname = RepMkPath(Type,Filename);
   if (!FnameOld || !Fname)
     {
@@ -446,7 +495,7 @@ int	RepExist	(char *Type, char *Filename)
     return(-1);
     }
 
-  Fname = RepMkPathTmp(Type,Filename,NULL);
+  Fname = RepMkPath(Type,Filename);
   if (!Fname)
     {
     fprintf(stderr,"ERROR: Unable to allocate path for '%s/%s'\n",Type,Filename);
@@ -479,7 +528,7 @@ int	RepRemove	(char *Type, char *Filename)
     return(0);
     }
 
-  Fname = RepMkPathTmp(Type,Filename,NULL);
+  Fname = RepMkPath(Type,Filename);
   if (!Fname)
     {
     fprintf(stderr,"ERROR: Unable to allocate path for '%s/%s'\n",Type,Filename);
@@ -519,7 +568,7 @@ FILE *	RepFread	(char *Type, char *Filename)
     return(NULL);
     }
 
-  Fname = RepMkPathTmp(Type,Filename,NULL);
+  Fname = RepMkPath(Type,Filename);
   if (!Fname)
     {
     fprintf(stderr,"ERROR: Unable to allocate path for '%s/%s'\n",Type,Filename);
@@ -555,7 +604,7 @@ FILE *	RepFwriteTmp	(char *Type, char *Filename, char *Ext)
     return(NULL);
     }
 
-  Fname = RepMkPathTmp(Type,Filename,Ext);
+  Fname = RepMkPathTmp(Type,Filename,Ext,1);
   if (!Fname)
     {
     fprintf(stderr,"ERROR: Unable to allocate path for '%s/%s'\n",Type,Filename);
@@ -658,7 +707,7 @@ RepMmapStruct *	RepMmap	(char *Type, char *Filename)
 
   if (!_RepCheckType(Type) || !_RepCheckString(Filename)) return(NULL);
 
-  Fname = RepMkPathTmp(Type,Filename,NULL);
+  Fname = RepMkPath(Type,Filename);
   if (!Fname) return(NULL);
   _RepUpdateTime(Fname);
 
@@ -688,7 +737,7 @@ int	RepImport	(char *Source, char *Type, char *Filename, int Link)
   /* easy route: make a hard link */
   if (Link)
     {
-    FoutPath = RepMkPathTmp(Type,Filename,NULL);
+    FoutPath = RepMkPath(Type,Filename);
     if (!FoutPath) return(0);
     if (_RepMkDirs(FoutPath)) /* make the directory */
       {
@@ -822,7 +871,7 @@ int	RepOpen	()
   /** I'm in the config directory. **/
   /* Map the host file to a global. */
   RepConfig = RepMmapFile("Hosts.conf");
-  
+
   /* Load the depth file. */
   Config = RepMmapFile("Depth.conf");
   if (Config)
