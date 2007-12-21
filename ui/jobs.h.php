@@ -524,7 +524,7 @@ function showjobs()
     // or this jq depends on another and that one report 0 items processed
         if (empty($jq['jdep_jq_depends_fk']))
         {
-            printf("<br>&nbsp; elapsed: %s", secs2dhms($jq[jq_elapsedtime]));
+            printf("<br>&nbsp;elapsed: %s", secs2dhms($jq[jq_elapsedtime]));
             printf("<br>run time: %s", secs2dhms($jq[jq_processedtime]));
         }
         else
