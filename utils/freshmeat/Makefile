@@ -6,7 +6,7 @@
 # Makefile for the freshmeat process.
 
 include ../../Makefile.conf
-include ../Makefile.utils
+#include ../Makefile.utils
 
 SHELL=/bin/bash
 
@@ -39,7 +39,9 @@ MANpages:
  
  # NOTE when man pages exist, uncomment the man entries below.  
 InstallationCreate:
-	echo "INSTALLATIONCREATE target"; \
+	echo "INSTALLATIONCREATE target";
+	echo "FM->InstallationCreate" ;
+	@ls ../../install/$(BINDIR) ;
 	for file in ${BINFILES} ; do \
 		chmod a+x $${file} ; \
 		echo "Installing $${file} into ../../install/${BINDIR}"; \
@@ -51,22 +53,29 @@ InstallationCreate:
 			cp $${file} ../../install/${BINDIR} ; \
 		 fi \
 	 done
-	mkdir -p ../../install/$(INCLUDEDIR)
+	$(MKDIR) -p ../../install/$(LIBDIR)
 	$(CP) $(LIBFILES) ../../install/$(LIBDIR)
 #	$(CP) $(MAN1FILES) ../../install/$(MAN1DIR)
 	$(CP) $(fmPATHFILE) ../../install/$(INCLUDEDIR)
+	echo "FM->END OF InstallationCreate"
+	ls ../../install/$(BINDIR)
+	ls ../../install/usr/local 
 	
 install: all InstallationCreate
 	for file in ${BINFILES}; do \
 		chmod a+x $${file}; \
 	done
-	mkdir -p $(MAN1DIR)
-	mkdir -p $(INCLUDEDIR)
+	@$(MKDIR) -p $(MAN1DIR)
+	@$(MKDIR) -p $(INCLUDEDIR)
+	@$(MKDIR) -p $(BINDIR)
+	@$(MKDIR) -p $(LIBDIR)
+	$(CP) $(BINFILES) $(BINDIR)
 	$(CP) $(LIBFILES) $(LIBDIR)
-#	$(CP) $(MAN1FILES) ../../install/$(MAN1DIR)
-	$(CP) $(fmPATHFILE) ../../install/$(INCLUDEDIR)
+#	$(CP) $(MAN1FILES) $(MAN1DIR)
+	$(CP) $(fmPATHFILE) $(INCLUDEDIR)
 	
 uninstall:
+	(cd $(BINDIR) ;     $(RM) $(BINFILES))
 	(cd $(LIBDIR) ;     $(RM) $(LIBFILES))
 #	(cd $(MAN1FILES);   $(RM) $(MAN1DIR))
 	(cd $(INCLUDEDIR) ; $(RM) $(fmPATHFILE))
