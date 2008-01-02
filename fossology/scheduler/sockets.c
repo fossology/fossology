@@ -187,6 +187,7 @@ int	SelectAnyData	(int HasFin, int Fin)
   time_t Now;
   static time_t LastTimeCheck = 0;
   struct timeval Timeout;
+  char Ctime[MAXCTIME];
 
   /* watch for any hung processes */
   Now = time(NULL);
@@ -195,7 +196,9 @@ int	SelectAnyData	(int HasFin, int Fin)
   if (Now - LastTimeCheck < MAXHEARTBEAT) CheckChildren(Now);
   else if (LastTimeCheck != 0)
 	{
-	printf("WARNING: scheduler is running slow.  It took %d seconds to check agent status: %s",(int)(Now - LastTimeCheck),ctime(&Now));
+	memset(Ctime,'\0',MAXCTIME);
+	ctime_r(&Now,Ctime);
+	printf("WARNING: scheduler is running slow.  It took %d seconds to check agent status: %s",(int)(Now - LastTimeCheck),Ctime);
 	/* Reset all heardbeats since I cannot tell if any are hung */
 	for(Thread=0; Thread < MaxThread; Thread++)
 	  {

@@ -84,6 +84,7 @@ char *StatusName[] = {
 void	ShowStates	(int Thread)
 {
   time_t Now;
+  char Ctime[MAXCTIME];
   if (!ShowState) return;
 
   /* for speed: don't show READY/RUNNING transitions */
@@ -95,10 +96,11 @@ void	ShowStates	(int Thread)
 	return;
 
   Now = time(NULL);
+  memset(Ctime,'\0',MAXCTIME);
+  ctime_r(&Now,Ctime);
   fprintf(stderr,"Child[%d] '%s' state=%s(%d) @ %s",
 	Thread,CM[Thread].Attr,
-	StatusName[CM[Thread].Status],CM[Thread].Status,
-	ctime(&Now));
+	StatusName[CM[Thread].Status],CM[Thread].Status,Ctime);
   if (CM[Thread].Status == ST_FAIL)
     {
     fprintf(stderr,"  Attr:    '%s'\n",CM[Thread].Attr);
@@ -113,6 +115,7 @@ void	ShowStates	(int Thread)
  **********************************************/
 void	DebugThread	(int Thread)
 {
+  char Ctime[MAXCTIME];
   fprintf(stderr,"\nThread %d:\n",Thread);
   fprintf(stderr,"  PID:       %d\n",CM[Thread].ChildPid);
   fprintf(stderr,"  Pipes:     in=%d->%d / out=%d->%d\n",
@@ -121,11 +124,16 @@ void	DebugThread	(int Thread)
   fprintf(stderr,"  Attr:      '%s'\n",CM[Thread].Attr);
   fprintf(stderr,"  Command:   '%s'\n",CM[Thread].Command);
   fprintf(stderr,"  Parm:      '%s'\n",CM[Thread].Parm);
-  fprintf(stderr,"  Heartbeat:  %s",ctime(&(CM[Thread].Heartbeat)));
-  fprintf(stderr,"  State:      %s",ctime(&(CM[Thread].StatusTime)));
+  memset(Ctime,'\0',MAXCTIME);
+  ctime_r(&(CM[Thread].Heartbeat),Ctime);
+  fprintf(stderr,"  Heartbeat:  %s",Ctime);
+  memset(Ctime,'\0',MAXCTIME);
+  ctime_r(&(CM[Thread].StatusTime),Ctime);
+  fprintf(stderr,"  State:      %s",Ctime);
   fprintf(stderr,"  Status:     %d (%s)\n",CM[Thread].Status,StatusName[CM[Thread].Status]);
-  fprintf(stderr,"  Spawn:      %d at %s",
-	CM[Thread].SpawnCount,ctime(&(CM[Thread].SpawnTime)));
+  memset(Ctime,'\0',MAXCTIME);
+  ctime_r(&(CM[Thread].SpawnTime),Ctime);
+  fprintf(stderr,"  Spawn:      %d at %s",CM[Thread].SpawnCount,Ctime);
   fprintf(stderr,"  DB:\n");
   fprintf(stderr,"    IsDB:     %d\n",CM[Thread].IsDB);
   fprintf(stderr,"    DBJobKey: %d\n",CM[Thread].DBJobKey);
@@ -265,6 +273,7 @@ int	KillChild	(int Thread)
 void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 {
   int Thread;
+  char Ctime[MAXCTIME];
 
   switch(Signo)
     {
@@ -272,7 +281,9 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 	{
 	time_t Now;
 	Now = time(NULL);
-	printf("ALARM at %s",ctime(&Now));
+	memset(Ctime,'\0',MAXCTIME);
+	ctime_r(&Now,Ctime);
+	printf("ALARM at %s",Ctime);
 	}
 	break;
     case SIGINT: /* kill all children and exit */
@@ -309,10 +320,12 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 	{
 	time_t Now;
 	Now = time(NULL);
-	fprintf(stderr,"CRASH DEBUG! %s",ctime(&Now));
+	memset(Ctime,'\0',MAXCTIME);
+	ctime_r(&Now,Ctime);
+	fprintf(stderr,"CRASH DEBUG! %s",Ctime);
 	fprintf(stderr,"  DEBUG: %s :: %d\n",Debug.File,Debug.Line);
 	DebugThreads(3);
-	fprintf(stderr,"CRASH DEAD! %s",ctime(&Now));
+	fprintf(stderr,"CRASH DEAD! %s",Ctime);
 	raise(SIGABRT); /* generate a core dump */
 	DBclose(DB);
 	exit(-1);

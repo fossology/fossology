@@ -27,6 +27,7 @@
 #define MAXBUFF	256
 #define MAXARG	256
 #define MAXATTR	256
+#define MAXCTIME	48
 
 extern int Verbose;
 extern char BuildVersion[];
