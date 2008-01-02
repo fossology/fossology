@@ -162,6 +162,12 @@ void	DeleteUpload	(long UploadId)
   VDB = DBmove(DB);
 
   /***********************************************/
+  /* Delete the upload from the folder-contents table */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE (foldercontents_mode & 2) != 0 AND child_id = %ld;",UploadId);
+  MyDBaccess(DB,SQL);
+
+  /***********************************************/
   /* Blow away jobs */
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM jobdepends WHERE jdep_jq_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk IN (SELECT job_pk FROM job WHERE job_upload_fk = %ld));",UploadId);
@@ -183,12 +189,6 @@ void	DeleteUpload	(long UploadId)
 
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM upload WHERE upload_pk = %ld;",UploadId);
-  MyDBaccess(DB,SQL);
-
-  /***********************************************/
-  /* Delete the upload from the folder-contents table */
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE (foldercontents_mode & 2) != 0 AND child_id = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   /***********************************************/
@@ -252,17 +252,17 @@ void	DeleteUpload	(long UploadId)
     S = DBgetvalue(VDB,Row,1); /* sha1.md5.len */
     if (RepExist("license",S))
 	{
-	if (Test) printf("Delete %s %s\n","license",S);
+	if (Test) printf("TEST: Delete %s %s\n","license",S);
 	else RepRemove("license",S);
 	}
     if (RepExist("files",S))
 	{
-	if (Test) printf("Delete %s %s\n","files",S);
+	if (Test) printf("TEST: Delete %s %s\n","files",S);
 	else RepRemove("files",S);
 	}
     if (RepExist("gold",S))
 	{
-	if (Test) printf("Delete %s %s\n","gold",S);
+	if (Test) printf("TEST: Delete %s %s\n","gold",S);
 	else RepRemove("gold",S);
 	}
     ItemsProcessed++;
@@ -315,7 +315,7 @@ void	ListFoldersRecurse	(void *VDB, long Parent, int Depth,
 		}
 	else
 		{
-		if (DelFlag) DeleteUpload(atol(DBgetvalue(VDB,r,3)));
+		if (DelFlag) DeleteUpload(atol(DBgetvalue(VDB,r,4)));
 		else printf("%4s :: Contains: %s\n","--",DBgetvalue(VDB,r,2));
 		}
 	}
@@ -334,12 +334,12 @@ void	ListFoldersRecurse	(void *VDB, long Parent, int Depth,
 	  default:	/* it's a folder */
 		memset(SQL,'\0',sizeof(SQL));
 		snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE foldercontents_mode = 1 AND child_id = '%ld';",Parent);
-		if (Test) printf("%s\n",SQL);
+		if (Test) printf("TEST: %s\n",SQL);
 		else MyDBaccess(DB,SQL);
 
 		memset(SQL,'\0',sizeof(SQL));
 		snprintf(SQL,sizeof(SQL),"DELETE FROM folder WHERE folder_pk = '%ld';",Parent);
-		if (Test) printf("%s\n",SQL);
+		if (Test) printf("TEST: %s\n",SQL);
 		else MyDBaccess(DB,SQL);
 		break;
 	  } /* switch() */
