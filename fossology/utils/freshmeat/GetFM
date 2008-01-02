@@ -22,7 +22,7 @@ mkdir -p $RLOGS
 mkdir -p $INPUTFILES
 if [! -d $RDIR ]
 then
-   mkdir -l $RDIR
+   mkdir -p $RDIR
 fi
 
 Date=`date +"%Y-%m-%d"`
@@ -52,9 +52,13 @@ echo $top1k > "${RDIR}Current-top1k"
 # uncompress todays rdf file and call mktop1k to create the top 1000 from this file
 #
 echo "uncompressing $RDIR$Compressed_file"
-
 echo "bunzip2 -qc $RDIR$Compressed_file > $RDIR$Uncompressed_file"
+echo
 echo "mktop1k -i $RDIR$Uncompressed_file -o $top1k"
+echo
+
+bunzip2 -qc $RDIR$Compressed_file > $RDIR$Uncompressed_file
+mktop1k -i $RDIR$Uncompressed_file -o $top1k
 
 # Diff the current and previous top 1000 xml files
 
@@ -62,6 +66,7 @@ current=`cat "${RDIR}Current-top1k"`
 previous=`cat "${RDIR}Previous-top1k"`
 echo  "Doing..."
 echo "diffm $current $previous -o $INPUTFILES"
+echo
 diffm -f "$current" "$previous" -o "$INPUTFILES" > "${RLOGS}log.diffm.${Date}"
 drtn=$?
 #echo "diffm returned the following:$drtn"
@@ -78,13 +83,15 @@ then
   exit 0
 else
 # we have something to process, get it and upload what we can.
-  echo "Doing...\n"
+  echo "Doing..."
   echo "get-projects -f ${INPUTFILES}Update.fm.rdf.${Date} > ${RLOGS}log.get-projects.${Date} 2>&1"
+  echo
   get-projects -f "${INPUTFILES}Update.fm.rdf.${Date} > ${RLOGS}log.get-projects.${Date} 2>&1"
 # upload the files with cp2foss 
-  echo "Doing...\n"
+  echo "Doing..."
   echo "cp2foss -f ${INPUTFILES}FM-projects2update.${Date} > ${RLOGS}log.cp2foss.${Date} 2>&1 &"
-  cp2foss -f "{INPUTFILES}FM-projects2update.${Date} > ${RLOGS}log.cp2foss.${Date} 2>&1 &"
+  echo
+  cp2foss -f "${INPUTFILES}FM-projects2update.${Date} > ${RLOGS}log.cp2foss.${Date} 2>&1 &"
 # echo check the following log files .....
 fi
 exit 0
