@@ -42,6 +42,11 @@ struct Type1SL
   };
 typedef struct Type1SL Type1SL;
 
+/* MAX1SL is used to prevent long lists (e.g., dictionaries) from
+   matching a 1SL.  (300 characters is a very long sentence...) */
+#define	MAX1SL	300
+
+
 /* For speed, don't start a regex with a "%" phrase.  '%' are expensive! */
 Type1SL List1SL[] = {
 	{"1SL: %s", "*.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}* < license : % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
@@ -87,7 +92,7 @@ int	Check1SL	(fileoffset Begin, fileoffset Finish, FILE *Fout)
 	{
 	/* it matched, see if it was best */
 	WR_GetStartEnd(&Start,&End);
-	if ((BestMatchId < 0) || (Start < BestStart))
+	if ((End-Start < MAX1SL) && ((BestMatchId < 0) || (Start < BestStart)))
 	  {
 	  BestMatchId = i;
 	  BestStart = Start;
