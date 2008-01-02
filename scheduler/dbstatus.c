@@ -311,6 +311,7 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
   char Empty[2]="";
   int rc;
   static int DBDead=0;
+  char Ctime[MAXCTIME];
 
   if ((Thread >= 0) && (CM[Thread].DBagent < 0))
     {
@@ -319,10 +320,12 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
 
   /* Do an update */
   memset(SQL,'\0',MAXCMD);
+  memset(Ctime,'\0',MAXCTIME);
   /* Not checking string size since I know MAXCMD is much larger */
+  ctime_r((&(CM[Thread].StatusTime)),Ctime);
   sprintf(SQL,"UPDATE scheduler_status SET agent_status='%s', agent_status_date='%s', record_update=now(), agent_param='%s' WHERE unique_scheduler='%s.%d' AND agent_number='%d';",
 	StatusName,
-	(Thread >= 0) ? ctime(&(CM[Thread].StatusTime)) : "now()",
+	(Thread >= 0) ? Ctime : "now()",
 	(Thread >= 0) ? CM[Thread].Parm : "",
 	Hostname,getpid(),Thread);
   rc = DBLockAccess(DB,SQL);
@@ -336,6 +339,8 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
   if (DBrowsaffected(DB) < 1)
     {
     memset(SQL,'\0',MAXCMD);
+    memset(Ctime,'\0',MAXCTIME);
+    ctime_r((&(CM[Thread].StatusTime)),Ctime);
     Value = NULL;
     if (Thread >= 0) Value = GetValueFromAttr(CM[Thread].Attr,"agent=");
     if (!Value) Value = Empty;
@@ -345,14 +350,12 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
 	(Thread >= 0) ? CM[Thread].Attr : "scheduler",
 	(Thread >= 0) ? CM[Thread].DBagent : -1,
 	StatusName,
-	(Thread >= 0) ? ctime(&(CM[Thread].StatusTime)) : "now()",
+	(Thread >= 0) ? Ctime : "now()",
 	(Thread >= 0) ? CM[Thread].Parm : ""
 	);
     if (Thread >= 0) Value = GetValueFromAttr(CM[Thread].Attr,"host=");
     if (!Value) Value = Empty;
-    sprintf(SQL+strlen(SQL),"'%s',now());",
-	(Thread >= 0) ? Value : Hostname
-	);
+    sprintf(SQL+strlen(SQL),"'%s',now());", (Thread >= 0) ? Value : Hostname);
     rc = DBLockAccess(DB,SQL);
     if (rc < 0)
       {
@@ -378,7 +381,9 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
 	{
 	time_t Now;
 	Now = time(NULL);
-	fprintf(stderr,"ERROR: Scheduler lost connection to the database! %s",ctime(&Now));
+	memset(Ctime,'\0',MAXCTIME);
+	ctime_r(&Now,Ctime);
+	fprintf(stderr,"ERROR: Scheduler lost connection to the database! %s",Ctime);
 	fprintf(stderr,"  Dumping debug information.\n");
 	DebugThreads(3);
 	fprintf(stderr,"INFO: Scheduler attempting to reconnect to the database.\n");
