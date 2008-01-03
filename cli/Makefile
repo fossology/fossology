@@ -16,10 +16,7 @@ MAN1FILES=cp2foss.1
 iPATHFILE=pathinclude.h.php
 
 all: $(iPATHFILE) MANpages
-	for file in ${BINFILES}; do \
-		chmod a+x $${file}; \
-	done
-
+	
 $(iPATHFILE): ../Makefile.conf
 	@echo "Building $(iPATHFILE)"
 	@echo "<?php" > $(iPATHFILE)
@@ -38,18 +35,17 @@ $(iPATHFILE): ../Makefile.conf
 	@echo "?>" >> $(iPATHFILE)
 
 MANpages:
-	echo "MANpages target"; \
-	chmod a+x ./mkpod
+	echo "MANpages target"
 	./mkpod $(MAN1SRC)
    
 InstallationCreate:
 	echo "INSTALLATIONCREATE target"; \
 #	chmod a+x $(BINFILES)
-	for file in ${BINFILES} ; do \
+	for file in "${BINFILES}" ; do \
 		chmod a+x $${file} ; \
 		echo "Installing $${file} into ../install/${BINDIR}"; \
 		if \
-		[[ $${file} == *.php ]] ; then \
+		[[ "$${file}" == *.php ]] ; then \
 			no_extention=$${file%.php} ; \
 			cp $${file} ../install/${BINDIR}/$${no_extention} ; \
 		 else \
@@ -66,6 +62,7 @@ install: all InstallationCreate
 	for file in ${BINFILES}; do \
 		chmod a+x $${file}; \
 	done
+	echo "CLI->install Makefile"
 	$(CP) $(BINFILES) $(BINDIR)
 	if [ -f $(PHPCLI) ] ; then \
 	grep -q '^extension.*=.*pgsql.so' $(PHPCLI) || \
