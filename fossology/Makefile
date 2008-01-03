@@ -4,11 +4,18 @@
 # List directories in order of dependencies!
 include Makefile.conf
 
-DIRS=devel/libfossrepo devel/libfossdb scheduler agents/foss_license_agent/bSAM agents/Shell agents/foss_license_agent/Filter_License agents/PkgMetaGetta agents/ununpack agents/wget_agent agents/foss_license_agent/Licenses agents/foss_license_agent/PkgMetaGetta agents/mimetype agents/specagent agents/sqlagent agents/delagent ui cli
+DIRS=devel/libfossrepo devel/libfossdb scheduler agents/foss_license_agent/bSAM agents/Shell agents/foss_license_agent/Filter_License agents/PkgMetaGetta agents/ununpack agents/wget_agent agents/foss_license_agent/Licenses agents/foss_license_agent/PkgMetaGetta agents/mimetype agents/specagent agents/sqlagent agents/delagent ui cli utils/freshmeat
+
+UTILDIRS=utils/freshmeat
 
 all:
 	@echo "Project $(PROJECT) $(SVN_REV)"
 	@for i in $(DIRS) ; do if [ -d $$i ] ; then echo "Making $$i" ; (cd $$i ; make) ; fi ; done
+
+utils: all
+	@echo "Project $(PROJECT) $(SVN_REV)"
+	@echo "Make Fossology optional utilities"
+	@for i in $(UTILDIRS) ; do if [ -d $$i ] ; then echo "Making $$i" ; (cd $$i ; make) ; fi ; done
 
 MakeBuildDirs:
 	@for i in $(BUILDINC) $(BUILDLIB) ; do if [ ! -d $$i ] ; then echo "Making directory $$i" ; $(MKDIR) -p $$i ; fi ; done
@@ -51,11 +58,30 @@ InstallationCreate: all InstallationRemove
 
 clean: InstallationRemove
 	@for i in $(DIRS) ; do if [ -d $$i ] ; then echo "Cleaning $$i" ; (cd $$i ; make clean) ; fi ; done
+	@for i in $(UTILDIRS) ; do if [ -d $$i ] ; then echo "Cleaning $$i" ; (cd $$i ; make clean) ; fi ; done
 	@for i in $(BUILDINC) $(BUILDLIB) ; do if [ -d $$i ] ; then echo "Cleaning directory $$i" ; $(RM) -rf $$i/* ; fi ; done
 
 install: InstallationCreate CreateInstallScript
 	@echo Project $(PROJECT)
 	./install.sh
+	
+InstallCreateUtils: utils
+	echo "MAIN-MK: Before InstallCreateUtils"
+	pwd
+	@ls install/$(BINDIR)
+	if [ ! -d install ] ; then $(MKDIR) install ; fi
+	# Create directories under the install tree.
+	$(MKDIR) -p install/$(INCLUDEDIR)
+	if [ ! -d $(BINDIR) ] ; then $(MKDIR) -p install/$(BINDIR) ; fi
+	# Populate directories
+	@for i in $(UTILDIRS) ; do if [ -d $$i ] ; then echo "Installing template $$i" ; (cd $$i ; make InstallationCreate) ; fi ; done
+	echo "MAIN-MK: After InstallCreateUtils"
+	pwd
+	@ls install/$(BINDIR)
+	
+installUtils: InstallCreateUtils CreateInstallScript
+	@echo "Installing utils into the staging area"
+	
 
 uninstall:
 
