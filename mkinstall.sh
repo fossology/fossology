@@ -312,7 +312,7 @@ REPODIR="\$PROJECTHOME/repository"
 if [ ! -f "\$REPOCONF/RepPath.conf" ] ; then
   # Set the repository path to the directory "./repository/" in the
   # user's directory.
-  \$DEBUG mkdir -p "\$REPODIR"
+  \$DEBUG \$MKDIR -p "\$REPODIR"
   \$DEBUG chown -R "\$PROJECTUSER" "\$REPODIR"
   \$DEBUG chgrp -R "\$PROJECTGROUP" "\$REPODIR"
   \$DEBUG find "\$REPODIR" -type d -exec chmod 2770 '{}' \;

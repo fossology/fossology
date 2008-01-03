@@ -32,9 +32,9 @@ $(fmPATHFILE): ../Makefile.utils
 	@echo "?>" >> $(fmPATHFILE)
 
 MANpages:
-	echo "MANpages target"
- 
- # NOTE when man pages exist, uncomment the man entries below.  
+	@echo "MANpages target"
+# NOTE when man pages exist, add the man entries.  
+
 InstallationCreate:
 	for file in "${BINFILES}" ; do \
 		chmod a+x $${file} ; \
