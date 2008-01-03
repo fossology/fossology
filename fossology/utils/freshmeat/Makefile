@@ -6,7 +6,7 @@
 # Makefile for the freshmeat process.
 
 include ../../Makefile.conf
-#include ../Makefile.utils
+include ../Makefile.utils
 
 SHELL=/bin/bash
 
@@ -18,9 +18,6 @@ MAN1FILES=
 fmPATHFILE=fm-paths.h.php
 
 all: $(fmPATHFILE) MANpages
-	for file in ${BINFILES}; do \
-		chmod a+x $${file}; \
-	done
 
 $(fmPATHFILE): ../Makefile.utils
 	@echo "Building $(fmPATHFILE)"
@@ -35,31 +32,27 @@ $(fmPATHFILE): ../Makefile.utils
 	@echo "?>" >> $(fmPATHFILE)
 
 MANpages:
-	echo "MANpages target"; \
+	echo "MANpages target"
  
  # NOTE when man pages exist, uncomment the man entries below.  
 InstallationCreate:
-	echo "INSTALLATIONCREATE target";
-	echo "FM->InstallationCreate" ;
-	@ls ../../install/$(BINDIR) ;
-	for file in ${BINFILES} ; do \
+	for file in "${BINFILES}" ; do \
 		chmod a+x $${file} ; \
-		echo "Installing $${file} into ../../install/${BINDIR}"; \
 		if \
-		[[ $${file} == *.php ]] ; then \
+		[[ "$${file}" == *.php ]] ; then \
 			no_extention=$${file%.php} ; \
+			echo "Installing $${file} into ../../install/${BINDIR}/$${no_extention}"; \
 			cp $${file} ../../install/${BINDIR}/$${no_extention} ; \
 		 else \
+		 	echo "Installing $${file} into ../../install/${BINDIR}"; \
 			cp $${file} ../../install/${BINDIR} ; \
 		 fi \
 	 done
 	$(MKDIR) -p ../../install/$(LIBDIR)
+	$(MKDIR) -p ../../install/$(INCLUDEDIR)
 	$(CP) $(LIBFILES) ../../install/$(LIBDIR)
 #	$(CP) $(MAN1FILES) ../../install/$(MAN1DIR)
 	$(CP) $(fmPATHFILE) ../../install/$(INCLUDEDIR)
-	echo "FM->END OF InstallationCreate"
-	ls ../../install/$(BINDIR)
-	ls ../../install/usr/local 
 	
 install: all InstallationCreate
 	for file in ${BINFILES}; do \
@@ -69,6 +62,7 @@ install: all InstallationCreate
 	@$(MKDIR) -p $(INCLUDEDIR)
 	@$(MKDIR) -p $(BINDIR)
 	@$(MKDIR) -p $(LIBDIR)
+	@echo "FM->install target"
 	$(CP) $(BINFILES) $(BINDIR)
 	$(CP) $(LIBFILES) $(LIBDIR)
 #	$(CP) $(MAN1FILES) $(MAN1DIR)
