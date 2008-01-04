@@ -72,8 +72,8 @@ require_once("pathinclude.h.php");
 require_once("$WEBDIR/webcommon.h.php");
 require_once("$WEBDIR/jobs.h.php");
 require_once("$WEBDIR/db_postgres.h.php");
-//require_once("$LIBDIR/libcp2foss.h.php");
-require_once("./libcp2foss.h.php");
+require_once("$LIBDIR/libcp2foss.h.php");
+//require_once("./libcp2foss.h.php");
 
 $usage = <<< USAGE
 Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> \
@@ -125,6 +125,7 @@ if ($argc < 2) {
 
 $fflag = 0;
 $cap_a = false;
+$dashD = false;
 
 for ($i = 1; $i < $argc; $i++) {
   switch ($argv[$i]) {
@@ -147,6 +148,7 @@ for ($i = 1; $i < $argc; $i++) {
       $i++;
       if (isset($argv[$i])) {
         $description = $argv[$i];
+        $dashD = True;
       }
       else {
         die("ERROR: Must supply a quoted description after -d");
@@ -195,6 +197,26 @@ for ($i = 1; $i < $argc; $i++) {
 
 
 // BUG: need to parameter check, did we get all required parameters?
+// pdbg("MAIN: checking parameters");
+if (!(isset($fpath))){
+  echo "ERROR, -p <parent-folder> is a required parameter\n$usage";
+  exit(1);
+}
+
+if (!(isset($folder))){
+  echo "ERROR, -n <folder> is a required parameter\n$usage";
+  exit(1);
+}
+
+if (!(isset($archive))){
+  echo "ERROR, -a <path-to-archive> is a required parameter\n$usage";
+  exit(1);
+}
+
+if ($dashD != True){
+  echo "ERROR, -d <description> is a required parameter\n$usage";
+  exit(1);
+}
 
 //echo "PARAMETERS:\n";
 //echo "PF:$parent_folder\nN:$folder\nD:$description\nA:$archive\nFURL:$fetch_url\n\n";
