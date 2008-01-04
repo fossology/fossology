@@ -734,7 +734,7 @@ function read_parms_file($parms_file){
     // Parsing the line is very hard with reqx's. I give up.  So
     // We use the shell to do it for us.... performance at this point
     // is not an issue.
-    $dummy = exec("./p.sh $rline",$parms, $retval);
+    $dummy = exec("/usr/local/bin/p.sh $rline",$parms, $retval);
     //pdbg("after shell call, \$parms is",$parms);
 
     $pcount = count($parms);
