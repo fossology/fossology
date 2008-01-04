@@ -46,7 +46,7 @@
  *
  * @package cp2foss
  * @author mark.donohoe@hp.com
- * @version $Id: cp2foss.php 1553 2007-12-10 18:58:44Z markd $
+ * @version $Id$
  *
  * @todo remove default 'parent folder'.
  * @todo Add in recursion
