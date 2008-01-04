@@ -370,7 +370,7 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
   memset(SQL,'\0',MAXCMD);
   memset(Ctime,'\0',MAXCTIME);
   /* Not checking string size since I know MAXCMD is much larger */
-  ctime_r((&(CM[Thread].StatusTime)),Ctime);
+  if (Thread >= 0) ctime_r((&(CM[Thread].StatusTime)),Ctime);
   sprintf(SQL,"UPDATE scheduler_status SET agent_status='%s', agent_status_date='%s', record_update=now(), agent_param='%s' WHERE unique_scheduler='%s.%d' AND agent_number='%d';",
 	StatusName,
 	(Thread >= 0) ? Ctime : "now()",
@@ -388,9 +388,12 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
     {
     memset(SQL,'\0',MAXCMD);
     memset(Ctime,'\0',MAXCTIME);
-    ctime_r((&(CM[Thread].StatusTime)),Ctime);
     Value = NULL;
-    if (Thread >= 0) Value = GetValueFromAttr(CM[Thread].Attr,"agent=");
+    if (Thread >= 0)
+	{
+	Value = GetValueFromAttr(CM[Thread].Attr,"agent=");
+	ctime_r((&(CM[Thread].StatusTime)),Ctime);
+	}
     if (!Value) Value = Empty;
     sprintf(SQL,"INSERT INTO scheduler_status (unique_scheduler,agent_number,agent_attrib,agent_fk,agent_status,agent_status_date,agent_param,agent_host,record_update) VALUES ('%s.%d','%d','%s','%d','%s','%s','%s',",
 	Hostname,getpid(),
