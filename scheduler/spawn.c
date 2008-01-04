@@ -169,15 +169,23 @@ void	DebugThreads	(int Flag)
  *********************************************/
 void	SaveStatus	()
 {
-  static time_t LastSave = 0;
   static time_t LastCheck = 0;
+  static time_t LastSave = 0;
+  static time_t LastReconnect = 0;
   time_t Now;
   int Thread;
 
   Now = time(NULL);
 
+  /* Refresh DB connection every hour */
+  if ((Now - LastReconnect) > 60*60)
+    {
+    DBLockReconnect();
+    LastReconnect = Now;
+    }
+
   /* Delete old schedule entries every 10 minutes. */
-  if ((Now - LastCheck) > 600)
+  if ((Now - LastCheck) > 60*10)
     {
     DBCheckStatus();
     LastCheck = Now;

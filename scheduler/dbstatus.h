@@ -25,6 +25,7 @@ void	DBSetHostname	();
 void	DBMkArgCols	(void *DB, int Row, char *Arg, int MaxArg);
 
 int	DBLockAccess	(void *VDB, char *SQL);
+void	DBLockReconnect	();
 void	DBUpdateJob	(int JobId, int UpdateType, char *Message);
 int	DBstrcatTaint	(char *V, char *S, int MaxS);
 
