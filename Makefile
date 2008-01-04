@@ -93,6 +93,6 @@ Test:
 
 tar:
 	# Package into a tar file.
-	chmod a+rw ./mktar.sh
+	chmod a+x ./mktar.sh
 	./mktar.sh
 
