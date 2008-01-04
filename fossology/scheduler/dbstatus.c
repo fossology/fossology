@@ -147,6 +147,54 @@ inline int	DBLockAccess	(void *VDB, char *SQL)
 } /* DBLockAccess() */
 
 /***********************************************************
+ DBLockReconnect(): DBclose and DBopen.
+ ***********************************************************/
+void	DBLockReconnect	()
+{
+  sigset_t Mask, OldMask;
+
+  /*****
+   The problem being solved:
+   Postgres seems to have a problem on AMD64 processors.
+   (NOTE: This problem has not been seen on i686 processors.) 
+   If a connection is held open and heavily used for a long time
+   (e.g., 24-72 hours with SELECT and UPDATE every few seconds) then
+   the DB can become sluggish and non-responsive.  Eventually, the client
+   hangs forever.
+   Some of the observed symptoms:
+   - A few postmaster processes grow in memory usage -- from 1M to 10M
+     or larger.
+   - psql queries like "select * from pfile" work fast, but "select * from
+     pfile where <any clause>" hang forever.  Simply having the WHERE
+     clause causes the hang.  Pressing Control-C can take minutes to cancel
+     the request.
+   - The delays get larger and larger, and eventually stop.
+   - To reset: Stop the scheduler, stop the db, restart the db, restart
+     the scheduler.  Suddenly everything is faster.  (If you only stop the
+     scheduler, then the problem does not go away.)
+   This function is an attempt to reset the connection and allow
+   postgres to cleanup periodically.  It should be called at least hourly.
+   *****/
+
+  /* Set the mask */
+  sigemptyset(&Mask);
+  sigaddset(&Mask,SIGCHLD);
+  sigaddset(&Mask,SIGTERM);
+  sigaddset(&Mask,SIGQUIT);
+  sigaddset(&Mask,SIGINT);
+  sigprocmask(SIG_BLOCK,&Mask,&OldMask);
+  DBclose(DB);
+  DB = DBopen();
+  if (!DB)
+    {
+    fprintf(stderr,"FATAL: Scheduler unable to reconnect to the database.\n");
+    exit(-1);
+    }
+  sigprocmask(SIG_UNBLOCK,&OldMask,NULL);
+  return;
+} /* DBLockReconnect() */
+
+/***********************************************************
  DBUpdateJob(): Update a particular job in the DB.
  JobId = jq_pk
  Possible update modes:
