@@ -41,7 +41,12 @@ eval `grep VERSION= Makefile.conf`
 # SVN_REV is the last revision from svn info.  This is used for packaging.
 SVN_REV="`svn info | grep '^Revision:' | awk '{print $2}'`"
 
-TARBASE="fossology-$VERSION-$SVN_REV"
+# Check for command-line for subversion
+TARBASE="fossology-$VERSION"
+if [ "$1" == "-s" ] ; then
+  TARBASE="fossology-$VERSION-$SVN_REV"
+fi
+
 echo "Packaging $VERSION ($SVN_REV) into $TARBASE"
 
 # Check for mixed revisions

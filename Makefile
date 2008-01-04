@@ -94,5 +94,10 @@ Test:
 tar:
 	# Package into a tar file.
 	chmod a+x ./mktar.sh
+	./mktar.sh -s
+
+tar-release:
+	# Package into a tar file.
+	chmod a+x ./mktar.sh
 	./mktar.sh
 
