@@ -1,6 +1,6 @@
 Test plan for cp2foss
 
-Last updated: 
+Last updated: $Id$
 
 Created by: Mark Donohoe
 
