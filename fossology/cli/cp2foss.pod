@@ -1,9 +1,9 @@
 # cp2foss.pod man page input file
 # Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
 #
-# VERSION: $Id: cp2foss.pod 1591 2007-12-17 23:15:16Z markd $
+# VERSION: $Id$
 
-=head1 cp2foss: load one or more files or archives into the fossology DB.
+=head1 cp2foss: load one or more files or archives into the Fossology DB.
 
 =head1 SYNOPSIS
 
@@ -22,7 +22,7 @@ cp2foss [-h] -f <file-of-parameters>
 =head1 DESCRIPTION
 
 B<cp2foss> (copy to foss) will load a single file or tar'ed archive into the
-folder specificed by B<-n>, under the folder-path specified with B<-p>.
+folder specified by B<-n>, under the folder-path specified with B<-p>.
 The I<folder-path> and I<folder-name> do not need to exist. B<cp2foss> 
 will create them as needed.
 
@@ -70,7 +70,7 @@ Description must be quoted with either single or double quotes.
 
 The folder name that will be used to store the archive in the
 date-base.  Only one upload into a file folder is allowed to avoid
-storing dulicate uploads.  The file folder is checked to see if it has been 
+storing duplicate uploads.  The file folder is checked to see if it has been 
 uploaded into.  If it has, no other uploads are allowed into that file folder.
 
 Use different folder paths or folder names to upload the same archive
@@ -106,8 +106,9 @@ I<Mysrcs/foo, Mysrcs/bar, Othersrc/randy>.
 
 =item B<-w>
 
-Switch to indicate that the archive is a url (-a <url>) and should first 
-be obtained using wget.
+Switch to indicate that the archive is a url (-a <url>).  B<cp2foss> will first 
+get the archive using B<wget>.  Then the archive will be loaded into the 
+folders specified.
 
 =back
 
@@ -126,7 +127,7 @@ uploaded into the data-base.
 
 C<cp2foss -pUbuntu -n GGibon -w -a 'http://ubuntu.cs.utah.edu/releases/gutsy/ubuntu-7.10-desktop-i386.iso' -d 'Ubuntu Gutsy 7.10'>
 
-The above example, will first get the archive using the url and wget.  It will
+The above example, B<cp2foss> will first get the archive using the url and wget.  It will
 then load the downloaded archive into the data-base.
 
 =head1 AUTHOR
