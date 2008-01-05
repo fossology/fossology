@@ -1,0 +1,19 @@
+Test plan for Freshmeat
+
+Last updated: $Id$
+
+Created by:
+
+Modified by: 
+
+This is just a placeholder for now.
+
+Use the different assert methods to check for file existence after a run.
+Same for logs.
+
+This plan should really consist of separate plans for each of the main 
+programs used in the process:
+- mktop1k
+- diffm
+- get-projects
+- GetFM
