@@ -2,7 +2,7 @@
 # Script to get latest FreshMeat RDF file and drive updating the DB
 #
 # Author: mark.donohoe@hp.com
-# Version: $Id: GetFM 1437 2007-11-17 04:37:18Z markd $
+# Version: $Id$
 
 # TODO: need to source a file with the correct paths, not hard code them.
 # 
@@ -20,9 +20,9 @@ RLOGS="${DIR}Run-logs/"
 # is the mkdir needed?  ReadMe says to precreate....
 mkdir -p $RLOGS
 mkdir -p $INPUTFILES
-if [! -d $RDIR ]
+if [ ! -d $RDIR ]
 then
-   mkdir -p $RDIR
+    mkdir -p $RDIR
 fi
 
 Date=`date +"%Y-%m-%d"`
@@ -56,10 +56,25 @@ echo "bunzip2 -qc $RDIR$Compressed_file > $RDIR$Uncompressed_file"
 echo
 echo "mktop1k -i $RDIR$Uncompressed_file -o $top1k"
 echo
-
+#
+# Note -qc is not working for some reason, it's supposed to remove 
+# the compressed file after the uncompress.  Is there an error?
+# TODO: if no errors, then remove by hand.
+#
 bunzip2 -qc $RDIR$Compressed_file > $RDIR$Uncompressed_file
+brtn=$?
+if [[ $brtn -ne 0 ]]
+then
+  echo "ERROR! could not uncompress $Compressed_file"
+  exit 1
+fi
 mktop1k -i $RDIR$Uncompressed_file -o $top1k
-
+mrtn=$?
+if [[ $mrtn -ne 0 ]]
+then
+    echo "ERROR! mktop1k returned error status, $mrtn"
+    exit 1
+fi
 # Diff the current and previous top 1000 xml files
 
 current=`cat "${RDIR}Current-top1k"`
@@ -77,21 +92,33 @@ current=`cat "${RDIR}Current-top1k"`
 echo $current > ${RDIR}Previous-top1k
 
 # if diffm returns 0 there is no projects to update, so clean up and stop
-if (( $drtn == 0 ))
+if [[ $drtn -eq 0 ]]
 then
-  echo "exiting, nothing to do"
-  exit 0
+    echo "exiting, nothing to do"
+    exit 0
 else
 # we have something to process, get it and upload what we can.
-  echo "Doing..."
-  echo "get-projects -f ${INPUTFILES}Update.fm.rdf.${Date} > ${RLOGS}log.get-projects.${Date} 2>&1"
-  echo
-  get-projects -f "${INPUTFILES}Update.fm.rdf.${Date} > ${RLOGS}log.get-projects.${Date} 2>&1"
+    echo "Doing..."
+    echo "get-projects -f ${INPUTFILES}Update.fm.rdf.${Date} > ${RLOGS}log.get-projects.${Date} 2>&1"
+    echo
+    get-projects -f ${INPUTFILES}Update.fm.rdf.${Date} > ${RLOGS}log.get-projects.${Date} 2>&1
+    grtn=$?
+    if [[ $grtn -ne 0 ]]
+	 then
+		echo "ERROR! get-projects returned error status, $grtn"
+		exit 1
+    fi
 # upload the files with cp2foss 
-  echo "Doing..."
-  echo "cp2foss -f ${INPUTFILES}FM-projects2update.${Date} > ${RLOGS}log.cp2foss.${Date} 2>&1 &"
-  echo
-  cp2foss -f "${INPUTFILES}FM-projects2update.${Date} > ${RLOGS}log.cp2foss.${Date} 2>&1 &"
+    echo "Doing..."
+    echo "cp2foss -f ${INPUTFILES}FM-projects2update.${Date} > ${RLOGS}log.cp2foss.${Date} 2>&1 &"
+    echo
+    cp2foss -f ${INPUTFILES}FM-projects2update.${Date} > ${RLOGS}log.cp2foss.${Date} 2>&1 &
+    crtn=$?
+    if [[ $crtn -ne 0 ]]
+	 then
+		echo "ERROR! cp2foss returned error status, $crtn"
+		exit 1
+    fi
 # echo check the following log files .....
 fi
 exit 0
