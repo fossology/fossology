@@ -610,7 +610,8 @@ void	Usage	(char *Name)
   fprintf(stderr,"  -i   :: Initialize the DB, then exit.\n");
   fprintf(stderr,"  -u   :: List uploads IDs.\n");
   fprintf(stderr,"  -U # :: Delete upload ID.\n");
-  fprintf(stderr,"  -L # :: ALL licenses associated with upload ID.\n");
+  fprintf(stderr,"  -l   :: List uploads IDs. (same as -u, but goes with -L)\n");
+  fprintf(stderr,"  -L # :: Delete ALL licenses associated with upload ID.\n");
   fprintf(stderr,"  -f   :: List folder IDs.\n");
   fprintf(stderr,"  -F # :: Delete folder ID and all uploads under this folder.\n");
   fprintf(stderr,"          Folder '1' is the default folder.  '-F 1' will delete\n");
@@ -629,7 +630,7 @@ int	main	(int argc, char *argv[])
   int Scheduler=0; /* should it run from the scheduler? */
   int GotArg=0;
 
-  while((c = getopt(argc,argv,"ifF:L:sTuU:v")) != -1)
+  while((c = getopt(argc,argv,"ifF:lL:sTuU:v")) != -1)
     {
     switch(c)
       {
@@ -646,6 +647,7 @@ int	main	(int argc, char *argv[])
       case 'f': ListFolder=1; GotArg=1; break;
       case 'F': DelFolder=atol(optarg); GotArg=1; break;
       case 'L': DelLicense=atol(optarg); GotArg=1; break;
+      case 'l': ListProj=1; GotArg=1; break;
       case 's': Scheduler=1; GotArg=1; break;
       case 'T': Test++; break;
       case 'u': ListProj=1; GotArg=1; break;
