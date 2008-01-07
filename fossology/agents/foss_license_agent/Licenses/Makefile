@@ -7,7 +7,18 @@ EXE=License.bsam
 all:
 
 License.bsam:
+	chmod u+x ./MkCache
 	./MkCache
+
+Test1:
+	@echo "Testing to find the best match"
+	chmod u+x ./SelfTest
+	./SelfTest
+
+Test2:
+	@echo "Testing to find all matches"
+	chmod u+x ./SelfTest2
+	./SelfTest2
 
 InstallationCreate:
 	find Raw -type f | grep -v svn | sed -e 's@^Raw/@@' | \
