@@ -36,6 +36,7 @@ The different types:
 	Then skip the comparison!)
 0128 Function tokens AND list -- 2 byte tokens, all must be in the comparison
 	token list.
+0129 Function "important" tokens (to be used for choosing between similar matches)
 0131 Byte offset to start in untokenized file (length is always 4)
 0132 Byte offset to end in untokenized file (length is always 4)
 	Both contain 4 bytes.
