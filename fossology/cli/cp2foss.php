@@ -194,8 +194,32 @@ for ($i = 1; $i < $argc; $i++) {
       break;
   }
 }
+$path = "{$DATADIR}/dbconnect/{$PROJECT}";
 
+db_init($path);
 
+if (!$_pg_conn) {
+  echo "ERROR: could not connect to DB\n";
+  exit(1);
+}
+
+// If we have a file of input, we process it and exit
+// should enhance this to have read_parms_file return a value and
+// exit accordingly.
+
+// Check this first, so that the other checks are ignored if we have -f
+if($fflag){
+  if (!(file_exists($in_file))){
+    echo "Error, the file $in_file does not exist\n";
+    exit(1);
+  }
+  elseif (($fsize = filesize($in_file)) <= 0){
+    echo "Error, file size of $in_file is not greater than zero\n";
+    exit(1);
+  }
+  read_parms_file($in_file);
+  exit;
+}
 // BUG: need to parameter check, did we get all required parameters?
 // pdbg("MAIN: checking parameters");
 if (!(isset($fpath))){
@@ -221,14 +245,6 @@ if ($dashD != True){
 //echo "PARAMETERS:\n";
 //echo "PF:$parent_folder\nN:$folder\nD:$description\nA:$archive\nFURL:$fetch_url\n\n";
 
-$path = "{$DATADIR}/dbconnect/{$PROJECT}";
-
-db_init($path);
-
-if (!$_pg_conn) {
-  echo "ERROR: could not connect to DB\n";
-  exit(1);
-}
 /*
  enhancement area:
  This is spot to check for:
@@ -243,22 +259,6 @@ if (!$_pg_conn) {
  <top/root folder>.../FreshMeat/a-c/buzzard
 
  */
-
-// If we have a file of input, we process it and exit
-// should enhance this to have read_parms_file return a value and
-// exit accordingly.
-if($fflag){
-  if (!(file_exists($in_file))){
-    echo "Error, the file $in_file does not exist\n";
-    exit(1);
-  }
-  elseif (($fsize = filesize($in_file)) <= 0){
-    echo "Error, file size of $in_file is not greater than zero\n";
-    exit(1);
-  }
-  read_parms_file($in_file);
-  exit;
-}
 
 /*
  * Stub for recursion
