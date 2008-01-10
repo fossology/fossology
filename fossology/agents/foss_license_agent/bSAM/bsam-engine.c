@@ -220,6 +220,7 @@
 
 #if 0
 #define DEBUG 1
+#define DEBUG_RECURSION 1
 #endif
 #define BEGIN_COMMIT 1
 
@@ -251,7 +252,7 @@ int	ExhaustiveSearch=0;	/* should it do an exhaustive search? */
    FunctionStart - FunctionEnd :: function within Mmap (abs file positions)
    0 - SymbolMax :: relative locations of FunctionStart - FunctionEnd
    0 - SymbolEnd :: scan window within Function (relative location, offset)
-     SymbolOffset = offset value
+     SymbolStart = offset value
    MatrixMinMatch - MatrixMaxMatch :: location of license within Symbol range
  ****************************************************************/
 typedef	uint16_t MTYPE;	/* data type for matrix */
@@ -260,6 +261,12 @@ MTYPE	*Matrix=NULL;	/* the alignment matrix: A*Bsize+B */
 int MatrixSize=0;	/* the allocated size of the matrix */
 
 #define MAX_PATH	65536	/* store up to 65536 tokens from best path */
+
+/* for matching */
+int	MatchThreshold[2]={90,90};
+int	MatchGap[2]={5,5};	/* maximum gap between sequences */
+int	MatchSeq[2]={10,10};	/* minimum sequences to match */
+int	MatchLen[2]={10,10};	/* minimum sequences to check */
 
 struct matrixstate
   {
@@ -277,13 +284,13 @@ struct matrixstate
   uint16_t *SymbolBase[2];	/* base set of symbols: [0]=A, [1]=B */
   uint16_t *Symbol[2];		/* the set of symbols: [0]=A, [1]=B */
   long SymbolMax[2];	/* size of the A and B lists */
-  unsigned char	*SymbolRealSize[2];
+  unsigned char	*SymbolRealSize[2]; /* real size (bytes) of each symbol */
   long	SymbolRealSizeLen[2];
 
   /* optimize scan range based on "must contain these" */
-  /** Real range is [SymbolOffset, SymbolOffset+SymbolEnd] **/
-  /** SymbolOffset+SymbolEnd <= SymbolMax **/
-  long SymbolOffset[2];
+  /** Real range is [SymbolStart, SymbolStart+SymbolEnd] **/
+  /** SymbolStart+SymbolEnd <= SymbolMax **/
+  long SymbolStart[2];
   long SymbolEnd[2];
 
   /* best path */
@@ -309,12 +316,6 @@ struct matrixstate
   }; /* matrixstate */
 typedef struct matrixstate matrixstate;
 matrixstate MS;
-
-/* for matching */
-int	MatchThreshold[2]={90,90};
-int	MatchGap[2]={5,5};	/* maximum gap between sequences */
-int	MatchSeq[2]={10,10};	/* minimum sequences to match */
-int	MatchLen[2]={10,10};	/* minimum sequences to check */
 
 #define	Max(a,b)	((a) > (b) ? (a) : (b))
 #define	Min(a,b)	((a) < (b) ? (a) : (b))
@@ -380,16 +381,54 @@ void    ShowHeartbeat   (int Sig)
 /**********************************************
  PrintRanges(): display the memory ranges for debugging.
  **********************************************/
-void	PrintRanges	(char *S, int Which)
+void	PrintRanges	(char *S, int Which, int ShowMatch)
 {
+  int i;
+  int S1,S2,S3;
+
+if (Which==1) return;
+
   printf("%s Range[%d]:\n",S,Which);
   printf("  Mmap: 0 - %x :: Offset %lx :: %s\n",RepFile[Which]->MmapSize,MS.MmapOffset[Which],MS.Filename[Which]);
   printf("  Function: %lx - %lx :: %s\n",MS.FunctionStart[Which],MS.FunctionEnd[Which],MS.Functionname[Which]);
-  printf("  Symbol: 0 - %ld\n",MS.SymbolMax[Which]);
-  printf("  Scan Range: %ld - %ld",MS.SymbolOffset[Which],MS.SymbolOffset[Which]+MS.SymbolEnd[Which]);
-  printf(" (Really 0 - %ld)\n",MS.SymbolEnd[Which]);
-  printf("  Match: %ld - %ld",MS.SymbolOffset[Which]+MS.MatrixMinPos[Which],MS.SymbolOffset[Which]+MS.MatrixMaxPos[Which]);
-  printf(" (Really %d - %d)\n",MS.MatrixMinPos[Which],MS.MatrixMaxPos[Which]);
+  printf("  Symbol: 0 - %ld (tokens)\n",MS.SymbolMax[Which]);
+  printf("  Scan Range tokens: %ld - %ld (length: %ld)\n",MS.SymbolStart[Which],MS.SymbolStart[Which]+MS.SymbolEnd[Which],MS.SymbolEnd[Which]);
+
+  /* Convert scan range to actual byte offsets in the file */
+  S1=MS.FunctionStart[Which];
+  for(i=0; i < MS.SymbolStart[Which]; i++)
+    {
+    S1 += MS.SymbolRealSize[Which][i];
+    }
+  for(S2=S1; i < MS.SymbolEnd[Which]; i++)
+    {
+    S2 += MS.SymbolRealSize[Which][i];
+    }
+  for(S3=S2; i < MS.SymbolMax[Which]; i++)
+    {
+    S3 += MS.SymbolRealSize[Which][i];
+    }
+  printf("  Scan Range bytes: %d - %d - %d (length: %d - %d)\n",S1,S2,S3,S2-S1,S3-S1);
+
+  if (ShowMatch)
+    {
+    printf("  Match tokens: %ld - %ld (length: %d)\n",
+    	MS.SymbolStart[Which]+MS.MatrixMinPos[Which],
+	MS.SymbolStart[Which]+MS.MatrixMaxPos[Which],
+	MS.MatrixMaxPos[Which]-MS.MatrixMinPos[Which]);
+
+    /* Convert match range to actual byte offsets */
+    S1=MS.FunctionStart[Which];
+    for(i=0,S1=MS.FunctionStart[Which]; i < MS.MatrixMinPos[Which]; i++)
+      {
+      S1 += MS.SymbolRealSize[Which][i];
+      }
+    for(S2=S1; i <= MS.MatrixMaxPos[Which]; i++)
+      {
+      S2 += MS.SymbolRealSize[Which][i];
+      }
+    printf("  Match bytes: %d - %d (length: %d)\n",S1,S2,S2-S1);
+    }
 } /* PrintRanges() */
 
 /**********************************************
@@ -429,7 +468,6 @@ inline void	FreeMatrixState	(matrixstate *M)
 {
   if (M->PathString[0]) free(M->PathString[0]);
   if (M->PathString[1]) free(M->PathString[1]);
-  memset(M,0,sizeof(matrixstate));
 } /* FreeMatrixState() */
 
 /**********************************************
@@ -447,22 +485,55 @@ inline void	InitMatrixState	(matrixstate *M)
 } /* InitMatrixState() */
 
 /**********************************************
- MoveMatrixState(): Transfer a matrix state structure
+ CopyMatrixState(): Transfer a matrix state structure
  to a second structure.  M1 -> M2
- M2 is freed before the move happens.
- M1 is reallocated.
+ This copies everything EXCEPT the PathString.
+ PathString is only moved on request.
  **********************************************/
-inline void	MoveMatrixState	(matrixstate *M1, matrixstate *M2)
+inline void	CopyMatrixState	(matrixstate *M1, matrixstate *M2,
+				 int MoveString)
 {
-  InitMatrixState(M2);
-  if (M2->PathString[0]) free(M2->PathString[0]);
-  if (M2->PathString[1]) free(M2->PathString[1]);
+  char *PS[2][2];
+  int PSlen[2][2];
+
+  /* Save the PathStrings */
+  PS[0][0] = M1->PathString[0];
+  PS[0][1] = M1->PathString[1];
+  PS[1][0] = M2->PathString[0];
+  PS[1][1] = M2->PathString[1];
+  PSlen[0][0] = M1->PathStringMax[0];
+  PSlen[0][1] = M1->PathStringMax[0];
+  PSlen[1][0] = M2->PathStringMax[1];
+  PSlen[1][1] = M2->PathStringMax[1];
+
   memcpy(M2,M1,sizeof(matrixstate));
-  M1->PathString[0] = (char *)calloc(128,1);
-  M1->PathString[1] = (char *)calloc(128,1);
-  M1->PathStringMax[0] = 128;
-  M1->PathStringMax[1] = 128;
-} /* MoveMatrixState() */
+
+  /* Put back the path strings */
+  if (MoveString)
+    {
+    /* move it */
+    M2->PathString[0] = PS[0][0];
+    M2->PathString[1] = PS[0][1];
+    M1->PathString[0] = PS[1][0];
+    M1->PathString[1] = PS[1][1];
+    M2->PathStringMax[0] = PSlen[0][0];
+    M2->PathStringMax[1] = PSlen[0][1];
+    M1->PathStringMax[0] = PSlen[1][0];
+    M1->PathStringMax[1] = PSlen[1][1];
+    }
+  else
+    {
+    /* don't move it */
+    M1->PathString[0] = PS[0][0];
+    M1->PathString[1] = PS[0][1];
+    M2->PathString[0] = PS[1][0];
+    M2->PathString[1] = PS[1][1];
+    M1->PathStringMax[0] = PSlen[0][0];
+    M1->PathStringMax[1] = PSlen[0][1];
+    M2->PathStringMax[0] = PSlen[1][0];
+    M2->PathStringMax[1] = PSlen[1][1];
+    }
+} /* CopyMatrixState() */
 
 /**********************************************
  ShowSQLERROR(): Ok, SQL reported a problem.
@@ -845,12 +916,13 @@ void	GetPathString	(int Which)
   int i;
   long BaseOffset;
 
-  BaseOffset = MS.SymbolOffset[Which];
+  BaseOffset = MS.SymbolStart[Which];
 
   /* clear memory */
   if (MS.PathStringMax[Which] > 0)
 	{
-	memset(MS.PathString[Which],'\0',MS.PathStringMax[Which]);
+	// memset(MS.PathString[Which],'\0',MS.PathStringMax[Which]);
+	MS.PathString[Which][0] = '\0';
 	}
 
   /* find the path */
@@ -939,11 +1011,15 @@ void	GetPathString	(int Which)
 	  {
 	  char *NewPath;
 	  MS.PathStringMax[Which] += 128;
-	  NewPath = (char *)realloc(MS.PathString[Which],MS.PathStringMax[Which]);
+	  NewPath = (char *)calloc(MS.PathStringMax[Which],sizeof(char));
 	  if (NewPath)
 	    {
+	    if (MS.PathString[Which])
+	    	{
+	    	strcpy(NewPath,MS.PathString[Which]);
+		free(MS.PathString[Which]);
+		}
 	    MS.PathString[Which] = NewPath;
-	    memset(MS.PathString[Which]+MS.PathStringMax[Which] - 128,'\0',128);
 	    }
 	  else
 	    {
@@ -985,17 +1061,17 @@ void	GetStartEnd	(int Which, long *RealStart, long *RealEnd)
   long i;
 
 #if DEBUG
-  if (Verbose) PrintRanges("GetStartEnd",Which);
+  if (Verbose) PrintRanges("GetStartEnd",Which,1);
 #endif
   if (MS.FunctionEnd[Which] > 0)
 	{
 	*RealStart = MS.FunctionStart[Which];
-	for(i=0; i < MS.SymbolOffset[Which] + MS.MatrixMinPos[Which]; i++)
+	for(i=0; i < MS.SymbolStart[Which] + MS.MatrixMinPos[Which]; i++)
 	  {
 	  *RealStart += MS.SymbolRealSize[Which][i];
 	  }
 	*RealEnd = *RealStart;
-	for( ; i < MS.SymbolOffset[Which] + MS.MatrixMaxPos[Which]; i++)
+	for( ; i < MS.SymbolStart[Which] + MS.MatrixMaxPos[Which]; i++)
 	  {
 	  *RealEnd += MS.SymbolRealSize[Which][i];
 	  }
@@ -1283,12 +1359,6 @@ inline int	GetSeqRange	()
   int vBestStart,vBestEnd;
   int Seq[2],SeqBest[2]={0,0};	/* track the best sequential match size */
 
-  /* Cannot match if there are no symbols */
-  if (!MS.SymbolEnd[0] || !MS.SymbolEnd[1])
-	{
-	return(0);
-	}
-
   v=MS.MatrixMax;
   a=MS.MatrixMaxPos[0];
   b=MS.MatrixMaxPos[1];
@@ -1385,8 +1455,10 @@ inline int	GetSeqRange	()
   MS.MatrixBestMax = vBestEnd;
 
   /* check if threshold matches */
-  if ((MS.MatrixMax*100/(MS.SymbolEnd[0]) < MatchThreshold[0]) ||
-      (MS.MatrixMax*100/(MS.SymbolEnd[1]) < MatchThreshold[1]))
+  a = MS.MatrixMaxPos[0] - MS.MatrixMinPos[0] + 1;
+  b = MS.MatrixMaxPos[1] - MS.MatrixMinPos[1] + 1;
+  if ((MS.MatrixMax*100 < a*MatchThreshold[0]) ||
+      (MS.MatrixMax*100 < b*MatchThreshold[1]))
 	{
 	return(0);
 	}
@@ -1449,10 +1521,10 @@ inline	int	ComputeMatrix	()
   /* set range */
   SkipA = MS.SymbolEnd[0] - ((MatchThreshold[0] * MS.SymbolEnd[0]) / 100);
   SkipB = MS.SymbolEnd[1] - ((MatchThreshold[1] * MS.SymbolEnd[1]) / 100);
-  MinA = MS.SymbolOffset[0];
-  MinB = MS.SymbolOffset[1];
-  MaxA = Min(MS.SymbolEnd[0]+MS.SymbolEnd[1],MS.SymbolEnd[0]);
-  MaxB = Min(MS.SymbolEnd[1]+MS.SymbolEnd[0],MS.SymbolEnd[1]);
+  MinA = MS.SymbolStart[0];
+  MinB = MS.SymbolStart[1];
+  MaxA = MS.SymbolEnd[0];
+  MaxB = MS.SymbolEnd[1];
 
 #if 0
   printf("\n");
@@ -1487,12 +1559,15 @@ inline	int	ComputeMatrix	()
 #endif
 
   /* Offset symbols, so the first is "zero" */
-  MS.Symbol[0] = MS.SymbolBase[0] + MS.SymbolOffset[0];
-  MS.Symbol[1] = MS.SymbolBase[1] + MS.SymbolOffset[1];
+  MS.Symbol[0] = MS.SymbolBase[0] + MS.SymbolStart[0];
+  MS.Symbol[1] = MS.SymbolBase[1] + MS.SymbolStart[1];
   MinA = 0;
   MinB = 0;
-  MaxA -= MS.SymbolOffset[0];
-  MaxB -= MS.SymbolOffset[1];
+  MaxA -= MS.SymbolStart[0];
+  MaxB -= MS.SymbolStart[1];
+
+  if ((MaxA <= 0) || (MaxB <= 0)) return(0); /* No symbols */
+
 #if 0
   printf("\n");
   printf("Loaded:\n  A: %s (%s: %ld) :: %d - %d\n  B: %s (%s %ld) :: %d - %d\n",
@@ -1565,6 +1640,12 @@ inline	int	ComputeMatrix	()
       }
     }
 
+  if (MS.MatrixMax >= MAX_PATH)
+	{
+	/* This should NEVER happen */
+	fprintf(stderr,"ERROR: Matrix size is out of bounds.\n");
+	exit(-1);
+	}
 #if DEBUG
   if (ShowStage2Flag)
   	{
@@ -1585,7 +1666,7 @@ inline	int	ComputeMatrix	()
 
 /**********************************************
  ExtremeTokens(): Set the extreme token range.
- This sets SymbolOffset[] and SymbolEnd[].
+ This sets SymbolStart[] and SymbolEnd[].
  Computes the range over B based on tokens found in A.
  Only symbols within this range will be considered for
  comparisons.  This prevents scanning large, unmatched
@@ -1600,7 +1681,7 @@ void	ExtremeTokens	(int A, int B)
   if (MS.SymbolMax[B] < 100) return; /* nothing will be optimized */
 
   /****
-   Assume that MS.SymbolOffset and MS.SymbolEnd are set to a max range.
+   Assume that MS.SymbolStart and MS.SymbolEnd are set to a max range.
    Find the outer most tokens!
 
    This must NEVER go outside of the predefined range.
@@ -1609,27 +1690,27 @@ void	ExtremeTokens	(int A, int B)
    ****/
 
   /* init bounds */
-  Min = MS.SymbolOffset[B];
+  Min = MS.SymbolStart[B];
   Max = MS.SymbolEnd[B];
 
   /* init range to extreme out-of-bounds range */
-  MS.SymbolOffset[B] = Max;
+  MS.SymbolStart[B] = Max;
   MS.SymbolEnd[B] = Min;
 
   /* check remaining tokens */
   for(a=0; a < MS.SymbolORMax[A]; a++)
     {
     /* find first matching token -- this will be the start */
-    if (MS.SymbolOffset[B] > Min)
+    if (MS.SymbolStart[B] > Min)
       {
       b=Min;
-      while((b < MS.SymbolOffset[B]) && (MS.SymbolOR[A][a] != MS.Symbol[B][b])) b++;
+      while((b < MS.SymbolStart[B]) && (MS.SymbolOR[A][a] != MS.Symbol[B][b])) b++;
       if ((b < Max) && (MS.SymbolOR[A][a] == MS.Symbol[B][b]))
 	{
 	/* save the minimum entry! */
-	if (b < MS.SymbolOffset[B])
+	if (b < MS.SymbolStart[B])
 	  {
-	  MS.SymbolOffset[B] = b;
+	  MS.SymbolStart[B] = b;
 	  }
 	}
       }
@@ -1638,8 +1719,8 @@ void	ExtremeTokens	(int A, int B)
     if (MS.SymbolEnd[B] < Max)
       {
       b=Max-1;
-      while((b >= MS.SymbolOffset[B]) && (MS.SymbolOR[A][a] != MS.Symbol[B][b])) b--;
-      if ((b>=MS.SymbolOffset[B]) && (MS.SymbolOR[A][a] == MS.Symbol[B][b]))
+      while((b >= MS.SymbolStart[B]) && (MS.SymbolOR[A][a] != MS.Symbol[B][b])) b--;
+      if ((b>=MS.SymbolStart[B]) && (MS.SymbolOR[A][a] == MS.Symbol[B][b]))
 	{
 	/* save the minimum entry! */
 	if (b > MS.SymbolEnd[B]) MS.SymbolEnd[B] = b;
@@ -1650,21 +1731,21 @@ void	ExtremeTokens	(int A, int B)
   if (Verbose > 1)
     {
     printf("ExtremeTokens %d: [%d : %ld] => [%ld : %ld] = %ld\n",
-      B,0,MS.SymbolEnd[B],MS.SymbolOffset[B],
-      MS.SymbolEnd[B],MS.SymbolEnd[B]-MS.SymbolOffset[B]);
+      B,0,MS.SymbolEnd[B],MS.SymbolStart[B],
+      MS.SymbolEnd[B],MS.SymbolEnd[B]-MS.SymbolStart[B]);
     }
 #endif
 
   /* Allow a few tokens (100) before and after the OR list. */
-  MS.SymbolOffset[B] = Max(MS.SymbolOffset[B]-100,Min);
+  MS.SymbolStart[B] = Max(MS.SymbolStart[B]-100,Min);
   MS.SymbolEnd[B] = Min(MS.SymbolEnd[B]+100,Max);
 
   /* Align end with offset */
 #if 0
-  if (MS.SymbolOffset[B] >= MS.SymbolEnd[B])
+  if (MS.SymbolStart[B] >= MS.SymbolEnd[B])
 	{
 	printf("  ExtremeTokens2: (%d,%d): %ld - %ld\n",
-		A,B,MS.SymbolOffset[B],MS.SymbolEnd[B]);
+		A,B,MS.SymbolStart[B],MS.SymbolEnd[B]);
 	printf("EXTREMETOKEN RANGE ERROR!\n");
 	}
 #endif
@@ -1873,7 +1954,7 @@ GetNext:
 	  MS.MatrixMaxPos[0] = Len;
 	  MS.MatrixMinPos[1] = 1;
 	  MS.MatrixMaxPos[1] = Len;
-	  MS.SymbolOffset[1] = 0;
+	  MS.SymbolStart[1] = 0;
 	  MS.SymbolEnd[1] = Len;
 	  MS.Functionname[1]=(char *)MapOffset;
 	  MS.FunctionStart[1]=1;
@@ -1947,7 +2028,7 @@ GetNext:
 	if (MS.SymbolMax[1] * MatchThreshold[1] > MS.SymbolMax[0]*100) goto GetNext;
 
 	/* set initial range */
-	MS.SymbolOffset[1]=0;
+	MS.SymbolStart[1]=0;
 	MS.SymbolEnd[1]=MS.SymbolMax[1];
 
 	/* check if required tokens are present */
@@ -1961,15 +2042,16 @@ GetNext:
 	} /* if Which == 1 */
   else /* Which == 0 */
 	{
-	MS.SymbolOffset[0]=0;
+	MS.SymbolStart[0]=0;
 	MS.SymbolEnd[0]=MS.SymbolMax[0];
 	}
 
 #if DEBUG
-    if (Verbose > 0)
+    if (Verbose > 1)
       {
-      printf("%d Loaded: (%s: %ld: %lX)  (%s: %ld: %lX)\n",
+      printf("%d Loaded: (%s: %ld: %lX)  (%s : %s: %ld: %lX)\n",
 	Which,MS.Functionname[0],MS.SymbolMax[0],MS.MmapOffset[0],
+	MS.Filename[1],
 	MS.Functionname[1],MS.SymbolMax[1],MS.MmapOffset[1]);
       }
 #endif
@@ -2230,7 +2312,7 @@ void	SAMfiles	()
   /* Now process the files */
   SetData(0);
   HasMatch=1;
-  RMS.SymbolOffset[0] = MS.SymbolOffset[0];
+  RMS.SymbolStart[0] = MS.SymbolStart[0];
   RMS.SymbolEnd[0] = MS.SymbolEnd[0];
   while(LoadNextData(0,!HasMatch))
     {
@@ -2242,7 +2324,7 @@ void	SAMfiles	()
       while(LoadNextData(1,0))
 	{
 	/* ALL idiot checking moved to LoadNextData */
-	MS.SymbolOffset[0]=0;
+	MS.SymbolStart[0]=0;
 	MS.SymbolEnd[0]=MS.SymbolMax[0];
 	/** Checking same function types moved to LoadNextData **/
 #if DEBUG
@@ -2266,7 +2348,7 @@ void	SAMfiles	()
     /* BIG "WATCHOUT"
        LoadNextData called ExtremeTokens.  This modified the range for A.
        Need to reset A's range. */
-    MS.SymbolOffset[0] = RMS.SymbolOffset[0];
+    MS.SymbolStart[0] = RMS.SymbolStart[0];
     MS.SymbolEnd[0] = RMS.SymbolEnd[0];
     } /* while(LoadNextData(0)) */
 
@@ -2314,8 +2396,11 @@ int	SAMfilesExhaustiveB	()
   matrixstate RMS;	/* original/real matrix configuration */
 
   /* store best matches */
-  int HasMatch=0;
   matrixstate BMS;	/* best matrix match */
+  int HasMatch=0;
+#ifdef DEBUG_RECURSION
+  static int Depth=0;
+#endif
 
   /* don't even load the ones that are too small */
   if (MS.SymbolEnd[0] < MatchLen[0]) return(0);
@@ -2323,9 +2408,11 @@ int	SAMfilesExhaustiveB	()
 
   /* save the existing symbol lists */
   SetData(1);
+  memset(&BMS,0,sizeof(matrixstate));
+  memset(&RMS,0,sizeof(matrixstate));
   InitMatrixState(&BMS);
   InitMatrixState(&RMS);
-  MoveMatrixState(&MS,&RMS);
+  CopyMatrixState(&MS,&RMS,1);
   MS.MatrixMax=0;
 
   HasMatch=0;
@@ -2356,13 +2443,23 @@ int	SAMfilesExhaustiveB	()
 		/* save the best match */
 		GetPathString(0);
 		GetPathString(1);
-		MoveMatrixState(&MS,&BMS);
+#if DEBUG
+		if (Verbose)
+		  {
+		  PrintRanges("SET BEST",0,1);
+		  PrintRanges("SET BEST",1,1);
+		  }
+#endif
+		MS.SymbolStart[0] = RMS.SymbolStart[0];
+		MS.SymbolEnd[0] = RMS.SymbolEnd[0];
+		CopyMatrixState(&MS,&BMS,1);
+		HasMatch=1;
 #if DEBUG
 		if (Verbose)
 		  {
 		  printf("DEBUG: GetSeqRange: Found part %ld - %ld in full %d - %ld\n",
-		  BMS.SymbolOffset[0]+BMS.MatrixMinPos[0],
-		  BMS.SymbolOffset[0]+BMS.MatrixMaxPos[0],
+		  BMS.SymbolStart[0]+BMS.MatrixMinPos[0],
+		  BMS.SymbolStart[0]+BMS.MatrixMaxPos[0],
 		  0,RMS.SymbolMax[0]);
 		  }
 #endif
@@ -2373,19 +2470,21 @@ int	SAMfilesExhaustiveB	()
 	/* BIG "WATCHOUT"
 	   LoadNextData called ExtremeTokens.  This modified the range for A.
 	   Need to reset A's range. */
-	MS.SymbolOffset[0] = RMS.SymbolOffset[0];
+	MS.SymbolStart[0] = RMS.SymbolStart[0];
 	MS.SymbolEnd[0] = RMS.SymbolEnd[0];
 	} /* while(LoadNextData(1)) */
 
   /* Ok, we have the best match! */
-  if (BMS.MatrixMax > 0)
+  if (HasMatch)
     {
     /* restore the best */
-    MoveMatrixState(&BMS,&MS);
+    CopyMatrixState(&BMS,&MS,1);
+#if DEBUG_RECURSION
+    printf("%*s BEST: %ld - %ld\n",Depth,"",MS.SymbolStart[0]+MS.MatrixPath[0][MS.MatrixBestMin],MS.SymbolStart[0]+MS.MatrixPath[0][MS.MatrixBestMax]);
+#endif
 #if DEBUG
     if (Verbose) { printf("DEBUG: Got a best match\n"); }
 #endif
-    HasMatch=1;
     VerboseStats(0);
 
     /* Now, recurse on the two segments: before and after */
@@ -2394,53 +2493,76 @@ int	SAMfilesExhaustiveB	()
       {
       printf("DEBUG: Full range: %d - %ld\n",0,MS.SymbolMax[0]);
       printf("DEBUG: Middle match: %ld - %ld :: %s:%s\n",
-	MS.SymbolOffset[0],MS.SymbolOffset[0] + MS.SymbolEnd[0],
+	MS.SymbolStart[0],MS.SymbolStart[0] + MS.SymbolEnd[0],
 	MS.Filename[1],MS.Functionname[1]);
       }
 #endif
 
     /* recurse on BEFORE segement */
-    if (MS.MatrixMinPos[0] >= MatchLen[0])
+    if (BMS.MatrixBestMin > 0)
+      { /* BEFORE */
+      CopyMatrixState(&BMS,&MS,0);
+      /** Don't change MS.SymbolStart -- keep the start **/
+      MS.SymbolEnd[0] = MS.SymbolStart[0]+MS.MatrixPath[0][MS.MatrixBestMin]-1;
+      if (MS.SymbolEnd[0] - MS.SymbolStart[0] >= MatchLen[0])
 	{
-	/* modify the original based on the best */
-	/* This segment uses the same start, but ends where the best begins */
-	MS.SymbolEnd[0] = BMS.MatrixMinPos[0];
 	MS.MatrixMinPos[0] = 0;
-	MS.MatrixMaxPos[0] = MS.SymbolEnd[0];
+	MS.MatrixMaxPos[0] = 0;
+	MS.MatrixBestMin=0;
+	MS.MatrixBestMax=0;
 #if DEBUG
 	if (Verbose)
 	  {
-	  PrintRanges("BEFORE",0);
-	  PrintRanges("BEFORE",1);
+	  PrintRanges("BEFORE",0,0);
+	  PrintRanges("BEFORE",1,0);
 	  }
 #endif
+#if DEBUG_RECURSION
+	printf("%*s BEFORE: %ld - %ld\n",Depth,"",MS.SymbolStart[0],MS.SymbolEnd[0]);
+	Depth++;
+#endif
 	HasMatch |= SAMfilesExhaustiveB();
+#if DEBUG_RECURSION
+	Depth--;
+#endif
 	}
+      } /* BEFORE */
 
     /* recurse on AFTER segement */
-    if (RMS.SymbolEnd[0] - BMS.MatrixMaxPos[0] >= MatchLen[0])
+    if (BMS.MatrixBestMax > BMS.MatrixBestMin)
+      { /* AFTER */
+      CopyMatrixState(&BMS,&MS,0);
+      /** Don't change MS.SymbolEnd -- keep the end **/
+      MS.SymbolStart[0] = MS.SymbolStart[0]+MS.MatrixPath[0][MS.MatrixBestMax]+1;
+      if (MS.SymbolEnd[0] - MS.SymbolStart[0] >= MatchLen[0])
 	{
-	/* modify the original based on the best */
-	/* This segment uses the same start, but begins where the best ends */
-	MoveMatrixState(&BMS,&MS);
-	MS.SymbolOffset[0] += BMS.MatrixMaxPos[0]+1;
-	MS.SymbolEnd[0] -= (BMS.MatrixMaxPos[0]+1);
 	MS.MatrixMinPos[0] = 0;
-	MS.MatrixMaxPos[0] = MS.SymbolEnd[0]-1;
+	MS.MatrixMaxPos[0] = 0;
+	MS.MatrixBestMin=0;
+	MS.MatrixBestMax=0;
 #if DEBUG
 	if (Verbose)
 	  {
-	  PrintRanges("AFTER",0);
-	  PrintRanges("AFTER",1);
+	  PrintRanges("AFTER",0,0);
+	  PrintRanges("AFTER",1,0);
 	  }
 #endif
 	/* Here is the RECURSION! */
+#if DEBUG_RECURSION
+	printf("%*s AFTER: %ld - %ld\n",Depth,"",MS.SymbolStart[0],MS.SymbolEnd[0]);
+	Depth++;
+#endif
 	HasMatch |= SAMfilesExhaustiveB();
+#if DEBUG_RECURSION
+	Depth--;
+#endif
 	}
+      } /* AFTER */
+
     } /* if BestMatch */
 
   /* put everything back */
-  MoveMatrixState(&RMS,&MS);
+  CopyMatrixState(&RMS,&MS,1);
   FreeMatrixState(&RMS);
   FreeMatrixState(&BMS);
   return(HasMatch);
