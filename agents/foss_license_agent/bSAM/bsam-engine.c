@@ -2450,8 +2450,9 @@ int	SAMfilesExhaustiveB	()
 		  PrintRanges("SET BEST",1,1);
 		  }
 #endif
-		MS.SymbolStart[0] = RMS.SymbolStart[0];
-		MS.SymbolEnd[0] = RMS.SymbolEnd[0];
+#if DEBUG_RECURSION
+	printf("%*s BEST: %ld - %ld\n",Depth,"",MS.SymbolStart[0],MS.SymbolEnd[0]);
+#endif
 		CopyMatrixState(&MS,&BMS,1);
 		HasMatch=1;
 #if DEBUG
