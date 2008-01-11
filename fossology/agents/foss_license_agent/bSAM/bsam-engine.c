@@ -250,9 +250,9 @@ int	ExhaustiveSearch=0;	/* should it do an exhaustive search? */
 /****************************************************************
  The entire bsam system is based on subsets of data.
    0 - MmapSize :: The file being analyzed
-   FunctionStart - FunctionEnd :: function within Mmap (abs file positions)
-   0 - SymbolMax :: relative locations of FunctionStart - FunctionEnd
-   0 - SymbolEnd :: scan window within Function (relative location, offset)
+   SectionStart - SectionEnd :: function within Mmap (abs file positions)
+   0 - SymbolMax :: relative locations of SectionStart - SectionEnd
+   0 - SymbolEnd :: scan window within Section (relative location, offset)
      SymbolStart = offset value
    MatrixMinMatch - MatrixMaxMatch :: location of license within Symbol range
  ****************************************************************/
@@ -307,11 +307,11 @@ struct matrixstate
 
   /* for multiple datasets per file... */
   char	*Filename[2];
-  char	*Functionname[2];
-  long	FunctionStart[2];
-  long	FunctionEnd[2];
-  char	*FunctionUnique[2];
-  int	FunctionUniqueKey[2];
+  char	*Sectionname[2];
+  long	SectionStart[2];
+  long	SectionEnd[2];
+  char	*SectionUnique[2];
+  int	SectionUniqueKey[2];
   char	*Tokentype[2];
   long	TokentypeLen[2];
   }; /* matrixstate */
@@ -391,12 +391,12 @@ if (Which==1) return;
 
   printf("%s Range[%d]:\n",S,Which);
   printf("  Mmap: 0 - %x :: Offset %lx :: %s\n",RepFile[Which]->MmapSize,MS.MmapOffset[Which],MS.Filename[Which]);
-  printf("  Function: %lx - %lx :: %s\n",MS.FunctionStart[Which],MS.FunctionEnd[Which],MS.Functionname[Which]);
+  printf("  Section: %lx - %lx :: %s\n",MS.SectionStart[Which],MS.SectionEnd[Which],MS.Sectionname[Which]);
   printf("  Symbol: 0 - %ld (tokens)\n",MS.SymbolMax[Which]);
   printf("  Scan Range tokens: %ld - %ld (length: %ld)\n",MS.SymbolStart[Which],MS.SymbolStart[Which]+MS.SymbolEnd[Which],MS.SymbolEnd[Which]);
 
   /* Convert scan range to actual byte offsets in the file */
-  S1=MS.FunctionStart[Which];
+  S1=MS.SectionStart[Which];
   for(i=0; i < MS.SymbolStart[Which]; i++)
     {
     S1 += MS.SymbolRealSize[Which][i];
@@ -419,8 +419,8 @@ if (Which==1) return;
 	MS.MatrixMaxPos[Which]-MS.MatrixMinPos[Which]);
 
     /* Convert match range to actual byte offsets */
-    S1=MS.FunctionStart[Which];
-    for(i=0,S1=MS.FunctionStart[Which]; i < MS.MatrixMinPos[Which]; i++)
+    S1=MS.SectionStart[Which];
+    for(i=0,S1=MS.SectionStart[Which]; i < MS.MatrixMinPos[Which]; i++)
       {
       S1 += MS.SymbolRealSize[Which][i];
       }
@@ -550,7 +550,7 @@ inline void	CopyMatrixState	(matrixstate *M1, matrixstate *M2,
 void	ShowSQLERROR	(char *SQL, int Which)
 {
   fprintf(stderr,"SQL ERROR[%d]: %s:%s\n  %s\n",
-	getpid(),MS.Filename[Which],MS.Functionname[Which],SQL);
+	getpid(),MS.Filename[Which],MS.Sectionname[Which],SQL);
 } /* ShowSQLERROR() */
 
 /**********************************************
@@ -934,15 +934,15 @@ void	GetPathString	(int Which)
 	}
 
   /* find the path */
-  Pos=MS.FunctionStart[Which];
+  Pos=MS.SectionStart[Which];
 
 #if 0
   /* Debugging */
   {
   int i,Sum;
   long Start;
-  printf("A:%s:%s  B:%s:%s\n",MS.Filename[0],MS.Functionname[0],
-    MS.Filename[1],MS.Functionname[1]);
+  printf("A:%s:%s  B:%s:%s\n",MS.Filename[0],MS.Sectionname[0],
+    MS.Filename[1],MS.Sectionname[1]);
   printf("Offset[%d] = %ld\n",Which,Pos);
   /* Display the path offsets */
   // printf("Before:");
@@ -990,7 +990,7 @@ void	GetPathString	(int Which)
   /*** TBD NAK: Rewrite this code!  It is functional, but looks ugly. ***/
   {
   /* Compute the path offsets before the first match */
-  Pos=MS.FunctionStart[Which];
+  Pos=MS.SectionStart[Which];
   for(i=0; i < BaseOffset + MS.MatrixPath[Which][MS.MatrixBestMin]; i++)
     {
     Pos += MS.SymbolRealSize[Which][i];
@@ -1072,9 +1072,9 @@ void	GetStartEnd	(int Which, long *RealStart, long *RealEnd)
 #if DEBUG
   if (Verbose) PrintRanges("GetStartEnd",Which,1);
 #endif
-  if (MS.FunctionEnd[Which] > 0)
+  if (MS.SectionEnd[Which] > 0)
 	{
-	*RealStart = MS.FunctionStart[Which];
+	*RealStart = MS.SectionStart[Which];
 	for(i=0; i < MS.SymbolStart[Which] + MS.MatrixMinPos[Which]; i++)
 	  {
 	  *RealStart += MS.SymbolRealSize[Which][i];
@@ -1087,8 +1087,8 @@ void	GetStartEnd	(int Which, long *RealStart, long *RealEnd)
 	}
     else
 	{
-	*RealStart=MS.FunctionStart[Which];
-	*RealEnd=MS.FunctionEnd[Which];
+	*RealStart=MS.SectionStart[Which];
+	*RealEnd=MS.SectionEnd[Which];
 	}
 #if DEBUG
   if (Verbose)
@@ -1119,12 +1119,12 @@ void	DBSaveLicense	(int Flag1SL, char *Unique,
       V = DBgetvalue(DB,0,0);
       if (V)
 	{
-	MS.FunctionUniqueKey[1] = atoi(V);
+	MS.SectionUniqueKey[1] = atoi(V);
 	}
       else
 	{
 	printf("FATAL: lic_unique not found (%s) from '%s' : '%s'\n",
-		MS.FunctionUnique[1],MS.Filename[1],MS.Functionname[1]);
+		MS.SectionUnique[1],MS.Filename[1],MS.Sectionname[1]);
 	fflush(stdout);
 	DBclose(DB);
 	exit(-1);
@@ -1191,7 +1191,7 @@ void	DBSaveLicense	(int Flag1SL, char *Unique,
   if (Flag1SL) /* if 1SL */
     {
     strcat(SQL,",'");
-    DBquote(MS.Functionname[1],250,SQL+strlen(SQL));
+    DBquote(MS.Sectionname[1],250,SQL+strlen(SQL));
     strcat(SQL,"'");
     /* set the range for 1SL phrases */
     memset(MS.PathString[0],'\0',MS.PathStringMax[0]);
@@ -1205,9 +1205,9 @@ void	DBSaveLicense	(int Flag1SL, char *Unique,
 
   strcat(SQL,",'0.1'"); /* version string */
   strcat(SQL2," AND version='0.1'"); /* version string */
-  /* store lic_fk (MS.FunctionUniqueKey[1] was set by the SELECT) */
-  sprintf(SQL+strlen(SQL),",%d",MS.FunctionUniqueKey[1]);
-  sprintf(SQL2+strlen(SQL2)," AND lic_fk='%d'",MS.FunctionUniqueKey[1]);
+  /* store lic_fk (MS.SectionUniqueKey[1] was set by the SELECT) */
+  sprintf(SQL+strlen(SQL),",%d",MS.SectionUniqueKey[1]);
+  sprintf(SQL2+strlen(SQL2)," AND lic_fk='%d'",MS.SectionUniqueKey[1]);
 
   /* store best path */
   strcat(SQL,",'");
@@ -1276,8 +1276,8 @@ inline void	VerboseStats	(int Flag1SL)
     {
     for(i=0; i<2; i++)
       {
-      RealStart[i] = MS.FunctionStart[i];
-      RealEnd[i] = MS.FunctionEnd[i];
+      RealStart[i] = MS.SectionStart[i];
+      RealEnd[i] = MS.SectionEnd[i];
       }
     }
 
@@ -1289,17 +1289,17 @@ inline void	VerboseStats	(int Flag1SL)
     case 'n':	/* normal DB output */
     case 'N':	/* normal DB output */
     /***
-     If FunctionUnique is defined, then do a different insert...
+     If SectionUnique is defined, then do a different insert...
      INSERT INTO agent_lic_meta (fields) SELECT 'constants',lic_pk FROM \
       agent_lic_raw WHERE lic_unique = 'string' order by and asc limit 1;
      ***/
 
-      MS.FunctionUniqueKey[1] = -1;
+      MS.SectionUniqueKey[1] = -1;
 
       /* Process regular licenses */
-      if (MS.FunctionUnique[1] != NULL)
+      if (MS.SectionUnique[1] != NULL)
 	{
-	DBSaveLicense(Flag1SL,MS.FunctionUnique[1],RealStart,RealEnd);
+	DBSaveLicense(Flag1SL,MS.SectionUnique[1],RealStart,RealEnd);
 	}
       else if (Flag1SL)
 	{
@@ -1314,7 +1314,7 @@ inline void	VerboseStats	(int Flag1SL)
 	fputs("A = ",stdout);
 	fputs(MS.Filename[0],stdout);
 	fputs("\n    ",stdout);
-	fputs(MS.Functionname[0],stdout);
+	fputs(MS.Sectionname[0],stdout);
 	if (RealStart[0] < RealEnd[0])
 	  {
 	  fprintf(stdout," (0x%lx,0x%lx)",RealStart[0],RealEnd[0]);
@@ -1324,7 +1324,7 @@ inline void	VerboseStats	(int Flag1SL)
 	fputs("B = ",stdout);
 	fputs(MS.Filename[1],stdout);
 	fputs("\n    ",stdout);
-	fputs(MS.Functionname[1],stdout);
+	fputs(MS.Sectionname[1],stdout);
 	if (RealStart[1] < RealEnd[1])
 	  {
 	  fprintf(stdout," (0x%lx,0x%lx)",RealStart[1],RealEnd[1]);
@@ -1516,8 +1516,8 @@ inline	int	ComputeMatrix	()
 #if 0
   printf("\n");
   printf("Loaded:\n  A: %s (%s: %ld)\n  B: %s (%s %ld)\n",
-    MS.Filename[0],MS.Functionname[0],MS.SymbolMax[0],
-    MS.Filename[1],MS.Functionname[1],MS.SymbolMax[1]);
+    MS.Filename[0],MS.Sectionname[0],MS.SymbolMax[0],
+    MS.Filename[1],MS.Sectionname[1],MS.SymbolMax[1]);
     printf("Matrix is %d x %d = %d\n",
 	(int)MS.SymbolEnd[0],(int)MS.SymbolEnd[1],
 	(int)(MS.SymbolEnd[0]*MS.SymbolEnd[1]));
@@ -1538,8 +1538,8 @@ inline	int	ComputeMatrix	()
 #if 0
   printf("\n");
   printf("Loaded:\n  A: %s (%s: %ld) :: %d - %d\n  B: %s (%s %ld) :: %d - %d\n",
-    MS.Filename[0],MS.Functionname[0],MS.SymbolMax[0],MinA,MaxA,
-    MS.Filename[1],MS.Functionname[1],MS.SymbolMax[1],MinB,MaxB);
+    MS.Filename[0],MS.Sectionname[0],MS.SymbolMax[0],MinA,MaxA,
+    MS.Filename[1],MS.Sectionname[1],MS.SymbolMax[1],MinB,MaxB);
     printf("Matrix is %d x %d = %d   Using %d x %d\n",
 	(int)MS.SymbolEnd[0],(int)MS.SymbolEnd[1],
 	(int)(MS.SymbolEnd[0]*MS.SymbolEnd[1]),
@@ -1560,8 +1560,8 @@ inline	int	ComputeMatrix	()
   if (ShowStage1Flag)
 	{
 	printf("Stage 1:\n  A: %s (%s: %ld)\n  B: %s (%s %ld)\n",
-		MS.Filename[0],MS.Functionname[0],MS.SymbolMax[0],
-		MS.Filename[1],MS.Functionname[1],MS.SymbolMax[1]);
+		MS.Filename[0],MS.Sectionname[0],MS.SymbolMax[0],
+		MS.Filename[1],MS.Sectionname[1],MS.SymbolMax[1]);
 	SameInitMatrix();
 	PrintMatrix(0,65536,0,65536);
 	}
@@ -1580,8 +1580,8 @@ inline	int	ComputeMatrix	()
 #if 0
   printf("\n");
   printf("Loaded:\n  A: %s (%s: %ld) :: %d - %d\n  B: %s (%s %ld) :: %d - %d\n",
-    MS.Filename[0],MS.Functionname[0],MS.SymbolMax[0],MinA,MaxA,
-    MS.Filename[1],MS.Functionname[1],MS.SymbolMax[1],MinB,MaxB);
+    MS.Filename[0],MS.Sectionname[0],MS.SymbolMax[0],MinA,MaxA,
+    MS.Filename[1],MS.Sectionname[1],MS.SymbolMax[1],MinB,MaxB);
     printf("Matrix is %d x %d = %d   Using %d x %d\n",
 	(int)MS.SymbolEnd[0],(int)MS.SymbolEnd[1],
 	(int)(MS.SymbolEnd[0]*MS.SymbolEnd[1]),
@@ -1659,8 +1659,8 @@ inline	int	ComputeMatrix	()
   if (ShowStage2Flag)
   	{
 	printf("Stage 2:\n  A: %s (%s: %ld)\n  B: %s (%s %ld)\n",
-		MS.Filename[0],MS.Functionname[0],MS.SymbolMax[0],
-		MS.Filename[1],MS.Functionname[1],MS.SymbolMax[1]);
+		MS.Filename[0],MS.Sectionname[0],MS.SymbolMax[0],
+		MS.Filename[1],MS.Sectionname[1],MS.SymbolMax[1]);
 	PrintMatrix(0,65536,0,65536);
 	}
   if (Verbose > 1) VerboseStats(0);
@@ -1785,7 +1785,7 @@ int	CheckTokensOR	(int A, int B)
   if (Verbose > 1)
     {
     printf("TokensOR missed: A=%s:%s  B=%s:%s\n",
-	MS.Filename[0],MS.Functionname[0],MS.Filename[1],MS.Functionname[1]);
+	MS.Filename[0],MS.Sectionname[0],MS.Filename[1],MS.Sectionname[1]);
     }
 #endif
   return(0);
@@ -1814,7 +1814,7 @@ int	CheckTokensAND	(int A, int B)
 	if (Verbose > 1)
 	  {
 	  printf("TokensAND missed: A=%s:%s  B=%s:%s\n",
-	   MS.Filename[0],MS.Functionname[0],MS.Filename[1],MS.Functionname[1]);
+	   MS.Filename[0],MS.Sectionname[0],MS.Filename[1],MS.Sectionname[1]);
 	  }
 #endif
 	return(0);
@@ -1887,12 +1887,12 @@ GetNext:
     	MS.Filename[Which] = (char *)MapOffset;
 	MS.SymbolMax[Which] = 0;
 	break;
-      case 0x0101:	/* Function name */
-    	MS.Functionname[Which] = (char *)MapOffset;
-	MS.FunctionStart[Which] = -1;
-	MS.FunctionEnd[Which] = -1;
-	MS.FunctionUnique[Which] = NULL;
-	MS.FunctionUniqueKey[Which] = -1;
+      case 0x0101:	/* Section name */
+    	MS.Sectionname[Which] = (char *)MapOffset;
+	MS.SectionStart[Which] = -1;
+	MS.SectionEnd[Which] = -1;
+	MS.SectionUnique[Which] = NULL;
+	MS.SectionUniqueKey[Which] = -1;
 	MS.SymbolMax[Which] = 0;
 	MS.SymbolRealSizeLen[Which] = 0;
 	MS.SymbolRealSize[Which] = NULL;
@@ -1901,22 +1901,22 @@ GetNext:
       /* not implemented yet */
       case 0x0002:	/* File checksum */
       case 0x0003:	/* File license */
-      case 0x0103:	/* Function license */
+      case 0x0103:	/* Section license */
     	break;
 #endif
       case 0x0004:	/* File type */
-      case 0x0104:	/* Function type (overrides File type) */
+      case 0x0104:	/* Section type (overrides File type) */
     	MS.Tokentype[Which] = (char *)MapOffset;
     	MS.TokentypeLen[Which] = Length;
 	break;
-      case 0x0108:	/* Function tokens */
+      case 0x0108:	/* Section tokens */
 	MS.SymbolMax[Which] = Length/2; /* 2 bytes per token */
 	MS.SymbolBase[Which] = (uint16_t *)(MapOffset);
 	MS.Symbol[Which] = MS.SymbolBase[Which];
 	break;
-      case 0x0110:	/* Function unique */
-	MS.FunctionUnique[Which] = (char *)MapOffset;
-	MS.FunctionUniqueKey[Which] = -1;
+      case 0x0110:	/* Section unique */
+	MS.SectionUnique[Which] = (char *)MapOffset;
+	MS.SectionUniqueKey[Which] = -1;
 	break;
       case 0x0118:	/* OR tokens */
 	MS.SymbolORMax[Which] = Length/2; /* 2 bytes per token */
@@ -1927,17 +1927,17 @@ GetNext:
 	MS.SymbolAND[Which] = (uint16_t *)(MapOffset);
 	break;
       case 0x0131:	/* start location */
-	MS.FunctionStart[Which] = 0;
+	MS.SectionStart[Which] = 0;
 	for(i=0; i<Length; i++)
 	  {
-	  MS.FunctionStart[Which] = MS.FunctionStart[Which] * 256 + MapOffset[i];
+	  MS.SectionStart[Which] = MS.SectionStart[Which] * 256 + MapOffset[i];
 	  }
 	break;
       case 0x0132:	/* end location */
-	MS.FunctionEnd[Which] = 0;
+	MS.SectionEnd[Which] = 0;
 	for(i=0; i<Length; i++)
 	  {
-	  MS.FunctionEnd[Which] = MS.FunctionEnd[Which] * 256 + MapOffset[i];
+	  MS.SectionEnd[Which] = MS.SectionEnd[Which] * 256 + MapOffset[i];
 	  }
 	break;
       case 0x0138:	/* Offsets between tokens */
@@ -1965,11 +1965,11 @@ GetNext:
 	  MS.MatrixMaxPos[1] = Len;
 	  MS.SymbolStart[1] = 0;
 	  MS.SymbolEnd[1] = Len;
-	  MS.Functionname[1]=(char *)MapOffset;
-	  MS.FunctionStart[1]=1;
-	  MS.FunctionEnd[1]=Length;
-	  sprintf(MS.PathString[0],"%ld-%ld",MS.FunctionStart[0],MS.FunctionEnd[0]);
-	  sprintf(MS.PathString[1],"%ld-%ld",MS.FunctionStart[1],MS.FunctionEnd[1]);
+	  MS.Sectionname[1]=(char *)MapOffset;
+	  MS.SectionStart[1]=1;
+	  MS.SectionEnd[1]=Length;
+	  sprintf(MS.PathString[0],"%ld-%ld",MS.SectionStart[0],MS.SectionEnd[0]);
+	  sprintf(MS.PathString[1],"%ld-%ld",MS.SectionStart[1],MS.SectionEnd[1]);
 	  VerboseStats(1);
 	  } /* case 0x0140 */
 	break;
@@ -1982,8 +1982,8 @@ GetNext:
     if (Verbose > 0)
       {
       printf("%d Loaded: (%s: %ld: %lX)  (%s: %ld: %lX)\n",
-	Which,MS.Functionname[0],MS.SymbolMax[0],MS.MmapOffset[0],
-	MS.Functionname[1],MS.SymbolMax[1],MS.MmapOffset[1]);
+	Which,MS.Sectionname[0],MS.SymbolMax[0],MS.MmapOffset[0],
+	MS.Sectionname[1],MS.SymbolMax[1],MS.MmapOffset[1]);
       }
 #endif
     MapOffset += Length;
@@ -2025,8 +2025,8 @@ GetNext:
 	else if (Verbose > 1)
 		{
 		printf("Comparing: A=%s:%s  B=%s:%s\n",
-			MS.Filename[0],MS.Functionname[0],
-			MS.Filename[1],MS.Functionname[1]);
+			MS.Filename[0],MS.Sectionname[0],
+			MS.Filename[1],MS.Sectionname[1]);
 		}
 #endif
 	/* if wrong token type */
@@ -2059,9 +2059,9 @@ GetNext:
     if (Verbose > 1)
       {
       printf("%d Loaded: (%s: %ld: %lX)  (%s : %s: %ld: %lX)\n",
-	Which,MS.Functionname[0],MS.SymbolMax[0],MS.MmapOffset[0],
+	Which,MS.Sectionname[0],MS.SymbolMax[0],MS.MmapOffset[0],
 	MS.Filename[1],
-	MS.Functionname[1],MS.SymbolMax[1],MS.MmapOffset[1]);
+	MS.Sectionname[1],MS.SymbolMax[1],MS.MmapOffset[1]);
       }
 #endif
 
@@ -2341,8 +2341,8 @@ void	SAMfiles	()
 	if (Verbose > 1)
 		{
 		printf("Loaded: (%s: %ld)  (%s %ld)\n",
-			MS.Functionname[0],MS.SymbolMax[0],
-			MS.Functionname[1],MS.SymbolMax[1]);
+			MS.Sectionname[0],MS.SymbolMax[0],
+			MS.Sectionname[1],MS.SymbolMax[1]);
 		}
 #endif
 	if (ComputeMatrix())
@@ -2436,8 +2436,8 @@ int	SAMfilesExhaustiveB	()
 	if (Verbose > 1)
 		{
 		printf("Loaded: (%s: %ld)  (%s %ld)\n",
-			MS.Functionname[0],MS.SymbolMax[0],
-			MS.Functionname[1],MS.SymbolMax[1]);
+			MS.Sectionname[0],MS.SymbolMax[0],
+			MS.Sectionname[1],MS.SymbolMax[1]);
 		}
 #endif
 	if (MS.SymbolEnd[0] && MS.SymbolEnd[1])
@@ -2506,7 +2506,7 @@ int	SAMfilesExhaustiveB	()
       printf("DEBUG: Full range: %d - %ld\n",0,MS.SymbolMax[0]);
       printf("DEBUG: Middle match: %ld - %ld :: %s:%s\n",
 	MS.SymbolStart[0],MS.SymbolStart[0] + MS.SymbolEnd[0],
-	MS.Filename[1],MS.Functionname[1]);
+	MS.Filename[1],MS.Sectionname[1]);
       }
 #endif
 
