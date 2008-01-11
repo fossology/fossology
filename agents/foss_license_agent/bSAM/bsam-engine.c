@@ -451,7 +451,6 @@ void	PrintMatrix	(int A1, int A2, int B1, int B2)
     {
     printf(" %02x ",MS.Symbol[0][a] % 256); /* header */
     aoffset = a * MS.SymbolEnd[1];
-    // for(b=B1; b<Min(MS.SymbolEnd[1],B2); b++)
     for(b=B1; b<Min(MS.SymbolEnd[1],B2+1); b++)
       {
       printf("%3d ",Matrix[aoffset+b]);
@@ -1412,11 +1411,13 @@ inline int	GetSeqRange	()
 	Seq[0]++;
 	if (Seq[0] > SeqBest[0]) SeqBest[0] = Seq[0];
 	}
+      else Seq[0]=1;
       if (MS.MatrixPath[1][v-1]+1 == MS.MatrixPath[1][v])
 	{
 	Seq[1]++;
 	if (Seq[1] > SeqBest[1]) SeqBest[1] = Seq[1];
 	}
+      else Seq[1]=1;
 
       /* See if they match the gap range */
       if ((MS.MatrixPath[0][v] - MS.MatrixPath[0][v-1] <= MatchGap[0]) &&
@@ -1445,12 +1446,11 @@ inline int	GetSeqRange	()
       }
     }
 
-  /* Check if the BestSeq is good enough */
+  /* Check if the BestSeq is good enough (this is "-M") */
   if (SeqBest[0] < MatchSeq[0]) return(0); /* no match */
   if (SeqBest[1] < MatchSeq[1]) return(0); /* no match */
 
-  /* Check if the thresholds match */
-
+  /* Check if the length thresholds match (this is "-L") */
   MS.MatrixMinPos[0] = MS.MatrixPath[0][vBestStart];
   MS.MatrixMaxPos[0] = MS.MatrixPath[0][vBestEnd];
   if (MS.MatrixMaxPos[0] - MS.MatrixMinPos[0] < MatchLen[0]) return(0);
@@ -1463,7 +1463,7 @@ inline int	GetSeqRange	()
   MS.MatrixBestMin = vBestStart;
   MS.MatrixBestMax = vBestEnd;
 
-  /* check if threshold matches */
+  /* check if threshold matches (this is -A and -B) */
   a = MS.MatrixMaxPos[0] - MS.MatrixMinPos[0] + 1;
   b = MS.MatrixMaxPos[1] - MS.MatrixMinPos[1] + 1;
   if ((MS.MatrixMax*100 < a*MatchThreshold[0]) ||
