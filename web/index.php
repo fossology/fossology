@@ -84,7 +84,7 @@ FOSSology Open Source Analysis Project
 <small>
 <strong>
 <center>
-Copyright &copy; 2007 Hewlett-Packard Development Company, L.P.
+Copyright &copy; 2007-2008 Hewlett-Packard Development Company, L.P.
 </strong>
 <br>
 <i>
