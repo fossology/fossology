@@ -468,6 +468,8 @@ inline void	FreeMatrixState	(matrixstate *M)
 {
   if (M->PathString[0]) free(M->PathString[0]);
   if (M->PathString[1]) free(M->PathString[1]);
+  M->PathString[0] = NULL;
+  M->PathString[1] = NULL;
 } /* FreeMatrixState() */
 
 /**********************************************
@@ -1018,6 +1020,7 @@ void	GetPathString	(int Which)
 	    	{
 	    	strcpy(NewPath,MS.PathString[Which]);
 		free(MS.PathString[Which]);
+		MS.PathString[Which] = NULL;
 		}
 	    MS.PathString[Which] = NewPath;
 	    }
