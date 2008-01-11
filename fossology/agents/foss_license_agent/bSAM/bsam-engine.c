@@ -225,6 +225,7 @@
 #define BEGIN_COMMIT 1
 
 #define MAXLINE	2048
+#define PATHINC 128	/* how much to increment the PathString */
 
 /************************************************************
  Globals: used for speed!
@@ -470,6 +471,8 @@ inline void	FreeMatrixState	(matrixstate *M)
   if (M->PathString[1]) free(M->PathString[1]);
   M->PathString[0] = NULL;
   M->PathString[1] = NULL;
+  M->PathStringMax[0] = 0;
+  M->PathStringMax[1] = 0;
 } /* FreeMatrixState() */
 
 /**********************************************
@@ -480,10 +483,10 @@ inline void	InitMatrixState	(matrixstate *M)
   if (M->PathString[0]) free(M->PathString[0]);
   if (M->PathString[1]) free(M->PathString[1]);
   memset(M,0,sizeof(matrixstate));
-  M->PathString[0] = (char *)calloc(128,1);
-  M->PathString[1] = (char *)calloc(128,1);
-  M->PathStringMax[0] = 128;
-  M->PathStringMax[1] = 128;
+  M->PathString[0] = (char *)calloc(PATHINC,1);
+  M->PathString[1] = (char *)calloc(PATHINC,1);
+  M->PathStringMax[0] = PATHINC;
+  M->PathStringMax[1] = PATHINC;
 } /* InitMatrixState() */
 
 /**********************************************
@@ -501,11 +504,12 @@ inline void	CopyMatrixState	(matrixstate *M1, matrixstate *M2,
   /* Save the PathStrings */
   PS[0][0] = M1->PathString[0];
   PS[0][1] = M1->PathString[1];
+  PSlen[0][0] = M1->PathStringMax[0];
+  PSlen[0][1] = M1->PathStringMax[1];
+
   PS[1][0] = M2->PathString[0];
   PS[1][1] = M2->PathString[1];
-  PSlen[0][0] = M1->PathStringMax[0];
-  PSlen[0][1] = M1->PathStringMax[0];
-  PSlen[1][0] = M2->PathStringMax[1];
+  PSlen[1][0] = M2->PathStringMax[0];
   PSlen[1][1] = M2->PathStringMax[1];
 
   memcpy(M2,M1,sizeof(matrixstate));
@@ -514,24 +518,26 @@ inline void	CopyMatrixState	(matrixstate *M1, matrixstate *M2,
   if (MoveString)
     {
     /* move it */
-    M2->PathString[0] = PS[0][0];
-    M2->PathString[1] = PS[0][1];
     M1->PathString[0] = PS[1][0];
     M1->PathString[1] = PS[1][1];
-    M2->PathStringMax[0] = PSlen[0][0];
-    M2->PathStringMax[1] = PSlen[0][1];
     M1->PathStringMax[0] = PSlen[1][0];
     M1->PathStringMax[1] = PSlen[1][1];
+
+    M2->PathString[0] = PS[0][0];
+    M2->PathString[1] = PS[0][1];
+    M2->PathStringMax[0] = PSlen[0][0];
+    M2->PathStringMax[1] = PSlen[0][1];
     }
   else
     {
     /* don't move it */
     M1->PathString[0] = PS[0][0];
     M1->PathString[1] = PS[0][1];
-    M2->PathString[0] = PS[1][0];
-    M2->PathString[1] = PS[1][1];
     M1->PathStringMax[0] = PSlen[0][0];
     M1->PathStringMax[1] = PSlen[0][1];
+
+    M2->PathString[0] = PS[1][0];
+    M2->PathString[1] = PS[1][1];
     M2->PathStringMax[0] = PSlen[1][0];
     M2->PathStringMax[1] = PSlen[1][1];
     }
@@ -1012,8 +1018,8 @@ void	GetPathString	(int Which)
 	if (Len+40 >= MS.PathStringMax[Which])
 	  {
 	  char *NewPath;
-	  MS.PathStringMax[Which] += 128;
-	  NewPath = (char *)calloc(MS.PathStringMax[Which],sizeof(char));
+	  MS.PathStringMax[Which] += PATHINC;
+	  NewPath = (char *)calloc(MS.PathStringMax[Which],1);
 	  if (NewPath)
 	    {
 	    if (MS.PathString[Which])
@@ -2315,6 +2321,7 @@ void	SAMfiles	()
   /* Now process the files */
   SetData(0);
   HasMatch=1;
+  InitMatrixState(&RMS);
   RMS.SymbolStart[0] = MS.SymbolStart[0];
   RMS.SymbolEnd[0] = MS.SymbolEnd[0];
   while(LoadNextData(0,!HasMatch))
@@ -2379,6 +2386,7 @@ void	SAMfiles	()
     default:
     	break;
     }
+  FreeMatrixState(&RMS);
 } /* SAMfiles() */
 
 /************************************************************/
