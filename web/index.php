@@ -41,11 +41,7 @@ FOSSology Open Source Analysis Project
           <tr><td>
 	    <p>
 	    <img src="fossology_flowchart.png" align="right" alt="FOSSology system flow chart">
-	    <p>
-	    
-		Our mission is to build a community to facilitate the study of Free and Open Source
-	        Software by providing free data analysis tools.
-	    
+	    <p>Our mission is to build a community to facilitate the study of Free and Open Source Software by providing free data analysis tools.
           </td></tr>
         </table>
       </td></tr> <!-- end body right bottom right -->
