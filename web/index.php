@@ -84,8 +84,8 @@ Copyright &copy; 2007-2008 Hewlett-Packard Development Company, L.P.
 </strong>
 <br>
 <i>
-Last Modified 
-Tue, 18 Dec 2007 15:58:14 -0600
+Last updated
+<?php include "timestamp"; ?>
 </i>
 </center>
 </small>
