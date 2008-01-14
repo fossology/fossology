@@ -413,7 +413,7 @@ function showu($otype, $opk, $activetab="")
                         // general form
                         echo "<form name='ops' method=post>\n";
                         echo "<br>";
-                        submit(" DELETE Folder: $oinfo[folder_name]", "fdelete", $oinfo['folder_pk']);
+                        submit(" DELETE Folder: $oinfo[folder_name]", "cfdelete", $oinfo['folder_pk']);
                         print "</form>";
                     }
                 }
@@ -424,7 +424,7 @@ function showu($otype, $opk, $activetab="")
                     {
                         echo "<form name='ops' method=post>\n";
                         echo "<br>";
-                        submit(" DELETE File: $oinfo[ufile_name]", "udelete", $oinfo['upload_pk']);
+                        submit(" DELETE File: $oinfo[ufile_name]", "cudelete", $oinfo['upload_pk']);
                         print "</form>";
                     }
                 }
@@ -850,7 +850,6 @@ function showdir($otype, $opk, $where="", $activetab="")
     		        echo "<a href=$url><b>$uname/</b></a>";
     	        else
     		        echo "<a href=$url>$uname</a>";
-                echo "\n";
 
     	        if ($file['pfile_pk'])  // DOWNLOAD DISABLED (NAK)
                 {
@@ -861,6 +860,9 @@ function showdir($otype, $opk, $where="", $activetab="")
                 // don't print description/added to repo for directories inside an upload
                 if (empty($file['parent']))
                 {
+                    echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                    submit(" DELETE Upload: $uname", "cudelete", $file['upload_pk']);
+                   // echo "\n";
                     if (empty($file['upload_desc']))
                         $desc = "No description";
                     else
@@ -874,7 +876,11 @@ function showdir($otype, $opk, $where="", $activetab="")
             if (!empty($file['folder_pk']))
             {
                 $pf = myname("f={$file['folder_pk']}", "rightframe.php/$n");
-       	        echo "<a href='$pf'><b>$file[folder_name]</b></a>\n";
+       	        echo "<a href='$pf'><b>$file[folder_name]</b></a> ";
+                echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+       	        //echo "<a href='$pf'>(Delete folder $file[folder_name])</a> ";
+                submit(" DELETE Folder: $file[folder_name]", "cfdelete", $file['folder_pk']);
+       	        echo " \n";
                 if (empty($file['folder_desc']))
                     $desc = "No description";
                 else
@@ -1119,13 +1125,13 @@ if (false)  // needs to be updated not to use defunct containers table
             $uploadtree_pk = $lic['uploadtree_pk'];
 
             $name = $lic_pk2name[$lic_pk];
-	    $name = strrchr($name,'/');
-	    if ($name) $name=substr($name,1);
-	    else $name  = $lic_pk2name[$lic_pk];
-	    if (!empty($lic["phrase_text"])) $name .= ': ' . $lic["phrase_text"];
-	    $name = str_replace("&","&amp;",$name);
-	    $name = str_replace("<","&lt;",$name);
-	    $name = str_replace(">","&gt;",$name);
+	        $name = strrchr($name,'/');
+    	    if ($name) $name=substr($name,1);
+    	    else $name  = $lic_pk2name[$lic_pk];
+    	    if (!empty($lic["phrase_text"])) $name .= ': ' . $lic["phrase_text"];
+    	    $name = str_replace("&","&amp;",$name);
+    	    $name = str_replace("<","&lt;",$name);
+    	    $name = str_replace(">","&gt;",$name);
             if ($name != $oldname) 
             {
         	    if (!empty($oldname)) echo "</ol>\n";
@@ -1138,7 +1144,11 @@ if (false)  // needs to be updated not to use defunct containers table
 //toend;
             if ($uploadtree_pk != $olduploadtree_pk)
             {
-                echo "<li>$lic[pctmatch]% <a href=" . myname("h=$uploadtree_pk") . ">{$lic['ufile_name']}</a></li>\n";
+                $patha = uploadtree2patha($uploadtree_pk);
+                $path = pathinfo2text($patha);
+                echo "<li>$lic[pctmatch]% <a href=" . myname("h=$uploadtree_pk") . 
+                     ">{$lic['ufile_name']}</a>  &nbsp;&nbsp;", $path,
+                     "</li>\n";
                 $olduploadtree_pk = $uploadtree_pk;
             }
 	    }
@@ -1250,12 +1260,18 @@ function handle($action, $aobj, $obj)
                 break;
             }
         	break;
+        case 'cfdelete':   // confirm delete a folder (recursive)
+        	del_cfolder($aobj);
+        	break;
+        case 'cudelete':   // confirm delete an upload
+        	del_cupload($aobj);
+        	break;
         case 'fdelete':   // delete a folder (recursive)
-        	del_folder($oarray['folder']);
+        	del_folder($aobj);
             goto('', '', true);
         	break;
         case 'udelete':   // delete an upload
-        	del_upload($oarray['upload']);
+        	del_upload($aobj);
             goto('', '', true);
         	break;
         case 'newfolder':  // create a new folder
@@ -1432,12 +1448,7 @@ if (empty($aobj))
 if ($_GET['search'])
 {
     $action = "search";
-}
-
-if (empty($action)) {
-    $action = 'show' . $otype;
-}
-
+} if (empty($action)) { $action = 'show' . $otype; } 
 //debugprint_r("action", $action);
 handle($action, $aobj, $gobj);
 echo "</body>";
