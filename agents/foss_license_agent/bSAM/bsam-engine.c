@@ -261,8 +261,6 @@ MTYPE	*Matrix=NULL;	/* the alignment matrix: A*Bsize+B */
 			/* looping over B as the inner loop is optimal! */
 int MatrixSize=0;	/* the allocated size of the matrix */
 
-#define MAX_PATH	65536	/* store up to 65536 tokens from best path */
-
 /* for matching */
 int	MatchThreshold[2]={90,90};
 int	MatchGap[2]={5,5};	/* maximum gap between sequences */
@@ -892,7 +890,7 @@ FindSeqPosReCheck:
 	{
 	*NewA = A-1;
 	*NewB = b;
-	if (CompSymbols(*NewA,*NewB) && (V < MAX_PATH))
+	if (CompSymbols(*NewA,*NewB))
 	  {
 	  MS.Path.MatrixPath[0][V] = *NewA;
 	  MS.Path.MatrixPath[1][V] = *NewB;
@@ -910,7 +908,7 @@ FindSeqPosReCheck:
 	{
 	*NewA = a/MS.Symbols.SymbolEnd[1]; /* this will mod-out the B-1 offset */
 	*NewB = B-1;
-	if (CompSymbols(*NewA,*NewB) && (V < MAX_PATH))
+	if (CompSymbols(*NewA,*NewB))
 	  {
 	  MS.Path.MatrixPath[0][V] = *NewA;
 	  MS.Path.MatrixPath[1][V] = *NewB;
@@ -1678,12 +1676,6 @@ inline	int	ComputeMatrix	()
       }
     }
 
-  if (MS.Matrix.MatrixMax >= MAX_PATH)
-	{
-	/* This should NEVER happen */
-	fprintf(stderr,"ERROR: Matrix size is out of bounds.\n");
-	exit(-1);
-	}
 #if DEBUG
   if (ShowStage2Flag)
   	{
