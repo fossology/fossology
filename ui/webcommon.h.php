@@ -258,6 +258,24 @@ function pathinfo2url($pathinfo)
    return $url;
 }
 
+
+/**
+ * Turn a path info into an text path
+ *
+ * @param array $pathinfo 
+ * @param array $minusprefix 
+ */
+function pathinfo2text($pathinfo)
+{
+   $tpath = "";
+   foreach($pathinfo as $info)
+   {
+       $tpath .= "$info[ufile_name]";
+       if (uis_container($info)) $tpath .= "/";
+   }
+   return $tpath;
+}
+
 /**
  * show an array of database records in an HTML table
  *
