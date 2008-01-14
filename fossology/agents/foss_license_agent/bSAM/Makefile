@@ -5,6 +5,7 @@ include ../../../Makefile.conf
 CC=gcc
 CFLAGS=-Wall -O2 $(CFLAGS2)
 #CFLAGS=-Wall -g -lefence $(CFLAGS2)
+#CFLAGS=-Wall -g -fstack-check $(CFLAGS2)
 EXE=bsam-engine SeeSam bsamlist
 INC=-I../../../ununpack -I../../../$(BUILDINC)
 LIB=-lpq -L../../../$(BUILDLIB) -lfossdb -lfossrepo
