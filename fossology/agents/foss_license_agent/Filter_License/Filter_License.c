@@ -959,7 +959,7 @@ int	PreprocessFile	(int UseRep)
 	}
 
     /* NEXT STEP!  Clean up text */
-    if ((BytesLeft >= 2) && !strncasecmp((char *)(Rep->Mmap+i),"(c)",3))
+    else if ((BytesLeft >= 2) && !strncasecmp((char *)(Rep->Mmap+i),"(c)",3))
 	{
 	i=i+2;
 	C=-2;
