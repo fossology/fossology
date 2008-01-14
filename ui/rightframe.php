@@ -316,7 +316,8 @@ function showufile($urec, $activetab="")
  *
  * @param lic_pk $lic license ID
  */
-function showlic($lic) {
+function showlic($lic) 
+{
     $lic = db_query1rec("SELECT * FROM agent_lic_raw WHERE lic_pk = $lic");
     $name = $lic['lic_name'];
     $name = strrchr($name,'/');
@@ -888,6 +889,7 @@ function showdir($otype, $opk, $where="", $activetab="")
 		    	echo "    <i>", $desc, "</i>\n";
             }
 	        
+            echo "<br>";
 	    }
         echo "</pre>";
     }
