@@ -483,13 +483,12 @@ inline void	FreeMatrixState	(matrixstate *M)
   if (M->Path.PathString[1]) { free(M->Path.PathString[1]); }
   if (M->Path.MatrixPath[0]) { free(M->Path.MatrixPath[0]); }
   if (M->Path.MatrixPath[1]) { free(M->Path.MatrixPath[1]); }
-  memset(M,0,sizeof(matrixstate));
 } /* FreeMatrixState() */
 
 /**********************************************
  InitMatrixState(): Initialize a matrix state structure.
  **********************************************/
-void	InitMatrixState	(matrixstate *M)
+inline void	InitMatrixState	(matrixstate *M)
 {
 #if 0
   if (M->Path.PathString[0]) free(M->Path.PathString[0]);
@@ -598,11 +597,7 @@ inline	void	SetMatrix	()
 
   /* only clear what we need to use */
   memset(Matrix,0,sizeof(MTYPE)*NewSize);
-  MS.Matrix.MatrixMax=0;	/* no max value yet */
-  MS.Matrix.MatrixMaxPos[0]=0;
-  MS.Matrix.MatrixMaxPos[1]=0;
-  MS.Matrix.MatrixMinPos[0]=0;
-  MS.Matrix.MatrixMinPos[1]=0;
+  memset(&MS.Matrix,0,sizeof(struct matrix));
 } /* SetMatrix() */
 
 /**********************************************
@@ -672,9 +667,10 @@ char *	Strstr	(char *H, char *N)
 
 /**********************************************
  CompSymbols(): Compare symbols
+ This macro assumes two uint16_t arrays.
  Returns: 1 if same, 0 if different.
  **********************************************/
-#define CompSymbols(a,b) (MS.Symbols[0].Symbol[a] == MS.Symbols[1].Symbol[b])
+#define CompSymbols(a,b) (Symbols0[a] == Symbols1[b])
 
 /************************************************************/
 /************************************************************/
@@ -682,22 +678,7 @@ char *	Strstr	(char *H, char *N)
 /************************************************************/
 /************************************************************/
 
-/**********************************************
- DumbInitMatrix(): Simple debugging init function
- **********************************************/
-inline void	DumbInitMatrix	()
-{
-  int a,b;
-  int Counter=0;
-
-  for(a=0; a<MS.Symbols[0].SymbolEnd; a++)
-  for(b=0; b<MS.Symbols[1].SymbolEnd; b++)
-    {
-    Matrix[a*MS.Symbols[1].SymbolEnd + b] = Counter;
-    Counter++;
-    }
-} /* DumbInitMatrix() */
-
+#if DEBUG
 /**********************************************
  SameInitMatrix(): Simple debugging init function
  Identifies all "same" values.
@@ -709,9 +690,11 @@ inline void	SameInitMatrix	()
   for(a=0; a<MS.Symbols[0].SymbolEnd; a++)
   for(b=0; b<MS.Symbols[1].SymbolEnd; b++)
     {
-    Matrix[a * MS.Symbols[1].SymbolEnd + b] = CompSymbols(a,b);
+    Matrix[a * MS.Symbols[1].SymbolEnd + b] =
+	(MS.Symbols[0].Symbol[a] == MS.Symbols[1].Symbol[b]);
     }
 } /* SameInitMatrix() */
+#endif
 
 /**********************************************
  ReadOK(): Read stdin until I see "OK\n".
@@ -736,7 +719,7 @@ void	ReadOK	()
  Hex2Ascii(): Convert a hex digit to an ascii char.
  v MUST be a number between 0 and 15
  **********************************************/
-char	Hex2Ascii	(int v)
+inline char	Hex2Ascii	(int v)
 {
   if (v < 10) return(v+'0');
   return(v-10+'A');
@@ -843,6 +826,12 @@ inline int	FindSeqPos	(int V, int A, int B, int *NewA, int *NewB)
 {
   int a,b;
   int aoffset;
+  /* for speed to reduce indirect indexing */
+  uint16_t *Symbols0,*Symbols1;
+
+  MS.Symbols[1].SymbolEnd = MS.Symbols[1].SymbolEnd;
+  Symbols0 = MS.Symbols[0].Symbol;
+  Symbols1 = MS.Symbols[1].Symbol;
 
 FindSeqPosReCheck:
   /* default return to furthest position */
@@ -907,7 +896,7 @@ FindSeqPosReCheck:
  Uses the global MS structure's Path.MatrixPath for the
  offsets -- set by FindSeqPos().
  **********************************************/
-void	GetPathString	(int Which)
+inline void	GetPathString	(int Which)
 {
   long Pos,PosStart,PosEnd; /* current file position, and range start/end */
   long Sym; /* current symbol */
@@ -1504,7 +1493,7 @@ inline int	GetSeqRange	()
  Also sets Matrix.MatrixMinPos and Matrix.MatrixMaxPos
  showing the range of the best match.
  **********************************************/
-inline	int	ComputeMatrix	()
+int	ComputeMatrix	()
 {
   register int a,b;	/* matrix is (a,b) = a*bMax + b */
   int a1offset,a2offset;	/* quick offset for a*bMax */
@@ -1514,6 +1503,10 @@ inline	int	ComputeMatrix	()
   int Bstart,Bend;	/* for speeding searches */
   int SubMax;	/* maximum value along submatrix (for optimization) */
   int rc;
+  /* for speed to reduce indirect indexing */
+  uint16_t *Symbols0,*Symbols1;
+
+  MS.Symbols[1].SymbolEnd = MS.Symbols[1].SymbolEnd;
 
   /* prepare the matrix */
   SetMatrix();
@@ -1579,6 +1572,8 @@ inline	int	ComputeMatrix	()
   MinB = 0;
   MaxA -= MS.Symbols[0].SymbolStart;
   MaxB -= MS.Symbols[1].SymbolStart;
+  Symbols0 = MS.Symbols[0].Symbol;
+  Symbols1 = MS.Symbols[1].Symbol;
 
   if ((MaxA <= 0) || (MaxB <= 0)) return(0); /* No symbols */
 
@@ -1680,13 +1675,12 @@ inline	int	ComputeMatrix	()
  comparisons.  This prevents scanning large, unmatched
  segments.
  **********************************************/
-void	ExtremeTokens	(int Which)
+inline void	ExtremeTokens	(int Which)
 {
   int A,B;
   int a,b;
   long EMin,EMax;
-  A = Which;
-  B = !A;
+  A = Which; B = !A;
 
   if (MS.Label[A].SymbolORMax == 0) return;
   if (MS.Symbols[B].SymbolMax < 100) return; /* nothing will be optimized */
@@ -1767,15 +1761,24 @@ void	ExtremeTokens	(int Which)
  Return 1 if at least one token matches.
  Return 0 if none match.
  **********************************************/
-int	CheckTokensOR	(int Which)
+inline int	CheckTokensOR	(int Which)
 {
   int a,b;
+  uint16_t *SymbolList,*ScanSymbols;
+  int SymbolListMax;
+  int ScanStart,ScanEnd;
 
-  for(a=0; a < MS.Label[Which].SymbolORMax; a++)
+  SymbolList = MS.Label[Which].SymbolOR;
+  SymbolListMax = MS.Label[Which].SymbolORMax;
+  ScanStart = MS.Symbols[!Which].SymbolStart;
+  ScanEnd   = MS.Symbols[!Which].SymbolEnd;
+  ScanSymbols = MS.Symbols[!Which].Symbol;
+
+  for(a=0; a < SymbolListMax; a++)
     {
-    for(b=MS.Symbols[!Which].SymbolStart; b < MS.Symbols[!Which].SymbolEnd; b++)
+    for(b=ScanStart; b < ScanEnd; b++)
       {
-      if (MS.Label[Which].SymbolOR[a] == MS.Symbols[!Which].Symbol[b])
+      if (SymbolList[a] == ScanSymbols[b])
 	  	{
 		/* at least one matched! */
 		return(1);
@@ -1799,20 +1802,29 @@ int	CheckTokensOR	(int Which)
  Return 1 if all token matches.
  Return 0 if at least one does not match.
  **********************************************/
-int	CheckTokensAND	(int Which)
+inline int	CheckTokensAND	(int Which)
 {
   int a,b;
+  uint16_t *SymbolList,*ScanSymbols;
+  int SymbolListMax;
+  int ScanStart,ScanEnd;
 
-  for(a=0; a < MS.Label[Which].SymbolANDMax; a++)
+  SymbolList = MS.Label[Which].SymbolAND;
+  SymbolListMax = MS.Label[Which].SymbolANDMax;
+  ScanStart = MS.Symbols[!Which].SymbolStart;
+  ScanEnd   = MS.Symbols[!Which].SymbolEnd;
+  ScanSymbols = MS.Symbols[!Which].Symbol;
+
+  for(a=0; a < SymbolListMax; a++)
     {
-    b=MS.Symbols[!Which].SymbolStart;
-    while((b < MS.Symbols[!Which].SymbolEnd) &&
-	  (MS.Label[Which].SymbolAND[a] != MS.Symbols[!Which].Symbol[b]))
+    b=ScanStart;
+    while((b < ScanEnd) &&
+	  (SymbolList[a] != ScanSymbols[b]))
 	  	{
 		/* if it is not the same, then increment */
 		b++;
 		}
-    if (b==MS.Symbols[!Which].SymbolEnd)
+    if (b==ScanEnd)
 	{
 #if DEBUG
 	if (Verbose > 1)
@@ -2060,8 +2072,15 @@ GetNext:
 	if ((MS.Label[1].SymbolANDMax > 0) && !CheckTokensAND(1)) goto GetNext;
 	if ((MS.Label[0].SymbolANDMax > 0) && !CheckTokensAND(0)) goto GetNext;
 	/* optimize matrix scan range */
+#if 0
+	/** ExtremeTokens is supposed to be an optimization function.
+	    However, gprof says it is slow.  Without it, ComputeMatrix
+	    takes a fraction longer, but ExtremeTokens was taking the same
+	    time as ComputeMatrix!.  It is faster to not use the
+	    optimization. **/
 	ExtremeTokens(0);
 	ExtremeTokens(1);
+#endif
 	} /* if Which == 1 */
   else /* Which == 0 */
 	{
