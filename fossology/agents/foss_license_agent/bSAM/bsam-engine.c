@@ -280,13 +280,14 @@ struct label
     /* for multiple datasets per file... */
     char *Filename;
     char *Sectionname;
+    /* "long" because these are file positions */
+    long MmapOffset;  /* index into memory map (instead of file with ftell) */
     long SectionStart;
     long SectionEnd;
     int SectionUniqueKey;
     char *SectionUnique;
-    long TokentypeLen;
+    int TokentypeLen;
     char *Tokentype;
-    long MmapOffset;  /* index into memory map (instead of file) */
 
     /* optimize based on "must have these" -- these are pointes to mmap */
     int SymbolORMax;		/* size of the OR lists */
@@ -298,17 +299,17 @@ struct label
 /* the symbols: SymbolBase is absolute, Symbol is offset */
 struct symbols
     {
-    long SymbolMax;		/* size of the A and B lists */
+    int SymbolMax;		/* size of the Symbol lists (65535 max) */
+    uint16_t *Symbol;		/* the set of symbols: [0]=A, [1]=B */
     uint16_t *SymbolBase;	/* base set of symbols: [0]=A, [1]=B */
-    uint16_t *Symbol;	/* the set of symbols: [0]=A, [1]=B */
-    long SymbolRealSizeLen;
+    int SymbolRealSizeLen;
     unsigned char *SymbolRealSize; /* real size (bytes) of each symbol */
 
     /* optimize scan range based on "must contain these" */
     /** Real range is [SymbolStart, SymbolStart+SymbolEnd] **/
     /** SymbolStart+SymbolEnd <= SymbolMax **/
-    long SymbolStart;
-    long SymbolEnd;
+    int SymbolStart;
+    int SymbolEnd;
     };
 
 struct matrix
@@ -362,6 +363,7 @@ int	DebugDBaccess	(void *a, char *b)
 } /* DebugDBaccess() */
 
 long    HeartbeatValue=-1;
+long	LastHeartbeatValue=-1;
 
 /**************************************************
  ShowHeartbeat(): Given an alarm signal, display a
@@ -369,7 +371,6 @@ long    HeartbeatValue=-1;
  **************************************************/
 void    ShowHeartbeat   (int Sig)
 {
-  static long LastHeartbeatValue=-1;
 
   /* IF we are tracking hearbeat values AND it has not changed,
      THEN don't display a heartbeat message.
@@ -899,13 +900,13 @@ FindSeqPosReCheck:
 inline void	GetPathString	(int Which)
 {
   long Pos,PosStart,PosEnd; /* current file position, and range start/end */
-  long Sym; /* current symbol */
+  int Sym; /* current symbol */
   int InRange=0; /* am I doing a ##-## range? */
   int ThisIsTheEnd=0; /* am I at the end of a sequence? */
   int V; /* matrix values for computing the full path */
   int Len;
   int i;
-  long BaseOffset;
+  int BaseOffset;
 
   BaseOffset = MS.Symbols[Which].SymbolStart;
 
@@ -1051,7 +1052,7 @@ inline void	GetPathString	(int Which)
  **********************************************/
 void	GetStartEnd	(int Which, long *RealStart, long *RealEnd)
 {
-  long i;
+  int i;
 
 #if DEBUG
   if (Verbose) PrintRanges("GetStartEnd",Which,1);
@@ -1506,8 +1507,6 @@ int	ComputeMatrix	()
   /* for speed to reduce indirect indexing */
   uint16_t *Symbols0,*Symbols1;
 
-  MS.Symbols[1].SymbolEnd = MS.Symbols[1].SymbolEnd;
-
   /* prepare the matrix */
   SetMatrix();
 
@@ -1679,7 +1678,7 @@ inline void	ExtremeTokens	(int Which)
 {
   int A,B;
   int a,b;
-  long EMin,EMax;
+  int EMin,EMax;
   A = Which; B = !A;
 
   if (MS.Label[A].SymbolORMax == 0) return;
@@ -2018,7 +2017,7 @@ GetNext:
   /* Idiot checking */
   if (MS.Symbols[Which].SymbolRealSizeLen && (MS.Symbols[Which].SymbolRealSizeLen != MS.Symbols[Which].SymbolMax))
 	{
-	printf("FATAL: BAD bSAM offsets: %s :: %ld should be %ld\n",
+	printf("FATAL: BAD bSAM offsets: %s :: %d should be %d\n",
 		MS.Label[Which].Filename,MS.Symbols[Which].SymbolRealSizeLen,MS.Symbols[Which].SymbolMax);
 	MS.Symbols[Which].SymbolRealSizeLen=0;
 	fflush(stdout);
