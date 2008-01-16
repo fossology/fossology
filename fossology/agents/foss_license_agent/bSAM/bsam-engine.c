@@ -671,7 +671,7 @@ char *	Strstr	(char *H, char *N)
  This macro assumes two uint16_t arrays.
  Returns: 1 if same, 0 if different.
  **********************************************/
-#define CompSymbols(a,b) (Symbols0[a] == Symbols1[b])
+#define CompSymbols(a,b) (MS.Symbols[0].Symbol[a] == MS.Symbols[1].Symbol[b])
 
 /************************************************************/
 /************************************************************/
@@ -828,11 +828,8 @@ inline int	FindSeqPos	(int V, int A, int B, int *NewA, int *NewB)
   int a,b;
   int aoffset;
   /* for speed to reduce indirect indexing */
-  uint16_t *Symbols0,*Symbols1;
 
   MS.Symbols[1].SymbolEnd = MS.Symbols[1].SymbolEnd;
-  Symbols0 = MS.Symbols[0].Symbol;
-  Symbols1 = MS.Symbols[1].Symbol;
 
 FindSeqPosReCheck:
   /* default return to furthest position */
@@ -1505,7 +1502,6 @@ int	ComputeMatrix	()
   int SubMax;	/* maximum value along submatrix (for optimization) */
   int rc;
   /* for speed to reduce indirect indexing */
-  uint16_t *Symbols0,*Symbols1;
 
   /* prepare the matrix */
   SetMatrix();
@@ -1571,8 +1567,6 @@ int	ComputeMatrix	()
   MinB = 0;
   MaxA -= MS.Symbols[0].SymbolStart;
   MaxB -= MS.Symbols[1].SymbolStart;
-  Symbols0 = MS.Symbols[0].Symbol;
-  Symbols1 = MS.Symbols[1].Symbol;
 
   if ((MaxA <= 0) || (MaxB <= 0)) return(0); /* No symbols */
 
@@ -1606,14 +1600,19 @@ int	ComputeMatrix	()
      But just in case: pam used this style of optimization three years
      before SAM was ever created.  And Dayhoff used the general algorithm
      28 years before SAM was created. */
+  /* Init quick indexes */
+  a1offset = (MinA-1)*MS.Symbols[1].SymbolEnd;
+  a2offset = (MinA)*MS.Symbols[1].SymbolEnd;
   for(a=MinA+1; a < MaxA; a++)
     {
     /* only start 'b' where it can lead to a match */
     Bstart=Max(MinB+1,a - MaxA + MaxB - SkipB);
     Bend = Min(MaxB,SkipB + a+1);
 
-    a1offset = (a-1)*MS.Symbols[1].SymbolEnd;
-    a2offset = (a)*MS.Symbols[1].SymbolEnd;
+    /* Quick indexes */
+    a1offset += MS.Symbols[1].SymbolEnd;
+    a2offset += MS.Symbols[1].SymbolEnd;
+
     SubMax=Matrix[a1offset + 0]; /* base case: the node above and behind me */
     for(b=Bstart; b<Bend; b++)
       {
@@ -1635,18 +1634,13 @@ int	ComputeMatrix	()
       Matrix[a2offset + b] = CompSymbols(a,b) + SubMax;
       if (Matrix[a2offset + b] > MS.Matrix.MatrixMax)
 	{
-	if ((MS.Matrix.MatrixMax == 1) && (MS.Matrix.MatrixMax < 1))
-	  {
-	  MS.Matrix.MatrixMinPos[0]=a;
-	  MS.Matrix.MatrixMinPos[1]=b;
-	  }
 	MS.Matrix.MatrixMax = Matrix[a2offset + b];
 	/* MS.Matrix.MatrixMaxPos is "<" end, not "<=" */
 	MS.Matrix.MatrixMaxPos[0]=a+1;
 	MS.Matrix.MatrixMaxPos[1]=b+1;
 	}
       }
-    }
+    } /* expensive for loop */
 
 #if DEBUG
   if (ShowStage2Flag)
