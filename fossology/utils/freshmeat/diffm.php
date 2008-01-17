@@ -45,9 +45,8 @@
 * file that will be used by get-projects to retrieve them from the net.
 *
 */
-// the requires below expect that path to be set correctly in php.ini
 require_once("pathinclude.h.php");
-require_once("lib_projxml.h.php");
+require_once("$LIBDIR/lib_projxml.h.php");
 
 $usage = <<< USAGE
 Usage: diffm -f <file1> <file2> [-o <dir-path>]
