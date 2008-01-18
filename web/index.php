@@ -52,7 +52,7 @@ FOSSology Open Source Analysis Project
           <tr><td valign="top">
             <table cellpadding="5" cellspacing="0" border="0" bgcolor="#cccccc" width="100%">
               <tr><td valign="top" align="center">
-	        <strong>Fossology RELEASE: Version 0.6.0</strong>
+	        <strong>FOSSology RELEASE: Version 0.6.0</strong>
               </td></tr>
             </table>
           </td></tr>
