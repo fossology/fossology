@@ -2,7 +2,7 @@
 <head>
    <link rel="stylesheet" type="text/css" href="project.css">
 <title>
-FOSSology Open Source Analysis Project
+FOSSology
 </title>
 </head>
 
@@ -42,6 +42,10 @@ FOSSology Open Source Analysis Project
 	    <p>
 	    <img src="fossology_flowchart.png" align="right" alt="FOSSology system flow chart">
 	    <p>Our mission is to build a community to facilitate the study of Free and Open Source Software by providing free data analysis tools.
+          </td></tr>
+          <tr><td>
+           For a quick look, check out 
+           <a href=http://fossology.org/docs/videos> <b>these short videos </b></a>
           </td></tr>
         </table>
       </td></tr> <!-- end body right bottom right -->
