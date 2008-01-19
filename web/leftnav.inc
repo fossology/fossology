@@ -16,7 +16,7 @@
 <li><a href="http://fossology.org/docs/link_to_source_download_at_sourceforge.net">Download</a>
 <li><a href="http://fossology.org/docs/contact_us">Mailing Lists</a>
 <li><a href="http://fossology.org/docs/frequently_asked_questions">FAQ</a>
-<li><a href="">Screenshots</a>
+<li><a href="http://fossology.org/docs/videos">Screenshots</a>
 <li><a href="http://fossology.org/docs/release_notes">Release Notes</a>
 <li><a href="http://fossology.org/docs/">User Docs</a>
 </ul>
