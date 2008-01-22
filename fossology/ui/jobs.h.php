@@ -1033,8 +1033,8 @@ function job_create_specagent($job, $upload_pk, $depends='')
     if (empty($mimetype_pk))
     {
         // if the mimetype doesn't exist, create it
-        $sql = "insert into mimetype (mimetype_name) values ('$mimetype_name');";
-        db_query($sql);
+        $sql1 = "insert into mimetype (mimetype_name) values ('$mimetype_name');";
+        db_query($sql1);
         $mimetype_pk = db_query1($sql);
     }
 
