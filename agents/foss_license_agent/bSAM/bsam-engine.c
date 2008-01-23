@@ -342,6 +342,7 @@ void	*DB=NULL;
 char	SQL[65536];	/* generic string buffer */
 char	SQL2[65536];	/* generic string buffer */
 int	Agent_pk=-1;	/* agent identifier */
+long	DBInsertCount=0;	/* how many inserts were done? */
 
 #if 0
   /* Massive debugging */
@@ -737,6 +738,7 @@ void	DBSetPhrase	()
   if ((rc < 0) || (DBdatasize(DB) <= 0))
     {
     DBaccess(DB,"INSERT INTO agent_lic_raw (lic_name,lic_unique,lic_text,lic_version,lic_section,lic_id) VALUES ('Phrase','1','Phrase','1',1,1);");
+    DBaccess(DB,"ANALYZE agent_lic_raw;");
     }
 } /* DBSetPhrase() */
 
@@ -1219,14 +1221,18 @@ void	DBSaveLicense	(int Flag1SL, char *Unique,
 	if (rc < 0) ShowSQLERROR(SQL2,0);
 	else if (DBdatasize(DB) <= 0)
 	  {
-	  DBaccess(DB,"SAVEPOINT oops;");
+	  DBaccess(DB,"SAVEPOINT bsamrollback;");
 	  rc = MyDBaccess(DB,SQL);
 	  if (rc < 0)
 		{
 		ShowSQLERROR(SQL,0);
-		DBaccess(DB,"ROLLBACK TO SAVEPOINT oops;");
+		DBaccess(DB,"ROLLBACK TO SAVEPOINT bsamrollback;");
 		}
-	  DBaccess(DB,"RELEASE SAVEPOINT oops;");
+	  else
+		{
+	  	DBInsertCount++;
+		}
+	  DBaccess(DB,"RELEASE SAVEPOINT bsamrollback;");
 	  }
 	}
 } /* DBSaveLicense() */
@@ -2240,6 +2246,13 @@ int	ReadLine	(FILE *Fin)
   char *FieldInset;
   int rc=0;	/* assume no data */
 
+  /* If we inserted, then analyze the table */
+  if (DBInsertCount > 0)
+    {
+    DBaccess(DB,"ANALYZE agent_lic_meta;");
+    DBInsertCount=0;
+    }
+
   memset(FullLine,0,MAXLINE);
   /* inform scheduler that we're ready for data */
   printf("OK\n");
@@ -2712,6 +2725,7 @@ void	GetAgentKey	()
         DBclose(DB);
 	exit(-1);
 	}
+      DBaccess(DB,"ANALYZE agent;");
       rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='license' ORDER BY agent_id DESC;");
       if (rc < 0)
 	{
