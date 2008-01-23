@@ -1266,7 +1266,7 @@ function handle($action, $aobj, $obj)
         	del_cfolder($aobj);
         	break;
         case 'cudelete':   // confirm delete an upload
-        	del_cupload($aobj);
+        	del_upload($aobj);
         	break;
         case 'fdelete':   // delete a folder (recursive)
         	del_folder($aobj);
