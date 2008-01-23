@@ -2,11 +2,11 @@
 <!-- left nav-->
 <!--SOME TWEAKING HAS TO BE DONE THERE TO KEEP BORDER ASPECT ON ALL BR0WSERS-->
 <div id="sidebar">
-<div class="sidetitle">FOSSOLOGY</div>
+<div class="sidetitle">FOSSology</div>
 <ul class="navibar">
 <li><a href="/">Home</a><br>
 <li><a href="http://fossology.org/docs/about_us">About FOSSology</a><br>
-<li><a href="http://repo.fossology.org">Demo - Try it!</a><br>
+<li><a href="http://fossology.org/docs/live_demo">Live Demo</a><br>
 <li><a href="http://fossology.org/docs/contact_us">Contact us</a><br>
 <li><a href="http://fossology.org/docs/links_-_related_projects">Links - Related Projects</a><br>
 </ul>
