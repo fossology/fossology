@@ -2,11 +2,11 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-   <link rel="stylesheet" type="text/css" href="project.css">
+   <link rel="stylesheet" type="text/css" href="project.css" />
    <title>FOSSology</title>
 </head>
 
-<body bgcolor="#ffffff">
+<body>
 <!-- top bar -->
 <?php include "topnav.inc"; ?>
 
@@ -40,8 +40,8 @@
         <table cellpadding="10" cellspacing="0">
           <tr><td>
 	    <p>
-	    <img src="fossology_flowchart.png" align="right" alt="FOSSology system flow chart">
-	    <p>Our mission is to build a community to facilitate the study of Free and Open Source Software by providing free data analysis tools.
+	    <img src="fossology_flowchart.png" align="right" alt="FOSSology system flow chart" />
+	    <p>Our mission is to build a community to facilitate the study of Free and Open Source Software by providing free data analysis tools.</p>
           </td></tr>
           <tr><td>
            For a quick look, check out <b><a href=http://fossology.org/docs/videos>these short videos</a></b>
