@@ -69,7 +69,7 @@ pre {
 	/*position: absolute;
 	top: 0px;
 	left: 0px; */
-	class: sidebar-width;       
+	class: "sidebar-width";       
 }
 
 .sidetitle {

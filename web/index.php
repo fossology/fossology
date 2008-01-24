@@ -1,12 +1,12 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
    <link rel="stylesheet" type="text/css" href="project.css">
-<title>
-FOSSology
-</title>
+   <title>FOSSology</title>
 </head>
 
-<body  bgcolor="#ffffff">
+<body bgcolor="#ffffff">
 <!-- top bar -->
 <?php include "topnav.inc"; ?>
 
@@ -44,8 +44,7 @@ FOSSology
 	    <p>Our mission is to build a community to facilitate the study of Free and Open Source Software by providing free data analysis tools.
           </td></tr>
           <tr><td>
-           For a quick look, check out 
-           <a href=http://fossology.org/docs/videos> <b>these short videos </b></a>
+           For a quick look, check out <b><a href=http://fossology.org/docs/videos>these short videos</a></b>
           </td></tr>
         </table>
       </td></tr> <!-- end body right bottom right -->
@@ -79,7 +78,7 @@ FOSSology
     </table>
   </td></tr>	<!-- end body right -->
 </table>	<!-- end body -->
-<br>
+<br />
 
 <small>
 <center>
