@@ -43,20 +43,16 @@
  * @todo Examine every function and return statement, decide if
  * void is ok or need to return true/false.
  * @todo should add in destination directory so it's not hardcoded
- * below.
+ * below.  Make the changes to include the .h file to get the paths.
  * @todo Bonus: start to pass arrays around by ref....
  *
  * @author mark.donohoe@hp.com
- * @version $Id: get-projects.php 1558 2007-12-11 00:14:55Z markd $
+ * @version $Id$
  *
  */
 
 /*
  * Defects:
- * 0. No description ever gets used.  Don't try putting it in 
- *    webgoldimport. That doesn't work. This has me confused, it appears
- *    as if it should get put on teh upload file folder, but wgi does that 
- *    and it doesn't take a description.
  * 1. if you don't pass in any parameters, weirdnes... need to check
  *    for that case.
  */
@@ -72,7 +68,9 @@ Usage: get-projects [-h] -f <file>
 
 USAGE;
 
-$XML_input_file = '';
+echo "Parsing parmeters\n";
+
+$XML_input_file = NULL;
 
 for ($i = 1; $i < $argc; $i++) {
   switch ($argv[$i]) {
@@ -98,6 +96,8 @@ for ($i = 1; $i < $argc; $i++) {
 // convention is to put the trailing / at the end of the dir so everyone else
 // doesn't have to worry about it.
 // FIX THIS: need to have env file created by install process.
+
+echo "\$XML_input_file is:\n$XML_input_file\n";
 
 $dest_dir = '/srv/fossology/repository/firenze/Freshmeat/';
 // create output directory with the date as part of the name.
@@ -436,8 +436,8 @@ function report($output_dir){
 /**
  * function: save_name
  *
- * save_name: save information in the file <i>failed_wgets</i> for retry.
- * The file is saved in $VARDATADIR/golden<i>yymdd</i>
+ * save_name: save information in the file <i>failed-wgets</i> for retry.
+ * The file is saved in $VARDATADIR/golden<i>yymdd</i>/Log-Data
  *
  * Save the package name, rank and archive type of a failed wget.
  * The package name, rank and archive type are determined by taking apart
@@ -450,7 +450,7 @@ function report($output_dir){
 
 function save_name($filename, $failed_path) {
 
-  $FWG = fopen("{$failed_path}failed_wgets", 'a') or
+  $FWG = fopen("{$failed_path}failed-wgets", 'a') or
   die("can't open: $php_errormsg");
 
   // grab name, rank and archive type
@@ -534,7 +534,7 @@ function wget_url($project_rank, $project_name, $ark_type, $proj_data, $mode){
     if ($retval != 0){
       $WGF = fopen ("{$log_data}failed-wgets", 'a') or
       die("Can't open: $php_errormsg\n");
-      if (-1 == fwrite($WGF, "$pk_rank $name $url\n")) {
+      if (-1 == fwrite($WGF, "$project_rank $project_name $url\n")) {
         die("Can't write: $php_errormsg");
       }
     }
@@ -561,8 +561,7 @@ function wget_url($project_rank, $project_name, $ark_type, $proj_data, $mode){
         $upload['N'] = True;
       }
       else{
-        $upload['U'] =
-      "'$project_name' '$archive_path'";
+        $upload['U'] = "'$project_name' '$archive_path'";
         $upload['N'] = True;
       }
     }
