@@ -1,10 +1,9 @@
-<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
-  <TR>
-    <TD align="center" class="sidebar-width"><IMG SRC="http://fossology.org/fossology-logo-draft.gif" ALT="FOSSology Project Logo">
-    <TD class="sidebar-gutter-width">
-    <TD><H2>The FOSSology Project</h2>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<tt><b>FOSS:</b></tt>  Free (as in Freedom) Open Source Software
-    <br>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<tt><b>-ology:</b></tt> the study of
-  </TR>
-</TABLE>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="center" class="sidebar-width"><a href="http://www.fossology.org/"><img src="http://fossology.org/fossology-logo-draft.gif" alt="FOSSology Project Logo" /></a>
+    <td class="sidebar-gutter-width"></td>
+    <td><h2>FOSSology</h2>
+    Advancing open source analysis and development
+    </td>
+  </tr>
+</table>

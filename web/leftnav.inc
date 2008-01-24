@@ -1,4 +1,3 @@
-<body  bgcolor="#ffffff">
 <!-- left nav-->
 <!--SOME TWEAKING HAS TO BE DONE THERE TO KEEP BORDER ASPECT ON ALL BR0WSERS-->
 <div id="sidebar">

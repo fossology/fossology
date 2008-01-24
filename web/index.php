@@ -82,11 +82,11 @@ FOSSology
 <br>
 
 <small>
-<strong>
 <center>
+<strong>
 Copyright &copy; 2007-2008 Hewlett-Packard Development Company, L.P.
 </strong>
-<br>
+<br />
 <i>
 Last updated
 <?php include "timestamp"; ?>
@@ -96,4 +96,3 @@ Last updated
 </div>
 </body>
 </html>
-
