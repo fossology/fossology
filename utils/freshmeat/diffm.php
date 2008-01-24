@@ -1,6 +1,22 @@
 #!/usr/bin/php
 <?php
+/***********************************************************
+ diffm.php
+ Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
 
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ ***********************************************************/
 /**
  * diffm: determine if there is a difference between top 1000 Freshmeat
  * project rdf files.
@@ -49,7 +65,7 @@ require_once("pathinclude.h.php");
 require_once("$LIBDIR/lib_projxml.h.php");
 
 $usage = <<< USAGE
-Usage: diffm -f <file1> <file2> [-o <dir-path>]
+Usage: diffm [-h] -f <file1> <file2> [-o <dir-path>]
    Where <file1> path to an uncompressed top1000 Freshmeat rdf XML file
          <file2> path to an uncompressed top1000 Freshmeat rdf XML file
          
