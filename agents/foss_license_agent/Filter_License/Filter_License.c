@@ -61,9 +61,6 @@ int	Agent_pk=-1;	/* the agent ID */
 /* for Meta information */
 FILE	*MetaFile=NULL;
 
-long	HeartbeatValue=-1;
-long	LastHeartbeatValue=-1;
-
 /**************************************************
  ShowHeartbeat(): Given an alarm signal, display a
  heartbeat.
@@ -75,14 +72,8 @@ void    ShowHeartbeat   (int Sig)
      THEN don't display a heartbeat message.
      This can happen if I/O is hung, but alarms are still being processed.
    */
-  if ((HeartbeatValue == -1) || (HeartbeatValue != LastHeartbeatValue))
-    {
-    printf("Heartbeat\n");
-    fflush(stdout);
-    }
-
-  /* re-schedule itself */
-  LastHeartbeatValue = HeartbeatValue;
+  printf("Heartbeat\n");
+  fflush(stdout);
   alarm(60);
 } /* ShowHeartbeat() */
 
@@ -722,7 +713,6 @@ int	PreprocessFile	(int UseRep)
       But we want to make sure it is alive. **/
   for(i=0; i < Rep->MmapSize; i++)
     {
-    HeartbeatValue = i;
     if (Verbose)
       {
       if (i >= PercentInc*Percent)
@@ -753,7 +743,9 @@ int	PreprocessFile	(int UseRep)
       LineLength=0;
       while((LineLength < BytesLeft) && (Rep->Mmap[i+LineLength] != '\n')
         && (Rep->Mmap[i+LineLength] != '\r'))
+	{
 	LineLength++;
+	}
 
       /* check for a copyright (word + year) */
       HasCopyright=0;
@@ -932,7 +924,6 @@ int	PreprocessFile	(int UseRep)
 	   strchr("\"'&/\\!@#$%^&*()-+_=.,?:;",Rep->Mmap[ii])) ; ii++)
 		{
 		/* skip likely tag characters */
-		;
 		}
 	if ((ii < Rep->MmapSize) && (Rep->Mmap[ii] == '>'))
 		{
@@ -1168,12 +1159,9 @@ void	SetFilename	()
 int	EngineReadLine	(char *Buf, int Bufsize)
 {
   int Len, c=0;
-  HeartbeatValue = -1;
 ReRead:
   if (Verbose > 1) fprintf(stderr,"Child[%d] Ready!\n",getpid());
   printf("OK\n"); /* tells parent to send more data! */
-  HeartbeatValue=-1;
-  LastHeartbeatValue=-1;
   fflush(stdout); /* make sure parent gets the message */
 
   memset(Buf,'\0',Bufsize);
@@ -1339,14 +1327,12 @@ int	main	(int argc, char *argv[])
   signal(SIGALRM,ShowHeartbeat);
   alarm(60);
   DB=DBopen();
-  HeartbeatValue = 0;
   if (!DB)
 	{
 	fprintf(stderr,"ERROR pfile %s Unable to open database connection\n",Pfile_fk);
 	exit(-1);
 	}
   GetAgentKey();
-  HeartbeatValue = -1;
 
   /* process each file from command-line */
   for( ; optind < argc; optind++)
@@ -1357,15 +1343,11 @@ int	main	(int argc, char *argv[])
     SetFilename();	/* process line and find filename */
     if (!Filename || Filename[0] == '\0') continue;
     if (Verbose) { fprintf(stderr,"Processing file '%s'\n",Filename); }
-    HeartbeatValue = 0;
-    LastHeartbeatValue = -1;
     if (!PreprocessFile(0))
 	{
 	if (Verbose) fprintf(stderr,"Child[%d] Something FAILED\n",getpid());
 	continue;
 	}
-    HeartbeatValue = -1;
-    LastHeartbeatValue = -1;
     if (Verbose) fprintf(stderr,"Child[%d] Something worked\n",getpid());
     /* update the DB */
     /** If no data, then mark it in the DB as being processed **/
@@ -1393,15 +1375,11 @@ int	main	(int argc, char *argv[])
       {
       SetFilename();	/* process line and find filename */
       if (!Filename || Filename[0] == '\0') continue;
-      HeartbeatValue = 0;
-      LastHeartbeatValue = -1;
       if (!PreprocessFile(1))
 	  {
 	  if (Verbose) fprintf(stderr,"Child[%d] Something FAILED\n",getpid());
 	  continue;
 	  }
-      HeartbeatValue = -1;
-      LastHeartbeatValue = -1;
       if (Verbose) fprintf(stderr,"Child[%d] Something worked\n",getpid());
       /* update the DB */
       /** If no data, then mark it in the DB as being processed **/
