@@ -30,7 +30,7 @@ class folder_rename extends Plugin
   var $Name="folder_rename";
   var $Version="1.0";
   var $MenuList="Admin::Folder::Rename";
-  var $Dependency=array("db","folders");
+  var $Dependency=array("db");
 
   /*********************************************
    Rename(): Given a folder's ID and a name, rename
@@ -99,8 +99,8 @@ class folder_rename extends Plugin
 	$V .= "<ol>\n";
 	$V .= "<li>Select the folder to rename:  \n";
 	$V .= "<select name='oldfolderid'>\n";
-	$V .= $F->ListFolderOption($F->GetTopFolder(),0);
-	$V .= "</select>\n";
+	$V .= FolderListOption(-1,0);
+	$V .= "</select><P />\n";
 	$V .= "<li>Enter the new name:  \n";
 	$V .= "<INPUT type='text' name='newname' size=40 />\n";
 	$V .= "</ol>\n";
