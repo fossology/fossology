@@ -35,7 +35,7 @@ class ui_menu extends Plugin
     global $Plugins;
     if ($this->State != PLUGIN_STATE_VALID) { return(0); } // don't run
     // Make sure dependencies are met
-    foreach($Dependency as $key => $val)
+    foreach($this->Dependency as $key => $val)
       {
       $id = plugin_find_id($val);
       if ($id < 0) { Destroy(); return(0); } 
