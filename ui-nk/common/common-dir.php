@@ -28,6 +28,57 @@ function Isdir($mode) { return(($mode & 1<<18) != 0); }
 function Isartifact($mode) { return(($mode & 1<<28) != 0); }
 
 /************************************************************
+ DirMode2String(): Convert a mode to string values.
+ ************************************************************/
+function DirMode2String($Mode)
+{
+  $V="";
+  if (Isartifact($Mode)) { $V .= "a"; } else { $V .= "-"; }
+  if (Isdir($Mode)) { $V .= "d"; } else { $V .= "-"; }
+
+  if ($Mode & 0x0100) { $V .= "r"; } else { $V .= "-"; }
+  if ($Mode & 0x0080) { $V .= "w"; } else { $V .= "-"; }
+  if ($Mode & 0x0040)
+    {
+    if ($Mode & 0x0800) { $V .= "s"; } /* setuid */
+    else { $V .= "x"; }
+    }
+  else
+    {
+    if ($Mode & 0x0800) { $V .= "S"; } /* setuid */
+    else { $V .= "-"; }
+    }
+
+  if ($Mode & 0x0020) { $V .= "r"; } else { $V .= "-"; }
+  if ($Mode & 0x0010) { $V .= "w"; } else { $V .= "-"; }
+  if ($Mode & 0x0008)
+    {
+    if ($Mode & 0x0400) { $V .= "s"; } /* setgid */
+    else { $V .= "x"; }
+    }
+  else
+    {
+    if ($Mode & 0x0400) { $V .= "S"; } /* setgid */
+    else { $V .= "-"; }
+    }
+
+  if ($Mode & 0x0004) { $V .= "r"; } else { $V .= "-"; }
+  if ($Mode & 0x0002) { $V .= "w"; } else { $V .= "-"; }
+  if ($Mode & 0x0001)
+    {
+    if ($Mode & 0x0200) { $V .= "t"; } /* sticky bit */
+    else { $V .= "x"; }
+    }
+  else
+    {
+    if ($Mode & 0x0200) { $V .= "T"; } /* setgid */
+    else { $V .= "-"; }
+    }
+
+  return($V);
+} // DirMode2String()
+
+/************************************************************
  DirGetNonArtifact(): Given an artifact directory (uploadtree_pk),
  return the first non-artifact directory (uploadtree_pk).
  TBD: "username" will be added in the future and it may change
@@ -41,7 +92,7 @@ function DirGetNonArtifact($UploadtreePk)
   if (empty($DB)) { return; }
 
   /* Get contents of this directory */
-  $Sql = "SELECT ufile_name,uploadtree_pk,ufile_mode FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk WHERE parent = $UploadtreePk;";
+  $Sql = "SELECT * FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk LEFT JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk WHERE parent = $UploadtreePk;";
   $Children = $DB->Action($Sql);
   $Recurse=NULL;
   foreach($Children as $C)
@@ -87,7 +138,7 @@ function DirGetList($Upload,$UploadtreePk)
   if (empty($DB)) { return; }
 
   /* Get the basic directory contents */
-  $Sql = "SELECT uploadtree_pk,ufile_pk,pfile_fk,ufile_name,ufile_mode FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk WHERE upload_fk = $Upload";
+  $Sql = "SELECT * FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk LEFT JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk WHERE upload_fk = $Upload";
   if (empty($UploadtreePk)) { $Sql .= " AND uploadtree.parent IS NULL"; }
   else { $Sql .= " AND uploadtree.parent = $UploadtreePk"; }
   $Sql .= " ORDER BY ufile.ufile_name ASC;";
