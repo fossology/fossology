@@ -60,7 +60,7 @@ function menu_cmp($a,$b)
  If $PluginName is blank, nothing is added.
  $LastOrder is used for grouping items in order.
  ***********************************************/
-function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$PluginName,$Depth)
+function menu_insert_r($Menu,$Path,$LastOrder,$Target,$PluginName,$Depth)
 {
   global $MenuMaxDepth;
   global $MenuList;
@@ -79,9 +79,12 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$PluginName,$Depth)
 
   /* Check if the name exists in the array */
   $M=NULL;
-  foreach($Menu as $Key => $Val)
+  if (is_array($Menu))
     {
-    if (!strcmp($Val->Name,$PathParts[0])) { $M = &$Menu[$Key]; break;}
+    foreach($Menu as $Key => $Val)
+      {
+      if (!strcmp($Val->Name,$PathParts[0])) { $M = &$Menu[$Key]; break;}
+      }
     }
 
   /* if it does not exist in the array, then add it */
