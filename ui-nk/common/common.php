@@ -30,5 +30,9 @@ if (!isset($GlobalReady)) { exit; }
 
 include_once("common-menu.php");
 include_once("common-plugin.php");
+include_once("common-folders.php");
+include_once("common-dir.php");
+include_once("common-parm.php");
+include_once("common-repo.php");
 
 ?>

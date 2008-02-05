@@ -25,12 +25,9 @@
  ***************************************************************/
 $GlobalReady=1;
 
-include_once("common/common.php");
-include_once("common/common-parm.php");
-include_once("common/common-folders.php");
-include_once("common/common-dir.php");
-include_once("template/template-plugin.php");
 include_once("pathinclude.h.php");
+include_once("common/common.php");
+include_once("template/template-plugin.php");
 
 /****************************************************
  This is the main guts of the UI: Find the plugin and run it.

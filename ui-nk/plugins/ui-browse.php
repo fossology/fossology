@@ -40,6 +40,7 @@ class ui_browse extends Plugin
     global $Plugins;
     $V="";
     $DB = &$Plugins[plugin_find_id("db")];
+    /* Use plugin "view" and "download" if they exist. */
     $ModDownload = &$Plugins[plugin_find_id("download")]; /* may be null */
     $ModView = &$Plugins[plugin_find_id("view")]; /* may be null */
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
@@ -128,10 +129,13 @@ class ui_browse extends Plugin
 	}
       $V .= "</td>\n";
       $V .= "<td>";
-      if (!empty($ModView) && !empty($View)) { $V .= "[<a href='$View'>View</a>] "; }
-      if (!empty($ModDownload) && !empty($Download)) { $V .= "[<a href='$Download'>Download</a>] "; }
       if (!empty($Link)) { $V .= "[<a href='$Link'>Traverse</a>] "; }
-      if (!empty($ModDownload) && !empty($Meta)) { $V .= "[<a href='$Meta'>Meta</a>] "; }
+      $V .= "</td><td>";
+      if (!empty($ModView) && !empty($View)) { $V .= "[<a href='$View'>View</a>] "; }
+      $V .= "</td><td>";
+      if (!empty($ModView) && !empty($Meta)) { $V .= "[<a href='$Meta'>Meta</a>] "; }
+      $V .= "</td><td>";
+      if (!empty($ModDownload) && !empty($Download)) { $V .= "[<a href='$Download'>Download</a>] "; }
       $V .= "</td></tr>\n";
       } /* foreach($Results as $Row) */
 
