@@ -25,6 +25,24 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 /************************************************************
+ GetMimeType(): Given a pfile_pk, return a string that describes
+ the mime type.
+ (This is in common-repo since mimetypes apply to repo contents.
+ ************************************************************/
+function GetMimeType($PfilePk)
+{
+  global $Plugins;
+  $DB = &$Plugins[plugin_find_id("db")];
+  if (empty($DB)) { return; }
+
+  $Sql = "SELECT * FROM mimetype JOIN pfile ON pfile.pfile_mimetypefk = mimetype.mimetype_pk WHERE pfile_pk = $PfilePk LIMIT 1;";
+  $Results = $DB->Action($Sql);
+  $Meta = $Results[0]['mimetype_name'];
+  if (empty($Meta)) { $Meta = 'application/octet-stream'; }
+  return($Meta);
+} /* GetMimeType() */
+
+/************************************************************
  RepPath(): Given a pfile id, retrieve the pfile path.
  NOTE: The filename at the path may not exist.
  In fact, the entire path may not exist!

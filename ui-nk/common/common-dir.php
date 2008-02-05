@@ -164,7 +164,7 @@ function DirGetList($Upload,$UploadtreePk)
  the path.  Each element in the path is an array containing
  ufile and uploadtree information.
  ************************************************************/
-function Dir2Path($UploadtreePk)
+function Dir2Path($UploadtreePk, $UfilePk=-1)
 {
   global $Plugins;
   $DB = &$Plugins[plugin_find_id("db")];
@@ -174,12 +174,22 @@ function Dir2Path($UploadtreePk)
 
   // build the array from the given node to the top and then reverse it so
   // it goes top down before returning it.
+
+  /* Add the ufile first (if it exists) */
+  if ($UfilePk >= 0)
+    {
+    $Sql = "SELECT * FROM uploadtree LEFT JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk WHERE ufile_pk = $UfilePk LIMIT 1;";
+    $Results = $DB->Action($Sql);
+    $Row = $Results[0];
+    array_push($Path,$Row);
+    }
+
   while(!empty($UploadtreePk))
     {
     $Sql = "SELECT * FROM uploadtree LEFT JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk WHERE uploadtree_pk = $UploadtreePk LIMIT 1;";
     $Results = $DB->Action($Sql);
     $Row = $Results[0];
-    if (!empty($Row['ufile_name']) && !Isartifact($Row['ufile_mode']))
+    if (!empty($Row['ufile_name']) && !Isartifact($Row['ufile_mode']) && ($UfilePk != $Row['ufile_pk']))
 	{
 	$Row['uploadtree_pk'] = DirGetNonArtifact($Row['uploadtree_pk']);
 	array_push($Path,$Row);
