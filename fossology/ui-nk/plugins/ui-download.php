@@ -46,21 +46,42 @@ class ui_download extends Plugin
     global $Plugins;
     $DB = &$Plugins[plugin_find_id("db")];
     $Pfile = GetParm("pfile",PARM_INTEGER);
-    if (empty($Pfile)) { return; }
-    /* Get meta type */
-    $Sql = "SELECT * FROM mimetype JOIN pfile ON pfile.pfile_mimetypefk = mimetype.mimetype_pk WHERE pfile_pk = $Pfile LIMIT 1;";
-    $Results = $DB->Action($Sql);
-    $Meta = $Results[0]['mimetype_name'];
-    if (empty($Meta)) { $Meta = 'application/octet-stream'; }
+    $Ufile = GetParm("ufile",PARM_INTEGER);
+    if (empty($Pfile) || empty($Ufile))
+	{
+	$this->OutputType = "corrupt";
+	return;
+	}
 
+    /* Get filename */
+    /** By using pfile and ufile, we cut down the risk of users blindly
+        guessing in order to download arbitrary files.
+	NOTE: The user can still iterate through every possible pfile and
+	ufile in order to find files.  And since the numbers are sequential,
+	they can optimize their scan.
+	However, it will still take plenty of queries to find most files.
+	Later: This will check if the user has access permission to the ufile.
+     **/
+    $Sql = "SELECT * FROM ufile WHERE ufile_pk = $Ufile AND pfile_fk = $Pfile LIMIT 1;";
+    $Results = $DB->Action($Sql);
+    $Name = $Results[0]['ufile_name'];
+    if (empty($Name))
+	{
+	$this->OutputType = "corrupt";
+	return;
+	}
+
+    /* Get meta type */
     switch($this->OutputType)
       {
       case "XML":
 	$V = "<xml>\n";
 	break;
       case "HTML":
+	$Meta = GetMimeType($Pfile);
 	header("Content-Type: $Meta");
 	// header('Content-Length: ' . $Results[0]['pfile_size']);
+	header('Content-Disposition: attachment; filename="' . $Name . '"');
 	break;
       case "Text":
 	break;
@@ -103,12 +124,12 @@ class ui_download extends Plugin
       case "XML":
       case "HTML":
       case "Text":
-      default:
 	/* Regardless of the format, dump the file's contents */
 	$Filename = RepPath($Pfile);
 	if (empty($Filename)) return;
 	if ($this->OutputToStdout) { readfile($Filename); }
 	else { return($V); }
+      default:
 	break;
       }
     return;

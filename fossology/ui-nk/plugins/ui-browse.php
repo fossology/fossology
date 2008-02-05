@@ -49,7 +49,7 @@ class ui_browse extends Plugin
     $Results = DirGetList($Upload,$Item);
     $ShowSomething=0;
 
-    $V .= "<table class='text' border=0 cellpadding=0>\n";
+    $V .= "<table class='text' style='border-collapse: collapse' border=0 padding=0>\n";
     foreach($Results as $Row)
       {
       if (empty($Row['uploadtree_pk'])) { continue; }
@@ -66,8 +66,8 @@ class ui_browse extends Plugin
 
       if (!empty($Row['pfile_fk']))
 	{
-	$View = Traceback_uri() . "?mod=view&pfile=" . $Row['pfile_fk'];
-	$Download = Traceback_uri() . "?mod=download&pfile=" . $Row['pfile_fk'];
+	$View = Traceback_uri() . "?mod=view&upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
+	$Download = Traceback_uri() . "?mod=download&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
 	}
 
       /* Scan for meta data */
@@ -81,7 +81,7 @@ class ui_browse extends Plugin
 	  {
 	  if (!Isdir($C['ufile_mode']))
 		{
-		$Meta = Traceback_uri() . "?mod=view&pfile=" . $C['pfile_fk'];
+		$Meta = Traceback_uri() . "?mod=view&upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
 		}
 	  }
 	else { $HasRealChildren = 1; }
@@ -103,7 +103,7 @@ class ui_browse extends Plugin
       /* Show details children */
       if ($Show == 'detail')
         {
-	$V .= "<td>" . DirMode2String($Row['ufile_mode']) . "</td>";
+	$V .= "<td class='mono'>" . DirMode2String($Row['ufile_mode']) . "</td>";
 	$V .= "<td>&nbsp;&nbsp;" . substr($Row['ufile_mtime'],0,19) . "</td>";
 	if (!empty($Row['pfile_size']))
 	  {
@@ -129,8 +129,8 @@ class ui_browse extends Plugin
 	}
       $V .= "</td>\n";
       $V .= "<td>";
-      if (!empty($Link)) { $V .= "[<a href='$Link'>Traverse</a>] "; }
-      $V .= "</td><td>";
+      // if (!empty($Link)) { $V .= "[<a href='$Link'>Traverse</a>] "; }
+      // $V .= "</td><td>";
       if (!empty($ModView) && !empty($View)) { $V .= "[<a href='$View'>View</a>] "; }
       $V .= "</td><td>";
       if (!empty($ModView) && !empty($Meta)) { $V .= "[<a href='$Meta'>Meta</a>] "; }
@@ -206,7 +206,8 @@ class ui_browse extends Plugin
 	break;
       case "HTML":
 	$V .= "<style type='text/css'>\n";
-	$V .= ".text { height:24px; font:normal 10pt verdana, arial, helvetica; }\n";
+	$V .= ".text { font:normal 10pt verdana, arial, helvetica; }\n";
+	$V .= ".mono { font:normal 10pt monospace; }\n";
 	$V .= ".dir { height:24px; font:normal 10pt verdana, arial, helvetica; border: thin black; border-style: none none dotted none; }\n";
 	$V .= "a { text-decoration:none; }\n";
 	$V .= "div { padding:0; margin:0; }\n";
