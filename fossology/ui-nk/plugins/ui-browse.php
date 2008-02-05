@@ -118,7 +118,9 @@ class ui_browse extends Plugin
       $V .= "<td>";
       if (!empty($Link)) /* if it's a directory */
 	{
-	$V .= "<a href='$Link'><b>$Name/</b></a>\n";
+	$V .= "<a href='$Link'><b>$Name";
+	if (Isdir($Row['ufile_mode'])) { $V .= "/"; }
+	$V .= "</b></a>\n";
 	}
       else
 	{
@@ -161,7 +163,7 @@ class ui_browse extends Plugin
       $UResults = $DB->Action($Sql);
       $Name = $UResults[0]['ufile_name'];
       $V .= "<tr><td>";
-      $V .= "<a href='$Uri&upload=" . $Row['upload_pk'] . "'>";
+      $V .= "<a href='$Uri&upload=" . $Row['upload_pk'] . "&show=$Show'>";
       $V .= $Name . "/";
       $V .= "</a><br>" . $Desc . "</td>\n";
       $V .= "<td align='right'>" . substr($Row['upload_ts'],0,16) . "</td></tr>\n";
@@ -206,7 +208,9 @@ class ui_browse extends Plugin
 	$V .= "div { padding:0; margin:0; }\n";
 	$V .= "</style>\n";
 
+	/*************************/
 	/* Create the micro-menu */
+	/*************************/
         $V .= "<div align=right><small>";
 	$Opt = "";
 	if ($Folder) { $Opt .= "&folder=$Folder"; }
@@ -219,7 +223,38 @@ class ui_browse extends Plugin
 
 	$V .= "<font class='text'>\n";
 
+	/************************/
+	/* Show the folder path */
+	/************************/
+	$Path = Dir2Path($Item);
+	$FirstPath=1;
+	$Opt = "";
+	if ($Folder) { $Opt .= "&folder=$Folder"; }
+	if ($Upload) { $Opt .= "&upload=$Upload"; }
+	$Opt .= "&show=$Show";
+	$V .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
+	foreach($Path as $P)
+	  {
+	  if (empty($P['ufile_name'])) { continue; }
+	  if (!$FirstPath) { $V .= "/ "; }
+	  $V .= "<a href='$Uri&item=" . $P['uploadtree_pk'] . "$Opt'>";
+	  if (Isdir($P['ufile_mode']))
+	    {
+	    $V .= $P['ufile_name'];
+	    }
+	  else
+	    {
+	    if (!$FirstPath) { $V .= "<br>\n&nbsp;&nbsp;"; }
+	    $V .= "<b>" . $P['ufile_name'] . "</b>";
+	    }
+	  $V .= "</a>";
+	  $FirstPath=0;
+	  }
+	$V .= "</div><P />\n";
+
+	/******************************/
 	/* Get the folder description */
+	/******************************/
 	if (!empty($Folder))
 	  {
 	  $V .= $this->ShowFolder($Folder,$Show);
@@ -228,8 +263,6 @@ class ui_browse extends Plugin
 	  {
 	  $V .= $this->ShowItem($Upload,$Item,$Show);
 	  }
-
-	/* Display the browse */
 	$V .= "</font>\n";
 	break;
       case "Text":
