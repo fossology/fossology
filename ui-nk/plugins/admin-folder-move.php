@@ -102,7 +102,7 @@ class folder_move extends Plugin
 	    $NRow = $NewFolder[0];
 	    $OldFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$OldFolderId';");
 	    $ORow = $OldFolder[0];
-	    $success = "Moved folder $ORow['folder_name'] to folder $NRow['folder_name']"; 
+	    $success = "Moved folder " . $ORow['folder_name'] . " to folder " . $NRow['folder_name']; 
 	    $V .= "<script language='javascript'>\n";
 	    $V .= "alert('$success')\n";
 	    $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
