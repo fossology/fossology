@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-function Isdir($mode) { return(($mode & 1<<18) != 0); }
+function Isdir($mode) { return(($mode & 1<<18) + ($mode & 0040000) != 0); }
 function Isartifact($mode) { return(($mode & 1<<28) != 0); }
 
 /************************************************************
@@ -34,44 +34,45 @@ function DirMode2String($Mode)
 {
   $V="";
   if (Isartifact($Mode)) { $V .= "a"; } else { $V .= "-"; }
+  if (($Mode & 0120000) == 0120000) { $V .= "l"; } else { $V .= "-"; }
   if (Isdir($Mode)) { $V .= "d"; } else { $V .= "-"; }
 
-  if ($Mode & 0x0100) { $V .= "r"; } else { $V .= "-"; }
-  if ($Mode & 0x0080) { $V .= "w"; } else { $V .= "-"; }
-  if ($Mode & 0x0040)
+  if ($Mode & 0000400) { $V .= "r"; } else { $V .= "-"; }
+  if ($Mode & 0000200) { $V .= "w"; } else { $V .= "-"; }
+  if ($Mode & 0000100)
     {
-    if ($Mode & 0x0800) { $V .= "s"; } /* setuid */
+    if ($Mode & 0004000) { $V .= "s"; } /* setuid */
     else { $V .= "x"; }
     }
   else
     {
-    if ($Mode & 0x0800) { $V .= "S"; } /* setuid */
+    if ($Mode & 0004000) { $V .= "S"; } /* setuid */
     else { $V .= "-"; }
     }
 
-  if ($Mode & 0x0020) { $V .= "r"; } else { $V .= "-"; }
-  if ($Mode & 0x0010) { $V .= "w"; } else { $V .= "-"; }
-  if ($Mode & 0x0008)
+  if ($Mode & 0000040) { $V .= "r"; } else { $V .= "-"; }
+  if ($Mode & 0000020) { $V .= "w"; } else { $V .= "-"; }
+  if ($Mode & 0000010)
     {
-    if ($Mode & 0x0400) { $V .= "s"; } /* setgid */
+    if ($Mode & 0002000) { $V .= "s"; } /* setgid */
     else { $V .= "x"; }
     }
   else
     {
-    if ($Mode & 0x0400) { $V .= "S"; } /* setgid */
+    if ($Mode & 0002000) { $V .= "S"; } /* setgid */
     else { $V .= "-"; }
     }
 
-  if ($Mode & 0x0004) { $V .= "r"; } else { $V .= "-"; }
-  if ($Mode & 0x0002) { $V .= "w"; } else { $V .= "-"; }
-  if ($Mode & 0x0001)
+  if ($Mode & 0000004) { $V .= "r"; } else { $V .= "-"; }
+  if ($Mode & 0000002) { $V .= "w"; } else { $V .= "-"; }
+  if ($Mode & 0000001)
     {
-    if ($Mode & 0x0200) { $V .= "t"; } /* sticky bit */
+    if ($Mode & 0001000) { $V .= "t"; } /* sticky bit */
     else { $V .= "x"; }
     }
   else
     {
-    if ($Mode & 0x0200) { $V .= "T"; } /* setgid */
+    if ($Mode & 0001000) { $V .= "T"; } /* setgid */
     else { $V .= "-"; }
     }
 
@@ -152,7 +153,6 @@ function DirGetList($Upload,$UploadtreePk)
     $R = &$Results[$Key];
     if (Isartifact($R['ufile_mode']) && Isdir($R['ufile_mode']))
 	{
-print("Got artifact\n");
 	$R['uploadtree_pk'] = DirGetNonArtifact($R['uploadtree_pk']);
 	}
     }
