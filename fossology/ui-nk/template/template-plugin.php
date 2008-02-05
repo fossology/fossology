@@ -130,7 +130,7 @@ class Plugin
   function Install()
     {
     return(0);
-    }
+    } // Install()
 
   /***********************************************************
    Remove(): This function (when defined) is only called once,
@@ -144,7 +144,7 @@ class Plugin
   function Remove()
     {
     return;
-    }
+    } // Remove()
 
   /***********************************************************
    Initialize(): This is called before the plugin is used.
@@ -164,7 +164,7 @@ class Plugin
       array_push($Plugins,$this);
       }
     return($this->State == PLUGIN_STATE_VALID);
-    }
+    } // Initialize()
 
   /***********************************************************
    PostInitialize(): This function is called before the plugin
@@ -197,7 +197,7 @@ class Plugin
 	menu_insert($this->MenuList,$this->MenuOrder,$this->MenuTarget,$this->Name);
 	}
     return($this->State == PLUGIN_STATE_READY);
-    }
+    } // PostInitialize()
 
   /***********************************************************
    Destroy(): This is a destructor called after the plugin
@@ -213,7 +213,7 @@ class Plugin
       }
     $this->State=PLUGIN_STATE_INVALID;
     return;
-    }
+    } // Destroy()
 
   /*********************************************************************/
   /*********************************************************************/
@@ -262,7 +262,7 @@ class Plugin
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     return;
-    }
+    } // OutputOpen()
 
   /***********************************************************
    OutputClose(): This function is called when user output is done.
@@ -295,7 +295,7 @@ class Plugin
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     return;
-    }
+    } // OutputClose()
 
   /***********************************************************
    OutputSet(): Similar to OutputOpen, this sets the output type
@@ -324,7 +324,7 @@ class Plugin
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     return;
-    }
+    } // OutputSet()
 
   /***********************************************************
    OutputUnSet(): Similar to OutputClose, this ends the output type
@@ -351,7 +351,7 @@ class Plugin
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     return;
-    }
+    } // OutputUnSet()
 
   /***********************************************************
    Output(): This function is called when user output is
@@ -382,7 +382,7 @@ class Plugin
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     return;
-    }
+    } // Output()
 
   /*********************************************************************/
   /*********************************************************************/
@@ -404,7 +404,7 @@ class Plugin
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     // Put your code here
     return;
-    }
+    } // Action()
 
   };
 ?>

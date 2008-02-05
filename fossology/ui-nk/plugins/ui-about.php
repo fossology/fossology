@@ -37,8 +37,8 @@ class ui_about extends Plugin
 
   function Output()
     {
-    $V="";
     if ($this->State != PLUGIN_STATE_READY) { return; }
+    $V="";
     switch($this->OutputType)
       {
       case "XML":
@@ -51,7 +51,7 @@ class ui_about extends Plugin
 	$V .= "$this->_Copyright<P>\n";
 	$V .= str_replace("\n","\n<P>\n",$this->_Text);
 	break;
-      case "_Text":
+      case "Text":
 	$V .= "$this->_Project\n";
 	$V .= "$this->_Copyright\n";
 	$V .= str_replace("\n","\n\n",$this->_Text) . "\n";
