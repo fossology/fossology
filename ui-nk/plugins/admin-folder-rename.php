@@ -68,7 +68,6 @@ class folder_rename extends Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
-    global $Plugins;
     switch($this->OutputType)
       {
       case "XML":
@@ -94,7 +93,6 @@ class folder_rename extends Plugin
 	  }
 
 	/* Display the form */
-	$F = &$Plugins[plugin_find_id("folders")];
 	$V .= "<form method='post'>\n"; // no url = this url
 	$V .= "<ol>\n";
 	$V .= "<li>Select the folder to rename:  \n";

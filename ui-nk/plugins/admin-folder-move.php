@@ -48,35 +48,21 @@ class folder_move extends Plugin
     global $Plugins;
     $DB = &$Plugins[plugin_find_id("db")];
 
-//    $Sql = "SELECT * from foldercontents WHERE child_id = '$FolderId' AND foldercontents_mode = '1';";
-//    $fcontents = $DB->Action($Sql);
-//    echo "<pre> FolderContnets:\n"; var_dump($fcontents); echo "</pre>";
-    
     /* Check the name */
     if (empty($NewParentId)) { return(0); }
-    
-    if ($FolderId == $NewParentId) { return(0); }
+    if ($FolderId == $NewParentId) { return(0); }   // already there
+    if ($FolderId == FolderGetTop()) { return(0); } // cannot move folder root
 
-    /* first folder exists, make sure it's not root folder (software repository) */
+    /* Both folders must exist */
     $Results = $DB->Action("SELECT * FROM folder where folder_pk = '$FolderId';");
     $Row = $Results[0];
-    if ($Row['folder_pk'] != $FolderId)
-      {
-        return(0);
-      }
-    // can't move Software Repository folder
-    elseif ($Row['folder_pk'] == 1) 
-      {
-        return(0);
-      }
+    if ($Row['folder_pk'] != $FolderId) { return(0); }
     /* Second folder exist? */
     $Results = $DB->Action("SELECT * FROM folder where folder_pk = '$NewParentId';");
     $Row = $Results[0];
     if ($Row['folder_pk'] != $NewParentId) { return(0); }
     
     /* Do the move */
-    /** Block SQL injection by protecting single quotes **/
-    //$NewName = str_replace("'", "''", $NewName);  // PostgreSQL quoting
     $Sql = "SELECT * from foldercontents WHERE child_id = '$FolderId' AND foldercontents_mode = '1';";
     $FContents = $DB->Action($Sql);
     $Row = $FContents[0];
@@ -85,7 +71,7 @@ class folder_move extends Plugin
     $Sql = "UPDATE foldercontents SET parent_fk = '$NewParentId' WHERE child_id = '$FolderId ' AND foldercontents_pk = '$fc_pk' AND foldercontents_mode = '1'";
     $Results = $DB->Action($Sql);
     return(1);
-    }
+    } // Move()
 
   /*********************************************
    Output(): Generate the text for this plugin.
@@ -105,27 +91,26 @@ class folder_move extends Plugin
 
 	/* If this is a POST, then process the request. */
 	$OldFolderId = GetParm('oldfolderid',PARM_INTEGER);
-	$TargetFolderId = GetParm('targetfolderid',PARM_TEXT);
+	$TargetFolderId = GetParm('targetfolderid',PARM_INTEGER);
 	if (!empty($OldFolderId) && !empty($TargetFolderId))
 	  {
 	  $rc = $this->Move($OldFolderId,$TargetFolderId);
 	  if ($rc==1)
-	  {
+	    {
 	   /* Need to refresh the screen */
 	    $NewFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$TargetFolderId';");
-       $NRow = $NewFolder[0];
-       $OldFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$OldFolderId';");
-       $ORow = $OldFolder[0];
-       $success = "Moved folder $ORow[folder_name] to folder $NRow[folder_name]"; 
-       $V .= "<script language='javascript'>\n";
-       $V .= "alert('$success')\n";
-       $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
+	    $NRow = $NewFolder[0];
+	    $OldFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$OldFolderId';");
+	    $ORow = $OldFolder[0];
+	    $success = "Moved folder $ORow['folder_name'] to folder $NRow['folder_name']"; 
+	    $V .= "<script language='javascript'>\n";
+	    $V .= "alert('$success')\n";
+	    $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
 	    $V .= "window.open('$Uri','_top');\n";
 	    $V .= "</script>\n";
+	    }
 	  }
-	  }
- /* Display the form */ 
-	$F = &$Plugins[plugin_find_id("folders")];
+	/* Display the form */ 
 	$V .= "<form method='post'>\n"; // no url = this url
 	$V .= "<ol>\n";
 	$V .= "<li>Select the folder to move:  \n";
