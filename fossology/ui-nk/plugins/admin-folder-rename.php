@@ -107,7 +107,7 @@ class folder_rename extends Plugin
 	$V .= "<input type='submit' value='Rename!'>\n";
 	$V .= "</form>\n";
 	break;
-      case "_Text":
+      case "Text":
 	break;
       default:
 	break;
