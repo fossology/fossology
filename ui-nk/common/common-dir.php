@@ -159,4 +159,34 @@ function DirGetList($Upload,$UploadtreePk)
   return($Results);
 } // DirGetList()
 
+/************************************************************
+ Dir2Path(): given an uploadtree_pk, return an array containing
+ the path.  Each element in the path is an array containing
+ ufile and uploadtree information.
+ ************************************************************/
+function Dir2Path($UploadtreePk)
+{
+  global $Plugins;
+  $DB = &$Plugins[plugin_find_id("db")];
+  if (empty($DB)) { return; }
+
+  $Path = array();	// return path array
+
+  // build the array from the given node to the top and then reverse it so
+  // it goes top down before returning it.
+  while(!empty($UploadtreePk))
+    {
+    $Sql = "SELECT * FROM uploadtree LEFT JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk WHERE uploadtree_pk = $UploadtreePk LIMIT 1;";
+    $Results = $DB->Action($Sql);
+    $Row = $Results[0];
+    if (!empty($Row['ufile_name']) && !Isartifact($Row['ufile_mode']))
+	{
+	$Row['uploadtree_pk'] = DirGetNonArtifact($Row['uploadtree_pk']);
+	array_push($Path,$Row);
+	}
+    $UploadtreePk = $Row['parent'];
+    }
+  return(array_reverse($Path,false));
+} // Dir2Path()
+
 ?>
