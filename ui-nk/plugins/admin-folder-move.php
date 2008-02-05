@@ -28,7 +28,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class mvFolder extends Plugin
+class folder_move extends Plugin
   {
   var $Type=PLUGIN_UI;
   var $Name="mvFolder";
@@ -140,7 +140,7 @@ class mvFolder extends Plugin
 	$V .= "<input type='submit' value='Move!'>\n";
 	$V .= "</form>\n";
 	break;
-      case "_Text":
+      case "Text":
 	break;
       default:
 	break;
@@ -151,6 +151,6 @@ class mvFolder extends Plugin
     }
 
   };
-$NewPlugin = new mvFolder;
+$NewPlugin = new folder_move;
 $NewPlugin->Initialize();
 ?>
