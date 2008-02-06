@@ -32,14 +32,69 @@ class ui_view extends Plugin
   var $Dependency=array("db","browse");
 
   /***********************************************************
+   ShowFlowedText(): Given a pfile_pk, display the text file as HTML.
+   Output goes to stdout!
+   ***********************************************************/
+  function ShowFlowedText($Pfile)
+    {
+    $Filename = RepPath($Pfile);
+    $Fin = fopen($Filename,"rb");
+    if (!$Fin) return;
+
+    /* Performance note:
+       Ideally, tables should be used for aligning columns.
+       However, after a few thousand rows, most browsers hang.
+       Thus, use text and not tables. */
+
+    /* Process the file */
+    print "<div class='text'>";
+    $S = fread($Fin,1024);
+    while(strlen($S) > 0)
+      {
+      $S = htmlentities($S);
+      $S = str_replace("\r\n","<br>\n",$S);
+      $S = str_replace("\n","<br>\n",$S);
+      $S = str_replace("\r","<br>\n",$S);
+      $S = str_replace("\t","&nbsp;&nbsp;",$S);
+      $S = preg_replace("/[^[:print:][:space:]]+/"," ",$S);
+      print $S;
+      $S = fread($Fin,1024);
+      }
+    print "</div>\n";
+
+    fclose($Fin);
+    } // ShowFlowedText()
+
+  /***********************************************************
    ShowText(): Given a pfile_pk, display "strings" of the file.
    Output goes to stdout!
    ***********************************************************/
   function ShowText($Pfile)
     {
-    // $Filename = 
+    $Filename = RepPath($Pfile);
+    $Fin = fopen($Filename,"rb");
+    if (!$Fin) return;
+
+    /* Performance note:
+       Ideally, tables should be used for aligning columns.
+       However, after a few thousand rows, most browsers hang.
+       Thus, use text and not tables. */
+
+    /* Process the file */
     print "<div class='mono'>";
+    print "<pre>";
+    $S = fread($Fin,1024);
+    while(strlen($S) > 0)
+      {
+      $S = htmlentities($S);
+      $S = preg_replace("/[^[:print:][:space:]]+/"," ",$S);
+      print $S;
+      $S = fread($Fin,1024);
+      }
+    print "</pre>";
     print "</div>\n";
+
+    fclose($Fin);
     } // ShowText()
 
   /***********************************************************
@@ -52,15 +107,32 @@ class ui_view extends Plugin
     $Fin = fopen($Filename,"rb");
     if (!$Fin) return;
 
+    /* Performance note:
+       Ideally, tables should be used for aligning columns.
+       However, after a few thousand rows, most browsers hang.
+       Thus, use text and not tables. */
+
     /* Process the file */
     print "<div class='mono'>";
-    $S = fread($Fin,32);
+    $S = fread($Fin,16);
     while(strlen($S) > 0)
       {
-      /* Print the hex */
+      /* Convert to hex */
       $Hex = bin2hex($S);
-      print "$Hex\n";
-      $S = fread($Fin,32);
+      /** Make sure it is always 32 characters (16 bytes) **/
+      for($i=strlen($Hex); $i < 32; $i+=2) { $Hex .= "  "; }
+      /** Add in the spacings **/
+      $Hex = preg_replace("/(..)/",'\1 ',$Hex);
+      $Hex = preg_replace("/(.......................) /",'\1 | ',$Hex);
+      $Hex = str_replace(" ","&nbsp;",$Hex);
+      print "| $Hex";
+      $S = preg_replace("/[^[:print:]]/",'.',$S);
+      $S = str_replace("/&/","&amp;",$S);
+      $S = str_replace("/</","&lt;",$S);
+      $S = str_replace("/>/","&gt;",$S);
+      $S = str_replace("/[[:space:]]/","&nbsp;",$S);
+      print "|$S|<br>\n";
+      $S = fread($Fin,16);
       }
     print "</div>\n";
 
@@ -92,16 +164,56 @@ class ui_view extends Plugin
     if (empty($Item) || empty($Pfile) || empty($Ufile) || empty($Upload))
 	{ return; }
 
-    /* Display micro header */
+    switch(GetParm("format",PARM_STRING))
+	{
+	case 'hex':	$Format='hex'; break;
+	case 'text':	$Format='text'; break;
+	case 'flow':	$Format='flow'; break;
+	default:
+	  /* Determine default show based on mime type */
+	  $Meta = GetMimeType($Pfile);
+	  list($Type,$Junk) = split("/",$Meta,2);
+	  if ($Type == 'text') { $Format = 'flow'; }
+	  else { $Format = 'hex'; }
+	  break;
+	}
+
+    /***********************************
+     Create micro menu
+     ***********************************/
+    $Uri = Traceback_uri() . "?mod=" . $this->Name;
+    $Opt="";
+    if (!empty($Pfile)) { $Opt .= "&pfile=$Pfile"; }
+    if (!empty($Ufile)) { $Opt .= "&ufile=$Ufile"; }
+    if (!empty($Upload)) { $Opt .= "&upload=$Upload"; }
+    if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
+    if (!empty($Show)) { $Opt .= "&show=$Show"; }
+    if (!empty($Item)) { $Opt .= "&item=$Item"; }
+    $V .= "<div align=right><small>";
+    if ($Format != 'hex') { $V .= "<a href='$Uri$Opt&format=hex'>Hex</a> | "; }
+    else { $V .= "Hex | "; }
+    if ($Format != 'text') { $V .= "<a href='$Uri$Opt&format=text'>Plain Text</a> | "; }
+    else { $V .= "Plain Text | "; }
+    if ($Format != 'flow') { $V .= "<a href='$Uri$Opt&format=flow'>Flowed Text</a> | "; }
+    else { $V .= "Flowed Text | "; }
+    $V .= "<a href='" . Traceback() . "'>Refresh</a>";
+    $V .= "</small></div>\n";
+
+    /**********************************
+      Display micro header
+     **********************************/
+    $Uri = Traceback_uri() . "?mod=browse";
+    $Opt="";
+    if (!empty($Pfile)) { $Opt .= "&pfile=$Pfile"; }
+    if (!empty($Ufile)) { $Opt .= "&ufile=$Ufile"; }
+    if (!empty($Upload)) { $Opt .= "&upload=$Upload"; }
+    if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
+    if (!empty($Show)) { $Opt .= "&show=$Show"; }
+    /* No item */
     $V .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
     $Path = Dir2Path($Item,$Ufile);
     $FirstPath=1;
     $Last = &$Path[count($Path)-1];
-    $Uri = Traceback_uri() . "?mod=browse";
-    $Opt = "";
-    if ($Folder) { $Opt .= "&folder=$Folder"; }
-    if ($Upload) { $Opt .= "&upload=$Upload"; }
-    if ($Show) { $Opt .= "&show=$Show"; }
 
     $V .= "<font class='text'>\n";
     foreach($Path as $P)
@@ -124,19 +236,6 @@ class ui_view extends Plugin
     $V .= "</div><P />\n";
     $V .= "</font>\n";
 
-    switch(GetParm("format",PARM_STRING))
-	{
-	case 'hex':	$Format='hex'; break;
-	case 'text':	$Format='text'; break;
-	default:
-	  /* Determine default show based on mime type */
-	  $Meta = GetMimeType($Pfile);
-	  list($Type,$Junk) = split("/",$Meta,2);
-	  if ($Type == 'text') { $Format = 'text'; }
-	  else { $Format = 'hex'; }
-	  break;
-	}
-
     /***********************************
      Display file contents
      ***********************************/
@@ -150,6 +249,7 @@ class ui_view extends Plugin
 	  print $V;
 	  if ($Format == 'text') { $V = $this->ShowText($Pfile); }
 	  else if ($Format == 'hex') { $V = $this->ShowHex($Pfile); }
+	  else if ($Format == 'flow') { $V = $this->ShowFlowedText($Pfile); }
 	  }
 	break;
       case "Text":
