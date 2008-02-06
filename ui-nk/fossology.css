@@ -67,6 +67,17 @@ table
   height:24px;
   border-style: none;
   border-left: thin dotted;
+  border-color: gray;
+  font:normal 10pt verdana, arial, helvetica;
+  text-decoration:none;
+  color:white;
+  }
+
+.treehide1
+  {
+  height:24px;
+  border-style: none;
+  border-left: thin dotted;
   border-color: white;
   font:normal 10pt verdana, arial, helvetica;
   text-decoration:none;

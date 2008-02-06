@@ -76,9 +76,7 @@ else
 	$V .= "</script>\n";
 
 	/* Display the tree */
-	$V .= "<font class='treehide'>\n";
 	$V .= FolderListDiv(-1,0);
-	$V .= "</font>\n";
 	break;
       case "Text":
 	break;

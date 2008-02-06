@@ -96,7 +96,10 @@ function FolderListOption($ParentFolder,$Depth)
 function FolderListDiv($ParentFolder,$Depth)
   {
   global $Plugins;
-  if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
+  if ($ParentFolder == "-1")
+	{
+	return(FolderListDiv(FolderGetTop(),0));
+	}
   if (empty($ParentFolder)) { return; }
   $DB = &$Plugins[plugin_find_id("db")];
   if (empty($DB)) { return; }
@@ -104,10 +107,21 @@ function FolderListDiv($ParentFolder,$Depth)
   $Uri = Traceback_uri();
   $V="";
 
-  $V .= "<font color='white'>";
-  if ($Depth != 0) { $V .= "+&nbsp;"; }
-  for($i=1; $i < $Depth; $i++) { $V .= "+&nbsp;"; }
-  $V .= "</font>";
+  if ($Depth != 0)
+    {
+    $V .= "<font class='treehide1' color='white'>";
+    $V .= "+&nbsp;";
+    $V .= "</font>";
+    if ($Depth > 1)
+      {
+      for($i=1; $i < $Depth; $i++)
+	{
+	$V .= "<font class='treehide'>";
+	$V .= "+&nbsp;";
+	$V .= "</font>";
+	}
+      }
+    }
 
   /* Load this folder's name */
   $Results = $DB->Action("SELECT folder_name FROM folder WHERE folder_pk=$ParentFolder LIMIT 1;");
@@ -125,7 +139,7 @@ function FolderListDiv($ParentFolder,$Depth)
     {
     $V .= "<font class='treearm'>&ndash;</font>";
     }
-  $V .= "&nbsp;</font>";
+  $V .= "&nbsp;";
   if (!empty($Browse)) { $V .= "<a target='basenav' href='$Uri?mod=browse&folder=$ParentFolder'>"; }
   $V .= "<font class='treetext'>" . htmlentities($Name) . "</font>";
   if (!empty($Browse)) { $V .= "</a>"; }
