@@ -51,12 +51,12 @@ class ui_view extends Plugin
     $S = fread($Fin,1024);
     while(strlen($S) > 0)
       {
+      $S = preg_replace('/[^[:print:][:space:]]+/'," ",$S);
       $S = htmlentities($S);
       $S = str_replace("\r\n","<br>\n",$S);
       $S = str_replace("\n","<br>\n",$S);
       $S = str_replace("\r","<br>\n",$S);
       $S = str_replace("\t","&nbsp;&nbsp;",$S);
-      $S = preg_replace("/[^[:print:][:space:]]+/"," ",$S);
       print $S;
       $S = fread($Fin,1024);
       }
@@ -86,8 +86,8 @@ class ui_view extends Plugin
     $S = fread($Fin,1024);
     while(strlen($S) > 0)
       {
+      $S = preg_replace('/[^[:print:][:space:]]+/'," ",$S);
       $S = htmlentities($S);
-      $S = preg_replace("/[^[:print:][:space:]]+/"," ",$S);
       print $S;
       $S = fread($Fin,1024);
       }
@@ -128,7 +128,7 @@ class ui_view extends Plugin
       print "| $Hex";
       $S = preg_replace("/[^[:print:]]/",'.',$S);
       $S = htmlentities($S);
-      $S = str_replace("/[[:space:]]/","&nbsp;",$S);
+      $S = preg_replace("/[[:space:]]/",'&nbsp;',$S);
       print "|$S|<br>\n";
       $S = fread($Fin,16);
       }
