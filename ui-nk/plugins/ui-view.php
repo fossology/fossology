@@ -127,9 +127,7 @@ class ui_view extends Plugin
       $Hex = str_replace(" ","&nbsp;",$Hex);
       print "| $Hex";
       $S = preg_replace("/[^[:print:]]/",'.',$S);
-      $S = str_replace("/&/","&amp;",$S);
-      $S = str_replace("/</","&lt;",$S);
-      $S = str_replace("/>/","&gt;",$S);
+      $S = htmlentities($S);
       $S = str_replace("/[[:space:]]/","&nbsp;",$S);
       print "|$S|<br>\n";
       $S = fread($Fin,16);
