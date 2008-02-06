@@ -75,16 +75,8 @@ else
 	$V .= "-->\n";
 	$V .= "</script>\n";
 
-	$V .= "<style type='text/css'>\n";
-	$V .= ".text { height:24px; font:normal 10pt verdana, arial, helvetica; }\n";
-	$V .= ".item { height:24px; border-style: none; border-left: thin dotted; border-color: gray; font:normal 10pt verdana, arial, helvetica; }\n";
-	$V .= "a { text-decoration:none; color:black; }\n";
-	$V .= "div { padding:0; margin:0; }\n";
-	$V .= "</style>\n";
-
-	$V .= "<font style='text-decoration:none; height:24px; font:normal 10pt verdana, arial, helvetica;'>\n";
-
 	/* Display the tree */
+	$V .= "<font class='treehide'>\n";
 	$V .= FolderListDiv(-1,0);
 	$V .= "</font>\n";
 	break;

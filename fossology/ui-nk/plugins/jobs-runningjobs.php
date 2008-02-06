@@ -71,7 +71,7 @@ class jobs_runningjobs extends Plugin
 
 	/* Put the results in a table */
 	$V .= "<div align=right><small><a href='" . Traceback() . "'>Refresh</a></small></div>\n";
-	$V .= "<table border=1 cellpadding=0 style='height:24px; font:normal 10pt verdana, arial, helvetica;' width='100%'>\n";
+	$V .= "<table border=1 cellpadding=0 width='100%'>\n";
 	$V .= "  <tr>\n";
 	$Uri=Traceback_uri() . '?mod=' . $this->Name;
 	$Ord = 'agent_status_date';

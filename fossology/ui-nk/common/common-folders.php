@@ -104,8 +104,10 @@ function FolderListDiv($ParentFolder,$Depth)
   $Uri = Traceback_uri();
   $V="";
 
-  if ($Depth != 0) { $V .= "<font color='white'>+&nbsp;</font>"; }
-  for($i=1; $i < $Depth; $i++) { $V .= "<font class='item' color='white'>+&nbsp;</font>"; }
+  $V .= "<font color='white'>";
+  if ($Depth != 0) { $V .= "+&nbsp;"; }
+  for($i=1; $i < $Depth; $i++) { $V .= "+&nbsp;"; }
+  $V .= "</font>";
 
   /* Load this folder's name */
   $Results = $DB->Action("SELECT folder_name FROM folder WHERE folder_pk=$ParentFolder LIMIT 1;");
@@ -115,19 +117,17 @@ function FolderListDiv($ParentFolder,$Depth)
   /* Load any subfolders */
   $Results = $DB->Action("SELECT folder_pk FROM leftnav WHERE parent=$ParentFolder AND folder_pk IS NOT NULL ORDER BY name;");
   /* Now create the HTML */
-  if ($Depth > 0) { $V .= "<font class='item'>"; }
-  else { $V .= "<font>"; }
   if (isset($Results[0]['folder_pk']))
     {
-    $V .= '<a href="javascript:ShowHide(' . "'TreeDiv-$ParentFolder'" . ')"><font color="blue">+</font></a>';
+    $V .= '<a href="javascript:ShowHide(' . "'TreeDiv-$ParentFolder'" . ')"><font class="treebranch">+</font></a>';
     }
   else
     {
-    $V .= "<font color='gray'>&ndash;</font>";
+    $V .= "<font class='treearm'>&ndash;</font>";
     }
   $V .= "&nbsp;</font>";
   if (!empty($Browse)) { $V .= "<a target='basenav' href='$Uri?mod=browse&folder=$ParentFolder'>"; }
-  $V .= htmlentities($Name);
+  $V .= "<font class='treetext'>" . htmlentities($Name) . "</font>";
   if (!empty($Browse)) { $V .= "</a>"; }
   $V .= "<br>\n";
   if (isset($Results[0]['folder_pk']))

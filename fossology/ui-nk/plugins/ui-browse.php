@@ -205,14 +205,6 @@ class ui_browse extends Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<style type='text/css'>\n";
-	$V .= ".text { font:normal 10pt verdana, arial, helvetica; }\n";
-	$V .= ".mono { font:normal 10pt monospace; }\n";
-	$V .= ".dir { height:24px; font:normal 10pt verdana, arial, helvetica; border: thin black; border-style: none none dotted none; }\n";
-	$V .= "a { text-decoration:none; }\n";
-	$V .= "div { padding:0; margin:0; }\n";
-	$V .= "</style>\n";
-
 	/*************************/
 	/* Create the micro-menu */
 	/*************************/
