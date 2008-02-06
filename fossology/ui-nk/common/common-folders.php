@@ -126,9 +126,11 @@ function FolderListDiv($ParentFolder,$Depth)
     }
 
   /* Load this folder's name */
-  $Results = $DB->Action("SELECT folder_name FROM folder WHERE folder_pk=$ParentFolder LIMIT 1;");
+  $Results = $DB->Action("SELECT folder_name,folder_desc FROM folder WHERE folder_pk=$ParentFolder LIMIT 1;");
   $Name = trim($Results[0]['folder_name']);
+  $Desc = trim($Results[0]['folder_desc']);
   if ($Name == "") { $Name = "[default]"; }
+  $Desc = str_replace('"',"&quot;",$Desc);
 
   /* Load any subfolders */
   $Results = $DB->Action("SELECT folder_pk FROM leftnav WHERE parent=$ParentFolder AND folder_pk IS NOT NULL ORDER BY name;");
@@ -142,7 +144,9 @@ function FolderListDiv($ParentFolder,$Depth)
     $V .= "<font class='treearm'>&ndash;</font>";
     }
   $V .= "&nbsp;";
-  if (!empty($Browse)) { $V .= "<a target='basenav' href='$Uri?mod=browse&folder=$ParentFolder'>"; }
+  if (!empty($Desc)) { $Title = 'title="' . $Desc . '"'; }
+  else { $Title = ""; }
+  if (!empty($Browse)) { $V .= "<a $Title target='basenav' href='$Uri?mod=browse&folder=$ParentFolder'>"; }
   $V .= "<font class='treetext'>" . htmlentities($Name) . "</font>";
   if (!empty($Browse)) { $V .= "</a>"; }
   $V .= "<br>\n";
