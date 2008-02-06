@@ -115,7 +115,7 @@ class folder_move extends Plugin
 	$V .= "<ol>\n";
 	$V .= "<li>Select the folder to move:  \n";
 	$V .= "<select name='oldfolderid'>\n";
-	$V .= FolderListOption(-1,0);
+	$V .= FolderListOption(-1,0,0);
 	$V .= "</select><P />\n";
 	$V .= "<li>Select the <em>move to</em> folder name:  \n";
 	$V .= "<select name='targetfolderid'>\n";
