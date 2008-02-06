@@ -431,11 +431,6 @@ class jobs_showjobs extends Plugin
 	  }
 	$Uri = Traceback_uri() . "?mod=" . $this->Name;
 
-	/* Start the output header */
-	$V .= "<style type='text/css'>\n";
-	$V .= ".text { height:24px; font:normal 10pt verdana, arial, helvetica; }\n";
-	$V .= "</style>\n";
-
 	/* Customize the top menu */
 	if ($Show == 'job')
 	  {

@@ -92,14 +92,7 @@ class ui_view extends Plugin
     if (empty($Item) || empty($Pfile) || empty($Ufile) || empty($Upload))
 	{ return; }
 
-    /* Setup fonts and display micro header */
-    $V .= "<style type='text/css'>\n";
-    $V .= ".mono { font:normal 10pt monospace; }\n";
-    $V .= ".text { height:24px; font:normal 10pt verdana, arial, helvetica; }\n";
-    $V .= "a { text-decoration:none; }\n";
-    $V .= "div { padding:0; margin:0; }\n";
-    $V .= "</style>\n";
-
+    /* Display micro header */
     $V .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
     $Path = Dir2Path($Item,$Ufile);
     $FirstPath=1;

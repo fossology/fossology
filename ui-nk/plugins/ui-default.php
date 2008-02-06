@@ -30,6 +30,7 @@ class ui_default extends Plugin
   var $Name="Default";
   var $Version="1.0";
   var $MenuList="";
+  var $Title="FOSSology";
 
   var $Dependency=array("topnav","folders","basenav");
 
@@ -94,55 +95,6 @@ class ui_default extends Plugin
 	}
     return($V);
     } // DrawHTMLPage()
-
-  /***********************************************************
-   OutputOpen(): This function is called when user output is
-   requested.  This function is responsible for assigning headers.
-   If $Type is "HTML" then generate an HTTP header.
-   If $Type is "XML" then begin an XML header.
-   If $Type is "Text" then generate a text header as needed.
-   The $ToStdout flag is "1" if output should go to stdout, and
-   0 if it should be returned as a string.  (Strings may be parsed
-   and used by other plugins.)
-   ***********************************************************/
-  function OutputOpen($Type,$ToStdout)
-    {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    $this->OutputType=$Type;
-    $this->OutputToStdout=$ToStdout;
-    // Put your code here
-    switch($this->OutputType)
-      {
-      case "XML":
-	$V = "<xml>\n";
-	break;
-      case "HTML":
-	$V = "";
-	/* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
-	$V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">' . "\n";
-	// $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
-	// $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
-	/* Fun bug: When using the DTD, you need to define html and body
-	   to be 100% AND div must be used.  Otherwise, iframe becomes
-	   a default/fixed height. */
-	$V .= "<html>\n";
-	$V .= "<head>\n";
-	$V .= "<title>FOSSology</title>\n";
-	$V .= "<style>\n";
-	$V .= "html, body { margin:0; padding:0; height:100%; }\n";
-	$V .= "</style>\n";
-	$V .= "</head>\n";
-	$V .= "<body bgcolor='white'>\n";
-	break;
-      case "Text":
-	break;
-      default:
-	break;
-      }
-    if (!$this->OutputToStdout) { return($V); }
-    print "$V";
-    return;
-    } // OutputOpen()
 
   /***********************************************************
    Output(): This function is called when user output is

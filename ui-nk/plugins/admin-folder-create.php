@@ -28,10 +28,6 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-require_once("pathinclude.php");
-//require_once("$WEBDIR/db_postgres.h.php");
-require_once("../ui/db_postgres.h.php");
-
 class folder_create extends Plugin
   {
   var $Type=PLUGIN_UI;
