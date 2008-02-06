@@ -50,7 +50,7 @@ function FolderGetTop()
  NOTE: If there is a recursive loop in the folder table, then
  this will loop INFINITELY.
  ***********************************************************/
-function FolderListOption($ParentFolder,$Depth)
+function FolderListOption($ParentFolder,$Depth, $IncludeTop=1)
   {
   global $Plugins;
   if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
@@ -58,30 +58,32 @@ function FolderListOption($ParentFolder,$Depth)
   $DB = &$Plugins[plugin_find_id("db")];
   if (empty($DB)) { return; }
   $V="";
-  $V .= "<option value='$ParentFolder'>\n";
-  if ($Depth != 0) { $V .= "&nbsp;&nbsp;"; }
-  for($i=1; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
 
-  /* Load this folder's name */
-  $Results = $DB->Action("SELECT folder_name FROM folder WHERE folder_pk=$ParentFolder LIMIT 1;");
-  $Name = trim($Results[0]['folder_name']);
-  if ($Name == "") { $Name = "[default]"; }
+  if (($Depth != 0) || $IncludeTop)
+    {
+    $V .= "<option value='$ParentFolder'>\n";
+    if ($Depth != 0) { $V .= "&nbsp;&nbsp;"; }
+    for($i=1; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
 
-  /* Load any subfolders */
+    /* Load this folder's name */
+    $Results = $DB->Action("SELECT folder_name FROM folder WHERE folder_pk=$ParentFolder LIMIT 1;");
+    $Name = trim($Results[0]['folder_name']);
+    if ($Name == "") { $Name = "[default]"; }
+
+    /* Load any subfolders */
+    /* Now create the HTML */
+    $V .= htmlentities($Name);
+    $V .= "</option>\n";
+    }
   $Results = $DB->Action("SELECT folder_pk FROM leftnav WHERE parent=$ParentFolder AND folder_pk IS NOT NULL ORDER BY name;");
-  /* Now create the HTML */
-  $V .= htmlentities($Name);
-  $V .= "</option>\n";
   if (isset($Results[0]['folder_pk']))
     {
     $Hide="";
     if ($Depth > 0) { $Hide = "style='display:none;'"; }
-    $V .= "<div id='TreeDiv-$ParentFolder' $Hide>\n";
     foreach($Results as $R)
 	{
 	$V .= FolderListOption($R['folder_pk'],$Depth+1);
 	}
-    $V .= "</div>\n";
     }
   return($V);
 } // FolderListOption()
