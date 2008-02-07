@@ -47,11 +47,13 @@ class ui_license extends Plugin
        - Number of items PER license family.
      *****/
     $VF=""; // return values for file listing
+    $VH=""; // return values for license histogram
     $V=""; // total return value
     global $Plugins;
     global $DB;
     $Time = time();
 
+    /****************************************/
     /* Load licenses */
     $LicPk2GID=array();  // map lic_pk to the group id: lic_id
     $LicGID2Name=array(); // map lic_id to name.
@@ -68,13 +70,14 @@ class ui_license extends Plugin
     if (empty($LicPk2GID[1])) { $LicPk2GID[1] = 1; }
 
     /* Arrays for storying item->license and license->item mappings */
-    $Item2LicGID = array();
     $LicGID2Item = array();
 
+    /****************************************/
     /* Get the items under this UploadtreePk */
     $Children = DirGetList($Upload,$Item);
     $ChildCount=0;
     $VF .= "<table border=0>";
+/*** TBD: Need to colorize based on licenses (populate LicGID2Item) with value from LicenseGet/LicenseGetAll.  LicGID2Item[$GID] .= "$Key:" ****/
     foreach($Children as $C)
       {
       /* Store the item information */
@@ -92,7 +95,7 @@ class ui_license extends Plugin
 	$LicUri = "$Uri&item=" . $C['uploadtree_pk'];
 	}
       $LicCount = $Lics['Total'];
-      $VF .= "<tr name='Lic-$ChildCount'><td>";
+      $VF .= '<tr><td id="Lic-' . $ChildCount . '" align="left">';
       if ($LicCount > 0)
 	{
 	$VF .= "<a href='$LicUri'>";
@@ -100,8 +103,9 @@ class ui_license extends Plugin
 	$VF .= $C['ufile_name'];
 	if ($IsDir) { $VF .= "/"; };
 	if ($IsContainer) { $VF .= "<b>"; };
-	$VF .= "</a></td>";
-	$VF .= "</td><td>[$LicCount license" . ($LicCount == 1 ? "" : "s") . "]</td>";
+	$VF .= "</a>";
+	$VF .= "</td><td>[" . number_format($LicCount,0,"",",");
+	$VF .= " license" . ($LicCount == 1 ? "" : "s") . "]</td>";
 	}
       else
 	{
@@ -111,7 +115,7 @@ class ui_license extends Plugin
 	if ($IsContainer) { $VF .= "<b>"; };
 	$VF .= "</td><td></td>";
 	}
-      $VF .= "</td></tr>\n";
+      $VF .= "</tr>\n";
       $ChildCount++;
       }
     $VF .= "</table>\n";
@@ -129,24 +133,53 @@ class ui_license extends Plugin
 	}
       }
 
+    /****************************************/
     /* List the licenses */
-    $V .= "<table border=1>\n";
-    $V .= "<tr><th>Count</th><th>License</th>\n\n";
+    $VH .= "<table border=1 width='100%'>\n";
+    $VH .= "<tr><th width='10%'>Count</th><th>License</th>\n\n";
     arsort($Lics);
     foreach($Lics as $Key => $Val)
       {
       $Key = $LicPk2GID[$Key];
       if (!empty($Key) && !empty($Val))
 	{
-	$V .= "<tr><td align='right'>$Val</td>";
-	$V .= "<td>" . $LicGID2Name[$Key] . "</td></tr>\n";
+	$VH .= "<tr><td align='right'>$Val</td>";
+	$VH .= "<td>";
+	$VH .= "<a href='javascript:;' onclick=\"LicColor('Lic-','" . $LicGID2Item[$Key] . "')\">";
+	$VH .= $LicGID2Name[$Key];
+	$VH .= "</a>";
+	$VH .= "</td></tr>\n";
 	}
       }
-    $V .= "</table>\n<hr />\n";
+    $VH .= "</table>\n";
 
+    /****************************************/
+    /* Licenses use Javascript to highlight */
+    $VJ = ""; // return values for the javascript
+    $VJ .= "<script language='javascript'>\n";
+    $VJ .= "<!--\n";
+    $VJ .= "function LicColor(Prefix,Listing)\n";
+    $VJ .= "{\n";
+    $VJ .= "for(var i=0; i < $ChildCount; i++)\n";
+    $VJ .= "  {\n";
+    $VJ .= "  document.getElementById(Prefix + i).style.backgroundColor='white';\n";
+    $VJ .= "  }\n";
+    $VJ .= "List = Listing.split(':');\n";
+    $VJ .= "for(var i in List)\n";
+    $VJ .= "  {\n";
+    $VJ .= "  document.getElementById(Prefix + List[i]).style.backgroundColor='yellow';\n";
+    $VJ .= "  }\n";
+    $VJ .= "}\n";
+    $VJ .= "// -->\n";
+    $VJ .= "</script>\n";
+
+    /* Combine VF and VH */
+    $V .= "<table border=0 width='100%'>\n";
+    $V .= "<tr><td valign='top'>$VH</td><td valign='top'>$VF</td></tr>\n";
+    $V .= "</table>\n<hr />\n";
     $Time = time() - $Time;
-    $V .= $VF;
     $V .= "<br>Elaspsed time: $Time seconds<br>\n";
+    $V .= $VJ;
     return($V);
     } // ShowUploadHist()
 
