@@ -40,9 +40,16 @@ function LicenseGet($PfilePk, &$Lics)
     $LicenseGet_Prepared=1;
     }
   $Results = $DB->Execute("LicenseGet",array($PfilePk));
+  if (empty($Lics['Total'])) { $Lics['Total']=0; }
   foreach($Results as $R)
 	{
-	if (!empty($R['lic_fk'])) { $Lics[] = $R['lic_fk']; }
+	$LicFk = $R['lic_fk'];
+	if (!empty($LicFk))
+	  {
+	  if (empty($Lics[$LicFk])) { $Lics[$LicFk]=1; }
+	  else { $Lics[$LicFk]++; }
+	  $Lics['Total']++;
+	  }
 	}
   return;
 } // LicenseGet()

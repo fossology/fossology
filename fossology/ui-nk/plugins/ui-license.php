@@ -34,8 +34,7 @@ class ui_license extends Plugin
   /***********************************************************
    ShowUploadHist(): Given an Upload and UploadtreePk item, display:
    (1) The histogram for the directory BY LICENSE.
-   (2) The histogram for the directory BY LICENSE FAMILY.
-   (3) The file listing for the directory.
+   (2) The file listing for the directory, with license navigation.
    ***********************************************************/
   function ShowUploadHist($Upload,$Item,$Uri)
     {
@@ -56,14 +55,17 @@ class ui_license extends Plugin
     /* Load licenses */
     $LicPk2GID=array();  // map lic_pk to the group id: lic_id
     $LicGID2Name=array(); // map lic_id to name.
-    $Results = $DB->Action("SELECT lic_pk,lic_id,lic_name,lic_section FROM agent_lic_raw;");
-    foreach($Results as $R)
+    $Results = $DB->Action("SELECT lic_pk,lic_id,lic_name FROM agent_lic_raw ORDER BY lic_name;");
+    foreach($Results as $Key => $R)
       {
       if (empty($R['lic_name'])) { continue; }
       $Name = preg_replace("/^.*\//","",$R['lic_name']);
-      $LicPk2Name[$R['lic_id']] = $Name;
-      $LicID2GID[$R['lic_pk']] = $R['lic_id'];
+      $GID = $R['lic_id'];
+      $LicGID2Name[$GID] = $Name;
+      $LicPk2GID[$R['lic_pk']] = $GID;
       }
+    if (empty($LicGID2Name[1])) { $LicGID2Name[1] = 'Phrase'; }
+    if (empty($LicPk2GID[1])) { $LicPk2GID[1] = 1; }
 
     /* Arrays for storying item->license and license->item mappings */
     $Item2LicGID = array();
@@ -76,11 +78,9 @@ class ui_license extends Plugin
     foreach($Children as $C)
       {
       /* Store the item information */
-      $VF .= "<div id='Lic-$ChildCount'>";
-
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
-      $Lics = array();
+      $Lics['Total'] = 0;
       if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics); }
       else { LicenseGet($C['pfile_fk'],$Lics); }
       if (!empty($C['pfile_fk']))
@@ -91,7 +91,7 @@ class ui_license extends Plugin
 	{
 	$LicUri = "$Uri&item=" . $C['uploadtree_pk'];
 	}
-      $LicCount = count($Lics);
+      $LicCount = $Lics['Total'];
       $VF .= "<tr name='Lic-$ChildCount'><td>";
       if ($LicCount > 0)
 	{
@@ -111,13 +111,43 @@ class ui_license extends Plugin
 	if ($IsContainer) { $VF .= "<b>"; };
 	$VF .= "</td><td></td>";
 	}
+      $VF .= "</td></tr>\n";
       $ChildCount++;
       }
     $VF .= "</table>\n";
 
+    /* Convert lics to licenses */
+    foreach($Lics as $Key => $Val)
+      {
+      if (!is_int($Key)) { continue; }
+      $LicGID = $LicPk2GID[$Key];
+      if ($LicGID != $Key)
+	{
+	if (empty($Lics[$LicGID])) $Lics[$LicGID] = $Val;
+	else { $Lics[$LicGID] += $Val; }
+	$Lics[$Key] = NULL;
+	}
+      }
+
+    /* List the licenses */
+    $V .= "<table border=1>\n";
+    $V .= "<tr><th>Count</th><th>License</th>\n\n";
+    arsort($Lics);
+    foreach($Lics as $Key => $Val)
+      {
+      $Key = $LicPk2GID[$Key];
+      if (!empty($Key) && !empty($Val))
+	{
+	$V .= "<tr><td align='right'>$Val</td>";
+	$V .= "<td>" . $LicGID2Name[$Key] . "</td></tr>\n";
+	}
+      }
+    $V .= "</table>\n<hr />\n";
+
     $Time = time() - $Time;
-    $VF .= "<br>Elaspsed time: $Time seconds<br>\n";
-    return($VF);
+    $V .= $VF;
+    $V .= "<br>Elaspsed time: $Time seconds<br>\n";
+    return($V);
     } // ShowUploadHist()
 
   /***********************************************************
@@ -152,14 +182,14 @@ class ui_license extends Plugin
 	/*************************/
 	/* Create the micro-menu */
 	/*************************/
-        $V .= "<div align=right><small>";
+	$V .= "<div align=right><small>";
 	$Opt = "";
 	if ($Folder) { $Opt .= "&folder=$Folder"; }
 	if ($Upload) { $Opt .= "&upload=$Upload"; }
 	if ($Item) { $Opt .= "&item=$Item"; }
 	$V .= "<a href='" . str_replace("mod=".$this->Name,"mod=browse",Traceback()) . "'>Browse</a> | ";
-        $V .= "<a href='" . Traceback() . "'>Refresh</a>";
-        $V .= "</small></div>\n";
+	$V .= "<a href='" . Traceback() . "'>Refresh</a>";
+	$V .= "</small></div>\n";
 
 	$V .= "<font class='text'>\n";
 
