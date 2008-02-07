@@ -32,7 +32,7 @@ if (!isset($GlobalReady)) { exit; }
 function GetMimeType($PfilePk)
 {
   global $Plugins;
-  $DB = &$Plugins[plugin_find_id("db")];
+  global $DB;
   if (empty($DB)) { return; }
 
   $Sql = "SELECT * FROM mimetype JOIN pfile ON pfile.pfile_mimetypefk = mimetype.mimetype_pk WHERE pfile_pk = $PfilePk LIMIT 1;";
@@ -52,7 +52,7 @@ function RepPath($PfilePk, $Repo="files")
 {
   global $Plugins;
   global $LIBEXECDIR;
-  $DB = &$Plugins[plugin_find_id("db")];
+  global $DB;
   if (empty($DB)) { return; }
 
   $Sql = "SELECT * FROM pfile WHERE pfile_pk = $PfilePk LIMIT 1;";

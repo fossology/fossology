@@ -24,12 +24,38 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+$DB = NULL; /* global pointer used by everyone... */
 class db_access extends Plugin
   {
   var $Name="db";
   var $Version="1.0";
 
   var $_pg_conn = NULL;
+
+  /***********************************************************
+   PostInitialize(): This function is called before the plugin
+   is used and after all plugins have been initialized.
+   If there is any initialization step that is dependent on other
+   plugins, put it here.
+   Returns true on success, false on failure.
+   NOTE: Do not assume that the plugin exists!  Actually check it!
+   ***********************************************************/
+  function PostInitialize()
+    {
+    global $Plugins;
+    if ($this->State != PLUGIN_STATE_VALID) { return(0); } // don't run
+    // Make sure dependencies are met
+    foreach($this->Dependency as $key => $val)
+      {
+      $id = plugin_find_id($val);
+      if ($id < 0) { $this->Destroy(); return(0); }
+      }
+
+    $this->State = PLUGIN_STATE_READY;
+    global $DB;
+    $DB = $this;
+    return($this->State == PLUGIN_STATE_READY);
+    } // PostInitialize()
 
   /*******************************************************
    db_init(): Establish a connection to the database.

@@ -28,15 +28,18 @@ if (!isset($GlobalReady)) { exit; }
  LicenseGet(): Return licenses for a pfile.
  Can return empty array if there is no license.
  ************************************************************/
-function LicenseGet(&$DB, $PfilePk, &$Lics)
+$LicenseGet_Prepared=0;
+function LicenseGet($PfilePk, &$Lics)
 {
-  // global $Plugins;
-  // $DB = &$Plugins[plugin_find_id("db")];
-  // if (empty($DB)) { return; }
-  // if (empty($PfilePk)) { return; }
-
-  $Sql = "SELECT lic_fk FROM agent_lic_meta WHERE pfile_fk = $PfilePk;";
-  $Results = $DB->Action($Sql);
+  global $LicenseGet_Prepared;
+  global $DB;
+  if (empty($DB)) { return; }
+  if (!$LicenseGet_Prepared)
+    {
+    $DB->Prepare("LicenseGet",'SELECT lic_fk FROM agent_lic_meta WHERE pfile_fk = $1;');
+    $LicenseGet_Prepared=1;
+    }
+  $Results = $DB->Execute("LicenseGet",array($PfilePk));
   foreach($Results as $R)
 	{
 	if (!empty($R['lic_fk'])) { $Lics[] = $R['lic_fk']; }
@@ -50,31 +53,33 @@ function LicenseGet(&$DB, $PfilePk, &$Lics)
  Returns NULL if not processed.
  NOTE: This is recursive!
  ************************************************************/
-function LicenseGetAll(&$DB, $UploadtreePk, &$Lics, $Prepare=0)
+$LicenseGetAll_Prepared=0;
+function LicenseGetAll($UploadtreePk, &$Lics)
 {
   global $Plugins;
-  $DB = &$Plugins[plugin_find_id("db")];
+  global $DB;
   if (empty($DB)) { return; }
   if (empty($UploadtreePk)) { return NULL; }
 
-  if ($Prepare==0)
+  global $LicenseGetAll_Prepared;
+  if (!$LicenseGetAll_Prepared)
     {
-    $Prepare = 1;
     $DB->Prepare("LicenseGetAll",'SELECT uploadtree_pk,ufile_mode,pfile_fk FROM uploadtree INNER JOIN ufile ON ufile_fk = ufile_pk WHERE parent = $1;');
+    $LicenseGetAll_Prepared = 1;
     }
   /* Find every item under this UploadtreePk... */
-  $Results = $DB->Execute("LicenseGetAll",array("$UploadtreePk"));
+  $Results = $DB->Execute("LicenseGetAll",array($UploadtreePk));
   if (!empty($Results) && (count($Results) > 0))
     {
     foreach($Results as $R)
       {
       if (!empty($R['pfile_fk']))
 	{
-	LicenseGet($DB,$R['pfile_fk'],$Lics);
+	LicenseGet($R['pfile_fk'],$Lics);
 	}
       if (Iscontainer($R['ufile_mode']))
 	{
-	LicenseGetAll($DB,$R['uploadtree_pk'],$Lics,1);
+	LicenseGetAll($R['uploadtree_pk'],$Lics);
 	}
       }
     }
@@ -89,7 +94,7 @@ function LicenseGetAll(&$DB, $UploadtreePk, &$Lics, $Prepare=0)
 function LicenseHist($UploadtreePk)
 {
   global $Plugins;
-  $DB = &$Plugins[plugin_find_id("db")];
+  global $DB;
   if (empty($DB)) { return; }
 
 } // LicenseHist()
@@ -101,7 +106,7 @@ function LicenseHist($UploadtreePk)
 function LicenseShowText($PfilePk, $Flow=1)
 {
   global $Plugins;
-  $DB = &$Plugins[plugin_find_id("db")];
+  global $DB;
   if (empty($DB)) { return; }
 
   return($Results);

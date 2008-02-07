@@ -41,7 +41,7 @@ class folder_properties extends Plugin
   function Edit($FolderId,$NewName)
     {
     global $Plugins;
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
 
     /* Check the name */
     $NewName = trim($NewName);

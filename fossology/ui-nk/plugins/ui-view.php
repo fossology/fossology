@@ -152,7 +152,6 @@ class ui_view extends Plugin
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     global $Plugins;
-    $DB = &$Plugins[plugin_find_id("db")];
     $Pfile = GetParm("pfile",PARM_INTEGER);
     $Ufile = GetParm("ufile",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);

@@ -44,7 +44,7 @@ class ui_download extends Plugin
     $this->OutputToStdout=$ToStdout;
 
     global $Plugins;
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
     $Pfile = GetParm("pfile",PARM_INTEGER);
     $Ufile = GetParm("ufile",PARM_INTEGER);
     if (empty($Pfile) || empty($Ufile))
@@ -116,7 +116,7 @@ class ui_download extends Plugin
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     global $Plugins;
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
     $Pfile = GetParm("pfile",PARM_INTEGER);
     if (empty($Pfile)) { return; }
     switch($this->OutputType)
