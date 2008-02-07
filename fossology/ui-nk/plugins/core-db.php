@@ -64,6 +64,33 @@ class db_access extends Plugin
     return $rows;
     }
 
+  /***********************************************************
+   Execute(): Run a prepared SQL statement from Prepare().
+   ***********************************************************/
+  function Execute($Prep,$Command)
+    {
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    if (!$this->db_init()) { return; }
+    $result = pg_execute($this->_pg_conn,$Prep,$Command);
+    if (!isset($result)) return;
+    $rows = pg_fetch_all($result);
+    if (!is_array($rows)) $rows = array();
+    pg_free_result($result);
+    return $rows;
+    }
+
+  /***********************************************************
+   Prepare(): This prepares an SQL statement for execution.
+   $Prep is the name of the prepared statement.
+   ***********************************************************/
+  function Prepare($Prep,$Command)
+    {
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    if (!$this->db_init()) { return; }
+    $result = pg_prepare($this->_pg_conn,$Prep,$Command);
+    return;
+    }
+
   };
 $NewPlugin = new db_access;
 $NewPlugin->Initialize();

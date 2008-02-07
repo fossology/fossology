@@ -81,7 +81,7 @@ class ui_browse extends Plugin
         $CountChildren++;
 	if (Isartifact($C['ufile_mode']))
 	  {
-	  if (!Isdir($C['ufile_mode']))
+	  if (!Isdir($C['ufile_mode']) && ($C['ufile_name'] == "artifact.meta"))
 		{
 		$Meta = Traceback_uri() . "?mod=view&upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
 		}
@@ -138,30 +138,19 @@ class ui_browse extends Plugin
       if (!empty($ModView) && !empty($Meta)) { $V .= "[<a href='$Meta'>Meta</a>] "; }
       $V .= "</td><td>";
       if (!empty($ModDownload) && !empty($Download)) { $V .= "[<a href='$Download'>Download</a>] "; }
+if (0) {
       $V .= "</td><td>";
-/* TBD: Licenses */
-if (0)
-{
       if (!empty($ModLicense) && !empty($Row['pfile_fk']))
 	{
-	$Lic = LicenseGet($Row['pfile_fk']);
+	$Lic = LicenseGetAll($Row['uploadtree_pk']);
 	$i = count($Lic);
 	if ($i > 0)
 	  {
 	  $V .= "[<a href='$License'>$i license" . ($i == 1 ? "" : "s") . "</a>] ";
 	  }
 	}
-      else
-	{
-	$Lic = LicenseGetAll($Row['uploadtree_pk']);
-	$i = count($Lic);
-	if ($i > 0)
-	  {
-	  $V .= "[$i license" . ($i == 1 ? "" : "s") . "] ";
-	  }
-	$V .= "</td></tr>\n";
-	}
 }
+      $V .= "</td>";
       } /* foreach($Results as $Row) */
 
     $V .= "</table>\n";
@@ -213,6 +202,8 @@ if (0)
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
+    global $Plugins;
+    $ModLicense = &$Plugins[plugin_find_id("license")]; /* may be null */
 
     switch(GetParm("show",PARM_STRING))
 	{
@@ -242,6 +233,7 @@ if (0)
         else { $V .= "Summary | "; }
         if ($Show != 'detail') { $V .= "<a href='$Uri&show=detail$Opt'>Detail</a> | "; }
         else { $V .= "Detail | "; }
+	if (!empty($ModLicense)) { $V .= "<a href='" . str_replace("mod=".$this->Name,"mod=license",Traceback()) . "'>License</a> | "; }
         $V .= "<a href='" . Traceback() . "'>Refresh</a>";
         $V .= "</small></div>\n";
 

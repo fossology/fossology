@@ -26,6 +26,7 @@ if (!isset($GlobalReady)) { exit; }
 
 function Isdir($mode) { return(($mode & 1<<18) + ($mode & 0040000) != 0); }
 function Isartifact($mode) { return(($mode & 1<<28) != 0); }
+function Iscontainer($mode) { return(($mode & 1<<29) != 0); }
 
 /************************************************************
  DirMode2String(): Convert a mode to string values.
