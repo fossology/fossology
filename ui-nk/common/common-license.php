@@ -27,23 +27,21 @@ if (!isset($GlobalReady)) { exit; }
 /************************************************************
  LicenseGet(): Return licenses for a pfile.
  Can return empty array if there is no license.
- Returns NULL if not processed.
  ************************************************************/
-function LicenseGet($PfilePk)
+function LicenseGet(&$DB, $PfilePk, &$Lics)
 {
-  global $Plugins;
-  $DB = &$Plugins[plugin_find_id("db")];
-  if (empty($DB)) { return; }
-  if (empty($PfilePk)) { return; }
+  // global $Plugins;
+  // $DB = &$Plugins[plugin_find_id("db")];
+  // if (empty($DB)) { return; }
+  // if (empty($PfilePk)) { return; }
 
-  $Sql = "SELECT * FROM agent_lic_meta WHERE pfile_fk = $PfilePk;";
+  $Sql = "SELECT lic_fk FROM agent_lic_meta WHERE pfile_fk = $PfilePk;";
   $Results = $DB->Action($Sql);
-  if (count($Results) != 0) { return($Results); }
-  /* see if it was processed */
-  $Sql = "SELECT * FROM agent_lic_status WHERE pfile_fk = $PfilePk AND processed IS TRUE;";
-  $Results = $DB->Action($Sql);
-  if (count($Results) != 0) { return(array()); }
-  return(NULL);
+  foreach($Results as $R)
+	{
+	if (!empty($R['lic_fk'])) { $Lics[] = $R['lic_fk']; }
+	}
+  return;
 } // LicenseGet()
 
 /************************************************************
@@ -52,31 +50,35 @@ function LicenseGet($PfilePk)
  Returns NULL if not processed.
  NOTE: This is recursive!
  ************************************************************/
-function LicenseGetAll($UploadtreePk)
+function LicenseGetAll(&$DB, $UploadtreePk, &$Lics, $Prepare=0)
 {
   global $Plugins;
   $DB = &$Plugins[plugin_find_id("db")];
   if (empty($DB)) { return; }
   if (empty($UploadtreePk)) { return NULL; }
 
-  $Total=NULL;
-
-  /* Find every pfile */
-  $Sql = "SELECT * FROM uploadtree LEFT JOIN ufile ON ufile_fk = ufile_pk WHERE parent = $UploadtreePk;";
-  $Results = $DB->Action($Sql);
-  foreach($Results as $R)
+  if ($Prepare==0)
     {
-    if (!empty($R['pfile_fk']))
-	{
-	$Lic = LicenseGet($R['pfile_fk']);
-	$Total = array_merge($Total,$Lic);
-	}
-    else
-	{
-	$Total = array_merge($Total,LicenseGetAll($R['uploadtree_pk']));
-	}
+    $Prepare = 1;
+    $DB->Prepare("LicenseGetAll",'SELECT uploadtree_pk,ufile_mode,pfile_fk FROM uploadtree INNER JOIN ufile ON ufile_fk = ufile_pk WHERE parent = $1;');
     }
-  return($Total);
+  /* Find every item under this UploadtreePk... */
+  $Results = $DB->Execute("LicenseGetAll",array("$UploadtreePk"));
+  if (!empty($Results) && (count($Results) > 0))
+    {
+    foreach($Results as $R)
+      {
+      if (!empty($R['pfile_fk']))
+	{
+	LicenseGet($DB,$R['pfile_fk'],$Lics);
+	}
+      if (Iscontainer($R['ufile_mode']))
+	{
+	LicenseGetAll($DB,$R['uploadtree_pk'],$Lics,1);
+	}
+      }
+    }
+  return;
 } // LicenseGetAll()
 
 /************************************************************
