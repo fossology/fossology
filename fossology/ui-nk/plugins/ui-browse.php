@@ -41,8 +41,9 @@ class ui_browse extends Plugin
     $V="";
     $DB = &$Plugins[plugin_find_id("db")];
     /* Use plugin "view" and "download" if they exist. */
-    $ModDownload = &$Plugins[plugin_find_id("download")]; /* may be null */
     $ModView = &$Plugins[plugin_find_id("view")]; /* may be null */
+    $ModDownload = &$Plugins[plugin_find_id("download")]; /* may be null */
+    $ModLicense = &$Plugins[plugin_find_id("license")]; /* may be null */
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
 
     /* Grab the directory */
@@ -68,6 +69,7 @@ class ui_browse extends Plugin
 	{
 	$View = Traceback_uri() . "?mod=view&upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
 	$Download = Traceback_uri() . "?mod=download&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
+	$License = Traceback_uri() . "?mod=license&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
 	}
 
       /* Scan for meta data */
@@ -136,7 +138,30 @@ class ui_browse extends Plugin
       if (!empty($ModView) && !empty($Meta)) { $V .= "[<a href='$Meta'>Meta</a>] "; }
       $V .= "</td><td>";
       if (!empty($ModDownload) && !empty($Download)) { $V .= "[<a href='$Download'>Download</a>] "; }
-      $V .= "</td></tr>\n";
+      $V .= "</td><td>";
+/* TBD: Licenses */
+if (0)
+{
+      if (!empty($ModLicense) && !empty($Row['pfile_fk']))
+	{
+	$Lic = LicenseGet($Row['pfile_fk']);
+	$i = count($Lic);
+	if ($i > 0)
+	  {
+	  $V .= "[<a href='$License'>$i license" . ($i == 1 ? "" : "s") . "</a>] ";
+	  }
+	}
+      else
+	{
+	$Lic = LicenseGetAll($Row['uploadtree_pk']);
+	$i = count($Lic);
+	if ($i > 0)
+	  {
+	  $V .= "[$i license" . ($i == 1 ? "" : "s") . "] ";
+	  }
+	$V .= "</td></tr>\n";
+	}
+}
       } /* foreach($Results as $Row) */
 
     $V .= "</table>\n";
@@ -213,8 +238,10 @@ class ui_browse extends Plugin
 	if ($Folder) { $Opt .= "&folder=$Folder"; }
 	if ($Upload) { $Opt .= "&upload=$Upload"; }
 	if ($Item) { $Opt .= "&item=$Item"; }
-        if ($Show == 'detail') { $V .= "<a href='$Uri&show=summary$Opt'>Summary</a> | "; }
-        else { $V .= "<a href='$Uri&show=detail$Opt'>Detail</a> | "; }
+        if ($Show != 'summary') { $V .= "<a href='$Uri&show=summary$Opt'>Summary</a> | "; }
+        else { $V .= "Summary | "; }
+        if ($Show != 'detail') { $V .= "<a href='$Uri&show=detail$Opt'>Detail</a> | "; }
+        else { $V .= "Detail | "; }
         $V .= "<a href='" . Traceback() . "'>Refresh</a>";
         $V .= "</small></div>\n";
 

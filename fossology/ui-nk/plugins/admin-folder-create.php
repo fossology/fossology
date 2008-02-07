@@ -28,16 +28,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-global $DATADIR, $PROJECT, $WEBDIR;
-
-require_once("$WEBDIR/db_postgres.h.php");
-
 class folder_create extends Plugin
   {
   var $Type=PLUGIN_UI;
   var $Name="folder_create";
   var $Version="1.0";
-  var $MenuList="Admin::Folder::Create";
+  var $MenuList="Organize::Folder::Create";
   var $Dependency=array("db");
 
   /*********************************************
@@ -105,7 +101,6 @@ class folder_create extends Plugin
 	break;
       case "HTML":
 	$V .= "<H1>Create Folder</H1>\n";
-   $V .= "<p>Select where the folder should go, default is the root folder Software Repository</p>";
 	/* If this is a POST, then process the request. */
 	$ParentId = GetParm('parentid',PARM_INTEGER);
 	$NewFolder = GetParm('newname',PARM_TEXT);
@@ -126,7 +121,7 @@ class folder_create extends Plugin
 	/* Display the form */
 	$V .= "<form method='post'>\n"; // no url = this url
 	$V .= "<ol>\n";
-	$V .= "<li>Select the Parent Folder:  \n";
+	$V .= "<li>Select the parent folder:  \n";
 	$V .= "<select name='parentid'>\n";
 	$V .= FolderListOption(-1,0);
 	$V .= "</select><P />\n";
