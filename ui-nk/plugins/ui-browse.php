@@ -39,7 +39,7 @@ class ui_browse extends Plugin
     {
     global $Plugins;
     $V="";
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
     /* Use plugin "view" and "download" if they exist. */
     $ModView = &$Plugins[plugin_find_id("view")]; /* may be null */
     $ModDownload = &$Plugins[plugin_find_id("download")]; /* may be null */
@@ -165,7 +165,7 @@ if (0) {
     {
     global $Plugins;
     $V="";
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
     $Sql = "SELECT * FROM upload WHERE upload_pk IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder);";
     $Results = $DB->Action($Sql);
 
@@ -203,6 +203,7 @@ if (0) {
     $Item = GetParm("item",PARM_INTEGER);
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     global $Plugins;
+    global $DB;
     $ModLicense = &$Plugins[plugin_find_id("license")]; /* may be null */
 
     switch(GetParm("show",PARM_STRING))

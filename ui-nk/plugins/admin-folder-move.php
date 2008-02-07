@@ -46,7 +46,7 @@ class folder_move extends Plugin
   function Move($FolderId,$NewParentId)
     {
     global $Plugins;
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
 
     /* Check the name */
     if (empty($NewParentId)) { return(0); }
@@ -81,7 +81,7 @@ class folder_move extends Plugin
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     global $Plugins;
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
     switch($this->OutputType)
       {
       case "XML":

@@ -87,15 +87,21 @@ function DirMode2String($Mode)
  how this function works.
  NOTE: This is recursive!
  ************************************************************/
+$DirGetNonArtifact_Prepared=0;
 function DirGetNonArtifact($UploadtreePk)
 {
   global $Plugins;
-  $DB = &$Plugins[plugin_find_id("db")];
+  global $DB;
   if (empty($DB)) { return; }
 
   /* Get contents of this directory */
-  $Sql = "SELECT * FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk LEFT JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk WHERE parent = $UploadtreePk;";
-  $Children = $DB->Action($Sql);
+  global $DirGetNonArtifact_Prepared;
+  if (!$DirGetNonArtifact_Prepared)
+    {
+    $DirGetNonArtifact_Prepared=1;
+    $DB->Prepare("DirGetNonArtifact",'SELECT * FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk LEFT JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk WHERE parent = $1;');
+    }
+  $Children = $DB->Execute("DirGetNonArtifact",array($UploadtreePk));
   $Recurse=NULL;
   foreach($Children as $C)
     {
@@ -133,18 +139,23 @@ function _DirCmp($a,$b)
  Returns array containing:
    uploadtree_pk,ufile_pk,pfile_pk,ufile_name,ufile_mode
  ************************************************************/
+$DirGetList_Prepared=0;
 function DirGetList($Upload,$UploadtreePk)
 {
   global $Plugins;
-  $DB = &$Plugins[plugin_find_id("db")];
+  global $DB;
   if (empty($DB)) { return; }
 
   /* Get the basic directory contents */
-  $Sql = "SELECT * FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk LEFT JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk WHERE upload_fk = $Upload";
-  if (empty($UploadtreePk)) { $Sql .= " AND uploadtree.parent IS NULL"; }
-  else { $Sql .= " AND uploadtree.parent = $UploadtreePk"; }
-  $Sql .= " ORDER BY ufile.ufile_name ASC;";
-  $Results = $DB->Action($Sql);
+  global $DirGetList_Prepared;
+  if (!$DirGetList_Prepared)
+    {
+    $DirGetList_Prepared=1;
+    $DB->Prepare("DirGetList_1",'SELECT * FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk LEFT JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent IS NULL ORDER BY ufile.ufile_name ASC;');
+    $DB->Prepare("DirGetList_2",'SELECT * FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk LEFT JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent = $2 ORDER BY ufile.ufile_name ASC;');
+    }
+  if (empty($UploadtreePk)) { $Results=$DB->Execute("DirGetList_1",array($Upload)); }
+  else { $Results=$DB->Execute("DirGetList_2",array($Upload,$UploadtreePk)); }
   usort($Results,_DirCmp);
 
   /* Replace all artifact directories */
@@ -168,7 +179,7 @@ function DirGetList($Upload,$UploadtreePk)
 function Dir2Path($UploadtreePk, $UfilePk=-1)
 {
   global $Plugins;
-  $DB = &$Plugins[plugin_find_id("db")];
+  global $DB;
   if (empty($DB)) { return; }
 
   $Path = array();	// return path array

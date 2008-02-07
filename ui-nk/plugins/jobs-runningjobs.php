@@ -65,7 +65,7 @@ class jobs_runningjobs extends Plugin
 	  }
 
 	/** Do the SQL **/
-	$DB = &$Plugins[plugin_find_id("db")];
+	global $DB;
 	$Results = $DB->Action("SELECT * FROM scheduler_status WHERE record_update > now()-interval '600' ORDER BY $OrderBy $OrderDir;");
 	if (!is_array($Results)) { return; }
 

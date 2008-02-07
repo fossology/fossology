@@ -32,7 +32,7 @@ if (!isset($GlobalReady)) { exit; }
 function FolderGetTop()
 {
   global $Plugins;
-  $DB = &$Plugins[plugin_find_id("db")];
+  global $DB;
   if (empty($DB)) { return; }
   if (!empty($username)) { $Where = "WHERE user_name='$username'"; }
   else { $Where = ""; }
@@ -55,7 +55,7 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1)
   global $Plugins;
   if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
   if (empty($ParentFolder)) { return; }
-  $DB = &$Plugins[plugin_find_id("db")];
+  global $DB;
   if (empty($DB)) { return; }
   $V="";
 
@@ -103,7 +103,7 @@ function FolderListDiv($ParentFolder,$Depth)
 	return(FolderListDiv(FolderGetTop(),0));
 	}
   if (empty($ParentFolder)) { return; }
-  $DB = &$Plugins[plugin_find_id("db")];
+  global $DB;
   if (empty($DB)) { return; }
   $Browse = &$Plugins[plugin_find_id("browse")];
   $Uri = Traceback_uri();

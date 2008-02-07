@@ -40,7 +40,7 @@ class ui_folders extends Plugin
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $V="";
     global $Plugins;
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
     switch($this->OutputType)
       {
       case "XML":

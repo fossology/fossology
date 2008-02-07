@@ -46,9 +46,9 @@ class folder_create extends Plugin
     {
     global $Plugins;
     global $_pg_conn, $DATADIR, $PROJECT, $WEBDIR;
+    global $DB;
     
     // Needed for the Action method
-    $DB = &$Plugins[plugin_find_id("db")];
     // below is needed for the createfolder call
     $path = "{$DATADIR}/dbconnect/{$PROJECT}";
     db_init($path);

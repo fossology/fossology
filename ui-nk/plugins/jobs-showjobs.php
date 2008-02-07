@@ -110,7 +110,7 @@ class jobs_showjobs extends Plugin
 	'job_upload_fk');
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&show=job&job=";
 
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
     $Sql = "SELECT *, job.* FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk = $Job LIMIT 1;";
     $Results = $DB->Action($Sql);
     $Row = $Results[0];
@@ -184,7 +184,7 @@ class jobs_showjobs extends Plugin
   function ShowDetail($History)
     {
     global $Plugins;
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
 
     if ($History == 1) { $Where = ""; }
     else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
@@ -313,7 +313,7 @@ class jobs_showjobs extends Plugin
   function ShowSummary($History)
     {
     global $Plugins;
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
 
     if ($History == 1) { $Where = ""; }
     else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }

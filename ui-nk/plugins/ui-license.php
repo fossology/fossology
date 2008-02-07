@@ -50,7 +50,7 @@ class ui_license extends Plugin
     $VF=""; // return values for file listing
     $V=""; // total return value
     global $Plugins;
-    $DB = &$Plugins[plugin_find_id("db")];
+    global $DB;
     $Time = time();
 
     /* Load licenses */
@@ -81,8 +81,8 @@ class ui_license extends Plugin
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
       $Lics = array();
-      if ($IsContainer) { LicenseGetAll($DB,$C['uploadtree_pk'],$Lics); }
-      else { LicenseGet($DB,$C['pfile_fk'],$Lics); }
+      if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics); }
+      else { LicenseGet($C['pfile_fk'],$Lics); }
       if (!empty($C['pfile_fk']))
 	{
 	$LicUri = "$Uri&item=$Item&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
@@ -131,6 +131,7 @@ class ui_license extends Plugin
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
+    global $DB;
 
     switch(GetParm("show",PARM_STRING))
 	{
