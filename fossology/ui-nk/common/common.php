@@ -34,5 +34,6 @@ include_once("common-folders.php");
 include_once("common-dir.php");
 include_once("common-parm.php");
 include_once("common-repo.php");
+include_once("common-license.php");
 
 ?>
