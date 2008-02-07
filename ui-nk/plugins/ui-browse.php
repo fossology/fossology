@@ -119,20 +119,14 @@ class ui_browse extends Plugin
 
       /* Display item */
       $V .= "<td>";
-      if (!empty($Link)) /* if it's a directory */
-	{
-	$V .= "<a href='$Link'><b>$Name";
-	if (Isdir($Row['ufile_mode'])) { $V .= "/"; }
-	$V .= "</b></a>\n";
-	}
-      else
-	{
-	$V .= "$Name\n";
-	}
+      if (Iscontainer($Row['ufile_mode'])) { $V .= "<b>"; }
+      if (!empty($Link)) { $V .= "<a href='$Link'>"; }
+      $V .= $Name;
+      if (Isdir($Row['ufile_mode'])) { $V .= "/"; }
+      if (!empty($Link)) { $V .= "</a>"; }
+      if (Iscontainer($Row['ufile_mode'])) { $V .= "</b>"; }
       $V .= "</td>\n";
       $V .= "<td>";
-      // if (!empty($Link)) { $V .= "[<a href='$Link'>Traverse</a>] "; }
-      // $V .= "</td><td>";
       if (!empty($ModView) && !empty($View)) { $V .= "[<a href='$View'>View</a>] "; }
       $V .= "</td><td>";
       if (!empty($ModView) && !empty($Meta)) { $V .= "[<a href='$Meta'>Meta</a>] "; }
