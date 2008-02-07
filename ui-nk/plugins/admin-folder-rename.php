@@ -24,21 +24,21 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class folder_rename extends Plugin
+class folder_properties extends Plugin
   {
   var $Type=PLUGIN_UI;
-  var $Name="folder_rename";
+  var $Name="folder_properties";
   var $Version="1.0";
-  var $MenuList="Admin::Folder::Rename";
+  var $MenuList="Organize::Folder::Edit Properties";
   var $Dependency=array("db");
 
   /*********************************************
-   Rename(): Given a folder's ID and a name, rename
-   the folder!  Includes idiot checking since the
-   input comes from stdin.
-   Returns: 1 if renamed, 0 if failed.
+   Edit(): Given a folder's ID and a name, alter
+   the folder properties.
+   Includes idiot checking since the input comes from stdin.
+   Returns: 1 if changed, 0 if failed.
    *********************************************/
-  function Rename($FolderId,$NewName)
+  function Edit($FolderId,$NewName)
     {
     global $Plugins;
     $DB = &$Plugins[plugin_find_id("db")];
@@ -59,7 +59,7 @@ class folder_rename extends Plugin
     $Sql = "UPDATE folder SET folder_name = '" . $NewName . "' WHERE folder_pk = '$FolderId';";
     $Results = $DB->Action($Sql);
     return(1);
-    } // Rename()
+    } // Edit()
 
   /*********************************************
    Output(): Generate the text for this plugin.
@@ -73,14 +73,14 @@ class folder_rename extends Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<H1>Rename Folder</H1>\n";
+	$V .= "<H1>Edit Folder Properties</H1>\n";
 
 	/* If this is a POST, then process the request. */
 	$OldFolderId = GetParm('oldfolderid',PARM_INTEGER);
 	$NewName = GetParm('newname',PARM_TEXT);
 	if (!empty($OldFolderId) && !empty($NewName))
 	  {
-	  $rc = $this->Rename($OldFolderId,$NewName);
+	  $rc = $this->Edit($OldFolderId,$NewName);
 	  if ($rc==1)
 	    {
 	    /* Need to refresh the screen */
@@ -95,14 +95,14 @@ class folder_rename extends Plugin
 	/* Display the form */
 	$V .= "<form method='post'>\n"; // no url = this url
 	$V .= "<ol>\n";
-	$V .= "<li>Select the folder to rename:  \n";
+	$V .= "<li>Select the folder to edit:  \n";
 	$V .= "<select name='oldfolderid'>\n";
 	$V .= FolderListOption(-1,0);
 	$V .= "</select><P />\n";
 	$V .= "<li>Enter the new name:  \n";
 	$V .= "<INPUT type='text' name='newname' size=40 />\n";
 	$V .= "</ol>\n";
-	$V .= "<input type='submit' value='Rename!'>\n";
+	$V .= "<input type='submit' value='Edit!'>\n";
 	$V .= "</form>\n";
 	break;
       case "Text":
@@ -116,6 +116,6 @@ class folder_rename extends Plugin
     }
 
   };
-$NewPlugin = new folder_rename;
+$NewPlugin = new folder_properties;
 $NewPlugin->Initialize();
 ?>
