@@ -28,6 +28,10 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+global $DATADIR, $PROJECT, $WEBDIR;
+
+require_once("$WEBDIR/db_postgres.h.php");
+
 class folder_create extends Plugin
   {
   var $Type=PLUGIN_UI;
@@ -45,14 +49,12 @@ class folder_create extends Plugin
   function Create($ParentId, $NewFolder, $Desc)
     {
     global $Plugins;
-    global $_pg_conn;
+    global $_pg_conn, $DATADIR, $PROJECT, $WEBDIR;
     
     // Needed for the Action method
     $DB = &$Plugins[plugin_find_id("db")];
-    // below is needed for the createfolder call, and something wrong with
-    // require on pathinclude... don't see $DATADIR or $PROJECT  
-    $path = "/usr/local/share/fossology/dbconnect/fossology";
-    //$path = "{$DATADIR}/dbconnect/{$PROJECT}";
+    // below is needed for the createfolder call
+    $path = "{$DATADIR}/dbconnect/{$PROJECT}";
     db_init($path);
     if (!$_pg_conn) {
       echo "<pre>ERROR: could not connect to DateBase\n</pre>";
@@ -73,11 +75,14 @@ class folder_create extends Plugin
     $Row = $Results[0];
     if ($Row['name'] == $NewFolder) { return(0); }
 
-    /* Create the folder */
-    /** Block SQL injection by protecting single quotes **/
+    /* Create the folder 
+     ** Block SQL injection by protecting single quotes 
+     *
+     * Protect the folder name with htmlentities.
+     */
     $NewFolder = str_replace("'", "''", $NewFolder);  // PostgreSQL quoting
-    // TODO: sanitize description as well...
-    
+    $NewFolder = htmlentities($NewFolder);            // for a clean display
+    $Desc = str_replace("'", "''", $Desc);            // PostgreSQL quoting
     $fc_pk = createfolder($ParentId, $NewFolder, $Desc);
     if (!isset($fc_pk)) {
       return(0);
@@ -118,7 +123,6 @@ class folder_create extends Plugin
 	    $V .= "</script>\n";
 	    }
 	  }
-
 	/* Display the form */
 	$V .= "<form method='post'>\n"; // no url = this url
 	$V .= "<ol>\n";
@@ -143,7 +147,6 @@ class folder_create extends Plugin
     print("$V");
     return;
     }
-
   };
 $NewPlugin = new folder_create;
 $NewPlugin->Initialize();
