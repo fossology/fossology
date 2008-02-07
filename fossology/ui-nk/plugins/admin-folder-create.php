@@ -110,7 +110,7 @@ class folder_create extends Plugin
 	$ParentId = GetParm('parentid',PARM_INTEGER);
 	$NewFolder = GetParm('newname',PARM_TEXT);
 	$Desc = GetParm('description',PARM_TEXT);
-	if (!empty($ParentId) && !empty($NewFolder) && !empty($Desc))
+	if (!empty($ParentId) && !empty($NewFolder))
 	  {
 	  $rc = $this->Create($ParentId, $NewFolder, $Desc);
 	  if ($rc==1)
