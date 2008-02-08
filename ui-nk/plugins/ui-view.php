@@ -32,14 +32,57 @@ class ui_view extends Plugin
   var $Dependency=array("db","browse");
 
   /***********************************************************
+   GetFileJumpMenu(): Given a file handle and current page,
+   generate the "Next" and "Prev" menu options.
+   Returns String.
+   ***********************************************************/
+  function GetFileJumpMenu($Fin,$CurrPage,$PageSize,$Uri)
+    {
+    if (!$Fin) return;
+    $Stat = fstat($Fin);
+    $MaxSize = $Stat['size'];
+    $V = "<font class='text'>";
+    $CurrSize = $CurrPage * $PageSize;
+
+    if ($CurrPage * $PageSize >= $MaxSize) { $CurrPage = 0; }
+    if ($CurrPage < 0) { $CurrPage = 0; }
+
+    if (($CurrPage-1) * $PageSize >= 0)
+	{
+	$V .= "<a href='$Uri&page=" . ($CurrPage-1) . "'>Prev</a> ";
+	}
+    for($i = $CurrPage-5; $i <= $CurrPage+5; $i ++)
+      {
+      if ($i == $CurrPage)
+	{
+	$V .= "<b>" . ($i+1) . "</b> ";
+	}
+      else if (($i * $PageSize >= 0) && ($i * $PageSize < $MaxSize))
+	{
+	$V .= "<a href='$Uri&page=$i'>" . ($i+1) . "</a> ";
+	}
+      }
+    if (($CurrPage+1) * $PageSize < $MaxSize)
+	{
+	$V .= "<a href='$Uri&page=" . ($CurrPage+1) . "'>Next</a>";
+	}
+    $V .= "</font>";
+    return($V);
+    }
+
+  /***********************************************************
    ShowFlowedText(): Given a pfile_pk, display the text file as HTML.
    Output goes to stdout!
    ***********************************************************/
-  function ShowFlowedText($Pfile)
+  function ShowFlowedText($Fin,$Start=0,$FullLength=-1)
     {
-    $Filename = RepPath($Pfile);
-    $Fin = fopen($Filename,"rb");
     if (!$Fin) return;
+    $Stat = fstat($Fin);
+    if ($FullLength < 0) { $FullLength = $Stat['size']; }
+    if (($Start < 0) || ($Start >= $Stat['size'])) { return; }
+    fseek($Fin,$Start,SEEK_SET);
+    $Length = $FullLength;
+    fseek($Fin,$Start,SEEK_SET);
 
     /* Performance note:
        Ideally, tables should be used for aligning columns.
@@ -48,9 +91,11 @@ class ui_view extends Plugin
 
     /* Process the file */
     print "<div class='text'>";
-    $S = fread($Fin,1024);
-    while(strlen($S) > 0)
+    $MadeOutput=0;
+    if ($Length > 0) { $S = fread($Fin,min(1024,$Length)); }
+    while((strlen($S) > 0) && ($Length > 0))
       {
+      $Length -= strlen($S);
       $S = preg_replace('/[^[:print:][:space:]]+/'," ",$S);
       $S = htmlentities($S);
       $S = str_replace("\r\n","<br>\n",$S);
@@ -58,22 +103,30 @@ class ui_view extends Plugin
       $S = str_replace("\r","<br>\n",$S);
       $S = str_replace("\t","&nbsp;&nbsp;",$S);
       print $S;
-      $S = fread($Fin,1024);
+      if (strlen(trim($S)) > 0) { $MadeOutput=1; }
+      if ($Length > 0) { $S = fread($Fin,min(1024,$Length)); }
       }
+    if (!$MadeOutput)
+	{
+	print "<b>" . number_format($FullLength,0,"",",") . " bytes non-printable</b>\n";
+	}
     print "</div>\n";
 
     fclose($Fin);
     } // ShowFlowedText()
 
   /***********************************************************
-   ShowText(): Given a pfile_pk, display "strings" of the file.
+   ShowText(): Given a file handle, display "strings" of the file.
    Output goes to stdout!
    ***********************************************************/
-  function ShowText($Pfile)
+  function ShowText($Fin,$Start=0,$FullLength=-1)
     {
-    $Filename = RepPath($Pfile);
-    $Fin = fopen($Filename,"rb");
     if (!$Fin) return;
+    $Stat = fstat($Fin);
+    if ($FullLength < 0) { $FullLength = $Stat['size']; }
+    if (($Start < 0) || ($Start >= $Stat['size'])) { return; }
+    fseek($Fin,$Start,SEEK_SET);
+    $Length = $FullLength;
 
     /* Performance note:
        Ideally, tables should be used for aligning columns.
@@ -83,29 +136,39 @@ class ui_view extends Plugin
     /* Process the file */
     print "<div class='mono'>";
     print "<pre>";
-    $S = fread($Fin,1024);
-    while(strlen($S) > 0)
+    $MadeOutput=0;
+    if ($Length > 0) { $S = fread($Fin,min(1024,$Length)); }
+    while((strlen($S) > 0) && ($Length > 0))
       {
+      $Length -= strlen($S);
       $S = preg_replace('/[^[:print:][:space:]]+/'," ",$S);
       $S = htmlentities($S);
       print $S;
-      $S = fread($Fin,1024);
+      if (strlen(trim($S)) > 0) { $MadeOutput=1; }
+      if ($Length > 0) { $S = fread($Fin,min(1024,$Length)); }
       }
     print "</pre>";
+    if (!$MadeOutput)
+	{
+	print "<b>" . number_format($FullLength,0,"",",") . " bytes non-printable</b>\n";
+	}
     print "</div>\n";
 
     fclose($Fin);
     } // ShowText()
 
   /***********************************************************
-   ShowHex(): Given a pfile_pk, display a "hex dump" of the file.
+   ShowHex(): Given a file handle, display a "hex dump" of the file.
    Output goes to stdout!
    ***********************************************************/
-  function ShowHex($Pfile)
+  function ShowHex($Fin,$Start=0,$Length=-1)
     {
-    $Filename = RepPath($Pfile);
-    $Fin = fopen($Filename,"rb");
     if (!$Fin) return;
+    $Stat = fstat($Fin);
+    if ($Length < 0) { $Length = $Stat['size']; }
+    if (($Start < 0) || ($Start >= $Stat['size'])) { return; }
+    fseek($Fin,$Start,SEEK_SET);
+    fseek($Fin,$Start,SEEK_SET);
 
     /* Performance note:
        Ideally, tables should be used for aligning columns.
@@ -114,9 +177,19 @@ class ui_view extends Plugin
 
     /* Process the file */
     print "<div class='mono'>";
-    $S = fread($Fin,16);
-    while(strlen($S) > 0)
+    $Tell = ftell($Fin);
+    $S = fread($Fin,min(16,$Length));
+    if ($Length > 0) { $S = fread($Fin,min(16,$Length)); }
+    while((strlen($S) > 0) && ($Length > 0))
       {
+      $Length -= strlen($S);
+      /* show file location */
+      $B = base_convert($Tell,10,16);
+      print "0x";
+      for($i=strlen($B); $i<8; $i++) { print("0"); }
+      print "$B&nbsp;";
+      $Tell = ftell($Fin);
+
       /* Convert to hex */
       $Hex = bin2hex($S);
       /** Make sure it is always 32 characters (16 bytes) **/
@@ -130,7 +203,7 @@ class ui_view extends Plugin
       $S = htmlentities($S);
       $S = preg_replace("/[[:space:]]/",'&nbsp;',$S);
       print "|$S|<br>\n";
-      $S = fread($Fin,16);
+      if ($Length > 0) { $S = fread($Fin,min(16,$Length)); }
       }
     print "</div>\n";
 
@@ -158,8 +231,10 @@ class ui_view extends Plugin
     $Folder = GetParm("folder",PARM_INTEGER);
     $Show = GetParm("show",PARM_STRING);
     $Item = GetParm("item",PARM_INTEGER);
+    $Page = GetParm("page",PARM_INTEGER);
     if (empty($Item) || empty($Pfile) || empty($Ufile) || empty($Upload))
 	{ return; }
+    if (empty($Page)) { $Page=0; };
 
     switch(GetParm("format",PARM_STRING))
 	{
@@ -244,9 +319,37 @@ class ui_view extends Plugin
 	if ($this->OutputToStdout)
 	  {
 	  print $V;
-	  if ($Format == 'text') { $V = $this->ShowText($Pfile); }
-	  else if ($Format == 'hex') { $V = $this->ShowHex($Pfile); }
-	  else if ($Format == 'flow') { $V = $this->ShowFlowedText($Pfile); }
+	  $Filename = RepPath($Pfile);
+	  $Fin = fopen($Filename,"rb");
+	  $Pages = "";
+	  $Uri = preg_replace('/&page=[0-9]*/','',Traceback());
+	  if ($Format == 'hex')
+	    {
+	    $PageBlock = 8192;
+	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,$PageBlock,$Uri);
+	    $PageSize = $PageBlock * $Page;
+	    print "<center>$PageMenu</center><br>\n";
+	    $this->ShowHex($Fin,$PageSize,4096);
+	    print "<P /><center>$PageMenu</center>\n";
+	    }
+	  else if ($Format == 'text')
+	    {
+	    $PageBlock = 100000;
+	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,$PageBlock,$Uri);
+	    $PageSize = $PageBlock * $Page;
+	    print "<center>$PageMenu</center><br>\n";
+	    $this->ShowText($Fin,$PageSize,$PageBlock);
+	    print "<P /><center>$PageMenu</center>\n";
+	    }
+	  else if ($Format == 'flow')
+	    {
+	    $PageBlock = 100000;
+	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,$PageBlock,$Uri);
+	    $PageSize = $PageBlock * $Page;
+	    print "<center>$PageMenu</center><br>\n";
+	    $this->ShowFlowedText($Fin,$PageSize,$PageBlock);
+	    print "<P /><center>$PageMenu</center>\n";
+	    }
 	  }
 	break;
       case "Text":
