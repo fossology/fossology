@@ -114,7 +114,7 @@ class folder_properties extends Plugin
         
         $V .= "<p>The folder properties that can be changed are the folder name and
 			 description.  First select the folder to edit. Then enter the new values.
-			 If no value is entered the corresponding field will not be changed.</p>";
+			 If no value is entered, then the corresponding field will not be changed.</p>";
          
         /* Display the form */
         $V .= "<form method='post'>\n"; // no url = this url
@@ -123,10 +123,10 @@ class folder_properties extends Plugin
         $V .= "<select name='oldfolderid'>\n";
         $V .= FolderListOption(-1,0);
         $V .= "</select><P />\n";
-        $V .= "<li>Folder name:  \n";
+        $V .= "<li>Change folder name:  \n";
         $V .= "<INPUT type='text' name='newname' size=40 />\n";
-        $V .= "<P /><li>Folder description:  \n";
-        $V .= "<INPUT type='text' name='newdesc' size=80 />\n";
+        $V .= "<P /><li>Change folder description:  \n";
+        $V .= "<INPUT type='text' name='newdesc' size=60 />\n";
         $V .= "</ol>\n";
         $V .= "<input type='submit' value='Edit!'>\n";
         $V .= "</form>\n";
