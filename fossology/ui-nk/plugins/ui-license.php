@@ -73,6 +73,7 @@ class ui_license extends Plugin
 
     /* Arrays for storying item->license and license->item mappings */
     $LicGID2Item = array();
+    $LicItem2GID = array();
 
     /****************************************/
     /* Get the items under this UploadtreePk */
@@ -118,6 +119,7 @@ class ui_license extends Plugin
 		{
 		$GID = $LicPk2GID[$Key];
 		$LicGID2Item[$GID] .= "$ChildCount ";
+		$LicItem2GID[$ChildCount] .= "$GID ";
 		}
 	else { $GID = $Key; }
 	if (empty($LicsTotal[$GID])) { $LicsTotal[$GID] = $Val; }
@@ -129,14 +131,24 @@ class ui_license extends Plugin
       $VF .= '<tr><td id="Lic-' . $ChildCount . '" align="left">';
       if ($LicCount > 0)
 	{
-	$VF .= "<a href='$LicUri'>";
-	if ($IsContainer) { $VF .= "<b>"; };
+	if ($IsContainer)
+	  {
+	  $VF .= "<a href='$LicUri'>";
+	  $VF .= "<b>";
+	  }
+	else
+	  {
+	  $VF .= "<a href='$LinkUri'>";
+	  }
 	$VF .= $C['ufile_name'];
 	if ($IsDir) { $VF .= "/"; };
 	if ($IsContainer) { $VF .= "<b>"; };
 	$VF .= "</a>";
-	$VF .= "</td><td>[" . number_format($LicCount,0,"",",");
-	$VF .= " license" . ($LicCount == 1 ? "" : "s") . "]</td>";
+	$VF .= "</td><td>[" . number_format($LicCount,0,"",",") . " ";
+	$VF .= "<a href='javascript:;' onclick=\"LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen')\">";
+	$VF .= "license" . ($LicCount == 1 ? "" : "s");
+	$VF .= "</a>";
+	$VF .= "]</td>";
 	}
       else
 	{
@@ -163,7 +175,7 @@ class ui_license extends Plugin
 	{
 	$VH .= "<tr><td align='right'>$Val</td>";
 	$VH .= "<td id='LicGroup-$Key'>";
-	$VH .= "<a href='javascript:;' onclick=\"LicColor('LicGroup-$Key','Lic-','" . trim($LicGID2Item[$Key]) . "')\">";
+	$VH .= "<a href='javascript:;' onclick=\"LicColor('LicGroup-$Key','Lic-','" . trim($LicGID2Item[$Key]) . "','yellow')\">";
 	$VH .= $LicGID2Name[$Key];
 	$VH .= "</a>";
 	$VH .= "</td></tr>\n";
@@ -176,21 +188,29 @@ class ui_license extends Plugin
     $VJ = ""; // return values for the javascript
     $VJ .= "<script language='javascript'>\n";
     $VJ .= "<!--\n";
-    $VJ .= "var LastLicGroup='';\n";
-    $VJ .= "function LicColor(Self,Prefix,Listing)\n";
+    $VJ .= "var LastSelf='';\n";
+    $VJ .= "var LastPrefix='';\n";
+    $VJ .= "var LastListing='';\n";
+    $VJ .= "function LicColor(Self,Prefix,Listing,color)\n";
     $VJ .= "{\n";
-    $VJ .= "if (LastLicGroup!='')\n";
-    $VJ .= "  { document.getElementById(LastLicGroup).style.backgroundColor='white'; }\n";
-    $VJ .= "document.getElementById(Self).style.backgroundColor='yellow';\n";
-    $VJ .= "LastLicGroup = Self;\n";
-    $VJ .= "for(var i=0; i < $ChildCount; i++)\n";
+    $VJ .= "if (LastSelf!='')\n";
+    $VJ .= "  { document.getElementById(LastSelf).style.backgroundColor='white'; }\n";
+    $VJ .= "LastSelf = Self;\n";
+    $VJ .= "if (LastPrefix!='')\n";
     $VJ .= "  {\n";
-    $VJ .= "  document.getElementById(Prefix + i).style.backgroundColor='white';\n";
+    $VJ .= "  List = LastListing.split(' ');\n";
+    $VJ .= "  for(var i in List)\n";
+    $VJ .= "    {\n";
+    $VJ .= "    document.getElementById(LastPrefix + List[i]).style.backgroundColor='white';\n";
+    $VJ .= "    }\n";
     $VJ .= "  }\n";
+    $VJ .= "LastPrefix = Prefix;\n";
+    $VJ .= "LastListing = Listing;\n";
+    $VJ .= "document.getElementById(Self).style.backgroundColor=color;\n";
     $VJ .= "List = Listing.split(' ');\n";
     $VJ .= "for(var i in List)\n";
     $VJ .= "  {\n";
-    $VJ .= "  document.getElementById(Prefix + List[i]).style.backgroundColor='yellow';\n";
+    $VJ .= "  document.getElementById(Prefix + List[i]).style.backgroundColor=color;\n";
     $VJ .= "  }\n";
     $VJ .= "}\n";
     $VJ .= "// -->\n";
@@ -198,10 +218,10 @@ class ui_license extends Plugin
 
     /* Combine VF and VH */
     $V .= "<table border=0 width='100%'>\n";
-    $V .= "<tr><td valign='top'>$VH</td><td valign='top'>$VF</td></tr>\n";
+    $V .= "<tr><td valign='top' width='50%'>$VH</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n<hr />\n";
     $Time = time() - $Time;
-    $V .= "<br>Elaspsed time: $Time seconds<br>\n";
+    $V .= "<small>Elaspsed time: $Time seconds</small>\n";
     $V .= $VJ;
     return($V);
     } // ShowUploadHist()
