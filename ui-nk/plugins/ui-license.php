@@ -52,6 +52,8 @@ class ui_license extends Plugin
     global $Plugins;
     global $DB;
     $Time = time();
+    $LicsTotal = array(); // total license summary for this directory
+    $Lics = array(); // license summary for an item in the directory
 
     /****************************************/
     /* Load licenses */
@@ -77,23 +79,52 @@ class ui_license extends Plugin
     $Children = DirGetList($Upload,$Item);
     $ChildCount=0;
     $VF .= "<table border=0>";
-/*** TBD: Need to colorize based on licenses (populate LicGID2Item) with value from LicenseGet/LicenseGetAll.  LicGID2Item[$GID] .= "$Key:" ****/
+    $LicsTotal = array();
     foreach($Children as $C)
       {
       /* Store the item information */
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
-      $Lics['Total'] = 0;
+
+      /* Load licenses for the item */
+      $Lics = array();
       if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics); }
       else { LicenseGet($C['pfile_fk'],$Lics); }
+
+      /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']))
 	{
-	$LicUri = "$Uri&item=$Item&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
+	$LinkUri = "$Uri&item=$Item&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
 	}
       else
 	{
-	$LicUri = "$Uri&item=" . $C['uploadtree_pk'];
+	$LinkUri = NULL;
 	}
+
+      if (Iscontainer($C['ufile_mode']))
+	{
+	$LicUri = "$Uri&item=" . DirGetNonArtifact($C['uploadtree_pk']);
+	}
+      else
+	{
+	$LicUri = NULL;
+	}
+
+      /* Save the license results (also converts values to GID) */
+      foreach($Lics as $Key => $Val)
+	{
+	if (empty($Key)) { continue; }
+	if (is_int($Key))
+		{
+		$GID = $LicPk2GID[$Key];
+		$LicGID2Item[$GID] .= "$ChildCount ";
+		}
+	else { $GID = $Key; }
+	if (empty($LicsTotal[$GID])) { $LicsTotal[$GID] = $Val; }
+	else { $LicsTotal[$GID] += $Val; }
+	}
+
+      /* Populate the output ($VF) */
       $LicCount = $Lics['Total'];
       $VF .= '<tr><td id="Lic-' . $ChildCount . '" align="left">';
       if ($LicCount > 0)
@@ -116,36 +147,23 @@ class ui_license extends Plugin
 	$VF .= "</td><td></td>";
 	}
       $VF .= "</tr>\n";
+
       $ChildCount++;
       }
     $VF .= "</table>\n";
-
-    /* Convert lics to licenses */
-    foreach($Lics as $Key => $Val)
-      {
-      if (!is_int($Key)) { continue; }
-      $LicGID = $LicPk2GID[$Key];
-      if ($LicGID != $Key)
-	{
-	if (empty($Lics[$LicGID])) $Lics[$LicGID] = $Val;
-	else { $Lics[$LicGID] += $Val; }
-	$Lics[$Key] = NULL;
-	}
-      }
 
     /****************************************/
     /* List the licenses */
     $VH .= "<table border=1 width='100%'>\n";
     $VH .= "<tr><th width='10%'>Count</th><th>License</th>\n\n";
-    arsort($Lics);
-    foreach($Lics as $Key => $Val)
+    arsort($LicsTotal);
+    foreach($LicsTotal as $Key => $Val)
       {
-      $Key = $LicPk2GID[$Key];
-      if (!empty($Key) && !empty($Val))
+      if (is_int($Key))
 	{
 	$VH .= "<tr><td align='right'>$Val</td>";
-	$VH .= "<td>";
-	$VH .= "<a href='javascript:;' onclick=\"LicColor('Lic-','" . $LicGID2Item[$Key] . "')\">";
+	$VH .= "<td id='LicGroup-$Key'>";
+	$VH .= "<a href='javascript:;' onclick=\"LicColor('LicGroup-$Key','Lic-','" . trim($LicGID2Item[$Key]) . "')\">";
 	$VH .= $LicGID2Name[$Key];
 	$VH .= "</a>";
 	$VH .= "</td></tr>\n";
@@ -158,13 +176,18 @@ class ui_license extends Plugin
     $VJ = ""; // return values for the javascript
     $VJ .= "<script language='javascript'>\n";
     $VJ .= "<!--\n";
-    $VJ .= "function LicColor(Prefix,Listing)\n";
+    $VJ .= "var LastLicGroup='';\n";
+    $VJ .= "function LicColor(Self,Prefix,Listing)\n";
     $VJ .= "{\n";
+    $VJ .= "if (LastLicGroup!='')\n";
+    $VJ .= "  { document.getElementById(LastLicGroup).style.backgroundColor='white'; }\n";
+    $VJ .= "document.getElementById(Self).style.backgroundColor='yellow';\n";
+    $VJ .= "LastLicGroup = Self;\n";
     $VJ .= "for(var i=0; i < $ChildCount; i++)\n";
     $VJ .= "  {\n";
     $VJ .= "  document.getElementById(Prefix + i).style.backgroundColor='white';\n";
     $VJ .= "  }\n";
-    $VJ .= "List = Listing.split(':');\n";
+    $VJ .= "List = Listing.split(' ');\n";
     $VJ .= "for(var i in List)\n";
     $VJ .= "  {\n";
     $VJ .= "  document.getElementById(Prefix + List[i]).style.backgroundColor='yellow';\n";
