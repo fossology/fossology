@@ -144,7 +144,7 @@ class ui_license extends Plugin
 	if ($IsDir) { $VF .= "/"; };
 	if ($IsContainer) { $VF .= "<b>"; };
 	$VF .= "</a>";
-	$VF .= "</td><td>[" . number_format($LicCount,0,"",",") . " ";
+	$VF .= "</td><td>[" . number_format($LicCount,0,"",",") . "&nbsp;";
 	$VF .= "<a href='javascript:;' onclick=\"LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen')\">";
 	$VF .= "license" . ($LicCount == 1 ? "" : "s");
 	$VF .= "</a>";

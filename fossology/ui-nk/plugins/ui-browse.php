@@ -132,7 +132,9 @@ class ui_browse extends Plugin
       if (!empty($ModView) && !empty($Meta)) { $V .= "[<a href='$Meta'>Meta</a>] "; }
       $V .= "</td><td>";
       if (!empty($ModDownload) && !empty($Download)) { $V .= "[<a href='$Download'>Download</a>] "; }
+
 if (0) {
+      /* Code disabled due to speed on really large files */
       $V .= "</td><td>";
       if (!empty($ModLicense) && !empty($Row['pfile_fk']))
 	{
@@ -140,10 +142,11 @@ if (0) {
 	$i = count($Lic);
 	if ($i > 0)
 	  {
-	  $V .= "[<a href='$License'>$i license" . ($i == 1 ? "" : "s") . "</a>] ";
+	  $V .= "[<a href='$License'>$i&nbsp;license" . ($i == 1 ? "" : "s") . "</a>] ";
 	  }
 	}
 }
+
       $V .= "</td>";
       } /* foreach($Results as $Row) */
 
