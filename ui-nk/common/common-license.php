@@ -29,7 +29,7 @@ if (!isset($GlobalReady)) { exit; }
  Can return empty array if there is no license.
  ************************************************************/
 $LicenseGet_Prepared=0;
-function LicenseGet($PfilePk, &$Lics)
+function LicenseGet(&$PfilePk, &$Lics)
 {
   global $LicenseGet_Prepared;
   global $DB;
@@ -61,7 +61,7 @@ function LicenseGet($PfilePk, &$Lics)
  NOTE: This is recursive!
  ************************************************************/
 $LicenseGetAll_Prepared=0;
-function LicenseGetAll($UploadtreePk, &$Lics)
+function LicenseGetAll(&$UploadtreePk, &$Lics)
 {
   global $Plugins;
   global $DB;
@@ -71,7 +71,7 @@ function LicenseGetAll($UploadtreePk, &$Lics)
   global $LicenseGetAll_Prepared;
   if (!$LicenseGetAll_Prepared)
     {
-    $DB->Prepare("LicenseGetAll",'SELECT uploadtree_pk,ufile_mode,pfile_fk FROM uploadtree INNER JOIN ufile ON ufile_fk = ufile_pk WHERE parent = $1;');
+    $DB->Prepare("LicenseGetAll",'SELECT uploadtree_pk,ufile_mode,ufile.pfile_fk,lic_fk FROM uploadtree INNER JOIN ufile ON ufile_fk = ufile_pk AND parent = $1 LEFT OUTER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk;');
     $LicenseGetAll_Prepared = 1;
     }
   /* Find every item under this UploadtreePk... */
@@ -80,9 +80,12 @@ function LicenseGetAll($UploadtreePk, &$Lics)
     {
     foreach($Results as $R)
       {
-      if (!empty($R['pfile_fk']))
+      $LicFk = $R['lic_fk'];
+      if (!empty($LicFk))
 	{
-	LicenseGet($R['pfile_fk'],$Lics);
+	if (empty($Lics[$LicFk])) { $Lics[$LicFk]=1; }
+	else { $Lics[$LicFk]++; }
+	$Lics['Total']++;
 	}
       if (Iscontainer($R['ufile_mode']))
 	{
