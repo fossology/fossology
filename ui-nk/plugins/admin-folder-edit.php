@@ -53,7 +53,7 @@ class folder_properties extends Plugin
     if ($Row['folder_name'] == $NewName) { return(0); } // don't rename the same thing
     // Make sure the user didn't just leave the root folder selected
     if ($FolderId == FolderGetTop()){
-      echo '<span style="color: #CC0000"<p><strong>Please Selcect the Folder to Operate on</strong></p></span>';
+      echo '<span style="color: #CC0000; font-size:larger;"<p><strong>Please Selcect the Folder to Operate on</strong></p></span>';
       return(0);
     }
      
