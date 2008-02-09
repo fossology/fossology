@@ -32,8 +32,9 @@ class folder_create extends Plugin
   {
   var $Type=PLUGIN_UI;
   var $Name="folder_create";
+  public $Title = "Create a new Fossology folder";
   var $Version="1.0";
-  var $MenuList="Organize::Folder::Create";
+  var $MenuList="Organize::Folders::Create";
   var $Dependency=array("db");
 
   /*********************************************
@@ -100,7 +101,7 @@ class folder_create extends Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<H1>Create Folder</H1>\n";
+	$V .= "<H1>$this->Title</H1>\n";
 	/* If this is a POST, then process the request. */
 	$ParentId = GetParm('parentid',PARM_INTEGER);
 	$NewFolder = GetParm('newname',PARM_TEXT);
