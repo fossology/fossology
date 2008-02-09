@@ -33,7 +33,7 @@ class folder_properties extends Plugin
   var $Type=PLUGIN_UI;
   var $Name="folder_properties";
   var $Version="1.0";
-  var $MenuList="Organize::Folder::Edit Properties";
+  var $MenuList="Organize::Folders::Edit Properties";
   var $Dependency=array("db");
 
   /*********************************************
