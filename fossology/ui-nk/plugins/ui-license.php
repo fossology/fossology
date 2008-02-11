@@ -54,6 +54,7 @@ class ui_license extends Plugin
     $Time = time();
     $LicsTotal = array(); // total license summary for this directory
     $Lics = array(); // license summary for an item in the directory
+    $ModLicView = &$Plugins[plugin_find_id("view-license")];
 
     /****************************************/
     /* Load licenses */
@@ -93,9 +94,10 @@ class ui_license extends Plugin
       else { LicenseGet($C['pfile_fk'],$Lics); }
 
       /* Determine the hyperlinks */
-      if (!empty($C['pfile_fk']))
+      if (!empty($C['pfile_fk']) && !empty($ModLicView))
 	{
 	$LinkUri = "$Uri&item=$Item&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
+	$LinkUri = preg_replace("/mod=license/","mod=view-license",$LinkUri);
 	}
       else
 	{
@@ -131,19 +133,22 @@ class ui_license extends Plugin
       $VF .= '<tr><td id="Lic-' . $ChildCount . '" align="left">';
       if ($LicCount > 0)
 	{
+	$HasHref=0;
 	if ($IsContainer)
 	  {
 	  $VF .= "<a href='$LicUri'>";
 	  $VF .= "<b>";
+	  $HasHref=1;
 	  }
-	else
+	else if (!empty($LinkUri))
 	  {
 	  $VF .= "<a href='$LinkUri'>";
+	  $HasHref=1;
 	  }
 	$VF .= $C['ufile_name'];
 	if ($IsDir) { $VF .= "/"; };
 	if ($IsContainer) { $VF .= "<b>"; };
-	$VF .= "</a>";
+	if ($HasHref) { $VF .= "</a>"; }
 	$VF .= "</td><td>[" . number_format($LicCount,0,"",",") . "&nbsp;";
 	$VF .= "<a href='javascript:;' onclick=\"LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen')\">";
 	$VF .= "license" . ($LicCount == 1 ? "" : "s");

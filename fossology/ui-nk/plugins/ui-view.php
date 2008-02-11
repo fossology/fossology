@@ -89,7 +89,7 @@ class ui_view extends Plugin
     $H['RefURI'] = $RefURI;
     $H['Name'] = htmlentities($Name);
     if (intval($Index) != -1) { $H['Index'] = intval($Index); }
-    else { $H['Index'] = count($Highlight)+1; }
+    else { $H['Index'] = count($this->Highlight)+1; }
     if (empty($this->Highlight)) { $this->Highlight = array($H); }
     else { array_push($this->Highlight,$H); }
     } // AddHighlight()
@@ -106,7 +106,6 @@ class ui_view extends Plugin
     $V .= "<th align='left'>Item</th>";
     $V .= "</tr>\n";
     $Uri = preg_replace('/&page=[0-9]*/',"",Traceback());
-// print "<pre>"; print_r($this->Highlight) ; print "</pre>";
     foreach($this->Highlight as $H)
       {
       if (!empty($H['Name']))
@@ -342,8 +341,9 @@ class ui_view extends Plugin
     $ReadCount=0;
 
     /* Begin color if it is IN but not at START of highlighting */
+    /** If it is START, then it will be added inside the loop **/
     $InColor=0;
-    if ($this->FindHighlight($Start) & 0x03 == 0x02)
+    if ($this->FindHighlight($Start) & 0x02)
 	{
 	$H = $this->Highlight[0]['Color'];
 	$Text .= "<font style='background:" . $this->HighlightColors[$H] . ";'>";
@@ -477,16 +477,12 @@ class ui_view extends Plugin
     } // ShowHex()
 
   /***********************************************************
-   Output(): This function is called when user output is
-   requested.  This function is responsible for content.
-   (OutputOpen and Output are separated so one plugin
-   can call another plugin's Output.)
-   This uses $OutputType.
-   The $ToStdout flag is "1" if output should go to stdout, and
-   0 if it should be returned as a string.  (Strings may be parsed
-   and used by other plugins.)
+   ShowView(): Generate the view contents in HTML and sends it
+   to stdout.
+   $Name is the name for this plugin.
+   This function is intended to be called from other plugins.
    ***********************************************************/
-  function Output()
+  function ShowView($Name)
     {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
@@ -535,7 +531,7 @@ class ui_view extends Plugin
     /***********************************
      Create micro menu
      ***********************************/
-    $Uri = Traceback_uri() . "?mod=" . $this->Name;
+    $Uri = Traceback_uri() . "?mod=" . $Name;
     $Opt="";
     if (!empty($Pfile)) { $Opt .= "&pfile=$Pfile"; }
     if (!empty($Ufile)) { $Opt .= "&ufile=$Ufile"; }
@@ -602,56 +598,74 @@ class ui_view extends Plugin
     /***********************************
      Display file contents
      ***********************************/
+    print $V;
+    $Filename = RepPath($Pfile);
+    $Fin = fopen($Filename,"rb");
+    $Pages = "";
+    $Uri = preg_replace('/&page=[0-9]*/','',Traceback());
+    if ($Format == 'hex')
+	{
+	$HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_HEX);
+	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
+	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_HEX,$Uri);
+	$PageSize = VIEW_BLOCK_HEX * $Page;
+	if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
+	$this->ShowHex($Fin,$PageSize,VIEW_BLOCK_HEX);
+	if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
+	}
+    else if ($Format == 'text')
+	{
+	$HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
+	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
+	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
+	$PageSize = VIEW_BLOCK_TEXT * $Page;
+	if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
+	$this->ShowText($Fin,$PageSize,0,VIEW_BLOCK_TEXT);
+	if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
+	}
+    else if ($Format == 'flow')
+	{
+	$HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
+	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
+	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
+	$PageSize = VIEW_BLOCK_TEXT * $Page;
+	if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
+	$this->ShowText($Fin,$PageSize,1,VIEW_BLOCK_TEXT);
+	if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
+	}
+    return;
+    } // ShowView()
+
+  /***********************************************************
+   Output(): This function is called when user output is
+   requested.  This function is responsible for content.
+   (OutputOpen and Output are separated so one plugin
+   can call another plugin's Output.)
+   This uses $OutputType.
+   The $ToStdout flag is "1" if output should go to stdout, and
+   0 if it should be returned as a string.  (Strings may be parsed
+   and used by other plugins.)
+   ***********************************************************/
+  function Output()
+    {
+    if ($this->State != PLUGIN_STATE_READY) { return; }
+    $V="";
     switch($this->OutputType)
       {
       case "XML":
-	break;
+        break;
       case "HTML":
-	if ($this->OutputToStdout)
-	  {
-	  print $V;
-	  $Filename = RepPath($Pfile);
-	  $Fin = fopen($Filename,"rb");
-	  $Pages = "";
-	  $Uri = preg_replace('/&page=[0-9]*/','',Traceback());
-	  if ($Format == 'hex')
-	    {
-	    $HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_HEX);
-	    if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
-	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_HEX,$Uri);
-	    $PageSize = VIEW_BLOCK_HEX * $Page;
-	    if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
-	    $this->ShowHex($Fin,$PageSize,VIEW_BLOCK_HEX);
-	    if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
-	    }
-	  else if ($Format == 'text')
-	    {
-	    $HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
-	    if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
-	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
-	    $PageSize = VIEW_BLOCK_TEXT * $Page;
-	    if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
-	    $this->ShowText($Fin,$PageSize,0,VIEW_BLOCK_TEXT);
-	    if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
-	    }
-	  else if ($Format == 'flow')
-	    {
-	    $HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
-	    if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
-	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
-	    $PageSize = VIEW_BLOCK_TEXT * $Page;
-	    if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
-	    $this->ShowText($Fin,$PageSize,1,VIEW_BLOCK_TEXT);
-	    if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
-	    }
-	  }
-	break;
+	if ($this->OutputToStdout) { $this->ShowView($this->Name); }
+        break;
       case "Text":
+        break;
       default:
-	break;
+        break;
       }
+    if (!$this->OutputToStdout) { return($V); }
+    print("$V");
     return;
-    } // Output()
+    }
 
   };
 $NewPlugin = new ui_view;
