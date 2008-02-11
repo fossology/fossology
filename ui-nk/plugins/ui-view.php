@@ -35,7 +35,7 @@ class ui_view extends Plugin
   var $Version="1.0";
   var $Dependency=array("db","browse");
 
-  var $HighlightColors = array("yellow","lightgreen","aqua","blueviolet","darkkhaki","orange","lightsteelblue","yellowgreen");
+  var $HighlightColors = array("yellow","lightgreen","aqua","mediumslateblue","darkkhaki","orange","lightsteelblue","yellowgreen");
   var $Highlight=NULL;
 
   /***********************************************************
@@ -364,7 +364,6 @@ class ui_view extends Plugin
 	for($i=$ReadCount; $i < 16; $i++)
 	  {
 	  $Hex .= "&nbsp;&nbsp;&nbsp;";
-	  $Text .= "&nbsp;";
 	  }
 	return($ReadCount);
 	}
@@ -386,7 +385,7 @@ class ui_view extends Plugin
 	  }
 
 	/* Process string */
-	$ST = preg_replace("/[^[:print:]]/",'.',$S);
+	$ST = preg_replace("/[^[:print:][:space:]]/",'.',$S);
 	$ST = htmlentities($ST);
 	$ST = preg_replace("/[[:space:]]/",'&nbsp;',$ST);
 	$Text .= $ST;
