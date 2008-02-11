@@ -24,12 +24,112 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("VIEW_BLOCK_HEX",8192);
+define("VIEW_BLOCK_TEXT",100*VIEW_BLOCK_HEX);
+define("MAXHIGHLIGHTCOLOR",8);
+
 class ui_view extends Plugin
   {
   var $Type=PLUGIN_UI;
   var $Name="view";
   var $Version="1.0";
   var $Dependency=array("db","browse");
+
+  var $HighlightColors = array("yellow","lightgreen","aqua","blueviolet","darkkhaki","orange","lightsteelblue","yellowgreen");
+  var $Highlight=NULL;
+
+  /***********************************************************
+   _cmp_highlight(): Use for sorting the highlight list.
+   ***********************************************************/
+  function _cmp_highlight($a,$b)
+    {
+    if ($a['Start'] != $b['Start'])
+	{
+	return($a['Start'] > $b['Start'] ? 1 : -1);
+	}
+    if ($a['End'] != $b['End'])
+	{
+	return($a['End'] > $b['End'] ? 1 : -1);
+	}
+    return(0);
+    } // _cmp_highlight()
+
+  /***********************************************************
+   AddHighlight(): Text can be highlighted!
+   Start, End, and Color are required.
+   If Color is -1, then uses last color.
+   If Color is -2, then uses color AFTER last color.
+   Name is only needed if you want to have it listed in the
+   top menu with a hyperlink jump.
+   Index is auto-assigned to Name, if not specified.
+   ***********************************************************/
+  function AddHighlight($ByteStart,$ByteEnd,$Color,
+			$Match=NULL,$Name=NULL,$Index=-1,$RefURL=NULL)
+    {
+    $H = array();
+    $H['Start'] = intval($ByteStart);
+    $H['End'] = intval($ByteEnd);
+    $Color = intval($Color);
+    if ($Color < 0)
+	{
+	/* Reuse last color */
+	if (empty($this->Highlight)) { $Color = 0; }
+	else if ($Color == -1)
+	  {
+	  $Color = $this->Highlight[count($this->Highlight)-1]['Color'];
+	  }
+	else // if ($Color == -2)
+	  {
+	  $Color = $this->Highlight[count($this->Highlight)-1]['Color'] + 1;
+	  }
+	}
+    $Color = $Color % MAXHIGHLIGHTCOLOR;
+    $H['Color'] = intval($Color);
+    $H['Match'] = htmlentities($Match);
+    $H['RefURI'] = $RefURI;
+    $H['Name'] = htmlentities($Name);
+    if (intval($Index) != -1) { $H['Index'] = intval($Index); }
+    else { $H['Index'] = count($Highlight)+1; }
+    if (empty($this->Highlight)) { $this->Highlight = array($H); }
+    else { array_push($this->Highlight,$H); }
+    } // AddHighlight()
+
+  /***********************************************************
+   GetHighlightMenu(): If there is a highlight menu, create it.
+   ***********************************************************/
+  function GetHighlightMenu($PageBlockSize)
+    {
+    if (empty($this->Highlight)) { return; }
+    $V = "<table>";
+    $V .= "<tr><th>Match</th>";
+    $V .= "<th></th><th></th>";
+    $V .= "<th align='left'>Item</th>";
+    $V .= "</tr>\n";
+    $Uri = preg_replace('/&page=[0-9]*/',"",Traceback());
+// print "<pre>"; print_r($this->Highlight) ; print "</pre>";
+    foreach($this->Highlight as $H)
+      {
+      if (!empty($H['Name']))
+	{
+	$V .= "<tr bgcolor='" . $this->HighlightColors[$H['Color']] . "'>\n";
+	$V .= "<td align='right'>" . $H['Match'] . "</td>\n";
+
+	$Page = intval($H['Start'] / $PageBlockSize);
+	$V .= "<td>";
+	$V .= "<a href='$Uri&page=$Page#" . $H['Index'] . "'>view</a>";
+	$V .= "</td>\n";
+
+	$V .= "<td>";
+	if (!empty($H['RefURI'])) { $V .= "<a href='" . $H['RefURI'] . "'>ref</a>"; }
+	$V .= "</td>\n";
+
+	$V .= "<td>" . $H['Name'] . "</td>\n";
+	$V .= "</tr>\n";
+	}
+      }
+    $V .= "</table>";
+    return($V);
+    } // GetHighlightMenu()
 
   /***********************************************************
    GetFileJumpMenu(): Given a file handle and current page,
@@ -44,12 +144,16 @@ class ui_view extends Plugin
     $V = "<font class='text'>";
     $CurrSize = $CurrPage * $PageSize;
 
+    $Pages=0; /* How many pages are there? */
+
     if ($CurrPage * $PageSize >= $MaxSize) { $CurrPage = 0; }
     if ($CurrPage < 0) { $CurrPage = 0; }
 
     if (($CurrPage-1) * $PageSize >= 0)
 	{
-	$V .= "<a href='$Uri&page=" . ($CurrPage-1) . "'>Prev</a> ";
+	$V .= "<a href='$Uri&page=0'>[First]</a> ";
+	$V .= "<a href='$Uri&page=" . ($CurrPage-1) . "'>[Prev]</a> ";
+	$Pages++;
 	}
     for($i = $CurrPage-5; $i <= $CurrPage+5; $i ++)
       {
@@ -64,62 +168,77 @@ class ui_view extends Plugin
       }
     if (($CurrPage+1) * $PageSize < $MaxSize)
 	{
-	$V .= "<a href='$Uri&page=" . ($CurrPage+1) . "'>Next</a>";
+	$V .= "<a href='$Uri&page=" . ($CurrPage+1) . "'>[Next]</a>";
+	$V .= "<a href='$Uri&page=" . (intval(($MaxSize-1)/$PageSize)) . "'>[Last]</a>";
+	$Pages++;
 	}
     $V .= "</font>";
+
+    /* If there is only one page, return nothing */
+    if ($Pages==0) { return; }
     return($V);
-    }
+    } // GetFileJumpMenu()
 
   /***********************************************************
-   ShowFlowedText(): Given a pfile_pk, display the text file as HTML.
-   Output goes to stdout!
+   FindHighlight(): REMOVE items from the Highlight array.
+   This shifts items off of the highlight array based on the
+   current position in the file.
+   The top of the array ($Highlight[0]) identifies the current
+   item to highlight.
+   Returns: flags
+     0 if no highlight
+     0x01 if at start
+     0x02 if highlighting
+     0x04 if at end
    ***********************************************************/
-  function ShowFlowedText($Fin,$Start=0,$FullLength=-1)
+  function FindHighlight($Pos)
     {
-    if (!$Fin) return;
-    $Stat = fstat($Fin);
-    if ($FullLength < 0) { $FullLength = $Stat['size']; }
-    if (($Start < 0) || ($Start >= $Stat['size'])) { return; }
-    fseek($Fin,$Start,SEEK_SET);
-    $Length = $FullLength;
-    fseek($Fin,$Start,SEEK_SET);
-
-    /* Performance note:
-       Ideally, tables should be used for aligning columns.
-       However, after a few thousand rows, most browsers hang.
-       Thus, use text and not tables. */
-
-    /* Process the file */
-    print "<div class='text'>";
-    $MadeOutput=0;
-    if ($Length > 0) { $S = fread($Fin,min(1024,$Length)); }
-    while((strlen($S) > 0) && ($Length > 0))
-      {
-      $Length -= strlen($S);
-      $S = preg_replace('/[^[:print:][:space:]]+/'," ",$S);
-      $S = htmlentities($S);
-      $S = str_replace("\r\n","<br>\n",$S);
-      $S = str_replace("\n","<br>\n",$S);
-      $S = str_replace("\r","<br>\n",$S);
-      $S = str_replace("\t","&nbsp;&nbsp;",$S);
-      print $S;
-      if (strlen(trim($S)) > 0) { $MadeOutput=1; }
-      if ($Length > 0) { $S = fread($Fin,min(1024,$Length)); }
-      }
-    if (!$MadeOutput)
+    while(!empty($this->Highlight) && ($Pos > $this->Highlight[0]['End']))
 	{
-	print "<b>" . number_format($FullLength,0,"",",") . " bytes non-printable</b>\n";
+	array_shift($this->Highlight);
 	}
-    print "</div>\n";
+    if (empty($this->Highlight)) { return(0); }
+    $rc=0;
+    $Start = $this->Highlight[0]['Start'];
+    $End = $this->Highlight[0]['End'];
+    if ($Pos == $Start) { $rc |= 0x01; }
+    if ($Pos == $End) { $rc |= 0x04; }
+    if (($Pos >= $Start) && ($Pos <= $End))
+	{ $rc |= 0x02; }
+    return($rc);
+    } // FindHighlight()
 
-    fclose($Fin);
-    } // ShowFlowedText()
+  /***********************************************************
+   ReadHighlight(): Given a file handle, read up to the next
+   highlight boundary (start or end).
+   Returns: String read.
+   NOTE: if strlen of return is < $MaxRead, then it hit a highlight.
+   ***********************************************************/
+  function ReadHighlight($Fin, $Pos, $MaxRead)
+    {
+    $this->FindHighlight($Pos);
+    if (empty($this->Highlight)) { $Len = $MaxRead; }
+    else
+      {
+      $Start = $this->Highlight[0]['Start'];
+      $End = $this->Highlight[0]['End'];
+      if ($Pos == $Start) { $Len = 1; }
+      else if ($Pos == $End) { $Len = 1; }
+      else if ($Pos < $Start) { $Len = min($MaxRead,$Start - $Pos); }
+      else if ($Pos < $End) { $Len = min($MaxRead,$End - $Pos); }
+      else
+	{
+	$Len=$MaxRead;
+	}
+      }
+    return(fread($Fin,$Len));
+    } // ReadHighlight()
 
   /***********************************************************
    ShowText(): Given a file handle, display "strings" of the file.
    Output goes to stdout!
    ***********************************************************/
-  function ShowText($Fin,$Start=0,$FullLength=-1)
+  function ShowText($Fin,$Start=0,$Flowed,$FullLength=-1)
     {
     if (!$Fin) return;
     $Stat = fstat($Fin);
@@ -127,6 +246,7 @@ class ui_view extends Plugin
     if (($Start < 0) || ($Start >= $Stat['size'])) { return; }
     fseek($Fin,$Start,SEEK_SET);
     $Length = $FullLength;
+    if ($Length == 0) { return; }
 
     /* Performance note:
        Ideally, tables should be used for aligning columns.
@@ -134,20 +254,72 @@ class ui_view extends Plugin
        Thus, use text and not tables. */
 
     /* Process the file */
-    print "<div class='mono'>";
-    print "<pre>";
+    if (!$Flowed) { print "<div class='mono'><pre>"; }
+    else print "<div class='text'>";
     $MadeOutput=0;
-    if ($Length > 0) { $S = fread($Fin,min(1024,$Length)); }
-    while((strlen($S) > 0) && ($Length > 0))
+    /* Begin color if it is IN but not at START of highlighting */
+    $InColor=0;
+    if ($this->FindHighlight($Start) & 0x03 == 0x02)
+	{
+	$H = $this->Highlight[0];
+	print "<font style='background:" . $this->HighlightColors[$H['Color']] . ";'>";
+	$InColor=1;
+	}
+    $S = $this->ReadHighlight($Fin,$Start,$Length);
+    $ReadCount = strlen($S);
+    while(($ReadCount > 0) && ($Length > 0))
       {
-      $Length -= strlen($S);
+      /* Massage the data and print it */
       $S = preg_replace('/[^[:print:][:space:]]+/'," ",$S);
       $S = htmlentities($S);
-      print $S;
+      if ($Flowed)
+	{
+	$S = str_replace("\r\n","<br>\n",$S);
+	$S = str_replace("\n","<br>\n",$S);
+	$S = str_replace("\r","<br>\n",$S);
+	$S = str_replace("\t","&nbsp;&nbsp;",$S);
+	}
+
+      if ($this->FindHighlight($Start) & 0x01)
+	{
+	if ($InColor) { print "</font>"; }
+	$H = $this->Highlight[0]['Color'];
+	print "<font style='background:" . $this->HighlightColors[$H] . ";'>";
+	$InColor=1;
+	if (!empty($this->Highlight[0]['Name']))
+	  {
+	  print "<a name='" . $this->Highlight[0]['Index'] . "'>" . $S . "</a>";
+	  }
+	else
+	  {
+	  print $S;
+	  }
+	}
+      else
+	{
+	print $S;
+	}
+
+      $Length -= $ReadCount;
+      $Start += $ReadCount;
       if (strlen(trim($S)) > 0) { $MadeOutput=1; }
-      if ($Length > 0) { $S = fread($Fin,min(1024,$Length)); }
-      }
-    print "</pre>";
+ 
+      if ($InColor && ($this->FindHighlight($Start) & 0x04))
+	{
+	print "</font>";
+	$InColor=0;
+	if ($Length <= 0) { $Start = -1; }
+	}
+
+      if ($Length > 0)
+	{
+	$S = $this->ReadHighlight($Fin,$Start,$Length);
+	$ReadCount = strlen($S);
+	}
+      } /* while reading */
+
+    if ($InColor) { print "</font>"; }
+    if (!$Flowed) { print "</pre>"; }
     if (!$MadeOutput)
 	{
 	print "<b>" . number_format($FullLength,0,"",",") . " bytes non-printable</b>\n";
@@ -156,6 +328,99 @@ class ui_view extends Plugin
 
     fclose($Fin);
     } // ShowText()
+
+  /***********************************************************
+   ReadHex(): Read bytes from a file (or stop at EOF).
+   This populates two strings: Hex and Text -- these represent
+   the bytes.  This function also handles highlighting.
+   Returns number of bytes read.
+   ***********************************************************/
+  function ReadHex($Fin,$Start,$Length, &$Text, &$Hex)
+    {
+    $Text = "";
+    $Hex = "";
+    $ReadCount=0;
+
+    /* Begin color if it is IN but not at START of highlighting */
+    $InColor=0;
+    if ($this->FindHighlight($Start) & 0x03 == 0x02)
+	{
+	$H = $this->Highlight[0]['Color'];
+	$Text .= "<font style='background:" . $this->HighlightColors[$H] . ";'>";
+	$Hex .= "<font style='background:" . $this->HighlightColors[$H] . ";'>";
+	$InColor=1;
+	}
+
+    while($Length > 0)
+      {
+      $S = $this->ReadHighlight($Fin,$Start,$Length);
+      $ReadCount += strlen($S);
+
+      /* If read nothing, then pad and exit */
+      if (strlen($S) == 0)
+	{
+	if ($InColor) { $Hex .= "</font>"; $Text .= "</font>"; }
+	/* Pad out and return */
+	for($i=$ReadCount; $i < 16; $i++)
+	  {
+	  $Hex .= "&nbsp;&nbsp;&nbsp;";
+	  $Text .= "&nbsp;";
+	  }
+	return($ReadCount);
+	}
+
+      else /* Read something */
+	{
+	/* Add color */
+	if ($this->FindHighlight($Start) & 0x01)
+	  {
+	  if ($InColor) { $Hex .= "</font>"; $Text .= "</font>"; }
+	  $H = $this->Highlight[0]['Color'];
+	  $Hex .= "<font style='background:" . $this->HighlightColors[$H] . ";'>";
+	  $Text .= "<font style='background:" . $this->HighlightColors[$H] . ";'>";
+	  $InColor=1;
+	  if (!empty($this->Highlight[0]['Name']))
+	    {
+	    $Hex .= "<a name='" . $this->Highlight[0]['Index'] . "'>";
+	    }
+	  }
+
+	/* Process string */
+	$ST = preg_replace("/[^[:print:]]/",'.',$S);
+	$ST = htmlentities($ST);
+	$ST = preg_replace("/[[:space:]]/",'&nbsp;',$ST);
+	$Text .= $ST;
+	$SH = bin2hex($S);
+	$SH = preg_replace("/(..)/",'\1 ',$SH);
+	// $SH = preg_replace("/(.......................) /",'\1 | ',$SH);
+	$SH = str_replace(" ","&nbsp;",$SH);
+	$Hex .= $SH;
+
+	if (($this->FindHighlight($Start) & 0x01) && !empty($this->Highlight[0]['Name']))
+	  {
+	  $Hex .= "</a>";
+	  }
+	}
+
+      $Length -= strlen($S);
+      $Start += strlen($S);
+
+      if ($InColor && ($this->FindHighlight($Start) & 0x04))
+	{
+	$Text .= "</font>";
+	$Hex .= "</font>";
+	$InColor=0;
+	}
+      } /* while reading */
+
+    /* End coloring as needed */
+    if ($InColor);
+	{
+	$Text .= "</font>";
+	$Hex .= "</font>";
+	}
+    return($ReadCount);
+    } // ReadHex()
 
   /***********************************************************
    ShowHex(): Given a file handle, display a "hex dump" of the file.
@@ -175,35 +440,36 @@ class ui_view extends Plugin
        However, after a few thousand rows, most browsers hang.
        Thus, use text and not tables. */
 
+    /*****
+     This system prints two columns, so it must track TWO output strings.
+     $Hex is the hex-string component.
+     $Text is the text-string component.
+     $S is the string read in from the file.
+     Each line represents 16 bytes.
+     The function ReadHex(): reads the 16 bytes and populates the strings.
+     The populated strings can be LONGER than 16 bytes due to highlighting
+     and HTML taint protection.
+     *****/
+
     /* Process the file */
     print "<div class='mono'>";
-    $Tell = ftell($Fin);
-    $S = fread($Fin,min(16,$Length));
-    if ($Length > 0) { $S = fread($Fin,min(16,$Length)); }
-    while((strlen($S) > 0) && ($Length > 0))
+    $ReadCount=1;
+    while(($ReadCount > 0) && ($Length > 0))
       {
-      $Length -= strlen($S);
-      /* show file location */
-      $B = base_convert($Tell,10,16);
-      print "0x";
-      for($i=strlen($B); $i<8; $i++) { print("0"); }
-      print "$B&nbsp;";
       $Tell = ftell($Fin);
+      $ReadCount = $this->ReadHex($Fin,$Start,min($Length,16),$Text,$Hex);
+      if ($ReadCount > 0)
+	{
+	/* show file location */
+	$B = base_convert($Tell,10,16);
+	print "0x";
+	for($i=strlen($B); $i<8; $i++) { print("0"); }
+	print "$B&nbsp;";
 
-      /* Convert to hex */
-      $Hex = bin2hex($S);
-      /** Make sure it is always 32 characters (16 bytes) **/
-      for($i=strlen($Hex); $i < 32; $i+=2) { $Hex .= "  "; }
-      /** Add in the spacings **/
-      $Hex = preg_replace("/(..)/",'\1 ',$Hex);
-      $Hex = preg_replace("/(.......................) /",'\1 | ',$Hex);
-      $Hex = str_replace(" ","&nbsp;",$Hex);
-      print "| $Hex";
-      $S = preg_replace("/[^[:print:]]/",'.',$S);
-      $S = htmlentities($S);
-      $S = preg_replace("/[[:space:]]/",'&nbsp;',$S);
-      print "|$S|<br>\n";
-      if ($Length > 0) { $S = fread($Fin,min(16,$Length)); }
+	print "|&nbsp;$Hex|&nbsp;|$Text|<br>\n";
+	}
+      $Start += $ReadCount;
+      $Length -= $ReadCount;
       }
     print "</div>\n";
 
@@ -251,6 +517,22 @@ class ui_view extends Plugin
 	}
 
     /***********************************
+     If there is paging, compute page conversions.
+     ***********************************/
+    switch($Format)
+	{
+	case 'hex':
+		$PageHex = $Page;
+		$PageText = intval($Page * VIEW_BLOCK_HEX / VIEW_BLOCK_TEXT);
+		break;
+	case 'text':
+	case 'flow':
+		$PageText = $Page;
+		$PageHex = intval($Page * VIEW_BLOCK_TEXT / VIEW_BLOCK_HEX);
+		break;
+	}
+
+    /***********************************
      Create micro menu
      ***********************************/
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
@@ -262,12 +544,13 @@ class ui_view extends Plugin
     if (!empty($Show)) { $Opt .= "&show=$Show"; }
     if (!empty($Item)) { $Opt .= "&item=$Item"; }
     $V .= "<div align=right><small>";
-    if ($Format != 'hex') { $V .= "<a href='$Uri$Opt&format=hex'>Hex</a> | "; }
+    if ($Format != 'hex') { $V .= "<a href='$Uri$Opt&format=hex&page=$PageHex'>Hex</a> | "; }
     else { $V .= "Hex | "; }
-    if ($Format != 'text') { $V .= "<a href='$Uri$Opt&format=text'>Plain Text</a> | "; }
+    if ($Format != 'text') { $V .= "<a href='$Uri$Opt&format=text&page=$PageText'>Plain Text</a> | "; }
     else { $V .= "Plain Text | "; }
-    if ($Format != 'flow') { $V .= "<a href='$Uri$Opt&format=flow'>Flowed Text</a> | "; }
+    if ($Format != 'flow') { $V .= "<a href='$Uri$Opt&format=flow&page=$PageText'>Flowed Text</a> | "; }
     else { $V .= "Flowed Text | "; }
+    $Opt="";
     $V .= "<a href='" . Traceback() . "'>Refresh</a>";
     $V .= "</small></div>\n";
 
@@ -309,6 +592,14 @@ class ui_view extends Plugin
     $V .= "</font>\n";
 
     /***********************************
+     Sort highlighting.
+     ***********************************/
+    if (!empty($this->Highlight))
+	{
+	usort($this->Highlight,array("ui_view","_cmp_highlight"));
+	}
+
+    /***********************************
      Display file contents
      ***********************************/
     switch($this->OutputType)
@@ -325,30 +616,33 @@ class ui_view extends Plugin
 	  $Uri = preg_replace('/&page=[0-9]*/','',Traceback());
 	  if ($Format == 'hex')
 	    {
-	    $PageBlock = 8192;
-	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,$PageBlock,$Uri);
-	    $PageSize = $PageBlock * $Page;
-	    print "<center>$PageMenu</center><br>\n";
-	    $this->ShowHex($Fin,$PageSize,4096);
-	    print "<P /><center>$PageMenu</center>\n";
+	    $HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_HEX);
+	    if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
+	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_HEX,$Uri);
+	    $PageSize = VIEW_BLOCK_HEX * $Page;
+	    if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
+	    $this->ShowHex($Fin,$PageSize,VIEW_BLOCK_HEX);
+	    if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
 	    }
 	  else if ($Format == 'text')
 	    {
-	    $PageBlock = 100000;
-	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,$PageBlock,$Uri);
-	    $PageSize = $PageBlock * $Page;
-	    print "<center>$PageMenu</center><br>\n";
-	    $this->ShowText($Fin,$PageSize,$PageBlock);
-	    print "<P /><center>$PageMenu</center>\n";
+	    $HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
+	    if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
+	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
+	    $PageSize = VIEW_BLOCK_TEXT * $Page;
+	    if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
+	    $this->ShowText($Fin,$PageSize,0,VIEW_BLOCK_TEXT);
+	    if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
 	    }
 	  else if ($Format == 'flow')
 	    {
-	    $PageBlock = 100000;
-	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,$PageBlock,$Uri);
-	    $PageSize = $PageBlock * $Page;
-	    print "<center>$PageMenu</center><br>\n";
-	    $this->ShowFlowedText($Fin,$PageSize,$PageBlock);
-	    print "<P /><center>$PageMenu</center>\n";
+	    $HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
+	    if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
+	    $PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
+	    $PageSize = VIEW_BLOCK_TEXT * $Page;
+	    if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
+	    $this->ShowText($Fin,$PageSize,1,VIEW_BLOCK_TEXT);
+	    if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
 	    }
 	  }
 	break;
