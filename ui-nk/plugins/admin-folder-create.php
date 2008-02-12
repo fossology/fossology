@@ -46,17 +46,7 @@ class folder_create extends Plugin
   function Create($ParentId, $NewFolder, $Desc)
     {
     global $Plugins;
-    global $_pg_conn, $DATADIR, $PROJECT, $WEBDIR;
     global $DB;
-    
-    // Needed for the Action method
-    // below is needed for the createfolder call
-    $path = "{$DATADIR}/dbconnect/{$PROJECT}";
-    db_init($path);
-    if (!$_pg_conn) {
-      echo "<pre>ERROR: could not connect to DateBase\n</pre>";
-      exit(1);
-    }
     
     /* Check the name */
     $NewFolder = trim($NewFolder);
@@ -66,6 +56,7 @@ class folder_create extends Plugin
     $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$ParentId';");
     $Row = $Results[0];
     if ($Row['folder_pk'] != $ParentId) { return(0); }
+
     // folder name exists under the parent?
     $Sql = "SELECT * FROM leftnav WHERE parent = '$ParentId' AND foldercontents_mode = '1';";
     $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$ParentId';");
@@ -78,15 +69,14 @@ class folder_create extends Plugin
      * Protect the folder name with htmlentities.
      */
     $NewFolder = str_replace("'", "''", $NewFolder);  // PostgreSQL quoting
-    $NewFolder = htmlentities($NewFolder);            // for a clean display
     $Desc = str_replace("'", "''", $Desc);            // PostgreSQL quoting
-    $fc_pk = createfolder($ParentId, $NewFolder, $Desc);
-    if (!isset($fc_pk)) {
-      return(0);
-    }
-    else {
-      return(1);
-    }
+    $DB->Action("INSERT INTO folder (folder_name,folder_desc) VALUES ('$NewFolder','$Desc');");
+    $Results = $DB->Action("SELECT folder_pk FROM folder WHERE folder_name='$NewFolder' AND folder_desc = '$Desc';");
+    $FolderPk = $Results[0]['folder_pk'];
+    if (empty($FolderPk)) { return(0); }
+
+    $DB->Action("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$ParentId','1','$FolderPk');");
+    return(1);
     } // Create()
 
   /*********************************************
