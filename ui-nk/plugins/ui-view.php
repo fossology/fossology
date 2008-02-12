@@ -86,7 +86,7 @@ class ui_view extends Plugin
     $Color = $Color % MAXHIGHLIGHTCOLOR;
     $H['Color'] = intval($Color);
     $H['Match'] = htmlentities($Match);
-    $H['RefURI'] = $RefURI;
+    $H['RefURL'] = $RefURL;
     $H['Name'] = htmlentities($Name);
     if (intval($Index) != -1) { $H['Index'] = intval($Index); }
     else { $H['Index'] = count($this->Highlight)+1; }
@@ -101,15 +101,20 @@ class ui_view extends Plugin
     {
     if (empty($this->Highlight)) { return; }
     $V = "<table>";
-    $V .= "<tr><th>Match</th>";
-    $V .= "<th></th><th></th>";
-    $V .= "<th align='left'>Item</th>";
-    $V .= "</tr>\n";
+    $First=1;
     $Uri = preg_replace('/&page=[0-9]*/',"",Traceback());
     foreach($this->Highlight as $H)
       {
       if (!empty($H['Name']))
 	{
+	if ($First)
+	  {
+	  $First = 0;
+	  $V .= "<tr><th>Match</th>";
+	  $V .= "<th></th><th></th>";
+	  $V .= "<th align='left'>Item</th>";
+	  $V .= "</tr>\n";
+	  }
 	$V .= "<tr bgcolor='" . $this->HighlightColors[$H['Color']] . "'>\n";
 	$V .= "<td align='right'>" . $H['Match'] . "</td>\n";
 
@@ -119,7 +124,11 @@ class ui_view extends Plugin
 	$V .= "</td>\n";
 
 	$V .= "<td>";
-	if (!empty($H['RefURI'])) { $V .= "<a href='" . $H['RefURI'] . "'>ref</a>"; }
+	if (!empty($H['RefURL']))
+		{
+		// $V .= "<a href='" . $H['RefURL'] . "' target='_blank'>ref</a>";
+		$V .= "<a href='javascript:;' onClick=\"javascript:window.open('" . $H['RefURL'] . "','License','width=600,height=400,toolbar=no,scrollbars=yes');\">ref</a>";
+		}
 	$V .= "</td>\n";
 
 	$V .= "<td>" . $H['Name'] . "</td>\n";
@@ -324,8 +333,6 @@ class ui_view extends Plugin
 	print "<b>" . number_format($FullLength,0,"",",") . " bytes non-printable</b>\n";
 	}
     print "</div>\n";
-
-    fclose($Fin);
     } // ShowText()
 
   /***********************************************************
@@ -471,8 +478,6 @@ class ui_view extends Plugin
       $Length -= $ReadCount;
       }
     print "</div>\n";
-
-    fclose($Fin);
     } // ShowHex()
 
   /***********************************************************
@@ -481,7 +486,8 @@ class ui_view extends Plugin
    $Name is the name for this plugin.
    This function is intended to be called from other plugins.
    ***********************************************************/
-  function ShowView($Name)
+  function ShowView($Fin=NULL, $BackName=NULL, $BackMod=NULL,
+		    $ShowMenu=1, $ShowHeader=1, $ShowText=NULL)
     {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
@@ -507,7 +513,20 @@ class ui_view extends Plugin
 	  $Meta = GetMimeType($Pfile);
 	  list($Type,$Junk) = split("/",$Meta,2);
 	  if ($Type == 'text') { $Format = 'flow'; }
-	  else { $Format = 'hex'; }
+	  else switch($Meta)
+	  	{
+		case "application/octet-string":
+		case "application/x-awk":
+		case "application/x-csh":
+		case "application/x-javascript":
+		case "application/x-perl":
+		case "application/x-shellscript":
+		case "message/rfc822":
+			$Format='flow';
+			break;
+		default:
+			$Format = 'hex';
+		}
 	  break;
 	}
 
@@ -530,61 +549,68 @@ class ui_view extends Plugin
     /***********************************
      Create micro menu
      ***********************************/
-    $Uri = Traceback_uri() . "?mod=" . $Name;
-    $Opt="";
-    if (!empty($Pfile)) { $Opt .= "&pfile=$Pfile"; }
-    if (!empty($Ufile)) { $Opt .= "&ufile=$Ufile"; }
-    if (!empty($Upload)) { $Opt .= "&upload=$Upload"; }
-    if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
-    if (!empty($Show)) { $Opt .= "&show=$Show"; }
-    if (!empty($Item)) { $Opt .= "&item=$Item"; }
-    $V .= "<div align=right><small>";
-    if ($Format != 'hex') { $V .= "<a href='$Uri$Opt&format=hex&page=$PageHex'>Hex</a> | "; }
-    else { $V .= "Hex | "; }
-    if ($Format != 'text') { $V .= "<a href='$Uri$Opt&format=text&page=$PageText'>Plain Text</a> | "; }
-    else { $V .= "Plain Text | "; }
-    if ($Format != 'flow') { $V .= "<a href='$Uri$Opt&format=flow&page=$PageText'>Flowed Text</a> | "; }
-    else { $V .= "Flowed Text | "; }
-    $Opt="";
-    $V .= "<a href='" . Traceback() . "'>Refresh</a>";
-    $V .= "</small></div>\n";
+    if ($ShowMenu)
+      {
+      $V .= "<div align=right><small>";
+      $Uri = preg_replace("/&page=[0-9]+/","",Traceback());
+      if ($Format != 'hex') { $V .= "<a href='" . preg_replace("/format=[a-z]+/","",$Uri) . "&format=hex&page=$PageHex'>Hex</a> | "; }
+      else { $V .= "Hex | "; }
+      if ($Format != 'text') { $V .= "<a href='" . preg_replace("/format=[a-z]+/","",$Uri) . "&format=text&page=$PageText'>Plain Text</a> | "; }
+      else { $V .= "Plain Text | "; }
+      if ($Format != 'flow') { $V .= "<a href='" . preg_replace("/format=[a-z]+/","",$Uri) . "&format=flow&page=$PageText'>Flowed Text</a> | "; }
+      else { $V .= "Flowed Text | "; }
+      if (!empty($BackName))
+	{
+	$V .= "<a href='" . preg_replace("/mod=[a-zA-Z0-9_+-]+/","mod=" . $BackMod,Traceback()) . "'>$BackName</a> | ";
+	}
+      $V .= "<a href='" . Traceback() . "'>Refresh</a>";
+      $V .= "</small></div>\n";
+      } // if ShowMenu
+
+    /**********************************
+     Show optional text message.
+     **********************************/
+    if (!empty($ShowText)) { $V .= $ShowText; }
 
     /**********************************
       Display micro header
      **********************************/
-    $Uri = Traceback_uri() . "?mod=browse";
-    $Opt="";
-    if (!empty($Pfile)) { $Opt .= "&pfile=$Pfile"; }
-    if (!empty($Ufile)) { $Opt .= "&ufile=$Ufile"; }
-    if (!empty($Upload)) { $Opt .= "&upload=$Upload"; }
-    if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
-    if (!empty($Show)) { $Opt .= "&show=$Show"; }
-    /* No item */
-    $V .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
-    $Path = Dir2Path($Item,$Ufile);
-    $FirstPath=1;
-    $Last = &$Path[count($Path)-1];
-
-    $V .= "<font class='text'>\n";
-    foreach($Path as $P)
+    if ($ShowHeader)
       {
-      if (empty($P['ufile_name'])) { continue; }
-      if (!$FirstPath) { $V .= "/ "; }
-      if ($P != $Last) { $V .= "<a href='$Uri&item=" . $P['uploadtree_pk'] . "$Opt'>"; }
-      if (Isdir($P['ufile_mode']))
+      $Uri = Traceback_uri() . "?mod=browse";
+      $Opt="";
+      if (!empty($Pfile)) { $Opt .= "&pfile=$Pfile"; }
+      if (!empty($Ufile)) { $Opt .= "&ufile=$Ufile"; }
+      if (!empty($Upload)) { $Opt .= "&upload=$Upload"; }
+      if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
+      if (!empty($Show)) { $Opt .= "&show=$Show"; }
+      /* No item */
+      $V .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
+      $Path = Dir2Path($Item,$Ufile);
+      $FirstPath=1;
+      $Last = &$Path[count($Path)-1];
+
+      $V .= "<font class='text'>\n";
+      foreach($Path as $P)
 	{
-	$V .= $P['ufile_name'];
+	if (empty($P['ufile_name'])) { continue; }
+	if (!$FirstPath) { $V .= "/ "; }
+	if ($P != $Last) { $V .= "<a href='$Uri&item=" . $P['uploadtree_pk'] . "$Opt'>"; }
+	if (Isdir($P['ufile_mode']))
+	  {
+	  $V .= $P['ufile_name'];
+	  }
+	else
+	  {
+	  if (!$FirstPath && ($P != $Last)) { $V .= "<br>\n&nbsp;&nbsp;"; }
+	  $V .= "<b>" . $P['ufile_name'] . "</b>";
+	  }
+	if ($P != $Last) { $V .= "</a>"; }
+	$FirstPath=0;
 	}
-      else
-	{
-	if (!$FirstPath && ($P != $Last)) { $V .= "<br>\n&nbsp;&nbsp;"; }
-	$V .= "<b>" . $P['ufile_name'] . "</b>";
-	}
-      if ($P != $Last) { $V .= "</a>"; }
-      $FirstPath=0;
-      }
-    $V .= "</div><P />\n";
-    $V .= "</font>\n";
+      $V .= "</div><P />\n";
+      $V .= "</font>\n";
+      } // if ShowHeader
 
     /***********************************
      Sort highlighting.
@@ -598,8 +624,11 @@ class ui_view extends Plugin
      Display file contents
      ***********************************/
     print $V;
-    $Filename = RepPath($Pfile);
-    $Fin = fopen($Filename,"rb");
+    if (empty($Fin))
+      { 
+      $Fin = fopen( RepPath($Pfile) ,"rb");
+      }
+    rewind($Fin);
     $Pages = "";
     $Uri = preg_replace('/&page=[0-9]*/','',Traceback());
     if ($Format == 'hex')
@@ -632,6 +661,7 @@ class ui_view extends Plugin
 	$this->ShowText($Fin,$PageSize,1,VIEW_BLOCK_TEXT);
 	if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
 	}
+    fclose($Fin);
     return;
     } // ShowView()
 
@@ -652,14 +682,24 @@ class ui_view extends Plugin
     switch($this->OutputType)
       {
       case "XML":
-        break;
+	break;
       case "HTML":
-	if ($this->OutputToStdout) { $this->ShowView($this->Name); }
-        break;
+	if ($this->OutputToStdout)
+		{
+		if (plugin_find_id("view-license") >= 0)
+		  {
+		  $this->ShowView(NULL,"License","view-license");
+		  }
+		else
+		  {
+		  $this->ShowView();
+		  }
+		}
+	break;
       case "Text":
-        break;
+	break;
       default:
-        break;
+	break;
       }
     if (!$this->OutputToStdout) { return($V); }
     print("$V");
