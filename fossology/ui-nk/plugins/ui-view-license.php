@@ -35,7 +35,7 @@ class ui_view_license extends Plugin
    ConvertLicPathToHighlighting(): Given a license path, insert
    it into the View highlighting.
    ***********************************************************/
-  function ConvertLicPathToHighlighting($Row,$LicName)
+  function ConvertLicPathToHighlighting($Row,$LicName,$RefURL=NULL)
     {
     global $Plugins;
     $View = &$Plugins[plugin_find_id("view")];
@@ -45,13 +45,62 @@ class ui_view_license extends Plugin
 	{
 	$Parts = split("-",$Segment,2);
 	if (empty($Parts[1])) { $Parts[1] = $Parts[0]; }
-	$Match = intval($Row['tok_match'] * 100 / $Row['tok_pfile']) . "%";
+	$Match = intval(0.5 + $Row['tok_match']*100 / $Row['tok_pfile']) . "%";
 	if ($First) { $First = 0; $Color=-2; }
 	else { $Color=-1; $LicName=NULL; }
 
-	$View ->AddHighlight($Parts[0],$Parts[1],$Color,$Match,$LicName);
+	$View ->AddHighlight($Parts[0],$Parts[1],$Color,$Match,$LicName,-1,$RefURL);
 	}
     } // ConvertLicPathToHighlighting()
+
+  /***********************************************************
+   ViewLicense(): Given a pfile_pk, lic_pk, and tok_pfile_start,
+   retrieve the license text and display it.
+   One caveat: The "ShowView" function only displays file contents.
+   But the license is located in the DB.
+   Solution: Save license to a temp file.
+   ***********************************************************/
+  function ViewLicense($PfilePk, $LicPk, $TokPfileStart)
+    {
+    global $DB;
+    global $Plugins;
+    $View = &$Plugins[plugin_find_id("view")];
+
+    /* Find the license path */
+    $Results = $DB->Action("SELECT license_path,tok_match,tok_license FROM agent_lic_meta WHERE pfile_fk = $PfilePk AND lic_fk = $LicPk AND tok_pfile_start = $TokPfileStart ORDER BY version DESC LIMIT 1;");
+    $Lic = $Results[0];
+    if (empty($Lic['license_path'])) { return; }
+
+    /* For ConvertLicPathToHighlighting, reverse the columns */
+    $Lic['pfile_path'] = $Lic['license_path'];
+    $Lic['tok_pfile'] = $Lic['tok_license'];
+
+    /* Load the License name and data */
+    $Results = $DB->Action("SELECT lic_name,lic_text FROM agent_lic_raw WHERE lic_pk = $LicPk;");
+    if (empty($Results[0]['lic_name'])) { return; }
+
+    /* Save license text to a temp file */
+if (0)
+{
+    /* DB does not contain the full license */
+    $Ftmp = tmpfile();
+    fwrite($Ftmp,$Results[0]['lic_text']);
+    rewind($Ftmp);
+}
+else
+{
+    global $DATADIR;
+    $Ftmp = fopen("$DATADIR/agents/licenses/" . $Results[0]['lic_name'],"rb");
+}
+
+    /* Save the path */
+    $this->ConvertLicPathToHighlighting($Lic,NULL);
+    $Text = "<div class='text'>";
+    $Text .= "<H1>License: " . $Results[0]['lic_name'] . "</H1>\n";
+    $Text .= "compared against:<br>\n";
+    $Text .= "</div>";
+    $View->ShowView($Ftmp,"View","view",1,1,$Text);
+    } // ViewLicense()
 
   /***********************************************************
    Output(): This function is called when user output is
@@ -68,7 +117,15 @@ class ui_view_license extends Plugin
     global $DB;
     $View = &$Plugins[plugin_find_id("view")];
     $Pfile = GetParm("pfile",PARM_INTEGER);
+    $LicId = GetParm("lic",PARM_INTEGER);
+    $LicIdSet = GetParm("licset",PARM_INTEGER);
     if (empty($Pfile)) { return; }
+
+    if (!empty($LicId) && !empty($LicIdSet))
+	{
+	$this->ViewLicense($Pfile,$LicId,$LicIdSet);
+	return;
+	}
 
     /* Load license names */
     $LicPk2GID=array();  // map lic_pk to the group id: lic_id
@@ -95,16 +152,18 @@ class ui_view_license extends Plugin
 	if (!empty($R['phrase_text']))
 		{
 		$LicName = "Phrase: " . $R['phrase_text'];
+		$RefURL = NULL;
 		}
 	else
 		{
 		$LicGID = $LicPk2GID[$R['lic_fk']];
 		$LicName = $LicGID2Name[$LicGID];
+		$RefURL=Traceback() . "&lic=" . $R['lic_fk'] . "&licset=" . $R['tok_pfile_start'];
 		}
-	$this->ConvertLicPathToHighlighting($R,$LicName);
+	$this->ConvertLicPathToHighlighting($R,$LicName,$RefURL);
 	}
 
-    $View->ShowView($this->Name);
+    $View->ShowView(NULL,"View","view");
     return;
     } // Output()
 
