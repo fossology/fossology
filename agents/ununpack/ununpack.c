@@ -1933,7 +1933,6 @@ int	Traverse	(char *Filename, char *Basename,
 	{
 	/* this should never happen... */
 	fprintf(stderr,"LOG pfile %s \"%s\" does not exist!\n",Pfile_Pk,Filename);
-	if (PI->Cmd) DisplayContainerInfo(&CI,PI->Cmd);
 	goto TraverseEnd;
 	}
 
