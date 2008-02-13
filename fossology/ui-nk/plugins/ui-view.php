@@ -39,6 +39,40 @@ class ui_view extends Plugin
   var $Highlight=NULL;
 
   /***********************************************************
+   RegisterMenus(): Customize submenus.
+   ***********************************************************/
+  function RegisterMenus()
+    {
+    // For the Browse menu, permit switching between detail and summary.
+    $Format = GetParm("format",PARM_STRING);
+    $URI = Traceback_parm();
+    $URI = preg_replace("/&format=[a-zA-Z0-9]*/","",$URI);
+    switch($Format)
+      {
+      case "hex":
+        menu_insert("License-View::Hex",12);
+        menu_insert("License-View::Text",11,"$URI&format=text");
+        menu_insert("License-View::Formatted",10,"$URI&format=flow");
+        break;
+      case "text":
+        menu_insert("License-View::Hex",12,"$URI&format=hex");
+        menu_insert("License-View::Text",11);
+        menu_insert("License-View::Formatted",10,"$URI&format=flow");
+        break;
+      case "flow":
+        menu_insert("License-View::Hex",12,"$URI&format=hex");
+        menu_insert("License-View::Text",11,"$URI&format=text");
+        menu_insert("License-View::Formatted",10);
+        break;
+      default:
+        menu_insert("License-View::Hex",12,"$URI&format=hex");
+        menu_insert("License-View::Text",11,"$URI&format=text");
+        menu_insert("License-View::Formatted",10,"$URI&format=flow");
+        break;
+      }
+    } // RegisterMenus()
+
+  /***********************************************************
    _cmp_highlight(): Use for sorting the highlight list.
    ***********************************************************/
   function _cmp_highlight($a,$b)
@@ -552,18 +586,7 @@ class ui_view extends Plugin
     if ($ShowMenu)
       {
       $V .= "<div align=right><small>";
-      $Uri = preg_replace("/&page=[0-9]+/","",Traceback());
-      if ($Format != 'hex') { $V .= "<a href='" . preg_replace("/format=[a-z]+/","",$Uri) . "&format=hex&page=$PageHex'>Hex</a> | "; }
-      else { $V .= "Hex | "; }
-      if ($Format != 'text') { $V .= "<a href='" . preg_replace("/format=[a-z]+/","",$Uri) . "&format=text&page=$PageText'>Plain Text</a> | "; }
-      else { $V .= "Plain Text | "; }
-      if ($Format != 'flow') { $V .= "<a href='" . preg_replace("/format=[a-z]+/","",$Uri) . "&format=flow&page=$PageText'>Flowed Text</a> | "; }
-      else { $V .= "Flowed Text | "; }
-      if (!empty($BackName))
-	{
-	$V .= "<a href='" . preg_replace("/mod=[a-zA-Z0-9_+-]+/","mod=" . $BackMod,Traceback()) . "'>$BackName</a> | ";
-	}
-      $V .= "<a href='" . Traceback() . "'>Refresh</a>";
+      $V .= menu_to_1html(menu_find("License-View",$MenuDepth),1);
       $V .= "</small></div>\n";
       } // if ShowMenu
 

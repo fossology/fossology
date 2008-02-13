@@ -31,7 +31,7 @@ if (!isset($GlobalReady)) { exit; }
 class menu
   {
   var $Name="";		// name of the menu item
-  var $PluginName=NULL;	// name for the plugin
+  var $URI=NULL;	// URI for the plugin (everything after the "?mod=")
   var $Order=0;		// Used for ordering menu items
   var $Target=NULL;	// recommended name of window for showing results
   var $MaxDepth=0;	// How deep is SubMenu?
@@ -58,10 +58,10 @@ function menu_cmp(&$a,&$b)
  menu_insert_r(): Given a Path, order level for the last
  item, and a plugin name, insert the menu item.
  This is VERY recursive and returns the new menu.
- If $PluginName is blank, nothing is added.
+ If $URI is blank, nothing is added.
  $LastOrder is used for grouping items in order.
  ***********************************************/
-function menu_insert_r(&$Menu,$Path,$LastOrder=0,$Target=NULL,$PluginName=NULL,$Depth)
+function menu_insert_r(&$Menu,$Path,$LastOrder=0,$Target=NULL,$URI=NULL,$Depth)
 {
   $AddNew=0;
   $PathParts = explode("::",$Path,2);
@@ -96,7 +96,7 @@ function menu_insert_r(&$Menu,$Path,$LastOrder=0,$Target=NULL,$PluginName=NULL,$
   /* $M is set! See if we need to traverse submenus */
   if ($Order == -1)
     {
-    $Depth = menu_insert_r($M->SubMenu,$PathParts[1],$LastOrder,$Target,$PluginName,$Depth+1);
+    $Depth = menu_insert_r($M->SubMenu,$PathParts[1],$LastOrder,$Target,$URI,$Depth+1);
     $NewDepth = $Depth + 1;
     if ($M->MaxDepth < $NewDepth)
 	{
@@ -108,7 +108,7 @@ function menu_insert_r(&$Menu,$Path,$LastOrder=0,$Target=NULL,$PluginName=NULL,$
     /* No traversal -- save the final values */
     $M->Order = $Order;
     $M->Target = $Target;
-    $M->PluginName = $PluginName;
+    $M->URI = $URI;
     }
 
   if ($AddNew == 1)
@@ -127,10 +127,10 @@ function menu_insert_r(&$Menu,$Path,$LastOrder=0,$Target=NULL,$PluginName=NULL,$
  menu_insert(): Given a Path, order level for the last
  item, and optional plugin name, insert the menu item.
  ***********************************************/
-function menu_insert($Path,$LastOrder=0,$Target=NULL,$PluginName=NULL)
+function menu_insert($Path,$LastOrder=0,$URI=NULL,$Target=NULL)
 {
   global $MenuList;
-  menu_insert_r(&$MenuList,$Path,$LastOrder,$Target,$PluginName,0);
+  menu_insert_r(&$MenuList,$Path,$LastOrder,$Target,$URI,0);
 } // menu_insert()
 
 /***********************************************
@@ -138,10 +138,12 @@ function menu_insert($Path,$LastOrder=0,$Target=NULL,$PluginName=NULL)
  the list of sub-menus below it and max depth of menu.
  $Name may be a "::" separated list.
  ***********************************************/
-function menu_find(&$Menu,$Name,&$MaxDepth)
+function menu_find($Name,&$MaxDepth,$Menu=NULL)
 {
+  global $MenuList;
+  if (empty($Menu)) { $Menu = $MenuList; }
   if (empty($Name)) { return($Menu); }
-  $PathParts = explode("::",$Path,2);
+  $PathParts = explode("::",$Name,2);
   foreach($Menu as $Key => $Val)
     {
     if ($Val->Name == $PathParts[0])
@@ -158,6 +160,42 @@ function menu_find(&$Menu,$Name,&$MaxDepth)
 } // menu_find()
 
 /***********************************************
+ menu_to_1html(): Take a menu and render it as
+ one HTML line.  This ignores submenus!
+ If $ShowAll==0, then items without hyperlinks are hidden.
+ ***********************************************/
+function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowAll=1)
+{
+  $V = "";
+  $First=1;
+  if (!empty($Menu))
+    {
+    foreach($Menu as $Val)
+      {
+      if (!empty($Val->URI))
+	{
+	if (!$First) { $V .= " | "; }
+	$V .= "<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "'>";
+	$V .= $Val->Name;
+	$V .= "</a>";
+	}
+      else if ($ShowAll)
+	{
+	if (!$First) { $V .= " | "; }
+	$V .= $Val->Name;
+	}
+      $First=0;
+      }
+    }
+  if ($ShowRefresh)
+    {
+    if (!$First) { $V .= " | "; }
+    $V .= "<a href='" . Traceback() . "'>Refresh</a>";
+    }
+  return($V);
+} // menu_to_1html()
+
+/***********************************************
  menu_print(): Debugging code for printing the menu.
  This is recursive.
  ***********************************************/
@@ -170,7 +208,7 @@ function menu_print(&$Menu,$Indent)
       {
       print " ";
       }
-    print "$Val->Name ($Val->Order,$Val->PluginName)\n";
+    print "$Val->Name ($Val->Order,$Val->URI)\n";
     menu_print($Val->SubMenu,$Indent+1);
     }
 } // menu_print()

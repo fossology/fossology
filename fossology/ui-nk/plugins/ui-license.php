@@ -32,6 +32,18 @@ class ui_license extends Plugin
   var $Dependency=array("db","browse");
 
   /***********************************************************
+   RegisterMenus(): Customize submenus.
+   ***********************************************************/
+  function RegisterMenus()
+    {
+    // For all other menus, permit coming back here.
+    $URI = $this->Name . Traceback_parm_keep(array("show","upload","item"));
+    menu_insert("Browse::License",1,$URI);
+    menu_insert("View::License",1,$URI);
+    menu_insert("License-View::License",1,$URI);
+    } // RegisterMenus()
+
+  /***********************************************************
    ShowUploadHist(): Given an Upload and UploadtreePk item, display:
    (1) The histogram for the directory BY LICENSE.
    (2) The file listing for the directory, with license navigation.
@@ -264,12 +276,7 @@ class ui_license extends Plugin
 	/* Create the micro-menu */
 	/*************************/
 	$V .= "<div align=right><small>";
-	$Opt = "";
-	if ($Folder) { $Opt .= "&folder=$Folder"; }
-	if ($Upload) { $Opt .= "&upload=$Upload"; }
-	if ($Item) { $Opt .= "&item=$Item"; }
-	$V .= "<a href='" . str_replace("mod=".$this->Name,"mod=browse",Traceback()) . "'>Browse</a> | ";
-	$V .= "<a href='" . Traceback() . "'>Refresh</a>";
+	$V .= menu_to_1html(menu_find("License",$MenuDepth),1);
 	$V .= "</small></div>\n";
 
 	$V .= "<font class='text'>\n";

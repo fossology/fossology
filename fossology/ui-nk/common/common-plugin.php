@@ -229,7 +229,8 @@ function plugin_load($PlugDir)
   foreach($Plugins as $Key => $Val)
     {
     $P = &$Plugins[$Key];
-    $P->PostInitialize();
+    if ($P->State == PLUGIN_STATE_VALID) { $P->PostInitialize(); }
+    if ($P->State == PLUGIN_STATE_READY) { $P->RegisterMenus(); }
     }
 } // plugin_load()
 

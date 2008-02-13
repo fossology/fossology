@@ -84,6 +84,44 @@ function Traceback_uri()
 } // Traceback_uri()
 
 /************************************************************
+ Traceback_parm(): The URI query to this location.
+ If ShowMod is set, then the module name is included.
+ Else, this begins with the first parameter.
+ ************************************************************/
+function Traceback_parm($ShowMod=1)
+{
+  $V = explode('?',$_SERVER['REQUEST_URI'],2);
+  $V = preg_replace("/^mod=/","",$V[1]);
+  if (!$ShowMod)
+    {
+    $V = preg_replace("/^[^&]*/","",$V);
+    }
+  return($V);
+} // Traceback_parm()
+
+/************************************************************
+ Traceback_parm_keep(): Create a new URI, keeping only these
+ items.
+ ************************************************************/
+function Traceback_parm_keep($List)
+{
+  $Opt="&";
+  $First=1;
+  foreach($List as $L)
+    {
+    $Val = GetParm($L,PARM_STRING);
+    if (!empty($Val))
+	{
+	if (!$First) { $Opt .= "&"; }
+	$Opt .= "$L=$Val";
+	$First=0;
+	}
+    }
+  if (!$First) { return($Opt); }
+  return("");
+} // Traceback_parm_keep()
+
+/************************************************************
  Traceback_dir(): The directory of the URI without query.
  ************************************************************/
 function Traceback_dir()
