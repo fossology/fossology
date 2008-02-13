@@ -195,10 +195,25 @@ class Plugin
     // Add this plugin to the menu
     if ($this->MenuList !== "")
 	{
-	menu_insert($this->MenuList,$this->MenuOrder,$this->MenuTarget,$this->Name);
+	menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
 	}
     return($this->State == PLUGIN_STATE_READY);
     } // PostInitialize()
+
+  /***********************************************************
+   RegisterMenus(): While menus can be added to any time at or after
+   the PostInitialize phase, this is the standard location for
+   registering this item with menus.
+   NOTE 1: Menu registration may be plugin specific!
+   NOTE 2: This is intended for cross-plugin registration and not
+   for the main menu.
+   ***********************************************************/
+  function RegisterMenus()
+    {
+    if ($this->State != PLUGIN_STATE_VALID) { return(0); } // don't run
+    // Add your own menu items here.
+    // E.g., menu_insert("Menu_Name::Item");
+    }
 
   /***********************************************************
    Destroy(): This is a destructor called after the plugin

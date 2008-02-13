@@ -32,6 +32,33 @@ class ui_browse extends Plugin
   var $Dependency=array("db");
 
   /***********************************************************
+   RegisterMenus(): Customize submenus.
+   ***********************************************************/
+  function RegisterMenus()
+    {
+    // For the Browse menu, permit switching between detail and summary.
+    $Show = GetParm("show",PARM_STRING);
+    $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
+    switch($Show)
+      {
+      case "detail":
+	menu_insert("Browse::Summary",10,"$URI&show=summary");
+	menu_insert("Browse::Detail",10);
+	break;
+      case "summary":
+      default:
+	menu_insert("Browse::Summary",10);
+	menu_insert("Browse::Detail",10,"$URI&show=detail");
+	break;
+      }
+
+    // For all other menus, permit coming back here.
+    $URI = $this->Name . Traceback_parm_keep(array("show","upload","item"));
+    menu_insert("View::Browse",1,$URI);
+    menu_insert("License::Browse",1,$URI);
+    } // RegisterMenus()
+
+  /***********************************************************
    ShowItem(): Given a upload_pk, list every item in it.
    If it is an individual file, then list the file contents.
    ***********************************************************/
@@ -223,16 +250,7 @@ if (0) {
 	/* Create the micro-menu */
 	/*************************/
         $V .= "<div align=right><small>";
-	$Opt = "";
-	if ($Folder) { $Opt .= "&folder=$Folder"; }
-	if ($Upload) { $Opt .= "&upload=$Upload"; }
-	if ($Item) { $Opt .= "&item=$Item"; }
-        if ($Show != 'summary') { $V .= "<a href='$Uri&show=summary$Opt'>Summary</a> | "; }
-        else { $V .= "Summary | "; }
-        if ($Show != 'detail') { $V .= "<a href='$Uri&show=detail$Opt'>Detail</a> | "; }
-        else { $V .= "Detail | "; }
-	if (!empty($ModLicense)) { $V .= "<a href='" . str_replace("mod=".$this->Name,"mod=license",Traceback()) . "'>License</a> | "; }
-        $V .= "<a href='" . Traceback() . "'>Refresh</a>";
+	$V .= menu_to_1html(menu_find("Browse",$MenuDepth),1);
         $V .= "</small></div>\n";
 
 	$V .= "<font class='text'>\n";

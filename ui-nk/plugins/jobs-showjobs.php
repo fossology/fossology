@@ -42,6 +42,52 @@ class jobs_showjobs extends Plugin
 	);
 
   /***********************************************************
+   RegisterMenus(): Customize submenus.
+   ***********************************************************/
+  function RegisterMenus()
+    {
+    // For the Browse menu, permit switching between detail and summary.
+    $Show = GetParm("show",PARM_STRING);
+    if (empty($Show)) { $Show = "summary"; }
+    $History = GetParm("history",PARM_INTEGER);
+    if (empty($History)) { $History = 0; }
+    $URI = $this->Name;
+
+    switch($Show)
+      {
+      case "detail":
+        menu_insert("JobDetails::Summary",11,"$URI&show=summary&history=$History");
+        menu_insert("JobDetails::Detail",11);
+        break;
+      case "summary":
+        menu_insert("JobDetails::Summary",11);
+        menu_insert("JobDetails::Detail",11,"$URI&show=detail&history=$History");
+	break;
+      case "job":
+        menu_insert("JobDetails::Jobs",11,"$URI&show=summary&history=$History");
+	break;
+      default:
+        break;
+      }
+
+    if ($Show != "job")
+      {
+      switch($History)
+        {
+        case "0":
+          menu_insert("JobDetails::History",10,"$URI&show=$Show&history=1");
+          menu_insert("JobDetails::Active",10);
+          break;
+        case "1":
+        default:
+          menu_insert("JobDetails::History",10);
+          menu_insert("JobDetails::Active",10,"$URI&show=$Show&history=0");
+          break;
+        }
+      }
+    } // RegisterMenus()
+
+  /***********************************************************
    PostInitialize(): This function is called before the plugin
    is used and after all plugins have been initialized.
    If there is any initialization step that is dependent on other
@@ -63,8 +109,8 @@ class jobs_showjobs extends Plugin
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
     // Add this plugin to the menu
-    menu_insert($this->MenuList,$this->MenuOrder,$this->MenuTarget,$this->Name);
-    menu_insert("Admin::Scheduler::Job Queue Details",$this->MenuOrder,$this->MenuTarget,$this->Name . "&show=detail");
+    menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+    menu_insert("Main::Admin::Scheduler::Job Queue Details",$this->MenuOrder,$this->Name . "&show=detail",$this->MenuTarget);
     return($this->State == PLUGIN_STATE_READY);
     }
 
@@ -420,7 +466,11 @@ class jobs_showjobs extends Plugin
 	  {
 	  case 'summary': $Show='summary'; break;
 	  case 'detail': $Show='detail'; break;
-	  case 'job': $Show='job'; $Job = GetParm('job',PARM_INTEGER); break;
+	  case 'job':
+	 	 $Show='job';
+		 $Job = GetParm('job',PARM_INTEGER);
+		 if (empty($Job)) { return; } // bad URL
+		 break;
 	  default: $Show='summary';
 	  }
 	switch(GetParm('history',PARM_STRING))
@@ -432,30 +482,11 @@ class jobs_showjobs extends Plugin
 	$Uri = Traceback_uri() . "?mod=" . $this->Name;
 
 	/* Customize the top menu */
-	if ($Show == 'job')
-	  {
-	  $V .= "<div align=right><small>";
-	  $V .= "<a href='$Uri&show=summary&history=$History'>Summary</a>";
-	  $V .= " | ";
-	  $V .= "<a href='$Uri&show=detail&history=$History'>Detail</a>";
-	  $V .= " | ";
-	  $V .= "<a href='" . Traceback() . "'>Refresh</a>";
-	  $V .= "</small></div>\n";
-	  }
-	else
-	  {
-	  $V .= "<div align=right><small>";
-	  if ($Show == 'detail') { $V .= "<a href='$Uri&show=summary&history=$History'>Summary</a>"; }
-	  else { $V .= "<a href='$Uri&show=detail&history=$History'>Detail</a>"; }
-	  $V .= " | ";
-	  if ($History) { $V .= "<a href='$Uri&show=$Show&history=0'>Active</a>"; }
-	  else { $V .= "<a href='$Uri&show=$Show&history=1'>History</a>"; }
-	  $V .= " | ";
-	  $V .= "<a href='" . Traceback() . "'>Refresh</a>";
-	  $V .= "</small></div>\n";
-	  $V .= $this->DrawColors();
-	  $V .= "<P />\n";
-	  }
+	$V .= "<div align=right><small>";
+	$V .= menu_to_1html(menu_find("JobDetails",$MenuDepth),1);
+	$V .= "</small></div>\n";
+	if ($Show != "job") { $V .= $this->DrawColors(); }
+	$V .= "<P />\n";
 
 	/* Display the output based on the values */
 	switch($Show)

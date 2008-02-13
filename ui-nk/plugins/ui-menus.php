@@ -42,27 +42,22 @@ class ui_menu extends Plugin
       } 
    
     // Add default menus (with no actions linked to plugins)
-    menu_insert("Tools",10,NULL,NULL);
-    menu_insert("Organize",8,NULL,NULL);
-    menu_insert("Admin",6,NULL,NULL);
-    menu_insert("Upload",4,NULL,NULL);
+    menu_insert("Main::Tools",10);
+    menu_insert("Main::Organize",8);
+    menu_insert("Main::Admin",6);
+    menu_insert("Main::Upload",4);
 
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
-    // Add this plugin to the menu
-    if (!strcmp($this->MenuList,""))
-      {
-      menu_insert($this->MenuList,$this->MenuOrder,$this->MenuTarget,$this->Name);
-      }
     return($this->State == PLUGIN_STATE_READY);
     }
 
   /********************************************
    menu_html(): Recursively generate the menu in HTML.
    ********************************************/
-  function menu_html($Menu,$Indent)
+  function menu_html(&$Menu,$Indent)
     {
-    if (!isset($Menu)) { return; }
+    if (empty($Menu)) { return; }
     $V="";
     for($i=0; $i<$Indent; $i++) { $V .= " "; }
     if ($Indent == 0)
@@ -82,33 +77,36 @@ class ui_menu extends Plugin
          This looks like a good one:
 	 http://www.cssplay.co.uk/menus/simple_vertical.html
      ***/
-    foreach($Menu as $Key => $Val)
+    foreach($Menu as $M)
       {
       for($i=0; $i<$Indent; $i++) { $V .= " "; }
       $V .= '<li><a href="';
-      if (isset($Val->PluginName) && ($Val->PluginName != ""))
+      if (!empty($M->URI))
 	{
-	$V .= Traceback_uri() . "?mod=" . $Val->PluginName;
-	if (!isset($Val->Target) || ($Val->Target == ""))
+	$V .= Traceback_uri() . "?mod=" . $M->URI;
+	if (empty($M->Target) || ($M->Target == ""))
 	  {
 	  $V .= '" target="basenav">';
 	  }
 	else
 	  {
-	  $V .= '" target="' . $Val->Target . '">';
+	  $V .= '" target="' . $M->Target . '">';
 	  }
-	$V .= $Val->Name;
+	$V .= $M->Name;
 	}
       else
 	{
-	$V .= '#">' . $Val->Name;
+	$V .= '#">' . $M->Name;
 	}
-      if (isset($Val->SubMenu) && ($Indent > 0))
+      if (!empty($M->SubMenu) && ($Indent > 0))
         {
 	$V .= " <span>&raquo;</span>";
 	}
       $V .= "</a>\n";
-      $V .= $this->menu_html($Val->SubMenu,$Indent+1);
+      if (!empty($M->SubMenu))
+	{
+	$V .= $this->menu_html($M->SubMenu,$Indent+1);
+	}
       }
     for($i=0; $i<$Indent; $i++) { $V .= " "; }
     $V .= "</ul>\n";
@@ -120,9 +118,6 @@ class ui_menu extends Plugin
    ********************************************/
   function Output()
     {
-    global $MenuList;
-    global $MenuMaxDepth;
-
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     // Put your code here
     $V="";
@@ -136,7 +131,8 @@ class ui_menu extends Plugin
 	/* Depth 0 is special: position is relative, colors are blue */
 	$Depth = 0;
 	$Label = "";
-	if ($Depth < $MenuMaxDepth)
+	$Menu = menu_find("Main",$MenuDepth);
+	if ($Depth < $MenuDepth)
 	  {
 	  $V .= "\n/* CSS for Depth $Depth */\n";
 	  $Label = "ul#nav-" . $Depth;
@@ -158,7 +154,7 @@ class ui_menu extends Plugin
 	  }
 
 	/* Depth 1 is special: position is absolute. Left is 0, top is 24 */
-	if ($Depth < $MenuMaxDepth)
+	if ($Depth < $MenuDepth)
 	  {
 	  $V .= "\n/* CSS for Depth $Depth */\n";
 	  $V .= $Label . " ul.nav-" . $Depth . "\n";
@@ -181,7 +177,7 @@ class ui_menu extends Plugin
 	  }
 
 	/* Depth 2+ is recursive: position is absolute. Left is 150*(Depth-1), top is 0 */
-	for( ; $Depth < $MenuMaxDepth; $Depth++)
+	for( ; $Depth < $MenuDepth; $Depth++)
 	  {
 	  $V .= "\n/* CSS for Depth $Depth */\n";
 	  $V .= $Label . " ul.nav-" . $Depth . "\n";
@@ -205,7 +201,7 @@ class ui_menu extends Plugin
 	$V .= "</style>\n";
 
 	/* Then display the menu */
-	$V .= $this->menu_html($MenuList,0);
+	$V .= $this->menu_html($Menu,0);
         break;
       case "Text":
         break;
