@@ -34,6 +34,7 @@ class menu
   var $PluginName=NULL;	// name for the plugin
   var $Order=0;		// Used for ordering menu items
   var $Target=NULL;	// recommended name of window for showing results
+  var $MaxDepth=0;	// How deep is SubMenu?
   var $SubMenu=NULL;	// list to submenu list
   };
 
@@ -46,7 +47,7 @@ $MenuMaxDepth=0;	// how deep is the tree (for UI display)
 /*****************************************
  menu_cmp(): Compare two menu items for sorting.
  *****************************************/
-function menu_cmp($a,$b)
+function menu_cmp(&$a,&$b)
 {
   if ($a->Order > $b->Order)  { return(-1); }
   if ($a->Order < $b->Order)  { return(1); }
@@ -60,17 +61,14 @@ function menu_cmp($a,$b)
  If $PluginName is blank, nothing is added.
  $LastOrder is used for grouping items in order.
  ***********************************************/
-function menu_insert_r($Menu,$Path,$LastOrder,$Target,$PluginName,$Depth)
+function menu_insert_r(&$Menu,$Path,$LastOrder=0,$Target=NULL,$PluginName=NULL,$Depth)
 {
-  global $MenuMaxDepth;
-  global $MenuList;
-
   $AddNew=0;
-  $Order=-1;
   $PathParts = explode("::",$Path,2);
   if (!isset($PathParts[0]) || !strcmp($PathParts[0],""))
-	{ return; } // nothing to do
+	{ return(0); } // nothing to do
   if (!isset($PathParts[1])) { $Order = $LastOrder; }
+  else { $Order = -1; }
 
   /*****
    $Menu is the top of the list.
@@ -88,20 +86,22 @@ function menu_insert_r($Menu,$Path,$LastOrder,$Target,$PluginName,$Depth)
     }
 
   /* if it does not exist in the array, then add it */
-  if (!isset($M))
+  if (empty($M))
     {
     $AddNew=1;
     $M = new menu;
     $M->Name = $PathParts[0];
     }
-  else
-    {
-    }
 
   /* $M is set! See if we need to traverse submenus */
   if ($Order == -1)
     {
-    menu_insert_r(&$M->SubMenu,$PathParts[1],$LastOrder,$Target,$PluginName,$Depth+1);
+    $Depth = menu_insert_r($M->SubMenu,$PathParts[1],$LastOrder,$Target,$PluginName,$Depth+1);
+    $NewDepth = $Depth + 1;
+    if ($M->MaxDepth < $NewDepth)
+	{
+	$M->MaxDepth = $NewDepth;
+	}
     }
   else
     {
@@ -118,24 +118,50 @@ function menu_insert_r($Menu,$Path,$LastOrder,$Target,$PluginName,$Depth)
     usort($Menu,menu_cmp);
     }
 
+  global $MenuMaxDepth;
   if ($Depth+1 > $MenuMaxDepth) { $MenuMaxDepth=$Depth+1; }
+  return($M->MaxDepth);
 } // menu_insert_r()
 
 /***********************************************
  menu_insert(): Given a Path, order level for the last
  item, and optional plugin name, insert the menu item.
  ***********************************************/
-function menu_insert($Path,$LastOrder,$Target,$PluginName)
+function menu_insert($Path,$LastOrder=0,$Target=NULL,$PluginName=NULL)
 {
   global $MenuList;
   menu_insert_r(&$MenuList,$Path,$LastOrder,$Target,$PluginName,0);
 } // menu_insert()
 
 /***********************************************
+ menu_find(): Given a top-level menu name, return
+ the list of sub-menus below it and max depth of menu.
+ $Name may be a "::" separated list.
+ ***********************************************/
+function menu_find(&$Menu,$Name,&$MaxDepth)
+{
+  if (empty($Name)) { return($Menu); }
+  $PathParts = explode("::",$Path,2);
+  foreach($Menu as $Key => $Val)
+    {
+    if ($Val->Name == $PathParts[0])
+	{
+	if (empty($PathParts[1]))
+		{
+		$MaxDepth = $Val->MaxDepth;
+		return($Val->SubMenu);
+		}
+	else { return(menu_find($Val->SubMenu,$PathParts[1],$MaxDepth)); }
+	}
+    }
+  return(NULL);
+} // menu_find()
+
+/***********************************************
  menu_print(): Debugging code for printing the menu.
  This is recursive.
  ***********************************************/
-function menu_print($Menu,$Indent)
+function menu_print(&$Menu,$Indent)
 {
   if (!isset($Menu)) { return; }
   foreach($Menu as $Key => $Val)
