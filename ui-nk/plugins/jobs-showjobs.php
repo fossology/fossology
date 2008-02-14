@@ -46,6 +46,8 @@ class jobs_showjobs extends Plugin
    ***********************************************************/
   function RegisterMenus()
     {
+    menu_insert("Main::Admin::Scheduler::Job Queue Details",$this->MenuOrder,$this->Name . "&show=detail",$this->MenuTarget);
+
     // For the Browse menu, permit switching between detail and summary.
     $Show = GetParm("show",PARM_STRING);
     if (empty($Show)) { $Show = "summary"; }
@@ -86,34 +88,6 @@ class jobs_showjobs extends Plugin
         }
       }
     } // RegisterMenus()
-
-  /***********************************************************
-   PostInitialize(): This function is called before the plugin
-   is used and after all plugins have been initialized.
-   If there is any initialization step that is dependent on other
-   plugins, put it here.
-   Returns true on success, false on failure.
-   NOTE: Do not assume that the plugin exists!  Actually check it!
-   ***********************************************************/
-  function PostInitialize()
-    {
-    global $Plugins;
-    if ($this->State != PLUGIN_STATE_VALID) { return(0); } // don't run
-    // Make sure dependencies are met
-    foreach($this->Dependency as $key => $val)
-      {
-      $id = plugin_find_id($val);
-      if ($id < 0) { $this->Destroy(); return(0); }
-      }
-
-    // It worked, so mark this plugin as ready.
-    $this->State = PLUGIN_STATE_READY;
-    // Add this plugin to the menu
-    menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
-    menu_insert("Main::Admin::Scheduler::Job Queue Details",$this->MenuOrder,$this->Name . "&show=detail",$this->MenuTarget);
-    return($this->State == PLUGIN_STATE_READY);
-    }
-
 
   /***********************************************************
    DrawColors(): Display colors and labels.

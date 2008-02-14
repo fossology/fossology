@@ -164,7 +164,7 @@ function menu_find($Name,&$MaxDepth,$Menu=NULL)
  one HTML line.  This ignores submenus!
  If $ShowAll==0, then items without hyperlinks are hidden.
  ***********************************************/
-function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowAll=1)
+function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=1,$ShowAll=1)
 {
   $V = "";
   $First=1;
@@ -187,11 +187,27 @@ function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowAll=1)
       $First=0;
       }
     }
+
+  if ($ShowTraceback)
+    {
+    global $Plugins;
+    $Refresh = &$Plugins[plugin_find_id("refresh")];
+    if (!empty($Refresh))
+	{
+	if (!$First) { $V .= " | "; }
+	else { $First=0; }
+	$URL = Traceback_dir() . "?" . $Refresh->GetRefresh();
+	$V .= "<a href='$URL'>Traceback</a>";
+	}
+    }
+
   if ($ShowRefresh)
     {
     if (!$First) { $V .= " | "; }
+    else { $First=0; }
     $V .= "<a href='" . Traceback() . "'>Refresh</a>";
     }
+
   return($V);
 } // menu_to_1html()
 
