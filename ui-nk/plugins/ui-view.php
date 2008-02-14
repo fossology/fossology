@@ -25,7 +25,7 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 define("VIEW_BLOCK_HEX",8192);
-define("VIEW_BLOCK_TEXT",100*VIEW_BLOCK_HEX);
+define("VIEW_BLOCK_TEXT",-120*VIEW_BLOCK_HEX);
 define("MAXHIGHLIGHTCOLOR",8);
 
 class ui_view extends Plugin
@@ -67,27 +67,28 @@ class ui_view extends Plugin
 		break;
 	}
 
+    menu_insert("License-View::[BREAK]",-1);
     switch($Format)
       {
       case "hex":
-        menu_insert("License-View::Hex",12);
-        menu_insert("License-View::Text",11,"$URI&format=text&page=$PageText");
-        menu_insert("License-View::Formatted",10,"$URI&format=flow&page=$PageText");
+        menu_insert("License-View::Hex",-10);
+        menu_insert("License-View::Text",-11,"$URI&format=text&page=$PageText");
+        menu_insert("License-View::Formatted",-12,"$URI&format=flow&page=$PageText");
         break;
       case "text":
-        menu_insert("License-View::Hex",12,"$URI&format=hex&page=$PageHex");
-        menu_insert("License-View::Text",11);
-        menu_insert("License-View::Formatted",10,"$URI&format=flow&page=$PageText");
+        menu_insert("License-View::Hex",-10,"$URI&format=hex&page=$PageHex");
+        menu_insert("License-View::Text",-11);
+        menu_insert("License-View::Formatted",-12,"$URI&format=flow&page=$PageText");
         break;
       case "flow":
-        menu_insert("License-View::Hex",12,"$URI&format=hex&page=$PageHex");
-        menu_insert("License-View::Text",11,"$URI&format=text&page=$PageText");
-        menu_insert("License-View::Formatted",10);
+        menu_insert("License-View::Hex",-10,"$URI&format=hex&page=$PageHex");
+        menu_insert("License-View::Text",-11,"$URI&format=text&page=$PageText");
+        menu_insert("License-View::Formatted",-12);
         break;
       default:
-        menu_insert("License-View::Hex",12,"$URI&format=hex&page=$PageHex");
-        menu_insert("License-View::Text",11,"$URI&format=text&page=$PageText");
-        menu_insert("License-View::Formatted",10,"$URI&format=flow&page=$PageText");
+        menu_insert("License-View::Hex",-10,"$URI&format=hex&page=$PageHex");
+        menu_insert("License-View::Text",-11,"$URI&format=text&page=$PageText");
+        menu_insert("License-View::Formatted",-12,"$URI&format=flow&page=$PageText");
         break;
       }
     } // RegisterMenus()
