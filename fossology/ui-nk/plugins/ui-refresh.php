@@ -33,6 +33,18 @@ class ui_refresh extends Plugin
   var $Dependency=array("Default");
 
   /***********************************************************
+   GetRefresh(): Generate a Refresh URL.
+   ***********************************************************/
+  function GetRefresh()
+    {
+    $Mod = GetParm("mod",PARM_STRING);
+    $Opt = Traceback_parm(0);
+    $Opt = preg_replace("/&/","--",$Opt);
+    $V = "mod=" . $this->Name . "&remod=$Mod" . "&reopt=$Opt";
+    return($V);
+    } // GetRefresh()
+
+  /***********************************************************
    OutputOpen(): This function is called when user output is
    requested.  This function is responsible for assigning headers.
    ***********************************************************/
@@ -56,6 +68,7 @@ class ui_refresh extends Plugin
     $P = &$Plugins[plugin_find_id("Default")];
     $GoMod = GetParm("remod",PARM_STRING);
     $GoOpt = GetParm("reopt",PARM_STRING);
+    $GoOpt = preg_replace("/--/","&",$GoOpt);
     return($P->OutputRefresh($GoMod,$GoOpt));
     } // Output()
 

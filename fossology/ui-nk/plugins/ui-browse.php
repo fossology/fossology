@@ -59,6 +59,7 @@ class ui_browse extends Plugin
     $URI = $this->Name . Traceback_parm_keep(array("show","upload","item"));
     menu_insert("View::Browse",1,$URI);
     menu_insert("License::Browse",1,$URI);
+    menu_insert("License-View::Browse",1,$URI);
     } // RegisterMenus()
 
   /***********************************************************

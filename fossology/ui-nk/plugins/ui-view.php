@@ -45,29 +45,49 @@ class ui_view extends Plugin
     {
     // For the Browse menu, permit switching between detail and summary.
     $Format = GetParm("format",PARM_STRING);
+    $Page = GetParm("page",PARM_INTEGER);
+    if (empty($Page)) { $Page = 0; }
     $URI = Traceback_parm();
     $URI = preg_replace("/&format=[a-zA-Z0-9]*/","",$URI);
+    $URI = preg_replace("/&page=[0-9]*/","",$URI);
+
+    /***********************************
+     If there is paging, compute page conversions.
+     ***********************************/
+    switch($Format)
+	{
+	case 'hex':
+		$PageHex = $Page;
+		$PageText = intval($Page * VIEW_BLOCK_HEX / VIEW_BLOCK_TEXT);
+		break;
+	case 'text':
+	case 'flow':
+		$PageText = $Page;
+		$PageHex = intval($Page * VIEW_BLOCK_TEXT / VIEW_BLOCK_HEX);
+		break;
+	}
+
     switch($Format)
       {
       case "hex":
         menu_insert("License-View::Hex",12);
-        menu_insert("License-View::Text",11,"$URI&format=text");
-        menu_insert("License-View::Formatted",10,"$URI&format=flow");
+        menu_insert("License-View::Text",11,"$URI&format=text&page=$PageText");
+        menu_insert("License-View::Formatted",10,"$URI&format=flow&page=$PageText");
         break;
       case "text":
-        menu_insert("License-View::Hex",12,"$URI&format=hex");
+        menu_insert("License-View::Hex",12,"$URI&format=hex&page=$PageHex");
         menu_insert("License-View::Text",11);
-        menu_insert("License-View::Formatted",10,"$URI&format=flow");
+        menu_insert("License-View::Formatted",10,"$URI&format=flow&page=$PageText");
         break;
       case "flow":
-        menu_insert("License-View::Hex",12,"$URI&format=hex");
-        menu_insert("License-View::Text",11,"$URI&format=text");
+        menu_insert("License-View::Hex",12,"$URI&format=hex&page=$PageHex");
+        menu_insert("License-View::Text",11,"$URI&format=text&page=$PageText");
         menu_insert("License-View::Formatted",10);
         break;
       default:
-        menu_insert("License-View::Hex",12,"$URI&format=hex");
-        menu_insert("License-View::Text",11,"$URI&format=text");
-        menu_insert("License-View::Formatted",10,"$URI&format=flow");
+        menu_insert("License-View::Hex",12,"$URI&format=hex&page=$PageHex");
+        menu_insert("License-View::Text",11,"$URI&format=text&page=$PageText");
+        menu_insert("License-View::Formatted",10,"$URI&format=flow&page=$PageText");
         break;
       }
     } // RegisterMenus()
@@ -562,22 +582,6 @@ class ui_view extends Plugin
 			$Format = 'hex';
 		}
 	  break;
-	}
-
-    /***********************************
-     If there is paging, compute page conversions.
-     ***********************************/
-    switch($Format)
-	{
-	case 'hex':
-		$PageHex = $Page;
-		$PageText = intval($Page * VIEW_BLOCK_HEX / VIEW_BLOCK_TEXT);
-		break;
-	case 'text':
-	case 'flow':
-		$PageText = $Page;
-		$PageHex = intval($Page * VIEW_BLOCK_TEXT / VIEW_BLOCK_HEX);
-		break;
 	}
 
     /***********************************
