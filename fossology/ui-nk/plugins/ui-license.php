@@ -38,9 +38,14 @@ class ui_license extends Plugin
     {
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("show","upload","item"));
-    menu_insert("Browse::License",1,$URI);
-    menu_insert("View::License",1,$URI);
-    menu_insert("License-View::License",1,$URI);
+    $Item = GetParm("item",PARM_INTEGER);
+    $Upload = GetParm("upload",PARM_INTEGER);
+    if (!empty($Item) && !empty($Upload))
+      {
+      menu_insert("Browse::License",1,$URI);
+      menu_insert("View::License",1,$URI);
+      menu_insert("License-View::License",1,$URI);
+      }
     } // RegisterMenus()
 
   /***********************************************************

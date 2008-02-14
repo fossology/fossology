@@ -36,6 +36,9 @@ class ui_browse extends Plugin
    ***********************************************************/
   function RegisterMenus()
     {
+    $Upload = GetParm("upload",PARM_INTEGER);
+    if (empty($Upload)) { return; }
+
     // For the Browse menu, permit switching between detail and summary.
     $Show = GetParm("show",PARM_STRING);
     $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
