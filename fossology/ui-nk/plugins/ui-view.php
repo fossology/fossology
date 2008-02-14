@@ -225,7 +225,7 @@ class ui_view extends Plugin
 	{
 	$V .= "<b>" . ($i+1) . "</b> ";
 	}
-      else if (($i >= 0) && ($i < $MaxPage))
+      else if (($i >= 0) && ($i <= $MaxPage))
 	{
 	$V .= "<a href='$Uri&page=$i'>" . ($i+1) . "</a> ";
 	}
