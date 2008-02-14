@@ -113,11 +113,11 @@ class folder_move extends Plugin
 	/* Display the form */ 
 	$V .= "<form method='post'>\n"; // no url = this url
 	$V .= "<ol>\n";
-	$V .= "<li>Select the folder to move:  \n";
+	$V .= "<li>Select the source folder to move:  \n";
 	$V .= "<select name='oldfolderid'>\n";
 	$V .= FolderListOption(-1,0,0);
 	$V .= "</select><P />\n";
-	$V .= "<li>Select the <em>move to</em> folder name:  \n";
+	$V .= "<li>Select the destination folder:  \n";
 	$V .= "<select name='targetfolderid'>\n";
 	$V .= FolderListOption(-1,0);
 	$V .= "</select><P />\n";

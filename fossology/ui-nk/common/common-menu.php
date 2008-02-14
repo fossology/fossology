@@ -167,26 +167,7 @@ function menu_find($Name,&$MaxDepth,$Menu=NULL)
 function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=1,$ShowAll=1)
 {
   $V = "";
-  $First=1;
-  if (!empty($Menu))
-    {
-    foreach($Menu as $Val)
-      {
-      if (!empty($Val->URI))
-	{
-	if (!$First) { $V .= " | "; }
-	$V .= "<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "'>";
-	$V .= $Val->Name;
-	$V .= "</a>";
-	}
-      else if ($ShowAll)
-	{
-	if (!$First) { $V .= " | "; }
-	$V .= $Val->Name;
-	}
-      $First=0;
-      }
-    }
+  $Std = "";
 
   if ($ShowTraceback)
     {
@@ -194,20 +175,56 @@ function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=1,$ShowAll=1)
     $Refresh = &$Plugins[plugin_find_id("refresh")];
     if (!empty($Refresh))
 	{
-	if (!$First) { $V .= " | "; }
-	else { $First=0; }
 	$URL = Traceback_dir() . "?" . $Refresh->GetRefresh();
-	$V .= "<a href='$URL'>Traceback</a>";
+	$Std .= "<a href='$URL' target='_top'>Traceback</a>";
 	}
     }
 
   if ($ShowRefresh)
     {
-    if (!$First) { $V .= " | "; }
-    else { $First=0; }
-    $V .= "<a href='" . Traceback() . "'>Refresh</a>";
+    if (!empty($Std)) { $Std .= " | "; }
+    $Std .= "<a href='" . Traceback() . "'>Refresh</a>";
     }
 
+  $First=1;
+  if (!empty($Menu))
+    {
+    foreach($Menu as $Val)
+      {
+      if ($Val->Name == "[BREAK]")
+	{
+	if (!empty($Std))
+		{
+		if (!$First) { $V .= " | "; }
+		$V .= $Std;
+		$Std=NULL;
+		}
+	$V .= "<br>\n";
+	$First=1;
+	}
+      else if (!empty($Val->URI))
+	{
+	if (!$First) { $V .= " | "; }
+	$V .= "<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "'>";
+	$V .= $Val->Name;
+	$V .= "</a>";
+	$First=0;
+	}
+      else if ($ShowAll)
+	{
+	if (!$First) { $V .= " | "; }
+	$V .= $Val->Name;
+	$First=0;
+	}
+      }
+    }
+
+  if (!empty($Std))
+	{
+	if (!$First) { $V .= " | "; }
+	$V .= $Std;
+	$Std=NULL;
+	}
   return($V);
 } // menu_to_1html()
 

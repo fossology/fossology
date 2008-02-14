@@ -25,19 +25,6 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 /************************************************************
-Notes for creating common-jobs
-
-To add a job:
-
-JobInsert($upload_pk,$job_name,$depends=-1,$priority=0,$job_email_notify='fossy@localhost')
-  $depends = $jobpk
-  This will set job_depends if $depends != -1
-  Also need all of the values for jobqueue table:
-	jq_type,jq_args,jq_runonpfile
-
- ************************************************************/
-
-/************************************************************
  Terminology:
  Scheduled jobs are divided into a specific heirarchy.
    "Job"
@@ -163,6 +150,106 @@ function JobQueueAddDependency($JobQueueChild, $JobQueueParent)
   if (empty($DB)) { return; }
   $DB->Action("INSERT INTO jobdepends (jdep_jq_fk,jdep_jq_depends_fk,jdep_depends_bits) VALUES ('$JobQueueChild','$JobQueueParent',1);");
 } // JobQueueAddDependency()
+
+/************************************************************
+ JobAddUpload(): Insert a new upload record.
+ Returns upload_pk.
+ ************************************************************/
+function JobAddUpload ($job_name,$desc,$filename,$UploadMode,$FolderPk)
+{
+  global $DB;
+  if (empty($DB)) { return; }
+
+  $job_name = preg_replace("/'/","''",$job_name);
+  $desc = preg_replace("/'/","''",$desc);
+  $filename = preg_replace("/'/","''",$filename);
+
+  /* Insert the ufile record */
+  $Mode = (1<<27); // project
+  $Results = $DB->Action("SELECT ufile_pk FROM ufile
+	WHERE ufile_name = '$Name' AND ufile_mode = '$Mode';");
+  $ufilepk = $Results[0]['ufile_pk'];
+  if (empty($ufilepk))
+    {
+    $DB->Action("INSERT INTO ufile (ufile_name,ufile_mode) VALUES
+	('$Name',''Mode');");
+    $Results = $DB->Action("SELECT ufile_pk FROM ufile
+	WHERE ufile_name = '$Name' AND ufile_mode = '$Mode';");
+    $ufilepk = $Results[0]['ufile_pk'];
+    if (empty($ufilepk)) { return; }
+    }
+  
+  /* Create the upload record */
+  $Results = $DB->Action("SELECT upload_pk FROM upload
+	WHERE ufile_fk = '$ufilepk'
+	AND upload_filename = '$filename'
+	AND upload_mode = '$UploadMode';");
+  $uploadpk = $Results[0]['upload_pk'];
+  if (empty($uploadpk))
+    {
+    $DB->Action("INSERT INTO upload
+	(upload_desc,upload_filename,upload_mode,ufile_fk) VALUES
+	('$desc',''$filename','$UploadMode','$ufilepk');");
+    $Results = $DB->Action("SELECT upload_pk FROM upload
+	WHERE ufile_fk = '$ufilepk'
+	AND upload_filename = '$filename'
+	AND upload_mode = '$UploadMode';");
+    $uploadpk = $Results[0]['upload_pk'];
+    if (empty($uploadpk)) { return; }
+    }
+
+  /* Add the upload record to the folder */
+/**** TBD ****/
+  $Results = $DB->Action("SELECT upload_pk FROM upload
+	WHERE ufile_fk = '$ufilepk'
+	AND upload_filename = '$filename'
+	AND upload_mode = '$UploadMode';");
+  $uploadpk = $Results[0]['upload_pk'];
+  if (empty($uploadpk))
+    {
+    $DB->Action("INSERT INTO upload
+	(upload_desc,upload_filename,upload_mode,ufile_fk) VALUES
+	('$desc',''$filename','$UploadMode','$ufilepk');");
+    $Results = $DB->Action("SELECT upload_pk FROM upload
+	WHERE ufile_fk = '$ufilepk'
+	AND upload_filename = '$filename'
+	AND upload_mode = '$UploadMode';");
+    $uploadpk = $Results[0]['upload_pk'];
+    if (empty($uploadpk)) { return; }
+    }
+
+
+  return($uploadpk);
+} // JobAddUpload()
+
+/************************************************************
+ JobAddJob(): Insert a new job type (not a jobqueue item).
+ NOTE: If the Job already exists, then it will not be added again.
+ Returns the job_pk.
+ ************************************************************/
+function JobAddJob ($upload_pk, $job_name,
+		    $priority=0,
+		    $job_submitter="fossy@localhost",
+		    $job_email_notify="fossy@localhost")
+{
+  global $DB;
+  if (empty($DB)) { return; }
+  $Results = $DB->Action("SELECT job_pk FROM job WHERE job_upload_fk = '$upload_pk' AND job_name = '$job_name';");
+  $jobpk = $Results[0]['job_pk'];
+  if (!empty($jobpk)) { return($jobpk); }
+
+  $job_submitter = preg_replace("/'/","''",$job_submitter);
+  $job_email_notify = preg_replace("/'/","''",$job_email_notify);
+  $job_name = preg_replace("/'/","''",$job_name);
+
+  $DB->Action("INSERT INTO job
+	(job_submitter,job_queued,job_priority,job_email_notify,job_name,job_upload_fk) VALUE
+	('$job_submitter','now()','$priority','$job_email_notify','$job_name','$upload_pk');");
+
+  $Results = $DB->Action("SELECT job_pk FROM job WHERE job_upload_fk = '$upload_pk' AND job_name = '$job_name';");
+  $jobpk = $Results[0]['job_pk'];
+  return($jobpk);
+} // JobAddJob()
 
 /************************************************************
  JobQueueAdd(): Insert a jobqueue item.

@@ -40,18 +40,19 @@ class ui_browse extends Plugin
     if (empty($Upload)) { return; }
 
     // For the Browse menu, permit switching between detail and summary.
+    menu_insert("Browse::[BREAK]",-1,"$URI&show=summary");
     $Show = GetParm("show",PARM_STRING);
     $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
     switch($Show)
       {
       case "detail":
-	menu_insert("Browse::Summary",10,"$URI&show=summary");
-	menu_insert("Browse::Detail",10);
+	menu_insert("Browse::Summary",-10,"$URI&show=summary");
+	menu_insert("Browse::Detail",-10);
 	break;
       case "summary":
       default:
-	menu_insert("Browse::Summary",10);
-	menu_insert("Browse::Detail",10,"$URI&show=detail");
+	menu_insert("Browse::Summary",-10);
+	menu_insert("Browse::Detail",-10,"$URI&show=detail");
 	break;
       }
 
