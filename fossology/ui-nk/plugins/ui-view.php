@@ -204,15 +204,16 @@ class ui_view extends Plugin
     if (!$Fin) return;
     $Stat = fstat($Fin);
     $MaxSize = $Stat['size'];
+    $MaxPage = intval($MaxSize / $PageSize);
     $V = "<font class='text'>";
     $CurrSize = $CurrPage * $PageSize;
 
     $Pages=0; /* How many pages are there? */
 
-    if ($CurrPage * $PageSize >= $MaxSize) { $CurrPage = 0; }
+    if ($CurrPage * $PageSize >= $MaxSize) { $CurrPage = 0; $CurrSize = 0; }
     if ($CurrPage < 0) { $CurrPage = 0; }
 
-    if (($CurrPage-1) * $PageSize >= 0)
+    if (($CurrPage-1) >= 0)
 	{
 	$V .= "<a href='$Uri&page=0'>[First]</a> ";
 	$V .= "<a href='$Uri&page=" . ($CurrPage-1) . "'>[Prev]</a> ";
@@ -224,12 +225,12 @@ class ui_view extends Plugin
 	{
 	$V .= "<b>" . ($i+1) . "</b> ";
 	}
-      else if (($i * $PageSize >= 0) && ($i * $PageSize < $MaxSize))
+      else if (($i >= 0) && ($i < $MaxPage))
 	{
 	$V .= "<a href='$Uri&page=$i'>" . ($i+1) . "</a> ";
 	}
       }
-    if (($CurrPage+1) * $PageSize < $MaxSize)
+    if ($CurrPage+1 < $MaxPage)
 	{
 	$V .= "<a href='$Uri&page=" . ($CurrPage+1) . "'>[Next]</a>";
 	$V .= "<a href='$Uri&page=" . (intval(($MaxSize-1)/$PageSize)) . "'>[Last]</a>";
