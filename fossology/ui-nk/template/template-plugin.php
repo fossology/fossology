@@ -276,7 +276,7 @@ class Plugin
 	if (!empty($Title)) { $V .= "<title>" . htmlentities($Title) . "</title>\n"; }
 	$V .= "<link rel='stylesheet' href='fossology.css'>\n";
 	$V .= "</head>\n";
-	$V .= "<body>\n";
+	$V .= "<body class='text'>\n";
 	break;
       case "Text":
 	break;
