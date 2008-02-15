@@ -155,7 +155,7 @@ function JobQueueAddDependency($JobQueueChild, $JobQueueParent)
  JobAddUpload(): Insert a new upload record.
  Returns upload_pk.
  ************************************************************/
-function JobAddUpload ($job_name,$desc,$filename,$UploadMode,$FolderPk)
+function JobAddUpload ($job_name,$filename,$desc,$UploadMode,$FolderPk)
 {
   global $DB;
   if (empty($DB)) { return; }
@@ -164,19 +164,25 @@ function JobAddUpload ($job_name,$desc,$filename,$UploadMode,$FolderPk)
   $desc = preg_replace("/'/","''",$desc);
   $filename = preg_replace("/'/","''",$filename);
 
+  $DB->Action("BEGIN;");
+
+  /* Make sure folder record exists */
+  $Results = $DB->Action("SELECT folder_pk FROM folder WHERE folder_pk = '$FolderPk';");
+  if (empty($Results[0]['folder_pk'])) { $DB->Action("ROLLBACK"); return; }
+
   /* Insert the ufile record */
   $Mode = (1<<27); // project
   $Results = $DB->Action("SELECT ufile_pk FROM ufile
-	WHERE ufile_name = '$Name' AND ufile_mode = '$Mode';");
+	WHERE ufile_name = '$job_name' AND ufile_mode = '$Mode';");
   $ufilepk = $Results[0]['ufile_pk'];
   if (empty($ufilepk))
     {
-    $DB->Action("INSERT INTO ufile (ufile_name,ufile_mode) VALUES
-	('$Name',''Mode');");
+    $DB->Action("INSERT INTO ufile (ufile_name,ufile_mode,ufile_container_fk) VALUES
+	('$job_name','$Mode','$FolderPk');");
     $Results = $DB->Action("SELECT ufile_pk FROM ufile
-	WHERE ufile_name = '$Name' AND ufile_mode = '$Mode';");
+	WHERE ufile_name = '$job_name' AND ufile_mode = '$Mode';");
     $ufilepk = $Results[0]['ufile_pk'];
-    if (empty($ufilepk)) { return; }
+    if (empty($ufilepk)) { $DB->Action("ROLLBACK"); return; }
     }
   
   /* Create the upload record */
@@ -189,36 +195,34 @@ function JobAddUpload ($job_name,$desc,$filename,$UploadMode,$FolderPk)
     {
     $DB->Action("INSERT INTO upload
 	(upload_desc,upload_filename,upload_mode,ufile_fk) VALUES
-	('$desc',''$filename','$UploadMode','$ufilepk');");
+	('$desc','$filename','$UploadMode','$ufilepk');");
     $Results = $DB->Action("SELECT upload_pk FROM upload
 	WHERE ufile_fk = '$ufilepk'
 	AND upload_filename = '$filename'
 	AND upload_mode = '$UploadMode';");
     $uploadpk = $Results[0]['upload_pk'];
-    if (empty($uploadpk)) { return; }
+    if (empty($uploadpk)) { $DB->Action("ROLLBACK"); return; }
     }
 
   /* Add the upload record to the folder */
-/**** TBD ****/
-  $Results = $DB->Action("SELECT upload_pk FROM upload
-	WHERE ufile_fk = '$ufilepk'
-	AND upload_filename = '$filename'
-	AND upload_mode = '$UploadMode';");
-  $uploadpk = $Results[0]['upload_pk'];
-  if (empty($uploadpk))
+  /** Mode == 2 means child_id is upload_pk **/
+  $Results = $DB->Action("SELECT * FROM foldercontents
+	WHERE parent_fk = '$FolderPk'
+	AND foldercontents_mode = 2
+	AND child_id = '$uploadpk';");
+  if (empty($Results[0]['foldercontents_pk']))
     {
-    $DB->Action("INSERT INTO upload
-	(upload_desc,upload_filename,upload_mode,ufile_fk) VALUES
-	('$desc',''$filename','$UploadMode','$ufilepk');");
-    $Results = $DB->Action("SELECT upload_pk FROM upload
-	WHERE ufile_fk = '$ufilepk'
-	AND upload_filename = '$filename'
-	AND upload_mode = '$UploadMode';");
-    $uploadpk = $Results[0]['upload_pk'];
-    if (empty($uploadpk)) { return; }
+    $DB->Action("INSERT INTO foldercontents
+	(parent_fk,foldercontents_mode,child_id) VALUES
+	('$FolderPk',2,'$uploadpk');");
+    $Results = $DB->Action("SELECT * FROM foldercontents
+	WHERE parent_fk = '$FolderPk'
+	AND foldercontents_mode = 2
+	AND child_id = '$uploadpk';");
+    if (empty($Results[0]['foldercontents_pk'])) { $DB->Action("ROLLBACK"); return; }
     }
 
-
+  $DB->Action("COMMIT;");
   return($uploadpk);
 } // JobAddUpload()
 
@@ -243,8 +247,8 @@ function JobAddJob ($upload_pk, $job_name,
   $job_name = preg_replace("/'/","''",$job_name);
 
   $DB->Action("INSERT INTO job
-	(job_submitter,job_queued,job_priority,job_email_notify,job_name,job_upload_fk) VALUE
-	('$job_submitter','now()','$priority','$job_email_notify','$job_name','$upload_pk');");
+	(job_submitter,job_queued,job_priority,job_email_notify,job_name,job_upload_fk) VALUES
+	('$job_submitter',now(),'$priority','$job_email_notify','$job_name','$upload_pk');");
 
   $Results = $DB->Action("SELECT job_pk FROM job WHERE job_upload_fk = '$upload_pk' AND job_name = '$job_name';");
   $jobpk = $Results[0]['job_pk'];
@@ -256,18 +260,12 @@ function JobAddJob ($upload_pk, $job_name,
  $Depends is an ARRAY that lists one or more jobqueue_pk's.
  Returns the new jobqueue key.
  ************************************************************/
-function JobQueueAdd ($upload_pk, $job_name,
-		      $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $Depends)
+function JobQueueAdd ($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $Depends)
 {
   global $DB;
   if (empty($DB)) { return; }
 
-  /* Find the job key */
-  $Results = $DB->Action("SELECT job_pk FROM job
-	WHERE job_name = '$job_name'
-	AND job_upload_fk = '$upload_pk';");
-  $job_pk = $Results[0]['job_pk'];
-  if (empty($job_pk)) { return; }
+  $DB->Action("BEGIN");
 
   /* Make sure all dependencies exist */
   if (is_array($Depends))
@@ -276,21 +274,25 @@ function JobQueueAdd ($upload_pk, $job_name,
 	{
 	if (empty($D)) { continue; }
 	$Results = $DB->Action("SELECT jq_pk FROM jobqueue WHERE jq_pk = '$D';");
-	if (empty($Results[0]['jq_pk'])) { return; }
+	if (empty($Results[0]['jq_pk'])) { $DB->Action("ROLLBACK;"); return; }
 	}
     }
 
   /* Add the job */
   $jq_args = preg_replace("/'/","''",$jq_args); // protect variables
-  $DB->Action("INSERT INTO jobqueue
-	(jq_job_fk,jq_type,jq_args,jq_repeat,jq_runonpfile) VALUES
-	('$job_pk','$jq_type','$jq_args','$jq_repeat','$jq_runonpfile');");
+  $SQL = "INSERT INTO ";
+  $SQL .= "jobqueue (jq_job_fk,jq_type,jq_args,jq_repeat,jq_runonpfile) VALUES ";
+  $SQL .= "('$job_pk','$jq_type','$jq_args','$jq_repeat',";
+  if (empty($jq_runonpfile)) { $SQL .= "NULL"; }
+  else { $SQL .= "'$jq_runonpfile'"; }
+  $SQL .= ");";
+  $DB->Action($SQL);
 
   /* Find the job that was just added */
   $Results = $DB->Action("SELECT jq_pk FROM jobqueue
-	WHERE jq_job_fk = '$job_pk' AND jq_type = 'jq_type';");
+	WHERE jq_job_fk = '$job_pk' AND jq_type = '$jq_type';");
   $jqpk = $Results[0]['jq_pk'];
-  if (empty($jqpk)) { return; }
+  if (empty($jqpk)) { $DB->Action("ROLLBACK;"); return; }
 
   /* Add dependencies */
   if (is_array($Depends))
@@ -298,13 +300,25 @@ function JobQueueAdd ($upload_pk, $job_name,
     foreach($Depends as $D)
 	{
 	if (empty($D)) { continue; }
-	$DB->Action("INSERT INTO jobdepends
+        $Results = $DB->Action("SELECT * FROM jobdepends
+		WHERE jdep_jq_fk = '$jqpk'
+		AND jdep_jq_depends_fk = '$D'
+		AND jdep_depends_bits = 1;");
+	if (empty($Results[0]['jdep_jq_fk']))
+	  {
+	  $DB->Action("INSERT INTO jobdepends
 		(jdep_jq_fk,jdep_jq_depends_fk,jdep_depends_bits) VALUES
 		('$jqpk','$D',1);");
-	if (empty($Results[0]['jq_pk'])) { return; }
+          $Results = $DB->Action("SELECT * FROM jobdepends
+		WHERE jdep_jq_fk = '$jqpk'
+		AND jdep_jq_depends_fk = '$D'
+		AND jdep_depends_bits = 1;");
+	  }
+	if (empty($Results[0]['jdep_jq_fk'])) { $DB->Action("ROLLBACK;"); return; }
 	}
     }
 
+  $DB->Action("COMMIT;");
   return($jqpk);
 } // JobQueueAdd()
 

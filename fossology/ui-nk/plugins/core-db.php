@@ -30,6 +30,8 @@ class db_access extends Plugin
   var $Name="db";
   var $Version="1.0";
 
+  var $Debug=0;
+
   var $_pg_conn = NULL;
 
   /***********************************************************
@@ -82,6 +84,7 @@ class db_access extends Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
+    if ($this->Debug) { print "DB.Action('$Command')\n"; }
     $result = pg_query($this->_pg_conn,$Command);
     if (!isset($result)) return;
     $rows = pg_fetch_all($result);
@@ -97,6 +100,7 @@ class db_access extends Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
+    if ($this->Debug) { print "DB.Execute('$Prep','$Command')\n"; }
     $result = pg_execute($this->_pg_conn,$Prep,$Command);
     if (!isset($result)) return;
     $rows = pg_fetch_all($result);
@@ -113,6 +117,7 @@ class db_access extends Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
+    if ($this->Debug) { print "DB.Prepare('$Prep','$Command')\n"; }
     $result = pg_prepare($this->_pg_conn,$Prep,$Command);
     return;
     }
