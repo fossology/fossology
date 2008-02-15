@@ -100,7 +100,9 @@ class agent_unpack extends Plugin
 		  SELECT upload_pk FROM upload
 		  INNER JOIN job ON job.job_upload_fk = upload.upload_pk
 		  INNER JOIN jobqueue ON jobqueue.jq_job_fk = job.job_pk
-		    AND job_name = 'unpack' ORDER BY upload_pk
+		    AND job.job_name = 'unpack'
+		    AND jobqueue.jq_type = 'unpack'
+		    ORDER BY upload_pk
 		)
 		ORDER BY upload_pk DESC;";
 	$Results = $DB->Action($SQL);

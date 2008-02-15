@@ -226,7 +226,8 @@ function plugin_load($PlugDir)
 
   /* Now activate the plugins */
   plugin_sort();
-  foreach($Plugins as $Key => $Val)
+  $Count = count($Plugins);
+  for($Key=0; $Key < $Count; $Key++)
     {
     $P = &$Plugins[$Key];
     if ($P->State == PLUGIN_STATE_VALID) { $P->PostInitialize(); }

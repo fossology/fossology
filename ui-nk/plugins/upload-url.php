@@ -47,7 +47,8 @@ class upload_url extends Plugin
     if (preg_match("@[[:space:]]@",$GetURL) != 0)
 	{ return("Invalid URL (no spaces permitted): " . htmlentities($GetURL)); }
 
-    $ShortName = preg_replace("@^.*/@","",$ShortName);
+    if (empty($Name)) { $Name = preg_replace("@^.*/@","",$GetURL); }
+    $ShortName = preg_replace("@^.*/@","",$Name);
     if (empty($ShortName)) { $ShortName = $Name; }
 
     /* Create an upload record. */

@@ -31,6 +31,25 @@ class core_debug_menus extends Plugin
   var $MenuList="Admin::Debug Menus";
 
   /***********************************************************
+   Menu2HTML(): Display the full menu as an ordered list.
+   This is recursive.
+   ***********************************************************/
+  function Menu2HTML(&$Menu)
+    {
+    print "<ol>\n";
+    foreach($Menu as $M)
+      {
+      print "<li>" . htmlentities($M->Name);
+      print " (" . htmlentities($M->Order);
+      print " -- " . htmlentities($M->URI);
+      print " @ " . htmlentities($M->Target);
+      print ")\n";
+      if (!empty($M->SubMenu)) { $this->Menu2HTML($M->SubMenu); }
+      }
+    print "</ol>\n";
+    } // Menu2HTML()
+
+  /***********************************************************
    Output(): Display the loaded menu and plugins.
    ***********************************************************/
   function Output()
@@ -44,6 +63,8 @@ class core_debug_menus extends Plugin
         break;
       case "HTML":
 	$V .= "<H1>Menu Details</H1>";
+	$this->Menu2HTML($MenuList);
+	$V .= "<hr>\n";
 	$V .= "<pre>";
 	$V .= print_r($MenuList,1);
 	$V .= "</pre>";

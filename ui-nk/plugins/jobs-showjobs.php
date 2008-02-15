@@ -55,18 +55,19 @@ class jobs_showjobs extends Plugin
     if (empty($History)) { $History = 0; }
     $URI = $this->Name;
 
+    menu_insert("JobDetails::[BREAK]",1);
     switch($Show)
       {
       case "detail":
-        menu_insert("JobDetails::Summary",11,"$URI&show=summary&history=$History");
-        menu_insert("JobDetails::Detail",11);
+        menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History");
+        menu_insert("JobDetails::Detail",-2);
         break;
       case "summary":
-        menu_insert("JobDetails::Summary",11);
-        menu_insert("JobDetails::Detail",11,"$URI&show=detail&history=$History");
+        menu_insert("JobDetails::Summary",-2);
+        menu_insert("JobDetails::Detail",-2,"$URI&show=detail&history=$History");
 	break;
       case "job":
-        menu_insert("JobDetails::Jobs",11,"$URI&show=summary&history=$History");
+        menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History");
 	break;
       default:
         break;
@@ -74,16 +75,17 @@ class jobs_showjobs extends Plugin
 
     if ($Show != "job")
       {
+      menu_insert("JobDetails::[BREAK]",-10);
       switch($History)
         {
         case "0":
-          menu_insert("JobDetails::History",10,"$URI&show=$Show&history=1");
-          menu_insert("JobDetails::Active",10);
+          menu_insert("JobDetails::History",-11,"$URI&show=$Show&history=1");
+          menu_insert("JobDetails::Active",-11);
           break;
         case "1":
         default:
-          menu_insert("JobDetails::History",10);
-          menu_insert("JobDetails::Active",10,"$URI&show=$Show&history=0");
+          menu_insert("JobDetails::History",-11);
+          menu_insert("JobDetails::Active",-11,"$URI&show=$Show&history=0");
           break;
         }
       }
