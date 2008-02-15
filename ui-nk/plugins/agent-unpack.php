@@ -120,7 +120,6 @@ class agent_unpack extends Plugin
 	    if (empty($Row['upload_pk'])) { continue; }
 	    if (empty($Row['upload_desc'])) { $Name = $Row['upload_filename']; }
 	    else { $Name = $Row['upload_desc'] . " (" . $Row['upload_filename'] . ")"; }
-	    $Name = str_replace("'","\'",$Name);
 	    $V .= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
 	    }
 	  $V .= "</select><P />\n";
