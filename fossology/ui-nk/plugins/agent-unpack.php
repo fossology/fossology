@@ -28,7 +28,7 @@ class agent_unpack extends Plugin
 {
   public $Type       = PLUGIN_UI;
   public $Name       = "agent_unpack";
-  public $Title      = "Schedule an Upload";
+  public $Title      = "Schedule an Unpack";
   public $MenuList   = "Tools::Agents::Unpack";
   public $Version    = "1.0";
   public $Dependency = array("db");
