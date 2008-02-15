@@ -113,7 +113,7 @@ class ui_browse extends Plugin
         $CountChildren++;
 	if (Isartifact($C['ufile_mode']))
 	  {
-	  if (!Isdir($C['ufile_mode']) && ($C['ufile_name'] == "artifact.meta"))
+	  if (!Isdir($C['ufile_mode']) && (!strcmp($C['ufile_name'],"artifact.meta")))
 		{
 		$Meta = Traceback_uri() . "?mod=view&upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
 		}

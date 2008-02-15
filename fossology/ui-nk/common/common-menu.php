@@ -81,7 +81,16 @@ function menu_insert_r(&$Menu,$Path,$LastOrder=0,$Target=NULL,$URI=NULL,$Depth)
     {
     foreach($Menu as $Key => $Val)
       {
-      if (!strcmp($Val->Name,$PathParts[0])) { $M = &$Menu[$Key]; break;}
+      if (!strcmp($Val->Name,$PathParts[0]) && strcmp($Val->Name,"[BREAK]"))
+	{
+	$M = &$Menu[$Key];
+	break;
+	}
+      else if (!strcmp($Val->Name,"[BREAK]") && ($Val->Order == $Order))
+	{
+	$M = &$Menu[$Key];
+	break;
+	}
       }
     }
 

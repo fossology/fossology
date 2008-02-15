@@ -66,7 +66,7 @@ function JobGetPriority($upload_pk,$job_name)
 {
   global $DB;
   if (empty($DB)) { return; }
-  $Name = preg_replace("/'/","''",$job_name); // SQL taint string
+  $Name = str_replace("'","''",$job_name); // SQL taint string
   $Results = $DB->Action("SELECT job_priority FROM job WHERE job_upload_fk = '$upload_pk' AND job_name = '$Name' ORDER BY job_queued ASC LIMIT 1;");
   return($Results[0]['job_priority']);
 } // JobGetPriority()
@@ -79,7 +79,7 @@ function JobSetPriority($upload_pk,$job_name,$priority)
 {
   global $DB;
   if (empty($DB)) { return; }
-  $Name = preg_replace("/'/","''",$job_name); // SQL taint string
+  $Name = str_replace("'","''",$job_name); // SQL taint string
   $DB->Action("UPDATE job_priority SET job_priority = '$priority' WHERE job_upload_fk = '$upload_pk' AND job_name = '$Name';");
 } // JobSetPriority()
 
@@ -92,7 +92,7 @@ function JobGetType($upload_pk,$job_name)
 {
   global $DB;
   if (empty($DB)) { return; }
-  $Name = preg_replace("/'/","''",$job_name); // SQL taint string
+  $Name = str_replace("'","''",$job_name); // SQL taint string
   $Results = $DB->Action("SELECT job_pk FROM job WHERE job_upload_fk = '$upload_pk' AND job_name = '$Name' ORDER BY job_queued DESC LIMIT 1;");
   return($Results[0]['job_pk']);
 } // JobGetType()
@@ -115,9 +115,9 @@ function JobSetType($upload_pk,$job_name,
   if (!empty($JobPk)) { return ($JobPk); }
 
   /* Does not exist; go ahead and create it.
-  $Name = preg_replace("/'/","''",$job_name); // SQL taint string
-  $Submitter = preg_replace("/'/","''",$job_submitter); // SQL taint string
-  $Notify = preg_replace("/'/","''",$job_email_notify); // SQL taint string
+  $Name = str_replace("'","''",$job_name); // SQL taint string
+  $Submitter = str_replace("'","''",$job_submitter); // SQL taint string
+  $Notify = str_replace("'","''",$job_email_notify); // SQL taint string
   $DB->Action("INSERT INTO job (job_upload_fk,job_name,job_priority,job_submitter,job_email_notify) VALUES ('$upload_pk','$Name','$priority','$Submitter','$Notify');");
 
   /* In case of duplicate inserts (race condition), go get it again */
@@ -160,9 +160,9 @@ function JobAddUpload ($job_name,$filename,$desc,$UploadMode,$FolderPk)
   global $DB;
   if (empty($DB)) { return; }
 
-  $job_name = preg_replace("/'/","''",$job_name);
-  $desc = preg_replace("/'/","''",$desc);
-  $filename = preg_replace("/'/","''",$filename);
+  $job_name = str_replace("'","''",$job_name);
+  $filename = str_replace("'","''",$filename);
+  $desc = str_replace("'","''",$desc);
 
   $DB->Action("BEGIN;");
 
@@ -242,9 +242,9 @@ function JobAddJob ($upload_pk, $job_name,
   $jobpk = $Results[0]['job_pk'];
   if (!empty($jobpk)) { return($jobpk); }
 
-  $job_submitter = preg_replace("/'/","''",$job_submitter);
-  $job_email_notify = preg_replace("/'/","''",$job_email_notify);
-  $job_name = preg_replace("/'/","''",$job_name);
+  $job_submitter = str_replace("'","''",$job_submitter);
+  $job_email_notify = str_replace("'","''",$job_email_notify);
+  $job_name = str_replace("'","''",$job_name);
 
   $DB->Action("INSERT INTO job
 	(job_submitter,job_queued,job_priority,job_email_notify,job_name,job_upload_fk) VALUES
@@ -278,21 +278,28 @@ function JobQueueAdd ($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $
 	}
     }
 
-  /* Add the job */
-  $jq_args = preg_replace("/'/","''",$jq_args); // protect variables
-  $SQL = "INSERT INTO ";
-  $SQL .= "jobqueue (jq_job_fk,jq_type,jq_args,jq_repeat,jq_runonpfile) VALUES ";
-  $SQL .= "('$job_pk','$jq_type','$jq_args','$jq_repeat',";
-  if (empty($jq_runonpfile)) { $SQL .= "NULL"; }
-  else { $SQL .= "'$jq_runonpfile'"; }
-  $SQL .= ");";
-  $DB->Action($SQL);
-
-  /* Find the job that was just added */
+  /* Check if the job exists */
   $Results = $DB->Action("SELECT jq_pk FROM jobqueue
 	WHERE jq_job_fk = '$job_pk' AND jq_type = '$jq_type';");
   $jqpk = $Results[0]['jq_pk'];
-  if (empty($jqpk)) { $DB->Action("ROLLBACK;"); return; }
+  if (empty($jqpk))
+    {
+    /* Add the job */
+    $jq_args = str_replace("'","''",$jq_args); // protect variables
+    $SQL = "INSERT INTO jobqueue ";
+    $SQL .= "(jq_job_fk,jq_type,jq_args,jq_repeat,jq_runonpfile,jq_starttime,jq_endtime,jq_end_bits) VALUES ";
+    $SQL .= "('$job_pk','$jq_type','$jq_args','$jq_repeat',";
+    if (empty($jq_runonpfile)) { $SQL .= "NULL"; }
+    else { $SQL .= "'$jq_runonpfile'"; }
+    $SQL .= ",NULL,NULL,0);";
+    $DB->Action($SQL);
+
+    /* Find the job that was just added */
+    $Results = $DB->Action("SELECT jq_pk FROM jobqueue
+	WHERE jq_job_fk = '$job_pk' AND jq_type = '$jq_type';");
+    $jqpk = $Results[0]['jq_pk'];
+    if (empty($jqpk)) { $DB->Action("ROLLBACK;"); return; }
+    }
 
   /* Add dependencies */
   if (is_array($Depends))
