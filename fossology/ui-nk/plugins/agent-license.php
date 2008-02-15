@@ -126,7 +126,6 @@ class agent_license extends Plugin
 	break;
       case "HTML":
 	$V .= "<H1>$this->Title</H1>\n";
-$V .= "<H1>DO NOT USE</H1>\n";
 	/* If this is a POST, then process the request. */
 	$uploadpk = GetParm('upload',PARM_INTEGER);
 	if (!empty($uploadpk))
