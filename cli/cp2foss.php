@@ -123,9 +123,10 @@ if ($argc < 2) {
   exit(1);
 }
 
-$fflag = 0;
-$cap_a = false;
-$dashD = false;
+$fflag   = 0;
+$cap_a   = false;
+$dashD   = false;
+$recurse = false;
 
 for ($i = 1; $i < $argc; $i++) {
   switch ($argv[$i]) {
@@ -182,6 +183,9 @@ for ($i = 1; $i < $argc; $i++) {
         die("ERROR: Must specify a folder path after -p");
       }
       break;
+    case '-R':
+      $recurse = TRUE;
+      break;
     case '-w':
       $fetch_url = true;
       break;
@@ -220,7 +224,6 @@ if($fflag){
   read_parms_file($in_file);
   exit;
 }
-// BUG: need to parameter check, did we get all required parameters?
 // pdbg("MAIN: checking parameters");
 if (!(isset($fpath))){
   echo "ERROR, -p <parent-folder> is a required parameter\n$usage";
@@ -251,22 +254,35 @@ if ($dashD != True){
  1. default parent folder
  2. no description, create as needed
  3. any special setups needed for recursion?
- - folder-path: e.g Fedora-8 or FreshMeat
- - folder: The name passed in to use for the archive file folder
- - For example, if -p FreshMeat -n buzzard is passed in, the following
- folder structure will be created.
-
- <top/root folder>.../FreshMeat/a-c/buzzard
 
  */
 
 /*
- * Stub for recursion
- if($recurse_flag){
- // if it's a file, print warning, but process anyway.
- // check if the dir pointed to in archive, exists.
- //
- }
+ * is the archive a dir? If so, we suck up the files in it unless
+ * recurse is turned on.  Function suckupfs returns false or the tar'ed
+ * archive it created.
+ */
+
+if(is_dir($archive)){
+  //pdbg("Calling suckupfs");
+  if ($recurse){
+    $archive = suckupfs($archive, $recurse);
+  }
+  else {
+    $archive = suckupfs($archive);
+  }
+}
+//pdbg("MAIN: archive is:$archive");
+// make sure we didn't get a false from suckupfs.
+if (!$archive){
+  echo
+   "ERROR: there is something wrong with the archive\n\$archive is:$archive\n";
+  exit(1);
+}
+/*
+ * pseudo code: for what goes here.
+ * do we even care?  at this point the archive is either a compressed file
+ * or a url or a file... either way, we can load it.
  */
 
 // It's either a url or an archive
@@ -287,7 +303,7 @@ if($fetch_url){
 }
 // if archive doesn't exist, stop.
 elseif(!(ck_archive($archive))){
-  echo "Stopping, can't find archive\n";
+  echo "Stopping, can't process archive\n";
   exit(1);
 }
 
@@ -358,6 +374,9 @@ else{
   if (!(upload_archive($folder_fk, $folder, $description, $archive))){
     echo "Unrecoverable error, during upload\n";
     exit(1);
+  }
+  else {
+    echo "The jobs for the archive\n$archive\nfound in $archive have been scheduled\n\n";
   }
 }
 
@@ -617,7 +636,7 @@ function create_parent($folder){
 function get_fpath_keys($folder_path){
 
   if (empty($folder_path)){
-    echo "DBG->GFK: returning due to empty input\n";
+    //echo "DBG->GFK: returning due to empty input\n";
     return(false);
   }
   //  echo "DBG->get_fpath_keys: \$folder_paht on entry is:\n";
@@ -682,23 +701,86 @@ function get_fpath_keys($folder_path){
   return($folder_cache);
 }
 
-
 /**
- * function: process_directory
+ * function: suckupfs
  *
- * process a directory entry, uploading all files and links in the directory.
+ * process a directory entry, tar up all files in the directory.
  * Unless recursion is specified (-r), subdirectories are not processed.
+ * If recursion is specified, everything under the directory is tared up
+ * and uploaded.
  *
- * Variable number of parmeters:
- * 2 parameters: parent-path, dir-path: process the dir, skip sub-dirs.
- * 3 parameters: parent-path, dir-path -r: process the dir, process all
- *   entries under dir.
+ * @param string $path directory path to upload
+ * @param string $recurse flag to indicate recursion is on.  Default is
+ * off.
+ *
+ * @return string $tpath the path to the tar archive
  *
  */
-function process_directory(){
+function suckupfs($path, $recursion = false){
 
-  echo "process_directory not yet implimented";
-  return(true);
+  $cwd       = '.';
+  $parentdir = '..';
+  $dirs      = array();
+  $other     = array();
+  $dir_parts = pathinfo($path);
+  $SPATH = opendir($path)
+  or die("Can't open: $path $php_errormsg\n");
+
+  while ($dir_entry = readdir($SPATH)){
+    //  echo "\$dir_entry is:$dir_entry\n";
+    if ($dir_entry == $cwd || $dir_entry == $parentdir) {
+      //echo ("skipping $dir_entry\n");
+      continue;
+    }
+    $check = "$path" . '/' . "$dir_entry";
+    if(is_dir("$check")){
+      $dirs[] = $dir_entry;
+    }
+    elseif(is_file("$check")){
+      $files[] = $dir_entry;
+    }
+    else {
+      $other[] = $dir_entry;
+    }
+  }
+  closedir($SPATH);
+
+  /*
+   * tar will suck up a sub dir and it's contnents, so must
+   * not supply them in list to tar if -r is not turned on.
+   *
+   * Always put the files in the list.  If recursion is on, put everything
+   * else in the list as well.  Return the path to the tar file.
+   */
+  foreach($files as $file){
+    $flist .= "$file ";
+  }
+  if($recursion){
+    foreach($dirs as $ditem){
+      $flist .= "$ditem ";
+    }
+    foreach($other as $item){
+      $flist .= " $item";
+    }
+  }
+
+  //pdbg("SUCKUPFS: list is:$flist");
+  chdir($path) or die("Can't cd to $path, $php_errormsg\n");
+  $tpath = '/tmp/' . "{$dir_parts['basename']}" . '.tar.bz2';
+  $tcmd = "tar -cjf $tpath --exclude='.svn' --exclude='.cvs' $flist";
+  $last = exec($tcmd, $tossme, $rtn);
+  // Tar almost never returns 0!  So if it's not 0, then check existence
+  // and size.
+  if ($rtn >= 0){
+    if(!(filesize($tpath))){
+      echo "ERROR: filesize returned False\n";
+      return(FALSE);
+    }
+    else {
+      //pdbg("SUCKUPFS: returning \$tpath");
+      return($tpath);
+    }
+  }
 }
 
 /**
