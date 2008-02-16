@@ -8,7 +8,7 @@
 =head1 SYNOPSIS
 
 General:
-cp2foss [-h] {-p <folder-path> -n <folder-name> -a <path-to-archive> -d "description" | [-f <file-of-parameters>]} [-A] [-w]
+cp2foss [-h] {-p <folder-path> -n <folder-name> -a <path-to-archive> -d "description" | [-f <file-of-parameters>]} [-A] [-w] [-R]
         
 Form 1:
 cp2foss [-h] -p <folder-path> -n <folder-name> -a <path-to-archive> -d "description" [-A]
@@ -18,6 +18,9 @@ cp2foss [-h] -p <folder-path> -n <folder-name> -w -a <url> -d "description" [-A]
         
 Form 3:
 cp2foss [-h] -f <file-of-parameters>
+
+Form 4: 
+cp2foss [-h] -p <folder-path> -n <folder-name> [-R ] -a <path-to-directory> -d "description" 
 
 =head1 DESCRIPTION
 
@@ -30,8 +33,8 @@ In the first form 1 archive is loaded into the Data Base.
 
 In the second form the optional B<-w> parameter is used.  When B<-w>
 is used the argument to the B<-a> option must be a valid URL.  In this form
-cp2foss will first download the archive using the supplied url using the 
-wget utility.  After successful download, the downloaded archive will be 
+cp2foss will first down-load the archive using the supplied url using the 
+wget utility.  After successful down-load, the down-loaded archive will be 
 loaded into the Data Base using the folders specified. 
 
 Use the third form if more than a single archive needs to be loaded.
@@ -42,6 +45,16 @@ ignored.
 The file format is the same as the command line input.  That is a set of
 switches followed by arguments.  The character # in the 1st column is a 
 comment.  Blank lines are allowed and ignored.
+
+The fourth form is used to load files or whole directory trees from the 
+server file system into the data-base.  In the fourth form, the archive
+should point to a valid directory.  If recursion is B<not on> then
+I<only> the files under the directory path will be uploaded.
+
+If recursion B<is on> then everything under the directory path will be
+scheduled to be loaded into the data-base.  B<NOTE:> This form first makes a compressed
+tar archive of the directory tree.  Make sure there is enough room in /tmp
+to hold the archive.
 
 =head2 Options
 
@@ -69,7 +82,7 @@ Description must be quoted with either single or double quotes.
 =item B<-n> I<folder-name>
 
 The folder name that will be used to store the archive in the
-date-base.  Only one upload into a file folder is allowed to avoid
+data-base.  Only one upload into a file folder is allowed to avoid
 storing duplicate uploads.  The file folder is checked to see if it has been 
 uploaded into.  If it has, no other uploads are allowed into that file folder.
 
@@ -104,6 +117,13 @@ I<Mysrcs> and I<Othersrc> would be created if they did not exist.  folders
 for I<foo> I<bar> and I<randy> would be placed under the parent folders.
 I<Mysrcs/foo, Mysrcs/bar, Othersrc/randy>.
 
+=item B<-R>
+
+Turn recursion on.  This option only applies when the archive is a directory path.
+If turned on, everything under the directory path will be scheduled to be
+loaded into the data-base.  Be careful with this option!  For example,
+specifying -R -a /usr would be really silly.
+
 =item B<-w>
 
 Switch to indicate that the archive is a url (-a <url>).  B<cp2foss> will first 
@@ -129,6 +149,11 @@ C<cp2foss -pUbuntu -n GGibon -w -a 'http://ubuntu.cs.utah.edu/releases/gutsy/ubu
 
 The above example, B<cp2foss> will first get the archive using the url and wget.  It will
 then load the downloaded archive into the data-base.
+
+C<cp2foss -pFedora -n Fedora8 -R -a /bigdisk/fedora/ -d 'Fedora 8 Sources'>
+
+This example loads every file under /bigdisk/fedora on the server into 
+the data-base.
 
 =head1 AUTHOR
 
