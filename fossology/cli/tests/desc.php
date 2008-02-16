@@ -1,5 +1,3 @@
-#!/usr/bin/php
-
 <?php
 /**
  * Test stub to see if this is how you run multiple tests
