@@ -55,7 +55,7 @@
           <tr><td valign="top">
             <table cellpadding="5" cellspacing="0" border="0" bgcolor="#cccccc" width="100%">
               <tr><td valign="top" align="center">
-	        <strong>FOSSology RELEASE: Version 0.6.0</strong>
+	        <strong>FOSSology RELEASE: Version 0.6.1</strong>
               </td></tr>
             </table>
           </td></tr>
@@ -65,9 +65,12 @@
         <table cellpadding="10" cellspacing="0">
           <tr><td>
 	    <p>
-	    0.6.0 Features:
-	    <br>  Web-based GUI
-            <br>  License Analysis
+            New in version 0.6.1:
+            <br>  * Tons of bug fixes.
+            <br>  * New delagent added to improve UI response time.
+            <br>  * Added a check for corrupt bsam file during install.
+            <br>  * Tweaks to vacuum and analyze in an effort to eliminate SQL timeouts.
+            <br>  * Major debugging of bsam-engine.
 	    <p>
 	    Future Features - Coming Soon:
 	    <br>  Code Re-Use Detection
