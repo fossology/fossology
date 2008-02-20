@@ -20,6 +20,7 @@ InstallationCreate:
 	$(CP) scheduler ../install/$(AGENTDIR)
 	$(CP) mkconfig ../install/$(AGENTDIR)
 	$(MKDIR) -p ../install/etc/init.d/
+        $(MKDIR) -p ../install/etc/default/
 	cat init.d | sed -e "s@AGENTDIR@$(AGENTDIR)@" > ../install/etc/init.d/fossology
 	$(CP) default ../install/etc/default/fossology
 	chmod 755 ../install/etc/init.d/fossology
