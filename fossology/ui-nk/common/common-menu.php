@@ -51,6 +51,7 @@ function menu_cmp(&$a,&$b)
 {
   if ($a->Order > $b->Order)  { return(-1); }
   if ($a->Order < $b->Order)  { return(1); }
+  $rc = strcmp($a->Name,$b->Name);
   return(strcmp($a->Name,$b->Name));
 } // menu_cmp()
 
@@ -61,7 +62,7 @@ function menu_cmp(&$a,&$b)
  If $URI is blank, nothing is added.
  $LastOrder is used for grouping items in order.
  ***********************************************/
-function menu_insert_r(&$Menu,$Path,$LastOrder=0,$Target=NULL,$URI=NULL,$Depth)
+function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$Depth)
 {
   $AddNew=0;
   $PathParts = explode("::",$Path,2);

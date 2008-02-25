@@ -200,7 +200,7 @@ class Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    if ($this->State != PLUGIN_STATE_VALID) { return(0); } // don't run
+    if ($this->State != PLUGIN_STATE_READY) { return(0); } // don't run
     // Add your own menu items here.
     // E.g., menu_insert("Menu_Name::Item");
     }

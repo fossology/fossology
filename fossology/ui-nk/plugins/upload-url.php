@@ -67,6 +67,7 @@ class upload_url extends Plugin
     global $Plugins;
     $Unpack = &$Plugins[plugin_find_id("agent_unpack")];
     $Unpack->AgentAdd($uploadpk,array($jobqueuepk));
+    AgentCheckBoxDo($uploadpk);
     return(NULL);
   } // Upload()
 
@@ -127,7 +128,9 @@ class upload_url extends Plugin
 	$V .= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
 	$V .= "<li>(Optional) Enter a viewable name for this file:<br />\n";
 	$V .= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
-	$V .= "<b>NOTE</b>: If no name is provided, then the uploaded file name will be used.\n";
+	$V .= "<b>NOTE</b>: If no name is provided, then the uploaded file name will be used.<P />\n";
+	$V .= "<li>Select optional analysis<br />\n";
+	$V .= AgentCheckBoxMake(-1,"agent_unpack");
 	$V .= "</ol>\n";
 	$V .= "<input type='submit' value='Upload!'>\n";
 	$V .= "</form>\n";
