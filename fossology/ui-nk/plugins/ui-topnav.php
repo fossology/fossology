@@ -26,7 +26,6 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_topnav extends Plugin
   {
-  var $Type=PLUGIN_UI;
   var $Name="topnav";
   var $Version="1.0";
   var $MenuList="";

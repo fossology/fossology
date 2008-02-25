@@ -26,7 +26,6 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_download extends Plugin
   {
-  var $Type=PLUGIN_UI;
   var $Name="download";
   var $Version="1.0";
   var $Dependency=array("db");

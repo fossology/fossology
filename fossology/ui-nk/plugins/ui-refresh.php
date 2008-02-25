@@ -26,7 +26,6 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_refresh extends Plugin
   {
-  var $Type=PLUGIN_UI;
   var $Name="refresh";
   var $Version="1.0";
 

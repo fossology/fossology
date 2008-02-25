@@ -30,7 +30,6 @@ if (!isset($GlobalReady)) { exit; }
 
 class folder_move extends Plugin
   {
-  var $Type=PLUGIN_UI;
   var $Name="mvFolder";
   var $Version="1.0";
   var $MenuList="Organize::Folders::Move";
