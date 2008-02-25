@@ -66,30 +66,42 @@ class ui_view extends Plugin
 		break;
 	}
 
-    menu_insert("License-View::[BREAK]",-1);
+    menu_insert("View::[BREAK]",-1);
     switch($Format)
       {
       case "hex":
-        menu_insert("License-View::Hex",-10);
-        menu_insert("License-View::Text",-11,"$URI&format=text&page=$PageText");
-        menu_insert("License-View::Formatted",-12,"$URI&format=flow&page=$PageText");
+        menu_insert("View::Hex",-10);
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText");
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText");
         break;
       case "text":
-        menu_insert("License-View::Hex",-10,"$URI&format=hex&page=$PageHex");
-        menu_insert("License-View::Text",-11);
-        menu_insert("License-View::Formatted",-12,"$URI&format=flow&page=$PageText");
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex");
+        menu_insert("View::Text",-11);
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText");
         break;
       case "flow":
-        menu_insert("License-View::Hex",-10,"$URI&format=hex&page=$PageHex");
-        menu_insert("License-View::Text",-11,"$URI&format=text&page=$PageText");
-        menu_insert("License-View::Formatted",-12);
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex");
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText");
+        menu_insert("View::Formatted",-12);
         break;
       default:
-        menu_insert("License-View::Hex",-10,"$URI&format=hex&page=$PageHex");
-        menu_insert("License-View::Text",-11,"$URI&format=text&page=$PageText");
-        menu_insert("License-View::Formatted",-12,"$URI&format=flow&page=$PageText");
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex");
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText");
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText");
         break;
       }
+
+    $URI = Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
+    if (GetParm("mod",PARM_STRING) == $this->Name)
+	{
+	menu_insert("View::View",2);
+	menu_insert("View-Meta::View",2);
+	}
+    else
+	{
+	menu_insert("View::View",2,$this->Name . $URI);
+	menu_insert("View-Meta::View",2,$this->Name . $URI);
+	}
     } // RegisterMenus()
 
   /***********************************************************
@@ -591,7 +603,7 @@ class ui_view extends Plugin
     if ($ShowMenu)
       {
       $V .= "<div align=right><small>";
-      $V .= menu_to_1html(menu_find("License-View",$MenuDepth),1);
+      $V .= menu_to_1html(menu_find("View",$MenuDepth),1);
       $V .= "</small></div>\n";
       } // if ShowMenu
 

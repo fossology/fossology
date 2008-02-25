@@ -37,14 +37,19 @@ class ui_license extends Plugin
   function RegisterMenus()
     {
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show","upload","item"));
+    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     if (!empty($Item) && !empty($Upload))
       {
-      menu_insert("Browse::License",1,$URI);
-      menu_insert("View::License",1,$URI);
-      menu_insert("License-View::License",1,$URI);
+      if (GetParm("mod",PARM_STRING) == $this->Name)
+	{
+	menu_insert("Browse::License",1);
+	}
+      else
+	{
+	menu_insert("Browse::License",1,$URI);
+	}
       }
     } // RegisterMenus()
 
@@ -281,7 +286,7 @@ class ui_license extends Plugin
 	/* Create the micro-menu */
 	/*************************/
 	$V .= "<div align=right><small>";
-	$V .= menu_to_1html(menu_find("License",$MenuDepth),1);
+	$V .= menu_to_1html(menu_find("Browse",$MenuDepth),1);
 	$V .= "</small></div>\n";
 
 	$V .= "<font class='text'>\n";
