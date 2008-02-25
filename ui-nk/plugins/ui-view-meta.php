@@ -118,20 +118,35 @@ class ui_view_meta extends Plugin
     /**********************************
      Display meta data
      **********************************/
+    $V .= "<table width='100%' border='1'>\n";
+    $V .= "<tr><th>Meta Data</th><th>Value</th></tr>\n";
+
+    $SQL = "SELECT * FROM mimetype
+	INNER JOIN pfile ON pfile_pk = '$Pfile'
+	AND pfile.pfile_mimetypefk = mimetype.mimetype_pk;";
+    $Results = $DB->Action($SQL);
+    foreach($Results as $R)
+	{
+	if (empty($R['mimetype_pk'])) { continue; }
+	$V .= "<tr><td width='20%'>Unpacked file type";
+	$V .= "</td><td>" . htmlentities($R['mimetype_name']) . "</td></tr>\n";
+	}
+
     $SQL = "SELECT * FROM attrib
 	INNER JOIN key ON key_pk = attrib_key_fk
 	AND key_parent_fk IN
-	(SELECT key_pk FROM key WHERE key_parent_fk=0 AND key_name = 'pkgmeta')
+	(SELECT key_pk FROM key WHERE key_parent_fk=0 AND
+	  (key_name = 'pkgmeta' OR key_name = 'specagent') )
 	WHERE pfile_fk = '$Pfile'
-	AND key_desc = 'Package meta data' ORDER BY key_name;";
+	AND key_name != 'Processed' ORDER BY key_name;";
     $Results = $DB->Action($SQL);
-    $V .= "<table width='100%' border='1'>\n";
-    $V .= "<tr><th>Meta Data</th><th>Value</th></tr>\n";
     foreach($Results as $R)
 	{
 	if (empty($R['attrib_pk'])) { continue; }
-	$V .= "<tr><td>" . $R['key_name'] . "</td><td>" . $R['attrib_value'] . "</td></tr>\n";
+	$V .= "<tr><td width='20%'>" . htmlentities($R['key_name']);
+	$V .= "</td><td>" . htmlentities($R['attrib_value']) . "</td></tr>\n";
 	}
+
     $V .= "</table>\n";
     return($V);
   } // ShowView()
