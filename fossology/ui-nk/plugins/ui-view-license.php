@@ -120,9 +120,8 @@ else
     $this->ConvertLicPathToHighlighting($Lic,NULL);
     $Text = "<div class='text'>";
     $Text .= "<H1>License: " . $Results[0]['lic_name'] . "</H1>\n";
-    $Text .= "compared against:<br>\n";
     $Text .= "</div>";
-    $View->ShowView($Ftmp,"View","view",1,1,$Text);
+    $View->ShowView($Ftmp,"View","view",0,0,$Text);
     } // ViewLicense()
 
   /***********************************************************
