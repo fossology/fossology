@@ -30,7 +30,6 @@ if (!isset($GlobalReady)) { exit; }
 
 class folder_properties extends Plugin
 {
-  var $Type=PLUGIN_UI;
   var $Name="folder_properties";
   var $Version="1.0";
   var $MenuList="Organize::Folders::Edit Properties";

@@ -26,7 +26,6 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_basenav extends Plugin
   {
-  var $Type=PLUGIN_UI;
   var $Name="basenav";
   var $Version="1.0";
   var $MenuList="";

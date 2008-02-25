@@ -30,7 +30,6 @@ define("MAXHIGHLIGHTCOLOR",8);
 
 class ui_view extends Plugin
   {
-  var $Type=PLUGIN_UI;
   var $Name="view";
   var $Version="1.0";
   var $Dependency=array("db","browse");

@@ -26,7 +26,6 @@ if (!isset($GlobalReady)) { exit; }
 
 class upload_url extends Plugin
 {
-  public $Type       = PLUGIN_UI;
   public $Name       = "upload_url";
   public $Title      = "Upload a New File";
   public $Version    = "1.0";

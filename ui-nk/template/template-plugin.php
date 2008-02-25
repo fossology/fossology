@@ -26,15 +26,6 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 /*************************************************************
- Each plugin should focus on one key functionality.
- These definitions identify the key types of functions.
- *************************************************************/
-define("PLUGIN_UI",1); // plugin is primarily a UI template
-define("PLUGIN_AGENT",2); // agents handle uploads and jobs
-define("PLUGIN_ADMIN",3); // plugin manages the system
-define("PLUGIN_MISC",4); // plugin does something else
-
-/*************************************************************
  Each plugin has a state to identify if it is invalid.
  For example, if a plugin crashes then it should mark the state
  as invalid.
@@ -57,7 +48,6 @@ class Plugin
   {
   // All public fields can be empty, indicating that it does not apply.
 
-  var $Type=PLUGIN_MISC;
   var $State=PLUGIN_STATE_INVALID;
 
   /*****

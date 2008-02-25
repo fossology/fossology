@@ -30,7 +30,6 @@ if (!isset($GlobalReady)) { exit; }
 
 class folder_create extends Plugin
 {
-  public $Type       = PLUGIN_UI;
   public $Name       = "folder_create";
   public $Title      = "Create a new Fossology folder";
   public $Version    = "1.0";

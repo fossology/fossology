@@ -26,7 +26,6 @@ if (!isset($GlobalReady)) { exit; }
 
 class agent_unpack extends Plugin
 {
-  public $Type       = PLUGIN_UI;
   public $Name       = "agent_unpack";
   public $Title      = "Schedule an Unpack";
   public $MenuList   = "Tools::Agents::Unpack";

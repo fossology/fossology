@@ -26,7 +26,6 @@ if (!isset($GlobalReady)) { exit; }
 
 class agent_license extends Plugin
 {
-  public $Type       = PLUGIN_UI;
   public $Name       = "agent_license";
   public $Title      = "Schedule License Analysis";
   public $MenuList   = "Tools::Agents::License Analysis";
