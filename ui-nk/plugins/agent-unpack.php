@@ -76,7 +76,7 @@ class agent_unpack extends Plugin
 	    INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk;";
     $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"no","pfile",$Depends);
     if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
-
+    AgentCheckboxDo($uploadpk);
     return(NULL);
   } // AgentAdd()
 
@@ -139,7 +139,8 @@ class agent_unpack extends Plugin
 	  {
 	  /* Display the form */
 	  $V .= "<form method='post'>\n"; // no url = this url
-	  $V .= "Select an uploaded file to unpack.\n";
+	  $V .= "<ol>\n";
+	  $V .= "<li>Select an uploaded file to unpack.\n";
 	  $V .= "Only uploads that are not already unpacked (and not already scheduled) can be scheduled.\n";
 	  $V .= "<p />\nUnpack: <select name='upload'>\n";
 	  foreach($Results as $Row)
@@ -150,6 +151,9 @@ class agent_unpack extends Plugin
 	    $V .= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
 	    }
 	  $V .= "</select><P />\n";
+	  $V .= "<li>Select optional analysis<br />\n";
+	  $V .= AgentCheckboxMake(-1,$this->Name);
+	  $V .= "</ol>\n";
 	  $V .= "<input type='submit' value='Unpack!'>\n";
 	  $V .= "</form>\n";
 	  }
