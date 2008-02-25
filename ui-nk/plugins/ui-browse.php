@@ -40,27 +40,33 @@ class ui_browse extends Plugin
     if (empty($Upload)) { return; }
 
     // For the Browse menu, permit switching between detail and summary.
+    $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
     menu_insert("Browse::[BREAK]",-1,"$URI&show=summary");
     $Show = GetParm("show",PARM_STRING);
-    $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
     switch($Show)
       {
       case "detail":
 	menu_insert("Browse::Summary",-10,"$URI&show=summary");
 	menu_insert("Browse::Detail",-10);
+	$URI .= "&show=detail";
 	break;
       case "summary":
       default:
 	menu_insert("Browse::Summary",-10);
 	menu_insert("Browse::Detail",-10,"$URI&show=detail");
+	$URI .= "&show=summary";
 	break;
       }
 
-    // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show","upload","item"));
-    menu_insert("View::Browse",1,$URI);
-    menu_insert("License::Browse",1,$URI);
-    menu_insert("License-View::Browse",1,$URI);
+    if (GetParm("mod",PARM_STRING) == $this->Name)
+	{ 
+	menu_insert("Browse::Browse",1);
+	}
+    else
+	{
+	menu_insert("Browse::Browse",1,$URI);
+	}
+
     } // RegisterMenus()
 
   /***********************************************************

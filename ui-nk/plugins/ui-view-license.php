@@ -31,6 +31,30 @@ class ui_view_license extends Plugin
   var $Dependency=array("db","view");
 
   /***********************************************************
+   RegisterMenus(): Customize submenus.
+   ***********************************************************/
+  function RegisterMenus()
+    {
+    // For all other menus, permit coming back here.
+    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
+    $Item = GetParm("item",PARM_INTEGER);
+    $Upload = GetParm("upload",PARM_INTEGER);
+    if (!empty($Item) && !empty($Upload))
+      {
+      if (GetParm("mod",PARM_STRING) == $this->Name)
+	{
+	menu_insert("View::License",1);
+	menu_insert("View-Meta::License",1);
+	}
+      else
+	{
+	menu_insert("View::License",1,$URI);
+	menu_insert("View-Meta::License",1,$URI);
+	}
+      }
+    } // RegisterMenus()
+
+  /***********************************************************
    ConvertLicPathToHighlighting(): Given a license path, insert
    it into the View highlighting.
    ***********************************************************/
