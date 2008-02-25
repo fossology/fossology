@@ -105,20 +105,15 @@ function Traceback_parm($ShowMod=1)
  ************************************************************/
 function Traceback_parm_keep($List)
 {
-  $Opt="&";
-  $First=1;
-  foreach($List as $L)
+  $Opt="";
+  $Max = count($List);
+  for($i=0; $i < $Max ; $i++)
     {
+    $L = &$List[$i];
     $Val = GetParm($L,PARM_STRING);
-    if (!empty($Val))
-	{
-	if (!$First) { $Opt .= "&"; }
-	$Opt .= "$L=$Val";
-	$First=0;
-	}
+    if (!empty($Val)) { $Opt .= "&" . "$L=$Val"; }
     }
-  if (!$First) { return($Opt); }
-  return("");
+  return($Opt);
 } // Traceback_parm_keep()
 
 /************************************************************
