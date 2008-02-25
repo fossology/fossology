@@ -36,5 +36,6 @@ include_once("common-parm.php");
 include_once("common-repo.php");
 include_once("common-license.php");
 include_once("common-job.php");
+include_once("common-agents.php");
 
 ?>

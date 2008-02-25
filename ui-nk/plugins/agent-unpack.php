@@ -32,6 +32,32 @@ class agent_unpack extends Plugin
   public $Version    = "1.0";
   public $Dependency = array("db");
 
+  /***********************************************************
+   RegisterMenus(): Register additional menus.
+   ***********************************************************/
+  function RegisterMenus()
+    {
+    if ($this->State != PLUGIN_STATE_READY) { return(0); } // don't run
+    menu_insert("Agents::" . $this->Title,0,$this->Name);
+    }
+
+  /*********************************************
+   AgentCheck(): Check if the job is already in the
+   queue.  Returns:
+     0 = not scheduled
+     1 = scheduled but not completed
+     2 = scheduled and completed
+   *********************************************/
+  function AgentCheck($uploadpk)
+  {
+    global $DB;
+    $SQL = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job ON job_upload_fk = '$uploadpk' AND job_pk = jq_job_fk AND jq_type = 'unpack';";
+    $Results = $DB->Action($SQL);
+    if (empty($Results[0]['jq_pk'])) { return(0); }
+    if (empty($Results[0]['jq_endtime'])) { return(1); }
+    return(2);
+  } // AgentCheck()
+
   /*********************************************
    AgentAdd(): Given an uploadpk, add a job.
    Returns NULL on success, string on failure.
