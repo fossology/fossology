@@ -54,7 +54,7 @@ install: all InstallationCreate
 	grep -q '^extension.*=.*pgsql.so' $(PHPWEB) || \
 	    echo 'extension=pgsql.so' >> $(PHPWEB) ; \
 	fi
-	mkdir -p $(PHPDIR)
+	$(MKDIR) -p $(PHPDIR)
 #	$(CP) $(LIBFILES) $(PHPDIR)
 	$(CP) $(WEBFILES) $(WEBDIR)
 	$(CP) $(iPATHFILE) $(WEBDIR)
