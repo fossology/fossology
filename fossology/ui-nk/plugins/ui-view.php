@@ -25,7 +25,7 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 define("VIEW_BLOCK_HEX",8192);
-define("VIEW_BLOCK_TEXT",-120*VIEW_BLOCK_HEX);
+define("VIEW_BLOCK_TEXT",20*VIEW_BLOCK_HEX);
 define("MAXHIGHLIGHTCOLOR",8);
 
 class ui_view extends Plugin
@@ -224,7 +224,7 @@ class ui_view extends Plugin
     if ($CurrPage * $PageSize >= $MaxSize) { $CurrPage = 0; $CurrSize = 0; }
     if ($CurrPage < 0) { $CurrPage = 0; }
 
-    if (($CurrPage-1) >= 0)
+    if ($CurrPage > 0)
 	{
 	$V .= "<a href='$Uri&page=0'>[First]</a> ";
 	$V .= "<a href='$Uri&page=" . ($CurrPage-1) . "'>[Prev]</a> ";
@@ -241,7 +241,7 @@ class ui_view extends Plugin
 	$V .= "<a href='$Uri&page=$i'>" . ($i+1) . "</a> ";
 	}
       }
-    if ($CurrPage+1 < $MaxPage)
+    if ($CurrPage < $MaxPage)
 	{
 	$V .= "<a href='$Uri&page=" . ($CurrPage+1) . "'>[Next]</a>";
 	$V .= "<a href='$Uri&page=" . (intval(($MaxSize-1)/$PageSize)) . "'>[Last]</a>";
