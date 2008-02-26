@@ -30,7 +30,7 @@ class jobs_showjobs extends Plugin
   var $Version="1.0";
   var $MenuList="Admin::Scheduler::Job Queue Summary";
   var $MenuOrder=5;
-  var $Dependency=array("db");
+  var $Dependency=array("db","browse");
 
   var $Colors=array(
 	"Queued" => "white",
@@ -156,8 +156,15 @@ class jobs_showjobs extends Plugin
 		else { $V .= "$t days "; }
 		$V .= gmdate("H:i:s",$Row[$F]);
 		break;
+	case 'job_upload_fk':
+		if (!empty($Row[$F]))
+		  {
+		  $Browse = Traceback_uri() . "?mod=browse&upload=" . htmlentities($Row[$F]);
+		  $V .= "<a href='$Browse'>" . htmlentities($Row[$F]) . "</a>";
+		  }
+		break;
 	default:
-		$V .= $Row[$F];
+		$V .= htmlentities($Row[$F]);
 		break;
 	}
       $V .= "</td></tr>\n";
@@ -262,15 +269,14 @@ class jobs_showjobs extends Plugin
 	$Color=$this->Colors['Finished'];
 	}
 
-      if ($Upload != $Row['upload_pk'])
 	{
 	$Upload = $Row['upload_pk'];
 	if ($First) { $First=0; }
 	else { $V .= "</table>\n<P />\n"; }
 	$V .= "<table class='text' border=1 width='100%'>\n";
 	if (!empty($Row['upload_desc'])) $JobName = $Row['upload_desc'];
-	else if (!empty($Row['upload_filename'])) $JobName = $Row['upload_filename'];
-	else $JobName = "[Default]";
+	else if (!empty($Row['upload_filename'])) { $JobName = $Row['upload_filename']; }
+	else { $JobName = "[Default]"; }
 	$V .= "<tr><th colspan=4 bgcolor='lightsteelblue'>$JobName</th></tr>\n";
 	}
       if ($Job != $Row['jq_job_fk'])
@@ -365,6 +371,7 @@ class jobs_showjobs extends Plugin
     $Blocked=array();
     $First=1;
     $Upload="";
+    $V="";
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     foreach($Results as $Row)
       {
@@ -375,7 +382,7 @@ class jobs_showjobs extends Plugin
 	$Color=$this->Colors['Failed'];
 	$Blocked[$Row['jq_pk']] = 1;
 	}
-      else if (isset($Blocked[$Row['jdep_jq_fk']]))
+      else if (isset($Blocked[$Row['jdep_jq_depends_fk']]))
 	{
 	$Color=$this->Colors['Blocked'];
 	$Blocked[$Row['jq_pk']] = 1;
@@ -389,15 +396,14 @@ class jobs_showjobs extends Plugin
 	$Color=$this->Colors['Finished'];
 	}
 
-      if ($Upload != $Row['upload_pk'])
 	{
 	$Upload = $Row['upload_pk'];
 	if ($First) { $First=0; }
 	else { $V .= "</table>\n<P />\n"; }
 	$V .= "<table class='text' border=1 width='100%'>\n";
-	if (!empty($Row['upload_desc'])) $JobName = $Row['upload_desc'];
-	else if (!empty($Row['upload_filename'])) $JobName = $Row['upload_filename'];
-	else $JobName = "[Default]";
+	if (!empty($Row['upload_desc'])) { $JobName = $Row['upload_desc']; }
+	else if (!empty($Row['upload_filename'])) { $JobName = $Row['upload_filename']; }
+	else { $JobName = "[Default]"; }
 	$V .= "<tr><th colspan=3 bgcolor='lightsteelblue'>$JobName</th></tr>\n";
 	}
       if ($Job != $Row['jq_job_fk'])
