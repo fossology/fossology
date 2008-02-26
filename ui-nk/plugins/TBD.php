@@ -34,6 +34,7 @@ class tbd extends Plugin
     {
     menu_insert("Main::Upload::From file (TBD)");
     menu_insert("Main::Organize::Uploads::Edit Properties (TBD)");
+    menu_insert("Main::Organize::Uploads::Move Folder (TBD)");
     }
 };
 $NewPlugin = new tbd;
