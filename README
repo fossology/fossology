@@ -57,17 +57,20 @@ FOSSology depends on recent versions of the following software:
 
 Postgresql:
  8.1 or newer
- On a debian based system you should be able to use something like
+ On Debian (or a Debian derived distribution) you should be able to use 
+ something like:
   apt-get install postgresql-8.1 postgresql-server-dev-8.1
 
 Apache2:
- FOSSology was developed using the Apache2 package included with the
- GNU/Linux 4.0 distro (codename "etch").  (Most Linux distros include
- Apache.)  On a debian based system you should be able to use 
+ FOSSology was developed using the Apache2 package included with Debian
+ GNU/Linux 4.0 (codename "Etch").  (Most Linux distros include Apache.)
+ On Debian (or a Debian derived distribution) you should be able to use 
+ something like:
    apt-get install apache2
 
 PHP5:
- On a debian based system you should be able to use something like
+ On Debian (or a Debian derived distribution) you should be able to use 
+ something like:
   apt-get install php5 php5-pgsql php-pear libapache2-mod-php5
 
 Libraries (see next section to install with apt-get):
@@ -78,8 +81,9 @@ Libraries (see next section to install with apt-get):
 * libextractor - GNU file meta-data extractor
    http://www.gnunet.org/libextractor/
 
-On a debian based system you should be able to use something like
-apt-get install libmagic-dev libxml2-dev libextractor-dev \
+ On Debian (or a Debian derived distribution) you should be able to use
+ something like:
+  apt-get install libmagic-dev libxml2-dev libextractor-dev \
 	libextractor-plugins
 
 External Commands:
@@ -111,7 +115,8 @@ External Commands:
 * zcat - for uncompressing .gz and .Z files, from the gzip software
    http://www.gzip.org/
 
-On a debian based system you should be able to use something like
+ On Debian (or a Debian derived distribution) you should be able to use 
+ something like:
    apt-get install binutils bzip2 cabextract cpio sleuthkit \
         mkisofs xpdf-utils rpm tar upx-ucl unrar-free unzip 
 
@@ -149,6 +154,9 @@ commands as root:
   groupadd fossy
   useradd -c FOSSology -d /srv/fossology -g fossy -s /bin/false fossy
 
+Alternatively, you can use the adduser:
+  adduser --gecos "FOSSology" --home /srv/fossology --shell /bin/false fossy
+
 Your system should now be ready for installing FOSSology!
   
 
@@ -156,7 +164,7 @@ Untar the tarball
 =================
 
 In the next step, you will need to use files included in the tarball.  If
-you haven't done so already, untar the fossology.tar tarball into a staging
+you haven't done so already, untar the fossology-<version>.tar.gz tarball into a staging
 directory.
 
 
@@ -191,7 +199,7 @@ and the one we use:
 
 Setting up the database:
 A sample database schema files is provided in the tarball under
-fossology/setup/fossologyinit.sql.  This will create the database when
+fossology-<version>/setup/fossologyinit.sql.  This will create the database when
 it is read in.  It will also create an owner for the database "fossy"
 and owner's password "fossy".  For security reasons, please change this
 password, after the database is created, using the alter command.
@@ -213,10 +221,10 @@ You should see the following message:
 
 2) The default database and owner is created by reading in a file of sql 
 statements to define the database schema. This file is included in the tar 
-bundle as fossology/setup/fossologyinit.sql.  You must be logged in as user 
+bundle as fossology-version/setup/fossologyinit.sql.  You must be logged in as user 
 postgres to create the database schema and define the owner.  As root, you
 can su to user postgres (su postgres) and then run the psql command:
-   psql  <fossology/setup/fossologyinit.sql
+   psql  <fossology-version/setup/fossologyinit.sql
 
 3) If any steps fail, check the postgres log file for errors:
    /var/log/postgresql/postgresql-8.1-main.log
@@ -456,7 +464,7 @@ https://linux.fc.hp.com/projects/wiki/doku.php?id=oslo-fossology:scheduler#confi
      addgroup <user> fossy 
    as root to add users to the fossy group.
 
-   Check to see that you are in the fossy group using the command "id".
+   Check to see that you are in the fossy group using the command "groups".
    As root, start the scheduler with:
      /etc/init.d/fossology start
 
@@ -469,9 +477,10 @@ https://linux.fc.hp.com/projects/wiki/doku.php?id=oslo-fossology:scheduler#confi
 
 Install Complete
 ================
-Congratulations FOSSology is now installed!
+Congratulations, FOSSology is now installed!
 For extended discussion on how to use or tune the software, please see
 the User Documentation, available on the website, in the doc/ directory
-of the source, or the doc/ directory on an installed system(directory
+of the source, or the doc/ directory on an installed system (directory
 may vary and in in the case of software packages, may be in a different
 package you need to install). FIXME: need to make sure this gets done
+
