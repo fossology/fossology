@@ -68,8 +68,7 @@ Apache2:
 
 PHP5:
  On a debian based system you should be able to use something like
-  apt-get install php5 php5-pgsql php-pear libapache2-mod-php5 \
-     php5-common
+  apt-get install php5 php5-pgsql php-pear libapache2-mod-php5
 
 Libraries (see next section to install with apt-get):
 * libmagic - for determining file types, from the "file" software
@@ -80,8 +79,8 @@ Libraries (see next section to install with apt-get):
    http://www.gnunet.org/libextractor/
 
 On a debian based system you should be able to use something like
-apt-get install libmagic1 libmagic-dev libxml2 libxml2-dev \
-   libextractor1c2a libextractor-dev libextractor-plugins
+apt-get install libmagic-dev libxml2-dev libextractor-dev \
+	libextractor-plugins
 
 External Commands:
 * ar - for extracting archives, from the binutils software
