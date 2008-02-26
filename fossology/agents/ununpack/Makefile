@@ -28,7 +28,7 @@ install: all
 	$(CP) UnMagic.mime $(AGENTDATADIR)
 	# configure unpack directory for scheduler
 	if [ ! -d /home/repository ] ; then useradd -m -c "Repository" repository ; fi
-	if [ ! -d /home/repository/ununpack ] ; then mkdir /home/repository/ununpack ; fi
+	if [ ! -d /home/repository/ununpack ] ; then $(MKDIR) /home/repository/ununpack ; fi
 	chown repository:osrb /home/repository/ununpack
 	chmod 770 /home/repository/ununpack
 	if [ -f /usr/local/bin/ununpack ] ; then $(RM) /usr/local/bin/ununpack ; fi
