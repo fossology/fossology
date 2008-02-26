@@ -136,6 +136,7 @@ class jobs_showjobs extends Plugin
     $Sql = "SELECT *, job.* FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk = $Job LIMIT 1;";
     $Results = $DB->Action($Sql);
     $Row = $Results[0];
+    if (empty($Row['jq_pk'])) { return; }
     $V .= "<table class='text' border=1>\n";
     foreach($Fields as $F)
       {
