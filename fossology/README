@@ -414,8 +414,8 @@ login, or your favorite root-obtaining utility.
     This file is used by the scheduler for configuration.
     The host names listed in Hosts.conf could match the host= strings
     here. See the developers document 
-https://linux.fc.hp.com/projects/wiki/doku.php?id=oslo-fossology:scheduler#configuring_the_scheduler
-    for a discussion on how to specify the number of processes per host 
+    http://fossology.org/docs/scheduler#configuring_the_scheduler for a 
+    discussion on how to specify the number of processes per host 
     and agent definitions.
 
     /usr/local/share/fossology/agents/proxy.conf
@@ -472,8 +472,8 @@ https://linux.fc.hp.com/projects/wiki/doku.php?id=oslo-fossology:scheduler#confi
      apache2ctl graceful
 
 8) Browse to http://<http_server>/repo/ to start using FOSSology.  See 
-   https://linux.fc.hp.com/projects/wiki/doku.php?id=oslo-fossology:overview_of_the_user_interface
-   for a descritpion of the UI.
+   http://fossology.org/docs/scheduler#configuring_the_scheduler for a 
+   description of the UI.
 
 Install Complete
 ================
