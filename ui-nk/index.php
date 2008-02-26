@@ -44,19 +44,6 @@ if ($PluginId >= 0)
   $Plugins[$PluginId]->Output();
   $Plugins[$PluginId]->OutputClose();
   }
-
-/*** DEBUG ***/
-if (0)
-  {
-  print "<P>===Plugins===\n";
-  foreach ($Plugins as $key => $val) { print "$key : $val->Name (state=$val->State)<br>\n"; }
-
-  print "===Menu===\n";
-  menu_print($MenuList,0);
-  }
-
 plugin_unload();
-
-/********************************** TESTING **************************/
 return(0);
 ?>
