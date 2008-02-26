@@ -17,6 +17,13 @@
 ***********************************************************/
 
 /*************************************************
+ Design note:
+ Folders could be stored in a menu listing (using menu_insert).
+ However, since menu_insert() runs a usort() during each insert,
+ this can be really slow.  For speed, folders are handled separately.
+ *************************************************/
+
+/*************************************************
  Restrict usage: Every PHP file should have this
  at the very beginning.
  This prevents hacking attempts.
@@ -98,13 +105,10 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1)
 function FolderListDiv($ParentFolder,$Depth)
   {
   global $Plugins;
-  if ($ParentFolder == "-1")
-	{
-	return(FolderListDiv(FolderGetTop(),0));
-	}
-  if (empty($ParentFolder)) { return; }
   global $DB;
   if (empty($DB)) { return; }
+  if (empty($ParentFolder)) { return; }
+  if ($ParentFolder == "-1") { return(FolderListDiv(FolderGetTop(),0)); }
   $Browse = &$Plugins[plugin_find_id("browse")];
   $Uri = Traceback_uri();
   $V="";
@@ -164,4 +168,62 @@ function FolderListDiv($ParentFolder,$Depth)
   return($V);
 } /* FolderListDiv() */
 
+/***********************************************************
+ FolderListUploads(): Returns an array of all uploads, upload_pk,
+ and folders, starting from the ParentFolder.
+ The array is sorted by folder and upload name.
+ Folders that are empty do not show up.
+ This is recursive!
+ NOTE: If there is a recursive loop in the folder table, then
+ this will loop INFINITELY.
+ ***********************************************************/
+function FolderListUploads($ParentFolder=-1, $FolderPath=NULL)
+  {
+  global $DB;
+  if (empty($DB)) { return; }
+  if (empty($ParentFolder)) { return; }
+  if ($ParentFolder == "-1") { return(FolderListUploads(FolderGetTop(),$FolderPath)); }
+  $List=array();
+
+  /* Get list of uploads */
+  /** mode 1<<1 = upload_fk **/
+  $SQL = "SELECT * FROM foldercontents
+	INNER JOIN upload ON upload.upload_pk = foldercontents.child_id
+	AND foldercontents.parent_fk = '$ParentFolder'
+	AND foldercontents.foldercontents_mode = 2
+	INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
+	INNER JOIN ufile ON upload.ufile_fk = ufile.ufile_pk
+	ORDER BY ufile.ufile_name,upload.upload_desc;";
+  $Results = $DB->Action($SQL);
+  foreach($Results as $R)
+    {
+    if (empty($R['upload_pk'])) { continue; }
+    $New['upload_pk'] = $R['upload_pk'];
+    $New['upload_desc'] = $R['upload_desc'];
+    $New['name'] = $R['ufile_name'];
+    $New['folder'] = $FolderPath . "/" . $R['folder_name'];
+    array_push($List,$New);
+    }
+  
+  /* Get list of subfolders and recurse */
+  /** mode 1<<0 = folder_pk **/
+  $SQL = "SELECT A.child_id AS id,B.folder_name AS folder,C.folder_name AS subfolder
+	FROM foldercontents AS A
+	INNER JOIN folder AS B ON A.parent_fk = B.folder_pk
+	AND A.foldercontents_mode = 1
+	AND A.parent_fk = '$ParentFolder'
+	INNER JOIN folder AS C ON A.child_id = C.folder_pk
+	ORDER BY C.folder_name;";
+  $Results = $DB->Action($SQL);
+  foreach($Results as $R)
+    {
+    if (empty($R['id'])) { continue; }
+    /* RECURSE! */
+    $SubList = FolderListUploads($R['id'],$FolderPath . "/" . $R['folder']);
+    $List = array_merge($List,$SubList);
+    }
+
+  /* Return findings */
+  return($List);
+  } // FolderListUploads()
 ?>

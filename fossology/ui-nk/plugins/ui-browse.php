@@ -201,7 +201,11 @@ if (0) {
     global $Plugins;
     $V="";
     global $DB;
-    $Sql = "SELECT * FROM upload WHERE upload_pk IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder);";
+    $Sql = "SELECT * FROM upload
+	INNER JOIN ufile ON ufile_pk = ufile_fk
+	WHERE upload_pk IN
+	(SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
+	ORDER BY upload_filename,upload_desc;";
     $Results = $DB->Action($Sql);
 
     $Uri = Traceback_uri() . "?mod=" . $this->Name;

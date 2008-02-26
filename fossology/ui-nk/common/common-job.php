@@ -238,19 +238,32 @@ function JobAddJob ($upload_pk, $job_name,
 {
   global $DB;
   if (empty($DB)) { return; }
-  $Results = $DB->Action("SELECT job_pk FROM job WHERE job_upload_fk = '$upload_pk' AND job_name = '$job_name';");
-  $jobpk = $Results[0]['job_pk'];
-  if (!empty($jobpk)) { return($jobpk); }
 
   $job_submitter = str_replace("'","''",$job_submitter);
   $job_email_notify = str_replace("'","''",$job_email_notify);
   $job_name = str_replace("'","''",$job_name);
 
-  $DB->Action("INSERT INTO job
+  if (empty($upload_pk))
+    {
+    $SQLSelect = "SELECT job_pk FROM job WHERE job_upload_fk IS NULL AND job_name = '$job_name';";
+    $SQLInsert = "INSERT INTO job
+	(job_submitter,job_queued,job_priority,job_email_notify,job_name) VALUES
+	('$job_submitter',now(),'$priority','$job_email_notify','$job_name');";
+    }
+  else
+    {
+    $SQLSelect = "SELECT job_pk FROM job WHERE job_upload_fk = '$upload_pk' AND job_name = '$job_name';";
+    $SQLInsert = "INSERT INTO job
 	(job_submitter,job_queued,job_priority,job_email_notify,job_name,job_upload_fk) VALUES
-	('$job_submitter',now(),'$priority','$job_email_notify','$job_name','$upload_pk');");
+	('$job_submitter',now(),'$priority','$job_email_notify','$job_name','$upload_pk');";
+    }
 
-  $Results = $DB->Action("SELECT job_pk FROM job WHERE job_upload_fk = '$upload_pk' AND job_name = '$job_name';");
+  $Results = $DB->Action($SQLSelect);
+  $jobpk = $Results[0]['job_pk'];
+  if (!empty($jobpk)) { return($jobpk); }
+
+  $DB->Action($SQLInsert);
+  $Results = $DB->Action($SQLSelect);
   $jobpk = $Results[0]['job_pk'];
   return($jobpk);
 } // JobAddJob()
@@ -280,7 +293,7 @@ function JobQueueAdd ($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $
 
   /* Check if the job exists */
   $Results = $DB->Action("SELECT jq_pk FROM jobqueue
-	WHERE jq_job_fk = '$job_pk' AND jq_type = '$jq_type';");
+	WHERE jq_job_fk = '$job_pk' AND jq_type = '$jq_type' AND jq_args = '$jq_args';");
   $jqpk = $Results[0]['jq_pk'];
   if (empty($jqpk))
     {
@@ -296,7 +309,7 @@ function JobQueueAdd ($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $
 
     /* Find the job that was just added */
     $Results = $DB->Action("SELECT jq_pk FROM jobqueue
-	WHERE jq_job_fk = '$job_pk' AND jq_type = '$jq_type';");
+	WHERE jq_job_fk = '$job_pk' AND jq_type = '$jq_type' AND jq_args = '$jq_args';");
     $jqpk = $Results[0]['jq_pk'];
     if (empty($jqpk)) { $DB->Action("ROLLBACK;"); return; }
     }
