@@ -65,22 +65,22 @@ class agent_pkgmetagetta extends Plugin
   function AgentAdd ($uploadpk,$Depends=NULL)
   {
     global $DB;
-    /* Get dependency: "specagent" require "mimetype". */
+    /* Get dependency: "pkgmetagetta" require "unpack". */
     $SQL = "SELECT jq_pk FROM jobqueue
 	    INNER JOIN job ON job.job_upload_fk = '$uploadpk'
 	    AND job.job_pk = jobqueue.jq_job_fk
-	    WHERE jobqueue.jq_type = 'mimetype';";
+	    WHERE jobqueue.jq_type = 'unpack';";
     $Results = $DB->Action($SQL);
     $Dep = $Results[0]['jq_pk'];
     if (empty($Dep))
 	{
 	global $Plugins;
-	$Unpack = &$Plugins[plugin_find_id("agent_mimetype")];
+	$Unpack = &$Plugins[plugin_find_id("agent_unpack")];
 	$rc = $Unpack->AgentAdd($uploadpk);
 	if (!empty($rc)) { return($rc); }
 	$Results = $DB->Action($SQL);
 	$Dep = $Results[0]['jq_pk'];
-	if (empty($Dep)) { return("Unable to find dependent job: mimetype"); }
+	if (empty($Dep)) { return("Unable to find dependent job: unpack"); }
 	}
 
     /* Prepare the job: job "Default Meta Agents" */

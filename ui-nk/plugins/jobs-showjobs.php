@@ -248,7 +248,7 @@ class jobs_showjobs extends Plugin
 	$Color=$this->Colors['Failed'];
 	$Blocked[$Row['jq_pk']] = 1;
 	}
-      else if (isset($Blocked[$Row['jdep_jq_fk']]))
+      else if ($Blocked[$Row['jdep_jq_depends_fk']] == 1)
 	{
 	$Color=$this->Colors['Blocked'];
 	$Blocked[$Row['jq_pk']] = 1;
