@@ -83,7 +83,7 @@ function AgentCheckBoxDo($upload_pk)
   $V = "";
   if (!empty($AgentList))
     {
-    foreach($AgentList as $Agent)
+    foreach($AgentList as $AgentItem)
       {
       $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
       if (empty($Agent)) { continue; }
