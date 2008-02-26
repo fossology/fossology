@@ -270,6 +270,7 @@ class jobs_showjobs extends Plugin
 	$Color=$this->Colors['Finished'];
 	}
 
+      if (empty($Row['upload_pk']) || ($Upload != $Row['upload_pk']))
 	{
 	$Upload = $Row['upload_pk'];
 	if ($First) { $First=0; }
@@ -397,6 +398,7 @@ class jobs_showjobs extends Plugin
 	$Color=$this->Colors['Finished'];
 	}
 
+      if (empty($Row['upload_pk']) || ($Upload != $Row['upload_pk']))
 	{
 	$Upload = $Row['upload_pk'];
 	if ($First) { $First=0; }
