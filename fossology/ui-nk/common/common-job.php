@@ -278,6 +278,7 @@ function JobQueueAdd ($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $
   global $DB;
   if (empty($DB)) { return; }
 
+  $jq_args = str_replace("'","''",$jq_args); // protect variables
   $DB->Action("BEGIN");
 
   /* Make sure all dependencies exist */
@@ -298,7 +299,6 @@ function JobQueueAdd ($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $
   if (empty($jqpk))
     {
     /* Add the job */
-    $jq_args = str_replace("'","''",$jq_args); // protect variables
     $SQL = "INSERT INTO jobqueue ";
     $SQL .= "(jq_job_fk,jq_type,jq_args,jq_repeat,jq_runonpfile,jq_starttime,jq_endtime,jq_end_bits) VALUES ";
     $SQL .= "('$job_pk','$jq_type','$jq_args','$jq_repeat',";
