@@ -68,7 +68,7 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1)
 
   if (($Depth != 0) || $IncludeTop)
     {
-    $V .= "<option value='$ParentFolder'>\n";
+    $V .= "<option value='$ParentFolder'>";
     if ($Depth != 0) { $V .= "&nbsp;&nbsp;"; }
     for($i=1; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
 
