@@ -1246,12 +1246,17 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 	if ((CMD[CI->PI.Cmd].DBindex > 0) &&
 	    (atol(DBgetvalue(DB,0,1)) != CMD[CI->PI.Cmd].DBindex))
 	    {
+	    DBaccess(DB,"BEGIN;");
+	    memset(SQL,'\0',MAXSQL);
+	    snprintf(SQL,MAXSQL,"SELECT * FROM pfile ' WHERE pfile_pk = '%ld' FOR UPDATE;", CI->pfile_pk);
+	    DBaccess(DB,SQL); /* lock pfile */
 	    memset(SQL,'\0',MAXSQL);
 	    snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld' WHERE pfile_pk = '%ld';",
 		CMD[CI->PI.Cmd].DBindex, CI->pfile_pk);
 	    rc=DBaccess(DB,SQL); /* UPDATE pfile */
 	    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
 	    if (rc < 0) fprintf(stderr,"ERROR: SQL '%s'\n",SQL);
+	    DBaccess(DB,"COMMIT;");
 	    }
 	}
     else
@@ -1287,7 +1292,8 @@ int	DBInsertUfile	(ContainerInfo *CI, int Mask)
     	(CI->HasChild<<BITS_CONTAINER)|(1<<BITS_ARTIFACT) **/
     /* all data exists EXCEPT for the container flag */
     /** Stat/mode is meaningless for top containers */
-    snprintf(SQL,MAXSQL,"UPDATE ufile SET ufile_mode = ufile_mode|%d WHERE ufile_pk = '%ld';", 
+    snprintf(SQL,MAXSQL,"BEGIN; SELECT * FROM ufile WHERE ufile_pk = '%ld' FOR UPDATE ; UPDATE ufile SET ufile_mode = ufile_mode|%d WHERE ufile_pk = '%ld'; COMMIT;", 
+	CI->ufile_pk,
     	(CI->HasChild<<BITS_CONTAINER),
 	CI->ufile_pk
 	);

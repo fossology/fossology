@@ -400,6 +400,9 @@ void	DBCheckMime	(char *Filename)
   if (Akey >= 0)
     {
     memset(SQL,'\0',sizeof(SQL));
+    DBaccess(DB,"BEGIN;");
+    snprintf(SQL,sizeof(SQL)-1,"SELECT * FROM pfile WHERE pfile_pk = %d FOR UPDATE;",Akey);
+    DBaccess(DB,SQL);
     snprintf(SQL,sizeof(SQL)-1,"UPDATE pfile SET pfile_mimetypefk = %d WHERE pfile_pk = %d;",MimeTypeID,Akey);
     if (DBaccess(DB,SQL) < 0)
       {
@@ -409,6 +412,7 @@ void	DBCheckMime	(char *Filename)
       DBclose(DB);
       exit(-1);
       }
+    DBaccess(DB,"COMMIT;");
     }
 } /* DBCheckMime() */
 
