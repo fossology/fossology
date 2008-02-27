@@ -2416,7 +2416,11 @@ void	SAMfiles	()
 	ReadOK();
 	break;
     case 'n':
-	sprintf(SQL,"UPDATE agent_lic_status SET processed = 'TRUE' where pfile_fk = '%ld';\n",Pfile[0]);
+	/* The "FOR UPDATE" clause locks the table */
+	sprintf(SQL,"SELECT * FROM agent_lic_status WHERE pfile_fk = '%ld' FOR UPDATE;\n",Pfile[0]);
+	rc = MyDBaccess(DB,SQL);
+	if (rc < 0) ShowSQLERROR(SQL,0);
+	sprintf(SQL,"UPDATE agent_lic_status SET processed = 'TRUE' WHERE pfile_fk = '%ld';\n",Pfile[0]);
 	rc = MyDBaccess(DB,SQL);
 	if (rc < 0) ShowSQLERROR(SQL,0);
 #if BEGIN_COMMIT
@@ -2676,6 +2680,10 @@ void	SAMfilesExhaustive	()
 	ReadOK();
 	break;
     case 'n':
+	/* The "FOR UPDATE" clause locks the table */
+	sprintf(SQL,"SELECT * FROM agent_lic_status WHERE pfile_fk = '%ld' FOR UPDATE;\n",Pfile[0]);
+	rc = MyDBaccess(DB,SQL);
+	if (rc < 0) ShowSQLERROR(SQL,0);
 	sprintf(SQL,"UPDATE agent_lic_status SET processed = 'TRUE' where pfile_fk = '%ld';\n",Pfile[0]);
 	rc = MyDBaccess(DB,SQL);
 	if (rc < 0) ShowSQLERROR(SQL,0);

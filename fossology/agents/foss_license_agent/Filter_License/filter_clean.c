@@ -79,10 +79,15 @@ void	RemoveCache	(char *PfileId, char *PfileName)
 
   if (Verbose > 1) fprintf(stderr,"%s: %s %s\n",__FUNCTION__,PfileId,PfileName);
   /* First, inform the DB that the data no longer exists */
+  DBaccess(DB,"BEGIN;");
   memset(SQL,'\0',MAXSQL);
-  sprintf(SQL,"UPDATE agent_lic_status SET inrepository=FALSE WHERE pfile_fk = %s;",PfileId);
+  sprintf(SQL,"SELECT * FROM agent_lic_status WHERE pfile_fk = '%s' FOR UPDATE;",PfileId);
+  if (!Test) { DBaccess(DB,SQL); }
+  memset(SQL,'\0',MAXSQL);
+  sprintf(SQL,"UPDATE agent_lic_status SET inrepository=FALSE WHERE pfile_fk = '%s';",PfileId);
   if (Verbose > 1) fprintf(stderr,"SQL: '%s'\n",SQL);
   if (!Test) { DBaccess(DB,SQL); }
+  DBaccess(DB,"COMMIT;");
 
   /* Now remove the file */
   if (Verbose)
