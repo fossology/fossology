@@ -26,6 +26,8 @@
 #include <ctype.h>
 #include <signal.h>
 #include <extractor.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
@@ -537,6 +539,7 @@ int	main	(int argc, char *argv[])
   char Parm[MAXCMD];
   char *Path;
   char *Env;
+  int rc;
 
   /* Init extractor */
   extractors = EXTRACTOR_loadDefaultLibraries();
@@ -574,11 +577,30 @@ int	main	(int argc, char *argv[])
   for(arg=optind; arg < argc; arg++)
     {
     printf("# File: %s\n",argv[arg]);
-    keywords = EXTRACTOR_getKeywords(extractors,argv[arg]);
-    /* Use my own print since I don't like EXTRACTOR_printKeywords */
-    PrintKeys(keywords);
+    /***
+     Here's the problem: EXTRACTOR_getKeywords can crash on some files.
+     Bugs have been submitted, but until a fix comes along, we need to
+     work around the crash.
+     The workaround: fork() the analysis.  If the child crashes, then it
+     won't hurt the parent.
+     ***/
+    rc = fork();
+    if (rc == 0)
+	{
+	/* Child does the work */
+	keywords = EXTRACTOR_getKeywords(extractors,argv[arg]);
+	/* Use my own print since I don't like EXTRACTOR_printKeywords */
+	PrintKeys(keywords);
+	EXTRACTOR_freeKeywords(keywords);
+	exit(-1);
+	}
+    else
+	{
+	/* Wait for the child to finish */
+	int Status;
+	waitpid(rc,&Status,0);
+	}
     /* Clean up */
-    EXTRACTOR_freeKeywords(keywords);
     }
 
   /* No args?  Run from schedule! */
@@ -618,15 +640,25 @@ int	main	(int argc, char *argv[])
 	Path = RepMkPath("files",Env);
 	if (Path && RepExist("files",Env))
 	  {
-	  keywords = EXTRACTOR_getKeywords(extractors,Path);
-	  /* Save results to the DB */
-	  PrintKeys(keywords);
-	  /* Mark it as processed */
-	  memset(SQL,0,sizeof(SQL));
-	  snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','true','%s');",KeywordTypes[GetKey(-2)].DBIndex,getenv("ARG_akey"));
-	  DBaccess(DB,SQL);
-	  /* Done */
-	  EXTRACTOR_freeKeywords(keywords);
+	  rc = fork();
+	  if (rc == 0)
+	    {
+	    keywords = EXTRACTOR_getKeywords(extractors,Path);
+	    /* Save results to the DB */
+	    PrintKeys(keywords);
+	    /* Mark it as processed */
+	    memset(SQL,0,sizeof(SQL));
+	    snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','true','%s');",KeywordTypes[GetKey(-2)].DBIndex,getenv("ARG_akey"));
+	    DBaccess(DB,SQL);
+	    /* Done */
+	    EXTRACTOR_freeKeywords(keywords);
+	    exit(-1);
+	    }
+	  else
+	    {
+	    int Status;
+	    waitpid(rc,&Status,0);
+	    }
 	  }
 	else
 	  {
