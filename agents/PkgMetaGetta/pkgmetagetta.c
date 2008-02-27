@@ -646,10 +646,6 @@ int	main	(int argc, char *argv[])
 	    keywords = EXTRACTOR_getKeywords(extractors,Path);
 	    /* Save results to the DB */
 	    PrintKeys(keywords);
-	    /* Mark it as processed */
-	    memset(SQL,0,sizeof(SQL));
-	    snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','true','%s');",KeywordTypes[GetKey(-2)].DBIndex,getenv("ARG_akey"));
-	    DBaccess(DB,SQL);
 	    /* Done */
 	    EXTRACTOR_freeKeywords(keywords);
 	    exit(-1);
@@ -658,6 +654,15 @@ int	main	(int argc, char *argv[])
 	    {
 	    int Status;
 	    waitpid(rc,&Status,0);
+	    if (WIFSIGNALED(Status))
+		{
+		DBclose(DB);
+		DB = DBopen();
+		}
+	    /* Mark it as processed */
+	    memset(SQL,0,sizeof(SQL));
+	    snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','true','%s');",KeywordTypes[GetKey(-2)].DBIndex,getenv("ARG_akey"));
+	    DBaccess(DB,SQL);
 	    }
 	  }
 	else
