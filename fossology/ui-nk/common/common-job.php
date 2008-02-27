@@ -97,11 +97,23 @@ function JobGetType($upload_pk,$job_name)
   return($Results[0]['job_pk']);
 } // JobGetType()
 
-/************************************************************
- JobSetType(): Given an upload_pk and a job_name, create the
- primary key for the job (job_pk) if it does not exist.
- NOTE: In case of duplicate jobs, this returns the oldest job.
- ************************************************************/
+
+/**
+ *************************************************************
+ * function: JobSetType()
+ * 
+ * Given an upload_pk and a job_name, create the
+ * primary key for the job (job_pk) if it does not exist.
+  * 
+ * @param int $upload_pk the upload primary key
+ * @param string $job_name name of the job
+ * @param string $job_submitter defaults to "fossy@localhost"
+ * @param string $job_email_notify the email address to use for noticifaction. defaults to "fossy@localhost"
+ * 
+ * @return job_pk, NOTE: In case of duplicate jobs, this returns the oldest job.
+ ************************************************************* 
+ */
+
 function JobSetType($upload_pk,$job_name,
 		    $priority=0,
 		    $job_submitter="fossy@localhost",
