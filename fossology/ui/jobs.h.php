@@ -975,7 +975,7 @@ function job_create_pkgmeta($job, $upload_pk, $depends='')
         log_write("fatal", $msg, "job_create_license", "key",null,null,true);
         exit();
     }
-   
+
     $pkgmetagettaargs = "SELECT DISTINCT(pfile_pk) as Akey, 
 			pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
 		    FROM uptreeup where upload_fk = $upload_pk  

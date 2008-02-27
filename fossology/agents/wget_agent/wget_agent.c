@@ -276,6 +276,10 @@ void	DBLoadGold	()
   UfileKey = atol(DBgetvalue(DB,0,0));
 
   /* Upload the DB so the pfile is linked to the ufile */
+  DBaccess(DB,"BEGIN;");
+  memset(SQL,'\0',MAXCMD);
+  snprintf(SQL,MAXCMD-1,"SELECT * FROM ufile WHERE ufile_pk=%ld FOR UPDATE;",UfileKey);
+  DBaccess(DB,SQL);
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD-1,"UPDATE ufile SET pfile_fk=%ld WHERE ufile_pk=%ld;",
 	PfileKey,UfileKey);
@@ -287,6 +291,7 @@ void	DBLoadGold	()
 	DBclose(DB);
 	exit(-1);
 	}
+  DBaccess(DB,"COMMIT;");
 
   /* Clean up */
   unlink(GlobalTempFile);
