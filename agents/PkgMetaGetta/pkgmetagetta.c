@@ -599,6 +599,7 @@ int	main	(int argc, char *argv[])
 	/* Wait for the child to finish */
 	int Status;
 	waitpid(rc,&Status,0);
+	if (DB) { DBclose(DB); DB=DBopen(); }
 	}
     /* Clean up */
     }
@@ -648,16 +649,22 @@ int	main	(int argc, char *argv[])
 	    PrintKeys(keywords);
 	    /* Done */
 	    EXTRACTOR_freeKeywords(keywords);
+	    DBclose(DB);
 	    exit(-1);
 	    }
 	  else
 	    {
 	    int Status;
 	    waitpid(rc,&Status,0);
-	    if (WIFSIGNALED(Status))
+	    /* Since child exited, DBclose was called. */
 		{
 		DBclose(DB);
 		DB = DBopen();
+		if (!DB) 
+			{
+			printf("FATAL: Unable to connect to database\n");
+			exit(-1);
+			}
 		}
 	    /* Mark it as processed */
 	    memset(SQL,0,sizeof(SQL));
