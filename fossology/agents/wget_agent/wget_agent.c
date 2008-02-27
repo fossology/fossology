@@ -58,6 +58,7 @@ int Agent_pk=-1;	/* agent identifier */
 long GlobalUploadKey=-1;
 char GlobalTempFile[MAXCMD];
 char GlobalURL[MAXCMD];
+int GlobalImportGold=1;	/* set to 0 to not store file in gold repository */
 
 /* for heartbeat checking */
 long	HeartbeatCount=-1;	/* used to flag heartbeats */
@@ -139,8 +140,8 @@ exit(0);
 } /* TaintString() */
 
 /*********************************************************
- DBLoadGold(): Insert a file into the database.
- (This mimicks webgoldimport.)
+ DBLoadGold(): Insert a file into the database and repository.
+ (This mimicks the old webgoldimport.)
  *********************************************************/
 void	DBLoadGold	()
 {
@@ -185,7 +186,9 @@ void	DBLoadGold	()
 	}
   Unique = SumToString(Sum);
 
-  if (RepImport(GlobalTempFile,"gold",Unique,1) != 0)
+  if (GlobalImportGold)
+    {
+    if (RepImport(GlobalTempFile,"gold",Unique,1) != 0)
 	{
 	printf("ERROR upload %ld Failed to import file into the repository.\n",GlobalUploadKey);
 	printf("LOG upload %ld Failed to import %s from %s into gold %s\n",
@@ -194,8 +197,14 @@ void	DBLoadGold	()
 	DBclose(DB);
 	exit(-1);
 	}
-  /* Put the file in the "files" repository too */
-  Path = RepMkPath("gold",Unique);
+    /* Put the file in the "files" repository too */
+    Path = RepMkPath("gold",Unique);
+    } /* if GlobalImportGold */
+  else /* if !GlobalImportGold */
+    {
+    Path = GlobalTempFile;
+    } /* else if !GlobalImportGold */
+
   if (!Path)
 	{
 	printf("ERROR upload %ld Failed to determine repository location.\n",GlobalUploadKey);
@@ -214,7 +223,7 @@ void	DBLoadGold	()
 	DBclose(DB);
 	exit(-1);
 	}
-  free(Path);
+  if (Path != GlobalTempFile) free(Path);
 
   /* Now update the DB */
   /** Break out the sha1, md5, len components **/
@@ -294,7 +303,6 @@ void	DBLoadGold	()
   DBaccess(DB,"COMMIT;");
 
   /* Clean up */
-  unlink(GlobalTempFile);
   free(Sum);
 } /* DBLoadGold() */
 
@@ -474,7 +482,7 @@ void    SetEnv  (char *S, char *TempFileDir)
 
 #if 1
   /* second value is the temp file location */
-  /** This will be removed with the jobqueue is changed. **/
+  /** This will be removed when the jobqueue is changed. **/
   SLen=0;
   GLen=0;
   while((GLen < MAXCMD-4) && S[SLen] && !isspace(S[SLen]))
@@ -559,12 +567,14 @@ void	GetAgentKey	()
  ***********************************************/
 void	Usage	(char *Name)
 {
-  printf("Usage: %s [options] [URL [URL [...]]\n",Name);
+  printf("Usage: %s [options] [OBJ [OBJ [...]]\n",Name);
   printf("  -i  :: Initialize the DB connection then exit (nothing downloaded)\n");
+  printf("  -G  :: Do NOT copy the file to the gold repository.\n");
   printf("  -d dir :: directory to use file for temporary file storage\n");
   printf("  -k key :: upload key identifier (number)\n");
-  printf("  URL :: if URLs are listed, they are retrieved.\n");
-  printf("         if URL and Key are provided, then they are inserted into\n");
+  printf("  OBJ :: if URLs are listed, they are retrieved.\n");
+  printf("         if files are listed, they are used.\n");
+  printf("         if OBJ and Key are provided, then they are inserted into\n");
   printf("         the DB and repository.\n");
   printf("  no file :: process data from the scheduler.\n");
 } /* Usage() */
@@ -589,6 +599,9 @@ int	main	(int argc, char *argv[])
 	{
 	case 'd':
 		TempFileDir = optarg;
+		break;
+	case 'G':
+		GlobalImportGold=0;
 		break;
 	case 'i':
 		InitFlag=1;
@@ -627,17 +640,31 @@ int	main	(int argc, char *argv[])
     GlobalUploadKey = -1;
     memset(GlobalURL,'\0',sizeof(GlobalURL));
     strncpy(GlobalURL,argv[arg],sizeof(GlobalURL));
-    if (GetURL(GlobalTempFile,GlobalURL) != 0)
+    /* If the file contains "://" then assume it is a URL.
+       Else, assume it is a file. */
+    if (strstr(GlobalURL,"://"))
+      {
+      if (GetURL(GlobalTempFile,GlobalURL) != 0)
 	{
 	printf("ERROR: Download of %s failed.\n",GlobalURL);
 	fflush(stdout);
 	DBclose(DB);
 	exit(-1);
 	}
-    if (GlobalUploadKey != -1)
+      if (GlobalUploadKey != -1)
 	{
-	DBLoadGold(GlobalTempFile,GlobalTempFile);
+	DBLoadGold();
+	unlink(GlobalTempFile);
 	}
+      }
+    else /* must be a file */
+      {
+      if (GlobalUploadKey != -1)
+	{
+	memcpy(GlobalTempFile,GlobalURL,MAXCMD);
+	DBLoadGold();
+	}
+      }
     }
 
   /* Run from scheduler! */
@@ -660,7 +687,8 @@ int	main	(int argc, char *argv[])
 	SetEnv(Parm,TempFileDir); /* set globals */
 	if (GetURL(GlobalTempFile,GlobalURL) == 0)
 		{
-		DBLoadGold(GlobalUploadKey,GlobalTempFile);
+		DBLoadGold();
+		unlink(GlobalTempFile);
 		}
 	else
 		{
