@@ -79,6 +79,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgent=NULL)
  ************************************************************/
 function AgentCheckBoxDo($upload_pk)
 {
+  global $Plugins;
   $AgentList = menu_find("Agents",$Depth);
   $V = "";
   if (!empty($AgentList))
