@@ -24,45 +24,41 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class upload_url extends Plugin
+class upload_file extends Plugin
 {
-  public $Name       = "upload_url";
+  public $Name       = "upload_file";
   public $Title      = "Upload a New File";
   public $Version    = "1.0";
-  public $MenuList   = "Upload::From URL";
+  public $MenuList   = "Upload::From File";
   public $Dependency = array("db","agent_unpack");
 
   /*********************************************
    Upload(): Process the upload request.
    Returns NULL on success, string on failure.
    *********************************************/
-  function Upload ($Folder, $GetURL, $Desc, $Name)
+  function Upload ($Folder, $TempFile, $Desc, $Name)
   {
     /* See if the URL looks valid */
     if (empty($Folder)) { return("Invalid folder"); }
-    if (empty($GetURL)) { return("Invalid URL"); }
-    if (preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i",$GetURL) != 1)
-	{ return("Invalid URL: " . htmlentities($GetURL)); }
-    if (preg_match("@[[:space:]]@",$GetURL) != 0)
-	{ return("Invalid URL (no spaces permitted): " . htmlentities($GetURL)); }
 
-    if (empty($Name)) { $Name = basename($GetURL); }
+    if (empty($Name)) { $Name = basename($_FILES['getfile']['name']); }
     $ShortName = basename($Name);
     if (empty($ShortName)) { $ShortName = $Name; }
 
     /* Create an upload record. */
-    $Mode = (1<<2); // code for "it came from wget"
+    $Mode = (1<<3); // code for "it came from web upload"
     $uploadpk = JobAddUpload($ShortName,$Name,$Desc,$Mode,$Folder);
     if (empty($uploadpk)) { return("Failed to insert upload record"); }
 
-    /* Prepare the job: job "wget" */
-    $jobpk = JobAddJob($uploadpk,"wget");
-    if (empty($jobpk)) { return("Failed to insert job record"); }
+    /* move the temp file */
+    move_uploaded_file($TempFile,"$TempFile.1");
+    $TempFile .= ".1";
 
-    /* Prepare the job: job "wget" has jobqueue item "wget" */
-    /** 2nd parameter is obsolete **/
-    $jobqueuepk = JobQueueAdd($jobpk,"wget","$uploadpk - $GetURL","no",NULL,NULL);
-    if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
+    /* Run wget_agent locally to import the file. */
+    global $LIBEXECDIR;
+    $Prog = "$LIBEXECDIR/agents/wget_agent -k $uploadpk '$TempFile'";
+    system($Prog);
+    unlink($TempFile);
 
     global $Plugins;
     $Unpack = &$Plugins[plugin_find_id("agent_unpack")];
@@ -86,12 +82,11 @@ class upload_url extends Plugin
 	$V .= "<H1>$this->Title</H1>\n";
 	/* If this is a POST, then process the request. */
 	$Folder = GetParm('folder',PARM_INTEGER);
-	$GetURL = GetParm('geturl',PARM_STRING);
 	$Desc = GetParm('description',PARM_TEXT); // may be null
 	$Name = GetParm('name',PARM_TEXT); // may be null
-	if (!empty($GetURL) && !empty($Folder))
+	if (file_exists($_FILES['getfile']['tmp_name']) && !empty($Folder))
 	  {
-	  $rc = $this->Upload($Folder, $GetURL, $Desc, $Name);
+	  $rc = $this->Upload($Folder,$_FILES['getfile']['tmp_name'],$Desc,$Name);
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
@@ -114,15 +109,15 @@ class upload_url extends Plugin
 	if (empty($GetURL)) { $GetURL='http://'; }
 
 	/* Display the form */
-	$V .= "<form method='post'>\n"; // no url = this url
+	$V .= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
 	$V .= "<ol>\n";
 	$V .= "<li>Select the folder for storing the uploaded file:\n";
 	$V .= "<select name='folder'>\n";
 	$V .= FolderListOption(-1,0);
 	$V .= "</select><P />\n";
-	$V .= "<li>Enter the URL to the file:<br />\n";
-	$V .= "<INPUT type='text' name='geturl' size=60 value='" . htmlentities($GetURL) . "'/><br />\n";
-	$V .= "<b>NOTE</b>: If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file. The URL can begin with HTTP://, HTTPS://, or FTP://.<P />\n";
+	$V .= "<li>Select the file to upload:<br />\n";
+	$V .= "<input name='getfile' size='60' type='file' /><br />\n";
+	$V .= "<b>NOTE</b>: If the file is larger than 650 Megs (one CD-ROM), then this method will not work with some browsers (e.g., Internet Explorer). Only attach files smaller than 650 Megs.<P />\n";
 
 	$V .= "<li>(Optional) Enter a description of this file:<br />\n";
 	$V .= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
@@ -132,6 +127,7 @@ class upload_url extends Plugin
 	$V .= "<li>Select optional analysis<br />\n";
 	$V .= AgentCheckBoxMake(-1,"agent_unpack");
 	$V .= "</ol>\n";
+	$V .= "It may take time to transmit the file from your computer to this server. Please be patient.<br>\n";
 	$V .= "<input type='submit' value='Upload!'>\n";
 	$V .= "</form>\n";
 	break;
@@ -145,6 +141,6 @@ class upload_url extends Plugin
     return;
   }
 };
-$NewPlugin = new upload_url;
+$NewPlugin = new upload_file;
 $NewPlugin->Initialize();
 ?>

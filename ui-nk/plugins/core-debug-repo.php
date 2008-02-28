@@ -49,7 +49,7 @@ class core_debug_repo extends Plugin
 	if (empty($R['pfile_pk'])) { continue; }
 	$URI = Traceback_uri() . "?mod=view";
 	$URI .= "&upload=" . $R['upload_fk'];
-	$URI .= "&item=" . $R['parent'];
+	$URI .= "&item=" . $R['uploadtree_pk'];
 	$URI .= "&ufile=" . $R['ufile_fk'];
 	$URI .= "&pfile=" . $R['pfile_pk'];
 	$V .= "<li><a href='$URI'>" . htmlentities($R['ufile_name']) . "</a>\n";

@@ -86,7 +86,7 @@ class ui_license extends Plugin
     foreach($Results as $Key => $R)
       {
       if (empty($R['lic_name'])) { continue; }
-      $Name = preg_replace("/^.*\//","",$R['lic_name']);
+      $Name = basename($R['lic_name']);
       $GID = $R['lic_id'];
       $LicGID2Name[$GID] = $Name;
       $LicPk2GID[$R['lic_pk']] = $GID;
