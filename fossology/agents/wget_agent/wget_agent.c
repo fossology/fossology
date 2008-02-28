@@ -64,6 +64,9 @@ int GlobalImportGold=1;	/* set to 0 to not store file in gold repository */
 long	HeartbeatCount=-1;	/* used to flag heartbeats */
 long	HeartbeatCounter=-1;	/* used to count heartbeats */
 
+/* for debugging */
+int Debug=0;
+
 /**************************************************
  ShowHeartbeat(): Given an alarm signal, display a
  heartbeat.
@@ -114,32 +117,6 @@ int     ReadLine (FILE *Fin, char *Line, int MaxLine)
 } /* ReadLine() */
 
 /*********************************************************
- TaintString(): Create a string with taint quoting.
- Returns static string.
- *********************************************************/
-char *	TaintString	(char *S)
-{
-  static char String[4096];
-  int i;
-
-  memset(String,'\0',4096);
-  if (!S) return(String);
-  for(i=0; (S[0]!='\0') && (i < 4096-1); S++)
-    {
-    if (S[0]=='\n') { String[i++]='\\'; String[i++]='n'; }
-    else if (S[0]=='\r') { String[i++]='\\'; String[i++]='r'; }
-    else if (S[0]=='\a') { String[i++]='\\'; String[i++]='a'; }
-    else if (S[0]=='\'') { String[i++]='\\'; String[i++]='\''; }
-    else if (S[0]=='\"') { String[i++]='\\'; String[i++]='"'; }
-    else if (S[0]=='\\') { String[i++]='\\'; String[i++]='\\'; }
-    else String[i++]=S[0];
-    }
-printf("Tainted string is: '%s'\n",String);
-exit(0);
-  return(String);
-} /* TaintString() */
-
-/*********************************************************
  DBLoadGold(): Insert a file into the database and repository.
  (This mimicks the old webgoldimport.)
  *********************************************************/
@@ -154,6 +131,7 @@ void	DBLoadGold	()
   char *Path;
   FILE *Fin;
 
+  if (Debug) printf("Processing %s\n",GlobalTempFile);
   Fin = fopen(GlobalTempFile,"rb");
   if (!Fin)
 	{
@@ -185,9 +163,11 @@ void	DBLoadGold	()
 	exit(-1);
 	}
   Unique = SumToString(Sum);
+  if (Debug) printf("Unique %s\n",Unique);
 
   if (GlobalImportGold)
     {
+    if (Debug) printf("Import Gold %s\n",Unique);
     if (RepImport(GlobalTempFile,"gold",Unique,1) != 0)
 	{
 	printf("ERROR upload %ld Failed to import file into the repository.\n",GlobalUploadKey);
@@ -204,6 +184,7 @@ void	DBLoadGold	()
     {
     Path = GlobalTempFile;
     } /* else if !GlobalImportGold */
+  if (Debug) printf("Path is %s\n",Path);
 
   if (!Path)
 	{
@@ -214,6 +195,7 @@ void	DBLoadGold	()
 	DBclose(DB);
 	exit(-1);
 	}
+  if (Debug) printf("Import files %s\n",Path);
   if (RepImport(Path,"files",Unique,1) != 0)
 	{
 	printf("ERROR upload %ld Failed to import file into the repository.\n",GlobalUploadKey);
@@ -261,6 +243,7 @@ void	DBLoadGold	()
 	DBaccess(DB,"SELECT currval('pfile_pfile_pk_seq');");
 	}
   PfileKey = atol(DBgetvalue(DB,0,0));
+  if (Debug) printf("pfile_pk = %ld\n",PfileKey);
 
   /* See if ufile needs to be added (it should be there, created by the UI) */
   memset(SQL,'\0',MAXCMD);
@@ -283,6 +266,7 @@ void	DBLoadGold	()
 	exit(-1);
 	}
   UfileKey = atol(DBgetvalue(DB,0,0));
+  if (Debug) printf("ufile_pk = %ld\n",UfileKey);
 
   /* Upload the DB so the pfile is linked to the ufile */
   DBaccess(DB,"BEGIN;");
@@ -292,6 +276,7 @@ void	DBLoadGold	()
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD-1,"UPDATE ufile SET pfile_fk=%ld WHERE ufile_pk=%ld;",
 	PfileKey,UfileKey);
+  if (Debug) printf("SQL=%s\n",SQL);
   if (DBaccess(DB,SQL) < 0)
 	{
 	printf("ERROR upload %ld Unable to update the database\n",GlobalUploadKey);
@@ -567,14 +552,14 @@ void	GetAgentKey	()
  ***********************************************/
 void	Usage	(char *Name)
 {
-  printf("Usage: %s [options] [OBJ [OBJ [...]]\n",Name);
+  printf("Usage: %s [options] [OBJ]\n",Name);
   printf("  -i  :: Initialize the DB connection then exit (nothing downloaded)\n");
   printf("  -G  :: Do NOT copy the file to the gold repository.\n");
   printf("  -d dir :: directory to use file for temporary file storage\n");
   printf("  -k key :: upload key identifier (number)\n");
-  printf("  OBJ :: if URLs are listed, they are retrieved.\n");
-  printf("         if files are listed, they are used.\n");
-  printf("         if OBJ and Key are provided, then they are inserted into\n");
+  printf("  OBJ :: if a URL is listed, then it is retrieved.\n");
+  printf("         if a file is listed, then it used.\n");
+  printf("         if OBJ and Key are provided, then it is inserted into\n");
   printf("         the DB and repository.\n");
   printf("  no file :: process data from the scheduler.\n");
 } /* Usage() */
@@ -616,6 +601,11 @@ int	main	(int argc, char *argv[])
 		exit(-1);
 	}
     }
+  if (argc - optind > 1)
+	{
+	Usage(argv[0]);
+	exit(-1);
+	}
 
   /* Init */
   DB = DBopen();
@@ -637,13 +627,14 @@ int	main	(int argc, char *argv[])
   /* Run from the command-line (for testing) */
   for(arg=optind; arg < argc; arg++)
     {
-    GlobalUploadKey = -1;
     memset(GlobalURL,'\0',sizeof(GlobalURL));
     strncpy(GlobalURL,argv[arg],sizeof(GlobalURL));
     /* If the file contains "://" then assume it is a URL.
        Else, assume it is a file. */
+    if (Debug) printf("Command-line: %s\n",GlobalURL);
     if (strstr(GlobalURL,"://"))
       {
+      if (Debug) printf("It's a URL\n");
       if (GetURL(GlobalTempFile,GlobalURL) != 0)
 	{
 	printf("ERROR: Download of %s failed.\n",GlobalURL);
@@ -659,6 +650,7 @@ int	main	(int argc, char *argv[])
       }
     else /* must be a file */
       {
+      if (Debug) printf("It's a file -- GlobalUploadKey = %ld\n",GlobalUploadKey);
       if (GlobalUploadKey != -1)
 	{
 	memcpy(GlobalTempFile,GlobalURL,MAXCMD);
