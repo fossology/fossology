@@ -70,6 +70,7 @@ class ui_default extends Plugin
     $Uri = Traceback_uri();
     if (1)
 	{
+	$V .= "<body>";
 	$P = &$Plugins[plugin_find_id("topnav")];
 	$P->OutputSet($this->OutputType,0);
 	$V .= $P->Output();
@@ -83,7 +84,7 @@ class ui_default extends Plugin
 	{
 	$V .= "<frameset rows='106,*' border=0>\n";
 	$V .= "  <frame name=topnav src='$Uri?mod=topnav'>\n";
-	$V .= "  <frameset cols='25%,*' border=5 onResize='if (navigator.family == 'nn4') window.location.reload()'>\n";
+	$V .= "  <frameset cols='25%,*' border=5 onResize=\"if (navigator.family == 'nn4') window.location.reload()\">\n";
 	$V .= "    <frame name=treenav src='$Uri?mod=$TreeNav'>\n";
 	$V .= "    <frame name=basenav src='$Uri?mod=$BaseNav'>\n";
 	$V .= "  </frameset>\n";
@@ -91,9 +92,45 @@ class ui_default extends Plugin
 	$V .= "<noframes>\n";
 	$V .= "<h1>Your browser does not appear to support frames</h1>\n";
 	$V .= "</noframes>\n";
+	$V .= "<body>";
 	}
     return($V);
     } // DrawHTMLPage()
+
+  /***********************************************************
+   OutputOpen(): This function is called when user output is
+   requested.  This function is responsible for assigning headers.
+   If $Type is "HTML" then generate an HTTP header.
+   If $Type is "XML" then begin an XML header.
+   If $Type is "Text" then generate a text header as needed.
+   The $ToStdout flag is "1" if output should go to stdout, and
+   0 if it should be returned as a string.  (Strings may be parsed
+   and used by other plugins.)
+   ***********************************************************/
+  function OutputOpen($Type,$ToStdout)
+    {
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    $this->OutputType=$Type;
+    $this->OutputToStdout=$ToStdout;
+    // Put your code here
+    switch($this->OutputType)
+      {
+      case "XML":
+        $V = "<xml>\n";
+        break;
+      case "HTML":
+        header('Content-type: text/html');
+        $V = "<html>\n";
+        break;
+      case "Text":
+        break;
+      default:
+        break;
+      }
+    if (!$this->OutputToStdout) { return($V); }
+    print "$V";
+    return;
+    } // OutputOpen()
 
   /***********************************************************
    Output(): This function is called when user output is

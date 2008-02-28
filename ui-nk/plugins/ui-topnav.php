@@ -42,7 +42,7 @@ class ui_topnav extends Plugin
 	break;
       case "HTML":
 	$Uri = Traceback_dir();
-	$V .= "<table border=0 cellpadding=0>\n";
+	$V .= "<table width='100%' border=0 cellpadding=0>\n";
 	$V .= "  <tr>\n";
 	$V .= "    <td rowspan=2>";
 	$V .= "<a href='/' target='_top'><img src='${Uri}images/fossology-logo.gif' align=absmiddle border=0></a>";
