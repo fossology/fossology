@@ -1248,7 +1248,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 	    {
 	    DBaccess(DB,"BEGIN;");
 	    memset(SQL,'\0',MAXSQL);
-	    snprintf(SQL,MAXSQL,"SELECT * FROM pfile ' WHERE pfile_pk = '%ld' FOR UPDATE;", CI->pfile_pk);
+	    snprintf(SQL,MAXSQL,"SELECT * FROM pfile WHERE pfile_pk = '%ld' FOR UPDATE;", CI->pfile_pk);
 	    DBaccess(DB,SQL); /* lock pfile */
 	    memset(SQL,'\0',MAXSQL);
 	    snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld' WHERE pfile_pk = '%ld';",
