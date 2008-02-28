@@ -80,39 +80,7 @@ class ui_view_meta extends Plugin
      **********************************/
     if ($ShowHeader)
       {
-      $Uri = Traceback_uri() . "?mod=browse";
-      $Opt="";
-      if (!empty($Pfile)) { $Opt .= "&pfile=$Pfile"; }
-      if (!empty($Ufile)) { $Opt .= "&ufile=$Ufile"; }
-      if (!empty($Upload)) { $Opt .= "&upload=$Upload"; }
-      if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
-      if (!empty($Show)) { $Opt .= "&show=$Show"; }
-      /* No item */
-      $V .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
-      $Path = Dir2Path($Item,$Ufile);
-      $FirstPath=1;
-      $Last = &$Path[count($Path)-1];
-
-      $V .= "<font class='text'>\n";
-      foreach($Path as $P)
-	{
-	if (empty($P['ufile_name'])) { continue; }
-	if (!$FirstPath) { $V .= "/ "; }
-	if ($P != $Last) { $V .= "<a href='$Uri&item=" . $P['uploadtree_pk'] . "$Opt'>"; }
-	if (Isdir($P['ufile_mode']))
-	  {
-	  $V .= $P['ufile_name'];
-	  }
-	else
-	  {
-	  if (!$FirstPath && ($P != $Last)) { $V .= "<br>\n&nbsp;&nbsp;"; }
-	  $V .= "<b>" . $P['ufile_name'] . "</b>";
-	  }
-	if ($P != $Last) { $V .= "</a>"; }
-	$FirstPath=0;
-	}
-      $V .= "</div><P />\n";
-      $V .= "</font>\n";
+      $V .= Dir2Browse("browse",$Item,$Ufile) . "<P />";
       } // if ShowHeader
 
     /**********************************
