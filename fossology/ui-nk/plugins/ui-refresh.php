@@ -26,10 +26,9 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_refresh extends Plugin
   {
-  var $Name="refresh";
-  var $Version="1.0";
-
-  var $Dependency=array("Default");
+  var $Name       = "refresh";
+  var $Version    = "1.0";
+  var $Dependency = array("Default");
 
   /***********************************************************
    GetRefresh(): Generate a Refresh URL.

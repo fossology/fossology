@@ -26,9 +26,9 @@ if (!isset($GlobalReady)) { exit; }
 
 class core_debug extends Plugin
   {
-  var $Name="debug";
-  var $Version="1.0";
-  var $MenuList="Admin::Debug Plugins";
+  var $Name       = "debug";
+  var $Version    = "1.0";
+  var $MenuList   = "Admin::Debug Plugins";
 
   /***********************************************************
    Output(): Display the loaded menu and plugins.

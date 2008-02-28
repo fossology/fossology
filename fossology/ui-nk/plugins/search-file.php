@@ -26,10 +26,11 @@ if (!isset($GlobalReady)) { exit; }
 
 class search_file extends Plugin
   {
-  var $Name="search_file";
-  var $Version="1.0";
-  var $MenuList="Tools::Search::Filename";
-  var $Dependency=array("db","view","browse");
+  var $Name       = "search_file";
+  var $Version    = "1.0";
+  var $MenuList   = "Tools::Search::Filename";
+  var $Dependency = array("db","view","browse");
+  var $DBaccess   = PLUGIN_DB_READ;
 
   /***********************************************************
    GetUfileFromName(): Given a pfile_pk, return all ufiles.

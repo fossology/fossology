@@ -26,9 +26,10 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_view_meta extends Plugin
   {
-  var $Name="view_meta";
-  var $Version="1.0";
-  var $Dependency=array("db","browse");
+  var $Name       = "view_meta";
+  var $Version    = "1.0";
+  var $Dependency = array("db","browse");
+  var $DBaccess   = PLUGIN_DB_READ;
 
   /***********************************************************
    RegisterMenus(): Customize submenus.

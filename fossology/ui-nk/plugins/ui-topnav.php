@@ -26,10 +26,10 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_topnav extends Plugin
   {
-  var $Name="topnav";
-  var $Version="1.0";
-  var $MenuList="";
-  var $Dependency=array("menus");
+  var $Name       = "topnav";
+  var $Version    = "1.0";
+  var $MenuList   = "";
+  var $Dependency = array("menus");
 
   function Output()
     {

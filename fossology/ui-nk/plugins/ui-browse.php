@@ -26,10 +26,11 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_browse extends Plugin
   {
-  var $Name="browse";
-  var $Version="1.0";
+  var $Name       = "browse";
+  var $Version    = "1.0";
   // var $MenuList="Tools::Browse";
-  var $Dependency=array("db");
+  var $Dependency = array("db");
+  var $DBaccess   = PLUGIN_DB_READ;
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
@@ -190,6 +191,12 @@ if (0) {
 
     $V .= "</table>\n";
     if (!$ShowSomething) { $V .= "<b>No files</b>\n"; }
+    else
+	{
+	$V .= "<hr>\n";
+	if (count($Results) == 1) { $V .= "1 item\n"; }
+	else { $V .= count($Results) . " items\n"; }
+	}
     return($V);
     } // ShowItem()
 

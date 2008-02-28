@@ -30,9 +30,10 @@ define("MAXHIGHLIGHTCOLOR",8);
 
 class ui_view extends Plugin
   {
-  var $Name="view";
-  var $Version="1.0";
-  var $Dependency=array("db","browse");
+  var $Name       = "view";
+  var $Version    = "1.0";
+  var $Dependency = array("db","browse");
+  var $DBaccess   = PLUGIN_DB_READ;
 
   var $HighlightColors = array("yellow","lightgreen","aqua","mediumslateblue","darkkhaki","orange","lightsteelblue","yellowgreen");
   var $Highlight=NULL;

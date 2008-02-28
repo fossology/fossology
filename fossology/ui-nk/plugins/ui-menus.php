@@ -26,9 +26,9 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_menu extends Plugin
   {
-  var $Name="menus";
-  var $Version="1.0";
-  var $MenuTarget="treenav";
+  var $Name       = "menus";
+  var $Version    = "1.0";
+  var $MenuTarget = "treenav";
 
   function PostInitialize()
     {

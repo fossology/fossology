@@ -31,6 +31,7 @@ class admin_upload_delete extends Plugin
   public $MenuList   = "Organize::Uploads::Delete Uploaded File";
   public $Version    = "1.0";
   public $Dependency = array("db");
+  public $DBaccess   = PLUGIN_DB_DELETE;
 
   /***********************************************************
    RegisterMenus(): Register additional menus.

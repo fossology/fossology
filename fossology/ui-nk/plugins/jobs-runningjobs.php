@@ -26,10 +26,11 @@ if (!isset($GlobalReady)) { exit; }
 
 class jobs_runningjobs extends Plugin
   {
-  var $Name="runningjobs";
-  var $Version="1.0";
-  var $MenuList="Admin::Scheduler::Running Jobs";
-  var $Dependency=array("db");
+  var $Name       = "runningjobs";
+  var $Version    = "1.0";
+  var $MenuList   = "Admin::Scheduler::Running Jobs";
+  var $Dependency = array("db");
+  var $DBaccess   = PLUGIN_DB_READ;
 
   /***********************************************************
    Output(): This function returns the scheduler status.

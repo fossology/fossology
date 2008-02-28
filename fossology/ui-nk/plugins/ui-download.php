@@ -26,9 +26,10 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_download extends Plugin
   {
-  var $Name="download";
-  var $Version="1.0";
-  var $Dependency=array("db");
+  var $Name       = "download";
+  var $Version    = "1.0";
+  var $Dependency = array("db");
+  var $DBaccess   = PLUGIN_DB_DOWNLOAD;
 
   /***********************************************************
    OutputOpen(): This function is called when user output is

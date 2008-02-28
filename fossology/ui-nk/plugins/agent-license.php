@@ -31,6 +31,7 @@ class agent_license extends Plugin
   public $MenuList   = "Tools::Agents::License Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
+  public $DBaccess   = PLUGIN_DB_ANALYZE;
 
   /***********************************************************
    RegisterMenus(): Register additional menus.

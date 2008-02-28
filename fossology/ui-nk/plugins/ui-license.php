@@ -26,10 +26,11 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_license extends Plugin
   {
-  var $Name="license";
-  var $Version="1.0";
-  // var $MenuList="Tools::License";
-  var $Dependency=array("db","browse");
+  var $Name       = "license";
+  var $Version    = "1.0";
+  // var $MenuList= "Tools::License";
+  var $Dependency = array("db","browse");
+  var $DBaccess   = PLUGIN_DB_READ;
 
   /***********************************************************
    RegisterMenus(): Customize submenus.

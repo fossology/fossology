@@ -26,11 +26,12 @@ if (!isset($GlobalReady)) { exit; }
 
 class jobs_showjobs extends Plugin
   {
-  var $Name="showjobs";
-  var $Version="1.0";
-  var $MenuList="Admin::Scheduler::Job Queue Summary";
-  var $MenuOrder=5;
-  var $Dependency=array("db","browse");
+  var $Name       = "showjobs";
+  var $Version    = "1.0";
+  var $MenuList   = "Admin::Scheduler::Job Queue Summary";
+  var $MenuOrder  = 5;
+  var $Dependency = array("db","browse");
+  var $DBaccess   = PLUGIN_DB_READ;
 
   var $Colors=array(
 	"Queued" => "white",

@@ -30,10 +30,11 @@ if (!isset($GlobalReady)) { exit; }
 
 class folder_move extends Plugin
   {
-  var $Name="mvFolder";
-  var $Version="1.0";
-  var $MenuList="Organize::Folders::Move";
-  var $Dependency=array("db");
+  var $Name       ="folder_move";
+  var $Version    ="1.0";
+  var $MenuList   ="Organize::Folders::Move";
+  var $Dependency =array("db");
+  var $DBaccess   = PLUGIN_DB_WRITE;
 
   /*********************************************
    Move(): Given a folder's ID and a TargetId, move
