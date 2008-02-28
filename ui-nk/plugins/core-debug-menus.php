@@ -26,9 +26,9 @@ if (!isset($GlobalReady)) { exit; }
 
 class core_debug_menus extends Plugin
   {
-  var $Name="debug-menus";
-  var $Version="1.0";
-  var $MenuList="Admin::Debug Menus";
+  var $Name       = "debug-menus";
+  var $Version    = "1.0";
+  var $MenuList   = "Admin::Debug Menus";
 
   /***********************************************************
    Menu2HTML(): Display the full menu as an ordered list.

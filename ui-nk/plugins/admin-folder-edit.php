@@ -30,10 +30,11 @@ if (!isset($GlobalReady)) { exit; }
 
 class folder_properties extends Plugin
 {
-  var $Name="folder_properties";
-  var $Version="1.0";
-  var $MenuList="Organize::Folders::Edit Properties";
-  var $Dependency=array("db");
+  var $Name       ="folder_properties";
+  var $Version    ="1.0";
+  var $MenuList   ="Organize::Folders::Edit Properties";
+  var $Dependency =array("db");
+  var $DBaccess   = PLUGIN_DB_WRITE;
 
   /*********************************************
    Edit(): Given a folder's ID and a name, alter

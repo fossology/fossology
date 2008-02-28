@@ -30,11 +30,12 @@ if (!isset($GlobalReady)) { exit; }
 
 class folder_create extends Plugin
 {
-  public $Name       = "folder_create";
-  public $Title      = "Create a new Fossology folder";
-  public $Version    = "1.0";
-  public $MenuList   = "Organize::Folders::Create";
-  public $Dependency = array("db");
+  var $Name       = "folder_create";
+  var $Title      = "Create a new Fossology folder";
+  var $Version    = "1.0";
+  var $MenuList   = "Organize::Folders::Create";
+  var $Dependency = array("db");
+  var $DBaccess   = PLUGIN_DB_WRITE;
 
   /**
    * Create(): Given a parent folder ID, a name and description,

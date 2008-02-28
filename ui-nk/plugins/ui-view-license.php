@@ -26,9 +26,10 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_view_license extends Plugin
   {
-  var $Name="view-license";
-  var $Version="1.0";
-  var $Dependency=array("db","view");
+  var $Name       = "view-license";
+  var $Version    = "1.0";
+  var $Dependency = array("db","view");
+  var $DBaccess   = PLUGIN_DB_READ;
 
   /***********************************************************
    RegisterMenus(): Customize submenus.

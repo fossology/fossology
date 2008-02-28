@@ -35,6 +35,18 @@ define("PLUGIN_STATE_VALID",1); // used during install
 define("PLUGIN_STATE_READY",2); // used during post-install
 
 /*************************************************************
+ Each plugin has a state to identify the kind of access required.
+ Plugins should select the highest level of access.
+ *************************************************************/
+define("PLUGIN_DB_NONE",0);
+define("PLUGIN_DB_READ",1);
+define("PLUGIN_DB_DOWNLOAD",2);
+define("PLUGIN_DB_WRITE",3);
+define("PLUGIN_DB_UPLOAD",4);
+define("PLUGIN_DB_ANALYZE",5);
+define("PLUGIN_DB_DELETE",6);
+
+/*************************************************************
  This is the Plugin class.  All plugins should:
    1. Use this class or extend this class.
    2. After defining the necessary functions and values, the plugin
@@ -57,6 +69,8 @@ class Plugin
   var $Name="";
   var $Version="1.0";
   var $Title="";  // used for HTML title tags and window menu bars
+  var $PluginLevel=10; /* user for sorting plugins -- higher comes first after dependencies are met */
+  var $DBaccess=PLUGIN_DB_NONE; /* what kind of access is needed? */
 
   /*****
    This array lists plugin dependencies by name and initialization order.

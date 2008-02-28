@@ -26,10 +26,11 @@ if (!isset($GlobalReady)) { exit; }
 
 class core_debug_repo extends Plugin
   {
-  var $Name="debug_repo";
-  var $Version="1.0";
-  var $MenuList="Admin::Debug Repository";
-  var $Dependency=array("db","view","browse");
+  var $Name       = "debug_repo";
+  var $Version    = "1.0";
+  var $MenuList   = "Admin::Debug Repository";
+  var $Dependency = array("db","view","browse");
+  var $DBaccess   = PLUGIN_DB_READ;
 
   /***********************************************************
    GetUfileFromPfile(): Given a pfile_pk, return all ufiles.

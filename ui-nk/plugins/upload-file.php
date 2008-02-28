@@ -31,6 +31,7 @@ class upload_file extends Plugin
   public $Version    = "1.0";
   public $MenuList   = "Upload::From File";
   public $Dependency = array("db","agent_unpack");
+  public $DBaccess   = PLUGIN_DB_ANALYZE;
 
   /*********************************************
    Upload(): Process the upload request.

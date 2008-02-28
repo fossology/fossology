@@ -31,6 +31,7 @@ class admin_folder_delete extends Plugin
   public $MenuList   = "Organize::Folders::Delete Folder";
   public $Version    = "1.0";
   public $Dependency = array("db");
+  public $DBaccess   = PLUGIN_DB_DELETE;
 
   /***********************************************************
    RegisterMenus(): Register additional menus.

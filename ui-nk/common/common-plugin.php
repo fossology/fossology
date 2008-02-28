@@ -59,6 +59,13 @@ function plugin_cmp($a,$b)
     }
   // print "STILL Comparing $a->Name with $b->Name\n";
 
+  /* If same dependencies, then sort by plugin level (highest comes first) */
+  if ($a->PluginLevel != $b->PluginLevel)
+    {
+    if ($a->PluginLevel > $b->PluginLevel) { return(-1); }
+    else { return(1); }
+    }
+
   /* Nothing else to sort by -- sort by number of dependencies */
   $rc = count($a->Dependency) - count($b->Dependency);
   return($rc);
