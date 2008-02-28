@@ -588,6 +588,7 @@ class ui_view extends Plugin
 		case "application/x-javascript":
 		case "application/x-perl":
 		case "application/x-shellscript":
+		case "application/x-rpm-spec":
 		case "message/rfc822":
 			$Format='flow';
 			break;
