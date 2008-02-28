@@ -29,7 +29,7 @@ class core_debug_repo extends Plugin
   var $Name="debug_repo";
   var $Version="1.0";
   var $MenuList="Admin::Debug Repository";
-  var $Dependency=array("db","view");
+  var $Dependency=array("db","view","browse");
 
   /***********************************************************
    GetUfileFromPfile(): Given a pfile_pk, return all ufiles.
@@ -43,18 +43,11 @@ class core_debug_repo extends Plugin
 	INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk;";
     $Results = $DB->Action($SQL);
     $V = "";
-    $V .= "<ul>";
     foreach($Results as $R)
 	{
 	if (empty($R['pfile_pk'])) { continue; }
-	$URI = Traceback_uri() . "?mod=view";
-	$URI .= "&upload=" . $R['upload_fk'];
-	$URI .= "&item=" . $R['uploadtree_pk'];
-	$URI .= "&ufile=" . $R['ufile_fk'];
-	$URI .= "&pfile=" . $R['pfile_pk'];
-	$V .= "<li><a href='$URI'>" . htmlentities($R['ufile_name']) . "</a>\n";
+	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$R['ufile_fk'],"view") . "<P />\n";
 	}
-    $V .= "</ul>";
     return($V);
     } // GetUfileFromPfile()
 

@@ -273,31 +273,7 @@ if (0) {
 	/************************/
 	/* Show the folder path */
 	/************************/
-	$Path = Dir2Path($Item);
-	$FirstPath=1;
-	$Opt = "";
-	if ($Folder) { $Opt .= "&folder=$Folder"; }
-	if ($Upload) { $Opt .= "&upload=$Upload"; }
-	$Opt .= "&show=$Show";
-	$V .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
-	foreach($Path as $P)
-	  {
-	  if (empty($P['ufile_name'])) { continue; }
-	  if (!$FirstPath) { $V .= "/ "; }
-	  $V .= "<a href='$Uri&item=" . $P['uploadtree_pk'] . "$Opt'>";
-	  if (Isdir($P['ufile_mode']))
-	    {
-	    $V .= $P['ufile_name'];
-	    }
-	  else
-	    {
-	    if (!$FirstPath) { $V .= "<br>\n&nbsp;&nbsp;"; }
-	    $V .= "<b>" . $P['ufile_name'] . "</b>";
-	    }
-	  $V .= "</a>";
-	  $FirstPath=0;
-	  }
-	$V .= "</div><P />\n";
+	$V .= Dir2Browse($this->Name,$Item,-1) . "<P />\n";
 
 	/******************************/
 	/* Get the folder description */

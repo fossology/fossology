@@ -215,7 +215,7 @@ function Dir2Path($UploadtreePk, $UfilePk=-1)
  Dir2Browse(): given an uploadtree_pk and ufile_pk, return a
  string listing the browse paths.
  ************************************************************/
-function Dir2Browse ($UploadtreePk, $UfilePk, $LinkLast=0, $ShowBox=1)
+function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL, $ShowBox=1)
 {
   global $Plugins;
   global $DB;
@@ -226,6 +226,9 @@ function Dir2Browse ($UploadtreePk, $UfilePk, $LinkLast=0, $ShowBox=1)
     $V .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
     }
 
+  $Opt = Traceback_parm_keep(array("folder","show"));
+  $Uri = Traceback_uri() . "?mod=$Mod";
+
   $Path = Dir2Path($UploadtreePk,$UfilePk);
   $FirstPath=1;
   $Last = &$Path[count($Path)-1];
@@ -235,9 +238,15 @@ function Dir2Browse ($UploadtreePk, $UfilePk, $LinkLast=0, $ShowBox=1)
     {
     if (empty($P['ufile_name'])) { continue; }
     if (!$FirstPath) { $V .= "/ "; }
-    if ($LinkLast || ($P != $Last))
+    if (!empty($LinkLast) || ($P != $Last))
 	{
-	$V .= "<a href='$Uri&item=" . $P['uploadtree_pk'] . "$Opt'>";
+	if ($P == $Last)
+	  {
+	  $Uri = Traceback_uri() . "?mod=$LinkLast";
+	  if (!empty($P['ufile_fk'])) { $Uri .= "&ufile=" . $P['ufile_fk']; }
+	  if (!empty($P['pfile_fk'])) { $Uri .= "&pfile=" . $P['pfile_fk']; }
+	  }
+	$V .= "<a href='$Uri&upload=" . $P['upload_fk'] . "&item=" . $P['uploadtree_pk'] . $Opt . "'>";
 	}
     if (Isdir($P['ufile_mode']))
 	{
@@ -248,7 +257,7 @@ function Dir2Browse ($UploadtreePk, $UfilePk, $LinkLast=0, $ShowBox=1)
 	if (!$FirstPath && ($P != $Last)) { $V .= "<br>\n&nbsp;&nbsp;"; }
 	$V .= "<b>" . $P['ufile_name'] . "</b>";
 	}
-    if ($LinkLast || ($P != $Last))
+    if (!empty($LinkLast) || ($P != $Last))
 	{
 	$V .= "</a>";
 	}
