@@ -32,7 +32,6 @@ class tbd extends Plugin
 
   function RegisterMenus()
     {
-    menu_insert("Main::Upload::From file (TBD)");
     menu_insert("Main::Organize::Uploads::Edit Properties (TBD)");
     menu_insert("Main::Organize::Uploads::Move Folder (TBD)");
     }
