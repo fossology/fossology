@@ -28,7 +28,7 @@ class core_debug extends Plugin
   {
   var $Name       = "debug";
   var $Version    = "1.0";
-  var $MenuList   = "Admin::Debug Plugins";
+  var $MenuList   = "Help::Debug Plugins";
   var $DBaccess   = PLUGIN_DB_DEBUG;
 
   /***********************************************************

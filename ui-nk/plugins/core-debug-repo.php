@@ -28,7 +28,7 @@ class core_debug_repo extends Plugin
   {
   var $Name       = "debug_repo";
   var $Version    = "1.0";
-  var $MenuList   = "Admin::Debug Repository";
+  var $MenuList   = "Help::Debug Repository";
   var $Dependency = array("db","view","browse");
   var $DBaccess   = PLUGIN_DB_DEBUG;
 

@@ -39,6 +39,16 @@ class ui_basenav extends Plugin
       case "XML":
 	break;
       case "HTML":
+	$V .= "<H1>Welcome to FOSSology</H1>\n";
+	$V .= "This system is designed to analyze open source projects.";
+	$V .= "Currently, this tool allows you to view project contents, meta information, and discovered license analysis.";
+	$V .= "<P>\n";
+	$V .= "What would you like to do?<P>\n";
+	$V .= "<ul>\n";
+	$V .= "<li>Search\n";
+	$V .= "<li>Browse\n";
+	$V .= "<li>Upload\n";
+	$V .= "</ul>\n";
 	break;
       case "Text":
 	break;

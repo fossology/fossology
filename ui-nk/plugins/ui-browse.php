@@ -28,7 +28,7 @@ class ui_browse extends Plugin
   {
   var $Name       = "browse";
   var $Version    = "1.0";
-  // var $MenuList="Tools::Browse";
+  // var $MenuList="Tasks::Browse";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;
 
@@ -148,11 +148,11 @@ class ui_browse extends Plugin
 	$V .= "<td>&nbsp;&nbsp;" . substr($Row['ufile_mtime'],0,19) . "</td>";
 	if (!empty($Row['pfile_size']))
 	  {
-	  $V .= "<td align=right>&nbsp;&nbsp;" . number_format($Row['pfile_size'], 0, "", ",") . "&nbsp;&nbsp;</td>";
+	  $V .= "<td align='left'>&nbsp;&nbsp;" . number_format($Row['pfile_size'], 0, "", ",") . "&nbsp;&nbsp;</td>";
 	  }
 	else
 	  {
-	  $V .= "<td align=right>&nbsp;&nbsp;&nbsp;&nbsp;</td>";
+	  $V .= "<td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;</td>";
 	  }
 	}
 
@@ -271,7 +271,7 @@ if (0) {
 	/*************************/
 	/* Create the micro-menu */
 	/*************************/
-        $V .= "<div align=right><small>";
+        $V .= "<div align='left'><small>";
 	$V .= menu_to_1html(menu_find("Browse",$MenuDepth),1);
         $V .= "</small></div>\n";
 

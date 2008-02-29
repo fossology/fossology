@@ -28,7 +28,7 @@ class ui_about extends Plugin
   {
   var $Name       = "about";
   var $Version    = "1.0";
-  var $MenuList   = "About";
+  var $MenuList   = "Help::About";
 
   var $_Project="FOSSology";
   var $_Copyright="Copyright (C) 2007-2008 Hewlett-Packard Development Company, L.P.";

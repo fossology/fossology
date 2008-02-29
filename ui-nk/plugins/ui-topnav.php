@@ -44,13 +44,10 @@ class ui_topnav extends Plugin
 	$Uri = Traceback_dir();
 	$V .= "<table width='100%' border=0 cellpadding=0>\n";
 	$V .= "  <tr>\n";
-	$V .= "    <td rowspan=2>";
+	$V .= "    <td width='15%'>";
 	$V .= "<a href='/' target='_top'><img src='${Uri}images/fossology-logo.gif' align=absmiddle border=0></a>";
 	$V .= "</td>\n";
-	$V .= "    <td><center><font size=+3>Software Repository Viewer</font></td></center>\n";
-	$V .= "  </tr>\n";
-	$V .= "  <tr>\n";
-	$V .= "    <td>";
+	$V .= "    <td valign='top'>";
 	$Menu = &$Plugins[plugin_find_id("menus")];
 	$Menu->OutputSet($this->OutputType,0);
 	$V .= $Menu->Output();
