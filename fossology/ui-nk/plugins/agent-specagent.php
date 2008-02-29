@@ -28,7 +28,7 @@ class agent_specagent extends Plugin
 {
   public $Name       = "agent_specagent";
   public $Title      = "Schedule Spec File Analysis";
-  public $MenuList   = "Tools::Agents::Spec File Analysis";
+  public $MenuList   = "Tasks::Agents::Spec File Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_ANALYZE;

@@ -28,7 +28,7 @@ class ui_folders extends Plugin
   {
   var $Name       = "folders";
   var $Version    = "1.0";
-  var $MenuList   = "Tools::Folders (refresh)";
+  var $MenuList   = "Tasks::Folders (refresh)";
   var $MenuTarget = "treenav";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;

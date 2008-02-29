@@ -28,7 +28,7 @@ class agent_license extends Plugin
 {
   public $Name       = "agent_license";
   public $Title      = "Schedule License Analysis";
-  public $MenuList   = "Tools::Agents::License Analysis";
+  public $MenuList   = "Tasks::Agents::License Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_ANALYZE;

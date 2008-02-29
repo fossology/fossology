@@ -28,7 +28,7 @@ class agent_mimetype extends Plugin
 {
   public $Name       = "agent_mimetype";
   public $Title      = "Schedule MIME-type Analysis";
-  public $MenuList   = "Tools::Agents::MIME-type Analysis";
+  public $MenuList   = "Tasks::Agents::MIME-type Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_ANALYZE;

@@ -28,7 +28,7 @@ class ui_license extends Plugin
   {
   var $Name       = "license";
   var $Version    = "1.0";
-  // var $MenuList= "Tools::License";
+  // var $MenuList= "Tasks::License";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;
 
@@ -285,7 +285,7 @@ class ui_license extends Plugin
 	/*************************/
 	/* Create the micro-menu */
 	/*************************/
-	$V .= "<div align=right><small>";
+	$V .= "<div align='left'><small>";
 	$V .= menu_to_1html(menu_find("Browse",$MenuDepth),1);
 	$V .= "</small></div>\n";
 

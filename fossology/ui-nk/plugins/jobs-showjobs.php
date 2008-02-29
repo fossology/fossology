@@ -28,7 +28,7 @@ class jobs_showjobs extends Plugin
   {
   var $Name       = "showjobs";
   var $Version    = "1.0";
-  var $MenuList   = "Admin::Scheduler::Job Queue Summary";
+  var $MenuList   = "Tasks::Jobs::Queue Summary";
   var $MenuOrder  = 5;
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -47,7 +47,7 @@ class jobs_showjobs extends Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    menu_insert("Main::Admin::Scheduler::Job Queue Details",$this->MenuOrder,$this->Name . "&show=detail",$this->MenuTarget);
+    menu_insert("Main::Tasks::Jobs::Queue Details",$this->MenuOrder,$this->Name . "&show=detail",$this->MenuTarget);
 
     // For the Browse menu, permit switching between detail and summary.
     $Show = GetParm("show",PARM_STRING);
@@ -468,7 +468,7 @@ class jobs_showjobs extends Plugin
 	$Uri = Traceback_uri() . "?mod=" . $this->Name;
 
 	/* Customize the top menu */
-	$V .= "<div align=right><small>";
+	$V .= "<div align='left'><small>";
 	$V .= menu_to_1html(menu_find("JobDetails",$MenuDepth),1);
 	$V .= "</small></div>\n";
 	if ($Show != "job") { $V .= $this->DrawColors(); }

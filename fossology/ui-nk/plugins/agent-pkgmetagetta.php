@@ -28,7 +28,7 @@ class agent_pkgmetagetta extends Plugin
 {
   public $Name       = "agent_pkgmetagetta";
   public $Title      = "Schedule Metadata Analysis";
-  public $MenuList   = "Tools::Agents::Metadata Analysis";
+  public $MenuList   = "Tasks::Agents::Metadata Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_ANALYZE;

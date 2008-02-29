@@ -42,10 +42,11 @@ class ui_menu extends Plugin
       } 
    
     // Add default menus (with no actions linked to plugins)
-    menu_insert("Main::Tools",10);
+    menu_insert("Main::Search",12);
+    menu_insert("Main::Tasks",10);
     menu_insert("Main::Organize",8);
-    menu_insert("Main::Admin",6);
-    menu_insert("Main::Upload",4);
+    menu_insert("Main::Upload",6);
+    menu_insert("Main::Admin",4);
 
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;

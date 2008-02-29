@@ -28,7 +28,7 @@ class jobs_runningjobs extends Plugin
   {
   var $Name       = "runningjobs";
   var $Version    = "1.0";
-  var $MenuList   = "Admin::Scheduler::Running Jobs";
+  var $MenuList   = "Tasks::Jobs::Show Running";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;
 
@@ -71,7 +71,7 @@ class jobs_runningjobs extends Plugin
 	if (!is_array($Results)) { return; }
 
 	/* Put the results in a table */
-	$V .= "<div align=right><small>";
+	$V .= "<div align='left'><small>";
 	$V .= menu_to_1html(menu_find("Jobs",$MenuDepth),1);
 	$V .= "<table border=1 cellpadding=0 width='100%'>\n";
 	$V .= "  <tr>\n";

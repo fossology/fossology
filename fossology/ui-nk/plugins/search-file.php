@@ -28,7 +28,7 @@ class search_file extends Plugin
   {
   var $Name       = "search_file";
   var $Version    = "1.0";
-  var $MenuList   = "Tools::Search::Filename";
+  var $MenuList   = "Search::By Filename";
   var $Dependency = array("db","view","browse");
   var $DBaccess   = PLUGIN_DB_READ;
 

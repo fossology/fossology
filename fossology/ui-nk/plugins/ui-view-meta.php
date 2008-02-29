@@ -71,7 +71,7 @@ class ui_view_meta extends Plugin
      ***********************************/
     if ($ShowMenu)
 	{
-	$V .= "<div align=right><small>";
+	$V .= "<div align='left'><small>";
 	$V .= menu_to_1html(menu_find("View-Meta",$MenuDepth),1);
 	$V .= "</small></div>\n";
 	} // if ShowMenu
