@@ -31,6 +31,28 @@ class core_auth extends Plugin
   var $PluginLevel = 100; /* make this run first! */
 
   /******************************************
+   GetIP(): Retrieve the user's IP address.
+   Some proxy systems pass forwarded IP address info.
+   This ensures that someone who steals the cookie won't
+   gain access unless they come from the same IP.
+   ******************************************/
+  function GetIP()
+    {
+    /* NOTE: This can be easily defeated wtih fake HTTP headers. */
+    $Vars = array(
+	'HTTP_CLIENT_IP',
+	'HTTP_X_COMING_FROM',
+	'HTTP_X_FORWARDED_FOR',
+	'HTTP_X_FORWARDED'
+	);
+    foreach($Vars as $V)
+      {
+      if (!empty($_SERVER[$V])) { return($_SERVER[$V]); }
+      }
+    return($_SERVER['REMOTE_ADDR']);
+    } // GetIP()
+
+  /******************************************
    PostInitialize(): This is where the magic for
    Authentication happens.
    ******************************************/
@@ -48,6 +70,17 @@ class core_auth extends Plugin
 	}
       }
     $_SESSION['time'] = $Now;
+
+    if (empty($_SESSION['ip']))
+	{
+	$_SESSION['ip'] = $this->GetIP();
+	}
+    else if ($_SESSION['ip'] != $this->GetIP())
+	{
+	/* Sessions are not transferable. */
+	$_SESSION['User'] = NULL;
+	$_SESSION['ip'] = $this->GetIP();
+	}
 
     /* Enable or disable plugins based on login status */
     if ($_SESSION['User'])
