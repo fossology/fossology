@@ -169,6 +169,47 @@ function FolderListDiv($ParentFolder,$Depth)
 } /* FolderListDiv() */
 
 /***********************************************************
+ FolderGetFromUpload(): Given an upload number, return the
+ folder path.
+ This is recursive!
+ NOTE: If there is a recursive loop in the folder table, then
+ this will loop INFINITELY.
+ ***********************************************************/
+function FolderGetFromUpload ($Uploadpk,$Folder=-1)
+{
+  global $DB;
+  if (empty($DB)) { return; }
+  if (empty($Uploadpk)) { return; }
+
+  if ($Folder < 0)
+    {
+    /* Mode 2 means child_id is an upload_pk */
+    $SQL = "SELECT parent_fk,folder_name FROM foldercontents
+	INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
+	WHERE foldercontents.foldercontents_mode = 2
+	AND foldercontents.child_id = '$Uploadpk' LIMIT 1;";
+    } 
+  else
+    {
+    /* Mode 1 means child_id is a folder_pk */
+    $SQL = "SELECT parent_fk,folder_name FROM foldercontents
+	INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
+	WHERE foldercontents.foldercontents_mode = 1
+	AND foldercontents.child_id = '$Folder' LIMIT 1;";
+    }
+  $Results = $DB->Action($SQL);
+  $R = &$Results[0];
+  if (empty($R['parent_fk'])) { return; }
+  $V = "";
+  if ($R['parent_fk'] != 0)
+	{
+	$V = FolderGetFromUpload($Uploadpk,$R['parent_fk']);
+	}
+  $V .= "/" . $R['folder_name'];
+  return($V);
+} // FolderGetFromUpload()
+
+/***********************************************************
  FolderListUploads(): Returns an array of all uploads, upload_pk,
  and folders, starting from the ParentFolder.
  The array is sorted by folder and upload name.
