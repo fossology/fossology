@@ -45,6 +45,7 @@ define("PLUGIN_DB_WRITE",3);
 define("PLUGIN_DB_UPLOAD",4);
 define("PLUGIN_DB_ANALYZE",5);
 define("PLUGIN_DB_DELETE",6);
+define("PLUGIN_DB_DEBUG",7);
 
 /*************************************************************
  This is the Plugin class.  All plugins should:

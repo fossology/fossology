@@ -30,7 +30,7 @@ class core_debug_repo extends Plugin
   var $Version    = "1.0";
   var $MenuList   = "Admin::Debug Repository";
   var $Dependency = array("db","view","browse");
-  var $DBaccess   = PLUGIN_DB_READ;
+  var $DBaccess   = PLUGIN_DB_DEBUG;
 
   /***********************************************************
    GetUfileFromPfile(): Given a pfile_pk, return all ufiles.

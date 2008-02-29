@@ -29,6 +29,7 @@ class core_debug extends Plugin
   var $Name       = "debug";
   var $Version    = "1.0";
   var $MenuList   = "Admin::Debug Plugins";
+  var $DBaccess   = PLUGIN_DB_DEBUG;
 
   /***********************************************************
    Output(): Display the loaded menu and plugins.
