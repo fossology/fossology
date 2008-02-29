@@ -234,6 +234,7 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL, $ShowBox=1)
   $Last = &$Path[count($Path)-1];
 
   $V .= "<font class='text'>\n";
+  $V .= "<b>" . FolderGetFromUpload($Path[0]['upload_fk']) . "</b>";
   foreach($Path as $P)
     {
     if (empty($P['ufile_name'])) { continue; }
@@ -254,7 +255,7 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL, $ShowBox=1)
 	}
     else
 	{
-	if (!$FirstPath && ($P != $Last)) { $V .= "<br>\n&nbsp;&nbsp;"; }
+	if ($P != $Last) { $V .= "<br>\n&nbsp;&nbsp;"; }
 	$V .= "<b>" . $P['ufile_name'] . "</b>";
 	}
     if (!empty($LinkLast) || ($P != $Last))
