@@ -235,7 +235,7 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL, $ShowBox=1)
 
   $V .= "<font class='text'>\n";
   $List = FolderGetFromUpload($Path[0]['upload_fk']);
-  $Uri2 = Traceback_uri() . "?" . Traceback_parm_keep(array("mod","show"));
+  $Uri2 = Traceback_uri() . "?mod=browse" . Traceback_parm_keep(array("show"));
   for($i=0; $i < count($List); $i++)
     {
     $Folder = $List[$i]['folder_pk'];
