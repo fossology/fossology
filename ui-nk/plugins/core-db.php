@@ -91,6 +91,14 @@ class db_access extends Plugin
     if (!is_array($rows)) $rows = array();
     pg_free_result($result);
     return $rows;
+
+    /*****
+     NOTE: Where's the error handling?
+     From the UI, there is not much that can cause an error, and even
+     less to resolve an error.
+     If an error happens, then NULL is returned.
+     If no error, then an array is returned (array may be empty).
+     *****/
     }
 
   /***********************************************************
