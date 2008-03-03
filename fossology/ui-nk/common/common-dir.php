@@ -234,7 +234,14 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL, $ShowBox=1)
   $Last = &$Path[count($Path)-1];
 
   $V .= "<font class='text'>\n";
-  $V .= "<b>" . FolderGetFromUpload($Path[0]['upload_fk']) . "</b>";
+  $List = FolderGetFromUpload($Path[0]['upload_fk']);
+  $Uri2 = Traceback_uri() . "?" . Traceback_parm_keep(array("mod","show"));
+  for($i=0; $i < count($List); $i++)
+    {
+    $Folder = $List[$i]['folder_pk'];
+    $FolderName = htmlentities($List[$i]['folder_name']);
+    $V .= "<b>/<a href='$Uri2&folder=$Folder'>$FolderName</a></b> ";
+    }
   foreach($Path as $P)
     {
     if (empty($P['ufile_name'])) { continue; }

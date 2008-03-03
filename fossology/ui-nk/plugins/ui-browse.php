@@ -28,7 +28,7 @@ class ui_browse extends Plugin
   {
   var $Name       = "browse";
   var $Version    = "1.0";
-  // var $MenuList="Tasks::Browse";
+  var $MenuList="Tasks::Browse";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;
 
@@ -74,7 +74,7 @@ class ui_browse extends Plugin
    ShowItem(): Given a upload_pk, list every item in it.
    If it is an individual file, then list the file contents.
    ***********************************************************/
-  function ShowItem($Upload,$Item,$Show)
+  function ShowItem($Upload,$Item,$Show,$Folder)
     {
     global $Plugins;
     $V="";
@@ -83,7 +83,7 @@ class ui_browse extends Plugin
     $ModView = &$Plugins[plugin_find_id("view")]; /* may be null */
     $ModDownload = &$Plugins[plugin_find_id("download")]; /* may be null */
     $ModLicense = &$Plugins[plugin_find_id("license")]; /* may be null */
-    $Uri = Traceback_uri() . "?mod=" . $this->Name;
+    $Uri = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
 
     /* Grab the directory */
     $Results = DirGetList($Upload,$Item);
@@ -216,23 +216,44 @@ if (0) {
     $Results = $DB->Action($Sql);
 
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
-    $V .= "<table class='text' border=0 width='100%' cellpadding=0>\n";
-    $V .= "<tr><th>Upload Name and Description</th><th>Upload Date</th></tr>\n";
-    foreach($Results as $Row)
-      {
-      if (empty($Row['upload_pk'])) { continue; }
-      $Desc = htmlentities($Row['upload_desc']);
-      if (empty($Desc)) { $Desc = "<i>No description</i>"; }
-      $Sql = "SELECT ufile_name FROM ufile WHERE ufile_pk = " . $Row['ufile_fk'] . ";";
-      $UResults = $DB->Action($Sql);
-      $Name = $UResults[0]['ufile_name'];
-      $V .= "<tr><td>";
-      $V .= "<a href='$Uri&upload=" . $Row['upload_pk'] . "&show=$Show'>";
-      $V .= $Name . "/";
-      $V .= "</a><br>" . $Desc . "</td>\n";
-      $V .= "<td align='right'>" . substr($Row['upload_ts'],0,16) . "</td></tr>\n";
-      $V .= "<tr><td colspan=2>&nbsp;</td></tr>\n";
-      }
+    $V .= "<table border=1 width='100%'>";
+    $V .= "<tr><td valign='top'>\n";
+
+	$V .= FolderListScript();
+	$V .= "<center><H3>Folder Navigation</H3></center>\n";
+	$V .= "<small>";
+	$V .= "<a href='javascript:Expand();'>Expand</a> |";
+	$V .= "<a href='javascript:Collapse();'>Collapse</a> |";
+	$V .= "<a href='" . Traceback() . "'>Refresh</a>";
+	$V .= "</small>";
+	$V .= "<P>\n";
+        $V .= "<form>\n";
+        $V .= FolderListDiv($Folder,0,$Folder,1);
+        $V .= "</form>\n";
+
+    $V .= "</td><td valign='top'>\n";
+
+	$V .= "<center><H3>Uploads</H3></center>\n";
+        $V .= "<table class='text' border=0 width='100%' cellpadding=0>\n";
+        $V .= "<th>Upload Name and Description</th><th>Upload Date</th></tr>\n";
+        foreach($Results as $Row)
+          {
+          if (empty($Row['upload_pk'])) { continue; }
+          $Desc = htmlentities($Row['upload_desc']);
+          if (empty($Desc)) { $Desc = "<i>No description</i>"; }
+          $Sql = "SELECT ufile_name FROM ufile WHERE ufile_pk = " . $Row['ufile_fk'] . ";";
+          $UResults = $DB->Action($Sql);
+          $Name = $UResults[0]['ufile_name'];
+          $V .= "<tr><td>";
+          $V .= "<a href='$Uri&upload=" . $Row['upload_pk'] . "&folder=$Folder&show=$Show'>";
+          $V .= $Name . "/";
+          $V .= "</a><br>" . $Desc . "</td>\n";
+          $V .= "<td align='right'>" . substr($Row['upload_ts'],0,16) . "</td></tr>\n";
+          $V .= "<tr><td colspan=2>&nbsp;</td></tr>\n";
+          }
+        $V .= "</table>\n";
+
+    $V .= "</td></tr>\n";
     $V .= "</table>\n";
     return($V);
     } /* ShowFolder() */
@@ -245,6 +266,7 @@ if (0) {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $V="";
     $Folder = GetParm("folder",PARM_INTEGER);
+    if (empty($Folder)) { $Folder = FolderGetTop(); }
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
@@ -285,13 +307,13 @@ if (0) {
 	/******************************/
 	/* Get the folder description */
 	/******************************/
-	if (!empty($Folder))
-	  {
-	  $V .= $this->ShowFolder($Folder,$Show);
-	  }
 	if (!empty($Upload))
 	  {
-	  $V .= $this->ShowItem($Upload,$Item,$Show);
+	  $V .= $this->ShowItem($Upload,$Item,$Show,$Folder);
+	  }
+	else if (!empty($Folder))
+	  {
+	  $V .= $this->ShowFolder($Folder,$Show);
 	  }
 	$V .= "</font>\n";
 	break;
