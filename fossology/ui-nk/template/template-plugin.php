@@ -72,6 +72,8 @@ class Plugin
   var $Title="";  // used for HTML title tags and window menu bars
   var $PluginLevel=10; /* user for sorting plugins -- higher comes first after dependencies are met */
   var $DBaccess=PLUGIN_DB_NONE; /* what kind of access is needed? */
+  var $NoHeader=0;
+  var $NoMenu=0;
 
   /*****
    This array lists plugin dependencies by name and initialization order.
@@ -274,14 +276,27 @@ class Plugin
 	header('Content-type: text/html');
 	$V = "<html>\n";
 	$V .= "<head>\n";
-	/* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
-	$V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
-	// $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
-	// $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
-	if (!empty($Title)) { $V .= "<title>" . htmlentities($Title) . "</title>\n"; }
-	$V .= "<link rel='stylesheet' href='fossology.css'>\n";
-	$V .= "</head>\n";
-	$V .= "<body class='text'>\n";
+	if ($this->NoHeader == 0)
+	  {
+	  /* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
+	  $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
+	  // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
+	  // $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
+	  if (!empty($Title)) { $V .= "<title>" . htmlentities($Title) . "</title>\n"; }
+	  $V .= "<link rel='stylesheet' href='fossology.css'>\n";
+	  $V .= "</head>\n";
+	  $V .= "<body class='text'>\n";
+	  if (($this->NoMenu == 0) && ($this->Name != "menus"))
+		{
+		global $Plugins;
+		$Menu = &$Plugins[plugin_find_id("menus")];
+		if (!empty($Menu))
+		  {
+		  $Menu->OutputSet($Type,$ToStdout);
+		  $Menu->Output();
+		  }
+		}
+	  }
 	break;
       case "Text":
 	break;
@@ -313,8 +328,11 @@ class Plugin
 	$V = "</xml>\n";
 	break;
       case "HTML":
-	$V = "</body>\n";
-	$V .= "</html>\n";
+	if (!$NoHeader)
+	  {
+	  $V = "</body>\n";
+	  $V .= "</html>\n";
+	  }
 	break;
       case "Text":
 	break;
