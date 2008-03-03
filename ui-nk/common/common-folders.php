@@ -96,13 +96,80 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1)
 } // FolderListOption()
 
 /***********************************************************
+ FolderListScript(): Create the javascript for FolderListDiv().
+ ***********************************************************/
+function FolderListScript()
+{
+  $V = "";
+  $V .= "<script language='javascript'>\n";
+  $V .= "<!--\n";
+  $V .= "function ShowHide(name)\n";
+  $V .= "  {\n";
+  $V .= "  if (name.length < 1) { return; }\n";
+  $V .= "  var Element, State;\n";
+  $V .= "  if (document.getElementById) // standard\n";
+  $V .= "    { Element = document.getElementById(name); }\n";
+  $V .= "  else if (document.all) // IE 4, 5, beta 6\n";
+  $V .= "    { Element = document.all[name]; }\n";
+  $V .= "  else // if (document.layers) // Netscape 4 and older\n";
+  $V .= "    { Element = document.layers[name]; }\n";
+  $V .= "  State = Element.style;\n";
+  $V .= "  if (State.display == 'none') { State.display='block'; }\n";
+  $V .= "  else { State.display='none'; }\n";
+  $V .= "  }\n";
+  $V .= "function Expand()\n";
+  $V .= "  {\n";
+  $V .= "  var E = document.getElementsByTagName('div');\n";
+  $V .= "  for(var i = 0; i < E.length; i++)\n";
+  $V .= "    {\n";
+  $V .= "    if (E[i].id.substr(0,8) == 'TreeDiv-')\n";
+  $V .= "      {\n";
+  $V .= "      var Element, State;\n";
+  $V .= "      if (document.getElementById) // standard\n";
+  $V .= "        { Element = document.getElementById(E[i].id); }\n";
+  $V .= "      else if (document.all) // IE 4, 5, beta 6\n";
+  $V .= "        { Element = document.all[E[i].id]; }\n";
+  $V .= "      else // if (document.layers) // Netscape 4 and older\n";
+  $V .= "        { Element = document.layers[E[i].id]; }\n";
+  $V .= "      State = Element.style;\n";
+  $V .= "      State.display='block';\n";
+  $V .= "      }\n";
+  $V .= "    }\n";
+  $V .= "  }\n";
+  $V .= "function Collapse()\n";
+  $V .= "  {\n";
+  $V .= "  var E = document.getElementsByTagName('div');\n";
+  $V .= "  var First=1;\n";
+  $V .= "  for(var i = 0; i < E.length; i++)\n";
+  $V .= "    {\n"; 
+  $V .= "    if (E[i].id.substr(0,8) == 'TreeDiv-')\n";
+  $V .= "      {\n";
+  $V .= "      var Element, State;\n";
+  $V .= "      if (document.getElementById) // standard\n";
+  $V .= "        { Element = document.getElementById(E[i].id); }\n";
+  $V .= "      else if (document.all) // IE 4, 5, beta 6\n";
+  $V .= "        { Element = document.all[E[i].id]; }\n";
+  $V .= "      else // if (document.layers) // Netscape 4 and older\n";
+  $V .= "        { Element = document.layers[E[i].id]; }\n";
+  $V .= "      State = Element.style;\n";
+  $V .= "      if (First) { State.display='block'; First=0; } \n";
+  $V .= "      else { State.display='none'; } \n";
+  $V .= "      }\n";
+  $V .= "    }\n";
+  $V .= "  }\n";
+  $V .= "-->\n";
+  $V .= "</script>\n";
+  return($V);
+} // FolderListScript()
+
+/***********************************************************
  FolderListDiv(): Create the tree, using DIVs.
  It returns the full HTML.
  This is recursive!
  NOTE: If there is a recursive loop in the folder table, then
  this will loop INFINITELY.
  ***********************************************************/
-function FolderListDiv($ParentFolder,$Depth)
+function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   {
   global $Plugins;
   global $DB;
@@ -129,6 +196,14 @@ function FolderListDiv($ParentFolder,$Depth)
       }
     }
 
+  /* Load this folder's parent */
+  if ($ShowParent && ($ParentFolder != FolderGetTop()))
+    {
+    $Results = $DB->Action("SELECT parent_fk FROM foldercontents WHERE foldercontents_mode = 1 AND child_id = '$ParentFolder' LIMIT 1;");
+    $P = $Results[0]['parent_fk'];
+    if (!empty($P) && ($P != 0)) { $ParentFolder=$P; }
+    }
+
   /* Load this folder's name */
   $Results = $DB->Action("SELECT folder_name,folder_desc FROM folder WHERE folder_pk=$ParentFolder LIMIT 1;");
   $Name = trim($Results[0]['folder_name']);
@@ -151,7 +226,12 @@ function FolderListDiv($ParentFolder,$Depth)
   if (!empty($Desc)) { $Title = 'title="' . $Desc . '"'; }
   else { $Title = ""; }
   if (!empty($Browse)) { $V .= "<a $Title target='basenav' href='$Uri?mod=browse&folder=$ParentFolder'>"; }
-  $V .= "<font class='treetext'>" . htmlentities($Name) . "</font>";
+  if (!empty($Highlight) && ($Highlight == $ParentFolder))
+    { $V .= "<font class='treetext' style='border: 1pt solid; color: red; font-weight: bold;'>"; }
+  else
+    { $V .= "<font class='treetext'>"; }
+  $V .= htmlentities($Name);
+  $V .= "</font>";
   if (!empty($Browse)) { $V .= "</a>"; }
   $V .= "<br>\n";
   if (isset($Results[0]['folder_pk']))
@@ -161,7 +241,7 @@ function FolderListDiv($ParentFolder,$Depth)
     $V .= "<div id='TreeDiv-$ParentFolder' $Hide>\n";
     foreach($Results as $R)
       {
-      $V .= FolderListDiv($R['folder_pk'],$Depth+1);
+      $V .= FolderListDiv($R['folder_pk'],$Depth+1,$Highlight);
       }
     $V .= "</div>\n";
     }
@@ -170,16 +250,18 @@ function FolderListDiv($ParentFolder,$Depth)
 
 /***********************************************************
  FolderGetFromUpload(): Given an upload number, return the
- folder path.
+ folder path in an array containing folder_pk and name.
  This is recursive!
  NOTE: If there is a recursive loop in the folder table, then
  this will loop INFINITELY.
  ***********************************************************/
-function FolderGetFromUpload ($Uploadpk,$Folder=-1)
+function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
 {
   global $DB;
   if (empty($DB)) { return; }
   if (empty($Uploadpk)) { return; }
+  if ($Stop == -1) { $Stop = FolderGetTop(); }
+  if ($Folder == $Stop) { return; }
 
   if ($Folder < 0)
     {
@@ -200,13 +282,16 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1)
   $Results = $DB->Action($SQL);
   $R = &$Results[0];
   if (empty($R['parent_fk'])) { return; }
-  $V = "";
+  $V = array();
+  $V['folder_pk'] = $R['parent_fk'];
+  $V['folder_name'] = $R['folder_name'];
   if ($R['parent_fk'] != 0)
 	{
-	$V = FolderGetFromUpload($Uploadpk,$R['parent_fk']);
+	$List = FolderGetFromUpload($Uploadpk,$R['parent_fk'],$Stop);
 	}
-  $V .= "/" . $R['folder_name'];
-  return($V);
+  if (empty($List)) { $List = array(); }
+  array_push($List,$V);
+  return($List);
 } // FolderGetFromUpload()
 
 /***********************************************************
