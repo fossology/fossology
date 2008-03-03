@@ -146,7 +146,14 @@ class ui_browse extends Plugin
         {
 	$V .= "<td class='mono'>" . DirMode2String($Row['ufile_mode']) . "</td>";
 	$V .= "<td>&nbsp;&nbsp;" . substr($Row['ufile_mtime'],0,19) . "</td>";
-	$V .= "<td align='right'>&nbsp;&nbsp;" . number_format($Row['pfile_size'], 0, "", ",") . "&nbsp;&nbsp;</td>";
+        if (!Isdir($Row['ufile_mode']))
+	  {
+	  $V .= "<td align='right'>&nbsp;&nbsp;" . number_format($Row['pfile_size'], 0, "", ",") . "&nbsp;&nbsp;</td>";
+	  }
+	else
+	  {
+	  $V .= "<td>&nbsp;</td>";
+	  }
 	}
 
       /* Display item */
