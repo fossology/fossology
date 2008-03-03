@@ -30,6 +30,7 @@ class ui_view_license extends Plugin
   var $Version    = "1.0";
   var $Dependency = array("db","view");
   var $DBaccess   = PLUGIN_DB_READ;
+  var $NoMenu     = 0;
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
@@ -53,6 +54,8 @@ class ui_view_license extends Plugin
 	menu_insert("View-Meta::License",1,$URI);
 	}
       }
+    $Lic = GetParm("lic",PARM_INTEGER);
+    if (!empty($Lic)) { $this->NoMenu = 1; }
     } // RegisterMenus()
 
   /***********************************************************

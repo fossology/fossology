@@ -33,7 +33,8 @@ class tbd extends Plugin
 
   function RegisterMenus()
     {
-    menu_insert("Main::Search::Advanced (TBD)");
+    menu_insert("Main::Search::Basic Search (TBD)",1);
+    menu_insert("Main::Search::Advance Search (TBD)",0);
     menu_insert("Main::Organize::Uploads::Edit Properties (TBD)");
     menu_insert("Main::Organize::Uploads::Move Folder (TBD)");
     menu_insert("Main::Tasks::Analyze::Code Compare (TBD)");
