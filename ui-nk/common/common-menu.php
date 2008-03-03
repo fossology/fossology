@@ -173,6 +173,7 @@ function menu_find($Name,&$MaxDepth,$Menu=NULL)
  menu_to_1html(): Take a menu and render it as
  one HTML line.  This ignores submenus!
  If $ShowAll==0, then items without hyperlinks are hidden.
+ This is commonly called the "micro-menu".
  ***********************************************/
 function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=1,$ShowAll=1)
 {
@@ -203,13 +204,13 @@ function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=1,$ShowAll=1)
       {
       if ($Val->Name == "[BREAK]")
 	{
-	if (!empty($Std))
+	if (0 && !empty($Std))
 		{
 		if (!$First) { $V .= " | "; }
 		$V .= $Std;
 		$Std=NULL;
 		}
-	$V .= "<br>\n";
+	if (!$First) { $V .= " &nbsp;&nbsp;&bull;&nbsp;&nbsp; "; }
 	$First=1;
 	}
       else if (!empty($Val->URI))
@@ -231,10 +232,11 @@ function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=1,$ShowAll=1)
 
   if (!empty($Std))
 	{
-	if (!$First) { $V .= " | "; }
+	if (!$First) { $V .= " &nbsp;&nbsp;&bull;&nbsp;&nbsp; "; }
 	$V .= $Std;
 	$Std=NULL;
 	}
+  $V .= "<P />";
   return($V);
 } // menu_to_1html()
 

@@ -168,11 +168,11 @@ class ui_menu extends Plugin
 	  $V .= "  { margin:0; padding:0; display:block; position:relative; width:150px; }\n";
 	  $V .= $Label . " a:link,\n";
 	  $V .= $Label . " a:visited\n";
-	  $V .= "  { padding:4px; color:black; background:white; border:1px solid #000; border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px; width:150px; display:block; }\n";
+	  $V .= "  { padding:4px 0px 4px 4px; color:black; background:white; border:1px solid #000; border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px; width:150px; display:block; }\n";
 	  $V .= $Label . ":hover a,\n";
 	  $V .= $Label . " a:active,\n";
 	  $V .= $Label . " a:hover\n";
-	  $V .= "  { padding:4px; color:white; background:#c50830; width:150px; display:block; }\n";
+	  $V .= "  { padding:4px 0px 4px 4px; color:white; background:#c50830; width:150px; display:block; }\n";
 	  $V .= $Label . " a span\n";
 	  $V .= "  { position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
 	  $Depth++;
@@ -191,11 +191,11 @@ class ui_menu extends Plugin
 	  $V .= "  { margin:0; padding:0; display:block; position:relative; width:150px; }\n";
 	  $V .= $Label . " a:link,\n";
 	  $V .= $Label . " a:visited\n";
-	  $V .= "  { padding:4px; color:black; background:white; border:1px solid #000; border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px; width:150px; display:block; }\n";
+	  $V .= "  { padding:4px 0px 4px 4px; color:black; background:white; border:1px solid #000; border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px; width:150px; display:block; }\n";
 	  $V .= $Label . ":hover a,\n";
 	  $V .= $Label . " a:active,\n";
 	  $V .= $Label . " a:hover\n";
-	  $V .= "  { padding:4px; color:white; background:#c50830; width:150px; display:block; }\n";
+	  $V .= "  { padding:4px 0px 4px 4px; color:white; background:#c50830; width:150px; display:block; }\n";
 	  $V .= $Label . " a span\n";
 	  $V .= "  { position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
 	  }
