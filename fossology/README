@@ -304,7 +304,7 @@ Configuring Apache
                 Options FollowSymLinks MultiViews
                 Order allow,deny
                 Allow from all
-		# Turn on php error reporting FIXME: bobg is this needed?
+		# Turn on php error reporting 
 		php_flag display_errors on
 		php_value error_reporting 2039
         </Directory>
