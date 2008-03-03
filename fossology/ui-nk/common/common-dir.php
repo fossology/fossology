@@ -230,7 +230,7 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL, $ShowBox=1)
   $Uri = Traceback_uri() . "?mod=$Mod";
 
   $Path = Dir2Path($UploadtreePk,$UfilePk);
-  $FirstPath=1;
+  $FirstPath=0;
   $Last = &$Path[count($Path)-1];
 
   $V .= "<font class='text'>\n";
