@@ -40,7 +40,7 @@ class ui_basenav extends Plugin
 	break;
       case "HTML":
 	$V .= "<H1>Welcome to FOSSology</H1>\n";
-	$V .= "This system is designed to analyze open source projects.";
+	$V .= "This system analyzes open source projects.";
 	$V .= "Currently, this tool allows you to view project contents, meta information, and discovered license analysis.";
 	$V .= "<P>\n";
 	$V .= "To begin, either browse uploaded files using the navigation tree on the left, ";
