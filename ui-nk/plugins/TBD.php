@@ -38,7 +38,6 @@ class tbd extends Plugin
     menu_insert("Main::Organize::Uploads::Edit Properties (TBD)");
     menu_insert("Main::Organize::Uploads::Move Folder (TBD)");
     menu_insert("Main::Tasks::Analyze::Code Compare (TBD)");
-    menu_insert("Main::Admin::Dashboard (TBD)");
     menu_insert("Main::Admin::Scheduler::Stop (TBD)");
     menu_insert("Main::Admin::Scheduler::Start (TBD)");
     menu_insert("Main::Admin::Scheduler::Kill Job (TBD)");
