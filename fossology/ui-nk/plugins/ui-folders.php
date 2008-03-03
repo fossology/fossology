@@ -50,7 +50,7 @@ class ui_folders extends Plugin
       case "HTML":
 	/* Load the logo image */
 	$Uri = Traceback_uri();
-	$V .= "<center><a href='/' target='_top'><img src='${Uri}images/fossology-logo.gif' align=absmiddle border=0></a></center><br>\n";
+	$V .= "<center><a href='/' target='_top'><img alt='FOSSology' title='FOSSology' src='${Uri}images/fossology-logo.gif' align=absmiddle border=0></a></center><br>\n";
 	/* Create Javascript to show/hide named elements (will be DIVs) */
 	$V .= "<script language='javascript'>\n";
 	$V .= "<!--\n";
@@ -109,11 +109,11 @@ class ui_folders extends Plugin
 	$V .= "  }\n";
 	$V .= "-->\n";
 	$V .= "</script>\n";
-	$V .= "<small>";
+	$V .= "<small><center>";
 	$V .= "<a href='javascript:Expand();'>Expand</a> |";
 	$V .= "<a href='javascript:Collapse();'>Collapse</a> |";
 	$V .= "<a href='" . Traceback() . "'>Refresh</a>";
-	$V .= "</small>";
+	$V .= "</center></small>";
 	$V .= "<P>\n";
 
 	/* Display the tree */
