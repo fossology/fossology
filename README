@@ -304,11 +304,18 @@ Configuring Apache
                 Options FollowSymLinks MultiViews
                 Order allow,deny
                 Allow from all
-		# Turn on php error reporting 
-		php_flag display_errors on
-		php_value error_reporting 2039
+		# uncomment to turn on php error reporting 
+		#php_flag display_errors on
+		#php_value error_reporting 2039
         </Directory>
 ========================================================================
+NOTE: included in the above example are some commented lines used for
+enabling php error reporting. If you are having problems you might
+choose to enable these to help determine the problem. Normally you
+probably want them turned off so they don't report confusing error
+messages to your end users or reveal information about your system
+configuration to potential attackers.
+
 2) A favicon.ico file is provided in the www directory.  Put it in
    your DocumentRoot if you want the FOSSology icon to show in your
    browser address bar.
