@@ -68,7 +68,7 @@ class ui_default extends Plugin
       }
 
     $Uri = Traceback_uri();
-    if (1)
+    if (0)
 	{
 	$V .= "<body>";
 	$P = &$Plugins[plugin_find_id("topnav")];
@@ -82,12 +82,9 @@ class ui_default extends Plugin
 	}
     else /* use frames */
 	{
-	$V .= "<frameset rows='106,*' border=0>\n";
-	$V .= "  <frame name=topnav src='$Uri?mod=topnav'>\n";
-	$V .= "  <frameset cols='25%,*' border=5 onResize=\"if (navigator.family == 'nn4') window.location.reload()\">\n";
-	$V .= "    <frame name=treenav src='$Uri?mod=$TreeNav'>\n";
-	$V .= "    <frame name=basenav src='$Uri?mod=$BaseNav'>\n";
-	$V .= "  </frameset>\n";
+	$V .= "<frameset cols='20%,*' border=3>\n";
+	$V .= "  <frame name=treenav src='$Uri?mod=$TreeNav'>\n";
+	$V .= "  <frame name=basenav src='$Uri?mod=$BaseNav'>\n";
 	$V .= "</frameset>\n";
 	$V .= "<noframes>\n";
 	$V .= "<h1>Your browser does not appear to support frames</h1>\n";

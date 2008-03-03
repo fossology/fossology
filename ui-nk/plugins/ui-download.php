@@ -30,6 +30,7 @@ class ui_download extends Plugin
   var $Version    = "1.0";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_DOWNLOAD;
+  var $NoHeader   = 1;
 
   /***********************************************************
    OutputOpen(): This function is called when user output is

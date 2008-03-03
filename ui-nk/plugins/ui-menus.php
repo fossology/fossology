@@ -61,6 +61,7 @@ class ui_menu extends Plugin
     if (empty($Menu)) { return; }
     $V="";
     for($i=0; $i<$Indent; $i++) { $V .= " "; }
+    $V .= "<!--[if lte IE 6]><table><tr><td><![endif]-->";
     if ($Indent == 0)
       {
       $V .= "<ul id='nav-$Indent'>\n";
@@ -110,7 +111,7 @@ class ui_menu extends Plugin
 	}
       }
     for($i=0; $i<$Indent; $i++) { $V .= " "; }
-    $V .= "</ul>\n";
+    $V .= "</ul><!--[if lte IE 6]></td></tr></table></a><![endif]-->\n";
     return($V);
     } // menu_html()
 
@@ -138,19 +139,19 @@ class ui_menu extends Plugin
 	  $V .= "\n/* CSS for Depth $Depth */\n";
 	  $Label = "ul#nav-" . $Depth;
 	  $V .= $Label . "\n";
-	  $V .= "  { z-index:0; margin:0; padding:1px 0; list-style:none; width:100%; height:24px; font:normal 10pt verdana, arial, helvetica;}\n";
+	  $V .= "  { z-index:0; margin:0; padding:0px; list-style:none; width:100%; height:24px; font:normal 10pt verdana, arial, helvetica;}\n";
 	  $Label .= " li";
 	  $V .= $Label . "\n";
-	  $V .= "  { margin:0; padding:0; display:block; float:left; position:relative; width:150px; }\n";
+	  $V .= "  { margin:0; padding:0px; display:block; float:left; position:relative; width:auto; }\n";
 	  $V .= $Label . " a:link,\n";
 	  $V .= $Label . " a:visited\n";
-	  $V .= "  { padding:4px 0; text-decoration:none; color:white; background:darkblue; width:150px; display:block; }\n";
+	  $V .= "  { padding:4px 10px; text-decoration:none; color:white; background:darkblue; width:auto; display:block; }\n";
 	  $V .= $Label . ":hover a,\n";
 	  $V .= $Label . " a:hover,\n";
 	  $V .= $Label . " a:active\n";
-	  $V .= "  { padding:4px 0; color:white; background:blue; width:150px; display:block; }\n";
+	  $V .= "  { padding:4px 10px; color:#c50830; background:white; width:auto; display:block; }\n";
 	  $V .= $Label . " a span\n";
-	  $V .= "  { position:absolute; top:0; left:135px; font-size:12pt; color:white; }\n";
+	  $V .= "  { position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
 	  $Depth++;
 	  }
 
@@ -167,13 +168,13 @@ class ui_menu extends Plugin
 	  $V .= "  { margin:0; padding:0; display:block; position:relative; width:150px; }\n";
 	  $V .= $Label . " a:link,\n";
 	  $V .= $Label . " a:visited\n";
-	  $V .= "  { padding:4px 0; color:white; background:darkred; width:150px; display:block; }\n";
+	  $V .= "  { padding:4px; color:black; background:white; border:1px solid #000; border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px; width:150px; display:block; }\n";
 	  $V .= $Label . ":hover a,\n";
 	  $V .= $Label . " a:active,\n";
 	  $V .= $Label . " a:hover\n";
-	  $V .= "  { padding:4px 0; color:white; background:red; width:150px; display:block; }\n";
+	  $V .= "  { padding:4px; color:white; background:#c50830; width:150px; display:block; }\n";
 	  $V .= $Label . " a span\n";
-	  $V .= "  { position:absolute; top:0; left:135px; font-size:12pt; color:white; }\n";
+	  $V .= "  { position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
 	  $Depth++;
 	  }
 
@@ -190,19 +191,21 @@ class ui_menu extends Plugin
 	  $V .= "  { margin:0; padding:0; display:block; position:relative; width:150px; }\n";
 	  $V .= $Label . " a:link,\n";
 	  $V .= $Label . " a:visited\n";
-	  $V .= "  { padding:4px 0; color:white; background:darkred; width:150px; display:block; }\n";
+	  $V .= "  { padding:4px; color:black; background:white; border:1px solid #000; border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px; width:150px; display:block; }\n";
 	  $V .= $Label . ":hover a,\n";
 	  $V .= $Label . " a:active,\n";
 	  $V .= $Label . " a:hover\n";
-	  $V .= "  { padding:4px 0; color:white; background:red; width:150px; display:block; }\n";
+	  $V .= "  { padding:4px; color:white; background:#c50830; width:150px; display:block; }\n";
 	  $V .= $Label . " a span\n";
-	  $V .= "  { position:absolute; top:0; left:135px; font-size:12pt; color:white; }\n";
+	  $V .= "  { position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
 	  }
 
 	$V .= "</style>\n";
 
 	/* Then display the menu */
+	$V .= "<div style='background:darkblue;'>";
 	$V .= $this->menu_html($Menu,0);
+	$V .= "<br /></div>";
         break;
       case "Text":
         break;

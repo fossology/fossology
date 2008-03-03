@@ -32,6 +32,7 @@ class ui_folders extends Plugin
   var $MenuTarget = "treenav";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;
+  var $NoMenu     = 1;
 
   /***********************************************************
    Output(): This function returns the scheduler status.
@@ -47,20 +48,15 @@ class ui_folders extends Plugin
       case "XML":
 	break;
       case "HTML":
+	/* Load the logo image */
+	$Uri = Traceback_uri();
+	$V .= "<center><a href='/' target='_top'><img src='${Uri}images/fossology-logo.gif' align=absmiddle border=0></a></center><br>\n";
 	/* Create Javascript to show/hide named elements (will be DIVs) */
 	$V .= "<script language='javascript'>\n";
 	$V .= "<!--\n";
 	$V .= "function ShowHide(name)\n";
 	$V .= "  {\n";
 	$V .= "  if (name.length < 1) { return; }\n";
-if (0){
-	$V .= "  if (document.getElementById(name).style.display == 'none')\n";
-	$V .= "    { document.getElementById(name).style.display = 'block'; }\n";
-	$V .= "  else\n";
-	$V .= "    { document.getElementById(name).style.display = 'none'; }\n";
-}
-else
-{
 	$V .= "  var Element, State;\n";
 	$V .= "  if (document.getElementById) // standard\n";
 	$V .= "    { Element = document.getElementById(name); }\n";
@@ -71,13 +67,59 @@ else
 	$V .= "  State = Element.style;\n";
 	$V .= "  if (State.display == 'none') { State.display='block'; }\n";
 	$V .= "  else { State.display='none'; }\n";
-}
+	$V .= "  }\n";
+	$V .= "function Expand()\n";
+	$V .= "  {\n";
+	$V .= "  var E = document.getElementsByTagName('div');\n";
+	$V .= "  for(var i = 0; i < E.length; i++)\n";
+	$V .= "    {\n";
+	$V .= "    if (E[i].id.substr(0,8) == 'TreeDiv-')\n";
+	$V .= "      {\n";
+	$V .= "      var Element, State;\n";
+	$V .= "      if (document.getElementById) // standard\n";
+	$V .= "        { Element = document.getElementById(E[i].id); }\n";
+	$V .= "      else if (document.all) // IE 4, 5, beta 6\n";
+	$V .= "        { Element = document.all[E[i].id]; }\n";
+	$V .= "      else // if (document.layers) // Netscape 4 and older\n";
+	$V .= "        { Element = document.layers[E[i].id]; }\n";
+	$V .= "      State = Element.style;\n";
+	$V .= "      State.display='block';\n";
+	$V .= "      }\n";
+	$V .= "    }\n";
+	$V .= "  }\n";
+	$V .= "function Collapse()\n";
+	$V .= "  {\n";
+	$V .= "  var E = document.getElementsByTagName('div');\n";
+	$V .= "  for(var i = 0; i < E.length; i++)\n";
+	$V .= "    {\n";
+	$V .= "    if (E[i].id.substr(0,8) == 'TreeDiv-')\n";
+	$V .= "      {\n";
+	$V .= "      var Element, State;\n";
+	$V .= "      if (document.getElementById) // standard\n";
+	$V .= "        { Element = document.getElementById(E[i].id); }\n";
+	$V .= "      else if (document.all) // IE 4, 5, beta 6\n";
+	$V .= "        { Element = document.all[E[i].id]; }\n";
+	$V .= "      else // if (document.layers) // Netscape 4 and older\n";
+	$V .= "        { Element = document.layers[E[i].id]; }\n";
+	$V .= "      State = Element.style;\n";
+	$V .= "      if (i == 0) { State.display='block'; } \n";
+	$V .= "      else { State.display='none'; } \n";
+	$V .= "      }\n";
+	$V .= "    }\n";
 	$V .= "  }\n";
 	$V .= "-->\n";
 	$V .= "</script>\n";
+	$V .= "<small>";
+	$V .= "<a href='javascript:Expand();'>Expand</a> |";
+	$V .= "<a href='javascript:Collapse();'>Collapse</a> |";
+	$V .= "<a href='" . Traceback() . "'>Refresh</a>";
+	$V .= "</small>";
+	$V .= "<P>\n";
 
 	/* Display the tree */
+	$V .= "<form>\n";
 	$V .= FolderListDiv(-1,0);
+	$V .= "</form>\n";
 	break;
       case "Text":
 	break;
