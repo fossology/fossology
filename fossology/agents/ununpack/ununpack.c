@@ -1939,7 +1939,8 @@ int	Traverse	(char *Filename, char *Basename,
 	{
 	/* this should never happen... */
 	fprintf(stderr,"LOG pfile %s \"%s\" does not exist!\n",Pfile_Pk,Filename);
-	goto TraverseEnd;
+	/* goto TraverseEnd; */
+	return(0);
 	}
 
   /***********************************************/
