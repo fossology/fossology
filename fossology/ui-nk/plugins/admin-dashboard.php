@@ -32,6 +32,30 @@ class dashboard extends Plugin
   var $Dependency = array("db");
 
   /************************************************
+   Bytes2Human(): Convert a number of bytes into
+   a human-readable format.
+   ************************************************/
+  function Bytes2Human	($Bytes)
+    {
+    if ($Bytes < 1024) { return($Bytes); }
+    $Bytes = $Bytes / 1024;
+    $Bint = intval($Bytes * 100.0) / 100.0;
+    if ($Bytes < 1024) { return("$Bint KB"); }
+    $Bytes = $Bytes / 1024;
+    $Bint = intval($Bytes * 100.0) / 100.0;
+    if ($Bytes < 1024) { return("$Bint MB"); }
+    $Bytes = $Bytes / 1024;
+    $Bint = intval($Bytes * 100.0) / 100.0;
+    if ($Bytes < 1024) { return("$Bint GB"); }
+    $Bytes = $Bytes / 1024;
+    $Bint = intval($Bytes * 100.0) / 100.0;
+    if ($Bytes < 1024) { return("$Bint TB"); }
+    $Bytes = $Bytes / 1024;
+    $Bint = intval($Bytes * 100.0) / 100.0;
+    return("$Bint PB");
+    } // Bytes2Human()
+
+  /************************************************
    DiskFree(): Determine amount of free disk space.
    ************************************************/
   function DiskFree()
@@ -42,9 +66,9 @@ class dashboard extends Plugin
 
     /* Read results */
     $Buf = "";
-    while(($Line = fread($Fin,8192)) && (strlen($Line) > 0))
+    while(!feof($Fin))
 	{
-	$Buf .= $Line;
+	$Buf .= fread($Fin,8192);
 	}
     pclose($Fin);
 
@@ -62,8 +86,17 @@ class dashboard extends Plugin
       $L = preg_replace("/[[:space:]][[:space:]]*/"," ",$L);
       $List = split(" ",$L);
       $V .= "<tr><td>" . htmlentities($List[0]) . "</td>";
-      $V .= "<td align='right'>" . number_format($List[2] * 1024,0,"",",") . "</td>";
-      $V .= "<td align='right'>" . number_format($List[1] * 1024,0,"",",") . "</td>";
+      $Used = $List[2] * 1024;
+      $UsedH = $this->Bytes2Human($Used);
+      if ($Used != $UsedH) { $UsedH = " ($UsedH)"; }
+      else { $UsedH = ""; }
+      $Capacity = $List[1] * 1024;
+      $CapacityH = $this->Bytes2Human($Capacity);
+      if ($Capacity != $CapacityH) { $CapacityH = " ($CapacityH)"; }
+      else { $CapacityH = ""; }
+
+      $V .= "<td align='right'>" . number_format($Used,0,"",",") . "$UsedH</td>";
+      $V .= "<td align='right'>" . number_format($Capacity,0,"",",") . "$CapacityH</td>";
       $V .= "<td align='right'>" . htmlentities($List[4]) . "</td></tr>\n";
       }
     $V .= "</table>\n";
