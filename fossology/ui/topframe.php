@@ -19,7 +19,7 @@
 //print "<body bgcolor='#880022'>";
 print "<body >";
 //print "<img src=\"/fossology_logo.png\" height=90 align=absmiddle>";
-print "<a href='/' target='_top' ><img src=\"logo2crop.png\" align=absmiddle border=0></a>";
+print "<a href='/' target='_top' ><img src=\"fossology-logo.gif\" align=absmiddle border=0></a>";
 ?>
 &nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;
