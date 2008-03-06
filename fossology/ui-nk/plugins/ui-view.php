@@ -31,6 +31,7 @@ define("MAXHIGHLIGHTCOLOR",8);
 class ui_view extends Plugin
   {
   var $Name       = "view";
+  var $Title      = "View File";
   var $Version    = "1.0";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -599,16 +600,6 @@ class ui_view extends Plugin
 	  break;
 	}
 
-    /***********************************
-     Create micro menu
-     ***********************************/
-    if ($ShowMenu)
-      {
-      $V .= "<div align='left'><small>";
-      $V .= menu_to_1html(menu_find("View",$MenuDepth),1);
-      $V .= "</small></div>\n";
-      } // if ShowMenu
-
     /**********************************
      Show optional text message.
      **********************************/
@@ -627,7 +618,7 @@ class ui_view extends Plugin
       if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
       if (!empty($Show)) { $Opt .= "&show=$Show"; }
       /* No item */
-      $V .= Dir2Browse("browse",$Item,$Ufile) . "<P />\n";
+      $V .= Dir2Browse("browse",$Item,$Ufile,NULL,1,"View") . "<P />\n";
       } // if ShowHeader
 
     /***********************************

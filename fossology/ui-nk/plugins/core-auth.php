@@ -27,6 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class core_auth extends Plugin
   {
   var $Name       = "auth";
+  var $Title      = "Login";
   var $Version    = "1.0";
   var $PluginLevel = 100; /* make this run first! */
 
@@ -63,8 +64,8 @@ class core_auth extends Plugin
     $Now = time();
     if (!empty($_SESSION['time']))
       {
-      /* Logins older than 15 minutes are auto-logout */
-      if ($_SESSION['time'] + 15*60 < $Now)
+      /* Logins older than 60 minutes are auto-logout */
+      if ($_SESSION['time'] + 60*60 < $Now)
 	{
 	$_SESSION['User'] = NULL;
 	}
@@ -85,11 +86,11 @@ class core_auth extends Plugin
     /* Enable or disable plugins based on login status */
     if ($_SESSION['User'])
       {
-      menu_insert("Main::Admin::Logout",10,$this->Name);
+      // menu_insert("Main::Admin::Logout",10,$this->Name);
       }
     else
       {
-      menu_insert("Main::Admin::Login",10,$this->Name);
+      // menu_insert("Main::Admin::Login",10,$this->Name);
       /* Disable all plugins with >= WRITE access */
       global $Plugins;
       $Max = count($Plugins);
@@ -124,11 +125,11 @@ class core_auth extends Plugin
 	  if ((GetParm("username",PARM_STRING) == 'fossy') &&
 	      (GetParm("password",PARM_STRING) == 'fossy'))
 		{
-		$_SESSION['User'] = 1;
+		$_SESSION['User'] = GetParm("username",PARM_STRING);
 		/* Need to refresh the screen */
 		$V .= "<script language='javascript'>\n";
 		$V .= "alert('User Logged In')\n";
-		$Uri = Traceback_uri() . "?mod=refresh&remod=default";
+		$Uri = Traceback_uri();
 		$V .= "window.open('$Uri','_top');\n";
 		$V .= "</script>\n";
 		}

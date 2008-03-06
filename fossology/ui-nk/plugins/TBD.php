@@ -26,18 +26,19 @@ if (!isset($GlobalReady)) { exit; }
 
 class tbd extends Plugin
 {
-  public $Name       = "TBD";
-  public $Version    = "1.0";
-  public $Dependency = array("db");
-  public $DBaccess   = PLUGIN_DB_WRITE;
+  var $Name       = "TBD";
+  var $Title      = "TBD (don't look!)";
+  var $Version    = "1.0";
+  var $Dependency = array("db");
+  var $DBaccess   = PLUGIN_DB_WRITE;
 
   function RegisterMenus()
     {
-    menu_insert("Main::Search::Basic Search (TBD)",1);
-    menu_insert("Main::Search::Advance Search (TBD)",0);
+    menu_insert("Search::Search::Basic Search (TBD)",1);
+    menu_insert("Search::Search::Advance Search (TBD)",0);
     menu_insert("Main::Organize::Uploads::Edit Properties (TBD)");
     menu_insert("Main::Organize::Uploads::Move Folder (TBD)");
-    menu_insert("Main::Tasks::Analyze::Code Compare (TBD)");
+    menu_insert("Main::Jobs::Analyze::Code Compare (TBD)");
     menu_insert("Main::Admin::Scheduler::Stop (TBD)");
     menu_insert("Main::Admin::Scheduler::Start (TBD)");
     menu_insert("Main::Admin::Scheduler::Kill Job (TBD)");
@@ -50,6 +51,7 @@ class tbd extends Plugin
     menu_insert("Main::Admin::Database::View Table (TBD)");
     menu_insert("Main::Admin::Database::Stats (TBD)");
     menu_insert("Main::Upload::From Mount (TBD)");
+    menu_insert("Main::Jobs::TBD::TBD::TBD");
     }
 };
 $NewPlugin = new tbd;

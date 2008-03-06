@@ -27,6 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class core_debug_repo extends Plugin
   {
   var $Name       = "debug_repo";
+  var $Title      = "Debug Repository";
   var $Version    = "1.0";
   var $MenuList   = "Help::Debug Repository";
   var $Dependency = array("db","view","browse");
@@ -95,7 +96,6 @@ class core_debug_repo extends Plugin
 	$Akey = GetParm("akey",PARM_INTEGER);
 	$A = GetParm("a",PARM_STRING);
 
-	$V .= "<H1>Debug Repository</H1>";
 	$V .= "Given a pfile_pk or repository id, return the list of files.\n";
 	$V .= "<form method='post'>\n";
 	$V .= "<ul>\n";

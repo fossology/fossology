@@ -80,7 +80,6 @@ class upload_file extends Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<H1>$this->Title</H1>\n";
 	/* If this is a POST, then process the request. */
 	$Folder = GetParm('folder',PARM_INTEGER);
 	$Desc = GetParm('description',PARM_TEXT); // may be null

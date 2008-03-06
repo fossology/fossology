@@ -26,8 +26,9 @@ if (!isset($GlobalReady)) { exit; }
 
 class ui_basenav extends Plugin
   {
-  var $Name       = "basenav";
-  var $Version    = "1.0";
+  var $Name       = "Default";
+  var $Title      = "Welcome to FOSSology";
+  var $Version    = "2.0";
   var $MenuList   = "";
 
   function Output()
@@ -39,11 +40,10 @@ class ui_basenav extends Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<H1>Welcome to FOSSology</H1>\n";
 	$V .= "This system analyzes open source projects.";
 	$V .= "Currently, this tool allows you to view project contents, meta information, and discovered license analysis.";
 	$V .= "<P>\n";
-	$V .= "To begin, either browse uploaded files using the navigation tree on the left, ";
+	$V .= "To begin, either browse uploaded files using the browse menu item, ";
 	$V .= "or select an option from the menu.";
 	break;
       case "Text":

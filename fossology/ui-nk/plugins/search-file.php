@@ -27,8 +27,9 @@ if (!isset($GlobalReady)) { exit; }
 class search_file extends Plugin
   {
   var $Name       = "search_file";
+  var $Title      = "Search for File";
   var $Version    = "1.0";
-  var $MenuList   = "Search::By Filename";
+  var $MenuList   = "";
   var $Dependency = array("db","view","browse");
   var $DBaccess   = PLUGIN_DB_READ;
 
@@ -53,6 +54,18 @@ class search_file extends Plugin
     } // GetUfileFromName()
 
   /***********************************************************
+   RegisterMenus(): Customize submenus.
+   ***********************************************************/
+  function RegisterMenus()
+    {
+    $Upload = GetParm("upload",PARM_INTEGER);
+    if (empty($Upload)) { return; }
+
+    $URI = $this->Name . Traceback_uri() . "?mod=" . $this->Name;
+    menu_insert("Search::Filename",-1,$URI);
+    } // RegisterMenus()
+
+  /***********************************************************
    Output(): Display the loaded menu and plugins.
    ***********************************************************/
   function Output()
@@ -68,7 +81,6 @@ class search_file extends Plugin
 
 	$Filename = GetParm("filename",PARM_STRING);
 
-	$V .= "<H1>Search for Filename</H1>";
 	$V .= "You can use '%' as a wild-card.\n";
 	$V .= "<form method='post'>\n";
 	$V .= "<ul>\n";

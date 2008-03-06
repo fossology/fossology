@@ -31,6 +31,7 @@ if (!isset($GlobalReady)) { exit; }
 class folder_properties extends Plugin
 {
   var $Name       ="folder_properties";
+  var $Title      = "Edit Folder Properties";
   var $Version    ="1.0";
   var $MenuList   ="Organize::Folders::Edit Properties";
   var $Dependency =array("db");
@@ -94,7 +95,6 @@ class folder_properties extends Plugin
       case "XML":
         break;
       case "HTML":
-        $V .= "<H1>Edit Folder Properties</H1>\n";
         /* If this is a POST, then process the request. */
         $FolderId = GetParm('oldfolderid',PARM_INTEGER);
         $NewName = GetParm('newname',PARM_TEXT);

@@ -96,7 +96,6 @@ class folder_create extends Plugin
       case "XML":
         break;
       case "HTML":
-        $V .= "<H1>$this->Title</H1>\n";
         /* If this is a POST, then process the request. */
         $ParentId = GetParm('parentid',PARM_INTEGER);
         $NewFolder = GetParm('newname',PARM_TEXT);

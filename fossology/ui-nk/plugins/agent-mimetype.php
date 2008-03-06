@@ -28,7 +28,7 @@ class agent_mimetype extends Plugin
 {
   public $Name       = "agent_mimetype";
   public $Title      = "Schedule MIME-type Analysis";
-  public $MenuList   = "Tasks::Agents::MIME-type Analysis";
+  public $MenuList   = "Jobs::Agents::MIME-type Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_ANALYZE;
@@ -114,7 +114,6 @@ class agent_mimetype extends Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<H1>$this->Title</H1>\n";
 	/* If this is a POST, then process the request. */
 	$uploadpk = GetParm('upload',PARM_INTEGER);
 	if (!empty($uploadpk))

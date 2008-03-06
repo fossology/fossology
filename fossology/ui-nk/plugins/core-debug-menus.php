@@ -27,6 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class core_debug_menus extends Plugin
   {
   var $Name       = "debug-menus";
+  var $Title      = "Debug Menus";
   var $Version    = "1.0";
   var $MenuList   = "Help::Debug Menus";
   var $DBaccess   = PLUGIN_DB_DEBUG;
@@ -63,7 +64,6 @@ class core_debug_menus extends Plugin
       case "XML":
         break;
       case "HTML":
-	$V .= "<H1>Menu Details</H1>";
 	$this->Menu2HTML($MenuList);
 	$V .= "<hr>\n";
 	$V .= "<pre>";

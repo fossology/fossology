@@ -27,9 +27,9 @@ if (!isset($GlobalReady)) { exit; }
 class ui_default extends Plugin
   {
   var $Name       = "Default";
+  var $Title      = "FOSSology";
   var $Version    = "1.0";
   var $MenuList   = "";
-  var $Title      = "FOSSology";
 
   var $Dependency=array("topnav","folders","basenav");
 

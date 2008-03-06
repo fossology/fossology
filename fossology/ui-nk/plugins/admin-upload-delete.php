@@ -71,7 +71,6 @@ class admin_upload_delete extends Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<H1>$this->Title</H1>\n";
 	/* If this is a POST, then process the request. */
 	$uploadpk = GetParm('upload',PARM_INTEGER);
 	if (!empty($uploadpk))

@@ -27,8 +27,9 @@ if (!isset($GlobalReady)) { exit; }
 class ui_folders extends Plugin
   {
   var $Name       = "folders";
+  var $Title      = "Show Folders";
   var $Version    = "1.0";
-  var $MenuList   = "Tasks::Folders (refresh)";
+  // var $MenuList   = "Jobs::Folders (refresh)";
   var $MenuTarget = "treenav";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;

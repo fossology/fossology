@@ -28,7 +28,7 @@ class agent_license extends Plugin
 {
   public $Name       = "agent_license";
   public $Title      = "Schedule License Analysis";
-  public $MenuList   = "Tasks::Agents::License Analysis";
+  public $MenuList   = "Jobs::Agents::License Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_ANALYZE;
@@ -151,7 +151,6 @@ class agent_license extends Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<H1>$this->Title</H1>\n";
 	/* If this is a POST, then process the request. */
 	$uploadpk = GetParm('upload',PARM_INTEGER);
 	if (!empty($uploadpk))

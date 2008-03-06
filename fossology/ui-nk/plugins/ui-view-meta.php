@@ -27,6 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class ui_view_meta extends Plugin
   {
   var $Name       = "view_meta";
+  var $Title      = "View Meta Data";
   var $Version    = "1.0";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -66,22 +67,12 @@ class ui_view_meta extends Plugin
     if (empty($Item) || empty($Pfile) || empty($Ufile) || empty($Upload))
 	{ return; }
 
-    /***********************************
-     Create micro menu
-     ***********************************/
-    if ($ShowMenu)
-	{
-	$V .= "<div align='left'><small>";
-	$V .= menu_to_1html(menu_find("View-Meta",$MenuDepth),1);
-	$V .= "</small></div>\n";
-	} // if ShowMenu
-
     /**********************************
      Display micro header
      **********************************/
     if ($ShowHeader)
       {
-      $V .= Dir2Browse("browse",$Item,$Ufile) . "<P />";
+      $V .= Dir2Browse("browse",$Item,$Ufile,NULL,1,"View-Meta");
       } // if ShowHeader
 
     /**********************************
