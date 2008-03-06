@@ -27,8 +27,9 @@ if (!isset($GlobalReady)) { exit; }
 class ui_license extends Plugin
   {
   var $Name       = "license";
+  var $Title      = "License Browser";
   var $Version    = "1.0";
-  // var $MenuList= "Tasks::License";
+  // var $MenuList= "Jobs::License";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;
 
@@ -282,19 +283,12 @@ class ui_license extends Plugin
       case "XML":
 	break;
       case "HTML":
-	/*************************/
-	/* Create the micro-menu */
-	/*************************/
-	$V .= "<div align='left'><small>";
-	$V .= menu_to_1html(menu_find("Browse",$MenuDepth),1);
-	$V .= "</small></div>\n";
-
 	$V .= "<font class='text'>\n";
 
 	/************************/
 	/* Show the folder path */
 	/************************/
-	$V .= Dir2Browse($this->Name,$Item,-1) . "<P />\n";
+	$V .= Dir2Browse($this->Name,$Item,-1,NULL,1,"Browse") . "<P />\n";
 
 	/******************************/
 	/* Get the folder description */

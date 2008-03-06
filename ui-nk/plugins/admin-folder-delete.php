@@ -71,7 +71,6 @@ class admin_folder_delete extends Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<H1>$this->Title</H1>\n";
 	/* If this is a POST, then process the request. */
 	$folder = GetParm('folder',PARM_INTEGER);
 	if (!empty($folder))

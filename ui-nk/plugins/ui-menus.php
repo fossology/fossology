@@ -27,6 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class ui_menu extends Plugin
   {
   var $Name       = "menus";
+  var $Title      = "Menus";
   var $Version    = "1.0";
   var $MenuTarget = "treenav";
 
@@ -42,10 +43,13 @@ class ui_menu extends Plugin
       } 
    
     // Add default menus (with no actions linked to plugins)
-    menu_insert("Main::Search",12);
-    menu_insert("Main::Tasks",10);
+    menu_insert("Main::Logo",20,NULL,NULL,"<a href='/' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . Traceback_uri() . "images/fossology-logo.gif' border=0></a>");
+    menu_insert("Main::Home",18,"Default","_top");
+    menu_insert("Main::Search",14);
+    menu_insert("Main::Browse",12);
+    menu_insert("Main::Upload",10);
     menu_insert("Main::Organize",8);
-    menu_insert("Main::Upload",6);
+    menu_insert("Main::Jobs",6);
     menu_insert("Main::Admin",4);
 
     // It worked, so mark this plugin as ready.
@@ -60,16 +64,8 @@ class ui_menu extends Plugin
     {
     if (empty($Menu)) { return; }
     $V="";
-    for($i=0; $i<$Indent; $i++) { $V .= " "; }
-    $V .= "<!--[if lte IE 6]><table><tr><td><![endif]-->";
-    if ($Indent == 0)
-      {
-      $V .= "<ul id='nav-$Indent'>\n";
-      }
-    else
-      {
-      $V .= "<ul class='nav-$Indent'>\n";
-      }
+    $V .= "<!--[if lt IE 7]><table><tr><td><![endif]-->\n";
+    $V .= "<ul id='menu-$Indent'>\n";
     /*** NOTE: http://www.cssplay.co.uk/menus/final_drop.html identifies
          why menus fail for IE6. IE6 needs the </a> to exist outside the
 	 submenus rather than before the submenus. ***/
@@ -81,48 +77,63 @@ class ui_menu extends Plugin
      ***/
     foreach($Menu as $M)
       {
-      for($i=0; $i<$Indent; $i++) { $V .= " "; }
-      $V .= '<li><a href="';
-      if (!empty($M->URI))
+      $V .= '<li>';
+
+      if (!empty($M->HTML))
 	{
-	$V .= Traceback_uri() . "?mod=" . $M->URI;
-	if (empty($M->Target) || ($M->Target == ""))
-	  {
-	  $V .= '" target="basenav">';
-	  }
-	else
-	  {
-	  $V .= '" target="' . $M->Target . '">';
-	  }
-	$V .= $M->Name;
+	$V .= $M->HTML;
 	}
-      else
-	{
-	$V .= '#">' . $M->Name;
-	}
-      if (!empty($M->SubMenu) && ($Indent > 0))
+      else /* create HTML */
         {
-	$V .= " <span>&raquo;</span>";
+	if (!empty($M->URI))
+	  {
+	  $V .= '<a href="' . Traceback_uri() . "?mod=" . $M->URI;
+	  if (empty($M->Target) || ($M->Target == ""))
+	    {
+	    // $V .= '" target="basenav">';
+	    $V .= '">';
+	    }
+	  else
+	    {
+	    $V .= '" target="' . $M->Target . '">';
+	    }
+	  $V .= $M->Name;
+	  }
+        else
+	  {
+	  $V .= '<a href="#">';
+	  if (empty($M->SubMenu))
+		{
+		$V .= "<font color='#C0C0C0'>" . $M->Name . "</font>";
+		}
+	  else { $V .= $M->Name; }
+	  }
+
+        if (!empty($M->SubMenu) && ($Indent > 0))
+          {
+	  $V .= " <span>&raquo;</span>";
+	  }
+        $V .= "</a>\n";
 	}
-      $V .= "</a>\n";
+
       if (!empty($M->SubMenu))
 	{
 	$V .= $this->menu_html($M->SubMenu,$Indent+1);
 	}
       }
-    for($i=0; $i<$Indent; $i++) { $V .= " "; }
-    $V .= "</ul><!--[if lte IE 6]></td></tr></table></a><![endif]-->\n";
+    $V .= "</ul>\n";
+    $V .= "<!--[if lt IE 7]></td></tr></table></a><![endif]-->\n";
     return($V);
     } // menu_html()
 
   /********************************************
    Output(): Create the output.
    ********************************************/
-  function Output()
+  function Output($Title=NULL)
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    // Put your code here
     $V="";
+    if (empty($Title)) { $Title = "Welcome to FOSSology"; }
     switch($this->OutputType)
       {
       case "XML":
@@ -134,24 +145,30 @@ class ui_menu extends Plugin
 	$Depth = 0;
 	$Label = "";
 	$Menu = menu_find("Main",$MenuDepth);
+	$Border = "border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px;";
+	$FOSScolor1 = "#c50830";
+	$FOSScolor2 = "#808080";
+	$FOSSbg1 = $FOSScolor2;
+	$FOSSbg2 = "white";
 	if ($Depth < $MenuDepth)
 	  {
+	  /** The "float:left" is needed to fix IE **/
 	  $V .= "\n/* CSS for Depth $Depth */\n";
-	  $Label = "ul#nav-" . $Depth;
+	  $Label = "ul#menu-" . $Depth;
 	  $V .= $Label . "\n";
-	  $V .= "  { z-index:0; margin:0; padding:0px; list-style:none; width:100%; height:24px; font:normal 10pt verdana, arial, helvetica;}\n";
+	  $V .= "  { z-index:0; margin:0; padding:0px; list-style:none; background:$FOSSbg2; width:100%; height:24px; font:normal 10pt verdana, arial, helvetica;}\n";
 	  $Label .= " li";
 	  $V .= $Label . "\n";
-	  $V .= "  { margin:0; padding:0px; display:block; float:left; position:relative; width:auto; }\n";
+	  $V .= "  { float:left; margin:0; padding:0px; display:block; position:relative; width:auto; border:0px solid #000; }\n";
 	  $V .= $Label . " a:link,\n";
 	  $V .= $Label . " a:visited\n";
-	  $V .= "  { padding:4px 10px; text-decoration:none; color:white; background:darkblue; width:auto; display:block; }\n";
+	  $V .= "  { float:left; padding:4px 10px; text-decoration:none; color:black; background:$FOSSbg2; width:auto; display:block; }\n";
 	  $V .= $Label . ":hover a,\n";
 	  $V .= $Label . " a:hover,\n";
 	  $V .= $Label . " a:active\n";
-	  $V .= "  { padding:4px 10px; color:#c50830; background:white; width:auto; display:block; }\n";
+	  $V .= "  { float:left; padding:4px 10px; color:$FOSScolor1; background:$FOSSbg2; $Border width:auto; display:block; }\n";
 	  $V .= $Label . " a span\n";
-	  $V .= "  { position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
+	  $V .= "  { float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
 	  $Depth++;
 	  }
 
@@ -159,22 +176,22 @@ class ui_menu extends Plugin
 	if ($Depth < $MenuDepth)
 	  {
 	  $V .= "\n/* CSS for Depth $Depth */\n";
-	  $V .= $Label . " ul.nav-" . $Depth . "\n";
-	  $V .= "  { z-index:1; margin:0; padding:1px 0; display:none; left:0px; width:150px; position:absolute; top:24px; }\n";
-	  $V .= $Label . ":hover ul.nav-" . $Depth . "\n";
-	  $V .= "  { display:block; }\n";
-	  $Label .= " ul.nav-" . $Depth . " li";
+	  $V .= $Label . " ul#menu-" . $Depth . "\n";
+	  $V .= "  { z-index:1; margin:0; padding:1px 0; list-style:none; display:none; visibility:hidden; left:0px; width:150px; position:absolute; top:24px; }\n";
+	  $V .= $Label . ":hover ul#menu-" . $Depth . "\n";
+	  $V .= "  { float:left; display:block; visibility:visible; }\n";
+	  $Label .= " ul#menu-" . $Depth . " li";
 	  $V .= $Label . "\n";
-	  $V .= "  { margin:0; padding:0; display:block; position:relative; width:150px; }\n";
+	  $V .= "  { float:left; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
 	  $V .= $Label . " a:link,\n";
 	  $V .= $Label . " a:visited\n";
-	  $V .= "  { padding:4px 0px 4px 4px; color:black; background:white; border:1px solid #000; border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px; width:150px; display:block; }\n";
+	  $V .= "  { float:left; padding:4px 0px 4px 4px; color:black; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; visibility:visible; }\n";
 	  $V .= $Label . ":hover a,\n";
 	  $V .= $Label . " a:active,\n";
 	  $V .= $Label . " a:hover\n";
-	  $V .= "  { padding:4px 0px 4px 4px; color:white; background:#c50830; width:150px; display:block; }\n";
+	  $V .= "  { float:left; padding:4px 0px 4px 4px; color:white; background:$FOSScolor1; width:150px; display:block; visibility:visible; }\n";
 	  $V .= $Label . " a span\n";
-	  $V .= "  { position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
+	  $V .= "  { float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
 	  $Depth++;
 	  }
 
@@ -182,30 +199,66 @@ class ui_menu extends Plugin
 	for( ; $Depth < $MenuDepth; $Depth++)
 	  {
 	  $V .= "\n/* CSS for Depth $Depth */\n";
-	  $V .= $Label . " ul.nav-" . $Depth . "\n";
-	  $V .= "  { z-index:$Depth; margin:0; padding:1px 0; display:none; left:150px; width:150px; position:absolute; top:-1px; }\n";
-	  $V .= $Label . ":hover ul.nav-" . $Depth . "\n";
-	  $V .= "  { display:block; }\n";
-	  $Label .= " ul.nav-" . $Depth . " li";
+	  $V .= $Label . " ul#menu-" . $Depth . "\n";
+	  $V .= "  { z-index:$Depth; margin:0; padding:1px 0; list-style:none; display:none; visibility:hidden; left:150px; width:150px; position:absolute; top:-2px; }\n";
+	  $V .= $Label . ":hover ul#menu-" . $Depth . "\n";
+	  $V .= "  { float:left; display:block; visibility:visible; }\n";
+	  $Label .= " ul#menu-" . $Depth . " li";
 	  $V .= $Label . "\n";
-	  $V .= "  { margin:0; padding:0; display:block; position:relative; width:150px; }\n";
+	  $V .= "  { float:left; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
 	  $V .= $Label . " a:link,\n";
 	  $V .= $Label . " a:visited\n";
-	  $V .= "  { padding:4px 0px 4px 4px; color:black; background:white; border:1px solid #000; border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px; width:150px; display:block; }\n";
+	  $V .= "  { float:left; padding:4px 0px 4px 4px; color:black; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; }\n";
 	  $V .= $Label . ":hover a,\n";
 	  $V .= $Label . " a:active,\n";
 	  $V .= $Label . " a:hover\n";
-	  $V .= "  { padding:4px 0px 4px 4px; color:white; background:#c50830; width:150px; display:block; }\n";
+	  $V .= "  { float:left; padding:4px 0px 4px 4px; color:white; background:$FOSScolor1; width:150px; display:block; visibility:visible; }\n";
 	  $V .= $Label . " a span\n";
-	  $V .= "  { position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
+	  $V .= "  { float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
 	  }
-
 	$V .= "</style>\n";
 
+	/* For IE's screwed up CSS: this defines "hover". */
+	$V .= "<!--[if lt IE 8]>\n";
+	$V .= "<style type='text/css' media='screen'>\n";
+	/** csshover.htc provides ":hover" support for IE **/
+	$V .= "body { behavior:url(csshover.htc); }\n";
+	/** table definition needed to get rid of extra space under items **/
+// try "margin:0"
+// try td {border:none; margin:0; }
+	for($i=1; $i < $MenuDepth; $i++)
+	  {
+	  $V .= "#menu-$i table {height:0px; border-collapse:collapse; margin:0; padding:0; }\n";
+	  $V .= "#menu-$i td {height:0px; border:none; margin:0; padding:0; }\n";
+	  }
+	$V .= "</style>\n";
+	$V .= "<![endif]-->\n";
+
 	/* Then display the menu */
-	$V .= "<div style='background:darkblue;'>";
+	/** Same height at FOSSology logo **/
+	$V .= "<div style='background:$FOSSbg2; height:92px;'>";
 	$V .= $this->menu_html($Menu,0);
-	$V .= "<br /></div>";
+	$V .= "<br /><table border=0 width='100%' style='float:left; position:absolute;'><tr>";
+	$V .= "<td><font size='+2'><b><center>$Title</center></b></font></td>";
+
+	/* Handle login information */
+	if (plugin_find_id("auth") >= 0)
+	  {
+	  /* Width matches logo image */
+	  $V .= "<td width='150px' align='right' valign='bottom'>";
+	  if (empty($_SESSION['User']))
+		{
+		$V .= "<small>[<a href='" . Traceback_uri() . "?mod=auth'>login</a>]</small>";
+		}
+	  else
+		{
+		$V .= "User: " . $_SESSION['User'] . " ";
+		$V .= "<small>[<a href='" . Traceback_uri() . "?mod=auth'>logout</a>]</small>";
+		}
+	  $V .= "</td></tr>";
+	  }
+	$V .= "</table>";
+	$V .= "</div>";
         break;
       case "Text":
         break;

@@ -27,6 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class core_debug extends Plugin
   {
   var $Name       = "debug";
+  var $Title      = "Debug Plugins";
   var $Version    = "1.0";
   var $MenuList   = "Help::Debug Plugins";
   var $DBaccess   = PLUGIN_DB_DEBUG;
@@ -44,12 +45,12 @@ class core_debug extends Plugin
       case "XML":
         break;
       case "HTML":
-	$V .= "<H1>Plugin State Summary</H1>";
+	$V .= "<H2>Plugin Summary</H2>";
 	foreach ($Plugins as $key => $val)
 	  {
 	  $V .=  "$key : $val->Name (state=$val->State)<br>\n";
 	  }
-	$V .= "<H1>Plugin State Details</H1>";
+	$V .= "<H2>Plugin State Details</H2>";
 	$V .= "<pre>";
 	$V .= print_r($Plugins,1);
 	$V .= "</pre>";

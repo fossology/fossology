@@ -24,17 +24,28 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_about extends Plugin
+class ui_search extends Plugin
   {
-  var $Name       = "about";
-  var $Title      = "About FOSSology";
+  var $Name       = "search";
+  var $Title      = "Search";
   var $Version    = "1.0";
-  var $MenuList   = "Help::About";
+  var $MenuList   = "Search";
 
-  var $_Project="FOSSology";
-  var $_Copyright="Copyright (C) 2007-2008 Hewlett-Packard Development Company, L.P.";
-  var $_Text="This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.\nThis program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\nYou should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.";
+  /***********************************************************
+   RegisterMenus(): Customize submenus.
+   ***********************************************************/
+  function RegisterMenus()
+    {
+    $Uri = Traceback_uri() . "?mod=" . $this->Name;
+    $HTML = "<form method='post' action='$Uri'>";
+    $HTML .= "<input type=text name='search' size='20' value='search'>";
+    $HTML .= "</form>";
+    // menu_insert("Main::SearchEntry",-10,NULL,NULL,$HTML);
+    } // RegisterMenus()
 
+  /********************************************
+   Output(): Generate output.
+   ********************************************/
   function Output()
     {
     if ($this->State != PLUGIN_STATE_READY) { return; }
@@ -42,28 +53,22 @@ class ui_about extends Plugin
     switch($this->OutputType)
       {
       case "XML":
-	$V .= "<project>$this->_Project</project>\n";
-	$V .= "<copyright>$this->_Copyright</copyright>\n";
-	$V .= "<text>$this->_Text</text>\n";
 	break;
       case "HTML":
-	$V .= "$this->_Copyright<P>\n";
-	$V .= str_replace("\n","\n<P>\n",$this->_Text);
+	$V .= menu_to_1html(menu_find("Search",$MenuDepth),1);
+	$V .= "TBD";
 	break;
       case "Text":
-	$V .= "$this->_Project\n";
-	$V .= "$this->_Copyright\n";
-	$V .= str_replace("\n","\n\n",$this->_Text) . "\n";
 	break;
       default:
 	break;
       }
     if (!$this->OutputToStdout) { return($V); }
-    print("$V");
+    print($V);
     return;
-    }
+    } // Output()
 
   };
-$NewPlugin = new ui_about;
+$NewPlugin = new ui_search;
 $NewPlugin->Initialize();
 ?>

@@ -30,10 +30,11 @@ if (!isset($GlobalReady)) { exit; }
 
 class folder_move extends Plugin
   {
-  var $Name       ="folder_move";
-  var $Version    ="1.0";
-  var $MenuList   ="Organize::Folders::Move";
-  var $Dependency =array("db");
+  var $Name       = "folder_move";
+  var $Title      = "Move Folder";
+  var $Version    = "1.0";
+  var $MenuList   = "Organize::Folders::Move";
+  var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_WRITE;
 
   /*********************************************
@@ -87,8 +88,6 @@ class folder_move extends Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<H1>Move Folder</H1>\n";
-
 	/* If this is a POST, then process the request. */
 	$OldFolderId = GetParm('oldfolderid',PARM_INTEGER);
 	$TargetFolderId = GetParm('targetfolderid',PARM_INTEGER);

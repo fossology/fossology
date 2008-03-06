@@ -27,8 +27,9 @@ if (!isset($GlobalReady)) { exit; }
 class jobs_runningjobs extends Plugin
   {
   var $Name       = "runningjobs";
+  var $Title      = "Show Agent Status";
   var $Version    = "1.0";
-  var $MenuList   = "Tasks::Jobs::Show Running";
+  var $MenuList   = "Admin::Scheduler::Status";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;
 
@@ -71,27 +72,26 @@ class jobs_runningjobs extends Plugin
 	if (!is_array($Results)) { return; }
 
 	/* Put the results in a table */
-	$V .= "<div align='left'><small>";
 	$V .= menu_to_1html(menu_find("Jobs",$MenuDepth),1);
 	$V .= "<table border=1 cellpadding=0 width='100%'>\n";
-	$V .= "  <tr>\n";
+	$Headings .= "  <tr>\n";
 	$Uri=Traceback_uri() . '?mod=' . $this->Name;
 	$Ord = 'agent_status_date';
 	if (!strcmp($OrderBy,$Ord)) { $Rev = (!strcmp($OrderDir,"ASC") ? 'desc' : 'asc'); } else { $Rev='desc'; }
-	$V .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Update time</a></th>\n";
+	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Update time</a></th>\n";
 	$Ord = 'agent_status';
 	if (!strcmp($OrderBy,$Ord)) { $Rev = (!strcmp($OrderDir,"ASC") ? 'desc' : 'asc'); } else { $Rev='desc'; }
-	$V .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Status</a></th>\n";
+	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Status</a></th>\n";
 	$Ord = 'agent_fk';
 	if (!strcmp($OrderBy,$Ord)) { $Rev = (!strcmp($OrderDir,"ASC") ? 'desc' : 'asc'); } else { $Rev='desc'; }
-	$V .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Agent Name</a></th>\n";
+	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Agent Name</a></th>\n";
 	$Ord = 'agent_host';
 	if (!strcmp($OrderBy,$Ord)) { $Rev = (!strcmp($OrderDir,"ASC") ? 'desc' : 'asc'); } else { $Rev='desc'; }
-	$V .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Host</a></th>\n";
+	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Host</a></th>\n";
 	$Ord = 'agent_param';
 	if (!strcmp($OrderBy,$Ord)) { $Rev = (!strcmp($OrderDir,"ASC") ? 'desc' : 'asc'); } else { $Rev='desc'; }
-	$V .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Parameters</a></th>\n";
-	$V .= "  </tr>\n";
+	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Parameters</a></th>\n";
+	$Headings .= "  </tr>\n";
 
 	$BGColor=array(
 		"FAIL" => "red",
@@ -105,8 +105,12 @@ class jobs_runningjobs extends Plugin
 		"END" => "white"
 		);
 
+	$Count=0;
 	foreach($Results as $Val)
 	  {
+	  if ($Count % 16 == 0) { $V .= $Headings; }
+	  $Count++;
+
 	  $V .= "  <tr bgcolor='" . $BGColor[$Val['agent_status']] . "'>\n";
 	  $V .= "    <td>" .  ereg_replace("^(....-..-.. ..:..:..).*","\\1",$Val['record_update']) . "</td>\n";
 	  $V .= "    <td align=center>" . $Val['agent_status'] . "</td>\n";
@@ -120,7 +124,14 @@ class jobs_runningjobs extends Plugin
 	    }
 	  $V .= "    <td align=center>" . htmlentities($VV) . "</td>\n";
 	  $V .= "    <td align=center>" . htmlentities($Val['agent_host']) . "</td>\n";
-	  $V .= "    <td>" . htmlentities($Val['agent_param']) . "</td>\n";
+	  if ($Val['agent_status'] != 'FREE')
+		{
+		$V .= "    <td>" . htmlentities($Val['agent_param']) . "</td>\n";
+		}
+	  else
+		{
+		$V .= "    <td></td>\n";
+		}
 	  $V .= "  </tr>\n";
 	  }
 

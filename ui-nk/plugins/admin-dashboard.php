@@ -28,6 +28,7 @@ class dashboard extends Plugin
   {
   var $Name       = "dashboard";
   var $Version    = "1.0";
+  var $Title      = "Dashboard";
   var $MenuList   = "Admin::Dashboard";
   var $Dependency = array("db");
 

@@ -27,8 +27,9 @@ if (!isset($GlobalReady)) { exit; }
 class ui_browse extends Plugin
   {
   var $Name       = "browse";
+  var $Title      = "Browse";
   var $Version    = "1.0";
-  var $MenuList="Tasks::Browse";
+  var $MenuList   = "Browse";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;
 
@@ -40,22 +41,22 @@ class ui_browse extends Plugin
     $Upload = GetParm("upload",PARM_INTEGER);
     if (empty($Upload)) { return; }
 
-    // For the Browse menu, permit switching between detail and summary.
+    // For the Browse menu, permit switching between detail and simple.
     $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
-    menu_insert("Browse::[BREAK]",-1,"$URI&show=summary");
+    menu_insert("Browse::[BREAK]",-1,"$URI&show=simple");
     $Show = GetParm("show",PARM_STRING);
     switch($Show)
       {
+      default:
       case "detail":
-	menu_insert("Browse::Summary",-10,"$URI&show=summary");
+	menu_insert("Browse::Simple",-10,"$URI&show=simple");
 	menu_insert("Browse::Detail",-10);
 	$URI .= "&show=detail";
 	break;
-      case "summary":
-      default:
-	menu_insert("Browse::Summary",-10);
+      case "simple":
+	menu_insert("Browse::Simple",-10);
 	menu_insert("Browse::Detail",-10,"$URI&show=detail");
-	$URI .= "&show=summary";
+	$URI .= "&show=simple";
 	break;
       }
 
@@ -217,7 +218,7 @@ if (0) {
 
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     $V .= "<table border=1 width='100%'>";
-    $V .= "<tr><td valign='top'>\n";
+    $V .= "<tr><td valign='top' width='20%'>\n";
 
 	$V .= FolderListScript();
 	$V .= "<center><H3>Folder Navigation</H3></center>\n";
@@ -276,12 +277,12 @@ if (0) {
 
     switch(GetParm("show",PARM_STRING))
 	{
+	default:
 	case 'detail':
 		$Show='detail';
 		break;
-	case 'summary':
-	default:
-		$Show='summary';
+	case 'simple':
+		$Show='simple';
 		break;
 	}
 
@@ -290,19 +291,19 @@ if (0) {
       case "XML":
 	break;
       case "HTML":
-	/*************************/
-	/* Create the micro-menu */
-	/*************************/
-        $V .= "<div align='left'><small>";
-	$V .= menu_to_1html(menu_find("Browse",$MenuDepth),1);
-        $V .= "</small></div>\n";
-
 	$V .= "<font class='text'>\n";
 
 	/************************/
 	/* Show the folder path */
 	/************************/
-	$V .= Dir2Browse($this->Name,$Item,-1) . "<P />\n";
+	if (!empty($Item))
+	  {
+	  $V .= Dir2Browse($this->Name,$Item,-1,NULL,1,"Browse") . "\n";
+	  }
+	else if (!empty($Upload))
+	  {
+	  $V .= Dir2BrowseUpload($this->Name,$Upload,-1,NULL,1,"Browse") . "\n";
+	  }
 
 	/******************************/
 	/* Get the folder description */

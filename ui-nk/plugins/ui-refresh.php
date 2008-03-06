@@ -28,7 +28,6 @@ class ui_refresh extends Plugin
   {
   var $Name       = "refresh";
   var $Version    = "1.0";
-  var $Dependency = array("Default");
 
   /***********************************************************
    GetRefresh(): Generate a Refresh URL.
@@ -67,7 +66,7 @@ class ui_refresh extends Plugin
     $GoMod = GetParm("remod",PARM_STRING);
     $GoOpt = GetParm("reopt",PARM_STRING);
     $GoOpt = preg_replace("/--/","&",$GoOpt);
-    return($P->OutputRefresh($GoMod,$GoOpt));
+    return($P->Output($GoMod,$GoOpt));
     } // Output()
 
   /***********************************************************
