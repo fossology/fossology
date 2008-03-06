@@ -263,6 +263,7 @@ class Plugin
    ***********************************************************/
   function OutputOpen($Type,$ToStdout)
     {
+    global $Plugins;
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $this->OutputType=$Type;
     $this->OutputToStdout=$ToStdout;
@@ -274,28 +275,39 @@ class Plugin
 	break;
       case "HTML":
 	header('Content-type: text/html');
-	$V = "<html>\n";
+	$V = "";
+	if (($this->NoMenu == 0) && ($this->Name != "menus"))
+	  {
+	  $Menu = &$Plugins[plugin_find_id("menus")];
+	  $Menu->OutputSet($Type,$ToStdout);
+	  }
+	else { $Menu = NULL; }
+
+	/* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
+	$V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
+	// $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
+	// $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
+	// $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "xhtml1-strict.dtd">' . "\n";
+
+	$V .= "<html>\n";
 	$V .= "<head>\n";
 	if ($this->NoHeader == 0)
 	  {
-	  /* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
-	  $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
-	  // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
-	  // $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
+	  /** Known bug: DOCTYPE "should" be in the HEADER
+	      and the HEAD tags should come first.
+	      However, if I do that, then Internet Explorer (IE) won't
+	      display the popup CSS menu.
+	      I have no idea why...
+	   **/
 	  if (!empty($Title)) { $V .= "<title>" . htmlentities($Title) . "</title>\n"; }
 	  $V .= "<link rel='stylesheet' href='fossology.css'>\n";
+	  print $V; $V="";
+	  if (!empty($Menu)) { print $Menu->OutputCSS(); }
 	  $V .= "</head>\n";
+
 	  $V .= "<body class='text'>\n";
-	  if (($this->NoMenu == 0) && ($this->Name != "menus"))
-		{
-		global $Plugins;
-		$Menu = &$Plugins[plugin_find_id("menus")];
-		if (!empty($Menu))
-		  {
-		  $Menu->OutputSet($Type,$ToStdout);
-		  $Menu->Output($this->Title);
-		  }
-		}
+	  print $V; $V="";
+	  if (!empty($Menu)) { $Menu->Output($this->Title); }
 	  }
 	break;
       case "Text":
