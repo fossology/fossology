@@ -31,6 +31,8 @@ class ui_menu extends Plugin
   var $Version    = "1.0";
   var $MenuTarget = "treenav";
 
+  var $_CSSdone   = 0;	/* has the CSS been displayed? */
+
   function PostInitialize()
     {
     global $Plugins;
@@ -127,6 +129,111 @@ class ui_menu extends Plugin
     } // menu_html()
 
   /********************************************
+   OutputCSS(): Create the output CSS.
+   ********************************************/
+  function OutputCSS	()
+    {
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    $V = "";
+
+    $V .= "<style type=\"text/css\">\n";
+    /* Depth 0 is special: position is relative, colors are blue */
+    $Depth = 0;
+    $Label = "";
+    $Menu = menu_find("Main",$MenuDepth);
+    $Border = "border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px;";
+    $FOSScolor1 = "#c50830";
+    $FOSScolor2 = "#808080";
+    $FOSSbg1 = $FOSScolor2;
+    $FOSSbg2 = "white";
+
+    if ($Depth < $MenuDepth)
+	{
+	/** The "float:left" is needed to fix IE **/
+	  $V .= "\n/* CSS for Depth $Depth */\n";
+	$Label = "ul#menu-" . $Depth;
+	$V .= $Label . "\n";
+	$V .= "  { z-index:0; margin:0; padding:0px; list-style:none; background:$FOSSbg2; width:100%; height:24px; font:normal 10pt verdana, arial, helvetica;}\n";
+	$Label .= " li";
+	$V .= $Label . "\n";
+	$V .= "  { float:left; margin:0; padding:0px; display:block; position:relative; width:auto; border:0px solid #000; }\n";
+	$V .= $Label . " a:link,\n";
+	$V .= $Label . " a:visited\n";
+	$V .= "  { float:left; padding:4px 10px; text-decoration:none; color:black; background:$FOSSbg2; width:auto; display:block; }\n";
+	$V .= $Label . ":hover a,\n";
+	$V .= $Label . " a:hover,\n";
+	$V .= $Label . " a:active\n";
+	$V .= "  { float:left; padding:4px 10px; color:$FOSScolor1; background:$FOSSbg2; $Border width:auto; display:block; }\n";
+	$V .= $Label . " a span\n";
+	$V .= "  { float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
+	$Depth++;
+	}
+
+    /* Depth 1 is special: position is absolute. Left is 0, top is 24 */
+    if ($Depth < $MenuDepth)
+	{
+	$V .= "\n/* CSS for Depth $Depth */\n";
+	$V .= $Label . " ul#menu-" . $Depth . "\n";
+	$V .= "  { margin:0; padding:1px 0; list-style:none; display:none; visibility:hidden; left:0px; width:150px; position:absolute; top:24px; }\n";
+	$V .= $Label . ":hover ul#menu-" . $Depth . "\n";
+	$V .= "  { float:left; display:block; visibility:visible; }\n";
+	$Label .= " ul#menu-" . $Depth . " li";
+	$V .= $Label . "\n";
+	$V .= "  { z-index:$Depth; float:left; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
+	$V .= $Label . " a:link,\n";
+	$V .= $Label . " a:visited\n";
+	$V .= "  { z-index:$Depth; float:left; padding:4px 0px 4px 0px; color:black; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; visibility:visible; }\n";
+	$V .= $Label . ":hover a,\n";
+	$V .= $Label . " a:active,\n";
+	$V .= $Label . " a:hover\n";
+	$V .= "  { z-index:$Depth; float:left; padding:4px 0px 4px 0px; color:white; background:$FOSScolor1; width:150px; display:block; visibility:visible; }\n";
+	$V .= $Label . " a span\n";
+	$V .= "  { z-index:$Depth; float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
+	$Depth++;
+	}
+
+    /* Depth 2+ is recursive: position is absolute. Left is 150*(Depth-1), top is 0 */
+    for( ; $Depth < $MenuDepth; $Depth++)
+	{
+	$V .= "\n/* CSS for Depth $Depth */\n";
+	$V .= $Label . " ul#menu-" . $Depth . "\n";
+	$V .= "  { margin:0; padding:1px 0; list-style:none; display:none; visibility:hidden; left:152px; width:150px; position:absolute; top:-2px; }\n";
+	$V .= $Label . ":hover ul#menu-" . $Depth . "\n";
+	$V .= "  { float:left; display:block; visibility:visible; }\n";
+	$Label .= " ul#menu-" . $Depth . " li";
+	$V .= $Label . "\n";
+	$V .= "  { z-index:$Depth; float:left; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
+	$V .= $Label . " a:link,\n";
+	$V .= $Label . " a:visited\n";
+	$V .= "  { z-index:$Depth; float:left; padding:4px 0px 4px 0px; color:black; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; }\n";
+	$V .= $Label . ":hover a,\n";
+	$V .= $Label . " a:active,\n";
+	$V .= $Label . " a:hover\n";
+	$V .= "  { z-index:$Depth; float:left; padding:4px 0px 4px 0px; color:white; background:$FOSScolor1; width:150px; display:block; visibility:visible; }\n";
+	$V .= $Label . " a span\n";
+	$V .= "  { z-index:$Depth; float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
+	}
+    $V .= "</style>\n";
+
+    /* For IE's screwed up CSS: this defines "hover". */
+    $V .= "<!--[if lt IE 8]>\n";
+    $V .= "<style type='text/css' media='screen'>\n";
+    /** csshover.htc provides ":hover" support for IE **/
+    $V .= "body { behavior:url(csshover.htc); }\n";
+    /** table definition needed to get rid of extra space under items **/
+    for($i=1; $i < $MenuDepth; $i++)
+	{
+	$V .= "#menu-$i table {height:0px; border-collapse:collapse; margin:0; padding:0; }\n";
+	$V .= "#menu-$i td {height:0px; border:none; margin:0; padding:0; }\n";
+	}
+    $V .= "</style>\n";
+    $V .= "<![endif]-->\n";
+
+    $this->_CSSdone = 1;
+    return($V);
+    } // OutputCSS()
+
+  /********************************************
    Output(): Create the output.
    ********************************************/
   function Output($Title=NULL)
@@ -139,113 +246,18 @@ class ui_menu extends Plugin
       case "XML":
         break;
       case "HTML":
-	/* Start with the style sheet */
-	$V .= "<style type='text/css'>\n";
-	/* Depth 0 is special: position is relative, colors are blue */
-	$Depth = 0;
-	$Label = "";
+	if (! $this->_CSSdone) { $V .= $this->OutputCSS(); }
 	$Menu = menu_find("Main",$MenuDepth);
-	$Border = "border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px;";
-	$FOSScolor1 = "#c50830";
-	$FOSScolor2 = "#808080";
-	$FOSSbg1 = $FOSScolor2;
-	$FOSSbg2 = "white";
-	if ($Depth < $MenuDepth)
-	  {
-	  /** The "float:left" is needed to fix IE **/
-	  $V .= "\n/* CSS for Depth $Depth */\n";
-	  $Label = "ul#menu-" . $Depth;
-	  $V .= $Label . "\n";
-	  $V .= "  { z-index:0; margin:0; padding:0px; list-style:none; background:$FOSSbg2; width:100%; height:24px; font:normal 10pt verdana, arial, helvetica;}\n";
-	  $Label .= " li";
-	  $V .= $Label . "\n";
-	  $V .= "  { float:left; margin:0; padding:0px; display:block; position:relative; width:auto; border:0px solid #000; }\n";
-	  $V .= $Label . " a:link,\n";
-	  $V .= $Label . " a:visited\n";
-	  $V .= "  { float:left; padding:4px 10px; text-decoration:none; color:black; background:$FOSSbg2; width:auto; display:block; }\n";
-	  $V .= $Label . ":hover a,\n";
-	  $V .= $Label . " a:hover,\n";
-	  $V .= $Label . " a:active\n";
-	  $V .= "  { float:left; padding:4px 10px; color:$FOSScolor1; background:$FOSSbg2; $Border width:auto; display:block; }\n";
-	  $V .= $Label . " a span\n";
-	  $V .= "  { float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
-	  $Depth++;
-	  }
-
-	/* Depth 1 is special: position is absolute. Left is 0, top is 24 */
-	if ($Depth < $MenuDepth)
-	  {
-	  $V .= "\n/* CSS for Depth $Depth */\n";
-	  $V .= $Label . " ul#menu-" . $Depth . "\n";
-	  $V .= "  { z-index:1; margin:0; padding:1px 0; list-style:none; display:none; visibility:hidden; left:0px; width:150px; position:absolute; top:24px; }\n";
-	  $V .= $Label . ":hover ul#menu-" . $Depth . "\n";
-	  $V .= "  { float:left; display:block; visibility:visible; }\n";
-	  $Label .= " ul#menu-" . $Depth . " li";
-	  $V .= $Label . "\n";
-	  $V .= "  { float:left; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
-	  $V .= $Label . " a:link,\n";
-	  $V .= $Label . " a:visited\n";
-	  $V .= "  { float:left; padding:4px 0px 4px 4px; color:black; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; visibility:visible; }\n";
-	  $V .= $Label . ":hover a,\n";
-	  $V .= $Label . " a:active,\n";
-	  $V .= $Label . " a:hover\n";
-	  $V .= "  { float:left; padding:4px 0px 4px 4px; color:white; background:$FOSScolor1; width:150px; display:block; visibility:visible; }\n";
-	  $V .= $Label . " a span\n";
-	  $V .= "  { float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
-	  $Depth++;
-	  }
-
-	/* Depth 2+ is recursive: position is absolute. Left is 150*(Depth-1), top is 0 */
-	for( ; $Depth < $MenuDepth; $Depth++)
-	  {
-	  $V .= "\n/* CSS for Depth $Depth */\n";
-	  $V .= $Label . " ul#menu-" . $Depth . "\n";
-	  $V .= "  { z-index:$Depth; margin:0; padding:1px 0; list-style:none; display:none; visibility:hidden; left:150px; width:150px; position:absolute; top:-2px; }\n";
-	  $V .= $Label . ":hover ul#menu-" . $Depth . "\n";
-	  $V .= "  { float:left; display:block; visibility:visible; }\n";
-	  $Label .= " ul#menu-" . $Depth . " li";
-	  $V .= $Label . "\n";
-	  $V .= "  { float:left; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
-	  $V .= $Label . " a:link,\n";
-	  $V .= $Label . " a:visited\n";
-	  $V .= "  { float:left; padding:4px 0px 4px 4px; color:black; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; }\n";
-	  $V .= $Label . ":hover a,\n";
-	  $V .= $Label . " a:active,\n";
-	  $V .= $Label . " a:hover\n";
-	  $V .= "  { float:left; padding:4px 0px 4px 4px; color:white; background:$FOSScolor1; width:150px; display:block; visibility:visible; }\n";
-	  $V .= $Label . " a span\n";
-	  $V .= "  { float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
-	  }
-	$V .= "</style>\n";
-
-	/* For IE's screwed up CSS: this defines "hover". */
-	$V .= "<!--[if lt IE 8]>\n";
-	$V .= "<style type='text/css' media='screen'>\n";
-	/** csshover.htc provides ":hover" support for IE **/
-	$V .= "body { behavior:url(csshover.htc); }\n";
-	/** table definition needed to get rid of extra space under items **/
-// try "margin:0"
-// try td {border:none; margin:0; }
-	for($i=1; $i < $MenuDepth; $i++)
-	  {
-	  $V .= "#menu-$i table {height:0px; border-collapse:collapse; margin:0; padding:0; }\n";
-	  $V .= "#menu-$i td {height:0px; border:none; margin:0; padding:0; }\n";
-	  }
-	$V .= "</style>\n";
-	$V .= "<![endif]-->\n";
-
-	/* Then display the menu */
 	/** Same height at FOSSology logo **/
-	$V .= "<div style='background:$FOSSbg2; height:92px;'>";
 	$V .= $this->menu_html($Menu,0);
-	$V .= "<br /><table border=0 width='100%' style='float:left; position:absolute;'><tr>";
-	$V .= "<td><font size='+2'><b><center>$Title</center></b></font></td>";
+	$V .= "<br />";
+	$V .= "<font size='+2'><b>$Title</b></font>";
 
 	/* Handle login information */
 	if (plugin_find_id("auth") >= 0)
 	  {
 	  /* Width matches logo image */
-	  $V .= "<td width='150px' align='right' valign='bottom'>";
+	  $V .= "<div align='right'>";
 	  if (empty($_SESSION['User']))
 		{
 		$V .= "<small>[<a href='" . Traceback_uri() . "?mod=auth'>login</a>]</small>";
@@ -255,10 +267,9 @@ class ui_menu extends Plugin
 		$V .= "User: " . $_SESSION['User'] . " ";
 		$V .= "<small>[<a href='" . Traceback_uri() . "?mod=auth'>logout</a>]</small>";
 		}
-	  $V .= "</td></tr>";
+	  $V .= "</div>";
+	  $V .= "<hr />";
 	  }
-	$V .= "</table>";
-	$V .= "</div>";
         break;
       case "Text":
         break;
