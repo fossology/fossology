@@ -295,9 +295,8 @@ class Plugin
 	  {
 	  /** Known bug: DOCTYPE "should" be in the HEADER
 	      and the HEAD tags should come first.
-	      However, if I do that, then Internet Explorer (IE) won't
-	      display the popup CSS menu.
-	      I have no idea why...
+	      Also, IE will ignore <style>...</style> tags that are NOT
+	      in a <head>...</head> block.
 	   **/
 	  if (!empty($Title)) { $V .= "<title>" . htmlentities($Title) . "</title>\n"; }
 	  $V .= "<link rel='stylesheet' href='fossology.css'>\n";
