@@ -215,7 +215,7 @@ function Dir2Path($UploadtreePk, $UfilePk=-1)
  Dir2Browse(): given an uploadtree_pk and ufile_pk, return a
  string listing the browse paths.
  ************************************************************/
-function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL, $ShowBox=1)
+function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL)
 {
   global $Plugins;
   global $DB;
@@ -273,10 +273,32 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL, $ShowBox=1)
     }
   $V .= "</font>\n";
 
+  if (!empty($ShowMicro))
+    {
+    $MenuDepth = 0; /* unused: depth of micro menu */
+    $V .= menu_to_1html(menu_find($ShowMicro,$MenuDepth),1);
+    }
+
   if ($ShowBox)
     {
     $V .= "</div>\n";
     }
   return($V);
 } // Dir2Browse()
+
+/************************************************************
+ Dir2BrowseUpload(): given an upload_pk, return a string listing
+ the browse paths.
+ This calls Dir2Browse().
+ ************************************************************/
+function Dir2BrowseUpload ($Mod, $UploadPk, $UfilePk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL)
+{
+  global $DB;
+  /* Find the file associated with the upload */
+  $SQL = "SELECT uploadtree_pk FROM upload INNER JOIN uploadtree ON upload_fk = '$UploadPk' AND upload.ufile_fk = uploadtree.ufile_fk;";
+  $Results = $DB->Action($SQL);
+  $UploadtreePk = $Results[0]['uploadtree_pk'];
+  return(Dir2Browse($Mod,$UploadtreePk,$UfilePk,$LinkLast,$ShowBox,$ShowMicro));
+} // Dir2BrowseUpload()
+
 ?>
