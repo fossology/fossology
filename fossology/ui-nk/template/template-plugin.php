@@ -293,7 +293,7 @@ class Plugin
 		if (!empty($Menu))
 		  {
 		  $Menu->OutputSet($Type,$ToStdout);
-		  $Menu->Output();
+		  $Menu->Output($this->Title);
 		  }
 		}
 	  }

@@ -32,6 +32,7 @@ class menu
   {
   var $Name="";		// name of the menu item
   var $URI=NULL;	// URI for the plugin (everything after the "?mod=")
+  var $HTML=NULL;	// HTML to include (if provided, used in place of all else)
   var $Order=0;		// Used for ordering menu items
   var $Target=NULL;	// recommended name of window for showing results
   var $MaxDepth=0;	// How deep is SubMenu?
@@ -62,7 +63,7 @@ function menu_cmp(&$a,&$b)
  If $URI is blank, nothing is added.
  $LastOrder is used for grouping items in order.
  ***********************************************/
-function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$Depth)
+function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth)
 {
   $AddNew=0;
   $PathParts = explode("::",$Path,2);
@@ -106,7 +107,7 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$Depth)
   /* $M is set! See if we need to traverse submenus */
   if ($Order == -1)
     {
-    $Depth = menu_insert_r($M->SubMenu,$PathParts[1],$LastOrder,$Target,$URI,$Depth+1);
+    $Depth = menu_insert_r($M->SubMenu,$PathParts[1],$LastOrder,$Target,$URI,$HTML,$Depth+1);
     $NewDepth = $Depth + 1;
     if ($M->MaxDepth < $NewDepth)
 	{
@@ -119,6 +120,7 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$Depth)
     $M->Order = $Order;
     $M->Target = $Target;
     $M->URI = $URI;
+    $M->HTML = $HTML;
     }
 
   if ($AddNew == 1)
@@ -137,10 +139,10 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$Depth)
  menu_insert(): Given a Path, order level for the last
  item, and optional plugin name, insert the menu item.
  ***********************************************/
-function menu_insert($Path,$LastOrder=0,$URI=NULL,$Target=NULL)
+function menu_insert($Path,$LastOrder=0,$URI=NULL,$Target=NULL,$HTML=NULL)
 {
   global $MenuList;
-  menu_insert_r(&$MenuList,$Path,$LastOrder,$Target,$URI,0);
+  menu_insert_r(&$MenuList,$Path,$LastOrder,$Target,$URI,$HTML,0);
 } // menu_insert()
 
 /***********************************************
@@ -175,7 +177,7 @@ function menu_find($Name,&$MaxDepth,$Menu=NULL)
  If $ShowAll==0, then items without hyperlinks are hidden.
  This is commonly called the "micro-menu".
  ***********************************************/
-function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=1,$ShowAll=1)
+function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
 {
   $V = "";
   $Std = "";
@@ -236,8 +238,7 @@ function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=1,$ShowAll=1)
 	$V .= $Std;
 	$Std=NULL;
 	}
-  $V .= "<P />";
-  return($V);
+  return("<div align='right' style='padding:0px 5px 0px 5px'><small>$V</small></div>");
 } // menu_to_1html()
 
 /***********************************************

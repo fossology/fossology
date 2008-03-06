@@ -225,7 +225,9 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   $V .= "&nbsp;";
   if (!empty($Desc)) { $Title = 'title="' . $Desc . '"'; }
   else { $Title = ""; }
-  if (!empty($Browse)) { $V .= "<a $Title target='basenav' href='$Uri?mod=browse&folder=$ParentFolder'>"; }
+
+  if (plugin_find_id("basenav") >= 0) { $Target = "target='basenav'"; }
+  if (!empty($Browse)) { $V .= "<a $Title $Target href='$Uri?mod=browse&folder=$ParentFolder'>"; }
   if (!empty($Highlight) && ($Highlight == $ParentFolder))
     { $V .= "<font class='treetext' style='border: 1pt solid; color: red; font-weight: bold;'>"; }
   else
