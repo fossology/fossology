@@ -39,16 +39,28 @@ class search_file extends Plugin
   function GetUfileFromName($Filename)
     {
     global $DB;
+    $Max = 100;
     $Filename = str_replace("'","''",$Filename); // protect DB
+    $Terms = split("[[:space:]][[:space:]]*",$Filename);
     $SQL = "SELECT * FROM ufile
 	INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk
-	WHERE ufile_name like '$Filename';";
+	WHERE";
+    foreach($Terms as $Key => $T)
+	{
+	if ($Key > 0) { $SQL .= " AND"; }
+	$SQL .= " ufile_name like '$T'";
+	}
+    $SQL .= " LIMIT $Max;";
     $Results = $DB->Action($SQL);
     $V = "";
-    foreach($Results as $R)
+    if (count($Results) >= $Max)
+	{
+	$V .= "Too many results.  Returning the first " . count($Results) . ".<P />\n";
+	}
+    foreach($Results as $Key => $R)
 	{
 	if (empty($R['pfile_fk'])) { continue; }
-	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"view") . "<P />\n";
+	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"view",1,NULL,$Key+1) . "<P />\n";
 	}
     return($V);
     } // GetUfileFromName()
