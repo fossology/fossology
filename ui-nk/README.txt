@@ -10,11 +10,6 @@ a few other folks to work in it and make comments.
 
 If you have any comments or feedback, please let me know: Neal Krawetz
 
-Things that are known to not work right now:
-  - Menus: the CSS does not support IE6.  But IE7, Firefox, Safari, and
-    Opera all work.
-  - Lots of functionality is missing.  I am still building plugins.
-
 
 To use:
   - Run "make".  This will create the path_include php file.
