@@ -26,12 +26,12 @@ if (!isset($GlobalReady)) { exit; }
 
 class admin_upload_delete extends Plugin
 {
-  public $Name       = "admin_upload_delete";
-  public $Title      = "Delete Uploaded File";
-  public $MenuList   = "Organize::Uploads::Delete Uploaded File";
-  public $Version    = "1.0";
-  public $Dependency = array("db");
-  public $DBaccess   = PLUGIN_DB_DELETE;
+  var $Name       = "admin_upload_delete";
+  var $Title      = "Delete Uploaded File";
+  var $MenuList   = "Organize::Uploads::Delete Uploaded File";
+  var $Version    = "1.0";
+  var $Dependency = array("db");
+  var $DBaccess   = PLUGIN_DB_DELETE;
 
   /***********************************************************
    RegisterMenus(): Register additional menus.
@@ -91,7 +91,23 @@ class admin_upload_delete extends Plugin
 	    }
 	  }
 
-        $V .= "<form method='post'>\n"; // no url = this url
+	/* Create the AJAX (Active HTTP) javascript for doing the reply
+	   and showing the response. */
+	$V .= ActiveHTTPscript("Uploads");
+	$V .= "<script language='javascript'>\n";
+	$V .= "function Uploads_Reply()\n";
+	$V .= "  {\n";
+	$V .= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
+	$V .= "    {\n";
+	/* Remove all options */
+	$V .= "    document.formy.upload.innerHTML = Uploads.responseText;\n";
+	/* Add new options */
+	$V .= "    }\n";
+	$V .= "  }\n";
+	$V .= "</script>\n";
+
+	/* Build HTML form */
+	$V .= "<form name='formy' method='post'>\n"; // no url = this url
 	$V .= "Select the uploaded file to <em>delete</em>.\n";
 	$V .= "<ul>\n";
 	$V .= "<li>This will <em>delete</em> the upload file!\n";
@@ -99,22 +115,33 @@ class admin_upload_delete extends Plugin
 	$V .= "<li>All analysis only associated with the deleted upload file will also be deleted.\n";
 	$V .= "<li>THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.\n";
 	$V .= "</ul>\n";
-        $V .= "<P>Select the uploaded file to delete:  \n";
-        $V .= "<BR><select name='upload' size='10'>\n";
-	$List = FolderListUploads();
+
+	$V .= "<P>Select the uploaded file to delete:<P>\n";
+	$V .= "<ol>\n";
+	$V .= "<li>Select the folder containing the file to delete: ";
+	$V .= "<select name='folder' ";
+	$V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
+	$V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + document.formy.folder.value)'>\n";
+	$V .= FolderListOption(-1,0);
+	$V .= "</select><P />\n";
+
+	$V .= "<li>Select the uploaded project to delete:";
+	$V .= "<BR><select name='upload' size='10'>\n";
+	$List = FolderListUploads(-1);
 	foreach($List as $L)
 	  {
 	  $V .= "<option value='" . $L['upload_pk'] . "'>";
-	  $V .= htmlentities($L['folder']) . " :: " . htmlentities($L['name']);
+	  $V .= htmlentities($L['name']);
 	  if (!empty($L['upload_desc']))
 	    {
 	    $V .= " (" . htmlentities($L['upload_desc']) . ")";
 	    }
 	  $V .= "</option>\n";
 	  }
-        $V .= "</select><P />\n";
-        $V .= "<input type='submit' value='Delete!'>\n";
-        $V .= "</form>\n";
+	$V .= "</select><P />\n";
+	$V .= "</ol>\n";
+	$V .= "<input type='submit' value='Delete!'>\n";
+	$V .= "</form>\n";
 	break;
       case "Text":
 	break;

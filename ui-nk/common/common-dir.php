@@ -215,7 +215,8 @@ function Dir2Path($UploadtreePk, $UfilePk=-1)
  Dir2Browse(): given an uploadtree_pk and ufile_pk, return a
  string listing the browse paths.
  ************************************************************/
-function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL)
+function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
+		     $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1)
 {
   global $Plugins;
   global $DB;
@@ -226,22 +227,27 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL, $ShowBox=1, 
     $V .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
     }
 
+  if ($Enumerate >= 0)
+    {
+    $V .= "<font size='+2'>" . number_format($Enumerate,0,"",",") . ":</font>";
+    }
+
   $Opt = Traceback_parm_keep(array("folder","show"));
   $Uri = Traceback_uri() . "?mod=$Mod";
 
   $Path = Dir2Path($UploadtreePk,$UfilePk);
-  $FirstPath=0;
   $Last = &$Path[count($Path)-1];
 
-  $V .= "<font class='text'>\n";
+  $V .= "<font class='text'>\n<b>Folder</b>: ";
   $List = FolderGetFromUpload($Path[0]['upload_fk']);
   $Uri2 = Traceback_uri() . "?mod=browse" . Traceback_parm_keep(array("show"));
   for($i=0; $i < count($List); $i++)
     {
     $Folder = $List[$i]['folder_pk'];
     $FolderName = htmlentities($List[$i]['folder_name']);
-    $V .= "<b>/<a href='$Uri2&folder=$Folder'>$FolderName</a></b> ";
+    $V .= "<b><a href='$Uri2&folder=$Folder'>$FolderName</a></b>/ ";
     }
+  $FirstPath=1;
   foreach($Path as $P)
     {
     if (empty($P['ufile_name'])) { continue; }

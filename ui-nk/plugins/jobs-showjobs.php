@@ -48,7 +48,7 @@ class jobs_showjobs extends Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    menu_insert("Main::Jobs::Queue::Details",$this->MenuOrder,$this->Name . "&show=detail",$this->MenuTarget);
+    menu_insert("Main::Jobs::Queue::Details",$this->MenuOrder -1,$this->Name . "&show=detail",$this->MenuTarget);
 
     // For the Browse menu, permit switching between detail and summary.
     $Show = GetParm("show",PARM_STRING);
@@ -62,11 +62,11 @@ class jobs_showjobs extends Plugin
       {
       case "detail":
         menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History");
-        menu_insert("JobDetails::Detail",-2);
+        menu_insert("JobDetails::Detail",-3);
         break;
       case "summary":
         menu_insert("JobDetails::Summary",-2);
-        menu_insert("JobDetails::Detail",-2,"$URI&show=detail&history=$History");
+        menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History");
 	break;
       case "job":
         menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History");
@@ -281,7 +281,7 @@ class jobs_showjobs extends Plugin
 	if (!empty($Row['upload_desc'])) $JobName = $Row['upload_desc'];
 	else if (!empty($Row['upload_filename'])) { $JobName = $Row['upload_filename']; }
 	else { $JobName = "[Default]"; }
-	$V .= "<tr><th colspan=4 bgcolor='lightsteelblue'>$JobName</th></tr>\n";
+	$V .= "<tr><th colspan=4>$JobName</font></th></tr>\n";
 	}
       if ($Job != $Row['jq_job_fk'])
 	{
@@ -303,11 +303,11 @@ class jobs_showjobs extends Plugin
 
       if (($Color == $this->Colors['Queued']) && ($Row['jq_itemsprocessed'] == 0))
 	{
-	$V .= "  <td></td>\n";
+	$V .= "  <td bgcolor='$Color'></td>\n";
 	}
       else
 	{
-	$V .= "  <td><table class='text' border=0 width='100%'><tr><td>";
+	$V .= "  <td bgcolor='$Color'><table class='text' border=0 width='100%'><tr><td bgcolor='$Color'>";
 	$t = number_format($Row['jq_itemsprocessed'], 0, "", ",");
 	if ($t == 1) { $V .= "  <td>$t item<br />\n"; }
 	else { $V .= "  <td>$t items<br />\n"; }
@@ -315,7 +315,7 @@ class jobs_showjobs extends Plugin
 	$V .= "Elapsed scheduled:<br />\n";
 	$V .= "Elapsed running:</td>\n";
 
-	$V .= "    <td align='right'><br />";
+	$V .= "    <td bgcolor='$Color'align='right'><br />";
 	$t = floor($Row['jq_elapsedtime'] / (60*60*24));
 	if ($t == 0) { $Time = ""; }
 	else if ($t == 1) { $Time = "$t day "; }
@@ -333,7 +333,7 @@ class jobs_showjobs extends Plugin
 	}
 
       $endtime = substr($Row['jq_endtime'],0,16);
-      $V .= "  <td>$endtime</td>\n";
+      $V .= "  <td bgcolor='$Color'>$endtime</td>\n";
       }
     $V .= "</table>\n";
     return($V);
@@ -429,7 +429,7 @@ class jobs_showjobs extends Plugin
       $V .= "</td>\n";
       $V .= "  <td bgcolor='$Color'>" . $Row['jq_type'] . "</td>\n";
       $endtime = substr($Row['jq_endtime'],0,16);
-      $V .= "  <td>$endtime</td>\n";
+      $V .= "  <td bgcolor='$Color'>$endtime</td>\n";
       }
     $V .= "</table>\n";
     return($V);

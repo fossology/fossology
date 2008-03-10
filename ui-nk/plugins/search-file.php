@@ -29,7 +29,7 @@ class search_file extends Plugin
   var $Name       = "search_file";
   var $Title      = "Search for File";
   var $Version    = "1.0";
-  var $MenuList   = "";
+  var $MenuList   = "Search";
   var $Dependency = array("db","view","browse");
   var $DBaccess   = PLUGIN_DB_READ;
 
@@ -58,11 +58,8 @@ class search_file extends Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    $Upload = GetParm("upload",PARM_INTEGER);
-    if (empty($Upload)) { return; }
-
-    $URI = $this->Name . Traceback_uri() . "?mod=" . $this->Name;
-    menu_insert("Search::Filename",-1,$URI);
+    $URI = $this->Name;
+    menu_insert("Search::Filename",0,$URI);
     } // RegisterMenus()
 
   /***********************************************************
@@ -78,6 +75,7 @@ class search_file extends Plugin
       case "XML":
         break;
       case "HTML":
+	$V .= menu_to_1html(menu_find("Search",$MenuDepth),1);
 
 	$Filename = GetParm("filename",PARM_STRING);
 
@@ -106,7 +104,6 @@ class search_file extends Plugin
     print("$V");
     return;
     } // Output()
-
 
   };
 $NewPlugin = new search_file;

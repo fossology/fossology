@@ -174,7 +174,7 @@ class ui_license extends Plugin
 	if ($IsContainer) { $VF .= "<b>"; };
 	if ($HasHref) { $VF .= "</a>"; }
 	$VF .= "</td><td>[" . number_format($LicCount,0,"",",") . "&nbsp;";
-	$VF .= "<a href='javascript:;' onclick=\"LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen')\">";
+	$VF .= "<a href='javascript:;' onclick=\"LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
 	$VF .= "license" . ($LicCount == 1 ? "" : "s");
 	$VF .= "</a>";
 	$VF .= "]</td>";
@@ -196,15 +196,24 @@ class ui_license extends Plugin
     /****************************************/
     /* List the licenses */
     $VH .= "<table border=1 width='100%'>\n";
-    $VH .= "<tr><th width='10%'>Count</th><th>License</th>\n\n";
+    $SFbL = plugin_find_id("search_file_by_license");
+    $VH .= "<tr><th width='10%'>Count</th>";
+    if ($SFbL >= 0) { $VH .= "<th width='10%'>Files</th>"; }
+    $VH .= "<th>License</th>\n";
     arsort($LicsTotal);
     foreach($LicsTotal as $Key => $Val)
       {
       if (is_int($Key))
 	{
 	$VH .= "<tr><td align='right'>$Val</td>";
+	if ($SFbL >= 0)
+	  {
+	  $VH .= "<td align='center'><a href='" . Traceback_uri() . "?mod=search_file_by_license&item=$Item&lic=$Key'>Show</a></td>";
+	  }
 	$VH .= "<td id='LicGroup-$Key'>";
-	$VH .= "<a href='javascript:;' onclick=\"LicColor('LicGroup-$Key','Lic-','" . trim($LicGID2Item[$Key]) . "','yellow')\">";
+	$Uri = Traceback_uri() . "?mod=license_listing&item=$Item&lic=$Key";
+	$VH .= "<a href='javascript:;' onclick=\"LicColor('LicGroup-$Key','Lic-','" . trim($LicGID2Item[$Key]) . "','yellow'); ";
+	$VH .= "\">";
 	$VH .= $LicGID2Name[$Key];
 	$VH .= "</a>";
 	$VH .= "</td></tr>\n";
@@ -248,7 +257,8 @@ class ui_license extends Plugin
     /* Combine VF and VH */
     $V .= "<table border=0 width='100%'>\n";
     $V .= "<tr><td valign='top' width='50%'>$VH</td><td valign='top'>$VF</td></tr>\n";
-    $V .= "</table>\n<hr />\n";
+    $V .= "</table>\n";
+    $V .= "<hr />\n";
     $Time = time() - $Time;
     $V .= "<small>Elaspsed time: $Time seconds</small>\n";
     $V .= $VJ;

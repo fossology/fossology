@@ -241,14 +241,22 @@ if (0) {
           {
           if (empty($Row['upload_pk'])) { continue; }
           $Desc = htmlentities($Row['upload_desc']);
+	  $UploadPk = $Row['upload_pk'];
           if (empty($Desc)) { $Desc = "<i>No description</i>"; }
           $Sql = "SELECT ufile_name FROM ufile WHERE ufile_pk = " . $Row['ufile_fk'] . ";";
           $UResults = $DB->Action($Sql);
           $Name = $UResults[0]['ufile_name'];
+	  $Sql2 = "SELECT count(*) AS count FROM uploadtree WHERE upload_fk = '$UploadPk';";
+          $SResults = $DB->Action($Sql2);
+	  $ItemCount = number_format($SResults[0]['count'], 0, "", ",");
           $V .= "<tr><td>";
-          $V .= "<a href='$Uri&upload=" . $Row['upload_pk'] . "&folder=$Folder&show=$Show'>";
+          $V .= "<a href='$Uri&upload=$UploadPk&folder=$Folder&show=$Show'>";
           $V .= $Name . "/";
-          $V .= "</a><br>" . $Desc . "</td>\n";
+          $V .= "</a><br>" . $Desc;
+          $V .= "<br>Contains $ItemCount ";
+	  if ($ItemCount != "1") { $V .= "items."; }
+	  else { $V .= "item."; }
+	  $V .= "</td>\n";
           $V .= "<td align='right'>" . substr($Row['upload_ts'],0,16) . "</td></tr>\n";
           $V .= "<tr><td colspan=2>&nbsp;</td></tr>\n";
           }

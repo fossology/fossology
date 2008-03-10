@@ -34,8 +34,8 @@ class tbd extends Plugin
 
   function RegisterMenus()
     {
-    menu_insert("Search::Search::Basic Search (TBD)",1);
-    menu_insert("Search::Search::Advance Search (TBD)",0);
+    menu_insert("Search::Basic Search (TBD)",1);
+    menu_insert("Search::Advance Search (TBD)",0);
     menu_insert("Main::Organize::Uploads::Edit Properties (TBD)");
     menu_insert("Main::Organize::Uploads::Move Folder (TBD)");
     menu_insert("Main::Jobs::Analyze::Code Compare (TBD)");
@@ -51,7 +51,6 @@ class tbd extends Plugin
     menu_insert("Main::Admin::Database::View Table (TBD)");
     menu_insert("Main::Admin::Database::Stats (TBD)");
     menu_insert("Main::Upload::From Mount (TBD)");
-    menu_insert("Main::Jobs::TBD::TBD::TBD");
     }
 };
 $NewPlugin = new tbd;

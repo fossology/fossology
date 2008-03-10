@@ -71,7 +71,7 @@ function LicenseGetAll(&$UploadtreePk, &$Lics)
   global $LicenseGetAll_Prepared;
   if (!$LicenseGetAll_Prepared)
     {
-    $DB->Prepare("LicenseGetAll",'SELECT uploadtree_pk,ufile_mode,ufile.pfile_fk,lic_fk FROM uploadtree INNER JOIN ufile ON ufile_fk = ufile_pk AND parent = $1 LEFT OUTER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk;');
+    $DB->Prepare("LicenseGetAll",'SELECT uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk FROM uploadtree INNER JOIN ufile ON ufile_fk = ufile_pk AND parent = $1 LEFT OUTER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk;');
     $LicenseGetAll_Prepared = 1;
     }
   /* Find every item under this UploadtreePk... */
@@ -95,6 +95,52 @@ function LicenseGetAll(&$UploadtreePk, &$Lics)
     }
   return;
 } // LicenseGetAll()
+
+/************************************************************
+ LicenseGetAllFiles(): Returns all files under a tree that
+ contain the same license.
+ Returns NULL if no files.
+ NOTE: This is recursive!
+ ************************************************************/
+function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic)
+{
+  global $Plugins;
+  global $DB;
+  if (empty($DB)) { return; }
+  if (empty($UploadtreePk)) { return NULL; }
+
+  global $LicenseGetAll_Prepared;
+  if (!$LicenseGetAll_Prepared)
+    {
+    $DB->Prepare("LicenseGetAll",'SELECT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk,lic_id
+	FROM uploadtree
+	INNER JOIN ufile ON ufile_fk = ufile_pk
+	AND parent = $1
+	LEFT OUTER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk
+	LEFT OUTER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
+	;');
+    $LicenseGetAll_Prepared = 1;
+    }
+
+  /* Find every item under this UploadtreePk... */
+  $Results = $DB->Execute("LicenseGetAll",array($UploadtreePk));
+  if (!empty($Results) && (count($Results) > 0))
+    {
+    foreach($Results as $R)
+      {
+      $LicFk = $R['lic_fk'];
+      if (!empty($LicFk) && ($R['lic_id'] == $WantLic))
+	{
+	array_push($Lics,$R);
+	}
+      if (Iscontainer($R['ufile_mode']))
+	{
+	LicenseGetAllFiles($R['uploadtree_pk'],$Lics,$WantLic);
+	}
+      }
+    }
+  return;
+} // LicenseGetAllFiles()
 
 /************************************************************
  LicenseHist(): Given an artifact directory (uploadtree_pk),
