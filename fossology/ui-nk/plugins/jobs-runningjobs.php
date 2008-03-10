@@ -94,13 +94,13 @@ class jobs_runningjobs extends Plugin
 	$Headings .= "  </tr>\n";
 
 	$BGColor=array(
-		"FAIL" => "red",
+		"FAIL" => "#FF6666", // "red",
 		"FREE" => "white",
 		"FREEING" => "white",
 		"PREPARING" => "yellow",
 		"SPAWNED" => "yellow",
-		"READY" => "limegreen",
-		"RUNNING" => " cornflowerblue",
+		"READY" => "#99FF99", // "limegreen",
+		"RUNNING" => "#99CCFF", // "cornflowerblue",
 		"DONE" => "white",
 		"END" => "white"
 		);

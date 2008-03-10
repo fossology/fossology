@@ -36,11 +36,11 @@ class jobs_showjobs extends Plugin
 
   var $Colors=array(
 	"Queued" => "white",
-	"Scheduled" => "limegreen",
-	"Running" => "cornflowerblue",
+	"Scheduled" => "#99FF99", // "limegreen",
+	"Running" => "#99CCFF", // "cornflowerblue",
 	"Finished" => "lightgray",
-	"Blocked" => "orange",
-	"Failed" => "red"
+	"Blocked" => "#FFCC66", // "orange",
+	"Failed" => "#FF6666" // "red"
 	);
 
   /***********************************************************
