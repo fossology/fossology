@@ -141,11 +141,26 @@ class ui_menu extends Plugin
     $Depth = 0;
     $Label = "";
     $Menu = menu_find("Main",$MenuDepth);
-    $Border = "border-color:#888 #888 #000 #000; border-width:1px 2px 2px 1px;";
+    $Border = "border-color:#CCC #CCC #CCC #CCC; border-width:1px 1px 1px 1px;";
+    $Padding = "padding:4px 0px 4px 4px;";
     $FOSScolor1 = "#c50830";
     $FOSScolor2 = "#808080";
-    $FOSSbg1 = $FOSScolor2;
-    $FOSSbg2 = "white";
+    $FOSSbg = "white";
+
+    $FOSSfg1 = "black";
+    $FOSSbg1 = "white";
+    $FOSSfg1h = $FOSScolor1; // highlight colors
+    $FOSSbg1h = "beige";
+
+    $FOSSfg2 = "black";
+    $FOSSbg2 = "beige";
+    $FOSSfg2h = $FOSScolor1; // highlight colors
+    $FOSSbg2h = "beige";
+
+    $FOSSfg3 = "black";
+    $FOSSbg3 = "beige";
+    $FOSSfg3h = $FOSScolor1; // highlight colors
+    $FOSSbg3h = "beige";
 
     if ($Depth < $MenuDepth)
 	{
@@ -153,19 +168,19 @@ class ui_menu extends Plugin
 	  $V .= "\n/* CSS for Depth $Depth */\n";
 	$Label = "ul#menu-" . $Depth;
 	$V .= $Label . "\n";
-	$V .= "  { z-index:0; margin:0; padding:0px; list-style:none; background:$FOSSbg2; width:100%; height:24px; font:normal 10pt verdana, arial, helvetica;}\n";
+	$V .= "  { z-index:0; margin:0; padding:0px; list-style:none; background:$FOSSbg1; width:100%; height:24px; font:normal 10pt verdana, arial, helvetica; font-weight: bold; }\n";
 	$Label .= " li";
 	$V .= $Label . "\n";
 	$V .= "  { float:left; margin:0; padding:0px; display:block; position:relative; width:auto; border:0px solid #000; }\n";
 	$V .= $Label . " a:link,\n";
 	$V .= $Label . " a:visited\n";
-	$V .= "  { float:left; padding:4px 10px; text-decoration:none; color:black; background:$FOSSbg2; width:auto; display:block; }\n";
+	$V .= "  { float:left; padding:4px 10px; text-decoration:none; color:$FOSSfg1; background:$FOSSbg1; width:auto; display:block; }\n";
 	$V .= $Label . ":hover a,\n";
 	$V .= $Label . " a:hover,\n";
 	$V .= $Label . " a:active\n";
-	$V .= "  { float:left; padding:4px 10px; color:$FOSScolor1; background:$FOSSbg2; $Border width:auto; display:block; }\n";
+	$V .= "  { float:left; padding:4px 10px; color:$FOSSfg1h; background:$FOSSbg1h; $Border width:auto; display:block; }\n";
 	$V .= $Label . " a span\n";
-	$V .= "  { float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
+	$V .= "  { float:left; position:absolute; top:0; left:135px; font-size:12pt; }\n";
 	$Depth++;
 	}
 
@@ -174,21 +189,21 @@ class ui_menu extends Plugin
 	{
 	$V .= "\n/* CSS for Depth $Depth */\n";
 	$V .= $Label . " ul#menu-" . $Depth . "\n";
-	$V .= "  { margin:0; padding:1px 0; list-style:none; display:none; visibility:hidden; left:0px; width:150px; position:absolute; top:24px; }\n";
+	$V .= "  { margin:0; padding:0px 0; list-style:none; display:none; visibility:hidden; left:0px; width:150px; position:absolute; top:24px; font-weight: bold; }\n";
 	$V .= $Label . ":hover ul#menu-" . $Depth . "\n";
 	$V .= "  { float:left; display:block; visibility:visible; }\n";
 	$Label .= " ul#menu-" . $Depth . " li";
 	$V .= $Label . "\n";
-	$V .= "  { z-index:$Depth; float:left; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
+	$V .= "  { z-index:$Depth; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
 	$V .= $Label . " a:link,\n";
 	$V .= $Label . " a:visited\n";
-	$V .= "  { z-index:$Depth; float:left; padding:4px 0px 4px 0px; color:black; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; visibility:visible; }\n";
+	$V .= "  { z-index:$Depth; $Padding color:$FOSSfg2; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; visibility:visible; }\n";
 	$V .= $Label . ":hover a,\n";
 	$V .= $Label . " a:active,\n";
 	$V .= $Label . " a:hover\n";
-	$V .= "  { z-index:$Depth; float:left; padding:4px 0px 4px 0px; color:white; background:$FOSScolor1; width:150px; display:block; visibility:visible; }\n";
+	$V .= "  { z-index:$Depth; $Padding color:$FOSSfg2h; background:$FOSSbg2h; width:150px; display:block; visibility:visible; }\n";
 	$V .= $Label . " a span\n";
-	$V .= "  { z-index:$Depth; float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
+	$V .= "  { text-align:left; }\n";
 	$Depth++;
 	}
 
@@ -197,21 +212,21 @@ class ui_menu extends Plugin
 	{
 	$V .= "\n/* CSS for Depth $Depth */\n";
 	$V .= $Label . " ul#menu-" . $Depth . "\n";
-	$V .= "  { margin:0; padding:1px 0; list-style:none; display:none; visibility:hidden; left:152px; width:150px; position:absolute; top:-2px; }\n";
+	$V .= "  { margin:0; padding:1px 0; list-style:none; display:none; visibility:hidden; left:156px; width:150px; position:absolute; top:-1px; font-weight: bold; }\n";
 	$V .= $Label . ":hover ul#menu-" . $Depth . "\n";
 	$V .= "  { float:left; display:block; visibility:visible; }\n";
 	$Label .= " ul#menu-" . $Depth . " li";
 	$V .= $Label . "\n";
-	$V .= "  { z-index:$Depth; float:left; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
+	$V .= "  { z-index:$Depth; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
 	$V .= $Label . " a:link,\n";
 	$V .= $Label . " a:visited\n";
-	$V .= "  { z-index:$Depth; float:left; padding:4px 0px 4px 0px; color:black; background:$FOSSbg2; border:1px solid #000; $Border width:150px; display:block; }\n";
+	$V .= "  { z-index:$Depth; $Padding color:$FOSSfg3; background:$FOSSbg2h; border:1px solid #000; $Border width:150px; display:block; }\n";
 	$V .= $Label . ":hover a,\n";
 	$V .= $Label . " a:active,\n";
 	$V .= $Label . " a:hover\n";
-	$V .= "  { z-index:$Depth; float:left; padding:4px 0px 4px 0px; color:white; background:$FOSScolor1; width:150px; display:block; visibility:visible; }\n";
+	$V .= "  { z-index:$Depth; $Padding color:$FOSSfg3h; background:$FOSSbg3h; width:150px; display:block; visibility:visible; }\n";
 	$V .= $Label . " a span\n";
-	$V .= "  { z-index:$Depth; float:left; position:absolute; top:0; left:135px; font-size:12pt; color:black; }\n";
+	$V .= "  { text-align:left; }\n";
 	}
     $V .= "</style>\n";
 
@@ -260,12 +275,12 @@ class ui_menu extends Plugin
 	  $V .= "<div align='right'>";
 	  if (empty($_SESSION['User']))
 		{
-		$V .= "<small>[<a href='" . Traceback_uri() . "?mod=auth'>login</a>]</small>";
+		$V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>login</b></a></small>";
 		}
 	  else
 		{
-		$V .= "User: " . $_SESSION['User'] . " ";
-		$V .= "<small>[<a href='" . Traceback_uri() . "?mod=auth'>logout</a>]</small>";
+		$V .= "<small>User:</small> " . $_SESSION['User'] . "<br>";
+		$V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
 		}
 	  $V .= "</div>";
 	  $V .= "<hr />";

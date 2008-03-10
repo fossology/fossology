@@ -227,13 +227,12 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   else { $Title = ""; }
 
   if (plugin_find_id("basenav") >= 0) { $Target = "target='basenav'"; }
-  if (!empty($Browse)) { $V .= "<a $Title $Target href='$Uri?mod=browse&folder=$ParentFolder'>"; }
+  if (!empty($Browse)) { $V .= "<a $Title $Target class='treetext' href='$Uri?mod=browse&folder=$ParentFolder'>"; }
   if (!empty($Highlight) && ($Highlight == $ParentFolder))
-    { $V .= "<font class='treetext' style='border: 1pt solid; color: red; font-weight: bold;'>"; }
-  else
-    { $V .= "<font class='treetext'>"; }
+    { $V .= "<font style='border: 1pt solid; color:red; font-weight:bold;'>"; }
   $V .= htmlentities($Name);
-  $V .= "</font>";
+  if (!empty($Highlight) && ($Highlight == $ParentFolder))
+    { $V .= "</font>"; }
   if (!empty($Browse)) { $V .= "</a>"; }
   $V .= "<br>\n";
   if (isset($Results[0]['folder_pk']))
@@ -257,6 +256,8 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
  NOTE: If there is a recursive loop in the folder table, then
  this will loop INFINITELY.
  ***********************************************************/
+$FolderGetFromUpload_1_Prepared=0;
+$FolderGetFromUpload_2_Prepared=0;
 function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
 {
   global $DB;
@@ -265,23 +266,39 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
   if ($Stop == -1) { $Stop = FolderGetTop(); }
   if ($Folder == $Stop) { return; }
 
+  $SQL = "";
+  $Parm = "";
   if ($Folder < 0)
     {
     /* Mode 2 means child_id is an upload_pk */
-    $SQL = "SELECT parent_fk,folder_name FROM foldercontents
-	INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
-	WHERE foldercontents.foldercontents_mode = 2
-	AND foldercontents.child_id = '$Uploadpk' LIMIT 1;";
-    } 
+    global $FolderGetFromUpload_1_Prepared;
+    $SQL = "FolderGetFromUpload_1";
+    $Parm = $Uploadpk;
+    if (!$FolderGetFromUpload_1_Prepared)
+	{
+	$DB->Prepare($SQL,"SELECT parent_fk,folder_name FROM foldercontents
+			  INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
+			  AND foldercontents.foldercontents_mode = 2
+			  WHERE foldercontents.child_id = $1 LIMIT 1;");
+	$FolderGetFromUpload_1_Prepared=1;
+	}
+    }
   else
     {
     /* Mode 1 means child_id is a folder_pk */
-    $SQL = "SELECT parent_fk,folder_name FROM foldercontents
-	INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
-	WHERE foldercontents.foldercontents_mode = 1
-	AND foldercontents.child_id = '$Folder' LIMIT 1;";
+    global $FolderGetFromUpload_2_Prepared;
+    $SQL = "FolderGetFromUpload_2";
+    $Parm = $Folder;
+    if (!$FolderGetFromUpload_2_Prepared)
+	{
+	$DB->Prepare($SQL,"SELECT parent_fk,folder_name FROM foldercontents
+			  INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
+			  AND foldercontents.foldercontents_mode = 1
+			  WHERE foldercontents.child_id = $1 LIMIT 1;");
+	$FolderGetFromUpload_2_Prepared=1;
+	}
     }
-  $Results = $DB->Action($SQL);
+  $Results = $DB->Execute($SQL,array($Parm));
   $R = &$Results[0];
   if (empty($R['parent_fk'])) { return; }
   $V = array();
@@ -297,7 +314,42 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
 } // FolderGetFromUpload()
 
 /***********************************************************
- FolderListUploads(): Returns an array of all uploads, upload_pk,
+ FolderListUploads(): Returns an array of all uploads and upload_pk
+ for a given folder.
+ This does NOT recurse.
+ The array is sorted by upload name.
+ Folders may be empty!
+ ***********************************************************/
+function FolderListUploads($ParentFolder=-1)
+  {
+  global $DB;
+  if (empty($DB)) { return; }
+  if (empty($ParentFolder)) { return; }
+  if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
+  $List=array();
+
+  /* Get list of uploads */
+  /** mode 1<<1 = upload_fk **/
+  $SQL = "SELECT * FROM foldercontents
+	INNER JOIN upload ON upload.upload_pk = foldercontents.child_id
+	AND foldercontents.parent_fk = '$ParentFolder'
+	AND foldercontents.foldercontents_mode = 2
+	INNER JOIN ufile ON upload.ufile_fk = ufile.ufile_pk
+	ORDER BY ufile.ufile_name,upload.upload_desc;";
+  $Results = $DB->Action($SQL);
+  foreach($Results as $R)
+    {
+    if (empty($R['upload_pk'])) { continue; }
+    $New['upload_pk'] = $R['upload_pk'];
+    $New['upload_desc'] = $R['upload_desc'];
+    $New['name'] = $R['ufile_name'];
+    array_push($List,$New);
+    }
+  return($List);
+  } // FolderListUploads()
+
+/***********************************************************
+ FolderListUploadsRecurse(): Returns an array of all uploads, upload_pk,
  and folders, starting from the ParentFolder.
  The array is sorted by folder and upload name.
  Folders that are empty do not show up.
@@ -305,12 +357,12 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
  NOTE: If there is a recursive loop in the folder table, then
  this will loop INFINITELY.
  ***********************************************************/
-function FolderListUploads($ParentFolder=-1, $FolderPath=NULL)
+function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL)
   {
   global $DB;
   if (empty($DB)) { return; }
   if (empty($ParentFolder)) { return; }
-  if ($ParentFolder == "-1") { return(FolderListUploads(FolderGetTop(),$FolderPath)); }
+  if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
   $List=array();
 
   /* Get list of uploads */
@@ -332,7 +384,7 @@ function FolderListUploads($ParentFolder=-1, $FolderPath=NULL)
     $New['folder'] = $FolderPath . "/" . $R['folder_name'];
     array_push($List,$New);
     }
-  
+
   /* Get list of subfolders and recurse */
   /** mode 1<<0 = folder_pk **/
   $SQL = "SELECT A.child_id AS id,B.folder_name AS folder,C.folder_name AS subfolder
@@ -347,11 +399,11 @@ function FolderListUploads($ParentFolder=-1, $FolderPath=NULL)
     {
     if (empty($R['id'])) { continue; }
     /* RECURSE! */
-    $SubList = FolderListUploads($R['id'],$FolderPath . "/" . $R['folder']);
+    $SubList = FolderListUploadsRecurse($R['id'],$FolderPath . "/" . $R['folder']);
     $List = array_merge($List,$SubList);
     }
 
   /* Return findings */
   return($List);
-  } // FolderListUploads()
+  } // FolderListUploadsRecurse()
 ?>

@@ -33,9 +33,18 @@
   border-style: none none dotted none;
   }
 
-a
+table { border-spacing:0; }
+
+th { background:lightsteelblue; }
+
+a, a:visited, a:link
   {
   text-decoration:none;
+  color:blue;
+  }
+a:active, a:hover
+  {
+  color:red;
   }
 
 div
@@ -51,7 +60,7 @@ table
   }
 
 /* For tree views */
-.tree, .tree a
+.tree, a.tree
   {
   height:24px;
   border-style: none;
@@ -60,6 +69,10 @@ table
   font:normal 10pt verdana, arial, helvetica;
   text-decoration:none;
   color:black;
+  }
+a.tree:active, a.tree:hover
+  {
+  color:red;
   }
 
 .treehide
@@ -106,7 +119,7 @@ table
   color:gray;
   }
 
-.treetext
+.treetext, a.treetext, a.treetext:link, a.treetext:visited
   {
   height:24px;
   border-style: none;
@@ -116,6 +129,10 @@ table
   text-decoration:none; 
   color:black;
   }
+a.treetext:active, a.treetext:hover
+  {
+  color:red;
+  }
 
 /* Fun bug: When using the DTD, you need to define html and body
    to be 100% AND div must be used.  Otherwise, iframe becomes
@@ -123,7 +140,7 @@ table
 html, body
   {
   margin:0;
-  padding:0;
+  padding:.25em;
   height:100%;
   background-color:white;
   }

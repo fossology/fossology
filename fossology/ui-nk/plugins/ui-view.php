@@ -195,7 +195,7 @@ class ui_view extends Plugin
 	if (!empty($H['RefURL']))
 		{
 		// $V .= "<a href='" . $H['RefURL'] . "' target='_blank'>ref</a>";
-		$V .= "<a href='javascript:;' onClick=\"javascript:window.open('" . $H['RefURL'] . "','License','width=600,height=400,toolbar=no,scrollbars=yes');\">ref</a>";
+		$V .= "<a href='javascript:;' onClick=\"javascript:window.open('" . $H['RefURL'] . "','License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">ref</a>";
 		}
 	$V .= "</td>\n";
 

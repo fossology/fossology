@@ -72,8 +72,9 @@ class Plugin
   var $Title="";  // used for HTML title tags and window menu bars
   var $PluginLevel=10; /* user for sorting plugins -- higher comes first after dependencies are met */
   var $DBaccess=PLUGIN_DB_NONE; /* what kind of access is needed? */
-  var $NoHeader=0;
-  var $NoMenu=0;
+  var $NoMenu=0;	/* 1 = Don't show the HTML menu at the top of page */
+  var $NoHeader=0;	/* 1 = Don't show the HTML header at the top of page */
+  var $NoHTML=0;	/* 1 = Don't add any HTML to the output */
 
   /*****
    This array lists plugin dependencies by name and initialization order.
@@ -275,6 +276,7 @@ class Plugin
 	break;
       case "HTML":
 	header('Content-type: text/html');
+	if ($this->NoHTML) { return; }
 	$V = "";
 	if (($this->NoMenu == 0) && ($this->Name != "menus"))
 	  {
@@ -315,7 +317,7 @@ class Plugin
 	break;
       }
     if (!$this->OutputToStdout) { return($V); }
-    print "$V";
+    print $V;
     return;
     } // OutputOpen()
 
@@ -339,7 +341,8 @@ class Plugin
 	$V = "</xml>\n";
 	break;
       case "HTML":
-	if (!$NoHeader)
+	if ($this->NoHTML) { return; }
+	if (!$this->NoHeader)
 	  {
 	  $V = "</body>\n";
 	  $V .= "</html>\n";
@@ -351,7 +354,7 @@ class Plugin
 	break;
       }
     if (!$this->OutputToStdout) { return($V); }
-    print "$V";
+    print $V;
     return;
     } // OutputClose()
 
@@ -380,7 +383,7 @@ class Plugin
 	break;
       }
     if (!$this->OutputToStdout) { return($V); }
-    print "$V";
+    print $V;
     return;
     } // OutputSet()
 
@@ -407,7 +410,7 @@ class Plugin
 	break;
       }
     if (!$this->OutputToStdout) { return($V); }
-    print "$V";
+    print $V;
     return;
     } // OutputUnSet()
 
@@ -438,7 +441,7 @@ class Plugin
 	break;
       }
     if (!$this->OutputToStdout) { return($V); }
-    print "$V";
+    print $V;
     return;
     } // Output()
 
