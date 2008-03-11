@@ -99,8 +99,8 @@ class jobs_runningjobs extends Plugin
 		"FREEING" => "white",
 		"PREPARING" => "yellow",
 		"SPAWNED" => "yellow",
-		"READY" => "#99FF99", // "limegreen",
-		"RUNNING" => "#99CCFF", // "cornflowerblue",
+		"READY" => "#99FFFF", // "limegreen",
+		"RUNNING" => "#99FF99", // "cornflowerblue",
 		"DONE" => "white",
 		"END" => "white"
 		);
