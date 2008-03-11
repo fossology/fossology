@@ -66,7 +66,7 @@ class search_file_by_license extends Plugin
 	$Results = $DB->Action("SELECT * FROM agent_lic_raw WHERE lic_pk = '$LicPk';");
 	$LicName = htmlentities($Results[0]['lic_name']);
 	if (empty($LicName)) { return; }
-	$V .= "The following files contain the license '<b>$LicName</b>'.<P />\n";
+	$V .= "The following files contain the license '<b>$LicName</b>'.\n";
 	/* Load licenses */
 	$Lics = array();
 	LicenseGetAllFiles($UploadTreePk,$Lics,$LicPk);
@@ -74,14 +74,15 @@ class search_file_by_license extends Plugin
 	$Count = count($Lics);
 	for($i=0; $i < $Count; $i++)
 	  {
+	  $V .= "<P />\n";
 	  $L = &$Lics[$i];
 	  if (Isdir($L['ufile_mode']))
 	    {
-	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"license",1,NULL,$i+1) . "<P />\n";
+	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"license",1,NULL,$i+1) . "\n";
 	    }
 	  else
 	    {
-	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"view-license",1,NULL,$i+1) . "<P />\n";
+	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"view-license",1,NULL,$i+1) . "\n";
 	    }
 	  }
 	$V .= "<hr>\n";
