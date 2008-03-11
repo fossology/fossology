@@ -129,7 +129,7 @@ function DirGetNonArtifact($UploadtreePk)
 function _DirCmp($a,$b)
 {
   return(strcmp($a['ufile_name'],$b['ufile_name']));
-}
+} // _DirCmp()
 
 /************************************************************
  DirGetList(): Given a directory (uploadtree_pk),
@@ -175,11 +175,16 @@ function DirGetList($Upload,$UploadtreePk)
  Dir2Path(): given an uploadtree_pk, return an array containing
  the path.  Each element in the path is an array containing
  ufile and uploadtree information.
+ The path begins with the upload file.
  ************************************************************/
+$Dir2Path_1_Prepared = 0;
+$Dir2Path_2_Prepared = 0;
 function Dir2Path($UploadtreePk, $UfilePk=-1)
 {
   global $Plugins;
   global $DB;
+  global $Dir2Path_1_Prepared;
+  global $Dir2Path_2_Prepared;
   if (empty($DB)) { return; }
 
   $Path = array();	// return path array
@@ -190,17 +195,26 @@ function Dir2Path($UploadtreePk, $UfilePk=-1)
   /* Add the ufile first (if it exists) */
   if ($UfilePk >= 0)
     {
-    $Sql = "SELECT * FROM uploadtree LEFT JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk WHERE ufile_pk = $UfilePk LIMIT 1;";
-    $Results = $DB->Action($Sql);
+    if (!$Dir2Path_1_Prepared)
+	{
+	$DB->Prepare("Dir2Path_1","SELECT * FROM uploadtree LEFT JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk WHERE ufile_pk = $1 LIMIT 1;");
+	$Dir2Path_1_Prepared = 1;
+	}
+    $Results = $DB->Execute("Dir2Path_1",array($UfilePk));
     $Row = $Results[0];
     array_push($Path,$Row);
     }
 
+  if (!$Dir2Path_2_Prepared)
+    {
+    $DB->Prepare("Dir2Path_2","SELECT * FROM uploadtree LEFT JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk WHERE uploadtree_pk = $1 LIMIT 1;");
+    $Dir2Path_2_Prepared = 1;
+    }
+
   while(!empty($UploadtreePk))
     {
-    $Sql = "SELECT * FROM uploadtree LEFT JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk WHERE uploadtree_pk = $UploadtreePk LIMIT 1;";
-    $Results = $DB->Action($Sql);
-    $Row = $Results[0];
+    $Results = $DB->Execute("Dir2Path_2",array($UploadtreePk));
+    $Row = &$Results[0];
     if (!empty($Row['ufile_name']) && !Isartifact($Row['ufile_mode']) && ($UfilePk != $Row['ufile_pk']))
 	{
 	$Row['uploadtree_pk'] = DirGetNonArtifact($Row['uploadtree_pk']);
@@ -208,7 +222,8 @@ function Dir2Path($UploadtreePk, $UfilePk=-1)
 	}
     $UploadtreePk = $Row['parent'];
     }
-  return(array_reverse($Path,false));
+  $Path = array_reverse($Path,false);
+  return($Path);
 } // Dir2Path()
 
 /************************************************************
@@ -238,6 +253,7 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
   $Path = Dir2Path($UploadtreePk,$UfilePk);
   $Last = &$Path[count($Path)-1];
 
+  /* Get the folder list for the upload */
   $V .= "<font class='text'>\n<b>Folder</b>: ";
   $List = FolderGetFromUpload($Path[0]['upload_fk']);
   $Uri2 = Traceback_uri() . "?mod=browse" . Traceback_parm_keep(array("show"));
@@ -247,7 +263,19 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
     $FolderName = htmlentities($List[$i]['folder_name']);
     $V .= "<b><a href='$Uri2&folder=$Folder'>$FolderName</a></b>/ ";
     }
-  $FirstPath=1;
+
+  $FirstPath=1; /* every firstpath belongs on a new line */
+
+  /* Store the upload, itself */
+  if ((count($Path) > 1) || ($UploadtreePk == $Path[0]['uploadtree_pk']))
+    {
+    $Upload = $Path[0]['upload_fk'];
+    $UploadName = htmlentities($Path[0]['ufile_name']);
+    $V .= "<b><a href='$Uri2&folder=$Folder&upload=$Upload'>$UploadName</a></b>";
+    $FirstPath=0;
+    }
+
+  /* Show the path within the upload */
   foreach($Path as $P)
     {
     if (empty($P['ufile_name'])) { continue; }
@@ -268,14 +296,17 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
 	}
     else
 	{
-	if ($P != $Last) { $V .= "<br>\n&nbsp;&nbsp;"; }
+        if (!$FirstPath && Iscontainer($P['ufile_mode']))
+	  {
+	  $V .= "<br>\n&nbsp;&nbsp;";
+	  }
 	$V .= "<b>" . $P['ufile_name'] . "</b>";
 	}
     if (!empty($LinkLast) || ($P != $Last))
 	{
 	$V .= "</a>";
 	}
-    $FirstPath=0;
+    $FirstPath = 0;
     }
   $V .= "</font>\n";
 
