@@ -208,16 +208,9 @@ class ui_license extends Plugin
 	$VH .= "<tr><td align='right'>$Val</td>";
 	if ($SFbL >= 0)
 	  {
-	  if ($Val <= 100)
-	    {
-	    $VH .= "<td align='center'><a href='";
-	    $VH .= Traceback_uri();
-	    $VH .= "?mod=search_file_by_license&item=$Item&lic=$Key'>Show</a></td>";
-	    }
-	  else
-	    {
-	    $VH .= "<td></td>";
-	    }
+	  $VH .= "<td align='center'><a href='";
+	  $VH .= Traceback_uri();
+	  $VH .= "?mod=search_file_by_license&item=$Item&lic=$Key'>Show</a></td>";
 	  }
 	$VH .= "<td id='LicGroup-$Key'>";
 	$Uri = Traceback_uri() . "?mod=license_listing&item=$Item&lic=$Key";

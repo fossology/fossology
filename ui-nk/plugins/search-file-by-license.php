@@ -50,6 +50,8 @@ class search_file_by_license extends Plugin
     global $Plugins;
     global $DB;
     $Time = time();
+    $Max = 50;
+
     switch($this->OutputType)
       {
       case "XML":
@@ -57,34 +59,55 @@ class search_file_by_license extends Plugin
       case "HTML":
 	$UploadTreePk = GetParm("item",PARM_INTEGER);
 	$LicPk = GetParm("lic",PARM_INTEGER);
+	$Page = GetParm("page",PARM_INTEGER);
 	if (empty($UploadTreePk) || empty($LicPk))
 		{
 		return;
 		}
+	if (empty($Page)) { $Page=0; }
+	$Offset = $Page * $Max;
 
 	/* Get License Name */
-	$Results = $DB->Action("SELECT * FROM agent_lic_raw WHERE lic_pk = '$LicPk';");
+	$Results = $DB->Action("SELECT * FROM agent_lic_raw WHERE lic_id = '$LicPk' LIMIT 1;");
 	$LicName = htmlentities($Results[0]['lic_name']);
 	if (empty($LicName)) { return; }
 	$V .= "The following files contain the license '<b>$LicName</b>'.\n";
+
 	/* Load licenses */
 	$Lics = array();
-	LicenseGetAllFiles($UploadTreePk,$Lics,$LicPk);
+	$M = $Max;
+	$O = $Offset;
+	LicenseGetAllFiles($UploadTreePk,$Lics,$LicPk,$M,$O);
+
 	/* Save the license results */
 	$Count = count($Lics);
+
+	/* Get the page menu */
+	if (($Count >= $Max) || ($Page > 0))
+	  {
+	  $VM = "<P />\n" . MenuEndlessPage($Page, ($Count >= $Max)) . "<P />\n";
+	  $V .= $VM;
+	  }
+	else
+	  {
+	  $VM = "";
+	  }
+
 	for($i=0; $i < $Count; $i++)
 	  {
 	  $V .= "<P />\n";
 	  $L = &$Lics[$i];
+	  $Pos = $Offset + $i + 1;
 	  if (Isdir($L['ufile_mode']))
 	    {
-	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"license",1,NULL,$i+1) . "\n";
+	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"license",1,NULL,$Pos) . "\n";
 	    }
 	  else
 	    {
-	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"view-license",1,NULL,$i+1) . "\n";
+	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"view-license",1,NULL,$Pos) . "\n";
 	    }
 	  }
+	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
 	$V .= "<small>Elaspsed time: $Time seconds</small>\n";
