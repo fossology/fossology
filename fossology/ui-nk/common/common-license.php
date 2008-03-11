@@ -112,10 +112,9 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic)
   global $LicenseGetAll_Prepared;
   if (!$LicenseGetAll_Prepared)
     {
-    $DB->Prepare("LicenseGetAll",'SELECT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk,lic_id
+    $DB->Prepare("LicenseGetAll",'SELECT DISTINCT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk,lic_id
 	FROM uploadtree
-	INNER JOIN ufile ON ufile_fk = ufile_pk
-	AND parent = $1
+	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = $1
 	LEFT OUTER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk
 	LEFT OUTER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
 	;');
