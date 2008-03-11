@@ -102,42 +102,66 @@ function LicenseGetAll(&$UploadtreePk, &$Lics)
  Returns NULL if no files.
  NOTE: This is recursive!
  ************************************************************/
-function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic)
+$LicenseGetAllFiles_1_Prepared = 0;
+$LicenseGetAllFiles_2_Prepared = 0;
+function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
 {
   global $Plugins;
   global $DB;
   if (empty($DB)) { return; }
   if (empty($UploadtreePk)) { return NULL; }
 
-  global $LicenseGetAll_Prepared;
-  if (!$LicenseGetAll_Prepared)
+  global $LicenseGetAllFiles_1_Prepared;
+  global $LicenseGetAllFiles_2_Prepared;
+
+  if (!$LicenseGetAllFiles_1_Prepared)
     {
-    $DB->Prepare("LicenseGetAll",'SELECT DISTINCT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk,lic_id
+    /* SQL to get all files with a specific license */
+    $DB->Prepare("LicenseGetAllFiles_1",'SELECT DISTINCT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk,lic_id
 	FROM uploadtree
 	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = $1
-	LEFT OUTER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk
-	LEFT OUTER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
+	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk
+	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
+	AND agent_lic_raw.lic_id = $2
+	ORDER BY ufile.ufile_pk
 	;');
-    $LicenseGetAll_Prepared = 1;
+    $LicenseGetAllFiles_1_Prepared = 1;
+    }
+
+  if (!$LicenseGetAllFiles_2_Prepared)
+    {
+    /* SQL to get all containers for recursing */
+    $Bit = 1<<29;
+    $DB->Prepare("LicenseGetAllFiles_2","SELECT uploadtree_pk
+	FROM uploadtree
+	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = $1
+	AND ufile_mode & $Bit != 0
+	ORDER BY ufile.ufile_pk
+	;");
+    $LicenseGetAllFiles_2_Prepared = 1;
     }
 
   /* Find every item under this UploadtreePk... */
-  $Results = $DB->Execute("LicenseGetAll",array($UploadtreePk));
-  if (!empty($Results) && (count($Results) > 0))
+  $Results = $DB->Execute("LicenseGetAllFiles_1",array($UploadtreePk,$WantLic));
+  foreach($Results as $R)
     {
-    foreach($Results as $R)
+    if (empty($R['pfile_fk'])) { continue; }
+    if ($Offset <= 0)
       {
-      $LicFk = $R['lic_fk'];
-      if (!empty($LicFk) && ($R['lic_id'] == $WantLic))
-	{
-	array_push($Lics,$R);
-	}
-      if (Iscontainer($R['ufile_mode']))
-	{
-	LicenseGetAllFiles($R['uploadtree_pk'],$Lics,$WantLic);
-	}
+      array_push($Lics,$R);
+      $Max--;
+      if ($Max <= 0) { return; }
       }
+    else { $Offset--; }
     }
+
+  /* Find the items to recurse on */
+  $Results = $DB->Execute("LicenseGetAllFiles_2",array($UploadtreePk));
+  foreach($Results as $R)
+	{
+	LicenseGetAllFiles($R['uploadtree_pk'],$Lics,$WantLic,$Max,$Offset);
+	if ($Max <= 0) { return; }
+	}
   return;
 } // LicenseGetAllFiles()
 

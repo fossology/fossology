@@ -45,6 +45,46 @@ class menu
 $MenuList=array();
 $MenuMaxDepth=0;	// how deep is the tree (for UI display)
 
+/***********************************************************
+ MenuEndlessPage(): Create a "next" page menu.
+ This function assumes the end number is unknown.  (Hence, "endless".)
+ Returns string containing menu.
+ ***********************************************************/
+function MenuEndlessPage      ($Page,$Next=1)
+  {
+  $V = "<font class='text'><center>";
+  $Uri = preg_replace("/&page=[^&]*/","",Traceback());
+  $Uri .= "&filename=" . GetParm("filename",PARM_STRING);
+
+  /* Create first page */
+  if ($Page > 0)
+        {
+        $V .= "<a href='$Uri&page=0'>[First]</a> ";
+        }
+
+  /* Create previous list page */
+  for($i = $Page-10; $i < $Page; $i++)
+        {
+        if ($i >= 0)
+          {
+          $V .= "<a href='$Uri&page=$i'>" . ($i+1) . "</a> ";
+          }
+        }
+
+  /* Show current page number */
+  $V .= ($Page+1);
+
+  /* Create next page */
+  if ($Next)
+        {
+        $i = $Page+1;
+        $V .= " <a href='$Uri&page=$i'>" . ($i+1) . "</a>";
+        $V .= " <a href='$Uri&page=$i'>[Next]</a>";
+        }
+  $V .= "</center></font>";
+  return($V);
+  } // MenuEndlessPage()
+
 /*****************************************
  menu_cmp(): Compare two menu items for sorting.
  *****************************************/

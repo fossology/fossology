@@ -36,10 +36,10 @@ class search_file extends Plugin
   /***********************************************************
    GetUfileFromName(): Given a pfile_pk, return all ufiles.
    ***********************************************************/
-  function GetUfileFromName($Filename)
+  function GetUfileFromName($Filename,$Page)
     {
     global $DB;
-    $Max = 100;
+    $Max = 50;
     $Filename = str_replace("'","''",$Filename); // protect DB
     $Terms = split("[[:space:]][[:space:]]*",$Filename);
     $SQL = "SELECT * FROM ufile
@@ -50,29 +50,47 @@ class search_file extends Plugin
 	if ($Key > 0) { $SQL .= " AND"; }
 	$SQL .= " ufile_name like '$T'";
 	}
-    $SQL .= " ORDER BY pfile_fk LIMIT $Max;";
+    $Offset = $Page * $Max;
+    $SQL .= " ORDER BY pfile_fk,ufile_pk LIMIT $Max OFFSET $Offset;";
     $Results = $DB->Action($SQL);
     $V = "";
     $Count = count($Results);
-    if ($Count >= $Max)
+
+    if (($Page > 0) || ($Count >= $Max))
+      {
+      $VM = MenuEndlessPage($Page, ($Count >= $Max)) . "<P />\n";
+      $V .= $VM;
+      }
+    else
+      {
+      $VM = "";
+      }
+
+    if ($Count == 0)
 	{
-	$V .= "Too many results.  Returning the first ${Count}.<P />\n";
+	$V .= "No results.\n";
+	return($V);
 	}
+
     $LastPfilePk = -1;
     for($i=0; $i < $Count; $i++)
 	{
 	$R = &$Results[$i];
-	if ($R['pfile_fk'] != $LastPfilePk) { $V .= "<P />\n"; }
-	$LastPfilePk = $R['pfile_fk'];
 	if (IsDir($R['ufile_mode']))
 	  {
-	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"browse",1,NULL,$i+1) . "\n";
+	  $V .= "<P />\n";
+	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"browse",1,NULL,$Page*$Max + $i+1) . "\n";
 	  }
 	else
 	  {
-	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"view",1,NULL,$i+1) . "\n";
+	  if ($R['pfile_fk'] != $LastPfilePk) { $V .= "<P />\n"; }
+	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"view",1,NULL,$Page*$Max + $i+1) . "\n";
+	  $LastPfilePk = $R['pfile_fk'];
 	  }
 	}
+
+    /* put page menu at the bottom, too */
+    if (!empty($VM)) { $V .= "<P />\n" . $VM; }
     return($V);
     } // GetUfileFromName()
 
@@ -101,9 +119,12 @@ class search_file extends Plugin
 	$V .= menu_to_1html(menu_find("Search",$MenuDepth),1);
 
 	$Filename = GetParm("filename",PARM_STRING);
+	$Page = GetParm("page",PARM_INTEGER);
+	$Uri = preg_replace("/&filename=[^&]*/","",Traceback());
+	$Uri = preg_replace("/&page=[^&]*/","",$Uri);
 
 	$V .= "You can use '%' as a wild-card.\n";
-	$V .= "<form method='post'>\n";
+	$V .= "<form action='$Uri' method='POST'>\n";
 	$V .= "<ul>\n";
 	$V .= "<li>Enter the filename to find:<P>";
 	$V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
@@ -113,9 +134,10 @@ class search_file extends Plugin
 
 	if (!empty($Filename))
 	  {
+	  if (empty($Page)) { $Page = 0; }
 	  $V .= "<hr>\n";
 	  $V .= "<H2>Files matching " . htmlentities($Filename) . "</H2>\n";
-	  $V .= $this->GetUfileFromName($Filename);
+	  $V .= $this->GetUfileFromName($Filename,$Page);
 	  }
         break;
       case "Text":
