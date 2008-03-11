@@ -35,12 +35,12 @@ class jobs_showjobs extends Plugin
   var $DBaccess   = PLUGIN_DB_READ;
 
   var $Colors=array(
-	"Queued" => "white",
-	"Scheduled" => "#99FF99", // "limegreen",
-	"Running" => "#99CCFF", // "cornflowerblue",
+	"Queued" => "#FFFFCC",	// "white-ish",
+	"Scheduled" => "#99FFFF", // "blue-ish",
+	"Running" => "#99FF99",	// "green",
 	"Finished" => "lightgray",
-	"Blocked" => "#FFCC66", // "orange",
-	"Failed" => "#FF6666" // "red"
+	"Blocked" => "#FFCC66",	// "orange",
+	"Failed" => "#FF6666"	// "red"
 	);
 
   /***********************************************************
@@ -281,8 +281,9 @@ class jobs_showjobs extends Plugin
 	if (!empty($Row['upload_desc'])) $JobName = $Row['upload_desc'];
 	else if (!empty($Row['upload_filename'])) { $JobName = $Row['upload_filename']; }
 	else { $JobName = "[Default]"; }
-	$V .= "<tr><th colspan=4>$JobName</font></th></tr>\n";
+	$V .= "<tr><th colspan=4 style='background:#202020;color:white;'>$JobName</font></th></tr>\n";
 	}
+
       if ($Job != $Row['jq_job_fk'])
 	{
 	$Job = $Row['jq_job_fk'];
@@ -409,7 +410,7 @@ class jobs_showjobs extends Plugin
 	if (!empty($Row['upload_desc'])) { $JobName = $Row['upload_desc']; }
 	else if (!empty($Row['upload_filename'])) { $JobName = $Row['upload_filename']; }
 	else { $JobName = "[Default]"; }
-	$V .= "<tr><th colspan=3 bgcolor='lightsteelblue'>$JobName</th></tr>\n";
+	$V .= "<tr><th colspan=3 style='background:#202020;color:white;'>$JobName</th></tr>\n";
 	}
       if ($Job != $Row['jq_job_fk'])
 	{
