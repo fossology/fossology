@@ -119,20 +119,21 @@ class dashboard extends Plugin
       case "HTML":
 	$V .= "<H2>Database Contents</H2>\n";
 	$V .= "<table border=1>\n";
+	$V .= "<tr><th>Metric</th><th>Total</th></tr>\n";
 	$Results = $DB->Action("SELECT count(*) AS val FROM upload;");
-	$V .= "<tr><td>Number of unique uploads</td>";
+	$V .= "<tr><td>Unique Uploads</td>";
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$Results = $DB->Action("SELECT count(*) AS val FROM pfile;");
-	$V .= "<tr><td>Number of unique extracted files</td>";
+	$V .= "<tr><td>Unique Extracted Files</td>";
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$Results = $DB->Action("SELECT count(*) AS val FROM uploadtree;");
-	$V .= "<tr><td>Number of extracted names</td>";
+	$V .= "<tr><td>Extracted Names</td>";
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$Results = $DB->Action("SELECT count(*) AS val FROM agent_lic_raw;");
-	$V .= "<tr><td>Number of known license templates</td>";
+	$V .= "<tr><td>Known License Templates</td>";
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$Results = $DB->Action("SELECT count(*) AS val FROM agent_lic_meta;");
-	$V .= "<tr><td>Number of identified licenses</td>";
+	$V .= "<tr><td>Identified Licenses</td>";
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$V .= "</table>\n";
 
