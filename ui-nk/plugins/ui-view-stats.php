@@ -83,11 +83,18 @@ class ui_view_info extends Plugin
     $Results = $DB->Action($SQL);
     if (count($Results) > 0)
 	{
-	$V .= "This file appears in the following alternate locations:\n";
+	$V .= "This exact file appears in the following alternate locations:\n";
         foreach($Results as $R)
           {
           if (empty($R['pfile_fk'])) { continue; }
-          $V .= "<P />" . Dir2Browse("browse",$R['uploadtree_pk'],-1,"view") . "\n";
+	  if (Isdir($R['ufile_mode']))
+	    {
+	    $V .= "<P />" . Dir2Browse("browse",$R['uploadtree_pk'],-1,"browse") . "\n";
+	    }
+	  else
+	    {
+	    $V .= "<P />" . Dir2Browse("browse",$R['uploadtree_pk'],-1,"view") . "\n";
+	    }
           }
 	}
     else

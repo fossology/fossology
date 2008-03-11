@@ -71,10 +71,18 @@ class search_file_by_license extends Plugin
 	$Lics = array();
 	LicenseGetAllFiles($UploadTreePk,$Lics,$LicPk);
 	/* Save the license results */
-	foreach($Lics as $Key => $L)
+	$Count = count($Lics);
+	for($i=0; $i < $Count; $i++)
 	  {
-	  if (empty($L['pfile_fk'])) { continue; }
-	  $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"view-license",1,NULL,$Key+1) . "<P />\n";
+	  $L = &$Lics[$i];
+	  if (Isdir($L['ufile_mode']))
+	    {
+	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"license",1,NULL,$i+1) . "<P />\n";
+	    }
+	  else
+	    {
+	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"view-license",1,NULL,$i+1) . "<P />\n";
+	    }
 	  }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;

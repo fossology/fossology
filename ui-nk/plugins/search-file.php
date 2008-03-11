@@ -50,17 +50,28 @@ class search_file extends Plugin
 	if ($Key > 0) { $SQL .= " AND"; }
 	$SQL .= " ufile_name like '$T'";
 	}
-    $SQL .= " LIMIT $Max;";
+    $SQL .= " ORDER BY pfile_fk LIMIT $Max;";
     $Results = $DB->Action($SQL);
     $V = "";
-    if (count($Results) >= $Max)
+    $Count = count($Results);
+    if ($Count >= $Max)
 	{
-	$V .= "Too many results.  Returning the first " . count($Results) . ".<P />\n";
+	$V .= "Too many results.  Returning the first ${Count}.<P />\n";
 	}
-    foreach($Results as $Key => $R)
+    $LastPfilePk = -1;
+    for($i=0; $i < $Count; $i++)
 	{
-	if (empty($R['pfile_fk'])) { continue; }
-	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"view",1,NULL,$Key+1) . "<P />\n";
+	$R = &$Results[$i];
+	if ($R['pfile_fk'] != $LastPfilePk) { $V .= "<P />\n"; }
+	$LastPfilePk = $R['pfile_fk'];
+	if (IsDir($R['ufile_mode']))
+	  {
+	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"browse",1,NULL,$i+1) . "\n";
+	  }
+	else
+	  {
+	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"view",1,NULL,$i+1) . "\n";
+	  }
 	}
     return($V);
     } // GetUfileFromName()
