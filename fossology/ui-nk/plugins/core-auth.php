@@ -143,7 +143,7 @@ class core_auth extends Plugin
 	  	$V .= "Username: <input type='text' size=20 name='username'><P>\n";
 	  	$V .= "Password: <input type='password' size=20 name='password'><P>\n";
 	  	$V .= "<input type='checkbox' name='checkip' value='1'>Validate IP.\n";
-		$V .= "With this option, your session is linked to your IP address (" . $_SESSION['ip'] . "). This deters session hijacking. While this option is more secure, it is not ideal for people using proxy networks, where their IP address regularly changes. If you find that are you constantly being logged out, then do not use this option.<P />\n";
+		$V .= "This option deters session hijacking by linking your session to your IP address (" . $_SESSION['ip'] . "). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.<P />\n";
 	  	$V .= "<input type='submit' value='Login'>\n";
 	  	$V .= "</form>\n";
 		}
