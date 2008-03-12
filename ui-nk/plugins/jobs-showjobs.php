@@ -57,6 +57,13 @@ class jobs_showjobs extends Plugin
     if (empty($History)) { $History = 0; }
     $URI = $this->Name;
 
+    $UploadPk = GetParm('upload',PARM_INTEGER);
+    if (!empty($UploadPk))
+	{
+	$NewURI = preg_replace('/&upload=[^&]*/','',$URI);
+	menu_insert("JobDetails::All",-4,"$NewURI");
+	}
+
     menu_insert("JobDetails::[BREAK]",1);
     switch($Show)
       {
@@ -214,13 +221,18 @@ class jobs_showjobs extends Plugin
   /***********************************************************
    ShowDetail(): This function returns the full job queue status.
    ***********************************************************/
-  function ShowDetail($History)
+  function ShowDetail($History,$UploadPk=-1)
     {
     global $Plugins;
     global $DB;
 
     if ($History == 1) { $Where = ""; }
     else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
+    if ($UploadPk != -1)
+	{
+	if (empty($Where)) { $Where = " WHERE job.job_upload_fk = '$UploadPk'"; }
+	else { $Where .= " AND job.job_upload_fk = '$UploadPk'"; }
+	}
 
     $Sql = "
     SELECT jobqueue.jq_pk,jobqueue.jq_job_fk,jobdepends.jdep_jq_depends_fk,
@@ -233,7 +245,7 @@ class jobs_showjobs extends Plugin
     FROM jobqueue
     LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk
     LEFT JOIN jobqueue AS depends
-      ON depends.jq_pk = jobdepends.jdep_jq_depends_fk
+    ON depends.jq_pk = jobdepends.jdep_jq_depends_fk
     LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk
     LEFT JOIN upload ON upload_pk = job.job_upload_fk
     $Where
@@ -344,13 +356,18 @@ class jobs_showjobs extends Plugin
   /***********************************************************
    ShowSummary(): Show the summary of the current queue state.
    ***********************************************************/
-  function ShowSummary($History)
+  function ShowSummary($History,$UploadPk=-1)
     {
     global $Plugins;
     global $DB;
 
     if ($History == 1) { $Where = ""; }
     else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
+    if ($UploadPk != -1)
+	{
+	if (empty($Where)) { $Where = " WHERE job.job_upload_fk = '$UploadPk'"; }
+	else { $Where .= " AND job.job_upload_fk = '$UploadPk'"; }
+	}
 
     $Sql = "
     SELECT jobqueue.jq_pk,jobqueue.jq_job_fk,jobdepends.jdep_jq_depends_fk,
@@ -444,6 +461,9 @@ class jobs_showjobs extends Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $V="";
+    $UploadPk = GetParm('upload',PARM_INTEGER);
+    if (empty($UploadPk)) { $UploadPk = -1; }
+
     switch($this->OutputType)
       {
       case "XML":
@@ -478,8 +498,8 @@ class jobs_showjobs extends Plugin
 	/* Display the output based on the values */
 	switch($Show)
 	  {
-	  case 'summary': $V .= $this->ShowSummary($History); break;
-	  case 'detail': $V .= $this->ShowDetail($History); break;
+	  case 'summary': $V .= $this->ShowSummary($History,$UploadPk); break;
+	  case 'detail': $V .= $this->ShowDetail($History,$UploadPk); break;
 	  case 'job': $V .= $this->ShowJob($Job); break;
 	  }
 	break;
