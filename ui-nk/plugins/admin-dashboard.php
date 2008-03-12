@@ -68,7 +68,7 @@ class dashboard extends Plugin
       if ($Used != $UsedH) { $UsedH = " ($UsedH)"; }
       else { $UsedH = ""; }
       $Capacity = $List[1] * 1024;
-      $CapacityH = $this->Bytes2Human($Capacity);
+      $CapacityH = Bytes2Human($Capacity);
       if ($Capacity != $CapacityH) { $CapacityH = " ($CapacityH)"; }
       else { $CapacityH = ""; }
 
