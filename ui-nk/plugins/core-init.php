@@ -30,16 +30,17 @@ class core_init extends Plugin
   var $Title      = "Initialize";
   var $Version    = "1.0";
   var $MenuList   = "Admin::Initialize";
-  var $PluginLevel = 100; /* make this run first! */
-  var $Dependency = array("db","auth","Default");
+  var $Dependency = array("debug","db","auth","refresh","menus","Default");
   var $DBaccess   = PLUGIN_DB_WRITE;
+  var $PluginLevel= 100; /* make this run first! */
 
   /******************************************
    PostInitialize(): This is where the magic for
-   Authentication happens.
+   mod=init happens.
    ******************************************/
   function PostInitialize()
     {
+    if ($this->State != PLUGIN_STATE_VALID) { return(1); } // don't re-run
     /** Disable everything but me, DB, menu **/
     /* Enable or disable plugins based on login status */
     global $Plugins;
@@ -50,24 +51,29 @@ class core_init extends Plugin
 	$this->State = PLUGIN_STATE_INVALID;
 	return;
 	}
-    menu_insert("Main::" . $this->MenuList,-100,$this->Name);
     $Max = count($Plugins);
     for($i=0; $i < $Max; $i++)
 	{
 	$P = &$Plugins[$i];
 	if ($P->State == PLUGIN_STATE_INVALID) { continue; }
 	$Key = array_search($P->Name,$this->Dependency);
-	if ($Key === FALSE)
+	if (($Key === FALSE) && ($P->Name != $this->Name))
 	  {
-	  // print "Disable " . $P->Name . " as $Key\n";
+	  // print "Disable " . $P->Name . " as $Key <br>\n";
 	  $P->Destroy();
+	  $P->State = PLUGIN_STATE_INVALID;
 	  }
 	else
 	  {
-	  // print "Keeping " . $P->Name . " as $Key\n";
+	  // print "Keeping " . $P->Name . " as $Key <br>\n";
 	  }
 	}
     $this->State = PLUGIN_STATE_READY;
+    if ($this->MenuList !== "")
+	{
+	menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+	}
+    return($this->State == PLUGIN_STATE_READY);
     } // PostInitialize()
 
   /******************************************
