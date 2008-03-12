@@ -168,8 +168,8 @@ class ui_view extends Plugin
   function GetHighlightMenu($PageBlockSize)
     {
     if (empty($this->Highlight)) { return; }
-    $V = "<table border=1>";
     $First=1;
+    $V = "<table border=1>";
     $Uri = preg_replace('/&page=[0-9]*/',"",Traceback());
     foreach($this->Highlight as $H)
       {
@@ -203,6 +203,7 @@ class ui_view extends Plugin
 	$V .= "</tr>\n";
 	}
       }
+    if ($First==1) return("");
     $V .= "</table>";
     return($V);
     } // GetHighlightMenu()
@@ -591,6 +592,7 @@ class ui_view extends Plugin
 		case "application/x-perl":
 		case "application/x-shellscript":
 		case "application/x-rpm-spec":
+		case "application/xml":
 		case "message/rfc822":
 			$Format='flow';
 			break;
