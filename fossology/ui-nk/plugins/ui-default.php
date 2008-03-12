@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_basenav extends Plugin
+class ui_default extends Plugin
   {
   var $Name       = "Default";
   var $Title      = "Welcome to FOSSology";
@@ -57,6 +57,6 @@ class ui_basenav extends Plugin
     }
 
   };
-$NewPlugin = new ui_basenav;
+$NewPlugin = new ui_default;
 $NewPlugin->Initialize();
 ?>
