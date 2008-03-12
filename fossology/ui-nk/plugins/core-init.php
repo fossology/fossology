@@ -43,12 +43,13 @@ class core_init extends Plugin
     /** Disable everything but me, DB, menu **/
     /* Enable or disable plugins based on login status */
     global $Plugins;
-    $Mod = GetParm("mod",PARM_STRING);
-    if ($Mod != $this->Name)
+    global $DATADIR;
+    $Filename = $DATADIR . "/init.ui";
+    if (!file_exists($Filename))
 	{
-	menu_insert("Main::" . $this->MenuList,-100,$this->Name);
 	return;
 	}
+    menu_insert("Main::" . $this->MenuList,-100,$this->Name);
     $Max = count($Plugins);
     for($i=0; $i < $Max; $i++)
 	{
@@ -92,15 +93,38 @@ class core_init extends Plugin
 	else /* It's an init */
 	  {
 	  $Max = count($Plugins);
+	  $FailFlag=0;
+	  global $DATADIR;
+	  $Filename = $DATADIR . "/init.ui";
 	  for($i=0; $i < $Max; $i++)
 	    {
 	    $P = &$Plugins[$i];
 	    /* Init ALL plugins */
 	    print "Initializing: " . htmlentities($P->Name) . "...\n";
-	    $P->Initialize();
-	    print "Done.<br />\n";
+	    $State = $P->Initialize();
+	    if ($State == 1) { print "Done.<br />\n"; }
+	    else { $FailFlag = 1; print "<font color='red'>FAILED.</font><br />\n"; }
 	    }
-	  $V .= "Initialization complete.";
+	  if (!$FailedFlag)
+	    {
+	    $V .= "Initialization complete.<br />";
+	    if (is_writable($DATADIR)) { $State = unlink($Filename); }
+	    else { $State = 0; }
+	    if (!$State)
+		{
+		$V .= "<font color='red'>";
+		$V .= "Failed to remove " . $DATADIR . "/init.ui\n";
+		$V .= "<br />Remove this file to complete the initialization.\n";
+		$V .= "</font>\n";
+		$FailedFlag = 1;
+		}
+	    }
+	  else
+	    {
+	    $V .= "<font color='red'>";
+	    $V .= "Initialization complete with errors.";
+	    $V .= "</font>\n";
+	    }
 	  }
 	break;
       case "Text":
