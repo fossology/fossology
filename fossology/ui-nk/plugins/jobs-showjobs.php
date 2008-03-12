@@ -140,6 +140,7 @@ class jobs_showjobs extends Plugin
     $Row = $Results[0];
     if (empty($Row['jq_pk'])) { return; }
     $V .= "<table class='text' border=1>\n";
+    $V .= "<tr><th>Field</th><th>Value</th></tr>\n";
     foreach($Fields as $F)
       {
       $V .= "  <tr><th align='left'>$F</th><td>";
