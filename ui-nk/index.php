@@ -44,6 +44,10 @@ if ($PluginId >= 0)
   $Plugins[$PluginId]->Output();
   $Plugins[$PluginId]->OutputClose();
   }
+else
+  {
+  print "Module unavailable.";
+  }
 plugin_unload();
 return(0);
 ?>
