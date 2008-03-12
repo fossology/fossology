@@ -30,7 +30,7 @@ class core_init extends Plugin
   var $Title      = "Initialize";
   var $Version    = "1.0";
   var $MenuList   = "Admin::Initialize";
-  var $Dependency = array("debug","db","auth","refresh","menus","Default");
+  var $Dependency = array("db","auth","refresh","menus","Default");
   var $DBaccess   = PLUGIN_DB_WRITE;
   var $PluginLevel= 100; /* make this run first! */
 
