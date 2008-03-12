@@ -47,6 +47,7 @@ class core_init extends Plugin
     $Filename = $DATADIR . "/init.ui";
     if (!file_exists($Filename))
 	{
+	$this->State = PLUGIN_STATE_INVALID;
 	return;
 	}
     menu_insert("Main::" . $this->MenuList,-100,$this->Name);
