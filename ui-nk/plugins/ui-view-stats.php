@@ -59,13 +59,17 @@ class ui_view_info extends Plugin
   {
     global $DB;
     $V = "";
+    $Folder = GetParm("folder",PARM_INTEGER);
+    $Upload = GetParm("upload",PARM_INTEGER);
+    $Item = GetParm("item",PARM_INTEGER);
     $Pfile = GetParm("pfile",PARM_INTEGER);
     $Ufile = GetParm("ufile",PARM_INTEGER);
-    $Upload = GetParm("upload",PARM_INTEGER);
-    $Folder = GetParm("folder",PARM_INTEGER);
-    $Item = GetParm("item",PARM_INTEGER);
-    if (empty($Upload) || empty($Item))
-	{ return; }
+    if (empty($Upload) || empty($Item) || empty($Pfile)) { return; }
+
+    $Page = GetParm("page",PARM_INTEGER);
+    if (empty($Page)) { $Page=0; }
+    $Max = 50;
+    $Offset = $Page * $Max;
 
     /**********************************
      Display micro header
@@ -76,26 +80,67 @@ class ui_view_info extends Plugin
       } // if ShowHeader
 
     /**********************************
+     List File Info
+     **********************************/
+    if ($Page == 0)
+      {
+      $V .= "<H2>Information</H2>\n";
+      $SQL = "SELECT * FROM pfile WHERE pfile_pk = '$Pfile' LIMIT 1;";
+      $Results = $DB->Action($SQL);
+      $R = &$Results[0];
+      $V .= "<table border=1>\n";
+      $V .= "<tr><th>Attribute</th><th>Value</th></tr>\n";
+      $Bytes = $R['pfile_size'];
+      $BytesH = Bytes2Human($Bytes);
+      $Bytes = number_format($Bytes, 0, "", ",");
+      if ($BytesH == $Bytes) { $BytesH = ""; }
+      else { $BytesH = '(' . $BytesH . ')'; }
+      $V .= "<tr><td align='center'>File Size</td><td align='right'>$Bytes $BytesH</td></tr>\n";
+      $V .= "<tr><td align='center'>SHA1 Checksum</td><td align='right'>" . $R['pfile_sha1'] . "</td></tr>\n";
+      $V .= "<tr><td align='center'>MD5 Checksum</td><td align='right'>" . $R['pfile_md5'] . "</td></tr>\n";
+      $V .= "</table>\n";
+      }
+
+    /**********************************
      Determine the contents of the container.
      **********************************/
     $V .= "<H2>Sightings</H2>\n";
-    $SQL = "SELECT * FROM pfile INNER JOIN ufile ON ufile.pfile_fk = '$Pfile' AND ufile.pfile_fk = pfile.pfile_pk INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk WHERE uploadtree.uploadtree_pk != '$Item';";
+    $SQL = "SELECT * FROM pfile
+	    INNER JOIN ufile ON pfile.pfile_pk = '$Pfile'
+	    AND ufile.pfile_fk = pfile.pfile_pk
+	    INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk
+	    ORDER BY pfile_pk
+	    LIMIT $Max OFFSET $Offset
+	    ;";
     $Results = $DB->Action($SQL);
-    if (count($Results) > 0)
+    $Count = count($Results);
+    if (($Page > 0) || ($Count >= $Max))
+      {
+      $VM = "<P />\n" . MenuEndlessPage($Page, ($Count >= $Max)) . "<P />\n";
+      }
+    else { $VM = ""; }
+    if ($Count > 0)
 	{
-	$V .= "This exact file appears in the following alternate locations:\n";
-        foreach($Results as $R)
+	$V .= "This exact file appears in the following locations:\n";
+	$V .= $VM;
+	$Offset++;
+        foreach($Results as $Key => $R)
           {
           if (empty($R['pfile_fk'])) { continue; }
 	  if (Isdir($R['ufile_mode']))
 	    {
-	    $V .= "<P />" . Dir2Browse("browse",$R['uploadtree_pk'],-1,"browse") . "\n";
+	    $V .= "<P />" . Dir2Browse("browse",$R['uploadtree_pk'],-1,"browse",1,NULL,$Offset + $Key) . "\n";
 	    }
 	  else
 	    {
-	    $V .= "<P />" . Dir2Browse("browse",$R['uploadtree_pk'],-1,"view") . "\n";
+	    $V .= "<P />" . Dir2Browse("browse",$R['uploadtree_pk'],-1,"view",1,NULL,$Offset + $Key) . "\n";
 	    }
           }
+	$V .= $VM;
+	}
+    else if ($Page > 0)
+	{
+	$V .= "End of listing.\n";
 	}
     else
 	{

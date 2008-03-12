@@ -81,11 +81,17 @@ class search_file extends Plugin
 	  $V .= "<P />\n";
 	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"browse",1,NULL,$Page*$Max + $i+1) . "\n";
 	  }
-	else
+	else if ($R['pfile_fk'] != $LastPfilePk)
 	  {
-	  if ($R['pfile_fk'] != $LastPfilePk) { $V .= "<P />\n"; }
+	  $V .= "<P />\n";
 	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"view",1,NULL,$Page*$Max + $i+1) . "\n";
 	  $LastPfilePk = $R['pfile_fk'];
+	  }
+	else
+	  {
+	  $V .= "<div style='margin-left:2em;'>";
+	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"view",1,NULL,$Page*$Max + $i+1) . "\n";
+	  $V .= "</div>";
 	  }
 	}
 

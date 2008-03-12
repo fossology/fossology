@@ -28,6 +28,30 @@ function Isdir($mode) { return(($mode & 1<<18) + ($mode & 0040000) != 0); }
 function Isartifact($mode) { return(($mode & 1<<28) != 0); }
 function Iscontainer($mode) { return(($mode & 1<<29) != 0); }
 
+/************************************************
+ Bytes2Human(): Convert a number of bytes into
+ a human-readable format.
+ ************************************************/
+function Bytes2Human  ($Bytes)
+{
+  if ($Bytes < 1024) { return($Bytes); }
+  $Bytes = $Bytes / 1024;
+  $Bint = intval($Bytes * 100.0) / 100.0;
+  if ($Bytes < 1024) { return("$Bint KB"); }
+  $Bytes = $Bytes / 1024;
+  $Bint = intval($Bytes * 100.0) / 100.0;
+  if ($Bytes < 1024) { return("$Bint MB"); }
+  $Bytes = $Bytes / 1024;
+  $Bint = intval($Bytes * 100.0) / 100.0;
+  if ($Bytes < 1024) { return("$Bint GB"); }
+  $Bytes = $Bytes / 1024;
+  $Bint = intval($Bytes * 100.0) / 100.0;
+  if ($Bytes < 1024) { return("$Bint TB"); }
+  $Bytes = $Bytes / 1024;
+  $Bint = intval($Bytes * 100.0) / 100.0;
+  return("$Bint PB");
+} // Bytes2Human()
+
 /************************************************************
  DirMode2String(): Convert a mode to string values.
  ************************************************************/

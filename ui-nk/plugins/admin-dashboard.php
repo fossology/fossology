@@ -33,30 +33,6 @@ class dashboard extends Plugin
   var $Dependency = array("db");
 
   /************************************************
-   Bytes2Human(): Convert a number of bytes into
-   a human-readable format.
-   ************************************************/
-  function Bytes2Human	($Bytes)
-    {
-    if ($Bytes < 1024) { return($Bytes); }
-    $Bytes = $Bytes / 1024;
-    $Bint = intval($Bytes * 100.0) / 100.0;
-    if ($Bytes < 1024) { return("$Bint KB"); }
-    $Bytes = $Bytes / 1024;
-    $Bint = intval($Bytes * 100.0) / 100.0;
-    if ($Bytes < 1024) { return("$Bint MB"); }
-    $Bytes = $Bytes / 1024;
-    $Bint = intval($Bytes * 100.0) / 100.0;
-    if ($Bytes < 1024) { return("$Bint GB"); }
-    $Bytes = $Bytes / 1024;
-    $Bint = intval($Bytes * 100.0) / 100.0;
-    if ($Bytes < 1024) { return("$Bint TB"); }
-    $Bytes = $Bytes / 1024;
-    $Bint = intval($Bytes * 100.0) / 100.0;
-    return("$Bint PB");
-    } // Bytes2Human()
-
-  /************************************************
    DiskFree(): Determine amount of free disk space.
    ************************************************/
   function DiskFree()
@@ -88,7 +64,7 @@ class dashboard extends Plugin
       $List = split(" ",$L);
       $V .= "<tr><td>" . htmlentities($List[0]) . "</td>";
       $Used = $List[2] * 1024;
-      $UsedH = $this->Bytes2Human($Used);
+      $UsedH = Bytes2Human($Used);
       if ($Used != $UsedH) { $UsedH = " ($UsedH)"; }
       else { $UsedH = ""; }
       $Capacity = $List[1] * 1024;

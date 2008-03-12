@@ -76,7 +76,7 @@ class core_auth extends Plugin
 	{
 	$_SESSION['ip'] = $this->GetIP();
 	}
-    else if ($_SESSION['ip'] != $this->GetIP())
+    else if (($_SESSION['checkip']==1) && ($_SESSION['ip'] != $this->GetIP()))
 	{
 	/* Sessions are not transferable. */
 	$_SESSION['User'] = NULL;
@@ -126,6 +126,7 @@ class core_auth extends Plugin
 	      (GetParm("password",PARM_STRING) == 'fossy'))
 		{
 		$_SESSION['User'] = GetParm("username",PARM_STRING);
+		$_SESSION['checkip'] = GetParm("checkip",PARM_STRING);
 		/* Need to refresh the screen */
 		$V .= "<script language='javascript'>\n";
 		$V .= "alert('User Logged In')\n";
@@ -141,6 +142,8 @@ class core_auth extends Plugin
 	  	$V .= "<form method='post'>\n";
 	  	$V .= "Username: <input type='text' size=20 name='username'><P>\n";
 	  	$V .= "Password: <input type='password' size=20 name='password'><P>\n";
+	  	$V .= "<input type='checkbox' name='checkip' value='1'>Validate IP.\n";
+		$V .= "With this option, your session is linked to your IP address (" . $_SESSION['ip'] . "). This deters session hijacking. While this option is more secure, it is not ideal for people using proxy networks, where their IP address regularly changes. If you find that are you constantly being logged out, then do not use this option.<P />\n";
 	  	$V .= "<input type='submit' value='Login'>\n";
 	  	$V .= "</form>\n";
 		}
@@ -161,7 +164,7 @@ class core_auth extends Plugin
 	break;
       }
     if (!$this->OutputToStdout) { return($V); }
-    print("$V");
+    print($V);
     return;
     } // Output()
 
