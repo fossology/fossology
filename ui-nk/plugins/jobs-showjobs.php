@@ -62,21 +62,22 @@ class jobs_showjobs extends Plugin
 	{
 	$NewURI = preg_replace('/&upload=[^&]*/','',$URI);
 	menu_insert("JobDetails::All",-4,"$NewURI");
+	$UploadPk = "&upload=$UploadPk";
 	}
 
     menu_insert("JobDetails::[BREAK]",1);
     switch($Show)
       {
       case "detail":
-        menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History");
+        menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History$UploadPk");
         menu_insert("JobDetails::Detail",-3);
         break;
       case "summary":
         menu_insert("JobDetails::Summary",-2);
-        menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History");
+        menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History$UploadPk");
 	break;
       case "job":
-        menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History");
+        menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History$UploadPk");
 	break;
       default:
         break;
