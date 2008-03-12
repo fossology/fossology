@@ -117,7 +117,7 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
   if (!$LicenseGetAllFiles_1_Prepared)
     {
     /* SQL to get all files with a specific license */
-    $DB->Prepare("LicenseGetAllFiles_1",'SELECT DISTINCT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk,lic_id
+    $DB->Prepare("LicenseGetAllFiles_1",'SELECT DISTINCT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk,lic_id,tok_pfile,tok_license,tok_match,phrase_text
 	FROM uploadtree
 	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = $1
 	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk

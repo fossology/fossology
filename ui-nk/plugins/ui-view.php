@@ -168,7 +168,7 @@ class ui_view extends Plugin
   function GetHighlightMenu($PageBlockSize)
     {
     if (empty($this->Highlight)) { return; }
-    $V = "<table>";
+    $V = "<table border=1>";
     $First=1;
     $Uri = preg_replace('/&page=[0-9]*/',"",Traceback());
     foreach($this->Highlight as $H)

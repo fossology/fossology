@@ -73,7 +73,7 @@ class ui_view_license extends Plugin
 	{
 	$Parts = split("-",$Segment,2);
 	if (empty($Parts[1])) { $Parts[1] = $Parts[0]; }
-	$Match = intval(0.5 + $Row['tok_match']*100 / $Row['tok_pfile']) . "%";
+	$Match = intval($Row['tok_match']*200 / ($Row['tok_pfile'] + $Row['tok_license'])) . "%";
 	if ($First) { $First = 0; $Color=-2; }
 	else { $Color=-1; $LicName=NULL; }
 

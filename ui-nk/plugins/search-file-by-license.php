@@ -98,14 +98,20 @@ class search_file_by_license extends Plugin
 	  $V .= "<P />\n";
 	  $L = &$Lics[$i];
 	  $Pos = $Offset + $i + 1;
+	  $Match = intval(20000*$L['tok_match'] / ($L['tok_pfile'] + $L['tok_license']))/100.0;
+	  $V .= "<table border=1 width='100%' style='background:lightyellow'>";
+	  $V .= "<tr><td align='center' width='5%'><font size='+2'>$Pos:</font></td>";
+	  $V .= "<td width='5%' align='right'>" . $Match . "%</td><td>";
+	  if (!empty($L['phrase_text'])) { $V .= "<b>Phrase:</b> " . htmlentities($L['phrase_text']) . "\n"; }
 	  if (Isdir($L['ufile_mode']))
 	    {
-	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"license",1,NULL,$Pos) . "\n";
+	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"license") . "\n";
 	    }
 	  else
 	    {
-	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"view-license",1,NULL,$Pos) . "\n";
+	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"view-license") . "\n";
 	    }
+	  $V .= "</td></tr></table>\n";
 	  }
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
