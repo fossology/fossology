@@ -58,6 +58,8 @@ class core_init extends Plugin
 	{
 	$P = &$Plugins[$i];
 	if ($P->State == PLUGIN_STATE_INVALID) { continue; }
+	/* Don't turn off plugins that are already up and running. */
+	if ($P->State == PLUGIN_STATE_READY) { continue; }
 	$Key = array_search($P->Name,$this->Dependency);
 	if (($Key === FALSE) && ($P->Name != $this->Name))
 	  {
