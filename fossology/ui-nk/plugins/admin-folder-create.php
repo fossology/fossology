@@ -114,7 +114,7 @@ class folder_create extends Plugin
           }
         }
         /* Display the form */
-        $V .= "<form method='post'>\n"; // no url = this url
+        $V .= "<form method='POST'>\n"; // no url = this url
         $V .= "<ol>\n";
         $V .= "<li>Select the parent folder:  \n";
         $V .= "<select name='parentid'>\n";
