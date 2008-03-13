@@ -31,12 +31,14 @@ class core_init extends Plugin
   var $Version    = "1.0";
   var $MenuList   = "Admin::Initialize";
   var $Dependency = array("db","auth","refresh","menus","Default");
-  var $DBaccess   = PLUGIN_DB_WRITE;
+  var $DBaccess   = PLUGIN_DB_READ;
   var $PluginLevel= 100; /* make this run first! */
 
   /******************************************
    PostInitialize(): This is where the magic for
    mod=init happens.
+   This plugin only runs when the special file
+   "/usr/local/share/fossology/init.ui" exists!
    ******************************************/
   function PostInitialize()
     {
@@ -69,7 +71,7 @@ class core_init extends Plugin
 	  }
 	}
     $this->State = PLUGIN_STATE_READY;
-    if ($this->MenuList !== "")
+    if (!empty($_SESSION['User']) && ($this->MenuList !== ""))
 	{
 	menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
 	}
@@ -107,12 +109,12 @@ class core_init extends Plugin
 	    {
 	    $P = &$Plugins[$i];
 	    /* Init ALL plugins */
-	    print "Initializing: " . htmlentities($P->Name) . "...\n";
-	    $State = $P->Initialize();
-	    if ($State == 1) { print "Done.<br />\n"; }
+	    print "Installing: " . htmlentities($P->Name) . "...\n";
+	    $State = $P->Install();
+	    if ($State == 0) { print "Done.<br />\n"; }
 	    else { $FailFlag = 1; print "<font color='red'>FAILED.</font><br />\n"; }
 	    }
-	  if (!$FailedFlag)
+	  if (!$FailFlag)
 	    {
 	    $V .= "Initialization complete.<br />";
 	    if (is_writable($DATADIR)) { $State = unlink($Filename); }
