@@ -34,13 +34,45 @@ class user_edit_self extends Plugin
   var $DBaccess   = PLUGIN_DB_NONE;
 
   /***********************************************************
+   PostInitialize(): This function is called before the plugin
+   is used and after all plugins have been initialized.
+   Returns true on success, false on failure.
+   NOTE: Do not assume that the plugin exists!  Actually check it!
+   ***********************************************************/
+  function PostInitialize()
+    {
+    global $Plugins;
+    if ($this->State != PLUGIN_STATE_VALID) { return(0); } // don't run
+    if (empty($_SESSION['UserId']))
+	{
+	/* Only valid if the user is logged in. */
+	$this->State = PLUGIN_STATE_INVALID;
+	return(0);
+	}
+    // Make sure dependencies are met
+    foreach($this->Dependency as $key => $val)
+	{
+	$id = plugin_find_id($val);
+	if ($id < 0) { $this->Destroy(); return(0); }
+	}
+
+    // It worked, so mark this plugin as ready.
+    $this->State = PLUGIN_STATE_READY;
+    // Add this plugin to the menu
+    if ($this->MenuList !== "")
+	{
+	menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+	}
+    return($this->State == PLUGIN_STATE_READY);
+    } // PostInitialize()
+
+  /***********************************************************
    RegisterMenus(): Register additional menus.
    ***********************************************************/
   function RegisterMenus()
     {
-    if (empty($_SESSION['UserId'])) { $this->State = PLUGIN_STATE_INVALID; }
     if ($this->State != PLUGIN_STATE_READY) { return(0); } // don't run
-    }
+    } // RegisterMenus()
 
   /*********************************************
    Edit(): Alter a user.
@@ -51,16 +83,16 @@ class user_edit_self extends Plugin
     global $DB;
     /* Get the parameters */
     $UserId = $_SESSION['UserId'];
-    $User = str_replace("'","''",GetParm('username',PARM_STRING));
-    $Pass0 = GetParm('pass0',PARM_STRING);
-    $Pass1 = GetParm('pass1',PARM_STRING);
-    $Pass2 = GetParm('pass2',PARM_STRING);
+    $User = GetParm('username',PARM_TEXT);
+    $Pass0 = GetParm('pass0',PARM_TEXT);
+    $Pass1 = GetParm('pass1',PARM_TEXT);
+    $Pass2 = GetParm('pass2',PARM_TEXT);
     $Seed = rand() . rand();
     $Hash = sha1($Seed . $Pass);
-    $Desc = str_replace("'","''",GetParm('description',PARM_STRING));
+    $Desc = GetParm('description',PARM_TEXT);
     $Perm = GetParm('permission',PARM_INTEGER);
     $Folder = GetParm('folder',PARM_INTEGER);
-    $Email = str_replace("'","''",GetParm('email',PARM_STRING));
+    $Email = GetParm('email',PARM_TEXT);
 
     /* Make sure username looks valid */
     if (empty($_SESSION['UserId'])) { return("You must be logged in."); }
@@ -122,10 +154,10 @@ class user_edit_self extends Plugin
     if (!empty($Pass1) && ($Pass0 != $Pass1) && ($Pass1 == $Pass2))
 	{
 	$Seed = rand() . rand();
-	$Hash = sha1($Seed . $Pass0);
+	$Hash = sha1($Seed . $Pass1);
 	if ($GotUpdate) { $SQL .= ", "; }
 	$SQL .= " user_seed = '$Seed'";
-	$SQL .= " user_pass = '$Hash'";
+	$SQL .= ", user_pass = '$Hash'";
 	$GotUpdate=1;
 	}
     $SQL .= " WHERE user_pk = '$UserId';";
@@ -148,7 +180,7 @@ class user_edit_self extends Plugin
 	break;
       case "HTML":
 	/* If this is a POST, then process the request. */
-	$User = GetParm('username',PARM_STRING);
+	$User = GetParm('username',PARM_TEXT);
 	if (!empty($User))
 	  {
 	  $rc = $this->Edit();

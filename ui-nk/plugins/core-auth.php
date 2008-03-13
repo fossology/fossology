@@ -266,8 +266,8 @@ class core_auth extends Plugin
       case "HTML":
 	if (empty($_SESSION['User']))
 	  {
-	  $User = GetParm("username",PARM_STRING);
-	  $Pass = GetParm("password",PARM_STRING);
+	  $User = GetParm("username",PARM_TEXT);
+	  $Pass = GetParm("password",PARM_TEXT);
 	  if (!empty($User)) { $VP = $this->CheckUser($User,$Pass); }
 	  else { $VP = ""; }
 	  if (!empty($VP))

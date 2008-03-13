@@ -49,15 +49,15 @@ class user_add extends Plugin
     {
     global $DB;
     /* Get the parameters */
-    $User = str_replace("'","''",GetParm('username',PARM_STRING));
-    $Pass = GetParm('pass1',PARM_STRING);
-    $Pass2 = GetParm('pass2',PARM_STRING);
+    $User = str_replace("'","''",GetParm('username',PARM_TEXT));
+    $Pass = GetParm('pass1',PARM_TEXT);
+    $Pass2 = GetParm('pass2',PARM_TEXT);
     $Seed = rand() . rand();
     $Hash = sha1($Seed . $Pass);
-    $Desc = str_replace("'","''",GetParm('description',PARM_STRING));
+    $Desc = str_replace("'","''",GetParm('description',PARM_TEXT));
     $Perm = GetParm('permission',PARM_INTEGER);
     $Folder = GetParm('folder',PARM_INTEGER);
-    $Email = str_replace("'","''",GetParm('email',PARM_STRING));
+    $Email = str_replace("'","''",GetParm('email',PARM_TEXT));
 
     /* Make sure username looks valid */
     if (empty($User)) { return("Username must be specified. Not added."); }
@@ -111,7 +111,7 @@ class user_add extends Plugin
 	break;
       case "HTML":
 	/* If this is a POST, then process the request. */
-	$User = GetParm('username',PARM_STRING);
+	$User = GetParm('username',PARM_TEXT);
 	if (!empty($User))
 	  {
 	  $rc = $this->Add();
@@ -136,17 +136,17 @@ class user_add extends Plugin
 	$Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 	$V .= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
 
-	$Val = htmlentities(GetParm('username',PARM_STRING),ENT_QUOTES);
+	$Val = htmlentities(GetParm('username',PARM_TEXT),ENT_QUOTES);
 	$V .= "$Style<th width='5%'>1.</th><th width='25%'>Enter the username.</th>";
 	$V .= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
 	$V .= "</tr>\n";
 
-	$Val = htmlentities(GetParm('description',PARM_STRING),ENT_QUOTES);
+	$Val = htmlentities(GetParm('description',PARM_TEXT),ENT_QUOTES);
 	$V .= "$Style<th>2.</th><th>Enter a description for the user (name, contact, or other information).  This may be blank.</th>\n";
 	$V .= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
 	$V .= "</tr>\n";
 
-	$Val = htmlentities(GetParm('email',PARM_STRING),ENT_QUOTES);
+	$Val = htmlentities(GetParm('email',PARM_TEXT),ENT_QUOTES);
 	$V .= "$Style<th>3.</th><th>Enter an email address for the user. This may be blank.</th>\n";
 	$V .= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
 	$V .= "</tr>\n";

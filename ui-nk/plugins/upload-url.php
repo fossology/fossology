@@ -86,7 +86,7 @@ class upload_url extends Plugin
       case "HTML":
 	/* If this is a POST, then process the request. */
 	$Folder = GetParm('folder',PARM_INTEGER);
-	$GetURL = GetParm('geturl',PARM_STRING);
+	$GetURL = GetParm('geturl',PARM_TEXT);
 	$Desc = GetParm('description',PARM_TEXT); // may be null
 	$Name = GetParm('name',PARM_TEXT); // may be null
 	if (!empty($GetURL) && !empty($Folder))
