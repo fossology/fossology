@@ -40,12 +40,13 @@ define("PLUGIN_STATE_READY",2); // used during post-install
  *************************************************************/
 define("PLUGIN_DB_NONE",0);
 define("PLUGIN_DB_READ",1);
-define("PLUGIN_DB_DOWNLOAD",2);
-define("PLUGIN_DB_WRITE",3);
-define("PLUGIN_DB_UPLOAD",4);
-define("PLUGIN_DB_ANALYZE",5);
-define("PLUGIN_DB_DELETE",6);
-define("PLUGIN_DB_DEBUG",7);
+define("PLUGIN_DB_DOWNLOAD",2);	/* file download permitted */
+define("PLUGIN_DB_WRITE",3);	/* DB writes permitted */
+define("PLUGIN_DB_UPLOAD",4);	/* file upload permitted */
+define("PLUGIN_DB_ANALYZE",5);	/* file analysis permitted */
+define("PLUGIN_DB_DELETE",6);	/* record deletion permitted */
+define("PLUGIN_DB_DEBUG",7);	/* see and run debug code */
+define("PLUGIN_DB_USERADMIN",10);	/* add/delete users */
 
 /*************************************************************
  This is the Plugin class.  All plugins should:
@@ -130,11 +131,17 @@ class Plugin
    *****/
 
   /***********************************************************
-   Install(): This function (when defined) is only called once,
-   when the plugin is first installed.  It should make sure all
+   Install(): This function (when defined) is only called when
+   the plugin is first installed.  It should make sure all
    requirements are available and create anything it needs to run.
    It returns 0 on success, non-zero on failure.
    A failed install is not inserted in the system.
+   NOTE: It may be called multiple times.  It must check that
+   changes are needed BEFORE doing any changes.
+   Also, it must check for partial installs in case the user is
+   recovering from an installation failure.
+   The only dependency that can be assumed to work is "global $DB",
+   and even then, be sure to check if $DB is NULL before using it.
    ***********************************************************/
   function Install()
     {

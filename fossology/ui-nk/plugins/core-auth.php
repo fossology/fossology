@@ -31,6 +31,63 @@ class core_auth extends Plugin
   var $Version    = "1.0";
   var $PluginLevel = 100; /* make this run first! */
 
+  /***********************************************************
+   Install(): Only used during installation.
+   This may be called multiple times.
+   Used to ensure the DB has the right default columns.
+   Returns 0 on success, non-zero on failure.
+   ***********************************************************/
+  function Install	()
+    {
+    global $DB;
+    if (empty($DB)) { return(1); } /* No DB */
+    $Results = $DB->Action("SELECT * FROM users LIMIT 1;");
+    $R = &$Results[0];
+    $Cols = array("user_desc","user_seed","user_pass","user_perm","user_email");
+    $Type = array("text",     "text",     "text",     "integer",  "text");
+    $Init = array("NULL",     "user_pk",  "NULL",     PLUGIN_DB_READ, "NULL");
+    for($i=0; !empty($Cols[$i]); $i++)
+      {
+      if (!array_key_exists($Cols[$i],$R))
+	{
+	$Val = $Cols[$i] . " " . $Type[$i];
+	$rc = $DB->Action("ALTER TABLE users ADD COLUMN $Val;");
+	$rc = $DB->Action("UPDATE users SET " . $Cols[$i] . " = " . $Init[$i] . " WHERE " . $Cols[$i] . " IS NULL;");
+	}
+      }
+
+    /* No users with no seed and no pass */
+    $DB->Action("UPDATE users SET user_seed = " . rand() . " WHERE user_seed IS NULL;");
+    /* No users with no seed and no perm -- make them read-only */
+    $DB->Action("UPDATE users SET user_perm = " . PLUGIN_DB_READ . " WHERE user_perm IS NULL;");
+
+    /* There must always be at least one user with user-admin access.
+       If he does not exist, make it user "fossy".
+       If user "fossy" does not exist, add him with the default password 'fossy'. */
+    $Perm = PLUGIN_DB_USERADMIN;
+    $Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Perm;");
+    if (empty($Results[0]['user_name']))
+	{
+	$Seed = rand() . rand();
+	$Hash = sha1($Seed . "fossy");
+	$Results = $DB->Action("SELECT * FROM users WHERE user_name = 'fossy';");
+	if (empty($Results[0]['user_name']))
+	  {
+	  $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
+		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,NULL,1);";
+	  }
+	else
+	  {
+	  $SQL = "UPDATE users SET user_seed = '$Seed', user_pass = '$Hash', user_perm = $Perm WHERE user_name = 'fossy';";
+	  }
+	$DB->Action($SQL);
+	$Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Perm;");
+	}
+
+    if (empty($Results[0]['user_name'])) { return(1); } /* Failed to insert */
+    return(0);
+    } // Install()
+
   /******************************************
    GetIP(): Retrieve the user's IP address.
    Some proxy systems pass forwarded IP address info.
@@ -142,12 +199,12 @@ class core_auth extends Plugin
     if (empty($R['user_name']))	{ return; } /* no user */
 
     /* Check the password -- only if a password exists */
-    if (!empty($R['user_seed']) || !empty($Pass))
+    if (!empty($R['user_seed']) || !empty($R['user_pass']))
       {
-      $Hash = sha1($R['user_seed'] . $R['user_pass']);
+      $Hash = sha1($R['user_seed'] . $Pass);
       if ($Hash != $R['user_pass']) { return; }
       }
-    if (!empty($R['user_seed']))
+    else if (!empty($R['user_seed']))
       {
       /* Seed with no password hash = no login */
       return;
@@ -197,9 +254,11 @@ class core_auth extends Plugin
 		}
 	  else
 		{
-	  	$V .= "This login uses HTTP, so passwords are tranmitted in plain text.<br>\n";
-	  	$V .= "Until the DB schema is updated and testing completes, the username is '<font color='red'><b>Default User</b></font>' and password is empty.\n";
-	  	$V .= "<P>\n";
+		$Protocol = preg_replace("@/.*@","",$_SERVER['SERVER_PROTOCOL']);
+		if ($Protocol != 'HTTPS')
+		  {
+	  	  $V .= "This login uses $Protocol, so passwords are tranmitted in plain text.  This is not a secure connection.<P />\n";
+		  }
 	  	$V .= "<form method='post'>\n";
 	  	$V .= "Username: <input type='text' size=20 name='username'><P>\n";
 	  	$V .= "Password: <input type='password' size=20 name='password'><P>\n";
