@@ -68,16 +68,19 @@ class core_auth extends Plugin
     $Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Perm;");
     if (empty($Results[0]['user_name']))
 	{
+	/* No user with PLUGIN_DB_USERADMIN access. */
 	$Seed = rand() . rand();
 	$Hash = sha1($Seed . "fossy");
 	$Results = $DB->Action("SELECT * FROM users WHERE user_name = 'fossy';");
 	if (empty($Results[0]['user_name']))
 	  {
+	  /* User "fossy" does not exist.  Create it. */
 	  $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
 		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,NULL,1);";
 	  }
 	else
 	  {
+	  /* User "fossy" exists!  Update it. */
 	  $SQL = "UPDATE users SET user_seed = '$Seed', user_pass = '$Hash', user_perm = $Perm WHERE user_name = 'fossy';";
 	  }
 	$DB->Action($SQL);
@@ -117,6 +120,7 @@ class core_auth extends Plugin
   function PostInitialize()
     {
     global $Plugins;
+    global $DB;
     session_name("Login");
     session_start();
     $Now = time();
@@ -128,6 +132,7 @@ class core_auth extends Plugin
 	$_SESSION['User'] = NULL;
 	$_SESSION['UserId'] = NULL;
 	$_SESSION['UserLevel'] = NULL;
+	$_SESSION['Folder'] = NULL;
 	}
       }
     $_SESSION['time'] = $Now;
@@ -142,42 +147,53 @@ class core_auth extends Plugin
 	$_SESSION['User'] = NULL;
 	$_SESSION['UserId'] = NULL;
 	$_SESSION['UserLevel'] = NULL;
+	$_SESSION['Folder'] = NULL;
 	$_SESSION['ip'] = $this->GetIP();
 	}
 
     /* Enable or disable plugins based on login status */
+    $Level = PLUGIN_DB_NONE;
     if ($_SESSION['User'])
       {
-      // menu_insert("Main::Admin::Logout",10,$this->Name);
-      /* Disable all plugins with >= Level access */
-      $Max = count($Plugins);
-      for($i=0; $i < $Max; $i++)
+      /* Recheck the user in case he is suddenly blocked or changed. */
+      if (empty($_SESSION['time_check'])) { $_SESSION['time_check'] = time()+10*60; }
+      if (time() >= $_SESSION['time_check'])
+	{
+	$Results = $DB->Action("SELECT * FROM users WHERE user_name='" . $_SESSION['User'] . "';");
+	$R = $Results[0];
+	$_SESSION['User'] = $R['user_name'];
+	$_SESSION['UserLevel'] = $R['user_perm'];
+	$_SESSION['Folder'] = $R['root_folder_fk'];
+	/* Check for instant logouts */
+	if (!empty($R['user_seed']) || empty($R['user_pass']))
+		{
+		$_SESSION['User'] = NULL;
+		$_SESSION['UserId'] = NULL;
+		$_SESSION['UserLevel'] = NULL;
+		$_SESSION['Folder'] = NULL;
+		}
+	}
+
+      if (empty($_SESSION['UserLevel'])) { $Level = PLUGIN_DB_DOWNLOAD; }
+      else { $Level = $_SESSION['UserLevel']; }
+      }
+    else
+      {
+      // menu_insert("Main::Admin::Login",10,$this->Name);
+      $Level = PLUGIN_DB_READ;
+      }
+
+    /* Disable all plugins with >= $Level access */
+    $Max = count($Plugins);
+    for($i=0; $i < $Max; $i++)
 	{
 	$P = &$Plugins[$i];
 	if ($P->State == PLUGIN_STATE_INVALID) { continue; }
-	if (empty($_SESSION['UserLevel'])) { $Level = PLUGIN_DB_DOWNLOAD; }
-	else { $Level = $_SESSION['UserLevel']; }
 	if ($P->DBaccess > $Level)
 	  {
 	  $P->Destroy();
 	  }
 	}
-      }
-    else
-      {
-      // menu_insert("Main::Admin::Login",10,$this->Name);
-      /* Disable all plugins with >= WRITE access */
-      $Max = count($Plugins);
-      for($i=0; $i < $Max; $i++)
-	{
-	$P = &$Plugins[$i];
-	if ($P->State == PLUGIN_STATE_INVALID) { continue; }
-	if ($P->DBaccess >= PLUGIN_DB_WRITE)
-	  {
-	  $P->Destroy();
-	  }
-	}
-      }
 
     $this->State = PLUGIN_STATE_READY;
     } // PostInitialize()
@@ -217,6 +233,7 @@ class core_auth extends Plugin
     /* If you make it here, then username and password were good! */
     $_SESSION['User'] = $User;
     $_SESSION['UserId'] = $R['user_pk'];
+    $_SESSION['Folder'] = $R['root_folder_fk'];
     /* No specified permission means ALL permission */
     if (empty($R['user_perm'])) { $_SESSION['UserLevel']=PLUGIN_DB_USERADMIN; }
     else { $_SESSION['UserLevel'] = $R['user_perm']; }
@@ -273,6 +290,7 @@ class core_auth extends Plugin
 	  $_SESSION['User'] = NULL;
 	  $_SESSION['UserId'] = NULL;
 	  $_SESSION['UserLevel'] = NULL;
+	  $_SESSION['Folder'] = NULL;
 	  $V .= "<script language='javascript'>\n";
 	  $V .= "alert('User Logged Out')\n";
 	  $Uri = Traceback_uri() . "?mod=refresh&remod=default";
