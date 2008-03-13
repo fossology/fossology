@@ -30,6 +30,7 @@ class core_auth extends Plugin
   var $Title      = "Login";
   var $Version    = "1.0";
   var $PluginLevel = 100; /* make this run first! */
+  var $Dependency = array("db");
 
   /***********************************************************
    Install(): Only used during installation.
@@ -155,27 +156,30 @@ class core_auth extends Plugin
     $Level = PLUGIN_DB_NONE;
     if ($_SESSION['User'])
       {
+      /* If you are logged in, then the default level is "Download". */
+      if (empty($_SESSION['UserLevel'])) { $Level = PLUGIN_DB_DOWNLOAD; }
+      else { $Level = $_SESSION['UserLevel']; }
+
       /* Recheck the user in case he is suddenly blocked or changed. */
       if (empty($_SESSION['time_check'])) { $_SESSION['time_check'] = time()+10*60; }
       if (time() >= $_SESSION['time_check'])
 	{
-	$Results = $DB->Action("SELECT * FROM users WHERE user_name='" . $_SESSION['User'] . "';");
+	$Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . $_SESSION['UserId'] . "';");
 	$R = $Results[0];
 	$_SESSION['User'] = $R['user_name'];
-	$_SESSION['UserLevel'] = $R['user_perm'];
 	$_SESSION['Folder'] = $R['root_folder_fk'];
+	$_SESSION['UserLevel'] = $R['user_perm'];
+	$Level = $_SESSION['UserLevel'];
 	/* Check for instant logouts */
-	if (!empty($R['user_seed']) || empty($R['user_pass']))
+	if (empty($R['user_pass']))
 		{
 		$_SESSION['User'] = NULL;
 		$_SESSION['UserId'] = NULL;
 		$_SESSION['UserLevel'] = NULL;
 		$_SESSION['Folder'] = NULL;
+		$Level = PLUGIN_DB_READ;
 		}
 	}
-
-      if (empty($_SESSION['UserLevel'])) { $Level = PLUGIN_DB_DOWNLOAD; }
-      else { $Level = $_SESSION['UserLevel']; }
       }
     else
       {
@@ -192,6 +196,7 @@ class core_auth extends Plugin
 	if ($P->DBaccess > $Level)
 	  {
 	  $P->Destroy();
+	  $P->State = PLUGIN_STATE_INVALID;
 	  }
 	}
 
