@@ -59,6 +59,7 @@ class core_auth extends Plugin
    ******************************************/
   function PostInitialize()
     {
+    global $Plugins;
     session_name("Login");
     session_start();
     $Now = time();
@@ -68,6 +69,8 @@ class core_auth extends Plugin
       if ($_SESSION['time'] + 60*60 < $Now)
 	{
 	$_SESSION['User'] = NULL;
+	$_SESSION['UserId'] = NULL;
+	$_SESSION['UserLevel'] = NULL;
 	}
       }
     $_SESSION['time'] = $Now;
@@ -80,6 +83,8 @@ class core_auth extends Plugin
 	{
 	/* Sessions are not transferable. */
 	$_SESSION['User'] = NULL;
+	$_SESSION['UserId'] = NULL;
+	$_SESSION['UserLevel'] = NULL;
 	$_SESSION['ip'] = $this->GetIP();
 	}
 
@@ -87,12 +92,24 @@ class core_auth extends Plugin
     if ($_SESSION['User'])
       {
       // menu_insert("Main::Admin::Logout",10,$this->Name);
+      /* Disable all plugins with >= Level access */
+      $Max = count($Plugins);
+      for($i=0; $i < $Max; $i++)
+	{
+	$P = &$Plugins[$i];
+	if ($P->State == PLUGIN_STATE_INVALID) { continue; }
+	if (empty($_SESSION['UserLevel'])) { $Level = PLUGIN_DB_DOWNLOAD; }
+	else { $Level = $_SESSION['UserLevel']; }
+	if ($P->DBaccess > $Level)
+	  {
+	  $P->Destroy();
+	  }
+	}
       }
     else
       {
       // menu_insert("Main::Admin::Login",10,$this->Name);
       /* Disable all plugins with >= WRITE access */
-      global $Plugins;
       $Max = count($Plugins);
       for($i=0; $i < $Max; $i++)
 	{
@@ -109,6 +126,54 @@ class core_auth extends Plugin
     } // PostInitialize()
 
   /******************************************
+   CheckUser(): See if a username/password is valid.
+   Returns string on match, or null on no-match.
+   ******************************************/
+  function CheckUser	($User,$Pass)
+    {
+    global $DB;
+    $V = "";
+    if (empty($User))	{ return; }
+    $User = str_replace("'","''",$User);	/* protect DB */
+
+    /* See if the user exists */
+    $Results = $DB->Action("SELECT * FROM users WHERE user_name = '$User';");
+    $R = $Results[0];
+    if (empty($R['user_name']))	{ return; } /* no user */
+
+    /* Check the password -- only if a password exists */
+    if (!empty($R['user_seed']) || !empty($Pass))
+      {
+      $Hash = sha1($R['user_seed'] . $R['user_pass']);
+      if ($Hash != $R['user_pass']) { return; }
+      }
+    if (!empty($R['user_seed']))
+      {
+      /* Seed with no password hash = no login */
+      return;
+      }
+    else
+      {
+      if (!empty($Pass)) { return; }	/* empty password required */
+      }
+
+    /* If you make it here, then username and password were good! */
+    $_SESSION['User'] = $User;
+    $_SESSION['UserId'] = $R['user_pk'];
+    /* No specified permission means ALL permission */
+    if (empty($R['user_perm'])) { $_SESSION['UserLevel']=PLUGIN_DB_USERADMIN; }
+    else { $_SESSION['UserLevel'] = $R['user_perm']; }
+    $_SESSION['checkip'] = GetParm("checkip",PARM_STRING);
+    /* Need to refresh the screen */
+    $V .= "<script language='javascript'>\n";
+    $V .= "alert('User Logged In')\n";
+    $Uri = Traceback_uri();
+    $V .= "window.open('$Uri','_top');\n";
+    $V .= "</script>\n";
+    return($V);
+    } // CheckUser()
+
+  /******************************************
    Output(): This is only called when the user logs out.
    ******************************************/
   function Output()
@@ -122,22 +187,18 @@ class core_auth extends Plugin
       case "HTML":
 	if (empty($_SESSION['User']))
 	  {
-	  if ((GetParm("username",PARM_STRING) == 'fossy') &&
-	      (GetParm("password",PARM_STRING) == 'fossy'))
+	  $User = GetParm("username",PARM_STRING);
+	  $Pass = GetParm("password",PARM_STRING);
+	  if (!empty($User)) { $VP = $this->CheckUser($User,$Pass); }
+	  else { $VP = ""; }
+	  if (!empty($VP))
 		{
-		$_SESSION['User'] = GetParm("username",PARM_STRING);
-		$_SESSION['checkip'] = GetParm("checkip",PARM_STRING);
-		/* Need to refresh the screen */
-		$V .= "<script language='javascript'>\n";
-		$V .= "alert('User Logged In')\n";
-		$Uri = Traceback_uri();
-		$V .= "window.open('$Uri','_top');\n";
-		$V .= "</script>\n";
+		$V .= $VP;
 		}
 	  else
 		{
-	  	$V .= "This login uses HTTP, so passwords are tranmitted in plain text.\n";
-	  	$V .= "Until the DB schema is updated and testing completes, the username is 'fossy' and password is 'fossy'.\n";
+	  	$V .= "This login uses HTTP, so passwords are tranmitted in plain text.<br>\n";
+	  	$V .= "Until the DB schema is updated and testing completes, the username is '<font color='red'><b>Default User</b></font>' and password is empty.\n";
 	  	$V .= "<P>\n";
 	  	$V .= "<form method='post'>\n";
 	  	$V .= "Username: <input type='text' size=20 name='username'><P>\n";
@@ -151,6 +212,8 @@ class core_auth extends Plugin
 	else /* It's a logout */
 	  {
 	  $_SESSION['User'] = NULL;
+	  $_SESSION['UserId'] = NULL;
+	  $_SESSION['UserLevel'] = NULL;
 	  $V .= "<script language='javascript'>\n";
 	  $V .= "alert('User Logged Out')\n";
 	  $Uri = Traceback_uri() . "?mod=refresh&remod=default";
