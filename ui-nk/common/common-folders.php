@@ -40,11 +40,12 @@ function FolderGetTop()
 {
   global $Plugins;
   global $DB;
-  if (empty($DB)) { return; }
-  if (!empty($username)) { $Where = "WHERE user_name='$username'"; }
-  else { $Where = ""; }
+
   /* Get the list of folders */
-  $Results = $DB->Action("SELECT root_folder_fk FROM users $Where ORDER BY user_pk ASC LIMIT 1;");
+  if (!empty($_SESSION['Folder'])) { return($_SESSION['Folder']); }
+
+  if (empty($DB)) { return; }
+  $Results = $DB->Action("SELECT root_folder_fk FROM users ORDER BY user_pk ASC LIMIT 1;");
   $Row = $Results[0];
   return($Row['root_folder_fk']);
 } // FolderGetTop()
