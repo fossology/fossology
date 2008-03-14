@@ -120,6 +120,7 @@ fi
 echo "# Checking files (exist and permissions)"
 # Remove obsolete licenses
 \$DEBUG \$RM -rf "\${AGENTDATADIR}/licenses"
+\$DEBUG \$RM -rf "\${WEBDIR}/licenses"
 echo "\$FILELIST" | while read i ; do
   if [ "\$FORCEFILES" == 1 ] || [ ! -f "/\$i" ] ; then
     if [ "\$FORCEFILES" == 1 ] ; then

@@ -38,7 +38,7 @@ class core_init extends Plugin
    PostInitialize(): This is where the magic for
    mod=init happens.
    This plugin only runs when the special file
-   "/usr/local/share/fossology/init.ui" exists!
+   "..../www/init.ui" exists!
    ******************************************/
   function PostInitialize()
     {
@@ -46,8 +46,7 @@ class core_init extends Plugin
     /** Disable everything but me, DB, menu **/
     /* Enable or disable plugins based on login status */
     global $Plugins;
-    global $DATADIR;
-    $Filename = $DATADIR . "/init.ui";
+    $Filename = getcwd() . "/init.ui";
     if (!file_exists($Filename))
 	{
 	$this->State = PLUGIN_STATE_INVALID;
@@ -73,7 +72,7 @@ class core_init extends Plugin
 	  }
 	}
     $this->State = PLUGIN_STATE_READY;
-    if (!empty($_SESSION['User']) && ($this->MenuList !== ""))
+    if (!empty($_SESSION['UserId']) && ($this->MenuList !== ""))
 	{
 	menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
 	}
@@ -105,8 +104,7 @@ class core_init extends Plugin
 	  {
 	  $Max = count($Plugins);
 	  $FailFlag=0;
-	  global $DATADIR;
-	  $Filename = $DATADIR . "/init.ui";
+	  $Filename = getcwd() . "/init.ui";
 	  for($i=0; $i < $Max; $i++)
 	    {
 	    $P = &$Plugins[$i];
@@ -119,12 +117,12 @@ class core_init extends Plugin
 	  if (!$FailFlag)
 	    {
 	    $V .= "Initialization complete.<br />";
-	    if (is_writable($DATADIR)) { $State = unlink($Filename); }
+	    if (is_writable(getcwd())) { $State = unlink($Filename); }
 	    else { $State = 0; }
 	    if (!$State)
 		{
 		$V .= "<font color='red'>";
-		$V .= "Failed to remove " . $DATADIR . "/init.ui\n";
+		$V .= "Failed to remove " . getcwd() . "/init.ui\n";
 		$V .= "<br />Remove this file to complete the initialization.\n";
 		$V .= "</font>\n";
 		$FailedFlag = 1;
