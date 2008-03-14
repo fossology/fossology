@@ -78,11 +78,13 @@ class core_auth extends Plugin
 	  /* User "fossy" does not exist.  Create it. */
 	  $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
 		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,NULL,1);";
+	  print "<br><b><font color='green'>Created default administrator: 'fossy' with password 'fossy'.</font></b><br>\n";
 	  }
 	else
 	  {
 	  /* User "fossy" exists!  Update it. */
-	  $SQL = "UPDATE users SET user_seed = '$Seed', user_pass = '$Hash', user_perm = $Perm WHERE user_name = 'fossy';";
+	  $SQL = "UPDATE users SET user_perm = $Perm WHERE user_name = 'fossy';";
+	  print "<br><b><font color='green'>Existing user 'fossy' promoted to default administrator.</font></b><br>\n";
 	  }
 	$DB->Action($SQL);
 	$Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Perm;");
@@ -122,6 +124,7 @@ class core_auth extends Plugin
     {
     global $Plugins;
     global $DB;
+    if (empty($DB)) { return(0); }
     session_name("Login");
     session_start();
     $Now = time();
@@ -153,7 +156,7 @@ class core_auth extends Plugin
 	}
 
     /* Enable or disable plugins based on login status */
-    $Level = PLUGIN_DB_NONE;
+    $Level = PLUGIN_DB_READ;
     if ($_SESSION['User'])
       {
       /* If you are logged in, then the default level is "Download". */
@@ -220,7 +223,7 @@ class core_auth extends Plugin
     if (empty($R['user_name']))	{ return; } /* no user */
 
     /* Check the password -- only if a password exists */
-    if (!empty($R['user_seed']) || !empty($R['user_pass']))
+    if (!empty($R['user_seed']) && !empty($R['user_pass']))
       {
       $Hash = sha1($R['user_seed'] . $Pass);
       if ($Hash != $R['user_pass']) { return; }
@@ -236,9 +239,10 @@ class core_auth extends Plugin
       }
 
     /* If you make it here, then username and password were good! */
-    $_SESSION['User'] = $User;
+    $_SESSION['User'] = $R['user_name'];
     $_SESSION['UserId'] = $R['user_pk'];
     $_SESSION['Folder'] = $R['root_folder_fk'];
+    $_SESSION['time_check'] = time() + 10*60;
     /* No specified permission means ALL permission */
     if (empty($R['user_perm'])) { $_SESSION['UserLevel']=PLUGIN_DB_USERADMIN; }
     else { $_SESSION['UserLevel'] = $R['user_perm']; }
@@ -276,6 +280,32 @@ class core_auth extends Plugin
 		}
 	  else
 		{
+		/* Check for init and first-time use */
+		if (plugin_find_id("init") >= 0)
+		  {
+		  $V .= "<b>The system requires initialization. Please login and use the Initialize option under the Admin menu.</b>";
+		  $V .= "<P />\n";
+		  /* Check for a default user */
+		  global $DB;
+		  $Results = $DB->Action("SELECT * FROM users LIMIT 1;");
+		  $R = &$Results[0];
+		  if (array_key_exists("user_seed",$R) && array_key_exists("user_pass",$R))
+			{
+			$Results = $DB->Action("SELECT user_name FROM users WHERE user_seed IS NULL AND user_pass IS NULL;");
+			}
+		  else
+			{
+			$Results = $DB->Action("SELECT user_name FROM users;");
+			}
+		  $R = &$Results[0];
+		  if (!empty($R['user_name']))
+			{
+			$V .= "If you need an account, use '" . $R['user_name'] . "' with no password.\n";
+			$V .= "<P />\n";
+			}
+		  }
+
+		/* Inform about the protocol. */
 		$Protocol = preg_replace("@/.*@","",$_SERVER['SERVER_PROTOCOL']);
 		if ($Protocol != 'HTTPS')
 		  {

@@ -23,9 +23,15 @@ $(iPATHFILE): ../Makefile.conf
 	@echo "\$$PROJECT=\"$(PROJECT)\";" >> $(iPATHFILE)
 	@echo "\$$DATADIR=\"$(DATADIR)\";" >> $(iPATHFILE)
 	@echo "\$$PATH=\"\$$LIBEXECDIR:\$$AGENTDIR:\$$PATH:/usr/bin\";" >> $(iPATHFILE)
+	@echo "\$$VERSION=\"$(VERSION)\";" >> $(iPATHFILE)
+	@echo "\$$SVN_REV=\"$(SVN_REV)\";" >> $(iPATHFILE)
 	@echo "?>" >> $(iPATHFILE)
 
-InstallationCreate:
+InstallationCreate: $(iPATHFILE)
+	mkdir -p ../install/$(WEBDIR)
+	chmod ug+w ../install/$(WEBDIR)
+	tar -cf - `find . -type f | grep -v svn | grep -E "(php|css|htm|html|dtd|htc|gif)$$"` | (cd ../install/$(WEBDIR) ; tar -xvf -)
+	touch ../install/$(WEBDIR)/init.ui
 
 install: all InstallationCreate
 	if [ -f $(PHPCLI) ] ; then \
@@ -36,8 +42,6 @@ install: all InstallationCreate
 	grep -q '^extension.*=.*pgsql.so' $(PHPWEB) || \
 	    echo 'extension=pgsql.so' >> $(PHPWEB) ; \
 	fi
-	# Fix the revision number in about.html
-	# sed -e "s/VERSION/$(VERSION)/g" -e "s/SVNREV/$(SVN_REV)/g" about.html > $(WEBDIR)/about.html
 
 uninstall:
 	(cd $(BINDIR) ; $(RM) $(BINFILES))
