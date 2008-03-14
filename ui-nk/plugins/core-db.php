@@ -29,6 +29,7 @@ class db_access extends Plugin
   {
   var $Name="db";
   var $Version="1.0";
+  var $PluginLevel=100;
 
   var $Debug=0;
 
