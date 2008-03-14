@@ -193,12 +193,19 @@ void	DeleteUpload	(long UploadId)
 
   /***********************************************/
   /* Delete unused ufiles */
+
+/*** Commented out because -- for huge uploads -- this can take more
+     than two minutes.  The result is a ton of locked rows and a flood
+     of DB timeouts and delays.
+ ***/
+#if 0
   memset(SQL,'\0',sizeof(SQL));
   /** All of the project info has been deleted.  This simply deletes any
       ufile that is no longer associated with any projects. **/
   /** Delete any ufile not used by uploadtree AND not used by upload. **/
   snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE ufile_pk NOT IN (SELECT DISTINCT(ufile_fk) FROM uploadtree) AND ufile_pk NOT IN (SELECT DISTINCT(ufile_fk) FROM upload);");
   MyDBaccess(DB,SQL);
+#endif
 
   /***********************************************/
   /* delete pfiles that are missing reuse in the DB */
