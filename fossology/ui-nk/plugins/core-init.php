@@ -31,7 +31,7 @@ class core_init extends Plugin
   var $Version    = "1.0";
   var $MenuList   = "Admin::Initialize";
   var $Dependency = array("db","auth","refresh","menus","Default");
-  var $DBaccess   = PLUGIN_DB_USERADMIN;
+  var $DBaccess   = PLUGIN_DB_NONE;
   var $PluginLevel= 100; /* make this run first! */
 
   /******************************************
@@ -61,7 +61,7 @@ class core_init extends Plugin
 	if ($P->State == PLUGIN_STATE_READY) { continue; }
 	if ($P->DBaccess == PLUGIN_DB_DEBUG) { continue; }
 	$Key = array_search($P->Name,$this->Dependency);
-	if (($Key === FALSE) && ($P->Name != $this->Name))
+	if (($Key === FALSE) && strcmp($P->Name,$this->Name))
 	  {
 	  // print "Disable " . $P->Name . " as $Key <br>\n";
 	  $P->Destroy();
@@ -73,7 +73,7 @@ class core_init extends Plugin
 	  }
 	}
     $this->State = PLUGIN_STATE_READY;
-    if (!empty($_SESSION['UserId']) && ($this->MenuList !== ""))
+    if (($_SESSION['UserLevel'] >= PLUGIN_DB_USERADMIN) && ($this->MenuList !== ""))
 	{
 	menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
 	}
