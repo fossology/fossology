@@ -42,6 +42,14 @@ class core_auth extends Plugin
     {
     global $DB;
     if (empty($DB)) { return(1); } /* No DB */
+
+    /* Validate the user index */
+    $Results = $DB->Action("SELECT max(ufile_pk) as max FROM users LIMIT 1;");
+    $Max = $Results[0]['max'];
+    if (empty($Max)) { $Max = 1; }
+    $DB->Action("SELECT setval('users_user_pk_seq',$Max);");
+
+    /* Check the DB schema */
     $Results = $DB->Action("SELECT * FROM users LIMIT 1;");
     $R = &$Results[0];
     $Cols = array("user_desc","user_seed","user_pass","user_perm","user_email");

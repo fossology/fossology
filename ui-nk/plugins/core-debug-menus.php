@@ -29,7 +29,7 @@ class core_debug_menus extends Plugin
   var $Name       = "debug-menus";
   var $Title      = "Debug Menus";
   var $Version    = "1.0";
-  var $MenuList   = "Help::Debug Menus";
+  var $MenuList   = "Help::Debug::Debug Menus";
   var $DBaccess   = PLUGIN_DB_DEBUG;
 
   /***********************************************************
