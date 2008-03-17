@@ -29,7 +29,7 @@ class debug_user extends Plugin
   var $Name       = "debug_user";
   var $Version    = "1.0";
   var $Title      = "Debug User";
-  var $MenuList   = "Help::Debug User";
+  var $MenuList   = "Help::Debug::Debug User";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_DEBUG;
 
