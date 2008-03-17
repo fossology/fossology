@@ -316,10 +316,7 @@ probably want them turned off so they don't report confusing error
 messages to your end users or reveal information about your system
 configuration to potential attackers.
 
-2) A favicon.ico file is provided in the www directory.  Put it in
-   your DocumentRoot if you want the FOSSology icon to show in your
-   browser address bar.
-3) Because this software dynamically generates web pages based on the
+2) Because this software dynamically generates web pages based on the
    database, you may want to tell web robots not to index pages.  You
    can do this with a robots.txt file in your DocumentRoot.  Here is
    a sample that tells all agents to ignore your /repo urls:
