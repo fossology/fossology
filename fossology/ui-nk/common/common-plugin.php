@@ -101,7 +101,7 @@ function plugin_sort()
     $D = &$DepArray[$P->Name];
     for($j=0; $j < count($P->Dependency); $j++)
       {
-      $D[$P->Dependency[$j]] = 1;
+      $D[$P->Dependency[$j]] = $P->PluginLevel;
       }
     }
 
