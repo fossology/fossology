@@ -33,14 +33,6 @@ class user_add extends Plugin
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
 
-  /***********************************************************
-   RegisterMenus(): Register additional menus.
-   ***********************************************************/
-  function RegisterMenus()
-    {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); } // don't run
-    }
-
   /*********************************************
    Add(): Add a user.
    Returns NULL on success, string on failure.

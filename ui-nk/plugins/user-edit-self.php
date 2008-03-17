@@ -27,8 +27,8 @@ if (!isset($GlobalReady)) { exit; }
 class user_edit_self extends Plugin
 {
   var $Name       = "user_edit_self";
-  var $Title      = "Add A User";
-  var $MenuList   = "Admin::Users::Edit Properties";
+  var $Title      = "Edit Your Account Settings";
+  var $MenuList   = "Admin::Users::Account Settings";
   var $Version    = "1.0";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_NONE;
@@ -38,6 +38,7 @@ class user_edit_self extends Plugin
    is used and after all plugins have been initialized.
    Returns true on success, false on failure.
    NOTE: Do not assume that the plugin exists!  Actually check it!
+   Purpose: Only allow people who are logged in to edit their own properties.
    ***********************************************************/
   function PostInitialize()
     {
@@ -211,7 +212,7 @@ class user_edit_self extends Plugin
 	$Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . $_SESSION['UserId'] . "';");
 	$R = $Results[0];
 
-	$V .= "To change user information, edit the following fields. You do not need to edit every field.<P />\n";
+	$V .= "To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n";
 	$Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 	$V .= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
 
@@ -235,7 +236,7 @@ class user_edit_self extends Plugin
 	$V .= "<input type='password' name='pass2' size=20></td>\n";
 	$V .= "</tr>\n";
 
-	$V .= "</table border=0><P />";
+	$V .= "</table><P />";
 	$V .= "<input type='submit' value='Edit!'>\n";
 	$V .= "</form>\n";
 	break;
