@@ -38,6 +38,9 @@ if (!isset($GlobalReady)) { exit; }
  The javascript function is named "${RequestName}_Get"
  The javascript function "${RequestName}_Reply" must be defined for
  handling the reply.  (You will need to make this Javascript function.)
+ The javascript variable "${RequestName}.status" contains the
+ reply's HTTP return code (200 means "OK") and "${RequestName}.readyState"
+ is the handle's state (4 = "loaded").
  References:
    http://www.w3schools.com/xml/xml_http.asp
  *************************************************/
