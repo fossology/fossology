@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_folders extends Plugin
+class ui_folders extends FO_Plugin
   {
   var $Name       = "folders";
   var $Title      = "Show Folders";

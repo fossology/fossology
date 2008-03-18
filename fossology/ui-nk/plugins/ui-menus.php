@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_menu extends Plugin
+class ui_menu extends FO_Plugin
   {
   var $Name       = "menus";
   var $Title      = "Menus";

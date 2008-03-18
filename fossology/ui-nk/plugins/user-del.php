@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class user_del extends Plugin
+class user_del extends FO_Plugin
 {
   var $Name       = "user_del";
   var $Title      = "Delete A User";

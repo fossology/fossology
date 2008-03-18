@@ -58,7 +58,7 @@ define("PLUGIN_DB_USERADMIN",10);	/* add/delete users */
 	$NewPlugin->Name="Fred";
 	if ($NewPlugin->Initialize() != 0) { destroy $NewPlugin; }
  *************************************************************/
-class Plugin
+class FO_Plugin
   {
   // All public fields can be empty, indicating that it does not apply.
 

@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class user_add extends Plugin
+class user_add extends FO_Plugin
 {
   var $Name       = "user_add";
   var $Title      = "Add A User";

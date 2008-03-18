@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class agent_specagent extends Plugin
+class agent_specagent extends FO_Plugin
 {
   public $Name       = "agent_specagent";
   public $Title      = "Schedule Spec File Analysis";

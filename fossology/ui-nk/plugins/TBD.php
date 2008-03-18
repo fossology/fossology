@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class tbd extends Plugin
+class tbd extends FO_Plugin
 {
   var $Name       = "TBD";
   var $Title      = "TBD (don't look!)";

@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_download extends Plugin
+class ui_download extends FO_Plugin
   {
   var $Name       = "download";
   var $Title      = "Download File";

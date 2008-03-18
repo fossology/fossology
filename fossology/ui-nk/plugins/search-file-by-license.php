@@ -32,7 +32,7 @@ if (!isset($GlobalReady)) { exit; }
  data to the UI.
  *************************************************/
 
-class search_file_by_license extends Plugin
+class search_file_by_license extends FO_Plugin
   {
   var $Name       = "search_file_by_license";
   var $Title      = "List Files based on License";

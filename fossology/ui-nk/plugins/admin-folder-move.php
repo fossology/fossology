@@ -28,7 +28,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class folder_move extends Plugin
+class folder_move extends FO_Plugin
   {
   var $Name       = "folder_move";
   var $Title      = "Move Folder";

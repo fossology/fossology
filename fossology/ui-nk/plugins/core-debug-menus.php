@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class core_debug_menus extends Plugin
+class core_debug_menus extends FO_Plugin
   {
   var $Name       = "debug-menus";
   var $Title      = "Debug Menus";

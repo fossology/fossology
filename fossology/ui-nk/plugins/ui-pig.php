@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_pig extends Plugin
+class ui_pig extends FO_Plugin
   {
   var $Name       = "pig";
   var $Title      = "Pig Lipstick";

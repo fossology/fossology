@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class core_auth extends Plugin
+class core_auth extends FO_Plugin
   {
   var $Name       = "auth";
   var $Title      = "Login";

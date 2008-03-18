@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class admin_upload_delete extends Plugin
+class admin_upload_delete extends FO_Plugin
 {
   var $Name       = "admin_upload_delete";
   var $Title      = "Delete Uploaded File";

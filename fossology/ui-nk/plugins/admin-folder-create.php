@@ -28,7 +28,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class folder_create extends Plugin
+class folder_create extends FO_Plugin
 {
   var $Name       = "folder_create";
   var $Title      = "Create a new Fossology folder";

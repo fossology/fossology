@@ -25,7 +25,7 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 $DB = NULL; /* global pointer used by everyone... */
-class db_access extends Plugin
+class db_access extends FO_Plugin
   {
   var $Name="db";
   var $Version="1.0";

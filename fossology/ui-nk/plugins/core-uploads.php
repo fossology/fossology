@@ -32,7 +32,7 @@ if (!isset($GlobalReady)) { exit; }
  data to the UI.
  *************************************************/
 
-class core_uploads extends Plugin
+class core_uploads extends FO_Plugin
   {
   var $Name       = "upload_options";
   var $Title      = "List Uploads as Options";

@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_about extends Plugin
+class ui_about extends FO_Plugin
   {
   var $Name       = "about";
   var $Title      = "About FOSSology";

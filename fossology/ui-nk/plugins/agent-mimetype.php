@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class agent_mimetype extends Plugin
+class agent_mimetype extends FO_Plugin
 {
   public $Name       = "agent_mimetype";
   public $Title      = "Schedule MIME-type Analysis";

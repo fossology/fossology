@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class jobs_showjobs extends Plugin
+class jobs_showjobs extends FO_Plugin
   {
   var $Name       = "showjobs";
   var $Title      = "Show Job Queue";

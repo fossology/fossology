@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class agent_pkgmetagetta extends Plugin
+class agent_pkgmetagetta extends FO_Plugin
 {
   public $Name       = "agent_pkgmetagetta";
   public $Title      = "Schedule Metadata Analysis";

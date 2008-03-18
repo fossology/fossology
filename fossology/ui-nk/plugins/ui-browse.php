@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_browse extends Plugin
+class ui_browse extends FO_Plugin
   {
   var $Name       = "browse";
   var $Title      = "Browse";

@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_view_meta extends Plugin
+class ui_view_meta extends FO_Plugin
   {
   var $Name       = "view_meta";
   var $Title      = "View Meta Data";

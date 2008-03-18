@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_license extends Plugin
+class ui_license extends FO_Plugin
   {
   var $Name       = "license";
   var $Title      = "License Browser";

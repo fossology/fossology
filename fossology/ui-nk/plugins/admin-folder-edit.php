@@ -28,7 +28,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class folder_properties extends Plugin
+class folder_properties extends FO_Plugin
 {
   var $Name       ="folder_properties";
   var $Title      = "Edit Folder Properties";
