@@ -38,7 +38,7 @@ class jobs_showjobs extends FO_Plugin
 	"Queued" => "#FFFFCC",	// "white-ish",
 	"Scheduled" => "#99FFFF", // "blue-ish",
 	"Running" => "#99FF99",	// "green",
-	"Finished" => "lightgray",
+	"Finished" => "#D3D3D3", // "lightgray",
 	"Blocked" => "#FFCC66",	// "orange",
 	"Failed" => "#FF6666"	// "red"
 	);
