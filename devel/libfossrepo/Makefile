@@ -27,6 +27,8 @@ libfossrepo.a: libfossrepo.c libfossrepo.h
 	$(RM) libfossrepo.a
 	$(CC) $(CFLAGS) -c libfossrepo.c
 	$(AR) cr libfossrepo.a libfossrepo.o
+	if [ ! -d ../lib ] ; then mkdir ../lib ; fi
+	if [ ! -d ../include ] ; then mkdir ../include ; fi
 	$(CP) libfossrepo.a ../lib/
 	$(CP) libfossrepo.h ../include/
 

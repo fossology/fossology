@@ -11,6 +11,8 @@ libfossdb.a: libfossdb.c libfossdb.h
 	$(RM) libfossdb.a
 	$(CC) $(CFLAGS) -c libfossdb.c
 	$(AR) cr libfossdb.a libfossdb.o
+	if [ ! -d ../lib ] ; then mkdir ../lib ; fi
+	if [ ! -d ../include ] ; then mkdir ../include ; fi
 	$(CP) libfossdb.a ../lib/
 	$(CP) libfossdb.h ../include/
 
