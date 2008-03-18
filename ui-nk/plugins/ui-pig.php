@@ -48,6 +48,7 @@ class ui_pig extends FO_Plugin
 	$V .= "Select your lipstick color: ";
 	global $DATADIR;
 	$V .= "<select id='lipstick' onchange='document.getElementById(\"pig\").style.background = document.getElementById(\"lipstick\").value'>\n";
+	$V .= "<option value='#FFFFFF'>Choose lipstick color by name...</option>\n";
 	global $DB;
 	$Results = $DB->Action("SELECT lic_name,lic_unique FROM agent_lic_raw WHERE lic_id = lic_pk ORDER BY lic_name;");
 	for($i=0; !empty($Results[$i]['lic_name']); $i++)
