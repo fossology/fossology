@@ -321,7 +321,7 @@ void	RecurseFiles	(char *S)
 	    {
 	    FILE *Fin;
 	    Fin = fopen64(NewS,"rb");
-	    if (!NewS)
+	    if (!Fin)
 	      fprintf(stderr,"ERROR: Cannot open file \"%s\".\n",NewS);
 	    else
 	      {

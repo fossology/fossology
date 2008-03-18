@@ -1144,11 +1144,11 @@ void	SetFilename	()
   do
     {
     F = GetFieldValue(F,Field,256,Value,1024);
-    if (Filename && !strcasecmp(Field,"A"))
+    if (!strcasecmp(Field,"A"))
       {
       strcpy(Filename,Value);
       }
-    if (Filename && !strcasecmp(Field,"Akey"))
+    if (!strcasecmp(Field,"Akey"))
       {
       strcpy(Pfile_fk,Value);
       }
@@ -1348,7 +1348,7 @@ int	main	(int argc, char *argv[])
     snprintf(Line,sizeof(Line),"A=\"%s\"",argv[optind]);
     if (Verbose) fprintf(stderr,"Processing %s\n",Line);
     SetFilename();	/* process line and find filename */
-    if (!Filename || Filename[0] == '\0') continue;
+    if (Filename[0] == '\0') continue;
     if (Verbose) { fprintf(stderr,"Processing file '%s'\n",Filename); }
     if (!PreprocessFile(0))
 	{
@@ -1381,7 +1381,7 @@ int	main	(int argc, char *argv[])
     while(EngineReadLine(Line,sizeof(Line)) > 0)
       {
       SetFilename();	/* process line and find filename */
-      if (!Filename || Filename[0] == '\0') continue;
+      if (Filename[0] == '\0') continue;
       if (!PreprocessFile(1))
 	  {
 	  if (Verbose) fprintf(stderr,"Child[%d] Something FAILED\n",getpid());
