@@ -256,7 +256,7 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
     }
 
   /* Create the SQL */
-  sprintf(LicSQL,"INSERT INTO agent_lic_raw (lic_id,lic_name,lic_section,lic_unique,lic_text) VALUES ('-1','%s','%s','%s','",Filename,Section,Unique);
+  sprintf(LicSQL,"INSERT INTO agent_lic_raw (lic_id,lic_name,lic_section,lic_unique,lic_text) VALUES ('-1','%s','%s','%s','",Filename,"",Unique);
   li = strlen(LicSQL);
   for(i=0; i<Length; i++)
     {
@@ -290,7 +290,7 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
     case -1: /* -1 is a duplicate constraint */
 	/* update the DB with the new filename */
 	memset(LicSQL,'\0',Len);
-	sprintf(LicSQL,"UPDATE agent_lic_raw SET lic_name='%s',lic_section='%s' WHERE lic_unique='%s' AND lic_version='1';",Filename,Section,Unique);
+	sprintf(LicSQL,"UPDATE agent_lic_raw SET lic_name='%s',lic_section='%s' WHERE lic_unique='%s' AND lic_version='1';",Filename,"",Unique);
 	DBaccess(DB,LicSQL);
 	break;
     default:
