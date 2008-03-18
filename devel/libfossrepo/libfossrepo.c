@@ -312,7 +312,7 @@ char *	RepMkPathTmp	(char *Type, char *Filename, char *Ext, int Which)
   /* create the name */
   Path = (char *)calloc(Len+1,1);
   Len=0; /* now Len is size of string */
-  if (RepPath) { strcat(Path,RepPath); strcat(Path,"/"); Len += strlen(RepPath)+1; }
+  { strcat(Path,RepPath); strcat(Path,"/"); Len += strlen(RepPath)+1; }
   if (Host) { strcat(Path,Host); strcat(Path,"/"); Len += strlen(Host)+1; }
   if (Type) { strcat(Path,Type); strcat(Path,"/"); Len += strlen(Type)+1; }
 
