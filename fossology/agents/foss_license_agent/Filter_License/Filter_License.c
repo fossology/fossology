@@ -241,7 +241,8 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
     {
     C=TH.Raw[MStart+i];
     if (!isalnum(C) && !ispunct(C) && (C != ' ')) Len+=4;
-    else if ((C == '\'') || (C == '\\')) Len+=4;
+    else if (C == '\'') Len+=2;
+    else if (C == '\\') Len+=4;
     else Len++;
     }
   /* Allocate space for the license (give me an extra K) */
@@ -265,7 +266,13 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
 	sprintf(LicSQL+li,"\\x%02x",C);
 	li+=4;
 	}
-    else if ((C == '\'') || (C == '\\'))
+    else if (C == '\'')
+	{
+	/* Convert ' to '' for DB protection */
+	LicSQL[li++] = '\'';
+	LicSQL[li++] = '\'';
+	}
+    else if (C == '\\')
 	{
 	sprintf(LicSQL+li,"\\x%02x",C);
 	li+=4;
