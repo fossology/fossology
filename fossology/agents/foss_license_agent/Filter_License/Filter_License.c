@@ -226,65 +226,21 @@ void	AddMetaToDB	(int LicPk)
 int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
 			 char *Section, fileoffset Start, fileoffset Length)
 {
-  int Len=0;
-  char *LicSQL; /* the license-insert SQL */
-  int C;
-  int i,li; /* index into LicSQL[] */
+  char LicSQL[1024]; /* the license-insert SQL */
   fileoffset MStart; /* start location into mmap */
   int LastAddPk;
 
   MStart = Start - TH.Start;
 
-  /* We need to know how long the license is.
-     This isn't just file length, since special characters get expanded. */
-  for(i=0; i<Length; i++)
-    {
-    C=TH.Raw[MStart+i];
-    if (!isalnum(C) && !ispunct(C) && (C != ' ')) Len+=4;
-    else if (C == '\'') Len+=2;
-    else if (C == '\\') Len+=4;
-    else Len++;
-    }
-  /* Allocate space for the license (give me an extra K) */
-  Len += 1024;
-  LicSQL = (char *)calloc(1,Len);
-  if (!LicSQL)
-    {
-    fprintf(stderr,"ERROR pfile %s Memory problem. Contact your administrator.\n",Pfile_fk);
-    fprintf(stderr,"LOG pfile %s Unable to allocate %d bytes. License '%s' not added to DB\n",Pfile_fk,Len,Filename);
-    return(-1);
-    }
-
   /* Check before adding */
+  memset(LicSQL,'\0',sizeof(LicSQL));
   sprintf(LicSQL,"SELECT lic_pk FROM agent_lic_raw WHERE lic_unique = '%s';",Unique);
   DBaccess(DB,LicSQL);
   if (DBdatasize(DB) <= 0) /* if it did not find the data, then INSERT */
     {
     /* Create the SQL */
-    sprintf(LicSQL,"INSERT INTO agent_lic_raw (lic_id,lic_name,lic_section,lic_unique,lic_text) VALUES ('-1','%s','%s','%s','",Filename,Section,Unique);
-    li = strlen(LicSQL);
-    for(i=0; i<Length; i++)
-      {
-      C=TH.Raw[MStart+i];
-      if (!isalnum(C) && !ispunct(C) && (C != ' '))
-	{
-	sprintf(LicSQL+li,"\\x%02x",C);
-	li+=4;
-	}
-      else if (C == '\'')
-	{
-	/* Convert ' to '' for DB protection */
-	LicSQL[li++] = '\'';
-	LicSQL[li++] = '\'';
-	}
-      else if (C == '\\')
-	{
-	sprintf(LicSQL+li,"\\x%02x",C);
-	li+=4;
-	}
-      else LicSQL[li++] = C;
-      }
-    strcat(LicSQL,"');");
+    memset(LicSQL,'\0',sizeof(LicSQL));
+    sprintf(LicSQL,"INSERT INTO agent_lic_raw (lic_id,lic_name,lic_section,lic_unique) VALUES ('-1','%s','%s','%s');",Filename,Section,Unique);
 
     /* Ok, we have the SQL query */
     switch(DBaccess(DB,LicSQL))
@@ -296,26 +252,24 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
 	{
 	fprintf(stderr,"ERROR pfile %s Bad database access.\n",Pfile_fk);
 	fprintf(stderr,"LOG pfile %s SQL error: %s\n",Pfile_fk,LicSQL);
-	free(LicSQL);
 	return(-1);
 	}
       }
     } /* if INSERT */
   else /* UPDATE record */
     {
-    memset(LicSQL,'\0',Len);
+    memset(LicSQL,'\0',sizeof(LicSQL));
     sprintf(LicSQL,"UPDATE agent_lic_raw SET lic_name='%s',lic_section='%s' WHERE lic_unique='%s' AND lic_version='1';",Filename,Section,Unique);
     DBaccess(DB,LicSQL);
     }
 
   /* We inserted!  Find the new primary key. */
-  memset(LicSQL,'\0',Len);
+  memset(LicSQL,'\0',sizeof(LicSQL));
   sprintf(LicSQL,"SELECT lic_pk FROM agent_lic_raw WHERE lic_name='%s' AND lic_section='%s' AND lic_unique='%s' AND lic_version='1';",Filename,Section,Unique);
   if (DBaccess(DB,LicSQL) < 0)
 	{
 	fprintf(stderr,"ERROR pfile %s Bad database access.\n",Pfile_fk);
 	fprintf(stderr,"LOG pfile %s SQL error: %s\n",Pfile_fk,LicSQL);
-	free(LicSQL);
 	return(-1);
 	}
   LastAddPk = atoi(DBgetvalue(DB,0,0));
@@ -336,8 +290,6 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
 
   /* Analyze table (for performance) */
   DBaccess(DB,"ANALYZE agent_lic_raw;");
-
-  free(LicSQL);
   return(Lic_Id);
 } /* AddLicenseToDB() */
 
