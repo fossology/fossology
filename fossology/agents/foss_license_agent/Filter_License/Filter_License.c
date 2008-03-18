@@ -255,51 +255,57 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
     return(-1);
     }
 
-  /* Create the SQL */
-  sprintf(LicSQL,"INSERT INTO agent_lic_raw (lic_id,lic_name,lic_section,lic_unique,lic_text) VALUES ('-1','%s','%s','%s','",Filename,"",Unique);
-  li = strlen(LicSQL);
-  for(i=0; i<Length; i++)
+  /* Check before adding */
+  sprintf(LicSQL,"SELECT lic_pk FROM agent_lic_raw WHERE lic_unique = '%s';",Unique);
+  DBaccess(DB,LicSQL);
+  if (DBdatasize(DB) <= 0) /* if it did not find the data, then INSERT */
     {
-    C=TH.Raw[MStart+i];
-    if (!isalnum(C) && !ispunct(C) && (C != ' '))
+    /* Create the SQL */
+    sprintf(LicSQL,"INSERT INTO agent_lic_raw (lic_id,lic_name,lic_section,lic_unique,lic_text) VALUES ('-1','%s','%s','%s','",Filename,Section,Unique);
+    li = strlen(LicSQL);
+    for(i=0; i<Length; i++)
+      {
+      C=TH.Raw[MStart+i];
+      if (!isalnum(C) && !ispunct(C) && (C != ' '))
 	{
 	sprintf(LicSQL+li,"\\x%02x",C);
 	li+=4;
 	}
-    else if (C == '\'')
+      else if (C == '\'')
 	{
 	/* Convert ' to '' for DB protection */
 	LicSQL[li++] = '\'';
 	LicSQL[li++] = '\'';
 	}
-    else if (C == '\\')
+      else if (C == '\\')
 	{
 	sprintf(LicSQL+li,"\\x%02x",C);
 	li+=4;
 	}
-    else LicSQL[li++] = C;
-    }
-  strcat(LicSQL,"');");
+      else LicSQL[li++] = C;
+      }
+    strcat(LicSQL,"');");
 
-  /* Ok, we have the SQL query */
-  switch(DBaccess(DB,LicSQL))
-    {
-    case 0: /* good SELECT */
-    case 1: /* good INSERT */
+    /* Ok, we have the SQL query */
+    switch(DBaccess(DB,LicSQL))
+      {
+      case 0: /* good SELECT */
+      case 1: /* good INSERT */
 	break;
-    case -1: /* -1 is a duplicate constraint */
-	/* update the DB with the new filename */
-	memset(LicSQL,'\0',Len);
-	sprintf(LicSQL,"UPDATE agent_lic_raw SET lic_name='%s',lic_section='%s' WHERE lic_unique='%s' AND lic_version='1';",Filename,"",Unique);
-	DBaccess(DB,LicSQL);
-	break;
-    default:
+      default:
 	{
 	fprintf(stderr,"ERROR pfile %s Bad database access.\n",Pfile_fk);
 	fprintf(stderr,"LOG pfile %s SQL error: %s\n",Pfile_fk,LicSQL);
 	free(LicSQL);
 	return(-1);
 	}
+      }
+    } /* if INSERT */
+  else /* UPDATE record */
+    {
+    memset(LicSQL,'\0',Len);
+    sprintf(LicSQL,"UPDATE agent_lic_raw SET lic_name='%s',lic_section='%s' WHERE lic_unique='%s' AND lic_version='1';",Filename,Section,Unique);
+    DBaccess(DB,LicSQL);
     }
 
   /* We inserted!  Find the new primary key. */
