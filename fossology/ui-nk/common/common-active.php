@@ -30,15 +30,14 @@ if (!isset($GlobalReady)) { exit; }
  ************************************************************/
 
 /*************************************************
- ActiveHTTPscript(): Given a URL, create the JavaScript
- needed for doing the request.
- The JavaScript returns the data.
+ ActiveHTTPscript(): Given a function name, create the
+ JavaScript needed for doing the request.
+ The JavaScript takes a URL and returns the data.
  The JavaScript is Asynchronous (no wait while the request goes on).
- The $URL can be a full URL or URI.
  The $RequestName is the JavaScript variable name to use.
  The javascript function is named "${RequestName}_Get"
  The javascript function "${RequestName}_Reply" must be defined for
- handling the reply.
+ handling the reply.  (You will need to make this Javascript function.)
  References:
    http://www.w3schools.com/xml/xml_http.asp
  *************************************************/
