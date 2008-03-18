@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class agent_unpack extends Plugin
+class agent_unpack extends FO_Plugin
 {
   public $Name       = "agent_unpack";
   public $Title      = "Schedule an Unpack";

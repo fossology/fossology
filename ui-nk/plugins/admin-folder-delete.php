@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class admin_folder_delete extends Plugin
+class admin_folder_delete extends FO_Plugin
 {
   public $Name       = "admin_folder_delete";
   public $Title      = "Delete Folder";

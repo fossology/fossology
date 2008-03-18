@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_treenav extends Plugin
+class ui_treenav extends FO_Plugin
   {
   var $Name       = "treenav";
   var $Version    = "1.0";

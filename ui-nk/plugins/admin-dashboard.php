@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class dashboard extends Plugin
+class dashboard extends FO_Plugin
   {
   var $Name       = "dashboard";
   var $Version    = "1.0";

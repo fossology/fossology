@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class jobs_runningjobs extends Plugin
+class jobs_runningjobs extends FO_Plugin
   {
   var $Name       = "runningjobs";
   var $Title      = "Show Agent Status";

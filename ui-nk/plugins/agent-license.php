@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class agent_license extends Plugin
+class agent_license extends FO_Plugin
 {
   public $Name       = "agent_license";
   public $Title      = "Schedule License Analysis";

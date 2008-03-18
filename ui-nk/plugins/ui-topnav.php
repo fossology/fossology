@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_topnav extends Plugin
+class ui_topnav extends FO_Plugin
   {
   var $Name       = "topnav";
   var $Version    = "1.0";

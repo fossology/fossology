@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class core_init extends Plugin
+class core_init extends FO_Plugin
   {
   var $Name       = "init";
   var $Title      = "Initialize";

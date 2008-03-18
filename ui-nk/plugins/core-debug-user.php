@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class debug_user extends Plugin
+class debug_user extends FO_Plugin
   {
   var $Name       = "debug_user";
   var $Version    = "1.0";

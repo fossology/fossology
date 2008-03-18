@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class user_edit_self extends Plugin
+class user_edit_self extends FO_Plugin
 {
   var $Name       = "user_edit_self";
   var $Title      = "Edit Your Account Settings";

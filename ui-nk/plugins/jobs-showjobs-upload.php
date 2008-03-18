@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class jobs_showjobs_upload extends Plugin
+class jobs_showjobs_upload extends FO_Plugin
 {
   var $Name       = "jobs_showjobs_upload";
   var $Title      = "View Jobs By Upload";

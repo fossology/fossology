@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_view_info extends Plugin
+class ui_view_info extends FO_Plugin
   {
   var $Name       = "view_info";
   var $Title      = "View File Information";

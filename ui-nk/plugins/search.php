@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_search extends Plugin
+class ui_search extends FO_Plugin
   {
   var $Name       = "search";
   var $Title      = "Search";

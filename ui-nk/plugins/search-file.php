@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class search_file extends Plugin
+class search_file extends FO_Plugin
   {
   var $Name       = "search_file";
   var $Title      = "Search for File";

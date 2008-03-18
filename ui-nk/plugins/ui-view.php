@@ -28,7 +28,7 @@ define("VIEW_BLOCK_HEX",8192);
 define("VIEW_BLOCK_TEXT",20*VIEW_BLOCK_HEX);
 define("MAXHIGHLIGHTCOLOR",8);
 
-class ui_view extends Plugin
+class ui_view extends FO_Plugin
   {
   var $Name       = "view";
   var $Title      = "View File";

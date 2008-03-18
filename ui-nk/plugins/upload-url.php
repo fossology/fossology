@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class upload_url extends Plugin
+class upload_url extends FO_Plugin
 {
   public $Name       = "upload_url";
   public $Title      = "Upload a New File";

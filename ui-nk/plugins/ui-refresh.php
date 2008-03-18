@@ -24,7 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_refresh extends Plugin
+class ui_refresh extends FO_Plugin
   {
   var $Name       = "refresh";
   var $Version    = "1.0";
