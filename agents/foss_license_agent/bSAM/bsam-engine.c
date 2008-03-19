@@ -169,6 +169,15 @@
    the file first and storing them in a cache.
    For bSAM, the preprocessing has been moved into the Filter_License program.
 
+ - Remove non-matches.
+   The matrix takes the most time.  However, if the starting tokens in
+   A have no matches in B, then there is no reason to process those
+   columns.  Similarly, there is no need to check unmatched token at the
+   end of A, or at the start or end of B.  In the worst case, this will
+   remove nothing.  In the best case, the entire comparison can be skipped
+   (skipping the whole matrix!).  In the average case, large sections of A
+   and B can be skipped.
+
  A note about other PAM variations:
 
  There is another (very different) variation of this algorithm called "pam".
@@ -264,8 +273,8 @@ int MatrixSize=0;	/* the allocated size of the matrix */
 /* for matching */
 int	MatchThreshold[2]={90,90};
 int	MatchGap[2]={5,5};	/* maximum gap between sequences */
-int	MatchSeq[2]={10,10};	/* minimum sequences to match */
 int	MatchLen[2]={10,10};	/* minimum sequences to check */
+int	MatchSeq[2]={10,10};	/* minimum sequences to match */
 
 struct path
     {
@@ -1486,6 +1495,80 @@ inline int	GetSeqRange	()
 #define	SetData(x)	(MS.Label[x].MmapOffset = 0)
 
 /**********************************************
+ OptimizeMatrixRange(): Rather than comparing
+ all symbols with all symbols, we can skip everything
+ at the beginning and end that has no matches.
+ This function identifies the range of available
+ tokens and moves the min/max ranges accordingly.
+ Returns 0 if no possible match, 1 if there is a match.
+ **********************************************/
+#define ByteMask(src,byte,mask)	{ (byte) = (src)/8; (mask) = 1<<(src)%8; }
+inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
+{
+  int a,b;
+  uint16_t Val,Byte,Mask;
+  /* List of known symbols.
+     Two lists: A and B
+     Since a token is 2 bytes, that means 65536 max */
+  /** For space, I am converting bytes to bits:
+      2*65536 = 128K.  But as bits, it is 16K. **/
+  static uint8_t Symbol[2][8192];
+
+  // printf("Was: [%d,%d] [%d,%d]\n",*MinA,*MaxA,*MinB,*MaxB);
+  memset(Symbol,0,sizeof(uint8_t)*2*8192);
+
+  /* Populate the known symbols */
+  for(a = *MinA; a < *MaxA; a++)
+    {
+    Val = MS.Symbols[0].Symbol[a];
+    ByteMask(Val,Byte,Mask);
+    Symbol[0][Byte] |= Mask;
+    }
+  for(b = *MinB; b < *MaxB; b++)
+    {
+    Val = MS.Symbols[1].Symbol[b];
+    ByteMask(Val,Byte,Mask);
+    Symbol[1][Byte] |= Mask;
+    }
+
+  /* Find the first symbol that matches */
+  for(a = *MinA; a < *MaxA; a++)
+    {
+    Val = MS.Symbols[0].Symbol[a];
+    ByteMask(Val,Byte,Mask);
+    if ((Symbol[1][Byte] | Mask) != 0) { break; }
+    }
+  *MinA = a;
+  for(a = *MaxA - 1; a > *MinA; a--)
+    {
+    Val = MS.Symbols[0].Symbol[a];
+    ByteMask(Val,Byte,Mask);
+    if ((Symbol[1][Byte] | Mask) != 0) { break; }
+    }
+  *MaxA = a+1;
+  if (*MaxA - *MinA <= MatchLen[0]) { return(0); }
+
+  for(b = *MinB; b < *MaxB; b++)
+    {
+    Val = MS.Symbols[1].Symbol[b];
+    ByteMask(Val,Byte,Mask);
+    if ((Symbol[0][Byte] | Mask) != 0) { break; }
+    }
+  *MinB = b;
+  for(b = *MaxB - 1; b > *MinB; b--)
+    {
+    Val = MS.Symbols[1].Symbol[b];
+    ByteMask(Val,Byte,Mask);
+    if ((Symbol[0][Byte] | Mask) != 0) { break; }
+    }
+  *MaxB = b+1;
+  if (*MaxB - *MinB <= MatchLen[1]) { return(0); }
+
+  // printf("Now: [%d,%d] [%d,%d]\n",*MinA,*MaxA,*MinB,*MaxB);
+  return(1);
+} /* OptimizeMatrixRange() */
+
+/**********************************************
  ComputeMatrix(): Fill the matrix based on the
  stored symbols.
  This can get very slow for vary large matricies.
@@ -1575,6 +1658,8 @@ int	ComputeMatrix	()
   MaxB -= MS.Symbols[1].SymbolStart;
 
   if ((MaxA <= 0) || (MaxB <= 0)) return(0); /* No symbols */
+
+  if (!OptimizeMatrixRange(&MinA,&MaxA,&MinB,&MaxB)) return(0);
 
 #if 0
   printf("\n");
