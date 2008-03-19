@@ -61,6 +61,8 @@ class agent_unpack extends FO_Plugin
 
   /*********************************************
    AgentAdd(): Given an uploadpk, add a job.
+   $Depends is for specifying other dependencies.
+   $Depends can be a jq_pk, or an array of jq_pks, or NULL.
    Returns NULL on success, string on failure.
    *********************************************/
   function AgentAdd ($uploadpk,$Depends=NULL)
@@ -68,6 +70,7 @@ class agent_unpack extends FO_Plugin
     /* Prepare the job: job "unpack" */
     $jobpk = JobAddJob($uploadpk,"unpack");
     if (empty($jobpk)) { return("Failed to insert job record"); }
+    if (!empty($Depends) && !is_array($Depends)) { $Depends = array($Depends); }
 
     /* Prepare the job: job "unpack" has jobqueue item "unpack" */
     $jqargs = "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile,
