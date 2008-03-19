@@ -61,6 +61,8 @@ class agent_pkgmetagetta extends FO_Plugin
 
   /*********************************************
    AgentAdd(): Given an uploadpk, add a job.
+   $Depends is for specifying other dependencies.
+   $Depends can be a jq_pk, or an array of jq_pks, or NULL.
    Returns NULL on success, string on failure.
    *********************************************/
   function AgentAdd ($uploadpk,$Depends=NULL)
@@ -83,6 +85,9 @@ class agent_pkgmetagetta extends FO_Plugin
 	$Dep = $Results[0]['jq_pk'];
 	if (empty($Dep)) { return("Unable to find dependent job: unpack"); }
 	}
+    $Dep = array($Dep);
+    if (is_array($Depends)) { $Dep = array_merge($Dep,$Depends); }
+    else if (!empty($Depends)) { $Dep[1] = $Depends; }
 
     /* Prepare the job: job "Default Meta Agents" */
     $jobpk = JobAddJob($uploadpk,"Default Meta Agents");
@@ -110,7 +115,7 @@ class agent_pkgmetagetta extends FO_Plugin
 	LIMIT 5000;";
 
     /* Add job: job "Default Meta Agents" has jobqueue item "pkgmetagetta" */
-    $jobqueuepk = JobQueueAdd($jobpk,"pkgmetagetta",$jqargs,"yes","a",array($Dep));
+    $jobqueuepk = JobQueueAdd($jobpk,"pkgmetagetta",$jqargs,"yes","a",$Dep);
     if (empty($jobqueuepk)) { return("Failed to insert pkgmetagetta into job queue"); }
     return(NULL);
   } // AgentAdd()
