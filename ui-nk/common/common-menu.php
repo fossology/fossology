@@ -79,7 +79,7 @@ function MenuEndlessPage      ($Page,$Next=1)
         {
         $i = $Page+1;
         $V .= " <a href='$Uri&page=$i'>" . ($i+1) . "</a>";
-        $V .= " <a href='$Uri&page=$i'>[Next]</a>";
+        $V .= " ... <a href='$Uri&page=$i'>[Next]</a>";
         }
   $V .= "</center></font>";
   return($V);
