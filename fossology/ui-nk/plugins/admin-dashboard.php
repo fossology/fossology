@@ -93,6 +93,31 @@ class dashboard extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
+	/**************************************************/
+	$V .= "<table border=0 width='100%'><tr><td align='left' valign='top'>\n";
+
+	$V .= "<H2>Job Queue</H2>\n";
+	$V .= "<table border=1>\n";
+	$V .= "<tr><th>Queue Information</th><th>Total</th></tr>\n";
+
+	$Results = $DB->Action("SELECT COUNT(DISTINCT jq_job_fk) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
+	$V .= "<tr><td>Pending Analysis Jobs</td>";
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
+	$V .= "<tr><td>Tasks in the Job Queue</td>";
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
+	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL AND jq_starttime IS NOT NULL;");
+	$V .= "<tr><td>Running Tasks</td>";
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
+	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NOT NULL AND jq_end_bits=2;");
+	$V .= "<tr><td>Failed Tasks</td>";
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
+
+	$V .= "</table>\n";
+
+	$V .= "</td><td align='left' valign='top'>\n";
+
+	/**************************************************/
 	$V .= "<H2>Database Contents</H2>\n";
 	$V .= "<table border=1>\n";
 	$V .= "<tr><th>Metric</th><th>Total</th></tr>\n";
@@ -113,6 +138,9 @@ class dashboard extends FO_Plugin
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$V .= "</table>\n";
 
+	$V .= "</td></tr></table>\n";
+
+	/**************************************************/
 	$V .= "<H2>Repository Disk Space</H2>\n";
 	$V .= $this->DiskFree();
 
