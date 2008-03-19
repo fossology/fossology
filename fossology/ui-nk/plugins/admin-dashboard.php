@@ -94,7 +94,7 @@ class dashboard extends FO_Plugin
 	break;
       case "HTML":
 	/**************************************************/
-	$V .= "<table border=0 width='100%'><tr><td align='left' valign='top'>\n";
+	$V .= "<table border=0 width='100%'><tr><td valign='top'>\n";
 
 	$V .= "<H2>Job Queue</H2>\n";
 	$V .= "<table border=1>\n";
@@ -115,7 +115,7 @@ class dashboard extends FO_Plugin
 
 	$V .= "</table>\n";
 
-	$V .= "</td><td align='left' valign='top'>\n";
+	$V .= "</td><td valign='top'>\n";
 
 	/**************************************************/
 	$V .= "<H2>Database Contents</H2>\n";
