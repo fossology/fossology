@@ -239,6 +239,49 @@ function JobAddUpload ($job_name,$filename,$desc,$UploadMode,$FolderPk)
 } // JobAddUpload()
 
 /************************************************************
+ JobQueueFindKey(): Given a job_pk and a jobqueue name, returns
+ the jq_pk, or -1 if it does not exist.
+ If you don't have a JobPk, use JobFindKey().
+ ************************************************************/
+function JobQueueFindKey	($JobPk, $Name)
+{
+  global $DB;
+  if (empty($DB)) { return; }
+  if (empty($JobPk)) { return(-1); }
+  $Name = str_replace("'","''",$Name);
+  $SQLSelect = "SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$JobPk' AND jq_type = '$Name';";
+  $Results = $DB->Action($SQLSelect);
+  $jqpk = $Results[0]['jq_pk'];
+  if (!empty($jqpk)) { return($jqpk); }
+  return(-1);
+} // JobQueueFindKey()
+
+/************************************************************
+ JobFindKey(): Given an upload_pk and a job name, returns
+ the job_pk, or -1 if it does not exist.
+ ************************************************************/
+function JobFindKey	($UploadPk, $JobName)
+{
+  global $DB;
+  if (empty($DB)) { return; }
+
+  $JobName = str_replace("'","''",$JobName);
+  if (empty($UploadPk))
+    {
+    $SQLSelect = "SELECT job_pk FROM job WHERE job_upload_fk IS NULL AND job_name = '$JobName';";
+    }
+  else
+    {
+    $SQLSelect = "SELECT job_pk FROM job WHERE job_upload_fk = '$UploadPk' AND job_name = '$JobName';";
+    }
+
+  $Results = $DB->Action($SQLSelect);
+  $jobpk = $Results[0]['job_pk'];
+  if (!empty($jobpk)) { return($jobpk); }
+  return(-1);
+} // JobFindKey()
+
+/************************************************************
  JobAddJob(): Insert a new job type (not a jobqueue item).
  NOTE: If the Job already exists, then it will not be added again.
  Returns the job_pk.
@@ -257,22 +300,19 @@ function JobAddJob ($upload_pk, $job_name,
 
   if (empty($upload_pk))
     {
-    $SQLSelect = "SELECT job_pk FROM job WHERE job_upload_fk IS NULL AND job_name = '$job_name';";
     $SQLInsert = "INSERT INTO job
 	(job_submitter,job_queued,job_priority,job_email_notify,job_name) VALUES
 	('$job_submitter',now(),'$priority','$job_email_notify','$job_name');";
     }
   else
     {
-    $SQLSelect = "SELECT job_pk FROM job WHERE job_upload_fk = '$upload_pk' AND job_name = '$job_name';";
     $SQLInsert = "INSERT INTO job
 	(job_submitter,job_queued,job_priority,job_email_notify,job_name,job_upload_fk) VALUES
 	('$job_submitter',now(),'$priority','$job_email_notify','$job_name','$upload_pk');";
     }
 
-  $Results = $DB->Action($SQLSelect);
-  $jobpk = $Results[0]['job_pk'];
-  if (!empty($jobpk)) { return($jobpk); }
+  $jobpk = JobFindKey($upload_pk,$job_name);
+  if ($jobpk >= 0) { return($jobpk); }
 
   $DB->Action($SQLInsert);
   $Results = $DB->Action($SQLSelect);
@@ -357,11 +397,51 @@ function JobQueueAdd ($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $
 /************************************************************
  JobChangeStatus(): Mark the entire job as "reset", "fail", or
  "succeed".
+ Returns 0 on success, non-0 on failure.
  ************************************************************/
+function JobChangeStatus	($jobpk,$Status)
+{
+  if (empty($jobpk) || ($jobpk < 0)) { return(-1); }
+  global $DB;
+  switch($Status)
+    {
+    case "reset":
+	$SQL = "UPDATE jobqueue SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0 WHERE jq_job_fk = '$jobpk'";
+	break;
+    case "fail":
+	$SQL = "UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2 WHERE jq_job_fk = '$jobpk' AND jq_starttime IS NULL; UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2 WHERE jq_job_fk = '$jobpk' AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;";
+	break;
+    case "succeed":
+	$SQL = "UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1 WHERE jq_job_fk = '$jobpk' AND jq_starttime IS NULL; UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1 WHERE jq_job_fk = '$jobpk' AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;";
+	break;
+    default:
+	return(-1);
+    }
+} // JobChangeStatus()
 
 /************************************************************
  JobQueueChangeStatus(): Change the jobqueue item status.
  This can be "reset", "fail", "succeed".
+ Returns 0 on success, non-0 on failure.
  ************************************************************/
+function JobQueueChangeStatus	($jqpk,$Status)
+{
+  if (empty($jqpk) || ($jqpk < 0)) { return(-1); }
+  global $DB;
+  switch($Status)
+    {
+    case "reset":
+	$SQL = "UPDATE jobqueue SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0 WHERE jq_fk = '$jqpk'";
+	break;
+    case "fail":
+	$SQL = "UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2 WHERE jq_pk = '$jqpk' AND jq_starttime IS NULL; UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2 WHERE jq_pk = '$jqpk' AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;";
+	break;
+    case "succeed":
+	$SQL = "UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1 WHERE jq_pk = '$jqpk' AND jq_starttime IS NULL; UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1 WHERE jq_pk = '$jqpk' AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;";
+	break;
+    default:
+	return(-1);
+    }
+} // JobQueueChangeStatus()
 
 ?>
