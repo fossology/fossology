@@ -292,9 +292,9 @@ class jobs_showjobs extends FO_Plugin
 	if ($First) { $First=0; }
 	else { $V .= "</table>\n<P />\n"; }
 	$V .= "<table class='text' border=1 width='100%'>\n";
-	if (!empty($Row['upload_desc'])) $JobName = $Row['upload_desc'];
-	else if (!empty($Row['upload_filename'])) { $JobName = $Row['upload_filename']; }
-	else { $JobName = "[Default]"; }
+	$JobName = preg_replace("@^.*/@","",$Row['upload_filename']);
+	if (empty($JobName)) { $JobName = "[Default]"; }
+	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
 	$V .= "<tr><th colspan=4 style='background:#202020;color:white;'>$JobName</font></th></tr>\n";
 	}
 
@@ -426,9 +426,9 @@ class jobs_showjobs extends FO_Plugin
 	if ($First) { $First=0; }
 	else { $V .= "</table>\n<P />\n"; }
 	$V .= "<table class='text' border=1 width='100%'>\n";
-	if (!empty($Row['upload_desc'])) { $JobName = $Row['upload_desc']; }
-	else if (!empty($Row['upload_filename'])) { $JobName = $Row['upload_filename']; }
-	else { $JobName = "[Default]"; }
+	$JobName = preg_replace("@^.*/@","",$Row['upload_filename']);
+	if (empty($JobName)) { $JobName = "[Default]"; }
+	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
 	$V .= "<tr><th colspan=3 style='background:#202020;color:white;'>$JobName</th></tr>\n";
 	}
       if ($Job != $Row['jq_job_fk'])
