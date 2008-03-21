@@ -160,7 +160,19 @@ function JobQueueAddDependency($JobQueueChild, $JobQueueParent)
 {
   global $DB;
   if (empty($DB)) { return; }
-  $DB->Action("INSERT INTO jobdepends (jdep_jq_fk,jdep_jq_depends_fk,jdep_depends_bits) VALUES ('$JobQueueChild','$JobQueueParent',1);");
+
+  /* See if the dependency exists */
+  $Results = $DB->Action("SELECT * FROM jobdepends
+	WHERE jdep_jq_fk = '$JobQueueChild'
+	AND jdep_jq_depends_fk = '$JobQueueParent'
+	AND jdep_depends_bits = 1;");
+  if (!empty($Results[0]['jdep_jq_fk'])) { return;} // Already exists
+
+  /* Add it since it is missing */
+  $DB->Action("INSERT INTO jobdepends
+	(jdep_jq_fk,jdep_jq_depends_fk,jdep_depends_bits)
+	VALUES
+	('$JobQueueChild','$JobQueueParent',1);");
 } // JobQueueAddDependency()
 
 /************************************************************
@@ -264,7 +276,6 @@ function JobFindKey	($UploadPk, $JobName)
 {
   global $DB;
   if (empty($DB)) { return; }
-
   $JobName = str_replace("'","''",$JobName);
   if (empty($UploadPk))
     {
@@ -274,7 +285,6 @@ function JobFindKey	($UploadPk, $JobName)
     {
     $SQLSelect = "SELECT job_pk FROM job WHERE job_upload_fk = '$UploadPk' AND job_name = '$JobName';";
     }
-
   $Results = $DB->Action($SQLSelect);
   $jobpk = $Results[0]['job_pk'];
   if (!empty($jobpk)) { return($jobpk); }
