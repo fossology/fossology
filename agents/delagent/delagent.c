@@ -74,7 +74,7 @@ void    ShowHeartbeat   (int Sig)
 int	MyDBaccess	(void *V, char *S)
 {
   int rc;
-  if (Verbose) printf("%s\n",S);
+  if (Verbose > 1) printf("%s\n",S);
   rc = DBaccess(V,S);
   if (rc < 0)
 	{
@@ -97,13 +97,23 @@ void	DeleteLicense	(long UploadId)
   void *VDB;
   char *S;
   int Row,MaxRow;
+  char TempTable[256];
 
+  if (Verbose) { printf("Deleting licenses for upload %ld\n",UploadId); }
   DBaccess(DB,"SET statement_timeout = 0;"); /* no timeout */
   MyDBaccess(DB,"BEGIN;");
+  memset(TempTable,'\0',sizeof(TempTable));
+  snprintf(TempTable,sizeof(TempTable),"DelLic_%ld",UploadId);
+
+  /* Create the temp table */
+  if (Verbose) { printf("  Creating temp table: %s\n",TempTable); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT ufile_pk,pfile_pk INTO TEMP %s FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk = '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk;",TempTable,UploadId);
+  MyDBaccess(DB,SQL);
 
   /* Get the list of pfiles to process */
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_fk) FROM uptreeup WHERE upload_fk=%ld;",UploadId);
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_pk) FROM %s;",TempTable);
   MyDBaccess(DB,SQL);
   VDB = DBmove(DB);
 
@@ -140,6 +150,7 @@ void	DeleteLicense	(long UploadId)
 	/* use heartbeat to say how many are completed */
 	raise(SIGALRM);
 	}
+  if (Verbose) { printf("Deleted licenses for upload %ld\n",UploadId); }
 } /* DeleteLicense() */
 
 /*********************************************
@@ -150,66 +161,128 @@ void	DeleteUpload	(long UploadId)
   void *VDB;
   char *S;
   int Row,MaxRow;
+  char TempTable[256];
 
+  if (Verbose) { printf("Deleting upload %ld\n",UploadId); }
   DBaccess(DB,"SET statement_timeout = 0;"); /* no timeout */
   MyDBaccess(DB,"BEGIN;");
+  memset(TempTable,'\0',sizeof(TempTable));
+  snprintf(TempTable,sizeof(TempTable),"DelUp_%ld",UploadId);
+
+  /***********************************************
+   Fun SQL:  (Assume UploadId = 48)
+
+   BEGIN;
+   -- Dump all ufile and pfile for this project into a table
+   SELECT ufile_pk,pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile
+   INTO agenttemp
+   FROM uploadtree
+   INNER JOIN ufile ON uploadtree.upload_fk = '48'
+   AND uploadtree.ufile_fk = ufile.ufile_pk
+   INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk;
+
+   -- Show each pfile used by this project
+   SELECT DISTINCT pfile,pfile_pk FROM agenttemp
+   ORDER BY pfile_pk;
+
+   -- Show pfile reuse WITHIN the project
+   SELECT pfile_pk,COUNT(pfile_pk) AS count FROM agenttemp
+   GROUP BY pfile_pk ORDER BY count,pfile_pk;
+
+   -- Show each pfile used by ONLY this project
+   -- For some weird reason, the inner join on pfile is needed.
+   -- You would think that it would not be needed because of pfile_fk.
+   -- However, pfile_fk returns 899199 rows, while pfile_pk returns 899198 rows.
+   -- And when used with the EXCEPT, pfile_fk (without the join to pfile)
+   -- return nothing!  While pfile_fk or pfile_pk WITH the join to pfile
+   -- returns the correct results.
+   SELECT DISTINCT pfile_pk,pfile FROM agenttemp
+   WHERE pfile_pk NOT IN
+   (
+   SELECT DISTINCT pfile_pk
+   FROM uploadtree
+   INNER JOIN ufile ON uploadtree.upload_fk != '48'
+   AND uploadtree.ufile_fk = ufile.ufile_pk
+   INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk
+   )
+   ORDER BY pfile_pk;
+
+   -- Show all ufiles ONLY used by this project
+   SELECT distinct agenttemp.ufile_pk FROM agenttemp EXCEPT
+   (
+   SELECT distinct agenttemp.ufile_pk FROM agenttemp
+   INNER JOIN uploadtree
+   ON uploadtree.upload_fk != '48'
+   AND agenttemp.ufile_pk = uploadtree.ufile_fk
+   );
+
+   ROLLBACK;
+   ***********************************************/
+
+  /* Create the temp table */
+  if (Verbose) { printf("  Creating temp table: %s\n",TempTable); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT ufile_pk,pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO TEMP %s FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk = '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk;",TempTable,UploadId);
+  MyDBaccess(DB,SQL);
 
   /* Get the list of pfiles to delete */
+/*** NAK: This is failing for pfile_pk = 31 (0-length file).  For some reason, this is selecting non-unique pfiles.  ***/
   /** These are all pfiles in the upload_fk that only appear once. **/
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_fk),pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile FROM uptreeup WHERE upload_fk = %ld AND pfile_fk NOT IN (SELECT DISTINCT(pfile_fk) FROM uptreeup WHERE upload_fk != %ld) ORDER BY pfile_fk;",UploadId,UploadId);
+  if (Verbose) { printf("  Getting list of pfiles to delete\n"); }
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT pfile_pk,pfile FROM %s WHERE pfile_pk NOT IN ( SELECT DISTINCT pfile_pk FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk != '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk) ORDER BY pfile_pk;",TempTable,UploadId);
   MyDBaccess(DB,SQL);
   VDB = DBmove(DB);
 
   /***********************************************/
   /* Delete the upload from the folder-contents table */
   memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("  Deleting foldercontents\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE (foldercontents_mode & 2) != 0 AND child_id = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   /***********************************************/
   /* Blow away jobs */
   memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("  Deleting jobdepends\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM jobdepends WHERE jdep_jq_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk IN (SELECT job_pk FROM job WHERE job_upload_fk = %ld));",UploadId);
   MyDBaccess(DB,SQL);
 
   memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("  Deleting jobqueue\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM jobqueue WHERE jq_job_fk IN (SELECT job_pk FROM job WHERE job_upload_fk = %ld);",UploadId);
   MyDBaccess(DB,SQL);
 
   memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("  Deleting job\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM job WHERE job_upload_fk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   /***********************************************/
-  /* Blow upload tree */
+  /* Blow away upload tree */
   memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("  Deleting uploadtree\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM uploadtree WHERE upload_fk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("  Deleting upload\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM upload WHERE upload_pk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   /***********************************************/
   /* Delete unused ufiles */
-
-/*** Commented out because -- for huge uploads -- this can take more
-     than two minutes.  The result is a ton of locked rows and a flood
-     of DB timeouts and delays.
- ***/
-#if 0
+  /** All of the project info has been deleted.  This deletes any
+      ufile only associated with this project. **/
+  if (Verbose) { printf("  Deleting list of ufiles\n"); }
   memset(SQL,'\0',sizeof(SQL));
-  /** All of the project info has been deleted.  This simply deletes any
-      ufile that is no longer associated with any projects. **/
-  /** Delete any ufile not used by uploadtree AND not used by upload. **/
-  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE ufile_pk NOT IN (SELECT DISTINCT(ufile_fk) FROM uploadtree) AND ufile_pk NOT IN (SELECT DISTINCT(ufile_fk) FROM upload);");
+  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE ufile_pk IN (SELECT distinct ufile_pk FROM %s EXCEPT SELECT distinct ufile_pk FROM %s INNER JOIN uploadtree ON uploadtree.upload_fk != '%ld' AND ufile_pk = uploadtree.ufile_fk);",TempTable,TempTable,UploadId);
   MyDBaccess(DB,SQL);
-#endif
 
   /***********************************************/
   /* delete pfiles that are missing reuse in the DB */
   MaxRow = DBdatasize(VDB);
+  if (Verbose) { printf("  Deleting pfile dependencies and pfiles\n"); }
   for(Row=0; Row<MaxRow; Row++)
     {
     S = DBgetvalue(VDB,Row,0);
@@ -232,10 +305,16 @@ void	DeleteUpload	(long UploadId)
 
   /***********************************************/
   /* Commit the change! */
-  if (Test) MyDBaccess(DB,"ROLLBACK;");
+  if (Test)
+	{
+	if (Verbose) { printf("  ROLLBACK\n"); }
+	MyDBaccess(DB,"ROLLBACK;");
+	}
   else
 	{
+	if (Verbose) { printf("  COMMIT\n"); }
 	MyDBaccess(DB,"COMMIT;");
+	if (Verbose) { printf("  VACUUM and ANALYZE\n"); }
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
 	MyDBaccess(DB,"VACUUM ANALYZE attrib;");
@@ -249,6 +328,8 @@ void	DeleteUpload	(long UploadId)
 	MyDBaccess(DB,"VACUUM ANALYZE job;");
 	}
   DBaccess(DB,"SET statement_timeout = 120000;");
+
+  if (Verbose) { printf("Deleted upload %ld DB, now doing repository.\n",UploadId); }
 
   /***********************************************/
   /* Whew!  Now to delete the actual pfiles from the repository. */
@@ -280,6 +361,7 @@ void	DeleteUpload	(long UploadId)
 	/* use heartbeat to say how many are completed */
 	raise(SIGALRM);
 	}
+  if (Verbose) { printf("Deleted upload %ld\n",UploadId); }
 } /* DeleteUpload() */
 
 /*********************************************
