@@ -144,6 +144,7 @@ class core_auth extends FO_Plugin
 	$_SESSION['User'] = NULL;
 	$_SESSION['UserId'] = NULL;
 	$_SESSION['UserLevel'] = NULL;
+	$_SESSION['UserEmail'] = NULL;
 	$_SESSION['Folder'] = NULL;
 	}
       }
@@ -159,6 +160,7 @@ class core_auth extends FO_Plugin
 	$_SESSION['User'] = NULL;
 	$_SESSION['UserId'] = NULL;
 	$_SESSION['UserLevel'] = NULL;
+	$_SESSION['UserEmail'] = NULL;
 	$_SESSION['Folder'] = NULL;
 	$_SESSION['ip'] = $this->GetIP();
 	}
@@ -180,6 +182,7 @@ class core_auth extends FO_Plugin
 	$_SESSION['User'] = $R['user_name'];
 	$_SESSION['Folder'] = $R['root_folder_fk'];
 	$_SESSION['UserLevel'] = $R['user_perm'];
+	$_SESSION['UserEmail'] = $R['user_email'];
 	$Level = $_SESSION['UserLevel'];
 	/* Check for instant logouts */
 	if (empty($R['user_pass']))
@@ -187,6 +190,7 @@ class core_auth extends FO_Plugin
 		$_SESSION['User'] = NULL;
 		$_SESSION['UserId'] = NULL;
 		$_SESSION['UserLevel'] = NULL;
+		$_SESSION['UserEmail'] = NULL;
 		$_SESSION['Folder'] = NULL;
 		$Level = PLUGIN_DB_READ;
 		}
@@ -249,6 +253,7 @@ class core_auth extends FO_Plugin
     /* If you make it here, then username and password were good! */
     $_SESSION['User'] = $R['user_name'];
     $_SESSION['UserId'] = $R['user_pk'];
+    $_SESSION['UserEmail'] = $R['user_email'];
     $_SESSION['Folder'] = $R['root_folder_fk'];
     $_SESSION['time_check'] = time() + 10*60;
     /* No specified permission means ALL permission */
@@ -333,6 +338,7 @@ class core_auth extends FO_Plugin
 	  $_SESSION['User'] = NULL;
 	  $_SESSION['UserId'] = NULL;
 	  $_SESSION['UserLevel'] = NULL;
+	  $_SESSION['UserEmail'] = NULL;
 	  $_SESSION['Folder'] = NULL;
 	  $V .= "<script language='javascript'>\n";
 	  $V .= "alert('User Logged Out')\n";
