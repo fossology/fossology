@@ -82,6 +82,7 @@ class ui_browse extends FO_Plugin
     global $DB;
     /* Use plugin "view" and "download" if they exist. */
     $ModView = &$Plugins[plugin_find_id("view")]; /* may be null */
+    $ModViewMeta = &$Plugins[plugin_find_id("view_meta")]; /* may be null */
     $ModDownload = &$Plugins[plugin_find_id("download")]; /* may be null */
     $ModLicense = &$Plugins[plugin_find_id("license")]; /* may be null */
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
@@ -108,6 +109,7 @@ class ui_browse extends FO_Plugin
       if (!empty($Row['pfile_fk']))
 	{
 	$View = Traceback_uri() . "?mod=view&upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
+	$Meta = Traceback_uri() . "?mod=view_meta&upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
 	$Download = Traceback_uri() . "?mod=download&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
 	$License = Traceback_uri() . "?mod=license&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
 	}
@@ -119,14 +121,7 @@ class ui_browse extends FO_Plugin
         {
 	if (empty($C['ufile_name'])) { continue; }
         $CountChildren++;
-	if (Isartifact($C['ufile_mode']))
-	  {
-	  if (!Isdir($C['ufile_mode']) && (!strcmp($C['ufile_name'],"artifact.meta")))
-		{
-		$Meta = Traceback_uri() . "?mod=view&upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
-		}
-	  }
-	else { $HasRealChildren = 1; }
+	if (!Isartifact($C['ufile_mode'])) { $HasRealChildren = 1; }
 	} /* foreach Children */
 
       /* Set the traversal link */
@@ -169,7 +164,7 @@ class ui_browse extends FO_Plugin
       $V .= "<td>";
       if (!empty($ModView) && !empty($View)) { $V .= "[<a href='$View'>View</a>] "; }
       $V .= "</td><td>";
-      if (!empty($ModView) && !empty($Meta)) { $V .= "[<a href='$Meta'>Meta</a>] "; }
+      if (!empty($ModViewMeta) && !empty($Meta)) { $V .= "[<a href='$Meta'>Meta</a>] "; }
       $V .= "</td><td>";
       if (!empty($ModDownload) && !empty($Download)) { $V .= "[<a href='$Download'>Download</a>] "; }
 
