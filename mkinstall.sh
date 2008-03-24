@@ -120,7 +120,10 @@ fi
 echo "# Checking files (exist and permissions)"
 # Remove obsolete licenses
 \$DEBUG \$RM -rf "\${AGENTDATADIR}/licenses"
-\$DEBUG \$RM -rf "\${WEBDIR}/licenses"
+# Remove obsolete ui
+if [ "\${WEBDIR}" != "" ] ; then
+  \$DEBUG \$RM -rf "\${WEBDIR}/"*
+fi
 echo "\$FILELIST" | while read i ; do
   if [ "\$FORCEFILES" == 1 ] || [ ! -f "/\$i" ] ; then
     if [ "\$FORCEFILES" == 1 ] ; then
@@ -487,7 +490,7 @@ if [ \$? == 0 ] ; then
       else
         \$DEBUG \${AGENTDIR}/Filter_License -Q -O "\$i" >> \${AGENTDATADIR}/License.bsam.new
       fi
-      if [ "\$?" != "0" ] ; then
+      if [ "\$DEBUG" == "" ] && [ "\$?" != "0" ] ; then
 	echo "ERROR processing license."
 	exit 1
       fi
