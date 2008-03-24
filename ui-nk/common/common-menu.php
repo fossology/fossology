@@ -106,6 +106,7 @@ function menu_cmp(&$a,&$b)
 function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth)
 {
   $AddNew=0;
+  $NeedSort=0;
   $PathParts = explode("::",$Path,2);
   if (!isset($PathParts[0]) || !strcmp($PathParts[0],""))
 	{ return(0); } // nothing to do
@@ -140,6 +141,7 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth)
   if (empty($M))
     {
     $AddNew=1;
+    $NeedSort=1;
     $M = new menu;
     $M->Name = $PathParts[0];
     }
@@ -157,7 +159,12 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth)
   else
     {
     /* No traversal -- save the final values */
-    $M->Order = $Order;
+    /** If the menu order is already set, don't reset it to the default **/
+    if ($Order != 0)
+      {
+      if ($M->Order != $Order) { $NeedSort=1; }
+      $M->Order = $Order;
+      }
     $M->Target = $Target;
     $M->URI = $URI;
     $M->HTML = $HTML;
@@ -167,8 +174,8 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth)
     {
     if (isset($Menu)) { array_push($Menu,$M); }
     else { $Menu = array($M); }
-    usort($Menu,menu_cmp);
     }
+  if ($NeedSort == 1) { usort($Menu,menu_cmp); }
 
   global $MenuMaxDepth;
   if ($Depth+1 > $MenuMaxDepth) { $MenuMaxDepth=$Depth+1; }
