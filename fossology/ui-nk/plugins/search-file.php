@@ -72,28 +72,7 @@ class search_file extends FO_Plugin
 	return($V);
 	}
 
-    $LastPfilePk = -1;
-    for($i=0; $i < $Count; $i++)
-	{
-	$R = &$Results[$i];
-	if (IsDir($R['ufile_mode']))
-	  {
-	  $V .= "<P />\n";
-	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"browse",1,NULL,$Page*$Max + $i+1) . "\n";
-	  }
-	else if ($R['pfile_fk'] != $LastPfilePk)
-	  {
-	  $V .= "<P />\n";
-	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"view",1,NULL,$Page*$Max + $i+1) . "\n";
-	  $LastPfilePk = $R['pfile_fk'];
-	  }
-	else
-	  {
-	  $V .= "<div style='margin-left:2em;'>";
-	  $V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,"view",1,NULL,$Page*$Max + $i+1) . "\n";
-	  $V .= "</div>";
-	  }
-	}
+    $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
 
     /* put page menu at the bottom, too */
     if (!empty($VM)) { $V .= "<P />\n" . $VM; }
