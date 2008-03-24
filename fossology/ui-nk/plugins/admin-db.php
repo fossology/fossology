@@ -139,7 +139,7 @@ $V .= "<H1>THIS IS TBD -- DO NOT USE</H1>\n";
 	$V .= "<li>The delete system removes records in series, so a partial delete (or delete in progress) can show inconsistencies.\n";
 	$V .= "</ul>\n";
 	$V .= "There $Verb <b>currently $Count $String running</b> in the job queue that may make records appear inconsistent.\n";
-	$V .= "Fixing inconsistencies while these are running could lead to job failures and further inconsistencies.\n";
+	$V .= "Fixing inconsistencies while any jobs are running could lead to job failures and further inconsistencies.\n";
 
 	$V .= "<P>The following inconsistencies have been identified:\n";
 	$V .= "<form method='POST'>";
