@@ -105,7 +105,7 @@ class admin_db_cleanup extends FO_Plugin
 	$i++;
 	$Checks[$i]['tag']   = "unreferenced_folder";
 	$Checks[$i]['label'] = "Unreferenced folders";
-	$Checks[$i]['sql']   = "FROM folder WHERE folder_pk NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1);";
+	$Checks[$i]['sql']   = "FROM folder WHERE folder_pk NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1) AND folder_pk != '1';";
 
 	/* Check for anything to fix */
         $Args=0;
