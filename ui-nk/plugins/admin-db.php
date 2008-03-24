@@ -145,19 +145,26 @@ class admin_db_cleanup extends FO_Plugin
 	$V .= "<table border=1>\n";
 	$V .= "<tr><th>Fix</th><th>Type of Inconsistency</th><th>Count</th></tr>\n";
 
+	$FixCount=0;
 	for($i=0; !empty($Checks[$i]['tag']); $i++)
 	  {
 	  $Results = $DB->Action("SELECT COUNT(*) AS count " . $Checks[$i]['sql']);
 	  $Count = $Results[0]['count'];
 	  $V .= "<tr>";
-	  if ($Count > 0) { $V .= "<td><input type='checkbox' name='" . $Checks[$i]['tag'] . "' value='1'></td>"; }
+	  if ($Count > 0)
+	    {
+	    $V .= "<td><input type='checkbox' name='" . $Checks[$i]['tag'] . "' value='1'></td>";
+	    $FixCount++;
+	    }
 	  else { $V .= "<td></td>"; }
 	  $V .= "<td>" . $Checks[$i]['label'] . "</td>";
 	  $V .= "<td align='right'>" . number_format($Count,0,"",",") . "</td></tr>\n";
 	  }
 
 	$V .= "</table>\n";
-	$V .= "<P /><input type='submit' value='Fix!'>";
+	$V .= "<P />";
+	if ($FixCount > 0) { $V .= "<input type='submit' value='Fix!'>"; }
+	else { $V .= "No database inconsistencies found.\n"; }
 	$V .= "</form>";
 	break;
       case "Text":
