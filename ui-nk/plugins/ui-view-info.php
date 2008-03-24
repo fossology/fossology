@@ -124,18 +124,7 @@ class ui_view_info extends FO_Plugin
 	$V .= "This exact file appears in the following locations:\n";
 	$V .= $VM;
 	$Offset++;
-        foreach($Results as $Key => $R)
-          {
-          if (empty($R['pfile_fk'])) { continue; }
-	  if (Isdir($R['ufile_mode']))
-	    {
-	    $V .= "<P />" . Dir2Browse("browse",$R['uploadtree_pk'],-1,"browse",1,NULL,$Offset + $Key) . "\n";
-	    }
-	  else
-	    {
-	    $V .= "<P />" . Dir2Browse("browse",$R['uploadtree_pk'],-1,"view",1,NULL,$Offset + $Key) . "\n";
-	    }
-          }
+	$V .= Dir2FileList($Results,"browse","view",$Offset);
 	$V .= $VM;
 	}
     else if ($Page > 0)
