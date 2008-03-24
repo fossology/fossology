@@ -31,7 +31,7 @@ class db_access extends FO_Plugin
   var $Version="1.0";
   var $PluginLevel=100;
 
-  var $Debug=0;
+  var $Debug=0; /* 0=none, 1=errors, 2=show all SQL */
 
   var $_pg_conn = NULL;
 
@@ -85,12 +85,30 @@ class db_access extends FO_Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
-    if ($this->Debug) { print "DB.Action('$Command')\n"; }
-    $result = pg_query($this->_pg_conn,$Command);
+    if ($this->Debug)
+	{
+	/* When using pg_query(), you need to use pg_set_error_verbosity().
+	   Otherwise, pg_last_error() returns nothing. */
+	pg_set_error_verbosity($this->_pg_conn,PGSQL_ERRORS_VERBOSE);
+	if ($this->Debug > 1) { print "DB.Action('$Command')\n"; }
+	}
+    @$result = pg_query($this->_pg_conn,$Command);
+    
+    /* Error handling */
+    if ($result == FALSE)
+      {
+      if ($this->Debug)
+	{
+	print "--------\n";
+	print "SQL failed: $Command\n";
+	print pg_last_error($this->_pg_conn);
+	}
+      }
+
     if (!isset($result)) return;
-    $rows = pg_fetch_all($result);
+    @$rows = pg_fetch_all($result);
     if (!is_array($rows)) $rows = array();
-    pg_free_result($result);
+    @pg_free_result($result);
     return $rows;
 
     /*****
@@ -109,7 +127,7 @@ class db_access extends FO_Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
-    if ($this->Debug) { print "DB.Execute('$Prep','$Command')\n"; }
+    if ($this->Debug > 1) { print "DB.Execute('$Prep','$Command')\n"; }
     $result = pg_execute($this->_pg_conn,$Prep,$Command);
     if (!isset($result)) return;
     $rows = pg_fetch_all($result);
@@ -126,7 +144,7 @@ class db_access extends FO_Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
-    if ($this->Debug) { print "DB.Prepare('$Prep','$Command')\n"; }
+    if ($this->Debug > 1) { print "DB.Prepare('$Prep','$Command')\n"; }
     $result = pg_prepare($this->_pg_conn,$Prep,$Command);
     return;
     }
