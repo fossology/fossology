@@ -60,6 +60,8 @@ function MenuEndlessPage      ($Page,$Next=1)
   if ($Page > 0)
         {
         $V .= "<a href='$Uri&page=0'>[First]</a> ";
+        $V .= "<a href='$Uri&page=" . ($Page - 1) . "'>[Prev]</a> ";
+	if ($Page > 10) { $V .= " ... "; }
         }
 
   /* Create previous list page */
@@ -72,7 +74,7 @@ function MenuEndlessPage      ($Page,$Next=1)
         }
 
   /* Show current page number */
-  $V .= ($Page+1);
+  $V .= "<b>" . ($Page+1) . "</b>";
 
   /* Create next page */
   if ($Next)
