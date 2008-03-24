@@ -114,10 +114,8 @@ function JobGetType($upload_pk,$job_name)
  ************************************************************* 
  */
 
-function JobSetType($upload_pk,$job_name,
-		    $priority=0,
-		    $job_submitter="fossy@localhost",
-		    $job_email_notify="fossy@localhost")
+function JobSetType($upload_pk,$job_name,$priority=0,
+		    $job_submitter=NULL,$job_email_notify=NULL)
 {
   global $DB;
   if (empty($DB)) { return; }
@@ -126,7 +124,18 @@ function JobSetType($upload_pk,$job_name,
   $JobPk = JobGetType($upload_pk,$job_name);
   if (!empty($JobPk)) { return ($JobPk); }
 
-  /* Does not exist; go ahead and create it.
+  if (empty($job_submitter))
+	{
+	if (!empty($_SESSION['UserEmail'])) { $job_submitter = $_SESSION['UserEmail']; }
+	else { $job_submitter = 'fossy@localhost'; }
+	}
+  if (empty($job_email_notify))
+	{
+	if (!empty($_SESSION['UserEmail'])) { $job_email_notify = $_SESSION['UserEmail']; }
+	else { $job_email_notify = 'fossy@localhost'; }
+	}
+
+  /* Does not exist; go ahead and create it. */
   $Name = str_replace("'","''",$job_name); // SQL taint string
   $Submitter = str_replace("'","''",$job_submitter); // SQL taint string
   $Notify = str_replace("'","''",$job_email_notify); // SQL taint string
@@ -296,13 +305,22 @@ function JobFindKey	($UploadPk, $JobName)
  NOTE: If the Job already exists, then it will not be added again.
  Returns the job_pk.
  ************************************************************/
-function JobAddJob ($upload_pk, $job_name,
-		    $priority=0,
-		    $job_submitter="fossy@localhost",
-		    $job_email_notify="fossy@localhost")
+function JobAddJob ($upload_pk, $job_name, $priority=0,
+		    $job_submitter=NULL, $job_email_notify=NULL)
 {
   global $DB;
   if (empty($DB)) { return; }
+
+  if (empty($job_submitter))
+	{
+	if (!empty($_SESSION['UserEmail'])) { $job_submitter = $_SESSION['UserEmail']; }
+	else { $job_submitter = 'fossy@localhost'; }
+	}
+  if (empty($job_email_notify))
+	{
+	if (!empty($_SESSION['UserEmail'])) { $job_email_notify = $_SESSION['UserEmail']; }
+	else { $job_email_notify = 'fossy@localhost'; }
+	}
 
   $job_submitter = str_replace("'","''",$job_submitter);
   $job_email_notify = str_replace("'","''",$job_email_notify);

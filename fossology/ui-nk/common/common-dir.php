@@ -362,4 +362,47 @@ function Dir2BrowseUpload ($Mod, $UploadPk, $UfilePk, $LinkLast=NULL, $ShowBox=1
   return(Dir2Browse($Mod,$UploadtreePk,$UfilePk,$LinkLast,$ShowBox,$ShowMicro));
 } // Dir2BrowseUpload()
 
+/************************************************************
+ Dir2FileList(): Given an array of pfiles/ufiles/uploadtree, sorted by
+ pfile, list all of the breadcrumbs for each file.
+ If the pfile is a duplicate, then indent it.
+   $Listing = array from a database selection.  The SQL query should
+	use "ORDER BY pfile_fk,ufile_pk".
+   $IfDirPlugin = string containing plugin name to use if this is a directory.
+   $IfFilePlugin = string containing plugin name to use if this is a file
+   $Count = first number for indexing the entries (may be -1 for no count)
+ Returns string containing the listing.
+ ************************************************************/
+function Dir2FileList	(&$Listing, &$IfDirPlugin, &$IfFilePlugin, $Count=-1)
+{
+  $LastPfilePk = -1;
+  $V = "";
+  for($i=0; !isempty($Listing[$i]['uploadtree_pk']); $i++)
+    {
+    $R = &$Listing[$i];
+    if (IsDir($R['ufile_mode']))
+	{
+	$V .= "<P />\n";
+	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,$IfDirPlugin,1,
+		NULL,$Count) . "\n";
+	}
+    else if ($R['pfile_fk'] != $LastPfilePk)
+	{
+	$V .= "<P />\n";
+	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,$IfFilePlugin,1,
+		NULL,$Count) . "\n";
+	$LastPfilePk = $R['pfile_fk'];
+	}
+    else
+	{
+	$V .= "<div style='margin-left:2em;'>";
+	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,$IfFilePlugin,1,
+		NULL,$Count) . "\n";
+	$V .= "</div>";
+	}
+    $Count++;
+    }
+  return($V);
+} // Dir2FileList()
+
 ?>
