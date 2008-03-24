@@ -121,7 +121,6 @@ class admin_db_cleanup extends FO_Plugin
 	  }
 	if ($Args > 0) { $V .= "<P />\n"; }
 
-$V .= "<H1>THIS IS TBD -- DO NOT USE</H1>\n";
 	/***************************************/
 	$V .= "On occasion, the database can become inconsistent.";
 	$V .= " For example, there may be pfile records without ufile entries";
