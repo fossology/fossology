@@ -59,18 +59,22 @@ class admin_db_cleanup extends FO_Plugin
       case "HTML":
 	$Checks = array();
 	$i=0;
-	$Checks[$i]['tag']   = "bad_lic_pfile";
-	$Checks[$i]['label'] = "License records associated with unreferenced pfiles";
-	$Checks[$i]['sql']   = "FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_pk FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile));";
-	$i++;
-	$Checks[$i]['tag']   = "bad_licstatus_pfile";
-	$Checks[$i]['label'] = "License status records associated with unreferenced pfiles";
-	$Checks[$i]['sql']   = "FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_pk FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile));";
-	$i++;
-	$Checks[$i]['tag']   = "bad_attrib_pfile";
-	$Checks[$i]['label'] = "Attribute records associated with unreferenced pfiles";
-	$Checks[$i]['sql']   = "FROM attrib WHERE pfile_fk IN (SELECT pfile_pk FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile));";
-	$i++;
+
+// bobg: These are agent_lic_meta recs that have a pfile where the pfile is not referenced by a ufile
+//       Since the real problem is having no ufile for the pfile, these others seem like extraneous information.
+//	$Checks[$i]['tag']   = "bad_lic_pfile";
+//	$Checks[$i]['label'] = "License records associated with unreferenced pfiles";
+//	$Checks[$i]['sql']   = "FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_pk FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile));";
+//	$i++;
+//	$Checks[$i]['tag']   = "bad_licstatus_pfile";
+//	$Checks[$i]['label'] = "License status records associated with unreferenced pfiles";
+//	$Checks[$i]['sql']   = "FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_pk FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile));";
+//	$i++;
+//	$Checks[$i]['tag']   = "bad_attrib_pfile";
+//	$Checks[$i]['label'] = "Attribute records associated with unreferenced pfiles";
+//	$Checks[$i]['sql']   = "FROM attrib WHERE pfile_fk IN (SELECT pfile_pk FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile));";
+//	$i++;
+
 	$Checks[$i]['tag']   = "unreferenced_pfiles";
 	$Checks[$i]['label'] = "Unreferenced pfiles";
 	$Checks[$i]['sql']   = "FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile);";
@@ -79,18 +83,21 @@ class admin_db_cleanup extends FO_Plugin
 	$Checks[$i]['label'] = "Unreferenced ufiles";
 	$Checks[$i]['sql']   = "FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree);";
 	$i++;
-	$Checks[$i]['tag']   = "bad_ufile_pfile";
-	$Checks[$i]['label'] = "Ufiles with invalid pfile references";
-	$Checks[$i]['sql']   = "FROM ufile WHERE pfile_fk IS NOT NULL AND pfile_fk NOT IN (SELECT pfile_pk FROM pfile);";
-	$i++;
-	$Checks[$i]['tag']   = "bad_upload_ufile";
-	$Checks[$i]['label'] = "Upload records with invalid ufile references";
-	$Checks[$i]['sql']   = "FROM upload WHERE ufile_fk NOT IN (SELECT ufile_pk FROM ufile);";
-	$i++;
-	$Checks[$i]['tag']   = "bad_uploadtree_ufile";
-	$Checks[$i]['label'] = "Uploadtree records with invalid ufile references";
-	$Checks[$i]['sql']   = "FROM uploadtree WHERE ufile_fk NOT IN (SELECT ufile_pk FROM ufile);";
-	$i++;
+
+// bobg: not possible due to referential integrity constraint
+//	$Checks[$i]['tag']   = "bad_ufile_pfile";
+//	$Checks[$i]['label'] = "Ufiles with invalid pfile references";
+//	$Checks[$i]['sql']   = "FROM ufile WHERE pfile_fk IS NOT NULL AND pfile_fk NOT IN (SELECT pfile_pk FROM pfile);";
+//	$i++;
+//	$Checks[$i]['tag']   = "bad_upload_ufile";
+//	$Checks[$i]['label'] = "Upload records with invalid ufile references";
+//	$Checks[$i]['sql']   = "FROM upload WHERE ufile_fk NOT IN (SELECT ufile_pk FROM ufile);";
+//	$i++;
+//	$Checks[$i]['tag']   = "bad_uploadtree_ufile";
+//	$Checks[$i]['label'] = "Uploadtree records with invalid ufile references";
+//	$Checks[$i]['sql']   = "FROM uploadtree WHERE ufile_fk NOT IN (SELECT ufile_pk FROM ufile);";
+//	$i++;
+
 	$Checks[$i]['tag']   = "bad_foldercontents_upload";
 	$Checks[$i]['label'] = "Foldercontents with invalid upload references";
 	$Checks[$i]['sql']   = "FROM foldercontents WHERE foldercontents_mode = 2 AND child_id NOT IN (SELECT upload_pk FROM upload);";
