@@ -373,11 +373,11 @@ function Dir2BrowseUpload ($Mod, $UploadPk, $UfilePk, $LinkLast=NULL, $ShowBox=1
    $Count = first number for indexing the entries (may be -1 for no count)
  Returns string containing the listing.
  ************************************************************/
-function Dir2FileList	(&$Listing, &$IfDirPlugin, &$IfFilePlugin, $Count=-1)
+function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1)
 {
   $LastPfilePk = -1;
   $V = "";
-  for($i=0; !isempty($Listing[$i]['uploadtree_pk']); $i++)
+  for($i=0; !empty($Listing[$i]['uploadtree_pk']); $i++)
     {
     $R = &$Listing[$i];
     if (IsDir($R['ufile_mode']))
