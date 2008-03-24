@@ -33,7 +33,8 @@ class db_access extends FO_Plugin
 
   var $Debug=0; /* 0=none, 1=errors, 2=show all SQL */
 
-  var $_pg_conn = NULL;
+  var $_pg_conn = NULL;	/* connection to database */
+  var $_pg_rows = 0;	/* number of affected rows */
 
   /***********************************************************
    PostInitialize(): This function is called before the plugin
@@ -77,6 +78,15 @@ class db_access extends FO_Plugin
     }
 
   /***********************************************************
+   GetAffectedRows(): Returns the number of affected rows from
+   the last call to Action().
+   ***********************************************************/
+  function GetAffectedRows	()
+    {
+    return($this->_pg_rows);
+    } // GetAffectedRows()
+
+  /***********************************************************
    Action(): This function performs an SQL command and returns
    a structure containing the results.
    The $Command is the SQL to process.
@@ -103,7 +113,9 @@ class db_access extends FO_Plugin
 	print "SQL failed: $Command\n";
 	print pg_last_error($this->_pg_conn);
 	}
+      $this->_pg_rows = 0;
       }
+    else { $this->_pg_rows = pg_affected_rows($result); }
 
     if (!isset($result)) return;
     @$rows = pg_fetch_all($result);
