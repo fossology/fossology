@@ -235,6 +235,7 @@ void	DeleteUpload	(long UploadId)
   snprintf(SQL,sizeof(SQL),"SELECT DISTINCT pfile_pk,pfile INTO TEMP %s_pfile FROM %s WHERE pfile_pk NOT IN ( SELECT DISTINCT pfile_pk FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk != '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk);",TempTable,TempTable,UploadId);
   MyDBaccess(DB,SQL);
 
+  /* Get the file listing -- needed for deleting pfiles from the repository. */
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT * FROM %s_pfile ORDER BY pfile_pk;",TempTable);
   MyDBaccess(DB,SQL);
@@ -279,32 +280,6 @@ void	DeleteUpload	(long UploadId)
 
   /***********************************************/
   /* delete pfiles that are missing reuse in the DB */
-#if 0
-  if (Verbose) { printf("  Deleting pfile dependencies and pfiles\n"); }
-  for(Row=0; Row<MaxRow; Row++)
-    {
-    S = DBgetvalue(VDB,Row,0);
-    memset(SQL,'\0',sizeof(SQL));
-    snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk = '%s';",S);
-    MyDBaccess(DB,SQL);
-
-    memset(SQL,'\0',sizeof(SQL));
-    snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk = '%s';",S);
-    MyDBaccess(DB,SQL);
-
-    memset(SQL,'\0',sizeof(SQL));
-    snprintf(SQL,sizeof(SQL),"DELETE FROM attrib WHERE pfile_fk = '%s';",S);
-    MyDBaccess(DB,SQL);
-
-    memset(SQL,'\0',sizeof(SQL));
-    snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk = '%s';",S);
-    MyDBaccess(DB,SQL);
-
-    memset(SQL,'\0',sizeof(SQL));
-    snprintf(SQL,sizeof(SQL),"DELETE FROM pfile WHERE pfile_pk = '%s';",S);
-    MyDBaccess(DB,SQL);
-    }
-#else
   if (Verbose) { printf("  Deleting from agent_lic_status\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
@@ -329,7 +304,6 @@ void	DeleteUpload	(long UploadId)
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM pfile WHERE pfile_pk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
-#endif
 
   /***********************************************/
   /* Commit the change! */
