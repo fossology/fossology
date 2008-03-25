@@ -79,6 +79,10 @@ class admin_db_cleanup extends FO_Plugin
 	$Checks[$i]['label'] = "Unreferenced pfiles";
 	$Checks[$i]['sql']   = "FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile);";
 	$i++;
+	$Checks[$i]['tag']   = "bad_upload_pfile";
+	$Checks[$i]['label'] = "Uploads missing pfiles";
+	$Checks[$i]['sql']   = "FROM upload WHERE ufile_fk IN (SELECT ufile_pk FROM ufile WHERE pfile_fk IS NULL);";
+	$i++;
 	$Checks[$i]['tag']   = "unreferenced_ufile";
 	$Checks[$i]['label'] = "Unreferenced ufiles";
 	$Checks[$i]['sql']   = "FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree);";

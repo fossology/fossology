@@ -58,29 +58,16 @@ if (!isset($GlobalReady)) { exit; }
  ************************************************************/
 
 /************************************************************
- JobGetPriority(): Given a upload_pk and job_name, get the priority.
- Returns priority or NULL if no job.
- NOTE: In case of duplicate jobs, this returns the oldest job.
- ************************************************************/
-function JobGetPriority($upload_pk,$job_name)
-{
-  global $DB;
-  if (empty($DB)) { return; }
-  $Name = str_replace("'","''",$job_name); // SQL taint string
-  $Results = $DB->Action("SELECT job_priority FROM job WHERE job_upload_fk = '$upload_pk' AND job_name = '$Name' ORDER BY job_queued ASC LIMIT 1;");
-  return($Results[0]['job_priority']);
-} // JobGetPriority()
-
-/************************************************************
  JobSetPriority(): Given an upload_pk and job_name, set the priority.
  NOTE: In case of duplicate jobs, this updates ALL jobs.
  ************************************************************/
-function JobSetPriority($upload_pk,$job_name,$priority)
+function JobSetPriority($jobpk,$priority)
 {
   global $DB;
   if (empty($DB)) { return; }
-  $Name = str_replace("'","''",$job_name); // SQL taint string
-  $DB->Action("UPDATE job_priority SET job_priority = '$priority' WHERE job_upload_fk = '$upload_pk' AND job_name = '$Name';");
+  if (empty($jobpk)) { return; }
+  if (empty($priority)) { $priority=0; }
+  $DB->Action("UPDATE job SET job_priority = '$priority' WHERE job_pk = '$jobpk';");
 } // JobSetPriority()
 
 /************************************************************
@@ -424,7 +411,7 @@ function JobQueueAdd ($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $
 
 /************************************************************
  JobChangeStatus(): Mark the entire job as "reset", "fail", or
- "succeed".
+ "succeed", or "delete".
  Returns 0 on success, non-0 on failure.
  ************************************************************/
 function JobChangeStatus	($jobpk,$Status)
@@ -434,17 +421,45 @@ function JobChangeStatus	($jobpk,$Status)
   switch($Status)
     {
     case "reset":
-	$SQL = "UPDATE jobqueue SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0 WHERE jq_job_fk = '$jobpk'";
+	$SQL = "UPDATE jobqueue
+	SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
+		WHERE jq_job_fk = '$jobpk'";
 	break;
     case "fail":
-	$SQL = "UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2 WHERE jq_job_fk = '$jobpk' AND jq_starttime IS NULL; UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2 WHERE jq_job_fk = '$jobpk' AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;";
+	$SQL = "UPDATE jobqueue
+		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2
+		WHERE jq_job_fk = '$jobpk'
+		AND jq_starttime IS NULL;
+		UPDATE jobqueue
+		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2
+		WHERE jq_job_fk = '$jobpk' AND jq_starttime IS NOT NULL
+		AND jq_endtime IS NULL;";
 	break;
     case "succeed":
-	$SQL = "UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1 WHERE jq_job_fk = '$jobpk' AND jq_starttime IS NULL; UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1 WHERE jq_job_fk = '$jobpk' AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;";
+	$SQL = "UPDATE jobqueue
+		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1
+		WHERE jq_job_fk = '$jobpk'
+		AND jq_starttime IS NULL;
+		UPDATE jobqueue
+		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1
+		WHERE jq_job_fk = '$jobpk'
+		AND jq_starttime IS NOT NULL
+		AND jq_endtime IS NULL;";
+	break;
+    case "delete":
+	/* Blow away the jobqueue items and the job */
+	$SQL = "DELETE FROM jobdepends WHERE
+		jdep_jq_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$jobpk')
+		OR
+		jdep_jq_depends_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$jobpk');
+		DELETE FROM jobqueue WHERE jq_job_fk = '$jobpk';
+		DELETE FROM job WHERE job_pk = '$jobpk'; ";
 	break;
     default:
 	return(-1);
     }
+  $DB->Action($SQL);
+  return(0);
 } // JobChangeStatus()
 
 /************************************************************
@@ -459,17 +474,47 @@ function JobQueueChangeStatus	($jqpk,$Status)
   switch($Status)
     {
     case "reset":
-	$SQL = "UPDATE jobqueue SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0 WHERE jq_fk = '$jqpk'";
+	$SQL = "UPDATE jobqueue
+		SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
+		WHERE jq_fk = '$jqpk'";
 	break;
     case "fail":
-	$SQL = "UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2 WHERE jq_pk = '$jqpk' AND jq_starttime IS NULL; UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2 WHERE jq_pk = '$jqpk' AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;";
+	$SQL = "UPDATE jobqueue
+		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2
+		WHERE jq_pk = '$jqpk' AND jq_starttime IS NULL;
+		UPDATE jobqueue
+		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=2
+		WHERE jq_pk = '$jqpk'
+		AND jq_starttime IS NOT NULL
+		AND jq_endtime IS NULL;";
 	break;
     case "succeed":
-	$SQL = "UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1 WHERE jq_pk = '$jqpk' AND jq_starttime IS NULL; UPDATE jobqueue SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1 WHERE jq_pk = '$jqpk' AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;";
+	$SQL = "UPDATE jobqueue
+		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1
+		WHERE jq_pk = '$jqpk'
+		AND jq_starttime IS NULL;
+		UPDATE jobqueue
+		SET jq_starttime=now(),jq_endtime=now(),jq_end_bits=1
+		WHERE jq_pk = '$jqpk'
+		AND jq_starttime IS NOT NULL
+		AND jq_endtime IS NULL;";
 	break;
+    case "delete":
+	/****
+	 There is no "Delete" for a jobqueue item.
+	 "Why not?"
+	 The jobdepends table creates complexity.  If a deleted job was
+	 a dependency, then all intermediate dependencies need to be
+	 deleted or rewritten.  In general, jobqueue dependencies are
+	 there for a reason.  Deleting a middle step destroys the flow
+	 and will likely lead to a failed analysis.
+	 If you need to delete, use delete job.
+	 ****/
     default:
 	return(-1);
     }
+  $DB->Action($SQL);
+  return(0);
 } // JobQueueChangeStatus()
 
 ?>
