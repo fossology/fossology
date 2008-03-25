@@ -63,7 +63,7 @@ class upload_url extends FO_Plugin
     /* Prepare the job: job "wget" has jobqueue item "wget" */
     /** 2nd parameter is obsolete **/
     $jobqueuepk = JobQueueAdd($jobpk,"wget","$uploadpk - $GetURL","no",NULL,NULL);
-    if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
+    if (empty($jobqueuepk)) { return("Failed to insert task 'wget' into job queue"); }
 
     global $Plugins;
     $Unpack = &$Plugins[plugin_find_id("agent_unpack")];
