@@ -257,8 +257,8 @@ function JobQueueFindKey	($JobPk, $Name)
   if (empty($DB)) { return; }
   if (empty($JobPk)) { return(-1); }
   $Name = str_replace("'","''",$Name);
-  $SQLSelect = "SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$JobPk' AND jq_type = '$Name';";
-  $Results = $DB->Action($SQLSelect);
+  $SQL = "SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$JobPk' AND jq_type = '$Name';";
+  $Results = $DB->Action($SQL);
   $jqpk = $Results[0]['jq_pk'];
   if (!empty($jqpk)) { return($jqpk); }
   return(-1);
@@ -275,13 +275,13 @@ function JobFindKey	($UploadPk, $JobName)
   $JobName = str_replace("'","''",$JobName);
   if (empty($UploadPk))
     {
-    $SQLSelect = "SELECT job_pk FROM job WHERE job_upload_fk IS NULL AND job_name = '$JobName';";
+    $SQL = "SELECT job_pk FROM job WHERE job_upload_fk IS NULL AND job_name = '$JobName';";
     }
   else
     {
-    $SQLSelect = "SELECT job_pk FROM job WHERE job_upload_fk = '$UploadPk' AND job_name = '$JobName';";
+    $SQL = "SELECT job_pk FROM job WHERE job_upload_fk = '$UploadPk' AND job_name = '$JobName';";
     }
-  $Results = $DB->Action($SQLSelect);
+  $Results = $DB->Action($SQL);
   $jobpk = $Results[0]['job_pk'];
   if (!empty($jobpk)) { return($jobpk); }
   return(-1);
@@ -330,8 +330,7 @@ function JobAddJob ($upload_pk, $job_name, $priority=0,
   if ($jobpk >= 0) { return($jobpk); }
 
   $DB->Action($SQLInsert);
-  $Results = $DB->Action($SQLSelect);
-  $jobpk = $Results[0]['job_pk'];
+  $jobpk = JobFindKey($upload_pk,$job_name);
   return($jobpk);
 } // JobAddJob()
 
