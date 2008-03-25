@@ -119,6 +119,7 @@ void	DeleteLicense	(long UploadId)
 
   /***********************************************/
   /* delete pfile licenses */
+  if (Verbose) { printf("  Deleting licenses\n"); }
   MaxRow = DBdatasize(VDB);
   for(Row=0; Row<MaxRow; Row++)
     {
@@ -135,10 +136,12 @@ void	DeleteLicense	(long UploadId)
 
   /***********************************************/
   /* Commit the change! */
+  if (Verbose) { printf("  Delete completed\n"); }
   if (Test) MyDBaccess(DB,"ROLLBACK;");
   else
 	{
 	MyDBaccess(DB,"COMMIT;");
+	if (Verbose) { printf("  Running vacuum and analyze\n"); }
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
 	}
@@ -226,13 +229,17 @@ void	DeleteUpload	(long UploadId)
   MyDBaccess(DB,SQL);
 
   /* Get the list of pfiles to delete */
-/*** NAK: This is failing for pfile_pk = 31 (0-length file).  For some reason, this is selecting non-unique pfiles.  ***/
   /** These are all pfiles in the upload_fk that only appear once. **/
   memset(SQL,'\0',sizeof(SQL));
   if (Verbose) { printf("  Getting list of pfiles to delete\n"); }
-  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT pfile_pk,pfile FROM %s WHERE pfile_pk NOT IN ( SELECT DISTINCT pfile_pk FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk != '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk) ORDER BY pfile_pk;",TempTable,UploadId);
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT pfile_pk,pfile INTO TEMP %s_pfile FROM %s WHERE pfile_pk NOT IN ( SELECT DISTINCT pfile_pk FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk != '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk);",TempTable,TempTable,UploadId);
+  MyDBaccess(DB,SQL);
+
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT * FROM %s_pfile ORDER BY pfile_pk;",TempTable);
   MyDBaccess(DB,SQL);
   VDB = DBmove(DB);
+  MaxRow = DBdatasize(VDB);
 
   /***********************************************/
   /* Delete the upload from the folder-contents table */
@@ -271,17 +278,8 @@ void	DeleteUpload	(long UploadId)
   MyDBaccess(DB,SQL);
 
   /***********************************************/
-  /* Delete unused ufiles */
-  /** All of the project info has been deleted.  This deletes any
-      ufile only associated with this project. **/
-  if (Verbose) { printf("  Deleting list of ufiles\n"); }
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE ufile_pk IN (SELECT distinct ufile_pk FROM %s EXCEPT SELECT distinct ufile_pk FROM %s INNER JOIN uploadtree ON uploadtree.upload_fk != '%ld' AND ufile_pk = uploadtree.ufile_fk);",TempTable,TempTable,UploadId);
-  MyDBaccess(DB,SQL);
-
-  /***********************************************/
   /* delete pfiles that are missing reuse in the DB */
-  MaxRow = DBdatasize(VDB);
+#if 0
   if (Verbose) { printf("  Deleting pfile dependencies and pfiles\n"); }
   for(Row=0; Row<MaxRow; Row++)
     {
@@ -291,7 +289,7 @@ void	DeleteUpload	(long UploadId)
     MyDBaccess(DB,SQL);
 
     memset(SQL,'\0',sizeof(SQL));
-    snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta where pfile_fk = '%s';",S);
+    snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk = '%s';",S);
     MyDBaccess(DB,SQL);
 
     memset(SQL,'\0',sizeof(SQL));
@@ -299,9 +297,39 @@ void	DeleteUpload	(long UploadId)
     MyDBaccess(DB,SQL);
 
     memset(SQL,'\0',sizeof(SQL));
+    snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk = '%s';",S);
+    MyDBaccess(DB,SQL);
+
+    memset(SQL,'\0',sizeof(SQL));
     snprintf(SQL,sizeof(SQL),"DELETE FROM pfile WHERE pfile_pk = '%s';",S);
     MyDBaccess(DB,SQL);
     }
+#else
+  if (Verbose) { printf("  Deleting from agent_lic_status\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
+  MyDBaccess(DB,SQL);
+
+  if (Verbose) { printf("  Deleting from agent_lic_meta\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
+  MyDBaccess(DB,SQL);
+
+  if (Verbose) { printf("  Deleting from attrib\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM attrib WHERE pfile_fk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
+  MyDBaccess(DB,SQL);
+
+  if (Verbose) { printf("  Deleting from ufile\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
+  MyDBaccess(DB,SQL);
+
+  if (Verbose) { printf("  Deleting from pfile\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM pfile WHERE pfile_pk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
+  MyDBaccess(DB,SQL);
+#endif
 
   /***********************************************/
   /* Commit the change! */
@@ -329,7 +357,7 @@ void	DeleteUpload	(long UploadId)
 	}
   DBaccess(DB,"SET statement_timeout = 120000;");
 
-  if (Verbose) { printf("Deleted upload %ld DB, now doing repository.\n",UploadId); }
+  if (Verbose) { printf("Deleted upload %ld from DB, now doing repository.\n",UploadId); }
 
   /***********************************************/
   /* Whew!  Now to delete the actual pfiles from the repository. */
