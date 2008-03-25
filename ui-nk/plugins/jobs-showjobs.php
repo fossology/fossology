@@ -66,18 +66,24 @@ class jobs_showjobs extends FO_Plugin
 	}
 
     menu_insert("JobDetails::[BREAK]",1);
+    menu_insert("JobDetails::[BREAK]",-20);
     switch($Show)
       {
       case "detail":
         menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History$UploadPk");
         menu_insert("JobDetails::Detail",-3);
+	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk");
         break;
       case "summary":
         menu_insert("JobDetails::Summary",-2);
         menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History$UploadPk");
+	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk");
 	break;
       case "job":
         menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History$UploadPk");
+	$Job = GetParm("job",PARM_INTEGER);
+	if (!empty($Job)) { $Job = "&job=$Job"; }
+	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk$Job");
 	break;
       default:
         break;
@@ -99,9 +105,6 @@ class jobs_showjobs extends FO_Plugin
           break;
         }
       }
-
-    menu_insert("JobDetails::[BREAK]",-20);
-    menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk");
     } // RegisterMenus()
 
   /***********************************************************
