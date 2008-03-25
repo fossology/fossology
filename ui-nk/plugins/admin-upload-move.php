@@ -110,8 +110,6 @@ class upload_move extends FO_Plugin
 
 	    $V .= "<script language='javascript'>\n";
 	    $V .= "alert('$success')\n";
-	    $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
-	    $V .= "window.open('$Uri','_top');\n";
 	    $V .= "</script>\n";
 	    }
 	  }
@@ -141,7 +139,7 @@ class upload_move extends FO_Plugin
 	$V .= "<select name='oldfolderid'\n";
     $V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
     $V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + document.formy.oldfolderid.value)'>\n";
-	$V .= FolderListOption(-1,0,0);
+	$V .= FolderListOption(-1,0);
 	$V .= "</select><P />\n";
 
 	$V .= "<li>Select the upload you wish to move:  \n";
