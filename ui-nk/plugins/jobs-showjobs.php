@@ -251,7 +251,7 @@ class jobs_showjobs extends FO_Plugin
     LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk
     LEFT JOIN upload ON upload_pk = job.job_upload_fk
     $Where
-    ORDER BY upload.upload_pk,jobqueue.jq_job_fk,jobdepends.jdep_jq_fk;
+    ORDER BY upload.upload_pk,job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk;
     ";
 
     $Results = $DB->Action($Sql);
@@ -297,28 +297,7 @@ class jobs_showjobs extends FO_Plugin
 	$JobName = preg_replace("@^.*/@","",$Row['upload_filename']);
 	if (empty($JobName)) { $JobName = "[Default]"; }
 	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
-	if ($_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
-	  {
-	  $V .= "<tr><th colspan=3 style='background:#202020;color:white;'>$JobName</font>";
-	  $Style = "style='color:white; font:normal 10pt verdana, arial, helvetica; background-color:#202020'";
-	  $V .= "</th><th $Style><small>";
-	  $V .= "<a href='$UriFull&action=reset&jobid=" . $Row['job_pk'] . "'><font color='red'>Reset</font></a>";
-	  $V .= " | ";
-	  $V .= "<a href='$UriFull&action=delete&jobid=" . $Row['job_pk'] . "'><font color='red'>Delete</font></a>";
-	  $V .= " | ";
-	  $Priority = $Row['job_priority'];
-	  $V .= "Priority: ";
-	  $V .= "<a href='$UriFull&action=priority&priority=" . ($Priority-1);
-	  $V .= "&jobid=" . $Row['job_pk'] . "'><font color='red'>&laquo;</font></a>";
-	  $V .= " $Priority ";
-	  $V .= "<a href='$UriFull&action=priority&priority=" . ($Priority+1);
-	  $V .= "&jobid=" . $Row['job_pk'] . "'><font color='red'>&raquo;</font></a>";
-	  $V .= "</small>";
-	  }
-	else
-	  {
-	  $V .= "<tr><th colspan=4 style='background:#202020;color:white;'>$JobName</font>";
-	  }
+	$V .= "<tr><th colspan=4 style='background:#202020;color:white;'>$JobName</font>";
 	$V .= "</th></tr>\n";
 	}
 
@@ -327,7 +306,24 @@ class jobs_showjobs extends FO_Plugin
 	$Job = $Row['jq_job_fk'];
 	$V .= "<tr><th width='20%'>Job/Dependency</th>\n";
 	$V .= "<th width='60%' colspan=2>Job Name: " . $Row['job_name'] . "</th>";
-	if ($History) { $V .= "<th width='20%'>End Time</th></tr>\n"; }
+	if ($_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+	  {
+	  $Style = "style='font:normal 8pt verdana, arial, helvetica;'";
+	  $JobId = $Row['job_pk'];
+	  $V .= "<th $Style>";
+	  $V .= "<a href='$UriFull&action=reset&jobid=$JobId'>Reset</a>";
+	  $V .= " | ";
+	  $V .= "<a href='$UriFull&action=delete&jobid=$JobId'>Delete</a>";
+	  $V .= " | ";
+	  $Priority = $Row['job_priority'];
+	  $V .= "Priority: ";
+	  $V .= "<a title='Decrease priority' href='$UriFull&action=priority&priority=" . ($Priority-1);
+	  $V .= "&jobid=$JobId'>&laquo;</a>";
+	  $V .= " $Priority ";
+	  $V .= "<a title='Increase priority' href='$UriFull&action=priority&priority=" . ($Priority+1);
+	  $V .= "&jobid=$JobId'>&raquo;</a>";
+	  $V .= "</th>";
+	  }
 	else { $V .= "<th width='20%'></th></tr>\n"; }
 	}
       $V .= "<tr>\n";
@@ -406,7 +402,7 @@ class jobs_showjobs extends FO_Plugin
     LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk
     LEFT JOIN upload ON upload_pk = job.job_upload_fk
     $Where
-    ORDER BY upload.upload_pk,jobqueue.jq_job_fk,jobdepends.jdep_jq_fk;
+    ORDER BY upload.upload_pk,job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk;
     ";
 
     $Results = $DB->Action($Sql);
@@ -453,28 +449,7 @@ class jobs_showjobs extends FO_Plugin
 	$JobName = preg_replace("@^.*/@","",$Row['upload_filename']);
 	if (empty($JobName)) { $JobName = "[Default]"; }
 	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
-	if ($_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
-	  {
-	  $V .= "<tr><th colspan=2 style='background:#202020;color:white;'>$JobName</font>";
-	  $Style = "style='color:white; font:normal 10pt verdana, arial, helvetica; background-color:#202020'";
-	  $V .= "</th><th $Style><small>";
-	  $V .= "<a href='$UriFull&action=reset&jobid=" . $Row['job_pk'] . "'><font color='red'>Reset</font></a>";
-	  $V .= " | ";
-	  $V .= "<a href='$UriFull&action=delete&jobid=" . $Row['job_pk'] . "'><font color='red'>Delete</font></a>";
-	  $V .= " | ";
-	  $Priority = $Row['job_priority'];
-	  $V .= "Priority: ";
-	  $V .= "<a href='$UriFull&action=priority&priority=" . ($Priority-1);
-	  $V .= "&jobid=" . $Row['job_pk'] . "'><font color='red'>&laquo;</font></a>";
-	  $V .= " $Priority ";
-	  $V .= "<a href='$UriFull&action=priority&priority=" . ($Priority+1);
-	  $V .= "&jobid=" . $Row['job_pk'] . "'><font color='red'>&raquo;</font></a>";
-	  $V .= "</small>";
-	  }
-	else
-	  {
-	  $V .= "<tr><th colspan=3 style='background:#202020;color:white;'>$JobName</font>";
-	  }
+	$V .= "<tr><th colspan=3 style='background:#202020;color:white;'>$JobName</font>";
 	$V .= "</th></tr>\n";
 	}
       if ($Job != $Row['jq_job_fk'])
@@ -482,7 +457,24 @@ class jobs_showjobs extends FO_Plugin
 	$Job = $Row['jq_job_fk'];
 	$V .= "<tr><th width='20%'>Job/Dependency</th>\n";
 	$V .= "<th width='60%'>Job Name: " . $Row['job_name'] . "</th>";
-	if ($History) { $V .= "<th width='20%'>End Time</th></tr>\n"; }
+	if ($_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+	  {
+	  $Style = "style='font:normal 8pt verdana, arial, helvetica;'";
+	  $JobId = $Row['job_pk'];
+	  $V .= "<th $Style>";
+	  $V .= "<a href='$UriFull&action=reset&jobid=$JobId'>Reset</a>";
+	  $V .= " | ";
+	  $V .= "<a href='$UriFull&action=delete&jobid=$JobId'>Delete</a>";
+	  $V .= " | ";
+	  $Priority = $Row['job_priority'];
+	  $V .= "Priority: ";
+	  $V .= "<a title='Decrease priority' href='$UriFull&action=priority&priority=" . ($Priority-1);
+	  $V .= "&jobid=$JobId'>&laquo;</a>";
+	  $V .= " $Priority ";
+	  $V .= "<a title='Increase priority' href='$UriFull&action=priority&priority=" . ($Priority+1);
+	  $V .= "&jobid=$JobId'>&raquo;</a>";
+	  $V .= "</th>";
+	  }
 	else { $V .= "<th width='20%'></th></tr>\n"; }
 	}
       $V .= "<tr>\n";
