@@ -99,6 +99,9 @@ class jobs_showjobs extends FO_Plugin
           break;
         }
       }
+
+    menu_insert("JobDetails::[BREAK]",-20);
+    menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk");
     } // RegisterMenus()
 
   /***********************************************************
@@ -556,7 +559,7 @@ class jobs_showjobs extends FO_Plugin
 	$Uri = Traceback_uri() . "?mod=" . $this->Name;
 
 	/* Customize the top menu */
-	$V .= menu_to_1html(menu_find("JobDetails",$MenuDepth),1);
+	$V .= menu_to_1html(menu_find("JobDetails",$MenuDepth),0);
 	if ($Show != "job") { $V .= $this->DrawColors(); }
 	$V .= "<P />\n";
 
