@@ -47,8 +47,11 @@ class admin_folder_delete extends FO_Plugin
    *********************************************/
   function Delete($folderpk,$Depends=NULL)
   {
+    /* Get the folder's name */
+    $FolderName = FolderGetName($folderpk);
+
     /* Prepare the job: job "Delete" */
-    $jobpk = JobAddJob(NULL,"Delete");
+    $jobpk = JobAddJob(NULL,"Delete Folder: $FolderName");
     if (empty($jobpk)) { return("Failed to create job record"); }
 
     /* Add job: job "Delete" has jobqueue item "delagent" */

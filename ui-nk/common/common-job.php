@@ -302,21 +302,21 @@ function JobAddJob ($upload_pk, $job_name, $priority=0)
   if (!empty($_SESSION['UserEmail'])) { $job_email_notify = $_SESSION['UserEmail']; }
   else { $job_email_notify = 'fossy@localhost'; }
 
-  $job_submitter = str_replace("'","''",$job_submitter);
-  $job_email_notify = str_replace("'","''",$job_email_notify);
-  $job_name = str_replace("'","''",$job_name);
+  $Job_submitter = str_replace("'","''",$job_submitter);
+  $Job_email_notify = str_replace("'","''",$job_email_notify);
+  $Job_name = str_replace("'","''",$job_name);
 
   if (empty($upload_pk))
     {
     $SQLInsert = "INSERT INTO job
 	(job_submitter,job_queued,job_priority,job_email_notify,job_name) VALUES
-	('$job_submitter',now(),'$priority','$job_email_notify','$job_name');";
+	('$Job_submitter',now(),'$priority','$Job_email_notify','$Job_name');";
     }
   else
     {
     $SQLInsert = "INSERT INTO job
 	(job_submitter,job_queued,job_priority,job_email_notify,job_name,job_upload_fk) VALUES
-	('$job_submitter',now(),'$priority','$job_email_notify','$job_name','$upload_pk');";
+	('$Job_submitter',now(),'$priority','$Job_email_notify','$Job_name','$upload_pk');";
     }
 
   $jobpk = JobFindKey($upload_pk,$job_name);
