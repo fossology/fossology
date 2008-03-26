@@ -49,25 +49,28 @@ class agent_remove_licenseMeta extends FO_Plugin
    :
    Given an upload_pk, add a job.Returns NULL on success, string on failure.
    */
-  function RemoveLicenseMeta($upload_pk, $Depends=NULL, $restart=NULL){
-
+  function RemoveLicenseMeta($upload_pk, $Depends=NULL, $restart=NULL)
+  {
     global $Plugins;
 
     // find the agent-license plugin
     $agent_license_plugin = &$Plugins[plugin_find_id("agent_license")]; /* may be null */
 
-    // Check to see if the job has already been scheduled.  If so, just
-    // return null.
-    $status = $agent_license_plugin->AgentCheck($upload_pk);
-    if ($status == 1){
-      return(NULL);
-    }
-    elseif ($status == 2) {
-      return("The job has been scheduled and completed");
-    }
+    /* Problem: We want all jobs of time "license" to go away. */
+    /* Solution: Delete them from the queue. */
+    $OldJobPk = JobFindKey($upload_pk,"license");
+    if ($OldJobPk >= 0)
+      {
+      JobChangeStatus($OldJobPk,"delete");
+      }
+    $OldJobPk = JobFindKey($upload_pk,"license-delete");
+    if ($OldJobPk >= 0)
+      {
+      JobChangeStatus($OldJobPk,"delete");
+      }
 
     /* Prepare the job: job "Delete" */
-    $jobpk = JobAddJob($upload_pk,"Delete");
+    $jobpk = JobAddJob($upload_pk,"license-delete");
     if (empty($jobpk)) { return("Failed to create job record"); }
 
     /* Add job: job "Delete" has jobqueue item "delagent" */
