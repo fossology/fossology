@@ -1650,6 +1650,9 @@ int	ComputeMatrix	()
 #endif
 
   /* Offset symbols, so the first is "zero" */
+  /***********************************************/
+  /*** NOTE: Move Symbols back before exiting! ***/
+  /***********************************************/
   MS.Symbols[0].Symbol = MS.Symbols[0].SymbolBase + MS.Symbols[0].SymbolStart;
   MS.Symbols[1].Symbol = MS.Symbols[1].SymbolBase + MS.Symbols[1].SymbolStart;
   MinA = 0;
@@ -1657,9 +1660,8 @@ int	ComputeMatrix	()
   MaxA -= MS.Symbols[0].SymbolStart;
   MaxB -= MS.Symbols[1].SymbolStart;
 
-  if ((MaxA <= 0) || (MaxB <= 0)) return(0); /* No symbols */
-
-  if (!OptimizeMatrixRange(&MinA,&MaxA,&MinB,&MaxB))
+  if ((MaxA <= 0) || (MaxB <= 0) /* no symbols */
+      || !OptimizeMatrixRange(&MinA,&MaxA,&MinB,&MaxB)) /* no range */
     {
     /* Return offset symbols, so the first is "zero" */
     MS.Symbols[0].Symbol = MS.Symbols[0].SymbolBase;
