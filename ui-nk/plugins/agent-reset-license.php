@@ -167,11 +167,11 @@ class agent_remove_licenseMeta extends FO_Plugin
           $V .= "</option>\n";
         }
         $V .= "</select><P />\n";
-        $V .= "</ol>\n";
-        $V .= "<p>After the license data is removed you can reschedule the License Analysis by checking the box below</p>";
+        $V .= "<li>After the license data is removed you can reschedule the License Analysis by checking the box below<br />";
         $V .= "<input type='checkbox' name='ReDoLisc' value='Y' />";
         $V .= "Reschedule License Analysis?<br /><br />\n";
-        $V .= "<input type='submit' value='Remove!'>\n";
+        $V .= "</ol>\n";
+        $V .= "<input type='submit' value='Reset!'>\n";
         $V .= "</form>\n";
         break;
       case "Text":
