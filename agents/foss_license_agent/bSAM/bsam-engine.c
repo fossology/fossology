@@ -416,8 +416,8 @@ void	PrintRanges	(char *S, int Which, int ShowMatch)
   printf("%s Range[%d]:\n",S,Which);
   printf("  Mmap: 0 - %x :: Offset %lx :: %s\n",RepFile[Which]->MmapSize,MS.Label[Which].MmapOffset,MS.Label[Which].Filename);
   printf("  Section: %lx - %lx :: %s\n",MS.Label[Which].SectionStart,MS.Label[Which].SectionEnd,MS.Label[Which].Sectionname);
-  printf("  Symbol: 0 - %ld (tokens)\n",MS.Symbols[Which].SymbolMax);
-  printf("  Scan Range tokens: %ld - %ld (length: %ld)\n",MS.Symbols[Which].SymbolStart,MS.Symbols[Which].SymbolStart+MS.Symbols[Which].SymbolEnd,MS.Symbols[Which].SymbolEnd);
+  printf("  Symbol: 0 - %d (tokens)\n",MS.Symbols[Which].SymbolMax);
+  printf("  Scan Range tokens: %d - %d (length: %d)\n",MS.Symbols[Which].SymbolStart,MS.Symbols[Which].SymbolStart+MS.Symbols[Which].SymbolEnd,MS.Symbols[Which].SymbolEnd);
 
   /* Convert scan range to actual byte offsets in the file */
   S1=MS.Label[Which].SectionStart;
@@ -437,7 +437,7 @@ void	PrintRanges	(char *S, int Which, int ShowMatch)
 
   if (ShowMatch)
     {
-    printf("  Match tokens: %ld - %ld (length: %d)\n",
+    printf("  Match tokens: %d - %d (length: %d)\n",
     	MS.Symbols[Which].SymbolStart+MS.Matrix.MatrixMinPos[Which],
 	MS.Symbols[Which].SymbolStart+MS.Matrix.MatrixMaxPos[Which],
 	MS.Matrix.MatrixMaxPos[Which]-MS.Matrix.MatrixMinPos[Which]);
@@ -856,7 +856,7 @@ FindSeqPosReCheck:
   /* look for best across (best=furthest right) */
   aoffset = (A-1)*MS.Symbols[1].SymbolEnd;
 #if 0
-  printf("Range: A[%d]=[%d,%d][%d,%ld]  B[%d]=[%d,%d][%d,%ld]\n",A,MS.Matrix.MatrixMinPos[0],MS.Matrix.MatrixMaxPos[0],0,MS.Symbols[0].SymbolEnd,B,MS.Matrix.MatrixMinPos[1],MS.Matrix.MatrixMaxPos[1],0,MS.Symbols[1].SymbolEnd);
+  printf("Range: A[%d]=[%d,%d][%d,%d]  B[%d]=[%d,%d][%d,%d]\n",A,MS.Matrix.MatrixMinPos[0],MS.Matrix.MatrixMaxPos[0],0,MS.Symbols[0].SymbolEnd,B,MS.Matrix.MatrixMinPos[1],MS.Matrix.MatrixMaxPos[1],0,MS.Symbols[1].SymbolEnd);
 #endif
   /** Scan from furthest to nearest to find the smallest match **/
   for(b=B-1; b >= V-1; b--)
@@ -1641,7 +1641,7 @@ int	ComputeMatrix	()
   /* debugging */
   if (ShowStage1Flag)
 	{
-	printf("Stage 1:\n  A: %s (%s: %ld)\n  B: %s (%s %ld)\n",
+	printf("Stage 1:\n  A: %s (%s: %d)\n  B: %s (%s: %d)\n",
 	  MS.Label[0].Filename,MS.Label[0].Sectionname,MS.Symbols[0].SymbolMax,
 	  MS.Label[1].Filename,MS.Label[1].Sectionname,MS.Symbols[1].SymbolMax);
 	SameInitMatrix();
@@ -1659,7 +1659,13 @@ int	ComputeMatrix	()
 
   if ((MaxA <= 0) || (MaxB <= 0)) return(0); /* No symbols */
 
-  if (!OptimizeMatrixRange(&MinA,&MaxA,&MinB,&MaxB)) return(0);
+  if (!OptimizeMatrixRange(&MinA,&MaxA,&MinB,&MaxB))
+    {
+    /* Return offset symbols, so the first is "zero" */
+    MS.Symbols[0].Symbol = MS.Symbols[0].SymbolBase;
+    MS.Symbols[1].Symbol = MS.Symbols[1].SymbolBase;
+    return(0);
+    }
 
 #if 0
   printf("\n");
@@ -1736,7 +1742,7 @@ int	ComputeMatrix	()
 #if DEBUG
   if (ShowStage2Flag)
   	{
-	printf("Stage 2:\n  A: %s (%s: %ld)\n  B: %s (%s %ld)\n",
+	printf("Stage 2:\n  A: %s (%s: %d)\n  B: %s (%s: %d)\n",
 	  MS.Label[0].Filename,MS.Label[0].Sectionname,MS.Symbols[0].SymbolMax,
 	  MS.Label[1].Filename,MS.Label[1].Sectionname,MS.Symbols[1].SymbolMax);
 	PrintMatrix(0,65536,0,65536);
@@ -1819,7 +1825,7 @@ inline void	ExtremeTokens	(int Which)
 #if DEBUG
   if (Verbose > 1)
     {
-    printf("ExtremeTokens %d: [%d : %ld] => [%ld : %ld] = %ld\n",
+    printf("ExtremeTokens %d: [%d : %d] => [%d : %d] = %d\n",
       B,0,MS.Symbols[B].SymbolEnd,MS.Symbols[B].SymbolStart,
       MS.Symbols[B].SymbolEnd,MS.Symbols[B].SymbolEnd-MS.Symbols[B].SymbolStart);
     }
@@ -1858,9 +1864,9 @@ inline int	CheckTokensOR	(int Which)
   ScanEnd   = MS.Symbols[!Which].SymbolEnd;
   ScanSymbols = MS.Symbols[!Which].Symbol;
 
-  for(a=0; a < SymbolListMax; a++)
+  for(b=ScanStart; b < ScanEnd; b++)
     {
-    for(b=ScanStart; b < ScanEnd; b++)
+    for(a=0; a < SymbolListMax; a++)
       {
       if (SymbolList[a] == ScanSymbols[b])
 	  	{
@@ -2021,7 +2027,6 @@ GetNext:
 	MS.Symbols[Which].Symbol = MS.Symbols[Which].SymbolBase;
 	MS.Symbols[Which].SymbolStart = 0;
 	MS.Symbols[Which].SymbolEnd = MS.Symbols[Which].SymbolMax;
-	MS.Label[Which].SymbolORMax = Length/2; /* 2 bytes per token */
 	break;
       case 0x0110:	/* Section unique */
 	MS.Label[Which].SectionUnique = (char *)MapOffset;
@@ -2119,17 +2124,17 @@ GetNext:
 	if (Verbose > 2)
 		{
 		printf("Comparing:\n");
-		printf("  Label.TokentypeLen: %ld = %ld\n",
+		printf("  Label.TokentypeLen: %d = %d\n",
 			MS.Label[0].TokentypeLen,MS.Label[1].TokentypeLen);
 		printf("  Label.Tokentype: %s = %s\n",
 			MS.Label[0].Tokentype,MS.Label[1].Tokentype);
-		printf("  Symbols.SymbolMax: %ld = %ld\n",
+		printf("  Symbols.SymbolMax: %d = %d\n",
 			MS.Symbols[0].SymbolMax,MS.Symbols[1].SymbolMax);
 		printf("  MatchThreshold: %d = %d\n",
 			MatchThreshold[0],MatchThreshold[1]);
-		printf("  Scale0: %ld = %ld\n",
+		printf("  Scale0: %d = %d\n",
 			MS.Symbols[0].SymbolMax * MatchThreshold[0],MS.Symbols[1].SymbolMax*100);
-		printf("  Scale1: %ld = %ld\n",
+		printf("  Scale1: %d = %d\n",
 			MS.Symbols[1].SymbolMax * MatchThreshold[1],MS.Symbols[0].SymbolMax*100);
 		}
 	else if (Verbose > 1)
@@ -2175,7 +2180,7 @@ GetNext:
 #if DEBUG
     if (Verbose > 1)
       {
-      printf("%d Loaded: (%s: %ld: %lX)  (%s : %s: %ld: %lX)\n",
+      printf("%d Loaded: (%s: %d: %lX)  (%s : %s: %d: %lX)\n",
 	Which,
 	MS.Label[0].Sectionname,MS.Symbols[0].SymbolMax,MS.Label[0].MmapOffset,
 	MS.Label[1].Filename,
@@ -2466,7 +2471,7 @@ void	SAMfiles	()
 #if DEBUG
 	if (Verbose > 1)
 		{
-		printf("Loaded: (%s: %ld)  (%s %ld)\n",
+		printf("Loaded: (%s: %d)  (%s: %d)\n",
 			MS.Label[0].Sectionname,MS.Symbols[0].SymbolMax,
 			MS.Label[1].Sectionname,MS.Symbols[1].SymbolMax);
 		}
@@ -2564,7 +2569,7 @@ int	SAMfilesExhaustiveB	()
 #if DEBUG
 	if (Verbose > 1)
 		{
-		printf("Loaded: (%s: %ld)  (%s %ld)\n",
+		printf("Loaded: (%s: %d)  (%s %d)\n",
 			MS.Label[0].Sectionname,MS.Symbols[0].SymbolMax,
 			MS.Label[1].Sectionname,MS.Symbols[1].SymbolMax);
 		}
@@ -2595,7 +2600,7 @@ int	SAMfilesExhaustiveB	()
 #if DEBUG
 		if (Verbose)
 		  {
-		  printf("DEBUG: GetSeqRange: Found part %ld - %ld in full %d - %ld\n",
+		  printf("DEBUG: GetSeqRange: Found part %d - %d in full %d - %d\n",
 		  BMS.Symbols[0].SymbolStart+BMS.Matrix.MatrixMinPos[0],
 		  BMS.Symbols[0].SymbolStart+BMS.Matrix.MatrixMaxPos[0],
 		  0,RMS.Symbols[0].SymbolMax);
@@ -2618,7 +2623,7 @@ int	SAMfilesExhaustiveB	()
     /* restore the best */
     CopyMatrixState(&BMS,&MS,1);
 #if DEBUG_RECURSION
-    printf("%*s BEST: %ld - %ld\n",Depth,"",MS.Symbols[0].SymbolStart+MS.Path.MatrixPath[0][MS.Matrix.MatrixBestMin],MS.Symbols[0].SymbolStart+MS.Path.MatrixPath[0][MS.Matrix.MatrixBestMax]);
+    printf("%*s BEST: %d - %d\n",Depth,"",MS.Symbols[0].SymbolStart+MS.Path.MatrixPath[0][MS.Matrix.MatrixBestMin],MS.Symbols[0].SymbolStart+MS.Path.MatrixPath[0][MS.Matrix.MatrixBestMax]);
 #endif
 #if DEBUG
     if (Verbose) { printf("DEBUG: Got a best match\n"); }
@@ -2629,8 +2634,8 @@ int	SAMfilesExhaustiveB	()
 #if DEBUG
     if (Verbose)
       {
-      printf("DEBUG: Full range: %d - %ld\n",0,MS.Symbols[0].SymbolMax);
-      printf("DEBUG: Middle match: %ld - %ld :: %s:%s\n",
+      printf("DEBUG: Full range: %d - %d\n",0,MS.Symbols[0].SymbolMax);
+      printf("DEBUG: Middle match: %d - %d :: %s:%s\n",
 	MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolStart + MS.Symbols[0].SymbolEnd,
 	MS.Label[1].Filename,MS.Label[1].Sectionname);
       }
