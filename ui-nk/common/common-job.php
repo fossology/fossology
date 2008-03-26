@@ -292,22 +292,15 @@ function JobFindKey	($UploadPk, $JobName)
  NOTE: If the Job already exists, then it will not be added again.
  Returns the job_pk.
  ************************************************************/
-function JobAddJob ($upload_pk, $job_name, $priority=0,
-		    $job_submitter=NULL, $job_email_notify=NULL)
+function JobAddJob ($upload_pk, $job_name, $priority=0)
 {
   global $DB;
   if (empty($DB)) { return; }
 
-  if (empty($job_submitter))
-	{
-	if (!empty($_SESSION['UserEmail'])) { $job_submitter = $_SESSION['UserEmail']; }
-	else { $job_submitter = 'fossy@localhost'; }
-	}
-  if (empty($job_email_notify))
-	{
-	if (!empty($_SESSION['UserEmail'])) { $job_email_notify = $_SESSION['UserEmail']; }
-	else { $job_email_notify = 'fossy@localhost'; }
-	}
+  if (!empty($_SESSION['UserEmail'])) { $job_submitter = $_SESSION['UserEmail']; }
+  else { $job_submitter = 'fossy@localhost'; }
+  if (!empty($_SESSION['UserEmail'])) { $job_email_notify = $_SESSION['UserEmail']; }
+  else { $job_email_notify = 'fossy@localhost'; }
 
   $job_submitter = str_replace("'","''",$job_submitter);
   $job_email_notify = str_replace("'","''",$job_email_notify);
@@ -339,7 +332,8 @@ function JobAddJob ($upload_pk, $job_name, $priority=0,
  $Depends is an ARRAY that lists one or more jobqueue_pk's.
  Returns the new jobqueue key.
  ************************************************************/
-function JobQueueAdd ($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $Depends)
+function JobQueueAdd	($job_pk, $jq_type, $jq_args, $jq_repeat,
+			 $jq_runonpfile, $Depends, $Reschedule=0)
 {
   global $DB;
   if (empty($DB)) { return; }
@@ -405,12 +399,15 @@ function JobQueueAdd ($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $
     }
 
   $DB->Action("COMMIT;");
+  if ($Reschedule)
+    {
+    JobQueueChangeStatus($jqpk,"reset");
+    }
   return($jqpk);
 } // JobQueueAdd()
 
 /************************************************************
- JobChangeStatus(): Mark the entire job as "reset", "fail", or
- "succeed", or "delete".
+ JobChangeStatus(): Mark the entire job with a state.
  Returns 0 on success, non-0 on failure.
  ************************************************************/
 function JobChangeStatus	($jobpk,$Status)
@@ -463,7 +460,6 @@ function JobChangeStatus	($jobpk,$Status)
 
 /************************************************************
  JobQueueChangeStatus(): Change the jobqueue item status.
- This can be "reset", "fail", "succeed".
  Returns 0 on success, non-0 on failure.
  ************************************************************/
 function JobQueueChangeStatus	($jqpk,$Status)
@@ -476,6 +472,11 @@ function JobQueueChangeStatus	($jqpk,$Status)
 	$SQL = "UPDATE jobqueue
 		SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
 		WHERE jq_fk = '$jqpk'";
+	break;
+    case "reset_completed":	/* reset the job if it is done */
+	$SQL = "UPDATE jobqueue
+		SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
+		WHERE jq_fk = '$jqpk' AND jq_endtime IS NOT NULL";
 	break;
     case "fail":
 	$SQL = "UPDATE jobqueue
