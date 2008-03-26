@@ -164,6 +164,31 @@ function FolderListScript()
 } // FolderListScript()
 
 /***********************************************************
+ FolderGetName(): Given a folder_pk, return the full path
+ to this folder.
+ This is recursive!
+ NOTE: If there is a recursive loop in the folder table, then
+ this will loop INFINITELY.
+ ***********************************************************/
+function FolderGetName($FolderPk,$Top=-1)
+{
+  global $DB;
+  if ($Top == -1) { $Top = FolderGetTop(); }
+  $Results = $DB->Action("SELECT folder_name,parent_fk FROM folder
+	LEFT JOIN foldercontents ON foldercontents_mode = 1
+	AND child_id = '$FolderPk'
+	WHERE folder_pk = '$FolderPk'
+	LIMIT 1;");
+  $Parent = $Results[0]['parent_fk'];
+  $Name = $Results[0]['folder_name'];
+  if (!empty($Parent) && ($FolderPk != $Top))
+      {
+      $Name = FolderGetName($Parent,$Top) . "/" . $Name;
+      }
+  return($Name);
+} // FolderGetName()
+
+/***********************************************************
  FolderListDiv(): Create the tree, using DIVs.
  It returns the full HTML.
  This is recursive!
