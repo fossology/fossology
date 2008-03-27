@@ -32,6 +32,7 @@ class ui_license extends FO_Plugin
   // var $MenuList= "Jobs::License";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;
+  var $LoginFlag  = 0;
 
   /***********************************************************
    RegisterMenus(): Customize submenus.

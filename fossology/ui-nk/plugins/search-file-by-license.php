@@ -39,6 +39,7 @@ class search_file_by_license extends FO_Plugin
   var $Version    = "1.0";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;
+  var $LoginFlag  = 0;
 
   /***********************************************************
    Output(): Display the loaded menu and plugins.

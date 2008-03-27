@@ -73,6 +73,7 @@ class FO_Plugin
   var $Title="";  // used for HTML title tags and window menu bars
   var $PluginLevel=10; /* user for sorting plugins -- higher comes first after dependencies are met */
   var $DBaccess=PLUGIN_DB_NONE; /* what kind of access is needed? */
+  var $LoginFlag=1;	/* Must you be logged in to access this plugin? 1=yes, 0=no */
   var $NoMenu=0;	/* 1 = Don't show the HTML menu at the top of page */
   var $NoHeader=0;	/* 1 = Don't show the HTML header at the top of page */
   var $NoHTML=0;	/* 1 = Don't add any HTML to the output */

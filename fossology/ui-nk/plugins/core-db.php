@@ -30,6 +30,7 @@ class db_access extends FO_Plugin
   var $Name="db";
   var $Version="1.0";
   var $PluginLevel=100;
+  var $LoginFlag=0;
 
   var $Debug=0; /* 0=none, 1=errors, 2=show all SQL */
 
