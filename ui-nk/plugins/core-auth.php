@@ -31,6 +31,7 @@ class core_auth extends FO_Plugin
   var $Version    = "1.0";
   var $PluginLevel = 100; /* make this run first! */
   var $Dependency = array("db");
+  var $LoginFlag  = 0;
 
   /***********************************************************
    Install(): Only used during installation.
@@ -203,12 +204,13 @@ class core_auth extends FO_Plugin
       }
 
     /* Disable all plugins with >= $Level access */
+    $LoginFlag = empty($_SESSION['User']);
     $Max = count($Plugins);
     for($i=0; $i < $Max; $i++)
 	{
 	$P = &$Plugins[$i];
 	if ($P->State == PLUGIN_STATE_INVALID) { continue; }
-	if ($P->DBaccess > $Level)
+	if (($P->DBaccess > $Level) || (empty($_SESSION['User']) && $P->LoginFlag) )
 	  {
 	  $P->Destroy();
 	  $P->State = PLUGIN_STATE_INVALID;

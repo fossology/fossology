@@ -32,6 +32,7 @@ class ui_browse extends FO_Plugin
   var $MenuList   = "Browse";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;
+  var $LoginFlag  = 0;
 
   /***********************************************************
    RegisterMenus(): Customize submenus.

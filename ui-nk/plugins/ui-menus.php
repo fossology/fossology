@@ -30,6 +30,7 @@ class ui_menu extends FO_Plugin
   var $Title      = "Menus";
   var $Version    = "1.0";
   var $MenuTarget = "treenav";
+  var $LoginFlag  = 0;
 
   var $_CSSdone   = 0;	/* has the CSS been displayed? */
 

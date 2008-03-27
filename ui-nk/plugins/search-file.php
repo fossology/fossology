@@ -32,6 +32,7 @@ class search_file extends FO_Plugin
   var $MenuList   = "Search";
   var $Dependency = array("db","view","browse");
   var $DBaccess   = PLUGIN_DB_READ;
+  var $LoginFlag  = 0;
 
   /***********************************************************
    GetUfileFromName(): Given a pfile_pk, return all ufiles.

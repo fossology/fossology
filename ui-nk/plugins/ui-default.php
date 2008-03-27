@@ -30,6 +30,7 @@ class ui_default extends FO_Plugin
   var $Title      = "Welcome to FOSSology";
   var $Version    = "2.0";
   var $MenuList   = "";
+  var $LoginFlag  = 0;
 
   function Output()
     {
