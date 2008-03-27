@@ -24,39 +24,57 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class core_debug_repo extends FO_Plugin
+class search_repo extends FO_Plugin
   {
-  var $Name       = "debug_repo";
-  var $Title      = "Debug Repository";
+  var $Name       = "search_repo";
+  var $Title      = "Search the Repository";
   var $Version    = "1.0";
-  var $MenuList   = "Help::Debug::Debug Repository";
+  // var $MenuList   = "Help::Debug::Debug Repository";
   var $Dependency = array("db","view","browse");
-  var $DBaccess   = PLUGIN_DB_DEBUG;
+  var $DBaccess   = PLUGIN_DB_READ;
+
+  /***********************************************************
+   RegisterMenus(): Customize submenus.
+   ***********************************************************/
+  function RegisterMenus()
+    {
+    menu_insert("Search::Repository",0,$this->Name);
+    } // RegisterMenus()
 
   /***********************************************************
    GetUfileFromPfile(): Given a pfile_pk, return all ufiles.
    ***********************************************************/
-  function GetUfileFromPfile($Pfilepk)
+  function GetUfileFromPfile($Pfilepk,$Page)
     {
     global $DB;
+    $Max = 50;
+    $Offset = $Max * $Page;
     $SQL = "SELECT * FROM pfile
 	INNER JOIN ufile ON pfile_pk = '$Pfilepk'
 	  AND ufile.pfile_fk = pfile.pfile_pk
-	INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk;";
+	INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk
+	ORDER BY pfile_fk,ufile_pk LIMIT $Max OFFSET $Offset
+	;";
     $Results = $DB->Action($SQL);
     $V = "";
-    foreach($Results as $R)
+    if (($Page > 0) || ($Count >= $Max))
 	{
-	if (empty($R['pfile_pk'])) { continue; }
-	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$R['ufile_fk'],"view") . "<P />\n";
+	$VM = MenuEndlessPage($Page, ($Count >= $Max)) . "<P />\n";
+	$V .= $VM;
 	}
+    else
+	{
+	$VM = "";
+	}
+    $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
+    if (!empty($VM)) { $V .= "<P />\n" . $VM; }
     return($V);
     } // GetUfileFromPfile()
 
   /***********************************************************
    GetUfileFromRepo(): Given a sha1.md5.len, return all ufiles.
    ***********************************************************/
-  function GetUfileFromRepo($Repo)
+  function GetUfileFromRepo($Repo,$Page)
     {
     /* Split repo into Sha1, Md5, and Len */
     $Repo = strtoupper($Repo);
@@ -76,8 +94,27 @@ class core_debug_repo extends FO_Plugin
 	AND pfile_size = '$Len';";
     $Results = $DB->Action($SQL);
     if (empty($Results[0]['pfile_pk'])) { return; }
-    return($this->GetUfileFromPfile($Results[0]['pfile_pk']));
+    return($this->GetUfileFromPfile($Results[0]['pfile_pk'],$Page));
     } // GetUfileFromRepo()
+
+  /***********************************************************
+   Search(): Given a string to search for, search for it!
+   This identifies whether the string is a pfile_pk or sha1.md5.len.
+   Returns all ufiles, or null if none found.
+   ***********************************************************/
+  function Search	($String,$Page=0)
+    {
+    if (preg_match("/^[0-9]+$/",$String) > 0)
+	{
+	return($this->GetUfileFromPfile($String,$Page));
+	}
+    if (preg_match("/^[0-9a-fA-F]{40}\.[0-9a-fA-F]{32}.[0-9]+$/",$String) > 0)
+	{
+	return($this->GetUfileFromRepo($String,$Page));
+	}
+    $V = "Search string is not a valid format.";
+    return($V);
+    } // Search()
 
   /***********************************************************
    Output(): Display the loaded menu and plugins.
@@ -92,33 +129,24 @@ class core_debug_repo extends FO_Plugin
       case "XML":
         break;
       case "HTML":
+	$V .= menu_to_1html(menu_find("Search",$MenuDepth),1);
 
-	$Akey = GetParm("akey",PARM_INTEGER);
-	$A = GetParm("a",PARM_STRING);
+	$SearchArg = GetParm("search",PARM_STRING);
+	$Page = GetParm("page",PARM_INTEGER);
+	if (empty($Page)) { $Page = 0; }
 
-	$V .= "Given a pfile_pk or repository id, return the list of files.\n";
-	$V .= "<form method='post'>\n";
-	$V .= "<ul>\n";
-	$V .= "<li>Enter the pfile key: ";
-	$V .= "<INPUT type='text' name='akey' size='8' value='" . htmlentities($Akey) . "'><P>\n";
-	$V .= "<li>Enter the repository key (sha1.md5.len):<br>";
-	$V .= "<INPUT type='text' name='a' size='80' value='" . htmlentities($A) . "'>\n";
-	$V .= "</ul>\n";
+	$V .= "Given a file key (pfile_pk) or repository identifier (sha1.md5.length), return the list of files.\n";
+	$V .= "<P /><form method='post'>\n";
+	$V .= "Enter the pfile key or repository identifier:<P />";
+	$V .= "<INPUT type='text' name='search' size='60' value='" . htmlentities($SearchArg) . "'><P>\n";
 	$V .= "<input type='submit' value='Find!'>\n";
 	$V .= "</form>\n";
 
-	if (!empty($Akey))
+	if (!empty($SearchArg))
 	  {
 	  $V .= "<hr>\n";
-	  $V .= "<H2>Files associated with pfile " . htmlentities($Akey) . "</H2>\n";
-	  $V .= $this->GetUfileFromPfile($Akey);
-	  }
-
-	if (!empty($A))
-	  {
-	  $V .= "<hr>\n";
-	  $V .= "<H2>Files associated with repository item " . htmlentities($A) . "</H2>\n";
-	  $V .= $this->GetUfileFromRepo($A);
+	  $V .= "<H2>Files associated with " . htmlentities($SearchArg) . "</H2>\n";
+	  $V .= $this->Search($SearchArg,$Page);
 	  }
 
         break;
@@ -134,7 +162,7 @@ class core_debug_repo extends FO_Plugin
 
 
   };
-$NewPlugin = new core_debug_repo;
+$NewPlugin = new search_repo;
 $NewPlugin->Initialize();
 
 ?>
