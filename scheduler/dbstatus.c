@@ -355,6 +355,7 @@ void	DBCheckSchedulerUnique	()
 void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
 {
   char SQL[MAXCMD];
+  char Args[MAXCMD];
   char *Value;
   char Empty[2]="";
   int rc;
@@ -368,18 +369,20 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
 
   /* Do an update */
   memset(SQL,'\0',MAXCMD);
+  memset(Args,'\0',MAXCMD);
   memset(Ctime,'\0',MAXCTIME);
   /* Not checking string size since I know MAXCMD is much larger */
   if (Thread >= 0) ctime_r((&(CM[Thread].StatusTime)),Ctime);
+  DBstrcatTaint( (Thread >= 0) ? CM[Thread].Parm : "" , Args,MAXCMD);
   sprintf(SQL,"UPDATE scheduler_status SET agent_status='%s', agent_status_date='%s', record_update=now(), agent_param='%s' WHERE unique_scheduler='%s.%d' AND agent_number='%d';",
 	StatusName,
 	(Thread >= 0) ? Ctime : "now()",
-	(Thread >= 0) ? CM[Thread].Parm : "",
+	Args,
 	Hostname,getpid(),Thread);
   rc = DBLockAccess(DB,SQL);
   if (rc < 0)
     {
-    fprintf(stderr,"FATAL: Scheduler failed to update status in DB.\n");
+    fprintf(stderr,"FATAL: Scheduler failed to update status in DB. SQL was: \"%s\"\n",SQL);
     exit(-1);
     }
 
