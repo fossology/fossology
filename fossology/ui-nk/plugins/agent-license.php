@@ -29,7 +29,7 @@ class agent_license extends FO_Plugin
   public $Name       = "agent_license";
   public $Title      = "Schedule License Analysis";
   public $MenuList   = "Jobs::Agents::License Analysis";
-  public $Version    = "1.0";
+  public $Version    = "1.1";
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_ANALYZE;
 
@@ -93,52 +93,107 @@ class agent_license extends FO_Plugin
     $jobpk = JobAddJob($uploadpk,"license");
     if (empty($jobpk)) { return("Failed to insert job record"); }
 
-    /* Add job: job "license" has jobqueue item "filter_license" */
+    /*****
+     Performance notes:
+     The bSAM algorithm is slow.  In order to speed it up, it has been
+     divided into specific tasks.
+       - filter_license: convert files to tokens for comparison.
+       - license: use bSAM to compare tokenized files.
+       - filter_clean: remove tokenized files that are no longer needed.
+     The SQL for each of these steps does not scale well.
+     In particular, finding all pfiles to process takes longer and longer
+     as the pfile and ufile tables grow.
+     Since the list of all pfiles is needed for each of the three
+     processing stages, two more stages are being introduced:
+       - sqlagent: Create a temporary table containing the pfile list.
+         This reduces the need to determine the list every time.
+       - filter_license: convert files to tokens for comparison.
+       - license: use bSAM to compare tokenized files.
+       - filter_clean: remove tokenized files that are no longer needed.
+       - sqlagent: Remove the temporary database table.
+     While the first sqlagent command may be time-consuming, the
+     remaining steps should be much faster.
+
+     The scheduler uses a greedy algorithm to identify which jobs to run.
+     Jobs are segmented into groups of tasks (right now, 5000 tasks per
+     segment).  A segment does not end (and the next does not start) until
+     all of the tasks complete.
+     The best case has the largest jobs run first, so they will complete as
+     soon as possible.  Meanwhile parallel tasks will start later and
+     (hopefully) finish earlier.
+     (In the worst case, everything will take a long time.)
+     Thus: records are sorted by size.  NOTE: This is the original file
+     size and not the tokenized file size.  But it should be good enough
+     for a greedy algorithm.
+     *****/
+
+    /* Before starting, make sure the temp table does not exist. */
+    $TempTable = "license_" . $uploadpk; /* must be lowercase */
+    $SQL = "SELECT * FROM pg_tables WHERE tablename='$TempTable';";
+    $Results = $DB->Action($SQL);
+    if (!empty($Results[0]['tablename']))
+	{
+	$DB->Action("DROP TABLE $TempTable;");
+	}
+
+    /* Add job: job "license" has jobqueue item "sqlagent" */
+    /** $jqargs = list of pfiles in the upload **/
     $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,
-	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
+	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A,
+	pfile_size as Size
+	INTO $TempTable
 	FROM uploadtree
 	INNER JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk
+	  AND upload_fk = '$uploadpk'
+	  AND ufile.pfile_fk IS NOT NULL
+	  AND (ufile.ufile_mode & (1<<29)) = 0
 	INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk
-	LEFT JOIN agent_lic_status ON agent_lic_status.pfile_fk = pfile.pfile_pk
-	WHERE upload_fk = '$uploadpk'
-	AND agent_lic_status.pfile_fk IS NULL
-	AND ufile.pfile_fk IS NOT NULL
-	AND (ufile.ufile_mode & (1<<29)) = 0
+	ORDER BY Size DESC;";
+    /** sqlagent does not line newlines! **/
+    $jqargs = str_replace("\n"," ",$jqargs);
+    $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",$Dep);
+    if (empty($jobqueuepk)) { return("Failed to insert first sqlagent into job queue"); }
+
+    /* Add job: job "license" has jobqueue item "filter_license" */
+    /** $jqargs = pfiles NOT processed and NOT with tokens in repository **/
+    $jqargs = "SELECT DISTINCT(Akey),A,Size
+	FROM $TempTable
+	LEFT JOIN agent_lic_status ON agent_lic_status.pfile_fk = Akey
+	WHERE agent_lic_status.inrepository IS NOT TRUE
+	AND agent_lic_status.processed IS NOT TRUE
+	ORDER BY Size DESC
 	LIMIT 5000;";
-    $jobqueuepk = JobQueueAdd($jobpk,"filter_license",$jqargs,"yes","a",$Dep);
+    $jobqueuepk = JobQueueAdd($jobpk,"filter_license",$jqargs,"yes","a",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert filter_license into job queue"); }
 
     /* Add job: job "license" has jobqueue item "license" */
-    $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,
-	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
-	FROM uploadtree
-	INNER JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk
-	INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk
-	INNER JOIN agent_lic_status ON agent_lic_status.pfile_fk = pfile.pfile_pk
-	LEFT JOIN agent_lic_meta ON pfile.pfile_pk = agent_lic_meta.pfile_fk
-	WHERE agent_lic_status.processed IS FALSE
-	AND agent_lic_meta.pfile_fk IS NULL
-	AND ufile.pfile_fk IS NOT NULL
-	AND (ufile.ufile_mode & (1<<29)) = 0
-	AND upload_fk = '$uploadpk'
+    /** jqargs = all pfiles NOT processed and WITH tokens in repository **/
+    $jqargs = "SELECT DISTINCT(Akey),A,Size
+	FROM $TempTable
+	INNER JOIN agent_lic_status ON agent_lic_status.pfile_fk = Akey
+	WHERE agent_lic_status.inrepository IS TRUE
+	AND agent_lic_status.processed IS NOT TRUE
+	ORDER BY Size DESC
 	LIMIT 5000;";
     $jobqueuepk = JobQueueAdd($jobpk,"license",$jqargs,"yes","a",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert filter_license into job queue"); }
 
     /* Add job: job "license" has jobqueue item "filter_clean" */
-    $jqargs = "SELECT DISTINCT(pfile_pk) as Akey, 
-	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
-	FROM uploadtree
-	INNER JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk
-	INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk
-	INNER JOIN agent_lic_status ON agent_lic_status.pfile_fk = pfile.pfile_pk
-	WHERE agent_lic_status.processed IS TRUE
-	AND agent_lic_status.inrepository IS TRUE
-	AND upload_fk = '$uploadpk'
-	AND (ufile.ufile_mode & (1<<29)) = 0
+    /** jqargs = all pfiles with tokens in the repository **/
+    $jqargs = "SELECT DISTINCT(Akey),A,Size
+	FROM $TempTable
+	INNER JOIN agent_lic_status ON agent_lic_status.pfile_fk = Akey
+	WHERE agent_lic_status.inrepository IS TRUE
+	AND agent_lic_status.processed IS TRUE
+	ORDER BY Size DESC
 	LIMIT 5000;";
     $jobqueuepk = JobQueueAdd($jobpk,"filter_clean",$jqargs,"yes","a",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert filter_clean into job queue"); }
+
+    /* Add job: job "license" has jobqueue item "sqlagent" */
+    $jqargs = "DROP TABLE $TempTable;";
+    $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",array($jobqueuepk));
+    if (empty($jobqueuepk)) { return("Failed to insert second sqlagent into job queue"); }
 
     return(NULL);
   } // AgentAdd()
