@@ -108,7 +108,7 @@ void	DeleteLicense	(long UploadId)
   /* Create the temp table */
   if (Verbose) { printf("  Creating temp table: %s\n",TempTable); }
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT ufile_pk,pfile_pk INTO TEMP %s FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk = '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk;",TempTable,UploadId);
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT ufile_pk,pfile_pk INTO TEMP %s FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk = '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk;",TempTable,UploadId);
   MyDBaccess(DB,SQL);
 
   /* Get the list of pfiles to process */
