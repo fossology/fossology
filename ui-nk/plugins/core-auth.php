@@ -87,13 +87,13 @@ class core_auth extends FO_Plugin
 	  /* User "fossy" does not exist.  Create it. */
 	  $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
 		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,NULL,1);";
-	  print "<br><b><font color='green'>Created default administrator: 'fossy' with password 'fossy'.</font></b><br>\n";
+	  print "*** Created default administrator: 'fossy' with password 'fossy'.\n";
 	  }
 	else
 	  {
 	  /* User "fossy" exists!  Update it. */
 	  $SQL = "UPDATE users SET user_perm = $Perm WHERE user_name = 'fossy';";
-	  print "<br><b><font color='green'>Existing user 'fossy' promoted to default administrator.</font></b><br>\n";
+	  print "*** Existing user 'fossy' promoted to default administrator.\n";
 	  }
 	$DB->Action($SQL);
 	$Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Perm;");

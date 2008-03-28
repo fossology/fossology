@@ -42,18 +42,8 @@ MANpages:
    
 InstallationCreate:
 	echo "INSTALLATIONCREATE target"; \
-#	chmod a+x $(BINFILES)
-	for file in "${BINFILES}" ; do \
-		chmod a+x $${file} ; \
-		echo "Installing $${file} into ../install/${BINDIR}"; \
-		if \
-		[[ "$${file}" == *.php ]] ; then \
-			no_extention=$${file%.php} ; \
-			cp $${file} ../install/${BINDIR}/$${no_extention} ; \
-		 else \
-			cp $${file} ../install/${BINDIR} ; \
-		 fi \
-	 done
+	chmod a+x $(BINFILES)
+	$(CP) $(BINFILES) ../install/$(BINDIR)
 	$(CP) $(LIBFILES) ../install/$(LIBDIR)
 	$(CP) $(MAN1FILES) ../install/$(MAN1DIR)
 	$(CP) $(iPATHFILE) ../install/$(WEBDIR)
