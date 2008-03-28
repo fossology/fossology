@@ -84,6 +84,10 @@ if (!$FailFlag)
     print "Failed to remove $Filename\n";
     print "Remove this file to complete the initialization.\n";
     }
+  else
+    {
+    print "Initialization completed successfully.\n";
+    }
   }
 else
   {
