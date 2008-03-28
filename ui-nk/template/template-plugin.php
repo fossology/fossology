@@ -30,6 +30,7 @@ if (!isset($GlobalReady)) { exit; }
  For example, if a plugin crashes then it should mark the state
  as invalid.
  *************************************************************/
+define("PLUGIN_STATE_FAIL",-1); // mark it as a total failure
 define("PLUGIN_STATE_INVALID",0);
 define("PLUGIN_STATE_VALID",1); // used during install
 define("PLUGIN_STATE_READY",2); // used during post-install

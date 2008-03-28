@@ -211,9 +211,26 @@ function plugin_find_any($Name)
 } // plugin_find_any()
 
 /*****************************************
+ plugin_init(): Initialize every plugin!
+ *****************************************/
+function plugin_init()
+{
+  global $Plugins;
+  /* Now activate the plugins */
+  plugin_sort();
+  $Count = count($Plugins);
+  for($Key=0; $Key < $Count; $Key++)
+    {
+    $P = &$Plugins[$Key];
+    if ($P->State == PLUGIN_STATE_VALID) { $P->PostInitialize(); }
+    if ($P->State == PLUGIN_STATE_READY) { $P->RegisterMenus(); }
+    }
+} // plugin_init()
+
+/*****************************************
  plugin_load(): Load every plugin!
  *****************************************/
-function plugin_load($PlugDir)
+function plugin_load($PlugDir, $CallInit=1)
 {
   global $Plugins;
 
@@ -230,16 +247,7 @@ function plugin_load($PlugDir)
 	}
     }
   closedir($Dir);
-
-  /* Now activate the plugins */
-  plugin_sort();
-  $Count = count($Plugins);
-  for($Key=0; $Key < $Count; $Key++)
-    {
-    $P = &$Plugins[$Key];
-    if ($P->State == PLUGIN_STATE_VALID) { $P->PostInitialize(); }
-    if ($P->State == PLUGIN_STATE_READY) { $P->RegisterMenus(); }
-    }
+  if ($CallInit == 1) { plugin_init(); }
 } // plugin_load()
 
 /*****************************************

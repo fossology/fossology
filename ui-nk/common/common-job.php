@@ -160,15 +160,14 @@ function JobQueueAddDependency($JobQueueChild, $JobQueueParent)
   /* See if the dependency exists */
   $Results = $DB->Action("SELECT * FROM jobdepends
 	WHERE jdep_jq_fk = '$JobQueueChild'
-	AND jdep_jq_depends_fk = '$JobQueueParent'
-	AND jdep_depends_bits = 1;");
+	AND jdep_jq_depends_fk = '$JobQueueParent';");
   if (!empty($Results[0]['jdep_jq_fk'])) { return;} // Already exists
 
   /* Add it since it is missing */
   $DB->Action("INSERT INTO jobdepends
-	(jdep_jq_fk,jdep_jq_depends_fk,jdep_depends_bits)
+	(jdep_jq_fk,jdep_jq_depends_fk)
 	VALUES
-	('$JobQueueChild','$JobQueueParent',1);");
+	('$JobQueueChild','$JobQueueParent');");
 } // JobQueueAddDependency()
 
 /************************************************************
@@ -382,17 +381,15 @@ function JobQueueAdd	($job_pk, $jq_type, $jq_args, $jq_repeat,
 	if (empty($D)) { continue; }
         $Results = $DB->Action("SELECT * FROM jobdepends
 		WHERE jdep_jq_fk = '$jqpk'
-		AND jdep_jq_depends_fk = '$D'
-		AND jdep_depends_bits = 1;");
+		AND jdep_jq_depends_fk = '$D'");
 	if (empty($Results[0]['jdep_jq_fk']))
 	  {
 	  $DB->Action("INSERT INTO jobdepends
-		(jdep_jq_fk,jdep_jq_depends_fk,jdep_depends_bits) VALUES
-		('$jqpk','$D',1);");
+		(jdep_jq_fk,jdep_jq_depends_fk) VALUES
+		('$jqpk','$D');");
           $Results = $DB->Action("SELECT * FROM jobdepends
 		WHERE jdep_jq_fk = '$jqpk'
-		AND jdep_jq_depends_fk = '$D'
-		AND jdep_depends_bits = 1;");
+		AND jdep_jq_depends_fk = '$D';");
 	  }
 	if (empty($Results[0]['jdep_jq_fk'])) { $DB->Action("ROLLBACK;"); return; }
 	}
