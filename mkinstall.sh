@@ -167,6 +167,9 @@ done
 # Fix one file (should be owned by root)
 \$DEBUG chown root:root /etc/init.d/fossology
 \$DEBUG chmod 755 /etc/init.d/fossology
+# Ensure that the web directory is group-accessible by fossy.
+\$DEBUG chown fossy:fossy \$WEBDIR
+\$DEBUG chmod 775 \$WEBDIR
 
 for i in \$LINKLIST ; do
   if [ "\$FORCEFILES" == 1 ] || [ ! -h "/\$i" ] ; then
