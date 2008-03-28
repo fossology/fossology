@@ -107,15 +107,19 @@ class core_init extends FO_Plugin
 	  $Max = count($Plugins);
 	  $FailFlag=0;
 	  $Filename = getcwd() . "/init.ui";
+	  print "<pre>";
 	  for($i=0; $i < $Max; $i++)
 	    {
 	    $P = &$Plugins[$i];
 	    /* Init ALL plugins */
-	    print "Installing: " . htmlentities($P->Name) . "...\n";
 	    $State = $P->Install();
-	    if ($State == 0) { print "Done.<br />\n"; }
-	    else { $FailFlag = 1; print "<font color='red'>FAILED.</font><br />\n"; }
+	    if ($State != 0)
+	      {
+	      $FailFlag = 1;
+	      print "FAILED: " . $P->Name . " failed to install.\n";
+	      }
 	    }
+	  print "</pre>";
 	  if (!$FailFlag)
 	    {
 	    $V .= "Initialization complete.<br />";
@@ -124,7 +128,7 @@ class core_init extends FO_Plugin
 	    if (!$State)
 		{
 		$V .= "<font color='red'>";
-		$V .= "Failed to remove " . getcwd() . "/init.ui\n";
+		$V .= "Failed to remove $Filename\n";
 		$V .= "<br />Remove this file to complete the initialization.\n";
 		$V .= "</font>\n";
 		$FailedFlag = 1;
