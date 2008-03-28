@@ -46,7 +46,17 @@ if ($PluginId >= 0)
   }
 else
   {
-  print "Module unavailable.";
+  $Uri = Traceback_uri();
+  print "Module unavailable.<P />";
+  print "Click <a href='$Uri'>here</a> to continue.";
+  print "<script language='JavaScript'>\n";
+  print "function Redirect()\n";
+  print "{\n";
+  print "window.location.href = '$Uri';\n";
+  print "}\n";
+  /* Redirect in 5 seconds. */
+  print "window.setTimeout('Redirect()',5000);\n";
+  print "</script>\n";
   }
 plugin_unload();
 return(0);
