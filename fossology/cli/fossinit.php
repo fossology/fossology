@@ -45,11 +45,10 @@ plugin_load("$WEBDIR/plugins",0); /* load but do not initialize */
 $P = &$Plugins[plugin_find_any_id("auth")];
 if (!empty($P)) { $P->State = PLUGIN_STATE_FAIL; }
 
-/* Initialize plugins (registers them with the menu structure) */
-if (0) /* not needed when doing Install calls... */
-  {
-  plugin_init(); /* this registers plugins with menus */
-  }
+/* Initialize plugins */
+/** This registers plugins with the menu structure and start the DB
+    connection. **/
+plugin_init(); /* this registers plugins with menus */
 
 /* Load command-line options */
 /*** -v  = verbose ***/
