@@ -28,6 +28,7 @@ class ui_refresh extends FO_Plugin
   {
   var $Name       = "refresh";
   var $Version    = "1.0";
+  var $LoginFlag  =  0;
 
   /***********************************************************
    GetRefresh(): Generate a Refresh URL.
