@@ -10,13 +10,14 @@ SHELL=/bin/bash
 PHPCLI=/etc/php5/cli/php.ini
 PHPWEB=/etc/php5/apache2/php.ini
 LIBFILES=libcp2foss.h.php
-BINFILES="cp2foss.php p.sh"
+BINFILES=cp2foss.php p.sh fossinit.php
 MAN1SRC=cp2foss.pod
 MAN1FILES=cp2foss.1
 iPATHFILE=pathinclude.h.php
 
 all: $(iPATHFILE) MANpages
-	
+
+
 $(iPATHFILE): ../Makefile.conf
 	@echo "Building $(iPATHFILE)"
 	@echo "<?php" > $(iPATHFILE)
