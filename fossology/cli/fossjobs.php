@@ -45,7 +45,7 @@ require_once("$WEBDIR/template/template-plugin.php");
 
 $usage = <<<USAGE
 fossjob [-h] [-l] | -u upload_pk
-   Where -h is help, this messagge.
+   Where -h is help, this message.
          -l list configured agents
          -u upload_pk the upload_pk to run the agents on
 
