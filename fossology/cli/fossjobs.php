@@ -28,7 +28,7 @@
  *
  * @return 0 for success, string for failure....
  * 
- * @version "$Id"
+ * @version "$Id$"
  * 
  * note: there is a user interface issue here in that the user has no
  * easy way to discover and specify what the upload_pk is.
