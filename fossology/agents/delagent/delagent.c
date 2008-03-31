@@ -166,6 +166,7 @@ void	DeleteUpload	(long UploadId)
   int Row,MaxRow;
   char TempTable[256];
   long UploadUfile,UploadPfile;
+  int rc;
 
   if (Verbose) { printf("Deleting upload %ld\n",UploadId); }
   DBaccess(DB,"SET statement_timeout = 0;"); /* no timeout */
@@ -254,7 +255,9 @@ void	DeleteUpload	(long UploadId)
   if (Verbose) { printf("  Retrieving upload informations\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT ufile.ufile_pk,ufile.pfile_fk FROM upload INNER JOIN ufile ON upload.upload_pk = %ld AND ufile.ufile_pk = upload.ufile_fk;",UploadId);
-  MyDBaccess(DB,SQL);
+  rc = MyDBaccess(DB,SQL);
+  if (rc < 0) { return; } /* no such job! */
+  if (DBdatasize(DB) <= 0) { return; } /* no such job! */
   UploadUfile = atol(DBgetvalue(DB,0,0));
   UploadPfile = atol(DBgetvalue(DB,0,1));
   if (Verbose) { printf("    UploadId = %ld  Ufile=%ld  Pfile=%ld\n",UploadId,UploadUfile,UploadPfile); }
