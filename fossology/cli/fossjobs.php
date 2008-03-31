@@ -70,8 +70,7 @@ require_once("$WEBDIR/template/template-plugin.php");
  INITIALIZE THIS INTERFACE
  **********************************************************************
  **********************************************************************/
-$usage = <<<USAGE
-fossjob [options]
+$usage = basename($argv[0]) . " [options]
   Options:
   -h        :: help, this message
   -v        :: verbose output
@@ -80,8 +79,7 @@ fossjob [options]
                The string can be a comma-separated list of agent tasks.
   -u        :: list available upload ids
   -U upload :: the upload identifier to for scheduling agent tasks
-
-USAGE;
+";
 
 //process parameters, see usage above
 $options = getopt("haA:uU:v");
