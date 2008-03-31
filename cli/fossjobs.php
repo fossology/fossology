@@ -167,7 +167,7 @@ if (array_key_exists("a",$options))
     }
   else
     {
-    echo "The configured agents are:\n";
+    echo "The available agents are:\n";
     $agent_count = count($agent_list);
     for ($ac=0; $ac<$agent_count; $ac++)
       {
