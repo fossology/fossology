@@ -1052,45 +1052,6 @@ struct ContainerInfo
   };
 typedef struct ContainerInfo ContainerInfo;
 
-/******************************
- SQL to list flags:
- select (ufile_mode & (1<<29)) != 0 as C,(ufile_mode & (1<<28)) != 0 as A,(ufile_mode & (1<<27)) != 0 as P,(ufile_mode & (1<<26)) != 0 as R,(ufile_mode & (1<<14)) != 0 as D,ufile_pk, ufile_container_fk, pfile_fk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size, ufile_name from ufile left join pfile on pfile_fk = pfile_pk;
- ******************************/
-
-#if 0
-OBSOLETE
-/***************************************************
- ReplicaInDB(): Check if a duplicate pfile exists in the
- ufile DB table.
- Returns 1 if there is a replica.  0 if this will be original.
- ***************************************************/
-int	ReplicaInDB	(ContainerInfo *CI)
-{
-  int rc;
-
-  if (!DB) return(0); /* not in the DB since there is no DB */
-  if (CI->pfile_pk == 0) return(0); /* no pfile key */
-  memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"SELECT * FROM ufile WHERE pfile_fk='%ld' AND (ufile_mode&(1<<26))=0 LIMIT 1;",
-	CI->pfile_pk);
-
-  if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-  rc = DBaccess(DB,SQL); /* SELECT */
-  if (rc <= 0)
-	{
-	if (Verbose) fprintf(stderr,"  Replica does not exist in DB due to a problem\n");
-	return(0);
-	}
-  if (DBdatasize(DB) > 0)
-	{
-	if (Verbose) fprintf(stderr,"  Replica exists in DB\n");
-	return(1);
-	}
-  if (Verbose) fprintf(stderr,"  Replica does not exist in DB\n");
-  return(0);
-} /* ReplicaInDB() */
-#endif
-
 /***************************************************
  ExistInDB(): Check if a ufile exists in the DB.
  Returns ufile_pk if the same filename, permissions, and parent
@@ -1297,7 +1258,7 @@ int	DBInsertUfile	(ContainerInfo *CI, int Mask)
     	(CI->HasChild<<BITS_CONTAINER),
 	CI->ufile_pk
 	);
-    if (SetContainerArtifact) DBaccess(DB,SQL); /* UPDATE ufile */
+    DBaccess(DB,SQL); /* UPDATE ufile to make it a container */
 #endif
     } /* if UPDATE */
 
