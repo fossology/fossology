@@ -65,7 +65,7 @@ class agent_license extends FO_Plugin
    $Depends can be a jq_pk, or an array of jq_pks, or NULL.
    Returns NULL on success, string on failure.
    *********************************************/
-  function AgentAdd ($uploadpk,$Depends=NULL)
+  function AgentAdd ($uploadpk,$Depends=NULL,$Priority=0)
   {
     global $DB;
     /* Get dependency: "license" require "unpack". */
@@ -90,7 +90,7 @@ class agent_license extends FO_Plugin
     else if (!empty($Depends)) { $Dep[1] = $Depends; }
 
     /* Prepare the job: job "license" */
-    $jobpk = JobAddJob($uploadpk,"license");
+    $jobpk = JobAddJob($uploadpk,"license",$Priority);
     if (empty($jobpk)) { return("Failed to insert job record"); }
 
     /*****
