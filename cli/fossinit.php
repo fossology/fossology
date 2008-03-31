@@ -50,9 +50,18 @@ if (!empty($P)) { $P->State = PLUGIN_STATE_FAIL; }
     connection. **/
 plugin_init(); /* this registers plugins with menus */
 
+$usage = "Usage: " . basename($argv[0]) . " [-v]
+  -v  = enable verbose mode
+  -h  = this help usage";
+
 /* Load command-line options */
 /*** -v  = verbose ***/
-$Options = getopt("v");
+$Options = getopt('vh');
+if (array_key_exists('h',$Options))
+  {
+  print "$usage\n";
+  exit(0);
+  }
 $Verbose = array_key_exists("v",$Options);
 
 /* Initialize the list of registered plugins */
