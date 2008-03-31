@@ -65,10 +65,10 @@ class agent_unpack extends FO_Plugin
    $Depends can be a jq_pk, or an array of jq_pks, or NULL.
    Returns NULL on success, string on failure.
    *********************************************/
-  function AgentAdd ($uploadpk,$Depends=NULL)
+  function AgentAdd ($uploadpk,$Depends=NULL,$Priority=0)
   {
     /* Prepare the job: job "unpack" */
-    $jobpk = JobAddJob($uploadpk,"unpack");
+    $jobpk = JobAddJob($uploadpk,"unpack",$Priority);
     if (empty($jobpk)) { return("Failed to insert job record"); }
     if (!empty($Depends) && !is_array($Depends)) { $Depends = array($Depends); }
 

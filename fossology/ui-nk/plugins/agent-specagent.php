@@ -65,7 +65,7 @@ class agent_specagent extends FO_Plugin
    $Depends can be a jq_pk, or an array of jq_pks, or NULL.
    Returns NULL on success, string on failure.
    *********************************************/
-  function AgentAdd ($uploadpk,$Depends=NULL)
+  function AgentAdd ($uploadpk,$Depends=NULL,$Priority)
   {
     global $DB;
     /* Get dependency: "specagent" require "mimetype". */
@@ -90,7 +90,7 @@ class agent_specagent extends FO_Plugin
     else if (!empty($Depends)) { $Dep[1] = $Depends; }
 
     /* Prepare the job: job "Default Meta Agents" */
-    $jobpk = JobAddJob($uploadpk,"Default Meta Agents");
+    $jobpk = JobAddJob($uploadpk,"Default Meta Agents",$Priority=0);
     if (empty($jobpk)) { return("Failed to insert job record"); }
 
     /* "specagent" needs to know the attribkey for 'Processed' */
