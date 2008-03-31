@@ -27,6 +27,7 @@
  * @param (optional) string -a lists agents
  * @param (optional) string -A specify agents
  * @param (optional) string -u list available uploads
+ * @param (optional) string -P priority for the jobs (default: 0)
  * @param int -U $upload_pk upload primary key to run agents on....
  *
  * @return 0 for success, string for failure....
@@ -79,10 +80,11 @@ $usage = basename($argv[0]) . " [options]
                The string can be a comma-separated list of agent tasks.
   -u        :: list available upload ids
   -U upload :: the upload identifier to for scheduling agent tasks
+  -P num    :: priority for the jobs (higher = more important, default:0)
 ";
 
 //process parameters, see usage above
-$options = getopt("haA:uU:v");
+$options = getopt("haA:P:uU:v");
 //print_r($options);
 if (empty($options))
   {
@@ -130,6 +132,12 @@ $Verbose = 0;
 if (array_key_exists("v",$options))
   {
   $Verbose = 1;
+  }
+
+$Priority = 0;
+if (array_key_exists("P",$options))
+  {
+  $Priority = intval($options["P"]);
   }
 
 // Get the list of registered agents
@@ -208,7 +216,7 @@ if (!empty($upload_pk))
     if (!empty($agentname))
       {
       $Agent = &$Plugins[plugin_find_id($agentname)];
-      $results = $Agent->AgentAdd($upload_pk);
+      $results = $Agent->AgentAdd($upload_pk,NULL,$Priority);
       if (!empty($results))
         {
         echo "ERROR: Scheduling failed for Agent $agentname\n";
