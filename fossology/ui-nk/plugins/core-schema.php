@@ -115,7 +115,7 @@ END;
 $$
 LANGUAGE plpgsql;
     ';
-    $DB->Action($GetRunnable);
+//    $DB->Action($GetRunnable);
 
     /********************************************/
     /* Have the scheduler initialize all agents */
