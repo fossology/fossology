@@ -120,6 +120,10 @@ class admin_db_cleanup extends FO_Plugin
 	$Checks[$i]['label'] = "Unreferenced folders";
 	$Checks[$i]['sql']   = "FROM folder WHERE folder_pk NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1) AND folder_pk != '1';";
 	$Checks[$i]['list']  = "SELECT folder_name AS list FROM folder WHERE folder_pk NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1) AND folder_pk != '1' LIMIT 20;";
+	$i++;
+	$Checks[$i]['tag']   = "duplicate_attrib";
+	$Checks[$i]['label'] = "Duplicate attrib records";
+	$Checks[$i]['sql']   = "FROM attrib WHERE attrib_pk NOT IN (SELECT MIN(dup.attrib_pk) FROM attrib AS dup GROUP BY dup.pfile_fk, dup.attrib_key_fk, dup.attrib_value);";
 
 	/* Check for anything to fix */
         $Args=0;
