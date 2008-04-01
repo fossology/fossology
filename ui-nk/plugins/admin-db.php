@@ -144,7 +144,7 @@ class admin_db_cleanup extends FO_Plugin
 	    $Args++;
 	    }
 	  }
-	if ($Args > 0) { $V .= "<P />\n"; }
+	if ($Args > 0) { $V .= "<H1>Fix Records</H1>\n"; }
 
 	/***************************************/
 	$V .= "On occasion, the database can become inconsistent.";
