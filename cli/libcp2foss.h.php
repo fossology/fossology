@@ -23,12 +23,68 @@
 * @package libcp2foss.h.php
 *
 * @author mark.donohoe@hp.com
-* @version $Id: libcp2foss.h.php 1589 2007-12-15 00:56:21Z markd $
+* @version $Id$
 *
 */
 
 /**
- * funciton: hash2bucket
+ * function: CreateFolder
+ *
+ * Given a parent folder, create the folder with the optional description
+ *
+ * @param int    $parent_fk the parent key
+ * @param string $folder_name the name of the folder to create
+ * @param string $description Brief descrition of the folders use
+ *
+ * @return an associative array folder name as the key and folder_pk as
+ * the value.
+ *
+ */
+
+function CreateFolder($parent_key, $folder_name, $description="") {
+  global $DB;
+
+  /* Check the name */
+  $folder_name = trim($folder_name);
+  if (empty($folder_name)) { return(FALSE); }
+
+  /* Make sure the parent folder exists */
+  $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$parent_key';");
+  $Row = $Results[0];
+  if ($Row['folder_pk'] != $parent_key)
+  {
+    // parent doesn't exist
+    return(FALSE);
+  }
+
+  // folder name exists under the parent?
+  $Sql = "SELECT * FROM leftnav WHERE name = '$folder_name' AND
+                parent = '$parent_key' AND foldercontents_mode = '1';";
+  $Results = $DB->Action($Sql);
+  if ($Results[0]['name'] == $folder_name) { return(0); }
+
+  /* Create the folder
+   * Block SQL injection by protecting single quotes
+   *
+   * Protect the folder name with htmlentities.
+   */
+  $folder_name = str_replace("'", "''", $folder_name);  // PostgreSQL quoting
+  $description = str_replace("'", "''", $description);            // PostgreSQL quoting
+  $DB->Action(
+  "INSERT INTO folder (folder_name,folder_desc) VALUES ('$folder_name','$description');");
+  $Results = $DB->Action(
+  "SELECT folder_pk FROM folder WHERE folder_name='$folder_name' AND folder_desc = '$description';");
+  $FolderPk = $Results[0]['folder_pk'];
+  if (empty($FolderPk)) { return(FALSE); }
+
+  $DB->Action("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$parent_key','1','$FolderPk');");
+
+  $name_and_key[$folder_name] = $FolderPk;
+
+  return($name_and_key);
+}
+/**
+ * function: hash2bucket
  *
  * Returns the folder name to place the archive in.
  *
@@ -90,36 +146,6 @@ function hash2bucket($name){
 }
 
 /**
- * function pdbg
- *
- * print a debug message and optionally dump a structure
- *
- * prints the message prepended with a DBG-> as the prefix.   The string
- * will have a new-line added to the end so that the caller does not have
- *  to supply it.
- *
- * @param string $message the debug message to display
- * @param mixed  $dump    if not null, will be printed using print_r.
- *
- * @return void
- *
- */
-
-function pdbg($message, $dump=''){
-
-  $dbg_msg = 'DBG->' . $message . "\n";
-
-  echo $dbg_msg;
-
-  if(isset($dump)){
-    //    echo "\$dump is:\n";
-    print_r($dump);
-    echo "\n";
-  }
-  return;
-}
-
-/**
  * function: wget_url
  *
  * wget a url and check for erorrs.
@@ -147,7 +173,7 @@ function wget_url($url){
     echo "ERROR! could not create/tmp file, $php_errormsg\n";
     return false;
   }
-  
+
   $wCmd .= "$proxy" . "wget $options -O $archive_tmp -o $wget_logfile '$url' ";
   //pdbg ("\$wCmd is:\n$wCmd");
   exec("$wCmd", $dummy, $retval);
