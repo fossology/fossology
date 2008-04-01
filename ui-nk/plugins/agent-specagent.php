@@ -65,7 +65,7 @@ class agent_specagent extends FO_Plugin
    $Depends can be a jq_pk, or an array of jq_pks, or NULL.
    Returns NULL on success, string on failure.
    *********************************************/
-  function AgentAdd ($uploadpk,$Depends=NULL,$Priority)
+  function AgentAdd ($uploadpk,$Depends=NULL,$Priority=0)
   {
     global $DB;
     /* Get dependency: "specagent" require "mimetype". */
