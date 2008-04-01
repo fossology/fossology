@@ -71,7 +71,7 @@ class agent_remove_licenseMeta extends FO_Plugin
 
     /* Prepare the job: job "Delete" */
     $jobpk = JobAddJob($upload_pk,"license-delete");
-    if (empty($jobpk)) { return("Failed to create job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to create job record"); }
 
     /* Add job: job "Delete" has jobqueue item "delagent" */
     $jqargs = "DELETE LICENSE $upload_pk";

@@ -69,7 +69,7 @@ class agent_unpack extends FO_Plugin
   {
     /* Prepare the job: job "unpack" */
     $jobpk = JobAddJob($uploadpk,"unpack",$Priority);
-    if (empty($jobpk)) { return("Failed to insert job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
     if (!empty($Depends) && !is_array($Depends)) { $Depends = array($Depends); }
 
     /* Prepare the job: job "unpack" has jobqueue item "unpack" */

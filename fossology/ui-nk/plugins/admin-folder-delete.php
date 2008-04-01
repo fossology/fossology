@@ -52,7 +52,7 @@ class admin_folder_delete extends FO_Plugin
 
     /* Prepare the job: job "Delete" */
     $jobpk = JobAddJob(NULL,"Delete Folder: $FolderName");
-    if (empty($jobpk)) { return("Failed to create job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to create job record"); }
 
     /* Add job: job "Delete" has jobqueue item "delagent" */
     $jqargs = "DELETE FOLDER $folderpk";

@@ -91,7 +91,7 @@ class agent_specagent extends FO_Plugin
 
     /* Prepare the job: job "Default Meta Agents" */
     $jobpk = JobAddJob($uploadpk,"Default Meta Agents",$Priority=0);
-    if (empty($jobpk)) { return("Failed to insert job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
 
     /* "specagent" needs to know the attribkey for 'Processed' */
     $SQL = "SELECT key_pk FROM key
