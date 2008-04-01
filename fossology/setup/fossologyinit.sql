@@ -525,7 +525,7 @@ CREATE TABLE job (
     job_priority integer DEFAULT 0 NOT NULL,
     job_email_notify text,
     job_name text,
-    job_upload_fk integer DEFAULT 0 NOT NULL
+    job_upload_fk integer
 );
 
 
