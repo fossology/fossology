@@ -40,8 +40,16 @@ class admin_db_cleanup extends FO_Plugin
     {
     global $DB;
     print "Deleting " . $CheckType['label'] . "...";
+    $DB->Debug=1;
+    print "<pre>";
     $DB->Action("DELETE " . $CheckType['sql']);
-    print $DB->GetAffectedRows . "cleaned.<br>";
+    print "</pre>";
+    $DB->Debug=0;
+    if ($DB->GetAffectedRows() > 0)
+      {
+      print "Deleted " . $DB->GetAffectedRows . " from ";
+      print $CheckType['label'] . ".<br>\n";
+      }
     } // FixDB()
 
   /************************************************
@@ -127,7 +135,6 @@ class admin_db_cleanup extends FO_Plugin
 
 	/* Check for anything to fix */
         $Args=0;
-	$DB->Debug=1; /* I want to see errors! */
 	for($i=0; !empty($Checks[$i]['tag']); $i++)
 	  {
 	  if (GetParm($Checks[$i]['tag'],PARM_INTEGER) == 1)
@@ -144,6 +151,7 @@ class admin_db_cleanup extends FO_Plugin
 	$V .= " For example, there may be pfile records without ufile entries";
 	$V .= " or ufile entries that are not linked by any uploadtree records.";
 	$V .= " Inconsistencies usually arise due to failed unpacking, partial deletions, and testing.\n";
+	$V.= "<P>NOTE: Some of these inconsistencies may not be resolvable from here due to table constraints.\n";
 
 	$V .= "<script language='javascript'>\n";
 	$V .= "<!--\n";
