@@ -854,6 +854,13 @@ void	InitEngines	(char *ConfigName)
 
   /* save results */
   MaxThread = Thread;
+  if (MaxThread <= 0)
+    {
+    fprintf(stderr,"ERROR: No agents found in the configuration file: '%s'\n",
+	ConfigName);
+    DBclose(DB);
+    exit(-1);
+    }
 } /* InitEngines() */
 
 /********************************************
