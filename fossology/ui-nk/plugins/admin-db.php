@@ -47,7 +47,7 @@ class admin_db_cleanup extends FO_Plugin
     $DB->Debug=0;
     if ($DB->GetAffectedRows() > 0)
       {
-      print "Deleted " . $DB->GetAffectedRows . " from ";
+      print "Deleted " . $DB->GetAffectedRows() . " from ";
       print $CheckType['label'] . ".<br>\n";
       }
     } // FixDB()
