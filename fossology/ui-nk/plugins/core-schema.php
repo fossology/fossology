@@ -76,6 +76,16 @@ class core_schema extends FO_Plugin
 	}
 
     /********************************************/
+    /* Modify the schema to match current needs */
+    /********************************************/
+
+    /* Delete folders needs to support nulls in the job_upload_fk */
+    $DB->Action("ALTER TABLE job
+		 ALTER COLUMN job_upload_fk DROP NOT NULL,");
+		 ALTER COLUMN job_upload_fk SET DEFAULT NULL;");
+
+
+    /********************************************/
     /* GetRunnable() is a DB function for listing the runnable items
        in the jobqueue. This is used by the scheduler. */
     /********************************************/
