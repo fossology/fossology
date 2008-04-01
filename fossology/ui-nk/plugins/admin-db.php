@@ -151,7 +151,6 @@ class admin_db_cleanup extends FO_Plugin
 	$V .= " For example, there may be pfile records without ufile entries";
 	$V .= " or ufile entries that are not linked by any uploadtree records.";
 	$V .= " Inconsistencies usually arise due to failed unpacking, partial deletions, and testing.\n";
-	$V.= "<P>NOTE: Some of these inconsistencies may not be resolvable from here due to table constraints.\n";
 
 	$V .= "<script language='javascript'>\n";
 	$V .= "<!--\n";
@@ -184,6 +183,7 @@ class admin_db_cleanup extends FO_Plugin
 	$V .= "</ul>\n";
 	$V .= "There $Verb <b>currently $Count $String running</b> in the job queue that may make records appear inconsistent.\n";
 	$V .= "Fixing inconsistencies while any jobs are running could lead to job failures and further inconsistencies.\n";
+	$V.= "<P>NOTE: Some of these inconsistencies may not be resolvable from here due to table constraints.\n";
 
 	$V .= "<P>The following inconsistencies have been identified:\n";
 	$V .= "<form method='POST'>";
