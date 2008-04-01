@@ -81,7 +81,7 @@ class core_schema extends FO_Plugin
 
     /* Delete folders needs to support nulls in the job_upload_fk */
     $DB->Action("ALTER TABLE job
-		 ALTER COLUMN job_upload_fk DROP NOT NULL,");
+		 ALTER COLUMN job_upload_fk DROP NOT NULL,
 		 ALTER COLUMN job_upload_fk SET DEFAULT NULL;");
 
 
