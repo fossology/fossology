@@ -1,5 +1,4 @@
 #!/usr/bin/php
-
 <?php
 /***********************************************************
  cp2foss.php
@@ -49,7 +48,6 @@
  * @version $Id$
  *
  * @todo remove default 'parent folder'.
- * @todo Add in recursion
  * @todo finish parameter checks.
  * @todo Finsih doc'ing all functions etc...
  *
@@ -68,12 +66,23 @@
  - Tree of dirs/files, no good solution, use last mod time on each dir/file?
  */
 
-require_once("pathinclude.h.php");
-require_once("$WEBDIR/webcommon.h.php");
-require_once("$WEBDIR/jobs.h.php");
-require_once("$WEBDIR/db_postgres.h.php");
+// Have to set this or else plugins will not load.
+$GlobalReady = 1;
+
+//error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
+//require_once("pathinclude.h.php");
+require_once("/home/markd/mypathinclude.h.php");
+global $WEBDIR;
+require_once("$WEBDIR/common/common.php");
+require_once("$WEBDIR/template/template-plugin.php");
+require_once("$WEBDIR/plugins/core-db.php");
+
 require_once("$LIBDIR/libcp2foss.h.php");
+require_once("$LIBDIR/common-cli.php");
 //require_once("./libcp2foss.h.php");
+
+global $DB;
+global $Plugins;
 
 $usage = <<< USAGE
 Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> \
@@ -106,23 +115,28 @@ Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> \
     -w Indicates that the argument to -a is going to be a url.  cp2foss
        will use the url supplied and the wget to get the archive before
        uploading.
-         
+ 
 USAGE;
+
+cli_Init();
+// Always perform this check after initalizing the environment as it
+// is supposed to open the db.
+if (empty($DB))
+  {
+  print "ERROR: Unable to connect to the database.\n";
+  exit(1);
+  }
 
 $parent_folder = 'Repository Directory';  // default if non given
 
 // NOTE: replace below with getops for cleaner/more flexible processing....
-// for example, can't really have an optional parent dir (default), nor
-// description, or -r (future). As written...
 // Well, prototyped with getopts.  Not much better than the switch below.
-// Not quite up to snuff in terms compared to perl or glibc...
 
 // This check is not sufficient.... has to be 2 to cover the -f <foo> case...
 if ($argc < 2) {
   echo $usage;
   exit(1);
 }
-
 $fflag   = 0;
 $cap_a   = false;
 $dashD   = false;
@@ -142,7 +156,7 @@ for ($i = 1; $i < $argc; $i++) {
         $archive = $argv[$i];
       }
       else {
-        die("ERROR: Must supply a fully qualified path to an archive after -a");
+        die("ERROR: Must supply a fully qualified path to an archive after -a\n");
       }
       break;
     case '-d':
@@ -152,7 +166,7 @@ for ($i = 1; $i < $argc; $i++) {
         $dashD = True;
       }
       else {
-        die("ERROR: Must supply a quoted description after -d");
+        die("ERROR: Must supply a quoted description after -d\n");
       }
       break;
     case '-f':
@@ -162,7 +176,7 @@ for ($i = 1; $i < $argc; $i++) {
         $in_file = $argv[$i];
       }
       else {
-        die("ERROR: Must supply a valid path to a file after -f");
+        die("ERROR: Must supply a valid path to a file after -f\n");
       }
       break;
     case '-n':
@@ -171,7 +185,7 @@ for ($i = 1; $i < $argc; $i++) {
         $folder = $argv[$i];
       }
       else {
-        die("ERROR: Must specify a folder name after -n");
+        die("ERROR: Must specify a folder name after -n\n");
       }
       break;
     case '-p':
@@ -180,7 +194,7 @@ for ($i = 1; $i < $argc; $i++) {
         $fpath = $argv[$i];
       }
       else {
-        die("ERROR: Must specify a folder path after -p");
+        die("ERROR: Must specify a folder path after -p\n");
       }
       break;
     case '-R':
@@ -197,14 +211,6 @@ for ($i = 1; $i < $argc; $i++) {
       die("ERROR: Unknown argument: $argv[$i]\n$usage");
       break;
   }
-}
-$path = "{$DATADIR}/dbconnect/{$PROJECT}";
-
-db_init($path);
-
-if (!$_pg_conn) {
-  echo "ERROR: could not connect to DB\n";
-  exit(1);
 }
 
 // If we have a file of input, we process it and exit
@@ -248,21 +254,14 @@ if ($dashD != True){
 //echo "PARAMETERS:\n";
 //echo "PF:$parent_folder\nN:$folder\nD:$description\nA:$archive\nFURL:$fetch_url\n\n";
 
-/*
- enhancement area:
- This is spot to check for:
- 1. default parent folder
- 2. no description, create as needed
- 3. any special setups needed for recursion?
-
- */
-
+/***********************************************************************
+ * Process file/directory (-R)
+ **********************************************************************/
 /*
  * is the archive a dir? If so, we suck up the files in it unless
  * recurse is turned on.  Function suckupfs returns false or the tar'ed
  * archive it created.
  */
-
 if(is_dir($archive)){
   //pdbg("Calling suckupfs");
   if ($recurse){
@@ -272,22 +271,17 @@ if(is_dir($archive)){
     $archive = suckupfs($archive);
   }
 }
-//pdbg("MAIN: archive is:$archive");
+
 // make sure we didn't get a false from suckupfs.
 if (!$archive){
   echo
    "ERROR: there is something wrong with the archive\n\$archive is:$archive\n";
   exit(1);
 }
-/*
- * pseudo code: for what goes here.
- * do we even care?  at this point the archive is either a compressed file
- * or a url or a file... either way, we can load it.
- */
-
 // It's either a url or an archive
+
+
 if($fetch_url){
-  //pdbg("MAIN: processing url \$archive is:\n$archive");
   // Check to make sure it's a valid http/s request
   if (!(preg_match('|^http[s]*?://|',$archive))){
     echo "ERROR: archive is expected to be a url\n";
@@ -323,12 +317,6 @@ if($cap_a){
   $alpha_folder = hash2bucket($folder);
   $foldr_path .= "/$alpha_folder";
 }
-
-//echo "DBG->MAIN:\$fpath is:$fpath\n";
-//echo "DBG->MAIN:\$foldr_path is:$foldr_path\n";
-
-//$folder_cache = array();
-
 echo
 "Working on uploading archive:\n$archive\ninto folder path $foldr_path\n";
 echo "Using folder file name $folder to store the archive in\n";
@@ -345,9 +333,7 @@ $folder_cache = get_fpath_keys($folder_path);
 // create any that don't exist and add the folder_pk for that folder.
 
 $folder_cache = create_folders($folder_cache, $folder_path);
-
-//echo "DBG->MAIN: after create folders folder_cache is:\n";
-//print_r($folder_cache);
+//pdbg("MAIN: create_folders: folder_cache is:",$folder_cache);
 
 if (ck_4_upload($folder_cache, $folder)){
   echo
@@ -357,7 +343,8 @@ if (ck_4_upload($folder_cache, $folder)){
 
 // Get the folder_fk of the last entry in the folder_cache, this should
 // be the last folder (leaf). end returns the value in an associative array.
-
+global $DB;
+$DB->Debug = 1;
 $folder_fk = end($folder_cache);
 
 //pdbg("Main: folder before upload:$folder");
@@ -379,7 +366,7 @@ else{
     echo "The jobs for the archive\n$archive\nfound in $archive have been scheduled\n\n";
   }
 }
-
+$DB->Debug = 0;
 // use the variable $foldr_path, as that has the alpha folder on the end of it.
 echo
   "Archive:\n$archive\nis scheduled to be loaded into folder:$foldr_path/$folder\n";
@@ -432,18 +419,23 @@ function ck_4_upload($folder_cache, $folder_name){
   // If there is an upload record, we emit a warning and stop processing
   // that archive
 
-  $folder_pk = end($folder_cache);
-  //  pdbg("CK4U: \$folder_pk is:$folder_pk");
+  global $DB;
 
+  //$folder_pk = end($folder_cache);
+  $folder_pk = $folder_cache[$folder_name][$folder_name];
+  //pdbg("CK4U: \$folder_pk is:",$folder_pk);
+  //pdbg("CK4U:\$folder_cache is:",$folder_cache);
+  
   $sql_up =
-  "select name, upload_pk from leftnav where parent=$folder_pk and foldercontents_mode=2";
+  "SELECT (name, upload_pk) FROM leftnav WHERE parent=$folder_pk AND foldercontents_mode=2";
 
-  $uploaded  = db_queryall($sql_up);
-  //  pdbg("CK4U: \$uploaded is:", $uploaded);
+  $results  = $DB->Action($sql_up);
+  $uploaded  = $results[0]['upload_pk'];
+
+  // may have to change this as action may return a nested array....
   $rows = count($uploaded);
-
+  
   // check rows, 0 = no upload rec
-
   if ($rows == 0){
     return(false);
   }
@@ -463,43 +455,6 @@ function ck_4_upload($folder_cache, $folder_name){
     }
   }
   return(false);
-}
-
-
-/**
- * function:create_folder
- *
- * create a folder in the db.  Assumes that the folder does NOT exist.
- * The caller should first verify that the folder doesn't exist.
- * Use folder_exists to determine folder existence.
- *
- * @param integer $parent_fk parent foreign key
- * @param string  $folder_name The name you want to give to the folder
- * @param string  $description Short description of the folders purpose
- *
- * Returns: associative array with folder as key and folder_pk as value.
- *
- * @author mark.donohoe@hp.com
- * @version 0.3
- *
- */
-
-function create_folder($parent_fk, $folder_name, $description){
-
-  // This used to be a useful function.  See if you can just enhance
-  // create_folder in the db_postgres lib and get rid of this pos.
-
-  echo "Creating Folder $folder_name associated with parent key:$parent_fk\n";
-  // ask bob about the difference between this and whats in folder_exists.
-
-  $fc_pk = createfolder($parent_fk, $folder_name, $description);
-  // Createfolder returns the foldercontents pk, not the folder pk.  Go get it.
-  $sql = "Select folder_pk from leftnav where
-                  parent='$parent_fk' and foldercontents_mode=1 
-                  and name='$folder_name'"; 
-  $folder_fk = db_query1($sql);
-  $name_and_key[$folder_name] = $folder_fk;
-  return($name_and_key);
 }
 
 /**
@@ -522,11 +477,11 @@ function create_folder($parent_fk, $folder_name, $description){
  */
 function create_folders($folder_cache, $folder_path){
 
-  //pdbg("CF: On entry, folder_cache is:",$folder_cache);
+  //pdbg("create_folders: On entry, folder_cache is:",$folder_cache);
 
   // used to determine if we are at the 1st folder.
   $cache_key = key($folder_cache);
-
+  //pdbg("CF:cache_key is:$cache_key");
   for ($fpi=0; $fpi<count($folder_cache); $fpi++){
     // top folder is a special case
     //pdbg("CF:\$folder_cache[$folder_path[$fpi]]:{$folder_cache[$folder_path[$fpi]]}");
@@ -536,7 +491,8 @@ function create_folders($folder_cache, $folder_path){
       //      print_r($folder_cache[$folder_path[$fpi]]);
       //      echo "\n";
       if ($folder_cache[$folder_path[$fpi]] === false){
-        //	echo "DBG->CF: Calling create_parent\n";
+        //echo "DBG->CF: Calling create_parent\n";
+        //pdbg("CF: folder_path[fpi]is:{$folder_path[$fpi]}");
         $fstat = create_parent($folder_path[$fpi]);
         if(! $fstat[$folder_path[$fpi]]){
           echo "Could not create folder $folder_path[$fpi]\n";
@@ -553,8 +509,8 @@ function create_folders($folder_cache, $folder_path){
       continue;
     }
     if ($folder_cache[$folder_path[$fpi]] === false){
-      //      echo "DBG->CF:\$folder_cache[$folder_path[$fpi]] was false\n";
-      $fstat = create_folder(
+      //pdbg("create_folders:\$folder_cache[$folder_path[$fpi]] was false");
+      $fstat = CreateFolder(
       $folder_cache[$folder_path[$fpi-1]], $folder_path[$fpi], '');
       if(! $fstat[$folder_path[$fpi]]){
         echo "Could not create folder $folder_path[$fpi]\n";
@@ -563,16 +519,14 @@ function create_folders($folder_cache, $folder_path){
       }
       // update the cache
       else{
-        //echo "DBG->CF: Updating cache\n";
-        //	echo "\$folder_cache[$folder_path[$fpi]] = \$fstat[$folder_path[$fpi]]\n";
+        //pdbg("CF: Updating cache");
+        echo "\$folder_cache[$folder_path[$fpi]] = \$fstat[$folder_path[$fpi]]\n";
         $folder_cache[$folder_path[$fpi]] = $fstat[$folder_path[$fpi]];
       }
     }
   }
 
-  //  echo "DBG->CF: after create folders folder_cache is:\n";
-  //  print_r($folder_cache);
-
+  //pdbg("create_folders: on exit folder_cache is:",$folder_cache);
   return($folder_cache);
 }
 
@@ -591,30 +545,26 @@ function create_folders($folder_cache, $folder_path){
  * @todo think about combining with create_folder
  *
  * @author mark.donohoe@hp.com
- * @version 0.3
  *
  */
 
 function create_parent($folder){
-
-  // HACK: the description is sorta lame... not sure what else to use
-  // NOTE: this function will probably have to change when users are
-  // implimented.
-
   // all parent folders are created as a child of the root folder for
   // the user (1st release only has one user....)
 
+  global $DB;
+
   echo "Creating Parent Folder:$folder\n";
   $desc = "Parent folder $folder";
-  $sql = 'select root_folder_fk from users limit 1';
-  $rfolder4user = db_query1($sql);
-  $fc_pk = createfolder($rfolder4user, $folder, $desc);
-  // Createfolder returns the foldercontents pk, not the folder pk.  Go get it.
-  $sql = "Select folder_pk from leftnav where
-                  parent='$rfolder4user' and foldercontents_mode=1 
-                  and name='$folder'"; 
-  $parent_pk = db_query1($sql);
-  $name_and_key[$folder] = $parent_pk;
+  $sql = 'SELECT root_folder_fk FROM users limit 1';
+  $results = $DB->Action($sql);
+  $rfolder4user = $results[0]['root_folder_fk'];
+  //pdbg("create_parent: \$rfolder4user is:$rfolder4user");
+  $folder_pk = CreateFolder($rfolder4user, $folder, $desc);
+  //pdbg("create_parent: \$folder_pk is:",$folder_pk);
+  $tfpk = $folder_pk[$folder];
+  //pdbg("create_parent:after assignment tfpk is:$tfpk");
+  $name_and_key[$folder] = $folder_pk[$folder];
   return($name_and_key);
 }
 
@@ -625,35 +575,38 @@ function create_parent($folder){
  *
  * Given an array of folder names, determine which ones exist.
  *
- * Returns: associative array with folder name as the key and folder_pk as
+ * @param string $folder_path the path to the folder.
+ *
+ * @Return associative array with folder name as the key and folder_pk as
  *          the value.  If there is no folder_pk, then the folder doesn't
  *          exist and the value is false.
  *
  * @author mark.donohoe@hp.com
- * @version 0.3
  *
  */
 function get_fpath_keys($folder_path){
+
+  global $DB;
 
   if (empty($folder_path)){
     //echo "DBG->GFK: returning due to empty input\n";
     return(false);
   }
-  //  echo "DBG->get_fpath_keys: \$folder_paht on entry is:\n";
-  //  print_r($folder_path);
-  //  echo "\n";
+  //pdbg("DBG->get_fpath_keys: \$folder_path on entry is:",$folder_path);
 
   $folder_cache = array();
   // process the 1st entry specially, as it must be associated with the
   // root.
   $sql = 'select root_folder_fk from users limit 1';
-  $rfolder4user = db_query1($sql);
+  $results = $DB->Action($sql);
+  $rfolder4user = $results[0]['root_folder_fk'];
   $sql_folderP = "Select folder_pk from leftnav where
                   parent='$rfolder4user' and foldercontents_mode=1 
                   and name='$folder_path[0]'";
 
   // If the query below returns nothing, then the folder doesn't exist.
-  $folder_exists_fk = db_query1($sql_folderP);
+  $results = $DB->Action($sql_folderP);
+  $folder_exists_fk = $results[0]['folder_pk'];
 
   if ($folder_exists_fk){
     $folder_cache[$folder_path[0]] = $folder_exists_fk;
@@ -665,7 +618,7 @@ function get_fpath_keys($folder_path){
     foreach ($folder_path as $folder){
       $folder_cache[$folder] = false;
     }
-
+    //pdbg("DBG->get_fpath_keys: On Return \$folder_cache is:\n",$folder_cache);  
     return($folder_cache);
   }
   // now process the rest of the path... Note the array index ($ai)
@@ -679,7 +632,8 @@ function get_fpath_keys($folder_path){
     //    echo "DBG->GFPK: Query: Select folder_pk from leftnav where name='$folder_path[$ai]' and parent=$parent_fk\n";
     //    echo "DBG->GFPK: Getting folder_pk\n";
 
-    $folder_exists = db_query1($sql_folder);
+    $results = $DB->Action($sql_folder);
+    $folder_exists = $results[0];
 
     //    echo "DBG->GFPK: folder_pk is:";
     //    print_r($folder_exists);
@@ -695,9 +649,7 @@ function get_fpath_keys($folder_path){
       break;
     }
   }
-  //  echo "DBG->get_fpath_keys: \$folder_cache is:\n";
-  //  print_r($folder_cache);
-  //  echo "\n";
+  //pdbg("DBG->get_fpath_keys: On Return \$folder_cache is:\n",$folder_cache);
   return($folder_cache);
 }
 
@@ -766,12 +718,17 @@ function suckupfs($path, $recursion = false){
 
   //pdbg("SUCKUPFS: list is:$flist");
   chdir($path) or die("Can't cd to $path, $php_errormsg\n");
-  $tpath = '/tmp/' . "{$dir_parts['basename']}" . '.tar.bz2';
-  $tcmd = "tar -cjf $tpath --exclude='.svn' --exclude='.cvs' $flist";
-  $last = exec($tcmd, $tossme, $rtn);
+  $ftail = getmypid();
+  if(empty($ftail)){
+    $ftail = session_id();
+  }
+  $tpath = '/tmp/' . "{$dir_parts['basename']}" . '.tar.bz2.' . "$ftail";
+  $tcmd = "tar -cjf $tpath --exclude='.svn' --exclude='.cvs' $flist 2>&1";
+  $last = exec($tcmd, &$tossme, &$rtn);
   // Tar almost never returns 0!  So if it's not 0, then check existence
   // and size.
   if ($rtn >= 0){
+    echo "\$tpath is:$tpath\n";
     if(!(filesize($tpath))){
       echo "ERROR: filesize returned False\n";
       return(FALSE);
@@ -975,34 +932,30 @@ function upload_archive($folder_fk, $folder_name, $description, $archive){
 
   // checking for a good archive occurs before this is called.
 
+  global $WEBDIR;
   global $AGENTDIR;
 
+  // create upload rec
   $upload_fk =
-  createuploadrec($folder_fk, $folder_name, $description, $archive, 1<<4);
-  // This saves the archive.  Set to NULL to have the archive removed.
-  // $keep = NULL;
-  $keep = 1;                     // Set for testing
-  // webgoldimport does not use the $folder_name, pass in ''
+  JobAddUpload($folder_name, $archive, $description, 1<<4, $folder_fk);
 
-  $cmd = "$AGENTDIR/webgoldimport $upload_fk $archive '' $keep 2>&1";
-
-  #  echo "DBG: will run:\n$cmd\n";
-
-  $lastline = exec($cmd, $out, $retval);
-  #  echo "lastline is:$lastline\n";
-
+  // upload the file(s) with wget_agent
+  $cmd = "$AGENTDIR/wget_agent -k $upload_fk $archive";
+  $lastline = exec($cmd, $output, $retval);
   if($retval != 0) {
-    echo "ERROR: could not run webgoldimport, return code is:$retval\n";
+    echo "ERROR: could not run wget_agent, return code is:$retval\n";
     return(false);
   }
+  // normally, one would need to schedule an unpack job, but by calling
+  // fossjobs, you don't need to.
 
-  $jobQ = job_create_unpack($upload_fk, $archive, '');
-  if(isset($jobQ)){
-    job_create_defaults($upload_fk, $jobQ);
-  }
-  else {
-    echo "INTERNAL ERROR! job_create_unpack did not return a jobq:$jobQ\n";
-    return(false);
+  $cmd = "fossjobs -U $upload_fk";
+  $last = exec($cmd, $output, $return);
+  if ($return != 0)
+  {
+    echo "Error, could not scheduled agents via fossjobs, error was\n";
+    echo $output;
+    return(False);
   }
   return(true);
 }
