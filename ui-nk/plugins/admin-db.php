@@ -82,12 +82,12 @@ class admin_db_cleanup extends FO_Plugin
 	$Checks[$i]['tag']   = "bad_upload_pfile";
 	$Checks[$i]['label'] = "Uploads missing pfiles";
 	$Checks[$i]['sql']   = "FROM upload WHERE ufile_fk IN (SELECT ufile_pk FROM ufile WHERE pfile_fk IS NULL);";
-	$Checks[$i]['list']  = "SELECT ufile_name AS list FROM upload INNER JOIN ufile ON ufile_fk = ufile_pk WHERE ufile_fk IN (SELECT ufile_pk FROM ufile WHERE pfile_fk IS NULL);";
+	$Checks[$i]['list']  = "SELECT ufile_name AS list FROM upload INNER JOIN ufile ON ufile_fk = ufile_pk WHERE ufile_fk IN (SELECT ufile_pk FROM ufile WHERE pfile_fk IS NULL) LIMIT 20;";
 	$i++;
 	$Checks[$i]['tag']   = "unreferenced_ufile";
 	$Checks[$i]['label'] = "Unreferenced ufiles";
 	$Checks[$i]['sql']   = "FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree);";
-	$Checks[$i]['list']   = "SELECT ufile_name AS list FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree);";
+	$Checks[$i]['list']   = "SELECT ufile_name AS list FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree) LIMIT 20;";
 	$i++;
 
 // bobg: not possible due to referential integrity constraint
@@ -119,7 +119,7 @@ class admin_db_cleanup extends FO_Plugin
 	$Checks[$i]['tag']   = "unreferenced_folder";
 	$Checks[$i]['label'] = "Unreferenced folders";
 	$Checks[$i]['sql']   = "FROM folder WHERE folder_pk NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1) AND folder_pk != '1';";
-	$Checks[$i]['list']  = "SELECT folder_name AS list FROM folder WHERE folder_pk NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1) AND folder_pk != '1';";
+	$Checks[$i]['list']  = "SELECT folder_name AS list FROM folder WHERE folder_pk NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1) AND folder_pk != '1' LIMIT 20;";
 
 	/* Check for anything to fix */
         $Args=0;
@@ -201,6 +201,7 @@ class admin_db_cleanup extends FO_Plugin
 	      if ($j > 0) { $V .= "<br>\n"; }
 	      $V .= ($j+1) . ": " . htmlentities($Results[$j]['list']);
 	      }
+	    if ($j < $Count) { $V .= "<br>\n..."; }
 	    $V .= "</div>\n";
 	    }
 	  $V .= "</td>";
