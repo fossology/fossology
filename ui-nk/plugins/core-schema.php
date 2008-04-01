@@ -45,8 +45,40 @@ class core_schema extends FO_Plugin
     global $DB;
     if (empty($DB)) { return(1); } /* No DB */
 
+    /********************************************/
+    /* Sequences can get out of sequence due to the fossologyinit.sql code.
+       Fix the sequences! */
+    /********************************************/
+    /** SQL = all table + column + default value that use sequences **/
+    $SQL = "SELECT a.table_name AS table,
+	b.column_name AS column,
+	b.column_default AS value
+	FROM information_schema.tables AS a
+	INNER JOIN information_schema.columns AS b
+	  ON b.table_name = a.table_name
+	WHERE a.table_type = 'BASE TABLE'
+	AND a.table_schema = 'public'
+	AND b.column_default LIKE 'nextval(%)'
+	;";
+    $Tables = $DB->Action($SQL);
+    for($i=0; !empty($Tables[$i]['table']); $i++)
+	{
+	/* Reset each sequence to the max value in the column. */
+	$Seq = $Tables[$i]['value'];
+	$Seq = preg_replace("/.*'(.*)'.*/",'$1',$Seq);
+	$Table = $Tables[$i]['table'];
+	$Column = $Tables[$i]['column'];
+	$Results = $DB->Action("SELECT max($Column) AS max FROM $Table LIMIT 1;");
+	$Max = $Results[0]['max'];
+	if (empty($Max)) { $Max = 1; }
+	// print "Setting table($Table) column($Column) sequence($Seq) to $Max\n";
+	$DB->Action("SELECT setval('$Seq',$Max);");
+	}
+
+    /********************************************/
     /* GetRunnable() is a DB function for listing the runnable items
-       in the jobqueue. */
+       in the jobqueue. This is used by the scheduler. */
+    /********************************************/
     $GetRunnable = '
 CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
 DECLARE
@@ -84,6 +116,16 @@ $$
 LANGUAGE plpgsql;
     ';
     $DB->Action($GetRunnable);
+
+    /********************************************/
+    /* Have the scheduler initialize all agents */
+    /* This only works without SSH. */
+    /********************************************/
+    // global $AGENTDIR;
+    // print "Initializing the scheduler\n";
+    // system("$AGENTDIR/scheduler -i");
+    // print "Testing the scheduler\n";
+    // system("$AGENTDIR/scheduler -t");
     } // Install()
 
   };
