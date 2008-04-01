@@ -91,7 +91,7 @@ class agent_mimetype extends FO_Plugin
 
     /* Prepare the job: job "Default Meta Agents" */
     $jobpk = JobAddJob($uploadpk,"Default Meta Agents",$Priority);
-    if (empty($jobpk)) { return("Failed to insert job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
 
     /* Add job: job "Default Meta Agents" has jobqueue item "mimetype" */
     $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,

@@ -49,7 +49,7 @@ class admin_upload_delete extends FO_Plugin
   {
     /* Prepare the job: job "Delete" */
     $jobpk = JobAddJob($uploadpk,"Delete");
-    if (empty($jobpk)) { return("Failed to create job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to create job record"); }
 
     /* Add job: job "Delete" has jobqueue item "delagent" */
     $jqargs = "DELETE UPLOAD $uploadpk";

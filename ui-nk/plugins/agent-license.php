@@ -91,7 +91,7 @@ class agent_license extends FO_Plugin
 
     /* Prepare the job: job "license" */
     $jobpk = JobAddJob($uploadpk,"license",$Priority);
-    if (empty($jobpk)) { return("Failed to insert job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
 
     /*****
      Performance notes:

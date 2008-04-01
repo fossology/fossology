@@ -58,7 +58,7 @@ class upload_url extends FO_Plugin
 
     /* Prepare the job: job "wget" */
     $jobpk = JobAddJob($uploadpk,"wget");
-    if (empty($jobpk)) { return("Failed to insert job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
 
     /* Prepare the job: job "wget" has jobqueue item "wget" */
     /** 2nd parameter is obsolete **/
