@@ -329,13 +329,26 @@ void	PrintKeys	(EXTRACTOR_KeywordList *keywords)
       }
     else
       {
-      /* Insert record into database.  Ignore insert errors. */
+      /* The attrib table permits duplicates. So check for dups first. */
       memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','%s','%s');",
+      snprintf(SQL,sizeof(SQL),"SELECT * FROM attrib WHERE attrib_key_fk = '%d' AND attrib_value = '%s' AND pfile_fk = '%s';",
 	KeywordTypes[K].DBIndex,
 	TaintString(keywords->keyword),
 	getenv("ARG_akey"));
       DBaccess(DB,SQL);
+      if (DBdatasize(DB) <= 0)
+	{
+	/* No duplicates?  Add it! */
+	/* NOTE: Postgres does not have an "UPDATE OR INSERT" function,
+	   so there is a race condition for duplicates. */
+        memset(SQL,'\0',sizeof(SQL));
+        snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','%s','%s');",
+	  KeywordTypes[K].DBIndex,
+	  TaintString(keywords->keyword),
+	  getenv("ARG_akey"));
+        /* Insert record into database.  Ignore insert errors. */
+        DBaccess(DB,SQL);
+	}
       }
     } /* for() */
 } /* PrintKeys() */
