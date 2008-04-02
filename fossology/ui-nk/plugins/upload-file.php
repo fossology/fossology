@@ -42,7 +42,7 @@ class upload_file extends FO_Plugin
     /* See if the URL looks valid */
     if (empty($Folder)) { return("Invalid folder"); }
 
-    if (empty($Name)) { $Name = basename($_FILES['getfile']['name']); }
+    if (empty($Name)) { $Name = basename(@$_FILES['getfile']['name']); }
     $ShortName = basename($Name);
     if (empty($ShortName)) { $ShortName = $Name; }
 
@@ -84,9 +84,9 @@ class upload_file extends FO_Plugin
 	$Folder = GetParm('folder',PARM_INTEGER);
 	$Desc = GetParm('description',PARM_TEXT); // may be null
 	$Name = GetParm('name',PARM_TEXT); // may be null
-	if (file_exists($_FILES['getfile']['tmp_name']) && !empty($Folder))
+	if (file_exists(@$_FILES['getfile']['tmp_name']) && !empty($Folder))
 	  {
-	  $rc = $this->Upload($Folder,$_FILES['getfile']['tmp_name'],$Desc,$Name);
+	  $rc = $this->Upload($Folder,@$_FILES['getfile']['tmp_name'],$Desc,$Name);
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */

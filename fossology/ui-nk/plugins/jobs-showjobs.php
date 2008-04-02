@@ -309,7 +309,7 @@ class jobs_showjobs extends FO_Plugin
 	$Job = $Row['jq_job_fk'];
 	$V .= "<tr><th width='20%'>Job/Dependency</th>\n";
 	$V .= "<th width='60%' colspan=2>Job Name: " . $Row['job_name'] . "</th>";
-	if ($_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
 	  {
 	  $Style = "style='font:normal 8pt verdana, arial, helvetica;'";
 	  $JobId = $Row['job_pk'];
@@ -460,7 +460,7 @@ class jobs_showjobs extends FO_Plugin
 	$Job = $Row['jq_job_fk'];
 	$V .= "<tr><th width='20%'>Job/Dependency</th>\n";
 	$V .= "<th width='60%'>Job Name: " . $Row['job_name'] . "</th>";
-	if ($_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
 	  {
 	  $Style = "style='font:normal 8pt verdana, arial, helvetica;'";
 	  $JobId = $Row['job_pk'];
@@ -512,7 +512,7 @@ class jobs_showjobs extends FO_Plugin
 	break;
       case "HTML":
 	/* Process any actions */
-	if ($_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
 	  {
 	  $JobPk = GetParm("jobid",PARM_INTEGER);
 	  $Action = GetParm("action",PARM_STRING);

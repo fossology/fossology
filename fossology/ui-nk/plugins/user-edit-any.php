@@ -177,7 +177,7 @@ class user_edit_any extends FO_Plugin
 	  }
 
 	/* Get the list of users */
-	$SQL = "SELECT user_pk,user_name,user_desc,user_pass,root_folder_fk,user_perm,user_email FROM users WHERE user_pk != '" . $_SESSION['UserId'] . "' ORDER BY user_name;";
+	$SQL = "SELECT user_pk,user_name,user_desc,user_pass,root_folder_fk,user_perm,user_email FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' ORDER BY user_name;";
 	$Results = $DB->Action($SQL);
 
 	/* Create JavaScript for updating users */

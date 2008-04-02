@@ -122,7 +122,7 @@ class core_auth extends FO_Plugin
       {
       if (!empty($_SERVER[$V])) { return($_SERVER[$V]); }
       }
-    return($_SERVER['REMOTE_ADDR']);
+    return(@$_SERVER['REMOTE_ADDR']);
     } // GetIP()
 
   /******************************************
@@ -140,7 +140,7 @@ class core_auth extends FO_Plugin
     if (!empty($_SESSION['time']))
       {
       /* Logins older than 60 minutes are auto-logout */
-      if ($_SESSION['time'] + 60*60 < $Now)
+      if (@$_SESSION['time'] + 60*60 < $Now)
 	{
 	$_SESSION['User'] = NULL;
 	$_SESSION['UserId'] = NULL;
@@ -155,7 +155,7 @@ class core_auth extends FO_Plugin
 	{
 	$_SESSION['ip'] = $this->GetIP();
 	}
-    else if (($_SESSION['checkip']==1) && ($_SESSION['ip'] != $this->GetIP()))
+    else if ((@$_SESSION['checkip']==1) && (@$_SESSION['ip'] != $this->GetIP()))
 	{
 	/* Sessions are not transferable. */
 	$_SESSION['User'] = NULL;
@@ -168,23 +168,23 @@ class core_auth extends FO_Plugin
 
     /* Enable or disable plugins based on login status */
     $Level = PLUGIN_DB_READ;
-    if ($_SESSION['User'])
+    if (@$_SESSION['User'])
       {
       /* If you are logged in, then the default level is "Download". */
       if (empty($_SESSION['UserLevel'])) { $Level = PLUGIN_DB_DOWNLOAD; }
-      else { $Level = $_SESSION['UserLevel']; }
+      else { $Level = @$_SESSION['UserLevel']; }
 
       /* Recheck the user in case he is suddenly blocked or changed. */
       if (empty($_SESSION['time_check'])) { $_SESSION['time_check'] = time()+10*60; }
-      if (time() >= $_SESSION['time_check'])
+      if (time() >= @$_SESSION['time_check'])
 	{
-	$Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . $_SESSION['UserId'] . "';");
+	$Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';");
 	$R = $Results[0];
 	$_SESSION['User'] = $R['user_name'];
 	$_SESSION['Folder'] = $R['root_folder_fk'];
 	$_SESSION['UserLevel'] = $R['user_perm'];
 	$_SESSION['UserEmail'] = $R['user_email'];
-	$Level = $_SESSION['UserLevel'];
+	$Level = @$_SESSION['UserLevel'];
 	/* Check for instant logouts */
 	if (empty($R['user_pass']))
 		{
@@ -321,7 +321,7 @@ class core_auth extends FO_Plugin
 		  }
 
 		/* Inform about the protocol. */
-		$Protocol = preg_replace("@/.*@","",$_SERVER['SERVER_PROTOCOL']);
+		$Protocol = preg_replace("@/.*@","",@$_SERVER['SERVER_PROTOCOL']);
 		if ($Protocol != 'HTTPS')
 		  {
 	  	  $V .= "This login uses $Protocol, so passwords are tranmitted in plain text.  This is not a secure connection.<P />\n";
@@ -330,7 +330,7 @@ class core_auth extends FO_Plugin
 	  	$V .= "Username: <input type='text' size=20 name='username'><P>\n";
 	  	$V .= "Password: <input type='password' size=20 name='password'><P>\n";
 	  	$V .= "<input type='checkbox' name='checkip' value='1'>Validate IP.\n";
-		$V .= "This option deters session hijacking by linking your session to your IP address (" . $_SESSION['ip'] . "). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.<P />\n";
+		$V .= "This option deters session hijacking by linking your session to your IP address (" . @$_SESSION['ip'] . "). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.<P />\n";
 	  	$V .= "<input type='submit' value='Login'>\n";
 	  	$V .= "</form>\n";
 		}

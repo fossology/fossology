@@ -83,7 +83,7 @@ class user_edit_self extends FO_Plugin
     {
     global $DB;
     /* Get the parameters */
-    $UserId = $_SESSION['UserId'];
+    $UserId = @$_SESSION['UserId'];
     $User = GetParm('username',PARM_TEXT);
     $Pass0 = GetParm('pass0',PARM_TEXT);
     $Pass1 = GetParm('pass1',PARM_TEXT);
@@ -209,7 +209,7 @@ class user_edit_self extends FO_Plugin
 	$V .= "Enter your password: <input type='password' name='pass0' size=20>\n";
 	$V .= "<hr>\n";
 
-	$Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . $_SESSION['UserId'] . "';");
+	$Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';");
 	$R = $Results[0];
 
 	$V .= "To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n";

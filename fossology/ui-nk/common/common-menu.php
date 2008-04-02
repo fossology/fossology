@@ -177,7 +177,7 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth)
     if (isset($Menu)) { array_push($Menu,$M); }
     else { $Menu = array($M); }
     }
-  if ($NeedSort == 1) { usort($Menu,menu_cmp); }
+  if ($NeedSort == 1) { usort($Menu,'menu_cmp'); }
 
   global $MenuMaxDepth;
   if ($Depth+1 > $MenuMaxDepth) { $MenuMaxDepth=$Depth+1; }
