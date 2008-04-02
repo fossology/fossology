@@ -22,7 +22,7 @@ $(iPATHFILE): ../Makefile.conf
 	@echo "\$$VARDATADIR=\"$(VARDATADIR)\";" >> $(iPATHFILE)
 	@echo "\$$PROJECT=\"$(PROJECT)\";" >> $(iPATHFILE)
 	@echo "\$$DATADIR=\"$(DATADIR)\";" >> $(iPATHFILE)
-	@echo "\$$PATH=\"\$$LIBEXECDIR:\$$AGENTDIR:\$$PATH:/usr/bin\";" >> $(iPATHFILE)
+	@echo "\$$PATH=\"\$$LIBEXECDIR:\$$AGENTDIR:/usr/bin\";" >> $(iPATHFILE)
 	@echo "\$$VERSION=\"$(VERSION)\";" >> $(iPATHFILE)
 	@echo "\$$SVN_REV=\"$(SVN_REV)\";" >> $(iPATHFILE)
 	@echo "?>" >> $(iPATHFILE)
