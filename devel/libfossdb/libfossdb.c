@@ -73,8 +73,8 @@ void *	DBopen	()
   FILE *Fconf;
   dbapi *DB;
   char *Env;
-  char Line[10240];
-  char CMD[102400];
+  char Line[1024];
+  char CMD[10240];
   int i,CMDlen;
   int C;
   int PosEqual; /* index of "=" in Line */
@@ -105,6 +105,8 @@ void *	DBopen	()
     PosSemi=0;
     memset(Line,'\0',sizeof(Line));
     /* read a line of data */
+    /* All lines are in the format: "field=value;" */
+    /* Lines beginning with "#" are ignored. */
     for(i=0; (i<sizeof(Line)) && (C != '\n') && (C > 0); i++)
       {
       C = fgetc(Fconf);
@@ -114,7 +116,7 @@ void *	DBopen	()
       }
     /* check for a valid line */
     if (PosSemi < PosEqual) PosEqual=0;
-    if ((Line[i] != '#') && PosEqual && PosSemi)
+    if ((Line[0] != '#') && PosEqual && PosSemi)
       {
       /* looks good to me! */
       if (CMD[0] != '\0')
