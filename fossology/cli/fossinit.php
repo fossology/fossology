@@ -36,6 +36,7 @@ global $WEBDIR;
 $UI_CLI = 1; /* this is a command-line program */
 require_once("$WEBDIR/common/common.php");
 require_once("$WEBDIR/template/template-plugin.php");
+cli_Init();
 
 global $Plugins;
 

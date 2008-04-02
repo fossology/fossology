@@ -38,6 +38,8 @@ function cli_Init()
 {
   // every cli must perform these steps
   global $WEBDIR; 
+  global $Plugins;
+
   /* Load the plugins */
   plugin_load("$WEBDIR/plugins",0); /* load but do not initialize */
 
@@ -54,7 +56,7 @@ function cli_Init()
   plugin_load("$WEBDIR/plugins");
 
   return(true);
-}
+} // cli_Init()
 
 /**
  * function cli_PrintDebugMessage
@@ -83,5 +85,5 @@ function cli_PrintDebugMessage($message, $dump=''){
     echo "\n";
   }
   return;
-}
+} // cli_PrintDebugMessage()
 ?>

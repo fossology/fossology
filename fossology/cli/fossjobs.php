@@ -65,6 +65,7 @@ global $WEBDIR;
 $UI_CLI = 1;
 require_once("$WEBDIR/common/common.php");
 require_once("$WEBDIR/template/template-plugin.php");
+cli_Init();
 
 
 /**********************************************************************
@@ -99,20 +100,6 @@ if (array_key_exists("h",$options))
   exit(0);
   }
 
-// every cli must perform these steps (make this a func/class);
-/* Load the plugins */
-plugin_load("$WEBDIR/plugins",0); /* load but do not initialize */
-
-/* Turn off authentication */
-/** The auth module hijacks and disables plugins, so turn it off. **/
-$P = &$Plugins[plugin_find_any_id("auth")];
-if (!empty($P)) { $P->State = PLUGIN_STATE_FAIL; }
-
-/* Initialize plugins */
-/** This registers plugins with the menu structure and start the DB
- connection. **/
-plugin_init(); /* this registers plugins with menus */
-plugin_load("$WEBDIR/plugins");
 
 global $Plugins;
 global $DB;
