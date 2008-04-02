@@ -28,15 +28,22 @@ if (!isset($GlobalReady)) { exit; }
  These are common functions to be used by anyone.
  *****************************************************************/
 
-include_once("common-menu.php");
-include_once("common-plugin.php");
-include_once("common-folders.php");
-include_once("common-dir.php");
-include_once("common-parm.php");
-include_once("common-repo.php");
-include_once("common-license.php");
-include_once("common-job.php");
-include_once("common-agents.php");
-include_once("common-active.php");
+require_once("common-menu.php");
+require_once("common-plugin.php");
+require_once("common-folders.php");
+require_once("common-dir.php");
+require_once("common-parm.php");
+require_once("common-repo.php");
+require_once("common-license.php");
+require_once("common-job.php");
+require_once("common-agents.php");
+require_once("common-active.php");
+
+/* Only include the command-line interface functions if it is required. */
+global $UI_CLI;
+if (!empty($UI_CLI) && ($UI_CLI == 1))
+  {
+  require_once("common-cli.php");
+  }
 
 ?>
