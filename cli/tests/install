@@ -25,12 +25,12 @@ if [[ -x "/usr/local/bin/test.cp2foss" ]]
 then
   :
 else
-  cp ../test.cp2foss /usr/local/bin/test.cp2foss
+  cp ../cp2foss.php /usr/local/bin/test.cp2foss
 fi
 
 # ensure owner and permissions are correct
 chown fossy:fossy /usr/local/bin/test.cp2foss
-chmod chmod ug-w+rx /usr/local/bin/test.cp2foss
+chmod ug-w+rx /usr/local/bin/test.cp2foss
 chmod o-wx+r /usr/local/bin/test.cp2foss
 
 # copy archives to tmp
