@@ -16,14 +16,18 @@ class TestCP2fossRecursion extends UnitTestCase {
    * input, but it is zero length.
    */
 
-
+  public $command = '/usr/local/bin/test.cp2foss';
+  
   function TestDashRNoArchive(){
-    $error = exec('/usr/local/bin/cp2foss.test -p devnull -n fail -a /dev/null -d "test should fail" ',
+    
+    global $command;
+    
+    $error = exec("$command -p devnull -n fail -a /dev/null -d \"test should fail\" ",
     $output, $retval);
     //print_r($output);
     $this->assertPattern('/Error, .* not greater than zero/', $output[1]);
     $output = array();
-    $error = exec('/usr/local/bin/cp2foss.test -p stdin -n fail -a /dev/stdin -d "stdin should fail"',
+    $error = exec("$command -p stdin -n fail -a /dev/stdin -d 'stdin should fail'",
     $output, $retval);
     //print_r($output);
     $this->assertPattern('/Stopping, can\'t process archive/', $output[2]);
@@ -35,7 +39,8 @@ class TestCP2fossRecursion extends UnitTestCase {
    * Tyically the fossology sources are used. Check them out to
    * /tmp/fossology for this test to work.
    *
-   * Consider adding setup and teardown methods.
+   * Consider adding setup and teardown methods.  For now the install
+   * test script sets this up.
    *
    */
 
@@ -46,7 +51,7 @@ class TestCP2fossRecursion extends UnitTestCase {
      * at least cp2foss worked as far as creating the archive to upload
      * correctly.  This test DOES NOT test if the upload worked.
      */
-    $last = exec('/usr/local/bin/cp2foss.test -p FossTest -n fossology -a /tmp/fossology -d "cp2foss, archive is a dirctory" ',
+    $last = exec('$command -p FossTest -n fossology -a /tmp/fossology -d "cp2foss, archive is a directory" ',
     $output, $retval);
     //echo "\$output is:\n"; print_r($output); echo "\n";
     // $output[2] will always have the archive we are loading... in this
@@ -80,21 +85,21 @@ class TestCP2fossRecursion extends UnitTestCase {
      */
     $apath = '/tmp/fossology';
     $last = exec(
-    "/usr/local/bin/cp2foss.test -p FossTest -n fossology -a $apath -R -d 'cp2foss, archive is a dirctory' ",
+    "$command -p FossTest -n fossology -a $apath -R -d 'cp2foss, archive is a dirctory' ",
     $output, $retval);
     // $output[2] will always have the archive we are loading... in this
     // case it will be a tar file....
     // get only the files under fossology
     //echo "o2 is:{$output[2]}\n";
     /*
-     * Tried using find and combos of ls etc... issue was getting the 
-     * trailing / on directories without changing the format.
-     * Gave up, and will just retar the archive and then compare to the 
-     * orginal tar.
-     */
+    * Tried using find and combos of ls etc... issue was getting the
+    * trailing / on directories without changing the format.
+    * Gave up, and will just retar the archive and then compare to the
+    * orginal tar.
+    */
     $temp_tar = "/tmp/test.tar.bz2";
     chdir($apath) or die("Can't cd to $path, $php_errormsg\n");
-    
+
     $tcmd = "tar -cjf $temp_tar --exclude='.svn' --exclude='.cvs' *";
     $last = exec($tcmd, $Rtoutput, $retval);
     $last = exec("tar -tf $output[2]", $tarout, $retval);
