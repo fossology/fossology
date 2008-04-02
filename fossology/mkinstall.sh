@@ -87,7 +87,7 @@ fi
 #####################################################
 if [ "\$PLACEFILES" != "0" ] ; then
 # Get file list
-FILELIST="`cd install ; find . -type f | sort | sed -e 's@^\./@@'`"
+FILELIST="`cd install ; find . -type f | sort | sed -e 's@^\./@@' | grep -v 'etc/default/fossology'`"
 
 LINKLIST="`cd install ; find . -type l | sort | sed -e 's@^\./@@'`"
 
@@ -251,6 +251,11 @@ PROXYCONF="\$AGENTDATADIR/proxy.conf"
 if [ "\$PLACECONFIG" != "0" ] ; then
 ## Create default DB file (this will need to be changed by the user)
 echo "# Checking configuration files"
+
+if [ !-f "/etc/default/fossology" ] ; then
+  \$DEBUG \$CP install/etc/default/fossology /etc/default/fossology
+fi
+
 if [ ! -d "\$DBDIR" ] ; then
   \$MKDIR -p "\$DBDIR"
 fi
