@@ -44,11 +44,11 @@ define("PARM_TEXT",4);
  ************************************************************/
 function GetParm($Name,$Type)
 {
-  $Var = $_GET[$Name];
-  if (!isset($Var)) { $Var = $_POST[$Name]; }
-  if (!isset($Var)) { $Var = $_SERVER[$Name]; }
-  if (!isset($Var)) { $Var = $_SESSION[$Name]; }
-  if (!isset($Var)) { $Var = $_COOKIE[$Name]; }
+  $Var = @$_GET[$Name];
+  if (!isset($Var)) { $Var = @$_POST[$Name]; }
+  if (!isset($Var)) { $Var = @$_SERVER[$Name]; }
+  if (!isset($Var)) { $Var = @$_SESSION[$Name]; }
+  if (!isset($Var)) { $Var = @$_COOKIE[$Name]; }
   if (!isset($Var)) { return; }
 
   /* Convert $Var to a string */
@@ -71,7 +71,7 @@ function GetParm($Name,$Type)
  ************************************************************/
 function Traceback()
 {
-  return($_SERVER['REQUEST_URI']);
+  return(@$_SERVER['REQUEST_URI']);
 } // Traceback()
 
 /************************************************************
@@ -79,7 +79,7 @@ function Traceback()
  ************************************************************/
 function Traceback_uri()
 {
-  $V = explode('?',$_SERVER['REQUEST_URI'],2);
+  $V = explode('?',@$_SERVER['REQUEST_URI'],2);
   return($V[0]);
 } // Traceback_uri()
 
@@ -90,7 +90,7 @@ function Traceback_uri()
  ************************************************************/
 function Traceback_parm($ShowMod=1)
 {
-  $V = explode('?',$_SERVER['REQUEST_URI'],2);
+  $V = explode('?',@$_SERVER['REQUEST_URI'],2);
   $V = preg_replace("/^mod=/","",$V[1]);
   if (!$ShowMod)
     {
@@ -121,7 +121,7 @@ function Traceback_parm_keep($List)
  ************************************************************/
 function Traceback_dir()
 {
-  $V = explode('?',$_SERVER['REQUEST_URI'],2);
+  $V = explode('?',@$_SERVER['REQUEST_URI'],2);
   $V = $V[0];
   $i = strlen($V);
   while(($i > 0) && ($V[$i-1] != '/')) { $i--; }

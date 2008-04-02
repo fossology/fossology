@@ -280,7 +280,7 @@ class ui_menu extends FO_Plugin
 		}
 	  else
 		{
-		$V .= "<small>User:</small> " . $_SESSION['User'] . "<br>";
+		$V .= "<small>User:</small> " . @$_SESSION['User'] . "<br>";
 		$V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
 		}
 	  $V .= "</div>";

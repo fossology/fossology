@@ -99,7 +99,7 @@ class user_del extends FO_Plugin
 	  }
 
 	/* Get the user list */
-	$Results = $DB->Action("SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '" . $_SESSION['UserId'] . "' AND user_pk != '1' ORDER BY user_name;");
+	$Results = $DB->Action("SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' AND user_pk != '1' ORDER BY user_name;");
 	if (empty($Results[0]['user_name']))
 	  {
 	  $V .= "No users to delete.";

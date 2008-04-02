@@ -259,6 +259,7 @@ function plugin_unload()
 
   foreach($Plugins as $Key => $Val)
     {
+    if (empty($Val)) { continue; }
     $P = &$Plugins[$Key];
     if ($P->State != PLUGIN_STATE_INVALID) { $P->Destroy(); }
     }

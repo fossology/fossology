@@ -41,6 +41,7 @@ if ($PluginId >= 0)
   {
   /* Found a plugin, so call it! */
   $Plugins[$PluginId]->OutputOpen("HTML",1);
+  // error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
   $Plugins[$PluginId]->Output();
   $Plugins[$PluginId]->OutputClose();
   }

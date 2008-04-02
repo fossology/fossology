@@ -46,7 +46,7 @@ class debug_user extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
-	$Results = $DB->Action("SELECT * FROM users WHERE user_pk = '" . $_SESSION['UserId'] . "';");
+	$Results = $DB->Action("SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';");
 	$R = &$Results[0];
 	$V .= "<H2>User Information</H2>\n";
 	$V .= "<table border=1>\n";

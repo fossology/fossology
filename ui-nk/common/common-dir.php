@@ -180,7 +180,7 @@ function DirGetList($Upload,$UploadtreePk)
     }
   if (empty($UploadtreePk)) { $Results=$DB->Execute("DirGetList_1",array($Upload)); }
   else { $Results=$DB->Execute("DirGetList_2",array($Upload,$UploadtreePk)); }
-  usort($Results,_DirCmp);
+  usort($Results,'_DirCmp');
 
   /* Replace all artifact directories */
   foreach($Results as $Key => $Val)
