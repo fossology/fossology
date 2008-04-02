@@ -24,10 +24,15 @@
  *
  */
 
-require_once("pathinclude.h.php");
-global $WEBDIR;
-require_once("$WEBDIR/common/common.php");
-require_once("$WEBDIR/template/template-plugin.php");
+/**
+ * function: cli_Init
+ * 
+ * Initalize the fossology environment for cli use.  This routine loads 
+ * the plugins so they can be use by cli programs.  In the process of doing 
+ * that it disables the core-auth plugin.
+ *
+ * @return true
+ */
 
 function cli_Init()
 {
@@ -50,6 +55,7 @@ function cli_Init()
 
   return(true);
 }
+
 /**
  * function pdbg
  *
@@ -65,7 +71,7 @@ function cli_Init()
  * @return Null
  *
  */
-function pdbg($message, $dump=''){
+function cli_PrintDebugMessage($message, $dump=''){
 
   $dbg_msg = 'DBG->' . $message . "\n";
 
