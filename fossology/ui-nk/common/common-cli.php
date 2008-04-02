@@ -57,7 +57,7 @@ function cli_Init()
 }
 
 /**
- * function pdbg
+ * function cli_PrintDebugMessage
  *
  * print a debug message and optionally dump a structure
  *
