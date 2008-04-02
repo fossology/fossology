@@ -25,9 +25,8 @@
  ***************************************************************/
 $GlobalReady=1;
 
-include_once("pathinclude.h.php");
-include_once("common/common.php");
-include_once("template/template-plugin.php");
+require_once("pathinclude.h.php");
+require_once("common/common.php");
 
 /****************************************************
  This is the main guts of the UI: Find the plugin and run it.

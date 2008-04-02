@@ -46,4 +46,7 @@ if (!empty($UI_CLI) && ($UI_CLI == 1))
   require_once("common-cli.php");
   }
 
+global $WEBDIR;
+require_once("$WEBDIR/template/template-plugin.php");
+
 ?>
