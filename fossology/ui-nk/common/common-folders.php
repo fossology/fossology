@@ -58,7 +58,7 @@ function FolderGetTop()
  NOTE: If there is a recursive loop in the folder table, then
  this will loop INFINITELY.
  ***********************************************************/
-function FolderListOption($ParentFolder,$Depth, $IncludeTop=1)
+function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
   {
   global $Plugins;
   if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
@@ -69,7 +69,14 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1)
 
   if (($Depth != 0) || $IncludeTop)
     {
-    $V .= "<option value='$ParentFolder'>";
+    if ($ParentFolder == $SelectId)
+      {
+      $V .= "<option value='$ParentFolder' SELECTED>";
+      }
+    else
+      {
+      $V .= "<option value='$ParentFolder'>";
+      }
     if ($Depth != 0) { $V .= "&nbsp;&nbsp;"; }
     for($i=1; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
 
@@ -90,7 +97,7 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1)
     if ($Depth > 0) { $Hide = "style='display:none;'"; }
     foreach($Results as $R)
 	{
-	$V .= FolderListOption($R['folder_pk'],$Depth+1);
+	$V .= FolderListOption($R['folder_pk'],$Depth+1,$IncludeTop,$SelectId);
 	}
     }
   return($V);
