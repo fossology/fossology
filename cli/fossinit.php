@@ -33,22 +33,11 @@ $GlobalReady = 1;
 /* Load all code */
 require_once("pathinclude.h.php");
 global $WEBDIR;
+$UI_CLI = 1; /* this is a command-line program */
 require_once("$WEBDIR/common/common.php");
 require_once("$WEBDIR/template/template-plugin.php");
 
-/* Load the plugins */
 global $Plugins;
-plugin_load("$WEBDIR/plugins",0); /* load but do not initialize */
-
-/* Turn off authentication */
-/** The auth module hijacks and disables plugins, so turn it off. **/
-$P = &$Plugins[plugin_find_any_id("auth")];
-if (!empty($P)) { $P->State = PLUGIN_STATE_FAIL; }
-
-/* Initialize plugins */
-/** This registers plugins with the menu structure and start the DB
-    connection. **/
-plugin_init(); /* this registers plugins with menus */
 
 $usage = "Usage: " . basename($argv[0]) . " [-v]
   -v  = enable verbose mode

@@ -62,6 +62,7 @@ function list_agents()
 }
 require_once("pathinclude.h.php");
 global $WEBDIR;
+$UI_CLI = 1;
 require_once("$WEBDIR/common/common.php");
 require_once("$WEBDIR/template/template-plugin.php");
 
