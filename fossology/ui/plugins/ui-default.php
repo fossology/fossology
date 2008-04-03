@@ -93,16 +93,19 @@ class ui_default extends FO_Plugin
 	  $V .= "Search";
 	  }
 	$V .= "</b>: Look through the uploaded projects for specific files.\n";
-	$V .= "<li><b>";
-	if (plugin_find_id("auth") >= 0)
+	if (empty($_SESSION['UserId']))
 	  {
-	  $V .= "<a href='" . Traceback_Uri() . "?mod=auth'>Login</a>";
+	  $V .= "<li><b>";
+	  if (plugin_find_id("auth") >= 0)
+	    {
+	    $V .= "<a href='" . Traceback_Uri() . "?mod=auth'>Login</a>";
+	    }
+	  else
+	    {
+	    $V .= "Login";
+	    }
+	  $V .= "</b>: Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or even add new users.\n";
 	  }
-	else
-	  {
-	  $V .= "Login";
-	  }
-	$V .= "</b>: Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or even add new users.\n";
 	$V .= "</ul>\n";
 
 	break;
