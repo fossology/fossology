@@ -73,7 +73,7 @@ class db_access extends FO_Plugin
     global $DATADIR, $PROJECT;
     if (isset($this->_pg_conn)) { return(1); }
     $path="$DATADIR/dbconnect/$PROJECT";
-    $this->_pg_conn = pg_connect(str_replace(";", " ", file_get_contents($path)));
+    $this->_pg_conn = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
     if (!isset($this->_pg_conn)) return(0);
     return(1);
     }
@@ -158,7 +158,7 @@ class db_access extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
     if ($this->Debug > 1) { print "DB.Prepare('$Prep','$Command')\n"; }
-    $result = pg_prepare($this->_pg_conn,$Prep,$Command);
+    $result = @pg_prepare($this->_pg_conn,$Prep,$Command);
     return;
     }
 
