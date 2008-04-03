@@ -246,15 +246,16 @@ class jobs_showjobs extends FO_Plugin
 	jobqueue.jq_elapsedtime,jobqueue.jq_processedtime,
 	jobqueue.jq_itemsprocessed,job.job_queued,jobqueue.jq_type,
 	jobqueue.jq_starttime,jobqueue.jq_endtime,jobqueue.jq_end_bits,
-	upload.*,job.*
+	upload.*,job.*,ufile.ufile_name
     FROM jobqueue
     LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk
     LEFT JOIN jobqueue AS depends
-    ON depends.jq_pk = jobdepends.jdep_jq_depends_fk
+      ON depends.jq_pk = jobdepends.jdep_jq_depends_fk
     LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk
     LEFT JOIN upload ON upload_pk = job.job_upload_fk
+    LEFT JOIN ufile ON ufile.ufile_pk = upload.ufile_fk
     $Where
-    ORDER BY upload.upload_pk,job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk;
+    ORDER BY ufile_name,upload.upload_pk,job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk;
     ";
 
     $Results = $DB->Action($Sql);
@@ -292,13 +293,13 @@ class jobs_showjobs extends FO_Plugin
 	$Color=$this->Colors['Finished'];
 	}
 
-      if (empty($Row['upload_pk']) || ($Upload != $Row['upload_pk']))
+      if ($Upload != $Row['upload_pk'])
 	{
 	$Upload = $Row['upload_pk'];
 	if ($First) { $First=0; }
 	else { $V .= "</table>\n<P />\n"; }
 	$V .= "<table class='text' border=1 width='100%'>\n";
-	$JobName = preg_replace("@^.*/@","",$Row['upload_filename']);
+	$JobName = $Row['ufile_name'];
 	if (empty($JobName)) { $JobName = "[Default]"; }
 	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
 	$V .= "<tr><th colspan=4 style='background:#202020;color:white;'>$JobName";
