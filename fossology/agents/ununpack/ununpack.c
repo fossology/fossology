@@ -1387,7 +1387,10 @@ void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
 	if (DBaccess(DBTREE,SQL) == 0) /* INSERT INTO uploadtree */
 	  {
 	  /* Find the new ID for this insertion */
-	  DBaccess(DBTREE,"SELECT currval('ufile_rel_ufile_rel_pk_seq'::regclass);");
+	  memset(SQL,'\0',MAXSQL);
+	  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE ufile_fk = '%ld' AND parent = '%ld' AND upload_fk = '%s';",
+	    Child, NewParent, Upload_Pk);
+	  DBaccess(DBTREE,SQL);
 	  /* Recurse! */
 	  DBInsertUploadTreeRecurse(atol(DBgetvalue(DBTREE,0,0)),UploadTree);
 	  }
