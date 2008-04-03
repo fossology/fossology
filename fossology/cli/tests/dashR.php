@@ -31,17 +31,17 @@ class TestCP2fossRecursion extends UnitTestCase {
    * input, but it is zero length.
    */
 
+  public $command = '/usr/local/bin/test.cp2foss';
+    
   function TestDashRNoArchive(){
     
-    $command = '/usr/local/bin/test.cp2foss';
-    
-    $error = exec("$command -p devnull -n fail -a /dev/null -d \"test should fail\" ",
+    $error = exec("$this->command -p devnull -n fail -a /dev/null -d \"test should fail\" ",
     $output, $retval);
     //print_r($output);
     $this->assertPattern('/Error, .* not greater than zero/', $output[0]);
     //print_r($output);
     $output = array();
-    $error = exec("$command -p stdin -n fail -a /dev/stdin -d 'stdin should fail'",
+    $error = exec("$this->command -p stdin -n fail -a /dev/stdin -d 'stdin should fail'",
     $output, $retval);
     //print_r($output);
     $this->assertPattern('/Stopping, can\'t process archive/', $output[1]);
@@ -66,9 +66,8 @@ class TestCP2fossRecursion extends UnitTestCase {
      * correctly.  This test DOES NOT test if the upload worked.
      */
     
-    $command = '/usr/local/bin/test.cp2foss';
-    
-    $last = exec("$command -p FossTest -n fossology -a /tmp/fossology -d 'cp2foss, archive is a directory' ",
+    $last = exec(
+    "$this->command -p FossTest -n fossology -a /tmp/fossology -d 'cp2foss, archive is a directory' ",
     $output, $retval);
     //echo "\$output is:\n"; print_r($output); echo "\n";
     // $output[2] will always have the archive we are loading... in this
@@ -100,12 +99,10 @@ class TestCP2fossRecursion extends UnitTestCase {
      * at least cp2foss worked as far as creating the archive to upload
      * correctly.  This test DOES NOT test if the upload worked.
      */
-    
-    $command = '/usr/local/bin/test.cp2foss';
-    
+
     $apath = '/tmp/fossology';
     $last = exec(
-    "$command -p FossTest -n fossology -a $apath -R -d 'cp2foss, archive is a dirctory' ",
+    "$this->command -p FossTest -n fossology -a $apath -R -d 'cp2foss, archive is a dirctory' ",
     $output, $retval);
     // $output[2] will always have the archive we are loading... in this
     // case it will be a tar file....
