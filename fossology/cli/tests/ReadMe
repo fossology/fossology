@@ -33,3 +33,7 @@ As root run the install script to set up the system for testing.
 2. copy to archives in ....cli/test/archives/* to /tmp, that is where the
    tests expect them to be.
    
+3. Create a directory tree with contents for recusive tests.   The 
+tests expect the fossology source is checked out into /tmp and that is used in the tests.
+So if you don't use this method, you will need to change the tests.
+   

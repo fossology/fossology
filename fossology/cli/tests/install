@@ -18,6 +18,8 @@
 #***********************************************************/
 #
 # install script for cp2foss tests MUST BE RUN AS ROOT
+# needs access to the svn repository, make sure subversion servers file
+# is correct.
 #
 # version "$Id: $"
 
@@ -36,3 +38,6 @@ chmod o-wx+r /usr/local/bin/test.cp2foss
 # copy archives to tmp
 
 cp archives/* /tmp
+
+cd /tmp
+svn co https://fossology.svn.sourceforge.net/svnroot/fossology/trunk/fossology/
