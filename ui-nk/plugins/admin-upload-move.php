@@ -138,7 +138,7 @@ class upload_move extends FO_Plugin
 	$V .= "<li>Select the folder containing the upload you wish to move:  \n";
 	$V .= "<select name='oldfolderid'\n";
     $V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
-    $V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + document.formy.oldfolderid.value)'>\n";
+    $V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
 	$V .= FolderListOption(-1,0);
 	$V .= "</select><P />\n";
 

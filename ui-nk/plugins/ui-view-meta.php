@@ -105,7 +105,9 @@ class ui_view_meta extends FO_Plugin
 	{
 	if (empty($R['key_name'])) { continue; }
 	$V .= "<tr><td width='20%'>" . htmlentities($R['key_name']);
-	$V .= "</td><td>" . htmlentities($R['attrib_value']) . "</td></tr>\n";
+	$Val = htmlentities($R['attrib_value']);
+	$Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
+	$V .= "</td><td>$Val</td></tr>\n";
 	}
 
     $V .= "</table>\n";
