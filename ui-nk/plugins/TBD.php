@@ -43,10 +43,6 @@ class tbd extends FO_Plugin
     menu_insert("Main::Admin::Scheduler::Kill Job (TBD)");
     menu_insert("Main::Admin::Scheduler::Update (TBD)");
     menu_insert("Main::Admin::Scheduler::Log (TBD)");
-    menu_insert("Main::Admin::Jobs::Pause (TBD)");
-    menu_insert("Main::Admin::Jobs::Abort (TBD)");
-    menu_insert("Main::Admin::Jobs::Reset (TBD)");
-    menu_insert("Main::Admin::Jobs::Edit Properties (TBD)");
     menu_insert("Main::Admin::Database::View Table (TBD)");
     menu_insert("Main::Admin::Database::Stats (TBD)");
     menu_insert("Main::Upload::From Mount (TBD)");
