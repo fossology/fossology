@@ -93,7 +93,7 @@ class ui_view_meta extends FO_Plugin
 	$V .= "</td><td>" . htmlentities($R['mimetype_name']) . "</td></tr>\n";
 	}
 
-    $SQL = "SELECT * FROM attrib
+    $SQL = "SELECT DISTINCT key_name,attrib_value FROM attrib
 	INNER JOIN key ON key_pk = attrib_key_fk
 	AND key_parent_fk IN
 	(SELECT key_pk FROM key WHERE key_parent_fk=0 AND
@@ -103,7 +103,7 @@ class ui_view_meta extends FO_Plugin
     $Results = $DB->Action($SQL);
     foreach($Results as $R)
 	{
-	if (empty($R['attrib_pk'])) { continue; }
+	if (empty($R['key_name'])) { continue; }
 	$V .= "<tr><td width='20%'>" . htmlentities($R['key_name']);
 	$V .= "</td><td>" . htmlentities($R['attrib_value']) . "</td></tr>\n";
 	}
