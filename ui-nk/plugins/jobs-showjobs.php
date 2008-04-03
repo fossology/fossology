@@ -70,40 +70,40 @@ class jobs_showjobs extends FO_Plugin
     switch($Show)
       {
       case "detail":
-        menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History$UploadPk");
-        menu_insert("JobDetails::Detail",-3);
+	menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History$UploadPk");
+	menu_insert("JobDetails::Detail",-3);
 	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk");
-        break;
+	break;
       case "summary":
-        menu_insert("JobDetails::Summary",-2);
-        menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History$UploadPk");
+	menu_insert("JobDetails::Summary",-2);
+	menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History$UploadPk");
 	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk");
 	break;
       case "job":
-        menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History$UploadPk");
+	menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History$UploadPk");
 	$Job = GetParm("job",PARM_INTEGER);
 	if (!empty($Job)) { $Job = "&job=$Job"; }
 	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk$Job");
 	break;
       default:
-        break;
+	break;
       }
 
     if ($Show != "job")
       {
       menu_insert("JobDetails::[BREAK]",-10);
       switch($History)
-        {
-        case "0":
-          menu_insert("JobDetails::History",-11,"$URI&show=$Show&history=1");
-          menu_insert("JobDetails::Active",-11);
-          break;
-        case "1":
-        default:
-          menu_insert("JobDetails::History",-11);
-          menu_insert("JobDetails::Active",-11,"$URI&show=$Show&history=0");
-          break;
-        }
+	{
+	case "0":
+	  menu_insert("JobDetails::History",-11,"$URI&show=$Show&history=1");
+	  menu_insert("JobDetails::Active",-11);
+	  break;
+	case "1":
+	default:
+	  menu_insert("JobDetails::History",-11);
+	  menu_insert("JobDetails::Active",-11,"$URI&show=$Show&history=0");
+	  break;
+	}
       }
     } // RegisterMenus()
 
@@ -226,9 +226,9 @@ class jobs_showjobs extends FO_Plugin
     } // ShowJob()
 
   /***********************************************************
-   ShowDetail(): This function returns the full job queue status.
+   Show(): This function returns the full job queue status.
    ***********************************************************/
-  function ShowDetail($History,$UploadPk=-1)
+  function Show	($History,$UploadPk=-1,$Detail=0)
     {
     global $Plugins;
     global $DB;
@@ -268,8 +268,9 @@ class jobs_showjobs extends FO_Plugin
     $Upload="";
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     $UriFull = $Uri . Traceback_parm_keep(array("show","history"));
-    foreach($Results as $Row)
+    for($i=0; !empty($Results[$i]['jq_pk']); $i++)
       {
+      $Row = &$Results[$i];
       /* Determine the color */
       $Color=$this->Colors['Queued']; /* default */
       if ($Row['jq_end_bits'] > 1)
@@ -300,7 +301,7 @@ class jobs_showjobs extends FO_Plugin
 	$JobName = preg_replace("@^.*/@","",$Row['upload_filename']);
 	if (empty($JobName)) { $JobName = "[Default]"; }
 	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
-	$V .= "<tr><th colspan=4 style='background:#202020;color:white;'>$JobName</font>";
+	$V .= "<tr><th colspan=4 style='background:#202020;color:white;'>$JobName";
 	$V .= "</th></tr>\n";
 	}
 
@@ -327,174 +328,73 @@ class jobs_showjobs extends FO_Plugin
 	  $V .= "&jobid=$JobId'>&raquo;</a>";
 	  $V .= "</th>";
 	  }
-	else { $V .= "<th width='20%'></th></tr>\n"; }
+	else { $V .= "<th width='20%'></th>\n"; }
+	$V .= "</tr>\n";
 	}
+
+      /* Display each jobqueue line */
       $V .= "<tr>\n";
-      $V .= "  <td bgcolor='$Color'>";
+
+      /** Job ID and dependencies **/
+      $V .= "  <td bgcolor='$Color' width='20%'>";
       $V .= "<a href='$Uri&show=job&job=" . $Row['jq_pk'] . "'>" . $Row['jq_pk'] . "</a>";
       if (!empty($Row['jdep_jq_depends_fk']))
 	{
-	$V .= "/<a href='$Uri&show=job&job=" . $Row['jdep_jq_depends_fk'] . "'>" . $Row['jdep_jq_depends_fk'] . "</a>";
-	}
-      $V .= "</td>\n";
-      $V .= "  <td bgcolor='$Color' width='20%'>" . $Row['jq_type'] . "</td>\n";
-
-      if (($Color == $this->Colors['Queued']) && ($Row['jq_itemsprocessed'] == 0))
-	{
-	$V .= "  <td bgcolor='$Color'></td>\n";
-	}
-      else
-	{
-	$V .= "  <td bgcolor='$Color'><table class='text' border=0 width='100%'><tr><td bgcolor='$Color'>";
-	$t = number_format($Row['jq_itemsprocessed'], 0, "", ",");
-	if ($t == 1) { $V .= "  <td>$t item<br />\n"; }
-	else { $V .= "  <td>$t items<br />\n"; }
-
-	$V .= "Elapsed scheduled:<br />\n";
-	$V .= "Elapsed running:</td>\n";
-
-	$V .= "    <td bgcolor='$Color'align='right'><br />";
-	$t = floor($Row['jq_elapsedtime'] / (60*60*24));
-	if ($t == 0) { $Time = ""; }
-	else if ($t == 1) { $Time = "$t day "; }
-	else { $Time = "$t days "; }
-	$Time .= gmdate("H:i:s",$Row['jq_elapsedtime']);
-	$V .= $Time . "<br />\n";
-
-	$t = floor($Row['jq_processedtime'] / (60*60*24));
-	if ($t == 0) { $Time = ""; }
-	else if ($t == 1) { $Time = "$t day "; }
-	else { $Time = "$t days "; }
-	$Time .= gmdate("H:i:s",$Row['jq_processedtime']);
-	$V .= $Time . "</td>\n";
-	$V .= "  </tr></table>\n";
-	}
-
-      $endtime = substr($Row['jq_endtime'],0,16);
-      $V .= "  <td bgcolor='$Color'>$endtime</td>\n";
-      }
-    $V .= "</table>\n";
-    return($V);
-    } // ShowDetail()
-
-  /***********************************************************
-   ShowSummary(): Show the summary of the current queue state.
-   ***********************************************************/
-  function ShowSummary($History,$UploadPk=-1)
-    {
-    global $Plugins;
-    global $DB;
-
-    if ($History == 1) { $Where = ""; }
-    else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
-    if ($UploadPk != -1)
-	{
-	if (empty($Where)) { $Where = " WHERE job.job_upload_fk = '$UploadPk'"; }
-	else { $Where .= " AND job.job_upload_fk = '$UploadPk'"; }
-	}
-
-    $Sql = "
-    SELECT jobqueue.jq_pk,jobqueue.jq_job_fk,jobdepends.jdep_jq_depends_fk,
-	jobqueue.jq_type,
-	jobqueue.jq_starttime,jobqueue.jq_endtime,jobqueue.jq_end_bits,
-	upload.*,job.*
-    FROM jobqueue
-    LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk
-    LEFT JOIN jobqueue AS depends
-      ON depends.jq_pk = jobdepends.jdep_jq_depends_fk
-    LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk
-    LEFT JOIN upload ON upload_pk = job.job_upload_fk
-    $Where
-    ORDER BY upload.upload_pk,job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk;
-    ";
-
-    $Results = $DB->Action($Sql);
-    if (!is_array($Results)) { return; }
-
-    /* Now display the summary */
-    $Job=-1;
-    $JobName="";
-    $Blocked=array();
-    $First=1;
-    $Upload="";
-    $V="";
-    $Uri = Traceback_uri() . "?mod=" . $this->Name;
-    $UriFull = $Uri . Traceback_parm_keep(array("show","history"));
-    foreach($Results as $Row)
-      {
-      /* Determine the color */
-      $Color=$this->Colors['Queued']; /* default */
-      if ($Row['jq_end_bits'] > 1)
-	{
-	$Color=$this->Colors['Failed'];
-	$Blocked[$Row['jq_pk']] = 1;
-	}
-      else if (isset($Blocked[$Row['jdep_jq_depends_fk']]))
-	{
-	$Color=$this->Colors['Blocked'];
-	$Blocked[$Row['jq_pk']] = 1;
-	}
-      else if (!empty($Row['jq_starttime']) && empty($Row['jq_endtime']))
-	{
-	$Color=$this->Colors['Scheduled'];
-	}
-      else if (!empty($Row['jq_starttime']) && !empty($Row['jq_endtime']))
-	{
-	$Color=$this->Colors['Finished'];
-	}
-
-      if (empty($Row['upload_pk']) || ($Upload != $Row['upload_pk']))
-	{
-	$Upload = $Row['upload_pk'];
-	if ($First) { $First=0; }
-	else { $V .= "</table>\n<P />\n"; }
-	$V .= "<table class='text' border=1 width='100%'>\n";
-	$JobName = preg_replace("@^.*/@","",$Row['upload_filename']);
-	if (empty($JobName)) { $JobName = "[Default]"; }
-	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
-	$V .= "<tr><th colspan=3 style='background:#202020;color:white;'>$JobName</font>";
-	$V .= "</th></tr>\n";
-	}
-      if ($Job != $Row['jq_job_fk'])
-	{
-	$Job = $Row['jq_job_fk'];
-	$V .= "<tr><th width='20%'>Job/Dependency</th>\n";
-	$V .= "<th width='60%'>Job Name: " . $Row['job_name'] . "</th>";
-	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+	$Dep = " / <a href='$Uri&show=job&job=" . $Row['jdep_jq_depends_fk'] . "'>" . $Row['jdep_jq_depends_fk'] . "</a>";
+	for( ; $Results[$i+1]['jq_pk'] == $Row['jq_pk']; $i++)
 	  {
-	  $Style = "style='font:normal 8pt verdana, arial, helvetica;'";
-	  $JobId = $Row['job_pk'];
-	  $V .= "<th $Style>";
-	  $V .= "<a href='$UriFull&action=reset&jobid=$JobId'>Reset</a>";
-	  $V .= " | ";
-	  $V .= "<a href='$UriFull&action=delete&jobid=$JobId'>Delete</a>";
-	  $V .= " | ";
-	  $Priority = $Row['job_priority'];
-	  $V .= "Priority: ";
-	  $V .= "<a title='Decrease priority' href='$UriFull&action=priority&priority=" . ($Priority-1);
-	  $V .= "&jobid=$JobId'>&laquo;</a>";
-	  $V .= " $Priority ";
-	  $V .= "<a title='Increase priority' href='$UriFull&action=priority&priority=" . ($Priority+1);
-	  $V .= "&jobid=$JobId'>&raquo;</a>";
-	  $V .= "</th>";
+	  $Dep .= ", <a href='$Uri&show=job&job=" . $Results[$i+1]['jdep_jq_depends_fk'] . "'>" . $Results[$i+1]['jdep_jq_depends_fk'] . "</a>";
 	  }
-	else { $V .= "<th width='20%'></th></tr>\n"; }
-	}
-      $V .= "<tr>\n";
-      $V .= "  <td bgcolor='$Color'>";
-      $V .= "<a href='$Uri&show=job&job=" . $Row['jq_pk'] . "'>" . $Row['jq_pk'] . "</a>";
-      if (!empty($Row['jdep_jq_depends_fk']))
-	{
-	$V .= "/<a href='$Uri&show=job&job=" . $Row['jdep_jq_depends_fk'] . "'>" . $Row['jdep_jq_depends_fk'] . "</a>";
+	$V .= $Dep;
 	}
       $V .= "</td>\n";
-      $V .= "  <td bgcolor='$Color'>" . $Row['jq_type'] . "</td>\n";
+
+      /** Job name and details **/
+      if (!$Detail) /* Show summary */
+	{
+	$V .= "  <td bgcolor='$Color' colspan='2'>" . $Row['jq_type'] . "</td>\n";
+	}
+      else /* Show details */
+	{
+	$V .= "  <td bgcolor='$Color' width='20%'>" . $Row['jq_type'] . "</td>\n";
+	if (($Color == $this->Colors['Queued']) && ($Row['jq_itemsprocessed'] == 0))
+	  {
+	  $V .= "  <td bgcolor='$Color'></td>\n";
+	  }
+	else
+	  {
+	  $V .= "  <td bgcolor='$Color'><table class='text' border=0 width='100%'><tr><td bgcolor='$Color'>";
+	  $t = number_format($Row['jq_itemsprocessed'], 0, "", ",");
+	  if ($t == 1) { $V .= "  <td>$t item<br />\n"; }
+	  else { $V .= "  <td>$t items<br />\n"; }
+
+	  $V .= "Elapsed scheduled:<br />\n";
+	  $V .= "Elapsed running:</td>\n";
+
+	  $V .= "    <td bgcolor='$Color'align='right'><br />";
+	  $t = floor($Row['jq_elapsedtime'] / (60*60*24));
+	  if ($t == 0) { $Time = ""; }
+	  else if ($t == 1) { $Time = "$t day "; }
+	  else { $Time = "$t days "; }
+	  $Time .= gmdate("H:i:s",$Row['jq_elapsedtime']);
+	  $V .= $Time . "<br />\n";
+
+	  $t = floor($Row['jq_processedtime'] / (60*60*24));
+	  if ($t == 0) { $Time = ""; }
+	  else if ($t == 1) { $Time = "$t day "; }
+	  else { $Time = "$t days "; }
+	  $Time .= gmdate("H:i:s",$Row['jq_processedtime']);
+	  $V .= $Time . "</td>\n";
+	  $V .= "  </tr></table>\n";
+	  }
+	} /* if show details */
       $endtime = substr($Row['jq_endtime'],0,16);
-      $V .= "  <td bgcolor='$Color'>$endtime</td>\n";
+      $V .= "  <td width='20%' bgcolor='$Color'>$endtime</td>\n";
+      $V .= "</tr>\n";
       }
     $V .= "</table>\n";
     return($V);
-    } // ShowSummary()
+    } // Show()
 
   /***********************************************************
    Output(): This function returns the job queue status.
@@ -561,8 +461,8 @@ class jobs_showjobs extends FO_Plugin
 	/* Display the output based on the values */
 	switch($Show)
 	  {
-	  case 'summary': $V .= $this->ShowSummary($History,$UploadPk); break;
-	  case 'detail': $V .= $this->ShowDetail($History,$UploadPk); break;
+	  case 'summary': $V .= $this->Show($History,$UploadPk,0); break;
+	  case 'detail': $V .= $this->Show($History,$UploadPk,1); break;
 	  case 'job': $V .= $this->ShowJob($Job); break;
 	  }
 	break;
