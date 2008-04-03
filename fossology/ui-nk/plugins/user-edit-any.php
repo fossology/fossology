@@ -223,7 +223,7 @@ class user_edit_any extends FO_Plugin
 
 	$V .= "Select the user to edit: ";
 	if (empty($UserId)) { $UserId = $Results[0]['user_pk']; }
-	$V .= "<select name='userid' onload='SetInfo($UserId);' onchange='SetInfo(document.formy.userid.value);'>\n";
+	$V .= "<select name='userid' onload='SetInfo($UserId);' onchange='SetInfo(this.value);'>\n";
 	for($i=0; !empty($Results[$i]['user_pk']); $i++)
 	  {
 	  $Selected = "";
