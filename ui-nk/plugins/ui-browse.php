@@ -209,7 +209,7 @@ if (0) {
 	INNER JOIN ufile ON ufile_pk = ufile_fk
 	WHERE upload_pk IN
 	(SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
-	ORDER BY upload_filename,upload_desc;";
+	ORDER BY ufile_name,upload_filename,upload_desc;";
     $Results = $DB->Action($Sql);
 
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
@@ -239,9 +239,7 @@ if (0) {
           $Desc = htmlentities($Row['upload_desc']);
 	  $UploadPk = $Row['upload_pk'];
           if (empty($Desc)) { $Desc = "<i>No description</i>"; }
-          $Sql = "SELECT ufile_name FROM ufile WHERE ufile_pk = " . $Row['ufile_fk'] . ";";
-          $UResults = $DB->Action($Sql);
-          $Name = $UResults[0]['ufile_name'];
+          $Name = $Row['ufile_name'];
 	  $Sql2 = "SELECT count(*) AS count FROM uploadtree WHERE upload_fk = '$UploadPk';";
           $SResults = $DB->Action($Sql2);
 	  $ItemCount = number_format($SResults[0]['count'], 0, "", ",");
