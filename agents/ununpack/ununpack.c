@@ -1441,24 +1441,35 @@ int	DBInsertUploadTree	(ContainerInfo *CI)
     }
 
 
+  /* Get the parent ID */
   /* Two cases -- depending on if the parent exists */
   memset(SQL,'\0',MAXSQL);
   if (CI->PI.ufile_pk > 0) /* This is a child */
     {
-    /* Find parent */
-    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE ufile_fk = '%ld' AND upload_fk = '%s';",
-	CI->PI.ufile_pk, Upload_Pk);
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-    if ((DBaccess(DBTREE,SQL) != 1) || (DBdatasize(DBTREE) <= 0)) /* SELECT */
+    /* This condition can happen multiple times.
+       Don't re-look up the same info. */
+    static long LastNewParent=-1, LastUfile=-1, LastUpload=-1;
+    if ((LastUfile==CI->PI.ufile_pk) && (LastUpload==atol(Upload_Pk)))
 	{
-	/* Got a problem: No parent! */
-	printf("FATAL pfile %s Database inconsistency detected.\n",Pfile_Pk);
-	printf("LOG pfile %s Child missing parent ufile[%ld].\n",Pfile_Pk,CI->PI.ufile_pk);
-	return(-1);
+	NewParent = LastNewParent;
 	}
-    else
+    else /* haven't seen it before */
 	{
+	/* Find parent */
+	snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE ufile_fk = '%ld' AND upload_fk = '%s';",
+		CI->PI.ufile_pk, Upload_Pk);
+	if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
+	if ((DBaccess(DBTREE,SQL) != 1) || (DBdatasize(DBTREE) <= 0)) /* SELECT */
+		{
+		/* Got a problem: No parent! */
+		printf("FATAL pfile %s Database inconsistency detected.\n",Pfile_Pk);
+		printf("LOG pfile %s Child missing parent ufile[%ld].\n",Pfile_Pk,CI->PI.ufile_pk);
+		return(-1);
+		}
 	NewParent = atol(DBgetvalue(DBTREE,0,0));
+	LastNewParent = NewParent;
+	LastUfile = CI->PI.ufile_pk;
+	LastUpload = atol(Upload_Pk);
 	}
 
     /* Prepare to insert child */
@@ -1471,8 +1482,6 @@ int	DBInsertUploadTree	(ContainerInfo *CI)
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE ufile_fk='%ld' AND parent = '%ld' AND upload_fk = '%s';",
       CI->ufile_pk, NewParent, Upload_Pk);
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-    DBaccess(DBTREE,SQL); /* SELECT */
     }
   else /* No parent!  This is the first upload! */
     {
@@ -1484,11 +1493,12 @@ int	DBInsertUploadTree	(ContainerInfo *CI)
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE ufile_fk='%ld' AND parent is NULL AND upload_fk = '%s';",
       CI->ufile_pk, Upload_Pk);
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-    DBaccess(DBTREE,SQL); /* SELECT */
     }
 
+  if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
+  DBaccess(DBTREE,SQL); /* SELECT */
   NewParent = atol(DBgetvalue(DBTREE,0,0));
+
   if (Exist)
     {
     /* There is a duplicate, so I just need to copy that over.  I need to
