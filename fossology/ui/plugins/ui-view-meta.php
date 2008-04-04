@@ -79,13 +79,15 @@ class ui_view_meta extends FO_Plugin
     /**********************************
      Display meta data
      **********************************/
-    $V .= "<table width='100%' border='1'>\n";
-    $V .= "<tr><th>Meta Data</th><th>Value</th></tr>\n";
 
     $SQL = "SELECT * FROM mimetype
 	INNER JOIN pfile ON pfile_pk = '$Pfile'
 	AND pfile.pfile_mimetypefk = mimetype.mimetype_pk;";
     $Results = $DB->Action($SQL);
+    $Total = count($Results);
+
+    $V .= "<table width='100%' border='1'>\n";
+    $V .= "<tr><th>Meta Data</th><th>Value</th></tr>\n";
     foreach($Results as $R)
 	{
 	if (empty($R['mimetype_pk'])) { continue; }
@@ -101,6 +103,8 @@ class ui_view_meta extends FO_Plugin
 	WHERE pfile_fk = '$Pfile'
 	AND key_name != 'Processed' ORDER BY key_name;";
     $Results = $DB->Action($SQL);
+    $Total += count($Results);
+
     foreach($Results as $R)
 	{
 	if (empty($R['key_name'])) { continue; }
@@ -111,6 +115,7 @@ class ui_view_meta extends FO_Plugin
 	}
 
     $V .= "</table>\n";
+    $V .= "<P />Total meta data records: " . number_format($Total,0,"",",") . "<br />\n";
     return($V);
   } // ShowView()
 
