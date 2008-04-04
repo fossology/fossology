@@ -36,6 +36,7 @@
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif
 
+int Verbose=0;
 char SQL[256];
 
 struct KeyType
@@ -50,6 +51,7 @@ typedef struct KeyType KeyType;
 /* For the database */
 void *DB=NULL;
 int Agent_pk=-1;	/* agent identifier */
+char *Akey=NULL;	/* set by ARG_akey */
 
 /* KeywordTypes is similar to extractor.c from libextractor */
 KeyType KeywordPkgMeta = { -1,-1,"pkgmeta","Package meta data" };
@@ -317,24 +319,27 @@ void	PrintKeys	(EXTRACTOR_KeywordList *keywords)
 {
   int K;
   char SQL[8192];
+  long Count=0;	/* how many records */
 
   for( ; keywords; keywords=keywords->next)
     {
     K = GetKey(keywords->keywordType);
 
-    if (!DB)
+    if (!DB || Verbose)
       {
+      if (Verbose) printf("%ld: ",Count);
       printf("%d: %s = ",KeywordTypes[K].KeyIndex,TaintString(KeywordTypes[K].Label));
       printf("'%s'\n",TaintString(keywords->keyword));
       }
-    else
+    if (DB)
       {
       /* The attrib table permits duplicates. So check for dups first. */
       memset(SQL,'\0',sizeof(SQL));
       snprintf(SQL,sizeof(SQL),"SELECT * FROM attrib WHERE attrib_key_fk = '%d' AND attrib_value = '%s' AND pfile_fk = '%s';",
 	KeywordTypes[K].DBIndex,
 	TaintString(keywords->keyword),
-	getenv("ARG_akey"));
+	Akey);
+      if (Verbose > 1) { printf("SQL = %s\n",SQL); }
       DBaccess(DB,SQL);
       if (DBdatasize(DB) <= 0)
 	{
@@ -345,11 +350,13 @@ void	PrintKeys	(EXTRACTOR_KeywordList *keywords)
         snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','%s','%s');",
 	  KeywordTypes[K].DBIndex,
 	  TaintString(keywords->keyword),
-	  getenv("ARG_akey"));
+	  Akey);
         /* Insert record into database.  Ignore insert errors. */
+        if (Verbose > 1) { printf("SQL = %s\n",SQL); }
         DBaccess(DB,SQL);
 	}
       }
+    Count++;
     } /* for() */
 } /* PrintKeys() */
 
@@ -490,6 +497,7 @@ void    SetEnv  (char *S, int Env)
     DBclose(DB);
     exit(-1);
     }
+  Akey = getenv("ARG_akey");
 } /* SetEnv() */
 
 /*********************************************************
@@ -535,8 +543,9 @@ void	GetAgentKey	()
  *********************************************************/
 void    Usage   (char *Name)
 {
-  printf("Usage: %s [-i] [file.spec [file.spec [...]]\n",Name);
+  printf("Usage: %s [options] [file.spec [file.spec [...]]\n",Name);
   printf("  -i        :: initialize the database, then exit.\n");
+  printf("  -v        :: verbose debugging (-vv = more verbose).\n");
   printf("  file.spec :: if files are listed, display their meta data.\n");
   printf("  no file   :: process data from the scheduler.\n");
 } /* Usage() */
@@ -563,7 +572,7 @@ int	main	(int argc, char *argv[])
     }
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"i")) != -1)
+  while((c = getopt(argc,argv,"iv")) != -1)
     {
     switch(c)
 	{
@@ -580,6 +589,9 @@ int	main	(int argc, char *argv[])
 			GetKey(KeywordTypes[c].KeyIndex);
 		DBclose(DB);
 		return(0);
+	case 'v':
+		Verbose++;
+		break;
 	default:
 		Usage(argv[0]);
 		exit(-1);
