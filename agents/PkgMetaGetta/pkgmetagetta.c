@@ -639,7 +639,6 @@ int	main	(int argc, char *argv[])
       if (Parm[0] != '\0')
 	{
 	/* Process the repository file */
-        alarm(0);  /* allow the scheduler to tell when this hangs */
 	/** Find the path **/
 	Env = getenv("ARG_a");
 	if (!Env)
