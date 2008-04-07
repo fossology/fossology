@@ -84,16 +84,15 @@ class ui_view_meta extends FO_Plugin
 	INNER JOIN pfile ON pfile_pk = '$Pfile'
 	AND pfile.pfile_mimetypefk = mimetype.mimetype_pk;";
     $Results = $DB->Action($SQL);
-    $Total = count($Results);
     $Count=1;
 
     $V .= "<table width='100%' border='1'>\n";
-    $V .= "<tr><th>Item</th><th>Meta Data</th><th>Value</th></tr>\n";
+    $V .= "<tr><th width='5%'>Item</th><th width='20%'>Meta Data</th><th>Value</th></tr>\n";
     foreach($Results as $R)
     for($i=0; !empty($Results[$i]['mimetype_pk']); $i++)
 	{
 	$R = &$Results[$i];
-	$V .= "<tr><td>$Count</td><td width='20%'>Unpacked file type";
+	$V .= "<tr><td align='right'>$Count</td><td>Unpacked file type";
 	$V .= "</td><td>" . htmlentities($R['mimetype_name']) . "</td></tr>\n";
 	$Count++;
 	}
@@ -106,12 +105,11 @@ class ui_view_meta extends FO_Plugin
 	WHERE pfile_fk = '$Pfile'
 	AND key_name != 'Processed' ORDER BY key_name;";
     $Results = $DB->Action($SQL);
-    $Total += count($Results);
 
     for($i=0; !empty($Results[$i]['key_name']); $i++)
 	{
 	$R = &$Results[$i];
-	$V .= "<tr><td>$Count</td><td width='20%'>" . htmlentities($R['key_name']);
+	$V .= "<tr><td align='right'>$Count</td><td>" . htmlentities($R['key_name']);
 	$Val = htmlentities($R['attrib_value']);
 	$Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
 	$V .= "</td><td>$Val</td></tr>\n";
@@ -119,7 +117,8 @@ class ui_view_meta extends FO_Plugin
 	}
 
     $V .= "</table>\n";
-    $V .= "<P />Total meta data records: " . number_format($Total,0,"",",") . "<br />\n";
+    $Count--;
+    $V .= "<P />Total meta data records: " . number_format($Count,0,"",",") . "<br />\n";
     return($V);
   } // ShowView()
 
