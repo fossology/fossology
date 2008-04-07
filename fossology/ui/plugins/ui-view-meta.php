@@ -85,14 +85,17 @@ class ui_view_meta extends FO_Plugin
 	AND pfile.pfile_mimetypefk = mimetype.mimetype_pk;";
     $Results = $DB->Action($SQL);
     $Total = count($Results);
+    $Count=1;
 
     $V .= "<table width='100%' border='1'>\n";
-    $V .= "<tr><th>Meta Data</th><th>Value</th></tr>\n";
+    $V .= "<tr><th>Item</th><th>Meta Data</th><th>Value</th></tr>\n";
     foreach($Results as $R)
+    for($i=0; !empty($Results[$i]['mimetype_pk']); $i++)
 	{
-	if (empty($R['mimetype_pk'])) { continue; }
-	$V .= "<tr><td width='20%'>Unpacked file type";
+	$R = &$Results[$i];
+	$V .= "<tr><td>$Count</td><td width='20%'>Unpacked file type";
 	$V .= "</td><td>" . htmlentities($R['mimetype_name']) . "</td></tr>\n";
+	$Count++;
 	}
 
     $SQL = "SELECT DISTINCT key_name,attrib_value FROM attrib
@@ -105,13 +108,14 @@ class ui_view_meta extends FO_Plugin
     $Results = $DB->Action($SQL);
     $Total += count($Results);
 
-    foreach($Results as $R)
+    for($i=0; !empty($Results[$i]['key_name']); $i++)
 	{
-	if (empty($R['key_name'])) { continue; }
-	$V .= "<tr><td width='20%'>" . htmlentities($R['key_name']);
+	$R = &$Results[$i];
+	$V .= "<tr><td>$Count</td><td width='20%'>" . htmlentities($R['key_name']);
 	$Val = htmlentities($R['attrib_value']);
 	$Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
 	$V .= "</td><td>$Val</td></tr>\n";
+	$Count++;
 	}
 
     $V .= "</table>\n";
