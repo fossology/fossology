@@ -352,7 +352,7 @@ void	PrintKeys	(EXTRACTOR_KeywordList *keywords)
 	  TaintString(keywords->keyword),
 	  Akey);
         /* Insert record into database.  Ignore insert errors. */
-        if (Verbose > 1) { printf("SQL = %s\n",SQL); }
+        if (Verbose) { printf("SQL = %s\n",SQL); }
         DBaccess(DB,SQL);
 	}
       }
