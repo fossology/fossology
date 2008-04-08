@@ -170,10 +170,19 @@ function JobQueueAddDependency($JobQueueChild, $JobQueueParent)
 	('$JobQueueChild','$JobQueueParent');");
 } // JobQueueAddDependency()
 
-/************************************************************
- JobAddUpload(): Insert a new upload record.
- Returns upload_pk.
- ************************************************************/
+/**
+ * function:  JobAddUpload
+ *   
+ * @abstract Insert a new upload record.
+ * 
+ * @param string $job_name   the name to associate with the job
+ * @param string $filename   the path the to file to upload
+ * @param string $desc       A meaningful description
+ * @param int    $UploadMode e.g. 1<<2, 1<<3
+ * @param int    $FolderPk   The folder primary key
+ * 
+ * @return upload_pk the upload primary key
+ */
 function JobAddUpload ($job_name,$filename,$desc,$UploadMode,$FolderPk)
 {
   global $DB;
