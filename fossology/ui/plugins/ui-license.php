@@ -48,6 +48,8 @@ class ui_license extends FO_Plugin
       if (GetParm("mod",PARM_STRING) == $this->Name)
 	{
 	menu_insert("Browse::License",1);
+	menu_insert("Browse::[BREAK]",100);
+	menu_insert("Browse::Clear",101,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
 	}
       else
 	{
@@ -247,11 +249,17 @@ class ui_license extends FO_Plugin
     $VJ .= "  }\n";
     $VJ .= "LastPrefix = Prefix;\n";
     $VJ .= "LastListing = Listing;\n";
-    $VJ .= "document.getElementById(Self).style.backgroundColor=color;\n";
-    $VJ .= "List = Listing.split(' ');\n";
-    $VJ .= "for(var i in List)\n";
+    $VJ .= "if (Self!='')\n";
     $VJ .= "  {\n";
-    $VJ .= "  document.getElementById(Prefix + List[i]).style.backgroundColor=color;\n";
+    $VJ .= "  document.getElementById(Self).style.backgroundColor=color;\n";
+    $VJ .= "  }\n";
+    $VJ .= "if (Listing!='')\n";
+    $VJ .= "  {\n";
+    $VJ .= "  List = Listing.split(' ');\n";
+    $VJ .= "  for(var i in List)\n";
+    $VJ .= "    {\n";
+    $VJ .= "    document.getElementById(Prefix + List[i]).style.backgroundColor=color;\n";
+    $VJ .= "    }\n";
     $VJ .= "  }\n";
     $VJ .= "}\n";
     $VJ .= "// -->\n";

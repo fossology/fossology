@@ -264,6 +264,11 @@ function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
 	if (!$First) { $V .= " &nbsp;&nbsp;&bull;&nbsp;&nbsp; "; }
 	$First=1;
 	}
+      else if (!empty($Val->HTML))
+	{
+	$V .= $Val->HTML;
+	$First=0;
+	}
       else if (!empty($Val->URI))
 	{
 	if (!$First) { $V .= " | "; }
