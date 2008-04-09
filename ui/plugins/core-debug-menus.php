@@ -67,7 +67,7 @@ class core_debug_menus extends FO_Plugin
 	$this->Menu2HTML($MenuList);
 	$V .= "<hr>\n";
 	$V .= "<pre>";
-	$V .= print_r($MenuList,1);
+	$V .= htmlentities(print_r($MenuList,1));
 	$V .= "</pre>";
         break;
       case "Text":
