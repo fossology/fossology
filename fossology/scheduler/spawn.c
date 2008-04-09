@@ -246,16 +246,14 @@ int	KillChild	(int Thread)
     {
     ActiveThread++;
 
-    /* kill the children! kill! kill! */
-    fprintf(stderr,"Sending kill to child %d (pid=%d)\n",
-	Thread,CM[Thread].ChildPid);
     /** Close structure FIRST since SIGCHLD may be received */
     ChangeStatus(Thread,ST_FREEING);
-    if (CM[Thread].ChildPid) kill(CM[Thread].ChildPid,SIGKILL);
     CheckClose(CM[Thread].ChildStdin);
     CheckClose(CM[Thread].ChildStdinRev);
+    /* kill the children! kill! kill! */
+    if (CM[Thread].ChildPid > 0) kill(CM[Thread].ChildPid,SIGKILL);
 
-    /** Process any pending I/O data **/
+    /** Give it up to ten seconds to flush I/O **/
     alarm(10);
     while(ReadChild(Thread) > 0)  ;
     alarm(0);
@@ -880,6 +878,7 @@ int	TestEngines	()
         Thread,CM[Thread].Command);
       Failures++;
       }
+    KillChild(Thread);
     }
   return(Failures);
 } /* TestEngines() */
