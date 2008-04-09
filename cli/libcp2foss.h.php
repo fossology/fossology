@@ -83,6 +83,7 @@ function CreateFolder($parent_key, $folder_name, $description="") {
 
   return($name_and_key);
 }
+
 /**
  * function: hash2bucket
  *
@@ -146,6 +147,90 @@ function hash2bucket($name){
 }
 
 /**
+ * function: suckupfs
+ *
+ * process a directory entry, tar up all files in the directory.
+ * Unless recursion is specified (-R), subdirectories are not processed.
+ * If recursion is specified, everything under the directory is tared up
+ *
+ * @param string $path directory path to upload
+ * @param string $recurse flag to indicate recursion is on.  Default is
+ * off.
+ *
+ * @return string $tpath the path to the tar archive, or false
+ *
+ */
+
+function suckupfs($path, $recursion = false){
+
+  $cwd       = '.';
+  $parentdir = '..';
+  $dirs      = array();
+  $other     = array();
+  $dir_parts = pathinfo($path);
+  $SPATH = opendir($path)
+  or die("Suckupfs: Can't open: $path $php_errormsg\n");
+
+  while ($dir_entry = readdir($SPATH)){
+    //  echo "\$dir_entry is:$dir_entry\n";
+    if ($dir_entry == $cwd || $dir_entry == $parentdir) {
+      //echo ("skipping $dir_entry\n");
+      continue;
+    }
+    $check = "$path" . '/' . "$dir_entry";
+    if(is_dir("$check")){
+      $dirs[] = $dir_entry;
+    }
+    elseif(is_file("$check")){
+      $files[] = $dir_entry;
+    }
+    else {
+      $other[] = $dir_entry;
+    }
+  }
+  closedir($SPATH);
+
+  /*
+   * tar will suck up a sub dir and it's contnents, so must
+   * not supply them in list to tar if -r is not turned on.
+   *
+   * Always put the files in the list.  If recursion is on, put everything
+   * else in the list as well.  Return the path to the tar file.
+   */
+  foreach($files as $file){
+    $flist .= "$file ";
+  }
+  if($recursion){
+    foreach($dirs as $ditem){
+      $flist .= "$ditem ";
+    }
+    foreach($other as $item){
+      $flist .= " $item";
+    }
+  }
+  chdir($path) or die("Can't cd to $path, $php_errormsg\n");
+  $ftail = getmypid();
+  if(empty($ftail)){
+    $ftail = session_id();
+  }
+  $tpath = '/tmp/' . "{$dir_parts['basename']}" . '.tar.bz2.' . "$ftail";
+  $tcmd = "tar -cjf $tpath --exclude='.svn' --exclude='.cvs' $flist 2>&1";
+  $last = exec($tcmd, &$tossme, &$rtn);
+  // Tar almost never returns 0!  So if it's not 0, then check existence
+  // and size.
+  if ($rtn >= 0){
+    //echo "\$tpath is:$tpath\n";
+    if(!(filesize($tpath))){
+      //echo "ERROR: filesize returned False\n";
+      return(FALSE);
+    }
+    else {
+      return($tpath);
+    }
+  }
+}
+
+/**
  * function: wget_url
  *
  * wget a url and check for erorrs.
@@ -190,6 +275,7 @@ function wget_url($url){
   }
   return $archive_tmp;
 }
+
 /**
  * function: ck4errors
  *
@@ -203,6 +289,7 @@ function wget_url($url){
  *
  * @return true if no errors false if errors are found
  */
+
 function ck4errors ($wget_logfile){
 
   $contents = file($wget_logfile);
