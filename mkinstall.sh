@@ -252,7 +252,7 @@ if [ "\$PLACECONFIG" != "0" ] ; then
 ## Create default DB file (this will need to be changed by the user)
 echo "# Checking configuration files"
 
-if [ !-f "/etc/default/fossology" ] ; then
+if [ ! -f "/etc/default/fossology" ] ; then
   \$DEBUG \$CP install/etc/default/fossology /etc/default/fossology
 fi
 
