@@ -92,7 +92,7 @@ External Commands:
 * bzcat - bz2 decompressor, from the bzip2 software
    http://www.bzip.org/
 * cabextract - extractor for Microsoft Cabinet files
-   http://www.kyz.uklinux.net/cabextract.php
+   http://www.cabextract.org.uk/
 * cpio - for extracting cpio archives
    http://www.gnu.org/software/cpio/
 * icat and fls - forensics tools from the sleuthkit software
