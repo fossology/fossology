@@ -70,12 +70,19 @@ class TestCP2fossRecursion extends UnitTestCase {
     "$this->command -p FossTest -n fossology -a /tmp/fossology -d 'cp2foss, archive is a directory' ",
     $output, $retval);
     //echo "\$output is:\n"; print_r($output); echo "\n";
-    // $output[2] will always have the archive we are loading... in this
-    // case it will be a tar file....
-    // get only the files under fossology
+    
+    /*
+     * $output[1] will always have the archive we are loading... in this
+     * case it will be a tar file....get only the files under fossology
+     * 
+     * NOTE: this seems to be brittle.... sometimes it's 2?! and then
+     * this test breaks....
+     * 
+     */
+    
     $find = "find /tmp/fossology -maxdepth 1  -type f -print";
     $last = exec($find, $findoutput, $retval);
-    $last = exec("tar -tf $output[2]", $tarout, $retval);
+    $last = exec("tar -tf $output[1]", $tarout, $retval);
     // get leaf names from find output
     $basenames = array();
     foreach($findoutput as $path) {
@@ -104,11 +111,17 @@ class TestCP2fossRecursion extends UnitTestCase {
     $last = exec(
     "$this->command -p FossTest -n fossology -a $apath -R -d 'cp2foss, archive is a dirctory' ",
     $output, $retval);
-    // $output[2] will always have the archive we are loading... in this
-    // case it will be a tar file....
-    // get only the files under fossology
-    //echo "o2 is:{$output[2]}\n";
-    //print_r($output);
+    /*
+     * $output[1] will always have the archive we are loading... in this
+     * case it will be a tar file....get only the files under fossology
+     * 
+     * NOTE: this seems to be brittle.... sometimes it's 2?! and then
+     * this test breaks....
+     * 
+     * get only the files under fossology
+     */
+    
+    //echo "output is:\n"; print_r($output); echo "\n";
     /*
     * Tried using find and combos of ls etc... issue was getting the
     * trailing / on directories without changing the format.
@@ -120,7 +133,7 @@ class TestCP2fossRecursion extends UnitTestCase {
 
     $tcmd = "tar -cjf $temp_tar --exclude='.svn' --exclude='.cvs' *";
     $last = exec($tcmd, $Rtoutput, $retval);
-    $last = exec("tar -tf $output[2]", $tarout, $retval);
+    $last = exec("tar -tf $output[1]", $tarout, $retval);
     $last = exec("tar -tf $temp_tar", $Rtout, $retval);
     foreach($tarout as $p) {
       //echo "tar path is:$p\n";

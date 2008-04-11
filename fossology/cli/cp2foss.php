@@ -70,12 +70,12 @@ global $WEBDIR;
 global $LIBDIR;
 
 require_once("$WEBDIR/common/common.php");
+require_once("$WEBDIR/common/common-cli.php");
 require_once("$WEBDIR/template/template-plugin.php");
 require_once("$WEBDIR/plugins/core-db.php");
 require_once("$LIBDIR/libcp2foss.h.php");
-require_once("$WEBDIR/common-cli.php");
 
-global $DB;
+
 global $Plugins;
 
 $usage = <<< USAGE
@@ -126,6 +126,8 @@ if (empty($DB))
   print "ERROR: Unable to connect to the database.\n";
   exit(1);
   }
+  
+global $DB;
 
 // NOTE: replace below with getops for cleaner/more flexible processing....
 // Well, prototyped with getopts.  Not much better than the switch below.

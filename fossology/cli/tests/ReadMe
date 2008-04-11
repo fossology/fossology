@@ -19,21 +19,25 @@
  #
 Setting up cp2foss Tests
 
-The steps are automated, but documented here.
+Almost all the steps are automated, but documented here. See the install 
+script for details.
 
-As root run the install script to set up the system for testing.
-
-1. make sure the version of cp2foss you want to test is installed in 
+NOTE: make sure the version of cp2foss you want to test is installed in 
    /usr/local/bin/test.cp2foss.  That's the name the tests expect to use.
    
-   1.1 make sure test.cp2foss has the following permissions:
+   This is a MANUAL STEP, please do this BEFORE running the tests
+   
+As root run the install script to set up the system for testing.
+
+1. make sure test.cp2foss has the following permissions:
    
        -rwxr-xr-- 1 fossy fossy 28724 2008-04-02 15:24 test.cp2foss
    
-2. copy to archives in ....cli/test/archives/* to /tmp, that is where the
+2. copy the archives in ....cli/test/archives/* to /tmp, that is where the
    tests expect them to be.
    
 3. Create a directory tree with contents for recusive tests.   The 
-tests expect the fossology source is checked out into /tmp and that is used in the tests.
-So if you don't use this method, you will need to change the tests.
+   tests expect the fossology source is checked out into /tmp and that is 
+   used in the tests. So if you don't use this method, you will need to 
+   change the tests.
    
