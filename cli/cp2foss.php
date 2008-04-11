@@ -64,16 +64,16 @@
 $GlobalReady = 1;
 
 //error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
-//require_once("pathinclude.h.php");
-require_once("/home/markd/mypathinclude.h.php");
+
+require_once("pathinclude.h.php");
 global $WEBDIR;
+global $LIBDIR;
+
 require_once("$WEBDIR/common/common.php");
 require_once("$WEBDIR/template/template-plugin.php");
 require_once("$WEBDIR/plugins/core-db.php");
-
 require_once("$LIBDIR/libcp2foss.h.php");
-require_once("$LIBDIR/common-cli.php");
-//require_once("./libcp2foss.h.php");
+require_once("$WEBDIR/common-cli.php");
 
 global $DB;
 global $Plugins;
