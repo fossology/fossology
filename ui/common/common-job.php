@@ -57,6 +57,18 @@ if (!isset($GlobalReady)) { exit; }
  item being processed.
  ************************************************************/
 
+/*
+ * funcion: JobSetPriority
+ * 
+ * Given an upload_pk and job_name, set the priority.
+ * NOTE: In case of duplicate jobs, this updates ALL jobs.
+ * 
+ * @param int $jobpk the upload_pk (why isn't the parameter called that?)
+ * @param string
+ * 
+ * Huh: the code does not match the comments, does this even work?
+ * chat with neal...
+ */
 /************************************************************
  JobSetPriority(): Given an upload_pk and job_name, set the priority.
  NOTE: In case of duplicate jobs, this updates ALL jobs.
@@ -181,7 +193,7 @@ function JobQueueAddDependency($JobQueueChild, $JobQueueParent)
  * @param int    $UploadMode e.g. 1<<2, 1<<3
  * @param int    $FolderPk   The folder primary key
  * 
- * @return upload_pk the upload primary key
+ * @return upload_pk the upload primary key or null (failure)
  */
 function JobAddUpload ($job_name,$filename,$desc,$UploadMode,$FolderPk)
 {
@@ -295,11 +307,20 @@ function JobFindKey	($UploadPk, $JobName)
   return(-1);
 } // JobFindKey()
 
-/************************************************************
- JobAddJob(): Insert a new job type (not a jobqueue item).
- NOTE: If the Job already exists, then it will not be added again.
- Returns the job_pk.
- ************************************************************/
+/**
+ * function: JobAddJob
+ * 
+ * Insert a new job type (not a jobqueue item). NOTE: If the Job already 
+ * exists, then it will not be added again.
+ * 
+ * @param int $upload_pk upload record primary key, see JobAddUpload
+ * @param string $job_name 
+ * @param int $priority the job priority, default 0
+ * 
+ * @return int $jobpk the job primary key
+ * 
+ */
+
 function JobAddJob ($upload_pk, $job_name, $priority=0)
 {
   global $DB;
@@ -335,11 +356,25 @@ function JobAddJob ($upload_pk, $job_name, $priority=0)
   return($jobpk);
 } // JobAddJob()
 
-/************************************************************
- JobQueueAdd(): Insert a jobqueue item.
- $Depends is an ARRAY that lists one or more jobqueue_pk's.
- Returns the new jobqueue key.
- ************************************************************/
+/**
+ * function: JobQueueAdd
+ * 
+ * Insert a jobqueue item.
+ * 
+ * @param int    $job_pk the job primary key (returned by JobAddJob)
+ * @param string $jq_type name of agent (should match a string in scheduler.conf
+ * @param string $jq_args arguments to pass to the agent in the form of
+ * $jq_args="folder_pk='$Folder' name='$Name' description='$Desc' ...";
+ * @param string $jq_repeat values: yes or no
+ * @param string $jq_runonpfile the column name 
+ * @param array  $Depends lists on or more jobqueue_pk's this job is 
+ * dependent on.
+ * @param int    $Reschedule, default 0, 1 to reschedule.
+ * 
+ * @return new jobqueue key ($jqpk)
+ * 
+ */
+
 function JobQueueAdd	($job_pk, $jq_type, $jq_args, $jq_repeat,
 			 $jq_runonpfile, $Depends, $Reschedule=0)
 {
@@ -464,10 +499,22 @@ function JobChangeStatus	($jobpk,$Status)
   return(0);
 } // JobChangeStatus()
 
-/************************************************************
- JobQueueChangeStatus(): Change the jobqueue item status.
- Returns 0 on success, non-0 on failure.
- ************************************************************/
+/**
+ * function: JobQueueChangeStatus
+ * 
+ * Change the jobqueue item status.
+ * 
+ * @param int $jqpk the job Queue primary key
+ * @param string $Status the new status
+ *        Valid status key words are:
+ *          reset
+ *          fail
+ *          succeed
+ *          delete (no real delete for job Q item)
+ * 
+ * @return 0 on success, non-0 on failure.
+ */
+
 function JobQueueChangeStatus	($jqpk,$Status)
 {
   if (empty($jqpk) || ($jqpk < 0)) { return(-1); }
