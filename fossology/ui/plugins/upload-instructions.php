@@ -68,6 +68,8 @@ class upload_instructions extends FO_Plugin
 	$V .= "This option is intended for developers who have mounted directories containing source trees.\n";
 	$V .= "The directory must be accessible via the web server's user.\n";
 	$V .= "</ul>\n";
+if (0)
+  {
 	$V .= "<P />\n";
 	$V .= "Select the type of upload based on where the data is located:\n";
 	/* ASCII ART ROCKS! */
@@ -144,6 +146,7 @@ class upload_instructions extends FO_Plugin
 	$V .= "<td bgcolor='white'>&nbsp;</td>";
 	$V .= "</tr>";
 	$V .= "</table>\n";
+  }
 	break;
       case "Text":
 	break;
