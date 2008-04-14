@@ -132,7 +132,6 @@ class upload_srv_files extends FO_Plugin {
       case "XML":
 	break;
       case "HTML":
-	$V .= "<H1>$this->Title</H1>\n";
 	//If this is a POST, then process the request.
 	// $Path    = GetParm('getfiles', PARAM_TEXT);
 	$Path = trim($_POST['getfiles']);
@@ -174,6 +173,12 @@ class upload_srv_files extends FO_Plugin {
 	$Desc     = NULL;
 	$Name     = NULL;
 	$Folder   = NULL;
+
+	/* Display instructions */
+	$V .= "This option permits uploading a file, set of files, or a directory from the web server to FOSSology.\n";
+	$V .= "This option is designed for developers who have large source code directories that they wish to analyze (and the directories are already mounted on the web server's system).\n";
+	$V .= "This option only uploads files located on the FOSSology web server.\n";
+	$V .= "If your file is located elsewhere, then use one of the other upload options.\n";
 
 	/* Display the form */
 	$V .= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url

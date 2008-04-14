@@ -108,6 +108,13 @@ class upload_file extends FO_Plugin
 	/* Set default values */
 	if (empty($GetURL)) { $GetURL='http://'; }
 
+	/* Display instructions */
+	$V .= "This option permits uploading a file from your computer to FOSSology.\n";
+	$V .= "The file to upload should be located on your computer.\n";
+	$V .= "Many browsers, including Microsoft's Internet Explorer, have trouble uploading ";
+	$V .= "file larger than 650 Megabytes (a standard-size CD-ROM image).\n";
+	$V .= "If your file is larger than 650 Megabytes, then choose one of the other upload options.";
+
 	/* Display the form */
 	$V .= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
 	$V .= "<ol>\n";

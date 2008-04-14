@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class upload_url extends FO_Plugin
 {
   public $Name       = "upload_url";
-  public $Title      = "Upload a New File";
+  public $Title      = "Upload from URL";
   public $Version    = "1.0";
   public $MenuList   = "Upload::From URL";
   public $Dependency = array("db","agent_unpack");
@@ -112,6 +112,11 @@ class upload_url extends FO_Plugin
 
 	/* Set default values */
 	if (empty($GetURL)) { $GetURL='http://'; }
+
+	/* Display instructions */
+	$V .= "This option permits uploading a file from a remote web for FTP server to FOSSology.\n";
+	$V .= "The file to upload must be accessible via a URL and must not require human interaction ";
+	$V .= "such as login credentials.\n";
 
 	/* Display the form */
 	$V .= "<form method='post'>\n"; // no url = this url
