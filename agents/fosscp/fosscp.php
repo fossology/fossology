@@ -65,12 +65,9 @@ global $Plugins;
 global $LIBEXECDIR;
 $UI_CLI=1;
 
-echo "DEBUG: Starting fosscp agent\n";
-
 // Check Required parameters, save all parameters passed in
 // if they are not saved they get over written on the next SQL?
 
-//echo "DEBUG: Argument Check fosscp agent\n";
 if (empty($_ENV['ARG_upload_pk']))
 {
   echo "FATAL: Upload ID (\$ARG_upload_pk) not set. Aborting.\n";
@@ -141,7 +138,7 @@ else
 {
   $description=$_ENV['ARG_description'];
 }
-echo "DEBUG: folder Check: fosscp agent\n";
+
 // Make sure the parent folder exists
 echo "SELECT * FROM folder WHERE folder_pk = '$parent_id';";
 if ( $_ENV['ARG_folder_pk'] != $parent_id )
@@ -208,8 +205,6 @@ else
   $upload_path = $upload_file;
 }
 // Run wget_agent locally to import the file.
-
-// echo "DEBUG: upload_path is:$upload_path\n";
 
 $Prog = "$LIBEXECDIR/agents/wget_agent -k $upload_pk '$upload_path'";
 $last = exec($Prog, $output, $rtn_code);
