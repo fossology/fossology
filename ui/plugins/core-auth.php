@@ -265,8 +265,15 @@ class core_auth extends FO_Plugin
     /* Need to refresh the screen */
     $V .= "<script language='javascript'>\n";
     $V .= "alert('User Logged In')\n";
-    $Uri = GetParm("redirect",PARM_TEXT);
-    if (empty($Uri)) { $Uri = Traceback_uri(); }
+
+    /* Use the previous redirect, but only use it if it comes from this
+       server's Traceback_uri().  (Ignore hostname.) */
+    $Redirect = preg_replace("@^[^/]*//[^/]*@","",GetParm("redirect",PARM_TEXT));
+    $Uri = Traceback_uri();
+    if (empty($Redirect) || strncmp($Redirect,$Uri,strlen($Uri))) { $Uri = Traceback_uri(); }
+    else { $Uri = $Redirect; }
+
+    /* Redirect window */
     $V .= "window.open('$Uri','_top');\n";
     $V .= "</script>\n";
     return($V);
