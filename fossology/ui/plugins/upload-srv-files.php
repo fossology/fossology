@@ -30,6 +30,7 @@ class upload_srv_files extends FO_Plugin {
   public $Version    = "1.0";
   public $MenuList   = "Upload::From Server";
   public $Dependency = array("db","agent_unpack");
+  public $DBaccess   = PLUGIN_DB_UPLOAD;
 
   /**
    *
@@ -129,82 +130,85 @@ class upload_srv_files extends FO_Plugin {
     $V="";
     switch($this->OutputType) {
       case "XML":
-        break;
+	break;
       case "HTML":
-        $V .= "<H1>$this->Title</H1>\n";
-        //If this is a POST, then process the request.
-        // $Path    = GetParm('getfiles', PARAM_TEXT);
-        $Path = trim($_POST['getfiles']);
-        $Recurse = $_POST['RecurseUpload'];
-        $Folder  = GetParm('folder',PARM_INTEGER);
-        $Desc    = GetParm('description',PARM_TEXT); // may be null
-        $Name    = GetParm('name',PARM_TEXT);        // may be null
+	$V .= "<H1>$this->Title</H1>\n";
+	//If this is a POST, then process the request.
+	// $Path    = GetParm('getfiles', PARAM_TEXT);
+	$Path = trim($_POST['getfiles']);
+	$Recurse = $_POST['RecurseUpload'];
+	$Folder  = GetParm('folder',PARM_INTEGER);
+	$Desc    = GetParm('description',PARM_TEXT); // may be null
+	$Name    = GetParm('name',PARM_TEXT);        // may be null
 
-        if (empty($Name)) {
-          $Name = $Path;
-        }
-        /*
-         * Need another check to see if both files and everything is
-         * checked, that's not really an error, it will just upload everything?
-         *
-         * Also, do we want to confirm the users choices, I think so,
-         * as a large upload is well... LARGE! ??
-         */
+	if (empty($Name)) {
+	  $Name = $Path;
+	}
+	/*
+	 * Need another check to see if both files and everything is
+	 * checked, that's not really an error, it will just upload everything?
+	 *
+	 * Also, do we want to confirm the users choices, I think so,
+	 * as a large upload is well... LARGE! ??
+	 */
 
-        if(!empty($Path))
-        {
-          $rc = $this->Upload($Folder, $Path, $Recurse, $Desc, $Name);
-          if (empty($rc)) 
-          {
-            // Need to refresh the screen
-            $V .= "<script language='javascript'>\n";
-            $V .= "alert('Upload jobs for $PATH added to job queue')\n";
-            $V .= "</script>\n";
-          }
-          else 
-          {
-            $V .= "<script language='javascript'>\n";
-            $V .= "alert('Upload failed: $rc')\n";
-            $V .= "</script>\n";
-          }
-        }
-        // Set default form values
-        $PATH     = NULL;
-        $Desc     = NULL;
-        $Name     = NULL;
-        $Folder   = NULL;
+	if(!empty($Path))
+	{
+	  $rc = $this->Upload($Folder, $Path, $Recurse, $Desc, $Name);
+	  if (empty($rc)) 
+	  {
+	    // Need to refresh the screen
+	    $V .= "<script language='javascript'>\n";
+	    $V .= "alert('Upload jobs for $PATH added to job queue')\n";
+	    $V .= "</script>\n";
+	  }
+	  else 
+	  {
+	    $V .= "<script language='javascript'>\n";
+	    $V .= "alert('Upload failed: $rc')\n";
+	    $V .= "</script>\n";
+	  }
+	}
+	// Set default form values
+	$PATH     = NULL;
+	$Desc     = NULL;
+	$Name     = NULL;
+	$Folder   = NULL;
 
-        /* Display the form */
-        $V .= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
-        $V .= "<ol>\n";
-        $V .= "<li>Select the folder for storing the uploaded file:\n";
-        $V .= "<select name='folder'>\n";
-        $V .= FolderListOption(-1,0);
-        $V .= "</select><P />\n";
-        $V .= "<li>Select the path to upload:<br />\n";
-        $V .= "<input name='getfiles' size='60' type='text' /><br /><br />\n";
-        $V .= "<li>The default is to only load just the files under the ";
-        $V .= "path, to load <em>everything</em> select the other option.<br />";
-        $V .= "<strong>NOTE:</strong> Large uploads can take many hours or days<br /><br />\n";
-        $V .= "<input type='radio' name='RecurseUpload' value='R' />";
-        $V .= "Upload everything under path?<br />\n";
-        $V .= "<input type='radio' checked name='RecurseUpload' value='F' />";
-        $V .= "Upload only files under path? E.G. No subfolders/directories and their contents?<br /><br />\n";
-        $V .= "<li>(Optional) Enter a description for this Upload:<br />\n";
-        $V .= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
-        $V .= "<li>(Optional) Enter a viewable name for this Upload:<br />\n";
-        $V .= "<INPUT type='text' name='name' size=60 value=''" . htmlentities($Name) . "'/><br />\n";
-        $V .= "<b>NOTE</b>: If no name is provided, then the uploaded path name will be used.<P />\n";
-        $V .= "<li>Select optional analysis<br />\n";
-        $V .= AgentCheckBoxMake(-1,"agent_unpack");
-        $V .= "</ol>\n";
-        $V .= "<input type='submit' value='Upload!'>\n";
-        $V .= "</form>\n";
-        break;
-        case "Text":
-          break;
-        default:
-          break;
+	/* Display the form */
+	$V .= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
+	$V .= "<ol>\n";
+	$V .= "<li>Select the folder for storing the uploaded file:\n";
+	$V .= "<select name='folder'>\n";
+	$V .= FolderListOption(-1,0);
+	$V .= "</select><P />\n";
+	$V .= "<li>Select the path or file on the server to upload:<br />\n";
+	$V .= "<input name='getfiles' size='60' type='text' /><br /><br />\n";
+	$V .= "<li>The default is to only load just the files under the ";
+	$V .= "path, to load <em>everything</em> select the other option.<br />";
+	$V .= "<strong>NOTE:</strong> Large uploads can take many hours or days<br /><br />\n";
+	$V .= "<input type='radio' name='RecurseUpload' value='R' />";
+	$V .= "Upload everything under path?<br />\n";
+	$V .= "<input type='radio' checked name='RecurseUpload' value='F' />";
+	$V .= "Upload only files under path? E.G. No subfolders/directories and their contents?<br /><br />\n";
+	$V .= "<li>(Optional) Enter a description for this Upload:<br />\n";
+	$V .= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
+	$V .= "<li>(Optional) Enter a viewable name for this Upload:<br />\n";
+	$V .= "<INPUT type='text' name='name' size=60 value=''" . htmlentities($Name) . "'/><br />\n";
+	$V .= "<b>NOTE</b>: If no name is provided, then the uploaded path name will be used.<P />\n";
+	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+		{
+		$V .= "<li>Select optional analysis<br />\n";
+		$V .= AgentCheckBoxMake(-1,"agent_unpack");
+		}
+	$V .= "</ol>\n";
+	$V .= "<input type='submit' value='Upload!'>\n";
+	$V .= "</form>\n";
+	break;
+	case "Text":
+	  break;
+	default:
+	  break;
     }
     if (!$this->OutputToStdout) { return($V); }
     print("$V");
