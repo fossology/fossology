@@ -34,8 +34,6 @@ class tbd extends FO_Plugin
 
   function RegisterMenus()
     {
-    menu_insert("Search::Basic Search (TBD)",1);
-    menu_insert("Search::Advance Search (TBD)",0);
     menu_insert("Main::Organize::Uploads::Edit Properties (TBD)");
     menu_insert("Main::Jobs::Analyze::Code Compare (TBD)");
     menu_insert("Main::Admin::Scheduler::Stop (TBD)");
@@ -45,7 +43,6 @@ class tbd extends FO_Plugin
     menu_insert("Main::Admin::Scheduler::Log (TBD)");
     menu_insert("Main::Admin::Database::View Table (TBD)");
     menu_insert("Main::Admin::Database::Stats (TBD)");
-    menu_insert("Main::Upload::From Mount (TBD)");
     }
 };
 $NewPlugin = new tbd;

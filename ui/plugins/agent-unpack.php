@@ -31,7 +31,7 @@ class agent_unpack extends FO_Plugin
   public $MenuList   = "Jobs::Agents::Unpack";
   public $Version    = "1.0";
   public $Dependency = array("db");
-  public $DBaccess   = PLUGIN_DB_ANALYZE;
+  public $DBaccess   = PLUGIN_DB_UPLOAD;
 
   /***********************************************************
    RegisterMenus(): Register additional menus.

@@ -31,7 +31,7 @@ class upload_url extends FO_Plugin
   public $Version    = "1.0";
   public $MenuList   = "Upload::From URL";
   public $Dependency = array("db","agent_unpack");
-  public $DBaccess   = PLUGIN_DB_ANALYZE;
+  public $DBaccess   = PLUGIN_DB_UPLOAD;
 
   /*********************************************
    Upload(): Process the upload request.
@@ -129,8 +129,11 @@ class upload_url extends FO_Plugin
 	$V .= "<li>(Optional) Enter a viewable name for this file:<br />\n";
 	$V .= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
 	$V .= "<b>NOTE</b>: If no name is provided, then the uploaded file name will be used.<P />\n";
-	$V .= "<li>Select optional analysis<br />\n";
-	$V .= AgentCheckBoxMake(-1,"agent_unpack");
+        if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
+		{
+		$V .= "<li>Select optional analysis<br />\n";
+		$V .= AgentCheckBoxMake(-1,"agent_unpack");
+		}
 	$V .= "</ol>\n";
 	$V .= "<input type='submit' value='Upload!'>\n";
 	$V .= "</form>\n";
