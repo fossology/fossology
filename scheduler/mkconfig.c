@@ -160,6 +160,15 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
     fprintf(Fout,"\n");
     }
 
+  /** fosscp **/
+  fprintf(Fout,"agent=fosscp_agent %s| ",CmdHost);
+  memset(Cmd,'\0',sizeof(Cmd));
+  RepPath = RepGetRepPath();
+  snprintf(Cmd,sizeof(Cmd)-1,Rcmd,"%s/engine-shell fosscp_agent '%s/fosscp_agent'");
+  fprintf(Fout,Cmd,BINDIR,BINDIR);
+  fprintf(Fout,"\n");
+  free(RepPath);
+
   /* all done */
   fprintf(Fout,"\n");
   return(rc);
