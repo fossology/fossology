@@ -265,7 +265,8 @@ class core_auth extends FO_Plugin
     /* Need to refresh the screen */
     $V .= "<script language='javascript'>\n";
     $V .= "alert('User Logged In')\n";
-    $Uri = Traceback_uri();
+    $Uri = GetParm("redirect",PARM_TEXT);
+    if (empty($Uri)) { $Uri = Traceback_uri(); }
     $V .= "window.open('$Uri','_top');\n";
     $V .= "</script>\n";
     return($V);
@@ -330,6 +331,11 @@ class core_auth extends FO_Plugin
 	  	$V .= "Username: <input type='text' size=20 name='username'><P>\n";
 	  	$V .= "Password: <input type='password' size=20 name='password'><P>\n";
 	  	$V .= "<input type='checkbox' name='checkip' value='1'>Validate IP.\n";
+		$Referer = @$_SERVER['HTTP_REFERER'];
+		if (!empty($Referer))
+	  	  {
+		  $V .= "<input type='hidden' name='redirect' value='$Referer'>";
+		  }
 		$V .= "This option deters session hijacking by linking your session to your IP address (" . @$_SESSION['ip'] . "). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.<P />\n";
 	  	$V .= "<input type='submit' value='Login'>\n";
 	  	$V .= "</form>\n";
