@@ -270,6 +270,10 @@ class core_auth extends FO_Plugin
        server's Traceback_uri().  (Ignore hostname.) */
     $Redirect = preg_replace("@^[^/]*//[^/]*@","",GetParm("redirect",PARM_TEXT));
     $Uri = Traceback_uri();
+    if (preg_match("/[?&]mod=Default/",$Redirect))
+	  {
+	  $Redirect = ""; /* don't reference myself! */
+	  }
     if (empty($Redirect) || strncmp($Redirect,$Uri,strlen($Uri))) { $Uri = Traceback_uri(); }
     else { $Uri = $Redirect; }
 
