@@ -45,6 +45,7 @@ class ui_view extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
+    menu_insert("Browse-Pfile::View",10,$this->Name);
     // For the Browse menu, permit switching between detail and summary.
     $Format = GetParm("format",PARM_STRING);
     $Page = GetParm("page",PARM_INTEGER);

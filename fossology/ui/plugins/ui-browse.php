@@ -82,11 +82,9 @@ class ui_browse extends FO_Plugin
     $V="";
     global $DB;
     /* Use plugin "view" and "download" if they exist. */
-    $ModView = &$Plugins[plugin_find_id("view")]; /* may be null */
-    $ModViewMeta = &$Plugins[plugin_find_id("view_meta")]; /* may be null */
-    $ModDownload = &$Plugins[plugin_find_id("download")]; /* may be null */
-    $ModLicense = &$Plugins[plugin_find_id("license")]; /* may be null */
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
+    $MenuPfile = menu_find("Browse-Pfile",$MenuDepth);
+    $MenuUfile = menu_find("Browse-Ufile",$MenuDepth);
 
     /* Grab the directory */
     $Results = DirGetList($Upload,$Item);
@@ -97,22 +95,17 @@ class ui_browse extends FO_Plugin
       {
       if (empty($Row['uploadtree_pk'])) { continue; }
       $ShowSomething=1;
-      $View = NULL;
-      $Download = NULL;
       $Link = NULL;
-      $Meta = NULL;
       $Name = $Row['ufile_name'];
       $V .= "<tr>";
 
       /* Check for children */
       $Children = DirGetList($Upload,$Row['uploadtree_pk']);
 
+      $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $Row['ufile_pk'];
       if (!empty($Row['pfile_fk']))
 	{
-	$View = Traceback_uri() . "?mod=view&upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
-	$Meta = Traceback_uri() . "?mod=view_meta&upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
-	$Download = Traceback_uri() . "?mod=download&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
-	$License = Traceback_uri() . "?mod=license&ufile=" . $Row['ufile_pk'] . "&pfile=" . $Row['pfile_fk'];
+	$Parm .= "&pfile=" . $Row['pfile_fk'];
 	}
 
       /* Scan for meta data */
@@ -162,26 +155,14 @@ class ui_browse extends FO_Plugin
       if (!empty($Link)) { $V .= "</a>"; }
       if (Iscontainer($Row['ufile_mode'])) { $V .= "</b>"; }
       $V .= "</td>\n";
-      $V .= "<td>";
-      if (!empty($ModView) && !empty($View)) { $V .= "[<a href='$View'>View</a>] "; }
-      $V .= "</td><td>";
-      if (!empty($ModViewMeta) && !empty($Meta)) { $V .= "[<a href='$Meta'>Meta</a>] "; }
-      $V .= "</td><td>";
-      if (!empty($ModDownload) && !empty($Download)) { $V .= "[<a href='$Download'>Download</a>] "; }
-
-if (0) {
-      /* Code disabled due to speed on really large files */
-      $V .= "</td><td>";
-      if (!empty($ModLicense) && !empty($Row['pfile_fk']))
+      if (Isdir($Row['ufile_mode']))
 	{
-	$Lic = LicenseGetAll($Row['uploadtree_pk']);
-	$i = count($Lic);
-	if ($i > 0)
-	  {
-	  $V .= "[<a href='$License'>$i&nbsp;license" . ($i == 1 ? "" : "s") . "</a>] ";
-	  }
+	$V .= menu_to_1list($MenuUfile,$Parm,"<td>","</td>\n");
 	}
-}
+      else
+	{
+	$V .= menu_to_1list($MenuPfile,$Parm,"<td>","</td>\n");
+	}
 
       $V .= "</td>";
       } /* foreach($Results as $Row) */
@@ -279,7 +260,6 @@ if (0) {
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     global $Plugins;
     global $DB;
-    $ModLicense = &$Plugins[plugin_find_id("license")]; /* may be null */
 
     switch(GetParm("show",PARM_STRING))
 	{
