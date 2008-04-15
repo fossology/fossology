@@ -34,6 +34,14 @@ class ui_download extends FO_Plugin
   var $NoHeader   = 1;
 
   /***********************************************************
+   RegisterMenus(): Customize submenus.
+   ***********************************************************/
+  function RegisterMenus()
+    {
+    menu_insert("Browse-Pfile::Download",0,$this->Name);
+    } // RegisterMenus()
+
+  /***********************************************************
    OutputOpen(): This function is called when user output is
    requested.  This function is responsible for assigning headers.
    The type of output depends on the metatype for the pfile.

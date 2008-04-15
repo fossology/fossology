@@ -255,12 +255,6 @@ function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
       {
       if ($Val->Name == "[BREAK]")
 	{
-	if (0 && !empty($Std))
-		{
-		if (!$First) { $V .= " | "; }
-		$V .= $Std;
-		$Std=NULL;
-		}
 	if (!$First) { $V .= " &nbsp;&nbsp;&bull;&nbsp;&nbsp; "; }
 	$First=1;
 	}
@@ -294,6 +288,47 @@ function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
 	}
   return("<div align='right' style='padding:0px 5px 0px 5px'><small>$V</small></div>");
 } // menu_to_1html()
+
+/***********************************************
+ menu_to_1list(): Take a menu and render it as
+ one HTML line with items in a "[name]" list.
+ This ignores submenus!
+ $Parm is a list of parameters to add to the URL.
+ If $ShowAll==0, then items without hyperlinks are hidden.
+ ***********************************************/
+function menu_to_1list(&$Menu,&$Parm,$Pre="",$Post="",$ShowAll=1)
+{
+  $V = "";
+  $Std = "";
+
+  if (!empty($Menu))
+    {
+    foreach($Menu as $Val)
+      {
+      if (!empty($Val->HTML))
+	{
+	$V .= $Pre;
+	$V .= $Val->HTML;
+	$V .= $Post;
+	}
+      else if (!empty($Val->URI))
+	{
+	$V .= $Pre;
+	$V .= "[<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "&" . $Parm . "'>";
+	$V .= $Val->Name;
+	$V .= "</a>]";
+	$V .= $Post;
+	}
+      else if ($ShowAll)
+	{
+	$V .= $Pre;
+	$V .= "[" . $Val->Name . "]";
+	$V .= $Post;
+	}
+      }
+    }
+  return($V);
+} // menu_to_1list()
 
 /***********************************************
  menu_print(): Debugging code for printing the menu.

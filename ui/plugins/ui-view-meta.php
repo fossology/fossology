@@ -38,6 +38,7 @@ class ui_view_meta extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
+    menu_insert("Browse-Pfile::Meta",5,$this->Name);
     // For the Browse menu, permit switching between detail and summary.
     $Parm = Traceback_parm_keep(array("upload","item","ufile","pfile","format"));
     $URI = $this->Name . $Parm;
