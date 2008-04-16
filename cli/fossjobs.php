@@ -78,9 +78,11 @@ $usage = basename($argv[0]) . " [options]
   -v        :: verbose output
   -a        :: list available agent tasks
   -A string :: specify agent to schedule (default is everything from -a)
-               The string can be a comma-separated list of agent tasks.
+	       The string can be a comma-separated list of agent tasks.
   -u        :: list available upload ids
-  -U upload :: the upload identifier to for scheduling agent tasks
+  -U upload :: the upload identifier for scheduling agent tasks
+	       The string can be a comma-separated list of upload ids.
+	       Or, use 'ALL' to specify all upload ids.
   -P num    :: priority for the jobs (higher = more important, default:0)
 ";
 
@@ -187,35 +189,53 @@ if (array_key_exists("u",$options))
       $Label .= " (" . $Results[$i]['upload_desc'] . ')';
       }
     print $Results[$i]['upload_pk'] . ": $Label\n";
+    if ($i==0) { $AllUploadPk = $Results[$i]['upload_pk']; }
+    else { $AllUploadPk .= "," . $Results[$i]['upload_pk']; }
     }
   }
 
-$upload_pk = $options['U'];
-if (!empty($upload_pk))
+$upload_pk_list = $options['U'];
+if ($upload_pk_list == 'ALL')
+  {
+  $upload_pk_list = "";
+  $SQL = "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;";
+  $Results = $DB->Action($SQL);
+  for($i=0; !empty($Results[$i]['upload_pk']); $i++)
+    {
+    if ($i==0) { $upload_pk_list = $Results[$i]['upload_pk']; }
+    else { $upload_pk_list .= "," . $Results[$i]['upload_pk']; }
+    }
+  }
+
+if (!empty($upload_pk_list))
   {
   $reg_agents = array();
   $results    = array();
   // Schedule them
   $agent_count = count($agent_list);
-  for ($ac=0; $ac<$agent_count; $ac++)
+  foreach(split(",",$upload_pk_list) as $upload_pk)
     {
-    $agentname = $agent_list[$ac]->URI;
-    if (!empty($agentname))
+    if (empty($upload_pk)) { continue; }
+    for ($ac=0; $ac<$agent_count; $ac++)
       {
-      $Agent = &$Plugins[plugin_find_id($agentname)];
-      $results = $Agent->AgentAdd($upload_pk,NULL,$Priority);
-      if (!empty($results))
-        {
-        echo "ERROR: Scheduling failed for Agent $agentname\n";
-        echo "ERROR message: $results\n";
-        exit(1);
-        }
-      else if ($Verbose)
-        {
-	print "Scheduled: $upload_pk -> $agentname\n";
+      $agentname = $agent_list[$ac]->URI;
+      if (!empty($agentname))
+	{
+	$Agent = &$Plugins[plugin_find_id($agentname)];
+	$results = $Agent->AgentAdd($upload_pk,NULL,$Priority);
+	if (!empty($results))
+	  {
+	  echo "ERROR: Scheduling failed for Agent $agentname\n";
+	  echo "ERROR message: $results\n";
+	  exit(1);
+	  }
+	else if ($Verbose)
+	  {
+	  print "Scheduled: $upload_pk -> $agentname\n";
+	  }
 	}
-      }
-    }
+      } /* for $ac */
+    } /* for each $upload_pk */
   } // if $upload_pk is defined
 exit(0);
 ?>
