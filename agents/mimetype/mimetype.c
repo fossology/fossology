@@ -393,7 +393,7 @@ void	DBCheckMime	(char *Filename)
   if (MimeTypeID < 0)
 	{
 	/* This should never happen; give it a default. */
-	MimeTypeID = DBFindMime("application/octet-string");
+	MimeTypeID = DBFindMime("application/octet-stream");
 	}
 
   /* Update pfile record */
