@@ -83,9 +83,10 @@ class admin_db_cleanup extends FO_Plugin
 //	$Checks[$i]['sql']   = "FROM attrib WHERE pfile_fk IN (SELECT pfile_pk FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile));";
 //	$i++;
 
-	$Checks[$i]['tag']   = "unreferenced_pfiles";
-	$Checks[$i]['label'] = "Unreferenced pfiles";
-	$Checks[$i]['sql']   = "FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile);";
+//  Bobg Apr 17, 2008  This is a hugely expensive query for large numbers (25M) ufiles.  Removing for now.
+//	$Checks[$i]['tag']   = "unreferenced_pfiles";
+//	$Checks[$i]['label'] = "Unreferenced pfiles";
+//	$Checks[$i]['sql']   = "FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile);";
 	$i++;
 	$Checks[$i]['tag']   = "bad_upload_pfile";
 	$Checks[$i]['label'] = "Uploads missing pfiles";
