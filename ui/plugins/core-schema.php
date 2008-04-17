@@ -136,17 +136,17 @@ LANGUAGE plpgsql;
     // system("$AGENTDIR/scheduler -i");
     // print "Testing the scheduler\n";
     // system("$AGENTDIR/scheduler -t");
-    } // Install()
 
-/*********************************  release 0.7.0  ********************************/
+    /***************************  release 0.7.0  ********************************/
 
     /*********************************************************************/
     /* Add attrib table indexes.  These are heavily used by pkgmetagetta */
     /*********************************************************************/
     $DB->Action("CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk)");
     $DB->Action("CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk)");
+    } // Install()
 
-  };
+  }; // class core_schema
 
 $NewPlugin = new core_schema;
 $NewPlugin->Initialize();
