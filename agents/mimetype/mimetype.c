@@ -49,6 +49,7 @@
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif
 
+int Verbose=0;
 #define MAXCMD	256
 char SQL[MAXCMD];
 
@@ -99,15 +100,15 @@ int     ReadLine (FILE *Fin, char *Line, int MaxLine)
   while(!feof(Fin) && (C>=0) && (i<MaxLine))
     {
     if (C=='\n')
-        {
-        if (i > 0) return(i);
-        /* if it is a blank line, then ignore it. */
-        }
+	{
+	if (i > 0) return(i);
+	/* if it is a blank line, then ignore it. */
+	}
     else
-        {
-        Line[i]=C;
-        i++;
-        }
+	{
+	Line[i]=C;
+	i++;
+	}
     C=fgetc(Fin);
     }
   return(i);
@@ -201,6 +202,7 @@ int	CheckMimeTypes	(char *Ext)
   if (!Ext || (Ext[0] == '\0')) return(-1);
   ExtLen = strlen(Ext);
   rewind(FMimetype);
+  if (Verbose > 1) printf("DEBUG: Looking for mimetype based on extension: '%s'\n",Ext);
 
   while(ReadLine(FMimetype,Line,MAXCMD) > 0)
     {
@@ -229,6 +231,7 @@ int	CheckMimeTypes	(char *Ext)
 	   )
 		{
 		/* it matched! */
+		if (Verbose) printf("DEBUG: Found mimetype by extension: '%s' = '%s'\n",Ext,Line);
 		return(DBFindMime(Line));	/* return metatype id */
 		}
 	}
@@ -272,11 +275,11 @@ int	DBCheckFileExtention	()
       {
       Ext = strrchr(DBgetvalue(DB,u,0),'.'); /* find the extention */
       if (Ext)
-        {
-        Ext++; /* move past period */
-        rc = CheckMimeTypes(Ext);
-        if (rc >= 0) return(rc);
-        }
+	{
+	Ext++; /* move past period */
+	rc = CheckMimeTypes(Ext);
+	if (rc >= 0) return(rc);
+	}
       }
     } /* if using DB */
   else
@@ -364,19 +367,21 @@ void	DBCheckMime	(char *Filename)
   memset(MimeType,'\0',MAXCMD);
   if (MagicType)
       {
+      if (Verbose) printf("DEBUG: Found mimetype by magic: '%s'\n",MagicType);
       /* Magic contains additional data after a ';' */
       for(i=0;
 	  (i<MAXCMD) && (MagicType[i] != '\0') &&
-	  !isspace(MagicType[i]) && (MagicType[i] != ';');
+	  !isspace(MagicType[i]) && !strchr(",;",MagicType[i]);
 	  i++)
 	{
 	MimeType[i] = MagicType[i];
 	}
+      if (!strchr(MimeType,'/')) { memset(MimeType,'\0',MAXCMD); }
       }
 
   /* If there is no mimetype, or there is one but it is a default value,
      then determine based on extension */
-  if (!strcmp(MimeType,"text/plain") || !strcmp(MimeType,"application/octet-stream"))
+  if (!strcmp(MimeType,"text/plain") || !strcmp(MimeType,"application/octet-stream") || (MimeType[0]=='\0'))
 	{
 	/* unknown type... Guess based on file extention */
 	MimeTypeID = DBCheckFileExtention();
@@ -414,6 +419,19 @@ void	DBCheckMime	(char *Filename)
       }
     DBaccess(DB,"COMMIT;");
     }
+  else
+    {
+    /* IF no Akey, then display to stdout */
+    int i;
+    for(i=0; i < MaxDBMime; i++)
+      {
+      if (MimeTypeID == atoi(DBgetvalue(DBMime,i,0)))
+	{
+	printf("%s : mimetype_pk=%d : ",DBgetvalue(DBMime,i,1),MimeTypeID);
+	}
+      }
+    printf("%s\n",Filename);
+    }
 } /* DBCheckMime() */
 
 /**********************************************
@@ -423,7 +441,7 @@ void	DBCheckMime	(char *Filename)
  NULL at \0.
  **********************************************/
 char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
-                         char *Value, int ValueMax)
+			 char *Value, int ValueMax)
 {
   int s,f,v;
   int GotQuote;
@@ -556,8 +574,9 @@ void	GetAgentKey	()
  ***********************************************/
 void	Usage	(char *Name)
 {
-  printf("Usage: %s [-i] [file [file [...]]\n",Name);
+  printf("Usage: %s [options] [file [file [...]]\n",Name);
   printf("  -i   :: initialize the database, then exit.\n");
+  printf("  -v   :: verbose (-vv = more verbose)\n");
   printf("  file :: if files are listed, display their mimetype.\n");
   printf("  no file :: process data from the scheduler.\n");
 } /* Usage() */
@@ -603,13 +622,16 @@ int	main	(int argc, char *argv[])
 	}
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"i")) != -1)
+  while((c = getopt(argc,argv,"iv")) != -1)
     {
     switch(c)
 	{
 	case 'i':
 		DBclose(DB);
 		return(0);
+	case 'v':
+		Verbose++;
+		break;
 	default:
 		Usage(argv[0]);
 		DBclose(DB);
