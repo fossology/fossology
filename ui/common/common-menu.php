@@ -50,11 +50,11 @@ $MenuMaxDepth=0;	// how deep is the tree (for UI display)
  This function assumes the end number is unknown.  (Hence, "endless".)
  Returns string containing menu.
  ***********************************************************/
-function MenuEndlessPage      ($Page,$Next=1)
+function MenuEndlessPage      ($Page,$Next=1,$Uri='')
   {
   $V = "<font class='text'><center>";
-  $Uri = preg_replace("/&page=[^&]*/","",Traceback());
-  $Uri .= "&filename=" . GetParm("filename",PARM_STRING);
+  if (empty($Uri)) { $Uri = Traceback(); }
+  $Uri = preg_replace("/&page=[^&]*/","",$Uri);
 
   /* Create first page */
   if ($Page > 0)

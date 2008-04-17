@@ -56,10 +56,13 @@ class search_repo extends FO_Plugin
 	ORDER BY pfile_fk,ufile_pk LIMIT $Max OFFSET $Offset
 	;";
     $Results = $DB->Action($SQL);
+    $Count = count($Results);
     $V = "";
     if (($Page > 0) || ($Count >= $Max))
 	{
-	$VM = MenuEndlessPage($Page, ($Count >= $Max)) . "<P />\n";
+	$Uri = Traceback_uri() . "?mod=" . $this->Name;
+	$Uri .= "&search=" . urlencode(GetParm("search",PARM_STRING));
+	$VM = MenuEndlessPage($Page, ($Count >= $Max), $Uri) . "<P />\n";
 	$V .= $VM;
 	}
     else

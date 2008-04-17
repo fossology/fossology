@@ -59,7 +59,9 @@ class search_file extends FO_Plugin
 
     if (($Page > 0) || ($Count >= $Max))
       {
-      $VM = MenuEndlessPage($Page, ($Count >= $Max)) . "<P />\n";
+      $Uri = Traceback_uri() . "?mod=" . $this->Name;
+      $Uri .= "&filename=" . urlencode($Filename);
+      $VM = MenuEndlessPage($Page, ($Count >= $Max),$Uri) . "<P />\n";
       $V .= $VM;
       }
     else
