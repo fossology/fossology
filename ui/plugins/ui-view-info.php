@@ -99,6 +99,7 @@ class ui_view_info extends FO_Plugin
       $V .= "<tr><td align='center'>File Size</td><td align='right'>$Bytes $BytesH</td></tr>\n";
       $V .= "<tr><td align='center'>SHA1 Checksum</td><td align='right'>" . $R['pfile_sha1'] . "</td></tr>\n";
       $V .= "<tr><td align='center'>MD5 Checksum</td><td align='right'>" . $R['pfile_md5'] . "</td></tr>\n";
+      $V .= "<tr><td align='center'>Repository ID</td><td align='right'>" . $R['pfile_sha1'] . "." . $R['pfile_md5'] . "." . $R['pfile_size'] . "</td></tr>\n";
       $V .= "</table>\n";
       }
 
