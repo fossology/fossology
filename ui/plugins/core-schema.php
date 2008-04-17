@@ -163,7 +163,7 @@ LANGUAGE plpgsql;
       $BadPfile = $DB->Action("SELECT * FROM pfile WHERE pfile_mimetypefk IN ($CheckMime);");
       print "Due to a previous bug (now fixed), " . number_format(count($BadPfile),0,"",",") . " files are associated with " . number_format(count($BadMime),0,"",",") . " bad mimetypes.  Fixing now.\n";
       $DB->Action("UPDATE pfile SET pfile_mimetypefk = NULL WHERE pfile_mimetypefk IN ($CheckMime);");
-      $DB->Action("DELETE FROM mimetype WHERE mimetype_name LIKE '%,%' OR mimetype_name NOT LIKE '%/%'  mimetype_name = 'application/octet-string';");
+      $DB->Action("DELETE FROM mimetype WHERE mimetype_name LIKE '%,%' OR mimetype_name NOT LIKE '%/%' OR mimetype_name = 'application/octet-string';");
       $DB->Action("VACUUM ANALYZE mimetype;");
       /* Reset all mimetype analysis -- the ones that are done will be skipped.
          The ones that are not done will be re-done. */
