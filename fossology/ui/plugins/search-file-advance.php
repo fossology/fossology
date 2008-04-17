@@ -77,13 +77,20 @@ class search_file_advance extends FO_Plugin
     $Offset = $Page * $Max;
     $SQL .= " ORDER BY pfile_fk,ufile_pk LIMIT $Max OFFSET $Offset;";
     $Results = $DB->Action($SQL);
+
     $V = "";
     $Count = count($Results);
     // $V .= "<pre>" . htmlentities($SQL) . "</pre>\n";
 
     if (($Page > 0) || ($Count >= $Max))
       {
-      $VM = MenuEndlessPage($Page, ($Count >= $Max)) . "<P />\n";
+      $Uri = Traceback_uri() . "?mod=" . $this->Name;
+      $Uri .= "&filename=" . urlencode($Filename);
+      $Uri .= "&sizemin=$SizeMin";
+      $Uri .= "&sizemax=$SizeMax";
+      $Uri .= "&notmimetype=$MimetypeNot";
+      $Uri .= "&mimetype=$Mimetype";
+      $VM = MenuEndlessPage($Page, ($Count >= $Max),$Uri) . "<P />\n";
       $V .= $VM;
       }
     else
@@ -96,6 +103,14 @@ class search_file_advance extends FO_Plugin
 	$V .= "No results.\n";
 	return($V);
 	}
+
+    if ($Page==0)
+      {
+      $SQL = preg_replace('/\*/','COUNT(*) AS count',$SQL,1);
+      $SQL = preg_replace('/ ORDER BY .*;/',';',$SQL);
+      $Count = $DB->Action($SQL);
+      $V .= "Total matched: " . number_format($Count[0]['count'],0,"",",") . "<br>\n";
+      }
 
     $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
 
