@@ -144,6 +144,36 @@ LANGUAGE plpgsql;
     /*********************************************************************/
     $DB->Action("CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk)");
     $DB->Action("CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk)");
+
+    /***************************  after 0.7.0  ********************************/
+
+    /* The mimetype agent had a bug where some mimetypes contain
+       commas or are missing the meta format ("class/type").
+       This happens because magic() lies -- sometimes it returns
+       strings that are not in the meta format, even when the meta
+       format is specified.
+       Also, there was a typo "octet/string" should be "octet/stream".
+       Check for these errors and fix these now.
+     */
+    $CheckMime = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name LIKE '%,%' OR mimetype_name NOT LIKE '%/%' OR mimetype_name = 'octet/string'";
+    $BadMime = $DB->Action($CheckMime);
+    if (count($BadMime) > 0)
+      {
+      $BadPfile = $DB->Action("SELECT * FROM pfile WHERE pfile_mimetypefk IN ($CheckMime);");
+      print "Due to a previous bug (now fixed), " . number_format(count($BadPfile),0,"",",") . " files are associated with " . number_format(count($BadMime),0,"",",") . " bad mimetypes.  Fixing now.\n";
+      $DB->Action("UPDATE pfile SET pfile_mimetypefk = NULL WHERE pfile_mimetypefk IN ($CheckMime);");
+      $DB->Action("DELETE FROM mimetype WHERE mimetype_name LIKE '%,%' OR mimetype_name NOT LIKE '%/%'  mimetype_name = 'octet/string';");
+      $DB->Action("VACUUM ANALYZE mimetype;");
+      /* Reset all mimetype analysis -- the ones that are done will be skipped.
+         The ones that are not done will be re-done. */
+      if (count($BadPfile) > 0)
+        {
+        print "  Rescheduling all mimetype analysis jobs.\n";
+        print "  (The ones that are completed will be quickly closed with no additional work.\n";
+        print "  Only the files that need to be re-scanned will be re-scanned.)\n";
+        $DB->Action("UPDATE jobqueue SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0 WHERE jq_type = 'mimetype';");
+	}
+      }
     } // Install()
 
   }; // class core_schema
