@@ -119,7 +119,20 @@ class db_access extends FO_Plugin
     else { $this->_pg_rows = pg_affected_rows($result); }
 
     if (!isset($result)) return;
-    @$rows = pg_fetch_all($result);
+    if ($this->Debug > 2)
+      {
+      $rows = array();
+      while ($r = pg_fetch_array($result))
+	{
+	print "Row: " . count($rows) . "\n";
+	$rows[] = $r;
+	}
+      }
+    else
+      {
+      @$rows = pg_fetch_all($result);
+      }
+
     if (!is_array($rows)) $rows = array();
     @pg_free_result($result);
     return $rows;
