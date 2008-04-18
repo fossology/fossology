@@ -1,0 +1,21 @@
+#!/bin/bash
+# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+
+if [ -f License.bsam.new ] ; then
+  rm License.bsam.new
+fi
+
+# Create cached files
+(
+cd Raw
+find . -type f | sed -e 's@^./@@' | grep -v svn | grep -v meta | sort | while read i ; do
+  echo "Processing $i"
+  ../../Filter_License/Filter_License -O "$i" >> ../License.bsam.new
+done
+)
+
+# Merge them
+if [ -f License.bsam.new ] ; then
+  mv License.bsam.new License.bsam
+fi
+

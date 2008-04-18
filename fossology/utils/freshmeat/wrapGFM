@@ -1,0 +1,10 @@
+#!/bin/bash
+#
+# Stupid wrapper so cron run is easier
+#
+thisrun=`date +"%Y-%m-%d"`
+#
+/usr/local/bin/GetFM > /srv/fossology/repository/firenze/Freshmeat/Run-logs/GetFM.log-$thisrun 2>&1
+
+exit 0
+
