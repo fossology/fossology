@@ -1,0 +1,163 @@
+#!/usr/bin/php -f
+<?php
+/***********************************************************
+ osrbjob
+ Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+***********************************************************/
+ini_set('include_path', '.:/usr/local/lib/ossdb/php');
+require_once("../php/jobs.h.php");
+
+function runable($type) {
+    $result = jobquery('',
+			"jobqueue.jq_type = '$type' AND %ready IS TRUE",
+    			'ORDER BY job.job_priority DESC LIMIT 1');
+    return $result[0];
+}
+
+function claim($jobtype, $claiminfo="")
+{
+    $jrec = runable($jobtype);
+
+    if (is_array($jrec) && $jrec['jq_pk']) {
+	// claim job
+	if (!empty($claiminfo))
+	    // XXX Note there is a race condition -- the schedinfo
+	    // should be read back and compared following the UPDATE
+	    // to assure this agent really got the claim
+	    db_query("UPDATE jobqueue SET jq_starttime = NOW(),
+			    jq_schedinfo = '"
+				. pg_escape_string($claiminfo) . "'
+			    WHERE jq_pk = {$jrec['jq_pk']}");
+	// encode/print args for caller
+	foreach ($jrec as $n => $v) {
+	    echo "$n=", escapeshellarg($v), "\n";
+	}
+	return 0;
+    } else {
+	return 3;
+    }
+}
+
+function query($jq_pk, $sql="", $argfmt=0)
+{
+    $exit = 3;
+
+    if (empty($sql))
+	$sql = db_query1("SELECT jq_args FROM jobqueue WHERE jq_pk = $jq_pk");
+    $result = db_query($sql);
+
+    while ($row = pg_fetch_array($result, $x, PGSQL_ASSOC)) {
+	switch ($argfmt) {
+	    case 0:
+		// XXX for now, NO QUOTING
+		$tab = "";
+		foreach ($row as $n => $v) {
+		    echo "$tab$v";
+		    $tab = "\t";
+		}
+		echo "\n";
+		break;
+	    case 1:
+		foreach ($row as $n => $v) {
+		    echo "ARG_$n=", escapeshellarg($v), "\n";
+		}
+		break;
+	}
+	$exit = 0;
+    }
+
+    pg_free_result($result);
+    return $exit;
+}
+
+function dbstdin()
+{
+    while (!feof(STDIN)) {
+        $sql = trim(fgets(STDIN, 1024*8));
+	// echo "DB: $sql\n";
+	$result = db_queryx($sql);
+	if ($result) pg_free_result($result);
+    }
+}
+
+db_init();
+
+list($progname, $action, $a1, $a2, $a3, $a4) = $argv;
+switch ($action)
+{
+case 'list':
+    exit (claim($a1, ""));
+    break;
+case 'claim':
+    exit (claim($a1, $a2));
+    break;
+case 'query':
+    if (empty($a1)) die ("empty jq_pk\n");
+    exit (query($a1, $a2));
+    break;
+case 'query1':
+    if (empty($a1)) die ("empty jq_pk\n");
+    exit (query($a1, $a2, 1));
+    break;
+case 'finish': // finish jq_pk endbits endtext
+    if (empty($a1)) die ("empty jq_pk\n");
+    db_query("UPDATE jobqueue SET
+    	jq_endtime = NOW(),
+	jq_end_bits = $a2,
+	jq_endtext = '$a3',
+	jq_endurl = '$a4'
+	WHERE jq_pk = $a1");
+    exit (0);
+case 'continue': // continue jq_pk
+    if (empty($a1)) die ("empty jq_pk\n");
+    db_query("UPDATE jobqueue SET
+    		jq_starttime = NULL,
+		jq_endtime = NULL,
+		jq_end_bits = 0
+		WHERE jq_pk = $a1");
+    exit (0);
+case 'db': // read stdin for DB commands until EOF
+    dbstdin();
+    exit (0);
+default:
+    echo "Usage: {$argv[0]} <command> <args>
+    list	job-type
+	Show the next job of the given type which is ready to run.
+    claim	job-type agent-data
+	Claim the next job of the given type which is ready to run,
+	placing agent-data into the jq_schedinfo column.
+    query	jq_pk [sql]
+	Run the SQL associated with jq_pk returning it one record per line
+	with fields separated by tabs.  If 'sql' is specified, ignore
+	jq_pk and run the given sql instead, formatted as specified above.
+    progress	jq_pk progress [length]
+	unimplemented... Intended to set the jq_progress and jq_length
+	fields in the job queue.
+    finish	jq_pk endbits endtext endurl
+	Mark jq_pk as finished, placing the end* fields in their
+	respective locations in the job queue.
+    continue	jq_pk
+	Make jq_pk ready to run (if its dependencies are also satisfied).
+    dbstdin
+	Execute SQL queries from standard input, one per line.  Nothing
+	is printed pertaining to these queries.  The queries may fail
+	with no harmful effect (for example duplicate INSERT statements).
+	This is intended for bulk SQL produced as an agent runs.
+";
+    exit (2);
+}
+
+?>
