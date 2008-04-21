@@ -15,7 +15,8 @@ LIBFILES=lib_projxml.h.php
 BINFILES="GetFM diffm.php get-projects.php mktop1k.php wrapGFM"
 MAN1SRC=
 MAN1FILES=
-fmPATHFILE=fm-paths.h.php
+fmPATHFILE=fm-paths.php
+FMDir=FMDir
 
 all: $(fmPATHFILE) MANpages
 
@@ -28,6 +29,7 @@ $(fmPATHFILE): ../Makefile.utils
 	@echo "\$$MAN1DIR=\"$(MAN1DIR)\";" >> $(fmPATHFILE)
 	@echo "\$$PROJECT=\"$(PROJECT)\";" >> $(fmPATHFILE)
 	@echo "\$$FMDIR=\"$(FMDIR)\";" >> $(fmPATHFILE)
+	@echo "\$$FMDIR=\"$(FMDIR)\"" >> $(FMDir)
 	@echo "\$$PATH=\"\$$LIBEXECDIR:\$$PATH:/usr/bin\";" >> $(fmPATHFILE)
 	@echo "?>" >> $(fmPATHFILE)
 
@@ -53,6 +55,8 @@ InstallationCreate:
 	$(CP) $(LIBFILES) ../../install/$(LIBDIR)
 #	$(CP) $(MAN1FILES) ../../install/$(MAN1DIR)
 	$(CP) $(fmPATHFILE) ../../install/$(INCLUDEDIR)
+	@echo "copy FMDir to the include dir";
+	$(CP) $(FMDir) ../../install/$(INCLUDEDIR)
 	
 install: all InstallationCreate
 	for file in ${BINFILES}; do \
@@ -67,13 +71,16 @@ install: all InstallationCreate
 	$(CP) $(LIBFILES) $(LIBDIR)
 #	$(CP) $(MAN1FILES) $(MAN1DIR)
 	$(CP) $(fmPATHFILE) $(INCLUDEDIR)
+	$(CP) $(FMDir) $(INCLUDEDIR)
 	
 uninstall:
 	(cd $(BINDIR) ;     $(RM) $(BINFILES))
 	(cd $(LIBDIR) ;     $(RM) $(LIBFILES))
 #	(cd $(MAN1FILES);   $(RM) $(MAN1DIR))
 	(cd $(INCLUDEDIR) ; $(RM) $(fmPATHFILE))
+	(cd $(INCLUDEDIR) ; $(RM) $(FMDir))
 
 clean:
 	$(RM) $(fmPATHFILE)
+	$(RM) $(FMDir)	
 
