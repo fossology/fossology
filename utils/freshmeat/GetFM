@@ -1,25 +1,47 @@
 #!/bin/bash
+# /***********************************************************
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# ***********************************************************/
+#
 # Script to get latest FreshMeat RDF file and drive updating the DB
 #
 # Author: mark.donohoe@hp.com
+#
 # Version: $Id$
 
-# TODO: need to source a file with the correct paths, not hard code them.
-# 
 Date=`date +"%Y-%m-%d"`
+
 # Constants
 #
-# put known filenames etc....
 URL="http://freshmeat.net/backend/fm-projects.rdf.bz2"
+#
+# The line below assumes that fossology has been installed.  Edit it
+# if you need to.  FMDir is created by the makefile and should contain
+# the path to the storage area the process will use (should be at least
+# 66GB, better is 100GB).  The path will be in the variable $FMDIR.
 
-#DIR="/srv/fossology/repository/happy/Freshmeat/Rdfs/"
-DIR="/srv/fossology/repository/firenze/Freshmeat/"
+. /usr/local/include/FMDir
+
+DIR=$FMDIR
 RDIR="${DIR}Rdfs/"
 Wget_Log="${RDIR}wget.log"
 INPUTFILES="${DIR}Input-Files/"
 RLOGS="${DIR}Run-logs/"
 GOLDEN="${DIR}golden.${Date}/Input-files/"
-# is the mkdir needed?  ReadMe says to precreate....
+# make the other directories needed.
 mkdir -p $RLOGS
 mkdir -p $INPUTFILES
 if [ ! -d $RDIR ]
@@ -31,14 +53,20 @@ fi
 Compressed_file="fm-projects.rdf-${Date}.bz2"
 Uncompressed_file="fm-projects.rdf-${Date}"
 
-# Programs, where on the system shall these be? I think in /usr/local/bin....
+# freshmeat programs usually are in /usr/local/bin....
 # Set the path to find them
+
 export PATH=$PATH:/usr/local/bin:/usr/local/lib
 
-# We need to explicitly export the proxy since crontab does not include
-# the shell
-export http_proxy="http://web-proxy.fc.hp.com:8088"
-#
+########################################################################
+# If you need to export a proxy, this is a good place to do it.
+# Edit the line below and uncomment it (remove the '#')
+########################################################################
+# Explicitly export the proxy since crontab does not include
+# the shell environment
+
+#export http_proxy="http://some-proxy.com:8080"
+
 # get the daily rdf file
 echo "will do:"
 echo "wget -o $Wget_Log -O $RDIR$Compressed_file $URL"
@@ -86,10 +114,10 @@ echo "diffm $current $previous -o $INPUTFILES"
 echo
 diffm -f "$current" "$previous" -o "$INPUTFILES" > "${RLOGS}log.diffm.${Date}"
 drtn=$?
-#echo "diffm returned the following:$drtn"
 #
 # replace previous rdf with current for the next run.
 # May want to make a function cause you might want to clean up old rdf's and top1k's.....
+
 current=`cat "${RDIR}Current-top1k"`
 echo $current > ${RDIR}Previous-top1k
 
