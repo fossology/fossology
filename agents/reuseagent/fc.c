@@ -21,15 +21,24 @@
  *********************************************************************/
 
 #include <stdlib.h>
-#include <stdio.h>
+#  include <stdio.h>
 #include <unistd.h>
-#    include <ctype.h>
+#	include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
-#  include <sys/stat.h>
+#include <sys/stat.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 
+/****************************************************
+ TBD:
+ - Identify functions in ProcessFunctions.
+ - Rewind the file (move Mmap pointer) so I can tokenize
+   and output the bsam cache file.
+ - Build a tokenizer and write to bsam cache file.
+ - Make a switch from C to Java.
+ - Make a parser for object code.
+ ****************************************************/
 
 /*** Globals ***/
 int Verbose=0;
@@ -39,7 +48,7 @@ unsigned char * Mmap = NULL; /* mmap */
 int MmapSize=0; /* size of mmap */
 
 /*** Globals for generic values ***/
-char *KeywordGeneric[] = {"COMMENT","NUMBER","STRING","CHAR","VAR","PARM",NULL};
+char *KeywordGeneric[] = {"COMMENT","KEYWORD","NUMBER","STRING","CHAR","VAR","PARM",NULL};
 
 /**********************************************************************
  These are ALL keywords for the language (everything else, like
@@ -65,71 +74,93 @@ struct token
   };
 typedef struct token token;
 
+struct multitoken
+  {
+  char *Value;
+  char *TokenValue;
+  };
+typedef struct multitoken multitoken;
+
 /*** Globals for quick parsing ***/
-char **Keyword = NULL;
-struct token *KeywordTokens = NULL;
-char **KeywordMultiTokens = NULL;
+token *Keyword = NULL;
+token *KeywordTokens = NULL;
+multitoken *KeywordMultiTokens = NULL;
 
 /*** Globals for parsing C and C++ ***/
-char *KeywordC[] = {
-		"auto", "break", "case", "catch", "char", "const",
-		"continue", "default", "do", "double", "else", "enum",
-		"extern", "float", "for", "goto", "if", "int", "long",
-		"register", "return", "short", "signed", "sizeof", "static",
-		"struct", "switch", "throw", "typedef", "union", "unsigned",
-		"void", "volatile", "while", NULL
+token KeywordC[] = {
+		{0,"auto"}, {0,"break"}, {0,"case"}, {0,"catch"},
+		{0,"char"}, {0,"const"}, {0,"continue"}, {0,"default"},
+		{0,"do"}, {0,"double"}, {0,"else"}, {0,"enum"},
+		{0,"extern"}, {0,"float"}, {0,"for"}, {0,"goto"},
+		{0,"if"}, {0,"int"}, {0,"long"}, {0,"register"},
+		{0,"return"}, {0,"short"}, {0,"signed"}, {0,"sizeof"},
+		{0,"static"}, {0,"struct"}, {0,"switch"}, {0,"throw"},
+		{0,"typedef"}, {0,"union"}, {0,"unsigned"}, {0,"void"},
+		{0,"volatile"}, {0,"while"}, {0,"NULL"}, {0,NULL}
 		};
   /** Token list identifies non-string special words.  List them by length
       since the first match is used.  Any string of symbols not listed
       here are kept as a string of symbols. **/
 token KeywordCTokens[] = {
-		{3,"<<="}, {3,">>="}, {3,"..."},
-		{2,"&&"}, {2,"||"}, {2,"<<"}, {2,">>"}, {2,"->"},
-		{2,"++"}, {2,"--"},
-		{2,"=="}, {2,"!="}, {2,"<="}, {2,">="},
-		{2,"+="}, {2,"-="}, {2,"*="}, {2,"/="}, {2,"%="},
-		{2,"&="}, {2,"|="}, {2,"^="},
-		{1,"!"}, {1,"+"}, {1,"-"}, {1,"*"}, {1,"/"}, {1,"%"},
-		{1,"|"}, {1,"&"}, {1,"^"}, {1,"~"},
-		{1,";"}, {1,"<"}, {1,">"}, {1,"="},
-		{1,"?"}, {1,":"}, {1,","}, {1,"."},
+		{0,"<<="}, {0,">>="}, {0,"..."},
+		{0,"&&"}, {0,"||"}, {0,"<<"}, {0,">>"}, {0,"->"},
+		{0,"++"}, {0,"--"},
+		{0,"=="}, {0,"!="}, {0,"<="}, {0,">="},
+		{0,"+="}, {0,"-="}, {0,"*="}, {0,"/="}, {0,"%="},
+		{0,"&="}, {0,"|="}, {0,"^="},
+		{0,"!"}, {0,"+"}, {0,"-"}, {0,"*"}, {0,"/"}, {0,"%"},
+		{0,"|"}, {0,"&"}, {0,"^"}, {0,"~"},
+		{0,";"}, {0,"<"}, {0,">"}, {0,"="},
+		{0,"?"}, {0,":"}, {0,","}, {0,"."},
 		{0,NULL} };
   /** MultiTokens are ones that can be separated by whitespace **/
-char *KeywordCMultiTokens[] = {
-		"# include",
-		"# import",
-		"# pragma",
-		"# define", "# ifndef", "# ifdef", "# undef",
-		"# else", "# elif", "# if", "# endif", 
-		"# error", "# using", "# line",
-		NULL };
-char KeywordCPreFunction[] = "";
+multitoken KeywordCMultiTokens[] = {
+		{"# include","#include"},
+		{"# import","#import"},
+		{"# pragma","#pragma"},
+		{"# define","#define"},
+		{"# ifndef","$ifndef"},
+		{"# ifdef","#ifdef"},
+		{"# undef","#undef"},
+		{"# else","#else"},
+		{"# elif","#elif"},
+		{"# if","#if"},
+		{"# endif", "#endif"},
+		{"# error","#error"},
+		{"# using","#using"},
+		{"# line","#line"},
+		{NULL,NULL} };
 
 /*** Globals for Java source code ***/
-char *KeywordJava[] = {
-		"abstract", "boolean", "break", "byte", "case", "catch",
-		"char", "class", "const", "continue", "default", "do",
-		"double", "else", "extends", "final", "finally", "float",
-		"for", "goto", "if", "implements", "import", "instanceof",
-		"int", "interface", "long", "native", "new", "package",
-		"private", "protected", "public", "return", "short",
-		"static", "strictfp", "super", "switch", "synchronized",
-		"this", "throw", "throws", "transient", "try", "void",
-		"volatile", "while", NULL
+token KeywordJava[] = {
+		{0,"abstract"}, {0,"boolean"}, {0,"break"}, {0,"byte"},
+		{0,"case"}, {0,"catch"}, {0,"char"}, {0,"class"},
+		{0,"const"}, {0,"continue"}, {0,"default"}, {0,"do"},
+		{0,"double"}, {0,"else"}, {0,"extends"}, {0,"final"},
+		{0,"finally"}, {0,"float"}, {0,"for"}, {0,"goto"},
+		{0,"if"}, {0,"implements"}, {0,"import"}, {0,"instanceof"},
+		{0,"int"}, {0,"interface"}, {0,"long"}, {0,"native"},
+		{0,"new"}, {0,"package"}, {0,"private"}, {0,"protected"},
+		{0,"public"}, {0,"return"}, {0,"short"}, {0,"static"},
+		{0,"strictfp"}, {0,"super"}, {0,"switch"}, {0,"synchronized"},
+		{0,"this"}, {0,"throw"}, {0,"throws"}, {0,"transient"},
+		{0,"try"}, {0,"void"}, {0,"volatile"}, {0,"while"},
+		{0,NULL}
 		};
 token KeywordJavaTokens[] = {
-		{3,"<<="}, {3,">>="}, {3,"..."},
-		{2,"&&"}, {2,"||"}, {2,"<<"}, {2,">>"}, {2,"->"},
-		{2,"++"}, {2,"--"},
-		{2,"=="}, {2,"!="}, {2,"<="}, {2,">="},
-		{2,"+="}, {2,"-="}, {2,"*="}, {2,"/="}, {2,"%="},
-		{2,"&="}, {2,"|="}, {2,"^="},
-		{1,"!"}, {1,"+"}, {1,"-"}, {1,"*"}, {1,"/"}, {1,"%"},
-		{1,"|"}, {1,"&"}, {1,"^"}, {1,"~"},
-		{1,";"}, {1,"<"}, {1,">"}, {1,"="},
-		{1,"?"}, {1,":"}, {1,","}, {1,"."},
+		{0,"<<="}, {0,">>="}, {0,"..."},
+		{0,"&&"}, {0,"||"}, {0,"<<"}, {0,">>"}, {0,"->"},
+		{0,"++"}, {0,"--"},
+		{0,"=="}, {0,"!="}, {0,"<="}, {0,">="},
+		{0,"+="}, {0,"-="}, {0,"*="}, {0,"/="}, {0,"%="},
+		{0,"&="}, {0,"|="}, {0,"^="},
+		{0,"!"}, {0,"+"}, {0,"-"}, {0,"*"}, {0,"/"}, {0,"%"},
+		{0,"|"}, {0,"&"}, {0,"^"}, {0,"~"},
+		{0,";"}, {0,"<"}, {0,">"}, {0,"="},
+		{0,"?"}, {0,":"}, {0,","}, {0,"."},
 		{0,NULL} };
-char KeywordJavaPreFunction[] = "";
+multitoken KeywordJavaMultiTokens[] = {
+		{NULL,NULL} };
 
 
 /********************************************************
@@ -155,6 +186,7 @@ int	GetTokenStart	(char *S, long MaxS)
   ( ) { } or [ ] = bracket () {} or []
   d = number (number)
   x = hex number (number)
+  m = multi-token (set by GetTokenEnd)
   n = variable name (letter, number, or underscore)
   s = symbol
   ' ' = white space
@@ -237,13 +269,13 @@ int	GetStringLen	(char *S, long MaxS, char StringType, int QuoteFlag)
  This function is quote-smart!
  Returns -1 when no more tokens.
  ********************************************************/
-int	GetTokenEnd	(char Type, char *S, int MaxS)
+int	GetTokenEnd	(tokeninfo *TI, char *S, int MaxS)
 {
   int i=0;
   int s,si,sj;
 
   if (!S) return(-1);
-  switch(Type)
+  switch(TI->Type)
     {
     case ' ': /* white-space */
 	while((i < MaxS) && isspace(S[i])) i++;
@@ -276,7 +308,7 @@ int	GetTokenEnd	(char Type, char *S, int MaxS)
 
     case '"':	/* quoted string */
     case '\'':	/* quoted string */
-	i=GetStringLen(S,MaxS,Type,1);
+	i=GetStringLen(S,MaxS,TI->Type,1);
 	break;
 
     case 'n':	/* variable name (name or name.name or name->name) */
@@ -311,7 +343,7 @@ int	GetTokenEnd	(char Type, char *S, int MaxS)
 	/* check for multitokens */
 	if (KeywordMultiTokens)
 	  {
-	  for(s=0; KeywordMultiTokens[s] != NULL; s++)
+	  for(s=0; KeywordMultiTokens[s].Value != NULL; s++)
 	    {
 	    si = i-1; /* temp holder */
 	    sj = -1;
@@ -320,18 +352,23 @@ int	GetTokenEnd	(char Type, char *S, int MaxS)
 	      si++;
 	      sj++;
 	      /* skip spaces */
-	      if (isspace(KeywordMultiTokens[s][sj]))
+	      if (isspace(KeywordMultiTokens[s].Value[sj]))
 	        {
 		/* only skip spaces if the token says to skip spaces */
 	        while((si < MaxS) && isspace(S[si])) si++;
-	        while(isspace(KeywordMultiTokens[s][sj])) sj++;
+	        while(isspace(KeywordMultiTokens[s].Value[sj])) sj++;
 		}
-	      } while((si < MaxS) && KeywordMultiTokens[s][sj] &&
-		  (S[si]==KeywordMultiTokens[s][sj]));
+	      } while((si < MaxS) && KeywordMultiTokens[s].Value[sj] &&
+		  (S[si]==KeywordMultiTokens[s].Value[sj]));
 	    /* see if it matched */
-	    if (!KeywordMultiTokens[s][sj]) return(si);
+	    if (!KeywordMultiTokens[s].Value[sj])
+		{
+		TI->Type = 'm';
+		TI->Generic = KeywordMultiTokens[s].TokenValue;
+		return(si);
+		}
 	    }
-	  }
+	  } /* if KeywordMultiTokens */
 
 	/* check for known tokens */
 	for(s=0; KeywordTokens[s].Len > 0; s++)
@@ -351,12 +388,34 @@ int	GetTokenEnd	(char Type, char *S, int MaxS)
 } /* GetTokenEnd() */
 
 /********************************************************
+ MatchKeyword(): Given an input string, does it match a
+ keyword?
+ Returns index of match, or -1 for miss.
+ ********************************************************/
+int	MatchKeyword	(S,KeywordList)
+  char *S;
+  token KeywordList[];
+{
+  int k;
+  for(k=0; KeywordList[k].Value != NULL; k++)
+    {
+    /* S must match KeywordList and not be a substring. */
+    if (!strncmp(S,KeywordList[k].Value,KeywordList[k].Len))
+	{
+	return(k); /* returns 1+keyword_index */
+	}
+    }
+  return(-1);
+} /* MatchKeyword() */
+
+/********************************************************
  GetToken(): Given an input string, return the next token.
  Returns tokeninfo.Start == -1 when no more tokens.
  ********************************************************/
 tokeninfo	GetToken	(char *S, int MaxS)
 {
   tokeninfo TI;
+  int rc;
 
   memset(&TI,0,sizeof(tokeninfo));
 
@@ -370,43 +429,228 @@ tokeninfo	GetToken	(char *S, int MaxS)
 	TI.Generic = KeywordGeneric[0];
 	break;
     case 'd': case 'x': /* digit (decimal or hex) */
-	TI.Generic = KeywordGeneric[1];
-	break;
-    case '"': /* string */
 	TI.Generic = KeywordGeneric[2];
 	break;
-    case '\'': /* character */
+    case '"': /* string */
 	TI.Generic = KeywordGeneric[3];
 	break;
-    case 'n': /* variable name */
+    case '\'': /* character */
 	TI.Generic = KeywordGeneric[4];
+	break;
+    case 'n': /* variable name */
+	TI.Generic = KeywordGeneric[5];
+	rc = MatchKeyword(S,Keyword);
+	if (rc >= 0)
+		{
+		TI.Generic = KeywordGeneric[1];
+		TI.Value = Keyword[rc].Value;
+		TI.Len = Keyword[rc].Len;
+		return(TI);
+		}
 	break;
     default:
 	TI.Generic = NULL;
+	rc = MatchKeyword(S,Keyword);
+	if (rc >= 0)
+		{
+		TI.Generic = KeywordGeneric[1];
+		TI.Value = Keyword[rc].Value;
+		TI.Len = Keyword[rc].Len;
+		return(TI);
+		}
+	break;
     }
 
-  TI.Len = GetTokenEnd(TI.Type,S+TI.Start,MaxS-TI.Start);
+  TI.Len = GetTokenEnd(&TI,S+TI.Start,MaxS-TI.Start);
   return(TI);
 } /* GetToken() */
 
-/********************************************************
- MatchKeyword(): Given an input string, does it match a
- keyword?
- Returns non-zero for match, 0 for miss.
- ********************************************************/
-int	MatchKeyword	(char *S, int SLen, char *KeywordList[])
+/**********************************************
+ FunctionToBsam(): given a function create the
+ bSAM cache output!
+ **********************************************/
+void	FunctionToBsam	(char *Fname, int FnameLen,
+			 long Fstart, long Fend)
 {
-  int k;
-  for(k=0; KeywordList[k] != NULL; k++)
+  printf("Function %.*s : %ld - %ld, size=%ld\n",
+	FnameLen,Fname,
+	Fstart,Fend,
+	Fend-Fstart+1);
+} /* FunctionToBsam() */
+
+/**********************************************
+ ProcessFunctions(): Identify functions and only
+ output them.
+ **********************************************/
+void	ProcessFunctions	()
+{
+  /* How to find a function:
+     Functions are in the form:
+       VAR ( "anything except ; ( ) and { }" )
+       "anything except ( ) and { }"
+       {
+       "anything"
+       }
+     The "anything except ; and { }" are the parameters.
+     Keep track of nested ( ) and { } and [ ] in the
+     parameters and in the function.
+   */
+  /* All items are offsets in the Mmap. */
+  char *FunctionName=NULL;
+  int FunctionNameLen=0;
+  long ParmStart=0;
+  long ParmEnd=0;
+  long FunctionStart=0;
+  long FunctionEnd=0;
+  int CountC=0;	/* count "{...}" -- curly bracket nesting */
+  tokeninfo TI;
+  long i;
+
+  /* Process the file! */
+  i=0;
+  while(i < MmapSize)
     {
-    /* S must match KeywordList and not be a substring. */
-    if (!strncmp(S,KeywordList[k],SLen) && (KeywordList[k][SLen] == '\0'))
+    /* Skip spaces */
+    while((i < MmapSize) && isspace(Mmap[i])) i++;
+    if (i >= MmapSize) continue; /* skip the rest */
+
+    /* Get the token */
+    TI = GetToken((char *)(Mmap+i),MmapSize-i);
+    if (TI.Start < 0)
 	{
-	return(k+1); /* returns 1+keyword_index */
+	/* No more tokens */
+	i = MmapSize;
+	continue; /* skip the rest */
 	}
+
+    /* Got a token */
+    /* Get function name first */
+    if (!FunctionName)
+	{
+	if (TI.Generic == KeywordGeneric[5])
+		{
+		FunctionName=(char *)(Mmap+i);
+		FunctionNameLen=TI.Len;
+		ParmStart=0;
+		ParmEnd=0;
+		FunctionStart=0;
+		FunctionEnd=0;
+		}
+	}
+    else if (ParmStart == 0)
+	{
+	if (!TI.Generic && (TI.Len==1) && (Mmap[i]=='('))
+		{
+		ParmStart=i;
+		}
+	else if (TI.Generic == KeywordGeneric[5]) /* if VAR */
+		{
+		/* reset function start */
+		FunctionName=(char *)(Mmap+i);
+		FunctionNameLen=TI.Len;
+		ParmStart=0;
+		ParmEnd=0;
+		FunctionStart=0;
+		FunctionEnd=0;
+		}
+	else if (!TI.Generic && (TI.Len==1) && strchr("{}()",Mmap[i]))
+		{
+		/* Not a valid start */
+		FunctionName=NULL;
+		FunctionNameLen=0;
+		}
+	else if ((TI.Generic == KeywordGeneric[2]) || /* if number */
+		 (TI.Generic == KeywordGeneric[3]) || /* if string */
+		 (TI.Generic == KeywordGeneric[4])) /* if character */
+		{
+		/* Not a valid start */
+		FunctionName=NULL;
+		FunctionNameLen=0;
+		}
+	/* skip everything else */
+	}
+    else if (ParmEnd == 0)
+	{
+	if (!TI.Generic && (TI.Len==1) && (Mmap[i]==')'))
+		{
+		ParmEnd=i;
+		}
+	else if (!TI.Generic && (TI.Len==1) && strchr("{}()",Mmap[i]))
+		{
+		/* Not a valid start */
+		FunctionName=NULL;
+		FunctionNameLen=0;
+		}
+	else if ((TI.Generic == KeywordGeneric[2]) || /* if number */
+		 (TI.Generic == KeywordGeneric[3]) || /* if string */
+		 (TI.Generic == KeywordGeneric[4])) /* if character */
+		{
+		/* Not a valid start */
+		FunctionName=NULL;
+		FunctionNameLen=0;
+		}
+	/* skip everything else */
+	}
+    else if (FunctionStart == 0)
+	{
+	if (!TI.Generic && (TI.Len==1) && (Mmap[i]=='{'))
+		{
+		FunctionStart=i;
+		CountC=1;
+		}
+	else if (!TI.Generic && (TI.Len==1) && strchr("{}()",Mmap[i]))
+		{
+		/* Not a valid start */
+		FunctionName=NULL;
+		FunctionNameLen=0;
+		}
+	else if ((TI.Generic == KeywordGeneric[2]) || /* if number */
+		 (TI.Generic == KeywordGeneric[3]) || /* if string */
+		 (TI.Generic == KeywordGeneric[4])) /* if character */
+		{
+		/* Not a valid start */
+		FunctionName=NULL;
+		FunctionNameLen=0;
+		}
+	/* skip everything else */
+	}
+    else /* Got FunctionName, Parms, and FunctionStart */
+	{
+	if (!TI.Generic && (TI.Len==1) && (Mmap[i]=='{'))
+		{
+		CountC++;
+		}
+	else if (!TI.Generic && (TI.Len==1) && (Mmap[i]=='}'))
+		{
+		CountC--;
+		if (CountC==0)
+		  {
+		  FunctionEnd=i;
+		  /* Print the function! */
+		  FunctionToBsam(FunctionName,FunctionNameLen,FunctionStart,FunctionEnd);
+		  /* Reset and get ready to go again! */
+		  FunctionName=NULL;
+		  FunctionNameLen=0;
+		  }
+		}
+	}
+
+    i += TI.Len;
+#if 0
+    else
+	{
+	i += TI.Start;
+	printf("%ld len: %d  value: '",i,TI.Len);
+	for(j=i; j < i+TI.Len; j++) fputc(Mmap[j],stdout);
+	printf("'");
+	if (TI.Generic) printf(" (%s)",TI.Generic);
+	printf("\n");
+	i += TI.Len;
+	}
+#endif
     }
-  return(0);
-} /* MatchKeyword() */
+} /* ProcessFunctions() */
+
 
 /**********************************************
  CloseFile(): Close a filename.
@@ -458,8 +702,7 @@ int	OpenFile	(char *Fname)
 int	main	(int argc, char *argv[])
 {
   int F;
-  long i,j;
-  tokeninfo TI;
+  long i;
 
   /*****
    Next step:
@@ -476,25 +719,19 @@ int	main	(int argc, char *argv[])
   Keyword = KeywordC;
   KeywordTokens = KeywordCTokens;
   KeywordMultiTokens = KeywordCMultiTokens;
-  while(i < MmapSize)
+
+  /* Compute string lengths (for speed) */
+  for(i=0; Keyword[i].Value != NULL; i++)
     {
-    TI = GetToken(Mmap+i,MmapSize-i);
-    if (TI.Start < 0)
-      {
-      i = MmapSize;
-      }
-    else
-	{
-	i += TI.Start;
-	printf("%ld len: %d  value: '",i,TI.Len);
-	for(j=i; j < i+TI.Len; j++) fputc(Mmap[j],stdout);
-	printf("'");
-	if (TI.Generic) printf(" (%s)",TI.Generic);
-	printf("\n");
-	i += TI.Len;
-	}
+    Keyword[i].Len = strlen(Keyword[i].Value);
+    }
+  for(i=0; KeywordTokens[i].Value != NULL; i++)
+    {
+    KeywordTokens[i].Len = strlen(KeywordTokens[i].Value);
     }
 
+  /* Process the file! */
+  ProcessFunctions();
   CloseFile(F);
   return(0);
 } /* main() */
