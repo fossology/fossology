@@ -24,6 +24,7 @@ $(iPATHFILE): ../Makefile.conf
 	@echo "\$$BINDIR=\"$(BINDIR)\";" >> $(iPATHFILE)
 	@echo "\$$LIBDIR=\"$(LIBDIR)\";" >> $(iPATHFILE)
 	@echo "\$$LIBEXECDIR=\"$(LIBEXECDIR)\";" >> $(iPATHFILE)
+	@echo "\$$INCLUDEDIR=\"$(INCLUDEDIR)\";" >> $(iPATHFILE)
 	@echo "\$$MAN1DIR=\"$(MAN1DIR)\";" >> $(iPATHFILE)
 	@echo "\$$AGENTDIR=\"$(AGENTDIR)\";" >> $(iPATHFILE)
 	@echo "\$$SYSCONFDIR=\"$(SYSCONFDIR)\";" >> $(iPATHFILE)
@@ -78,7 +79,7 @@ uninstall:
 	(cd $(WEBDIR) ;   $(RM) $(iPATHFILE))
 	(cd $(PHPDIR) ;   $(RM) $(iPATHFILE))
 	(cd $(AGENTDIR) ; $(RM) $(iPATHFILE))
-	(cd $(BUINDIR) ;  $(RM) $(BINFILES))
+	(cd $(BINDIR) ;   $(RM) $(BINFILES))
 
 clean:
 	$(RM) $(iPATHFILE)
