@@ -28,8 +28,7 @@ include ../../Makefile.conf
 
 all:	
 	chmod ug+x fosscp.php
-	mv fosscp.php fosscp_agent
-	chown fossy:fossy fosscp_agent
+	$(CP) fosscp.php fosscp_agent
 
 InstallationCreate:
 	# Uncomment to install
