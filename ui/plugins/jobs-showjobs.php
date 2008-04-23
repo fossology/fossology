@@ -250,14 +250,18 @@ class jobs_showjobs extends FO_Plugin
     /*****************************************************************/
     /* Get Jobs that ARE associated with uploads. */
     /*****************************************************************/
-    if (empty($Where)) { $WherePage = ' WHERE '; }
-    else { $WherePage = ' AND '; }
-    $WherePage .= "(ufile_name,upload_pk) IN
+    if (empty($UploadPk) || ($UploadPk < 0))
+      {
+      if (empty($Where)) { $WherePage = ' WHERE '; }
+      else { $WherePage = ' AND '; }
+      $WherePage .= "(ufile_name,upload_pk) IN
 	(SELECT DISTINCT ufile_name,upload_pk FROM job
 	INNER JOIN upload ON upload.upload_pk = job.job_upload_fk
 	INNER JOIN ufile ON ufile.ufile_pk = upload.ufile_fk
 	ORDER BY ufile_name,upload_pk
 	LIMIT 10 OFFSET $Offset)";
+      }
+    else { $WherePage = ""; }
 
     $Sql = "
     SELECT jobqueue.jq_pk,jobqueue.jq_job_fk,jobdepends.jdep_jq_depends_fk,
@@ -275,6 +279,7 @@ class jobs_showjobs extends FO_Plugin
     $Where $WherePage
     ORDER BY ufile_name,upload.upload_pk,job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk;
     ";
+    // print "<pre>" . htmlentities($Sql) . "</pre>";
     $Results = $DB->Action($Sql);
 
     /*****************************************************************/
@@ -287,7 +292,7 @@ class jobs_showjobs extends FO_Plugin
 	$Count++;
       }
 
-    if (!is_array($Results) || ($Count < 10))
+    if (($Upload < 0) && (!is_array($Results) || ($Count < 10)))
 	{
 	if ($History == 1) { $Where = ""; }
 	else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
@@ -369,7 +374,14 @@ class jobs_showjobs extends FO_Plugin
 	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
 	$V .= "<tr><th colspan=3 style='background:#202020;color:white;'>$JobName";
 	$Style = "style='font:normal 8pt verdana, arial, helvetica; background:#202020;color:white;}'";
-	$V .= "</th><th $Style><a $Style href='" . Traceback_uri() . "?mod=" . $this->Name . "&history=1&upload=$Upload'>History</a>";
+	if ($Upload >= 0)
+	  {
+	  $V .= "</th><th $Style><a $Style href='" . Traceback_uri() . "?mod=" . $this->Name . "&history=1&upload=$Upload'>History</a>";
+	  }
+	else
+	  {
+	  $V .= "</th><th $Style>";
+	  }
 	$V .= "</th></tr>\n";
 	}
 
