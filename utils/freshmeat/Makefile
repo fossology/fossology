@@ -29,7 +29,7 @@ $(fmPATHFILE): ../Makefile.utils
 	@echo "\$$MAN1DIR=\"$(MAN1DIR)\";" >> $(fmPATHFILE)
 	@echo "\$$PROJECT=\"$(PROJECT)\";" >> $(fmPATHFILE)
 	@echo "\$$FMDIR=\"$(FMDIR)\";" >> $(fmPATHFILE)
-	@echo "\$$FMDIR=\"$(FMDIR)\"" >> $(FMDir)
+	@echo "FMDIR=\"$(FMDIR)\"" >> $(FMDir)
 	@echo "\$$PATH=\"\$$LIBEXECDIR:\$$PATH:/usr/bin\";" >> $(fmPATHFILE)
 	@echo "?>" >> $(fmPATHFILE)
 

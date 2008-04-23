@@ -25,7 +25,7 @@ thisrun=`date +"%Y-%m-%d"`
 
 if [ "$FMDIR" == "" ]
 then
-	$FMDIR='/tmp'
+	FMDIR='/tmp'
 fi
 
 /usr/local/bin/GetFM > "$FMDIR/Run-logs/GetFM.log-$thisrun 2>&1"
