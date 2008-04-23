@@ -226,7 +226,7 @@ function menu_find($Name,&$MaxDepth,$Menu=NULL)
  If $ShowAll==0, then items without hyperlinks are hidden.
  This is commonly called the "micro-menu".
  ***********************************************/
-function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
+function menu_to_1html($Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
 {
   $V = "";
   $Std = "";
@@ -296,7 +296,7 @@ function menu_to_1html(&$Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
  $Parm is a list of parameters to add to the URL.
  If $ShowAll==0, then items without hyperlinks are hidden.
  ***********************************************/
-function menu_to_1list(&$Menu,&$Parm,$Pre="",$Post="",$ShowAll=1)
+function menu_to_1list($Menu,&$Parm,$Pre="",$Post="",$ShowAll=1)
 {
   $V = "";
   $Std = "";

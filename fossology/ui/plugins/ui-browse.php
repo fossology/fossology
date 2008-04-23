@@ -199,11 +199,15 @@ class ui_browse extends FO_Plugin
 
 	$V .= FolderListScript();
 	$V .= "<center><H3>Folder Navigation</H3></center>\n";
-	$V .= "<small>";
+	$V .= "<center><small>";
+	if ($Folder != FolderGetTop())
+	  {
+	  $V .= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>Top</a> |";
+	  }
 	$V .= "<a href='javascript:Expand();'>Expand</a> |";
 	$V .= "<a href='javascript:Collapse();'>Collapse</a> |";
 	$V .= "<a href='" . Traceback() . "'>Refresh</a>";
-	$V .= "</small>";
+	$V .= "</small></center>";
 	$V .= "<P>\n";
         $V .= "<form>\n";
         $V .= FolderListDiv($Folder,0,$Folder,1);
@@ -237,6 +241,18 @@ class ui_browse extends FO_Plugin
 	  else { $V .= "item."; }
 	  $V .= "</td>\n";
           $V .= "<td align='right'>" . substr($Row['upload_ts'],0,16) . "</td></tr>\n";
+
+	  $Status = JobListSummary($UploadPk);
+	  $V .= "<td>Scheduled ";
+	  if (plugin_find_id('showjobs') >= 0)
+	    { $V .= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>jobs</a>: "; }
+	  else
+	    { $V .= "jobs: "; }
+	  $V .= $Status['total'] . " total; ";
+	  $V .= $Status['completed'] . " completed; ";
+	  $V .= $Status['active'] . " active; ";
+	  $V .= $Status['failed'] . " failed.";
+
           $V .= "<tr><td colspan=2>&nbsp;</td></tr>\n";
           }
         $V .= "</table>\n";
