@@ -149,7 +149,7 @@ class agent_license extends FO_Plugin
 	  AND (ufile.ufile_mode & (1<<29)) = 0
 	INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk
 	ORDER BY Size DESC;";
-    /** sqlagent does not line newlines! **/
+    /** sqlagent does not like newlines! **/
     $jqargs = str_replace("\n"," ",$jqargs);
     $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",$Dep);
     if (empty($jobqueuepk)) { return("Failed to insert first sqlagent into job queue"); }

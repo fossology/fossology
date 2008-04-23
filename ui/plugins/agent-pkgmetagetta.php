@@ -89,8 +89,8 @@ class agent_pkgmetagetta extends FO_Plugin
     if (is_array($Depends)) { $Dep = array_merge($Dep,$Depends); }
     else if (!empty($Depends)) { $Dep[1] = $Depends; }
 
-    /* Prepare the job: job "Default Meta Agents" */
-    $jobpk = JobAddJob($uploadpk,"Default Meta Agents",$Priority);
+    /* Prepare the job: job "Meta Analysis" */
+    $jobpk = JobAddJob($uploadpk,"Meta Analysis",$Priority);
     if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
 
     /* "pkgmetagetta" needs to know the attribkey for 'Processed' */
@@ -101,22 +101,51 @@ class agent_pkgmetagetta extends FO_Plugin
     $attribkey = $Results[0]['key_pk'];
     if (empty($attribkey)) { return("Pkgmetagetta not installed."); }
 
+    /* Performance note: The SELECT of files can be very expensive.
+       Store results in a temp table to cut the cost. */
+
+    /* Before starting, make sure the temp table does not exist. */
+    $TempTable = "metaanalysis_" . $uploadpk; /* must be lowercase */
+    $SQL = "SELECT * FROM pg_tables WHERE tablename='$TempTable';";
+    $Results = $DB->Action($SQL);
+    if (!empty($Results[0]['tablename']))
+	{
+	$DB->Action("DROP TABLE $TempTable;");
+	}
+
     /** jqargs wants EVERY pfile in this upload that does not already
         have a specagent attribute. **/
     $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,
 	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
+	INTO $TempTable
 	FROM uploadtree
 	INNER JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk
 	  AND uploadtree.upload_fk = '$uploadpk'
 	  AND ufile.pfile_fk NOT IN
 	  (SELECT attrib.pfile_fk FROM attrib
 	  WHERE attrib_key_fk = '$attribkey')
-	INNER JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk
-	LIMIT 5000;";
+	INNER JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk;";
 
-    /* Add job: job "Default Meta Agents" has jobqueue item "pkgmetagetta" */
-    $jobqueuepk = JobQueueAdd($jobpk,"pkgmetagetta",$jqargs,"yes","a",$Dep);
+    /* Add job: job has jobqueue item "sqlagent" */
+    /** sqlagent does not like newlines! **/
+    $jqargs = str_replace("\n"," ",$jqargs);
+    $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",$Dep);
+    if (empty($jobqueuepk)) { return("Failed to insert first sqlagent into job queue"); }
+
+    /* Add job: job has jobqueue item "pkgmetagetta" */
+    $jqargs = "SELECT * FROM $TempTable
+	WHERE Akey NOT IN
+	(SELECT attrib.pfile_fk FROM attrib
+	WHERE attrib_key_fk = '$attribkey')
+	LIMIT 5000;";
+    $jobqueuepk = JobQueueAdd($jobpk,"pkgmetagetta",$jqargs,"yes","a",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert pkgmetagetta into job queue"); }
+
+    /* Add job: job has jobqueue item "sqlagent" to remove the temporary table */
+    $jqargs = "DROP TABLE $TempTable;";
+    $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",array($jobqueuepk));
+    if (empty($jobqueuepk)) { return("Failed to insert second sqlagent into job queue"); }
+
     return(NULL);
   } // AgentAdd()
 
@@ -161,7 +190,7 @@ class agent_pkgmetagetta extends FO_Plugin
 		  SELECT upload_pk FROM upload
 		  INNER JOIN job ON job.job_upload_fk = upload.upload_pk
 		  INNER JOIN jobqueue ON jobqueue.jq_job_fk = job.job_pk
-		    AND job.job_name = 'Default Meta Agents'
+		    AND job.job_name = 'Meta Analysis'
 		    AND jobqueue.jq_type = 'pkgmetagetta'
 		    ORDER BY upload_pk
 		)
