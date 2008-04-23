@@ -149,7 +149,7 @@ class jobs_showjobs extends FO_Plugin
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&show=job&job=";
 
     global $DB;
-    $Sql = "SELECT *, job.* FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk = $Job LIMIT 1;";
+    $Sql = "SELECT * FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk = $Job LIMIT 1;";
     $Results = $DB->Action($Sql);
     $Row = $Results[0];
     if (empty($Row['jq_pk'])) { return; }
@@ -237,9 +237,27 @@ class jobs_showjobs extends FO_Plugin
     else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
     if ($UploadPk != -1)
 	{
-	if (empty($Where)) { $Where = " WHERE job.job_upload_fk = '$UploadPk'"; }
-	else { $Where .= " AND job.job_upload_fk = '$UploadPk'"; }
+	if (empty($Where)) { $Where = ' WHERE '; }
+	else { $Where = ' AND '; }
+	$Where .= "job.job_upload_fk = '$UploadPk'";
 	}
+
+    /* Add in paging */
+    $Page=getparm('page',PARM_INTEGER);
+    if (empty($Page)) { $Offset = 0; }
+    else { $Offset = $Page * 10; }
+
+    /*****************************************************************/
+    /* Get Jobs that ARE associated with uploads. */
+    /*****************************************************************/
+    if (empty($Where)) { $WherePage = ' WHERE '; }
+    else { $WherePage = ' AND '; }
+    $WherePage .= "(ufile_name,upload_pk) IN
+	(SELECT DISTINCT ufile_name,upload_pk FROM job
+	INNER JOIN upload ON upload.upload_pk = job.job_upload_fk
+	INNER JOIN ufile ON ufile.ufile_pk = upload.ufile_fk
+	ORDER BY ufile_name,upload_pk
+	LIMIT 10 OFFSET $Offset)";
 
     $Sql = "
     SELECT jobqueue.jq_pk,jobqueue.jq_job_fk,jobdepends.jdep_jq_depends_fk,
@@ -251,17 +269,64 @@ class jobs_showjobs extends FO_Plugin
     LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk
     LEFT JOIN jobqueue AS depends
       ON depends.jq_pk = jobdepends.jdep_jq_depends_fk
-    LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk
-    LEFT JOIN upload ON upload_pk = job.job_upload_fk
-    LEFT JOIN ufile ON ufile.ufile_pk = upload.ufile_fk
-    $Where
+    INNER JOIN job ON jobqueue.jq_job_fk = job.job_pk
+    INNER JOIN upload ON upload_pk = job.job_upload_fk
+    INNER JOIN ufile ON ufile.ufile_pk = upload.ufile_fk
+    $Where $WherePage
     ORDER BY ufile_name,upload.upload_pk,job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk;
     ";
-
     $Results = $DB->Action($Sql);
+
+    /*****************************************************************/
+    /* Get Jobs that are NOT associated with uploads (e.g., folder delete). */
+    /*****************************************************************/
+    $Count = 0; /* count number of jobs */
+    for($i=1; !empty($Results[$i]['upload_pk']); $i++)
+      {
+      if ($Results[$i]['upload_pk'] != $Results[$i+1]['upload_pk'])
+	$Count++;
+      }
+
+    if (!is_array($Results) || ($Count < 10))
+	{
+	if ($History == 1) { $Where = ""; }
+	else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
+
+	$Sql = "
+    SELECT jobqueue.jq_pk,jobqueue.jq_job_fk,jobdepends.jdep_jq_depends_fk,
+	jobqueue.jq_elapsedtime,jobqueue.jq_processedtime,
+	jobqueue.jq_itemsprocessed,job.job_queued,jobqueue.jq_type,
+	jobqueue.jq_starttime,jobqueue.jq_endtime,jobqueue.jq_end_bits,
+	job.*, '-1' AS upload_pk, '' AS ufile_name
+    FROM jobqueue
+    LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk
+    LEFT JOIN jobqueue AS depends
+      ON depends.jq_pk = jobdepends.jdep_jq_depends_fk
+    INNER JOIN job ON jobqueue.jq_job_fk = job.job_pk
+      AND job.job_upload_fk IS NULL
+    $Where
+    ORDER BY job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk
+    ";
+	if (!is_array($Results) || ($Count <= 0))
+	  {
+	  $Results = $DB->Action($Sql);
+	  }
+	else
+	  {
+	  $Results = array_merge($Results,$DB->Action($Sql));
+	  }
+	}
+
+    if ($Count >= 10) { $VM = MenuEndlessPage($Page,1); }
+    else if ($Page > 0) { $VM = MenuEndlessPage($Page,0); }
+    else { $VM = ""; }
     if (!is_array($Results)) { return; }
 
+    $V .= "<P />$VM<P />";
+
+    /*****************************************************************/
     /* Now display the summary */
+    /*****************************************************************/
     $Job=-1;
     $JobName="";
     $Blocked=array();
@@ -396,6 +461,7 @@ class jobs_showjobs extends FO_Plugin
       $V .= "</tr>\n";
       }
     $V .= "</table>\n";
+    $V .= "<P />$VM<P />";
     return($V);
     } // Show()
 
