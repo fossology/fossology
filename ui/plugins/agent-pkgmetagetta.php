@@ -113,18 +113,16 @@ class agent_pkgmetagetta extends FO_Plugin
 	$DB->Action("DROP TABLE $TempTable;");
 	}
 
-    /** jqargs wants EVERY pfile in this upload that does not already
-        have a specagent attribute. **/
+    /** jqargs wants EVERY pfile in this upload that hasn't been processed
+        by pkgmetagetta. **/
     $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,
 	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
 	INTO $TempTable
-	FROM uploadtree
-	INNER JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk
-	  AND uploadtree.upload_fk = '$uploadpk'
-	  AND ufile.pfile_fk NOT IN
-	  (SELECT attrib.pfile_fk FROM attrib
-	  WHERE attrib_key_fk = '$attribkey')
-	INNER JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk;";
+    FROM pfile left outer join attrib on (attrib_key_fk='$attribkey' 
+      AND pfile_fk=pfile_pk and attrib_value is null)
+    INNER join ufile on (ufile.pfile_fk=pfile_pk)
+    INNER join uploadtree on (ufile_pk=uploadtree.ufile_fk 
+      AND upload_fk='$uploadpk');";
 
     /* Add job: job has jobqueue item "sqlagent" */
     /** sqlagent does not like newlines! **/
