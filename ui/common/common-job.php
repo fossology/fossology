@@ -570,4 +570,57 @@ function JobQueueChangeStatus	($jqpk,$Status)
   return(0);
 } // JobQueueChangeStatus()
 
+/************************************************************
+ JobListSummary(): Given an upload_pk, return a list of 
+ the number of items in the jobqueue.
+ The returned array:
+   ['failed'] = 0x01 number of failed jobs (not jobqueue items)
+   ['completed'] = 0x02 number of completed jobs (not jobqueue items)
+   ['pending'] = 0x04 number of pending (not active) jobs (not jobqueue items)
+   ['active'] = 0x08 number of active jobs (not jobqueue items)
+   ['total'] = number of total jobs (not jobqueue items)
+ ************************************************************/
+function JobListSummary	($upload_pk)
+{
+  global $DB;
+  if (empty($DB)) { return; }
+  $Status=array();
+  $Status['total'] = 0;
+  $Status['completed'] = 0;
+  $Status['active'] = 0;
+  $Status['failed'] = 0;
+  $SQL = "SELECT job_pk,jq_starttime,jq_endtime,jq_end_bits FROM jobqueue
+	INNER JOIN job ON jq_job_fk = job_pk
+	AND job_upload_fk = '$upload_pk'
+	ORDER BY job_pk;";
+  $Results = $DB->Action($SQL);
+
+  /* Scan and track the results */
+  $JobId=$Results[0]['job_pk'];
+  $i=0;
+  $State=0;
+  while(!empty($Results[$i]['job_pk']))
+    {
+    if ($Results[$i]['jq_end_bits'] == 2) { $State |= 0x01; }
+    if (!empty($Results[$i]['jq_starttime']))
+      {
+      if (!empty($Results[$i]['jq_endtime'])) { $State |= 0x02; }
+      else { $State |= 0x08; }
+      }
+    else { $State |= 0x04; }
+    $i++;
+    if ($Results[$i]['job_pk'] != $JobId)
+	{
+	$Status['total']++;
+	if ($State & 0x01) { $Status['failed']++; }
+	else if ($State & 0x08) { $Status['active']++; }
+	else if ($State & 0x04) { $Status['completed']++; }
+	else if ($State & 0x02) { $Status['completed']++; }
+	$State=0;
+	$JobId = $Results[$i]['job_pk'];
+	}
+    }
+  return($Status);
+} // JobListSummary()
+
 ?>

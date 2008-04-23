@@ -286,7 +286,7 @@ class FO_Plugin
       case "HTML":
 	header('Content-type: text/html');
 	if ($this->NoHTML) { return; }
-	$V = "";
+	var $V = "";
 	if (($this->NoMenu == 0) && ($this->Name != "menus"))
 	  {
 	  $Menu = &$Plugins[plugin_find_id("menus")];
