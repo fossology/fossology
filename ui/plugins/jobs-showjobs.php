@@ -234,7 +234,7 @@ class jobs_showjobs extends FO_Plugin
     global $DB;
 
     if ($History == 1) { $Where = ""; }
-    else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
+    else { $Where = "WHERE (jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1)"; }
     if ($UploadPk != -1)
 	{
 	if (empty($Where)) { $Where = ' WHERE '; }
@@ -250,16 +250,16 @@ class jobs_showjobs extends FO_Plugin
     /*****************************************************************/
     /* Get Jobs that ARE associated with uploads. */
     /*****************************************************************/
-    if (empty($UploadPk) || ($UploadPk < 0))
+    if ($History && (empty($UploadPk) || ($UploadPk < 0)))
       {
       if (empty($Where)) { $WherePage = ' WHERE '; }
       else { $WherePage = ' AND '; }
       $WherePage .= "(ufile_name,upload_pk) IN
 	(SELECT DISTINCT ufile_name,upload_pk FROM job
 	INNER JOIN upload ON upload.upload_pk = job.job_upload_fk
-	INNER JOIN ufile ON ufile.ufile_pk = upload.ufile_fk
-	ORDER BY ufile_name,upload_pk
-	LIMIT 10 OFFSET $Offset)";
+	INNER JOIN ufile ON ufile.ufile_pk = upload.ufile_fk";
+      $WherePage .= " ORDER BY ufile_name,upload_pk";
+      $WherePage .= " LIMIT 10 OFFSET $Offset)";
       }
     else { $WherePage = ""; }
 
@@ -376,7 +376,14 @@ class jobs_showjobs extends FO_Plugin
 	$Style = "style='font:normal 8pt verdana, arial, helvetica; background:#202020;color:white;}'";
 	if ($Upload >= 0)
 	  {
-	  $V .= "</th><th $Style><a $Style href='" . Traceback_uri() . "?mod=" . $this->Name . "&history=1&upload=$Upload'>History</a>";
+	  if ($Detail)
+	    {
+	    $V .= "</th><th $Style><a $Style href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=detail&history=1&upload=$Upload'>History</a>";
+	    }
+	  else
+	    {
+	    $V .= "</th><th $Style><a $Style href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=summary&history=1&upload=$Upload'>History</a>";
+	    }
 	  }
 	else
 	  {
