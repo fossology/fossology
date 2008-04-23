@@ -61,7 +61,7 @@ class jobs_showjobs extends FO_Plugin
     if (!empty($UploadPk))
 	{
 	$NewURI = preg_replace('/&upload=[^&]*/','',$URI);
-	menu_insert("JobDetails::All",-4,"$NewURI");
+	menu_insert("JobDetails::All",-11,"$NewURI");
 	$UploadPk = "&upload=$UploadPk";
 	}
 
@@ -95,13 +95,13 @@ class jobs_showjobs extends FO_Plugin
       switch($History)
 	{
 	case "0":
-	  menu_insert("JobDetails::History",-11,"$URI&show=$Show&history=1");
-	  menu_insert("JobDetails::Active",-11);
+	  menu_insert("JobDetails::History",-12,"$URI&show=$Show&history=1");
+	  menu_insert("JobDetails::Active",-12);
 	  break;
 	case "1":
 	default:
-	  menu_insert("JobDetails::History",-11);
-	  menu_insert("JobDetails::Active",-11,"$URI&show=$Show&history=0");
+	  menu_insert("JobDetails::History",-12);
+	  menu_insert("JobDetails::Active",-12,"$URI&show=$Show&history=0");
 	  break;
 	}
       }
@@ -302,7 +302,9 @@ class jobs_showjobs extends FO_Plugin
 	$JobName = $Row['ufile_name'];
 	if (empty($JobName)) { $JobName = "[Default]"; }
 	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
-	$V .= "<tr><th colspan=4 style='background:#202020;color:white;'>$JobName";
+	$V .= "<tr><th colspan=3 style='background:#202020;color:white;'>$JobName";
+	$Style = "style='font:normal 8pt verdana, arial, helvetica; background:#202020;color:white;}'";
+	$V .= "</th><th $Style><a $Style href='" . Traceback_uri() . "?mod=" . $this->Name . "&history=1&upload=$Upload'>History</a>";
 	$V .= "</th></tr>\n";
 	}
 
