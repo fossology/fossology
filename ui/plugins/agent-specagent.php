@@ -28,7 +28,7 @@ class agent_specagent extends FO_Plugin
 {
   public $Name       = "agent_specagent";
   public $Title      = "Schedule Spec File Analysis";
-  public $MenuList   = "Jobs::Agents::Spec File Analysis";
+  // public $MenuList   = "Jobs::Agents::Spec File Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_ANALYZE;
