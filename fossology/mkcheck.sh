@@ -79,9 +79,9 @@ fi
 
 #####################################################
 # Get file list
-FILELIST="`cd install ; find . -type f | sort | sed -e 's@^\./@/@' | grep -v init.d`"
+FILELIST="`cd install ; find . -type f | sort | sed -e 's@^\./@/@' | grep -v init.d | grep -v init.ui`"
 
-FILELISTROOT="`cd install ; find . -type f | sort | sed -e 's@^\./@/@' | grep init.d`"
+FILELISTROOT="`cd install ; find . -type f | sort | sed -e 's@^\./@/@' | grep init.d | grep -v init.ui`"
 
 LINKLIST="`cd install ; find . -type l | sort | sed -e 's@^\./@/@'`"
 
@@ -135,21 +135,23 @@ echo "\$LINKLIST" | while read i ; do
   # but the link may be a directory
   DIR="\${i%/*}"
   NAME="\${i##*/}"
-  if [ ! -e "\$i" ] ; then
-    echo "ERROR: Link '\$i' not found."
-    touch \$ERRORS
-  else
-    CHECK1=\`find "\$DIR" -follow -name "\$NAME" -xtype f -group "\$PROJECTGROUP" -print 2>/dev/null\`
-    CHECK2=\`find "\$DIR" -follow -name "\$NAME" -xtype d -print 2>/dev/null\`
-    CHECK3=\`find "\$DIR" -follow -name "\$NAME" \\( -perm -g=r -a ! -perm -o=rwx \\) -print 2>/dev/null\`
-    # If there is no file and it is not a directory...
-    if [ "\$CHECK1" == "" ] && [ "\$CHECK2" == "" ] ; then
-      echo "ERROR: Link target '\$i' must be group '\$PROJECTGROUP'."
+  if [ "\$i" != "" ] ; then
+    if [ ! -e "\$i" ] ; then
+      echo "ERROR: Link '\$i' not found."
       touch \$ERRORS
-    fi
-    if [ "\$CHECK3" == "" ] ; then
-      echo "ERROR: Link target '\$i' permissions must be group readable and not other."
-      touch \$ERRORS
+    else
+      CHECK1=\`find "\$DIR" -follow -name "\$NAME" -xtype f -group "\$PROJECTGROUP" -print 2>/dev/null\`
+      CHECK2=\`find "\$DIR" -follow -name "\$NAME" -xtype d -print 2>/dev/null\`
+      CHECK3=\`find "\$DIR" -follow -name "\$NAME" \\( -perm -g=r -a ! -perm -o=rwx \\) -print 2>/dev/null\`
+      # If there is no file and it is not a directory...
+      if [ "\$CHECK1" == "" ] && [ "\$CHECK2" == "" ] ; then
+        echo "ERROR: Link target '\$i' must be group '\$PROJECTGROUP'."
+        touch \$ERRORS
+      fi
+      if [ "\$CHECK3" == "" ] ; then
+        echo "ERROR: Link target '\$i' permissions must be group readable and not other."
+        touch \$ERRORS
+      fi
     fi
   fi
 done
