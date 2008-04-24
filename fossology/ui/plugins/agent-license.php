@@ -28,7 +28,7 @@ class agent_license extends FO_Plugin
 {
   public $Name       = "agent_license";
   public $Title      = "Schedule License Analysis";
-  public $MenuList   = "Jobs::Agents::License Analysis";
+  // public $MenuList   = "Jobs::Agents::License Analysis";
   public $Version    = "1.1";
   public $Dependency = array("db");
   public $DBaccess   = PLUGIN_DB_ANALYZE;
