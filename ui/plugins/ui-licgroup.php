@@ -61,6 +61,15 @@ class licgroup extends FO_Plugin
      global $DB;
      if (empty($DB)) { return(1); } /* No DB */
 
+/*******************************************/
+/*******************************************/
+/*******************************************/
+/*** Need code to check BEFORE creation. ***/
+/*** Do not just assume a failure means it worked. ***/
+/*******************************************/
+/*******************************************/
+/*******************************************/
+
      /* Create tables, ignore error if they already exist */
      $sql = "CREATE SEQUENCE licgroup_licgroup_pk_seq START 1;
              CREATE TABLE licgroup (
@@ -91,7 +100,7 @@ class licgroup extends FO_Plugin
              COMMENT ON COLUMN licgroup_memberfk IS 'Key of license group that belongs to licgroup_fk';
              ";
      $Results = $DB->Action($sql);
-   }
+   } // Install()
 
   /***********************************************************
    Output(): This function is called when user output is
