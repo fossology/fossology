@@ -338,7 +338,7 @@ class jobs_showjobs extends FO_Plugin
     $First=1;
     $Upload="";
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
-    $UriFull = $Uri . Traceback_parm_keep(array("show","history"));
+    $UriFull = $Uri . Traceback_parm_keep(array("show","history","upload"));
     for($i=0; !empty($Results[$i]['jq_pk']); $i++)
       {
       $Row = &$Results[$i];
