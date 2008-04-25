@@ -6,7 +6,7 @@
 .||.    ''|...|' |'....|' |'....|'  '|..|'.||.'|..|''||||.   '|    
                                                    .|....'.. |     
                                                            ''     
-Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
 About
 =====
@@ -25,9 +25,8 @@ looking to create packages.
 
 For extended discussion on how to use or tune the software, please see
 the User Documentation, available on the website, in the doc/ directory
-of the source, or the doc/ directory on an installed system(directory
-may vary and in in the case of software packages, may be in a different
-package you need to install). FIXME: need to make sure this gets done
+of the source, or the doc/ directory on an installed system (directory
+may vary depending on where you install it).
 
 Preparing your system
 =====================
@@ -221,7 +220,7 @@ You should see the following message:
 
 2) The default database and owner is created by reading in a file of sql 
 statements to define the database schema. This file is included in the tar 
-bundle as fossology-version/setup/fossologyinit.sql.  You must be logged in as user 
+bundle as fossology-<version>/setup/fossologyinit.sql.  You must be logged in as user 
 postgres to create the database schema and define the owner.  As root, you
 can su to user postgres (su postgres) and then run the psql command:
    psql  <fossology-version/setup/fossologyinit.sql
@@ -420,7 +419,9 @@ login, or your favorite root-obtaining utility.
     here. See the developers document 
     http://fossology.org/docs/scheduler#configuring_the_scheduler for a 
     discussion on how to specify the number of processes per host 
-    and agent definitions.
+    and agent definitions.  You may also use the utility script, 
+    /usr/local/fossology/agents/mkconfig, to generate the scheduler.conf
+    file.
 
     /usr/local/share/fossology/agents/proxy.conf
     This file identifies proxies for using wget on your system.
@@ -475,9 +476,11 @@ login, or your favorite root-obtaining utility.
 7) Restart the Apache server
      apache2ctl graceful
 
-8) Browse to http://<http_server>/repo/ to start using FOSSology.  See 
-   http://fossology.org/docs/scheduler#configuring_the_scheduler for a 
-   description of the UI.
+8) Browse to http://<http_server>/repo/ to login (as "Default User") and 
+   initialize the UI via the Admin -> Initialize menu item.
+
+9) You are now ready to use FOSSology!  See 
+   http://fossology.org/user_documentation for a description of the UI.
 
 Install Complete
 ================
