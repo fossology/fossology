@@ -32,6 +32,40 @@ class core_debug_menus extends FO_Plugin
   var $MenuList   = "Help::Debug::Debug Menus";
   var $DBaccess   = PLUGIN_DB_DEBUG;
 
+  /******************************************
+   PostInitialize(): This is where we check for
+   changes to the full-debug setting.
+   ******************************************/
+  function PostInitialize()
+    {
+    if ($this->State != PLUGIN_STATE_VALID) { return(0); } // don't re-run
+    // Make sure dependencies are met
+    foreach($this->Dependency as $key => $val)
+      {
+      $id = plugin_find_id($val);
+      if ($id < 0) { $this->Destroy(); return(0); }
+      }
+
+    $FullMenuDebug = GetParm("fullmenu",PARM_INTEGER);
+    if ($FullMenuDebug == 2)
+	{
+	$_SESSION['fullmenudebug'] = 1;
+	}
+    if ($FullMenuDebug == 1)
+	{
+	$_SESSION['fullmenudebug'] = 0;
+	}
+
+    // It worked, so mark this plugin as ready.
+    $this->State = PLUGIN_STATE_READY;
+    // Add this plugin to the menu
+    if ($this->MenuList !== "")
+	{
+	menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+	}
+    return(1);
+    } // PostInitialize()
+
   /***********************************************************
    Menu2HTML(): Display the full menu as an ordered list.
    This is recursive.
@@ -64,15 +98,13 @@ class core_debug_menus extends FO_Plugin
       case "XML":
         break;
       case "HTML":
-        $FullMenuDebug = GetParm("fullmenu",PARM_INTEGER);
+	$FullMenuDebug = GetParm("fullmenu",PARM_INTEGER);
 	if ($FullMenuDebug == 2)
 		{
-		$_SESSION['fullmenudebug'] = 1;
 		print "<b>Full debug ENABLED!</b> Now view any page.<P>\n";
 		}
 	if ($FullMenuDebug == 1)
 		{
-		$_SESSION['fullmenudebug'] = 0;
 		print "<b>Full debug disabled!</b> Now view any page.<P>\n";
 		}
 	print "This developer tool lists all items in the menu structure.\n";
