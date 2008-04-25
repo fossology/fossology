@@ -52,6 +52,7 @@ typedef struct KeyType KeyType;
 void *DB=NULL;
 int Agent_pk=-1;	/* agent identifier */
 char *Akey=NULL;	/* set by ARG_akey */
+char *Table=NULL;	/* set by ARG_table */
 
 /* KeywordTypes is similar to extractor.c from libextractor */
 KeyType KeywordPkgMeta = { -1,-1,"pkgmeta","Package meta data" };
@@ -465,6 +466,7 @@ void    SetEnv  (char *S, int Env)
   char Value[1024];
   int GotA=0;
   int GotAkey=0;
+  int GotTable=0;
   int GotOther=0;
   char *OrigS;
 
@@ -482,6 +484,7 @@ void    SetEnv  (char *S, int Env)
 		setenv(Field,Value,1);
 		if (!strcmp(Field,"ARG_a")) GotA=1;
 		else if (!strcmp(Field,"ARG_akey")) GotAkey=1;
+		else if (!strcmp(Field,"ARG_table")) GotTable=1;
 		else GotOther=1;
 		break;
         default:        break;
@@ -498,6 +501,7 @@ void    SetEnv  (char *S, int Env)
     exit(-1);
     }
   Akey = getenv("ARG_akey");
+  if (GotTable) { Table = getenv("ARG_table"); }
 } /* SetEnv() */
 
 /*********************************************************
@@ -694,6 +698,16 @@ int	main	(int argc, char *argv[])
 	    memset(SQL,0,sizeof(SQL));
 	    snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','true','%s');",KeywordTypes[GetKey(-2)].DBIndex,getenv("ARG_akey"));
 	    DBaccess(DB,SQL);
+	    /* Make the table as processed */
+	    /** Without this, we need a "SELECT ... EXCEPT SELECT..." which
+	        is really inefficient. **/
+	    if (Table != NULL)
+	      {
+	      memset(SQL,0,sizeof(SQL));
+	      snprintf(SQL,sizeof(SQL),"DELETE FROM %s WHERE akey = '%s';",
+		Table,Akey);
+	      DBaccess(DB,SQL);
+	      }
 	    }
 	  }
 	else
