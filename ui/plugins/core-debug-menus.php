@@ -64,11 +64,41 @@ class core_debug_menus extends FO_Plugin
       case "XML":
         break;
       case "HTML":
+        $FullMenuDebug = GetParm("fullmenudebug",PARM_INTEGER);
+	if ($FullMenuDebug == 2)
+		{
+		$_SESSION['fullmenudebug'] = 1;
+		print "<b>Full debug ENABLED!</b> Now view any page.<P>\n";
+		}
+	if ($FullMenuDebug == 1)
+		{
+		$_SESSION['fullmenudebug'] = 0;
+		print "<b>Full debug disabled!</b> Now view any page.<P>\n";
+		}
+	print "This developer tool lists all items in the menu structure.\n";
+	print "Since some menu inserts are conditional, not everything may appear here (the conditions may not lead to the insertion).\n";
+	print "Fully-debugged menus show the full menu path and order number <i>in the menu</i>.\n";
+	print "The full debugging is restricted to <b>your</b> login session. (Nobody else will see it.)\n";
+	print "To disable full debugging, return here and unselect the option.\n";
+	print "<br>\n";
+	print "<form method='post'>\n";
+	if (@$_SESSION['fullmenudebug'] == 1)
+	  {
+	  print "<input type='hidden' name='fullmenudebug' value='1'>";
+	  print "<input type='submit' value='Disable Full Debug!'>";
+	  }
+	else
+	  {
+	  print "<input type='hidden' name='fullmenudebug' value='2'>";
+	  print "<input type='submit' value='Enable Full Debug!'>";
+	  }
+	print "</form>\n";
+	print "<hr>";
 	$this->Menu2HTML($MenuList);
-	$V .= "<hr>\n";
-	$V .= "<pre>";
-	$V .= htmlentities(print_r($MenuList,1));
-	$V .= "</pre>";
+	print "<hr>\n";
+	print "<pre>";
+	print htmlentities(print_r($MenuList,1));
+	print "</pre>";
         break;
       case "Text":
 	print_r($MenuList);
@@ -77,7 +107,7 @@ class core_debug_menus extends FO_Plugin
         break;
       }
     if (!$this->OutputToStdout) { return($V); }
-    print("$V");
+    print($V);
     return;
     } // Output()
 
