@@ -112,7 +112,8 @@ class core_debug_menus extends FO_Plugin
 	print "Fully-debugged menus show the full menu path and order number <i>in the menu</i>.\n";
 	print "<ul>\n";
 	print "<li>The full debugging is restricted to <b>your</b> login session. (Nobody else will see it.)\n";
-	print "<li>Full debugging shows the full menu path for each menu.\n";
+	print "<li>Full debugging shows the full menu path for each menu\n";
+	print "and the order is included in parenthesis.\n";
 	print "However, menus that use HTML instead of text will <i>not</i> show the full path.\n";
 	print "<li>To disable full debugging, return here and unselect the option.\n";
 	print "</ul>\n";
