@@ -131,11 +131,7 @@ class agent_pkgmetagetta extends FO_Plugin
     if (empty($jobqueuepk)) { return("Failed to insert first sqlagent into job queue"); }
 
     /* Add job: job has jobqueue item "pkgmetagetta" */
-    $jqargs = "SELECT * FROM $TempTable
-	WHERE Akey NOT IN
-	(SELECT attrib.pfile_fk FROM attrib
-	WHERE attrib_key_fk = '$attribkey')
-	LIMIT 5000;";
+    $jqargs = "SELECT *, '$TempTable' AS table FROM $TempTable LIMIT 5000;";
     $jobqueuepk = JobQueueAdd($jobpk,"pkgmetagetta",$jqargs,"yes","a",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert pkgmetagetta into job queue"); }
 
