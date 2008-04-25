@@ -64,7 +64,7 @@ class core_debug_menus extends FO_Plugin
       case "XML":
         break;
       case "HTML":
-        $FullMenuDebug = GetParm("fullmenudebug",PARM_INTEGER);
+        $FullMenuDebug = GetParm("fullmenu",PARM_INTEGER);
 	if ($FullMenuDebug == 2)
 		{
 		$_SESSION['fullmenudebug'] = 1;
@@ -78,18 +78,22 @@ class core_debug_menus extends FO_Plugin
 	print "This developer tool lists all items in the menu structure.\n";
 	print "Since some menu inserts are conditional, not everything may appear here (the conditions may not lead to the insertion).\n";
 	print "Fully-debugged menus show the full menu path and order number <i>in the menu</i>.\n";
-	print "The full debugging is restricted to <b>your</b> login session. (Nobody else will see it.)\n";
-	print "To disable full debugging, return here and unselect the option.\n";
+	print "<ul>\n";
+	print "<li>The full debugging is restricted to <b>your</b> login session. (Nobody else will see it.)\n";
+	print "<li>Full debugging shows the full menu path for each menu.\n";
+	print "However, menus that use HTML instead of text will <i>not</i> show the full path.\n";
+	print "<li>To disable full debugging, return here and unselect the option.\n";
+	print "</ul>\n";
 	print "<br>\n";
 	print "<form method='post'>\n";
 	if (@$_SESSION['fullmenudebug'] == 1)
 	  {
-	  print "<input type='hidden' name='fullmenudebug' value='1'>";
+	  print "<input type='hidden' name='fullmenu' value='1'>";
 	  print "<input type='submit' value='Disable Full Debug!'>";
 	  }
 	else
 	  {
-	  print "<input type='hidden' name='fullmenudebug' value='2'>";
+	  print "<input type='hidden' name='fullmenu' value='2'>";
 	  print "<input type='submit' value='Enable Full Debug!'>";
 	  }
 	print "</form>\n";
