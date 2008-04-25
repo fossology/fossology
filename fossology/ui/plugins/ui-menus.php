@@ -100,16 +100,24 @@ class ui_menu extends FO_Plugin
 	    {
 	    $V .= '" target="' . $M->Target . '">';
 	    }
-	  $V .= $M->Name;
+	  if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName; }
+	  else { $V .= $M->Name; }
 	  }
         else
 	  {
 	  $V .= '<a href="#">';
 	  if (empty($M->SubMenu))
 		{
-		$V .= "<font color='#C0C0C0'>" . $M->Name . "</font>";
+		$V .= "<font color='#C0C0C0'>";
+		if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName; }
+		else { $V .= $M->Name; }
+		$V .= "</font>";
 		}
-	  else { $V .= $M->Name; }
+	  else
+		{
+		if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName; }
+		else { $V .= $M->Name; }
+		}
 	  }
 
         if (!empty($M->SubMenu) && ($Indent > 0))
