@@ -112,8 +112,8 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth,&$FullN
   $PathParts = explode("::",$Path,2);
   if (!isset($PathParts[0]) || !strcmp($PathParts[0],""))
 	{ return(0); } // nothing to do
-  if (!isset($PathParts[1])) { $Order = $LastOrder; }
-  else { $Order = -1; }
+  if (!isset($PathParts[1])) { $LastPart=1; }
+  else { $LastPart = 0; }
 
   /*****
    $Menu is the top of the list.
@@ -131,7 +131,7 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth,&$FullN
 	$M = &$Menu[$Key];
 	break;
 	}
-      else if (!strcmp($Val->Name,"[BREAK]") && ($Val->Order == $Order))
+      else if (!strcmp($Val->Name,"[BREAK]") && ($Val->Order == $LastOrder))
 	{
 	$M = &$Menu[$Key];
 	break;
@@ -150,7 +150,7 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth,&$FullN
     }
 
   /* $M is set! See if we need to traverse submenus */
-  if ($Order == -1)
+  if ($LastPart != 1)
     {
     $Depth = menu_insert_r($M->SubMenu,$PathParts[1],$LastOrder,$Target,$URI,$HTML,$Depth+1,$FullName);
     $NewDepth = $Depth + 1;
@@ -163,10 +163,10 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth,&$FullN
     {
     /* No traversal -- save the final values */
     /** If the menu order is already set, don't reset it to the default **/
-    if ($Order != 0)
+    if ($LastOrder != 0)
       {
-      if ($M->Order != $Order) { $NeedSort=1; }
-      $M->Order = $Order;
+      if ($M->Order != $LastOrder) { $NeedSort=1; }
+      $M->Order = $LastOrder;
       }
     $M->Target = $Target;
     $M->URI = $URI;
