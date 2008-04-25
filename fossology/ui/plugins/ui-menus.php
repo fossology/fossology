@@ -100,7 +100,7 @@ class ui_menu extends FO_Plugin
 	    {
 	    $V .= '" target="' . $M->Target . '">';
 	    }
-	  if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName; }
+	  if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName . "(" . $M->Order . ")"; }
 	  else { $V .= $M->Name; }
 	  }
         else
@@ -109,13 +109,13 @@ class ui_menu extends FO_Plugin
 	  if (empty($M->SubMenu))
 		{
 		$V .= "<font color='#C0C0C0'>";
-		if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName; }
+		if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName . "(" . $M->Order . ")"; }
 		else { $V .= $M->Name; }
 		$V .= "</font>";
 		}
 	  else
 		{
-		if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName; }
+		if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName . "(" . $M->Order . ")"; }
 		else { $V .= $M->Name; }
 		}
 	  }

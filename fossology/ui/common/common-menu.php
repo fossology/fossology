@@ -270,7 +270,7 @@ function menu_to_1html($Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
 	{
 	if (!$First) { $V .= " | "; }
 	$V .= "<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "'>";
-	if (@$_SESSION['fullmenudebug'] == 1) { $V .= $Val->FullName; }
+	if (@$_SESSION['fullmenudebug'] == 1) { $V .= $Val->FullName . "(" . $Val->Order . ")"; }
 	else { $V .= $Val->Name; }
 	$V .= "</a>";
 	$First=0;
@@ -278,7 +278,7 @@ function menu_to_1html($Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
       else if ($ShowAll)
 	{
 	if (!$First) { $V .= " | "; }
-	if (@$_SESSION['fullmenudebug'] == 1) { $V .= $Val->FullName; }
+	if (@$_SESSION['fullmenudebug'] == 1) { $V .= $Val->FullName . "(" . $Val->Order . ")"; }
 	else { $V .= $Val->Name; }
 	$First=0;
 	}
@@ -320,7 +320,7 @@ function menu_to_1list($Menu,&$Parm,$Pre="",$Post="",$ShowAll=1)
 	{
 	$V .= $Pre;
 	$V .= "[<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "&" . $Parm . "'>";
-	if (@$_SESSION['fullmenudebug'] == 1) { $V .= $Val->FullName; }
+	if (@$_SESSION['fullmenudebug'] == 1) { $V .= $Val->FullName . "(" . $Val->Order . ")"; }
 	else { $V .= $Val->Name; }
 	$V .= "</a>]";
 	$V .= $Post;
@@ -329,7 +329,7 @@ function menu_to_1list($Menu,&$Parm,$Pre="",$Post="",$ShowAll=1)
 	{
 	$V .= $Pre;
 	$V .= "[";
-	if (@$_SESSION['fullmenudebug'] == 1) { $V .= $Val->FullName; }
+	if (@$_SESSION['fullmenudebug'] == 1) { $V .= $Val->FullName . "(" . $Val->Order . ")"; }
 	else { $V .= $Val->Name; }
 	$V .= "]";
 	$V .= $Post;
