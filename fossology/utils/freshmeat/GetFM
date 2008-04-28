@@ -36,11 +36,11 @@ URL="http://freshmeat.net/backend/fm-projects.rdf.bz2"
 . /usr/local/include/FMDir
 
 DIR=$FMDIR
-RDIR="${DIR}Rdfs/"
+RDIR="${DIR}/Rdfs/"
 Wget_Log="${RDIR}wget.log"
-INPUTFILES="${DIR}Input-Files/"
-RLOGS="${DIR}Run-logs/"
-GOLDEN="${DIR}golden.${Date}/Input-files/"
+INPUTFILES="${DIR}/Input-Files/"
+RLOGS="${DIR}/Run-logs/"
+GOLDEN="${DIR}/golden.${Date}/Input-files/"
 # make the other directories needed.
 mkdir -p $RLOGS
 mkdir -p $INPUTFILES
