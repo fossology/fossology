@@ -29,13 +29,12 @@ if (!isset($GlobalReady)) { exit; }
  *************************************************/
 class licgroup extends FO_Plugin
   {
-  var $Name       = "licgrp";
+  var $Name       = "license_groups";
   var $Title      = "License Groups";
   var $Version    = "1.0";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_WRITE;
   var $LoginFlag  = 0;
-
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
@@ -61,45 +60,94 @@ class licgroup extends FO_Plugin
      global $DB;
      if (empty($DB)) { return(1); } /* No DB */
 
-/*******************************************/
-/*******************************************/
-/*******************************************/
-/*** Need code to check BEFORE creation. ***/
-/*** Do not just assume a failure means it worked. ***/
-/*******************************************/
-/*******************************************/
-/*******************************************/
+    /* Create TABLE licgroup if it does not exist */
+    $SQL = "SELECT table_name AS table
+	FROM information_schema.tables
+	WHERE table_type = 'BASE TABLE'
+	AND table_schema = 'public'
+	AND table_name = 'licgroup';";
+    $Results = $DB->Action($SQL);
+    if (empty($Results[0]['table']))
+      {
+      $SQL1 = "CREATE SEQUENCE licgroup_licgroup_pk_seq START 1;";
+      $DB->Action($SQL1);
+      $SQL1 = "CREATE TABLE licgroup (
+	licgroup_pk integer PRIMARY KEY DEFAULT nextval('licgroup_licgroup_pk_seq'),
+	licgroup_name text UNIQUE,
+	licgroup_desc text,
+	licgroup_color integer UNIQUE
+        );
+	COMMENT ON COLUMN licgroup.licgroup_name IS 'Name of License Group';
+	COMMENT ON COLUMN licgroup.licgroup_desc IS 'Description of License Group';
+	COMMENT ON COLUMN licgroup.licgroup_color IS 'Color to associate with License Group (#RRGGBB)';
+	";
+      $DB->Action($SQL1);
+      $Results = $DB->Action($SQL);
+      if (empty($Results[0]['table']))
+        {
+	printf("ERROR: Failed to create table: licgroup\n");
+	return(1);
+	}
+      } /* create TABLE licgroup */
 
-     /* Create tables, ignore error if they already exist */
-     $sql = "CREATE SEQUENCE licgroup_licgroup_pk_seq START 1;
-             CREATE TABLE licgroup (
-                licgroup_pk integer PRIMARY KEY DEFAULT nextval('licgroup_licgroup_pk_seq'),
-                licgroup_name text UNIQUE,
-                licgroup_desc text,
-                licgroup_color integer UNIQUE
-             );
-             COMMENT ON COLUMN licgroup_name IS 'Name of License Group';
-             COMMENT ON COLUMN licgroup_description IS 'Description of License Group';
-             ";
-     $Results = $DB->Action($sql);
-     $sql = "CREATE SEQUENCE licgroup_lics_licgroup_lics_pk_seq START 1;
-             CREATE TABLE licgroup_lics (
-                licgroup_lics_pk integer PRIMARY KEY DEFAULT nextval('licgroup_lics_licgroup_lics_pk_seq'),
-                licgroup_fk      integer FOREIGN KEY('licgroup.licgroup_pk'),
-                lic_fk           integer FOREIGN KEY('agent_lic_raw.lic_pk')
-             );
-             ";
-     $Results = $DB->Action($sql);
-     $sql = "CREATE SEQUENCE licgroup_grps_licgroup_grps_pk_seq START 1;
-             CREATE TABLE licgroup_grps (
-                licgroup_grps_pk integer PRIMARY KEY DEFAULT nextval('licgroup_grps_licgroup_grps_pk_seq'),
-                licgroup_fk      integer FOREIGN KEY('licgroup.licgroup_pk'),
-                licgroup_memberfk integer FOREIGN KEY('licgroup.licgroup_pk'),
-             );
-             COMMENT ON COLUMN licgroup_fk IS 'Key of parent license group';
-             COMMENT ON COLUMN licgroup_memberfk IS 'Key of license group that belongs to licgroup_fk';
-             ";
-     $Results = $DB->Action($sql);
+    /* Create TABLE licgroup_lics if it does not exist */
+    $SQL = "SELECT table_name AS table
+	FROM information_schema.tables
+	WHERE table_type = 'BASE TABLE'
+	AND table_schema = 'public'
+	AND table_name = 'licgroup_lics';";
+    $Results = $DB->Action($SQL);
+    if (empty($Results[0]['table']))
+      {
+      $SQL1 = "CREATE SEQUENCE licgroup_lics_licgroup_lics_pk_seq START 1;";
+      $DB->Action($SQL1);
+      $SQL1 = "CREATE TABLE licgroup_lics (
+	licgroup_lics_pk integer PRIMARY KEY DEFAULT nextval('licgroup_lics_licgroup_lics_pk_seq'),
+	licgroup_fk      integer,
+	lic_fk           integer,
+	CONSTRAINT licgroup_exist FOREIGN KEY(licgroup_fk) REFERENCES licgroup(licgroup_pk) ON UPDATE RESTRICT ON DELETE RESTRICT
+	);
+	";
+// Commented out because 'there is no unique constraint matching given keys for referenced table "agent_lic_raw"'  -- Leave it for Bob to resolve. :-)
+//	CONSTRAINT lic_exist FOREIGN KEY(lic_fk) REFERENCES agent_lic_raw(lic_pk) ON UPDATE RESTRICT ON DELETE RESTRICT
+      $DB->Action($SQL1);
+      $Results = $DB->Action($SQL);
+      if (empty($Results[0]['table']))
+        {
+	printf("ERROR: Failed to create table: licgroup_lics\n");
+	return(1);
+	}
+      } /* create TABLE licgroup_lics */
+
+    /* Check if TABLE licgroup_grps exists */
+    $SQL = "SELECT table_name AS table
+	FROM information_schema.tables
+	WHERE table_type = 'BASE TABLE'
+	AND table_schema = 'public'
+	AND table_name = 'licgroup_grps';";
+    $Results = $DB->Action($SQL);
+    if (empty($Results[0]['table']))
+      {
+      $SQL1 = "CREATE SEQUENCE licgroup_grps_licgroup_grps_pk_seq START 1;
+	CREATE TABLE licgroup_grps (
+	licgroup_grps_pk integer PRIMARY KEY DEFAULT nextval('licgroup_grps_licgroup_grps_pk_seq'),
+	licgroup_fk      integer,
+	licgroup_memberfk integer,
+	CONSTRAINT licgroup_exist FOREIGN KEY(licgroup_fk) REFERENCES licgroup(licgroup_pk) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT licgroupmember_exist FOREIGN KEY(licgroup_memberfk) REFERENCES licgroup(licgroup_pk) ON UPDATE RESTRICT ON DELETE RESTRICT
+	);
+	COMMENT ON COLUMN licgroup_grps.licgroup_fk IS 'Key of parent license group';
+	COMMENT ON COLUMN licgroup_grps.licgroup_memberfk IS 'Key of license group that belongs to licgroup_fk';
+	";
+      $DB->Action($SQL1);
+      $Results = $DB->Action($SQL);
+      if (empty($Results[0]['table']))
+        {
+	printf("ERROR: Failed to create table: licgroup_grps\n");
+	return(1);
+	}
+      } /* create TABLE licgroup_grps */
+   return(0);
    } // Install()
 
   /***********************************************************
