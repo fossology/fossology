@@ -318,7 +318,7 @@ class ui_view extends FO_Plugin
    ShowText(): Given a file handle, display "strings" of the file.
    Output goes to stdout!
    ***********************************************************/
-  function ShowText($Fin,$Start=0,$Flowed,$FullLength=-1)
+  function ShowText($Fin,$Start,$Flowed,$FullLength=-1)
     {
     if (!$Fin) return;
     $Stat = fstat($Fin);
@@ -339,7 +339,7 @@ class ui_view extends FO_Plugin
     $MadeOutput=0;
     /* Begin color if it is IN but not at START of highlighting */
     $InColor=0;
-    if ($this->FindHighlight($Start) & 0x03 == 0x02)
+    if (($this->FindHighlight($Start) & 0x03) == 0x02)
 	{
 	$H = $this->Highlight[0];
 	print "<font style='background:" . $this->HighlightColors[$H['Color']] . ";'>";
@@ -360,7 +360,7 @@ class ui_view extends FO_Plugin
 	$S = str_replace("\t","&nbsp;&nbsp;",$S);
 	}
 
-      if ($this->FindHighlight($Start) & 0x01)
+      if (($this->FindHighlight($Start)) & 0x01)
 	{
 	if ($InColor) { print "</font>"; }
 	$H = $this->Highlight[0]['Color'];
@@ -571,8 +571,10 @@ class ui_view extends FO_Plugin
     $Show = GetParm("show",PARM_STRING);
     $Item = GetParm("item",PARM_INTEGER);
     $Page = GetParm("page",PARM_INTEGER);
+/*
     if (empty($Item) || empty($Pfile) || empty($Ufile) || empty($Upload))
 	{ return; }
+*/
     if (empty($Page)) { $Page=0; };
 
     switch(GetParm("format",PARM_STRING))
