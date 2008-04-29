@@ -75,7 +75,7 @@ class licgroup extends FO_Plugin
 	licgroup_pk integer PRIMARY KEY DEFAULT nextval('licgroup_licgroup_pk_seq'),
 	licgroup_name text UNIQUE,
 	licgroup_desc text,
-	licgroup_color integer UNIQUE
+	licgroup_color text
         );
 	COMMENT ON COLUMN licgroup.licgroup_name IS 'Name of License Group';
 	COMMENT ON COLUMN licgroup.licgroup_desc IS 'Description of License Group';
@@ -104,9 +104,12 @@ class licgroup extends FO_Plugin
       $SQL1 = "CREATE TABLE licgroup_lics (
 	licgroup_lics_pk integer PRIMARY KEY DEFAULT nextval('licgroup_lics_licgroup_lics_pk_seq'),
 	licgroup_fk      integer,
-	lic_fk           integer,
+	lic_fk   integer,
+	CONSTRAINT only_one UNIQUE (licgroup_lics_pk, licgroup_fk),
 	CONSTRAINT licgroup_exist FOREIGN KEY(licgroup_fk) REFERENCES licgroup(licgroup_pk) ON UPDATE RESTRICT ON DELETE RESTRICT
 	);
+	COMMENT ON COLUMN licgroup_lics.licgroup_fk IS 'Parent License Group';
+	COMMENT ON COLUMN licgroup_lics.lic_fk IS 'License in Group';
 	";
 // Commented out because 'there is no unique constraint matching given keys for referenced table "agent_lic_raw"'  -- Leave it for Bob to resolve. :-)
 //	CONSTRAINT lic_exist FOREIGN KEY(lic_fk) REFERENCES agent_lic_raw(lic_pk) ON UPDATE RESTRICT ON DELETE RESTRICT
@@ -133,6 +136,7 @@ class licgroup extends FO_Plugin
 	licgroup_grps_pk integer PRIMARY KEY DEFAULT nextval('licgroup_grps_licgroup_grps_pk_seq'),
 	licgroup_fk      integer,
 	licgroup_memberfk integer,
+	CONSTRAINT only_one UNIQUE (licgroup_fk, licgroup_memberfk),
 	CONSTRAINT licgroup_exist FOREIGN KEY(licgroup_fk) REFERENCES licgroup(licgroup_pk) ON UPDATE RESTRICT ON DELETE RESTRICT,
 	CONSTRAINT licgroupmember_exist FOREIGN KEY(licgroup_memberfk) REFERENCES licgroup(licgroup_pk) ON UPDATE RESTRICT ON DELETE RESTRICT
 	);
