@@ -411,6 +411,7 @@ function moveOptions(theSelFrom, theSelTo)
     /* List the license groups */
     $V .= "</td><td>";
     $V .= "<select multiple='multiple' id='liclist' name='liclist[]' size='10'>";
+    ksort($GroupListLic);
     foreach($GroupListLic as $Name => $Key)
       {
       $V .= "<option value='$Key'";
