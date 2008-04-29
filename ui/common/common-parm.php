@@ -28,6 +28,7 @@ define("PARM_INTEGER",1);
 define("PARM_NUMBER",2);
 define("PARM_STRING",3);
 define("PARM_TEXT",4);
+define("PARM_RAW",5);
 
 /************************************************************
  GetParm(): Plugins should not use globals to access HTTP variables.
@@ -37,6 +38,7 @@ define("PARM_TEXT",4);
    PARM_NUMBER: Only numbers (decimals are fine) are returned.
    PARM_STRING: The variable is converted from URI encoding to text.
    PARM_TEXT: Like PARM_STRING, but all safe quoting is removed.
+   PARM_RAW: Return the raw value.
  If the variable does not exist, OR is the wrong type (e.g., a string
  when it should be a number), then nothing is returned.
  NOTE: If a plugin wants to access these variable directly, it can.
@@ -58,10 +60,12 @@ function GetParm($Name,$Type)
 	return(intval($Var));
     case PARM_NUMBER:
 	return(floatval($Var));
-    case PARM_STRING:
-	return($Var);
     case PARM_TEXT:
 	return(stripslashes($Var));
+    case PARM_STRING:
+	return(urldecode($Var));
+    case PARM_RAW:
+	return($Var);
     }
   return;
 } // GetParm()
