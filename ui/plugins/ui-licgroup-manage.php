@@ -194,7 +194,9 @@ function moveOptions(theSelFrom, theSelTo)
     global $DB;
     $GroupName = GetParm('name',PARM_TEXT);
     $GroupName = str_replace("'","''",$GroupName);
-    $Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_name = '$GroupName';");
+    $GroupKey = GetParm('groupkey',PARM_INTEGER);
+    /* To delete: name and key number must match */
+    $Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_pk = '$GroupKey' AND licgroup_name = '$GroupName';");
     $GroupKey = $Results[0]['licgroup_pk'];
     if (empty($GroupKey))
       {
@@ -214,6 +216,8 @@ function moveOptions(theSelFrom, theSelTo)
   function LicGroupInsert	()
     {
     global $DB;
+    $GroupKey = GetParm('groupkey',PARM_INTEGER);
+    if ($GroupKey <= 0) { $GroupKey=NULL; }
     $GroupName = GetParm('name',PARM_TEXT);
     $GroupDesc = GetParm('desc',PARM_TEXT);
     $GroupColor = GetParm('color',PARM_TEXT);
@@ -229,9 +233,18 @@ function moveOptions(theSelFrom, theSelTo)
     /* Check if values look good */
     if (empty($GroupName)) { return("Group name must be specified.\n"); }
 
-    /* Do the insert (or update) */
-    $Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_name = '$GroupName';");
+    if (!empty($GroupKey))
+      {
+      $SQL = "SELECT licgroup_pk FROM licgroup WHERE licgroup_pk = '$GroupKey';";
+      }
+    else
+      {
+      $SQL = "SELECT * FROM licgroup WHERE licgroup_name = '$GroupName';";
+      }
+    $Results = $DB->Action($SQL);
     $GroupKey = $Results[0]['licgroup_pk'];
+
+    /* Do the insert (or update) */
     if (empty($GroupKey))
       {
       $SQL = "INSERT INTO licgroup (licgroup_name,licgroup_desc,licgroup_color)
@@ -330,7 +343,7 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "<tr>\n";
     $V .= "<td width='20%'>Select management action</td>";
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&groupkey=";
-    $V .= "<td><select name='action' onChange='window.open(\"$Uri\"+this.value,\"_top\");'>\n";
+    $V .= "<td><select name='groupkey' onChange='window.open(\"$Uri\"+this.value,\"_top\");'>\n";
     $V .= $this->LicGroupCurrList($GroupKey,1);
     $V .= "</select>\n";
     $V .= "<td>";
@@ -474,6 +487,7 @@ function moveOptions(theSelFrom, theSelTo)
 	    }
 	  }
 	$GroupKey = GetParm('groupkey',PARM_INTEGER);
+	if ($GroupKey <= 0) { $GroupKey = NULL; }
 	$V .= $this->LicGroupForm($GroupKey);
 	break;
       case "Text":
