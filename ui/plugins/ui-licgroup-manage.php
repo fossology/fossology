@@ -42,7 +42,7 @@ class licgroup_manage extends FO_Plugin
   var $Name       = "license_groups_manage";
   var $Title      = "Manage License Groups";
   var $Version    = "1.0";
-  var $MenuList   = "Organize::License::Group Manage";
+  var $MenuList   = "Organize::License::Manage Groups";
   var $Dependency = array("db","license_groups","view-license");
   var $DBaccess   = PLUGIN_DB_ANALYZE;
   var $LoginFlag  = 1; /* must be logged in to use this */
@@ -88,6 +88,11 @@ class licgroup_manage extends FO_Plugin
     {
     var i;
     List = document.getElementById("liclist");
+    for(i=0; i < List.options.length; i++)
+      {
+      List.options[i].selected = true;
+      }
+    List = document.getElementById("grplist");
     for(i=0; i < List.options.length; i++)
       {
       List.options[i].selected = true;
@@ -196,18 +201,23 @@ function moveOptions(theSelFrom, theSelTo)
     $GroupName = str_replace("'","''",$GroupName);
     $GroupKey = GetParm('groupkey',PARM_INTEGER);
     /* To delete: name and key number must match */
-    $Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_pk = '$GroupKey' AND licgroup_name = '$GroupName';");
+    $Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_pk = '$GroupKey';");
     $GroupKey = $Results[0]['licgroup_pk'];
-    if (empty($GroupKey))
+    if (empty($GroupKey)) { return("Record not found.  Nothing to delete."); }
+    $GroupName = GetParm('name',PARM_TEXT);
+    if ($GroupName != $Results[0]['licgroup_name'])
       {
-      return;
+      return("Group name ($GroupName) does not match name field (" . $Results[0]['licgroup_name'] . ").  Delete aborted.");
       }
+
     $DB->Action("DELETE FROM licgroup_lics WHERE licgroup_fk = '$GroupKey';");
+    $DB->Action("DELETE FROM licgroup_grps WHERE licgroup_fk = '$GroupKey';");
     $DB->Action("DELETE FROM licgroup WHERE licgroup_pk = '$GroupKey';");
     $DB->Action("VACUUM ANALYZE licgroup_lics;");
+    $DB->Action("VACUUM ANALYZE licgroup_grps;");
     $DB->Action("VACUUM ANALYZE licgroup;");
     return;
-    }
+    } // LicGroupDelete()
 
   /***********************************************************
    LicGroupInsert(): Someone posted data!  Add or update the group!
@@ -222,7 +232,7 @@ function moveOptions(theSelFrom, theSelTo)
     $GroupDesc = GetParm('desc',PARM_TEXT);
     $GroupColor = GetParm('color',PARM_TEXT);
     $GroupListLic = GetParm('liclist',PARM_RAW); /* licenses in this group */
-//    $GroupListGrp = array(); /* groups in this group */
+    $GroupListGrp = GetParm('grplist',PARM_RAW); /* groups in this group */
     /* Protect for the DB */
     $GroupName = str_replace("'","''",$GroupName);
     $GroupDesc = str_replace("'","''",$GroupDesc);
@@ -276,8 +286,16 @@ function moveOptions(theSelFrom, theSelTo)
       $DB->Action("INSERT INTO licgroup_lics (licgroup_fk,lic_fk)
 	VALUES ('$GroupKey','$LicNum');");
       }
+    $Results = $DB->Action("DELETE FROM licgroup_grps WHERE licgroup_fk = '$GroupKey';");
+    for($i=0; !empty($GroupListGrp[$i]); $i++)
+      {
+      $GrpNum = intval($GroupListGrp[$i]);
+      $DB->Action("INSERT INTO licgroup_grps (licgroup_fk,licgroup_memberfk)
+	VALUES ('$GroupKey','$GrpNum');");
+      }
     $DB->Action("COMMIT;");
     $DB->Action("VACUUM ANALYZE licgroup_lics;");
+    $DB->Action("VACUUM ANALYZE licgroup_grps;");
 
     return;
     } // LicGroupInsert() */
@@ -376,9 +394,9 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "</tr><tr>\n";
     $V .= "<td>Select licenses to include in the group</td><td>";
     $V .= "<table width='100%'>";
-    $V .= "<tr><td align='center' width='10%'>Available licenses</td><td width='10%'></td><td align='center'>Licenses in this Group</td></tr>";
+    $V .= "<tr><td align='center' width='45%'>Available licenses</td><td width='10%'></td><td width='45%' align='center'>Licenses in this Group</td></tr>";
     $V .= "<tr>";
-    $V .= "<tr><td width='10%'>";
+    $V .= "<tr><td>";
     $V .= "<select multiple='multiple' id='licavailable' name='licavailable' size='10'>";
     foreach($LicAvailable as $Name => $Key)
       {
@@ -389,7 +407,7 @@ function moveOptions(theSelFrom, theSelTo)
 
     /* center list of options */
     /*** <-- View ***/
-    $V .= "</td><td width='10%'>";
+    $V .= "</td><td>";
     $V .= "<center>\n";
     $Uri = "onClick=\"javascript:if (document.getElementById('licavailable').value) window.open('";
     $Uri .= Traceback_uri();
@@ -402,7 +420,7 @@ function moveOptions(theSelFrom, theSelTo)
     $Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\"";
 
     /*** View --> ***/
-    $V .= "<a href='#' $Uri>&larr View</a><P/>\n";
+    $V .= "<a href='#' $Uri>&larr;View</a><P/>\n";
     $Uri = "onClick=\"javascript:if (document.getElementById('liclist').value) window.open('";
     $Uri .= Traceback_uri();
     $Uri .= "?mod=view-license";
@@ -412,13 +430,13 @@ function moveOptions(theSelFrom, theSelTo)
     $Uri .= "&licset=";
     $Uri .= "' + document.getElementById('liclist').value";
     $Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\"";
-    $V .= "<a href='#' $Uri>View &rarr;</a><hr/>\n";
+    $V .= "<a href='#' $Uri>View&rarr;</a><hr/>\n";
 
     /*** Add --> ***/
-    $V .= "<a href='#' onClick='moveOptions(document.formy.licavailable,document.formy.liclist);'>Add &rarr;</a><P/>\n";
+    $V .= "<a href='#' onClick='moveOptions(document.formy.licavailable,document.formy.liclist);'>Add&rarr;</a><P/>\n";
 
     /*** <-- Remove ***/
-    $V .= "<a href='#' onClick='moveOptions(document.formy.liclist,document.formy.licavailable);'>&larr; Remove</a>\n";
+    $V .= "<a href='#' onClick='moveOptions(document.formy.liclist,document.formy.licavailable);'>&larr;Remove</a>\n";
     $V .= "</center>\n";
 
     /* List the license groups */
@@ -427,12 +445,67 @@ function moveOptions(theSelFrom, theSelTo)
     ksort($GroupListLic);
     foreach($GroupListLic as $Name => $Key)
       {
-      $V .= "<option value='$Key'";
-      $V .= ">" . htmlentities($Name) . "</option>\n";
+      $V .= "<option value='$Key'>";
+      $V .= htmlentities($Name) . "</option>\n";
       }
     $V .= "</select>";
     $V .= "</td></table>\n";
-    $V .= "</td>";
+
+    /* Groups can contain groups */
+    $V .= "</tr><tr>\n";
+    $V .= "<td>Select subgroups to include in this group</td><td>";
+    $V .= "<table width='100%'>";
+    $V .= "<tr><td align='center' width='45%'>Available subgroups</td><td width='10%'></td><td width='45%' align='center'>Subgroups in this Group</td></tr>";
+    $V .= "<tr>";
+    $V .= "<tr><td>";
+    $V .= "<select multiple='multiple' id='grpavailable' name='grpavailable' size='10'>";
+    if (!empty($GroupKey))
+      {
+      $SQL = "SELECT DISTINCT licgroup_pk,licgroup_name
+	FROM licgroup
+	LEFT OUTER JOIN licgroup_grps ON licgroup_memberfk = licgroup_pk
+	WHERE licgroup_pk != '$GroupKey'
+	AND
+	  (licgroup_fk IS NULL OR licgroup_fk != '$GroupKey')
+	ORDER BY licgroup_name;";
+      }
+    else
+      {
+      $SQL = "SELECT * FROM licgroup ORDER BY licgroup_name;";
+      }
+    $Results = $DB->Action($SQL);
+    for($i=0; !empty($Results[$i]['licgroup_pk']); $i++)
+      {
+      $V .= "<option value='" . $Results[$i]['licgroup_pk'] . "'>";
+      $V .= htmlentities($Results[$i]['licgroup_name']) . "</option>\n";
+      }
+    $V .= "</select>";
+
+    /*** Add --> ***/
+    $V .= "</td><td>";
+    $V .= "<a href='#' onClick='moveOptions(document.formy.grpavailable,document.formy.grplist);'>Add&rarr;</a><P/>\n";
+
+    /*** <-- Remove ***/
+    $V .= "<a href='#' onClick='moveOptions(document.formy.grplist,document.formy.grpavailable);'>&larr;Remove</a>\n";
+    $V .= "</center>\n";
+
+    /* List the license subgroups */
+    $V .= "</td><td>";
+    if (!empty($GroupKey))
+      {
+      $SQL = "SELECT DISTINCT licgroup_memberfk,licgroup_name FROM licgroup INNER JOIN licgroup_grps ON licgroup_memberfk = licgroup_pk WHERE licgroup_fk = '$GroupKey' ORDER BY licgroup_name;";
+      $Results = $DB->Action($SQL);
+      }
+    else { $Results = NULL; }
+    $V .= "<select multiple='multiple' id='grplist' name='grplist[]' size='10'>";
+    for($i=0; !empty($Results[$i]['licgroup_memberfk']); $i++)
+      {
+      $V .= "<option value='" . $Results[$i]['licgroup_memberfk'] . "'>";
+      $V .= htmlentities($Results[$i]['licgroup_name']) . "</option>\n";
+      }
+    $V .= "</select>";
+
+    $V .= "</td></table>\n";
 
     /* Permit delete */
     $V .= "</tr><tr>\n";
