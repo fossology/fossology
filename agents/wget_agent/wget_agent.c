@@ -625,6 +625,7 @@ int	main	(int argc, char *argv[])
 	}
 
   /* Run from the command-line (for testing) */
+  signal(SIGALRM,ShowHeartbeat);
   for(arg=optind; arg < argc; arg++)
     {
     memset(GlobalURL,'\0',sizeof(GlobalURL));
@@ -634,6 +635,9 @@ int	main	(int argc, char *argv[])
     if (Debug) printf("Command-line: %s\n",GlobalURL);
     if (strstr(GlobalURL,"://"))
       {
+      alarm(60);
+      HeartbeatCount=0;
+      HeartbeatCounter=-1;
       if (Debug) printf("It's a URL\n");
       if (GetURL(GlobalTempFile,GlobalURL) != 0)
 	{
@@ -642,11 +646,14 @@ int	main	(int argc, char *argv[])
 	DBclose(DB);
 	exit(-1);
 	}
+      HeartbeatCount=-1;
+      HeartbeatCounter=-1;
       if (GlobalUploadKey != -1)
 	{
 	DBLoadGold();
 	unlink(GlobalTempFile);
 	}
+      alarm(0);
       }
     else /* must be a file */
       {
@@ -662,8 +669,6 @@ int	main	(int argc, char *argv[])
   /* Run from scheduler! */
   if (optind == argc)
     {
-    signal(SIGALRM,ShowHeartbeat);
-
     printf("OK\n"); /* inform scheduler that we are ready */
     fflush(stdout);
     HeartbeatCount=-1;
@@ -672,7 +677,6 @@ int	main	(int argc, char *argv[])
       {
       if (Parm[0] != '\0')
 	{
-	alarm(0);	/* allow scheduler to know if this hangs */
 	HeartbeatCount=0;
 	HeartbeatCounter=-1;
 	/* 3 parameters: uploadpk downloadfile url */
