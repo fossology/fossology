@@ -38,7 +38,7 @@ class dashboard extends FO_Plugin
   function DiskFree()
   {
     global $DATADIR;
-    $Cmd = "/bin/df -Pk `cat '$DATADIR/repository/RepPath.conf'`/*/* | /usr/bin/sort -u | /bin/grep '%'";
+    $Cmd = "df -Pk `cat '$DATADIR/repository/RepPath.conf'`/*/* | sort -u | grep '%'";
     $Fin = popen($Cmd,"r");
 
     /* Read results */
