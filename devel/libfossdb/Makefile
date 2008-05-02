@@ -1,47 +1,45 @@
-# libfossdb Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+# FOSSology Makefile - devel/libfossdb
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 include ../../Makefile.conf
-CC=gcc
-CFLAGS=-DFOSSDB_CONF='"$(DATADIR)/dbconnect/$(PROJECT)"' -O2 -Wall $(CFLAGS2)
-EXE=dbtest dbinit libfossdb.a dbq dbcheck
 
-all: $(EXE)
+CFLAGS_LOCAL=-DFOSSDB_CONF="$(DATADIR)/dbconnect/$(PROJECT)" -lpq \
+          -L. -lfossdb $(ALL_CFLAGS)
+EXE=dbtest dbinit dbq dbcheck
+LIB=libfossdb.a
 
-libfossdb.a: libfossdb.c libfossdb.h
-	$(RM) libfossdb.a
-	$(CC) $(CFLAGS) -c libfossdb.c
-	$(AR) cr libfossdb.a libfossdb.o
-	if [ ! -d ../lib ] ; then mkdir ../lib ; fi
-	if [ ! -d ../include ] ; then mkdir ../include ; fi
-	$(CP) libfossdb.a ../lib/
-	$(CP) libfossdb.h ../include/
+all: $(LIB) $(EXE)
 
-dbtest: libfossdb.c libfossdb.h libfossdb.a
-	$(CC) $(CFLAGS) dbtest.c -o dbtest -lpq -L. -lfossdb
+$(LIB): %.a: %.c %.h
+	$(CC) -c $< $(ALL_CFLAGS)
+	$(AR) cr $@ libfossdb.o
 
-dbcheck: libfossdb.c libfossdb.h libfossdb.a
-	$(CC) $(CFLAGS) dbcheck.c -o dbcheck -lpq -L. -lfossdb
-
-dbq: dbq.c libfossdb.h libfossdb.a
-	$(CC) $(CFLAGS) dbq.c -o dbq -lpq -L. -lfossdb
-
-dbinit: dbinit.c libfossdb.h libfossdb.a
-	$(CC) $(CFLAGS) dbinit.c -o dbinit -lpq -L. -lfossdb
-
-InstallationCreate:
-	$(CP) dbcheck ../../install/$(AGENTTESTDDIR)/
-	$(CP) dbinit ../../install/$(AGENTTESTDDIR)/
-	$(CP) dbinit.sql ../../install/$(AGENTTESTDDIR)/
-	$(CP) dbclear.sql ../../install/$(AGENTTESTDDIR)/
+$(EXE): %: %.c $(LIB)
+	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 install: all
-	#$(CP) libfossdb.a $(LIBDIR)
-	#$(CP) libfossdb.h $(INCLUDEDIR)
+	$(INSTALL_DATA) libfossdb.a $(LIBDIR)/libfossdb.a
+	$(INSTALL_DATA) libfossdb.h $(INCLUDEDIR)/libfossdb.h
 
+	$(INSTALL_PROGRAM) dbcheck $(AGENTTESTDDIR)/dbcheck
+	$(INSTALL_PROGRAM) dbinit $(AGENTTESTDDIR)/dbinit
+	$(INSTALL_DATA) dbinit.sql $(AGENTTESTDDIR)/dbinit.sql
+	$(INSTALL_DATA) dbclear.sql $(AGENTTESTDDIR)/dbclear.sql
+
+# uninstall only cleans up the files, not the directories that might have
+# been created
 uninstall:
-	#$(RM) $(LIBDIR)/libfossdb.a
-	#$(RM) $(INCLUDEDIR)/libfossdb.h
+	rm -f $(LIBDIR)/libfossdb.a
+	rm -f $(INCLUDEDIR)/libfossdb.h
+
+	rm -f $(AGENTTESTDDIR)/dbcheck
+	rm -f $(AGENTTESTDDIR)/dbinit
+	rm -f $(AGENTTESTDDIR)/dbinit.sql
+	rm -f $(AGENTTESTDDIR)/dbclear.sql
+
+test: all
+	@echo "*** No tests available for libfossdb ***"
 
 clean:
-	$(RM) *.o core $(EXE)
+	rm -f $(LIB) $(EXE) *.o core
 
+.PHONY: all install uninstall clean test
