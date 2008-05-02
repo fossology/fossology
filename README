@@ -197,7 +197,7 @@ and the one we use:
 > #log_line_prefix = ''			# Special values:
 
 Setting up the database:
-A sample database schema files is provided in the tarball under
+A sample database schema file can be found in the tarball under
 fossology-<version>/setup/fossologyinit.sql.  This will create the database when
 it is read in.  It will also create an owner for the database "fossy"
 and owner's password "fossy".  For security reasons, please change this
