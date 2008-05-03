@@ -168,6 +168,15 @@ function suckupfs($path, $recursion = false){
   $dirs      = array();
   $other     = array();
   $dir_parts = pathinfo($path);
+
+  // check if the file exists (can you reach it? in the case of multiple
+  // agent machines).
+
+  if( ! file_exists($path))
+  {
+    return(FALSE);
+  }
+
   $SPATH = opendir($path)
   or die("Suckupfs: Can't open: $path $php_errormsg\n");
 
