@@ -105,7 +105,7 @@ else
 // create output directory with the date as part of the name.
 
 $yyyymmdd = date('Y-m-d');
-$golden = 'golden.' . "$yyyymmdd" . '/';
+$golden = '/golden.' . "$yyyymmdd" . '/';
 $dest_dir .= $golden;
 $wget_logs   = $dest_dir . 'wget-logs/';
 $log_data    = $dest_dir . 'Logs-Data/';
@@ -288,7 +288,7 @@ if ($skipped_up != 0){
   echo "Saving skipped uploads (downloaded files that were not compressed)\n";
   echo
 "There were $skipped_up skipped uploads, see $log_data/skipped_uploads for details\n";
-  
+
   $SUP = fopen("$log_data/skipped_uploads", 'w')
           or die("Can't open $log_data/skipped_uploads, $php_errormsg\n");
   foreach($skipped_uploads as $skipped){
