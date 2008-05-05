@@ -101,6 +101,9 @@ function LicenseGetAll(&$UploadtreePk, &$Lics)
  contain the same license.
  Returns NULL if no files.
  NOTE: This is recursive!
+ NOTE: $WantLic can be a specific license ID (in which case, the
+ percent match is returned), or a SQL string (in which case, no
+ percent match is returned).
  ************************************************************/
 $LicenseGetAllFiles_1_Prepared = 0;
 $LicenseGetAllFiles_2_Prepared = 0;
@@ -142,7 +145,23 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
     }
 
   /* Find every item under this UploadtreePk... */
-  $Results = $DB->Execute("LicenseGetAllFiles_1",array($UploadtreePk,$WantLic));
+  if (is_int($WantLic))
+    {
+    $Results = $DB->Execute("LicenseGetAllFiles_1",array($UploadtreePk,$WantLic));
+    }
+  else
+    {
+    $SQL = "SELECT DISTINCT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk
+	FROM uploadtree
+	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = $UploadtreePk
+	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk
+	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
+	AND ($WantLic)
+	ORDER BY ufile.ufile_pk
+	;";
+    $Results = $DB->Action($SQL);
+    }
+
   foreach($Results as $R)
     {
     if (empty($R['pfile_fk'])) { continue; }

@@ -177,7 +177,7 @@ class ui_license extends FO_Plugin
 	if ($IsContainer) { $VF .= "<b>"; };
 	if ($HasHref) { $VF .= "</a>"; }
 	$VF .= "</td><td>[" . number_format($LicCount,0,"",",") . "&nbsp;";
-	$VF .= "<a href='javascript:;' onclick=\"LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
+	$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
 	$VF .= "license" . ($LicCount == 1 ? "" : "s");
 	$VF .= "</a>";
 	$VF .= "]</td>";
@@ -217,7 +217,7 @@ class ui_license extends FO_Plugin
 	  }
 	$VH .= "<td id='LicGroup-$Key'>";
 	$Uri = Traceback_uri() . "?mod=license_listing&item=$Item&lic=$Key";
-	$VH .= "<a href='javascript:;' onclick=\"LicColor('LicGroup-$Key','Lic-','" . trim($LicGID2Item[$Key]) . "','yellow'); ";
+	$VH .= "<a href=\"javascript:LicColor('LicGroup-$Key','Lic-','" . trim($LicGID2Item[$Key]) . "','yellow'); ";
 	$VH .= "\">";
 	$VH .= $LicGID2Name[$Key];
 	$VH .= "</a>";
@@ -286,7 +286,6 @@ class ui_license extends FO_Plugin
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
-    global $DB;
 
     switch(GetParm("show",PARM_STRING))
 	{
