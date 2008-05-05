@@ -33,7 +33,7 @@ class licgroup_debug extends FO_Plugin
   var $Title      = "License Groups Debug";
   var $Version    = "1.0";
   var $MenuList   = "Help::Debug::Debug License Groups";
-  var $Dependency = array("db","license_groups");
+  var $Dependency = array("db","licgroup");
   var $DBaccess   = PLUGIN_DB_WRITE;
   var $LoginFlag  = 0;
 
