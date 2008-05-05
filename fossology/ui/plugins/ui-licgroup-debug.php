@@ -121,7 +121,7 @@ class licgroup_debug extends FO_Plugin
       }
     $this->GrpName['g0'] = 'Phrase';
     $this->LicName['l1'] = 'Phrase';
-    $this->LicGroupPlugin = &$Plugins[plugin_find_id('license_groups')];
+    $this->LicGroupPlugin = &$Plugins[plugin_find_id('licgroup')];
     $this->LicGroupPlugin->MakeGroupTables();
 
     switch($this->OutputType)
