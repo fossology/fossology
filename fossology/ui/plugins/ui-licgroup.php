@@ -33,8 +33,7 @@ class licgroup extends FO_Plugin
   var $Title      = "License Groups";
   var $Version    = "1.0";
   var $Dependency = array("db","browse");
-  var $DBaccess   = PLUGIN_DB_WRITE;
-  var $LoginFlag  = 0;
+  var $DBaccess   = PLUGIN_DB_READ;
 
   /*--- Globals for this object ---*/
   var $LicInGroup=NULL; /* list of licenses in a group */
