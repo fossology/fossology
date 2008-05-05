@@ -34,6 +34,7 @@ class licgroup extends FO_Plugin
   var $Version    = "1.0";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;
+  var $LoginFlag  = 0;
 
   /*--- Globals for this object ---*/
   var $LicInGroup=NULL; /* list of licenses in a group */
@@ -696,15 +697,15 @@ class licgroup extends FO_Plugin
     $this->SFbL = plugin_find_id("search_file_by_license");
 
     switch(GetParm("show",PARM_STRING))
-        {
-        case 'detail':
-                $Show='detail';
-                break;
-        case 'summary':
-        default:
-                $Show='summary';
-                break;
-        }
+	{
+	case 'detail':
+	        $Show='detail';
+	        break;
+	case 'summary':
+	default:
+	        $Show='summary';
+	        break;
+	}
 
     switch($this->OutputType)
       {
