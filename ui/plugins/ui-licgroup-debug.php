@@ -63,24 +63,29 @@ class licgroup_debug extends FO_Plugin
 	{
 	if (substr($G,0,1) == 'g')
 	  {
+	  if ($g == 1)
+	    {
+	    print "<li>Inherited Group: " . htmlentities($this->GrpName[$G]) . "\n";
+	    }
 	  if ($g == 0)
 	    {
-	    print "<li><b><font color='red'>loop</font></b> to group " . htmlentities($this->GrpName[$G]) . "\n";
+	    print "<li><b>Loop</b> to Group: " . htmlentities($this->GrpName[$G]) . "\n";
 	    }
-	  else
+	  else /* direct */
 	    {
+	    print "<li>Group: " . htmlentities($this->GrpName[$G]) . "\n";
 	    $this->DrawGroupTree($G);
 	    }
 	  }
 	else if (substr($G,0,1) == 'l')
 	  {
-	  if (!empty($this->LicGroupPlugin->LicInGroup[$Group][$G]))
+	  if ($g == 2)
 	    {
 	    print "<li>License: ";
 	    }
-	  else
+	  if ($g == 1)
 	    {
-	    print "<li>Inherited license: ";
+	    print "<li>Inherited License: ";
 	    }
 	  print htmlentities($this->LicName[$G]) . "\n";
 	  }

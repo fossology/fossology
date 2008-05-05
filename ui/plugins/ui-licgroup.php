@@ -183,6 +183,10 @@ class licgroup extends FO_Plugin
    This function populates two quick-lookup tables so it can
    be quickly determined if a license is in a group, or if
    a group is in a group.
+   The contents of GrpInGroup:
+     0 = loop
+     1 = inherited relation
+     2 = direct relation
    ***********************************************************/
   function MakeGroupTables	()
     {
@@ -197,7 +201,7 @@ class licgroup extends FO_Plugin
       $R = &$Results[$i];
       /* Insert a 'g' for 'group', because otherwise merge treats the
 	 keys as numbers and not strings.  (Numbers get renumbered.) */
-      $GrpInGroup['g'.$R['licgroup_fk']]['g'.$R['licgroup_memberfk']] = 1;
+      $GrpInGroup['g'.$R['licgroup_fk']]['g'.$R['licgroup_memberfk']] = 2;
       }
 
     /* Load the licenses per group */
@@ -207,8 +211,8 @@ class licgroup extends FO_Plugin
       {
       $R = &$Results[$i];
       /* 'g' is for group, so 'l' is for license */
-      $LicInGroup['g'.$R['licgroup_fk']]['l'.$R['lic_fk']] = 1;
-      $GrpInGroup['g'.$R['licgroup_fk']]['l'.$R['lic_fk']] = 1;
+      $LicInGroup['g'.$R['licgroup_fk']]['l'.$R['lic_fk']] = 2;
+      $GrpInGroup['g'.$R['licgroup_fk']]['l'.$R['lic_fk']] = 2;
       }
 
     /* Fill out group-in-groups implicit inheritance */
@@ -224,7 +228,11 @@ class licgroup extends FO_Plugin
 	$Bb = &$GrpInGroup[$B];
 	if (!empty($Bb[$A]))
 	  {
-	  $GrpInGroup[$B] = array_merge($Aa,$Bb);
+	  /* Combine them manually, track inheritance */
+	  foreach($Aa as $Key => $Val)
+	    {
+	    if (empty($Bb[$Key])) { $Bb[$Key] = 1; }
+	    }
 	  }
 	} /* foreach $B */
       } /* foreach $A */
@@ -293,7 +301,7 @@ class licgroup extends FO_Plugin
     if (0) /* Debug code */
       {
       print "<pre>";
-      print "LicGroups:\n"; print_r($this->LicInGroup);
+      // print "LicGroups:\n"; print_r($this->LicInGroup);
       print "GrpGroups:\n"; print_r($this->GrpInGroup);
       print "</pre>";
       print "<hr>";
@@ -335,8 +343,19 @@ class licgroup extends FO_Plugin
       $V .= "?mod=search_file_by_licgroup&item=$Item&licgroup=" . $this->GrpInGroup[$Group]['id'] . "'>Show</a></td>";
       }
 
+    /* Create the "+" for expanding the list */
     $V .= "</td><td width='1%'>";
-    if (empty($this->GrpInGroup[$Group]['tail']))
+    /* Check if subgroups contain licenses */
+    $Count=0;
+    foreach($this->GrpInGroup[$Group] as $G => $g)
+	{
+	/* only do direct groups */
+	if (($g > 1) && (substr($G,0,1) == 'g'))
+	  {
+	  $Count += $this->GrpInGroup[$G]['count'];
+	  }
+	}
+    if (($Count > 0) && empty($this->GrpInGroup[$Group]['tail']))
       {
       $V .= "<a href='javascript:ShowHide(\"DivGrp-" . $this->ShowHistRow . "\")'>+</a>";
       }
@@ -345,10 +364,11 @@ class licgroup extends FO_Plugin
       $V .= "<font color='white'>+</font>";
       }
 
+    /* Show the license name */
     $V .= "</td><td id='LicGroup r" . $this->ShowHistRow . " $Group";
     foreach($this->GrpInGroup[$Group] as $G => $g)
 	{
-	if (($g != 0) && (substr($G,0,1) == 'g'))
+	if (($g > 1) && (substr($G,0,1) == 'g'))
 	  {
 	  $V .= " $G";
 	  }
@@ -366,7 +386,8 @@ class licgroup extends FO_Plugin
       $V .= "<div id='DivGrp-" . ($this->ShowHistRow-1) . "' style='display:none;'>";
       foreach($this->GrpInGroup[$Group] as $G => $g)
 	{
-	if (($g != 0) && (substr($G,0,1) == 'g'))
+	/* only process direct relations */
+	if (($g > 1) && (substr($G,0,1) == 'g'))
 	  {
 	  $V .= $this->ShowHistTable($G,$Depth+1,$Item);
 	  }
