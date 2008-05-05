@@ -510,7 +510,7 @@ function moveOptions(theSelFrom, theSelTo)
     /* Permit delete */
     $V .= "</tr><tr>\n";
     $V .= "<td>Delete</td>";
-    $V .= "<td><input type='checkbox' value='1' name='delete'><b>Check to delete this license!</b></td>\n";
+    $V .= "<td><input type='checkbox' value='1' name='delete'><b>Check to delete this license group!</b></td>\n";
 
     $V .= "</tr>\n";
     $V .= "</table>\n";
