@@ -331,7 +331,7 @@ class licgroup extends FO_Plugin
       }
     else if ($this->SFbLG >= 0)
       {
-      $V .= "<td width='10%' align='center'><a href='";
+      $V .= "<td width='10%' align='center' bgcolor='" . $this->GrpInGroup[$Group]['color'] . "'><a href='";
       $V .= Traceback_uri();
       $V .= "?mod=search_file_by_licgroup&item=$Item&licgroup=" . $this->GrpInGroup[$Group]['id'] . "'>Show</a></td>";
       }
