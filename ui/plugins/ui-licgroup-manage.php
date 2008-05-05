@@ -212,6 +212,7 @@ function moveOptions(theSelFrom, theSelTo)
 
     $DB->Action("DELETE FROM licgroup_lics WHERE licgroup_fk = '$GroupKey';");
     $DB->Action("DELETE FROM licgroup_grps WHERE licgroup_fk = '$GroupKey';");
+    $DB->Action("DELETE FROM licgroup_grps WHERE licgroup_memberfk = '$GroupKey';");
     $DB->Action("DELETE FROM licgroup WHERE licgroup_pk = '$GroupKey';");
     $DB->Action("VACUUM ANALYZE licgroup_lics;");
     $DB->Action("VACUUM ANALYZE licgroup_grps;");
@@ -223,16 +224,16 @@ function moveOptions(theSelFrom, theSelTo)
    LicGroupInsert(): Someone posted data!  Add or update the group!
    Returns NULL on success, or error string.
    ***********************************************************/
-  function LicGroupInsert	()
+  function LicGroupInsert	($GroupKey='',$GroupName='',$GroupDesc='',$GroupColor='',$GroupListLic=NULL,$GroupListGrp=NULL)
     {
     global $DB;
-    $GroupKey = GetParm('groupkey',PARM_INTEGER);
+    if (empty($GroupKey)) { $GroupKey = GetParm('groupkey',PARM_INTEGER); }
     if ($GroupKey <= 0) { $GroupKey=NULL; }
-    $GroupName = GetParm('name',PARM_TEXT);
-    $GroupDesc = GetParm('desc',PARM_TEXT);
-    $GroupColor = GetParm('color',PARM_TEXT);
-    $GroupListLic = GetParm('liclist',PARM_RAW); /* licenses in this group */
-    $GroupListGrp = GetParm('grplist',PARM_RAW); /* groups in this group */
+    if (empty($GroupName)) { $GroupName = GetParm('name',PARM_TEXT); }
+    if (empty($GroupDesc)) { $GroupDesc = GetParm('desc',PARM_TEXT); }
+    if (empty($GroupColor)) { $GroupColor = GetParm('color',PARM_TEXT); }
+    if (empty($GroupListLic)) { $GroupListLic = GetParm('liclist',PARM_RAW); } /* licenses in this group */
+    if (empty($GroupListGrp)) { $GroupListGrp = GetParm('grplist',PARM_RAW); } /* groups in this group */
     /* Protect for the DB */
     $GroupName = str_replace("'","''",$GroupName);
     $GroupDesc = str_replace("'","''",$GroupDesc);
@@ -243,7 +244,7 @@ function moveOptions(theSelFrom, theSelTo)
     /* Check if values look good */
     if (empty($GroupName)) { return("Group name must be specified.\n"); }
 
-    if (!empty($GroupKey))
+    if (!empty($GroupKey) && ($GroupKey >= 0))
       {
       $SQL = "SELECT licgroup_pk FROM licgroup WHERE licgroup_pk = '$GroupKey';";
       }
