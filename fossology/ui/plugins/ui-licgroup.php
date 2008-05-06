@@ -397,9 +397,10 @@ class licgroup extends FO_Plugin
       $V .= Traceback_uri();
       $V .= "?mod=search_file_by_licgroup&item=$Item&licgroup=" . $this->GrpInGroup[$Group]['id'] . "'>Show</a></td>";
       }
+    $V .= "</td>";
 
     /* Create the "+" for expanding the list */
-    $V .= "</td><td width='1%' style='border-right:none;'>";
+    $V .= "<td width='1%' style='border-right:none;'>";
     /* Check if subgroups contain licenses */
     $Count=0;
     foreach($this->GrpInGroup[$Group] as $G => $g)
@@ -429,7 +430,12 @@ class licgroup extends FO_Plugin
 	  }
 	}
     $V .= " ' style='border-left:none;'>";
-    for($i; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
+    if ($Depth > 0)
+      {
+      $V .= "<font color='#999999'>";
+      for($i=0; $i < $Depth; $i++) { $V .= "&#8230;"; }
+      $V .= "</font>";
+      }
     $V .= "<a href=\"javascript:LicColor('LicGroup','r" . $this->ShowHistRow . "','LicItem','$Group','yellow')\"";
     $V .= " title='" . htmlentities($this->GrpInGroup[$Group]['desc'],ENT_QUOTES) . "'>";
     $V .= htmlentities($this->GrpInGroup[$Group]['name']);
@@ -449,6 +455,10 @@ class licgroup extends FO_Plugin
 	  }
 	}
       $V .= "</div>";
+      }
+    if ($Depth == 0)
+      {
+      $V .= "<div style='height:0.5em;'></div>";
       }
     return($V);
     } // ShowHistTable()
