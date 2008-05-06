@@ -168,6 +168,59 @@ class licgroup extends FO_Plugin
    } // Install()
 
   /***********************************************************
+   GroupColorMerge(): If the color of a group is white, then
+   make the color a merger of all sub-groups.
+   (If the color is not white, then don't change it.)
+   THIS IS RECURSIVE.
+   ***********************************************************/
+  function GroupColorMerge	($Group=NULL)
+    {
+    if (empty($Group))
+      {
+      foreach($this->GrpInGroup as $G => $g)
+        {
+        if ($g['head'] == 1) { $this->GroupColorMerge($G); }
+        }
+      return;
+      }
+    if (empty($Group)) { return; }
+
+    /* Recurse to bottom */
+    foreach($this->GrpInGroup[$Group] as $G => $g)
+      {
+      if (empty($G)) { continue; }
+      if (($g > 1) && (substr($G,0,1) == 'g'))
+	{
+	$this->GroupColorMerge($G);
+	}
+      }
+    /* Now color them based on sub-colors */
+    if ($this->GrpInGroup[$Group]['color'] == '#ffffff')
+      {
+      $Count = 1; /* Mostly default color */
+      $cR = 255*$Count; $cG = 255*$Count; $cB = 255*$Count;
+      foreach($this->GrpInGroup[$Group] as $G => $g)
+        {
+	if ($this->GrpInGroup[$G]['color'] == '#ffffff') { continue; }
+        if (($g > 1) && (substr($G,0,1) == 'g'))
+	  {
+	  $Count++;
+	  $cR += hexdec(substr($this->GrpInGroup[$G]['color'],1,2));
+	  $cG += hexdec(substr($this->GrpInGroup[$G]['color'],3,2));
+	  $cB += hexdec(substr($this->GrpInGroup[$G]['color'],5,2));
+	  }
+	}
+      $cR = $cR / $Count;
+      $cG = $cG / $Count;
+      $cB = $cB / $Count;
+      if ($cR < 16) { $cR = '0' . dechex($cR); } else { $cR = dechex($cR); }
+      if ($cG < 16) { $cG = '0' . dechex($cG); } else { $cG = dechex($cG); }
+      if ($cB < 16) { $cB = '0' . dechex($cB); } else { $cB = dechex($cB); }
+      $this->GrpInGroup[$Group]['color'] = '#' . $cR . $cG . $cB;
+      }
+    } // GroupColorMerge()
+
+  /***********************************************************
    CmpGroupTables(): Sort function.
    ***********************************************************/
   function CmpGroupTables	($a,$b)
@@ -239,13 +292,14 @@ class licgroup extends FO_Plugin
       } /* foreach $A */
 
     /* Add the group name */
-    $SQL = "SELECT licgroup_pk,licgroup_name,licgroup_color FROM licgroup;";
+    $SQL = "SELECT * FROM licgroup;";
     $Results = $DB->Action($SQL);
     for($i=0; !empty($Results[$i]['licgroup_pk']); $i++)
       {
       $GrpInGroup['g'.$Results[$i]['licgroup_pk']]['name'] = $Results[$i]['licgroup_name'];
       $GrpInGroup['g'.$Results[$i]['licgroup_pk']]['color'] = $Results[$i]['licgroup_color'];
       $GrpInGroup['g'.$Results[$i]['licgroup_pk']]['id'] = $Results[$i]['licgroup_pk'];
+      $GrpInGroup['g'.$Results[$i]['licgroup_pk']]['desc'] = $Results[$i]['licgroup_desc'];
       }
 
     /* Add in the phrase group */
@@ -322,7 +376,7 @@ class licgroup extends FO_Plugin
   function ShowHistTable	(&$Group, $Depth=0, &$Item)
     {
     if ($this->GrpInGroup[$Group]['count'] <= 0) { return; }
-    $V .= "<table border='1' width='100%'>";
+    $V .= "<table border='1' width='100%' style='border-top:none;'>";
     $V .= "<tr>";
     $V .= "<td align='right' width='10%'>";
     $V .= number_format($this->GrpInGroup[$Group]['count'],0,"",",");
@@ -345,7 +399,7 @@ class licgroup extends FO_Plugin
       }
 
     /* Create the "+" for expanding the list */
-    $V .= "</td><td width='1%'>";
+    $V .= "</td><td width='1%' style='border-right:none;'>";
     /* Check if subgroups contain licenses */
     $Count=0;
     foreach($this->GrpInGroup[$Group] as $G => $g)
@@ -374,9 +428,10 @@ class licgroup extends FO_Plugin
 	  $V .= " $G";
 	  }
 	}
-    $V .= " '>";
+    $V .= " ' style='border-left:none;'>";
     for($i; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
-    $V .= "<a href=\"javascript:LicColor('LicGroup','r" . $this->ShowHistRow . "','LicItem','$Group','yellow')\">";
+    $V .= "<a href=\"javascript:LicColor('LicGroup','r" . $this->ShowHistRow . "','LicItem','$Group','yellow')\"";
+    $V .= " title='" . htmlentities($this->GrpInGroup[$Group]['desc'],ENT_QUOTES) . "'>";
     $V .= htmlentities($this->GrpInGroup[$Group]['name']);
     $V .= "</a>";
     $V .= "</td></tr></table>";
@@ -690,6 +745,7 @@ class licgroup extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     $this->MakeGroupTables();
+    $this->GroupColorMerge();
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
