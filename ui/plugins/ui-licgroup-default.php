@@ -47,6 +47,8 @@ class licgroup_default extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_USERADMIN;
   var $LoginFlag  = 1; /* must be logged in to use this */
 
+  var $DefaultName = "Similar Text";
+
   /***********************************************************
    DefaultGroups(): Create a default "family" of groups based
    on the installed raw directories.
@@ -66,7 +68,7 @@ class licgroup_default extends FO_Plugin
     $GroupPk = array();
     for($i=0; !empty($Lics[$i]['lic_pk']); $i++)
       {
-      $Lics[$i]['lic_name'] = "/Family/" . $Lics[$i]['lic_name'];
+      $Lics[$i]['lic_name'] = "/" . $this->DefaultName . "/" . $Lics[$i]['lic_name'];
       $Name = preg_replace("@/[^/]*$@","",$Lics[$i]['lic_name']);
       foreach(split('/',$Name) as $N)
         {
@@ -112,7 +114,7 @@ class licgroup_default extends FO_Plugin
       }
     print "Created " . count($GroupPk) . " default license groups,";
     print " containing " . count($Lics) . " licenses.\n";
-    print "All default groups are stored under the license group 'Family'.";
+    print "All default groups are stored under the license group '" . $this->DefaultName . "'.";
     print "<hr>\n";
     } // DefaultGroups()
 
@@ -128,6 +130,8 @@ class licgroup_default extends FO_Plugin
    ***********************************************************/
   function Output()
     {
+    global $Plugins;
+
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     switch($this->OutputType)
@@ -157,6 +161,8 @@ class licgroup_default extends FO_Plugin
 	$V .= "<form method='post'>\n";
 	$V .= "License groups provide organization for licenses.\n";
 	$V .= "By selecting the 'Create' button, you will initialize the license groups.\n";
+	$V .= "This initialization will create many default groups, based on a similar-text heirarchy.\n";
+	$V .= "All of these default groups are organized under the parent group '" . $this->DefaultName . "'.\n";
 	$V .= "<ul>\n";
 	$V .= "<li>The default license groups are based on a heirarchy of similar text.\n";
 	$V .= "<li>The default license groups are <b>NOT</b> a recommendation or legal interpretation.\n";
@@ -167,6 +173,14 @@ class licgroup_default extends FO_Plugin
 	$V .= "If you are still sure you want to do this:<P/>\n";
 	$V .= "<input type='hidden' name='init' value='1'>";
 	$V .= "<input type='submit' value='Create!'>";
+	$V .= "<P/>\n";
+	$V .= "After the default groups are created, you can modify, edit, or delete the default groups with the ";
+	$P = &$Plugins[plugin_find_id("license_groups_manage")];
+	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->Title . "</a>";
+	$V .= " menu option.\n";
+	$V .= "You can also use the ";
+	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->Title . "</a>";
+	$V .= " menu option to add new groups.\n";
 	$V .= "</form>\n";
 	break;
       case "Text":
