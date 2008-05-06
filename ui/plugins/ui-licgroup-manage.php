@@ -370,7 +370,7 @@ function moveOptions(theSelFrom, theSelTo)
 
     /* Text fields */
     $V .= "</tr><tr>\n";
-    $V .= "<td width='20%'>Group name</td><td><input type='text' name='name' size='20' value='" . htmlentities($GroupName,ENT_QUOTES) . "'></td>\n";
+    $V .= "<td width='20%'>Group name</td><td><input type='text' name='name' size='60' value='" . htmlentities($GroupName,ENT_QUOTES) . "'></td>\n";
     $V .= "</tr><tr>\n";
     $V .= "<td>Group description</td><td><input type='text' name='desc' size='60' value='" . htmlentities($GroupDesc,ENT_QUOTES) . "'></td>\n";
 

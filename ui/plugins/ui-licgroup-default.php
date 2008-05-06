@@ -50,6 +50,227 @@ class licgroup_default extends FO_Plugin
   var $DefaultName = "Similar Text";
 
   /***********************************************************
+   CmpGroupPaths(): Sort by group paths.
+   ***********************************************************/
+  function CmpGroupPaths	($a,$b)
+    {
+    if ($a['lic_name'] < $b['lic_name']) { return(-1); }
+    if ($a['lic_name'] > $b['lic_name']) { return(1); }
+    return(0);
+    } // CmpGroupPaths()
+
+  /***********************************************************
+   DefaultGroupList(): List the potential default groups as
+   a list of checkboxes.
+   ***********************************************************/
+  function DefaultGroupList	()
+    {
+    global $DB;
+    $V = "";
+    $V .= "<input type='checkbox' value='Group-" . $this->DefaultName . "'>" . $this->DefaultName . "<br>\n";
+    $LastPathName = $this->DefaultName;
+    $Lics = $DB->Action("SELECT lic_name FROM agent_lic_raw WHERE lic_pk=lic_id ORDER BY lic_name;");
+    for($i=0; !empty($Lics[$i]['lic_name']); $i++)
+      {
+      $Lics[$i]['lic_name'] = $this->DefaultName . "/" . preg_replace("@/[^/]*\$@","",$Lics[$i]['lic_name']);
+      }
+    usort($Lics,array("licgroup_default","CmpGroupPaths"));
+    for($i=0; !empty($Lics[$i]['lic_name']); $i++)
+      {
+      $PathName = $Lics[$i]['lic_name'];
+      if ($PathName == $LastPathName) { continue; }
+      $Path = split("/",$PathName);
+      for($j=1; !empty($Path[$j]); $j++)
+        {
+	if ($Path[$j] != $Path[$j-1]) { $V .= "&nbsp;&zwnj;"; }
+	}
+      $V .= "&mdash;";
+      $Group = htmlentities(preg_replace("@^.*/@","",$PathName),ENT_QUOTES);
+      $V .= "<input type='checkbox' value='Group-$Group'>$Group<br>\n";
+      $LastPathName = $PathName;
+      }
+    return($V);
+    } // DefaultGroupList()
+
+  /***********************************************************
+   DefaultGroupsFSF(): Create a default "FSF" of groups.
+   See http://www.fsf.org/licensing/licenses/index_html
+   ***********************************************************/
+  function DefaultGroupsFSF	()
+    {
+    global $DB;
+    global $Plugins;
+
+    /* Get the list of licenses */
+    $Lics = $DB->Action("SELECT lic_pk,lic_name FROM agent_lic_raw WHERE lic_pk=lic_id ORDER BY lic_name;");
+    $LG = &$Plugins[plugin_find_id("license_groups_manage")];
+
+    /* These are the FSF license groups:
+       FSF GPL-Compatible Free Software Licenses    (Green)
+       FSF GPL-Incompatible Free Software Licenses  (Yellow)
+       FSF Non-Free Software Licenses               (Red)
+       FSF Free Documentation Licenses              (Green)
+       FSF Non-Free Documentation Licenses          (Red)
+
+       These FSF license groups are not going to be created.
+       FSF Licenses for Works Besides Software and Documentation
+       FSF Licenses for Fonts
+
+       Groups are populated based on the known names in the DB.
+       As we modify/add to the DB, this list will likely need to be modifed.
+     */
+
+    $GroupName = "FSF GPL-Compatible Free Software Licenses";
+    $GroupColor = "#00ff00";
+    $LicList = array(); /* list of licenses in the group */
+    for($i=0; !empty($Lics[$i]['lic_pk']); $i++)
+      {
+      $Name = $Lics[$i]['lic_name'];
+      $InGroup=0;
+      if (strstr($Name,"/LGPL/LGPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/GPL/v1") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/GPL/v2") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/GPL/v3") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/Apache/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Artistic 2.") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Affero GPL 3.0") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Sleepycat") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Boost") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/BSD.new/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"CeCILL_V2") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Cryptix") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Eiffel Forum License 2") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"EU DataGrid") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/MIT/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"FreeBSD") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Intel-OSL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Microsoft Public License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"NCSA") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"OpenLDAP") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Public Domain") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/Free/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/Python Software Foundation 2./") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Ruby") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Starndard ML of New Jersey") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Vim") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/W3C/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"X11") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"zLib") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Zope 2.0") != FALSE) { $InGroup = 1; }
+      if ($InGroup) { $LicList[] = $Lics[$i]['lic_pk']; }
+      }
+    $LG->LicGroupInsert(-1,$GroupName,$GroupName,$GroupColor,$LicList,NULL);
+
+    $GroupName = "FSF GPL-Incompatible Free Software Licenses";
+    $GroupColor = "#ffff00";
+    $LicList = array(); /* list of licenses in the group */
+    for($i=0; !empty($Lics[$i]['lic_pk']); $i++)
+      {
+      $Name = $Lics[$i]['lic_name'];
+      $InGroup=0;
+      if (strstr($Name,"Affero GPL 1.0") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/AFL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Apache Software License 1.") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Apple Public Source License 2.") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/BSD.old/BSD") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/CDDL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/CPL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/Condor/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/EPL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/IBM_PL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Interbase") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Jabber") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"LaTeX") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Lucent") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Microsoft Reciprocal License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/MPL/MPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Netizen") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/MPL/NPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Nokia") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"OpenSSL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Phorum") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/PHP/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Q Public License 1.0") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/RealNetworks/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/Sun/Sun") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Zend") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Zope 1.0") != FALSE) { $InGroup = 1; }
+      if ($InGroup) { $LicList[] = $Lics[$i]['lic_pk']; }
+      }
+    $LG->LicGroupInsert(-1,$GroupName,$GroupName,$GroupColor,$LicList,NULL);
+
+    $GroupName = "FSF Non-Free Software Licenses";
+    $GroupColor = "#ff0000";
+    $LicList = array(); /* list of licenses in the group */
+    for($i=0; !empty($Lics[$i]['lic_pk']); $i++)
+      {
+      $Name = $Lics[$i]['lic_name'];
+      $InGroup=0;
+      if (strstr($Name,"Aladdin") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Apple Public Source License 1.") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Artistic 1.") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"GPL for Computer Programs of the Public Administration") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Hacktivismo") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Jahia") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Microsoft Limited Public License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Microsoft Limited Reciprical License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Microsoft Reference License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"NASA") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Pine License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"qmail License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Squeak") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"University of Utah Public License") != FALSE) { $InGroup = 1; }
+      if ($InGroup) { $LicList[] = $Lics[$i]['lic_pk']; }
+      }
+    $LG->LicGroupInsert(-1,$GroupName,$GroupName,$GroupColor,$LicList,NULL);
+
+    $GroupName = "FSF Free Documentation Licenses";
+    $GroupColor = "#00ff00";
+    $LicList = array(); /* list of licenses in the group */
+    for($i=0; !empty($Lics[$i]['lic_pk']); $i++)
+      {
+      $Name = $Lics[$i]['lic_name'];
+      $InGroup=0;
+      if (strstr($Name,"GNU Free Documentation License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Apple Common Documentation License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Open Publication License") != FALSE) { $InGroup = 1; }
+      if ($InGroup) { $LicList[] = $Lics[$i]['lic_pk']; }
+      }
+    $LG->LicGroupInsert(-1,$GroupName,$GroupName,$GroupColor,$LicList,NULL);
+
+    $GroupName = "FSF Non-Free Documentation Licenses";
+    $GroupColor = "#ff0000";
+    $LicList = array(); /* list of licenses in the group */
+    for($i=0; !empty($Lics[$i]['lic_pk']); $i++)
+      {
+      $Name = $Lics[$i]['lic_name'];
+      $InGroup=0;
+      if (strstr($Name,"OpenContent License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Open Directory License") != FALSE) { $InGroup = 1; }
+      if ($InGroup) { $LicList[] = $Lics[$i]['lic_pk']; }
+      }
+    $LG->LicGroupInsert(-1,$GroupName,$GroupName,$GroupColor,$LicList,NULL);
+
+    /* Now, get the list of group ids */
+    $GroupName = "FSF License Groups";
+    $GroupColor = "#ffffff";
+    $Results = $DB->Action("SELECT licgroup_pk FROM licgroup
+	WHERE licgroup_name = 'FSF GPL-Compatible Free Software Licenses'
+	OR licgroup_name = 'FSF GPL-Incompatible Free Software Licenses'
+	OR licgroup_name = 'FSF Non-Free Software Licenses'
+	OR licgroup_name = 'FSF Free Documentation Licenses'
+	OR licgroup_name = 'FSF Non-Free Documentation Licenses';");
+    $LicList = array();
+    for($i=0; !empty($Results[$i]['licgroup_pk']); $i++)
+      {
+      $LicList[] = $Results[$i]['licgroup_pk'];
+      }
+    $LG->LicGroupInsert(-1,$GroupName,$GroupName,$GroupColor,NULL,$LicList);
+
+    print "Default FSF groups created.\n<hr>\n";
+    } // DefaultGroupsFSF()
+
+  /***********************************************************
    DefaultGroups(): Create a default "family" of groups based
    on the installed raw directories.
    ***********************************************************/
@@ -139,18 +360,11 @@ class licgroup_default extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
-	$Init = GetParm('init',PARM_STRING);
+	$Init = GetParm('Default',PARM_INTEGER);
 	if ($Init == 1)
 	  {
 	  $rc = $this->DefaultGroups();
-	  if (empty($rc))
-	    {
-	    /* Need to refresh the screen */
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Default license groups created.')\n";
-	    $V .= "</script>\n";
-	    }
-	  else
+	  if (!empty($rc))
 	    {
 	    $V .= "<script language='javascript'>\n";
 	    $rc = htmlentities($rc,ENT_QUOTES);
@@ -158,29 +372,46 @@ class licgroup_default extends FO_Plugin
 	    $V .= "</script>\n";
 	    }
 	  }
+
+	$Init = GetParm('Default-FSF',PARM_INTEGER);
+	if ($Init == 1)
+	  {
+	  $rc = $this->DefaultGroupsFSF();
+	  if (!empty($rc))
+	    {
+	    $V .= "<script language='javascript'>\n";
+	    $rc = htmlentities($rc,ENT_QUOTES);
+	    $V .= "alert('$rc')\n";
+	    $V .= "</script>\n";
+	    }
+	  }
+
 	$V .= "<form method='post'>\n";
 	$V .= "License groups provide organization for licenses.\n";
 	$V .= "By selecting the 'Create' button, you will initialize the license groups.\n";
-	$V .= "This initialization will create many default groups, based on a similar-text heirarchy.\n";
-	$V .= "All of these default groups are organized under the parent group '" . $this->DefaultName . "'.\n";
+	$V .= "This initialization will create many default license groups.";
 	$V .= "<ul>\n";
-	$V .= "<li>The default license groups are based on a heirarchy of similar text.\n";
 	$V .= "<li>The default license groups are <b>NOT</b> a recommendation or legal interpretation.\n";
-	$V .= "In particular, licenses may have similar text but very different legal meanings.\n";
+	$V .= "In particular, related licenses may have very different legal meanings.\n";
 	$V .= "<li>If you create these default groups twice, then any modification you made to the default groups <b>will be lost</b>.\n";
 	$V .= "<li>Creating default groups will not impact any new groups you created.\n";
 	$V .= "</ul>\n";
-	$V .= "If you are still sure you want to do this:<P/>\n";
-	$V .= "<input type='hidden' name='init' value='1'>";
-	$V .= "<input type='submit' value='Create!'>";
-	$V .= "<P/>\n";
 	$V .= "After the default groups are created, you can modify, edit, or delete the default groups with the ";
 	$P = &$Plugins[plugin_find_id("license_groups_manage")];
 	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->Title . "</a>";
 	$V .= " menu option.\n";
 	$V .= "You can also use the ";
 	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->Title . "</a>";
-	$V .= " menu option to add new groups.\n";
+	$V .= " to create new groups.<P/>\n";
+
+	$V .= "Select the default groups to create:\n";
+	$V .= "<P/>\n";
+	$V .= "<input type='checkbox' value='1' name='Default-Tree'><b>" . $this->DefaultName . "</b>.\n";
+	$V .= "These are default license groups based on a heirarchy of similar license text.<br>\n";
+	$V .= "<input type='checkbox' value='1' name='Default-FSF'><b>FSF</b>. See <a href='http://www.fsf.org/licensing/licenses/index_html'>FSF Licensing</a> for the list of GPL-compatible, incompatible, and free licenses.<br>\n";
+	// $V .= "<input type='checkbox' value='1' name='Default-Fedora'><b>Fedora</b>. See <a href='http://fedoraproject.org/wiki/Licensing'>Fedora Licensing</a> for the list of good, bad, and unknown licenses.<br>\n";
+	$V .= "<P/>\n";
+	$V .= "<input type='submit' value='Create!'>";
 	$V .= "</form>\n";
 	break;
       case "Text":
