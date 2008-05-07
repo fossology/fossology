@@ -302,9 +302,7 @@ class licgroup_default extends FO_Plugin
       $Name = $Lics[$i]['lic_name'];
       $InGroup=0;
       if (strstr($Name,"/LGPL/LGPL") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/GPL/v1") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/GPL/v2") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/GPL/v3") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/GPL") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/Apache/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Artistic 2.") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Affero GPL 3.0") != FALSE) { $InGroup = 1; }
