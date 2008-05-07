@@ -197,10 +197,11 @@ class licgroup extends FO_Plugin
     /* Now color them based on sub-colors */
     if ($this->GrpInGroup[$Group]['color'] == '#ffffff')
       {
-      $Count = 1; /* Mostly default color */
+      $Count = 0; /* Mostly default color */
       $cR = 255*$Count; $cG = 255*$Count; $cB = 255*$Count;
       foreach($this->GrpInGroup[$Group] as $G => $g)
         {
+	if ($this->GrpInGroup[$G]['count'] <= 0) { continue; }
 	if ($this->GrpInGroup[$G]['color'] == '#ffffff') { continue; }
         if (($g > 1) && (substr($G,0,1) == 'g'))
 	  {
@@ -210,13 +211,16 @@ class licgroup extends FO_Plugin
 	  $cB += hexdec(substr($this->GrpInGroup[$G]['color'],5,2));
 	  }
 	}
-      $cR = $cR / $Count;
-      $cG = $cG / $Count;
-      $cB = $cB / $Count;
-      if ($cR < 16) { $cR = '0' . dechex($cR); } else { $cR = dechex($cR); }
-      if ($cG < 16) { $cG = '0' . dechex($cG); } else { $cG = dechex($cG); }
-      if ($cB < 16) { $cB = '0' . dechex($cB); } else { $cB = dechex($cB); }
-      $this->GrpInGroup[$Group]['color'] = '#' . $cR . $cG . $cB;
+      if ($Count > 0)
+        {
+        $cR = $cR / $Count;
+        $cG = $cG / $Count;
+        $cB = $cB / $Count;
+        if ($cR < 16) { $cR = '0' . dechex($cR); } else { $cR = dechex($cR); }
+        if ($cG < 16) { $cG = '0' . dechex($cG); } else { $cG = dechex($cG); }
+        if ($cB < 16) { $cB = '0' . dechex($cB); } else { $cB = dechex($cB); }
+        $this->GrpInGroup[$Group]['color'] = '#' . $cR . $cG . $cB;
+	}
       }
     } // GroupColorMerge()
 
@@ -356,7 +360,7 @@ class licgroup extends FO_Plugin
     if (0) /* Debug code */
       {
       print "<pre>";
-      print "LicGroups:\n"; print_r($this->LicInGroup);
+      // print "LicGroups:\n"; print_r($this->LicInGroup);
       print "GrpGroups:\n"; print_r($this->GrpInGroup);
       print "</pre>";
       print "<hr>";
@@ -644,6 +648,7 @@ class licgroup extends FO_Plugin
 
     /****************************************/
     /* List the licenses */
+    $this->GroupColorMerge(); /* muddy the colors! */
     $VH .= FolderListScript();
     $VH .= "<table border='1' width='100%'>";
     $VH .= "<tr><th width='15%'>Count</th>";
@@ -784,7 +789,6 @@ class licgroup extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     $this->MakeGroupTables();
-    $this->GroupColorMerge();
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
