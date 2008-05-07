@@ -368,6 +368,20 @@ class licgroup extends FO_Plugin
   /*******************************************************************/
 
   /***********************************************************
+   LightenColor(): Given an "#rrggbb" color, make it ligher.
+   ***********************************************************/
+  function LightenColor	($Color)
+    {
+    $cR = (hexdec(substr($Color,1,2)) * 3 + 255) / 4;
+    $cG = (hexdec(substr($Color,3,2)) * 3 + 255) / 4;
+    $cB = (hexdec(substr($Color,5,2)) * 3 + 255) / 4;
+    if ($cR < 16) { $cR = '0' . dechex($cR); } else { $cR = dechex($cR); }
+    if ($cG < 16) { $cG = '0' . dechex($cG); } else { $cG = dechex($cG); }
+    if ($cB < 16) { $cB = '0' . dechex($cB); } else { $cB = dechex($cB); }
+    return('#' . $cR . $cG . $cB);
+    } // LightenColor()
+
+  /***********************************************************
    ShowHistTable(): Given a loaded list of groups and an array
    that lists which files are in which groups, display the table.
    THIS IS RECURSIVE!
@@ -378,7 +392,7 @@ class licgroup extends FO_Plugin
     if ($this->GrpInGroup[$Group]['count'] <= 0) { return; }
     $V .= "<table border='1' width='100%' style='border-top:none;'>";
     $V .= "<tr>";
-    $V .= "<td align='right' width='10%'>";
+    $V .= "<td align='right' width='15%'>";
     $V .= number_format($this->GrpInGroup[$Group]['count'],0,"",",");
     $V .= "</td>";
 
@@ -393,9 +407,24 @@ class licgroup extends FO_Plugin
       }
     else if ($this->SFbLG >= 0)
       {
-      $V .= "<td width='10%' align='center' bgcolor='" . $this->GrpInGroup[$Group]['color'] . "'><a href='";
+      $V .= "<td width='10%' align='center' bgcolor='" . $this->GrpInGroup[$Group]['color'] . "'>";
+      $V .= "<a ";
+      if ($this->GrpInGroup[$Group]['color'] == '#ff0000')
+        {
+	$V .= "onMouseOver='this.style.color=\"#ffffff\";' onMouseOut='this.style.color=\"#0000ff\";' ";
+	}
+      if ($this->GrpInGroup[$Group]['color'] == '#0000ff')
+        {
+	$V .= "style='color:#ffffff' ";
+	$V .= "onMouseOut='this.style.color=\"#ffffff\";' onMouseOver='this.style.color=\"#ff0000\";' ";
+	}
+      $V .= "href='";
       $V .= Traceback_uri();
-      $V .= "?mod=search_file_by_licgroup&item=$Item&licgroup=" . $this->GrpInGroup[$Group]['id'] . "'>Show</a></td>";
+      $V .= "?mod=search_file_by_licgroup&item=$Item&licgroup=" . $this->GrpInGroup[$Group]['id'] . "'>";
+      $V .= "<font style='text-shadow: black 0px 0px 5px;'>";
+      $V .= "Show";
+      $V .= "</a>";
+      $V .= "</td>";
       }
     $V .= "</td>";
 
@@ -617,7 +646,7 @@ class licgroup extends FO_Plugin
     /* List the licenses */
     $VH .= FolderListScript();
     $VH .= "<table border='1' width='100%'>";
-    $VH .= "<tr><th width='10%'>Count</th>";
+    $VH .= "<tr><th width='15%'>Count</th>";
     if ($this->SFbLG >= 0) { $VH .= "<th width='10%'>Files</th>"; }
     $VH .= "<th colspan='2'>License Groups</th></tr>";
     $VH .= "</table>";
