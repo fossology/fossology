@@ -153,7 +153,13 @@ class db_access extends FO_Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
-    if ($this->Debug > 1) { print "DB.Execute('$Prep','$Command')\n"; }
+    if ($this->Debug)
+	{
+	/* When using pg_query(), you need to use pg_set_error_verbosity().
+	   Otherwise, pg_last_error() returns nothing. */
+	pg_set_error_verbosity($this->_pg_conn,PGSQL_ERRORS_VERBOSE);
+	if ($this->Debug > 1) { print "DB.Execute('$Prep','$Command')\n"; }
+	}
     $result = pg_execute($this->_pg_conn,$Prep,$Command);
     if (!isset($result)) return;
     $rows = pg_fetch_all($result);
@@ -170,7 +176,14 @@ class db_access extends FO_Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
-    if ($this->Debug > 1) { print "DB.Prepare('$Prep','$Command')\n"; }
+    if ($this->Debug)
+	{
+	/* When using pg_query(), you need to use pg_set_error_verbosity().
+	   Otherwise, pg_last_error() returns nothing. */
+	pg_set_error_verbosity($this->_pg_conn,PGSQL_ERRORS_VERBOSE);
+	if ($this->Debug > 1) { print "DB.Prepare('$Prep','$Command')\n"; }
+	}
+    /* Because the DB connection is shared, $Prep may already exist! */
     $result = @pg_prepare($this->_pg_conn,$Prep,$Command);
     return;
     }

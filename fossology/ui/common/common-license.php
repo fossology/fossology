@@ -105,8 +105,7 @@ function LicenseGetAll(&$UploadtreePk, &$Lics)
  percent match is returned), or a SQL string (in which case, no
  percent match is returned).
  ************************************************************/
-$LicenseGetAllFiles_1_Prepared = 0;
-$LicenseGetAllFiles_2_Prepared = 0;
+$LicenseGetAllFiles_Prepared = array();
 function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
 {
   global $Plugins;
@@ -114,53 +113,25 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
   if (empty($DB)) { return; }
   if (empty($UploadtreePk)) { return NULL; }
 
-  global $LicenseGetAllFiles_1_Prepared;
-  global $LicenseGetAllFiles_2_Prepared;
+  global $LicenseGetAllFiles_Prepared;
 
-  if (!$LicenseGetAllFiles_1_Prepared)
+  $PrepName = preg_replace("@[^a-zA-Z0-9]@","_",$WantLic);
+  if (empty($LicenseGetAllFiles_Prepared[$PrepName]))
     {
     /* SQL to get all files with a specific license */
-    $DB->Prepare("LicenseGetAllFiles_1",'SELECT DISTINCT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk,lic_id,tok_pfile,tok_license,tok_match,phrase_text
+    $DB->Prepare("LicenseGetAllFiles_$PrepName","SELECT DISTINCT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk,lic_id,tok_pfile,tok_license,tok_match,phrase_text
 	FROM uploadtree
-	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = $1
+	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = \$1
 	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk
 	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
-	AND agent_lic_raw.lic_id = $2
-	ORDER BY ufile.ufile_pk
-	;');
-    $LicenseGetAllFiles_1_Prepared = 1;
-    }
-
-  if (!$LicenseGetAllFiles_2_Prepared)
-    {
-    /* SQL to get all containers for recursing */
-    $Bit = 1<<29;
-    $DB->Prepare("LicenseGetAllFiles_2","SELECT uploadtree_pk
-	FROM uploadtree
-	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = $1
-	AND ufile_mode & $Bit != 0
+	AND ( $WantLic )
 	ORDER BY ufile.ufile_pk
 	;");
-    $LicenseGetAllFiles_2_Prepared = 1;
+    $LicenseGetAllFiles_Prepared[$PrepName] = 1;
     }
 
   /* Find every item under this UploadtreePk... */
-  if (is_int($WantLic))
-    {
-    $Results = $DB->Execute("LicenseGetAllFiles_1",array($UploadtreePk,$WantLic));
-    }
-  else
-    {
-    $SQL = "SELECT DISTINCT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk
-	FROM uploadtree
-	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = $UploadtreePk
-	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk
-	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
-	AND ($WantLic)
-	ORDER BY ufile.ufile_pk
-	;";
-    $Results = $DB->Action($SQL);
-    }
+  $Results = $DB->Execute("LicenseGetAllFiles_$PrepName",array($UploadtreePk));
 
   foreach($Results as $R)
     {
@@ -175,7 +146,20 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
     }
 
   /* Find the items to recurse on */
-  $Results = $DB->Execute("LicenseGetAllFiles_2",array($UploadtreePk));
+  if (empty($LicenseGetAllFiles_Prepared["a0"]))
+    {
+    /* SQL to get all containers for recursing */
+    $Bit = 1<<29;
+    $DB->Prepare("LicenseGetAllFiles__a0","SELECT uploadtree_pk
+	FROM uploadtree
+	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = \$1
+	AND ufile_mode & $Bit != 0
+	ORDER BY ufile.ufile_pk
+	;");
+    $LicenseGetAllFiles_Prepared["a0"] = 1;
+    }
+
+  $Results = $DB->Execute("LicenseGetAllFiles__a0",array($UploadtreePk));
   foreach($Results as $R)
 	{
 	LicenseGetAllFiles($R['uploadtree_pk'],$Lics,$WantLic,$Max,$Offset);
