@@ -310,7 +310,8 @@ function moveOptions(theSelFrom, theSelTo)
     {
     global $DB;
     $V = "";
-    $ColorParts = array("ff","cc","99","66","33","00");
+    $ColorParts1 = array("ff","00");  /* common colors */
+    $ColorParts = array("ff","cc","99","66","33","00"); /* web safe colors */
     $GroupName = "";
     $GroupDesc = "";
     $GroupColor = "#ffffff";
@@ -376,7 +377,19 @@ function moveOptions(theSelFrom, theSelTo)
 
     $V .= "</tr><tr>\n";
     $V .= "<td>Group color</td><td>";
-    $V .= "<select name='color' style='background-color:$GroupColor' onchange='this.style.background=this.value;'>\n";
+    $V .= "<select name='color' style='background-color:$GroupColor' onSelect='this.style.background=this.value;' onChange='this.style.background=this.value;'>\n";
+    foreach($ColorParts1 as $C1)
+    foreach($ColorParts1 as $C2)
+    foreach($ColorParts1 as $C3)
+      {
+      $Color = "#" . $C1 . $C2 . $C3;
+      $V .= "<option value='$Color' style='background-color:$Color'";
+      if (!strcasecmp($Color,$GroupColor)) { $V .= " selected"; }
+      $V .= ">";
+      // $V .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+      $V .= $Color;
+      $V .= "</option>";
+      }
     foreach($ColorParts as $C1)
     foreach($ColorParts as $C2)
     foreach($ColorParts as $C3)

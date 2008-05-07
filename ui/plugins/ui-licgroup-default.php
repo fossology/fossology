@@ -93,6 +93,180 @@ class licgroup_default extends FO_Plugin
     } // DefaultGroupList()
 
   /***********************************************************
+   DefaultGroupsFedora(): Create a default "Fedora" of groups.
+   See http://fedoraproject.org/wiki/Licensing
+   ***********************************************************/
+  function DefaultGroupsFedora	()
+    {
+    global $DB;
+    global $Plugins;
+
+    /* Get the list of licenses */
+    $Lics = $DB->Action("SELECT lic_pk,lic_name FROM agent_lic_raw WHERE lic_pk=lic_id ORDER BY lic_name;");
+    $LG = &$Plugins[plugin_find_id("license_groups_manage")];
+
+    /* Fedora has three license groups:
+       Good (green)
+       Bad (red)
+       Unknown (yellow)
+     */
+
+    $GroupName = "Fedora Good Licenses";
+    $GroupColor = "#00ff00";
+    $LicList = array(); /* list of licenses in the group */
+    for($i=0; !empty($Lics[$i]['lic_pk']); $i++)
+      {
+      $Name = $Lics[$i]['lic_name'];
+      $InGroup=0;
+      if (strstr($Name,"/Glide") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Academic Free License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Academy of Motion Picture Arts and Sciences") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Adobe") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Affero") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/Apache/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/APSL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/Artistic 2.0") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/BitTorrent") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Boost") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"BSD.new/BSD") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"BSD.old/BSD") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"CeCILL_V2") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/CMU/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/CDDL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Common Public License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Condor") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/FreeWithCopyright/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Cryptix") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"WTFP") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Eclipse Public License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"eCos") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/MIT/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Eiffel Forum License 2") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"EU DataGrid Software License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Fair License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/FreeType/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Giftware") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/GPL/v1/GPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/GPL/v2/GPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/GPL/v3/GPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/GPL/LGPL/LGPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"gnuplot") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/IBM_PL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Imlib2") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"IJG") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Interbase") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Internet Software Consortium") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Jabber") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"JasPer") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"LaTeX") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/Lucent/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"mecab-ipadic") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"X11") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"MPL 1.") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Naumen Public License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"NCSA") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Nethack") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Netizen") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"NPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Nokia Open Source License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"OpenLDAP") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/OSL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"OpenSSL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Phorum") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"PHP 3.0") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/Python/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Q Public License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/RealNetworks/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Ruby") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Sleepycat") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Starndard ML of New Jersey") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/SISSL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Sun Public License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"TCL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Vim") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Vovida Software License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/W3C/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Zend") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"zlib") != FALSE) { $InGroup = 1; }
+      if ($InGroup) { $LicList[] = $Lics[$i]['lic_pk']; }
+      }
+    $LG->LicGroupInsert(-1,$GroupName,$GroupName,$GroupColor,$LicList,NULL);
+
+    $GroupName = "Fedora Bad Licenses";
+    $GroupColor = "#ff0000";
+    $LicList = array(); /* list of licenses in the group */
+    for($i=0; !empty($Lics[$i]['lic_pk']); $i++)
+      {
+      $Name = $Lics[$i]['lic_name'];
+      $InGroup=0;
+      if (strstr($Name,"/Adaptive/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Aladdin") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Apple Public Source License 1") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/Artistic 1.0") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"C_Migemo") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Eiffel Forum License 1") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"GPL for Computer Programs of the Public Administration") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Hacktivismo") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Historical Permission Notice and Disclaimer") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Intel-OSL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Jahia Community Source License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Maia Mailguard License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"MITRE Collaborative Virtual Workspace License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"MSNTP License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"NASA Open Source 1.3") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Open Motif Public End User License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Pine License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"qmail License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Scilab License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"SGI GLX") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Squeak") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Sun Solaris Source Code") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Sybase") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"University of Utah Public License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"X.Net License") != FALSE) { $InGroup = 1; }
+      if ($InGroup) { $LicList[] = $Lics[$i]['lic_pk']; }
+      }
+    $LG->LicGroupInsert(-1,$GroupName,$GroupName,$GroupColor,$LicList,NULL);
+
+    $GroupName = "Fedora Unknown Licenses";
+    $GroupColor = "#ffff00";
+    $LicList = array(); /* list of licenses in the group */
+    for($i=0; !empty($Lics[$i]['lic_pk']); $i++)
+      {
+      $Name = $Lics[$i]['lic_name'];
+      $InGroup=0;
+      if (strstr($Name,"Attribution Assurance License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Computer Associates Trusted Open Source License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"CUA Office Public License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Educational Community License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Entessa Public License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Motosoto") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"OCLC") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Open Group Test Suite License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Ricoh Source Code Public License") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/RSA/") != FALSE) { $InGroup = 1; }
+      if ($InGroup) { $LicList[] = $Lics[$i]['lic_pk']; }
+      }
+    $LG->LicGroupInsert(-1,$GroupName,$GroupName,$GroupColor,$LicList,NULL);
+
+    /* Now, get the list of group ids */
+    $GroupName = "Fedora License Groups";
+    $GroupColor = "#ffffff";
+    $Results = $DB->Action("SELECT licgroup_pk FROM licgroup
+	WHERE licgroup_name = 'Fedora Good Licenses'
+	OR licgroup_name = 'Fedora Bad Licenses'
+	OR licgroup_name = 'Fedora Unknown Licenses';");
+    $LicList = array();
+    for($i=0; !empty($Results[$i]['licgroup_pk']); $i++)
+      {
+      $LicList[] = $Results[$i]['licgroup_pk'];
+      }
+    $LG->LicGroupInsert(-1,$GroupName,$GroupName,$GroupColor,NULL,$LicList);
+    
+    print "Default Fedora groups created.\n<hr>\n";
+    } // DefaultGroupsFedora()
+
+  /***********************************************************
    DefaultGroupsFSF(): Create a default "FSF" of groups.
    See http://www.fsf.org/licensing/licenses/index_html
    ***********************************************************/
@@ -386,6 +560,19 @@ class licgroup_default extends FO_Plugin
 	    }
 	  }
 
+	$Init = GetParm('Default-Fedora',PARM_INTEGER);
+	if ($Init == 1)
+	  {
+	  $rc = $this->DefaultGroupsFedora();
+	  if (!empty($rc))
+	    {
+	    $V .= "<script language='javascript'>\n";
+	    $rc = htmlentities($rc,ENT_QUOTES);
+	    $V .= "alert('$rc')\n";
+	    $V .= "</script>\n";
+	    }
+	  }
+
 	$V .= "<form method='post'>\n";
 	$V .= "License groups provide organization for licenses.\n";
 	$V .= "By selecting the 'Create' button, you will initialize the license groups.\n";
@@ -409,7 +596,7 @@ class licgroup_default extends FO_Plugin
 	$V .= "<input type='checkbox' value='1' name='Default-Tree'><b>" . $this->DefaultName . "</b>.\n";
 	$V .= "These are default license groups based on a heirarchy of similar license text.<br>\n";
 	$V .= "<input type='checkbox' value='1' name='Default-FSF'><b>FSF</b>. See <a href='http://www.fsf.org/licensing/licenses/index_html'>FSF Licensing</a> for the list of GPL-compatible, incompatible, and free licenses.<br>\n";
-	// $V .= "<input type='checkbox' value='1' name='Default-Fedora'><b>Fedora</b>. See <a href='http://fedoraproject.org/wiki/Licensing'>Fedora Licensing</a> for the list of good, bad, and unknown licenses.<br>\n";
+	$V .= "<input type='checkbox' value='1' name='Default-Fedora'><b>Fedora</b>. See <a href='http://fedoraproject.org/wiki/Licensing'>Fedora Licensing</a> for the list of good, bad, and unknown licenses.<br>\n";
 	$V .= "<P/>\n";
 	$V .= "<input type='submit' value='Create!'>";
 	$V .= "</form>\n";
