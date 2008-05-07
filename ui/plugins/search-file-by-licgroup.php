@@ -37,11 +37,23 @@ class search_file_by_licgroup extends FO_Plugin
   var $Name       = "search_file_by_licgroup";
   var $Title      = "List Files based on License Group";
   var $Version    = "1.0";
-  var $Dependency = array("db","browse","licgroup");
+  var $Dependency = array("db","browse","licgroup","search_file_by_license");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
 
   var $LicPk      = array();
+
+  /***********************************************************
+   CmpLicNames(): Sort function.
+   ***********************************************************/
+  function CmpLicNames       ($a,$b)
+    {
+    $Aname = $a['lic_name'];
+    $Bname = $b['lic_name'];
+    if (empty($Aname)) { $Aname = $a; }
+    if (empty($Bname)) { $Bname = $b; }
+    return(strcmp($Aname,$Bname));
+    } // CmpLicNames()
 
   /***********************************************************
    Output(): Display the loaded menu and plugins.
@@ -97,10 +109,38 @@ class search_file_by_licgroup extends FO_Plugin
 	  if (substr($Key,0,1) != 'l') { continue; }
 	  $LicPk = substr($Key,1);
 	  if (!empty($LicPkList)) { $LicPkList .= " OR "; }
-	  $LicPkList .= "agent_lic_raw.lic_id = $LicPk";
+	  $LicPkList .= "lic_id=$LicPk";
 	  }
 	LicenseGetAllFiles($UploadTreePk,$Lics,$LicPkList,$M,$O);
+	/* $LicPkList = all licenses in this group */
 
+        /*****************************************/
+	/* Permit refining the search by license */
+	$SQL = "SELECT DISTINCT lic_id,lic_name FROM agent_lic_raw
+		WHERE lic_pk=lic_id AND ($LicPkList);";
+	// print "<pre>" . strlen($SQL) . ": $SQL</pre>";
+	$Results = $DB->Action($SQL);
+	for($i=0; !empty($Results[$i]['lic_name']); $i++)
+	  {
+	  $Results[$i]['lic_name'] = preg_replace("@^.*/@","",$Results[$i]['lic_name']);
+	  }
+	usort($Results,array($this,"CmpLicNames"));
+	$V .= "<form method='get' action='" . Traceback_uri() . "'>";
+	$V .= "Refine search by specific license: ";
+	$V .= "<input type='hidden' name='mod' value='search_file_by_license'>";
+	$V .= "<input type='hidden' name='item' value='$UploadTreePk'>";
+	$V .= "<select name='lic'>";
+	for($i=0; !empty($Results[$i]['lic_name']); $i++)
+	  {
+	  $V .= "<option value='" . $Results[$i]['lic_id'] . "'>";
+	  $V .= htmlentities($Results[$i]['lic_name']);
+	  $V .= "</option>";
+	  }
+	$V .= "</select>";
+	$V .= "<input type='submit'>";
+	$V .= "</form>\n";
+
+        /*****************************************/
 	/* Save the license results */
 	$Count = count($Lics);
 

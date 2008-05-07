@@ -49,19 +49,19 @@ class licgroup extends FO_Plugin
   {
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
+    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
     if (!empty($Item) && !empty($Upload))
       {
-      if (GetParm("mod",PARM_TEXT) != $this->Name)
+      if (GetParm("mod",PARM_TEXT) == $this->Name)
 	{
-	$URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
+	menu_insert("Browse::License Groups",1);
+	menu_insert("Browse::[BREAK]",100);
+	menu_insert("Browse::Clear",101,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
 	}
       else
 	{
-	$URI=NULL;
+	menu_insert("Browse::License Groups",1, $URI);
 	}
-      menu_insert("Browse::License Groups",1, $URI);
-      menu_insert("Browse::[BREAK]",100);
-      menu_insert("Browse::Clear",101,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
       }
   } // RegisterMenus()
 
@@ -356,7 +356,7 @@ class licgroup extends FO_Plugin
     if (0) /* Debug code */
       {
       print "<pre>";
-      // print "LicGroups:\n"; print_r($this->LicInGroup);
+      print "LicGroups:\n"; print_r($this->LicInGroup);
       print "GrpGroups:\n"; print_r($this->GrpInGroup);
       print "</pre>";
       print "<hr>";
