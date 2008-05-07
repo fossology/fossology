@@ -116,8 +116,23 @@ class search_file_by_licgroup extends FO_Plugin
 
         /*****************************************/
 	/* Permit refining the search by license */
+        /*****************************************/
+	$LicList = array();
+	LicenseGetAll($UploadTreePk,$LicList);
 	$SQL = "SELECT DISTINCT lic_id,lic_name FROM agent_lic_raw
-		WHERE lic_pk=lic_id AND ($LicPkList);";
+		WHERE lic_pk=lic_id AND ($LicPkList)";
+	$SQL .= " AND (";
+	$First=1;
+	foreach($LicList as $L => $Lval)
+	  {
+	  if (is_int($L))
+	    {
+	    if (!$First) { $SQL .= " OR"; }
+	    $SQL .= " lic_pk=$L";
+	    $First=0;
+	    }
+	  }
+	$SQL .= ")";
 	// print "<pre>" . strlen($SQL) . ": $SQL</pre>";
 	$Results = $DB->Action($SQL);
 	for($i=0; !empty($Results[$i]['lic_name']); $i++)
@@ -142,6 +157,7 @@ class search_file_by_licgroup extends FO_Plugin
 
         /*****************************************/
 	/* Save the license results */
+        /*****************************************/
 	$Count = count($Lics);
 
 	/* Get the page menu */
