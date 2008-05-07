@@ -532,7 +532,7 @@ class licgroup_default extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
-	$Init = GetParm('Default',PARM_INTEGER);
+	$Init = GetParm('Default-Tree',PARM_INTEGER);
 	if ($Init == 1)
 	  {
 	  $rc = $this->DefaultGroups();
