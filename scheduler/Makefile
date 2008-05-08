@@ -1,49 +1,94 @@
 # scheduler Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 include ../Makefile.conf
 
-CC=gcc -DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
-CFLAGS=-Wall -O2 $(CFLAGS2)
-#CFLAGS=-Wall -g $(CFLAGS2)
-#CFLAGS=-Wall -g -efence $(CFLAGS2)
-OBJ=scheduler.o spawn.o sockets.o agents.o dbq.o dbstatus.o hosts.o debug.o dberror.o
-SRC=scheduler.c spawn.c sockets.c agents.c dbq.c dbstatus.c hosts.c debug.c dberror.c
-HDR=scheduler.h spawn.h sockets.h agents.h dbq.h dbstatus.h hosts.h debug.h dberror.h
-INC=-I../$(BUILDINC)
-LIB=-L../$(BUILDLIB)
-LIBDB=-lpq -lfossdb
-LIBREP=-lfossrepo
+DBPATH=../devel/libfossdb
+DB=$(DBPATH)/libfossdb.a
+REPOPATH=../devel/libfossrepo
+REPO=$(REPOPATH)/libfossrepo.a
 
-all: scheduler mkconfig
+CFLAGS_DB=-I$(DBPATH) -L$(DBPATH)
+CFLAGS_REPO=-I$(REPOPATH) -L$(REPOPATH)
 
-InstallationCreate:
-	$(CP) scheduler ../install/$(AGENTDIR)
-	$(CP) mkconfig ../install/$(AGENTDIR)
-	$(MKDIR) -p ../install/etc/init.d/
-	$(MKDIR) -p ../install/etc/default/
-	cat init.d | sed -e "s@AGENTDIR@$(AGENTDIR)@" > ../install/etc/init.d/fossology
-	$(CP) default ../install/etc/default/fossology
-	chmod 755 ../install/etc/init.d/fossology
+CONFDEF=-DDEFAULTSETUP='"$(AGENTDATADIR)/scheduler.conf"'
+FODEF=-DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
+MSCDEF=-DDATADIR='"$(AGENTDATADIR)"' -DBINDIR='"$(AGENTDIR)"' -DVARDATADIR='"$(VARDATADIR)"'
+
+# these objects need libfossdb
+OBJ=scheduler.o spawn.o sockets.o agents.o hosts.o debug.o dberror.o
+# these objects need libfossrepo as well
+REPOOBJ=dbstatus.o dbq.o
+
+all: fossology mkschedconf
+
+fossology: $(OBJ) $(REPOOBJ)
+	$(CC) $^ $(FODEF) $(CFLAGS_DB) -lfossdb $(CFLAGS_REPO) -lfossrepo \
+	$(ALL_CFLAGS) -lpq -o $@
+
+mkschedconf: mkschedconf.c $(REPO)
+	$(CC) $< $(MSCDEF) $(CFLAGS_REPO) -lfossrepo $(ALL_CFLAGS) -o $@
+
+
+# targets for our needed objects
+$(OBJ): %.o: %.c %.h $(DB)
+	$(CC) -c $< $(CONFDEF) $(CFLAGS_DB) $(ALL_CFLAGS)
+
+$(REPOOBJ): %.o: %.c %.h $(DB) $(REPO)
+	$(CC) -c $< $(CONFDEF) $(CFLAGS_REPO) $(CFLAGS_DB) $(ALL_CFLAGS)
+
+
+# targets to make sure the libfoss libraries we use are up to date
+$(DB):
+	$(MAKE) -C ../devel/libfossdb
+
+$(REPO):
+	$(MAKE) -C ../devel/libfossrepo
+
 
 install: all
-	$(CP) scheduler $(AGENTDIR)
-	$(CP) mkconfig $(AGENTDIR)
-	if [ -f $(DATADIR)/scheduler.conf ] ; then ./mkconfig -o $(DATADIR)/scheduler.conf -L ; fi
+	$(INSTALL_PROGRAM) fossology $(AGENTDIR)/fossology
+	$(INSTALL_PROGRAM) mkschedulerconf $(LIBEXECDIR)/mkschedulerconf
+
+	# init script
+	if [ ! -f $(DESTDIR)/etc/init.d/fossology -o $(OVERWRITE) ] ; then \
+		cat init.d | sed -e "s@BINDIR@$(BINDIR)@" > \
+			$(DESTDIR)/etc/init.d/fossology
+	else \
+		echo "WARNING: /etc/init.d/fossology already exists."; \
+		echo "  Not overwriting, consider checking it by hand."; \
+	fi
+
+	# default file
+	if [ ! -f $(DESTDIR)/etc/default/fossology -o $(OVERWRITE) ] ; then \
+		$(INSTALL_DATA) default $(DESTDIR)/etc/default/fossology
+	else \
+		echo "WARNING: /etc/init.d/fossology already exists."; \
+		echo "  Not overwriting, consider checking it by hand."; \
+	fi
+
+	# scheduler config file
+	if [ ! -f $(DATADIR)/scheduler.conf -o $(OVERWRITE) ] ; then \
+		./mkconfig -o $(DATADIR)/scheduler.conf -L; \
+	else \
+		echo "WARNING: $(DATADIR)/scheduler.conf already exists,"; \
+		echo "  consider checking or recreating it with mkconfig."; \
+	fi
 
 uninstall:
-	$(RM) $(BINDIR)/scheduler
-	$(RM) $(LIBEXECDIR)/mkconfig
-	$(RM) $(DATADIR)/scheduler.conf
-
-scheduler: $(OBJ) $(HDR)
-	$(CC) $(CFLAGS) $(INC) -o scheduler $(OBJ) $(LIB) $(LIBDB) $(LIBREP)
-
-mkconfig: mkconfig.c
-	$(CC) $(CFLAGS) $(INC) -DDATADIR='"$(AGENTDATADIR)"' -DBINDIR='"$(AGENTDIR)"' -DVARDATADIR='"$(VARDATADIR)"' mkconfig.c -o mkconfig $(LIB) $(LIBREP)
-
-%.o: %.c
-	$(CC) $(CFLAGS) $(INC) -DDEFAULTSETUP='"$(AGENTDATADIR)/scheduler.conf"' -c $<
+	rm -f $(BINDIR)/fossology
+	rm -f $(LIBEXECDIR)/mkschedconf
+	# we cowardly refuse to remove the scheduler.conf file
+	@echo "WARNING: Cowardly refusing to remove the following"
+	@echo "      $(DATADIR)/scheduler.conf"
+	@echo "      $(DESTDIR)/etc/init.d/fossology"
+	@echo "      $(DESTDIR)/etc/default/fossology"
+	@echo "  Remove by hand if you desire."
 
 clean:
-	$(RM) $(OBJ) core scheduler mkconfig
+	$(RM) $(OBJ) $(REPOOBJ) core fossology mkschedconf
 
+test: all
+	@echo "NOTICE: no tests available for scheduler"
+
+
+.PHONY: all install uninstall clean test
