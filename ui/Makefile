@@ -19,7 +19,7 @@ $(iPATHFILE): ../Makefile.conf
 	@echo "\$$SYSCONFDIR=\"$(SYSCONFDIR)\";" >> $(iPATHFILE)
 	@echo "\$$WEBDIR=\"$(WEBDIR)\";" >> $(iPATHFILE)
 	@echo "\$$PHPDIR=\"$(PHPDIR)\";" >> $(iPATHFILE)
-	@echo "\$$VARDATADIR=\"$(VARDATADIR)\";" >> $(iPATHFILE)
+	@echo "\$$PROJECTSTATEDIR=\"$(PROJECTSTATEDIR)\";" >> $(iPATHFILE)
 	@echo "\$$PROJECT=\"$(PROJECT)\";" >> $(iPATHFILE)
 	@echo "\$$DATADIR=\"$(DATADIR)\";" >> $(iPATHFILE)
 	@echo "\$$PATH=\"\$$LIBEXECDIR:\$$AGENTDIR:/bin:/usr/bin:/sbin:/usr/sbin\";" >> $(iPATHFILE)

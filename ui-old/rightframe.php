@@ -142,14 +142,14 @@ function addfile_form($info)
  */
 function upload($parent)
 {
-    global $uid, $VARDATADIR, $AGENTDIR;
+    global $uid, $PROJECTSTATEDIR, $AGENTDIR;
 
     $upurl = trim($_POST['url']);
     $file = $_POST['file'];
     $name = trim($_POST['name']);
     $descr = trim($_POST['descr']);
     $jq = "";
-    @mkdir($VARDATADIR, 0777);
+    @mkdir($PROJECTSTATEDIR, 0777);
 
     if (!empty($upurl)) 
     {
@@ -164,7 +164,7 @@ function upload($parent)
         }
 
     	// tmp upload file
-    	$tmpfile = $VARDATADIR . "/" . uuid();
+    	$tmpfile = $PROJECTSTATEDIR . "/" . uuid();
 
     	$jq = job_create_wget($upload_fk, $tmpfile, $upurl);
     	$jq = job_create_unpack($upload_fk, $upurl, $jq);
@@ -178,7 +178,7 @@ function upload($parent)
 	
     	if ($f['error'] == UPLOAD_ERROR_OK && is_uploaded_file($f['tmp_name'])) 
     	{
-    	    $tmp = $VARDATADIR . "/" . uuid();
+    	    $tmp = $PROJECTSTATEDIR . "/" . uuid();
 
     	    move_uploaded_file($f['tmp_name'], $tmp);
     	    chmod($tmp, 0666);
