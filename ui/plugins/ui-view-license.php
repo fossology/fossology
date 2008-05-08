@@ -82,7 +82,7 @@ class ui_view_license extends FO_Plugin
 	  if ($First) { $First = 0; $Color=-2; }
 	  else { $Color=-1; $LicName=NULL; }
 
-	  $View ->AddHighlight($Parts[0],$Parts[1],$Color,$Match,$LicName,-1,$RefURL);
+	  $View->AddHighlight($Parts[0],$Parts[1],$Color,$Match,$LicName,-1,$RefURL);
 	  }
 	}
     } // ConvertLicPathToHighlighting()
@@ -172,7 +172,14 @@ class ui_view_license extends FO_Plugin
     $Results = $DB->Action("SELECT * FROM agent_lic_meta WHERE pfile_fk = $Pfile ORDER BY tok_pfile_start;");
 
     /* Process all licenses */
-    foreach($Results as $R)
+    if (count($Results) <= 0)
+      {
+      $View = &$Plugins[plugin_find_id("view")];
+      $View->AddHighlight(-1,-1,'white',NULL,"No licenses found");
+      }
+    else
+      {
+      foreach($Results as $R)
 	{
 	if (empty($R['pfile_path'])) { continue; }
 	if (!empty($R['phrase_text']))
@@ -188,6 +195,7 @@ class ui_view_license extends FO_Plugin
 		}
 	$this->ConvertLicPathToHighlighting($R,$LicName,$RefURL);
 	}
+      }
 
     $View->ShowView(NULL,"View","view");
     return;
