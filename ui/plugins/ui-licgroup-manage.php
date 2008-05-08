@@ -208,6 +208,7 @@ function moveOptions(theSelFrom, theSelTo)
       }
 
     $GrpInGroup = &$this->LicGroupPlugin->GrpInGroup[$Group];
+    if ($GrpInGroup['id'] == 'phrase') { return($V); }
 
     $V .= "<option ";
     if ($SelectKey == $GrpInGroup['id']) { $V .= "selected "; }
