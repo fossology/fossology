@@ -47,6 +47,8 @@ class licgroup_manage extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_ANALYZE;
   var $LoginFlag  = 1; /* must be logged in to use this */
 
+  var $LicGroupPlugin = NULL; /* pointer to LicGroup plugin */
+
   /***********************************************************
    LicGroupJavascript(): Return Javascript needed for this plugin.
    ***********************************************************/
@@ -57,74 +59,62 @@ class licgroup_manage extends FO_Plugin
     $V .= '
     <script language="JavaScript" type="text/javascript">
 <!--
-  function compSortList(Item1,Item2)
-    {
-    if (Item1.text < Item2.text) { return(-1); }
-    if (Item1.text > Item2.text) { return(1); }
-    return(0);
-    }
+function compSortList(Item1,Item2)
+  {
+  if (Item1.text < Item2.text) { return(-1); }
+  if (Item1.text > Item2.text) { return(1); }
+  return(0);
+  }
 
-  function SortList(List)
+function SortList(List)
+  {
+  var ListItem = new Array(List.options.length);
+  var i;
+  for(i=0; i < List.options.length; i++)
     {
-    var ListItem = new Array(List.options.length);
-    var i;
-    for(i=0; i < List.options.length; i++)
-      {
-      ListItem[i] = new Option (
+    ListItem[i] = new Option (
 	List.options[i].text,
 	List.options[i].value,
 	List.options[i].selected,
 	List.options[i].defaultSelected
 	);
-      }
-    ListItem.sort(compSortList);
-    for(i=0; i < List.options.length; i++)
-      {
-      List.options[i] = ListItem[i];
-      }
     }
+  ListItem.sort(compSortList);
+  for(i=0; i < List.options.length; i++) { List.options[i] = ListItem[i]; }
+  }
 
-  function ToggleForm(Value)
-    {
-    UnselectForm("licavailable");
-    UnselectForm("liclist");
-    UnselectForm("grpavailable");
-    UnselectForm("grplist");
-    document.formy.name.disabled = Value;
-    document.formy.desc.disabled = Value;
-    document.formy.color.disabled = Value;
-    document.formy.licavailable.disabled = Value;
-    document.formy.liclist.disabled = Value;
-    document.formy.grpavailable.disabled = Value;
-    document.formy.grplist.disabled = Value;
-    }
+function ToggleForm(Value)
+  {
+  UnselectForm("licavailable");
+  UnselectForm("liclist");
+  UnselectForm("grpavailable");
+  UnselectForm("grplist");
+  document.formy.name.disabled = Value;
+  document.formy.desc.disabled = Value;
+  document.formy.color.disabled = Value;
+  document.formy.licavailable.disabled = Value;
+  document.formy.liclist.disabled = Value;
+  document.formy.grpavailable.disabled = Value;
+  document.formy.grplist.disabled = Value;
+  }
 
-  function UnselectForm(Name)
-    {
-    var i;
-    List = document.getElementById(Name);
-    for(i=0; i < List.options.length; i++)
-      {
-      List.options[i].selected = false;
-      }
-    return(1);
-    }
+function UnselectForm(Name)
+  {
+  var i;
+  List = document.getElementById(Name);
+  for(i=0; i < List.options.length; i++) { List.options[i].selected = false; }
+  return(1);
+  }
 
-  function SelectAll()
-    {
-    var i;
-    List = document.getElementById("liclist");
-    for(i=0; i < List.options.length; i++)
-      {
-      List.options[i].selected = true;
-      }
-    List = document.getElementById("grplist");
-    for(i=0; i < List.options.length; i++)
-      {
-      List.options[i].selected = true;
-      }
-    return(1);
-    }
+function SelectAll()
+  {
+  var i;
+  List = document.getElementById("liclist");
+  for(i=0; i < List.options.length; i++) { List.options[i].selected = true; }
+  List = document.getElementById("grplist");
+  for(i=0; i < List.options.length; i++) { List.options[i].selected = true; }
+  return(1);
+  }
 //-->
 </script>';
   $V .= "\n";
@@ -137,11 +127,11 @@ class licgroup_manage extends FO_Plugin
 var NS4 = (navigator.appName == "Netscape" && parseInt(navigator.appVersion) < 5);
 
 function addOption(theSel, theText, theValue)
-{
+  {
   var newOpt = new Option(theText, theValue);
   var selLength = theSel.length;
   theSel.options[selLength] = newOpt;
-}
+  }
 
 function deleteOption(theSel, theIndex)
 { 
@@ -197,21 +187,44 @@ function moveOptions(theSelFrom, theSelTo)
   /***********************************************************
    LicGroupCurrList(): Return the list of current groups, in
    a heirarchical tree.
+   THIS IS RECURSIVE!
    ***********************************************************/
-  function LicGroupCurrList	($SelectKey=NULL, $PermitNew=0)
+  function LicGroupCurrList	($SelectKey=NULL, $PermitNew=0, $Group=NULL, $Depth=0)
     {
     global $DB;
     /* Get list of groups */
     $V = "";
     if ($PermitNew) { $V .= "<option value='-1'>[New Group]</option>\n"; }
-    $Results = $DB->Action("SELECT licgroup_name,licgroup_pk FROM licgroup ORDER BY licgroup_name;");
-    for($i=0; !empty($Results[$i]['licgroup_pk']); $i++)
+    if (empty($Group))
       {
-      $V .= "<option ";
-      if ($SelectKey == $Results[$i]['licgroup_pk']) { $V .= "selected "; }
-      $V .= "value='" . $Results[$i]['licgroup_pk'] . "'>";
-      $V .= htmlentities($Results[$i]['licgroup_name']);
-      $V .= "</option>\n";
+      foreach($this->LicGroupPlugin->GrpInGroup as $G => $g)
+        {
+	if ($this->LicGroupPlugin->GrpInGroup[$G]['head'] == 1)
+	  {
+	  $V .= $this->LicGroupCurrList($SelectKey,0,$G,0);
+	  }
+	}
+      return($V);
+      }
+
+    $GrpInGroup = &$this->LicGroupPlugin->GrpInGroup[$Group];
+
+    $V .= "<option ";
+    if ($SelectKey == $GrpInGroup['id']) { $V .= "selected "; }
+    $V .= "value='" . $GrpInGroup['id'] . "'>";
+    for($i=0; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
+    $V .= htmlentities($GrpInGroup['name']);
+    $V .= "</option>\n";
+
+    foreach($GrpInGroup as $G => $g)
+      {
+      if ((substr($G,0,1) == 'g') && ($g > 1))
+	{
+	if (empty($GrpInGroup['tail']))
+	  {
+	  $V .= $this->LicGroupCurrList($SelectKey,0,$G,$Depth+1);
+	  }
+	}
       }
     return($V);
     } // LicGroupCurrList()
@@ -332,6 +345,7 @@ function moveOptions(theSelFrom, theSelTo)
   function LicGroupForm	($GroupKey=NULL)
     {
     global $DB;
+
     $V = "";
     $ColorParts = array("ff","00");  /* common colors */
     // $ColorParts = array("ff","cc","99","66","33","00"); /* web safe colors */
@@ -552,6 +566,9 @@ function moveOptions(theSelFrom, theSelTo)
     {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
+    global $Plugins;
+    $this->LicGroupPlugin = &$Plugins[plugin_find_id('licgroup')];
+    $this->LicGroupPlugin->MakeGroupTables();
     switch($this->OutputType)
       {
       case "XML":
