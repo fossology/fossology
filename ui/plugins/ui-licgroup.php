@@ -557,6 +557,7 @@ class licgroup extends FO_Plugin
 	{
 	$LinkUri = "$Uri&item=$Item&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
 	$LinkUri = preg_replace("/mod=licgroup/","mod=view-license",$LinkUri);
+	$LinkUri .= "&modback=" . $this->Name;
 	}
       else
 	{

@@ -561,7 +561,7 @@ class ui_view extends FO_Plugin
    $Name is the name for this plugin.
    This function is intended to be called from other plugins.
    ***********************************************************/
-  function ShowView($Fin=NULL, $BackName=NULL, $BackMod=NULL,
+  function ShowView($Fin=NULL, $BackMod="browse",
 		    $ShowMenu=1, $ShowHeader=1, $ShowText=NULL)
     {
     if ($this->State != PLUGIN_STATE_READY) { return; }
@@ -627,7 +627,7 @@ class ui_view extends FO_Plugin
       if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
       if (!empty($Show)) { $Opt .= "&show=$Show"; }
       /* No item */
-      $V .= Dir2Browse("browse",$Item,$Ufile,NULL,1,"View") . "<P />\n";
+      $V .= Dir2Browse($BackMod,$Item,$Ufile,NULL,1,"View") . "<P />\n";
       } // if ShowHeader
 
     /***********************************
@@ -704,14 +704,7 @@ class ui_view extends FO_Plugin
       case "HTML":
 	if ($this->OutputToStdout)
 		{
-		if (plugin_find_id("view-license") >= 0)
-		  {
-		  $this->ShowView(NULL,"License","view-license");
-		  }
-		else
-		  {
-		  $this->ShowView();
-		  }
+		$this->ShowView(NULL,"browse");
 		}
 	break;
       case "Text":
@@ -720,7 +713,7 @@ class ui_view extends FO_Plugin
 	break;
       }
     if (!$this->OutputToStdout) { return($V); }
-    print("$V");
+    print($V);
     return;
     }
 
