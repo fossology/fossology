@@ -139,8 +139,10 @@ class ui_view extends FO_Plugin
     $H = array();
     $H['Start'] = intval($ByteStart);
     $H['End'] = intval($ByteEnd);
-    $Color = intval($Color);
-    if ($Color < 0)
+    if (is_int($Color))
+      {
+      $Color = intval($Color);
+      if ($Color < 0)
 	{
 	/* Reuse last color */
 	if (empty($this->Highlight)) { $Color = 0; }
@@ -153,8 +155,9 @@ class ui_view extends FO_Plugin
 	  $Color = $this->Highlight[count($this->Highlight)-1]['Color'] + 1;
 	  }
 	}
-    $Color = $Color % MAXHIGHLIGHTCOLOR;
-    $H['Color'] = intval($Color);
+      $Color = $Color % MAXHIGHLIGHTCOLOR;
+      }
+    $H['Color'] = $Color;
     $H['Match'] = htmlentities($Match);
     $H['RefURL'] = $RefURL;
     $H['Name'] = htmlentities($Name);
