@@ -126,7 +126,7 @@ class ui_view_license extends FO_Plugin
     $Text = "<div class='text'>";
     $Text .= "<H1>License: " . $Results[0]['lic_name'] . "</H1>\n";
     $Text .= "</div>";
-    $View->ShowView($Ftmp,"View","view",0,0,$Text);
+    $View->ShowView($Ftmp,"view",0,0,$Text);
     } // ViewLicense()
 
   /***********************************************************
@@ -152,6 +152,8 @@ class ui_view_license extends FO_Plugin
 	return;
 	}
     if (empty($Pfile)) { return; }
+    $ModBack = GetParm("modback",PARM_STRING);
+    if (empty($ModBack)) { $ModBack='license'; }
 
     /* Load license names */
     $LicPk2GID=array();  // map lic_pk to the group id: lic_id
@@ -197,7 +199,7 @@ class ui_view_license extends FO_Plugin
 	}
       }
 
-    $View->ShowView(NULL,"View","view");
+    $View->ShowView(NULL,$ModBack);
     return;
     } // Output()
 
