@@ -84,6 +84,32 @@ class licgroup_manage extends FO_Plugin
       }
     }
 
+  function ToggleForm(Value)
+    {
+    UnselectForm("licavailable");
+    UnselectForm("liclist");
+    UnselectForm("grpavailable");
+    UnselectForm("grplist");
+    document.formy.name.disabled = Value;
+    document.formy.desc.disabled = Value;
+    document.formy.color.disabled = Value;
+    document.formy.licavailable.disabled = Value;
+    document.formy.liclist.disabled = Value;
+    document.formy.grpavailable.disabled = Value;
+    document.formy.grplist.disabled = Value;
+    }
+
+  function UnselectForm(Name)
+    {
+    var i;
+    List = document.getElementById(Name);
+    for(i=0; i < List.options.length; i++)
+      {
+      List.options[i].selected = false;
+      }
+    return(1);
+    }
+
   function SelectAll()
     {
     var i;
@@ -205,10 +231,6 @@ function moveOptions(theSelFrom, theSelTo)
     $GroupKey = $Results[0]['licgroup_pk'];
     if (empty($GroupKey)) { return("Record not found.  Nothing to delete."); }
     $GroupName = GetParm('name',PARM_TEXT);
-    if ($GroupName != $Results[0]['licgroup_name'])
-      {
-      return("Group name ($GroupName) does not match name field (" . $Results[0]['licgroup_name'] . ").  Delete aborted.");
-      }
 
     $DB->Action("DELETE FROM licgroup_lics WHERE licgroup_fk = '$GroupKey';");
     $DB->Action("DELETE FROM licgroup_grps WHERE licgroup_fk = '$GroupKey';");
@@ -239,10 +261,11 @@ function moveOptions(theSelFrom, theSelTo)
     $GroupDesc = str_replace("'","''",$GroupDesc);
     if (preg_match("/^#[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/",$GroupColor) != 1)
       {
-      return("Invalid color: $GroupColor\n");
+      return("Invalid color: $GroupColor");
       }
+
     /* Check if values look good */
-    if (empty($GroupName)) { return("Group name must be specified.\n"); }
+    if (empty($GroupName)) { return("Group name must be specified."); }
 
     if (!empty($GroupKey) && ($GroupKey >= 0))
       {
@@ -274,7 +297,7 @@ function moveOptions(theSelFrom, theSelTo)
     $Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_name = '$GroupName';");
     if (empty($Results[0]['licgroup_pk']))
       {
-      return("Bad SQL: $SQL\n");
+      return("Bad SQL: $SQL");
       }
     $GroupKey = $Results[0]['licgroup_pk'];
 
@@ -310,8 +333,8 @@ function moveOptions(theSelFrom, theSelTo)
     {
     global $DB;
     $V = "";
-    $ColorParts1 = array("ff","00");  /* common colors */
-    $ColorParts = array("ff","cc","99","66","33","00"); /* web safe colors */
+    $ColorParts = array("ff","00");  /* common colors */
+    // $ColorParts = array("ff","cc","99","66","33","00"); /* web safe colors */
     $GroupName = "";
     $GroupDesc = "";
     $GroupColor = "#ffffff";
@@ -366,7 +389,8 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "<td><select name='groupkey' onChange='window.open(\"$Uri\"+this.value,\"_top\");'>\n";
     $V .= $this->LicGroupCurrList($GroupKey,1);
     $V .= "</select>\n";
-    $V .= "<td>";
+    /* Permit delete */
+    $V .= "<input type='checkbox' value='1' name='delete' onclick='ToggleForm(this.checked);'><b>Check to delete this license group!</b></td>\n";
     $V .= "</td>";
 
     /* Text fields */
@@ -378,18 +402,6 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "</tr><tr>\n";
     $V .= "<td>Group color</td><td>";
     $V .= "<select name='color' style='background-color:$GroupColor' onSelect='this.style.background=this.value;' onChange='this.style.background=this.value;'>\n";
-    foreach($ColorParts1 as $C1)
-    foreach($ColorParts1 as $C2)
-    foreach($ColorParts1 as $C3)
-      {
-      $Color = "#" . $C1 . $C2 . $C3;
-      $V .= "<option value='$Color' style='background-color:$Color'";
-      if (!strcasecmp($Color,$GroupColor)) { $V .= " selected"; }
-      $V .= ">";
-      // $V .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-      $V .= $Color;
-      $V .= "</option>";
-      }
     foreach($ColorParts as $C1)
     foreach($ColorParts as $C2)
     foreach($ColorParts as $C3)
@@ -411,7 +423,7 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "<tr><td align='center' width='45%'>Available licenses</td><td width='10%'></td><td width='45%' align='center'>Licenses in this Group</td></tr>";
     $V .= "<tr>";
     $V .= "<tr><td>";
-    $V .= "<select multiple='multiple' id='licavailable' name='licavailable' size='10'>";
+    $V .= "<select onFocus='UnselectForm(\"liclist\");' multiple='multiple' id='licavailable' name='licavailable' size='10'>";
     foreach($LicAvailable as $Name => $Key)
       {
       $V .= "<option value='$Key'";
@@ -420,10 +432,10 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "</select>";
 
     /* center list of options */
-    /*** <-- View ***/
+    /*** View ***/
     $V .= "</td><td>";
     $V .= "<center>\n";
-    $Uri = "onClick=\"javascript:if (document.getElementById('licavailable').value) window.open('";
+    $Uri = "if (document.getElementById('licavailable').value) { window.open('";
     $Uri .= Traceback_uri();
     $Uri .= "?mod=view-license";
     $Uri .= "&format=flow";
@@ -431,11 +443,9 @@ function moveOptions(theSelFrom, theSelTo)
     $Uri .= "' + document.getElementById('licavailable').value + '";
     $Uri .= "&licset=";
     $Uri .= "' + document.getElementById('licavailable').value";
-    $Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\"";
-
-    /*** View --> ***/
-    $V .= "<a href='#' $Uri>&larr;View</a><P/>\n";
-    $Uri = "onClick=\"javascript:if (document.getElementById('liclist').value) window.open('";
+    $Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes'); }";
+    $Uri .= " else ";
+    $Uri .= "if (document.getElementById('liclist').value) { window.open('";
     $Uri .= Traceback_uri();
     $Uri .= "?mod=view-license";
     $Uri .= "&format=flow";
@@ -443,8 +453,8 @@ function moveOptions(theSelFrom, theSelTo)
     $Uri .= "' + document.getElementById('liclist').value + '";
     $Uri .= "&licset=";
     $Uri .= "' + document.getElementById('liclist').value";
-    $Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\"";
-    $V .= "<a href='#' $Uri>View&rarr;</a><hr/>\n";
+    $Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes'); }";
+    $V .= "<a href='#' onClick=\"$Uri\">View</a><hr/>\n";
 
     /*** Add --> ***/
     $V .= "<a href='#' onClick='moveOptions(document.formy.licavailable,document.formy.liclist);'>Add&rarr;</a><P/>\n";
@@ -455,7 +465,7 @@ function moveOptions(theSelFrom, theSelTo)
 
     /* List the license groups */
     $V .= "</td><td>";
-    $V .= "<select multiple='multiple' id='liclist' name='liclist[]' size='10'>";
+    $V .= "<select onFocus='UnselectForm(\"licavailable\");' multiple='multiple' id='liclist' name='liclist[]' size='10'>";
     ksort($GroupListLic);
     foreach($GroupListLic as $Name => $Key)
       {
@@ -521,14 +531,9 @@ function moveOptions(theSelFrom, theSelTo)
 
     $V .= "</td></table>\n";
 
-    /* Permit delete */
-    $V .= "</tr><tr>\n";
-    $V .= "<td>Delete</td>";
-    $V .= "<td><input type='checkbox' value='1' name='delete'><b>Check to delete this license group!</b></td>\n";
-
     $V .= "</tr>\n";
     $V .= "</table>\n";
-    $V .= "<input type='submit' value='Go!'>\n";
+    $V .= "<input type='submit' name='submit' value='Go!'>\n";
     $V .= "</form>\n";
     return($V);
     } // LicGroupForm()
@@ -552,9 +557,9 @@ function moveOptions(theSelFrom, theSelTo)
       case "XML":
 	break;
       case "HTML":
-	$Name = GetParm('name',PARM_STRING);
+	$Submit = GetParm('submit',PARM_STRING);
 	$Delete = GetParm('delete',PARM_INTEGER);
-	if (!empty($Name))
+	if (!empty($Submit))
 	  {
 	  if ($Delete == 1) { $rc = $this->LicGroupDelete(); }
 	  else { $rc = $this->LicGroupInsert(); }
