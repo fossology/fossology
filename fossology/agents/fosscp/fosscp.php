@@ -45,8 +45,8 @@
  *
  * engine-shell will convert all of the SQL columns into environment
  * variables.  E.G. The MSQ will return pfile=... and pfile_fk=...
- * These will become $ARG_pfile and $ARG_pfile_fk. 
- * 
+ * These will become $ARG_pfile and $ARG_pfile_fk.
+ *
  * Access them with the php $_ENV global array.
  *
  */
@@ -177,8 +177,8 @@ else
   $child_id = $_ENV['ARG_folder_pk'];
 }
 
-// put the folder info into foldercontest table 
- 
+// put the folder info into foldercontest table
+
 echo "!INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$parent_id','1<<3','$child_id');";
 
 /*
@@ -192,12 +192,20 @@ if (is_dir($upload_file))
   if ($recurse == 'y')
   {
     //tar up everything
-    $upload_path = suckupfs($upload_file, TRUE);
+    if( false === $upload_path = suckupfs($upload_file, TRUE));
+    {
+      echo "FATAL: Could not open $upload_path\n";
+      exit(1);
+    }
   }
   else
   {
     // save just the files
-    $upload_path = suckupfs($upload_file, FALSE);
+    if( false === $upload_path = suckupfs($upload_file, FALSE));
+    {
+      echo "FATAL: Could not open $upload_path\n";
+      exit(1);
+    }
   }
 }
 else
