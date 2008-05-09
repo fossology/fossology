@@ -33,7 +33,7 @@
  *
  * @return 0 for success, 1 for failure....
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  */
 
