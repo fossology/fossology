@@ -43,6 +43,7 @@
 
 function CreateFolder($parent_key, $folder_name, $description="") {
   global $DB;
+  require_once("/usr/local/share/fossology/www/common/common-cli.php");
 
   /* Check the name */
   $folder_name = trim($folder_name);
@@ -50,6 +51,7 @@ function CreateFolder($parent_key, $folder_name, $description="") {
 
   /* Make sure the parent folder exists */
   $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$parent_key';");
+  cli_PrintDebugMessage ("CreateFolder: results after parent check",$Results);
   $Row = $Results[0];
   if ($Row['folder_pk'] != $parent_key)
   {
@@ -61,6 +63,7 @@ function CreateFolder($parent_key, $folder_name, $description="") {
   $Sql = "SELECT * FROM leftnav WHERE name = '$folder_name' AND
                 parent = '$parent_key' AND foldercontents_mode = '1';";
   $Results = $DB->Action($Sql);
+  //cli_PrintDebugMessage ("CreateFolder: results after under parent check",$Results);
   if ($Results[0]['name'] == $folder_name) { return(0); }
 
   /* Create the folder
@@ -70,11 +73,15 @@ function CreateFolder($parent_key, $folder_name, $description="") {
    */
   $folder_name = str_replace("'", "''", $folder_name);  // PostgreSQL quoting
   $description = str_replace("'", "''", $description);            // PostgreSQL quoting
-  $DB->Action(
+  $IRes = $DB->Action(
   "INSERT INTO folder (folder_name,folder_desc) VALUES ('$folder_name','$description');");
   $Results = $DB->Action(
   "SELECT folder_pk FROM folder WHERE folder_name='$folder_name' AND folder_desc = '$description';");
-  $FolderPk = $Results[0]['folder_pk'];
+
+  //cli_PrintDebugMessage ("CreateFolder: results after INSERT getting folder_pk of ",$Results);
+  $size = count($Results);
+  $FolderPk = $Results[$size-1]['folder_pk'];
+  //cli_PrintDebugMessage ("CreateFolder: Folder_pk is:$FolderPk");
   if (empty($FolderPk)) { return(FALSE); }
 
   $DB->Action("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$parent_key','1','$FolderPk');");
