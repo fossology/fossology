@@ -88,7 +88,7 @@ class search_file extends FO_Plugin
   function RegisterMenus()
     {
     $URI = $this->Name;
-    menu_insert("Search::Filename",0,$URI);
+    menu_insert("Search::Filename",0,$URI,"Search based on filename");
     } // RegisterMenus()
 
   /***********************************************************

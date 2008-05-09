@@ -125,7 +125,7 @@ class search_file_advance extends FO_Plugin
   function RegisterMenus()
     {
     $URI = $this->Name;
-    menu_insert("Search::Advanced",0,$URI);
+    menu_insert("Search::Advanced",0,$URI,"Additional search options");
     } // RegisterMenus()
 
   /***********************************************************

@@ -45,7 +45,7 @@ class ui_view extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    menu_insert("Browse-Pfile::View",10,$this->Name);
+    menu_insert("Browse-Pfile::View",10,$this->Name,"View file contents");
     // For the Browse menu, permit switching between detail and summary.
     $Format = GetParm("format",PARM_STRING);
     $Page = GetParm("page",PARM_INTEGER);
@@ -75,23 +75,23 @@ class ui_view extends FO_Plugin
       {
       case "hex":
         menu_insert("View::Hex",-10);
-        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText");
-        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText");
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText","View as unformatted text");
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText","View as formatted text");
         break;
       case "text":
-        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex");
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex","View as a hex dump");
         menu_insert("View::Text",-11);
-        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText");
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText","View as formatted text");
         break;
       case "flow":
-        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex");
-        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText");
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex","View as a hex dump");
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText","View as unformatted text");
         menu_insert("View::Formatted",-12);
         break;
       default:
-        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex");
-        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText");
-        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText");
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex","View as a hex dump");
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText","View as unformatted text");
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText","View as formatted text");
         break;
       }
 
@@ -103,8 +103,8 @@ class ui_view extends FO_Plugin
 	}
     else
 	{
-	menu_insert("View::View",2,$this->Name . $URI);
-	menu_insert("View-Meta::View",2,$this->Name . $URI);
+	menu_insert("View::View",2,$this->Name . $URI,"View file contents");
+	menu_insert("View-Meta::View",2,$this->Name . $URI,"View file contents");
 	}
     } // RegisterMenus()
 

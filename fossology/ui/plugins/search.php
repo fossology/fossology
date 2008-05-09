@@ -40,7 +40,6 @@ class ui_search extends FO_Plugin
     $HTML = "<form method='post' action='$Uri'>";
     $HTML .= "<input type=text name='search' size='20' value='search'>";
     $HTML .= "</form>";
-    // menu_insert("Main::SearchEntry",-10,NULL,NULL,$HTML);
     } // RegisterMenus()
 
   /********************************************

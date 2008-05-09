@@ -105,7 +105,7 @@ function menu_cmp(&$a,&$b)
  If $URI is blank, nothing is added.
  $LastOrder is used for grouping items in order.
  ***********************************************/
-function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth,&$FullName)
+function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth,&$FullName,&$Title)
 {
   $AddNew=0;
   $NeedSort=0;
@@ -152,7 +152,7 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth,&$FullN
   /* $M is set! See if we need to traverse submenus */
   if ($LastPart != 1)
     {
-    $Depth = menu_insert_r($M->SubMenu,$PathParts[1],$LastOrder,$Target,$URI,$HTML,$Depth+1,$FullName);
+    $Depth = menu_insert_r($M->SubMenu,$PathParts[1],$LastOrder,$Target,$URI,$HTML,$Depth+1,$FullName,$Title);
     $NewDepth = $Depth + 1;
     if ($M->MaxDepth < $NewDepth)
 	{
@@ -172,6 +172,7 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth,&$FullN
     $M->URI = $URI;
     $M->HTML = $HTML;
     $M->FullName = $FullName;
+    $M->Title = $Title;
     }
 
   if ($AddNew == 1)
@@ -190,11 +191,11 @@ function menu_insert_r(&$Menu,$Path,$LastOrder,$Target,$URI,$HTML,$Depth,&$FullN
  menu_insert(): Given a Path, order level for the last
  item, and optional plugin name, insert the menu item.
  ***********************************************/
-function menu_insert($Path,$LastOrder=0,$URI=NULL,$Target=NULL,$HTML=NULL)
+function menu_insert($Path,$LastOrder=0,$URI=NULL,$Title=NULL,$Target=NULL,$HTML=NULL)
 {
   global $MenuList;
   $FullName = $Path;
-  menu_insert_r(&$MenuList,$Path,$LastOrder,$Target,$URI,$HTML,0,$FullName);
+  menu_insert_r(&$MenuList,$Path,$LastOrder,$Target,$URI,$HTML,0,$FullName,$Title);
 } // menu_insert()
 
 /***********************************************
@@ -269,7 +270,9 @@ function menu_to_1html($Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
       else if (!empty($Val->URI))
 	{
 	if (!$First) { $V .= " | "; }
-	$V .= "<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "'>";
+	$V .= "<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "'";
+	if (!empty($Val->Title)) { $V .= " title='" . htmlentities($Val->Title,ENT_QUOTES) . "'"; }
+	$V .= ">";
 	if (@$_SESSION['fullmenudebug'] == 1) { $V .= $Val->FullName . "(" . $Val->Order . ")"; }
 	else { $V .= $Val->Name; }
 	$V .= "</a>";
@@ -319,7 +322,9 @@ function menu_to_1list($Menu,&$Parm,$Pre="",$Post="",$ShowAll=1)
       else if (!empty($Val->URI))
 	{
 	$V .= $Pre;
-	$V .= "[<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "&" . $Parm . "'>";
+	$V .= "[<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "&" . $Parm . "'";
+	if (!empty($Val->Title)) { $V .= " title='" . htmlentities($Val->Title,ENT_QUOTES) . "'"; }
+	$V .= ">";
 	if (@$_SESSION['fullmenudebug'] == 1) { $V .= $Val->FullName . "(" . $Val->Order . ")"; }
 	else { $V .= $Val->Name; }
 	$V .= "</a>]";

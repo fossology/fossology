@@ -38,7 +38,7 @@ class search_repo extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    menu_insert("Search::Repository",0,$this->Name);
+    menu_insert("Search::Repository",0,$this->Name,"Search based on repository keys");
     } // RegisterMenus()
 
   /***********************************************************

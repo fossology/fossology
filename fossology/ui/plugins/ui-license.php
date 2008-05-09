@@ -49,11 +49,11 @@ class ui_license extends FO_Plugin
 	{
 	menu_insert("Browse::License",1);
 	menu_insert("Browse::[BREAK]",100);
-	menu_insert("Browse::Clear",101,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
+	menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
 	}
       else
 	{
-	menu_insert("Browse::License",1,$URI);
+	menu_insert("Browse::License",1,$URI,"View license histogram");
 	}
       }
     } // RegisterMenus()
