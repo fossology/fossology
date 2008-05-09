@@ -146,7 +146,7 @@ class ui_view_license extends FO_Plugin
     $LicId = GetParm("lic",PARM_INTEGER);
     $LicIdSet = GetParm("licset",PARM_INTEGER);
     $Pfile = GetParm("pfile",PARM_INTEGER);
-    if (!empty($LicId) && !empty($LicIdSet))
+    if (!empty($LicId))
 	{
 	$this->ViewLicense($Pfile,$LicId,$LicIdSet);
 	return;
