@@ -120,7 +120,7 @@ class search_file_by_licgroup extends FO_Plugin
 	$LicList = array();
 	LicenseGetAll($UploadTreePk,$LicList);
 	$SQL = "SELECT DISTINCT lic_id,lic_name FROM agent_lic_raw
-		WHERE lic_pk=lic_id AND ($LicPkList)";
+		WHERE ($LicPkList)";
 	$SQL .= " AND (";
 	$First=1;
 	foreach($LicList as $L => $Lval)
@@ -152,7 +152,7 @@ class search_file_by_licgroup extends FO_Plugin
 	  $V .= "</option>";
 	  }
 	$V .= "</select>";
-	$V .= "<input type='submit'>";
+	$V .= "<input type='submit' value='Search!'>";
 	$V .= "</form>\n";
 
         /*****************************************/
@@ -182,11 +182,11 @@ class search_file_by_licgroup extends FO_Plugin
 	  if (!empty($L['phrase_text'])) { $V .= "<b>Phrase:</b> " . htmlentities($L['phrase_text']) . "\n"; }
 	  if (Isdir($L['ufile_mode']))
 	    {
-	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"license") . "\n";
+	    $V .= Dir2Browse("licgroup",$L['uploadtree_pk'],$L['ufile_pk'],"license") . "\n";
 	    }
 	  else
 	    {
-	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"view-license") . "\n";
+	    $V .= Dir2Browse("licgroup",$L['uploadtree_pk'],$L['ufile_pk'],"view-license") . "\n";
 	    }
 	  $V .= "</td></tr></table>\n";
 	  }
