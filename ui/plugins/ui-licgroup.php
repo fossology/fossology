@@ -56,11 +56,11 @@ class licgroup extends FO_Plugin
 	{
 	menu_insert("Browse::License Groups",1);
 	menu_insert("Browse::[BREAK]",100);
-	menu_insert("Browse::Clear",101,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
+	menu_insert("Browse::Clear",101,NULL,NULL,"<a title='Clear highlighting' href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
 	}
       else
 	{
-	menu_insert("Browse::License Groups",1, $URI);
+	menu_insert("Browse::License Groups",1,$URI,"View license group histogram");
 	}
       }
   } // RegisterMenus()

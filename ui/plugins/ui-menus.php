@@ -46,8 +46,8 @@ class ui_menu extends FO_Plugin
       } 
    
     // Add default menus (with no actions linked to plugins)
-    menu_insert("Main::Logo",20,NULL,NULL,"<a href='/' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . Traceback_uri() . "images/fossology-logo.gif' border=0></a>");
-    menu_insert("Main::Home",18,"Default","_top");
+    menu_insert("Main::Logo",20,NULL,NULL,NULL,"<a href='/' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . Traceback_uri() . "images/fossology-logo.gif' border=0></a>");
+    menu_insert("Main::Home",18,"Default",NULL,"_top");
     menu_insert("Main::Search",14);
     menu_insert("Main::Browse",12);
     menu_insert("Main::Upload",10);

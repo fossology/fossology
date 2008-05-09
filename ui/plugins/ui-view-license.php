@@ -52,8 +52,8 @@ class ui_view_license extends FO_Plugin
 	}
       else
 	{
-	menu_insert("View::License",1,$URI);
-	menu_insert("View-Meta::License",1,$URI);
+	menu_insert("View::License",1,$URI,"View license histogram");
+	menu_insert("View-Meta::License",1,$URI,"View license histogram");
 	}
       }
     $Lic = GetParm("lic",PARM_INTEGER);

@@ -44,19 +44,19 @@ class ui_browse extends FO_Plugin
 
     // For the Browse menu, permit switching between detail and simple.
     $URI = $this->Name . Traceback_parm_keep(array("upload","item"));
-    menu_insert("Browse::[BREAK]",-1,"$URI&show=simple");
+    menu_insert("Browse::[BREAK]",-1,"$URI&show=simple","Basic directory listing");
     $Show = GetParm("show",PARM_STRING);
     switch($Show)
       {
       default:
       case "detail":
-	menu_insert("Browse::Simple",-10,"$URI&show=simple");
+	menu_insert("Browse::Simple",-10,"$URI&show=simple","Basic directory listing");
 	menu_insert("Browse::Detail",-10);
 	$URI .= "&show=detail";
 	break;
       case "simple":
 	menu_insert("Browse::Simple",-10);
-	menu_insert("Browse::Detail",-10,"$URI&show=detail");
+	menu_insert("Browse::Detail",-10,"$URI&show=detail","Detailed directory listing");
 	$URI .= "&show=simple";
 	break;
       }
