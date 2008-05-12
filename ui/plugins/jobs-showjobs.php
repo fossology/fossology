@@ -61,7 +61,7 @@ class jobs_showjobs extends FO_Plugin
     if (!empty($UploadPk))
 	{
 	$NewURI = preg_replace('/&upload=[^&]*/','',$URI);
-	menu_insert("JobDetails::All",-11,"$NewURI");
+	menu_insert("JobDetails::All",-11,"$NewURI","Show all jobs (not just this one)");
 	$UploadPk = "&upload=$UploadPk";
 	}
 
@@ -70,17 +70,17 @@ class jobs_showjobs extends FO_Plugin
     switch($Show)
       {
       case "detail":
-	menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History$UploadPk");
+	menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History$UploadPk","Show a summary of jobs");
 	menu_insert("JobDetails::Detail",-3);
 	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk");
 	break;
       case "summary":
 	menu_insert("JobDetails::Summary",-2);
-	menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History$UploadPk");
-	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk");
+	menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History$UploadPk","Show detailed information about each job");
+	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk","Show all jobs (active and completed)");
 	break;
       case "job":
-	menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History$UploadPk");
+	menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History$UploadPk","Show the job queue");
 	$Job = GetParm("job",PARM_INTEGER);
 	if (!empty($Job)) { $Job = "&job=$Job"; }
 	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk$Job");
@@ -95,13 +95,13 @@ class jobs_showjobs extends FO_Plugin
       switch($History)
 	{
 	case "0":
-	  menu_insert("JobDetails::History",-12,"$URI&show=$Show&history=1");
+	  menu_insert("JobDetails::History",-12,"$URI&show=$Show&history=1","Show all jobs (active and completed)");
 	  menu_insert("JobDetails::Active",-12);
 	  break;
 	case "1":
 	default:
 	  menu_insert("JobDetails::History",-12);
-	  menu_insert("JobDetails::Active",-12,"$URI&show=$Show&history=0");
+	  menu_insert("JobDetails::Active",-12,"$URI&show=$Show&history=0","Show only active jobs");
 	  break;
 	}
       }
@@ -378,11 +378,11 @@ class jobs_showjobs extends FO_Plugin
 	  {
 	  if ($Detail)
 	    {
-	    $V .= "</th><th $Style><a $Style href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=detail&history=1&upload=$Upload'>History</a>";
+	    $V .= "</th><th $Style><a $Style title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=detail&history=1&upload=$Upload'>History</a>";
 	    }
 	  else
 	    {
-	    $V .= "</th><th $Style><a $Style href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=summary&history=1&upload=$Upload'>History</a>";
+	    $V .= "</th><th $Style><a $Style title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=summary&history=1&upload=$Upload'>History</a>";
 	    }
 	  }
 	else
@@ -402,9 +402,9 @@ class jobs_showjobs extends FO_Plugin
 	  $Style = "style='font:normal 8pt verdana, arial, helvetica;'";
 	  $JobId = $Row['job_pk'];
 	  $V .= "<th $Style>";
-	  $V .= "<a href='$UriFull&action=reset&jobid=$JobId'>Reset</a>";
+	  $V .= "<a href='$UriFull&action=reset&jobid=$JobId' title='Reset this specific job'>Reset</a>";
 	  $V .= " | ";
-	  $V .= "<a href='$UriFull&action=delete&jobid=$JobId'>Delete</a>";
+	  $V .= "<a href='$UriFull&action=delete&jobid=$JobId' title='Delete this specific job'>Delete</a>";
 	  $V .= " | ";
 	  $Priority = $Row['job_priority'];
 	  $V .= "Priority: ";
