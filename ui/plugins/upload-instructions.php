@@ -68,7 +68,7 @@ class upload_instructions extends FO_Plugin
 	$V .= "This option is intended for developers who have mounted directories containing source trees.\n";
 	$V .= "The directory must be accessible via the web server's user.\n";
 	$V .= "<P />\n";
-	$V .= "If your system is configured to use mutltiple agent servers, the data area must be\n";
+	$V .= "If your system is configured to use multiple agent servers, the data area must be\n";
 	$V .= "mounted and accessible to the FOSSology user (fossy) on every agent system.  See\n";
 	$V .= "the section <em>Configuring the Scheduler</em> in the <a href='http://fossology.org/scheduler'>Scheduler documentation</a>.\n";
 	$V .= "</ul>\n";
