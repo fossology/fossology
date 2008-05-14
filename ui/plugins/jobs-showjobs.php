@@ -372,17 +372,22 @@ class jobs_showjobs extends FO_Plugin
 	$JobName = $Row['ufile_name'];
 	if (empty($JobName)) { $JobName = "[Default]"; }
 	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
-	$V .= "<tr><th colspan=3 style='background:#202020;color:white;'>$JobName";
-	$Style = "style='font:normal 8pt verdana, arial, helvetica; background:#202020;color:white;}'";
+	$Style = "style='background:#202020; color:white;}'";
+	$Style1 = "style='font:normal 8pt verdana, arial, helvetica; background:#202020; color:white;'";
+	$V .= "<tr><th colspan=3 $Style>";
+	$V .= "<a title='Click to browse this upload' $Style href='" . Traceback_uri() . "?mod=browse&upload=" . $Row['upload_pk'] . "'>";
+	$V .= $JobName;
+	$V .= "</a>";
+	$V .= "</th>";
 	if ($Upload >= 0)
 	  {
 	  if ($Detail)
 	    {
-	    $V .= "</th><th $Style><a $Style title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=detail&history=1&upload=$Upload'>History</a>";
+	    $V .= "<th $Style1><a $Style1 title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=detail&history=1&upload=$Upload'>History</a>";
 	    }
 	  else
 	    {
-	    $V .= "</th><th $Style><a $Style title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=summary&history=1&upload=$Upload'>History</a>";
+	    $V .= "<th $Style1><a $Style1 title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=summary&history=1&upload=$Upload'>History</a>";
 	    }
 	  }
 	else
