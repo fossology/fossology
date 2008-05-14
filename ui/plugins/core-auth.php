@@ -339,8 +339,10 @@ class core_auth extends FO_Plugin
 	  	  $V .= "This login uses $Protocol, so passwords are tranmitted in plain text.  This is not a secure connection.<P />\n";
 		  }
 	  	$V .= "<form method='post'>\n";
-	  	$V .= "Username: <input type='text' size=20 name='username'><P>\n";
-	  	$V .= "Password: <input type='password' size=20 name='password'><P>\n";
+		$V .= "<table border=0>";
+	  	$V .= "<tr><td>Username:</td><td><input type='text' size=20 name='username'></td></tr>\n";
+	  	$V .= "<tr><td>Password:</td><td><input type='password' size=20 name='password'></td></tr>\n";
+		$V .= "</table>";
 	  	$V .= "<input type='checkbox' name='checkip' value='1'>Validate IP.\n";
 		$Referer = @$_SERVER['HTTP_REFERER'];
 		if (!empty($Referer))
