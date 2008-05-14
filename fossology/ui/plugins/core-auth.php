@@ -343,6 +343,7 @@ class core_auth extends FO_Plugin
 	  	$V .= "<tr><td>Username:</td><td><input type='text' size=20 name='username'></td></tr>\n";
 	  	$V .= "<tr><td>Password:</td><td><input type='password' size=20 name='password'></td></tr>\n";
 		$V .= "</table>";
+		$V .= "<P/>";
 	  	$V .= "<input type='checkbox' name='checkip' value='1'>Validate IP.\n";
 		$Referer = @$_SERVER['HTTP_REFERER'];
 		if (!empty($Referer))
