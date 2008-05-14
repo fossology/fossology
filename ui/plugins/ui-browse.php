@@ -250,7 +250,8 @@ class ui_browse extends FO_Plugin
 	    { $V .= "jobs: "; }
 	  $V .= $Status['total'] . " total; ";
 	  $V .= $Status['completed'] . " completed; ";
-	  $V .= $Status['active'] . " active; ";
+	  if (!empty($Status['pending'])) { $V .= $Status['pending'] . " pending; "; }
+	  if (!empty($Status['pending'])) { $V .= $Status['active'] . " active; "; }
 	  $V .= $Status['failed'] . " failed.";
 
           $V .= "<tr><td colspan=2>&nbsp;</td></tr>\n";
