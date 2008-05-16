@@ -178,6 +178,10 @@ class agent_license_once extends FO_Plugin
 	  $_FILES['licfile']['tmp_name'] = $Ftmp;
 	  $_FILES['licfile']['size'] = filesize($Ftmp);
 	  }
+	else
+	  {
+	  unlink($Ftmp);
+	  }
 	fclose($Fin);
 	}
 
