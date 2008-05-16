@@ -191,9 +191,16 @@ class ui_view extends FO_Plugin
 	$V .= "<tr bgcolor='" . $this->HighlightColors[$H['Color']] . "'>\n";
 	$V .= "<td align='right'>" . $H['Match'] . "</td>\n";
 
-	$Page = intval($H['Start'] / $PageBlockSize);
 	$V .= "<td>";
-	$V .= "<a href='$Uri&page=$Page#" . $H['Index'] . "'>view</a>";
+	if ($PageBlockSize > 0)
+	  {
+	  $Page = intval($H['Start'] / $PageBlockSize);
+	  $V .= "<a href='$Uri&page=$Page#" . $H['Index'] . "'>view</a>";
+	  }
+	else
+	  {
+	  $V .= "<a href='#" . $H['Index'] . "'>view</a>";
+	  }
 	$V .= "</td>\n";
 
 	$V .= "<td>";
