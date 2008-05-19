@@ -78,6 +78,7 @@ class agent_license_once extends FO_Plugin
 	  {
 	  $LicNum++;
 	  $LicName = trim(substr($Line,4));
+	  $LicName = preg_replace("@.*License.bsam.*@","Phrase",$LicName);
 	  $LicShort = preg_replace("@^.*/@","",$LicName);
 	  /* Really simplify the data, per Paul's request */
 	  $LicShort = preg_replace("@ variant.*@","",$LicShort);
@@ -85,7 +86,7 @@ class agent_license_once extends FO_Plugin
 	  $LicShort = preg_replace("@ short.*@","",$LicShort);
 	  $LicShort = preg_replace("@^BSD .*@","BSD",$LicShort);
 	  $LicShort = preg_replace("@^MIT .*@","MIT",$LicShort);
-	  $LicShort = preg_replace("@^.*Phrase:.*@","Phrase",$LicShort);
+	  $LicShort = preg_replace("@.*License.bsam.*@","Phrase",$LicShort);
 	  $LicShort = trim($LicShort);
 	  $LicSummary[$LicShort] = 1;
 	  $Denominator = 0;
