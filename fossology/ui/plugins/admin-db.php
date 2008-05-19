@@ -87,12 +87,14 @@ class admin_db_cleanup extends FO_Plugin
 //	$Checks[$i]['tag']   = "unreferenced_pfiles";
 //	$Checks[$i]['label'] = "Unreferenced pfiles";
 //	$Checks[$i]['sql']   = "FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile);";
-	$i++;
+//	$i++;
+
 	$Checks[$i]['tag']   = "bad_upload_pfile";
 	$Checks[$i]['label'] = "Uploads missing pfiles";
 	$Checks[$i]['sql']   = "FROM upload WHERE ufile_fk IN (SELECT ufile_pk FROM ufile WHERE pfile_fk IS NULL);";
 	$Checks[$i]['list']  = "SELECT ufile_name AS list FROM upload INNER JOIN ufile ON ufile_fk = ufile_pk WHERE ufile_fk IN (SELECT ufile_pk FROM ufile WHERE pfile_fk IS NULL) LIMIT 20;";
 	$i++;
+
 	$Checks[$i]['tag']   = "unreferenced_ufile";
 	$Checks[$i]['label'] = "Unreferenced ufiles";
 	$Checks[$i]['sql']   = "FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree);";
@@ -117,22 +119,43 @@ class admin_db_cleanup extends FO_Plugin
 	$Checks[$i]['label'] = "Foldercontents with invalid upload references";
 	$Checks[$i]['sql']   = "FROM foldercontents WHERE foldercontents_mode = 2 AND child_id NOT IN (SELECT upload_pk FROM upload);";
 	$i++;
+
 	$Checks[$i]['tag']   = "bad_foldercontents_uploadtree";
 	$Checks[$i]['label'] = "Foldercontents with invalid uploadtree references";
 	$Checks[$i]['sql']   = "FROM foldercontents WHERE foldercontents_mode = 4 AND child_id NOT IN (SELECT uploadtree_pk FROM uploadtree);";
 	$i++;
+
 	$Checks[$i]['tag']   = "bad_foldercontents_folder";
 	$Checks[$i]['label'] = "Foldercontents with invalid folder references";
 	$Checks[$i]['sql']   = "FROM foldercontents WHERE foldercontents_mode = 1 AND child_id NOT IN (SELECT folder_pk FROM folder);";
 	$i++;
+
 	$Checks[$i]['tag']   = "unreferenced_folder";
 	$Checks[$i]['label'] = "Unreferenced folders";
 	$Checks[$i]['sql']   = "FROM folder WHERE folder_pk NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1) AND folder_pk != '1';";
 	$Checks[$i]['list']  = "SELECT folder_name AS list FROM folder WHERE folder_pk NOT IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1) AND folder_pk != '1' LIMIT 20;";
 	$i++;
+
 	$Checks[$i]['tag']   = "duplicate_attrib";
 	$Checks[$i]['label'] = "Duplicate attrib records";
 	$Checks[$i]['sql']   = "FROM attrib WHERE attrib_pk NOT IN (SELECT MIN(dup.attrib_pk) FROM attrib AS dup GROUP BY dup.pfile_fk, dup.attrib_key_fk, dup.attrib_value);";
+	$i++;
+
+if (0)
+{
+	$Checks[$i]['tag']   = "abandoned_license_temp_table";
+	$Checks[$i]['label'] = "Stranded temporary license lookup table";
+	$Checks[$i]['sql']   = "FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public' AND table_name SIMILAR TO '^license_[[:digit:]]+$';";
+	$Checks[$i]['list']  = "SELECT table_name AS list " . $Checks[$i]['sql'];
+	$i++;
+
+	$Checks[$i]['tag']   = "abandoned_metaanalysis_temp_table";
+	$Checks[$i]['label'] = "Stranded temporary metaanalysis lookup table";
+	$Checks[$i]['sql']   = "FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public' AND table_name SIMILAR TO '^metaanalysis_[[:digit:]]+$';";
+	$Checks[$i]['list']  = "SELECT table_name AS list " . $Checks[$i]['sql'];
+	$i++;
+}
+
 
 	/* Check for anything to fix */
         $Args=0;
@@ -172,7 +195,7 @@ class admin_db_cleanup extends FO_Plugin
 	$V .= "// -->\n";
 	$V .= "</script>\n";
 
-	$Results = $DB->Action("SELECT COUNT(*) AS count FROM jobqueue WHERE (jq_type = 'unpack' OR jq_type = 'delagent') AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;");
+	$Results = $DB->Action("SELECT COUNT(*) AS count FROM jobqueue WHERE (jq_type = 'unpack' OR jq_type = 'delagent' OR jq_type = 'license' OR jq_type = 'pkgmetagetta') AND jq_starttime IS NOT NULL AND jq_endtime IS NULL;");
 	$Count = $Results[0]['count'];
 	if ($Count == 1) { $Verb = "is"; $String = "task"; }
 	else { $Verb = "are"; $String = "tasks"; }
@@ -186,6 +209,7 @@ class admin_db_cleanup extends FO_Plugin
 	$V .= "Fixing inconsistencies while any jobs are running could lead to job failures and further inconsistencies.\n";
 	$V.= "<P>NOTE: Some of these inconsistencies may not be resolvable from here due to table constraints.\n";
 
+	/****************************************************/
 	$V .= "<P>The following inconsistencies have been identified:\n";
 	$V .= "<form method='POST'>";
 	$V .= "<table border=1 width='100%'>\n";
