@@ -144,12 +144,13 @@ class licgroup extends FO_Plugin
     $Results = $DB->Action($SQL);
     if (empty($Results[0]['table']))
       {
-      $SQL1 = "CREATE SEQUENCE licgroup_grps_licgroup_grps_pk_seq START 1;
-	CREATE TABLE licgroup_grps (
+      $SQL1 = "CREATE SEQUENCE licgroup_grps_licgroup_grps_pk_seq START 1;";
+      $DB->Action($SQL1);
+      $SQL1 = "CREATE TABLE licgroup_grps (
 	licgroup_grps_pk integer PRIMARY KEY DEFAULT nextval('licgroup_grps_licgroup_grps_pk_seq'),
 	licgroup_fk      integer,
 	licgroup_memberfk integer,
-	CONSTRAINT only_one UNIQUE (licgroup_fk, licgroup_memberfk),
+	CONSTRAINT only_one_grp UNIQUE (licgroup_fk, licgroup_memberfk),
 	CONSTRAINT licgroup_exist FOREIGN KEY(licgroup_fk) REFERENCES licgroup(licgroup_pk) ON UPDATE RESTRICT ON DELETE RESTRICT,
 	CONSTRAINT licgroupmember_exist FOREIGN KEY(licgroup_memberfk) REFERENCES licgroup(licgroup_pk) ON UPDATE RESTRICT ON DELETE RESTRICT
 	);
