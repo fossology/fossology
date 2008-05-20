@@ -595,6 +595,8 @@ function moveOptions(theSelFrom, theSelTo)
 	    $V .= "alert('$rc')\n";
 	    $V .= "</script>\n";
 	    }
+	  /* Reload the group list since it changed. */
+	  $this->LicGroupPlugin->MakeGroupTables();
 	  }
 	$GroupKey = GetParm('groupkey',PARM_INTEGER);
 	if ($GroupKey <= 0) { $GroupKey = NULL; }
