@@ -73,26 +73,18 @@ class ui_default extends FO_Plugin
 	$V .= "<b>Where to Begin...</b><br />\n";
 	$V .= "The menu at the top contains all the primary capabilities of FOSSology.\n";
 	$V .= "<ul>\n";
-	$V .= "<li><b>";
 	if (plugin_find_id("browse") >= 0)
 	  {
+	  $V .= "<li><b>";
 	  $V .= "<a href='" . Traceback_Uri() . "?mod=browse'>Browse</a>";
+	  $V .= "</b>: If you don't know where to start, try browsing the currently uploaded projects.\n";
 	  }
-	else
-	  {
-	  $V .= "Browse";
-	  }
-	$V .= "</b>: If you don't know where to start, try browsing the currently uploaded projects.\n";
-	$V .= "<li><b>";
 	if (plugin_find_id("search_file") >= 0)
 	  {
+	  $V .= "<li><b>";
 	  $V .= "<a href='" . Traceback_Uri() . "?mod=search_file'>Search</a>";
+	  $V .= "</b>: Look through the uploaded projects for specific files.\n";
 	  }
-	else
-	  {
-	  $V .= "Search";
-	  }
-	$V .= "</b>: Look through the uploaded projects for specific files.\n";
 	if (empty($_SESSION['UserId']))
 	  {
 	  $V .= "<li><b>";
