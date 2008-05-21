@@ -615,6 +615,63 @@ void	WriteMarker	(int Marker, FILE *Fout, long Offset)
 } /* WriteMarker() */
 
 /*********************************************
+ CopyrightYearCheck(): A copyright may be associated
+ with a series of years.  This function finds the
+ end of the year list (stopping at 250 characters).
+ The list must be in the form:
+   4-digit year
+   followed by a comma or hyphen
+   followed by any amount of whitespace (but not newline) and !isalnum
+   followed by another 4-digit year.
+ NOTE: Year lists cannot span lines!
+ I'm hard-coding this: all years MUST begin with a 19 or 20.
+ (The year "0123" and "2103" are not valid.)
+ Returns number of bytes matched.
+ *********************************************/
+int	CopyrightYearCheck	(char *Mmap, fileoffset MaxLen)
+{
+  fileoffset Len=0;
+  fileoffset Spaces=0;
+
+  if (MaxLen > 250) MaxLen=250;
+  while(Len < MaxLen)
+    {
+    /* Check if enough room for a year (minimum: 4 digits + \n) */
+    if (Len + Spaces + 5 > MaxLen) return(Len);
+    /* Check for a year... */
+    if (!strncmp(Mmap+Len+Spaces,"19",2) + !strncmp(Mmap+Len+Spaces,"20",2) != 1)
+	{
+	return(Len);
+	}
+    if (!isdigit(Mmap[Len+2+Spaces]) || !isdigit(Mmap[Len+3+Spaces]))
+	{
+	return(Len);
+	}
+    if (isalnum(Mmap[Len+4+Spaces]))
+	{
+	return(Len);
+	}
+    /* Got a year! */
+    Len += 4 + Spaces;
+
+    /* Comma or hyphen is permitted */
+    if ((Len < MaxLen) && strchr(",-",Mmap[Len]))
+	{
+	Len++;
+	}
+
+    /* Skip spaces */
+    Spaces=0;
+    while((Len+Spaces < MaxLen) && isspace(Mmap[Len+Spaces]))
+	{
+	Spaces++;
+	}
+    /* Loop back and check for another date */
+    }
+  return(Len);
+} /* CopyrightYearCheck() */
+
+/*********************************************
  PreprocessFile(): Load raw datafile and convert
  it to a pre-processed format.
  This takes care of case, language conversion, and
@@ -630,6 +687,7 @@ int	PreprocessFile	(int UseRep)
   fileoffset ii;
   fileoffset BytesLeft=0;
   fileoffset FileLocation=0;
+  fileoffset YearLength; /* used for copyright processing */
   int C;
   int LastC=' ';	/* last C value */
   char S[256];	/* used when C==-2 */
@@ -735,48 +793,30 @@ int	PreprocessFile	(int UseRep)
 	if (!HasCopyright && (Rep->Mmap[i+j] == 0xAE))
 		{ HasCopyright=1; }
 
-	/* try to ignore phone numbers, but accept years */
-	if (!HasYear && (LineLength-j >= 10) &&
-	    !isalnum(Rep->Mmap[i+j]) &&
-	    isdigit(Rep->Mmap[i+j+1]) &&
-	    isdigit(Rep->Mmap[i+j+2]) &&
-	    isdigit(Rep->Mmap[i+j+3]) &&
-	    !isdigit(Rep->Mmap[i+j+4]) && /* is punct */
-	    isdigit(Rep->Mmap[i+j+5]) &&
-	    isdigit(Rep->Mmap[i+j+6]) &&
-	    isdigit(Rep->Mmap[i+j+7]) &&
-	    isdigit(Rep->Mmap[i+j+8]) &&
-	    !isdigit(Rep->Mmap[i+j+9]))
-		{ HasYear=0; j=j+9; } /* phone number */
-	else if (!HasYear && (LineLength-j >= 9) &&
-	    !isalnum(Rep->Mmap[i+j]) &&
-	    isdigit(Rep->Mmap[i+j+1]) &&
-	    isdigit(Rep->Mmap[i+j+2]) &&
-	    !isdigit(Rep->Mmap[i+j+3]) && /* is punct */
-	    isdigit(Rep->Mmap[i+j+4]) &&
-	    isdigit(Rep->Mmap[i+j+5]) &&
-	    isdigit(Rep->Mmap[i+j+6]) &&
-	    isdigit(Rep->Mmap[i+j+7]) &&
-	    !isdigit(Rep->Mmap[i+j+8]))
-		{ HasYear=0; j=j+8; } /* phone number */
-	else if (!HasYear && (LineLength-j >= 8) &&
-	    !isalnum(Rep->Mmap[i+j]) &&
-	    isdigit(Rep->Mmap[i+j+1]) &&
-	    !isdigit(Rep->Mmap[i+j+2]) && /* is punct */
-	    isdigit(Rep->Mmap[i+j+3]) &&
-	    isdigit(Rep->Mmap[i+j+4]) &&
-	    isdigit(Rep->Mmap[i+j+5]) &&
-	    isdigit(Rep->Mmap[i+j+6]) &&
-	    !isdigit(Rep->Mmap[i+j+7]))
-		{ HasYear=0; j=j+7; } /* phone number */
-	else if (!HasYear && (LineLength-j >= 6) &&
-	    !isalnum(Rep->Mmap[i+j]) &&
-	    isdigit(Rep->Mmap[i+j+1]) &&
-	    isdigit(Rep->Mmap[i+j+2]) &&
-	    isdigit(Rep->Mmap[i+j+3]) &&
-	    isdigit(Rep->Mmap[i+j+4]) &&
-	    !isdigit(Rep->Mmap[i+j+5]))
-		{ HasYear=1; j=j+5; }
+	/* try to ignore generic numbers, but accept years */
+	if (!HasYear)
+	  {
+	  YearLength = CopyrightYearCheck((char *)(Rep->Mmap+i+j),LineLength-j);
+	  if (YearLength > 0)
+	    {
+#if 0
+	    fprintf(stderr,"YEAR: [%d] '%.*s'\n",YearLength,YearLength,Rep->Mmap+i+j);
+#endif
+	    HasYear = 1;
+	    j = j + YearLength;
+	    }
+	  else /* skip numbers, +/-, dots */
+	    {
+	    int MovedIndex=0;
+	    while((j<LineLength) &&
+	          (isdigit(Rep->Mmap[i+j]) || strchr("+-.",Rep->Mmap[i+j])))
+		  {
+		  MovedIndex=1;
+		  j++;
+		  }
+	    if (MovedIndex) j--; /* let the for-loop move it */
+	    }
+	  }
 	} /* for j */
       if (HasCopyright && HasYear)
         {
@@ -921,13 +961,10 @@ int	PreprocessFile	(int UseRep)
 	C=-2;
 	strcpy(S,"copyright");
 	}
-    else if (!isalnum(LastC) && (BytesLeft >= 4) &&
-             isdigit(Rep->Mmap[i]) && isdigit(Rep->Mmap[i+1]) &&
-             isdigit(Rep->Mmap[i+2]) && isdigit(Rep->Mmap[i+3]) &&
-	     !isdigit(Rep->Mmap[i+4]))
+    else if (isdigit(Rep->Mmap[i]) && ((YearLength = CopyrightYearCheck((char *)(Rep->Mmap+i),BytesLeft)) > 0))
 	{
 	/* found a date */
-	i=i+3;
+	i+=YearLength-1;
 	C=-7;
 	strcpy(S,"Year");
 	}
