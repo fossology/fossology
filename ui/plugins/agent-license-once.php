@@ -129,12 +129,16 @@ class agent_license_once extends FO_Plugin
     if ($Highlight)
       {
       $Fin = fopen($TempFile,"r");
-      print "<center>";
-      print $View->GetHighlightMenu(-1);
-      print "</center>";
-      print "<hr />\n";
-      $View->ShowText($Fin,0,1,-1);
-      fclose($Fin);
+      if ($Fin)
+        {
+	$View->SortHighlightMenu();
+        print "<center>";
+        print $View->GetHighlightMenu(-1);
+        print "</center>";
+        print "<hr />\n";
+        $View->ShowText($Fin,0,1,-1);
+        fclose($Fin);
+	}
       }
     else
       {
@@ -145,7 +149,6 @@ class agent_license_once extends FO_Plugin
 
     /* Clean up */
     unlink($TempCache);
-    unlink($TempFile);
     return($V);
   } // AnalyzeOne()
 
@@ -196,7 +199,16 @@ class agent_license_once extends FO_Plugin
     /* Only register with the menu system if the user is logged in. */
     if (!empty($_SESSION['User']))
       {
-      menu_insert("Main::Jobs::Analyze::One-Shot License",$this->MenuOrder,$this->Name,$this->MenuTarget);
+      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)	// Debugging changes to license analysis
+	{
+	menu_insert("Main::Jobs::Analyze::One-Shot License",$this->MenuOrder,$this->Name,$this->MenuTarget);
+	}
+      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG)	// Debugging changes to license analysis
+	{
+	$URI = $this->Name . Traceback_parm_keep(array("format","pfile"));
+	menu_insert("View::One-Shot",1,$URI,"One-shot, real-time license analysis");
+	menu_insert("View-Meta::One-Shot",1,$URI,"One-shot, real-time license analysis");
+	}
       }
   } // RegisterMenus()
 
@@ -206,6 +218,7 @@ class agent_license_once extends FO_Plugin
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
+    global $DB;
     $V="";
     switch($this->OutputType)
     {
@@ -214,6 +227,8 @@ class agent_license_once extends FO_Plugin
       case "HTML":
 	/* If this is a POST, then process the request. */
 	$Highlight = GetParm('highlight',PARM_INTEGER); // may be null
+	/* You can also specify the file by pfile_pk */
+	$PfilePk = GetParm('pfile',PARM_INTEGER); // may be null
 	if (file_exists(@$_FILES['licfile']['tmp_name']))
 	  {
 	  if ($_FILES['licfile']['size'] <= 1024*1024*10)
@@ -221,8 +236,29 @@ class agent_license_once extends FO_Plugin
 	    /* Size is not too big.  */
 	    print $this->AnalyzeOne($Highlight) . "\n";
 	    }
-	  @unlink($_FILES['licfile']['tmp_name']);
+	  unlink($_FILES['licfile']['tmp_name']);
 	  return;
+	  }
+	else if (!empty($PfilePk) && !empty($DB))
+	  {
+	  /* Get the pfile info */
+	  $Results = $DB->Action("SELECT * FROM pfile WHERE pfile_pk = '$PfilePk';");
+	  if (!empty($Results[0]['pfile_pk']))
+	    {
+	    global $LIBEXECDIR;
+	    $Highlight=1; /* processing a pfile? Always highlight. */
+	    $Repo = $Results[0]['pfile_sha1'] . "." . $Results[0]['pfile_md5'] . "." . $Results[0]['pfile_size'];
+	    $Repo = trim(shell_exec("$LIBEXECDIR/reppath files '$Repo'"));
+	    $_FILES['licfile']['tmp_name'] = $Repo;
+	    $_FILES['licfile']['size'] = $Results[0]['pfile_size'];
+	    if ($_FILES['licfile']['size'] <= 1024*1024*10)
+	      {
+	      /* Size is not too big.  */
+	      print $this->AnalyzeOne($Highlight) . "\n";
+	      }
+	    /* Do NOT unlink the file! */
+	    return;
+	    }
 	  }
 
 	/* Display instructions */
