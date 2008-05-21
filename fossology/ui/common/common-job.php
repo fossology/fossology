@@ -614,7 +614,7 @@ function JobListSummary	($upload_pk)
 	$Status['total']++;
 	if ($State & 0x01) { $Status['failed']++; }
 	else if ($State & 0x08) { $Status['active']++; }
-	else if ($State & 0x04) { $Status['completed']++; }
+	else if ($State & 0x04) { $Status['pending']++; }
 	else if ($State & 0x02) { $Status['completed']++; }
 	$State=0;
 	$JobId = $Results[$i]['job_pk'];

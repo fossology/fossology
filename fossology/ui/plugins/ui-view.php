@@ -125,6 +125,18 @@ class ui_view extends FO_Plugin
     } // _cmp_highlight()
 
   /***********************************************************
+   SortHighlightMenu() Sort highlighting.
+   The list of highlights were probably not inserted in order...
+   ***********************************************************/
+  function SortHighlightMenu	()
+    {
+    if (!empty($this->Highlight))
+	{
+	usort($this->Highlight,array("ui_view","_cmp_highlight"));
+	}
+    } // SortHighlightMenu()
+
+  /***********************************************************
    AddHighlight(): Text can be highlighted!
    Start, End, and Color are required.
    If Color is -1, then uses last color.
@@ -637,13 +649,7 @@ class ui_view extends FO_Plugin
       $V .= Dir2Browse($BackMod,$Item,$Ufile,NULL,1,"View") . "<P />\n";
       } // if ShowHeader
 
-    /***********************************
-     Sort highlighting.
-     ***********************************/
-    if (!empty($this->Highlight))
-	{
-	usort($this->Highlight,array("ui_view","_cmp_highlight"));
-	}
+    $this->SortHighlightMenu();
 
     /***********************************
      Display file contents
