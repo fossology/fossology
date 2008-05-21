@@ -1,6 +1,7 @@
 # scheduler Makefile
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-include ../Makefile.conf
+VARS=../Makefile.conf
+include $(VARS)
 
 DBPATH=../devel/libfossdb
 DB=$(DBPATH)/libfossdb.a
@@ -10,82 +11,100 @@ REPO=$(REPOPATH)/libfossrepo.a
 CFLAGS_DB=-I$(DBPATH) -L$(DBPATH)
 CFLAGS_REPO=-I$(REPOPATH) -L$(REPOPATH)
 
-CONFDEF=-DDEFAULTSETUP='"$(AGENTDATADIR)/scheduler.conf"'
+CONFDEF=-DDEFAULTSETUP='"$(SYSCONFDIR)/scheduler.conf"'
 FODEF=-DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
-MSCDEF=-DDATADIR='"$(AGENTDATADIR)"' -DBINDIR='"$(AGENTDIR)"' -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"'
+MSCDEF=-DDATADIR='"$(DATADIR)"' -DBINDIR='"$(LIBEXECDIR)"' -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"'
 
 # these objects need libfossdb
 OBJ=scheduler.o spawn.o sockets.o agents.o hosts.o debug.o dberror.o
 # these objects need libfossrepo as well
 REPOOBJ=dbstatus.o dbq.o
 
-all: fossology mkschedconf
+all: fossology-scheduler mkschedconf
 
-fossology: $(OBJ) $(REPOOBJ)
-	$(CC) $^ $(FODEF) $(CFLAGS_DB) -lfossdb $(CFLAGS_REPO) -lfossrepo \
-	$(ALL_CFLAGS) -lpq -o $@
+fossology-scheduler: $(OBJ) $(REPOOBJ) $(VARS)
+	$(CC) $(OBJ) $(REPOOBJ) $(FODEF) $(CFLAGS_DB) -lfossdb $(CFLAGS_REPO) \
+	-lfossrepo $(ALL_CFLAGS) -lpq -o $@
 
-mkschedconf: mkschedconf.c $(REPO)
+mkschedconf: mkschedconf.c $(REPO) $(VARS)
 	$(CC) $< $(MSCDEF) $(CFLAGS_REPO) -lfossrepo $(ALL_CFLAGS) -o $@
 
 
 # targets for our needed objects
-$(OBJ): %.o: %.c %.h $(DB)
+$(OBJ): %.o: %.c %.h $(DB) $(VARS)
 	$(CC) -c $< $(CONFDEF) $(CFLAGS_DB) $(ALL_CFLAGS)
 
-$(REPOOBJ): %.o: %.c %.h $(DB) $(REPO)
+$(REPOOBJ): %.o: %.c %.h $(DB) $(REPO) $(VARS)
 	$(CC) -c $< $(CONFDEF) $(CFLAGS_REPO) $(CFLAGS_DB) $(ALL_CFLAGS)
 
 
 # targets to make sure the libfoss libraries we use are up to date
 $(DB):
-	$(MAKE) -C ../devel/libfossdb
+	$(MAKE) -C $(DBPATH) libfossdb.a
 
 $(REPO):
-	$(MAKE) -C ../devel/libfossrepo
+	$(MAKE) -C $(REPOPATH) libfossrepo.a
 
 
-install: all
-	$(INSTALL_PROGRAM) fossology $(AGENTDIR)/fossology
-	$(INSTALL_PROGRAM) mkschedulerconf $(LIBEXECDIR)/mkschedulerconf
+install: all $(VARS)
+	$(INSTALL_PROGRAM) fossology-scheduler $(DESTDIR)$(LIBEXECDIR)/fossology-scheduler
+	$(INSTALL_PROGRAM) mkschedconf $(DESTDIR)$(LIBEXECDIR)/mkschedconf
 
 	# init script
-	if [ ! -f $(DESTDIR)/etc/init.d/fossology -o $(OVERWRITE) ] ; then \
-		cat init.d | sed -e "s@BINDIR@$(BINDIR)@" > \
-			$(DESTDIR)/etc/init.d/fossology
+	if [ ! -f $(DESTDIR)/etc/init.d/fossology -o "$(OVERWRITE)" ] ; then \
+		mkdir -p $(DESTDIR)/etc/init.d; \
+		cat init.d | sed -e "s@LIBEXECDIR@$(LIBEXECDIR)@" > $(DESTDIR)/etc/init.d/fossology; \
 	else \
 		echo "WARNING: /etc/init.d/fossology already exists."; \
 		echo "  Not overwriting, consider checking it by hand."; \
 	fi
 
 	# default file
-	if [ ! -f $(DESTDIR)/etc/default/fossology -o $(OVERWRITE) ] ; then \
-		$(INSTALL_DATA) default $(DESTDIR)/etc/default/fossology
+	if [ ! -f $(DESTDIR)/etc/default/fossology -o "$(OVERWRITE)" ] ; then \
+		mkdir -p $(DESTDIR)/etc/default; \
+		$(INSTALL_DATA) default $(DESTDIR)/etc/default/fossology; \
 	else \
 		echo "WARNING: /etc/init.d/fossology already exists."; \
 		echo "  Not overwriting, consider checking it by hand."; \
 	fi
 
 	# scheduler config file
-	if [ ! -f $(DATADIR)/scheduler.conf -o $(OVERWRITE) ] ; then \
-		./mkconfig -o $(DATADIR)/scheduler.conf -L; \
+	if [ ! -f $(DESTDIR)$(SYSCONFDIR)/scheduler.conf -o "$(OVERWRITE)" ] ; then \
+		mkdir -p $(DESTDIR)$(SYSCONFDIR); \
+		./mkschedconf -o $(DESTDIR)$(SYSCONFDIR)/scheduler.conf -L; \
 	else \
-		echo "WARNING: $(DATADIR)/scheduler.conf already exists,"; \
+		echo "WARNING: $(DESTDIR)$(SYSCONFDIR)/scheduler.conf already exists,"; \
 		echo "  consider checking or recreating it with mkconfig."; \
 	fi
 
 uninstall:
-	rm -f $(BINDIR)/fossology
-	rm -f $(LIBEXECDIR)/mkschedconf
-	# we cowardly refuse to remove the scheduler.conf file
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fossology-scheduler
+	rm -f $(DESTDIR)$(LIBEXECDIR)/mkschedconf
+
+	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
+		if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \
+			echo "WARNING: $(DESTDIR)$(LIBEXECDIR) not empty, not removing";\
+		else \
+			rmdir $(DESTDIR)$(LIBEXECDIR); \
+		fi; \
+	fi
+
+	@if [ -d $(DESTDIR)$(SYSCONFDIR) ]; then \
+		if [ "`ls -A $(DESTDIR)$(SYSCONFDIR)`" ]; then \
+			echo "WARNING: $(DESTDIR)$(SYSCONFDIR) not empty, not removing";\
+		else \
+			rmdir $(DESTDIR)$(SYSCONFDIR); \
+		fi; \
+	fi
+
 	@echo "WARNING: Cowardly refusing to remove the following"
-	@echo "      $(DATADIR)/scheduler.conf"
+	@echo "      $(DESTDIR)$(SYSCONFDIR)/scheduler.conf"
 	@echo "      $(DESTDIR)/etc/init.d/fossology"
 	@echo "      $(DESTDIR)/etc/default/fossology"
 	@echo "  Remove by hand if you desire."
 
 clean:
-	$(RM) $(OBJ) $(REPOOBJ) core fossology mkschedconf
+	rm -f $(OBJ) $(REPOOBJ) core fossology-scheduler mkschedconf
 
 test: all
 	@echo "NOTICE: no tests available for scheduler"
