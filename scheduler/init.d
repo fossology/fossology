@@ -11,7 +11,7 @@
 #
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=AGENTDIR/scheduler
+DAEMON=LIBEXECDIR/fossology-scheduler
 NAME=scheduler
 DESC="FOSS analysis job scheduler"
 
