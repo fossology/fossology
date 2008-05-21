@@ -657,7 +657,12 @@ class ui_view extends FO_Plugin
     print $V;
     if (empty($Fin))
       { 
-      $Fin = fopen( RepPath($Pfile) ,"rb");
+      $Fin = @fopen( RepPath($Pfile) ,"rb");
+      if (empty($Fin))
+	{
+	print "File contents are not available in the repository.\n";
+	return;
+	}
       }
     rewind($Fin);
     $Pages = "";
