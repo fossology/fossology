@@ -49,6 +49,10 @@ class ui_about extends FO_Plugin
 	$V .= "<text>$this->_Text</text>\n";
 	break;
       case "HTML":
+	global $VERSION;
+	global $SVN_REV;
+	$V .= "<b>FOSSology version $VERSION (code revision $SVN_REV)</b>\n";
+	$V .= "<P/>\n";
 	$V .= "$this->_Copyright<P>\n";
 	$V .= str_replace("\n","\n<P>\n",$this->_Text);
 	break;
@@ -61,7 +65,7 @@ class ui_about extends FO_Plugin
 	break;
       }
     if (!$this->OutputToStdout) { return($V); }
-    print("$V");
+    print($V);
     return;
     }
 
