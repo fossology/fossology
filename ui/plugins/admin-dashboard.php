@@ -97,8 +97,10 @@ class dashboard extends FO_Plugin
         break;
       case "HTML":
         /**************************************************/
-        $V .= "<table border=0 width='100%'><tr><td valign='top'>\n";
+        $V .= "<table border=0 width='100%'><tr>\n";
 
+        /**************************************************/
+	$V .= "<td valign='top'>\n";
         $V .= "<H2>Job Queue</H2>\n";
         $V .= "<table border=1>\n";
         $V .= "<tr><th>Queue Information</th><th>Total</th></tr>\n";
@@ -139,8 +141,10 @@ class dashboard extends FO_Plugin
         }
         $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
         $V .= "</table>\n";
-        $V .= "</td><td valign='top'>\n";
+        $V .= "</td>";
+
         /**************************************************/
+	$V .= "<td valign='top'>\n";
         $V .= "<H2>Database Contents</H2>\n";
         $V .= "<table border=1>\n";
         $V .= "<tr><th>Metric</th><th>Total</th></tr>\n";
@@ -161,7 +165,30 @@ class dashboard extends FO_Plugin
         $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
         $V .= "</table>\n";
 
-        $V .= "</td></tr></table>\n";
+        /**************************************************/
+        $Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity';");
+	if (!empty($Results[0]['val']))
+	  {
+	  $V .= "<td valign='top'>\n";
+          $V .= "<H2>Database Activity</H2>\n";
+          $V .= "<table border=1>\n";
+          $V .= "<tr><th>Metric</th><th>Total</th></tr>\n";
+          $V .= "<tr><td>Active database connections</td>";
+          $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+          $Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology';");
+          $V .= "<tr><td>Active FOSSology queries</td>";
+          $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+          $Results = $DB->Action("SELECT datname,now()-query_start AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology' ORDER BY val;");
+	  for($i=0; !empty($Results['datname']); $i++)
+	    {
+	    $V .= "<tr><td>Duration query #" . $i . " has been active</td>";
+	    $V .= "<td align='right'>" . $Results[$i]['val'] . "</td></tr>\n";
+	    }
+          $V .= "</table>\n";
+	  }
+
+        /**************************************************/
+        $V .= "</table>\n";
 
         /**************************************************/
         $V .= "<H2>Repository Disk Space</H2>\n";
