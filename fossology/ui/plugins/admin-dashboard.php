@@ -55,7 +55,7 @@ class dashboard extends FO_Plugin
     /* Display results */
     $V = "";
     $V .= "<table border=1>\n";
-    $V .= "<tr><th>Filesystem</th><th>Used</th><th>Capacity</th><th>Percent Full</th></tr>\n";
+    $V .= "<tr><th>Filesystem</th><th colspan=2>Used</th><th colspan=2>Capacity</th><th>Percent Full</th></tr>\n";
     foreach($Lines as $L)
     {
       if (empty($L)) { continue; }
@@ -65,15 +65,13 @@ class dashboard extends FO_Plugin
       $V .= "<tr><td>" . htmlentities($List[0]) . "</td>";
       $Used = $List[2] * 1024;
       $UsedH = Bytes2Human($Used);
-      if ($Used != $UsedH) { $UsedH = " ($UsedH)"; }
-      else { $UsedH = ""; }
       $Capacity = $List[1] * 1024;
       $CapacityH = Bytes2Human($Capacity);
-      if ($Capacity != $CapacityH) { $CapacityH = " ($CapacityH)"; }
-      else { $CapacityH = ""; }
 
-      $V .= "<td align='right'>" . number_format($Used,0,"",",") . "$UsedH</td>";
-      $V .= "<td align='right'>" . number_format($Capacity,0,"",",") . "$CapacityH</td>";
+      $V .= "<td align='right' style='border-right:none'>$UsedH</td>";
+      $V .= "<td align='right' style='border-left:none'>(" . number_format($Used,0,"",",") . ")</td>";
+      $V .= "<td align='right' style='border-right:none'>$CapacityH</td>";
+      $V .= "<td align='right' style='border-left:none'>(" . number_format($Capacity,0,"",",") . ")</td>";
       $V .= "<td align='right'>" . htmlentities($List[4]) . "</td></tr>\n";
     }
     $V .= "</table>\n";
@@ -94,111 +92,116 @@ class dashboard extends FO_Plugin
     switch($this->OutputType)
     {
       case "XML":
-        break;
+	break;
       case "HTML":
-        /**************************************************/
-        $V .= "<table border=0 width='100%'><tr>\n";
+	/**************************************************/
+	$V .= "<table border=0 width='100%'><tr>\n";
 
-        /**************************************************/
+	/**************************************************/
 	$V .= "<td valign='top'>\n";
-        $V .= "<H2>Job Queue</H2>\n";
-        $V .= "<table border=1>\n";
-        $V .= "<tr><th>Queue Information</th><th>Total</th></tr>\n";
-        // Dynamically set hyperlinks based on showjobs plugin existence.
-        $uri_showjobs = Traceback_uri() . "?mod=showjobs";
-        $showjobs_exists = &$Plugins[plugin_find_id("showjobs")]; /* may be null */
+	$V .= "<H2>Job Queue</H2>\n";
+	$V .= "<table border=1>\n";
+	$V .= "<tr><th>Queue Information</th><th>Total</th></tr>\n";
+	// Dynamically set hyperlinks based on showjobs plugin existence.
+	$uri_showjobs = Traceback_uri() . "?mod=showjobs";
+	$showjobs_exists = &$Plugins[plugin_find_id("showjobs")]; /* may be null */
 
-        $Results = $DB->Action("SELECT COUNT(DISTINCT jq_job_fk) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
-        if ($showjobs_exists) {
-          $V .= "<tr><td><a href='$uri_showjobs'>Pending Analysis Jobs</a></td>";
-        }
-        else {
-          $V .= "<tr><td>Pending Analysis Jobs</td>";
-        }
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-        $Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
-        if ($showjobs_exists) {
-          $V .= "<tr><td><a href='$uri_showjobs'>Tasks in the Job Queue</a></td>";
-        }
-        else {
-          $V .= "<tr><td>Tasks in the Job Queue</td>";
-        }
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
-        $Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL AND jq_starttime IS NOT NULL;");
-        if ($showjobs_exists) {
-          $V .= "<tr><td><a href='$uri_showjobs'>Running Tasks</a></td>";
-        }
-        else {
-          $V .= "<tr><td>Running Tasks</td>";
-        }
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
-        $Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NOT NULL AND jq_end_bits=2;");
-        if ($showjobs_exists) {
-          $V .= "<tr><td><a href='$uri_showjobs'>Failed Tasks</a></td>";
-        }
-        else {
-          $V .= "<tr><td>Failed Tasks</td>";
-        }
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
-        $V .= "</table>\n";
-        $V .= "</td>";
+	$Results = $DB->Action("SELECT COUNT(DISTINCT jq_job_fk) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
+	if ($showjobs_exists) {
+	  $V .= "<tr><td><a href='$uri_showjobs'>Pending Analysis Jobs</a></td>";
+	}
+	else {
+	  $V .= "<tr><td>Pending Analysis Jobs</td>";
+	}
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
+	if ($showjobs_exists) {
+	  $V .= "<tr><td><a href='$uri_showjobs'>Tasks in the Job Queue</a></td>";
+	}
+	else {
+	  $V .= "<tr><td>Tasks in the Job Queue</td>";
+	}
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
+	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL AND jq_starttime IS NOT NULL;");
+	if ($showjobs_exists) {
+	  $V .= "<tr><td><a href='$uri_showjobs'>Running Tasks</a></td>";
+	}
+	else {
+	  $V .= "<tr><td>Running Tasks</td>";
+	}
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
+	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NOT NULL AND jq_end_bits=2;");
+	if ($showjobs_exists) {
+	  $V .= "<tr><td><a href='$uri_showjobs'>Failed Tasks</a></td>";
+	}
+	else {
+	  $V .= "<tr><td>Failed Tasks</td>";
+	}
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
+	$V .= "</table>\n";
+	$V .= "</td>";
 
-        /**************************************************/
+	/**************************************************/
 	$V .= "<td valign='top'>\n";
-        $V .= "<H2>Database Contents</H2>\n";
-        $V .= "<table border=1>\n";
-        $V .= "<tr><th>Metric</th><th>Total</th></tr>\n";
-        $Results = $DB->Action("SELECT count(*) AS val FROM upload;");
-        $V .= "<tr><td>Unique Uploads</td>";
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-        $Results = $DB->Action("SELECT count(*) AS val FROM pfile;");
-        $V .= "<tr><td>Unique Extracted Files</td>";
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-        $Results = $DB->Action("SELECT count(*) AS val FROM uploadtree;");
-        $V .= "<tr><td>Extracted Names</td>";
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-        $Results = $DB->Action("SELECT count(*) AS val FROM agent_lic_raw;");
-        $V .= "<tr><td>Known License Templates</td>";
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-        $Results = $DB->Action("SELECT count(*) AS val FROM agent_lic_meta;");
-        $V .= "<tr><td>Identified Licenses</td>";
-        $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-        $V .= "</table>\n";
+	$V .= "<H2>Database Contents</H2>\n";
+	$V .= "<table border=1>\n";
+	$V .= "<tr><th>Metric</th><th>Total</th></tr>\n";
+	$Results = $DB->Action("SELECT count(*) AS val FROM upload;");
+	$V .= "<tr><td>Unique Uploads</td>";
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+	$Results = $DB->Action("SELECT count(*) AS val FROM pfile;");
+	$V .= "<tr><td>Unique Extracted Files</td>";
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+	$Results = $DB->Action("SELECT count(*) AS val FROM uploadtree;");
+	$V .= "<tr><td>Extracted Names</td>";
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+	$Results = $DB->Action("SELECT count(*) AS val FROM agent_lic_raw;");
+	$V .= "<tr><td>Known License Templates</td>";
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+	$Results = $DB->Action("SELECT count(*) AS val FROM agent_lic_meta;");
+	$V .= "<tr><td>Identified Licenses</td>";
+	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+	$V .= "</table>\n";
 
-        /**************************************************/
-        $Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity';");
+	/**************************************************/
+	$V .= "<td valign='top'>\n";
+	$V .= "<H2>Database Metrics</H2>\n";
+	$V .= "<table border=1>\n";
+	$V .= "<tr><th>Metric</th><th>Total</th></tr>\n";
+	$Results = $DB->Action("SELECT SUM(relpages) AS val FROM pg_class INNER JOIN pg_stat_all_tables ON pg_stat_all_tables.relname = pg_class.relname WHERE schemaname='public';");
+	$V .= "<tr><td>FOSSology database size</td>";
+	$Size = $Results[0]['val'] * 8*1024; /* 8K per page */
+	$V .= "<td align='right'>" . Bytes2Human($Size) . " (" . number_format($Size,0,"",",") . ")</td></tr>\n";;
+
+	$Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity';");
 	if (!empty($Results[0]['val']))
 	  {
-	  $V .= "<td valign='top'>\n";
-          $V .= "<H2>Database Activity</H2>\n";
-          $V .= "<table border=1>\n";
-          $V .= "<tr><th>Metric</th><th>Total</th></tr>\n";
-          $V .= "<tr><td>Active database connections</td>";
-          $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-          $Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology';");
-          $V .= "<tr><td>Active FOSSology queries</td>";
-          $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
-          $Results = $DB->Action("SELECT datname,now()-query_start AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology' ORDER BY val;");
+	  $V .= "<tr><td>Active database connections</td>";
+	  $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+	  $Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology';");
+	  $V .= "<tr><td>Active FOSSology queries</td>";
+	  $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
+	  $Results = $DB->Action("SELECT datname,now()-query_start AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology' ORDER BY val;");
 	  for($i=0; !empty($Results['datname']); $i++)
 	    {
 	    $V .= "<tr><td>Duration query #" . $i . " has been active</td>";
 	    $V .= "<td align='right'>" . $Results[$i]['val'] . "</td></tr>\n";
 	    }
-          $V .= "</table>\n";
 	  }
+	$V .= "</table>\n";
 
-        /**************************************************/
-        $V .= "</table>\n";
+	/**************************************************/
+	$V .= "</table>\n";
 
-        /**************************************************/
-        $V .= "<H2>Repository Disk Space</H2>\n";
-        $V .= $this->DiskFree();
+	/**************************************************/
+	$V .= "<H2>Repository Disk Space</H2>\n";
+	$V .= $this->DiskFree();
 
-        break;
+	break;
       case "Text":
-        break;
+	break;
       default:
-        break;
+	break;
     }
     if (!$this->OutputToStdout) { return($V); }
     print($V);
