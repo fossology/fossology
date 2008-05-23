@@ -1,15 +1,8 @@
 # scheduler Makefile
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-VARS=../Makefile.conf
+TOP=..
+VARS=$(TOP)/Makefile.conf
 include $(VARS)
-
-DBPATH=../devel/libfossdb
-DB=$(DBPATH)/libfossdb.a
-REPOPATH=../devel/libfossrepo
-REPO=$(REPOPATH)/libfossrepo.a
-
-CFLAGS_DB=-I$(DBPATH) -L$(DBPATH)
-CFLAGS_REPO=-I$(REPOPATH) -L$(REPOPATH)
 
 CONFDEF=-DDEFAULTSETUP='"$(SYSCONFDIR)/scheduler.conf"'
 FODEF=-DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
@@ -24,7 +17,7 @@ all: fossology-scheduler mkschedconf
 
 fossology-scheduler: $(OBJ) $(REPOOBJ) $(VARS)
 	$(CC) $(OBJ) $(REPOOBJ) $(FODEF) $(CFLAGS_DB) -lfossdb $(CFLAGS_REPO) \
-	-lfossrepo $(ALL_CFLAGS) -lpq -o $@
+	-lfossrepo -lpq $(ALL_CFLAGS) -o $@
 
 mkschedconf: mkschedconf.c $(REPO) $(VARS)
 	$(CC) $< $(MSCDEF) $(CFLAGS_REPO) -lfossrepo $(ALL_CFLAGS) -o $@
@@ -32,10 +25,10 @@ mkschedconf: mkschedconf.c $(REPO) $(VARS)
 
 # targets for our needed objects
 $(OBJ): %.o: %.c %.h $(DB) $(VARS)
-	$(CC) -c $< $(CONFDEF) $(CFLAGS_DB) $(ALL_CFLAGS)
+	$(CC) -c $< $(CONFDEF) $(CFLAGS_DBO) $(ALL_CFLAGS)
 
 $(REPOOBJ): %.o: %.c %.h $(DB) $(REPO) $(VARS)
-	$(CC) -c $< $(CONFDEF) $(CFLAGS_REPO) $(CFLAGS_DB) $(ALL_CFLAGS)
+	$(CC) -c $< $(CONFDEF) $(CFLAGS_REPOO) $(CFLAGS_DBO) $(ALL_CFLAGS)
 
 
 # targets to make sure the libfoss libraries we use are up to date
@@ -46,7 +39,7 @@ $(REPO):
 	$(MAKE) -C $(REPOPATH) libfossrepo.a
 
 
-install: all $(VARS)
+install: all
 	$(INSTALL_PROGRAM) fossology-scheduler $(DESTDIR)$(LIBEXECDIR)/fossology-scheduler
 	$(INSTALL_PROGRAM) mkschedconf $(DESTDIR)$(LIBEXECDIR)/mkschedconf
 

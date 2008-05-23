@@ -1,6 +1,7 @@
 # FOSSology Makefile - devel/libfossdb
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-VARS=../../Makefile.conf
+TOP=../..
+VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 CFLAGS_LOCAL=-DFOSSDB_CONF="$(DATADIR)/dbconnect/$(PROJECT)" -lpq \
