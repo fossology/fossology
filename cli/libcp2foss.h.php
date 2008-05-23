@@ -51,7 +51,6 @@ function CreateFolder($parent_key, $folder_name, $description="") {
 
   /* Make sure the parent folder exists */
   $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$parent_key';");
-  cli_PrintDebugMessage ("CreateFolder: results after parent check",$Results);
   $Row = $Results[0];
   if ($Row['folder_pk'] != $parent_key)
   {
@@ -185,12 +184,11 @@ function suckupfs($path, $recursion = false){
   }
 
   $SPATH = opendir($path)
-  or die("Suckupfs: Can't open: $path $php_errormsg\n");
+  or die("suckupfs: Can't open: $path $php_errormsg\n");
 
   while ($dir_entry = readdir($SPATH)){
     //  echo "\$dir_entry is:$dir_entry\n";
     if ($dir_entry == $cwd || $dir_entry == $parentdir) {
-      //echo ("skipping $dir_entry\n");
       continue;
     }
     $check = "$path" . '/' . "$dir_entry";
@@ -208,7 +206,7 @@ function suckupfs($path, $recursion = false){
 
   /*
    * tar will suck up a sub dir and it's contnents, so must
-   * not supply them in list to tar if -r is not turned on.
+   * not supply them in list to tar if -R is not turned on.
    *
    * Always put the files in the list.  If recursion is on, put everything
    * else in the list as well.  Return the path to the tar file.

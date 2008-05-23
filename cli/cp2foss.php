@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/***********************************************************
+/*
  cp2foss.php
  Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
 
@@ -119,8 +119,10 @@ Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> \
 USAGE;
 
 cli_Init();
-// Always perform this check after initalizing the environment as
-// the init of the ui is supposed to open the db.
+/* Always perform this check after initalizing the environment as
+ * the init of the ui is supposed to open the db.
+ */
+
 if (empty($DB))
   {
   print "ERROR: Unable to connect to the database.\n";
@@ -132,7 +134,8 @@ global $DB;
 // NOTE: replace below with getops for cleaner/more flexible processing....
 // Well, prototyped with getopts.  Not much better than the switch below.
 
-// This check is not sufficient.... has to be 2 to cover the -f <foo> case...
+/* This check is not sufficient.... has to be 2 to cover the -f <foo> case... */
+
 if ($argc < 2) {
   echo $usage;
   exit(1);
@@ -198,6 +201,7 @@ for ($i = 1; $i < $argc; $i++) {
       }
       break;
     case '-R':
+      echo "DBG->setting recurse\n";
       $recurse = TRUE;
       break;
     case '-w':
@@ -261,15 +265,16 @@ if ($dashD != True){
  * archive it created.
  */
 if(is_dir($archive)){
-  //pdbg("Calling suckupfs");
   if ($recurse){
+      cli_PrintDebugMessage("Calling suckupfs with Recurse");
     $archive = suckupfs($archive, $recurse);
   }
   else {
+      cli_PrintDebugMessage("Calling suckupfs NO Recurse");
     $archive = suckupfs($archive);
   }
 }
-
+cli_PrintDebugMessage("Returned archive from SUPFS is:$archive");
 // make sure we didn't get a false from suckupfs.
 if (!$archive){
   echo
@@ -410,20 +415,20 @@ function ck_4_upload($folder_cache, $folder_name){
 
   global $DB;
 
-  //$folder_pk = end($folder_cache);
-  $folder_pk = $folder_cache[$folder_name][$folder_name];
-  //cli_PrintDebugMessage("CK4U: \$folder_pk is:",$folder_pk);
-  //cli_PrintDebugMessage("CK4U:\$folder_cache is:",$folder_cache);
+  $folder_pk = end($folder_cache);
 
   $sql_up =
-  "SELECT (name, upload_pk) FROM leftnav WHERE parent=$folder_pk AND foldercontents_mode=2";
+  "SELECT name, upload_pk FROM leftnav WHERE parent=$folder_pk AND foldercontents_mode=2";
+
+  /* results will be a multi-demension array.  The inner array is assocative with the
+   * selected fields as the keys (.e.g. name, upload_pk)
+   */
 
   $results  = $DB->Action($sql_up);
   //cli_PrintDebugMessage("CK4UP: results array after select:",$results);
-  $uploaded  = $results[0]['upload_pk'];
 
-  // may have to change this as action may return a nested array....
-  $rows = count($uploaded);
+  $rows = count($results);
+  //cli_PrintDebugMessage("CK4UP: \$rows in result is:",$rows);
 
   // check rows, 0 = no upload rec
   if ($rows == 0){
@@ -434,17 +439,19 @@ function ck_4_upload($folder_cache, $folder_name){
     // check to see if this name has been uploaded before
     // If we find it we return true, else false.
     for ($i=0; $i< $rows; $i++){
-      $upload_name = $uploaded[$i]['name'];
+      $upload_name = $results[$i]['name'];
       if ($upload_name == $folder_name){
+        //cli_PrintDebugMessage("CK4UP: \$upload_name matched $folder_name:",$upload_name);
         // if there is an upload_pk, we have already loaded this....
-        $upk = $uploaded[$i]['upload_pk'];
+        $upk = $results[$i]['upload_pk'];
+        //cli_PrintDebugMessage("CK4UP: \$upload_pk is:",$upk);
         if ($upk == true){
-          return(true);
+          return(TRUE);
         }
       }
     }
-  }
   return(false);
+  }
 }
 /**
  * function:create_folders
@@ -480,7 +487,7 @@ function create_folders($folder_cache, $folder_path){
         // update the cache
         else{
           $folder_cache[$folder_path[0]] = $fstat[$folder_path[0]];
-          cli_PrintDebugMessage ("CreFldr: Cache updated after parent create:",$folder_cache);
+          //cli_PrintDebugMessage ("CreFldr: Cache updated after parent create:",$folder_cache);
           continue;
         }
       }
@@ -566,7 +573,7 @@ function get_fpath_keys($folder_path){
   $sql = 'select root_folder_fk from users limit 1';
   $results = $DB->Action($sql);
   $rfolder4user = $results[0]['root_folder_fk'];
-  //cli_PrintDebugMessage("READP: folder path is:",$folder_path);
+
   $sql_folderP = "Select folder_pk from leftnav where
                   parent='$rfolder4user' and foldercontents_mode=1
                   and name='$folder_path[0]'";
