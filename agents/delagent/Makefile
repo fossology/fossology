@@ -1,28 +1,36 @@
-# Filter_license Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-include ../../Makefile.conf
+# FOSSology Makefile - agent/delagent
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
-CC=gcc
-CFLAGS=-Wall -O2 $(CFLAGS2)
-#CFLAGS=-Wall -g -lefence $(CFLAGS2)
+TOP=../..
+
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
+
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS)
 EXE=delagent
-INC=-I../../$(BUILDINC)
-LIB=-L../../$(BUILDLIB) -lfossrepo -lfossdb -lpq
 
 all: $(EXE)
 
-delagent: delagent.c
-	$(CC) $(CFLAGS) $(INC) -o delagent delagent.c $(LIB)
+$(EXE): %: %.c $(DB) $(REPO) $(VARS)
+	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
-InstallationCreate:
-	$(CP) delagent ../../install/$(AGENTDIR)
+# targets to make sure the libfoss libraries we use are up to date
+$(DB):
+	$(MAKE) -C $(DBPATH) libfossdb.a
+
+$(REPO):
+	$(MAKE) -C $(REPOPATH) libfossrepo.a
 
 install: all
-	$(CP) delagent $(AGENTDIR)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 uninstall:
-	$(RM) $(AGENTDIR)/delagent
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+
+test: all
+	@echo "*** No tests available for agent/$(EXE) ***"
 
 clean:
-	$(RM) *.o core $(EXE)
+	rm -f $(EXE) *.o core
 
+.PHONY: all install uninstall clean test
