@@ -18,10 +18,10 @@
 #***********************************************************/
 #
 # install script for cp2foss tests MUST BE RUN AS ROOT
-# needs access to the svn repository, make sure subversion servers file
-# is correct.
+# needs access to the svn repository at SourceForge, make sure subversion
+# servers file is correct.
 #
-# version "$Id: $"
+# version "$Id$"
 
 if [[ -x "/usr/local/bin/test.cp2foss" ]]
 then
@@ -39,9 +39,12 @@ chown fossy:fossy /usr/local/bin/test.cp2foss
 chmod ug-w+rx /usr/local/bin/test.cp2foss
 chmod o-wx+r /usr/local/bin/test.cp2foss
 
+chmod a+x all_tests.php
+
 # copy archives to tmp
 
 cp archives/* /tmp
 
+# create a dir tree for use (use fossology itself)
 cd /tmp
 svn co https://fossology.svn.sourceforge.net/svnroot/fossology/trunk/fossology/
