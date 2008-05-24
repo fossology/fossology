@@ -1,5 +1,5 @@
 /*******************************************************************
- mkconfig: Create a scheduler configuration file.
+ mkschedconf: Create a scheduler configuration file.
 
  Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
  
@@ -71,7 +71,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
 
   /** wget **/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/wget_agent -d %s",BINDIR,VARDATADIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/wget_agent -d %s",BINDIR,PROJECTSTATEDIR);
   fprintf(Fout,"agent=wget %s| ",CmdHost);
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
