@@ -1,46 +1,27 @@
-#/***********************************************************
+# FOSSology Makefile - agent/fosscp
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-# ***********************************************************/
-# Makefile for fosscp (in php!)
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+TOP=../..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
 
-include ../../Makefile.conf
+EXE=fosscp_agent
 
-#CC=gcc
-#CFLAGS=-Wall -O2 $(CFLAGS2)
-#CFLAGS=-Wall -g -lefence $(CFLAGS2)
-#EXE=wc_agent
-#INC=-I../../$(BUILDINC)
-#LIB$=-L../../$(BUILDLIB) -lfossrepo -lfossdb -lpq$
+all: $(EXE)
 
-all:	
+$(EXE): fosscp.php
 	chmod ug+x fosscp.php
-	$(CP) fosscp.php fosscp_agent
+	cp fosscp.php $(EXE)
 
-InstallationCreate:
-	# Uncomment to install
-	$(CP) fosscp_agent ../../install/$(AGENTDIR)
-
-install:
-	# Uncomment to install
-	$(CP) fosscp_agent $(AGENTDIR)
+install: all $(VARS)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 uninstall:
-	$(RM) $(AGENTDIR)/fosscp_agent
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+
+test: all
+	@echo "*** No tests available for agent/$(EXE) ***"
 
 clean:
-	$(RM) fosscp_agent
+	rm -f $(EXE) *.o core
 
+.PHONY: all install uninstall clean test
