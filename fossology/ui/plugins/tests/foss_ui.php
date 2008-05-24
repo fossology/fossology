@@ -27,7 +27,7 @@ class TestRepoLogin extends WebTestCase{
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $this->assertTrue($this->get('http://repo.fossology.org/'));
     $this->assertAuthentication('Basic');
-    $this->authenticate('fossology', 'OeyiW5go');
+    $this->authenticate('fossology', 'xxxxxxxx');
     $this->assertText('Software Repository Viewer');
   }
 }
@@ -67,7 +67,7 @@ class TestOrganizeFolders extends WebTestCase {
   function testFolderCreate(){
     $this->assertTrue($this->get('http://osrb-1.fc.hp.com/~markd/ui-md/'));
     //$this->assertAuthentication('Basic');
-    //$this->authenticate('fossology', 'OeyiW5go');
+    //$this->authenticate('fossology', 'xxxxxxxx');
     $this->assertText('Software Repository');
 
     $this->click('Organize');
@@ -83,7 +83,7 @@ class TestOrganizeFolders extends WebTestCase {
   function testFolderMove(){
     $this->assertTrue($this->get('http://osrb-1.fc.hp.com/~markd/ui-md/'));
     //$this->assertAuthentication('Basic');
-    //$this->authenticate('fossology', 'OeyiW5go');
+    //$this->authenticate('fossology', 'xxxxxxxx');
     $this->assertText('Software Repository');
 
     $this->click('Organize');
@@ -96,7 +96,7 @@ class TestOrganizeFolders extends WebTestCase {
     // Web page load
     $this->assertTrue($this->get('http://osrb-1.fc.hp.com/~markd/ui-md/'));
     //$this->assertAuthentication('Basic');
-    //$this->authenticate('fossology', 'OeyiW5go');
+    //$this->authenticate('fossology', 'xxxxxxxx');
     $this->assertText('Software Repository');
     // Navigate test (plugin is there)
     $this->click('Organize');
@@ -106,12 +106,12 @@ class TestOrganizeFolders extends WebTestCase {
     $this->setField('description', 'edit properties Test folder');
     $this->clickSubmit('Create!');
   }
-  
+
   function testEditProperties(){
     // Web page load
     $this->assertTrue($this->get('http://osrb-1.fc.hp.com/~markd/ui-md/'));
     //$this->assertAuthentication('Basic');
-    //$this->authenticate('fossology', 'OeyiW5go');
+    //$this->authenticate('fossology', 'xxxxxxxx');
     $this->assertText('Software Repository');
     // Navigate test (plugin is there)
     $this->click('Organize');
@@ -148,7 +148,7 @@ class TestCreateFolder extends WebTestCase {
   function testFuncCreateFolder(){
     $this->assertTrue($this->get('http://osrb-1.fc.hp.com/~markd/ui-md/'));
     //$this->assertAuthentication('Basic');
-    //$this->authenticate('fossology', 'OeyiW5go');
+    //$this->authenticate('fossology', 'xxxxxxxx');
     $this->assertText('Software Repository');
 
     $this->click('Organize');
