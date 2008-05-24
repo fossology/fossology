@@ -16,17 +16,22 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * Test stub to see if this is how you run multiple tests
+ * Test the description parameter
+ * Test cases are:
+ *   1. with  a description using ""
+ *   2. without the -d flag (allowed, should pass)
+ *
+ * @version "$Id$"
  *
  */
-class TestCP2foss extends UnitTestCase {
-  
+class TestDashD extends UnitTestCase {
+
   public $command = '/usr/local/bin/test.cp2foss';
 
   function TestDesc(){
-    
+
     $output = array();
-    $error = exec("$this->command -p baz -n foo -a /tmp/zlib.tar.bz2 -d \"a comment\"", $output, $retval);
+    $error = exec("$this->command -p CP2fossTest -n foo -a /tmp/zlib.tar.bz2 -d \"a comment\"", $output, $retval);
     //print_r($output);
     $this->assertPattern('/Working on /', $output[0]);
     $output = array();
