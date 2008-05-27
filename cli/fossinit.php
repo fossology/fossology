@@ -39,8 +39,10 @@ cli_Init();
 
 global $Plugins;
 
-$usage = "Usage: " . basename($argv[0]) . " [-v]
-  -v  = enable verbose mode
+$usage = "Usage: " . basename($argv[0]) . " [options]
+  -v  = enable verbose mode (lists each module being processed)
+  -d  = enable debug database (lists every DB error)
+  -D  = enable debug database (lists EVERY DB call)
   -h  = this help usage";
 
 /* Load command-line options */
@@ -52,6 +54,17 @@ if (array_key_exists('h',$Options))
   exit(0);
   }
 $Verbose = array_key_exists("v",$Options);
+
+global $DB;
+if (array_key_exists('d',$Options))
+  {
+  $DB->Debug=1;
+  }
+if (array_key_exists('D',$Options))
+  {
+  $DB->Debug=2;
+  }
+
 
 /* Initialize the list of registered plugins */
 $FailFlag=0;

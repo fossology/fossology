@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/***********************************************************
+/*
  cp2foss.php
  Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
 
@@ -86,53 +86,56 @@ Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> \
    <upload-name> is the name of the file folder to store this archive in
    <path-to-archive> is the fully qualified path to the compressedd archive.
    <description> is the single or double quoted description.
-   <file-of-parameters> is a file that contains the parameters needed to load 
-   an archive.  Typical usage is to load multiple archives.  For example, 
+   <file-of-parameters> is a file that contains the parameters needed to load
+   an archive.  Typical usage is to load multiple archives.  For example,
    a file with the contents:
    -p Mysrcs -n foo -a /tmp/mysrcs/foo.c -d "the foo program"
    -p Mysrcs -n bar -a /tmp/mysrcs/bar.c -d "the bar program"
    -p Othersrc -n randy /tmp/other/randy -d "somebodies randy program"
 
-   would load 3 archives, foo.c, bar.c and randy.  Folders Mysrcs and 
+   would load 3 archives, foo.c, bar.c and randy.  Folders Mysrcs and
    Othersrc would be created if they did not exist.  folders for foo
    bar and randy would be placed under the parent folders.
    Mysrcs/foo, Mysrcs/bar, Othersrc/randy.
 
-   -A  turns on alpha bucket mode.  The archive is place in a folder 
-       corresponding to the first letter of the leaf folder (usually 
+   -A  turns on alpha bucket mode.  The archive is place in a folder
+       corresponding to the first letter of the leaf folder (usually
        the same name as the archive).  For example archive folder ark
        would be placed in the alpha bucket folder a-c. The bucket size is
        3.  For example, d-f. The 'remainder' letters form the last alpha
        bucket.  This option is useful when downloading large number of archives
        like from freshmeat.
-       
+
     -w Indicates that the argument to -a is going to be a url.  cp2foss
        will use the url supplied and the wget to get the archive before
        uploading.
-       
+
     -R Turn on recursion.  If the archive is a directory, and this option
        is used, the complete contents of the directory and all subdirectories
        will be tar'ed up and submitted as a single job. If this option is
        omitted and the archive is a directory, only the files in the directory
        will be submitted as a job.  The directory name is the folder name.
- 
+
 USAGE;
 
 cli_Init();
-// Always perform this check after initalizing the environment as 
-// the init of the ui is supposed to open the db.
+/* Always perform this check after initalizing the environment as
+ * the init of the ui is supposed to open the db.
+ */
+
 if (empty($DB))
   {
   print "ERROR: Unable to connect to the database.\n";
   exit(1);
   }
-  
+
 global $DB;
 
 // NOTE: replace below with getops for cleaner/more flexible processing....
 // Well, prototyped with getopts.  Not much better than the switch below.
 
-// This check is not sufficient.... has to be 2 to cover the -f <foo> case...
+/* This check is not sufficient.... has to be 2 to cover the -f <foo> case... */
+
 if ($argc < 2) {
   echo $usage;
   exit(1);
@@ -198,6 +201,7 @@ for ($i = 1; $i < $argc; $i++) {
       }
       break;
     case '-R':
+      echo "DBG->setting recurse\n";
       $recurse = TRUE;
       break;
     case '-w':
@@ -218,7 +222,7 @@ for ($i = 1; $i < $argc; $i++) {
  * If we have a file of input, we process it and exit
  * should enhance this to have read_parms_file return a value and
  * exit accordingly.
- * 
+ *
  * Check this first, so that the other checks are ignored if we have -f
  */
 if($fflag){
@@ -261,15 +265,16 @@ if ($dashD != True){
  * archive it created.
  */
 if(is_dir($archive)){
-  //pdbg("Calling suckupfs");
   if ($recurse){
+      cli_PrintDebugMessage("Calling suckupfs with Recurse");
     $archive = suckupfs($archive, $recurse);
   }
   else {
+      cli_PrintDebugMessage("Calling suckupfs NO Recurse");
     $archive = suckupfs($archive);
   }
 }
-
+cli_PrintDebugMessage("Returned archive from SUPFS is:$archive");
 // make sure we didn't get a false from suckupfs.
 if (!$archive){
   echo
@@ -410,40 +415,43 @@ function ck_4_upload($folder_cache, $folder_name){
 
   global $DB;
 
-  //$folder_pk = end($folder_cache);
-  $folder_pk = $folder_cache[$folder_name][$folder_name];
-  //pdbg("CK4U: \$folder_pk is:",$folder_pk);
-  //pdbg("CK4U:\$folder_cache is:",$folder_cache);
-  
+  $folder_pk = end($folder_cache);
+
   $sql_up =
-  "SELECT (name, upload_pk) FROM leftnav WHERE parent=$folder_pk AND foldercontents_mode=2";
+  "SELECT name, upload_pk FROM leftnav WHERE parent=$folder_pk AND foldercontents_mode=2";
+
+  /* results will be a multi-demension array.  The inner array is assocative with the
+   * selected fields as the keys (.e.g. name, upload_pk)
+   */
 
   $results  = $DB->Action($sql_up);
-  $uploaded  = $results[0]['upload_pk'];
+  //cli_PrintDebugMessage("CK4UP: results array after select:",$results);
 
-  // may have to change this as action may return a nested array....
-  $rows = count($uploaded);
-  
+  $rows = count($results);
+  //cli_PrintDebugMessage("CK4UP: \$rows in result is:",$rows);
+
   // check rows, 0 = no upload rec
   if ($rows == 0){
     return(false);
   }
   elseif ($rows >= 1){
-    //    pdbg("CK4U: \$folder_name is:$folder_name");
+       //cli_PrintDebugMessage("CK4U: \$folder_name is:$folder_name");
     // check to see if this name has been uploaded before
     // If we find it we return true, else false.
     for ($i=0; $i< $rows; $i++){
-      $upload_name = $uploaded[$i]['name'];
+      $upload_name = $results[$i]['name'];
       if ($upload_name == $folder_name){
+        //cli_PrintDebugMessage("CK4UP: \$upload_name matched $folder_name:",$upload_name);
         // if there is an upload_pk, we have already loaded this....
-        $upk = $uploaded[$i]['upload_pk'];
+        $upk = $results[$i]['upload_pk'];
+        //cli_PrintDebugMessage("CK4UP: \$upload_pk is:",$upk);
         if ($upk == true){
-          return(true);
+          return(TRUE);
         }
       }
     }
-  }
   return(false);
+  }
 }
 /**
  * function:create_folders
@@ -479,12 +487,14 @@ function create_folders($folder_cache, $folder_path){
         // update the cache
         else{
           $folder_cache[$folder_path[0]] = $fstat[$folder_path[0]];
+          //cli_PrintDebugMessage ("CreFldr: Cache updated after parent create:",$folder_cache);
           continue;
         }
       }
       continue;
     }
     if ($folder_cache[$folder_path[$fpi]] === false){
+      //cli_PrintDebugMessage ("CreFldr:values to createFolder:\n {$folder_cache[$folder_path[$fpi-1]]}, $folder_path[$fpi]");
       $fstat = CreateFolder(
       $folder_cache[$folder_path[$fpi-1]], $folder_path[$fpi], '');
       if(! $fstat[$folder_path[$fpi]]){
@@ -516,6 +526,7 @@ function create_folders($folder_cache, $folder_path){
  * @author mark.donohoe@hp.com
  *
  */
+
 function create_parent($folder){
   // all parent folders are created as a child of the root folder for
   // the user (1st release only has one user....)
@@ -562,13 +573,17 @@ function get_fpath_keys($folder_path){
   $sql = 'select root_folder_fk from users limit 1';
   $results = $DB->Action($sql);
   $rfolder4user = $results[0]['root_folder_fk'];
+
   $sql_folderP = "Select folder_pk from leftnav where
-                  parent='$rfolder4user' and foldercontents_mode=1 
+                  parent='$rfolder4user' and foldercontents_mode=1
                   and name='$folder_path[0]'";
 
   // If the query below returns nothing, then the folder doesn't exist.
   $results = $DB->Action($sql_folderP);
   $folder_exists_fk = $results[0]['folder_pk'];
+
+  //cli_PrintDebugMessage("GFPK: after parent check, results is:",$results);
+  //cli_PrintDebugMessage("GFPK: folder fk is:$folder_pk");
 
   if ($folder_exists_fk){
     $folder_cache[$folder_path[0]] = $folder_exists_fk;
@@ -579,31 +594,37 @@ function get_fpath_keys($folder_path){
     // cache with 'false' and return.
     foreach ($folder_path as $folder){
       $folder_cache[$folder] = false;
-    } 
-    //pdbg("ckFpKeys: after false fill, folder_cache on exit is:",$folder_cache);
+    }
+    //cli_PrintDebugMessage("ckFpKeys: after false fill, folder_cache on exit is:",$folder_cache);
     return($folder_cache);
   }
   // now process the rest of the path... Note the array index ($ai)
   // starts at the second array entry.
   $folder_path_size = count($folder_path);
+  /*
+  * problem may be here, what happens when subfolder doesn't exist?'
+  */
   for ($ai=1; $ai < $folder_path_size; $ai++){
     $parent_fk = $folder_cache[$folder_path[$ai-1]];
+    //cli_PrintDebugMessage("READP: parent_fk is:$parent_fk");
     $sql_folder = "Select folder_pk from leftnav where
                    name='$folder_path[$ai]' and parent=$parent_fk";
+    //cli_PrintDebugMessage("READP: sql is:$sql_folder");
     $results = $DB->Action($sql_folder);
+    //cli_PrintDebugMessage ("GFPK: after sql: res[0][fpk]is:",$results);
     $folder_exists = $results[0]['folder_pk'];
     if ($folder_exists){
       $folder_cache[$folder_path[$ai]] = $folder_exists;
     }
     else {
-      //pdbg("setting remaining entries to false");
+      //cli_PrintDebugMessage("setting remaining entries to false");
       for ($start_here = $ai; $start_here < $folder_path_size; $start_here++){
         $folder_cache[$folder_path[$start_here]] = false;
       }
       break;
     }
   }
-  //pdbg("ckFpKeys: folder_cache on exit is:",$folder_cache);
+  //cli_PrintDebugMessage("ckFpKeys: folder_cache on exit is:",$folder_cache);
   return($folder_cache);
 }
 
@@ -613,7 +634,7 @@ function get_fpath_keys($folder_path){
  * Read a file of input parameters and act on them
  *
  * @param string $parms_file fully qualified path to input file
- * 
+ *
  * @todo add in check for empty description.
  *
  */
@@ -642,17 +663,17 @@ function read_parms_file($parms_file){
     // We use the shell to do it for us.... performance at this point
     // is not an issue.
     $dummy = exec("/usr/local/bin/p.sh $rline",$parms, $retval);
-    //pdbg("after shell call, \$parms is",$parms);
+    //cli_PrintDebugMessage("after shell call, \$parms is",$parms);
 
     $pcount = count($parms);
     for($p=0; $p<$pcount; $p++){
       //    echo "\$parms[$p]is:$parms[$p]";
       $token = rtrim($parms[$p]);
       $token = ltrim($token);
-      //pdbg("\$token is:$token \$p is:$p");
+      //cli_PrintDebugMessage("\$token is:$token \$p is:$p");
       switch($token){
         case '-A':
-          //pdbg("Matched -A");
+          //cli_PrintDebugMessage("Matched -A");
           $cap_a = true;
           //	$p++;
           //	$bucket_size = rtrim($parms[$p]);
@@ -668,7 +689,7 @@ function read_parms_file($parms_file){
           break;
         case '-n':
           $p++;
-          //      pdbg("Matched -n");
+          //      cli_PrintDebugMessage("Matched -n");
           $raw_name = rtrim($parms[$p]);
           $raw_name = rtrim($raw_name, '\'"');
           $folder_name = ltrim($raw_name, '\'"');
@@ -689,13 +710,13 @@ function read_parms_file($parms_file){
     }
     // verify input parameters
     // if the description is null (empty), put default in: Future enhancement
-    //    pdbg("RPF: Out of while loop, checking archive");
+    //    cli_PrintDebugMessage("RPF: Out of while loop, checking archive");
 
     // It's either a url or an archive
     // if archive doesn't exist, don't create folders, skip to next line in
     // input file. Same if the wget does not succeed.
     if($fetch_url){
-      //pdbg("RP: processing url \$archive is:\n$archive");
+      //cli_PrintDebugMessage("RP: processing url \$archive is:\n$archive");
       if (!(preg_match('|^http[s]*?://|',$archive))){
         echo "ERROR: archive is expected to be a url\n";
         exit(1);
@@ -746,7 +767,9 @@ function read_parms_file($parms_file){
 
     $folder_path = explode('/', $fldr_path);
     $folder_cache = get_fpath_keys($folder_path);
-    
+
+    //cli_PrintDebugMessage("READP: folder cache before create_folders",$folder_cache);
+
     // Create folders in folder path as needed and schedule the upload.
     $folder_cache = create_folders($folder_cache, $folder_path);
 
@@ -796,9 +819,9 @@ function read_parms_file($parms_file){
  * @param string $folder_name the name of the folder
  * @param string $description like it says
  * @param string $archive     the fully qualified path to the archive
- * 
+ *
  * @return True on success, false otherwise
- * 
+ *
  */
 function upload_archive($folder_fk, $folder_name, $description, $archive){
 

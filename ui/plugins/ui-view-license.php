@@ -52,8 +52,8 @@ class ui_view_license extends FO_Plugin
 	}
       else
 	{
-	menu_insert("View::License",1,$URI);
-	menu_insert("View-Meta::License",1,$URI);
+	menu_insert("View::License",1,$URI,"View license histogram");
+	menu_insert("View-Meta::License",1,$URI,"View license histogram");
 	}
       }
     $Lic = GetParm("lic",PARM_INTEGER);
@@ -82,7 +82,7 @@ class ui_view_license extends FO_Plugin
 	  if ($First) { $First = 0; $Color=-2; }
 	  else { $Color=-1; $LicName=NULL; }
 
-	  $View ->AddHighlight($Parts[0],$Parts[1],$Color,$Match,$LicName,-1,$RefURL);
+	  $View->AddHighlight($Parts[0],$Parts[1],$Color,$Match,$LicName,-1,$RefURL);
 	  }
 	}
     } // ConvertLicPathToHighlighting()
@@ -126,7 +126,7 @@ class ui_view_license extends FO_Plugin
     $Text = "<div class='text'>";
     $Text .= "<H1>License: " . $Results[0]['lic_name'] . "</H1>\n";
     $Text .= "</div>";
-    $View->ShowView($Ftmp,"View","view",0,0,$Text);
+    $View->ShowView($Ftmp,"view",0,0,$Text);
     } // ViewLicense()
 
   /***********************************************************
@@ -146,12 +146,14 @@ class ui_view_license extends FO_Plugin
     $LicId = GetParm("lic",PARM_INTEGER);
     $LicIdSet = GetParm("licset",PARM_INTEGER);
     $Pfile = GetParm("pfile",PARM_INTEGER);
-    if (!empty($LicId) && !empty($LicIdSet))
+    if (!empty($LicId))
 	{
 	$this->ViewLicense($Pfile,$LicId,$LicIdSet);
 	return;
 	}
     if (empty($Pfile)) { return; }
+    $ModBack = GetParm("modback",PARM_STRING);
+    if (empty($ModBack)) { $ModBack='license'; }
 
     /* Load license names */
     $LicPk2GID=array();  // map lic_pk to the group id: lic_id
@@ -172,7 +174,14 @@ class ui_view_license extends FO_Plugin
     $Results = $DB->Action("SELECT * FROM agent_lic_meta WHERE pfile_fk = $Pfile ORDER BY tok_pfile_start;");
 
     /* Process all licenses */
-    foreach($Results as $R)
+    if (count($Results) <= 0)
+      {
+      $View = &$Plugins[plugin_find_id("view")];
+      $View->AddHighlight(-1,-1,'white',NULL,"No licenses found");
+      }
+    else
+      {
+      foreach($Results as $R)
 	{
 	if (empty($R['pfile_path'])) { continue; }
 	if (!empty($R['phrase_text']))
@@ -188,8 +197,9 @@ class ui_view_license extends FO_Plugin
 		}
 	$this->ConvertLicPathToHighlighting($R,$LicName,$RefURL);
 	}
+      }
 
-    $View->ShowView(NULL,"View","view");
+    $View->ShowView(NULL,$ModBack);
     return;
     } // Output()
 

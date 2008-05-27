@@ -125,7 +125,7 @@ class search_file_advance extends FO_Plugin
   function RegisterMenus()
     {
     $URI = $this->Name;
-    menu_insert("Search::Advanced",0,$URI);
+    menu_insert("Search::Advanced",0,$URI,"Additional search options");
     } // RegisterMenus()
 
   /***********************************************************
@@ -145,19 +145,20 @@ class search_file_advance extends FO_Plugin
 	$V .= menu_to_1html(menu_find("Search",$MenuDepth),1);
 
 	$Filename = GetParm("filename",PARM_STRING);
-	$SizeMin = GetParm("sizemin",PARM_INTEGER);
-	if (empty($SizeMin) || ($SizeMin < 0)) { $SizeMin=-1; }
-	$SizeMax = GetParm("sizemax",PARM_INTEGER);
-	if (empty($SizeMax) || ($SizeMax < 0)) { $SizeMax=-1; }
+	$SizeMin = GetParm("sizemin",PARM_TEXT) . 'x';
+	if ($SizeMin != 'x') { $SizeMin=intval($SizeMin); }
+	else { $SizeMin = -1; }
+	if ($SizeMin < 0) { $SizeMin=-1; }
+	$SizeMax = GetParm("sizemax",PARM_TEXT) . 'x';
+	if ($SizeMax != 'x') { $SizeMax=intval($SizeMax); }
+	else { $SizeMax = -1; }
+	if ($SizeMax < 0) { $SizeMax=-1; }
 	$MimetypeNot = GetParm("notmimetype",PARM_INTEGER);
 	$Mimetype = GetParm("mimetype",PARM_INTEGER);
 	$Page = GetParm("page",PARM_INTEGER);
 
-	$Uri = preg_replace("/&filename=[^&]*/","",Traceback());
-	$Uri = preg_replace("/&page=[^&]*/","",$Uri);
-
 	$V .= "You can use '%' as a wild-card.\n";
-	$V .= "<form action='$Uri' method='POST'>\n";
+	$V .= "<form action='" . Traceback_uri() . "?mod=" . $this->Name . "' method='POST'>\n";
 	$V .= "<ul>\n";
 	$V .= "<li>Enter the filename to find: ";
 	$V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
@@ -192,10 +193,9 @@ class search_file_advance extends FO_Plugin
 	  $V .= "</option>\n";
 	  }
 	$V .= "</select>\n";
-
-	if ($SizeMin <= 0) { $Value=''; } else { $Value=$SizeMin; }
+	$Value=$SizeMin; if ($Value < 0) { $Value=''; }
 	$V .= "<li>File size is &gt; <input name='sizemin' size=10 value='$Value'> bytes\n";
-	if ($SizeMax <= 0) { $Value=''; } else { $Value=$SizeMax; }
+	$Value=$SizeMax; if ($Value < 0) { $Value=''; }
 	$V .= "<li>File size is &lt; <input name='sizemax' size=10 value='$Value'> bytes\n";
 
 	$V .= "</ul>\n";

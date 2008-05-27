@@ -1,5 +1,5 @@
 <?php
-/***********************************************************
+/*
  Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
@@ -24,6 +24,7 @@
  * @version "$Id$"
  */
 
+$archive_path = '/tmp/fossology';
 
 class TestCP2fossRecursion extends UnitTestCase {
   /*
@@ -32,9 +33,9 @@ class TestCP2fossRecursion extends UnitTestCase {
    */
 
   public $command = '/usr/local/bin/test.cp2foss';
-    
+
   function TestDashRNoArchive(){
-    
+
     $error = exec("$this->command -p devnull -n fail -a /dev/null -d \"test should fail\" ",
     $output, $retval);
     //print_r($output);
@@ -65,21 +66,21 @@ class TestCP2fossRecursion extends UnitTestCase {
      * at least cp2foss worked as far as creating the archive to upload
      * correctly.  This test DOES NOT test if the upload worked.
      */
-    
+
     $last = exec(
-    "$this->command -p FossTest -n fossology -a /tmp/fossology -d 'cp2foss, archive is a directory' ",
-    $output, $retval);
-    //echo "\$output is:\n"; print_r($output); echo "\n";
-    
+    "$this->command -p CP2fossTest/fldr1 -n fossology -a $archive_path -d 'no -R, only files saved' ", $output, $retval
+                );
+    echo "\$output Only files is:\n"; dump($output); echo "\n";
+
     /*
      * $output[1] will always have the archive we are loading... in this
      * case it will be a tar file....get only the files under fossology
-     * 
+     *
      * NOTE: this seems to be brittle.... sometimes it's 2?! and then
      * this test breaks....
-     * 
+     *
      */
-    
+
     $find = "find /tmp/fossology -maxdepth 1  -type f -print";
     $last = exec($find, $findoutput, $retval);
     $last = exec("tar -tf $output[1]", $tarout, $retval);
@@ -106,22 +107,16 @@ class TestCP2fossRecursion extends UnitTestCase {
      * at least cp2foss worked as far as creating the archive to upload
      * correctly.  This test DOES NOT test if the upload worked.
      */
-
-    $apath = '/tmp/fossology';
     $last = exec(
-    "$this->command -p FossTest -n fossology -a $apath -R -d 'cp2foss, archive is a dirctory' ",
+    "$this->command -p CP2fossTest -n fossology -a $archive_path -R -d '-R all contents saved' ",
     $output, $retval);
     /*
      * $output[1] will always have the archive we are loading... in this
      * case it will be a tar file....get only the files under fossology
-     * 
-     * NOTE: this seems to be brittle.... sometimes it's 2?! and then
-     * this test breaks....
-     * 
-     * get only the files under fossology
+     *
      */
-    
-    //echo "output is:\n"; print_r($output); echo "\n";
+
+    echo "output All contents is:\n"; dump($output); echo "\n";
     /*
     * Tried using find and combos of ls etc... issue was getting the
     * trailing / on directories without changing the format.
@@ -129,7 +124,7 @@ class TestCP2fossRecursion extends UnitTestCase {
     * orginal tar.
     */
     $temp_tar = "/tmp/test.tar.bz2";
-    chdir($apath) or die("Can't cd to $path, $php_errormsg\n");
+    chdir($apath) or die("Can't cd to $apath, $php_errormsg\n");
 
     $tcmd = "tar -cjf $temp_tar --exclude='.svn' --exclude='.cvs' *";
     $last = exec($tcmd, $Rtoutput, $retval);

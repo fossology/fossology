@@ -37,7 +37,7 @@ class search_file_by_license extends FO_Plugin
   var $Name       = "search_file_by_license";
   var $Title      = "List Files based on License";
   var $Version    = "1.0";
-  var $Dependency = array("db","browse");
+  var $Dependency = array("db","license");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
 
@@ -78,7 +78,8 @@ class search_file_by_license extends FO_Plugin
 	$Lics = array();
 	$M = $Max;
 	$O = $Offset;
-	LicenseGetAllFiles($UploadTreePk,$Lics,$LicPk,$M,$O);
+	$LicPkList = "lic_id=$LicPk";
+	LicenseGetAllFiles($UploadTreePk,$Lics,$LicPkList,$M,$O);
 
 	/* Save the license results */
 	$Count = count($Lics);
@@ -106,11 +107,11 @@ class search_file_by_license extends FO_Plugin
 	  if (!empty($L['phrase_text'])) { $V .= "<b>Phrase:</b> " . htmlentities($L['phrase_text']) . "\n"; }
 	  if (Isdir($L['ufile_mode']))
 	    {
-	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"license") . "\n";
+	    $V .= Dir2Browse("license",$L['uploadtree_pk'],$L['ufile_pk'],"license") . "\n";
 	    }
 	  else
 	    {
-	    $V .= Dir2Browse("browse",$L['uploadtree_pk'],$L['ufile_pk'],"view-license") . "\n";
+	    $V .= Dir2Browse("license",$L['uploadtree_pk'],$L['ufile_pk'],"view-license") . "\n";
 	    }
 	  $V .= "</td></tr></table>\n";
 	  }

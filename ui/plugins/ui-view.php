@@ -45,7 +45,7 @@ class ui_view extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    menu_insert("Browse-Pfile::View",10,$this->Name);
+    menu_insert("Browse-Pfile::View",10,$this->Name,"View file contents");
     // For the Browse menu, permit switching between detail and summary.
     $Format = GetParm("format",PARM_STRING);
     $Page = GetParm("page",PARM_INTEGER);
@@ -75,23 +75,23 @@ class ui_view extends FO_Plugin
       {
       case "hex":
         menu_insert("View::Hex",-10);
-        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText");
-        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText");
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText","View as unformatted text");
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText","View as formatted text");
         break;
       case "text":
-        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex");
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex","View as a hex dump");
         menu_insert("View::Text",-11);
-        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText");
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText","View as formatted text");
         break;
       case "flow":
-        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex");
-        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText");
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex","View as a hex dump");
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText","View as unformatted text");
         menu_insert("View::Formatted",-12);
         break;
       default:
-        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex");
-        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText");
-        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText");
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex","View as a hex dump");
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText","View as unformatted text");
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText","View as formatted text");
         break;
       }
 
@@ -103,8 +103,8 @@ class ui_view extends FO_Plugin
 	}
     else
 	{
-	menu_insert("View::View",2,$this->Name . $URI);
-	menu_insert("View-Meta::View",2,$this->Name . $URI);
+	menu_insert("View::View",2,$this->Name . $URI,"View file contents");
+	menu_insert("View-Meta::View",2,$this->Name . $URI,"View file contents");
 	}
     } // RegisterMenus()
 
@@ -125,6 +125,18 @@ class ui_view extends FO_Plugin
     } // _cmp_highlight()
 
   /***********************************************************
+   SortHighlightMenu() Sort highlighting.
+   The list of highlights were probably not inserted in order...
+   ***********************************************************/
+  function SortHighlightMenu	()
+    {
+    if (!empty($this->Highlight))
+	{
+	usort($this->Highlight,array("ui_view","_cmp_highlight"));
+	}
+    } // SortHighlightMenu()
+
+  /***********************************************************
    AddHighlight(): Text can be highlighted!
    Start, End, and Color are required.
    If Color is -1, then uses last color.
@@ -139,8 +151,10 @@ class ui_view extends FO_Plugin
     $H = array();
     $H['Start'] = intval($ByteStart);
     $H['End'] = intval($ByteEnd);
-    $Color = intval($Color);
-    if ($Color < 0)
+    if (is_int($Color))
+      {
+      $Color = intval($Color);
+      if ($Color < 0)
 	{
 	/* Reuse last color */
 	if (empty($this->Highlight)) { $Color = 0; }
@@ -153,8 +167,9 @@ class ui_view extends FO_Plugin
 	  $Color = $this->Highlight[count($this->Highlight)-1]['Color'] + 1;
 	  }
 	}
-    $Color = $Color % MAXHIGHLIGHTCOLOR;
-    $H['Color'] = intval($Color);
+      $Color = $Color % MAXHIGHLIGHTCOLOR;
+      }
+    $H['Color'] = $Color;
     $H['Match'] = htmlentities($Match);
     $H['RefURL'] = $RefURL;
     $H['Name'] = htmlentities($Name);
@@ -188,9 +203,16 @@ class ui_view extends FO_Plugin
 	$V .= "<tr bgcolor='" . $this->HighlightColors[$H['Color']] . "'>\n";
 	$V .= "<td align='right'>" . $H['Match'] . "</td>\n";
 
-	$Page = intval($H['Start'] / $PageBlockSize);
 	$V .= "<td>";
-	$V .= "<a href='$Uri&page=$Page#" . $H['Index'] . "'>view</a>";
+	if ($PageBlockSize > 0)
+	  {
+	  $Page = intval($H['Start'] / $PageBlockSize);
+	  $V .= "<a href='$Uri&page=$Page#" . $H['Index'] . "'>view</a>";
+	  }
+	else
+	  {
+	  $V .= "<a href='#" . $H['Index'] . "'>view</a>";
+	  }
 	$V .= "</td>\n";
 
 	$V .= "<td>";
@@ -558,7 +580,7 @@ class ui_view extends FO_Plugin
    $Name is the name for this plugin.
    This function is intended to be called from other plugins.
    ***********************************************************/
-  function ShowView($Fin=NULL, $BackName=NULL, $BackMod=NULL,
+  function ShowView($Fin=NULL, $BackMod="browse",
 		    $ShowMenu=1, $ShowHeader=1, $ShowText=NULL)
     {
     if ($this->State != PLUGIN_STATE_READY) { return; }
@@ -624,16 +646,10 @@ class ui_view extends FO_Plugin
       if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
       if (!empty($Show)) { $Opt .= "&show=$Show"; }
       /* No item */
-      $V .= Dir2Browse("browse",$Item,$Ufile,NULL,1,"View") . "<P />\n";
+      $V .= Dir2Browse($BackMod,$Item,$Ufile,NULL,1,"View") . "<P />\n";
       } // if ShowHeader
 
-    /***********************************
-     Sort highlighting.
-     ***********************************/
-    if (!empty($this->Highlight))
-	{
-	usort($this->Highlight,array("ui_view","_cmp_highlight"));
-	}
+    $this->SortHighlightMenu();
 
     /***********************************
      Display file contents
@@ -641,7 +657,12 @@ class ui_view extends FO_Plugin
     print $V;
     if (empty($Fin))
       { 
-      $Fin = fopen( RepPath($Pfile) ,"rb");
+      $Fin = @fopen( RepPath($Pfile) ,"rb");
+      if (empty($Fin))
+	{
+	print "File contents are not available in the repository.\n";
+	return;
+	}
       }
     rewind($Fin);
     $Pages = "";
@@ -701,14 +722,7 @@ class ui_view extends FO_Plugin
       case "HTML":
 	if ($this->OutputToStdout)
 		{
-		if (plugin_find_id("view-license") >= 0)
-		  {
-		  $this->ShowView(NULL,"License","view-license");
-		  }
-		else
-		  {
-		  $this->ShowView();
-		  }
+		$this->ShowView(NULL,"browse");
 		}
 	break;
       case "Text":
@@ -717,7 +731,7 @@ class ui_view extends FO_Plugin
 	break;
       }
     if (!$this->OutputToStdout) { return($V); }
-    print("$V");
+    print($V);
     return;
     }
 

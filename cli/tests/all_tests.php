@@ -19,11 +19,11 @@
 
 /**
  * Wrapper to run all tests
- * 
- * @todo figure out where the test archives should be stored and 
+ *
+ * @todo figure out where the test archives should be stored and
  * installed.
 */
-// Standard requires for any test. 
+// Standard requires for any test.
 require_once('/usr/local/simpletest/unit_tester.php');
 require_once('/usr/local/simpletest/mock_objects.php');
 require_once('/usr/local/simpletest/reporter.php');
@@ -38,6 +38,7 @@ $test->addTestFile('parameters.php');
 $test->addTestFile('desc.php');
 //echo "Running Recursion, directory input Tests\n";
 $test->addTestFile('dashR.php');
+$test->addTestFile('duplicate-Upfolder.php');
 $test->run(new TextReporter());
 
 ?>

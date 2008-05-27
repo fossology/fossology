@@ -43,6 +43,7 @@
 
 function CreateFolder($parent_key, $folder_name, $description="") {
   global $DB;
+  require_once("/usr/local/share/fossology/www/common/common-cli.php");
 
   /* Check the name */
   $folder_name = trim($folder_name);
@@ -61,6 +62,7 @@ function CreateFolder($parent_key, $folder_name, $description="") {
   $Sql = "SELECT * FROM leftnav WHERE name = '$folder_name' AND
                 parent = '$parent_key' AND foldercontents_mode = '1';";
   $Results = $DB->Action($Sql);
+  //cli_PrintDebugMessage ("CreateFolder: results after under parent check",$Results);
   if ($Results[0]['name'] == $folder_name) { return(0); }
 
   /* Create the folder
@@ -70,11 +72,15 @@ function CreateFolder($parent_key, $folder_name, $description="") {
    */
   $folder_name = str_replace("'", "''", $folder_name);  // PostgreSQL quoting
   $description = str_replace("'", "''", $description);            // PostgreSQL quoting
-  $DB->Action(
+  $IRes = $DB->Action(
   "INSERT INTO folder (folder_name,folder_desc) VALUES ('$folder_name','$description');");
   $Results = $DB->Action(
   "SELECT folder_pk FROM folder WHERE folder_name='$folder_name' AND folder_desc = '$description';");
-  $FolderPk = $Results[0]['folder_pk'];
+
+  //cli_PrintDebugMessage ("CreateFolder: results after INSERT getting folder_pk of ",$Results);
+  $size = count($Results);
+  $FolderPk = $Results[$size-1]['folder_pk'];
+  //cli_PrintDebugMessage ("CreateFolder: Folder_pk is:$FolderPk");
   if (empty($FolderPk)) { return(FALSE); }
 
   $DB->Action("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$parent_key','1','$FolderPk');");
@@ -168,13 +174,21 @@ function suckupfs($path, $recursion = false){
   $dirs      = array();
   $other     = array();
   $dir_parts = pathinfo($path);
+
+  // check if the file exists (can you reach it? in the case of multiple
+  // agent machines).
+
+  if( ! file_exists($path))
+  {
+    return(FALSE);
+  }
+
   $SPATH = opendir($path)
-  or die("Suckupfs: Can't open: $path $php_errormsg\n");
+  or die("suckupfs: Can't open: $path $php_errormsg\n");
 
   while ($dir_entry = readdir($SPATH)){
     //  echo "\$dir_entry is:$dir_entry\n";
     if ($dir_entry == $cwd || $dir_entry == $parentdir) {
-      //echo ("skipping $dir_entry\n");
       continue;
     }
     $check = "$path" . '/' . "$dir_entry";
@@ -192,7 +206,7 @@ function suckupfs($path, $recursion = false){
 
   /*
    * tar will suck up a sub dir and it's contnents, so must
-   * not supply them in list to tar if -r is not turned on.
+   * not supply them in list to tar if -R is not turned on.
    *
    * Always put the files in the list.  If recursion is on, put everything
    * else in the list as well.  Return the path to the tar file.

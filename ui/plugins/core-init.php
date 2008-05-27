@@ -122,7 +122,7 @@ class core_init extends FO_Plugin
 	  print "</pre>";
 	  if (!$FailFlag)
 	    {
-	    $V .= "Initialization complete.<br />";
+	    $V .= "Initialization complete.  Click 'Home' in the top menu to proceed.<br />";
 	    if (is_writable(getcwd())) { $State = unlink($Filename); }
 	    else { $State = 0; }
 	    if (!$State)

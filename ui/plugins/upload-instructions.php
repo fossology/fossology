@@ -54,19 +54,23 @@ class upload_instructions extends FO_Plugin
 	$V .= "<ul>\n";
 	$V .= "<li><b>On your browser system</b>.\n";
 	$V .= "Use the <a href='${Uri}?mod=upload_file'>Upload File</a> option to select and upload the file.\n";
-	$V .= "While this can be very convenient (particularly if the file is not readily accessable online),\n";
+	$V .= "While this can be very convenient (particularly if the file is not readily accessible online),\n";
 	$V .= "uploading via your web browser can be slow for large files,\n";
 	$V .= "and files larger than 650 Megabytes may not be uploadable.\n";
 	$V .= "<P />\n";
 	$V .= "<li><b>On a remote server</b>.\n";
-	$V .= "Use the <a href='${Uri}?mod=upload_url'>Upload from URL</a> option specify a remote server.\n";
+	$V .= "Use the <a href='${Uri}?mod=upload_url'>Upload from URL</a> option to specify a remote server.\n";
 	$V .= "This is the most flexible option, but the URL must denote a publicly accessible HTTP, HTTPS, or FTP location.\n";
 	$V .= "URLs that require authentication or human interactions cannot be downloaded through this automated system.\n";
 	$V .= "<P />\n";
 	$V .= "<li><b>On the FOSSology web server</b>.\n";
-	$V .= "Use the <a href='${Uri}?mod=upload_srv_files'>Upload from Server</a> option specify a file or path on the server.\n";
+	$V .= "Use the <a href='${Uri}?mod=upload_srv_files'>Upload from Server</a> option to specify a file or path on the server.\n";
 	$V .= "This option is intended for developers who have mounted directories containing source trees.\n";
 	$V .= "The directory must be accessible via the web server's user.\n";
+	$V .= "<P />\n";
+	$V .= "If your system is configured to use multiple agent servers, the data area must be\n";
+	$V .= "mounted and accessible to the FOSSology user (fossy) on every agent system.  See\n";
+	$V .= "the section <em>Configuring the Scheduler</em> in the <a href='http://fossology.org/scheduler'>Scheduler documentation</a>.\n";
 	$V .= "</ul>\n";
 if (0)
   {

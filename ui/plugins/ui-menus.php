@@ -46,8 +46,7 @@ class ui_menu extends FO_Plugin
       } 
    
     // Add default menus (with no actions linked to plugins)
-    menu_insert("Main::Logo",20,NULL,NULL,"<a href='/' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . Traceback_uri() . "images/fossology-logo.gif' border=0></a>");
-    menu_insert("Main::Home",18,"Default","_top");
+    menu_insert("Main::Home",18,"Default",NULL,"_top");
     menu_insert("Main::Search",14);
     menu_insert("Main::Browse",12);
     menu_insert("Main::Upload",10);
@@ -273,15 +272,22 @@ class ui_menu extends FO_Plugin
 	if (! $this->_CSSdone) { $V .= $this->OutputCSS(); }
 	$Menu = menu_find("Main",$MenuDepth);
 	/** Same height at FOSSology logo **/
+	$V .= "<table border=0 width='100%'>";
+	$V .= "<tr>";
+	$V .= "<td width='150' rowspan='2'><a href='/' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . Traceback_uri() . "images/fossology-logo.gif' border=0></a></td>";
+	$V .= "<td colspan='2'>";
 	$V .= $this->menu_html($Menu,0);
-	$V .= "<br />";
+	$V .= "</td>";
+	$V .= "</tr><tr>";
+	$V .= "<td>";
 	$V .= "<font size='+2'><b>$Title</b></font>";
+	$V .= "</td>";
 
+	$V .= "<td align='right' valign='bottom'>";
 	/* Handle login information */
 	if (plugin_find_id("auth") >= 0)
 	  {
 	  /* Width matches logo image */
-	  $V .= "<div align='right'>";
 	  if (empty($_SESSION['User']))
 		{
 		$V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>login</b></a></small>";
@@ -291,9 +297,11 @@ class ui_menu extends FO_Plugin
 		$V .= "<small>User:</small> " . @$_SESSION['User'] . "<br>";
 		$V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
 		}
-	  $V .= "</div>";
-	  $V .= "<hr />";
 	  }
+	$V .= "</td>";
+	$V .= "</tr>";
+	$V .= "</table>";
+	$V .= "<hr />";
         break;
       case "Text":
         break;
