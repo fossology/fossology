@@ -1,0 +1,165 @@
+# cp2foss.pod man page input file
+# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+#
+# VERSION: $Id$
+
+=head1 cp2foss: load one or more files or archives into the Fossology DB.
+
+=head1 SYNOPSIS
+
+General:
+cp2foss [-h] {-p <folder-path> -n <folder-name> -a <path-to-archive> -d "description" | [-f <file-of-parameters>]} [-A] [-w] [-R]
+        
+Form 1:
+cp2foss [-h] -p <folder-path> -n <folder-name> -a <path-to-archive> -d "description" [-A]
+        
+Form 2: 
+cp2foss [-h] -p <folder-path> -n <folder-name> -w -a <url> -d "description" [-A]
+        
+Form 3:
+cp2foss [-h] -f <file-of-parameters>
+
+Form 4: 
+cp2foss [-h] -p <folder-path> -n <folder-name> [-R ] -a <path-to-directory> -d "description" 
+
+=head1 DESCRIPTION
+
+B<cp2foss> (copy to foss) will load a single file or tar'ed archive into the
+folder specified by B<-n>, under the folder-path specified with B<-p>.
+The I<folder-path> and I<folder-name> do not need to exist. B<cp2foss> 
+will create them as needed.
+
+In the first form 1 archive is loaded into the Data Base.
+
+In the second form the optional B<-w> parameter is used.  When B<-w>
+is used the argument to the B<-a> option must be a valid URL.  In this form
+cp2foss will first down-load the archive using the supplied url using the 
+wget utility.  After successful down-load, the down-loaded archive will be 
+loaded into the Data Base using the folders specified. 
+
+Use the third form if more than a single archive needs to be loaded.
+A file of input parameters can be supplied using the B<-f> option.
+If the B<-f> option is used, all other options on the command line are
+ignored.
+
+The file format is the same as the command line input.  That is a set of
+switches followed by arguments.  The character # in the 1st column is a 
+comment.  Blank lines are allowed and ignored.
+
+The fourth form is used to load files or whole directory trees from the 
+server file system into the data-base.  In the fourth form, the archive
+should point to a valid directory.  If recursion is B<not on> then
+I<only> the files under the directory path will be uploaded.
+
+If recursion B<is on> then everything under the directory path will be
+scheduled to be loaded into the data-base.  B<NOTE:> This form first makes a compressed
+tar archive of the directory tree.  Make sure there is enough room in /tmp
+to hold the archive.
+
+=head2 Options
+
+=over
+
+=item B<-A>
+
+Turn on I<alpha-folders>.  Default is B<off>. When large amounts of
+archives are loaded, navigating through all the folders can be
+difficult.  This option will group packages under alpha folders based
+on the 1st letter of the package name.  For example, your folder path
+is I<ProjX/pass1>, and the folder name is I<abcd>.  Using alpha-folders the
+package abcd would end up under a folder path I<ProjX/pass/a-c/abcd>.
+
+=item B<-a> I<path-to-archive | url>
+
+Fully qualified path to the archive to load or a valid url. B<-w> indicates
+that the argument to -a is a url.
+
+=item B<-d> I<description>
+
+A short meaningful description the captures what the folder will hold.
+Description must be quoted with either single or double quotes.
+
+=item B<-n> I<folder-name>
+
+The folder name that will be used to store the archive in the
+data-base.  Only one upload into a file folder is allowed to avoid
+storing duplicate uploads.  The file folder is checked to see if it has been 
+uploaded into.  If it has, no other uploads are allowed into that file folder.
+
+Use different folder paths or folder names to upload the same archive
+multiple times.  The underlying data will not be duplicated, it will be reused
+by the application software.  This helps preserve disk space.
+
+=item B<-p> I<folder-path>
+
+The name of the folder-path that will hold the I<folder_name>
+specified with B<-n>.  The folder path does not have to exist.  It
+will be created as needed.
+
+=item B<-f> I<file-of-input-parameters>
+
+I<file-of-input-parameters> is a file that contains the parameters
+needed to load an archive.  Typical usage is to load multiple
+archives.  For example, a file with the contents:
+
+=over
+
+     -p Mysrcs -n foo -a /tmp/mysrcs/foo.c -d "the foo program"
+
+     -p Mysrcs -n bar -a /tmp/mysrcs/bar.c -d "the bar program"
+
+     -p Othersrc -n randy /tmp/other/randy -d "somebodies randy program"
+
+=back
+
+The above file would load 3 archives, foo.c, bar.c and randy.  Folders
+I<Mysrcs> and I<Othersrc> would be created if they did not exist.  folders
+for I<foo> I<bar> and I<randy> would be placed under the parent folders.
+I<Mysrcs/foo, Mysrcs/bar, Othersrc/randy>.
+
+=item B<-R>
+
+Turn recursion on.  This option only applies when the archive is a directory path.
+If turned on, everything under the directory path will be scheduled to be
+loaded into the data-base.  Be careful with this option!  For example,
+specifying -R -a /usr would be really silly.
+
+=item B<-w>
+
+Switch to indicate that the archive is a url (-a <url>).  B<cp2foss> will first 
+get the archive using B<wget>.  Then the archive will be loaded into the 
+folders specified.
+
+=back
+
+=head1 EXAMPLES
+
+C<cp2foss -p Mom -n son -d "Sonny program, for cher" -a /pub/archive/sonny>
+
+Would load the archive called I<sonny> in the folder I<son> under the folder
+path I<Mom>.
+
+C<cp2foss -f /pub/lotsOarchives>
+
+Would read the file /pub/lotsOarchives and process each line.  If
+there were no errors, each archive specified in each line would be
+uploaded into the data-base.
+
+C<cp2foss -pUbuntu -n GGibon -w -a 'http://ubuntu.cs.utah.edu/releases/gutsy/ubuntu-7.10-desktop-i386.iso' -d 'Ubuntu Gutsy 7.10'>
+
+The above example, B<cp2foss> will first get the archive using the url and wget.  It will
+then load the downloaded archive into the data-base.
+
+C<cp2foss -pFedora -n Fedora8 -R -a /bigdisk/fedora/ -d 'Fedora 8 Sources'>
+
+This example loads every file under /bigdisk/fedora on the server into 
+the data-base.
+
+=head1 AUTHOR
+
+Mark Donohoe for the Hewlett-Packard Company
+
+=head1 SEE ALSO
+
+wget 
+
