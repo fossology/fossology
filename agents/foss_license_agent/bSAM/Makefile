@@ -4,7 +4,7 @@ TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS:-g=)
 EXE=bsam-engine
 UTILS=SeeSam bsamlist
 
