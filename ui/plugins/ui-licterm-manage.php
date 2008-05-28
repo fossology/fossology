@@ -498,7 +498,7 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "</tr>";
 
     $V .= "</table>\n";
-    $V .= "<input type='submit' name='submit' value='Go!'>\n";
+    $V .= "<input type='submit' name='submit' value='Commit!'>\n";
     $V .= "</form>\n";
     return($V);
     } // LicTermForm()
