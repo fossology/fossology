@@ -4,7 +4,8 @@ This directory contains the FOSSology agents.
 
 If you want to add an agent:
 1.) create a new directory
-2.) put your code in it
+2.) put your code in it. For an example agent and more hints on writing
+    agents see the code and README in the example_wc_agent/ directory.
 3.) setup a Makefile that builds and installs your agent using the standard
    make targets and to the standard locations, you can use
    Makefile.template as a template
