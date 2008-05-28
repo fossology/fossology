@@ -1,33 +1,37 @@
-# wget_agent Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-include ../../Makefile.conf
+# FOSSology Makefile - agents/wget_agent
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+TOP=../..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
 
-CC=gcc -DPROXYFILE='"$(AGENTDATADIR)/proxy.conf"'
-CFLAGS=-Wall -O2 $(CFLAGS2)
-#CFLAGS=-Wall -g -lefence $(CFLAGS2)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS)
+PROXYDEF=-DPROXYFILE='"$(AGENTDATADIR)/proxy.conf"'
 EXE=wget_agent
-INC=-I../../$(BUILDINC)
-LIB=-L../../$(BUILDLIB) -lfossrepo -lfossdb -lpq
-
-WGETSRC=wget_agent.c ../ununpack/checksum.c ../ununpack/md5.c ../ununpack/sha1.c
+CHKHDR=../ununpack/checksum.h ../ununpack/md5.h ../ununpack/sha1.h
+CHKSRC=$(CHKHDR:%.h=%.c)
 
 all: $(EXE)
 
-wget_agent: $(WGETSRC)
-	$(CC) $(CFLAGS) $(WGETSRC) -o wget_agent $(INC) $(LIB)
+$(EXE): %: %.c $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS)
+	$(CC) $< $(CHKSRC) $(PROXYDEF) $(CFLAGS_LOCAL) -o $@
 
-InstallationCreate:
-	cp wget_agent ../../install/$(AGENTDIR)/wget_agent
-	chmod a+rx ../../install/$(AGENTDIR)/wget_agent
+# targets to make sure the libfoss libraries we use are up to date
+$(DB):
+	$(MAKE) -C $(DBPATH) libfossdb.a
+
+$(REPO):
+	$(MAKE) -C $(REPOPATH) libfossrepo.a
 
 install: all
-	$(CP) wget_agent $(AGENTDIR)
-	cp wget_agent $(AGENTDIR)/wget_agent
-	chmod a+rx $(AGENTDIR)/wget_agent
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 uninstall:
-	$(RM) $(AGENTDIR)/wget_agent
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+
+test: all
+	@echo "*** No tests available for agents/$(EXE) ***"
 
 clean:
-	$(RM) $(EXE)
+	rm -f $(EXE) *.o core
 
+.PHONY: all install uninstall clean test
