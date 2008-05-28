@@ -1,26 +1,34 @@
-# engine-shell Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-include ../../Makefile.conf
+# FOSSology Makefile - agents/Shell
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+TOP=../..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
 
-CC=gcc
-CFLAGS=-Wall -O2 $(CFLAGS2)
-#CFLAGS=-Wall -g $(CFLAGS2)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS)
 EXE=engine-shell
 
 all: $(EXE)
 
-engine-shell: engine-shell.c
-	$(CC) $(CFLAGS) engine-shell.c -o engine-shell
+$(EXE): %: %.c $(DB) $(REPO) $(VARS)
+	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
-InstallationCreate:
-	$(CP) engine-shell ../../install/$(AGENTDIR)
+# targets to make sure the libfoss libraries we use are up to date
+$(DB):
+	$(MAKE) -C $(DBPATH) libfossdb.a
+
+$(REPO):
+	$(MAKE) -C $(REPOPATH) libfossrepo.a
 
 install: all
-	$(CP) engine-shell $(AGENTDIR)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 uninstall:
-	$(RM) $(AGENTDIR)/engine-shell
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+
+test: all
+	@echo "*** No tests available for agents/$(EXE) ***"
 
 clean:
-	$(RM) *.o core $(EXE)
+	rm -f $(EXE) *.o core
 
+.PHONY: all install uninstall clean test
