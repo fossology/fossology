@@ -9,6 +9,9 @@ FL=../Filter_License/Filter_License
 EXE=License.bsam
 
 all:
+install:
+uninstall:
+test:
 
 # no default targets
 # this Makefile is really only useful on a system with fossology already
@@ -20,13 +23,13 @@ $(EXE): $(FL)
 	chmod u+x ./MkCache
 	./MkCache
 
-install: all
+install2: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
-uninstall:
+uninstall2:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
 
-test: all test-best test-all
+test2: all test-best test-all
 
 test-best: License.bsam $(BSAM)
 	@echo "Testing to find the best match"
