@@ -1,28 +1,34 @@
-# specagent Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-include ../../Makefile.conf
+# FOSSology Makefile - agents/specagent
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+TOP=../..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
 
-CC=gcc
-CFLAGS=-Wall -O2 $(CFLAGS2)
-#CFLAGS=-Wall -g -lefence $(CFLAGS2)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq -lextractor $(ALL_CFLAGS)
 EXE=specagent
-INC=-I../../$(BUILDINC)
-LIB=-L../../$(BUILDLIB) -lfossrepo -lfossdb -lpq -lextractor
 
 all: $(EXE)
 
-specagent: specagent.c
-	$(CC) $(CFLAGS) specagent.c -o specagent $(INC) $(LIB)
+$(EXE): %: %.c $(DB) $(REPO) $(VARS)
+	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
-InstallationCreate:
-	$(CP) specagent ../../install/$(AGENTDIR)
+# targets to make sure the libfoss libraries we use are up to date
+$(DB):
+	$(MAKE) -C $(DBPATH) libfossdb.a
+
+$(REPO):
+	$(MAKE) -C $(REPOPATH) libfossrepo.a
 
 install: all
-	$(CP) specagent $(AGENTDIR)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 uninstall:
-	$(RM) $(AGENTDIR)/specagent
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+
+test: all
+	@echo "*** No tests available for agents/$(EXE) ***"
 
 clean:
-	$(RM) *.o core $(EXE)
+	rm -f $(EXE) *.o core
 
+.PHONY: all install uninstall clean test
