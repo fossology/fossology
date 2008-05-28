@@ -1,38 +1,51 @@
-# Licenses Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-include ../../../Makefile.conf
+# FOSSology Makefile - agents/foss_license_agent/Licenses
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+TOP=../../..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
 
+BSAM=../bSAM/bsam-engine ../bSAM/SeeSam
+FL=../Filter_License/Filter_License
 EXE=License.bsam
 
 all:
 
-License.bsam:
+# no default targets
+# this Makefile is really only useful on a system with fossology already
+# installed and the database setup. For installing new systems we need
+# to do this work post-install. Thus Makefile is only for the convenience
+# of developers.
+
+$(EXE): $(FL)
 	chmod u+x ./MkCache
 	./MkCache
 
-Test1:	License.bsam
+install: all
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+
+uninstall:
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+
+test: all test-best test-all
+
+test-best: License.bsam $(BSAM)
 	@echo "Testing to find the best match"
 	chmod u+x ./SelfTest
 	./SelfTest
 
-Test2:	License.bsam
+test-all: License.bsam $(BSAM)
 	@echo "Testing to find all matches"
 	chmod u+x ./SelfTest2
 	./SelfTest2
 
-InstallationCreate:
-	find Raw -type f | grep -v svn | sed -e 's@^Raw/@@' | \
-	while read i ; do \
-	  $(MKDIR) -p ../../../install/$(AGENTDATADIR)/licenses/"$${i%/*}"; \
-	  $(CP) Raw/"$$i" ../../../install/$(AGENTDATADIR)/licenses/"$$i"; \
-	done
+# dependency targets
+$(BSAM):
+	$(MAKE) -C ../bSAM
 
-install: $(EXE)
-	$(CP) License.bsam $(AGENTDATADIR)
-
-uninstall:
-	$(RM) $(AGENTDATADIR)/License.bsam
+$(FL):
+	$(MAKE) -C ../Filter_License
 
 clean:
-	$(RM) *.o core $(EXE)
+	rm -f $(EXE) *.o core
 
+.PHONY: all install uninstall clean test
