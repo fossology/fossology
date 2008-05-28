@@ -19,16 +19,16 @@
  * General purpose classes used by fossology cli programs.
  *
  * @package common-cli
- * 
+ *
  * @version "$Id$"
  *
  */
 
 /**
  * function: cli_Init
- * 
- * Initalize the fossology environment for cli use.  This routine loads 
- * the plugins so they can be use by cli programs.  In the process of doing 
+ *
+ * Initalize the fossology environment for cli use.  This routine loads
+ * the plugins so they can be use by cli programs.  In the process of doing
  * that it disables the core-auth plugin.
  *
  * @return true
@@ -37,7 +37,7 @@
 function cli_Init()
 {
   // every cli must perform these steps
-  global $WEBDIR; 
+  global $WEBDIR;
   global $Plugins;
 
   /* Load the plugins */
@@ -57,6 +57,37 @@ function cli_Init()
 
   return(true);
 } // cli_Init()
+
+/**
+ * function cli_logger
+ * write/append a message to the log handle passed in.
+ *
+ * @param string $handle the path to the file
+ * @param string $message the message to put in the log file, the string
+ * should not have a new line at the end, this function will add it.
+ * @param string $mode the open mode, either 'a' or 'w'
+ *
+ * NOTE: it is up to the caller to manage the mode
+ *
+ * @return null on sucess, string for failure
+ *
+ */
+
+function cli_logger($handle, $message, $mode='a')
+{
+  $message .= "\n";
+  $FR = fopen($handle, $mode) or
+        die("Can't open $handle, $php_errormsg\n");
+  $wrote = fwrite ($FR, $message);
+  fflush($FR);
+  if ($wrote == -1)
+  {
+    fclose($FR);
+    return("ERROR: could not write message to $handle\n");
+  }
+  fclose($FR);
+  return(Null);
+}
 
 /**
  * function cli_PrintDebugMessage
