@@ -1049,6 +1049,7 @@ struct ContainerInfo
   int IsCompressed; /* this container is compressed */
   long ufile_pk;	/* ufile of this item */
   long pfile_pk;	/* pfile of this item */
+  long ufile_mode;	/* ufile_mode of this item */
   };
 typedef struct ContainerInfo ContainerInfo;
 
@@ -1273,6 +1274,7 @@ int	DBInsertUfile	(ContainerInfo *CI, int Mask)
       Bits = CI->Stat.st_mode & Mask;
       if (CI->Artifact) Bits |= (1 << BITS_ARTIFACT);
       if (CI->HasChild) Bits |= (1 << BITS_CONTAINER);
+      CI->ufile_mode = Bits;
 
       /* not inserting ufile_ts since it defaults to "now()" */
       memset(SQL,'\0',MAXSQL);
@@ -1360,14 +1362,14 @@ int	DBInsertUfile	(ContainerInfo *CI, int Mask)
 void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
 {
   long Child;
-  long UploadTree;
+  long UploadTree,pfile_fk,ufile_mode;
   void *DBR;	/* data base results */
   int i,Max;
 
   /* Get all (unique) children for this parent */
   memset(SQL,'\0',MAXSQL);
   /* uploadtree_pk is unique */
-  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk,ufile_fk FROM uploadtree WHERE parent = '%ld';",CopyParent);
+  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk,ufile_fk,pfile_fk,ufile_mode FROM uploadtree WHERE parent = '%ld';",CopyParent);
   if (DBaccess(DBTREE,SQL) > 0) /* SELECT */
     {
     /* Insert each child under this tree */
@@ -1377,13 +1379,15 @@ void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
 	{
 	UploadTree = atol(DBgetvalue(DBR,i,0));
 	Child = atol(DBgetvalue(DBR,i,1));
+	pfile_fk = atol(DBgetvalue(DBR,i,2));
+	ufile_mode = atol(DBgetvalue(DBR,i,3));
 
 	/* Add the child to uploadtree */
 	/** While uploadtree_pk is unique, ufile_fk/parent is not.
 	    There may be duplicates that are blocked by constraints. **/
 	memset(SQL,'\0',MAXSQL);
-	snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (ufile_fk,parent,upload_fk) VALUES (%ld,%ld,%s);",
-	  Child, NewParent, Upload_Pk);
+	snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (ufile_fk,parent,pfile_fk,ufile_mode,upload_fk) VALUES (%ld,%ld,%ld,%ld,%s);",
+	  Child, NewParent, pfile_fk,ufile_mode,Upload_Pk);
 	if (DBaccess(DBTREE,SQL) == 0) /* INSERT INTO uploadtree */
 	  {
 	  /* Find the new ID for this insertion */
@@ -1474,8 +1478,8 @@ int	DBInsertUploadTree	(ContainerInfo *CI)
 
     /* Prepare to insert child */
     memset(SQL,'\0',MAXSQL);
-    snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (ufile_fk,parent,upload_fk) VALUES (%ld,%ld,%s);",
-      CI->ufile_pk, NewParent, Upload_Pk);
+    snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (ufile_fk,parent,pfile_fk, ufile_mode, upload_fk) VALUES (%ld,%ld,%ld, %ld, %s);",
+      CI->ufile_pk, NewParent, CI->pfile_pk, CI->ufile_mode, Upload_Pk);
     if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
     DBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
     /* Find the inserted child (use select since dups may exist) */
@@ -1485,8 +1489,8 @@ int	DBInsertUploadTree	(ContainerInfo *CI)
     }
   else /* No parent!  This is the first upload! */
     {
-    snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (ufile_fk,upload_fk) VALUES (%ld,%s);",
-      CI->ufile_pk, Upload_Pk);
+    snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (ufile_fk,upload_fk,pfile_fk,ufile_mode) VALUES (%ld,%s,%ld,%ld);",
+      CI->ufile_pk, Upload_Pk,CI->pfile_pk,CI->ufile_mode);
     if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
     DBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
     /* Find the inserted child (use select since dups may exist) */
