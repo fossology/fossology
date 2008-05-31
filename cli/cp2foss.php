@@ -78,9 +78,13 @@ require_once("$LIBDIR/libcp2foss.h.php");
 
 global $Plugins;
 
-$usage = <<< USAGE
-Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> \
-       -d "description" [-f <file-of-parameters>] [-A] [-w] [-R]
+$usage =
+"Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> -d \"description\" [-f <file-of-parameters>] [-A] [-w] [-R]";
+
+/*
+<<< USAGE
+
+
    Where:
    <folder-path> is the folder path to store the upload under.
    <upload-name> is the name of the file folder to store this archive in
@@ -117,6 +121,7 @@ Usage: cp2foss [-h] -p <folder-path> -n <upload-name> -a <path-to-archive> \
        will be submitted as a job.  The directory name is the folder name.
 
 USAGE;
+*/
 
 cli_Init();
 /* Always perform this check after initalizing the environment as
@@ -841,10 +846,15 @@ function upload_archive($folder_fk, $folder_name, $description, $archive){
     echo "ERROR: could not run wget_agent, return code is:$retval\n";
     return(false);
   }
-  // normally, one would need to schedule an unpack job, but by calling
-  // fossjobs, you don't need to.
+  /*
+   * normally, one would need to schedule an unpack job, but by calling
+   * fossjobs, you don't need to.
+   *
+   * NOTE: we always schedule with a -1 priority so that normal users
+   * can use the system.
+   */
 
-  $cmd = "fossjobs -U $upload_fk";
+  $cmd = "fossjobs -U $upload_fk -P -1";
   $last = exec($cmd, $output, $return);
   if ($return != 0)
   {
