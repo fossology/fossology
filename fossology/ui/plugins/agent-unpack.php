@@ -42,6 +42,34 @@ class agent_unpack extends FO_Plugin
     menu_insert("Agents::" . $this->Title,0,$this->Name);
     }
 
+  /***********************************************************
+   Install(): Create and configure database tables
+   ***********************************************************/
+   function Install()
+   {
+     global $DB;
+     if (empty($DB)) { return(1); } /* No DB */
+
+     /* if pfile_fk or ufile_mode don't exist in table uploadtree 
+      * create them and populate them from ufile table    
+      * Leave the ufile columns there for now  */
+     if (!$DB->ColExist("uploadtree", "pfile_fk"))
+     {
+         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN pfile_fk integer" );
+         $DB->Action("UPDATE uploadtree SET pfile_fk=(SELECT pfile_fk FROM ufile WHERE uploadtree.ufile_fk=ufile_pk)");
+     }
+
+     if (!$DB->ColExist("uploadtree", "ufile_mode"))
+     {
+         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN ufile_mode integer" );
+         $DB->Action("UPDATE uploadtree SET ufile_mode=(SELECT ufile_mode FROM ufile WHERE uploadtree.ufile_fk=ufile_pk)");
+     }
+
+     return(0);
+   } // Install()
+
+
+
   /*********************************************
    AgentCheck(): Check if the job is already in the
    queue.  Returns:
