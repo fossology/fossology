@@ -188,7 +188,30 @@ class db_access extends FO_Plugin
     return;
     }
 
-  };
+  /***********************************************************
+   ColExist(): Check if Column $Col,exists in Table
+               Return True if the column exists in Table
+               Return False if either the column or the table
+               do not exist
+   This could also be done via a pg_query > pg_fetch_object.
+   ***********************************************************/
+  function ColExist($Table,$Col)
+  {
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    if (!$this->db_init()) { return; }
+
+    $result = pg_query($this->_pg_conn,
+             "SELECT 'SUCCESS' FROM pg_attribute , pg_type 
+              WHERE typrelid=attrelid AND typname = '$Table'
+                AND attname='$Col' LIMIT 1");
+    if ($result)
+    {
+        if (pg_num_rows($result) > 0) return true;
+    }
+    return false;
+  }
+}
+
 $NewPlugin = new db_access;
 $NewPlugin->Initialize();
 
