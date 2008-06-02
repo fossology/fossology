@@ -142,13 +142,13 @@ class agent_license extends FO_Plugin
 	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A,
 	pfile_size as Size
 	INTO $TempTable
-	FROM uploadtree
-	INNER JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk
-	  AND upload_fk = '$uploadpk'
-	  AND ufile.pfile_fk IS NOT NULL
-	  AND (ufile.ufile_mode & (1<<29)) = 0
-	INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk
+	FROM uploadtree,pfile
+    WHERE upload_fk = '$uploadpk'
+	  AND pfile_fk IS NOT NULL
+	  AND (ufile_mode & (1<<29)) = 0
+      AND pfile_fk = pfile_pk
 	ORDER BY Size DESC;";
+
     /** sqlagent does not like newlines! **/
     $jqargs = str_replace("\n"," ",$jqargs);
     $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",$Dep);
