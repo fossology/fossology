@@ -72,7 +72,6 @@ function LicenseGetAll(&$UploadtreePk, &$Lics)
   if (!$LicenseGetAll_Prepared)
     {
     $DB->Prepare("LicenseGetAll",'SELECT uploadtree_pk,ufile_mode,ufile_fk as ufile_pk,uploadtree.pfile_fk,lic_fk FROM uploadtree LEFT OUTER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = uploadtree.pfile_fk where parent = $1;');
-echo "LicenseGetAll lasterr: ", pg_last_error();
     $LicenseGetAll_Prepared = 1;
     }
   /* Find every item under this UploadtreePk... */
