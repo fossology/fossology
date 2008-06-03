@@ -35,25 +35,30 @@ class search_file extends FO_Plugin
   var $LoginFlag  = 0;
 
   /***********************************************************
-   GetUfileFromName(): Given a pfile_pk, return all ufiles.
+   GetUfileFromName(): Given a name, return all ufiles.
    ***********************************************************/
-  function GetUfileFromName($Filename,$Page)
+  function GetUfileFromName($Filename,$Page, $ContainerOnly=1)
     {
     global $DB;
     $Max = 50;
     $Filename = str_replace("'","''",$Filename); // protect DB
     $Terms = split("[[:space:]][[:space:]]*",$Filename);
-    $SQL = "SELECT * FROM ufile
-	INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk
-	WHERE";
+    $SQL = "SELECT ufile.ufile_name, uploadtree.* FROM ufile,uploadtree,pfile
+	WHERE uploadtree.ufile_fk=ufile.ufile_pk ";
+    $SQL .= " AND pfile_pk=uploadtree.pfile_fk";
+    if ($ContainerOnly) $SQL .= " AND ((uploadtree.ufile_mode & (1<<29)) != 0) ";
     foreach($Terms as $Key => $T)
 	{
-	if ($Key > 0) { $SQL .= " AND"; }
-	$SQL .= " ufile_name like '$T'";
+	$SQL .= " AND ufile.ufile_name like '$T'";
 	}
     $Offset = $Page * $Max;
-    $SQL .= " ORDER BY ufile.ufile_name LIMIT $Max OFFSET $Offset;";
+    $SQL .= " ORDER BY pfile_size DESC LIMIT $Max OFFSET $Offset;";
     $Results = $DB->Action($SQL);
+    if (!$Results)
+    {
+        echo "GetUfileFromName Error SQL:", $SQL, "<br>";
+        echo "GetUfileFromName Error:", pg_last_error(), "<br>";
+    }
     $V = "";
     $Count = count($Results);
 
@@ -108,6 +113,7 @@ class search_file extends FO_Plugin
 
 	$Filename = GetParm("filename",PARM_STRING);
 	$Page = GetParm("page",PARM_INTEGER);
+	$allfiles = GetParm("allfiles",PARM_STRING);
 	$Uri = preg_replace("/&filename=[^&]*/","",Traceback());
 	$Uri = preg_replace("/&page=[^&]*/","",$Uri);
 
@@ -116,6 +122,8 @@ class search_file extends FO_Plugin
 	$V .= "<ul>\n";
 	$V .= "<li>Enter the filename to find:<P>";
 	$V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
+	$V .= "<li>By default only containers (rpms, tars, isos, etc) are shown.<P>";
+	$V .= "<INPUT type='checkbox' name='allfiles'> Show All Files\n";
 	$V .= "</ul>\n";
 	$V .= "<input type='submit' value='Search!'>\n";
 	$V .= "</form>\n";
@@ -123,9 +131,10 @@ class search_file extends FO_Plugin
 	if (!empty($Filename))
 	  {
 	  if (empty($Page)) { $Page = 0; }
+	  if (empty($allfiles)) { $ContainerOnly = 1; }
 	  $V .= "<hr>\n";
 	  $V .= "<H2>Files matching " . htmlentities($Filename) . "</H2>\n";
-	  $V .= $this->GetUfileFromName($Filename,$Page);
+	  $V .= $this->GetUfileFromName($Filename,$Page, $ContainerOnly);
 	  }
         break;
       case "Text":
