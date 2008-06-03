@@ -52,7 +52,7 @@ class search_file extends FO_Plugin
 	$SQL .= " ufile_name like '$T'";
 	}
     $Offset = $Page * $Max;
-    $SQL .= " ORDER BY pfile_fk,ufile_pk LIMIT $Max OFFSET $Offset;";
+    $SQL .= " ORDER BY ufile.ufile_name LIMIT $Max OFFSET $Offset;";
     $Results = $DB->Action($SQL);
     $V = "";
     $Count = count($Results);
