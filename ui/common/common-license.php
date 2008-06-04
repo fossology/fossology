@@ -115,11 +115,11 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
 
   global $LicenseGetAllFiles_Prepared;
 
-  $PrepName = preg_replace("@[^a-zA-Z0-9]@","_",$WantLic);
+  $PrepName = sha1(preg_replace("@[^a-zA-Z0-9]@","_",$WantLic));
   if (empty($LicenseGetAllFiles_Prepared[$PrepName]))
     {
     /* SQL to get all files with a specific license */
-    $DB->Prepare("LicenseGetAllFiles_$PrepName","SELECT DISTINCT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk,lic_id,tok_pfile,tok_license,tok_match,phrase_text
+    $DB->Prepare("LicenseGetAllFiles_$PrepName","SELECT DISTINCT ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,uploadtree.pfile_fk,lic_fk,lic_id,tok_pfile,tok_license,tok_match,phrase_text
 	FROM uploadtree
 	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = \$1
 	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk
@@ -153,7 +153,7 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
     $DB->Prepare("LicenseGetAllFiles__a0","SELECT uploadtree_pk
 	FROM uploadtree
 	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = \$1
-	AND ufile_mode & $Bit != 0
+	AND uploadtree.ufile_mode & $Bit != 0
 	ORDER BY ufile.ufile_pk
 	;");
     $LicenseGetAllFiles_Prepared["a0"] = 1;
