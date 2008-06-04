@@ -385,6 +385,7 @@ void	ComputeConfidence	(float LicPercent, char *LicName)
   int t;
   int TermAdded=0;
   int TermSame=0;
+  char *LicenseName;
   /*
   Here's how the Confidence Value works:
      - Start with the percent match of the license.
@@ -421,17 +422,19 @@ void	ComputeConfidence	(float LicPercent, char *LicName)
     }
 
   /* See what we got */
+  LicenseName = strrchr(LicName,'/');
+  if (LicenseName) LicName = LicenseName+1;
   if (ConfidenceValue >= ThresholdSame)
 	{
-	printf("%s\n",LicName);
+	printf("  %s\n",LicName);
 	}
   else if (ConfidenceValue >= ThresholdSimilar)
 	{
-	printf("'%s'-style\n",LicName);
+	printf("  '%s'-style\n",LicName);
 	}
   else if (!TermAdded && !TermSame)
 	{
-	printf("'%s'-partial\n",LicName);
+	printf("  '%s'-partial\n",LicName);
 	}
   if (TermAdded)
     {
@@ -439,7 +442,7 @@ void	ComputeConfidence	(float LicPercent, char *LicName)
       {
       if (TermsCounter[t] & 0x01)
 	{
-	printf("%s\n",DBgetvalue(DBTerms,t,1));
+	printf("  %s\n",DBgetvalue(DBTerms,t,1));
 	}
       }
     }
@@ -487,6 +490,7 @@ void	ProcessTerms	()
       DiscoverTerms(Start,End,LicMmap,0x02);
       RepMunmap(LicMmap);
       }
+    printf("# Section %ld - %ld:\n",Start,End);
     ComputeConfidence(LicPercent,LicName);
     }
 
@@ -572,7 +576,7 @@ int	main	(int argc, char *argv[])
   int c;
   int rc;
 
-  while((c = getopt(argc,argv,"iv")) != -1)
+  while((c = getopt(argc,argv,"S:s:M:iv")) != -1)
     {
     switch(c)
       {
@@ -586,6 +590,9 @@ int	main	(int argc, char *argv[])
 	GetAgentKey();
 	DBclose(DB);
 	return(0);
+      case 'S': ThresholdSame = atof(optarg); break; /* same */
+      case 's': ThresholdSimilar = atof(optarg); break; /* similar */
+      case 'M': ThresholdMissing = atof(optarg); break; /* missing penalty */
       case 'v':	Verbose++;	break;
       default:
 	Usage(argv[0]);
