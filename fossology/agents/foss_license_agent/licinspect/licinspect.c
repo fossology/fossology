@@ -57,6 +57,17 @@ char	*LicName = NULL;	/* license name */
 RepMmapStruct *PfileMmap=NULL;
 RepMmapStruct *LicMmap=NULL;
 
+/* For explicit data (command-line '-X') instead of DB */
+/** A=unknown, B=known file sources **/
+int	IsExplicit=0;
+char	*Aname=NULL;	/* the unknown source file */
+char	*Bname=NULL;	/* the known license file */
+char	*ABmatch=NULL;	/* the number of matched tokens */
+char	*Atok=NULL;	/* the unknown license number of tokens */
+char	*Btok=NULL;	/* the known license number of tokens */
+char	*Apath=NULL;	/* the matched byte ranges in the unknown file */
+char	*Bpath=NULL;	/* the matched byte ranges in the known license */
+
 int	Verbose=0;	/* debugging via '-v' */
 
 /* Thresholds for confidence interval */
@@ -454,7 +465,11 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
     }
   if (!HasOutput)
 	{
-	if (IsPhrase) printf("  %s\n",LicName);
+	if (IsPhrase)
+	  {
+	  if (IsExplicit) printf("  Phrase\n");
+	  else printf("  %s\n",LicName);
+	  }
 	else printf("  '%s'-partial\n",LicName);
 	}
 } /* ComputeConfidence() */
@@ -467,24 +482,49 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
 void	ProcessTerms	()
 {
   int i; /* which byte to look at */
-  void *DBRanges;
+  void *DBRanges=NULL;
   char *Range;
   long MaxRanges,Start,End;
   char LicName[MAXLINE];
+  char *LicNameTmp;
   float LicPercent;
+  float Denominator;
   int IsPhrase;
+  int MaxRangesCount;
 
   /* Get the list of license segments */
   snprintf(SQL,MAXLINE,"SELECT pfile_path,license_path,lic_name,tok_match,tok_license,lic_unique,tok_pfile_start FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE pfile_fk = '%ld' ORDER BY tok_pfile_start;",PfilePk);
-  DBaccess(DB,SQL);
-  DBRanges = DBmove(DB);
-  for(MaxRanges=0; MaxRanges < DBdatasize(DBRanges); MaxRanges++)
+  if (!IsExplicit)
+    {
+    DBaccess(DB,SQL);
+    DBRanges = DBmove(DB);
+    MaxRangesCount = DBdatasize(DBRanges);
+    }
+  else
+    {
+    /* Explicit means doing just one range */
+    MaxRangesCount = 1;
+    }
+  for(MaxRanges=0; MaxRanges < MaxRangesCount; MaxRanges++)
     {
     /* Determine the license match */
-    LicPercent = 100.0 * atof(DBgetvalue(DBRanges,MaxRanges,3)) / atof(DBgetvalue(DBRanges,MaxRanges,4));
+    if (IsExplicit)
+      {
+      Denominator = atof(Btok);
+      if (Denominator != 0) LicPercent = 100.0 * atof(ABmatch) / Denominator;
+      else LicPercent = 0;
+      }
+    else
+      {
+      Denominator = atof(DBgetvalue(DBRanges,MaxRanges,4));
+      if (Denominator != 0) LicPercent = 100.0 * atof(DBgetvalue(DBRanges,MaxRanges,3)) / Denominator;
+      else LicPercent = 0;
+      }
 
     /* Pfile: Load the start and end */
-    Range = DBgetvalue(DBRanges,MaxRanges,0);
+    if (IsExplicit) Range = Apath;
+    else Range = DBgetvalue(DBRanges,MaxRanges,0);
+
     Start = atol(Range);
     for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
     End = atoi(Range+i);
@@ -502,15 +542,36 @@ void	ProcessTerms	()
 
     /* License: Load the start and end */
     /** Phrases do not have a sha1.md5.len unique value **/
-    if (strlen(DBgetvalue(DBRanges,MaxRanges,5)) > 72)
+    /** Set rc = is it a phrase? **/
+    if (IsExplicit)
+      {
+      IsPhrase = (Bname[0]=='/');
+      LicNameTmp = Bname;
+      if (IsPhrase)
+        {
+	snprintf(LicName,sizeof(LicName),"%s",Aname);
+	Range = Apath;
+	}
+      else
+	{
+        Range = Bpath;
+	snprintf(LicName,sizeof(LicName),"%s/%s",AGENTDATADIR,Bname);
+	}
+      }
+    else /* not explicit */
+      {
+      IsPhrase = (strlen(DBgetvalue(DBRanges,MaxRanges,5)) <= 72); 
+      Range = DBgetvalue(DBRanges,MaxRanges,1);
+      LicNameTmp = DBgetvalue(DBRanges,MaxRanges,2);
+      snprintf(LicName,sizeof(LicName),"%s/%s",AGENTDATADIR,LicNameTmp);
+      }
+
+    if (!IsPhrase)
       {
       /* not a phrase */
-      IsPhrase=0;
-      Range = DBgetvalue(DBRanges,MaxRanges,1);
       Start = atol(Range);
       for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
       End = atoi(Range+i);
-      snprintf(LicName,sizeof(LicName),"%s/%s",AGENTDATADIR,DBgetvalue(DBRanges,MaxRanges,2));
       LicMmap = RepMmapFile(LicName);
       if (LicMmap)
 	{
@@ -521,8 +582,8 @@ void	ProcessTerms	()
     else
       {
       /* if Phrase */
-      IsPhrase=1;
-      snprintf(LicName,sizeof(LicName),"%s",DBgetvalue(DBRanges,MaxRanges,2));
+      if (Verbose) printf("# Found phrase\n");
+      snprintf(LicName,sizeof(LicName),"%s",LicNameTmp);
       }
     ComputeConfidence(IsPhrase,LicPercent,LicName);
     }
@@ -590,6 +651,19 @@ void	Usage	(char *Name)
   printf("    -S ##         :: 'same' threshold %% for license (default: %.0f)\n",ThresholdSame);
   printf("    -s ##         :: 'similar' threshold %% for license (default: %.0f)\n",ThresholdSimilar);
   printf("    -M ##         :: penalty %% for missing terms in license text (default: %.0f)\n",ThresholdMissing);
+  printf("  Manual options:\n");
+  printf("    -X            :: command-line contains matched info (do not access DB)\n");
+  printf("           The following command-line options are required (in order):\n");
+  printf("           (These come from bsam-engine.)\n");
+  printf("             aname :: known file name\n");
+  printf("             bname :: unknown file name\n");
+  printf("             match :: number of matched tokens\n");
+  printf("             atok  :: number of tokens in the unknown file\n");
+  printf("             btok  :: number of tokens in the known/license file\n");
+  printf("             apath :: byte path through the unknown file\n");
+  printf("             bpath :: byte path through the known file\n");
+  printf("           For example:\n");
+  printf("             -X myfile 'MPL/MPL1.0' 12 14 15 1-12 1-3,4-13\n");
   printf("  Debugging options:\n");
   printf("    -i = Initialize the database, then exit.\n");
   printf("    -v = Verbose (-vv = more verbose, etc.)\n");
@@ -609,7 +683,7 @@ int	main	(int argc, char *argv[])
   int c;
   int rc;
 
-  while((c = getopt(argc,argv,"S:s:M:iv")) != -1)
+  while((c = getopt(argc,argv,"S:s:M:ivX")) != -1)
     {
     switch(c)
       {
@@ -627,6 +701,7 @@ int	main	(int argc, char *argv[])
       case 's': ThresholdSimilar = atof(optarg); break; /* similar */
       case 'M': ThresholdMissing = atof(optarg); break; /* missing penalty */
       case 'v':	Verbose++;	break;
+      case 'X':	IsExplicit=1;	break;
       default:
 	Usage(argv[0]);
 	DBclose(DB);
@@ -643,7 +718,36 @@ int	main	(int argc, char *argv[])
 	}
   GetTerms();
 
-  if (optind < argc)
+  if (IsExplicit)
+    {
+    if (optind != argc-7)
+	{
+	fprintf(stderr,"ERROR: Wrong number of parameters for -X.\n");
+	Usage(argv[0]);
+	exit(-1);
+	}
+    /* Load Values */
+    Aname = argv[optind]; optind++;
+    Bname = argv[optind]; optind++;
+    ABmatch = argv[optind]; optind++;
+    Atok = argv[optind]; optind++;
+    Btok = argv[optind]; optind++;
+    Apath = argv[optind]; optind++;
+    Bpath = argv[optind]; optind++;
+
+    /* Process the data */
+    PfileMmap = RepMmapFile(Aname);
+    if (PfileMmap)
+	{
+	ProcessTerms();
+	CloseFile(PfileMmap);
+	}
+    else
+	{
+	fprintf(stderr,"ERROR: Failed to open '%s'\n",Aname);
+	}
+    }
+  else if (optind < argc)
     {
     /* command-line contains a list of pfile_pk values */
     for( ; optind < argc; optind++)
@@ -660,6 +764,10 @@ int	main	(int argc, char *argv[])
 	{
 	ProcessTerms();
 	CloseFile(PfileMmap);
+	}
+      else
+	{
+	fprintf(stderr,"ERROR: Failed to open '%s'\n",PfileName);
 	}
       }
     } /* if reading from the command-line */
