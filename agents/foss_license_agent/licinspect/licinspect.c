@@ -463,7 +463,7 @@ void	ProcessTerms	()
   float LicPercent;
 
   memset(TermsCounter,0,TermsCounterSize*sizeof(int));
-  snprintf(SQL,MAXLINE,"SELECT pfile_path,license_path,lic_name,tok_match,tok_license FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE pfile_fk = '%ld';",PfilePk);
+  snprintf(SQL,MAXLINE,"SELECT pfile_path,license_path,lic_name,tok_match,tok_license,lic_unique FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE pfile_fk = '%ld';",PfilePk);
   DBaccess(DB,SQL);
   DBRanges = DBmove(DB);
   for(MaxRanges=0; MaxRanges < DBdatasize(DBRanges); MaxRanges++)
@@ -477,20 +477,28 @@ void	ProcessTerms	()
     for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
     End = atoi(Range+i);
     DiscoverTerms(Start,End,PfileMmap,0x01);
+    printf("# Section %ld - %ld:\n",Start,End);
 
     /* License: Load the start and end */
-    Range = DBgetvalue(DBRanges,MaxRanges,1);
-    Start = atol(Range);
-    for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
-    End = atoi(Range+i);
-    snprintf(LicName,sizeof(LicName),"%s/%s",AGENTDATADIR,DBgetvalue(DBRanges,MaxRanges,2));
-    LicMmap = RepMmapFile(LicName);
-    if (LicMmap)
+    if (strlen(DBgetvalue(DBRanges,MaxRanges,5)) > 72)
       {
-      DiscoverTerms(Start,End,LicMmap,0x02);
-      RepMunmap(LicMmap);
+      Range = DBgetvalue(DBRanges,MaxRanges,1);
+      Start = atol(Range);
+      for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
+      End = atoi(Range+i);
+      snprintf(LicName,sizeof(LicName),"%s/%s",AGENTDATADIR,DBgetvalue(DBRanges,MaxRanges,2));
+      LicMmap = RepMmapFile(LicName);
+      if (LicMmap)
+	{
+	DiscoverTerms(Start,End,LicMmap,0x02);
+	RepMunmap(LicMmap);
+	}
       }
-    printf("# Section %ld - %ld:\n",Start,End);
+    else
+      {
+      /* if Phrase */
+      snprintf(LicName,sizeof(LicName),"%s",DBgetvalue(DBRanges,MaxRanges,2));
+      }
     ComputeConfidence(LicPercent,LicName);
     }
 
