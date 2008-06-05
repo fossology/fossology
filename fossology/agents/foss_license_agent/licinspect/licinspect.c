@@ -314,18 +314,18 @@ void	GetTerms	()
  *********************************************************/
 int	MatchTerm	(char *Term, char *Str, long StrLen)
 {
-  long i,j=0;
-  for(i=0; Term[i]; i++)
+  long t,j=0;
+  for(t=0; Term[t]; t++)
     {
     if (j >= StrLen) return(0); /* miss: too short */
-    if (isspace(Term[i]))
+    if (isspace(Term[t]))
       {
       if (isalnum(Str[j])) return(0); /* miss */
       while((j<StrLen) && !isalnum(Str[j])) j++;
       }
     else
       {
-      if (tolower(Term[i]) != tolower(Str[j])) return(0); /* miss */
+      if (tolower(Term[t]) != tolower(Str[j])) return(0); /* miss */
       j++;
       }
     }
@@ -356,10 +356,10 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
     rc=0;
     for(t=0; !rc && (t<TermsCounterSize); t++)
       {
-      rc = MatchTerm(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap+i),Mmap->MmapSize-i);
+      rc = MatchTerm(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap+i),End-i);
       if (rc > 0)
 	{
-	// printf("Matched: Term='%s' rc=%d\n",DBgetvalue(DBTerms,t,1),rc);
+	if (Verbose > 1) printf("Matched: Term='%s' rc=%d\n",DBgetvalue(DBTerms,t,1),rc);
 	i+=rc;
 	TermsCounter[t] |= Mask;
 	}
@@ -379,12 +379,14 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
    0x01 = term seen in unknown file.
    0x02 = term seen in known (license) file.
  *********************************************************/
-void	ComputeConfidence	(float LicPercent, char *LicName)
+void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
 {
   float ConfidenceValue = 0;
   int t;
   int TermAdded=0;
+  int TermRemoved=0;
   int TermSame=0;
+  int HasOutput=0;
   char *LicenseName;
   /*
   Here's how the Confidence Value works:
@@ -399,6 +401,8 @@ void	ComputeConfidence	(float LicPercent, char *LicName)
      - If the value < ThresholdSimilar, but no new license terms added
        (no 0x01 in TermsCounter), then say "partial".
      - If any new terms added (0x01 in TermsCounter), then list those too.
+
+   Phrases are always a 100% match, but terms can override the output.
    */
   ConfidenceValue = LicPercent;
   for(t=0; t<TermsCounterSize; t++)
@@ -415,6 +419,7 @@ void	ComputeConfidence	(float LicPercent, char *LicName)
 	if (Verbose) printf("Term added: %s\n",DBgetvalue(DBTerms,t,1));
 	break;
       case 0x02:	/* term removed */
+	TermRemoved++;
 	if (Verbose) printf("Term removed: %s\n",DBgetvalue(DBTerms,t,1));
 	ConfidenceValue -= ThresholdMissing;
 	break;
@@ -424,28 +429,34 @@ void	ComputeConfidence	(float LicPercent, char *LicName)
   /* See what we got */
   LicenseName = strrchr(LicName,'/');
   if (LicenseName) LicName = LicenseName+1;
-  if (ConfidenceValue >= ThresholdSame)
+  if (!TermRemoved && !IsPhrase)
+    {
+    HasOutput=1;
+    if (ConfidenceValue >= ThresholdSame)
 	{
 	printf("  %s\n",LicName);
 	}
-  else if (ConfidenceValue >= ThresholdSimilar)
+    else if (ConfidenceValue >= ThresholdSimilar)
 	{
 	printf("  '%s'-style\n",LicName);
 	}
-  else if (!TermAdded && !TermSame)
-	{
-	printf("  '%s'-partial\n",LicName);
-	}
+    }
   if (TermAdded)
     {
     for(t=0; t<TermsCounterSize; t++)
       {
       if (TermsCounter[t] & 0x01)
 	{
+	HasOutput=1;
 	printf("  %s\n",DBgetvalue(DBTerms,t,1));
 	}
       }
     }
+  if (!HasOutput)
+	{
+	if (IsPhrase) printf("  %s\n",LicName);
+	else printf("  '%s'-partial\n",LicName);
+	}
 } /* ComputeConfidence() */
 
 /*********************************************************
@@ -461,9 +472,10 @@ void	ProcessTerms	()
   long MaxRanges,Start,End;
   char LicName[MAXLINE];
   float LicPercent;
+  int IsPhrase;
 
-  memset(TermsCounter,0,TermsCounterSize*sizeof(int));
-  snprintf(SQL,MAXLINE,"SELECT pfile_path,license_path,lic_name,tok_match,tok_license,lic_unique FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE pfile_fk = '%ld';",PfilePk);
+  /* Get the list of license segments */
+  snprintf(SQL,MAXLINE,"SELECT pfile_path,license_path,lic_name,tok_match,tok_license,lic_unique,tok_pfile_start FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE pfile_fk = '%ld' ORDER BY tok_pfile_start;",PfilePk);
   DBaccess(DB,SQL);
   DBRanges = DBmove(DB);
   for(MaxRanges=0; MaxRanges < DBdatasize(DBRanges); MaxRanges++)
@@ -476,12 +488,24 @@ void	ProcessTerms	()
     Start = atol(Range);
     for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
     End = atoi(Range+i);
-    DiscoverTerms(Start,End,PfileMmap,0x01);
     printf("# Section %ld - %ld:\n",Start,End);
+    if (Verbose > 1)
+	{
+	printf("============================================\n");
+	printf("%.*s\n",(int)(End-Start),PfileMmap->Mmap + Start);
+	printf("============================================\n");
+	}
+
+    /* Set counters */
+    memset(TermsCounter,0,TermsCounterSize*sizeof(int));
+    DiscoverTerms(Start,End,PfileMmap,0x01);
 
     /* License: Load the start and end */
+    /** Phrases do not have a sha1.md5.len unique value **/
     if (strlen(DBgetvalue(DBRanges,MaxRanges,5)) > 72)
       {
+      /* not a phrase */
+      IsPhrase=0;
       Range = DBgetvalue(DBRanges,MaxRanges,1);
       Start = atol(Range);
       for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
@@ -497,9 +521,10 @@ void	ProcessTerms	()
     else
       {
       /* if Phrase */
+      IsPhrase=1;
       snprintf(LicName,sizeof(LicName),"%s",DBgetvalue(DBRanges,MaxRanges,2));
       }
-    ComputeConfidence(LicPercent,LicName);
+    ComputeConfidence(IsPhrase,LicPercent,LicName);
     }
 
   DBclose(DBRanges);
@@ -629,7 +654,7 @@ int	main	(int argc, char *argv[])
       DBaccess(DB,SQL);
       memset(PfileName,'\0',MAXLINE);
       strncpy(PfileName,DBgetvalue(DB,0,0),MAXLINE-1);
-      if (Verbose) fprintf(stderr,"Processing: pfile_pk=%ld '%s'\n",PfilePk,PfileName);
+      printf("### Processing: pfile_pk=%ld '%s'\n",PfilePk,PfileName);
       PfileMmap = OpenFile(PfileName);
       if (PfileMmap)
 	{
