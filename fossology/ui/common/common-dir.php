@@ -369,6 +369,7 @@ function Dir2BrowseUpload ($Mod, $UploadPk, $UfilePk, $LinkLast=NULL, $ShowBox=1
    $Listing = array from a database selection.  The SQL query should
 	use "ORDER BY pfile_fk,ufile_pk".
    $IfDirPlugin = string containing plugin name to use if this is a directory.
+                  or any other container
    $IfFilePlugin = string containing plugin name to use if this is a file
    $Count = first number for indexing the entries (may be -1 for no count)
  Returns string containing the listing.
@@ -380,7 +381,7 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1)
   for($i=0; !empty($Listing[$i]['uploadtree_pk']); $i++)
     {
     $R = &$Listing[$i];
-    if (IsDir($R['ufile_mode']))
+    if ((IsDir($R['ufile_mode'])) || (Iscontainer($R['ufile_mode'])))
 	{
 	$V .= "<P />\n";
 	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,$IfDirPlugin,1,
