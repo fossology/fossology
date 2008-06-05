@@ -1248,12 +1248,6 @@ void	GetAgentKey	()
  ****************************************/
 void	Usage	(char *Name)
 {
-#if 0
-  fprintf(stderr,"Usage: %s [options]\n",Name);
-  fprintf(stderr,"  Usage removed per beta design decision.\n");
-  fprintf(stderr,"  See source code or white paper for details, or contact Neal Krawetz.\n");
-  fprintf(stderr,"  Patents submitted.\n");
-#else
   fprintf(stderr,"Usage: %s [options] [file [file ...]]\n",Name);
   fprintf(stderr,"  -i = Initialize the database, then exit.\n");
   fprintf(stderr,"  -O = Send results to stdout instead of the repository (turns off DB updates)\n");
@@ -1269,7 +1263,6 @@ void	Usage	(char *Name)
   fprintf(stderr,"  (The queue manager can use this to denote a queue item as processed.\n");
   fprintf(stderr,"  Engine sends SIG_USR2 to parent when ready for an input line and\n");
   fprintf(stderr,"  to denote an UNSUCCESSFUL operation.\n");
-#endif
 } /* Usage() */
 
 /***********************************************************************/
