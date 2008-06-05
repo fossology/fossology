@@ -2844,12 +2844,6 @@ void	GetAgentKey	()
  **********************************************/
 void	Usage	(char *Name)
 {
-#if 0
-  printf("Usage: %s [options]\n",Name);
-  printf("  Usage removed per beta design decision.\n");
-  printf("  See source code or white paper for details, or contact Neal Krawetz.\n");
-  printf("  Patents submitted.\n");
-#else
   printf("Usage: %s [options] fileA fileB\n",Name);
   printf("  Compares fileA against fileB.\n");
   printf("  If either fileA or fileB is -, then a list of files are read from stdin.\n");
@@ -2884,7 +2878,6 @@ void	Usage	(char *Name)
   printf("    -v = Verbose (-vv = more verbose, etc.)\n");
   printf("    -1 = Show matrix stage 1 (same)\n");
   printf("    -2 = Show matrix stage 2 (align)\n");
-#endif
 #endif
 } /* Usage() */
 
