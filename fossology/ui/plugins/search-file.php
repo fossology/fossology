@@ -54,11 +54,6 @@ class search_file extends FO_Plugin
     $Offset = $Page * $Max;
     $SQL .= " ORDER BY pfile_size DESC LIMIT $Max OFFSET $Offset;";
     $Results = $DB->Action($SQL);
-    if (!$Results)
-    {
-        echo "GetUfileFromName Error SQL:", $SQL, "<br>";
-        echo "GetUfileFromName Error:", pg_last_error(), "<br>";
-    }
     $V = "";
     $Count = count($Results);
 
