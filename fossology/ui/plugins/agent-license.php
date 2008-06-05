@@ -42,6 +42,26 @@ class agent_license extends FO_Plugin
     menu_insert("Agents::" . $this->Title,0,$this->Name);
     }
 
+
+  /***********************************************************
+   Install(): Create and configure database tables
+   ***********************************************************/
+   function Install()
+   {
+     global $DB;
+     if (empty($DB)) { return(1); } /* No DB */
+
+     /* Make sure agent_lic_meta_pk exists  
+        Use a sequence as the default values.
+      */
+     if (!$DB->ColExist("agent_lic_meta", "agent_lic_meta_pk"))
+     {
+         $DB->Action( "ALTER TABLE agent_lic_meta ADD COLUMN agent_lic_meta_pk serial PRIMARY KEY");
+     }
+
+     return(0);
+   } // Install()
+
   /*********************************************
    AgentCheck(): Check if the job is already in the
    queue.  Returns:
