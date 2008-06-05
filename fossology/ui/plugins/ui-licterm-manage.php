@@ -151,7 +151,7 @@ class licterm_manage extends FO_Plugin
 	CONSTRAINT lictermwords_exist FOREIGN KEY(licterm_words_fk) REFERENCES licterm_words(licterm_words_pk) ON UPDATE RESTRICT ON DELETE RESTRICT
 	);
 	COMMENT ON COLUMN licterm_map.licterm_fk IS 'Key of parent term group';
-	COMMENT ON COLUMN licterm_map.licterm_memberfk IS 'Key of term word group that belongs to licterm_fk';
+	COMMENT ON COLUMN licterm_map.licterm_words_fk IS 'Key of term word group that belongs to licterm_fk';
 	";
       $DB->Action($SQL1);
       $Results = $DB->Action($SQL);
