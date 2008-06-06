@@ -50,7 +50,6 @@ class search_file_advance extends FO_Plugin
 	$SQL .= " AND ufile_name like '$T'";
 	}
     $NeedAnd=0;
-    $SQL .= " INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk";
     if (!empty($Mimetype) && ($Mimetype >= 0))
 	{
 	if ($NeedAnd) { $SQL .= " AND"; }
@@ -75,7 +74,7 @@ class search_file_advance extends FO_Plugin
 	$NeedAnd=1;
 	}
     $Offset = $Page * $Max;
-    $SQL .= " ORDER BY pfile_fk,ufile_pk LIMIT $Max OFFSET $Offset;";
+    $SQL .= " ORDER BY uploadtree.pfile_fk,ufile_pk LIMIT $Max OFFSET $Offset;";
     $Results = $DB->Action($SQL);
 
     $V = "";
