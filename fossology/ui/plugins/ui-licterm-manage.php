@@ -161,6 +161,41 @@ class licterm_manage extends FO_Plugin
 	return(1);
 	}
       } /* create TABLE licterm_map */
+
+    /* Check if TABLE licterm_maplic exists */
+    $SQL = "SELECT relname FROM pg_class WHERE relkind = 'S' AND relname = 'licterm_maplic_licterm_maplic_pk_seq';";
+    $Results = $DB->Action($SQL);
+    if (empty($Results[0]['relname']))
+      {
+      $SQL1 = "CREATE SEQUENCE licterm_maplic_licterm_maplic_pk_seq START 1;";
+      $DB->Action($SQL1);
+      }
+    $SQL = "SELECT table_name AS table
+	FROM information_schema.tables
+	WHERE table_type = 'BASE TABLE'
+	AND table_schema = 'public'
+	AND table_name = 'licterm_maplic';";
+    $Results = $DB->Action($SQL);
+    if (empty($Results[0]['table']))
+      {
+      $SQL1 = "CREATE TABLE licterm_maplic (
+	licterm_maplic_pk integer PRIMARY KEY DEFAULT nextval('licterm_maplic_licterm_maplic_pk_seq'),
+	licterm_fk       integer,
+	lic_fk           integer,
+	CONSTRAINT only_one_licterm_maplic UNIQUE (licterm_fk, lic_fk),
+	CONSTRAINT lictermlicterm_exist FOREIGN KEY(licterm_fk) REFERENCES licterm(licterm_pk) ON UPDATE RESTRICT ON DELETE RESTRICT
+	);
+	COMMENT ON COLUMN licterm_maplic.licterm_fk IS 'Key of parent term group';
+	COMMENT ON COLUMN licterm_maplic.lic_fk IS 'License that belongs to licterm_fk';
+	";
+      $DB->Action($SQL1);
+      $Results = $DB->Action($SQL);
+      if (empty($Results[0]['table']))
+	{
+	printf("ERROR: Failed to create table: licterm_maplic\n");
+	return(1);
+	}
+      } /* create TABLE licterm_maplic */
   return(0);
   } // Install()
 
@@ -231,6 +266,8 @@ function SelectAll()
   var i;
   List = document.getElementById("termlist");
   for(i=0; i < List.options.length; i++) { List.options[i].selected = true; }
+  List = document.getElementById("liclist");
+  for(i=0; i < List.options.length; i++) { List.options[i].selected = true; }
   return(1);
   }
 
@@ -242,6 +279,8 @@ function ToggleForm(Value)
   document.formy.termavailable.disabled = Value;
   document.formy.newtext.disabled = Value;
   document.formy.addtext.disabled = Value;
+  document.formy.liclist.disabled = Value;
+  document.formy.licavailable.disabled = Value;
   document.formy.deleteword.disabled = Value;
   }
 //-->';
@@ -353,7 +392,7 @@ function moveOptions(theSelFrom, theSelTo)
       {
       $Text = strtolower($Results[$i]['text']);
       $Text = preg_replace("[^[a-zA-Z0-9]"," ",$Text);
-      $Text = preg_replace(" +"," ",$Text);
+      $Text = trim(preg_replace(" +"," ",$Text));
       $V .= "<option value='$Text'>$Text</option>\n";
       }
     return($V);
@@ -393,6 +432,7 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "<form name='formy' method='post' onSubmit='return SelectAll();'>\n";
     $V .= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%' border='1'>\n";
 
+    /***********************************************************/
     /* List groups fields */
     $V .= "<tr>\n";
     $V .= "<td width='20%'>Select canonical group to edit</td>";
@@ -405,6 +445,7 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "</td>";
     $V .= "</tr>\n";
 
+    /***********************************************************/
     /* Text fields */
     $V .= "<tr>\n";
     $V .= "<td width='20%'>Canonical name</td><td><input type='text' name='name' size='60' value='" . htmlentities($TermName,ENT_QUOTES) . "'></td>\n";
@@ -412,6 +453,7 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "<td>Description</td><td><input type='text' name='desc' size='60' value='" . htmlentities($TermDesc,ENT_QUOTES) . "'></td>\n";
     $V .= "</tr>\n";
 
+    /***********************************************************/
     /* Add a new term */
     $V .= "<tr>\n";
     $V .= "<td width='20%'>Keywords, terms, and phrases specific to this group.</td>";
@@ -441,8 +483,7 @@ function moveOptions(theSelFrom, theSelTo)
       $Text = strtolower($TermList[$i]['text']);
       $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
       $Text = preg_replace("/ +/"," ",$Text);
-      $Text = preg_replace("/^ */","",$Text);
-      $Text = preg_replace("/ *$/","",$Text);
+      $Text = trim(preg_replace("/  */"," ",$Text));
       $V .= "<option value='$Text'>$Text</option>\n";
       }
     $V .= "</select>";
@@ -461,9 +502,7 @@ function moveOptions(theSelFrom, theSelTo)
       {
       $Text = strtolower($TermAvailable[$i]['text']);
       $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
-      $Text = preg_replace("/  */"," ",$Text);
-      $Text = preg_replace("/^ */","",$Text);
-      $Text = preg_replace("/ *$/","",$Text);
+      $Text = trim(preg_replace("/  */"," ",$Text));
       $V .= "<option value='$Text'>$Text</option>\n";
       }
     $V .= "</select>";
@@ -481,6 +520,64 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "Only letters, numbers, and spaces are permitted. Text will be normalized to lowercase letters with no more than one space between words.\n";
     $V .= "</td>";
 
+    /***********************************************************/
+    /* Permit associating licenses with canonical names */
+    $V .= "<tr>\n";
+    $V .= "<td width='20%'>Associate licenses with this canonical group.\n";
+    $V .= "<P />\n";
+    $V .= "Licenses that are associated will be referred by the canonical name.\n";
+    $V .= "Unassociated licenses are referred by their license name.";
+    $V .= "</td>";
+
+    $V .= "<td>";
+    $V .= "<table width='100%'>";
+    $V .= "<td align='center' width='45%'>Licenses associated with this canonical group</td><td width='10%'></td><td width='45%' align='center'>Known Licenses</td></tr>";
+
+    /* List these license terms */
+    if (!empty($TermKey))
+      {
+      $LicList = $DB->Action("SELECT lic_pk AS id, lic_name AS text FROM agent_lic_raw INNER JOIN licterm_maplic ON lic_pk = lic_fk AND licterm_fk = '$TermKey' AND lic_id = lic_pk ORDER BY lic_name;"); 
+      $LicAvailable = $DB->Action("SELECT lic_pk AS id, lic_name AS text FROM agent_lic_raw WHERE lic_id = lic_pk AND lic_pk NOT IN (SELECT lic_pk FROM agent_lic_raw INNER JOIN licterm_maplic ON lic_pk = lic_fk AND licterm_fk = '$TermKey' AND lic_id = lic_pk) ORDER BY lic_name;");
+      }
+    else
+      {
+      $LicList = array();
+      $LicAvailable = $DB->Action("SELECT lic_pk AS id, lic_name AS text FROM agent_lic_raw WHERE lic_id = lic_pk ORDER BY lic_name;");
+      }
+
+    /* List all license terms */
+    $V .= "<tr>";
+    $V .= "<td>";
+    $V .= "<select onFocus='UnselectForm(\"licavailable\");' multiple='multiple' id='liclist' name='liclist[]' size='10'>";
+    for($i=0; !empty($LicList[$i]['text']); $i++)
+      {
+      $Text = trim($LicList[$i]['text']);
+      $Id = trim($LicList[$i]['id']);
+      $V .= "<option value='$Id'>$Text</option>\n";
+      }
+    $V .= "</select>";
+    $V .= "</td>\n";
+
+    /* center list of options */
+    $V .= "<td>";
+    $V .= "<center>\n";
+    $V .= "<a href='#' onClick='moveOptions(document.formy.licavailable,document.formy.liclist);'>&larr;Add</a><P/>\n";
+    $V .= "<a href='#' onClick='moveOptions(document.formy.liclist,document.formy.licavailable);'>Remove&rarr;</a>\n";
+    $V .= "</center></td>\n";
+
+    $V .= "<td>";
+    $V .= "<select onFocus='UnselectForm(\"liclist\");' multiple='multiple' id='licavailable' name='licavailable' size='10'>";
+    for($i=0; !empty($LicAvailable[$i]['text']); $i++)
+      {
+      $Text = trim($LicAvailable[$i]['text']);
+      $Id = trim($LicAvailable[$i]['id']);
+      $V .= "<option value='$Id'>$Text</option>\n";
+      }
+    $V .= "</select>";
+    $V .= "</td></table>\n";
+    $V .= "</tr>\n";
+
+    /***********************************************************/
     /* Delete a keyword */
     $V .= "<tr>";
     $V .= "<td>Delete a keyword from <i>all</i> canonical groups.\n";
@@ -494,9 +591,7 @@ function moveOptions(theSelFrom, theSelTo)
       {
       $Text = strtolower($TermList[$i]['text']);
       $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
-      $Text = preg_replace("/ +/"," ",$Text);
-      $Text = preg_replace("/^ */","",$Text);
-      $Text = preg_replace("/ *$/","",$Text);
+      $Text = trim(preg_replace("/ +/"," ",$Text));
       $V .= "<option value='$Text'>Delete: $Text</option>\n";
       }
     $V .= "</select>\n";
@@ -592,9 +687,7 @@ function moveOptions(theSelFrom, theSelTo)
       {
       $Term = strtolower($TermList[$i]);
       $Term = preg_replace("/[^a-z0-9]/"," ",$Term);
-      $Term = preg_replace("/  */"," ",$Term);
-      $Term = preg_replace("/^ */","",$Term);
-      $Term = preg_replace("/ *$/","",$Term);
+      $Term = trim(preg_replace("/  */"," ",$Term));
       $SQL = "SELECT * FROM licterm_words WHERE licterm_words_text = '$Term';";
       $Results = $DB->Action($SQL);
       if (empty($Results[0]['licterm_words_pk']))
@@ -610,6 +703,23 @@ function moveOptions(theSelFrom, theSelTo)
 	VALUES (" . $Results[0]['licterm_words_pk'] . ",$TermKey);");
       }
     $DB->Action("VACUUM ANALYZE licterm_map;");
+
+    /* Now add in all the licenses */
+    $LicList = GetParm('liclist',PARM_RAW);
+    $DB->Action("DELETE FROM licterm_maplic WHERE licterm_fk = '$TermKey';");
+    for($i=0; !empty($LicList[$i]); $i++)
+      {
+      $Lic = intval($LicList[$i]);
+      $SQL = "SELECT * FROM agent_lic_raw WHERE lic_pk = '$Lic' AND lic_pk = lic_id;";
+      $Results = $DB->Action($SQL);
+      if (!empty($Results[0]['lic_pk']))
+	{
+	$DB->Action("INSERT INTO licterm_maplic (lic_fk,licterm_fk)
+	VALUES (" . $Results[0]['lic_pk'] . ",$TermKey);");
+	}
+      }
+    $DB->Action("VACUUM ANALYZE licterm_maplic;");
+
     return;
     } // LicTermInsert()
 
@@ -624,9 +734,7 @@ function moveOptions(theSelFrom, theSelTo)
       {
       $Term = strtolower($TermDel);
       $Term = preg_replace("/[^a-z0-9]/"," ",$Term);
-      $Term = preg_replace("/  */"," ",$Term);
-      $Term = preg_replace("/^ */","",$Term);
-      $Term = preg_replace("/ *$/","",$Term);
+      $Term = trim(preg_replace("/  */"," ",$Term));
       $SQL = "SELECT * FROM licterm_words WHERE licterm_words_text = '$Term';";
       $Results = $DB->Action($SQL);
       if (!empty($Results[0]['licterm_words_pk']))
