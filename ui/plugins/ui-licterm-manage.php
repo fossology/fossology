@@ -537,7 +537,7 @@ function moveOptions(theSelFrom, theSelTo)
     if (!empty($TermKey))
       {
       $LicList = $DB->Action("SELECT lic_pk AS id, lic_name AS text FROM agent_lic_raw INNER JOIN licterm_maplic ON lic_pk = lic_fk AND licterm_fk = '$TermKey' AND lic_id = lic_pk ORDER BY lic_name;"); 
-      $LicAvailable = $DB->Action("SELECT lic_pk AS id, lic_name AS text FROM agent_lic_raw WHERE lic_id = lic_pk AND lic_pk NOT IN (SELECT lic_pk FROM agent_lic_raw INNER JOIN licterm_maplic ON lic_pk = lic_fk AND licterm_fk = '$TermKey' AND lic_id = lic_pk) ORDER BY lic_name;");
+      $LicAvailable = $DB->Action("SELECT lic_pk AS id, lic_name AS text FROM agent_lic_raw WHERE lic_id = lic_pk AND lic_pk NOT IN (SELECT lic_fk FROM licterm_maplic) ORDER BY lic_name;");
       }
     else
       {
