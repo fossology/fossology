@@ -486,8 +486,9 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
       if (TermsCounter[t] & 0x01)
 	{
 	if (ShowTerms) { printf("%s\n",DBgetvalue(DBTerms,t,1)); HasOutput=1; }
-	if (!First) { strcat(SQL," OR "); First=0; }
+	if (!First) { strcat(SQL," OR "); }
 	sprintf(SQL+strlen(SQL)," licterm_words_fk = '%s'",DBgetvalue(DBTerms,t,0));
+	First=0;
 	}
       }
     strcat(SQL," ORDER BY licterm_name;");
