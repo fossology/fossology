@@ -4,7 +4,7 @@
 # List directories in order of dependencies!
 include Makefile.conf
 
-DIRS=devel/libfossrepo devel/libfossdb scheduler agents/fosscp agents/foss_license_agent/bSAM agents/Shell agents/foss_license_agent/Filter_License agents/PkgMetaGetta agents/ununpack agents/wget_agent agents/foss_license_agent/Licenses agents/foss_license_agent/PkgMetaGetta agents/mimetype agents/specagent agents/sqlagent agents/delagent ui cli utils/freshmeat
+DIRS=devel/libfossrepo devel/libfossdb scheduler agents/fosscp agents/foss_license_agent/bSAM agents/foss_license_agent/licinspect agents/Shell agents/foss_license_agent/Filter_License agents/PkgMetaGetta agents/ununpack agents/wget_agent agents/foss_license_agent/Licenses agents/foss_license_agent/PkgMetaGetta agents/mimetype agents/specagent agents/sqlagent agents/delagent ui cli utils/freshmeat
 
 UTILDIRS=utils/freshmeat
 
