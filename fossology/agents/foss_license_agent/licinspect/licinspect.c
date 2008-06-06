@@ -124,7 +124,7 @@ void    ShowHeartbeat   (int Sig)
  **********************************************/
 void	CloseFile	(RepMmapStruct *Rep)
 {
-  if (Verbose > 1) fprintf(stderr,"Debug: closing\n");
+  if (Verbose > 2) fprintf(stderr,"Debug: closing\n");
   RepMunmap(Rep);
 } /* CloseFile() */
 
@@ -137,7 +137,7 @@ RepMmapStruct *	OpenFile	(char *Filename)
 {
   RepMmapStruct *Rep=NULL;
   /* open the file (memory map) */
-  if (Verbose > 1) fprintf(stderr,"Debug: opening %s\n",Filename);
+  if (Verbose > 2) fprintf(stderr,"Debug: opening %s\n",Filename);
   if (PfilePk >= 0)
     {
     /* Check if the file exists before trying to use it. */
@@ -371,7 +371,7 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
       rc = MatchTerm(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap+i),End-i);
       if (rc > 0)
 	{
-	if (Verbose > 1) printf("Matched: Term='%s' rc=%d\n",DBgetvalue(DBTerms,t,1),rc);
+	if (Verbose > 2) printf("Matched: Term='%s' rc=%d\n",DBgetvalue(DBTerms,t,1),rc);
 	i+=rc;
 	TermsCounter[t] |= Mask;
 	}
@@ -390,6 +390,22 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
 void	PrintLicName	(char *LicName, FILE *Fout)
 {
   int i,Max;
+  char *LicenseName;
+
+  LicenseName = strrchr(LicName,'/');
+  if (LicenseName) LicName=LicenseName+1;
+
+  /* Find the LicName in the DB and see what it is associated with */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT licterm_name FROM licterm INNER JOIN licterm_maplic ON licterm_fk = licterm_pk INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE lic_name LIKE '%%/%s';",LicName);
+  DBaccess(DB,SQL);
+  if (DBdatasize(DB) > 0)
+    {
+    fputs(DBgetvalue(DB,0,0),Fout);
+    return;
+    }
+
+  /* Not in the DB, so just return the name. */
   Max = strlen(LicName);
   for(i=0; i<Max; i++)
     {
@@ -418,7 +434,6 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
   int TermSame=0;
   int HasOutput=0;
   int First=0;
-  char *LicenseName;
   /*
   Here's how the Confidence Value works:
      - Start with the percent match of the license.
@@ -447,19 +462,17 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
 	break;
       case 0x01:	/* new term */
 	TermAdded++;
-	if (Verbose) printf("Term added: %s\n",DBgetvalue(DBTerms,t,1));
+	if (Verbose > 1) printf("Term added: %s\n",DBgetvalue(DBTerms,t,1));
 	break;
       case 0x02:	/* term removed */
 	TermRemoved++;
-	if (Verbose) printf("Term removed: %s\n",DBgetvalue(DBTerms,t,1));
+	if (Verbose > 1) printf("Term removed: %s\n",DBgetvalue(DBTerms,t,1));
 	ConfidenceValue -= ThresholdMissing;
 	break;
       }
     }
 
   /* See what we got */
-  LicenseName = strrchr(LicName,'/');
-  if (LicenseName) LicName = LicenseName+1;
   if (!TermRemoved && !IsPhrase)
     {
     if (ConfidenceValue >= ThresholdSame)
@@ -575,7 +588,7 @@ void	ProcessTerms	()
     for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
     End = atoi(Range+i);
     if (Verbose) { printf("# Section %ld - %ld:\n",Start,End); }
-    if (Verbose > 1)
+    if (Verbose > 2)
 	{
 	printf("============================================\n");
 	printf("%.*s\n",(int)(End-Start),PfileMmap->Mmap + Start);
