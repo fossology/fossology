@@ -30,13 +30,13 @@ class agent_license_once extends FO_Plugin
   public $Title      = "One-Shot License Analysis";
   public $Version    = "1.0";
   public $Dependency = array("view","view-license");
-  /** For anyone to access, without login, use:
-  public $DBaccess   = PLUGIN_DB_NONE;
-  public $LoginFlag  = 0;
-  **/
+  public $NoHTML     = 0;
+  /** For anyone to access, without login, use: **/
+  // public $DBaccess   = PLUGIN_DB_NONE;
+  // public $LoginFlag  = 0;
+  /** To require login access, use: **/
   public $DBaccess   = PLUGIN_DB_ANALYZE;
   public $LoginFlag  = 1;
-  public $NoHTML     = 0;
 
   /*********************************************
    AnalyzeOne(): Analyze one uploaded file.
@@ -48,6 +48,7 @@ class agent_license_once extends FO_Plugin
     global $DATADIR;
     $V = "";
     $View = &$Plugins[plugin_find_id("view")];
+    $Bsam = array(); /* results from bSAM */
 
     /* move the temp file */
     $TempFile = $_FILES['licfile']['tmp_name'];
@@ -63,7 +64,6 @@ class agent_license_once extends FO_Plugin
     $Sys = "$AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 10 -M 10 -E -O t '$TempCache' '$DATADIR/agents/License.bsam'";
     $Fin = popen($Sys,"r");
     $LicSummary = array();
-    $LicName = "";
     $LicNum = -1;
     $Denominator = 0;
     $Match = "0%";
@@ -74,34 +74,32 @@ class agent_license_once extends FO_Plugin
       if (strlen($Line) > 0)
 	{
 	// print "<pre>$Line</pre>";
-	if (substr($Line,0,4) == "B = ")
+	if (substr($Line,0,4) == "A = ")
 	  {
+	  $Bsam = array(); /* clear the structure */
+	  $Bsam['Aname'] = trim(substr($Line,4));
+	  /* Initialize all other counters */
 	  $LicNum++;
-	  $LicName = trim(substr($Line,4));
-	  $LicName = preg_replace("@.*License.bsam.*@","Phrase",$LicName);
-	  $LicShort = preg_replace("@^.*/@","",$LicName);
-	  /* Really simplify the data, per Paul's request */
-	  $LicShort = preg_replace("@ variant.*@","",$LicShort);
-	  $LicShort = preg_replace("@ reference.*@","",$LicShort);
-	  $LicShort = preg_replace("@ short.*@","",$LicShort);
-	  $LicShort = preg_replace("@^BSD .*@","BSD",$LicShort);
-	  $LicShort = preg_replace("@^MIT .*@","MIT",$LicShort);
-	  $LicShort = preg_replace("@.*License.bsam.*@","Phrase",$LicShort);
-	  $LicShort = trim($LicShort);
-	  $LicSummary[$LicShort] = 1;
 	  $Denominator = 0;
 	  $Match = "0%";
 	  }
+	else if (substr($Line,0,4) == "B = ")
+	  {
+	  $Bsam['Bname'] = trim(substr($Line,4));
+	  }
 	else if (substr($Line,0,6) == "|A| = ")
 	  {
+	  $Bsam['Atok'] = intval(substr($Line,6));
 	  $Denominator += intval(substr($Line,6));
 	  }
 	else if (substr($Line,0,6) == "|B| = ")
 	  {
+	  $Bsam['Btok'] = intval(substr($Line,6));
 	  $Denominator += intval(substr($Line,6));
 	  }
 	else if (substr($Line,0,11) == "max(AxB) = ")
 	  {
+	  $Bsam['ABmatch'] = intval(substr($Line,11));
 	  if ($Denominator > 0)
 	    {
 	    $Numerator = intval(substr($Line,11));
@@ -111,19 +109,47 @@ class agent_license_once extends FO_Plugin
 	  }
 	else if (substr($Line,0,8) == "Apath = ")
 	  {
-	  $Line = trim(substr($Line,8));
-	  $Name = preg_replace("@^.*/@","",$LicName);
-	  foreach(split(",",$Line) as $Segment)
+	  $Bsam['Apath'] = trim(substr($Line,8));
+	  }
+	else if (substr($Line,0,8) == "Bpath = ")
+	  {
+	  $Bsam['Bpath'] = trim(substr($Line,8));
+	  /* This is the last record.  Generate the results. */
+	  $Sys = "$AGENTDIR/licinspect -X ";
+	  $Sys .= " '" . $Bsam['Aname'] . "' ";
+	  $Sys .= " '" . $Bsam['Bname'] . "' ";
+	  $Sys .= " '" . $Bsam['ABmatch'] . "' ";
+	  $Sys .= " '" . $Bsam['Atok'] . "' ";
+	  $Sys .= " '" . $Bsam['Btok'] . "' ";
+	  $Sys .= " '" . $Bsam['Apath'] . "' ";
+	  $Sys .= " '" . $Bsam['Bpath'] . "'";
+	  $Fin2 = popen($Sys,"r");
+	  $NameList = '';
+	  while(!feof($Fin2))
+	    {
+	    $Line = fgets($Fin2);
+	    $LicShort = trim($Line);
+	    if (strlen($LicShort) > 0)
+	      {
+	      $LicSummary[$LicShort] = 1;
+	      if (empty($NameList)) { $NameList = $LicShort; }
+	      else { $NameList .= ", $LicShort"; }
+	      }
+	    }
+	  pclose($Fin2);
+
+	  /* Add the namelist to the highlighting */
+	  foreach(split(",",$Bsam['Apath']) as $Segment)
 	    {
 	    if (empty($Segment)) { continue; }
 	    $Parts = split("-",$Segment,2);
 	    if (empty($Parts[1])) { $Parts[1] = $Parts[0]; }
-	    $View->AddHighlight($Parts[0],$Parts[1],$LicNum,$Match,$Name);
-	    $Name = NULL;
+	    $View->AddHighlight($Parts[0],$Parts[1],$LicNum,$Match,$NameList);
+	    $NameList = NULL;
 	    }
 	  }
-	}
-      }
+	} /* while read a line */
+      } /* while read from bsam */
     pclose($Fin);
 
     if ($Highlight)

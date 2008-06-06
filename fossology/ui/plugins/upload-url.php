@@ -53,7 +53,7 @@ class upload_url extends FO_Plugin
 
     /* Create an upload record. */
     $Mode = (1<<2); // code for "it came from wget"
-    $uploadpk = JobAddUpload($ShortName,$Name,$Desc,$Mode,$Folder);
+    $uploadpk = JobAddUpload($ShortName,$GetURL,$Desc,$Mode,$Folder);
     if (empty($uploadpk)) { return("Failed to insert upload record"); }
 
     /* Prepare the job: job "wget" */
