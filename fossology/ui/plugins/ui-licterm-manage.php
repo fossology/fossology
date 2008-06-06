@@ -50,8 +50,8 @@ class licterm_manage extends FO_Plugin
   /***********************************************************
    Install(): Create and configure database tables
    ***********************************************************/
-   function Install()
-   {
+  function Install()
+  {
      global $DB;
      if (empty($DB)) { return(1); } /* No DB */
 
@@ -161,8 +161,8 @@ class licterm_manage extends FO_Plugin
 	return(1);
 	}
       } /* create TABLE licterm_map */
-   return(0);
-   } // Install()
+  return(0);
+  } // Install()
 
   /***********************************************************
    LicTermJavascript(): All of the Javascript needed for this plugin.
@@ -242,6 +242,7 @@ function ToggleForm(Value)
   document.formy.termavailable.disabled = Value;
   document.formy.newtext.disabled = Value;
   document.formy.addtext.disabled = Value;
+  document.formy.deleteword.disabled = Value;
   }
 //-->';
     $V .= "</script>\n";
@@ -394,7 +395,7 @@ function moveOptions(theSelFrom, theSelTo)
 
     /* List groups fields */
     $V .= "<tr>\n";
-    $V .= "<td width='20%'>Select management action</td>";
+    $V .= "<td width='20%'>Select canonical group to edit</td>";
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&termkey=";
     $V .= "<td><select name='termkey' onChange='window.open(\"$Uri\"+this.value,\"_top\");'>\n";
     $V .= $this->LicTermCurrList($TermKey);
@@ -417,8 +418,9 @@ function moveOptions(theSelFrom, theSelTo)
 
     $V .= "<td>";
     $V .= "<table width='100%'>";
-    $V .= "<tr><td align='center' width='45%'>Known terms</td><td width='10%'></td><td width='45%' align='center'>Terms associated with this canonical group</td></tr>";
-    $V .= "<tr><td>";
+    $V .= "<td align='center' width='45%'>Terms associated with this canonical group</td><td width='10%'></td><td width='45%' align='center'>Known terms</td></tr>";
+
+    /* List these license terms */
     if (!empty($TermKey))
       {
       $TermList = $DB->Action("SELECT licterm_words_text AS text FROM licterm_words INNER JOIN licterm_map ON licterm_words_pk = licterm_words_fk AND licterm_fk = '$TermKey' ORDER BY licterm_words_text;"); 
@@ -429,33 +431,37 @@ function moveOptions(theSelFrom, theSelTo)
       $TermList = array();
       $TermAvailable = $DB->Action("SELECT licterm_words_text AS text FROM licterm_words ORDER BY licterm_words_text;");
       }
+
+    /* List all license terms */
+    $V .= "<tr>";
+    $V .= "<td>";
+    $V .= "<select onFocus='UnselectForm(\"termavailable\");' onChange='document.getElementById(\"newtext\").value=this.value' multiple='multiple' id='termlist' name='termlist[]' size='10'>";
+    for($i=0; !empty($TermList[$i]['text']); $i++)
+      {
+      $Text = strtolower($TermList[$i]['text']);
+      $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
+      $Text = preg_replace("/ +/"," ",$Text);
+      $Text = preg_replace("/^ */","",$Text);
+      $Text = preg_replace("/ *$/","",$Text);
+      $V .= "<option value='$Text'>$Text</option>\n";
+      }
+    $V .= "</select>";
+    $V .= "</td>\n";
+
+    /* center list of options */
+    $V .= "<td>";
+    $V .= "<center>\n";
+    $V .= "<a href='#' onClick='moveOptions(document.formy.termavailable,document.formy.termlist);'>&larr;Add</a><P/>\n";
+    $V .= "<a href='#' onClick='moveOptions(document.formy.termlist,document.formy.termavailable);'>Remove&rarr;</a>\n";
+    $V .= "</center></td>\n";
+
+    $V .= "<td>";
     $V .= "<select onFocus='UnselectForm(\"termlist\");' onChange='document.getElementById(\"newtext\").value=this.value' multiple='multiple' id='termavailable' name='termavailable' size='10'>";
     for($i=0; !empty($TermAvailable[$i]['text']); $i++)
       {
       $Text = strtolower($TermAvailable[$i]['text']);
       $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
       $Text = preg_replace("/  */"," ",$Text);
-      $Text = preg_replace("/^ */","",$Text);
-      $Text = preg_replace("/ *$/","",$Text);
-      $V .= "<option value='$Text'>$Text</option>\n";
-      }
-    $V .= "</select>";
-
-    /* center list of options */
-    $V .= "</td><td>";
-    $V .= "<center>\n";
-    $V .= "<a href='#' onClick='moveOptions(document.formy.termavailable,document.formy.termlist);'>Add&rarr;</a><P/>\n";
-    $V .= "<a href='#' onClick='moveOptions(document.formy.termlist,document.formy.termavailable);'>&larr;Remove</a>\n";
-    $V .= "</center>\n";
-
-    /* List the license groups */
-    $V .= "</td><td>";
-    $V .= "<select onFocus='UnselectForm(\"termavailable\");' multiple='multiple' id='termlist' name='termlist[]' size='10'>";
-    for($i=0; !empty($TermList[$i]['text']); $i++)
-      {
-      $Text = strtolower($TermList[$i]['text']);
-      $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
-      $Text = preg_replace("/ +/"," ",$Text);
       $Text = preg_replace("/^ */","",$Text);
       $Text = preg_replace("/ *$/","",$Text);
       $V .= "<option value='$Text'>$Text</option>\n";
