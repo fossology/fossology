@@ -542,7 +542,7 @@ function moveOptions(theSelFrom, theSelTo)
     else
       {
       $LicList = array();
-      $LicAvailable = $DB->Action("SELECT lic_pk AS id, lic_name AS text FROM agent_lic_raw WHERE lic_id = lic_pk ORDER BY lic_name;");
+      $LicAvailable = $DB->Action("SELECT lic_pk AS id, lic_name AS text FROM agent_lic_raw WHERE lic_id = lic_pk AND lic_pk NOT IN (SELECT lic_fk FROM licterm_maplic) ORDER BY lic_name;");
       }
 
     /* List all license terms */
