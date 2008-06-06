@@ -69,10 +69,11 @@ char	*Apath=NULL;	/* the matched byte ranges in the unknown file */
 char	*Bpath=NULL;	/* the matched byte ranges in the known license */
 
 int	Verbose=0;	/* debugging via '-v' */
+int	ShowTerms=0;	/* output individual terms */
 
 /* Thresholds for confidence interval */
-float	ThresholdSame=98;	/* 98% match == same */
-float	ThresholdSimilar=90;	/* 90% match == similar */
+float	ThresholdSame=97;	/* match == same */
+float	ThresholdSimilar=90;	/* match == similar */
 float	ThresholdMissing=10;	/* subtract 10% for each missing term */
 
 
@@ -383,6 +384,24 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
 } /* DiscoverTerms() */
 
 /*********************************************************
+ PrintLicName(): License names contain additional "stuff".
+ Print everything before the "stuff".
+ *********************************************************/
+void	PrintLicName	(char *LicName, FILE *Fout)
+{
+  int i,Max;
+  Max = strlen(LicName);
+  for(i=0; i<Max; i++)
+    {
+    if ((i <= Max-2) && !strncmp(" (",LicName+i,2)) return;
+    if ((i <= Max-6) && !strncmp(" short",LicName+i,6)) return;
+    if ((i <= Max-8) && !strncmp(" variant",LicName+i,8)) return;
+    if ((i <= Max-10) && !strncmp(" reference",LicName+i,10)) return;
+    fputc(LicName[i],Fout);
+    }
+} /* PrintLicName() */
+
+/*********************************************************
  ComputeConfidence(): TermsCounter is populated.  Let's
  see what we found.
  The value of TermsCounter come from Mask:
@@ -393,11 +412,12 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
 void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
 {
   float ConfidenceValue = 0;
-  int t;
+  int t,i;
   int TermAdded=0;
   int TermRemoved=0;
   int TermSame=0;
   int HasOutput=0;
+  int First=0;
   char *LicenseName;
   /*
   Here's how the Confidence Value works:
@@ -442,35 +462,60 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
   if (LicenseName) LicName = LicenseName+1;
   if (!TermRemoved && !IsPhrase)
     {
-    HasOutput=1;
     if (ConfidenceValue >= ThresholdSame)
 	{
-	printf("  %s\n",LicName);
+	HasOutput=1;
+	PrintLicName(LicName,stdout);
+	printf("\n");
 	}
     else if (ConfidenceValue >= ThresholdSimilar)
 	{
-	printf("  '%s'-style\n",LicName);
+	HasOutput=1;
+	printf("'");
+	PrintLicName(LicName,stdout);
+	printf("'-style\n");
 	}
     }
-  if (TermAdded)
+  if (TermAdded && (TermsCounterSize > 0))
     {
+    memset(SQL,'\0',sizeof(SQL));
+    sprintf(SQL,"SELECT DISTINCT licterm_name FROM licterm INNER JOIN licterm_map ON licterm_pk = licterm_fk WHERE");
+    First=1;
     for(t=0; t<TermsCounterSize; t++)
       {
       if (TermsCounter[t] & 0x01)
 	{
-	HasOutput=1;
-	printf("  %s\n",DBgetvalue(DBTerms,t,1));
+	if (ShowTerms) { printf("%s\n",DBgetvalue(DBTerms,t,1)); HasOutput=1; }
+	if (!First) { strcat(SQL," OR "); First=0; }
+	sprintf(SQL+strlen(SQL)," licterm_words_fk = '%s'",DBgetvalue(DBTerms,t,0));
 	}
+      }
+    strcat(SQL," ORDER BY licterm_name;");
+    DBaccess(DB,SQL);
+    First=1;
+    for(i=0; i<DBdatasize(DB); i++)
+      {
+      printf("%s\n",DBgetvalue(DB,i,0));
+      HasOutput=1;
       }
     }
   if (!HasOutput)
 	{
 	if (IsPhrase)
 	  {
-	  if (IsExplicit) printf("  Phrase\n");
-	  else printf("  %s\n",LicName);
+	  if (IsExplicit) printf("Phrase\n");
+	  else
+	    {
+	    PrintLicName(LicName,stdout);
+	    printf("\n");
+	    }
 	  }
-	else printf("  '%s'-partial\n",LicName);
+	else
+	  {
+	  printf("'");
+	  PrintLicName(LicName,stdout);
+	  printf("'-partial\n");
+	  }
 	}
 } /* ComputeConfidence() */
 
@@ -528,7 +573,7 @@ void	ProcessTerms	()
     Start = atol(Range);
     for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
     End = atoi(Range+i);
-    printf("# Section %ld - %ld:\n",Start,End);
+    if (Verbose) { printf("# Section %ld - %ld:\n",Start,End); }
     if (Verbose > 1)
 	{
 	printf("============================================\n");
@@ -650,6 +695,7 @@ void	Usage	(char *Name)
   printf("  Threshold options:\n");
   printf("    -S ##         :: 'same' threshold %% for license (default: %.0f)\n",ThresholdSame);
   printf("    -s ##         :: 'similar' threshold %% for license (default: %.0f)\n",ThresholdSimilar);
+  printf("    -t            :: Show individual terms\n");
   printf("    -M ##         :: penalty %% for missing terms in license text (default: %.0f)\n",ThresholdMissing);
   printf("  Manual options:\n");
   printf("    -X            :: command-line contains matched info (do not access DB)\n");
@@ -683,7 +729,7 @@ int	main	(int argc, char *argv[])
   int c;
   int rc;
 
-  while((c = getopt(argc,argv,"S:s:M:ivX")) != -1)
+  while((c = getopt(argc,argv,"iM:S:s:tvX")) != -1)
     {
     switch(c)
       {
@@ -697,9 +743,10 @@ int	main	(int argc, char *argv[])
 	GetAgentKey();
 	DBclose(DB);
 	return(0);
+      case 'M': ThresholdMissing = atof(optarg); break; /* missing penalty */
       case 'S': ThresholdSame = atof(optarg); break; /* same */
       case 's': ThresholdSimilar = atof(optarg); break; /* similar */
-      case 'M': ThresholdMissing = atof(optarg); break; /* missing penalty */
+      case 't':	ShowTerms=1;	break;
       case 'v':	Verbose++;	break;
       case 'X':	IsExplicit=1;	break;
       default:
@@ -758,7 +805,7 @@ int	main	(int argc, char *argv[])
       DBaccess(DB,SQL);
       memset(PfileName,'\0',MAXLINE);
       strncpy(PfileName,DBgetvalue(DB,0,0),MAXLINE-1);
-      printf("### Processing: pfile_pk=%ld '%s'\n",PfilePk,PfileName);
+      if (Verbose) { printf("### Processing: pfile_pk=%ld '%s'\n",PfilePk,PfileName); }
       PfileMmap = OpenFile(PfileName);
       if (PfileMmap)
 	{
