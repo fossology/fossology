@@ -561,6 +561,26 @@ function moveOptions(theSelFrom, theSelTo)
     /* center list of options */
     $V .= "<td>";
     $V .= "<center>\n";
+    $Uri = "if (document.getElementById('licavailable').value) { window.open('";
+    $Uri .= Traceback_uri();
+    $Uri .= "?mod=view-license";
+    $Uri .= "&format=flow";
+    $Uri .= "&lic=";
+    $Uri .= "' + document.getElementById('licavailable').value + '";
+    $Uri .= "&licset=";
+    $Uri .= "' + document.getElementById('licavailable').value";
+    $Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes'); }";
+    $Uri .= " else ";
+    $Uri .= "if (document.getElementById('liclist').value) { window.open('";
+    $Uri .= Traceback_uri();
+    $Uri .= "?mod=view-license";
+    $Uri .= "&format=flow";
+    $Uri .= "&lic=";
+    $Uri .= "' + document.getElementById('liclist').value + '";
+    $Uri .= "&licset=";
+    $Uri .= "' + document.getElementById('liclist').value";
+    $Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes'); }";
+    $V .= "<a href='#' onClick=\"$Uri\">View</a><hr/>\n";
     $V .= "<a href='#' onClick='moveOptions(document.formy.licavailable,document.formy.liclist);'>&larr;Add</a><P/>\n";
     $V .= "<a href='#' onClick='moveOptions(document.formy.liclist,document.formy.licavailable);'>Remove&rarr;</a>\n";
     $V .= "</center></td>\n";
