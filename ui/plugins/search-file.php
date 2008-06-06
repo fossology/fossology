@@ -118,7 +118,9 @@ class search_file extends FO_Plugin
 	$V .= "<li>Enter the filename to find:<P>";
 	$V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
 	$V .= "<li>By default only containers (rpms, tars, isos, etc) are shown.<P>";
-	$V .= "<INPUT type='checkbox' name='allfiles'> Show All Files\n";
+	$V .= "<INPUT type='checkbox' name='allfiles' value='1'";
+	if ($allfiles == '1') { $V .= " checked"; }
+	$V .= "> Show All Files\n";
 	$V .= "</ul>\n";
 	$V .= "<input type='submit' value='Search!'>\n";
 	$V .= "</form>\n";
