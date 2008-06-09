@@ -59,7 +59,8 @@ RepMmapStruct *LicMmap=NULL;
 
 /* For explicit data (command-line '-X') instead of DB */
 /** A=unknown, B=known file sources **/
-int	IsExplicit=0;
+int	StoreDB=1;	/* store results in the DB? */
+int	IsExplicit=0;	/* all parameters explicitly listed on command line? */
 char	*Aname=NULL;	/* the unknown source file */
 char	*Bname=NULL;	/* the known license file */
 char	*ABmatch=NULL;	/* the number of matched tokens */
@@ -419,6 +420,26 @@ void	PrintLicName	(char *LicName, FILE *Fout)
 } /* PrintLicName() */
 
 /*********************************************************
+ StoreResults(): Save the license match in the DB.
+ *********************************************************/
+void	StoreResults	(long PfilePk, long LicTermPk, long MetaPk,
+			 int Confidence)
+{
+  memset(SQL,'\0',sizeof(SQL));
+  if (LicTermPk > 0)
+    {
+    snprintf(SQL,MAXLINE,"INSERT INTO licterm_name (pfile_fk,licterm_fk,agent_lic_meta_fk,licterm_name_confidence) VALUES (%ld,%ld,%ld,%d);",
+	PfilePk,LicTermPk,MetaPk,Confidence);
+    }
+  else
+    {
+    snprintf(SQL,MAXLINE,"INSERT INTO licterm_name (pfile_fk,agent_lic_meta_fk,licterm_name_confidence) VALUES (%ld,%ld,%d);",
+	PfilePk,MetaPk,Confidence);
+    }
+  DBaccess(DB,SQL);
+} /* StoreResults() */
+
+/*********************************************************
  ComputeConfidence(): TermsCounter is populated.  Let's
  see what we found.
  The value of TermsCounter come from Mask:
@@ -426,7 +447,8 @@ void	PrintLicName	(char *LicName, FILE *Fout)
    0x01 = term seen in unknown file.
    0x02 = term seen in known (license) file.
  *********************************************************/
-void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
+void	ComputeConfidence	(int IsPhrase, float LicPercent,
+				 char *LicName, long LicMetaPk)
 {
   float ConfidenceValue = 0;
   int t,i;
@@ -435,6 +457,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
   int TermSame=0;
   int HasOutput=0;
   int First=0;
+  void *DBresults;
   /*
   Here's how the Confidence Value works:
      - Start with the percent match of the license.
@@ -476,24 +499,35 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
   /* See what we got */
   if (!TermRemoved && !IsPhrase)
     {
+    /* Got a great match */
     if (ConfidenceValue >= ThresholdSame)
 	{
 	HasOutput=1;
-	PrintLicName(LicName,stdout);
-	printf("\n");
+	if (!StoreDB || Verbose)
+	  {
+	  PrintLicName(LicName,stdout);
+	  printf("\n");
+	  }
+	if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,3);
 	}
+    /* Got an good match */
     else if (ConfidenceValue >= ThresholdSimilar)
 	{
 	HasOutput=1;
-	printf("'");
-	PrintLicName(LicName,stdout);
-	printf("'-style\n");
+	if (!StoreDB || Verbose)
+	  {
+	  printf("'");
+	  PrintLicName(LicName,stdout);
+	  printf("'-style\n");
+	  }
+	if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,2);
 	}
     }
   if (TermAdded && (TermsCounterSize > 0))
     {
+    /* Got a great match on a term */
     memset(SQL,'\0',sizeof(SQL));
-    sprintf(SQL,"SELECT DISTINCT licterm_name FROM licterm INNER JOIN licterm_map ON licterm_pk = licterm_fk WHERE");
+    sprintf(SQL,"SELECT DISTINCT licterm_pk,licterm_name FROM licterm INNER JOIN licterm_map ON licterm_pk = licterm_fk WHERE");
     First=1;
     for(t=0; t<TermsCounterSize; t++)
       {
@@ -507,29 +541,43 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent, char *LicName)
       }
     strcat(SQL," ORDER BY licterm_name;");
     DBaccess(DB,SQL);
+    DBresults = DBmove(DB);
     First=1;
-    for(i=0; i<DBdatasize(DB); i++)
+    for(i=0; i<DBdatasize(DBresults); i++)
       {
-      printf("%s\n",DBgetvalue(DB,i,0));
+      if (!StoreDB || Verbose) printf("%s\n",DBgetvalue(DBresults,i,1));
+      if (StoreDB) StoreResults(PfilePk,atol(DBgetvalue(DBresults,i,0)),LicMetaPk,0);
       HasOutput=1;
       }
+    DBclose(DBresults);
     }
+
   if (!HasOutput)
 	{
+	/* Got a bad match on a phrase */
 	if (IsPhrase)
 	  {
 	  if (IsExplicit) printf("Phrase\n");
 	  else
 	    {
-	    PrintLicName(LicName,stdout);
-	    printf("\n");
+	    if (!StoreDB || Verbose)
+	      {
+	      PrintLicName(LicName,stdout);
+	      printf("\n");
+	      }
+	    if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,3);
 	    }
 	  }
+	/* Got a bad match on a license */
 	else
 	  {
-	  printf("'");
-	  PrintLicName(LicName,stdout);
-	  printf("'-partial\n");
+	  if (!StoreDB || Verbose)
+	    {
+	    printf("'");
+	    PrintLicName(LicName,stdout);
+	    printf("'-partial\n");
+	    }
+	  if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,1);
 	  }
 	}
 } /* ComputeConfidence() */
@@ -553,7 +601,7 @@ void	ProcessTerms	()
   int MaxRangesCount;
 
   /* Get the list of license segments */
-  snprintf(SQL,MAXLINE,"SELECT pfile_path,license_path,lic_name,tok_match,tok_license,lic_unique,tok_pfile_start FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE pfile_fk = '%ld' ORDER BY tok_pfile_start;",PfilePk);
+  snprintf(SQL,MAXLINE,"SELECT agent_lic_meta_pk,pfile_path,license_path,lic_name,tok_match,tok_license,lic_unique,tok_pfile_start FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE pfile_fk = '%ld' ORDER BY tok_pfile_start;",PfilePk);
   if (!IsExplicit)
     {
     DBaccess(DB,SQL);
@@ -576,14 +624,14 @@ void	ProcessTerms	()
       }
     else
       {
-      Denominator = atof(DBgetvalue(DBRanges,MaxRanges,4));
-      if (Denominator != 0) LicPercent = 100.0 * atof(DBgetvalue(DBRanges,MaxRanges,3)) / Denominator;
+      Denominator = atof(DBgetvalue(DBRanges,MaxRanges,5));
+      if (Denominator != 0) LicPercent = 100.0 * atof(DBgetvalue(DBRanges,MaxRanges,4)) / Denominator;
       else LicPercent = 0;
       }
 
     /* Pfile: Load the start and end */
     if (IsExplicit) Range = Apath;
-    else Range = DBgetvalue(DBRanges,MaxRanges,0);
+    else Range = DBgetvalue(DBRanges,MaxRanges,1);
 
     Start = atol(Range);
     for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
@@ -620,9 +668,9 @@ void	ProcessTerms	()
       }
     else /* not explicit */
       {
-      IsPhrase = (strlen(DBgetvalue(DBRanges,MaxRanges,5)) <= 72); 
-      Range = DBgetvalue(DBRanges,MaxRanges,1);
-      LicNameTmp = DBgetvalue(DBRanges,MaxRanges,2);
+      IsPhrase = (strlen(DBgetvalue(DBRanges,MaxRanges,6)) <= 72); 
+      Range = DBgetvalue(DBRanges,MaxRanges,2);
+      LicNameTmp = DBgetvalue(DBRanges,MaxRanges,3);
       snprintf(LicName,sizeof(LicName),"%s/%s",AGENTDATADIR,LicNameTmp);
       }
 
@@ -645,7 +693,7 @@ void	ProcessTerms	()
       if (Verbose) printf("# Found phrase\n");
       snprintf(LicName,sizeof(LicName),"%s",LicNameTmp);
       }
-    ComputeConfidence(IsPhrase,LicPercent,LicName);
+    ComputeConfidence(IsPhrase,LicPercent,LicName,atol(DBgetvalue(DBRanges,MaxRanges,0)));
     }
 
   DBclose(DBRanges);
@@ -763,7 +811,7 @@ int	main	(int argc, char *argv[])
       case 's': ThresholdSimilar = atof(optarg); break; /* similar */
       case 't':	ShowTerms=1;	break;
       case 'v':	Verbose++;	break;
-      case 'X':	IsExplicit=1;	break;
+      case 'X':	IsExplicit=1; break;
       default:
 	Usage(argv[0]);
 	DBclose(DB);
@@ -782,6 +830,7 @@ int	main	(int argc, char *argv[])
 
   if (IsExplicit)
     {
+    StoreDB=0;
     if (optind != argc-7)
 	{
 	fprintf(stderr,"ERROR: Wrong number of parameters for -X.\n");
@@ -812,6 +861,7 @@ int	main	(int argc, char *argv[])
   else if (optind < argc)
     {
     /* command-line contains a list of pfile_pk values */
+    StoreDB=0;
     for( ; optind < argc; optind++)
       {
       PfilePk = atol(argv[optind]);
@@ -835,6 +885,8 @@ int	main	(int argc, char *argv[])
     } /* if reading from the command-line */
   else
     {
+    /* processing from the scheduler */
+    StoreDB=1;
     rc = ReadLine(stdin);
     do
       {
