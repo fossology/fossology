@@ -105,6 +105,16 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
     fprintf(Fout,"\n");
     }
 
+  /** license inspector (uses licinspect) ***/
+  memset(Cmd,'\0',sizeof(Cmd));
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/licinspect",BINDIR);
+  for(i=0; i<NumCPU1; i++)
+    {
+    fprintf(Fout,"agent=licinspect %s| ",CmdHost);
+    fprintf(Fout,Rcmd,Cmd);
+    fprintf(Fout,"\n");
+    }
+
   /** mimetype ***/
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,"%s/mimetype",BINDIR);
