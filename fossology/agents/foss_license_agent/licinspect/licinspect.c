@@ -693,7 +693,8 @@ void	ProcessTerms	()
       if (Verbose) printf("# Found phrase\n");
       snprintf(LicName,sizeof(LicName),"%s",LicNameTmp);
       }
-    ComputeConfidence(IsPhrase,LicPercent,LicName,atol(DBgetvalue(DBRanges,MaxRanges,0)));
+    if (IsExplicit) ComputeConfidence(IsPhrase,LicPercent,LicName,0);
+    else ComputeConfidence(IsPhrase,LicPercent,LicName,atol(DBgetvalue(DBRanges,MaxRanges,0)));
     }
 
   DBclose(DBRanges);
