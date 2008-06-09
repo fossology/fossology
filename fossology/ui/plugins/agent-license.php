@@ -207,7 +207,7 @@ class agent_license extends FO_Plugin
 	AND agent_lic_status.inspect_name IS NOT TRUE
 	ORDER BY Size DESC
 	LIMIT 5000;";
-    $jobqueuepk = JobQueueAdd($jobpk,"license",$jqargs,"yes","a",array($jobqueuepk));
+    $jobqueuepk = JobQueueAdd($jobpk,"licinspect",$jqargs,"yes","a",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert licinspect into job queue"); }
 
     /* Add job: job "license" has jobqueue item "filter_clean" */
