@@ -159,6 +159,8 @@ void	DeleteLicense	(long UploadId)
 	raise(SIGALRM);
 	}
   if (Verbose) { printf("Deleted licenses for upload %ld\n",UploadId); }
+  snprintf(SQL,sizeof(SQL),"DROP TABLE %s;",TempTable);
+  MyDBaccess(DB,SQL);
 } /* DeleteLicense() */
 
 /*********************************************
