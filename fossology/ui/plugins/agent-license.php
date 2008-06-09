@@ -196,7 +196,19 @@ class agent_license extends FO_Plugin
 	ORDER BY Size DESC
 	LIMIT 5000;";
     $jobqueuepk = JobQueueAdd($jobpk,"license",$jqargs,"yes","a",array($jobqueuepk));
-    if (empty($jobqueuepk)) { return("Failed to insert filter_license into job queue"); }
+    if (empty($jobqueuepk)) { return("Failed to insert license into job queue"); }
+
+    /* Add job: job "license" has jobqueue item "licinspect" */
+    /** jqargs = all pfiles NOT processed and WITH tokens in repository **/
+    $jqargs = "SELECT DISTINCT(Akey),A,Size
+	FROM $TempTable
+	INNER JOIN agent_lic_status ON agent_lic_status.pfile_fk = Akey
+	WHERE agent_lic_status.inrepository IS TRUE
+	AND agent_lic_status.inspect_name IS NOT TRUE
+	ORDER BY Size DESC
+	LIMIT 5000;";
+    $jobqueuepk = JobQueueAdd($jobpk,"license",$jqargs,"yes","a",array($jobqueuepk));
+    if (empty($jobqueuepk)) { return("Failed to insert licinspect into job queue"); }
 
     /* Add job: job "license" has jobqueue item "filter_clean" */
     /** jqargs = all pfiles with tokens in the repository **/
@@ -205,6 +217,7 @@ class agent_license extends FO_Plugin
 	INNER JOIN agent_lic_status ON agent_lic_status.pfile_fk = Akey
 	WHERE agent_lic_status.inrepository IS TRUE
 	AND agent_lic_status.processed IS TRUE
+	AND agent_lic_status.inspect_name IS TRUE
 	ORDER BY Size DESC
 	LIMIT 5000;";
     $jobqueuepk = JobQueueAdd($jobpk,"filter_clean",$jqargs,"yes","a",array($jobqueuepk));

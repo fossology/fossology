@@ -196,6 +196,57 @@ class licterm_manage extends FO_Plugin
 	return(1);
 	}
       } /* create TABLE licterm_maplic */
+
+    /* Check if TABLE licterm_name exists */
+    /** licterm_name: assign the name to a agent_lic_meta row. **/
+    $SQL = "SELECT relname FROM pg_class WHERE relkind = 'S' AND relname = 'licterm_name_licterm_name_pk_seq';";
+    $Results = $DB->Action($SQL);
+    if (empty($Results[0]['relname']))
+      {
+      $SQL1 = "CREATE SEQUENCE licterm_name_licterm_name_pk_seq START 1;";
+      $DB->Action($SQL1);
+      }
+    $SQL = "SELECT table_name AS table
+	FROM information_schema.tables
+	WHERE table_type = 'BASE TABLE'
+	AND table_schema = 'public'
+	AND table_name = 'licterm_name';";
+    $Results = $DB->Action($SQL);
+    if (empty($Results[0]['table']))
+      {
+      $SQL1 = "CREATE TABLE licterm_name (
+	licterm_name_pk integer PRIMARY KEY DEFAULT nextval('licterm_name_licterm_name_pk_seq'),
+	pfile_fk         integer,
+	licterm_fk       integer,
+	agent_lic_meta_fk integer,
+	licterm_name_confidence integer,
+	CONSTRAINT only_one_licterm_name UNIQUE (licterm_fk, agent_lic_meta_fk),
+	CONSTRAINT lictermname_pfile_exist FOREIGN KEY(pfile_fk) REFERENCES pfile(pfile_pk) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT lictermname_licterm_exist FOREIGN KEY(licterm_fk) REFERENCES licterm(licterm_pk) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT lictermname_licmeta_exist FOREIGN KEY(agent_lic_meta_fk) REFERENCES agent_lic_meta(agent_lic_meta_pk) ON UPDATE RESTRICT ON DELETE RESTRICT
+	);
+	COMMENT ON COLUMN licterm_name.pfile_fk IS 'Pfile containing this canonical name';
+	COMMENT ON COLUMN licterm_name.licterm_fk IS 'Canonical name to use (null means use the real license name)';
+	COMMENT ON COLUMN licterm_name.agent_lic_meta_fk IS 'License range containing this canonical name';
+	COMMENT ON COLUMN licterm_name.licterm_name_confidence IS 'Confidence that the license template name is correct (0=no, 1=partial, 2=style, 3=use the name)';
+	";
+      $DB->Action($SQL1);
+      $Results = $DB->Action($SQL);
+      if (empty($Results[0]['table']))
+	{
+	printf("ERROR: Failed to create table: licterm_name\n");
+	return(1);
+	}
+      } /* create TABLE licterm_name */
+
+  /* Make sure the licinspect status column exists */
+  if (! $DB->ColExist('agent_lic_status','inspect_name'))
+    {
+    $DB->Action("ALTER TABLE agent_lic_status
+	ADD COLUMN inspect_name boolean DEFAULT FALSE;
+	COMMENT ON COLUMN agent_lic_status.inspect_name IS 'Has licinspect processed the pfile?';");
+    }
+
   return(0);
   } // Install()
 
