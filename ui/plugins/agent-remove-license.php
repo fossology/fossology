@@ -174,7 +174,7 @@ class agent_remove_licenseMeta extends FO_Plugin
         $V .= "<input type='checkbox' name='ReDoLisc' value='Y' />";
         $V .= "Reschedule License Analysis?<br /><br />\n";
         $V .= "</ol>\n";
-        $V .= "<input type='submit' value='Reset!'>\n";
+        $V .= "<input type='submit' value='Commit!'>\n";
         $V .= "</form>\n";
         break;
       case "Text":

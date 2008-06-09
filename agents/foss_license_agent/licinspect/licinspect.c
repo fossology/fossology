@@ -900,6 +900,20 @@ int	main	(int argc, char *argv[])
 	  CloseFile(PfileMmap);
 	  }
 	}
+
+      /* Mark it as processed */
+      if (StoreDB)
+        {
+        DBaccess(DB,"BEGIN;");
+        memset(SQL,'\0',sizeof(SQL));
+        snprintf(SQL,sizeof(SQL),"SELECT * FROM agent_lic_status WHERE pfile_fk = '%ld' FOR UPDATE;",PfilePk);
+        DBaccess(DB,SQL);
+        snprintf(SQL,sizeof(SQL),"UPDATE agent_lic_status SET inspect_name = 'TRUE' WHERE pfile_fk = '%ld';",PfilePk);
+        DBaccess(DB,SQL);
+        DBaccess(DB,"COMMIT;");
+	}
+
+      /* Off to the next item to process */
       rc = ReadLine(stdin);
       } while(rc >= 0);
     } /* if reading from the scheduler */
