@@ -368,7 +368,7 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
     rc=0;
     for(t=0; !rc && (t<TermsCounterSize); t++)
       {
-      rc = MatchTerm(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap+i),End-i);
+      rc = MatchTerm(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap+i),Mmap->MmapSize-i);
       if (rc > 0)
 	{
 	if (Verbose > 2) printf("Matched: Term='%s' rc=%d\n",DBgetvalue(DBTerms,t,1),rc);
@@ -410,6 +410,7 @@ void	PrintLicName	(char *LicName, FILE *Fout)
   for(i=0; i<Max; i++)
     {
     if ((i <= Max-2) && !strncmp(" (",LicName+i,2)) return;
+    if ((i <= Max-5) && !strncmp(" part",LicName+i,5)) return;
     if ((i <= Max-6) && !strncmp(" short",LicName+i,6)) return;
     if ((i <= Max-8) && !strncmp(" variant",LicName+i,8)) return;
     if ((i <= Max-10) && !strncmp(" reference",LicName+i,10)) return;
