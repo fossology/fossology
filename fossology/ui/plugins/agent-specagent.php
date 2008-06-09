@@ -118,9 +118,7 @@ class agent_specagent extends FO_Plugin
 	FROM mimetype
 	INNER JOIN pfile ON pfile.pfile_mimetypefk = mimetype.mimetype_pk
 	  AND mimetype.mimetype_pk = '$mimetypepk'
-	INNER JOIN ufile ON ufile.pfile_fk = pfile.pfile_pk
-	INNER JOIN uploadtree ON uploadtree.ufile_fk=ufile.ufile_pk
-	  AND upload_fk = '$uploadpk'
+	INNER JOIN uploadtree ON upload_fk = '$uploadpk'
 	WHERE pfile.pfile_pk NOT IN
 	  (SELECT attrib.pfile_fk FROM attrib
 	  WHERE attrib_key_fk = '$attribkey')

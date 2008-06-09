@@ -119,10 +119,8 @@ class agent_pkgmetagetta extends FO_Plugin
 	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
 	INTO $TempTable
     FROM pfile left outer join attrib on (attrib_key_fk='$attribkey' 
-      AND pfile_fk=pfile_pk and attrib_value is null)
-    INNER join ufile on (ufile.pfile_fk=pfile_pk)
-    INNER join uploadtree on (ufile_pk=uploadtree.ufile_fk 
-      AND upload_fk='$uploadpk');";
+      AND attrib.pfile_fk=pfile_pk and attrib_value is null)
+    INNER join uploadtree on (upload_fk='$uploadpk');";
 
     /* Add job: job has jobqueue item "sqlagent" */
     /** sqlagent does not like newlines! **/
