@@ -228,7 +228,7 @@ class licterm_manage extends FO_Plugin
 	COMMENT ON COLUMN licterm_name.pfile_fk IS 'Pfile containing this canonical name';
 	COMMENT ON COLUMN licterm_name.licterm_fk IS 'Canonical name to use (null means use the real license name)';
 	COMMENT ON COLUMN licterm_name.agent_lic_meta_fk IS 'License range containing this canonical name';
-	COMMENT ON COLUMN licterm_name.licterm_name_confidence IS 'Confidence that the license template name is correct (0=no, 1=partial, 2=style, 3=use the name)';
+	COMMENT ON COLUMN licterm_name.licterm_name_confidence IS 'Confidence that the license template name is correct (3=no, 2=partial, 1=style, 0=use the name)';
 	";
       $DB->Action($SQL1);
       $Results = $DB->Action($SQL);

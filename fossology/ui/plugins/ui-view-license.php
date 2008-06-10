@@ -155,21 +155,6 @@ class ui_view_license extends FO_Plugin
     $ModBack = GetParm("modback",PARM_STRING);
     if (empty($ModBack)) { $ModBack='license'; }
 
-    /* Load license names */
-    $LicPk2GID=array();  // map lic_pk to the group id: lic_id
-    $LicGID2Name=array(); // map lic_id to name.
-    $Results = $DB->Action("SELECT lic_pk,lic_id,lic_name FROM agent_lic_raw ORDER BY lic_name;");
-    foreach($Results as $Key => $R)
-      {
-      if (empty($R['lic_name'])) { continue; }
-      $Name = basename($R['lic_name']);
-      $GID = $R['lic_id'];
-      $LicGID2Name[$GID] = $Name;
-      $LicPk2GID[$R['lic_pk']] = $GID;
-      }
-    if (empty($LicGID2Name[1])) { $LicGID2Name[1] = 'Phrase'; }
-    if (empty($LicPk2GID[1])) { $LicPk2GID[1] = 1; }
-
     /* Load licenses for this file */
     $Results = $DB->Action("SELECT * FROM agent_lic_meta WHERE pfile_fk = $Pfile ORDER BY tok_pfile_start;");
 
@@ -191,8 +176,7 @@ class ui_view_license extends FO_Plugin
 		}
 	else
 		{
-		$LicGID = $LicPk2GID[$R['lic_fk']];
-		$LicName = $LicGID2Name[$LicGID];
+		$LicName = LicenseGetName($R['agent_lic_meta_pk'],1);
 		$RefURL=Traceback() . "&lic=" . $R['lic_fk'] . "&licset=" . $R['tok_pfile_start'];
 		}
 	$this->ConvertLicPathToHighlighting($R,$LicName,$RefURL);
