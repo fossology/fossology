@@ -537,7 +537,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	{
 	if (ShowTerms) { printf("%s\n",DBgetvalue(DBTerms,t,1)); HasOutput=1; }
 	if (!First) { strcat(SQL," OR "); }
-	sprintf(SQL+strlen(SQL)," licterm_words_fk = '%s'",DBgetvalue(DBTerms,t,3));
+	sprintf(SQL+strlen(SQL)," licterm_words_fk = '%s'",DBgetvalue(DBTerms,t,0));
 	First=0;
 	}
       }
@@ -547,9 +547,9 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
     First=1;
     for(i=0; i<DBdatasize(DBresults); i++)
       {
-      if (!StoreDB || Verbose) printf("%s\n",DBgetvalue(DBresults,i,2));
+      if (!StoreDB || Verbose) printf("%s\n",DBgetvalue(DBresults,i,1));
       /* No confidence in template's name. Use the canonical name. */
-      if (StoreDB) StoreResults(PfilePk,atol(DBgetvalue(DBresults,i,3)),LicMetaPk,0);
+      if (StoreDB) StoreResults(PfilePk,atol(DBgetvalue(DBresults,i,0)),LicMetaPk,3);
       HasOutput=1;
       }
     DBclose(DBresults);
