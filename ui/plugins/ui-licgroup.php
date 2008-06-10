@@ -520,23 +520,9 @@ class licgroup extends FO_Plugin
     $Time = time();
     $Lics = array(); // license summary for an item in the directory
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
+    $MapLic2GID = array(); /* every license should have an ID number */
+    $MapNext=0;
     
-    /****************************************/
-    /* Load licenses */
-    $LicPk2GID=array();  // map lic_pk to the group id: lic_id
-    $LicGID2Name=array(); // map lic_id to name.
-    $Results = $DB->Action("SELECT lic_pk,lic_id,lic_name FROM agent_lic_raw ORDER BY lic_name;");
-    foreach($Results as $Key => $R)
-      {
-      if (empty($R['lic_name'])) { continue; }
-      $Name = basename($R['lic_name']);
-      $GID = $R['lic_id'];
-      $LicGID2Name[$GID] = $Name;
-      $LicPk2GID[$R['lic_pk']] = $GID;
-      }
-    if (empty($LicGID2Name[1])) { $LicGID2Name[1] = 'Phrase'; }
-    if (empty($LicPk2GID[1])) { $LicPk2GID[1] = 1; }
-
     /****************************************/
     /* Get the items under this UploadtreePk */
     $Children = DirGetList($Upload,$Item);
@@ -574,14 +560,20 @@ class licgroup extends FO_Plugin
 	$LicUri = NULL;
 	}
 
+      /* Ensure every license name has an ID number */
+      foreach($Lics as $Key => $Val)
+        {
+	if (empty($MapLic2GID[$Key])) { $MapLic2GID[$Key] = $MapNext++; }
+	}
+
       /* Save the license results (also converts values to GID) */
       $GrpList=array();
       foreach($Lics as $Key => $Val)
 	{
 	if (empty($Key)) { continue; }
-	if (is_int($Key))
+	if ($Key != ' Total ')
 		{
-		$GID = $LicPk2GID[$Key];
+		$GID = $MapLic2GID[$Key];
 		/* Find every license group that includes the license */
 		$FoundGroup=0;
 		foreach($this->GrpInGroup as $G => $g)
@@ -603,7 +595,7 @@ class licgroup extends FO_Plugin
 	}
 
       /* Populate the output ($VF) */
-      $LicCount = $Lics['Total'];
+      $LicCount = $Lics[' Total '];
       $VF .= '<tr>';
       $VF .= "<td id='LicItem i$ChildCount";
       foreach($GrpList as $G => $g) { $VF .= " $G"; }

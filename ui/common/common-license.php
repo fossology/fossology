@@ -54,7 +54,8 @@ if (!isset($GlobalReady)) { exit; }
 function LicenseNormalizeName	($LicName,$Confidence,$CanonicalName)
 {
   /* Find the right name to use */
-  if ($Confidence >= 3) { $Name = $LicTerm; }
+  $Name = '';
+  if ($Confidence >= 3) { $Name = $CanonicalName; }
   else
     {
     $Name = $LicName;
@@ -139,7 +140,7 @@ function LicenseGet(&$PfilePk, &$Lics)
   if (empty($Lics[' Total '])) { $Lics[' Total ']=0; }
   foreach($Results as $R)
 	{
-	$LicName = LicenseNormalizeName($R['lic_name'],$R['licterm_name_confidence'],$R['licterm_fk']);
+	$LicName = LicenseNormalizeName($R['lic_name'],$R['licterm_name_confidence'],$R['licterm_name']);
 	if (!empty($LicName))
 	  {
 	  if (empty($Lics[$LicName])) { $Lics[$LicName]=1; }
@@ -167,7 +168,6 @@ function LicenseGetAll(&$UploadtreePk, &$Lics)
   global $LicenseGetAll_Prepared;
   if (!$LicenseGetAll_Prepared)
     {
-    // $DB->Prepare("LicenseGetAll",'SELECT uploadtree_pk,ufile_mode,ufile_fk AS ufile_pk,uploadtree.pfile_fk,lic_fk,licterm_name_confidence,licterm_fk FROM uploadtree LEFT OUTER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = uploadtree.pfile_fk LEFT OUTER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk WHERE parent = $1;');
     $DB->Prepare("LicenseGetAll_License",'SELECT agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name
 	FROM uploadtree
 	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = uploadtree.pfile_fk
