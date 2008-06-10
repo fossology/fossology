@@ -421,6 +421,7 @@ void	PrintLicName	(char *LicName, FILE *Fout)
 
 /*********************************************************
  StoreResults(): Save the license match in the DB.
+ Confidence: 0=full, 1=style, 2=partial, 3=none.
  *********************************************************/
 void	StoreResults	(long PfilePk, long LicTermPk, long MetaPk,
 			 int Confidence)
@@ -508,7 +509,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	  PrintLicName(LicName,stdout);
 	  printf("\n");
 	  }
-	if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,3);
+	if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,0); /* full confidence */
 	}
     /* Got an good match */
     else if (ConfidenceValue >= ThresholdSimilar)
@@ -520,9 +521,10 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	  PrintLicName(LicName,stdout);
 	  printf("'-style\n");
 	  }
-	if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,2);
+	if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,1); /* style confidence */
 	}
     }
+
   if (TermAdded && (TermsCounterSize > 0))
     {
     /* Got a great match on a term */
@@ -535,7 +537,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	{
 	if (ShowTerms) { printf("%s\n",DBgetvalue(DBTerms,t,1)); HasOutput=1; }
 	if (!First) { strcat(SQL," OR "); }
-	sprintf(SQL+strlen(SQL)," licterm_words_fk = '%s'",DBgetvalue(DBTerms,t,0));
+	sprintf(SQL+strlen(SQL)," licterm_words_fk = '%s'",DBgetvalue(DBTerms,t,3));
 	First=0;
 	}
       }
@@ -545,8 +547,9 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
     First=1;
     for(i=0; i<DBdatasize(DBresults); i++)
       {
-      if (!StoreDB || Verbose) printf("%s\n",DBgetvalue(DBresults,i,1));
-      if (StoreDB) StoreResults(PfilePk,atol(DBgetvalue(DBresults,i,0)),LicMetaPk,0);
+      if (!StoreDB || Verbose) printf("%s\n",DBgetvalue(DBresults,i,2));
+      /* No confidence in template's name. Use the canonical name. */
+      if (StoreDB) StoreResults(PfilePk,atol(DBgetvalue(DBresults,i,3)),LicMetaPk,0);
       HasOutput=1;
       }
     DBclose(DBresults);
@@ -565,7 +568,8 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	      PrintLicName(LicName,stdout);
 	      printf("\n");
 	      }
-	    if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,3);
+	    /* Use template's name = Phrase. */
+	    if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,0);
 	    }
 	  }
 	/* Got a bad match on a license */
@@ -577,7 +581,8 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	    PrintLicName(LicName,stdout);
 	    printf("'-partial\n");
 	    }
-	  if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,1);
+	  /* At least it is a partial match. */
+	  if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,2);
 	  }
 	}
 } /* ComputeConfidence() */
