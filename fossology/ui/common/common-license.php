@@ -85,12 +85,14 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
 	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
 	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_pk
 	LEFT OUTER JOIN licterm ON licterm_pk = licterm_name.licterm_fk
-	OR licterm_pk = licterm_maplic.licterm_fk;');
+	OR licterm_pk = licterm_maplic.licterm_fk
+	ORDER BY licterm_name_confidence,licterm_name;');
     $LicenceGetName_Prepared=1;
     }
 
   $FullName='';
   $Results = $DB->Execute("LicenseGetName_List",array($MetaId));
+  $LastConfidence=$Results[0]['licterm_name_confidence'];
   for($i=0; !empty($Results[$i]['lic_name']); $i++)
     {
     /* Get the components */
@@ -109,8 +111,13 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
       }
 
     /* Store it */
-    if (!empty($FullName)) { $FullName .= ", "; }
+    if (!empty($FullName))
+	{
+	if (empty($LastConfidence) || ($LastConfidence < 3) && ($Confidence >= 3) ) { $FullName .= " + "; }
+	else { $FullName .= ", "; }
+	}
     $FullName .= $Name;
+    $LastConfidence = $Confidence;
     }
 
   return($FullName);
