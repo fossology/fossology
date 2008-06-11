@@ -118,6 +118,7 @@ class licgroup_default extends FO_Plugin
       {
       $Name = $Lics[$i]['lic_name'];
       $InGroup=0;
+echo "$Name <br>";
       if (strstr($Name,"/Glide") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Academic Free License") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Academy of Motion Picture Arts and Sciences") != FALSE) { $InGroup = 1; }
@@ -163,6 +164,7 @@ class licgroup_default extends FO_Plugin
       else if (strstr($Name,"mecab-ipadic") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"X11") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"MPL 1.") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"MySQL/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Naumen Public License") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"NCSA") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Nethack") != FALSE) { $InGroup = 1; }
