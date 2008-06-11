@@ -59,9 +59,9 @@ class search_file_by_license extends FO_Plugin
         break;
       case "HTML":
 	$UploadTreePk = GetParm("item",PARM_INTEGER);
-	$LicPk = GetParm("lic",PARM_INTEGER);
 	$Page = GetParm("page",PARM_INTEGER);
-	if (empty($UploadTreePk) || empty($LicPk))
+	$WantLic = urldecode(GetParm("lic",PARM_TEXT));
+	if (empty($UploadTreePk) || empty($WantLic))
 		{
 		return;
 		}
@@ -69,17 +69,13 @@ class search_file_by_license extends FO_Plugin
 	$Offset = $Page * $Max;
 
 	/* Get License Name */
-	$Results = $DB->Action("SELECT * FROM agent_lic_raw WHERE lic_id = '$LicPk' LIMIT 1;");
-	$LicName = htmlentities($Results[0]['lic_name']);
-	if (empty($LicName)) { return; }
-	$V .= "The following files contain the license '<b>$LicName</b>'.\n";
+	$V .= "The following files contain the license '<b>";
+	$V .= htmlentities($WantLic);
+	$V .= "</b>'.\n";
 
 	/* Load licenses */
 	$Lics = array();
-	$M = $Max;
-	$O = $Offset;
-	$LicPkList = "lic_id=$LicPk";
-	LicenseGetAllFiles($UploadTreePk,$Lics,$LicPkList,$M,$O);
+	LicenseGetAllFilesWithCanonicalName($UploadTreePk,$Lics,$WantLic);
 
 	/* Save the license results */
 	$Count = count($Lics);
@@ -100,10 +96,9 @@ class search_file_by_license extends FO_Plugin
 	  $V .= "<P />\n";
 	  $L = &$Lics[$i];
 	  $Pos = $Offset + $i + 1;
-	  $Match = intval(20000*$L['tok_match'] / ($L['tok_pfile'] + $L['tok_license']))/100.0;
 	  $V .= "<table border=1 width='100%' style='background:lightyellow'>";
 	  $V .= "<tr><td align='center' width='5%'><font size='+2'>$Pos:</font></td>";
-	  $V .= "<td width='5%' align='right'>" . $Match . "%</td><td>";
+	  $V .= "<td>";
 	  if (!empty($L['phrase_text'])) { $V .= "<b>Phrase:</b> " . htmlentities($L['phrase_text']) . "\n"; }
 	  if (Isdir($L['ufile_mode']))
 	    {

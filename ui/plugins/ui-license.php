@@ -192,7 +192,6 @@ class ui_license extends FO_Plugin
     /* List the licenses */
     $VH .= "<table border=1 width='100%'>\n";
     $SFbL = plugin_find_id("search_file_by_license");
-$SFbL=-1; /* TBD: disable for now */
     $VH .= "<tr><th width='10%'>Count</th>";
     if ($SFbL >= 0) { $VH .= "<th width='10%'>Files</th>"; }
     $VH .= "<th>License</th>\n";
@@ -207,7 +206,7 @@ $SFbL=-1; /* TBD: disable for now */
 	  {
 	  $VH .= "<td align='center'><a href='";
 	  $VH .= Traceback_uri();
-	  $VH .= "?mod=search_file_by_license&item=$Item&lic=$GID'>Show</a></td>";
+	  $VH .= "?mod=search_file_by_license&item=$Item&lic=" . urlencode($Key) . "'>Show</a></td>";
 	  }
 	$VH .= "<td id='LicGroup-$GID'>";
 	$Uri = Traceback_uri() . "?mod=license_listing&item=$Item&lic=$GID";
