@@ -121,7 +121,7 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
  May return empty array if there is no license.
  ************************************************************/
 $LicenseGet_Prepared=0;
-function LicenseGet(&$PfilePk, &$Lics, $GetGroups=0)
+function LicenseGet(&$PfilePk, &$Lics, $GetPks=0)
 {
   global $LicenseGet_Prepared;
   global $DB;
@@ -143,7 +143,7 @@ function LicenseGet(&$PfilePk, &$Lics, $GetGroups=0)
   if (empty($Lics[' Total '])) { $Lics[' Total ']=0; }
   foreach($Results as $R)
     {
-    if ($GetGroups)
+    if ($GetPks)
 	{
 	$LicName = $R['lic_pk'];
 	}
@@ -168,7 +168,7 @@ function LicenseGet(&$PfilePk, &$Lics, $GetGroups=0)
  NOTE: This is recursive!
  ************************************************************/
 $LicenseGetAll_Prepared=0;
-function LicenseGetAll(&$UploadtreePk, &$Lics, $GetGroups=0)
+function LicenseGetAll(&$UploadtreePk, &$Lics, $GetPks=0)
 {
   global $Plugins;
   global $DB;
@@ -198,7 +198,7 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetGroups=0)
     {
     foreach($Results as $R)
       {
-      if ($GetGroups)
+      if ($GetPks)
 	{
 	$LicFk = $R['lic_pk'];
 	}
@@ -221,11 +221,67 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetGroups=0)
     {
     if (Iscontainer($Results[$i]['ufile_mode']))
 	{
-	LicenseGetAll($Results[$i]['uploadtree_pk'],$Lics,$GetGroups);
+	LicenseGetAll($Results[$i]['uploadtree_pk'],$Lics,$GetPks);
 	}
     }
   return;
 } // LicenseGetAll()
+
+/************************************************************
+ LicenseGetAllFilesWithCanonicalName(): Given an uploadtree_pk,
+ return all Pfile_pks that have the correct canonical/normalized name.
+ NOTE: This is recursive!
+ ************************************************************/
+$LicenseGetAllFilesWithCanonicalName_Prepared=0;
+function LicenseGetAllFilesWithCanonicalName (&$UploadtreePk, &$Lics, &$WantName)
+{
+  global $Plugins;
+  global $DB;
+  if (empty($DB)) { return; }
+  if (empty($UploadtreePk)) { return NULL; }
+
+  global $LicenseGetAllFilesWithCanonicalName_Prepared;
+  if (!$LicenseGetAllFilesWithCanonicalName_Prepared)
+    {
+    $DB->Prepare("LicenseGetAll_Lics",'SELECT DISTINCT uploadtree.pfile_fk AS pfile,ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name,lic_pk
+	FROM uploadtree
+	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = uploadtree.pfile_fk
+	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = $1
+	INNER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
+	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_pk
+	LEFT OUTER JOIN licterm ON licterm_pk = licterm_name.licterm_fk
+	OR licterm_pk = licterm_maplic.licterm_fk
+	WHERE parent = $1 ORDER BY uploadtree.pfile_fk;');
+    $DB->Prepare("LicenseGetAll_Traverse",'SELECT uploadtree_pk,ufile_mode FROM uploadtree WHERE parent = $1;');
+    $LicenseGetAllFilesWithCanonicalName_Prepared = 1;
+    }
+
+  /* Find every license under this UploadtreePk... */
+  $Results = $DB->Execute("LicenseGetAll_Lics",array($UploadtreePk));
+  if (!empty($Results) && (count($Results) > 0))
+    {
+    foreach($Results as $R)
+	{
+	$LicName = LicenseNormalizeName($R['lic_name'],$R['licterm_name_confidence'],$R['licterm_name']);
+        if ($LicName == $WantName)
+	  {
+	  $Lics[] = $R;
+	  }
+	}
+    }
+
+  /* Recurse */
+  $Results = $DB->Execute("LicenseGetAll_Traverse",array($UploadtreePk));
+  for($i=0; !empty($Results[$i]['uploadtree_pk']); $i++)
+    {
+    if (Iscontainer($Results[$i]['ufile_mode']))
+	{
+	LicenseGetAllFilesWithCanonicalName($Results[$i]['uploadtree_pk'],$Lics,$WantName);
+	}
+    }
+  return;
+} // LicenseGetAllFilesWithCanonicalName()
 
 /************************************************************
  LicenseGetAllFiles(): Returns all files under a tree that
