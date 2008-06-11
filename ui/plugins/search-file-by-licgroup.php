@@ -118,21 +118,22 @@ class search_file_by_licgroup extends FO_Plugin
 	/* Permit refining the search by license */
         /*****************************************/
 	$LicList = array();
-	LicenseGetAll($UploadTreePk,$LicList);
+	LicenseGetAll($UploadTreePk,$LicList,1);
 	$SQL = "SELECT DISTINCT lic_id,lic_name FROM agent_lic_raw
 		WHERE ($LicPkList)";
-	$SQL .= " AND (";
 	$First=1;
 	foreach($LicList as $L => $Lval)
 	  {
+	  if (empty($L)) { continue; }
 	  if (is_int($L))
 	    {
 	    if (!$First) { $SQL .= " OR"; }
+	    else { $SQL .= " AND ("; }
 	    $SQL .= " lic_pk=$L";
 	    $First=0;
 	    }
 	  }
-	$SQL .= ")";
+	if (!$First) { $SQL .= ")"; }
 	// print "<pre>" . strlen($SQL) . ": $SQL</pre>";
 	$Results = $DB->Action($SQL);
 	for($i=0; !empty($Results[$i]['lic_name']); $i++)
