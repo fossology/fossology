@@ -124,7 +124,7 @@ class licgroup_default extends FO_Plugin
       else if (strstr($Name,"Adobe") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Affero") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/Apache/") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/APSL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Apple Public Source License 2.0") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/Artistic 2.0") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/BitTorrent") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Boost") != FALSE) { $InGroup = 1; }
@@ -132,7 +132,7 @@ class licgroup_default extends FO_Plugin
       else if (strstr($Name,"BSD.old/BSD") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"CeCILL_V2") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/CMU/") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/CDDL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"CDDL/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Common Public License") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Condor") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/FreeWithCopyright/") != FALSE) { $InGroup = 1; }
@@ -140,16 +140,16 @@ class licgroup_default extends FO_Plugin
       else if (strstr($Name,"WTFP") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Eclipse Public License") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"eCos") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/MIT/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"MIT/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Eiffel Forum License 2") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"EU DataGrid Software License") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Fair License") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/FreeType/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"FreeType/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Giftware") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/GPL/v1/GPL") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/GPL/v2/GPL") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/GPL/v3/GPL") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/GPL/LGPL/LGPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"GPL/v1/GPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"GPL/v2/GPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"GPL/v3/GPL") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"GPL/LGPL/LGPL") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"gnuplot") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/IBM_PL/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Imlib2") != FALSE) { $InGroup = 1; }
@@ -174,7 +174,7 @@ class licgroup_default extends FO_Plugin
       else if (strstr($Name,"OpenSSL") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Phorum") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"PHP 3.0") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/Python/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Python/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Q Public License") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/RealNetworks/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Ruby") != FALSE) { $InGroup = 1; }
@@ -199,7 +199,7 @@ class licgroup_default extends FO_Plugin
       {
       $Name = $Lics[$i]['lic_name'];
       $InGroup=0;
-      if (strstr($Name,"/Adaptive/") != FALSE) { $InGroup = 1; }
+      if (strstr($Name,"Adaptive/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Aladdin") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Apple Public Source License 1") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/Artistic 1.0") != FALSE) { $InGroup = 1; }
@@ -313,14 +313,14 @@ class licgroup_default extends FO_Plugin
       else if (strstr($Name,"Cryptix") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Eiffel Forum License 2") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"EU DataGrid") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/MIT/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"MIT/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"FreeBSD") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Intel-OSL") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Microsoft Public License") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"NCSA") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"OpenLDAP") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Public Domain") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/Free/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"Free/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/Python Software Foundation 2./") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Ruby") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Starndard ML of New Jersey") != FALSE) { $InGroup = 1; }
@@ -345,10 +345,10 @@ class licgroup_default extends FO_Plugin
       else if (strstr($Name,"Apache Software License 1.") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Apple Public Source License 2.") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/BSD.old/BSD") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/CDDL/") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/CPL/") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/Condor/") != FALSE) { $InGroup = 1; }
-      else if (strstr($Name,"/EPL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"CDDL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"CPL/") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"/Condor") != FALSE) { $InGroup = 1; }
+      else if (strstr($Name,"EPL/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"/IBM_PL/") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Interbase") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Jabber") != FALSE) { $InGroup = 1; }
