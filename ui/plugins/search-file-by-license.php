@@ -75,7 +75,7 @@ class search_file_by_license extends FO_Plugin
 
 	/* Load licenses */
 	$Lics = array();
-	LicenseGetAllFilesWithCanonicalName($UploadTreePk,$Lics,$WantLic);
+	LicenseGetAllFilesByCanonicalName($UploadTreePk,$Lics,$WantLic);
 
 	/* Save the license results */
 	$Count = count($Lics);
