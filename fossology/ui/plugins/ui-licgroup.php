@@ -522,7 +522,23 @@ class licgroup extends FO_Plugin
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
     $MapLic2GID = array(); /* every license should have an ID number */
     $MapNext=0;
-    
+
+    /****************************************/
+    /* Load licenses */
+    $LicPk2GID=array();  // map lic_pk to the group id: lic_id
+    $LicGID2Name=array(); // map lic_id to name.
+    $Results = $DB->Action("SELECT lic_pk,lic_id,lic_name FROM agent_lic_raw ORDER BY lic_name;");
+    foreach($Results as $Key => $R)
+      {
+      if (empty($R['lic_name'])) { continue; }
+      $Name = basename($R['lic_name']);
+      $GID = $R['lic_id'];
+      $LicGID2Name[$GID] = $Name;
+      $LicPk2GID[$R['lic_pk']] = $GID;
+      }
+    if (empty($LicGID2Name[1])) { $LicGID2Name[1] = 'Phrase'; }
+    if (empty($LicPk2GID[1])) { $LicPk2GID[1] = 1; }
+
     /****************************************/
     /* Get the items under this UploadtreePk */
     $Children = DirGetList($Upload,$Item);
@@ -536,8 +552,8 @@ class licgroup extends FO_Plugin
 
       /* Load licenses for the item */
       $Lics = array();
-      if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics); }
-      else { LicenseGet($C['pfile_fk'],$Lics); }
+      if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics,1); }
+      else { LicenseGet($C['pfile_fk'],$Lics,1); }
 
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
@@ -568,30 +584,29 @@ class licgroup extends FO_Plugin
 
       /* Save the license results (also converts values to GID) */
       $GrpList=array();
-      foreach($Lics as $Key => $Val)
+      foreach($Lics as $Key => $Total)
 	{
 	if (empty($Key)) { continue; }
 	if ($Key != ' Total ')
 		{
-		$GID = $MapLic2GID[$Key];
+		$GID = $LicPk2GID[$Key];
 		/* Find every license group that includes the license */
 		$FoundGroup=0;
 		foreach($this->GrpInGroup as $G => $g)
 		  {
 		  if (!empty($this->GrpInGroup[$G]['l'.$GID]))
 		    {
-		    $this->GrpInGroup[$G]['count']+=$Val;
+		    $this->GrpInGroup[$G]['count']+=$Total;
 		    $GrpList[$G]=1;
 		    $FoundGroup=1;
 		    }
 		  }
 		if (!$FoundGroup)
 		    {
-		    $this->GrpInGroup['Gnone']['count']+=$Val;
+		    $this->GrpInGroup['Gnone']['count']+=$Total;
 		    $GrpList['Gnone']=1;
 		    }
 		}
-	else { $GID = $Key; }
 	}
 
       /* Populate the output ($VF) */
@@ -660,12 +675,12 @@ class licgroup extends FO_Plugin
     if ($this->GrpInGroup['Gnone']['count'] > 0)
       {
       $VH .= "<table border='1' width='100%'>";
-      $VH .= "<tr><td width='10%' align='right'>";
+      $VH .= "<tr><td width='15%' align='right'>";
       $VH .= number_format($this->GrpInGroup['Gnone']['count'],0,"",",");
       $VH .= "</td>";
       $VH .= "<td width='10%'></td>";
-      $VH .= "<td width='1%'><font color='white'>+</font></td>";
-      $VH .= "<td id='LicGroup Gnone '>";
+      $VH .= "<td width='1%' style='border-right:none;'><font color='white'>+</font></td>";
+      $VH .= "<td id='LicGroup Gnone ' style='border-left:none;'>";
       $VH .= "<a href=\"javascript:LicColor('LicGroup','Gnone','LicItem','Gnone','yellow')\">";
       $VH .= "License not part of any group";
       $VH .= "</a>";

@@ -26,13 +26,6 @@ if (!isset($GlobalReady)) { exit; }
 
 /************************************************************
  Developer notes:
- Licenses are identified by a three-digit number.
-   template.confidence.canonical
-   E.g., 12345.0.7
-
- The template identifies the actual lic_pk (from agent_lic_raw) used
- to complete the match.  The template must be provided.  All other
- values are optional.
 
  The confidence is a number used to identify how good the template is.
  Values are:
@@ -58,12 +51,16 @@ function LicenseNormalizeName	($LicName,$Confidence,$CanonicalName)
   if ($Confidence >= 3) { $Name = $CanonicalName; }
   else
     {
-    $Name = $LicName;
-    $Name = preg_replace("@.*/@","",$Name);
-    $Name = preg_replace("/ part.*/","",$Name);
-    $Name = preg_replace("/ short.*/","",$Name);
-    $Name = preg_replace("/ variant.*/","",$Name);
-    $Name = preg_replace("/ reference.*/","",$Name);
+    if (!empty($CanonicalName)) { $Name = $CanonicalName; }
+    else
+      {
+      $Name = $LicName;
+      $Name = preg_replace("@.*/@","",$Name);
+      $Name = preg_replace("/ part.*/","",$Name);
+      $Name = preg_replace("/ short.*/","",$Name);
+      $Name = preg_replace("/ variant.*/","",$Name);
+      $Name = preg_replace("/ reference.*/","",$Name);
+      }
     if ($Confidence == 1) { $Name = "'$Name'-style"; }
     else if ($Confidence == 2) { $Name = "'$Name'-partial"; }
     }
@@ -86,7 +83,9 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
 	INNER JOIN agent_lic_meta ON agent_lic_meta_fk = agent_lic_meta_pk
 	AND agent_lic_meta_fk = $1
 	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
-	LEFT OUTER JOIN licterm ON licterm_fk = licterm_pk;');
+	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_pk
+	LEFT OUTER JOIN licterm ON licterm_pk = licterm_name.licterm_fk
+	OR licterm_pk = licterm_maplic.licterm_fk;');
     $LicenceGetName_Prepared=1;
     }
 
@@ -122,32 +121,43 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
  May return empty array if there is no license.
  ************************************************************/
 $LicenseGet_Prepared=0;
-function LicenseGet(&$PfilePk, &$Lics)
+function LicenseGet(&$PfilePk, &$Lics, $GetGroups=0)
 {
   global $LicenseGet_Prepared;
   global $DB;
   if (empty($DB)) { return; }
   if (!$LicenseGet_Prepared)
     {
-    $DB->Prepare("LicenseGet_Licenses",'SELECT lic_name,licterm_name_confidence,licterm_name
+    $DB->Prepare("LicenseGet_License",'SELECT lic_name,licterm_name_confidence,licterm_name,lic_pk
 	FROM licterm_name
-	INNER JOIN agent_lic_meta ON licterm_name.pfile_fk = $1 AND agent_lic_meta_pk = agent_lic_meta_fk
+	INNER JOIN agent_lic_meta ON licterm_name.pfile_fk = $1
+	AND agent_lic_meta_pk = agent_lic_meta_fk
 	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
-	LEFT OUTER JOIN licterm ON licterm_pk = licterm_fk;');
+	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_pk
+	LEFT OUTER JOIN licterm ON licterm_pk = licterm_name.licterm_fk
+	OR licterm_pk = licterm_maplic.licterm_fk;');
     $LicenseGet_Prepared=1;
     }
-  $Results = $DB->Execute("LicenseGet_Licenses",array($PfilePk));
+  $Results = $DB->Execute("LicenseGet_License",array($PfilePk));
+
   if (empty($Lics[' Total '])) { $Lics[' Total ']=0; }
   foreach($Results as $R)
+    {
+    if ($GetGroups)
+	{
+	$LicName = $R['lic_pk'];
+	}
+    else
 	{
 	$LicName = LicenseNormalizeName($R['lic_name'],$R['licterm_name_confidence'],$R['licterm_name']);
-	if (!empty($LicName))
-	  {
-	  if (empty($Lics[$LicName])) { $Lics[$LicName]=1; }
-	  else { $Lics[$LicName]++; }
-	  $Lics[' Total ']++;
-	  }
 	}
+    if (!empty($LicName))
+	{
+	if (empty($Lics[$LicName])) { $Lics[$LicName]=1; }
+	else { $Lics[$LicName]++; }
+	$Lics[' Total ']++;
+	}
+    }
   return;
 } // LicenseGet()
 
@@ -158,7 +168,7 @@ function LicenseGet(&$PfilePk, &$Lics)
  NOTE: This is recursive!
  ************************************************************/
 $LicenseGetAll_Prepared=0;
-function LicenseGetAll(&$UploadtreePk, &$Lics)
+function LicenseGetAll(&$UploadtreePk, &$Lics, $GetGroups=0)
 {
   global $Plugins;
   global $DB;
@@ -168,24 +178,34 @@ function LicenseGetAll(&$UploadtreePk, &$Lics)
   global $LicenseGetAll_Prepared;
   if (!$LicenseGetAll_Prepared)
     {
-    $DB->Prepare("LicenseGetAll_License",'SELECT agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name
+    $DB->Prepare("LicenseGetAll_Licenses",'SELECT agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name,lic_pk
 	FROM uploadtree
 	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = uploadtree.pfile_fk
 	INNER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk
 	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
-	LEFT OUTER JOIN licterm ON licterm_fk = licterm_pk
+	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_pk
+	LEFT OUTER JOIN licterm ON licterm_pk = licterm_name.licterm_fk
+	OR licterm_pk = licterm_maplic.licterm_fk
 	WHERE parent = $1;');
     $DB->Prepare("LicenseGetAll_Traverse",'SELECT uploadtree_pk,ufile_mode FROM uploadtree WHERE parent = $1;');
     $LicenseGetAll_Prepared = 1;
     }
 
   /* Find every license under this UploadtreePk... */
-  $Results = $DB->Execute("LicenseGetAll_License",array($UploadtreePk));
+  $Results = $DB->Execute("LicenseGetAll_Licenses",array($UploadtreePk));
+  if (empty($Lics[' Total '])) { $Lics[' Total '] = 0; }
   if (!empty($Results) && (count($Results) > 0))
     {
     foreach($Results as $R)
       {
-      $LicFk = LicenseNormalizeName($R['lic_name'],$R['licterm_name_confidence'],$R['licterm_name']);
+      if ($GetGroups)
+	{
+	$LicFk = $R['lic_pk'];
+	}
+      else
+	{
+	$LicFk = LicenseNormalizeName($R['lic_name'],$R['licterm_name_confidence'],$R['licterm_name']);
+	}
       if (!empty($LicFk))
 	{
 	if (empty($Lics[$LicFk])) { $Lics[$LicFk]=1; }
@@ -201,7 +221,7 @@ function LicenseGetAll(&$UploadtreePk, &$Lics)
     {
     if (Iscontainer($Results[$i]['ufile_mode']))
 	{
-	LicenseGetAll($Results[$i]['uploadtree_pk'],$Lics);
+	LicenseGetAll($Results[$i]['uploadtree_pk'],$Lics,$GetGroups);
 	}
     }
   return;
