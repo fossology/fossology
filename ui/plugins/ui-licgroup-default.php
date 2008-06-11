@@ -118,7 +118,7 @@ class licgroup_default extends FO_Plugin
       {
       $Name = $Lics[$i]['lic_name'];
       $InGroup=0;
-echo "$Name <br>";
+#echo "$Name <br>";
       if (strstr($Name,"/Glide") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Academic Free License") != FALSE) { $InGroup = 1; }
       else if (strstr($Name,"Academy of Motion Picture Arts and Sciences") != FALSE) { $InGroup = 1; }
