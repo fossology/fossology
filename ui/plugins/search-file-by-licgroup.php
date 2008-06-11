@@ -141,6 +141,10 @@ class search_file_by_licgroup extends FO_Plugin
 	  $Results[$i]['lic_name'] = preg_replace("@^.*/@","",$Results[$i]['lic_name']);
 	  }
 	usort($Results,array($this,"CmpLicNames"));
+
+if (0)
+{
+/* TBD: Fix this so it works with license groups. */
 	$V .= "<form method='get' action='" . Traceback_uri() . "'>";
 	$V .= "Refine search by specific license: ";
 	$V .= "<input type='hidden' name='mod' value='search_file_by_license'>";
@@ -155,6 +159,7 @@ class search_file_by_licgroup extends FO_Plugin
 	$V .= "</select>";
 	$V .= "<input type='submit' value='Search!'>";
 	$V .= "</form>\n";
+}
 
         /*****************************************/
 	/* Save the license results */
