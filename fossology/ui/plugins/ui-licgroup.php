@@ -678,7 +678,13 @@ class licgroup extends FO_Plugin
       $VH .= "<tr><td width='15%' align='right'>";
       $VH .= number_format($this->GrpInGroup['Gnone']['count'],0,"",",");
       $VH .= "</td>";
-      $VH .= "<td width='10%'></td>";
+      $VH .= "<td width='10%' align='center'>";
+      $VH .= "<a href='" . Traceback_uri();
+      $VH .= "?mod=search_file_by_licgroup&item=$Item&licgroup=-1'>";
+      $VH .= "<font style='text-shadow: black 0px 0px 5px;'>";
+      $VH .= "Show";
+      $VH .= "</a>";
+      $VH .= "</td>";
       $VH .= "<td width='1%' style='border-right:none;'><font color='white'>+</font></td>";
       $VH .= "<td id='LicGroup Gnone ' style='border-left:none;'>";
       $VH .= "<a href=\"javascript:LicColor('LicGroup','Gnone','LicItem','Gnone','yellow')\">";

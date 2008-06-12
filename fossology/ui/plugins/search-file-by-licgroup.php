@@ -77,6 +77,7 @@ class search_file_by_licgroup extends FO_Plugin
       case "HTML":
 	$UploadTreePk = GetParm("item",PARM_INTEGER);
 	$LicGrpPk = GetParm("licgroup",PARM_INTEGER);
+	/* $LicGrpPk = -1 for "Not in any group" */
 	$Page = GetParm("page",PARM_INTEGER);
 	if (empty($UploadTreePk) || empty($LicGrpPk))
 		{
@@ -86,32 +87,58 @@ class search_file_by_licgroup extends FO_Plugin
 	$Offset = $Page * $Max;
 
 	/* Get License Name */
-	$Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_pk = '$LicGrpPk' LIMIT 1;");
-	$LicName = htmlentities($Results[0]['licgroup_name']);
-	if (empty($LicName)) { return; }
-	$V .= "The following files include licenses in the license group '<b>$LicName</b>'.\n";
+	if ($LicGrpPk != -1)
+	  {
+	  $Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_pk = '$LicGrpPk' LIMIT 1;");
+	  $LicName = htmlentities($Results[0]['licgroup_name']);
+	  if (empty($LicName)) { return; }
+	  $V .= "The following files include licenses in the license group '<b>$LicName</b>'.\n";
+	  }
+	else
+	  {
+	  $V .= "The following files are not included in any license groups..\n";
+	  }
 
 	/* Find the key associated with the group id */
 	$LicGrp = '';
-	foreach($LicGroup->GrpInGroup as $g)
-	  {
-	  if ($g['id'] == $LicGrpPk) { $LicGrp = $g; }
-	  }
-	if (empty($LicGrp)) { return; }
 
 	/* Load licenses */
 	$Lics = array();
 	$M = $Max;
 	$O = $Offset;
 	$LicPkList = '';
-	foreach($LicGrp as $Key => $Val)
+	if ($LicGrpPk != -1)
 	  {
-	  if (substr($Key,0,1) != 'l') { continue; }
-	  $LicPk = substr($Key,1);
-	  if (!empty($LicPkList)) { $LicPkList .= " OR "; }
-	  $LicPkList .= "lic_id=$LicPk";
+	  /* Build SQL for "is in this group" */
+	  foreach($LicGroup->GrpInGroup as $g)
+	    {
+	    if ($g['id'] == $LicGrpPk) { $LicGrp = $g; }
+	    }
+	  if (empty($LicGrp)) { return; }
+	  foreach($LicGrp as $Key => $Val)
+	    {
+	    if (substr($Key,0,1) != 'l') { continue; }
+	    $LicPk = substr($Key,1);
+	    if (!empty($LicPkList)) { $LicPkList .= " OR "; }
+	    $LicPkList .= "lic_id=$LicPk";
+	    }
+	  }
+	else
+	  {
+	  /* Build SQL for "not in any group" */
+	  foreach($LicGroup->GrpInGroup as $g)
+	    {
+	    foreach($g as $Key => $Val)
+	      {
+	      if (substr($Key,0,1) != 'l') { continue; }
+	      $LicPk = substr($Key,1);
+	      if (!empty($LicPkList)) { $LicPkList .= " OR "; }
+	      $LicPkList .= "lic_id!=$LicPk";
+	      }
+	    }
 	  }
 	LicenseGetAllFiles($UploadTreePk,$Lics,$LicPkList,$M,$O);
+
 	/* $LicPkList = all licenses in this group */
 
         /*****************************************/
