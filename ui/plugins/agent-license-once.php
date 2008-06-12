@@ -207,6 +207,7 @@ class agent_license_once extends FO_Plugin
 	  {
 	  $_FILES['licfile']['tmp_name'] = $Ftmp;
 	  $_FILES['licfile']['size'] = filesize($Ftmp);
+	  $_FILES['licfile']['unlink_flag'] = 1;
 	  }
 	else
 	  {
@@ -262,7 +263,8 @@ class agent_license_once extends FO_Plugin
 	    /* Size is not too big.  */
 	    print $this->AnalyzeOne($Highlight) . "\n";
 	    }
-	  unlink($_FILES['licfile']['tmp_name']);
+	  if (!empty($_FILES['licfile']['unlink_flag']))
+	    { unlink($_FILES['licfile']['tmp_name']); }
 	  return;
 	  }
 	else if (!empty($PfilePk) && !empty($DB))
@@ -282,8 +284,9 @@ class agent_license_once extends FO_Plugin
 	      /* Size is not too big.  */
 	      print $this->AnalyzeOne($Highlight) . "\n";
 	      }
-	    /* Unlink the file! */
-	    unlink($_FILES['licfile']['tmp_name']);
+	    /* Do not unlink the or it will delete the repo file! */
+	    if (!empty($_FILES['licfile']['unlink_flag']))
+	      { unlink($_FILES['licfile']['tmp_name']); }
 	    return;
 	    }
 	  }
