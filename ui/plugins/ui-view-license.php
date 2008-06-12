@@ -114,7 +114,7 @@ class ui_view_license extends FO_Plugin
     $Lic['tok_pfile'] = $Lic['tok_license'];
 
     /* Load the License name and data */
-    $Results = $DB->Action("SELECT lic_name FROM agent_lic_raw WHERE lic_pk = $LicPk;");
+    $Results = $DB->Action("SELECT lic_name, lic_url FROM agent_lic_raw WHERE lic_pk = $LicPk;");
     if (empty($Results[0]['lic_name'])) { return; }
 
     /* View license text as a temp file */
@@ -125,6 +125,7 @@ class ui_view_license extends FO_Plugin
     $this->ConvertLicPathToHighlighting($Lic,NULL);
     $Text = "<div class='text'>";
     $Text .= "<H1>License: " . $Results[0]['lic_name'] . "</H1>\n";
+    $Text .= "Reference URL: <a href=\"" . $Results[0]['lic_url'] . "\" target=_blank> " . $Results[0]['lic_url'] . "</a> <br>\n";
     $Text .= "</div>";
     $View->ShowView($Ftmp,"view",0,0,$Text);
     } // ViewLicense()
