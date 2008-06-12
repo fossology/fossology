@@ -282,7 +282,8 @@ class agent_license_once extends FO_Plugin
 	      /* Size is not too big.  */
 	      print $this->AnalyzeOne($Highlight) . "\n";
 	      }
-	    /* Do NOT unlink the file! */
+	    /* Unlink the file! */
+	    unlink($_FILES['licfile']['tmp_name']);
 	    return;
 	    }
 	  }
