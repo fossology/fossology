@@ -96,7 +96,7 @@ class search_file_by_licgroup extends FO_Plugin
 	  }
 	else
 	  {
-	  $V .= "The following files are not included in any license groups..\n";
+	  $V .= "The following files are not included in any license groups.\n";
 	  }
 
 	/* Find the key associated with the group id */
