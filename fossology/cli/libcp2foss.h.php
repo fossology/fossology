@@ -1,4 +1,5 @@
 <?php
+
 /***********************************************************
  libcp2foss.h.php
  Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
@@ -15,7 +16,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************//**
+ ***********************************************************/ /**
 
 /**
 * Library of functions that help cp2* do their job.
@@ -41,13 +42,17 @@
  *
  */
 
-function CreateFolder($parent_key, $folder_name, $description="") {
+function CreateFolder($parent_key, $folder_name, $description = "")
+{
   global $DB;
-  require_once("/usr/local/share/fossology/www/common/common-cli.php");
+  require_once ("/usr/local/share/fossology/www/common/common-cli.php");
 
   /* Check the name */
   $folder_name = trim($folder_name);
-  if (empty($folder_name)) { return(FALSE); }
+  if (empty ($folder_name))
+  {
+    return (FALSE);
+  }
 
   /* Make sure the parent folder exists */
   $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$parent_key';");
@@ -55,39 +60,43 @@ function CreateFolder($parent_key, $folder_name, $description="") {
   if ($Row['folder_pk'] != $parent_key)
   {
     // parent doesn't exist
-    return(FALSE);
+    return (FALSE);
   }
 
   // folder name exists under the parent?
   $Sql = "SELECT * FROM leftnav WHERE name = '$folder_name' AND
-                parent = '$parent_key' AND foldercontents_mode = '1';";
+                  parent = '$parent_key' AND foldercontents_mode = '1';";
   $Results = $DB->Action($Sql);
   //cli_PrintDebugMessage ("CreateFolder: results after under parent check",$Results);
-  if ($Results[0]['name'] == $folder_name) { return(0); }
+  if ($Results[0]['name'] == $folder_name)
+  {
+    return (0);
+  }
 
   /* Create the folder
    * Block SQL injection by protecting single quotes
    *
    * Protect the folder name with htmlentities.
    */
-  $folder_name = str_replace("'", "''", $folder_name);  // PostgreSQL quoting
-  $description = str_replace("'", "''", $description);            // PostgreSQL quoting
-  $IRes = $DB->Action(
-  "INSERT INTO folder (folder_name,folder_desc) VALUES ('$folder_name','$description');");
-  $Results = $DB->Action(
-  "SELECT folder_pk FROM folder WHERE folder_name='$folder_name' AND folder_desc = '$description';");
+  $folder_name = str_replace("'", "''", $folder_name); // PostgreSQL quoting
+  $description = str_replace("'", "''", $description); // PostgreSQL quoting
+  $IRes = $DB->Action("INSERT INTO folder (folder_name,folder_desc) VALUES ('$folder_name','$description');");
+  $Results = $DB->Action("SELECT folder_pk FROM folder WHERE folder_name='$folder_name' AND folder_desc = '$description';");
 
   //cli_PrintDebugMessage ("CreateFolder: results after INSERT getting folder_pk of ",$Results);
   $size = count($Results);
-  $FolderPk = $Results[$size-1]['folder_pk'];
+  $FolderPk = $Results[$size -1]['folder_pk'];
   //cli_PrintDebugMessage ("CreateFolder: Folder_pk is:$FolderPk");
-  if (empty($FolderPk)) { return(FALSE); }
+  if (empty ($FolderPk))
+  {
+    return (FALSE);
+  }
 
   $DB->Action("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$parent_key','1','$FolderPk');");
 
   $name_and_key[$folder_name] = $FolderPk;
 
-  return($name_and_key);
+  return ($name_and_key);
 }
 
 /**
@@ -106,49 +115,52 @@ function CreateFolder($parent_key, $folder_name, $description="") {
  *
  */
 
-function hash2bucket($name){
+function hash2bucket($name)
+{
 
   // convert to lower case, both upper and lower letters map to the
   // same alpha-group e.g. A => a-c, c => a-c
 
   $lc_name = strtolower($name);
 
-  $map = array('a' => 'a-c',
-               'b' => 'a-c',
-               'c' => 'a-c',
-               'd' => 'd-f',
-               'e' => 'd-f',
-               'f' => 'd-f',
-               'g' => 'g-i',
-               'h' => 'g-i',
-               'i' => 'g-i',
-               'j' => 'j-l',
-               'k' => 'j-l',
-               'l' => 'j-l',
-               'm' => 'm-o',
-               'n' => 'm-o',
-               'o' => 'm-o',
-               'p' => 'p-r',
-               'q' => 'p-r',
-               'r' => 'p-r',
-               's' => 's-u',
-               't' => 's-u',
-               'u' => 's-u',
-               'v' => 'v-z',
-               'w' => 'v-z',
-               'x' => 'v-z',
-               'y' => 'v-z',
-               'z' => 'v-z'
-               );
+  $map = array (
+    'a' => 'a-c',
+    'b' => 'a-c',
+    'c' => 'a-c',
+    'd' => 'd-f',
+    'e' => 'd-f',
+    'f' => 'd-f',
+    'g' => 'g-i',
+    'h' => 'g-i',
+    'i' => 'g-i',
+    'j' => 'j-l',
+    'k' => 'j-l',
+    'l' => 'j-l',
+    'm' => 'm-o',
+    'n' => 'm-o',
+    'o' => 'm-o',
+    'p' => 'p-r',
+    'q' => 'p-r',
+    'r' => 'p-r',
+    's' => 's-u',
+    't' => 's-u',
+    'u' => 's-u',
+    'v' => 'v-z',
+    'w' => 'v-z',
+    'x' => 'v-z',
+    'y' => 'v-z',
+    'z' => 'v-z'
+  );
 
-               // return 'Other' if the name starts with a non-alpha char.
-               $dir = $map[substr($lc_name,0,1)];
-               if (isset($dir)){
-                 return($dir);
-               }
-               else {
-                 return('Other');
-               }
+  // return 'Other' if the name starts with a non-alpha char.
+  $dir = $map[substr($lc_name, 0, 1)];
+  if (isset ($dir))
+  {
+    return ($dir);
+  } else
+  {
+    return ('Other');
+  }
 
 }
 
@@ -163,42 +175,47 @@ function hash2bucket($name){
  * @param string $recurse flag to indicate recursion is on.  Default is
  * off.
  *
- * @return string $tpath the path to the tar archive, or false
+ * @return string $tpath the path to the tar archive, or NULL
  *
  */
 
-function suckupfs($path, $recursion = false){
+function suckupfs($path, $recursion = false)
+{
 
-  $cwd       = '.';
+  $cwd = '.';
   $parentdir = '..';
-  $dirs      = array();
-  $other     = array();
+  $dirs = array ();
+  $other = array ();
   $dir_parts = pathinfo($path);
+  global $VARDATADIR;
 
   // check if the file exists (can you reach it? in the case of multiple
   // agent machines).
 
-  if( ! file_exists($path))
+  if (!file_exists($path))
   {
-    return(FALSE);
+    return (NULL);
   }
 
-  $SPATH = opendir($path)
-  or die("suckupfs: Can't open: $path $php_errormsg\n");
+  $SPATH = opendir($path) or die("suckupfs: Can't open: $path $php_errormsg\n");
 
-  while ($dir_entry = readdir($SPATH)){
+  while ($dir_entry = readdir($SPATH))
+  {
     //  echo "\$dir_entry is:$dir_entry\n";
-    if ($dir_entry == $cwd || $dir_entry == $parentdir) {
+    if ($dir_entry == $cwd || $dir_entry == $parentdir)
+    {
       continue;
     }
     $check = "$path" . '/' . "$dir_entry";
-    if(is_dir("$check")){
+    if (is_dir("$check"))
+    {
       $dirs[] = $dir_entry;
     }
-    elseif(is_file("$check")){
+    elseif (is_file("$check"))
+    {
       $files[] = $dir_entry;
-    }
-    else {
+    } else
+    {
       $other[] = $dir_entry;
     }
   }
@@ -211,35 +228,45 @@ function suckupfs($path, $recursion = false){
    * Always put the files in the list.  If recursion is on, put everything
    * else in the list as well.  Return the path to the tar file.
    */
-  foreach($files as $file){
+  foreach ($files as $file)
+  {
     $flist .= "$file ";
   }
-  if($recursion){
-    foreach($dirs as $ditem){
+  if ($recursion)
+  {
+    foreach ($dirs as $ditem)
+    {
       $flist .= "$ditem ";
     }
-    foreach($other as $item){
+    foreach ($other as $item)
+    {
       $flist .= " $item";
     }
   }
   chdir($path) or die("Can't cd to $path, $php_errormsg\n");
   $ftail = getmypid();
-  if(empty($ftail)){
+  if (empty ($ftail))
+  {
     $ftail = session_id();
   }
-  $tpath = '/tmp/' . "{$dir_parts['basename']}" . '.tar.bz2.' . "$ftail";
+  $tpath = "$VARDATADIR" . "/" . "{$dir_parts['basename']}" . '.tar.bz2.' . "$ftail";
   $tcmd = "tar -cjf $tpath --exclude='.svn' --exclude='.cvs' $flist 2>&1";
-  $last = exec($tcmd, &$tossme, &$rtn);
+
+  $last = exec($tcmd, & $tossme, & $rtn);
   // Tar almost never returns 0!  So if it's not 0, then check existence
   // and size.
-  if ($rtn >= 0){
-    //echo "\$tpath is:$tpath\n";
-    if(!(filesize($tpath))){
-      //echo "ERROR: filesize returned False\n";
-      return(FALSE);
-    }
-    else {
-      return($tpath);
+  if ($rtn >= 0)
+  {
+    if (file_exists($tpath))
+    {
+      if (!(filesize($tpath)))
+      {
+        return (NULL);
+      }
+      else
+      {
+        return ($tpath);
+      }
     }
   }
 }
@@ -257,18 +284,21 @@ function suckupfs($path, $recursion = false){
  * @return path to file(true) or false on wget failure
  */
 
-function wget_url($url){
+function wget_url($url)
+{
 
   // items we need
   $proxy = "export http_proxy='web-proxy.fc.hp.com:8088'; ";
   $options = '--no-check-certificate';
 
   // tmp files
-  if (!($wget_logfile = tempnam('/tmp', 'wgetlog-cp2-'))){
+  if (!($wget_logfile = tempnam('/tmp', 'wgetlog-cp2-')))
+  {
     echo "ERROR! could not create tmp file, $php_errormsg\n";
     return false;
   }
-  if (!($archive_tmp = tempnam('/tmp', 'cp2-archive-'))){
+  if (!($archive_tmp = tempnam('/tmp', 'cp2-archive-')))
+  {
     echo "ERROR! could not create/tmp file, $php_errormsg\n";
     return false;
   }
@@ -277,12 +307,14 @@ function wget_url($url){
   //pdbg ("\$wCmd is:\n$wCmd");
   exec("$wCmd", $dummy, $retval);
   //pdbg("Wget return code is:$retval");
-  if ($retval != 0){
+  if ($retval != 0)
+  {
     echo "ERROR: wget returned non-zero:$retval\n";
     echo "See the file /tmp$wget_tmpfile for details\n";
     return false;
   }
-  if(!ck4errors($wget_logfile)){
+  if (!ck4errors($wget_logfile))
+  {
     echo "ERROR: wgetreturned 0, but there were web errors\n";
     echo "See the file /tmp/$wget_tmpfile for details\n";
     return false;
@@ -304,38 +336,44 @@ function wget_url($url){
  * @return true if no errors false if errors are found
  */
 
-function ck4errors ($wget_logfile){
+function ck4errors($wget_logfile)
+{
 
   $contents = file($wget_logfile);
   $size = count($contents);
-  $stat_line = $contents[$size-2];
-  if(ereg('^Removed ',$stat_line)){
+  $stat_line = $contents[$size -2];
+  if (ereg('^Removed ', $stat_line))
+  {
     // adjust for a different case, if wget downloads a .listing file
     // it adjusts it be an index.html file instead.
-    $stat_line = $contents[$size-1];
+    $stat_line = $contents[$size -1];
   }
   //pdbg("_GFMP: Stat line is:\n$stat_line");
   // We shouldn't find errors like this in the file, wget is supposed to
   // have returned with 0 status.
-  if (ereg('ERROR 404:', $stat_line)){
+  if (ereg('ERROR 404:', $stat_line))
+  {
     echo "ERROR 404 found in file $dir_entry\n";
     echo "Line was:\n$stat_line\n";
-    return(false);
+    return (false);
   }
-  elseif (ereg('ERROR 502:', $stat_line)){
+  elseif (ereg('ERROR 502:', $stat_line))
+  {
     echo "ERROR 502 found in file $dir_entry\n$stat_line\n";
     echo "Line was:\n$stat_line\n";
-    return(false);
+    return (false);
   }
-  elseif (ereg('ERROR 503:', $stat_line)){
+  elseif (ereg('ERROR 503:', $stat_line))
+  {
     echo "ERROR 503 found in file $dir_entry\n$stat_line\n";
     echo "Line was:\n$stat_line\n";
-    return(false);
+    return (false);
   }
-  elseif (ereg('ERROR 400:', $stat_line)){
+  elseif (ereg('ERROR 400:', $stat_line))
+  {
     echo "ERROR 400 found in file $dir_entry\n$stat_line\n";
     echo "Line was:\n$stat_line\n";
-    return(false);
+    return (false);
   }
-  return(true);
+  return (true);
 }
