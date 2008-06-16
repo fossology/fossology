@@ -238,6 +238,8 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetPks=0)
  LicenseGetAllFilesByCanonicalName(): Given an uploadtree_pk,
  return all Pfile_pks that have the correct canonical/normalized name.
  NOTE: This is recursive!
+ NOTE: Duplicate names are NOT returned. If the same file sees the
+ same license 10 times, it will only be listed once.
  ************************************************************/
 $LicenseGetAllFilesByCanonicalName_Prepared=0;
 function LicenseGetAllFilesByCanonicalName (&$UploadtreePk, &$Lics, &$WantName)
@@ -268,12 +270,14 @@ function LicenseGetAllFilesByCanonicalName (&$UploadtreePk, &$Lics, &$WantName)
   $Results = $DB->Execute("LicenseGetAllFilesByCanonicalName_Lics",array($UploadtreePk));
   if (!empty($Results) && (count($Results) > 0))
     {
+    $LastName="";
     foreach($Results as $R)
 	{
 	$LicName = LicenseNormalizeName($R['lic_name'],$R['licterm_name_confidence'],$R['licterm_name']);
-        if ($LicName == $WantName)
+        if (($LicName == $WantName) && ($LicName != $LastName))
 	  {
 	  $Lics[] = $R;
+	  $LastName = $LicName;
 	  }
 	}
     }
