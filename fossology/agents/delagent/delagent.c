@@ -108,12 +108,10 @@ void	DeleteLicense	(long UploadId)
   /* Create the temp table */
   if (Verbose) { printf("  Creating temp table: %s\n",TempTable); }
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT ufile_pk,pfile_pk INTO TEMP %s FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk = '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk;",TempTable,UploadId);
-  MyDBaccess(DB,SQL);
 
   /* Get the list of pfiles to process */
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_pk) FROM %s;",TempTable);
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_pk) FROM uploadtree WHERE upload_fk = '%ld' ;",UploadId);
   MyDBaccess(DB,SQL);
   VDB = DBmove(DB);
 
@@ -159,8 +157,6 @@ void	DeleteLicense	(long UploadId)
 	raise(SIGALRM);
 	}
   if (Verbose) { printf("Deleted licenses for upload %ld\n",UploadId); }
-  snprintf(SQL,sizeof(SQL),"DROP TABLE %s;",TempTable);
-  MyDBaccess(DB,SQL);
 } /* DeleteLicense() */
 
 /*********************************************
@@ -272,7 +268,7 @@ void	DeleteUpload	(long UploadId)
   /* Create the temp table */
   if (Verbose) { printf("  Creating file table: %s\n",TempTable); }
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT ufile_pk,pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO TEMP %s FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk = '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk;",TempTable,UploadId);
+  snprintf(SQL,sizeof(SQL),"SELECT ufile_pk,pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO TEMP %s FROM uploadtree, pfile WHERE uploadtree.upload_fk = '%ld' AND uploadtree.pfile_fk = pfile.pfile_pk;",TempTable,UploadId);
   MyDBaccess(DB,SQL);
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT COUNT(*) FROM %s;",TempTable);
