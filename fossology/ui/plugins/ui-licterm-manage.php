@@ -692,6 +692,10 @@ function moveOptions(theSelFrom, theSelTo)
 
     $DB->Action("DELETE FROM licterm_map WHERE licterm_fk = '$TermKey';");
     $DB->Action("VACUUM ANALYZE licterm_map;");
+
+    $DB->Action("DELETE FROM licterm_maplic WHERE licterm_fk = '$TermKey';");
+    $DB->Action("VACUUM ANALYZE licterm_maplic;");
+
     if ($DeleteAll)
       {
       $DB->Action("DELETE FROM licterm WHERE licterm_pk = '$TermKey';");
@@ -702,7 +706,7 @@ function moveOptions(theSelFrom, theSelTo)
   /***********************************************************
    LicTermInsert(): Insert a term record into the DB.
    ***********************************************************/
-  function LicTermInsert	($TermKey='',$TermName='',$TermDesc='',$TermListWords=NULL, $LicList=NULL, $DeleteAll=1)
+  function LicTermInsert	($TermKey='',$TermName='',$TermDesc='',$TermList=NULL, $LicList=NULL, $DeleteAll=1)
     {
     global $DB;
     if (empty($TermKey)) { $TermKey = GetParm('termkey',PARM_INTEGER); }
