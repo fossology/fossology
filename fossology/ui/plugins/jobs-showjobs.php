@@ -285,7 +285,7 @@ class jobs_showjobs extends FO_Plugin
     /*****************************************************************/
     /* Get Jobs that are NOT associated with uploads (e.g., folder delete). */
     /*****************************************************************/
-    $Count = 0; /* count number of jobs */
+    $Count = 1; /* count number of jobs */
     for($i=1; !empty($Results[$i]['upload_pk']); $i++)
       {
       if ($Results[$i]['upload_pk'] != $Results[$i+1]['upload_pk'])
