@@ -678,7 +678,7 @@ function moveOptions(theSelFrom, theSelTo)
   /***********************************************************
    LicTermDelete(): Delete a term record from the DB.
    ***********************************************************/
-  function LicTermDelete	()
+  function LicTermDelete	($DeleteAll=1)
     {
     global $DB;
     $TermName = GetParm('name',PARM_TEXT);
@@ -691,15 +691,18 @@ function moveOptions(theSelFrom, theSelTo)
     $TermName = GetParm('name',PARM_TEXT);
 
     $DB->Action("DELETE FROM licterm_map WHERE licterm_fk = '$TermKey';");
-    $DB->Action("DELETE FROM licterm WHERE licterm_pk = '$TermKey';");
     $DB->Action("VACUUM ANALYZE licterm_map;");
-    $DB->Action("VACUUM ANALYZE licterm;");
+    if ($DeleteAll)
+      {
+      $DB->Action("DELETE FROM licterm WHERE licterm_pk = '$TermKey';");
+      $DB->Action("VACUUM ANALYZE licterm;");
+      }
     } // LicTermDelete()
 
   /***********************************************************
    LicTermInsert(): Insert a term record into the DB.
    ***********************************************************/
-  function LicTermInsert	($TermKey='',$TermName='',$TermDesc='',$TermListWords=NULL)
+  function LicTermInsert	($TermKey='',$TermName='',$TermDesc='',$TermListWords=NULL, $LicList=NULL, $DeleteAll=1)
     {
     global $DB;
     if (empty($TermKey)) { $TermKey = GetParm('termkey',PARM_INTEGER); }
@@ -707,7 +710,7 @@ function moveOptions(theSelFrom, theSelTo)
     if (empty($TermName)) { $TermName = GetParm('name',PARM_TEXT); }
     if (empty($TermDesc)) { $TermDesc = GetParm('desc',PARM_TEXT); }
     /* Check if values look good */
-    $rc = $this->LicTermWordDelete();
+    $rc = $this->LicTermWordDelete($DeleteAll);
     if (empty($TermName))
 	{
 	if ($rc == "") { return; }
@@ -752,7 +755,7 @@ function moveOptions(theSelFrom, theSelTo)
     $TermKey = $Results[0]['licterm_pk'];
 
     /* Now add in all the terms */
-    $TermList = GetParm('termlist',PARM_RAW);
+    if (empty($TermList)) { $TermList = GetParm('termlist',PARM_RAW); }
     $DB->Action("DELETE FROM licterm_map WHERE licterm_fk = '$TermKey';");
     for($i=0; !empty($TermList[$i]); $i++)
       {
@@ -776,7 +779,7 @@ function moveOptions(theSelFrom, theSelTo)
     $DB->Action("VACUUM ANALYZE licterm_map;");
 
     /* Now add in all the licenses */
-    $LicList = GetParm('liclist',PARM_RAW);
+    if (empty($LicList)) { $LicList = GetParm('liclist',PARM_RAW); }
     $DB->Action("DELETE FROM licterm_maplic WHERE licterm_fk = '$TermKey';");
     for($i=0; !empty($LicList[$i]); $i++)
       {
