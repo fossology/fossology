@@ -104,7 +104,7 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
     /* Normalize the name */
     $Name = LicenseNormalizeName($Name,$Confidence,$LicTerm);
 
-    if (!empty($Phrase))
+    if (!empty($Phrase) && ($Confidence < 3))
       {
       $Name = "Phrase";
       if ($IncludePhrase) { $Name .= ": $Phrase"; }
