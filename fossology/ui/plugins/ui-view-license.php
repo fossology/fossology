@@ -172,14 +172,13 @@ class ui_view_license extends FO_Plugin
 	if (empty($R['pfile_path'])) { continue; }
 	if (!empty($R['phrase_text']))
 		{
-		$LicName = "Phrase: " . $R['phrase_text'];
 		$RefURL = NULL;
 		}
 	else
 		{
-		$LicName = LicenseGetName($R['agent_lic_meta_pk'],1);
 		$RefURL=Traceback() . "&lic=" . $R['lic_fk'] . "&licset=" . $R['tok_pfile_start'];
 		}
+	$LicName = LicenseGetName($R['agent_lic_meta_pk'],1);
 	$this->ConvertLicPathToHighlighting($R,$LicName,$RefURL);
 	}
       }
