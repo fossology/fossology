@@ -228,7 +228,7 @@ class agent_license_once extends FO_Plugin
       {
       if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)	// Debugging changes to license analysis
 	{
-	menu_insert("Main::Jobs::Analyze::One-Shot License",$this->MenuOrder,$this->Name,$this->MenuTarget);
+	menu_insert("Main::Upload::One-Shot License",$this->MenuOrder,$this->Name,$this->MenuTarget);
 	}
       if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG)	// Debugging changes to license analysis
 	{
