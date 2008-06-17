@@ -125,7 +125,7 @@ class ui_view_license extends FO_Plugin
     $this->ConvertLicPathToHighlighting($Lic,NULL);
     $Text = "<div class='text'>";
     $Text .= "<H1>License: " . $Results[0]['lic_name'] . "</H1>\n";
-    $Text .= "Reference URL: <a href=\"" . $Results[0]['lic_url'] . "\" target=_blank> " . $Results[0]['lic_url'] . "</a> <br>\n";
+    $Text .= "Reference URL: <a href=\"" . $Results[0]['lic_url'] . "\" target=_blank> " . $Results[0]['lic_url'] . "</a> <hr>\n";
     $Text .= "</div>";
     $View->ShowView($Ftmp,"view",0,0,$Text);
     } // ViewLicense()
