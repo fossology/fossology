@@ -268,7 +268,7 @@ void	DeleteUpload	(long UploadId)
   /* Create the temp table */
   if (Verbose) { printf("  Creating file table: %s\n",TempTable); }
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT ufile_pk,pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO TEMP %s FROM uploadtree, pfile WHERE uploadtree.upload_fk = '%ld' AND uploadtree.pfile_fk = pfile.pfile_pk;",TempTable,UploadId);
+  snprintf(SQL,sizeof(SQL),"SELECT ufile_fk,pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO TEMP %s FROM uploadtree, pfile WHERE uploadtree.upload_fk = '%ld' AND uploadtree.pfile_fk = pfile.pfile_pk;",TempTable,UploadId);
   MyDBaccess(DB,SQL);
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT COUNT(*) FROM %s;",TempTable);
