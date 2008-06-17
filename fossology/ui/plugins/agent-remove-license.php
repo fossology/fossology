@@ -87,7 +87,7 @@ class agent_remove_licenseMeta extends FO_Plugin
       }
     }
     return(NULL);
-  } // RemovelicenseMeta
+  } // RemoveLicenseMeta()
 
   /*********************************************
    Output(): Generate the text for this plugin.
@@ -104,7 +104,7 @@ class agent_remove_licenseMeta extends FO_Plugin
       case "HTML":
         /* If this is a POST, then process the request. */
         $upload_pk = GetParm('upload',PARM_INTEGER);
-        $Restart = GetParm('ReDoLisc',PARM_STRING);
+        $Restart = GetParm('ReDoLic',PARM_STRING);
         if (!empty($upload_pk)){
           $rc = $this->RemoveLicenseMeta($upload_pk, $depends, $Restart);
           if (empty($rc))
@@ -112,7 +112,14 @@ class agent_remove_licenseMeta extends FO_Plugin
           {
             // Need to refresh the screen
             $V .= "<script language='javascript'>\n";
-            $V .= "alert('License Data Removal added to job queue')\n";
+	    if ($Restart)
+	      {
+              $V .= "alert('License data re-analysis added to job queue')\n";
+	      }
+	    else
+	      {
+              $V .= "alert('License data removal added to job queue')\n";
+	      }
             $V .= "</script>\n";
           }
           else
@@ -171,7 +178,7 @@ class agent_remove_licenseMeta extends FO_Plugin
         }
         $V .= "</select><P />\n";
         $V .= "<li>After the license data is removed you can reschedule the License Analysis by checking the box below<br />";
-        $V .= "<input type='checkbox' name='ReDoLisc' value='Y' />";
+        $V .= "<input type='checkbox' name='ReDoLic' value='Y' />";
         $V .= "Reschedule License Analysis?<br /><br />\n";
         $V .= "</ol>\n";
         $V .= "<input type='submit' value='Commit!'>\n";
