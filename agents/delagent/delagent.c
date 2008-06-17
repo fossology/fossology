@@ -111,7 +111,7 @@ void	DeleteLicense	(long UploadId)
 
   /* Get the list of pfiles to process */
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_pk) FROM uploadtree WHERE upload_fk = '%ld' ;",UploadId);
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_fk) FROM uploadtree WHERE upload_fk = '%ld' ;",UploadId);
   MyDBaccess(DB,SQL);
   VDB = DBmove(DB);
 
