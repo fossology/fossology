@@ -1,24 +1,5 @@
 SGI FREE SOFTWARE LICENSE B (Version 1.0 [1/25/2000])
 
-1. Definitions.
-
-   1. "Additional Notice Provisions" means such additional provisions as appear in the Notice in Original Code under the heading "Additional Notice Provisions."
-   2. "API" means an application programming interface established by SGI in conjunction with the Original Code.
-   3. "Covered Code" means the Original Code or Modifications or the combination of the Original Code and Modifications, in each case including portions thereof.
-   4. "Hardware" means any physical device that accepts input, processes input, stores the results of processing, and/or provides output.
-   5. "Larger Work" means a work which combines Covered Code or portions thereof with code not governed by the terms of this License.
-   6. "Licensable" means having the right to grant, to the maximum extent possible, whether at the time of the initial grant or subsequently acquired, any and all of the rights conveyed herein.
-   7. "License" means this document.
-   8. "Modifications" means any addition to or deletion from the substance or structure of either the Original Code or any previous Modifications. When Covered Code is released as a series of files, a Modification is: 
-
-         1. Any addition to or deletion from the contents of a file containing Original Code or previous Modifications.
-         2. Any new file that contains any part of the Original Code or previous Modifications.
-
-   9. "Notice" means any notice in Original Code or Covered Code, as required by and in compliance with this License.
-  10. "Original Code" means source code of computer software code which is described in the source code Notice required by Exhibit A as Original Code, and updates and error corrections specifically thereto.
-  11. "Recipient" means an individual or a legal entity exercising rights under, and complying with all of the terms of, this License or a future version of this License issued under Section 8. For legal entities, "Recipient" includes any entity which controls, is controlled by, or is under common control with Recipient. For purposes of this definition, "control" of an entity means (a) the power, direct or indirect, to direct or manage such entity, or (b) ownership of fifty percent (50%) or more of the outstanding shares or beneficial ownership of such entity.
-  12. "SGI" means Silicon Graphics, Inc.
-
 2. License Grant and Restrictions.
 
    1. License Grant. Subject to the provisions of this License and any third party intellectual property claims, for the duration of intellectual property protections inherent in the Original Code, SGI hereby grants Recipient a worldwide, royalty-free, non-exclusive license, to do the following: (i) under copyrights Licensable by SGI, to reproduce, distribute, create derivative works from, and, to the extent applicable, display and perform the Original Code alone and/or as part of a Larger Work; and (ii) under any patent claims Licensable by SGI and embodied in the Original Code, to make, have made, use, practice, sell, and offer for sale, and/or otherwise dispose of the Original Code. Recipient accepts the terms and conditions of this License by undertaking any of the aforementioned actions.
