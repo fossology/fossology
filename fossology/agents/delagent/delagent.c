@@ -310,22 +310,22 @@ void	DeleteUpload	(long UploadId)
   /* delete pfiles that are missing reuse in the DB */
   if (Verbose) { printf("  Deleting from agent_lic_status\n"); }
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
 
   if (Verbose) { printf("  Deleting from agent_lic_meta\n"); }
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
 
   if (Verbose) { printf("  Deleting from attrib\n"); }
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM attrib WHERE pfile_fk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM attrib WHERE pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
 
   if (Verbose) { printf("  Deleting from ufile\n"); }
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk != %ld AND pfile_fk IN (SELECT pfile_pk FROM %s_pfile);",UploadPfile,TempTable);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk != %ld AND pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",UploadPfile,TempTable);
   MyDBaccess(DB,SQL);
 
   if (Verbose) { printf("  Deleting from pfile\n"); }
@@ -373,7 +373,7 @@ void	DeleteUpload	(long UploadId)
   /* Delete the upload's files */
   memset(SQL,'\0',sizeof(SQL));
   if (Verbose) { printf("  Deleting upload's ufile\n"); }
-  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk = %ld AND pfile_fk IN (SELECT pfile_pk FROM %s_pfile);",UploadPfile,TempTable);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk = %ld AND pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",UploadPfile,TempTable);
   MyDBaccess(DB,SQL);
 
   memset(SQL,'\0',sizeof(SQL));
