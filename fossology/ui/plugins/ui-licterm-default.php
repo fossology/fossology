@@ -237,6 +237,9 @@ class licterm_default extends FO_Plugin
     $Term["GPLv1"]["Term"][4]="gplv1";
     $Term["GPLv1"]["Term"][5]="gpl v1";
     $Term["GPLv1"]["Term"][6]="gpl version 1";
+    $Term["GPLv1"]["License"][0]="GPL/v1/GPLv1";
+    $Term["GPLv1"]["License"][1]="GPL/v1/GPLv1 Preamble";
+    $Term["GPLv1"]["License"][2]="GPL/v1/GPLv1 reference";
     /* Canonical name: 5 */
     $Term["GPLv2"]["Desc"]="Gnu Public License version 2";
     $Term["GPLv2"]["Term"][0]="gnu general public licence 2";
@@ -256,6 +259,19 @@ class licterm_default extends FO_Plugin
     $Term["GPLv2"]["Term"][14]="gpl v2";
     $Term["GPLv2"]["Term"][15]="gpl version 2";
     $Term["GPLv2"]["License"][0]="GPL/v2/eCos";
+    $Term["GPLv2"]["License"][1]="GPL/v2/GPL from FSF reference 1";
+    $Term["GPLv2"]["License"][2]="GPL/v2/GPL from FSF reference 2";
+    $Term["GPLv2"]["License"][3]="GPL/v2/GPLv2";
+    $Term["GPLv2"]["License"][4]="GPL/v2/GPLv2 Preamble";
+    $Term["GPLv2"]["License"][5]="GPL/v2/GPLv2 reference";
+    $Term["GPLv2"]["License"][6]="GPL/v2/GPLv2 reference 1";
+    $Term["GPLv2"]["License"][7]="GPL/v2/GPLv2 reference 2";
+    $Term["GPLv2"]["License"][8]="GPL/v2/GPLv2 reference 3";
+    $Term["GPLv2"]["License"][9]="GPL/v2/GPLv2 reference 4";
+    $Term["GPLv2"]["License"][10]="GPL/v2/GPLv2 reference 5";
+    $Term["GPLv2"]["License"][11]="GPL/v2/GPLv2 reference 6";
+    $Term["GPLv2"]["License"][12]="GPL/v2/GPLv2 reference 7";
+    $Term["GPLv2"]["License"][13]="GPL/v2/GPLv2 reference 8";
     /* Canonical name: 6 */
     $Term["GPLv3"]["Desc"]="Gnu Public License version 3";
     $Term["GPLv3"]["Term"][0]="gnu general public licence 3";
@@ -274,6 +290,10 @@ class licterm_default extends FO_Plugin
     $Term["GPLv3"]["Term"][13]="gplv3";
     $Term["GPLv3"]["Term"][14]="gpl v3";
     $Term["GPLv3"]["Term"][15]="gpl version 3";
+    $Term["GPLv3"]["License"][0]="GPL/v3/GPLv3";
+    $Term["GPLv3"]["License"][1]="GPL/v3/GPLv3 Preamble";
+    $Term["GPLv3"]["License"][2]="GPL/v3/GPLv3 reference 1";
+    $Term["GPLv3"]["License"][3]="GPL/v3/GPLv3 reference 2";
     /* Canonical name: 98 */
     $Term["gSOAP"]["Desc"]="gSOAP Public License";
     $Term["gSOAP"]["Term"][0]="gsoap public license";
@@ -287,18 +307,23 @@ class licterm_default extends FO_Plugin
     $Term["LaTeX Project Public License"]["Term"][1]="lppl";
     /* Canonical name: 75 */
     $Term["LGPL"]["Desc"]="GNU Library General Public License";
-    $Term["LGPL"]["Term"][0]="gnu lesser general public license";
-    $Term["LGPL"]["Term"][1]="gnu lesser public license";
-    $Term["LGPL"]["Term"][2]="gnu library general public license";
-    $Term["LGPL"]["Term"][3]="lesser general public license";
-    $Term["LGPL"]["Term"][4]="lesser gpl";
-    $Term["LGPL"]["Term"][5]="lgpl";
-    $Term["LGPL"]["Term"][6]="lgplv2";
-    $Term["LGPL"]["Term"][7]="lgplv3";
-    $Term["LGPL"]["Term"][8]="lgpl version 2";
-    $Term["LGPL"]["Term"][9]="lgpl version 3";
-    $Term["LGPL"]["Term"][10]="library general public license";
-    $Term["LGPL"]["Term"][11]="library gpl";
+    $Term["LGPL"]["Term"][0]="gnu lesser general public licence";
+    $Term["LGPL"]["Term"][1]="gnu lesser general public license";
+    $Term["LGPL"]["Term"][2]="gnu lesser public licence";
+    $Term["LGPL"]["Term"][3]="gnu lesser public license";
+    $Term["LGPL"]["Term"][4]="gnu library general public licence";
+    $Term["LGPL"]["Term"][5]="gnu library general public license";
+    $Term["LGPL"]["Term"][6]="lesser general public licence";
+    $Term["LGPL"]["Term"][7]="lesser general public license";
+    $Term["LGPL"]["Term"][8]="lesser gpl";
+    $Term["LGPL"]["Term"][9]="lgpl";
+    $Term["LGPL"]["Term"][10]="lgplv2";
+    $Term["LGPL"]["Term"][11]="lgplv3";
+    $Term["LGPL"]["Term"][12]="lgpl version 2";
+    $Term["LGPL"]["Term"][13]="lgpl version 3";
+    $Term["LGPL"]["Term"][14]="library general public licence";
+    $Term["LGPL"]["Term"][15]="library general public license";
+    $Term["LGPL"]["Term"][16]="library gpl";
     /* Canonical name: 82 */
     $Term["MPL"]["Desc"]="MPL";
     $Term["MPL"]["Term"][0]="mozillapl";
@@ -383,7 +408,7 @@ class licterm_default extends FO_Plugin
     $Term["SunVariant2"]["Desc"]="Sun Microsystems variant 2";
     $Term["SunVariant2"]["Term"][0]="sun or x consortium";
     /* Canonical name: 41 */
-    $Term["UofUtahPL"]["Desc"]="University of Utah Research Foundation Public License";
+    $Term["UofUtahPL"]["Desc"]="UNIVERSITY OF UTAH RESEARCH FOUNDATION PUBLIC LICENSE";
     $Term["UofUtahPL"]["Term"][0]="university of utah research foundation public license";
     /* Canonical name: 39 */
     $Term["Vovida"]["Desc"]="Vovida Software License";
