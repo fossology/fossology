@@ -119,6 +119,7 @@ class licterm_default extends FO_Plugin
     $Term["Affero GPL"]["Term"][1]="affero general public license";
     $Term["Affero GPL"]["License"][0]="GPL/Affero/Affero GPL 1.0";
     $Term["Affero GPL"]["License"][1]="GPL/Affero/Affero GPL 3.0";
+    $Term["Affero GPL"]["License"][2]="GPL/Affero/Affero Preamble 1.0";
     /* Canonical name: 10 */
     $Term["AFL"]["Desc"]="Academic Free License";
     $Term["AFL"]["Term"][0]="academic free license";
@@ -449,8 +450,11 @@ class licterm_default extends FO_Plugin
     /**************************************/
 
     $LT = &$Plugins[plugin_find_id("licterm_manage")];
+    print "<ol>\n";
     foreach($Term as $Key => $Val)
       {
+      print "<li>Creating default canonical name: " . htmlentities($Key) . "\n";
+
       /* Get the list of licenses */
       $SQL = "SELECT DISTINCT lic_id FROM agent_lic_raw WHERE lic_pk=lic_id AND (";
       $First=0;
@@ -479,6 +483,7 @@ class licterm_default extends FO_Plugin
       /** Delete terms and license mappings, but not the canonical names **/
       $LT->LicTermInsert('',$Key,$Val['Desc'],$TermList,$LicList,0);
       }
+    print "</ol><hr>\n";
     } // DefaultTerms()
 
   /***********************************************************
