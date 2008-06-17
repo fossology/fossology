@@ -135,12 +135,12 @@ function LicenseGet(&$PfilePk, &$Lics, $GetPks=0)
   if (empty($DB)) { return; }
   if (!$LicenseGet_Prepared)
     {
-    $DB->Prepare("LicenseGet_License",'SELECT lic_name,licterm_name_confidence,licterm_name,lic_pk
+    $DB->Prepare("LicenseGet_License",'SELECT lic_name,licterm_name_confidence,licterm_name,lic_id
 	FROM licterm_name
 	INNER JOIN agent_lic_meta ON licterm_name.pfile_fk = $1
 	AND agent_lic_meta_pk = agent_lic_meta_fk
 	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
-	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_pk
+	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
 	LEFT OUTER JOIN licterm ON licterm_pk = licterm_name.licterm_fk
 	OR licterm_pk = licterm_maplic.licterm_fk;');
     $LicenseGet_Prepared=1;
@@ -152,7 +152,7 @@ function LicenseGet(&$PfilePk, &$Lics, $GetPks=0)
     {
     if ($GetPks)
 	{
-	$LicName = $R['lic_pk'];
+	$LicName = $R['lic_id'];
 	}
     else
 	{
@@ -185,12 +185,12 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetPks=0)
   global $LicenseGetAll_Prepared;
   if (!$LicenseGetAll_Prepared)
     {
-    $DB->Prepare("LicenseGetAll_Licenses",'SELECT agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name,lic_pk
+    $DB->Prepare("LicenseGetAll_Licenses",'SELECT agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name,lic_id
 	FROM uploadtree
 	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = uploadtree.pfile_fk
 	INNER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk
 	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
-	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_pk
+	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
 	LEFT OUTER JOIN licterm ON licterm_pk = licterm_name.licterm_fk
 	OR licterm_pk = licterm_maplic.licterm_fk
 	WHERE parent = $1;');
@@ -207,7 +207,7 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetPks=0)
       {
       if ($GetPks)
 	{
-	$LicFk = $R['lic_pk'];
+	$LicFk = $R['lic_id'];
 	}
       else
 	{
@@ -258,7 +258,7 @@ function LicenseGetAllFilesByCanonicalName (&$UploadtreePk, &$Lics, &$WantName)
 	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = $1
 	INNER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk
 	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
-	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_pk
+	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
 	LEFT OUTER JOIN licterm ON licterm_pk = licterm_name.licterm_fk
 	OR licterm_pk = licterm_maplic.licterm_fk
 	WHERE parent = $1 ORDER BY uploadtree.pfile_fk;');
