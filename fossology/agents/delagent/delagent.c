@@ -255,7 +255,7 @@ void	DeleteUpload	(long UploadId)
 
   /* Retrieve upload info -- these are special and must be deleted last
      due to constraints */
-  if (Verbose) { printf("  Retrieving upload informations\n"); }
+  if (Verbose) { printf("  Retrieving upload information\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT ufile.ufile_pk,ufile.pfile_fk FROM upload INNER JOIN ufile ON upload.upload_pk = %ld AND ufile.ufile_pk = upload.ufile_fk;",UploadId);
   rc = MyDBaccess(DB,SQL);
@@ -308,6 +308,11 @@ void	DeleteUpload	(long UploadId)
 
   /***********************************************/
   /* delete pfiles that are missing reuse in the DB */
+  if (Verbose) { printf("  Deleting from licterm_name\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name WHERE pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",TempTable);
+  MyDBaccess(DB,SQL);
+
   if (Verbose) { printf("  Deleting from agent_lic_status\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",TempTable);
