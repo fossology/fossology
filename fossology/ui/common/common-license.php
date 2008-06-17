@@ -83,7 +83,7 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
 	INNER JOIN agent_lic_meta ON agent_lic_meta_fk = agent_lic_meta_pk
 	AND agent_lic_meta_fk = $1
 	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
-	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_pk
+	LEFT OUTER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
 	LEFT OUTER JOIN licterm ON licterm_pk = licterm_name.licterm_fk
 	OR licterm_pk = licterm_maplic.licterm_fk
 	ORDER BY licterm_name_confidence,licterm_name;');
