@@ -184,8 +184,12 @@ class ui_browse extends FO_Plugin
   function ShowFolder($Folder,$Show)
     {
     global $Plugins;
-    $V="";
     global $DB;
+
+    $ReAnalyze = &$Plugins[plugin_find_id("agent_reset_license")]; /* may be null */
+    $Analyze = &$Plugins[plugin_find_id("agent_license")]; /* may be null */
+
+    $V="";
     $Sql = "SELECT * FROM upload
 	INNER JOIN ufile ON ufile_pk = ufile_fk
 	WHERE upload_pk IN
@@ -230,7 +234,7 @@ class ui_browse extends FO_Plugin
 	  $ItemCount = number_format($SResults[0]['count'], 0, "", ",");
           $V .= "<tr><td>";
           $V .= "<a href='$Uri&upload=$UploadPk&folder=$Folder&show=$Show'>";
-          $V .= $Name . "/";
+          $V .= "<b>" . $Name . "/</b>";
           $V .= "</a>";
 	  if ($Row['upload_mode'] & 1<<2) { $V .= "<br>Added by URL: " . htmlentities($Row['upload_filename']); }
 	  if ($Row['upload_mode'] & 1<<3) { $V .= "<br>Added by file upload: " . htmlentities($Row['upload_filename']); }
@@ -242,6 +246,7 @@ class ui_browse extends FO_Plugin
 	  $V .= "</td>\n";
           $V .= "<td align='right'>" . substr($Row['upload_ts'],0,16) . "</td></tr>\n";
 
+	  /* Check job status */
 	  $Status = JobListSummary($UploadPk);
 	  $V .= "<td>Scheduled ";
 	  if (plugin_find_id('showjobs') >= 0)
@@ -254,6 +259,28 @@ class ui_browse extends FO_Plugin
 	  if (!empty($Status['pending'])) { $V .= $Status['active'] . " active; "; }
 	  $V .= $Status['failed'] . " failed.";
 
+	  /* Check for re-do license analysis */
+	  if (!empty($ReAnalyze))
+	    {
+	    /* Check if the analysis already exists and is not running */
+	    $V .= "<tr><td>";
+	    $Status = $Analyze->AgentCheck($UploadPk);
+	    $Uri = Traceback_uri() . "?mod=" . $this->Name . Traceback_parm_keep(array("folder"));
+	    if ($Status == 0)
+		{
+		$V .= "<a href='";
+		$V .= $Uri . "&analyze=$UploadPk";
+		$V .= "'>Schedule</a> license analysis";
+		}
+	    else if ($Status == 2)
+		{
+		$V .= "<a href='";
+		$V .= $Uri . "&reanalyze=$UploadPk";
+		$V .= "'>Reschedule</a> license analysis";
+		}
+	    }
+
+	  /* End of the record */
           $V .= "<tr><td colspan=2>&nbsp;</td></tr>\n";
           }
         $V .= "</table>\n";
@@ -288,6 +315,40 @@ class ui_browse extends FO_Plugin
 		$Show='simple';
 		break;
 	}
+
+    /* Check for re-analysis */
+    $ReAnalyze = &$Plugins[plugin_find_id("agent_reset_license")]; /* may be null */
+    $Analyze = &$Plugins[plugin_find_id("agent_license")]; /* may be null */
+    $UploadPk = GetParm("reanalyze",PARM_INTEGER);
+    if (!empty($ReAnalyze) && !empty($UploadPk))
+      {
+      $rc = $ReAnalyze->RemoveLicenseMeta($UploadPk,NULL,1);
+      $V .= "<script language='javascript'>\n";
+      if (empty($rc))
+        {
+	$V .= "alert('License data re-analysis added to job queue')\n";
+	}
+      else
+	{
+	$V .= "alert('$rc')\n";
+	}
+      $V .= "</script>\n";
+      }
+    $UploadPk = GetParm("analyze",PARM_INTEGER);
+    if (!empty($Analyze) && !empty($UploadPk))
+      {
+      $rc = $Analyze->AgentAdd($UploadPk);
+      $V .= "<script language='javascript'>\n";
+      if (empty($rc))
+        {
+	$V .= "alert('License data analysis added to job queue')\n";
+	}
+      else
+	{
+	$V .= "alert('$rc')\n";
+	}
+      $V .= "</script>\n";
+      }
 
     switch($this->OutputType)
       {
