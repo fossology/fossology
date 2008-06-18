@@ -173,6 +173,7 @@ class licterm_default extends FO_Plugin
     $Term["BSD"]["License"][12]="BSD/BSD.old/FreeBSD";
     $Term["BSD"]["License"][13]="BSD/BSD.old/INRIA-OSL";
     $Term["BSD"]["License"][14]="BSD/BSD.old/Intel-OSL";
+    $Term["BSD"]["License"][15]="Free/FreeWithCopyright/UC Regents free with copyright clause";
     /* Canonical name: 60 */
     $Term["CDDL"]["Desc"]="Common Development and Distribution License";
     $Term["CDDL"]["Term"][0]="cddl";

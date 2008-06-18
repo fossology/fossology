@@ -104,7 +104,8 @@ class ui_view_license extends FO_Plugin
     /* Find the license path */
     if (!empty($PfilePk))
       {
-      $Results = $DB->Action("SELECT license_path,tok_match,tok_license FROM agent_lic_meta WHERE pfile_fk = $PfilePk AND lic_fk = $LicPk AND tok_pfile_start = $TokPfileStart ORDER BY version DESC LIMIT 1;");
+      $SQL = "SELECT license_path,tok_match,tok_license FROM agent_lic_meta WHERE pfile_fk = $PfilePk AND lic_fk = $LicPk AND tok_pfile_start = $TokPfileStart ORDER BY version DESC LIMIT 1;";
+      $Results = $DB->Action($SQL);
       $Lic = $Results[0];
       if (empty($Lic['license_path'])) { return; }
       }
@@ -125,7 +126,11 @@ class ui_view_license extends FO_Plugin
     $this->ConvertLicPathToHighlighting($Lic,NULL);
     $Text = "<div class='text'>";
     $Text .= "<H1>License: " . $Results[0]['lic_name'] . "</H1>\n";
-    $Text .= "Reference URL: <a href=\"" . $Results[0]['lic_url'] . "\" target=_blank> " . $Results[0]['lic_url'] . "</a> <hr>\n";
+    if (!empty($Results[0]['lic_url']))
+      {
+      $Text .= "Reference URL: <a href=\"" . $Results[0]['lic_url'] . "\" target=_blank> " . $Results[0]['lic_url'] . "</a>";
+      }
+    $Text .= "<hr>\n";
     $Text .= "</div>";
     $View->ShowView($Ftmp,"view",0,0,$Text);
     } // ViewLicense()
