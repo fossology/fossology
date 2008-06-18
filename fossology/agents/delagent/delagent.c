@@ -106,7 +106,7 @@ void	DeleteLicense	(long UploadId)
   snprintf(TempTable,sizeof(TempTable),"DelLic_%ld",UploadId);
 
   /* Create the temp table */
-  if (Verbose) { printf("  Creating temp table: %s\n",TempTable); }
+  if (Verbose) { printf("# Creating temp table: %s\n",TempTable); }
   memset(SQL,'\0',sizeof(SQL));
 
   /* Get the list of pfiles to process */
@@ -117,7 +117,7 @@ void	DeleteLicense	(long UploadId)
 
   /***********************************************/
   /* delete pfile licenses */
-  if (Verbose) { printf("  Deleting licenses\n"); }
+  if (Verbose) { printf("# Deleting licenses\n"); }
   MaxRow = DBdatasize(VDB);
   for(Row=0; Row<MaxRow; Row++)
     {
@@ -139,12 +139,12 @@ void	DeleteLicense	(long UploadId)
 
   /***********************************************/
   /* Commit the change! */
-  if (Verbose) { printf("  Delete completed\n"); }
+  if (Verbose) { printf("# Delete completed\n"); }
   if (Test) MyDBaccess(DB,"ROLLBACK;");
   else
 	{
 	MyDBaccess(DB,"COMMIT;");
-	if (Verbose) { printf("  Running vacuum and analyze\n"); }
+	if (Verbose) { printf("# Running vacuum and analyze\n"); }
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
 	}
@@ -184,7 +184,7 @@ void	DeleteUpload	(long UploadId)
   /***********************************************/
   /* Delete the upload from the folder-contents table */
   memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("  Deleting foldercontents\n"); }
+  if (Verbose) { printf("# Deleting foldercontents\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE (foldercontents_mode & 2) != 0 AND child_id = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
@@ -192,9 +192,9 @@ void	DeleteUpload	(long UploadId)
 	{
 	/* The UI depends on uploadtree and folders for navigation.
 	   Delete them now to block timeouts from the UI. */
-	if (Verbose) { printf("  COMMIT;\n"); }
+	if (Verbose) { printf("# COMMIT;\n"); }
 	MyDBaccess(DB,"COMMIT;");
-	if (Verbose) { printf("  BEGIN;\n"); }
+	if (Verbose) { printf("# BEGIN;\n"); }
 	MyDBaccess(DB,"BEGIN;");
 	}
 
@@ -255,7 +255,7 @@ void	DeleteUpload	(long UploadId)
 
   /* Retrieve upload info -- these are special and must be deleted last
      due to constraints */
-  if (Verbose) { printf("  Retrieving upload information\n"); }
+  if (Verbose) { printf("# Retrieving upload information\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT ufile.ufile_pk,ufile.pfile_fk FROM upload INNER JOIN ufile ON upload.upload_pk = %ld AND ufile.ufile_pk = upload.ufile_fk;",UploadId);
   rc = MyDBaccess(DB,SQL);
@@ -263,28 +263,28 @@ void	DeleteUpload	(long UploadId)
   if (DBdatasize(DB) <= 0) { return; } /* no such job! */
   UploadUfile = atol(DBgetvalue(DB,0,0));
   UploadPfile = atol(DBgetvalue(DB,0,1));
-  if (Verbose) { printf("    UploadId = %ld  Ufile=%ld  Pfile=%ld\n",UploadId,UploadUfile,UploadPfile); }
+  if (Verbose) { printf("#   UploadId = %ld  Ufile=%ld  Pfile=%ld\n",UploadId,UploadUfile,UploadPfile); }
 
   /* Create the temp table */
-  if (Verbose) { printf("  Creating file table: %s\n",TempTable); }
+  if (Verbose) { printf("# Creating file table: %s\n",TempTable); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT ufile_fk,pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO TEMP %s FROM uploadtree, pfile WHERE uploadtree.upload_fk = '%ld' AND uploadtree.pfile_fk = pfile.pfile_pk;",TempTable,UploadId);
   MyDBaccess(DB,SQL);
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT COUNT(*) FROM %s;",TempTable);
   MyDBaccess(DB,SQL);
-  if (Verbose) { printf("  Created file table: %ld entries\n",atol(DBgetvalue(DB,0,0))); }
+  if (Verbose) { printf("# Created file table: %ld entries\n",atol(DBgetvalue(DB,0,0))); }
 
   /* Get the list of pfiles to delete */
   /** These are all pfiles in the upload_fk that only appear once. **/
   memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("  Getting list of pfiles to delete\n"); }
+  if (Verbose) { printf("# Getting list of pfiles to delete\n"); }
   snprintf(SQL,sizeof(SQL),"SELECT DISTINCT pfile_pk,pfile INTO TEMP %s_pfile FROM %s WHERE pfile_pk NOT IN ( SELECT DISTINCT pfile_pk FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk != '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk);",TempTable,TempTable,UploadId);
   MyDBaccess(DB,SQL);
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT COUNT(*) FROM %s_pfile;",TempTable);
   MyDBaccess(DB,SQL);
-  if (Verbose) { printf("  Created pfile table: %ld entries\n",atol(DBgetvalue(DB,0,0))); }
+  if (Verbose) { printf("# Created pfile table: %ld entries\n",atol(DBgetvalue(DB,0,0))); }
 
   /* Get the file listing -- needed for deleting pfiles from the repository. */
   memset(SQL,'\0',sizeof(SQL));
@@ -302,38 +302,38 @@ void	DeleteUpload	(long UploadId)
   /***********************************************/
   /* Blow away uploadtree */
   memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("  Deleting uploadtree\n"); }
+  if (Verbose) { printf("# Deleting uploadtree\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM uploadtree WHERE upload_fk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   /***********************************************/
   /* delete pfiles that are missing reuse in the DB */
-  if (Verbose) { printf("  Deleting from licterm_name\n"); }
+  if (Verbose) { printf("# Deleting from licterm_name\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name WHERE pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
 
-  if (Verbose) { printf("  Deleting from agent_lic_status\n"); }
+  if (Verbose) { printf("# Deleting from agent_lic_status\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
 
-  if (Verbose) { printf("  Deleting from agent_lic_meta\n"); }
+  if (Verbose) { printf("# Deleting from agent_lic_meta\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
 
-  if (Verbose) { printf("  Deleting from attrib\n"); }
+  if (Verbose) { printf("# Deleting from attrib\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM attrib WHERE pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
 
-  if (Verbose) { printf("  Deleting from ufile\n"); }
+  if (Verbose) { printf("# Deleting from ufile\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk != %ld AND pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",UploadPfile,TempTable);
   MyDBaccess(DB,SQL);
 
-  if (Verbose) { printf("  Deleting from pfile\n"); }
+  if (Verbose) { printf("# Deleting from pfile\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM pfile WHERE pfile_pk != %ld AND pfile_pk IN (SELECT pfile_pk FROM %s_pfile);",UploadPfile,TempTable);
   MyDBaccess(DB,SQL);
@@ -354,35 +354,35 @@ void	DeleteUpload	(long UploadId)
    The solution is to delete the jobqueue LAST, so the scheduler won't hang.
    *****/
   memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("  Deleting jobdepends\n"); }
+  if (Verbose) { printf("# Deleting jobdepends\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM jobdepends WHERE jdep_jq_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk IN (SELECT job_pk FROM job WHERE job_upload_fk = %ld));",UploadId);
   MyDBaccess(DB,SQL);
 
   memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("  Deleting jobqueue\n"); }
+  if (Verbose) { printf("# Deleting jobqueue\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM jobqueue WHERE jq_job_fk IN (SELECT job_pk FROM job WHERE job_upload_fk = %ld);",UploadId);
   MyDBaccess(DB,SQL);
 
   memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("  Deleting job\n"); }
+  if (Verbose) { printf("# Deleting job\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM job WHERE job_upload_fk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   /***********************************************/
   /* Delete the actual upload */
   memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("  Deleting upload\n"); }
+  if (Verbose) { printf("# Deleting upload\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM upload WHERE upload_pk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
   /* Delete the upload's files */
   memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("  Deleting upload's ufile\n"); }
+  if (Verbose) { printf("# Deleting upload's ufile\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk = %ld AND pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",UploadPfile,TempTable);
   MyDBaccess(DB,SQL);
 
   memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("  Deleting upload's pfile\n"); }
+  if (Verbose) { printf("# Deleting upload's pfile\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM pfile WHERE pfile_pk = %ld AND pfile_pk IN (SELECT pfile_pk FROM %s_pfile);",UploadPfile,TempTable);
   MyDBaccess(DB,SQL);
 
@@ -390,14 +390,14 @@ void	DeleteUpload	(long UploadId)
   /* Commit the change! */
   if (Test)
 	{
-	if (Verbose) { printf("  ROLLBACK\n"); }
+	if (Verbose) { printf("# ROLLBACK\n"); }
 	MyDBaccess(DB,"ROLLBACK;");
 	}
   else
 	{
-	if (Verbose) { printf("  COMMIT\n"); }
+	if (Verbose) { printf("# COMMIT\n"); }
 	MyDBaccess(DB,"COMMIT;");
-	if (Verbose) { printf("  VACUUM and ANALYZE\n"); }
+	if (Verbose) { printf("# VACUUM and ANALYZE\n"); }
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
 	MyDBaccess(DB,"VACUUM ANALYZE attrib;");
