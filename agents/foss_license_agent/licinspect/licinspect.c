@@ -301,7 +301,7 @@ void	GetTerms	()
   DBTerms = NULL;
   TermsCounter = NULL;
   TermsCounterSize = 0;
-  rc = DBaccess(DB,"SELECT licterm_words_pk,licterm_words_text FROM licterm_words ORDER BY licterm_words_text DESC;");
+  rc = DBaccess(DB,"SELECT licterm_words_pk,licterm_words_text,length(licterm_words_text) AS length FROM licterm_words ORDER BY length DESC;");
   if (rc < 0) return;
   if (DBdatasize(DB) <= 0)
     {
@@ -346,6 +346,47 @@ int	MatchTerm	(char *Term, char *Str, long StrLen)
 } /* MatchTerm() */
 
 /*********************************************************
+ MatchTermRev(): Like MatchTerm(), but checks if the term
+ is found at the beginning of Str.  This is used for cases
+ where the bSAM match truncates the beginning of the term.
+ The match MUST include outside of the beginning of the range.
+ Returns length of match, or 0 on miss.
+ - All comparisons are lowercase.
+ - Any space in the term string is treated as one or more "not alnum".
+ *********************************************************/
+int	MatchTermRev	(char *Term, char *Str, long Start, long End)
+{
+  long t,j;
+  int TermLen;
+  /* start at the end of the string */
+  TermLen = strlen(Term)-1;
+  /* Move start so it begins at the END of the word */
+  while((Start < End) && isalnum(Str[Start+1])) Start++;
+  if (tolower(Term[TermLen]) != tolower(Str[Start]))
+    {
+    return(0); /* missed */
+    }
+
+  j=Start;
+  for(t=TermLen; t>=0; t--)
+    {
+    if (j < 0) return(0); /* miss: too short */
+    if (isspace(Term[t]))
+      {
+      if (isalnum(Str[j])) return(0); /* miss */
+      while((j>=0) && !isalnum(Str[j])) j--;
+      }
+    else
+      {
+      if (tolower(Term[t]) != tolower(Str[j])) return(0); /* miss */
+      j--;
+      }
+    } /* for each Term[t] */
+  /* Matched all characters in the term. */
+  return(j < Start); /* must have missed */
+} /* MatchTermRev() */
+
+/*********************************************************
  DiscoverTerms(): Given a range, identify all of the matched terms.
  NOTE: This populates TermsCounter with the number of times
  the term is seen.  The value of TermsCounter come from Mask:
@@ -369,12 +410,22 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
     rc=0;
     for(t=0; !rc && (t<TermsCounterSize); t++)
       {
-      rc = MatchTerm(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap+i),Mmap->MmapSize-i);
-      if (rc > 0)
-	{
-	if (Verbose > 2) printf("Matched: Term='%s' rc=%d\n",DBgetvalue(DBTerms,t,1),rc);
-	i+=rc;
+      /* Check if the term is hanging off the front */
+      if (MatchTermRev(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap),i,Mmap->MmapSize))
+        {
+	if (Verbose > 2) printf("Matched Rev: Term='%s'\n",DBgetvalue(DBTerms,t,1));
+	i+=1;
 	TermsCounter[t] |= Mask;
+	}
+      else
+        {
+        rc = MatchTerm(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap+i),Mmap->MmapSize-i);
+        if (rc > 0)
+	  {
+	  if (Verbose > 2) printf("Matched: Term='%s' rc=%d\n",DBgetvalue(DBTerms,t,1),rc);
+	  i+=rc;
+	  TermsCounter[t] |= Mask;
+	  }
 	}
       }
 
@@ -688,6 +739,12 @@ void	ProcessTerms	()
       LicMmap = RepMmapFile(LicName);
       if (LicMmap)
 	{
+        if (Verbose > 2)
+	  {
+	  printf("============================================\n");
+	  printf("%.*s\n",(int)(End-Start),LicMmap->Mmap + Start);
+	  printf("============================================\n");
+	  }
 	DiscoverTerms(Start,End,LicMmap,0x02);
 	RepMunmap(LicMmap);
 	}
