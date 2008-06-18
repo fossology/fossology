@@ -76,6 +76,7 @@ char *GoodWords[] =
   "permission",
   "permissions",
   "proprietary",
+  "redistributed",
   "redistribution",
   "restriction",
   "restrictions",
