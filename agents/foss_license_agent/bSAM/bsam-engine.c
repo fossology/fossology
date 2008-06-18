@@ -2550,6 +2550,7 @@ int	SAMfilesExhaustiveB	()
   /* store best matches */
   matrixstate BMS;	/* best matrix match */
   int HasMatch=0;
+  int BestCmp;
 
   /* don't even load the ones that are too small */
   if (MS.Symbols[0].SymbolEnd < MatchLen[0]) return(0);
@@ -2583,7 +2584,14 @@ int	SAMfilesExhaustiveB	()
 	  /* Determine:
 	     IF it has a better percentage OR
 	     it has the same percentage, but more tokens that match */
-	  if (MS.Matrix.MatrixMax > BMS.Matrix.MatrixMax)
+	  BestCmp = (MS.Matrix.MatrixMax > BMS.Matrix.MatrixMax);
+	  if (!BestCmp && (MS.Matrix.MatrixMax == BMS.Matrix.MatrixMax))
+	    {
+	    /* If same match, choose the one with the fewest skipped */
+	    BestCmp = (MS.Matrix.MatrixMaxPos[1]-MS.Matrix.MatrixMinPos[1]) <
+		      (BMS.Matrix.MatrixMaxPos[1]-BMS.Matrix.MatrixMinPos[1]);
+	    }
+	  if (BestCmp)
 	    {
 	    if (MS.Matrix.MatrixMinPos[0] < MS.Matrix.MatrixMaxPos[0])
 		{
