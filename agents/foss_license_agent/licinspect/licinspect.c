@@ -399,6 +399,8 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
   int t; /* which term to look for */
   long i; /* which byte to look at */
   int rc;
+  int CheckRev=1;
+
   i=Start;
   while(i<=End)
     {
@@ -411,11 +413,12 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
     for(t=0; !rc && (t<TermsCounterSize); t++)
       {
       /* Check if the term is hanging off the front */
-      if (MatchTermRev(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap),i,Mmap->MmapSize))
+      if (CheckRev && MatchTermRev(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap),i,Mmap->MmapSize))
         {
 	if (Verbose > 2) printf("Matched Rev: Term='%s'\n",DBgetvalue(DBTerms,t,1));
 	i+=1;
 	TermsCounter[t] |= Mask;
+	CheckRev=0;
 	}
       else
         {
@@ -425,6 +428,7 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
 	  if (Verbose > 2) printf("Matched: Term='%s' rc=%d\n",DBgetvalue(DBTerms,t,1),rc);
 	  i+=rc;
 	  TermsCounter[t] |= Mask;
+	  CheckRev=0;
 	  }
 	}
       }
