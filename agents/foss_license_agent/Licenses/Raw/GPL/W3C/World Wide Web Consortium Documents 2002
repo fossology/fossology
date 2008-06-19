@@ -1,7 +1,5 @@
-****** W3C® DOCUMENT NOTICE AND LICENSE ******
-**** Copyright © 1994-2002 
-All Rights Reserved.
-http://www.w3.org/Consortium/Legal/ ****
+W3C® DOCUMENT LICENSE
+http://www.w3.org/Consortium/Legal/2002/copyright-documents-20021231
 
 Public documents on the W3C site are provided by the copyright holders under
 the following license. The software or Document Type Definitions (DTDs)
@@ -45,10 +43,3 @@ The name and trademarks of copyright holders may NOT be used in advertising or
 publicity pertaining to this document or its contents without specific, written
 prior permission. Title to copyright in this document will at all times remain
 with copyright holders.
-
-This formulation of W3C's notice and license became active on April 05 1999 so
-as to account for the treatment of DTDs, schema's and bindings. See the 
-for the policy prior to this date. Please see our for
-common questions about using materials from our site, including specific terms
-and conditions for packages like libwww, Amaya, and Jigsaw. Other questions
-about this notice can be directed to .
