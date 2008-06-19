@@ -6,7 +6,7 @@ CC=gcc
 CFLAGS=-O -Wall -DFOSSREPO_CONF='"$(DATADIR)/repository"' -DFOSSGROUP='"$(PROJECTGROUP)"' $(CFLAGS2)
 #CFLAGS=-g -Wall -lefence -DFOSSREPO_CONF='"$(DATADIR)/repository"' $(CFLAGS2)
 LIB=libfossrepo.a
-EXE=reppath repwrite repcat repexist repcopyin repremove rephost
+EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck
 
 all: $(LIB) $(EXE)
 
@@ -52,6 +52,9 @@ repcopyin: repcopyin.c $(LIB)
 
 repremove: repremove.c $(LIB)
 	$(CC) $(CFLAGS) -o repremove repremove.c -L . -lfossrepo
+
+repmmapcheck: repmmapcheck.c $(LIB)
+	$(CC) $(CFLAGS) -o repmmapcheck repmmapcheck.c -L . -lfossrepo
 
 clean:
 	$(RM) $(LIB) $(EXE) *.o
