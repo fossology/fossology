@@ -546,7 +546,7 @@ int	RepFclose	(FILE *F)
 {
   if (!F) return(0);
   return(fclose(F));
-} /* RepFread() */
+} /* RepFclose() */
 
 /***********************************************
  RepFread(): Perform an fopen for reading only.
