@@ -195,13 +195,16 @@ class admin_check_template extends FO_Plugin
     if ($Verbose)
       {
       print "<H3>Checking for Uploads to Re-analyze</H3>\n";
-      print "The impacted uploads:<br>\n";
-      print "<ul>\n";
-      for($i=0; !empty($Uploads[$i]['upload_fk']); $i++)
-	{
-	print "<li>" . htmlentities($Uploads[$i]['upload_filename']) . "\n";
+      if (count($UploadList) > 0)
+        {
+        print "The impacted uploads:<br>\n";
+        print "<ul>\n";
+        for($i=0; !empty($Uploads[$i]['upload_fk']); $i++)
+	  {
+	  print "<li>" . htmlentities($Uploads[$i]['upload_filename']) . "\n";
+	  }
+        print "</ul>\n";
 	}
-      print "</ul>\n";
       }
 
     return($UploadList);
@@ -296,6 +299,12 @@ class admin_check_template extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
+	print "When FOSSology is updated, license templates may be changed.\n";
+	print "Obsolete license templates may still be associated with previous license analysis.\n";
+	print "The files associated with the obsolete license analysis should be re-analyzed.\n";
+	print "NOTE: This does not check for files that need re-analysis based on <i>new</i> license templates; it only checks for obsolete templates.\n";
+	print "<hr>\n";
+
 	if (GetParm('cleanup',PARM_INTEGER) == 1)
 	  {
 	  $BsamUniq = $this->ReadBsamUnique(0);
