@@ -112,7 +112,7 @@ function close_tag($handle){
 /**
  * function: parse_fm_input
  *
- * @abstract parse the freshmeat input and return an array of tokens.
+ * Parse the freshmeat input and return an array of tokens.
  *
  * @param string $line a string with space seperated tokens.  Some
  * of the tokens will be '...' or "..." with imbeded spaces.
