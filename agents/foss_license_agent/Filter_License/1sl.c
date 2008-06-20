@@ -49,21 +49,22 @@ typedef struct Type1SL Type1SL;
 
 /* For speed, don't start a regex with a "%" phrase.  '%' are expensive! */
 Type1SL List1SL[] = {
-	{"1SL: %s", "*.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}* < license : % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * is free|freely * % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * is not free|freely * % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< %2 provide|provided|distribute|distributed|redistributed|release|released freely % > *.*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * is|be provided|distributed|redistributed|released|licensed|licenced|covered|adheres as|under|by|in|from % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * under the terms of % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * * * \"|' as is \"|' % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * * * \"|' as - is \"|' % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * proprietary % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * public domain % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * special exception % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * accept the license % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * governs use of % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * governs the use of % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * non - commercial % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "*.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}* < license : % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * is free|freely * % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * is not free|freely * % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< %2 provide|provided|distribute|distributed|redistributed|release|released freely % > *.*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * is|be provided|distributed|redistributed|released|licensed|licenced|covered|adheres as|under|by|in|from % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * under the terms of % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * distribute|redistribute|modify it under % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * * * \"|' as is \"|' % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * * * \"|' as - is \"|' % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * proprietary % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * public domain % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * special exception % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * accept the|this license % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * governs use of % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * governs the use of % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< * * non - commercial % > *.*|*,*|*;*|*$*|*(*|*)*|*{*|*}*"},
 	{NULL,NULL}
 	};
 
