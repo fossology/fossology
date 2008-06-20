@@ -62,19 +62,21 @@
   $Term["BSD"]["License"][0]="BSD/BSD.new/BSD new";
   $Term["BSD"]["License"][1]="BSD/BSD.new/BSD new short";
   $Term["BSD"]["License"][2]="BSD/BSD.new/Cryptix";
-  $Term["BSD"]["License"][3]="BSD/BSD.new/Entessa Public License";
-  $Term["BSD"]["License"][4]="BSD/BSD.new/Vovida Software License 1.0";
-  $Term["BSD"]["License"][5]="BSD/BSD.old/BSD As-Is clause";
-  $Term["BSD"]["License"][6]="BSD/BSD.old/BSD Harvard";
-  $Term["BSD"]["License"][7]="BSD/BSD.old/BSD NRL";
-  $Term["BSD"]["License"][8]="BSD/BSD.old/BSD old";
-  $Term["BSD"]["License"][9]="BSD/BSD.old/BSD UCRegents";
-  $Term["BSD"]["License"][10]="BSD/BSD.old/BSD UCRegents 2";
-  $Term["BSD"]["License"][11]="BSD/BSD.old/BSD zlib";
-  $Term["BSD"]["License"][12]="BSD/BSD.old/FreeBSD";
-  $Term["BSD"]["License"][13]="BSD/BSD.old/INRIA-OSL";
-  $Term["BSD"]["License"][14]="BSD/BSD.old/Intel-OSL";
-  $Term["BSD"]["License"][15]="Free/FreeWithCopyright/UC Regents free with copyright clause";
+  $Term["BSD"]["License"][3]="BSD/BSD.new/CWI";
+  $Term["BSD"]["License"][4]="BSD/BSD.new/Entessa Public License";
+  $Term["BSD"]["License"][5]="BSD/BSD.new/Vovida Software License 1.0";
+  $Term["BSD"]["License"][6]="BSD/BSD.old/Boost Software License";
+  $Term["BSD"]["License"][7]="BSD/BSD.old/BSD As-Is clause";
+  $Term["BSD"]["License"][8]="BSD/BSD.old/BSD Harvard";
+  $Term["BSD"]["License"][9]="BSD/BSD.old/BSD NRL";
+  $Term["BSD"]["License"][10]="BSD/BSD.old/BSD old";
+  $Term["BSD"]["License"][11]="BSD/BSD.old/BSD UCRegents";
+  $Term["BSD"]["License"][12]="BSD/BSD.old/BSD UCRegents 2";
+  $Term["BSD"]["License"][13]="BSD/BSD.old/BSD zlib";
+  $Term["BSD"]["License"][14]="BSD/BSD.old/FreeBSD";
+  $Term["BSD"]["License"][15]="BSD/BSD.old/INRIA-OSL";
+  $Term["BSD"]["License"][16]="BSD/BSD.old/Intel-OSL";
+  $Term["BSD"]["License"][17]="Free/FreeWithCopyright/UC Regents free with copyright clause";
   /* Canonical name: 60 */
   $Term["CDDL"]["Desc"]="Common Development and Distribution License";
   $Term["CDDL"]["Term"][0]="cddl";
@@ -131,6 +133,8 @@
   $Term["GPL"]["Term"][1]="gnu general public license";
   $Term["GPL"]["Term"][2]="gnu public license";
   $Term["GPL"]["Term"][3]="gpl";
+  $Term["GPL"]["License"][0]="GPL/GPL from FSF reference";
+  $Term["GPL"]["License"][1]="GPL/GPL reference";
   /* Canonical name: 7 */
   $Term["GPLv1"]["Desc"]="Gnu Public License version 1";
   $Term["GPLv1"]["Term"][0]="gnu general public licence 1";
@@ -227,6 +231,16 @@
   $Term["LGPL"]["Term"][14]="library general public licence";
   $Term["LGPL"]["Term"][15]="library general public license";
   $Term["LGPL"]["Term"][16]="library gpl";
+  $Term["LGPL"]["License"][0]="GPL/LGPL/LGPL 2.0";
+  $Term["LGPL"]["License"][1]="GPL/LGPL/LGPL 2.0 reference";
+  $Term["LGPL"]["License"][2]="GPL/LGPL/LGPL 2.0 with exceptions";
+  $Term["LGPL"]["License"][3]="GPL/LGPL/LGPL 2.1";
+  $Term["LGPL"]["License"][4]="GPL/LGPL/LGPL 2.1 Preamble";
+  $Term["LGPL"]["License"][5]="GPL/LGPL/LGPL 2.1 reference";
+  $Term["LGPL"]["License"][6]="GPL/LGPL/LGPL 3.0";
+  $Term["LGPL"]["License"][7]="GPL/LGPL/LGPL gettext library variant";
+  $Term["LGPL"]["License"][8]="GPL/LGPL/LGPL GNU C Library variant";
+  $Term["LGPL"]["License"][9]="GPL/LGPL/LGPL wxWindows Library Licence 3.0 variant";
   /* Canonical name: 82 */
   $Term["MPL"]["Desc"]="MPL";
   $Term["MPL"]["Term"][0]="mozillapl";
