@@ -30,7 +30,7 @@ $(iPATHFILE): ../Makefile.conf
 InstallationCreate: $(iPATHFILE)
 	mkdir -p ../install/$(WEBDIR)
 	chmod ug+w ../install/$(WEBDIR)
-	tar -cf - `find . -type f | grep -v svn | grep -E "(php|css|htm|html|dtd|htc|gif)$$"` | (cd ../install/$(WEBDIR) ; tar -xvf -)
+	tar -cf - `find . -type f | grep -v svn | grep -E "(php|css|htm|html|dtd|htc|gif|dat)$$"` | (cd ../install/$(WEBDIR) ; tar -xvf -)
 	touch ../install/$(WEBDIR)/init.ui
 
 install: all InstallationCreate
