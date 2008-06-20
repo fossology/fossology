@@ -52,14 +52,33 @@ class upload_file extends FO_Plugin
     if (empty($uploadpk)) { return("Failed to insert upload record"); }
 
     /* move the temp file */
-    move_uploaded_file($TempFile,"$TempFile.1");
-    $TempFile .= ".1";
+    //move_uploaded_file($TempFile,"$TempFile.1");
+    //echo "<pre>uploadfile: renaming uploaded file\n</pre>";
+    if(!rename($TempFile,"$TempFile-uploaded"))
+    {
+      echo "<pre>uploadfile: rename Failed!\n</pre>";
+      if(!copy($TempFile,"$TempFile.1"))
+      {
+        return("Could not save uploaded file");
+      }
+      $UploadedFile = "$TempFile"  . "-uploaded";
+    }
+    //$TempFile .= ".1";
+
+    $UploadedFile = "$TempFile"  . "-uploaded";
+    //echo "<pre>uploadfile: \$UploadedFile is:$UploadedFile\n</pre>";
+    if(!chmod($UploadedFile, 0660))
+    {
+      return("ERROR! could not update permissions on downloaded file");
+    }
+    //echo "<pre>uploadfile: File Chmod'ed\n</pre>";
+    //echo "<pre>uploadfile: scheduling wget\n</pre>";
 
     /* Run wget_agent locally to import the file. */
     global $LIBEXECDIR;
-    $Prog = "$LIBEXECDIR/agents/wget_agent -k $uploadpk '$TempFile'";
-    system($Prog);
-    unlink($TempFile);
+    $Prog = "$LIBEXECDIR/agents/wget_agent -k $uploadpk '$UploadedFile'";
+    $toss = system($Prog);
+    unlink($UploadedFile);
 
     global $Plugins;
     $Unpack = &$Plugins[plugin_find_id("agent_unpack")];
