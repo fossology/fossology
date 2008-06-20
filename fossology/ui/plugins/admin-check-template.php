@@ -89,7 +89,7 @@ class admin_check_template extends FO_Plugin
     global $DB;
     $SQL = "SELECT lic_pk,lic_id,lic_unique,lic_name,lic_section FROM agent_lic_raw ORDER BY lic_name;";
     $Results = $DB->Action($SQL);
-    if ($Verbose) { print "<H3>Checking for obsolete the license templates</H3>\n"; }
+    if ($Verbose) { print "<H3>Checking for obsolete license templates</H3>\n"; }
     $BadList = array();
     if ($Verbose) { print "<ol>\n"; }
     for($i=0; !empty($Results[$i]['lic_pk']); $i++)
