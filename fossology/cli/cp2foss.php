@@ -206,7 +206,6 @@ for ($i = 1; $i < $argc; $i++) {
       }
       break;
     case '-R':
-      echo "DBG->setting recurse\n";
       $recurse = TRUE;
       break;
     case '-w':
@@ -271,15 +270,12 @@ if ($dashD != True){
  */
 if(is_dir($archive)){
   if ($recurse){
-      cli_PrintDebugMessage("Calling suckupfs with Recurse");
     $archive = suckupfs($archive, $recurse);
   }
   else {
-      cli_PrintDebugMessage("Calling suckupfs NO Recurse");
     $archive = suckupfs($archive);
   }
 }
-cli_PrintDebugMessage("Returned archive from SUPFS is:$archive");
 // make sure we didn't get a false from suckupfs.
 if (!$archive){
   echo
