@@ -95,11 +95,12 @@ class admin_db_cleanup extends FO_Plugin
 	$Checks[$i]['list']  = "SELECT ufile_name AS list FROM upload INNER JOIN ufile ON ufile_fk = ufile_pk WHERE ufile_fk IN (SELECT ufile_pk FROM ufile WHERE pfile_fk IS NULL) LIMIT 20;";
 	$i++;
 
-	$Checks[$i]['tag']   = "unreferenced_ufile";
-	$Checks[$i]['label'] = "Unreferenced ufiles";
-	$Checks[$i]['sql']   = "FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree);";
-	$Checks[$i]['list']   = "SELECT ufile_name AS list FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree) LIMIT 20;";
-	$i++;
+//  Bobg June 21, 2008  This is a hugely expensive query.  Removing it for now.
+//	$Checks[$i]['tag']   = "unreferenced_ufile";
+//	$Checks[$i]['label'] = "Unreferenced ufiles";
+//	$Checks[$i]['sql']   = "FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree);";
+//	$Checks[$i]['list']   = "SELECT ufile_name AS list FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree) LIMIT 20;";
+//	$i++;
 
 // bobg: not possible due to referential integrity constraint
 //	$Checks[$i]['tag']   = "bad_ufile_pfile";
