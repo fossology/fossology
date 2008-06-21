@@ -143,21 +143,33 @@ class admin_check_template extends FO_Plugin
     {
     global $DB;
 
+    $PfileList=array();
+
     /* Get pfiles to fix */
+    $i = 0;
+    /* Loop through sql so that the max sql stmt size isn't reached */
+    do
+    {
     $SQL = "SELECT DISTINCT pfile_fk FROM agent_lic_meta WHERE";
-    for($i=0; !empty($List[$i]); $i++)
-      {
+    $start = $i;
+    for(; !empty($List[$i]); $i++)
+    {
       if ($i > 0) { $SQL .= " OR"; }
       $SQL .= " lic_fk='" . $List[$i] . "'";
-      }
+      if (($i % 50) == 0) break;
+    }
+    $end = $i;
     $SQL .= ";";
     $Pfiles = $DB->Action($SQL);
 
-    $PfileList=array();
-    for($i=0; !empty($Pfiles[$i]['pfile_fk']); $i++)
+    for($j=0; !empty($Pfiles[$j]); $j++)
       {
-      $PfileList[] = $Pfiles[$i]['pfile_fk'];
+      $PfileList[] = $Pfiles[$j]['pfile_fk'];
       }
+
+    $i++;
+
+    } while (!empty($List[$i]));
 
     return($PfileList);
     } // FindPfiles()
@@ -172,40 +184,50 @@ class admin_check_template extends FO_Plugin
     {
     global $DB;
 
-    /* Get uploads to fix */
-    $SQL = "SELECT DISTINCT upload_fk,upload_filename FROM uploadtree
-	INNER JOIN upload ON upload_pk=upload_fk
-	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk=uploadtree.pfile_fk
-	WHERE";
-    for($i=0; !empty($List[$i]); $i++)
-      {
-      if ($i > 0) { $SQL .= " OR"; }
-      $SQL .= " lic_fk='" . $List[$i] . "'";
-      }
-    $SQL .= " ORDER BY upload_filename";
-    $SQL .= ";";
-    $Uploads = $DB->Action($SQL);
-
+    $VerboseInit = 1;
     $UploadList=array();
-    for($i=0; !empty($Uploads[$i]['upload_fk']); $i++)
-      {
-      $UploadList[] = $Uploads[$i]['upload_fk'];
-      }
+    /* Loop through sql so that the max sql stmt size isn't reached */
+    $i = 0;
+    do
+    {
+      $start = $i;
+      /* Get uploads to fix */
+      $SQL = "SELECT DISTINCT upload_fk,upload_filename FROM uploadtree
+          INNER JOIN upload ON upload_pk=upload_fk
+          INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk=uploadtree.pfile_fk
+          WHERE";
 
-    if ($Verbose)
+      for(; !empty($List[$i]); $i++)
       {
-      print "<H3>Checking for Uploads to Re-analyze</H3>\n";
-      if (count($UploadList) > 0)
-        {
-        print "The impacted uploads:<br>\n";
-        print "<ul>\n";
-        for($i=0; !empty($Uploads[$i]['upload_fk']); $i++)
-	  {
-	  print "<li>" . htmlentities($Uploads[$i]['upload_filename']) . "\n";
-	  }
-        print "</ul>\n";
-	}
+        if ($i > 0) { $SQL .= " OR"; }
+        $SQL .= " lic_fk='" . $List[$i] . "'";
+        if (($i % 50) == 0) break;
       }
+      $end = $i;
+      $SQL .= " ORDER BY upload_filename";
+      $SQL .= ";";
+      $Uploads = $DB->Action($SQL);
+
+      for($j=0; !empty($Uploads[$j]); $j++)
+      {
+        $UploadList[] = $Uploads[$j]['upload_fk'];
+        if ($Verbose)
+        {
+          if ($VerboseInit)
+          { 
+            print "<H3>Checking for Uploads to Re-analyze</H3>\n";
+            print "The impacted uploads:<br>\n";
+            print "<ul>\n";
+            $VerboseInit = 0;
+          }
+          if (!empty($Uploads[$j]['upload_filename']))
+            print "<li>" . htmlentities($Uploads[$j]['upload_filename']) . "\n";
+        }
+      }
+      $i++;
+    } while (!empty($List[$i]));
+
+    if (!$VerboseInit) print "</ul>\n";
 
     return($UploadList);
     } // FindUploads()
@@ -299,12 +321,6 @@ class admin_check_template extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
-	print "When FOSSology is updated, license templates may be changed.\n";
-	print "Obsolete license templates may still be associated with previous license analysis.\n";
-	print "The files associated with the obsolete license analysis should be re-analyzed.\n";
-	print "NOTE: This does not check for files that need re-analysis based on <i>new</i> license templates; it only checks for obsolete templates.\n";
-	print "<hr>\n";
-
 	if (GetParm('cleanup',PARM_INTEGER) == 1)
 	  {
 	  $BsamUniq = $this->ReadBsamUnique(0);
