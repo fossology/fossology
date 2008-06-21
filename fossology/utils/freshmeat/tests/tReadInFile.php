@@ -32,7 +32,7 @@
 // The require below needs to be fixed up once we know where the class
 // file should go.
 require_once ('../../../tests/fossologyUnitTestCase.php');
-require_once ('../ReadInputFile.php');
+require_once ('../Classes/ReadInputFile.php');
 
 class TestReadinFile extends fossologyUnitTestCase
 {
