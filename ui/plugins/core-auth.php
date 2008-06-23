@@ -171,7 +171,7 @@ class core_auth extends FO_Plugin
     if (@$_SESSION['User'])
       {
       /* If you are logged in, then the default level is "Download". */
-      if (empty($_SESSION['UserLevel'])) { $Level = PLUGIN_DB_DOWNLOAD; }
+      if ("X".$_SESSION['UserLevel'] == "X") { $Level = PLUGIN_DB_DOWNLOAD; }
       else { $Level = @$_SESSION['UserLevel']; }
 
       /* Recheck the user in case he is suddenly blocked or changed. */
