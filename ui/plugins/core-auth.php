@@ -58,7 +58,7 @@ class core_auth extends FO_Plugin
     $Init = array("NULL",     "user_pk",  "NULL",     PLUGIN_DB_READ, "NULL");
     for($i=0; !empty($Cols[$i]); $i++)
       {
-      if (!array_key_exists($Cols[$i],$R))
+      if (!is_array($R) || !array_key_exists($Cols[$i],$R))
 	{
 	$Val = $Cols[$i] . " " . $Type[$i];
 	$rc = $DB->Action("ALTER TABLE users ADD COLUMN $Val;");
@@ -316,7 +316,11 @@ class core_auth extends FO_Plugin
 		  global $DB;
 		  $Results = $DB->Action("SELECT * FROM users LIMIT 1;");
 		  $R = &$Results[0];
-		  if (array_key_exists("user_seed",$R) && array_key_exists("user_pass",$R))
+		  if (!is_array($R))
+			{
+			$Results[0]=array();
+			}
+		  else if (array_key_exists("user_seed",$R) && array_key_exists("user_pass",$R))
 			{
 			$Results = $DB->Action("SELECT user_name FROM users WHERE user_seed IS NULL AND user_pass IS NULL;");
 			}
