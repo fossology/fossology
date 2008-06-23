@@ -48,6 +48,36 @@ class licterm_default extends FO_Plugin
   var $LoginFlag  = 1; /* must be logged in to use this */
 
   /***********************************************************
+   Install(): Create and configure database tables
+   ***********************************************************/
+  function Install()
+  {
+    global $DB;
+    if (empty($DB)) { return(1); } /* No DB */
+
+    /****************
+     Terms needed tables:
+     Table #1: List of term groups (name, description) ("licterm")
+     Table #2: List of terms ("licterm_words")
+     Table #3: Associated matrix of terms to term groups ("licterm_map")
+     ****************/
+
+    /* check for mandatory tables */
+    $SQL = "SELECT relname FROM pg_class WHERE relname = 'licterm' OR relname = 'licterm_words' OR relname = 'licterm_map';";
+    $Results = $DB->Action($SQL);
+    if (count($Results) != 3) { return(1); } /* tables missing */
+
+    /* check if the table needs population */
+    $SQL = "SELECT * FROM licterm LIMIT 1;";
+    $Results = $DB->Action($SQL);
+    if (count($Results) == 0)
+      {
+      $this->DefaultTerms();
+      }
+    return(0);
+  } // Install()
+
+  /***********************************************************
    ExportTerms(): Display the entire term table system as a big array.
    This array should be pasted into the Default() function for
    use as the default values.
@@ -126,7 +156,9 @@ class licterm_default extends FO_Plugin
     /** END: Term list from ExportTerms() **/
     /**************************************/
 
-    $LT = &$Plugins[plugin_find_id("licterm_manage")];
+    $LT = &$Plugins[plugin_find_id("licterm_manage")-100];
+    /* During install, $LT may be empty but we can still use it */
+    if (empty($LT)) { $LT = &$Plugins[plugin_find_any_id("licterm_manage")]; }
     print "<ol>\n";
     foreach($Term as $Key => $Val)
       {
