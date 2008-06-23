@@ -17,8 +17,7 @@
   $Term["Affero GPL"]["Term"][0]="affero";
   $Term["Affero GPL"]["Term"][1]="affero general public license";
   $Term["Affero GPL"]["License"][0]="GPL/Affero/Affero GPL 1.0";
-  $Term["Affero GPL"]["License"][1]="GPL/Affero/Affero GPL 3.0";
-  $Term["Affero GPL"]["License"][2]="GPL/Affero/Affero Preamble 1.0";
+  $Term["Affero GPL"]["License"][1]="GPL/Affero/Affero Preamble 1.0";
   /* Canonical name: 10 */
   $Term["AFL"]["Desc"]="Academic Free License";
   $Term["AFL"]["Term"][0]="academic free license";
@@ -290,6 +289,12 @@
   $Term["OSL"]["Desc"]="The Open Software License";
   $Term["OSL"]["Term"][0]="open software license";
   $Term["OSL"]["Term"][1]="osl";
+  $Term["OSL"]["License"][0]="AFL/OSL/Open Software License 1.0";
+  $Term["OSL"]["License"][1]="AFL/OSL/Open Software License 1.0 reference";
+  $Term["OSL"]["License"][2]="AFL/OSL/Open Software License 1.1";
+  $Term["OSL"]["License"][3]="AFL/OSL/Open Software License 2.0";
+  $Term["OSL"]["License"][4]="AFL/OSL/Open Software License 2.1";
+  $Term["OSL"]["License"][5]="AFL/OSL/Open Software License 3.0";
   /* Canonical name: 87 */
   $Term["Public Domain"]["Desc"]="Generic Public Domain";
   $Term["Public Domain"]["Term"][0]="public domain";
@@ -337,9 +342,8 @@
   $Term["W3C"]["Term"][0]="w3c";
   $Term["W3C"]["Term"][1]="world wide web consortium";
   $Term["W3C"]["License"][0]="GPL/W3C/World Wide Web Consortium 2001";
-  $Term["W3C"]["License"][1]="GPL/W3C/World Wide Web Consortium 2002";
-  $Term["W3C"]["License"][2]="GPL/W3C/World Wide Web Consortium Documents 2002";
-  $Term["W3C"]["License"][3]="GPL/W3C/World Wide Web Consortium Software 2002";
+  $Term["W3C"]["License"][1]="GPL/W3C/World Wide Web Consortium Documents 2002";
+  $Term["W3C"]["License"][2]="GPL/W3C/World Wide Web Consortium Software 2002";
   /* Canonical name: 38 */
   $Term["WTFPL"]["Desc"]="Do What The Fuck You Want To Public License";
   $Term["WTFPL"]["Term"][0]="do what the fuck you want";
