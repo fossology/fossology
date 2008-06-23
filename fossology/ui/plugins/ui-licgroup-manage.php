@@ -250,9 +250,9 @@ function moveOptions(theSelFrom, theSelTo)
     $DB->Action("DELETE FROM licgroup_grps WHERE licgroup_fk = '$GroupKey';");
     $DB->Action("DELETE FROM licgroup_grps WHERE licgroup_memberfk = '$GroupKey';");
     $DB->Action("DELETE FROM licgroup WHERE licgroup_pk = '$GroupKey';");
-    $DB->Action("VACUUM ANALYZE licgroup_lics;");
-    $DB->Action("VACUUM ANALYZE licgroup_grps;");
-    $DB->Action("VACUUM ANALYZE licgroup;");
+    // $DB->Action("VACUUM ANALYZE licgroup_lics;");
+    // $DB->Action("VACUUM ANALYZE licgroup_grps;");
+    // $DB->Action("VACUUM ANALYZE licgroup;");
     return;
     } // LicGroupDelete()
 
@@ -332,8 +332,8 @@ function moveOptions(theSelFrom, theSelTo)
 	VALUES ('$GroupKey','$GrpNum');");
       }
     $DB->Action("COMMIT;");
-    $DB->Action("VACUUM ANALYZE licgroup_lics;");
-    $DB->Action("VACUUM ANALYZE licgroup_grps;");
+    // $DB->Action("VACUUM ANALYZE licgroup_lics;");
+    // $DB->Action("VACUUM ANALYZE licgroup_grps;");
 
     return;
     } // LicGroupInsert() */
