@@ -741,6 +741,8 @@ void	ProcessTerms	()
       for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
       End = atoi(Range+i);
       LicMmap = RepMmapFile(LicName);
+      /* if the file has been modified, then the filesize could be wrong. */
+      if (End > LicMmap->MmapSize) End = LicMmap->MmapSize;
       if (LicMmap)
 	{
         if (Verbose > 2)
