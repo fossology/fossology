@@ -203,8 +203,7 @@ class agent_license extends FO_Plugin
     $jqargs = "SELECT DISTINCT(Akey),A,Size
 	FROM $TempTable
 	INNER JOIN agent_lic_status ON agent_lic_status.pfile_fk = Akey
-	WHERE agent_lic_status.inrepository IS TRUE
-	AND agent_lic_status.inspect_name IS NOT TRUE
+	WHERE agent_lic_status.inspect_name IS NOT TRUE
 	ORDER BY Size DESC
 	LIMIT 5000;";
     $jobqueuepk = JobQueueAdd($jobpk,"licinspect",$jqargs,"yes","a",array($jobqueuepk));
