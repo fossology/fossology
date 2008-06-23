@@ -259,7 +259,7 @@ class core_auth extends FO_Plugin
     $_SESSION['Folder'] = $R['root_folder_fk'];
     $_SESSION['time_check'] = time() + 10*60;
     /* No specified permission means ALL permission */
-    if (empty($R['user_perm'])) { $_SESSION['UserLevel']=PLUGIN_DB_USERADMIN; }
+    if ("X".$R['user_perm'] == "X") { $_SESSION['UserLevel']=PLUGIN_DB_USERADMIN; }
     else { $_SESSION['UserLevel'] = $R['user_perm']; }
     $_SESSION['checkip'] = GetParm("checkip",PARM_STRING);
     /* Need to refresh the screen */
