@@ -747,7 +747,10 @@ void	DBSetPhrase	()
   if ((rc < 0) || (DBdatasize(DB) <= 0))
     {
     DBaccess(DB,"INSERT INTO agent_lic_raw (lic_name,lic_unique,lic_text,lic_version,lic_section,lic_id) VALUES ('Phrase','1','Phrase','1',1,1);");
+#if 0
+    /** Disabled: Database will take care of this **/
     DBaccess(DB,"ANALYZE agent_lic_raw;");
+#endif
     }
 } /* DBSetPhrase() */
 
@@ -2341,7 +2344,10 @@ int	ReadLine	(FILE *Fin)
   /* If we inserted, then analyze the table */
   if (DBInsertCount > 0)
     {
+#if 0
+    /** Disabled: Database will take care of this **/
     DBaccess(DB,"ANALYZE agent_lic_meta;");
+#endif
     DBInsertCount=0;
     }
 
@@ -2833,7 +2839,10 @@ void	GetAgentKey	()
         DBclose(DB);
 	exit(-1);
 	}
+#if 0
+      /** Disabled: Database will take care of this **/
       DBaccess(DB,"ANALYZE agent;");
+#endif
       rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='license' ORDER BY agent_id DESC;");
       if (rc < 0)
 	{

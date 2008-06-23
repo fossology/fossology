@@ -288,8 +288,11 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
   /* Add in meta info */
   AddMetaToDB(LastAddPk);
 
+#if 0
+  /** Disabled: Database will take care of this **/
   /* Analyze table (for performance) */
   DBaccess(DB,"ANALYZE agent_lic_raw;");
+#endif
   return(Lic_Id);
 } /* AddLicenseToDB() */
 

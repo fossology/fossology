@@ -797,7 +797,10 @@ void	GetAgentKey	()
 	DBclose(DB);
 	exit(-1);
 	}
+#if 0
+      /** Disabled: Database will take care of this **/
       DBaccess(DB,"ANALYZE agent;");
+#endif
       rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='licinspect' ORDER BY agent_id DESC;");
       if (rc < 0)
 	{

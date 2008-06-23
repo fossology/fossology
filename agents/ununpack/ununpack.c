@@ -2641,6 +2641,8 @@ int	main	(int argc, char *argv[])
 
 	if (DB)
 	  {
+#if 0
+  /** Disabled -- DB will handle this **/
 	  /* Tell DB that lots of updates are done */
 	  /* This has no visible benefit for small files, but after unpacking
 	     a full ISO, analyze has a huge performance benefit. */
@@ -2648,6 +2650,7 @@ int	main	(int argc, char *argv[])
 	  DBaccess(DB,"ANALYZE pfile;");
 	  DBaccess(DB,"ANALYZE ufile;");
 	  DBaccess(DB,"ANALYZE uploadtree;");
+#endif
 	  /* Tell the world how many items we proudly processed */
 	  /** Humans will ignore this, but the scheduler will use it. **/
 	  alarm(0);

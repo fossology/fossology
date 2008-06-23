@@ -691,15 +691,15 @@ function moveOptions(theSelFrom, theSelTo)
     $TermName = GetParm('name',PARM_TEXT);
 
     $DB->Action("DELETE FROM licterm_map WHERE licterm_fk = '$TermKey';");
-    $DB->Action("VACUUM ANALYZE licterm_map;");
+    // $DB->Action("VACUUM ANALYZE licterm_map;");
 
     $DB->Action("DELETE FROM licterm_maplic WHERE licterm_fk = '$TermKey';");
-    $DB->Action("VACUUM ANALYZE licterm_maplic;");
+    // $DB->Action("VACUUM ANALYZE licterm_maplic;");
 
     if ($DeleteAll)
       {
       $DB->Action("DELETE FROM licterm WHERE licterm_pk = '$TermKey';");
-      $DB->Action("VACUUM ANALYZE licterm;");
+      // $DB->Action("VACUUM ANALYZE licterm;");
       }
     } // LicTermDelete()
 
@@ -780,7 +780,7 @@ function moveOptions(theSelFrom, theSelTo)
       $DB->Action("INSERT INTO licterm_map (licterm_words_fk,licterm_fk)
 	VALUES (" . $Results[0]['licterm_words_pk'] . ",$TermKey);");
       }
-    $DB->Action("VACUUM ANALYZE licterm_map;");
+    // $DB->Action("VACUUM ANALYZE licterm_map;");
 
     /* Now add in all the licenses */
     if (empty($LicList)) { $LicList = GetParm('liclist',PARM_RAW); }
@@ -796,7 +796,7 @@ function moveOptions(theSelFrom, theSelTo)
 	VALUES (" . $Results[0]['lic_pk'] . ",$TermKey);");
 	}
       }
-    $DB->Action("VACUUM ANALYZE licterm_maplic;");
+    // $DB->Action("VACUUM ANALYZE licterm_maplic;");
 
     return;
     } // LicTermInsert()
@@ -819,7 +819,7 @@ function moveOptions(theSelFrom, theSelTo)
 	{
 	$DB->Action("DELETE FROM licterm_map WHERE licterm_words_fk = '" . $Results[0]['licterm_words_pk'] . "';");
 	$DB->Action("DELETE FROM licterm_words WHERE licterm_words_pk = '" . $Results[0]['licterm_words_pk'] . "';");
-	$DB->Action("VACUUM ANALYZE licterm_words;");
+	// $DB->Action("VACUUM ANALYZE licterm_words;");
 	}
       return;
       }

@@ -144,9 +144,12 @@ void	DeleteLicense	(long UploadId)
   else
 	{
 	MyDBaccess(DB,"COMMIT;");
+#if 0
+	/** Disabled: DB will take care of this **/
 	if (Verbose) { printf("# Running vacuum and analyze\n"); }
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
+#endif
 	}
   DBaccess(DB,"SET statement_timeout = 120000;");
 
@@ -397,6 +400,8 @@ void	DeleteUpload	(long UploadId)
 	{
 	if (Verbose) { printf("# COMMIT\n"); }
 	MyDBaccess(DB,"COMMIT;");
+#if 0
+	/** Disabled: Database will take care of this **/
 	if (Verbose) { printf("# VACUUM and ANALYZE\n"); }
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
@@ -409,6 +414,7 @@ void	DeleteUpload	(long UploadId)
 	MyDBaccess(DB,"VACUUM ANALYZE jobdepends;");
 	MyDBaccess(DB,"VACUUM ANALYZE jobqueue;");
 	MyDBaccess(DB,"VACUUM ANALYZE job;");
+#endif
 	}
   DBaccess(DB,"SET statement_timeout = 120000;");
 
@@ -625,8 +631,11 @@ void	DeleteFolder	(long FolderId)
   VDB = DBmove(DB);
   ListFoldersRecurse(VDB,FolderId,0,-1,1);
   DBclose(VDB);
+#if 0
+  /** Disabled: Database will take care of this **/
   MyDBaccess(DB,"VACUUM ANALYZE foldercontents;");
   MyDBaccess(DB,"VACUUM ANALYZE folder;");
+#endif
 } /* DeleteFolder() */
 
 /**********************************************************************/
