@@ -252,7 +252,7 @@ function LicenseGetAllFilesByCanonicalName (&$UploadtreePk, &$Lics, &$WantName)
   global $LicenseGetAllFilesByCanonicalName_Prepared;
   if (!$LicenseGetAllFilesByCanonicalName_Prepared)
     {
-    $DB->Prepare("LicenseGetAllFilesByCanonicalName_Lics",'SELECT DISTINCT uploadtree.pfile_fk AS pfile,ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name,lic_pk
+    $DB->Prepare("LicenseGetAllFilesByCanonicalName_Lics",'SELECT DISTINCT uploadtree.pfile_fk AS pfile,ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name,lic_pk,phrase_text
 	FROM uploadtree
 	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = uploadtree.pfile_fk
 	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = $1
