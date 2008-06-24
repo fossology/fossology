@@ -407,7 +407,7 @@ class licgroup extends FO_Plugin
 	{
 	$V .= "<td width='10%' align='center'><a href='";
 	$V .= Traceback_uri();
-	$V .= "?mod=search_file_by_license&item=$Item&lic=1'>Show</a></td>";
+	$V .= "?mod=search_file_by_license&item=$Item&lic=Phrase'>Show</a></td>";
 	}
       }
     else if ($this->SFbLG >= 0)
