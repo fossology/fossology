@@ -59,6 +59,43 @@ class ui_license extends FO_Plugin
     } // RegisterMenus()
 
   /***********************************************************
+   SortName(): Given two elements sort them by name.
+   Used for sorting the histogram.
+   ***********************************************************/
+  function SortName ($a,$b)
+    {
+    list($A0,$A1,$A2) = split("\|",$a,3);
+    list($B0,$B1,$B2) = split("\|",$b,3);
+    /* Sort by count */
+    if ($A0 < $B0) { return(1); }
+    if ($A0 > $B0) { return(-1); }
+    /* Same count? sort by root name.
+       Same root? place real before style before partial. */
+    $A0 = str_replace('-partial$',"",$A1);
+    if ($A0 != $A1) { $A1 = '-partial'; }
+    else
+      {
+      $A0 = str_replace('-style',"",$A1);
+      if ($A0 != $A1) { $A1 = '-style'; }
+      else { $A1=''; }
+      }
+    $B0 = str_replace('-partial$',"",$B1);
+    if ($B0 != $B1) { $B1 = '-partial'; }
+    else
+      {
+      $B0 = str_replace('-style',"",$B1);
+      if ($B0 != $B1) { $B1 = '-style'; }
+      else { $B1=''; }
+      }
+    if ($A0 != $B0) { return(strcmp($A0,$B0)); }
+    if ($A1 == "") { return(-1); }
+    if ($B1 == "") { return(1); }
+    if ($A1 == "-partial") { return(-1); }
+    if ($B1 == "-partial") { return(1); }
+    return(strcmp($A1,$B1));
+    } // SortName()
+
+  /***********************************************************
    ShowUploadHist(): Given an Upload and UploadtreePk item, display:
    (1) The histogram for the directory BY LICENSE.
    (2) The file listing for the directory, with license navigation.
@@ -195,7 +232,25 @@ class ui_license extends FO_Plugin
     $VH .= "<tr><th width='10%'>Count</th>";
     if ($SFbL >= 0) { $VH .= "<th width='10%'>Files</th>"; }
     $VH .= "<th>License</th>\n";
+
+    /* krsort + arsort = consistent sorting order */
     arsort($LicsTotal);
+    /* Redo the sorting */
+    $SortOrder=array();
+    foreach($LicsTotal as $Key => $Val)
+      {
+      if (empty($Val)) { continue; }
+      $SortOrder[] = $Val . "|" . str_replace("'","",$Key) . "|" . $Key;
+      }
+    usort($SortOrder,array($this,"SortName"));
+    $LicsTotal = array();
+    foreach($SortOrder as $Key => $Val)
+      {
+      if (empty($Val)) { continue; }
+      list($x,$y,$z) = split("\|",$Val,3);
+      $LicsTotal[$z]=$x;
+      }
+
     foreach($LicsTotal as $Key => $Val)
       {
       if ($Key != ' Total ')
