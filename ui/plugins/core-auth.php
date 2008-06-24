@@ -167,7 +167,7 @@ class core_auth extends FO_Plugin
 	}
 
     /* Enable or disable plugins based on login status */
-    $Level = PLUGIN_DB_READ;
+    $Level = PLUGIN_DB_NONE;
     if (@$_SESSION['User'])
       {
       /* If you are logged in, then the default level is "Download". */
@@ -193,14 +193,18 @@ class core_auth extends FO_Plugin
 		$_SESSION['UserLevel'] = NULL;
 		$_SESSION['UserEmail'] = NULL;
 		$_SESSION['Folder'] = NULL;
-		$Level = PLUGIN_DB_READ;
+		$Results = $DB->Action("SELECT * FROM users WHERE user_name='Default User';");
+		if (empty($Results)) { $Level = PLUGIN_DB_NONE; }
+		else { $Level = $Results[0]['user_perm']; }
 		}
 	}
       }
     else
       {
-      // menu_insert("Main::Admin::Login",10,$this->Name);
-      $Level = PLUGIN_DB_READ;
+      /* Default to permissions for "Default User" */
+      $Results = $DB->Action("SELECT * FROM users WHERE user_name='Default User';");
+      if (empty($Results)) { $Level = PLUGIN_DB_NONE; }
+      else { $Level = $Results[0]['user_perm']; }
       }
 
     /* Disable all plugins with >= $Level access */
