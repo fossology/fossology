@@ -486,6 +486,10 @@ if [ \$? == 0 ] ; then
     exit 1
   fi
   if [ \$INSTALLLICENSES == 1 ] ; then
+    if [ ! -d "\${AGENTDATADIR}/licenses" ] ; then
+      echo "ERROR: License directory (\${AGENTDATADIR}/licenses) does not exist.  Use 'install.sh -f'\n"
+      exit 1
+    fi
     echo "# Adding licenses to database"
     (
     # remove the old file
