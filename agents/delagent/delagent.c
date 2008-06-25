@@ -95,8 +95,6 @@ int	MyDBaccess	(void *V, char *S)
 void	DeleteLicense	(long UploadId)
 {
   void *VDB;
-  char *S;
-  int Row,MaxRow;
   char TempTable[256];
 
   if (Verbose) { printf("Deleting licenses for upload %ld\n",UploadId); }
@@ -118,26 +116,18 @@ void	DeleteLicense	(long UploadId)
   /***********************************************/
   /* delete pfile licenses */
   if (Verbose) { printf("# Deleting licenses\n"); }
-  MaxRow = DBdatasize(VDB);
-  for(Row=0; Row<MaxRow; Row++)
-    {
-    S = DBgetvalue(VDB,Row,0);
-    if (S[0])
-      {
       memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name WHERE pfile_fk = '%s';",S);
+      snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
       MyDBaccess(DB,SQL);
 
       memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk = '%s';",S);
+      snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
       MyDBaccess(DB,SQL);
 
       memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk = '%s';",S);
+      snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
       MyDBaccess(DB,SQL);
-      ItemsProcessed++;
-      }
-    }
+  ItemsProcessed+=DBdatasize(VDB);
 
   /***********************************************/
   /* Commit the change! */
