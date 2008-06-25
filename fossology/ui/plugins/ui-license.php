@@ -131,9 +131,9 @@ class ui_license extends FO_Plugin
     $Children = DirGetList($Upload,$Item);
     $ChildCount=0;
     $VF .= "<table border=0>";
-    $LicsTotal = array();
     foreach($Children as $C)
       {
+      if (empty($C)) { continue; }
       /* Store the item information */
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
