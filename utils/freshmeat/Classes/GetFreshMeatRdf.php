@@ -21,19 +21,26 @@
 /**
  * Class to get the Freshmeat RDF file
  *
- * @param
+ * @param $name path to the downloaded rdf file
  *
- * @return
+ * Sets: $rdf_name
  *
  * @version "$Id: $"
  *
  * Created on Jun 6, 2008
  */
 
+ /*
+  * Where will this leave the file? we just pass in some name...so it's
+  * current dir or a full path to where...?
+  */
+
 class GetFreshMeatRdf
 {
   public $rdf_url = "http://freshmeat.net/backend/fm-projects.rdf.bz2";
   public $rdf_name;
+  public $error_code;
+  public $error_out;
   private $Date;
 
   public function __construct($name = NULL)
@@ -65,6 +72,8 @@ class GetFreshMeatRdf
     $cmd = "wget -q -O $name $this->rdf_url";
     //echo "will do\n$cmd\n";
     $toss = exec($cmd, $output, $rtn);
+    $this->error_code = $rtn;
+    $this->error_out  = $output;
   }
 }
 ?>
