@@ -122,19 +122,21 @@ void	DeleteLicense	(long UploadId)
   for(Row=0; Row<MaxRow; Row++)
     {
     S = DBgetvalue(VDB,Row,0);
+    if (S[0])
+      {
+      memset(SQL,'\0',sizeof(SQL));
+      snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name WHERE pfile_fk = '%s';",S);
+      MyDBaccess(DB,SQL);
 
-    memset(SQL,'\0',sizeof(SQL));
-    snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name WHERE pfile_fk = '%s';",S);
-    MyDBaccess(DB,SQL);
+      memset(SQL,'\0',sizeof(SQL));
+      snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk = '%s';",S);
+      MyDBaccess(DB,SQL);
 
-    memset(SQL,'\0',sizeof(SQL));
-    snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk = '%s';",S);
-    MyDBaccess(DB,SQL);
-
-    memset(SQL,'\0',sizeof(SQL));
-    snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk = '%s';",S);
-    MyDBaccess(DB,SQL);
-    ItemsProcessed++;
+      memset(SQL,'\0',sizeof(SQL));
+      snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk = '%s';",S);
+      MyDBaccess(DB,SQL);
+      ItemsProcessed++;
+      }
     }
 
   /***********************************************/
