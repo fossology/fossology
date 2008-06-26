@@ -61,6 +61,7 @@ class search_file extends FO_Plugin
       {
       $Uri = Traceback_uri() . "?mod=" . $this->Name;
       $Uri .= "&filename=" . urlencode($Filename);
+      $Uri .= "&allfiles=" . GetParm("allfiles",PARM_INTEGER);
       $VM = MenuEndlessPage($Page, ($Count >= $Max),$Uri) . "<P />\n";
       $V .= $VM;
       }
@@ -108,7 +109,7 @@ class search_file extends FO_Plugin
 
 	$Filename = GetParm("filename",PARM_STRING);
 	$Page = GetParm("page",PARM_INTEGER);
-	$allfiles = GetParm("allfiles",PARM_STRING);
+	$allfiles = GetParm("allfiles",PARM_INTEGER);
 	$Uri = preg_replace("/&filename=[^&]*/","",Traceback());
 	$Uri = preg_replace("/&page=[^&]*/","",$Uri);
 

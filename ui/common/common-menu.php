@@ -46,6 +46,52 @@ $MenuList=array();
 $MenuMaxDepth=0;	// how deep is the tree (for UI display)
 
 /***********************************************************
+ MenuPage(): Create a "next" page menu.
+ This function assumes the end number is known.
+ Returns string containing menu.
+ ***********************************************************/
+function MenuPage      ($Page,$TotalPage,$Uri='')
+  {
+  $V = "<font class='text'><center>";
+  if (empty($Uri)) { $Uri = Traceback(); }
+  $Uri = preg_replace("/&page=[^&]*/","",$Uri);
+
+  /* Create first page */
+  if ($Page > 0)
+        {
+        $V .= "<a href='$Uri&page=0'>[First]</a> ";
+        $V .= "<a href='$Uri&page=" . ($Page - 1) . "'>[Prev]</a> ";
+	if ($Page > 9) { $V .= " ... "; }
+        }
+
+  /* Create previous list page */
+  for($i = $Page-9; $i < $Page; $i++)
+        {
+        if ($i >= 0)
+          {
+          $V .= "<a href='$Uri&page=$i'>" . ($i+1) . "</a> ";
+          }
+        }
+
+  /* Show current page number */
+  $V .= "<b>" . ($Page+1) . "</b>";
+
+  /* Create next page */
+  for($i = $Page+1; ($i <= $TotalPage) && ($i < $Page+9); $i++)
+        {
+        $V .= " <a href='$Uri&page=$i'>" . ($i+1) . "</a>";
+        }
+  if ($Page < $TotalPage)
+	{
+	if ($Page < $TotalPage-9) { $V .= " ..."; }
+        $V .= " <a href='$Uri&page=" . ($Page+1) . "'>[Next]</a>";
+        $V .= " <a href='$Uri&page=" . ($TotalPage) . "'>[Last]</a>";
+	}
+  $V .= "</center></font>";
+  return($V);
+  } // MenuPage()
+
+/***********************************************************
  MenuEndlessPage(): Create a "next" page menu.
  This function assumes the end number is unknown.  (Hence, "endless".)
  Returns string containing menu.
@@ -61,11 +107,11 @@ function MenuEndlessPage      ($Page,$Next=1,$Uri='')
         {
         $V .= "<a href='$Uri&page=0'>[First]</a> ";
         $V .= "<a href='$Uri&page=" . ($Page - 1) . "'>[Prev]</a> ";
-	if ($Page > 10) { $V .= " ... "; }
+	if ($Page > 9) { $V .= " ... "; }
         }
 
   /* Create previous list page */
-  for($i = $Page-10; $i < $Page; $i++)
+  for($i = $Page-9; $i < $Page; $i++)
         {
         if ($i >= 0)
           {
