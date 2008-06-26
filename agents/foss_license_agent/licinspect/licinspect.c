@@ -552,6 +552,14 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
       }
     }
 
+  if (Verbose > 1)
+    {
+    printf("# ConfidenceValue=%f\n",ConfidenceValue);
+    printf("# TermsCounterSize=%d\n",TermsCounterSize);
+    printf("# TermAdded=%d\n",TermAdded);
+    printf("# TermRemoved=%d\n",TermRemoved);
+    }
+
   /* See what we got */
   if (!TermRemoved && !IsPhrase)
     {
@@ -608,6 +616,33 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
       HasOutput=1;
       }
     DBclose(DBresults);
+    }
+
+  else if (TermRemoved && (TermsCounterSize > 0))
+    {
+    HasOutput=1;
+    if (!StoreDB || Verbose)
+	{
+	if (ConfidenceValue >= ThresholdSimilar)
+	  {
+	  printf("'"); PrintLicName(LicName,stdout); printf("'-style\n");
+	  }
+	else
+	  {
+	  printf("'"); PrintLicName(LicName,stdout); printf("'-partial\n");
+	  }
+	}
+    if (StoreDB)
+	{
+	if (ConfidenceValue >= ThresholdSimilar)
+	  {
+	  StoreResults(PfilePk,0,LicMetaPk,1); /* style confidence */
+	  }
+	else
+	  {
+	  StoreResults(PfilePk,0,LicMetaPk,2); /* partial confidence */
+	  }
+	}
     }
 
   if (!HasOutput)
