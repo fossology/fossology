@@ -83,7 +83,7 @@ class search_file_by_license extends FO_Plugin
 	/* Get the page menu */
 	if (($Count >= $Max) || ($Page > 0))
 	  {
-	  $VM = "<P />\n" . MenuEndlessPage($Page, ($Count >= $Max)) . "<P />\n";
+	  $VM = "<P />\n" . MenuPage($Page,intval($Count/$Max)) . "<P />\n";
 	  $V .= $VM;
 	  }
 	else
@@ -91,11 +91,11 @@ class search_file_by_license extends FO_Plugin
 	  $VM = "";
 	  }
 
-	for($i=0; $i < $Count; $i++)
+	for($i=$Offset; ($i < $Count) && ($i < $Offset+$Max); $i++)
 	  {
 	  $V .= "<P />\n";
 	  $L = &$Lics[$i];
-	  $Pos = $Offset + $i + 1;
+	  $Pos = $i + 1;
 	  $V .= "<table border=1 width='100%' style='background:lightyellow'>";
 	  $V .= "<tr><td align='center' width='5%'><font size='+2'>$Pos:</font></td>";
 	  $V .= "<td>";
