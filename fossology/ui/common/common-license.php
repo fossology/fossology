@@ -214,18 +214,55 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetPks=0, $Depth=0)
   global $LicenseGetAll_Prepared;
   if (!$LicenseGetAll_Prepared)
     {
-    $DB->Prepare("LicenseGetAll_Pfile",'SELECT pfile_fk,uploadtree_pk FROM uploadtree WHERE parent = $1;');
     $DB->Prepare("LicenseGetAll_Traverse",'SELECT uploadtree_pk,ufile_mode FROM uploadtree WHERE parent = $1;');
+    $DB->Prepare("LicenseGetAll_Raw",'SELECT lic_name,lic_id,phrase_text,agent_lic_meta_pk
+	FROM uploadtree
+	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk;');
+    $DB->Prepare("LicenseGetAll_Canonical",'SELECT licterm.licterm_name,licterm_name.licterm_name_confidence,lic_name,phrase_text,lic_id,agent_lic_meta_pk
+	FROM uploadtree
+	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
+	INNER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk
+	INNER JOIN licterm ON licterm_fk = licterm_pk;');
     $LicenseGetAll_Prepared = 1;
     }
 
   /* Get every license */
-  $Results = $DB->Execute("LicenseGetAll_Pfile",array($UploadtreePk));
-  for($i=0; !empty($Results[$i]['uploadtree_pk']); $i++)
+  $CanonicalList =  $DB->Execute("LicenseGetAll_Canonical",array($UploadtreePk));
+  $RawList = $DB->Execute("LicenseGetAll_Raw",array($UploadtreePk));
+  $Results=array();
+  $PfileList=array();
+  foreach($CanonicalList as $R)
     {
-    if (!empty($Results[$i]['pfile_fk']))
+    if (empty($PfileList[$R['agent_lic_meta_pk']]))
       {
-      LicenseGet($Results[$i]['pfile_fk'],$Lics,$GetPks);
+      $PfileList[$R['agent_lic_meta_pk']] = 1;
+      $Results[] = $R;
+      }
+    }
+  foreach($RawList as $R)
+    {
+    if (empty($PfileList[$R['agent_lic_meta_pk']]))
+      {
+      $PfileList[$R['agent_lic_meta_pk']] = 1;
+      $Results[] = $R;
+      }
+    }
+
+  if (!empty($Results) && (count($Results) > 0))
+    {
+    /* Got canonical name */
+    foreach($Results as $Name)
+      {
+      if ($GetPks) { $LicName = $Name['lic_id']; }
+      else { $LicName = LicenseNormalizeName($Name['lic_name'],$Name['licterm_name_confidence'],$Name['licterm_name']); }
+      if (!empty($LicName))
+	{
+	if (empty($Lics[$LicName])) { $Lics[$LicName]=1; }
+	else { $Lics[$LicName]++; }
+	$Lics[' Total ']++;
+	}
       }
     }
 
