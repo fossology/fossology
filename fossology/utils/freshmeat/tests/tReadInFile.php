@@ -23,7 +23,6 @@
  *
  * @param
  *
- *
  * @version "$Id: $"
  *
  * Created on Jun 11, 2008
@@ -42,23 +41,17 @@ class TestReadinFile extends fossologyUnitTestCase
    * Dang, just hardcode for now...
    */
 
-  /*  function TestNoInputFile()
-    {
-  // use an empty file
-  //
-  //
-  //
-      $RF = new ReadInputFile(" ");
-      if (!assert_resource($RF->file_resource))
-      {
-        $this->pass();
-      } else
-      {
-        $this->fail();
-      }
-    }
-  */
-  /* Test Case #1
+   /*
+    * Test case, no file, should not get a file resource
+    */
+
+  function TestNoInputFile()
+  {
+    $RF = new ReadInputFile(" ");
+    $this->assert_Notresource($RF->file_resource);
+  }
+
+  /* Test Case
    * Use a test input file., Should get a file resouce back.
    */
   function TestResource()
@@ -66,18 +59,10 @@ class TestReadinFile extends fossologyUnitTestCase
     $Rif = new ReadInputFile('/home/markd/workspace/fossology/utils/freshmeat/tests/tfile_small');
 
     /* make sure we have a resource */
-    $exists = $this->CheckForResource($Rif->file_resource);
-    if ($exists)
-    {
-      $this->pass("TestResource Passed\n");
-    } else
-    {
-      print "Failing TestResource, exits is:$exists\n";
-      print_r($exists);
-      $this->fail('Failed TestResource Test, Readline Failed file open test');
-    }
+    $this->assert_resource($Rif->file_resource);
   }
-  /* Test Case #2
+
+  /* Test Case
    * Get all lines of data, check for comments or blank lines, Fail if we
    * find any....
    */
@@ -89,18 +74,17 @@ class TestReadinFile extends fossologyUnitTestCase
     $line = $Rif->getline($Rif->file_resource);
     while ($line = $Rif->getline($Rif->file_resource))
     {
-//      print "DB: T4BCL line is:$line\n";
+      //      print "DB: T4BCL line is:$line\n";
       $this->assert_NoPattern('/^#/', $line);
       $this->assert_NoPattern('//', $line);
       $line = $Rif->getline($Rif->file_resource);
     }
     $this->pass("TestForCommentBlankLine Passed\n");
   }
-  /* Test Case #3
-   * Get two lines... they should be different.
+  /* Test Case
+   * Read the complete file, make sure eof is dealt with correctly.
    */
 
-  /* read till no more lines... what happens? */
   function TestEof()
   {
     $Rif = new ReadInputFile('/home/markd/workspace/fossology/utils/freshmeat/tests/tfile_medium');
@@ -108,7 +92,7 @@ class TestReadinFile extends fossologyUnitTestCase
     {
       continue;
     }
-    if(empty($line))
+    if (empty ($line))
     {
       $this->pass("TestEof Passed\n");
     }
