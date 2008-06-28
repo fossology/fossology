@@ -42,7 +42,8 @@ class GpClassTestSuite extends TestSuite
   {
 //    $this->test_file = $testfile;
     $this->TestSuite("GpClasses - test common classes used in getting projects\n");
-    $this->addTestFile('tReadInFile.php');
+    //$this->addTestFile('tReadInFile.php');
+    $this->addTestFile('tfmrdf.php');
   }
 }
 ?>

@@ -21,7 +21,7 @@
  * class to read simple input file.  Takes care of # comment lines and
  * blank lines.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Jun 6, 2008
  */
@@ -47,10 +47,9 @@ class ReadInputFile
      * NOTE, test to see if it exsits, if not create it?
      */
      $this->input_file = $file;
-     if(empty($file))
+     if(!file_exists($file))
      {
-      print "DB: RIF: Failing due to empty file?\n";
-      return;
+      return(NULL);
      }
     //print "DB: RIF: input_file is:$this->input_file\n";
     $FD = fopen($this->input_file, 'r') or die("Can't open $this->input_file, $php_errormsg\n");
@@ -73,22 +72,23 @@ class ReadInputFile
    *
    * @return the data line or NULL on EOF/Failure
    */
-  public function getline($FD)
+  public function GetLine($FD)
   {
     while($rline = fgets($FD, 1024))
     {
       $line = trim($rline);
             // check for blank lines, (null after trim), skip them
-      if (!$line === "")
+      if ($line === "")
       {
         continue;
       }
-      if (!(preg_match('/^#/', $line)))
+      if (preg_match('/^#/', $line))
       {
         continue;
       }
+      return($line);
     }
-    return($line);
+
   }
 }
 ?>

@@ -1,5 +1,7 @@
 #!/usr/bin/php
 <?php
+
+
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -24,21 +26,41 @@
  *
  * Created on Jun 6, 2008
  */
+require_once ('../../../tests/fossologyUnitTestCase.php');
+require_once ('../Classes/FreshmeatRdfs.php');
+require_once ('../Classes/GetFreshmeatRdf.php');
 
-require_once('FreshmeatRdfs.php');
-$cfile = './fm-projects.rdf-2008-6-06.bz2';
-$file = './fm-projects.rdf-2008-6-06';
+class TestFreshmeatRdfs extends fossologyUnitTestCase
+{
 
-$Rdf = new FreshmeatRdfs();
+  function TestFMRdfs()
+  {
+    print "Starting TestFMRdfs\n";
+      // Get a rdf file from FM.
+    $Gfm = new GetFreshmeatRdf();
+    if($Gfm->get_rdf($Gfm->rdf_name))
+    {
+      print "wget failed, error code was:$Gfm->error_code\n";
+      print "Error message was:\n$Gfm->error_code\n";
+    }
 
-echo "uncompressing\n";
-$Rdf->Uncompress($cfile);
+    print "rdf name is:$Gfm->rdf_name\n";
 
-echo "extracting\n";
-$info = $Rdf->XtractProjInfo($file);
+    $Rdf = new FreshmeatRdfs($Gfm->rdf_name);
 
-echo "info is:\n";
-print_r($info);
+    echo "uncompressing\n";
+    if(!$Rdf->Uncompress($Gfm->rdf_name))
+    {
+      print "Uncompress return non zero status\n";
+      print "Error code was:$Rdf->error_code\n";
+      print "Error message was:\n$Rdf->error_out\n";
+    }
 
+    echo "extracting\n";
+    $info = $Rdf->XtractProjInfo($Rdf->uncompressed_file);
 
+    echo "info is:\n";
+    print_r($info);
+  }
+}
 ?>
