@@ -120,7 +120,7 @@ class agent_pkgmetagetta extends FO_Plugin
 	INTO $TempTable
     FROM pfile left outer join attrib on (attrib_key_fk='$attribkey' 
       AND attrib.pfile_fk=pfile_pk and attrib_value is null)
-    INNER join uploadtree on (upload_fk='$uploadpk');";
+    INNER join uploadtree on (upload_fk='$uploadpk') and uploadtree.pfile_fk=pfile_pk;";
 
     /* Add job: job has jobqueue item "sqlagent" */
     /** sqlagent does not like newlines! **/
