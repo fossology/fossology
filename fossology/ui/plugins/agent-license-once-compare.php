@@ -65,7 +65,7 @@ class agent_license_once_compare extends FO_Plugin
     for($i=0; !empty($LicList[$i]); $i++)
       {
       if (!empty($SQL)) { $SQL .= " OR"; }
-      $SQL .= " lic_pk = '" . intval($LicList[$i]) . "'";
+      $SQL .= " lic_id = '" . intval($LicList[$i]) . "'";
       }
     if (empty($SQL))
 	{
@@ -79,10 +79,11 @@ class agent_license_once_compare extends FO_Plugin
 	print "No comparison licenses found.";
 	return(1);
 	}
+    chdir("$DATADIR/agents/licenses/");
     for($i=0; !empty($Lics[$i]['lic_name']); $i++)
 	{
 	$Filename = $Lics[$i]['lic_name'];
-	$Sys = "$AGENTDIR/Filter_License -O '$DATADIR/agents/licenses/$Filename' >> '$TempLics'";
+	$Sys = "$AGENTDIR/Filter_License -O '$Filename' >> '$TempLics'";
 	system($Sys);
 	}
 
