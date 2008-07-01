@@ -227,6 +227,11 @@
 #include "libfossrepo.h"
 #include "libfossdb.h"
 
+#ifdef SVN_REV
+char BuildVersion[]="Build version: " SVN_REV ".\n";
+char Version[]=SVN_REV;
+#endif
+
 #if 0
 #define DEBUG 1
 #define DEBUG_RECURSION 0

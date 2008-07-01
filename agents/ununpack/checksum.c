@@ -352,6 +352,10 @@ skip:
 
 /**************************************************************************/
 #ifdef MAIN
+#ifdef SVN_REV
+char BuildVersion[]="Build version: " SVN_REV ".\n";
+char Version[]=SVN_REV;
+#endif
 int	main	(int argc, char *argv[])
 {
   int i;

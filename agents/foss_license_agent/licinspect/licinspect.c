@@ -34,6 +34,11 @@
 #include "libfossrepo.h"
 #include "libfossdb.h"
 
+#ifdef SVN_REV
+char BuildVersion[]="Build version: " SVN_REV ".\n";
+char Version[]=SVN_REV;
+#endif
+
 #define MAXLINE	2048
 #define PATHINC 128	/* how much to increment the Path.PathString */
 

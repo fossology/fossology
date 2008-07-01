@@ -36,6 +36,11 @@
 #include "wordcheck.h"
 #include "../../ununpack/checksum.h"
 
+#ifdef SVN_REV
+char BuildVersion[]="Build version: " SVN_REV ".\n";
+char Version[]=SVN_REV;
+#endif
+
 int Verbose=0;	/* how verbose? (for debugging) */
 int AddToDB=0;  /* should the license be added to the license table? */
 int UpdateDB=1;	/* should process results go into the DB/repository? */
