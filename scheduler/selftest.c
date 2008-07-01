@@ -132,7 +132,13 @@ int	SelfTest	()
 	if (memcmp(Line[0],Line[1],1024))
 	  {
 	  fprintf(stderr,"FATAL: Configuration on agent '%s' differs from scheduler.\n",HostList[HostId].Hostname);
-	  if (Line[1]) fprintf(stderr,"FATAL: Offending line: %s\n",Line[1]);
+	  if (Line[1])
+		{
+		fprintf(stderr,"FATAL: The difference is ");
+		for(i=0; (Line[1][i] != 0) && !strchr("=:",Line[1][i]); i++)
+		  fputc(Line[1][i],stderr);
+		fprintf(stderr,"\n");
+		}
 	  rc=0;
 	  HostCheck[HostId] = -1;
 	  }
