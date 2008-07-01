@@ -12,7 +12,7 @@ LIB=-L../../$(BUILDLIB) -lfossrepo -lfossdb -lpq
 all: $(EXE)
 
 selftest: selftest.c
-	$(CC) $(CFLAGS) -DBSAMLIC='"$(AGENTDATADIR)/License.bsam"' -DLICDIR='"$(AGENTDATADIR)/licenses"' $(INC) -o selftest selftest.c ../ununpack/checksum.c ../ununpack/md5.c ../ununpack/sha1.c $(LIB)
+	$(CC) $(CFLAGS) -DBSAMLIC='"$(AGENTDATADIR)/License.bsam"' -DLICDIR='"$(AGENTDATADIR)/licenses"' -DAGENTDIR='"$(AGENTDIR)"' $(INC) -o selftest selftest.c ../ununpack/checksum.c ../ununpack/md5.c ../ununpack/sha1.c $(LIB)
 
 InstallationCreate:
 	$(CP) selftest ../../install/$(AGENTDIR)

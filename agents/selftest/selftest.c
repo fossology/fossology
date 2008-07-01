@@ -87,6 +87,21 @@ int	MyDBaccess	(void *V, char *S)
 } /* MyDBaccess() */
 
 /*********************************************************
+ CheckAgents(): Verify each agent installed on the system.
+ Returns 1 on success, 0 on failure.
+ *********************************************************/
+int	CheckAgents	()
+{
+  if (chdir(AGENTDIR) != 0)
+    {
+    printf("ERROR: Unable to access %s\n",AGENTDIR);
+    return(0);
+    }
+  system("for i in * ; do echo -n \"$i: \" ; strings $i | grep \"^Build version:\" | while read A; do echo -n $A ; done; echo \"\"; done");
+  return(1);
+} /* CheckAgents() */
+
+/*********************************************************
  CheckLicenses(): Verify that every entry in License.bsam
  exists in the DB *and* on the file system.
  List each license file found.
@@ -202,7 +217,15 @@ int	CheckLicenses	()
 		  else { Data[i]=c; }
 		  }
 		if (Verbose) printf("# Unique: %s\n",Data);
-/* TBD: Test against DB */
+		memset(SQL,'\0',sizeof(SQL));
+		snprintf(SQL,sizeof(SQL),"SELECT * FROM agent_lic_raw WHERE lic_unique = '%s';",Data);
+		DBaccess(DB,SQL);
+		/* Test against DB */
+		if (DBdatasize(DB) != 1)
+		  {
+		  printf("ERROR: License unqiue '%s' not found in database.\n",Data);
+		  return(0);
+		  }
 		break;
 	default:
 		for(i=0; (i<Len); i++)
@@ -401,7 +424,7 @@ int     ReadLine        (FILE *Fin)
   while(isspace(L[0])) L++;
   rc = L[0];
 
-  CheckRepo() && CheckLicenses();
+  CheckRepo() && CheckLicenses() && CheckAgents();
   return(rc);
 } /* ReadLine() */
 
@@ -506,6 +529,10 @@ int	main	(int argc, char *argv[])
   if (Scheduler)
     {
     while(ReadLine(stdin) >= 0) ;
+    }
+  else /* !Scheduler */
+    {
+    CheckRepo() && CheckLicenses() && CheckAgents();
     }
 
   DBclose(DB);
