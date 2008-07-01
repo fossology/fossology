@@ -6,9 +6,9 @@ CC=gcc -DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
 CFLAGS=-Wall -O2 $(CFLAGS2)
 #CFLAGS=-Wall -g $(CFLAGS2)
 #CFLAGS=-Wall -g -efence $(CFLAGS2)
-OBJ=scheduler.o spawn.o sockets.o agents.o dbq.o dbstatus.o hosts.o debug.o dberror.o
-SRC=scheduler.c spawn.c sockets.c agents.c dbq.c dbstatus.c hosts.c debug.c dberror.c
-HDR=scheduler.h spawn.h sockets.h agents.h dbq.h dbstatus.h hosts.h debug.h dberror.h
+OBJ=scheduler.o spawn.o sockets.o agents.o dbq.o dbstatus.o hosts.o debug.o dberror.o selftest.o
+SRC=scheduler.c spawn.c sockets.c agents.c dbq.c dbstatus.c hosts.c debug.c dberror.c selftest.c
+HDR=scheduler.h spawn.h sockets.h agents.h dbq.h dbstatus.h hosts.h debug.h dberror.h selftest.h
 INC=-I../$(BUILDINC)
 LIB=-L../$(BUILDLIB)
 LIBDB=-lpq -lfossdb
@@ -42,7 +42,7 @@ mkconfig: mkconfig.c
 	$(CC) $(CFLAGS) $(INC) -DDATADIR='"$(AGENTDATADIR)"' -DBINDIR='"$(AGENTDIR)"' -DVARDATADIR='"$(VARDATADIR)"' mkconfig.c -o mkconfig $(LIB) $(LIBREP)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(INC) -DDEFAULTSETUP='"$(AGENTDATADIR)/scheduler.conf"' -c $<
+	$(CC) $(CFLAGS) $(INC) -DBINDIR='"$(AGENTDIR)"' -DDEFAULTSETUP='"$(AGENTDATADIR)/scheduler.conf"' -c $<
 
 clean:
 	$(RM) $(OBJ) core scheduler mkconfig

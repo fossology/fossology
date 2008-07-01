@@ -334,7 +334,7 @@ void	GenerateTestData	()
   FILE *Fout;
 
   Time = time(NULL);
-  printf("DATA: %s",ctime(&Time));
+  if (Verbose) printf("DATA: %s",ctime(&Time));
   if (!RepOpen())
     {
     printf("FATAL: Unable to access repository.\n");
