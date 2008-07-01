@@ -98,6 +98,7 @@ int	CheckAgents	()
     return(0);
     }
   system("for i in * ; do echo -n \"Agent $i: \" ; strings $i | grep \"^Build version:\" | while read A; do echo -n $A ; done; echo \"\"; done");
+  fflush(stdout);
   return(1);
 } /* CheckAgents() */
 
@@ -246,6 +247,7 @@ int	CheckLicenses	()
 
   /* All done! */
   fclose(Fin);
+  fflush(stdout);
   return(1);
 } /* CheckLicenses() */
 
@@ -313,6 +315,7 @@ int	CheckRepo	()
 
   free(RepPath);
   RepClose();
+  fflush(stdout);
   return(1);
 } /* CheckRepo() */
 
