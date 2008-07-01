@@ -167,7 +167,6 @@ int	SelfTest	()
   free(HostCheck);
 
   fclose(FData);
-rc=1;
   return(rc);
 } /* SelfTest() */
 
