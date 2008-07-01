@@ -101,6 +101,7 @@
 #include "dbq.h"
 #include "dbstatus.h"
 #include "dberror.h"
+#include "selftest.h"
 
 int Verbose=0;
 int ShowState=1;
@@ -371,6 +372,14 @@ int	main	(int argc, char *argv[])
   DBQinit();
   if (optind == argc) InitEngines(DEFAULTSETUP);
   else InitEngines(argv[optind]);
+
+  /* Check for good agents */
+  if (SelfTest())
+    {
+    fprintf(stderr,"FATAL: Inconsistent agent(s) detected.\n");
+    DBclose(DB);
+    exit(-1);
+    }
 
   /* See if we're testing */
   if (Test)

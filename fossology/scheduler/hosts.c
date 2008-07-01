@@ -38,18 +38,9 @@
      or must kill a child before you can spawn a new one.
      (It's a cruel world.)
  **********************************************/
-struct hostlist
-  {
-  char Hostname[65];
-  int MaxRunning;	/* max number of running processes */
-  int MaxUrgent;	/* max number of urgent processes */
-  int Running;	/* number of currently running processes */
-  };
-typedef struct hostlist hostlist;
 #define MAXHOSTLIST	64
 hostlist HostList[MAXHOSTLIST];	/* currently limit number of hosts */
 int	MaxHostList = 0;	/* how many loaded? */
-
 int	RunCount=0;	/* total number of running processes */
 
 /*****************************************************

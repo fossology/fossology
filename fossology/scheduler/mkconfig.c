@@ -177,6 +177,13 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
   fprintf(Fout,Cmd,BINDIR,BINDIR);
   fprintf(Fout,"\n");
 
+  /** selftest -- host-specific **/
+  memset(Cmd,'\0',sizeof(Cmd));
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/selftest -s",BINDIR);
+  fprintf(Fout,"agent=selftest %s| ",CmdHost);
+  fprintf(Fout,Rcmd,Cmd);
+  fprintf(Fout,"\n");
+
   /* all done */
   fprintf(Fout,"\n");
   return(rc);

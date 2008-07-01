@@ -19,6 +19,17 @@
 #ifndef HOSTS_H
 #define HOSTS_H
 
+struct hostlist
+  {
+  char Hostname[65];
+  int MaxRunning;       /* max number of running processes */
+  int MaxUrgent;        /* max number of urgent processes */
+  int Running;  /* number of currently running processes */
+  };
+typedef struct hostlist hostlist;
+extern hostlist HostList[]; /* currently limit number of hosts */
+extern int MaxHostList;	/* how many hosts are known? */
+
 extern int RunCount;	/* total number of running processes */
 void	HostAdd	(char *Hostname, int MaxRunning, int MaxUrgent);
 int	GetHostFromAttr	(char *Attr);
