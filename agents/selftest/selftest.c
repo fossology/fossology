@@ -97,7 +97,7 @@ int	CheckAgents	()
     printf("ERROR: Unable to access %s\n",AGENTDIR);
     return(0);
     }
-  system("for i in * ; do echo -n \"$i: \" ; strings $i | grep \"^Build version:\" | while read A; do echo -n $A ; done; echo \"\"; done");
+  system("for i in * ; do echo -n \"Agent $i: \" ; strings $i | grep \"^Build version:\" | while read A; do echo -n $A ; done; echo \"\"; done");
   return(1);
 } /* CheckAgents() */
 
