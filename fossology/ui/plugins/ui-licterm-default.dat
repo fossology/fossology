@@ -196,6 +196,7 @@
   $Term["GPLv3"]["Term"][13]="gplv3";
   $Term["GPLv3"]["Term"][14]="gpl v3";
   $Term["GPLv3"]["Term"][15]="gpl version 3";
+  $Term["GPLv3"]["Term"][16]="gpl 3";
   $Term["GPLv3"]["License"][0]="GPL/v3/GPLv3";
   $Term["GPLv3"]["License"][1]="GPL/v3/GPLv3 Preamble";
   $Term["GPLv3"]["License"][2]="GPL/v3/GPLv3 reference 1";
