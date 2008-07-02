@@ -171,7 +171,7 @@ int	SelfTest	()
     {
     if (HostCheck[i] != 1)
       {
-      fprintf(stderr,"FATAL: Host '%s' failed self-tested.\n",HostList[i].Hostname);
+      fprintf(stderr,"FATAL: Host '%s' failed self-test.\n",HostList[i].Hostname);
       rc=1;
       }
     }
