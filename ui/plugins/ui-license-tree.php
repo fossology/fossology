@@ -47,8 +47,6 @@ class ui_license_tree extends FO_Plugin
       if (GetParm("mod",PARM_STRING) == $this->Name)
 	{
 	menu_insert("Browse::License Tree",1);
-	menu_insert("Browse::[BREAK]",100);
-	menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
 	}
       else
 	{
