@@ -117,6 +117,13 @@ int	SelfTest	()
 	  if ((c>=0) && (c!='\n')) Line[0][i]=c;
 	  i++;
 	  } while(!feof(FData) && (c >= 0) && (c!='\n') && (i<1023));
+	if (!strncmp(Line[0],"FATAL:",6))
+	  {
+	  fprintf(stderr,"FATAL: Scheduler error: %s\n",Line[0]+6);
+	  fclose(FData);
+	  pclose(FTest);
+	  return(1);
+	  }
 
 	/** Read line from agent system **/
 	memset(Line[1],0,1024);
@@ -134,6 +141,10 @@ int	SelfTest	()
 	  fprintf(stderr,"FATAL: Configuration on agent '%s' differs from scheduler.\n",HostList[HostId].Hostname);
 	  if (Line[1])
 		{
+		if (Verbose)
+		  {
+		  fprintf(stderr,"FATAL: Difference: '%s' != '%s'\n",Line[0],Line[1]);
+		  }
 		fprintf(stderr,"FATAL: The difference is ");
 		for(i=0; (Line[1][i] != 0) && !strchr("=:",Line[1][i]); i++)
 		  fputc(Line[1][i],stderr);
