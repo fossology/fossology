@@ -215,8 +215,8 @@ class ui_license_tree extends FO_Plugin
 
       /* Recurse! */
       if (($IsDir || $IsContainer) && ($LicCount > 0))
-        {
-        $NewPath = $Path;
+	{
+	$NewPath = $Path;
 	$NewPath[] = $Name;
 	$this->ShowLicenseTree($Upload,$C['uploadtree_pk'],$Uri,$NewPath);
 	}
