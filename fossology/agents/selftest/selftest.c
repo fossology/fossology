@@ -366,6 +366,7 @@ void	GenerateTestData	()
       }
     memset(Path,'\0',sizeof(Path));
     snprintf(Path,sizeof(Path),"%s/%s/selftest.txt",RepPath,Host);
+    unlink(Path);
     Fout = fopen(Path,"w");
     if (!Fout)
       {

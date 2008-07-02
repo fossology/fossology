@@ -255,7 +255,8 @@ int	main	(int argc, char *argv[])
 	DBclose(DB);
 	exit(-1);
 	}
-      if (setgid(G->gr_gid) != 0)
+      setgroups(1,&(G->gr_gid));
+      if ((setgid(G->gr_gid) != 0) || (setegid(G->gr_gid) != 0))
 	{
 	fprintf(stderr,"ERROR: Cannot run as group '%s'.  Aborting.\n",PROJECTGROUP);
 	DBclose(DB);
