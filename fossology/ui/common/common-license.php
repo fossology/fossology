@@ -60,6 +60,7 @@ function LicenseNormalizeName	($LicName,$Confidence,$CanonicalName)
       $Name = preg_replace("/ short.*/","",$Name);
       $Name = preg_replace("/ variant.*/","",$Name);
       $Name = preg_replace("/ reference.*/","",$Name);
+      $Name = preg_replace("/ \(.*/","",$Name);
       }
     if ($Confidence == 1) { $Name = "'$Name'-style"; }
     else if ($Confidence == 2) { $Name = "'$Name'-partial"; }
