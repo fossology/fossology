@@ -347,6 +347,8 @@ int	MatchTerm	(char *Term, char *Str, long StrLen)
       j++;
       }
     }
+  /* Make sure it does not match a partial word */
+  if (j && isalnum(Str[j])) j=0;
   return(j);
 } /* MatchTerm() */
 
