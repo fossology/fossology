@@ -78,10 +78,20 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
   global $LicenceGetName_Prepared;
   if (!$LicenceGetName_Prepared)
     {
-    $DB->Prepare("LicenseGetName_RawName",'SELECT lic_name,phrase_text,lic_id
+    $DB->Prepare("LicenseGetName_Raw1",'SELECT licterm.licterm_name,lic_name,phrase_text,lic_id
 	FROM agent_lic_raw
 	INNER JOIN agent_lic_meta ON agent_lic_meta_pk = $1
-	AND lic_fk = lic_pk;');
+	AND lic_fk = lic_pk
+	INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
+        INNER JOIN licterm ON licterm_fk = licterm_pk
+	;');
+
+    $DB->Prepare("LicenseGetName_Raw2",'SELECT lic_name,phrase_text,lic_id
+	FROM agent_lic_raw
+	INNER JOIN agent_lic_meta ON agent_lic_meta_pk = $1
+	AND lic_fk = lic_pk
+	;');
+
     $DB->Prepare("LicenseGetName_CanonicalName",'SELECT licterm_name_confidence,licterm_name
 	FROM licterm
 	INNER JOIN licterm_name ON agent_lic_meta_fk = $1
@@ -91,7 +101,8 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
 
   $FullName='';
   $CanonicalList =  $DB->Execute("LicenseGetName_CanonicalName",array($MetaId));
-  $RawList =  $DB->Execute("LicenseGetName_RawName",array($MetaId));
+  $RawList =  $DB->Execute("LicenseGetName_Raw1",array($MetaId));
+  if (empty($RawList)) { $RawList =  $DB->Execute("LicenseGetName_Raw2",array($MetaId)); }
 
   $LastConfidence = $CanonicalList[0]['licterm_name_confidence'];
   $Phrase = $RawName[0]['phrase_text'];
@@ -146,9 +157,16 @@ function LicenseGet(&$PfilePk, &$Lics, $GetPks=0)
   if (empty($DB)) { return; }
   if (!$LicenseGet_Prepared)
     {
-    $DB->Prepare("LicenseGet_Raw",'SELECT lic_name,lic_id,phrase_text,agent_lic_meta_pk
+    $DB->Prepare("LicenseGet_Raw1",'SELECT licterm.licterm_name,lic_id,phrase_text,agent_lic_meta_pk
 	FROM agent_lic_meta
-	INNER JOIN agent_lic_raw ON lic_fk = lic_pk AND pfile_fk = $1;');
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk AND pfile_fk = $1
+	INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
+        INNER JOIN licterm ON licterm_fk = licterm_pk
+	;');
+    $DB->Prepare("LicenseGet_Raw2",'SELECT lic_id,phrase_text,agent_lic_meta_pk
+	FROM agent_lic_meta
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk AND pfile_fk = $1
+	;');
     $DB->Prepare("LicenseGet_Canonical",'SELECT licterm.licterm_name,licterm_name.licterm_name_confidence,lic_name,phrase_text,lic_id,agent_lic_meta_pk
 	FROM agent_lic_meta
 	INNER JOIN agent_lic_raw ON lic_fk = lic_pk AND pfile_fk = $1
@@ -159,7 +177,8 @@ function LicenseGet(&$PfilePk, &$Lics, $GetPks=0)
   if (empty($Lics[' Total '])) { $Lics[' Total ']=0; }
 
   $CanonicalList =  $DB->Execute("LicenseGet_Canonical",array($PfilePk));
-  $RawList = $DB->Execute("LicenseGet_Raw",array($PfilePk));
+  $RawList = $DB->Execute("LicenseGet_Raw1",array($PfilePk));
+  if (empty($RawList)) { $RawList = $DB->Execute("LicenseGet_Raw2",array($PfilePk)); }
   $Results=array();
   $PfileList=array();
   foreach($CanonicalList as $R)
@@ -215,10 +234,20 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetPks=0, $Depth=0)
   if (!$LicenseGetAll_Prepared)
     {
     $DB->Prepare("LicenseGetAll_Traverse",'SELECT uploadtree_pk,ufile_mode FROM uploadtree WHERE parent = $1;');
-    $DB->Prepare("LicenseGetAll_Raw",'SELECT lic_name,lic_id,phrase_text,agent_lic_meta_pk
+    $DB->Prepare("LicenseGetAll_Raw1",'SELECT licterm.licterm_name,lic_name,lic_id,phrase_text,agent_lic_meta_pk
 	FROM uploadtree
 	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
-	INNER JOIN agent_lic_raw ON lic_fk = lic_pk;');
+	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = lic_pk
+	INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
+	INNER JOIN licterm ON licterm_fk = licterm_pk
+	;');
+
+    $DB->Prepare("LicenseGetAll_Raw2",'SELECT lic_name,lic_id,phrase_text,agent_lic_meta_pk
+	FROM uploadtree
+	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
+	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = lic_pk
+	;');
+
     $DB->Prepare("LicenseGetAll_Canonical",'SELECT licterm.licterm_name,licterm_name.licterm_name_confidence,lic_name,phrase_text,lic_id,agent_lic_meta_pk
 	FROM uploadtree
 	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
@@ -230,7 +259,8 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetPks=0, $Depth=0)
 
   /* Get every license */
   $CanonicalList =  $DB->Execute("LicenseGetAll_Canonical",array($UploadtreePk));
-  $RawList = $DB->Execute("LicenseGetAll_Raw",array($UploadtreePk));
+  $RawList = $DB->Execute("LicenseGetAll_Raw1",array($UploadtreePk));
+  if (empty($RawList)) { $RawList = $DB->Execute("LicenseGetAll_Raw2",array($UploadtreePk)); }
   $Results=array();
   $PfileList=array();
   foreach($CanonicalList as $R)
@@ -296,11 +326,21 @@ function LicenseGetAllFilesByCanonicalName (&$UploadtreePk, &$Lics, &$WantName)
   global $LicenseGetAllFilesByCanonicalName_Prepared;
   if (!$LicenseGetAllFilesByCanonicalName_Prepared)
     {
-    $DB->Prepare("LicenseGetAllFilesByCanonicalName_Raw",'SELECT uploadtree.pfile_fk AS pfile,ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,lic_pk,phrase_text,agent_lic_meta_pk
+    $DB->Prepare("LicenseGetAllFilesByCanonicalName_Raw1",'SELECT licterm.licterm_name,uploadtree.pfile_fk AS pfile,ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,lic_pk,phrase_text,agent_lic_meta_pk
 	FROM uploadtree
 	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
 	INNER JOIN ufile ON ufile_fk = ufile_pk
-	INNER JOIN agent_lic_raw ON lic_fk = lic_pk;');
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
+	INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
+        INNER JOIN licterm ON licterm_fk = licterm_pk
+        ;');
+
+    $DB->Prepare("LicenseGetAllFilesByCanonicalName_Raw2",'SELECT licterm.licterm_name,uploadtree.pfile_fk AS pfile,ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,lic_pk,phrase_text,agent_lic_meta_pk
+	FROM uploadtree
+	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
+	INNER JOIN ufile ON ufile_fk = ufile_pk
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
+        ;');
 
     $DB->Prepare("LicenseGetAllFilesByCanonicalName_Canonical",'SELECT uploadtree.pfile_fk AS pfile,ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name,lic_pk,phrase_text,agent_lic_meta_pk
 	FROM uploadtree
@@ -316,7 +356,8 @@ function LicenseGetAllFilesByCanonicalName (&$UploadtreePk, &$Lics, &$WantName)
 
   /* Find every license under this UploadtreePk... */
   $CanonicalList = $DB->Execute("LicenseGetAllFilesByCanonicalName_Canonical",array($UploadtreePk));
-  $RawList = $DB->Execute("LicenseGetAllFilesByCanonicalName_Raw",array($UploadtreePk));
+  $RawList = $DB->Execute("LicenseGetAllFilesByCanonicalName_Raw1",array($UploadtreePk));
+  if (empty($RawList)) { $RawList = $DB->Execute("LicenseGetAllFilesByCanonicalName_Raw2",array($UploadtreePk)); }
   /* Combine Raw and Canonical */
   $PfileList=array(); /* list of Pfiles that I have seen */
   $Results = array();
