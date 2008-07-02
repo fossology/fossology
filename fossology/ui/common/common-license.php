@@ -335,7 +335,7 @@ function LicenseGetAllFilesByCanonicalName (&$UploadtreePk, &$Lics, &$WantName)
         INNER JOIN licterm ON licterm_fk = licterm_pk
         ;');
 
-    $DB->Prepare("LicenseGetAllFilesByCanonicalName_Raw2",'SELECT licterm.licterm_name,uploadtree.pfile_fk AS pfile,ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,lic_pk,phrase_text,agent_lic_meta_pk
+    $DB->Prepare("LicenseGetAllFilesByCanonicalName_Raw2",'SELECT uploadtree.pfile_fk AS pfile,ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,lic_pk,phrase_text,agent_lic_meta_pk
 	FROM uploadtree
 	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
 	INNER JOIN ufile ON ufile_fk = ufile_pk
