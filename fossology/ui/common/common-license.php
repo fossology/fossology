@@ -181,20 +181,20 @@ function LicenseGet(&$PfilePk, &$Lics, $GetPks=0)
   $RawList = $DB->Execute("LicenseGet_Raw1",array($PfilePk));
   if (empty($RawList)) { $RawList = $DB->Execute("LicenseGet_Raw2",array($PfilePk)); }
   $Results=array();
-  $PfileList=array();
+  $PfileList=array(); /* used to omit duplicates */
   foreach($CanonicalList as $R)
     {
-    if (empty($PfileList[$R['agent_lic_meta_pk']]))
+    if (empty($PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']]))
       {
-      $PfileList[$R['agent_lic_meta_pk']] = 1;
+      $PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']] = 1;
       $Results[] = $R;
       }
     }
   foreach($RawList as $R)
     {
-    if (empty($PfileList[$R['agent_lic_meta_pk']]))
+    if (empty($PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']]))
       {
-      $PfileList[$R['agent_lic_meta_pk']] = 1;
+      $PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']] = 1;
       $Results[] = $R;
       }
     }
@@ -263,20 +263,20 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetPks=0, $Depth=0)
   $RawList = $DB->Execute("LicenseGetAll_Raw1",array($UploadtreePk));
   if (empty($RawList)) { $RawList = $DB->Execute("LicenseGetAll_Raw2",array($UploadtreePk)); }
   $Results=array();
-  $PfileList=array();
+  $PfileList=array(); /* used to omit duplicates */
   foreach($CanonicalList as $R)
     {
-    if (empty($PfileList[$R['agent_lic_meta_pk']]))
+    if (empty($PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']]))
       {
-      $PfileList[$R['agent_lic_meta_pk']] = 1;
+      $PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']] = 1;
       $Results[] = $R;
       }
     }
   foreach($RawList as $R)
     {
-    if (empty($PfileList[$R['agent_lic_meta_pk']]))
+    if (empty($PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']]))
       {
-      $PfileList[$R['agent_lic_meta_pk']] = 1;
+      $PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']] = 1;
       $Results[] = $R;
       }
     }
