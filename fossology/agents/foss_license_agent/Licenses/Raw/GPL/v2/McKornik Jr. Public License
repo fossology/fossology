@@ -1,0 +1,27 @@
+1 The McKornik Jr. Public License
+*********************************
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+   In particular, this program is provided as is, without any warranty,
+not even of any kind.  It might (or might not) do what it is supposed
+to do, it might (or might not) destroy your printer, and it might (or
+might not) be useful to you.  In any case, you are on your own.
+
+   This program is written in Perl.  While stronger people find reading
+Perl code character-building, it should not be shown to people in their
+formative years.  The author will not accept any responsibility for any
+moral grief caused.
+
+   I would like to ask you _not_ to distribute the generated fonts
+without including a pointer to the original AFMs and the rest of the
+code.  Furthermore, please notify me if you decide to include this code
+in a larger piece of software.
+
+   If you find this software useful, local goodies, makowiec, beer from
+Zywiec, postcards from exotic places and all sorts of things are
+accepted.
+
