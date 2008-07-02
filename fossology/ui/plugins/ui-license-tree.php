@@ -168,14 +168,14 @@ class ui_license_tree extends FO_Plugin
       /* Display the results */
       if ($LicCount > 0)
 	{
-	print "<tr><td align='right' width='10%'>";
+	print "<tr><td align='right' width='10%' valign='top'>";
 	print " [" . number_format($LicCount,0,"",",") . "&nbsp;";
 	print "license" . ($LicCount == 1 ? "" : "s");
 	print "</a>";
 	print "]";
 
 	/* Compute license summary */
-	print "</td><td width='1%'></td><td width='10%'>";
+	print "</td><td width='1%'></td><td width='10%' valign='top'>";
 	$LicSum = "";
 	foreach($Lics as $Key => $Val)
 	  {
@@ -186,7 +186,7 @@ class ui_license_tree extends FO_Plugin
 	print htmlentities($LicSum);
 
         /* Show the history path */
-	print "</td><td width='1%'></td><td>";
+	print "</td><td width='1%'></td><td valign='top'>";
         for($i=0; !empty($Path[$i]); $i++) { print $Path[$i]; }
 
 	$HasHref=0;
