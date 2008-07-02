@@ -164,7 +164,7 @@ function LicenseGet(&$PfilePk, &$Lics, $GetPks=0)
 	INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
         INNER JOIN licterm ON licterm_fk = licterm_pk
 	;');
-    $DB->Prepare("LicenseGet_Raw2",'SELECT lic_id,phrase_text,agent_lic_meta_pk
+    $DB->Prepare("LicenseGet_Raw2",'SELECT lic_name as licterm_name,lic_id,phrase_text,agent_lic_meta_pk
 	FROM agent_lic_meta
 	INNER JOIN agent_lic_raw ON lic_fk = lic_pk AND pfile_fk = $1
 	;');
@@ -192,6 +192,7 @@ function LicenseGet(&$PfilePk, &$Lics, $GetPks=0)
     }
   foreach($RawList as $R)
     {
+    $R['licterm_name'] = LicenseNormalizeName($R['licterm_name'],0,"");
     if (empty($PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']]))
       {
       $PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']] = 1;
