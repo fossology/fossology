@@ -421,16 +421,16 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
       {
       /* Check if the term is hanging off the front */
       if (CheckRev && MatchTermRev(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap),i,Mmap->MmapSize))
-        {
+	{
 	if (Verbose > 2) printf("Matched Rev: Term='%s'\n",DBgetvalue(DBTerms,t,1));
 	i+=1;
 	TermsCounter[t] |= Mask;
 	CheckRev=0;
 	}
       else
-        {
-        rc = MatchTerm(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap+i),Mmap->MmapSize-i);
-        if (rc > 0)
+	{
+	rc = MatchTerm(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap+i),Mmap->MmapSize-i);
+	if (rc > 0)
 	  {
 	  if (Verbose > 2) printf("Matched: Term='%s' rc=%d\n",DBgetvalue(DBTerms,t,1),rc);
 	  i+=rc;
@@ -736,8 +736,10 @@ void	ProcessTerms	()
     else Range = DBgetvalue(DBRanges,MaxRanges,1);
 
     Start = atol(Range);
+    if (Start < 0) Start=0;
     for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
     End = atoi(Range+i);
+    if (End >= PfileMmap->MmapSize) End = PfileMmap->MmapSize-1;
     if (Verbose) { printf("# Section %ld - %ld:\n",Start,End); }
     if (Verbose > 2)
 	{
@@ -758,13 +760,13 @@ void	ProcessTerms	()
       IsPhrase = (Bname[0]=='/');
       LicNameTmp = Bname;
       if (IsPhrase)
-        {
+	{
 	snprintf(LicName,sizeof(LicName),"%s",Aname);
 	Range = Apath;
 	}
       else
 	{
-        Range = Bpath;
+	Range = Bpath;
 	snprintf(LicName,sizeof(LicName),"%s/%s",AGENTDATADIR,Bname);
 	}
       }
@@ -779,15 +781,17 @@ void	ProcessTerms	()
     if (!IsPhrase)
       {
       /* not a phrase */
+      LicMmap = RepMmapFile(LicName);
       Start = atol(Range);
+      if (Start < 0) Start=0;
       for(i=strlen(Range); (i>0) && isdigit(Range[i-1]); i--)	;
       End = atoi(Range+i);
-      LicMmap = RepMmapFile(LicName);
+      if (End >= LicMmap->MmapSize) End = LicMmap->MmapSize-1;
       /* if the file has been modified, then the filesize could be wrong. */
       if (End > LicMmap->MmapSize) End = LicMmap->MmapSize;
       if (LicMmap)
 	{
-        if (Verbose > 2)
+	if (Verbose > 2)
 	  {
 	  printf("============================================\n");
 	  printf("%.*s\n",(int)(End-Start),LicMmap->Mmap + Start);
@@ -878,15 +882,15 @@ void	Usage	(char *Name)
   printf("    -X            :: command-line contains matched info (do not access DB)\n");
   printf("           The following command-line options are required (in order):\n");
   printf("           (These come from bsam-engine.)\n");
-  printf("             aname :: known file name\n");
-  printf("             bname :: unknown file name\n");
+  printf("             aname :: unknown file name\n");
+  printf("             bname :: known file name (path in license raw directory)\n");
   printf("             match :: number of matched tokens\n");
   printf("             atok  :: number of tokens in the unknown file\n");
   printf("             btok  :: number of tokens in the known/license file\n");
   printf("             apath :: byte path through the unknown file\n");
   printf("             bpath :: byte path through the known file\n");
   printf("           For example:\n");
-  printf("             -X myfile 'MPL/MPL1.0' 12 14 15 1-12 1-3,4-13\n");
+  printf("             -X myfile 'MPL/MPL v1.0' 12 14 15 1-12 1-3,4-13\n");
   printf("  Debugging options:\n");
   printf("    -i = Initialize the database, then exit.\n");
   printf("    -v = Verbose (-vv = more verbose, etc.)\n");
@@ -1017,14 +1021,14 @@ int	main	(int argc, char *argv[])
 
       /* Mark it as processed */
       if (StoreDB)
-        {
-        DBaccess(DB,"BEGIN;");
-        memset(SQL,'\0',sizeof(SQL));
-        snprintf(SQL,sizeof(SQL),"SELECT * FROM agent_lic_status WHERE pfile_fk = '%ld' FOR UPDATE;",PfilePk);
-        DBaccess(DB,SQL);
-        snprintf(SQL,sizeof(SQL),"UPDATE agent_lic_status SET inspect_name = 'TRUE' WHERE pfile_fk = '%ld';",PfilePk);
-        DBaccess(DB,SQL);
-        DBaccess(DB,"COMMIT;");
+	{
+	DBaccess(DB,"BEGIN;");
+	memset(SQL,'\0',sizeof(SQL));
+	snprintf(SQL,sizeof(SQL),"SELECT * FROM agent_lic_status WHERE pfile_fk = '%ld' FOR UPDATE;",PfilePk);
+	DBaccess(DB,SQL);
+	snprintf(SQL,sizeof(SQL),"UPDATE agent_lic_status SET inspect_name = 'TRUE' WHERE pfile_fk = '%ld';",PfilePk);
+	DBaccess(DB,SQL);
+	DBaccess(DB,"COMMIT;");
 	}
 
       /* Off to the next item to process */
