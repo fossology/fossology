@@ -6,8 +6,6 @@ include Makefile.conf
 
 # the directories we do things in by default
 DIRS=devel scheduler agents ui cli
-# utils is a separate target, since it isn't built by default yet
-utils: build-utils
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
@@ -19,17 +17,20 @@ UNINSTALLDIRS = $(DIRS:%=uninstall-%)
 CLEANDIRS = $(DIRS:%=clean-%)
 TESTDIRS = $(DIRS:%=test-%)
 
-# dependencies:
-# the scheduler and agents need the devel stuff built first
-build-scheduler: build-devel
-build-agents: build-devel
-
 ## Targets
 # build
 all: $(BUILDDIRS)
 $(DIRS): $(BUILDDIRS)
 $(BUILDDIRS):
 	$(MAKE) -C $(@:build-%=%)
+
+# high level dependencies:
+# the scheduler and agents need the devel stuff built first
+build-scheduler: build-devel
+build-agents: build-devel
+
+# utils is a separate target, since it isn't built by default yet
+utils: build-utils
 
 # install depends on everything being built first
 install: all $(INSTALLDIRS)
