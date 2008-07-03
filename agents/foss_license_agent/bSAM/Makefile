@@ -16,13 +16,6 @@ $(EXE): %: %.c $(DB) $(REPO) $(VARS)
 $(UTILS): %: %.c $(VARS)
 	$(CC) $< $(CFLAGS) -o $@
 
-# targets to make sure the libfoss libraries we use are up to date
-$(DB):
-	$(MAKE) -C $(DBPATH) libfossdb.a
-
-$(REPO):
-	$(MAKE) -C $(REPOPATH) libfossrepo.a
-
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 # we don't install the UTILS or the stuff in docs/ currently

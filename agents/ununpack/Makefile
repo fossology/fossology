@@ -32,13 +32,6 @@ metahandle.c: metahandle.tab metahandle.pl
 	if [ ! -x metahandle.pl ] ; then chmod u+x metahandle.pl; fi
 	./metahandle.pl
 
-# targets to make sure the libfoss libraries we use are up to date
-$(DB):
-	$(MAKE) -C $(DBPATH) libfossdb.a
-
-$(REPO):
-	$(MAKE) -C $(REPOPATH) libfossrepo.a
-
 install: all $(VARS)
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(AGENTDIR)/departition
 	$(INSTALL_PROGRAM) checksum $(DESTDIR)$(AGENTDIR)/checksum

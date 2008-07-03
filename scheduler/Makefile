@@ -31,14 +31,6 @@ $(REPOOBJ): %.o: %.c %.h $(DB) $(REPO) $(VARS)
 	$(CC) -c $< $(CONFDEF) $(CFLAGS_REPOO) $(CFLAGS_DBO) $(ALL_CFLAGS)
 
 
-# targets to make sure the libfoss libraries we use are up to date
-$(DB):
-	$(MAKE) -C $(DBPATH) libfossdb.a
-
-$(REPO):
-	$(MAKE) -C $(REPOPATH) libfossrepo.a
-
-
 install: all
 	$(INSTALL_PROGRAM) fossology-scheduler $(DESTDIR)$(LIBEXECDIR)/fossology-scheduler
 	$(INSTALL_PROGRAM) mkschedconf $(DESTDIR)$(LIBEXECDIR)/mkschedconf

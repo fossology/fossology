@@ -17,13 +17,6 @@ Filter_License: $(FLSRC) $(FLSRC:%.c=%.h) $(DB) $(REPO) $(VARS)
 filter_clean: %: %.c $(DB) $(REPO)
 	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
-# targets to make sure the libfoss libraries we use are up to date
-$(DB):
-	$(MAKE) -C $(DBPATH) libfossdb.a
-
-$(REPO):
-	$(MAKE) -C $(REPOPATH) libfossrepo.a
-
 install: all
 	$(INSTALL_PROGRAM) Filter_License $(DESTDIR)$(AGENTDIR)/Filter_License
 	$(INSTALL_PROGRAM) filter_clean $(DESTDIR)$(AGENTDIR)/filter_clean
