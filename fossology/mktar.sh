@@ -76,6 +76,14 @@ sed -e "s@^SVN_REV=.*@SVN_REV=${SVN_REV}@" Makefile.conf.svn > Makefile.conf
 rm Makefile.conf.svn
 )
 
+(
+# Create and copy over the pathinclude.h.php
+cd ui
+rm pathinclude.h.php
+make
+cp pathinclude.h.php ../../$TARBASE/ui/pathinclude.h.php
+)
+
 # Create the tar
 (
 cd ..
