@@ -32,6 +32,86 @@ class ui_license_tree extends FO_Plugin
   var $Dependency = array("db","browse","license","view-license");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
+  var $NoHeader     = 0;
+
+  /***********************************************************
+   OutputOpen(): This function is called when user output is
+   requested.  This function is responsible for assigning headers.
+   If $Type is "HTML" then generate an HTTP header.
+   If $Type is "XML" then begin an XML header.
+   If $Type is "Text" then generate a text header as needed.
+   The $ToStdout flag is "1" if output should go to stdout, and
+   0 if it should be returned as a string.  (Strings may be parsed
+   and used by other plugins.)
+   ***********************************************************/
+  function OutputOpen($Type,$ToStdout)
+    {
+    global $Plugins;
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    if (GetParm("output",PARM_STRING) == 'csv') { $Type='CSV'; }
+    $this->OutputType=$Type;
+    $this->OutputToStdout=$ToStdout;
+    // Put your code here
+    switch($this->OutputType)
+      {
+      case "CSV":
+	$this->NoHeader=1;
+	$Item = GetParm("item",PARM_INTEGER);
+	if (empty($Item)) { return; }
+	$Path = Dir2Path($Item);
+	$Name = $Path[count($Path)-1]['ufile_name'] . ".csv";
+	header("Content-Type: text/comma-separated-values");
+	header('Content-Disposition: attachment; filename="' . $Name . '"');
+	break;
+      case "XML":
+	$V = "<xml>\n";
+	break;
+      case "HTML":
+	header('Content-type: text/html');
+	if ($this->NoHTML) { return; }
+	$V = "";
+	if (($this->NoMenu == 0) && ($this->Name != "menus"))
+	  {
+	  $Menu = &$Plugins[plugin_find_id("menus")];
+	  $Menu->OutputSet($Type,$ToStdout);
+	  }
+	else { $Menu = NULL; }
+
+	/* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
+	$V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
+	// $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
+	// $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
+	// $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "xhtml1-strict.dtd">' . "\n";
+
+	$V .= "<html>\n";
+	$V .= "<head>\n";
+	if ($this->NoHeader == 0)
+	  {
+	  /** Known bug: DOCTYPE "should" be in the HEADER
+	      and the HEAD tags should come first.
+	      Also, IE will ignore <style>...</style> tags that are NOT
+	      in a <head>...</head> block.
+	   **/
+	  if (!empty($Title)) { $V .= "<title>" . htmlentities($Title) . "</title>\n"; }
+	  $V .= "<link rel='stylesheet' href='fossology.css'>\n";
+	  print $V; $V="";
+	  if (!empty($Menu)) { print $Menu->OutputCSS(); }
+	  $V .= "</head>\n";
+
+	  $V .= "<body class='text'>\n";
+	  print $V; $V="";
+	  if (!empty($Menu)) { $Menu->Output($this->Title); }
+	  }
+	break;
+      case "Text":
+	break;
+      default:
+	break;
+      }
+    if (!$this->OutputToStdout) { return($V); }
+    print $V;
+    return;
+    } // OutputOpen()
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
@@ -47,6 +127,8 @@ class ui_license_tree extends FO_Plugin
       if (GetParm("mod",PARM_STRING) == $this->Name)
 	{
 	menu_insert("Browse::License Tree",1);
+	menu_insert("Browse::[BREAK]",100);
+	menu_insert("Browse::CSV",101,$URI . "&output=csv");
 	}
       else
 	{
@@ -91,6 +173,77 @@ class ui_license_tree extends FO_Plugin
     if ($B1 == "-partial") { return(1); }
     return(strcmp($A1,$B1));
     } // SortName()
+
+  /***********************************************************
+   ShowOutputCSV(): Generate CSV output.
+   Use "|" as the divider (not a comma) because commas can appear
+   in file names.
+   ***********************************************************/
+  function ShowOutputCSV (&$LicCount,&$LicSum,&$IsContainer,&$IsArtifact,&$IsDir,&$Path,&$Name,&$LicUri,&$LinkUri)
+    {
+    print number_format($LicCount,0,"",",");
+    print "|";
+
+    /* Show license summary */
+    print $LicSum . "|";
+
+    /* Show the history path */
+    for($i=0; !empty($Path[$i]); $i++) { print $Path[$i] . "|"; }
+
+    print $Name;
+    if ($IsDir)
+	{
+	print "/";
+	$Name .= "/";
+	}
+    else if ($IsContainer) { $Name .= "|::"; }
+    print "\n";
+    } // ShowOutputCSV()
+
+  /***********************************************************
+   ShowOutputHTML(): Generate HTML output.
+   ***********************************************************/
+  function ShowOutputHTML (&$LicCount,&$LicSum,&$IsContainer,&$IsArtifact,&$IsDir,&$Path,&$Name,&$LicUri,&$LinkUri)
+    {
+	{
+	print "<tr><td align='right' width='10%' valign='top'>";
+	print "[" . number_format($LicCount,0,"",",") . "&nbsp;";
+	print "license" . ($LicCount == 1 ? "" : "s");
+	print "</a>";
+	print "]";
+
+	/* Compute license summary */
+	print "</td><td width='1%'></td><td width='10%' valign='top'>";
+	print htmlentities($LicSum);
+
+	/* Show the history path */
+	print "</td><td width='1%'></td><td valign='top'>";
+	for($i=0; !empty($Path[$i]); $i++) { print $Path[$i]; }
+
+	$HasHref=0;
+	if ($IsContainer)
+	  {
+	  print "<a href='$LicUri'>";
+	  $HasHref=1;
+	  }
+	else if (!empty($LinkUri))
+	  {
+	  print "<a href='$LinkUri'>";
+	  $HasHref=1;
+	  }
+	if ($IsContainer) { print "<b>"; };
+	print $Name;
+	if ($IsContainer) { print "</b>"; };
+	if ($IsDir)
+	  {
+	  print "/";
+	  $Name .= "/";
+	  }
+	else if ($IsContainer) { $Name .= " :: "; }
+	if ($HasHref) { print "</a>"; }
+	print "</td></tr>";
+	}
+    } // ShowOutputHTML()
 
   /***********************************************************
    ShowLicenseTree(): Given an Upload and UploadtreePk item, display:
@@ -158,22 +311,14 @@ class ui_license_tree extends FO_Plugin
       $LicCount = $Lics[' Total '];
       $LicSum = "";
       foreach($Lics as $Key => $Val)
-        {
+	{
 	if (!empty($LicSum)) { $LicSum .= ","; }
 	$LicSum .= $Key;
 	}
 
       /* Display the results */
       if ($LicCount > 0)
-	{
-	print "<tr><td align='right' width='10%' valign='top'>";
-	print " [" . number_format($LicCount,0,"",",") . "&nbsp;";
-	print "license" . ($LicCount == 1 ? "" : "s");
-	print "</a>";
-	print "]";
-
-	/* Compute license summary */
-	print "</td><td width='1%'></td><td width='10%' valign='top'>";
+        {
 	$LicSum = "";
 	foreach($Lics as $Key => $Val)
 	  {
@@ -181,36 +326,16 @@ class ui_license_tree extends FO_Plugin
 	  if (!empty($LicSum)) { $LicSum .= ","; }
 	  $LicSum .= $Key;
 	  }
-	print htmlentities($LicSum);
-
-        /* Show the history path */
-	print "</td><td width='1%'></td><td valign='top'>";
-        for($i=0; !empty($Path[$i]); $i++) { print $Path[$i]; }
-
-	$HasHref=0;
-	if ($IsContainer)
-	  {
-	  print "<a href='$LicUri'>";
-	  $HasHref=1;
-	  }
-	else if (!empty($LinkUri))
-	  {
-	  print "<a href='$LinkUri'>";
-	  $HasHref=1;
-	  }
-	if ($IsContainer) { print "<b>"; };
 	$Name = $C['ufile_name'];
 	if ($IsArtifact) { $Name = str_replace("artifact.","",$Name); }
-	print $Name;
-	if ($IsContainer) { print "</b>"; };
-	if ($IsDir)
+	if ($this->OutputType == 'HTML')
 	  {
-	  print "/";
-	  $Name .= "/";
+	  $this->ShowOutputHTML($LicCount,$LicSum,$IsContainer,$IsArtifact,$IsDir,$Path,$Name,$LicUri,$LinkUri);
 	  }
-	else if ($IsContainer) { $Name .= " :: "; }
-	if ($HasHref) { print "</a>"; }
-	print "</td></tr>";
+	else if ($this->OutputType == 'CSV')
+	  {
+	  $this->ShowOutputCSV($LicCount,$LicSum,$IsContainer,$IsArtifact,$IsDir,$Path,$Name,$LicUri,$LinkUri);
+	  }
 	}
 
       /* Recurse! */
@@ -235,19 +360,12 @@ class ui_license_tree extends FO_Plugin
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
 
-    switch(GetParm("show",PARM_STRING))
-	{
-	case 'detail':
-		$Show='detail';
-		break;
-	case 'summary':
-	default:
-		$Show='summary';
-		break;
-	}
-
     switch($this->OutputType)
       {
+      case "CSV":
+	print "License Count|License Summary|Path\n";
+	$this->ShowLicenseTree($Upload,$Item,$Uri);
+	break;
       case "XML":
 	break;
       case "HTML":
