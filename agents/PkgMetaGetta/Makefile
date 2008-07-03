@@ -2,6 +2,7 @@
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 TOP=../..
 VARS=$(TOP)/Makefile.conf
+DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq -lextractor $(ALL_CFLAGS)
@@ -23,5 +24,7 @@ test: all
 
 clean:
 	rm -f $(EXE) *.o core
+
+include $(DEPS)
 
 .PHONY: all install uninstall clean test

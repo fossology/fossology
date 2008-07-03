@@ -2,6 +2,7 @@
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 TOP=..
 VARS=$(TOP)/Makefile.conf
+DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 CONFDEF=-DDEFAULTSETUP='"$(SYSCONFDIR)/scheduler.conf"'
@@ -94,5 +95,6 @@ clean:
 test: all
 	@echo "NOTICE: no tests available for scheduler"
 
+include $(DEPS)
 
 .PHONY: all install uninstall clean test
