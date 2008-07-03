@@ -184,18 +184,15 @@ function LicenseGet(&$PfilePk, &$Lics, $GetPks=0)
   $PfileList=array(); /* used to omit duplicates */
   foreach($CanonicalList as $R)
     {
-    if (empty($PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']]))
-      {
-      $PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']] = 1;
-      $Results[] = $R;
-      }
+    $PfileList[$R['agent_lic_meta_pk']] = 1;
+    $Results[] = $R;
     }
   foreach($RawList as $R)
     {
     $R['licterm_name'] = LicenseNormalizeName($R['licterm_name'],0,"");
-    if (empty($PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']]))
+    if (empty($PfileList[$R['agent_lic_meta_pk']]))
       {
-      $PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']] = 1;
+      $PfileList[$R['agent_lic_meta_pk']] = 1;
       $Results[] = $R;
       }
     }
@@ -232,10 +229,12 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetPks=0, $Depth=0)
   if (empty($DB)) { return; }
   if (empty($UploadtreePk)) { return NULL; }
 
+  if (empty($Lics[' Total '])) { $Lics[' Total ']=0; }
   global $LicenseGetAll_Prepared;
   if (!$LicenseGetAll_Prepared)
     {
     $DB->Prepare("LicenseGetAll_Traverse",'SELECT uploadtree_pk,ufile_mode FROM uploadtree WHERE parent = $1;');
+
     $DB->Prepare("LicenseGetAll_Raw1",'SELECT licterm.licterm_name,lic_name,lic_id,phrase_text,agent_lic_meta_pk
 	FROM uploadtree
 	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
@@ -267,17 +266,14 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetPks=0, $Depth=0)
   $PfileList=array(); /* used to omit duplicates */
   foreach($CanonicalList as $R)
     {
-    if (empty($PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']]))
-      {
-      $PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']] = 1;
-      $Results[] = $R;
-      }
+    $PfileList[$R['agent_lic_meta_pk']] = 1;
+    $Results[] = $R;
     }
   foreach($RawList as $R)
     {
-    if (empty($PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']]))
+    if (empty($PfileList[$R['agent_lic_meta_pk']]))
       {
-      $PfileList[$R['agent_lic_meta_pk']."-".$R['licterm_name']] = 1;
+      $PfileList[$R['agent_lic_meta_pk']] = 1;
       $Results[] = $R;
       }
     }
