@@ -39,7 +39,7 @@ class agent_license_reanalyze extends FO_Plugin
    AnalyzeOne(): Analyze one uploaded file.
    Returns 0 on success, !0 on failure.
    *********************************************/
-  function AnalyzeOne ($PfilePk)
+  function AnalyzeOne ($PfilePk,$UploadtreePk)
   {
     global $Plugins;
     global $AGENTDIR;
@@ -62,33 +62,42 @@ class agent_license_reanalyze extends FO_Plugin
     $DB->Action("DELETE FROM agent_lic_status WHERE pfile_fk = '$Akey';");
     $DB->Action("COMMIT;");
 
-    /* Run the analysis */
-    $CmdOk = "echo \"akey='$Akey' a='$A' size='$ASize'\"";
-    $CmdEnd = "2>&1 > /dev/null";
-
-    $Cmd = "$CmdOk | $AGENTDIR/Filter_License $CmdEnd";
-    print "Creating license cache\n"; flush();
-    system($Cmd);
-
-    $Results = $DB->Action("SELECT * FROM agent_lic_status WHERE pfile_fk = '$Akey' AND inrepository = TRUE AND processed = FALSE;");
-    if (!empty($Results[0]['pfile_fk']))
+    /* Don't analyze containers! */
+    $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$UploadtreePk';");
+    if (Iscontainer($Results[0]['ufile_mode']))
       {
-      $Cmd = "$CmdOk | $AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -T license -O n -- - $DATADIR/agents/License.bsam $CmdEnd";
-      print "Finding licenses based on templates\n"; flush();
-      system($Cmd);
-
-      $Cmd = "$CmdOk | $AGENTDIR/licinspect $CmdEnd";
-      print "Finding license names based on terms and keywords\n"; flush();
-      system($Cmd);
+      print "Container not processed.\n";
       }
     else
       {
-      print "No licenses found.\n";
-      }
+      /* Run the analysis */
+      $CmdOk = "echo \"akey='$Akey' a='$A' size='$ASize'\"";
+      $CmdEnd = "2>&1 > /dev/null";
 
-    $Cmd = "$CmdOk | $AGENTDIR/filter_clean -s $CmdEnd";
-    print "Cleaning up\n"; flush();
-    system($Cmd);
+      $Cmd = "$CmdOk | $AGENTDIR/Filter_License $CmdEnd";
+      print "Creating license cache\n"; flush();
+      system($Cmd);
+
+      $Results = $DB->Action("SELECT * FROM agent_lic_status WHERE pfile_fk = '$Akey' AND inrepository = TRUE AND processed = FALSE;");
+      if (!empty($Results[0]['pfile_fk']))
+	{
+	$Cmd = "$CmdOk | $AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -T license -O n -- - $DATADIR/agents/License.bsam $CmdEnd";
+	print "Finding licenses based on templates\n"; flush();
+	system($Cmd);
+
+	$Cmd = "$CmdOk | $AGENTDIR/licinspect $CmdEnd";
+	print "Finding license names based on terms and keywords\n"; flush();
+	system($Cmd);
+	}
+      else
+	{
+	print "No licenses found.\n";
+	}
+
+      $Cmd = "$CmdOk | $AGENTDIR/filter_clean -s $CmdEnd";
+      print "Cleaning up\n"; flush();
+      system($Cmd);
+      }
 
     /* Clean up */
     print "</pre>";
@@ -171,7 +180,11 @@ class agent_license_reanalyze extends FO_Plugin
 	/* If this is a POST, then process the request. */
 	/* You can also specify the file by pfile_pk */
 	$PfilePk = GetParm('pfile',PARM_INTEGER); // may be null
-	$this->AnalyzeOne($PfilePk);
+	$UploadtreePk = GetParm('item',PARM_INTEGER); // may be null
+	if (!empty($PfilePk) && !empty($UploadtreePk))
+	  {
+	  $this->AnalyzeOne($PfilePk,$UploadtreePk);
+	  }
 	/* Refresh the screen */
 	$Uri = Traceback();
 	$Uri = str_replace("agent_license_reanalyze","view-license",$Uri);
