@@ -68,13 +68,21 @@ class agent_license_reanalyze extends FO_Plugin
     print "Creating license cache\n"; flush();
     system($Cmd);
 
-    $Cmd = "$CmdOk | $AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -T license -O n -- - $DATADIR/agents/License.bsam $CmdEnd";
-    print "Finding licenses based on templates\n"; flush();
-    system($Cmd);
+    $Results = $DB->Action("SELECT * FROM agent_lic_status WHERE pfile_fk = '$Akey' AND inrepository = TRUE AND processed = FALSE;");
+    if (!empty($Results[0]['pfile_fk']))
+      {
+      $Cmd = "$CmdOk | $AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -T license -O n -- - $DATADIR/agents/License.bsam $CmdEnd";
+      print "Finding licenses based on templates\n"; flush();
+      system($Cmd);
 
-    $Cmd = "$CmdOk | $AGENTDIR/licinspect $CmdEnd";
-    print "Finding license names based on terms and keywords\n"; flush();
-    system($Cmd);
+      $Cmd = "$CmdOk | $AGENTDIR/licinspect $CmdEnd";
+      print "Finding license names based on terms and keywords\n"; flush();
+      system($Cmd);
+      }
+    else
+      {
+      print "No licenses found.\n";
+      }
 
     $Cmd = "$CmdOk | $AGENTDIR/filter_clean -s $CmdEnd";
     print "Cleaning up\n"; flush();
@@ -165,9 +173,11 @@ class agent_license_reanalyze extends FO_Plugin
 	/* Refresh the screen */
 	$Uri = Traceback();
 	$Uri = str_replace("agent_license_reanalyze","view-license",$Uri);
-	print "<script>";
-	print "window.open('$Uri','_top');";
+	print "<script>\n";
+	print "function Refresh() { window.open('$Uri','_top'); }\n";
+	print "window.setTimeout('Refresh()',2000);\n";
 	print "</script>";
+	print "Refreshing in 2 seconds...";
 	break;
       case "Text":
 	break;
