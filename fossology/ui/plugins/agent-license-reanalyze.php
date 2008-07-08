@@ -46,6 +46,8 @@ class agent_license_reanalyze extends FO_Plugin
     global $DATADIR;
     global $DB;
 
+    print "<pre>";
+
     /* Get the pfile information */
     $Results = $DB->Action("SELECT * FROM pfile WHERE pfile_pk = '$PfilePk';");
     $A = $Results[0]['pfile_sha1'] . "." . $Results[0]['pfile_md5'] . "." . $Results[0]['pfile_size'];
@@ -53,6 +55,7 @@ class agent_license_reanalyze extends FO_Plugin
     $ASize = $Results[0]['pfile_size'];
 
     /* Remove old database information */
+    print "Removing previous license information.\n"; flush();
     $DB->Action("BEGIN;");
     $DB->Action("DELETE FROM licterm_name WHERE pfile_fk = '$Akey';");
     $DB->Action("DELETE FROM agent_lic_meta WHERE pfile_fk = '$Akey';");
@@ -60,7 +63,6 @@ class agent_license_reanalyze extends FO_Plugin
     $DB->Action("COMMIT;");
 
     /* Run the analysis */
-    print "<pre>";
     $CmdOk = "echo \"akey='$Akey' a='$A' size='$ASize'\"";
     $CmdEnd = "2>&1 > /dev/null";
 
@@ -87,9 +89,9 @@ class agent_license_reanalyze extends FO_Plugin
     $Cmd = "$CmdOk | $AGENTDIR/filter_clean -s $CmdEnd";
     print "Cleaning up\n"; flush();
     system($Cmd);
-    print "</pre>";
 
     /* Clean up */
+    print "</pre>";
     return;
   } // AnalyzeOne()
 
