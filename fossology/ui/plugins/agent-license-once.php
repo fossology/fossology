@@ -233,8 +233,10 @@ class agent_license_once extends FO_Plugin
       if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG)	// Debugging changes to license analysis
 	{
 	$URI = $this->Name . Traceback_parm_keep(array("format","pfile"));
-	menu_insert("View::One-Shot",1,$URI,"One-shot, real-time license analysis");
-	menu_insert("View-Meta::One-Shot",1,$URI,"One-shot, real-time license analysis");
+	menu_insert("View::[BREAK]",100);
+	menu_insert("View::One-Shot",101,$URI,"One-shot, real-time license analysis");
+	menu_insert("View-Meta::[BREAK]",100);
+	menu_insert("View-Meta::One-Shot",101,$URI,"One-shot, real-time license analysis");
 	}
       }
   } // RegisterMenus()
