@@ -2,7 +2,6 @@
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 TOP=..
 VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 DIRS=images plugins common template
@@ -10,7 +9,7 @@ SUBFILES=`find . -type f | grep -v svn | grep -E "(php|css|htm|html|dtd|htc|gif)
 # also set in Makefile.conf, but we override with a shorter version
 iPATHFILE=pathinclude.h.php
 
-all: $(iPATHFILE)
+all:
 
 $(iPATHFILE): ../Makefile.conf
 	@echo "Building $(iPATHFILE)"
@@ -34,7 +33,7 @@ $(iPATHFILE): ../Makefile.conf
 	@echo "\$$SVN_REV=\"$(SVN_REV)\";" >> $(iPATHFILE)
 	@echo "?>" >> $(iPATHFILE)
 
-install: all
+install: all $(iPATHFILE)
 
 	for dir in $(DIRS); do \
 		mkdir -p $(DESTDIR)$(WEBDIR)/$$dir; \
@@ -47,13 +46,20 @@ install: all
 	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 
 uninstall:
+	for file in $(FILES); do \
+		rm -f $(DESTDIR)$(WEBDIR)/$$file; \
+	done
+
+	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
+
+	for dir in $(DIRS); do \
+		mkdir -p $(DESTDIR)$(WEBDIR)/$$dir; \
+	done
 
 test: all
 	@echo "*** Tests are still run by hand for ui/ ***"
 
 clean:
-	rm -f *.o core
-
-include $(DEPS)
+	rm -f *.o core $(iPATHFILE)
 
 .PHONY: all install uninstall clean test
