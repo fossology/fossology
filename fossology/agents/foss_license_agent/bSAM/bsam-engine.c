@@ -2551,7 +2551,7 @@ void	SAMfiles	()
  **********************************************/
 int	SAMfilesExhaustiveB	()
 {
-#ifdef DEBUG_RECURSION
+#if DEBUG_RECURSION
   static int Depth=0;
 #endif
 
@@ -2562,6 +2562,7 @@ int	SAMfilesExhaustiveB	()
   matrixstate BMS;	/* best matrix match */
   int HasMatch=0;
   int BestCmp;
+  int GoodCount;	/* how many good matches have been seen? */
 
   /* don't even load the ones that are too small */
   if (MS.Symbols[0].SymbolEnd < MatchLen[0]) return(0);
@@ -2575,6 +2576,7 @@ int	SAMfilesExhaustiveB	()
   MS.Matrix.MatrixMax=0;
 
   HasMatch=0;
+  GoodCount=0;
   while(LoadNextData(1,0))
 	{
 	RMS.Label[1].MmapOffset = MS.Label[1].MmapOffset;
@@ -2595,6 +2597,7 @@ int	SAMfilesExhaustiveB	()
 	  /* Determine:
 	     IF it has a better percentage OR
 	     it has the same percentage, but more tokens that match */
+	  GoodCount++;
 	  BestCmp = (MS.Matrix.MatrixMax > BMS.Matrix.MatrixMax);
 	  if (!BestCmp && (MS.Matrix.MatrixMax == BMS.Matrix.MatrixMax))
 	    {
@@ -2663,7 +2666,7 @@ int	SAMfilesExhaustiveB	()
 #endif
 
     /* recurse on BEFORE segement */
-    if (BMS.Matrix.MatrixBestMin > 0)
+    if ((GoodCount > 1) && (BMS.Matrix.MatrixBestMin > 0))
       { /* BEFORE */
       CopyMatrixState(&BMS,&MS,0);
       /** Don't change MS.Symbols.SymbolStart -- keep the start **/
@@ -2693,7 +2696,7 @@ int	SAMfilesExhaustiveB	()
       } /* BEFORE */
 
     /* recurse on AFTER segement */
-    if (BMS.Matrix.MatrixBestMax > BMS.Matrix.MatrixBestMin)
+    if ((GoodCount > 1) && (BMS.Matrix.MatrixBestMax > BMS.Matrix.MatrixBestMin))
       { /* AFTER */
       CopyMatrixState(&BMS,&MS,0);
       /** Don't change MS.Symbols.SymbolEnd -- keep the end **/
