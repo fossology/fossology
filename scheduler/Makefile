@@ -54,15 +54,6 @@ install: all
 		echo "  Not overwriting, consider checking it by hand."; \
 	fi
 
-	# scheduler config file
-	if [ ! -f $(DESTDIR)$(SYSCONFDIR)/scheduler.conf -o "$(OVERWRITE)" ] ; then \
-		mkdir -p $(DESTDIR)$(SYSCONFDIR); \
-		./mkschedconf -o $(DESTDIR)$(SYSCONFDIR)/scheduler.conf -L; \
-	else \
-		echo "WARNING: $(DESTDIR)$(SYSCONFDIR)/scheduler.conf already exists,"; \
-		echo "  consider checking or recreating it with mkconfig."; \
-	fi
-
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fossology-scheduler
 	rm -f $(DESTDIR)$(LIBEXECDIR)/mkschedconf
