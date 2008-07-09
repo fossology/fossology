@@ -327,7 +327,7 @@ class agent_license_once_compare extends FO_Plugin
 	$V .= "<li>The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n";
 	$V .= "<li>The analysis is done in real-time. Selecting many licenses to compare against can take a long time.\n";
 	$V .= "<li>Files that contain files are <b>not</b> unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n";
-	$V .= "<li>Results are <b>not</b> stored. As soon as you get your results, your uploaded file is removed from the system.\n";
+	$V .= "<li>Results are <b>not</b> stored. As soon as you get your results, your analysis is removed from the system.\n";
 	$V .= "</ul>\n";
 
 	$V .= "<form enctype='multipart/form-data' method='post'>\n";
