@@ -1,4 +1,16 @@
-FOSSology Installation
+FOSSology Installation Documentation
+
+Introduction
+============
+This document is designed to help you get FOSSology installed and ready
+to use. It's intended audience is the system administrator who wants to
+quickly get a local install up and running, or a distribution developer
+looking to create packages.
+
+For extended discussion on how to use or tune the software, please see
+the User Documentation, available on the website, in the doc/ directory
+of the source, or the doc/ directory on an installed system (directory
+may vary depending on where you install it).
 
 Preparing your system
 =====================
