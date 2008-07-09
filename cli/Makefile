@@ -2,6 +2,7 @@
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 TOP=..
 VARS=$(TOP)/Makefile.conf
+DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 LIB=libcp2foss.h.php
@@ -12,9 +13,6 @@ HTMLFILES=$(DOCS:%.pod=%.html)
 TEXTFILES=$(DOCS:%.pod=%.txt)
 
 all: $(iPATHFILE) docs
-	for file in $(EXE); do \
-		chmod +x $${file}; \
-	done
 
 docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 
@@ -35,7 +33,6 @@ install: all
 	done
 
 	$(INSTALL_DATA) $(LIB) $(DESTDIR)$(LIBDIR)/$(LIB)
-	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(LIBDIR)/$(iPATHFILE)
 
 	for file in $(MAN1FILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MAN1DIR)/$$file; \
@@ -58,5 +55,7 @@ test: all
 clean:
 	# pod2html leaves temporary files: see debian bug #378328
 	rm -f *.o core $(MAN1FILES) $(HTMLFILES) $(TEXTFILES) pod*.tmp
+
+include $(DEPS)
 
 .PHONY: all install uninstall clean test
