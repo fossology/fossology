@@ -1,0 +1,39 @@
+FOSSology hacking
+=================
+The fossology build uses make variables for most things and variables are
+inherited down the hierarchy. By setting variables on the make command
+line you can easily change things in the build
+
+CFLAGS:
+The default CFLAGS for all C compilation is "-g -O2 -Wall". Let's say
+you wanted to build the whole tree with debugging and warnings but
+without optimization. You could do that with
+
+  $ make clean; make CFLAGS=-g -Wall
+
+or just in a particular subdir and everything below it
+
+  $ cd devel; make clean; make CFLAGS=-g -Wall
+
+Or maybe you want to build the scheduler using electricfence
+
+  $ cd scheduler; make clean; make CFLAGS=-lefence
+
+
+Installation location:
+All installation locations are controlled by variables as well. Let's say
+you wanted to do a test install into a directory pseudoroot rather than
+on the system itself
+
+  $ make; mkdir /tmp/foo; make DESTDIR=/tmp/foo install
+
+If you are someone packaging for a distribution you want to use the paths
+defined by the FHS for distributions, and install to a pseudoroot so you
+can run your packaging results.
+
+ $ make SYSCONFDIR=/etc; mkdir /tmp/foo; make DESTDIR=/tmp/foo \
+        PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var/
+
+Note: SYSCONFDIR needs to be set during the build as the location of the
+configuration files is embedded in the binaries. But none of the other
+variables should need to be set at build time, only at install time.
