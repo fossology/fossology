@@ -32,7 +32,7 @@ class agent_license_reanalyze extends FO_Plugin
   public $Dependency = array("db","view","view-license");
   public $NoHTML     = 0;
   /** To require login access, use: **/
-  public $DBaccess   = PLUGIN_DB_ANALYZE;
+  public $DBaccess   = PLUGIN_DB_DEBUG;
   public $LoginFlag  = 1;
 
   /*********************************************
@@ -63,7 +63,7 @@ class agent_license_reanalyze extends FO_Plugin
     $DB->Action("COMMIT;");
 
     /* Don't analyze containers! */
-    $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$UploadtreePk';");
+    $Results = $DB->Action("SELECT * FROM uploadtree WHERE parent = '$UploadtreePk' AND pfile_fk = '$PfilePk';");
     if (Iscontainer($Results[0]['ufile_mode']))
       {
       print "Container not processed.\n";
@@ -150,17 +150,14 @@ class agent_license_reanalyze extends FO_Plugin
       }
 
     /* Only register with the menu system if the user is logged in. */
-    if (!empty($_SESSION['User']))
-      {
-      if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG)	// Debugging changes to license analysis
+    if (!empty($_SESSION['User']) && (GetParm("mod",PARM_STRING) == 'view-license'))
 	{
-	$URI = $this->Name . Traceback_parm_keep(array("format","pfile","item","ufile"));
+	$URI = $this->Name . "&" . Traceback_parm(0);
 	menu_insert("View::[BREAK]",200);
 	menu_insert("View::Reanalyze",201,$URI,"Reanalyze license and store results");
 	menu_insert("View-Meta::[BREAK]",200);
 	menu_insert("View-Meta::Reanalyze",201,$URI,"Reanalyze license and store results");
 	}
-      }
   } // RegisterMenus()
 
   /*********************************************
