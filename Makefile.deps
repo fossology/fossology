@@ -16,4 +16,4 @@ $(REPO):
 
 # the php stuff uses the single include that we build in ui/
 $(iPATHFILE):
-	$(MAKE) -C $(TOP)/ui $(iPATHFILE)
+	$(MAKE) -C $(TOP)/ui $(notdir $(iPATHFILE))
