@@ -10,34 +10,11 @@ DOCS=cp2foss.pod fossjobs.pod
 MAN1FILES=$(DOCS:%.pod=%.1)
 HTMLFILES=$(DOCS:%.pod=%.html)
 TEXTFILES=$(DOCS:%.pod=%.txt)
-iPATHFILE=pathinclude.h.php
 
 all: $(iPATHFILE) docs
 	for file in $(EXE); do \
 		chmod +x $${file}; \
 	done
-
-$(iPATHFILE): ../Makefile.conf
-	@echo "Building $(iPATHFILE)"
-	@echo "<?php" > $(iPATHFILE)
-	@echo "global \$$GlobalReady;" >> $(iPATHFILE)
-	@echo "if (!isset(\$$GlobalReady)) { exit; }" >> $(iPATHFILE)
-	@echo "\$$BINDIR=\"$(BINDIR)\";" >> $(iPATHFILE)
-	@echo "\$$LIBDIR=\"$(LIBDIR)\";" >> $(iPATHFILE)
-	@echo "\$$LIBEXECDIR=\"$(LIBEXECDIR)\";" >> $(iPATHFILE)
-	@echo "\$$INCLUDEDIR=\"$(INCLUDEDIR)\";" >> $(iPATHFILE)
-	@echo "\$$MAN1DIR=\"$(MAN1DIR)\";" >> $(iPATHFILE)
-	@echo "\$$AGENTDIR=\"$(AGENTDIR)\";" >> $(iPATHFILE)
-	@echo "\$$SYSCONFDIR=\"$(SYSCONFDIR)\";" >> $(iPATHFILE)
-	@echo "\$$WEBDIR=\"$(WEBDIR)\";" >> $(iPATHFILE)
-	@echo "\$$PHPDIR=\"$(PHPDIR)\";" >> $(iPATHFILE)
-	@echo "\$$PROJECTSTATEDIR=\"$(PROJECTSTATEDIR)\";" >> $(iPATHFILE)
-	@echo "\$$PROJECT=\"$(PROJECT)\";" >> $(iPATHFILE)
-	@echo "\$$DATADIR=\"$(DATADIR)\";" >> $(iPATHFILE)
-	@echo "\$$PATH=\"\$$LIBEXECDIR:\$$AGENTDIR:\$$PATH:/usr/bin\";" >> $(iPATHFILE)
-	@echo "\$$VERSION=\"$(VERSION)\";" >> $(iPATHFILE)
-	@echo "\$$SVN_REV=\"$(SVN_REV)\";" >> $(iPATHFILE)
-	@echo "?>" >> $(iPATHFILE)
 
 docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 
@@ -46,6 +23,7 @@ docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 
 %.html: %.pod
 	pod2html --infile=$< --outfile=$*.html
+	# pod2html leaves temporary files: see debian bug #378328
 	rm -f pod*.tmp
 
 %.txt: %.pod
@@ -63,18 +41,12 @@ install: all
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MAN1DIR)/$$file; \
 	done
 
-	# FIXME: need to pick a central location
-	#$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(WEBDIR)/$(iPATHFILE)
-	#$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
-	#$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(AGENTDIR)/$(iPATHFILE)
-
 uninstall:
 	for file in $(EXE); do \
 		rm -f $(DESTDIR)$(BINDIR)/$$file; \
 	done
 
 	rm -f $(DESTDIR)$(LIBDIR)/$(LIB)
-	rm -f $(DESTDIR)$(LIBDIR)/$(iPATHNAME)
 
 	for file in $(MAN1FILES); do \
 		rm -f $(DESTDIR)$(MAN1DIR)/$$file
@@ -84,6 +56,7 @@ test: all
 	@echo "*** Tests are still run by hand for cli/ ***"
 
 clean:
-	rm -f $(iPATHFILE) *.o core $(MAN1FILES) $(HTMLFILES) $(TEXTFILES) pod*.tmp
+	# pod2html leaves temporary files: see debian bug #378328
+	rm -f *.o core $(MAN1FILES) $(HTMLFILES) $(TEXTFILES) pod*.tmp
 
 .PHONY: all install uninstall clean test

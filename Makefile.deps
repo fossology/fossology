@@ -14,6 +14,6 @@ $(DB):
 $(REPO):
 	$(MAKE) -C $(REPOPATH) libfossrepo.a
 
-# the php stuff uses the single include that we build in cli/
+# the php stuff uses the single include that we build in ui/
 $(iPATHFILE):
-	$(MAKE) -C $(TOP)/cli $(iPATHFILE)
+	$(MAKE) -C $(TOP)/ui $(iPATHFILE)
