@@ -165,7 +165,7 @@ echo "SELECT * FROM leftnav WHERE name = '$name' AND parent = '$parent_id' AND f
 $name        = str_replace("'", "''", $name);           // PostgreSQL quoting
 $description = str_replace("'", "''", $description);    // PostgreSQL quoting
 
-echo "!INSERT INTO folder (folder_name,folder_desc) VALUES ('$name','$description');";
+echo "INSERT INTO folder (folder_name,folder_desc) VALUES ('$name','$description');";
 echo "SELECT folder_pk FROM folder WHERE folder_name='$name' AND folder_desc='$description';";
 if (empty($_ENV['ARG_folder_pk']))
 {
@@ -179,7 +179,7 @@ else
 
 // put the folder info into foldercontest table
 
-echo "!INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$parent_id','1<<3','$child_id');";
+echo "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$parent_id','1<<3','$child_id');";
 
 /*
  * save files or the whole tree?
