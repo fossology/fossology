@@ -47,7 +47,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
                You do not need to specify '/System Repository'.
                All paths are under '/System Repository'.
     -A       = alphabet folders; organize uploads into folder a-c, d-f, etc.
-    -AA num  = When using -A, specify the number of letters but folder (default: 3)
+    -AA num  = specify the number of letters per folder (default: 3); implies -A
     -n name  = (optional) name for the upload (default: name it after the file)
     -d desc  = (optional) description for the update
 
@@ -55,13 +55,21 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -Q       = list all available processing agents
     -q       = specify a comma-separated list of agents, or 'all'
     NOTE: By default, no analysis agents are queued up.
+    -T       = TEST. No database or repository updates are performed.
+               Test mode enables verbose mode.
 
   FOSSology source options:
     archive  = file, directory, or URL to the archive.
+             If the archive is a URL, then it is retrieved and added.
              If the archive is a file, then it is used as the source to add.
              If the archive is a directory, then ALL files under it are
              recursively added.
-             If the archive is a URL, then it is retrieved and added.
+    -        = a single hyphen means the archive list will come from stdin.
+    -X path  = item to exclude when archive is a directory
+             You can specify more than one -X.  For example, to exclude
+             all svn and cvs directories, include the following before the
+             archive's directory path:
+               -X .svn -X .cvs
     NOTES:
       If you use -n, then -n must be set BEFORE each archive.
       If you specify a directory, then -n and -d are ignored.
@@ -83,6 +91,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
 /* Load command-line options */
 global $DB;
 $Verbose=0;
+$Test=0;
 
 /************************************************************************/
 /************************************************************************/
@@ -125,6 +134,7 @@ function GetFolder	($FolderPath, $Parent=NULL)
 {
   global $DB;
   global $Verbose;
+  global $Test;
   if (empty($Parent)) { $Parent = FolderGetTop(); }
   if (empty($FolderPath)) { return($Parent); }
   list($Folder,$FolderPath) = split('/',$FolderPath,2);
@@ -149,7 +159,7 @@ function GetFolder	($FolderPath, $Parent=NULL)
       exit(-1);
       }
     if ($Verbose) { print "Folder not found: Creating $Folder\n"; }
-    $P->Create($Parent,$Folder,"");
+    if (!$Test) { $P->Create($Parent,$Folder,""); }
     $Results = $DB->Action($SQL);
     }
 
@@ -161,9 +171,10 @@ function GetFolder	($FolderPath, $Parent=NULL)
  UploadOne(): Given one object (file or URL), upload it.
  This is a function because it is can also be recursive!
  ****************************************************/
-function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription)
+function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription,$TarSource=NULL)
 {
   global $Verbose;
+  global $Test;
   global $QueueList;
 
   /* $Mode determines where it came from */
@@ -171,14 +182,31 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription)
     {
     $Mode = 1<<2; /* Looks like a URL */
     }
+  else if (is_dir($UploadArchive))
+    {
+    /* It's a directory, tar it! */
+    global $VARDATADIR;
+    global $TarExcludeList;
+    $Filename = "$VARDATADIR/cp2foss-" . uniqid() . ".tar";
+    if (empty($UploadName)) { $UploadName = basename($UploadArchive); }
+    if ($Verbose > 1) { $TarArg = "-cvf"; }
+    else { $TarArg = "-cf"; }
+    $Cmd = "tar $TarArg '$Filename' $TarExcludeList '$UploadArchive'";
+    if ($Verbose) { print "CMD=$Cmd\n"; }
+    system($Cmd);
+    UploadOne($FolderPath,$Filename,$UploadName,$UploadDescription,$UploadArchive);
+    unlink($Filename);
+    return;
+    }
   else if (file_exists($UploadArchive))
     {
     $Mode = 1<<4; /* Looks like a filesystem */
     }
-  else if (is_dir($UploadArchive))
+  else
     {
-    /* It's a directory, punt! */
-    return;
+    /* Don't know what it is... */
+    print "FATAL: '$UploadArchive' does not exist.\n";
+    exit(1);
     }
 
   /* Get the folder's primary key */
@@ -194,18 +222,23 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription)
 
   /* Create the upload for the file */
   if ($Verbose > 1) { print "JobAddUpload($UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk);\n"; }
-  $UploadPk = JobAddUpload($UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk);
+  if (!$Test)
+    {
+    $Src = $UploadArchive;
+    if (!empty($TarSource)) { $Src = $TarSource; }
+    $UploadPk = JobAddUpload($UploadName,$Src,$UploadDescription,$Mode,$FolderPk);
+    }
 
   /* Tell wget_agent to actually grab the upload */
   global $AGENTDIR;
   $Cmd = "$AGENTDIR/wget_agent -k '$UploadPk' '$UploadArchive'";
   if ($Verbose) { print "CMD=$Cmd\n"; }
-  system($Cmd);
+  if (!$Test) { system($Cmd); }
 
   /* Schedule the unpack */
   $Cmd = "fossjobs.php -U '$UploadPk' -A agent_unpack";
   if ($Verbose) { print "CMD=$Cmd\n"; }
-  system($Cmd);
+  if (!$Test) { system($Cmd); }
   if (!empty($QueueList))
     {
     switch($QueueList)
@@ -220,7 +253,7 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription)
 	break;
       }
     if ($Verbose) { print "CMD=$Cmd\n"; }
-    system($Cmd);
+    if (!$Test) { system($Cmd); }
     }
 } /* UploadOne() */
 
@@ -232,6 +265,7 @@ $FolderPath="/";
 $UploadDescription="";
 $UploadName="";
 $QueueList="";
+$TarExcludeList="";
 $bucket_size = 3;
 for($i=1; $i < $argc; $i++)
   {
@@ -241,6 +275,7 @@ for($i=1; $i < $argc; $i++)
 	$OptionA = true;
 	break;
     case '-AA': /* use alphabet buckets */
+	$OptionA = true;
 	$i++; $bucket_size = intval($argv[$i]);
 	if ($bucket_size < 1) { $bucket_size=1; }
 	break;
@@ -269,8 +304,16 @@ for($i=1; $i < $argc; $i++)
     case '-q':
 	$i++; $QueueList = $argv[$i];
 	break;
+    case '-T': /* Test mode */
+	$Test = 1;
+	if (!$Verbose) { $Verbose++; }
+	break;
     case '-v':
 	$Verbose++;
+	break;
+    case '-X':
+	if (!empty($TarExcludeList)) { $TarExcludeList .= " "; }
+	$i++; $TarExcludeList .= "--exclude '" . $argv[$i] . "'";
 	break;
     case '-h':
     case '-?':
@@ -279,6 +322,25 @@ for($i=1; $i < $argc; $i++)
     case '-a': /* it's an archive! */
 	/* ignore -a since the next name is a file. */
 	break;
+    case '-': /* it's an archive list from stdin! */
+	$Fin = fopen("php://stdin","r");
+	while(!feof($Fin))
+	  {
+	  $UploadArchive = trim(fgets($Fin));
+	  if (strlen($UploadArchive) > 0)
+	    {
+	    print "Loading $UploadArchive\n";
+	    print "  Uploading to folder: '$FolderPath'\n";
+	    if (empty($UploadName)) { $UploadName = basename($UploadArchive); }
+	    print "  Uploading as '$UploadName'\n";
+	    if (!empty($UploadDescription)) { print "  Upload description: '$UploadDescription'\n"; }
+	    UploadOne($FolderPath,$UploadArchive,$UploadName,$UploadDescription);
+	    /* prepare for next parameter */
+	    $UploadName="";
+	    }
+	  }
+	fclose($Fin);
+	break;
     default:
 	if (substr($argv[$i],0,1)=='-')
 	  {
@@ -286,6 +348,7 @@ for($i=1; $i < $argc; $i++)
 	  print $Usage . "\n";
 	  return(1);
 	  }
+
 	/* No break! No hyphen means it is a file! */
 	$UploadArchive = $argv[$i];
 	print "Loading $UploadArchive\n";
