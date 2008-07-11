@@ -364,4 +364,5 @@ for($i=1; $i < $argc; $i++)
     } /* switch */
   } /* for each parameter */
 
+return(0);
 ?>
