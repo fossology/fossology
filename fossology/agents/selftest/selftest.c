@@ -428,7 +428,7 @@ int     ReadLine        (FILE *Fin)
   while(isspace(L[0])) L++;
   rc = L[0];
 
-  CheckRepo() && CheckLicenses() && CheckAgents();
+  if (CheckRepo()) if (CheckLicenses()) CheckAgents(); 
   return(rc);
 } /* ReadLine() */
 
@@ -536,7 +536,7 @@ int	main	(int argc, char *argv[])
     }
   else /* !Scheduler */
     {
-    CheckRepo() && CheckLicenses() && CheckAgents();
+    if (CheckRepo()) if (CheckLicenses()) CheckAgents(); 
     }
 
   DBclose(DB);
