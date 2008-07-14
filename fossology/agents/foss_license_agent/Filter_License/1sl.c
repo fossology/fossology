@@ -49,7 +49,7 @@ typedef struct Type1SL Type1SL;
 
 /* For speed, don't start a regex with a "%" phrase.  '%' are expensive! */
 Type1SL List1SL[] = {
-	{"1SL: %s", "< license|copyright : % %EOL >"},
+	{"1SL: %s", "< license|copyright : * %EOL >"},
 	{"1SL: %s", "< %2 is free|freely %EOS >"},
 	{"1SL: %s", "< %2 is not free|freely * %EOS >"},
 	{"1SL: %s", "< %2 provide|provided|distribute|distributed|redistributed|release|released freely %EOS >"},
