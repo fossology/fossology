@@ -49,7 +49,7 @@ typedef struct Type1SL Type1SL;
 
 /* For speed, don't start a regex with a "%" phrase.  '%' are expensive! */
 Type1SL List1SL[] = {
-	{"1SL: %s", "%EOS < license|copyright : % %EOL >"},
+	{"1SL: %s", "< license|copyright : % %EOL >"},
 	{"1SL: %s", "< %2 is free|freely %EOS >"},
 	{"1SL: %s", "< %2 is not free|freely * %EOS >"},
 	{"1SL: %s", "< %2 provide|provided|distribute|distributed|redistributed|release|released freely %EOS >"},
@@ -57,14 +57,14 @@ Type1SL List1SL[] = {
 	{"1SL: %s", "< %2 under the terms of %EOS >"},
 	{"1SL: %s", "< %2 distribute|redistribute|modify it under %EOS >"},
 	{"1SL: %s", "< %4 \"|' as is \"|' %EOS >"},
-	{"1SL: %s", "< %4 \"|' as-is \"|' %EOS >"},
+	{"1SL: %s", "< %4 \"|' as - is \"|' %EOS >"},
 	{"1SL: %s", "< %2 proprietary %EOS >"},
 	{"1SL: %s", "< %2 public domain %EOS >"},
 	{"1SL: %s", "< %2 special exception %EOS >"},
 	{"1SL: %s", "< %2 accept the|this license %EOS >"},
 	{"1SL: %s", "< %2 governs use of %EOS >"},
 	{"1SL: %s", "< %2 governs the use of %EOS >"},
-	{"1SL: %s", "< %2 non-commercial %EOS >"},
+	{"1SL: %s", "< %2 non - commercial %EOS >"},
 	{NULL,NULL}
 	};
 
