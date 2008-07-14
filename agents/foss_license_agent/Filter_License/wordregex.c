@@ -29,6 +29,8 @@
    "string1|string1"	match string1 or string2
    "< ... >"	place matches in return string
    "\"		quote next character (only for start of match)
+   "%EOL"       match to the end of line
+   "%EOS"       match to the end of sentence
  **********************************************************/
 
 #include <stdlib.h>
@@ -92,6 +94,45 @@ int	WR_ProcessOR	(char *String, int StringWordLen,
 } /* WR_ProcessOR() */
 
 /**************************************************
+ WR_ProcessEOL(): Percent can match to end of line.
+ Returns 1 if match, 0 if fails.
+ **************************************************/
+int	WR_ProcessEOL	(char *String, int StringWordLen,
+			 char *Regex, int RegexWordLen,
+			 uint32_t Start, int CRcount)
+{
+  int rc;
+  if ((Start == 0) || CRcount) /* match! */
+    {
+    rc = WR_MatchString(1,String,Regex+RegexWordLen,Start);
+    }
+  else { rc = WR_MatchString(1,String,Regex,Start+StringWordLen); }
+  return(rc);
+} /* WR_ProcessEOL() */
+
+/**************************************************
+ WR_ProcessEOS(): Percent can match to end of sentence.
+ Sentences ends with \n\n OR punctuation followed by space.
+ Returns 1 if match, 0 if fails.
+ **************************************************/
+int	WR_ProcessEOS	(char *String, int StringWordLen,
+			 char *Regex, int RegexWordLen,
+			 uint32_t Start, int CRcount)
+{
+  int rc;
+  if ((CRcount > 1) || (Start==0) || (StringWordLen < 1)) /* match! */
+	{
+	rc = WR_MatchString(1,String,Regex+RegexWordLen,Start); 
+	}
+  else if (strchr(".!?;{}<>[]()",String[Start+StringWordLen-1]))
+	{
+	rc = WR_MatchString(1,String,Regex+RegexWordLen,Start+StringWordLen);
+	}
+  else { rc = WR_MatchString(1,String,Regex,Start+StringWordLen); }
+  return(rc);
+} /* WR_ProcessEOS() */
+
+/**************************************************
  WR_ProcessPercent(): Percent can match 0 or more words.
  Returns 1 if match, 0 if fails.
  **************************************************/
@@ -153,6 +194,7 @@ int	WR_MatchString	(int MatchFlag,
   int rc;
   int NotFlag;
   char *RegexOrig;
+  int CRcount;
 
   RegexOrig=Regex;
 
@@ -160,18 +202,27 @@ int	WR_MatchString	(int MatchFlag,
   if (!String || !Regex) return(0); /* error */
 
 Rescan: /* reduce cost from recursion */
-  if (Regex[0]=='\0') return(1); /* empty regex misses */
   NotFlag=0;
   rc=0;
 
   /****************************************/
   /* space reductions */
-  while((String[Start] != '\0') && isspace(String[Start])) { Start++; }
+  CRcount=0;
+  while((String[Start] != '\0') && isspace(String[Start]))
+	{
+	CRcount += (String[Start]=='\n');
+	Start++;
+	}
   /* find the length of the word to match */
   StringWordLen=0;
   while( (String[Start+StringWordLen] != '\0') &&
          !isspace(String[Start+StringWordLen]))
 	{ StringWordLen++; }
+  if (StringWordLen==0)
+	{
+	CRcount++;
+	if (WR_End < WR_Start) WR_End = Start;
+	}
 
   /****************************************/
 RemoveSpacesRegex:
@@ -186,8 +237,6 @@ RemoveSpacesRegex:
 	 (Regex[RegexWordLen] != '|'))
 	{ RegexWordLen++; }
   if (RegexWordLen == 0) { return(1); } /* null matches */
-
-  if ((String[Start+StringWordLen] == '\0') && (Regex[0] != '%')) return(0);
 
   /* check for saving stuff */
   if (Regex[0]=='<')
@@ -205,14 +254,25 @@ RemoveSpacesRegex:
     goto RemoveSpacesRegex;
     }
 
-
   /****************************************/
 
   /****************************************/
   /** PROCESS REGEX ***********************/
   /****************************************/
   /* process word skips */
-  if (Regex[0] == '%')
+  if (!strncmp("%EOL",Regex,4))
+	{
+	rc = WR_ProcessEOL(String,StringWordLen,Regex,RegexWordLen,Start,CRcount);
+	if (rc) return(rc);
+	goto Endscan;
+	}
+  else if (!strncmp("%EOS",Regex,4))
+	{
+	rc = WR_ProcessEOS(String,StringWordLen,Regex,RegexWordLen,Start,CRcount);
+	if (rc) return(rc);
+	goto Endscan;
+	}
+  else if (Regex[0] == '%')
 	{
 	rc = WR_ProcessPercent(String,StringWordLen,Regex,RegexWordLen,Start);
 	if (rc) return(rc);
