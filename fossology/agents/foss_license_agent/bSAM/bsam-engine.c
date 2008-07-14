@@ -2464,7 +2464,7 @@ void	SAMfiles	()
 
   /* Now process the files */
   SetData(0);
-  HasMatch=1;
+  HasMatch=0;
   InitMatrixState(&RMS);
   RMS.Symbols[0].SymbolStart = MS.Symbols[0].SymbolStart;
   RMS.Symbols[0].SymbolEnd = MS.Symbols[0].SymbolEnd;
@@ -2755,7 +2755,7 @@ void	SAMfilesExhaustive	()
 
   /* Now process the files */
   SetData(0);
-  HasMatch=1;
+  HasMatch=0;
 
   switch(OutputFormat)
     {
