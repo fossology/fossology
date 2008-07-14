@@ -251,12 +251,14 @@ class ui_license extends FO_Plugin
       $LicsTotal[$z]=$x;
       }
 
+    $Total=0;
     foreach($LicsTotal as $Key => $Val)
       {
       if ($Key != ' Total ')
 	{
 	$GID = $MapLic2GID[$Key];
 	$VH .= "<tr><td align='right'>$Val</td>";
+	$Total += $Val;
 	if ($SFbL >= 0)
 	  {
 	  $VH .= "<td align='center'><a href='";
@@ -273,6 +275,8 @@ class ui_license extends FO_Plugin
 	}
       }
     $VH .= "</table>\n";
+    $VH .= "<br>\n";
+    $VH .= "Total licenses: $Total\n";
 
     /****************************************/
     /* Licenses use Javascript to highlight */
