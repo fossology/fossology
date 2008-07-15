@@ -47,7 +47,6 @@ InstallationCreate:
 	$(CP) $(BINFILES) ../install/$(BINDIR)
 	$(CP) $(LIBFILES) ../install/$(LIBDIR)
 	$(CP) $(MAN1FILES) ../install/$(MAN1DIR)
-	$(CP) $(iPATHFILE) ../install/$(WEBDIR)
 	$(CP) $(iPATHFILE) ../install/$(PHPDIR)
 	$(CP) $(iPATHFILE) ../install/$(AGENTDIR)
 
