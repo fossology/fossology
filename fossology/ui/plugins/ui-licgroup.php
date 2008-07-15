@@ -552,7 +552,7 @@ class licgroup extends FO_Plugin
 
       /* Load licenses for the item */
       $Lics = array();
-      if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics,1); }
+      if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics,'lic_id'); }
       else { LicenseGet($C['pfile_fk'],$Lics,1); }
 
       /* Determine the hyperlinks */

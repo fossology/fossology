@@ -321,6 +321,20 @@
   $Term["RSA"]["Desc"]="RSA Commercial License";
   $Term["RSA"]["Term"][0]="rsa";
   $Term["RSA"]["License"][0]="Corporate/RSA/RSA MD5";
+  /* Canonical name: 105 */
+  $Term["SCSL"]["Desc"]="Sun Community Source License";
+  $Term["SCSL"]["Term"][0]="sun community source license";
+  $Term["SCSL"]["License"][0]="Corporate/Sun/Sun Community Source License TSA v1.0";
+  /* Canonical name: 104 */
+  $Term["SCSL v2.3"]["Desc"]="Sun Community Source License v2.3";
+  $Term["SCSL v2.3"]["Term"][0]="sun community source license v2 3";
+  $Term["SCSL v2.3"]["License"][0]="Corporate/Sun/Sun Community Source License v2.3";
+  $Term["SCSL v2.3"]["License"][1]="Corporate/Sun/Sun Community Source License v2.3 Attachment";
+  /* Canonical name: 103 */
+  $Term["SCSL v3.0"]["Desc"]="Sun Community Source License v3.0";
+  $Term["SCSL v3.0"]["Term"][0]="sun community source license v3 0";
+  $Term["SCSL v3.0"]["License"][0]="Corporate/Sun/Sun Community Source License v3.0";
+  $Term["SCSL v3.0"]["License"][1]="Corporate/Sun/Sun Community Source License v3.0 Supplement";
   /* Canonical name: 93 */
   $Term["SPL"]["Desc"]="Sun Public License";
   $Term["SPL"]["Term"][0]="spl";
