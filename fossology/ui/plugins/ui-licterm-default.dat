@@ -122,6 +122,14 @@
   /* Canonical name: 69 */
   $Term["Free Art License"]["Desc"]="Free Art License";
   $Term["Free Art License"]["Term"][0]="free art license";
+  /* Canonical name: 106 */
+  $Term["GFDL"]["Desc"]="Gnu Free Documentation License";
+  $Term["GFDL"]["Term"][0]="gnu free documentation licence";
+  $Term["GFDL"]["Term"][1]="gnu free documentation license";
+  $Term["GFDL"]["License"][0]="GPL/GFDL/GNU Free Documentation License v1.1 reference 1";
+  $Term["GFDL"]["License"][1]="GPL/GFDL/GNU Free Documentation License v1.1 reference 2";
+  $Term["GFDL"]["License"][2]="GPL/GFDL/GNU Free Documentation License v1.2";
+  $Term["GFDL"]["License"][3]="GPL/GFDL/GNU Free Documentation License v1.2 reference";
   /* Canonical name: 70 */
   $Term["GNU Free Documentation License"]["Desc"]="GNU Free Documentation License";
   $Term["GNU Free Documentation License"]["Term"][0]="gfdl";
@@ -317,6 +325,10 @@
   $Term["RedHat"]["Desc"]="RedHat Public License";
   $Term["RedHat"]["License"][0]="RedHat/Red Hat EULA";
   $Term["RedHat"]["License"][1]="RedHat/Red Hat reference";
+  /* Canonical name: 107 */
+  $Term["RPL"]["Desc"]="Reciprocal Public License";
+  $Term["RPL"]["License"][0]="RPL/Reciprocal Public License v1.1";
+  $Term["RPL"]["License"][1]="RPL/Reciprocal Public License v1.5";
   /* Canonical name: 101 */
   $Term["RSA"]["Desc"]="RSA Commercial License";
   $Term["RSA"]["Term"][0]="rsa";
