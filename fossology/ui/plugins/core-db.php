@@ -210,6 +210,27 @@ class db_access extends FO_Plugin
     }
     return false;
   }
+
+  /***********************************************************
+   TblExist(): Check if Table $Col,exists
+               Return True if the table exists
+               Return False if the table does not exist
+   This could also be done via a pg_query > pg_fetch_object.
+   ***********************************************************/
+  function TblExist($Table)
+  {
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    if (!$this->db_init()) { return; }
+
+    $result = pg_query($this->_pg_conn,
+             "SELECT count(*) FROM pg_type 
+              WHERE typname = '$Table'");
+    if ($result)
+    {
+        if (pg_num_rows($result) > 0) return true;
+    }
+    return false;
+  }
 }
 
 $NewPlugin = new db_access;
