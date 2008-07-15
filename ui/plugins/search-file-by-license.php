@@ -91,25 +91,8 @@ class search_file_by_license extends FO_Plugin
 	  $VM = "";
 	  }
 
-	for($i=$Offset; ($i < $Count) && ($i < $Offset+$Max); $i++)
-	  {
-	  $V .= "<P />\n";
-	  $L = &$Lics[$i];
-	  $Pos = $i + 1;
-	  $V .= "<table border=1 width='100%' style='background:lightyellow'>";
-	  $V .= "<tr><td align='center' width='5%'><font size='+2'>$Pos:</font></td>";
-	  $V .= "<td>";
-	  if (!empty($L['phrase_text'])) { $V .= "<b>Phrase:</b> " . htmlentities($L['phrase_text']) . "\n"; }
-	  if (Isdir($L['ufile_mode']))
-	    {
-	    $V .= Dir2Browse("license",$L['uploadtree_pk'],$L['ufile_pk'],"license") . "\n";
-	    }
-	  else
-	    {
-	    $V .= Dir2Browse("license",$L['uploadtree_pk'],$L['ufile_pk'],"view-license") . "\n";
-	    }
-	  $V .= "</td></tr></table>\n";
-	  }
+	$V .= Dir2FileList($Lics,"browse","view",$Page*$Max + 1,1);
+
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
