@@ -518,7 +518,6 @@ class licgroup extends FO_Plugin
     global $Plugins;
     global $DB;
     $Time = time();
-    $Lics = array(); // license summary for an item in the directory
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
     $MapLic2GID = array(); /* every license should have an ID number */
     $MapNext=0;
@@ -552,7 +551,7 @@ class licgroup extends FO_Plugin
 
       /* Load licenses for the item */
       $Lics = array();
-      if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics,'lic_id'); }
+      if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics,1); }
       else { LicenseGet($C['pfile_fk'],$Lics,1); }
 
       /* Determine the hyperlinks */
@@ -584,33 +583,32 @@ class licgroup extends FO_Plugin
 
       /* Save the license results (also converts values to GID) */
       $GrpList=array();
-      foreach($Lics as $Key => $Total)
+      $LicCount=0;
+      foreach($Lics as $Key => $Val)
 	{
-	if (empty($Key)) { continue; }
-	if ($Key != ' Total ')
-		{
-		$GID = $LicPk2GID[$Key];
-		/* Find every license group that includes the license */
-		$FoundGroup=0;
-		foreach($this->GrpInGroup as $G => $g)
-		  {
-		  if (!empty($this->GrpInGroup[$G]['l'.$GID]))
-		    {
-		    $this->GrpInGroup[$G]['count']+=$Total;
-		    $GrpList[$G]=1;
-		    $FoundGroup=1;
-		    }
-		  }
-		if (!$FoundGroup)
-		    {
-		    $this->GrpInGroup['Gnone']['count']+=$Total;
-		    $GrpList['Gnone']=1;
-		    }
-		}
+	if (!is_int($Key)) { continue; }
+	if (empty($Val['lic_pk'])) { $GID = $LicPk2GID[$Val['lic_id']]; }
+	else { $GID = $LicPk2GID[$Val['lic_pk']]; }
+	/* Find every license group that includes the license */
+	$FoundGroup=0;
+	foreach($this->GrpInGroup as $G => $g)
+	  {
+	  if (!empty($this->GrpInGroup[$G]['l'.$GID]))
+	    {
+	    $this->GrpInGroup[$G]['count']++;
+	    $GrpList[$G]=1;
+	    $FoundGroup=1;
+	    }
+	  }
+	if (!$FoundGroup)
+	    {
+	    $this->GrpInGroup['Gnone']['count']++;
+	    $GrpList['Gnone']=1;
+	    }
+        $LicCount++;
 	}
 
       /* Populate the output ($VF) */
-      $LicCount = $Lics[' Total '];
       $VF .= '<tr>';
       $VF .= "<td id='LicItem i$ChildCount";
       foreach($GrpList as $G => $g) { $VF .= " $G"; }
