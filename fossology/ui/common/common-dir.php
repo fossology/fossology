@@ -255,7 +255,7 @@ function Dir2Path($UploadtreePk, $UfilePk=-1)
  string listing the browse paths.
  ************************************************************/
 function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
-		     $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1)
+		     $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $Text='')
 {
   global $Plugins;
   global $DB;
@@ -268,7 +268,9 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
 
   if ($Enumerate >= 0)
     {
+    $V .= "<table border=0 width='100%'><tr><td width='5%'>";
     $V .= "<font size='+2'>" . number_format($Enumerate,0,"",",") . ":</font>";
+    $V .= "</td><td>";
     }
 
   $Opt = Traceback_parm_keep(array("folder","show"));
@@ -276,6 +278,11 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
 
   $Path = Dir2Path($UploadtreePk,$UfilePk);
   $Last = &$Path[count($Path)-1];
+
+  $V .= "<font class='text'>\n";
+
+  /* Add in additional text */
+  if (!empty($Text)) { $V .= "$Text<br>\n"; }
 
   /* Get the folder list for the upload */
   $V .= "<font class='text'>\n<b>Folder</b>: ";
@@ -340,6 +347,11 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
     $V .= menu_to_1html(menu_find($ShowMicro,$MenuDepth),1);
     }
 
+  if ($Enumerate >= 0)
+    {
+    $V .= "</td></tr></table>";
+    }
+
   if ($ShowBox)
     {
     $V .= "</div>\n";
@@ -374,31 +386,36 @@ function Dir2BrowseUpload ($Mod, $UploadPk, $UfilePk, $LinkLast=NULL, $ShowBox=1
    $Count = first number for indexing the entries (may be -1 for no count)
  Returns string containing the listing.
  ************************************************************/
-function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1)
+function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowPhrase=0)
 {
   $LastPfilePk = -1;
   $V = "";
   for($i=0; !empty($Listing[$i]['uploadtree_pk']); $i++)
     {
     $R = &$Listing[$i];
+    $Phrase='';
+    if ($ShowPhrase && !empty($R['phrase_text']))
+      {
+      $Phrase = "<b>Phrase:</b> " . htmlentities($R['phrase_text']);
+      }
     if ((IsDir($R['ufile_mode'])) || (Iscontainer($R['ufile_mode'])))
 	{
 	$V .= "<P />\n";
 	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,$IfDirPlugin,1,
-		NULL,$Count) . "\n";
+		NULL,$Count,$Phrase) . "\n";
 	}
     else if ($R['pfile_fk'] != $LastPfilePk)
 	{
 	$V .= "<P />\n";
 	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,$IfFilePlugin,1,
-		NULL,$Count) . "\n";
+		NULL,$Count,$Phrase) . "\n";
 	$LastPfilePk = $R['pfile_fk'];
 	}
     else
 	{
 	$V .= "<div style='margin-left:2em;'>";
 	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,$IfFilePlugin,1,
-		NULL,$Count) . "\n";
+		NULL,$Count,$Phrase) . "\n";
 	$V .= "</div>";
 	}
     $Count++;
