@@ -260,7 +260,7 @@ void	RunAllNew	()
 	if (S && S[0]) printf(" (%s)",S);
 	printf("\n");
 	LoadAdj(UploadPk);
-	if (Tree) WalkTree(0,0);
+	if (Tree) { DBaccess(DB,"BEGIN;"); WalkTree(0,0); DBaccess(DB,"COMMIT;"); }
 	if (Tree) free(Tree);
 	Tree=NULL;
 	TreeSize=0;
@@ -588,7 +588,7 @@ int	main	(int argc, char *argv[])
     {
     UploadPk = atol(argv[arg]);
     LoadAdj(UploadPk);
-    if (Tree) WalkTree(0,0);
+    if (Tree) { DBaccess(DB,"BEGIN;"); WalkTree(0,0); DBaccess(DB,"COMMIT;"); }
     if (Tree) free(Tree);
     Tree=NULL;
     TreeSize=0;
@@ -605,7 +605,7 @@ int	main	(int argc, char *argv[])
       {
       UploadPk = atol(Parm);
       LoadAdj(UploadPk);
-      if (Tree) WalkTree(0,0);
+      if (Tree) { DBaccess(DB,"BEGIN;"); WalkTree(0,0); DBaccess(DB,"COMMIT;"); }
       if (Tree) free(Tree);
       Tree=NULL;
       TreeSize=0;
