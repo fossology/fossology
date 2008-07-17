@@ -553,6 +553,7 @@ int	main	(int argc, char *argv[])
     LoadAdj(UploadPk);
     if (Tree) WalkTree(0,0);
     if (Tree) free(Tree);
+    Tree=NULL;
     TreeSize=0;
     }
 
@@ -569,6 +570,7 @@ int	main	(int argc, char *argv[])
       LoadAdj(UploadPk);
       if (Tree) WalkTree(0,0);
       if (Tree) free(Tree);
+      Tree=NULL;
       TreeSize=0;
       printf("OK\n"); /* inform scheduler that we are ready */
       fflush(stdout);
