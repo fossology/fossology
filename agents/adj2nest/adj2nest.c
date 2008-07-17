@@ -237,6 +237,39 @@ void	LoadAdj	(long UploadPk)
 } /* LoadAdj() */
 
 /*********************************************
+ RunAllNew(): Run on all uploads WHERE the upload
+ has no nested set numbers.
+ This displays each upload as it runs!
+ *********************************************/
+void	RunAllNew	()
+{
+  int Row,MaxRow;
+  long UploadPk;
+  void *UDB;
+  DBaccess(DB,"SELECT DISTINCT upload_pk,upload_desc,upload_filename FROM upload WHERE upload_pk IN ( SELECT DISTINCT upload_fk FROM uploadtree WHERE lft IS NULL );");
+  UDB=DBmove(DB);
+  MaxRow = DBdatasize(UDB);
+  for(Row=0; Row < MaxRow; Row++)
+      {
+      UploadPk = atol(DBgetvalue(UDB,Row,0));
+      if (UploadPk >= 0)
+	{
+	char *S;
+	printf("Processing %ld :: %s",UploadPk,DBgetvalue(UDB,Row,2));
+	S = DBgetvalue(UDB,Row,1);
+	if (S && S[0]) printf(" (%s)",S);
+	printf("\n");
+	LoadAdj(UploadPk);
+	if (Tree) WalkTree(0,0);
+	if (Tree) free(Tree);
+	Tree=NULL;
+	TreeSize=0;
+	}
+      }
+  DBclose(UDB);
+} /* RunAllNew() */
+
+/*********************************************
  ListUploads(): List every upload ID.
  *********************************************/
 void    ListUploads     ()
@@ -501,6 +534,7 @@ void    Usage   (char *Name)
 {
   printf("Usage: %s [options] [id [id ...]]\n",Name);
   printf("  -i        :: initialize the database, then exit.\n");
+  printf("  -a        :: run on ALL uploads that have no nested set records.\n");
   printf("  -u        :: list all upload ids, then exit.\n");
   printf("  no file   :: process upload ids from the scheduler.\n");
   printf("  id        :: process upload ids from the command-line.\n");
@@ -524,10 +558,13 @@ int	main	(int argc, char *argv[])
   GetAgentKey();
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"iuv")) != -1)
+  while((c = getopt(argc,argv,"aiuv")) != -1)
     {
     switch(c)
 	{
+	case 'a': /* run on ALL */
+		RunAllNew();
+		break;
 	case 'i':
 		/* GetAgentKey() already processed */
 		DBclose(DB);
