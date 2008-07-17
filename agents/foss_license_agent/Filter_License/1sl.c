@@ -55,6 +55,7 @@ Type1SL List1SL[] = {
 	{"1SL: %s", "< %2 provide|provided|distribute|distributed|redistributed|release|released freely %EOS >"},
 	{"1SL: %s", "< %2 is|be provided|distributed|redistributed|released|licensed|licenced|covered|adheres as|under|by|in|from %EOS >"},
 	{"1SL: %s", "< %2 provided|distributed|redistributed|released|licensed|licenced|covered|adheres as|under|by|in|from %EOS >"},
+	{"1SL: %s", "< %2 provide|distribute|redistribute|release|copy %1 license|licence|software|program|library|file %EOS >"},
 	{"1SL: %s", "< %4 under the terms of %EOS >"},
 	{"1SL: %s", "< %2 distribute|redistribute|modify it under %EOS >"},
 	{"1SL: %s", "< %4 \"|' as is \"|' %EOS >"},
