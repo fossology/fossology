@@ -85,6 +85,13 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
   fprintf(Fout,"\n");
   free(RepPath);
 
+  /** adj2nest **/
+  memset(Cmd,'\0',sizeof(Cmd));
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/adj2nest",BINDIR);
+  fprintf(Fout,"agent=adj2nest %s| ",CmdHost);
+  fprintf(Fout,Rcmd,Cmd);
+  fprintf(Fout,"\n");
+
   /** filter license **/
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,"%s/Filter_License",BINDIR);
