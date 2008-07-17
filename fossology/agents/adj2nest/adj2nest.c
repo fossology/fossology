@@ -99,20 +99,23 @@ void	WalkTree	(long Index, long Depth)
 
   LeftSet = SetNum;
   SetNum++;
+
   if (Tree[Index].Child > -1)
     {
     WalkTree(Tree[Index].Child,Depth+1);
-    SetNum++;
-    }
-  if (Tree[Index].Sibling > -1)
-    {
-    WalkTree(Tree[Index].Sibling,Depth+1);
     SetNum++;
     }
 
   snprintf(SQL,sizeof(SQL),"UPDATE uploadtree SET lft='%ld', rgt='%ld' WHERE uploadtree_pk='%ld';",
 	LeftSet,SetNum,Tree[Index].UploadtreePk);
   DBaccess(DB,SQL);
+
+  if (Tree[Index].Sibling > -1)
+    {
+    SetNum++;
+    WalkTree(Tree[Index].Sibling,Depth+1);
+    }
+
 } /* WalkTree() */
 
 /**************************************************
