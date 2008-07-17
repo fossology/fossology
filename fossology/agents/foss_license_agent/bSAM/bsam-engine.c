@@ -162,6 +162,15 @@
    While this doesn't do much for small matrices, this is a huge
    performance gain for large matrices.
 
+ - Reduce comparison scope.
+   Similar to "Reduce matrix scope": see how many distinct tokens in A
+   appear in B (and vice versa). If they are less than the required
+   percentage, then don't even bother comparing.
+   For example, if B has 100 tokens and the match must include 20% of B,
+   then at least 20 tokens in B must appear in A.
+   This check totally omits comparisons where there are not enough tokens
+   in A for matching B.
+
  - External optimizations.
    The preprocessing option ("-p program") can be slower than the
    matrix comparison.  when comparing many programs against each other
@@ -1514,13 +1523,14 @@ inline int	GetSeqRange	()
 inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
 {
   int a,b;
-  uint16_t Val,Byte,Mask;
+  uint16_t Byte,Mask;
   /* List of known symbols.
      Two lists: A and B
      Since a token is 2 bytes, that means 65536 max */
   /** For space, I am converting bytes to bits:
       2*65536 = 128K.  But as bits, it is 16K. **/
   static uint8_t Symbol[2][8192];
+  float Count,Total;
 
   // printf("Was: [%d,%d] [%d,%d]\n",*MinA,*MaxA,*MinB,*MaxB);
   memset(Symbol,0,sizeof(uint8_t)*2*8192);
@@ -1528,46 +1538,71 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
   /* Populate the known symbols */
   for(a = *MinA; a < *MaxA; a++)
     {
-    Val = MS.Symbols[0].Symbol[a];
-    ByteMask(Val,Byte,Mask);
+    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
     Symbol[0][Byte] |= Mask;
     }
   for(b = *MinB; b < *MaxB; b++)
     {
-    Val = MS.Symbols[1].Symbol[b];
-    ByteMask(Val,Byte,Mask);
+    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
     Symbol[1][Byte] |= Mask;
     }
 
+  /********** Check for possible match *********************/
+  /* Determine how many symbols in A are in B and vice versa. */
+  Count=0; Total=0;
+  for(a = 0; a < 8192; a++)
+    {
+    if (Symbol[0][a] & 0x01) { Total++; if (Symbol[1][a] & 0x01) Count++; }
+    if (Symbol[0][a] & 0x02) { Total++; if (Symbol[1][a] & 0x02) Count++; }
+    if (Symbol[0][a] & 0x04) { Total++; if (Symbol[1][a] & 0x04) Count++; }
+    if (Symbol[0][a] & 0x08) { Total++; if (Symbol[1][a] & 0x08) Count++; }
+    if (Symbol[0][a] & 0x10) { Total++; if (Symbol[1][a] & 0x10) Count++; }
+    if (Symbol[0][a] & 0x20) { Total++; if (Symbol[1][a] & 0x20) Count++; }
+    if (Symbol[0][a] & 0x40) { Total++; if (Symbol[1][a] & 0x04) Count++; }
+    if (Symbol[0][a] & 0x80) { Total++; if (Symbol[1][a] & 0x80) Count++; }
+    }
+  if (Count*100.0/Total < MatchThreshold[1]) return(0); /* no match */
+
+  Count=0; Total=0;
+  for(b = 0; b < 8192; b++)
+    {
+    if (Symbol[1][b] & 0x01) { Total++; if (Symbol[0][b] & 0x01) Count++; }
+    if (Symbol[1][b] & 0x02) { Total++; if (Symbol[0][b] & 0x02) Count++; }
+    if (Symbol[1][b] & 0x04) { Total++; if (Symbol[0][b] & 0x04) Count++; }
+    if (Symbol[1][b] & 0x08) { Total++; if (Symbol[0][b] & 0x08) Count++; }
+    if (Symbol[1][b] & 0x10) { Total++; if (Symbol[0][b] & 0x10) Count++; }
+    if (Symbol[1][b] & 0x20) { Total++; if (Symbol[0][b] & 0x20) Count++; }
+    if (Symbol[1][b] & 0x40) { Total++; if (Symbol[0][b] & 0x04) Count++; }
+    if (Symbol[1][b] & 0x80) { Total++; if (Symbol[0][b] & 0x80) Count++; }
+    }
+  if (Count*100.0/Total < MatchThreshold[0]) return(0); /* no match */
+
+  /********** Find start and end *********************/
   /* Find the first symbol that matches */
   for(a = *MinA; a < *MaxA; a++)
     {
-    Val = MS.Symbols[0].Symbol[a];
-    ByteMask(Val,Byte,Mask);
-    if ((Symbol[1][Byte] | Mask) != 0) { break; }
+    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
+    if ((Symbol[1][Byte] & Mask) != 0) { break; }
     }
   *MinA = a;
   for(a = *MaxA - 1; a > *MinA; a--)
     {
-    Val = MS.Symbols[0].Symbol[a];
-    ByteMask(Val,Byte,Mask);
-    if ((Symbol[1][Byte] | Mask) != 0) { break; }
+    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
+    if ((Symbol[1][Byte] & Mask) != 0) { break; }
     }
   *MaxA = a+1;
   if (*MaxA - *MinA <= MatchLen[0]) { return(0); }
 
   for(b = *MinB; b < *MaxB; b++)
     {
-    Val = MS.Symbols[1].Symbol[b];
-    ByteMask(Val,Byte,Mask);
-    if ((Symbol[0][Byte] | Mask) != 0) { break; }
+    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
+    if ((Symbol[0][Byte] & Mask) != 0) { break; }
     }
   *MinB = b;
   for(b = *MaxB - 1; b > *MinB; b--)
     {
-    Val = MS.Symbols[1].Symbol[b];
-    ByteMask(Val,Byte,Mask);
-    if ((Symbol[0][Byte] | Mask) != 0) { break; }
+    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
+    if ((Symbol[0][Byte] & Mask) != 0) { break; }
     }
   *MaxB = b+1;
   if (*MaxB - *MinB <= MatchLen[1]) { return(0); }
