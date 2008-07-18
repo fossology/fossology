@@ -281,7 +281,7 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL)
 	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = lic_pk
 	;');
 
-    $DB->Prepare("LicenseGetAll_Canonical",'SELECT uploadtree.pfile_fk AS pfile,ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name,lic_pk,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
+    $DB->Prepare("LicenseGetAll_Canonical",'SELECT uploadtree.pfile_fk AS pfile,ufile.ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name,lic_pk,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
 	FROM uploadtree
 	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
 	INNER JOIN ufile ON ufile_fk = ufile_pk
@@ -289,7 +289,7 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL)
 	INNER JOIN licterm ON licterm_pk = licterm_fk
 	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
 	UNION
-	SELECT uploadtree.pfile_fk AS pfile,ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name_confidence,'."''".',lic_pk,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
+	SELECT uploadtree.pfile_fk AS pfile,ufile.ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name_confidence,'."''".',lic_pk,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
 	FROM uploadtree
 	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
 	INNER JOIN ufile ON ufile_fk = ufile_pk
@@ -391,7 +391,7 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
   if (empty($LicenseGetAllFiles_Prepared[$PrepName]))
     {
     /* SQL to get all files with a specific license */
-    $DB->Prepare("LicenseGetAllFiles_$PrepName","SELECT DISTINCT ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,uploadtree.pfile_fk,lic_fk,lic_id,tok_pfile,tok_license,tok_match,phrase_text
+    $DB->Prepare("LicenseGetAllFiles_$PrepName","SELECT DISTINCT ufile.ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,uploadtree.pfile_fk,lic_fk,lic_id,tok_pfile,tok_license,tok_match,phrase_text
 	FROM uploadtree
 	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = \$1
 	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk
