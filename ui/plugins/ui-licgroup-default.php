@@ -540,10 +540,7 @@ class licgroup_default extends FO_Plugin
 	  $rc = $this->DefaultGroups();
 	  if (!empty($rc))
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $rc = htmlentities($rc,ENT_QUOTES);
-	    $V .= "alert('$rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert($rc);
 	    }
 	  }
 
@@ -553,10 +550,7 @@ class licgroup_default extends FO_Plugin
 	  $rc = $this->DefaultGroupsFSF();
 	  if (!empty($rc))
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $rc = htmlentities($rc,ENT_QUOTES);
-	    $V .= "alert('$rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert($rc);
 	    }
 	  }
 
@@ -566,10 +560,7 @@ class licgroup_default extends FO_Plugin
 	  $rc = $this->DefaultGroupsFedora();
 	  if (!empty($rc))
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $rc = htmlentities($rc,ENT_QUOTES);
-	    $V .= "alert('$rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert($rc);
 	    }
 	  }
 

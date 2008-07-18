@@ -222,10 +222,7 @@ class licterm_default extends FO_Plugin
 	  $rc = $this->DefaultTerms();
 	  if (!empty($rc))
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $rc = htmlentities($rc,ENT_QUOTES);
-	    $V .= "alert('$rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert($rc);
 	    }
 	  }
 
@@ -236,10 +233,7 @@ class licterm_default extends FO_Plugin
 	  $rc = $this->ExportTerms();
 	  if (!empty($rc))
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $rc = htmlentities($rc,ENT_QUOTES);
-	    $V .= "alert('$rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert($rc);
 	    }
 	  }
 

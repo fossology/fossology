@@ -323,31 +323,27 @@ class ui_browse extends FO_Plugin
     if (!empty($ReAnalyze) && !empty($UploadPk))
       {
       $rc = $ReAnalyze->RemoveLicenseMeta($UploadPk,NULL,1);
-      $V .= "<script language='javascript'>\n";
       if (empty($rc))
         {
-	$V .= "alert('License data re-analysis added to job queue')\n";
+	$V .= PopupAlert('License data re-analysis added to job queue');
 	}
       else
 	{
-	$V .= "alert('$rc')\n";
+	$V .= PopupAlert($rc);
 	}
-      $V .= "</script>\n";
       }
     $UploadPk = GetParm("analyze",PARM_INTEGER);
     if (!empty($Analyze) && !empty($UploadPk))
       {
       $rc = $Analyze->AgentAdd($UploadPk);
-      $V .= "<script language='javascript'>\n";
       if (empty($rc))
         {
-	$V .= "alert('License data analysis added to job queue')\n";
+	$V .= PopupAlert('License data analysis added to job queue');
 	}
       else
 	{
-	$V .= "alert('$rc')\n";
+	$V .= PopupAlert($rc);
 	}
-      $V .= "</script>\n";
       }
 
     switch($this->OutputType)

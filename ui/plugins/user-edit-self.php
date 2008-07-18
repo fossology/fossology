@@ -188,18 +188,15 @@ class user_edit_self extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
+	    $V .= PopupAlert('User information updated.');
 	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('User information updated.')\n";
 	    $Uri = Traceback_uri() . "?mod=" . $this->Name;
 	    $V .= "window.open('$Uri','_top');\n";
 	    $V .= "</script>\n";
 	    }
 	  else
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $rc = htmlentities($rc,ENT_QUOTES);
-	    $V .= "alert('$rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert($rc);
 	    }
 	  }
 

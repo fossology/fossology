@@ -86,15 +86,11 @@ class user_del extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('User deleted.')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert('User deleted.');
 	    }
 	  else
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('$rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert($rc);
 	    }
 	  }
 

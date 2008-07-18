@@ -857,16 +857,11 @@ function moveOptions(theSelFrom, theSelTo)
           if (empty($rc))
             {
             /* Need to refresh the screen */
-            $V .= "<script language='javascript'>\n";
-            $V .= "alert('License term information updated.')\n";
-            $V .= "</script>\n";
+            $V .= PopupAlert('License term information updated.');
             } 
           else
             {
-            $V .= "<script language='javascript'>\n";
-            $rc = htmlentities($rc,ENT_QUOTES);
-            $V .= "alert('$rc')\n";
-            $V .= "</script>\n";
+            $V .= PopupAlert($rc);
             }
           }
         $TermKey = GetParm('termkey',PARM_INTEGER);

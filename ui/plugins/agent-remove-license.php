@@ -111,22 +111,18 @@ class agent_remove_licenseMeta extends FO_Plugin
 
           {
             // Need to refresh the screen
-            $V .= "<script language='javascript'>\n";
 	    if ($Restart)
 	      {
-              $V .= "alert('License data re-analysis added to job queue')\n";
+              $V .= PopupAlert('License data re-analysis added to job queue');
 	      }
 	    else
 	      {
-              $V .= "alert('License data removal added to job queue')\n";
+              $V .= PopupAlert('License data removal added to job queue');
 	      }
-            $V .= "</script>\n";
           }
           else
           {
-            $V .= "<script language='javascript'>\n";
-            $V .= "alert('$rc')\n";
-            $V .= "</script>\n";
+            $V .= PopupAlert($rc);
           }
         }
          

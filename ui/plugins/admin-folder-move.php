@@ -102,9 +102,9 @@ class folder_move extends FO_Plugin
 	    $OldFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$OldFolderId';");
 	    $ORow = $OldFolder[0];
 	    $success = "Moved folder " . $ORow['folder_name'] . " to folder " . $NRow['folder_name']; 
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('$success')\n";
+	    $V .= PopupAlert($success);
 	    $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
+	    $V .= "<script language='javascript'>\n";
 	    $V .= "window.open('$Uri','_top');\n";
 	    $V .= "</script>\n";
 	    }
