@@ -162,7 +162,7 @@
    While this doesn't do much for small matrices, this is a huge
    performance gain for large matrices.
 
- - Reduce comparison scope.
+ - (DISABLED) Reduce comparison scope.
    Similar to "Reduce matrix scope": see how many distinct tokens in A
    appear in B (and vice versa). If they are less than the required
    percentage, then don't even bother comparing.
@@ -1530,7 +1530,6 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
   /** For space, I am converting bytes to bits:
       2*65536 = 128K.  But as bits, it is 16K. **/
   static uint8_t Symbol[2][8192];
-  float Count,Total;
 
   // printf("Was: [%d,%d] [%d,%d]\n",*MinA,*MaxA,*MinB,*MaxB);
   memset(Symbol,0,sizeof(uint8_t)*2*8192);
@@ -1547,7 +1546,11 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
     Symbol[1][Byte] |= Mask;
     }
 
+#if 0
+  /** Optimization DISABLED since it leads to far fewer matches. **/
   /********** Check for possible match *********************/
+  {
+  float Count,Total;
   /* Determine how many symbols in A are in B and vice versa. */
   Count=0; Total=0;
   for(a = 0; a < 8192; a++)
@@ -1576,6 +1579,8 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
     if (Symbol[1][b] & 0x80) { Total++; if (Symbol[0][b] & 0x80) Count++; }
     }
   if (Count*100.0/Total < MatchThreshold[0]) return(0); /* no match */
+  }
+#endif
 
   /********** Find start and end *********************/
   /* Find the first symbol that matches */
