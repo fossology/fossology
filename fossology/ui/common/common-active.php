@@ -30,6 +30,24 @@ if (!isset($GlobalReady)) { exit; }
  ************************************************************/
 
 /*************************************************
+ PopupAlert(): Generate a popup alert window.
+ *************************************************/
+function PopupAlert	($Message)
+{
+  if (!empty($_SESSION['debugpopup']) && ($_SESSION['debugpopup'] == 1))
+    {
+    $HTML = "<H3>" . htmlentities($Message,ENT_QUOTES) . "</H3>\n";
+    }
+  else
+    {
+    $HTML  = "<script language='javascript'>\n";
+    $HTML .= "alert('" . htmlentities($Message,ENT_QUOTES) . "');\n";
+    $HTML .= "</script>";
+    }
+  return($HTML);
+} // PopupAlert()
+
+/*************************************************
  ActiveHTTPscript(): Given a function name, create the
  JavaScript needed for doing the request.
  The JavaScript takes a URL and returns the data.
@@ -46,7 +64,7 @@ if (!isset($GlobalReady)) { exit; }
  *************************************************/
 function ActiveHTTPscript	($RequestName,$IncludeScriptTags=1)
 {
-  $HTML=null;
+  $HTML="";
 
   if ($IncludeScriptTags)
     {

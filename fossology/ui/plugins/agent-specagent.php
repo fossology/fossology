@@ -151,15 +151,11 @@ class agent_specagent extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Analysis added to job queue')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert('Analysis added to job queue');
 	    }
 	  else
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Scheduling failed: $rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert("Scheduling failed: $rc");
 	    }
 	  }
 

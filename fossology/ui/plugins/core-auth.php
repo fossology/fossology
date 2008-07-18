@@ -266,10 +266,10 @@ class core_auth extends FO_Plugin
     if ("X".$R['user_perm'] == "X") { $_SESSION['UserLevel']=PLUGIN_DB_USERADMIN; }
     else { $_SESSION['UserLevel'] = $R['user_perm']; }
     $_SESSION['checkip'] = GetParm("checkip",PARM_STRING);
-    /* Need to refresh the screen */
-    $V .= "<script language='javascript'>\n";
-    $V .= "alert('User Logged In')\n";
 
+    /* Need to refresh the screen */
+    $V .= PopupAlert('User Logged In');
+    $V .= "<script language='javascript'>\n";
     /* Use the previous redirect, but only use it if it comes from this
        server's Traceback_uri().  (Ignore hostname.) */
     $Redirect = preg_replace("@^[^/]*//[^/]*@","",GetParm("redirect",PARM_TEXT));
@@ -370,9 +370,9 @@ class core_auth extends FO_Plugin
 	  $_SESSION['UserLevel'] = NULL;
 	  $_SESSION['UserEmail'] = NULL;
 	  $_SESSION['Folder'] = NULL;
-	  $V .= "<script language='javascript'>\n";
-	  $V .= "alert('User Logged Out')\n";
+	  $V .= PopupAlert('User Logged Out');
 	  $Uri = Traceback_uri() . "?mod=refresh&remod=default";
+	  $V .= "<script language='javascript'>\n";
 	  $V .= "window.open('$Uri','_top');\n";
 	  $V .= "</script>\n";
 	  }

@@ -584,16 +584,11 @@ function moveOptions(theSelFrom, theSelTo)
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('License group information updated.')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert('License group information updated.');
 	    }
 	  else
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $rc = htmlentities($rc,ENT_QUOTES);
-	    $V .= "alert('$rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert($rc);
 	    }
 	  /* Reload the group list since it changed. */
 	  $this->LicGroupPlugin->MakeGroupTables();

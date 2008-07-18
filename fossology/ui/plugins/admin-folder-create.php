@@ -106,9 +106,9 @@ class folder_create extends FO_Plugin
           if ($rc==1)
           {
             /* Need to refresh the screen */
-            $V .= "<script language='javascript'>\n";
-            $V .= "alert('Folder $NewFolder Created')\n";
+	    $V .= PopupAlert("Folder $NewFolder Created");
             $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
+            $V .= "<script language='javascript'>\n";
             $V .= "window.open('$Uri','_top');\n";
             $V .= "</script>\n";
           }

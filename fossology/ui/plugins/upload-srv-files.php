@@ -157,15 +157,11 @@ class upload_srv_files extends FO_Plugin {
 	  if (empty($rc)) 
 	  {
 	    // Need to refresh the screen
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Upload jobs for $PATH added to job queue')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert("Upload jobs for $PATH added to job queue");
 	  }
 	  else 
 	  {
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Upload failed: $rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert("Upload failed: $rc");
 	  }
 	}
 	// Set default form values
