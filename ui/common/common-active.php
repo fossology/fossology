@@ -34,7 +34,7 @@ if (!isset($GlobalReady)) { exit; }
  *************************************************/
 function PopupAlert	($Message)
 {
-  if (!empty($_SESSION['debugpopup']) && ($_SESSION['debugpopup'] == 1))
+  if (!empty($_SESSION['NoPopup']) && ($_SESSION['NoPopup'] == 1))
     {
     $HTML = "<H3>" . htmlentities($Message,ENT_QUOTES) . "</H3>\n";
     }
