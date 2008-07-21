@@ -262,10 +262,15 @@ class core_auth extends FO_Plugin
     $_SESSION['UserEmail'] = $R['user_email'];
     $_SESSION['Folder'] = $R['root_folder_fk'];
     $_SESSION['time_check'] = time() + 10*60;
+
     /* No specified permission means ALL permission */
     if ("X".$R['user_perm'] == "X") { $_SESSION['UserLevel']=PLUGIN_DB_USERADMIN; }
     else { $_SESSION['UserLevel'] = $R['user_perm']; }
     $_SESSION['checkip'] = GetParm("checkip",PARM_STRING);
+
+    /* Check for the no-popup flag */
+    if (GetParm("nopopup",PARM_INTEGER) == 1) { $_SESSION['NoPopup'] = 1; }
+    else { $_SESSION['NoPopup'] = 0; }
 
     /* Need to refresh the screen */
     $V .= PopupAlert('User Logged In');
