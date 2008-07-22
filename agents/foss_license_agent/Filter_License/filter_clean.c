@@ -398,12 +398,6 @@ void	GetAgentKey	()
  *********************************************/
 void	Usage	(char *Name)
 {
-#if 0
-  fprintf(stderr,"Usage: %s [options]\n",Name);
-  fprintf(stderr,"  Usage removed per beta design decision.\n");
-  fprintf(stderr,"  See source code or white paper for details, or contact Neal Krawetz.\n");
-  fprintf(stderr,"  Patents submitted.\n");
-#else
   fprintf(stderr,"Usage: %s [options] [uploads]\n",Name);
   fprintf(stderr,"  For each processed file, remove the cache.\n");
   fprintf(stderr,"  Options\n");
@@ -415,7 +409,6 @@ void	Usage	(char *Name)
   fprintf(stderr,"  -T :: TEST -- do not update the DB or delete any files (just pretend)\n");
   fprintf(stderr,"  You can also list one or more upload IDs for processing.\n");
   fprintf(stderr,"  Upload ID of '-1' will process all uploads.\n");
-#endif
 } /* Usage() */
 
 /**********************************************************************/

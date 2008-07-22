@@ -49,15 +49,24 @@ typedef struct Type1SL Type1SL;
 
 /* For speed, don't start a regex with a "%" phrase.  '%' are expensive! */
 Type1SL List1SL[] = {
-	{"1SL: %s", "*.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}* < license : % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * is free|freely * % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * is not free|freely * % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< %2 provide|provided|distribute|distributed|release|released freely % > *.*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * is provided|distributed|released|licensed|licenced|covered|adheres as|under|by|in % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * under the terms of % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * * * \"|' as is \"|' % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * * * \"|' as - is \"|' % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
-	{"1SL: %s", "< * * proprietary % > *.*|*,*|*;*|*:*|*$*|*(*|*)*|*{*|*}*"},
+	{"1SL: %s", "< license|licence : * %EOL >"},
+	{"1SL: %s", "< %2 is free|freely %EOS >"},
+	{"1SL: %s", "< %2 is not free|freely * %EOS >"},
+	{"1SL: %s", "< %2 provide|provided|distribute|distributed|redistributed|release|released freely %EOS >"},
+	{"1SL: %s", "< %2 is|be provided|distributed|redistributed|released|licensed|licenced|covered|adheres as|under|by|in|from %EOS >"},
+	{"1SL: %s", "< %2 provided|distributed|redistributed|released|licensed|licenced|covered|adheres as|under|by|in|from %EOS >"},
+	{"1SL: %s", "< %2 provide|distribute|redistribute|release|copy %1 license|licence|software|program|library|file %EOS >"},
+	{"1SL: %s", "< %4 under the terms of %EOS >"},
+	{"1SL: %s", "< %2 distribute|redistribute|modify it under %EOS >"},
+	{"1SL: %s", "< %4 \"|' as is \"|' %EOS >"},
+	{"1SL: %s", "< %4 \"|' as - is \"|' %EOS >"},
+	{"1SL: %s", "< %2 proprietary %EOS >"},
+	{"1SL: %s", "< %2 public domain %EOS >"},
+	{"1SL: %s", "< %2 special exception %EOS >"},
+	{"1SL: %s", "< %2 accept the|this license %EOS >"},
+	{"1SL: %s", "< %2 governs use of %EOS >"},
+	{"1SL: %s", "< %2 governs the use of %EOS >"},
+	{"1SL: %s", "< %2 non - commercial %EOS >"},
 	{NULL,NULL}
 	};
 

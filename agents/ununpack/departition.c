@@ -30,6 +30,11 @@
   #define O_LARGEFILE 0100000
 #endif
 
+#ifdef SVN_REV
+char BuildVersion[]="Build version: " SVN_REV ".\n";
+char Version[]=SVN_REV;
+#endif
+
 int	Test=0;	/* set to 0 to extract, 1 to just be verbose */
 
 /****************************************************

@@ -165,7 +165,7 @@ echo "SELECT * FROM leftnav WHERE name = '$name' AND parent = '$parent_id' AND f
 $name        = str_replace("'", "''", $name);           // PostgreSQL quoting
 $description = str_replace("'", "''", $description);    // PostgreSQL quoting
 
-echo "!INSERT INTO folder (folder_name,folder_desc) VALUES ('$name','$description');";
+echo "INSERT INTO folder (folder_name,folder_desc) VALUES ('$name','$description');";
 echo "SELECT folder_pk FROM folder WHERE folder_name='$name' AND folder_desc='$description';";
 if (empty($_ENV['ARG_folder_pk']))
 {
@@ -179,7 +179,7 @@ else
 
 // put the folder info into foldercontest table
 
-echo "!INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$parent_id','1<<3','$child_id');";
+echo "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$parent_id','1<<3','$child_id');";
 
 /*
  * save files or the whole tree?
@@ -192,18 +192,20 @@ if (is_dir($upload_file))
   if ($recurse == 'y')
   {
     //tar up everything
-    if( false === $upload_path = suckupfs($upload_file, TRUE));
+    $upload_path = suckupfs($upload_file, TRUE);
+    if(is_null($upload_path))
     {
-      echo "FATAL: Could not open $upload_path\n";
+      echo "FATAL: Could not open $upload_path it is NULL\n";
       exit(1);
     }
   }
   else
   {
     // save just the files
-    if( false === $upload_path = suckupfs($upload_file, FALSE));
+    $upload_path = suckupfs($upload_file, FALSE);
+    if(is_null($upload_path))
     {
-      echo "FATAL: Could not open $upload_path\n";
+      echo "FATAL: Could not open $upload_path it is NULL\n";
       exit(1);
     }
   }
@@ -211,13 +213,14 @@ if (is_dir($upload_file))
 else
 {
   $upload_path = $upload_file;
+  echo "LOG: fosscp->\$upload_path is:$upload_path\n";
 }
 // Run wget_agent locally to import the file.
 
 $Prog = "$LIBEXECDIR/agents/wget_agent -k $upload_pk '$upload_path'";
 $last = exec($Prog, $output, $rtn_code);
 // unlink($upload_path);
-// echo "LOG: return code from wget is:$rtn_code";
+echo "LOG: return code from wget is:$rtn_code\n";
 
 if ($rtn_code != 0)
 {
@@ -225,6 +228,7 @@ if ($rtn_code != 0)
   exit(1);
 }
 
+echo "LOG: fosscp_agent is exiting.....\n";
 exit(0);  # done successfully
 
 ?>

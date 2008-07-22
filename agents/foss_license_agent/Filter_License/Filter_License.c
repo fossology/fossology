@@ -36,6 +36,11 @@
 #include "wordcheck.h"
 #include "../../ununpack/checksum.h"
 
+#ifdef SVN_REV
+char BuildVersion[]="Build version: " SVN_REV ".\n";
+char Version[]=SVN_REV;
+#endif
+
 int Verbose=0;	/* how verbose? (for debugging) */
 int AddToDB=0;  /* should the license be added to the license table? */
 int UpdateDB=1;	/* should process results go into the DB/repository? */
@@ -288,8 +293,11 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
   /* Add in meta info */
   AddMetaToDB(LastAddPk);
 
+#if 0
+  /** Disabled: Database will take care of this **/
   /* Analyze table (for performance) */
   DBaccess(DB,"ANALYZE agent_lic_raw;");
+#endif
   return(Lic_Id);
 } /* AddLicenseToDB() */
 
@@ -1248,12 +1256,6 @@ void	GetAgentKey	()
  ****************************************/
 void	Usage	(char *Name)
 {
-#if 0
-  fprintf(stderr,"Usage: %s [options]\n",Name);
-  fprintf(stderr,"  Usage removed per beta design decision.\n");
-  fprintf(stderr,"  See source code or white paper for details, or contact Neal Krawetz.\n");
-  fprintf(stderr,"  Patents submitted.\n");
-#else
   fprintf(stderr,"Usage: %s [options] [file [file ...]]\n",Name);
   fprintf(stderr,"  -i = Initialize the database, then exit.\n");
   fprintf(stderr,"  -O = Send results to stdout instead of the repository (turns off DB updates)\n");
@@ -1269,7 +1271,6 @@ void	Usage	(char *Name)
   fprintf(stderr,"  (The queue manager can use this to denote a queue item as processed.\n");
   fprintf(stderr,"  Engine sends SIG_USR2 to parent when ready for an input line and\n");
   fprintf(stderr,"  to denote an UNSUCCESSFUL operation.\n");
-#endif
 } /* Usage() */
 
 /***********************************************************************/

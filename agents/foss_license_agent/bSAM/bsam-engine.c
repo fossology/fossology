@@ -162,6 +162,15 @@
    While this doesn't do much for small matrices, this is a huge
    performance gain for large matrices.
 
+ - (DISABLED) Reduce comparison scope.
+   Similar to "Reduce matrix scope": see how many distinct tokens in A
+   appear in B (and vice versa). If they are less than the required
+   percentage, then don't even bother comparing.
+   For example, if B has 100 tokens and the match must include 20% of B,
+   then at least 20 tokens in B must appear in A.
+   This check totally omits comparisons where there are not enough tokens
+   in A for matching B.
+
  - External optimizations.
    The preprocessing option ("-p program") can be slower than the
    matrix comparison.  when comparing many programs against each other
@@ -226,6 +235,11 @@
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
+
+#ifdef SVN_REV
+char BuildVersion[]="Build version: " SVN_REV ".\n";
+char Version[]=SVN_REV;
+#endif
 
 #if 0
 #define DEBUG 1
@@ -747,7 +761,10 @@ void	DBSetPhrase	()
   if ((rc < 0) || (DBdatasize(DB) <= 0))
     {
     DBaccess(DB,"INSERT INTO agent_lic_raw (lic_name,lic_unique,lic_text,lic_version,lic_section,lic_id) VALUES ('Phrase','1','Phrase','1',1,1);");
+#if 0
+    /** Disabled: Database will take care of this **/
     DBaccess(DB,"ANALYZE agent_lic_raw;");
+#endif
     }
 } /* DBSetPhrase() */
 
@@ -1506,7 +1523,7 @@ inline int	GetSeqRange	()
 inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
 {
   int a,b;
-  uint16_t Val,Byte,Mask;
+  uint16_t Byte,Mask;
   /* List of known symbols.
      Two lists: A and B
      Since a token is 2 bytes, that means 65536 max */
@@ -1520,46 +1537,77 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
   /* Populate the known symbols */
   for(a = *MinA; a < *MaxA; a++)
     {
-    Val = MS.Symbols[0].Symbol[a];
-    ByteMask(Val,Byte,Mask);
+    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
     Symbol[0][Byte] |= Mask;
     }
   for(b = *MinB; b < *MaxB; b++)
     {
-    Val = MS.Symbols[1].Symbol[b];
-    ByteMask(Val,Byte,Mask);
+    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
     Symbol[1][Byte] |= Mask;
     }
 
+#if 0
+  /** Optimization DISABLED since it leads to far fewer matches. **/
+  /********** Check for possible match *********************/
+  {
+  float Count,Total;
+  /* Determine how many symbols in A are in B and vice versa. */
+  Count=0; Total=0;
+  for(a = 0; a < 8192; a++)
+    {
+    if (Symbol[0][a] & 0x01) { Total++; if (Symbol[1][a] & 0x01) Count++; }
+    if (Symbol[0][a] & 0x02) { Total++; if (Symbol[1][a] & 0x02) Count++; }
+    if (Symbol[0][a] & 0x04) { Total++; if (Symbol[1][a] & 0x04) Count++; }
+    if (Symbol[0][a] & 0x08) { Total++; if (Symbol[1][a] & 0x08) Count++; }
+    if (Symbol[0][a] & 0x10) { Total++; if (Symbol[1][a] & 0x10) Count++; }
+    if (Symbol[0][a] & 0x20) { Total++; if (Symbol[1][a] & 0x20) Count++; }
+    if (Symbol[0][a] & 0x40) { Total++; if (Symbol[1][a] & 0x04) Count++; }
+    if (Symbol[0][a] & 0x80) { Total++; if (Symbol[1][a] & 0x80) Count++; }
+    }
+  if (Count*100.0/Total < MatchThreshold[1]) return(0); /* no match */
+
+  Count=0; Total=0;
+  for(b = 0; b < 8192; b++)
+    {
+    if (Symbol[1][b] & 0x01) { Total++; if (Symbol[0][b] & 0x01) Count++; }
+    if (Symbol[1][b] & 0x02) { Total++; if (Symbol[0][b] & 0x02) Count++; }
+    if (Symbol[1][b] & 0x04) { Total++; if (Symbol[0][b] & 0x04) Count++; }
+    if (Symbol[1][b] & 0x08) { Total++; if (Symbol[0][b] & 0x08) Count++; }
+    if (Symbol[1][b] & 0x10) { Total++; if (Symbol[0][b] & 0x10) Count++; }
+    if (Symbol[1][b] & 0x20) { Total++; if (Symbol[0][b] & 0x20) Count++; }
+    if (Symbol[1][b] & 0x40) { Total++; if (Symbol[0][b] & 0x04) Count++; }
+    if (Symbol[1][b] & 0x80) { Total++; if (Symbol[0][b] & 0x80) Count++; }
+    }
+  if (Count*100.0/Total < MatchThreshold[0]) return(0); /* no match */
+  }
+#endif
+
+  /********** Find start and end *********************/
   /* Find the first symbol that matches */
   for(a = *MinA; a < *MaxA; a++)
     {
-    Val = MS.Symbols[0].Symbol[a];
-    ByteMask(Val,Byte,Mask);
-    if ((Symbol[1][Byte] | Mask) != 0) { break; }
+    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
+    if ((Symbol[1][Byte] & Mask) != 0) { break; }
     }
   *MinA = a;
   for(a = *MaxA - 1; a > *MinA; a--)
     {
-    Val = MS.Symbols[0].Symbol[a];
-    ByteMask(Val,Byte,Mask);
-    if ((Symbol[1][Byte] | Mask) != 0) { break; }
+    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
+    if ((Symbol[1][Byte] & Mask) != 0) { break; }
     }
   *MaxA = a+1;
   if (*MaxA - *MinA <= MatchLen[0]) { return(0); }
 
   for(b = *MinB; b < *MaxB; b++)
     {
-    Val = MS.Symbols[1].Symbol[b];
-    ByteMask(Val,Byte,Mask);
-    if ((Symbol[0][Byte] | Mask) != 0) { break; }
+    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
+    if ((Symbol[0][Byte] & Mask) != 0) { break; }
     }
   *MinB = b;
   for(b = *MaxB - 1; b > *MinB; b--)
     {
-    Val = MS.Symbols[1].Symbol[b];
-    ByteMask(Val,Byte,Mask);
-    if ((Symbol[0][Byte] | Mask) != 0) { break; }
+    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
+    if ((Symbol[0][Byte] & Mask) != 0) { break; }
     }
   *MaxB = b+1;
   if (*MaxB - *MinB <= MatchLen[1]) { return(0); }
@@ -2341,7 +2389,10 @@ int	ReadLine	(FILE *Fin)
   /* If we inserted, then analyze the table */
   if (DBInsertCount > 0)
     {
+#if 0
+    /** Disabled: Database will take care of this **/
     DBaccess(DB,"ANALYZE agent_lic_meta;");
+#endif
     DBInsertCount=0;
     }
 
@@ -2453,7 +2504,7 @@ void	SAMfiles	()
 
   /* Now process the files */
   SetData(0);
-  HasMatch=1;
+  HasMatch=0;
   InitMatrixState(&RMS);
   RMS.Symbols[0].SymbolStart = MS.Symbols[0].SymbolStart;
   RMS.Symbols[0].SymbolEnd = MS.Symbols[0].SymbolEnd;
@@ -2540,7 +2591,7 @@ void	SAMfiles	()
  **********************************************/
 int	SAMfilesExhaustiveB	()
 {
-#ifdef DEBUG_RECURSION
+#if DEBUG_RECURSION
   static int Depth=0;
 #endif
 
@@ -2550,6 +2601,8 @@ int	SAMfilesExhaustiveB	()
   /* store best matches */
   matrixstate BMS;	/* best matrix match */
   int HasMatch=0;
+  int BestCmp;
+  int GoodCount;	/* how many good matches have been seen? */
 
   /* don't even load the ones that are too small */
   if (MS.Symbols[0].SymbolEnd < MatchLen[0]) return(0);
@@ -2563,6 +2616,7 @@ int	SAMfilesExhaustiveB	()
   MS.Matrix.MatrixMax=0;
 
   HasMatch=0;
+  GoodCount=0;
   while(LoadNextData(1,0))
 	{
 	RMS.Label[1].MmapOffset = MS.Label[1].MmapOffset;
@@ -2583,7 +2637,15 @@ int	SAMfilesExhaustiveB	()
 	  /* Determine:
 	     IF it has a better percentage OR
 	     it has the same percentage, but more tokens that match */
-	  if (MS.Matrix.MatrixMax > BMS.Matrix.MatrixMax)
+	  GoodCount++;
+	  BestCmp = (MS.Matrix.MatrixMax > BMS.Matrix.MatrixMax);
+	  if (!BestCmp && (MS.Matrix.MatrixMax == BMS.Matrix.MatrixMax))
+	    {
+	    /* If same match, choose the one with the fewest skipped */
+	    BestCmp = (MS.Matrix.MatrixMaxPos[1]-MS.Matrix.MatrixMinPos[1]) <
+		      (BMS.Matrix.MatrixMaxPos[1]-BMS.Matrix.MatrixMinPos[1]);
+	    }
+	  if (BestCmp)
 	    {
 	    if (MS.Matrix.MatrixMinPos[0] < MS.Matrix.MatrixMaxPos[0])
 		{
@@ -2644,7 +2706,7 @@ int	SAMfilesExhaustiveB	()
 #endif
 
     /* recurse on BEFORE segement */
-    if (BMS.Matrix.MatrixBestMin > 0)
+    if ((GoodCount > 1) && (BMS.Matrix.MatrixBestMin > 0))
       { /* BEFORE */
       CopyMatrixState(&BMS,&MS,0);
       /** Don't change MS.Symbols.SymbolStart -- keep the start **/
@@ -2674,7 +2736,7 @@ int	SAMfilesExhaustiveB	()
       } /* BEFORE */
 
     /* recurse on AFTER segement */
-    if (BMS.Matrix.MatrixBestMax > BMS.Matrix.MatrixBestMin)
+    if ((GoodCount > 1) && (BMS.Matrix.MatrixBestMax > BMS.Matrix.MatrixBestMin))
       { /* AFTER */
       CopyMatrixState(&BMS,&MS,0);
       /** Don't change MS.Symbols.SymbolEnd -- keep the end **/
@@ -2733,7 +2795,7 @@ void	SAMfilesExhaustive	()
 
   /* Now process the files */
   SetData(0);
-  HasMatch=1;
+  HasMatch=0;
 
   switch(OutputFormat)
     {
@@ -2825,7 +2887,10 @@ void	GetAgentKey	()
         DBclose(DB);
 	exit(-1);
 	}
+#if 0
+      /** Disabled: Database will take care of this **/
       DBaccess(DB,"ANALYZE agent;");
+#endif
       rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='license' ORDER BY agent_id DESC;");
       if (rc < 0)
 	{
@@ -2844,12 +2909,6 @@ void	GetAgentKey	()
  **********************************************/
 void	Usage	(char *Name)
 {
-#if 0
-  printf("Usage: %s [options]\n",Name);
-  printf("  Usage removed per beta design decision.\n");
-  printf("  See source code or white paper for details, or contact Neal Krawetz.\n");
-  printf("  Patents submitted.\n");
-#else
   printf("Usage: %s [options] fileA fileB\n",Name);
   printf("  Compares fileA against fileB.\n");
   printf("  If either fileA or fileB is -, then a list of files are read from stdin.\n");
@@ -2884,7 +2943,6 @@ void	Usage	(char *Name)
   printf("    -v = Verbose (-vv = more verbose, etc.)\n");
   printf("    -1 = Show matrix stage 1 (same)\n");
   printf("    -2 = Show matrix stage 2 (align)\n");
-#endif
 #endif
 } /* Usage() */
 
