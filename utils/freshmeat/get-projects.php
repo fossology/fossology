@@ -47,6 +47,8 @@
  * @author mark.donohoe@hp.com
  * @version $Id$
  *
+ * @todo Stop using /tmp, switch to $VARDATADIR? (bug taggart)
+ *
  */
 
 /*
@@ -56,6 +58,8 @@
  */
 // pathinclude below is dependent on having fossology installed.
 require_once "pathinclude.h.php";       // brings in global $PROJECTSTATEDIR +
+global $LIBDIR;
+global $INCLUDEDIR;
 require_once("$LIBDIR/lib_projxml.h.php");
 require_once("$INCLUDEDIR/fm-paths.php");
 
