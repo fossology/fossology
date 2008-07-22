@@ -53,7 +53,7 @@ class search_repo extends FO_Plugin
 	INNER JOIN ufile ON pfile_pk = '$Pfilepk'
 	  AND ufile.pfile_fk = pfile.pfile_pk
 	INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk
-	ORDER BY pfile_fk,ufile_pk LIMIT $Max OFFSET $Offset
+	ORDER BY uploadtree.pfile_fk,ufile_pk LIMIT $Max OFFSET $Offset
 	;";
     $Results = $DB->Action($SQL);
     $Count = count($Results);

@@ -104,7 +104,8 @@ class ui_view_license extends FO_Plugin
     /* Find the license path */
     if (!empty($PfilePk))
       {
-      $Results = $DB->Action("SELECT license_path,tok_match,tok_license FROM agent_lic_meta WHERE pfile_fk = $PfilePk AND lic_fk = $LicPk AND tok_pfile_start = $TokPfileStart ORDER BY version DESC LIMIT 1;");
+      $SQL = "SELECT license_path,tok_match,tok_license FROM agent_lic_meta WHERE pfile_fk = $PfilePk AND lic_fk = $LicPk AND tok_pfile_start = $TokPfileStart ORDER BY version DESC LIMIT 1;";
+      $Results = $DB->Action($SQL);
       $Lic = $Results[0];
       if (empty($Lic['license_path'])) { return; }
       }
@@ -114,7 +115,7 @@ class ui_view_license extends FO_Plugin
     $Lic['tok_pfile'] = $Lic['tok_license'];
 
     /* Load the License name and data */
-    $Results = $DB->Action("SELECT lic_name FROM agent_lic_raw WHERE lic_pk = $LicPk;");
+    $Results = $DB->Action("SELECT lic_name, lic_url FROM agent_lic_raw WHERE lic_pk = $LicPk;");
     if (empty($Results[0]['lic_name'])) { return; }
 
     /* View license text as a temp file */
@@ -125,6 +126,11 @@ class ui_view_license extends FO_Plugin
     $this->ConvertLicPathToHighlighting($Lic,NULL);
     $Text = "<div class='text'>";
     $Text .= "<H1>License: " . $Results[0]['lic_name'] . "</H1>\n";
+    if (!empty($Results[0]['lic_url']) && (strtolower($Results[0]['lic_url']) != 'none'))
+      {
+      $Text .= "Reference URL: <a href=\"" . $Results[0]['lic_url'] . "\" target=_blank> " . $Results[0]['lic_url'] . "</a>";
+      }
+    $Text .= "<hr>\n";
     $Text .= "</div>";
     $View->ShowView($Ftmp,"view",0,0,$Text);
     } // ViewLicense()
@@ -155,21 +161,6 @@ class ui_view_license extends FO_Plugin
     $ModBack = GetParm("modback",PARM_STRING);
     if (empty($ModBack)) { $ModBack='license'; }
 
-    /* Load license names */
-    $LicPk2GID=array();  // map lic_pk to the group id: lic_id
-    $LicGID2Name=array(); // map lic_id to name.
-    $Results = $DB->Action("SELECT lic_pk,lic_id,lic_name FROM agent_lic_raw ORDER BY lic_name;");
-    foreach($Results as $Key => $R)
-      {
-      if (empty($R['lic_name'])) { continue; }
-      $Name = basename($R['lic_name']);
-      $GID = $R['lic_id'];
-      $LicGID2Name[$GID] = $Name;
-      $LicPk2GID[$R['lic_pk']] = $GID;
-      }
-    if (empty($LicGID2Name[1])) { $LicGID2Name[1] = 'Phrase'; }
-    if (empty($LicPk2GID[1])) { $LicPk2GID[1] = 1; }
-
     /* Load licenses for this file */
     $Results = $DB->Action("SELECT * FROM agent_lic_meta WHERE pfile_fk = $Pfile ORDER BY tok_pfile_start;");
 
@@ -186,15 +177,13 @@ class ui_view_license extends FO_Plugin
 	if (empty($R['pfile_path'])) { continue; }
 	if (!empty($R['phrase_text']))
 		{
-		$LicName = "Phrase: " . $R['phrase_text'];
 		$RefURL = NULL;
 		}
 	else
 		{
-		$LicGID = $LicPk2GID[$R['lic_fk']];
-		$LicName = $LicGID2Name[$LicGID];
 		$RefURL=Traceback() . "&lic=" . $R['lic_fk'] . "&licset=" . $R['tok_pfile_start'];
 		}
+	$LicName = LicenseGetName($R['agent_lic_meta_pk'],1);
 	$this->ConvertLicPathToHighlighting($R,$LicName,$RefURL);
 	}
       }

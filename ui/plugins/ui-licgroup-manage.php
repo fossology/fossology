@@ -250,9 +250,9 @@ function moveOptions(theSelFrom, theSelTo)
     $DB->Action("DELETE FROM licgroup_grps WHERE licgroup_fk = '$GroupKey';");
     $DB->Action("DELETE FROM licgroup_grps WHERE licgroup_memberfk = '$GroupKey';");
     $DB->Action("DELETE FROM licgroup WHERE licgroup_pk = '$GroupKey';");
-    $DB->Action("VACUUM ANALYZE licgroup_lics;");
-    $DB->Action("VACUUM ANALYZE licgroup_grps;");
-    $DB->Action("VACUUM ANALYZE licgroup;");
+    // $DB->Action("VACUUM ANALYZE licgroup_lics;");
+    // $DB->Action("VACUUM ANALYZE licgroup_grps;");
+    // $DB->Action("VACUUM ANALYZE licgroup;");
     return;
     } // LicGroupDelete()
 
@@ -332,8 +332,8 @@ function moveOptions(theSelFrom, theSelTo)
 	VALUES ('$GroupKey','$GrpNum');");
       }
     $DB->Action("COMMIT;");
-    $DB->Action("VACUUM ANALYZE licgroup_lics;");
-    $DB->Action("VACUUM ANALYZE licgroup_grps;");
+    // $DB->Action("VACUUM ANALYZE licgroup_lics;");
+    // $DB->Action("VACUUM ANALYZE licgroup_grps;");
 
     return;
     } // LicGroupInsert() */
@@ -548,7 +548,7 @@ function moveOptions(theSelFrom, theSelTo)
 
     $V .= "</tr>\n";
     $V .= "</table>\n";
-    $V .= "<input type='submit' name='submit' value='Go!'>\n";
+    $V .= "<input type='submit' name='submit' value='Commit!'>\n";
     $V .= "</form>\n";
     return($V);
     } // LicGroupForm()
@@ -584,16 +584,11 @@ function moveOptions(theSelFrom, theSelTo)
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('License group information updated.')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert('License group information updated.');
 	    }
 	  else
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $rc = htmlentities($rc,ENT_QUOTES);
-	    $V .= "alert('$rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert($rc);
 	    }
 	  /* Reload the group list since it changed. */
 	  $this->LicGroupPlugin->MakeGroupTables();

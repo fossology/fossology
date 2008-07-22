@@ -58,7 +58,7 @@ class core_auth extends FO_Plugin
     $Init = array("NULL",     "user_pk",  "NULL",     PLUGIN_DB_READ, "NULL");
     for($i=0; !empty($Cols[$i]); $i++)
       {
-      if (!array_key_exists($Cols[$i],$R))
+      if (!is_array($R) || !array_key_exists($Cols[$i],$R))
 	{
 	$Val = $Cols[$i] . " " . $Type[$i];
 	$rc = $DB->Action("ALTER TABLE users ADD COLUMN $Val;");
@@ -167,11 +167,11 @@ class core_auth extends FO_Plugin
 	}
 
     /* Enable or disable plugins based on login status */
-    $Level = PLUGIN_DB_READ;
+    $Level = PLUGIN_DB_NONE;
     if (@$_SESSION['User'])
       {
       /* If you are logged in, then the default level is "Download". */
-      if (empty($_SESSION['UserLevel'])) { $Level = PLUGIN_DB_DOWNLOAD; }
+      if ("X".$_SESSION['UserLevel'] == "X") { $Level = PLUGIN_DB_DOWNLOAD; }
       else { $Level = @$_SESSION['UserLevel']; }
 
       /* Recheck the user in case he is suddenly blocked or changed. */
@@ -193,14 +193,18 @@ class core_auth extends FO_Plugin
 		$_SESSION['UserLevel'] = NULL;
 		$_SESSION['UserEmail'] = NULL;
 		$_SESSION['Folder'] = NULL;
-		$Level = PLUGIN_DB_READ;
+		$Results = $DB->Action("SELECT * FROM users WHERE user_name='Default User';");
+		if (empty($Results)) { $Level = PLUGIN_DB_NONE; }
+		else { $Level = $Results[0]['user_perm']; }
 		}
 	}
       }
     else
       {
-      // menu_insert("Main::Admin::Login",10,$this->Name);
-      $Level = PLUGIN_DB_READ;
+      /* Default to permissions for "Default User" */
+      $Results = $DB->Action("SELECT * FROM users WHERE user_name='Default User';");
+      if (empty($Results)) { $Level = PLUGIN_DB_NONE; }
+      else { $Level = $Results[0]['user_perm']; }
       }
 
     /* Disable all plugins with >= $Level access */
@@ -258,14 +262,19 @@ class core_auth extends FO_Plugin
     $_SESSION['UserEmail'] = $R['user_email'];
     $_SESSION['Folder'] = $R['root_folder_fk'];
     $_SESSION['time_check'] = time() + 10*60;
+
     /* No specified permission means ALL permission */
-    if (empty($R['user_perm'])) { $_SESSION['UserLevel']=PLUGIN_DB_USERADMIN; }
+    if ("X".$R['user_perm'] == "X") { $_SESSION['UserLevel']=PLUGIN_DB_USERADMIN; }
     else { $_SESSION['UserLevel'] = $R['user_perm']; }
     $_SESSION['checkip'] = GetParm("checkip",PARM_STRING);
-    /* Need to refresh the screen */
-    $V .= "<script language='javascript'>\n";
-    $V .= "alert('User Logged In')\n";
 
+    /* Check for the no-popup flag */
+    if (GetParm("nopopup",PARM_INTEGER) == 1) { $_SESSION['NoPopup'] = 1; }
+    else { $_SESSION['NoPopup'] = 0; }
+
+    /* Need to refresh the screen */
+    $V .= PopupAlert('User Logged In');
+    $V .= "<script language='javascript'>\n";
     /* Use the previous redirect, but only use it if it comes from this
        server's Traceback_uri().  (Ignore hostname.) */
     $Redirect = preg_replace("@^[^/]*//[^/]*@","",GetParm("redirect",PARM_TEXT));
@@ -316,7 +325,11 @@ class core_auth extends FO_Plugin
 		  global $DB;
 		  $Results = $DB->Action("SELECT * FROM users LIMIT 1;");
 		  $R = &$Results[0];
-		  if (array_key_exists("user_seed",$R) && array_key_exists("user_pass",$R))
+		  if (!is_array($R))
+			{
+			$Results[0]=array();
+			}
+		  else if (array_key_exists("user_seed",$R) && array_key_exists("user_pass",$R))
 			{
 			$Results = $DB->Action("SELECT user_name FROM users WHERE user_seed IS NULL AND user_pass IS NULL;");
 			}
@@ -362,9 +375,9 @@ class core_auth extends FO_Plugin
 	  $_SESSION['UserLevel'] = NULL;
 	  $_SESSION['UserEmail'] = NULL;
 	  $_SESSION['Folder'] = NULL;
-	  $V .= "<script language='javascript'>\n";
-	  $V .= "alert('User Logged Out')\n";
+	  $V .= PopupAlert('User Logged Out');
 	  $Uri = Traceback_uri() . "?mod=refresh&remod=default";
+	  $V .= "<script language='javascript'>\n";
 	  $V .= "window.open('$Uri','_top');\n";
 	  $V .= "</script>\n";
 	  }

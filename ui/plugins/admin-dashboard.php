@@ -31,6 +31,7 @@ class dashboard extends FO_Plugin
   var $Title      = "Dashboard";
   var $MenuList   = "Admin::Dashboard";
   var $Dependency = array("db");
+  var $DBaccess   = PLUGIN_DB_READ;
 
   /************************************************
    DiskFree(): Determine amount of free disk space.

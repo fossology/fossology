@@ -110,9 +110,7 @@ class folder_properties extends FO_Plugin
 	  if ($rc==1)
 	    {
 	    /* Need to refresh the screen */
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Folder Properties changed')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert('Folder Properties changed');
 	    }
 	}
 	

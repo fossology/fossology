@@ -53,7 +53,7 @@ class upload_url extends FO_Plugin
 
     /* Create an upload record. */
     $Mode = (1<<2); // code for "it came from wget"
-    $uploadpk = JobAddUpload($ShortName,$Name,$Desc,$Mode,$Folder);
+    $uploadpk = JobAddUpload($ShortName,$GetURL,$Desc,$Mode,$Folder);
     if (empty($uploadpk)) { return("Failed to insert upload record"); }
 
     /* Prepare the job: job "wget" */
@@ -95,18 +95,14 @@ class upload_url extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Upload added to job queue')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert('Upload added to job queue');
 	    $GetURL=NULL;
 	    $Desc=NULL;
 	    $Name=NULL;
 	    }
 	  else
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Upload failed: $rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert("Upload failed: $rc");
 	    }
 	  }
 

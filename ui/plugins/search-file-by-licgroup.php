@@ -77,6 +77,7 @@ class search_file_by_licgroup extends FO_Plugin
       case "HTML":
 	$UploadTreePk = GetParm("item",PARM_INTEGER);
 	$LicGrpPk = GetParm("licgroup",PARM_INTEGER);
+	/* $LicGrpPk = -1 for "Not in any group" */
 	$Page = GetParm("page",PARM_INTEGER);
 	if (empty($UploadTreePk) || empty($LicGrpPk))
 		{
@@ -86,53 +87,80 @@ class search_file_by_licgroup extends FO_Plugin
 	$Offset = $Page * $Max;
 
 	/* Get License Name */
-	$Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_pk = '$LicGrpPk' LIMIT 1;");
-	$LicName = htmlentities($Results[0]['licgroup_name']);
-	if (empty($LicName)) { return; }
-	$V .= "The following files include licenses in the license group '<b>$LicName</b>'.\n";
+	if ($LicGrpPk != -1)
+	  {
+	  $Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_pk = '$LicGrpPk' LIMIT 1;");
+	  $LicName = htmlentities($Results[0]['licgroup_name']);
+	  if (empty($LicName)) { return; }
+	  $V .= "The following files include licenses in the license group '<b>$LicName</b>'.\n";
+	  }
+	else
+	  {
+	  $V .= "The following files are not included in any license groups.\n";
+	  }
 
 	/* Find the key associated with the group id */
 	$LicGrp = '';
-	foreach($LicGroup->GrpInGroup as $g)
-	  {
-	  if ($g['id'] == $LicGrpPk) { $LicGrp = $g; }
-	  }
-	if (empty($LicGrp)) { return; }
 
 	/* Load licenses */
 	$Lics = array();
 	$M = $Max;
 	$O = $Offset;
 	$LicPkList = '';
-	foreach($LicGrp as $Key => $Val)
+	if ($LicGrpPk != -1)
 	  {
-	  if (substr($Key,0,1) != 'l') { continue; }
-	  $LicPk = substr($Key,1);
-	  if (!empty($LicPkList)) { $LicPkList .= " OR "; }
-	  $LicPkList .= "lic_id=$LicPk";
+	  /* Build SQL for "is in this group" */
+	  foreach($LicGroup->GrpInGroup as $g)
+	    {
+	    if ($g['id'] == $LicGrpPk) { $LicGrp = $g; }
+	    }
+	  if (empty($LicGrp)) { return; }
+	  foreach($LicGrp as $Key => $Val)
+	    {
+	    if (substr($Key,0,1) != 'l') { continue; }
+	    $LicPk = substr($Key,1);
+	    if (!empty($LicPkList)) { $LicPkList .= " OR "; }
+	    $LicPkList .= "lic_id=$LicPk";
+	    }
+	  }
+	else
+	  {
+	  /* Build SQL for "not in any group" */
+	  foreach($LicGroup->GrpInGroup as $g)
+	    {
+	    foreach($g as $Key => $Val)
+	      {
+	      if (substr($Key,0,1) != 'l') { continue; }
+	      $LicPk = substr($Key,1);
+	      if (!empty($LicPkList)) { $LicPkList .= " OR "; }
+	      $LicPkList .= "lic_id!=$LicPk";
+	      }
+	    }
 	  }
 	LicenseGetAllFiles($UploadTreePk,$Lics,$LicPkList,$M,$O);
+
 	/* $LicPkList = all licenses in this group */
 
         /*****************************************/
 	/* Permit refining the search by license */
         /*****************************************/
 	$LicList = array();
-	LicenseGetAll($UploadTreePk,$LicList);
+	LicenseGetAll($UploadTreePk,$LicList,1);
 	$SQL = "SELECT DISTINCT lic_id,lic_name FROM agent_lic_raw
 		WHERE ($LicPkList)";
-	$SQL .= " AND (";
 	$First=1;
 	foreach($LicList as $L => $Lval)
 	  {
+	  if (empty($L)) { continue; }
 	  if (is_int($L))
 	    {
 	    if (!$First) { $SQL .= " OR"; }
+	    else { $SQL .= " AND ("; }
 	    $SQL .= " lic_pk=$L";
 	    $First=0;
 	    }
 	  }
-	$SQL .= ")";
+	if (!$First) { $SQL .= ")"; }
 	// print "<pre>" . strlen($SQL) . ": $SQL</pre>";
 	$Results = $DB->Action($SQL);
 	for($i=0; !empty($Results[$i]['lic_name']); $i++)
@@ -140,6 +168,10 @@ class search_file_by_licgroup extends FO_Plugin
 	  $Results[$i]['lic_name'] = preg_replace("@^.*/@","",$Results[$i]['lic_name']);
 	  }
 	usort($Results,array($this,"CmpLicNames"));
+
+if (0)
+{
+/* TBD: Fix this so it works with license groups. */
 	$V .= "<form method='get' action='" . Traceback_uri() . "'>";
 	$V .= "Refine search by specific license: ";
 	$V .= "<input type='hidden' name='mod' value='search_file_by_license'>";
@@ -154,6 +186,7 @@ class search_file_by_licgroup extends FO_Plugin
 	$V .= "</select>";
 	$V .= "<input type='submit' value='Search!'>";
 	$V .= "</form>\n";
+}
 
         /*****************************************/
 	/* Save the license results */

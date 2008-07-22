@@ -118,9 +118,7 @@ class agent_specagent extends FO_Plugin
 	FROM mimetype
 	INNER JOIN pfile ON pfile.pfile_mimetypefk = mimetype.mimetype_pk
 	  AND mimetype.mimetype_pk = '$mimetypepk'
-	INNER JOIN ufile ON ufile.pfile_fk = pfile.pfile_pk
-	INNER JOIN uploadtree ON uploadtree.ufile_fk=ufile.ufile_pk
-	  AND upload_fk = '$uploadpk'
+	INNER JOIN uploadtree ON upload_fk = '$uploadpk'
 	WHERE pfile.pfile_pk NOT IN
 	  (SELECT attrib.pfile_fk FROM attrib
 	  WHERE attrib_key_fk = '$attribkey')
@@ -153,15 +151,11 @@ class agent_specagent extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Analysis added to job queue')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert('Analysis added to job queue');
 	    }
 	  else
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Scheduling failed: $rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert("Scheduling failed: $rc");
 	    }
 	  }
 

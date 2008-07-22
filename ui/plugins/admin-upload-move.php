@@ -107,10 +107,7 @@ class upload_move extends FO_Plugin
 	    $ORow = $OldFolder[0];
         $base = basename($NUploads['upload_filename']);
 	    $success = "Moved $base  from folder $ORow[folder_name] to folder $NRow[folder_name]"; 
-
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('$success')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert($success);
 	    }
 	  }
 

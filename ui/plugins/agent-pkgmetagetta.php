@@ -119,10 +119,8 @@ class agent_pkgmetagetta extends FO_Plugin
 	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
 	INTO $TempTable
     FROM pfile left outer join attrib on (attrib_key_fk='$attribkey' 
-      AND pfile_fk=pfile_pk and attrib_value is null)
-    INNER join ufile on (ufile.pfile_fk=pfile_pk)
-    INNER join uploadtree on (ufile_pk=uploadtree.ufile_fk 
-      AND upload_fk='$uploadpk');";
+      AND attrib.pfile_fk=pfile_pk and attrib_value is null)
+    INNER join uploadtree on (upload_fk='$uploadpk') and uploadtree.pfile_fk=pfile_pk;";
 
     /* Add job: job has jobqueue item "sqlagent" */
     /** sqlagent does not like newlines! **/
@@ -164,15 +162,11 @@ class agent_pkgmetagetta extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Analysis added to job queue')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert('Analysis added to job queue');
 	    }
 	  else
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Scheduling failed: $rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert("Scheduling failed: $rc");
 	    }
 	  }
 

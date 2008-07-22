@@ -37,7 +37,7 @@ class TestAboutMenu extends WebTestCase {
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $this->assertTrue($this->get('http://repo.fossology.org/'));
     $this->assertAuthentication('Basic');
-    $this->authenticate('fossology', 'OeyiW5go');
+    $this->authenticate('fossology', 'xxxxxxx');
     $this->assertText('Software Repository');
 
     $this->click('About');
@@ -54,7 +54,7 @@ class TestToolsMenu extends WebTestCase {
   function testMenuTools(){
     $this->assertTrue($this->get('http://osrb-1.fc.hp.com/~markd/ui-md/'));
     //$this->assertAuthentication('Basic');
-    //$this->authenticate('fossology', 'OeyiW5go');
+    //$this->authenticate('fossology', 'xxxxxxx');
     $this->assertText('Software Repository');
 
     $this->click('Tools');

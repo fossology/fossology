@@ -42,6 +42,26 @@ class agent_license extends FO_Plugin
     menu_insert("Agents::" . $this->Title,0,$this->Name);
     }
 
+
+  /***********************************************************
+   Install(): Create and configure database tables
+   ***********************************************************/
+   function Install()
+   {
+     global $DB;
+     if (empty($DB)) { return(1); } /* No DB */
+
+     /* Make sure agent_lic_meta_pk exists  
+        Use a sequence as the default values.
+      */
+     if (!$DB->ColExist("agent_lic_meta", "agent_lic_meta_pk"))
+     {
+         $DB->Action( "ALTER TABLE agent_lic_meta ADD COLUMN agent_lic_meta_pk serial PRIMARY KEY");
+     }
+
+     return(0);
+   } // Install()
+
   /*********************************************
    AgentCheck(): Check if the job is already in the
    queue.  Returns:
@@ -142,13 +162,13 @@ class agent_license extends FO_Plugin
 	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A,
 	pfile_size as Size
 	INTO $TempTable
-	FROM uploadtree
-	INNER JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk
-	  AND upload_fk = '$uploadpk'
-	  AND ufile.pfile_fk IS NOT NULL
-	  AND (ufile.ufile_mode & (1<<29)) = 0
-	INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk
+	FROM uploadtree,pfile
+    WHERE upload_fk = '$uploadpk'
+	  AND pfile_fk IS NOT NULL
+	  AND (ufile_mode & (1<<29)) = 0
+      AND pfile_fk = pfile_pk
 	ORDER BY Size DESC;";
+
     /** sqlagent does not like newlines! **/
     $jqargs = str_replace("\n"," ",$jqargs);
     $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",$Dep);
@@ -176,7 +196,18 @@ class agent_license extends FO_Plugin
 	ORDER BY Size DESC
 	LIMIT 5000;";
     $jobqueuepk = JobQueueAdd($jobpk,"license",$jqargs,"yes","a",array($jobqueuepk));
-    if (empty($jobqueuepk)) { return("Failed to insert filter_license into job queue"); }
+    if (empty($jobqueuepk)) { return("Failed to insert license into job queue"); }
+
+    /* Add job: job "license" has jobqueue item "licinspect" */
+    /** jqargs = all pfiles NOT processed and WITH tokens in repository **/
+    $jqargs = "SELECT DISTINCT(Akey),A,Size
+	FROM $TempTable
+	INNER JOIN agent_lic_status ON agent_lic_status.pfile_fk = Akey
+	WHERE agent_lic_status.inspect_name IS NOT TRUE
+	ORDER BY Size DESC
+	LIMIT 5000;";
+    $jobqueuepk = JobQueueAdd($jobpk,"licinspect",$jqargs,"yes","a",array($jobqueuepk));
+    if (empty($jobqueuepk)) { return("Failed to insert licinspect into job queue"); }
 
     /* Add job: job "license" has jobqueue item "filter_clean" */
     /** jqargs = all pfiles with tokens in the repository **/
@@ -185,6 +216,7 @@ class agent_license extends FO_Plugin
 	INNER JOIN agent_lic_status ON agent_lic_status.pfile_fk = Akey
 	WHERE agent_lic_status.inrepository IS TRUE
 	AND agent_lic_status.processed IS TRUE
+	AND agent_lic_status.inspect_name IS TRUE
 	ORDER BY Size DESC
 	LIMIT 5000;";
     $jobqueuepk = JobQueueAdd($jobpk,"filter_clean",$jqargs,"yes","a",array($jobqueuepk));
@@ -219,15 +251,11 @@ class agent_license extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Analysis added to job queue')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert('Analysis added to job queue');
 	    }
 	  else
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Scheduling failed: $rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert("Scheduling failed: $rc");
 	    }
 	  }
 

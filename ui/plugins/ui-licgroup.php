@@ -407,7 +407,7 @@ class licgroup extends FO_Plugin
 	{
 	$V .= "<td width='10%' align='center'><a href='";
 	$V .= Traceback_uri();
-	$V .= "?mod=search_file_by_license&item=$Item&lic=1'>Show</a></td>";
+	$V .= "?mod=search_file_by_license&item=$Item&lic=Phrase'>Show</a></td>";
 	}
       }
     else if ($this->SFbLG >= 0)
@@ -518,9 +518,10 @@ class licgroup extends FO_Plugin
     global $Plugins;
     global $DB;
     $Time = time();
-    $Lics = array(); // license summary for an item in the directory
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
-    
+    $MapLic2GID = array(); /* every license should have an ID number */
+    $MapNext=0;
+
     /****************************************/
     /* Load licenses */
     $LicPk2GID=array();  // map lic_pk to the group id: lic_id
@@ -550,8 +551,8 @@ class licgroup extends FO_Plugin
 
       /* Load licenses for the item */
       $Lics = array();
-      if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics); }
-      else { LicenseGet($C['pfile_fk'],$Lics); }
+      if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics,1); }
+      else { LicenseGet($C['pfile_fk'],$Lics,1); }
 
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
@@ -574,36 +575,40 @@ class licgroup extends FO_Plugin
 	$LicUri = NULL;
 	}
 
+      /* Ensure every license name has an ID number */
+      foreach($Lics as $Key => $Val)
+        {
+	if (empty($MapLic2GID[$Key])) { $MapLic2GID[$Key] = $MapNext++; }
+	}
+
       /* Save the license results (also converts values to GID) */
       $GrpList=array();
+      $LicCount=0;
       foreach($Lics as $Key => $Val)
 	{
-	if (empty($Key)) { continue; }
-	if (is_int($Key))
-		{
-		$GID = $LicPk2GID[$Key];
-		/* Find every license group that includes the license */
-		$FoundGroup=0;
-		foreach($this->GrpInGroup as $G => $g)
-		  {
-		  if (!empty($this->GrpInGroup[$G]['l'.$GID]))
-		    {
-		    $this->GrpInGroup[$G]['count']+=$Val;
-		    $GrpList[$G]=1;
-		    $FoundGroup=1;
-		    }
-		  }
-		if (!$FoundGroup)
-		    {
-		    $this->GrpInGroup['Gnone']['count']+=$Val;
-		    $GrpList['Gnone']=1;
-		    }
-		}
-	else { $GID = $Key; }
+	if (!is_int($Key)) { continue; }
+	if (empty($Val['lic_pk'])) { $GID = $LicPk2GID[$Val['lic_id']]; }
+	else { $GID = $LicPk2GID[$Val['lic_pk']]; }
+	/* Find every license group that includes the license */
+	$FoundGroup=0;
+	foreach($this->GrpInGroup as $G => $g)
+	  {
+	  if (!empty($this->GrpInGroup[$G]['l'.$GID]))
+	    {
+	    $this->GrpInGroup[$G]['count']++;
+	    $GrpList[$G]=1;
+	    $FoundGroup=1;
+	    }
+	  }
+	if (!$FoundGroup)
+	    {
+	    $this->GrpInGroup['Gnone']['count']++;
+	    $GrpList['Gnone']=1;
+	    }
+        $LicCount++;
 	}
 
       /* Populate the output ($VF) */
-      $LicCount = $Lics['Total'];
       $VF .= '<tr>';
       $VF .= "<td id='LicItem i$ChildCount";
       foreach($GrpList as $G => $g) { $VF .= " $G"; }
@@ -668,12 +673,18 @@ class licgroup extends FO_Plugin
     if ($this->GrpInGroup['Gnone']['count'] > 0)
       {
       $VH .= "<table border='1' width='100%'>";
-      $VH .= "<tr><td width='10%' align='right'>";
+      $VH .= "<tr><td width='15%' align='right'>";
       $VH .= number_format($this->GrpInGroup['Gnone']['count'],0,"",",");
       $VH .= "</td>";
-      $VH .= "<td width='10%'></td>";
-      $VH .= "<td width='1%'><font color='white'>+</font></td>";
-      $VH .= "<td id='LicGroup Gnone '>";
+      $VH .= "<td width='10%' align='center'>";
+      $VH .= "<a href='" . Traceback_uri();
+      $VH .= "?mod=search_file_by_licgroup&item=$Item&licgroup=-1'>";
+      $VH .= "<font style='text-shadow: black 0px 0px 5px;'>";
+      $VH .= "Show";
+      $VH .= "</a>";
+      $VH .= "</td>";
+      $VH .= "<td width='1%' style='border-right:none;'><font color='white'>+</font></td>";
+      $VH .= "<td id='LicGroup Gnone ' style='border-left:none;'>";
       $VH .= "<a href=\"javascript:LicColor('LicGroup','Gnone','LicItem','Gnone','yellow')\">";
       $VH .= "License not part of any group";
       $VH .= "</a>";

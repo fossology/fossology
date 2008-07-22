@@ -59,6 +59,43 @@ class ui_license extends FO_Plugin
     } // RegisterMenus()
 
   /***********************************************************
+   SortName(): Given two elements sort them by name.
+   Used for sorting the histogram.
+   ***********************************************************/
+  function SortName ($a,$b)
+    {
+    list($A0,$A1,$A2) = split("\|",$a,3);
+    list($B0,$B1,$B2) = split("\|",$b,3);
+    /* Sort by count */
+    if ($A0 < $B0) { return(1); }
+    if ($A0 > $B0) { return(-1); }
+    /* Same count? sort by root name.
+       Same root? place real before style before partial. */
+    $A0 = str_replace('-partial$',"",$A1);
+    if ($A0 != $A1) { $A1 = '-partial'; }
+    else
+      {
+      $A0 = str_replace('-style',"",$A1);
+      if ($A0 != $A1) { $A1 = '-style'; }
+      else { $A1=''; }
+      }
+    $B0 = str_replace('-partial$',"",$B1);
+    if ($B0 != $B1) { $B1 = '-partial'; }
+    else
+      {
+      $B0 = str_replace('-style',"",$B1);
+      if ($B0 != $B1) { $B1 = '-style'; }
+      else { $B1=''; }
+      }
+    if ($A0 != $B0) { return(strcmp($A0,$B0)); }
+    if ($A1 == "") { return(-1); }
+    if ($B1 == "") { return(1); }
+    if ($A1 == "-partial") { return(-1); }
+    if ($B1 == "-partial") { return(1); }
+    return(strcmp($A1,$B1));
+    } // SortName()
+
+  /***********************************************************
    ShowUploadHist(): Given an Upload and UploadtreePk item, display:
    (1) The histogram for the directory BY LICENSE.
    (2) The file listing for the directory, with license navigation.
@@ -83,34 +120,20 @@ class ui_license extends FO_Plugin
     $Lics = array(); // license summary for an item in the directory
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
 
-    /****************************************/
-    /* Load licenses */
-    $LicPk2GID=array();  // map lic_pk to the group id: lic_id
-    $LicGID2Name=array(); // map lic_id to name.
-    $Results = $DB->Action("SELECT lic_pk,lic_id,lic_name FROM agent_lic_raw ORDER BY lic_name;");
-    foreach($Results as $Key => $R)
-      {
-      if (empty($R['lic_name'])) { continue; }
-      $Name = basename($R['lic_name']);
-      $GID = $R['lic_id'];
-      $LicGID2Name[$GID] = $Name;
-      $LicPk2GID[$R['lic_pk']] = $GID;
-      }
-    if (empty($LicGID2Name[1])) { $LicGID2Name[1] = 'Phrase'; }
-    if (empty($LicPk2GID[1])) { $LicPk2GID[1] = 1; }
-
     /* Arrays for storying item->license and license->item mappings */
     $LicGID2Item = array();
     $LicItem2GID = array();
+    $MapLic2GID = array(); /* every license should have an ID number */
+    $MapNext=0;
 
     /****************************************/
     /* Get the items under this UploadtreePk */
     $Children = DirGetList($Upload,$Item);
     $ChildCount=0;
     $VF .= "<table border=0>";
-    $LicsTotal = array();
     foreach($Children as $C)
       {
+      if (empty($C)) { continue; }
       /* Store the item information */
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
@@ -119,6 +142,12 @@ class ui_license extends FO_Plugin
       $Lics = array();
       if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics); }
       else { LicenseGet($C['pfile_fk'],$Lics); }
+
+      /* Ensure that every license is associated with an ID */
+      foreach($Lics as $Key => $Val)
+        {
+	if (empty($MapLic2GID[$Key])) { $MapLic2GID[$Key] = $MapNext++; }
+	}
 
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
@@ -144,19 +173,19 @@ class ui_license extends FO_Plugin
       foreach($Lics as $Key => $Val)
 	{
 	if (empty($Key)) { continue; }
-	if (is_int($Key))
+	if ($Key != ' Total ')
 		{
-		$GID = $LicPk2GID[$Key];
+		$GID = $MapLic2GID[$Key];
 		$LicGID2Item[$GID] .= "$ChildCount ";
 		$LicItem2GID[$ChildCount] .= "$GID ";
 		}
 	else { $GID = $Key; }
-	if (empty($LicsTotal[$GID])) { $LicsTotal[$GID] = $Val; }
-	else { $LicsTotal[$GID] += $Val; }
+	if (empty($LicsTotal[$Key])) { $LicsTotal[$Key] = $Val; }
+	else { $LicsTotal[$Key] += $Val; }
 	}
 
       /* Populate the output ($VF) */
-      $LicCount = $Lics['Total'];
+      $LicCount = $Lics[' Total '];
       $VF .= '<tr><td id="Lic-' . $ChildCount . '" align="left">';
       if ($LicCount > 0)
 	{
@@ -203,28 +232,51 @@ class ui_license extends FO_Plugin
     $VH .= "<tr><th width='10%'>Count</th>";
     if ($SFbL >= 0) { $VH .= "<th width='10%'>Files</th>"; }
     $VH .= "<th>License</th>\n";
+
+    /* krsort + arsort = consistent sorting order */
     arsort($LicsTotal);
+    /* Redo the sorting */
+    $SortOrder=array();
     foreach($LicsTotal as $Key => $Val)
       {
-      if (is_int($Key))
+      if (empty($Val)) { continue; }
+      $SortOrder[] = $Val . "|" . str_replace("'","",$Key) . "|" . $Key;
+      }
+    usort($SortOrder,array($this,"SortName"));
+    $LicsTotal = array();
+    foreach($SortOrder as $Key => $Val)
+      {
+      if (empty($Val)) { continue; }
+      list($x,$y,$z) = split("\|",$Val,3);
+      $LicsTotal[$z]=$x;
+      }
+
+    $Total=0;
+    foreach($LicsTotal as $Key => $Val)
+      {
+      if ($Key != ' Total ')
 	{
+	$GID = $MapLic2GID[$Key];
 	$VH .= "<tr><td align='right'>$Val</td>";
+	$Total += $Val;
 	if ($SFbL >= 0)
 	  {
 	  $VH .= "<td align='center'><a href='";
 	  $VH .= Traceback_uri();
-	  $VH .= "?mod=search_file_by_license&item=$Item&lic=$Key'>Show</a></td>";
+	  $VH .= "?mod=search_file_by_license&item=$Item&lic=" . urlencode($Key) . "'>Show</a></td>";
 	  }
-	$VH .= "<td id='LicGroup-$Key'>";
-	$Uri = Traceback_uri() . "?mod=license_listing&item=$Item&lic=$Key";
-	$VH .= "<a href=\"javascript:LicColor('LicGroup-$Key','Lic-','" . trim($LicGID2Item[$Key]) . "','yellow'); ";
+	$VH .= "<td id='LicGroup-$GID'>";
+	$Uri = Traceback_uri() . "?mod=license_listing&item=$Item&lic=$GID";
+	$VH .= "<a href=\"javascript:LicColor('LicGroup-$GID','Lic-','" . trim($LicGID2Item[$GID]) . "','yellow'); ";
 	$VH .= "\">";
-	$VH .= $LicGID2Name[$Key];
+	$VH .= htmlentities($Key);
 	$VH .= "</a>";
 	$VH .= "</td></tr>\n";
 	}
       }
     $VH .= "</table>\n";
+    $VH .= "<br>\n";
+    $VH .= "Total licenses: $Total\n";
 
     /****************************************/
     /* Licenses use Javascript to highlight */

@@ -96,10 +96,9 @@ class agent_mimetype extends FO_Plugin
     /* Add job: job "Default Meta Agents" has jobqueue item "mimetype" */
     $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,
 	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
-	FROM uploadtree
-	INNER JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk
-	INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk
-	WHERE pfile_mimetypefk is NULL AND upload_fk = '$uploadpk'
+	FROM uploadtree,pfile
+	WHERE uploadtree.pfile_fk = pfile.pfile_pk
+	   AND pfile_mimetypefk is NULL AND upload_fk = '$uploadpk'
 	LIMIT 5000;";
     $jobqueuepk = JobQueueAdd($jobpk,"mimetype",$jqargs,"yes","a",$Dep);
     if (empty($jobqueuepk)) { return("Failed to insert mimetype into job queue"); }
@@ -127,15 +126,11 @@ class agent_mimetype extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Analysis added to job queue')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert('Analysis added to job queue');
 	    }
 	  else
 	    {
-	    $V .= "<script language='javascript'>\n";
-	    $V .= "alert('Scheduling failed: $rc')\n";
-	    $V .= "</script>\n";
+	    $V .= PopupAlert("Scheduling failed: $rc");
 	    }
 	  }
 
