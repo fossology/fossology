@@ -1,30 +1,31 @@
-# FOSSology Makefile - agents/foss_license_agent/licinspect
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-TOP=../../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
-include $(VARS)
+# foss_license_agent Makefile
+# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+include ../../../Makefile.conf
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS)
+CC=gcc
+CFLAGS=-Wall -O2 $(CFLAGS2)
+#CFLAGS=-Wall -g $(CFLAGS2)
+#CFLAGS=-Wall -g -lefence $(CFLAGS2)
+#CFLAGS=-Wall -g -fstack-check $(CFLAGS2)
+#CFLAGS=-Wall -pg $(CFLAGS2)
 EXE=licinspect
+INC=-I../../../$(BUILDINC)
+LIB=-lpq -L../../../$(BUILDLIB) -lfossdb -lfossrepo
 
 all: $(EXE)
 
-$(EXE): %: %.c $(DB) $(REPO) $(VARS)
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+licinspect: licinspect.c
+	$(CC) $(CFLAGS) licinspect.c -o licinspect $(INC) $(LIB)
+
+InstallationCreate:
+	$(CP) licinspect ../../../install/$(AGENTDIR)
 
 install: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	$(CP) licinspect $(AGENTDIR)
 
 uninstall:
-	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
-
-test: all
-	@echo "*** No tests available for agents/$(EXE) ***"
+	$(RM) $(AGENTDIR)/licinspect
 
 clean:
-	rm -f $(EXE) *.o core
+	$(RM) *.o core $(EXE)
 
-include $(DEPS)
-
-.PHONY: all install uninstall clean test
