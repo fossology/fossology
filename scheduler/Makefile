@@ -5,12 +5,12 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CONFDEF=-DDEFAULTSETUP='"$(SYSCONFDIR)/scheduler.conf"'
+CONFDEF=-DBINDIR='"$(LIBEXECDIR)"' -DDEFAULTSETUP='"$(SYSCONFDIR)/scheduler.conf"'
 FODEF=-DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
 MSCDEF=-DDATADIR='"$(DATADIR)"' -DBINDIR='"$(LIBEXECDIR)"' -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"'
 
 # these objects need libfossdb
-OBJ=scheduler.o spawn.o sockets.o agents.o hosts.o debug.o dberror.o
+OBJ=scheduler.o spawn.o sockets.o agents.o hosts.o debug.o dberror.o selftest.o
 # these objects need libfossrepo as well
 REPOOBJ=dbstatus.o dbq.o
 
