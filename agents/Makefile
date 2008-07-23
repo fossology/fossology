@@ -3,7 +3,7 @@
 #
 
 # the directories we do things in by default
-DIRS = fosscp foss_license_agent Shell PkgMetaGetta ununpack wget_agent mimetype specagent sqlagent delagent
+DIRS = fosscp foss_license_agent Shell PkgMetaGetta ununpack wget_agent mimetype specagent sqlagent delagent adj2nest selftest
 # not in use: example_wc_agent reuseagent
 
 # create lists of targets for various operations
