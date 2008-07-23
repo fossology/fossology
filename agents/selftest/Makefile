@@ -1,32 +1,28 @@
-# FOSSology Makefile - agents/selftest
-# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-TOP=../..
-VARS=$(TOP)/Makefile.conf
-DEPS=$(TOP)/Makefile.deps
-include $(VARS)
+# Filter_license Makefile
+# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+include ../../Makefile.conf
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS)
-STDEF=-DBSAMLIC='"$(AGENTDATADIR)/License.bsam"' -DLICDIR='"$(AGENTDATADIR)/licenses"' -DAGENTDIR='"$(AGENTDIR)"'
-CKSRC=../ununpack/checksum.c ../ununpack/md5.c ../ununpack/sha1.c
+CC=gcc
+CFLAGS=-Wall -O2 $(CFLAGS2)
+#CFLAGS=-Wall -g -lefence $(CFLAGS2)
 EXE=selftest
+INC=-I../../$(BUILDINC) -I../ununpack
+LIB=-L../../$(BUILDLIB) -lfossrepo -lfossdb -lpq
 
 all: $(EXE)
 
-$(EXE): %: %.c $(CKSRC) $(CKSRC:%.c=%.h) $(DB) $(REPO) $(VARS)
-	$(CC) $< $(CKSRC)  $(STDEF) -I../ununpack $(CFLAGS_LOCAL) -o $@
+selftest: selftest.c
+	$(CC) $(CFLAGS) -DBSAMLIC='"$(AGENTDATADIR)/License.bsam"' -DLICDIR='"$(AGENTDATADIR)/licenses"' -DAGENTDIR='"$(AGENTDIR)"' $(INC) -o selftest selftest.c ../ununpack/checksum.c ../ununpack/md5.c ../ununpack/sha1.c $(LIB)
+
+InstallationCreate:
+	$(CP) selftest ../../install/$(AGENTDIR)
 
 install: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	$(CP) selftest $(AGENTDIR)
 
 uninstall:
-	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
-
-test: all
-	@echo "*** No tests available for agents/$(EXE) ***"
+	$(RM) $(AGENTDIR)/selftest
 
 clean:
-	rm -f $(EXE) *.o core
+	$(RM) *.o core $(EXE)
 
-include $(DEPS)
-
-.PHONY: all install uninstall clean test
