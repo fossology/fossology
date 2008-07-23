@@ -17,11 +17,11 @@ REPOOBJ=dbstatus.o dbq.o
 all: fossology-scheduler mkschedconf
 
 fossology-scheduler: $(OBJ) $(REPOOBJ) $(VARS)
-	$(CC) $(OBJ) $(REPOOBJ) $(FODEF) $(CFLAGS_DB) -lfossdb $(CFLAGS_REPO) \
-	-lfossrepo -lpq $(ALL_CFLAGS) -o $@
+	$(CC) $(OBJ) $(REPOOBJ) $(FODEF) $(CFLAGS_DB) $(CFLAGS_REPO) \
+	-lpq $(ALL_CFLAGS) -o $@
 
 mkschedconf: mkschedconf.c $(REPO) $(VARS)
-	$(CC) $< $(MSCDEF) $(CFLAGS_REPO) -lfossrepo $(ALL_CFLAGS) -o $@
+	$(CC) $< $(MSCDEF) $(CFLAGS_REPO) $(ALL_CFLAGS) -o $@
 
 
 # targets for our needed objects
