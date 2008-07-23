@@ -57,6 +57,9 @@ char *	RepGetRepPath	(); /* path to mounted repository */
 char *	RepGetHost	(char *Type, char *Filename);
 char *	RepMkPath	(char *Type, char *Filename);
 
+/* Not intended for external use */
+int	_RepMkDirs	(char *Filename);
+
 /* Sanity checks */
 int	RepExist	(char *Type, char *Filename);
 int	RepHostExist	(char *Type, char *Host);

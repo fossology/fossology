@@ -8,7 +8,7 @@ CFLAGS_LOCAL=-DFOSSREPO_CONF="$(DATADIR)/repository" \
 	-DFOSSGROUP="$(PROJECTGROUP)" -L. -lfossrepo $(ALL_CFLAGS)
 
 LIB=libfossrepo.a
-EXE=reppath repwrite repcat repexist repcopyin repremove rephost
+EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck
 
 all: $(LIB) $(EXE)
 
