@@ -6,7 +6,7 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 LIB=libcp2foss.h.php
-EXE=cp2foss.php p.sh fossinit.php fossjobs.php fosslic.php
+EXE=cp2foss.php fossinit.php fossjobs.php fosslic.php
 DOCS=cp2foss.pod fossjobs.pod
 MAN1FILES=$(DOCS:%.pod=%.1)
 HTMLFILES=$(DOCS:%.pod=%.html)
@@ -29,7 +29,7 @@ docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 
 install: all
 	for file in $(EXE); do \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(BINDIR)/$$file; \
+		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(BINDIR)/$${file%.php}; \
 	done
 
 	$(INSTALL_DATA) $(LIB) $(DESTDIR)$(LIBDIR)/$(LIB)
