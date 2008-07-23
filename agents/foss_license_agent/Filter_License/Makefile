@@ -13,7 +13,7 @@ FLSRC=Filter_License.c 1sl.c wordcheck.c tokholder.c ../../ununpack/checksum.c .
 all: $(EXE)
 
 Filter_License: $(FLSRC) $(FLSRC:%.c=%.h) $(DB) $(REPO) $(VARS)
-	$(CC) $(FLSRC) $(CFLAGS_LOCAL) -I../.. -o $@
+	$(CC) $(FLSRC) -I../../ununpack $(CFLAGS_LOCAL) -o $@
 
 filter_clean: %: %.c $(DB) $(REPO)
 	$(CC) $< $(CFLAGS_LOCAL) -o $@

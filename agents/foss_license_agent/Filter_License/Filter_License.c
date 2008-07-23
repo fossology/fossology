@@ -34,7 +34,7 @@
 #include "tokholder.h"
 #include "1sl.h"
 #include "wordcheck.h"
-#include "../../ununpack/checksum.h"
+#include "checksum.h"
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
