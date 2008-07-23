@@ -190,7 +190,7 @@ function JobQueueAddDependency($JobQueueChild, $JobQueueParent)
  * @param string $job_name   the name to associate with the job
  * @param string $filename   the path the to file to upload
  * @param string $desc       A meaningful description
- * @param int    $UploadMode e.g. 1<<2, 1<<3
+ * @param int    $UploadMode e.g. 1<<2 = URL, 1<<3 = file upload, 1<<4 = filesystem
  * @param int    $FolderPk   The folder primary key
  * 
  * @return upload_pk the upload primary key or null (failure)

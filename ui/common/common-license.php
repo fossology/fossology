@@ -25,32 +25,225 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 /************************************************************
+ Developer notes:
+
+ The confidence is a number used to identify how good the template is.
+ Values are:
+   NULL (not present) = use the template's name.
+   0 = high confidence. Use the template's name.  (Ignore canonical.)
+   1 = medium confidence. Most of the template matched.  Call it 'style'.
+   2 = low confidence. Part of the template matched.  Call it 'partial'.
+   3 = no confidence. The canonical identifier must be present and
+       will be used.
+
+ The canonical is the canonical name (licterm_pk from licterm).
+ When the confidence is 3, the canonical name will be used.
+ ************************************************************/
+
+/************************************************************
+ LicenseNormalizeName(): Given a name, remove all of the
+ extraneous text.
+ ************************************************************/
+function LicenseNormalizeName	($LicName,$Confidence,$CanonicalName)
+{
+  /* Find the right name to use */
+  $Name = '';
+  if ($Confidence >= 3) { $Name = $CanonicalName; }
+  else
+    {
+    if (!empty($CanonicalName)) { $Name = $CanonicalName; }
+    else
+      {
+      $Name = $LicName;
+      $Name = preg_replace("@.*/@","",$Name);
+      $Name = preg_replace("/ part.*/","",$Name);
+      $Name = preg_replace("/ short.*/","",$Name);
+      $Name = preg_replace("/ variant.*/","",$Name);
+      $Name = preg_replace("/ reference.*/","",$Name);
+      $Name = preg_replace("/ \(.*/","",$Name);
+      }
+    if ($Confidence == 1) { $Name = "'$Name'-style"; }
+    else if ($Confidence == 2) { $Name = "'$Name'-partial"; }
+    }
+  return($Name);
+} // LicenseNormalizeName()
+
+/************************************************************
+ LicenseGetName(): Given a meta id (agent_lic_meta_pk), return
+ the license name.
+ ************************************************************/
+$LicenceGetName_Prepared=0;
+function LicenseGetName(&$MetaId, $IncludePhrase=0)
+{
+  global $DB;
+  global $LicenceGetName_Prepared;
+  if (!$LicenceGetName_Prepared)
+    {
+    $DB->Prepare("LicenseGetName_Raw1",'SELECT licterm.licterm_name,lic_name,phrase_text,lic_id
+	FROM agent_lic_raw
+	INNER JOIN agent_lic_meta ON agent_lic_meta_pk = $1
+	AND lic_fk = lic_pk
+	INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
+        INNER JOIN licterm ON licterm_fk = licterm_pk
+	;');
+
+    $DB->Prepare("LicenseGetName_Raw2",'SELECT lic_name,phrase_text,lic_id
+	FROM agent_lic_raw
+	INNER JOIN agent_lic_meta ON agent_lic_meta_pk = $1
+	AND lic_fk = lic_pk
+	;');
+
+    $DB->Prepare("LicenseGetName_CanonicalName",'SELECT licterm_name_confidence,licterm_name
+	FROM licterm
+	INNER JOIN licterm_name ON agent_lic_meta_fk = $1
+	AND licterm_fk = licterm_pk
+	UNION
+	SELECT licterm_name_confidence,' . "''" . '
+	FROM licterm_name
+	WHERE agent_lic_meta_fk = $1 AND licterm_fk IS NULL
+	;');
+    $LicenceGetName_Prepared=1;
+    }
+
+  $FullName='';
+  $CanonicalList =  $DB->Execute("LicenseGetName_CanonicalName",array($MetaId));
+  $RawList =  $DB->Execute("LicenseGetName_Raw1",array($MetaId));
+  if (empty($RawList)) { $RawList =  $DB->Execute("LicenseGetName_Raw2",array($MetaId)); }
+
+  $LastConfidence = $CanonicalList[0]['licterm_name_confidence'];
+  $Phrase = $RawList[0]['phrase_text'];
+  $Name = $RawList[0]['licterm_name'];
+  if (empty($Name)) { $Name = $RawList[0]['lic_name']; }
+  foreach($CanonicalList as $C)
+    {
+    if (empty($C)) { continue; }
+    /* Get the components */
+    $Confidence = $C['licterm_name_confidence'];
+    $LicTerm = $C['licterm_name'];
+
+    /* Normalize the name */
+    $Name = LicenseNormalizeName($Name,$Confidence,$LicTerm);
+
+    if (!empty($Phrase) && ($Confidence < 3))
+      {
+      $Name = "Phrase";
+      if ($IncludePhrase) { $Name .= ": $Phrase"; }
+      }
+
+    /* Store it */
+    if (!empty($FullName))
+	{
+	if (empty($LastConfidence) || ($LastConfidence < 3) && ($Confidence >= 3) ) { $FullName .= " + "; }
+	else { $FullName .= ", "; }
+	}
+    $FullName .= $Name;
+    $LastConfidence = $Confidence;
+    }
+
+  if (empty($FullName))
+    {
+    $Name = LicenseNormalizeName($RawList[0]['lic_name'],0,"");
+    if (!empty($Phrase))
+      {
+      $Name = "Phrase";
+      if ($IncludePhrase) { $Name .= ": $Phrase"; }
+      }
+    $FullName .= $Name;
+    }
+
+  return($FullName);
+} // LicenseGetName()
+
+/************************************************************
  LicenseGet(): Return licenses for a pfile.
- Can return empty array if there is no license.
+ May return empty array if there is no license.
  ************************************************************/
 $LicenseGet_Prepared=0;
-function LicenseGet(&$PfilePk, &$Lics)
+function LicenseGet(&$PfilePk, &$Lics, $GetField=0)
 {
   global $LicenseGet_Prepared;
   global $DB;
   if (empty($DB)) { return; }
   if (!$LicenseGet_Prepared)
     {
-    $DB->Prepare("LicenseGet",'SELECT lic_fk FROM agent_lic_meta WHERE pfile_fk = $1;');
+    $DB->Prepare("LicenseGet_Raw1",'SELECT licterm.licterm_name,lic_id,phrase_text,agent_lic_meta_pk
+	FROM agent_lic_meta
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk AND pfile_fk = $1
+	INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
+        INNER JOIN licterm ON licterm_fk = licterm_pk
+	;');
+    $DB->Prepare("LicenseGet_Raw2",'SELECT lic_name as licterm_name,lic_id,phrase_text,agent_lic_meta_pk
+	FROM agent_lic_meta
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk AND pfile_fk = $1
+	;');
+    $DB->Prepare("LicenseGet_Canonical",'SELECT licterm.licterm_name,licterm_name_confidence,lic_name,phrase_text,lic_id,agent_lic_meta_pk
+	FROM agent_lic_meta
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk AND pfile_fk = $1
+	INNER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk
+	INNER JOIN licterm ON licterm_fk = licterm_pk
+	UNION
+	SELECT '."''".',licterm_name_confidence,lic_name,phrase_text,lic_id,agent_lic_meta_pk
+	FROM agent_lic_meta
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk AND pfile_fk = $1
+	INNER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk
+	AND licterm_fk IS NULL
+	;');
     $LicenseGet_Prepared=1;
     }
-  $Results = $DB->Execute("LicenseGet",array($PfilePk));
-  if (empty($Lics['Total'])) { $Lics['Total']=0; }
-  foreach($Results as $R)
-	{
-	$LicFk = $R['lic_fk'];
-	if (!empty($LicFk))
+  if (empty($Lics[' Total '])) { $Lics[' Total ']=0; }
+
+  /* Prepare map */
+  $Results = $DB->Action("SELECT * FROM licterm_maplic
+	INNER JOIN licterm ON licterm_fk = licterm_pk
+	;");
+  $MapLic = array();
+  for($i=0; !empty($Results[$i]['licterm_maplic_pk']); $i++)
+    {
+    $MapLic[$Results[$i]['lic_fk']] = $Results[$i]['licterm_name'];
+    }
+
+  $CanonicalList =  $DB->Execute("LicenseGet_Canonical",array($PfilePk));
+  $RawList = $DB->Execute("LicenseGet_Raw1",array($PfilePk));
+  if (empty($RawList)) { $RawList = $DB->Execute("LicenseGet_Raw2",array($PfilePk)); }
+  $Results=array();
+  $PfileList=array(); /* used to omit duplicates */
+  foreach($CanonicalList as $R)
+    {
+    $PfileList[$R['agent_lic_meta_pk']] = 1;
+    $Results[] = $R;
+    }
+  foreach($RawList as $R)
+    {
+    $R['licterm_name'] = LicenseNormalizeName($R['licterm_name'],0,"");
+    if (empty($PfileList[$R['agent_lic_meta_pk']]))
+      {
+      $PfileList[$R['agent_lic_meta_pk']] = 1;
+      $Results[] = $R;
+      }
+    }
+
+  if (!empty($Results) && (count($Results) > 0))
+    {
+    /* Got canonical name */
+    foreach($Results as $Name)
+      {
+      $LicName="";
+      if ($Name['licterm_name_confidence'] == 3) { $LicName = $Name['licterm_name']; }
+      if (empty($LicName)) { $LicName = LicenseNormalizeName($Name['lic_name'],$Name['licterm_name_confidence'],$MapLic[$Name['lic_id']]); }
+      if (empty($LicName)) { $LicName = LicenseNormalizeName($Name['lic_name'],$Name['licterm_name_confidence'],$Name['licterm_name']); }
+
+      if (!empty($LicName))
+        {
+	if (!empty($GetField)) { $Lics[]=$Name; }
+	else
 	  {
-	  if (empty($Lics[$LicFk])) { $Lics[$LicFk]=1; }
-	  else { $Lics[$LicFk]++; }
-	  $Lics['Total']++;
+	  if (empty($Lics[$LicName])) { $Lics[$LicName]=1; }
+	  else { $Lics[$LicName]++; }
+	  $Lics[' Total ']++;
 	  }
 	}
+      }
+    }
   return;
 } // LicenseGet()
 
@@ -61,44 +254,123 @@ function LicenseGet(&$PfilePk, &$Lics)
  NOTE: This is recursive!
  ************************************************************/
 $LicenseGetAll_Prepared=0;
-function LicenseGetAll(&$UploadtreePk, &$Lics)
+function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL)
 {
   global $Plugins;
   global $DB;
   if (empty($DB)) { return; }
   if (empty($UploadtreePk)) { return NULL; }
 
+  if (empty($Lics[' Total ']) && empty($GetField)) { $Lics[' Total ']=0; }
   global $LicenseGetAll_Prepared;
   if (!$LicenseGetAll_Prepared)
     {
-    $DB->Prepare("LicenseGetAll",'SELECT uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk FROM uploadtree INNER JOIN ufile ON ufile_fk = ufile_pk AND parent = $1 LEFT OUTER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk;');
+    $DB->Prepare("LicenseGetAll_Traverse",'SELECT uploadtree_pk,ufile_mode FROM uploadtree WHERE parent = $1;');
+
+    $DB->Prepare("LicenseGetAll_Raw1",'SELECT licterm.licterm_name,lic_name,lic_id,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
+	FROM uploadtree
+	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
+	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = lic_pk
+	INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
+	INNER JOIN licterm ON licterm_fk = licterm_pk
+	;');
+
+    $DB->Prepare("LicenseGetAll_Raw2",'SELECT lic_name,lic_id,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
+	FROM uploadtree
+	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
+	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = lic_pk
+	;');
+
+    $DB->Prepare("LicenseGetAll_Canonical",'SELECT uploadtree.pfile_fk AS pfile,ufile.ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name,lic_pk,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
+	FROM uploadtree
+	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
+	INNER JOIN ufile ON ufile_fk = ufile_pk
+	INNER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk
+	INNER JOIN licterm ON licterm_pk = licterm_fk
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
+	UNION
+	SELECT uploadtree.pfile_fk AS pfile,ufile.ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name_confidence,'."''".',lic_pk,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
+	FROM uploadtree
+	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
+	INNER JOIN ufile ON ufile_fk = ufile_pk
+	INNER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk
+	AND licterm_fk IS NULL
+	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
+	;');
+
     $LicenseGetAll_Prepared = 1;
     }
-  /* Find every item under this UploadtreePk... */
-  $Results = $DB->Execute("LicenseGetAll",array($UploadtreePk));
+
+  /* Prepare map */
+  $Results = $DB->Action("SELECT * FROM licterm_maplic
+	INNER JOIN licterm ON licterm_fk = licterm_pk
+	;");
+  $MapLic = array();
+  for($i=0; !empty($Results[$i]['licterm_maplic_pk']); $i++)
+    {
+    $MapLic[$Results[$i]['lic_fk']] = $Results[$i]['licterm_name'];
+    }
+
+  /* Get every license */
+  $RawList = $DB->Execute("LicenseGetAll_Raw1",array($UploadtreePk));
+  if (empty($RawList)) { $RawList = $DB->Execute("LicenseGetAll_Raw2",array($UploadtreePk)); }
+  $Results=array();
+  $PfileList=array(); /* used to omit duplicates */
+  $CanonicalList =  $DB->Execute("LicenseGetAll_Canonical",array($UploadtreePk));
+  foreach($CanonicalList as $R)
+    {
+    $PfileList[$R['agent_lic_meta_pk']] = 1;
+    $Results[] = $R;
+    }
+  foreach($RawList as $R)
+    {
+    if (empty($PfileList[$R['agent_lic_meta_pk']]))
+      {
+      $PfileList[$R['agent_lic_meta_pk']] = 1;
+      $Results[] = $R;
+      }
+    }
+
   if (!empty($Results) && (count($Results) > 0))
     {
-    foreach($Results as $R)
+    /* Got canonical name */
+    foreach($Results as $Name)
       {
-      $LicFk = $R['lic_fk'];
-      if (!empty($LicFk))
-	{
-	if (empty($Lics[$LicFk])) { $Lics[$LicFk]=1; }
-	else { $Lics[$LicFk]++; }
-	$Lics['Total']++;
-	}
-      if (Iscontainer($R['ufile_mode']))
-	{
-	LicenseGetAll($R['uploadtree_pk'],$Lics);
+      /* Get the license name */
+      $LicName="";
+      if ($Name['licterm_name_confidence'] == 3) { $LicName = $Name['licterm_name']; }
+      if (empty($LicName)) { $LicName = LicenseNormalizeName($Name['lic_name'],$Name['licterm_name_confidence'],$MapLic[$Name['lic_pk']]); }
+      if (empty($LicName)) { $LicName = LicenseNormalizeName($Name['lic_name'],$Name['licterm_name_confidence'],$Name['licterm_name']); }
+      if (!empty($WantLic) && ($LicName != $WantLic)) { $LicName = ""; }
+
+      if (!empty($LicName))
+        {
+	if (!empty($GetField)) { $Lics[]=$Name; }
+	else
+	  {
+	  if (empty($Lics[$LicName])) { $Lics[$LicName]=1; }
+	  else { $Lics[$LicName]++; }
+	  $Lics[' Total ']++;
+	  }
 	}
       }
+    }
+
+  /* Recurse */
+  $Results = $DB->Execute("LicenseGetAll_Traverse",array($UploadtreePk));
+  for($i=0; !empty($Results[$i]['uploadtree_pk']); $i++)
+    {
+    if (Iscontainer($Results[$i]['ufile_mode']))
+	{
+	LicenseGetAll($Results[$i]['uploadtree_pk'],$Lics,$GetField,$WantLic);
+	}
     }
   return;
 } // LicenseGetAll()
 
 /************************************************************
  LicenseGetAllFiles(): Returns all files under a tree that
- contain the same license.
+ contain the same license based on LICENSE GROUP.
  Returns NULL if no files.
  NOTE: This is recursive!
  NOTE: $WantLic can be a specific license ID (in which case, the
@@ -115,11 +387,11 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
 
   global $LicenseGetAllFiles_Prepared;
 
-  $PrepName = preg_replace("@[^a-zA-Z0-9]@","_",$WantLic);
+  $PrepName = sha1(preg_replace("@[^a-zA-Z0-9]@","_",$WantLic));
   if (empty($LicenseGetAllFiles_Prepared[$PrepName]))
     {
     /* SQL to get all files with a specific license */
-    $DB->Prepare("LicenseGetAllFiles_$PrepName","SELECT DISTINCT ufile_name,uploadtree_pk,ufile_mode,ufile.ufile_pk,ufile.pfile_fk,lic_fk,lic_id,tok_pfile,tok_license,tok_match,phrase_text
+    $DB->Prepare("LicenseGetAllFiles_$PrepName","SELECT DISTINCT ufile.ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,uploadtree.pfile_fk,lic_fk,lic_id,tok_pfile,tok_license,tok_match,phrase_text
 	FROM uploadtree
 	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = \$1
 	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk
@@ -153,7 +425,7 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
     $DB->Prepare("LicenseGetAllFiles__a0","SELECT uploadtree_pk
 	FROM uploadtree
 	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = \$1
-	AND ufile_mode & $Bit != 0
+	AND uploadtree.ufile_mode & $Bit != 0
 	ORDER BY ufile.ufile_pk
 	;");
     $LicenseGetAllFiles_Prepared["a0"] = 1;
@@ -167,31 +439,5 @@ function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
 	}
   return;
 } // LicenseGetAllFiles()
-
-/************************************************************
- LicenseHist(): Given an artifact directory (uploadtree_pk),
- return the license historgram.
- NOTE: This is recursive!
- ************************************************************/
-function LicenseHist($UploadtreePk)
-{
-  global $Plugins;
-  global $DB;
-  if (empty($DB)) { return; }
-
-} // LicenseHist()
-
-/************************************************************
- LicenseShowText(): Given a pfile, display the license contents.
- This writes to stdout!
- ************************************************************/
-function LicenseShowText($PfilePk, $Flow=1)
-{
-  global $Plugins;
-  global $DB;
-  if (empty($DB)) { return; }
-
-  return($Results);
-} // LicenseShowText()
 
 ?>
