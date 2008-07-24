@@ -18,18 +18,14 @@
  ***********************************************************/
 
 /**
- * Describe your PHP program or function here
- *
- * @param
- *
- * @return
+ * Test to check the Help/About menu item, make sure page loads
  *
  * @version "$Id: $"
  *
  * Created on Jul 21, 2008
  */
 
-require_once('../../../tests/fossologyWebTestCase.php');
+require_once('../../../../tests/fossologyWebTestCase.php');
 
 error_reporting(E_ALL);
 
