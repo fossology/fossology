@@ -102,7 +102,6 @@ class upload_srv_files extends FO_Plugin {
     $CMD .= " $SourceFiles";
     $jq_args = trim($CMD);
 
-print "CMD=$CMD<br>\n";
     /* Add the job to the queue */
     // create the job
     $ShortName = basename($Name);
@@ -116,11 +115,9 @@ print "CMD=$CMD<br>\n";
 	{
 	return("Failed to create job record");
 	}
-print "jobq=$jobq<br>\n";
     // put the job in the jobqueue
     $jq_type = 'fosscp_agent';
     $jobqueue_pk = JobQueueAdd($jobq, $jq_type, $jq_args, "no" ,NULL ,NULL, 0);
-print "jobqueue_pk=$jobqueue_pk<br>\n";
     if (empty($jobqueue_pk))
 	{
 	return("Failed to place fosscp_agent in job queue");
