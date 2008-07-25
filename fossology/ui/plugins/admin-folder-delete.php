@@ -109,6 +109,7 @@ class admin_folder_delete extends FO_Plugin
 	$V .= "</ul>\n";
         $V .= "<P>Select the folder to delete:  \n";
         $V .= "<select name='folder'>\n";
+	$V .= "<option value=''>[select folder]</option>\n";
         $V .= FolderListOption(-1,0);
         $V .= "</select><P />\n";
         $V .= "<input type='submit' value='Delete!'>\n";
