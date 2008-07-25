@@ -69,6 +69,7 @@ char *Pattern;
 int PatternLen=0;
 char *AgentName=NULL;
 int AgentNameLen=0;
+int Verbose=0;
 
 /**************************************************
  ShowHeartbeat(): Given an alarm signal, display a
@@ -424,6 +425,7 @@ void    Usage   (char *Name)
   printf("  command    :: the process to execute.\n");
   printf("Usage:  %s -i\n",Name);
   printf("  -i         :: initialize the database, then exit.\n");
+  printf("  -v         :: run verbosely for debugging.\n");
 } /* Usage() */
 
 
@@ -436,13 +438,16 @@ int	main	(int argc, char *argv[])
   int c;
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"i")) != -1)
+  while((c = getopt(argc,argv,"iv")) != -1)
     {
     switch(c)
         {
         case 'i':
 		/* nothing to initialize */
                 return(0);
+        case 'v':
+		Verbose++;
+		break;
         default:
                 Usage(argv[0]);
                 exit(-1);
@@ -473,6 +478,7 @@ int	main	(int argc, char *argv[])
 	rc = FillCmd(Parm);
 	if (!rc)
 	  {
+	  if (Verbose) printf("DEBUG: %s\n",Cmd);
 	  rc = system(Cmd);
 	  if (WIFSIGNALED(rc))
 	    {
