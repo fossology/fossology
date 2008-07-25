@@ -180,7 +180,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
   /** fosscp **/
   fprintf(Fout,"agent=fosscp_agent %s| ",CmdHost);
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,Rcmd,"%s/engine-shell fosscp_agent '%s/fosscp_agent'");
+  snprintf(Cmd,sizeof(Cmd)-1,Rcmd,"%s/engine-shell fosscp_agent '/usr/local/bin/cp2foss.php %{*}'");
   fprintf(Fout,Cmd,BINDIR,BINDIR);
   fprintf(Fout,"\n");
 
