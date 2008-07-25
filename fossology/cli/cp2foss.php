@@ -285,7 +285,7 @@ for($i=1; $i < $argc; $i++)
 	/* idiot check for absolute paths */
 	$FolderPath = preg_replace('@^/*@',"",$FolderPath);
 	$FolderPath = preg_replace('@/*$@',"",$FolderPath);
-	$FolderPath = preg_replace("@^Software Repository/@","",$FolderPath);
+	$FolderPath = preg_replace("@^System Repository/@","",$FolderPath);
 	$FolderPath = preg_replace('@//*@',"/",$FolderPath);
 	$FolderPath = '/' . $FolderPath;
 	break;
