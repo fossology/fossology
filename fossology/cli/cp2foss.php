@@ -105,8 +105,10 @@ function GetBucketFolder ($UploadName, $BucketGroupSize)
 {
   $Letters = "abcdefghijklmnopqrstuvwxyz";
   $Numbers = "0123456789";
+  if (empty($UploadName)) { return; }
   $Name = strtolower(substr($UploadName,0,1));
   /* See if I can find the bucket */
+  if (empty($BucketGroupSize) || ($BucketGroupSize < 1)) { $BucketGroupSize=3; }
   for($i=0; $i < 26; $i += $BucketGroupSize)
     {
     $Range = substr($Letters,$i,$BucketGroupSize);
@@ -209,16 +211,20 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription,$T
     exit(1);
     }
 
+  if (empty($UploadName)) { return; }
+
   /* Get the folder's primary key */
   global $OptionA; /* Should it use bucket names? */
   if ($OptionA)
     {
-    $FolderPk = GetFolder($FolderPath . "/" . GetBucketFolder($UploadName,$bucket_size));
+    global $bucket_size;
+    $FolderPath .= "/" . GetBucketFolder($UploadName,$bucket_size);
     }
-  else
-    {
-    $FolderPk = GetFolder($FolderPath);
-    }
+  $FolderPk = GetFolder($FolderPath);
+
+  print "  Uploading to folder: '$FolderPath'\n";
+  print "  Uploading as '$UploadName'\n";
+  if (!empty($UploadDescription)) { print "  Upload description: '$UploadDescription'\n"; }
 
   /* Create the upload for the file */
   if ($Verbose > 1) { print "JobAddUpload($UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk);\n"; }
@@ -330,10 +336,7 @@ for($i=1; $i < $argc; $i++)
 	  if (strlen($UploadArchive) > 0)
 	    {
 	    print "Loading $UploadArchive\n";
-	    print "  Uploading to folder: '$FolderPath'\n";
 	    if (empty($UploadName)) { $UploadName = basename($UploadArchive); }
-	    print "  Uploading as '$UploadName'\n";
-	    if (!empty($UploadDescription)) { print "  Upload description: '$UploadDescription'\n"; }
 	    UploadOne($FolderPath,$UploadArchive,$UploadName,$UploadDescription);
 	    /* prepare for next parameter */
 	    $UploadName="";
@@ -352,10 +355,7 @@ for($i=1; $i < $argc; $i++)
 	/* No break! No hyphen means it is a file! */
 	$UploadArchive = $argv[$i];
 	print "Loading $UploadArchive\n";
-	print "  Uploading to folder: '$FolderPath'\n";
 	if (empty($UploadName)) { $UploadName = basename($UploadArchive); }
-	print "  Uploading as '$UploadName'\n";
-	if (!empty($UploadDescription)) { print "  Upload description: '$UploadDescription'\n"; }
 	UploadOne($FolderPath,$UploadArchive,$UploadName,$UploadDescription);
 
 	/* prepare for next parameter */
