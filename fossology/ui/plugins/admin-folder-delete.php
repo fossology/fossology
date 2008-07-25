@@ -47,6 +47,11 @@ class admin_folder_delete extends FO_Plugin
    *********************************************/
   function Delete($folderpk,$Depends=NULL)
   {
+    /* Can't remove top folder */
+    if ($folderpk == FolderGetTop())
+    {
+      return("Can Not Delete Root Folder");
+    }
     /* Get the folder's name */
     $FolderName = FolderGetName($folderpk);
 
@@ -81,12 +86,16 @@ class admin_folder_delete extends FO_Plugin
 	  $rc = $this->Delete($folder);
 	  if (empty($rc))
 	    {
-	    /* Need to refresh the screen */
-	    $V .= PopupAlert('Deletion added to job queue');
+
+      $Folderprop = $DB->Action("SELECT * FROM folder where folder_pk = '$folder';");
+      $Folder = $Folderprop[0];
+      /* Need to refresh the screen */
+
+	    $R .= PopupAlert("Deletion of folder " . $Folder['folder_name'] . " added to job queue", NULL);
 	    }
 	  else
 	    {
-	    $V .= PopupAlert('Scheduling failed: $rc');
+	    $R .= PopupAlert("Scheduling failed: $rc", NULL);
 	    }
 	  }
 
@@ -103,6 +112,7 @@ class admin_folder_delete extends FO_Plugin
         $V .= FolderListOption(-1,0);
         $V .= "</select><P />\n";
         $V .= "<input type='submit' value='Delete!'>\n";
+        $V .= "$R\n";
         $V .= "</form>\n";
 	break;
       case "Text":
