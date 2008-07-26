@@ -45,8 +45,8 @@ require_once SIMPLE_TEST . 'mock_objects.php';
 require_once SIMPLE_TEST . 'web_tester.php';
 
 /* does the path need to be modified?, I don't recommend running the
- * .. copy of the program to test.  I think the test should
- * define/create it when doing setup.
+ * ../copy of the program to test.  I think the test should define/create
+ * it when doing setup.
  */
 
 /**
@@ -61,7 +61,9 @@ require_once SIMPLE_TEST . 'web_tester.php';
  */
 class fossologyUnitTestCase extends UnitTestCase
 {
-  /* Utility methods go here */
+  /* Utility methods go here NOTE fix the example below see extending
+   * on the web site
+   */
   function myassert($pattern, $space)
   {
     return TRUE;
@@ -70,23 +72,31 @@ class fossologyUnitTestCase extends UnitTestCase
   {
     if (is_resource($resource))
     {
-      return (TRUE);
-    } else
-    {
-      return (FALSE);
-    }
-  }
-  function CheckForResource($file_resource)
-  {
-    /* make sure we have a resource */
-    if ($answer = $this->assert_resource($file_resource))
-    {
-      return(TRUE);
+      $this->pass("Resource assertion passed\n");
     }
     else
     {
-      return(FALSE);
+      $this->fail();
     }
+  }
+  public function assert_Notresource($resource)
+  {
+    if (!is_resource($resource))
+    {
+      $this->pass("Not Resource assertion passed\n");
+    }
+    else
+    {
+      $this->fail();
+    }
+  }
+  public function repoLogin($user='fossy', $password='fossy')
+  {
+    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
+    $this->assertTrue($this->get('http://osrb-1.fc.hp.com/repo/'));
+    //$this->assertAuthentication('Basic');
+    $this->authenticate($user, $password);
+    //$this->assertText('Welcome to FOSSology');
   }
 }
 
