@@ -28,15 +28,22 @@
  * Created on Jul 21, 2008
  */
 
-require_once('../../../tests/fossologyWebTestCase.php');
+require_once('../../../../tests/fossologyWebTestCase.php');
 
 error_reporting(E_ALL);
 
 class TestRepoLogin extends fossologyWebTestCase{
 
   function testLogin(){
-    $this->repoLogin();
-    $this->assertText('Welcome to FOSSology');
+    print "login test starting\n";
+    $browser = & new SimpleBrowser();
+    $this->repoLogin($browser);
+    $page = $browser->getContent();
+    //print "************LOGIN: Page after Login is:************\n";
+    //$this->dump($page);
+    preg_match('/FOSSology/', $page, $matches);
+    //$this->dump($matches);
+    $this->assertTrue($matches);
   }
 }
 
