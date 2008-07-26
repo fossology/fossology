@@ -35,7 +35,7 @@ class TestAboutMenu extends fossologyWebTestCase
   function testMenuAbout()
   {
     print "starting testMenuAbout\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
+    //$this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     //$this->assertTrue($this->get('http://fluffy.ostt/repo/'));
     $this->assertTrue($this->get('http://osrb-1.fc.hp.com/repo/'));
     $this->assertText('Welcome to FOSSology');

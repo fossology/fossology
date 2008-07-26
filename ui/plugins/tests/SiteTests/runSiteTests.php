@@ -29,9 +29,11 @@ require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
 $test = &new TestSuite('Fossology Repo Site UI tests');
-$test->addTestFile('AboutMenuTest.php');
-$test->addTestFile('login.php');
-$test->addTestFile('SearchMunuTest.php');
+//$test->addTestFile('AboutMenuTest.php');
+//$test->addTestFile('login.php');
+//$test->addTestFile('SearchMenuTest.php');
+$test->addTestFile('OrgFoldersMenuTest.php');
+//$test->addTestFile('OrgFoldersMenuTest-sel.php');
 exit ($test->run(new TextReporter()) ? 0 : 1);
 
 
