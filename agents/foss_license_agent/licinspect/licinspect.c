@@ -332,11 +332,11 @@ void	GetTerms	()
  - Any space in the term string is treated as one or more "not alnum".
  NOTE: THIS IS RECURSIVE.
  *********************************************************/
-int	MatchTerm	(char *Term, char *Str, long StrLen)
+long	MatchTerm	(char *Term, char *Str, long StrLen)
 {
   long t,j=0;
   int Skip=0;
-  int rc;
+  long rc;
 
   for(t=0; Term[t]; t++)
     {
@@ -352,7 +352,10 @@ int	MatchTerm	(char *Term, char *Str, long StrLen)
       while(Str[j] && (Skip >= 0))
         {
 	rc = MatchTerm(Term+t,Str+j,StrLen-j);
-	if (rc) return(rc);
+	if (rc)
+	  {
+	  return(j+rc);
+	  }
 	/* missed, so skip one word in Str */
 	Skip--;
 	while(Str[j] && !isspace(Str[j])) j++;
@@ -381,7 +384,7 @@ int	MatchTerm	(char *Term, char *Str, long StrLen)
  is found at the beginning of Str.  This is used for cases
  where the bSAM match truncates the beginning of the term.
  The match MUST include outside of the beginning of the range.
- Returns length of match, or 0 on miss.
+ Returns 1 on match, or 0 on miss.
  - All comparisons are lowercase.
  - Any space in the term string is treated as one or more "not alnum".
  *********************************************************/
@@ -389,7 +392,8 @@ int	MatchTermRev	(char *Term, char *Str, long Start, long End)
 {
   long t,j;
   int TermLen;
-  int rc,c;
+  int rc;
+  int c;
   int Skip;
 
   /* start at the end of the string */
@@ -469,6 +473,14 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
     rc=0;
     for(t=0; !rc && (t<TermsCounterSize); t++)
       {
+      rc = MatchTerm(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap+i),Mmap->MmapSize-i);
+      if (rc > 0)
+	{
+	if (Verbose > 2) printf("Matched: Term='%s' rc=%d\n",DBgetvalue(DBTerms,t,1),rc);
+	i+=rc;
+	TermsCounter[t] |= Mask;
+	CheckRev=0;
+	}
       /* Check if the term is hanging off the front */
       if (CheckRev && MatchTermRev(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap),i,Mmap->MmapSize))
 	{
@@ -476,17 +488,6 @@ void	DiscoverTerms	(long Start, long End, RepMmapStruct *Mmap, int Mask)
 	i+=1;
 	TermsCounter[t] |= Mask;
 	CheckRev=0;
-	}
-      else
-	{
-	rc = MatchTerm(DBgetvalue(DBTerms,t,1),(char *)(Mmap->Mmap+i),Mmap->MmapSize-i);
-	if (rc > 0)
-	  {
-	  if (Verbose > 2) printf("Matched: Term='%s' rc=%d\n",DBgetvalue(DBTerms,t,1),rc);
-	  i+=rc;
-	  TermsCounter[t] |= Mask;
-	  CheckRev=0;
-	  }
 	}
       }
 
