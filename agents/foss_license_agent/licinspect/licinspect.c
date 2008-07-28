@@ -326,24 +326,48 @@ void	GetTerms	()
 /*********************************************************
  MatchTerm(): See if a term matches a string.
  - Str must point to the start of the match for Term.
+ - Term may contain "%num" to inducate number of items to skip.
  Returns length of match, or 0 on miss.
  - All comparisons are lowercase.
  - Any space in the term string is treated as one or more "not alnum".
+ NOTE: THIS IS RECURSIVE.
  *********************************************************/
 int	MatchTerm	(char *Term, char *Str, long StrLen)
 {
   long t,j=0;
+  int Skip=0;
+  int rc;
+
   for(t=0; Term[t]; t++)
     {
     if (j >= StrLen) return(0); /* miss: too short */
-    if (isspace(Term[t]))
+    if (Term[t]=='%')
       {
-      if (isalnum(Str[j])) return(0); /* miss */
+      Skip = atoi(Term+t+1);
+      t++; /* skip % */
+      while(isdigit(Term[t])) t++; /* skip numbers */
+      if (Term[t] != '%') return(0); /* missed */
+      t++; /* skip the percent */
+      while(isspace(Term[t])) t++; /* skip spaces */
+      while(Str[j] && (Skip >= 0))
+        {
+	rc = MatchTerm(Term+t,Str+j,StrLen-j);
+	if (rc) return(rc);
+	/* missed, so skip one word in Str */
+	Skip--;
+	while(Str[j] && !isspace(Str[j])) j++;
+	while(Str[j] && isspace(Str[j])) j++;
+	}
+      return(0);
+      }
+    else if (isspace(Term[t])) /* spaces should match spaces */
+      {
+      if (isalnum(Str[j])) { return(0); } /* miss */
       while((j<StrLen) && !isalnum(Str[j])) j++;
       }
     else
       {
-      if (tolower(Term[t]) != tolower(Str[j])) return(0); /* miss */
+      if (tolower(Term[t]) != tolower(Str[j])) { return(0); } /* miss */
       j++;
       }
     }
@@ -365,6 +389,9 @@ int	MatchTermRev	(char *Term, char *Str, long Start, long End)
 {
   long t,j;
   int TermLen;
+  int rc,c;
+  int Skip;
+
   /* start at the end of the string */
   TermLen = strlen(Term)-1;
   /* Move start so it begins at the END of the word */
@@ -378,7 +405,30 @@ int	MatchTermRev	(char *Term, char *Str, long Start, long End)
   for(t=TermLen; t>=0; t--)
     {
     if (j < 0) return(0); /* miss: too short */
-    if (isspace(Term[t]))
+    if (Term[t]=='%')
+      {
+      t--;
+      while((t>0) && isdigit(Term[t])) t--;
+      if (Term[t] != '%') return(0); /* missed */
+      Skip = atoi(Term+t+1);
+      t--; /* skip the percent */
+      while((t>=0) && isspace(Term[t])) t--; /* skip spaces */
+      if (t < 0) return(0);
+      t++;
+      c = Term[t]; Term[t]='\0';
+      while((j>=0) && (Skip >= 0))
+        {
+	rc = MatchTermRev(Term,Str,j,j);
+	if (rc) { Term[t]=c; return(rc); }
+	/* missed, so skip one word in Str */
+	Skip--;
+	while((j>=0) && !isspace(Str[j])) j--;
+	while((j>=0) && isspace(Str[j])) j--;
+	}
+      Term[t]=c;
+      return(0);
+      }
+    else if (isspace(Term[t]))
       {
       if (isalnum(Str[j])) return(0); /* miss */
       while((j>=0) && !isalnum(Str[j])) j--;
@@ -879,6 +929,8 @@ void	Usage	(char *Name)
   printf("    -t            :: Show individual terms\n");
   printf("    -M ##         :: penalty %% for missing terms in license text (default: %.0f)\n",ThresholdMissing);
   printf("  Manual options:\n");
+  printf("    -N needle     :: must use with -H\n");
+  printf("    -H haystack   :: command-line test: find term 'needle' in string 'haystack'\n");
   printf("    -X            :: command-line contains matched info (do not access DB)\n");
   printf("           The following command-line options are required (in order):\n");
   printf("           (These come from bsam-engine.)\n");
@@ -891,6 +943,9 @@ void	Usage	(char *Name)
   printf("             bpath :: byte path through the known file\n");
   printf("           For example:\n");
   printf("             -X myfile 'MPL/MPL v1.0' 12 14 15 1-12 1-3,4-13\n");
+  printf("  NOTE:\n");
+  printf("    The term to match (needle) can contain '%%num%%' as a wildcard.\n");
+  printf("    The number identifies the number of words in the target to skip.\n");
   printf("  Debugging options:\n");
   printf("    -i = Initialize the database, then exit.\n");
   printf("    -v = Verbose (-vv = more verbose, etc.)\n");
@@ -909,8 +964,10 @@ int	main	(int argc, char *argv[])
 {
   int c;
   int rc;
+  char *Needle=NULL;
+  char *Haystack=NULL;
 
-  while((c = getopt(argc,argv,"iM:S:s:tvX")) != -1)
+  while((c = getopt(argc,argv,"iH:M:N:S:s:tvX")) != -1)
     {
     switch(c)
       {
@@ -924,7 +981,9 @@ int	main	(int argc, char *argv[])
 	GetAgentKey();
 	DBclose(DB);
 	return(0);
+      case 'H':	Haystack = optarg; break;
       case 'M': ThresholdMissing = atof(optarg); break; /* missing penalty */
+      case 'N':	Needle = optarg; break;
       case 'S': ThresholdSame = atof(optarg); break; /* same */
       case 's': ThresholdSimilar = atof(optarg); break; /* similar */
       case 't':	ShowTerms=1;	break;
@@ -945,6 +1004,41 @@ int	main	(int argc, char *argv[])
 	exit(-1);
 	}
   GetTerms();
+
+  if (Needle && Haystack)
+    {
+    int h,rc=0;
+    printf("# Forward check: ");
+    h=0;
+    while(!rc && Haystack[h])
+      {
+      if (MatchTerm(Needle,Haystack+h,strlen(Haystack+h)))
+	{
+	printf("MATCH\n");
+	rc=1;
+	}
+      while(Haystack[h] && !isspace(Haystack[h])) h++;
+      while(Haystack[h] && isspace(Haystack[h])) h++;
+      }
+    if (!rc) printf("MISS\n");
+
+    printf("# Reverse check: ");
+    rc=0;
+    h=0;
+    while(!rc && Haystack[h])
+      {
+      if (MatchTermRev(Needle,Haystack,h,strlen(Haystack)))
+	{
+	printf("MATCH\n");
+	rc=1;
+	}
+      while(Haystack[h] && !isspace(Haystack[h])) h++;
+      while(Haystack[h] && isspace(Haystack[h])) h++;
+      }
+    if (!rc) printf("MISS\n");
+
+    return(0);
+    }
 
   if (IsExplicit)
     {
