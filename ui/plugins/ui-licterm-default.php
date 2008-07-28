@@ -120,7 +120,14 @@ class licterm_default extends FO_Plugin
         {
 	$Term = $Terms[$t]['licterm_words_text'];
         $Term = str_replace('"','\\"',$Term);
-	fwrite($Fout,'  $Term["' . $Name . '"]["Term"][' . $t . ']="' . $Term . '";' . "\n");
+	if ($t == 0)
+	  {
+	  fwrite($Fout,'  $Term["' . $Name . '"]["Term"][' . $t . ']="' . $Term . '";' . "\n");
+	  }
+	else
+	  {
+	  fwrite($Fout,'  $Term["' . $Name . '"]["Term"][]="' . $Term . '";' . "\n");
+	  }
 	}
 
       $SQL = "SELECT DISTINCT lic_name FROM agent_lic_raw INNER JOIN licterm_maplic ON licterm_fk='$Pk' AND lic_fk = lic_pk ORDER BY lic_name;";
