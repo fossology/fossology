@@ -442,7 +442,7 @@ function moveOptions(theSelFrom, theSelTo)
     for($i=0; !empty($Results[$i]['text']); $i++)
       {
       $Text = strtolower($Results[$i]['text']);
-      $Text = preg_replace("[^[a-zA-Z0-9]"," ",$Text);
+      $Text = preg_replace("[^[a-zA-Z0-9%]"," ",$Text);
       $Text = trim(preg_replace(" +"," ",$Text));
       $V .= "<option value='$Text'>$Text</option>\n";
       }
