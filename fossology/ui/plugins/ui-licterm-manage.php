@@ -285,7 +285,7 @@ function SortList(List)
 function AddText()
   {
   var Text = document.getElementById("newtext").value.toLowerCase();
-  Text = Text.replace(/[^a-zA-Z0-9]/g," ");
+  Text = Text.replace(/[^a-zA-Z0-9%]/g," ");
   Text = Text.replace(/  */g," ");
   Text = Text.replace(/^ */,"");
   Text = Text.replace(/ *$/,"");
