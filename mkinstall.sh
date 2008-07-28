@@ -495,7 +495,7 @@ if [ \$? == 0 ] ; then
     # remove the old file
     \$DEBUG rm -f \${AGENTDATADIR}/License.bsam.new 2>/dev/null
     cd \${AGENTDATADIR}/licenses
-    find . -type f | grep -v "\.meta" | sed -e 's@^./@@' | while read i ; do
+    find . -type f | grep -v "\.meta" | sed -e 's@^./@@' | sort | while read i ; do
       echo "Processing \$i"
       if [ -f "\$i.meta" ] ; then
         \$DEBUG \${AGENTDIR}/Filter_License -Q -O -M "\$i.meta" "\$i" >> \${AGENTDATADIR}/License.bsam.new
