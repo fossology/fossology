@@ -532,7 +532,7 @@ function moveOptions(theSelFrom, theSelTo)
     for($i=0; !empty($TermList[$i]['text']); $i++)
       {
       $Text = strtolower($TermList[$i]['text']);
-      $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
+      $Text = preg_replace("/[^a-z0-9%]/"," ",$Text);
       $Text = preg_replace("/ +/"," ",$Text);
       $Text = trim(preg_replace("/  */"," ",$Text));
       $V .= "<option value='$Text'>$Text</option>\n";
@@ -552,7 +552,7 @@ function moveOptions(theSelFrom, theSelTo)
     for($i=0; !empty($TermAvailable[$i]['text']); $i++)
       {
       $Text = strtolower($TermAvailable[$i]['text']);
-      $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
+      $Text = preg_replace("/[^a-z0-9%]/"," ",$Text);
       $Text = trim(preg_replace("/  */"," ",$Text));
       $V .= "<option value='$Text'>$Text</option>\n";
       }
@@ -661,7 +661,7 @@ function moveOptions(theSelFrom, theSelTo)
     for($i=0; !empty($TermList[$i]['text']); $i++)
       {
       $Text = strtolower($TermList[$i]['text']);
-      $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
+      $Text = preg_replace("/[^a-z0-9%]/"," ",$Text);
       $Text = trim(preg_replace("/ +/"," ",$Text));
       $V .= "<option value='$Text'>Delete: $Text</option>\n";
       }
@@ -764,7 +764,7 @@ function moveOptions(theSelFrom, theSelTo)
     for($i=0; !empty($TermList[$i]); $i++)
       {
       $Term = strtolower($TermList[$i]);
-      $Term = preg_replace("/[^a-z0-9]/"," ",$Term);
+      $Term = preg_replace("/[^a-z0-9%]/"," ",$Term);
       $Term = trim(preg_replace("/  */"," ",$Term));
       $SQL = "SELECT * FROM licterm_words WHERE licterm_words_text = '$Term';";
       $Results = $DB->Action($SQL);
@@ -811,7 +811,7 @@ function moveOptions(theSelFrom, theSelTo)
     if (!empty($TermDel))
       {
       $Term = strtolower($TermDel);
-      $Term = preg_replace("/[^a-z0-9]/"," ",$Term);
+      $Term = preg_replace("/[^a-z0-9%]/"," ",$Term);
       $Term = trim(preg_replace("/  */"," ",$Term));
       $SQL = "SELECT * FROM licterm_words WHERE licterm_words_text = '$Term';";
       $Results = $DB->Action($SQL);
