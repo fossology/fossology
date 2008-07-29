@@ -123,9 +123,6 @@
   $Term["Eclipse Public License"]["Desc"]="Eclipse Public License";
   $Term["Eclipse Public License"]["Term"][0]="eclipse public license";
   $Term["Eclipse Public License"]["Term"][]="epl";
-  /* Canonical name: 30 */
-  $Term["ecos"]["Desc"]="Embedded Configurable Operating System";
-  $Term["ecos"]["Term"][0]="ecos";
   /* Canonical name: 66 */
   $Term["Educational Community License"]["Desc"]="Educational Community License";
   $Term["Educational Community License"]["Term"][0]="educational community license";
