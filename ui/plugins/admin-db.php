@@ -91,8 +91,8 @@ class admin_db_cleanup extends FO_Plugin
 
 	$Checks[$i]['tag']   = "bad_upload_pfile";
 	$Checks[$i]['label'] = "Uploads missing pfiles";
-	$Checks[$i]['sql']   = "FROM upload WHERE ufile_fk IN (SELECT ufile_pk FROM ufile WHERE pfile_fk IS NULL);";
-	$Checks[$i]['list']  = "SELECT ufile_name AS list FROM upload INNER JOIN ufile ON ufile_fk = ufile_pk WHERE ufile_fk IN (SELECT ufile_pk FROM ufile WHERE pfile_fk IS NULL) LIMIT 20;";
+	$Checks[$i]['sql']   = "FROM upload WHERE upload_pk IN (SELECT upload_fk FROM uploadtree WHERE parent IS NULL AND pfile_fk IS NULL) OR upload_pk NOT IN (SELECT upload_fk FROM uploadtree);";
+	$Checks[$i]['list']  = "SELECT upload_filename AS list " . $Checks[$i]['sql'];
 	$i++;
 
 //  Bobg June 21, 2008  This is a hugely expensive query.  Removing it for now.
@@ -140,6 +140,12 @@ class admin_db_cleanup extends FO_Plugin
 	$Checks[$i]['tag']   = "duplicate_attrib";
 	$Checks[$i]['label'] = "Duplicate attrib records";
 	$Checks[$i]['sql']   = "FROM attrib WHERE attrib_pk NOT IN (SELECT MIN(dup.attrib_pk) FROM attrib AS dup GROUP BY dup.pfile_fk, dup.attrib_key_fk, dup.attrib_value);";
+	$i++;
+
+	$Checks[$i]['tag']   = "unused_terms";
+	$Checks[$i]['label'] = "License terms with no canonical names";
+	$Checks[$i]['sql']   = "FROM licterm_words WHERE licterm_words_pk NOT IN (SELECT licterm_words_fk FROM licterm_map);";
+	$Checks[$i]['list']  = "SELECT licterm_words_text AS list " . $Checks[$i]['sql'];
 	$i++;
 
 if (0)
