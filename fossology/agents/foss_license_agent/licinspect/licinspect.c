@@ -341,6 +341,7 @@ long	MatchTerm	(char *Term, char *Str, long StrLen)
   for(t=0; Term[t]; t++)
     {
     if (j >= StrLen) return(0); /* miss: too short */
+
     if (Term[t]=='%')
       {
       Skip = atoi(Term+t+1);
@@ -367,6 +368,13 @@ long	MatchTerm	(char *Term, char *Str, long StrLen)
       {
       if (isalnum(Str[j])) { return(0); } /* miss */
       while((j<StrLen) && !isalnum(Str[j])) j++;
+      }
+    else if ((t>4) && (j>4) &&
+	     strchr("SCsc",Term[t]) && strchr("SCsc",Str[j]) &&
+	     !strncasecmp("licen",Term+t-5,5) &&
+	     !strncasecmp("licen",Str+j-5,5))
+      {
+      j++; /* match */
       }
     else
       {
@@ -409,6 +417,7 @@ int	MatchTermRev	(char *Term, char *Str, long Start, long End)
   for(t=TermLen; t>=0; t--)
     {
     if (j < 0) return(0); /* miss: too short */
+
     if (Term[t]=='%')
       {
       t--;
@@ -436,6 +445,13 @@ int	MatchTermRev	(char *Term, char *Str, long Start, long End)
       {
       if (isalnum(Str[j])) return(0); /* miss */
       while((j>=0) && !isalnum(Str[j])) j--;
+      }
+    else if ((t>4) && (j>4) &&
+	     strchr("SCsc",Term[t]) && strchr("SCsc",Str[j]) &&
+	     !strncasecmp("licen",Term+t-5,5) &&
+	     !strncasecmp("licen",Str+j-5,5))
+      {
+      j--; /* match */
       }
     else
       {
