@@ -294,12 +294,40 @@
   $Term["LGPL v2+"]["Term"][]="version 2 %5% or %5% later %5% gnu library general public license";
   $Term["LGPL v2+"]["Term"][]="version 2 %5% or %5% later %5% lesser general public license";
   $Term["LGPL v2+"]["Term"][]="version 2 %5% or %5% later %5% library general public license";
-  $Term["LGPL v2+"]["License"][0]="GPL/LGPL/LGPL GNU C Library variant";
-  $Term["LGPL v2+"]["License"][1]="GPL/LGPL/LGPL v2.0 reference";
-  $Term["LGPL v2+"]["License"][2]="GPL/LGPL/LGPL v2.1";
-  $Term["LGPL v2+"]["License"][3]="GPL/LGPL/LGPL v2.1 Preamble";
-  $Term["LGPL v2+"]["License"][4]="GPL/LGPL/LGPL v2.1 reference";
-  $Term["LGPL v2+"]["License"][5]="GPL/LGPL/LGPL wxWindows Library Licence v3.0 variant";
+  $Term["LGPL v2+"]["License"][0]="GPL/LGPL/LGPL v2.0 reference";
+  $Term["LGPL v2+"]["License"][1]="GPL/LGPL/LGPL wxWindows Library Licence v3.0 variant";
+  /* Canonical name: 121 */
+  $Term["LGPL v2.1"]["Desc"]="GNU Library General Public License Version 2 1";
+  $Term["LGPL v2.1"]["Term"][0]="gnu lesser general public license %10% version 2 1";
+  $Term["LGPL v2.1"]["Term"][]="gnu lesser public license %10% version 2 1";
+  $Term["LGPL v2.1"]["Term"][]="gnu library general public license %10% version 2 1";
+  $Term["LGPL v2.1"]["Term"][]="lesser general public license %10% version 2 1";
+  $Term["LGPL v2.1"]["Term"][]="lesser gnu public license %10% version 2 1";
+  $Term["LGPL v2.1"]["Term"][]="lgplv2 1";
+  $Term["LGPL v2.1"]["Term"][]="lgpl version 2 1";
+  $Term["LGPL v2.1"]["Term"][]="library general public license %10% version 2 1";
+  $Term["LGPL v2.1"]["Term"][]="version 2 1 %5% gnu lesser general public license";
+  $Term["LGPL v2.1"]["Term"][]="version 2 1 %5% gnu library general public license";
+  $Term["LGPL v2.1"]["Term"][]="version 2 1 %5% lesser general public license";
+  $Term["LGPL v2.1"]["Term"][]="version 2 1 %5% library general public license";
+  /* Canonical name: 122 */
+  $Term["LGPL v2.1+"]["Desc"]="GNU Library General Public License Version 2 1 or later";
+  $Term["LGPL v2.1+"]["Term"][0]="gnu lesser general public license %10% version 2 1 %5% or %5% later";
+  $Term["LGPL v2.1+"]["Term"][]="gnu lesser public license %10% version 2 1 %5% or %5% later";
+  $Term["LGPL v2.1+"]["Term"][]="gnu library general public license %10% version 2 1 %5% or %5% later";
+  $Term["LGPL v2.1+"]["Term"][]="lesser general public license %10% version 2 1 %5% or %5% later";
+  $Term["LGPL v2.1+"]["Term"][]="lesser gnu public license %10% version 2 1 %5% or %5% later";
+  $Term["LGPL v2.1+"]["Term"][]="lgplv2 1 %5% or %5% later";
+  $Term["LGPL v2.1+"]["Term"][]="lgpl version 2 1 %5% or %5% later";
+  $Term["LGPL v2.1+"]["Term"][]="library general public license %10% version 2 1 %5% or %5% later";
+  $Term["LGPL v2.1+"]["Term"][]="version 2 1 %5% or %5% later %5% gnu lesser general public license";
+  $Term["LGPL v2.1+"]["Term"][]="version 2 1 %5% or %5% later %5% gnu library general public license";
+  $Term["LGPL v2.1+"]["Term"][]="version 2 1 %5% or %5% later %5% lesser general public license";
+  $Term["LGPL v2.1+"]["Term"][]="version 2 1 %5% or %5% later %5% library general public license";
+  $Term["LGPL v2.1+"]["License"][0]="GPL/LGPL/LGPL GNU C Library variant";
+  $Term["LGPL v2.1+"]["License"][1]="GPL/LGPL/LGPL v2.1";
+  $Term["LGPL v2.1+"]["License"][2]="GPL/LGPL/LGPL v2.1 Preamble";
+  $Term["LGPL v2.1+"]["License"][3]="GPL/LGPL/LGPL v2.1 reference";
   /* Canonical name: 116 */
   $Term["LGPL v3"]["Desc"]="GNU Library General Public License Version 3";
   $Term["LGPL v3"]["Term"][0]="gnu lesser general public license %10% version 3";
@@ -399,10 +427,11 @@
   $Term["Python v2.2"]["Desc"]="Python v2.2 License";
   $Term["Python v2.2"]["Term"][0]="python 2 2 license";
   /* Canonical name: 80 */
-  $Term["RealNetworks Community Source License"]["Desc"]="RealNetworks Community Source License";
-  $Term["RealNetworks Community Source License"]["Term"][0]="rcsl";
-  $Term["RealNetworks Community Source License"]["Term"][]="realnetworks community source license";
-  /* Canonical name: 79 */
+  $Term["RCSL v3.0"]["Desc"]="RealNetworks Community Source License";
+  $Term["RCSL v3.0"]["Term"][0]="rcsl";
+  $Term["RCSL v3.0"]["Term"][]="realnetworks community source license";
+  $Term["RCSL v3.0"]["License"][0]="GPL/v2/RealNetworks/RealNetworks Community Source Licensing";
+  /* Canonical name: 123 */
   $Term["RealNetworks Public Source License"]["Desc"]="";
   $Term["RealNetworks Public Source License"]["Term"][0]="realnetworks public source license";
   $Term["RealNetworks Public Source License"]["Term"][]="rpsl";
@@ -414,6 +443,12 @@
   $Term["RPL"]["Desc"]="Reciprocal Public License";
   $Term["RPL"]["License"][0]="RPL/Reciprocal Public License v1.1";
   $Term["RPL"]["License"][1]="RPL/Reciprocal Public License v1.5";
+  /* Canonical name: 79 */
+  $Term["RPSL v1.0"]["Desc"]="RealNetworks Public Source License";
+  $Term["RPSL v1.0"]["Term"][0]="realnetworks public source license";
+  $Term["RPSL v1.0"]["Term"][]="rpsl";
+  $Term["RPSL v1.0"]["License"][0]="GPL/v2/RealNetworks/RealNetworks Public Source License v1.0";
+  $Term["RPSL v1.0"]["License"][1]="GPL/v2/RealNetworks/RealNetworks Public Source License v1.0 reference";
   /* Canonical name: 101 */
   $Term["RSA"]["Desc"]="RSA Commercial License";
   $Term["RSA"]["Term"][0]="rsa";
