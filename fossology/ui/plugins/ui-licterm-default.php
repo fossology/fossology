@@ -116,17 +116,23 @@ class licterm_default extends FO_Plugin
 
       $SQL = "SELECT DISTINCT licterm_words_text FROM licterm_words INNER JOIN licterm_map ON licterm_fk='$Pk' AND licterm_words_fk = licterm_words_pk ORDER BY licterm_words_text;";
       $Terms = $DB->Action($SQL);
+      $T = array();
       for($t=0; !empty($Terms[$t]['licterm_words_text']); $t++)
         {
 	$Term = $Terms[$t]['licterm_words_text'];
         $Term = str_replace('"','\\"',$Term);
-	if ($t == 0)
+        $Term = str_replace('licenc','licens',$Term);
+	if (empty($T[$Term]))
 	  {
-	  fwrite($Fout,'  $Term["' . $Name . '"]["Term"][' . $t . ']="' . $Term . '";' . "\n");
-	  }
-	else
-	  {
-	  fwrite($Fout,'  $Term["' . $Name . '"]["Term"][]="' . $Term . '";' . "\n");
+	  if ($t == 0)
+	    {
+	    fwrite($Fout,'  $Term["' . $Name . '"]["Term"][' . $t . ']="' . $Term . '";' . "\n");
+	    }
+	  else
+	    {
+	    fwrite($Fout,'  $Term["' . $Name . '"]["Term"][]="' . $Term . '";' . "\n");
+	    }
+	  $T[$Term]=1;
 	  }
 	}
 
