@@ -54,6 +54,10 @@
   $Term["Apple Public Source License"]["Term"][0]="apl";
   $Term["Apple Public Source License"]["Term"][]="apple public source license";
   $Term["Apple Public Source License"]["Term"][]="apsl";
+  /* Canonical name: 126 */
+  $Term["AptanaPL v1.0"]["Desc"]="Aptana Public License v1.0";
+  $Term["AptanaPL v1.0"]["Term"][0]="aptana";
+  $Term["AptanaPL v1.0"]["License"][0]="Aptana/Aptana Public License v1.0";
   /* Canonical name: 56 */
   $Term["Artistic License"]["Desc"]="Artistic License";
   $Term["Artistic License"]["Term"][0]="artistic license";
@@ -244,8 +248,9 @@
   $Term["GPL v3+"]["License"][0]="GPL/v3/GPL v3 reference 1";
   $Term["GPL v3+"]["License"][1]="GPL/v3/GPL v3 reference 2";
   /* Canonical name: 98 */
-  $Term["gSOAP"]["Desc"]="gSOAP Public License";
-  $Term["gSOAP"]["Term"][0]="gsoap public license";
+  $Term["gSOAP v1.3"]["Desc"]="gSOAP Public License";
+  $Term["gSOAP v1.3"]["Term"][0]="gsoap public license";
+  $Term["gSOAP v1.3"]["License"][0]="MPL/gSOAP Public License";
   /* Canonical name: 72 */
   $Term["Independent JPEG Group License"]["Desc"]="Independent JPEG Group";
   $Term["Independent JPEG Group License"]["Term"][0]="ijg";
@@ -363,6 +368,9 @@
   $Term["MPL"]["Term"][]="mozilla public license";
   $Term["MPL"]["Term"][]="mozpl";
   $Term["MPL"]["Term"][]="mpl";
+  $Term["MPL"]["License"][0]="MPL/MPL v1.0";
+  $Term["MPL"]["License"][1]="MPL/MPL v1.1";
+  $Term["MPL"]["License"][2]="MPL/MPL v1.1 reference";
   /* Canonical name: 94 */
   $Term["Ms-LPL"]["Desc"]="Microsoft Limited Public License";
   $Term["Ms-LPL"]["Term"][0]="microsoft limited public license";
@@ -383,15 +391,19 @@
   $Term["Ms-RL"]["Term"][0]="microsoft reciprocal license";
   $Term["Ms-RL"]["Term"][]="ms rl";
   $Term["Ms-RL"]["License"][0]="Corporate/Microsoft/Microsoft Reciprocal License";
+  /* Canonical name: 125 */
+  $Term["MySQL v0.3"]["Desc"]="MySQL FLOSS License Exception";
+  $Term["MySQL v0.3"]["Term"][0]="mysql %5% floss %5% exception";
+  $Term["MySQL v0.3"]["License"][0]="Corporate/MySQL/MySQL AB Exception";
   /* Canonical name: 86 */
   $Term["Non-commercial"]["Desc"]="Generic non-commercial";
   $Term["Non-commercial"]["Term"][0]="non commercial";
   /* Canonical name: 83 */
   $Term["NPL"]["Desc"]="NPL";
-  $Term["NPL"]["Term"][0]="mozilla public license";
-  $Term["NPL"]["Term"][]="mpl";
-  $Term["NPL"]["Term"][]="netscape public license";
+  $Term["NPL"]["Term"][0]="netscape public license";
   $Term["NPL"]["Term"][]="npl";
+  $Term["NPL"]["License"][0]="MPL/NPL v1.1";
+  $Term["NPL"]["License"][1]="MPL/NPL v1.1 reference";
   /* Canonical name: 99 */
   $Term["Nvidia License"]["Desc"]="Nvidia family of licenses";
   $Term["Nvidia License"]["License"][0]="Corporate/Nvidia/Nvidia Software License";
@@ -453,6 +465,12 @@
   $Term["RSA"]["Desc"]="RSA Commercial License";
   $Term["RSA"]["Term"][0]="rsa";
   $Term["RSA"]["License"][0]="Corporate/RSA/RSA MD5";
+  /* Canonical name: 124 */
+  $Term["SBCLA"]["Desc"]="Sun Binary Code License Agreement";
+  $Term["SBCLA"]["Term"][0]="sun %5% binary code %5% license";
+  $Term["SBCLA"]["License"][0]="Corporate/Sun/Sun Microsystems Binary Code License";
+  $Term["SBCLA"]["License"][1]="Corporate/Sun/Sun Microsystems Binary Code License J2SDK";
+  $Term["SBCLA"]["License"][2]="Corporate/Sun/Sun Microsystems Binary Code License supplement";
   /* Canonical name: 105 */
   $Term["SCSL"]["Desc"]="Sun Community Source License";
   $Term["SCSL"]["Term"][0]="sun community source license";
