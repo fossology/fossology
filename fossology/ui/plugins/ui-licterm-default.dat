@@ -45,10 +45,12 @@
   $Term["AFL"]["License"][2]="AFL/AFL/Academic Free License v2.0";
   $Term["AFL"]["License"][3]="AFL/AFL/Academic Free License v2.1";
   $Term["AFL"]["License"][4]="AFL/AFL/Academic Free License v3.0";
-  /* Canonical name: 53 */
-  $Term["Apache License"]["Desc"]="Apache Software Foundation License";
-  $Term["Apache License"]["Term"][0]="apache licence";
-  $Term["Apache License"]["Term"][]="apache license";
+  /* Canonical name: 118 */
+  $Term["Apache v2.0"]["Desc"]="Apache Software License v2.0";
+  $Term["Apache v2.0"]["Term"][0]="apache licence";
+  $Term["Apache v2.0"]["Term"][]="apache license";
+  $Term["Apache v2.0"]["License"][0]="BSD/BSD.new/Apache/Apache Software License v2.0";
+  $Term["Apache v2.0"]["License"][1]="BSD/BSD.new/Apache/Apache Software License v2.0 reference";
   /* Canonical name: 54 */
   $Term["Apple Common Documentation License"]["Desc"]="Apple Common Documentation License";
   $Term["Apple Common Documentation License"]["Term"][0]="cdl";
@@ -401,6 +403,14 @@
   $Term["Nvidia License"]["License"][0]="Corporate/Nvidia/Nvidia Software License";
   $Term["Nvidia License"]["License"][1]="Corporate/Nvidia/Nvidia Software License variant 1";
   $Term["Nvidia License"]["License"][2]="Corporate/Nvidia/Nvidia Source Code";
+  /* Canonical name: 119 */
+  $Term["OCLC v1.0"]["Desc"]="OCLC Research Public License v1.0";
+  $Term["OCLC v1.0"]["Term"][0]="oclc %5% 1";
+  $Term["OCLC v1.0"]["License"][0]="OCLC/OCLC Research Public License v1.0";
+  /* Canonical name: 120 */
+  $Term["OCLC v2.0"]["Desc"]="OCLC Research Public License v2.0";
+  $Term["OCLC v2.0"]["Term"][0]="oclc %5% 2";
+  $Term["OCLC v2.0"]["License"][0]="OCLC/OCLC Research Public License v2.0";
   /* Canonical name: 96 */
   $Term["OPL"]["Desc"]="OpenContent License";
   $Term["OPL"]["Term"][0]="opencontent";
