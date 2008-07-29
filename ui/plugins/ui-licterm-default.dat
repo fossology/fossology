@@ -14,13 +14,10 @@
   $Term["Adaptive Public License"]["Term"][0]="adaptive public license";
   /* Canonical name: 47 */
   $Term["Affero"]["Desc"]="Affero General Public License";
-  $Term["Affero"]["Term"][0]="affero general public licence";
-  $Term["Affero"]["Term"][]="affero general public license";
+  $Term["Affero"]["Term"][0]="affero general public license";
   /* Canonical name: 108 */
   $Term["Affero v1.0"]["Desc"]="Affero General Public License v1.0";
-  $Term["Affero v1.0"]["Term"][0]="affero general public licence v1";
-  $Term["Affero v1.0"]["Term"][]="affero general public licence version 1";
-  $Term["Affero v1.0"]["Term"][]="affero general public license v1";
+  $Term["Affero v1.0"]["Term"][0]="affero general public license v1";
   $Term["Affero v1.0"]["Term"][]="affero general public license version 1";
   $Term["Affero v1.0"]["Term"][]="affero v1";
   $Term["Affero v1.0"]["Term"][]="affero version 1";
@@ -28,9 +25,7 @@
   $Term["Affero v1.0"]["License"][1]="GPL/Affero/Affero Preamble v1.0";
   /* Canonical name: 109 */
   $Term["Affero v3.0"]["Desc"]="Affero General Public License v3.0";
-  $Term["Affero v3.0"]["Term"][0]="affero general public licence v3";
-  $Term["Affero v3.0"]["Term"][]="affero general public licence version 3";
-  $Term["Affero v3.0"]["Term"][]="affero general public license v3";
+  $Term["Affero v3.0"]["Term"][0]="affero general public license v3";
   $Term["Affero v3.0"]["Term"][]="affero general public license version 3";
   $Term["Affero v3.0"]["Term"][]="affero v3";
   $Term["Affero v3.0"]["Term"][]="affero version 3";
@@ -47,8 +42,7 @@
   $Term["AFL"]["License"][4]="AFL/AFL/Academic Free License v3.0";
   /* Canonical name: 118 */
   $Term["Apache v2.0"]["Desc"]="Apache Software License v2.0";
-  $Term["Apache v2.0"]["Term"][0]="apache licence";
-  $Term["Apache v2.0"]["Term"][]="apache license";
+  $Term["Apache v2.0"]["Term"][0]="apache license";
   $Term["Apache v2.0"]["License"][0]="BSD/BSD.new/Apache/Apache Software License v2.0";
   $Term["Apache v2.0"]["License"][1]="BSD/BSD.new/Apache/Apache Software License v2.0 reference";
   /* Canonical name: 54 */
@@ -62,8 +56,7 @@
   $Term["Apple Public Source License"]["Term"][]="apsl";
   /* Canonical name: 56 */
   $Term["Artistic License"]["Desc"]="Artistic License";
-  $Term["Artistic License"]["Term"][0]="artistic licence";
-  $Term["Artistic License"]["Term"][]="artistic license";
+  $Term["Artistic License"]["Term"][0]="artistic license";
   $Term["Artistic License"]["License"][0]="Artistic/Artistic v1.0";
   $Term["Artistic License"]["License"][1]="Artistic/Artistic v1.0 short";
   $Term["Artistic License"]["License"][2]="Artistic/Artistic v2.0";
@@ -145,8 +138,7 @@
   $Term["Free Art License"]["Term"][0]="free art license";
   /* Canonical name: 106 */
   $Term["GFDL"]["Desc"]="Gnu Free Documentation License";
-  $Term["GFDL"]["Term"][0]="gnu free documentation licence";
-  $Term["GFDL"]["Term"][]="gnu free documentation license";
+  $Term["GFDL"]["Term"][0]="gnu free documentation license";
   $Term["GFDL"]["License"][0]="GPL/GFDL/GNU Free Documentation License v1.1 reference 1";
   $Term["GFDL"]["License"][1]="GPL/GFDL/GNU Free Documentation License v1.1 reference 2";
   $Term["GFDL"]["License"][2]="GPL/GFDL/GNU Free Documentation License v1.2";
@@ -157,44 +149,40 @@
   $Term["GNU Free Documentation License"]["Term"][]="gnu free documentation license";
   /* Canonical name: 4 */
   $Term["GPL"]["Desc"]="Gnu General Public License";
-  $Term["GPL"]["Term"][0]="gnu general public licence";
-  $Term["GPL"]["Term"][]="gnu general public license";
-  $Term["GPL"]["Term"][]="gnu public licence";
+  $Term["GPL"]["Term"][0]="gnu general public license";
   $Term["GPL"]["Term"][]="gnu public license";
   $Term["GPL"]["Term"][]="gpl";
   $Term["GPL"]["License"][0]="GPL/GPL from FSF reference";
   $Term["GPL"]["License"][1]="GPL/GPL reference";
   /* Canonical name: 7 */
   $Term["GPL v1"]["Desc"]="Gnu Public License version 1";
-  $Term["GPL v1"]["Term"][0]="gnu general public licence 1";
-  $Term["GPL v1"]["Term"][]="gnu general public licence version 1";
-  $Term["GPL v1"]["Term"][]="gnu general public license 1";
+  $Term["GPL v1"]["Term"][0]="gnu general public license 1";
   $Term["GPL v1"]["Term"][]="gnu general public license version 1";
-  $Term["GPL v1"]["Term"][]="gnu public licence 1";
   $Term["GPL v1"]["Term"][]="gnu public license 1";
   $Term["GPL v1"]["Term"][]="gplv1";
   $Term["GPL v1"]["Term"][]="gpl v1";
   $Term["GPL v1"]["Term"][]="gpl version 1";
+  $Term["GPL v1"]["Term"][]="version 1 %5% general public license";
+  $Term["GPL v1"]["Term"][]="version 1 %5% gnu general public license";
+  $Term["GPL v1"]["Term"][]="version 1 %5% gnu public license";
   $Term["GPL v1"]["License"][0]="GPL/v1/GPL v1";
   $Term["GPL v1"]["License"][1]="GPL/v1/GPL v1 Preamble";
   $Term["GPL v1"]["License"][2]="GPL/v1/GPL v1 reference";
   /* Canonical name: 5 */
   $Term["GPL v2"]["Desc"]="Gnu Public License version 2";
-  $Term["GPL v2"]["Term"][0]="gnu general public licence %10% version 2";
-  $Term["GPL v2"]["Term"][]="gnu general public licence 2";
-  $Term["GPL v2"]["Term"][]="gnu general public license %10% version 2";
+  $Term["GPL v2"]["Term"][0]="gnu general public license %10% version 2";
   $Term["GPL v2"]["Term"][]="gnu general public license 2";
   $Term["GPL v2"]["Term"][]="gnu general public license v2";
-  $Term["GPL v2"]["Term"][]="gnu public licence 2";
   $Term["GPL v2"]["Term"][]="gnu public license 2";
   $Term["GPL v2"]["Term"][]="gpl 2";
-  $Term["GPL v2"]["Term"][]="gpl 2 0 licence";
   $Term["GPL v2"]["Term"][]="gpl 2 0 license";
-  $Term["GPL v2"]["Term"][]="gpl 2 licence";
   $Term["GPL v2"]["Term"][]="gpl 2 license";
   $Term["GPL v2"]["Term"][]="gplv2";
   $Term["GPL v2"]["Term"][]="gpl v2";
   $Term["GPL v2"]["Term"][]="gpl version 2";
+  $Term["GPL v2"]["Term"][]="version 2 %5% general public license";
+  $Term["GPL v2"]["Term"][]="version 2 %5% gnu general public license";
+  $Term["GPL v2"]["Term"][]="version 2 %5% gnu public license";
   $Term["GPL v2"]["License"][0]="GPL/v2/eCos";
   $Term["GPL v2"]["License"][1]="GPL/v2/GPL from FSF reference 1";
   $Term["GPL v2"]["License"][2]="GPL/v2/GPL from FSF reference 2";
@@ -204,22 +192,19 @@
   $Term["GPL v2"]["License"][6]="GPL/v2/GPL v2 reference 4";
   /* Canonical name: 110 */
   $Term["GPL v2+"]["Desc"]="Gnu General Public License Version 2 or later";
-  $Term["GPL v2+"]["Term"][0]="gnu general public licence %10% version 2 %5% or %5% later";
-  $Term["GPL v2+"]["Term"][]="gnu general public licence 2 %5% or %5% later";
-  $Term["GPL v2+"]["Term"][]="gnu general public licence %5% v2 %5% or %5% later";
-  $Term["GPL v2+"]["Term"][]="gnu general public license %10% version 2 %5% or %5% later";
+  $Term["GPL v2+"]["Term"][0]="gnu general public license %10% version 2 %5% or %5% later";
   $Term["GPL v2+"]["Term"][]="gnu general public license 2 %5% or %5% later";
   $Term["GPL v2+"]["Term"][]="gnu general public license %5% v2 %5% or %5% later";
-  $Term["GPL v2+"]["Term"][]="gnu public licence 2 %5% or %5% later";
   $Term["GPL v2+"]["Term"][]="gnu public license 2 %5% or %5% later";
-  $Term["GPL v2+"]["Term"][]="gpl 2 0 licence %5% or %5% later";
   $Term["GPL v2+"]["Term"][]="gpl 2 0 license %5% or %5% later";
   $Term["GPL v2+"]["Term"][]="gpl 2 %5% or %5% later";
-  $Term["GPL v2+"]["Term"][]="gpl 2 licence %5% or %5% later";
   $Term["GPL v2+"]["Term"][]="gpl 2 license %5% or %5% later";
   $Term["GPL v2+"]["Term"][]="gpl v2 %5% or %5% later";
   $Term["GPL v2+"]["Term"][]="gplv2 %5% or %5% later";
   $Term["GPL v2+"]["Term"][]="gpl version 2 %5% or %5% later";
+  $Term["GPL v2+"]["Term"][]="version 2 %5% or %5% later %5% general public license";
+  $Term["GPL v2+"]["Term"][]="version 2 %5% or %5% later %5% gnu general public license";
+  $Term["GPL v2+"]["Term"][]="version 2 %5% or %5% later %5% gnu public license";
   $Term["GPL v2+"]["License"][0]="GPL/v2/GPL v2 reference";
   $Term["GPL v2+"]["License"][1]="GPL/v2/GPL v2 reference 1";
   $Term["GPL v2+"]["License"][2]="GPL/v2/GPL v2 reference 3";
@@ -230,38 +215,35 @@
   $Term["GPL v2+"]["License"][7]="GPL/v2/GPL v2 reference 9";
   /* Canonical name: 6 */
   $Term["GPL v3"]["Desc"]="Gnu Public License version 3";
-  $Term["GPL v3"]["Term"][0]="gnu general public licence %10% version 3";
-  $Term["GPL v3"]["Term"][]="gnu general public license %10% version 3";
+  $Term["GPL v3"]["Term"][0]="gnu general public license %10% version 3";
   $Term["GPL v3"]["Term"][]="gnu general public license v3";
-  $Term["GPL v3"]["Term"][]="gnu public licence 3";
   $Term["GPL v3"]["Term"][]="gnu public license 3";
   $Term["GPL v3"]["Term"][]="gpl 3";
-  $Term["GPL v3"]["Term"][]="gpl 3 0 licence";
   $Term["GPL v3"]["Term"][]="gpl 3 0 license";
-  $Term["GPL v3"]["Term"][]="gpl 3 licence";
   $Term["GPL v3"]["Term"][]="gpl 3 license";
   $Term["GPL v3"]["Term"][]="gplv3";
   $Term["GPL v3"]["Term"][]="gpl v3";
   $Term["GPL v3"]["Term"][]="gpl version 3";
+  $Term["GPL v3"]["Term"][]="version 3 %5% general public license";
+  $Term["GPL v3"]["Term"][]="version 3 %5% gnu general public license";
+  $Term["GPL v3"]["Term"][]="version 3 %5% gnu public license";
   $Term["GPL v3"]["License"][0]="GPL/v3/GPL v3";
   $Term["GPL v3"]["License"][1]="GPL/v3/GPL v3 Preamble";
   /* Canonical name: 111 */
   $Term["GPL v3+"]["Desc"]="Gnu General Public License Version 3 or later";
-  $Term["GPL v3+"]["Term"][0]="gnu general public licence %10% version 3 %5% or %5% later";
-  $Term["GPL v3+"]["Term"][]="gnu general public licence %5% v3 %5% or %5% later";
-  $Term["GPL v3+"]["Term"][]="gnu general public license %10% version 3 %5% or %5% later";
+  $Term["GPL v3+"]["Term"][0]="gnu general public license %10% version 3 %5% or %5% later";
   $Term["GPL v3+"]["Term"][]="gnu general public license 3 %5% or %5% later";
   $Term["GPL v3+"]["Term"][]="gnu general public license %5% v3 %5% or %5% later";
-  $Term["GPL v3+"]["Term"][]="gnu public licence 3 %5% or %5% later";
   $Term["GPL v3+"]["Term"][]="gnu public license 3 %5% or %5% later";
-  $Term["GPL v3+"]["Term"][]="gpl 3 0 licence %5% or %5% later";
   $Term["GPL v3+"]["Term"][]="gpl 3 0 license %5% or %5% later";
   $Term["GPL v3+"]["Term"][]="gpl 3 %5% or %5% later";
-  $Term["GPL v3+"]["Term"][]="gpl 3 licence %5% or %5% later";
   $Term["GPL v3+"]["Term"][]="gpl 3 license %5% or %5% later";
   $Term["GPL v3+"]["Term"][]="gpl v3 %5% or %5% later";
   $Term["GPL v3+"]["Term"][]="gplv3 %5% or %5% later";
   $Term["GPL v3+"]["Term"][]="gpl version 3 %5% or %5% later";
+  $Term["GPL v3+"]["Term"][]="version 3 %5% or %5% later %5% general public license";
+  $Term["GPL v3+"]["Term"][]="version 3 %5% or %5% later %5% gnu general public license";
+  $Term["GPL v3+"]["Term"][]="version 3 %5% or %5% later %5% gnu public license";
   $Term["GPL v3+"]["License"][0]="GPL/v3/GPL v3 reference 1";
   $Term["GPL v3+"]["License"][1]="GPL/v3/GPL v3 reference 2";
   /* Canonical name: 98 */
@@ -277,53 +259,44 @@
   $Term["LaTeX Project Public License"]["Term"][]="lppl";
   /* Canonical name: 75 */
   $Term["LGPL"]["Desc"]="GNU Library General Public License";
-  $Term["LGPL"]["Term"][0]="gnu lesser general public licence";
-  $Term["LGPL"]["Term"][]="gnu lesser general public license";
-  $Term["LGPL"]["Term"][]="gnu lesser public licence";
+  $Term["LGPL"]["Term"][0]="gnu lesser general public license";
   $Term["LGPL"]["Term"][]="gnu lesser public license";
-  $Term["LGPL"]["Term"][]="gnu library general public licence";
   $Term["LGPL"]["Term"][]="gnu library general public license";
-  $Term["LGPL"]["Term"][]="lesser general public licence";
   $Term["LGPL"]["Term"][]="lesser general public license";
-  $Term["LGPL"]["Term"][]="lesser gnu public licence";
   $Term["LGPL"]["Term"][]="lesser gnu public license";
   $Term["LGPL"]["Term"][]="lesser gpl";
   $Term["LGPL"]["Term"][]="lgpl";
   $Term["LGPL"]["License"][0]="GPL/LGPL/LGPL gettext library variant";
   /* Canonical name: 113 */
   $Term["LGPL v2"]["Desc"]="GNU Library General Public License Version 2";
-  $Term["LGPL v2"]["Term"][0]="gnu lesser general public licence %10% version 2";
-  $Term["LGPL v2"]["Term"][]="gnu lesser general public license %10% version 2";
-  $Term["LGPL v2"]["Term"][]="gnu lesser public licence %10% version 2";
+  $Term["LGPL v2"]["Term"][0]="gnu lesser general public license %10% version 2";
   $Term["LGPL v2"]["Term"][]="gnu lesser public license %10% version 2";
-  $Term["LGPL v2"]["Term"][]="gnu library general public licence %10% version 2";
   $Term["LGPL v2"]["Term"][]="gnu library general public license %10% version 2";
-  $Term["LGPL v2"]["Term"][]="lesser general public licence %10% version 2";
   $Term["LGPL v2"]["Term"][]="lesser general public license %10% version 2";
-  $Term["LGPL v2"]["Term"][]="lesser gnu public licence %10% version 2";
   $Term["LGPL v2"]["Term"][]="lesser gnu public license %10% version 2";
   $Term["LGPL v2"]["Term"][]="lgplv2";
   $Term["LGPL v2"]["Term"][]="lgpl version 2";
-  $Term["LGPL v2"]["Term"][]="library general public licence %10% version 2";
   $Term["LGPL v2"]["Term"][]="library general public license %10% version 2";
+  $Term["LGPL v2"]["Term"][]="version 2 %5% gnu lesser general public license";
+  $Term["LGPL v2"]["Term"][]="version 2 %5% gnu library general public license";
+  $Term["LGPL v2"]["Term"][]="version 2 %5% lesser general public license";
+  $Term["LGPL v2"]["Term"][]="version 2 %5% library general public license";
   $Term["LGPL v2"]["License"][0]="GPL/LGPL/LGPL v2.0";
   $Term["LGPL v2"]["License"][1]="GPL/LGPL/LGPL v2.0 with exceptions";
   /* Canonical name: 115 */
   $Term["LGPL v2+"]["Desc"]="GNU Library General Public License Version 2 or later";
-  $Term["LGPL v2+"]["Term"][0]="gnu lesser general public licence %10% version 2 %5% or %5% later";
-  $Term["LGPL v2+"]["Term"][]="gnu lesser general public license %10% version 2 %5% or %5% later";
-  $Term["LGPL v2+"]["Term"][]="gnu lesser public licence %10% version 2 %5% or %5% later";
+  $Term["LGPL v2+"]["Term"][0]="gnu lesser general public license %10% version 2 %5% or %5% later";
   $Term["LGPL v2+"]["Term"][]="gnu lesser public license %10% version 2 %5% or %5% later";
-  $Term["LGPL v2+"]["Term"][]="gnu library general public licence %10% version 2 %5% or %5% later";
   $Term["LGPL v2+"]["Term"][]="gnu library general public license %10% version 2 %5% or %5% later";
-  $Term["LGPL v2+"]["Term"][]="lesser general public licence %10% version 2 %5% or %5% later";
   $Term["LGPL v2+"]["Term"][]="lesser general public license %10% version 2 %5% or %5% later";
-  $Term["LGPL v2+"]["Term"][]="lesser gnu public licence %10% version 2 %5% or %5% later";
   $Term["LGPL v2+"]["Term"][]="lesser gnu public license %10% version 2 %5% or %5% later";
   $Term["LGPL v2+"]["Term"][]="lgplv2 %5% or %5% later";
   $Term["LGPL v2+"]["Term"][]="lgpl version 2 %5% or %5% later";
-  $Term["LGPL v2+"]["Term"][]="library general public licence %10% version 2 %5% or %5% later";
   $Term["LGPL v2+"]["Term"][]="library general public license %10% version 2 %5% or %5% later";
+  $Term["LGPL v2+"]["Term"][]="version 2 %5% or %5% later %5% gnu lesser general public license";
+  $Term["LGPL v2+"]["Term"][]="version 2 %5% or %5% later %5% gnu library general public license";
+  $Term["LGPL v2+"]["Term"][]="version 2 %5% or %5% later %5% lesser general public license";
+  $Term["LGPL v2+"]["Term"][]="version 2 %5% or %5% later %5% library general public license";
   $Term["LGPL v2+"]["License"][0]="GPL/LGPL/LGPL GNU C Library variant";
   $Term["LGPL v2+"]["License"][1]="GPL/LGPL/LGPL v2.0 reference";
   $Term["LGPL v2+"]["License"][2]="GPL/LGPL/LGPL v2.1";
@@ -332,37 +305,33 @@
   $Term["LGPL v2+"]["License"][5]="GPL/LGPL/LGPL wxWindows Library Licence v3.0 variant";
   /* Canonical name: 116 */
   $Term["LGPL v3"]["Desc"]="GNU Library General Public License Version 3";
-  $Term["LGPL v3"]["Term"][0]="gnu lesser general public licence %10% version 3";
-  $Term["LGPL v3"]["Term"][]="gnu lesser general public license %10% version 3";
-  $Term["LGPL v3"]["Term"][]="gnu lesser public licence %10% version 3";
+  $Term["LGPL v3"]["Term"][0]="gnu lesser general public license %10% version 3";
   $Term["LGPL v3"]["Term"][]="gnu lesser public license %10% version 3";
-  $Term["LGPL v3"]["Term"][]="gnu library general public licence %10% version 3";
   $Term["LGPL v3"]["Term"][]="gnu library general public license %10% version 3";
-  $Term["LGPL v3"]["Term"][]="lesser general public licence %10% version 3";
   $Term["LGPL v3"]["Term"][]="lesser general public license %10% version 3";
-  $Term["LGPL v3"]["Term"][]="lesser gnu public licence %10% version 3";
   $Term["LGPL v3"]["Term"][]="lesser gnu public license %10% version 3";
   $Term["LGPL v3"]["Term"][]="lgplv3";
   $Term["LGPL v3"]["Term"][]="lgpl version 3";
-  $Term["LGPL v3"]["Term"][]="library general public licence %10% version 3";
   $Term["LGPL v3"]["Term"][]="library general public license %10% version 3";
+  $Term["LGPL v3"]["Term"][]="version 3 %5% gnu lesser general public license";
+  $Term["LGPL v3"]["Term"][]="version 3 %5% gnu library general public license";
+  $Term["LGPL v3"]["Term"][]="version 3 %5% lesser general public license";
+  $Term["LGPL v3"]["Term"][]="version 3 %5% library general public license";
   $Term["LGPL v3"]["License"][0]="GPL/LGPL/LGPL v3.0";
   /* Canonical name: 117 */
   $Term["LGPL v3+"]["Desc"]="GNU Library General Public License Version 3 or later";
-  $Term["LGPL v3+"]["Term"][0]="gnu lesser general public licence %10% version 3 %5% or %5% later";
-  $Term["LGPL v3+"]["Term"][]="gnu lesser general public license %10% version 3 %5% or %5% later";
-  $Term["LGPL v3+"]["Term"][]="gnu lesser public licence %10% version 3 %5% or %5% later";
+  $Term["LGPL v3+"]["Term"][0]="gnu lesser general public license %10% version 3 %5% or %5% later";
   $Term["LGPL v3+"]["Term"][]="gnu lesser public license %10% version 3 %5% or %5% later";
-  $Term["LGPL v3+"]["Term"][]="gnu library general public licence %10% version 3 %5% or %5% later";
   $Term["LGPL v3+"]["Term"][]="gnu library general public license %10% version 3 %5% or %5% later";
-  $Term["LGPL v3+"]["Term"][]="lesser general public licence %10% version 3 %5% or %5% later";
   $Term["LGPL v3+"]["Term"][]="lesser general public license %10% version 3 %5% or %5% later";
-  $Term["LGPL v3+"]["Term"][]="lesser gnu public licence %10% version 3 %5% or %5% later";
   $Term["LGPL v3+"]["Term"][]="lesser gnu public license %10% version 3 %5% or %5% later";
   $Term["LGPL v3+"]["Term"][]="lgplv3 %5% or %5% later";
   $Term["LGPL v3+"]["Term"][]="lgpl version 3 %5% or %5% later";
-  $Term["LGPL v3+"]["Term"][]="library general public licence %10% version 3 %5% or %5% later";
   $Term["LGPL v3+"]["Term"][]="library general public license %10% version 3 %5% or %5% later";
+  $Term["LGPL v3+"]["Term"][]="version 3 %5% or %5% later %5% gnu lesser general public license";
+  $Term["LGPL v3+"]["Term"][]="version 3 %5% or %5% later %5% gnu library general public license";
+  $Term["LGPL v3+"]["Term"][]="version 3 %5% or %5% later %5% lesser general public license";
+  $Term["LGPL v3+"]["Term"][]="version 3 %5% or %5% later %5% library general public license";
   /* Canonical name: 82 */
   $Term["MPL"]["Desc"]="MPL";
   $Term["MPL"]["Term"][0]="mozillapl";
@@ -513,19 +482,16 @@
   $Term["Zend"]["Term"][0]="zend";
   /* Canonical name: 81 */
   $Term["Zope"]["Desc"]="Zope Public License";
-  $Term["Zope"]["Term"][0]="zope public licence";
-  $Term["Zope"]["Term"][]="zope public license";
+  $Term["Zope"]["Term"][0]="zope public license";
   $Term["Zope"]["Term"][]="zpl";
   /* Canonical name: 32 */
   $Term["Zope v1.0"]["Desc"]="Zope Public License v1";
-  $Term["Zope v1.0"]["Term"][0]="zope public licence version 1";
-  $Term["Zope v1.0"]["Term"][]="zope public license version 1";
+  $Term["Zope v1.0"]["Term"][0]="zope public license version 1";
   $Term["Zope v1.0"]["Term"][]="zpl version 1";
   $Term["Zope v1.0"]["License"][0]="BSD/BSD.old/Zope/Zope v1.0";
   /* Canonical name: 33 */
   $Term["Zope v2.0"]["Desc"]="Zope Public License v2";
-  $Term["Zope v2.0"]["Term"][0]="zope public licence version 2";
-  $Term["Zope v2.0"]["Term"][]="zope public license version 2";
+  $Term["Zope v2.0"]["Term"][0]="zope public license version 2";
   $Term["Zope v2.0"]["Term"][]="zpl version 2";
   $Term["Zope v2.0"]["License"][0]="BSD/BSD.old/Zope/Zope v2.0";
 ?>
