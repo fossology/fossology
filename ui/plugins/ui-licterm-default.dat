@@ -12,6 +12,13 @@
   /* Canonical name: 45 */
   $Term["Adaptive Public License"]["Desc"]="Adaptive Public License";
   $Term["Adaptive Public License"]["Term"][0]="adaptive public license";
+  /* Canonical name: 127 */
+  $Term["Adobe Commercial"]["Desc"]="Adobe Commercial licenses";
+  $Term["Adobe Commercial"]["Term"][0]="adobe flex %5% sdk";
+  $Term["Adobe Commercial"]["Term"][]="adobe flex %5% software development kit";
+  $Term["Adobe Commercial"]["Term"][]="adobe product license agreement";
+  $Term["Adobe Commercial"]["License"][0]="Corporate/Adobe/Adobe Flex 2.0.1 SDK EULA";
+  $Term["Adobe Commercial"]["License"][1]="Corporate/Adobe/Adobe Product License Agreement";
   /* Canonical name: 47 */
   $Term["Affero"]["Desc"]="Affero General Public License";
   $Term["Affero"]["Term"][0]="affero general public license";
@@ -45,6 +52,12 @@
   $Term["Apache v2.0"]["Term"][0]="apache license";
   $Term["Apache v2.0"]["License"][0]="BSD/BSD.new/Apache/Apache Software License v2.0";
   $Term["Apache v2.0"]["License"][1]="BSD/BSD.new/Apache/Apache Software License v2.0 reference";
+  /* Canonical name: 128 */
+  $Term["Apple Commercial"]["Desc"]="Apple Commercial Licenses";
+  $Term["Apple Commercial"]["License"][0]="Corporate/Apple/Apple iTunes License";
+  $Term["Apple Commercial"]["License"][1]="Corporate/Apple/Apple Quicktime License";
+  $Term["Apple Commercial"]["License"][2]="Corporate/Apple/Apple Quicktime Pro7 License";
+  $Term["Apple Commercial"]["License"][3]="Corporate/Apple/Apple Quicktime Pro7 License Exhibit A";
   /* Canonical name: 54 */
   $Term["Apple Common Documentation License"]["Desc"]="Apple Common Documentation License";
   $Term["Apple Common Documentation License"]["Term"][0]="cdl";
@@ -65,6 +78,9 @@
   $Term["Artistic License"]["License"][1]="Artistic/Artistic v1.0 short";
   $Term["Artistic License"]["License"][2]="Artistic/Artistic v2.0";
   $Term["Artistic License"]["License"][3]="Artistic/Artistic v2.0beta4";
+  /* Canonical name: 131 */
+  $Term["ATI Commercial"]["Desc"]="ATI Commercial licenses";
+  $Term["ATI Commercial"]["License"][0]="Corporate/ATI/ATI Software EULA";
   /* Canonical name: 58 */
   $Term["BitTorrent Open Source License"]["Desc"]="BitTorrent Open Source License";
   $Term["BitTorrent Open Source License"]["Term"][0]="bittorrent open source license";
@@ -255,6 +271,10 @@
   $Term["Independent JPEG Group License"]["Desc"]="Independent JPEG Group";
   $Term["Independent JPEG Group License"]["Term"][0]="ijg";
   $Term["Independent JPEG Group License"]["Term"][]="independent jpeg group license";
+  /* Canonical name: 129 */
+  $Term["Intel Commercial"]["Desc"]="Intel Commercial Licenses";
+  $Term["Intel Commercial"]["License"][0]="Corporate/Intel";
+  $Term["Intel Commercial"]["License"][1]="Corporate/Intel reference";
   /* Canonical name: 76 */
   $Term["LaTeX Project Public License"]["Desc"]="LaTeX Project Public License";
   $Term["LaTeX Project Public License"]["Term"][0]="latex project public license";
@@ -405,10 +425,10 @@
   $Term["NPL"]["License"][0]="MPL/NPL v1.1";
   $Term["NPL"]["License"][1]="MPL/NPL v1.1 reference";
   /* Canonical name: 99 */
-  $Term["Nvidia License"]["Desc"]="Nvidia family of licenses";
-  $Term["Nvidia License"]["License"][0]="Corporate/Nvidia/Nvidia Software License";
-  $Term["Nvidia License"]["License"][1]="Corporate/Nvidia/Nvidia Software License variant 1";
-  $Term["Nvidia License"]["License"][2]="Corporate/Nvidia/Nvidia Source Code";
+  $Term["Nvidia Commercial"]["Desc"]="Nvidia family of commercial licenses";
+  $Term["Nvidia Commercial"]["License"][0]="Corporate/Nvidia/Nvidia Software License";
+  $Term["Nvidia Commercial"]["License"][1]="Corporate/Nvidia/Nvidia Software License variant 1";
+  $Term["Nvidia Commercial"]["License"][2]="Corporate/Nvidia/Nvidia Source Code";
   /* Canonical name: 119 */
   $Term["OCLC v1.0"]["Desc"]="OCLC Research Public License v1.0";
   $Term["OCLC v1.0"]["Term"][0]="oclc %5% 1";
@@ -527,6 +547,11 @@
   /* Canonical name: 36 */
   $Term["X.Net"]["Desc"]="X.Net, Inc. License";
   $Term["X.Net"]["Term"][0]="x net";
+  /* Canonical name: 130 */
+  $Term["Yahoo Commercial"]["Desc"]="Yahoo Commercial licenses";
+  $Term["Yahoo Commercial"]["License"][0]="Corporate/Yahoo/Yahoo Toolbar License";
+  $Term["Yahoo Commercial"]["License"][1]="Corporate/Yahoo/Yahoo Toolbar License variant 2";
+  $Term["Yahoo Commercial"]["License"][2]="Corporate/Yahoo/Yahoo Toolbar License variant 3";
   /* Canonical name: 34 */
   $Term["Zend"]["Desc"]="Zend Engine License";
   $Term["Zend"]["Term"][0]="zend";
