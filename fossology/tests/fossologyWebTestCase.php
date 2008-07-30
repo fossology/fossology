@@ -66,9 +66,10 @@ class fossologyWebTestCase extends WebTestCase
     }
     //print "********* checking object passed in**************\n";
     $this->assertTrue(is_object($browser));
+    $browser->useCookies();
     $page = $browser->get('http://osrb-1.fc.hp.com/repo/');
     $this->assertTrue($page);
-    $this->assertTrue($browser->get('http://osrb-1.fc.hp.com/repo/?mod=auth&nopopup=1'));
+    $this->assertTrue($browser->get('http://osrb-1.fc.hp.com/~markd/ui-md/?mod=auth&nopopup=1'));
     $this->assertTrue($browser->setField('username', $user));
     $this->assertTrue($browser->setField('password', $password));
     $this->assertTrue($browser->isSubmit('Login'));
@@ -77,7 +78,16 @@ class fossologyWebTestCase extends WebTestCase
     preg_match('/User Logged In/', $page, $matches);
     $this->assertTrue($matches);
     // retry is needed for some reason or we just stay on the login page
+    $c = $_COOKIE['Login'];
+    echo "Login cookie is:$c\n";
     $this->assertTrue($browser->retry());
+    $mysid = session_id();
+    print "RepoLogin SID IS:$mysid\n";
+    print "RepoLogin trying ses[Login]\n";
+    var_dump($_SESSION['Login']);
+    print "RepoLogin trying ses[name]\n";
+    var_dump($_SESSION['name']);
+    //$this->dump($mycookie);
     $page = $browser->getContent();
     //print "************ After Login/ReTry page is:********************\n";
     //$this->dump($page);
@@ -96,8 +106,8 @@ class fossologyWebTestCase extends WebTestCase
   public function assertText($page, $pattern)
   {
     preg_match($pattern, $page, $matches);
-    print "*** assertText: matches is:***\n";
-    $this->dump($matches);
+    //print "*** assertText: matches is:***\n";
+    //$this->dump($matches);
     if(count($matches))
     {
       return(TRUE);
