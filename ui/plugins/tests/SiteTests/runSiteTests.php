@@ -32,8 +32,13 @@ $test = &new TestSuite('Fossology Repo Site UI tests');
 //$test->addTestFile('AboutMenuTest.php');
 //$test->addTestFile('login.php');
 //$test->addTestFile('SearchMenuTest.php');
-$test->addTestFile('OrgFoldersMenuTest.php');
-//$test->addTestFile('OrgFoldersMenuTest-sel.php');
+//$test->addTestFile('OrgFoldersMenuTest-Create.php');
+//$test->addTestFile('OrgFoldersMenuTest-Delete.php');
+//$test->addTestFile('OrgFoldersMenuTest-Edit.php');
+$test->addTestFile('OrgFoldersMenuTest-Move.php');
+$test->addTestFile('OrgUploadsMenuTest-Delete.php');
+$test->addTestFile('OrgUploadsMenuTest-Move.php');
+$test->addTestFile('OrgUploadsMenuTest-RemoveLA.php');
 exit ($test->run(new TextReporter()) ? 0 : 1);
 
 

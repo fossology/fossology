@@ -28,14 +28,16 @@ require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
-$mysid = session_id();
-print "Runner SID Before TestSuite call:$mysid\n";
+//$mysid = session_id();
+//print "Runner SID Before TestSuite call:$mysid\n";
+$headers = get_headers('http://osrb-1.fc.hp.com/~markd/ui-md/', 1);
+//$headers = get_headers('http://snape.west/repo/', 1);
+//print "Runner headers are:\n";
+//var_dump($headers);
+print "set cookie from the header\n";
+print $headers['Set-Cookie'] . "\n";
 $test = &new TestSuite('Fossology Repo Site UI tests');
-$mysid = session_id();
-print "Runner SID/COOKIE IS:$mysid\n";
 $test->addTestFile('dblogout.php');
-$mysid = session_id();
-print "Runner SID After Test IS:$mysid\n";
 exit ($test->run(new TextReporter()) ? 0 : 1);
 
 
