@@ -262,6 +262,7 @@ int	CheckRepo	()
   char Host[1024];
   char Path[1024];
   extern RepMmapStruct * RepConfig;
+  extern int RepDepth;
   char *RepPath;
   FILE *Fin;
 
@@ -271,6 +272,9 @@ int	CheckRepo	()
     fflush(stdout);
     return(0);
     }
+
+  printf("Repository: Depth.conf is %d\n",RepDepth);
+
   RepPath = RepGetRepPath();
 
   i=0;
