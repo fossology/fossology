@@ -1644,10 +1644,10 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
   int TokA=0,TokB=0;
   int Seq,TokSeqA=0,TokSeqB=0; /* number of sequential */
   int TokPosA=0,TokPosB=0;
-  int Gap;
-  int GotMin;
+  int GotMin,GotMax;
   Seq=0;
   GotMin=0;
+  GotMax=0;
   for(a = *MinA; a < *MaxA; a++)
     {
     ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
@@ -1656,12 +1656,23 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
       TokA++;
       Seq++;
       if (Seq > TokSeqA) { TokSeqA=Seq; TokPosA=a; }
-      if (!GotMin && Seq >= MatchSeq[0]) { GotMin=1; *MinA = a-Seq; }
+      if (!GotMin && Seq >= MatchSeq[0]) { GotMin = a-Seq; }
       }
-    else { Seq=0; }
+    else
+      {
+      if (Seq >= MatchSeq[0]) { GotMax = a; }
+      Seq=0;
+      }
     }
+  if (Seq >= MatchSeq[0]) { GotMax = b; }
+  if (GotMin < *MinA) GotMin=*MinA;
+  if (GotMax > *MaxA) GotMax=*MaxA;
+  if (GotMin) *MinA=GotMin;
+  if (GotMax) *MaxA=GotMax;
+
   Seq=0;
   GotMin=0;
+  GotMax=0;
   for(b = *MinB; b < *MaxB; b++)
     {
     ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
@@ -1670,28 +1681,21 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
       TokB++;
       Seq++;
       if (Seq > TokSeqB) { TokSeqB=Seq; TokPosB=b; }
-      if (!GotMin && Seq >= MatchSeq[1]) { GotMin=1; *MinB = b-Seq; }
+      if (!GotMin && Seq >= MatchSeq[1]) { GotMin = b-Seq; }
       }
-    else { Seq=0; }
+    else
+      {
+      if (Seq >= MatchSeq[1]) { GotMax = b; }
+      Seq=0;
+      }
     }
+  if (Seq >= MatchSeq[1]) { GotMax = b; }
+  if (GotMin < *MinB) GotMin=*MinB;
+  if (GotMax > *MaxB) GotMax=*MaxB;
+  if (GotMin) *MinB=GotMin;
+  if (GotMax) *MaxB=GotMax;
   if (TokSeqA < MatchSeq[0]) return(0); /* too few */
   if (TokSeqB < MatchSeq[1]) return(0); /* too few */
-
-  /* TokPosA and TokPosB identify the location of the biggest sequential
-     match.  The scan range start/end should be somewhere between the
-     end of the match, skipping no more than the Gap size. */
-  for(Gap=0, a = TokSeqA; a < *MaxA; a++)
-    {
-    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
-    if (Symbol[2][Byte] & Mask) { Gap=0; }
-    else { Gap++; if (Gap > MatchGap[0]) *MaxA=a; }
-    }
-  for(Gap=0, b = TokSeqB; b < *MaxB; b++)
-    {
-    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
-    if (Symbol[2][Byte] & Mask) { Gap=0; }
-    else { Gap++; if (Gap > MatchGap[1]) *MaxB=b; }
-    }
   }
   return(1);
 } /* OptimizeMatrixRange() */
