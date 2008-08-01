@@ -26,22 +26,25 @@
  */
 
 require_once('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/TestEnvironment.php');
 
-error_reporting(E_ALL);
+global $URL;
+global $USER;
+global $PASSWORD;
 
 class TestAboutMenu extends fossologyWebTestCase
 {
 
   function testMenuAbout()
   {
+    global $URL;
     print "starting testMenuAbout\n";
-    //$this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    //$this->assertTrue($this->get('http://fluffy.ostt/repo/'));
-    $this->assertTrue($this->get('http://osrb-1.fc.hp.com/repo/'));
-    $this->assertText('Welcome to FOSSology');
+    $page = $this->get($URL);
+    $this->assertTrue($page);
+    $this->assertText($page, '/Welcome to FOSSology/');
     $this->click('Help');
     $this->click('About');
-    $this->assertText('About FOSSology');
+    $this->assertText($page, '/About FOSSology/');
   }
 }
 ?>
