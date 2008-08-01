@@ -31,8 +31,8 @@ require_once '/usr/local/simpletest/reporter.php';
 require_once ('../../../../tests/fossologyWebTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
-$test = &new TestSuite('Fossology Repo Site UI tests');
-$test->addTestFile('PassTest.php');
+$test = &new TestSuite('Fossology Repo UI Page Functional tests');
+$test->addTestFile('UploadFileTest.php');
 
 if (TextReporter::inCli())
 {
