@@ -46,7 +46,9 @@ $test = &new TestSuite('Fossology Repo Site UI tests');
 $test->addTestFile('UploadFileMenuTest.php');
 $test->addTestFile('UploadServerMenuTest.php');
 $test->addTestFile('UploadUrlMenuTest.php');
-exit ($test->run(new TextReporter()) ? 0 : 1);
-
-
+if (TextReporter::inCli())
+{
+  exit ($test->run(new TextReporter()) ? 0 : 1);
+}
+$test->run(new HtmlReporter());
 ?>
