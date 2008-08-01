@@ -29,19 +29,7 @@ require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
 require_once ('../../../../tests/fossologyWebTestCase.php');
-
-$usage = "$argv[0] Url User Password path-to-suite";
-
-// process parameters
-if(count($argc) >= 4)
-{
-  print $usage;
-  exit(1);
-}
-
-list($me, $url, $user, $password, $Testpath) = $argv;
-
-fossologyWebTestCase.php::setTestEnv($url, $user, $password);
+require_once ('../../../../tests/TestEnvironment.php');
 
 $test = &new TestSuite('Fossology Repo Site UI tests');
 $test->addTestFile('PassTest.php');
