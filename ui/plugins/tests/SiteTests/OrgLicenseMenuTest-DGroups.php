@@ -28,13 +28,13 @@ require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class LicenseMTermsMenuTest extends fossologyWebTestCase
+class LicenseDGroupsMenuTest extends fossologyWebTestCase
 {
 
-  function testLicenseMTermsMenu()
+  function testLicenseDGroupsMenu()
   {
     global $URL;
-    print "starting LicenseDTermsMenuTest\n";
+    print "starting LicenseDGroupsMenuTest\n";
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $browser = & new SimpleBrowser();
     $page = $browser->get($URL);
@@ -54,9 +54,10 @@ class LicenseMTermsMenuTest extends fossologyWebTestCase
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get("$URL?mod=licterm_manage");
-    $this->assertTrue($this->assertText($page, '/Manage License Terms/'));
-    $this->assertTrue($this->assertText($page, '/function moveOptions/'));
+    $page = $browser->get("$URL?mod=license_groups_default");
+    $this->assertTrue($this->assertText($page, '/Create Default License Groups/'));
+    $this->assertTrue($this->assertText($page, '/Similar Text/'));
+    $this->assertTrue($this->assertText($page, '/FSF/'));
   }
 }
 ?>

@@ -24,35 +24,37 @@
  * Created on Jul 31, 2008
  */
 require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/TestEnvironment.php');
 
-//error_reporting(E_ALL);
+global $URL;
 
 class UploadsDeleteMenuTest extends fossologyWebTestCase
 {
 
   function testUploadsDeleteMenu()
   {
+    global $URL;
     print "starting UploadsDeleteMenuTest\n";
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $browser = & new SimpleBrowser();
-    $page = $browser->get('http://osrb-1.fc.hp.com/repo/');
+    $page = $browser->get($URL);
     $this->assertTrue($page);
     $this->assertTrue(is_object($browser));
     $cookie = $this->repoLogin($browser);
-    $browser->setCookie('Login', $cookie, 'osrb-1.fc.hp.com');
-    $loggedIn = $browser->getContent();
+    $host = $this->getHost($URL);
+    $browser->setCookie('Login', $cookie, $host);
     /* we get the home page to get rid of the user logged in page */
-    $page = $browser->get('http://osrb-1.fc.hp.com/repo/');
+    $loggedIn = $browser->get($URL);
     $this->assertTrue($this->assertText($loggedIn, '/Organize/'));
     $this->assertTrue($this->assertText($loggedIn, '/Uploads/'));
     $this->assertTrue($this->assertText($loggedIn, '/Delete Uploaded File/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Edit Properties (TBD)/'));
+    $this->assertTrue($this->assertText($loggedIn, '/Edit Properties \(TBD\)/'));
     $this->assertTrue($this->assertText($loggedIn, '/Move/'));
     $this->assertTrue($this->assertText($loggedIn, '/Remove License Analysis/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get('http://osrb-1.fc.hp.com/repo/?mod=admin_upload_delete');
+    $page = $browser->get("$URL?mod=admin_upload_delete");
     $this->assertTrue($this->assertText($page, '/Delete Uploaded File/'));
     $this->assertTrue($this->assertText($page, '/THERE IS NO UNDELETE/'));
   }

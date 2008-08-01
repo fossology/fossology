@@ -24,25 +24,26 @@
  * Created on Jul 31, 2008
  */
 require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/TestEnvironment.php');
 
-//error_reporting(E_ALL);
+global $URL;
 
 class UploadServerMenuTest extends fossologyWebTestCase
 {
 
   function testUploadServerMenu()
   {
+    global $URL;
     print "starting UploadServerMenuTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $browser = & new SimpleBrowser();
-    $page = $browser->get('http://osrb-1.fc.hp.com/repo/');
+    $page = $browser->get($URL);
     $this->assertTrue($page);
     $this->assertTrue(is_object($browser));
     $cookie = $this->repoLogin($browser);
-    $browser->setCookie('Login', $cookie, 'osrb-1.fc.hp.com');
-    $loggedIn = $browser->getContent();
+    $host = $this->getHost($URL);
+    $browser->setCookie('Login', $cookie, $host);
     /* we get the home page to get rid of the user logged in page */
-    $page = $browser->get('http://osrb-1.fc.hp.com/repo/');
+    $loggedIn = $browser->get($URL);
     $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
     $this->assertTrue($this->assertText($loggedIn, '/Instructions/'));
     $this->assertTrue($this->assertText($loggedIn, '/From File/'));
@@ -52,7 +53,7 @@ class UploadServerMenuTest extends fossologyWebTestCase
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get('http://osrb-1.fc.hp.com/repo/?mod=upload_srv_files');
+    $page = $browser->get("$URL?mod=upload_srv_files");
     $this->assertTrue($this->assertText($page, '/Upload from Server/'));
     $this->assertTrue($this->assertText($page, '/Disable alphabetized sub-folders/'));
   }

@@ -28,13 +28,13 @@ require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class LicenseMTermsMenuTest extends fossologyWebTestCase
+class UploadOneShotMenuTest extends fossologyWebTestCase
 {
 
-  function testLicenseMTermsMenu()
+  function testUploadOneShotMenu()
   {
     global $URL;
-    print "starting LicenseDTermsMenuTest\n";
+    print "starting UploadUrlMenuTest\n";
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $browser = & new SimpleBrowser();
     $page = $browser->get($URL);
@@ -45,18 +45,18 @@ class LicenseMTermsMenuTest extends fossologyWebTestCase
     $browser->setCookie('Login', $cookie, $host);
     /* we get the home page to get rid of the user logged in page */
     $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Organize/'));
-    $this->assertTrue($this->assertText($loggedIn, '/License/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Default Groups/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Default Terms/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Manage Groups/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Manage Terms/'));
+    $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
+    $this->assertTrue($this->assertText($loggedIn, '/Instructions/'));
+    $this->assertTrue($this->assertText($loggedIn, '/From File/'));
+    $this->assertTrue($this->assertText($loggedIn, '/From Server/'));
+    $this->assertTrue($this->assertText($loggedIn, '/From URL/'));
+    $this->assertTrue($this->assertText($loggedIn, '/One-Shot License/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get("$URL?mod=licterm_manage");
-    $this->assertTrue($this->assertText($page, '/Manage License Terms/'));
-    $this->assertTrue($this->assertText($page, '/function moveOptions/'));
+    $page = $browser->get("$URL?mod=upload_url");
+    $this->assertTrue($this->assertText($page, '/Upload from URL/'));
+    $this->assertTrue($this->assertText($page, '/Enter the URL to the file:/'));
   }
 }
 ?>
