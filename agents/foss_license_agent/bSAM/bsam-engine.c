@@ -1645,7 +1645,9 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
   int Seq,TokSeqA=0,TokSeqB=0; /* number of sequential */
   int TokPosA=0,TokPosB=0;
   int Gap;
+  int GotMin;
   Seq=0;
+  GotMin=0;
   for(a = *MinA; a < *MaxA; a++)
     {
     ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
@@ -1654,10 +1656,12 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
       TokA++;
       Seq++;
       if (Seq > TokSeqA) { TokSeqA=Seq; TokPosA=a; }
+      if (!GotMin && Seq >= MatchSeq[0]) { GotMin=1; *MinA = a-Seq; }
       }
     else { Seq=0; }
     }
   Seq=0;
+  GotMin=0;
   for(b = *MinB; b < *MaxB; b++)
     {
     ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
@@ -1666,6 +1670,7 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
       TokB++;
       Seq++;
       if (Seq > TokSeqB) { TokSeqB=Seq; TokPosB=b; }
+      if (!GotMin && Seq >= MatchSeq[1]) { GotMin=1; *MinB = b-Seq; }
       }
     else { Seq=0; }
     }
@@ -1675,23 +1680,11 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
   /* TokPosA and TokPosB identify the location of the biggest sequential
      match.  The scan range start/end should be somewhere between the
      end of the match, skipping no more than the Gap size. */
-  for(Gap=0, a = TokPosA-TokSeqA; a >= *MinA; a--)
-    {
-    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
-    if (Symbol[2][Byte] & Mask) { Gap=0; }
-    else { Gap++; if (Gap > MatchGap[0]) *MinA=a; }
-    }
   for(Gap=0, a = TokSeqA; a < *MaxA; a++)
     {
     ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
     if (Symbol[2][Byte] & Mask) { Gap=0; }
     else { Gap++; if (Gap > MatchGap[0]) *MaxA=a; }
-    }
-  for(Gap=0, b = TokPosB-TokSeqB; b >= *MinB; b--)
-    {
-    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
-    if (Symbol[2][Byte] & Mask) { Gap=0; }
-    else { Gap++; if (Gap > MatchGap[1]) *MinB=b; }
     }
   for(Gap=0, b = TokSeqB; b < *MaxB; b++)
     {
