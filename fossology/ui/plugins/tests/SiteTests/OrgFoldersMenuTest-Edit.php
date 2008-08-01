@@ -24,32 +24,34 @@
  * Created on Jul 31, 2008
  */
 require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/TestEnvironment.php');
 
-//error_reporting(E_ALL);
+global $URL;
 
 class FoldersEditMenuTest extends fossologyWebTestCase
 {
 
   function testFolderEditMenu()
   {
+    global $URL;
     print "starting FolderEditMenuTest\n";
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $browser = & new SimpleBrowser();
-    $page = $browser->get('http://osrb-1.fc.hp.com/repo/');
+    $page = $browser->get($URL);
     $this->assertTrue($page);
     $this->assertTrue(is_object($browser));
     $cookie = $this->repoLogin($browser);
-    $browser->setCookie('Login', $cookie, 'osrb-1.fc.hp.com');
-    $loggedIn = $browser->getContent();
+    $host = $this->getHost($URL);
+    $browser->setCookie('Login', $cookie, $host);
     /* we get the home page to get rid of the user logged in page */
-    $page = $browser->get('http://osrb-1.fc.hp.com/repo/');
+    $loggedIn = $browser->get($URL);
     $this->assertTrue($this->assertText($loggedIn, '/Organize/'));
     $this->assertTrue($this->assertText($loggedIn, '/Folders /'));
     $this->assertTrue($this->assertText($loggedIn, '/Create/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the edit page.
      */
-    $page = $browser->get('http://osrb-1.fc.hp.com/repo/?mod=admin_folder_delete');
+    $page = $browser->get("$URL?mod=folder_properties");
     $this->assertTrue($this->assertText($page, '/Edit Folder Properties/'));
     $this->assertTrue($this->assertText($page, '/Change folder name:/'));
   }

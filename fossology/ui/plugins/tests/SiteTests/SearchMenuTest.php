@@ -25,22 +25,26 @@
  */
 
 require_once('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/TestEnvironment.php');
 
-error_reporting(E_ALL);
+global $URL;
+global $USER;
+global $PASSWORD;
 
 class SearchMenuTest extends fossologyWebTestCase
 {
 
   function testSearchMenu()
   {
+    global $URL;
     print "starting SearchMenuTest\n";
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    //$this->assertTrue($this->get('http://fluffy.ostt/repo/'));
-    $this->assertTrue($this->get('http://osrb-1.fc.hp.com/repo/'));
-    $this->assertText('Welcome to FOSSology');
-    $this->click('Search');
-    $this->assertText('Search for File');
-    $this->assertText('Enter the filename to find');
+    $page = $this->get($URL);
+    $this->assertTrue($page);
+    $this->assertText($page, '/Welcome to FOSSology/');
+    $page = $this->click('Search');
+    $this->assertText($page, '/Search for File/');
+    $this->assertText($page, '/Enter the filename to find/');
   }
 }
 ?>
