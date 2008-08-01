@@ -29,12 +29,17 @@
  */
 
 require_once('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/TestEnvironment.php');
 
-error_reporting(E_ALL);
+global $URL;
+global $USER;
+global $PASSWORD;
 
 class TestRepoLogin extends fossologyWebTestCase{
 
   function testLogin(){
+
+    global $URL;
     print "login test starting\n";
     $browser = & new SimpleBrowser();
     $this->repoLogin($browser);

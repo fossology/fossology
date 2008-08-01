@@ -27,6 +27,11 @@ set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
+require_once ('../../../../tests/TestEnvironment.php');
+
+global $URL;
+global $USER;
+global $PASSWORD;
 
 $test = &new TestSuite('Fossology Repo Site UI tests');
 //$test->addTestFile('AboutMenuTest.php');
@@ -43,9 +48,11 @@ $test = &new TestSuite('Fossology Repo Site UI tests');
 //$test->addTestFile('OrgLicenseMenuTest-DTerms.php');
 //$test->addTestFile('OrgLicenseMenuTest-MGroups.php');
 //$test->addTestFile('OrgLicenseMenuTest-MTerms.php');
+$test->addTestFile('UploadInstructMenuTest.php');
 $test->addTestFile('UploadFileMenuTest.php');
 $test->addTestFile('UploadServerMenuTest.php');
 $test->addTestFile('UploadUrlMenuTest.php');
+$test->addTestFile('UploadOne-ShotMenuTest.php');
 if (TextReporter::inCli())
 {
   exit ($test->run(new TextReporter()) ? 0 : 1);
