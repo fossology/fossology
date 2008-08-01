@@ -44,7 +44,6 @@ if (!defined('SIMPLE_TEST'))
 /* simpletest includes */
 require_once SIMPLE_TEST . 'unit_tester.php';
 require_once SIMPLE_TEST . 'reporter.php';
-require_once SIMPLE_TEST . 'mock_objects.php';
 require_once SIMPLE_TEST . 'web_tester.php';
 
 /* does the path need to be modified?, I don't recommend running the
@@ -55,42 +54,66 @@ require_once SIMPLE_TEST . 'web_tester.php';
 class fossologyWebTestCase extends WebTestCase
 {
 
+  protected $url;
+  protected $user;
+  protected $password;
+
+/*
+  function __construct($url, $user, $password)
+  {
+
+    if (is_null($url))
+    {
+      $this->url = 'http://localhost/';
+    } else
+    {
+      $this->url = $url;
+    }
+    if (is_null($user))
+    {
+      $this->user = 'fossy';
+    } else
+    {
+      $this->user = $user;
+    }
+    if (is_null($password))
+    {
+      $this->password = 'fossy';
+    } else
+    {
+      $this->password = $url;
+    }
+  }
+  */
+
   public function repoLogin($browser = NULL, $user = 'fossy', $password = 'fossy')
   {
-    $page = 0;
-    print "in repoLogin\n";
+    $page = NULL;
+    $cookieValue = NULL;
+
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     if (is_null($browser))
     {
       $browser = & new SimpleBrowser();
     }
-    //print "********* checking object passed in**************\n";
     $this->assertTrue(is_object($browser));
     $browser->useCookies();
-    $page = $browser->get('http://osrb-1.fc.hp.com/repo/');
-    $this->assertTrue($page);
-    $this->assertTrue($browser->get('http://osrb-1.fc.hp.com/~markd/ui-md/?mod=auth&nopopup=1'));
+    $cookieValue = $browser->getCookieValue('osrb-1.fc.hp.com', '/', 'Login');
+    // need to check $cookieValue for validity
+    $browser->setCookie('Login', $cookieValue, 'osrb-1.fc.hp.com');
+    $this->assertTrue($browser->get('http://osrb-1.fc.hp.com/repo/?mod=auth&nopopup=1'));
     $this->assertTrue($browser->setField('username', $user));
     $this->assertTrue($browser->setField('password', $password));
     $this->assertTrue($browser->isSubmit('Login'));
     $this->assertTrue($browser->clickSubmit('Login'));
     $page = $browser->getContent();
     preg_match('/User Logged In/', $page, $matches);
-    $this->assertTrue($matches);
-    // retry is needed for some reason or we just stay on the login page
-    $c = $_COOKIE['Login'];
-    echo "Login cookie is:$c\n";
-    $this->assertTrue($browser->retry());
-    $mysid = session_id();
-    print "RepoLogin SID IS:$mysid\n";
-    print "RepoLogin trying ses[Login]\n";
-    var_dump($_SESSION['Login']);
-    print "RepoLogin trying ses[name]\n";
-    var_dump($_SESSION['name']);
-    //$this->dump($mycookie);
+    $this->assertTrue($matches, "Login PASSED");
+    $browser->setCookie('Login', $cv, 'osrb-1.fc.hp.com');
     $page = $browser->getContent();
-    //print "************ After Login/ReTry page is:********************\n";
-    //$this->dump($page);
+    $NumMatches = preg_match('/User Logged Out/', $page, $matches);
+    $this->assertFalse($NumMatches, "User Logged out!, Login Failed! %s");
+    return($cookieValue);
   }
 
 /**
@@ -105,14 +128,27 @@ class fossologyWebTestCase extends WebTestCase
  */
   public function assertText($page, $pattern)
   {
-    preg_match($pattern, $page, $matches);
+    $NumMatches = preg_match($pattern, $page, $matches);
     //print "*** assertText: matches is:***\n";
     //$this->dump($matches);
-    if(count($matches))
+    if(NumMatches)
     {
       return(TRUE);
     }
     return(FALSE);
+  }
+
+  public function getUrl()
+  {
+    return $this->$url;
+  }
+  public function getUser()
+  {
+    return $this->$user;
+  }
+  public function getPassword()
+  {
+    return $this->$password;
   }
 }
 ?>
