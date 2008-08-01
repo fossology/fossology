@@ -391,6 +391,12 @@
   $Term["MPL"]["License"][0]="MPL/MPL v1.0";
   $Term["MPL"]["License"][1]="MPL/MPL v1.1";
   $Term["MPL"]["License"][2]="MPL/MPL v1.1 reference";
+  /* Canonical name: 132 */
+  $Term["MS-Commercial"]["Desc"]="Microsoft Commercial Licenses";
+  $Term["MS-Commercial"]["License"][0]="Corporate/Microsoft/Microsoft EULA";
+  $Term["MS-Commercial"]["License"][1]="Corporate/Microsoft/Microsoft EULA 2003";
+  $Term["MS-Commercial"]["License"][2]="Corporate/Microsoft/Microsoft EULA Software";
+  $Term["MS-Commercial"]["License"][3]="Corporate/Microsoft/Microsoft Shared Source License";
   /* Canonical name: 94 */
   $Term["Ms-LPL"]["Desc"]="Microsoft Limited Public License";
   $Term["Ms-LPL"]["Term"][0]="microsoft limited public license";
