@@ -33,6 +33,7 @@ require_once ('../../../../tests/TestEnvironment.php');
 
 $test = &new TestSuite('Fossology Repo UI Page Functional tests');
 $test->addTestFile('UploadFileTest.php');
+$test->addTestFile('UploadUrlTest.php');
 
 if (TextReporter::inCli())
 {
