@@ -1645,6 +1645,8 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
   int Seq,TokSeqA=0,TokSeqB=0; /* number of sequential */
   int TokPosA=0,TokPosB=0;
   int GotMin,GotMax;
+  int Gap;
+
   Seq=0;
   GotMin=0;
   GotMax=0;
@@ -1667,6 +1669,21 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
   if (Seq >= MatchSeq[0]) { GotMax = b; }
   if (GotMin < *MinA) GotMin=*MinA;
   if (GotMax > *MaxA) GotMax=*MaxA;
+
+  /* we have the first and last consecutive sections in A.
+     Now check for acceptable gaps. */
+  for(Gap=0, a = GotMin;  a >= *MinA; a--)
+    {
+    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
+    if (Symbol[2][Byte] & Mask) { Gap=0; }
+    else { Gap++; if (Gap >= MatchGap[0]) { GotMin=a; break; } }
+    }
+  for(Gap=0, a = GotMax;  a < *MaxA; a++)
+    {
+    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
+    if (Symbol[2][Byte] & Mask) { Gap=0; }
+    else { Gap++; if (Gap >= MatchGap[0]) { GotMax=a; break; } }
+    }
   if (GotMin) *MinA=GotMin;
   if (GotMax) *MaxA=GotMax;
 
@@ -1692,8 +1709,24 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
   if (Seq >= MatchSeq[1]) { GotMax = b; }
   if (GotMin < *MinB) GotMin=*MinB;
   if (GotMax > *MaxB) GotMax=*MaxB;
+
+  /* we have the first and last consecutive sections in B.
+     Now check for acceptable gaps. */
+  for(Gap=0, b = GotMin;  b >= *MinB; b--)
+    {
+    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
+    if (Symbol[2][Byte] & Mask) { Gap=0; }
+    else { Gap++; if (Gap >= MatchGap[1]) { GotMin=b; break; } }
+    }
+  for(Gap=0, b = GotMax;  b < *MaxB; b++)
+    {
+    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
+    if (Symbol[2][Byte] & Mask) { Gap=0; }
+    else { Gap++; if (Gap >= MatchGap[1]) { GotMax=b; break; } }
+    }
   if (GotMin) *MinB=GotMin;
   if (GotMax) *MaxB=GotMax;
+
   if (TokSeqA < MatchSeq[0]) return(0); /* too few */
   if (TokSeqB < MatchSeq[1]) return(0); /* too few */
   }
