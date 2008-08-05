@@ -3,23 +3,27 @@
 # This Makefile is included by other Makefiles in the tree that need
 # these targets in order to preprocess files with embedded references
 # to the variables in Makefile.conf
+ifdef TOP
+include $(TOP)/Makefile.conf
+else
+TOP=.
 include Makefile.conf
+endif
 
 VARIABLES := PROJECT VERSION PROJECTUSER PROJECTGROUP DESTDIR PREFIX BINDIR SBINDIR SYSCONFDIR LIBDIR INCLUDEDIR LIBEXECDIR DATAROOTDIR DATADIR LOCALSTATEDIR PROJECTSTATEDIR MANDIR MAN1DIR DOCDIR WEBDIR PHPDIR AGENTDIR AGENTDATADIR AGENTSTATEDIR AGENTCHECKDDIR AGENTTESTDDIR SVN_REV
 
-preprocess-%: %.in variable.list
+%-process: %.in $(TOP)/variable.list
 	@echo "Generate $* ..."
-	utils/preprocess $< > $*
+	$(TOP)/utils/preprocess $(TOP)/variable.list $< > $*
 
-variable.list: Makefile.conf
-	$(MAKE) -f Makefile.process $(VARIABLES)
-	echo in variable.list
+$(TOP)/variable.list: $(TOP)/Makefile.conf
+	$(MAKE) -f $(TOP)/Makefile.process $(VARIABLES)
 
 $(VARIABLES):
 	if [ "$@" = "PROJECT" ]; then \
-	   echo "$@=\"$($@)\"" >variable.list; \
+	   echo "$@=\"$($@)\"" >$(TOP)/variable.list; \
 	else \
-	  echo "$@=\"$($@)\"" >>variable.list; \
+	  echo "$@=\"$($@)\"" >>$(TOP)/variable.list; \
 	fi
 
 .PHONY: $(VARIABLES)

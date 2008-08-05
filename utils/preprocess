@@ -4,9 +4,9 @@
 
 use Text::Template;
 
-$form=$ARGV[0];
+$list=$ARGV[0];
+$form=$ARGV[1];
 
-$list="variable.list";
 open LIST,$list or die "Can't open $list\n";
 
 # load the file into a hash
