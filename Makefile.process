@@ -17,7 +17,7 @@ VARIABLES := PROJECT VERSION PROJECTUSER PROJECTGROUP DESTDIR PREFIX BINDIR SBIN
 	$(TOP)/utils/preprocess $(TOP)/variable.list $< > $*
 
 $(TOP)/variable.list: $(TOP)/Makefile.conf
-	$(MAKE) -f $(TOP)/Makefile.process $(VARIABLES)
+	TOP=$(TOP) $(MAKE) -f $(TOP)/Makefile.process $(VARIABLES)
 
 $(VARIABLES):
 	if [ "$@" = "PROJECT" ]; then \
