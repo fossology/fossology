@@ -1676,13 +1676,13 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
     {
     ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
     if (Symbol[2][Byte] & Mask) { Gap=0; }
-    else { Gap++; if (Gap >= MatchGap[0]) { GotMin=a; break; } }
+    else { Gap++; if (Gap >= MatchGap[0]) { GotMin=a+Gap; break; } }
     }
   for(Gap=0, a = GotMax;  a < *MaxA; a++)
     {
     ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
     if (Symbol[2][Byte] & Mask) { Gap=0; }
-    else { Gap++; if (Gap >= MatchGap[0]) { GotMax=a; break; } }
+    else { Gap++; if (Gap >= MatchGap[0]) { GotMax=a-Gap; break; } }
     }
   if (GotMin) *MinA=GotMin;
   if (GotMax) *MaxA=GotMax;
@@ -1716,13 +1716,13 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
     {
     ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
     if (Symbol[2][Byte] & Mask) { Gap=0; }
-    else { Gap++; if (Gap >= MatchGap[1]) { GotMin=b; break; } }
+    else { Gap++; if (Gap >= MatchGap[1]) { GotMin=b+Gap; break; } }
     }
   for(Gap=0, b = GotMax;  b < *MaxB; b++)
     {
     ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
     if (Symbol[2][Byte] & Mask) { Gap=0; }
-    else { Gap++; if (Gap >= MatchGap[1]) { GotMax=b; break; } }
+    else { Gap++; if (Gap >= MatchGap[1]) { GotMax=b-Gap; break; } }
     }
   if (GotMin) *MinB=GotMin;
   if (GotMax) *MaxB=GotMax;
