@@ -36,13 +36,16 @@ FOSSology uses lots of different existing tools and software and
 expects to find it on the system, and also depends on certain system
 users existing, and other adjustments to the system config.
 
-FOSSology depends on recent versions of the following software:
+FOSSology depends on recent versions of the following software,
+dependencies needed when building fossology are labeled "build:" and
+dependencies needed at runtime are labeled "runtime:".
 
 Postgresql:
  8.1 or newer
  On Debian (or a Debian derived distribution) you should be able to use 
  something like:
-  apt-get install postgresql-8.1 postgresql-server-dev-8.1
+  runtime: apt-get install postgresql-8.1
+  build: apt-get install postgresql-server-dev-8.1
 
 Apache2:
  FOSSology was developed using the Apache2 package included with Debian
@@ -66,8 +69,9 @@ Libraries (see next section to install with apt-get):
 
  On Debian (or a Debian derived distribution) you should be able to use
  something like:
-  apt-get install libmagic-dev libxml2-dev libextractor-dev \
+  runtime: apt-get install libmagic1 libxml2 libextractor1x2a \
 	libextractor-plugins
+  build: apt-get install libmagic-dev libxml2-dev libextractor-dev
 
 External Commands:
 * ar - for extracting archives, from the binutils software
@@ -100,8 +104,18 @@ External Commands:
 
  On Debian (or a Debian derived distribution) you should be able to use 
  something like:
-   apt-get install binutils bzip2 cabextract cpio sleuthkit \
+   runtime: apt-get install binutils bzip2 cabextract cpio sleuthkit \
         mkisofs xpdf-utils rpm tar upx-ucl unrar-free unzip 
+
+Additional build dependencies:
+The fossology build requires gcc, make, perl, and other tools you'd
+expect to find on a development system. In addition the Text::Template
+perl module is needed for processing files in the build tree, and
+subversion is needed to embed version control numbers into the build.
+
+ On Debian (or a Debian derived distribution) you should be able to use 
+ something like:
+   build: apt-get install build-essential libtext-template-perl subversion
 
 *** Adjusting the Kernel ***
 On modern large memory systems(>4gb), the linux kernel needs to be
