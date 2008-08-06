@@ -40,13 +40,13 @@ install: all
 
 uninstall:
 	for file in $(EXE); do \
-		rm -f $(DESTDIR)$(BINDIR)/$$file; \
+		rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
 	done
 
 	rm -f $(DESTDIR)$(LIBDIR)/$(LIB)
 
 	for file in $(MAN1FILES); do \
-		rm -f $(DESTDIR)$(MAN1DIR)/$$file
+		rm -f $(DESTDIR)$(MAN1DIR)/$$file; \
 	done
 
 test: all

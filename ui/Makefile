@@ -53,8 +53,10 @@ uninstall:
 	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 
 	for dir in $(DIRS); do \
-		mkdir -p $(DESTDIR)$(WEBDIR)/$$dir; \
+		rmdir $(DESTDIR)$(WEBDIR)/$$dir; \
 	done
+
+	rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 
 test: all
 	@echo "*** Tests are still run by hand for ui/ ***"
