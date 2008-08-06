@@ -1,19 +1,15 @@
 #! /bin/sh
-# Init script for the scheduler.
-#
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+# Init script for the {$PROJECT} scheduler.
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 #
 # Based on the example skeleton:
 #	Written by Miquel van Smoorenburg <miquels@cistron.nl>.
-#	Modified for Debian 
-#	by Ian Murdock <imurdock@gnu.ai.mit.edu>.
-#	@(#)skeleton  1.9  26-Feb-2001  miquels@cistron.nl
-#
+#	Modified for Debian by Ian Murdock <imurdock@gnu.ai.mit.edu>.
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=LIBEXECDIR/fossology-scheduler
+DAEMON={$LIBEXECDIR}/fossology-scheduler
 NAME=scheduler
-DESC="FOSS analysis job scheduler"
+DESC="FOSSology job scheduler"
 
 test -x $DAEMON || exit 0
 
@@ -22,10 +18,10 @@ ENABLED=1
 
 # Include scheduler defaults if available
 SCHEDULEROPT="-d"
-if [ -f /etc/default/fossology ] ; then
+if [ -f {$PROJECTCONFDIR}/default/fossology ] ; then
 	# This can override SCHEDULEROPT.
 	# Be sure to keep "-d" for daemon mode
-	. /etc/default/fossology
+	. {$PROJECTCONFDIR}/default/fossology
 fi
 
 # Quit quietly, if $ENABLED is 0.
@@ -72,7 +68,7 @@ case "$1" in
 	$DAEMON $SCHEDULEROPT
 	;;
   *)
-	N=/etc/init.d/$NAME
+	N={$PROJECTCONFDIR}/$NAME
 	# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
 	echo "Usage: $N {start|stop|restart|force-reload}" >&2
 	exit 1

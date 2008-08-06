@@ -14,7 +14,10 @@ OBJ=scheduler.o spawn.o sockets.o agents.o hosts.o debug.o dberror.o selftest.o
 # these objects need libfossrepo as well
 REPOOBJ=dbstatus.o dbq.o
 
-all: fossology-scheduler mkschedconf
+INITFILE=init.d/fossology
+CONFFILE=default/fossology fossology/Depth.conf fossology/RepPath.conf fossology/Hosts.conf
+
+all: fossology-scheduler mkschedconf defconf/init.d/fossology
 
 fossology-scheduler: $(OBJ) $(REPOOBJ) $(VARS)
 	$(CC) $(OBJ) $(REPOOBJ) $(FODEF) $(CFLAGS_DB) $(CFLAGS_REPO) \
@@ -23,6 +26,9 @@ fossology-scheduler: $(OBJ) $(REPOOBJ) $(VARS)
 mkschedconf: mkschedconf.c $(REPO) $(VARS)
 	$(CC) $< $(MSCDEF) $(CFLAGS_REPO) $(ALL_CFLAGS) -o $@
 
+# include the preprocessing stuff to generate the init script
+include $(TOP)/Makefile.process
+defconf/init.d/fossology: defconf/init.d/fossology-process
 
 # targets for our needed objects
 $(OBJ): %.o: %.c %.h $(DB) $(VARS)
@@ -36,23 +42,30 @@ install: all
 	$(INSTALL_PROGRAM) fossology-scheduler $(DESTDIR)$(LIBEXECDIR)/fossology-scheduler
 	$(INSTALL_PROGRAM) mkschedconf $(DESTDIR)$(LIBEXECDIR)/mkschedconf
 
-	# init script
-	if [ ! -f $(DESTDIR)/etc/init.d/fossology -o "$(OVERWRITE)" ] ; then \
-		mkdir -p $(DESTDIR)/etc/init.d; \
-		cat init.d | sed -e "s@LIBEXECDIR@$(LIBEXECDIR)@" > $(DESTDIR)/etc/init.d/fossology; \
-	else \
-		echo "WARNING: /etc/init.d/fossology already exists."; \
-		echo "  Not overwriting, consider checking it by hand."; \
-	fi
 
-	# default file
-	if [ ! -f $(DESTDIR)/etc/default/fossology -o "$(OVERWRITE)" ] ; then \
-		mkdir -p $(DESTDIR)/etc/default; \
-		$(INSTALL_DATA) default $(DESTDIR)/etc/default/fossology; \
+	@ echo "Installing configuration files..."
+	@for file in $(CONFFILE); do \
+		if [ ! -f $(DESTDIR)$(PROJECTCONFDIR)/$$file -o "$(OVERWRITE)" ] ; then \
+			mkdir -p $(DESTDIR)$(PROJECTCONFDIR)/$${file%/*}; \
+			echo "NOTE: using default version for $(DESTDIR)$(PROJECTCONFDIR)/$$file"; \
+		 	$(INSTALL) defconf/$$file $(DESTDIR)$(PROJECTCONFDIR)/$$file; \
+		else \
+			echo "WARNING: $(DESTDIR)$(PROJECTCONFDIR)/$$file already exists."; \
+			echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+		fi \
+	done
+
+	@ echo "Installing init script..."
+	@if [ ! -f $(DESTDIR)$(SYSCONFDIR)/$(INITFILE) -o "$(OVERWRITE)" ] ; then \
+		mkdir -p $(DESTDIR)$(SYSCONFDIR)/$(dir $(INITFILE)); \
+		echo "NOTE: using default version for $(DESTDIR)$(SYSCONFDIR)/$(INITFILE)"; \
+	 	$(INSTALL) defconf/$(INITFILE) $(DESTDIR)$(SYSCONFDIR)/$(INITFILE); \
 	else \
-		echo "WARNING: /etc/init.d/fossology already exists."; \
-		echo "  Not overwriting, consider checking it by hand."; \
+		echo "WARNING: $(DESTDIR)$(SYSCONFDIR)/$(INITFILE) already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi
+	@chmod +x $(DESTDIR)$(SYSCONFDIR)/$(INITFILE)
+		
 
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fossology-scheduler
@@ -81,7 +94,7 @@ uninstall:
 	@echo "  Remove by hand if you desire."
 
 clean:
-	rm -f $(OBJ) $(REPOOBJ) core fossology-scheduler mkschedconf
+	rm -f $(OBJ) $(REPOOBJ) core fossology-scheduler mkschedconf defconf/init.d/fossology
 
 test: all
 	@echo "NOTICE: no tests available for scheduler"
