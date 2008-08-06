@@ -5,7 +5,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CONFDEF=-DBINDIR='"$(LIBEXECDIR)"' -DDEFAULTSETUP='"$(SYSCONFDIR)/scheduler.conf"'
+CONFDEF=-DBINDIR='"$(LIBEXECDIR)"' -DDEFAULTSETUP='"$(SYSCONFDIR)/fossology/scheduler.conf"'
 FODEF=-DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
 MSCDEF=-DDATADIR='"$(DATADIR)"' -DBINDIR='"$(LIBEXECDIR)"' -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"'
 
@@ -45,26 +45,26 @@ install: all
 
 	@ echo "Installing configuration files..."
 	@for file in $(CONFFILE); do \
-		if [ ! -f $(DESTDIR)$(PROJECTCONFDIR)/$$file -o "$(OVERWRITE)" ] ; then \
-			mkdir -p $(DESTDIR)$(PROJECTCONFDIR)/$${file%/*}; \
-			echo "NOTE: using default version for $(DESTDIR)$(PROJECTCONFDIR)/$$file"; \
-		 	$(INSTALL) defconf/$$file $(DESTDIR)$(PROJECTCONFDIR)/$$file; \
+		if [ ! -f $(DESTDIR)$(SYSCONFDIR)/$$file -o "$(OVERWRITE)" ] ; then \
+			mkdir -p $(DESTDIR)$(SYSCONFDIR)/$${file%/*}; \
+			echo "NOTE: using default version for $(DESTDIR)$(SYSCONFDIR)/$$file"; \
+		 	$(INSTALL) defconf/$$file $(DESTDIR)$(SYSCONFDIR)/$$file; \
 		else \
-			echo "WARNING: $(DESTDIR)$(PROJECTCONFDIR)/$$file already exists."; \
+			echo "WARNING: $(DESTDIR)$(SYSCONFDIR)/$$file already exists."; \
 			echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 		fi \
 	done
 
 	@ echo "Installing init script..."
-	@if [ ! -f $(DESTDIR)$(SYSCONFDIR)/$(INITFILE) -o "$(OVERWRITE)" ] ; then \
-		mkdir -p $(DESTDIR)$(SYSCONFDIR)/$(dir $(INITFILE)); \
-		echo "NOTE: using default version for $(DESTDIR)$(SYSCONFDIR)/$(INITFILE)"; \
-	 	$(INSTALL) defconf/$(INITFILE) $(DESTDIR)$(SYSCONFDIR)/$(INITFILE); \
+	@if [ ! -f $(DESTDIR)$(INITDIR)/$(INITFILE) -o "$(OVERWRITE)" ] ; then \
+		mkdir -p $(DESTDIR)$(INITDIR)/$(dir $(INITFILE)); \
+		echo "NOTE: using default version for $(DESTDIR)$(INITDIR)/$(INITFILE)"; \
+	 	$(INSTALL) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE); \
 	else \
-		echo "WARNING: $(DESTDIR)$(SYSCONFDIR)/$(INITFILE) already exists."; \
+		echo "WARNING: $(DESTDIR)$(INITDIR)/$(INITFILE) already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi
-	@chmod +x $(DESTDIR)$(SYSCONFDIR)/$(INITFILE)
+	@chmod +x $(DESTDIR)$(INITDIR)/$(INITFILE)
 		
 
 uninstall:
@@ -79,18 +79,20 @@ uninstall:
 		fi; \
 	fi
 
-	@if [ -d $(DESTDIR)$(SYSCONFDIR) ]; then \
-		if [ "`ls -A $(DESTDIR)$(SYSCONFDIR)`" ]; then \
-			echo "WARNING: $(DESTDIR)$(SYSCONFDIR) not empty, not removing";\
+	@if [ -d $(DESTDIR)$(SYSCONFDIR)/fossology ]; then \
+		if [ "`ls -A $(DESTDIR)$(SYSCONFDIR)/fossology`" ]; then \
+			echo "WARNING: $(DESTDIR)$(SYSCONFDIR)/fossology not empty, not removing";\
 		else \
-			rmdir $(DESTDIR)$(SYSCONFDIR); \
+			rmdir $(DESTDIR)$(SYSCONFDIR)/fossology; \
 		fi; \
 	fi
 
 	@echo "WARNING: Cowardly refusing to remove the following"
-	@echo "      $(DESTDIR)$(SYSCONFDIR)/scheduler.conf"
+	@echo "      $(DESTDIR)$(SYSCONFDIR)/fossology/Depth.conf"
+	@echo "      $(DESTDIR)$(SYSCONFDIR)/fossology/Hosts.conf"
+	@echo "      $(DESTDIR)$(SYSCONFDIR)/fossology/RepPath.conf"
 	@echo "      $(DESTDIR)/etc/init.d/fossology"
-	@echo "      $(DESTDIR)/etc/default/fossology"
+	@echo "      $(DESTDIR)$(SYSCONFDIR)/default/fossology"
 	@echo "  Remove by hand if you desire."
 
 clean:

@@ -18,10 +18,10 @@ ENABLED=1
 
 # Include scheduler defaults if available
 SCHEDULEROPT="-d"
-if [ -f {$PROJECTCONFDIR}/default/fossology ] ; then
+if [ -f {$SYSCONFDIR}/default/fossology ] ; then
 	# This can override SCHEDULEROPT.
 	# Be sure to keep "-d" for daemon mode
-	. {$PROJECTCONFDIR}/default/fossology
+	. {$SYSCONFDIR}/default/fossology
 fi
 
 # Quit quietly, if $ENABLED is 0.
@@ -68,7 +68,7 @@ case "$1" in
 	$DAEMON $SCHEDULEROPT
 	;;
   *)
-	N={$PROJECTCONFDIR}/$NAME
+	N={$INITDIR}/init.d/$NAME
 	# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
 	echo "Usage: $N {start|stop|restart|force-reload}" >&2
 	exit 1
