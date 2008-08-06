@@ -19,10 +19,16 @@ TESTDIRS = $(DIRS:%=test-%)
 
 ## Targets
 # build
-all: $(BUILDDIRS)
+all: $(BUILDDIRS) fo-postinstall
 $(DIRS): $(BUILDDIRS)
 $(BUILDDIRS):
 	$(MAKE) -C $(@:build-%=%)
+
+# include the preprocessing stuff
+include Makefile.process
+# generate the postinstall script
+fo-postinstall: fo-postinstall-process
+	chmod +x fo-postinstall
 
 # high level dependencies:
 # the scheduler and agents need the devel stuff built first
@@ -50,6 +56,8 @@ $(TESTDIRS):
 	$(MAKE) -C $(@:test-%=%) test
 
 clean: $(CLEANDIRS)
+	rm -f variable.list fo-postinstall
+
 $(CLEANDIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
 
@@ -67,11 +75,7 @@ dist:
 	./mktar.sh
 
 
-.PHONY: subdirs $(BUILDDIRS)
-.PHONY: subdirs $(DIRS)
-.PHONY: subdirs $(INSTALLDIRS)
-.PHONY: subdirs $(UNINSTALLDIRS)
-.PHONY: subdirs $(TESTDIRS)
-.PHONY: subdirs $(CLEANDIRS)
+.PHONY: $(BUILDDIRS) $(DIRS) $(INSTALLDIRS) $(UNINSTALLDIRS)
+.PHONY: $(TESTDIRS) $(CLEANDIRS)
 .PHONY: all install uninstall clean test utils
 .PHONY: dist dist-testing tar tar-release
