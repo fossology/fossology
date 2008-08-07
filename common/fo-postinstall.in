@@ -111,19 +111,6 @@ fi
 #  chmod 2770 {$PROJECTSTATEDIR}
 #fi
 
-# The repo dir is needed in all cases, but in a multi-machine install it
-# will be nfs mounted from the machine with the scheduler, so we should
-# really only create it if needed on the scheduler machine
-if [ $SCHEDULER ]; then
-   echo "*** Making sure repo exists with right ownership and permissions ***"
-   if [ ! -d "$REPO" ] ; then
-     mkdir -p "$REPO"
-     chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
-     # FIXME: do we really need setgid?
-     #chmod 2770 $REPO
-     chmod 770 $REPO
-   fi
-fi # end of SCHEDULER
 
 # unfinished beyond this point
 echo "Not tested yet, exiting."
@@ -167,65 +154,36 @@ fi
 
 fi # end of DATABASE
 
-## Create repository configuration files
-# The repository is VERY LARGE.  It can easily be on the order of terabytes.
-# Historically, /var is a small partition and a bad place for this.
-# /home usually has space, but is not desirable for application data.
-# /usr and /etc are intended for read-only mounting.  So this is not idea.
-# /srv or /opt is a very good place for it.  But these do not exist on
-# every OS.  /srv is standard as of FHS 2.3 (January 2004).
-# The solution: put the repository in the project's home directory.
-# The admin can always edit \$REPOCONF/RepPath.conf to move it.
-# Just be sure to set the permissions and groups correctly!
-# And I don't recommend using symlinks just because of the overhead from
-# traversing links.
+if [ $SCHEDULER ]; then
+   # The repo dir is needed in all cases, but in a multi-machine install it
+   # will be nfs mounted from the machine with the scheduler, so we should
+   # really only create it if needed on the scheduler machine
+   echo "*** Making sure repo exists with right ownership and permissions ***"
+   if [ ! -d "$REPO" ] ; then
+     mkdir -p "$REPO"
+     chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
+     # FIXME: do we really need setgid?
+     #chmod 2770 $REPO
+     chmod 770 $REPO
+   fi
 
-FIXME STOPPED HERE
-    echo 'localhost * 00 ff' ">" "\$REPOCONF/Hosts.conf"
-  else
-    echo 'localhost * 00 ff' > "\$REPOCONF/Hosts.conf"
-  fi
-  CONFIGOK=0
-  CONFIGREPO=0
-else
-  echo "Configration \$REPOCONF/Hosts.conf already exists. No change."
-fi
+   # scheduler config file
+   # this has to be done after the database is setup
+   # BTW- mkschedconf seems to be hardcoded to use localhost, if that
+   # is ever fixed this code might need to be too
+   SCHEDCONF={$SYSCONFDIR}/fossology/Scheduler.conf
+   if [ ! -f {$SCHEDCONF} -o "$OVERWRITE" ] ; then
+      mkdir -p `dirname {$SCHEDCONF}`
+      {$LIBEXECDIR}/mkschedconf -o {$SCHEDCONF} -L
+      echo "WARNING: default {$SCHEDCONF} created."
+      echo "  Please check that is it correct for your environment or"
+      echo "  create a different one with mkschedconf."
+   else
+      echo "WARNING: {$SCHEDCONF} already exists,"
+      echo "  consider checking it or recreating with mkschedconf."
+   fi
 
-# Define directory for the repo
-REPODIR="\$PROJECTHOME/repository"
-if [ ! -f "\$REPOCONF/RepPath.conf" ] ; then
-  # Set the repository path to the directory "./repository/" in the
-  # user's directory.
-  \$DEBUG \$MKDIR -p "\$REPODIR"
-  \$DEBUG chown -R "\$PROJECTUSER" "\$REPODIR"
-  \$DEBUG chgrp -R "\$PROJECTGROUP" "\$REPODIR"
-  \$DEBUG find "\$REPODIR" -type d -exec chmod 2770 '{}' \;
-  \$DEBUG find "\$REPODIR" -type f -exec chmod 770 '{}' \;
-  if [ "\$DEBUG" != "" ] ; then
-    echo "\$REPODIR/" ">" "\$REPOCONF/RepPath.conf"
-  else
-    echo "\$REPODIR/" > "\$REPOCONF/RepPath.conf"
-  fi
-  echo "The file \$REPOCONF/RepPath.conf points to the repository."
-  echo "  The repository can be a mount point, and should be a large disk space."
-  echo "  If you plan to process ISOs, then consider a terabyte of disk or larger."
-  CONFIGOK=0
-  CONFIGREPO=0
-else
-  echo "Configration \$REPOCONF/RepPath.conf already exists. No change."
-fi
-
-# scheduler config file
-if [ ! -f SYSCONFDIR/scheduler.conf -o "$OVERWRITE" ] ; then
-	mkdir -p SYSCONFDIR
-	BINDIR/fo-mkschedconf -o SYSCONFDIR/scheduler.conf -L
-	echo "WARNING: default SYSCONFDIR/scheduler.conf created."
-	echo "  Please check that is it correct for your environment or"
-	echo "  create a different one with fo-mkschedconf."
-else
-	echo "WARNING: SYSCONFDIR/scheduler.conf already exists,"
-	echo "  consider checking or recreating it with fo-mkschedconf."
-fi
+fi # end of SCHEDULER
 
 ## Create the License.bsam file
 
