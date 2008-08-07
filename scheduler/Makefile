@@ -48,7 +48,7 @@ install: all
 		if [ ! -f $(DESTDIR)$(SYSCONFDIR)/$$file -o "$(OVERWRITE)" ] ; then \
 			mkdir -p $(DESTDIR)$(SYSCONFDIR)/$${file%/*}; \
 			echo "NOTE: using default version for $(DESTDIR)$(SYSCONFDIR)/$$file"; \
-		 	$(INSTALL) defconf/$$file $(DESTDIR)$(SYSCONFDIR)/$$file; \
+		 	$(INSTALL_DATA) defconf/$$file $(DESTDIR)$(SYSCONFDIR)/$$file; \
 		else \
 			echo "WARNING: $(DESTDIR)$(SYSCONFDIR)/$$file already exists."; \
 			echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
@@ -59,12 +59,11 @@ install: all
 	@if [ ! -f $(DESTDIR)$(INITDIR)/$(INITFILE) -o "$(OVERWRITE)" ] ; then \
 		mkdir -p $(DESTDIR)$(INITDIR)/$(dir $(INITFILE)); \
 		echo "NOTE: using default version for $(DESTDIR)$(INITDIR)/$(INITFILE)"; \
-	 	$(INSTALL) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE); \
+	 	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE); \
 	else \
 		echo "WARNING: $(DESTDIR)$(INITDIR)/$(INITFILE) already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi
-	@chmod +x $(DESTDIR)$(INITDIR)/$(INITFILE)
 		
 
 uninstall:
