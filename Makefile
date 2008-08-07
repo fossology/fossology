@@ -5,7 +5,7 @@
 include Makefile.conf
 
 # the directories we do things in by default
-DIRS=devel scheduler agents ui cli
+DIRS=devel scheduler agents ui cli common
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
@@ -19,16 +19,10 @@ TESTDIRS = $(DIRS:%=test-%)
 
 ## Targets
 # build
-all: $(BUILDDIRS) fo-postinstall
+all: $(BUILDDIRS)
 $(DIRS): $(BUILDDIRS)
 $(BUILDDIRS):
 	$(MAKE) -C $(@:build-%=%)
-
-# include the preprocessing stuff
-include Makefile.process
-# generate the postinstall script
-fo-postinstall: fo-postinstall-process
-	chmod +x fo-postinstall
 
 # high level dependencies:
 # the scheduler and agents need the devel stuff built first

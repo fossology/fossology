@@ -6,7 +6,7 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS)
-PROXYDEF=-DPROXYFILE='"$(AGENTDATADIR)/proxy.conf"'
+PROXYDEF=-DPROXYFILE='"$(SYSCONFDIR)/fossology/Proxy.conf"'
 EXE=wget_agent
 CHKHDR=../ununpack/checksum.h ../ununpack/md5.h ../ununpack/sha1.h
 CHKSRC=$(CHKHDR:%.h=%.c)
