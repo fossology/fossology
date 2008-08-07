@@ -15,7 +15,7 @@ OBJ=scheduler.o spawn.o sockets.o agents.o hosts.o debug.o dberror.o selftest.o
 REPOOBJ=dbstatus.o dbq.o
 
 INITFILE=init.d/fossology
-CONFFILE=default/fossology fossology/Depth.conf fossology/RepPath.conf fossology/Hosts.conf
+DEFFILE=default/fossology
 
 all: fossology-scheduler mkschedconf defconf/init.d/fossology
 
@@ -42,18 +42,15 @@ install: all
 	$(INSTALL_PROGRAM) fossology-scheduler $(DESTDIR)$(LIBEXECDIR)/fossology-scheduler
 	$(INSTALL_PROGRAM) mkschedconf $(DESTDIR)$(LIBEXECDIR)/mkschedconf
 
-
-	@ echo "Installing configuration files..."
-	@for file in $(CONFFILE); do \
-		if [ ! -f $(DESTDIR)$(SYSCONFDIR)/$$file -o "$(OVERWRITE)" ] ; then \
-			mkdir -p $(DESTDIR)$(SYSCONFDIR)/$${file%/*}; \
-			echo "NOTE: using default version for $(DESTDIR)$(SYSCONFDIR)/$$file"; \
-		 	$(INSTALL_DATA) defconf/$$file $(DESTDIR)$(SYSCONFDIR)/$$file; \
-		else \
-			echo "WARNING: $(DESTDIR)$(SYSCONFDIR)/$$file already exists."; \
-			echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
-		fi \
-	done
+	@ echo "Installing default file..."
+	if [ ! -f $(DESTDIR)$(SYSCONFDIR)/$(DEFFILE) -o "$(OVERWRITE)" ] ; then \
+		mkdir -p $(DESTDIR)$(SYSCONFDIR)/$(dir $(DEFFILE)); \
+		echo "NOTE: using default version for $(DESTDIR)$(SYSCONFDIR)/$(DEFFILE)"; \
+	 	$(INSTALL_DATA) defconf/$(DEFFILE) $(DESTDIR)$(SYSCONFDIR)/$(DEFFILE); \
+	else \
+		echo "WARNING: $(DESTDIR)$(SYSCONFDIR)/$(DEFFILE) already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+	fi \
 
 	@ echo "Installing init script..."
 	@if [ ! -f $(DESTDIR)$(INITDIR)/$(INITFILE) -o "$(OVERWRITE)" ] ; then \
@@ -87,9 +84,6 @@ uninstall:
 	fi
 
 	@echo "WARNING: Cowardly refusing to remove the following"
-	@echo "      $(DESTDIR)$(SYSCONFDIR)/fossology/Depth.conf"
-	@echo "      $(DESTDIR)$(SYSCONFDIR)/fossology/Hosts.conf"
-	@echo "      $(DESTDIR)$(SYSCONFDIR)/fossology/RepPath.conf"
 	@echo "      $(DESTDIR)/etc/init.d/fossology"
 	@echo "      $(DESTDIR)$(SYSCONFDIR)/default/fossology"
 	@echo "  Remove by hand if you desire."

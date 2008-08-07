@@ -5,8 +5,8 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-PROXY=Proxy.conf
-PROXYPATH=$(SYSCONFDIR)/fossology/$(PROXY)
+CONFFILES=Depth.conf RepPath.conf Hosts.conf Proxy.conf
+CONFPATH=$(SYSCONFDIR)/fossology
 
 all: fo-postinstall
 
@@ -18,17 +18,22 @@ fo-postinstall: fo-postinstall-process
 
 
 install: all
-	@ echo "Installing $(PROXY) ..."
-	if [ ! -f $(DESTDIR)$(PROXYPATH) -o "$(OVERWRITE)" ] ; then \
-		mkdir -p $(DESTDIR)$(dir PROXYPATH); \
-		echo "NOTE: using default version for $(DESTDIR)$(PROXYPATH)"; \
-		$(INSTALL_DATA) $(PROXY) $(DESTDIR)$(PROXYPATH); \
-	else \
-		echo "WARNING: $(DESTDIR)$(PROXYPATH) already exists."; \
-		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+	$(INSTALL_PROGRAM) fo-postinstall $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
+
+	@ echo "Installing configuration files..."
+	if [ ! -e $(DESTDIR)$(CONFPATH) ] ; then \
+		mkdir -p $(DESTDIR)$(CONFPATH); \
 	fi
 
-	$(INSTALL_PROGRAM) fo-postinstall $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
+	@for file in $(CONFFILES); do \
+		if [ ! -f $(DESTDIR)$(CONFPATH)/$$file -o "$(OVERWRITE)" ] ; then \
+			echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/$$file"; \
+		 	$(INSTALL_DATA) defconf/$$file $(DESTDIR)$(CONFPATH)/$$file; \
+		else \
+			echo "WARNING: $(DESTDIR)$(CONFPATH)/$$file already exists."; \
+			echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+		fi \
+	done
 
 
 uninstall:
@@ -43,7 +48,10 @@ uninstall:
 	fi
 
 	@echo "WARNING: Cowardly refusing to remove the following"
-	@echo "      $(DESTDIR)$(SYSCONFDIR)/fossology/Proxy.conf"
+	@echo "      $(DESTDIR)$(CONFPATH)/Depth.conf"
+	@echo "      $(DESTDIR)$(CONFPATH)/Hosts.conf"
+	@echo "      $(DESTDIR)$(CONFPATH)/Proxy.conf"
+	@echo "      $(DESTDIR)$(CONFPATH)/RepPath.conf"
 	@echo "  Remove by hand if you desire."
 
 
