@@ -148,12 +148,12 @@ class upload_srv_files extends FO_Plugin {
 	if (!empty($SourceFiles) && !empty($FolderPk))
 	  {
 	  $rc = $this->Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name);
-	  if (empty($rc)) 
+	  if (empty($rc))
 	    {
 	    // Need to refresh the screen
 	    $V .= PopupAlert("Upload jobs for $Path added to job queue");
 	    }
-	  else 
+	  else
 	    {
 	    $V .= PopupAlert("Upload failed: $rc");
 	    }
@@ -170,7 +170,8 @@ class upload_srv_files extends FO_Plugin {
 	$V .= "<ol>\n";
 	$V .= "<li>Select the folder for storing the upload:\n";
 	$V .= "<select name='folder'>\n";
-	$V .= FolderListOption($FolderPk,0);
+	//$V .= FolderListOption($FolderPk,0);
+  $V .= FolderListOption(-1,0);
 	$V .= "</select>\n";
 	$V .= "<p><li>Select the directory or file(s) on the server to upload:<br />\n";
 	$V .= "<input type='text' name='sourcefiles' size='60' value='" . htmlentities($SourceFiles,ENT_QUOTES) . "'/><br />\n";
