@@ -19,9 +19,9 @@
 
 /**************************************************************
  cp2foss
- 
+
  Import a file (or directory) into FOSSology for processing.
- 
+
  @return 0 for success, 1 for failure.
  *************************************************************/
 
@@ -137,10 +137,17 @@ function GetFolder	($FolderPath, $Parent=NULL)
   global $DB;
   global $Verbose;
   global $Test;
+
+  //print "  Getting Folder path: '$FolderPath'\n";
+  //print "  Parent is: '$Parent'\n";
   if (empty($Parent)) { $Parent = FolderGetTop(); }
   if (empty($FolderPath)) { return($Parent); }
   list($Folder,$FolderPath) = split('/',$FolderPath,2);
-  if (empty($Folder)) { return(GetFolder($FolderPath,$Parent)); }
+  if (empty($Folder))
+  {
+    //print "  Calling GetFolder with: '$FolderPath''$Parent'\n";
+    return(GetFolder($FolderPath,$Parent));
+  }
 
   /* See if it exists */
   $SQLFolder = str_replace("'","''",$Folder);
@@ -251,7 +258,7 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription,$T
       {
       case 'agent_unpack':	$Cmd=""; break; /* already scheduled */
       case 'ALL':
-      case 'all':	
+      case 'all':
 	$Cmd = "fossjobs.php -U '$UploadPk'";
 	break;
       default:
@@ -289,11 +296,17 @@ for($i=1; $i < $argc; $i++)
     case '-p': /* depricated 'path' to folder */
 	$i++; $FolderPath = $argv[$i];
 	/* idiot check for absolute paths */
+  //print "  Before Idiot Checks: '$FolderPath'\n";
 	$FolderPath = preg_replace('@^/*@',"",$FolderPath);
 	$FolderPath = preg_replace('@/*$@',"",$FolderPath);
-	$FolderPath = preg_replace("@^System Repository/@","",$FolderPath);
+  /* Note: the pattern below should probably be generalized to remove everything
+   * up to and including the 1st /, This pattern works in what I've
+   * tested: @^.*\/@ ( I had to escape the / so the comment works!)
+   */
+	$FolderPath = preg_replace("@^S.*? Repository/@","",$FolderPath);
 	$FolderPath = preg_replace('@//*@',"/",$FolderPath);
 	$FolderPath = '/' . $FolderPath;
+  //print "  AFTER Idiot Checks: '$FolderPath'\n";
 	break;
     case '-R': /* obsolete: recurse directories */
     case '-w': /* obsolete: URL switch to use wget */
@@ -356,6 +369,7 @@ for($i=1; $i < $argc; $i++)
 	$UploadArchive = $argv[$i];
 	print "Loading $UploadArchive\n";
 	if (empty($UploadName)) { $UploadName = basename($UploadArchive); }
+  //print "  CAlling UploadOne in 'main': '$FolderPath'\n";
 	UploadOne($FolderPath,$UploadArchive,$UploadName,$UploadDescription);
 
 	/* prepare for next parameter */
