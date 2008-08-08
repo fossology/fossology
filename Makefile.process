@@ -12,15 +12,18 @@ endif
 
 VARIABLES := PROJECT VERSION PROJECTUSER PROJECTGROUP DESTDIR PREFIX BINDIR SBINDIR SYSCONFDIR INITDIR LIBDIR INCLUDEDIR LIBEXECDIR DATAROOTDIR DATADIR LOCALSTATEDIR PROJECTSTATEDIR MANDIR MAN1DIR DOCDIR WEBDIR PHPDIR AGENTDIR AGENTDATADIR AGENTSTATEDIR AGENTCHECKDDIR AGENTTESTDDIR SVN_REV
 
-%-process: %.in $(TOP)/variable.list
+%-process: %.in
+	@ echo "Regenerating variables list ..."
+	@rm -f $(TOP)/variable.list
+	@TOP=$(TOP) $(MAKE) -f $(TOP)/Makefile.process $(TOP)/variable.list
 	@echo "Generate $* ..."
 	$(TOP)/utils/preprocess $(TOP)/variable.list $< > $*
 
 $(TOP)/variable.list: $(TOP)/Makefile.conf
-	TOP=$(TOP) $(MAKE) -f $(TOP)/Makefile.process $(VARIABLES)
+	@TOP=$(TOP) $(MAKE) -f $(TOP)/Makefile.process $(VARIABLES)
 
 $(VARIABLES):
-	if [ "$@" = "PROJECT" ]; then \
+	@if [ "$@" = "PROJECT" ]; then \
 	   echo "$@=\"$($@)\"" >$(TOP)/variable.list; \
 	else \
 	  echo "$@=\"$($@)\"" >>$(TOP)/variable.list; \
