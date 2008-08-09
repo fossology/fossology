@@ -1,5 +1,6 @@
 <?php
 
+
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -18,9 +19,10 @@
  ***********************************************************/
 
 /**
- * Upload a file using the UI
+ * Upload a file from the server using the UI
  *
  *@TODO need to make sure testing folder exists....
+ *@TODO needs setup and account to really work well...
  *
  * @version "$Id: $"
  *
@@ -28,8 +30,13 @@
  */
 
 /*
- * Yuk! This test is ugly!  NOTE: Will need to set a proxy for this to
- * work inside hp.
+ * NOTE this test is difficult in that the material uploaded MUST be
+ * available to the test.  If multiple agent systems are used, then the
+ * material must be available there as well.
+ *
+ * One possibility is to modify the readme to include the creation of
+ * a test user and material.  Since it takes sudo, the test cannot
+ * automatically do it. Well it could, but it's a bad idea.
  */
 
 require_once ('../../../../tests/fossologyWebTestCase.php');
@@ -39,12 +46,18 @@ global $URL;
 
 class UploadUrlTest extends fossologyWebTestCase
 {
+  function setUp()
+  {
+    /* check to see if the user and material exist*/
+    $this->assertTrue(file_exists('/home/fossTester/.bashrc'));
+    $this->assertTrue(file_exists('/home/fossTester/xxxxx'));
+  }
 
-  function testUploadUrl()
+  function testUploadUSrv()
   {
     global $URL;
 
-    print "starting UploadUrlTest\n";
+    print "starting UploadUSrvTest\n";
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $browser = & new SimpleBrowser();
     $page = $browser->get($URL);
@@ -55,33 +68,34 @@ class UploadUrlTest extends fossologyWebTestCase
     $browser->setCookie('Login', $cookie, $host);
 
     $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
-    $this->assertTrue($this->assertText($loggedIn, '/From URL/'));
-    $page = $browser->get("$URL?mod=upload_url");
-    $this->assertTrue($this->assertText($page, '/Upload from URL/'));
-    $this->assertTrue($this->assertText($page, '/Enter the URL to the file:/'));
+    $this->assertTrue($this->assertText($loggedIn, '/Upload/'),
+                      'Did not find Upload Menu');
+    $this->assertTrue($this->assertText($loggedIn, '/From Server/'),
+                      'Did not find From Server Menu');
 
-    /* select Testing folder, filename based on pid or session number */
+    $page = $browser->get("$URL?mod=upload_srv_files");
+    $this->assertTrue($this->assertText($page, '/Upload from Server/'),
+                      'Did not find Upload from Server Title');
+    $this->assertTrue($this->assertText($page, '/on the server to upload:/'),
+                      'Did not find the sourcefile Selection Text');
 
-    /* NOTE: the test below will break.  Need to dynamically determine
-     * the value(number) from the form. The value below is from sirius.
-     */
+    /* select Testing folder */
+
     $FolderId = $this->getFolderId('Testing', $page);
     $this->assertTrue($browser->setField('folder', $FolderId));
-    $simpletest = 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz';
-    $this->assertTrue($browser->setField('geturl', $simpletest));
-    $desc = 'File uploaded by test UploadUrlTest';
+    $this->assertTrue($browser->setField('sourcefiles', '/home/fosstester/simpletest_1.0.1.tar.gz'));
+    $desc = 'File uploaded by test UploadSrvTest to folder Testing';
     $this->assertTrue($browser->setField('description', "$desc"));
-    $id = getmypid();
-    $upload_name = 'TestUploadUrl-' . "$id";
-    $this->assertTrue($browser->setField('name', $upload_name));
+    //$id = getmypid();
+    //$upload_name = 'TestUploadUrl-' . "$id";
+    //$this->assertTrue($browser->setField('name', $upload_name));
     /* we won't select any agents this time' */
     $this->assertTrue($browser->clickSubmit('Upload!'));
     /* normally we would check for the H3 Alert text, but it is not showing
      * up.
-     * $page = $browser->getContent();
-     * print  "************ page after Upload! *************\n$page\n";
-     */
+     * */
+    $page = $browser->getContent();
+    print "************ page after Upload! *************\n$page\n";
   }
 }
 ?>
