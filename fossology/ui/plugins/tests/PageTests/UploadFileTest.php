@@ -20,15 +20,16 @@
  * Upload a file using the UI
  *
  *
+ *@TODO need to make sure testing folder exists....
+ *
  * @version "$Id: $"
  *
  * Created on Aug 1, 2008
  */
 
  /*
-  * Yuk! This test is ugly!  It wants to pick a file from the system you
-  * are running on?....hmmm let's just try to specify a file and see
-  * what happens.'
+  * Yuk! This test is ugly! May Need A proxy for this test to work
+  * inside hp.
   */
 
 require_once ('../../../../tests/fossologyWebTestCase.php');
@@ -64,8 +65,7 @@ class UploadFileTest extends fossologyWebTestCase
     /* NOTE: the test below will break.  Need to dynamically determine
      * the value(number) from the form. The value below is from sirius.
      */
-    $id = $this->getFolderId($folder_name, $page);
-    print "DB: TUF: id is:$id\n";
+    $id = $this->getFolderId('Testing', $page);
     $this->assertTrue($browser->setField('folder', $id));
     $this->assertTrue($browser->setField('getfile', './TestData/gplv2.1' ));
     $desc = 'File uploaded by test UploadFileTest';
