@@ -21,14 +21,14 @@
 #
 # NOTE: assumes being executed from the sources!
 #
-# Best if run as fosstester.
+# must be run as fosstester.
 #
 thisdir=`pwd`
 error_cnt=0
 
 if [ -r ./TestData/fosstester/ReadMe ]
 then
-	#cp ./TestData/fosstester/\.* ~fosstester
+	cp -R ./TestData/fosstester/\.* ~fosstester
 	cp -R ./TestData/fosstester/* ~fosstester
 else
 	echo "ERROR! fosstester environment could not be found in $thisdir/TestData/fosstester/"
@@ -37,7 +37,7 @@ fi
 
 if [ -d ./TestData/archives ]
 then
-	cp -R ./TestData/archives/* ~fosstester
+	cp -R ./TestData/archives ~fosstester
 else
 	echo "ERROR! no $thisdir/TestData/archives directory found, could not install archives for testing"
 	let $error_cnt += 1
@@ -45,7 +45,7 @@ fi
 
 if [ -d ./TestData/licenses ]
 then
-	cp -R ./TestData/licenses/* ~fosstester
+	cp -R ./TestData/licenses ~fosstester
 else
 	echo "ERROR! no $thisdir/TestData/license directory found, could not install licenses for testing"
 	let $error_cnt += 1
