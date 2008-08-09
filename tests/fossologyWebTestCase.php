@@ -45,6 +45,11 @@ if (!defined('SIMPLE_TEST'))
 require_once SIMPLE_TEST . 'unit_tester.php';
 require_once SIMPLE_TEST . 'reporter.php';
 require_once SIMPLE_TEST . 'web_tester.php';
+require_once ('../../../../tests/TestEnvironment.php');
+
+global $URL;
+global $USER;
+global $PASSWORD;
 
 /* does the path need to be modified?, I don't recommend running the
  * ../copy of the program to test.  I think the test should define/create
@@ -88,20 +93,23 @@ class fossologyWebTestCase extends WebTestCase
 
   public function repoLogin($browser = NULL, $user = 'fossy', $password = 'fossy')
   {
+    global $URL;
+    global $USER;
+    global $PASSWORD;
     $page = NULL;
     $cookieValue = NULL;
 
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     if (is_null($browser))
     {
       $browser = & new SimpleBrowser();
     }
+    $host = $this->getHost($URL);
     $this->assertTrue(is_object($browser));
     $browser->useCookies();
-    $cookieValue = $browser->getCookieValue('osrb-1.fc.hp.com', '/', 'Login');
+    $cookieValue = $browser->getCookieValue($host, '/', 'Login');
     // need to check $cookieValue for validity
-    $browser->setCookie('Login', $cookieValue, 'osrb-1.fc.hp.com');
-    $this->assertTrue($browser->get('http://osrb-1.fc.hp.com/repo/?mod=auth&nopopup=1'));
+    $browser->setCookie('Login', $cookieValue, $host);
+    $this->assertTrue($browser->get("$URL?mod=auth&nopopup=1"));
     $this->assertTrue($browser->setField('username', $user));
     $this->assertTrue($browser->setField('password', $password));
     $this->assertTrue($browser->isSubmit('Login'));
@@ -109,7 +117,7 @@ class fossologyWebTestCase extends WebTestCase
     $page = $browser->getContent();
     preg_match('/User Logged In/', $page, $matches);
     $this->assertTrue($matches, "Login PASSED");
-    $browser->setCookie('Login', $cv, 'osrb-1.fc.hp.com');
+    $browser->setCookie('Login', $cookieValue, $host);
     $page = $browser->getContent();
     $NumMatches = preg_match('/User Logged Out/', $page, $matches);
     $this->assertFalse($NumMatches, "User Logged out!, Login Failed! %s");
@@ -131,11 +139,49 @@ class fossologyWebTestCase extends WebTestCase
     $NumMatches = preg_match($pattern, $page, $matches);
     //print "*** assertText: matches is:***\n";
     //$this->dump($matches);
-    if(NumMatches)
+    if($NumMatches)
     {
       return(TRUE);
     }
     return(FALSE);
+  }
+
+  /**
+   * public function getHost
+   *
+   * @param string $URL a url in the form of http://somehost.xx.com/repo/
+   *
+   * @return string $host he somehost.xx.com part is returned
+   *
+   * @TODO generalize so you don't depend on /repo/
+   */
+  public function getHost($URL)
+  {
+    if(empty($URL))
+    {
+      return('localhost');
+    }
+    $temp = rtrim($URL, '/repo/\n');
+    $host = ltrim($temp, 'http://');
+    //print "DB GHost: host is:$host\n";
+    return($host);
+  }
+
+  /**
+   * parse the folder id out of the html...
+   *
+   * @TODO see if you can somehow use the ui routine instead!  much
+   * better.... (talk with neal as don't want to have to be a class of
+   * that type...?')
+   */
+  public function getFolderId($folderName, $page)
+  {
+    // this function doesn't work!
+    /* no error checks for now, may use the ui */
+    $found = preg_match("/.*value='([0-9].*?)'.*?;($folderName)<\//", $page, $matches);
+    //print "DB: matches is:\n";
+    //var_dump($matches) . "\n";
+    return($matches[1]);
   }
 
   public function getUrl()
