@@ -63,25 +63,21 @@ class UploadUrlTest extends fossologyWebTestCase
 
     /* select Testing folder, filename based on pid or session number */
 
-    /* NOTE: the test below will break.  Need to dynamically determine
-     * the value(number) from the form. The value below is from sirius.
-     */
     $FolderId = $this->getFolderId('Testing', $page);
     $this->assertTrue($browser->setField('folder', $FolderId));
     $simpletest = 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz';
     $this->assertTrue($browser->setField('geturl', $simpletest));
     $desc = 'File uploaded by test UploadUrlTest';
     $this->assertTrue($browser->setField('description', "$desc"));
-    $id = getmypid();
-    $upload_name = 'TestUploadUrl-' . "$id";
+    $pid = getmypid();
+    $upload_name = 'TestUploadUrl-' . "$pid";
     $this->assertTrue($browser->setField('name', $upload_name));
     /* we won't select any agents this time' */
-    $this->assertTrue($browser->clickSubmit('Upload!'));
-    /* normally we would check for the H3 Alert text, but it is not showing
-     * up.
-     * $page = $browser->getContent();
-     * print  "************ page after Upload! *************\n$page\n";
-     */
+    $page = $browser->clickSubmit('Upload!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->assertText($page, '/Upload added to job queue/'));
+
+    //print  "************ page after Upload! *************\n$page\n";
   }
 }
 ?>
