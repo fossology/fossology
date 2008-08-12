@@ -32,8 +32,11 @@ require_once ('../../../../tests/fossologyWebTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 $test = &new TestSuite('Fossology Repo UI Page Functional tests');
-//$test->addTestFile('UploadFileTest.php');
+$test->addTestFile('UploadFileTest.php');
 $test->addTestFile('UploadUrlTest.php');
+$test->addTestFile('UploadSrvTest.php');
+$test->addTestFile('OneShot-lgpl2.1.php');
+$test->addTestFile('OneShot-lgpl2.1-T.php');
 
 if (TextReporter::inCli())
 {
