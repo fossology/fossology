@@ -1666,7 +1666,7 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
       Seq=0;
       }
     }
-  if (Seq >= MatchSeq[0]) { GotMax = b; }
+  if (Seq >= MatchSeq[0]) { GotMax = a; }
   if (GotMin < *MinA) GotMin=*MinA;
   if (GotMax > *MaxA) GotMax=*MaxA;
 
