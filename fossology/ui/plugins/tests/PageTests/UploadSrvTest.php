@@ -89,12 +89,13 @@ class UploadSrvTest extends fossologyWebTestCase
     $desc = 'File uploaded by test UploadSrvTest to folder Testing';
     $this->assertTrue($browser->setField('description', "$desc"));
     /* we won't select any agents this time' */
-    $this->assertTrue($browser->clickSubmit('Upload!'));
-    /* normally we would check for the H3 Alert text, but it is not showing
-     * up.
-     * */
-    //$page = $browser->getContent();
-    //print "************ page after Upload! *************\n$page\n";
+    $page = $browser->clickSubmit('Upload!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->assertText($page,
+                     '/Upload jobs for \/home\/fosstester\/archives\/simpletest_1\.0\.1\.tar\.gz/'),
+                      "FAIL! Did not match Upload message\n");
+
+    print "************ page after Upload! *************\n$page\n";
   }
 }
 ?>

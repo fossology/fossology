@@ -62,9 +62,6 @@ class UploadFileTest extends fossologyWebTestCase
     $this->assertTrue($this->assertText($page, '/Select the file to upload:/'));
     /* select Testing folder, filename based on pid or session number */
 
-    /* NOTE: the test below will break.  Need to dynamically determine
-     * the value(number) from the form. The value below is from sirius.
-     */
     $id = $this->getFolderId('Testing', $page);
     $this->assertTrue($browser->setField('folder', $id));
     $this->assertTrue($browser->setField('getfile', './TestData/gplv2.1' ));
@@ -74,10 +71,10 @@ class UploadFileTest extends fossologyWebTestCase
     $upload_name = 'TestUploadFile-' . "$id";
     $this->assertTrue($browser->setField('name', $upload_name ));
     /* we won't select any agents this time' */
-    $this->assertTrue($browser->clickSubmit('Upload!'));
-    /* normally we would check for the H3 Alert text, but it is not showing
-     * up.
-     */
+    $page = $browser->clickSubmit('Upload!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->assertText($page, '/Upload added to job queue/'));
+    print "*********** Page after upload **************\n$page\n";
   }
 }
 
