@@ -26,17 +26,7 @@
  *
  * @version "$Id: $"
  *
- * Created on Aug 1, 2008
- */
-
-/*
- * NOTE this test is difficult in that the material uploaded MUST be
- * available to the test.  If multiple agent systems are used, then the
- * material must be available there as well.
- *
- * One possibility is to modify the readme to include the creation of
- * a test user and material.  Since it takes sudo, the test cannot
- * automatically do it. Well it could, but it's a bad idea.
+ * Created on Aug 11, 2008
  */
 
 require_once ('../../../../tests/fossologyWebTestCase.php');
@@ -44,7 +34,7 @@ require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class UploadSrvTest extends fossologyWebTestCase
+class OneShotTablegplv21Test extends fossologyWebTestCase
 {
   function setUp()
   {
@@ -55,11 +45,11 @@ class UploadSrvTest extends fossologyWebTestCase
                       "FAILURE! Readme in ~fosstester not found\n");
   }
 
-  function testUploadUSrv()
+  function testOneShotTablegplv21()
   {
     global $URL;
 
-    print "starting UploadUSrvTest\n";
+    print "starting OneShotgplv21Test-Table\n";
     $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
     $browser = & new SimpleBrowser();
     $page = $browser->get($URL);
@@ -71,30 +61,33 @@ class UploadSrvTest extends fossologyWebTestCase
 
     $loggedIn = $browser->get($URL);
     $this->assertTrue($this->assertText($loggedIn, '/Upload/'),
-                      'Did not find Upload Menu');
-    $this->assertTrue($this->assertText($loggedIn, '/From Server/'),
-                      'Did not find From Server Menu');
+                      "FAIL! Did not find Upload Menu\n");
+    $this->assertTrue($this->assertText($loggedIn, '/One-Shot License/'),
+                      "FAIL! Did not find One-Shot License Menu\n");
 
-    $page = $browser->get("$URL?mod=upload_srv_files");
-    $this->assertTrue($this->assertText($page, '/Upload from Server/'),
-                      'Did not find Upload from Server Title');
-    $this->assertTrue($this->assertText($page, '/on the server to upload:/'),
-                      'Did not find the sourcefile Selection Text');
+    $page = $browser->get("$URL?mod=agent_license_once");
+    $this->assertTrue($this->assertText($page, '/One-Shot License Analysis/'),
+                      "FAIL! Did not find One-Shot License Analysis Title\n");
+    $this->assertTrue($this->assertText($page, '/The analysis is done in real-time/'),
+                      "FAIL! Did not find real-time Text\n");
 
-    /* select Testing folder */
-
-    $FolderId = $this->getFolderId('Testing', $page);
-    $this->assertTrue($browser->setField('folder', $FolderId));
-    $this->assertTrue($browser->setField('sourcefiles', '/home/fosstester/archives/simpletest_1.0.1.tar.gz'));
-    $desc = 'File uploaded by test UploadSrvTest to folder Testing';
-    $this->assertTrue($browser->setField('description', "$desc"));
-    /* we won't select any agents this time' */
-    $this->assertTrue($browser->clickSubmit('Upload!'));
-    /* normally we would check for the H3 Alert text, but it is not showing
-     * up.
-     * */
-    //$page = $browser->getContent();
-    //print "************ page after Upload! *************\n$page\n";
+    $this->assertTrue($browser->setField('licfile', '/home/fosstester/licenses/gplv2.1'));
+    /* select highlights' */
+    $this->assertTrue($browser->setField('highlight', 1),
+                      "FAIL! Count not click  highlight\n");
+    $this->assertTrue($browser->clickSubmit('Analyze!'),
+                      "FAIL! Count not click Analyze button\n");
+    /* Check for the correct analysis....it should be 100% match, no partials */
+    $page = $browser->getContentAsText();
+    //print "************ page a text (after analysis) *************\n$ct\n";
+    $this->assertTrue($this->assertText($page, '/One-Shot License Analysis/'),
+                      "FAIL! Did not find One-Shot License Analysis Title\n");
+    $this->assertTrue($this->assertText($page, '/Match/'),
+                      "FAIL! Did not find text 'Match' \n");
+    $this->assertTrue($this->assertText($page, '/100% view LGPL v2\.1/'),
+                      "FAIL! Did not find '100% view LGPL v2.1' \n");
+    $this->assertFalse($this->assertText($page, '/-partial/'),
+                      "FAIL! Found -partial in a non partial license file\n");
   }
 }
 ?>
