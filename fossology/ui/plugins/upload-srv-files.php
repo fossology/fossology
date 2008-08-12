@@ -78,6 +78,10 @@ class upload_srv_files extends FO_Plugin {
       $Name = str_replace('$','\$',$Name);
       $CMD .= " -n \"$Name\"";
       }
+    else
+    {
+      $Name = $SourceFiles;
+    }
 
     /* Check for specified agent analysis */
     $AgentList = menu_find("Agents",$Depth);
@@ -151,7 +155,7 @@ class upload_srv_files extends FO_Plugin {
 	  if (empty($rc))
 	    {
 	    // Need to refresh the screen
-	    $V .= PopupAlert("Upload jobs for $Path added to job queue");
+	    $V .= PopupAlert("Upload jobs for $SourceFiles added to job queue");
 	    }
 	  else
 	    {
