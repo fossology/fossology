@@ -17,7 +17,7 @@
  ***********************************************************/
 
 /**
- * Template to use for a simpletest test
+ * Delete a folder
  *
  * @param
  *
@@ -28,16 +28,12 @@
  * Created on Aug 1, 2008
  */
 
-/* every test must use these includes, adjust the paths based on where the
- * tests are in the source tree.
- */
+
 require_once ('../../../../tests/fossologyWebTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 /* every test must use these globals, at least $URL */
 global $URL;
-
-/* The class name should end in Test */
 
 class DeleteFolderTest extends fossologyWebTestCase
 {
