@@ -461,6 +461,10 @@
   /* Canonical name: 87 */
   $Term["Public Domain"]["Desc"]="Generic Public Domain";
   $Term["Public Domain"]["Term"][0]="public domain";
+  /* Canonical name: 133 */
+  $Term["Python CNRI"]["Desc"]="Python CNRI";
+  $Term["Python CNRI"]["License"][0]="Python/Python CNRI v1.6";
+  $Term["Python CNRI"]["License"][1]="Python/Python CNRI v1.6.1";
   /* Canonical name: 97 */
   $Term["Python v2.2"]["Desc"]="Python v2.2 License";
   $Term["Python v2.2"]["Term"][0]="python 2 2 license";
