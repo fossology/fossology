@@ -137,7 +137,7 @@ class fossologyWebTestCase extends WebTestCase
   public function assertText($page, $pattern)
   {
     $NumMatches = preg_match($pattern, $page, $matches);
-    //print "*** assertText: matches is:***\n";
+    //print "*** assertText: NumMatches is:$NumMatches\nmatches is:***\n";
     //$this->dump($matches);
     if($NumMatches)
     {

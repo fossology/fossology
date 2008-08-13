@@ -44,15 +44,27 @@ global $PASSWORD;
 /* NOTE: You MUST remove the abstract or the test will not get run */
 abstract class someTest extends fossologyWebTestCase
 {
+  public $mybrowser;
+  public $someOtherVariable;
 
   /*
-   * if you need to do some setup for the test, define a setup function
-   * and the test framework will call in when the class is run.
+   * Every Test needs to login so we use the setUp method for that.
+   * setUp is called before any other method by default.
+   *
+   * If other actions like creating a folder or something are needed,
+   * put them in the setUp method after login.
+   *
    */
-  function setup()
+  function setUp()
   {
     global $URL;
-    return TRUE;
+    $this->mybrowser = & new SimpleBrowser();
+    $this->assertTrue(is_object($this->mybrowser));
+    $page = $this->mybrowser->get($URL);
+    $this->assertTrue($page);
+    $cookie = $this->repoLogin($this->mybrowser);
+    $host = $this->getHost($URL);
+    $this->mybrowser->setCookie('Login', $cookie, $host);
   }
 
   /*
@@ -75,19 +87,23 @@ abstract class someTest extends fossologyWebTestCase
     global $URL;
 
     print "starting testSome\n";
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
 
-    /* at this point the test is ready to naviate to the url is wants to
+    /* at this point the test is ready to naviate to the url it wants to
      * test and starts testing.
+     *
+     * For example, the lines below navigate to the browse screen and
+     * look for a title called Folder Navigation and the standard root
+     * folder (Software Repository.)
+     *
+     * Just for fun it checks to see if /tmp exists. :)
      */
-
-    $this->assertTrue(is_dir('/tmp'), "this is true");
+    $page = $this->mybrowser->get("$URL?mod=browse");
+    $this->assertTrue(assertText('/Folder Navigation/'),
+                      "FAIL! There is no Folder Navigation Title\n");
+    $this->assertTrue(assertText('/>S.*?y<//'),
+                      "FAIL! There is no Root Folder!\n");
+    $this->assertTrue(is_dir('/tmp'),
+                      "FAIL! There is no /tmp\n");
   }
 }
 
