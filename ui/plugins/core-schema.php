@@ -176,6 +176,40 @@ LANGUAGE plpgsql;
         $DB->Action("UPDATE jobqueue SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0 WHERE jq_type = 'mimetype';");
 	}
       }
+
+    /***************************  release 0.10  ********************************/
+    /* if pfile_fk or ufile_mode don't exist in table uploadtree 
+      * create them and populate them from ufile table    
+      * Leave the ufile columns there for now  */
+     if (!$DB->ColExist("uploadtree", "pfile_fk"))
+     {
+         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN pfile_fk integer" );
+         $DB->Action("UPDATE uploadtree SET pfile_fk=(SELECT pfile_fk FROM ufile WHERE uploadtree.ufile_fk=ufile_pk)");
+     }
+
+     /* Move ufile_mode and ufile_name from ufile table to uploadtree table */
+     if (!$DB->ColExist("uploadtree", "ufile_mode"))
+     {
+         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN ufile_mode integer" );
+         $DB->Action("UPDATE uploadtree SET ufile_mode=(SELECT ufile_mode FROM ufile WHERE uploadtree.ufile_fk=ufile_pk)");
+     }
+     if (!$DB->ColExist("uploadtree", "ufile_name"))
+     {
+         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN ufile_name text" );
+         $DB->Action("UPDATE uploadtree SET ufile_text=(SELECT ufile_text FROM ufile WHERE uploadtree.ufile_fk=ufile_pk)");
+     }
+
+     /* Make sure lft, rgt are in uploadtree, they will need adj2nest to populate */
+     if (!$DB->ColExist("uploadtree", "lft"))
+     {
+         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN lft integer" );
+         $DB->Action( "CREATE INDEX lft_idx ON uploadtree USING btree (lft)");
+     }
+     if (!$DB->ColExist("uploadtree", "rgt"))
+     {
+         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN rgt integer" );
+     }
+
     } // Install()
 
   }; // class core_schema

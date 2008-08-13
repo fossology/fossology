@@ -50,21 +50,6 @@ class agent_unpack extends FO_Plugin
      global $DB;
      if (empty($DB)) { return(1); } /* No DB */
 
-     /* if pfile_fk or ufile_mode don't exist in table uploadtree 
-      * create them and populate them from ufile table    
-      * Leave the ufile columns there for now  */
-     if (!$DB->ColExist("uploadtree", "pfile_fk"))
-     {
-         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN pfile_fk integer" );
-         $DB->Action("UPDATE uploadtree SET pfile_fk=(SELECT pfile_fk FROM ufile WHERE uploadtree.ufile_fk=ufile_pk)");
-     }
-
-     if (!$DB->ColExist("uploadtree", "ufile_mode"))
-     {
-         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN ufile_mode integer" );
-         $DB->Action("UPDATE uploadtree SET ufile_mode=(SELECT ufile_mode FROM ufile WHERE uploadtree.ufile_fk=ufile_pk)");
-     }
-
      return(0);
    } // Install()
 
@@ -100,6 +85,7 @@ class agent_unpack extends FO_Plugin
     if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
     if (!empty($Depends) && !is_array($Depends)) { $Depends = array($Depends); }
 
+/*******  NEED TO CHANGE UNPACK TO NOT USE UFILE_PK  CHANGE THIS********/
     /* Prepare the job: job "unpack" has jobqueue item "unpack" */
     $jqargs = "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile,
             upload.upload_pk, ufile_pk, pfile_fk

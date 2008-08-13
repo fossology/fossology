@@ -568,7 +568,8 @@ class licgroup extends FO_Plugin
 
       if (Iscontainer($C['ufile_mode']))
 	{
-	$LicUri = "$Uri&item=" . DirGetNonArtifact($C['uploadtree_pk']);
+	$uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
+	$LicUri = "$Uri&item=" . $uploadtree_pk;
 	}
       else
 	{
@@ -829,7 +830,7 @@ class licgroup extends FO_Plugin
 	/************************/
 	/* Show the folder path */
 	/************************/
-	$V .= Dir2Browse($this->Name,$Item,-1,NULL,1,"Browse") . "<P />\n";
+	$V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
 
 	/******************************/
 	/* Get the folder description */

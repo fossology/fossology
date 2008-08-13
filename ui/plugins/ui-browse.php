@@ -79,12 +79,12 @@ class ui_browse extends FO_Plugin
   function ShowItem($Upload,$Item,$Show,$Folder)
     {
     global $Plugins;
-    $V="";
     global $DB;
+    $V="";
+
     /* Use plugin "view" and "download" if they exist. */
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
     $MenuPfile = menu_find("Browse-Pfile",$MenuDepth);
-    $MenuUfile = menu_find("Browse-Ufile",$MenuDepth);
 
     /* Grab the directory */
     $Results = DirGetList($Upload,$Item);
@@ -155,11 +155,7 @@ class ui_browse extends FO_Plugin
       if (!empty($Link)) { $V .= "</a>"; }
       if (Iscontainer($Row['ufile_mode'])) { $V .= "</b>"; }
       $V .= "</td>\n";
-      if (Isdir($Row['ufile_mode']))
-	{
-	$V .= menu_to_1list($MenuUfile,$Parm,"<td>","</td>\n");
-	}
-      else
+      if (!Isdir($Row['ufile_mode']))
 	{
 	$V .= menu_to_1list($MenuPfile,$Parm,"<td>","</td>\n");
 	}
@@ -358,11 +354,11 @@ class ui_browse extends FO_Plugin
 	/************************/
 	if (!empty($Item))
 	  {
-	  $V .= Dir2Browse($this->Name,$Item,-1,NULL,1,"Browse") . "\n";
+	  $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "\n";
 	  }
 	else if (!empty($Upload))
 	  {
-	  $V .= Dir2BrowseUpload($this->Name,$Upload,-1,NULL,1,"Browse") . "\n";
+	  $V .= Dir2BrowseUpload($this->Name,$Upload,NULL,1,"Browse") . "\n";
 	  }
 
 	/******************************/
