@@ -339,13 +339,12 @@ class agent_license_once_compare extends FO_Plugin
 	  $V .= "<input name='licfile' size='60' type='file' /><br />\n";
 	  $V .= "<b>NOTE</b>: Files larger than 100K will be discarded and not analyzed.<P />\n";
 	  $V .= "<input type='hidden' name='pfile' value='$PfilePk'>";
-	  $V .= "<input type='hidden' name='ufile' value='$UfilePk'>";
 	  $V .= "<input type='hidden' name='item' value='$Item'>";
 	  }
 	else
 	  {
 	  $V .= "<li>This is the selected file to re-analyze:<br />\n";
-	  $V .= Dir2Browse("license",$Item,$UfilePk) . "<P />\n";
+	  $V .= Dir2Browse("license",$Item) . "<P />\n";
 	  }
 
 	$V .= "<li>Select one or more licenses to compare against:<br>\n";

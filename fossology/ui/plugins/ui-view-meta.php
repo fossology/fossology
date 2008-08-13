@@ -62,7 +62,6 @@ class ui_view_meta extends FO_Plugin
     global $DB;
     $V = "";
     $Pfile = GetParm("pfile",PARM_INTEGER);
-    $Ufile = GetParm("ufile",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Folder = GetParm("folder",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
@@ -74,7 +73,7 @@ class ui_view_meta extends FO_Plugin
      **********************************/
     if ($ShowHeader)
       {
-      $V .= Dir2Browse("browse",$Item,$Ufile,NULL,1,"View-Meta");
+      $V .= Dir2Browse("browse",$Item,NULL,1,"View-Meta");
       } // if ShowHeader
 
     /**********************************

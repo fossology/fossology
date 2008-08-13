@@ -641,12 +641,11 @@ class ui_view extends FO_Plugin
       $Uri = Traceback_uri() . "?mod=browse";
       $Opt="";
       if (!empty($Pfile)) { $Opt .= "&pfile=$Pfile"; }
-      if (!empty($Ufile)) { $Opt .= "&ufile=$Ufile"; }
       if (!empty($Upload)) { $Opt .= "&upload=$Upload"; }
       if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
       if (!empty($Show)) { $Opt .= "&show=$Show"; }
       /* No item */
-      $V .= Dir2Browse($BackMod,$Item,$Ufile,NULL,1,"View") . "<P />\n";
+      $V .= Dir2Browse($BackMod,$Item,NULL,1,"View") . "<P />\n";
       } // if ShowHeader
 
     $this->SortHighlightMenu();

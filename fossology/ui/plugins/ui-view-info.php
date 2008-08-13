@@ -64,7 +64,6 @@ class ui_view_info extends FO_Plugin
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
     $Pfile = GetParm("pfile",PARM_INTEGER);
-    $Ufile = GetParm("ufile",PARM_INTEGER);
     if (empty($Upload) || empty($Item) || empty($Pfile)) { return; }
 
     $Page = GetParm("page",PARM_INTEGER);
@@ -77,7 +76,7 @@ class ui_view_info extends FO_Plugin
      **********************************/
     if ($ShowHeader)
       {
-      $V .= Dir2Browse("browse",$Item,$Ufile,NULL,1,"View-Meta");
+      $V .= Dir2Browse("browse",$Item,NULL,1,"View-Meta");
       } // if ShowHeader
 
     /**********************************
@@ -104,16 +103,10 @@ class ui_view_info extends FO_Plugin
       }
 
     /**********************************
-     Determine the contents of the container.
+     List the directory locations where this pfile is found
      **********************************/
     $V .= "<H2>Sightings</H2>\n";
-    $SQL = "SELECT * FROM pfile
-	    INNER JOIN ufile ON pfile.pfile_pk = '$Pfile'
-	    AND ufile.pfile_fk = pfile.pfile_pk
-	    INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk
-	    ORDER BY pfile_pk
-	    LIMIT $Max OFFSET $Offset
-	    ;";
+    $SQL = "SELECT * FROM pfile, uploadtree WHERE pfile_pk='$Pfile' and pfile_pk=pfile_fk LIMIT $Max OFFSET $Offset";
     $Results = $DB->Action($SQL);
     $Count = count($Results);
     if (($Page > 0) || ($Count >= $Max))
