@@ -190,7 +190,7 @@ function LicenseGet(&$PfilePk, &$Lics, $GetField=0)
 	;');
     $LicenseGet_Prepared=1;
     }
-  if (empty($Lics[' Total '])) { $Lics[' Total ']=0; }
+  if (empty($Lics['Total'])) { $Lics['Total']=0; }
 
   /* Prepare map */
   $Results = $DB->Action("SELECT * FROM licterm_maplic
@@ -239,7 +239,7 @@ function LicenseGet(&$PfilePk, &$Lics, $GetField=0)
 	  {
 	  if (empty($Lics[$LicName])) { $Lics[$LicName]=1; }
 	  else { $Lics[$LicName]++; }
-	  $Lics[' Total ']++;
+	  $Lics['Total']++;
 	  }
 	}
       }
@@ -248,94 +248,83 @@ function LicenseGet(&$PfilePk, &$Lics, $GetField=0)
 } // LicenseGet()
 
 /************************************************************
- LicenseGetAll(): Return licenses for a uploadtree_pk.
- Can return empty array if there is no license.
- Returns NULL if not processed.
- NOTE: This is recursive!
+ LicenseCount(): Return license count for a uploadtree_pk.
+ If uploadtree_pk is a file, the # of licenses in that file 
+    is returned.
+ If uploadtree_pk is a container, the # of licenses contained
+    in that container (and children) is returned.
  ************************************************************/
-$LicenseGetAll_Prepared=0;
-function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL)
+function LicenseCount($UploadtreePk)
 {
   global $Plugins;
   global $DB;
+
+  if (empty($DB)) { return 0; }
+  if (empty($UploadtreePk)) { return 0; }
+
+  $Results = $DB->Action("select count(*)
+    FROM uploadtree as UT1 
+    INNER JOIN uploadtree as UT2 on UT1.lft BETWEEN UT2.lft and UT2.rgt
+          and UT2.uploadtree_pk=$UploadtreePk
+          and UT1.upload_fk=UT2.upload_fk
+    INNER JOIN agent_lic_meta on UT1.pfile_fk=agent_lic_meta.pfile_fk");
+  return($Results[0]["count"] );
+} // LicenseCount()
+
+/************************************************************
+ LicenseGetAll(): Return licenses for a uploadtree_pk.
+ Can return empty array if there is no license.
+ $Max: $Max # of returned records
+ $Offset: offset into $Results of first returned rec
+ Returns NULL if not processed.
+ ************************************************************/
+$LicenseGetAll_Prepared=0;
+$MapResults = array();
+function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL, $Max=-1, $Offset=0)
+{
+  global $Plugins;
+  global $DB;
+  global $MapResults;
+
   if (empty($DB)) { return; }
   if (empty($UploadtreePk)) { return NULL; }
 
-  if (empty($Lics[' Total ']) && empty($GetField)) { $Lics[' Total ']=0; }
-  global $LicenseGetAll_Prepared;
-  if (!$LicenseGetAll_Prepared)
+  /* Number of licenses */
+  if (empty($Lics['Total']) && empty($GetField)) { $Lics['Total']=0; }
+
+  /*  Get every license for every file in this subtree */
+  $Results = $DB->Action("select UT1.*,lic_name,licterm_name, licterm_name_confidence,lic_pk
+    FROM uploadtree as UT1 
+    INNER JOIN uploadtree as UT2 on UT1.lft BETWEEN UT2.lft and UT2.rgt
+          and UT1.upload_fk=UT2.upload_fk
+          and UT2.uploadtree_pk=$UploadtreePk
+    INNER JOIN licterm_name on licterm_name.pfile_fk=UT1.pfile_fk
+    INNER JOIN agent_lic_meta on agent_lic_meta_pk=licterm_name.agent_lic_meta_fk
+    INNER JOIN agent_lic_raw on agent_lic_meta.lic_fk=agent_lic_raw.lic_pk
+    LEFT OUTER JOIN licterm on licterm_pk=licterm_name.licterm_fk
+    ORDER BY UT1.pfile_fk, lic_name");
+  $Count = count($Results);
+
+  if (($Results) && ($Count > 0))
+  {
+    if (empty($MapResults))
     {
-    $DB->Prepare("LicenseGetAll_Traverse",'SELECT uploadtree_pk,ufile_mode FROM uploadtree WHERE parent = $1;');
-
-    $DB->Prepare("LicenseGetAll_Raw1",'SELECT licterm.licterm_name,lic_name,lic_id,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
-	FROM uploadtree
-	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
-	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = lic_pk
-	INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
-	INNER JOIN licterm ON licterm_fk = licterm_pk
-	;');
-
-    $DB->Prepare("LicenseGetAll_Raw2",'SELECT lic_name,lic_id,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
-	FROM uploadtree
-	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
-	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = lic_pk
-	;');
-
-    $DB->Prepare("LicenseGetAll_Canonical",'SELECT uploadtree.pfile_fk AS pfile,ufile.ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name.licterm_name_confidence,licterm.licterm_name,lic_pk,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
-	FROM uploadtree
-	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
-	INNER JOIN ufile ON ufile_fk = ufile_pk
-	INNER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk
-	INNER JOIN licterm ON licterm_pk = licterm_fk
-	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
-	UNION
-	SELECT uploadtree.pfile_fk AS pfile,ufile.ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,agent_lic_raw.lic_name,licterm_name_confidence,'."''".',lic_pk,phrase_text,agent_lic_meta_pk,uploadtree.pfile_fk
-	FROM uploadtree
-	INNER JOIN agent_lic_meta ON parent = $1 AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
-	INNER JOIN ufile ON ufile_fk = ufile_pk
-	INNER JOIN licterm_name ON agent_lic_meta_fk = agent_lic_meta_pk
-	AND licterm_fk IS NULL
-	INNER JOIN agent_lic_raw ON lic_fk = lic_pk
-	;');
-
-    $LicenseGetAll_Prepared = 1;
-    }
-
-  /* Prepare map */
-  $Results = $DB->Action("SELECT * FROM licterm_maplic
-	INNER JOIN licterm ON licterm_fk = licterm_pk
-	;");
-  $MapLic = array();
-  for($i=0; !empty($Results[$i]['licterm_maplic_pk']); $i++)
-    {
-    $MapLic[$Results[$i]['lic_fk']] = $Results[$i]['licterm_name'];
-    }
-
-  /* Get every license */
-  $RawList = $DB->Execute("LicenseGetAll_Raw1",array($UploadtreePk));
-  if (empty($RawList)) { $RawList = $DB->Execute("LicenseGetAll_Raw2",array($UploadtreePk)); }
-  $Results=array();
-  $PfileList=array(); /* used to omit duplicates */
-  $CanonicalList =  $DB->Execute("LicenseGetAll_Canonical",array($UploadtreePk));
-  foreach($CanonicalList as $R)
-    {
-    $PfileList[$R['agent_lic_meta_pk']] = 1;
-    $Results[] = $R;
-    }
-  foreach($RawList as $R)
-    {
-    if (empty($PfileList[$R['agent_lic_meta_pk']]))
+      /* Prepare map */
+      $MapResults = $DB->Action("SELECT * FROM licterm_maplic INNER JOIN licterm ON licterm_fk = licterm_pk ;");
+      $MapLic = array();
+      for($i=0; !empty($MapResults[$i]['licterm_maplic_pk']); $i++)
       {
-      $PfileList[$R['agent_lic_meta_pk']] = 1;
-      $Results[] = $R;
+        $MapLic[$MapResults[$i]['lic_fk']] = $MapResults[$i]['licterm_name'];
       }
     }
 
-  if (!empty($Results) && (count($Results) > 0))
-    {
+    if ($Max == -1) $Max = $Count;
+
     /* Got canonical name */
-    foreach($Results as $Name)
-      {
+    $Found = 0;
+    for ($i=0; ($Found < $Max+$Offset) && $Results[$i]; $i++)
+    {
+      $Name = &$Results[$i];
       /* Get the license name */
       $LicName="";
       if ($Name['licterm_name_confidence'] == 3) { $LicName = $Name['licterm_name']; }
@@ -344,100 +333,74 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL)
       if (!empty($WantLic) && ($LicName != $WantLic)) { $LicName = ""; }
 
       if (!empty($LicName))
+      {
+        if ($Found >= $Offset)
         {
-	if (!empty($GetField)) { $Lics[]=$Name; }
-	else
-	  {
-	  if (empty($Lics[$LicName])) { $Lics[$LicName]=1; }
-	  else { $Lics[$LicName]++; }
-	  $Lics[' Total ']++;
+          if (!empty($GetField)) 
+          { $Lics[]=$Name; }
+          else
+          {
+            if (empty($Lics[$LicName])) 
+            { $Lics[$LicName]=1; }
+            else 
+            { $Lics[$LicName]++; }
+            $Lics['Total']++;
+          }
+        }
+        $Found++;
 	  }
-	}
-      }
     }
+  }
 
-  /* Recurse */
-  $Results = $DB->Execute("LicenseGetAll_Traverse",array($UploadtreePk));
-  for($i=0; !empty($Results[$i]['uploadtree_pk']); $i++)
-    {
-    if (Iscontainer($Results[$i]['ufile_mode']))
-	{
-	LicenseGetAll($Results[$i]['uploadtree_pk'],$Lics,$GetField,$WantLic);
-	}
-    }
-  return;
+  return; 
 } // LicenseGetAll()
 
+
 /************************************************************
- LicenseGetAllFiles(): Returns all files under a tree that
- contain the same license based on LICENSE GROUP.
- Returns NULL if no files.
- NOTE: This is recursive!
- NOTE: $WantLic can be a specific license ID (in which case, the
- percent match is returned), or a SQL string (in which case, no
- percent match is returned).
+ LicenseGetAllFiles(): Return licenses for a uploadtree_pk.
+ This is only for search-file-by-licgroup.php
+ License Groups only use the the license stored in agent_lic_meta
+ Can return empty array if there is no license.
+ $Max: $Max # of returned records
+ $Offset: offset into $Results of first returned rec
+ Returns NULL if not processed.
  ************************************************************/
-$LicenseGetAllFiles_Prepared = array();
-function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, &$Max, &$Offset)
+function LicenseGetAllFiles(&$UploadtreePk, &$Lics, &$WantLic, $Max, $Offset)
 {
   global $Plugins;
   global $DB;
+
   if (empty($DB)) { return; }
   if (empty($UploadtreePk)) { return NULL; }
 
-  global $LicenseGetAllFiles_Prepared;
-
-  $PrepName = sha1(preg_replace("@[^a-zA-Z0-9]@","_",$WantLic));
-  if (empty($LicenseGetAllFiles_Prepared[$PrepName]))
-    {
+  /*  Get every license for every file in this subtree */
     /* SQL to get all files with a specific license */
-    $DB->Prepare("LicenseGetAllFiles_$PrepName","SELECT DISTINCT ufile.ufile_name,uploadtree_pk,uploadtree.ufile_mode,ufile.ufile_pk,uploadtree.pfile_fk,lic_fk,lic_id,tok_pfile,tok_license,tok_match,phrase_text
-	FROM uploadtree
-	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = \$1
-	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = ufile.pfile_fk
-	INNER JOIN agent_lic_raw ON agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
+  $Results = $DB->Action("select UT1.*,lic_fk,lic_id,tok_pfile,tok_license,tok_match,phrase_text
+    FROM uploadtree as UT1 
+    INNER JOIN uploadtree as UT2 on UT1.lft BETWEEN UT2.lft and UT2.rgt
+          and UT1.upload_fk=UT2.upload_fk
+          and UT2.uploadtree_pk=$UploadtreePk
+	INNER JOIN agent_lic_meta ON agent_lic_meta.pfile_fk = UT1.pfile_fk
+    INNER JOIN agent_lic_raw on agent_lic_meta.lic_fk=agent_lic_raw.lic_pk
 	AND ( $WantLic )
-	ORDER BY ufile.ufile_pk
-	;");
-    $LicenseGetAllFiles_Prepared[$PrepName] = 1;
-    }
+    ORDER BY UT1.ufile_name");
+  $Count = count($Results);
 
-  /* Find every item under this UploadtreePk... */
-  $Results = $DB->Execute("LicenseGetAllFiles_$PrepName",array($UploadtreePk));
+    if ($Max == -1) $Max = $Count;
 
-  foreach($Results as $R)
+    /* Got canonical name */
+    $Found = 0;
+    for ($i=0; ($Found < $Max+$Offset) && $Results[$i]; $i++)
     {
-    if (empty($R['pfile_fk'])) { continue; }
-    if ($Offset <= 0)
+      //if (empty($Results[$i]['lic_fk'])) { continue; }
+      if ($Found >= $Offset)
       {
-      array_push($Lics,$R);
-      $Max--;
-      if ($Max <= 0) { return; }
+         $Lics[]=$Results[$i]; 
       }
-    else { $Offset--; }
+      $Found++;
     }
 
-  /* Find the items to recurse on */
-  if (empty($LicenseGetAllFiles_Prepared["a0"]))
-    {
-    /* SQL to get all containers for recursing */
-    $Bit = 1<<29;
-    $DB->Prepare("LicenseGetAllFiles__a0","SELECT uploadtree_pk
-	FROM uploadtree
-	INNER JOIN ufile ON ufile_fk = ufile_pk AND uploadtree.parent = \$1
-	AND uploadtree.ufile_mode & $Bit != 0
-	ORDER BY ufile.ufile_pk
-	;");
-    $LicenseGetAllFiles_Prepared["a0"] = 1;
-    }
-
-  $Results = $DB->Execute("LicenseGetAllFiles__a0",array($UploadtreePk));
-  foreach($Results as $R)
-	{
-	LicenseGetAllFiles($R['uploadtree_pk'],$Lics,$WantLic,$Max,$Offset);
-	if ($Max <= 0) { return; }
-	}
-  return;
+  return; 
 } // LicenseGetAllFiles()
 
 ?>
