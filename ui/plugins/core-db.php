@@ -91,8 +91,9 @@ class db_access extends FO_Plugin
    Action(): This function performs an SQL command and returns
    a structure containing the results.
    The $Command is the SQL to process.
+   If given, $PGError will return the PGSQL_DIAG_SQLSTATE error code
    ***********************************************************/
-  function Action($Command)
+  function Action($Command, &$PGError=0)
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
@@ -108,11 +109,13 @@ class db_access extends FO_Plugin
     /* Error handling */
     if ($result == FALSE)
       {
+      //$PGError = pg_result_error_field($result, PGSQL_DIAG_SQLSTATE);
+	  $PGError = pg_last_error($this->_pg_conn);
       if ($this->Debug)
 	{
 	print "--------\n";
 	print "SQL failed: $Command\n";
-	print pg_last_error($this->_pg_conn);
+	print $PGError;
 	}
       $this->_pg_rows = 0;
       }
