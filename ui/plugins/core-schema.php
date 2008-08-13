@@ -177,7 +177,7 @@ LANGUAGE plpgsql;
 	}
       }
 
-    /***************************  release 0.10  ********************************/
+    /***************************  release 1.0  ********************************/
     /* if pfile_fk or ufile_mode don't exist in table uploadtree 
       * create them and populate them from ufile table    
       * Leave the ufile columns there for now  */
@@ -209,7 +209,9 @@ LANGUAGE plpgsql;
      {
          $DB->Action( "ALTER TABLE uploadtree ADD COLUMN rgt integer" );
      }
-
+     
+     /* Ignore errors if contraints already exist */
+     $DB->Action( "ALTER TABLE agent_lic_raw ADD PRIMARY KEY (lic_pk)" );
     } // Install()
 
   }; // class core_schema
