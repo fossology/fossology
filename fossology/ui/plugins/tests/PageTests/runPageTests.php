@@ -37,12 +37,12 @@ $test = &new TestSuite('Fossology Repo UI Page Functional tests');
 //$test->addTestFile('UploadSrvTest.php');
 //$test->addTestFile('OneShot-lgpl2.1.php');
 //$test->addTestFile('OneShot-lgpl2.1-T.php');
-//$test->addTestFile('CreateFolderTest.php');
-//$test->addTestFile('DeleteFolderTest.php');
-//$test->addTestFile('EditFolderTest.php');
+$test->addTestFile('CreateFolderTest.php');
+$test->addTestFile('DeleteFolderTest.php');
+$test->addTestFile('EditFolderTest.php');
 $test->addTestFile('editFolderNameOnlyTest.php');
 $test->addTestFile('editFolderDescriptionOnlyTest.php');
-
+$test->addTestFile('MoveFolderTest.php');
 
 if (TextReporter::inCli())
 {

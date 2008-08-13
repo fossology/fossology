@@ -36,21 +36,23 @@ global $URL;
 
 class CreateFolderTest extends fossologyWebTestCase
 {
+  public $folder_name;
+  public $mybrowser;
 
   function testCreateFolder()
   {
     global $URL;
 
     print "starting CreateFoldertest\n";
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
+    $this->mybrowser = & new SimpleBrowser();
+    $page = $this->mybrowser->get($URL);
     $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
+    $this->assertTrue(is_object($this->mybrowser));
+    $cookie = $this->repoLogin($this->mybrowser);
     $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
+    $this->mybrowser->setCookie('Login', $cookie, $host);
 
-    $loggedIn = $browser->get($URL);
+    $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->assertText($loggedIn, '/Organize/'),
                       "FAIL! Could not find Organize menu\n");
     $this->assertTrue($this->assertText($loggedIn, '/Folders /'));
@@ -58,23 +60,36 @@ class CreateFolderTest extends fossologyWebTestCase
     /* ok, this proves the text is on the page, let's see if we can
      * go to the page and create a folder
      */
-    $page = $browser->get("$URL?mod=folder_create");
+    $page = $this->mybrowser->get("$URL?mod=folder_create");
     $this->assertTrue($this->assertText($page, '/Create a new Fossology folder/'));
     /* select the folder to create this folder under */
     $FolderId = $this->getFolderId('Testing', $page);
-    $this->assertTrue($browser->setField('parentid', $FolderId));
+    $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
     /* create unique name and insert into form */
     $id = getmypid();
-    $folder_name = 'TestCreateFolder-' . "$id";
-    $this->assertTrue($browser->setField('newname', $folder_name));
+    $this->folder_name = 'TestCreateFolder-' . "$id";
+
+    $this->assertTrue($this->mybrowser->setField('newname', $this->folder_name));
     $desc = 'Folder created by CreateFolderTest as subfolder of Testing';
-    $this->assertTrue($browser->setField('description', "$desc"));
-    $page = $browser->clickSubmit('Create!');
+    $this->assertTrue($this->mybrowser->setField('description', "$desc"));
+    $page = $this->mybrowser->clickSubmit('Create!');
     $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, "/Folder $folder_name Created/"),
-                      "FAIL! Folder $folder_name Created not found\n");
+    $this->assertTrue($this->assertText($page, "/Folder $this->folder_name Created/"),
+                      "FAIL! Folder $this->folder_name Created not found\n");
 
     //print "************ page after Folder Create! *************\n$page\n";
+  }
+  function tearDown()
+  {
+    global $URL;
+    $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
+    $this->assertTrue($this->assertText($page, '/Delete Folder/'));
+    $FolderId = $this->getFolderId($this->folder_name, $page);
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
+    $page = $this->mybrowser->clickSubmit('Delete!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->assertText($page, "/Deletion of folder $this->folder_name/"),
+                      "MoveFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
   }
 }
 ?>

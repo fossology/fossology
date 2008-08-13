@@ -38,6 +38,7 @@ class EditFolderTest extends fossologyWebTestCase
 {
   public $folder_name;
   public $mybrowser;
+  public $newname;
 
   function setUp()
   {
@@ -91,11 +92,12 @@ class EditFolderTest extends fossologyWebTestCase
     $page = $this->mybrowser->get("$URL?mod=folder_properties");
     $this->assertTrue($this->assertText($page, '/Edit Folder Properties/'));
     $FolderId = $this->getFolderId('EditMe', $page);
+    $this->assertTrue($FolderId);
     $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
     /* edit the properties */
     $pid = getmypid();
-    $newname = "FolderEditedByTest-$pid";
-    $this->assertTrue($this->mybrowser->setField('newname', "$newname"));
+    $this->newname = "FolderEditedByTest-$pid";
+    $this->assertTrue($this->mybrowser->setField('newname', "$this->newname"));
     $desc = 'Folder name/description changed by EditFolderTest as subfolder of Testing';
     $this->assertTrue($this->mybrowser->setField('newdesc', "$desc"),
                       "FAIL! Could not set description 'newdesc'\n");
@@ -105,9 +107,21 @@ class EditFolderTest extends fossologyWebTestCase
                       "FAIL! Folder Properties changed not found\n");
     /* check the browse page */
     $page = $this->mybrowser->get("$URL?mod=browse");
-    $this->assertTrue($this->assertText($page, "/$newname/"),
-                       "FAIL! Folder $newname not found\n");
+    $this->assertTrue($this->assertText($page, "/$this->newname/"),
+                       "FAIL! Folder $this->newname not found\n");
     //print "************ page after Folder Delete! *************\n$page\n";
+  }
+  function tearDown()
+  {
+    global $URL;
+    $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
+    $this->assertTrue($this->assertText($page, '/Delete Folder/'));
+    $FolderId = $this->getFolderId($this->newname, $page);
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
+    $page = $this->mybrowser->clickSubmit('Delete!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->assertText($page, "/Deletion of folder $this->newname/"),
+                      "EditFoldeTest tearDown FAILED! Deletion of $this->newname not found\n");
   }
 }
 
