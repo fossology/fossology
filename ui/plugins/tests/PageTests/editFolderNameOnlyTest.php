@@ -38,6 +38,7 @@ class EditFolderNameOnlyTest extends fossologyWebTestCase
 {
   public $folder_name;
   public $mybrowser;
+  public $newname;
 
   function setUp()
   {
@@ -83,11 +84,12 @@ class EditFolderNameOnlyTest extends fossologyWebTestCase
     $page = $this->mybrowser->get("$URL?mod=folder_properties");
     $this->assertTrue($this->assertText($page, '/Edit Folder Properties/'));
     $FolderId = $this->getFolderId($this->folder_name, $page);
+    $this->assertTrue($FolderId);
     $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
     /* edit the properties */
     $pid = getmypid();
-    $newname = "FolderNameEditedByTest-$pid";
-    $this->assertTrue($this->mybrowser->setField('newname', "$newname"),
+    $this->newname = "FolderNameEditedByTest-$pid";
+    $this->assertTrue($this->mybrowser->setField('newname', "$this->newname"),
                       "FAIL! Folder rename Failed\n");
     $page = $this->mybrowser->clickSubmit('Edit!');
     $this->assertTrue(page);
@@ -95,10 +97,21 @@ class EditFolderNameOnlyTest extends fossologyWebTestCase
                       "FAIL! Folder Properties changed not found\n");
     /* check the browse page */
     $page = $this->mybrowser->get("$URL?mod=browse");
-    $this->assertTrue($this->assertText($page, "/$newname/"),
-                       "FAIL! Folder $newname not found\n");
+    $this->assertTrue($this->assertText($page, "/$this->newname/"),
+                       "FAIL! Folder $this->newname not found\n");
     //print "************ page after Folder Delete! *************\n$page\n";
   }
+  function tearDown()
+  {
+    global $URL;
+    $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
+    $this->assertTrue($this->assertText($page, '/Delete Folder/'));
+    $FolderId = $this->getFolderId($this->newname, $page);
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
+    $page = $this->mybrowser->clickSubmit('Delete!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->assertText($page, "/Deletion of folder $this->newname/"),
+                      "EditFolderOnlyTest tearDown FAILED! Deletion of $this->newname not found\n");
+  }
 }
-
 ?>

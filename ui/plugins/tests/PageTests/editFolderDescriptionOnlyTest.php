@@ -17,7 +17,7 @@
  ***********************************************************/
 
 /**
- * Basic edit folder test
+ * edit only the description test
  *
  * @param
  *
@@ -34,7 +34,7 @@ require_once ('../../../../tests/TestEnvironment.php');
 /* every test must use these globals, at least $URL */
 global $URL;
 
-class EditFolderDescripyionOnlyTest extends fossologyWebTestCase
+class EditFolderDescriptionOnlyTest extends fossologyWebTestCase
 {
   public $folder_name;
   public $mybrowser;
@@ -96,6 +96,18 @@ class EditFolderDescripyionOnlyTest extends fossologyWebTestCase
     $this->assertTrue($this->assertText($page, "/$desc/"),
                        "FAIL! Folder $desc not found\n");
     //print "************ page after Folder Delete! *************\n$page\n";
+  }
+  function tearDown()
+  {
+    global $URL;
+    $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
+    $this->assertTrue($this->assertText($page, '/Delete Folder/'));
+    $FolderId = $this->getFolderId($this->folder_name, $page);
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
+    $page = $this->mybrowser->clickSubmit('Delete!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->assertText($page, "/Deletion of folder $this->folder_name/"),
+                      "EditFolderDescriptionOnlyTest tearDown FAILED! Deletion of $this->folder_name not found\n");
   }
 }
 
