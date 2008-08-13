@@ -85,13 +85,12 @@ class agent_unpack extends FO_Plugin
     if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
     if (!empty($Depends) && !is_array($Depends)) { $Depends = array($Depends); }
 
-/*******  NEED TO CHANGE UNPACK TO NOT USE UFILE_PK  CHANGE THIS********/
     /* Prepare the job: job "unpack" has jobqueue item "unpack" */
     $jqargs = "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile,
-            upload.upload_pk, ufile_pk, pfile_fk
-	    FROM ufile
-	    INNER JOIN upload ON upload.upload_pk = '$uploadpk' AND ufile.ufile_pk = upload.ufile_fk
-	    INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk;";
+	    upload_pk, pfile_fk
+	    FROM upload
+	    INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk
+	    WHERE upload.upload_pk = '$uploadpk';";
     $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"no","pfile",$Depends);
     if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
     AgentCheckboxDo($uploadpk);
