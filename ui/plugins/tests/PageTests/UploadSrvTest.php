@@ -95,7 +95,7 @@ class UploadSrvTest extends fossologyWebTestCase
                      '/Upload jobs for \/home\/fosstester\/archives\/simpletest_1\.0\.1\.tar\.gz/'),
                       "FAIL! Did not match Upload message\n");
 
-    print "************ page after Upload! *************\n$page\n";
+    //print "************ page after Upload! *************\n$page\n";
   }
 }
 ?>
