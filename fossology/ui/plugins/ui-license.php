@@ -155,7 +155,7 @@ class ui_license extends FO_Plugin
     $VF .= "<table border=0>";
     foreach($Children as $C)
     {
-//      if (empty($C)) { continue; }
+      if (empty($C)) { continue; }
       /* Store the item information */
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
@@ -163,7 +163,7 @@ class ui_license extends FO_Plugin
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
 	  {
-        $LinkUri = "$Uri&item=$Item";
+        $LinkUri = "$Uri&item=" . $C['uploadtree_pk'];
         $LinkUri = preg_replace("/mod=license/","mod=view-license",$LinkUri);
       }
       else
@@ -205,7 +205,7 @@ class ui_license extends FO_Plugin
         $VF .= "<b>";
         $HasHref=1;
       }
-      else if (!empty($LinkUri))
+      else if (!empty($LinkUri) && ($LicCount > 0))
       {
         $VF .= "<a href='$LinkUri'>";
         $HasHref=1;
