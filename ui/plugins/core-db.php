@@ -72,7 +72,7 @@ class db_access extends FO_Plugin
     {
     global $DATADIR, $PROJECT;
     if (isset($this->_pg_conn)) { return(1); }
-    $path="$DATADIR/dbconnect/$PROJECT";
+    $path="$SYSCONFDIR/$PROJECT/Db.conf";
     $this->_pg_conn = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
     if (!isset($this->_pg_conn)) return(0);
     return(1);

@@ -4,7 +4,7 @@ TOP=../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
-CFLAGS_LOCAL=-DFOSSDB_CONF="$(DATADIR)/dbconnect/$(PROJECT)" -lpq \
+CFLAGS_LOCAL=-DFOSSDB_CONF="$(SYSCONFDIR)/$(PROJECT)/Db.conf" -lpq \
           -L. -lfossdb $(ALL_CFLAGS)
 EXE=dbtest dbinit dbq dbcheck
 LIB=libfossdb.a
