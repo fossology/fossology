@@ -5,50 +5,64 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 BSAM=../bSAM/bsam-engine ../bSAM/SeeSam
-FL=../Filter_License/Filter_License
-EXE=License.bsam
 
-all:
-install:
+all: mkbsamcache
+
+# include the preprocessing stuff
+include $(TOP)/Makefile.process
+# generate the postinstall script
+mkbsamcache: mkbsamcache-process
+	chmod +x mkbsamcache
+
+bsam-test1: bsam-test1-process
+	chmod +x bsam-test1
+
+bsam-test2: bsam-test2-process
+	chmod +x bsam-test2
+
+install: all
+	find Raw -type f | grep -v svn | sed -e 's@^Raw/@@' | \
+        while read i ; do \
+           mkdir -p $(DESTDIR)$(AGENTDATADIR)/licenses/"$${i%/*}"; \
+           $(INSTALL_DATA) Raw/"$$i" $(DESTDIR)$(AGENTDATADIR)/licenses/"$$i"; \
+        done
+
+	$(INSTALL_PROGRAM) mkbsamcache $(DESTDIR)$(AGENTDIR)/mkbsamcache
+	@# these don't work yet
+	@#$(INSTALL_PROGRAM) bsam-test1 $(DESTDIR)$(AGENTDIR)/bsam-test1
+	@#$(INSTALL_PROGRAM) bsam-test2 $(DESTDIR)$(AGENTDIR)/bsam-test2
+
 uninstall:
-test:
+	@# we only want to remove the licenses that we installed
+	find Raw -type f | grep -v svn | sed -e 's@^Raw/@@' | \
+        while read i ; do \
+           if [ -f $(DESTDIR)$(AGENTDATADIR)/licenses/"$$i" ]; then \
+              rm -f $(DESTDIR)$(AGENTDATADIR)/licenses/"$$i"; \
+	   fi; \
+	done
+	(if [ -d "$(DESTDIR)$(AGENTDATADIR)" ]; then \
+	   cd $(DESTDIR)$(AGENTDATADIR); \
+	   for dir in `find licenses -type d`; do \
+              rmdir --ignore-fail-on-non-empty -p $$dir; \
+	   done; \
+	fi)
 
-# no default targets
-# this Makefile is really only useful on a system with fossology already
-# installed and the database setup. For installing new systems we need
-# to do this work post-install. Thus Makefile is only for the convenience
-# of developers.
+	@# try to remove the dir one time w/o error supression so
+	@# we get an error if the user has stuff in there
+	if [ -d "$(DESTDIR)$(AGENTDATADIR)/licenses/" ]; then \
+	   rmdir $(DESTDIR)$(AGENTDATADIR)/licenses/; \
+	fi
 
-$(EXE): $(FL)
-	chmod u+x ./MkCache
-	./MkCache
+	rm -f $(DESTDIR)$(AGENTDIR)/mkbsamcache
+	rm -f $(DESTDIR)$(AGENTDIR)/bsam-test1
+	rm -f $(DESTDIR)$(AGENTDIR)/bsam-test2
 
-install2: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
-
-uninstall2:
-	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
-
-test2: all test-best test-all
-
-test-best: License.bsam $(BSAM)
-	@echo "Testing to find the best match"
-	chmod u+x ./SelfTest
-	./SelfTest
-
-test-all: License.bsam $(BSAM)
-	@echo "Testing to find all matches"
-	chmod u+x ./SelfTest2
-	./SelfTest2
-
-# dependency targets
-$(BSAM):
-	$(MAKE) -C ../bSAM
-
-$(FL):
-	$(MAKE) -C ../Filter_License
+	[ ! -d $(DESTDIR)$(AGENTDATADIR) ] || rmdir $(DESTDIR)$(AGENTDATADIR)
+	[ ! -d $(DESTDIR)$(DATADIR) ] || rmdir $(DESTDIR)$(DATADIR)
+	[ ! -d $(DESTDIR)$(AGENTDIR) ] || rmdir $(DESTDIR)$(AGENTDIR)
+	[ ! -d $(DESTDIR)$(LIBEXECDIR) ] || rmdir $(DESTDIR)$(LIBEXECDIR)
 
 clean:
-	rm -f $(EXE) *.o core
+	rm -f *.o core mkbsamcache bsam-test1 bsam-test2
 
 .PHONY: all install uninstall clean test

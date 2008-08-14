@@ -49,12 +49,12 @@ The steps for adding a license:
    This will build the License.bsam file.
 
 3. Test the file.
-   ./SelfTest
+   ./bsam-test1
      This will create a file called "self-compare" showing the best match.
      Make sure your license does not match any other licenses.
      This might take 5 minutes to run.  (More licenses take more time.)
 
-   ./SelfTest2
+   ./bsam-test2
      This will show ALL matches > 60%.
      This might take 5 minutes to run.  (More licenses take more time.)
      Make sure your license is not too close to some other license.
