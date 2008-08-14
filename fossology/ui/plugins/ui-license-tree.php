@@ -51,13 +51,13 @@ class ui_license_tree extends FO_Plugin
     if (GetParm("output",PARM_STRING) == 'csv') { $Type='CSV'; }
     $this->OutputType=$Type;
     $this->OutputToStdout=$ToStdout;
-    // Put your code here
+    $Item = GetParm("item",PARM_INTEGER);
+    if (empty($Item)) { return; }
+
     switch($this->OutputType)
       {
       case "CSV":
 	$this->NoHeader=1;
-	$Item = GetParm("item",PARM_INTEGER);
-	if (empty($Item)) { return; }
 	$Path = Dir2Path($Item);
 	$Name = $Path[count($Path)-1]['ufile_name'] . ".csv";
 	header("Content-Type: text/comma-separated-values");
@@ -288,7 +288,7 @@ class ui_license_tree extends FO_Plugin
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']))
 	{
-	$LinkUri = "$Uri&item=$Item";
+	$LinkUri = "$Uri&item=" . $C['uploadtree_pk'];
 	$LinkUri = str_replace("mod=license-tree","mod=view-license",$LinkUri);
 	}
       else
@@ -313,6 +313,7 @@ class ui_license_tree extends FO_Plugin
       $LicSum = "";
       foreach($Lics as $Key => $Val)
 	{
+        if ($Key == " Total ") { continue; }
 	if (!empty($LicSum)) { $LicSum .= ","; }
 	$LicSum .= $Key;
 	}
@@ -360,6 +361,7 @@ class ui_license_tree extends FO_Plugin
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
+    if (empty($Item)) { return; }
 
     switch($this->OutputType)
       {
