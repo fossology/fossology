@@ -214,9 +214,9 @@ function JobAddUpload ($job_name,$filename,$desc,$UploadMode,$FolderPk)
   $DB->Action("INSERT INTO upload
 	(upload_desc,upload_filename,upload_mode) VALUES
 	('$desc','$filename','$UploadMode');");
-    $Results = $DB->Action("SELECT currval('upload_upload_pk_seq') as upload_pk FROM upload;");
-    $uploadpk = $Results[0]['upload_pk'];
-    if (empty($uploadpk)) { $DB->Action("ROLLBACK"); return; }
+  $Results = $DB->Action("SELECT currval('upload_upload_pk_seq') as upload_pk FROM upload;");
+  $uploadpk = $Results[0]['upload_pk'];
+  if (empty($uploadpk)) { $DB->Action("ROLLBACK"); return; }
 
   /* Add the upload record to the folder */
   /** Mode == 2 means child_id is upload_pk **/
