@@ -225,6 +225,10 @@ LANGUAGE plpgsql;
      
      /* Ignore errors if contraints already exist */
      $DB->Action("ALTER TABLE agent_lic_raw ADD PRIMARY KEY (lic_pk)");
+
+     /* Make sure every upload has left and right indexes set. */
+     global $LIBEXECDIR;
+     system("$LIBEXECDIR/agents/adj2nest -a");
     } // Install()
 
   }; // class core_schema
