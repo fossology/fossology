@@ -42,7 +42,7 @@ global $PASSWORD;
 /* The class name should end in Test */
 
 /* NOTE: You MUST remove the abstract or the test will not get run */
-abstract class someTest extends fossologyWebTestCase
+class someTest extends fossologyWebTestCase
 {
   public $mybrowser;
   public $someOtherVariable;
@@ -82,7 +82,7 @@ abstract class someTest extends fossologyWebTestCase
    * The login routine will return the session cookie.  Use it to set
    * set the cookie.
    */
-  function testSome()
+  function testsome()
   {
     global $URL;
 
@@ -105,6 +105,14 @@ abstract class someTest extends fossologyWebTestCase
     $this->assertTrue(is_dir('/tmp'),
                       "FAIL! There is no /tmp\n");
   }
+
+  /* use the tearDown method to clean up after a test.  This method like
+   * setUp will run after every test.
+   */
+   function tearDown()
+   {
+     return(TRUE);
+   }
 }
 
 ?>
