@@ -170,17 +170,32 @@ class fossologyWebTestCase extends WebTestCase
   /**
    * parse the folder id out of the html...
    *
-   * @TODO see if you can somehow use the ui routine instead!  much
-   * better.... (talk with neal as don't want to have to be a class of
-   * that type...?')
+   *@param string $folderName the name of the folder
+   *@param string $page the xhtml page to search
+   *
+   *@return string (the folder id)
    */
   public function getFolderId($folderName, $page)
   {
-    // this function doesn't work!
-    /* no error checks for now, may use the ui */
     $found = preg_match("/.*value='([0-9].*?)'.*?;($folderName)<\//", $page, $matches);
     //print "DB: matches is:\n";
     //var_dump($matches) . "\n";
+    return($matches[1]);
+  }
+
+/**
+ * getBrowserUri get the url fragment to display the upload from the
+ * xhtml page.
+ */
+  public function getBrowseUri($uploadName, $page)
+  {
+    //print "DB: GBURI: page is:\n$page\n";
+    //$found = preg_match("/href='(.*?)'>($uploadName)<\/a>/", $page, $matches);
+    //$found = preg_match("/href='(.*?)'>$uploadName/", $page, $matches);
+    $found = preg_match("/href='(.*?)'.*?$uploadName/", $page, $matches);
+    print "DB: GBURI: found matches is:$found\n";
+    print "DB: GBURI: matches is:\n";
+    var_dump($matches) . "\n";
     return($matches[1]);
   }
 
