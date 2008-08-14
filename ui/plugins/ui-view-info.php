@@ -39,7 +39,7 @@ class ui_view_info extends FO_Plugin
   function RegisterMenus()
     {
     // For the Browse menu, permit switching between detail and summary.
-    $Parm = Traceback_parm_keep(array("upload","item","ufile","pfile","format"));
+    $Parm = Traceback_parm_keep(array("upload","item","format"));
     $URI = $this->Name . $Parm;
     if (GetParm("mod",PARM_STRING) == $this->Name)
 	{
