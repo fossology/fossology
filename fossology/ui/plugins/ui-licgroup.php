@@ -49,7 +49,7 @@ class licgroup extends FO_Plugin
   {
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
-    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
+    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
     if (!empty($Item) && !empty($Upload))
       {
       if (GetParm("mod",PARM_TEXT) == $this->Name)

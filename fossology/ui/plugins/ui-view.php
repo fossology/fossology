@@ -95,7 +95,7 @@ class ui_view extends FO_Plugin
         break;
       }
 
-    $URI = Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
+    $URI = Traceback_parm_keep(array("show","format","page","upload","item"));
     if (GetParm("mod",PARM_STRING) == $this->Name)
 	{
 	menu_insert("View::View",2);
