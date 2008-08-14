@@ -293,7 +293,7 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL, $Max=
   if (empty($Lics[' Total ']) && empty($GetField)) { $Lics[' Total ']=0; }
 
   /*  Get every license for every file in this subtree */
-  $Results = $DB->Action("select UT1.*,lic_name,licterm_name, licterm_name_confidence,lic_pk
+  $Results = $DB->Action("select UT1.*,lic_name,licterm_name,licterm_name_confidence,lic_pk,phrase_text
     FROM uploadtree as UT1 
     INNER JOIN uploadtree as UT2 on UT1.lft BETWEEN UT2.lft and UT2.rgt
           and UT1.upload_fk=UT2.upload_fk
