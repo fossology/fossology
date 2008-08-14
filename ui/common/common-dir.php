@@ -175,7 +175,7 @@ function DirGetList($Upload,$UploadtreePk)
   if (!$DirGetList_Prepared) 
     {   
     $DirGetList_Prepared=1;
-    $DB->Prepare("DirGetList_1",'SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent is NULL ORDER BY ufile_name ASC;');
+    $DB->Prepare("DirGetList_1",'SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent IS NULL ORDER BY ufile_name ASC;');
     $DB->Prepare("DirGetList_2",'SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent = $2 ORDER BY ufile_name ASC;');
 
     }

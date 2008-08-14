@@ -40,7 +40,7 @@ class ui_view_license extends FO_Plugin
   function RegisterMenus()
     {
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
+    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     if (!empty($Item) && !empty($Upload))
@@ -88,23 +88,28 @@ class ui_view_license extends FO_Plugin
     } // ConvertLicPathToHighlighting()
 
   /***********************************************************
-   ViewLicense(): Given a pfile_pk, lic_pk, and tok_pfile_start,
+   ViewLicense(): Given a uploadtree_pk, lic_pk, and tok_pfile_start,
    retrieve the license text and display it.
    One caveat: The "ShowView" function only displays file contents.
    But the license is located in the DB.
    Solution: Save license to a temp file.
-   NOTE: If the pfile is provided, then highlighting is enabled.
+   NOTE: If the uploadtree_pk is provided, then highlighting is enabled.
    ***********************************************************/
-  function ViewLicense($PfilePk, $LicPk, $TokPfileStart)
+  function ViewLicense($Item, $LicPk, $TokPfileStart)
     {
     global $DB;
     global $Plugins;
     $View = &$Plugins[plugin_find_id("view")];
 
     /* Find the license path */
-    if (!empty($PfilePk))
+    if (!empty($Item))
       {
-      $SQL = "SELECT license_path,tok_match,tok_license FROM agent_lic_meta WHERE pfile_fk = $PfilePk AND lic_fk = $LicPk AND tok_pfile_start = $TokPfileStart ORDER BY version DESC LIMIT 1;";
+      $SQL = "SELECT license_path,tok_match,tok_license
+	FROM agent_lic_meta
+	INNER JOIN uploadtree ON uploadtree_pk = '$Item'
+	AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
+	WHERE lic_fk = $LicPk AND tok_pfile_start = $TokPfileStart
+	ORDER BY version DESC LIMIT 1;";
       $Results = $DB->Action($SQL);
       $Lic = $Results[0];
       if (empty($Lic['license_path'])) { return; }
@@ -151,18 +156,21 @@ class ui_view_license extends FO_Plugin
     $View = &$Plugins[plugin_find_id("view")];
     $LicId = GetParm("lic",PARM_INTEGER);
     $LicIdSet = GetParm("licset",PARM_INTEGER);
-    $Pfile = GetParm("pfile",PARM_INTEGER);
+    $Item = GetParm("item",PARM_INTEGER);
     if (!empty($LicId))
 	{
-	$this->ViewLicense($Pfile,$LicId,$LicIdSet);
+	$this->ViewLicense($Item,$LicId,$LicIdSet);
 	return;
 	}
-    if (empty($Pfile)) { return; }
+    if (empty($Item)) { return; }
     $ModBack = GetParm("modback",PARM_STRING);
     if (empty($ModBack)) { $ModBack='license'; }
 
     /* Load licenses for this file */
-    $Results = $DB->Action("SELECT * FROM agent_lic_meta WHERE pfile_fk = $Pfile ORDER BY tok_pfile_start;");
+    $Results = $DB->Action("SELECT * FROM agent_lic_meta
+	INNER JOIN uploadtree ON uploadtree_pk = '$Item'
+	AND uploadtree.pfile_fk = agent_lic_meta.pfile_fk
+	ORDER BY tok_pfile_start;");
 
     /* Process all licenses */
     if (count($Results) <= 0)
