@@ -183,35 +183,48 @@ LANGUAGE plpgsql;
       * Leave the ufile columns there for now  */
      if (!$DB->ColExist("uploadtree", "pfile_fk"))
      {
-         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN pfile_fk integer" );
-         $DB->Action("UPDATE uploadtree SET pfile_fk=(SELECT pfile_fk FROM ufile WHERE uploadtree.ufile_fk=ufile_pk)");
+         $DB->Action("ALTER TABLE uploadtree ADD COLUMN pfile_fk integer");
+     }
+
+     if (!$DB->ColExist("upload","ufile_fk"))
+     {
+         $DB->Action("ALTER TABLE upload ALTER COLUMN ufile_fk DROP NOT NULL");
+	 /* Migrate data -- this could be slow */
+	 $DB->Action("UPDATE upload SET pfile_fk = ufile.pfile_fk FROM ufile WHERE upload.pfile_fk IS NULL AND upload.ufile_fk = ufile.ufile_pk;");
      }
 
      /* Move ufile_mode and ufile_name from ufile table to uploadtree table */
      if (!$DB->ColExist("uploadtree", "ufile_mode"))
      {
-         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN ufile_mode integer" );
-         $DB->Action("UPDATE uploadtree SET ufile_mode=(SELECT ufile_mode FROM ufile WHERE uploadtree.ufile_fk=ufile_pk)");
+         $DB->Action("ALTER TABLE uploadtree ADD COLUMN ufile_mode integer");
      }
      if (!$DB->ColExist("uploadtree", "ufile_name"))
      {
-         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN ufile_name text" );
-         $DB->Action("UPDATE uploadtree SET ufile_text=(SELECT ufile_text FROM ufile WHERE uploadtree.ufile_fk=ufile_pk)");
+         $DB->Action("ALTER TABLE uploadtree ADD COLUMN ufile_name text");
+     }
+
+     if (!$DB->ColExist("uploadtree","ufile_fk"))
+     {
+         $DB->Action("ALTER TABLE uploadtree ALTER COLUMN ufile_fk DROP NOT NULL");
+	 /* Migrate data -- this could be slow */
+	 $DB->Action("UPDATE uploadtree SET pfile_fk = ufile.pfile_fk FROM ufile WHERE uploadtree.pfile_fk IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
+	 $DB->Action("UPDATE uploadtree SET ufile_name = ufile.ufile_name FROM ufile WHERE uploadtree.ufile_name IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
+	 $DB->Action("UPDATE uploadtree SET ufile_mode = ufile.ufile_mode FROM ufile WHERE uploadtree.ufile_mode IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
      }
 
      /* Make sure lft, rgt are in uploadtree, they will need adj2nest to populate */
      if (!$DB->ColExist("uploadtree", "lft"))
      {
-         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN lft integer" );
-         $DB->Action( "CREATE INDEX lft_idx ON uploadtree USING btree (lft)");
+         $DB->Action("ALTER TABLE uploadtree ADD COLUMN lft integer");
+         $DB->Action("CREATE INDEX lft_idx ON uploadtree USING btree (lft)");
      }
      if (!$DB->ColExist("uploadtree", "rgt"))
      {
-         $DB->Action( "ALTER TABLE uploadtree ADD COLUMN rgt integer" );
+         $DB->Action("ALTER TABLE uploadtree ADD COLUMN rgt integer");
      }
      
      /* Ignore errors if contraints already exist */
-     $DB->Action( "ALTER TABLE agent_lic_raw ADD PRIMARY KEY (lic_pk)" );
+     $DB->Action("ALTER TABLE agent_lic_raw ADD PRIMARY KEY (lic_pk)");
     } // Install()
 
   }; // class core_schema
