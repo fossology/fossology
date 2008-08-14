@@ -557,7 +557,7 @@ class licgroup extends FO_Plugin
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
 	{
-	$LinkUri = "$Uri&item=$Item&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
+	$LinkUri = "$Uri&item=$Item";
 	$LinkUri = preg_replace("/mod=licgroup/","mod=view-license",$LinkUri);
 	$LinkUri .= "&modback=" . $this->Name;
 	}

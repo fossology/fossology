@@ -55,9 +55,8 @@ class ui_download extends FO_Plugin
 
     global $Plugins;
     global $DB;
-    $Pfile = GetParm("pfile",PARM_INTEGER);
-    $Ufile = GetParm("ufile",PARM_INTEGER);
-    if (empty($Pfile) || empty($Ufile))
+    $Item = GetParm("item",PARM_INTEGER);
+    if (empty($Item))
 	{
 	$this->OutputType = "corrupt";
 	return;
@@ -72,7 +71,7 @@ class ui_download extends FO_Plugin
 	However, it will still take plenty of queries to find most files.
 	Later: This will check if the user has access permission to the ufile.
      **/
-    $Sql = "SELECT * FROM ufile WHERE ufile_pk = $Ufile AND pfile_fk = $Pfile LIMIT 1;";
+    $Sql = "SELECT * FROM uploadtree WHERE uploadtree_pk = $Item LIMIT 1;";
     $Results = $DB->Action($Sql);
     $Name = $Results[0]['ufile_name'];
     if (empty($Name))
@@ -88,7 +87,7 @@ class ui_download extends FO_Plugin
 	$V = "<xml>\n";
 	break;
       case "HTML":
-	$Meta = GetMimeType($Pfile);
+	$Meta = GetMimeType($Item);
 	header("Content-Type: $Meta");
 	// header('Content-Length: ' . $Results[0]['pfile_size']);
 	header('Content-Disposition: attachment; filename="' . $Name . '"');
@@ -127,15 +126,15 @@ class ui_download extends FO_Plugin
     $V="";
     global $Plugins;
     global $DB;
-    $Pfile = GetParm("pfile",PARM_INTEGER);
-    if (empty($Pfile)) { return; }
+    $Item = GetParm("item",PARM_INTEGER);
+    if (empty($Item)) { return; }
     switch($this->OutputType)
       {
       case "XML":
       case "HTML":
       case "Text":
 	/* Regardless of the format, dump the file's contents */
-	$Filename = RepPath($Pfile);
+	$Filename = RepPathItem($Item);
 	if (empty($Filename)) return;
 	if ($this->OutputToStdout) { readfile($Filename); }
 	else { return($V); }

@@ -288,7 +288,7 @@ class ui_license_tree extends FO_Plugin
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']))
 	{
-	$LinkUri = "$Uri&item=$Item&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
+	$LinkUri = "$Uri&item=$Item";
 	$LinkUri = str_replace("mod=license-tree","mod=view-license",$LinkUri);
 	}
       else

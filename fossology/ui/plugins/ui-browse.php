@@ -102,19 +102,15 @@ class ui_browse extends FO_Plugin
       /* Check for children */
       $Children = DirGetList($Upload,$Row['uploadtree_pk']);
 
-      $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'] . "&ufile=" . $Row['ufile_pk'];
-      if (!empty($Row['pfile_fk']))
-	{
-	$Parm .= "&pfile=" . $Row['pfile_fk'];
-	}
+      $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
 
       /* Scan for meta data */
       $HasRealChildren=0;
       $CountChildren=0;
       foreach($Children as $C)
-        {
+	{
 	if (empty($C['ufile_name'])) { continue; }
-        $CountChildren++;
+	$CountChildren++;
 	if (!Isartifact($C['ufile_mode'])) { $HasRealChildren = 1; }
 	} /* foreach Children */
 
@@ -135,7 +131,6 @@ class ui_browse extends FO_Plugin
       if ($Show == 'detail')
         {
 	$V .= "<td class='mono'>" . DirMode2String($Row['ufile_mode']) . "</td>";
-	$V .= "<td>&nbsp;&nbsp;" . substr($Row['ufile_mtime'],0,19) . "</td>";
         if (!Isdir($Row['ufile_mode']))
 	  {
 	  $V .= "<td align='right'>&nbsp;&nbsp;" . number_format($Row['pfile_size'], 0, "", ",") . "&nbsp;&nbsp;</td>";
@@ -187,10 +182,11 @@ class ui_browse extends FO_Plugin
 
     $V="";
     $Sql = "SELECT * FROM upload
-	INNER JOIN ufile ON ufile_pk = ufile_fk
+	INNER JOIN uploadtree ON upload_fk = upload_pk
+	AND parent IS NULL
 	WHERE upload_pk IN
 	(SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
-	ORDER BY ufile_name,upload_filename,upload_desc;";
+	ORDER BY upload_filename,upload_desc;";
     $Results = $DB->Action($Sql);
 
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
@@ -225,12 +221,13 @@ class ui_browse extends FO_Plugin
 	  $UploadPk = $Row['upload_pk'];
           if (empty($Desc)) { $Desc = "<i>No description</i>"; }
           $Name = $Row['ufile_name'];
+          if (empty($Name)) { $Name = $Row['upload_filename']; }
 	  $Sql2 = "SELECT count(*) AS count FROM uploadtree WHERE upload_fk = '$UploadPk';";
           $SResults = $DB->Action($Sql2);
 	  $ItemCount = number_format($SResults[0]['count'], 0, "", ",");
           $V .= "<tr><td>";
           $V .= "<a href='$Uri&upload=$UploadPk&folder=$Folder&show=$Show'>";
-          $V .= "<b>" . $Name . "/</b>";
+          $V .= "<b>" . $Name . "</b>";
           $V .= "</a>";
 	  if ($Row['upload_mode'] & 1<<2) { $V .= "<br>Added by URL: " . htmlentities($Row['upload_filename']); }
 	  if ($Row['upload_mode'] & 1<<3) { $V .= "<br>Added by file upload: " . htmlentities($Row['upload_filename']); }

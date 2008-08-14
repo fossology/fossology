@@ -25,17 +25,21 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 /************************************************************
- GetMimeType(): Given a pfile_pk, return a string that describes
+ GetMimeTypeItem(): Given an uploadtree_pk, return a string that describes
  the mime type.
- (This is in common-repo since mimetypes apply to repo contents.
+ (This is in common-repo since mimetypes apply to repo contents.)
  ************************************************************/
-function GetMimeType($PfilePk)
+function GetMimeType($Item)
 {
   global $Plugins;
   global $DB;
   if (empty($DB)) { return; }
 
-  $Sql = "SELECT * FROM mimetype JOIN pfile ON pfile.pfile_mimetypefk = mimetype.mimetype_pk WHERE pfile_pk = $PfilePk LIMIT 1;";
+  $Sql = "SELECT *
+	FROM uploadtree
+	INNER JOIN pfile ON pfile_pk = pfile_fk
+	INNER JOIN mimetype ON pfile.pfile_mimetypefk = mimetype.mimetype_pk
+	WHERE pfile_pk = $PfilePk LIMIT 1;";
   $Results = $DB->Action($Sql);
   $Meta = $Results[0]['mimetype_name'];
   if (empty($Meta)) { $Meta = 'application/octet-stream'; }
@@ -63,5 +67,28 @@ function RepPath($PfilePk, $Repo="files")
   exec("$LIBEXECDIR/reppath $Repo $Hash", $Path);
   return($Path[0]);
 } // RepPath()
+
+/************************************************************
+ RepPathItem(): Given an uploadtree_pk, retrieve the pfile path.
+ NOTE: The filename at the path may not exist.
+ In fact, the entire path may not exist!
+ Returns the path, or NULL if the pfile record does not exist.
+ ************************************************************/
+function RepPathItem($Item, $Repo="files")
+{
+  global $Plugins;
+  global $LIBEXECDIR;
+  global $DB;
+  if (empty($DB)) { return; }
+
+  $Sql = "SELECT * FROM pfile INNER JOIN uploadtree ON pfile_fk = pfile_pk
+	  WHERE uploadtree_pk = $Item LIMIT 1;";
+  $Results = $DB->Action($Sql);
+  $Row = $Results[0];
+  if (empty($Row['pfile_sha1'])) { return(NULL); }
+  $Hash = $Row['pfile_sha1'] . "." . $Row['pfile_md5'] . "." . $Row['pfile_size'];
+  exec("$LIBEXECDIR/reppath $Repo $Hash", $Path);
+  return($Path[0]);
+} // RepPathItem()
 
 ?>
