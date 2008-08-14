@@ -40,7 +40,7 @@ class ui_view_meta extends FO_Plugin
     {
     menu_insert("Browse-Pfile::Meta",5,$this->Name,"View meta information");
     // For the Browse menu, permit switching between detail and summary.
-    $Parm = Traceback_parm_keep(array("upload","item","ufile","pfile","format"));
+    $Parm = Traceback_parm_keep(array("upload","item","format"));
     $URI = $this->Name . $Parm;
     if (GetParm("mod",PARM_STRING) == $this->Name)
 	{
@@ -61,11 +61,10 @@ class ui_view_meta extends FO_Plugin
   {
     global $DB;
     $V = "";
-    $Pfile = GetParm("pfile",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Folder = GetParm("folder",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
-    if (empty($Item) || empty($Pfile) || empty($Ufile) || empty($Upload))
+    if (empty($Item) || empty($Upload))
 	{ return; }
 
     /**********************************
@@ -80,9 +79,11 @@ class ui_view_meta extends FO_Plugin
      Display meta data
      **********************************/
 
-    $SQL = "SELECT * FROM mimetype
-	INNER JOIN pfile ON pfile_pk = '$Pfile'
-	AND pfile.pfile_mimetypefk = mimetype.mimetype_pk;";
+    $SQL = "SELECT *
+	FROM uploadtree
+	INNER JOIN pfile ON uploadtree_pk = $Item
+	AND pfile_fk = pfile_pk
+	INNER JOIN mimetype ON pfile_mimetypefk = mimetype_pk;";
     $Results = $DB->Action($SQL);
     $Count=1;
 
@@ -102,7 +103,7 @@ class ui_view_meta extends FO_Plugin
 	AND key_parent_fk IN
 	(SELECT key_pk FROM key WHERE key_parent_fk=0 AND
 	  (key_name = 'pkgmeta' OR key_name = 'specagent') )
-	WHERE pfile_fk = '$Pfile'
+	INNER JOIN uploadtree ON uploadtree_pk = $Item
 	AND key_name != 'Processed' ORDER BY key_name;";
     $Results = $DB->Action($SQL);
 
