@@ -190,7 +190,7 @@ function LicenseGet(&$PfilePk, &$Lics, $GetField=0)
 	;');
     $LicenseGet_Prepared=1;
     }
-  if (empty($Lics['Total'])) { $Lics['Total']=0; }
+  if (empty($Lics[' Total '])) { $Lics[' Total ']=0; }
 
   /* Prepare map */
   $Results = $DB->Action("SELECT * FROM licterm_maplic
@@ -239,7 +239,7 @@ function LicenseGet(&$PfilePk, &$Lics, $GetField=0)
 	  {
 	  if (empty($Lics[$LicName])) { $Lics[$LicName]=1; }
 	  else { $Lics[$LicName]++; }
-	  $Lics['Total']++;
+	  $Lics[' Total ']++;
 	  }
 	}
       }
@@ -290,7 +290,7 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL, $Max=
   if (empty($UploadtreePk)) { return NULL; }
 
   /* Number of licenses */
-  if (empty($Lics['Total']) && empty($GetField)) { $Lics['Total']=0; }
+  if (empty($Lics[' Total ']) && empty($GetField)) { $Lics[' Total ']=0; }
 
   /*  Get every license for every file in this subtree */
   $Results = $DB->Action("select UT1.*,lic_name,licterm_name, licterm_name_confidence,lic_pk
@@ -344,7 +344,7 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL, $Max=
             { $Lics[$LicName]=1; }
             else 
             { $Lics[$LicName]++; }
-            $Lics['Total']++;
+            $Lics[' Total ']++;
           }
         }
         $Found++;

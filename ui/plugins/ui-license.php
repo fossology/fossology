@@ -127,7 +127,7 @@ class ui_license extends FO_Plugin
     /*  Get the counts for each license under this UploadtreePk*/
     $Lics = array();
     LicenseGetAll($Item,$Lics);   // key is license name, value is count
-    $LicTotal = $Lics['Total'];
+    $LicTotal = $Lics[' Total '];
 
     /* Ensure that every license is associated with an ID */
     /* MapLic2Gid key is license name, value is a sequence number (GID) */
@@ -259,7 +259,7 @@ class ui_license extends FO_Plugin
     $Total=0;
     foreach($Lics as $Key => $Val)
       {
-      if ($Key != 'Total')
+      if ($Key != ' Total ')
 	{
 	$GID = $MapLic2GID[$Key];
 	$VH .= "<tr><td align='right'>$Val</td>";
