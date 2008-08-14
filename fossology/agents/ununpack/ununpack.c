@@ -1054,6 +1054,31 @@ struct ContainerInfo
 typedef struct ContainerInfo ContainerInfo;
 
 /***************************************************
+ DebugContainerInfo(): Check the structure.
+ ***************************************************/
+void	DebugContainerInfo	(ContainerInfo *CI)
+{
+  printf("Container: %X\n",(unsigned int)CI);
+  printf("  Source: %s\n",CI->Source); 
+  printf("  Partdir: %s\n",CI->Partdir); 
+  printf("  Partname: %s\n",CI->Partname); 
+  printf("  PartnameNew: %s\n",CI->PartnameNew); 
+  printf("  TopContainer: %d\n",CI->TopContainer);
+  printf("  HasChild: %d\n",CI->HasChild);
+  printf("  Pruned: %d\n",CI->Pruned);
+  printf("  Corrupt: %d\n",CI->Corrupt);
+  printf("  Artifact: %d\n",CI->Artifact);
+  printf("  IsDir: %d\n",CI->IsDir);
+  printf("  IsCompressed: %d\n",CI->IsCompressed);
+  printf("  uploadtree_pk: %ld\n",CI->uploadtree_pk);
+  printf("  pfile_pk: %ld\n",CI->pfile_pk);
+  printf("  ufile_mode: %ld\n",CI->ufile_mode);
+  printf("  Parent Cmd: %d\n",CI->PI.Cmd);
+  printf("  Parent ChildRecurseArtifact: %d\n",CI->PI.ChildRecurseArtifact);
+  printf("  Parent uploadtree_pk: %ld\n",CI->PI.uploadtree_pk);
+} /* DebugContainerInfo() */
+
+/***************************************************
  DBInsertPfile(): Insert a Pfile record.
  Sets the pfile_pk in CI.
  Returns: 1 if record exists, 0 if record does not exist.
@@ -1208,11 +1233,12 @@ void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
  ***************************************************/
 int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 {
-  long NewParent,CopyParent;
+  long CopyParent;
   char UfileName[1024];
   int Exist=0;
 
   if (!Upload_Pk) return(-1); /* should never happen */
+  // printf("=========== BEFORE ==========\n"); DebugContainerInfo(CI);
 
   /* Check if tree already exists for some other project */
   /** Same pfile = same tree **/
@@ -1234,7 +1260,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
           {
 	  if (strcmp(DBgetvalue(DBTREE,i,2),Upload_Pk)) continue;
 	  CopyParent = atol(DBgetvalue(DBTREE,i,1));
-	  if ((CopyParent==CI->PI.uploadtree_pk) || ((CopyParent==0)&&(CI->PI.uploadtree_pk==-1)))
+	  if ((CopyParent==CI->PI.uploadtree_pk) || ((CopyParent==0)&&(CI->PI.uploadtree_pk==0)))
 	    {
 	    printf("WARNING pfile %s Duplicate record exists for this project.\n",Pfile_Pk);
 	    return(1);
@@ -1251,7 +1277,14 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 
   /* Find record's name */
   memset(UfileName,'\0',sizeof(UfileName));
-  if (CI->Artifact)
+  if (CI->TopContainer)
+	{
+	snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
+	DBaccess(DB,UfileName);
+	memset(UfileName,'\0',sizeof(UfileName));
+	strncpy(UfileName,DBgetvalue(DB,0,0),sizeof(UfileName));
+	}
+  else if (CI->Artifact)
 	{
 	int Len;
 	Len = strlen(CI->Partname);
@@ -1278,36 +1311,11 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   memset(SQL,'\0',MAXSQL);
   if (CI->PI.uploadtree_pk > 0) /* This is a child */
     {
-    /* This condition can happen multiple times.
-       Don't re-look up the same info. */
-    static long LastNewParent=-1, LastTree=-1, LastUpload=-1;
-    if ((LastTree==CI->PI.uploadtree_pk) && (LastUpload==atol(Upload_Pk)))
-	{
-	NewParent = LastNewParent;
-	}
-    else /* haven't seen it before */
-	{
-	/* Find parent */
-	snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE parent = '%ld' AND upload_fk = '%s';",
-		CI->PI.uploadtree_pk, Upload_Pk);
-	if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-	if ((DBaccess(DBTREE,SQL) != 1) || (DBdatasize(DBTREE) <= 0)) /* SELECT */
-		{
-		/* Got a problem: No parent! */
-		printf("FATAL pfile %s Database inconsistency detected.\n",Pfile_Pk);
-		printf("LOG pfile %s Child missing parent uploadtree[%ld].\n",Pfile_Pk,CI->PI.uploadtree_pk);
-		return(-1);
-		}
-	NewParent = atol(DBgetvalue(DBTREE,0,0));
-	LastNewParent = NewParent;
-	LastTree = CI->PI.uploadtree_pk;
-	LastUpload = atol(Upload_Pk);
-	}
-
     /* Prepare to insert child */
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,'%s',%s);",
-	NewParent, CI->pfile_pk, CI->ufile_mode, UfileName, Upload_Pk);
+	CI->PI.uploadtree_pk, CI->pfile_pk, CI->ufile_mode,
+	UfileName, Upload_Pk);
     if (Verbose) fprintf(stderr,"SQL1: %s\n",SQL);
     DBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
     }
@@ -1321,8 +1329,9 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   /* Find the inserted child */
 
   DBaccess(DBTREE,"SELECT currval('uploadtree_uploadtree_pk_seq'::regclass);");
-  NewParent = atol(DBgetvalue(DBTREE,0,0));
+  CI->uploadtree_pk = atol(DBgetvalue(DBTREE,0,0));
   TotalItems++;
+  // printf("=========== AFTER ==========\n"); DebugContainerInfo(CI);
 
   if (Exist)
     {
@@ -1340,7 +1349,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     if (DBdatasize(DBTREE) == 1)
       {
       CopyParent = atol(DBgetvalue(DBTREE,0,0));
-      DBInsertUploadTreeRecurse(NewParent,CopyParent);
+      DBInsertUploadTreeRecurse(CI->PI.uploadtree_pk,CopyParent);
       }
     }
   return(Exist);
@@ -2015,7 +2024,7 @@ void	TraverseStart	(char *Filename, char *Label, char *NewDir,
   PI.Cmd = 0;
   PI.StartTime = time(NULL);
   PI.EndTime = PI.StartTime;
-  PI.uploadtree_pk = -1;
+  PI.uploadtree_pk = 0;
   Basename = strrchr(Filename,'/');
   if (Basename) Basename++;
   else Basename = Filename;
@@ -2423,7 +2432,12 @@ int	main	(int argc, char *argv[])
 	  DBaccess(DBTREE,SQL); /* UPDATE upload */
 	  }
 
+#if 0
+	/* Debugging code */
+	if (DBTREE && (DBaccess(DBTREE,"ROLLBACK;") < 0))
+#else
 	if (DBTREE && (DBaccess(DBTREE,"COMMIT;") < 0))
+#endif
 	  {
 	  printf("ERROR pfile %s Unable to 'COMMIT' database updates.\n",Pfile_Pk);
 	  SafeExit(-1);
