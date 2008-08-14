@@ -7,6 +7,7 @@
 # idempotent, meaning that running it repeatedly will still do the
 # right thing, regardless of the success of previous runs.
 
+## Options parsing and setup
 # parse options
 OPTS=`getopt -o aduseoh --long agent,database,ui,scheduler,everything,overwrite,help -n 'fo-postinstall' -- "$@"`
 
@@ -53,16 +54,14 @@ if [ $EVERYTHING ]; then
    SCHEDULER=1
 fi
 
-# need adduser option
-
 # This must run as root.
 if [ `id -u` != "0" ] ; then
-  echo "ERROR: fo-postinstall must run as root."
-  echo "Aborting."
-  exit 1
+   echo "ERROR: fo-postinstall must run as root."
+   echo "Aborting."
+   exit 1
 fi
 
-## variables
+# get path to repo
 if [ -e "{$SYSCONFDIR}/fossology/RepPath.conf" ] ; then
    REPO=`cat {$SYSCONFDIR}/fossology/RepPath.conf`
 fi
@@ -75,30 +74,32 @@ fi
 # to do uid/gid mapping. More details will be provided in the multi-machine
 # documentation.
 
+
 # Make sure the user and group exist, if not then create
+# FIXME: need to check for adduser and use that if available
 echo "*** Creating user and group ***"
 if grep -q "^{$PROJECTGROUP}:" /etc/group; then
-  echo "NOTE: group '{$PROJECTGROUP}' already exists, good."
+   echo "NOTE: group '{$PROJECTGROUP}' already exists, good."
 else
-  groupadd "{$PROJECTGROUP}"
-  if [ "$?" != "0" ] ; then
-    echo "ERROR: Unable to create group '{$PROJECTGROUP}'"
-    exit 1
-  else
-    echo "NOTE: group '{$PROJECTGROUP}' created"
-  fi
+   groupadd "{$PROJECTGROUP}"
+   if [ "$?" != "0" ] ; then
+      echo "ERROR: Unable to create group '{$PROJECTGROUP}'"
+      exit 1
+   else
+      echo "NOTE: group '{$PROJECTGROUP}' created"
+   fi
 fi
 
 if grep -q "^{$PROJECTUSER}:" /etc/passwd; then
-  echo "NOTE: user '{$PROJECTUSER}' already exists, good."
+   echo "NOTE: user '{$PROJECTUSER}' already exists, good."
 else
-  useradd -c "{$PROJECT}" -g "{$PROJECTGROUP}" -m -s /bin/bash -d "${REPO%/*}" "{$PROJECTUSER}"
-  if [ "$?" != "0" ] ; then
-    echo "ERROR: Unable to create user '{$PROJECTUSER}'"
-    exit 1
-  else
-    echo "NOTE: user '{$PROJECTUSER}' created"
-  fi
+   useradd -c "{$PROJECT}" -g "{$PROJECTGROUP}" -m -s /bin/bash -d "${REPO%/*}" "{$PROJECTUSER}"
+   if [ "$?" != "0" ] ; then
+      echo "ERROR: Unable to create user '{$PROJECTUSER}'"
+      exit 1
+   else
+      echo "NOTE: user '{$PROJECTUSER}' created"
+   fi
 fi
 
 ## check for existance/ownership/permissions of needed directories
@@ -118,43 +119,97 @@ exit 0
 # everything else is currently code from other places or notes to remind
 # me what's left to do, it needs to be rewritten
 
-## Database setup
-if [ $DATABASE ]; then
-# need a way of determining if a db already exists, if not we create the
-# the default one
+########################################################################
 
-DBDIR="\$DATADIR/dbconnect"
-DBCONF="\$DBDIR/\${PROJECT}"
-REPOCONF="\$DATADIR/repository"
-SCHEDULERCONF="\$AGENTDATADIR/scheduler.conf"
-PROXYCONF="\$AGENTDATADIR/proxy.conf"
-#####################################################
-if [ ! -d "\$DBDIR" ] ; then
-  \$MKDIR -p "\$DBDIR"
-fi
-if [ ! -f "\$DBCONF" ] ; then
-  echo "Creating configration \$DBCONF"
-  if [ "\$DEBUG" != "" ] ; then
-    echo "dbname=\${PROJECT};" ">" "\$DBCONF"
-    echo "host=localhost;" ">>" "\$DBCONF"  # assume DB is local
-    echo "user=\$PROJECTUSER;" ">>" "\$DBCONF"
-    echo "password=\$PROJECTUSER;" ">>" "\$DBCONF"  # user WILL want to change this
-  else
-    echo "dbname=\${PROJECT};" > "\$DBCONF"
-    echo "host=localhost;" >> "\$DBCONF"  # assume DB is local
-    echo "user=\$PROJECTUSER;" >> "\$DBCONF"
-    echo "password=\$PROJECTUSER;" >> "\$DBCONF"  # user WILL want to change this
+if [ $DATABASE ]; then
+echo "*** Setting up database ***"
+
+DBCONF="{$SYSCONFDIR/fossology/Db.conf}"
+
+if [ ! -f "$DBCONF" -o "$OVERWRITE" ] ; then
+  echo "NOTE: using default version for $DBCONF"
+    echo "dbname={$PROJECT};" > "$DBCONF"
+    echo "host=localhost;" >> "$DBCONF"  # assume DB is local
+    echo "user={$PROJECTUSER};" >> "$DBCONF"
+    echo "password={$PROJECTUSER};" >> "$DBCONF"  # user WILL want to change this
   fi
-    echo "Be sure to configure \$DBCONF for your environment."
-    CONFIGOK=0
-    CONFIGDB=0
 else
-  echo "Configration \$DBCONF already exists. No change."
+  echo "WARNING: $DBCONF already exists."
+  echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option." 
 fi
+
+FIXME rest unfinished
+# check if we can get to the database, if we can't but postgres seems ok
+# then create it
+
+echo "# Checking database connectivity"
+# FIXME: this needs to be rewritten
+{$AGENTTESTDDIR}/dbcheck
+if [ $? == 0 ] ; then
+  {$AGENTTESTDDIR}/dbinit {$AGENTTESTDDIR}/dbinit.sql
+  if [ $? != 0 ] ; then
+    echo "ERROR: Database failed during configuration.\n"
+    exit 1
+  fi
+
+# now that we know the database is available, (re)generate the
+# License.bsam file
+
+#FIXME ugg how are we going to do the cleanup....
+# clean up licenses before recreating
+#rm -rf "AGENTDATADIR/licenses"
+
+echo "*** Adding licenses to database ***"
+# remove the old file
+rm -f {$AGENTDATADIR}/License.bsam.new 2>/dev/null
+cd {$AGENTDATADIR}/licenses; find . -type f | grep -v "\.meta" | sed -e 's@^./@@' | while read i ; do
+   echo "Processing $i"
+   if [ -f "$i.meta" ] ; then
+      {$AGENTDIR}/Filter_License -Q -O -M "$i.meta" "$i" >> {$AGENTDATADIR}/License.bsam.new
+   else
+      {$AGENTDIR}/Filter_License -Q -O "$i" >> {$AGENTDATADIR}/License.bsam.new
+   fi
+   if [ "\$?" != "0" ] ; then
+      echo "ERROR processing license."
+      exit 1
+   fi
+done
+
+# Make sure the file is valid
+{$AGENTDIR}/bsam-engine -t "{$AGENTDATADIR}/License.bsam.new"
+if [ "$?" != "0" ] ; then
+   echo "ERROR processing licenses."
+   echo "  Please remove \${AGENTDATADIR}/License.bsam.new"
+   echo "  and \${AGENTDATADIR}/License.bsam,"
+   echo "  then re-run the install"
+   exit 1
+fi
+rm -f {$AGENTDATADIR}/License.bsam 2>/dev/null
+mv {$AGENTDATADIR}/License.bsam.new {$AGENTDATADIR}/License.bsam 2>/dev/null
+
+# FIXME: is this needed?
+chown {$PROJECTUSER}:{$PROJECTGROUP} {$AGENTDATADIR}/License.bsam
+chmod 640 {$AGENTDATADIR}/License.bsam
+
+
+## Initialize database for all agents
+echo "# Initializing agents"
+for i in bsam-engine engine-shell filter_clean Filter_License mimetype pkgmetagetta scheduler specagent ununpack wget_agent ; do
+  echo "  Initializing $i"
+  {$AGENTDIR}/$i -i
+  if [ "$?" != 0 ] ; then
+    echo "ERROR: Failed to initialize database for agent $i"
+    exit 1
+  fi
+done
 
 fi # end of DATABASE
 
+########################################################################
+
 if [ $SCHEDULER ]; then
+   echo "*** Setting up scheduler ***"
+
    # The repo dir is needed in all cases, but in a multi-machine install it
    # will be nfs mounted from the machine with the scheduler, so we should
    # really only create it if needed on the scheduler machine
@@ -162,7 +217,7 @@ if [ $SCHEDULER ]; then
    if [ ! -d "$REPO" ] ; then
      mkdir -p "$REPO"
      chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
-     # FIXME: do we really need setgid?
+     # FIXME: which specific directories do we need setgid for?
      #chmod 2770 $REPO
      chmod 770 $REPO
    fi
@@ -175,7 +230,7 @@ if [ $SCHEDULER ]; then
    if [ ! -f {$SCHEDCONF} -o "$OVERWRITE" ] ; then
       mkdir -p `dirname {$SCHEDCONF}`
       {$LIBEXECDIR}/mkschedconf -o {$SCHEDCONF} -L
-      echo "WARNING: default {$SCHEDCONF} created."
+      echo "NOTE: default {$SCHEDCONF} created."
       echo "  Please check that is it correct for your environment or"
       echo "  create a different one with mkschedconf."
    else
@@ -185,114 +240,33 @@ if [ $SCHEDULER ]; then
 
 fi # end of SCHEDULER
 
-## Create the License.bsam file
+########################################################################
 
-# clean up licenses before recreating
-rm -rf "AGENTDATADIR/licenses"
+if [ $UI ]; then
+echo "*** Setting up UI ***"
 
-## This requires DB access and everything must be installed first.
-echo "# Checking database connectivity"
-\${AGENTTESTDDIR}/dbcheck
-if [ \$? == 0 ] ; then
-  \${AGENTTESTDDIR}/dbinit \${AGENTTESTDDIR}/dbinit.sql
-  if [ \$? != 0 ] ; then
-    echo "ERROR: Database failed during configuration.\n"
-    exit 1
-  fi
-  if [ \$INSTALLLICENSES == 1 ] ; then
-    if [ ! -d "\${AGENTDATADIR}/licenses" ] ; then
-      echo "ERROR: License directory (\${AGENTDATADIR}/licenses) does not exist.  Use 'install.sh -f'\n"
-      exit 1
-    fi
-    echo "# Adding licenses to database"
-    (
-    # remove the old file
-    \$DEBUG rm -f \${AGENTDATADIR}/License.bsam.new 2>/dev/null
-    cd \${AGENTDATADIR}/licenses
-    find . -type f | grep -v "\.meta" | sed -e 's@^./@@' | while read i ; do
-      echo "Processing \$i"
-      if [ -f "\$i.meta" ] ; then
-        \$DEBUG \${AGENTDIR}/Filter_License -Q -O -M "\$i.meta" "\$i" >> \${AGENTDATADIR}/License.bsam.new
-      else
-        \$DEBUG \${AGENTDIR}/Filter_License -Q -O "\$i" >> \${AGENTDATADIR}/License.bsam.new
-      fi
-      if [ "\$DEBUG" == "" ] && [ "\$?" != "0" ] ; then
-	echo "ERROR processing license."
-	exit 1
-      fi
-    done
-    # Make sure the file is valid
-    \$DEBUG \${AGENTDIR}/bsam-engine -t "\${AGENTDATADIR}/License.bsam.new"
-    if [ "\$?" != "0" ] ; then
-	echo "ERROR processing licenses."
-	echo "  Please remove \${AGENTDATADIR}/License.bsam.new"
-	echo "  and \${AGENTDATADIR}/License.bsam,"
-	echo "  then re-run the install"
-	exit 1
-    fi
-    \$DEBUG rm -f \${AGENTDATADIR}/License.bsam 2>/dev/null
-    \$DEBUG mv \${AGENTDATADIR}/License.bsam.new \${AGENTDATADIR}/License.bsam 2>/dev/null
-    )
-    chown \$PROJECTUSER:\$PROJECTGROUP \${AGENTDATADIR}/License.bsam
-    chmod 640 \${AGENTDATADIR}/License.bsam
-  else
-    echo "# Skipping licenses"
-  fi
-else
-  echo "ERROR: Database not configured."
-  echo "  Check \$DBCONF then re-run the install."
-  exit 1
+# See if web server user (www-data) exists, if so add to the group.
+grep -q "^www-data:" /etc/passwd
+if [ "$?" == 0 ] ; then
+  echo "NOTE: Adding user www-data to group {$PROJECTGROUP}"
+  # this is smart enough to not add multiple times so it's ok to repeat
+  usermod -G {$PROJECTGROUP} -a www-data
 fi
-fi # if PLACECONFIG
-
-#####################################################
-# See if Web server (www-data) exists.  If so add him to the group.
-grep -q "^www-data:" /etc/group
-if [ "\$?" == 0 ] ; then
-  echo "# Adding user www-data to group \$PROJECTGROUP"
-  WEBGROUPS=\`groups www-data 2>/dev/null | sed -e 's/.*: //' -e 's/ /,/g'\`
-  if [ "\$WEBGROUPS" != "" ] ; then
-    WEBGROUPS="\$WEBGROUPS,\$PROJECTGROUP"
-  else
-    WEBGROUPS="\$PROJECTGROUP"
-  fi
-  \$DEBUG usermod -G \$WEBGROUPS www-data
-fi
-
-#####################################################
-# Initialize all agents
-echo "# Initializing agents"
-for i in bsam-engine engine-shell filter_clean Filter_License mimetype pkgmetagetta scheduler specagent ununpack wget_agent ; do
-  echo "  Initializing \$i"
-  \${AGENTDIR}/\$i -i
-  if [ "\$?" != 0 ] ; then
-    echo "ERROR: Failed to initialize database for agent \$i"
-    exit 1
-  fi
-done
-
-#####################################################
-
-echo "# Automated installation completed"
-
-# Additional instructions
-echo "Be sure to:"
-echo "  + Install PHP5"
-echo "  + Configure your web server so \$WEBDIR"
-echo "    is used for the user interface."
-echo "  + Make sure your web server user is in group \$PROJECTUSER in /etc/group"
-echo "    then restart your web server so it runs with the new group access."
-echo "  + Double check the configuration in the following files and directories:"
-echo "    \$DBCONF"
-echo "    \$REPOCONF"
-echo "    \$SCHEDULERCONF"
-echo "    \$PROXYCONF"
-
-EOF
-
-
 
 # touch the ui init semaphore
-INIT=WEBDIR/init.ui
+INIT={$WEBDIR}/init.ui
 touch $INIT
-chown fossy:fossy $INIT
+chown {$PROJECTUSER}:{$PROJECTGROUP} $INIT
+
+fi # end of UI
+
+########################################################################
+
+if [ $AGENT ]; then
+   # nothing to do for agents yet
+   echo "*** Setting up agents ***"
+fi # end of AGENT
+
+
+echo "FOSSology postinstall complete, but sure to complete the remaining"
+echo "  steps in the INSTALL instructions."

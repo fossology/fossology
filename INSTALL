@@ -86,7 +86,7 @@ External Commands:
    http://sourceforge.net/projects/sleuthkit/
 * isoinfo - read metadata info from ISO9660 images, from the
    mkisofs/cdrtools/cdrkit implementations
-   cdrkit implemtation http://debburn.alioth.debian.org/
+   cdrkit implementation http://debburn.alioth.debian.org/
 * pdftotext - from the xpdf software
    http://www.foolabs.com/xpdf
 * rpm and rpm2cpio - for extracting software and metadata from rpm packages
@@ -130,43 +130,7 @@ This number is the number of pages (usually 4k each), and is based on a
 fairly complicated formula, please see the postgresql tuning part of the
 user guide.
 
-*** Setting up Users and Groups ***
-You are expected to already have a "postgres" user as part of the
-system postgresql install, and a "www-data" user as part of the
-apache2 install.
-
-FOSSology requires a system user and a system group both named
-"fossy". The /etc/passwd entries for these user should look
-something like (Note: your uid & gid values may be different):
-
-  fossy:x:1001:1001:FOSSology:/srv/fossology:/bin/false
-
-and the /etc/group entry
-
-  fossy:x:1001:fossy
-
-On a system with the useradd and groupadd commands (such as Debian based
-systems) you can create the above system user and group with the following
-commands as root:
-  groupadd fossy
-  useradd -c FOSSology -d /srv/fossology -g fossy -s /bin/false fossy
-
-Alternatively, you can use the adduser:
-  adduser --gecos "FOSSology" --home /srv/fossology --shell /bin/false fossy
-
-Your system should now be ready for installing FOSSology!
-  
-
-Untar the tarball
-=================
-
-In the next step, you will need to use files included in the tarball.  If
-you haven't done so already, untar the fossology-<version>.tar.gz tarball into a staging
-directory.
-
-
-Preparing Postgresql
-====================
+*** Preparing Postgresql ***
 Your postgresql install should be configured and running. If you need
 help doing that consult the user documentation at
 http://www.postgresql.org/docs/manuals/. If you are using SSL in
@@ -174,9 +138,10 @@ particular see the section Secure TCP/IP Connections with SSL to set it up.
 
 Edit /etc/postgresql/<version>/main/postgresql.conf:
 The tuning and preferences in the config file will vary depending on your
-installation.  Here's the results of a diff between the default config file
-and the one we use:
-
+installation. We don't provide an automated way to do this because it
+is complicated and specific to your particular install goals. Here are
+the results of a diff between the default config file provided by
+Debian and the one used for the http://repo.fossology.org database:
 
 > #hba_file = 'ConfigDir/pg_hba.conf'	# host-based authentication file
 > #ident_file = 'ConfigDir/pg_ident.conf'	# IDENT configuration file
@@ -194,73 +159,11 @@ and the one we use:
 > log_min_duration_statement = -1	# -1 is disabled, 0 logs all statements
 > #log_line_prefix = ''			# Special values:
 
-Setting up the database:
-A sample database schema file can be found in the tarball under
-fossology-<version>/setup/fossologyinit.sql.  This will create the database when
-it is read in.  It will also create an owner for the database "fossy"
-and owner's password "fossy".  For security reasons, please change this
-password, after the database is created, using the alter command.
-Detailed steps follow:
 
-Check to see the database server is running
-1) Ensure that postgresql is running using this command:
-   /etc/init.d/postgresql-8.1 status
-   Version Cluster   Port Status Owner    Data directory                     Log file
-8.1     main      5432 online postgres /var/lib/postgresql/8.1/main       /var/log/postgresql/postgresql-8.1-main.log
-
-If the status reported is "online", you can proceed to the next step.  If the 
-status is "down", use this command to start postgres:
-   /etc/init.d/postgresql-8.1 start
-
-You should see the following message:
-   Starting PostgreSQL 8.1 database server: main.
-
-
-2) The default database and owner is created by reading in a file of sql 
-statements to define the database schema. This file is included in the tar 
-bundle as fossology-<version>/setup/fossologyinit.sql.  You must be logged in as user 
-postgres to create the database schema and define the owner.  As root, you
-can su to user postgres (su postgres) and then run the psql command:
-   psql  <fossology-version/setup/fossologyinit.sql
-
-3) If any steps fail, check the postgres log file for errors:
-   /var/log/postgresql/postgresql-8.1-main.log
-
-4) Make sure /etc/postgresql/8.1/main/pg_hba.conf is configured correctly 
-to allow your connection.  This file controls: which hosts are allowed to
-connect, how clients are authenticated, which PostgreSQL user names they 
-can use, which databases they can access.  As a starting point, you will
-need something like the following for local connections:
-
-    # local      DATABASE  USER  METHOD  [OPTION]
-      local       all      all   md5
-
-   See http://www.postgresql.org/docs/current/static/client-authentication.html
-   for detailed information.
-
-5) After editing the pg_hba.conf file, restart the postgres server:
-     /etc/init.d/postgres<version> restart
-
-6) Once the database is defined, verify connection with
-     psql -d fossology -U fossy
-
-   use the default password "fossy".  You should connect and see the following:
-     Welcome to psql 8.1.9, the PostgreSQL interactive terminal.
-
-     Type:  \copyright for distribution terms
-            \h for help with SQL commands
-            \? for help with psql commands
-            \g or terminate with semicolon to execute query
-            \q to quit
-
-     fossology=>
-
-7) If any steps fail, check the postgres log file for errors:
-   /var/log/postgresql/postgresql-8.1-main.log
-
-Configuring PHP
-===============
-Some php config variables need to be adjusted for FOSSology. Edit your
+*** Configuring PHP ***
+Some php config variables need to be adjusted for FOSSology. We don't
+provide an automated way to do this because it can be specific to your
+particular install if you are using php for other things. Edit your
 php.ini file for apache (location dependent on how you installed, but probably
 something like /etc/php5/apache2/php.ini) and make the following
 changes by locating where the variable is set and adjusting:
@@ -282,17 +185,18 @@ in the php command line interface path:
   include_path = ".:/usr/local/share/fossology/www"
 
 
-Configuring Apache
-==================
+*** Configuring Apache ***
 1) You need to add something like the following to the apache config,
   and this will depend on
- A) How you have apache configured, you might be adding it to the
-   "default" site (/etc/apache2/sites-available/default) or some other
-    config you have setup.
+ A) How you have apache configured, you might be creating a new site
+    config using apache's "sites-available"/a2ensite(8) mechanism or
+    editing a different config files you have setup.
  B) The path you want the FOSSology UI to appear on the server, this
    example uses "/repo/"
  C) Where your FOSSology is installed, this example assumes the default
    local sysadmin share prefix of /usr/local/share/
+ D) What other things you might be using apache for on the system.
+ for these reasons we can't provide an automated way of doing this.
 
 ========================================================================
 	Alias /repo/ /usr/local/share/fossology/www/
@@ -330,57 +234,198 @@ by running (as root):
   apache2ctl graceful
 Note: the site won't work yet until we install FOSSology below.
 
+
+Your system should now be ready for installing FOSSology!
+
+
 Building FOSSology
 ==================
-FOSSology uses a system of variables to control where the build will
-install things. These are documented and set in Makefile.conf at the
-top of the source tree. The defaults are all set for a standard
-local sysadmin install, but if you prefer other locations or are
-building distribution or 3rd party packages you can adjust to meet your
-needs.
+In the following steps, you will need to use files included in the
+fossology source.  If you haven't done so already, untar the
+fossology-<version>.tar.gz tarball into a staging directory.
+
+NOTE: FOSSology uses a system of variables to control where the build
+will install things. The defaults are all set for a standard local
+sysadmin install, but if you prefer other locations or are building
+distribution or 3rd party packages you can adjust to meet your needs.
+See the HACKING file for more info.
 
 NOTE: some commands are required to be run as the root user and are
 indicated so. You should be able to use sudo, "su -", a normal root
 login, or your favorite root-obtaining utility.
 
-1) cd into the fossology directory.
+1) cd into the directory unpacking the tarball created
+   (fossology-<version>/).
 
-2) To build the software run "make" followed by "make install" in the 
-   fossology directory.   
-   "make install" creates an install directory and populates
-   it with the files that will be installed on your system.  It also creates
-   an install.sh file (the install script) to perform the installation.
+2) To build the software run "make".
 
-3) Run the install script.
-   You must run the script as root:  ./install.sh -f
-   The install script copies executables to their system directories,
-   populates the database with license data, and creates default
-   default configuration files. You should see this final 
-   message:
+3) To install the software run "make install". You will need the proper
+   permissions to install to where the files will be install, which in
+   most cases means this needs to be run by root.
 
-     # Checking configuration files
-     Creating configuration /usr/local/share/fossology/dbconnect/fossology
-     Be sure to configure /usr/local/share/fossology/dbconnect/fossology for your environment.
-     The file /usr/local/share/fossology/repository/RepPath.conf points to the repository.
-       The repository can be a mount point, and should be a large disk space.
-       If you plan to process ISOs, then consider a terabyte of disk or larger.
-     You should check /usr/local/share/fossology/agents/scheduler.conf and
-     configure it to match your environment.
-     You should check /usr/local/share/fossology/agents/proxy.conf and
-     configure it to match your environment.
-     All files and configuration files have been placed on the system.
-     However, some configuration files needed to be created.
-     Check the configuration in the following files and directories:
-         /usr/local/share/fossology/dbconnect/fossology
-         /usr/local/share/fossology/repository
-         /usr/local/share/fossology/agents/scheduler.conf
-         /usr/local/share/fossology/agents/proxy.conf
-     Then re-run this script.
+As part of the install a script was placed in
+  /usr/local/lib/fossology/fo-postinstall
+(by default, or similar if you configured a different install location).
+This script will help you finish the install, setting up things that
+can't be done by merely installing files on the filesystem. Because of
+the things it does, the script must be run as root. By default the
+script is designed to do everything you will need for a single machine
+install. If you are doing a multiple machine install, please see the
+INSTALL.multi document.
 
-   The default configuration files which MUST BE EDITED.  This is described
-   in the following step.
+4) Run the postinstall script
 
-3) Edit the configuration files.
+  # /usr/local/lib/fossology/fo-postinstall
+
+If you prefer to do these steps by hand or are curious of what the
+fo-postinstall script is doing, continue reading, otherwise skip to
+step # FIXME
+
+5) Setting up Users and Groups
+You are expected to already have a "postgres" user as part of the
+system postgresql install, and a "www-data" user as part of the
+apache2 install.
+
+FOSSology requires a system user and a system group both named
+"fossy".
+
+The /etc/passwd entries for these user should look
+something like (Note: your uid & gid values may be different):
+
+  fossy:x:1001:1001:FOSSology:/srv/fossology:/bin/false
+
+and the /etc/group entry
+
+  fossy:x:1001:fossy
+
+On a system with the useradd and groupadd commands (all LSB systems
+including Debian, Fedora, etc) you can create the above system user
+and group with the following commands as root:
+  groupadd fossy
+  useradd -c FOSSology -d /srv/fossology -g fossy -s /bin/false fossy
+
+Alternatively, you can use the adduser command:
+  adduser --gecos "FOSSology" --home /srv/fossology --system --group fossy
+
+6) Setting up the database
+A sample database schema file can be found in the tarball under
+fossology-<version>/setup/fossologyinit.sql.  This will create the
+database when it is read in.  It will also create an owner for the
+database "fossy" and owner's password "fossy".  For security reasons,
+please change this password, after the database is created, using
+the alter command. Here are the steps:
+
+Check to see the database server is running
+   A) Ensure that postgresql is running using this command:
+      /etc/init.d/postgresql-8.1 status
+      Version Cluster   Port Status Owner    Data directory            Log file
+      8.1     main      5432 online postgres /var/lib/postgresql/8.1/main \
+           /var/log/postgresql/postgresql-8.1-main.log
+
+   If the status reported is "online", you can proceed to the next step.
+   If the status is "down", use this command to start postgres:
+   /etc/init.d/postgresql-8.1 start
+
+   You should see the following message:
+      Starting PostgreSQL 8.1 database server: main.
+
+   B) The default database and owner is created by reading in a file of
+   sql statements to define the database schema. This file is included
+   in the tar bundle as fossology-<version>/setup/fossologyinit.sql.
+
+   You must be logged in as user postgres to create the database schema
+   and define the owner.  As root, you can su to user postgres (su
+   postgres) and then run the psql command:
+      psql  <fossology-version/setup/fossologyinit.sql
+
+   C) If any steps fail, check the postgres log file for errors:
+      /var/log/postgresql/postgresql-8.1-main.log
+
+   D) Make sure /etc/postgresql/8.1/main/pg_hba.conf is configured
+   correctly to allow your connection.  This file controls: which hosts
+   are allowed to connect, how clients are authenticated, which
+   PostgreSQL user names they can use, which databases they can access.
+   As a starting point, you will need something like the following for
+   local connections:
+
+    # local      DATABASE  USER  METHOD  [OPTION]
+      local       all      all   md5
+
+   See http://www.postgresql.org/docs/current/static/client-authentication.html
+   for detailed information.
+   If you do need to edit it then restart postgresql so the changes take
+   effect:
+        /etc/init.d/postgresql-<version> restart
+
+   E) Once the database is defined, verify connection with
+        psql -d fossology -U fossy
+
+      use the default password "fossy".  You should connect and see the
+      following:
+        Welcome to psql 8.1.9, the PostgreSQL interactive terminal.
+
+        Type:  \copyright for distribution terms
+               \h for help with SQL commands
+               \? for help with psql commands
+               \g or terminate with semicolon to execute query
+               \q to quit
+
+        fossology=>
+      If so then you successfully connected. Type \q to quit.
+
+   F) If any steps fail, check the postgres log file for errors:
+      /var/log/postgresql/postgresql-8.1-main.log
+
+
+7) Checking the default configuration files
+On a fresh install you start with default versions of configuration
+files that contain reasonable defaults (where possible), or some files
+are generated via the post install script. You need to review and edit
+where needed.
+   A) /usr/local/etc/fossology/RepPath.conf
+     This is the path to the fossology repository. The repository can
+     be a mount point, and should be a large disk space. If you plan to
+     analyze ISOs, then consider a terabyte of disk or larger. For more
+     discussion of this topic see the INSTALL.multi file and user
+     documents on the website.
+   B) /usr/local/etc/fossology/Hosts.conf
+     This file determines how the file repository is split across
+     hosts, the default is a single machine. For more into see the
+     INSTALL.multi file.
+   C) /usr/local/etc/fossology/Proxy.conf
+     If you need to use a proxy to access the internet, you can use this
+     file to tell the different parts of fossology that need internet
+     access which proxy to use.
+   D) /usr/local/etc/fossology/Depth.conf
+     This file is magic, do not touch unless you are a wizard.
+   E) /usr/local/etc/fossology/Db.conf
+     This file is the information needed to access the database. It's
+     ownership and permissions should be root:fossy 660 so that
+     only root and people in the fossy group can read it.
+   F) /usr/local/etc/fossology/Scheduler.conf
+     This file tells the scheduler how to send out work to the agents.
+     It is generated by the mkschedconf utility.
+
+  Creating configuration /usr/local/share/fossology/dbconnect/fossology
+  Be sure to configure /usr/local/share/fossology/dbconnect/fossology for your environment.
+  The file /usr/local/share/fossology/repository/RepPath.conf points to the repository.
+  You should check /usr/local/share/fossology/agents/scheduler.conf and
+  configure it to match your environment.
+  You should check /usr/local/share/fossology/agents/proxy.conf and
+  configure it to match your environment.
+  All files and configuration files have been placed on the system.
+  However, some configuration files needed to be created.
+  Check the configuration in the following files and directories:
+      /usr/local/share/fossology/dbconnect/fossology
+      /usr/local/share/fossology/repository
+      /usr/local/share/fossology/agents/scheduler.conf
+      /usr/local/share/fossology/agents/proxy.conf
+  Then re-run this script.
+
+The default configuration files which MUST BE EDITED.  This is described
+in the following step.
+
+8) Edit the configuration files.
    The first time the install script runs on your system, it will create 
    some default configuration files.  These files control database 
    connections, define proxies (for http, https, ftp) and specify the 
@@ -424,7 +469,7 @@ login, or your favorite root-obtaining utility.
     /usr/local/share/fossology/agents/proxy.conf
     This file identifies proxies for using wget on your system.
 
-4) After editing/verifying the configuration files, you will need to re-run
+9) After editing/verifying the configuration files, you will need to re-run
    the install.sh file again (as root):
 	./install.sh -f
 
@@ -444,7 +489,7 @@ login, or your favorite root-obtaining utility.
          /usr/local/share/fossology/agents/scheduler.conf
          /usr/local/share/fossology/agents/proxy.conf
 
-5) Run the check.sh script as root to check the configuration for the
+10) Run the check.sh script as root to check the configuration for the
    fossology scheduler:
      ./check.sh -S
 
@@ -461,7 +506,7 @@ login, or your favorite root-obtaining utility.
    files are reported, fix these errors and re-run check.sh till all
    issues are resolved.
 
-6) Start the scheduler
+11) Start the scheduler
    NOTE:
    The user starting the scheduler must be in the fossy group.  Use
      addgroup <user> fossy 
@@ -471,21 +516,19 @@ login, or your favorite root-obtaining utility.
    As root, start the scheduler with:
      /etc/init.d/fossology start
 
-7) Restart the Apache server
+12) Restart the Apache server UNNEEDED?
      apache2ctl graceful
 
-8) Browse to http://<http_server>/repo/ to login (as "Default User") and 
+13) Browse to http://<http_server>/repo/ to login (as "Default User") and 
    initialize the UI via the Admin -> Initialize menu item.
 
-9) You are now ready to use FOSSology!  See 
+14) You are now ready to use FOSSology!  See 
    http://fossology.org/user_documentation for a description of the UI.
 
 Install Complete
 ================
 Congratulations, FOSSology is now installed!
 For extended discussion on how to use or tune the software, please see
-the User Documentation, available on the website, in the doc/ directory
-of the source, or the doc/ directory on an installed system (directory
-may vary and in in the case of software packages, may be in a different
-package you need to install). FIXME: need to make sure this gets done
+the User Documentation, available on the website at
 
+   http://fossology.org/user_documentation
