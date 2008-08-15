@@ -104,6 +104,7 @@ class ui_view_meta extends FO_Plugin
 	(SELECT key_pk FROM key WHERE key_parent_fk=0 AND
 	  (key_name = 'pkgmeta' OR key_name = 'specagent') )
 	INNER JOIN uploadtree ON uploadtree_pk = $Item
+	AND uploadtree.pfile_fk = attrib.pfile_fk
 	AND key_name != 'Processed' ORDER BY key_name;";
     $Results = $DB->Action($SQL);
 
