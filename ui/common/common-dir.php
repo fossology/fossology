@@ -299,7 +299,6 @@ if ($FirstPath!=0)
       if ($P == $Last)
 	  {
 	    $Uri = Traceback_uri() . "?mod=$LinkLast";
-	    if (!empty($P['pfile_fk'])) { $Uri .= "&pfile=" . $P['pfile_fk']; }
 	  }
 	$V .= "<a href='$Uri&upload=" . $P['upload_fk'] . "&item=" . $P['uploadtree_pk'] . $Opt . "'>";
 	}
