@@ -254,14 +254,6 @@ void	DeleteUpload	(long UploadId)
   snprintf(SQL,sizeof(SQL),"DELETE FROM attrib WHERE pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
 
-#if 0
-  /** ufile table is going away. **/
-  if (Verbose) { printf("# Deleting from ufile\n"); }
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk != %ld AND pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",UploadPfile,TempTable);
-  MyDBaccess(DB,SQL);
-#endif
-
   /***********************************************/
   /*** Everything above is slow, everything below is fast ***/
   /***********************************************/
@@ -270,7 +262,7 @@ void	DeleteUpload	(long UploadId)
   /* Blow away jobs */
   /*****
    There is an ordering issue.
-   The delete from attrib, pfile, and ufile can take a long time (hours for
+   The delete from attrib and pfile can take a long time (hours for
    a source code DVD).
    If we delete from the jobqueue first, then it will hang the scheduler
    as the scheduler tries to update the jobqueue record.  (Row is locked
@@ -308,14 +300,6 @@ void	DeleteUpload	(long UploadId)
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM pfile WHERE pfile_pk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
-
-#if 0
-  /* Delete the upload's files */
-  memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("# Deleting upload's ufile\n"); }
-  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk = %ld AND pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",UploadPfile,TempTable);
-  MyDBaccess(DB,SQL);
-#endif
 
   /***********************************************/
   /* Commit the change! */
