@@ -174,7 +174,7 @@ class agent_license extends FO_Plugin
     $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",$Dep);
     if (empty($jobqueuepk)) { return("Failed to insert first sqlagent into job queue"); }
 
-    /* Add job: job "license" has jobqueue item "filter_license" */
+    /* job "license" has jobqueue item "filter_license" */
     /** $jqargs = pfiles NOT processed and NOT with tokens in repository **/
     $jqargs = "SELECT DISTINCT(Akey),A,Size
 	FROM $TempTable
@@ -186,7 +186,7 @@ class agent_license extends FO_Plugin
     $jobqueuepk = JobQueueAdd($jobpk,"filter_license",$jqargs,"yes","a",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert filter_license into job queue"); }
 
-    /* Add job: job "license" has jobqueue item "license" */
+    /* job "license" has jobqueue item "license" */
     /** jqargs = all pfiles NOT processed and WITH tokens in repository **/
     $jqargs = "SELECT DISTINCT(Akey),A,Size
 	FROM $TempTable
@@ -198,7 +198,7 @@ class agent_license extends FO_Plugin
     $jobqueuepk = JobQueueAdd($jobpk,"license",$jqargs,"yes","a",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert license into job queue"); }
 
-    /* Add job: job "license" has jobqueue item "licinspect" */
+    /* job "license" has jobqueue item "licinspect" */
     /** jqargs = all pfiles NOT processed and WITH tokens in repository **/
     $jqargs = "SELECT DISTINCT(Akey),A,Size
 	FROM $TempTable
@@ -209,7 +209,7 @@ class agent_license extends FO_Plugin
     $jobqueuepk = JobQueueAdd($jobpk,"licinspect",$jqargs,"yes","a",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert licinspect into job queue"); }
 
-    /* Add job: job "license" has jobqueue item "filter_clean" */
+    /* job "license" has jobqueue item "filter_clean" */
     /** jqargs = all pfiles with tokens in the repository **/
     $jqargs = "SELECT DISTINCT(Akey),A,Size
 	FROM $TempTable
@@ -222,7 +222,7 @@ class agent_license extends FO_Plugin
     $jobqueuepk = JobQueueAdd($jobpk,"filter_clean",$jqargs,"yes","a",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert filter_clean into job queue"); }
 
-    /* Add job: job "license" has jobqueue item "sqlagent" */
+    /* job "license" has jobqueue item "sqlagent" */
     $jqargs = "DROP TABLE $TempTable;";
     $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert second sqlagent into job queue"); }
