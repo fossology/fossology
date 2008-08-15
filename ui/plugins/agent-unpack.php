@@ -85,7 +85,7 @@ class agent_unpack extends FO_Plugin
     if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
     if (!empty($Depends) && !is_array($Depends)) { $Depends = array($Depends); }
 
-    /* Prepare the job: job "unpack" has jobqueue item "unpack" */
+    /* job "unpack" has jobqueue item "unpack" */
     $jqargs = "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile,
 	    upload_pk, pfile_fk
 	    FROM upload
@@ -93,7 +93,12 @@ class agent_unpack extends FO_Plugin
 	    WHERE upload.upload_pk = '$uploadpk';";
     $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"no","pfile",$Depends);
     if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
-    AgentCheckboxDo($uploadpk);
+
+    /* job "unpack" has jobqueue item "adj2nest" */
+    $jqargs = "$uploadpk";
+    $jobqueuepk = JobQueueAdd($jobpk,"adj2nest",$jqargs,"no","",array($jobqueuepk));
+    if (empty($jobqueuepk)) { return("Failed to insert adj2nest into job queue"); }
+
     return(NULL);
   } // AgentAdd()
 
