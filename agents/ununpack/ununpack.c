@@ -1206,8 +1206,16 @@ void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
 	/** While uploadtree_pk is unique, ufile_fk/parent is not.
 	    There may be duplicates that are blocked by constraints. **/
 	memset(SQL,'\0',MAXSQL);
-	snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,'%s',%s);",
-	  NewParent, pfile_fk, ufile_mode, ufile_name, Upload_Pk);
+	if (NewParent > 0)
+	  {
+	  snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,'%s',%s);",
+	    NewParent, pfile_fk, ufile_mode, ufile_name, Upload_Pk);
+	  }
+	else
+	  {
+	  snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,'%s',%s);",
+	    pfile_fk, ufile_mode, ufile_name, Upload_Pk);
+	  }
 	if (DBaccess(DBTREE,SQL) == 0) /* INSERT INTO uploadtree */
 	  {
 	  /* Find the new ID for this insertion */
