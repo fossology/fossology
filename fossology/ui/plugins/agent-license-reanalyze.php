@@ -39,7 +39,7 @@ class agent_license_reanalyze extends FO_Plugin
    AnalyzeOne(): Analyze one uploaded file.
    Returns 0 on success, !0 on failure.
    *********************************************/
-  function AnalyzeOne ($PfilePk,$UploadtreePk)
+  function AnalyzeOne ($Item)
   {
     global $Plugins;
     global $AGENTDIR;
@@ -49,9 +49,11 @@ class agent_license_reanalyze extends FO_Plugin
     print "<pre>";
 
     /* Get the pfile information */
-    $Results = $DB->Action("SELECT * FROM pfile WHERE pfile_pk = '$PfilePk';");
+    $Results = $DB->Action("SELECT * FROM pfile
+	INNER JOIN uploadtree ON uploadtree_pk = '$Item'
+	AND pfile_pk = pfile_fk");
     $A = $Results[0]['pfile_sha1'] . "." . $Results[0]['pfile_md5'] . "." . $Results[0]['pfile_size'];
-    $Akey = $PfilePk;
+    $Akey = $Results[0]['pfile_pk'];
     $ASize = $Results[0]['pfile_size'];
 
     /* Remove old database information */
@@ -63,7 +65,7 @@ class agent_license_reanalyze extends FO_Plugin
     $DB->Action("COMMIT;");
 
     /* Don't analyze containers! */
-    $Results = $DB->Action("SELECT * FROM uploadtree WHERE parent = '$UploadtreePk' AND pfile_fk = '$PfilePk';");
+    $Results = $DB->Action("SELECT * FROM uploadtree WHERE parent = '$UploadtreePk';");
     if (Iscontainer($Results[0]['ufile_mode']))
       {
       print "Container not processed.\n";
@@ -152,7 +154,7 @@ class agent_license_reanalyze extends FO_Plugin
     /* Only register with the menu system if the user is logged in. */
     if (!empty($_SESSION['User']) && (GetParm("mod",PARM_STRING) == 'view-license'))
 	{
-	$URI = $this->Name . "&" . Traceback_parm(0);
+	$URI = $this->Name . Traceback_parm(0);
 	menu_insert("View::[BREAK]",200);
 	menu_insert("View::Reanalyze",201,$URI,"Reanalyze license and store results");
 	menu_insert("View-Meta::[BREAK]",200);
@@ -176,11 +178,10 @@ class agent_license_reanalyze extends FO_Plugin
       case "HTML":
 	/* If this is a POST, then process the request. */
 	/* You can also specify the file by pfile_pk */
-	$PfilePk = GetParm('pfile',PARM_INTEGER); // may be null
 	$UploadtreePk = GetParm('item',PARM_INTEGER); // may be null
-	if (!empty($PfilePk) && !empty($UploadtreePk))
+	if (!empty($UploadtreePk))
 	  {
-	  $this->AnalyzeOne($PfilePk,$UploadtreePk);
+	  $this->AnalyzeOne($UploadtreePk);
 	  }
 	/* Refresh the screen */
 	$Uri = Traceback();
