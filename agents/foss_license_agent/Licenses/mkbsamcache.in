@@ -11,9 +11,25 @@ fi
 cd {$AGENTDATADIR}/licenses/
 find . -type f | sed -e 's@^./@@' | grep -v \.meta | sort | while read i ; do
    echo "Processing $i"
-   {$AGENTDIR}/Filter_License -O "$i" >> {$PROJECTSTATEDIR}/agents/License.bsam.new
+   if [ -f "$i.meta" ] ; then
+      {$AGENTDIR}/Filter_License -Q -O -M "$i.meta" "$i" >> {$PROJECTSTATEDIR}/agents/License.bsam.new
+   else
+      {$AGENTDIR}/Filter_License -Q -O "$i" >> {$PROJECTSTATEDIR}/agents/License.bsam.new
+   fi
+   if [ "$?" != "0" ] ; then
+      echo "ERROR processing license."
+      exit 1
+   fi
 done
+
+# Make sure the file is valid
+{$AGENTDIR}/bsam-engine -t "{$PROJECTSTATEDIR}/agents/License.bsam.new"
+if [ "$?" != "0" ] ; then
+   echo "ERROR processing licenses."
+   echo "  The bad result is {$PROJECTSTATEDIR}/agents/License.bsam.new"
+   echo "  Please determine what is wrong, fix the input problem, and rerun."
+   exit 1
+fi
 
 # Move the new one in to place
 mv {$PROJECTSTATEDIR}/agents/License.bsam.new {$PROJECTSTATEDIR}/agents/License.bsam
-
