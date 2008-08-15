@@ -7,5 +7,5 @@ make DESTDIR=/tmp/fo-sysadmin install
 
 rm -rf /tmp/fo-distro
 mkdir /tmp/fo-distro
-make DESTDIR=/tmp/fo-distro PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var/ install
+make DESTDIR=/tmp/fo-distro PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install
 (cd /tmp/fo-distro; find . -type f -printf "%M %p\n"|sort -k2 >/tmp/new-distro)
