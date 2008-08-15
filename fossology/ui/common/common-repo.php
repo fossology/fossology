@@ -39,7 +39,7 @@ function GetMimeType($Item)
 	FROM uploadtree
 	INNER JOIN pfile ON pfile_pk = pfile_fk
 	INNER JOIN mimetype ON pfile.pfile_mimetypefk = mimetype.mimetype_pk
-	WHERE pfile_pk = $PfilePk LIMIT 1;";
+	WHERE uploadtree_pk = $Item LIMIT 1;";
   $Results = $DB->Action($Sql);
   $Meta = $Results[0]['mimetype_name'];
   if (empty($Meta)) { $Meta = 'application/octet-stream'; }
