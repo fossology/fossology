@@ -93,7 +93,7 @@ class search_file_by_license extends FO_Plugin
         }
 
         /* Offset is +1 to start numbering from 1 instead of zero */
-        $V .= Dir2FileList($Lics,"browse","view",$Offset + 1,1);
+        $V .= Dir2FileList($Lics,"browse","view-license",$Offset + 1,1);
 
         if (!empty($VM)) { $V .= $VM . "\n"; }
         $V .= "<hr>\n";
