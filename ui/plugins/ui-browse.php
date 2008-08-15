@@ -181,9 +181,13 @@ class ui_browse extends FO_Plugin
     $Analyze = &$Plugins[plugin_find_id("agent_license")]; /* may be null */
 
     $V="";
+    /* Get list of fully unpacked uploads */
+    /*** last unpack task: lft is set by adj2nest ***/
     $Sql = "SELECT * FROM upload
 	INNER JOIN uploadtree ON upload_fk = upload_pk
+	AND upload.pfile_fk = uploadtree.pfile_fk
 	AND parent IS NULL
+	AND lft IS NOT NULL
 	WHERE upload_pk IN
 	(SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
 	ORDER BY upload_filename,upload_desc;";
