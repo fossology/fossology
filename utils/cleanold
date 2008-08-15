@@ -1,0 +1,52 @@
+#!/bin/sh
+# cleanold - a utility to clean up old fossology installs
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+
+SAVE="/usr/local/share/fossology/agents/proxy.conf
+/usr/local/share/fossology/agents/scheduler.conf
+/usr/local/share/fossology/dbconnect/fossology
+/usr/local/share/fossology/repository/Depth.conf
+/usr/local/share/fossology/repository/Hosts.conf
+/usr/local/share/fossology/repository/RepPath.conf"
+
+FILES="/usr/local/bin/cp2foss.php
+/usr/local/bin/diffm
+/usr/local/bin/fossinit.php
+/usr/local/bin/fossjobs.php
+/usr/local/bin/fosslic.php
+/usr/local/bin/GetFM
+/usr/local/bin/get-projects
+/usr/local/bin/mktop1k
+/usr/local/bin/wrapGFM
+/usr/local/include/FMDir
+/usr/local/include/fm-paths.php
+/usr/local/lib/libcp2foss.h.php
+/usr/local/lib/lib_projxml.h.php
+/usr/local/share/man/man1/cp2foss.1"
+
+DIRS="/usr/local/fossology/
+/usr/local/share/fossology/"
+
+TMPDIR=`mktemp -d /tmp/fossology-configs.XXXX` || exit 1
+echo "*** Searching for old fossology config files ***"
+for conffile in $SAVE; do
+   if [ -f $conffile ]; then
+      echo "NOTE: found $conffile saving to $TMPDIR/"
+      cp $conffile $TMPDIR/
+   fi
+done
+
+echo "*** Cleaning up old fossology files ***"
+for file in $FILES; do
+   if [ -f $file ]; then
+      #rm -f $file
+      echo "foo $file foo"
+   fi
+done
+
+for dir in $DIRS; do
+   if [ -d $dir ]; then
+      echo "foo $dir foo"
+      #rm -rf $dir
+   fi
+done
