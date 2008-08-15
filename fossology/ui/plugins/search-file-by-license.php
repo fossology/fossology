@@ -60,7 +60,7 @@ class search_file_by_license extends FO_Plugin
       case "HTML":
         $UploadTreePk = GetParm("item",PARM_INTEGER);
         $Page = GetParm("page",PARM_INTEGER);
-        $WantLic = urldecode(GetParm("lic",PARM_TEXT));
+        $WantLic = GetParm("lic",PARM_RAW);
         if (empty($UploadTreePk) || empty($WantLic))
         {
           return;
@@ -76,13 +76,13 @@ class search_file_by_license extends FO_Plugin
         /* Load licenses */
         $Lics = array();
         $Offset = $Page*$Max;
-        LicenseGetAll($UploadTreePk,$Lics,1,$WantLic, $Max, $Offset);
+        LicenseGetAll($UploadTreePk,$Lics,1,$WantLic,$Max,$Offset);
 
         /* Save the license results */
         $Count = count($Lics);
 
         /* Get the page menu */
-        if (($Count >= $Max) || ($Page >= 0))
+        if (($Count >= $Max) || ($Page > 0))
         {
           $VM = "<P />\n" . MenuPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
           $V .= $VM;
