@@ -61,7 +61,7 @@ class agent_license_once extends FO_Plugin
     // print "Cached file $TempCache = " . filesize($TempCache) . " bytes.\n";
 
     /* Create bsam results */
-    $Sys = "$AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -O t '$TempCache' '$DATADIR/agents/License.bsam'";
+    $Sys = "$AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -O t '$TempCache' '$PROJECTSTATEDIR/agents/License.bsam'";
     $Fin = popen($Sys,"r");
     $LicSummary = array();
     $LicNum = -1;
