@@ -149,22 +149,21 @@ class fossologyWebTestCase extends WebTestCase
   /**
    * public function getHost
    *
+   * returns the host (if present) from a URL
+   *
    * @param string $URL a url in the form of http://somehost.xx.com/repo/
    *
-   * @return string $host he somehost.xx.com part is returned
+   * @return string $host the somehost.xxx part is returned or
+   *         NULL, if there is no host in the uri
    *
-   * @TODO generalize so you don't depend on /repo/
    */
   public function getHost($URL)
   {
     if(empty($URL))
     {
-      return('localhost');
+      return(NULL);
     }
-    $temp = rtrim($URL, '/repo/\n');
-    $host = ltrim($temp, 'http://');
-    //print "DB GHost: host is:$host\n";
-    return($host);
+    return(parse_url($URL, PHP_URL_HOST));      // can return NULL
   }
 
   /**
@@ -186,17 +185,82 @@ class fossologyWebTestCase extends WebTestCase
 /**
  * getBrowserUri get the url fragment to display the upload from the
  * xhtml page.
+ *
+ * @param string $name the name of a folder or upload
+ * @param string $page the xhtml page to search
+ *
+ * @return $string the matching uri or null.
+ *
  */
-  public function getBrowseUri($uploadName, $page)
+  public function getBrowseUri($name, $page)
   {
     //print "DB: GBURI: page is:\n$page\n";
     //$found = preg_match("/href='(.*?)'>($uploadName)<\/a>/", $page, $matches);
-    //$found = preg_match("/href='(.*?)'>$uploadName/", $page, $matches);
-    $found = preg_match("/href='(.*?)'.*?$uploadName/", $page, $matches);
+    // doesn't work: '$found = preg_match("/href='(.*?)'>$name/", $page, $matches);
+    $found = preg_match("/href='((.*?)&show=detail).*?/", $page, $matches);
+    //$found = preg_match("/ class=.*?href='(.*?)'>$name/", $page, $matches);
     print "DB: GBURI: found matches is:$found\n";
     print "DB: GBURI: matches is:\n";
     var_dump($matches) . "\n";
-    return($matches[1]);
+    if($found)
+    {
+      return($matches[1]);
+    }
+    else
+    {
+      return(NULL);
+    }
+  }
+  /**
+   * getNextLink given a pattern, find the link in the page and return
+   * it.
+   *
+   * @param string $pattern a preg_match compatible pattern
+   * @param string $page    the xhtml page to search
+   *
+   * @return string $result or null if no pattern found.
+   *
+   */
+  public function getNextLink($pattern, $page, $debug=0)
+  {
+    $found = preg_match($pattern, $page, $matches);
+    if ($debug)
+    {
+     print "DB: GNL: pattern is:$pattern\n";
+     print "DB: GNL: found matches is:$found\n";
+     print "DB: GNL: matches is:\n";
+     var_dump($matches) . "\n";
+    }
+    if($found)
+    {
+      return($matches[1]);
+    }
+    else
+    {
+      return(NULL);
+    }
+  }
+
+  /**
+   * function makeUrl
+   * Make a url from the host and query strings.
+   *
+   * @param $string $host the host (e.g. somehost.com, host.privatenet)
+   * @param $string $query the query to append to the host.
+   *
+   * @return the http string or NULL on error
+   */
+  public function makeUrl($host, $query)
+  {
+    if(empty($host))
+    {
+      return(NULL);
+    }
+   if(empty($query))
+    {
+      return(NULL);
+    }
+    return("http://$host$query");
   }
 
   public function getUrl()

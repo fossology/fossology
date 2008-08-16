@@ -42,7 +42,7 @@ global $PASSWORD;
 /* The class name should end in Test */
 
 /* NOTE: You MUST remove the abstract or the test will not get run */
-class someTest extends fossologyWebTestCase
+abstract class someTest extends fossologyWebTestCase
 {
   public $mybrowser;
   public $someOtherVariable;
