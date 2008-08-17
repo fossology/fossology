@@ -25,19 +25,16 @@
  * Created on Aug 15, 2008
  */
 
-require_once ('../tests/fossologyWebTestCase.php');
-require_once ('../tests/TestEnvironment.php');
+require_once ('fossologyWebTestCase.php');
 
 /* every test must use these globals, at least $URL */
 global $URL;
-global $USER;
-global $PASSWORD;
 
 class uploadFile extends fossologyWebTestCase
 {
   public $mybrowser;
 
-  function __construct()
+  function setUp()
   {
     global $URL;
     $this->mybrowser = & new SimpleBrowser();
@@ -95,7 +92,7 @@ class uploadFile extends fossologyWebTestCase
     $this->assertTrue($this->mybrowser->setField('parentid', $parentFolder),
                       "FAIL! could not select Parent Folder!\n");
     $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile" ));
-
+    /* this test always sets description and upload name, usually set to null */
     $this->assertTrue($this->mybrowser->setField('description', "$description" ));
     $this->assertTrue($this->mybrowser->setField('name', $upload_name ));
     /* we won't select any agents for now.... see todo above */
