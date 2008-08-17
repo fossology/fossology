@@ -46,7 +46,7 @@ class UploadFileTest extends fossologyWebTestCase
 
     print "starting UploadFileTest\n";
     $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
+    $page = $browser->get($URL, "Fail! Count not get a page from $URL\n");
     $this->assertTrue($page);
     $this->assertTrue(is_object($browser));
     $cookie = $this->repoLogin($browser);

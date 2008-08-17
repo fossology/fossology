@@ -32,6 +32,7 @@ global $URL;
 class browseUPloadedTest extends fossologyWebTestCase
 {
   public $mybrowser;
+  public $host;
 
   function setUp()
   {
@@ -51,7 +52,7 @@ class browseUPloadedTest extends fossologyWebTestCase
     $this->assertTrue(is_object($browser));
     $this->mybrowser = $browser;
     $cookie = $this->repoLogin($this->mybrowser);
-    $host = $this->getHost($URL);
+    $this->host = $this->getHost($URL);
     $this->mybrowser->setCookie('Login', $cookie, $host);
   }
 
@@ -59,18 +60,78 @@ class browseUPloadedTest extends fossologyWebTestCase
   {
     global $URL;
 
-    $upload_name = 'simpletest_1\.0\.1\.tar\.gz';
+    $name = 'simpletest_1\.0\.1\.tar\.gz';
 
     print "starting BrowseUploadedtest\n";
-    $loggedIn = $this->mybrowser->get("$URL?mod=browse");
-    $this->assertTrue($this->assertText($loggedIn, '/Browse/'),
+    $page = $this->mybrowser->get("$URL?mod=browse");
+    $this->assertTrue($this->assertText($page, '/Browse/'),
                       "FAIL! Could not find Browse menu\n");
-    $stuff = $this->getBrowseUri($upload_name, $loggedIn);
-    print "************ Suff after getBrowseUri *************\n$stuff\n";
 
-    //$this->assertTrue($this->assertText($page, "/Moved folder $this->folder_name to folder/"),
-      //                "FAIL! Moved folder $this->folder_name to folder not found\n");
-    //print "************ page after Folder Move! *************\n$page\n";
+    /* select simpltest upload */
+    $link = $this->getNextLink("/href='((.*?)&show=detail).*?$name/",$page);
+    $upLink = $this->makeUrl($this->host, $link);
+    $page = $this->mybrowser->get($upLink);
+    //print "************ Page after upload link *************\n$page\n";
+    $this->assertTrue($this->assertText($page, "/Browse/"),
+                      "FAIL! Browse Title not found\n");
+    $this->assertTrue($this->assertText($page, "/$name/"),
+                      "FAIL! did not find simpletest_1.0.1.tar.gz\n");
+    $this->assertTrue($this->assertText($page, "/>View</"),
+                      "FAIL! >View< not found\n");
+    $this->assertTrue($this->assertText($page, "/>Meta</"),
+                      "FAIL! >Meta< not found\n");
+    $this->assertTrue($this->assertText($page, "/>Download</"),
+                      "FAIL! >Download< not found\n");
+
+    /* Select 'simpletest_1.0.1.tar.gz' */
+    $link = $this->getNextLink("/ class=.*?href='(.*?)'>$name/", $page);
+    $compressedLink = $this->makeUrl($this->host, $link);
+    $page = $this->mybrowser->get($compressedLink);
+    $this->assertTrue($this->assertText($page, "/simpletest\//"));
+    $this->assertFalse($this->assertText($page, "/>View</"),
+                      "FAIL! >View< was found\n");
+    $this->assertFalse($this->assertText($page, "/>Meta</"),
+                      "FAIL! >Meta< was found\n");
+    $this->assertFalse($this->assertText($page, "/>Download</"),
+                      "FAIL! >Download< was found\n");
+
+    /* Select simpltest link */
+    $name = 'simpletest';
+    $link = $this->getNextLink("/ class=.*?href='(.*?)'>$name/", $page);
+    $simpleLink = $this->makeUrl($this->host, $link);
+    $page = $this->mybrowser->get($simpleLink);
+    $this->assertTrue($this->assertText($page, "/HELP_MY_TESTS_DONT_WORK_ANYMORE/"));
+    $this->assertTrue($this->assertText($page, "/$name/"),
+                      "FAIL! did not find simpletest_1.0.1.tar.gz\n");
+    $this->assertTrue($this->assertText($page, "/>View</"),
+                      "FAIL! >View< not found\n");
+    $this->assertTrue($this->assertText($page, "/>Meta</"),
+                      "FAIL! >Meta< not found\n");
+    $this->assertTrue($this->assertText($page, "/>Download</"),
+                      "FAIL! >Download< not found\n");
+
+    /* Select the License link to View License Historgram */
+    $link = $this->getNextLink("/href='((.*?mod=license).*?)'.*?License</", $page);
+    $tblLink = $this->makeUrl($this->host, $link);
+    $page = $this->mybrowser->get($tblLink);
+    $this->assertTrue($this->assertText($page, '/License Browser/'),
+                      "FAIL! License Browser not found\n");
+    $this->assertTrue($this->assertText($page, '/Total licenses: 3/'),
+                      "FAIL! Total Licenses does not equal 3\n");
+    //print "************ Should be a License Browser page *************\n$page\n";
+    /* Select Show in the table */
+    $showLink = $this->getNextLink("/href='((.*?mod=search_file_by_license).*?)'.*?Show/", $page);
+    /* view the license */
+    $licLink = $this->getNextLink("/href='((.*?mod=view-license).*?)'.*?LICENSE</", $page);
+    $viewLink = $this->makeUrl($this->host, $licLink);
+    $page = $this->mybrowser->get($viewLink);
+    $this->assertTrue($this->assertText($page, '/View License/'),
+                          "FAIL! View License not found\n");
+    $licenseResult = $this->mybrowser->getContentAsText($viewLink);
+    $this->assertTrue($this->assertText($licenseResult, '/100% view LGPL v2\.1/'),
+                      "FAIL! Did not find '100% view LGPL v2.1'\n   In the License Table for simpletest\n");
+
+    //print "************ page after Browse $nlink *************\n$page\n";
   }
 }
 ?>
