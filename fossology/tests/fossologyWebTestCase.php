@@ -1,5 +1,6 @@
 <?php
 
+
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -38,6 +39,8 @@
 
 //require_once('fossologyUnitTestCase.php');
 
+// FIX THIS PATH REQUIRE STUFF BELOW!
+
 if (!defined('SIMPLE_TEST'))
   define('SIMPLE_TEST', '/usr/share/php/simpletest/');
 
@@ -45,51 +48,17 @@ if (!defined('SIMPLE_TEST'))
 require_once SIMPLE_TEST . 'unit_tester.php';
 require_once SIMPLE_TEST . 'reporter.php';
 require_once SIMPLE_TEST . 'web_tester.php';
-require_once ('../../../../tests/TestEnvironment.php');
+require_once ('TestEnvironment.php');
+//require_once ('testClasses/common.php');
 
 global $URL;
 global $USER;
 global $PASSWORD;
 
-/* does the path need to be modified?, I don't recommend running the
- * ../copy of the program to test.  I think the test should define/create
- * it when doing setup.
- */
-
 class fossologyWebTestCase extends WebTestCase
 {
-
-  protected $url;
-  protected $user;
-  protected $password;
-
-/*
-  function __construct($url, $user, $password)
-  {
-
-    if (is_null($url))
-    {
-      $this->url = 'http://localhost/';
-    } else
-    {
-      $this->url = $url;
-    }
-    if (is_null($user))
-    {
-      $this->user = 'fossy';
-    } else
-    {
-      $this->user = $user;
-    }
-    if (is_null($password))
-    {
-      $this->password = 'fossy';
-    } else
-    {
-      $this->password = $url;
-    }
-  }
-  */
+  public $mybrowser;
+  public $debug;
 
   public function repoLogin($browser = NULL, $user = 'fossy', $password = 'fossy')
   {
@@ -121,31 +90,248 @@ class fossologyWebTestCase extends WebTestCase
     $page = $browser->getContent();
     $NumMatches = preg_match('/User Logged Out/', $page, $matches);
     $this->assertFalse($NumMatches, "User Logged out!, Login Failed! %s");
-    return($cookieValue);
+    return ($cookieValue);
   }
 
-/**
- * function assertText
- *
- * @param string $page, a page of html or text to search
- * @param string $pattern a perl/php pattern e.g. '/suff/'
- *
- * @return boolean
- * @access public
- *
- */
+  /**
+   * function assertText
+   *
+   * @param string $page, a page of html or text to search
+   * @param string $pattern a perl/php pattern e.g. '/suff/'
+   *
+   * @return boolean
+   * @access public
+   *
+   */
   public function assertText($page, $pattern)
   {
     $NumMatches = preg_match($pattern, $page, $matches);
     //print "*** assertText: NumMatches is:$NumMatches\nmatches is:***\n";
     //$this->dump($matches);
-    if($NumMatches)
+    if ($NumMatches)
     {
-      return(TRUE);
+      return (TRUE);
     }
-    return(FALSE);
+    return (FALSE);
   }
 
+  /**
+  * function uploadAFile
+  * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
+  *
+  * Upload a file and optionally schedule the agents.
+  *
+  * @param string $parentFolder the parent folder name, default is root
+  * folder (1)
+  * @param string $uploadFile the path to the file to upload
+  * @param string $description=null optonal description
+  * @param string $uploadName=null optional upload name
+  *
+  * @todo, add in selecting agents the parameter to this routine will
+  * need to be quoted if it contains commas.
+  *
+  * @todo add ability to specify uploadName
+  *
+  * @return false on error
+  */
+  public function uploadAFile($parentFolder, $uploadFile, $description = null, $uploadName = null, $agents = null)
+  {
+    global $URL;
+    /*
+     * check parameters:
+     * default parent folder is root folder
+     * no uploadfile return false
+     * description and upload name are optonal
+     * future: agents are optional
+     */
+    if (empty ($parentFolder))
+    {
+      $parentFolder = 1;
+    }
+    if (empty ($uploadFile))
+    {
+      return (FALSE);
+    }
+    if (is_null($description)) // set default if null
+    {
+      $description = "File $uploadFile uploaded by test UploadAFileTest";
+    }
+    $loggedIn = $this->mybrowser->get($URL);
+    $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
+    $page = $this->mybrowser->get("$URL?mod=upload_file");
+    $this->assertTrue($this->assertText($page, '/Upload a New File/'));
+    $this->assertTrue($this->assertText($page, '/Select the file to upload:/'));
+    $this->assertTrue($this->mybrowser->setField('folder', $parentFolder), "FAIL! could not select Parent Folder!\n");
+    $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile"));
+    $this->assertTrue($this->mybrowser->setField('description', "$description"));
+    /*
+     * the test breaks if the name is set to null $this->assertTrue
+     * ($this- >mybrowser- >setField ('name', $upload_name));
+     *
+     */
+    /* we won't select any agents for now.... see todo above */
+    $page = $this->mybrowser->clickSubmit('Upload!');
+    $this->assertTrue(page);
+    //print "************* page after Upload! is *************\n$page\n";
+    $this->assertTrue($this->assertText($page, '/Upload added to job queue/'));
+  }
+  /**
+  * function uploadAUrl
+  * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
+  *
+  * Upload a file and optionally schedule the agents.
+  *
+  * @param string $parentFolder the parent folder name, default is root
+  * folder (1)
+  * @param string $uploadFile the path to the file to upload
+  * @param string $description=null optonal description
+  * @param string $uploadName=null optional upload name
+  * @param string $agents=null optional agents to schedule
+  *
+  * @todo, add in selecting agents the parameter to this routine will
+  * need to be quoted if it contains commas.
+  *
+  * @return false on error
+  */
+  public function uploadAUrl($parentFolder = 1, $url, $description = null, $uploadName = null, $agents = null)
+  {
+    global $URL;
+    /*
+     * check parameters:
+     * default parent folder is root folder
+     * no uploadfile return false
+     * description and upload name are optonal
+     * future: agents are optional
+     */
+    if (empty ($parentFolder))
+    {
+      $parentFolder = 1;
+    }
+    if (empty ($uploadFile))
+    {
+      return (FALSE);
+    }
+    if (is_null($description)) // set default if null
+    {
+      $description = "File $uploadFile uploaded by test UploadAUrl";
+    }
+    print "starting UploadAUrlTest\n";
+    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
+    $browser = & new SimpleBrowser();
+    $page = $browser->get($URL);
+    $this->assertTrue($page);
+    $this->assertTrue(is_object($browser));
+    $cookie = $this->repoLogin($browser);
+    $host = $this->getHost($URL);
+    $browser->setCookie('Login', $cookie, $host);
+
+    $loggedIn = $browser->get($URL);
+    $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
+    $this->assertTrue($this->assertText($loggedIn, '/From URL/'));
+    $page = $browser->get("$URL?mod=upload_url");
+    $this->assertTrue($this->assertText($page, '/Upload from URL/'));
+    $this->assertTrue($this->assertText($page, '/Enter the URL to the file:/'));
+    /* only look for the the folder id if it's not the root folder */
+    if ($parentFolder != 1)
+    {
+      $FolderId = $this->getFolderId($parentFolder, $page);
+    }
+    $this->assertTrue($browser->setField('folder', $FolderId));
+    $this->assertTrue($browser->setField('geturl', $url));
+    $this->assertTrue($browser->setField('description', "$description"));
+    /* Set the name field if an upload name was passed in. */
+    if (!(is_null($upload_name)))
+    {
+      $this->assertTrue($browser->setField('name', $upload_name));
+    }
+    /* we won't select any agents this time' */
+    $page = $browser->clickSubmit('Upload!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->assertText($page, '/Upload added to job queue/'));
+
+    //print  "************ page after Upload! *************\n$page\n";
+  }
+  /**
+   * function setAgents
+   *
+   * Set 0 or more agents
+   *
+   * Assumes it is on a page where agents can be selected with
+   * checkboxes.  Will produce test errors if it is not.
+   *
+   * @param string $agents a comma seperated list of number 1-4 or all.
+   * e.g. 1 1,2 1,4 4,3 all
+   *
+   */
+  public function setAgents($agents = NULL)
+  {
+    $agentList = array (
+      'license' => 'Check_agent_license',
+      'mimetype' => 'Check_agent_mimetype',
+      'pkgmetagetta' => 'Check_agent_pkgmetagetta',
+      'specagent' => 'Check_agent_specagent',
+
+    );
+    /* check parameters and parse */
+    if (is_null($agents))
+    {
+      return;       // No agents to set
+    }
+    /* see them all if 'all' */
+    if (0 === strcasecmp($agents, 'all'))
+    {
+      foreach ($agentList as $agent => $name)
+      {
+        $this->assertTrue($browser->setField($name, 1));
+      }
+    }
+    /*
+     * what is left is 0 or more numbers, comma seperated
+     * parse them then use them to set a list of agents.
+		 */
+    $numberList = explode(',', $agents);
+    $numAgents = count($numberList);
+    if ($numAgents = 0)
+    {
+      return;       // no agents to schedule
+    }
+    else
+    {
+      foreach ($numberList as $number)
+      {
+        switch ($number)
+        {
+          case 1 :
+            $checklist[] = $agentList['license'];
+            break;
+          case 2 :
+            $checklist[] = $agentList['mimetype'];
+            break;
+          case 3 :
+            $checklist[] = $agentList['pkgmetagetta'];
+            break;
+          case 4 :
+            $checklist[] = $agentList['specagent'];
+            break;
+        }
+      } // foreach
+      if($this->debug) { print "the agent list is:\n"; }
+
+
+      foreach($checklist as $agent)
+      {
+        if($this->debug)
+        {
+          print "DEBUG: $agent\n";
+        }
+        $this->assertTrue($browser->setField($agent, 1));
+      }
+    }
+  } //setAgents
+
+  /********************************************************************
+    * Static functions
+    *******************************************************************/
   /**
    * public function getHost
    *
@@ -157,13 +343,14 @@ class fossologyWebTestCase extends WebTestCase
    *         NULL, if there is no host in the uri
    *
    */
+
   public function getHost($URL)
   {
-    if(empty($URL))
+    if (empty ($URL))
     {
-      return(NULL);
+      return (NULL);
     }
-    return(parse_url($URL, PHP_URL_HOST));      // can return NULL
+    return (parse_url($URL, PHP_URL_HOST)); // can return NULL
   }
 
   /**
@@ -179,19 +366,19 @@ class fossologyWebTestCase extends WebTestCase
     $found = preg_match("/.*value='([0-9].*?)'.*?;($folderName)<\//", $page, $matches);
     //print "DB: matches is:\n";
     //var_dump($matches) . "\n";
-    return($matches[1]);
+    return ($matches[1]);
   }
 
-/**
- * getBrowserUri get the url fragment to display the upload from the
- * xhtml page.
- *
- * @param string $name the name of a folder or upload
- * @param string $page the xhtml page to search
- *
- * @return $string the matching uri or null.
- *
- */
+  /**
+   * getBrowserUri get the url fragment to display the upload from the
+   * xhtml page.
+   *
+   * @param string $name the name of a folder or upload
+   * @param string $page the xhtml page to search
+   *
+   * @return $string the matching uri or null.
+   *
+   */
   public function getBrowseUri($name, $page)
   {
     //print "DB: GBURI: page is:\n$page\n";
@@ -202,13 +389,12 @@ class fossologyWebTestCase extends WebTestCase
     print "DB: GBURI: found matches is:$found\n";
     print "DB: GBURI: matches is:\n";
     var_dump($matches) . "\n";
-    if($found)
+    if ($found)
     {
-      return($matches[1]);
-    }
-    else
+      return ($matches[1]);
+    } else
     {
-      return(NULL);
+      return (NULL);
     }
   }
   /**
@@ -221,23 +407,22 @@ class fossologyWebTestCase extends WebTestCase
    * @return string $result or null if no pattern found.
    *
    */
-  public function getNextLink($pattern, $page, $debug=0)
+  public function getNextLink($pattern, $page, $debug = 0)
   {
     $found = preg_match($pattern, $page, $matches);
     if ($debug)
     {
-     print "DB: GNL: pattern is:$pattern\n";
-     print "DB: GNL: found matches is:$found\n";
-     print "DB: GNL: matches is:\n";
-     var_dump($matches) . "\n";
+      print "DB: GNL: pattern is:$pattern\n";
+      print "DB: GNL: found matches is:$found\n";
+      print "DB: GNL: matches is:\n";
+      var_dump($matches) . "\n";
     }
-    if($found)
+    if ($found)
     {
-      return($matches[1]);
-    }
-    else
+      return ($matches[1]);
+    } else
     {
-      return(NULL);
+      return (NULL);
     }
   }
 
@@ -252,28 +437,28 @@ class fossologyWebTestCase extends WebTestCase
    */
   public function makeUrl($host, $query)
   {
-    if(empty($host))
+    if (empty ($host))
     {
-      return(NULL);
+      return (NULL);
     }
-   if(empty($query))
+    if (empty ($query))
     {
-      return(NULL);
+      return (NULL);
     }
-    return("http://$host$query");
+    return ("http://$host$query");
   }
 
   public function getUrl()
   {
-    return $this->$url;
+    return $this-> $url;
   }
   public function getUser()
   {
-    return $this->$user;
+    return $this-> $user;
   }
   public function getPassword()
   {
-    return $this->$password;
+    return $this-> $password;
   }
 }
 ?>
