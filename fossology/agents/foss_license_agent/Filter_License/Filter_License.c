@@ -222,6 +222,65 @@ void	AddMetaToDB	(int LicPk)
 } /* AddMetaToDB() */
 
 /*********************************************
+ AddCanonicalName(): Make sure the name exists in the DB.
+ *********************************************/
+void	AddCanonicalName	(char *Filename, int LicId)
+{
+  char SQL[1024]; /* SQL */
+  char Name[1024]; /* the canonical name */
+  char *S;
+  int i,j;
+  long LicTermId;
+
+  S = strrchr(Filename,'/');
+  if (S) { S++; /* pass the slash */ }
+  else S=Filename;
+
+  /* copy over the name, and taint the string as we go */
+  memset(Name,'\0',sizeof(Name));
+  for(i=0,j=0; (j<sizeof(Name)-2) && S[i]; i++)
+    {
+    if (S[i]=='\'') { Name[j++]='\''; Name[j++]='\''; }
+    else if (isprint(S[i])) { Name[j++] = S[i]; }
+    }
+
+  /* remove unnecessary strings */
+  S=strstr(Name," part"); if (S) S[0]='\0';
+  S=strstr(Name," short"); if (S) S[0]='\0';
+  S=strstr(Name," variant"); if (S) S[0]='\0';
+  S=strstr(Name," reference"); if (S) S[0]='\0';
+  S=strstr(Name," ("); if (S) S[0]='\0';
+
+  /* Check if it exists in the DB */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT licterm_pk FROM licterm WHERE licterm_name = '%s';",Name);
+  DBaccess(DB,SQL);
+  if (DBdatasize(DB) < 1)
+	{
+	// fprintf(stderr,"Not in DB: '%s'\n",Name);
+	memset(SQL,'\0',sizeof(SQL));
+	snprintf(SQL,sizeof(SQL),"INSERT INTO licterm (licterm_name) VALUES ('%s');",Name);
+	DBaccess(DB,SQL);
+	memset(SQL,'\0',sizeof(SQL));
+	snprintf(SQL,sizeof(SQL),"SELECT licterm_pk FROM licterm WHERE licterm_name = '%s';",Name);
+	DBaccess(DB,SQL);
+	}
+  LicTermId = atol(DBgetvalue(DB,0,0));
+
+  /* Now associate the license if there is no current association */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT * FROM licterm_maplic WHERE lic_fk = '%d';",LicId);
+  DBaccess(DB,SQL);
+  if (DBdatasize(DB) < 1)
+	{
+	// fprintf(stderr,"Not linked in DB: '%s' (link it to %ld)\n",Name,LicTermId);
+	memset(SQL,'\0',sizeof(SQL));
+	snprintf(SQL,sizeof(SQL),"INSERT INTO licterm_maplic (licterm_fk,lic_fk) VALUES ('%ld','%d');",LicTermId,LicId);
+	DBaccess(DB,SQL);
+	}
+} /* AddCanonicalName() */
+
+/*********************************************
  AddLicenseToDB(): Given a license, add it to
  the database.
  This requires the unique value, license name,
@@ -292,6 +351,9 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
 
   /* Add in meta info */
   AddMetaToDB(LastAddPk);
+
+  /* Add canonical name to the DB */
+  AddCanonicalName(Filename,Lic_Id);
 
 #if 0
   /** Disabled: Database will take care of this **/
