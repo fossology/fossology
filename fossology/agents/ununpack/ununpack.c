@@ -1058,7 +1058,7 @@ typedef struct ContainerInfo ContainerInfo;
  ***************************************************/
 void	DebugContainerInfo	(ContainerInfo *CI)
 {
-  printf("Container: %X\n",(unsigned int)CI);
+  printf("Container:\n");
   printf("  Source: %s\n",CI->Source); 
   printf("  Partdir: %s\n",CI->Partdir); 
   printf("  Partname: %s\n",CI->Partname); 
