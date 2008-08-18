@@ -61,6 +61,7 @@ class search_file_by_license extends FO_Plugin
         $UploadTreePk = GetParm("item",PARM_INTEGER);
         $Page = GetParm("page",PARM_INTEGER);
         $WantLic = GetParm("lic",PARM_RAW);
+	$WantLic = str_replace("\\'","'",$WantLic);
         if (empty($UploadTreePk) || empty($WantLic))
         {
           return;
