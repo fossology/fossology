@@ -1287,10 +1287,13 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   memset(UfileName,'\0',sizeof(UfileName));
   if (CI->TopContainer)
 	{
+	char *ufile_name;
 	snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
 	DBaccess(DB,UfileName);
 	memset(UfileName,'\0',sizeof(UfileName));
-	strncpy(UfileName,DBgetvalue(DB,0,0),sizeof(UfileName));
+	ufile_name = DBgetvalue(DB,0,0);
+	if (strchr(ufile_name,'/')) ufile_name = strrchr(ufile_name,'/')+1;
+	strncpy(UfileName,ufile_name,sizeof(UfileName)-1);
 	}
   else if (CI->Artifact)
 	{
