@@ -349,12 +349,22 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 void	CheckPids	()
 {
   int Thread;
-  siginfo_t Info;
+  /***************************************
+   waitid() is Linux only.
+   waitpid() is found on Linux and BSD.
+   ***************************************/
+#define USE_WAITID 0
+#if USE_WAITID
   int rc;
+  siginfo_t Info;
+#else
+  int Status, Pid;
+#endif
 
   /* loop until there are no processes */
   do
     {
+#if USE_WAITID
     memset(&Info,0,sizeof(siginfo_t));
     rc = waitid(P_ALL,P_ALL,&Info,WNOHANG|WEXITED);
     if ((rc != 0) || (Info.si_pid == 0))
@@ -362,10 +372,24 @@ void	CheckPids	()
 	/* distinguish WNOHANG from error: Info.si_pid == 0 if WNOHANG */
 	return;
 	}
+#else
+    Pid = waitpid(-1, &Status, WNOHANG);
+    if ((Pid == 0) || (Pid == -1))
+	{
+	/* When options contain WNOHANG:
+	   exit status of 0 means no children
+	   exit status of -1 means no child terminated */
+	return;
+	}
+#endif
     /* Here: a signal was read */
     /* Find the thread */
-    for(Thread=0;
-	(Thread < MaxThread) && (CM[Thread].ChildPid != Info.si_pid);
+    for(Thread=0; (Thread < MaxThread) &&
+#if USE_WAITID
+        (CM[Thread].ChildPid != Info.si_pid);
+#else
+        (CM[Thread].ChildPid != Pid);
+#endif
 	Thread++)
 	;
     /* If it is a known thread, then process it */
@@ -373,7 +397,11 @@ void	CheckPids	()
 	{
 	if (CM[Thread].Status != ST_FREEING)
 		{
+#if USE_WAITID
 		fprintf(stderr,"ERROR: Child[%d] died prematurely (was state %s, signal was %d)\n",Thread,StatusName[CM[Thread].Status],Info.si_signo);
+#else
+		fprintf(stderr,"ERROR: Child[%d] died prematurely (was state %s, signal was %d)\n",Thread,StatusName[CM[Thread].Status],WTERMSIG(Status));
+#endif
 		DebugThread(Thread);
 		}
 	if (Verbose) fprintf(stderr,"Child[%d] (pid=%d) found dead\n",
@@ -423,11 +451,22 @@ void	CheckPids	()
 	} /*  matched thread */
     else /* if unknown process sent signal */
 	{
+#if USE_WAITID
 	if (Info.si_signo != SIGCHLD) /* ignore unknown children */
 	fprintf(stderr,"INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
 		Info.si_signo, Info.si_pid, Info.si_status);
+#else
+	if (WTERMSIG(Status) != SIGCHLD) /* ignore unknown children */
+	fprintf(stderr,"INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
+		WTERMSIG(Status), Pid, Status);
+#endif
 	}
-    } while(rc==0); /* while !rc == while got a signal */
+    } /* while loop */
+#if USE_WAITID
+    while(rc==0); /* while !rc == while got a signal */
+#else
+    while(Pid > 0); /* while "Pid > 0"  == while got a signal */
+#endif
 } /* CheckPids() */
 
 /********************************************
