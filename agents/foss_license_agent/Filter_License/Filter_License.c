@@ -278,7 +278,39 @@ void	AddCanonicalName	(char *Filename, int LicId)
 	snprintf(SQL,sizeof(SQL),"INSERT INTO licterm_maplic (licterm_fk,lic_fk) VALUES ('%ld','%d');",LicTermId,LicId);
 	DBaccess(DB,SQL);
 	}
+
+  /* Make sure all records are updated */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"UPDATE licterm_name SET licterm_fk = %ld WHERE licterm_fk IS NULL AND agent_lic_meta_fk IN (SELECT DISTINCT agent_lic_meta_pk FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_id = %d AND lic_fk = lic_pk);",LicTermId,LicId);
+  DBaccess(DB,SQL);
+  // fprintf(stderr,"%s\n",SQL);
 } /* AddCanonicalName() */
+
+/*********************************************
+ AddPhrase(): Phrase is a static license.
+ *********************************************/
+void	AddPhrase	()
+{
+  int rc;
+  long TermId;
+
+  rc = DBaccess(DB,"SELECT lic_pk FROM agent_lic_raw WHERE lic_name = 'Phrase';");
+  if ((rc < 0) || (DBdatasize(DB) <= 0))
+    {
+    DBaccess(DB,"INSERT INTO agent_lic_raw (lic_name,lic_unique,lic_text,lic_version,lic_section,lic_id) VALUES ('Phrase','1','Phrase','1',1,1);");
+    }
+
+  rc = DBaccess(DB,"SELECT licterm_pk FROM licterm WHERE licterm_name = 'Phrase';");
+  if ((rc < 0) || (DBdatasize(DB) <= 0))
+    {
+    DBaccess(DB,"INSERT INTO licterm (licterm_name) VALUES ('Phrase');");
+    DBaccess(DB,"SELECT licterm_pk FROM licterm WHERE licterm_name = 'Phrase';");
+    }
+  TermId = atol(DBgetvalue(DB,0,0));
+
+  /* Update any records that need migration */
+  DBaccess(DB,"UPDATE licterm_name SET licterm_fk = (SELECT licterm_pk FROM licterm WHERE licterm_name = 'Phrase') WHERE licterm_fk IS NULL AND agent_lic_meta_fk IN (SELECT DISTINCT agent_lic_meta_pk FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_name = 'Phrase' AND lic_fk = lic_pk);");
+} /* AddPhrase() */
 
 /*********************************************
  AddLicenseToDB(): Given a license, add it to
@@ -1398,6 +1430,8 @@ int	main	(int argc, char *argv[])
 	exit(-1);
 	}
   GetAgentKey();
+
+  if (DB && AddToDB) AddPhrase();
 
   /* process each file from command-line */
   for( ; optind < argc; optind++)
