@@ -808,6 +808,7 @@ function moveOptions(theSelFrom, theSelTo)
     for($i=0; !empty($LicList[$i]); $i++)
       {
       $Lic = intval($LicList[$i]);
+      $DB->Action("DELETE FROM licterm_maplic WHERE lic_fk = '$Lic';");
       $SQL = "SELECT * FROM agent_lic_raw WHERE lic_pk = '$Lic' AND lic_pk = lic_id;";
       $Results = $DB->Action($SQL);
       if (!empty($Results[0]['lic_pk']))
