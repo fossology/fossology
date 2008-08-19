@@ -229,6 +229,8 @@ LANGUAGE plpgsql;
      /* Drop obsolete ufile table */
      $DB->Action("DROP TABLE ufile");
 
+     $DB->Action("ALTER TABLE agent_lic_raw ADD COLUMN lic_tokens integer");
+
      /* Make sure every upload has left and right indexes set. */
      global $LIBEXECDIR;
      system("$LIBEXECDIR/agents/adj2nest -a");
