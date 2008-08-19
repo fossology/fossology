@@ -213,6 +213,7 @@ int	SelfTest	()
     {
     if (HostCheck[i] != 1)
       {
+      if (HostCheck[i] == 0) fprintf(stderr,"FATAL: Host '%s' missing self-test agent.\n",HostList[i].Hostname);
       fprintf(stderr,"FATAL: Host '%s' failed self-test.\n",HostList[i].Hostname);
       rc=1;
       }
