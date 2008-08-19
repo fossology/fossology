@@ -808,6 +808,7 @@ function moveOptions(theSelFrom, theSelTo)
     for($i=0; !empty($LicList[$i]); $i++)
       {
       $Lic = intval($LicList[$i]);
+      /* This delete ensures that every lic_fk is only seen once! */
       $DB->Action("DELETE FROM licterm_maplic WHERE lic_fk = '$Lic';");
       $SQL = "SELECT * FROM agent_lic_raw WHERE lic_pk = '$Lic' AND lic_pk = lic_id;";
       $Results = $DB->Action($SQL);
