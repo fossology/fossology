@@ -320,7 +320,8 @@ void	AddPhrase	()
  Returns the license Id.
  *********************************************/
 int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
-			 char *Section, fileoffset Start, fileoffset Length)
+			 char *Section, fileoffset Start, fileoffset Length,
+			 int TokCount)
 {
   char LicSQL[1024]; /* the license-insert SQL */
   fileoffset MStart; /* start location into mmap */
@@ -336,7 +337,7 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
     {
     /* Create the SQL */
     memset(LicSQL,'\0',sizeof(LicSQL));
-    sprintf(LicSQL,"INSERT INTO agent_lic_raw (lic_id,lic_name,lic_section,lic_unique) VALUES ('-1','%s','%s','%s');",Filename,Section,Unique);
+    sprintf(LicSQL,"INSERT INTO agent_lic_raw (lic_id,lic_name,lic_section,lic_unique,lic_tokens) VALUES ('-1','%s','%s','%s','%d');",Filename,Section,Unique,TokCount);
 
     /* Ok, we have the SQL query */
     switch(DBaccess(DB,LicSQL))
@@ -355,7 +356,7 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
   else /* UPDATE record */
     {
     memset(LicSQL,'\0',sizeof(LicSQL));
-    sprintf(LicSQL,"UPDATE agent_lic_raw SET lic_name='%s',lic_section='%s' WHERE lic_unique='%s' AND lic_version='1';",Filename,Section,Unique);
+    sprintf(LicSQL,"UPDATE agent_lic_raw SET lic_name='%s',lic_section='%s',lic_tokens='%d' WHERE lic_unique='%s' AND lic_version='1';",Filename,Section,TokCount,Unique);
     DBaccess(DB,LicSQL);
     }
 
@@ -495,7 +496,7 @@ int	PrintTokens	(tokentype *Token, fileoffset *TokenOffsets,
 	if (Sum) { Unique = SumToString(Sum); free(Sum); }
 	fputc(0x01,Fout); fputc(0x10,Fout); /* tag 0x0110 = unique value */
 	PrintString(Unique);
-	Lic_Id = AddLicenseToDB(Lic_Id,Unique,Filename,SectionString,TokenOffsets[Start],TokenOffsets[End]-TokenOffsets[Start]);
+	Lic_Id = AddLicenseToDB(Lic_Id,Unique,Filename,SectionString,TokenOffsets[Start],TokenOffsets[End]-TokenOffsets[Start],End-Start);
 	free(Unique);
 	Unique=NULL;
 	}
