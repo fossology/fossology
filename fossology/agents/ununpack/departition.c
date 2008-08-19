@@ -17,6 +17,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ******************************************************************/
 
+/* specify support for files > 2G */
+#define __USE_LARGEFILE64
+#define __USE_FILE_OFFSET64
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -25,10 +29,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#ifndef O_LARGEFILE
-  #define O_LARGEFILE 0100000
-#endif
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
@@ -99,7 +99,12 @@ void	ExtractKernel	(int Fin)
     /* prepare file for writing */
     memset(Name,0,sizeof(Name));
     snprintf(Name,250,"Kernel_%04d",Counter);
+#ifdef O_LARGEFILE
     Fout = open(Name,O_CREAT | O_LARGEFILE | O_WRONLY | O_TRUNC, 0644);
+#else
+    /** BSD does not use nor need O_LARGEFILE **/
+    Fout = open(Name,O_CREAT | O_WRONLY | O_TRUNC, 0644);
+#endif
     }
 
   if (Fout == -1)
@@ -158,7 +163,12 @@ void	ExtractPartition	(int Fin, u_long Start, u_long Size)
   /* prepare file for writing */
   memset(Name,0,sizeof(Name));
   snprintf(Name,250,"Partition_%04d",Counter);
+#ifdef O_LARGEFILE
   Fout = open(Name,O_CREAT | O_LARGEFILE | O_WRONLY | O_TRUNC, 0644);
+#else
+  /** BSD does not use nor need O_LARGEFILE **/
+  Fout = open(Name,O_CREAT | O_WRONLY | O_TRUNC, 0644);
+#endif
   if (Fout == -1)
       {
       perror("ERROR: Unable to create output file for partition");
@@ -362,7 +372,12 @@ int	main	(int argc, char *argv[])
     exit(-1);
     }
 
+#ifdef O_LARGEFILE
   Fin = open(argv[optind],O_RDONLY | O_LARGEFILE);
+#else
+  /** BSD does not use nor need O_LARGEFILE **/
+  Fin = open(argv[optind],O_RDONLY);
+#endif
   if (Fin == -1)
     {
     perror("ERROR: Unable to open diskimage");
