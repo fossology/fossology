@@ -134,19 +134,6 @@ class ui_license extends FO_Plugin
     $MapNext=0;
     foreach($Lics as $Key => $Val) $MapLic2GID[$Key] = $MapNext++; 
 
-    /* Save the license results (also converts values to GID) */
-    /* Key is reported license name, value is count */
-    /* "Total" is a special key containing the sum of the counts */
-//    foreach($Lics as $Key => $Val)
-//	{
-//	  if ($Key != 'Total')
- //     {
-//		$GID = $MapLic2GID[$Key];
-//		$LicGID2Item[$GID] .= "$ChildCount ";
-//		$LicItem2GID[$ChildCount] .= "$GID ";
- //     }
-  //    else { $GID = $Key; }
-	//}
 
     /****************************************/
     /* Get ALL the items under this UploadtreePk */
