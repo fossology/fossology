@@ -90,7 +90,10 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
     $V .= htmlentities($Name);
     $V .= "</option>\n";
     }
-  $Results = $DB->Action("SELECT folder_pk FROM leftnav WHERE parent=$ParentFolder AND folder_pk IS NOT NULL ORDER BY name;");
+  $Results = $DB->Action("SELECT folder_pk FROM folderlist
+	WHERE parent=$ParentFolder
+	AND folder_pk IS NOT NULL
+	ORDER BY name;");
   if (isset($Results[0]['folder_pk']))
     {
     $Hide="";
@@ -245,7 +248,10 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   $Desc = str_replace('"',"&quot;",$Desc);
 
   /* Load any subfolders */
-  $Results = $DB->Action("SELECT folder_pk FROM leftnav WHERE parent=$ParentFolder AND folder_pk IS NOT NULL ORDER BY name;");
+  $Results = $DB->Action("SELECT folder_pk FROM folderlist
+	WHERE parent=$ParentFolder
+	AND folder_pk IS NOT NULL
+	ORDER BY name;");
   /* Now create the HTML */
   if (isset($Results[0]['folder_pk']))
     {

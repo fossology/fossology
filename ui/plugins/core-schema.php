@@ -179,57 +179,89 @@ LANGUAGE plpgsql;
 
     /***************************  release 1.0  ********************************/
     /* if pfile_fk or ufile_mode don't exist in table uploadtree 
-      * create them and populate them from ufile table    
-      * Leave the ufile columns there for now  */
+     * create them and populate them from ufile table    
+     * Drop the ufile columns */
+     if (!$DB->ColExist("upload", "pfile_fk"))
+     {
+         $DB->Action("ALTER TABLE upload ADD COLUMN pfile_fk integer;");
+	 $DB->Action("UPDATE upload SET pfile_fk = ufile.pfile_fk FROM ufile WHERE upload.pfile_fk IS NULL AND upload.ufile_fk = ufile.ufile_pk;");
+     }
+
      if (!$DB->ColExist("uploadtree", "pfile_fk"))
      {
          $DB->Action("ALTER TABLE uploadtree ADD COLUMN pfile_fk integer");
-     }
-
-     if (!$DB->ColExist("upload","ufile_fk"))
-     {
-         $DB->Action("ALTER TABLE upload ALTER COLUMN ufile_fk DROP NOT NULL");
-	 /* Migrate data -- this could be slow */
-	 $DB->Action("UPDATE upload SET pfile_fk = ufile.pfile_fk FROM ufile WHERE upload.pfile_fk IS NULL AND upload.ufile_fk = ufile.ufile_pk;");
+	 $DB->Action("UPDATE uploadtree SET pfile_fk = ufile.pfile_fk FROM ufile WHERE uploadtree.pfile_fk IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
      }
 
      /* Move ufile_mode and ufile_name from ufile table to uploadtree table */
      if (!$DB->ColExist("uploadtree", "ufile_mode"))
      {
          $DB->Action("ALTER TABLE uploadtree ADD COLUMN ufile_mode integer");
+	 $DB->Action("UPDATE uploadtree SET ufile_mode = ufile.ufile_mode FROM ufile WHERE uploadtree.ufile_mode IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
      }
      if (!$DB->ColExist("uploadtree", "ufile_name"))
      {
          $DB->Action("ALTER TABLE uploadtree ADD COLUMN ufile_name text");
-     }
-
-     if (!$DB->ColExist("uploadtree","ufile_fk"))
-     {
-         $DB->Action("ALTER TABLE uploadtree ALTER COLUMN ufile_fk DROP NOT NULL");
-	 /* Migrate data -- this could be slow */
-	 $DB->Action("UPDATE uploadtree SET pfile_fk = ufile.pfile_fk FROM ufile WHERE uploadtree.pfile_fk IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
 	 $DB->Action("UPDATE uploadtree SET ufile_name = ufile.ufile_name FROM ufile WHERE uploadtree.ufile_name IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
-	 $DB->Action("UPDATE uploadtree SET ufile_mode = ufile.ufile_mode FROM ufile WHERE uploadtree.ufile_mode IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
      }
 
-     /* Make sure lft, rgt are in uploadtree, they will need adj2nest to populate */
-     if (!$DB->ColExist("uploadtree", "lft"))
+     if ($DB->ColExist("uploadtree", "lft"))
      {
-         $DB->Action("ALTER TABLE uploadtree ADD COLUMN lft integer");
-         $DB->Action("CREATE INDEX lft_idx ON uploadtree USING btree (lft)");
+       $DB->Action("ALTER TABLE uploadtree ADD COLUMN lft integer");
+       $DB->Action("CREATE INDEX lft_idx ON uploadtree USING btree (lft)");
      }
      if (!$DB->ColExist("uploadtree", "rgt"))
      {
-         $DB->Action("ALTER TABLE uploadtree ADD COLUMN rgt integer");
+       $DB->Action("ALTER TABLE uploadtree ADD COLUMN rgt integer");
      }
+
+     $DB->Action("ALTER TABLE agent_lic_raw ADD COLUMN lic_tokens integer");
      
      /* Ignore errors if contraints already exist */
      $DB->Action("ALTER TABLE agent_lic_raw ADD PRIMARY KEY (lic_pk)");
 
-     /* Drop obsolete ufile table */
-     $DB->Action("DROP TABLE ufile");
+     /************ Rebuild folder view ************/
+     $DB->Action("DROP VIEW folderlist;");
+     $DB->Action("CREATE VIEW folderlist AS
+	SELECT folder.folder_pk,
+	       folder.folder_name AS name,
+	       folder.folder_desc AS description,
+	       foldercontents.parent_fk AS parent,
+	       foldercontents.foldercontents_mode,
+	       NULL::\"unknown\" AS ts,
+	       NULL::\"unknown\" AS upload_pk,
+	       NULL::\"unknown\" AS pfile_fk,
+	       NULL::\"unknown\" AS ufile_mode
+	FROM folder, foldercontents
+	WHERE foldercontents.foldercontents_mode = 1
+	AND foldercontents.child_id = folder.folder_pk
+	UNION ALL 
+	SELECT NULL::\"unknown\" AS folder_pk,
+	       ufile_name AS name,
+	       upload.upload_desc AS description,
+	       foldercontents.parent_fk AS parent,
+	       foldercontents.foldercontents_mode, upload.upload_ts AS ts,
+	       upload.upload_pk,
+	       uploadtree.pfile_fk,
+	       ufile_mode
+	FROM upload
+	INNER JOIN uploadtree ON upload_pk = upload_fk
+	AND parent IS NULL
+	INNER JOIN foldercontents ON foldercontents.foldercontents_mode = 2
+	AND foldercontents.child_id = upload.upload_pk;");
 
-     $DB->Action("ALTER TABLE agent_lic_raw ADD COLUMN lic_tokens integer");
+     /************ Delete old columns and tables ************/
+     /* Drop obsolete ufile table, ignore errors */
+     $DB->Action("ALTER TABLE uploadtree ALTER COLUMN ufile_fk DROP NOT NULL;");
+     $DB->Action("ALTER TABLE uploadtree DROP CONSTRAINT uploadtree_ufilefk;");
+     $DB->Action("ALTER TABLE upload ALTER COLUMN ufile_fk DROP NOT NULL;");
+     $DB->Action("DROP VIEW leftnav;");
+     $DB->Action("DROP VIEW uptreeup;");
+     $DB->Action("DROP VIEW uptreeattrib;");
+     $DB->Action("DROP VIEW uptreeatkey;");
+     $DB->Action("DROP VIEW uplicense;");
+     $DB->Action("DROP VIEW lic_progress;");
+     $DB->Action("DROP TABLE ufile;");
 
      /* Make sure every upload has left and right indexes set. */
      global $LIBEXECDIR;

@@ -35,16 +35,15 @@ class search_file_advance extends FO_Plugin
   var $LoginFlag  = 0;
 
   /***********************************************************
-   GetUfileFromName(): Given a pfile_pk, return all ufiles.
+   GetUploadtreeFromName(): Given a filename, return all uploadtree.
    ***********************************************************/
-  function GetUfileFromName($Filename,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax)
+  function GetUploadtreeFromName($Filename,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax)
     {
     global $DB;
     $Max = 50;
     $Filename = str_replace("'","''",$Filename); // protect DB
     $Terms = split("[[:space:]][[:space:]]*",$Filename);
-    $SQL = "SELECT * FROM ufile";
-    $SQL .= " INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk";
+    $SQL = "SELECT * FROM uploadtree INNER JOIN pfile ON pfile_pk = pfile_fk";
     foreach($Terms as $Key => $T)
 	{
 	$SQL .= " AND ufile_name like '$T'";
@@ -74,7 +73,7 @@ class search_file_advance extends FO_Plugin
 	$NeedAnd=1;
 	}
     $Offset = $Page * $Max;
-    $SQL .= " ORDER BY uploadtree.pfile_fk,ufile_pk LIMIT $Max OFFSET $Offset;";
+    $SQL .= " ORDER BY pfile_fk,ufile_name LIMIT $Max OFFSET $Offset;";
     $Results = $DB->Action($SQL);
 
     $V = "";
@@ -116,7 +115,7 @@ class search_file_advance extends FO_Plugin
     /* put page menu at the bottom, too */
     if (!empty($VM)) { $V .= "<P />\n" . $VM; }
     return($V);
-    } // GetUfileFromName()
+    } // GetUploadtreeFromName()
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
@@ -206,7 +205,7 @@ class search_file_advance extends FO_Plugin
 	  if (empty($Page)) { $Page = 0; }
 	  $V .= "<hr>\n";
 	  $V .= "<H2>Files matching " . htmlentities($Filename) . "</H2>\n";
-	  $V .= $this->GetUfileFromName($Filename,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax);
+	  $V .= $this->GetUploadtreeFromName($Filename,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax);
 	  }
         break;
       case "Text":

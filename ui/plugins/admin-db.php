@@ -68,53 +68,11 @@ class admin_db_cleanup extends FO_Plugin
 	$Checks = array();
 	$i=0;
 
-// bobg: These are agent_lic_meta recs that have a pfile where the pfile is not referenced by a ufile
-//       Since the real problem is having no ufile for the pfile, these others seem like extraneous information.
-//	$Checks[$i]['tag']   = "bad_lic_pfile";
-//	$Checks[$i]['label'] = "License records associated with unreferenced pfiles";
-//	$Checks[$i]['sql']   = "FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_pk FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile));";
-//	$i++;
-//	$Checks[$i]['tag']   = "bad_licstatus_pfile";
-//	$Checks[$i]['label'] = "License status records associated with unreferenced pfiles";
-//	$Checks[$i]['sql']   = "FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_pk FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile));";
-//	$i++;
-//	$Checks[$i]['tag']   = "bad_attrib_pfile";
-//	$Checks[$i]['label'] = "Attribute records associated with unreferenced pfiles";
-//	$Checks[$i]['sql']   = "FROM attrib WHERE pfile_fk IN (SELECT pfile_pk FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile));";
-//	$i++;
-
-//  Bobg Apr 17, 2008  This is a hugely expensive query for large numbers (25M) ufiles.  Removing for now.
-//	$Checks[$i]['tag']   = "unreferenced_pfiles";
-//	$Checks[$i]['label'] = "Unreferenced pfiles";
-//	$Checks[$i]['sql']   = "FROM pfile WHERE pfile_pk NOT IN (SELECT pfile_fk FROM ufile);";
-//	$i++;
-
 	$Checks[$i]['tag']   = "bad_upload_pfile";
 	$Checks[$i]['label'] = "Uploads missing pfiles";
 	$Checks[$i]['sql']   = "FROM upload WHERE upload_pk IN (SELECT upload_fk FROM uploadtree WHERE parent IS NULL AND pfile_fk IS NULL) OR upload_pk NOT IN (SELECT upload_fk FROM uploadtree);";
 	$Checks[$i]['list']  = "SELECT upload_filename AS list " . $Checks[$i]['sql'];
 	$i++;
-
-//  Bobg June 21, 2008  This is a hugely expensive query.  Removing it for now.
-//	$Checks[$i]['tag']   = "unreferenced_ufile";
-//	$Checks[$i]['label'] = "Unreferenced ufiles";
-//	$Checks[$i]['sql']   = "FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree);";
-//	$Checks[$i]['list']   = "SELECT ufile_name AS list FROM ufile WHERE ufile_pk NOT IN (SELECT ufile_fk FROM upload) AND ufile_pk NOT IN (SELECT ufile_fk FROM uploadtree) LIMIT 20;";
-//	$i++;
-
-// bobg: not possible due to referential integrity constraint
-//	$Checks[$i]['tag']   = "bad_ufile_pfile";
-//	$Checks[$i]['label'] = "Ufiles with invalid pfile references";
-//	$Checks[$i]['sql']   = "FROM ufile WHERE pfile_fk IS NOT NULL AND pfile_fk NOT IN (SELECT pfile_pk FROM pfile);";
-//	$i++;
-//	$Checks[$i]['tag']   = "bad_upload_ufile";
-//	$Checks[$i]['label'] = "Upload records with invalid ufile references";
-//	$Checks[$i]['sql']   = "FROM upload WHERE ufile_fk NOT IN (SELECT ufile_pk FROM ufile);";
-//	$i++;
-//	$Checks[$i]['tag']   = "bad_uploadtree_ufile";
-//	$Checks[$i]['label'] = "Uploadtree records with invalid ufile references";
-//	$Checks[$i]['sql']   = "FROM uploadtree WHERE ufile_fk NOT IN (SELECT ufile_pk FROM ufile);";
-//	$i++;
 
 	$Checks[$i]['tag']   = "bad_foldercontents_upload";
 	$Checks[$i]['label'] = "Foldercontents with invalid upload references";
@@ -179,8 +137,8 @@ if (0)
 
 	/***************************************/
 	$V .= "On occasion, the database can become inconsistent.";
-	$V .= " For example, there may be pfile records without ufile entries";
-	$V .= " or ufile entries that are not linked by any uploadtree records.";
+	$V .= " For example, there may be pfile records without uploadtree entries";
+	$V .= " or uploadtree entries that are not linked by any upload records.";
 	$V .= " Inconsistencies usually arise due to failed unpacking, partial deletions, and testing.\n";
 
 	$V .= "<script language='javascript'>\n";
@@ -209,7 +167,7 @@ if (0)
 	$V .= "<P>Temporary inconsistencies may exist when a file is uploaded, being unpacked, or being deleted.\n";
 	$V .= "<ul>";
 	$V .= "<li>An uploaded file -- before being unpacked -- can appear inconsistent.\n";
-	$V .= "<li>The unpack system creates ufiles and pfiles first, then links them together when it completes.\n";
+	$V .= "<li>The unpack system creates pfiles first, then links them together when it completes.\n";
 	$V .= "<li>The delete system removes records in series, so a partial delete (or delete in progress) can show inconsistencies.\n";
 	$V .= "</ul>\n";
 	$V .= "There $Verb <b>currently $Count $String running</b> in the job queue that may make records appear inconsistent.\n";

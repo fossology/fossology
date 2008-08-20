@@ -387,11 +387,15 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
       {
       $Phrase = "<b>Phrase:</b> " . htmlentities($R['phrase_text']);
       }
-    else
-    {
-      $PctMatch = (int)($R['tok_match'] * 100 / ($R['lic_tokens']));
-      $Phrase = $PctMatch . "%  ";
-    }
+//    else
+//    {
+//      if ($R['lic_tokens'] != 0)
+//        {
+//	$PctMatch = (int)($R['tok_match'] * 100 / ($R['lic_tokens']));
+//	}
+//      else { $PctMatch = 0; }
+//      $Phrase = $PctMatch . "%  ";
+//    }
 
     if ((IsDir($R['ufile_mode'])) || (Iscontainer($R['ufile_mode'])))
 	{

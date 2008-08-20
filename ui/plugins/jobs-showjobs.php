@@ -123,14 +123,6 @@ class jobs_showjobs extends FO_Plugin
     } // DrawColors()
 
   /***********************************************************
-   GetUfileFromJob(): Give a job number,
-   TBD: Allow the user to clear hung jobs, alter priority.
-   ***********************************************************/
-  function GetUfileFromJob($Job)
-    {
-    } // GetUfileFromJob()
-
-  /***********************************************************
    ShowJob(): This function returns the full job information.
    TBD: Allow the user to clear hung jobs, alter priority.
    ***********************************************************/
