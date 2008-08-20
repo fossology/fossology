@@ -276,10 +276,12 @@ function menu_find($Name,&$MaxDepth,$Menu=NULL)
  If $ShowAll==0, then items without hyperlinks are hidden.
  This is commonly called the "micro-menu".
  ***********************************************/
+$menu_to_1html_counter=0;
 function menu_to_1html($Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
 {
   $V = "";
   $Std = "";
+  global $menu_to_1html_counter;
 
   if ($ShowTraceback)
     {
@@ -340,7 +342,8 @@ function menu_to_1html($Menu,$ShowRefresh=1,$ShowTraceback=0,$ShowAll=1)
 	$V .= $Std;
 	$Std=NULL;
 	}
-  return("<div align='right' style='padding:0px 5px 0px 5px'><small>$V</small></div>");
+  $menu_to_1html_counter++;
+  return("<div id='menu1html-$menu_to_1html_counter' align='right' style='padding:0px 5px 0px 5px'><small>$V</small></div>");
 } // menu_to_1html()
 
 /***********************************************
