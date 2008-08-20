@@ -1203,8 +1203,6 @@ void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
 	ufile_name = DBTaintString(DBgetvalue(DBR,i,3));
 
 	/* Add the child to uploadtree */
-	/** While uploadtree_pk is unique, ufile_fk/parent is not.
-	    There may be duplicates that are blocked by constraints. **/
 	memset(SQL,'\0',MAXSQL);
 	if (NewParent > 0)
 	  {
@@ -1685,16 +1683,6 @@ int	Traverse	(char *Filename, char *Basename,
 
   /* check for top containers */
   CI.TopContainer = (NewDir!=NULL);
-#if 0
-  if (CI.TopContainer)
-    {
-    char *V;
-    V = getenv("ARG_ufile_pk");
-    if (!V) V = getenv("ufile_pk");
-    if (!V) V = getenv("ufile");
-    if (V) CI.ufile_pk = atoi(V);
-    }
-#endif
 
   /***********************************************/
   /* Populate CI and CI.PI structure */

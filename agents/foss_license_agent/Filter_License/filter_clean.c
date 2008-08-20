@@ -114,7 +114,7 @@ void	ListUploads	(int ProcessFlag)
 
   rc=1;
   memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"select upload_pk,ufile_fk,upload_desc,upload_filename from upload order by upload_pk;");
+  snprintf(SQL,MAXSQL,"SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;");
   rc = DBaccess(DB,SQL);
   if (rc < 1)
 	{
@@ -147,7 +147,6 @@ void	ListUploads	(int ProcessFlag)
 /*********************************************
  ProcessUpload(): process every cache file related
  to this upload.
- Upload -1 == process all of them!
  *********************************************/
 void	ProcessUpload	(long Pid)
 {
@@ -166,24 +165,9 @@ void	ProcessUpload	(long Pid)
     return;
     }
 
-
   /* if it gets here, then there is a real upload ID (Pid) */
-/**
- SELECT DISTINCT(pfile_pk) AS Akey,
-        pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
-                    FROM containers
-                    INNER JOIN ufile ON ufile_container_fk = contained_fk
-                    INNER JOIN pfile ON pfile_pk = pfile_fk
-                    INNER JOIN agent_lic_status
-                        ON agent_lic_status.pfile_fk = pfile.pfile_pk
-                    WHERE agent_lic_status.processed IS TRUE
-                    AND agent_lic_status.inrepository IS TRUE
-                    AND container_fk = %ld
-		    LIMIT 1000;
-  %ld = 1223021
- **/
   snprintf(SQL,MAXSQL,
-    "SELECT DISTINCT(pfile_pk) AS Akey, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A FROM containers INNER JOIN ufile ON ufile_container_fk = contained_fk INNER JOIN pfile ON pfile_pk = pfile_fk INNER JOIN agent_lic_status ON agent_lic_status.pfile_fk = pfile.pfile_pk WHERE agent_lic_status.processed IS TRUE AND agent_lic_status.inrepository IS TRUE AND container_fk = %ld LIMIT 1000;"
+    "SELECT DISTINCT(pfile_pk) AS Akey, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A FROM uploadtree INNER JOIN pfile ON upload_fk = %ld AND pfile_pk = uploadtree.pfile_fk INNER JOIN agent_lic_status ON agent_lic_status.pfile_fk = pfile_pk WHERE agent_lic_status.processed IS TRUE AND agent_lic_status.inrepository IS TRUE LIMIT 1000;"
       ,Pid);
 
   /* while there are records, process each record */
