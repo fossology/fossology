@@ -376,11 +376,17 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
   for($i=0; !empty($Listing[$i]['uploadtree_pk']); $i++)
   {
     $R = &$Listing[$i];
-    $Phrase='';
+
     if ($ShowPhrase && !empty($R['phrase_text']))
       {
       $Phrase = "<b>Phrase:</b> " . htmlentities($R['phrase_text']);
       }
+    else
+    {
+      $PctMatch = (int)($R['tok_match'] * 100 / ($R['lic_tokens']));
+      $Phrase = $PctMatch . "%  ";
+    }
+
     if ((IsDir($R['ufile_mode'])) || (Iscontainer($R['ufile_mode'])))
 	{
 	$V .= "<P />\n";
