@@ -42,18 +42,17 @@ class search_repo extends FO_Plugin
     } // RegisterMenus()
 
   /***********************************************************
-   GetUfileFromPfile(): Given a pfile_pk, return all ufiles.
+   GetUploadtreeFromPfile(): Given a pfile_pk, return all uploadtree.
    ***********************************************************/
-  function GetUfileFromPfile($Pfilepk,$Page)
+  function GetUploadtreeFromPfile($Pfilepk,$Page)
     {
     global $DB;
     $Max = 50;
     $Offset = $Max * $Page;
     $SQL = "SELECT * FROM pfile
-	INNER JOIN ufile ON pfile_pk = '$Pfilepk'
-	  AND ufile.pfile_fk = pfile.pfile_pk
-	INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk
-	ORDER BY uploadtree.pfile_fk,ufile_pk LIMIT $Max OFFSET $Offset
+	INNER JOIN uploadtree ON pfile_pk = '$Pfilepk'
+	AND pfile_fk = pfile_pk
+	ORDER BY pfile_fk,ufile_name LIMIT $Max OFFSET $Offset
 	;";
     $Results = $DB->Action($SQL);
     $Count = count($Results);
@@ -72,12 +71,12 @@ class search_repo extends FO_Plugin
     $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
     if (!empty($VM)) { $V .= "<P />\n" . $VM; }
     return($V);
-    } // GetUfileFromPfile()
+    } // GetUploadtreeFromPfile()
 
   /***********************************************************
-   GetUfileFromRepo(): Given a sha1.md5.len, return all ufiles.
+   GetUploadtreeFromRepo(): Given a sha1.md5.len, return all uploadtree.
    ***********************************************************/
-  function GetUfileFromRepo($Repo,$Page)
+  function GetUploadtreeFromRepo($Repo,$Page)
     {
     /* Split repo into Sha1, Md5, and Len */
     $Repo = strtoupper($Repo);
@@ -97,23 +96,23 @@ class search_repo extends FO_Plugin
 	AND pfile_size = '$Len';";
     $Results = $DB->Action($SQL);
     if (empty($Results[0]['pfile_pk'])) { return; }
-    return($this->GetUfileFromPfile($Results[0]['pfile_pk'],$Page));
-    } // GetUfileFromRepo()
+    return($this->GetUploadtreeFromPfile($Results[0]['pfile_pk'],$Page));
+    } // GetUploadtreeFromRepo()
 
   /***********************************************************
    Search(): Given a string to search for, search for it!
    This identifies whether the string is a pfile_pk or sha1.md5.len.
-   Returns all ufiles, or null if none found.
+   Returns all uploadtree, or null if none found.
    ***********************************************************/
   function Search	($String,$Page=0)
     {
     if (preg_match("/^[0-9]+$/",$String) > 0)
 	{
-	return($this->GetUfileFromPfile($String,$Page));
+	return($this->GetUploadtreeFromPfile($String,$Page));
 	}
     if (preg_match("/^[0-9a-fA-F]{40}\.[0-9a-fA-F]{32}.[0-9]+$/",$String) > 0)
 	{
-	return($this->GetUfileFromRepo($String,$Page));
+	return($this->GetUploadtreeFromRepo($String,$Page));
 	}
     $V = "Search string is not a valid format.";
     return($V);
