@@ -273,18 +273,17 @@ function LicenseCount($UploadtreePk)
 
 /************************************************************
  LicenseGetAll(): Return licenses for a uploadtree_pk.
- Can return empty array if there is no license.
+ Array returned looks like Array[license_name] = count.
+ An array is always returned unless the db is not open 
+ or no uploadtreepk is passed in.
  $Max: $Max # of returned records
  $Offset: offset into $Results of first returned rec
  Returns NULL if not processed.
  ************************************************************/
-$LicenseGetAll_Prepared=0;
-$MapResults = array();
 function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL, $Max=-1, $Offset=0)
 {
   global $Plugins;
   global $DB;
-  global $MapResults;
 
   if (empty($DB)) { return; }
   if (empty($UploadtreePk)) { return NULL; }
@@ -292,68 +291,76 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL, $Max=
   /* Number of licenses */
   if (empty($Lics[' Total ']) && empty($GetField)) { $Lics[' Total ']=0; }
 
+  if ($Offset > 0) 
+    $OffsetPhrase = " OFFSET $Offset";
+  else
+    $OffsetPhrase = "";
+
+  if ($Max > 0)
+    $LimitPhrase = " LIMIT $Max";
+  else
+    $LimitPhrase = "";
+
   /*  Get every license for every file in this subtree */
-  $Results = $DB->Action("select UT1.*,lic_name,licterm_name,licterm_name_confidence,lic_pk,phrase_text
-    FROM uploadtree as UT1 
-    INNER JOIN uploadtree as UT2 on UT1.lft BETWEEN UT2.lft and UT2.rgt
+  $Results = $DB->Action("select licterm_name, count(licterm_name) as liccount
+    FROM uploadtree as UT1, uploadtree as UT2, licterm_name, licterm
+    WHERE UT1.lft BETWEEN UT2.lft and UT2.rgt
           and UT1.upload_fk=UT2.upload_fk
           and UT2.uploadtree_pk=$UploadtreePk
-    INNER JOIN licterm_name on licterm_name.pfile_fk=UT1.pfile_fk
-    INNER JOIN agent_lic_meta on agent_lic_meta_pk=licterm_name.agent_lic_meta_fk
-    INNER JOIN agent_lic_raw on agent_lic_meta.lic_fk=agent_lic_raw.lic_pk
-    LEFT OUTER JOIN licterm on licterm_pk=licterm_name.licterm_fk
-    ORDER BY UT1.pfile_fk, lic_name");
-  $Count = count($Results);
+          and licterm_name.pfile_fk=UT1.pfile_fk
+          and licterm_pk=licterm_name.licterm_fk
+    GROUP BY licterm_name
+    ORDER BY liccount DESC  $LimitPhrase $OffsetPhrase");
 
-  if (($Results) && ($Count > 0))
-  {
-    if (empty($MapResults))
-    {
-      /* Prepare map */
-      $MapResults = $DB->Action("SELECT * FROM licterm_maplic INNER JOIN licterm ON licterm_fk = licterm_pk ;");
-      $MapLic = array();
-      for($i=0; !empty($MapResults[$i]['licterm_maplic_pk']); $i++)
-      {
-        $MapLic[$MapResults[$i]['lic_fk']] = $MapResults[$i]['licterm_name'];
-      }
-    }
+   $Lics[' Total '] = count($Results);
 
-    if ($Max == -1) $Max = $Count;
-
-    /* Got canonical name */
-    $Found = 0;
-    for ($i=0; ($Found < $Max+$Offset) && $Results[$i]; $i++)
-    {
-      $Name = &$Results[$i];
-      /* Get the license name */
-      $LicName="";
-      if ($Name['licterm_name_confidence'] == 3) { $LicName = $Name['licterm_name']; }
-      if (empty($LicName)) { $LicName = LicenseNormalizeName($Name['lic_name'],$Name['licterm_name_confidence'],$MapLic[$Name['lic_pk']]); }
-      if (empty($LicName)) { $LicName = LicenseNormalizeName($Name['lic_name'],$Name['licterm_name_confidence'],$Name['licterm_name']); }
-      if (!empty($WantLic) && ($LicName != $WantLic)) { $LicName = ""; }
-
-      if (!empty($LicName))
-      {
-        if ($Found >= $Offset)
-        {
-          if (!empty($GetField)) 
-          { $Lics[]=$Name; }
-          else
-          {
-            if (empty($Lics[$LicName])) 
-            { $Lics[$LicName]=1; }
-            else 
-            { $Lics[$LicName]++; }
-            $Lics[' Total ']++;
-          }
-        }
-        $Found++;
-	  }
-    }
-  }
-
+   /* Rewrite results for consumption */
+   foreach ($Results as $Rec) $Lics[$Rec['licterm_name']] = $Rec['liccount'];
+   
   return; 
 } // LicenseGetAll()
+
+
+/* Return license records that match the license in $WantLic, including and under UploadtreePK  */
+function LicenseGetAllFiles2($UploadtreePk, &$Lics, $WantLic, $Max=-1, $Offset=0)
+{
+  global $Plugins;
+  global $DB;
+
+  if (empty($DB)) { return; }
+  if (empty($UploadtreePk)) { return NULL; }
+
+  if ($Offset > 0) 
+    $OffsetPhrase = " OFFSET $Offset";
+  else
+    $OffsetPhrase = "";
+
+  if ($Max > 0)
+    $LimitPhrase = " LIMIT $Max";
+  else
+    $LimitPhrase = "";
+
+  /*  Get the recs with $WantLic license in this subtree */
+  $sql = "select UT1.*, licterm_name, agent_lic_meta.*, lic_tokens
+    FROM uploadtree as UT1, uploadtree as UT2, licterm_name, licterm, agent_lic_meta, agent_lic_raw
+    WHERE UT1.lft BETWEEN UT2.lft and UT2.rgt
+          and UT1.upload_fk=UT2.upload_fk
+          and UT2.uploadtree_pk=$UploadtreePk
+          and licterm_name.pfile_fk=UT1.pfile_fk
+          and agent_lic_meta_pk=licterm_name.agent_lic_meta_fk
+          and licterm_pk=licterm_name.licterm_fk
+          and licterm_name = '$WantLic'
+          and agent_lic_raw.lic_pk=agent_lic_meta.lic_fk
+    ORDER BY UT1.pfile_fk DESC  $LimitPhrase $OffsetPhrase";
+  $Results = $DB->Action($sql);
+
+   $Lics[' Total '] = count($Results);
+
+   /* Rewrite results for consumption */
+   foreach ($Results as $Rec) $Lics[] = $Rec;
+
+  return; 
+} // LicenseGetAllFiles2()
 
 
 /************************************************************
