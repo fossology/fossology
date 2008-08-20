@@ -182,6 +182,8 @@ class agent_license_reanalyze extends FO_Plugin
 	if (!empty($UploadtreePk))
 	  {
 	  $this->AnalyzeOne($UploadtreePk);
+	  if (!empty($_FILES['licfile']['unlink_flag']))
+            { unlink($_FILES['licfile']['tmp_name']); }
 	  }
 	/* Refresh the screen */
 	$Uri = Traceback();
