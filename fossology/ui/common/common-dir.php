@@ -131,14 +131,14 @@ function DirGetNonArtifact($UploadtreePk)
     {
     if (empty($C['ufile_mode'])) { continue; }
     if (!Isartifact($C['ufile_mode']))
-    {
-    return($UploadtreePk);
-    }
+      {
+      return($UploadtreePk);
+      }
     if (($C['ufile_name'] == 'artifact.dir') ||
         ($C['ufile_name'] == 'artifact.unpacked'))
-    {
-    $Recurse = DirGetNonArtifact($C['uploadtree_pk']);
-    }
+      {
+      $Recurse = DirGetNonArtifact($C['uploadtree_pk']);
+      }
     }
   if (!empty($Recurse))
     {
@@ -209,12 +209,12 @@ function Dir2Path($UploadtreePk)
 
   if (empty($DB)) { return; }
 
-  $Rows = $DB->Action("select UT2.* from uploadtree as UT1, uploadtree as UT2
-            WHERE UT1.lft BETWEEN UT2.lft and UT2.rgt 
+  $Rows = $DB->Action("SELECT UT2.* FROM uploadtree AS UT1, uploadtree AS UT2
+            WHERE UT1.lft BETWEEN UT2.lft AND UT2.rgt 
               AND UT1.upload_fk=UT2.upload_fk 
               AND UT1.uploadtree_pk=$UploadtreePk
               AND ((UT2.ufile_mode & (1<<28)) = 0)
-              ORDER BY UT2.uploadtree_pk asc
+              ORDER BY UT2.uploadtree_pk ASC
          ");
 
   return($Rows);
@@ -269,59 +269,65 @@ function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
   $List = FolderGetFromUpload($Path[0]['upload_fk']);
   $Uri2 = Traceback_uri() . "?mod=browse" . Traceback_parm_keep(array("show"));
   for($i=0; $i < count($List); $i++)
-  {
+    {
     $Folder = $List[$i]['folder_pk'];
     $FolderName = htmlentities($List[$i]['folder_name']);
     $V .= "<b><a href='$Uri2&folder=$Folder'>$FolderName</a></b>/ ";
-  }
+    }
 
   $FirstPath=1; /* every firstpath belongs on a new line */
 
   /* Print the upload, itself (on the next line since it is not a folder) */
-  if ((count($Path) == 1) || ($UploadtreePk == $Path[0]['uploadtree_pk']))
-  {
+  if (count($Path) == -1)
+    {
     $Upload = $Path[0]['upload_fk'];
     $UploadName = htmlentities($Path[0]['ufile_name']);
-    $V .= "<br><b><a href='$Uri2&folder=$Folder&upload=$Upload'>$UploadName</a></b>";
-    $FirstPath=0;
-  }
+    $UploadtreePk =  $Path[0]['uploadtree_pk'];
+    $V .= "<br><b><a href='$Uri2&folder=$Folder&upload=$Upload&item=$UploadtreePk'>$UploadName</a></b>";
+    // $FirstPath=0;
+    }
   else
     $V .= "<br>";
   
   /* Show the path within the upload */
-if ($FirstPath!=0)
-  foreach($Path as $P)
-  {
-    if (empty($P['ufile_name'])) { continue; }
-    if (!$FirstPath) { $V .= "/ "; }
-    if (!empty($LinkLast) || ($P != $Last))
+  if ($FirstPath!=0)
+    {
+    for($p=0; !empty($Path[$p]['uploadtree_pk']); $p++)
+      {
+      $P = &$Path[$p];
+      if (empty($P['ufile_name'])) { continue; }
+      $UploadtreePk = $P['uploadtree_pk'];
+
+      if (!$FirstPath) { $V .= "/ "; }
+      if (!empty($LinkLast) || ($P != $Last))
 	{
-      if ($P == $Last)
+        if ($P == $Last)
 	  {
 	    $Uri = Traceback_uri() . "?mod=$LinkLast";
 	  }
-	$V .= "<a href='$Uri&upload=" . $P['upload_fk'] . "&item=" . $P['uploadtree_pk'] . $Opt . "'>";
+	$V .= "<a href='$Uri&upload=" . $P['upload_fk'] . "&item=" . DirGetNonArtifact($UploadtreePk) . $Opt . "'>";
 	}
 
-    if (Isdir($P['ufile_mode']))
+      if (Isdir($P['ufile_mode']))
 	{
-      $V .= $P['ufile_name'];
+        $V .= $P['ufile_name'];
 	}
-    else
+      else
 	{
-      if (!$FirstPath && Iscontainer($P['ufile_mode']))
+        if (!$FirstPath && Iscontainer($P['ufile_mode']))
 	  {
 	    $V .= "<br>\n&nbsp;&nbsp;";
 	  }
-	  $V .= "<b>" . $P['ufile_name'] . "</b>";
+	$V .= "<b>" . $P['ufile_name'] . "</b>";
 	}
 
-    if (!empty($LinkLast) || ($P != $Last))
+      if (!empty($LinkLast) || ($P != $Last))
 	{
 	  $V .= "</a>";
 	}
-    $FirstPath = 0;
-  }
+      $FirstPath = 0;
+      }
+    }
   $V .= "</font>\n";
 
   if (!empty($ShowMicro))
