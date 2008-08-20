@@ -76,9 +76,10 @@ class ui_view_license extends FO_Plugin
 	  {
 	  $Parts = split("-",$Segment,2);
 	  if (empty($Parts[1])) { $Parts[1] = $Parts[0]; }
-	  $Denominator = ($Row['tok_pfile'] + $Row['tok_license']);
-	  if ($Denominator > 0) { $Match = intval($Row['tok_match']*200 / $Denominator) . "%"; }
-	  else { $Match = "0%"; }
+      if (empty($Row['lic_tokens']))
+        $Match = "";
+      else
+        $Match = (int)($Row['tok_match'] * 100 / ($Row['lic_tokens'])) . "%";
 	  if ($First) { $First = 0; $Color=-2; }
 	  else { $Color=-1; $LicName=NULL; }
 
@@ -104,10 +105,11 @@ class ui_view_license extends FO_Plugin
     /* Find the license path */
     if (!empty($Item))
       {
-      $SQL = "SELECT license_path,tok_match,tok_license
+      $SQL = "SELECT license_path,tok_match,tok_license, lic_tokens
 	FROM agent_lic_meta
 	INNER JOIN uploadtree ON uploadtree_pk = '$Item'
 	AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
+    INNER JOIN agent_lic_raw ON lic_pk=lic_fk
 	WHERE lic_fk = $LicPk AND tok_pfile_start = $TokPfileStart
 	ORDER BY version DESC LIMIT 1;";
       $Results = $DB->Action($SQL);
@@ -167,8 +169,9 @@ class ui_view_license extends FO_Plugin
     if (empty($ModBack)) { $ModBack='license'; }
 
     /* Load licenses for this file */
-    $Results = $DB->Action("SELECT * FROM agent_lic_meta
+    $Results = $DB->Action("SELECT agent_lic_meta.*, lic_tokens FROM agent_lic_meta
 	INNER JOIN uploadtree ON uploadtree_pk = '$Item'
+    INNER JOIN agent_lic_raw ON lic_pk=lic_fk
 	AND uploadtree.pfile_fk = agent_lic_meta.pfile_fk
 	ORDER BY tok_pfile_start;");
 

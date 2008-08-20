@@ -77,7 +77,7 @@ class search_file_by_license extends FO_Plugin
         /* Load licenses */
         $Lics = array();
         $Offset = $Page*$Max;
-        LicenseGetAll($UploadTreePk,$Lics,1,$WantLic,$Max,$Offset);
+        LicenseGetAllFiles2($UploadTreePk,$Lics,$WantLic,$Max,$Offset);
 
         /* Save the license results */
         $Count = count($Lics);
