@@ -70,9 +70,15 @@ class uploadTestDataTest extends fossologyWebTestCase
     $urlList = array('http://www.gnu.org/licenses/gpl-3.0.txt',
                      'http://www.gnu.org/licenses/agpl-3.0.txt');
 
+    /* upload the archives using the upload from file menu */
     foreach($uploadList as $upload)
     {
-      $this->uploadAFile($rootFolder, $upload);
+      $this->uploadAFile($rootFolder, $upload, null, null, '1,2,3');
+    }
+    /* Upload the urls using upload from url */
+    foreach($urlList as $url)
+    {
+      $this->uploadAUrl($rootFolder, $url, null, null, '1,2,3');
     }
   }
 }
