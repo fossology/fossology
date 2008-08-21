@@ -474,6 +474,8 @@ if [ "\$CONFIGOK" != "1" ] ; then
   exit
 fi
 
+## Initialize the tables
+/usr/local/bin/fossinit.php -v
 
 ## Create the License.bsam file
 ## This requires DB access and everything must be installed first.
