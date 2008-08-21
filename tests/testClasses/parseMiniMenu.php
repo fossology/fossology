@@ -24,9 +24,9 @@
  *
  * @param string $page the xhtml page to parse
  *
- * @return assocative array with menu names as keys an links if any as
- * values.  Can return an empty array indicating no menu found on the
- * page.
+ * @return assocative array with menu names as keys and links as values.
+ * Can return an empty array indicating no mini menus found on the page.
+ * Only menus with links are returned.
  *
  * @version "$Id: $"
  *
