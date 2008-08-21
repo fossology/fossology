@@ -21,7 +21,7 @@
  * Site Level test to verify Organize->Folder->* menus exist
  *
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Jul 24, 2008
  */

@@ -19,7 +19,7 @@
 /**
  * Is the folder edit properties menu available?
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Jul 31, 2008
  */

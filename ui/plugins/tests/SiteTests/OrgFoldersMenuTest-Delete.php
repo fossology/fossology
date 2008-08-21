@@ -19,7 +19,7 @@
 /**
  * Can the folder delete menu be reached?
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Jul 31, 2008
  */

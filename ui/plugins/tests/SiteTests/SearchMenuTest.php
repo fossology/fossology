@@ -19,7 +19,7 @@
 /**
  * Test to check that the search menu exists and the page loads
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Jul 23, 2008
  */
