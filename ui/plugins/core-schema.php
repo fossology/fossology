@@ -221,6 +221,7 @@ LANGUAGE plpgsql;
      /* Ignore errors if contraints already exist */
      $DB->Action("ALTER TABLE agent_lic_raw ADD PRIMARY KEY (lic_pk)");
 
+
      /************ Rebuild folder view ************/
      $DB->Action("DROP VIEW folderlist;");
      $DB->Action("CREATE VIEW folderlist AS
@@ -263,6 +264,50 @@ LANGUAGE plpgsql;
      $DB->Action("DROP VIEW uplicense;");
      $DB->Action("DROP VIEW lic_progress;");
      $DB->Action("DROP TABLE ufile;");
+
+
+    /********************************************
+     * uploadtree2path(uploadtree_pk integer) is a DB function that returns
+     * the non-artifact parents of an uploadtree_pk
+     ********************************************/
+    $sql = '
+CREATE or REPLACE function uploadtree2path(uploadtree_pk_in int) returns setof uploadtree as $$ 
+DECLARE
+  UTrec   uploadtree;
+  UTpk    integer;
+  sql     varchar;
+BEGIN
+
+  UTpk := uploadtree_pk_in;
+
+    WHILE UTpk > 0 LOOP
+      sql := \'select * from uploadtree where uploadtree_pk=\' || UTpk;
+      execute sql into UTrec;
+    
+      IF ((UTrec.ufile_mode & (1<<28)) = 0) THEN RETURN NEXT UTrec; END IF;
+      UTpk := UTrec.parent;
+    END LOOP;
+  RETURN;
+END;
+$$ 
+LANGUAGE plpgsql;
+    ';
+    $DB->Action($sql);
+
+     /* Create the report_cache table */
+    $sql = ' 
+CREATE TABLE report_cache (
+    report_cache_pk serial NOT NULL,
+    report_cache_tla timestamp without time zone DEFAULT now() NOT NULL,
+    report_cache_key text NOT NULL,
+    report_cache_value text NOT NULL,
+    report_cache_uploadfk integer
+);
+ALTER TABLE ONLY report_cache ADD CONSTRAINT report_cache_pkey PRIMARY KEY (report_cache_pk);
+ALTER TABLE ONLY report_cache ADD CONSTRAINT report_cache_report_cache_key_key UNIQUE (report_cache_key);
+CREATE INDEX report_cache_tlats ON report_cache USING btree (report_cache_tla);
+    ';
+    $DB->Action($sql);
 
      /* Make sure every upload has left and right indexes set. */
      global $LIBEXECDIR;
