@@ -9,16 +9,6 @@
   /* Canonical name: 71 */
   $Term["3dfx GLIDE"]["Desc"]="3dfx GLIDE Source Code General Public License";
   $Term["3dfx GLIDE"]["Term"][0]="3dfx glide";
-  /* Canonical name: 138 */
-  $Term["Academic Free License v1.1"]["Desc"]="";
-  /* Canonical name: 139 */
-  $Term["Academic Free License v1.2"]["Desc"]="";
-  /* Canonical name: 140 */
-  $Term["Academic Free License v2.0"]["Desc"]="";
-  /* Canonical name: 141 */
-  $Term["Academic Free License v2.1"]["Desc"]="";
-  /* Canonical name: 142 */
-  $Term["Academic Free License v3.0"]["Desc"]="";
   /* Canonical name: 157 */
   $Term["Academy of Motion Picture Arts and Sciences"]["Desc"]="";
   $Term["Academy of Motion Picture Arts and Sciences"]["License"][0]="BSD/BSD.new/Academy of Motion Picture Arts and Sciences";
@@ -45,21 +35,9 @@
   $Term["Adobe Commercial"]["Term"][]="adobe product license agreement";
   $Term["Adobe Commercial"]["License"][0]="Corporate/Adobe/Adobe Flex 2.0.1 SDK EULA";
   $Term["Adobe Commercial"]["License"][1]="Corporate/Adobe/Adobe Product License Agreement";
-  /* Canonical name: 188 */
-  $Term["Adobe Flex 2.0.1 SDK EULA"]["Desc"]="";
-  /* Canonical name: 189 */
-  $Term["Adobe Product License Agreement"]["Desc"]="";
   /* Canonical name: 47 */
   $Term["Affero"]["Desc"]="Affero General Public License";
   $Term["Affero"]["Term"][0]="affero general public license";
-  /* Canonical name: 289 */
-  $Term["Affero GPL v1.0"]["Desc"]="";
-  /* Canonical name: 290 */
-  $Term["Affero GPL v3.0"]["Desc"]="";
-  /* Canonical name: 291 */
-  $Term["Affero Preamble v1.0"]["Desc"]="";
-  /* Canonical name: 292 */
-  $Term["Affero Preamble v3.0"]["Desc"]="";
   /* Canonical name: 108 */
   $Term["Affero v1.0"]["Desc"]="Affero General Public License v1.0";
   $Term["Affero v1.0"]["Term"][0]="affero general public license v1";
@@ -97,8 +75,6 @@
   /* Canonical name: 159 */
   $Term["Apache Software License v1.1"]["Desc"]="";
   $Term["Apache Software License v1.1"]["License"][0]="BSD/BSD.new/Apache/Apache Software License v1.1";
-  /* Canonical name: 160 */
-  $Term["Apache Software License v2.0"]["Desc"]="";
   /* Canonical name: 118 */
   $Term["Apache v2.0"]["Desc"]="Apache Software License v2.0";
   $Term["Apache v2.0"]["Term"][0]="apache license";
@@ -117,8 +93,6 @@
   /* Canonical name: 191 */
   $Term["Apple Common Documentation License v1.0"]["Desc"]="";
   $Term["Apple Common Documentation License v1.0"]["License"][0]="Corporate/Apple/Apple Common Documentation License v1.0";
-  /* Canonical name: 192 */
-  $Term["Apple iTunes License"]["Desc"]="";
   /* Canonical name: 55 */
   $Term["Apple Public Source License"]["Desc"]="Apple Public Source License";
   $Term["Apple Public Source License"]["Term"][0]="apl";
@@ -136,12 +110,6 @@
   /* Canonical name: 152 */
   $Term["Apple Public Source License v2.0"]["Desc"]="";
   $Term["Apple Public Source License v2.0"]["License"][0]="APSL/Apple Public Source License v2.0";
-  /* Canonical name: 193 */
-  $Term["Apple Quicktime License"]["Desc"]="";
-  /* Canonical name: 194 */
-  $Term["Apple Quicktime Pro7 License"]["Desc"]="";
-  /* Canonical name: 195 */
-  $Term["Apple Quicktime Pro7 License Exhibit A"]["Desc"]="";
   /* Canonical name: 196 */
   $Term["Apple Squeak"]["Desc"]="";
   $Term["Apple Squeak"]["License"][0]="Corporate/Apple/Apple Squeak";
@@ -149,8 +117,6 @@
   $Term["AptanaPL v1.0"]["Desc"]="Aptana Public License v1.0";
   $Term["AptanaPL v1.0"]["Term"][0]="aptana";
   $Term["AptanaPL v1.0"]["License"][0]="Aptana/Aptana Public License v1.0";
-  /* Canonical name: 153 */
-  $Term["Aptana Public License v1.0"]["Desc"]="";
   /* Canonical name: 56 */
   $Term["Artistic License"]["Desc"]="Artistic License";
   $Term["Artistic License"]["Term"][0]="artistic license";
@@ -158,17 +124,9 @@
   $Term["Artistic License"]["License"][1]="Artistic/Artistic v1.0 short";
   $Term["Artistic License"]["License"][2]="Artistic/Artistic v2.0";
   $Term["Artistic License"]["License"][3]="Artistic/Artistic v2.0beta4";
-  /* Canonical name: 154 */
-  $Term["Artistic v1.0"]["Desc"]="";
-  /* Canonical name: 155 */
-  $Term["Artistic v2.0"]["Desc"]="";
-  /* Canonical name: 156 */
-  $Term["Artistic v2.0beta4"]["Desc"]="";
   /* Canonical name: 131 */
   $Term["ATI Commercial"]["Desc"]="ATI Commercial licenses";
   $Term["ATI Commercial"]["License"][0]="Corporate/ATI/ATI Software EULA";
-  /* Canonical name: 197 */
-  $Term["ATI Software EULA"]["Desc"]="";
   /* Canonical name: 171 */
   $Term["Attribution Assurance License"]["Desc"]="";
   $Term["Attribution Assurance License"]["License"][0]="BSD/BSD.old/Attribution Assurance License";
@@ -189,8 +147,6 @@
   $Term["BitTorrent Open Source License"]["Desc"]="BitTorrent Open Source License";
   $Term["BitTorrent Open Source License"]["Term"][0]="bittorrent open source license";
   $Term["BitTorrent Open Source License"]["Term"][]="jabber open source license";
-  /* Canonical name: 172 */
-  $Term["Boost Software License"]["Desc"]="";
   /* Canonical name: 78 */
   $Term["BSD"]["Desc"]="BSD";
   $Term["BSD"]["Term"][0]="boost software license";
@@ -217,23 +173,9 @@
   $Term["BSD"]["License"][15]="BSD/BSD.old/INRIA-OSL";
   $Term["BSD"]["License"][16]="BSD/BSD.old/Intel-OSL";
   $Term["BSD"]["License"][17]="Free/FreeWithCopyright/UC Regents free with copyright clause";
-  /* Canonical name: 173 */
-  $Term["BSD As-Is clause"]["Desc"]="";
   /* Canonical name: 174 */
   $Term["BSD Gov"]["Desc"]="";
   $Term["BSD Gov"]["License"][0]="BSD/BSD.old/BSD Gov";
-  /* Canonical name: 175 */
-  $Term["BSD Harvard"]["Desc"]="";
-  /* Canonical name: 161 */
-  $Term["BSD new"]["Desc"]="";
-  /* Canonical name: 176 */
-  $Term["BSD NRL"]["Desc"]="";
-  /* Canonical name: 177 */
-  $Term["BSD old"]["Desc"]="";
-  /* Canonical name: 178 */
-  $Term["BSD UCRegents"]["Desc"]="";
-  /* Canonical name: 179 */
-  $Term["BSD zlib"]["Desc"]="";
   /* Canonical name: 256 */
   $Term["Carnegie Mellon University 1991"]["Desc"]="";
   $Term["Carnegie Mellon University 1991"]["License"][0]="Edu/CMU/Carnegie Mellon University 1991";
@@ -264,22 +206,6 @@
   $Term["CeCILL"]["License"][5]="Gov/CeCILL_V1-fr";
   $Term["CeCILL"]["License"][6]="Gov/CeCILL_V2-en";
   $Term["CeCILL"]["License"][7]="Gov/CeCILL_V2-fr";
-  /* Canonical name: 277 */
-  $Term["CeCILL-B_V1-en"]["Desc"]="";
-  /* Canonical name: 278 */
-  $Term["CeCILL-B_V1-fr"]["Desc"]="";
-  /* Canonical name: 279 */
-  $Term["CeCILL-C_V1-en"]["Desc"]="";
-  /* Canonical name: 280 */
-  $Term["CeCILL-C_V1-fr"]["Desc"]="";
-  /* Canonical name: 281 */
-  $Term["CeCILL_V1.1-US"]["Desc"]="";
-  /* Canonical name: 282 */
-  $Term["CeCILL_V1-fr"]["Desc"]="";
-  /* Canonical name: 283 */
-  $Term["CeCILL_V2-en"]["Desc"]="";
-  /* Canonical name: 284 */
-  $Term["CeCILL_V2-fr"]["Desc"]="";
   /* Canonical name: 331 */
   $Term["C_Migemo License"]["Desc"]="";
   $Term["C_Migemo License"]["License"][0]="MiscOSS/C_Migemo License";
@@ -323,8 +249,6 @@
   /* Canonical name: 255 */
   $Term["Creative Commons Public License"]["Desc"]="";
   $Term["Creative Commons Public License"]["License"][0]="Creative_Commons/Creative Commons Public License";
-  /* Canonical name: 162 */
-  $Term["Cryptix"]["Desc"]="";
   /* Canonical name: 378 */
   $Term["CUA Office Public License v1.0"]["Desc"]="";
   $Term["CUA Office Public License v1.0"]["License"][0]="MPL/CUA Office Public License v1.0";
@@ -332,8 +256,6 @@
   $Term["CUAPL"]["Desc"]="CUA Office Public License";
   $Term["CUAPL"]["Term"][0]="cua office public license";
   $Term["CUAPL"]["Term"][]="cuapl";
-  /* Canonical name: 163 */
-  $Term["CWI"]["Desc"]="";
   /* Canonical name: 294 */
   $Term["Dual MPL GPL"]["Desc"]="";
   $Term["Dual MPL GPL"]["License"][0]="GPL/Dual MPL GPL";
@@ -348,8 +270,6 @@
   $Term["Eclipse Public License v1.0"]["Desc"]="";
   $Term["Eclipse Public License v1.0"]["License"][0]="EPL/Eclipse Public License v1.0";
   $Term["Eclipse Public License v1.0"]["License"][1]="EPL/Eclipse Public License v1.0 reference";
-  /* Canonical name: 311 */
-  $Term["eCos"]["Desc"]="";
   /* Canonical name: 66 */
   $Term["Educational Community License"]["Desc"]="Educational Community License";
   $Term["Educational Community License"]["Term"][0]="educational community license";
@@ -379,8 +299,6 @@
   /* Canonical name: 266 */
   $Term["Free Art License v1.2"]["Desc"]="";
   $Term["Free Art License v1.2"]["License"][0]="FreeArtLicense/Free Art License v1.2";
-  /* Canonical name: 180 */
-  $Term["FreeBSD"]["Desc"]="";
   /* Canonical name: 269 */
   $Term["Free clause"]["Desc"]="";
   $Term["Free clause"]["License"][0]="Free/Free clause";
@@ -434,14 +352,6 @@
   /* Canonical name: 337 */
   $Term["Glide"]["Desc"]="";
   $Term["Glide"]["License"][0]="MiscOSS/Glide";
-  /* Canonical name: 70 */
-  $Term["GNU Free Documentation License"]["Desc"]="GNU Free Documentation License";
-  $Term["GNU Free Documentation License"]["Term"][0]="gfdl";
-  $Term["GNU Free Documentation License"]["Term"][]="gnu free documentation license";
-  /* Canonical name: 297 */
-  $Term["GNU Free Documentation License v1.1"]["Desc"]="";
-  /* Canonical name: 298 */
-  $Term["GNU Free Documentation License v1.2"]["Desc"]="";
   /* Canonical name: 338 */
   $Term["gnuplot"]["Desc"]="";
   $Term["gnuplot"]["License"][0]="MiscOSS/gnuplot";
@@ -467,8 +377,6 @@
   /* Canonical name: 300 */
   $Term["GPL for Computer Programs of the Public Administration"]["Desc"]="";
   $Term["GPL for Computer Programs of the Public Administration"]["License"][0]="GPL/GPL for Computer Programs of the Public Administration";
-  /* Canonical name: 301 */
-  $Term["GPL from FSF"]["Desc"]="";
   /* Canonical name: 302 */
   $Term["GPL JavaScript Exception clause"]["Desc"]="";
   $Term["GPL JavaScript Exception clause"]["License"][0]="GPL/GPL JavaScript Exception clause";
@@ -486,8 +394,6 @@
   $Term["GPL v1"]["License"][0]="GPL/v1/GPL v1";
   $Term["GPL v1"]["License"][1]="GPL/v1/GPL v1 Preamble";
   $Term["GPL v1"]["License"][2]="GPL/v1/GPL v1 reference";
-  /* Canonical name: 310 */
-  $Term["GPL v1 Preamble"]["Desc"]="";
   /* Canonical name: 5 */
   $Term["GPL v2"]["Desc"]="Gnu Public License version 2";
   $Term["GPL v2"]["Term"][0]="gnu general public license %10% version 2";
@@ -536,8 +442,6 @@
   /* Canonical name: 312 */
   $Term["GPL v2 Java Index Serialization Package"]["Desc"]="";
   $Term["GPL v2 Java Index Serialization Package"]["License"][0]="GPL/v2/GPL v2 Java Index Serialization Package variant";
-  /* Canonical name: 313 */
-  $Term["GPL v2 Preamble"]["Desc"]="";
   /* Canonical name: 6 */
   $Term["GPL v3"]["Desc"]="Gnu Public License version 3";
   $Term["GPL v3"]["Term"][0]="gnu general public license %10% version 3";
@@ -571,10 +475,6 @@
   $Term["GPL v3+"]["Term"][]="version 3 %5% or %5% later %5% gnu public license";
   $Term["GPL v3+"]["License"][0]="GPL/v3/GPL v3 reference 1";
   $Term["GPL v3+"]["License"][1]="GPL/v3/GPL v3 reference 2";
-  /* Canonical name: 318 */
-  $Term["GPL v3 Preamble"]["Desc"]="";
-  /* Canonical name: 380 */
-  $Term["gSOAP Public License"]["Desc"]="";
   /* Canonical name: 98 */
   $Term["gSOAP v1.3"]["Desc"]="gSOAP Public License";
   $Term["gSOAP v1.3"]["Term"][0]="gsoap public license";
@@ -633,16 +533,10 @@
   /* Canonical name: 364 */
   $Term["InfoZip"]["Desc"]="";
   $Term["InfoZip"]["License"][0]="MiscOSS/zlib/InfoZip";
-  /* Canonical name: 181 */
-  $Term["INRIA-OSL"]["Desc"]="";
-  /* Canonical name: 205 */
-  $Term["Intel"]["Desc"]="";
   /* Canonical name: 129 */
   $Term["Intel Commercial"]["Desc"]="Intel Commercial Licenses";
   $Term["Intel Commercial"]["License"][0]="Corporate/Intel";
   $Term["Intel Commercial"]["License"][1]="Corporate/Intel reference";
-  /* Canonical name: 182 */
-  $Term["Intel-OSL"]["Desc"]="";
   /* Canonical name: 381 */
   $Term["Interbase"]["Desc"]="";
   $Term["Interbase"]["License"][0]="MPL/Interbase";
@@ -694,10 +588,6 @@
   $Term["LGPL"]["Term"][]="lesser gpl";
   $Term["LGPL"]["Term"][]="lgpl";
   $Term["LGPL"]["License"][0]="GPL/LGPL/LGPL gettext library variant";
-  /* Canonical name: 303 */
-  $Term["LGPL gettext library"]["Desc"]="";
-  /* Canonical name: 304 */
-  $Term["LGPL GNU C Library"]["Desc"]="";
   /* Canonical name: 113 */
   $Term["LGPL v2"]["Desc"]="GNU Library General Public License Version 2";
   $Term["LGPL v2"]["Term"][0]="gnu lesser general public license %10% version 2";
@@ -730,10 +620,6 @@
   $Term["LGPL v2+"]["Term"][]="version 2 %5% or %5% later %5% library general public license";
   $Term["LGPL v2+"]["License"][0]="GPL/LGPL/LGPL v2.0 reference";
   $Term["LGPL v2+"]["License"][1]="GPL/LGPL/LGPL wxWindows Library Licence v3.0 variant";
-  /* Canonical name: 305 */
-  $Term["LGPL v2.0"]["Desc"]="";
-  /* Canonical name: 306 */
-  $Term["LGPL v2.0 with exceptions"]["Desc"]="";
   /* Canonical name: 121 */
   $Term["LGPL v2.1"]["Desc"]="GNU Library General Public License Version 2 1";
   $Term["LGPL v2.1"]["Term"][0]="gnu lesser general public license %10% version 2 1";
@@ -767,8 +653,6 @@
   $Term["LGPL v2.1+"]["License"][1]="GPL/LGPL/LGPL v2.1";
   $Term["LGPL v2.1+"]["License"][2]="GPL/LGPL/LGPL v2.1 Preamble";
   $Term["LGPL v2.1+"]["License"][3]="GPL/LGPL/LGPL v2.1 reference";
-  /* Canonical name: 307 */
-  $Term["LGPL v2.1 Preamble"]["Desc"]="";
   /* Canonical name: 116 */
   $Term["LGPL v3"]["Desc"]="GNU Library General Public License Version 3";
   $Term["LGPL v3"]["Term"][0]="gnu lesser general public license %10% version 3";
@@ -798,10 +682,6 @@
   $Term["LGPL v3+"]["Term"][]="version 3 %5% or %5% later %5% gnu library general public license";
   $Term["LGPL v3+"]["Term"][]="version 3 %5% or %5% later %5% lesser general public license";
   $Term["LGPL v3+"]["Term"][]="version 3 %5% or %5% later %5% library general public license";
-  /* Canonical name: 308 */
-  $Term["LGPL v3.0"]["Desc"]="";
-  /* Canonical name: 309 */
-  $Term["LGPL wxWindows Library Licence v3.0"]["Desc"]="";
   /* Canonical name: 143 */
   $Term["License Text Protection"]["Desc"]="";
   $Term["License Text Protection"]["License"][0]="AFL/License Text Protection";
@@ -823,25 +703,9 @@
   /* Canonical name: 314 */
   $Term["McKornik Jr. Public License"]["Desc"]="";
   $Term["McKornik Jr. Public License"]["License"][0]="GPL/v2/McKornik Jr. Public License";
-  /* Canonical name: 209 */
-  $Term["Microsoft EULA"]["Desc"]="";
-  /* Canonical name: 210 */
-  $Term["Microsoft EULA 2003"]["Desc"]="";
-  /* Canonical name: 211 */
-  $Term["Microsoft EULA Software"]["Desc"]="";
-  /* Canonical name: 212 */
-  $Term["Microsoft Limited Public License"]["Desc"]="";
-  /* Canonical name: 213 */
-  $Term["Microsoft Limited Reciprocal License"]["Desc"]="";
-  /* Canonical name: 214 */
-  $Term["Microsoft Public License"]["Desc"]="";
-  /* Canonical name: 215 */
-  $Term["Microsoft Reciprocal License"]["Desc"]="";
   /* Canonical name: 216 */
   $Term["Microsoft Reference License"]["Desc"]="";
   $Term["Microsoft Reference License"]["License"][0]="Corporate/Microsoft/Microsoft Reference License";
-  /* Canonical name: 217 */
-  $Term["Microsoft Shared Source License"]["Desc"]="";
   /* Canonical name: 373 */
   $Term["MIT"]["Desc"]="";
   $Term["MIT"]["License"][0]="MIT/MIT (modern)";
@@ -893,10 +757,6 @@
   /* Canonical name: 382 */
   $Term["MPL contributor clause with dual license"]["Desc"]="";
   $Term["MPL contributor clause with dual license"]["License"][0]="MPL/MPL contributor clause with dual license";
-  /* Canonical name: 383 */
-  $Term["MPL v1.0"]["Desc"]="";
-  /* Canonical name: 384 */
-  $Term["MPL v1.1"]["Desc"]="";
   /* Canonical name: 132 */
   $Term["MS-Commercial"]["Desc"]="Microsoft Commercial Licenses";
   $Term["MS-Commercial"]["License"][0]="Corporate/Microsoft/Microsoft EULA";
@@ -926,8 +786,6 @@
   $Term["Ms-RL"]["Term"][0]="microsoft reciprocal license";
   $Term["Ms-RL"]["Term"][]="ms rl";
   $Term["Ms-RL"]["License"][0]="Corporate/Microsoft/Microsoft Reciprocal License";
-  /* Canonical name: 219 */
-  $Term["MySQL AB Exception"]["Desc"]="";
   /* Canonical name: 125 */
   $Term["MySQL v0.3"]["Desc"]="MySQL FLOSS License Exception";
   $Term["MySQL v0.3"]["Term"][0]="mysql %5% floss %5% exception";
@@ -968,21 +826,11 @@
   /* Canonical name: 386 */
   $Term["NPL contributor clause with dual license"]["Desc"]="";
   $Term["NPL contributor clause with dual license"]["License"][0]="MPL/NPL contributor clause with dual license";
-  /* Canonical name: 387 */
-  $Term["NPL v1.1"]["Desc"]="";
   /* Canonical name: 99 */
   $Term["Nvidia Commercial"]["Desc"]="Nvidia family of commercial licenses";
   $Term["Nvidia Commercial"]["License"][0]="Corporate/Nvidia/Nvidia Software License";
   $Term["Nvidia Commercial"]["License"][1]="Corporate/Nvidia/Nvidia Software License variant 1";
   $Term["Nvidia Commercial"]["License"][2]="Corporate/Nvidia/Nvidia Source Code";
-  /* Canonical name: 223 */
-  $Term["Nvidia Software License"]["Desc"]="";
-  /* Canonical name: 224 */
-  $Term["Nvidia Source Code"]["Desc"]="";
-  /* Canonical name: 391 */
-  $Term["OCLC Research Public License v1.0"]["Desc"]="";
-  /* Canonical name: 392 */
-  $Term["OCLC Research Public License v2.0"]["Desc"]="";
   /* Canonical name: 119 */
   $Term["OCLC v1.0"]["Desc"]="OCLC Research Public License v1.0";
   $Term["OCLC v1.0"]["Term"][0]="oclc %5% 1";
@@ -1024,16 +872,6 @@
   /* Canonical name: 356 */
   $Term["Open Services Gateway Initiative"]["Desc"]="";
   $Term["Open Services Gateway Initiative"]["License"][0]="MiscOSS/Open Services Gateway Initiative";
-  /* Canonical name: 144 */
-  $Term["Open Software License v1.0"]["Desc"]="";
-  /* Canonical name: 145 */
-  $Term["Open Software License v1.1"]["Desc"]="";
-  /* Canonical name: 146 */
-  $Term["Open Software License v2.0"]["Desc"]="";
-  /* Canonical name: 147 */
-  $Term["Open Software License v2.1"]["Desc"]="";
-  /* Canonical name: 148 */
-  $Term["Open Software License v3.0"]["Desc"]="";
   /* Canonical name: 185 */
   $Term["OpenSSL"]["Desc"]="";
   $Term["OpenSSL"]["License"][0]="BSD/BSD.old/OpenSSL";
@@ -1058,8 +896,6 @@
   /* Canonical name: 168 */
   $Term["PHP v3.0"]["Desc"]="";
   $Term["PHP v3.0"]["License"][0]="BSD/BSD.new/PHP/PHP v3.0";
-  /* Canonical name: 411 */
-  $Term["Phrase"]["Desc"]="";
   /* Canonical name: 357 */
   $Term["Pine License"]["Desc"]="";
   $Term["Pine License"]["License"][0]="MiscOSS/Pine License";
@@ -1073,10 +909,6 @@
   $Term["Python CNRI"]["Desc"]="Python CNRI";
   $Term["Python CNRI"]["License"][0]="Python/Python CNRI v1.6";
   $Term["Python CNRI"]["License"][1]="Python/Python CNRI v1.6.1";
-  /* Canonical name: 401 */
-  $Term["Python CNRI v1.6"]["Desc"]="";
-  /* Canonical name: 402 */
-  $Term["Python CNRI v1.6.1"]["Desc"]="";
   /* Canonical name: 403 */
   $Term["Python InfoSeek"]["Desc"]="";
   $Term["Python InfoSeek"]["License"][0]="Python/Python InfoSeek variant";
@@ -1100,26 +932,10 @@
   $Term["RCSL v3.0"]["Term"][0]="rcsl";
   $Term["RCSL v3.0"]["Term"][]="realnetworks community source license";
   $Term["RCSL v3.0"]["License"][0]="GPL/v2/RealNetworks/RealNetworks Community Source Licensing";
-  /* Canonical name: 315 */
-  $Term["RealNetworks Community Source Licensing"]["Desc"]="";
-  /* Canonical name: 123 */
-  $Term["RealNetworks Public Source License"]["Desc"]="";
-  $Term["RealNetworks Public Source License"]["Term"][0]="realnetworks public source license";
-  $Term["RealNetworks Public Source License"]["Term"][]="rpsl";
-  /* Canonical name: 316 */
-  $Term["RealNetworks Public Source License v1.0"]["Desc"]="";
-  /* Canonical name: 406 */
-  $Term["Reciprocal Public License v1.1"]["Desc"]="";
-  /* Canonical name: 407 */
-  $Term["Reciprocal Public License v1.5"]["Desc"]="";
   /* Canonical name: 102 */
   $Term["RedHat"]["Desc"]="RedHat Public License";
   $Term["RedHat"]["License"][0]="RedHat/Red Hat EULA";
   $Term["RedHat"]["License"][1]="RedHat/Red Hat reference";
-  /* Canonical name: 405 */
-  $Term["Red Hat"]["Desc"]="";
-  /* Canonical name: 404 */
-  $Term["Red Hat EULA"]["Desc"]="";
   /* Canonical name: 389 */
   $Term["Ricoh Source Code Public License"]["Desc"]="";
   $Term["Ricoh Source Code Public License"]["License"][0]="MPL/Ricoh Source Code Public License";
@@ -1137,8 +953,6 @@
   $Term["RSA"]["Desc"]="RSA Commercial License";
   $Term["RSA"]["Term"][0]="rsa";
   $Term["RSA"]["License"][0]="Corporate/RSA/RSA MD5";
-  /* Canonical name: 225 */
-  $Term["RSA MD5"]["Desc"]="";
   /* Canonical name: 360 */
   $Term["Ruby"]["Desc"]="";
   $Term["Ruby"]["License"][0]="MiscOSS/Ruby";
@@ -1204,16 +1018,6 @@
   /* Canonical name: 288 */
   $Term["Standard ML of New Jersey"]["Desc"]="";
   $Term["Standard ML of New Jersey"]["License"][0]="Gov/Standard ML of New Jersey";
-  /* Canonical name: 232 */
-  $Term["Sun Community Source License TSA v1.0"]["Desc"]="";
-  /* Canonical name: 233 */
-  $Term["Sun Community Source License v2.3"]["Desc"]="";
-  /* Canonical name: 234 */
-  $Term["Sun Community Source License v2.3 Attachment"]["Desc"]="";
-  /* Canonical name: 235 */
-  $Term["Sun Community Source License v3.0"]["Desc"]="";
-  /* Canonical name: 236 */
-  $Term["Sun Community Source License v3.0 Supplement"]["Desc"]="";
   /* Canonical name: 237 */
   $Term["Sun Contributor Agreement"]["Desc"]="";
   $Term["Sun Contributor Agreement"]["License"][0]="Corporate/Sun/Sun Contributor Agreement";
@@ -1225,12 +1029,6 @@
   $Term["Sun Microsystems"]["Desc"]="";
   $Term["Sun Microsystems"]["License"][0]="Corporate/Sun/Sun Microsystems variant 1";
   $Term["Sun Microsystems"]["License"][1]="Corporate/Sun/Sun Microsystems variant 2";
-  /* Canonical name: 239 */
-  $Term["Sun Microsystems Binary Code License"]["Desc"]="";
-  /* Canonical name: 240 */
-  $Term["Sun Microsystems Binary Code License J2SDK"]["Desc"]="";
-  /* Canonical name: 241 */
-  $Term["Sun Microsystems Binary Code License supplement"]["Desc"]="";
   /* Canonical name: 242 */
   $Term["Sun Microsystems Free with Copyright"]["Desc"]="";
   $Term["Sun Microsystems Free with Copyright"]["License"][0]="Corporate/Sun/Sun Microsystems Free with Copyright variant 1";
@@ -1238,25 +1036,15 @@
   /* Canonical name: 243 */
   $Term["Sun Microsystems Sun Public License"]["Desc"]="";
   $Term["Sun Microsystems Sun Public License"]["License"][0]="Corporate/Sun/Sun Microsystems Sun Public License";
-  /* Canonical name: 245 */
-  $Term["Sun Solaris Source Code License Foundation Release"]["Desc"]="";
-  /* Canonical name: 246 */
-  $Term["Sun Solaris Source Code License Foundation Release Attachment A-1"]["Desc"]="";
-  /* Canonical name: 247 */
-  $Term["Sun Solaris Source Code License Foundation Release Preamble"]["Desc"]="";
   /* Canonical name: 317 */
   $Term["Sybase Open Watcom Public License v1.0"]["Desc"]="";
   $Term["Sybase Open Watcom Public License v1.0"]["License"][0]="GPL/v2/Sybase Open Watcom Public License v1.0";
   /* Canonical name: 362 */
   $Term["TCL"]["Desc"]="";
   $Term["TCL"]["License"][0]="MiscOSS/TCL";
-  /* Canonical name: 272 */
-  $Term["UC Regents free with copyright clause"]["Desc"]="";
   /* Canonical name: 273 */
   $Term["Unidex"]["Desc"]="";
   $Term["Unidex"]["License"][0]="Free/FreeWithCopyright/Unidex";
-  /* Canonical name: 259 */
-  $Term["University of Utah Public License"]["Desc"]="";
   /* Canonical name: 260 */
   $Term["Univ of Cambridge"]["Desc"]="";
   $Term["Univ of Cambridge"]["License"][0]="Edu/Univ of Cambridge";
@@ -1278,8 +1066,6 @@
   $Term["Vovida"]["Desc"]="Vovida Software License";
   $Term["Vovida"]["Term"][0]="vovida";
   $Term["Vovida"]["Term"][]="vovida software license";
-  /* Canonical name: 170 */
-  $Term["Vovida Software License v1.0"]["Desc"]="";
   /* Canonical name: 37 */
   $Term["W3C"]["Desc"]="World Wide Web Consortium";
   $Term["W3C"]["Term"][0]="w3c";
@@ -1287,12 +1073,6 @@
   $Term["W3C"]["License"][0]="GPL/W3C/World Wide Web Consortium 2001";
   $Term["W3C"]["License"][1]="GPL/W3C/World Wide Web Consortium Documents 2002";
   $Term["W3C"]["License"][2]="GPL/W3C/World Wide Web Consortium Software 2002";
-  /* Canonical name: 319 */
-  $Term["World Wide Web Consortium 2001"]["Desc"]="";
-  /* Canonical name: 320 */
-  $Term["World Wide Web Consortium Documents 2002"]["Desc"]="";
-  /* Canonical name: 321 */
-  $Term["World Wide Web Consortium Software 2002"]["Desc"]="";
   /* Canonical name: 38 */
   $Term["WTFPL"]["Desc"]="Do What The Fuck You Want To Public License";
   $Term["WTFPL"]["Term"][0]="do what the fuck you want";
@@ -1313,8 +1093,6 @@
   $Term["Yahoo Commercial"]["License"][0]="Corporate/Yahoo/Yahoo Toolbar License";
   $Term["Yahoo Commercial"]["License"][1]="Corporate/Yahoo/Yahoo Toolbar License variant 2";
   $Term["Yahoo Commercial"]["License"][2]="Corporate/Yahoo/Yahoo Toolbar License variant 3";
-  /* Canonical name: 248 */
-  $Term["Yahoo Toolbar License"]["Desc"]="";
   /* Canonical name: 34 */
   $Term["Zend"]["Desc"]="Zend Engine License";
   $Term["Zend"]["Term"][0]="zend";
