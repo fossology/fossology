@@ -42,15 +42,11 @@
 require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
-//require_once ('fossologyWebTestCase.php');
 require_once ('TestEnvironment.php');
-require_once ('testClasses/upload.php');
 
 global $URL;
 
-
 $test = &new TestSuite('Fossology Repo UI Upload Prep/Test');
-
 $test->addTestFile('uploadTestData.php');
 
 if (TextReporter::inCli())

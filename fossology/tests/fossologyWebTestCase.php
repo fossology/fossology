@@ -42,14 +42,13 @@
 // FIX THIS PATH REQUIRE STUFF BELOW!
 
 if (!defined('SIMPLE_TEST'))
-  define('SIMPLE_TEST', '/usr/share/php/simpletest/');
+  define('SIMPLE_TEST', '/usr/local/simpletest/');
 
 /* simpletest includes */
 require_once SIMPLE_TEST . 'unit_tester.php';
 require_once SIMPLE_TEST . 'reporter.php';
 require_once SIMPLE_TEST . 'web_tester.php';
 require_once ('TestEnvironment.php');
-//require_once ('testClasses/common.php');
 
 global $URL;
 global $USER;
@@ -134,7 +133,7 @@ class fossologyWebTestCase extends WebTestCase
   *
   * @return false on error
   */
-  public function uploadAFile($parentFolder, $uploadFile, $description = null, $uploadName = null, $agents = null)
+  public function uploadAFile($parentFolder, $uploadFile, $description=null, $uploadName=null, $agents=null)
   {
     global $URL;
     /*
@@ -156,6 +155,7 @@ class fossologyWebTestCase extends WebTestCase
     {
       $description = "File $uploadFile uploaded by test UploadAFileTest";
     }
+    //print "starting uploadAFile\n";
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
     $page = $this->mybrowser->get("$URL?mod=upload_file");
@@ -169,7 +169,10 @@ class fossologyWebTestCase extends WebTestCase
      * ($this- >mybrowser- >setField ('name', $upload_name));
      *
      */
-    /* we won't select any agents for now.... see todo above */
+    /* Select agents to run, we just pass on the parameter to setAgents */
+    $rtn = $this->setAgents($agents);
+    //$this->assertNotNull($rtn, "FAIL: could not set agents in uploadAFILE test\n");
+    if(is_null($rtn)) { $this->fail("FAIL: could not set agents in uploadAFILE test\n"); }
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
     //print "************* page after Upload! is *************\n$page\n";
@@ -179,21 +182,22 @@ class fossologyWebTestCase extends WebTestCase
   * function uploadAUrl
   * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
   *
-  * Upload a file and optionally schedule the agents.
+  * Upload a file and optionally schedule the agents.  The web-site must
+  * already be logged into before using this method.
   *
   * @param string $parentFolder the parent folder name, default is root
   * folder (1)
-  * @param string $uploadFile the path to the file to upload
-  * @param string $description=null optonal description
+  * @param string $url the url of the file to upload, no url sanity
+  * checking is done.
+  * @param string $description a default description is always used. It
+  * can be overridden by supplying a description.
   * @param string $uploadName=null optional upload name
-  * @param string $agents=null optional agents to schedule
-  *
-  * @todo, add in selecting agents the parameter to this routine will
-  * need to be quoted if it contains commas.
+  * @param string $agents=null agents to schedule, the default is to
+  * schedule license, pkgettametta, and mime.
   *
   * @return false on error
   */
-  public function uploadAUrl($parentFolder = 1, $url, $description = null, $uploadName = null, $agents = null)
+  public function uploadAUrl($parentFolder=1, $url, $description=null, $uploadName=null, $agents=null)
   {
     global $URL;
     /*
@@ -207,45 +211,40 @@ class fossologyWebTestCase extends WebTestCase
     {
       $parentFolder = 1;
     }
-    if (empty ($uploadFile))
+    if (empty ($url))
     {
       return (FALSE);
     }
     if (is_null($description)) // set default if null
     {
-      $description = "File $uploadFile uploaded by test UploadAUrl";
+      $description = "File $url uploaded by test UploadAUrl";
     }
-    print "starting UploadAUrlTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
+    //print "starting UploadAUrl\n";
 
-    $loggedIn = $browser->get($URL);
+    $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
     $this->assertTrue($this->assertText($loggedIn, '/From URL/'));
-    $page = $browser->get("$URL?mod=upload_url");
+    $page = $this->mybrowser->get("$URL?mod=upload_url");
     $this->assertTrue($this->assertText($page, '/Upload from URL/'));
     $this->assertTrue($this->assertText($page, '/Enter the URL to the file:/'));
     /* only look for the the folder id if it's not the root folder */
+    $folderId = $parentFolder;
     if ($parentFolder != 1)
     {
       $FolderId = $this->getFolderId($parentFolder, $page);
     }
-    $this->assertTrue($browser->setField('folder', $FolderId));
-    $this->assertTrue($browser->setField('geturl', $url));
-    $this->assertTrue($browser->setField('description', "$description"));
+    $this->assertTrue($this->mybrowser->setField('folder', $folderId));
+    $this->assertTrue($this->mybrowser->setField('geturl', $url));
+    $this->assertTrue($this->mybrowser->setField('description', "$description"));
     /* Set the name field if an upload name was passed in. */
     if (!(is_null($upload_name)))
     {
-      $this->assertTrue($browser->setField('name', $upload_name));
+      $this->assertTrue($this->mybrowser->setField('name', $url));
     }
-    /* we won't select any agents this time' */
-    $page = $browser->clickSubmit('Upload!');
+    /* selects agents 1,2,3 license, mime, pkgmetagetta */
+    $rtn = $this->setAgents($agents);
+    if(is_null($rtn)) { $this->fail("FAIL: could not set agents in uploadAFILE test\n"); }
+    $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
     $this->assertTrue($this->assertText($page, '/Upload added to job queue/'));
 
@@ -275,15 +274,21 @@ class fossologyWebTestCase extends WebTestCase
     /* check parameters and parse */
     if (is_null($agents))
     {
-      return;       // No agents to set
+      return NULL;       // No agents to set
     }
     /* see them all if 'all' */
     if (0 === strcasecmp($agents, 'all'))
     {
       foreach ($agentList as $agent => $name)
       {
-        $this->assertTrue($browser->setField($name, 1));
+        if($this->debug)
+        {
+          print "SA: setting agents for 'all', agent name is:$name\n";
+        }
+
+        $this->assertTrue($this->mybrowser->setField($name, 1));
       }
+      return(TRUE);
     }
     /*
      * what is left is 0 or more numbers, comma seperated
@@ -291,9 +296,10 @@ class fossologyWebTestCase extends WebTestCase
 		 */
     $numberList = explode(',', $agents);
     $numAgents = count($numberList);
+
     if ($numAgents = 0)
     {
-      return;       // no agents to schedule
+      return NULL;       // no agents to schedule
     }
     else
     {
@@ -315,8 +321,8 @@ class fossologyWebTestCase extends WebTestCase
             break;
         }
       } // foreach
-      if($this->debug) { print "the agent list is:\n"; }
 
+      if($this->debug == 1) { print "the agent list is:\n"; }
 
       foreach($checklist as $agent)
       {
@@ -324,9 +330,10 @@ class fossologyWebTestCase extends WebTestCase
         {
           print "DEBUG: $agent\n";
         }
-        $this->assertTrue($browser->setField($agent, 1));
+        $this->assertTrue($this->mybrowser->setField($agent, 1));
       }
     }
+    return(TRUE);
   } //setAgents
 
   /********************************************************************
