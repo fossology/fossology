@@ -55,13 +55,18 @@ class parseBrowseMenu
    */
   function parseBrowseMenuFiles()
   {
-    $matches = preg_match_all(
-      "|.*?class='mono'.*?align='right'>.*?nbsp;</td><td>(.*?)<|",
-      $this->page, $files, PREG_PATTERN_ORDER);
+    $matches = preg_match_all("|.*?class='mono'.*?align='right'>.*?nbsp;</td><td>(.*?)<|", $this->page, $files, PREG_PATTERN_ORDER);
     print "files is:";
     print_r($files) . "\n";
     print "files[1] is:";
     print_r($files[1]) . "\n";
+    if ($numMenus = count($files[1]))
+    {
+      return ($files[1]);
+    } else
+    {
+      return (array ());
+    }
   }
   /**
    * function parseBrowseFileMinis
@@ -73,12 +78,10 @@ class parseBrowseMenu
    */
   function parseBrowseFileMinis()
   {
-    $matches = preg_match_all(
-      "/.*?\[<a href='(.*?)'.*?>([V|M|Down].*?)</",
-      $this->page, $fileMini, PREG_PATTERN_ORDER);
+    $matches = preg_match_all("/.*?\[<a href='(.*?)'.*?>([V|M|Down].*?)</", $this->page, $fileMini, PREG_PATTERN_ORDER);
     print "fileMini Menus are:";
     print_r($fileMini) . "\n";
-
+    return (_createRtnArray($fileMini, $matches));
   }
   /**
    * function parseBrowseDirs
@@ -90,31 +93,34 @@ class parseBrowseMenu
    */
   function parseBrowseMenuDirs()
   {
-    $matches = preg_match_all(
-      "/.+class='mono'.*?<a href='(.*)'>(.*?)<\/a>/",
-      $this->page, $dirs, PREG_PATTERN_ORDER);
+    $matches = preg_match_all("/.+class='mono'.*?<a href='(.*)'>(.*?)<\/a>/", $this->page, $dirs, PREG_PATTERN_ORDER);
     print "dirs is:";
     print_r($dirs) . "\n";
+    return (_createRtnArray($dirs, $matches));
   }
 
+  function _createRtnArray($array, $matches)
+  {
     /*
-     * if we have a match, the create return array, else return empty
-     * array.
-
+    * if we have a match, the create return array, else return empty
+    * array.
+    */
     if ($matches > 0)
     {
-      $numMenus = count($parsed[1]);
+      $numMenus = count($array[1]);
       $menus = array ();
       for ($i = 0; $i <= $numMenus -1; $i++)
       {
-        $menus[$parsed[3][$i]] = $parsed[1][$i];
+        $rtnList[$parsed[2][$i]] = $parsed[1][$i];
       }
-      print "menus after construct:\n"; print_r($menus) . "\n";
-      return ($menus);
+      print "menus after construct:\n";
+      print_r($rtnList) . "\n";
+      return ($rtnList);
     } else
     {
       return (array ());
     }
-    */
+
+  }
 }
 ?>
