@@ -342,6 +342,17 @@ class ui_license extends FO_Plugin
 		break;
 	}
 
+    $CacheKey = $_SERVER['REQUEST_URI'];
+    $V = ReportCacheGet($CacheKey);
+    if (!empty($V) )
+    {
+      if (!$this->OutputToStdout) { return($V); }
+      print $V;
+      echo "<i>cached</i>";
+      return;
+    }
+
+
     switch($this->OutputType)
       {
       case "XML":
@@ -373,6 +384,10 @@ class ui_license extends FO_Plugin
       default:
 	break;
       }
+
+    /*  Cache Report */
+    ReportCachePut($CacheKey, $V);
+
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     return;
