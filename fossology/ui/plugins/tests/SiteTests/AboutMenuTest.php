@@ -20,7 +20,7 @@
 /**
  * Test to check the Help/About menu item, make sure page loads
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Jul 21, 2008
  */
