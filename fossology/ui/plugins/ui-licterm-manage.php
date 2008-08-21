@@ -709,17 +709,18 @@ function moveOptions(theSelFrom, theSelTo)
     if (empty($TermKey)) { return("Record not found.  Nothing to delete."); }
     $TermName = GetParm('name',PARM_TEXT);
 
-    $DB->Action("DELETE FROM licterm_map WHERE licterm_fk = '$TermKey';");
-    // $DB->Action("VACUUM ANALYZE licterm_map;");
-
+    $DB->Action("BEGIN;");
+    $DB->Action("DELETE FROM licterm_name WHERE licterm_fk = '$TermKey';");
     $DB->Action("DELETE FROM licterm_maplic WHERE licterm_fk = '$TermKey';");
-    // $DB->Action("VACUUM ANALYZE licterm_maplic;");
+    $DB->Action("DELETE FROM licterm_map WHERE licterm_fk = '$TermKey';");
 
     if ($DeleteAll)
       {
       $DB->Action("DELETE FROM licterm WHERE licterm_pk = '$TermKey';");
       // $DB->Action("VACUUM ANALYZE licterm;");
       }
+
+    $DB->Action("COMMIT;");
     } // LicTermDelete()
 
   /***********************************************************
