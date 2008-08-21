@@ -31,6 +31,7 @@ class core_schema extends FO_Plugin
   var $Version     = "1.0";
   var $Dependency  = array("db");
   var $DBaccess    = PLUGIN_DB_WRITE;
+  var $PluginLevel = 100;
 
   /******************************************
    This plugin is used to configure the schema.
