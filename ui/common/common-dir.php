@@ -196,6 +196,7 @@ function DirGetList($Upload,$UploadtreePk)
   return($Results);
 } // DirGetList()
 
+
 /************************************************************
  Dir2Path(): given an uploadtree_pk, return an array containing
  the path (with no artifacts).  Each element in the path is an array containing
@@ -209,13 +210,8 @@ function Dir2Path($UploadtreePk)
 
   if (empty($DB)) { return; }
 
-  $Rows = $DB->Action("SELECT UT2.* FROM uploadtree AS UT1, uploadtree AS UT2
-            WHERE UT1.lft BETWEEN UT2.lft AND UT2.rgt 
-              AND UT1.upload_fk=UT2.upload_fk 
-              AND UT1.uploadtree_pk=$UploadtreePk
-              AND ((UT2.ufile_mode & (1<<28)) = 0)
-              ORDER BY UT2.uploadtree_pk ASC
-         ");
+  $Rows = $DB->Action("SELECT * from (SELECT * from uploadtree2path($UploadtreePk)) AS path 
+           ORDER BY lft ASC");
 
   return($Rows);
 } // Dir2Path()
@@ -387,15 +383,6 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
       {
       $Phrase = "<b>Phrase:</b> " . htmlentities($R['phrase_text']);
       }
-//    else
-//    {
-//      if ($R['lic_tokens'] != 0)
-//        {
-//	$PctMatch = (int)($R['tok_match'] * 100 / ($R['lic_tokens']));
-//	}
-//      else { $PctMatch = 0; }
-//      $Phrase = $PctMatch . "%  ";
-//    }
 
     if ((IsDir($R['ufile_mode'])) || (Iscontainer($R['ufile_mode'])))
 	{
