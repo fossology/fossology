@@ -1326,7 +1326,6 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   if (CI->PI.uploadtree_pk > 0) /* This is a child */
     {
     /* Prepare to insert child */
-    memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,'%s',%s);",
 	CI->PI.uploadtree_pk, CI->pfile_pk, CI->ufile_mode,
 	UfileName, Upload_Pk);
@@ -1339,8 +1338,10 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
     }
   /* Find the inserted child */
-
-  MyDBaccess(DBTREE,"SELECT currval('uploadtree_uploadtree_pk_seq'::regclass);");
+  memset(SQL,'\0',MAXSQL);
+  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%ld AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name='%s';",
+    Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
+  MyDBaccess(DBTREE,SQL);
   CI->uploadtree_pk = atol(DBgetvalue(DBTREE,0,0));
   TotalItems++;
   // printf("=========== AFTER ==========\n"); DebugContainerInfo(CI);
