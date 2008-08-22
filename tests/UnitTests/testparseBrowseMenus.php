@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 
 /***********************************************************
@@ -63,23 +63,59 @@ class testParseBrowseMenu extends fossologyWebTestCase
      * Third test is only a directory
      */
     $testPages = array (
-      'http://snape.west/repo/?mod=browse&folder=1&show=detail&upload=155&item=49948',
-      'http://snape.west/repo/?mod=browse&folder=1&show=detail&upload=155&item=50013',
-      'http://snape.west/repo/?mod=browse&upload=155&item=49947&folder=1&show=detail'
+     'http://snape.west/repo/?mod=browse&folder=1&show=detail&upload=155&item=49948',
+     'http://snape.west/repo/?mod=browse&folder=1&show=detail&upload=155&item=50013',
+     'http://snape.west/repo/?mod=browse&upload=155&item=49947&folder=1&show=detail'
                         );
-    /* navigate to a page with one */
+    /*
+     * testCounts is the number to test against. Each row below
+     * represents the counts for files, fileminis and dirs.  The count
+     * for file and fileminis should always be equal.
+     *
+     * This will make the this test a bit brittle, but needed to ensure
+     * proper operation. Think about using mocks in the future.
+		 */
+    $testCounts = array(7, 7,  8,
+                        9, 9,  0,
+                        0, 0,  1);
+
+    /* navigate to a page to test*/
+    $index = 0;
     foreach ($testPages as $link)
     {
-      print "navigating to:\n";
-      print "$link\n";
+      //print "navigating to:\n";
+      //print "$link\n";
       $page = $this->mybrowser->get($link);
       $bmenu = new parseBrowseMenu($page);
       $parsed = $bmenu->parseBrowseMenuFiles();
+      $fileCount = count($parsed);
+      $this->assertEqual($fileCount,$testCounts[$index],
+             "FAIL! File counts did not match\n");
+      $index++;
+
       $parsed = $bmenu->parseBrowseFileMinis();
+      $this->assertEqual(count($parsed),$testCounts[$index],
+             "FAIL! FileMini counts did not match\n");
+      $index++;
+      /* Make sure files = fileminis */
+      $this->assertEqual(count($parsed),$fileCount,
+             "FAIL! File counts does not equal Fileminis\n");
+
       $parsed = $bmenu->parseBrowseMenuDirs();
-      //$this->assertEqual(count($parsed), 5);
+      $this->assertEqual(count($parsed),$testCounts[$index],
+             "FAIL! Directory counts are not equal\n");
+      $index++;
     }
-    print "DB: parsed is:\n"; print_r($parsed) . "\n";
+    /*
+     * if (!empty ($parsed))
+      {
+        print "parsed files are:\n";
+        print_r($parsed) . "\n";
+      }
+
+     */
+    //print "DB: parsed is:\n";
+    //print_r($parsed) . "\n";
   }
 }
 ?>

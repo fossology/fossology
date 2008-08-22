@@ -56,13 +56,14 @@ class parseBrowseMenu
   function parseBrowseMenuFiles()
   {
     $matches = preg_match_all("|.*?class='mono'.*?align='right'>.*?nbsp;</td><td>(.*?)<|", $this->page, $files, PREG_PATTERN_ORDER);
-    print "files is:";
-    print_r($files) . "\n";
-    print "files[1] is:";
-    print_r($files[1]) . "\n";
-    if ($numMenus = count($files[1]))
+    if ($numFiles = count($files[1]))
     {
-      return ($files[1]);
+      $links = $this->parseBrowseFileMinis();
+      for ($i = 0; $i <= $numFiles -1; $i++)
+      {
+        $fileLinks[$files[1][$i]] = $links[$i];
+      }
+      return ($fileLinks);
     } else
     {
       return (array ());
@@ -79,9 +80,9 @@ class parseBrowseMenu
   function parseBrowseFileMinis()
   {
     $matches = preg_match_all("/.*?\[<a href='(.*?)'.*?>([V|M|Down].*?)</", $this->page, $fileMini, PREG_PATTERN_ORDER);
-    print "fileMini Menus are:";
-    print_r($fileMini) . "\n";
-    return (_createRtnArray($fileMini, $matches));
+    //print "fileMini Menus are:";
+    //print_r($fileMini) . "\n";
+    return ($this->_createMiniArray($fileMini, $matches));
   }
   /**
    * function parseBrowseDirs
@@ -94,9 +95,9 @@ class parseBrowseMenu
   function parseBrowseMenuDirs()
   {
     $matches = preg_match_all("/.+class='mono'.*?<a href='(.*)'>(.*?)<\/a>/", $this->page, $dirs, PREG_PATTERN_ORDER);
-    print "dirs is:";
-    print_r($dirs) . "\n";
-    return (_createRtnArray($dirs, $matches));
+    //print "dirs is:";
+    //print_r($dirs) . "\n";
+    return ($this->_createRtnArray($dirs, $matches));
   }
 
   function _createRtnArray($array, $matches)
@@ -108,13 +109,52 @@ class parseBrowseMenu
     if ($matches > 0)
     {
       $numMenus = count($array[1]);
-      $menus = array ();
+      $rtnList = array ();
       for ($i = 0; $i <= $numMenus -1; $i++)
       {
-        $rtnList[$parsed[2][$i]] = $parsed[1][$i];
+        $rtnList[$array[2][$i]] = $array[1][$i];
       }
-      print "menus after construct:\n";
-      print_r($rtnList) . "\n";
+      return ($rtnList);
+    } else
+    {
+      return (array ());
+    }
+  }
+
+  /**
+   * function _createMiniArray
+   *
+   * combine two arrays into a single associative array.  One of the
+   * arrays is already associative and had duplicate keys.
+   *
+   * ($array, $matches)
+   */
+  function _createMiniArray($array, $matches)
+  {
+    /*
+    * if we have a match, then create return array, else return empty
+    * array. file mini menus have duplicated keys (view,meta,download)
+    * so they must be processed a different way.
+    */
+    //print "_CMiniA: matches is:$matches\n";
+    if ($matches > 0)
+    {
+      $triple = array ();
+      $numMenus = count($array[1]);
+      $loopCnt = $numMenus / 3;
+      $rtnList = array ();
+      /* index is used to step through all the links*/
+      $index = 0;
+      for ($i = 0; $i <= $loopCnt -1; $i++)
+      {
+        $triple = array ();
+        for ($j = 0; $j <= 2; $j++)
+        {
+          $triple[$array[2][$j]] = $array[1][$index];
+          $index++;
+        }
+        $rtnList[$i] = $triple;
+      }
       return ($rtnList);
     } else
     {
