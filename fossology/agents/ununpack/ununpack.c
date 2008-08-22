@@ -1339,7 +1339,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     }
   /* Find the inserted child */
   memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%ld AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name='%s';",
+  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name='%s';",
     Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
   MyDBaccess(DBTREE,SQL);
   CI->uploadtree_pk = atol(DBgetvalue(DBTREE,0,0));
