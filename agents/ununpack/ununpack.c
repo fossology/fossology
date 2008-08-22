@@ -88,6 +88,15 @@ int TotalContainers=0;
 int TotalArtifacts=0;
 
 /*********************************************************
+ MyDBaccess(): MyDBaccess with debugging wrapper.
+ *********************************************************/
+int	MyDBaccess	(void *VDB, char *SQL)
+{
+  if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
+  return(DBaccess(DB,SQL));
+} /* MyDBaccess() */
+
+/*********************************************************
  AlarmDisplay(): While running, periodically display the
  number of items inserted.
  *********************************************************/
@@ -118,7 +127,7 @@ void	GetAgentKey	()
 {
   int rc;
 
-  rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='unpack' ORDER BY agent_id DESC;");
+  rc = MyDBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='unpack' ORDER BY agent_id DESC;");
   if (rc < 0)
 	{
 	printf("ERROR: unable to access the database\n");
@@ -128,14 +137,14 @@ void	GetAgentKey	()
   if (DBdatasize(DB) <= 0)
       {
       /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('unpack','unknown','Recursively extract files');");
+      rc = MyDBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('unpack','unknown','Recursively extract files');");
       if (rc < 0)
 	{
 	printf("ERROR: unable to write to the database\n");
 	printf("LOG: unable to write 'unpack' to the database table 'agent'\n");
 	SafeExit(-1);
 	}
-      rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='unpack' ORDER BY agent_id DESC;");
+      rc = MyDBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='unpack' ORDER BY agent_id DESC;");
       if (rc < 0)
 	{
 	printf("ERROR: unable to access the database\n");
@@ -171,7 +180,7 @@ void	InitCmd	()
 ReGetCmd:
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT mimetype_pk FROM mimetype WHERE mimetype_name = '%s';",CMD[i].Magic);
-    rc = DBaccess(DB,SQL); /* SELECT */
+    rc = MyDBaccess(DB,SQL); /* SELECT */
     if (rc < 0)
 	{
 	printf("ERROR: SQL '%s'\n",SQL);
@@ -185,7 +194,7 @@ ReGetCmd:
 	{
 	memset(SQL,'\0',MAXSQL);
 	snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('%s');",CMD[i].Magic);
-	rc = DBaccess(DB,SQL); /* INSERT INTO mimetype */
+	rc = MyDBaccess(DB,SQL); /* INSERT INTO mimetype */
 	if (rc < 0)
 	  {
 	  printf("ERROR: SQL '%s'\n",SQL);
@@ -1095,7 +1104,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
 	Fuid,Fuid+41,Fuid+74);
-  rc=DBaccess(DB,SQL); /* SELECT */
+  rc=MyDBaccess(DB,SQL); /* SELECT */
 
   if (rc < 0)
 	{
@@ -1121,8 +1130,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 	snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size) VALUES ('%.40s','%.32s','%s');",
 	Fuid,Fuid+41,Fuid+74);
 	}
-    rc=DBaccess(DB,SQL); /* INSERT INTO pfile */
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
+    rc=MyDBaccess(DB,SQL); /* INSERT INTO pfile */
 #if 0
     if (rc >= 0) TotalItems++;
 #endif
@@ -1132,8 +1140,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
 	Fuid,Fuid+41,Fuid+74);
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-    rc=DBaccess(DB,SQL); /* SELECT */
+    rc=MyDBaccess(DB,SQL); /* SELECT */
     if (rc < 0)
 	{
 	printf("FATAL: Database access error.\n");
@@ -1152,17 +1159,16 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 	if ((CMD[CI->PI.Cmd].DBindex > 0) &&
 	    (atol(DBgetvalue(DB,0,1)) != CMD[CI->PI.Cmd].DBindex))
 	    {
-	    DBaccess(DB,"BEGIN;");
+	    MyDBaccess(DB,"BEGIN;");
 	    memset(SQL,'\0',MAXSQL);
 	    snprintf(SQL,MAXSQL,"SELECT * FROM pfile WHERE pfile_pk = '%ld' FOR UPDATE;", CI->pfile_pk);
-	    DBaccess(DB,SQL); /* lock pfile */
+	    MyDBaccess(DB,SQL); /* lock pfile */
 	    memset(SQL,'\0',MAXSQL);
 	    snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld' WHERE pfile_pk = '%ld';",
 		CMD[CI->PI.Cmd].DBindex, CI->pfile_pk);
-	    rc=DBaccess(DB,SQL); /* UPDATE pfile */
-	    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
+	    rc=MyDBaccess(DB,SQL); /* UPDATE pfile */
 	    if (rc < 0) fprintf(stderr,"ERROR: SQL '%s'\n",SQL);
-	    DBaccess(DB,"COMMIT;");
+	    MyDBaccess(DB,"COMMIT;");
 	    }
 	}
     else
@@ -1190,7 +1196,7 @@ void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
   memset(SQL,'\0',MAXSQL);
   /* uploadtree_pk is unique */
   snprintf(SQL,MAXSQL,"SELECT uploadtree_pk,pfile_fk,ufile_mode,ufile_name FROM uploadtree WHERE parent = '%ld';",CopyParent);
-  if (DBaccess(DBTREE,SQL) > 0) /* SELECT */
+  if (MyDBaccess(DBTREE,SQL) > 0) /* SELECT */
     {
     /* Insert each child under this tree */
     DBR = DBmove(DBTREE);
@@ -1214,13 +1220,13 @@ void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
 	  snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,'%s',%s);",
 	    pfile_fk, ufile_mode, ufile_name, Upload_Pk);
 	  }
-	if (DBaccess(DBTREE,SQL) == 0) /* INSERT INTO uploadtree */
+	if (MyDBaccess(DBTREE,SQL) == 0) /* INSERT INTO uploadtree */
 	  {
 	  /* Find the new ID for this insertion */
 	  memset(SQL,'\0',MAXSQL);
 	  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE parent = '%ld' AND upload_fk = '%s';",
 	    NewParent, Upload_Pk);
-	  DBaccess(DBTREE,SQL);
+	  MyDBaccess(DBTREE,SQL);
 	  /* Recurse! */
 	  DBInsertUploadTreeRecurse(atol(DBgetvalue(DBTREE,0,0)),UploadTree);
 	  }
@@ -1253,8 +1259,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT uploadtree_pk,parent,upload_fk FROM uploadtree WHERE pfile_fk = '%ld';",
 	  CI->pfile_pk);
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-    if ((DBaccess(DBTREE,SQL) == 1) && (DBdatasize(DBTREE) > 0)) /* SELECT */
+    if ((MyDBaccess(DBTREE,SQL) == 1) && (DBdatasize(DBTREE) > 0)) /* SELECT */
       {
       int i,Max;
       Max = DBdatasize(DBTREE);
@@ -1287,7 +1292,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 	{
 	char *ufile_name;
 	snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
-	DBaccess(DB,UfileName);
+	MyDBaccess(DB,UfileName);
 	memset(UfileName,'\0',sizeof(UfileName));
 	ufile_name = DBgetvalue(DB,0,0);
 	if (strchr(ufile_name,'/')) ufile_name = strrchr(ufile_name,'/')+1;
@@ -1325,19 +1330,17 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,'%s',%s);",
 	CI->PI.uploadtree_pk, CI->pfile_pk, CI->ufile_mode,
 	UfileName, Upload_Pk);
-    if (Verbose) fprintf(stderr,"SQL1: %s\n",SQL);
-    DBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
+    MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
     }
   else /* No parent!  This is the first upload! */
     {
     snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (upload_fk,pfile_fk,ufile_mode,ufile_name) VALUES (%s,%ld,%ld,'%s');",
 	Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
-    if (Verbose) fprintf(stderr,"SQL2: %s\n",SQL);
-    DBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
+    MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
     }
   /* Find the inserted child */
 
-  DBaccess(DBTREE,"SELECT currval('uploadtree_uploadtree_pk_seq'::regclass);");
+  MyDBaccess(DBTREE,"SELECT currval('uploadtree_uploadtree_pk_seq'::regclass);");
   CI->uploadtree_pk = atol(DBgetvalue(DBTREE,0,0));
   TotalItems++;
   // printf("=========== AFTER ==========\n"); DebugContainerInfo(CI);
@@ -1353,8 +1356,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE pfile_fk = %ld AND upload_fk != '%s' LIMIT 1;",
 	CI->pfile_pk,Upload_Pk);
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-    DBaccess(DBTREE,SQL); /* SELECT */
+    MyDBaccess(DBTREE,SQL); /* SELECT */
     if (DBdatasize(DBTREE) == 1)
       {
       CopyParent = atol(DBgetvalue(DBTREE,0,0));
@@ -2179,7 +2181,7 @@ int	main	(int argc, char *argv[])
 		  fprintf(stderr,"FATAL: Unable to access database\n");
 		  SafeExit(-1);
 		  }
-		if (DBaccess(DBTREE,"BEGIN;") < 0)
+		if (MyDBaccess(DBTREE,"BEGIN;") < 0)
 		  {
 		  printf("ERROR pfile %s Unable to 'BEGIN' database updates.\n",Pfile_Pk);
 		  SafeExit(-1);
@@ -2427,15 +2429,14 @@ int	main	(int argc, char *argv[])
 	  {
 	  memset(SQL,'\0',MAXSQL);
 	  snprintf(SQL,MAXSQL,"UPDATE upload SET upload_mode = upload_mode | (1<<5) WHERE upload_pk = '%s';",Upload_Pk);
-	  if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-	  DBaccess(DBTREE,SQL); /* UPDATE upload */
+	  MyDBaccess(DBTREE,SQL); /* UPDATE upload */
 	  }
 
 #if 0
 	/* Debugging code */
-	if (DBTREE && (DBaccess(DBTREE,"ROLLBACK;") < 0))
+	if (DBTREE && (MyDBaccess(DBTREE,"ROLLBACK;") < 0))
 #else
-	if (DBTREE && (DBaccess(DBTREE,"COMMIT;") < 0))
+	if (DBTREE && (MyDBaccess(DBTREE,"COMMIT;") < 0))
 #endif
 	  {
 	  printf("ERROR pfile %s Unable to 'COMMIT' database updates.\n",Pfile_Pk);
@@ -2449,9 +2450,9 @@ int	main	(int argc, char *argv[])
 	  /* Tell DB that lots of updates are done */
 	  /* This has no visible benefit for small files, but after unpacking
 	     a full ISO, analyze has a huge performance benefit. */
-	  DBaccess(DB,"ANALYZE mimetype;");
-	  DBaccess(DB,"ANALYZE pfile;");
-	  DBaccess(DB,"ANALYZE uploadtree;");
+	  MyDBaccess(DB,"ANALYZE mimetype;");
+	  MyDBaccess(DB,"ANALYZE pfile;");
+	  MyDBaccess(DB,"ANALYZE uploadtree;");
 #endif
 	  /* Tell the world how many items we proudly processed */
 	  /** Humans will ignore this, but the scheduler will use it. **/
