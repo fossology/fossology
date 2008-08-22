@@ -342,15 +342,15 @@ class ui_license extends FO_Plugin
 		break;
 	}
 
-    // $CacheKey = $_SERVER['REQUEST_URI'];
-    // $V = ReportCacheGet($CacheKey);
-    // if (!empty($V) )
-    // {
-    //   if (!$this->OutputToStdout) { return($V); }
-    //   print $V;
-    //   echo "<i>cached</i>";
-    //   return;
-    // }
+    $CacheKey = $_SERVER['REQUEST_URI'];
+    $V = ReportCacheGet($CacheKey);
+    if (!empty($V) )
+    {
+      if (!$this->OutputToStdout) { return($V); }
+      print $V;
+      echo "<i>cached</i>";
+      return;
+    }
 
 
     switch($this->OutputType)
@@ -386,7 +386,7 @@ class ui_license extends FO_Plugin
       }
 
     /*  Cache Report */
-    // ReportCachePut($CacheKey, $V);
+    ReportCachePut($CacheKey, $V);
 
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
