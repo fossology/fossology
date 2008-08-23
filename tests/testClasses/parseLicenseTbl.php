@@ -1,7 +1,4 @@
-
 <?php
-
-
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
