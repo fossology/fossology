@@ -19,24 +19,19 @@
  ***********************************************************/
 
 /**
- * Given a fossology License Broswe page, parse it and return the
- * license table.  The rest of the page can be parsed by the browseMenu
- * class.
+ * Given a fossology page, parse all the href's in it and return them in
+ * an array
  *
  * @param string $page the xhtml page to parse
  *
- * @return assocative array with  Can return an empty array indicating
+ * @return assocative array.  Can return an empty array indicating
  * nothing on the page to browse.
  *
- * TODO: rename this class and methods to parseFolderPath, its more
- * general and I beieve it can parse the folder path at the top of the
- * License Browser Screen.
- *
  * @version "$Id: $"
- * Created on Aug 21, 2008
+ * Created on Aug 22, 2008
  */
 
-class parseLicFileList
+class parsePgLinks
 {
   public $page;
   private $test;
@@ -59,34 +54,15 @@ class parseLicFileList
    * filename. An empty array is returned if no license paths on that
    * page.
    */
-  function parseLicFileList()
+  function parsePgLinks()
   {
-    /* Extract the folder path line from the page */
-    $regExp = "Folder<\/b>:.*";
-    $matches = preg_match_all("|$regExp|", $this->page, $pathLines, PREG_SET_ORDER);
-    foreach ($pathLines as $aptr)
-    {
-      foreach ($aptr as $path)
-      {
-        $paths[] = $path;
-      }
-    }
-    $cnt = count($paths);
-    //print "count for Folder paths is:$cnt\n";
-    //print "paths are:\n"; print_r($paths) . "\n";
-    foreach ($paths as $apath)
-    {
-      //print "before parse: path is:\n$apath\n";
-      // The line below is great for pasring hrefs out of a page
-      $regExp = "<a\s[^>]*href=(\'??)([^\'>]*?)\\1[^>]*>(.*)<\/a>";
-      $matches = preg_match_all("|$regExp|iU", $apath, $pathList, PREG_PATTERN_ORDER);
-      //print "pathList is:\n";
-      //print_r($pathList) . "\n";
-      $lstFilesLic[] = $this->_createRtnArray($pathList, $matches);
-    }
-    //print "lstFilesLic is:\n";
-    //print_r($lstFilesLic) . "\n";
-    return ($lstFilesLic);
+    // The line below is great for pasring hrefs out of a page
+    $regExp = "<a\s[^>]*href=(\'??)([^\'>]*?)\\1[^>]*>(.*)<\/a>";
+    $matches = preg_match_all("|$regExp|iU", $this->page, $links, PREG_SET_ORDER);
+    print "links are:\n";
+    print_r($links) . "\n";
+    //$lstFilesLic[] = $this->_createRtnArray($pathList, $matches);
+    //return ($lstFilesLic);
   }
   function _createRtnArray($list, $matches)
   {
@@ -102,7 +78,7 @@ class parseLicFileList
       //print_r($list) . "\n";
 
       $rtnList = array ();
-      for ($i = 0; $i <= $numPaths-1 ; $i++)
+      for ($i = 0; $i <= $numPaths -1; $i++)
       {
         $cleanKey = trim($list[3][$i], "\/<>b");
         $rtnList[$cleanKey] = $list[2][$i];
