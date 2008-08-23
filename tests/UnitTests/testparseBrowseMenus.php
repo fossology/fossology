@@ -30,9 +30,10 @@
  * Created on Aug 20, 2008
  */
 
-require_once ('../testClasses/parseBrowseMenu.php');
-require_once ('../fossologyWebTestCase.php');
-require_once ('../TestEnvironment.php');
+//require_once ('../testClasses/parseBrowseMenu.php');
+require_once ('testClasses/parseBrowseMenu.php');
+require_once ('fossologyWebTestCase.php');
+require_once ('TestEnvironment.php');
 
 global $URL;
 
