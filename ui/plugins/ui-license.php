@@ -115,7 +115,6 @@ class ui_license extends FO_Plugin
     $V=""; // total return value
     global $Plugins;
     global $DB;
-    $Time = time();
     $Lics = array(); // license summary for an item in the directory
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
 
@@ -314,8 +313,6 @@ class ui_license extends FO_Plugin
     $V .= "<tr><td valign='top' width='50%'>$VH</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
-    $Time = time() - $Time;
-    $V .= "<small>Elaspsed time: $Time seconds</small>\n";
     $V .= $VJ;
     return($V);
     } // ShowUploadHist()
@@ -324,7 +321,8 @@ class ui_license extends FO_Plugin
    Output(): This function returns the scheduler status.
    ***********************************************************/
   function Output()
-    {
+  {
+    $uTime = microtime(true);
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $V="";
     $Folder = GetParm("folder",PARM_INTEGER);
@@ -344,16 +342,9 @@ class ui_license extends FO_Plugin
 
     $CacheKey = $_SERVER['REQUEST_URI'];
     $V = ReportCacheGet($CacheKey);
-    if (!empty($V) )
+    if (empty($V) )  // no cache exists
     {
-      if (!$this->OutputToStdout) { return($V); }
-      print $V;
-      echo "<i>cached</i>";
-      return;
-    }
-
-
-    switch($this->OutputType)
+      switch($this->OutputType)
       {
       case "XML":
 	break;
@@ -385,15 +376,22 @@ class ui_license extends FO_Plugin
 	break;
       }
 
-    /*  Cache Report */
-    ReportCachePut($CacheKey, $V);
+      $Cached = false;
+      /*  Cache Report */
+      ReportCachePut($CacheKey, $V);
+    }
+    else
+      $Cached = true;
 
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
+    $Time = microtime(true) - $uTime;  // convert usecs to secs
+    printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
+    if ($Cached) echo " <i>cached</i>";
     return;
-    }
+  }
 
-  };
+};
 $NewPlugin = new ui_license;
 $NewPlugin->Initialize();
 
