@@ -39,10 +39,40 @@ if (!isset($GlobalReady)) { exit; }
    Else, there is an empty return.
    By convention, this should be called with _SERVER[REQUEST_URI].
    However, any data may be put into the cache by any key.
+   This function also purges the cache of unused items.
    ***********************************************************/
+/* UserCacheStat: Does user want cache on?
+ *                0 Don't know
+ *                1 Cache is on
+ *                2 Cache is off for this user
+ */
+$UserCacheStat = 0;  // default, don't know
+
   function ReportCacheGet($CacheKey)
   {
     global $DB;
+    global $UserCacheStat;
+
+    /* Purge old entries ~ 1/100 of the times this fcn is called */
+    if ( rand(1,100) == 1)
+    {
+      ReportCachePurgeByDate(" now() - interval '10 days'");
+    }
+
+    /* Check if user has cache turned off by default it is on for everyone.
+     * If a record does not exist for this user, then the cache is on default
+     * is used.
+     */
+    if ($UserCacheStat == 0)
+    {
+      $sql = "select cache_on from report_cache_user where user_fk='$_SESSION[UserId]'";
+      $Result = $DB->Action($sql);
+      if (!empty($Result[0]['cache_on']) && ($Result[0]['cache_on'] == 'N'))
+      {
+        $UserCacheStat = 2;
+        return;  /* cache is off for this user */
+      }
+    }
 
     $EscKey = pg_escape_string($CacheKey);
 
@@ -50,7 +80,9 @@ if (!isset($GlobalReady)) { exit; }
     $Result = $DB->Action("UPDATE report_cache SET report_cache_tla = now() WHERE report_cache_key='$EscKey'",
                           $PGError);
 
+    // Get the cached data
     $Result = $DB->Action("SELECT report_cache_value from report_cache WHERE report_cache_key='$EscKey'");
+
     return $Result[0]['report_cache_value'];
   } // ReportCacheGet()
 
@@ -63,6 +95,17 @@ if (!isset($GlobalReady)) { exit; }
   function ReportCachePut($CacheKey, $CacheValue)
   {
     global $DB;
+    global $UserCacheStat;
+
+    /* Check if user has cache turned off
+     * CacheUserStat is set in ReportCacheGet
+     * If it isn't, it is safe to fallback to the default
+     * behavior (cache is on).
+     */
+    if ($UserCacheStat == 2) 
+    {
+      return;
+    }
 
     $EscKey = pg_escape_string($CacheKey);
     $EscValue = pg_escape_string($CacheValue);
