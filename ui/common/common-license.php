@@ -302,7 +302,7 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL, $Max=
     $LimitPhrase = "";
 
   /*  Get every license for every file in this subtree */
-  $Results = $DB->Action("select licterm_name, count(licterm_name) as liccount
+  $sql = "select licterm_name, count(licterm_name) as liccount
     FROM uploadtree as UT1, uploadtree as UT2, licterm_name, licterm
     WHERE UT1.lft BETWEEN UT2.lft and UT2.rgt
           and UT1.upload_fk=UT2.upload_fk
@@ -310,7 +310,8 @@ function LicenseGetAll(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL, $Max=
           and licterm_name.pfile_fk=UT1.pfile_fk
           and licterm_pk=licterm_name.licterm_fk
     GROUP BY licterm_name
-    ORDER BY liccount DESC  $LimitPhrase $OffsetPhrase");
+    ORDER BY liccount DESC  $LimitPhrase $OffsetPhrase";
+  $Results = $DB->Action($sql);
 
    $Lics[' Total '] = count($Results);
 
