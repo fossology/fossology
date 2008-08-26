@@ -309,6 +309,22 @@ CREATE INDEX report_cache_tlats ON report_cache USING btree (report_cache_tla);
     ';
     $DB->Action($sql);
 
+    /* Create the report_cache_user table 
+     * This allows the cache to be turned off/on on a per user basis 
+     */
+    $sql = ' 
+CREATE TABLE report_cache_user (
+    report_cache_user_pk serial NOT NULL,
+    user_fk integer NOT NULL,
+    cache_on character(1) DEFAULT \'Y\'::bpchar NOT NULL
+);
+COMMENT ON TABLE report_cache_user IS \'Allow the report cached to be turned off for individual users.  This is mostly for developers.\';
+COMMENT ON COLUMN report_cache_user.cache_on IS \'Y or N\';
+ALTER TABLE ONLY report_cache_user
+    ADD CONSTRAINT report_cache_user_pkey PRIMARY KEY (report_cache_user_pk);
+    ';
+    $DB->Action($sql);
+
      /* Make sure every upload has left and right indexes set. */
      global $LIBEXECDIR;
      system("$LIBEXECDIR/agents/adj2nest -a");
