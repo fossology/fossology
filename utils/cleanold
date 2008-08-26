@@ -8,6 +8,7 @@ SAVE="/usr/local/share/fossology/agents/proxy.conf
 /usr/local/share/fossology/repository/Depth.conf
 /usr/local/share/fossology/repository/Hosts.conf
 /usr/local/share/fossology/repository/RepPath.conf"
+# NOTE: we don't bother to look for nomos3 conffiles
 
 FILES="/usr/local/bin/cp2foss.php
 /usr/local/bin/diffm
@@ -22,15 +23,23 @@ FILES="/usr/local/bin/cp2foss.php
 /usr/local/include/fm-paths.php
 /usr/local/lib/libcp2foss.h.php
 /usr/local/lib/lib_projxml.h.php
-/usr/local/share/man/man1/cp2foss.1"
+/usr/local/share/man/man1/cp2foss.1
+/usr/local/bin/cp2foss
+/usr/local/bin/p.sh
+/usr/local/bin/ununpack
+/usr/local/bin/unrar
+/usr/local/bin/unrar-free
+/usr/local/include/fm-paths.php
+"
 
 DIRS="/usr/local/fossology/
-/usr/local/share/fossology/"
+/usr/local/share/fossology/
+/usr/local/share/nomos3/"
 
 TMPDIR=`mktemp -d /tmp/fossology-configs.XXXX` || exit 1
 echo "*** Searching for old fossology config files ***"
 for conffile in $SAVE; do
-   if [ -f $conffile ]; then
+   if [ -f "$conffile" ]; then
       echo "NOTE: found $conffile saving to $TMPDIR/"
       cp $conffile $TMPDIR/
    fi
@@ -38,15 +47,13 @@ done
 
 echo "*** Cleaning up old fossology files ***"
 for file in $FILES; do
-   if [ -f $file ]; then
-      #rm -f $file
-      echo "foo $file foo"
+   if [ -f "$file" ]; then
+      rm -f $file
    fi
 done
 
 for dir in $DIRS; do
-   if [ -d $dir ]; then
-      echo "foo $dir foo"
-      #rm -rf $dir
+   if [ -d "$dir" ]; then
+      rm -rf $dir
    fi
 done
