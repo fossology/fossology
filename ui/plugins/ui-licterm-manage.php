@@ -285,10 +285,11 @@ function SortList(List)
 function AddText()
   {
   var Text = document.getElementById("newtext").value.toLowerCase();
-  Text = Text.replace(/[^a-zA-Z0-9]/g," ");
+  Text = Text.replace(/[^a-zA-Z0-9%]/g," ");
   Text = Text.replace(/  */g," ");
   Text = Text.replace(/^ */,"");
   Text = Text.replace(/ *$/,"");
+  Text = Text.replace(/licenc/,"licens");
   /* Reset */
   document.getElementById("newtext").value = "";
   if (Text == "") { return; } /* no blanks */
@@ -442,7 +443,8 @@ function moveOptions(theSelFrom, theSelTo)
     for($i=0; !empty($Results[$i]['text']); $i++)
       {
       $Text = strtolower($Results[$i]['text']);
-      $Text = preg_replace("[^[a-zA-Z0-9]"," ",$Text);
+      $Text = preg_replace("[^[a-zA-Z0-9%]"," ",$Text);
+      $Text = preg_replace("/licenc/","licens",$Text);
       $Text = trim(preg_replace(" +"," ",$Text));
       $V .= "<option value='$Text'>$Text</option>\n";
       }
@@ -475,9 +477,13 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "Terms consist of two parts: a canonical name for the class of terms, and a list of words or phrases that are members of the class.\n";
     $V .= "For example, the phrases 'GNU General Public License version 2' and 'GPL version 2' may both be parts of the 'GPLv2' class.\n"; 
     $V .= "<P />\n";
-    $V .= "<b>Note</b>: Changes to this list will impact all new license analysis.\n";
+    $V .= "<b>Note #1</b>: Changes to this list will impact all new license analysis.\n";
     $V .= "However, all completed license analysis will be unchanged.\n";
     $V .= "You may wish to clear the license analysis for an upload and reschedule the analysis in order to apply changes.\n";
+    $V .= "<P />\n";
+    $V .= "<b>Note #2</b>: There is one special case for spelling.\n";
+    $V .= "Many licenses spell the word 'licen<b>c</b>e' instead of 'licen<b>s</b>e.\n";
+    $V .= "If the term contains either spelling of 'license', 'licensing', 'licensed', etc., then it will be converted to 's' but will match both spellings.\n";
     $V .= "<P />\n";
 
     $V .= "<form name='formy' method='post' onSubmit='return SelectAll();'>\n";
@@ -529,13 +535,19 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "<tr>";
     $V .= "<td>";
     $V .= "<select onFocus='UnselectForm(\"termavailable\");' onChange='document.getElementById(\"newtext\").value=this.value' multiple='multiple' id='termlist' name='termlist[]' size='10'>";
+    $TL=array();
     for($i=0; !empty($TermList[$i]['text']); $i++)
       {
       $Text = strtolower($TermList[$i]['text']);
-      $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
+      $Text = preg_replace("/[^a-z0-9%]/"," ",$Text);
       $Text = preg_replace("/ +/"," ",$Text);
+      $Text = preg_replace("/licenc/","licens",$Text);
       $Text = trim(preg_replace("/  */"," ",$Text));
-      $V .= "<option value='$Text'>$Text</option>\n";
+      if (empty($TL[$Text]))
+	{
+	$V .= "<option value='$Text'>$Text</option>\n";
+	$TL[$Text] = 1;
+	}
       }
     $V .= "</select>";
     $V .= "</td>\n";
@@ -549,12 +561,18 @@ function moveOptions(theSelFrom, theSelTo)
 
     $V .= "<td>";
     $V .= "<select onFocus='UnselectForm(\"termlist\");' onChange='document.getElementById(\"newtext\").value=this.value' multiple='multiple' id='termavailable' name='termavailable' size='10'>";
+    $TL=array();
     for($i=0; !empty($TermAvailable[$i]['text']); $i++)
       {
       $Text = strtolower($TermAvailable[$i]['text']);
-      $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
+      $Text = preg_replace("/[^a-z0-9%]/"," ",$Text);
       $Text = trim(preg_replace("/  */"," ",$Text));
-      $V .= "<option value='$Text'>$Text</option>\n";
+      $Text = preg_replace("/licenc/","licens",$Text);
+      if (empty($TL[$Text]))
+	{
+	$V .= "<option value='$Text'>$Text</option>\n";
+	$TL[$Text] = 1;
+	}
       }
     $V .= "</select>";
     $V .= "</td></table>\n";
@@ -661,7 +679,8 @@ function moveOptions(theSelFrom, theSelTo)
     for($i=0; !empty($TermList[$i]['text']); $i++)
       {
       $Text = strtolower($TermList[$i]['text']);
-      $Text = preg_replace("/[^a-z0-9]/"," ",$Text);
+      $Text = preg_replace("/[^a-z0-9%]/"," ",$Text);
+      $Text = preg_replace("/licenc/","licens",$Text);
       $Text = trim(preg_replace("/ +/"," ",$Text));
       $V .= "<option value='$Text'>Delete: $Text</option>\n";
       }
@@ -690,17 +709,18 @@ function moveOptions(theSelFrom, theSelTo)
     if (empty($TermKey)) { return("Record not found.  Nothing to delete."); }
     $TermName = GetParm('name',PARM_TEXT);
 
-    $DB->Action("DELETE FROM licterm_map WHERE licterm_fk = '$TermKey';");
-    // $DB->Action("VACUUM ANALYZE licterm_map;");
-
+    $DB->Action("BEGIN;");
+    $DB->Action("DELETE FROM licterm_name WHERE licterm_fk = '$TermKey';");
     $DB->Action("DELETE FROM licterm_maplic WHERE licterm_fk = '$TermKey';");
-    // $DB->Action("VACUUM ANALYZE licterm_maplic;");
+    $DB->Action("DELETE FROM licterm_map WHERE licterm_fk = '$TermKey';");
 
     if ($DeleteAll)
       {
       $DB->Action("DELETE FROM licterm WHERE licterm_pk = '$TermKey';");
       // $DB->Action("VACUUM ANALYZE licterm;");
       }
+
+    $DB->Action("COMMIT;");
     } // LicTermDelete()
 
   /***********************************************************
@@ -764,7 +784,8 @@ function moveOptions(theSelFrom, theSelTo)
     for($i=0; !empty($TermList[$i]); $i++)
       {
       $Term = strtolower($TermList[$i]);
-      $Term = preg_replace("/[^a-z0-9]/"," ",$Term);
+      $Term = preg_replace("/[^a-z0-9%]/"," ",$Term);
+      $Term = preg_replace("/licenc/","licens",$Term);
       $Term = trim(preg_replace("/  */"," ",$Term));
       $SQL = "SELECT * FROM licterm_words WHERE licterm_words_text = '$Term';";
       $Results = $DB->Action($SQL);
@@ -788,6 +809,8 @@ function moveOptions(theSelFrom, theSelTo)
     for($i=0; !empty($LicList[$i]); $i++)
       {
       $Lic = intval($LicList[$i]);
+      /* This delete ensures that every lic_fk is only seen once! */
+      $DB->Action("DELETE FROM licterm_maplic WHERE lic_fk = '$Lic';");
       $SQL = "SELECT * FROM agent_lic_raw WHERE lic_pk = '$Lic' AND lic_pk = lic_id;";
       $Results = $DB->Action($SQL);
       if (!empty($Results[0]['lic_pk']))
@@ -811,7 +834,8 @@ function moveOptions(theSelFrom, theSelTo)
     if (!empty($TermDel))
       {
       $Term = strtolower($TermDel);
-      $Term = preg_replace("/[^a-z0-9]/"," ",$Term);
+      $Term = preg_replace("/[^a-z0-9%]/"," ",$Term);
+      $Term = preg_replace("/licenc/","licens",$Term);
       $Term = trim(preg_replace("/  */"," ",$Term));
       $SQL = "SELECT * FROM licterm_words WHERE licterm_words_text = '$Term';";
       $Results = $DB->Action($SQL);

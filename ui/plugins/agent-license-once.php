@@ -232,7 +232,7 @@ class agent_license_once extends FO_Plugin
 	}
       if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG)	// Debugging changes to license analysis
 	{
-	$URI = $this->Name . Traceback_parm_keep(array("format","pfile"));
+	$URI = $this->Name . Traceback_parm_keep(array("format","item"));
 	menu_insert("View::[BREAK]",100);
 	menu_insert("View::One-Shot",101,$URI,"One-shot, real-time license analysis");
 	menu_insert("View-Meta::[BREAK]",100);
@@ -256,8 +256,8 @@ class agent_license_once extends FO_Plugin
       case "HTML":
 	/* If this is a POST, then process the request. */
 	$Highlight = GetParm('highlight',PARM_INTEGER); // may be null
-	/* You can also specify the file by pfile_pk */
-	$PfilePk = GetParm('pfile',PARM_INTEGER); // may be null
+	/* You can also specify the file by uploadtree_pk as 'item' */
+	$Item = GetParm('item',PARM_INTEGER); // may be null
 	if (file_exists(@$_FILES['licfile']['tmp_name']))
 	  {
 	  if ($_FILES['licfile']['size'] <= 1024*1024*10)
@@ -269,10 +269,12 @@ class agent_license_once extends FO_Plugin
 	    { unlink($_FILES['licfile']['tmp_name']); }
 	  return;
 	  }
-	else if (!empty($PfilePk) && !empty($DB))
+	else if (!empty($Item) && !empty($DB))
 	  {
 	  /* Get the pfile info */
-	  $Results = $DB->Action("SELECT * FROM pfile WHERE pfile_pk = '$PfilePk';");
+	  $Results = $DB->Action("SELECT * FROM pfile
+		INNER JOIN uploadtree ON uploadtree_pk = $Item
+		AND pfile_pk = pfile_fk;");
 	  if (!empty($Results[0]['pfile_pk']))
 	    {
 	    global $LIBEXECDIR;
@@ -292,6 +294,8 @@ class agent_license_once extends FO_Plugin
 	    return;
 	    }
 	  }
+	if (!empty($_FILES['licfile']['unlink_flag']))
+	      { unlink($_FILES['licfile']['tmp_name']); }
 
 	/* Display instructions */
 	$V .= "This analyzer allows you to upload a single file for license analysis.\n";

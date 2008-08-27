@@ -256,7 +256,7 @@ class agent_license_once_compare extends FO_Plugin
       {
       if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG)	// Debugging changes to license analysis
 	{
-	$URI = $this->Name . Traceback_parm_keep(array("format","pfile","item","ufile"));
+	$URI = $this->Name . Traceback_parm_keep(array("format","item"));
 	menu_insert("View::[BREAK]",100);
 	menu_insert("View::Recompare",101,$URI,"One-shot, real-time license recomparison");
 	menu_insert("View-Meta::[BREAK]",100);
@@ -279,9 +279,7 @@ class agent_license_once_compare extends FO_Plugin
 	break;
       case "HTML":
 	/* If this is a POST, then process the request. */
-	/* You can also specify the file by pfile_pk */
-	$PfilePk = GetParm('pfile',PARM_INTEGER); // may be null
-	$UfilePk = GetParm('ufile',PARM_INTEGER); // may be null
+	/* You can also specify the file by uploadtree_pk */
 	$Item = GetParm('item',PARM_INTEGER); // may be null
 	$LicList = GetParm('liclist',PARM_RAW); // may be null
 	$Highlight=1; /* Always highlight. */
@@ -296,11 +294,13 @@ class agent_license_once_compare extends FO_Plugin
 	    { unlink($_FILES['licfile']['tmp_name']); }
 	  return;
 	  }
-	else if (is_array($LicList) && !empty($LicList[0]) && !empty($PfilePk) && !empty($DB))
+	else if (is_array($LicList) && !empty($LicList[0]) && !empty($DB))
 	  {
 	  /* Get the pfile info */
-	  $Results = $DB->Action("SELECT * FROM pfile WHERE pfile_pk = '$PfilePk';");
-	  if (!empty($Results[0]['pfile_pk']))
+	  $Results = $DB->Action("SELECT * FROM pfile
+		INNER JOIN uploadtree ON uploadtree_pk = $Item
+		AND pfile_fk = pfile_pk;");
+	  if (!empty($Results[0]['uploadtree_pk']))
 	    {
 	    global $LIBEXECDIR;
 	    $Repo = $Results[0]['pfile_sha1'] . "." . $Results[0]['pfile_md5'] . "." . $Results[0]['pfile_size'];
@@ -318,6 +318,8 @@ class agent_license_once_compare extends FO_Plugin
 	    return;
 	    }
 	  }
+	if (!empty($_FILES['licfile']['unlink_flag']))
+	    { unlink($_FILES['licfile']['tmp_name']); }
 
 	/* Display instructions */
 	$V .= "This analyzer allows you to upload a single file for license analysis and select the licenses to compare against.\n";
@@ -333,19 +335,17 @@ class agent_license_once_compare extends FO_Plugin
 	$V .= "<form enctype='multipart/form-data' method='post'>\n";
 	$V .= "<ol>\n";
 	/* Display the form */
-	if (empty($PfilePk))
+	if (empty($Item))
 	  {
 	  $V .= "<li>Select the file to upload:<br />\n";
 	  $V .= "<input name='licfile' size='60' type='file' /><br />\n";
 	  $V .= "<b>NOTE</b>: Files larger than 100K will be discarded and not analyzed.<P />\n";
-	  $V .= "<input type='hidden' name='pfile' value='$PfilePk'>";
-	  $V .= "<input type='hidden' name='ufile' value='$UfilePk'>";
 	  $V .= "<input type='hidden' name='item' value='$Item'>";
 	  }
 	else
 	  {
 	  $V .= "<li>This is the selected file to re-analyze:<br />\n";
-	  $V .= Dir2Browse("license",$Item,$UfilePk) . "<P />\n";
+	  $V .= Dir2Browse("license",$Item) . "<P />\n";
 	  }
 
 	$V .= "<li>Select one or more licenses to compare against:<br>\n";

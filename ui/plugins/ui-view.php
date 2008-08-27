@@ -95,7 +95,7 @@ class ui_view extends FO_Plugin
         break;
       }
 
-    $URI = Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
+    $URI = Traceback_parm_keep(array("show","format","page","upload","item"));
     if (GetParm("mod",PARM_STRING) == $this->Name)
 	{
 	menu_insert("View::View",2);
@@ -437,8 +437,8 @@ class ui_view extends FO_Plugin
    ***********************************************************/
   function ReadHex($Fin,$Start,$Length, &$Text, &$Hex)
     {
-    $Text = "";
-    $Hex = "";
+    $Text = "<font class='mono'>";
+    $Hex = "<font class='mono'>";
     $ReadCount=0;
 
     /* Begin color if it is IN but not at START of highlighting */
@@ -514,11 +514,13 @@ class ui_view extends FO_Plugin
       } /* while reading */
 
     /* End coloring as needed */
-    if ($InColor);
+    if ($InColor)
 	{
 	$Text .= "</font>";
 	$Hex .= "</font>";
 	}
+    $Text .= "</font>";
+    $Hex .= "</font>";
     return($ReadCount);
     } // ReadHex()
 
@@ -562,9 +564,10 @@ class ui_view extends FO_Plugin
 	{
 	/* show file location */
 	$B = base_convert($Tell,10,16);
-	print "0x";
+	print "<font class='mono'>0x";
 	for($i=strlen($B); $i<8; $i++) { print("0"); }
 	print "$B&nbsp;";
+        print "</font>";
 
 	print "|&nbsp;$Hex|&nbsp;|$Text|<br>\n";
 	}
@@ -586,17 +589,12 @@ class ui_view extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
     global $Plugins;
-    $Pfile = GetParm("pfile",PARM_INTEGER);
-    $Ufile = GetParm("ufile",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Folder = GetParm("folder",PARM_INTEGER);
     $Show = GetParm("show",PARM_STRING);
     $Item = GetParm("item",PARM_INTEGER);
     $Page = GetParm("page",PARM_INTEGER);
-/*
-    if (empty($Item) || empty($Pfile) || empty($Ufile) || empty($Upload))
-	{ return; }
-*/
+    if (empty($Item) || empty($Upload)) { return; }
     if (empty($Page)) { $Page=0; };
 
     switch(GetParm("format",PARM_STRING))
@@ -606,7 +604,7 @@ class ui_view extends FO_Plugin
 	case 'flow':	$Format='flow'; break;
 	default:
 	  /* Determine default show based on mime type */
-	  $Meta = GetMimeType($Pfile);
+	  $Meta = GetMimeType($Item);
 	  list($Type,$Junk) = split("/",$Meta,2);
 	  if ($Type == 'text') { $Format = 'flow'; }
 	  else switch($Meta)
@@ -640,13 +638,12 @@ class ui_view extends FO_Plugin
       {
       $Uri = Traceback_uri() . "?mod=browse";
       $Opt="";
-      if (!empty($Pfile)) { $Opt .= "&pfile=$Pfile"; }
-      if (!empty($Ufile)) { $Opt .= "&ufile=$Ufile"; }
+      if (!empty($Item)) { $Opt .= "&item=$Item"; }
       if (!empty($Upload)) { $Opt .= "&upload=$Upload"; }
       if (!empty($Folder)) { $Opt .= "&folder=$Folder"; }
       if (!empty($Show)) { $Opt .= "&show=$Show"; }
       /* No item */
-      $V .= Dir2Browse($BackMod,$Item,$Ufile,NULL,1,"View") . "<P />\n";
+      $V .= Dir2Browse($BackMod,$Item,NULL,1,"View") . "<P />\n";
       } // if ShowHeader
 
     $this->SortHighlightMenu();
@@ -657,7 +654,7 @@ class ui_view extends FO_Plugin
     print $V;
     if (empty($Fin))
       { 
-      $Fin = @fopen( RepPath($Pfile) ,"rb");
+      $Fin = @fopen( RepPathItem($Item) ,"rb");
       if (empty($Fin))
 	{
 	print "File contents are not available in the repository.\n";

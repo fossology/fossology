@@ -54,49 +54,52 @@ class search_file_by_license extends FO_Plugin
     $Max = 50;
 
     switch($this->OutputType)
-      {
+    {
       case "XML":
         break;
       case "HTML":
-	$UploadTreePk = GetParm("item",PARM_INTEGER);
-	$Page = GetParm("page",PARM_INTEGER);
-	$WantLic = urldecode(GetParm("lic",PARM_TEXT));
-	if (empty($UploadTreePk) || empty($WantLic))
-		{
-		return;
-		}
-	if (empty($Page)) { $Page=0; }
-	$Offset = $Page * $Max;
+        $UploadTreePk = GetParm("item",PARM_INTEGER);
+        $Page = GetParm("page",PARM_INTEGER);
+        $WantLic = GetParm("lic",PARM_RAW);
+	$WantLic = str_replace("\\'","'",$WantLic);
+        if (empty($UploadTreePk) || empty($WantLic))
+        {
+          return;
+        }
+	    if (empty($Page)) { $Page=0; }
+        $Offset = $Page * $Max;
 
-	/* Get License Name */
-	$V .= "The following files contain the license '<b>";
-	$V .= htmlentities($WantLic);
-	$V .= "</b>'.\n";
+        /* Get License Name */
+        $V .= "The following files contain the license '<b>";
+        $V .= htmlentities($WantLic);
+        $V .= "</b>'.\n";
 
-	/* Load licenses */
-	$Lics = array();
-	LicenseGetAll($UploadTreePk,$Lics,1,$WantLic);
+        /* Load licenses */
+        $Lics = array();
+        $Offset = $Page*$Max;
+        LicenseGetAllFiles2($UploadTreePk,$Lics,$WantLic,$Max,$Offset);
 
-	/* Save the license results */
-	$Count = count($Lics);
+        /* Save the license results */
+        $Count = count($Lics);
 
-	/* Get the page menu */
-	if (($Count >= $Max) || ($Page > 0))
-	  {
-	  $VM = "<P />\n" . MenuPage($Page,intval($Count/$Max)) . "<P />\n";
-	  $V .= $VM;
-	  }
-	else
-	  {
-	  $VM = "";
-	  }
+        /* Get the page menu */
+        if (($Count >= $Max) || ($Page > 0))
+        {
+          $VM = "<P />\n" . MenuPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
+          $V .= $VM;
+        }
+        else
+        {
+          $VM = "";
+        }
 
-	$V .= Dir2FileList($Lics,"browse","view",$Page*$Max + 1,1);
+        /* Offset is +1 to start numbering from 1 instead of zero */
+        $V .= Dir2FileList($Lics,"browse","view-license",$Offset + 1,1);
 
-	if (!empty($VM)) { $V .= $VM . "\n"; }
-	$V .= "<hr>\n";
-	$Time = time() - $Time;
-	$V .= "<small>Elaspsed time: $Time seconds</small>\n";
+        if (!empty($VM)) { $V .= $VM . "\n"; }
+        $V .= "<hr>\n";
+        $Time = time() - $Time;
+        $V .= "<small>Elaspsed time: $Time seconds</small>\n";
         break;
       case "Text":
         break;

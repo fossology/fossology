@@ -81,6 +81,7 @@ class licterm_default extends FO_Plugin
    ExportTerms(): Display the entire term table system as a big array.
    This array should be pasted into the Default() function for
    use as the default values.
+   NOTE: This only exports canonical names that contain terms.
    ***********************************************************/
   function ExportTerms	()
     {
@@ -111,20 +112,43 @@ class licterm_default extends FO_Plugin
       $Desc = str_replace('"','\\"',$Desc);
       $Pk = $Names[$n]['licterm_pk'];
 
+      /* Get terms associated with the canonical name */
+      $SQL = "SELECT DISTINCT licterm_words_text FROM licterm_words INNER JOIN licterm_map ON licterm_fk='$Pk' AND licterm_words_fk = licterm_words_pk ORDER BY licterm_words_text;";
+      $Terms = $DB->Action($SQL);
+
+      /* Get Licenses associated with the canonical name */
+      $SQL = "SELECT DISTINCT lic_name FROM agent_lic_raw INNER JOIN licterm_maplic ON licterm_fk='$Pk' AND lic_fk = lic_pk ORDER BY lic_name;";
+      $Lics = $DB->Action($SQL);
+
+      /* Check if we need to write it */
+      if ((count($Terms) <= 0) && (count($Lics) <= 0)) { continue; }
+
+      /* Create the canonical name record */
       fwrite($Fout,"  /* Canonical name: $Pk */\n");
       fwrite($Fout,'  $Term["' . $Name . '"]["Desc"]="' . $Desc . '";' . "\n");
 
-      $SQL = "SELECT DISTINCT licterm_words_text FROM licterm_words INNER JOIN licterm_map ON licterm_fk='$Pk' AND licterm_words_fk = licterm_words_pk ORDER BY licterm_words_text;";
-      $Terms = $DB->Action($SQL);
+      /* Write the terms */
+      $T = array();
       for($t=0; !empty($Terms[$t]['licterm_words_text']); $t++)
         {
 	$Term = $Terms[$t]['licterm_words_text'];
         $Term = str_replace('"','\\"',$Term);
-	fwrite($Fout,'  $Term["' . $Name . '"]["Term"][' . $t . ']="' . $Term . '";' . "\n");
+        $Term = str_replace('licenc','licens',$Term);
+	if (empty($T[$Term]))
+	  {
+	  if ($t == 0)
+	    {
+	    fwrite($Fout,'  $Term["' . $Name . '"]["Term"][' . $t . ']="' . $Term . '";' . "\n");
+	    }
+	  else
+	    {
+	    fwrite($Fout,'  $Term["' . $Name . '"]["Term"][]="' . $Term . '";' . "\n");
+	    }
+	  $T[$Term]=1;
+	  }
 	}
 
-      $SQL = "SELECT DISTINCT lic_name FROM agent_lic_raw INNER JOIN licterm_maplic ON licterm_fk='$Pk' AND lic_fk = lic_pk ORDER BY lic_name;";
-      $Lics = $DB->Action($SQL);
+      /* Write the Licenses */
       for($l=0; !empty($Lics[$l]['lic_name']); $l++)
         {
 	$Lic = $Lics[$l]['lic_name'];

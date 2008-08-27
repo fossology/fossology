@@ -123,14 +123,6 @@ class jobs_showjobs extends FO_Plugin
     } // DrawColors()
 
   /***********************************************************
-   GetUfileFromJob(): Give a job number,
-   TBD: Allow the user to clear hung jobs, alter priority.
-   ***********************************************************/
-  function GetUfileFromJob($Job)
-    {
-    } // GetUfileFromJob()
-
-  /***********************************************************
    ShowJob(): This function returns the full job information.
    TBD: Allow the user to clear hung jobs, alter priority.
    ***********************************************************/
@@ -254,33 +246,27 @@ class jobs_showjobs extends FO_Plugin
       {
       if (empty($Where)) { $WherePage = ' WHERE '; }
       else { $WherePage = ' AND '; }
-      $WherePage .= "(ufile_name,upload_pk) IN
-	(SELECT DISTINCT ufile_name,upload_pk FROM job
-	INNER JOIN upload ON upload.upload_pk = job.job_upload_fk
-	INNER JOIN ufile ON ufile.ufile_pk = upload.ufile_fk";
-      $WherePage .= " ORDER BY ufile_name,upload_pk";
-      $WherePage .= " LIMIT 10 OFFSET $Offset)";
+      $WherePage .= "(upload_filename,upload_pk) IN
+	(SELECT DISTINCT upload_filename,upload_pk FROM job
+	LEFT OUTER JOIN upload ON upload.upload_pk = job.job_upload_fk
+	LIMIT 10 OFFSET $Offset)";
       }
     else { $WherePage = ""; }
 
+    /** NOTE: Results are NOT in alphabetical order.  They are in
+        LC_COLLATE order.  Changing LC_COLLATE requires re-running 
+	postgresql's initdb. **/
     $Sql = "
-    SELECT jobqueue.jq_pk,jobqueue.jq_job_fk,jobdepends.jdep_jq_depends_fk,
-	jobqueue.jq_elapsedtime,jobqueue.jq_processedtime,
-	jobqueue.jq_itemsprocessed,job.job_queued,jobqueue.jq_type,
-	jobqueue.jq_starttime,jobqueue.jq_endtime,jobqueue.jq_end_bits,
-	upload.*,job.*,ufile.ufile_name
+    SELECT *
     FROM jobqueue
-    LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk
-    LEFT JOIN jobqueue AS depends
-      ON depends.jq_pk = jobdepends.jdep_jq_depends_fk
     INNER JOIN job ON jobqueue.jq_job_fk = job.job_pk
-    INNER JOIN upload ON upload_pk = job.job_upload_fk
-    INNER JOIN ufile ON ufile.ufile_pk = upload.ufile_fk
+    LEFT OUTER JOIN upload ON upload_pk = job.job_upload_fk
+    LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk
     $Where $WherePage
-    ORDER BY ufile_name,upload.upload_pk,job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk;
+    ORDER BY upload_filename,upload.upload_pk,job.job_pk,jobqueue.jq_pk,jobdepends.jdep_jq_fk;
     ";
-    // print "<pre>" . htmlentities($Sql) . "</pre>";
     $Results = $DB->Action($Sql);
+    // print "<pre>" . htmlentities($Sql); print_r($Results); print "</pre>";
 
     /*****************************************************************/
     /* Get Jobs that are NOT associated with uploads (e.g., folder delete). */
@@ -298,11 +284,7 @@ class jobs_showjobs extends FO_Plugin
 	else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
 
 	$Sql = "
-    SELECT jobqueue.jq_pk,jobqueue.jq_job_fk,jobdepends.jdep_jq_depends_fk,
-	jobqueue.jq_elapsedtime,jobqueue.jq_processedtime,
-	jobqueue.jq_itemsprocessed,job.job_queued,jobqueue.jq_type,
-	jobqueue.jq_starttime,jobqueue.jq_endtime,jobqueue.jq_end_bits,
-	job.*, '-1' AS upload_pk, '' AS ufile_name
+    SELECT jobqueue.*,jobdepends.*,job.*, '-1' AS upload_pk, '' AS ufile_name
     FROM jobqueue
     LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk
     LEFT JOIN jobqueue AS depends
@@ -339,7 +321,7 @@ class jobs_showjobs extends FO_Plugin
     $Upload="-1";
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     $UriFull = $Uri . Traceback_parm_keep(array("show","history","upload"));
-    for($i=0; !empty($Results[$i]['jq_pk']); $i++)
+    for($i=0; !empty($Results[$i]['job_name']); $i++)
       {
       $Row = &$Results[$i];
       /* Determine the color */
@@ -369,7 +351,7 @@ class jobs_showjobs extends FO_Plugin
 	if ($First) { $First=0; }
 	else { $V .= "</table>\n<P />\n"; }
 	$V .= "<table class='text' border=1 width='100%'>\n";
-	$JobName = $Row['ufile_name'];
+	$JobName = $Row['upload_filename'];
 	if (empty($JobName)) { $JobName = "[Default]"; }
 	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
 	$Style = "style='background:#202020; color:white;}'";

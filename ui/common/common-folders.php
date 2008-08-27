@@ -90,7 +90,10 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
     $V .= htmlentities($Name);
     $V .= "</option>\n";
     }
-  $Results = $DB->Action("SELECT folder_pk FROM leftnav WHERE parent=$ParentFolder AND folder_pk IS NOT NULL ORDER BY name;");
+  $Results = $DB->Action("SELECT folder_pk FROM folderlist
+	WHERE parent=$ParentFolder
+	AND folder_pk IS NOT NULL
+	ORDER BY name;");
   if (isset($Results[0]['folder_pk']))
     {
     $Hide="";
@@ -245,7 +248,10 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   $Desc = str_replace('"',"&quot;",$Desc);
 
   /* Load any subfolders */
-  $Results = $DB->Action("SELECT folder_pk FROM leftnav WHERE parent=$ParentFolder AND folder_pk IS NOT NULL ORDER BY name;");
+  $Results = $DB->Action("SELECT folder_pk FROM folderlist
+	WHERE parent=$ParentFolder
+	AND folder_pk IS NOT NULL
+	ORDER BY name;");
   /* Now create the HTML */
   if (isset($Results[0]['folder_pk']))
     {
@@ -348,10 +354,13 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
 } // FolderGetFromUpload()
 
 /***********************************************************
- FolderListUploads(): Returns an array of all uploads and upload_pk
- for a given folder.
+ FolderListUploads(): Returns an array of:
+   upload_pk
+   upload_desc
+   ufile_name
+ for all uploads in a given folder.
  This does NOT recurse.
- The array is sorted by upload name.
+ The returned array is sorted by ufile_name and ufile_desc.
  Folders may be empty!
  ***********************************************************/
 function FolderListUploads($ParentFolder=-1)
@@ -364,12 +373,14 @@ function FolderListUploads($ParentFolder=-1)
 
   /* Get list of uploads */
   /** mode 1<<1 = upload_fk **/
-  $SQL = "SELECT * FROM foldercontents
-	INNER JOIN upload ON upload.upload_pk = foldercontents.child_id
-	AND foldercontents.parent_fk = '$ParentFolder'
+  $SQL = "SELECT upload_pk, upload_desc, ufile_name FROM foldercontents,uploadtree, upload
+	WHERE 
+	    foldercontents.parent_fk = '$ParentFolder'
 	AND foldercontents.foldercontents_mode = 2
-	INNER JOIN ufile ON upload.ufile_fk = ufile.ufile_pk
-	ORDER BY ufile.ufile_name,upload.upload_desc;";
+    AND foldercontents.child_id = upload.upload_pk
+    AND uploadtree.upload_fk = upload.upload_pk
+    AND uploadtree.parent is null
+	ORDER BY uploadtree.ufile_name,upload.upload_desc;";
   $Results = $DB->Action($SQL);
   foreach($Results as $R)
     {
@@ -401,13 +412,15 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath=NULL)
 
   /* Get list of uploads */
   /** mode 1<<1 = upload_fk **/
-  $SQL = "SELECT * FROM foldercontents
-	INNER JOIN upload ON upload.upload_pk = foldercontents.child_id
-	AND foldercontents.parent_fk = '$ParentFolder'
-	AND foldercontents.foldercontents_mode = 2
-	INNER JOIN folder ON foldercontents.parent_fk = folder.folder_pk
-	INNER JOIN ufile ON upload.ufile_fk = ufile.ufile_pk
-	ORDER BY ufile.ufile_name,upload.upload_desc;";
+ $SQL = "SELECT upload_pk, upload_desc, ufile_name, folder_name FROM foldercontents,uploadtree, u
+pload
+    WHERE 
+        foldercontents.parent_fk = '$ParentFolder'
+    AND foldercontents.foldercontents_mode = 2 
+    AND foldercontents.child_id = upload.upload_pk
+    AND uploadtree.upload_fk = upload.upload_pk
+    AND uploadtree.parent is null
+    ORDER BY uploadtree.ufile_name,upload.upload_desc;";
   $Results = $DB->Action($SQL);
   foreach($Results as $R)
     {

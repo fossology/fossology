@@ -87,7 +87,7 @@ Existing functionality is accessable from the user interface.
 Try one of the following resources:
 <ul>
 <li>Help tab
-<li>FOSSology documentation Wiki
+<li><a href='http://fossology.org/'>FOSSology documentation Wiki</a>
 <li><a href='http://fossbazaar.org/'>FOSSbazaar</a> web site
 </ul>";
 	break;

@@ -40,7 +40,7 @@ class ui_license extends FO_Plugin
   function RegisterMenus()
     {
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
+    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     if (!empty($Item) && !empty($Upload))
@@ -115,8 +115,6 @@ class ui_license extends FO_Plugin
     $V=""; // total return value
     global $Plugins;
     global $DB;
-    $Time = time();
-    $LicsTotal = array(); // total license summary for this directory
     $Lics = array(); // license summary for an item in the directory
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
 
@@ -124,101 +122,94 @@ class ui_license extends FO_Plugin
     $LicGID2Item = array();
     $LicItem2GID = array();
     $MapLic2GID = array(); /* every license should have an ID number */
+
+    /*  Get the counts for each license under this UploadtreePk*/
+    $Lics = array();
+    LicenseGetAll($Item,$Lics);   // key is license name, value is count
+    $LicTotal = $Lics[' Total '];
+
+    /* Ensure that every license is associated with an ID */
+    /* MapLic2Gid key is license name, value is a sequence number (GID) */
     $MapNext=0;
+    foreach($Lics as $Key => $Val) $MapLic2GID[$Key] = $MapNext++; 
+
 
     /****************************************/
-    /* Get the items under this UploadtreePk */
+    /* Get ALL the items under this UploadtreePk */
     $Children = DirGetList($Upload,$Item);
     $ChildCount=0;
     $VF .= "<table border=0>";
     foreach($Children as $C)
-      {
+    {
       if (empty($C)) { continue; }
       /* Store the item information */
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
 
-      /* Load licenses for the item */
-      $Lics = array();
-      if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics); }
-      else { LicenseGet($C['pfile_fk'],$Lics); }
-
-      /* Ensure that every license is associated with an ID */
-      foreach($Lics as $Key => $Val)
-        {
-	if (empty($MapLic2GID[$Key])) { $MapLic2GID[$Key] = $MapNext++; }
-	}
-
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
-	{
-	$LinkUri = "$Uri&item=$Item&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
-	$LinkUri = preg_replace("/mod=license/","mod=view-license",$LinkUri);
-	}
+	  {
+        $LinkUri = "$Uri&item=" . $C['uploadtree_pk'];
+        $LinkUri = preg_replace("/mod=license/","mod=view-license",$LinkUri);
+      }
       else
-	{
-	$LinkUri = NULL;
-	}
+      {
+        $LinkUri = NULL;
+      }
 
       if (Iscontainer($C['ufile_mode']))
-	{
-	$LicUri = "$Uri&item=" . DirGetNonArtifact($C['uploadtree_pk']);
-	}
+      {
+        $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
+        $LicUri = "$Uri&item=" . $uploadtree_pk;
+      }
       else
-	{
-	$LicUri = NULL;
-	}
+      {
+        $LicUri = NULL;
+      }
 
-      /* Save the license results (also converts values to GID) */
-      foreach($Lics as $Key => $Val)
-	{
-	if (empty($Key)) { continue; }
-	if ($Key != ' Total ')
-		{
-		$GID = $MapLic2GID[$Key];
-		$LicGID2Item[$GID] .= "$ChildCount ";
-		$LicItem2GID[$ChildCount] .= "$GID ";
-		}
-	else { $GID = $Key; }
-	if (empty($LicsTotal[$Key])) { $LicsTotal[$Key] = $Val; }
-	else { $LicsTotal[$Key] += $Val; }
-	}
 
-      /* Populate the output ($VF) */
-      $LicCount = $Lics[' Total '];
-      $VF .= '<tr><td id="Lic-' . $ChildCount . '" align="left">';
-      if ($LicCount > 0)
-	{
-	$HasHref=0;
-	if ($IsContainer)
-	  {
-	  $VF .= "<a href='$LicUri'>";
-	  $VF .= "<b>";
-	  $HasHref=1;
-	  }
-	else if (!empty($LinkUri))
-	  {
-	  $VF .= "<a href='$LinkUri'>";
-	  $HasHref=1;
-	  }
-	$VF .= $C['ufile_name'];
-	if ($IsDir) { $VF .= "/"; };
-	if ($IsContainer) { $VF .= "<b>"; };
-	if ($HasHref) { $VF .= "</a>"; }
-	$VF .= "</td><td>[" . number_format($LicCount,0,"",",") . "&nbsp;";
-	$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
-	$VF .= "license" . ($LicCount == 1 ? "" : "s");
-	$VF .= "</a>";
-	$VF .= "]</td>";
-	}
+      /* Populate the output ($VF) - file list */
+
+      /* Find number of licenses in child 
+       * But only if there are <500 licenses in the parent.  This number
+       * is arbitrary but the idea is to save a whole bunch of LicenseCount
+       * calls when the license counts are not that interesting (due to the large
+       * number of licenses).
+       */
+      if ($LicTotal < 500)
+      {
+        $LicCount = LicenseCount($C['uploadtree_pk']);
+      }
       else
-	{
-	if ($IsContainer) { $VF .= "<b>"; };
-	$VF .= $C['ufile_name'];
-	if ($IsDir) { $VF .= "/"; };
-	if ($IsContainer) { $VF .= "<b>"; };
-	$VF .= "</td><td></td>";
-	}
+        $LicCount = 0;
+
+      $VF .= '<tr><td id="Lic-' . $LicCount . '" align="left">';
+      $HasHref=0;
+      if ($IsContainer)
+      {
+        $VF .= "<a href='$LicUri'>";
+        $VF .= "<b>";
+        $HasHref=1;
+      }
+      else if (!empty($LinkUri) && ($LicCount > 0))
+      {
+        $VF .= "<a href='$LinkUri'>";
+        $HasHref=1;
+      }
+      $VF .= $C['ufile_name'];
+      if ($IsDir) { $VF .= "/"; };
+      if ($IsContainer) { $VF .= "<b>"; };
+      if ($HasHref) { $VF .= "</a>"; }
+      $VF .= "</td><td>";
+      if ($LicCount)
+      {
+        $VF .= "[" . number_format($LicCount,0,"",",") . "&nbsp;";
+      //$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
+        $VF .= "license" . ($LicCount == 1 ? "" : "s");
+        $VF .= "</a>";
+        $VF .= "]";
+      }
+      $VF .= "</td>";
       $VF .= "</tr>\n";
 
       $ChildCount++;
@@ -234,10 +225,10 @@ class ui_license extends FO_Plugin
     $VH .= "<th>License</th>\n";
 
     /* krsort + arsort = consistent sorting order */
-    arsort($LicsTotal);
+    arsort($Lics);
     /* Redo the sorting */
     $SortOrder=array();
-    foreach($LicsTotal as $Key => $Val)
+    foreach($Lics as $Key => $Val)
       {
       if (empty($Val)) { continue; }
       $SortOrder[] = $Val . "|" . str_replace("'","",$Key) . "|" . $Key;
@@ -252,7 +243,7 @@ class ui_license extends FO_Plugin
       }
 
     $Total=0;
-    foreach($LicsTotal as $Key => $Val)
+    foreach($Lics as $Key => $Val)
       {
       if ($Key != ' Total ')
 	{
@@ -322,8 +313,6 @@ class ui_license extends FO_Plugin
     $V .= "<tr><td valign='top' width='50%'>$VH</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
-    $Time = time() - $Time;
-    $V .= "<small>Elaspsed time: $Time seconds</small>\n";
     $V .= $VJ;
     return($V);
     } // ShowUploadHist()
@@ -332,7 +321,8 @@ class ui_license extends FO_Plugin
    Output(): This function returns the scheduler status.
    ***********************************************************/
   function Output()
-    {
+  {
+    $uTime = microtime(true);
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $V="";
     $Folder = GetParm("folder",PARM_INTEGER);
@@ -350,7 +340,11 @@ class ui_license extends FO_Plugin
 		break;
 	}
 
-    switch($this->OutputType)
+    $CacheKey = $_SERVER['REQUEST_URI'];
+    $V = ReportCacheGet($CacheKey);
+    if (empty($V) )  // no cache exists
+    {
+      switch($this->OutputType)
       {
       case "XML":
 	break;
@@ -360,7 +354,7 @@ class ui_license extends FO_Plugin
 	/************************/
 	/* Show the folder path */
 	/************************/
-	$V .= Dir2Browse($this->Name,$Item,-1,NULL,1,"Browse") . "<P />\n";
+	$V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
 
 	/******************************/
 	/* Get the folder description */
@@ -381,12 +375,23 @@ class ui_license extends FO_Plugin
       default:
 	break;
       }
+
+      $Cached = false;
+      /*  Cache Report */
+      ReportCachePut($CacheKey, $V);
+    }
+    else
+      $Cached = true;
+
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
+    $Time = microtime(true) - $uTime;  // convert usecs to secs
+    printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
+    if ($Cached) echo " <i>cached</i>";
     return;
-    }
+  }
 
-  };
+};
 $NewPlugin = new ui_license;
 $NewPlugin->Initialize();
 

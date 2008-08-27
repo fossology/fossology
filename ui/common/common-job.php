@@ -210,39 +210,13 @@ function JobAddUpload ($job_name,$filename,$desc,$UploadMode,$FolderPk)
   $Results = $DB->Action("SELECT folder_pk FROM folder WHERE folder_pk = '$FolderPk';");
   if (empty($Results[0]['folder_pk'])) { $DB->Action("ROLLBACK"); return; }
 
-  /* Insert the ufile record */
-  $Mode = (1<<27); // project
-  $Results = $DB->Action("SELECT ufile_pk FROM ufile
-	WHERE ufile_name = '$job_name' AND ufile_mode = '$Mode';");
-  $ufilepk = $Results[0]['ufile_pk'];
-  if (empty($ufilepk))
-    {
-    $DB->Action("INSERT INTO ufile (ufile_name,ufile_mode,ufile_container_fk) VALUES
-	('$job_name','$Mode','$FolderPk');");
-    $Results = $DB->Action("SELECT ufile_pk FROM ufile
-	WHERE ufile_name = '$job_name' AND ufile_mode = '$Mode';");
-    $ufilepk = $Results[0]['ufile_pk'];
-    if (empty($ufilepk)) { $DB->Action("ROLLBACK"); return; }
-    }
-  
   /* Create the upload record */
-  $Results = $DB->Action("SELECT upload_pk FROM upload
-	WHERE ufile_fk = '$ufilepk'
-	AND upload_filename = '$filename'
-	AND upload_mode = '$UploadMode';");
+  $DB->Action("INSERT INTO upload
+	(upload_desc,upload_filename,upload_mode) VALUES
+	('$desc','$filename','$UploadMode');");
+  $Results = $DB->Action("SELECT currval('upload_upload_pk_seq') as upload_pk FROM upload;");
   $uploadpk = $Results[0]['upload_pk'];
-  if (empty($uploadpk))
-    {
-    $DB->Action("INSERT INTO upload
-	(upload_desc,upload_filename,upload_mode,ufile_fk) VALUES
-	('$desc','$filename','$UploadMode','$ufilepk');");
-    $Results = $DB->Action("SELECT upload_pk FROM upload
-	WHERE ufile_fk = '$ufilepk'
-	AND upload_filename = '$filename'
-	AND upload_mode = '$UploadMode';");
-    $uploadpk = $Results[0]['upload_pk'];
-    if (empty($uploadpk)) { $DB->Action("ROLLBACK"); return; }
-    }
+  if (empty($uploadpk)) { $DB->Action("ROLLBACK"); return; }
 
   /* Add the upload record to the folder */
   /** Mode == 2 means child_id is upload_pk **/

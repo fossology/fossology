@@ -123,7 +123,7 @@ function DirGetNonArtifact($UploadtreePk)
   if (!$DirGetNonArtifact_Prepared)
     {
     $DirGetNonArtifact_Prepared=1;
-    $DB->Prepare("DirGetNonArtifact",'SELECT * FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk LEFT JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk WHERE parent = $1;');
+    $DB->Prepare("DirGetNonArtifact",'SELECT * FROM uploadtree LEFT JOIN pfile ON pfile_pk = pfile_fk WHERE parent = $1;'); 
     }
   $Children = $DB->Execute("DirGetNonArtifact",array($UploadtreePk));
   $Recurse=NULL;
@@ -131,14 +131,14 @@ function DirGetNonArtifact($UploadtreePk)
     {
     if (empty($C['ufile_mode'])) { continue; }
     if (!Isartifact($C['ufile_mode']))
-	{
-	return($UploadtreePk);
-	}
+      {
+      return($UploadtreePk);
+      }
     if (($C['ufile_name'] == 'artifact.dir') ||
         ($C['ufile_name'] == 'artifact.unpacked'))
-	{
-	$Recurse = DirGetNonArtifact($C['uploadtree_pk']);
-	}
+      {
+      $Recurse = DirGetNonArtifact($C['uploadtree_pk']);
+      }
     }
   if (!empty($Recurse))
     {
@@ -146,6 +146,7 @@ function DirGetNonArtifact($UploadtreePk)
     }
   return($UploadtreePk);
 } // DirGetNonArtifact()
+
 
 /************************************************************
  _DirCmp(): Compare function for usort() on directory items.
@@ -157,26 +158,26 @@ function _DirCmp($a,$b)
 
 /************************************************************
  DirGetList(): Given a directory (uploadtree_pk),
- return the directory contents.
+ return the directory contents but resolve artifacts.
  TBD: "username" will be added in the future and it may change
  how this function works.
- Returns array containing:
-   uploadtree_pk,ufile_pk,pfile_pk,ufile_name,ufile_mode
+ Returns array of uploadtree records sorted by file name
  ************************************************************/
 $DirGetList_Prepared=0;
 function DirGetList($Upload,$UploadtreePk)
-{
+{ 
   global $Plugins;
   global $DB;
   if (empty($DB)) { return; }
-
+    
   /* Get the basic directory contents */
   global $DirGetList_Prepared;
-  if (!$DirGetList_Prepared)
-    {
+  if (!$DirGetList_Prepared) 
+    {   
     $DirGetList_Prepared=1;
-    $DB->Prepare("DirGetList_1",'SELECT * FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk LEFT JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent IS NULL ORDER BY ufile.ufile_name ASC;');
-    $DB->Prepare("DirGetList_2",'SELECT * FROM uploadtree LEFT JOIN ufile ON ufile.ufile_pk = uploadtree.ufile_fk LEFT JOIN pfile ON pfile.pfile_pk = ufile.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent = $2 ORDER BY ufile.ufile_name ASC;');
+    $DB->Prepare("DirGetList_1",'SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent IS NULL ORDER BY ufile_name ASC;');
+    $DB->Prepare("DirGetList_2",'SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent = $2 ORDER BY ufile_name ASC;');
+
     }
   if (empty($UploadtreePk)) { $Results=$DB->Execute("DirGetList_1",array($Upload)); }
   else { $Results=$DB->Execute("DirGetList_2",array($Upload,$UploadtreePk)); }
@@ -187,74 +188,46 @@ function DirGetList($Upload,$UploadtreePk)
     {
     /* if artifact and directory */
     $R = &$Results[$Key];
-    if (Isartifact($R['ufile_mode']) && Isdir($R['ufile_mode']))
-	{
-	$R['uploadtree_pk'] = DirGetNonArtifact($R['uploadtree_pk']);
-	}
+    if (Isartifact($R['ufile_mode']) && Iscontainer($R['ufile_mode']))
+    {
+    $R['uploadtree_pk'] = DirGetNonArtifact($R['uploadtree_pk']);
+    }
     }
   return($Results);
 } // DirGetList()
 
+
 /************************************************************
  Dir2Path(): given an uploadtree_pk, return an array containing
- the path.  Each element in the path is an array containing
- ufile and uploadtree information.
- The path begins with the upload file.
+ the path (with no artifacts).  Each element in the path is an array containing
+ uploadtree records for $UploadtreePk and its parents.
+ The path begins with the UploadtreePk record.
  ************************************************************/
-$Dir2Path_1_Prepared = 0;
-$Dir2Path_2_Prepared = 0;
-function Dir2Path($UploadtreePk, $UfilePk=-1)
+function Dir2Path($UploadtreePk)
 {
   global $Plugins;
   global $DB;
-  global $Dir2Path_1_Prepared;
-  global $Dir2Path_2_Prepared;
+
   if (empty($DB)) { return; }
 
-  $Path = array();	// return path array
+  $Rows = $DB->Action("SELECT * from (SELECT * from uploadtree2path($UploadtreePk)) AS path 
+           ORDER BY lft ASC");
 
-  // build the array from the given node to the top and then reverse it so
-  // it goes top down before returning it.
-
-  /* Add the ufile first (if it exists) */
-  if ($UfilePk >= 0)
-    {
-    if (!$Dir2Path_1_Prepared)
-	{
-	$DB->Prepare("Dir2Path_1","SELECT * FROM uploadtree LEFT JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk WHERE ufile_pk = $1 LIMIT 1;");
-	$Dir2Path_1_Prepared = 1;
-	}
-    $Results = $DB->Execute("Dir2Path_1",array($UfilePk));
-    $Row = $Results[0];
-    array_push($Path,$Row);
-    }
-
-  if (!$Dir2Path_2_Prepared)
-    {
-    $DB->Prepare("Dir2Path_2","SELECT * FROM uploadtree LEFT JOIN ufile ON uploadtree.ufile_fk=ufile.ufile_pk WHERE uploadtree_pk = $1 LIMIT 1;");
-    $Dir2Path_2_Prepared = 1;
-    }
-
-  while(!empty($UploadtreePk))
-    {
-    $Results = $DB->Execute("Dir2Path_2",array($UploadtreePk));
-    $Row = &$Results[0];
-    if (!empty($Row['ufile_name']) && !Isartifact($Row['ufile_mode']) && ($UfilePk != $Row['ufile_pk']))
-	{
-	$Row['uploadtree_pk'] = DirGetNonArtifact($Row['uploadtree_pk']);
-	array_push($Path,$Row);
-	}
-    $UploadtreePk = $Row['parent'];
-    }
-  $Path = array_reverse($Path,false);
-  return($Path);
+  return($Rows);
 } // Dir2Path()
 
 /************************************************************
- Dir2Browse(): given an uploadtree_pk and ufile_pk, return a
+ Dir2Browse(): given an uploadtree_pk, return a
  string listing the browse paths.
+  $Mod - Module name (e.g. "browse")
+  $UploadtreePk
+  $LinkLast - create link (a href) for last item and use LinkLast as the module name
+  $ShowMicro - show micro menu
+  $Enumerate - if >= zero number the folder/file path (the stuff in the yellow bar)
+    starting with the value $Enumerate 
+  $Text - additional text to preceed the folder path
  ************************************************************/
-function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
+function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
 		     $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $Text='')
 {
   global $Plugins;
@@ -262,21 +235,24 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
 
   $V = "";
   if ($ShowBox)
-    {
+  {
     $V .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
-    }
+  }
 
   if ($Enumerate >= 0)
-    {
+  {
     $V .= "<table border=0 width='100%'><tr><td width='5%'>";
     $V .= "<font size='+2'>" . number_format($Enumerate,0,"",",") . ":</font>";
     $V .= "</td><td>";
-    }
+  }
 
   $Opt = Traceback_parm_keep(array("folder","show"));
   $Uri = Traceback_uri() . "?mod=$Mod";
 
-  $Path = Dir2Path($UploadtreePk,$UfilePk);
+  /* Get array of upload recs for this path, in top down order.
+     This does not contain artifacts.
+   */
+  $Path = Dir2Path($UploadtreePk);
   $Last = &$Path[count($Path)-1];
 
   $V .= "<font class='text'>\n";
@@ -284,8 +260,8 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
   /* Add in additional text */
   if (!empty($Text)) { $V .= "$Text<br>\n"; }
 
-  /* Get the folder list for the upload */
-  $V .= "<font class='text'>\n<b>Folder</b>: ";
+  /* Get the FOLDER list for the upload */
+  $V .= "<b>Folder</b>: ";
   $List = FolderGetFromUpload($Path[0]['upload_fk']);
   $Uri2 = Traceback_uri() . "?mod=browse" . Traceback_parm_keep(array("show"));
   for($i=0; $i < count($List); $i++)
@@ -297,47 +273,56 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
 
   $FirstPath=1; /* every firstpath belongs on a new line */
 
-  /* Store the upload, itself */
-  if ((count($Path) > 1) || ($UploadtreePk == $Path[0]['uploadtree_pk']))
+  /* Print the upload, itself (on the next line since it is not a folder) */
+  if (count($Path) == -1)
     {
     $Upload = $Path[0]['upload_fk'];
     $UploadName = htmlentities($Path[0]['ufile_name']);
-    $V .= "<b><a href='$Uri2&folder=$Folder&upload=$Upload'>$UploadName</a></b>";
-    $FirstPath=0;
+    $UploadtreePk =  $Path[0]['uploadtree_pk'];
+    $V .= "<br><b><a href='$Uri2&folder=$Folder&upload=$Upload&item=$UploadtreePk'>$UploadName</a></b>";
+    // $FirstPath=0;
     }
-
+  else
+    $V .= "<br>";
+  
   /* Show the path within the upload */
-  foreach($Path as $P)
+  if ($FirstPath!=0)
     {
-    if (empty($P['ufile_name'])) { continue; }
-    if (!$FirstPath) { $V .= "/ "; }
-    if (!empty($LinkLast) || ($P != $Last))
+    for($p=0; !empty($Path[$p]['uploadtree_pk']); $p++)
+      {
+      $P = &$Path[$p];
+      if (empty($P['ufile_name'])) { continue; }
+      $UploadtreePk = $P['uploadtree_pk'];
+
+      if (!$FirstPath) { $V .= "/ "; }
+      if (!empty($LinkLast) || ($P != $Last))
 	{
-	if ($P == $Last)
+        if ($P == $Last)
 	  {
-	  $Uri = Traceback_uri() . "?mod=$LinkLast";
-	  if (!empty($P['ufile_fk'])) { $Uri .= "&ufile=" . $P['ufile_fk']; }
-	  if (!empty($P['pfile_fk'])) { $Uri .= "&pfile=" . $P['pfile_fk']; }
+	    $Uri = Traceback_uri() . "?mod=$LinkLast";
 	  }
-	$V .= "<a href='$Uri&upload=" . $P['upload_fk'] . "&item=" . $P['uploadtree_pk'] . $Opt . "'>";
+	$V .= "<a href='$Uri&upload=" . $P['upload_fk'] . $Opt . "&item=" . DirGetNonArtifact($UploadtreePk) . "'>";
 	}
-    if (Isdir($P['ufile_mode']))
+
+      if (Isdir($P['ufile_mode']))
 	{
-	$V .= $P['ufile_name'];
+        $V .= $P['ufile_name'];
 	}
-    else
+      else
 	{
         if (!$FirstPath && Iscontainer($P['ufile_mode']))
 	  {
-	  $V .= "<br>\n&nbsp;&nbsp;";
+	    $V .= "<br>\n&nbsp;&nbsp;";
 	  }
 	$V .= "<b>" . $P['ufile_name'] . "</b>";
 	}
-    if (!empty($LinkLast) || ($P != $Last))
+
+      if (!empty($LinkLast) || ($P != $Last))
 	{
-	$V .= "</a>";
+	  $V .= "</a>";
 	}
-    $FirstPath = 0;
+      $FirstPath = 0;
+      }
     }
   $V .= "</font>\n";
 
@@ -364,22 +349,22 @@ function Dir2Browse ($Mod, $UploadtreePk, $UfilePk, $LinkLast=NULL,
  the browse paths.
  This calls Dir2Browse().
  ************************************************************/
-function Dir2BrowseUpload ($Mod, $UploadPk, $UfilePk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL)
+function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMicro=NULL)
 {
   global $DB;
   /* Find the file associated with the upload */
-  $SQL = "SELECT uploadtree_pk FROM upload INNER JOIN uploadtree ON upload_fk = '$UploadPk' AND upload.ufile_fk = uploadtree.ufile_fk;";
+  $SQL = "SELECT uploadtree_pk FROM upload INNER JOIN uploadtree ON upload_fk = '$UploadPk' AND parent is null;";
   $Results = $DB->Action($SQL);
   $UploadtreePk = $Results[0]['uploadtree_pk'];
-  return(Dir2Browse($Mod,$UploadtreePk,$UfilePk,$LinkLast,$ShowBox,$ShowMicro));
+  return(Dir2Browse($Mod,$UploadtreePk,$LinkLast,$ShowBox,$ShowMicro));
 } // Dir2BrowseUpload()
 
 /************************************************************
- Dir2FileList(): Given an array of pfiles/ufiles/uploadtree, sorted by
+ Dir2FileList(): Given an array of pfiles/uploadtree, sorted by
  pfile, list all of the breadcrumbs for each file.
  If the pfile is a duplicate, then indent it.
    $Listing = array from a database selection.  The SQL query should
-	use "ORDER BY pfile_fk,ufile_pk".
+	use "ORDER BY pfile_fk" so that the listing can indent duplicate pfiles
    $IfDirPlugin = string containing plugin name to use if this is a directory.
                   or any other container
    $IfFilePlugin = string containing plugin name to use if this is a file
@@ -391,35 +376,36 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
   $LastPfilePk = -1;
   $V = "";
   for($i=0; !empty($Listing[$i]['uploadtree_pk']); $i++)
-    {
+  {
     $R = &$Listing[$i];
-    $Phrase='';
+
     if ($ShowPhrase && !empty($R['phrase_text']))
       {
       $Phrase = "<b>Phrase:</b> " . htmlentities($R['phrase_text']);
       }
+
     if ((IsDir($R['ufile_mode'])) || (Iscontainer($R['ufile_mode'])))
 	{
 	$V .= "<P />\n";
-	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,$IfDirPlugin,1,
+	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfDirPlugin,1,
 		NULL,$Count,$Phrase) . "\n";
 	}
     else if ($R['pfile_fk'] != $LastPfilePk)
 	{
 	$V .= "<P />\n";
-	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,$IfFilePlugin,1,
+	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
 		NULL,$Count,$Phrase) . "\n";
 	$LastPfilePk = $R['pfile_fk'];
 	}
     else
 	{
 	$V .= "<div style='margin-left:2em;'>";
-	$V .= Dir2Browse("browse",$R['uploadtree_pk'],-1,$IfFilePlugin,1,
+	$V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
 		NULL,$Count,$Phrase) . "\n";
 	$V .= "</div>";
 	}
     $Count++;
-    }
+  }
   return($V);
 } // Dir2FileList()
 

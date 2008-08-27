@@ -52,20 +52,14 @@ class upload_file extends FO_Plugin
     if (empty($uploadpk)) { return("Failed to insert upload record"); }
 
     /* move the temp file */
-    //move_uploaded_file($TempFile,"$TempFile.1");
     //echo "<pre>uploadfile: renaming uploaded file\n</pre>";
-    if(!rename($TempFile,"$TempFile-uploaded"))
+    if (!move_uploaded_file($TempFile,"$TempFile-uploaded"))
     {
       echo "<pre>uploadfile: rename Failed!\n</pre>";
-      if(!copy($TempFile,"$TempFile.1"))
-      {
-        return("Could not save uploaded file");
-      }
-      $UploadedFile = "$TempFile"  . "-uploaded";
+      return("Could not save uploaded file");
     }
-    //$TempFile .= ".1";
-
     $UploadedFile = "$TempFile"  . "-uploaded";
+
     //echo "<pre>uploadfile: \$UploadedFile is:$UploadedFile\n</pre>";
     if(!chmod($UploadedFile, 0660))
     {
@@ -77,7 +71,7 @@ class upload_file extends FO_Plugin
     /* Run wget_agent locally to import the file. */
     global $LIBEXECDIR;
     $Prog = "$LIBEXECDIR/agents/wget_agent -k $uploadpk '$UploadedFile'";
-    $toss = system($Prog);
+    system($Prog);
     unlink($UploadedFile);
 
     global $Plugins;

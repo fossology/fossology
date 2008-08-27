@@ -19,11 +19,18 @@
 /*
  * Runner script that runs the web tests
  */
-require_once('/usr/local/simpletest/web_tester.php');
-require_once('/usr/local/simpletest/reporter.php');
+// set the path for where simpletest is
+$path = '/usr/share/php' . PATH_SEPARATOR;
+set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
-$test = &new TestSuite('Fossology Repo Web site tests');
-$test->addTestFile('foss_ui.php');
+/* simpletest includes */
+require_once '/usr/local/simpletest/unit_tester.php';
+require_once '/usr/local/simpletest/web_tester.php';
+require_once '/usr/local/simpletest/reporter.php';
+
+$test = &new TestSuite('Fossology Repo UI tests');
+$test->addTestFile('AboutMenuTest.php');
+$test->addTestFile('login.php');
 exit ($test->run(new TextReporter()) ? 0 : 1);
 
 

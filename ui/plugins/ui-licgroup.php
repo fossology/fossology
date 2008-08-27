@@ -49,7 +49,7 @@ class licgroup extends FO_Plugin
   {
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
-    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
+    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
     if (!empty($Item) && !empty($Upload))
       {
       if (GetParm("mod",PARM_TEXT) == $this->Name)
@@ -557,7 +557,7 @@ class licgroup extends FO_Plugin
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
 	{
-	$LinkUri = "$Uri&item=$Item&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
+	$LinkUri = "$Uri&item=$Item";
 	$LinkUri = preg_replace("/mod=licgroup/","mod=view-license",$LinkUri);
 	$LinkUri .= "&modback=" . $this->Name;
 	}
@@ -568,7 +568,8 @@ class licgroup extends FO_Plugin
 
       if (Iscontainer($C['ufile_mode']))
 	{
-	$LicUri = "$Uri&item=" . DirGetNonArtifact($C['uploadtree_pk']);
+	$uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
+	$LicUri = "$Uri&item=" . $uploadtree_pk;
 	}
       else
 	{
@@ -829,7 +830,7 @@ class licgroup extends FO_Plugin
 	/************************/
 	/* Show the folder path */
 	/************************/
-	$V .= Dir2Browse($this->Name,$Item,-1,NULL,1,"Browse") . "<P />\n";
+	$V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
 
 	/******************************/
 	/* Get the folder description */

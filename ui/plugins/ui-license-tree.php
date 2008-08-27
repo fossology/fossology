@@ -51,13 +51,13 @@ class ui_license_tree extends FO_Plugin
     if (GetParm("output",PARM_STRING) == 'csv') { $Type='CSV'; }
     $this->OutputType=$Type;
     $this->OutputToStdout=$ToStdout;
-    // Put your code here
+    $Item = GetParm("item",PARM_INTEGER);
+    if (empty($Item)) { return; }
+
     switch($this->OutputType)
       {
       case "CSV":
 	$this->NoHeader=1;
-	$Item = GetParm("item",PARM_INTEGER);
-	if (empty($Item)) { return; }
 	$Path = Dir2Path($Item);
 	$Name = $Path[count($Path)-1]['ufile_name'] . ".csv";
 	header("Content-Type: text/comma-separated-values");
@@ -119,7 +119,7 @@ class ui_license_tree extends FO_Plugin
   function RegisterMenus()
     {
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item","ufile","pfile"));
+    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item",));
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     if (!empty($Item) && !empty($Upload))
@@ -288,7 +288,7 @@ class ui_license_tree extends FO_Plugin
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']))
 	{
-	$LinkUri = "$Uri&item=$Item&ufile=" . $C['ufile_pk'] . "&pfile=" . $C['pfile_fk'];
+	$LinkUri = "$Uri&item=" . $C['uploadtree_pk'];
 	$LinkUri = str_replace("mod=license-tree","mod=view-license",$LinkUri);
 	}
       else
@@ -298,7 +298,8 @@ class ui_license_tree extends FO_Plugin
 
       if (Iscontainer($C['ufile_mode']))
 	{
-	$LicUri = "$Uri&item=" . DirGetNonArtifact($C['uploadtree_pk']);
+	$uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
+	$LicUri = "$Uri&item=" . $uploadtree_pk;
 	$LicUri = str_replace("mod=license-tree","mod=license",$LicUri);
 	}
       else
@@ -312,6 +313,7 @@ class ui_license_tree extends FO_Plugin
       $LicSum = "";
       foreach($Lics as $Key => $Val)
 	{
+        if ($Key == " Total ") { continue; }
 	if (!empty($LicSum)) { $LicSum .= ","; }
 	$LicSum .= $Key;
 	}
@@ -359,6 +361,7 @@ class ui_license_tree extends FO_Plugin
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
+    if (empty($Item)) { return; }
 
     switch($this->OutputType)
       {
@@ -374,7 +377,7 @@ class ui_license_tree extends FO_Plugin
 	/************************/
 	/* Show the folder path */
 	/************************/
-	$V .= Dir2Browse($this->Name,$Item,-1,NULL,1,"Browse") . "<P />\n";
+	$V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
 
 	/******************************/
 	/* Get the folder description */

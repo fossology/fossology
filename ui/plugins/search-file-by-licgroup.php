@@ -215,11 +215,11 @@ if (0)
 	  if (!empty($L['phrase_text'])) { $V .= "<b>Phrase:</b> " . htmlentities($L['phrase_text']) . "\n"; }
 	  if (Isdir($L['ufile_mode']))
 	    {
-	    $V .= Dir2Browse("licgroup",$L['uploadtree_pk'],$L['ufile_pk'],"license") . "\n";
+	    $V .= Dir2Browse("licgroup",$L['uploadtree_pk'],"license") . "\n";
 	    }
 	  else
 	    {
-	    $V .= Dir2Browse("licgroup",$L['uploadtree_pk'],$L['ufile_pk'],"view-license") . "\n";
+	    $V .= Dir2Browse("licgroup",$L['uploadtree_pk'],"view-license") . "\n";
 	    }
 	  $V .= "</td></tr></table>\n";
 	  }

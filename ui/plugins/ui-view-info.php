@@ -39,7 +39,7 @@ class ui_view_info extends FO_Plugin
   function RegisterMenus()
     {
     // For the Browse menu, permit switching between detail and summary.
-    $Parm = Traceback_parm_keep(array("upload","item","ufile","pfile","format"));
+    $Parm = Traceback_parm_keep(array("upload","item","format"));
     $URI = $this->Name . $Parm;
     if (GetParm("mod",PARM_STRING) == $this->Name)
 	{
@@ -63,9 +63,7 @@ class ui_view_info extends FO_Plugin
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
-    $Pfile = GetParm("pfile",PARM_INTEGER);
-    $Ufile = GetParm("ufile",PARM_INTEGER);
-    if (empty($Upload) || empty($Item) || empty($Pfile)) { return; }
+    if (empty($Upload) || empty($Item)) { return; }
 
     $Page = GetParm("page",PARM_INTEGER);
     if (empty($Page)) { $Page=0; }
@@ -77,7 +75,7 @@ class ui_view_info extends FO_Plugin
      **********************************/
     if ($ShowHeader)
       {
-      $V .= Dir2Browse("browse",$Item,$Ufile,NULL,1,"View-Meta");
+      $V .= Dir2Browse("browse",$Item,NULL,1,"View-Meta");
       } // if ShowHeader
 
     /**********************************
@@ -86,7 +84,10 @@ class ui_view_info extends FO_Plugin
     if ($Page == 0)
       {
       $V .= "<H2>Information</H2>\n";
-      $SQL = "SELECT * FROM pfile WHERE pfile_pk = '$Pfile' LIMIT 1;";
+      $SQL = "SELECT * FROM uploadtree
+	INNER JOIN pfile ON uploadtree_pk = $Item
+	AND pfile_fk = pfile_pk
+	LIMIT 1;";
       $Results = $DB->Action($SQL);
       $R = &$Results[0];
       $V .= "<table border=1>\n";
@@ -104,16 +105,14 @@ class ui_view_info extends FO_Plugin
       }
 
     /**********************************
-     Determine the contents of the container.
+     List the directory locations where this pfile is found
      **********************************/
     $V .= "<H2>Sightings</H2>\n";
-    $SQL = "SELECT * FROM pfile
-	    INNER JOIN ufile ON pfile.pfile_pk = '$Pfile'
-	    AND ufile.pfile_fk = pfile.pfile_pk
-	    INNER JOIN uploadtree ON uploadtree.ufile_fk = ufile.ufile_pk
-	    ORDER BY pfile_pk
-	    LIMIT $Max OFFSET $Offset
-	    ;";
+    $SQL = "SELECT * FROM pfile,uploadtree
+	WHERE pfile_pk=pfile_fk
+	AND pfile_pk IN
+	(SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $Item)
+	LIMIT $Max OFFSET $Offset";
     $Results = $DB->Action($SQL);
     $Count = count($Results);
     if (($Page > 0) || ($Count >= $Max))
