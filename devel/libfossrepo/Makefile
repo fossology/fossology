@@ -4,20 +4,18 @@ TOP=../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
-CFLAGS_LOCAL=-DFOSSREPO_CONF="$(DATADIR)/repository" \
-	-DFOSSGROUP="$(PROJECTGROUP)" -L. -lfossrepo $(ALL_CFLAGS)
-
+CONFDEF=-DFOSSREPO_CONF='"$(DATADIR)/repository"' -DFOSSGROUP='"$(PROJECTGROUP)"'
 LIB=libfossrepo.a
 EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck
 
 all: $(LIB) $(EXE)
 
 $(LIB): %.a: %.c %.h
-	$(CC) -c $< $(ALL_CFLAGS)
+	$(CC) -c $< $(CONFDEF) $(ALL_CFLAGS)
 	$(AR) cr $@ libfossrepo.o
 
 $(EXE): %: %.c $(LIB) $(VARS)
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+	$(CC) $< $(CFLAGS_REPO) -o $@
 
 install: all $(VARS)
 	$(INSTALL_DATA) libfossrepo.a $(DESTDIR)$(LIBDIR)/libfossrepo.a
