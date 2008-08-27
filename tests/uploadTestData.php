@@ -59,15 +59,23 @@ class uploadTestDataTest extends fossologyWebTestCase
     $this->mybrowser->setCookie('Login', $cookie, $host);
   }
 
+  function testCreateTestingFolder()
+  {
+    $page = $this->mybrowser->clickLink('Create');
+    print "page after create is:\n$page\n";
+    exit(777);
+  }
+
   function testuploadTestDataTest()
   {
     global $URL;
     print "starting testUploadTestData\n";
     $rootFolder = 1;
-    $uploadList = array('TestData/archives/simpletest_1.0.1.tar.gz',
+    $uploadList = array('TestData/archives/fossI16L499.tar.bz2',
                         'TestData/licenses/gplv2.1',
                         'TestData/licenses/Affero-v1.0');
-    $urlList = array('http://www.gnu.org/licenses/gpl-3.0.txt',
+    $urlList = array('http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz',
+                     'http://www.gnu.org/licenses/gpl-3.0.txt',
                      'http://www.gnu.org/licenses/agpl-3.0.txt');
 
     /* upload the archives using the upload from file menu */
