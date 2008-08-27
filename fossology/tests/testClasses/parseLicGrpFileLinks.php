@@ -20,7 +20,10 @@
  ***********************************************************/
 
 /**
- * DO NOT USE THIS CLASS.  IT's not done. Given a fossology License
+ * DO NOT USE THIS CLASS.  IT's not done.
+ *
+ *
+ * Given a fossology License
  * Groups page, parse it and return the license Groups table.  The rest
  * of the page can be parsed by the browseMenu class.
  *
@@ -44,8 +47,8 @@ class parseLicenseGrpTbl
     $this->page = $page;
   }
   /**
-   * function parseLicenseTbl
-   * given a fossology license browse page parse the license table on
+   * parseLicenseTbl
+   * Given a fossology license browse page parse the license table on
    * the page.
    *
    * @returns array of empty array if license table on that page.
