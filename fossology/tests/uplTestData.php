@@ -59,11 +59,22 @@ class uploadTestDataTest extends fossologyWebTestCase
     $this->mybrowser->setCookie('Login', $cookie, $host);
   }
 
+  /**
+   * create the Testing folder used by other tests
+   */
   function testCreateTestingFolder()
   {
+    $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Create');
-    print "page after create is:\n$page\n";
-    exit(777);
+    $this->assertTrue($this->assertText($page, '/Create a new Fossology folder/'));
+    $this->assertTrue($this->mybrowser->setField('parentid', 1));
+    $this->assertTrue($this->mybrowser->setField('newname', 'Testing'));
+    $desc = 'Folder created by uplTestData as subfolder of Root Folder';
+    $this->assertTrue($this->mybrowser->setField('description', "$desc"));
+    $page = $this->mybrowser->clickSubmit('Create!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->assertText($page, "/Folder Testing Created/"),
+                      "FAIL! Folder Testing Created not found\n");
   }
 
   function testuploadTestDataTest()
@@ -81,7 +92,7 @@ class uploadTestDataTest extends fossologyWebTestCase
     /* upload the archives using the upload from file menu */
     foreach($uploadList as $upload)
     {
-      $this->uploadAFile($rootFolder, $upload, null, null, '1,2,3');
+      $this->uploadAFile($rootFolder, $upload, 'Testing', null, '1,2,3');
     }
     /* Upload the urls using upload from url */
     foreach($urlList as $url)
