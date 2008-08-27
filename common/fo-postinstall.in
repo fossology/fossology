@@ -102,22 +102,14 @@ else
    fi
 fi
 
-## check for existance/ownership/permissions of needed directories
-# PROJECTSTATEDIR isn't used yet, but we will probably need it at some point
-## PROJECTSTATEDIR is needed in all machine cases
-#if [ ! -d "{$PROJECTSTATEDIR}" ] ; then
-#  mkdir -p "{$PROJECTSTATEDIR}"
-#  chown {$PROJECTUSER}:{$PROJECTGROUP} {$PROJECTSTATEDIR}
-#  # FIXME: do we really need setgid?
-#  chmod 2770 {$PROJECTSTATEDIR}
-#fi
-
-
-# unfinished beyond this point
-echo "Not tested yet, exiting."
-exit 0
-# everything else is currently code from other places or notes to remind
-# me what's left to do, it needs to be rewritten
+# check for existance/ownership/permissions of needed directories
+# PROJECTSTATEDIR is needed in all machine cases
+if [ ! -d "{$PROJECTSTATEDIR}" ] ; then
+   mkdir -p "{$PROJECTSTATEDIR}"
+   chown {$PROJECTUSER}:{$PROJECTGROUP} {$PROJECTSTATEDIR}
+   # FIXME: do we really need setgid?
+   chmod 2770 {$PROJECTSTATEDIR}
+fi
 
 ########################################################################
 
@@ -151,21 +143,24 @@ if [ `su postgres -c 'psql -l' |grep -q fossology` ]; then
    fi
 else
    echo "*** Initializing database ***"
-  {$AGENTTESTDDIR}/dbinit {$AGENTTESTDDIR}/dbinit.sql
+   psql < {$AGENTTESTDDIR}/fossologyinit.sql
   if [ $? != 0 ] ; then
     echo "ERROR: Database failed during configuration.\n"
     exit 1
   fi
 fi
 
+# touch the ui init semaphore FIXME: can this go away?
+INIT={$WEBDIR}/init.ui
+touch $INIT
+chown {$PROJECTUSER}:{$PROJECTGROUP} $INIT
+
+## Initialize the tables
+echo "*** Initializing database tables ***"
+{$BINDIR}/fossinit -v
+
 # now that we know the database is available, (re)generate the
 # License.bsam file
-
-#FIXME we need to clean up old licenses but also not remove end user
-#  licenses, we need to figure out a way to solve this. for now we just
-#  won't clean up and instruct the user to do it by hand.
-# clean up licenses before recreating
-#rm -rf "AGENTDATADIR/licenses"
 
 echo "*** Generating license cache ***"
 {$AGENTDIR}/mkbsamcache
@@ -174,17 +169,6 @@ echo "*** Generating license cache ***"
 # readable, so it shouldn't be.
 #chown {$PROJECTUSER}:{$PROJECTGROUP} {$PROJECTSTATEDIR}/agents/License.bsam
 #chmod 640 {$PROJECTSTATEDIR}/agents/License.bsam
-
-## Initialize database for all agents
-echo "# Initializing agents"
-for i in bsam-engine engine-shell filter_clean Filter_License mimetype pkgmetagetta scheduler specagent ununpack wget_agent ; do
-  echo "  Initializing $i"
-  {$AGENTDIR}/$i -i
-  if [ "$?" != 0 ] ; then
-    echo "ERROR: Failed to initialize database for agent $i"
-    exit 1
-  fi
-done
 
 fi # end of DATABASE
 
@@ -235,11 +219,6 @@ if [ $? == 0 ] ; then
   # this is smart enough to not add multiple times so it's ok to repeat
   usermod -G {$PROJECTGROUP} -a www-data
 fi
-
-# touch the ui init semaphore
-INIT={$WEBDIR}/init.ui
-touch $INIT
-chown {$PROJECTUSER}:{$PROJECTGROUP} $INIT
 
 fi # end of UI
 
