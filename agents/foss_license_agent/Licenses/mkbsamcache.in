@@ -7,18 +7,27 @@ if [ -f "{$PROJECTSTATEDIR}/agents/License.bsam.new" ]; then
    rm -f {$PROJECTSTATEDIR}/agents/License.bsam.new
 fi
 
+if [ ! -d "{$PROJECTSTATEDIR}/agents/" ]; then
+   mkdir -p "{$PROJECTSTATEDIR}/agents/"
+fi
+
 # Create cached files
 cd {$AGENTDATADIR}/licenses/
+
 find . -type f | sed -e 's@^./@@' | grep -v \.meta | sort | while read i ; do
    echo "Processing $i"
    if [ -f "$i.meta" ] ; then
       {$AGENTDIR}/Filter_License -Q -O -M "$i.meta" "$i" >> {$PROJECTSTATEDIR}/agents/License.bsam.new
+      if [ $? != 0 ] ; then
+         echo "ERROR processing $i."
+         exit 1
+      fi
    else
       {$AGENTDIR}/Filter_License -Q -O "$i" >> {$PROJECTSTATEDIR}/agents/License.bsam.new
-   fi
-   if [ "$?" != "0" ] ; then
-      echo "ERROR processing license."
-      exit 1
+      if [ $? != 0 ] ; then
+         echo "ERROR processing $i."
+         exit 1
+      fi
    fi
 done
 
