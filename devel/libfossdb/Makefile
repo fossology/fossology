@@ -4,19 +4,18 @@ TOP=../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
-CFLAGS_LOCAL=-DFOSSDB_CONF="$(SYSCONFDIR)/$(PROJECT)/Db.conf" -lpq \
-          -L. -lfossdb $(ALL_CFLAGS)
+CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"'
 EXE=dbtest dbq dbcheck
 LIB=libfossdb.a
 
 all: $(LIB) $(EXE)
 
 $(LIB): %.a: %.c %.h $(VARS)
-	$(CC) -c $< $(ALL_CFLAGS)
+	$(CC) -c $< $(CONFDEF) $(ALL_CFLAGS)
 	$(AR) cr $@ libfossdb.o
 
 $(EXE): %: %.c $(LIB) $(VARS)
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+	$(CC) $< $(CFLAGS_DB) -lpq -o $@
 
 install: all $(VARS)
 	$(INSTALL_DATA) libfossdb.a $(DESTDIR)$(LIBDIR)/libfossdb.a
