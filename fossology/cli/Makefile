@@ -81,5 +81,6 @@ uninstall:
 	(cd $(BINDIR) ;   $(RM) $(BINFILES))
 
 clean:
-	$(RM) $(iPATHFILE)
+	# pod2html leaves temporary files: see debian bug #378328
+	$(RM) -f $(iPATHFILE) $(MAN1FILES) cp2foss.html cp2foss.txt pod*.tmp
 
