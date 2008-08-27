@@ -222,6 +222,97 @@ void	AddMetaToDB	(int LicPk)
 } /* AddMetaToDB() */
 
 /*********************************************
+ AddCanonicalName(): Make sure the name exists in the DB.
+ *********************************************/
+void	AddCanonicalName	(char *Filename, int LicId)
+{
+  char SQL[1024]; /* SQL */
+  char Name[1024]; /* the canonical name */
+  char *S;
+  int i,j;
+  long LicTermId;
+
+  S = strrchr(Filename,'/');
+  if (S) { S++; /* pass the slash */ }
+  else S=Filename;
+
+  /* copy over the name, and taint the string as we go */
+  memset(Name,'\0',sizeof(Name));
+  for(i=0,j=0; (j<sizeof(Name)-2) && S[i]; i++)
+    {
+    if (S[i]=='\'') { Name[j++]='\''; Name[j++]='\''; }
+    else if (isprint(S[i])) { Name[j++] = S[i]; }
+    }
+
+  /* remove unnecessary strings */
+  S=strstr(Name," part"); if (S) S[0]='\0';
+  S=strstr(Name," short"); if (S) S[0]='\0';
+  S=strstr(Name," variant"); if (S) S[0]='\0';
+  S=strstr(Name," reference"); if (S) S[0]='\0';
+  S=strstr(Name," ("); if (S) S[0]='\0';
+
+  /* Check if it exists in the DB */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT licterm_pk FROM licterm WHERE licterm_name = '%s';",Name);
+  DBaccess(DB,SQL);
+  if (DBdatasize(DB) < 1)
+	{
+	// fprintf(stderr,"Not in DB: '%s'\n",Name);
+	memset(SQL,'\0',sizeof(SQL));
+	snprintf(SQL,sizeof(SQL),"INSERT INTO licterm (licterm_name) VALUES ('%s');",Name);
+	DBaccess(DB,SQL);
+	memset(SQL,'\0',sizeof(SQL));
+	snprintf(SQL,sizeof(SQL),"SELECT licterm_pk FROM licterm WHERE licterm_name = '%s';",Name);
+	DBaccess(DB,SQL);
+	}
+  LicTermId = atol(DBgetvalue(DB,0,0));
+
+  /* Now associate the license if there is no current association */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT * FROM licterm_maplic WHERE lic_fk = '%d';",LicId);
+  DBaccess(DB,SQL);
+  if (DBdatasize(DB) < 1)
+	{
+	// fprintf(stderr,"Not linked in DB: '%s' (link it to %ld)\n",Name,LicTermId);
+	memset(SQL,'\0',sizeof(SQL));
+	snprintf(SQL,sizeof(SQL),"INSERT INTO licterm_maplic (licterm_fk,lic_fk) VALUES ('%ld','%d');",LicTermId,LicId);
+	DBaccess(DB,SQL);
+	}
+
+  /* Make sure all records are updated */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"UPDATE licterm_name SET licterm_fk = %ld WHERE licterm_fk IS NULL AND agent_lic_meta_fk IN (SELECT DISTINCT agent_lic_meta_pk FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_id = %d AND lic_fk = lic_pk);",LicTermId,LicId);
+  DBaccess(DB,SQL);
+  // fprintf(stderr,"%s\n",SQL);
+} /* AddCanonicalName() */
+
+/*********************************************
+ AddPhrase(): Phrase is a static license.
+ *********************************************/
+void	AddPhrase	()
+{
+  int rc;
+  long TermId;
+
+  rc = DBaccess(DB,"SELECT lic_pk FROM agent_lic_raw WHERE lic_name = 'Phrase';");
+  if ((rc < 0) || (DBdatasize(DB) <= 0))
+    {
+    DBaccess(DB,"INSERT INTO agent_lic_raw (lic_name,lic_unique,lic_text,lic_version,lic_section,lic_id) VALUES ('Phrase','1','Phrase','1',1,1);");
+    }
+
+  rc = DBaccess(DB,"SELECT licterm_pk FROM licterm WHERE licterm_name = 'Phrase';");
+  if ((rc < 0) || (DBdatasize(DB) <= 0))
+    {
+    DBaccess(DB,"INSERT INTO licterm (licterm_name) VALUES ('Phrase');");
+    DBaccess(DB,"SELECT licterm_pk FROM licterm WHERE licterm_name = 'Phrase';");
+    }
+  TermId = atol(DBgetvalue(DB,0,0));
+
+  /* Update any records that need migration */
+  DBaccess(DB,"UPDATE licterm_name SET licterm_fk = (SELECT licterm_pk FROM licterm WHERE licterm_name = 'Phrase') WHERE licterm_fk IS NULL AND agent_lic_meta_fk IN (SELECT DISTINCT agent_lic_meta_pk FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_name = 'Phrase' AND lic_fk = lic_pk);");
+} /* AddPhrase() */
+
+/*********************************************
  AddLicenseToDB(): Given a license, add it to
  the database.
  This requires the unique value, license name,
@@ -229,7 +320,8 @@ void	AddMetaToDB	(int LicPk)
  Returns the license Id.
  *********************************************/
 int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
-			 char *Section, fileoffset Start, fileoffset Length)
+			 char *Section, fileoffset Start, fileoffset Length,
+			 int TokCount)
 {
   char LicSQL[1024]; /* the license-insert SQL */
   fileoffset MStart; /* start location into mmap */
@@ -245,7 +337,7 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
     {
     /* Create the SQL */
     memset(LicSQL,'\0',sizeof(LicSQL));
-    sprintf(LicSQL,"INSERT INTO agent_lic_raw (lic_id,lic_name,lic_section,lic_unique) VALUES ('-1','%s','%s','%s');",Filename,Section,Unique);
+    sprintf(LicSQL,"INSERT INTO agent_lic_raw (lic_id,lic_name,lic_section,lic_unique,lic_tokens) VALUES ('-1','%s','%s','%s','%d');",Filename,Section,Unique,TokCount);
 
     /* Ok, we have the SQL query */
     switch(DBaccess(DB,LicSQL))
@@ -264,7 +356,7 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
   else /* UPDATE record */
     {
     memset(LicSQL,'\0',sizeof(LicSQL));
-    sprintf(LicSQL,"UPDATE agent_lic_raw SET lic_name='%s',lic_section='%s' WHERE lic_unique='%s' AND lic_version='1';",Filename,Section,Unique);
+    sprintf(LicSQL,"UPDATE agent_lic_raw SET lic_name='%s',lic_section='%s',lic_tokens='%d' WHERE lic_unique='%s' AND lic_version='1';",Filename,Section,TokCount,Unique);
     DBaccess(DB,LicSQL);
     }
 
@@ -292,6 +384,9 @@ int	AddLicenseToDB	(int Lic_Id, char *Unique, char *Filename,
 
   /* Add in meta info */
   AddMetaToDB(LastAddPk);
+
+  /* Add canonical name to the DB */
+  AddCanonicalName(Filename,Lic_Id);
 
 #if 0
   /** Disabled: Database will take care of this **/
@@ -401,7 +496,7 @@ int	PrintTokens	(tokentype *Token, fileoffset *TokenOffsets,
 	if (Sum) { Unique = SumToString(Sum); free(Sum); }
 	fputc(0x01,Fout); fputc(0x10,Fout); /* tag 0x0110 = unique value */
 	PrintString(Unique);
-	Lic_Id = AddLicenseToDB(Lic_Id,Unique,Filename,SectionString,TokenOffsets[Start],TokenOffsets[End]-TokenOffsets[Start]);
+	Lic_Id = AddLicenseToDB(Lic_Id,Unique,Filename,SectionString,TokenOffsets[Start],TokenOffsets[End]-TokenOffsets[Start],End-Start);
 	free(Unique);
 	Unique=NULL;
 	}
@@ -1336,6 +1431,8 @@ int	main	(int argc, char *argv[])
 	exit(-1);
 	}
   GetAgentKey();
+
+  if (DB && AddToDB) AddPhrase();
 
   /* process each file from command-line */
   for( ; optind < argc; optind++)

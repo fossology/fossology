@@ -41,7 +41,6 @@ int Test=0;
 
 /* for DB */
 void	*DB=NULL;
-char	*Pfile_fk=NULL;
 int	Agent_pk=-1;	/* agent ID */
 char	SQL[MAXSQL];
 
@@ -163,8 +162,6 @@ void	DeleteUpload	(long UploadId)
   char *S;
   int Row,MaxRow;
   char TempTable[256];
-  long UploadUfile,UploadPfile;
-  int rc;
 
   if (Verbose) { printf("Deleting upload %ld\n",UploadId); }
   DBaccess(DB,"SET statement_timeout = 0;"); /* no timeout */
@@ -198,84 +195,18 @@ void	DeleteUpload	(long UploadId)
   /*** Begin complicated stuff ***/
   /***********************************************/
 
-  /***********************************************
-   Fun SQL:  (Assume UploadId = 48)
-
-   BEGIN;
-   -- Dump all ufile and pfile for this project into a table
-   SELECT ufile_pk,pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile
-   INTO agenttemp
-   FROM uploadtree
-   INNER JOIN ufile ON uploadtree.upload_fk = '48'
-   AND uploadtree.ufile_fk = ufile.ufile_pk
-   INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk;
-
-   -- Show each pfile used by this project
-   SELECT DISTINCT pfile,pfile_pk FROM agenttemp
-   ORDER BY pfile_pk;
-
-   -- Show pfile reuse WITHIN the project
-   SELECT pfile_pk,COUNT(pfile_pk) AS count FROM agenttemp
-   GROUP BY pfile_pk ORDER BY count,pfile_pk;
-
-   -- Show each pfile used by ONLY this project
-   -- For some weird reason, the inner join on pfile is needed.
-   -- You would think that it would not be needed because of pfile_fk.
-   -- However, pfile_fk returns 899199 rows, while pfile_pk returns 899198 rows.
-   -- And when used with the EXCEPT, pfile_fk (without the join to pfile)
-   -- return nothing!  While pfile_fk or pfile_pk WITH the join to pfile
-   -- returns the correct results.
-   SELECT DISTINCT pfile_pk,pfile FROM agenttemp
-   WHERE pfile_pk NOT IN
-   (
-   SELECT DISTINCT pfile_pk
-   FROM uploadtree
-   INNER JOIN ufile ON uploadtree.upload_fk != '48'
-   AND uploadtree.ufile_fk = ufile.ufile_pk
-   INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk
-   )
-   ORDER BY pfile_pk;
-
-   -- Show all ufiles ONLY used by this project
-   SELECT distinct agenttemp.ufile_pk FROM agenttemp EXCEPT
-   (
-   SELECT distinct agenttemp.ufile_pk FROM agenttemp
-   INNER JOIN uploadtree
-   ON uploadtree.upload_fk != '48'
-   AND agenttemp.ufile_pk = uploadtree.ufile_fk
-   );
-
-   ROLLBACK;
-   ***********************************************/
-
-  /* Retrieve upload info -- these are special and must be deleted last
-     due to constraints */
-  if (Verbose) { printf("# Retrieving upload information\n"); }
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT ufile.ufile_pk,ufile.pfile_fk FROM upload INNER JOIN ufile ON upload.upload_pk = %ld AND ufile.ufile_pk = upload.ufile_fk;",UploadId);
-  rc = MyDBaccess(DB,SQL);
-  if (rc < 0) { return; } /* no such job! */
-  if (DBdatasize(DB) <= 0) { return; } /* no such job! */
-  UploadUfile = atol(DBgetvalue(DB,0,0));
-  UploadPfile = atol(DBgetvalue(DB,0,1));
-  if (Verbose) { printf("#   UploadId = %ld  Ufile=%ld  Pfile=%ld\n",UploadId,UploadUfile,UploadPfile); }
-
-  /* Create the temp table */
-  if (Verbose) { printf("# Creating file table: %s\n",TempTable); }
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT ufile_fk,pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO TEMP %s FROM uploadtree, pfile WHERE uploadtree.upload_fk = '%ld' AND uploadtree.pfile_fk = pfile.pfile_pk;",TempTable,UploadId);
-  MyDBaccess(DB,SQL);
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT COUNT(*) FROM %s;",TempTable);
-  MyDBaccess(DB,SQL);
-  if (Verbose) { printf("# Created file table: %ld entries\n",atol(DBgetvalue(DB,0,0))); }
-
   /* Get the list of pfiles to delete */
   /** These are all pfiles in the upload_fk that only appear once. **/
   memset(SQL,'\0',sizeof(SQL));
   if (Verbose) { printf("# Getting list of pfiles to delete\n"); }
-  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT pfile_pk,pfile INTO TEMP %s_pfile FROM %s WHERE pfile_pk NOT IN ( SELECT DISTINCT pfile_pk FROM uploadtree INNER JOIN ufile ON uploadtree.upload_fk != '%ld' AND uploadtree.ufile_fk = ufile.ufile_pk INNER JOIN pfile ON ufile.pfile_fk = pfile.pfile_pk);",TempTable,TempTable,UploadId);
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile,0 AS count INTO TEMP %s_pfile FROM uploadtree INNER JOIN pfile ON upload_fk = %ld AND pfile_fk = pfile_pk;",TempTable,UploadId);
   MyDBaccess(DB,SQL);
+
+  /* Remove pfiles with reuse */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM %s_pfile WHERE pfile_pk IN (SELECT pfile_fk FROM %s_pfile INNER JOIN uploadtree ON pfile_pk = pfile_fk WHERE upload_fk != %ld);",TempTable,TempTable,UploadId);
+  MyDBaccess(DB,SQL);
+
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT COUNT(*) FROM %s_pfile;",TempTable);
   MyDBaccess(DB,SQL);
@@ -323,16 +254,6 @@ void	DeleteUpload	(long UploadId)
   snprintf(SQL,sizeof(SQL),"DELETE FROM attrib WHERE pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
 
-  if (Verbose) { printf("# Deleting from ufile\n"); }
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk != %ld AND pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",UploadPfile,TempTable);
-  MyDBaccess(DB,SQL);
-
-  if (Verbose) { printf("# Deleting from pfile\n"); }
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM pfile WHERE pfile_pk != %ld AND pfile_pk IN (SELECT pfile_pk FROM %s_pfile);",UploadPfile,TempTable);
-  MyDBaccess(DB,SQL);
-
   /***********************************************/
   /*** Everything above is slow, everything below is fast ***/
   /***********************************************/
@@ -341,7 +262,7 @@ void	DeleteUpload	(long UploadId)
   /* Blow away jobs */
   /*****
    There is an ordering issue.
-   The delete from attrib, pfile, and ufile can take a long time (hours for
+   The delete from attrib and pfile can take a long time (hours for
    a source code DVD).
    If we delete from the jobqueue first, then it will hang the scheduler
    as the scheduler tries to update the jobqueue record.  (Row is locked
@@ -366,19 +287,18 @@ void	DeleteUpload	(long UploadId)
   /***********************************************/
   /* Delete the actual upload */
   memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("# Deleting uploadtree\n"); }
+  snprintf(SQL,sizeof(SQL),"DELETE FROM uploadtree WHERE upload_fk = %ld;",UploadId);
+  MyDBaccess(DB,SQL);
+
+  memset(SQL,'\0',sizeof(SQL));
   if (Verbose) { printf("# Deleting upload\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM upload WHERE upload_pk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
 
-  /* Delete the upload's files */
+  if (Verbose) { printf("# Deleting from pfile\n"); }
   memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("# Deleting upload's ufile\n"); }
-  snprintf(SQL,sizeof(SQL),"DELETE FROM ufile WHERE pfile_fk = %ld AND pfile_fk IN (SELECT pfile_pk as pfile_fk FROM %s_pfile);",UploadPfile,TempTable);
-  MyDBaccess(DB,SQL);
-
-  memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("# Deleting upload's pfile\n"); }
-  snprintf(SQL,sizeof(SQL),"DELETE FROM pfile WHERE pfile_pk = %ld AND pfile_pk IN (SELECT pfile_pk FROM %s_pfile);",UploadPfile,TempTable);
+  snprintf(SQL,sizeof(SQL),"DELETE FROM pfile WHERE pfile_pk IN (SELECT pfile_pk FROM %s_pfile);",TempTable);
   MyDBaccess(DB,SQL);
 
   /***********************************************/
@@ -398,7 +318,6 @@ void	DeleteUpload	(long UploadId)
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
 	MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
 	MyDBaccess(DB,"VACUUM ANALYZE attrib;");
-	MyDBaccess(DB,"VACUUM ANALYZE ufile;");
 	MyDBaccess(DB,"VACUUM ANALYZE pfile;");
 	MyDBaccess(DB,"VACUUM ANALYZE foldercontents;");
 	MyDBaccess(DB,"VACUUM ANALYZE upload;");

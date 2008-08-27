@@ -1529,10 +1529,10 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
      Since a token is 2 bytes, that means 65536 max */
   /** For space, I am converting bytes to bits:
       2*65536 = 128K.  But as bits, it is 16K. **/
-  static uint8_t Symbol[2][8192];
+  static uint8_t Symbol[3][8192]; /* A, B, and intersection(A,B) */
 
   // printf("Was: [%d,%d] [%d,%d]\n",*MinA,*MaxA,*MinB,*MaxB);
-  memset(Symbol,0,sizeof(uint8_t)*2*8192);
+  memset(Symbol,0,sizeof(uint8_t)*3*8192);
 
   /* Populate the known symbols */
   for(a = *MinA; a < *MaxA; a++)
@@ -1544,11 +1544,34 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
     {
     ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
     Symbol[1][Byte] |= Mask;
+    /* Also mark the intersection of A and B */
+    if (Symbol[0][Byte] & Mask) Symbol[2][Byte] |= Mask;
     }
 
 #if 0
   /** Optimization DISABLED since it leads to far fewer matches. **/
   /********** Check for possible match *********************/
+  /***********************************************************
+   SIMILAR_THRESHOLD says "how many tokens in A must be seen in B" and
+   vice versa.  NOTE: This does not take into account the number of times
+   each token is seen.
+   If the threshold is too high, then many partial matches will be skipped.
+   This will increase the error rate.  (When using phrases, you may see
+   a huge number of phrases and few matches.)
+   If the threshold is too low, then every potential match will be checked.
+   Each check takes time, but it will find everything.
+   Ideally, we want a threashold that removes some cases (runs faster) but
+   does not introduce a significant amount of error.
+
+   How did I come up with the current threshold value?  Trial and error.
+   In the license self-test (compare every license to every license):
+    0.0 takes 29 minutes 39 seconds.
+   30.0 takes 16 minutes 19 seconds.
+   40.0 takes 9 minutes 25 seconds.
+   50.0 takes 5 minutes 24 seconds.
+   70.0 takes 3 minutes 52 seconds. Introduces a huge number of misses.
+   ***********************************************************/
+#define SIMILAR_THRESHOLD 40.0
   {
   float Count,Total;
   /* Determine how many symbols in A are in B and vice versa. */
@@ -1564,7 +1587,8 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
     if (Symbol[0][a] & 0x40) { Total++; if (Symbol[1][a] & 0x04) Count++; }
     if (Symbol[0][a] & 0x80) { Total++; if (Symbol[1][a] & 0x80) Count++; }
     }
-  if (Count*100.0/Total < MatchThreshold[1]) return(0); /* no match */
+  if (Total) /* no divide by zero */
+  if (Count*100.0/Total < SIMILAR_THRESHOLD) return(0); /* no match */
 
   Count=0; Total=0;
   for(b = 0; b < 8192; b++)
@@ -1578,7 +1602,8 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
     if (Symbol[1][b] & 0x40) { Total++; if (Symbol[0][b] & 0x04) Count++; }
     if (Symbol[1][b] & 0x80) { Total++; if (Symbol[0][b] & 0x80) Count++; }
     }
-  if (Count*100.0/Total < MatchThreshold[0]) return(0); /* no match */
+  if (Total) /* no divide by zero */
+  if (Count*100.0/Total < SIMILAR_THRESHOLD) return(0); /* no match */
   }
 #endif
 
@@ -1587,13 +1612,13 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
   for(a = *MinA; a < *MaxA; a++)
     {
     ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
-    if ((Symbol[1][Byte] & Mask) != 0) { break; }
+    if (Symbol[2][Byte] & Mask) { break; }
     }
   *MinA = a;
   for(a = *MaxA - 1; a > *MinA; a--)
     {
     ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
-    if ((Symbol[1][Byte] & Mask) != 0) { break; }
+    if (Symbol[2][Byte] & Mask) { break; }
     }
   *MaxA = a+1;
   if (*MaxA - *MinA <= MatchLen[0]) { return(0); }
@@ -1601,18 +1626,110 @@ inline int	OptimizeMatrixRange	(int *MinA, int *MaxA, int *MinB, int *MaxB)
   for(b = *MinB; b < *MaxB; b++)
     {
     ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
-    if ((Symbol[0][Byte] & Mask) != 0) { break; }
+    if (Symbol[2][Byte] & Mask) { break; }
     }
   *MinB = b;
   for(b = *MaxB - 1; b > *MinB; b--)
     {
     ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
-    if ((Symbol[0][Byte] & Mask) != 0) { break; }
+    if (Symbol[2][Byte] & Mask) { break; }
     }
   *MaxB = b+1;
   if (*MaxB - *MinB <= MatchLen[1]) { return(0); }
 
   // printf("Now: [%d,%d] [%d,%d]\n",*MinA,*MaxA,*MinB,*MaxB);
+
+  /* Check if there are enough tokens in the range to make a match... */
+  {
+  int TokA=0,TokB=0;
+  int Seq,TokSeqA=0,TokSeqB=0; /* number of sequential */
+  int TokPosA=0,TokPosB=0;
+  int GotMin,GotMax;
+  int Gap;
+
+  Seq=0;
+  GotMin=0;
+  GotMax=0;
+  for(a = *MinA; a < *MaxA; a++)
+    {
+    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
+    if (Symbol[2][Byte] & Mask)
+      {
+      TokA++;
+      Seq++;
+      if (Seq > TokSeqA) { TokSeqA=Seq; TokPosA=a; }
+      if (!GotMin && Seq >= MatchSeq[0]) { GotMin = a-Seq; }
+      }
+    else
+      {
+      if (Seq >= MatchSeq[0]) { GotMax = a; }
+      Seq=0;
+      }
+    }
+  if (Seq >= MatchSeq[0]) { GotMax = a; }
+  if (GotMin < *MinA) GotMin=*MinA;
+  if (GotMax > *MaxA) GotMax=*MaxA;
+
+  /* we have the first and last consecutive sections in A.
+     Now check for acceptable gaps. */
+  for(Gap=0, a = GotMin;  a >= *MinA; a--)
+    {
+    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
+    if (Symbol[2][Byte] & Mask) { Gap=0; }
+    else { Gap++; if (Gap >= MatchGap[0]) { GotMin=a+Gap; break; } }
+    }
+  for(Gap=0, a = GotMax;  a < *MaxA; a++)
+    {
+    ByteMask(MS.Symbols[0].Symbol[a],Byte,Mask);
+    if (Symbol[2][Byte] & Mask) { Gap=0; }
+    else { Gap++; if (Gap >= MatchGap[0]) { GotMax=a-Gap; break; } }
+    }
+  if (GotMin) *MinA=GotMin;
+  if (GotMax) *MaxA=GotMax;
+
+  Seq=0;
+  GotMin=0;
+  GotMax=0;
+  for(b = *MinB; b < *MaxB; b++)
+    {
+    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
+    if (Symbol[2][Byte] & Mask)
+      {
+      TokB++;
+      Seq++;
+      if (Seq > TokSeqB) { TokSeqB=Seq; TokPosB=b; }
+      if (!GotMin && Seq >= MatchSeq[1]) { GotMin = b-Seq; }
+      }
+    else
+      {
+      if (Seq >= MatchSeq[1]) { GotMax = b; }
+      Seq=0;
+      }
+    }
+  if (Seq >= MatchSeq[1]) { GotMax = b; }
+  if (GotMin < *MinB) GotMin=*MinB;
+  if (GotMax > *MaxB) GotMax=*MaxB;
+
+  /* we have the first and last consecutive sections in B.
+     Now check for acceptable gaps. */
+  for(Gap=0, b = GotMin;  b >= *MinB; b--)
+    {
+    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
+    if (Symbol[2][Byte] & Mask) { Gap=0; }
+    else { Gap++; if (Gap >= MatchGap[1]) { GotMin=b+Gap; break; } }
+    }
+  for(Gap=0, b = GotMax;  b < *MaxB; b++)
+    {
+    ByteMask(MS.Symbols[1].Symbol[b],Byte,Mask);
+    if (Symbol[2][Byte] & Mask) { Gap=0; }
+    else { Gap++; if (Gap >= MatchGap[1]) { GotMax=b-Gap; break; } }
+    }
+  if (GotMin) *MinB=GotMin;
+  if (GotMax) *MaxB=GotMax;
+
+  if (TokSeqA < MatchSeq[0]) return(0); /* too few */
+  if (TokSeqB < MatchSeq[1]) return(0); /* too few */
+  }
   return(1);
 } /* OptimizeMatrixRange() */
 

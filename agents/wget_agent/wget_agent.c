@@ -127,7 +127,6 @@ void	DBLoadGold	()
   char *SHA1, *MD5, *Len;
   char SQL[MAXCMD];
   long PfileKey;
-  long UfileKey;
   char *Path;
   FILE *Fin;
 
@@ -245,37 +244,14 @@ void	DBLoadGold	()
   PfileKey = atol(DBgetvalue(DB,0,0));
   if (Debug) printf("pfile_pk = %ld\n",PfileKey);
 
-  /* See if ufile needs to be added (it should be there, created by the UI) */
-  memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD-1,"SELECT ufile_fk FROM upload WHERE upload_pk=%ld;",
-	GlobalUploadKey);
-  if (DBaccess(DB,SQL) < 0)
-	{
-	printf("ERROR upload %ld Unable to select from the database\n",GlobalUploadKey);
-	printf("LOG upload %ld Unable to select from the database: %s\n",GlobalUploadKey,SQL);
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
-  if (DBdatasize(DB) <= 0)
-	{
-	printf("ERROR upload %ld Unable to find data in the database\n",GlobalUploadKey);
-	printf("LOG upload %ld No ufile found in the database: %s\n",GlobalUploadKey,SQL);
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
-  UfileKey = atol(DBgetvalue(DB,0,0));
-  if (Debug) printf("ufile_pk = %ld\n",UfileKey);
-
-  /* Upload the DB so the pfile is linked to the ufile */
+  /* Upload the DB so the pfile is linked to the upload record */
   DBaccess(DB,"BEGIN;");
   memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD-1,"SELECT * FROM ufile WHERE ufile_pk=%ld FOR UPDATE;",UfileKey);
+  snprintf(SQL,MAXCMD-1,"SELECT * FROM upload WHERE upload_pk=%ld FOR UPDATE;",GlobalUploadKey);
   DBaccess(DB,SQL);
   memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD-1,"UPDATE ufile SET pfile_fk=%ld WHERE ufile_pk=%ld;",
-	PfileKey,UfileKey);
+  snprintf(SQL,MAXCMD-1,"UPDATE upload SET pfile_fk=%ld WHERE upload_pk=%ld;",
+	PfileKey,GlobalUploadKey);
   if (Debug) printf("SQL=%s\n",SQL);
   if (DBaccess(DB,SQL) < 0)
 	{
@@ -527,7 +503,7 @@ void	GetAgentKey	()
   if (DBdatasize(DB) <= 0)
       {
       /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('wget_agent','unknown','Sets pfile wget_agent from magic or ufile extension');");
+      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('wget_agent','unknown','Sets pfile wget_agent from magic or filename extension');");
       if (rc < 0)
 	{
 	printf("ERROR upload %ld unable to write to the database\n",GlobalUploadKey);

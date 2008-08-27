@@ -80,12 +80,21 @@ enum BITS {
   };
 
 /*** Global Stats (for summaries) ***/
-long TotalItems=0;	/* number of ufiles inserted */
+long TotalItems=0;	/* number of records inserted */
 int TotalFiles=0;
 int TotalCompressedFiles=0;
 int TotalDirectories=0;
 int TotalContainers=0;
 int TotalArtifacts=0;
+
+/*********************************************************
+ MyDBaccess(): MyDBaccess with debugging wrapper.
+ *********************************************************/
+int	MyDBaccess	(void *VDB, char *SQL)
+{
+  if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
+  return(DBaccess(DB,SQL));
+} /* MyDBaccess() */
 
 /*********************************************************
  AlarmDisplay(): While running, periodically display the
@@ -118,7 +127,7 @@ void	GetAgentKey	()
 {
   int rc;
 
-  rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='unpack' ORDER BY agent_id DESC;");
+  rc = MyDBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='unpack' ORDER BY agent_id DESC;");
   if (rc < 0)
 	{
 	printf("ERROR: unable to access the database\n");
@@ -128,14 +137,14 @@ void	GetAgentKey	()
   if (DBdatasize(DB) <= 0)
       {
       /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('unpack','unknown','Recursively extract files');");
+      rc = MyDBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('unpack','unknown','Recursively extract files');");
       if (rc < 0)
 	{
 	printf("ERROR: unable to write to the database\n");
 	printf("LOG: unable to write 'unpack' to the database table 'agent'\n");
 	SafeExit(-1);
 	}
-      rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='unpack' ORDER BY agent_id DESC;");
+      rc = MyDBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='unpack' ORDER BY agent_id DESC;");
       if (rc < 0)
 	{
 	printf("ERROR: unable to access the database\n");
@@ -171,7 +180,7 @@ void	InitCmd	()
 ReGetCmd:
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT mimetype_pk FROM mimetype WHERE mimetype_name = '%s';",CMD[i].Magic);
-    rc = DBaccess(DB,SQL); /* SELECT */
+    rc = MyDBaccess(DB,SQL); /* SELECT */
     if (rc < 0)
 	{
 	printf("ERROR: SQL '%s'\n",SQL);
@@ -185,7 +194,7 @@ ReGetCmd:
 	{
 	memset(SQL,'\0',MAXSQL);
 	snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('%s');",CMD[i].Magic);
-	rc = DBaccess(DB,SQL); /* INSERT INTO mimetype */
+	rc = MyDBaccess(DB,SQL); /* INSERT INTO mimetype */
 	if (rc < 0)
 	  {
 	  printf("ERROR: SQL '%s'\n",SQL);
@@ -577,7 +586,7 @@ struct ParentInfo
   time_t StartTime;     /* time when command started */
   time_t EndTime;       /* time when command ended */
   int ChildRecurseArtifact; /* child is an artifact -- don't log to XML */
-  long ufile_pk;	/* if DB is enabled, this is the parents ufile */
+  long uploadtree_pk;	/* if DB is enabled, this is the parent */
   };
 typedef struct ParentInfo ParentInfo;
 
@@ -1047,92 +1056,36 @@ struct ContainerInfo
   int Artifact; /* this container is an artifact -- don't log to XML */
   int IsDir; /* this container is a directory */
   int IsCompressed; /* this container is compressed */
-  long ufile_pk;	/* ufile of this item */
+  long uploadtree_pk;	/* uploadtree of this item */
   long pfile_pk;	/* pfile of this item */
   long ufile_mode;	/* ufile_mode of this item */
   };
 typedef struct ContainerInfo ContainerInfo;
 
 /***************************************************
- ExistInDB(): Check if a ufile exists in the DB.
- Returns ufile_pk if the same filename, permissions, and parent
- exists.  This happens during a re-run.
- Returns 0 if it does not exist.
- NOTE: "Exist" means:
-   - Same name, same pfile_fk, and same container.
+ DebugContainerInfo(): Check the structure.
  ***************************************************/
-long	ExistInDB	(ContainerInfo *CI, int Mask)
+void	DebugContainerInfo	(ContainerInfo *CI)
 {
-  int rc;
-  char *S;
-
-  if (!DB) return(0); /* not in the DB since there is no DB */
-
-  memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"SELECT ufile_pk FROM ufile WHERE ");
-
-  /* set the name */
-  if (CI->Artifact)
-	{
-	int Len;
-	Len = strlen(CI->Partname);
-	/* determine type of artifact */
-	if ((Len > 4) && !strcmp(CI->Partname+Len-4,".dir"))
-		sprintf(SQL+strlen(SQL),"ufile_name='artifact.dir'");
-	else if ((Len > 9) && !strcmp(CI->Partname+Len-9,".unpacked"))
-		sprintf(SQL+strlen(SQL),"ufile_name='artifact.unpacked'");
-	else if ((Len > 5) && !strcmp(CI->Partname+Len-5,".meta"))
-		sprintf(SQL+strlen(SQL),"ufile_name='artifact.meta'");
-	else /* Don't know what it is */
-		sprintf(SQL+strlen(SQL),"ufile_name='artifact'");
-	}
-    else /* not an artifact -- use the name */
-	{
-	S = DBTaintString(CI->Partname);
-	sprintf(SQL+strlen(SQL),"ufile_name='%s'",S);
-	free(S);
-	}
-
-    /* Now update based on conditional elements */
-    if (CI->pfile_pk > 0) /* pfile_fk */
-	{
-	sprintf(SQL+strlen(SQL)," AND pfile_fk='%ld'",CI->pfile_pk);
-	}
-    else
-	{
-	sprintf(SQL+strlen(SQL)," AND pfile_fk IS NULL");
-	}
-
-#if 0
-    if (CI->Stat.st_mtime &&
-	((CI->Stat.st_mtime < CI->PI.StartTime) ||
-	 (CI->Stat.st_mtime > CI->PI.EndTime))) /* ufile_mtime */
-	{
-	sprintf(SQL+strlen(SQL)," AND ufile_mtime='%s'",ctime(&(CI->Stat.st_mtime)));
-	}
-#endif
-
-    if (CI->PI.ufile_pk > 0) /* ufile_container_fk */
-	{
-	sprintf(SQL+strlen(SQL)," AND ufile_container_fk='%ld'",CI->PI.ufile_pk);
-	}
-
-    strcat(SQL,";");
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-    rc = DBaccess(DB,SQL); /* SELECT */
-    if (rc <= 0)
-	{
-	if (Verbose) fprintf(stderr,"  Does not exist in DB due to a problem\n");
-	return(0);
-	}
-    if (DBdatasize(DB) > 0)
-	{
-	if (Verbose) fprintf(stderr,"  Exists in DB: %d records\n",DBdatasize(DB));
-	return(atol(DBgetvalue(DB,0,0)));
-	}
-    if (Verbose) fprintf(stderr,"  Does not exist in DB\n");
-    return(0);
-} /* ExistInDB() */
+  printf("Container:\n");
+  printf("  Source: %s\n",CI->Source); 
+  printf("  Partdir: %s\n",CI->Partdir); 
+  printf("  Partname: %s\n",CI->Partname); 
+  printf("  PartnameNew: %s\n",CI->PartnameNew); 
+  printf("  TopContainer: %d\n",CI->TopContainer);
+  printf("  HasChild: %d\n",CI->HasChild);
+  printf("  Pruned: %d\n",CI->Pruned);
+  printf("  Corrupt: %d\n",CI->Corrupt);
+  printf("  Artifact: %d\n",CI->Artifact);
+  printf("  IsDir: %d\n",CI->IsDir);
+  printf("  IsCompressed: %d\n",CI->IsCompressed);
+  printf("  uploadtree_pk: %ld\n",CI->uploadtree_pk);
+  printf("  pfile_pk: %ld\n",CI->pfile_pk);
+  printf("  ufile_mode: %ld\n",CI->ufile_mode);
+  printf("  Parent Cmd: %d\n",CI->PI.Cmd);
+  printf("  Parent ChildRecurseArtifact: %d\n",CI->PI.ChildRecurseArtifact);
+  printf("  Parent uploadtree_pk: %ld\n",CI->PI.uploadtree_pk);
+} /* DebugContainerInfo() */
 
 /***************************************************
  DBInsertPfile(): Insert a Pfile record.
@@ -1151,7 +1104,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
 	Fuid,Fuid+41,Fuid+74);
-  rc=DBaccess(DB,SQL); /* SELECT */
+  rc=MyDBaccess(DB,SQL); /* SELECT */
 
   if (rc < 0)
 	{
@@ -1177,8 +1130,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 	snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size) VALUES ('%.40s','%.32s','%s');",
 	Fuid,Fuid+41,Fuid+74);
 	}
-    rc=DBaccess(DB,SQL); /* INSERT INTO pfile */
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
+    rc=MyDBaccess(DB,SQL); /* INSERT INTO pfile */
 #if 0
     if (rc >= 0) TotalItems++;
 #endif
@@ -1188,8 +1140,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
 	Fuid,Fuid+41,Fuid+74);
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-    rc=DBaccess(DB,SQL); /* SELECT */
+    rc=MyDBaccess(DB,SQL); /* SELECT */
     if (rc < 0)
 	{
 	printf("FATAL: Database access error.\n");
@@ -1208,17 +1159,16 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 	if ((CMD[CI->PI.Cmd].DBindex > 0) &&
 	    (atol(DBgetvalue(DB,0,1)) != CMD[CI->PI.Cmd].DBindex))
 	    {
-	    DBaccess(DB,"BEGIN;");
+	    MyDBaccess(DB,"BEGIN;");
 	    memset(SQL,'\0',MAXSQL);
 	    snprintf(SQL,MAXSQL,"SELECT * FROM pfile WHERE pfile_pk = '%ld' FOR UPDATE;", CI->pfile_pk);
-	    DBaccess(DB,SQL); /* lock pfile */
+	    MyDBaccess(DB,SQL); /* lock pfile */
 	    memset(SQL,'\0',MAXSQL);
 	    snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld' WHERE pfile_pk = '%ld';",
 		CMD[CI->PI.Cmd].DBindex, CI->pfile_pk);
-	    rc=DBaccess(DB,SQL); /* UPDATE pfile */
-	    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
+	    rc=MyDBaccess(DB,SQL); /* UPDATE pfile */
 	    if (rc < 0) fprintf(stderr,"ERROR: SQL '%s'\n",SQL);
-	    DBaccess(DB,"COMMIT;");
+	    MyDBaccess(DB,"COMMIT;");
 	    }
 	}
     else
@@ -1231,146 +1181,22 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 } /* DBInsertPfile() */
 
 /***************************************************
- DBInsertUfile(): Insert a Ufile record.
- Sets the ufile_pk in CI.
- Returns:
-   0 if record does not exist (error condition)
-   1 if record inserted
-   2 if it's a duplicate
- ***************************************************/
-int	DBInsertUfile	(ContainerInfo *CI, int Mask)
-{
-  long rc;
-  int Bits;
-  char *S;
-  int DupState = 1;  /* is it a DB replica? 1=unique, 2=duplicate, 0=error */
-
-  memset(SQL,'\0',MAXSQL);
-  if (CI->TopContainer && CI->ufile_pk) /* it's an update */
-    {
-#if 1
-    /** 2007-03-01: At the request of bame and bobg, user-supplied files
-        are assumed to have real names and not marked as artifacts.
-    	(CI->HasChild<<BITS_CONTAINER)|(1<<BITS_ARTIFACT) **/
-    /* all data exists EXCEPT for the container flag */
-    /** Stat/mode is meaningless for top containers */
-    snprintf(SQL,MAXSQL,"BEGIN; SELECT * FROM ufile WHERE ufile_pk = '%ld' FOR UPDATE ; UPDATE ufile SET ufile_mode = ufile_mode|%d WHERE ufile_pk = '%ld'; COMMIT;", 
-	CI->ufile_pk,
-    	(CI->HasChild<<BITS_CONTAINER),
-	CI->ufile_pk
-	);
-    DBaccess(DB,SQL); /* UPDATE ufile to make it a container */
-#endif
-    } /* if UPDATE */
-
-  else
-    {
-    rc=ExistInDB(CI,Mask); /* set rc to the ufile_pk if it exists */
-    if (!rc)
-      {
-      /* This record should only exist in the DB if we are testing/rerunning */
-
-      /* Compute mode and flags */
-      Bits = CI->Stat.st_mode & Mask;
-      if (CI->Artifact) Bits |= (1 << BITS_ARTIFACT);
-      if (CI->HasChild) Bits |= (1 << BITS_CONTAINER);
-      CI->ufile_mode = Bits;
-
-      /* not inserting ufile_ts since it defaults to "now()" */
-      memset(SQL,'\0',MAXSQL);
-      snprintf(SQL,MAXSQL,"INSERT INTO ufile (ufile_mode,ufile_name,pfile_fk,ufile_mtime,ufile_container_fk) VALUES ('%d'",Bits);
-
-      /* set the name */
-      if (CI->Artifact)
-	{
-	int Len;
-	Len = strlen(CI->Partname);
-	/* determine type of artifact */
-	if ((Len > 4) && !strcmp(CI->Partname+Len-4,".dir"))
-		sprintf(SQL+strlen(SQL),",'artifact.dir'");
-	else if ((Len > 9) && !strcmp(CI->Partname+Len-9,".unpacked"))
-		sprintf(SQL+strlen(SQL),",'artifact.unpacked'");
-	else if ((Len > 5) && !strcmp(CI->Partname+Len-5,".meta"))
-		sprintf(SQL+strlen(SQL),",'artifact.meta'");
-	else /* Don't know what it is */
-		sprintf(SQL+strlen(SQL),",'artifact'");
-	}
-      else /* not an artifact -- use the name */
-	{
-	S = DBTaintString(CI->Partname);
-	sprintf(SQL+strlen(SQL),",'%s'",S);
-	free(S);
-	}
-
-      /* Now update based on conditional elements */
-      if (CI->pfile_pk > 0) /* pfile_fk */
-	{
-	sprintf(SQL+strlen(SQL),",'%ld'",CI->pfile_pk);
-	}
-      else	sprintf(SQL+strlen(SQL),",NULL");
-      if (CI->Stat.st_mtime &&
-	  ((CI->Stat.st_mtime < CI->PI.StartTime) ||
-	   (CI->Stat.st_mtime > CI->PI.EndTime))) /* ufile_mtime */
-	{
-	sprintf(SQL+strlen(SQL),",'%s'",ctime(&(CI->Stat.st_mtime)));
-	}
-      else	sprintf(SQL+strlen(SQL),",NULL");
-      if (CI->PI.ufile_pk > 0) /* ufile_container_fk */
-	{
-	sprintf(SQL+strlen(SQL),",'%ld'",CI->PI.ufile_pk);
-	}
-      else
-	{
-	fprintf(stderr,"ERROR: Unknown ufile_fk so ignoring insert for '%s'\n",CI->Source);
-	sprintf(SQL+strlen(SQL),",NULL");
-	}
-      strcat(SQL,");");
-
-      /* The SQL is complete! Do the insert */
-      if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-      /* Get and save the new ufile value */
-      rc = DBaccess(DB,SQL); /* INSERT INTO ufile */
-      if (rc >= 0) TotalItems++;
-
-      /* There is a possible race condition if TWO ununpack jobs run
-         at the same time and insert the ufile at the same time. */
-      rc=ExistInDB(CI,Mask); /* set rc to the ufile_pk if it exists */
-      if (!rc)
-	{
-	printf("ERROR: Problem inserting data into the database.\n");
-	printf("LOG: Problem inserting data into the database: ufile could not be inserted.\n");
-	SafeExit(-1);
-	}
-      DupState=1; /* inserted */
-      } /* if INSERT */
-
-    else /* already exists in DB */
-      {
-      DupState = 2; /* not inserted */
-      }
-    CI->ufile_pk = rc;
-    }
-  if (Verbose) fprintf(stderr,"ufile_pk = %ld\n",CI->ufile_pk);
-  return(DupState);
-} /* DBInsertUfile() */
-
-/***************************************************
  DBInsertUploadTreeRecurse(): Recursively copy an uploadtree.
  Copy the tree starting at the parent.  Inserts everything
  under the current Upload_Pk.
  ***************************************************/
 void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
 {
-  long Child;
   long UploadTree,pfile_fk,ufile_mode;
+  char *ufile_name;
   void *DBR;	/* data base results */
   int i,Max;
 
   /* Get all (unique) children for this parent */
   memset(SQL,'\0',MAXSQL);
   /* uploadtree_pk is unique */
-  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk,ufile_fk,pfile_fk,ufile_mode FROM uploadtree WHERE parent = '%ld';",CopyParent);
-  if (DBaccess(DBTREE,SQL) > 0) /* SELECT */
+  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk,pfile_fk,ufile_mode,ufile_name FROM uploadtree WHERE parent = '%ld';",CopyParent);
+  if (MyDBaccess(DBTREE,SQL) > 0) /* SELECT */
     {
     /* Insert each child under this tree */
     DBR = DBmove(DBTREE);
@@ -1378,23 +1204,29 @@ void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
     for(i=0; i<Max; i++)
 	{
 	UploadTree = atol(DBgetvalue(DBR,i,0));
-	Child = atol(DBgetvalue(DBR,i,1));
-	pfile_fk = atol(DBgetvalue(DBR,i,2));
-	ufile_mode = atol(DBgetvalue(DBR,i,3));
+	pfile_fk = atol(DBgetvalue(DBR,i,1));
+	ufile_mode = atol(DBgetvalue(DBR,i,2));
+	ufile_name = DBTaintString(DBgetvalue(DBR,i,3));
 
 	/* Add the child to uploadtree */
-	/** While uploadtree_pk is unique, ufile_fk/parent is not.
-	    There may be duplicates that are blocked by constraints. **/
 	memset(SQL,'\0',MAXSQL);
-	snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (ufile_fk,parent,pfile_fk,ufile_mode,upload_fk) VALUES (%ld,%ld,%ld,%ld,%s);",
-	  Child, NewParent, pfile_fk,ufile_mode,Upload_Pk);
-	if (DBaccess(DBTREE,SQL) == 0) /* INSERT INTO uploadtree */
+	if (NewParent > 0)
+	  {
+	  snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,'%s',%s);",
+	    NewParent, pfile_fk, ufile_mode, ufile_name, Upload_Pk);
+	  }
+	else
+	  {
+	  snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,'%s',%s);",
+	    pfile_fk, ufile_mode, ufile_name, Upload_Pk);
+	  }
+	if (MyDBaccess(DBTREE,SQL) == 0) /* INSERT INTO uploadtree */
 	  {
 	  /* Find the new ID for this insertion */
 	  memset(SQL,'\0',MAXSQL);
-	  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE ufile_fk = '%ld' AND parent = '%ld' AND upload_fk = '%s';",
-	    Child, NewParent, Upload_Pk);
-	  DBaccess(DBTREE,SQL);
+	  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE parent = '%ld' AND upload_fk = '%s';",
+	    NewParent, Upload_Pk);
+	  MyDBaccess(DBTREE,SQL);
 	  /* Recurse! */
 	  DBInsertUploadTreeRecurse(atol(DBgetvalue(DBTREE,0,0)),UploadTree);
 	  }
@@ -1404,133 +1236,132 @@ void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
 } /* DBInsertUploadTreeRecurse() */
 
 /***************************************************
- DBInsertUploadTree(): Insert a UploadTree record.
- If the ufile is a duplicate, then we need to replicate
- all of the uploadtree records for the ufile.
- This uses CI->ufile_pk and Upload_Pk
+ DBInsertUploadTree(): Insert an UploadTree record.
+ If the tree is a duplicate, then we need to replicate
+ all of the uploadtree records for the tree.
+ This uses Upload_Pk.
  Returns: 1 if tree exists for some other project (duplicate)
  and 0 if tree does not exist.
  ***************************************************/
-int	DBInsertUploadTree	(ContainerInfo *CI)
+int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 {
-  long NewParent,CopyParent;
+  long CopyParent;
+  char UfileName[1024];
   int Exist=0;
 
-  if (!Upload_Pk || !CI->ufile_pk) return(-1); /* should never happen */
+  if (!Upload_Pk) return(-1); /* should never happen */
+  // printf("=========== BEFORE ==========\n"); DebugContainerInfo(CI);
 
   /* Check if tree already exists for some other project */
-  memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk,parent,upload_fk FROM uploadtree WHERE ufile_fk = '%ld';",
-	  CI->ufile_pk);
-  if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-  if ((DBaccess(DBTREE,SQL) == 1) && (DBdatasize(DBTREE) > 0)) /* SELECT */
+  /** Same pfile = same tree **/
+  if (CI->pfile_pk > 0)
     {
-    int i,Max;
-    Max = DBdatasize(DBTREE);
-    Exist = (Max > 0);
-    /* See if this RECORD already exists */
-    if (Exist)
+    memset(SQL,'\0',MAXSQL);
+    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk,parent,upload_fk FROM uploadtree WHERE pfile_fk = '%ld';",
+	  CI->pfile_pk);
+    if ((MyDBaccess(DBTREE,SQL) == 1) && (DBdatasize(DBTREE) > 0)) /* SELECT */
       {
-      for(i=0; i<Max; i++)
+      int i,Max;
+      Max = DBdatasize(DBTREE);
+      Exist = (Max > 0);
+      /* See if this RECORD already exists */
+      if (Exist)
         {
-	if (strcmp(DBgetvalue(DBTREE,i,2),Upload_Pk)) continue;
-	CopyParent = atol(DBgetvalue(DBTREE,i,1));
-	if ((CopyParent==CI->PI.ufile_pk) || ((CopyParent==0)&&(CI->PI.ufile_pk==-1)))
-	  {
-	  printf("WARNING pfile %s Duplicate record exists for this project.\n",Pfile_Pk);
-	  return(1);
+        for(i=0; i<Max; i++)
+          {
+	  if (strcmp(DBgetvalue(DBTREE,i,2),Upload_Pk)) continue;
+	  CopyParent = atol(DBgetvalue(DBTREE,i,1));
+	  if ((CopyParent==CI->PI.uploadtree_pk) || ((CopyParent==0)&&(CI->PI.uploadtree_pk==0)))
+	    {
+	    printf("WARNING pfile %s Duplicate record exists for this project.\n",Pfile_Pk);
+	    return(1);
+	    }
 	  }
-	}
+        }
       }
-    }
+    } /* If pfile_pk is set */
 
+  /* Find record's mode */
+  CI->ufile_mode = CI->Stat.st_mode & Mask;
+  if (!CI->TopContainer && CI->Artifact) CI->ufile_mode |= (1 << BITS_ARTIFACT);
+  if (CI->HasChild) CI->ufile_mode |= (1 << BITS_CONTAINER);
+
+  /* Find record's name */
+  memset(UfileName,'\0',sizeof(UfileName));
+  if (CI->TopContainer)
+	{
+	char *ufile_name;
+	snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
+	MyDBaccess(DB,UfileName);
+	memset(UfileName,'\0',sizeof(UfileName));
+	ufile_name = DBgetvalue(DB,0,0);
+	if (strchr(ufile_name,'/')) ufile_name = strrchr(ufile_name,'/')+1;
+	strncpy(UfileName,ufile_name,sizeof(UfileName)-1);
+	}
+  else if (CI->Artifact)
+	{
+	int Len;
+	Len = strlen(CI->Partname);
+	/* determine type of artifact */
+	if ((Len > 4) && !strcmp(CI->Partname+Len-4,".dir"))
+		strcpy(UfileName,"artifact.dir");
+	else if ((Len > 9) && !strcmp(CI->Partname+Len-9,".unpacked"))
+		strcpy(UfileName,"artifact.unpacked");
+	else if ((Len > 5) && !strcmp(CI->Partname+Len-5,".meta"))
+		strcpy(UfileName,"artifact.meta");
+	else /* Don't know what it is */
+		strcpy(UfileName,"artifact");
+	}
+  else /* not an artifact -- use the name */
+	{
+	char *S;
+	S = DBTaintString(CI->Partname);
+	strncpy(UfileName,S,sizeof(UfileName));
+	free(S);
+	}
 
   /* Get the parent ID */
   /* Two cases -- depending on if the parent exists */
   memset(SQL,'\0',MAXSQL);
-  if (CI->PI.ufile_pk > 0) /* This is a child */
+  if (CI->PI.uploadtree_pk > 0) /* This is a child */
     {
-    /* This condition can happen multiple times.
-       Don't re-look up the same info. */
-    static long LastNewParent=-1, LastUfile=-1, LastUpload=-1;
-    if ((LastUfile==CI->PI.ufile_pk) && (LastUpload==atol(Upload_Pk)))
-	{
-	NewParent = LastNewParent;
-	}
-    else /* haven't seen it before */
-	{
-	/* Find parent */
-	snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE ufile_fk = '%ld' AND upload_fk = '%s';",
-		CI->PI.ufile_pk, Upload_Pk);
-	if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-	if ((DBaccess(DBTREE,SQL) != 1) || (DBdatasize(DBTREE) <= 0)) /* SELECT */
-		{
-		/* Got a problem: No parent! */
-		printf("FATAL pfile %s Database inconsistency detected.\n",Pfile_Pk);
-		printf("LOG pfile %s Child missing parent ufile[%ld].\n",Pfile_Pk,CI->PI.ufile_pk);
-		return(-1);
-		}
-	NewParent = atol(DBgetvalue(DBTREE,0,0));
-	LastNewParent = NewParent;
-	LastUfile = CI->PI.ufile_pk;
-	LastUpload = atol(Upload_Pk);
-	}
-
     /* Prepare to insert child */
-    memset(SQL,'\0',MAXSQL);
-    snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (ufile_fk,parent,pfile_fk, ufile_mode, upload_fk) VALUES (%ld,%ld,%ld, %ld, %s);",
-      CI->ufile_pk, NewParent, CI->pfile_pk, CI->ufile_mode, Upload_Pk);
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-    DBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
-    /* Find the inserted child (use select since dups may exist) */
-    memset(SQL,'\0',MAXSQL);
-    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE ufile_fk='%ld' AND parent = '%ld' AND upload_fk = '%s';",
-      CI->ufile_pk, NewParent, Upload_Pk);
+    snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,'%s',%s);",
+	CI->PI.uploadtree_pk, CI->pfile_pk, CI->ufile_mode,
+	UfileName, Upload_Pk);
+    MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
     }
   else /* No parent!  This is the first upload! */
     {
-    snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (ufile_fk,upload_fk,pfile_fk,ufile_mode) VALUES (%ld,%s,%ld,%ld);",
-      CI->ufile_pk, Upload_Pk,CI->pfile_pk,CI->ufile_mode);
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-    DBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
-    /* Find the inserted child (use select since dups may exist) */
-    memset(SQL,'\0',MAXSQL);
-    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE ufile_fk='%ld' AND parent is NULL AND upload_fk = '%s';",
-      CI->ufile_pk, Upload_Pk);
+    snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (upload_fk,pfile_fk,ufile_mode,ufile_name) VALUES (%s,%ld,%ld,'%s');",
+	Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
+    MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
     }
-
-  if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-  DBaccess(DBTREE,SQL); /* SELECT */
-  NewParent = atol(DBgetvalue(DBTREE,0,0));
+  /* Find the inserted child */
+  memset(SQL,'\0',MAXSQL);
+  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name='%s';",
+    Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
+  MyDBaccess(DBTREE,SQL);
+  CI->uploadtree_pk = atol(DBgetvalue(DBTREE,0,0));
+  TotalItems++;
+  // printf("=========== AFTER ==========\n"); DebugContainerInfo(CI);
 
   if (Exist)
     {
     /* There is a duplicate, so I just need to copy that over.  I need to
-       find the duplicate's ufile_pk for the recursion. */
+       find the duplicate's uploadtree_pk for the recursion. */
 
     /* There is a problem: a pfile may have a ufile without an uploadtree
        entry.  This can happen if we screwed up things by deleting from
        uploadtree without deleting the ufile. */
     memset(SQL,'\0',MAXSQL);
-    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE ufile_fk = %ld AND upload_fk != '%s' LIMIT 1;",
-	CI->ufile_pk,Upload_Pk);
-    if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-    DBaccess(DBTREE,SQL); /* SELECT */
+    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE pfile_fk = %ld AND upload_fk != '%s' LIMIT 1;",
+	CI->pfile_pk,Upload_Pk);
+    MyDBaccess(DBTREE,SQL); /* SELECT */
     if (DBdatasize(DBTREE) == 1)
       {
       CopyParent = atol(DBgetvalue(DBTREE,0,0));
-      DBInsertUploadTreeRecurse(NewParent,CopyParent);
-      }
-    else
-      {
-      /* We have a ufile without an uploadtree entry.
-         This can happen in two cases:
-         Case 1: Someone dropped/deleted/corrupted the uploadtree table.
-	 Case 2: The same ufile is found twice in one project (shouldn't
-	         happen, but who knows).
-	 Solution?  Reprocess.
-	*/
-      Exist=0;
+      DBInsertUploadTreeRecurse(CI->PI.uploadtree_pk,CopyParent);
       }
     }
   return(Exist);
@@ -1568,16 +1399,6 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
   /* populate DB (skip artifacts) */
   if (!DB) return(1); /* No DB? Quit! (and say it is unique) */
 
-#if 0
-  /** 2006-10-20: Talked to Paul -- we need to insert artifacts **/
-  if (CI->Artifact)
-    {
-    /* copy the artifact's parent */
-    CI->ufile_pk = CI->PI.ufile_pk;
-    return; /* do not insert artifacts */
-    }
-#endif
-
   /* PERFORMANCE NOTE:
      I used to use and INSERT and an UPDATE.
      Turns out, INSERT is fast, UPDATE is *very* slow (10x).
@@ -1586,10 +1407,8 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
 
   /* Insert pfile record */
   if (!DBInsertPfile(CI,Fuid)) return(0);
-  /* Insert ufile record */
-  if (!DBInsertUfile(CI,Mask)) return(0);
   /* Update uploadtree table */
-  IsUnique = !DBInsertUploadTree(CI);
+  IsUnique = !DBInsertUploadTree(CI,Mask);
 
   if (ForceDuplicate) IsUnique=1;
   return(IsUnique);
@@ -1867,14 +1686,6 @@ int	Traverse	(char *Filename, char *Basename,
 
   /* check for top containers */
   CI.TopContainer = (NewDir!=NULL);
-  if (CI.TopContainer)
-    {
-    char *V;
-    V = getenv("ARG_ufile_pk");
-    if (!V) V = getenv("ufile_pk");
-    if (!V) V = getenv("ufile");
-    if (V) CI.ufile_pk = atoi(V);
-    }
 
   /***********************************************/
   /* Populate CI and CI.PI structure */
@@ -1882,7 +1693,7 @@ int	Traverse	(char *Filename, char *Basename,
   CI.PI.Cmd=PI->Cmd;	/* inherit */
   CI.PI.StartTime = PI->StartTime;
   CI.PI.EndTime = PI->EndTime;
-  CI.PI.ufile_pk = PI->ufile_pk;
+  CI.PI.uploadtree_pk = PI->uploadtree_pk;
   CI.Artifact = PI->ChildRecurseArtifact;
   /* the item is processed; log all children */
   if (CI.Artifact > 0) PI->ChildRecurseArtifact=CI.Artifact-1;
@@ -1966,11 +1777,11 @@ int	Traverse	(char *Filename, char *Basename,
 	  {
 	  SetDir(CI.Partdir,sizeof(CI.Partdir),NewDir,CI.Source);
 	  strcat(CI.Partdir,DLentry->Name);
-	  TmpPk = CI.PI.ufile_pk;
-	  CI.PI.ufile_pk = CI.ufile_pk;
+	  TmpPk = CI.PI.uploadtree_pk;
+	  CI.PI.uploadtree_pk = CI.uploadtree_pk;
 	  /* don't decrement just because it is a directory */
 	  Traverse(CI.Partdir,NULL,"Called by dir",NULL,Recurse,&(CI.PI));
-	  CI.PI.ufile_pk = TmpPk;
+	  CI.PI.uploadtree_pk = TmpPk;
 	  }
 	}
     if (PI->Cmd && ListOutFile)
@@ -2022,7 +1833,7 @@ int	Traverse	(char *Filename, char *Basename,
     Queue[Index].PI.StartTime = CI.PI.StartTime;
     Queue[Index].ChildEnd=0;
     Queue[Index].PI.Cmd = CI.PI.Cmd;
-    Queue[Index].PI.ufile_pk = CI.PI.ufile_pk;
+    Queue[Index].PI.uploadtree_pk = CI.PI.uploadtree_pk;
     Queue[Index].ChildStat = CI.Stat;
     switch(CMD[CI.PI.Cmd].Type)
 	{
@@ -2084,7 +1895,7 @@ int	Traverse	(char *Filename, char *Basename,
       CImeta.Artifact=1;
       CImeta.HasChild=0;
       CImeta.TopContainer = 0;
-      CImeta.PI.ufile_pk = CI.ufile_pk;
+      CImeta.PI.uploadtree_pk = CI.uploadtree_pk;
       CImeta.PI.Cmd = 0; /* no meta type */
       memset(Cmd,0,sizeof(Cmd));
       memset(Fname,0,sizeof(Fname));
@@ -2151,10 +1962,10 @@ int	Traverse	(char *Filename, char *Basename,
 	    CI.Corrupt = Queue[Index].ChildCorrupt;
 	    CI.PI.StartTime = Queue[Index].PI.StartTime;
 	    CI.PI.EndTime = Queue[Index].PI.EndTime;
-	    CI.PI.ufile_pk = Queue[Index].PI.ufile_pk;
+	    CI.PI.uploadtree_pk = Queue[Index].PI.uploadtree_pk;
 	    CI.HasChild = Queue[Index].ChildHasChild;
 	    CI.Stat = Queue[Index].ChildStat;
-	    Queue[Index].PI.ufile_pk = CI.ufile_pk;
+	    Queue[Index].PI.uploadtree_pk = CI.uploadtree_pk;
 	    if (Recurse > 0)
 	      Traverse(Queue[Index].ChildRecurse,NULL,"Called by dir/wait",NULL,Recurse-1,&Queue[Index].PI);
 	    else if (Recurse < 0)
@@ -2215,7 +2026,7 @@ void	TraverseStart	(char *Filename, char *Label, char *NewDir,
   PI.Cmd = 0;
   PI.StartTime = time(NULL);
   PI.EndTime = PI.StartTime;
-  PI.ufile_pk = -1;
+  PI.uploadtree_pk = 0;
   Basename = strrchr(Filename,'/');
   if (Basename) Basename++;
   else Basename = Filename;
@@ -2240,16 +2051,6 @@ void	TraverseStart	(char *Filename, char *Label, char *NewDir,
 	  }
 	FreeDirList(DLhead);
 	}
-
-  /* If it is a container, then update the DB */
-#if 0
-  if (DB)
-    {
-    memset(SQL,'\0',MAXSQL);
-    snprintf(SQL,MAXSQL,"UPDATE ufile SET ufile_mode = ufile_mode | (1<<BITS_CONTAINER) WHERE ufile_proj_fk = '%ld';";
-	Proj_fk);
-    }
-#endif
 
   /* remove anything that we needed to create */
   if (UnlinkAll)
@@ -2381,7 +2182,7 @@ int	main	(int argc, char *argv[])
 		  fprintf(stderr,"FATAL: Unable to access database\n");
 		  SafeExit(-1);
 		  }
-		if (DBaccess(DBTREE,"BEGIN;") < 0)
+		if (MyDBaccess(DBTREE,"BEGIN;") < 0)
 		  {
 		  printf("ERROR pfile %s Unable to 'BEGIN' database updates.\n",Pfile_Pk);
 		  SafeExit(-1);
@@ -2629,11 +2430,15 @@ int	main	(int argc, char *argv[])
 	  {
 	  memset(SQL,'\0',MAXSQL);
 	  snprintf(SQL,MAXSQL,"UPDATE upload SET upload_mode = upload_mode | (1<<5) WHERE upload_pk = '%s';",Upload_Pk);
-	  if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-	  DBaccess(DBTREE,SQL); /* UPDATE upload */
+	  MyDBaccess(DBTREE,SQL); /* UPDATE upload */
 	  }
 
-	if (DBTREE && (DBaccess(DBTREE,"COMMIT;") < 0))
+#if 0
+	/* Debugging code */
+	if (DBTREE && (MyDBaccess(DBTREE,"ROLLBACK;") < 0))
+#else
+	if (DBTREE && (MyDBaccess(DBTREE,"COMMIT;") < 0))
+#endif
 	  {
 	  printf("ERROR pfile %s Unable to 'COMMIT' database updates.\n",Pfile_Pk);
 	  SafeExit(-1);
@@ -2646,10 +2451,9 @@ int	main	(int argc, char *argv[])
 	  /* Tell DB that lots of updates are done */
 	  /* This has no visible benefit for small files, but after unpacking
 	     a full ISO, analyze has a huge performance benefit. */
-	  DBaccess(DB,"ANALYZE mimetype;");
-	  DBaccess(DB,"ANALYZE pfile;");
-	  DBaccess(DB,"ANALYZE ufile;");
-	  DBaccess(DB,"ANALYZE uploadtree;");
+	  MyDBaccess(DB,"ANALYZE mimetype;");
+	  MyDBaccess(DB,"ANALYZE pfile;");
+	  MyDBaccess(DB,"ANALYZE uploadtree;");
 #endif
 	  /* Tell the world how many items we proudly processed */
 	  /** Humans will ignore this, but the scheduler will use it. **/

@@ -62,7 +62,12 @@ CksumFile *	SumOpenFile	(char *Fname)
   if (!CF) return(NULL);
 
   /* open the file (memory map) */
+#ifdef O_LARGEFILE
   CF->FileHandle = open(Fname,O_RDONLY|O_LARGEFILE);
+#else
+  /** BSD does not need nor use O_LARGEFILE **/
+  CF->FileHandle = open(Fname,O_RDONLY);
+#endif
   if (CF->FileHandle == -1)
 	{
 	fprintf(stderr,"ERROR: Unable to open file (%s)\n",Fname);
