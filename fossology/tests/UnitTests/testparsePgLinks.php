@@ -65,10 +65,10 @@ class testParsePgLinks extends fossologyWebTestCase
      *4th url is License Browser Screen
      */
     $testPages = array (
-    //'http://osrb-1.fc.hp.com/repo/?mod=browse',
-    //'http://osrb-1.fc.hp.com/repo/?mod=browse&folder=299',
-    'http://osrb-1.fc.hp.com/repo/?mod=browse&folder=299&show=detail&upload=627&item=5066018',
-    'http://osrb-1.fc.hp.com/repo/?mod=license&show=detail&upload=627&item=5066018',
+    'http://osrb-1.fc.hp.com/repo/?mod=browse',
+    'http://osrb-1.fc.hp.com/repo/?mod=browse&folder=299',
+    //'http://osrb-1.fc.hp.com/repo/?mod=browse&folder=299&show=detail&upload=627&item=5066018',
+    //'http://osrb-1.fc.hp.com/repo/?mod=license&show=detail&upload=627&item=5066018',
                         );
     /*
      * testCounts is the number of table elements in each test

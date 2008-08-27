@@ -113,5 +113,10 @@ class parseLicFileList
       return (array ());
     }
   }
+
+  public function setPage($page)
+  {
+    if(!empty($page)) {$this->page = $page; }
+  }
 }
 ?>
