@@ -6,7 +6,7 @@ include $(VARS)
 
 CFLAGS_LOCAL=-DFOSSDB_CONF="$(SYSCONFDIR)/$(PROJECT)/Db.conf" -lpq \
           -L. -lfossdb $(ALL_CFLAGS)
-EXE=dbtest dbinit dbq dbcheck
+EXE=dbtest dbq dbcheck
 LIB=libfossdb.a
 
 all: $(LIB) $(EXE)
@@ -23,9 +23,6 @@ install: all $(VARS)
 	$(INSTALL_DATA) libfossdb.h $(DESTDIR)$(INCLUDEDIR)/libfossdb.h
 
 	$(INSTALL_PROGRAM) dbcheck $(DESTDIR)$(AGENTTESTDDIR)/dbcheck
-	$(INSTALL_PROGRAM) dbinit $(DESTDIR)$(AGENTTESTDDIR)/dbinit
-	$(INSTALL_DATA) dbinit.sql $(DESTDIR)$(AGENTTESTDDIR)/dbinit.sql
-	$(INSTALL_DATA) dbclear.sql $(DESTDIR)$(AGENTTESTDDIR)/dbclear.sql
 
 # uninstall only cleans up the files, not the directories that might have
 # been created
@@ -34,9 +31,6 @@ uninstall:
 	rm -f $(DESTDIR)$(INCLUDEDIR)/libfossdb.h
 
 	rm -f $(DESTDIR)$(AGENTTESTDDIR)/dbcheck
-	rm -f $(DESTDIR)$(AGENTTESTDDIR)/dbinit
-	rm -f $(DESTDIR)$(AGENTTESTDDIR)/dbinit.sql
-	rm -f $(DESTDIR)$(AGENTTESTDDIR)/dbclear.sql
 
 test: all
 	@echo "*** No tests available for libfossdb ***"

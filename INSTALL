@@ -308,8 +308,9 @@ Alternatively, you can use the adduser command:
   adduser --gecos "FOSSology" --home /srv/fossology --system --group fossy
 
 6) Setting up the database
-A sample database schema file can be found in the tarball under
-fossology-<version>/setup/fossologyinit.sql.  This will create the
+A sample database schema file can be found either on the installed system
+at /usr/local/lib/fossology/test.d/fossologyinit.sql or in the tarball at
+fossology-<version>/db/fossologyinit.sql.  This will create the
 database when it is read in.  It will also create an owner for the
 database "fossy" and owner's password "fossy".  For security reasons,
 please change this password, after the database is created, using
@@ -329,14 +330,13 @@ Check to see the database server is running
    You should see the following message:
       Starting PostgreSQL 8.1 database server: main.
 
-   B) The default database and owner is created by reading in a file of
-   sql statements to define the database schema. This file is included
-   in the tar bundle as fossology-<version>/setup/fossologyinit.sql.
+   B) The default database and owner is created by reading in the
+   fossologyinit.sql file of sql statements to define the database schema.
 
    You must be logged in as user postgres to create the database schema
    and define the owner.  As root, you can su to user postgres (su
    postgres) and then run the psql command:
-      psql  <fossology-version/setup/fossologyinit.sql
+      psql  < fossologyinit.sql
 
    C) If any steps fail, check the postgres log file for errors:
       /var/log/postgresql/postgresql-8.1-main.log
