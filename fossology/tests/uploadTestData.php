@@ -47,7 +47,7 @@ require_once ('TestEnvironment.php');
 global $URL;
 
 $test = &new TestSuite('Fossology Repo UI Upload Prep/Test');
-$test->addTestFile('uploadTestData.php');
+$test->addTestFile('uplTestData.php');
 
 if (TextReporter::inCli())
 {
