@@ -21,6 +21,14 @@ bsam-test2: bsam-test2-process
 	chmod +x bsam-test2
 
 install: all
+	@# first nuke the existing licenses. currently we only support
+	@# adding licenses as part of the build. eventually we will
+	@# support at runtime but in a user dir in /var so this will
+	@# continue to be ok
+	if [ -d "$(DESTDIR)$(AGENTDATADIR)/licenses/" ]; then \
+	   rm -rf $(DESTDIR)$(AGENTDATADIR)/licenses/; \
+	fi
+
 	find Raw -type f | grep -v svn | sed -e 's@^Raw/@@' | \
         while read i ; do \
            mkdir -p $(DESTDIR)$(AGENTDATADIR)/licenses/"$${i%/*}"; \
