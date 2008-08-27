@@ -19,9 +19,9 @@
 
 /**************************************************************
  cp2foss
- 
+
  Import a file (or directory) into FOSSology for processing.
- 
+
  @return 0 for success, 1 for failure.
  *************************************************************/
 
@@ -105,8 +105,10 @@ function GetBucketFolder ($UploadName, $BucketGroupSize)
 {
   $Letters = "abcdefghijklmnopqrstuvwxyz";
   $Numbers = "0123456789";
+  if (empty($UploadName)) { return; }
   $Name = strtolower(substr($UploadName,0,1));
   /* See if I can find the bucket */
+  if (empty($BucketGroupSize) || ($BucketGroupSize < 1)) { $BucketGroupSize=3; }
   for($i=0; $i < 26; $i += $BucketGroupSize)
     {
     $Range = substr($Letters,$i,$BucketGroupSize);
@@ -135,10 +137,17 @@ function GetFolder	($FolderPath, $Parent=NULL)
   global $DB;
   global $Verbose;
   global $Test;
+
+  //print "  Getting Folder path: '$FolderPath'\n";
+  //print "  Parent is: '$Parent'\n";
   if (empty($Parent)) { $Parent = FolderGetTop(); }
   if (empty($FolderPath)) { return($Parent); }
   list($Folder,$FolderPath) = split('/',$FolderPath,2);
-  if (empty($Folder)) { return(GetFolder($FolderPath,$Parent)); }
+  if (empty($Folder))
+  {
+    //print "  Calling GetFolder with: '$FolderPath''$Parent'\n";
+    return(GetFolder($FolderPath,$Parent));
+  }
 
   /* See if it exists */
   $SQLFolder = str_replace("'","''",$Folder);
@@ -209,16 +218,20 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription,$T
     exit(1);
     }
 
+  if (empty($UploadName)) { return; }
+
   /* Get the folder's primary key */
   global $OptionA; /* Should it use bucket names? */
   if ($OptionA)
     {
-    $FolderPk = GetFolder($FolderPath . "/" . GetBucketFolder($UploadName,$bucket_size));
+    global $bucket_size;
+    $FolderPath .= "/" . GetBucketFolder($UploadName,$bucket_size);
     }
-  else
-    {
-    $FolderPk = GetFolder($FolderPath);
-    }
+  $FolderPk = GetFolder($FolderPath);
+
+  print "  Uploading to folder: '$FolderPath'\n";
+  print "  Uploading as '$UploadName'\n";
+  if (!empty($UploadDescription)) { print "  Upload description: '$UploadDescription'\n"; }
 
   /* Create the upload for the file */
   if ($Verbose > 1) { print "JobAddUpload($UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk);\n"; }
@@ -245,7 +258,7 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription,$T
       {
       case 'agent_unpack':	$Cmd=""; break; /* already scheduled */
       case 'ALL':
-      case 'all':	
+      case 'all':
 	$Cmd = "fossjobs.php -U '$UploadPk'";
 	break;
       default:
@@ -283,11 +296,17 @@ for($i=1; $i < $argc; $i++)
     case '-p': /* depricated 'path' to folder */
 	$i++; $FolderPath = $argv[$i];
 	/* idiot check for absolute paths */
+  //print "  Before Idiot Checks: '$FolderPath'\n";
 	$FolderPath = preg_replace('@^/*@',"",$FolderPath);
 	$FolderPath = preg_replace('@/*$@',"",$FolderPath);
-	$FolderPath = preg_replace("@^Software Repository/@","",$FolderPath);
+  /* Note: the pattern below should probably be generalized to remove everything
+   * up to and including the 1st /, This pattern works in what I've
+   * tested: @^.*\/@ ( I had to escape the / so the comment works!)
+   */
+	$FolderPath = preg_replace("@^S.*? Repository/@","",$FolderPath);
 	$FolderPath = preg_replace('@//*@',"/",$FolderPath);
 	$FolderPath = '/' . $FolderPath;
+  //print "  AFTER Idiot Checks: '$FolderPath'\n";
 	break;
     case '-R': /* obsolete: recurse directories */
     case '-w': /* obsolete: URL switch to use wget */
@@ -330,10 +349,7 @@ for($i=1; $i < $argc; $i++)
 	  if (strlen($UploadArchive) > 0)
 	    {
 	    print "Loading $UploadArchive\n";
-	    print "  Uploading to folder: '$FolderPath'\n";
 	    if (empty($UploadName)) { $UploadName = basename($UploadArchive); }
-	    print "  Uploading as '$UploadName'\n";
-	    if (!empty($UploadDescription)) { print "  Upload description: '$UploadDescription'\n"; }
 	    UploadOne($FolderPath,$UploadArchive,$UploadName,$UploadDescription);
 	    /* prepare for next parameter */
 	    $UploadName="";
@@ -352,10 +368,8 @@ for($i=1; $i < $argc; $i++)
 	/* No break! No hyphen means it is a file! */
 	$UploadArchive = $argv[$i];
 	print "Loading $UploadArchive\n";
-	print "  Uploading to folder: '$FolderPath'\n";
 	if (empty($UploadName)) { $UploadName = basename($UploadArchive); }
-	print "  Uploading as '$UploadName'\n";
-	if (!empty($UploadDescription)) { print "  Upload description: '$UploadDescription'\n"; }
+  //print "  CAlling UploadOne in 'main': '$FolderPath'\n";
 	UploadOne($FolderPath,$UploadArchive,$UploadName,$UploadDescription);
 
 	/* prepare for next parameter */
