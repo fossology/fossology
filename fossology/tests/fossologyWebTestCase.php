@@ -32,7 +32,7 @@
  * @package fossology
  * @subpackage tests
  *
-  * @version "$Id: $"
+  * @version "$Id$"
  *
  * Created on Jul 21, 2008
  */

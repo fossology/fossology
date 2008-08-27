@@ -25,7 +25,7 @@
  * Only menus with links are returned. Can return an empty array
  * indicating nothing on the page to browse.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  * Created on Aug 19, 2008
  */
 

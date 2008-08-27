@@ -26,7 +26,7 @@
  *
  * @return 0 if file created, 1 otherwise.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Jul 31, 2008
  */

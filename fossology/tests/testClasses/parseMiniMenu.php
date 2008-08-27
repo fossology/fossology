@@ -28,7 +28,7 @@
  * Can return an empty array indicating no mini menus found on the page.
  * Only menus with links are returned.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Aug 19, 2008
  */
