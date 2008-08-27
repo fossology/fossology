@@ -41,6 +41,7 @@ int	SelfTest	()
 {
   FILE *Fin, *FData, *FTest;
   char SelfTest[] = "echo 'test' | " BINDIR "/selftest -g -s"; /* -g for generate test data */
+  char MkConfig[] = BINDIR "/mkconfig -L 2>&1 | grep agent | sed 's/.*agent=\\(\\w*\\).*/\\1/' | sort -u"; /* get list of agents */
   int c,i;
   int Thread;
   int rc=0;
@@ -54,6 +55,45 @@ int	SelfTest	()
     fprintf(stderr,"FATAL: No agent systems loaded for self-test.\n");
     return(1);
     }
+
+  /*************************************************/
+  /* Make sure every agent exists */
+  Fin = popen(MkConfig,"r");
+  if (!Fin)
+    {
+    fprintf(stderr,"FATAL: Unable to run mkconfig for self-test.\n");
+    return(1);
+    }
+  /* read every line and check if the agent exists */
+  rc=0;
+  while(!feof(Fin))
+    {
+    memset(Line[0],0,1024);
+    i=0;
+    c=fgetc(Fin);
+    while(!feof(Fin) && (c>0) && (c!='\n'))
+      {
+      Line[0][i]=c;
+      i++;
+      c=fgetc(Fin);
+      }
+    /* Check if the agent exists */
+    if (i>0)
+      {
+      Thread = CheckAgent(Line[0]);
+      if (Thread < 0)
+        {
+	fprintf(stderr,"FATAL: Agent type '%s' not in scheduler.conf.\n",Line[0]);
+	rc=1;
+	}
+      }
+    }
+  pclose(Fin);
+  if (rc) return(1);
+  rc=0;
+
+  /*************************************************/
+  /* Make sure every agent tests properly */
   HostCheck = (int *)calloc(MaxHostList,sizeof(int));
   FData = tmpfile();
   if (!FData)
@@ -149,6 +189,8 @@ int	SelfTest	()
 		for(i=0; (Line[1][i] != 0) && !strchr("=:",Line[1][i]); i++)
 		  fputc(Line[1][i],stderr);
 		fprintf(stderr,"\n");
+		fprintf(stderr,"  Observed: %s\n",Line[1]);
+		fprintf(stderr,"  Expected: %s\n",Line[0]);
 		}
 	  rc=0;
 	  HostCheck[HostId] = -1;
@@ -171,6 +213,7 @@ int	SelfTest	()
     {
     if (HostCheck[i] != 1)
       {
+      if (HostCheck[i] == 0) fprintf(stderr,"FATAL: Host '%s' missing self-test agent.\n",HostList[i].Hostname);
       fprintf(stderr,"FATAL: Host '%s' failed self-test.\n",HostList[i].Hostname);
       rc=1;
       }

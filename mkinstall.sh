@@ -474,6 +474,8 @@ if [ "\$CONFIGOK" != "1" ] ; then
   exit
 fi
 
+## Initialize the tables
+/usr/local/bin/fossinit.php -v
 
 ## Create the License.bsam file
 ## This requires DB access and everything must be installed first.
@@ -495,7 +497,7 @@ if [ \$? == 0 ] ; then
     # remove the old file
     \$DEBUG rm -f \${AGENTDATADIR}/License.bsam.new 2>/dev/null
     cd \${AGENTDATADIR}/licenses
-    find . -type f | grep -v "\.meta" | sed -e 's@^./@@' | while read i ; do
+    find . -type f | grep -v "\.meta" | sed -e 's@^./@@' | sort | while read i ; do
       echo "Processing \$i"
       if [ -f "\$i.meta" ] ; then
         \$DEBUG \${AGENTDIR}/Filter_License -Q -O -M "\$i.meta" "\$i" >> \${AGENTDATADIR}/License.bsam.new
