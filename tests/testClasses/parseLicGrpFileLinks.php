@@ -20,9 +20,9 @@
  ***********************************************************/
 
 /**
- * Given a fossology License Groups page, parse it and return the
- * license Groups table.  The rest of the page can be parsed by the
- * browseMenu class.
+ * DO NOT USE THIS CLASS.  IT's not done. Given a fossology License
+ * Groups page, parse it and return the license Groups table.  The rest
+ * of the page can be parsed by the browseMenu class.
  *
  * @param string $page the xhtml page to parse
  *
