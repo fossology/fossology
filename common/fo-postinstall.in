@@ -210,7 +210,7 @@ if [ $SCHEDULER ]; then
    # BTW- mkschedconf seems to be hardcoded to use localhost, if that
    # is ever fixed this code might need to be too
    SCHEDCONF={$SYSCONFDIR}/fossology/Scheduler.conf
-   if [ ! -f {$SCHEDCONF} -o "$OVERWRITE" ] ; then
+   if [ ! -f "{$SCHEDCONF}" -o "$OVERWRITE" ] ; then
       mkdir -p `dirname {$SCHEDCONF}`
       {$LIBEXECDIR}/mkschedconf -o {$SCHEDCONF} -L
       echo "NOTE: default {$SCHEDCONF} created."
@@ -230,7 +230,7 @@ echo "*** Setting up UI ***"
 
 # See if web server user (www-data) exists, if so add to the group.
 grep -q "^www-data:" /etc/passwd
-if [ "$?" == 0 ] ; then
+if [ $? == 0 ] ; then
   echo "NOTE: Adding user www-data to group {$PROJECTGROUP}"
   # this is smart enough to not add multiple times so it's ok to repeat
   usermod -G {$PROJECTGROUP} -a www-data
