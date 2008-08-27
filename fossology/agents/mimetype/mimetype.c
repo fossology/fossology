@@ -244,7 +244,7 @@ int	CheckMimeTypes	(char *Ext)
 } /* CheckMimeTypes() */
 
 /*********************************************************
- DBCheckFileExtention(): given a pfile, identify any ufiles
+ DBCheckFileExtention(): given a pfile, identify any filenames
  and see if any of them have a known extension based on
  /etc/mime.types.
  Returns the mimetype, or -1 if not found.
@@ -260,7 +260,7 @@ int	DBCheckFileExtention	()
   if (Akey >= 0)
     {
     memset(SQL,'\0',sizeof(SQL));
-    snprintf(SQL,sizeof(SQL)-1,"SELECT distinct(ufile_name) FROM ufile WHERE pfile_fk = %d",Akey);
+    snprintf(SQL,sizeof(SQL)-1,"SELECT distinct(ufile_name) FROM uploadtree WHERE pfile_fk = %d",Akey);
     if (DBaccess(DB,SQL) < 0)
       {
       printf("ERROR: Unable to query the database.\n");
@@ -549,7 +549,7 @@ void	GetAgentKey	()
   if (DBdatasize(DB) <= 0)
       {
       /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('mimetype','unknown','Sets pfile mimetype from magic or ufile extension');");
+      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('mimetype','unknown','Sets pfile mimetype from magic or filename extension');");
       if (rc < 0)
 	{
 	printf("ERROR: unable to write to the database\n");
