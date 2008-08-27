@@ -59,7 +59,7 @@ ununpack: $(UUSRC) $(UUHDR)
 	$(CC) $(CFLAGS) $(INC) -o ununpack $(UUSRC) $(LIB) -lmagic
 
 clean:
-	$(RM) *.o core $(EXE)
+	$(RM) *.o core $(EXE) metahandle.h metahandle.c
 
 getsrc:
 	apt-get install libmagic-dev upx-ucl mkisofs unzip xpdf-utils unrar-free cabextract rpm sleuthkit
