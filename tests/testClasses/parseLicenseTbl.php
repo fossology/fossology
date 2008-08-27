@@ -50,9 +50,9 @@ class parseLicenseTbl
   function parseLicenseTbl()
   {
     $matches = preg_match_all(
-  "|.*?align='right'.*?align='center'><a href='(.*?)>(.*?)<.*?id='(.*?)'.*?a href=\"(.*?)\">(.*?)<|",
+  "|.*?align='right'.*?align='center'><a href='(.*?)'>(.*?)<.*?id='(.*?)'.*?a href=\"(.*?)\">(.*?)<|",
     $this->page, $tableEntries, PREG_PATTERN_ORDER);
-   //print "tableEntries are:\n"; print_r($tableEntries) . "\n";
+   //print "PLTBL: tableEntries are:\n"; print_r($tableEntries) . "\n";
    return($this->_createRtnLicTbl($tableEntries, $matches));
   }
 

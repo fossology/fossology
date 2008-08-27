@@ -414,6 +414,9 @@ class fossologyWebTestCase extends WebTestCase
    *
    * @return string $result or null if no pattern found.
    *
+   * Note, this function is not very useful on inspection... consider
+   * rewrite or scrap it.
+   *
    */
   public function getNextLink($pattern, $page, $debug = 0)
   {
@@ -456,7 +459,7 @@ class fossologyWebTestCase extends WebTestCase
     return ("http://$host$query");
   }
 
-  public function getUrl()
+  public function mygetUrl()
   {
     return $this-> $url;
   }

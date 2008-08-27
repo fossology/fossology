@@ -18,27 +18,30 @@
  ***********************************************************/
 
 /**
- * runtests: run a fossology test suite
+ * configTestEnv: configure the test environment
  *
- * @param string $url the url to test
- * @param string $user the user account (e.g. fossy)
- * @param string $password the users password
+ * @param string $url the url to test, full url with ending /
+ * @param string $user the Data-Base user account (e.g. fossy)
+ * @param string $password the Data-Base user's password
  *
- * @return 0 if test launched, 1 otherwise.
+ * @return 0 if file created, 1 otherwise.
  *
  * @version "$Id: $"
  *
  * Created on Jul 31, 2008
  */
 
-$usage = "$argv[0] Url User Password path-to-suite\n";
+// TODO : $usage = "$argv[0] Url User Password [path-to-suite]\n";
 
-var_dump($argv);
-var_dump($argc);
-print "number of args is:$argc\n";
+// usage done this way as here doc's mess up eclipse colors.
+$U .= "Usage: $argv[0] Url User Password \nUrl is a full url with ending /\n";
+$U .= "e.g. http://someHost.somedomain/repo/\n";
+$U .= "Data-Base User and Data-Base Password\n";
+$U .= "Very little parameter checking is done.\n";
+$usage = $U;
 
-// process parameters
-if($argc <= 4)
+// simple parameter checks
+if($argc < 4)
 {
   print $usage;
   exit(1);
@@ -46,16 +49,21 @@ if($argc <= 4)
 
 list($me, $url, $user, $password, $Testpath) = $argv;
 //print "Params: U:$url USR:$user PW:password TP:$Testpath\n";
+if(empty($url)) { exit(1); }
+if('http://' != substr($url,0,7))
+{
+  print "$me ERROR not a valid URL\n$url\n\n$usage";
+  exit(1);
+}
 
 $FD = fopen('./TestEnvironment.php', 'w') or die("Can't open ./TestEnvironment $php_errormsg\n");
 $startphp = "<?php\n";
-$furl = "\$URL='$url';\n";
+$fullUrl = "\$URL='$url';\n";
 $usr = "\$USER='$user';\n";
 $passwd = "\$PASSWORD='$password';\n";
-print "$furl";
-print "$usr";
-print "$passwd";
 $endphp = "?>\n";
-fwrite($FD, "$startphp$furl$usr$passwd$endphp");
 
+fwrite($FD, "$startphp$fullUrl$usr$passwd$endphp");
+fclose($FD);
+print "./TestEnvrionment.php created sucessfully\n";
 ?>
