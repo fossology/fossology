@@ -341,7 +341,8 @@
   $Term["FSF"]["License"][4]="FSF/FSF variant 4";
   /* Canonical name: 106 */
   $Term["GFDL"]["Desc"]="Gnu Free Documentation License";
-  $Term["GFDL"]["Term"][0]="gnu free documentation license";
+  $Term["GFDL"]["Term"][0]="gfdl";
+  $Term["GFDL"]["Term"][]="gnu free documentation license";
   $Term["GFDL"]["License"][0]="GPL/GFDL/GNU Free Documentation License v1.1 reference 1";
   $Term["GFDL"]["License"][1]="GPL/GFDL/GNU Free Documentation License v1.1 reference 2";
   $Term["GFDL"]["License"][2]="GPL/GFDL/GNU Free Documentation License v1.2";
