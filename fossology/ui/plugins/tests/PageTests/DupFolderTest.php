@@ -22,7 +22,7 @@
  * Try to create a duplicate folder under the root folder
  *
 
- * @version "$Id:  $"
+ * @version "$Id$"
  *
  * Created on Aug 27, 2008
  */
@@ -87,7 +87,7 @@ class DupFolderTest extends fossologyWebTestCase
       //print "************ page after Folder Create! *************\n$page\n";
     }
   }
-  /*
+
   function tearDown()
   {
     global $URL;
@@ -99,6 +99,5 @@ class DupFolderTest extends fossologyWebTestCase
     $this->assertTrue(page);
     $this->assertTrue($this->assertText($page, "/Deletion of folder $this->folder_name/"), "MoveFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
   }
-  */
 }
 ?>
