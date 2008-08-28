@@ -39,42 +39,49 @@ global $URL;
 
 class UploadFileTest extends fossologyWebTestCase
 {
+  public $mybrowser;
+
+   function setUP()
+  {
+    global $URL;
+
+    $this->mybrowser = & new SimpleBrowser();
+    $page = $this->mybrowser->get($URL);
+    $this->assertTrue($page);
+    $this->assertTrue(is_object($this->mybrowser));
+    $cookie = $this->repoLogin($this->mybrowser);
+    $host = $this->getHost($URL);
+    $this->mybrowser->setCookie('Login', $cookie, $host);
+  }
 
   function testUploadFile()
   {
     global $URL;
 
     print "starting UploadFileTest\n";
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL, "Fail! Count not get a page from $URL\n");
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
 
-    $loggedIn = $browser->get($URL);
+    $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
     $this->assertTrue($this->assertText($loggedIn, '/From File/'));
 
-    $page = $browser->get("$URL?mod=upload_file");
+    $page = $this->mybrowser->get("$URL?mod=upload_file");
     $this->assertTrue($this->assertText($page, '/Upload a New File/'));
     $this->assertTrue($this->assertText($page, '/Select the file to upload:/'));
-    /* select Testing folder, filename based on pid or session number */
+    /* select Testing folder, filename based on pid */
 
     $id = $this->getFolderId('Testing', $page);
-    $this->assertTrue($browser->setField('folder', $id));
-    $this->assertTrue($browser->setField('getfile', './TestData/gplv2.1' ));
-    $desc = 'File uploaded by test UploadFileTest';
-    $this->assertTrue($browser->setField('description', "$desc" ));
+    $this->assertTrue($this->mybrowser->setField('folder', $id));
+    $this->assertTrue($this->mybrowser->setField('getfile', '/home/fosstester/licenses/gpl-3.0.txt' ));
+    $desc = 'File gpl-3.0.txt uploaded by test UploadFileTest into Testing folder';
+    $this->assertTrue($this->mybrowser->setField('description', "$desc" ));
     $id = getmypid();
     $upload_name = 'TestUploadFile-' . "$id";
-    $this->assertTrue($browser->setField('name', $upload_name ));
+    $this->assertTrue($this->mybrowser->setField('name', $upload_name ));
     /* we won't select any agents this time' */
-    $page = $browser->clickSubmit('Upload!');
+    $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
     $this->assertTrue($this->assertText($page, '/Upload added to job queue/'));
-    print "*********** Page after upload **************\n$page\n";
+    //print "*********** Page after upload **************\n$page\n";
   }
 }
 
