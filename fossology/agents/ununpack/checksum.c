@@ -143,7 +143,7 @@ Cksum *	SumComputeFile	(FILE *Fin)
 {
   int rc;
   SHA1Context sha1;
-  MD5_CTX md5;
+  MyMD5_CTX md5;
   char Buffer[64];
   Cksum *Sum;
   int ReadLen;
@@ -152,7 +152,7 @@ Cksum *	SumComputeFile	(FILE *Fin)
   Sum = (Cksum *)calloc(1,sizeof(Cksum));
   if (!Sum) return(NULL);
 
-  MD5_Init(&md5);
+  MyMD5_Init(&md5);
   rc = SHA1Reset(&sha1);
   if (rc)
     {
@@ -166,7 +166,7 @@ Cksum *	SumComputeFile	(FILE *Fin)
     ReadLen = fread(Buffer,1,64,Fin);
     if (ReadLen > 0)
 	{
-	MD5_Update(&md5,Buffer,ReadLen);
+	MyMD5_Update(&md5,Buffer,ReadLen);
 	if (SHA1Input(&sha1,(uint8_t *)Buffer,ReadLen) != shaSuccess)
 	  {
 	  fprintf(stderr,"ERROR: Failed to compute sha1 (intermediate compute)\n");
@@ -178,7 +178,7 @@ Cksum *	SumComputeFile	(FILE *Fin)
     }
 
   Sum->DataLen = ReadTotalLen;
-  MD5_Final(Sum->MD5digest,&md5);
+  MyMD5_Final(Sum->MD5digest,&md5);
   rc = SHA1Result(&sha1,Sum->SHA1digest);
   if (rc != shaSuccess)
     {
@@ -199,14 +199,14 @@ Cksum *	SumComputeBuff	(CksumFile *CF)
 {
   int rc;
   SHA1Context sha1;
-  MD5_CTX md5;
+  MyMD5_CTX md5;
   Cksum *Sum;
 
   Sum = (Cksum *)calloc(1,sizeof(Cksum));
   if (!Sum) return(NULL);
   Sum->DataLen = CF->MmapSize;
 
-  MD5_Init(&md5);
+  MyMD5_Init(&md5);
   rc = SHA1Reset(&sha1);
   if (rc)
     {
@@ -215,8 +215,8 @@ Cksum *	SumComputeBuff	(CksumFile *CF)
     return(NULL);
     }
 
-  MD5_Update(&md5,CF->Mmap,CF->MmapSize);
-  MD5_Final(Sum->MD5digest,&md5);
+  MyMD5_Update(&md5,CF->Mmap,CF->MmapSize);
+  MyMD5_Final(Sum->MD5digest,&md5);
   SHA1Input(&sha1,CF->Mmap,CF->MmapSize);
   rc = SHA1Result(&sha1,Sum->SHA1digest);
   if (rc)
