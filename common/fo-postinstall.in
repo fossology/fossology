@@ -130,7 +130,8 @@ else
 fi
 
 # first check to see if the db already exists
-if [ `su postgres -c 'psql -l' |grep -q fossology` ]; then
+su postgres -c 'psql -l' |grep -q fossology
+if [ $? = 0 ]; then
    echo "NOTE: fossology database already exists, not creating"
    echo "*** Checking database connectivity ***"
    # next check that we can talk to the db
@@ -197,6 +198,7 @@ if [ $SCHEDULER ]; then
    # this has to be done after the database is setup
    # BTW- mkschedconf seems to be hardcoded to use localhost, if that
    # is ever fixed this code might need to be too
+   echo "*** Checking Scheduler.conf ***"
    SCHEDCONF={$SYSCONFDIR}/fossology/Scheduler.conf
    if [ ! -f "$SCHEDCONF" -o "$OVERWRITE" ] ; then
       mkdir -p `dirname $SCHEDCONF`
