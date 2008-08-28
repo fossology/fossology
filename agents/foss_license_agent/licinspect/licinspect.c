@@ -588,6 +588,8 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
   int HasOutput=0;
   int First=0;
   void *DBresults;
+  int Confidence;
+
   /*
   Here's how the Confidence Value works:
      - Start with the percent match of the license.
@@ -635,6 +637,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
     }
 
   /* See what we got */
+  Confidence=0;
   if (!TermRemoved && !IsPhrase)
     {
     /* Got a great match */
@@ -646,7 +649,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	  PrintLicName(LicName,stdout);
 	  printf("\n");
 	  }
-	if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,0); /* full confidence */
+	Confidence=0;
 	}
     /* Got an good match */
     else if (ConfidenceValue >= ThresholdSimilar)
@@ -658,8 +661,14 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	  PrintLicName(LicName,stdout);
 	  printf("'-style\n");
 	  }
-	if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,1); /* style confidence */
+	Confidence=1; /* style confidence */
 	}
+    /* Not a good match, so just add it */
+    else
+	{
+	Confidence=2; /* low confidence; go with partial name */
+	}
+    if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,Confidence);
     }
 
   if (TermAdded && (TermsCounterSize > 0))
@@ -724,7 +733,11 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	/* Got a bad match on a phrase */
 	if (IsPhrase)
 	  {
-	  if (IsExplicit) printf("Phrase\n");
+	  if (IsExplicit)
+		{
+		printf("Phrase\n");
+		if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,0);
+		}
 	  else
 	    {
 	    if (!StoreDB || Verbose)
