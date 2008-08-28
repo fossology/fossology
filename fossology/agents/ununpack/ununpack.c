@@ -92,8 +92,8 @@ int TotalArtifacts=0;
  *********************************************************/
 int	MyDBaccess	(void *VDB, char *SQL)
 {
-  if (Verbose) fprintf(stderr,"SQL: %s\n",SQL);
-  return(DBaccess(DB,SQL));
+  if (Verbose) fprintf(stderr,"SQL[%s]: %s\n",VDB==DBTREE ? "DBTREE" : "DB",SQL);
+  return(DBaccess(VDB,SQL));
 } /* MyDBaccess() */
 
 /*********************************************************
@@ -1224,8 +1224,16 @@ void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
 	  {
 	  /* Find the new ID for this insertion */
 	  memset(SQL,'\0',MAXSQL);
-	  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE parent = '%ld' AND upload_fk = '%s';",
+	  if (NewParent > 0)
+	    {
+	    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE parent = '%ld' AND upload_fk = '%s';",
 	    NewParent, Upload_Pk);
+	    }
+	  else
+	    {
+	    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE parent IS NULL AND upload_fk = '%s';",
+	    Upload_Pk);
+	    }
 	  MyDBaccess(DBTREE,SQL);
 	  /* Recurse! */
 	  DBInsertUploadTreeRecurse(atol(DBgetvalue(DBTREE,0,0)),UploadTree);
@@ -1248,6 +1256,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   long CopyParent;
   char UfileName[1024];
   int Exist=0;
+  int rc;
 
   if (!Upload_Pk) return(-1); /* should never happen */
   // printf("=========== BEFORE ==========\n"); DebugContainerInfo(CI);
@@ -1329,19 +1338,19 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,'%s',%s);",
 	CI->PI.uploadtree_pk, CI->pfile_pk, CI->ufile_mode,
 	UfileName, Upload_Pk);
-    MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
+    rc=MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
     }
   else /* No parent!  This is the first upload! */
     {
     snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (upload_fk,pfile_fk,ufile_mode,ufile_name) VALUES (%s,%ld,%ld,'%s');",
 	Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
-    MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
+    rc=MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
     }
   /* Find the inserted child */
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name='%s';",
     Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
-  MyDBaccess(DBTREE,SQL);
+  rc=MyDBaccess(DBTREE,SQL);
   CI->uploadtree_pk = atol(DBgetvalue(DBTREE,0,0));
   TotalItems++;
   // printf("=========== AFTER ==========\n"); DebugContainerInfo(CI);
