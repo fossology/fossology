@@ -63,6 +63,7 @@ class verifyFossolyTest extends fossologyWebTestCase
     global $URL;
 
     $name = 'fossarchive-T\.tar\.bz2';
+    // new name: $name = 'fossI16L499.tar.bz2';
 
     print "starting VerifyFossology test\n";
     $page = $this->mybrowser->get("$URL?mod=browse");
