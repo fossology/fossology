@@ -17,6 +17,7 @@ CREATE DATABASE fossology WITH TEMPLATE = template0 ENCODING = 'SQL_ASCII';
 ALTER DATABASE fossology OWNER TO fossy;
 
 \connect fossology
+CREATE LANGUAGE plpgsql;
 
 SET client_encoding = 'SQL_ASCII';
 SET check_function_bodies = false;
