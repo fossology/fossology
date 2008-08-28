@@ -40,7 +40,7 @@ while true; do
 	 echo "  -e or --everything : all actions (default)"
 	 echo "  -o or --overwrite  : overwrite config files with new versions"
 	 echo "  -h or --help       : this help text"
-	 shift;;
+	 exit;;
       --) shift; break;;
       *) echo "Error: option $1 not recognised"; exit 1;;
    esac
