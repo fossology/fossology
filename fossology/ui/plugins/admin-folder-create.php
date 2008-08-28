@@ -1,4 +1,5 @@
 <?php
+
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -26,23 +27,28 @@
  This prevents hacking attempts.
  *************************************************/
 global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+if (!isset ($GlobalReady))
+{
+  exit;
+}
 
 class folder_create extends FO_Plugin
 {
-  var $Name       = "folder_create";
-  var $Title      = "Create a new Fossology folder";
-  var $Version    = "1.0";
-  var $MenuList   = "Organize::Folders::Create";
-  var $Dependency = array("db");
-  var $DBaccess   = PLUGIN_DB_WRITE;
+  var $Name = "folder_create";
+  var $Title = "Create a new Fossology folder";
+  var $Version = "1.0";
+  var $MenuList = "Organize::Folders::Create";
+  var $Dependency = array (
+    "db"
+  );
+  var $DBaccess = PLUGIN_DB_WRITE;
 
   /**
    * Create(): Given a parent folder ID, a name and description,
    * create the named folder under the parent.
    *
    * Includes idiot checking since the input comes from stdin.
-   * 
+   *
    * @param int    $ParentId
    * @param string $NewFolder
    * @param string $Desc
@@ -55,33 +61,45 @@ class folder_create extends FO_Plugin
 
     /* Check the name */
     $NewFolder = trim($NewFolder);
-    if (empty($NewFolder)) { return(0); }
+    if (empty ($NewFolder))
+    {
+      return (0);
+    }
 
     /* Make sure the parent folder exists */
     $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$ParentId';");
     $Row = $Results[0];
-    if ($Row['folder_pk'] != $ParentId) { return(0); }
+    if ($Row['folder_pk'] != $ParentId)
+    {
+      return (0);
+    }
 
     // folder name exists under the parent?
-    $Sql = "SELECT * FROM leftnav WHERE name = '$NewFolder' AND 
-    			parent = '$ParentId' AND foldercontents_mode = '1';";
+    $Sql = "SELECT * FROM folderlist WHERE name = '$NewFolder' AND
+        			parent = '$ParentId' AND foldercontents_mode = '1';";
     $Results = $DB->Action($Sql);
-    if ($Results[0]['name'] == $NewFolder) { return(0); } 
+    if ($Results[0]['name'] == $NewFolder)
+    {
+      return (0);
+    }
 
     /* Create the folder
      * Block SQL injection by protecting single quotes
      *
      * Protect the folder name with htmlentities.
      */
-    $NewFolder = str_replace("'", "''", $NewFolder);  // PostgreSQL quoting
-    $Desc = str_replace("'", "''", $Desc);            // PostgreSQL quoting
+    $NewFolder = str_replace("'", "''", $NewFolder); // PostgreSQL quoting
+    $Desc = str_replace("'", "''", $Desc); // PostgreSQL quoting
     $DB->Action("INSERT INTO folder (folder_name,folder_desc) VALUES ('$NewFolder','$Desc');");
     $Results = $DB->Action("SELECT folder_pk FROM folder WHERE folder_name='$NewFolder' AND folder_desc = '$Desc';");
     $FolderPk = $Results[0]['folder_pk'];
-    if (empty($FolderPk)) { return(0); }
+    if (empty ($FolderPk))
+    {
+      return (0);
+    }
 
     $DB->Action("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ('$ParentId','1','$FolderPk');");
-    return(1);
+    return (1);
   } // Create()
 
   /*********************************************
@@ -89,28 +107,34 @@ class folder_create extends FO_Plugin
    *********************************************/
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
-    $V="";
-    switch($this->OutputType)
+    if ($this->State != PLUGIN_STATE_READY)
     {
-      case "XML":
+      return;
+    }
+    $V = "";
+    switch ($this->OutputType)
+    {
+      case "XML" :
         break;
-      case "HTML":
+      case "HTML" :
         /* If this is a POST, then process the request. */
-        $ParentId = GetParm('parentid',PARM_INTEGER);
-        $NewFolder = GetParm('newname',PARM_TEXT);
-        $Desc = GetParm('description',PARM_TEXT);
-        if (!empty($ParentId) && !empty($NewFolder))
+        $ParentId = GetParm('parentid', PARM_INTEGER);
+        $NewFolder = GetParm('newname', PARM_TEXT);
+        $Desc = GetParm('description', PARM_TEXT);
+        if (!empty ($ParentId) && !empty ($NewFolder))
         {
           $rc = $this->Create($ParentId, $NewFolder, $Desc);
-          if ($rc==1)
+          if ($rc == 1)
           {
             /* Need to refresh the screen */
-	    $V .= PopupAlert("Folder $NewFolder Created");
             $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
-            $V .= "<script language='javascript'>\n";
-            $V .= "window.open('$Uri','_top');\n";
-            $V .= "</script>\n";
+            //print "<pre> calling PopupAlert</pre>\n";
+            $R .= PopupAlert("Folder $NewFolder Created", $Uri);
+
+            /*
+             * $V .= "<script language='javascript'>\n"; $V .= "window.
+             * open('$Uri','_top');\n"; $V .= "</script>\n";
+             */
           }
         }
         /* Display the form */
@@ -118,7 +142,7 @@ class folder_create extends FO_Plugin
         $V .= "<ol>\n";
         $V .= "<li>Select the parent folder:  \n";
         $V .= "<select name='parentid'>\n";
-        $V .= FolderListOption(-1,0);
+        $V .= FolderListOption(-1, 0);
         $V .= "</select><P />\n";
         $V .= "<li>Enter the new folder name:  \n";
         $V .= "<INPUT type='text' name='newname' size=40 />\n<br>";
@@ -126,15 +150,19 @@ class folder_create extends FO_Plugin
         $V .= "<INPUT type='text' name='description' size=80 />\n";
         $V .= "</ol>\n";
         $V .= "<input type='submit' value='Create!'>\n";
+        $V .= "$R\n";
         $V .= "</form>\n";
         break;
-      case "Text":
+      case "Text" :
         break;
-      default:
+      default :
         break;
     }
-    if (!$this->OutputToStdout) { return($V); }
-    print("$V");
+    if (!$this->OutputToStdout)
+    {
+      return ($V);
+    }
+    print ("$V");
     return;
   }
 };
