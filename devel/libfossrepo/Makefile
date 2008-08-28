@@ -4,7 +4,7 @@ TOP=../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
-CONFDEF=-DFOSSREPO_CONF='"$(DATADIR)/repository"' -DFOSSGROUP='"$(PROJECTGROUP)"'
+CONFDEF=-DFOSSREPO_CONF='"$(REPODIR)"' -DFOSSGROUP='"$(PROJECTGROUP)"'
 LIB=libfossrepo.a
 EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck
 
