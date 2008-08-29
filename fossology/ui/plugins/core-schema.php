@@ -95,21 +95,21 @@ CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
 DECLARE
   jqrec jobqueue;
   jqrec_test jobqueue;
-  jqcurse CURSOR FOR SELECT *  from jobqueue where jq_endtime is null and jq_end_bits < 2;
+  jqcurse CURSOR FOR SELECT *  FROM jobqueue WHERE jq_starttime IS NULL AND jq_end_bits < 2;
   jdep_row jobdepends;
   success integer;
 BEGIN
   open jqcurse;
 <<MYLABEL>>
   LOOP
-    FETCH jqcurse into jqrec;
+    FETCH jqcurse INTO jqrec;
     IF FOUND
     THEN -- check all dependencies
       success := 1;
       <<DEPLOOP>>
-      FOR jdep_row IN SELECT *  from jobdepends where jdep_jq_fk=jqrec.jq_pk LOOP
+      FOR jdep_row IN SELECT *  FROM jobdepends WHERE jdep_jq_fk=jqrec.jq_pk LOOP
         -- has the dependency been satisfied?
-        SELECT INTO jqrec_test * from jobqueue where jdep_row.jdep_jq_depends_fk=jq_pk and jq_endtime is not null and jq_end_bits != 2;
+        SELECT INTO jqrec_test * FROM jobqueue WHERE jdep_row.jdep_jq_depends_fk=jq_pk AND jq_endtime IS NOT NULL AND jq_end_bits < 2;
         IF NOT FOUND
         THEN
           success := 0;
