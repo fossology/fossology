@@ -293,6 +293,7 @@ void	AddPhrase	()
 {
   int rc;
   long TermId;
+  char SQL[1024]; /* SQL */
 
   rc = DBaccess(DB,"SELECT lic_pk FROM agent_lic_raw WHERE lic_name = 'Phrase';");
   if ((rc < 0) || (DBdatasize(DB) <= 0))
@@ -307,6 +308,15 @@ void	AddPhrase	()
     DBaccess(DB,"SELECT licterm_pk FROM licterm WHERE licterm_name = 'Phrase';");
     }
   TermId = atol(DBgetvalue(DB,0,0));
+
+  /* Make sure Phrase exists in the licterm_maplic table */
+  rc = DBaccess(DB,"SELECT licterm_maplic_pk FROM licterm_maplic WHERE lic_fk = 1;");
+  if ((rc < 0) || (DBdatasize(DB) <= 0))
+    {
+    memset(SQL,'\0',sizeof(SQL));
+    snprintf(SQL,sizeof(SQL),"INSERT INTO licterm_maplic (licterm_fk,lic_fk) VALUES (%ld,1);",TermId);
+    DBaccess(DB,SQL);
+    }
 
   /* Update any records that need migration */
   DBaccess(DB,"UPDATE licterm_name SET licterm_fk = (SELECT licterm_pk FROM licterm WHERE licterm_name = 'Phrase') WHERE licterm_fk IS NULL AND agent_lic_meta_fk IN (SELECT DISTINCT agent_lic_meta_pk FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_name = 'Phrase' AND lic_fk = lic_pk);");
