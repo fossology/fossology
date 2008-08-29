@@ -557,7 +557,7 @@ void	PrintLicName	(char *LicName, FILE *Fout)
 long	GetLicTermPk	(long MetaPk)
 {
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,MAXLINE,"SELECT licterm_pk FROM agent_lic_raw INNER JOIN agent_lic_meta ON agent_lic_meta_pk = %ld AND agent_lic_meta.lic_fk = lic_id INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id INNER JOIN licterm ON licterm_pk = licterm_fk;",
+  snprintf(SQL,MAXLINE,"SELECT licterm_pk FROM agent_lic_raw INNER JOIN agent_lic_meta ON agent_lic_meta_pk = %ld AND agent_lic_meta.lic_fk = lic_pk INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id INNER JOIN licterm ON licterm_pk = licterm_fk;",
 	MetaPk);
   DBaccess(DB,SQL);
   if (DBdatasize(DB) < 1) return(0);
@@ -581,6 +581,7 @@ void	StoreResults	(long PfilePk, long LicTermPk, long MetaPk,
     }
   else
     {
+    // printf("Got null: PfilePk=%ld LicTermPk=%ld MetaPk=%ld Confidence=%d\n",PfilePk,LicTermPk,MetaPk,Confidence);
     /* Get the LicTermPk from the MetaPk record */
     snprintf(SQL,MAXLINE,"INSERT INTO licterm_name (pfile_fk,agent_lic_meta_fk,licterm_name_confidence) VALUES (%ld,%ld,%d);",
 	PfilePk,MetaPk,Confidence);
