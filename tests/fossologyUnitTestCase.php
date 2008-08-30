@@ -90,15 +90,6 @@ class fossologyUnitTestCase extends UnitTestCase
       $this->fail();
     }
   }
-  public function repoLogin($user='fossy', $password='fossy')
-  {
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $this->assertTrue($this->get('http://osrb-1.fc.hp.com/repo/'));
-    //$this->assertAuthentication('Basic');
-    $this->authenticate($user, $password);
-    //$this->assertText('Welcome to FOSSology');
-  }
-}
 
 /* make it easy to run cli or the web
 if (TextReporter :: inCli())
@@ -107,4 +98,5 @@ if (TextReporter :: inCli())
 }
 $test->run(new HtmlReporter());
 */
+}
 ?>

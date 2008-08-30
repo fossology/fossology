@@ -49,13 +49,12 @@ require_once SIMPLE_TEST . 'unit_tester.php';
 require_once SIMPLE_TEST . 'reporter.php';
 require_once SIMPLE_TEST . 'web_tester.php';
 require_once ('TestEnvironment.php');
-require_once ('testClasses/parseBrowseMenu.php');
 
 global $URL;
 global $USER;
 global $PASSWORD;
 
-class fossologyWebTestCase extends WebTestCase
+class hideme
 {
   public $mybrowser;
   public $debug;

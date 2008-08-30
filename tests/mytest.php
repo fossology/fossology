@@ -23,7 +23,7 @@
  *
  * @return
  *
- * @version "$Id$"
+ * @version "$Id: templateTest.php 1210 2008-08-27 19:50:04Z rrando $"
  *
  * Created on Aug 1, 2008
  */
@@ -31,21 +31,17 @@
 /* every test must use these includes, adjust the paths based on where the
  * tests are in the source tree.
  */
-require_once ('../../../../tests/fossologyWebTestCase.php');
-require_once ('../../../../tests/TestEnvironment.php');
+require_once ('TestEnvironment.php');
 
-/* every test must use these globals, at least $URL */
 global $URL;
-global $USER;
-global $PASSWORD;
 
 /* The class name should end in Test */
 
 /* NOTE: You MUST remove the abstract or the test will not get run */
-abstract class someTest extends fossologyWebTestCase
+class myFirstTest extends createFolder
 {
   public $mybrowser;
-  public $someOtherVariable;
+  public $testFolder;
 
   /*
    * Every Test needs to login so we use the setUp method for that.
@@ -58,61 +54,43 @@ abstract class someTest extends fossologyWebTestCase
   function setUp()
   {
     global $URL;
+    print "setUP myFirstTest\n";
     $this->mybrowser = & new SimpleBrowser();
     $this->assertTrue(is_object($this->mybrowser));
     $page = $this->mybrowser->get($URL);
     $this->assertTrue($page);
-    $cookie = $this->repoLogin($this->mybrowser);
+    $cookie = $this->repoLogin($this->mybrowser,NULL,NULL);
     $host = $this->getHost($URL);
     $this->mybrowser->setCookie('Login', $cookie, $host);
   }
 
-  /*
-   * usually the test will only have one method, start it with the word
-   * test.
-   *
-   * Every Test should print a start message, this is useful to help
-   * determine where a test failed.  Most assert's can
-   *
-   * Every test should login to the site, so that it can be run
-   * standalone.  Use the repoLogin method defined in
-   * fossologyWebTestCase.  Typically you create a browser and then use
-   * that object to login with.  See below.
-   *
-   * The login routine will return the session cookie.  Use it to set
-   * set the cookie.
-   */
-  function testsome()
+  function testmytest()
   {
     global $URL;
-
-    print "starting testSome\n";
-
-    /* at this point the test is ready to naviate to the url it wants to
-     * test and starts testing.
-     *
-     * For example, the lines below navigate to the browse screen and
-     * look for a title called Folder Navigation and the standard root
-     * folder (Software Repository.)
-     *
-     * Just for fun it checks to see if /tmp exists. :)
-     */
+    print "starting testmytest\n";
+    print "url is:$URL\n";
+    $page = $this->mybrowser->get($URL);
+    print "after mybrowser->get\n";
+    //print "page after get is:\n$page\n";
     $page = $this->mybrowser->clickLink('Browse');
-    $this->assertTrue(assertText('/Folder Navigation/'),
+    print "after mybrowser->clickLink('Browse')\n";
+    //print "page after Browse is:\n$page\n";
+    $this->assertTrue($this->myassertText($page,'/Folder Navigation/'),
                       "FAIL! There is no Folder Navigation Title\n");
-    $this->assertTrue(assertText('/>S.*?y<//'),
-                      "FAIL! There is no Root Folder!\n");
-    $this->assertTrue(is_dir('/tmp'),
-                      "FAIL! There is no /tmp\n");
+    print "after AssTRUE 'Folder Navigation'\n";
+    $page = $this->mybrowser->clickLink('Create');
+    print "mytest: calling createAFolder\n";
+    $this->createAFolder('Testing', 'ATFX', "DuhX");
+    print "mytest: After createAFolder\n";
   }
 
   /* use the tearDown method to clean up after a test.  This method like
    * setUp will run after every test.
-   */
+
    function tearDown()
    {
      return(TRUE);
    }
+   */
 }
-
 ?>
