@@ -69,6 +69,7 @@ class myFirstTest extends createFolder
     global $URL;
     print "starting testmytest\n";
     print "url is:$URL\n";
+    $this->atst('From MyTest');
     $page = $this->mybrowser->get($URL);
     print "after mybrowser->get\n";
     //print "page after get is:\n$page\n";
