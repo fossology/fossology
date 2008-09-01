@@ -1,5 +1,4 @@
 <?php
-
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -48,10 +47,32 @@ class fossologyTest extends WebTestCase
   private $Password;
 
   /* Accesor methods */
-  public function getBrowser() { return ($this->mybrowser); }
-  public function setBrowser($browser) { return ($this->mybrowser = $browser); }
-  public function getCookie() { return ($this->cookie); }
-  public function setmyCookie($cookie){ return ($this->cookie = $cookie); }
+  public function getBrowser()
+  {
+    return ($this->mybrowser);
+  }
+  public function setBrowser($browser)
+  {
+    return ($this->mybrowser = $browser);
+  }
+  public function getCookie()
+  {
+    return ($this->cookie);
+  }
+  public function setmyCookie($cookie)
+  {
+    return ($this->cookie = $cookie);
+  }
+
+  /* Factory methods, still need to change methods */
+  function pmm($test)
+  {
+    return(new parseMiniMenu($this));
+  }
+  function plt($test)
+  {
+    return(new parseLicenseTbl($this));
+  }
 
   public function myassertText($page, $pattern)
   {
@@ -79,10 +100,11 @@ class fossologyTest extends WebTestCase
   public function setAgents($agents = NULL)
   {
     $agentList = array (
-      'license'      => 'Check_agent_license',
-      'mimetype'     => 'Check_agent_mimetype',
+      'license' => 'Check_agent_license',
+      'mimetype' => 'Check_agent_mimetype',
       'pkgmetagetta' => 'Check_agent_pkgmetagetta',
-      'specagent'    => 'Check_agent_specagent',
+      'specagent' => 'Check_agent_specagent',
+
     );
     /* check parameters and parse */
     if (is_null($agents))
@@ -151,158 +173,157 @@ class fossologyTest extends WebTestCase
     return (TRUE);
   } //setAgents
 
-/**
- * Login()
- *
- * Login to the FOSSology Repository, uses the globals set in
- * TestEnvironment.php
- *
- */
-public function Login()
-{
-  global $URL;
-  $browser = &new SimpleBrowser();
-  $this->setBrowser($browser);
-  $this->assertTrue(is_object($this->mybrowser),
-        "FAIL! Login() internal failure did not get a browser object\n");
-  $page = $this->mybrowser->get($URL);
-  $this->assertTrue($page);
-  $cookie = _repoDBlogin($this->mybrowser);
-  $this->setmyCookie($cookie);
-  $host = $this->getHost($URL);
-  $this->mybrowser->setCookie('Login', $cookie, $host);
-}
-private function _repoDBlogin($browser = NULL, $user, $password)
-{
-
-  print "repoLogin is running\n";
-  if (is_null($browser))
+  /**
+   * Login()
+   *
+   * Login to the FOSSology Repository, uses the globals set in
+   * TestEnvironment.php
+   *
+   */
+  public function Login()
   {
-    print "_repoDBlogin setting browser\n";
+    global $URL;
     $browser = & new SimpleBrowser();
+    $this->setBrowser($browser);
+    $this->assertTrue(is_object($this->mybrowser), "FAIL! Login() internal failure did not get a browser object\n");
+    $page = $this->mybrowser->get($URL);
+    $this->assertTrue($page);
+    $cookie = $this->_repoDBlogin($this->mybrowser);
+    $this->setmyCookie($cookie);
+    $host = $this->getHost($URL);
+    $this->mybrowser->setCookie('Login', $cookie, $host);
   }
-  $this->setBrowser($browser);
-  global $URL;
-  global $USER;
-  global $PASSWORD;
-  $page = NULL;
-  $cookieValue = NULL;
-
-  $host = $this->getHost($URL);
-  $this->assertTrue(is_object($browser));
-  $browser->useCookies();
-  $cookieValue = $browser->getCookieValue($host, '/', 'Login');
-  // need to check $cookieValue for validity
-  $browser->setCookie('Login', $cookieValue, $host);
-  $this->assertTrue($browser->get("$URL?mod=auth&nopopup=1"));
-  $this->assertTrue($browser->setField('username', $USER));
-  $this->assertTrue($browser->setField('password', $PASSWORD));
-  $this->assertTrue($browser->isSubmit('Login'));
-  $this->assertTrue($browser->clickSubmit('Login'));
-  $page = $browser->getContent();
-  preg_match('/User Logged In/', $page, $matches);
-  $this->assertTrue($matches, "Login PASSED");
-  $browser->setCookie('Login', $cookieValue, $host);
-  $page = $browser->getContent();
-  $NumMatches = preg_match('/User Logged Out/', $page, $matches);
-  $this->assertFalse($NumMatches, "User Logged out!, Login Failed! %s");
-  return ($cookieValue);
-}
-/********************************************************************
-  * Static methods
-  * Even though these are static, they should still be called with a
-  * $this-> in case they turn into non-static methods.
-  * ******************************************************************/
-/**
- * public function getHost
- *
- * returns the host (if present) from a URL
- *
- * @param string $URL a url in the form of http://somehost.xx.com/repo/
- *
- * @return string $host the somehost.xxx part is returned or
- *         NULL, if there is no host in the uri
- *
- */
-
-public function getHost($URL)
-{
-  if (empty ($URL))
+  private function _repoDBlogin($browser = NULL)
   {
-    return (NULL);
+
+    print "repoLogin is running\n";
+    if (is_null($browser))
+    {
+      print "_repoDBlogin setting browser\n";
+      $browser = & new SimpleBrowser();
+    }
+    $this->setBrowser($browser);
+    global $URL;
+    global $USER;
+    global $PASSWORD;
+    $page = NULL;
+    $cookieValue = NULL;
+
+    $host = $this->getHost($URL);
+    $this->assertTrue(is_object($browser));
+    $browser->useCookies();
+    $cookieValue = $browser->getCookieValue($host, '/', 'Login');
+    // need to check $cookieValue for validity
+    $browser->setCookie('Login', $cookieValue, $host);
+    $this->assertTrue($browser->get("$URL?mod=auth&nopopup=1"));
+    $this->assertTrue($browser->setField('username', $USER));
+    $this->assertTrue($browser->setField('password', $PASSWORD));
+    $this->assertTrue($browser->isSubmit('Login'));
+    $this->assertTrue($browser->clickSubmit('Login'));
+    $page = $browser->getContent();
+    preg_match('/User Logged In/', $page, $matches);
+    $this->assertTrue($matches, "Login PASSED");
+    $browser->setCookie('Login', $cookieValue, $host);
+    $page = $browser->getContent();
+    $NumMatches = preg_match('/User Logged Out/', $page, $matches);
+    $this->assertFalse($NumMatches, "User Logged out!, Login Failed! %s");
+    return ($cookieValue);
   }
-  return (parse_url($URL, PHP_URL_HOST)); // can return NULL
-}
+  /********************************************************************
+    * Static methods
+    * Even though these are static, they should still be called with a
+    * $this-> in case they turn into non-static methods.
+    * ******************************************************************/
+  /**
+   * public function getHost
+   *
+   * returns the host (if present) from a URL
+   *
+   * @param string $URL a url in the form of http://somehost.xx.com/repo/
+   *
+   * @return string $host the somehost.xxx part is returned or
+   *         NULL, if there is no host in the uri
+   *
+   */
 
-/**
- * parse the folder id out of the html...
- *
- *@param string $folderName the name of the folder
- *@param string $page the xhtml page to search
- *
- *@return string (the folder id)
- */
-public function getFolderId($folderName, $page)
-{
-  $found = preg_match("/.*value='([0-9].*?)'.*?;($folderName)<\//", $page, $matches);
-  //print "DB: matches is:\n";
-  //var_dump($matches) . "\n";
-  return ($matches[1]);
-}
-
-/**
- * getBrowserUri get the url fragment to display the upload from the
- * xhtml page.
- *
- * @param string $name the name of a folder or upload
- * @param string $page the xhtml page to search
- *
- *
- * TODO: finish or scrap this method
- *
- * @return $string the matching uri or null.
- *
- */
-public function getBrowseUri($name, $page)
-{
-  //print "DB: GBURI: page is:\n$page\n";
-  //$found = preg_match("/href='(.*?)'>($uploadName)<\/a>/", $page, $matches);
-  // doesn't work: '$found = preg_match("/href='(.*?)'>$name/", $page, $matches);
-  $found = preg_match("/href='((.*?)&show=detail).*?/", $page, $matches);
-  //$found = preg_match("/ class=.*?href='(.*?)'>$name/", $page, $matches);
-  print "DB: GBURI: found matches is:$found\n";
-  print "DB: GBURI: matches is:\n";
-  var_dump($matches) . "\n";
-  if ($found)
+  public function getHost($URL)
   {
+    if (empty ($URL))
+    {
+      return (NULL);
+    }
+    return (parse_url($URL, PHP_URL_HOST)); // can return NULL
+  }
+
+  /**
+   * parse the folder id out of the html...
+   *
+   *@param string $folderName the name of the folder
+   *@param string $page the xhtml page to search
+   *
+   *@return string (the folder id)
+   */
+  public function getFolderId($folderName, $page)
+  {
+    $found = preg_match("/.*value='([0-9].*?)'.*?;($folderName)<\//", $page, $matches);
+    //print "DB: matches is:\n";
+    //var_dump($matches) . "\n";
     return ($matches[1]);
-  } else
-  {
-    return (NULL);
   }
-}
-/**
- * makeUrl($host,$query)
- *
- * Make a url from the host and query strings.
- *
- * @param $string $host the host (e.g. somehost.com, host.privatenet)
- * @param $string $query the query to append to the host.
- *
- * @return the http string or NULL on error
- */
-public function makeUrl($host, $query)
-{
-  if (empty ($host))
+
+  /**
+   * getBrowserUri get the url fragment to display the upload from the
+   * xhtml page.
+   *
+   * @param string $name the name of a folder or upload
+   * @param string $page the xhtml page to search
+   *
+   *
+   * TODO: finish or scrap this method
+   *
+   * @return $string the matching uri or null.
+   *
+   */
+  public function getBrowseUri($name, $page)
   {
-    return (NULL);
+    //print "DB: GBURI: page is:\n$page\n";
+    //$found = preg_match("/href='(.*?)'>($uploadName)<\/a>/", $page, $matches);
+    // doesn't work: '$found = preg_match("/href='(.*?)'>$name/", $page, $matches);
+    $found = preg_match("/href='((.*?)&show=detail).*?/", $page, $matches);
+    //$found = preg_match("/ class=.*?href='(.*?)'>$name/", $page, $matches);
+    print "DB: GBURI: found matches is:$found\n";
+    print "DB: GBURI: matches is:\n";
+    var_dump($matches) . "\n";
+    if ($found)
+    {
+      return ($matches[1]);
+    } else
+    {
+      return (NULL);
+    }
   }
-  if (empty ($query))
+  /**
+   * makeUrl($host,$query)
+   *
+   * Make a url from the host and query strings.
+   *
+   * @param $string $host the host (e.g. somehost.com, host.privatenet)
+   * @param $string $query the query to append to the host.
+   *
+   * @return the http string or NULL on error
+   */
+  public function makeUrl($host, $query)
   {
-    return (NULL);
+    if (empty ($host))
+    {
+      return (NULL);
+    }
+    if (empty ($query))
+    {
+      return (NULL);
+    }
+    return ("http://$host$query");
   }
-  return ("http://$host$query");
-}
 
 } // fossolgyTest
 ?>

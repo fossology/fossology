@@ -32,13 +32,13 @@
  * tests are in the source tree.
  */
 require_once ('TestEnvironment.php');
+require_once ('fossologyTestCase.php');
 
 global $URL;
 
 /* The class name should end in Test */
 
-/* NOTE: You MUST remove the abstract or the test will not get run */
-class myFirstTest extends createFolder
+class myFirstTest extends fossologyTestCase
 {
   public $mybrowser;
   public $testFolder;
@@ -53,38 +53,24 @@ class myFirstTest extends createFolder
    */
   function setUp()
   {
-    global $URL;
     print "setUP myFirstTest\n";
-    $this->mybrowser = & new SimpleBrowser();
-    $this->assertTrue(is_object($this->mybrowser));
-    $page = $this->mybrowser->get($URL);
-    $this->assertTrue($page);
-    $cookie = $this->repoLogin($this->mybrowser,NULL,NULL);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login();
   }
-
+/* all runnable test names (methods/functions) must start with 'test' */
   function testmytest()
   {
     global $URL;
     print "starting testmytest\n";
-    print "url is:$URL\n";
-    $this->atst('From MyTest');
     $page = $this->mybrowser->get($URL);
-    print "after mybrowser->get\n";
     //print "page after get is:\n$page\n";
     $page = $this->mybrowser->clickLink('Browse');
-    print "after mybrowser->clickLink('Browse')\n";
     //print "page after Browse is:\n$page\n";
     $this->assertTrue($this->myassertText($page,'/Folder Navigation/'),
                       "FAIL! There is no Folder Navigation Title\n");
-    print "after AssTRUE 'Folder Navigation'\n";
     $page = $this->mybrowser->clickLink('Create');
-    print "mytest: calling createAFolder\n";
-    $this->createAFolder('Testing', 'ATFX', "DuhX");
-    print "mytest: After createAFolder\n";
+    $this->createFolder('Testing', 'New', "New Scheme");
+    print "mytest: After createFolder\n";
   }
-
   /* use the tearDown method to clean up after a test.  This method like
    * setUp will run after every test.
 
