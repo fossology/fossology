@@ -21,7 +21,7 @@
  * Base Class for all fossology tests.  All fossology tests should
  * extend this class.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Sep 1, 2008
  */

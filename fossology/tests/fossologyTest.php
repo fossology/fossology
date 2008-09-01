@@ -27,7 +27,7 @@
  *
  * @package fossologyTest
  *
- * @version "$Id:  $"
+ * @version "$Id$"
  *
  * Created on Sept. 1, 2008
  */

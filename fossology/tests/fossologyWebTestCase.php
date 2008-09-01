@@ -115,70 +115,6 @@ class hideme
   }
 
   /**
-  * function uploadAFile
-  * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
-  *
-  * Upload a file and optionally schedule the agents.
-  *
-  * @param string $parentFolder the parent folder name, default is root
-  * folder (1)
-  * @param string $uploadFile the path to the file to upload
-  * @param string $description=null optonal description
-  * @param string $uploadName=null optional upload name
-  *
-  * @todo, add in selecting agents the parameter to this routine will
-  * need to be quoted if it contains commas.
-  *
-  * @todo add ability to specify uploadName
-  *
-  * @return false on error
-  */
-  public function uploadAFile($parentFolder, $uploadFile, $description=null, $uploadName=null, $agents=null)
-  {
-    global $URL;
-    /*
-     * check parameters:
-     * default parent folder is root folder
-     * no uploadfile return false
-     * description and upload name are optonal
-     * future: agents are optional
-     */
-    if (empty ($parentFolder))
-    {
-      $parentFolder = 1;
-    }
-    if (empty ($uploadFile))
-    {
-      return (FALSE);
-    }
-    if (is_null($description)) // set default if null
-    {
-      $description = "File $uploadFile uploaded by test UploadAFileTest";
-    }
-    //print "starting uploadAFile\n";
-    $loggedIn = $this->mybrowser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
-    $page = $this->mybrowser->get("$URL?mod=upload_file");
-    $this->assertTrue($this->assertText($page, '/Upload a New File/'));
-    $this->assertTrue($this->assertText($page, '/Select the file to upload:/'));
-    $this->assertTrue($this->mybrowser->setField('folder', $parentFolder), "FAIL! could not select Parent Folder!\n");
-    $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile"));
-    $this->assertTrue($this->mybrowser->setField('description', "$description"));
-    /*
-     * the test breaks if the name is set to null $this->assertTrue
-     * ($this- >mybrowser- >setField ('name', $upload_name));
-     *
-     */
-    /* Select agents to run, we just pass on the parameter to setAgents */
-    $rtn = $this->setAgents($agents);
-    //$this->assertNotNull($rtn, "FAIL: could not set agents in uploadAFILE test\n");
-    if(is_null($rtn)) { $this->fail("FAIL: could not set agents in uploadAFILE test\n"); }
-    $page = $this->mybrowser->clickSubmit('Upload!');
-    $this->assertTrue(page);
-    //print "************* page after Upload! is *************\n$page\n";
-    $this->assertTrue($this->assertText($page, '/Upload added to job queue/'));
-  }
-  /**
   * function uploadAUrl
   * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
   *
@@ -247,7 +183,6 @@ class hideme
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
     $this->assertTrue($this->assertText($page, '/Upload added to job queue/'));
-
     //print  "************ page after Upload! *************\n$page\n";
   }
   /**

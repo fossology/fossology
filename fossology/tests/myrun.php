@@ -29,20 +29,31 @@
 
 $path = '/usr/local/simpletest' . PATH_SEPARATOR;
 set_include_path(get_include_path() . PATH_SEPARATOR . $path);
+if (!defined('SIMPLE_TEST'))
+  define('SIMPLE_TEST', '/usr/local/simpletest/');
+
+/* simpletest includes */
+require_once SIMPLE_TEST . 'unit_tester.php';
+require_once SIMPLE_TEST . 'reporter.php';
+require_once SIMPLE_TEST . 'web_tester.php';
 
 /* simpletest includes */
 require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
-require_once ('testUtils.php');
-require_once ('testClasses/fossLogin.php');
-require_once ('testClasses/createFolder.php');
+//require_once ('testUtils.php');
+//require_once ('ex.php');
+//require_once ('testClasses/fossLogin.php');
+//require_once ('testClasses/createFolder.php');
 require_once ('TestEnvironment.php');
 
 $test = & new TestSuite("Sample Fossology test");
 
-$test->addTestFile('mytest.php');
+//$test->addTestFile('mytest.php');
+require_once ('ex.php');
+//$test->addTestFile('ex.php');
+$test->addTestFile('twtc.php');
 /*
  * leave the code below alone, it allows the tests to be run either by
  * the cli or in a web browser
