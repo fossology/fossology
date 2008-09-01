@@ -42,18 +42,11 @@ require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
-//require_once ('testUtils.php');
-//require_once ('ex.php');
-//require_once ('testClasses/fossLogin.php');
-//require_once ('testClasses/createFolder.php');
 require_once ('TestEnvironment.php');
 
 $test = & new TestSuite("Sample Fossology test");
+$test->addTestFile('mytest.php');
 
-//$test->addTestFile('mytest.php');
-require_once ('ex.php');
-//$test->addTestFile('ex.php');
-$test->addTestFile('twtc.php');
 /*
  * leave the code below alone, it allows the tests to be run either by
  * the cli or in a web browser

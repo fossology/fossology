@@ -26,13 +26,48 @@
  * Created on Sep 1, 2008
  */
 
- require_once('TestEnvironment.php');
+require_once('TestEnvironment.php');
+require_once('fossologyTest.php');
 
  class fossologyTestCase extends fossologyTest
 {
   public $mybrowser;
   public $debug;
 
+  /* possible methods to add */
+  public function uploadServer(){
+    return TRUE;
+  }
+  public function oneShotLicense(){
+    return TRUE;
+  }
+  public function deleteFolder(){
+    return TRUE;
+  }
+  public function deleteUpload(){
+    return TRUE;
+  }
+  public function moveUpload(){
+    return TRUE;
+  }
+  public function rmLicAnalysis(){
+    return TRUE;
+  }
+  public function editFolder(){
+    return TRUE;
+  }
+  public function mvFolder(){
+    return TRUE;
+  }
+  public function jobsSummary(){
+    return TRUE;
+  }
+  public function jobsDetail(){
+    return TRUE;
+  }
+  public function dbCheck(){
+    return TRUE;
+  }
   /**
    * createFolder
    * Uses the UI 'Create' menu to create a folder.  Always creates a
@@ -71,7 +106,7 @@
     $page = $this->mybrowser->clickSubmit('Create!');
     $this->assertTrue(page);
     $this->assertTrue($this->myassertText($page, "/Folder $name Created/"),
-     "FAIL! Folder $name Created not found\n");
+     "createFolder Failed!\nPhrase 'Folder $name Created' not found\nDoes the Folder exist?\n");
   }
 
   /**
