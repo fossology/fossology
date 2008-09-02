@@ -35,12 +35,7 @@ class UploadsRemoveLAMenuTest extends fossologyTestCase
   {
     global $URL;
     print "starting UploadsRemoveLAMenuTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
+    $this->Login($browser);
     $host = $this->getHost($URL);
     $browser->setCookie('Login', $cookie, $host);
     /* we get the home page to get rid of the user logged in page */

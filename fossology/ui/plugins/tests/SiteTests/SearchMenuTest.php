@@ -33,16 +33,18 @@ global $PASSWORD;
 
 class SearchMenuTest extends fossologyTestCase
 {
+  public $mybroswer;
 
   function testSearchMenu()
   {
     global $URL;
     print "starting SearchMenuTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $page = $this->get($URL);
+    $browser = & new SimpleBrowser();
+    $this->setBrowser($browser);
+    $page = $this->mybrowser->get($URL);
     $this->assertTrue($page);
     $this->myassertText($page, '/Welcome to FOSSology/');
-    $page = $this->click('Search');
+    $page = $this->mybrowser->click('Search');
     $this->myassertText($page, '/Search for File/');
     $this->myassertText($page, '/Enter the filename to find/');
   }

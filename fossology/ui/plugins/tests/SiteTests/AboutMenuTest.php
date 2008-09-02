@@ -34,16 +34,18 @@ global $PASSWORD;
 
 class TestAboutMenu extends fossologyTestCase
 {
+  public $mybrowser;
 
   function testMenuAbout()
   {
     global $URL;
     print "starting testMenuAbout\n";
-    $page = $this->get($URL);
+    $mybrowser = new SimpleBrowser();
+    $page = $this->mybrowser->get($URL);
     $this->assertTrue($page);
     $this->myassertText($page, '/Welcome to FOSSology/');
-    $this->click('Help');
-    $this->click('About');
+    $this->mybrowser->click('Help');
+    $this->mybrowser->click('About');
     $this->myassertText($page, '/About FOSSology/');
   }
 }

@@ -33,28 +33,20 @@ global $PASSWORD;
 
 class FoldersDeleteMenuTest extends fossologyTestCase
 {
+  public $mybrowser;
 
   function testFolderDeleteMenu()
   {
-    global $URL;
-    print "starting FolderDeleteMenuTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
+    $this->Login($this->mybrowser);
     /* we get the home page to get rid of the user logged in page */
-    $loggedIn = $browser->get($URL);
+    $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Folders /'));
     $this->assertTrue($this->myassertText($loggedIn, '/Create/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get("$URL?mod=admin_folder_delete");
+    $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
     $this->assertTrue($this->myassertText($page, '/Delete Folder/'));
     $this->assertTrue($this->myassertText($page, '/THERE IS NO UNDELETE/'));
   }

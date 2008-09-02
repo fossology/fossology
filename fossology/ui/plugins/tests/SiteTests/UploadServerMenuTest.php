@@ -35,13 +35,7 @@ class UploadServerMenuTest extends fossologyTestCase
   {
     global $URL;
     print "starting UploadServerMenuTest\n";
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
+    $this->Login($browser);
     /* we get the home page to get rid of the user logged in page */
     $loggedIn = $browser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
