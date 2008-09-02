@@ -35,11 +35,11 @@ class UploadsRemoveLAMenuTest extends fossologyTestCase
   {
     global $URL;
     print "starting UploadsRemoveLAMenuTest\n";
-    $this->Login($browser);
+    $this->Login($this->mybrowser);
     $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
+    $this->mybrowser->setCookie('Login', $cookie, $host);
     /* we get the home page to get rid of the user logged in page */
-    $loggedIn = $browser->get($URL);
+    $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Uploads/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Delete Uploaded File/'));
@@ -49,7 +49,7 @@ class UploadsRemoveLAMenuTest extends fossologyTestCase
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get("$URL?mod=agent_reset_license");
+    $page = $this->mybrowser->get("$URL?mod=agent_reset_license");
     $this->assertTrue($this->myassertText($page, '/Remove License Analysis/'));
     $this->assertTrue($this->myassertText($page, '/THERE IS NO UNREMOVE/'));
   }
