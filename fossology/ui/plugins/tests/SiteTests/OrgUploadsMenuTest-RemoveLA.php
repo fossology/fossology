@@ -36,8 +36,6 @@ class UploadsRemoveLAMenuTest extends fossologyTestCase
     global $URL;
     print "starting UploadsRemoveLAMenuTest\n";
     $this->Login($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
     /* we get the home page to get rid of the user logged in page */
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
