@@ -37,7 +37,7 @@ class UploadsMoveMenuTest extends fossologyTestCase
     print "starting UploadsMoveMenuTest\n";
     $this->Login($browser);
     /* we get the home page to get rid of the user logged in page */
-    $loggedIn = $browser->get($URL);
+    $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Uploads/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Delete Uploaded File/'));
@@ -47,7 +47,7 @@ class UploadsMoveMenuTest extends fossologyTestCase
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get("$URL?mod=upload_move");
+    $page = $this->mybrowser->get("$URL?mod=upload_move");
     $this->assertTrue($this->myassertText($page, '/Move upload to different folder/'));
     $this->assertTrue($this->myassertText($page, '/Select the destination folder/'));
   }

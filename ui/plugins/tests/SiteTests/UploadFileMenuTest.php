@@ -37,7 +37,7 @@ class UploadFileMenuTest extends fossologyTestCase
     print "starting UploadFileMenuTest\n";
     $this->Login($browser);
     /* we get the home page to get rid of the user logged in page */
-    $loggedIn = $browser->get($URL);
+    $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Instructions/'));
     $this->assertTrue($this->myassertText($loggedIn, '/From File/'));
@@ -47,7 +47,7 @@ class UploadFileMenuTest extends fossologyTestCase
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get("$URL?mod=upload_file");
+    $page = $this->mybrowser->get("$URL?mod=upload_file");
     $this->assertTrue($this->myassertText($page, '/Upload a New File/'));
     $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
   }

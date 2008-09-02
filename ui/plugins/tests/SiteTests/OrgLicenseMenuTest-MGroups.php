@@ -37,7 +37,7 @@ class LicenseMGroupsMenuTest extends fossologyTestCase
     print "starting LicenseMGroupsMenuTest\n";
     $this->Login($browser);
     /* we get the home page to get rid of the user logged in page */
-    $loggedIn = $browser->get($URL);
+    $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
     $this->assertTrue($this->myassertText($loggedIn, '/License/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Default Groups/'));
@@ -47,7 +47,7 @@ class LicenseMGroupsMenuTest extends fossologyTestCase
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get("$URL?mod=license_groups_manage");
+    $page = $this->mybrowser->get("$URL?mod=license_groups_manage");
     $this->assertTrue($this->myassertText($page, '/Manage License Groups/'));
     $this->assertTrue($this->myassertText($page, '/Select subgroups to include/'));
   }

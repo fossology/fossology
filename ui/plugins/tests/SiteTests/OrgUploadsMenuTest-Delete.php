@@ -37,7 +37,7 @@ class UploadsDeleteMenuTest extends fossologyTestCase
     print "starting UploadsDeleteMenuTest\n";
     $this->Login($browser);
     /* we get the home page to get rid of the user logged in page */
-    $loggedIn = $browser->get($URL);
+    $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Uploads/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Delete Uploaded File/'));
@@ -47,7 +47,7 @@ class UploadsDeleteMenuTest extends fossologyTestCase
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get("$URL?mod=admin_upload_delete");
+    $page = $this->mybrowser->get("$URL?mod=admin_upload_delete");
     $this->assertTrue($this->myassertText($page, '/Delete Uploaded File/'));
     $this->assertTrue($this->myassertText($page, '/THERE IS NO UNDELETE/'));
   }
