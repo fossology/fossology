@@ -39,12 +39,12 @@
  * automatically do it. Well it could, but it's a bad idea.
  */
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class UploadSrvTest extends fossologyWebTestCase
+class UploadSrvTest extends fossologyTestCase
 {
   function setUp()
   {

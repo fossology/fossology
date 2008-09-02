@@ -27,13 +27,13 @@
  * Created on Aug 27, 2008
  */
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 /* every test must use these globals, at least $URL */
 global $URL;
 
-class DupFolderTest extends fossologyWebTestCase
+class DupFolderTest extends fossologyTestCase
 {
   public $folder_name;
   public $mybrowser;

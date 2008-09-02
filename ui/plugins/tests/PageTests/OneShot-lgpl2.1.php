@@ -29,12 +29,12 @@
  * Created on Aug 1, 2008
  */
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class OneShotgplv21Test extends fossologyWebTestCase
+class OneShotgplv21Test extends fossologyTestCase
 {
   function setUp()
   {
