@@ -23,12 +23,12 @@
  *
  * Created on Jul 31, 2008
  */
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class LicenseDTermsMenuTest extends fossologyWebTestCase
+class LicenseDTermsMenuTest extends fossologyTestCase
 {
 
   function testLicenseDTermsMenu()
@@ -45,18 +45,18 @@ class LicenseDTermsMenuTest extends fossologyWebTestCase
     $browser->setCookie('Login', $cookie, $host);
     /* we get the home page to get rid of the user logged in page */
     $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Organize/'));
-    $this->assertTrue($this->assertText($loggedIn, '/License/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Default Groups/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Default Terms/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Manage Groups/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Manage Terms/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/License/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Default Groups/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Default Terms/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Manage Groups/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Manage Terms/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
     $page = $browser->get("$URL?mod=license_terms_default");
-    $this->assertTrue($this->assertText($page, '/Create Default License Terms/'));
-    $this->assertTrue($this->assertText($page, '/Check to create the default terms/'));
+    $this->assertTrue($this->myassertText($page, '/Create Default License Terms/'));
+    $this->assertTrue($this->myassertText($page, '/Check to create the default terms/'));
   }
 }
 ?>

@@ -23,12 +23,12 @@
  *
  * Created on Jul 31, 2008
  */
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class UploadServerMenuTest extends fossologyWebTestCase
+class UploadServerMenuTest extends fossologyTestCase
 {
 
   function testUploadServerMenu()
@@ -44,18 +44,18 @@ class UploadServerMenuTest extends fossologyWebTestCase
     $browser->setCookie('Login', $cookie, $host);
     /* we get the home page to get rid of the user logged in page */
     $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Instructions/'));
-    $this->assertTrue($this->assertText($loggedIn, '/From File/'));
-    $this->assertTrue($this->assertText($loggedIn, '/From Server/'));
-    $this->assertTrue($this->assertText($loggedIn, '/From URL/'));
-    $this->assertTrue($this->assertText($loggedIn, '/One-Shot License/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Instructions/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/From File/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/From Server/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/From URL/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/One-Shot License/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
     $page = $browser->get("$URL?mod=upload_srv_files");
-    $this->assertTrue($this->assertText($page, '/Upload from Server/'));
-    $this->assertTrue($this->assertText($page, '/Disable alphabetized sub-folders/'));
+    $this->assertTrue($this->myassertText($page, '/Upload from Server/'));
+    $this->assertTrue($this->myassertText($page, '/Disable alphabetized sub-folders/'));
   }
 }
 ?>

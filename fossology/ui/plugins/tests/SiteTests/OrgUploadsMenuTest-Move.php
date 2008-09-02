@@ -23,12 +23,12 @@
  *
  * Created on Jul 31, 2008
  */
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class UploadsMoveMenuTest extends fossologyWebTestCase
+class UploadsMoveMenuTest extends fossologyTestCase
 {
 
   function testUploadsMoveMenu()
@@ -45,18 +45,18 @@ class UploadsMoveMenuTest extends fossologyWebTestCase
     $browser->setCookie('Login', $cookie, $host);
     /* we get the home page to get rid of the user logged in page */
     $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Organize/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Uploads/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Delete Uploaded File/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Edit Properties \(TBD\)/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Move/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Remove License Analysis/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Uploads/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Delete Uploaded File/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Edit Properties \(TBD\)/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Move/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Remove License Analysis/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
     $page = $browser->get("$URL?mod=upload_move");
-    $this->assertTrue($this->assertText($page, '/Move upload to different folder/'));
-    $this->assertTrue($this->assertText($page, '/Select the destination folder/'));
+    $this->assertTrue($this->myassertText($page, '/Move upload to different folder/'));
+    $this->assertTrue($this->myassertText($page, '/Select the destination folder/'));
   }
 }
 ?>

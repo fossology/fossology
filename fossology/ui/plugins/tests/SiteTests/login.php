@@ -28,14 +28,14 @@
  * Created on Jul 21, 2008
  */
 
-require_once('../../../../tests/fossologyWebTestCase.php');
+require_once('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 global $USER;
 global $PASSWORD;
 
-class TestRepoLogin extends fossologyWebTestCase{
+class TestRepoLogin extends fossologyTestCase{
 
   function testLogin(){
 

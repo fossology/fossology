@@ -25,14 +25,14 @@
  * Created on Jul 21, 2008
  */
 
-require_once('../../../../tests/fossologyWebTestCase.php');
+require_once('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 global $USER;
 global $PASSWORD;
 
-class TestAboutMenu extends fossologyWebTestCase
+class TestAboutMenu extends fossologyTestCase
 {
 
   function testMenuAbout()
@@ -41,10 +41,10 @@ class TestAboutMenu extends fossologyWebTestCase
     print "starting testMenuAbout\n";
     $page = $this->get($URL);
     $this->assertTrue($page);
-    $this->assertText($page, '/Welcome to FOSSology/');
+    $this->myassertText($page, '/Welcome to FOSSology/');
     $this->click('Help');
     $this->click('About');
-    $this->assertText($page, '/About FOSSology/');
+    $this->myassertText($page, '/About FOSSology/');
   }
 }
 ?>
