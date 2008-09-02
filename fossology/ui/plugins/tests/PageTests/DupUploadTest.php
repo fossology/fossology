@@ -1,5 +1,4 @@
 <?php
-
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -60,12 +59,12 @@ class DupUploadTest extends fossologyTestCase
     for ($i = 0; $i < 2; $i++)
     {
       $loggedIn = $this->mybrowser->get($URL);
-      $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
-      $this->assertTrue($this->assertText($loggedIn, '/From File/'));
+      $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
+      $this->assertTrue($this->myassertText($loggedIn, '/From File/'));
 
       $page = $this->mybrowser->clickLink('From File');
-      $this->assertTrue($this->assertText($page, '/Upload a New File/'));
-      $this->assertTrue($this->assertText($page, '/Select the file to upload:/'));
+      $this->assertTrue($this->myassertText($page, '/Upload a New File/'));
+      $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
       /* select Testing folder, filename based on pid */
 
       $id = $this->getFolderId('Testing', $page);
@@ -82,12 +81,12 @@ class DupUploadTest extends fossologyTestCase
             /* On the second try, we SHOULD NOT see Upload added to job queue */
       if($i == 1)
       {
-        $this->assertFalse($this->assertText($page, "/Upload added to job queue/"),
+        $this->assertFalse($this->myassertText($page, "/Upload added to job queue/"),
               "FAIL! Duplicate Upload created!\nUpload added to job queue Was seen,\n");
       }
       else
       {
-        $this->assertTrue($this->assertText($page, "/Upload added to job queue/"),
+        $this->assertTrue($this->myassertText($page, "/Upload added to job queue/"),
                 "FAIL! Upload Failed?\nUpload added to job queue not found\n");
       }
       //print "*********** Page after upload **************\n$page\n";
