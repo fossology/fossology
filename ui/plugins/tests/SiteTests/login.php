@@ -15,13 +15,8 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
 /**
  * Describe your PHP program or function here
- *
- * @param
- *
- * @return
  *
  * @version "$Id$"
  *
@@ -42,8 +37,9 @@ class TestRepoLogin extends fossologyTestCase{
     global $URL;
     print "login test starting\n";
     $browser = & new SimpleBrowser();
-    $this->repoLogin($browser);
-    $page = $browser->getContent();
+    $this->setBrowser($browser);
+    $this->Login($this->mybrowser);
+    $page = $this->mybrowser->getContent();
     //print "************LOGIN: Page after Login is:************\n";
     //$this->dump($page);
     preg_match('/FOSSology/', $page, $matches);
