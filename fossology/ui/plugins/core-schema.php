@@ -30,7 +30,7 @@ class core_schema extends FO_Plugin
   var $Title       = "Database Schema";
   var $Version     = "1.0";
   var $Dependency  = array("db");
-  var $DBaccess    = PLUGIN_DB_WRITE;
+  var $DBaccess    = PLUGIN_DB_USERADMIN;
   var $PluginLevel = 100;
   var $MenuList    = "Admin::Database::Schema";
   var $LoginFlag   = 1; /* must be logged in to use this */
@@ -774,7 +774,7 @@ if (0)
 	$V .= "<P/><b>Using this functionality may <u><i>TOTALLY SCREW UP</i></u> your FOSSology database.</b>\n";
 
 	$V .= "<P/>\n";
-	$V .= "<input type='checkbox' value='1' name='View'>Check to view the current schema. (The output harmless, but extremely technical.)<br>\n";
+	$V .= "<input type='checkbox' value='1' name='View'>Check to view the current schema. (The output generation is harmless, but extremely technical.)<br>\n";
 	$V .= "<input type='checkbox' value='1' name='Export'>(TBD) Check to export the current schema.<br>\n";
 	$V .= "<input type='checkbox' value='1' name='Apply'>(TBD) Check to apply the last exported schema.\n";
 	$V .= "<P/>\n";
