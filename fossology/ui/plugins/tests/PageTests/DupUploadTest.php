@@ -29,12 +29,12 @@
  * Created on Aug 28, 2008
  */
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class DupUploadTest extends fossologyWebTestCase
+class DupUploadTest extends fossologyTestCase
 {
   public $mybrowser;
 

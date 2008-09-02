@@ -32,12 +32,12 @@
   * inside hp.
   */
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class UploadFileTest extends fossologyWebTestCase
+class UploadFileTest extends fossologyTestCase
 {
   public $mybrowser;
 

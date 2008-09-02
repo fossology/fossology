@@ -24,12 +24,12 @@
  * Created on Aug 13, 2008
  */
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class browseUPloadedTest extends fossologyWebTestCase
+class browseUPloadedTest extends fossologyTestCase
 {
   public $mybrowser;
   public $host;
