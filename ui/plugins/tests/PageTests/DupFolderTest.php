@@ -1,6 +1,4 @@
 <?php
-
-
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -61,7 +59,7 @@ class DupFolderTest extends fossologyTestCase
     {
       $this->mybrowser->get($URL);
       $page = $this->mybrowser->clickLink('Create');
-      $this->assertTrue($this->assertText($page, '/Create a new Fossology folder/'));
+      $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
       /* select the folder to create this folder under */
       $this->assertTrue($this->mybrowser->setField('parentid', 1));
       /* create unique name and insert into form */
@@ -75,12 +73,12 @@ class DupFolderTest extends fossologyTestCase
       /* On the second try, we SHOULD NOT see Folder xxx Created */
       if($i == 1)
       {
-        $this->assertFalse($this->assertText($page, "/Folder $this->folder_name Created/"),
+        $this->assertFalse($this->myassertText($page, "/Folder $this->folder_name Created/"),
               "FAIL! Folder $this->folder_name Created Was seen,\n");
       }
       else
       {
-        $this->assertTrue($this->assertText($page, "/Folder $this->folder_name Created/"),
+        $this->assertTrue($this->myassertText($page, "/Folder $this->folder_name Created/"),
                 "FAIL! Folder $this->folder_name Created not found\n");
       }
 
@@ -92,12 +90,12 @@ class DupFolderTest extends fossologyTestCase
   {
     global $URL;
     $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
-    $this->assertTrue($this->assertText($page, '/Delete Folder/'));
+    $this->assertTrue($this->myassertText($page, '/Delete Folder/'));
     $FolderId = $this->getFolderId($this->folder_name, $page);
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
     $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, "/Deletion of folder $this->folder_name/"), "MoveFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
+    $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"), "MoveFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
   }
 }
 ?>

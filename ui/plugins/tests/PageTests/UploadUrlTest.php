@@ -1,5 +1,4 @@
 <?php
-
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -16,7 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
 /**
  * Upload a file using the UI
  *
@@ -55,11 +53,11 @@ class UploadUrlTest extends fossologyTestCase
     $browser->setCookie('Login', $cookie, $host);
 
     $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
-    $this->assertTrue($this->assertText($loggedIn, '/From URL/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/From URL/'));
     $page = $browser->get("$URL?mod=upload_url");
-    $this->assertTrue($this->assertText($page, '/Upload from URL/'));
-    $this->assertTrue($this->assertText($page, '/Enter the URL to the file:/'));
+    $this->assertTrue($this->myassertText($page, '/Upload from URL/'));
+    $this->assertTrue($this->myassertText($page, '/Enter the URL to the file:/'));
 
     /* select Testing folder, filename based on pid or session number */
 
@@ -75,7 +73,7 @@ class UploadUrlTest extends fossologyTestCase
     /* we won't select any agents this time' */
     $page = $browser->clickSubmit('Upload!');
     $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, '/Upload added to job queue/'));
+    $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
 
     //print  "************ page after Upload! *************\n$page\n";
   }

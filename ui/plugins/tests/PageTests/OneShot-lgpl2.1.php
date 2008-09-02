@@ -1,6 +1,4 @@
 <?php
-
-
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -17,7 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
 /**
  * Upload a file from the server using the UI
  *
@@ -60,15 +57,15 @@ class OneShotgplv21Test extends fossologyTestCase
     $browser->setCookie('Login', $cookie, $host);
 
     $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Upload/'),
+    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
                       "FAIL! Did not find Upload Menu\n");
-    $this->assertTrue($this->assertText($loggedIn, '/One-Shot License/'),
+    $this->assertTrue($this->myassertText($loggedIn, '/One-Shot License/'),
                       "FAIL! Did not find One-Shot License Menu\n");
 
     $page = $browser->get("$URL?mod=agent_license_once");
-    $this->assertTrue($this->assertText($page, '/One-Shot License Analysis/'),
+    $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
                       "FAIL! Did not find One-Shot License Analysis Title\n");
-    $this->assertTrue($this->assertText($page, '/The analysis is done in real-time/'),
+    $this->assertTrue($this->myassertText($page, '/The analysis is done in real-time/'),
                       "FAIL! Did not find real-time Text\n");
 
     $this->assertTrue($browser->setField('licfile', '/home/fosstester/licenses/gplv2.1'));
@@ -77,13 +74,13 @@ class OneShotgplv21Test extends fossologyTestCase
                       "FAIL! Count not click Analyze button\n");
     /* Check for the correct analysis.... */
     $page = $browser->getContent();
-    $this->assertTrue($this->assertText($page, '/LGPL/'),
+    $this->assertTrue($this->myassertText($page, '/LGPL/'),
                       "FAIL! Did not identify LGPL as LGPL\n");
-    $this->assertTrue($this->assertText($page, '/v2\.1/'),
+    $this->assertTrue($this->myassertText($page, '/v2\.1/'),
                       "FAIL! Did not find v2.1 version string\n");
-        $this->assertTrue($this->assertText($page, '/One-Shot License Analysis/'),
+        $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
                       "FAIL! Did not find One-Shot License Analysis Title\n");
-    $this->assertFalse($this->assertText($page, '/-partial/'),
+    $this->assertFalse($this->myassertText($page, '/-partial/'),
                       "FAIL! Found -partial in a non partial license file\n");
 
     //print "************ page after Analysis! *************\n$page\n";
