@@ -23,12 +23,12 @@
  *
  * Created on Jul 31, 2008
  */
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class UploadsDeleteMenuTest extends fossologyWebTestCase
+class UploadsDeleteMenuTest extends fossologyTestCase
 {
 
   function testUploadsDeleteMenu()
@@ -45,18 +45,18 @@ class UploadsDeleteMenuTest extends fossologyWebTestCase
     $browser->setCookie('Login', $cookie, $host);
     /* we get the home page to get rid of the user logged in page */
     $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Organize/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Uploads/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Delete Uploaded File/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Edit Properties \(TBD\)/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Move/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Remove License Analysis/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Uploads/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Delete Uploaded File/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Edit Properties \(TBD\)/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Move/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Remove License Analysis/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
     $page = $browser->get("$URL?mod=admin_upload_delete");
-    $this->assertTrue($this->assertText($page, '/Delete Uploaded File/'));
-    $this->assertTrue($this->assertText($page, '/THERE IS NO UNDELETE/'));
+    $this->assertTrue($this->myassertText($page, '/Delete Uploaded File/'));
+    $this->assertTrue($this->myassertText($page, '/THERE IS NO UNDELETE/'));
   }
 }
 ?>
