@@ -32,6 +32,8 @@ class core_schema extends FO_Plugin
   var $Dependency  = array("db");
   var $DBaccess    = PLUGIN_DB_WRITE;
   var $PluginLevel = 100;
+  var $MenuList    = "Admin::Database::Schema";
+  var $LoginFlag   = 1; /* must be logged in to use this */
 
   /******************************************
    This plugin is used to configure the schema.
@@ -108,13 +110,13 @@ BEGIN
       success := 1;
       <<DEPLOOP>>
       FOR jdep_row IN SELECT *  FROM jobdepends WHERE jdep_jq_fk=jqrec.jq_pk LOOP
-        -- has the dependency been satisfied?
-        SELECT INTO jqrec_test * FROM jobqueue WHERE jdep_row.jdep_jq_depends_fk=jq_pk AND jq_endtime IS NOT NULL AND jq_end_bits < 2;
-        IF NOT FOUND
-        THEN
-          success := 0;
-          EXIT DEPLOOP;
-        END IF;
+	-- has the dependency been satisfied?
+	SELECT INTO jqrec_test * FROM jobqueue WHERE jdep_row.jdep_jq_depends_fk=jq_pk AND jq_endtime IS NOT NULL AND jq_end_bits < 2;
+	IF NOT FOUND
+	THEN
+	  success := 0;
+	  EXIT DEPLOOP;
+	END IF;
       END LOOP DEPLOOP;
 
       IF success=1 THEN RETURN NEXT jqrec; END IF;
@@ -168,13 +170,13 @@ LANGUAGE plpgsql;
       $DB->Action("DELETE FROM mimetype WHERE mimetype_name LIKE '%,%' OR mimetype_name NOT LIKE '%/%' OR mimetype_name = 'application/octet-string';");
       // $DB->Action("VACUUM ANALYZE mimetype;");
       /* Reset all mimetype analysis -- the ones that are done will be skipped.
-         The ones that are not done will be re-done. */
+	 The ones that are not done will be re-done. */
       if ($BadPfile['count'] > 0)
-        {
-        print "  Rescheduling all mimetype analysis jobs.\n";
-        print "  (The ones that are completed will be quickly closed with no additional work.\n";
-        print "  Only the files that need to be re-scanned will be re-scanned.)\n";
-        $DB->Action("UPDATE jobqueue SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0 WHERE jq_type = 'mimetype';");
+	{
+	print "  Rescheduling all mimetype analysis jobs.\n";
+	print "  (The ones that are completed will be quickly closed with no additional work.\n";
+	print "  Only the files that need to be re-scanned will be re-scanned.)\n";
+	$DB->Action("UPDATE jobqueue SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0 WHERE jq_type = 'mimetype';");
 	}
       }
 
@@ -184,25 +186,25 @@ LANGUAGE plpgsql;
      * Drop the ufile columns */
      if (!$DB->ColExist("upload", "pfile_fk"))
      {
-         $DB->Action("ALTER TABLE upload ADD COLUMN pfile_fk integer;");
+	 $DB->Action("ALTER TABLE upload ADD COLUMN pfile_fk integer;");
 	 $DB->Action("UPDATE upload SET pfile_fk = ufile.pfile_fk FROM ufile WHERE upload.pfile_fk IS NULL AND upload.ufile_fk = ufile.ufile_pk;");
      }
 
      if (!$DB->ColExist("uploadtree", "pfile_fk"))
      {
-         $DB->Action("ALTER TABLE uploadtree ADD COLUMN pfile_fk integer");
+	 $DB->Action("ALTER TABLE uploadtree ADD COLUMN pfile_fk integer");
 	 $DB->Action("UPDATE uploadtree SET pfile_fk = ufile.pfile_fk FROM ufile WHERE uploadtree.pfile_fk IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
      }
 
      /* Move ufile_mode and ufile_name from ufile table to uploadtree table */
      if (!$DB->ColExist("uploadtree", "ufile_mode"))
      {
-         $DB->Action("ALTER TABLE uploadtree ADD COLUMN ufile_mode integer");
+	 $DB->Action("ALTER TABLE uploadtree ADD COLUMN ufile_mode integer");
 	 $DB->Action("UPDATE uploadtree SET ufile_mode = ufile.ufile_mode FROM ufile WHERE uploadtree.ufile_mode IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
      }
      if (!$DB->ColExist("uploadtree", "ufile_name"))
      {
-         $DB->Action("ALTER TABLE uploadtree ADD COLUMN ufile_name text");
+	 $DB->Action("ALTER TABLE uploadtree ADD COLUMN ufile_name text");
 	 $DB->Action("UPDATE uploadtree SET ufile_name = ufile.ufile_name FROM ufile WHERE uploadtree.ufile_name IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
      }
 
@@ -329,6 +331,465 @@ ALTER TABLE ONLY report_cache_user
      global $LIBEXECDIR;
      system("$LIBEXECDIR/agents/adj2nest -a");
     } // Install()
+
+  /******************************************
+   GetSchema(): Load the schema into an array.
+   ******************************************/
+  function GetSchema()
+    {
+    global $DB;
+    if (empty($DB)) { return(1); } /* No DB */
+
+    $Schema = array();
+
+    /***************************/
+    /* Get the tables */
+    /***************************/
+    $SQL = "SELECT class.relname AS table,
+	attr.attnum AS ordinal,
+	attr.attname AS column_name,
+	type.typname AS type,
+	attr.atttypmod-4 AS modifier,
+	attr.attnotnull AS notnull,
+	attr.atthasdef AS hasdefault,
+	attrdef.adsrc AS default,
+	col_description(attr.attrelid, attr.attnum) AS description
+	FROM pg_class AS class
+	INNER JOIN pg_attribute AS attr ON attr.attrelid = class.oid
+	AND attr.attnum > 0
+	INNER JOIN pg_type AS type ON attr.atttypid = type.oid
+	INNER JOIN information_schema.tables AS tab ON class.relname = tab.table_name
+	AND tab.table_type = 'BASE TABLE'
+	AND tab.table_schema = 'public'
+	LEFT OUTER JOIN pg_attrdef AS attrdef ON adrelid = attrelid
+	AND adnum = attnum
+	ORDER BY class.relname,attr.attnum;
+	";
+    $Results = $DB->Action($SQL);
+    for($i=0; !empty($Results[$i]['table']); $i++)
+      {
+      $R = &$Results[$i];
+      $Table = $R['table'];
+      if (preg_match('/[0-9]/',$Table)) { continue; }
+      $Column = $R['column_name'];
+      $Type = $R['type'];
+      if ($R['modifier'] > 0) { $Type .= '[' . $R['modifier'] . ']'; }
+      $Desc = str_replace("'","''",$R['description']);
+
+      $Schema['TABLEID'][$Table][$R['ordinal']] = $Column;
+      if (!empty($Desc))
+        {
+        $Schema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN $Table.$Column IS '$Desc'";
+	}
+      else
+        {
+	$Schema['TABLE'][$Table][$Column]['DESC'] = "";
+	}
+      $Schema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE $Table ADD COLUMN $Column $Type";
+      $Schema['TABLE'][$Table][$Column]['ALTER'] = "ALTER TABLE $Table ALTER COLUMN $Column TYPE $Type";
+      if ($R['notnull'] == 't') { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " SET NOT NULL"; }
+      else { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " DROP NOT NULL"; }
+      if ($R['hasdefault'] == 't') { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " SET DEFAULT " . $R['default']; }
+      else { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " DROP DEFAULT"; }
+      }
+
+    /***************************/
+    /* Get Views */
+    /***************************/
+    $SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'fossy';";
+    $Results = $DB->Action($SQL);
+    for($i=0; !empty($Results[$i]['viewname']); $i++)
+      {
+      $Schema['VIEW'][$Results[$i]['viewname']] = $Results[$i]['definition'];
+      }
+
+    /***************************/
+    /* Get Index */
+    /***************************/
+    $SQL = "SELECT tablename AS table, indexname AS index, indexdef AS define
+	FROM pg_indexes
+	INNER JOIN information_schema.tables ON table_name = tablename
+	AND table_type = 'BASE TABLE'
+	AND table_schema = 'public'
+	AND schemaname = 'public'
+	ORDER BY tablename,indexname;
+	";
+    $Results = $DB->Action($SQL);
+    for($i=0; !empty($Results[$i]['table']); $i++)
+      {
+      $Schema['INDEX'][$Results[$i]['table']][$Results[$i]['index']] = $Results[$i]['define'];
+      }
+
+    /***************************/
+    /* Get Constraints */
+    /***************************/
+    $SQL = "SELECT c.conname AS constraint_name,
+	CASE c.contype
+		WHEN 'c' THEN 'CHECK'
+		WHEN 'f' THEN 'FOREIGN KEY'
+		WHEN 'p' THEN 'PRIMARY KEY'
+		WHEN 'u' THEN 'UNIQUE'
+	END AS type,
+	CASE WHEN c.condeferrable = 'f' THEN 0 ELSE 1 END AS is_deferrable,
+	CASE WHEN c.condeferred = 'f' THEN 0 ELSE 1 END AS is_deferred,
+	t.relname AS table_name, array_to_string(c.conkey, ' ') AS constraint_key,
+	CASE confupdtype
+		WHEN 'a' THEN 'NO ACTION'
+		WHEN 'r' THEN 'RESTRICT'
+		WHEN 'c' THEN 'CASCADE'
+		WHEN 'n' THEN 'SET NULL'
+		WHEN 'd' THEN 'SET DEFAULT'
+	END AS on_update,
+	CASE confdeltype
+		WHEN 'a' THEN 'NO ACTION'
+		WHEN 'r' THEN 'RESTRICT'
+		WHEN 'c' THEN 'CASCADE'
+		WHEN 'n' THEN 'SET NULL'
+		WHEN 'd' THEN 'SET DEFAULT' END AS on_delete, CASE confmatchtype
+		WHEN 'u' THEN 'UNSPECIFIED'
+		WHEN 'f' THEN 'FULL'
+		WHEN 'p' THEN 'PARTIAL'
+	END AS match_type,
+	t2.relname AS references_table,
+	array_to_string(c.confkey, ' ') AS fk_constraint_key
+	FROM pg_constraint AS c
+	LEFT JOIN pg_class AS t ON c.conrelid = t.oid
+	INNER JOIN information_schema.tables AS tab ON t.relname = tab.table_name
+	LEFT JOIN pg_class AS t2 ON c.confrelid = t2.oid
+	ORDER BY constraint_name,table_name;
+	";
+    $Results = $DB->Action($SQL);
+
+    /* Constraints use indexes into columns.  Covert those to column names. */
+    for($i=0; !empty($Results[$i]['constraint_name']); $i++)
+      {
+      $Key = "";
+      $Keys = split(" ",$Results[$i]['constraint_key']);
+      foreach($Keys as $K)
+        {
+	if (empty($K)) { continue; }
+	if (!empty($Key)) { $Key .= ","; }
+	$Key .= $Schema['TABLEID'][$Results[$i]['table_name']][$K];
+	}
+      $Results[$i]['constraint_key'] = $Key;
+      $Key = "";
+      $Keys = split(" ",$Results[$i]['fk_constraint_key']);
+      foreach($Keys as $K)
+        {
+	if (empty($K)) { continue; }
+	if (!empty($Key)) { $Key .= ","; }
+	$Key .= $Schema['TABLEID'][$Results[$i]['references_table']][$K];
+	}
+      $Results[$i]['fk_constraint_key'] = $Key;
+      }
+
+    /* Save the constraint */
+    for($i=0; !empty($Results[$i]['constraint_name']); $i++)
+      {
+      $SQL = "ALTER TABLE " . $Results[$i]['table_name'];
+      $SQL .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
+      $SQL .= " " . $Results[$i]['type'];
+      $SQL .= " (" . $Results[$i]['constraint_key'] . ")";
+      if (!empty($Results[$i]['references_table']))
+        {
+	$SQL .= " REFERENCES " . $Results[$i]['references_table'];
+        $SQL .= " (" . $Results[$i]['constraint_key'] . ")";
+	}
+      $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
+      }
+
+if (0)
+{
+    /***************************/
+    /* Get Functions */
+    /***************************/
+    // prosrc
+    // proretset == setof
+    $SQL = "SELECT proname AS name,
+	pronargs AS input_num,
+	proargnames AS input_names,
+	proargtypes AS input_type,
+	proargmodes AS input_modes,
+	proretset AS setof,
+	prorettype AS output_type
+	FROM pg_proc AS proc
+	INNER JOIN pg_language AS lang ON proc.prolang = lang.oid
+	WHERE lang.lanname = 'plpgsql'
+	ORDER BY proname;";
+    $Results = $DB->Action($SQL);
+    for($i=0; !empty($Results[$i]['proname']); $i++)
+      {
+      $SQL = "CREATE or REPLACE function " . $Results[$i]['proname'] . "()";
+      $SQL .= ' RETURNS ' . "TBD" . ' AS $$';
+      $SQL .= " " . $Results[$i]['prosrc'];
+      $Schema['FUNCTION'][$Results[$i]['proname']] = $SQL;
+      }
+}
+
+    unset($Schema['TABLEID']);
+    return($Schema);
+    } // GetSchema()
+
+  /***********************************************************
+   ViewSchema(): Get the current schema and display it to the screen.
+   ***********************************************************/
+  function ViewSchema()
+    {
+    $Schema = $this->GetSchema();
+
+    print "<ul>\n";
+    print "<li><a href='#Table'>Tables</a>\n";
+    print "<ol>\n";
+    foreach($Schema['TABLE'] as $TableName => $Columns)
+      {
+      if (empty($TableName)) { continue; }
+      print "<li><a href='#Table-$TableName'>$TableName</a>\n";
+      }
+    print "</ol>\n";
+    print "<li><a href='#View'>Views</a>\n";
+    print "<li><a href='#Index'>Indexes</a>\n";
+    print "<li><a href='#Constraint'>Constraints</a>\n";
+    if (count($Schema['FUNCTION']) > 0)
+      {
+      print "<li><a href='#Function'>Functions</a>\n";
+      }
+    print "</ul>\n";
+
+    print "<a name='Table'></a><table width='100%' border='1'>\n";
+    $LastTableName="";
+    foreach($Schema['TABLE'] as $TableName => $Columns)
+      {
+      if (empty($TableName)) { continue; }
+      foreach($Columns as $ColName => $Val)
+	{
+	if ($LastTableName != $TableName)
+	  {
+	  print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>Alter SQL\n";
+	  $LastTableName = $TableName;
+	  }
+	if (empty($ColName)) { continue; }
+	print "<tr><td>" . htmlentities($TableName);
+	print "<td>" . htmlentities($ColName);
+	print "<td>" . $Val['DESC'];
+	print "<td>" . $Val['ADD'];
+	print "<td>" . $Val['ALTER'];
+	print "\n";
+	}
+      }
+    print "</table>\n";
+
+    print "<P/>\n";
+    print "<a name='View'></a><table width='100%' border='1'>\n";
+    print "<th>View<th>Definition\n";
+    foreach($Schema['VIEW'] as $Name => $Description)
+      {
+      if (empty($Name)) { continue; }
+      print "<tr><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+      }
+    print "</table>\n";
+
+    print "<P/>\n";
+    print "<a name='Index'></a><table width='100%' border='1'>\n";
+    print "<th>Table<th>Index<th>Definition\n";
+    foreach($Schema['INDEX'] as $Table => $Indexes)
+      {
+      if (empty($Table)) { continue; }
+      foreach($Indexes as $Index => $Define)
+	{
+	print "<tr><td>" . htmlentities($Table);
+	print "<td>" . htmlentities($Index);
+	print "<td>" . htmlentities($Define);
+	}
+      }
+    print "</table>\n";
+
+    print "<P/>\n";
+    print "<a name='Constraint'></a><table width='100%' border='1'>\n";
+    print "<th>Constraint<th>Definition\n";
+    foreach($Schema['CONSTRAINT'] as $Name => $Description)
+      {
+      if (empty($Name)) { continue; }
+      print "<tr><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+      }
+    print "</table>\n";
+
+    if (count($Schema['FUNCTION']) > 0)
+      {
+      print "<P/>\n";
+      print "<a name='Function'></a><table width='100%' border='1'>\n";
+      print "<th>Function<th>Definition\n";
+      foreach($Schema['FUNCTION'] as $Name => $Description)
+        {
+        if (empty($Name)) { continue; }
+        print "<tr><td>" . htmlentities($Name) . "<td><pre>" . htmlentities($Description) . "</pre>\n";
+        }
+      print "</table>\n";
+      }
+
+    } // ViewSchema()
+
+  /***********************************************************
+   ExportSchema(): Export the current schema to a file.
+   ***********************************************************/
+  function ExportSchema($Filename)
+    {
+    $Schema = $this->GetSchema();
+    $Fout = fopen($Filename,"w");
+    if (!$Fout)
+	{
+	return("Failed to write to $Filename\n");
+	}
+
+    fwrite($Fout,"<?php\n");
+    fwrite($Fout,"/* This file is generated by " . $this->Name . " */\n");
+    fwrite($Fout,"/* Do not manually edit this file */\n\n");
+    fwrite($Fout,"  global \$GlobalReady;\n");
+    fwrite($Fout,"  if (!isset(\$GlobalReady)) { exit; }\n\n");
+    fwrite($Fout,'  $Schema=array();' . "\n");
+    foreach($Schema as $K1 => $V1)
+      {
+      $K1 = str_replace('"','\"',$K1);
+      $A1 = '  $Schema["' . $K1 . "\"]";
+      if (!is_array($V1))
+        {
+        $V1 = str_replace('"','\"',$V1);
+	fwrite($Fout,"$A1 = \"$V1\";\n");
+	}
+      else
+        {
+	foreach($V1 as $K2 => $V2)
+	  {
+          $K2 = str_replace('"','\"',$K2);
+	  $A2 = $A1 . '["' . $K2 . '"]';
+          if (!is_array($V2))
+            {
+            $V2 = str_replace('"','\"',$V2);
+	    fwrite($Fout,"$A2 = \"$V2\";\n");
+	    }
+          else
+            {
+	    foreach($V2 as $K3 => $V3)
+	      {
+              $K3 = str_replace('"','\"',$K3);
+	      $A3 = $A2 . '["' . $K3 . '"]';
+              if (!is_array($V3))
+                {
+                $V3 = str_replace('"','\"',$V3);
+	        fwrite($Fout,"$A3 = \"$V3\";\n");
+	        }
+	      else
+	        {
+		foreach($V3 as $K4 => $V4)
+		  {
+                  $V4 = str_replace('"','\"',$V4);
+	          $A4 = $A3 . '["' . $K4 . '"]';
+	          fwrite($Fout,"$A4 = \"$V4\";\n");
+		  } /* K4 */
+		fwrite($Fout,"\n");
+		}
+	      } /* K3 */
+	    fwrite($Fout,"\n");
+	    }
+	  } /* K2 */
+	fwrite($Fout,"\n");
+	}
+      } /* K1 */
+    fwrite($Fout,"?>\n");
+    fclose($Fout);
+    print "Data written to $Filename\n";
+    } // ExportSchema()
+
+  /***********************************************************
+   ApplySchema(): Apply the current schema from a file.
+   ***********************************************************/
+  function ApplySchema($Filename)
+    {
+    /**************************************/
+    /** BEGIN: Term list from ExportTerms() **/
+    /**************************************/
+    require_once($Filename);
+    /**************************************/
+    /** END: Term list from ExportTerms() **/
+    /**************************************/
+    print "<pre>"; print_r($Schema); print "</pre>";
+    } // ApplySchema()
+
+  /***********************************************************
+   Output(): This function is called when user output is
+   requested.  This function is responsible for content.
+   (OutputOpen and Output are separated so one plugin
+   can call another plugin's Output.)
+   This uses $OutputType.
+   The $ToStdout flag is "1" if output should go to stdout, and
+   0 if it should be returned as a string.  (Strings may be parsed
+   and used by other plugins.)
+   ***********************************************************/
+  function Output()
+    {
+    global $Plugins;
+    $Filename = "plugins/core-schema.dat";
+
+    if ($this->State != PLUGIN_STATE_READY) { return; }
+    $V=""; 
+    switch($this->OutputType)
+      {
+      case "XML":
+	break;
+      case "HTML":
+	$Init = GetParm('View',PARM_INTEGER);
+	if ($Init == 1)
+	  {
+	  $rc = $this->ViewSchema();
+	  if (!empty($rc))
+	    {
+	    $V .= PopupAlert($rc);
+	    }
+	  $V .= "<hr>\n";
+	  }
+	/* Undocumented parameter: Used for exporting the current terms. */
+	$Init = GetParm('Export',PARM_INTEGER);
+	if ($Init == 1)
+	  {
+	  $rc = $this->ExportSchema($Filename);
+	  if (!empty($rc))
+	    {
+	    $V .= PopupAlert($rc);
+	    }
+	  $V .= "<hr>\n";
+	  }
+	$Init = GetParm('Apply',PARM_INTEGER);
+	if ($Init == 1)
+	  {
+	  $rc = $this->ApplySchema($Filename);
+	  if (!empty($rc))
+	    {
+	    $V .= PopupAlert($rc);
+	    }
+	  $V .= "<hr>\n";
+	  }
+
+	$V .= "<form method='post'>\n";
+	$V .= "Viewing, exporting, and applying the schema is only used by installation and debugging.\n";
+	$V .= "Otherwise, you should not need to use this functionality.\n";
+	$V .= "<P/><b>Using this functionality may <u><i>TOTALLY SCREW UP</i></u> your FOSSology database.</b>\n";
+
+	$V .= "<P/>\n";
+	$V .= "<input type='checkbox' value='1' name='View'>Check to view the current schema. (The output harmless, but extremely technical.)<br>\n";
+	$V .= "<input type='checkbox' value='1' name='Export'>(TBD) Check to export the current schema.<br>\n";
+	$V .= "<input type='checkbox' value='1' name='Apply'>(TBD) Check to apply the last exported schema.\n";
+	$V .= "<P/>\n";
+	$V .= "<input type='submit' value='Go!'>";
+	$V .= "</form>\n";
+	break;
+      case "Text":
+	break;
+      default:
+	break;
+      }
+    if (!$this->OutputToStdout) { return($V); }
+    print($V);
+    return;
+    } // Output()
 
   }; // class core_schema
 
