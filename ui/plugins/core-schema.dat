@@ -6,944 +6,973 @@
   if (!isset($GlobalReady)) { exit; }
 
   $Schema=array();
-  $Schema["TABLE"]["agent"]["agent_pk"]["DESC"] = "COMMENT ON COLUMN agent.agent_pk IS 'Primary key'";
-  $Schema["TABLE"]["agent"]["agent_pk"]["ADD"] = "ALTER TABLE agent ADD COLUMN agent_pk int4";
-  $Schema["TABLE"]["agent"]["agent_pk"]["ALTER"] = "ALTER TABLE agent ALTER COLUMN agent_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('agent_agent_pk_seq'::regclass)";
+  $Schema["TABLE"]["agent"]["agent_pk"]["DESC"] = "COMMENT ON COLUMN agent.agent_pk IS 'Primary key';";
+  $Schema["TABLE"]["agent"]["agent_pk"]["ADD"] = "ALTER TABLE agent ADD COLUMN agent_pk int4;";
+  $Schema["TABLE"]["agent"]["agent_pk"]["ALTER"] = "ALTER TABLE agent ALTER COLUMN agent_pk SET NOT NULL, ALTER COLUMN agent_pk SET DEFAULT nextval('agent_agent_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["agent"]["agent_name"]["DESC"] = "COMMENT ON COLUMN agent.agent_name IS 'display name'";
-  $Schema["TABLE"]["agent"]["agent_name"]["ADD"] = "ALTER TABLE agent ADD COLUMN agent_name varchar[32]";
-  $Schema["TABLE"]["agent"]["agent_name"]["ALTER"] = "ALTER TABLE agent ALTER COLUMN agent_name TYPE varchar[32] SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent"]["agent_name"]["DESC"] = "COMMENT ON COLUMN agent.agent_name IS 'display name';";
+  $Schema["TABLE"]["agent"]["agent_name"]["ADD"] = "ALTER TABLE agent ADD COLUMN agent_name varchar[32];";
+  $Schema["TABLE"]["agent"]["agent_name"]["ALTER"] = "ALTER TABLE agent ALTER COLUMN agent_name SET NOT NULL;";
 
-  $Schema["TABLE"]["agent"]["agent_rev"]["DESC"] = "COMMENT ON COLUMN agent.agent_rev IS 'revision string'";
-  $Schema["TABLE"]["agent"]["agent_rev"]["ADD"] = "ALTER TABLE agent ADD COLUMN agent_rev varchar[32]";
-  $Schema["TABLE"]["agent"]["agent_rev"]["ALTER"] = "ALTER TABLE agent ALTER COLUMN agent_rev TYPE varchar[32] DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent"]["agent_rev"]["DESC"] = "COMMENT ON COLUMN agent.agent_rev IS 'revision string';";
+  $Schema["TABLE"]["agent"]["agent_rev"]["ADD"] = "ALTER TABLE agent ADD COLUMN agent_rev varchar[32];";
+  $Schema["TABLE"]["agent"]["agent_rev"]["ALTER"] = "ALTER TABLE agent ALTER COLUMN agent_rev DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent"]["agent_desc"]["DESC"] = "COMMENT ON COLUMN agent.agent_desc IS 'short description'";
-  $Schema["TABLE"]["agent"]["agent_desc"]["ADD"] = "ALTER TABLE agent ADD COLUMN agent_desc varchar[255]";
-  $Schema["TABLE"]["agent"]["agent_desc"]["ALTER"] = "ALTER TABLE agent ALTER COLUMN agent_desc TYPE varchar[255] DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent"]["agent_desc"]["DESC"] = "COMMENT ON COLUMN agent.agent_desc IS 'short description';";
+  $Schema["TABLE"]["agent"]["agent_desc"]["ADD"] = "ALTER TABLE agent ADD COLUMN agent_desc varchar[255];";
+  $Schema["TABLE"]["agent"]["agent_desc"]["ALTER"] = "ALTER TABLE agent ALTER COLUMN agent_desc DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent"]["agent_id"]["DESC"] = "COMMENT ON COLUMN agent.agent_id IS 'agent ID (agents will have same ID regardless of revision)'";
-  $Schema["TABLE"]["agent"]["agent_id"]["ADD"] = "ALTER TABLE agent ADD COLUMN agent_id int4";
-  $Schema["TABLE"]["agent"]["agent_id"]["ALTER"] = "ALTER TABLE agent ALTER COLUMN agent_id TYPE int4 SET NOT NULL SET DEFAULT currval('agent_agent_pk_seq'::regclass)";
+  $Schema["TABLE"]["agent"]["agent_id"]["DESC"] = "COMMENT ON COLUMN agent.agent_id IS 'agent ID (agents will have same ID regardless of revision)';";
+  $Schema["TABLE"]["agent"]["agent_id"]["ADD"] = "ALTER TABLE agent ADD COLUMN agent_id int4;";
+  $Schema["TABLE"]["agent"]["agent_id"]["ALTER"] = "ALTER TABLE agent ALTER COLUMN agent_id SET NOT NULL, ALTER COLUMN agent_id SET DEFAULT currval('agent_agent_pk_seq'::regclass);";
 
 
   $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN pfile_fk int4";
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN pfile_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN pfile_fk int4;";
+  $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN pfile_fk SET NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_pfile IS '# Tokens found in pfile, number of tokens in the unknown (A) segment'";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_pfile int4";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_pfile TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_pfile IS '# Tokens found in pfile, number of tokens in the unknown (A) segment';";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_pfile int4;";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_pfile DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["tok_match"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_match IS '# tokens from match'";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_match"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_match int4";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_match"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_match TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_match"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_match IS '# tokens from match';";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_match"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_match int4;";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_match"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_match DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["version"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.version IS 'Version of license agent - this should be replaced by a agent_fk'";
-  $Schema["TABLE"]["agent_lic_meta"]["version"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN version varchar[32]";
-  $Schema["TABLE"]["agent_lic_meta"]["version"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN version TYPE varchar[32] DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["version"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.version IS 'Version of license agent - this should be replaced by a agent_fk';";
+  $Schema["TABLE"]["agent_lic_meta"]["version"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN version varchar[32];";
+  $Schema["TABLE"]["agent_lic_meta"]["version"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN version DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.phrase_text IS 'Section of the file containing the license.'";
-  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN phrase_text varchar[256]";
-  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN phrase_text TYPE varchar[256] DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.phrase_text IS 'Section of the file containing the license.';";
+  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN phrase_text varchar[256];";
+  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN phrase_text DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_start"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_pfile_start IS 'Offset of starting byte in the pfile (for display)'";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_start"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_pfile_start int4";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_start"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_pfile_start TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_start"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_pfile_start IS 'Offset of starting byte in the pfile (for display)';";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_start"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_pfile_start int4;";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_start"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_pfile_start DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_end"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_pfile_end IS 'Offset of ending byte in the pfile (for display)'";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_end"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_pfile_end int4";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_end"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_pfile_end TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_end"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_pfile_end IS 'Offset of ending byte in the pfile (for display)';";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_end"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_pfile_end int4;";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_end"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_pfile_end DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_start"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_license_start IS 'byte offset in license of start'";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_start"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_license_start int4";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_start"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_license_start TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_license_start"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_license_start IS 'byte offset in license of start';";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_license_start"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_license_start int4;";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_license_start"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_license_start DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_end"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_license_end IS 'byte offset in license of end'";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_end"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_license_end int4";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license_end"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_license_end TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_license_end"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_license_end IS 'byte offset in license of end';";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_license_end"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_license_end int4;";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_license_end"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_license_end DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_license IS '# tokens found in license'";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_license int4";
-  $Schema["TABLE"]["agent_lic_meta"]["tok_license"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_license TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_license"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.tok_license IS '# tokens found in license';";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_license"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN tok_license int4;";
+  $Schema["TABLE"]["agent_lic_meta"]["tok_license"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN tok_license DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["lic_fk"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.lic_fk IS 'Link to the agent_lic_raw table'";
-  $Schema["TABLE"]["agent_lic_meta"]["lic_fk"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN lic_fk int4";
-  $Schema["TABLE"]["agent_lic_meta"]["lic_fk"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN lic_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["lic_fk"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.lic_fk IS 'Link to the agent_lic_raw table';";
+  $Schema["TABLE"]["agent_lic_meta"]["lic_fk"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN lic_fk int4;";
+  $Schema["TABLE"]["agent_lic_meta"]["lic_fk"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN lic_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_path"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.pfile_path IS 'The file offsets for the best match path'";
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_path"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN pfile_path varchar";
-  $Schema["TABLE"]["agent_lic_meta"]["pfile_path"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN pfile_path TYPE varchar DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["pfile_path"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.pfile_path IS 'The file offsets for the best match path';";
+  $Schema["TABLE"]["agent_lic_meta"]["pfile_path"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN pfile_path varchar;";
+  $Schema["TABLE"]["agent_lic_meta"]["pfile_path"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN pfile_path DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_meta"]["license_path"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.license_path IS 'The file offsets for the best match in the license'";
-  $Schema["TABLE"]["agent_lic_meta"]["license_path"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN license_path varchar";
-  $Schema["TABLE"]["agent_lic_meta"]["license_path"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN license_path TYPE varchar DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_meta"]["license_path"]["DESC"] = "COMMENT ON COLUMN agent_lic_meta.license_path IS 'The file offsets for the best match in the license';";
+  $Schema["TABLE"]["agent_lic_meta"]["license_path"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN license_path varchar;";
+  $Schema["TABLE"]["agent_lic_meta"]["license_path"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN license_path DROP NOT NULL;";
 
   $Schema["TABLE"]["agent_lic_meta"]["agent_lic_meta_pk"]["DESC"] = "";
-  $Schema["TABLE"]["agent_lic_meta"]["agent_lic_meta_pk"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN agent_lic_meta_pk int4";
-  $Schema["TABLE"]["agent_lic_meta"]["agent_lic_meta_pk"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN agent_lic_meta_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('agent_lic_meta_agent_lic_meta_pk_seq'::regclass)";
+  $Schema["TABLE"]["agent_lic_meta"]["agent_lic_meta_pk"]["ADD"] = "ALTER TABLE agent_lic_meta ADD COLUMN agent_lic_meta_pk int4;";
+  $Schema["TABLE"]["agent_lic_meta"]["agent_lic_meta_pk"]["ALTER"] = "ALTER TABLE agent_lic_meta ALTER COLUMN agent_lic_meta_pk SET NOT NULL, ALTER COLUMN agent_lic_meta_pk SET DEFAULT nextval('agent_lic_meta_agent_lic_meta_pk_seq'::regclass);";
 
 
   $Schema["TABLE"]["agent_lic_phrases"]["phrase_group"]["DESC"] = "";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_group"]["ADD"] = "ALTER TABLE agent_lic_phrases ADD COLUMN phrase_group varchar";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_group"]["ALTER"] = "ALTER TABLE agent_lic_phrases ALTER COLUMN phrase_group TYPE varchar SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_phrases"]["phrase_group"]["ADD"] = "ALTER TABLE agent_lic_phrases ADD COLUMN phrase_group varchar;";
+  $Schema["TABLE"]["agent_lic_phrases"]["phrase_group"]["ALTER"] = "ALTER TABLE agent_lic_phrases ALTER COLUMN phrase_group SET NOT NULL;";
 
   $Schema["TABLE"]["agent_lic_phrases"]["phrase_match"]["DESC"] = "";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_match"]["ADD"] = "ALTER TABLE agent_lic_phrases ADD COLUMN phrase_match varchar";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_match"]["ALTER"] = "ALTER TABLE agent_lic_phrases ALTER COLUMN phrase_match TYPE varchar SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_phrases"]["phrase_match"]["ADD"] = "ALTER TABLE agent_lic_phrases ADD COLUMN phrase_match varchar;";
+  $Schema["TABLE"]["agent_lic_phrases"]["phrase_match"]["ALTER"] = "ALTER TABLE agent_lic_phrases ALTER COLUMN phrase_match SET NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_unique"]["DESC"] = "COMMENT ON COLUMN agent_lic_phrases.phrase_unique IS 'The unique value to add to the license table'";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_unique"]["ADD"] = "ALTER TABLE agent_lic_phrases ADD COLUMN phrase_unique int4";
-  $Schema["TABLE"]["agent_lic_phrases"]["phrase_unique"]["ALTER"] = "ALTER TABLE agent_lic_phrases ALTER COLUMN phrase_unique TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_phrases"]["phrase_unique"]["DESC"] = "COMMENT ON COLUMN agent_lic_phrases.phrase_unique IS 'The unique value to add to the license table';";
+  $Schema["TABLE"]["agent_lic_phrases"]["phrase_unique"]["ADD"] = "ALTER TABLE agent_lic_phrases ADD COLUMN phrase_unique int4;";
+  $Schema["TABLE"]["agent_lic_phrases"]["phrase_unique"]["ALTER"] = "ALTER TABLE agent_lic_phrases ALTER COLUMN phrase_unique DROP NOT NULL;";
 
 
-  $Schema["TABLE"]["agent_lic_raw"]["lic_pk"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_pk IS 'License primary key.  Uniquely identifies a license section.'";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_pk"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_pk int4";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_pk"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('agent_lic_raw_lic_pk_seq'::regclass)";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_pk"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_pk IS 'License primary key.  Uniquely identifies a license section.';";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_pk"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_pk int4;";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_pk"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_pk SET NOT NULL, ALTER COLUMN lic_pk SET DEFAULT nextval('agent_lic_raw_lic_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_name IS 'Common license name (typically abbreviation like GPLv2)'";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_name text";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_name TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_name"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_name IS 'Common license name (typically abbreviation like GPLv2)';";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_name"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_name text;";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_name"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_name SET NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_raw"]["lic_unique"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_unique IS 'A unique identifier for the license (used to remove duplicate entries)'";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_unique"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_unique text";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_unique"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_unique TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_unique"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_unique IS 'A unique identifier for the license (used to remove duplicate entries)';";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_unique"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_unique text;";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_unique"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_unique SET NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_raw"]["lic_text"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_text IS 'The actual license text'";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_text"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_text text";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_text"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_text TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_text"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_text IS 'The actual license text';";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_text"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_text text;";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_text"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_text DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_raw"]["lic_version"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_version IS 'Analysis code version (bsam/filter)'";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_version"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_version int4";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_version"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_version TYPE int4 SET NOT NULL SET DEFAULT 1";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_version"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_version IS 'Analysis code version (bsam/filter)';";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_version"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_version int4;";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_version"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_version SET NOT NULL, ALTER COLUMN lic_version SET DEFAULT 1;";
 
-  $Schema["TABLE"]["agent_lic_raw"]["lic_section"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_section IS 'Section identifier'";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_section"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_section text";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_section"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_section TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_section"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_section IS 'Section identifier';";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_section"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_section text;";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_section"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_section DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_raw"]["lic_id"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_id IS 'uniquely identifies a license (s opposed to a license section)'";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_id"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_id int4";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_id"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_id TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_id"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_id IS 'uniquely identifies a license (s opposed to a license section)';";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_id"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_id int4;";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_id"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_id DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name_full"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_name_full IS 'Full text license name'";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name_full"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_name_full text";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_name_full"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_name_full TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_name_full"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_name_full IS 'Full text license name';";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_name_full"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_name_full text;";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_name_full"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_name_full DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_raw"]["lic_url"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_url IS 'URL origin of the license'";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_url"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_url text";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_url"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_url TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_url"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_url IS 'URL origin of the license';";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_url"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_url text;";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_url"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_url DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_raw"]["lic_date"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_date IS 'when license text was captured'";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_date"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_date timestamptz";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_date"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_date TYPE timestamptz DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_date"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_date IS 'when license text was captured';";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_date"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_date timestamptz;";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_date"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_date DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_raw"]["lic_tokens"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_tokens IS '# of filter_license tokens in license'";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_tokens"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_tokens int4";
-  $Schema["TABLE"]["agent_lic_raw"]["lic_tokens"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_tokens TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_tokens"]["DESC"] = "COMMENT ON COLUMN agent_lic_raw.lic_tokens IS '# of filter_license tokens in license';";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_tokens"]["ADD"] = "ALTER TABLE agent_lic_raw ADD COLUMN lic_tokens int4;";
+  $Schema["TABLE"]["agent_lic_raw"]["lic_tokens"]["ALTER"] = "ALTER TABLE agent_lic_raw ALTER COLUMN lic_tokens DROP NOT NULL;";
 
 
   $Schema["TABLE"]["agent_lic_status"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["agent_lic_status"]["pfile_fk"]["ADD"] = "ALTER TABLE agent_lic_status ADD COLUMN pfile_fk int4";
-  $Schema["TABLE"]["agent_lic_status"]["pfile_fk"]["ALTER"] = "ALTER TABLE agent_lic_status ALTER COLUMN pfile_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_lic_status"]["pfile_fk"]["ADD"] = "ALTER TABLE agent_lic_status ADD COLUMN pfile_fk int4;";
+  $Schema["TABLE"]["agent_lic_status"]["pfile_fk"]["ALTER"] = "ALTER TABLE agent_lic_status ALTER COLUMN pfile_fk SET NOT NULL;";
 
-  $Schema["TABLE"]["agent_lic_status"]["processed"]["DESC"] = "COMMENT ON COLUMN agent_lic_status.processed IS 'Has this file been processed by the license agent?'";
-  $Schema["TABLE"]["agent_lic_status"]["processed"]["ADD"] = "ALTER TABLE agent_lic_status ADD COLUMN processed bool";
-  $Schema["TABLE"]["agent_lic_status"]["processed"]["ALTER"] = "ALTER TABLE agent_lic_status ALTER COLUMN processed TYPE bool SET NOT NULL SET DEFAULT false";
+  $Schema["TABLE"]["agent_lic_status"]["processed"]["DESC"] = "COMMENT ON COLUMN agent_lic_status.processed IS 'Has this file been processed by the license agent?';";
+  $Schema["TABLE"]["agent_lic_status"]["processed"]["ADD"] = "ALTER TABLE agent_lic_status ADD COLUMN processed bool;";
+  $Schema["TABLE"]["agent_lic_status"]["processed"]["ALTER"] = "ALTER TABLE agent_lic_status ALTER COLUMN processed SET NOT NULL, ALTER COLUMN processed SET DEFAULT false;";
 
-  $Schema["TABLE"]["agent_lic_status"]["inrepository"]["DESC"] = "COMMENT ON COLUMN agent_lic_status.inrepository IS 'Is the cache file in the repository?'";
-  $Schema["TABLE"]["agent_lic_status"]["inrepository"]["ADD"] = "ALTER TABLE agent_lic_status ADD COLUMN inrepository bool";
-  $Schema["TABLE"]["agent_lic_status"]["inrepository"]["ALTER"] = "ALTER TABLE agent_lic_status ALTER COLUMN inrepository TYPE bool SET NOT NULL SET DEFAULT false";
+  $Schema["TABLE"]["agent_lic_status"]["inrepository"]["DESC"] = "COMMENT ON COLUMN agent_lic_status.inrepository IS 'Is the cache file in the repository?';";
+  $Schema["TABLE"]["agent_lic_status"]["inrepository"]["ADD"] = "ALTER TABLE agent_lic_status ADD COLUMN inrepository bool;";
+  $Schema["TABLE"]["agent_lic_status"]["inrepository"]["ALTER"] = "ALTER TABLE agent_lic_status ALTER COLUMN inrepository SET NOT NULL, ALTER COLUMN inrepository SET DEFAULT false;";
 
-  $Schema["TABLE"]["agent_lic_status"]["inspect_name"]["DESC"] = "COMMENT ON COLUMN agent_lic_status.inspect_name IS 'Has licinspect processed the pfile?'";
-  $Schema["TABLE"]["agent_lic_status"]["inspect_name"]["ADD"] = "ALTER TABLE agent_lic_status ADD COLUMN inspect_name bool";
-  $Schema["TABLE"]["agent_lic_status"]["inspect_name"]["ALTER"] = "ALTER TABLE agent_lic_status ALTER COLUMN inspect_name TYPE bool DROP NOT NULL SET DEFAULT false";
+  $Schema["TABLE"]["agent_lic_status"]["inspect_name"]["DESC"] = "COMMENT ON COLUMN agent_lic_status.inspect_name IS 'Has licinspect processed the pfile?';";
+  $Schema["TABLE"]["agent_lic_status"]["inspect_name"]["ADD"] = "ALTER TABLE agent_lic_status ADD COLUMN inspect_name bool;";
+  $Schema["TABLE"]["agent_lic_status"]["inspect_name"]["ALTER"] = "ALTER TABLE agent_lic_status ALTER COLUMN inspect_name DROP NOT NULL, ALTER COLUMN inspect_name SET DEFAULT false;";
 
 
-  $Schema["TABLE"]["agent_wc"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN agent_wc.pfile_fk IS 'pfile key'";
-  $Schema["TABLE"]["agent_wc"]["pfile_fk"]["ADD"] = "ALTER TABLE agent_wc ADD COLUMN pfile_fk int4";
-  $Schema["TABLE"]["agent_wc"]["pfile_fk"]["ALTER"] = "ALTER TABLE agent_wc ALTER COLUMN pfile_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_wc"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN agent_wc.pfile_fk IS 'pfile key';";
+  $Schema["TABLE"]["agent_wc"]["pfile_fk"]["ADD"] = "ALTER TABLE agent_wc ADD COLUMN pfile_fk int4;";
+  $Schema["TABLE"]["agent_wc"]["pfile_fk"]["ALTER"] = "ALTER TABLE agent_wc ALTER COLUMN pfile_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_wc"]["wc_words"]["DESC"] = "COMMENT ON COLUMN agent_wc.wc_words IS 'wc words'";
-  $Schema["TABLE"]["agent_wc"]["wc_words"]["ADD"] = "ALTER TABLE agent_wc ADD COLUMN wc_words int4";
-  $Schema["TABLE"]["agent_wc"]["wc_words"]["ALTER"] = "ALTER TABLE agent_wc ALTER COLUMN wc_words TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_wc"]["wc_words"]["DESC"] = "COMMENT ON COLUMN agent_wc.wc_words IS 'wc words';";
+  $Schema["TABLE"]["agent_wc"]["wc_words"]["ADD"] = "ALTER TABLE agent_wc ADD COLUMN wc_words int4;";
+  $Schema["TABLE"]["agent_wc"]["wc_words"]["ALTER"] = "ALTER TABLE agent_wc ALTER COLUMN wc_words DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_wc"]["wc_lines"]["DESC"] = "COMMENT ON COLUMN agent_wc.wc_lines IS 'wc lines'";
-  $Schema["TABLE"]["agent_wc"]["wc_lines"]["ADD"] = "ALTER TABLE agent_wc ADD COLUMN wc_lines int4";
-  $Schema["TABLE"]["agent_wc"]["wc_lines"]["ALTER"] = "ALTER TABLE agent_wc ALTER COLUMN wc_lines TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["agent_wc"]["wc_lines"]["DESC"] = "COMMENT ON COLUMN agent_wc.wc_lines IS 'wc lines';";
+  $Schema["TABLE"]["agent_wc"]["wc_lines"]["ADD"] = "ALTER TABLE agent_wc ADD COLUMN wc_lines int4;";
+  $Schema["TABLE"]["agent_wc"]["wc_lines"]["ALTER"] = "ALTER TABLE agent_wc ALTER COLUMN wc_lines DROP NOT NULL;";
 
 
   $Schema["TABLE"]["attrib"]["attrib_pk"]["DESC"] = "";
-  $Schema["TABLE"]["attrib"]["attrib_pk"]["ADD"] = "ALTER TABLE attrib ADD COLUMN attrib_pk int4";
-  $Schema["TABLE"]["attrib"]["attrib_pk"]["ALTER"] = "ALTER TABLE attrib ALTER COLUMN attrib_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('attrib_attrib_pk_seq'::regclass)";
+  $Schema["TABLE"]["attrib"]["attrib_pk"]["ADD"] = "ALTER TABLE attrib ADD COLUMN attrib_pk int4;";
+  $Schema["TABLE"]["attrib"]["attrib_pk"]["ALTER"] = "ALTER TABLE attrib ALTER COLUMN attrib_pk SET NOT NULL, ALTER COLUMN attrib_pk SET DEFAULT nextval('attrib_attrib_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["attrib"]["attrib_key_fk"]["DESC"] = "COMMENT ON COLUMN attrib.attrib_key_fk IS 'attribute key reference'";
-  $Schema["TABLE"]["attrib"]["attrib_key_fk"]["ADD"] = "ALTER TABLE attrib ADD COLUMN attrib_key_fk int4";
-  $Schema["TABLE"]["attrib"]["attrib_key_fk"]["ALTER"] = "ALTER TABLE attrib ALTER COLUMN attrib_key_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["attrib"]["attrib_key_fk"]["DESC"] = "COMMENT ON COLUMN attrib.attrib_key_fk IS 'attribute key reference';";
+  $Schema["TABLE"]["attrib"]["attrib_key_fk"]["ADD"] = "ALTER TABLE attrib ADD COLUMN attrib_key_fk int4;";
+  $Schema["TABLE"]["attrib"]["attrib_key_fk"]["ALTER"] = "ALTER TABLE attrib ALTER COLUMN attrib_key_fk SET NOT NULL;";
 
-  $Schema["TABLE"]["attrib"]["attrib_value"]["DESC"] = "COMMENT ON COLUMN attrib.attrib_value IS 'attribute value'";
-  $Schema["TABLE"]["attrib"]["attrib_value"]["ADD"] = "ALTER TABLE attrib ADD COLUMN attrib_value text";
-  $Schema["TABLE"]["attrib"]["attrib_value"]["ALTER"] = "ALTER TABLE attrib ALTER COLUMN attrib_value TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["attrib"]["attrib_value"]["DESC"] = "COMMENT ON COLUMN attrib.attrib_value IS 'attribute value';";
+  $Schema["TABLE"]["attrib"]["attrib_value"]["ADD"] = "ALTER TABLE attrib ADD COLUMN attrib_value text;";
+  $Schema["TABLE"]["attrib"]["attrib_value"]["ALTER"] = "ALTER TABLE attrib ALTER COLUMN attrib_value DROP NOT NULL;";
 
-  $Schema["TABLE"]["attrib"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN attrib.pfile_fk IS 'key of pfile record that attribute refers to'";
-  $Schema["TABLE"]["attrib"]["pfile_fk"]["ADD"] = "ALTER TABLE attrib ADD COLUMN pfile_fk int4";
-  $Schema["TABLE"]["attrib"]["pfile_fk"]["ALTER"] = "ALTER TABLE attrib ALTER COLUMN pfile_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["attrib"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN attrib.pfile_fk IS 'key of pfile record that attribute refers to';";
+  $Schema["TABLE"]["attrib"]["pfile_fk"]["ADD"] = "ALTER TABLE attrib ADD COLUMN pfile_fk int4;";
+  $Schema["TABLE"]["attrib"]["pfile_fk"]["ALTER"] = "ALTER TABLE attrib ALTER COLUMN pfile_fk SET NOT NULL;";
 
 
   $Schema["TABLE"]["folder"]["folder_pk"]["DESC"] = "";
-  $Schema["TABLE"]["folder"]["folder_pk"]["ADD"] = "ALTER TABLE folder ADD COLUMN folder_pk int4";
-  $Schema["TABLE"]["folder"]["folder_pk"]["ALTER"] = "ALTER TABLE folder ALTER COLUMN folder_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('folder_folder_pk_seq'::regclass)";
+  $Schema["TABLE"]["folder"]["folder_pk"]["ADD"] = "ALTER TABLE folder ADD COLUMN folder_pk int4;";
+  $Schema["TABLE"]["folder"]["folder_pk"]["ALTER"] = "ALTER TABLE folder ALTER COLUMN folder_pk SET NOT NULL, ALTER COLUMN folder_pk SET DEFAULT nextval('folder_folder_pk_seq'::regclass);";
 
   $Schema["TABLE"]["folder"]["folder_name"]["DESC"] = "";
-  $Schema["TABLE"]["folder"]["folder_name"]["ADD"] = "ALTER TABLE folder ADD COLUMN folder_name text";
-  $Schema["TABLE"]["folder"]["folder_name"]["ALTER"] = "ALTER TABLE folder ALTER COLUMN folder_name TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["folder"]["folder_name"]["ADD"] = "ALTER TABLE folder ADD COLUMN folder_name text;";
+  $Schema["TABLE"]["folder"]["folder_name"]["ALTER"] = "ALTER TABLE folder ALTER COLUMN folder_name SET NOT NULL;";
 
   $Schema["TABLE"]["folder"]["folder_desc"]["DESC"] = "";
-  $Schema["TABLE"]["folder"]["folder_desc"]["ADD"] = "ALTER TABLE folder ADD COLUMN folder_desc text";
-  $Schema["TABLE"]["folder"]["folder_desc"]["ALTER"] = "ALTER TABLE folder ALTER COLUMN folder_desc TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["folder"]["folder_desc"]["ADD"] = "ALTER TABLE folder ADD COLUMN folder_desc text;";
+  $Schema["TABLE"]["folder"]["folder_desc"]["ALTER"] = "ALTER TABLE folder ALTER COLUMN folder_desc DROP NOT NULL;";
 
-  $Schema["TABLE"]["folder"]["folder_perm"]["DESC"] = "COMMENT ON COLUMN folder.folder_perm IS 'future permission'";
-  $Schema["TABLE"]["folder"]["folder_perm"]["ADD"] = "ALTER TABLE folder ADD COLUMN folder_perm int4";
-  $Schema["TABLE"]["folder"]["folder_perm"]["ALTER"] = "ALTER TABLE folder ALTER COLUMN folder_perm TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["folder"]["folder_perm"]["DESC"] = "COMMENT ON COLUMN folder.folder_perm IS 'future permission';";
+  $Schema["TABLE"]["folder"]["folder_perm"]["ADD"] = "ALTER TABLE folder ADD COLUMN folder_perm int4;";
+  $Schema["TABLE"]["folder"]["folder_perm"]["ALTER"] = "ALTER TABLE folder ALTER COLUMN folder_perm DROP NOT NULL;";
 
 
   $Schema["TABLE"]["foldercontents"]["foldercontents_pk"]["DESC"] = "";
-  $Schema["TABLE"]["foldercontents"]["foldercontents_pk"]["ADD"] = "ALTER TABLE foldercontents ADD COLUMN foldercontents_pk int4";
-  $Schema["TABLE"]["foldercontents"]["foldercontents_pk"]["ALTER"] = "ALTER TABLE foldercontents ALTER COLUMN foldercontents_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('foldercontents_foldercontents_pk_seq'::regclass)";
+  $Schema["TABLE"]["foldercontents"]["foldercontents_pk"]["ADD"] = "ALTER TABLE foldercontents ADD COLUMN foldercontents_pk int4;";
+  $Schema["TABLE"]["foldercontents"]["foldercontents_pk"]["ALTER"] = "ALTER TABLE foldercontents ALTER COLUMN foldercontents_pk SET NOT NULL, ALTER COLUMN foldercontents_pk SET DEFAULT nextval('foldercontents_foldercontents_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["foldercontents"]["parent_fk"]["DESC"] = "COMMENT ON COLUMN foldercontents.parent_fk IS 'parent folder_fk'";
-  $Schema["TABLE"]["foldercontents"]["parent_fk"]["ADD"] = "ALTER TABLE foldercontents ADD COLUMN parent_fk int4";
-  $Schema["TABLE"]["foldercontents"]["parent_fk"]["ALTER"] = "ALTER TABLE foldercontents ALTER COLUMN parent_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["foldercontents"]["parent_fk"]["DESC"] = "COMMENT ON COLUMN foldercontents.parent_fk IS 'parent folder_fk';";
+  $Schema["TABLE"]["foldercontents"]["parent_fk"]["ADD"] = "ALTER TABLE foldercontents ADD COLUMN parent_fk int4;";
+  $Schema["TABLE"]["foldercontents"]["parent_fk"]["ALTER"] = "ALTER TABLE foldercontents ALTER COLUMN parent_fk SET NOT NULL;";
 
-  $Schema["TABLE"]["foldercontents"]["foldercontents_mode"]["DESC"] = "COMMENT ON COLUMN foldercontents.foldercontents_mode IS '1<<0 child is folder_fk, 1<<1 child is upload_fk, 1<<2 child is an uploadtree_fk'";
-  $Schema["TABLE"]["foldercontents"]["foldercontents_mode"]["ADD"] = "ALTER TABLE foldercontents ADD COLUMN foldercontents_mode int4";
-  $Schema["TABLE"]["foldercontents"]["foldercontents_mode"]["ALTER"] = "ALTER TABLE foldercontents ALTER COLUMN foldercontents_mode TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["foldercontents"]["foldercontents_mode"]["DESC"] = "COMMENT ON COLUMN foldercontents.foldercontents_mode IS '1<<0 child is folder_fk, 1<<1 child is upload_fk, 1<<2 child is an uploadtree_fk';";
+  $Schema["TABLE"]["foldercontents"]["foldercontents_mode"]["ADD"] = "ALTER TABLE foldercontents ADD COLUMN foldercontents_mode int4;";
+  $Schema["TABLE"]["foldercontents"]["foldercontents_mode"]["ALTER"] = "ALTER TABLE foldercontents ALTER COLUMN foldercontents_mode SET NOT NULL;";
 
   $Schema["TABLE"]["foldercontents"]["child_id"]["DESC"] = "";
-  $Schema["TABLE"]["foldercontents"]["child_id"]["ADD"] = "ALTER TABLE foldercontents ADD COLUMN child_id int4";
-  $Schema["TABLE"]["foldercontents"]["child_id"]["ALTER"] = "ALTER TABLE foldercontents ALTER COLUMN child_id TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["foldercontents"]["child_id"]["ADD"] = "ALTER TABLE foldercontents ADD COLUMN child_id int4;";
+  $Schema["TABLE"]["foldercontents"]["child_id"]["ALTER"] = "ALTER TABLE foldercontents ALTER COLUMN child_id SET NOT NULL;";
 
 
   $Schema["TABLE"]["job"]["job_pk"]["DESC"] = "";
-  $Schema["TABLE"]["job"]["job_pk"]["ADD"] = "ALTER TABLE job ADD COLUMN job_pk int4";
-  $Schema["TABLE"]["job"]["job_pk"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('job_job_pk_seq'::regclass)";
+  $Schema["TABLE"]["job"]["job_pk"]["ADD"] = "ALTER TABLE job ADD COLUMN job_pk int4;";
+  $Schema["TABLE"]["job"]["job_pk"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_pk SET NOT NULL, ALTER COLUMN job_pk SET DEFAULT nextval('job_job_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["job"]["job_ufile_fk"]["DESC"] = "COMMENT ON COLUMN job.job_ufile_fk IS 'obsolete in 0.10: ufile associated with job'";
-  $Schema["TABLE"]["job"]["job_ufile_fk"]["ADD"] = "ALTER TABLE job ADD COLUMN job_ufile_fk int4";
-  $Schema["TABLE"]["job"]["job_ufile_fk"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_ufile_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["job"]["job_ufile_fk"]["DESC"] = "COMMENT ON COLUMN job.job_ufile_fk IS 'obsolete in 0.10: ufile associated with job';";
+  $Schema["TABLE"]["job"]["job_ufile_fk"]["ADD"] = "ALTER TABLE job ADD COLUMN job_ufile_fk int4;";
+  $Schema["TABLE"]["job"]["job_ufile_fk"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_ufile_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["job"]["job_submitter"]["DESC"] = "COMMENT ON COLUMN job.job_submitter IS 'job submitter name'";
-  $Schema["TABLE"]["job"]["job_submitter"]["ADD"] = "ALTER TABLE job ADD COLUMN job_submitter varchar[64]";
-  $Schema["TABLE"]["job"]["job_submitter"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_submitter TYPE varchar[64] SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["job"]["job_submitter"]["DESC"] = "COMMENT ON COLUMN job.job_submitter IS 'job submitter name';";
+  $Schema["TABLE"]["job"]["job_submitter"]["ADD"] = "ALTER TABLE job ADD COLUMN job_submitter varchar[64];";
+  $Schema["TABLE"]["job"]["job_submitter"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_submitter SET NOT NULL;";
 
   $Schema["TABLE"]["job"]["job_queued"]["DESC"] = "";
-  $Schema["TABLE"]["job"]["job_queued"]["ADD"] = "ALTER TABLE job ADD COLUMN job_queued timestamptz";
-  $Schema["TABLE"]["job"]["job_queued"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_queued TYPE timestamptz DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["job"]["job_queued"]["ADD"] = "ALTER TABLE job ADD COLUMN job_queued timestamptz;";
+  $Schema["TABLE"]["job"]["job_queued"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_queued DROP NOT NULL;";
 
   $Schema["TABLE"]["job"]["job_priority"]["DESC"] = "";
-  $Schema["TABLE"]["job"]["job_priority"]["ADD"] = "ALTER TABLE job ADD COLUMN job_priority int4";
-  $Schema["TABLE"]["job"]["job_priority"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_priority TYPE int4 SET NOT NULL SET DEFAULT 0";
+  $Schema["TABLE"]["job"]["job_priority"]["ADD"] = "ALTER TABLE job ADD COLUMN job_priority int4;";
+  $Schema["TABLE"]["job"]["job_priority"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_priority SET NOT NULL, ALTER COLUMN job_priority SET DEFAULT 0;";
 
-  $Schema["TABLE"]["job"]["job_email_notify"]["DESC"] = "COMMENT ON COLUMN job.job_email_notify IS 'list of emails to notify on completion (format?)'";
-  $Schema["TABLE"]["job"]["job_email_notify"]["ADD"] = "ALTER TABLE job ADD COLUMN job_email_notify text";
-  $Schema["TABLE"]["job"]["job_email_notify"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_email_notify TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["job"]["job_email_notify"]["DESC"] = "COMMENT ON COLUMN job.job_email_notify IS 'list of emails to notify on completion (format?)';";
+  $Schema["TABLE"]["job"]["job_email_notify"]["ADD"] = "ALTER TABLE job ADD COLUMN job_email_notify text;";
+  $Schema["TABLE"]["job"]["job_email_notify"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_email_notify DROP NOT NULL;";
 
-  $Schema["TABLE"]["job"]["job_name"]["DESC"] = "COMMENT ON COLUMN job.job_name IS 'what to call this job, for the user'";
-  $Schema["TABLE"]["job"]["job_name"]["ADD"] = "ALTER TABLE job ADD COLUMN job_name text";
-  $Schema["TABLE"]["job"]["job_name"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_name TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["job"]["job_name"]["DESC"] = "COMMENT ON COLUMN job.job_name IS 'what to call this job, for the user';";
+  $Schema["TABLE"]["job"]["job_name"]["ADD"] = "ALTER TABLE job ADD COLUMN job_name text;";
+  $Schema["TABLE"]["job"]["job_name"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_name DROP NOT NULL;";
 
-  $Schema["TABLE"]["job"]["job_upload_fk"]["DESC"] = "COMMENT ON COLUMN job.job_upload_fk IS 'upload this job applies to'";
-  $Schema["TABLE"]["job"]["job_upload_fk"]["ADD"] = "ALTER TABLE job ADD COLUMN job_upload_fk int4";
-  $Schema["TABLE"]["job"]["job_upload_fk"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_upload_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["job"]["job_upload_fk"]["DESC"] = "COMMENT ON COLUMN job.job_upload_fk IS 'upload this job applies to';";
+  $Schema["TABLE"]["job"]["job_upload_fk"]["ADD"] = "ALTER TABLE job ADD COLUMN job_upload_fk int4;";
+  $Schema["TABLE"]["job"]["job_upload_fk"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_upload_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["job"]["job_folder_fk"]["DESC"] = "COMMENT ON COLUMN job.job_folder_fk IS 'folder this job applies to'";
-  $Schema["TABLE"]["job"]["job_folder_fk"]["ADD"] = "ALTER TABLE job ADD COLUMN job_folder_fk int4";
-  $Schema["TABLE"]["job"]["job_folder_fk"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_folder_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["job"]["job_folder_fk"]["DESC"] = "COMMENT ON COLUMN job.job_folder_fk IS 'folder this job applies to';";
+  $Schema["TABLE"]["job"]["job_folder_fk"]["ADD"] = "ALTER TABLE job ADD COLUMN job_folder_fk int4;";
+  $Schema["TABLE"]["job"]["job_folder_fk"]["ALTER"] = "ALTER TABLE job ALTER COLUMN job_folder_fk DROP NOT NULL;";
 
 
-  $Schema["TABLE"]["jobdepends"]["jdep_jq_fk"]["DESC"] = "COMMENT ON COLUMN jobdepends.jdep_jq_fk IS 'jdep_jq_fk depends on jdep_jq_depends_fk'";
-  $Schema["TABLE"]["jobdepends"]["jdep_jq_fk"]["ADD"] = "ALTER TABLE jobdepends ADD COLUMN jdep_jq_fk int4";
-  $Schema["TABLE"]["jobdepends"]["jdep_jq_fk"]["ALTER"] = "ALTER TABLE jobdepends ALTER COLUMN jdep_jq_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobdepends"]["jdep_jq_fk"]["DESC"] = "COMMENT ON COLUMN jobdepends.jdep_jq_fk IS 'jdep_jq_fk depends on jdep_jq_depends_fk';";
+  $Schema["TABLE"]["jobdepends"]["jdep_jq_fk"]["ADD"] = "ALTER TABLE jobdepends ADD COLUMN jdep_jq_fk int4;";
+  $Schema["TABLE"]["jobdepends"]["jdep_jq_fk"]["ALTER"] = "ALTER TABLE jobdepends ALTER COLUMN jdep_jq_fk DROP NOT NULL;";
 
   $Schema["TABLE"]["jobdepends"]["jdep_jq_depends_fk"]["DESC"] = "";
-  $Schema["TABLE"]["jobdepends"]["jdep_jq_depends_fk"]["ADD"] = "ALTER TABLE jobdepends ADD COLUMN jdep_jq_depends_fk int4";
-  $Schema["TABLE"]["jobdepends"]["jdep_jq_depends_fk"]["ALTER"] = "ALTER TABLE jobdepends ALTER COLUMN jdep_jq_depends_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobdepends"]["jdep_jq_depends_fk"]["ADD"] = "ALTER TABLE jobdepends ADD COLUMN jdep_jq_depends_fk int4;";
+  $Schema["TABLE"]["jobdepends"]["jdep_jq_depends_fk"]["ALTER"] = "ALTER TABLE jobdepends ALTER COLUMN jdep_jq_depends_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["jobdepends"]["jdep_depends_bits_obsolete"]["DESC"] = "COMMENT ON COLUMN jobdepends.jdep_depends_bits_obsolete IS 'This is a mask to use with jobqueue.jq_end_bits. If jq_end_bits & jdepdepends_bits != 0, then this job can be scheduled.'";
-  $Schema["TABLE"]["jobdepends"]["jdep_depends_bits_obsolete"]["ADD"] = "ALTER TABLE jobdepends ADD COLUMN jdep_depends_bits_obsolete int2";
-  $Schema["TABLE"]["jobdepends"]["jdep_depends_bits_obsolete"]["ALTER"] = "ALTER TABLE jobdepends ALTER COLUMN jdep_depends_bits_obsolete TYPE int2 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobdepends"]["jdep_depends_bits_obsolete"]["DESC"] = "COMMENT ON COLUMN jobdepends.jdep_depends_bits_obsolete IS 'This is a mask to use with jobqueue.jq_end_bits. If jq_end_bits & jdepdepends_bits != 0, then this job can be scheduled.';";
+  $Schema["TABLE"]["jobdepends"]["jdep_depends_bits_obsolete"]["ADD"] = "ALTER TABLE jobdepends ADD COLUMN jdep_depends_bits_obsolete int2;";
+  $Schema["TABLE"]["jobdepends"]["jdep_depends_bits_obsolete"]["ALTER"] = "ALTER TABLE jobdepends ALTER COLUMN jdep_depends_bits_obsolete DROP NOT NULL;";
 
 
   $Schema["TABLE"]["jobqueue"]["jq_pk"]["DESC"] = "";
-  $Schema["TABLE"]["jobqueue"]["jq_pk"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_pk int4";
-  $Schema["TABLE"]["jobqueue"]["jq_pk"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('jobqueue_jq_pk_seq'::regclass)";
+  $Schema["TABLE"]["jobqueue"]["jq_pk"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_pk int4;";
+  $Schema["TABLE"]["jobqueue"]["jq_pk"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_pk SET NOT NULL, ALTER COLUMN jq_pk SET DEFAULT nextval('jobqueue_jq_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["jobqueue"]["jq_job_fk"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_job_fk IS 'which user job this step supports'";
-  $Schema["TABLE"]["jobqueue"]["jq_job_fk"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_job_fk int4";
-  $Schema["TABLE"]["jobqueue"]["jq_job_fk"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_job_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_job_fk"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_job_fk IS 'which user job this step supports';";
+  $Schema["TABLE"]["jobqueue"]["jq_job_fk"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_job_fk int4;";
+  $Schema["TABLE"]["jobqueue"]["jq_job_fk"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_job_fk SET NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_type"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_type IS 'text agent name - THIS SHOULD BE REPLACED BY agent_fk'";
-  $Schema["TABLE"]["jobqueue"]["jq_type"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_type text";
-  $Schema["TABLE"]["jobqueue"]["jq_type"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_type TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_type"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_type IS 'text agent name - THIS SHOULD BE REPLACED BY agent_fk';";
+  $Schema["TABLE"]["jobqueue"]["jq_type"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_type text;";
+  $Schema["TABLE"]["jobqueue"]["jq_type"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_type SET NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_args"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_args IS 'arbitrary text understood by the agent'";
-  $Schema["TABLE"]["jobqueue"]["jq_args"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_args text";
-  $Schema["TABLE"]["jobqueue"]["jq_args"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_args TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_args"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_args IS 'arbitrary text understood by the agent';";
+  $Schema["TABLE"]["jobqueue"]["jq_args"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_args text;";
+  $Schema["TABLE"]["jobqueue"]["jq_args"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_args DROP NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_length"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_length IS 'number of \"items\" to process (file size in K for example) or NULL/0 if unknown'";
-  $Schema["TABLE"]["jobqueue"]["jq_length"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_length int4";
-  $Schema["TABLE"]["jobqueue"]["jq_length"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_length TYPE int4 SET NOT NULL SET DEFAULT 0";
+  $Schema["TABLE"]["jobqueue"]["jq_length"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_length IS 'number of \"items\" to process (file size in K for example) or NULL/0 if unknown';";
+  $Schema["TABLE"]["jobqueue"]["jq_length"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_length int4;";
+  $Schema["TABLE"]["jobqueue"]["jq_length"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_length SET NOT NULL, ALTER COLUMN jq_length SET DEFAULT 0;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_progress"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_progress IS '# items processed in same units as jq_length'";
-  $Schema["TABLE"]["jobqueue"]["jq_progress"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_progress int4";
-  $Schema["TABLE"]["jobqueue"]["jq_progress"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_progress TYPE int4 SET NOT NULL SET DEFAULT 0";
+  $Schema["TABLE"]["jobqueue"]["jq_progress"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_progress IS '# items processed in same units as jq_length';";
+  $Schema["TABLE"]["jobqueue"]["jq_progress"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_progress int4;";
+  $Schema["TABLE"]["jobqueue"]["jq_progress"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_progress SET NOT NULL, ALTER COLUMN jq_progress SET DEFAULT 0;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_starttime"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_starttime IS 'set this field to indicate job is in progress'";
-  $Schema["TABLE"]["jobqueue"]["jq_starttime"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_starttime timestamptz";
-  $Schema["TABLE"]["jobqueue"]["jq_starttime"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_starttime TYPE timestamptz DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_starttime"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_starttime IS 'set this field to indicate job is in progress';";
+  $Schema["TABLE"]["jobqueue"]["jq_starttime"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_starttime timestamptz;";
+  $Schema["TABLE"]["jobqueue"]["jq_starttime"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_starttime DROP NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_endtime"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_endtime IS 'set this when job completed for whatever reason'";
-  $Schema["TABLE"]["jobqueue"]["jq_endtime"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_endtime timestamptz";
-  $Schema["TABLE"]["jobqueue"]["jq_endtime"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_endtime TYPE timestamptz DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_endtime"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_endtime IS 'set this when job completed for whatever reason';";
+  $Schema["TABLE"]["jobqueue"]["jq_endtime"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_endtime timestamptz;";
+  $Schema["TABLE"]["jobqueue"]["jq_endtime"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_endtime DROP NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_endurl"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_endurl IS 'optional URL associated with end of this job, error report for example'";
-  $Schema["TABLE"]["jobqueue"]["jq_endurl"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_endurl text";
-  $Schema["TABLE"]["jobqueue"]["jq_endurl"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_endurl TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_endurl"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_endurl IS 'optional URL associated with end of this job, error report for example';";
+  $Schema["TABLE"]["jobqueue"]["jq_endurl"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_endurl text;";
+  $Schema["TABLE"]["jobqueue"]["jq_endurl"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_endurl DROP NOT NULL;";
 
   $Schema["TABLE"]["jobqueue"]["jq_endtext"]["DESC"] = "";
-  $Schema["TABLE"]["jobqueue"]["jq_endtext"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_endtext text";
-  $Schema["TABLE"]["jobqueue"]["jq_endtext"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_endtext TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_endtext"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_endtext text;";
+  $Schema["TABLE"]["jobqueue"]["jq_endtext"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_endtext DROP NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_end_bits IS 'bitmask(ok=0x1, fail=0x2, nonfatal=0x4)'";
-  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_end_bits int2";
-  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_end_bits TYPE int2 SET NOT NULL SET DEFAULT 0";
+  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_end_bits IS 'bitmask(ok=0x1, fail=0x2, nonfatal=0x4)';";
+  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_end_bits int2;";
+  $Schema["TABLE"]["jobqueue"]["jq_end_bits"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_end_bits SET NOT NULL, ALTER COLUMN jq_end_bits SET DEFAULT 0;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_sqlprogress"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_sqlprogress IS 'if set, an SQL query which returns a single value in same units as jq_length whereupon jq_progress is unusued'";
-  $Schema["TABLE"]["jobqueue"]["jq_sqlprogress"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_sqlprogress text";
-  $Schema["TABLE"]["jobqueue"]["jq_sqlprogress"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_sqlprogress TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_sqlprogress"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_sqlprogress IS 'if set, an SQL query which returns a single value in same units as jq_length whereupon jq_progress is unusued';";
+  $Schema["TABLE"]["jobqueue"]["jq_sqlprogress"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_sqlprogress text;";
+  $Schema["TABLE"]["jobqueue"]["jq_sqlprogress"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_sqlprogress DROP NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_schedinfo IS 'Field for information storage by job scheduler(s) presumably useful for cleanup after failures too'";
-  $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_schedinfo text";
-  $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_schedinfo TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_schedinfo IS 'Field for information storage by job scheduler(s) presumably useful for cleanup after failures too';";
+  $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_schedinfo text;";
+  $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_schedinfo DROP NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_repeat IS 'yes means re-queue this job until the query returns empty.  only meaningful when jq_runonpfile is set'";
-  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_repeat bpchar[3]";
-  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_repeat TYPE bpchar[3] SET NOT NULL SET DEFAULT 'no'::bpchar";
+  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_repeat IS 'yes means re-queue this job until the query returns empty.  only meaningful when jq_runonpfile is set';";
+  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_repeat bpchar[3];";
+  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_repeat SET NOT NULL, ALTER COLUMN jq_repeat SET DEFAULT 'no'::bpchar;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_runonpfile IS 'when set, scheduler runs the jq_arg as sql and sends each row to the host indicated by the jq_runonpfile column (a pfile name)'";
-  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_runonpfile bpchar[12]";
-  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_runonpfile TYPE bpchar[12] DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_runonpfile IS 'when set, scheduler runs the jq_arg as sql and sends each row to the host indicated by the jq_runonpfile column (a pfile name)';";
+  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_runonpfile bpchar[12];";
+  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_runonpfile DROP NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_units"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_units IS 'the units name of jq_progress and jq_length'";
-  $Schema["TABLE"]["jobqueue"]["jq_units"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_units varchar[32]";
-  $Schema["TABLE"]["jobqueue"]["jq_units"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_units TYPE varchar[32] DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_units"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_units IS 'the units name of jq_progress and jq_length';";
+  $Schema["TABLE"]["jobqueue"]["jq_units"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_units varchar[32];";
+  $Schema["TABLE"]["jobqueue"]["jq_units"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_units DROP NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_statustime"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_statustime IS 'last time the agent gave a progress update, even when progress didn''t change'";
-  $Schema["TABLE"]["jobqueue"]["jq_statustime"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_statustime timestamptz";
-  $Schema["TABLE"]["jobqueue"]["jq_statustime"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_statustime TYPE timestamptz DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["jobqueue"]["jq_statustime"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_statustime IS 'last time the agent gave a progress update, even when progress didn''t change';";
+  $Schema["TABLE"]["jobqueue"]["jq_statustime"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_statustime timestamptz;";
+  $Schema["TABLE"]["jobqueue"]["jq_statustime"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_statustime DROP NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_elapsedtime"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_elapsedtime IS 'Elapsed secs working on jq'";
-  $Schema["TABLE"]["jobqueue"]["jq_elapsedtime"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_elapsedtime int4";
-  $Schema["TABLE"]["jobqueue"]["jq_elapsedtime"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_elapsedtime TYPE int4 DROP NOT NULL SET DEFAULT 0";
+  $Schema["TABLE"]["jobqueue"]["jq_elapsedtime"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_elapsedtime IS 'Elapsed secs working on jq';";
+  $Schema["TABLE"]["jobqueue"]["jq_elapsedtime"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_elapsedtime int4;";
+  $Schema["TABLE"]["jobqueue"]["jq_elapsedtime"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_elapsedtime DROP NOT NULL, ALTER COLUMN jq_elapsedtime SET DEFAULT 0;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_processedtime"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_processedtime IS 'sum of process times (secs) from all agents'";
-  $Schema["TABLE"]["jobqueue"]["jq_processedtime"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_processedtime int4";
-  $Schema["TABLE"]["jobqueue"]["jq_processedtime"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_processedtime TYPE int4 DROP NOT NULL SET DEFAULT 0";
+  $Schema["TABLE"]["jobqueue"]["jq_processedtime"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_processedtime IS 'sum of process times (secs) from all agents';";
+  $Schema["TABLE"]["jobqueue"]["jq_processedtime"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_processedtime int4;";
+  $Schema["TABLE"]["jobqueue"]["jq_processedtime"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_processedtime DROP NOT NULL, ALTER COLUMN jq_processedtime SET DEFAULT 0;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_itemsprocessed IS 'sum of files processed by all agents'";
-  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_itemsprocessed int4";
-  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_itemsprocessed TYPE int4 DROP NOT NULL SET DEFAULT 0";
+  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["DESC"] = "COMMENT ON COLUMN jobqueue.jq_itemsprocessed IS 'sum of files processed by all agents';";
+  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["ADD"] = "ALTER TABLE jobqueue ADD COLUMN jq_itemsprocessed int4;";
+  $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["ALTER"] = "ALTER TABLE jobqueue ALTER COLUMN jq_itemsprocessed DROP NOT NULL, ALTER COLUMN jq_itemsprocessed SET DEFAULT 0;";
 
 
   $Schema["TABLE"]["key"]["key_pk"]["DESC"] = "";
-  $Schema["TABLE"]["key"]["key_pk"]["ADD"] = "ALTER TABLE key ADD COLUMN key_pk int4";
-  $Schema["TABLE"]["key"]["key_pk"]["ALTER"] = "ALTER TABLE key ALTER COLUMN key_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('key_key_pk_seq'::regclass)";
+  $Schema["TABLE"]["key"]["key_pk"]["ADD"] = "ALTER TABLE key ADD COLUMN key_pk int4;";
+  $Schema["TABLE"]["key"]["key_pk"]["ALTER"] = "ALTER TABLE key ALTER COLUMN key_pk SET NOT NULL, ALTER COLUMN key_pk SET DEFAULT nextval('key_key_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["key"]["key_name"]["DESC"] = "COMMENT ON COLUMN key.key_name IS 'displayed key name'";
-  $Schema["TABLE"]["key"]["key_name"]["ADD"] = "ALTER TABLE key ADD COLUMN key_name varchar[32]";
-  $Schema["TABLE"]["key"]["key_name"]["ALTER"] = "ALTER TABLE key ALTER COLUMN key_name TYPE varchar[32] SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["key"]["key_name"]["DESC"] = "COMMENT ON COLUMN key.key_name IS 'displayed key name';";
+  $Schema["TABLE"]["key"]["key_name"]["ADD"] = "ALTER TABLE key ADD COLUMN key_name varchar[32];";
+  $Schema["TABLE"]["key"]["key_name"]["ALTER"] = "ALTER TABLE key ALTER COLUMN key_name SET NOT NULL;";
 
-  $Schema["TABLE"]["key"]["key_desc"]["DESC"] = "COMMENT ON COLUMN key.key_desc IS 'brief description of the key'";
-  $Schema["TABLE"]["key"]["key_desc"]["ADD"] = "ALTER TABLE key ADD COLUMN key_desc varchar[255]";
-  $Schema["TABLE"]["key"]["key_desc"]["ALTER"] = "ALTER TABLE key ALTER COLUMN key_desc TYPE varchar[255] DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["key"]["key_desc"]["DESC"] = "COMMENT ON COLUMN key.key_desc IS 'brief description of the key';";
+  $Schema["TABLE"]["key"]["key_desc"]["ADD"] = "ALTER TABLE key ADD COLUMN key_desc varchar[255];";
+  $Schema["TABLE"]["key"]["key_desc"]["ALTER"] = "ALTER TABLE key ALTER COLUMN key_desc DROP NOT NULL;";
 
-  $Schema["TABLE"]["key"]["key_parent_fk"]["DESC"] = "COMMENT ON COLUMN key.key_parent_fk IS 'parent key_pk (keys may be nested), 0 if no parent, 0 is used instead of null beause of unique constraint'";
-  $Schema["TABLE"]["key"]["key_parent_fk"]["ADD"] = "ALTER TABLE key ADD COLUMN key_parent_fk int4";
-  $Schema["TABLE"]["key"]["key_parent_fk"]["ALTER"] = "ALTER TABLE key ALTER COLUMN key_parent_fk TYPE int4 SET NOT NULL SET DEFAULT 0";
+  $Schema["TABLE"]["key"]["key_parent_fk"]["DESC"] = "COMMENT ON COLUMN key.key_parent_fk IS 'parent key_pk (keys may be nested), 0 if no parent, 0 is used instead of null beause of unique constraint';";
+  $Schema["TABLE"]["key"]["key_parent_fk"]["ADD"] = "ALTER TABLE key ADD COLUMN key_parent_fk int4;";
+  $Schema["TABLE"]["key"]["key_parent_fk"]["ALTER"] = "ALTER TABLE key ALTER COLUMN key_parent_fk SET NOT NULL, ALTER COLUMN key_parent_fk SET DEFAULT 0;";
 
-  $Schema["TABLE"]["key"]["key_agent_fk"]["DESC"] = "COMMENT ON COLUMN key.key_agent_fk IS 'agent id to use to populate this data type'";
-  $Schema["TABLE"]["key"]["key_agent_fk"]["ADD"] = "ALTER TABLE key ADD COLUMN key_agent_fk int4";
-  $Schema["TABLE"]["key"]["key_agent_fk"]["ALTER"] = "ALTER TABLE key ALTER COLUMN key_agent_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["key"]["key_agent_fk"]["DESC"] = "COMMENT ON COLUMN key.key_agent_fk IS 'agent id to use to populate this data type';";
+  $Schema["TABLE"]["key"]["key_agent_fk"]["ADD"] = "ALTER TABLE key ADD COLUMN key_agent_fk int4;";
+  $Schema["TABLE"]["key"]["key_agent_fk"]["ALTER"] = "ALTER TABLE key ALTER COLUMN key_agent_fk SET NOT NULL;";
 
 
   $Schema["TABLE"]["licgroup"]["licgroup_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licgroup"]["licgroup_pk"]["ADD"] = "ALTER TABLE licgroup ADD COLUMN licgroup_pk int4";
-  $Schema["TABLE"]["licgroup"]["licgroup_pk"]["ALTER"] = "ALTER TABLE licgroup ALTER COLUMN licgroup_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('licgroup_licgroup_pk_seq'::regclass)";
+  $Schema["TABLE"]["licgroup"]["licgroup_pk"]["ADD"] = "ALTER TABLE licgroup ADD COLUMN licgroup_pk int4;";
+  $Schema["TABLE"]["licgroup"]["licgroup_pk"]["ALTER"] = "ALTER TABLE licgroup ALTER COLUMN licgroup_pk SET NOT NULL, ALTER COLUMN licgroup_pk SET DEFAULT nextval('licgroup_licgroup_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["licgroup"]["licgroup_name"]["DESC"] = "COMMENT ON COLUMN licgroup.licgroup_name IS 'Name of License Group'";
-  $Schema["TABLE"]["licgroup"]["licgroup_name"]["ADD"] = "ALTER TABLE licgroup ADD COLUMN licgroup_name text";
-  $Schema["TABLE"]["licgroup"]["licgroup_name"]["ALTER"] = "ALTER TABLE licgroup ALTER COLUMN licgroup_name TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licgroup"]["licgroup_name"]["DESC"] = "COMMENT ON COLUMN licgroup.licgroup_name IS 'Name of License Group';";
+  $Schema["TABLE"]["licgroup"]["licgroup_name"]["ADD"] = "ALTER TABLE licgroup ADD COLUMN licgroup_name text;";
+  $Schema["TABLE"]["licgroup"]["licgroup_name"]["ALTER"] = "ALTER TABLE licgroup ALTER COLUMN licgroup_name DROP NOT NULL;";
 
-  $Schema["TABLE"]["licgroup"]["licgroup_desc"]["DESC"] = "COMMENT ON COLUMN licgroup.licgroup_desc IS 'Description of License Group'";
-  $Schema["TABLE"]["licgroup"]["licgroup_desc"]["ADD"] = "ALTER TABLE licgroup ADD COLUMN licgroup_desc text";
-  $Schema["TABLE"]["licgroup"]["licgroup_desc"]["ALTER"] = "ALTER TABLE licgroup ALTER COLUMN licgroup_desc TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licgroup"]["licgroup_desc"]["DESC"] = "COMMENT ON COLUMN licgroup.licgroup_desc IS 'Description of License Group';";
+  $Schema["TABLE"]["licgroup"]["licgroup_desc"]["ADD"] = "ALTER TABLE licgroup ADD COLUMN licgroup_desc text;";
+  $Schema["TABLE"]["licgroup"]["licgroup_desc"]["ALTER"] = "ALTER TABLE licgroup ALTER COLUMN licgroup_desc DROP NOT NULL;";
 
-  $Schema["TABLE"]["licgroup"]["licgroup_color"]["DESC"] = "COMMENT ON COLUMN licgroup.licgroup_color IS 'Color to associate with License Group (#RRGGBB)'";
-  $Schema["TABLE"]["licgroup"]["licgroup_color"]["ADD"] = "ALTER TABLE licgroup ADD COLUMN licgroup_color text";
-  $Schema["TABLE"]["licgroup"]["licgroup_color"]["ALTER"] = "ALTER TABLE licgroup ALTER COLUMN licgroup_color TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licgroup"]["licgroup_color"]["DESC"] = "COMMENT ON COLUMN licgroup.licgroup_color IS 'Color to associate with License Group (#RRGGBB)';";
+  $Schema["TABLE"]["licgroup"]["licgroup_color"]["ADD"] = "ALTER TABLE licgroup ADD COLUMN licgroup_color text;";
+  $Schema["TABLE"]["licgroup"]["licgroup_color"]["ALTER"] = "ALTER TABLE licgroup ALTER COLUMN licgroup_color DROP NOT NULL;";
 
 
   $Schema["TABLE"]["licgroup_grps"]["licgroup_grps_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_grps_pk"]["ADD"] = "ALTER TABLE licgroup_grps ADD COLUMN licgroup_grps_pk int4";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_grps_pk"]["ALTER"] = "ALTER TABLE licgroup_grps ALTER COLUMN licgroup_grps_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('licgroup_grps_licgroup_grps_pk_seq'::regclass)";
+  $Schema["TABLE"]["licgroup_grps"]["licgroup_grps_pk"]["ADD"] = "ALTER TABLE licgroup_grps ADD COLUMN licgroup_grps_pk int4;";
+  $Schema["TABLE"]["licgroup_grps"]["licgroup_grps_pk"]["ALTER"] = "ALTER TABLE licgroup_grps ALTER COLUMN licgroup_grps_pk SET NOT NULL, ALTER COLUMN licgroup_grps_pk SET DEFAULT nextval('licgroup_grps_licgroup_grps_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_fk"]["DESC"] = "COMMENT ON COLUMN licgroup_grps.licgroup_fk IS 'Key of parent license group'";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_fk"]["ADD"] = "ALTER TABLE licgroup_grps ADD COLUMN licgroup_fk int4";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_fk"]["ALTER"] = "ALTER TABLE licgroup_grps ALTER COLUMN licgroup_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licgroup_grps"]["licgroup_fk"]["DESC"] = "COMMENT ON COLUMN licgroup_grps.licgroup_fk IS 'Key of parent license group';";
+  $Schema["TABLE"]["licgroup_grps"]["licgroup_fk"]["ADD"] = "ALTER TABLE licgroup_grps ADD COLUMN licgroup_fk int4;";
+  $Schema["TABLE"]["licgroup_grps"]["licgroup_fk"]["ALTER"] = "ALTER TABLE licgroup_grps ALTER COLUMN licgroup_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_memberfk"]["DESC"] = "COMMENT ON COLUMN licgroup_grps.licgroup_memberfk IS 'Key of license group that belongs to licgroup_fk'";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_memberfk"]["ADD"] = "ALTER TABLE licgroup_grps ADD COLUMN licgroup_memberfk int4";
-  $Schema["TABLE"]["licgroup_grps"]["licgroup_memberfk"]["ALTER"] = "ALTER TABLE licgroup_grps ALTER COLUMN licgroup_memberfk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licgroup_grps"]["licgroup_memberfk"]["DESC"] = "COMMENT ON COLUMN licgroup_grps.licgroup_memberfk IS 'Key of license group that belongs to licgroup_fk';";
+  $Schema["TABLE"]["licgroup_grps"]["licgroup_memberfk"]["ADD"] = "ALTER TABLE licgroup_grps ADD COLUMN licgroup_memberfk int4;";
+  $Schema["TABLE"]["licgroup_grps"]["licgroup_memberfk"]["ALTER"] = "ALTER TABLE licgroup_grps ALTER COLUMN licgroup_memberfk DROP NOT NULL;";
 
 
   $Schema["TABLE"]["licgroup_lics"]["licgroup_lics_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_lics_pk"]["ADD"] = "ALTER TABLE licgroup_lics ADD COLUMN licgroup_lics_pk int4";
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_lics_pk"]["ALTER"] = "ALTER TABLE licgroup_lics ALTER COLUMN licgroup_lics_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('licgroup_lics_licgroup_lics_pk_seq'::regclass)";
+  $Schema["TABLE"]["licgroup_lics"]["licgroup_lics_pk"]["ADD"] = "ALTER TABLE licgroup_lics ADD COLUMN licgroup_lics_pk int4;";
+  $Schema["TABLE"]["licgroup_lics"]["licgroup_lics_pk"]["ALTER"] = "ALTER TABLE licgroup_lics ALTER COLUMN licgroup_lics_pk SET NOT NULL, ALTER COLUMN licgroup_lics_pk SET DEFAULT nextval('licgroup_lics_licgroup_lics_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_fk"]["DESC"] = "COMMENT ON COLUMN licgroup_lics.licgroup_fk IS 'Parent License Group'";
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_fk"]["ADD"] = "ALTER TABLE licgroup_lics ADD COLUMN licgroup_fk int4";
-  $Schema["TABLE"]["licgroup_lics"]["licgroup_fk"]["ALTER"] = "ALTER TABLE licgroup_lics ALTER COLUMN licgroup_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licgroup_lics"]["licgroup_fk"]["DESC"] = "COMMENT ON COLUMN licgroup_lics.licgroup_fk IS 'Parent License Group';";
+  $Schema["TABLE"]["licgroup_lics"]["licgroup_fk"]["ADD"] = "ALTER TABLE licgroup_lics ADD COLUMN licgroup_fk int4;";
+  $Schema["TABLE"]["licgroup_lics"]["licgroup_fk"]["ALTER"] = "ALTER TABLE licgroup_lics ALTER COLUMN licgroup_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["licgroup_lics"]["lic_fk"]["DESC"] = "COMMENT ON COLUMN licgroup_lics.lic_fk IS 'License in Group'";
-  $Schema["TABLE"]["licgroup_lics"]["lic_fk"]["ADD"] = "ALTER TABLE licgroup_lics ADD COLUMN lic_fk int4";
-  $Schema["TABLE"]["licgroup_lics"]["lic_fk"]["ALTER"] = "ALTER TABLE licgroup_lics ALTER COLUMN lic_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licgroup_lics"]["lic_fk"]["DESC"] = "COMMENT ON COLUMN licgroup_lics.lic_fk IS 'License in Group';";
+  $Schema["TABLE"]["licgroup_lics"]["lic_fk"]["ADD"] = "ALTER TABLE licgroup_lics ADD COLUMN lic_fk int4;";
+  $Schema["TABLE"]["licgroup_lics"]["lic_fk"]["ALTER"] = "ALTER TABLE licgroup_lics ALTER COLUMN lic_fk DROP NOT NULL;";
 
 
   $Schema["TABLE"]["licterm"]["licterm_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm"]["licterm_pk"]["ADD"] = "ALTER TABLE licterm ADD COLUMN licterm_pk int4";
-  $Schema["TABLE"]["licterm"]["licterm_pk"]["ALTER"] = "ALTER TABLE licterm ALTER COLUMN licterm_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('licterm_licterm_pk_seq'::regclass)";
+  $Schema["TABLE"]["licterm"]["licterm_pk"]["ADD"] = "ALTER TABLE licterm ADD COLUMN licterm_pk int4;";
+  $Schema["TABLE"]["licterm"]["licterm_pk"]["ALTER"] = "ALTER TABLE licterm ALTER COLUMN licterm_pk SET NOT NULL, ALTER COLUMN licterm_pk SET DEFAULT nextval('licterm_licterm_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["licterm"]["licterm_name"]["DESC"] = "COMMENT ON COLUMN licterm.licterm_name IS 'Name of License Term Group'";
-  $Schema["TABLE"]["licterm"]["licterm_name"]["ADD"] = "ALTER TABLE licterm ADD COLUMN licterm_name text";
-  $Schema["TABLE"]["licterm"]["licterm_name"]["ALTER"] = "ALTER TABLE licterm ALTER COLUMN licterm_name TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licterm"]["licterm_name"]["DESC"] = "COMMENT ON COLUMN licterm.licterm_name IS 'Name of License Term Group';";
+  $Schema["TABLE"]["licterm"]["licterm_name"]["ADD"] = "ALTER TABLE licterm ADD COLUMN licterm_name text;";
+  $Schema["TABLE"]["licterm"]["licterm_name"]["ALTER"] = "ALTER TABLE licterm ALTER COLUMN licterm_name DROP NOT NULL;";
 
-  $Schema["TABLE"]["licterm"]["licterm_desc"]["DESC"] = "COMMENT ON COLUMN licterm.licterm_desc IS 'Description of License Term Group'";
-  $Schema["TABLE"]["licterm"]["licterm_desc"]["ADD"] = "ALTER TABLE licterm ADD COLUMN licterm_desc text";
-  $Schema["TABLE"]["licterm"]["licterm_desc"]["ALTER"] = "ALTER TABLE licterm ALTER COLUMN licterm_desc TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licterm"]["licterm_desc"]["DESC"] = "COMMENT ON COLUMN licterm.licterm_desc IS 'Description of License Term Group';";
+  $Schema["TABLE"]["licterm"]["licterm_desc"]["ADD"] = "ALTER TABLE licterm ADD COLUMN licterm_desc text;";
+  $Schema["TABLE"]["licterm"]["licterm_desc"]["ALTER"] = "ALTER TABLE licterm ALTER COLUMN licterm_desc DROP NOT NULL;";
 
 
   $Schema["TABLE"]["licterm_map"]["licterm_map_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_map"]["licterm_map_pk"]["ADD"] = "ALTER TABLE licterm_map ADD COLUMN licterm_map_pk int4";
-  $Schema["TABLE"]["licterm_map"]["licterm_map_pk"]["ALTER"] = "ALTER TABLE licterm_map ALTER COLUMN licterm_map_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('licterm_map_licterm_map_pk_seq'::regclass)";
+  $Schema["TABLE"]["licterm_map"]["licterm_map_pk"]["ADD"] = "ALTER TABLE licterm_map ADD COLUMN licterm_map_pk int4;";
+  $Schema["TABLE"]["licterm_map"]["licterm_map_pk"]["ALTER"] = "ALTER TABLE licterm_map ALTER COLUMN licterm_map_pk SET NOT NULL, ALTER COLUMN licterm_map_pk SET DEFAULT nextval('licterm_map_licterm_map_pk_seq'::regclass);";
 
   $Schema["TABLE"]["licterm_map"]["licterm_fk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_map"]["licterm_fk"]["ADD"] = "ALTER TABLE licterm_map ADD COLUMN licterm_fk int4";
-  $Schema["TABLE"]["licterm_map"]["licterm_fk"]["ALTER"] = "ALTER TABLE licterm_map ALTER COLUMN licterm_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licterm_map"]["licterm_fk"]["ADD"] = "ALTER TABLE licterm_map ADD COLUMN licterm_fk int4;";
+  $Schema["TABLE"]["licterm_map"]["licterm_fk"]["ALTER"] = "ALTER TABLE licterm_map ALTER COLUMN licterm_fk DROP NOT NULL;";
 
   $Schema["TABLE"]["licterm_map"]["licterm_words_fk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_map"]["licterm_words_fk"]["ADD"] = "ALTER TABLE licterm_map ADD COLUMN licterm_words_fk int4";
-  $Schema["TABLE"]["licterm_map"]["licterm_words_fk"]["ALTER"] = "ALTER TABLE licterm_map ALTER COLUMN licterm_words_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licterm_map"]["licterm_words_fk"]["ADD"] = "ALTER TABLE licterm_map ADD COLUMN licterm_words_fk int4;";
+  $Schema["TABLE"]["licterm_map"]["licterm_words_fk"]["ALTER"] = "ALTER TABLE licterm_map ALTER COLUMN licterm_words_fk DROP NOT NULL;";
 
 
   $Schema["TABLE"]["licterm_maplic"]["licterm_maplic_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_maplic"]["licterm_maplic_pk"]["ADD"] = "ALTER TABLE licterm_maplic ADD COLUMN licterm_maplic_pk int4";
-  $Schema["TABLE"]["licterm_maplic"]["licterm_maplic_pk"]["ALTER"] = "ALTER TABLE licterm_maplic ALTER COLUMN licterm_maplic_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('licterm_maplic_licterm_maplic_pk_seq'::regclass)";
+  $Schema["TABLE"]["licterm_maplic"]["licterm_maplic_pk"]["ADD"] = "ALTER TABLE licterm_maplic ADD COLUMN licterm_maplic_pk int4;";
+  $Schema["TABLE"]["licterm_maplic"]["licterm_maplic_pk"]["ALTER"] = "ALTER TABLE licterm_maplic ALTER COLUMN licterm_maplic_pk SET NOT NULL, ALTER COLUMN licterm_maplic_pk SET DEFAULT nextval('licterm_maplic_licterm_maplic_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["licterm_maplic"]["licterm_fk"]["DESC"] = "COMMENT ON COLUMN licterm_maplic.licterm_fk IS 'Key of parent term group'";
-  $Schema["TABLE"]["licterm_maplic"]["licterm_fk"]["ADD"] = "ALTER TABLE licterm_maplic ADD COLUMN licterm_fk int4";
-  $Schema["TABLE"]["licterm_maplic"]["licterm_fk"]["ALTER"] = "ALTER TABLE licterm_maplic ALTER COLUMN licterm_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licterm_maplic"]["licterm_fk"]["DESC"] = "COMMENT ON COLUMN licterm_maplic.licterm_fk IS 'Key of parent term group';";
+  $Schema["TABLE"]["licterm_maplic"]["licterm_fk"]["ADD"] = "ALTER TABLE licterm_maplic ADD COLUMN licterm_fk int4;";
+  $Schema["TABLE"]["licterm_maplic"]["licterm_fk"]["ALTER"] = "ALTER TABLE licterm_maplic ALTER COLUMN licterm_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["licterm_maplic"]["lic_fk"]["DESC"] = "COMMENT ON COLUMN licterm_maplic.lic_fk IS 'License that belongs to licterm_fk'";
-  $Schema["TABLE"]["licterm_maplic"]["lic_fk"]["ADD"] = "ALTER TABLE licterm_maplic ADD COLUMN lic_fk int4";
-  $Schema["TABLE"]["licterm_maplic"]["lic_fk"]["ALTER"] = "ALTER TABLE licterm_maplic ALTER COLUMN lic_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licterm_maplic"]["lic_fk"]["DESC"] = "COMMENT ON COLUMN licterm_maplic.lic_fk IS 'License that belongs to licterm_fk';";
+  $Schema["TABLE"]["licterm_maplic"]["lic_fk"]["ADD"] = "ALTER TABLE licterm_maplic ADD COLUMN lic_fk int4;";
+  $Schema["TABLE"]["licterm_maplic"]["lic_fk"]["ALTER"] = "ALTER TABLE licterm_maplic ALTER COLUMN lic_fk DROP NOT NULL;";
 
 
   $Schema["TABLE"]["licterm_name"]["licterm_name_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_name"]["licterm_name_pk"]["ADD"] = "ALTER TABLE licterm_name ADD COLUMN licterm_name_pk int4";
-  $Schema["TABLE"]["licterm_name"]["licterm_name_pk"]["ALTER"] = "ALTER TABLE licterm_name ALTER COLUMN licterm_name_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('licterm_name_licterm_name_pk_seq'::regclass)";
+  $Schema["TABLE"]["licterm_name"]["licterm_name_pk"]["ADD"] = "ALTER TABLE licterm_name ADD COLUMN licterm_name_pk int4;";
+  $Schema["TABLE"]["licterm_name"]["licterm_name_pk"]["ALTER"] = "ALTER TABLE licterm_name ALTER COLUMN licterm_name_pk SET NOT NULL, ALTER COLUMN licterm_name_pk SET DEFAULT nextval('licterm_name_licterm_name_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["licterm_name"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN licterm_name.pfile_fk IS 'Pfile containing this canonical name'";
-  $Schema["TABLE"]["licterm_name"]["pfile_fk"]["ADD"] = "ALTER TABLE licterm_name ADD COLUMN pfile_fk int4";
-  $Schema["TABLE"]["licterm_name"]["pfile_fk"]["ALTER"] = "ALTER TABLE licterm_name ALTER COLUMN pfile_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licterm_name"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN licterm_name.pfile_fk IS 'Pfile containing this canonical name';";
+  $Schema["TABLE"]["licterm_name"]["pfile_fk"]["ADD"] = "ALTER TABLE licterm_name ADD COLUMN pfile_fk int4;";
+  $Schema["TABLE"]["licterm_name"]["pfile_fk"]["ALTER"] = "ALTER TABLE licterm_name ALTER COLUMN pfile_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["licterm_name"]["licterm_fk"]["DESC"] = "COMMENT ON COLUMN licterm_name.licterm_fk IS 'Canonical name to use (null means use the real license name)'";
-  $Schema["TABLE"]["licterm_name"]["licterm_fk"]["ADD"] = "ALTER TABLE licterm_name ADD COLUMN licterm_fk int4";
-  $Schema["TABLE"]["licterm_name"]["licterm_fk"]["ALTER"] = "ALTER TABLE licterm_name ALTER COLUMN licterm_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licterm_name"]["licterm_fk"]["DESC"] = "COMMENT ON COLUMN licterm_name.licterm_fk IS 'Canonical name to use (null means use the real license name)';";
+  $Schema["TABLE"]["licterm_name"]["licterm_fk"]["ADD"] = "ALTER TABLE licterm_name ADD COLUMN licterm_fk int4;";
+  $Schema["TABLE"]["licterm_name"]["licterm_fk"]["ALTER"] = "ALTER TABLE licterm_name ALTER COLUMN licterm_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["licterm_name"]["agent_lic_meta_fk"]["DESC"] = "COMMENT ON COLUMN licterm_name.agent_lic_meta_fk IS 'License range containing this canonical name'";
-  $Schema["TABLE"]["licterm_name"]["agent_lic_meta_fk"]["ADD"] = "ALTER TABLE licterm_name ADD COLUMN agent_lic_meta_fk int4";
-  $Schema["TABLE"]["licterm_name"]["agent_lic_meta_fk"]["ALTER"] = "ALTER TABLE licterm_name ALTER COLUMN agent_lic_meta_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licterm_name"]["agent_lic_meta_fk"]["DESC"] = "COMMENT ON COLUMN licterm_name.agent_lic_meta_fk IS 'License range containing this canonical name';";
+  $Schema["TABLE"]["licterm_name"]["agent_lic_meta_fk"]["ADD"] = "ALTER TABLE licterm_name ADD COLUMN agent_lic_meta_fk int4;";
+  $Schema["TABLE"]["licterm_name"]["agent_lic_meta_fk"]["ALTER"] = "ALTER TABLE licterm_name ALTER COLUMN agent_lic_meta_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["licterm_name"]["licterm_name_confidence"]["DESC"] = "COMMENT ON COLUMN licterm_name.licterm_name_confidence IS 'Confidence that the license template name is correct (3=no, 2=partial, 1=style, 0=use the name)'";
-  $Schema["TABLE"]["licterm_name"]["licterm_name_confidence"]["ADD"] = "ALTER TABLE licterm_name ADD COLUMN licterm_name_confidence int4";
-  $Schema["TABLE"]["licterm_name"]["licterm_name_confidence"]["ALTER"] = "ALTER TABLE licterm_name ALTER COLUMN licterm_name_confidence TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licterm_name"]["licterm_name_confidence"]["DESC"] = "COMMENT ON COLUMN licterm_name.licterm_name_confidence IS 'Confidence that the license template name is correct (3=no, 2=partial, 1=style, 0=use the name)';";
+  $Schema["TABLE"]["licterm_name"]["licterm_name_confidence"]["ADD"] = "ALTER TABLE licterm_name ADD COLUMN licterm_name_confidence int4;";
+  $Schema["TABLE"]["licterm_name"]["licterm_name_confidence"]["ALTER"] = "ALTER TABLE licterm_name ALTER COLUMN licterm_name_confidence DROP NOT NULL;";
 
 
   $Schema["TABLE"]["licterm_words"]["licterm_words_pk"]["DESC"] = "";
-  $Schema["TABLE"]["licterm_words"]["licterm_words_pk"]["ADD"] = "ALTER TABLE licterm_words ADD COLUMN licterm_words_pk int4";
-  $Schema["TABLE"]["licterm_words"]["licterm_words_pk"]["ALTER"] = "ALTER TABLE licterm_words ALTER COLUMN licterm_words_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('licterm_words_licterm_words_pk_seq'::regclass)";
+  $Schema["TABLE"]["licterm_words"]["licterm_words_pk"]["ADD"] = "ALTER TABLE licterm_words ADD COLUMN licterm_words_pk int4;";
+  $Schema["TABLE"]["licterm_words"]["licterm_words_pk"]["ALTER"] = "ALTER TABLE licterm_words ALTER COLUMN licterm_words_pk SET NOT NULL, ALTER COLUMN licterm_words_pk SET DEFAULT nextval('licterm_words_licterm_words_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["licterm_words"]["licterm_words_text"]["DESC"] = "COMMENT ON COLUMN licterm_words.licterm_words_text IS 'Text for a keyword term'";
-  $Schema["TABLE"]["licterm_words"]["licterm_words_text"]["ADD"] = "ALTER TABLE licterm_words ADD COLUMN licterm_words_text text";
-  $Schema["TABLE"]["licterm_words"]["licterm_words_text"]["ALTER"] = "ALTER TABLE licterm_words ALTER COLUMN licterm_words_text TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["licterm_words"]["licterm_words_text"]["DESC"] = "COMMENT ON COLUMN licterm_words.licterm_words_text IS 'Text for a keyword term';";
+  $Schema["TABLE"]["licterm_words"]["licterm_words_text"]["ADD"] = "ALTER TABLE licterm_words ADD COLUMN licterm_words_text text;";
+  $Schema["TABLE"]["licterm_words"]["licterm_words_text"]["ALTER"] = "ALTER TABLE licterm_words ALTER COLUMN licterm_words_text DROP NOT NULL;";
 
 
-  $Schema["TABLE"]["log"]["log_table_enum"]["DESC"] = "COMMENT ON COLUMN log.log_table_enum IS 'enum see table_enum'";
-  $Schema["TABLE"]["log"]["log_table_enum"]["ADD"] = "ALTER TABLE log ADD COLUMN log_table_enum int4";
-  $Schema["TABLE"]["log"]["log_table_enum"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_table_enum TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["log"]["log_table_enum"]["DESC"] = "COMMENT ON COLUMN log.log_table_enum IS 'enum see table_enum';";
+  $Schema["TABLE"]["log"]["log_table_enum"]["ADD"] = "ALTER TABLE log ADD COLUMN log_table_enum int4;";
+  $Schema["TABLE"]["log"]["log_table_enum"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_table_enum SET NOT NULL;";
 
-  $Schema["TABLE"]["log"]["log_rec_fk"]["DESC"] = "COMMENT ON COLUMN log.log_rec_fk IS 'Record identifier'";
-  $Schema["TABLE"]["log"]["log_rec_fk"]["ADD"] = "ALTER TABLE log ADD COLUMN log_rec_fk int4";
-  $Schema["TABLE"]["log"]["log_rec_fk"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_rec_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["log"]["log_rec_fk"]["DESC"] = "COMMENT ON COLUMN log.log_rec_fk IS 'Record identifier';";
+  $Schema["TABLE"]["log"]["log_rec_fk"]["ADD"] = "ALTER TABLE log ADD COLUMN log_rec_fk int4;";
+  $Schema["TABLE"]["log"]["log_rec_fk"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_rec_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["log"]["log_type"]["DESC"] = "COMMENT ON COLUMN log.log_type IS 'Type of log record: 0=debug, 1=warning, 2=error, 3=fatal'";
-  $Schema["TABLE"]["log"]["log_type"]["ADD"] = "ALTER TABLE log ADD COLUMN log_type int4";
-  $Schema["TABLE"]["log"]["log_type"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_type TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["log"]["log_type"]["DESC"] = "COMMENT ON COLUMN log.log_type IS 'Type of log record: 0=debug, 1=warning, 2=error, 3=fatal';";
+  $Schema["TABLE"]["log"]["log_type"]["ADD"] = "ALTER TABLE log ADD COLUMN log_type int4;";
+  $Schema["TABLE"]["log"]["log_type"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_type SET NOT NULL;";
 
-  $Schema["TABLE"]["log"]["log_message"]["DESC"] = "COMMENT ON COLUMN log.log_message IS 'Message text'";
-  $Schema["TABLE"]["log"]["log_message"]["ADD"] = "ALTER TABLE log ADD COLUMN log_message text";
-  $Schema["TABLE"]["log"]["log_message"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_message TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["log"]["log_message"]["DESC"] = "COMMENT ON COLUMN log.log_message IS 'Message text';";
+  $Schema["TABLE"]["log"]["log_message"]["ADD"] = "ALTER TABLE log ADD COLUMN log_message text;";
+  $Schema["TABLE"]["log"]["log_message"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_message SET NOT NULL;";
 
-  $Schema["TABLE"]["log"]["log_date"]["DESC"] = "COMMENT ON COLUMN log.log_date IS 'Date log was added'";
-  $Schema["TABLE"]["log"]["log_date"]["ADD"] = "ALTER TABLE log ADD COLUMN log_date timestamptz";
-  $Schema["TABLE"]["log"]["log_date"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_date TYPE timestamptz SET NOT NULL SET DEFAULT now()";
+  $Schema["TABLE"]["log"]["log_date"]["DESC"] = "COMMENT ON COLUMN log.log_date IS 'Date log was added';";
+  $Schema["TABLE"]["log"]["log_date"]["ADD"] = "ALTER TABLE log ADD COLUMN log_date timestamptz;";
+  $Schema["TABLE"]["log"]["log_date"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_date SET NOT NULL, ALTER COLUMN log_date SET DEFAULT now();";
 
-  $Schema["TABLE"]["log"]["log_pk"]["DESC"] = "COMMENT ON COLUMN log.log_pk IS 'PK for log'";
-  $Schema["TABLE"]["log"]["log_pk"]["ADD"] = "ALTER TABLE log ADD COLUMN log_pk int4";
-  $Schema["TABLE"]["log"]["log_pk"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('log_log_pk_seq'::regclass)";
+  $Schema["TABLE"]["log"]["log_pk"]["DESC"] = "COMMENT ON COLUMN log.log_pk IS 'PK for log';";
+  $Schema["TABLE"]["log"]["log_pk"]["ADD"] = "ALTER TABLE log ADD COLUMN log_pk int4;";
+  $Schema["TABLE"]["log"]["log_pk"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_pk SET NOT NULL, ALTER COLUMN log_pk SET DEFAULT nextval('log_log_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["log"]["log_jq_fk"]["DESC"] = "COMMENT ON COLUMN log.log_jq_fk IS 'Link to job that created this log entry.'";
-  $Schema["TABLE"]["log"]["log_jq_fk"]["ADD"] = "ALTER TABLE log ADD COLUMN log_jq_fk int4";
-  $Schema["TABLE"]["log"]["log_jq_fk"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_jq_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["log"]["log_jq_fk"]["DESC"] = "COMMENT ON COLUMN log.log_jq_fk IS 'Link to job that created this log entry.';";
+  $Schema["TABLE"]["log"]["log_jq_fk"]["ADD"] = "ALTER TABLE log ADD COLUMN log_jq_fk int4;";
+  $Schema["TABLE"]["log"]["log_jq_fk"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_jq_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["log"]["log_logger"]["DESC"] = "COMMENT ON COLUMN log.log_logger IS 'logger (function, script name, etc)  when table_enum is unknown '";
-  $Schema["TABLE"]["log"]["log_logger"]["ADD"] = "ALTER TABLE log ADD COLUMN log_logger text";
-  $Schema["TABLE"]["log"]["log_logger"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_logger TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["log"]["log_logger"]["DESC"] = "COMMENT ON COLUMN log.log_logger IS 'logger (function, script name, etc)  when table_enum is unknown ';";
+  $Schema["TABLE"]["log"]["log_logger"]["ADD"] = "ALTER TABLE log ADD COLUMN log_logger text;";
+  $Schema["TABLE"]["log"]["log_logger"]["ALTER"] = "ALTER TABLE log ALTER COLUMN log_logger DROP NOT NULL;";
 
 
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["DESC"] = "";
-  $Schema["TABLE"]["mimetype"]["mimetype_pk"]["ADD"] = "ALTER TABLE mimetype ADD COLUMN mimetype_pk int4";
-  $Schema["TABLE"]["mimetype"]["mimetype_pk"]["ALTER"] = "ALTER TABLE mimetype ALTER COLUMN mimetype_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('mimetype_mimetype_pk_seq'::regclass)";
+  $Schema["TABLE"]["mimetype"]["mimetype_pk"]["ADD"] = "ALTER TABLE mimetype ADD COLUMN mimetype_pk int4;";
+  $Schema["TABLE"]["mimetype"]["mimetype_pk"]["ALTER"] = "ALTER TABLE mimetype ALTER COLUMN mimetype_pk SET NOT NULL, ALTER COLUMN mimetype_pk SET DEFAULT nextval('mimetype_mimetype_pk_seq'::regclass);";
 
   $Schema["TABLE"]["mimetype"]["mimetype_name"]["DESC"] = "";
-  $Schema["TABLE"]["mimetype"]["mimetype_name"]["ADD"] = "ALTER TABLE mimetype ADD COLUMN mimetype_name text";
-  $Schema["TABLE"]["mimetype"]["mimetype_name"]["ALTER"] = "ALTER TABLE mimetype ALTER COLUMN mimetype_name TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["mimetype"]["mimetype_name"]["ADD"] = "ALTER TABLE mimetype ADD COLUMN mimetype_name text;";
+  $Schema["TABLE"]["mimetype"]["mimetype_name"]["ALTER"] = "ALTER TABLE mimetype ALTER COLUMN mimetype_name SET NOT NULL;";
 
 
   $Schema["TABLE"]["pfile"]["pfile_pk"]["DESC"] = "";
-  $Schema["TABLE"]["pfile"]["pfile_pk"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_pk int4";
-  $Schema["TABLE"]["pfile"]["pfile_pk"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('pfile_pfile_pk_seq'::regclass)";
+  $Schema["TABLE"]["pfile"]["pfile_pk"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_pk int4;";
+  $Schema["TABLE"]["pfile"]["pfile_pk"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_pk SET NOT NULL, ALTER COLUMN pfile_pk SET DEFAULT nextval('pfile_pfile_pk_seq'::regclass);";
 
   $Schema["TABLE"]["pfile"]["pfile_md5"]["DESC"] = "";
-  $Schema["TABLE"]["pfile"]["pfile_md5"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_md5 bpchar[32]";
-  $Schema["TABLE"]["pfile"]["pfile_md5"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_md5 TYPE bpchar[32] SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["pfile"]["pfile_md5"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_md5 bpchar[32];";
+  $Schema["TABLE"]["pfile"]["pfile_md5"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_md5 SET NOT NULL;";
 
   $Schema["TABLE"]["pfile"]["pfile_sha1"]["DESC"] = "";
-  $Schema["TABLE"]["pfile"]["pfile_sha1"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_sha1 bpchar[40]";
-  $Schema["TABLE"]["pfile"]["pfile_sha1"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_sha1 TYPE bpchar[40] SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["pfile"]["pfile_sha1"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_sha1 bpchar[40];";
+  $Schema["TABLE"]["pfile"]["pfile_sha1"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_sha1 SET NOT NULL;";
 
   $Schema["TABLE"]["pfile"]["pfile_size"]["DESC"] = "";
-  $Schema["TABLE"]["pfile"]["pfile_size"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_size int8";
-  $Schema["TABLE"]["pfile"]["pfile_size"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_size TYPE int8 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["pfile"]["pfile_size"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_size int8;";
+  $Schema["TABLE"]["pfile"]["pfile_size"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_size SET NOT NULL;";
 
-  $Schema["TABLE"]["pfile"]["pfile_mimetypefk"]["DESC"] = "COMMENT ON COLUMN pfile.pfile_mimetypefk IS 'NULL is treated as application/octet-stream'";
-  $Schema["TABLE"]["pfile"]["pfile_mimetypefk"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_mimetypefk int4";
-  $Schema["TABLE"]["pfile"]["pfile_mimetypefk"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_mimetypefk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["pfile"]["pfile_mimetypefk"]["DESC"] = "COMMENT ON COLUMN pfile.pfile_mimetypefk IS 'NULL is treated as application/octet-stream';";
+  $Schema["TABLE"]["pfile"]["pfile_mimetypefk"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_mimetypefk int4;";
+  $Schema["TABLE"]["pfile"]["pfile_mimetypefk"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_mimetypefk DROP NOT NULL;";
 
   $Schema["TABLE"]["pfile"]["pfile_usecount"]["DESC"] = "";
-  $Schema["TABLE"]["pfile"]["pfile_usecount"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_usecount int4";
-  $Schema["TABLE"]["pfile"]["pfile_usecount"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_usecount TYPE int4 SET NOT NULL SET DEFAULT 0";
+  $Schema["TABLE"]["pfile"]["pfile_usecount"]["ADD"] = "ALTER TABLE pfile ADD COLUMN pfile_usecount int4;";
+  $Schema["TABLE"]["pfile"]["pfile_usecount"]["ALTER"] = "ALTER TABLE pfile ALTER COLUMN pfile_usecount SET NOT NULL, ALTER COLUMN pfile_usecount SET DEFAULT 0;";
 
 
   $Schema["TABLE"]["proj"]["ufile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["proj"]["ufile_fk"]["ADD"] = "ALTER TABLE proj ADD COLUMN ufile_fk int4";
-  $Schema["TABLE"]["proj"]["ufile_fk"]["ALTER"] = "ALTER TABLE proj ALTER COLUMN ufile_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["proj"]["ufile_fk"]["ADD"] = "ALTER TABLE proj ADD COLUMN ufile_fk int4;";
+  $Schema["TABLE"]["proj"]["ufile_fk"]["ALTER"] = "ALTER TABLE proj ALTER COLUMN ufile_fk SET NOT NULL;";
 
   $Schema["TABLE"]["proj"]["proj_desc"]["DESC"] = "";
-  $Schema["TABLE"]["proj"]["proj_desc"]["ADD"] = "ALTER TABLE proj ADD COLUMN proj_desc text";
-  $Schema["TABLE"]["proj"]["proj_desc"]["ALTER"] = "ALTER TABLE proj ALTER COLUMN proj_desc TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["proj"]["proj_desc"]["ADD"] = "ALTER TABLE proj ADD COLUMN proj_desc text;";
+  $Schema["TABLE"]["proj"]["proj_desc"]["ALTER"] = "ALTER TABLE proj ALTER COLUMN proj_desc SET NOT NULL;";
 
   $Schema["TABLE"]["proj"]["proj_origin"]["DESC"] = "";
-  $Schema["TABLE"]["proj"]["proj_origin"]["ADD"] = "ALTER TABLE proj ADD COLUMN proj_origin text";
-  $Schema["TABLE"]["proj"]["proj_origin"]["ALTER"] = "ALTER TABLE proj ALTER COLUMN proj_origin TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["proj"]["proj_origin"]["ADD"] = "ALTER TABLE proj ADD COLUMN proj_origin text;";
+  $Schema["TABLE"]["proj"]["proj_origin"]["ALTER"] = "ALTER TABLE proj ALTER COLUMN proj_origin SET NOT NULL;";
 
-  $Schema["TABLE"]["proj"]["proj_creator"]["DESC"] = "COMMENT ON COLUMN proj.proj_creator IS 'who created this project'";
-  $Schema["TABLE"]["proj"]["proj_creator"]["ADD"] = "ALTER TABLE proj ADD COLUMN proj_creator text";
-  $Schema["TABLE"]["proj"]["proj_creator"]["ALTER"] = "ALTER TABLE proj ALTER COLUMN proj_creator TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["proj"]["proj_creator"]["DESC"] = "COMMENT ON COLUMN proj.proj_creator IS 'who created this project';";
+  $Schema["TABLE"]["proj"]["proj_creator"]["ADD"] = "ALTER TABLE proj ADD COLUMN proj_creator text;";
+  $Schema["TABLE"]["proj"]["proj_creator"]["ALTER"] = "ALTER TABLE proj ALTER COLUMN proj_creator DROP NOT NULL;";
 
 
   $Schema["TABLE"]["report_cache"]["report_cache_pk"]["DESC"] = "";
-  $Schema["TABLE"]["report_cache"]["report_cache_pk"]["ADD"] = "ALTER TABLE report_cache ADD COLUMN report_cache_pk int4";
-  $Schema["TABLE"]["report_cache"]["report_cache_pk"]["ALTER"] = "ALTER TABLE report_cache ALTER COLUMN report_cache_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('report_cache_report_cache_pk_seq'::regclass)";
+  $Schema["TABLE"]["report_cache"]["report_cache_pk"]["ADD"] = "ALTER TABLE report_cache ADD COLUMN report_cache_pk int4;";
+  $Schema["TABLE"]["report_cache"]["report_cache_pk"]["ALTER"] = "ALTER TABLE report_cache ALTER COLUMN report_cache_pk SET NOT NULL, ALTER COLUMN report_cache_pk SET DEFAULT nextval('report_cache_report_cache_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["report_cache"]["report_cache_tla"]["DESC"] = "COMMENT ON COLUMN report_cache.report_cache_tla IS 'time last accessed'";
-  $Schema["TABLE"]["report_cache"]["report_cache_tla"]["ADD"] = "ALTER TABLE report_cache ADD COLUMN report_cache_tla timestamp";
-  $Schema["TABLE"]["report_cache"]["report_cache_tla"]["ALTER"] = "ALTER TABLE report_cache ALTER COLUMN report_cache_tla TYPE timestamp SET NOT NULL SET DEFAULT now()";
+  $Schema["TABLE"]["report_cache"]["report_cache_tla"]["DESC"] = "COMMENT ON COLUMN report_cache.report_cache_tla IS 'time last accessed';";
+  $Schema["TABLE"]["report_cache"]["report_cache_tla"]["ADD"] = "ALTER TABLE report_cache ADD COLUMN report_cache_tla timestamp;";
+  $Schema["TABLE"]["report_cache"]["report_cache_tla"]["ALTER"] = "ALTER TABLE report_cache ALTER COLUMN report_cache_tla SET NOT NULL, ALTER COLUMN report_cache_tla SET DEFAULT now();";
 
-  $Schema["TABLE"]["report_cache"]["report_cache_key"]["DESC"] = "COMMENT ON COLUMN report_cache.report_cache_key IS 'http GET args'";
-  $Schema["TABLE"]["report_cache"]["report_cache_key"]["ADD"] = "ALTER TABLE report_cache ADD COLUMN report_cache_key text";
-  $Schema["TABLE"]["report_cache"]["report_cache_key"]["ALTER"] = "ALTER TABLE report_cache ALTER COLUMN report_cache_key TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["report_cache"]["report_cache_key"]["DESC"] = "COMMENT ON COLUMN report_cache.report_cache_key IS 'http GET args';";
+  $Schema["TABLE"]["report_cache"]["report_cache_key"]["ADD"] = "ALTER TABLE report_cache ADD COLUMN report_cache_key text;";
+  $Schema["TABLE"]["report_cache"]["report_cache_key"]["ALTER"] = "ALTER TABLE report_cache ALTER COLUMN report_cache_key SET NOT NULL;";
 
-  $Schema["TABLE"]["report_cache"]["report_cache_value"]["DESC"] = "COMMENT ON COLUMN report_cache.report_cache_value IS 'report to output'";
-  $Schema["TABLE"]["report_cache"]["report_cache_value"]["ADD"] = "ALTER TABLE report_cache ADD COLUMN report_cache_value text";
-  $Schema["TABLE"]["report_cache"]["report_cache_value"]["ALTER"] = "ALTER TABLE report_cache ALTER COLUMN report_cache_value TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["report_cache"]["report_cache_value"]["DESC"] = "COMMENT ON COLUMN report_cache.report_cache_value IS 'report to output';";
+  $Schema["TABLE"]["report_cache"]["report_cache_value"]["ADD"] = "ALTER TABLE report_cache ADD COLUMN report_cache_value text;";
+  $Schema["TABLE"]["report_cache"]["report_cache_value"]["ALTER"] = "ALTER TABLE report_cache ALTER COLUMN report_cache_value SET NOT NULL;";
 
   $Schema["TABLE"]["report_cache"]["report_cache_uploadfk"]["DESC"] = "";
-  $Schema["TABLE"]["report_cache"]["report_cache_uploadfk"]["ADD"] = "ALTER TABLE report_cache ADD COLUMN report_cache_uploadfk int4";
-  $Schema["TABLE"]["report_cache"]["report_cache_uploadfk"]["ALTER"] = "ALTER TABLE report_cache ALTER COLUMN report_cache_uploadfk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["report_cache"]["report_cache_uploadfk"]["ADD"] = "ALTER TABLE report_cache ADD COLUMN report_cache_uploadfk int4;";
+  $Schema["TABLE"]["report_cache"]["report_cache_uploadfk"]["ALTER"] = "ALTER TABLE report_cache ALTER COLUMN report_cache_uploadfk DROP NOT NULL;";
 
 
   $Schema["TABLE"]["report_cache_user"]["report_cache_user_pk"]["DESC"] = "";
-  $Schema["TABLE"]["report_cache_user"]["report_cache_user_pk"]["ADD"] = "ALTER TABLE report_cache_user ADD COLUMN report_cache_user_pk int4";
-  $Schema["TABLE"]["report_cache_user"]["report_cache_user_pk"]["ALTER"] = "ALTER TABLE report_cache_user ALTER COLUMN report_cache_user_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('report_cache_user_report_cache_user_pk_seq'::regclass)";
+  $Schema["TABLE"]["report_cache_user"]["report_cache_user_pk"]["ADD"] = "ALTER TABLE report_cache_user ADD COLUMN report_cache_user_pk int4;";
+  $Schema["TABLE"]["report_cache_user"]["report_cache_user_pk"]["ALTER"] = "ALTER TABLE report_cache_user ALTER COLUMN report_cache_user_pk SET NOT NULL, ALTER COLUMN report_cache_user_pk SET DEFAULT nextval('report_cache_user_report_cache_user_pk_seq'::regclass);";
 
   $Schema["TABLE"]["report_cache_user"]["user_fk"]["DESC"] = "";
-  $Schema["TABLE"]["report_cache_user"]["user_fk"]["ADD"] = "ALTER TABLE report_cache_user ADD COLUMN user_fk int4";
-  $Schema["TABLE"]["report_cache_user"]["user_fk"]["ALTER"] = "ALTER TABLE report_cache_user ALTER COLUMN user_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["report_cache_user"]["user_fk"]["ADD"] = "ALTER TABLE report_cache_user ADD COLUMN user_fk int4;";
+  $Schema["TABLE"]["report_cache_user"]["user_fk"]["ALTER"] = "ALTER TABLE report_cache_user ALTER COLUMN user_fk SET NOT NULL;";
 
-  $Schema["TABLE"]["report_cache_user"]["cache_on"]["DESC"] = "COMMENT ON COLUMN report_cache_user.cache_on IS '''Y'' or ''N'''";
-  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ADD"] = "ALTER TABLE report_cache_user ADD COLUMN cache_on bpchar[1]";
-  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE report_cache_user ALTER COLUMN cache_on TYPE bpchar[1] SET NOT NULL SET DEFAULT 'Y'::bpchar";
+  $Schema["TABLE"]["report_cache_user"]["cache_on"]["DESC"] = "COMMENT ON COLUMN report_cache_user.cache_on IS '''Y'' or ''N''';";
+  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ADD"] = "ALTER TABLE report_cache_user ADD COLUMN cache_on bpchar[1];";
+  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE report_cache_user ALTER COLUMN cache_on SET NOT NULL, ALTER COLUMN cache_on SET DEFAULT 'Y'::bpchar;";
 
 
-  $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["DESC"] = "COMMENT ON COLUMN scheduler_status.unique_scheduler IS 'unique id for the scheduler: gethostid()+getpid() for the scheduler'";
-  $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN unique_scheduler text";
-  $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN unique_scheduler TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["DESC"] = "COMMENT ON COLUMN scheduler_status.unique_scheduler IS 'unique id for the scheduler: gethostid()+getpid() for the scheduler';";
+  $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN unique_scheduler text;";
+  $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN unique_scheduler SET NOT NULL;";
 
-  $Schema["TABLE"]["scheduler_status"]["agent_number"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_number IS 'unique id for the agent based on the scheduler'";
-  $Schema["TABLE"]["scheduler_status"]["agent_number"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_number int4";
-  $Schema["TABLE"]["scheduler_status"]["agent_number"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_number TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["scheduler_status"]["agent_number"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_number IS 'unique id for the agent based on the scheduler';";
+  $Schema["TABLE"]["scheduler_status"]["agent_number"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_number int4;";
+  $Schema["TABLE"]["scheduler_status"]["agent_number"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_number SET NOT NULL;";
 
-  $Schema["TABLE"]["scheduler_status"]["agent_attrib"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_attrib IS 'attributes for the agent (type, host, etc.)'";
-  $Schema["TABLE"]["scheduler_status"]["agent_attrib"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_attrib text";
-  $Schema["TABLE"]["scheduler_status"]["agent_attrib"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_attrib TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["scheduler_status"]["agent_attrib"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_attrib IS 'attributes for the agent (type, host, etc.)';";
+  $Schema["TABLE"]["scheduler_status"]["agent_attrib"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_attrib text;";
+  $Schema["TABLE"]["scheduler_status"]["agent_attrib"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_attrib SET NOT NULL;";
 
-  $Schema["TABLE"]["scheduler_status"]["agent_status"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_status IS 'run-time status of the agent'";
-  $Schema["TABLE"]["scheduler_status"]["agent_status"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_status text";
-  $Schema["TABLE"]["scheduler_status"]["agent_status"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_status TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["scheduler_status"]["agent_status"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_status IS 'run-time status of the agent';";
+  $Schema["TABLE"]["scheduler_status"]["agent_status"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_status text;";
+  $Schema["TABLE"]["scheduler_status"]["agent_status"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_status SET NOT NULL;";
 
-  $Schema["TABLE"]["scheduler_status"]["agent_status_date"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_status_date IS 'time of the last status change for the agent'";
-  $Schema["TABLE"]["scheduler_status"]["agent_status_date"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_status_date timestamp";
-  $Schema["TABLE"]["scheduler_status"]["agent_status_date"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_status_date TYPE timestamp DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["scheduler_status"]["agent_status_date"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_status_date IS 'time of the last status change for the agent';";
+  $Schema["TABLE"]["scheduler_status"]["agent_status_date"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_status_date timestamp;";
+  $Schema["TABLE"]["scheduler_status"]["agent_status_date"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_status_date DROP NOT NULL;";
 
-  $Schema["TABLE"]["scheduler_status"]["record_update"]["DESC"] = "COMMENT ON COLUMN scheduler_status.record_update IS 'time this record was last updated (scheduler updates at least once a minute so old entries indicate a dead scheduler)'";
-  $Schema["TABLE"]["scheduler_status"]["record_update"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN record_update timestamp";
-  $Schema["TABLE"]["scheduler_status"]["record_update"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN record_update TYPE timestamp SET NOT NULL SET DEFAULT now()";
+  $Schema["TABLE"]["scheduler_status"]["record_update"]["DESC"] = "COMMENT ON COLUMN scheduler_status.record_update IS 'time this record was last updated (scheduler updates at least once a minute so old entries indicate a dead scheduler)';";
+  $Schema["TABLE"]["scheduler_status"]["record_update"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN record_update timestamp;";
+  $Schema["TABLE"]["scheduler_status"]["record_update"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN record_update SET NOT NULL, ALTER COLUMN record_update SET DEFAULT now();";
 
-  $Schema["TABLE"]["scheduler_status"]["agent_host"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_host IS 'The host class where this job runs (value from the host= scheduler.conf field)'";
-  $Schema["TABLE"]["scheduler_status"]["agent_host"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_host text";
-  $Schema["TABLE"]["scheduler_status"]["agent_host"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_host TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["scheduler_status"]["agent_host"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_host IS 'The host class where this job runs (value from the host= scheduler.conf field)';";
+  $Schema["TABLE"]["scheduler_status"]["agent_host"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_host text;";
+  $Schema["TABLE"]["scheduler_status"]["agent_host"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_host DROP NOT NULL;";
 
-  $Schema["TABLE"]["scheduler_status"]["agent_fk"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_fk IS 'Linking scheduler.conf \"agent=\" to agent table.'";
-  $Schema["TABLE"]["scheduler_status"]["agent_fk"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_fk int4";
-  $Schema["TABLE"]["scheduler_status"]["agent_fk"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["scheduler_status"]["agent_fk"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_fk IS 'Linking scheduler.conf \"agent=\" to agent table.';";
+  $Schema["TABLE"]["scheduler_status"]["agent_fk"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_fk int4;";
+  $Schema["TABLE"]["scheduler_status"]["agent_fk"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["scheduler_status"]["agent_param"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_param IS 'The last parameters sent to the agent (for debugging)'";
-  $Schema["TABLE"]["scheduler_status"]["agent_param"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_param text";
-  $Schema["TABLE"]["scheduler_status"]["agent_param"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_param TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["scheduler_status"]["agent_param"]["DESC"] = "COMMENT ON COLUMN scheduler_status.agent_param IS 'The last parameters sent to the agent (for debugging)';";
+  $Schema["TABLE"]["scheduler_status"]["agent_param"]["ADD"] = "ALTER TABLE scheduler_status ADD COLUMN agent_param text;";
+  $Schema["TABLE"]["scheduler_status"]["agent_param"]["ALTER"] = "ALTER TABLE scheduler_status ALTER COLUMN agent_param DROP NOT NULL;";
 
 
   $Schema["TABLE"]["sqlagentproc"]["sap_pk"]["DESC"] = "";
-  $Schema["TABLE"]["sqlagentproc"]["sap_pk"]["ADD"] = "ALTER TABLE sqlagentproc ADD COLUMN sap_pk int4";
-  $Schema["TABLE"]["sqlagentproc"]["sap_pk"]["ALTER"] = "ALTER TABLE sqlagentproc ALTER COLUMN sap_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('sqlagentproc_sap_pk_seq'::regclass)";
+  $Schema["TABLE"]["sqlagentproc"]["sap_pk"]["ADD"] = "ALTER TABLE sqlagentproc ADD COLUMN sap_pk int4;";
+  $Schema["TABLE"]["sqlagentproc"]["sap_pk"]["ALTER"] = "ALTER TABLE sqlagentproc ALTER COLUMN sap_pk SET NOT NULL, ALTER COLUMN sap_pk SET DEFAULT nextval('sqlagentproc_sap_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["sqlagentproc"]["sap_name"]["DESC"] = "COMMENT ON COLUMN sqlagentproc.sap_name IS 'procedure name'";
-  $Schema["TABLE"]["sqlagentproc"]["sap_name"]["ADD"] = "ALTER TABLE sqlagentproc ADD COLUMN sap_name text";
-  $Schema["TABLE"]["sqlagentproc"]["sap_name"]["ALTER"] = "ALTER TABLE sqlagentproc ALTER COLUMN sap_name TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["sqlagentproc"]["sap_name"]["DESC"] = "COMMENT ON COLUMN sqlagentproc.sap_name IS 'procedure name';";
+  $Schema["TABLE"]["sqlagentproc"]["sap_name"]["ADD"] = "ALTER TABLE sqlagentproc ADD COLUMN sap_name text;";
+  $Schema["TABLE"]["sqlagentproc"]["sap_name"]["ALTER"] = "ALTER TABLE sqlagentproc ALTER COLUMN sap_name SET NOT NULL;";
 
-  $Schema["TABLE"]["sqlagentproc"]["sap_proc"]["DESC"] = "COMMENT ON COLUMN sqlagentproc.sap_proc IS 'sql stmts'";
-  $Schema["TABLE"]["sqlagentproc"]["sap_proc"]["ADD"] = "ALTER TABLE sqlagentproc ADD COLUMN sap_proc text";
-  $Schema["TABLE"]["sqlagentproc"]["sap_proc"]["ALTER"] = "ALTER TABLE sqlagentproc ALTER COLUMN sap_proc TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["sqlagentproc"]["sap_proc"]["DESC"] = "COMMENT ON COLUMN sqlagentproc.sap_proc IS 'sql stmts';";
+  $Schema["TABLE"]["sqlagentproc"]["sap_proc"]["ADD"] = "ALTER TABLE sqlagentproc ADD COLUMN sap_proc text;";
+  $Schema["TABLE"]["sqlagentproc"]["sap_proc"]["ALTER"] = "ALTER TABLE sqlagentproc ALTER COLUMN sap_proc SET NOT NULL;";
 
-  $Schema["TABLE"]["sqlagentproc"]["agent_fk"]["DESC"] = "COMMENT ON COLUMN sqlagentproc.agent_fk IS 'agent foreign key'";
-  $Schema["TABLE"]["sqlagentproc"]["agent_fk"]["ADD"] = "ALTER TABLE sqlagentproc ADD COLUMN agent_fk int4";
-  $Schema["TABLE"]["sqlagentproc"]["agent_fk"]["ALTER"] = "ALTER TABLE sqlagentproc ALTER COLUMN agent_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["sqlagentproc"]["agent_fk"]["DESC"] = "COMMENT ON COLUMN sqlagentproc.agent_fk IS 'agent foreign key';";
+  $Schema["TABLE"]["sqlagentproc"]["agent_fk"]["ADD"] = "ALTER TABLE sqlagentproc ADD COLUMN agent_fk int4;";
+  $Schema["TABLE"]["sqlagentproc"]["agent_fk"]["ALTER"] = "ALTER TABLE sqlagentproc ALTER COLUMN agent_fk SET NOT NULL;";
 
-  $Schema["TABLE"]["sqlagentproc"]["sap_version"]["DESC"] = "COMMENT ON COLUMN sqlagentproc.sap_version IS 'procedure version'";
-  $Schema["TABLE"]["sqlagentproc"]["sap_version"]["ADD"] = "ALTER TABLE sqlagentproc ADD COLUMN sap_version int4";
-  $Schema["TABLE"]["sqlagentproc"]["sap_version"]["ALTER"] = "ALTER TABLE sqlagentproc ALTER COLUMN sap_version TYPE int4 SET NOT NULL SET DEFAULT 1";
+  $Schema["TABLE"]["sqlagentproc"]["sap_version"]["DESC"] = "COMMENT ON COLUMN sqlagentproc.sap_version IS 'procedure version';";
+  $Schema["TABLE"]["sqlagentproc"]["sap_version"]["ADD"] = "ALTER TABLE sqlagentproc ADD COLUMN sap_version int4;";
+  $Schema["TABLE"]["sqlagentproc"]["sap_version"]["ALTER"] = "ALTER TABLE sqlagentproc ALTER COLUMN sap_version SET NOT NULL, ALTER COLUMN sap_version SET DEFAULT 1;";
 
 
   $Schema["TABLE"]["table_enum"]["table_pk"]["DESC"] = "";
-  $Schema["TABLE"]["table_enum"]["table_pk"]["ADD"] = "ALTER TABLE table_enum ADD COLUMN table_pk int4";
-  $Schema["TABLE"]["table_enum"]["table_pk"]["ALTER"] = "ALTER TABLE table_enum ALTER COLUMN table_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('table_enum_table_pk_seq'::regclass)";
+  $Schema["TABLE"]["table_enum"]["table_pk"]["ADD"] = "ALTER TABLE table_enum ADD COLUMN table_pk int4;";
+  $Schema["TABLE"]["table_enum"]["table_pk"]["ALTER"] = "ALTER TABLE table_enum ALTER COLUMN table_pk SET NOT NULL, ALTER COLUMN table_pk SET DEFAULT nextval('table_enum_table_pk_seq'::regclass);";
 
   $Schema["TABLE"]["table_enum"]["table_name"]["DESC"] = "";
-  $Schema["TABLE"]["table_enum"]["table_name"]["ADD"] = "ALTER TABLE table_enum ADD COLUMN table_name varchar";
-  $Schema["TABLE"]["table_enum"]["table_name"]["ALTER"] = "ALTER TABLE table_enum ALTER COLUMN table_name TYPE varchar SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["table_enum"]["table_name"]["ADD"] = "ALTER TABLE table_enum ADD COLUMN table_name varchar;";
+  $Schema["TABLE"]["table_enum"]["table_name"]["ALTER"] = "ALTER TABLE table_enum ALTER COLUMN table_name SET NOT NULL;";
 
   $Schema["TABLE"]["table_enum"]["table_enum"]["DESC"] = "";
-  $Schema["TABLE"]["table_enum"]["table_enum"]["ADD"] = "ALTER TABLE table_enum ADD COLUMN table_enum int4";
-  $Schema["TABLE"]["table_enum"]["table_enum"]["ALTER"] = "ALTER TABLE table_enum ALTER COLUMN table_enum TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["table_enum"]["table_enum"]["ADD"] = "ALTER TABLE table_enum ADD COLUMN table_enum int4;";
+  $Schema["TABLE"]["table_enum"]["table_enum"]["ALTER"] = "ALTER TABLE table_enum ALTER COLUMN table_enum SET NOT NULL;";
 
 
   $Schema["TABLE"]["upload"]["upload_pk"]["DESC"] = "";
-  $Schema["TABLE"]["upload"]["upload_pk"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_pk int4";
-  $Schema["TABLE"]["upload"]["upload_pk"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('upload_upload_pk_seq'::regclass)";
+  $Schema["TABLE"]["upload"]["upload_pk"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_pk int4;";
+  $Schema["TABLE"]["upload"]["upload_pk"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_pk SET NOT NULL, ALTER COLUMN upload_pk SET DEFAULT nextval('upload_upload_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["upload"]["upload_desc"]["DESC"] = "COMMENT ON COLUMN upload.upload_desc IS 'description of file'";
-  $Schema["TABLE"]["upload"]["upload_desc"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_desc text";
-  $Schema["TABLE"]["upload"]["upload_desc"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_desc TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["upload"]["upload_desc"]["DESC"] = "COMMENT ON COLUMN upload.upload_desc IS 'description of file';";
+  $Schema["TABLE"]["upload"]["upload_desc"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_desc text;";
+  $Schema["TABLE"]["upload"]["upload_desc"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_desc DROP NOT NULL;";
 
-  $Schema["TABLE"]["upload"]["upload_filename"]["DESC"] = "COMMENT ON COLUMN upload.upload_filename IS 'file name'";
-  $Schema["TABLE"]["upload"]["upload_filename"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_filename text";
-  $Schema["TABLE"]["upload"]["upload_filename"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_filename TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["upload"]["upload_filename"]["DESC"] = "COMMENT ON COLUMN upload.upload_filename IS 'file name';";
+  $Schema["TABLE"]["upload"]["upload_filename"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_filename text;";
+  $Schema["TABLE"]["upload"]["upload_filename"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_filename SET NOT NULL;";
 
-  $Schema["TABLE"]["upload"]["upload_userid"]["DESC"] = "COMMENT ON COLUMN upload.upload_userid IS 'who uploaded this file FUTURE'";
-  $Schema["TABLE"]["upload"]["upload_userid"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_userid text";
-  $Schema["TABLE"]["upload"]["upload_userid"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_userid TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["upload"]["upload_userid"]["DESC"] = "COMMENT ON COLUMN upload.upload_userid IS 'who uploaded this file FUTURE';";
+  $Schema["TABLE"]["upload"]["upload_userid"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_userid text;";
+  $Schema["TABLE"]["upload"]["upload_userid"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_userid DROP NOT NULL;";
 
-  $Schema["TABLE"]["upload"]["upload_mode"]["DESC"] = "COMMENT ON COLUMN upload.upload_mode IS '1 upload complete, 1<<1 gold (devel only), 1<<2 wget, 1<<3 web upload, 1<<4 discovery ; 1<<5 ununpack complete without fatal errors'";
-  $Schema["TABLE"]["upload"]["upload_mode"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_mode int4";
-  $Schema["TABLE"]["upload"]["upload_mode"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_mode TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["upload"]["upload_mode"]["DESC"] = "COMMENT ON COLUMN upload.upload_mode IS '1 upload complete, 1<<1 gold (devel only), 1<<2 wget, 1<<3 web upload, 1<<4 discovery ; 1<<5 ununpack complete without fatal errors';";
+  $Schema["TABLE"]["upload"]["upload_mode"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_mode int4;";
+  $Schema["TABLE"]["upload"]["upload_mode"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_mode SET NOT NULL;";
 
-  $Schema["TABLE"]["upload"]["upload_ts"]["DESC"] = "COMMENT ON COLUMN upload.upload_ts IS 'record (upload) creation time'";
-  $Schema["TABLE"]["upload"]["upload_ts"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_ts timestamptz";
-  $Schema["TABLE"]["upload"]["upload_ts"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_ts TYPE timestamptz SET NOT NULL SET DEFAULT now()";
+  $Schema["TABLE"]["upload"]["upload_ts"]["DESC"] = "COMMENT ON COLUMN upload.upload_ts IS 'record (upload) creation time';";
+  $Schema["TABLE"]["upload"]["upload_ts"]["ADD"] = "ALTER TABLE upload ADD COLUMN upload_ts timestamptz;";
+  $Schema["TABLE"]["upload"]["upload_ts"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN upload_ts SET NOT NULL, ALTER COLUMN upload_ts SET DEFAULT now();";
 
-  $Schema["TABLE"]["upload"]["ufile_fk"]["DESC"] = "COMMENT ON COLUMN upload.ufile_fk IS 'Obsolete in 0.10 needed by ununpack ONLY, others should use uploadtree_pk'";
-  $Schema["TABLE"]["upload"]["ufile_fk"]["ADD"] = "ALTER TABLE upload ADD COLUMN ufile_fk int4";
-  $Schema["TABLE"]["upload"]["ufile_fk"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN ufile_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["upload"]["ufile_fk"]["DESC"] = "COMMENT ON COLUMN upload.ufile_fk IS 'Obsolete in 0.10 needed by ununpack ONLY, others should use uploadtree_pk';";
+  $Schema["TABLE"]["upload"]["ufile_fk"]["ADD"] = "ALTER TABLE upload ADD COLUMN ufile_fk int4;";
+  $Schema["TABLE"]["upload"]["ufile_fk"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN ufile_fk DROP NOT NULL;";
 
   $Schema["TABLE"]["upload"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["upload"]["pfile_fk"]["ADD"] = "ALTER TABLE upload ADD COLUMN pfile_fk int4";
-  $Schema["TABLE"]["upload"]["pfile_fk"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN pfile_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["upload"]["pfile_fk"]["ADD"] = "ALTER TABLE upload ADD COLUMN pfile_fk int4;";
+  $Schema["TABLE"]["upload"]["pfile_fk"]["ALTER"] = "ALTER TABLE upload ALTER COLUMN pfile_fk DROP NOT NULL;";
 
 
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN uploadtree_pk int4";
-  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN uploadtree_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('uploadtree_uploadtree_pk_seq'::regclass)";
+  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN uploadtree_pk int4;";
+  $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN uploadtree_pk SET NOT NULL, ALTER COLUMN uploadtree_pk SET DEFAULT nextval('uploadtree_uploadtree_pk_seq'::regclass);";
 
   $Schema["TABLE"]["uploadtree"]["ufile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree"]["ufile_fk"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN ufile_fk int4";
-  $Schema["TABLE"]["uploadtree"]["ufile_fk"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN ufile_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["uploadtree"]["ufile_fk"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN ufile_fk int4;";
+  $Schema["TABLE"]["uploadtree"]["ufile_fk"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN ufile_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["uploadtree"]["parent"]["DESC"] = "COMMENT ON COLUMN uploadtree.parent IS 'uploadtree parent'";
-  $Schema["TABLE"]["uploadtree"]["parent"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN parent int4";
-  $Schema["TABLE"]["uploadtree"]["parent"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN parent TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["uploadtree"]["parent"]["DESC"] = "COMMENT ON COLUMN uploadtree.parent IS 'uploadtree parent';";
+  $Schema["TABLE"]["uploadtree"]["parent"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN parent int4;";
+  $Schema["TABLE"]["uploadtree"]["parent"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN parent DROP NOT NULL;";
 
-  $Schema["TABLE"]["uploadtree"]["upload_fk"]["DESC"] = "COMMENT ON COLUMN uploadtree.upload_fk IS 'original uploaded file'";
-  $Schema["TABLE"]["uploadtree"]["upload_fk"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN upload_fk int4";
-  $Schema["TABLE"]["uploadtree"]["upload_fk"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN upload_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["uploadtree"]["upload_fk"]["DESC"] = "COMMENT ON COLUMN uploadtree.upload_fk IS 'original uploaded file';";
+  $Schema["TABLE"]["uploadtree"]["upload_fk"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN upload_fk int4;";
+  $Schema["TABLE"]["uploadtree"]["upload_fk"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN upload_fk SET NOT NULL;";
 
   $Schema["TABLE"]["uploadtree"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN pfile_fk int4";
-  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN pfile_fk TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN pfile_fk int4;";
+  $Schema["TABLE"]["uploadtree"]["pfile_fk"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN pfile_fk DROP NOT NULL;";
 
-  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["DESC"] = "COMMENT ON COLUMN uploadtree.ufile_mode IS 'container=1<<29, artifact=1<<28, project=1<<27, replica(same pfile)=1<<26, directory=1<<18 (directory doesn''t seem to be used), note: wget and POST names are NOT considered artifacts.'";
-  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN ufile_mode int4";
-  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN ufile_mode TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["DESC"] = "COMMENT ON COLUMN uploadtree.ufile_mode IS 'container=1<<29, artifact=1<<28, project=1<<27, replica(same pfile)=1<<26, directory=1<<18 (directory doesn''t seem to be used), note: wget and POST names are NOT considered artifacts.';";
+  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN ufile_mode int4;";
+  $Schema["TABLE"]["uploadtree"]["ufile_mode"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN ufile_mode DROP NOT NULL;";
 
-  $Schema["TABLE"]["uploadtree"]["lft"]["DESC"] = "COMMENT ON COLUMN uploadtree.lft IS 'nested set left edge'";
-  $Schema["TABLE"]["uploadtree"]["lft"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN lft int4";
-  $Schema["TABLE"]["uploadtree"]["lft"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN lft TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["uploadtree"]["lft"]["DESC"] = "COMMENT ON COLUMN uploadtree.lft IS 'nested set left edge';";
+  $Schema["TABLE"]["uploadtree"]["lft"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN lft int4;";
+  $Schema["TABLE"]["uploadtree"]["lft"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN lft DROP NOT NULL;";
 
-  $Schema["TABLE"]["uploadtree"]["rgt"]["DESC"] = "COMMENT ON COLUMN uploadtree.rgt IS 'nested set right edge'";
-  $Schema["TABLE"]["uploadtree"]["rgt"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN rgt int4";
-  $Schema["TABLE"]["uploadtree"]["rgt"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN rgt TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["uploadtree"]["rgt"]["DESC"] = "COMMENT ON COLUMN uploadtree.rgt IS 'nested set right edge';";
+  $Schema["TABLE"]["uploadtree"]["rgt"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN rgt int4;";
+  $Schema["TABLE"]["uploadtree"]["rgt"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN rgt DROP NOT NULL;";
 
-  $Schema["TABLE"]["uploadtree"]["ufile_name"]["DESC"] = "COMMENT ON COLUMN uploadtree.ufile_name IS 'file name'";
-  $Schema["TABLE"]["uploadtree"]["ufile_name"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN ufile_name text";
-  $Schema["TABLE"]["uploadtree"]["ufile_name"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN ufile_name TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["uploadtree"]["ufile_name"]["DESC"] = "COMMENT ON COLUMN uploadtree.ufile_name IS 'file name';";
+  $Schema["TABLE"]["uploadtree"]["ufile_name"]["ADD"] = "ALTER TABLE uploadtree ADD COLUMN ufile_name text;";
+  $Schema["TABLE"]["uploadtree"]["ufile_name"]["ALTER"] = "ALTER TABLE uploadtree ALTER COLUMN ufile_name DROP NOT NULL;";
 
 
   $Schema["TABLE"]["users"]["user_pk"]["DESC"] = "";
-  $Schema["TABLE"]["users"]["user_pk"]["ADD"] = "ALTER TABLE users ADD COLUMN user_pk int4";
-  $Schema["TABLE"]["users"]["user_pk"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_pk TYPE int4 SET NOT NULL SET DEFAULT nextval('users_user_pk_seq'::regclass)";
+  $Schema["TABLE"]["users"]["user_pk"]["ADD"] = "ALTER TABLE users ADD COLUMN user_pk int4;";
+  $Schema["TABLE"]["users"]["user_pk"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_pk SET NOT NULL, ALTER COLUMN user_pk SET DEFAULT nextval('users_user_pk_seq'::regclass);";
 
   $Schema["TABLE"]["users"]["user_name"]["DESC"] = "";
-  $Schema["TABLE"]["users"]["user_name"]["ADD"] = "ALTER TABLE users ADD COLUMN user_name text";
-  $Schema["TABLE"]["users"]["user_name"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_name TYPE text SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["users"]["user_name"]["ADD"] = "ALTER TABLE users ADD COLUMN user_name text;";
+  $Schema["TABLE"]["users"]["user_name"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_name SET NOT NULL;";
 
-  $Schema["TABLE"]["users"]["root_folder_fk"]["DESC"] = "COMMENT ON COLUMN users.root_folder_fk IS 'root folder for this user'";
-  $Schema["TABLE"]["users"]["root_folder_fk"]["ADD"] = "ALTER TABLE users ADD COLUMN root_folder_fk int4";
-  $Schema["TABLE"]["users"]["root_folder_fk"]["ALTER"] = "ALTER TABLE users ALTER COLUMN root_folder_fk TYPE int4 SET NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["users"]["root_folder_fk"]["DESC"] = "COMMENT ON COLUMN users.root_folder_fk IS 'root folder for this user';";
+  $Schema["TABLE"]["users"]["root_folder_fk"]["ADD"] = "ALTER TABLE users ADD COLUMN root_folder_fk int4;";
+  $Schema["TABLE"]["users"]["root_folder_fk"]["ALTER"] = "ALTER TABLE users ALTER COLUMN root_folder_fk SET NOT NULL;";
 
   $Schema["TABLE"]["users"]["user_desc"]["DESC"] = "";
-  $Schema["TABLE"]["users"]["user_desc"]["ADD"] = "ALTER TABLE users ADD COLUMN user_desc text";
-  $Schema["TABLE"]["users"]["user_desc"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_desc TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["users"]["user_desc"]["ADD"] = "ALTER TABLE users ADD COLUMN user_desc text;";
+  $Schema["TABLE"]["users"]["user_desc"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_desc DROP NOT NULL;";
 
   $Schema["TABLE"]["users"]["user_seed"]["DESC"] = "";
-  $Schema["TABLE"]["users"]["user_seed"]["ADD"] = "ALTER TABLE users ADD COLUMN user_seed text";
-  $Schema["TABLE"]["users"]["user_seed"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_seed TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["users"]["user_seed"]["ADD"] = "ALTER TABLE users ADD COLUMN user_seed text;";
+  $Schema["TABLE"]["users"]["user_seed"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_seed DROP NOT NULL;";
 
   $Schema["TABLE"]["users"]["user_pass"]["DESC"] = "";
-  $Schema["TABLE"]["users"]["user_pass"]["ADD"] = "ALTER TABLE users ADD COLUMN user_pass text";
-  $Schema["TABLE"]["users"]["user_pass"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_pass TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["users"]["user_pass"]["ADD"] = "ALTER TABLE users ADD COLUMN user_pass text;";
+  $Schema["TABLE"]["users"]["user_pass"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_pass DROP NOT NULL;";
 
   $Schema["TABLE"]["users"]["user_perm"]["DESC"] = "";
-  $Schema["TABLE"]["users"]["user_perm"]["ADD"] = "ALTER TABLE users ADD COLUMN user_perm int4";
-  $Schema["TABLE"]["users"]["user_perm"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_perm TYPE int4 DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["users"]["user_perm"]["ADD"] = "ALTER TABLE users ADD COLUMN user_perm int4;";
+  $Schema["TABLE"]["users"]["user_perm"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_perm DROP NOT NULL;";
 
   $Schema["TABLE"]["users"]["user_email"]["DESC"] = "";
-  $Schema["TABLE"]["users"]["user_email"]["ADD"] = "ALTER TABLE users ADD COLUMN user_email text";
-  $Schema["TABLE"]["users"]["user_email"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_email TYPE text DROP NOT NULL DROP DEFAULT";
+  $Schema["TABLE"]["users"]["user_email"]["ADD"] = "ALTER TABLE users ADD COLUMN user_email text;";
+  $Schema["TABLE"]["users"]["user_email"]["ALTER"] = "ALTER TABLE users ALTER COLUMN user_email DROP NOT NULL;";
 
 
 
-  $Schema["VIEW"]["keyagent"] = "SELECT \"key\".key_pk, \"key\".key_name, \"key\".key_desc, \"key\".key_parent_fk, \"key\".key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc, agent.agent_id FROM \"key\", agent WHERE (agent.agent_pk = \"key\".key_agent_fk);";
-  $Schema["VIEW"]["folderlist"] = "SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::\"unknown\" AS ts, NULL::\"unknown\" AS upload_pk, NULL::\"unknown\" AS pfile_fk, NULL::\"unknown\" AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::\"unknown\" AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
+  $Schema["VIEW"]["keyagent"] = "CREATE VIEW keyagent AS SELECT \"key\".key_pk, \"key\".key_name, \"key\".key_desc, \"key\".key_parent_fk, \"key\".key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc, agent.agent_id FROM \"key\", agent WHERE (agent.agent_pk = \"key\".key_agent_fk);";
+  $Schema["VIEW"]["folderlist"] = "CREATE VIEW folderlist AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::\"unknown\" AS ts, NULL::\"unknown\" AS upload_pk, NULL::\"unknown\" AS pfile_fk, NULL::\"unknown\" AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::\"unknown\" AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
 
-  $Schema["INDEX"]["agent"]["agent_pkey"] = "CREATE UNIQUE INDEX agent_pkey ON agent USING btree (agent_pk)";
-  $Schema["INDEX"]["agent"]["agent_unique_name_rev"] = "CREATE UNIQUE INDEX agent_unique_name_rev ON agent USING btree (agent_name, agent_rev)";
+  $Schema["SEQUENCE"]["agent_agent_pk_seq"] = "CREATE SEQUENCE agent_agent_pk_seq START 1;";
+  $Schema["SEQUENCE"]["agent_lic_meta_agent_lic_meta_pk_seq"] = "CREATE SEQUENCE agent_lic_meta_agent_lic_meta_pk_seq START 1;";
+  $Schema["SEQUENCE"]["licgroup_licgroup_pk_seq"] = "CREATE SEQUENCE licgroup_licgroup_pk_seq START 1;";
+  $Schema["SEQUENCE"]["agent_lic_raw_lic_pk_seq"] = "CREATE SEQUENCE agent_lic_raw_lic_pk_seq START 1;";
+  $Schema["SEQUENCE"]["key_key_pk_seq"] = "CREATE SEQUENCE key_key_pk_seq START 1;";
+  $Schema["SEQUENCE"]["attrib_attrib_pk_seq"] = "CREATE SEQUENCE attrib_attrib_pk_seq START 1;";
+  $Schema["SEQUENCE"]["folder_folder_pk_seq"] = "CREATE SEQUENCE folder_folder_pk_seq START 1;";
+  $Schema["SEQUENCE"]["foldercontents_foldercontents_pk_seq"] = "CREATE SEQUENCE foldercontents_foldercontents_pk_seq START 1;";
+  $Schema["SEQUENCE"]["table_enum_table_pk_seq"] = "CREATE SEQUENCE table_enum_table_pk_seq START 1;";
+  $Schema["SEQUENCE"]["job_job_pk_seq"] = "CREATE SEQUENCE job_job_pk_seq START 1;";
+  $Schema["SEQUENCE"]["jobqueue_jq_pk_seq"] = "CREATE SEQUENCE jobqueue_jq_pk_seq START 1;";
+  $Schema["SEQUENCE"]["licgroup_grps_licgroup_grps_pk_seq"] = "CREATE SEQUENCE licgroup_grps_licgroup_grps_pk_seq START 1;";
+  $Schema["SEQUENCE"]["users_user_pk_seq"] = "CREATE SEQUENCE users_user_pk_seq START 1;";
+  $Schema["SEQUENCE"]["log_log_pk_seq"] = "CREATE SEQUENCE log_log_pk_seq START 1;";
+  $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"] = "CREATE SEQUENCE mimetype_mimetype_pk_seq START 1;";
+  $Schema["SEQUENCE"]["pfile_pfile_pk_seq"] = "CREATE SEQUENCE pfile_pfile_pk_seq START 1;";
+  $Schema["SEQUENCE"]["upload_upload_pk_seq"] = "CREATE SEQUENCE upload_upload_pk_seq START 1;";
+  $Schema["SEQUENCE"]["sqlagentproc_sap_pk_seq"] = "CREATE SEQUENCE sqlagentproc_sap_pk_seq START 1;";
+  $Schema["SEQUENCE"]["licterm_licterm_pk_seq"] = "CREATE SEQUENCE licterm_licterm_pk_seq START 1;";
+  $Schema["SEQUENCE"]["uploadtree_uploadtree_pk_seq"] = "CREATE SEQUENCE uploadtree_uploadtree_pk_seq START 1;";
+  $Schema["SEQUENCE"]["licgroup_lics_licgroup_lics_pk_seq"] = "CREATE SEQUENCE licgroup_lics_licgroup_lics_pk_seq START 1;";
+  $Schema["SEQUENCE"]["licterm_maplic_licterm_maplic_pk_seq"] = "CREATE SEQUENCE licterm_maplic_licterm_maplic_pk_seq START 1;";
+  $Schema["SEQUENCE"]["licterm_name_licterm_name_pk_seq"] = "CREATE SEQUENCE licterm_name_licterm_name_pk_seq START 1;";
+  $Schema["SEQUENCE"]["licterm_words_licterm_words_pk_seq"] = "CREATE SEQUENCE licterm_words_licterm_words_pk_seq START 1;";
+  $Schema["SEQUENCE"]["licterm_grps_licterm_grps_pk_seq"] = "CREATE SEQUENCE licterm_grps_licterm_grps_pk_seq START 1;";
+  $Schema["SEQUENCE"]["licterm_map_licterm_map_pk_seq"] = "CREATE SEQUENCE licterm_map_licterm_map_pk_seq START 1;";
+  $Schema["SEQUENCE"]["report_cache_report_cache_pk_seq"] = "CREATE SEQUENCE report_cache_report_cache_pk_seq START 1;";
+  $Schema["SEQUENCE"]["report_cache_user_report_cache_user_pk_seq"] = "CREATE SEQUENCE report_cache_user_report_cache_user_pk_seq START 1;";
 
-  $Schema["INDEX"]["agent_lic_meta"]["No duplicates"] = "CREATE UNIQUE INDEX \"No duplicates\" ON agent_lic_meta USING btree (pfile_fk, tok_pfile, tok_match, version, tok_pfile_start, tok_pfile_end, tok_license_start, tok_license_end, tok_license, lic_fk)";
-  $Schema["INDEX"]["agent_lic_meta"]["agent_lic_meta_pkey"] = "CREATE UNIQUE INDEX agent_lic_meta_pkey ON agent_lic_meta USING btree (agent_lic_meta_pk)";
-  $Schema["INDEX"]["agent_lic_meta"]["lic_fk_btree"] = "CREATE INDEX lic_fk_btree ON agent_lic_meta USING btree (lic_fk)";
-  $Schema["INDEX"]["agent_lic_meta"]["pfile_fk_idx"] = "CREATE INDEX pfile_fk_idx ON agent_lic_meta USING btree (pfile_fk)";
+  $Schema["INDEX"]["agent"]["agent_pkey"] = "CREATE UNIQUE INDEX agent_pkey ON agent USING btree (agent_pk);";
+  $Schema["INDEX"]["agent"]["agent_unique_name_rev"] = "CREATE UNIQUE INDEX agent_unique_name_rev ON agent USING btree (agent_name, agent_rev);";
 
-  $Schema["INDEX"]["agent_lic_phrases"]["agent_lic_phrases_phrase_group_key"] = "CREATE UNIQUE INDEX agent_lic_phrases_phrase_group_key ON agent_lic_phrases USING btree (phrase_group, phrase_match)";
-  $Schema["INDEX"]["agent_lic_phrases"]["phrases_unique"] = "CREATE UNIQUE INDEX phrases_unique ON agent_lic_phrases USING btree (phrase_group, phrase_match)";
+  $Schema["INDEX"]["agent_lic_meta"]["No duplicates"] = "CREATE UNIQUE INDEX \"No duplicates\" ON agent_lic_meta USING btree (pfile_fk, tok_pfile, tok_match, version, tok_pfile_start, tok_pfile_end, tok_license_start, tok_license_end, tok_license, lic_fk);";
+  $Schema["INDEX"]["agent_lic_meta"]["agent_lic_meta_pkey"] = "CREATE UNIQUE INDEX agent_lic_meta_pkey ON agent_lic_meta USING btree (agent_lic_meta_pk);";
+  $Schema["INDEX"]["agent_lic_meta"]["lic_fk_btree"] = "CREATE INDEX lic_fk_btree ON agent_lic_meta USING btree (lic_fk);";
+  $Schema["INDEX"]["agent_lic_meta"]["pfile_fk_idx"] = "CREATE INDEX pfile_fk_idx ON agent_lic_meta USING btree (pfile_fk);";
 
-  $Schema["INDEX"]["agent_lic_raw"]["One unique per software version"] = "CREATE UNIQUE INDEX \"One unique per software version\" ON agent_lic_raw USING btree (lic_unique, lic_version)";
-  $Schema["INDEX"]["agent_lic_raw"]["lic_pk"] = "CREATE UNIQUE INDEX lic_pk ON agent_lic_raw USING btree (lic_pk)";
+  $Schema["INDEX"]["agent_lic_phrases"]["agent_lic_phrases_phrase_group_key"] = "CREATE UNIQUE INDEX agent_lic_phrases_phrase_group_key ON agent_lic_phrases USING btree (phrase_group, phrase_match);";
+  $Schema["INDEX"]["agent_lic_phrases"]["phrases_unique"] = "CREATE UNIQUE INDEX phrases_unique ON agent_lic_phrases USING btree (phrase_group, phrase_match);";
 
-  $Schema["INDEX"]["agent_lic_status"]["agent_lic_status_pfile_fk_key"] = "CREATE UNIQUE INDEX agent_lic_status_pfile_fk_key ON agent_lic_status USING btree (pfile_fk)";
-  $Schema["INDEX"]["agent_lic_status"]["inrepository_idx"] = "CREATE INDEX inrepository_idx ON agent_lic_status USING btree (inrepository)";
-  $Schema["INDEX"]["agent_lic_status"]["processed_idx"] = "CREATE INDEX processed_idx ON agent_lic_status USING btree (processed)";
+  $Schema["INDEX"]["agent_lic_raw"]["One unique per software version"] = "CREATE UNIQUE INDEX \"One unique per software version\" ON agent_lic_raw USING btree (lic_unique, lic_version);";
+  $Schema["INDEX"]["agent_lic_raw"]["lic_pk"] = "CREATE UNIQUE INDEX lic_pk ON agent_lic_raw USING btree (lic_pk);";
 
-  $Schema["INDEX"]["agent_wc"]["agent_wc_pfile_fk_key"] = "CREATE UNIQUE INDEX agent_wc_pfile_fk_key ON agent_wc USING btree (pfile_fk)";
+  $Schema["INDEX"]["agent_lic_status"]["agent_lic_status_pfile_fk_key"] = "CREATE UNIQUE INDEX agent_lic_status_pfile_fk_key ON agent_lic_status USING btree (pfile_fk);";
+  $Schema["INDEX"]["agent_lic_status"]["inrepository_idx"] = "CREATE INDEX inrepository_idx ON agent_lic_status USING btree (inrepository);";
+  $Schema["INDEX"]["agent_lic_status"]["processed_idx"] = "CREATE INDEX processed_idx ON agent_lic_status USING btree (processed);";
 
-  $Schema["INDEX"]["attrib"]["attrib_key_fk_idx"] = "CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk)";
-  $Schema["INDEX"]["attrib"]["attrib_pfile_fk_idx"] = "CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk)";
-  $Schema["INDEX"]["attrib"]["attrib_pkey"] = "CREATE UNIQUE INDEX attrib_pkey ON attrib USING btree (attrib_pk)";
+  $Schema["INDEX"]["agent_wc"]["agent_wc_pfile_fk_key"] = "CREATE UNIQUE INDEX agent_wc_pfile_fk_key ON agent_wc USING btree (pfile_fk);";
 
-  $Schema["INDEX"]["folder"]["folder_pkey"] = "CREATE UNIQUE INDEX folder_pkey ON folder USING btree (folder_pk)";
+  $Schema["INDEX"]["attrib"]["attrib_key_fk_idx"] = "CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk);";
+  $Schema["INDEX"]["attrib"]["attrib_pfile_fk_idx"] = "CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk);";
+  $Schema["INDEX"]["attrib"]["attrib_pkey"] = "CREATE UNIQUE INDEX attrib_pkey ON attrib USING btree (attrib_pk);";
 
-  $Schema["INDEX"]["foldercontents"]["foldercontents_pkey"] = "CREATE UNIQUE INDEX foldercontents_pkey ON foldercontents USING btree (foldercontents_pk)";
+  $Schema["INDEX"]["folder"]["folder_pkey"] = "CREATE UNIQUE INDEX folder_pkey ON folder USING btree (folder_pk);";
 
-  $Schema["INDEX"]["job"]["job_pkey"] = "CREATE UNIQUE INDEX job_pkey ON job USING btree (job_pk)";
+  $Schema["INDEX"]["foldercontents"]["foldercontents_pkey"] = "CREATE UNIQUE INDEX foldercontents_pkey ON foldercontents USING btree (foldercontents_pk);";
 
-  $Schema["INDEX"]["jobqueue"]["jobqueue_pkey"] = "CREATE UNIQUE INDEX jobqueue_pkey ON jobqueue USING btree (jq_pk)";
+  $Schema["INDEX"]["job"]["job_pkey"] = "CREATE UNIQUE INDEX job_pkey ON job USING btree (job_pk);";
 
-  $Schema["INDEX"]["key"]["key_pkey"] = "CREATE UNIQUE INDEX key_pkey ON \"key\" USING btree (key_pk)";
-  $Schema["INDEX"]["key"]["name_parent"] = "CREATE UNIQUE INDEX name_parent ON \"key\" USING btree (key_name, key_parent_fk)";
+  $Schema["INDEX"]["jobqueue"]["jobqueue_pkey"] = "CREATE UNIQUE INDEX jobqueue_pkey ON jobqueue USING btree (jq_pk);";
 
-  $Schema["INDEX"]["licgroup"]["licgroup_licgroup_name_key"] = "CREATE UNIQUE INDEX licgroup_licgroup_name_key ON licgroup USING btree (licgroup_name)";
-  $Schema["INDEX"]["licgroup"]["licgroup_pkey"] = "CREATE UNIQUE INDEX licgroup_pkey ON licgroup USING btree (licgroup_pk)";
+  $Schema["INDEX"]["key"]["key_pkey"] = "CREATE UNIQUE INDEX key_pkey ON \"key\" USING btree (key_pk);";
+  $Schema["INDEX"]["key"]["name_parent"] = "CREATE UNIQUE INDEX name_parent ON \"key\" USING btree (key_name, key_parent_fk);";
 
-  $Schema["INDEX"]["licgroup_grps"]["licgroup_grps_pkey"] = "CREATE UNIQUE INDEX licgroup_grps_pkey ON licgroup_grps USING btree (licgroup_grps_pk)";
+  $Schema["INDEX"]["licgroup"]["licgroup_licgroup_name_key"] = "CREATE UNIQUE INDEX licgroup_licgroup_name_key ON licgroup USING btree (licgroup_name);";
+  $Schema["INDEX"]["licgroup"]["licgroup_pkey"] = "CREATE UNIQUE INDEX licgroup_pkey ON licgroup USING btree (licgroup_pk);";
 
-  $Schema["INDEX"]["licgroup_lics"]["licgroup_lics_pkey"] = "CREATE UNIQUE INDEX licgroup_lics_pkey ON licgroup_lics USING btree (licgroup_lics_pk)";
-  $Schema["INDEX"]["licgroup_lics"]["only_one"] = "CREATE UNIQUE INDEX only_one ON licgroup_lics USING btree (licgroup_lics_pk, licgroup_fk)";
+  $Schema["INDEX"]["licgroup_grps"]["licgroup_grps_pkey"] = "CREATE UNIQUE INDEX licgroup_grps_pkey ON licgroup_grps USING btree (licgroup_grps_pk);";
 
-  $Schema["INDEX"]["licterm"]["licterm_licterm_desc_key"] = "CREATE UNIQUE INDEX licterm_licterm_desc_key ON licterm USING btree (licterm_desc)";
-  $Schema["INDEX"]["licterm"]["licterm_licterm_name_key"] = "CREATE UNIQUE INDEX licterm_licterm_name_key ON licterm USING btree (licterm_name)";
-  $Schema["INDEX"]["licterm"]["licterm_pkey"] = "CREATE UNIQUE INDEX licterm_pkey ON licterm USING btree (licterm_pk)";
+  $Schema["INDEX"]["licgroup_lics"]["licgroup_lics_pkey"] = "CREATE UNIQUE INDEX licgroup_lics_pkey ON licgroup_lics USING btree (licgroup_lics_pk);";
+  $Schema["INDEX"]["licgroup_lics"]["only_one"] = "CREATE UNIQUE INDEX only_one ON licgroup_lics USING btree (licgroup_lics_pk, licgroup_fk);";
 
-  $Schema["INDEX"]["licterm_map"]["licterm_map_pkey"] = "CREATE UNIQUE INDEX licterm_map_pkey ON licterm_map USING btree (licterm_map_pk)";
-  $Schema["INDEX"]["licterm_map"]["only_one_licterm_map"] = "CREATE UNIQUE INDEX only_one_licterm_map ON licterm_map USING btree (licterm_fk, licterm_words_fk)";
+  $Schema["INDEX"]["licterm"]["licterm_licterm_desc_key"] = "CREATE UNIQUE INDEX licterm_licterm_desc_key ON licterm USING btree (licterm_desc);";
+  $Schema["INDEX"]["licterm"]["licterm_licterm_name_key"] = "CREATE UNIQUE INDEX licterm_licterm_name_key ON licterm USING btree (licterm_name);";
+  $Schema["INDEX"]["licterm"]["licterm_pkey"] = "CREATE UNIQUE INDEX licterm_pkey ON licterm USING btree (licterm_pk);";
 
-  $Schema["INDEX"]["licterm_maplic"]["licterm_maplic_pkey"] = "CREATE UNIQUE INDEX licterm_maplic_pkey ON licterm_maplic USING btree (licterm_maplic_pk)";
-  $Schema["INDEX"]["licterm_maplic"]["only_one_licterm_maplic"] = "CREATE UNIQUE INDEX only_one_licterm_maplic ON licterm_maplic USING btree (licterm_fk, lic_fk)";
+  $Schema["INDEX"]["licterm_map"]["licterm_map_pkey"] = "CREATE UNIQUE INDEX licterm_map_pkey ON licterm_map USING btree (licterm_map_pk);";
+  $Schema["INDEX"]["licterm_map"]["only_one_licterm_map"] = "CREATE UNIQUE INDEX only_one_licterm_map ON licterm_map USING btree (licterm_fk, licterm_words_fk);";
 
-  $Schema["INDEX"]["licterm_name"]["licterm_name_pkey"] = "CREATE UNIQUE INDEX licterm_name_pkey ON licterm_name USING btree (licterm_name_pk)";
-  $Schema["INDEX"]["licterm_name"]["only_one_licterm_name"] = "CREATE UNIQUE INDEX only_one_licterm_name ON licterm_name USING btree (licterm_fk, agent_lic_meta_fk)";
+  $Schema["INDEX"]["licterm_maplic"]["licterm_maplic_pkey"] = "CREATE UNIQUE INDEX licterm_maplic_pkey ON licterm_maplic USING btree (licterm_maplic_pk);";
+  $Schema["INDEX"]["licterm_maplic"]["only_one_licterm_maplic"] = "CREATE UNIQUE INDEX only_one_licterm_maplic ON licterm_maplic USING btree (licterm_fk, lic_fk);";
 
-  $Schema["INDEX"]["licterm_words"]["licterm_words_licterm_words_text_key"] = "CREATE UNIQUE INDEX licterm_words_licterm_words_text_key ON licterm_words USING btree (licterm_words_text)";
-  $Schema["INDEX"]["licterm_words"]["licterm_words_pkey"] = "CREATE UNIQUE INDEX licterm_words_pkey ON licterm_words USING btree (licterm_words_pk)";
+  $Schema["INDEX"]["licterm_name"]["licterm_name_pkey"] = "CREATE UNIQUE INDEX licterm_name_pkey ON licterm_name USING btree (licterm_name_pk);";
+  $Schema["INDEX"]["licterm_name"]["only_one_licterm_name"] = "CREATE UNIQUE INDEX only_one_licterm_name ON licterm_name USING btree (licterm_fk, agent_lic_meta_fk);";
 
-  $Schema["INDEX"]["mimetype"]["dirmodemask"] = "CREATE UNIQUE INDEX dirmodemask ON mimetype USING btree (mimetype_name)";
-  $Schema["INDEX"]["mimetype"]["mimetype_pk"] = "CREATE UNIQUE INDEX mimetype_pk ON mimetype USING btree (mimetype_pk)";
+  $Schema["INDEX"]["licterm_words"]["licterm_words_licterm_words_text_key"] = "CREATE UNIQUE INDEX licterm_words_licterm_words_text_key ON licterm_words USING btree (licterm_words_text);";
+  $Schema["INDEX"]["licterm_words"]["licterm_words_pkey"] = "CREATE UNIQUE INDEX licterm_words_pkey ON licterm_words USING btree (licterm_words_pk);";
 
-  $Schema["INDEX"]["pfile"]["md5_sha1_size"] = "CREATE UNIQUE INDEX md5_sha1_size ON pfile USING btree (pfile_md5, pfile_sha1, pfile_size)";
-  $Schema["INDEX"]["pfile"]["pfile_mimetypefk_idx"] = "CREATE INDEX pfile_mimetypefk_idx ON pfile USING btree (pfile_mimetypefk)";
-  $Schema["INDEX"]["pfile"]["pfile_pkey"] = "CREATE UNIQUE INDEX pfile_pkey ON pfile USING btree (pfile_pk)";
+  $Schema["INDEX"]["mimetype"]["dirmodemask"] = "CREATE UNIQUE INDEX dirmodemask ON mimetype USING btree (mimetype_name);";
+  $Schema["INDEX"]["mimetype"]["mimetype_pk"] = "CREATE UNIQUE INDEX mimetype_pk ON mimetype USING btree (mimetype_pk);";
 
-  $Schema["INDEX"]["proj"]["proj_pkey"] = "CREATE UNIQUE INDEX proj_pkey ON proj USING btree (ufile_fk)";
+  $Schema["INDEX"]["pfile"]["md5_sha1_size"] = "CREATE UNIQUE INDEX md5_sha1_size ON pfile USING btree (pfile_md5, pfile_sha1, pfile_size);";
+  $Schema["INDEX"]["pfile"]["pfile_mimetypefk_idx"] = "CREATE INDEX pfile_mimetypefk_idx ON pfile USING btree (pfile_mimetypefk);";
+  $Schema["INDEX"]["pfile"]["pfile_pkey"] = "CREATE UNIQUE INDEX pfile_pkey ON pfile USING btree (pfile_pk);";
 
-  $Schema["INDEX"]["report_cache"]["report_cache_createdts"] = "CREATE INDEX report_cache_createdts ON report_cache USING btree (report_cache_tla)";
-  $Schema["INDEX"]["report_cache"]["report_cache_pkey"] = "CREATE UNIQUE INDEX report_cache_pkey ON report_cache USING btree (report_cache_pk)";
-  $Schema["INDEX"]["report_cache"]["report_cache_report_cache_key_key"] = "CREATE UNIQUE INDEX report_cache_report_cache_key_key ON report_cache USING btree (report_cache_key)";
+  $Schema["INDEX"]["proj"]["proj_pkey"] = "CREATE UNIQUE INDEX proj_pkey ON proj USING btree (ufile_fk);";
 
-  $Schema["INDEX"]["report_cache_user"]["report_cache_user_pkey"] = "CREATE UNIQUE INDEX report_cache_user_pkey ON report_cache_user USING btree (report_cache_user_pk)";
+  $Schema["INDEX"]["report_cache"]["report_cache_createdts"] = "CREATE INDEX report_cache_createdts ON report_cache USING btree (report_cache_tla);";
+  $Schema["INDEX"]["report_cache"]["report_cache_pkey"] = "CREATE UNIQUE INDEX report_cache_pkey ON report_cache USING btree (report_cache_pk);";
+  $Schema["INDEX"]["report_cache"]["report_cache_report_cache_key_key"] = "CREATE UNIQUE INDEX report_cache_report_cache_key_key ON report_cache USING btree (report_cache_key);";
 
-  $Schema["INDEX"]["scheduler_status"]["scheduler_status_pkey"] = "CREATE UNIQUE INDEX scheduler_status_pkey ON scheduler_status USING btree (unique_scheduler, agent_number)";
+  $Schema["INDEX"]["report_cache_user"]["report_cache_user_pkey"] = "CREATE UNIQUE INDEX report_cache_user_pkey ON report_cache_user USING btree (report_cache_user_pk);";
 
-  $Schema["INDEX"]["sqlagentproc"]["sqlagentproc_pkey"] = "CREATE UNIQUE INDEX sqlagentproc_pkey ON sqlagentproc USING btree (sap_pk)";
+  $Schema["INDEX"]["scheduler_status"]["scheduler_status_pkey"] = "CREATE UNIQUE INDEX scheduler_status_pkey ON scheduler_status USING btree (unique_scheduler, agent_number);";
 
-  $Schema["INDEX"]["table_enum"]["table_enum_pkey"] = "CREATE UNIQUE INDEX table_enum_pkey ON table_enum USING btree (table_pk)";
+  $Schema["INDEX"]["sqlagentproc"]["sqlagentproc_pkey"] = "CREATE UNIQUE INDEX sqlagentproc_pkey ON sqlagentproc USING btree (sap_pk);";
 
-  $Schema["INDEX"]["upload"]["upload_pkey_idx"] = "CREATE UNIQUE INDEX upload_pkey_idx ON upload USING btree (upload_pk)";
+  $Schema["INDEX"]["table_enum"]["table_enum_pkey"] = "CREATE UNIQUE INDEX table_enum_pkey ON table_enum USING btree (table_pk);";
 
-  $Schema["INDEX"]["uploadtree"]["lft_idx"] = "CREATE INDEX lft_idx ON uploadtree USING btree (lft)";
-  $Schema["INDEX"]["uploadtree"]["projtree_parent_idx"] = "CREATE INDEX projtree_parent_idx ON uploadtree USING btree (parent)";
-  $Schema["INDEX"]["uploadtree"]["projtree_projid_idx"] = "CREATE INDEX projtree_projid_idx ON uploadtree USING btree (upload_fk)";
-  $Schema["INDEX"]["uploadtree"]["ufile_rel_pkey"] = "CREATE UNIQUE INDEX ufile_rel_pkey ON uploadtree USING btree (uploadtree_pk)";
-  $Schema["INDEX"]["uploadtree"]["uploadtree_pfile_fk_idx"] = "CREATE INDEX uploadtree_pfile_fk_idx ON uploadtree USING btree (pfile_fk)";
-  $Schema["INDEX"]["uploadtree"]["uploadtree_unique"] = "CREATE UNIQUE INDEX uploadtree_unique ON uploadtree USING btree (ufile_fk, parent, upload_fk)";
+  $Schema["INDEX"]["upload"]["upload_pkey_idx"] = "CREATE UNIQUE INDEX upload_pkey_idx ON upload USING btree (upload_pk);";
 
-  $Schema["INDEX"]["users"]["user_pkey"] = "CREATE UNIQUE INDEX user_pkey ON users USING btree (user_pk)";
-  $Schema["INDEX"]["users"]["user_user_name_key"] = "CREATE UNIQUE INDEX user_user_name_key ON users USING btree (user_name)";
+  $Schema["INDEX"]["uploadtree"]["lft_idx"] = "CREATE INDEX lft_idx ON uploadtree USING btree (lft);";
+  $Schema["INDEX"]["uploadtree"]["projtree_parent_idx"] = "CREATE INDEX projtree_parent_idx ON uploadtree USING btree (parent);";
+  $Schema["INDEX"]["uploadtree"]["projtree_projid_idx"] = "CREATE INDEX projtree_projid_idx ON uploadtree USING btree (upload_fk);";
+  $Schema["INDEX"]["uploadtree"]["ufile_rel_pkey"] = "CREATE UNIQUE INDEX ufile_rel_pkey ON uploadtree USING btree (uploadtree_pk);";
+  $Schema["INDEX"]["uploadtree"]["uploadtree_pfile_fk_idx"] = "CREATE INDEX uploadtree_pfile_fk_idx ON uploadtree USING btree (pfile_fk);";
+  $Schema["INDEX"]["uploadtree"]["uploadtree_unique"] = "CREATE UNIQUE INDEX uploadtree_unique ON uploadtree USING btree (ufile_fk, parent, upload_fk);";
+
+  $Schema["INDEX"]["users"]["user_pkey"] = "CREATE UNIQUE INDEX user_pkey ON users USING btree (user_pk);";
+  $Schema["INDEX"]["users"]["user_user_name_key"] = "CREATE UNIQUE INDEX user_user_name_key ON users USING btree (user_name);";
 
 
-  $Schema["CONSTRAINT"]["No duplicates"] = "ALTER TABLE agent_lic_meta ADD CONSTRAINT \"No duplicates\" UNIQUE (pfile_fk,tok_pfile,tok_match,version,tok_pfile_start,tok_pfile_end,tok_license_start,tok_license_end,tok_license,lic_fk)";
-  $Schema["CONSTRAINT"]["One unique per software version"] = "ALTER TABLE agent_lic_raw ADD CONSTRAINT \"One unique per software version\" UNIQUE (lic_unique,lic_version)";
-  $Schema["CONSTRAINT"]["agent_lic_meta_pfile_fk_fkey"] = "ALTER TABLE agent_lic_meta ADD CONSTRAINT \"agent_lic_meta_pfile_fk_fkey\" FOREIGN KEY (pfile_fk) REFERENCES pfile (pfile_fk)";
-  $Schema["CONSTRAINT"]["agent_lic_meta_pkey"] = "ALTER TABLE agent_lic_meta ADD CONSTRAINT \"agent_lic_meta_pkey\" PRIMARY KEY (agent_lic_meta_pk)";
-  $Schema["CONSTRAINT"]["agent_lic_phrases_phrase_group_key"] = "ALTER TABLE agent_lic_phrases ADD CONSTRAINT \"agent_lic_phrases_phrase_group_key\" UNIQUE (phrase_group,phrase_match)";
-  $Schema["CONSTRAINT"]["agent_lic_status_pfile_fk_fkey"] = "ALTER TABLE agent_lic_status ADD CONSTRAINT \"agent_lic_status_pfile_fk_fkey\" FOREIGN KEY (pfile_fk) REFERENCES pfile (pfile_fk)";
-  $Schema["CONSTRAINT"]["agent_lic_status_pfile_fk_key"] = "ALTER TABLE agent_lic_status ADD CONSTRAINT \"agent_lic_status_pfile_fk_key\" UNIQUE (pfile_fk)";
-  $Schema["CONSTRAINT"]["agent_pkey"] = "ALTER TABLE agent ADD CONSTRAINT \"agent_pkey\" PRIMARY KEY (agent_pk)";
-  $Schema["CONSTRAINT"]["agent_unique_name_rev"] = "ALTER TABLE agent ADD CONSTRAINT \"agent_unique_name_rev\" UNIQUE (agent_name,agent_rev)";
-  $Schema["CONSTRAINT"]["agent_wc_pfile_fk_key"] = "ALTER TABLE agent_wc ADD CONSTRAINT \"agent_wc_pfile_fk_key\" UNIQUE (pfile_fk)";
-  $Schema["CONSTRAINT"]["attrib_attrib_key_fk_fkey"] = "ALTER TABLE attrib ADD CONSTRAINT \"attrib_attrib_key_fk_fkey\" FOREIGN KEY (attrib_key_fk) REFERENCES key (attrib_key_fk)";
-  $Schema["CONSTRAINT"]["attrib_pfile_fk_fkey"] = "ALTER TABLE attrib ADD CONSTRAINT \"attrib_pfile_fk_fkey\" FOREIGN KEY (pfile_fk) REFERENCES pfile (pfile_fk)";
-  $Schema["CONSTRAINT"]["attrib_pkey"] = "ALTER TABLE attrib ADD CONSTRAINT \"attrib_pkey\" PRIMARY KEY (attrib_pk)";
-  $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE mimetype ADD CONSTRAINT \"dirmodemask\" UNIQUE (mimetype_name)";
-  $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE folder ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (folder_pk)";
-  $Schema["CONSTRAINT"]["foldercontents_pkey"] = "ALTER TABLE foldercontents ADD CONSTRAINT \"foldercontents_pkey\" PRIMARY KEY (foldercontents_pk)";
-  $Schema["CONSTRAINT"]["jdep_depends_jq_fk"] = "ALTER TABLE jobdepends ADD CONSTRAINT \"jdep_depends_jq_fk\" FOREIGN KEY (jdep_jq_depends_fk) REFERENCES jobqueue (jdep_jq_depends_fk)";
-  $Schema["CONSTRAINT"]["jdep_jq_fk"] = "ALTER TABLE jobdepends ADD CONSTRAINT \"jdep_jq_fk\" FOREIGN KEY (jdep_jq_fk) REFERENCES jobqueue (jdep_jq_fk)";
-  $Schema["CONSTRAINT"]["job_job_folder_fk_fkey"] = "ALTER TABLE job ADD CONSTRAINT \"job_job_folder_fk_fkey\" FOREIGN KEY (job_folder_fk) REFERENCES folder (job_folder_fk)";
-  $Schema["CONSTRAINT"]["job_job_upload_fk_fkey"] = "ALTER TABLE job ADD CONSTRAINT \"job_job_upload_fk_fkey\" FOREIGN KEY (job_upload_fk) REFERENCES upload (job_upload_fk)";
-  $Schema["CONSTRAINT"]["job_pkey"] = "ALTER TABLE job ADD CONSTRAINT \"job_pkey\" PRIMARY KEY (job_pk)";
-  $Schema["CONSTRAINT"]["jobqueue_job_fk"] = "ALTER TABLE jobqueue ADD CONSTRAINT \"jobqueue_job_fk\" FOREIGN KEY (jq_job_fk) REFERENCES job (jq_job_fk)";
-  $Schema["CONSTRAINT"]["jobqueue_pkey"] = "ALTER TABLE jobqueue ADD CONSTRAINT \"jobqueue_pkey\" PRIMARY KEY (jq_pk)";
-  $Schema["CONSTRAINT"]["key_key_agent_fk_fkey"] = "ALTER TABLE key ADD CONSTRAINT \"key_key_agent_fk_fkey\" FOREIGN KEY (key_agent_fk) REFERENCES agent (key_agent_fk)";
-  $Schema["CONSTRAINT"]["key_pkey"] = "ALTER TABLE key ADD CONSTRAINT \"key_pkey\" PRIMARY KEY (key_pk)";
-  $Schema["CONSTRAINT"]["lic_pk"] = "ALTER TABLE agent_lic_raw ADD CONSTRAINT \"lic_pk\" PRIMARY KEY (lic_pk)";
-  $Schema["CONSTRAINT"]["licgroup_exist"] = "ALTER TABLE licgroup_lics ADD CONSTRAINT \"licgroup_exist\" FOREIGN KEY (licgroup_fk) REFERENCES licgroup (licgroup_fk)";
-  $Schema["CONSTRAINT"]["licgroup_grps_pkey"] = "ALTER TABLE licgroup_grps ADD CONSTRAINT \"licgroup_grps_pkey\" PRIMARY KEY (licgroup_grps_pk)";
-  $Schema["CONSTRAINT"]["licgroup_licgroup_name_key"] = "ALTER TABLE licgroup ADD CONSTRAINT \"licgroup_licgroup_name_key\" UNIQUE (licgroup_name)";
-  $Schema["CONSTRAINT"]["licgroup_lics_pkey"] = "ALTER TABLE licgroup_lics ADD CONSTRAINT \"licgroup_lics_pkey\" PRIMARY KEY (licgroup_lics_pk)";
-  $Schema["CONSTRAINT"]["licgroup_pkey"] = "ALTER TABLE licgroup ADD CONSTRAINT \"licgroup_pkey\" PRIMARY KEY (licgroup_pk)";
-  $Schema["CONSTRAINT"]["licgroupmember_exist"] = "ALTER TABLE licgroup_grps ADD CONSTRAINT \"licgroupmember_exist\" FOREIGN KEY (licgroup_memberfk) REFERENCES licgroup (licgroup_memberfk)";
-  $Schema["CONSTRAINT"]["licterm_exist"] = "ALTER TABLE licterm_map ADD CONSTRAINT \"licterm_exist\" FOREIGN KEY (licterm_fk) REFERENCES licterm (licterm_fk)";
-  $Schema["CONSTRAINT"]["licterm_licterm_desc_key"] = "ALTER TABLE licterm ADD CONSTRAINT \"licterm_licterm_desc_key\" UNIQUE (licterm_desc)";
-  $Schema["CONSTRAINT"]["licterm_licterm_name_key"] = "ALTER TABLE licterm ADD CONSTRAINT \"licterm_licterm_name_key\" UNIQUE (licterm_name)";
-  $Schema["CONSTRAINT"]["licterm_map_pkey"] = "ALTER TABLE licterm_map ADD CONSTRAINT \"licterm_map_pkey\" PRIMARY KEY (licterm_map_pk)";
-  $Schema["CONSTRAINT"]["licterm_maplic_pkey"] = "ALTER TABLE licterm_maplic ADD CONSTRAINT \"licterm_maplic_pkey\" PRIMARY KEY (licterm_maplic_pk)";
-  $Schema["CONSTRAINT"]["licterm_name_pkey"] = "ALTER TABLE licterm_name ADD CONSTRAINT \"licterm_name_pkey\" PRIMARY KEY (licterm_name_pk)";
-  $Schema["CONSTRAINT"]["licterm_pkey"] = "ALTER TABLE licterm ADD CONSTRAINT \"licterm_pkey\" PRIMARY KEY (licterm_pk)";
-  $Schema["CONSTRAINT"]["licterm_words_licterm_words_text_key"] = "ALTER TABLE licterm_words ADD CONSTRAINT \"licterm_words_licterm_words_text_key\" UNIQUE (licterm_words_text)";
-  $Schema["CONSTRAINT"]["licterm_words_pkey"] = "ALTER TABLE licterm_words ADD CONSTRAINT \"licterm_words_pkey\" PRIMARY KEY (licterm_words_pk)";
-  $Schema["CONSTRAINT"]["lictermlicterm_exist"] = "ALTER TABLE licterm_maplic ADD CONSTRAINT \"lictermlicterm_exist\" FOREIGN KEY (licterm_fk) REFERENCES licterm (licterm_fk)";
-  $Schema["CONSTRAINT"]["lictermname_licmeta_exist"] = "ALTER TABLE licterm_name ADD CONSTRAINT \"lictermname_licmeta_exist\" FOREIGN KEY (agent_lic_meta_fk) REFERENCES agent_lic_meta (agent_lic_meta_fk)";
-  $Schema["CONSTRAINT"]["lictermname_licterm_exist"] = "ALTER TABLE licterm_name ADD CONSTRAINT \"lictermname_licterm_exist\" FOREIGN KEY (licterm_fk) REFERENCES licterm (licterm_fk)";
-  $Schema["CONSTRAINT"]["lictermname_pfile_exist"] = "ALTER TABLE licterm_name ADD CONSTRAINT \"lictermname_pfile_exist\" FOREIGN KEY (pfile_fk) REFERENCES pfile (pfile_fk)";
-  $Schema["CONSTRAINT"]["lictermwords_exist"] = "ALTER TABLE licterm_map ADD CONSTRAINT \"lictermwords_exist\" FOREIGN KEY (licterm_words_fk) REFERENCES licterm_words (licterm_words_fk)";
-  $Schema["CONSTRAINT"]["md5_sha1_size"] = "ALTER TABLE pfile ADD CONSTRAINT \"md5_sha1_size\" UNIQUE (pfile_md5,pfile_sha1,pfile_size)";
-  $Schema["CONSTRAINT"]["mimetype_fk"] = "ALTER TABLE pfile ADD CONSTRAINT \"mimetype_fk\" FOREIGN KEY (pfile_mimetypefk) REFERENCES mimetype (pfile_mimetypefk)";
-  $Schema["CONSTRAINT"]["mimetype_pk"] = "ALTER TABLE mimetype ADD CONSTRAINT \"mimetype_pk\" PRIMARY KEY (mimetype_pk)";
-  $Schema["CONSTRAINT"]["name_parent"] = "ALTER TABLE key ADD CONSTRAINT \"name_parent\" UNIQUE (key_name,key_parent_fk)";
-  $Schema["CONSTRAINT"]["only_one"] = "ALTER TABLE licgroup_lics ADD CONSTRAINT \"only_one\" UNIQUE (licgroup_lics_pk,licgroup_fk)";
-  $Schema["CONSTRAINT"]["only_one_licterm_map"] = "ALTER TABLE licterm_map ADD CONSTRAINT \"only_one_licterm_map\" UNIQUE (licterm_fk,licterm_words_fk)";
-  $Schema["CONSTRAINT"]["only_one_licterm_maplic"] = "ALTER TABLE licterm_maplic ADD CONSTRAINT \"only_one_licterm_maplic\" UNIQUE (licterm_fk,lic_fk)";
-  $Schema["CONSTRAINT"]["only_one_licterm_name"] = "ALTER TABLE licterm_name ADD CONSTRAINT \"only_one_licterm_name\" UNIQUE (licterm_fk,agent_lic_meta_fk)";
-  $Schema["CONSTRAINT"]["pfile_fk"] = "ALTER TABLE agent_wc ADD CONSTRAINT \"pfile_fk\" FOREIGN KEY (pfile_fk) REFERENCES pfile (pfile_fk)";
-  $Schema["CONSTRAINT"]["pfile_pkey"] = "ALTER TABLE pfile ADD CONSTRAINT \"pfile_pkey\" PRIMARY KEY (pfile_pk)";
-  $Schema["CONSTRAINT"]["proj_pkey"] = "ALTER TABLE proj ADD CONSTRAINT \"proj_pkey\" PRIMARY KEY (ufile_fk)";
-  $Schema["CONSTRAINT"]["report_cache_pkey"] = "ALTER TABLE report_cache ADD CONSTRAINT \"report_cache_pkey\" PRIMARY KEY (report_cache_pk)";
-  $Schema["CONSTRAINT"]["report_cache_report_cache_key_key"] = "ALTER TABLE report_cache ADD CONSTRAINT \"report_cache_report_cache_key_key\" UNIQUE (report_cache_key)";
-  $Schema["CONSTRAINT"]["report_cache_user_pkey"] = "ALTER TABLE report_cache_user ADD CONSTRAINT \"report_cache_user_pkey\" PRIMARY KEY (report_cache_user_pk)";
-  $Schema["CONSTRAINT"]["scheduler_status_pkey"] = "ALTER TABLE scheduler_status ADD CONSTRAINT \"scheduler_status_pkey\" PRIMARY KEY (unique_scheduler,agent_number)";
-  $Schema["CONSTRAINT"]["sqlagentproc_pkey"] = "ALTER TABLE sqlagentproc ADD CONSTRAINT \"sqlagentproc_pkey\" PRIMARY KEY (sap_pk)";
-  $Schema["CONSTRAINT"]["table_enum_pkey"] = "ALTER TABLE table_enum ADD CONSTRAINT \"table_enum_pkey\" PRIMARY KEY (table_pk)";
-  $Schema["CONSTRAINT"]["ufile_rel_pkey"] = "ALTER TABLE uploadtree ADD CONSTRAINT \"ufile_rel_pkey\" PRIMARY KEY (uploadtree_pk)";
-  $Schema["CONSTRAINT"]["upload_pkey_idx"] = "ALTER TABLE upload ADD CONSTRAINT \"upload_pkey_idx\" PRIMARY KEY (upload_pk)";
-  $Schema["CONSTRAINT"]["uploadtree_unique"] = "ALTER TABLE uploadtree ADD CONSTRAINT \"uploadtree_unique\" UNIQUE (ufile_fk,parent,upload_fk)";
-  $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE uploadtree ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (upload_fk) REFERENCES upload (upload_fk)";
-  $Schema["CONSTRAINT"]["user_pkey"] = "ALTER TABLE users ADD CONSTRAINT \"user_pkey\" PRIMARY KEY (user_pk)";
-  $Schema["CONSTRAINT"]["user_user_name_key"] = "ALTER TABLE users ADD CONSTRAINT \"user_user_name_key\" UNIQUE (user_name)";
+  $Schema["CONSTRAINT"]["No duplicates"] = "ALTER TABLE agent_lic_meta ADD CONSTRAINT \"No duplicates\" UNIQUE (pfile_fk,tok_pfile,tok_match,version,tok_pfile_start,tok_pfile_end,tok_license_start,tok_license_end,tok_license,lic_fk);";
+  $Schema["CONSTRAINT"]["One unique per software version"] = "ALTER TABLE agent_lic_raw ADD CONSTRAINT \"One unique per software version\" UNIQUE (lic_unique,lic_version);";
+  $Schema["CONSTRAINT"]["agent_lic_meta_pfile_fk_fkey"] = "ALTER TABLE agent_lic_meta ADD CONSTRAINT \"agent_lic_meta_pfile_fk_fkey\" FOREIGN KEY (pfile_fk) REFERENCES pfile (pfile_fk);";
+  $Schema["CONSTRAINT"]["agent_lic_meta_pkey"] = "ALTER TABLE agent_lic_meta ADD CONSTRAINT \"agent_lic_meta_pkey\" PRIMARY KEY (agent_lic_meta_pk);";
+  $Schema["CONSTRAINT"]["agent_lic_phrases_phrase_group_key"] = "ALTER TABLE agent_lic_phrases ADD CONSTRAINT \"agent_lic_phrases_phrase_group_key\" UNIQUE (phrase_group,phrase_match);";
+  $Schema["CONSTRAINT"]["agent_lic_status_pfile_fk_fkey"] = "ALTER TABLE agent_lic_status ADD CONSTRAINT \"agent_lic_status_pfile_fk_fkey\" FOREIGN KEY (pfile_fk) REFERENCES pfile (pfile_fk);";
+  $Schema["CONSTRAINT"]["agent_lic_status_pfile_fk_key"] = "ALTER TABLE agent_lic_status ADD CONSTRAINT \"agent_lic_status_pfile_fk_key\" UNIQUE (pfile_fk);";
+  $Schema["CONSTRAINT"]["agent_pkey"] = "ALTER TABLE agent ADD CONSTRAINT \"agent_pkey\" PRIMARY KEY (agent_pk);";
+  $Schema["CONSTRAINT"]["agent_unique_name_rev"] = "ALTER TABLE agent ADD CONSTRAINT \"agent_unique_name_rev\" UNIQUE (agent_name,agent_rev);";
+  $Schema["CONSTRAINT"]["agent_wc_pfile_fk_key"] = "ALTER TABLE agent_wc ADD CONSTRAINT \"agent_wc_pfile_fk_key\" UNIQUE (pfile_fk);";
+  $Schema["CONSTRAINT"]["attrib_attrib_key_fk_fkey"] = "ALTER TABLE attrib ADD CONSTRAINT \"attrib_attrib_key_fk_fkey\" FOREIGN KEY (attrib_key_fk) REFERENCES key (attrib_key_fk);";
+  $Schema["CONSTRAINT"]["attrib_pfile_fk_fkey"] = "ALTER TABLE attrib ADD CONSTRAINT \"attrib_pfile_fk_fkey\" FOREIGN KEY (pfile_fk) REFERENCES pfile (pfile_fk);";
+  $Schema["CONSTRAINT"]["attrib_pkey"] = "ALTER TABLE attrib ADD CONSTRAINT \"attrib_pkey\" PRIMARY KEY (attrib_pk);";
+  $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE mimetype ADD CONSTRAINT \"dirmodemask\" UNIQUE (mimetype_name);";
+  $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE folder ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (folder_pk);";
+  $Schema["CONSTRAINT"]["foldercontents_pkey"] = "ALTER TABLE foldercontents ADD CONSTRAINT \"foldercontents_pkey\" PRIMARY KEY (foldercontents_pk);";
+  $Schema["CONSTRAINT"]["jdep_depends_jq_fk"] = "ALTER TABLE jobdepends ADD CONSTRAINT \"jdep_depends_jq_fk\" FOREIGN KEY (jdep_jq_depends_fk) REFERENCES jobqueue (jdep_jq_depends_fk);";
+  $Schema["CONSTRAINT"]["jdep_jq_fk"] = "ALTER TABLE jobdepends ADD CONSTRAINT \"jdep_jq_fk\" FOREIGN KEY (jdep_jq_fk) REFERENCES jobqueue (jdep_jq_fk);";
+  $Schema["CONSTRAINT"]["job_job_folder_fk_fkey"] = "ALTER TABLE job ADD CONSTRAINT \"job_job_folder_fk_fkey\" FOREIGN KEY (job_folder_fk) REFERENCES folder (job_folder_fk);";
+  $Schema["CONSTRAINT"]["job_job_upload_fk_fkey"] = "ALTER TABLE job ADD CONSTRAINT \"job_job_upload_fk_fkey\" FOREIGN KEY (job_upload_fk) REFERENCES upload (job_upload_fk);";
+  $Schema["CONSTRAINT"]["job_pkey"] = "ALTER TABLE job ADD CONSTRAINT \"job_pkey\" PRIMARY KEY (job_pk);";
+  $Schema["CONSTRAINT"]["jobqueue_job_fk"] = "ALTER TABLE jobqueue ADD CONSTRAINT \"jobqueue_job_fk\" FOREIGN KEY (jq_job_fk) REFERENCES job (jq_job_fk);";
+  $Schema["CONSTRAINT"]["jobqueue_pkey"] = "ALTER TABLE jobqueue ADD CONSTRAINT \"jobqueue_pkey\" PRIMARY KEY (jq_pk);";
+  $Schema["CONSTRAINT"]["key_key_agent_fk_fkey"] = "ALTER TABLE key ADD CONSTRAINT \"key_key_agent_fk_fkey\" FOREIGN KEY (key_agent_fk) REFERENCES agent (key_agent_fk);";
+  $Schema["CONSTRAINT"]["key_pkey"] = "ALTER TABLE key ADD CONSTRAINT \"key_pkey\" PRIMARY KEY (key_pk);";
+  $Schema["CONSTRAINT"]["lic_pk"] = "ALTER TABLE agent_lic_raw ADD CONSTRAINT \"lic_pk\" PRIMARY KEY (lic_pk);";
+  $Schema["CONSTRAINT"]["licgroup_exist"] = "ALTER TABLE licgroup_lics ADD CONSTRAINT \"licgroup_exist\" FOREIGN KEY (licgroup_fk) REFERENCES licgroup (licgroup_fk);";
+  $Schema["CONSTRAINT"]["licgroup_grps_pkey"] = "ALTER TABLE licgroup_grps ADD CONSTRAINT \"licgroup_grps_pkey\" PRIMARY KEY (licgroup_grps_pk);";
+  $Schema["CONSTRAINT"]["licgroup_licgroup_name_key"] = "ALTER TABLE licgroup ADD CONSTRAINT \"licgroup_licgroup_name_key\" UNIQUE (licgroup_name);";
+  $Schema["CONSTRAINT"]["licgroup_lics_pkey"] = "ALTER TABLE licgroup_lics ADD CONSTRAINT \"licgroup_lics_pkey\" PRIMARY KEY (licgroup_lics_pk);";
+  $Schema["CONSTRAINT"]["licgroup_pkey"] = "ALTER TABLE licgroup ADD CONSTRAINT \"licgroup_pkey\" PRIMARY KEY (licgroup_pk);";
+  $Schema["CONSTRAINT"]["licgroupmember_exist"] = "ALTER TABLE licgroup_grps ADD CONSTRAINT \"licgroupmember_exist\" FOREIGN KEY (licgroup_memberfk) REFERENCES licgroup (licgroup_memberfk);";
+  $Schema["CONSTRAINT"]["licterm_exist"] = "ALTER TABLE licterm_map ADD CONSTRAINT \"licterm_exist\" FOREIGN KEY (licterm_fk) REFERENCES licterm (licterm_fk);";
+  $Schema["CONSTRAINT"]["licterm_licterm_desc_key"] = "ALTER TABLE licterm ADD CONSTRAINT \"licterm_licterm_desc_key\" UNIQUE (licterm_desc);";
+  $Schema["CONSTRAINT"]["licterm_licterm_name_key"] = "ALTER TABLE licterm ADD CONSTRAINT \"licterm_licterm_name_key\" UNIQUE (licterm_name);";
+  $Schema["CONSTRAINT"]["licterm_map_pkey"] = "ALTER TABLE licterm_map ADD CONSTRAINT \"licterm_map_pkey\" PRIMARY KEY (licterm_map_pk);";
+  $Schema["CONSTRAINT"]["licterm_maplic_pkey"] = "ALTER TABLE licterm_maplic ADD CONSTRAINT \"licterm_maplic_pkey\" PRIMARY KEY (licterm_maplic_pk);";
+  $Schema["CONSTRAINT"]["licterm_name_pkey"] = "ALTER TABLE licterm_name ADD CONSTRAINT \"licterm_name_pkey\" PRIMARY KEY (licterm_name_pk);";
+  $Schema["CONSTRAINT"]["licterm_pkey"] = "ALTER TABLE licterm ADD CONSTRAINT \"licterm_pkey\" PRIMARY KEY (licterm_pk);";
+  $Schema["CONSTRAINT"]["licterm_words_licterm_words_text_key"] = "ALTER TABLE licterm_words ADD CONSTRAINT \"licterm_words_licterm_words_text_key\" UNIQUE (licterm_words_text);";
+  $Schema["CONSTRAINT"]["licterm_words_pkey"] = "ALTER TABLE licterm_words ADD CONSTRAINT \"licterm_words_pkey\" PRIMARY KEY (licterm_words_pk);";
+  $Schema["CONSTRAINT"]["lictermlicterm_exist"] = "ALTER TABLE licterm_maplic ADD CONSTRAINT \"lictermlicterm_exist\" FOREIGN KEY (licterm_fk) REFERENCES licterm (licterm_fk);";
+  $Schema["CONSTRAINT"]["lictermname_licmeta_exist"] = "ALTER TABLE licterm_name ADD CONSTRAINT \"lictermname_licmeta_exist\" FOREIGN KEY (agent_lic_meta_fk) REFERENCES agent_lic_meta (agent_lic_meta_fk);";
+  $Schema["CONSTRAINT"]["lictermname_licterm_exist"] = "ALTER TABLE licterm_name ADD CONSTRAINT \"lictermname_licterm_exist\" FOREIGN KEY (licterm_fk) REFERENCES licterm (licterm_fk);";
+  $Schema["CONSTRAINT"]["lictermname_pfile_exist"] = "ALTER TABLE licterm_name ADD CONSTRAINT \"lictermname_pfile_exist\" FOREIGN KEY (pfile_fk) REFERENCES pfile (pfile_fk);";
+  $Schema["CONSTRAINT"]["lictermwords_exist"] = "ALTER TABLE licterm_map ADD CONSTRAINT \"lictermwords_exist\" FOREIGN KEY (licterm_words_fk) REFERENCES licterm_words (licterm_words_fk);";
+  $Schema["CONSTRAINT"]["md5_sha1_size"] = "ALTER TABLE pfile ADD CONSTRAINT \"md5_sha1_size\" UNIQUE (pfile_md5,pfile_sha1,pfile_size);";
+  $Schema["CONSTRAINT"]["mimetype_fk"] = "ALTER TABLE pfile ADD CONSTRAINT \"mimetype_fk\" FOREIGN KEY (pfile_mimetypefk) REFERENCES mimetype (pfile_mimetypefk);";
+  $Schema["CONSTRAINT"]["mimetype_pk"] = "ALTER TABLE mimetype ADD CONSTRAINT \"mimetype_pk\" PRIMARY KEY (mimetype_pk);";
+  $Schema["CONSTRAINT"]["name_parent"] = "ALTER TABLE key ADD CONSTRAINT \"name_parent\" UNIQUE (key_name,key_parent_fk);";
+  $Schema["CONSTRAINT"]["only_one"] = "ALTER TABLE licgroup_lics ADD CONSTRAINT \"only_one\" UNIQUE (licgroup_lics_pk,licgroup_fk);";
+  $Schema["CONSTRAINT"]["only_one_licterm_map"] = "ALTER TABLE licterm_map ADD CONSTRAINT \"only_one_licterm_map\" UNIQUE (licterm_fk,licterm_words_fk);";
+  $Schema["CONSTRAINT"]["only_one_licterm_maplic"] = "ALTER TABLE licterm_maplic ADD CONSTRAINT \"only_one_licterm_maplic\" UNIQUE (licterm_fk,lic_fk);";
+  $Schema["CONSTRAINT"]["only_one_licterm_name"] = "ALTER TABLE licterm_name ADD CONSTRAINT \"only_one_licterm_name\" UNIQUE (licterm_fk,agent_lic_meta_fk);";
+  $Schema["CONSTRAINT"]["pfile_fk"] = "ALTER TABLE agent_wc ADD CONSTRAINT \"pfile_fk\" FOREIGN KEY (pfile_fk) REFERENCES pfile (pfile_fk);";
+  $Schema["CONSTRAINT"]["pfile_pkey"] = "ALTER TABLE pfile ADD CONSTRAINT \"pfile_pkey\" PRIMARY KEY (pfile_pk);";
+  $Schema["CONSTRAINT"]["proj_pkey"] = "ALTER TABLE proj ADD CONSTRAINT \"proj_pkey\" PRIMARY KEY (ufile_fk);";
+  $Schema["CONSTRAINT"]["report_cache_pkey"] = "ALTER TABLE report_cache ADD CONSTRAINT \"report_cache_pkey\" PRIMARY KEY (report_cache_pk);";
+  $Schema["CONSTRAINT"]["report_cache_report_cache_key_key"] = "ALTER TABLE report_cache ADD CONSTRAINT \"report_cache_report_cache_key_key\" UNIQUE (report_cache_key);";
+  $Schema["CONSTRAINT"]["report_cache_user_pkey"] = "ALTER TABLE report_cache_user ADD CONSTRAINT \"report_cache_user_pkey\" PRIMARY KEY (report_cache_user_pk);";
+  $Schema["CONSTRAINT"]["scheduler_status_pkey"] = "ALTER TABLE scheduler_status ADD CONSTRAINT \"scheduler_status_pkey\" PRIMARY KEY (unique_scheduler,agent_number);";
+  $Schema["CONSTRAINT"]["sqlagentproc_pkey"] = "ALTER TABLE sqlagentproc ADD CONSTRAINT \"sqlagentproc_pkey\" PRIMARY KEY (sap_pk);";
+  $Schema["CONSTRAINT"]["table_enum_pkey"] = "ALTER TABLE table_enum ADD CONSTRAINT \"table_enum_pkey\" PRIMARY KEY (table_pk);";
+  $Schema["CONSTRAINT"]["ufile_rel_pkey"] = "ALTER TABLE uploadtree ADD CONSTRAINT \"ufile_rel_pkey\" PRIMARY KEY (uploadtree_pk);";
+  $Schema["CONSTRAINT"]["upload_pkey_idx"] = "ALTER TABLE upload ADD CONSTRAINT \"upload_pkey_idx\" PRIMARY KEY (upload_pk);";
+  $Schema["CONSTRAINT"]["uploadtree_unique"] = "ALTER TABLE uploadtree ADD CONSTRAINT \"uploadtree_unique\" UNIQUE (ufile_fk,parent,upload_fk);";
+  $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE uploadtree ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (upload_fk) REFERENCES upload (upload_fk);";
+  $Schema["CONSTRAINT"]["user_pkey"] = "ALTER TABLE users ADD CONSTRAINT \"user_pkey\" PRIMARY KEY (user_pk);";
+  $Schema["CONSTRAINT"]["user_user_name_key"] = "ALTER TABLE users ADD CONSTRAINT \"user_user_name_key\" UNIQUE (user_name);";
 
 ?>

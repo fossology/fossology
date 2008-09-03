@@ -89,48 +89,6 @@ class core_schema extends FO_Plugin
 
 
     /********************************************/
-    /* GetRunnable() is a DB function for listing the runnable items
-       in the jobqueue. This is used by the scheduler. */
-    /********************************************/
-    $GetRunnable = '
-CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
-DECLARE
-  jqrec jobqueue;
-  jqrec_test jobqueue;
-  jqcurse CURSOR FOR SELECT *  FROM jobqueue WHERE jq_starttime IS NULL AND jq_end_bits < 2;
-  jdep_row jobdepends;
-  success integer;
-BEGIN
-  open jqcurse;
-<<MYLABEL>>
-  LOOP
-    FETCH jqcurse INTO jqrec;
-    IF FOUND
-    THEN -- check all dependencies
-      success := 1;
-      <<DEPLOOP>>
-      FOR jdep_row IN SELECT *  FROM jobdepends WHERE jdep_jq_fk=jqrec.jq_pk LOOP
-	-- has the dependency been satisfied?
-	SELECT INTO jqrec_test * FROM jobqueue WHERE jdep_row.jdep_jq_depends_fk=jq_pk AND jq_endtime IS NOT NULL AND jq_end_bits < 2;
-	IF NOT FOUND
-	THEN
-	  success := 0;
-	  EXIT DEPLOOP;
-	END IF;
-      END LOOP DEPLOOP;
-
-      IF success=1 THEN RETURN NEXT jqrec; END IF;
-    ELSE EXIT;
-    END IF;
-  END LOOP MYLABEL;
-RETURN;
-END;
-$$
-LANGUAGE plpgsql;
-    ';
-    $DB->Action($GetRunnable);
-
-    /********************************************/
     /* Have the scheduler initialize all agents */
     /* This only works without SSH. */
     /********************************************/
@@ -268,34 +226,6 @@ LANGUAGE plpgsql;
      $DB->Action("DROP TABLE ufile;");
 
 
-    /********************************************
-     * uploadtree2path(uploadtree_pk integer) is a DB function that returns
-     * the non-artifact parents of an uploadtree_pk
-     ********************************************/
-    $sql = '
-CREATE or REPLACE function uploadtree2path(uploadtree_pk_in int) returns setof uploadtree as $$ 
-DECLARE
-  UTrec   uploadtree;
-  UTpk    integer;
-  sql     varchar;
-BEGIN
-
-  UTpk := uploadtree_pk_in;
-
-    WHILE UTpk > 0 LOOP
-      sql := \'select * from uploadtree where uploadtree_pk=\' || UTpk;
-      execute sql into UTrec;
-    
-      IF ((UTrec.ufile_mode & (1<<28)) = 0) THEN RETURN NEXT UTrec; END IF;
-      UTpk := UTrec.parent;
-    END LOOP;
-  RETURN;
-END;
-$$ 
-LANGUAGE plpgsql;
-    ';
-    $DB->Action($sql);
-
      /* Create the report_cache table */
     $sql = ' 
 CREATE TABLE report_cache (
@@ -351,7 +281,6 @@ ALTER TABLE ONLY report_cache_user
 	type.typname AS type,
 	attr.atttypmod-4 AS modifier,
 	attr.attnotnull AS notnull,
-	attr.atthasdef AS hasdefault,
 	attrdef.adsrc AS default,
 	col_description(attr.attrelid, attr.attnum) AS description
 	FROM pg_class AS class
@@ -365,6 +294,22 @@ ALTER TABLE ONLY report_cache_user
 	AND adnum = attnum
 	ORDER BY class.relname,attr.attnum;
 	";
+    /* Using information_schema.columns is easier, but missing the
+       column description.  Also, it does not distinguish a default of "NULL"
+       from having no default (technicality, but no implementation
+       difference). */
+    $SQLInfo = "SELECT table_name AS table,
+	ordinal_position AS ordinal
+	column_name AS column_name,
+	data_type AS type,
+	character_maximum_length AS modifier,
+	is_nullable AS notnull,
+	column_default AS default,
+	FROM information_schema.columns
+	WHERE table_catalog = 'fossology'
+	AND table_schema = 'public';
+	";
+
     $Results = $DB->Action($SQL);
     for($i=0; !empty($Results[$i]['table']); $i++)
       {
@@ -378,19 +323,24 @@ ALTER TABLE ONLY report_cache_user
 
       $Schema['TABLEID'][$Table][$R['ordinal']] = $Column;
       if (!empty($Desc))
-        {
-        $Schema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN $Table.$Column IS '$Desc'";
+	{
+	$Schema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN $Table.$Column IS '$Desc';";
 	}
       else
-        {
+	{
 	$Schema['TABLE'][$Table][$Column]['DESC'] = "";
 	}
-      $Schema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE $Table ADD COLUMN $Column $Type";
-      $Schema['TABLE'][$Table][$Column]['ALTER'] = "ALTER TABLE $Table ALTER COLUMN $Column TYPE $Type";
-      if ($R['notnull'] == 't') { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " SET NOT NULL"; }
-      else { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " DROP NOT NULL"; }
-      if ($R['hasdefault'] == 't') { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " SET DEFAULT " . $R['default']; }
-      else { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " DROP DEFAULT"; }
+      $Schema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE $Table ADD COLUMN $Column $Type;";
+      $Schema['TABLE'][$Table][$Column]['ALTER'] = "ALTER TABLE $Table";
+      $Alter = "ALTER COLUMN $Column";
+      // $Schema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter TYPE $Type";
+      if ($R['notnull'] == 't') { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter SET NOT NULL"; }
+      else { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter DROP NOT NULL"; }
+      if ($R['default'] != '')
+        {
+        $Schema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
+	}
+      $Schema['TABLE'][$Table][$Column]['ALTER'] .= ";";
       }
 
     /***************************/
@@ -400,7 +350,27 @@ ALTER TABLE ONLY report_cache_user
     $Results = $DB->Action($SQL);
     for($i=0; !empty($Results[$i]['viewname']); $i++)
       {
-      $Schema['VIEW'][$Results[$i]['viewname']] = $Results[$i]['definition'];
+      $SQL = "CREATE VIEW " . $Results[$i]['viewname'] . " AS " . $Results[$i]['definition'];
+      $Schema['VIEW'][$Results[$i]['viewname']] = $SQL;
+      }
+
+    /***************************/
+    /* Get Sequence */
+    /***************************/
+    $SQL = "SELECT relname
+	FROM pg_class
+	WHERE relkind = 'S'
+	AND relnamespace IN (
+	SELECT oid
+	FROM pg_namespace
+	WHERE nspname NOT LIKE 'pg_%'
+	AND nspname != 'information_schema'
+	);";
+    $Results = $DB->Action($SQL);
+    for($i=0; !empty($Results[$i]['relname']); $i++)
+      {
+      $SQL = "CREATE SEQUENCE " . $Results[$i]['relname'] . " START 1;";
+      $Schema['SEQUENCE'][$Results[$i]['relname']] = $SQL;
       }
 
     /***************************/
@@ -417,7 +387,7 @@ ALTER TABLE ONLY report_cache_user
     $Results = $DB->Action($SQL);
     for($i=0; !empty($Results[$i]['table']); $i++)
       {
-      $Schema['INDEX'][$Results[$i]['table']][$Results[$i]['index']] = $Results[$i]['define'];
+      $Schema['INDEX'][$Results[$i]['table']][$Results[$i]['index']] = $Results[$i]['define'] . ";";
       }
 
     /***************************/
@@ -466,7 +436,7 @@ ALTER TABLE ONLY report_cache_user
       $Key = "";
       $Keys = split(" ",$Results[$i]['constraint_key']);
       foreach($Keys as $K)
-        {
+	{
 	if (empty($K)) { continue; }
 	if (!empty($Key)) { $Key .= ","; }
 	$Key .= $Schema['TABLEID'][$Results[$i]['table_name']][$K];
@@ -475,7 +445,7 @@ ALTER TABLE ONLY report_cache_user
       $Key = "";
       $Keys = split(" ",$Results[$i]['fk_constraint_key']);
       foreach($Keys as $K)
-        {
+	{
 	if (empty($K)) { continue; }
 	if (!empty($Key)) { $Key .= ","; }
 	$Key .= $Schema['TABLEID'][$Results[$i]['references_table']][$K];
@@ -491,10 +461,11 @@ ALTER TABLE ONLY report_cache_user
       $SQL .= " " . $Results[$i]['type'];
       $SQL .= " (" . $Results[$i]['constraint_key'] . ")";
       if (!empty($Results[$i]['references_table']))
-        {
+	{
 	$SQL .= " REFERENCES " . $Results[$i]['references_table'];
-        $SQL .= " (" . $Results[$i]['constraint_key'] . ")";
+	$SQL .= " (" . $Results[$i]['constraint_key'] . ")";
 	}
+      $SQL .= ";";
       $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
       }
 
@@ -516,15 +487,31 @@ if (0)
 	INNER JOIN pg_language AS lang ON proc.prolang = lang.oid
 	WHERE lang.lanname = 'plpgsql'
 	ORDER BY proname;";
+
+    $SQLinfo = "SELECT r.routine_name AS name,
+	p.parameter_mode, p.parameter_name, p.data_type,
+	r.routine_definition AS definition
+	FROM information_schema.parameters AS p
+	INNER JOIN information_schema.routines AS r
+	ON r.specific_name = p.specific_name
+	AND r.specific_catalog = p.specific_catalog
+	AND r.specific_schema = p.specific_schema
+	WHERE r.routine_type = 'FUNCTION'
+	AND r.specific_catalog = 'fossology'
+	AND r.specific_schema = 'public';
+	";
+
     $Results = $DB->Action($SQL);
     for($i=0; !empty($Results[$i]['proname']); $i++)
       {
       $SQL = "CREATE or REPLACE function " . $Results[$i]['proname'] . "()";
       $SQL .= ' RETURNS ' . "TBD" . ' AS $$';
       $SQL .= " " . $Results[$i]['prosrc'];
+      $SQL .= ";";
       $Schema['FUNCTION'][$Results[$i]['proname']] = $SQL;
       }
 }
+	
 
     unset($Schema['TABLEID']);
     return($Schema);
@@ -539,13 +526,14 @@ if (0)
 
     print "<ul>\n";
     print "<li><a href='#Table'>Tables</a>\n";
-    print "<ol>\n";
-    foreach($Schema['TABLE'] as $TableName => $Columns)
-      {
-      if (empty($TableName)) { continue; }
-      print "<li><a href='#Table-$TableName'>$TableName</a>\n";
-      }
-    print "</ol>\n";
+    // print "<ol>\n";
+    // foreach($Schema['TABLE'] as $TableName => $Columns)
+    //   {
+    //   if (empty($TableName)) { continue; }
+    //   print "<li><a href='#Table-$TableName'>$TableName</a>\n";
+    //   }
+    // print "</ol>\n";
+    print "<li><a href='#Sequence'>Sequences</a>\n";
     print "<li><a href='#View'>Views</a>\n";
     print "<li><a href='#Index'>Indexes</a>\n";
     print "<li><a href='#Constraint'>Constraints</a>\n";
@@ -557,6 +545,7 @@ if (0)
 
     print "<a name='Table'></a><table width='100%' border='1'>\n";
     $LastTableName="";
+    if (!empty($Schema['TABLE']))
     foreach($Schema['TABLE'] as $TableName => $Columns)
       {
       if (empty($TableName)) { continue; }
@@ -579,8 +568,21 @@ if (0)
     print "</table>\n";
 
     print "<P/>\n";
+    print "<a name='Sequence'></a><table width='100%' border='1'>\n";
+    print "<th>Sequence<th>Definition\n";
+    if (!empty($Schema['SEQUENCE']))
+    foreach($Schema['SEQUENCE'] as $Name => $Description)
+      {
+      if (empty($Name)) { continue; }
+      print "<tr><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+      }
+    print "</table>\n";
+
+    print "</table>\n";
+    print "<P/>\n";
     print "<a name='View'></a><table width='100%' border='1'>\n";
     print "<th>View<th>Definition\n";
+    if (!empty($Schema['VIEW']))
     foreach($Schema['VIEW'] as $Name => $Description)
       {
       if (empty($Name)) { continue; }
@@ -591,6 +593,7 @@ if (0)
     print "<P/>\n";
     print "<a name='Index'></a><table width='100%' border='1'>\n";
     print "<th>Table<th>Index<th>Definition\n";
+    if (!empty($Schema['INDEX']))
     foreach($Schema['INDEX'] as $Table => $Indexes)
       {
       if (empty($Table)) { continue; }
@@ -606,6 +609,7 @@ if (0)
     print "<P/>\n";
     print "<a name='Constraint'></a><table width='100%' border='1'>\n";
     print "<th>Constraint<th>Definition\n";
+    if (!empty($Schema['CONSTRAINT']))
     foreach($Schema['CONSTRAINT'] as $Name => $Description)
       {
       if (empty($Name)) { continue; }
@@ -618,14 +622,14 @@ if (0)
       print "<P/>\n";
       print "<a name='Function'></a><table width='100%' border='1'>\n";
       print "<th>Function<th>Definition\n";
+      if (!empty($Schema['FUNCTION']))
       foreach($Schema['FUNCTION'] as $Name => $Description)
-        {
-        if (empty($Name)) { continue; }
-        print "<tr><td>" . htmlentities($Name) . "<td><pre>" . htmlentities($Description) . "</pre>\n";
-        }
+	{
+	if (empty($Name)) { continue; }
+	print "<tr><td>" . htmlentities($Name) . "<td><pre>" . htmlentities($Description) . "</pre>\n";
+	}
       print "</table>\n";
       }
-
     } // ViewSchema()
 
   /***********************************************************
@@ -651,37 +655,37 @@ if (0)
       $K1 = str_replace('"','\"',$K1);
       $A1 = '  $Schema["' . $K1 . "\"]";
       if (!is_array($V1))
-        {
-        $V1 = str_replace('"','\"',$V1);
+	{
+	$V1 = str_replace('"','\"',$V1);
 	fwrite($Fout,"$A1 = \"$V1\";\n");
 	}
       else
-        {
+	{
 	foreach($V1 as $K2 => $V2)
 	  {
-          $K2 = str_replace('"','\"',$K2);
+	  $K2 = str_replace('"','\"',$K2);
 	  $A2 = $A1 . '["' . $K2 . '"]';
-          if (!is_array($V2))
-            {
-            $V2 = str_replace('"','\"',$V2);
+	  if (!is_array($V2))
+	    {
+	    $V2 = str_replace('"','\"',$V2);
 	    fwrite($Fout,"$A2 = \"$V2\";\n");
 	    }
-          else
-            {
+	  else
+	    {
 	    foreach($V2 as $K3 => $V3)
 	      {
-              $K3 = str_replace('"','\"',$K3);
+	      $K3 = str_replace('"','\"',$K3);
 	      $A3 = $A2 . '["' . $K3 . '"]';
-              if (!is_array($V3))
-                {
-                $V3 = str_replace('"','\"',$V3);
+	      if (!is_array($V3))
+	        {
+	        $V3 = str_replace('"','\"',$V3);
 	        fwrite($Fout,"$A3 = \"$V3\";\n");
 	        }
 	      else
 	        {
 		foreach($V3 as $K4 => $V4)
 		  {
-                  $V4 = str_replace('"','\"',$V4);
+	          $V4 = str_replace('"','\"',$V4);
 	          $A4 = $A3 . '["' . $K4 . '"]';
 	          fwrite($Fout,"$A4 = \"$V4\";\n");
 		  } /* K4 */
@@ -700,10 +704,106 @@ if (0)
     } // ExportSchema()
 
   /***********************************************************
-   ApplySchema(): Apply the current schema from a file.
+   MigrateSchema(): Any special code for migrating data.
+   This is called AFTER columns/tables are added and AFTER
+   constraints are removed.
+   But it is called BEFORE old columns are dropped.
    ***********************************************************/
-  function ApplySchema($Filename)
+  function MigrateSchema()
     {
+    } // MigrateSchema()
+
+  /***********************************************************
+   MakeFunctions(): Create any required functions.
+   ***********************************************************/
+  function MakeFunctions($Debug)
+    {
+    global $DB;
+
+    /********************************************/
+    /* GetRunnable() is a DB function for listing the runnable items
+       in the jobqueue. This is used by the scheduler. */
+    /********************************************/
+    $SQL = '
+CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
+DECLARE
+  jqrec jobqueue;
+  jqrec_test jobqueue;
+  jqcurse CURSOR FOR SELECT *  FROM jobqueue WHERE jq_starttime IS NULL AND jq_end_bits < 2;
+  jdep_row jobdepends;
+  success integer;
+BEGIN
+  open jqcurse;
+<<MYLABEL>>
+  LOOP
+    FETCH jqcurse INTO jqrec;
+    IF FOUND
+    THEN -- check all dependencies
+      success := 1;
+      <<DEPLOOP>>
+      FOR jdep_row IN SELECT *  FROM jobdepends WHERE jdep_jq_fk=jqrec.jq_pk LOOP
+	-- has the dependency been satisfied?
+	SELECT INTO jqrec_test * FROM jobqueue WHERE jdep_row.jdep_jq_depends_fk=jq_pk AND jq_endtime IS NOT NULL AND jq_end_bits < 2;
+	IF NOT FOUND
+	THEN
+	  success := 0;
+	  EXIT DEPLOOP;
+	END IF;
+      END LOOP DEPLOOP;
+
+      IF success=1 THEN RETURN NEXT jqrec; END IF;
+    ELSE EXIT;
+    END IF;
+  END LOOP MYLABEL;
+RETURN;
+END;
+$$
+LANGUAGE plpgsql;
+    ';
+    if ($Debug) { print "$SQL;\n"; }
+    else { $DB->Action($SQL); }
+
+    /********************************************
+     * uploadtree2path(uploadtree_pk integer) is a DB function that returns
+     * the non-artifact parents of an uploadtree_pk
+     ********************************************/
+    $SQL = '
+CREATE or REPLACE function uploadtree2path(uploadtree_pk_in int) returns setof uploadtree as $$ 
+DECLARE
+  UTrec   uploadtree;
+  UTpk    integer;
+  sql     varchar;
+BEGIN
+
+  UTpk := uploadtree_pk_in;
+
+    WHILE UTpk > 0 LOOP
+      sql := \'select * from uploadtree where uploadtree_pk=\' || UTpk;
+      execute sql into UTrec;
+    
+      IF ((UTrec.ufile_mode & (1<<28)) = 0) THEN RETURN NEXT UTrec; END IF;
+      UTpk := UTrec.parent;
+    END LOOP;
+  RETURN;
+END;
+$$ 
+LANGUAGE plpgsql;
+    ';
+    if ($Debug) { print "$SQL;\n"; }
+    else { $DB->Action($SQL); }
+    } // MakeFunctions()
+
+  /***********************************************************
+   ApplySchema(): Apply the current schema from a file.
+   NOTE: The order for add/delete is important!
+   ***********************************************************/
+  function ApplySchema($Filename,$Debug)
+    {
+    global $DB;
+    if (empty($DB)) { return("No database connection."); }
+
+    if ($Debug) { print "<pre>"; }
+
     /**************************************/
     /** BEGIN: Term list from ExportTerms() **/
     /**************************************/
@@ -711,7 +811,209 @@ if (0)
     /**************************************/
     /** END: Term list from ExportTerms() **/
     /**************************************/
-    print "<pre>"; print_r($Schema); print "</pre>";
+    $Curr = $this->GetSchema();
+    /* The gameplan: Make $Curr look like $Schema. */
+    // print "<pre>"; print_r($Schema); print "</pre>";
+
+    /************************************/
+    /* Add sequences */
+    /************************************/
+    if (!empty($Schema['SEQUENCE']))
+    foreach($Schema['SEQUENCE'] as $Name => $SQL)
+      {
+      if (empty($Name)) { continue; }
+      if ($Curr['SEQUENCE'][$Name] == $SQL) { continue; }
+      if ($Debug) { print "$SQL\n"; }
+      else { $DB->Action($SQL); }
+      }
+
+    /************************************/
+    /* Add tables/columns (dependent on sequences for default values) */
+    /************************************/
+    if (!empty($Schema['TABLE']))
+    foreach($Schema['TABLE'] as $Table => $Columns)
+      {
+      if (empty($Table)) { continue; }
+      if (!$DB->TblExist($Table))
+	{
+	$SQL = "CREATE TABLE $Table ();";
+	if ($Debug) { print "$SQL\n"; }
+	else { $DB->Action($SQL); }
+	}
+      foreach($Columns as $Column => $Val)
+	{
+	if ($Curr['TABLE'][$Table][$Column]['ADD'] != $Val['ADD'])
+	  {
+	  if ($Debug) { print $Val['ADD'] . "\n"; }
+	  else { $DB->Action($Val['ADD']); }
+	  }
+	if ($Curr['TABLE'][$Table][$Column]['ALTER'] != $Val['ALTER'])
+	  {
+	  if ($Debug) { print $Val['ALTER'] . "\n"; }
+	  else { $DB->Action($Val['ALTER']); }
+	  }
+	if ($Curr['TABLE'][$Table][$Column]['DESC'] != $Val['DESC'])
+	  {
+	  if ($Debug) { print $Val['DESC'] . "\n"; }
+	  else { $DB->Action($Val['DESC']); }
+	  }
+	}
+      }
+
+    /************************************/
+    /* Add views (dependent on columns) */
+    /************************************/
+    if (!empty($Schema['VIEW']))
+    foreach($Schema['VIEW'] as $Name => $SQL)
+      {
+      if (empty($Name)) { continue; }
+      if ($Curr['VIEW'][$Name] == $SQL) { continue; }
+      if (!empty($Curr['VIEW'][$Name]))
+        {
+	/* Delete it if it exists and looks different */
+	$SQL1 = "DROP VIEW $Name;";
+        if ($Debug) { print "$SQL1\n"; }
+        else { $DB->Action($SQL1); }
+	}
+      /* Create the view */
+      if ($Debug) { print "$SQL\n"; }
+      else { $DB->Action($SQL); }
+      }
+
+    /************************************/
+    /* Delete indexes */
+    /************************************/
+    if (!empty($Curr['INDEX']))
+    foreach($Curr['INDEX'] as $Table => $IndexInfo)
+      {
+      if (empty($Table)) { continue; }
+      /* Only delete indexes on known tables */
+      if (empty($Schema['TABLE'][$Table])) { continue; }
+      foreach($IndexInfo as $Name => $SQL)
+        {
+        if (empty($Name)) { continue; }
+        /* Only delete indexes that are different */
+        if ($Schema['INDEX'][$Table][$Name] == $SQL) { continue; }
+        $SQL = "DROP INDEX IF EXISTS \"$Name\";";
+        if ($Debug) { print "$SQL\n"; }
+        else { $DB->Action($SQL); }
+	}
+      }
+
+    /************************************/
+    /* Add indexes (dependent on columns) */
+    /************************************/
+    if (!empty($Schema['INDEX']))
+    foreach($Schema['INDEX'] as $Table => $IndexInfo)
+      {
+      if (empty($Table)) { continue; }
+      foreach($IndexInfo as $Name => $SQL)
+        {
+        if (empty($Name)) { continue; }
+        if ($Curr['INDEX'][$Table][$Name] == $SQL) { continue; }
+        if ($Debug) { print "$SQL\n"; }
+        else { $DB->Action($SQL); }
+	}
+      }
+
+    /************************************/
+    /* Delete constraints */
+    /* Delete now, so they won't interfere with migrations. */
+    /************************************/
+    if (!empty($Curr['CONSTRAINT']))
+    foreach($Curr['CONSTRAINT'] as $Name => $SQL)
+      {
+      if (empty($Name)) { continue; }
+      /* Only process tables that I know about */
+      $Table = preg_replace("/^ALTER TABLE (.*) ADD CONSTRAINT.*/",'${1}',$SQL);
+      $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES (.*) \(.*/",'${1}',$SQL);
+      if ($TableFk == $SQL) { $TableFk = $Table; }
+      /* If I don't know the primary or foreign table... */
+      if (empty($Schema['TABLE'][$Table]) && empty($Schema['TABLE'][$TableFk]))
+	{
+	continue;
+	}
+      /* If it is already set correctly, then skip it. */
+      if ($Schema['CONSTRAINT'][$Name] == $SQL) { continue; }
+      $SQL = "ALTER TABLE $Table DROP CONSTRAINT \"$Name\";";
+      if ($Debug) { print "$SQL\n"; }
+      else { $DB->Action($SQL); }
+      }
+
+    /************************************/
+    /* Add constraints (dependent on columns and views) */
+    /************************************/
+    if (!empty($Schema['CONSTRAINT']))
+    foreach($Schema['CONSTRAINT'] as $Name => $SQL)
+      {
+      if (empty($Name)) { continue; }
+      if ($Curr['CONSTRAINT'][$Name] == $SQL) { continue; }
+      if ($Debug) { print "$SQL\n"; }
+      else { $DB->Action($SQL); }
+      }
+
+    /************************************/
+    /* CREATE FUNCTIONS */
+    /************************************/
+    $this->MakeFunctions($Debug);
+
+    /************************************/
+    /* MIGRATE DATA */
+    /************************************/
+    $this->MigrateSchema();
+
+    /************************************/
+    /* Delete views */
+    /************************************/
+    /* Get current tables and columns used by all views */
+    /* Delete if: uses table I know and column I do not know. */
+    /* Without this delete, we won't be able to drop columns. */
+    $SQL = "SELECT view_name,table_name,column_name
+	FROM information_schema.view_column_usage
+	WHERE table_catalog='fossology'
+	ORDER BY view_name,table_name,column_name;";
+    $Results = $DB->Action($SQL);
+    for($i=0; !empty($Results[$i]['view_name']); $i++)
+      {
+      $View = $Results[$i]['view_name'];
+      $Table = $Results[$i]['table_name'];
+      if (empty($Schema['TABLE'][$Table])) { continue; }
+      $Column = $Results[$i]['column_name'];
+      if (empty($Schema['TABLE'][$Table][$Column]))
+	{
+	$SQL = "DROP VIEW $View;";
+        if ($Debug) { print "$SQL\n"; }
+        else { $DB->Action($SQL); }
+	}
+      }
+
+    /************************************/
+    /* Delete columns/tables */
+    /************************************/
+    if (!empty($Curr['TABLE']))
+    foreach($Curr['TABLE'] as $Table => $Columns)
+      {
+      if (empty($Table)) { continue; }
+      /* only delete from tables I know */
+      if (empty($Schema['TABLE'][$Table])) { continue; }
+      foreach($Columns as $Column => $Val)
+	{
+        if (empty($Column)) { continue; }
+	if (empty($Schema['TABLE'][$Table][$Column]))
+	  {
+	  $SQL = "ALTER TABLE $Table DROP COLUMN $Column;";
+	  if ($Debug) { print "$SQL\n"; }
+	  else { $DB->Action($SQL); }
+	  }
+	}
+      }
+
+    /************************************/
+    /* Delete sequences */
+    /* DO NOT DELETE: cannot map to tables I use. */
+    /************************************/
+
+    if ($Debug) { print "</pre>"; }
     } // ApplySchema()
 
   /***********************************************************
@@ -760,7 +1062,7 @@ if (0)
 	$Init = GetParm('Apply',PARM_INTEGER);
 	if ($Init == 1)
 	  {
-	  $rc = $this->ApplySchema($Filename);
+	  $rc = $this->ApplySchema($Filename,1);
 	  if (!empty($rc))
 	    {
 	    $V .= PopupAlert($rc);
@@ -775,7 +1077,7 @@ if (0)
 
 	$V .= "<P/>\n";
 	$V .= "<input type='checkbox' value='1' name='View'>Check to view the current schema. (The output generation is harmless, but extremely technical.)<br>\n";
-	$V .= "<input type='checkbox' value='1' name='Export'>(TBD) Check to export the current schema.<br>\n";
+	$V .= "<input type='checkbox' value='1' name='Export'>Check to export the current schema.<br>\n";
 	$V .= "<input type='checkbox' value='1' name='Apply'>(TBD) Check to apply the last exported schema.\n";
 	$V .= "<P/>\n";
 	$V .= "<input type='submit' value='Go!'>";
