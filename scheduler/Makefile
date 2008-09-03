@@ -20,7 +20,7 @@ DEFFILE=default/fossology
 all: fossology-scheduler mkschedconf defconf/init.d/fossology
 
 fossology-scheduler: $(OBJ) $(REPOOBJ) $(VARS)
-	$(CC) $(OBJ) $(REPOOBJ) $(FODEF) $(CFLAGS_DB) $(CFLAGS_REPO) \
+	$(CC) $(OBJ) $(REPOOBJ) $(CFLAGS_DB) $(CFLAGS_REPO) \
 	-lpq $(ALL_CFLAGS) -o $@
 
 mkschedconf: mkschedconf.c $(REPO) $(VARS)
@@ -32,7 +32,7 @@ defconf/init.d/fossology: defconf/init.d/fossology-process
 
 # targets for our needed objects
 $(OBJ): %.o: %.c %.h $(DB) $(VARS)
-	$(CC) -c $< $(CONFDEF) $(CFLAGS_DBO) $(ALL_CFLAGS)
+	$(CC) -c $< $(CONFDEF) $(FODEF) $(CFLAGS_DBO) $(ALL_CFLAGS)
 
 $(REPOOBJ): %.o: %.c %.h $(DB) $(REPO) $(VARS)
 	$(CC) -c $< $(CONFDEF) $(CFLAGS_REPOO) $(CFLAGS_DBO) $(ALL_CFLAGS)
