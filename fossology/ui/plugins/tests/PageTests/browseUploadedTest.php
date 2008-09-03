@@ -46,14 +46,7 @@ class browseUPloadedTest extends fossologyTestCase
      */
     global $URL;
 
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $this->mybrowser = $browser;
-    $cookie = $this->repoLogin($this->mybrowser);
-    $this->host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login($this->mybrowser);
   }
 
   function testBrowseUploaded()
@@ -68,7 +61,7 @@ class browseUPloadedTest extends fossologyTestCase
                       "FAIL! Could not find Browse menu\n");
 
     /* select simpltest upload */
-    $link = $this->getNextLink("/href='((.*?)&show=detail).*?$name/",$page);
+    $link = $this->mybrowser->clickLink('simpletest_1.0.1.tar.gz');
     $upLink = $this->makeUrl($this->host, $link);
     $page = $this->mybrowser->get($upLink);
     //print "************ Page after upload link *************\n$page\n";
@@ -84,7 +77,7 @@ class browseUPloadedTest extends fossologyTestCase
                       "FAIL! >Download< not found\n");
 
     /* Select 'simpletest_1.0.1.tar.gz' */
-    $link = $this->getNextLink("/ class=.*?href='(.*?)'>$name/", $page);
+    $link = $this->mybrowser->clickLink('simpletest_1.0.1.tar.gz');
     $compressedLink = $this->makeUrl($this->host, $link);
     $page = $this->mybrowser->get($compressedLink);
     $this->assertTrue($this->myassertText($page, "/simpletest\//"));
@@ -97,7 +90,7 @@ class browseUPloadedTest extends fossologyTestCase
 
     /* Select simpltest link */
     $name = 'simpletest';
-    $link = $this->getNextLink("/ class=.*?href='(.*?)'>$name/", $page);
+    $link = $this->mybrowser->clickLink('simpletest');
     $simpleLink = $this->makeUrl($this->host, $link);
     $page = $this->mybrowser->get($simpleLink);
     $this->assertTrue($this->myassertText($page, "/HELP_MY_TESTS_DONT_WORK_ANYMORE/"));
@@ -111,7 +104,7 @@ class browseUPloadedTest extends fossologyTestCase
                       "FAIL! >Download< not found\n");
 
     /* Select the License link to View License Historgram */
-    $link = $this->getNextLink("/href='((.*?mod=license).*?)'.*?License</", $page);
+    $link = $this->mybrowser->clickLink('License');
     $tblLink = $this->makeUrl($this->host, $link);
     $page = $this->mybrowser->get($tblLink);
     $this->assertTrue($this->myassertText($page, '/License Browser/'),
@@ -120,9 +113,9 @@ class browseUPloadedTest extends fossologyTestCase
                       "FAIL! Total Licenses does not equal 3\n");
     //print "************ Should be a License Browser page *************\n$page\n";
     /* Select Show in the table */
-    $showLink = $this->getNextLink("/href='((.*?mod=search_file_by_license).*?)'.*?Show/", $page);
+    $showLink = $this->mybrowser->clickLink('Show');
     /* view the license */
-    $licLink = $this->getNextLink("/href='((.*?mod=view-license).*?)'.*?LICENSE</", $page);
+    $licLink = $this->mybrowser->clickLink('LICENSE');
     $viewLink = $this->makeUrl($this->host, $licLink);
     $page = $this->mybrowser->get($viewLink);
     $this->assertTrue($this->myassertText($page, '/View License/'),

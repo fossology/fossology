@@ -49,14 +49,7 @@ class MoveFolderTest extends fossologyTestCase
     global $URL;
 
     //print "starting setUp DeleteFoldertest\n";
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $this->mybrowser = $browser;
-    $cookie = $this->repoLogin($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login($this->mybrowser);
     /* create a folder to move the folder to */
     $page = $this->mybrowser->get("$URL?mod=folder_create");
     $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));

@@ -40,13 +40,7 @@ class DupFolderTest extends fossologyTestCase
   {
     global $URL;
 
-    $this->mybrowser = & new SimpleBrowser();
-    $page = $this->mybrowser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($this->mybrowser));
-    $cookie = $this->repoLogin($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login($this->mybrowser);
   }
 
   function testCreateFolder()

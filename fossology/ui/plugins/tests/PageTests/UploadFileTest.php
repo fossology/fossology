@@ -27,11 +27,6 @@
  * Created on Aug 1, 2008
  */
 
- /*
-  * Yuk! This test is ugly! May Need A proxy for this test to work
-  * inside hp.
-  */
-
 require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
@@ -44,14 +39,7 @@ class UploadFileTest extends fossologyTestCase
    function setUP()
   {
     global $URL;
-
-    $this->mybrowser = & new SimpleBrowser();
-    $page = $this->mybrowser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($this->mybrowser));
-    $cookie = $this->repoLogin($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login();
   }
 
   function testUploadFile()
@@ -61,12 +49,12 @@ class UploadFileTest extends fossologyTestCase
     print "starting UploadFileTest\n";
 
     $loggedIn = $this->mybrowser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
-    $this->assertTrue($this->assertText($loggedIn, '/From File/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/From File/'));
 
     $page = $this->mybrowser->get("$URL?mod=upload_file");
-    $this->assertTrue($this->assertText($page, '/Upload a New File/'));
-    $this->assertTrue($this->assertText($page, '/Select the file to upload:/'));
+    $this->assertTrue($this->myassertText($page, '/Upload a New File/'));
+    $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
     /* select Testing folder, filename based on pid */
 
     $id = $this->getFolderId('Testing', $page);
@@ -80,7 +68,7 @@ class UploadFileTest extends fossologyTestCase
     /* we won't select any agents this time' */
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, '/Upload added to job queue/'));
+    $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
     //print "*********** Page after upload **************\n$page\n";
   }
 }
