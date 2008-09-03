@@ -40,9 +40,7 @@ class DupUploadTest extends fossologyTestCase
   function setUP()
   {
     global $URL;
-    $this->Login($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login();
   }
 
   function testUploadFile()
@@ -77,7 +75,7 @@ class DupUploadTest extends fossologyTestCase
       if($i == 1)
       {
         $this->assertFalse($this->myassertText($page, "/Upload added to job queue/"),
-              "FAIL! Duplicate Upload created!\nUpload added to job queue Was seen,\n");
+              "FAIL! A Duplicate Upload created!\nThe phrase 'Upload added to job queue' was seen\n");
       }
       else
       {
