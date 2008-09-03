@@ -46,71 +46,64 @@ class browseUPloadedTest extends fossologyTestCase
      */
     global $URL;
 
-    $this->Login($this->mybrowser);
+    $this->Login();
   }
 
   function testBrowseUploaded()
   {
     global $URL;
 
-    $name = 'simpletest_1\.0\.1\.tar\.gz';
-
     print "starting BrowseUploadedtest\n";
     $page = $this->mybrowser->get("$URL?mod=browse");
     $this->assertTrue($this->myassertText($page, '/Browse/'),
-                      "FAIL! Could not find Browse menu\n");
-
-    /* select simpltest upload */
-    $link = $this->mybrowser->clickLink('simpletest_1.0.1.tar.gz');
-    $upLink = $this->makeUrl($this->host, $link);
-    $page = $this->mybrowser->get($upLink);
-    //print "************ Page after upload link *************\n$page\n";
+                      "BrowseUploadedTest FAILED! Could not find Browse menu\n");
     $this->assertTrue($this->myassertText($page, "/Browse/"),
-                      "FAIL! Browse Title not found\n");
-    $this->assertTrue($this->myassertText($page, "/$name/"),
-                      "FAIL! did not find simpletest_1.0.1.tar.gz\n");
+                      "BrowseUploadedTest FAILED! Browse Title not found\n");
+    $this->assertTrue($this->myassertText($page, "|simpletest_1\.0\.1\.tar\.gz|"),
+                      "BrowseUploadedTest FAILED did not find string simpletest_1.0.1.tar.gz\n");
     $this->assertTrue($this->myassertText($page, "/>View</"),
-                      "FAIL! >View< not found\n");
+                      "BrowseUploadedTest FAILED! Do not see  >View< link\n");
     $this->assertTrue($this->myassertText($page, "/>Meta</"),
-                      "FAIL! >Meta< not found\n");
+                      "BrowseUploadedTest FAILED!FAIL!Do not see  >Meta< not found\n");
     $this->assertTrue($this->myassertText($page, "/>Download</"),
-                      "FAIL! >Download< not found\n");
+                      "BrowseUploadedTest FAILED!FAIL! Do not see >Download< not found\n");
 
     /* Select 'simpletest_1.0.1.tar.gz' */
-    $link = $this->mybrowser->clickLink('simpletest_1.0.1.tar.gz');
-    $compressedLink = $this->makeUrl($this->host, $link);
-    $page = $this->mybrowser->get($compressedLink);
-    $this->assertTrue($this->myassertText($page, "/simpletest\//"));
+    $page = $this->mybrowser->clickLink('simpletest_1.0.1.tar.gz');
+    //print "*** Page after click simpletest_1.0.1.tar.gz\n$page\n";
+    $this->assertTrue($this->myassertText($page, "/simpletest\//"),
+                      "BrowseUploadedTest FAILED! simpletest link not found\n)");
+    /*
+     * TODO: these asserts are bogus, they pass, when those strings are
+     * NOT on the page!  wait, sirius, is way messed up....
+     */
     $this->assertFalse($this->myassertText($page, "/>View</"),
-                      "FAIL! >View< was found\n");
+                      "BrowseUploadedTest FAILED! Do not see >View< link\n");
     $this->assertFalse($this->myassertText($page, "/>Meta</"),
-                      "FAIL! >Meta< was found\n");
+                      "BrowseUploadedTest FAILED! Do not see >Meta< link\n");
     $this->assertFalse($this->myassertText($page, "/>Download</"),
-                      "FAIL! >Download< was found\n");
+                      "BrowseUploadedTest FAILED! Do not see >Download< link\n");
 
     /* Select simpltest link */
-    $name = 'simpletest';
-    $link = $this->mybrowser->clickLink('simpletest');
-    $simpleLink = $this->makeUrl($this->host, $link);
-    $page = $this->mybrowser->get($simpleLink);
+
+    $page = $this->mybrowser->clickLink('simpletest');
+    print "*** Page after click simpletest\n$page\n";
     $this->assertTrue($this->myassertText($page, "/HELP_MY_TESTS_DONT_WORK_ANYMORE/"));
     $this->assertTrue($this->myassertText($page, "/$name/"),
-                      "FAIL! did not find simpletest_1.0.1.tar.gz\n");
+                      "BrowseUploadedTest FAILED! did not find simpletest_1.0.1.tar.gz\n");
     $this->assertTrue($this->myassertText($page, "/>View</"),
-                      "FAIL! >View< not found\n");
+                      "BrowseUploadedTest FAILED! Do not see >View< link\n");
     $this->assertTrue($this->myassertText($page, "/>Meta</"),
-                      "FAIL! >Meta< not found\n");
+                      "BrowseUploadedTest FAILED! Do not see >Meta< link\n");
     $this->assertTrue($this->myassertText($page, "/>Download</"),
-                      "FAIL! >Download< not found\n");
+                      "BrowseUploadedTest FAILED! Do not see >Download< link\n");
 
     /* Select the License link to View License Historgram */
-    $link = $this->mybrowser->clickLink('License');
-    $tblLink = $this->makeUrl($this->host, $link);
-    $page = $this->mybrowser->get($tblLink);
+    $page = $this->mybrowser->clickLink('License');
     $this->assertTrue($this->myassertText($page, '/License Browser/'),
-                      "FAIL! License Browser not found\n");
+                      "BrowseUploadedTest FAILED!FAIL! License Browser not found\n");
     $this->assertTrue($this->myassertText($page, '/Total licenses: 3/'),
-                      "FAIL! Total Licenses does not equal 3\n");
+                      "BrowseUploadedTest FAILED!FAIL! Total Licenses does not equal 3\n");
     //print "************ Should be a License Browser page *************\n$page\n";
     /* Select Show in the table */
     $showLink = $this->mybrowser->clickLink('Show');
@@ -119,10 +112,10 @@ class browseUPloadedTest extends fossologyTestCase
     $viewLink = $this->makeUrl($this->host, $licLink);
     $page = $this->mybrowser->get($viewLink);
     $this->assertTrue($this->myassertText($page, '/View License/'),
-                          "FAIL! View License not found\n");
+                          "BrowseUploadedTest FAILED!FAIL! View License not found\n");
     $licenseResult = $this->mybrowser->getContentAsText($viewLink);
     $this->assertTrue($this->myassertText($licenseResult, '/100% view LGPL v2\.1/'),
-                      "FAIL! Did not find '100% view LGPL v2.1'\n   In the License Table for simpletest\n");
+                      "BrowseUploadedTest FAILED!FAIL! Did not find '100% view LGPL v2.1'\n   In the License Table for simpletest\n");
 
     //print "************ page after Browse $nlink *************\n$page\n";
   }

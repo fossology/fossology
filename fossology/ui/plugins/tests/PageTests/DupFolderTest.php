@@ -40,7 +40,7 @@ class DupFolderTest extends fossologyTestCase
   {
     global $URL;
 
-    $this->Login($this->mybrowser);
+    $this->Login();
   }
 
   function testCreateFolder()
