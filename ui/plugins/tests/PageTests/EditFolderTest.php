@@ -43,14 +43,7 @@ class EditFolderTest extends fossologyTestCase
   {
     global $URL;
 
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $this->mybrowser = $browser;
-    $cookie = $this->repoLogin($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login($this->mybrowser);
     /* create a folder, which is edited below */
     $page = $this->mybrowser->get("$URL?mod=folder_create");
     $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
@@ -72,13 +65,6 @@ class EditFolderTest extends fossologyTestCase
     global $URL;
 
     print "starting EditFoldertest\n";
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
 
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'),

@@ -45,14 +45,7 @@ class DeleteFolderTest extends fossologyTestCase
     global $URL;
 
     //print "starting setUp DeleteFoldertest\n";
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $this->mybrowser = $browser;
-    $cookie = $this->repoLogin($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login($this->mybrowser);
     /* create a folder, which get's deleted below */
     $page = $this->mybrowser->get("$URL?mod=folder_create");
     $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
@@ -74,13 +67,6 @@ class DeleteFolderTest extends fossologyTestCase
     global $URL;
 
     print "starting DeleteFoldertest\n";
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
 
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'),
@@ -101,7 +87,7 @@ class DeleteFolderTest extends fossologyTestCase
     /* go to sleep for 30 seconds to see if the folder get's deleted */
     sleep(30);
     $page = $this->mybrowser->get("$URL?mod=browse");
-    $this->assertFalse($this->assertText($page, '/DeleteMe/'),
+    $this->assertFalse($this->myassertText($page, '/DeleteMe/'),
                        "NOTE: Folder DeleteMe still exists after 30 seconds");
     //print "************ page after Folder Delete! *************\n$page\n";
   }

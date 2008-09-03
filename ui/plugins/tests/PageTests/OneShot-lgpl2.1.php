@@ -33,6 +33,8 @@ global $URL;
 
 class OneShotgplv21Test extends fossologyTestCase
 {
+  public $mybrowser;
+
   function setUp()
   {
     /* check to see if the user and material exist*/
@@ -40,6 +42,7 @@ class OneShotgplv21Test extends fossologyTestCase
                       "FAILURE! .bashrc not found\n");
     $this->assertTrue(file_exists('/home/fosstester/ReadMe'),
                       "FAILURE! Readme in ~fosstester not found\n");
+    $this->Login($browser);
   }
 
   function testOneShotgplv21()
@@ -47,33 +50,24 @@ class OneShotgplv21Test extends fossologyTestCase
     global $URL;
 
     print "starting OneShotgplv21Test\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
-
-    $loggedIn = $browser->get($URL);
+    $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
                       "FAIL! Did not find Upload Menu\n");
     $this->assertTrue($this->myassertText($loggedIn, '/One-Shot License/'),
                       "FAIL! Did not find One-Shot License Menu\n");
 
-    $page = $browser->get("$URL?mod=agent_license_once");
+    $page = $this->mybrowser->get("$URL?mod=agent_license_once");
     $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
                       "FAIL! Did not find One-Shot License Analysis Title\n");
     $this->assertTrue($this->myassertText($page, '/The analysis is done in real-time/'),
                       "FAIL! Did not find real-time Text\n");
 
-    $this->assertTrue($browser->setField('licfile', '/home/fosstester/licenses/gplv2.1'));
+    $this->assertTrue($this->mybrowser->setField('licfile', '/home/fosstester/licenses/gplv2.1'));
     /* we won't select highlights' */
-    $this->assertTrue($browser->clickSubmit('Analyze!'),
+    $this->assertTrue($this->mybrowser->clickSubmit('Analyze!'),
                       "FAIL! Count not click Analyze button\n");
     /* Check for the correct analysis.... */
-    $page = $browser->getContent();
+    $page = $this->mybrowser->getContent();
     $this->assertTrue($this->myassertText($page, '/LGPL/'),
                       "FAIL! Did not identify LGPL as LGPL\n");
     $this->assertTrue($this->myassertText($page, '/v2\.1/'),

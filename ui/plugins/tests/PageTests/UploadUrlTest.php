@@ -43,35 +43,29 @@ class UploadUrlTest extends fossologyTestCase
     global $URL;
 
     print "starting UploadUrlTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
+    //$this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
+    $this->Login($browser);
 
-    $loggedIn = $browser->get($URL);
+    $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
     $this->assertTrue($this->myassertText($loggedIn, '/From URL/'));
-    $page = $browser->get("$URL?mod=upload_url");
+    $page = $this->mybrowser->get("$URL?mod=upload_url");
     $this->assertTrue($this->myassertText($page, '/Upload from URL/'));
     $this->assertTrue($this->myassertText($page, '/Enter the URL to the file:/'));
 
     /* select Testing folder, filename based on pid or session number */
 
     $FolderId = $this->getFolderId('Testing', $page);
-    $this->assertTrue($browser->setField('folder', $FolderId));
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $simpletest = 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz';
-    $this->assertTrue($browser->setField('geturl', $simpletest));
+    $this->assertTrue($this->mybrowser->setField('geturl', $simpletest));
     $desc = 'File uploaded by test UploadUrlTest';
-    $this->assertTrue($browser->setField('description', "$desc"));
+    $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     $pid = getmypid();
     $upload_name = 'TestUploadUrl-' . "$pid";
-    $this->assertTrue($browser->setField('name', $upload_name));
+    $this->assertTrue($this->mybrowser->setField('name', $upload_name));
     /* we won't select any agents this time' */
-    $page = $browser->clickSubmit('Upload!');
+    $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
     $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
 
