@@ -32,11 +32,6 @@
 require_once('TestEnvironment.php');
 require_once('fossologyTest.php');
 
-/**
- * @package fossologyTest
- * @subpackage fossologyTestCase
- */
-
  class fossologyTestCase extends fossologyTest
 {
   public $mybrowser;
