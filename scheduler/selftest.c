@@ -40,7 +40,7 @@
 int	SelfTest	()
 {
   FILE *Fin, *FData, *FTest;
-  char SelfTest[] = "echo 'test' | " BINDIR "/selftest -g -s"; /* -g for generate test data */
+  char SelfTest[] = "echo 'test' | " AGENTDIR "/selftest -g -s"; /* -g for generate test data */
   char MkConfig[] = BINDIR "/mkconfig -L 2>&1 | grep agent | sed 's/.*agent=\\(\\w*\\).*/\\1/' | sort -u"; /* get list of agents */
   int c,i;
   int Thread;

@@ -5,9 +5,10 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CONFDEF=-DBINDIR='"$(LIBEXECDIR)"' -DDEFAULTSETUP='"$(SYSCONFDIR)/fossology/scheduler.conf"'
-FODEF=-DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
-MSCDEF=-DDATADIR='"$(DATADIR)"' -DBINDIR='"$(LIBEXECDIR)"' -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"'
+DEF=-DBINDIR='"$(LIBEXECDIR)"' -DAGENTDIR='"$(AGENTDIR)"'
+CONFDEF=-DDEFAULTSETUP='"$(SYSCONFDIR)/fossology/scheduler.conf"'
+FODEF=$(DEF) -DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
+MSCDEF=$(DEF) -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"'
 
 # these objects need libfossdb
 OBJ=scheduler.o spawn.o sockets.o agents.o hosts.o debug.o dberror.o selftest.o

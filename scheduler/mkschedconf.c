@@ -71,7 +71,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
 
   /** wget **/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/wget_agent -d %s",BINDIR,PROJECTSTATEDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/wget_agent -d %s",AGENTDIR,PROJECTSTATEDIR);
   fprintf(Fout,"agent=wget %s| ",CmdHost);
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
@@ -87,7 +87,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
 
   /** filter license **/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/Filter_License",BINDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/Filter_License",AGENTDIR);
   for(i=0; i<NumCPU; i++)
     {
     fprintf(Fout,"agent=filter_license %s| ",CmdHost);
@@ -97,7 +97,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
 
   /** license analysis (uses bsam) ***/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/bsam-engine -L 20 -A 0 -B 60 -G 10 -M 10 -E -T license -O n -- - %s/License.bsam",BINDIR,PROJECTSTATEDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/bsam-engine -L 20 -A 0 -B 60 -G 10 -M 10 -E -T license -O n -- - %s/License.bsam",AGENTDIR,PROJECTSTATEDIR);
   for(i=0; i<NumCPU1; i++)
     {
     fprintf(Fout,"agent=license %s| ",CmdHost);
@@ -107,7 +107,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
 
   /** mimetype ***/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/mimetype",BINDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/mimetype",AGENTDIR);
   for(i=0; i<NumCPU; i++)
     {
     fprintf(Fout,"agent=mimetype %s| ",CmdHost);
@@ -117,42 +117,42 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
 
   /** specagent (it's fast, so only allocate one) ***/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/specagent",BINDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/specagent",AGENTDIR);
   fprintf(Fout,"agent=specagent %s| ",CmdHost);
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
 
   /** filter clean ***/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/filter_clean -s",BINDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/filter_clean -s",AGENTDIR);
   fprintf(Fout,"agent=filter_clean %s| ",CmdHost);
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
 
   /** delagent -- host-less **/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/delagent -s",BINDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/delagent -s",AGENTDIR);
   fprintf(Fout,"agent=delagent %s| ",CmdHost);
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
 
   /** sqlagent -- host-less **/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/sqlagent",BINDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/sqlagent",AGENTDIR);
   fprintf(Fout,"agent=sqlagent %s| ",CmdHost);
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
 
   /** sqlagent -- host-specific **/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/sqlagent -a sql",BINDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/sqlagent -a sql",AGENTDIR);
   fprintf(Fout,"agent=sqlagenthost %s| ",CmdHost);
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
 
   /** pkgmetagetta **/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/pkgmetagetta",BINDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/pkgmetagetta",AGENTDIR);
   for(i=0; i<NumCPU; i++)
     {
     fprintf(Fout,"agent=pkgmetagetta %s| ",CmdHost);
@@ -164,7 +164,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
   fprintf(Fout,"agent=fosscp_agent %s| ",CmdHost);
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,Rcmd,"%s/engine-shell fosscp_agent '%s/fosscp_agent'");
-  fprintf(Fout,Cmd,BINDIR,BINDIR);
+  fprintf(Fout,Cmd,AGENTDIR,AGENTDIR);
   fprintf(Fout,"\n");
 
   /* all done */
