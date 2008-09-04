@@ -24,9 +24,6 @@
  *
  * Only put methods in here that more than one fossologyTestCase use.
  *
- * @package FOSSology_Test
- * @subpackage fossologyTest
- *
  * @version "$Id$"
  *
  * Created on Sept. 1, 2008
