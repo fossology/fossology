@@ -21,6 +21,9 @@
  * Base Class for all fossology tests.  All fossology tests should
  * extend this class.
  *
+ * @package FOSSology_Test
+ * @subpackage fossologyTestCase
+ *
  * @version "$Id$"
  *
  * Created on Sep 1, 2008
@@ -28,6 +31,11 @@
 
 require_once('TestEnvironment.php');
 require_once('fossologyTest.php');
+
+/**
+ * @package fossologyTest
+ * @subpackage fossologyTestCase
+ */
 
  class fossologyTestCase extends fossologyTest
 {

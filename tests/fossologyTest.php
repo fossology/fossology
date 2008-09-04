@@ -41,6 +41,10 @@ global $URL;
 global $USER;
 global $PASSWORD;
 
+/**
+ * @package fossologyTest
+ */
+
 class fossologyTest extends WebTestCase
 {
   public $mybrowser;
