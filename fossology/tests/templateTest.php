@@ -31,7 +31,7 @@
 /* every test must use these includes, adjust the paths based on where the
  * tests are in the source tree.
  */
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 /* Globals for test use, most tests need $URL, only login needs the others */
@@ -42,7 +42,7 @@ global $PASSWORD;
 /* The class name should end in Test */
 
 /* NOTE: You MUST remove the abstract or the test will not get run */
-abstract class someTest extends fossologyWebTestCase
+abstract class someTest extends fossologyTestCase
 {
   public $mybrowser;          // must have
   public $someOtherVariable;
