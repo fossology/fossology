@@ -24,14 +24,18 @@
  *
  * Only put methods in here that more than one fossologyTestCase use.
  *
- * @package fossologyTest
+ * @package FOSSology_Test
+ * @subpackage fossologyTest
  *
  * @version "$Id$"
  *
  * Created on Sept. 1, 2008
  */
-
+/**#@+
+ * include test files
+ */
 require_once ('TestEnvironment.php');
+/**#@-*/
 
 global $URL;
 global $USER;

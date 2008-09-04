@@ -87,8 +87,8 @@ require_once('fossologyTest.php');
    */
   public function createFolder($parent, $name, $description = null)
   {
-    print "createFolder is running\n";
-    print "createFolder:Parameters: P:$parent N:$name D:$description\n";
+    //print "createFolder is running\n";
+    //print "createFolder:Parameters: P:$parent N:$name D:$description\n";
 
     /* Need to check parameters */
     if (is_null($description)) // set default if null

@@ -62,6 +62,15 @@ class myFirstTest extends fossologyTestCase
     $page = $this->mybrowser->clickLink('Create');
     $this->testFolder = 'Sample-Folder';
     $this->createFolder('Testing', $this->testFolder, null);
+    /* normally one should verify that the folder was created.  You could
+     * see if it was in the Software Repository listing, you could find
+     * it's folder_pk in the page and verify that by looking in the
+     * db... for this sample, the tear down method will also serve as a
+     * verify method.  If teardown fails, because it can't find the
+     * folder, then we know that the folder create failed.  Additionally
+     * the createFolder routine verifies it saw the folder created
+     * message... so for this example, I skipped it.
+     */
   }
   /* use the tearDown method to clean up after a test.  This method like
    * setUp will run after every test.
@@ -70,7 +79,7 @@ class myFirstTest extends fossologyTestCase
    function tearDown()
    {
     global $URL;
-    print "in tearDown\n";
+    print "mytest: in tearDown\n";
     $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
     $this->assertTrue($this->myassertText($page, '/Delete Folder/'));
     $FolderId = $this->getFolderId($this->testFolder, $page);
