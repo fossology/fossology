@@ -19,10 +19,6 @@
 /**
  * Template to use for a simpletest test
  *
- * @param
- *
- * @return
- *
  * @version "$Id: templateTest.php 1210 2008-08-27 19:50:04Z rrando $"
  *
  * Created on Aug 1, 2008
@@ -35,8 +31,6 @@ require_once ('TestEnvironment.php');
 require_once ('fossologyTestCase.php');
 
 global $URL;
-
-/* The class name should end in Test */
 
 class myFirstTest extends fossologyTestCase
 {
@@ -53,7 +47,6 @@ class myFirstTest extends fossologyTestCase
    */
   function setUp()
   {
-    print "setUP myFirstTest\n";
     $this->Login();
   }
 /* all runnable test names (methods/functions) must start with 'test' */
@@ -62,22 +55,30 @@ class myFirstTest extends fossologyTestCase
     global $URL;
     print "starting testmytest\n";
     $page = $this->mybrowser->get($URL);
-    //print "page after get is:\n$page\n";
     $page = $this->mybrowser->clickLink('Browse');
     //print "page after Browse is:\n$page\n";
     $this->assertTrue($this->myassertText($page,'/Folder Navigation/'),
-                      "FAIL! There is no Folder Navigation Title\n");
+                      "testmyTest FAILED! There is no Folder Navigation Title\n");
     $page = $this->mybrowser->clickLink('Create');
-    $this->createFolder('Testing', 'New', "New Scheme");
-    print "mytest: After createFolder\n";
+    $this->testFolder = 'Sample-Folder';
+    $this->createFolder('Testing', $this->testFolder, null);
   }
   /* use the tearDown method to clean up after a test.  This method like
    * setUp will run after every test.
+   */
 
    function tearDown()
    {
-     return(TRUE);
+    global $URL;
+    print "in tearDown\n";
+    $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
+    $this->assertTrue($this->myassertText($page, '/Delete Folder/'));
+    $FolderId = $this->getFolderId($this->testFolder, $page);
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
+    $page = $this->mybrowser->clickSubmit('Delete!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->testFolder/"),
+                      "FolderTest tearDown FAILED! Deletion of $this->testFolder not found\n");
    }
-   */
 }
 ?>

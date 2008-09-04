@@ -29,13 +29,14 @@
 
 $path = '/usr/local/simpletest' . PATH_SEPARATOR;
 set_include_path(get_include_path() . PATH_SEPARATOR . $path);
+if (!defined('SIMPLE_TEST'))
+  define('SIMPLE_TEST', '/usr/local/simpletest/');
 
 /* simpletest includes */
-require_once '/usr/local/simpletest/unit_tester.php';
-require_once '/usr/local/simpletest/web_tester.php';
-require_once '/usr/local/simpletest/reporter.php';
+require_once SIMPLE_TEST . 'unit_tester.php';
+require_once SIMPLE_TEST . 'reporter.php';
+require_once SIMPLE_TEST . 'web_tester.php';
 
-require_once ('fossologyWebTestCase.php');
 require_once ('TestEnvironment.php');
 
 /* replace the TestSuite string with one that describes what the test suite is */
@@ -45,7 +46,7 @@ $test = & new TestSuite("Run Fossology tests");
  * Just keep adding more $test->addTestFile(sometest) lines to this
  * file for each new test.
  */
-$test->addTestFile('mytest');
+$test->addTestFile('atest');
 /*
  * leave the code below alone, it allows the tests to be run either by
  * the cli or in a web browser

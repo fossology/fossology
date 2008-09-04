@@ -196,7 +196,7 @@ class fossologyTest extends WebTestCase
   private function _repoDBlogin($browser = NULL)
   {
 
-    print "repoLogin is running\n";
+    //print "repoLogin is running\n";
     if (is_null($browser))
     {
       print "_repoDBlogin setting browser\n";
@@ -210,21 +210,21 @@ class fossologyTest extends WebTestCase
     $cookieValue = NULL;
 
     $host = $this->getHost($URL);
-    $this->assertTrue(is_object($browser));
-    $browser->useCookies();
-    $cookieValue = $browser->getCookieValue($host, '/', 'Login');
+    $this->assertTrue(is_object($this->mybrowser));
+    $this->mybrowser->useCookies();
+    $cookieValue = $this->mybrowser->getCookieValue($host, '/', 'Login');
     // need to check $cookieValue for validity
-    $browser->setCookie('Login', $cookieValue, $host);
-    $this->assertTrue($browser->get("$URL?mod=auth&nopopup=1"));
-    $this->assertTrue($browser->setField('username', $USER));
-    $this->assertTrue($browser->setField('password', $PASSWORD));
-    $this->assertTrue($browser->isSubmit('Login'));
-    $this->assertTrue($browser->clickSubmit('Login'));
-    $page = $browser->getContent();
+    $this->mybrowser->setCookie('Login', $cookieValue, $host);
+    $this->assertTrue($this->mybrowser->get("$URL?mod=auth&nopopup=1"));
+    $this->assertTrue($this->mybrowser->setField('username', $USER));
+    $this->assertTrue($this->mybrowser->setField('password', $PASSWORD));
+    $this->assertTrue($this->mybrowser->isSubmit('Login'));
+    $this->assertTrue($this->mybrowser->clickSubmit('Login'));
+    $page = $this->mybrowser->getContent();
     preg_match('/User Logged In/', $page, $matches);
     $this->assertTrue($matches, "Login PASSED");
-    $browser->setCookie('Login', $cookieValue, $host);
-    $page = $browser->getContent();
+    $this->mybrowser->setCookie('Login', $cookieValue, $host);
+    $page = $this->mybrowser->getContent();
     $NumMatches = preg_match('/User Logged Out/', $page, $matches);
     $this->assertFalse($NumMatches, "User Logged out!, Login Failed! %s");
     return ($cookieValue);
