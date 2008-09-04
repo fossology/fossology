@@ -31,7 +31,7 @@ require_once '/usr/local/simpletest/reporter.php';
 require_once ('../../../../tests/TestEnvironment.php');
 
 $test = &new TestSuite('Fossology Repo UI Page Functional tests');
-/*
+
 $test->addTestFile('UploadFileTest.php');
 $test->addTestFile('UploadUrlTest.php');
 $test->addTestFile('UploadSrvTest.php');
@@ -43,7 +43,6 @@ $test->addTestFile('EditFolderTest.php');
 $test->addTestFile('editFolderNameOnlyTest.php');
 $test->addTestFile('editFolderDescriptionOnlyTest.php');
 $test->addTestFile('MoveFolderTest.php');
-*/
 $test->addTestFile('browseUploadedTest.php');
 $test->addTestFile('DupFolderTest.php');
 $test->addTestFile('DupUploadTest.php');
