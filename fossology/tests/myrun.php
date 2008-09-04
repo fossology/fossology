@@ -37,16 +37,10 @@ require_once SIMPLE_TEST . 'unit_tester.php';
 require_once SIMPLE_TEST . 'reporter.php';
 require_once SIMPLE_TEST . 'web_tester.php';
 
-/* simpletest includes */
-require_once '/usr/local/simpletest/unit_tester.php';
-require_once '/usr/local/simpletest/web_tester.php';
-require_once '/usr/local/simpletest/reporter.php';
-
 require_once ('TestEnvironment.php');
 
 $test = & new TestSuite("Sample Fossology test");
 $test->addTestFile('mytest.php');
-
 /*
  * leave the code below alone, it allows the tests to be run either by
  * the cli or in a web browser

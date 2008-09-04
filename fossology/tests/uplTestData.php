@@ -43,7 +43,7 @@ require_once ('TestEnvironment.php');
 
 global $URL;
 
-class uploadTestDataTest extends fossologyWebTestCase
+class uploadTestDataTest extends fossologyTestCase
 {
   public $mybrowser;
 
