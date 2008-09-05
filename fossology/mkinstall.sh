@@ -474,6 +474,9 @@ if [ "\$CONFIGOK" != "1" ] ; then
   exit
 fi
 
+chgrp fossy "\${AGENTDATADIR}"
+chmod g+w "\${AGENTDATADIR}"
+
 ## Initialize the tables
 /usr/local/bin/fossinit.php -v
 
