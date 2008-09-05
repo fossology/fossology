@@ -779,96 +779,6 @@
   $Schema["SEQUENCE"]["report_cache_report_cache_pk_seq"] = "CREATE SEQUENCE \"report_cache_report_cache_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["report_cache_user_report_cache_user_pk_seq"] = "CREATE SEQUENCE \"report_cache_user_report_cache_user_pk_seq\" START 1;";
 
-  $Schema["INDEX"]["agent"]["agent_pkey"] = "CREATE UNIQUE INDEX agent_pkey ON agent USING btree (agent_pk);";
-  $Schema["INDEX"]["agent"]["agent_unique_name_rev"] = "CREATE UNIQUE INDEX agent_unique_name_rev ON agent USING btree (agent_name, agent_rev);";
-
-  $Schema["INDEX"]["agent_lic_meta"]["No duplicates"] = "CREATE UNIQUE INDEX \"No duplicates\" ON agent_lic_meta USING btree (pfile_fk, tok_pfile, tok_match, version, tok_pfile_start, tok_pfile_end, tok_license_start, tok_license_end, tok_license, lic_fk);";
-  $Schema["INDEX"]["agent_lic_meta"]["agent_lic_meta_pkey"] = "CREATE UNIQUE INDEX agent_lic_meta_pkey ON agent_lic_meta USING btree (agent_lic_meta_pk);";
-  $Schema["INDEX"]["agent_lic_meta"]["lic_fk_btree"] = "CREATE INDEX lic_fk_btree ON agent_lic_meta USING btree (lic_fk);";
-  $Schema["INDEX"]["agent_lic_meta"]["pfile_fk_idx"] = "CREATE INDEX pfile_fk_idx ON agent_lic_meta USING btree (pfile_fk);";
-
-  $Schema["INDEX"]["agent_lic_phrases"]["agent_lic_phrases_phrase_group_key"] = "CREATE UNIQUE INDEX agent_lic_phrases_phrase_group_key ON agent_lic_phrases USING btree (phrase_group, phrase_match);";
-  $Schema["INDEX"]["agent_lic_phrases"]["phrases_unique"] = "CREATE UNIQUE INDEX phrases_unique ON agent_lic_phrases USING btree (phrase_group, phrase_match);";
-
-  $Schema["INDEX"]["agent_lic_raw"]["One unique per software version"] = "CREATE UNIQUE INDEX \"One unique per software version\" ON agent_lic_raw USING btree (lic_unique, lic_version);";
-  $Schema["INDEX"]["agent_lic_raw"]["lic_pk"] = "CREATE UNIQUE INDEX lic_pk ON agent_lic_raw USING btree (lic_pk);";
-
-  $Schema["INDEX"]["agent_lic_status"]["agent_lic_status_pfile_fk_key"] = "CREATE UNIQUE INDEX agent_lic_status_pfile_fk_key ON agent_lic_status USING btree (pfile_fk);";
-  $Schema["INDEX"]["agent_lic_status"]["inrepository_idx"] = "CREATE INDEX inrepository_idx ON agent_lic_status USING btree (inrepository);";
-  $Schema["INDEX"]["agent_lic_status"]["processed_idx"] = "CREATE INDEX processed_idx ON agent_lic_status USING btree (processed);";
-
-  $Schema["INDEX"]["agent_wc"]["agent_wc_pfile_fk_key"] = "CREATE UNIQUE INDEX agent_wc_pfile_fk_key ON agent_wc USING btree (pfile_fk);";
-
-  $Schema["INDEX"]["attrib"]["attrib_key_fk_idx"] = "CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk);";
-  $Schema["INDEX"]["attrib"]["attrib_pfile_fk_idx"] = "CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk);";
-  $Schema["INDEX"]["attrib"]["attrib_pkey"] = "CREATE UNIQUE INDEX attrib_pkey ON attrib USING btree (attrib_pk);";
-
-  $Schema["INDEX"]["folder"]["folder_pkey"] = "CREATE UNIQUE INDEX folder_pkey ON folder USING btree (folder_pk);";
-
-  $Schema["INDEX"]["foldercontents"]["foldercontents_pkey"] = "CREATE UNIQUE INDEX foldercontents_pkey ON foldercontents USING btree (foldercontents_pk);";
-
-  $Schema["INDEX"]["job"]["job_pkey"] = "CREATE UNIQUE INDEX job_pkey ON job USING btree (job_pk);";
-
-  $Schema["INDEX"]["jobqueue"]["jobqueue_pkey"] = "CREATE UNIQUE INDEX jobqueue_pkey ON jobqueue USING btree (jq_pk);";
-
-  $Schema["INDEX"]["key"]["key_pkey"] = "CREATE UNIQUE INDEX key_pkey ON \"key\" USING btree (key_pk);";
-  $Schema["INDEX"]["key"]["name_parent"] = "CREATE UNIQUE INDEX name_parent ON \"key\" USING btree (key_name, key_parent_fk);";
-
-  $Schema["INDEX"]["licgroup"]["licgroup_licgroup_name_key"] = "CREATE UNIQUE INDEX licgroup_licgroup_name_key ON licgroup USING btree (licgroup_name);";
-  $Schema["INDEX"]["licgroup"]["licgroup_pkey"] = "CREATE UNIQUE INDEX licgroup_pkey ON licgroup USING btree (licgroup_pk);";
-
-  $Schema["INDEX"]["licgroup_grps"]["licgroup_grps_pkey"] = "CREATE UNIQUE INDEX licgroup_grps_pkey ON licgroup_grps USING btree (licgroup_grps_pk);";
-
-  $Schema["INDEX"]["licgroup_lics"]["licgroup_lics_pkey"] = "CREATE UNIQUE INDEX licgroup_lics_pkey ON licgroup_lics USING btree (licgroup_lics_pk);";
-  $Schema["INDEX"]["licgroup_lics"]["only_one"] = "CREATE UNIQUE INDEX only_one ON licgroup_lics USING btree (licgroup_lics_pk, licgroup_fk);";
-
-  $Schema["INDEX"]["licterm"]["licterm_licterm_desc_key"] = "CREATE UNIQUE INDEX licterm_licterm_desc_key ON licterm USING btree (licterm_desc);";
-  $Schema["INDEX"]["licterm"]["licterm_licterm_name_key"] = "CREATE UNIQUE INDEX licterm_licterm_name_key ON licterm USING btree (licterm_name);";
-  $Schema["INDEX"]["licterm"]["licterm_pkey"] = "CREATE UNIQUE INDEX licterm_pkey ON licterm USING btree (licterm_pk);";
-
-  $Schema["INDEX"]["licterm_map"]["licterm_map_pkey"] = "CREATE UNIQUE INDEX licterm_map_pkey ON licterm_map USING btree (licterm_map_pk);";
-  $Schema["INDEX"]["licterm_map"]["only_one_licterm_map"] = "CREATE UNIQUE INDEX only_one_licterm_map ON licterm_map USING btree (licterm_fk, licterm_words_fk);";
-
-  $Schema["INDEX"]["licterm_maplic"]["licterm_maplic_pkey"] = "CREATE UNIQUE INDEX licterm_maplic_pkey ON licterm_maplic USING btree (licterm_maplic_pk);";
-  $Schema["INDEX"]["licterm_maplic"]["only_one_licterm_maplic"] = "CREATE UNIQUE INDEX only_one_licterm_maplic ON licterm_maplic USING btree (licterm_fk, lic_fk);";
-
-  $Schema["INDEX"]["licterm_name"]["licterm_name_pkey"] = "CREATE UNIQUE INDEX licterm_name_pkey ON licterm_name USING btree (licterm_name_pk);";
-  $Schema["INDEX"]["licterm_name"]["only_one_licterm_name"] = "CREATE UNIQUE INDEX only_one_licterm_name ON licterm_name USING btree (licterm_fk, agent_lic_meta_fk);";
-
-  $Schema["INDEX"]["licterm_words"]["licterm_words_licterm_words_text_key"] = "CREATE UNIQUE INDEX licterm_words_licterm_words_text_key ON licterm_words USING btree (licterm_words_text);";
-  $Schema["INDEX"]["licterm_words"]["licterm_words_pkey"] = "CREATE UNIQUE INDEX licterm_words_pkey ON licterm_words USING btree (licterm_words_pk);";
-
-  $Schema["INDEX"]["mimetype"]["dirmodemask"] = "CREATE UNIQUE INDEX dirmodemask ON mimetype USING btree (mimetype_name);";
-  $Schema["INDEX"]["mimetype"]["mimetype_pk"] = "CREATE UNIQUE INDEX mimetype_pk ON mimetype USING btree (mimetype_pk);";
-
-  $Schema["INDEX"]["pfile"]["md5_sha1_size"] = "CREATE UNIQUE INDEX md5_sha1_size ON pfile USING btree (pfile_md5, pfile_sha1, pfile_size);";
-  $Schema["INDEX"]["pfile"]["pfile_mimetypefk_idx"] = "CREATE INDEX pfile_mimetypefk_idx ON pfile USING btree (pfile_mimetypefk);";
-  $Schema["INDEX"]["pfile"]["pfile_pkey"] = "CREATE UNIQUE INDEX pfile_pkey ON pfile USING btree (pfile_pk);";
-
-  $Schema["INDEX"]["report_cache"]["report_cache_createdts"] = "CREATE INDEX report_cache_createdts ON report_cache USING btree (report_cache_tla);";
-  $Schema["INDEX"]["report_cache"]["report_cache_pkey"] = "CREATE UNIQUE INDEX report_cache_pkey ON report_cache USING btree (report_cache_pk);";
-  $Schema["INDEX"]["report_cache"]["report_cache_report_cache_key_key"] = "CREATE UNIQUE INDEX report_cache_report_cache_key_key ON report_cache USING btree (report_cache_key);";
-
-  $Schema["INDEX"]["report_cache_user"]["report_cache_user_pkey"] = "CREATE UNIQUE INDEX report_cache_user_pkey ON report_cache_user USING btree (report_cache_user_pk);";
-
-  $Schema["INDEX"]["scheduler_status"]["scheduler_status_pkey"] = "CREATE UNIQUE INDEX scheduler_status_pkey ON scheduler_status USING btree (unique_scheduler, agent_number);";
-
-  $Schema["INDEX"]["sqlagentproc"]["sqlagentproc_pkey"] = "CREATE UNIQUE INDEX sqlagentproc_pkey ON sqlagentproc USING btree (sap_pk);";
-
-  $Schema["INDEX"]["table_enum"]["table_enum_pkey"] = "CREATE UNIQUE INDEX table_enum_pkey ON table_enum USING btree (table_pk);";
-
-  $Schema["INDEX"]["upload"]["upload_pkey_idx"] = "CREATE UNIQUE INDEX upload_pkey_idx ON upload USING btree (upload_pk);";
-
-  $Schema["INDEX"]["uploadtree"]["lft_idx"] = "CREATE INDEX lft_idx ON uploadtree USING btree (lft);";
-  $Schema["INDEX"]["uploadtree"]["projtree_parent_idx"] = "CREATE INDEX projtree_parent_idx ON uploadtree USING btree (parent);";
-  $Schema["INDEX"]["uploadtree"]["projtree_projid_idx"] = "CREATE INDEX projtree_projid_idx ON uploadtree USING btree (upload_fk);";
-  $Schema["INDEX"]["uploadtree"]["ufile_rel_pkey"] = "CREATE UNIQUE INDEX ufile_rel_pkey ON uploadtree USING btree (uploadtree_pk);";
-  $Schema["INDEX"]["uploadtree"]["uploadtree_pfile_fk_idx"] = "CREATE INDEX uploadtree_pfile_fk_idx ON uploadtree USING btree (pfile_fk);";
-
-  $Schema["INDEX"]["users"]["user_pkey"] = "CREATE UNIQUE INDEX user_pkey ON users USING btree (user_pk);";
-  $Schema["INDEX"]["users"]["user_user_name_key"] = "CREATE UNIQUE INDEX user_user_name_key ON users USING btree (user_name);";
-
-
   $Schema["CONSTRAINT"]["No duplicates"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"No duplicates\" UNIQUE (\"pfile_fk\",\"tok_pfile\",\"tok_match\",\"version\",\"tok_pfile_start\",\"tok_pfile_end\",\"tok_license_start\",\"tok_license_end\",\"tok_license\",\"lic_fk\");";
   $Schema["CONSTRAINT"]["One unique per software version"] = "ALTER TABLE \"agent_lic_raw\" ADD CONSTRAINT \"One unique per software version\" UNIQUE (\"lic_unique\",\"lic_version\");";
   $Schema["CONSTRAINT"]["agent_lic_meta_pfile_fk_fkey"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"agent_lic_meta_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
@@ -936,5 +846,28 @@
   $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\");";
   $Schema["CONSTRAINT"]["user_pkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_pkey\" PRIMARY KEY (\"user_pk\");";
   $Schema["CONSTRAINT"]["user_user_name_key"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_user_name_key\" UNIQUE (\"user_name\");";
+
+  $Schema["INDEX"]["agent_lic_meta"]["lic_fk_btree"] = "CREATE INDEX lic_fk_btree ON agent_lic_meta USING btree (lic_fk);";
+  $Schema["INDEX"]["agent_lic_meta"]["pfile_fk_idx"] = "CREATE INDEX pfile_fk_idx ON agent_lic_meta USING btree (pfile_fk);";
+
+  $Schema["INDEX"]["agent_lic_phrases"]["phrases_unique"] = "CREATE UNIQUE INDEX phrases_unique ON agent_lic_phrases USING btree (phrase_group, phrase_match);";
+
+  $Schema["INDEX"]["agent_lic_raw"]["lic_pk"] = "CREATE UNIQUE INDEX lic_pk ON agent_lic_raw USING btree (lic_pk);";
+
+  $Schema["INDEX"]["agent_lic_status"]["inrepository_idx"] = "CREATE INDEX inrepository_idx ON agent_lic_status USING btree (inrepository);";
+  $Schema["INDEX"]["agent_lic_status"]["processed_idx"] = "CREATE INDEX processed_idx ON agent_lic_status USING btree (processed);";
+
+  $Schema["INDEX"]["attrib"]["attrib_key_fk_idx"] = "CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk);";
+  $Schema["INDEX"]["attrib"]["attrib_pfile_fk_idx"] = "CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk);";
+
+  $Schema["INDEX"]["pfile"]["pfile_mimetypefk_idx"] = "CREATE INDEX pfile_mimetypefk_idx ON pfile USING btree (pfile_mimetypefk);";
+
+  $Schema["INDEX"]["report_cache"]["report_cache_createdts"] = "CREATE INDEX report_cache_createdts ON report_cache USING btree (report_cache_tla);";
+
+  $Schema["INDEX"]["uploadtree"]["lft_idx"] = "CREATE INDEX lft_idx ON uploadtree USING btree (lft);";
+  $Schema["INDEX"]["uploadtree"]["projtree_parent_idx"] = "CREATE INDEX projtree_parent_idx ON uploadtree USING btree (parent);";
+  $Schema["INDEX"]["uploadtree"]["projtree_projid_idx"] = "CREATE INDEX projtree_projid_idx ON uploadtree USING btree (upload_fk);";
+  $Schema["INDEX"]["uploadtree"]["uploadtree_pfile_fk_idx"] = "CREATE INDEX uploadtree_pfile_fk_idx ON uploadtree USING btree (pfile_fk);";
+
 
 ?>
