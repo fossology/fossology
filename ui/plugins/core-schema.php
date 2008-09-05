@@ -954,6 +954,10 @@ LANGUAGE plpgsql;
 	if ($Debug) { print "$SQL\n"; }
 	else { $DB->Action($SQL); }
         if ($DB->Error) { exit(1); }
+	$SQL = "REINDEX INDEX \"$Name\";";
+	if ($Debug) { print "$SQL\n"; }
+	else { $DB->Action($SQL); }
+        if ($DB->Error) { exit(1); }
 	}
       }
 
