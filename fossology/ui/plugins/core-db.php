@@ -158,11 +158,14 @@ class db_access extends FO_Plugin
 
   /***********************************************************
    Execute(): Run a prepared SQL statement from Prepare().
+   NOTE: Statements are actually version specific.
    ***********************************************************/
   function Execute($Prep,$Command)
     {
+    global $SVN_REV;
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
+    $Prep .= "_$SVN_REV";
     if ($this->Debug)
 	{
 	/* When using pg_query(), you need to use pg_set_error_verbosity().
@@ -186,11 +189,14 @@ class db_access extends FO_Plugin
   /***********************************************************
    Prepare(): This prepares an SQL statement for execution.
    $Prep is the name of the prepared statement.
+   NOTE: Statements are actually version specific.
    ***********************************************************/
   function Prepare($Prep,$Command)
     {
+    global $SVN_REV;
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
+    $Prep .= "_$SVN_REV";
     if ($this->Debug)
 	{
 	/* When using pg_query(), you need to use pg_set_error_verbosity().
