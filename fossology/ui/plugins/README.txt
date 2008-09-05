@@ -2,8 +2,9 @@ Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
 Plugins have prefixes for maintenance convenience.
   "core-"  :: These are core plugins that are used by other plugins.
-             Core plugins do not generate any UI output.
+              Core plugins may not generate any UI output.
   "ui-"    :: These are dependent on each other and define the user interface.
+  "user-"  :: These manage user accounts.
   "agent-" :: These are not dependent on the UI and control agents.
   "jobs-"  :: These are not dependent on the UI and manage jobs.
   "admin-" :: These are not dependent on the UI and manage the system/db.

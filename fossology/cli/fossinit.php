@@ -65,19 +65,22 @@ if (array_key_exists('D',$Options))
   $DB->Debug=2;
   }
 
-
-/* Initialize the list of registered plugins */
-$FailFlag=0;
-for($p=0; !empty($Plugins[$p]); $p++)
+/* Initialize the system! */
+$Schema = &$Plugins[plugin_find_id("schema")];
+if (empty($Schema))
   {
-  $P = &$Plugins[$p];
-  if ($Verbose) { print "Initialize: " . $P->Name . "\n"; }
-  if ($P->Install() != 0)
-    {
-    $FailFlag = 1;
-    print "FAILED: " . $P->Name . " failed to install.\n";
-    }
+  print "FAILED: Unable to find the schema plugin.\n";
+  return(1);
   }
+
+global $WEBDIR;
+$Filename = "$WEBDIR/plugins/core-schema.dat";
+if (!file_exists($Filename))
+  {
+  print "FAILED: Schema data file ($Filename) not found.\n";
+  return(1);
+  }
+$FailFlag = $Schema->ApplySchema($Filename,0);
 
 /* Remove the "Need to initialize" flag */
 if (!$FailFlag)

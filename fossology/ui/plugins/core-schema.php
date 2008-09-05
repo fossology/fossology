@@ -35,232 +35,7 @@ class core_schema extends FO_Plugin
   var $MenuList    = "Admin::Database::Schema";
   var $LoginFlag   = 1; /* must be logged in to use this */
 
-  /******************************************
-   This plugin is used to configure the schema.
-   Only the 'Install()' function is used.
-   ******************************************/
-
-  /******************************************
-   Install(): Create and configure the schema.
-   ******************************************/
-  function Install()
-    {
-    global $DB;
-    if (empty($DB)) { return(1); } /* No DB */
-
-    /********************************************/
-    /* Sequences can get out of sequence due to the fossologyinit.sql code.
-       Fix the sequences! */
-    /********************************************/
-    /** SQL = all table + column + default value that use sequences **/
-    $SQL = "SELECT a.table_name AS table,
-	b.column_name AS column,
-	b.column_default AS value
-	FROM information_schema.tables AS a
-	INNER JOIN information_schema.columns AS b
-	  ON b.table_name = a.table_name
-	WHERE a.table_type = 'BASE TABLE'
-	AND a.table_schema = 'public'
-	AND b.column_default LIKE 'nextval(%)'
-	;";
-    $Tables = $DB->Action($SQL);
-    for($i=0; !empty($Tables[$i]['table']); $i++)
-	{
-	/* Reset each sequence to the max value in the column. */
-	$Seq = $Tables[$i]['value'];
-	$Seq = preg_replace("/.*'(.*)'.*/",'$1',$Seq);
-	$Table = $Tables[$i]['table'];
-	$Column = $Tables[$i]['column'];
-	$Results = $DB->Action("SELECT max($Column) AS max FROM $Table LIMIT 1;");
-	$Max = $Results[0]['max'];
-	if (empty($Max)) { $Max = 1; }
-	// print "Setting table($Table) column($Column) sequence($Seq) to $Max\n";
-	$DB->Action("SELECT setval('$Seq',$Max);");
-	}
-
-    /********************************************/
-    /* Modify the schema to match current needs */
-    /********************************************/
-
-    /* Delete folders needs to support nulls in the job_upload_fk */
-    $DB->Action("ALTER TABLE job
-		 ALTER COLUMN job_upload_fk DROP NOT NULL,
-		 ALTER COLUMN job_upload_fk SET DEFAULT NULL;");
-
-
-    /********************************************/
-    /* Have the scheduler initialize all agents */
-    /* This only works without SSH. */
-    /********************************************/
-    // global $AGENTDIR;
-    // print "Initializing the scheduler\n";
-    // system("$AGENTDIR/scheduler -i");
-    // print "Testing the scheduler\n";
-    // system("$AGENTDIR/scheduler -t");
-
-    /***************************  release 0.7.0  ********************************/
-
-    /*********************************************************************/
-    /* Add attrib table indexes.  These are heavily used by pkgmetagetta */
-    /*********************************************************************/
-    $DB->Action("CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk)");
-    $DB->Action("CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk)");
-
-    /***************************  after 0.7.0  ********************************/
-
-    /* The mimetype agent had a bug where some mimetypes contain
-       commas or are missing the meta format ("class/type").
-       This happens because magic() lies -- sometimes it returns
-       strings that are not in the meta format, even when the meta
-       format is specified.
-       Also, there was a typo "application/octet-string" should be
-       "application/octet-stream".
-       Check for these errors and fix these now.
-     */
-    $CheckMime = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name LIKE '%,%' OR mimetype_name NOT LIKE '%/%' OR mimetype_name = 'application/octet-string'";
-    $BadMime = $DB->Action($CheckMime);
-    if (count($BadMime) > 0)
-      {
-      /* Determine if ANY need to be fixed. */
-      $BadPfile = $DB->Action("SELECT COUNT(*) AS count FROM pfile WHERE pfile_mimetypefk IN ($CheckMime);");
-      print "Due to a previous bug (now fixed), " . number_format($BadPfile['count'],0,"",",") . " files are associated with " . number_format(count($BadMime),0,"",",") . " bad mimetypes.  Fixing now.\n";
-      $DB->Action("UPDATE pfile SET pfile_mimetypefk = NULL WHERE pfile_mimetypefk IN ($CheckMime);");
-      $DB->Action("DELETE FROM mimetype WHERE mimetype_name LIKE '%,%' OR mimetype_name NOT LIKE '%/%' OR mimetype_name = 'application/octet-string';");
-      // $DB->Action("VACUUM ANALYZE mimetype;");
-      /* Reset all mimetype analysis -- the ones that are done will be skipped.
-	 The ones that are not done will be re-done. */
-      if ($BadPfile['count'] > 0)
-	{
-	print "  Rescheduling all mimetype analysis jobs.\n";
-	print "  (The ones that are completed will be quickly closed with no additional work.\n";
-	print "  Only the files that need to be re-scanned will be re-scanned.)\n";
-	$DB->Action("UPDATE jobqueue SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0 WHERE jq_type = 'mimetype';");
-	}
-      }
-
-    /***************************  release 1.0  ********************************/
-    /* if pfile_fk or ufile_mode don't exist in table uploadtree 
-     * create them and populate them from ufile table    
-     * Drop the ufile columns */
-     if (!$DB->ColExist("upload", "pfile_fk"))
-     {
-	 $DB->Action("ALTER TABLE upload ADD COLUMN pfile_fk integer;");
-	 $DB->Action("UPDATE upload SET pfile_fk = ufile.pfile_fk FROM ufile WHERE upload.pfile_fk IS NULL AND upload.ufile_fk = ufile.ufile_pk;");
-     }
-
-     if (!$DB->ColExist("uploadtree", "pfile_fk"))
-     {
-	 $DB->Action("ALTER TABLE uploadtree ADD COLUMN pfile_fk integer");
-	 $DB->Action("UPDATE uploadtree SET pfile_fk = ufile.pfile_fk FROM ufile WHERE uploadtree.pfile_fk IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
-     }
-
-     /* Move ufile_mode and ufile_name from ufile table to uploadtree table */
-     if (!$DB->ColExist("uploadtree", "ufile_mode"))
-     {
-	 $DB->Action("ALTER TABLE uploadtree ADD COLUMN ufile_mode integer");
-	 $DB->Action("UPDATE uploadtree SET ufile_mode = ufile.ufile_mode FROM ufile WHERE uploadtree.ufile_mode IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
-     }
-     if (!$DB->ColExist("uploadtree", "ufile_name"))
-     {
-	 $DB->Action("ALTER TABLE uploadtree ADD COLUMN ufile_name text");
-	 $DB->Action("UPDATE uploadtree SET ufile_name = ufile.ufile_name FROM ufile WHERE uploadtree.ufile_name IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
-     }
-
-     if ($DB->ColExist("uploadtree", "lft"))
-     {
-       $DB->Action("ALTER TABLE uploadtree ADD COLUMN lft integer");
-       $DB->Action("CREATE INDEX lft_idx ON uploadtree USING btree (lft)");
-     }
-     if (!$DB->ColExist("uploadtree", "rgt"))
-     {
-       $DB->Action("ALTER TABLE uploadtree ADD COLUMN rgt integer");
-     }
-
-     $DB->Action("ALTER TABLE agent_lic_raw ADD COLUMN lic_tokens integer");
-     
-     /* Ignore errors if contraints already exist */
-     $DB->Action("ALTER TABLE agent_lic_raw ADD PRIMARY KEY (lic_pk)");
-
-
-     /************ Rebuild folder view ************/
-     $DB->Action("DROP VIEW folderlist;");
-     $DB->Action("CREATE VIEW folderlist AS
-	SELECT folder.folder_pk,
-	       folder.folder_name AS name,
-	       folder.folder_desc AS description,
-	       foldercontents.parent_fk AS parent,
-	       foldercontents.foldercontents_mode,
-	       NULL::\"unknown\" AS ts,
-	       NULL::\"unknown\" AS upload_pk,
-	       NULL::\"unknown\" AS pfile_fk,
-	       NULL::\"unknown\" AS ufile_mode
-	FROM folder, foldercontents
-	WHERE foldercontents.foldercontents_mode = 1
-	AND foldercontents.child_id = folder.folder_pk
-	UNION ALL 
-	SELECT NULL::\"unknown\" AS folder_pk,
-	       ufile_name AS name,
-	       upload.upload_desc AS description,
-	       foldercontents.parent_fk AS parent,
-	       foldercontents.foldercontents_mode, upload.upload_ts AS ts,
-	       upload.upload_pk,
-	       uploadtree.pfile_fk,
-	       ufile_mode
-	FROM upload
-	INNER JOIN uploadtree ON upload_pk = upload_fk
-	AND parent IS NULL
-	INNER JOIN foldercontents ON foldercontents.foldercontents_mode = 2
-	AND foldercontents.child_id = upload.upload_pk;");
-
-     /************ Delete old columns and tables ************/
-     /* Drop obsolete ufile table, ignore errors */
-     $DB->Action("ALTER TABLE uploadtree ALTER COLUMN ufile_fk DROP NOT NULL;");
-     $DB->Action("ALTER TABLE uploadtree DROP CONSTRAINT uploadtree_ufilefk;");
-     $DB->Action("ALTER TABLE upload ALTER COLUMN ufile_fk DROP NOT NULL;");
-     $DB->Action("DROP VIEW leftnav;");
-     $DB->Action("DROP VIEW uptreeup;");
-     $DB->Action("DROP VIEW uptreeattrib;");
-     $DB->Action("DROP VIEW uptreeatkey;");
-     $DB->Action("DROP VIEW uplicense;");
-     $DB->Action("DROP VIEW lic_progress;");
-     $DB->Action("DROP TABLE ufile;");
-
-
-     /* Create the report_cache table */
-    $sql = ' 
-CREATE TABLE report_cache (
-    report_cache_pk serial NOT NULL,
-    report_cache_tla timestamp without time zone DEFAULT now() NOT NULL,
-    report_cache_key text NOT NULL,
-    report_cache_value text NOT NULL,
-    report_cache_uploadfk integer
-);
-ALTER TABLE ONLY report_cache ADD CONSTRAINT report_cache_pkey PRIMARY KEY (report_cache_pk);
-ALTER TABLE ONLY report_cache ADD CONSTRAINT report_cache_report_cache_key_key UNIQUE (report_cache_key);
-CREATE INDEX report_cache_tlats ON report_cache USING btree (report_cache_tla);
-    ';
-    $DB->Action($sql);
-
-    /* Create the report_cache_user table 
-     * This allows the cache to be turned off/on on a per user basis 
-     */
-    $sql = ' 
-CREATE TABLE report_cache_user (
-    report_cache_user_pk serial NOT NULL,
-    user_fk integer NOT NULL,
-    cache_on character(1) DEFAULT \'Y\'::bpchar NOT NULL
-);
-COMMENT ON TABLE report_cache_user IS \'Allow the report cached to be turned off for individual users.  This is mostly for developers.\';
-COMMENT ON COLUMN report_cache_user.cache_on IS \'Y or N\';
-ALTER TABLE ONLY report_cache_user
-    ADD CONSTRAINT report_cache_user_pkey PRIMARY KEY (report_cache_user_pk);
-    ';
-    $DB->Action($sql);
-
-     /* Make sure every upload has left and right indexes set. */
-     global $LIBEXECDIR;
-     system("$LIBEXECDIR/agents/adj2nest -a");
-    } // Install()
+  var $Filename = "plugins/core-schema.dat";
 
   /******************************************
    GetSchema(): Load the schema into an array.
@@ -324,21 +99,21 @@ ALTER TABLE ONLY report_cache_user
       $Schema['TABLEID'][$Table][$R['ordinal']] = $Column;
       if (!empty($Desc))
 	{
-	$Schema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN $Table.$Column IS '$Desc';";
+	$Schema['TABLE'][$Table][$Column]['DESC'] = "COMMENT ON COLUMN \"$Table\".\"$Column\" IS '$Desc';";
 	}
       else
 	{
 	$Schema['TABLE'][$Table][$Column]['DESC'] = "";
 	}
-      $Schema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE $Table ADD COLUMN $Column $Type;";
-      $Schema['TABLE'][$Table][$Column]['ALTER'] = "ALTER TABLE $Table";
-      $Alter = "ALTER COLUMN $Column";
+      $Schema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE \"$Table\" ADD COLUMN \"$Column\" $Type;";
+      $Schema['TABLE'][$Table][$Column]['ALTER'] = "ALTER TABLE \"$Table\"";
+      $Alter = "ALTER COLUMN \"$Column\"";
       // $Schema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter TYPE $Type";
       if ($R['notnull'] == 't') { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter SET NOT NULL"; }
       else { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter DROP NOT NULL"; }
       if ($R['default'] != '')
-        {
-        $Schema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
+	{
+	$Schema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
 	}
       $Schema['TABLE'][$Table][$Column]['ALTER'] .= ";";
       }
@@ -350,7 +125,7 @@ ALTER TABLE ONLY report_cache_user
     $Results = $DB->Action($SQL);
     for($i=0; !empty($Results[$i]['viewname']); $i++)
       {
-      $SQL = "CREATE VIEW " . $Results[$i]['viewname'] . " AS " . $Results[$i]['definition'];
+      $SQL = "CREATE VIEW \"" . $Results[$i]['viewname'] . "\" AS " . $Results[$i]['definition'];
       $Schema['VIEW'][$Results[$i]['viewname']] = $SQL;
       }
 
@@ -369,7 +144,7 @@ ALTER TABLE ONLY report_cache_user
     $Results = $DB->Action($SQL);
     for($i=0; !empty($Results[$i]['relname']); $i++)
       {
-      $SQL = "CREATE SEQUENCE " . $Results[$i]['relname'] . " START 1;";
+      $SQL = "CREATE SEQUENCE \"" . $Results[$i]['relname'] . "\" START 1;";
       $Schema['SEQUENCE'][$Results[$i]['relname']] = $SQL;
       }
 
@@ -456,13 +231,13 @@ ALTER TABLE ONLY report_cache_user
     /* Save the constraint */
     for($i=0; !empty($Results[$i]['constraint_name']); $i++)
       {
-      $SQL = "ALTER TABLE " . $Results[$i]['table_name'];
+      $SQL = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
       $SQL .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
       $SQL .= " " . $Results[$i]['type'];
       $SQL .= " (" . $Results[$i]['constraint_key'] . ")";
       if (!empty($Results[$i]['references_table']))
 	{
-	$SQL .= " REFERENCES " . $Results[$i]['references_table'];
+	$SQL .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
 	$SQL .= " (" . $Results[$i]['constraint_key'] . ")";
 	}
       $SQL .= ";";
@@ -511,7 +286,6 @@ if (0)
       $Schema['FUNCTION'][$Results[$i]['proname']] = $SQL;
       }
 }
-	
 
     unset($Schema['TABLEID']);
     return($Schema);
@@ -635,8 +409,9 @@ if (0)
   /***********************************************************
    ExportSchema(): Export the current schema to a file.
    ***********************************************************/
-  function ExportSchema($Filename)
+  function ExportSchema($Filename=NULL)
     {
+    if (empty($Filename)) { $Filename = $this->Filename; }
     $Schema = $this->GetSchema();
     $Fout = fopen($Filename,"w");
     if (!$Fout)
@@ -711,7 +486,207 @@ if (0)
    ***********************************************************/
   function MigrateSchema()
     {
+    global $DB;
+    print "  Migrating database records\n"; flush();
+
+    /***************************  after 0.7.0  ********************************/
+    /* The mimetype agent had a bug where some mimetypes contain
+       commas or are missing the meta format ("class/type").
+       This happens because magic() lies -- sometimes it returns
+       strings that are not in the meta format, even when the meta
+       format is specified.
+       Also, there was a typo "application/octet-string" should be
+       "application/octet-stream".
+       Check for these errors and fix these now.
+     */
+    $CheckMime = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name LIKE '%,%' OR mimetype_name NOT LIKE '%/%' OR mimetype_name = 'application/octet-string'";
+    $BadMime = $DB->Action($CheckMime);
+    if (count($BadMime) > 0)
+      {
+      /* Determine if ANY need to be fixed. */
+      $BadPfile = $DB->Action("SELECT COUNT(*) AS count FROM pfile WHERE pfile_mimetypefk IN ($CheckMime);");
+      print "Due to a previous bug (now fixed), " . number_format($BadPfile['count'],0,"",",") . " files are associated with " . number_format(count($BadMime),0,"",",") . " bad mimetypes.  Fixing now.\n";
+      $DB->Action("UPDATE pfile SET pfile_mimetypefk = NULL WHERE pfile_mimetypefk IN ($CheckMime);");
+      $DB->Action("DELETE FROM mimetype WHERE mimetype_name LIKE '%,%' OR mimetype_name NOT LIKE '%/%' OR mimetype_name = 'application/octet-string';");
+      // $DB->Action("VACUUM ANALYZE mimetype;");
+      /* Reset all mimetype analysis -- the ones that are done will be skipped.
+	 The ones that are not done will be re-done. */
+      if ($BadPfile['count'] > 0)
+	{
+	print "  Rescheduling all mimetype analysis jobs.\n";
+	print "  (The ones that are completed will be quickly closed with no additional work.\n";
+	print "  Only the files that need to be re-scanned will be re-scanned.)\n";
+	$DB->Action("UPDATE jobqueue SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0 WHERE jq_type = 'mimetype';");
+	}
+      }
+
+    /***************************  release 1.0  ********************************/
+    /* if pfile_fk or ufile_mode don't exist in table uploadtree 
+     * create them and populate them from ufile table    
+     * Drop the ufile columns */
+    if ($DB->TblExist("ufile") && $DB->ColExist("upload", "ufile_fk"))
+	{
+	$DB->Action("UPDATE upload SET pfile_fk = ufile.pfile_fk FROM ufile WHERE upload.pfile_fk IS NULL AND upload.ufile_fk = ufile.ufile_pk;");
+	}
+
+     if ($DB->TblExist("ufile") && $DB->ColExist("uploadtree", "ufile_fk"))
+	{
+	$DB->Action("UPDATE uploadtree SET pfile_fk = ufile.pfile_fk FROM ufile WHERE uploadtree.pfile_fk IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
+	$DB->Action("UPDATE uploadtree SET ufile_mode = ufile.ufile_mode FROM ufile WHERE uploadtree.ufile_mode IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
+	$DB->Action("UPDATE uploadtree SET ufile_name = ufile.ufile_name FROM ufile WHERE uploadtree.ufile_name IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
+	}
+
+    /************ Delete obsolete tables ************/
+    if ($DB->TblExist("ufile")) { $DB->Action("DROP TABLE ufile CASCADE;"); }
+    if ($DB->TblExist("proj")) { $DB->Action("DROP TABLE proj CASCADE;"); }
+
+    /********************************************/
+    /* Sequences can get out of sequence; Fix the sequences! */
+    /********************************************/
+    /** SQL = all table + column + default value that use sequences **/
+    $SQL = "SELECT a.table_name AS table,
+	b.column_name AS column,
+	b.column_default AS value
+	FROM information_schema.tables AS a
+	INNER JOIN information_schema.columns AS b
+	  ON b.table_name = a.table_name
+	WHERE a.table_type = 'BASE TABLE'
+	AND a.table_schema = 'public'
+	AND b.column_default LIKE 'nextval(%)'
+	;";
+    $Tables = $DB->Action($SQL);
+    for($i=0; !empty($Tables[$i]['table']); $i++)
+	{
+	/* Reset each sequence to the max value in the column. */
+	$Seq = $Tables[$i]['value'];
+	$Seq = preg_replace("/.*'(.*)'.*/",'$1',$Seq);
+	$Table = $Tables[$i]['table'];
+	$Column = $Tables[$i]['column'];
+	$Results = $DB->Action("SELECT max($Column) AS max FROM $Table LIMIT 1;");
+	$Max = $Results[0]['max'];
+	if (empty($Max)) { $Max = 1; }
+	// print "Setting table($Table) column($Column) sequence($Seq) to $Max\n";
+	$DB->Action("SELECT setval('$Seq',$Max);");
+	}
     } // MigrateSchema()
+
+  /***********************************************************
+   InitSchema(): Initialize any new schema elements.
+   ***********************************************************/
+  function InitSchema($Debug)
+    {
+    /* Make sure every upload has left and right indexes set. */
+    global $LIBEXECDIR;
+    print "  Initializing new tables and columns\n"; flush();
+    system("$LIBEXECDIR/agents/adj2nest -a");
+
+    global $Plugins;
+    $Max = count($Plugins);
+    $FailFlag=0;
+    print "  Initializing plugins\n"; flush();
+    for($i=0; $i < $Max; $i++)
+      {
+      $P = &$Plugins[$i];
+      /* Init ALL plugins */
+      if ($Debug) { print "    Initializing plugin '" . $P->Name . "'\n"; }
+      $State = $P->Install();
+      if ($State != 0)
+	{
+	$FailFlag = 1;
+	print "FAILED: " . $P->Name . " failed to install.\n"; flush();
+	return(1);
+	}
+      }
+    $this->InitDatafiles($Debug);
+    return(0);
+    } // InitSchema()
+
+  /***********************************************************
+   InitDatafiles(): Initialize any datafiles.
+   ***********************************************************/
+  function InitDatafiles($Debug=1)
+    {
+    print "  Initializing data files.  This may take a few minutes.\n"; flush();
+    $CWD = getcwd();
+    global $DATADIR;
+    global $AGENTDIR;
+    if ($Debug) { print "Going to $DATADIR/agents/licenses\n"; }
+    chdir("$DATADIR/agents/licenses");
+    $CMD = 'find . -type f | grep -v "\.meta" | sed -e "s@^./@@"';
+    $Filelist = explode("\n",shell_exec($CMD));
+    sort($Filelist);
+    $Realfile = "$DATADIR/agents/License.bsam";
+    $Tempfile = $Realfile . ".new";
+    if (file_exists($Tempfile))
+      {
+      if (!unlink($Tempfile))
+        {
+        print "Unable to delete '$Tempfile'\n";
+	flush();
+	exit(1);
+	}
+      }
+    $Count=0;
+    print "    Processing " . (count($Filelist)-1) . " license templates.\n";
+    flush();
+    print "    ";
+    foreach($Filelist as $File)
+      {
+      if (empty($File)) { continue; }
+      $Count++;
+      if (file_exists($File . ".meta"))
+        {
+	$CMD = "$AGENTDIR/Filter_License -Q -O -M '" . $File . ".meta' '$File' >> $Tempfile";
+	}
+      else
+        {
+	$CMD = "$AGENTDIR/Filter_License -Q -O '$File' >> $Tempfile";
+	}
+      if ($Debug) { print "$CMD\n"; }
+      else
+        {
+        print "."; flush();
+	if (($Count % 50) == 0) { print "$Count\n    "; flush(); }
+        system($CMD,$rc);
+	if ($rc != 0)
+	  {
+	  print "Command failed: '$CMD'. Aborting.\n";
+	  flush();
+	  exit;
+	  }
+	}
+      }
+    /* Test the new file */
+    $CMD = "$AGENTDIR/bsam-engine -t '$Tempfile'";
+    if ($Debug) { print "$CMD\n"; }
+    else
+      {
+      system($CMD,$rc);
+      if ($rc != 0)
+	  {
+	  print "FAILED: Unable to validate the new cache file.\n";
+	  print "Command failed: '$CMD'. Aborting.\n";
+	  flush();
+	  exit;
+	  }
+      }
+
+    /* Move it into place */
+    $CMD = "cat '$Tempfile' > '$Realfile'";
+    if ($Debug) { print "$CMD\n"; }
+    else
+      {
+      system($CMD,$rc);
+      unlink($Tempfile);
+      if ($rc != 0)
+	  {
+	  print "Command failed: '$CMD'. Aborting.\n";
+	  flush();
+	  exit;
+	  }
+      }
+    print "!\n"; flush();
+    } // InitDatafiles()
 
   /***********************************************************
    MakeFunctions(): Create any required functions.
@@ -719,6 +694,7 @@ if (0)
   function MakeFunctions($Debug)
     {
     global $DB;
+    print "  Applying database functions\n"; flush();
 
     /********************************************/
     /* GetRunnable() is a DB function for listing the runnable items
@@ -797,20 +773,36 @@ LANGUAGE plpgsql;
    ApplySchema(): Apply the current schema from a file.
    NOTE: The order for add/delete is important!
    ***********************************************************/
-  function ApplySchema($Filename,$Debug)
+  function ApplySchema($Filename=NULL,$Debug=1)
     {
     global $DB;
     if (empty($DB)) { return("No database connection."); }
+    if (empty($Filename)) { $Filename = $this->Filename; }
 
-    if ($Debug) { print "<pre>"; }
+    print "Applying database schema\n"; flush();
 
     /**************************************/
     /** BEGIN: Term list from ExportTerms() **/
     /**************************************/
-    require_once($Filename);
+    require_once($Filename); /* this will DIE if the file does not exist. */
     /**************************************/
     /** END: Term list from ExportTerms() **/
     /**************************************/
+
+    /* Very basic sanity check (so we don't delete everything!) */
+    if ((count($Schema['TABLE']) < 5) ||
+	(count($Schema['VIEW']) < 1) ||
+	(count($Schema['SEQUENCE']) < 5) ||
+	(count($Schema['INDEX']) < 5) ||
+	(count($Schema['CONSTRAINT']) < 5))
+	{
+	print "FATAL: Schema from '$Filename' appears invalid.\n";
+	flush();
+	exit(1);
+	}
+
+    $DB->Action("BEGIN;");
+    $DB->Debug=1; /* show errors */
     $Curr = $this->GetSchema();
     /* The gameplan: Make $Curr look like $Schema. */
     // print "<pre>"; print_r($Schema); print "</pre>";
@@ -836,7 +828,7 @@ LANGUAGE plpgsql;
       if (empty($Table)) { continue; }
       if (!$DB->TblExist($Table))
 	{
-	$SQL = "CREATE TABLE $Table ();";
+	$SQL = "CREATE TABLE \"$Table\" ();";
 	if ($Debug) { print "$SQL\n"; }
 	else { $DB->Action($SQL); }
 	}
@@ -869,51 +861,15 @@ LANGUAGE plpgsql;
       if (empty($Name)) { continue; }
       if ($Curr['VIEW'][$Name] == $SQL) { continue; }
       if (!empty($Curr['VIEW'][$Name]))
-        {
+	{
 	/* Delete it if it exists and looks different */
-	$SQL1 = "DROP VIEW $Name;";
-        if ($Debug) { print "$SQL1\n"; }
-        else { $DB->Action($SQL1); }
+	$SQL1 = "DROP VIEW \"$Name\";";
+	if ($Debug) { print "$SQL1\n"; }
+	else { $DB->Action($SQL1); }
 	}
       /* Create the view */
       if ($Debug) { print "$SQL\n"; }
       else { $DB->Action($SQL); }
-      }
-
-    /************************************/
-    /* Delete indexes */
-    /************************************/
-    if (!empty($Curr['INDEX']))
-    foreach($Curr['INDEX'] as $Table => $IndexInfo)
-      {
-      if (empty($Table)) { continue; }
-      /* Only delete indexes on known tables */
-      if (empty($Schema['TABLE'][$Table])) { continue; }
-      foreach($IndexInfo as $Name => $SQL)
-        {
-        if (empty($Name)) { continue; }
-        /* Only delete indexes that are different */
-        if ($Schema['INDEX'][$Table][$Name] == $SQL) { continue; }
-        $SQL = "DROP INDEX IF EXISTS \"$Name\";";
-        if ($Debug) { print "$SQL\n"; }
-        else { $DB->Action($SQL); }
-	}
-      }
-
-    /************************************/
-    /* Add indexes (dependent on columns) */
-    /************************************/
-    if (!empty($Schema['INDEX']))
-    foreach($Schema['INDEX'] as $Table => $IndexInfo)
-      {
-      if (empty($Table)) { continue; }
-      foreach($IndexInfo as $Name => $SQL)
-        {
-        if (empty($Name)) { continue; }
-        if ($Curr['INDEX'][$Table][$Name] == $SQL) { continue; }
-        if ($Debug) { print "$SQL\n"; }
-        else { $DB->Action($SQL); }
-	}
       }
 
     /************************************/
@@ -925,8 +881,8 @@ LANGUAGE plpgsql;
       {
       if (empty($Name)) { continue; }
       /* Only process tables that I know about */
-      $Table = preg_replace("/^ALTER TABLE (.*) ADD CONSTRAINT.*/",'${1}',$SQL);
-      $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES (.*) \(.*/",'${1}',$SQL);
+      $Table = preg_replace("/^ALTER TABLE \"(.*)\" ADD CONSTRAINT.*/",'${1}',$SQL);
+      $TableFk = preg_replace("/^.*FOREIGN KEY .* REFERENCES \"(.*)\" \(.*/",'${1}',$SQL);
       if ($TableFk == $SQL) { $TableFk = $Table; }
       /* If I don't know the primary or foreign table... */
       if (empty($Schema['TABLE'][$Table]) && empty($Schema['TABLE'][$TableFk]))
@@ -935,13 +891,51 @@ LANGUAGE plpgsql;
 	}
       /* If it is already set correctly, then skip it. */
       if ($Schema['CONSTRAINT'][$Name] == $SQL) { continue; }
-      $SQL = "ALTER TABLE $Table DROP CONSTRAINT \"$Name\";";
+      $SQL = "ALTER TABLE \"$Table\" DROP CONSTRAINT \"$Name\" CASCADE;";
       if ($Debug) { print "$SQL\n"; }
       else { $DB->Action($SQL); }
       }
+    /* Reload current since the CASCADE may have changed things */
+    $Curr = $this->GetSchema();
 
     /************************************/
-    /* Add constraints (dependent on columns and views) */
+    /* Delete indexes */
+    /************************************/
+    if (!empty($Curr['INDEX']))
+    foreach($Curr['INDEX'] as $Table => $IndexInfo)
+      {
+      if (empty($Table)) { continue; }
+      /* Only delete indexes on known tables */
+      if (empty($Schema['TABLE'][$Table])) { continue; }
+      foreach($IndexInfo as $Name => $SQL)
+	{
+	if (empty($Name)) { continue; }
+	/* Only delete indexes that are different */
+	if ($Schema['INDEX'][$Table][$Name] == $SQL) { continue; }
+	$SQL = "DROP INDEX \"$Name\";";
+	if ($Debug) { print "$SQL\n"; }
+	else { $DB->Action($SQL); }
+	}
+      }
+
+    /************************************/
+    /* Add indexes (dependent on columns) */
+    /************************************/
+    if (!empty($Schema['INDEX']))
+    foreach($Schema['INDEX'] as $Table => $IndexInfo)
+      {
+      if (empty($Table)) { continue; }
+      foreach($IndexInfo as $Name => $SQL)
+	{
+	if (empty($Name)) { continue; }
+	if ($Curr['INDEX'][$Table][$Name] == $SQL) { continue; }
+	if ($Debug) { print "$SQL\n"; }
+	else { $DB->Action($SQL); }
+	}
+      }
+
+    /************************************/
+    /* Add constraints (dependent on columns, views, and indexes) */
     /************************************/
     if (!empty($Schema['CONSTRAINT']))
     foreach($Schema['CONSTRAINT'] as $Name => $SQL)
@@ -961,10 +955,13 @@ LANGUAGE plpgsql;
     /* MIGRATE DATA */
     /************************************/
     $this->MigrateSchema();
+    /* Reload current since CASCADE during migration may have changed things */
+    $Curr = $this->GetSchema();
 
     /************************************/
     /* Delete views */
     /************************************/
+    print "  Removing obsolete views\n"; flush();
     /* Get current tables and columns used by all views */
     /* Delete if: uses table I know and column I do not know. */
     /* Without this delete, we won't be able to drop columns. */
@@ -981,15 +978,16 @@ LANGUAGE plpgsql;
       $Column = $Results[$i]['column_name'];
       if (empty($Schema['TABLE'][$Table][$Column]))
 	{
-	$SQL = "DROP VIEW $View;";
-        if ($Debug) { print "$SQL\n"; }
-        else { $DB->Action($SQL); }
+	$SQL = "DROP VIEW \"$View\";";
+	if ($Debug) { print "$SQL\n"; }
+	else { $DB->Action($SQL); }
 	}
       }
 
     /************************************/
     /* Delete columns/tables */
     /************************************/
+    print "  Removing obsolete columns\n"; flush();
     if (!empty($Curr['TABLE']))
     foreach($Curr['TABLE'] as $Table => $Columns)
       {
@@ -998,10 +996,10 @@ LANGUAGE plpgsql;
       if (empty($Schema['TABLE'][$Table])) { continue; }
       foreach($Columns as $Column => $Val)
 	{
-        if (empty($Column)) { continue; }
+	if (empty($Column)) { continue; }
 	if (empty($Schema['TABLE'][$Table][$Column]))
 	  {
-	  $SQL = "ALTER TABLE $Table DROP COLUMN $Column;";
+	  $SQL = "ALTER TABLE \"$Table\" DROP COLUMN \"$Column\";";
 	  if ($Debug) { print "$SQL\n"; }
 	  else { $DB->Action($SQL); }
 	  }
@@ -1013,7 +1011,24 @@ LANGUAGE plpgsql;
     /* DO NOT DELETE: cannot map to tables I use. */
     /************************************/
 
-    if ($Debug) { print "</pre>"; }
+    print "  Committing changes...\n"; flush();
+    $rc = $DB->Action("COMMIT;");
+    if ($rc < 0)
+      {
+      print "FAILURE while applying schema.\n";
+      flush();
+      exit(1);
+      }
+
+    /************************************/
+    /* Initialize all remaining plugins. */
+    /************************************/
+    if ($this->InitSchema($Debug))
+      {
+      return("Unable to initialize the new schema.\n");
+      }
+    print "New schema applied and initialization completed.\n";
+    return;
     } // ApplySchema()
 
   /***********************************************************
@@ -1029,7 +1044,6 @@ LANGUAGE plpgsql;
   function Output()
     {
     global $Plugins;
-    $Filename = "plugins/core-schema.dat";
 
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V=""; 
@@ -1052,7 +1066,7 @@ LANGUAGE plpgsql;
 	$Init = GetParm('Export',PARM_INTEGER);
 	if ($Init == 1)
 	  {
-	  $rc = $this->ExportSchema($Filename);
+	  $rc = $this->ExportSchema($this->Filename);
 	  if (!empty($rc))
 	    {
 	    $V .= PopupAlert($rc);
@@ -1062,7 +1076,9 @@ LANGUAGE plpgsql;
 	$Init = GetParm('Apply',PARM_INTEGER);
 	if ($Init == 1)
 	  {
-	  $rc = $this->ApplySchema($Filename,1);
+	  print "<pre>";
+	  $rc = $this->ApplySchema($this->Filename,0);
+	  print "</pre>";
 	  if (!empty($rc))
 	    {
 	    $V .= PopupAlert($rc);
@@ -1073,12 +1089,14 @@ LANGUAGE plpgsql;
 	$V .= "<form method='post'>\n";
 	$V .= "Viewing, exporting, and applying the schema is only used by installation and debugging.\n";
 	$V .= "Otherwise, you should not need to use this functionality.\n";
-	$V .= "<P/><b>Using this functionality may <u><i>TOTALLY SCREW UP</i></u> your FOSSology database.</b>\n";
+	$V .= "<P/><b>Using this functionality willy-nilly may <u><i>TOTALLY SCREW UP</i></u> your FOSSology database.</b>\n";
 
 	$V .= "<P/>\n";
-	$V .= "<input type='checkbox' value='1' name='View'>Check to view the current schema. (The output generation is harmless, but extremely technical.)<br>\n";
-	$V .= "<input type='checkbox' value='1' name='Export'>Check to export the current schema.<br>\n";
-	$V .= "<input type='checkbox' value='1' name='Apply'>(TBD) Check to apply the last exported schema.\n";
+	$V .= "<table width='100%' border='1'>\n";
+	$V .= "<tr><td width='2%'><input type='checkbox' value='1' name='View'><td>Check to view the current schema. The output generation is harmless, but extremely technical.<br>\n";
+	$V .= "<tr><td><input type='checkbox' value='1' name='Export'><td>Check to export the current schema. This will overwrite your default schema configuration file. Don't do this unless you know <i>exactly</i> what you are doing. The default configuration file is the only one that is supported. This will overwrite your default file.<br>\n";
+	$V .= "<tr><td><input type='checkbox' value='1' name='Apply'><td>Check to apply the last exported schema. This will overwrite and atempt to migrate your database schema according to the default configuration file. Non-standard columns, tables, constraints, and views can and will be destroyed.\n";
+	$V .= "</table>\n";
 	$V .= "<P/>\n";
 	$V .= "<input type='submit' value='Go!'>";
 	$V .= "</form>\n";
