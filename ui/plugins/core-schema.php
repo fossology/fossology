@@ -149,23 +149,6 @@ class core_schema extends FO_Plugin
       }
 
     /***************************/
-    /* Get Index */
-    /***************************/
-    $SQL = "SELECT tablename AS table, indexname AS index, indexdef AS define
-	FROM pg_indexes
-	INNER JOIN information_schema.tables ON table_name = tablename
-	AND table_type = 'BASE TABLE'
-	AND table_schema = 'public'
-	AND schemaname = 'public'
-	ORDER BY tablename,indexname;
-	";
-    $Results = $DB->Action($SQL);
-    for($i=0; !empty($Results[$i]['table']); $i++)
-      {
-      $Schema['INDEX'][$Results[$i]['table']][$Results[$i]['index']] = $Results[$i]['define'] . ";";
-      }
-
-    /***************************/
     /* Get Constraints */
     /***************************/
     $SQL = "SELECT c.conname AS constraint_name,
@@ -242,6 +225,27 @@ class core_schema extends FO_Plugin
 	}
       $SQL .= ";";
       $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
+      }
+
+    /***************************/
+    /* Get Index */
+    /***************************/
+    $SQL = "SELECT tablename AS table, indexname AS index, indexdef AS define
+	FROM pg_indexes
+	INNER JOIN information_schema.tables ON table_name = tablename
+	AND table_type = 'BASE TABLE'
+	AND table_schema = 'public'
+	AND schemaname = 'public'
+	ORDER BY tablename,indexname;
+	";
+    $Results = $DB->Action($SQL);
+    for($i=0; !empty($Results[$i]['table']); $i++)
+      {
+      /* UNIQUE constraints also include indexes. */
+      if (empty($Schema['CONSTRAINT'][$Results[$i]['index']]))
+        {
+        $Schema['INDEX'][$Results[$i]['table']][$Results[$i]['index']] = $Results[$i]['define'] . ";";
+	}
       }
 
 if (0)
@@ -803,6 +807,7 @@ LANGUAGE plpgsql;
 
     $DB->Action("BEGIN;");
     $DB->Debug=1; /* show errors */
+    $DB->Error=0; /* clear any previous errors */
     $Curr = $this->GetSchema();
     /* The gameplan: Make $Curr look like $Schema. */
     // print "<pre>"; print_r($Schema); print "</pre>";
@@ -817,6 +822,7 @@ LANGUAGE plpgsql;
       if ($Curr['SEQUENCE'][$Name] == $SQL) { continue; }
       if ($Debug) { print "$SQL\n"; }
       else { $DB->Action($SQL); }
+      if ($DB->Error) { exit(1); }
       }
 
     /************************************/
@@ -831,6 +837,7 @@ LANGUAGE plpgsql;
 	$SQL = "CREATE TABLE \"$Table\" ();";
 	if ($Debug) { print "$SQL\n"; }
 	else { $DB->Action($SQL); }
+        if ($DB->Error) { exit(1); }
 	}
       foreach($Columns as $Column => $Val)
 	{
@@ -838,11 +845,13 @@ LANGUAGE plpgsql;
 	  {
 	  if ($Debug) { print $Val['ADD'] . "\n"; }
 	  else { $DB->Action($Val['ADD']); }
+          if ($DB->Error) { exit(1); }
 	  }
 	if ($Curr['TABLE'][$Table][$Column]['ALTER'] != $Val['ALTER'])
 	  {
 	  if ($Debug) { print $Val['ALTER'] . "\n"; }
 	  else { $DB->Action($Val['ALTER']); }
+	  if ($DB->Error) { exit(1); }
 	  }
 	if ($Curr['TABLE'][$Table][$Column]['DESC'] != $Val['DESC'])
 	  {
@@ -856,6 +865,7 @@ LANGUAGE plpgsql;
 	    }
 	  if ($Debug) { print "$SQL\n"; }
 	  else { $DB->Action($SQL); }
+	  if ($DB->Error) { exit(1); }
 	  }
 	}
       }
@@ -874,10 +884,12 @@ LANGUAGE plpgsql;
 	$SQL1 = "DROP VIEW \"$Name\";";
 	if ($Debug) { print "$SQL1\n"; }
 	else { $DB->Action($SQL1); }
+	if ($DB->Error) { exit(1); }
 	}
       /* Create the view */
       if ($Debug) { print "$SQL\n"; }
       else { $DB->Action($SQL); }
+      if ($DB->Error) { exit(1); }
       }
 
     /************************************/
@@ -902,6 +914,7 @@ LANGUAGE plpgsql;
       $SQL = "ALTER TABLE \"$Table\" DROP CONSTRAINT \"$Name\" CASCADE;";
       if ($Debug) { print "$SQL\n"; }
       else { $DB->Action($SQL); }
+      if ($DB->Error) { exit(1); }
       }
     /* Reload current since the CASCADE may have changed things */
     $Curr = $this->GetSchema();
@@ -923,6 +936,7 @@ LANGUAGE plpgsql;
 	$SQL = "DROP INDEX \"$Name\";";
 	if ($Debug) { print "$SQL\n"; }
 	else { $DB->Action($SQL); }
+        if ($DB->Error) { exit(1); }
 	}
       }
 
@@ -939,6 +953,7 @@ LANGUAGE plpgsql;
 	if ($Curr['INDEX'][$Table][$Name] == $SQL) { continue; }
 	if ($Debug) { print "$SQL\n"; }
 	else { $DB->Action($SQL); }
+        if ($DB->Error) { exit(1); }
 	}
       }
 
@@ -952,6 +967,7 @@ LANGUAGE plpgsql;
       if ($Curr['CONSTRAINT'][$Name] == $SQL) { continue; }
       if ($Debug) { print "$SQL\n"; }
       else { $DB->Action($SQL); }
+      if ($DB->Error) { exit(1); }
       }
 
     /************************************/
@@ -978,6 +994,7 @@ LANGUAGE plpgsql;
 	WHERE table_catalog='fossology'
 	ORDER BY view_name,table_name,column_name;";
     $Results = $DB->Action($SQL);
+    if ($DB->Error) { exit(1); }
     for($i=0; !empty($Results[$i]['view_name']); $i++)
       {
       $View = $Results[$i]['view_name'];
@@ -989,6 +1006,7 @@ LANGUAGE plpgsql;
 	$SQL = "DROP VIEW \"$View\";";
 	if ($Debug) { print "$SQL\n"; }
 	else { $DB->Action($SQL); }
+        if ($DB->Error) { exit(1); }
 	}
       }
 
@@ -1010,6 +1028,7 @@ LANGUAGE plpgsql;
 	  $SQL = "ALTER TABLE \"$Table\" DROP COLUMN \"$Column\";";
 	  if ($Debug) { print "$SQL\n"; }
 	  else { $DB->Action($SQL); }
+          if ($DB->Error) { exit(1); }
 	  }
 	}
       }
@@ -1020,8 +1039,8 @@ LANGUAGE plpgsql;
     /************************************/
 
     print "  Committing changes...\n"; flush();
-    $rc = $DB->Action("COMMIT;");
-    if ($rc < 0)
+    $DB->Action("COMMIT;");
+    if ($DB->Error)
       {
       print "FAILURE while applying schema.\n";
       flush();
