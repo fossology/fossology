@@ -199,20 +199,16 @@ class db_access extends FO_Plugin
    This could also be done via a pg_query > pg_fetch_object.
    ***********************************************************/
   function ColExist($Table,$Col)
-  {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    if (!$this->db_init()) { return; }
-
-    $result = pg_query($this->_pg_conn,
-             "SELECT 'SUCCESS' FROM pg_attribute , pg_type 
-              WHERE typrelid=attrelid AND typname = '$Table'
-                AND attname='$Col' LIMIT 1");
-    if ($result)
     {
-        if (pg_num_rows($result) > 0) return true;
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    global $DB;
+    if (empty($DB)) { return(0); }
+    $Results = $DB->Action("SELECT 'SUCCESS' FROM pg_attribute, pg_type 
+              WHERE typrelid=attrelid AND typname = '$Table'
+	      AND attname='$Col' LIMIT 1");
+    if (count($Results) > 0) { return(1); }
+    return(0);
     }
-    return false;
-  }
 
   /***********************************************************
    TblExist(): Check if Table $Col,exists
@@ -221,19 +217,15 @@ class db_access extends FO_Plugin
    This could also be done via a pg_query > pg_fetch_object.
    ***********************************************************/
   function TblExist($Table)
-  {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    if (!$this->db_init()) { return; }
-
-    $result = pg_query($this->_pg_conn,
-             "SELECT count(*) FROM pg_type 
-              WHERE typname = '$Table'");
-    if ($result)
     {
-        if (pg_num_rows($result) > 0) return true;
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    global $DB;
+    if (empty($DB)) { return(0); }
+    $Results = $DB->Action("SELECT count(*) AS count FROM pg_type
+			    WHERE typname = '$Table'");
+    if ($Results[0]['count'] > 0) { return(1); }
+    return(0);
     }
-    return false;
-  }
 }
 
 $NewPlugin = new db_access;

@@ -42,19 +42,6 @@ class agent_unpack extends FO_Plugin
     menu_insert("Agents::" . $this->Title,0,$this->Name);
     }
 
-  /***********************************************************
-   Install(): Create and configure database tables
-   ***********************************************************/
-   function Install()
-   {
-     global $DB;
-     if (empty($DB)) { return(1); } /* No DB */
-
-     return(0);
-   } // Install()
-
-
-
   /*********************************************
    AgentCheck(): Check if the job is already in the
    queue.  Returns:
