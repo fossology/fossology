@@ -238,7 +238,7 @@ class core_schema extends FO_Plugin
       if (!empty($Results[$i]['references_table']))
 	{
 	$SQL .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
-	$SQL .= " (" . $Results[$i]['constraint_key'] . ")";
+	$SQL .= " (" . $Results[$i]['fk_constraint_key'] . ")";
 	}
       $SQL .= ";";
       $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
@@ -846,8 +846,16 @@ LANGUAGE plpgsql;
 	  }
 	if ($Curr['TABLE'][$Table][$Column]['DESC'] != $Val['DESC'])
 	  {
-	  if ($Debug) { print $Val['DESC'] . "\n"; }
-	  else { $DB->Action($Val['DESC']); }
+	  if (empty($Val['DESC']))
+	    {
+	    $SQL = "COMMENT ON COLUMN \"$Table\".\"$Column\" IS '';";
+	    }
+	  else
+	    {
+	    $SQL = $Val['DESC'];
+	    }
+	  if ($Debug) { print "$SQL\n"; }
+	  else { $DB->Action($SQL); }
 	  }
 	}
       }
