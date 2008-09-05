@@ -214,7 +214,7 @@ class core_schema extends FO_Plugin
 	{
 	if (empty($K)) { continue; }
 	if (!empty($Key)) { $Key .= ","; }
-	$Key .= $Schema['TABLEID'][$Results[$i]['table_name']][$K];
+	$Key .= '"' . $Schema['TABLEID'][$Results[$i]['table_name']][$K] . '"';
 	}
       $Results[$i]['constraint_key'] = $Key;
       $Key = "";
@@ -223,7 +223,7 @@ class core_schema extends FO_Plugin
 	{
 	if (empty($K)) { continue; }
 	if (!empty($Key)) { $Key .= ","; }
-	$Key .= $Schema['TABLEID'][$Results[$i]['references_table']][$K];
+	$Key .= '"' . $Schema['TABLEID'][$Results[$i]['references_table']][$K] . '"';
 	}
       $Results[$i]['fk_constraint_key'] = $Key;
       }
