@@ -85,6 +85,13 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
   fprintf(Fout,"\n");
   free(RepPath);
 
+  /** adj2nest **/
+  memset(Cmd,'\0',sizeof(Cmd));
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/adj2nest",BINDIR);
+  fprintf(Fout,"agent=adj2nest %s| ",CmdHost);
+  fprintf(Fout,Rcmd,Cmd);
+  fprintf(Fout,"\n");
+
   /** filter license **/
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,"%s/Filter_License",AGENTDIR);
@@ -97,10 +104,20 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
 
   /** license analysis (uses bsam) ***/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/bsam-engine -L 20 -A 0 -B 60 -G 10 -M 10 -E -T license -O n -- - %s/License.bsam",AGENTDIR,PROJECTSTATEDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -T license -O n -- - %s/License.bsam",AGENTDIR,PROJECTSTATEDIR);
   for(i=0; i<NumCPU1; i++)
     {
     fprintf(Fout,"agent=license %s| ",CmdHost);
+    fprintf(Fout,Rcmd,Cmd);
+    fprintf(Fout,"\n");
+    }
+
+  /** license inspector (uses licinspect) ***/
+  memset(Cmd,'\0',sizeof(Cmd));
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/licinspect",BINDIR);
+  for(i=0; i<NumCPU1; i++)
+    {
+    fprintf(Fout,"agent=licinspect %s| ",CmdHost);
     fprintf(Fout,Rcmd,Cmd);
     fprintf(Fout,"\n");
     }
@@ -165,6 +182,13 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,Rcmd,"%s/engine-shell fosscp_agent '%s/fosscp_agent'");
   fprintf(Fout,Cmd,AGENTDIR,AGENTDIR);
+  fprintf(Fout,"\n");
+
+  /** selftest -- host-specific **/
+  memset(Cmd,'\0',sizeof(Cmd));
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/selftest -s",AGENTDIR);
+  fprintf(Fout,"agent=selftest %s| ",CmdHost);
+  fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
 
   /* all done */
