@@ -549,12 +549,30 @@ void	PrintLicName	(char *LicName, FILE *Fout)
 } /* PrintLicName() */
 
 /*********************************************************
+ GetLicTermPk(): Given an agent_lic_meta_pk, return the
+ licterm_pk.
+ Under normal circumstances, every raw license should have
+ one licterm mapping.
+ *********************************************************/
+long	GetLicTermPk	(long MetaPk)
+{
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,MAXLINE,"SELECT licterm_pk FROM agent_lic_raw INNER JOIN agent_lic_meta ON agent_lic_meta_pk = %ld AND agent_lic_meta.lic_fk = lic_pk INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id INNER JOIN licterm ON licterm_pk = licterm_fk;",
+	MetaPk);
+  DBaccess(DB,SQL);
+  if (DBdatasize(DB) < 1) return(0);
+  return(atol(DBgetvalue(DB,0,0)));
+} /* GetLicTermPk() */
+
+/*********************************************************
  StoreResults(): Save the license match in the DB.
  Confidence: 0=full, 1=style, 2=partial, 3=none.
  *********************************************************/
 void	StoreResults	(long PfilePk, long LicTermPk, long MetaPk,
 			 int Confidence)
 {
+  if (LicTermPk <= 0) LicTermPk = GetLicTermPk(MetaPk);
+
   memset(SQL,'\0',sizeof(SQL));
   if (LicTermPk > 0)
     {
@@ -563,6 +581,8 @@ void	StoreResults	(long PfilePk, long LicTermPk, long MetaPk,
     }
   else
     {
+    // printf("Got null: PfilePk=%ld LicTermPk=%ld MetaPk=%ld Confidence=%d\n",PfilePk,LicTermPk,MetaPk,Confidence);
+    /* Get the LicTermPk from the MetaPk record */
     snprintf(SQL,MAXLINE,"INSERT INTO licterm_name (pfile_fk,agent_lic_meta_fk,licterm_name_confidence) VALUES (%ld,%ld,%d);",
 	PfilePk,MetaPk,Confidence);
     }
@@ -588,6 +608,8 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
   int HasOutput=0;
   int First=0;
   void *DBresults;
+  int Confidence;
+
   /*
   Here's how the Confidence Value works:
      - Start with the percent match of the license.
@@ -635,6 +657,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
     }
 
   /* See what we got */
+  Confidence=0;
   if (!TermRemoved && !IsPhrase)
     {
     /* Got a great match */
@@ -646,7 +669,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	  PrintLicName(LicName,stdout);
 	  printf("\n");
 	  }
-	if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,0); /* full confidence */
+	Confidence=0;
 	}
     /* Got an good match */
     else if (ConfidenceValue >= ThresholdSimilar)
@@ -658,8 +681,14 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	  PrintLicName(LicName,stdout);
 	  printf("'-style\n");
 	  }
-	if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,1); /* style confidence */
+	Confidence=1; /* style confidence */
 	}
+    /* Not a good match, so just add it */
+    else
+	{
+	Confidence=2; /* low confidence; go with partial name */
+	}
+    if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,Confidence);
     }
 
   if (TermAdded && (TermsCounterSize > 0))
@@ -724,7 +753,11 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	/* Got a bad match on a phrase */
 	if (IsPhrase)
 	  {
-	  if (IsExplicit) printf("Phrase\n");
+	  if (IsExplicit)
+		{
+		printf("Phrase\n");
+		if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,0);
+		}
 	  else
 	    {
 	    if (!StoreDB || Verbose)
@@ -769,8 +802,18 @@ void	ProcessTerms	()
   int IsPhrase;
   int MaxRangesCount;
 
+  DBaccess(DB,"BEGIN;");
+
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name WHERE pfile_fk = '%ld';",PfilePk);
+  if (StoreDB)
+	{
+	DBaccess(DB,SQL);
+	}
+
   /* Get the list of license segments */
-  snprintf(SQL,MAXLINE,"SELECT agent_lic_meta_pk,pfile_path,license_path,lic_name,tok_match,tok_license,lic_unique,tok_pfile_start FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE pfile_fk = '%ld' ORDER BY tok_pfile_start;",PfilePk);
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT agent_lic_meta_pk,pfile_path,license_path,lic_name,tok_match,tok_license,lic_unique,tok_pfile_start FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE pfile_fk = '%ld' ORDER BY tok_pfile_start;",PfilePk);
   if (!IsExplicit)
     {
     DBaccess(DB,SQL);
@@ -782,6 +825,8 @@ void	ProcessTerms	()
     /* Explicit means doing just one range */
     MaxRangesCount = 1;
     }
+
+
   for(MaxRanges=0; MaxRanges < MaxRangesCount; MaxRanges++)
     {
     /* Determine the license match */
@@ -879,6 +924,7 @@ void	ProcessTerms	()
     }
 
   DBclose(DBRanges);
+  DBaccess(DB,"COMMIT;");
 } /* ProcessTerms() */
 
 /*********************************************************
@@ -946,6 +992,8 @@ void	Usage	(char *Name)
   printf("    -t            :: Show individual terms\n");
   printf("    -M ##         :: penalty %% for missing terms in license text (default: %.0f)\n",ThresholdMissing);
   printf("  Manual options:\n");
+  printf("    -D            :: store results in the DB\n");
+  printf("                     DB storage is normally disabled with the command-line.\n");
   printf("    -N needle     :: must use with -H\n");
   printf("    -H haystack   :: command-line test: find term 'needle' in string 'haystack'\n");
   printf("    -X            :: command-line contains matched info (do not access DB)\n");
@@ -983,11 +1031,13 @@ int	main	(int argc, char *argv[])
   int rc;
   char *Needle=NULL;
   char *Haystack=NULL;
+  int MustStoreDB=0;
 
-  while((c = getopt(argc,argv,"iH:M:N:S:s:tvX")) != -1)
+  while((c = getopt(argc,argv,"DiH:M:N:S:s:tvX")) != -1)
     {
     switch(c)
       {
+      case 'D': MustStoreDB=1; break;
       case 'i':
 	DB = DBopen();
 	if (!DB)
@@ -1059,7 +1109,7 @@ int	main	(int argc, char *argv[])
 
   if (IsExplicit)
     {
-    StoreDB=0;
+    StoreDB=MustStoreDB;
     if (optind != argc-7)
 	{
 	fprintf(stderr,"ERROR: Wrong number of parameters for -X.\n");
@@ -1090,7 +1140,7 @@ int	main	(int argc, char *argv[])
   else if (optind < argc)
     {
     /* command-line contains a list of pfile_pk values */
-    StoreDB=0;
+    StoreDB=MustStoreDB;
     for( ; optind < argc; optind++)
       {
       PfilePk = atol(argv[optind]);

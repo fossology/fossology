@@ -23,37 +23,31 @@
  *
  * Created on Jul 31, 2008
  */
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class FoldersMoveMenuTest extends fossologyWebTestCase
+class FoldersMoveMenuTest extends fossologyTestCase
 {
 
   function testFolderMoveMenu()
   {
     global $URL;
-    print "starting FolderMoveMenuTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, 'osrb-1.fc.hp.com');
+    print "starting OrgFolderMoveMenuTest\n";
+
+    $this->Login($this->mybrowser);
     /* we get the home page to get rid of the user logged in page */
-    $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Organize/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Folders /'));
-    $this->assertTrue($this->assertText($loggedIn, '/Create/'));
+    $loggedIn = $this->mybrowser->get($URL);
+    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Folders /'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Create/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the move page.
      */
-    $page = $browser->get("$URL?mod=folder_move");
-    $this->assertTrue($this->assertText($page, '/Move Folder/'));
-    $this->assertTrue($this->assertText($page, '/destination folder:/'));
+    $page = $this->mybrowser->get("$URL?mod=folder_move");
+    $this->assertTrue($this->myassertText($page, '/Move Folder/'));
+    $this->assertTrue($this->myassertText($page, '/destination folder:/'));
   }
 }
 ?>

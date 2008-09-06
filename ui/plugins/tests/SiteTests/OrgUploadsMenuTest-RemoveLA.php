@@ -23,40 +23,33 @@
  *
  * Created on Jul 31, 2008
  */
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class UploadsRemoveLAMenuTest extends fossologyWebTestCase
+class UploadsRemoveLAMenuTest extends fossologyTestCase
 {
 
   function testUploadsRemoveLAMenu()
   {
     global $URL;
     print "starting UploadsRemoveLAMenuTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
+    $this->Login($this->mybrowser);
     /* we get the home page to get rid of the user logged in page */
-    $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Organize/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Uploads/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Delete Uploaded File/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Edit Properties \(TBD\)/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Move/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Remove License Analysis/'));
+    $loggedIn = $this->mybrowser->get($URL);
+    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Uploads/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Delete Uploaded File/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Edit Properties \(TBD\)/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Move/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Remove License Analysis/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get("$URL?mod=agent_reset_license");
-    $this->assertTrue($this->assertText($page, '/Remove License Analysis/'));
-    $this->assertTrue($this->assertText($page, '/THERE IS NO UNREMOVE/'));
+    $page = $this->mybrowser->get("$URL?mod=agent_reset_license");
+    $this->assertTrue($this->myassertText($page, '/Remove License Analysis/'));
+    $this->assertTrue($this->myassertText($page, '/THERE IS NO UNREMOVE/'));
   }
 }
 ?>

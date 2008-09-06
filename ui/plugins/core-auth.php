@@ -44,28 +44,6 @@ class core_auth extends FO_Plugin
     global $DB;
     if (empty($DB)) { return(1); } /* No DB */
 
-    /* Validate the user index */
-    $Results = $DB->Action("SELECT max(user_pk) as max FROM users LIMIT 1;");
-    $Max = $Results[0]['max'];
-    if (empty($Max)) { $Max = 1; }
-    $DB->Action("SELECT setval('users_user_pk_seq',$Max);");
-
-    /* Check the DB schema */
-    $Results = $DB->Action("SELECT * FROM users LIMIT 1;");
-    $R = &$Results[0];
-    $Cols = array("user_desc","user_seed","user_pass","user_perm","user_email");
-    $Type = array("text",     "text",     "text",     "integer",  "text");
-    $Init = array("NULL",     "user_pk",  "NULL",     PLUGIN_DB_READ, "NULL");
-    for($i=0; !empty($Cols[$i]); $i++)
-      {
-      if (!is_array($R) || !array_key_exists($Cols[$i],$R))
-	{
-	$Val = $Cols[$i] . " " . $Type[$i];
-	$rc = $DB->Action("ALTER TABLE users ADD COLUMN $Val;");
-	$rc = $DB->Action("UPDATE users SET " . $Cols[$i] . " = " . $Init[$i] . " WHERE " . $Cols[$i] . " IS NULL;");
-	}
-      }
-
     /* No users with no seed and no pass */
     $DB->Action("UPDATE users SET user_seed = " . rand() . " WHERE user_seed IS NULL;");
     /* No users with no seed and no perm -- make them read-only */

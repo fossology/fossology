@@ -559,6 +559,8 @@ int	DBProcessQueue	()
 
   /***********************************
    Get the queue, and prioritize it by job_priority.
+   We do this with a stored procedure: getrunnable().
+   If that fails, try this:
    SELECT DISTINCT(jobqueue.*), job.* FROM jobqueue
      LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk 
      LEFT JOIN jobqueue AS depends 
@@ -572,7 +574,11 @@ int	DBProcessQueue	()
      ) 
    ORDER BY job.job_priority DESC,job.job_queued ASC LIMIT 6;
    ***********************************/
+  rc = DBLockAccess(DB,"SELECT * FROM getrunnable() LIMIT 10;");
+  if (rc < 0)
+    {
   rc = DBLockAccess(DB,"SELECT DISTINCT(jobqueue.*), job.* FROM jobqueue LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk LEFT JOIN jobqueue AS depends ON depends.jq_pk = jobdepends.jdep_jq_depends_fk LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk WHERE jobqueue.jq_starttime IS NULL AND ( (depends.jq_endtime IS NOT NULL AND depends.jq_end_bits < 2 ) OR jobdepends.jdep_jq_depends_fk IS NULL) ORDER BY job.job_priority DESC,job.job_queued ASC LIMIT 6;");
+    }
   if (Verbose) fprintf(stderr,"SQL: Getting queue = %d :: %d items\n",rc,DBdatasize(DB));
   if (rc == 1) /* if get list of queued items */
     {

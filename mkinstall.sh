@@ -474,6 +474,9 @@ if [ "\$CONFIGOK" != "1" ] ; then
   exit
 fi
 
+chgrp fossy "\${AGENTDATADIR}"
+chmod g+w "\${AGENTDATADIR}"
+
 ## Initialize the tables
 /usr/local/bin/fossinit.php -v
 
@@ -486,45 +489,6 @@ if [ \$? == 0 ] ; then
   if [ \$? != 0 ] ; then
     echo "ERROR: Database failed during configuration.\n"
     exit 1
-  fi
-  if [ \$INSTALLLICENSES == 1 ] ; then
-    if [ ! -d "\${AGENTDATADIR}/licenses" ] ; then
-      echo "ERROR: License directory (\${AGENTDATADIR}/licenses) does not exist.  Use 'install.sh -f'\n"
-      exit 1
-    fi
-    echo "# Adding licenses to database"
-    (
-    # remove the old file
-    \$DEBUG rm -f \${AGENTDATADIR}/License.bsam.new 2>/dev/null
-    cd \${AGENTDATADIR}/licenses
-    find . -type f | grep -v "\.meta" | sed -e 's@^./@@' | sort | while read i ; do
-      echo "Processing \$i"
-      if [ -f "\$i.meta" ] ; then
-        \$DEBUG \${AGENTDIR}/Filter_License -Q -O -M "\$i.meta" "\$i" >> \${AGENTDATADIR}/License.bsam.new
-      else
-        \$DEBUG \${AGENTDIR}/Filter_License -Q -O "\$i" >> \${AGENTDATADIR}/License.bsam.new
-      fi
-      if [ "\$DEBUG" == "" ] && [ "\$?" != "0" ] ; then
-	echo "ERROR processing license."
-	exit 1
-      fi
-    done
-    # Make sure the file is valid
-    \$DEBUG \${AGENTDIR}/bsam-engine -t "\${AGENTDATADIR}/License.bsam.new"
-    if [ "\$?" != "0" ] ; then
-	echo "ERROR processing licenses."
-	echo "  Please remove \${AGENTDATADIR}/License.bsam.new"
-	echo "  and \${AGENTDATADIR}/License.bsam,"
-	echo "  then re-run the install"
-	exit 1
-    fi
-    \$DEBUG rm -f \${AGENTDATADIR}/License.bsam 2>/dev/null
-    \$DEBUG mv \${AGENTDATADIR}/License.bsam.new \${AGENTDATADIR}/License.bsam 2>/dev/null
-    )
-    chown \$PROJECTUSER:\$PROJECTGROUP \${AGENTDATADIR}/License.bsam
-    chmod 640 \${AGENTDATADIR}/License.bsam
-  else
-    echo "# Skipping licenses"
   fi
 else
   echo "ERROR: Database not configured."

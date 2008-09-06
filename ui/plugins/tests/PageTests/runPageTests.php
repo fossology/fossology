@@ -28,28 +28,28 @@ require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 $test = &new TestSuite('Fossology Repo UI Page Functional tests');
-//$test->addTestFile('UploadFileTest.php');
-//$test->addTestFile('UploadUrlTest.php');
-//$test->addTestFile('UploadSrvTest.php');
-//$test->addTestFile('OneShot-lgpl2.1.php');
-//$test->addTestFile('OneShot-lgpl2.1-T.php');
-//$test->addTestFile('CreateFolderTest.php');
-//$test->addTestFile('DeleteFolderTest.php');
-//$test->addTestFile('EditFolderTest.php');
-//$test->addTestFile('editFolderNameOnlyTest.php');
-//$test->addTestFile('editFolderDescriptionOnlyTest.php');
-//$test->addTestFile('MoveFolderTest.php');
+
+$test->addTestFile('UploadFileTest.php');
+$test->addTestFile('UploadUrlTest.php');
+$test->addTestFile('UploadSrvTest.php');
+$test->addTestFile('OneShot-lgpl2.1.php');
+$test->addTestFile('OneShot-lgpl2.1-T.php');
+$test->addTestFile('CreateFolderTest.php');
+$test->addTestFile('DeleteFolderTest.php');
+$test->addTestFile('EditFolderTest.php');
+$test->addTestFile('editFolderNameOnlyTest.php');
+$test->addTestFile('editFolderDescriptionOnlyTest.php');
+$test->addTestFile('MoveFolderTest.php');
 $test->addTestFile('browseUploadedTest.php');
+$test->addTestFile('DupFolderTest.php');
+$test->addTestFile('DupUploadTest.php');
 
 if (TextReporter::inCli())
 {
-  exit ($test->run(new TextReporter()) ? 0 : 1);
+  exit($test->run(new TextReporter()) ? 0 : 1);
 }
 $test->run(new HtmlReporter());
-
-
 ?>

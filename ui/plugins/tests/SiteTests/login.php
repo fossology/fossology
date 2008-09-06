@@ -15,35 +15,31 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
 /**
  * Describe your PHP program or function here
- *
- * @param
- *
- * @return
  *
  * @version "$Id$"
  *
  * Created on Jul 21, 2008
  */
 
-require_once('../../../../tests/fossologyWebTestCase.php');
+require_once('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 global $USER;
 global $PASSWORD;
 
-class TestRepoLogin extends fossologyWebTestCase{
+class TestRepoLogin extends fossologyTestCase{
 
   function testLogin(){
 
     global $URL;
     print "login test starting\n";
     $browser = & new SimpleBrowser();
-    $this->repoLogin($browser);
-    $page = $browser->getContent();
+    $this->setBrowser($browser);
+    $this->Login($this->mybrowser);
+    $page = $this->mybrowser->getContent();
     //print "************LOGIN: Page after Login is:************\n";
     //$this->dump($page);
     preg_match('/FOSSology/', $page, $matches);

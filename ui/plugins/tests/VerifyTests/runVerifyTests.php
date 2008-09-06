@@ -15,43 +15,30 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
-
-/**
- * Upload Test data to the repo
- *
- * Uses the simpletest framework, this way it doesn't matter where the
- * repo is, it will get uploaded, and this is another set of tests.
- *
- * @param URL obtained from the test enviroment globals
- *
- * @version "$Id$"
- *
- * Created on Aug 15, 2008
+***********************************************************/
+/*
+ * Runner script to run Verify tests
  */
+// set the path for where simpletest is
+$path = '/usr/share/php' . PATH_SEPARATOR;
+set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
-/* Upload the following files from the fosstester home directory:
- * - simpletest_1.0.1.tar.gz
- * - gplv2.1
- * - Affero-v1.0
- * - http://www.gnu.org/licenses/gpl-3.0.txt
- * - http://www.gnu.org/licenses/agpl-3.0.txt
- */
-
-
+/* simpletest includes */
 require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
-require_once ('TestEnvironment.php');
 
-global $URL;
+require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/TestEnvironment.php');
 
-$test = &new TestSuite('Fossology Repo UI Upload Prep/Test');
-$test->addTestFile('uplTestData.php');
+$test = &new TestSuite('Fossology Repo UI Verification Functional tests');
+$test->addTestFile('verifyFossTestAr.php');
 
 if (TextReporter::inCli())
 {
   exit ($test->run(new TextReporter()) ? 0 : 1);
 }
 $test->run(new HtmlReporter());
+
+
 ?>

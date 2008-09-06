@@ -39,12 +39,12 @@
  * automatically do it. Well it could, but it's a bad idea.
  */
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class UploadSrvTest extends fossologyWebTestCase
+class UploadSrvTest extends fossologyTestCase
 {
   function setUp()
   {
@@ -53,48 +53,38 @@ class UploadSrvTest extends fossologyWebTestCase
                       "FAILURE! .bashrc not found\n");
     $this->assertTrue(file_exists('/home/fosstester/ReadMe'),
                       "FAILURE! Readme in ~fosstester not found\n");
+    $this->Login($browser);
   }
 
   function testUploadUSrv()
   {
+
+
     global $URL;
 
     print "starting UploadUSrvTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
-
-    $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Upload/'),
+    $loggedIn = $this->mybrowser->get($URL);
+    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
                       'Did not find Upload Menu');
-    $this->assertTrue($this->assertText($loggedIn, '/From Server/'),
+    $this->assertTrue($this->myassertText($loggedIn, '/From Server/'),
                       'Did not find From Server Menu');
-
-    $page = $browser->get("$URL?mod=upload_srv_files");
-    $this->assertTrue($this->assertText($page, '/Upload from Server/'),
+    $page = $this->mybrowser->get("$URL?mod=upload_srv_files");
+    $this->assertTrue($this->myassertText($page, '/Upload from Server/'),
                       'Did not find Upload from Server Title');
-    $this->assertTrue($this->assertText($page, '/on the server to upload:/'),
+    $this->assertTrue($this->myassertText($page, '/on the server to upload:/'),
                       'Did not find the sourcefile Selection Text');
-
     /* select Testing folder */
-
     $FolderId = $this->getFolderId('Testing', $page);
-    $this->assertTrue($browser->setField('folder', $FolderId));
-    $this->assertTrue($browser->setField('sourcefiles', '/home/fosstester/archives/simpletest_1.0.1.tar.gz'));
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
+    $this->assertTrue($this->mybrowser->setField('sourcefiles', '/home/fosstester/archives/simpletest_1.0.1.tar.gz'));
     $desc = 'File uploaded by test UploadSrvTest to folder Testing';
-    $this->assertTrue($browser->setField('description', "$desc"));
+    $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     /* we won't select any agents this time' */
-    $page = $browser->clickSubmit('Upload!');
+    $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page,
+    $this->assertTrue($this->myassertText($page,
                      '/Upload jobs for \/home\/fosstester\/archives\/simpletest_1\.0\.1\.tar\.gz/'),
                       "FAIL! Did not match Upload message\n");
-
     //print "************ page after Upload! *************\n$page\n";
   }
 }

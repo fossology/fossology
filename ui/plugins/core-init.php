@@ -104,22 +104,20 @@ class core_init extends FO_Plugin
 	  }
 	else /* It's an init */
 	  {
-	  $Max = count($Plugins);
 	  $FailFlag=0;
 	  $Filename = getcwd() . "/init.ui";
-	  print "<pre>";
-	  for($i=0; $i < $Max; $i++)
+	  $Schema = &$Plugins[plugin_find_id("schema")];
+	  if (empty($Schema))
 	    {
-	    $P = &$Plugins[$i];
-	    /* Init ALL plugins */
-	    $State = $P->Install();
-	    if ($State != 0)
-	      {
-	      $FailFlag = 1;
-	      print "FAILED: " . $P->Name . " failed to install.\n";
-	      }
+	    $V .= "Failed to find schema plugin.\n";
+	    $FailFlag = 1;
 	    }
-	  print "</pre>";
+	  else
+	    {
+	    print "<pre>";
+	    $FailFlag = $Schema->ApplySchema($Schema->Filename,0);
+	    print "</pre>";
+	    }
 	  if (!$FailFlag)
 	    {
 	    $V .= "Initialization complete.  Click 'Home' in the top menu to proceed.<br />";

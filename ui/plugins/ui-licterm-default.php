@@ -62,11 +62,6 @@ class licterm_default extends FO_Plugin
      Table #3: Associated matrix of terms to term groups ("licterm_map")
      ****************/
 
-    /* check for mandatory tables */
-    $SQL = "SELECT relname FROM pg_class WHERE relname = 'licterm' OR relname = 'licterm_words' OR relname = 'licterm_map';";
-    $Results = $DB->Action($SQL);
-    if (count($Results) != 3) { return(1); } /* tables missing */
-
     /* check if the table needs population */
     $SQL = "SELECT * FROM licterm LIMIT 1;";
     $Results = $DB->Action($SQL);

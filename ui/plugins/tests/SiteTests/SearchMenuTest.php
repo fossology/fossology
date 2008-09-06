@@ -24,27 +24,29 @@
  * Created on Jul 23, 2008
  */
 
-require_once('../../../../tests/fossologyWebTestCase.php');
+require_once('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 global $USER;
 global $PASSWORD;
 
-class SearchMenuTest extends fossologyWebTestCase
+class SearchMenuTest extends fossologyTestCase
 {
+  public $mybroswer;
 
   function testSearchMenu()
   {
     global $URL;
     print "starting SearchMenuTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $page = $this->get($URL);
+    $browser = & new SimpleBrowser();
+    $this->setBrowser($browser);
+    $page = $this->mybrowser->get($URL);
     $this->assertTrue($page);
-    $this->assertText($page, '/Welcome to FOSSology/');
-    $page = $this->click('Search');
-    $this->assertText($page, '/Search for File/');
-    $this->assertText($page, '/Enter the filename to find/');
+    $this->myassertText($page, '/Welcome to FOSSology/');
+    $page = $this->mybrowser->click('Search');
+    $this->myassertText($page, '/Search for File/');
+    $this->myassertText($page, '/Enter the filename to find/');
   }
 }
 ?>

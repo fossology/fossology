@@ -18,38 +18,34 @@
  ***********************************************************/
 
 /**
- * Upload Test data to the repo
+ * Simpletest run script template
  *
- * Uses the simpletest framework, this way it doesn't matter where the
- * repo is, it will get uploaded, and this is another set of tests.
+ * Run a test using simpletest, useful when working on a new test.
  *
- * @param URL obtained from the test enviroment globals
+ * @version "$Id: runtemplate.php 1210 2008-08-27 19:50:04Z rrando $"
  *
- * @version "$Id: $"
- *
- * Created on Aug 15, 2008
+ * Created on Aug 27, 2008
  */
 
-/* Upload the following files from the fosstester home directory:
- * - simpletest_1.0.1.tar.gz
- * - gplv2.1
- * - Affero-v1.0
- * - http://www.gnu.org/licenses/gpl-3.0.txt
- * - http://www.gnu.org/licenses/agpl-3.0.txt
- */
+$path = '/usr/local/simpletest' . PATH_SEPARATOR;
+set_include_path(get_include_path() . PATH_SEPARATOR . $path);
+if (!defined('SIMPLE_TEST'))
+  define('SIMPLE_TEST', '/usr/local/simpletest/');
 
+/* simpletest includes */
+require_once SIMPLE_TEST . 'unit_tester.php';
+require_once SIMPLE_TEST . 'reporter.php';
+require_once SIMPLE_TEST . 'web_tester.php';
 
-require_once '/usr/local/simpletest/unit_tester.php';
-require_once '/usr/local/simpletest/web_tester.php';
-require_once '/usr/local/simpletest/reporter.php';
 require_once ('TestEnvironment.php');
 
-global $URL;
-
-$test = &new TestSuite('Fossology Repo UI Upload Prep/Test');
-$test->addTestFile('uploadTestData.php');
-
-if (TextReporter::inCli())
+$test = & new TestSuite("Sample Fossology test");
+$test->addTestFile('mytest.php');
+/*
+ * leave the code below alone, it allows the tests to be run either by
+ * the cli or in a web browser
+ */
+if (TextReporter :: inCli())
 {
   exit ($test->run(new TextReporter()) ? 0 : 1);
 }

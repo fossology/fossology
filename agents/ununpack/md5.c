@@ -15,10 +15,9 @@
  * and avoid compile-time configuration.
  */
 
-#ifndef HAVE_OPENSSL
-
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-
 #include "md5.h"
 
 /*
@@ -68,7 +67,7 @@
  * This processes one or more 64-byte data blocks, but does NOT update
  * the bit counters.  There're no alignment requirements.
  */
-static void *body(MD5_CTX *ctx, void *data, unsigned long size)
+static void *body(MyMD5_CTX *ctx, void *data, unsigned long size)
 {
 	unsigned char *ptr;
 	MD5_u32plus a, b, c, d;
@@ -175,7 +174,7 @@ static void *body(MD5_CTX *ctx, void *data, unsigned long size)
 	return ptr;
 }
 
-void MD5_Init(MD5_CTX *ctx)
+void MyMD5_Init(MyMD5_CTX *ctx)
 {
 	ctx->a = 0x67452301;
 	ctx->b = 0xefcdab89;
@@ -186,7 +185,7 @@ void MD5_Init(MD5_CTX *ctx)
 	ctx->hi = 0;
 }
 
-void MD5_Update(MD5_CTX *ctx, void *data, unsigned long size)
+void MyMD5_Update(MyMD5_CTX *ctx, void *data, unsigned long size)
 {
 	MD5_u32plus saved_lo;
 	unsigned long used, free;
@@ -220,7 +219,7 @@ void MD5_Update(MD5_CTX *ctx, void *data, unsigned long size)
 	memcpy(ctx->buffer, data, size);
 }
 
-void MD5_Final(unsigned char *result, MD5_CTX *ctx)
+void MyMD5_Final(unsigned char *result, MyMD5_CTX *ctx)
 {
 	unsigned long used, free;
 
@@ -270,5 +269,3 @@ void MD5_Final(unsigned char *result, MD5_CTX *ctx)
 
 	memset(ctx, 0, sizeof(*ctx));
 }
-
-#endif

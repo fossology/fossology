@@ -29,13 +29,13 @@
  */
 
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 /* every test must use these globals, at least $URL */
 global $URL;
 
-class DeleteFolderTest extends fossologyWebTestCase
+class DeleteFolderTest extends fossologyTestCase
 {
   public $folder_name;
   public $mybrowser;
@@ -45,17 +45,10 @@ class DeleteFolderTest extends fossologyWebTestCase
     global $URL;
 
     //print "starting setUp DeleteFoldertest\n";
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $this->mybrowser = $browser;
-    $cookie = $this->repoLogin($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login($this->mybrowser);
     /* create a folder, which get's deleted below */
     $page = $this->mybrowser->get("$URL?mod=folder_create");
-    $this->assertTrue($this->assertText($page, '/Create a new Fossology folder/'));
+    $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
     /* select the folder to create this folder under */
     $FolderId = $this->getFolderId('Testing', $page);
     $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
@@ -65,7 +58,7 @@ class DeleteFolderTest extends fossologyWebTestCase
     $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     $page = $this->mybrowser->clickSubmit('Create!');
     $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, "/Folder $this->folder_name Created/"),
+    $this->assertTrue($this->myassertText($page, "/Folder $this->folder_name Created/"),
                       "FAIL! Folder $this->folder_name Created not found\n");
   }
 
@@ -74,34 +67,27 @@ class DeleteFolderTest extends fossologyWebTestCase
     global $URL;
 
     print "starting DeleteFoldertest\n";
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
 
     $loggedIn = $this->mybrowser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Organize/'),
+    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'),
                       "FAIL! Could not find Organize menu\n");
-    $this->assertTrue($this->assertText($loggedIn, '/Folders /'));
-    $this->assertTrue($this->assertText($loggedIn, '/Delete Folder/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Folders /'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Delete Folder/'));
     /* ok, this proves the text is on the page, let's see if we can
      * go to the page and delete a folder
      */
     $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
-    $this->assertTrue($this->assertText($page, '/Delete Folder/'));
+    $this->assertTrue($this->myassertText($page, '/Delete Folder/'));
     $FolderId = $this->getFolderId('DeleteMe', $page);
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
     $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, "/Deletion of folder $this->folder_name/"),
+    $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"),
                       "FAIL! Deletion of $folder_name not found\n");
     /* go to sleep for 30 seconds to see if the folder get's deleted */
     sleep(30);
     $page = $this->mybrowser->get("$URL?mod=browse");
-    $this->assertFalse($this->assertText($page, '/DeleteMe/'),
+    $this->assertFalse($this->myassertText($page, '/DeleteMe/'),
                        "NOTE: Folder DeleteMe still exists after 30 seconds");
     //print "************ page after Folder Delete! *************\n$page\n";
   }

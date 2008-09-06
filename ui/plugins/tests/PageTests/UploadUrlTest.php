@@ -1,5 +1,4 @@
 <?php
-
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -16,7 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
 /**
  * Upload a file using the UI
  *
@@ -32,12 +30,12 @@
  * work inside hp.
  */
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class UploadUrlTest extends fossologyWebTestCase
+class UploadUrlTest extends fossologyTestCase
 {
 
   function testUploadUrl()
@@ -45,37 +43,31 @@ class UploadUrlTest extends fossologyWebTestCase
     global $URL;
 
     print "starting UploadUrlTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
+    //$this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
+    $this->Login($browser);
 
-    $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Upload/'));
-    $this->assertTrue($this->assertText($loggedIn, '/From URL/'));
-    $page = $browser->get("$URL?mod=upload_url");
-    $this->assertTrue($this->assertText($page, '/Upload from URL/'));
-    $this->assertTrue($this->assertText($page, '/Enter the URL to the file:/'));
+    $loggedIn = $this->mybrowser->get($URL);
+    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/From URL/'));
+    $page = $this->mybrowser->get("$URL?mod=upload_url");
+    $this->assertTrue($this->myassertText($page, '/Upload from URL/'));
+    $this->assertTrue($this->myassertText($page, '/Enter the URL to the file:/'));
 
     /* select Testing folder, filename based on pid or session number */
 
     $FolderId = $this->getFolderId('Testing', $page);
-    $this->assertTrue($browser->setField('folder', $FolderId));
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $simpletest = 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz';
-    $this->assertTrue($browser->setField('geturl', $simpletest));
+    $this->assertTrue($this->mybrowser->setField('geturl', $simpletest));
     $desc = 'File uploaded by test UploadUrlTest';
-    $this->assertTrue($browser->setField('description', "$desc"));
+    $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     $pid = getmypid();
     $upload_name = 'TestUploadUrl-' . "$pid";
-    $this->assertTrue($browser->setField('name', $upload_name));
+    $this->assertTrue($this->mybrowser->setField('name', $upload_name));
     /* we won't select any agents this time' */
-    $page = $browser->clickSubmit('Upload!');
+    $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, '/Upload added to job queue/'));
+    $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
 
     //print  "************ page after Upload! *************\n$page\n";
   }

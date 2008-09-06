@@ -36,6 +36,7 @@ class db_access extends FO_Plugin
 
   var $_pg_conn = NULL;	/* connection to database */
   var $_pg_rows = 0;	/* number of affected rows */
+  var $Error = 0;	/* was the last operating an error? */
 
   /***********************************************************
    PostInitialize(): This function is called before the plugin
@@ -75,6 +76,7 @@ class db_access extends FO_Plugin
     $path="$SYSCONFDIR/$PROJECT/Db.conf";
     $this->_pg_conn = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
     if (!isset($this->_pg_conn)) return(0);
+    $this->Error = 0;
     return(1);
     }
 
@@ -109,8 +111,9 @@ class db_access extends FO_Plugin
     /* Error handling */
     if ($result == FALSE)
       {
+      $this->Error=1;
       //$PGError = pg_result_error_field($result, PGSQL_DIAG_SQLSTATE);
-	  $PGError = pg_last_error($this->_pg_conn);
+      $PGError = pg_last_error($this->_pg_conn);
       if ($this->Debug)
 	{
 	print "--------\n";
@@ -119,7 +122,11 @@ class db_access extends FO_Plugin
 	}
       $this->_pg_rows = 0;
       }
-    else { $this->_pg_rows = pg_affected_rows($result); }
+    else
+      {
+      $this->Error=0;
+      $this->_pg_rows = pg_affected_rows($result);
+      }
 
     if (!isset($result)) return;
     if ($this->Debug > 2)
@@ -151,11 +158,14 @@ class db_access extends FO_Plugin
 
   /***********************************************************
    Execute(): Run a prepared SQL statement from Prepare().
+   NOTE: Statements are actually version specific.
    ***********************************************************/
   function Execute($Prep,$Command)
     {
+    global $SVN_REV;
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
+    $Prep .= "_$SVN_REV";
     if ($this->Debug)
 	{
 	/* When using pg_query(), you need to use pg_set_error_verbosity().
@@ -164,7 +174,12 @@ class db_access extends FO_Plugin
 	if ($this->Debug > 1) { print "DB.Execute('$Prep','$Command')\n"; }
 	}
     $result = pg_execute($this->_pg_conn,$Prep,$Command);
-    if (!isset($result)) return;
+    if (!isset($result))
+	{
+	$this->Error=1;
+	return;
+	}
+    $this->Error=0;
     $rows = pg_fetch_all($result);
     if (!is_array($rows)) $rows = array();
     pg_free_result($result);
@@ -174,11 +189,14 @@ class db_access extends FO_Plugin
   /***********************************************************
    Prepare(): This prepares an SQL statement for execution.
    $Prep is the name of the prepared statement.
+   NOTE: Statements are actually version specific.
    ***********************************************************/
   function Prepare($Prep,$Command)
     {
+    global $SVN_REV;
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     if (!$this->db_init()) { return; }
+    $Prep .= "_$SVN_REV";
     if ($this->Debug)
 	{
 	/* When using pg_query(), you need to use pg_set_error_verbosity().
@@ -188,6 +206,12 @@ class db_access extends FO_Plugin
 	}
     /* Because the DB connection is shared, $Prep may already exist! */
     $result = @pg_prepare($this->_pg_conn,$Prep,$Command);
+    if (!isset($result))
+	{
+	$this->Error=1;
+	return;
+	}
+    $this->Error=0;
     return;
     }
 
@@ -199,20 +223,16 @@ class db_access extends FO_Plugin
    This could also be done via a pg_query > pg_fetch_object.
    ***********************************************************/
   function ColExist($Table,$Col)
-  {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    if (!$this->db_init()) { return; }
-
-    $result = pg_query($this->_pg_conn,
-             "SELECT 'SUCCESS' FROM pg_attribute , pg_type 
-              WHERE typrelid=attrelid AND typname = '$Table'
-                AND attname='$Col' LIMIT 1");
-    if ($result)
     {
-        if (pg_num_rows($result) > 0) return true;
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    global $DB;
+    if (empty($DB)) { return(0); }
+    $Results = $DB->Action("SELECT 'SUCCESS' FROM pg_attribute, pg_type 
+              WHERE typrelid=attrelid AND typname = '$Table'
+	      AND attname='$Col' LIMIT 1");
+    if (count($Results) > 0) { return(1); }
+    return(0);
     }
-    return false;
-  }
 
   /***********************************************************
    TblExist(): Check if Table $Col,exists
@@ -221,19 +241,15 @@ class db_access extends FO_Plugin
    This could also be done via a pg_query > pg_fetch_object.
    ***********************************************************/
   function TblExist($Table)
-  {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
-    if (!$this->db_init()) { return; }
-
-    $result = pg_query($this->_pg_conn,
-             "SELECT count(*) FROM pg_type 
-              WHERE typname = '$Table'");
-    if ($result)
     {
-        if (pg_num_rows($result) > 0) return true;
+    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    global $DB;
+    if (empty($DB)) { return(0); }
+    $Results = $DB->Action("SELECT count(*) AS count FROM pg_type
+			    WHERE typname = '$Table'");
+    if ($Results[0]['count'] > 0) { return(1); }
+    return(0);
     }
-    return false;
-  }
 }
 
 $NewPlugin = new db_access;

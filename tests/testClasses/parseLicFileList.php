@@ -32,7 +32,7 @@
  * general and I beieve it can parse the folder path at the top of the
  * License Browser Screen.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  * Created on Aug 21, 2008
  */
 
@@ -112,6 +112,11 @@ class parseLicFileList
     {
       return (array ());
     }
+  }
+
+  public function setPage($page)
+  {
+    if(!empty($page)) {$this->page = $page; }
   }
 }
 ?>

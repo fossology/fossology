@@ -29,12 +29,12 @@
  * Created on Aug 11, 2008
  */
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class OneShotTablegplv21Test extends fossologyWebTestCase
+class OneShotTablegplv21Test extends fossologyTestCase
 {
   function setUp()
   {
@@ -43,6 +43,7 @@ class OneShotTablegplv21Test extends fossologyWebTestCase
                       "FAILURE! .bashrc not found\n");
     $this->assertTrue(file_exists('/home/fosstester/ReadMe'),
                       "FAILURE! Readme in ~fosstester not found\n");
+    $this->Login($browser);
   }
 
   function testOneShotTablegplv21()
@@ -50,43 +51,35 @@ class OneShotTablegplv21Test extends fossologyWebTestCase
     global $URL;
 
     print "starting OneShotgplv21Test-Table\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
 
-    $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Upload/'),
+    $loggedIn = $this->mybrowser->get($URL);
+    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
                       "FAIL! Did not find Upload Menu\n");
-    $this->assertTrue($this->assertText($loggedIn, '/One-Shot License/'),
+    $this->assertTrue($this->myassertText($loggedIn, '/One-Shot License/'),
                       "FAIL! Did not find One-Shot License Menu\n");
 
-    $page = $browser->get("$URL?mod=agent_license_once");
-    $this->assertTrue($this->assertText($page, '/One-Shot License Analysis/'),
+    $page = $this->mybrowser->get("$URL?mod=agent_license_once");
+    $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
                       "FAIL! Did not find One-Shot License Analysis Title\n");
-    $this->assertTrue($this->assertText($page, '/The analysis is done in real-time/'),
+    $this->assertTrue($this->myassertText($page, '/The analysis is done in real-time/'),
                       "FAIL! Did not find real-time Text\n");
 
-    $this->assertTrue($browser->setField('licfile', '/home/fosstester/licenses/gplv2.1'));
+    $this->assertTrue($this->mybrowser->setField('licfile', '/home/fosstester/licenses/gplv2.1'));
     /* select highlights' */
-    $this->assertTrue($browser->setField('highlight', 1),
+    $this->assertTrue($this->mybrowser->setField('highlight', 1),
                       "FAIL! Count not click  highlight\n");
-    $this->assertTrue($browser->clickSubmit('Analyze!'),
+    $this->assertTrue($this->mybrowser->clickSubmit('Analyze!'),
                       "FAIL! Count not click Analyze button\n");
     /* Check for the correct analysis....it should be 100% match, no partials */
-    $page = $browser->getContentAsText();
+    $page = $this->mybrowser->getContentAsText();
     //print "************ page a text (after analysis) *************\n$ct\n";
-    $this->assertTrue($this->assertText($page, '/One-Shot License Analysis/'),
+    $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
                       "FAIL! Did not find One-Shot License Analysis Title\n");
-    $this->assertTrue($this->assertText($page, '/Match/'),
+    $this->assertTrue($this->myassertText($page, '/Match/'),
                       "FAIL! Did not find text 'Match' \n");
-    $this->assertTrue($this->assertText($page, '/100% view LGPL v2\.1/'),
+    $this->assertTrue($this->myassertText($page, '/100% view LGPL v2\.1/'),
                       "FAIL! Did not find '100% view LGPL v2.1' \n");
-    $this->assertFalse($this->assertText($page, '/-partial/'),
+    $this->assertFalse($this->myassertText($page, '/-partial/'),
                       "FAIL! Found -partial in a non partial license file\n");
   }
 }

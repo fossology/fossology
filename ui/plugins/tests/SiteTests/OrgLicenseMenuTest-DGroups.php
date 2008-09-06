@@ -23,41 +23,34 @@
  *
  * Created on Jul 31, 2008
  */
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class LicenseDGroupsMenuTest extends fossologyWebTestCase
+class LicenseDGroupsMenuTest extends fossologyTestCase
 {
 
   function testLicenseDGroupsMenu()
   {
     global $URL;
     print "starting LicenseDGroupsMenuTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
+    $this->Login($browser);
     /* we get the home page to get rid of the user logged in page */
-    $loggedIn = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Organize/'));
-    $this->assertTrue($this->assertText($loggedIn, '/License/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Default Groups/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Default Terms/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Manage Groups/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Manage Terms/'));
+    $loggedIn = $this->mybrowser->get($URL);
+    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/License/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Default Groups/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Default Terms/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Manage Groups/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Manage Terms/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
-    $page = $browser->get("$URL?mod=license_groups_default");
-    $this->assertTrue($this->assertText($page, '/Create Default License Groups/'));
-    $this->assertTrue($this->assertText($page, '/Similar Text/'));
-    $this->assertTrue($this->assertText($page, '/FSF/'));
+    $page = $this->mybrowser->get("$URL?mod=license_groups_default");
+    $this->assertTrue($this->myassertText($page, '/Create Default License Groups/'));
+    $this->assertTrue($this->myassertText($page, '/Similar Text/'));
+    $this->assertTrue($this->myassertText($page, '/FSF/'));
   }
 }
 ?>

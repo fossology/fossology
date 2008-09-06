@@ -202,6 +202,7 @@ void *	DBmove	(void *VDB)
 int	DBaccess	(void *VDB, char *SQL)
 {
   dbapi *DB;
+  int Status;
   DB = (dbapi *)VDB;
 
   if (!DB || !SQL) return(-1);
@@ -213,8 +214,16 @@ int	DBaccess	(void *VDB, char *SQL)
     }
 
   DB->Res = PQexec(DB->Conn,SQL);
+  if (DB->Res == NULL)
+	{
+	printf("ERROR: DBaccess(%d): %s\n",
+		PGRES_FATAL_ERROR,PQresultErrorMessage(DB->Res));
+	printf("ERROR: DBaccess error: '%s'\n",SQL);
+	return(-2);
+	}
+  Status = PQresultStatus(DB->Res);
   DB->RowsAffected = atoi(PQcmdTuples(DB->Res));
-  switch(PQresultStatus(DB->Res))
+  switch(Status)
       {
       /* case: Ok, no reply data */
       case PGRES_COMMAND_OK:  /* query had no results */

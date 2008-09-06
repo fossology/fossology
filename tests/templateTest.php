@@ -23,7 +23,7 @@
  *
  * @return
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Aug 1, 2008
  */
@@ -31,10 +31,10 @@
 /* every test must use these includes, adjust the paths based on where the
  * tests are in the source tree.
  */
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
-/* every test must use these globals, at least $URL */
+/* Globals for test use, most tests need $URL, only login needs the others */
 global $URL;
 global $USER;
 global $PASSWORD;
@@ -42,9 +42,9 @@ global $PASSWORD;
 /* The class name should end in Test */
 
 /* NOTE: You MUST remove the abstract or the test will not get run */
-abstract class someTest extends fossologyWebTestCase
+abstract class someTest extends fossologyTestCase
 {
-  public $mybrowser;
+  public $mybrowser;          // must have
   public $someOtherVariable;
 
   /*
@@ -58,29 +58,25 @@ abstract class someTest extends fossologyWebTestCase
   function setUp()
   {
     global $URL;
-    $this->mybrowser = & new SimpleBrowser();
-    $this->assertTrue(is_object($this->mybrowser));
-    $page = $this->mybrowser->get($URL);
-    $this->assertTrue($page);
-    $cookie = $this->repoLogin($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login();
   }
 
   /*
-   * usually the test will only have one method, start it with the word
-   * test.
+   * usually the test will only have one method.  For a test to be
+   * run the method name must start with 'test'.
    *
    * Every Test should print a start message, this is useful to help
-   * determine where a test failed.  Most assert's can
+   * determine where a test failed.  Most assert's can take an optional
+   * string to be printed on failure of the assertion.  This is a good
+   * practice to help someone running the tests figure out what went
+   * wrong.
    *
    * Every test should login to the site, so that it can be run
-   * standalone.  Use the repoLogin method defined in
-   * fossologyWebTestCase.  Typically you create a browser and then use
-   * that object to login with.  See below.
+   * standalone.  Use the Login method (defined in fossologyTest).
    *
-   * The login routine will return the session cookie.  Use it to set
-   * set the cookie.
+   * The login method will get a browser object and store that in the
+   * instance variable/class property $mybrowser.  The login method also
+   * sets the cookie so the test doesn't get logged out.
    */
   function testsome()
   {
@@ -97,7 +93,7 @@ abstract class someTest extends fossologyWebTestCase
      *
      * Just for fun it checks to see if /tmp exists. :)
      */
-    $page = $this->mybrowser->get("$URL?mod=browse");
+    $page = $this->mybrowser->clickLink('Browse');
     $this->assertTrue(assertText('/Folder Navigation/'),
                       "FAIL! There is no Folder Navigation Title\n");
     $this->assertTrue(assertText('/>S.*?y<//'),

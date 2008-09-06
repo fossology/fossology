@@ -451,7 +451,7 @@ void	ListFolders	()
   void *VDB;
 
   printf("# Folders\n");
-  MyDBaccess(DB,"SELECT folder_pk,parent,name,description,upload_pk FROM leftnav ORDER BY name,parent,folder_pk;");
+  MyDBaccess(DB,"SELECT folder_pk,parent,name,description,upload_pk FROM folderlist ORDER BY name,parent,folder_pk;");
   VDB = DBmove(DB);
   ListFoldersRecurse(VDB,1,1,-1,0);
 
@@ -538,7 +538,7 @@ void	ListUploads	()
 void	DeleteFolder	(long FolderId)
 {
   void *VDB;
-  MyDBaccess(DB,"SELECT folder_pk,parent,name,description,upload_pk FROM leftnav ORDER BY name,parent,folder_pk;");
+  MyDBaccess(DB,"SELECT folder_pk,parent,name,description,upload_pk FROM folderlist ORDER BY name,parent,folder_pk;");
   VDB = DBmove(DB);
   ListFoldersRecurse(VDB,FolderId,0,-1,1);
   DBclose(VDB);

@@ -25,11 +25,14 @@
 #
 thisdir=`pwd`
 error_cnt=0
+filelist='.bash_aliases .bashrc .subversion .svn'
 
 if [ -r ./TestData/fosstester/ReadMe ]
 then
-	cp -R ./TestData/fosstester/\.* ~fosstester
-	cp -R ./TestData/fosstester/* ~fosstester
+	for file in $filelist
+	do
+		cp -r ./TestData/fosstester/$file /home/fosstester/
+	done
 else
 	echo "ERROR! fosstester environment could not be found in $thisdir/TestData/fosstester/"
 	let $error_cnt += 1

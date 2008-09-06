@@ -20,16 +20,19 @@
  ***********************************************************/
 
 /**
- * Given a fossology License Groups page, parse it and return the
- * license Groups table.  The rest of the page can be parsed by the
- * browseMenu class.
+ * DO NOT USE THIS CLASS.  IT's not done.
+ *
+ *
+ * Given a fossology License
+ * Groups page, parse it and return the license Groups table.  The rest
+ * of the page can be parsed by the browseMenu class.
  *
  * @param string $page the xhtml page to parse
  *
  * @return assocative array with  Can return an empty array indicating
  * nothing on the page to browse.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  * Created on Aug 21, 2008
  */
 
@@ -44,8 +47,8 @@ class parseLicenseGrpTbl
     $this->page = $page;
   }
   /**
-   * function parseLicenseTbl
-   * given a fossology license browse page parse the license table on
+   * parseLicenseTbl
+   * Given a fossology license browse page parse the license table on
    * the page.
    *
    * @returns array of empty array if license table on that page.

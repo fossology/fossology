@@ -26,39 +26,34 @@
  * Created on Jul 24, 2008
  */
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 global $URL;
 global $USER;
 global $PASSWORD;
 
-class FoldersCreateMenuTest extends fossologyWebTestCase
+class FoldersCreateMenuTest extends fossologyTestCase
 {
+  public $mybrowser;
 
   function testCreateFolderMenu()
   {
     global $URL;
-    print "starting FolderCreateMenuTest\n";
-    $this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-     $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $cookie = $this->repoLogin($browser);
-    $host = $this->getHost($URL);
-    $browser->setCookie('Login', $cookie, $host);
-    $loggedIn = $browser->get($URL);
+    print "starting OrgFolderCreateMenuTest\n";
+
+    $this->Login();
+    $loggedIn = $this->mybrowser->get($URL);
     /* we get the home page to get rid of the user logged in page */
-    $page = $browser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Organize/'));
-    $this->assertTrue($this->assertText($loggedIn, '/Folders /'));
-    $this->assertTrue($this->assertText($loggedIn, '/Create/'));
+    $page = $this->mybrowser->get($URL);
+    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Folders /'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Create/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the create page.
      */
-    $page = $browser->get("$URL?mod=folder_create");
-    $this->assertTrue($this->assertText($page, '/Create a new Fossology folder/'));
+    $page = $this->mybrowser->get("$URL?mod=folder_create");
+    $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
   }
 }
 ?>

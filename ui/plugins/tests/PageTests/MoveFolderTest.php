@@ -15,7 +15,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
 /**
  * Move folder test
  *
@@ -31,7 +30,7 @@
 /* every test must use these includes, adjust the paths based on where the
  * tests are in the source tree.
  */
-require_once ('../../../../tests/fossologyWebTestCase.php');
+require_once ('../../../../tests/fossologyTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
 
 /* every test must use these globals, at least $URL */
@@ -39,7 +38,7 @@ global $URL;
 
 /* The class name should end in Test */
 
-class MoveFolderTest extends fossologyWebTestCase
+class MoveFolderTest extends fossologyTestCase
 {
   public $folder_name;
   public $move_folder;
@@ -50,17 +49,10 @@ class MoveFolderTest extends fossologyWebTestCase
     global $URL;
 
     //print "starting setUp DeleteFoldertest\n";
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $this->mybrowser = $browser;
-    $cookie = $this->repoLogin($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login($this->mybrowser);
     /* create a folder to move the folder to */
     $page = $this->mybrowser->get("$URL?mod=folder_create");
-    $this->assertTrue($this->assertText($page, '/Create a new Fossology folder/'));
+    $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
     /* select the folder to create this folder under */
     $FolderId = $this->getFolderId('Testing', $page);
     $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
@@ -71,11 +63,11 @@ class MoveFolderTest extends fossologyWebTestCase
     $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     $page = $this->mybrowser->clickSubmit('Create!');
     $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, "/Folder $this->move_folder Created/"),
+    $this->assertTrue($this->myassertText($page, "/Folder $this->move_folder Created/"),
                       "FAIL! Folder $this->move_folder Created not found\n");
     /* create a folder, which get's moved below */
     $page = $this->mybrowser->get("$URL?mod=folder_create");
-    $this->assertTrue($this->assertText($page, '/Create a new Fossology folder/'));
+    $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
     /* select the folder to create this folder under */
     $FolderId = $this->getFolderId($this->move_folder, $page);
     $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
@@ -86,7 +78,7 @@ class MoveFolderTest extends fossologyWebTestCase
     $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     $page = $this->mybrowser->clickSubmit('Create!');
     $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, "/Folder $this->folder_name Created/"),
+    $this->assertTrue($this->myassertText($page, "/Folder $this->folder_name Created/"),
                       "FAIL! Folder $this->folder_name Created not found\n");
   }
 
@@ -96,15 +88,15 @@ class MoveFolderTest extends fossologyWebTestCase
 
     print "starting MoveFoldertest\n";
     $loggedIn = $this->mybrowser->get($URL);
-    $this->assertTrue($this->assertText($loggedIn, '/Organize/'),
+    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'),
                       "FAIL! Could not find Organize menu\n");
-    $this->assertTrue($this->assertText($loggedIn, '/Folders /'));
-    $this->assertTrue($this->assertText($loggedIn, '/Move/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Folders /'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Move/'));
     /* ok, this proves the text is on the page, let's see if we can
      * go to the page and delete a folder
      */
     $page = $this->mybrowser->get("$URL?mod=folder_move");
-    $this->assertTrue($this->assertText($page, '/Move Folder/'));
+    $this->assertTrue($this->myassertText($page, '/Move Folder/'));
     $FolderId = $this->getFolderId($this->folder_name, $page);
     $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
     $MvFolderId = $this->getFolderId($this->move_folder, $page);
@@ -112,13 +104,13 @@ class MoveFolderTest extends fossologyWebTestCase
     $page = $this->mybrowser->clickSubmit('Move!');
     $this->assertTrue(page);
     //print "************ page after Folder Move! *************\n$page\n";
-    $this->assertTrue($this->assertText($page, "/Moved folder $this->folder_name to folder/"),
+    $this->assertTrue($this->myassertText($page, "/Moved folder $this->folder_name to folder/"),
                       "FAIL! Moved folder $this->folder_name to folder not found\n");
     $page = $this->mybrowser->get("$URL?mod=browse");
     /* best we can do with simpletest is to see if the folder is still there.
      * This is a place where selenium may be useful.
      */
-    $this->assertTrue($this->assertText($page, "/$this->folder_name/"),
+    $this->assertTrue($this->myassertText($page, "/$this->folder_name/"),
                        "FAIL! Folder $this->folder_name no longer exists!\n");
     //print "************ page after Folder Delete! *************\n$page\n";
   }
@@ -129,12 +121,12 @@ class MoveFolderTest extends fossologyWebTestCase
   function tearDown()
   {
     $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
-    $this->assertTrue($this->assertText($page, '/Delete Folder/'));
+    $this->assertTrue($this->myassertText($page, '/Delete Folder/'));
     $FolderId = $this->getFolderId($this->move_folder, $page);
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
     $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, "/Deletion of folder $this->move_folder/"),
+    $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->move_folder/"),
                       "MoveFoldeTest tearDown FAILED! Deletion of $this->move_folder not found\n");
   }
 }
