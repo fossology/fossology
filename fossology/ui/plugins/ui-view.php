@@ -620,7 +620,7 @@ class ui_view extends FO_Plugin
 			$Format='flow';
 			break;
 		default:
-			$Format = 'hex';
+			$Format = 'flow';
 		}
 	  break;
 	}
