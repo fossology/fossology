@@ -46,10 +46,10 @@ if (!isset($GlobalReady)) { exit; }
  ************************************************************/
 function LicenseNormalizeName	($LicName,$Confidence,$CanonicalName)
 {
+print "<pre>$LicName  $Confidence  $CanonicalName</pre>\n";
   /* Find the right name to use */
-  $Name = '';
-  if ($Confidence >= 3) { $Name = $CanonicalName; }
-  else
+  $Name = $CanonicalName;
+  if ($Confidence < 3)
     {
     if (!empty($CanonicalName)) { $Name = $CanonicalName; }
     else
@@ -70,7 +70,7 @@ function LicenseNormalizeName	($LicName,$Confidence,$CanonicalName)
 
 /************************************************************
  LicenseGetName(): Given a meta id (agent_lic_meta_pk), return
- the license name.
+ the license name (mapped to canonical name).
  ************************************************************/
 $LicenceGetName_Prepared=0;
 function LicenseGetName(&$MetaId, $IncludePhrase=0)
@@ -79,18 +79,12 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
   global $LicenceGetName_Prepared;
   if (!$LicenceGetName_Prepared)
     {
-    $DB->Prepare("LicenseGetName_Raw1",'SELECT licterm.licterm_name,lic_name,phrase_text,lic_id
+    $DB->Prepare("LicenseGetName_Raw",'SELECT licterm.licterm_name,lic_name,phrase_text,lic_id
 	FROM agent_lic_raw
 	INNER JOIN agent_lic_meta ON agent_lic_meta_pk = $1
 	AND lic_fk = lic_pk
 	INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id
         INNER JOIN licterm ON licterm_fk = licterm_pk
-	;');
-
-    $DB->Prepare("LicenseGetName_Raw2",'SELECT lic_name,phrase_text,lic_id
-	FROM agent_lic_raw
-	INNER JOIN agent_lic_meta ON agent_lic_meta_pk = $1
-	AND lic_fk = lic_pk
 	;');
 
     $DB->Prepare("LicenseGetName_CanonicalName",'SELECT licterm_name_confidence,licterm_name
@@ -105,15 +99,12 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
     $LicenceGetName_Prepared=1;
     }
 
-  $FullName='';
   $CanonicalList =  $DB->Execute("LicenseGetName_CanonicalName",array($MetaId));
-  $RawList =  $DB->Execute("LicenseGetName_Raw1",array($MetaId));
-  if (empty($RawList)) { $RawList =  $DB->Execute("LicenseGetName_Raw2",array($MetaId)); }
+  $RawList =  $DB->Execute("LicenseGetName_Raw",array($MetaId));
 
   $LastConfidence = $CanonicalList[0]['licterm_name_confidence'];
   $Phrase = $RawList[0]['phrase_text'];
-  $Name = $RawList[0]['licterm_name'];
-  if (empty($Name)) { $Name = $RawList[0]['lic_name']; }
+  $FullName = '';
   foreach($CanonicalList as $C)
     {
     if (empty($C)) { continue; }
@@ -122,7 +113,7 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
     $LicTerm = $C['licterm_name'];
 
     /* Normalize the name */
-    $Name = LicenseNormalizeName($Name,$Confidence,$LicTerm);
+    $Name = $RawList[0]['licterm_name'];
 
     if (!empty($Phrase) && ($Confidence < 3))
       {
@@ -142,7 +133,7 @@ function LicenseGetName(&$MetaId, $IncludePhrase=0)
 
   if (empty($FullName))
     {
-    $Name = LicenseNormalizeName($RawList[0]['lic_name'],0,"");
+    $Name = $RawList[0]['licterm_name'];
     if (!empty($Phrase))
       {
       $Name = "Phrase";
