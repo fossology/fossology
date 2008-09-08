@@ -65,7 +65,7 @@ $UserCacheStat = 0;  // default, don't know
      */
     if ($UserCacheStat == 0)
     {
-      $sql = "select cache_on from report_cache_user where user_fk='$_SESSION[UserId]'";
+      $sql = "SELECT cache_on FROM report_cache_user WHERE user_fk='$_SESSION[UserId]'";
       $Result = $DB->Action($sql);
       if (!empty($Result[0]['cache_on']) && ($Result[0]['cache_on'] == 'N'))
       {
@@ -81,7 +81,7 @@ $UserCacheStat = 0;  // default, don't know
                           $PGError);
 
     // Get the cached data
-    $Result = $DB->Action("SELECT report_cache_value from report_cache WHERE report_cache_key='$EscKey'");
+    $Result = $DB->Action("SELECT report_cache_value FROM report_cache WHERE report_cache_key='$EscKey'");
 
     return $Result[0]['report_cache_value'];
   } // ReportCacheGet()
@@ -121,7 +121,7 @@ $UserCacheStat = 0;  // default, don't know
     else
       if (empty($Upload) and (!empty($ParsedURI['item'])))
       {
-        $Result = $DB->Action("SELECT upload_fk from uploadtree WHERE uploadtree_pk='$ParsedURI[item]'");
+        $Result = $DB->Action("SELECT upload_fk FROM uploadtree WHERE uploadtree_pk='$ParsedURI[item]'");
         $Upload = $Result['upload_fk'];
       }
 
@@ -131,10 +131,20 @@ $UserCacheStat = 0;  // default, don't know
     
     /* If duplicate key, do an update, else report the error */
     if (strpos($PGError, "duplicate") >> 0)
-      $Result = $DB->Action("UPDATE report_cache SET report_cache_value = '$EscValue', report_cache_tla=now() where report_cache_key = '$EscKey'",
+      $Result = $DB->Action("UPDATE report_cache SET report_cache_value = '$EscValue', report_cache_tla=now() WHERE report_cache_key = '$EscKey'",
                             $PGError);
     if ($PGError) echo "UPDATE: $PGError";
   } // ReportCacheInit()
+
+  /***********************************************************
+   ReportCachePurgeAll(): Purge all records from the report cache.
+   ***********************************************************/
+  function ReportCachePurgeAll()
+  {
+    global $DB;
+
+    $Result = $DB->Action("DELETE FROM report_cache;");
+  } // ReportCachePurgeByDate()
 
   /***********************************************************
    ReportCachePurgeByDate(): Purge from the report cache records
@@ -145,8 +155,8 @@ $UserCacheStat = 0;  // default, don't know
   {
     global $DB;
 
-    $Result = $DB->Action("DELETE FROM report_cache where report_cache_tla < $PurgeDate");
-  } // ReportCacheGet()
+    $Result = $DB->Action("DELETE FROM report_cache WHERE report_cache_tla < $PurgeDate");
+  } // ReportCachePurgeByDate()
 
   /***********************************************************
    ReportCachePurgeByUpload(): Purge from the report cache 
@@ -156,7 +166,7 @@ $UserCacheStat = 0;  // default, don't know
   {
     global $DB;
 
-    $Result = $DB->Action("DELETE FROM report_cache where report_cache_uploadfk = $UploadPK");
-  } // ReportCacheGet()
+    $Result = $DB->Action("DELETE FROM report_cache WHERE report_cache_uploadfk = $UploadPK");
+  } // ReportCachePurgeByUpload()
 
 ?>
