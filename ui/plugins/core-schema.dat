@@ -479,39 +479,6 @@
   $Schema["TABLE"]["licterm_words"]["licterm_words_text"]["ALTER"] = "ALTER TABLE \"licterm_words\" ALTER COLUMN \"licterm_words_text\" DROP NOT NULL;";
 
 
-  $Schema["TABLE"]["log"]["log_table_enum"]["DESC"] = "COMMENT ON COLUMN \"log\".\"log_table_enum\" IS 'enum see table_enum';";
-  $Schema["TABLE"]["log"]["log_table_enum"]["ADD"] = "ALTER TABLE \"log\" ADD COLUMN \"log_table_enum\" int4;";
-  $Schema["TABLE"]["log"]["log_table_enum"]["ALTER"] = "ALTER TABLE \"log\" ALTER COLUMN \"log_table_enum\" SET NOT NULL;";
-
-  $Schema["TABLE"]["log"]["log_rec_fk"]["DESC"] = "COMMENT ON COLUMN \"log\".\"log_rec_fk\" IS 'Record identifier';";
-  $Schema["TABLE"]["log"]["log_rec_fk"]["ADD"] = "ALTER TABLE \"log\" ADD COLUMN \"log_rec_fk\" int4;";
-  $Schema["TABLE"]["log"]["log_rec_fk"]["ALTER"] = "ALTER TABLE \"log\" ALTER COLUMN \"log_rec_fk\" DROP NOT NULL;";
-
-  $Schema["TABLE"]["log"]["log_type"]["DESC"] = "COMMENT ON COLUMN \"log\".\"log_type\" IS 'Type of log record: 0=debug, 1=warning, 2=error, 3=fatal';";
-  $Schema["TABLE"]["log"]["log_type"]["ADD"] = "ALTER TABLE \"log\" ADD COLUMN \"log_type\" int4;";
-  $Schema["TABLE"]["log"]["log_type"]["ALTER"] = "ALTER TABLE \"log\" ALTER COLUMN \"log_type\" SET NOT NULL;";
-
-  $Schema["TABLE"]["log"]["log_message"]["DESC"] = "COMMENT ON COLUMN \"log\".\"log_message\" IS 'Message text';";
-  $Schema["TABLE"]["log"]["log_message"]["ADD"] = "ALTER TABLE \"log\" ADD COLUMN \"log_message\" text;";
-  $Schema["TABLE"]["log"]["log_message"]["ALTER"] = "ALTER TABLE \"log\" ALTER COLUMN \"log_message\" SET NOT NULL;";
-
-  $Schema["TABLE"]["log"]["log_date"]["DESC"] = "COMMENT ON COLUMN \"log\".\"log_date\" IS 'Date log was added';";
-  $Schema["TABLE"]["log"]["log_date"]["ADD"] = "ALTER TABLE \"log\" ADD COLUMN \"log_date\" timestamptz;";
-  $Schema["TABLE"]["log"]["log_date"]["ALTER"] = "ALTER TABLE \"log\" ALTER COLUMN \"log_date\" SET NOT NULL, ALTER COLUMN \"log_date\" SET DEFAULT now();";
-
-  $Schema["TABLE"]["log"]["log_pk"]["DESC"] = "COMMENT ON COLUMN \"log\".\"log_pk\" IS 'PK for log';";
-  $Schema["TABLE"]["log"]["log_pk"]["ADD"] = "ALTER TABLE \"log\" ADD COLUMN \"log_pk\" int4;";
-  $Schema["TABLE"]["log"]["log_pk"]["ALTER"] = "ALTER TABLE \"log\" ALTER COLUMN \"log_pk\" SET NOT NULL, ALTER COLUMN \"log_pk\" SET DEFAULT nextval('log_log_pk_seq'::regclass);";
-
-  $Schema["TABLE"]["log"]["log_jq_fk"]["DESC"] = "COMMENT ON COLUMN \"log\".\"log_jq_fk\" IS 'Link to job that created this log entry.';";
-  $Schema["TABLE"]["log"]["log_jq_fk"]["ADD"] = "ALTER TABLE \"log\" ADD COLUMN \"log_jq_fk\" int4;";
-  $Schema["TABLE"]["log"]["log_jq_fk"]["ALTER"] = "ALTER TABLE \"log\" ALTER COLUMN \"log_jq_fk\" DROP NOT NULL;";
-
-  $Schema["TABLE"]["log"]["log_logger"]["DESC"] = "COMMENT ON COLUMN \"log\".\"log_logger\" IS 'logger (function, script name, etc)  when table_enum is unknown ';";
-  $Schema["TABLE"]["log"]["log_logger"]["ADD"] = "ALTER TABLE \"log\" ADD COLUMN \"log_logger\" text;";
-  $Schema["TABLE"]["log"]["log_logger"]["ALTER"] = "ALTER TABLE \"log\" ALTER COLUMN \"log_logger\" DROP NOT NULL;";
-
-
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["DESC"] = "";
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["ADD"] = "ALTER TABLE \"mimetype\" ADD COLUMN \"mimetype_pk\" int4;";
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["ALTER"] = "ALTER TABLE \"mimetype\" ALTER COLUMN \"mimetype_pk\" SET NOT NULL, ALTER COLUMN \"mimetype_pk\" SET DEFAULT nextval('mimetype_mimetype_pk_seq'::regclass);";
@@ -638,19 +605,6 @@
   $Schema["TABLE"]["sqlagentproc"]["sap_version"]["ALTER"] = "ALTER TABLE \"sqlagentproc\" ALTER COLUMN \"sap_version\" SET NOT NULL, ALTER COLUMN \"sap_version\" SET DEFAULT 1;";
 
 
-  $Schema["TABLE"]["table_enum"]["table_pk"]["DESC"] = "";
-  $Schema["TABLE"]["table_enum"]["table_pk"]["ADD"] = "ALTER TABLE \"table_enum\" ADD COLUMN \"table_pk\" int4;";
-  $Schema["TABLE"]["table_enum"]["table_pk"]["ALTER"] = "ALTER TABLE \"table_enum\" ALTER COLUMN \"table_pk\" SET NOT NULL, ALTER COLUMN \"table_pk\" SET DEFAULT nextval('table_enum_table_pk_seq'::regclass);";
-
-  $Schema["TABLE"]["table_enum"]["table_name"]["DESC"] = "";
-  $Schema["TABLE"]["table_enum"]["table_name"]["ADD"] = "ALTER TABLE \"table_enum\" ADD COLUMN \"table_name\" varchar;";
-  $Schema["TABLE"]["table_enum"]["table_name"]["ALTER"] = "ALTER TABLE \"table_enum\" ALTER COLUMN \"table_name\" SET NOT NULL;";
-
-  $Schema["TABLE"]["table_enum"]["table_enum"]["DESC"] = "";
-  $Schema["TABLE"]["table_enum"]["table_enum"]["ADD"] = "ALTER TABLE \"table_enum\" ADD COLUMN \"table_enum\" int4;";
-  $Schema["TABLE"]["table_enum"]["table_enum"]["ALTER"] = "ALTER TABLE \"table_enum\" ALTER COLUMN \"table_enum\" SET NOT NULL;";
-
-
   $Schema["TABLE"]["upload"]["upload_pk"]["DESC"] = "";
   $Schema["TABLE"]["upload"]["upload_pk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"upload_pk\" int4;";
   $Schema["TABLE"]["upload"]["upload_pk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"upload_pk\" SET NOT NULL, ALTER COLUMN \"upload_pk\" SET DEFAULT nextval('upload_upload_pk_seq'::regclass);";
@@ -758,7 +712,6 @@
   $Schema["SEQUENCE"]["attrib_attrib_pk_seq"] = "CREATE SEQUENCE \"attrib_attrib_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["folder_folder_pk_seq"] = "CREATE SEQUENCE \"folder_folder_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["foldercontents_foldercontents_pk_seq"] = "CREATE SEQUENCE \"foldercontents_foldercontents_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["table_enum_table_pk_seq"] = "CREATE SEQUENCE \"table_enum_table_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["job_job_pk_seq"] = "CREATE SEQUENCE \"job_job_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["jobqueue_jq_pk_seq"] = "CREATE SEQUENCE \"jobqueue_jq_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["licgroup_grps_licgroup_grps_pk_seq"] = "CREATE SEQUENCE \"licgroup_grps_licgroup_grps_pk_seq\" START 1;";
@@ -840,7 +793,6 @@
   $Schema["CONSTRAINT"]["report_cache_user_pkey"] = "ALTER TABLE \"report_cache_user\" ADD CONSTRAINT \"report_cache_user_pkey\" PRIMARY KEY (\"report_cache_user_pk\");";
   $Schema["CONSTRAINT"]["scheduler_status_pkey"] = "ALTER TABLE \"scheduler_status\" ADD CONSTRAINT \"scheduler_status_pkey\" PRIMARY KEY (\"unique_scheduler\",\"agent_number\");";
   $Schema["CONSTRAINT"]["sqlagentproc_pkey"] = "ALTER TABLE \"sqlagentproc\" ADD CONSTRAINT \"sqlagentproc_pkey\" PRIMARY KEY (\"sap_pk\");";
-  $Schema["CONSTRAINT"]["table_enum_pkey"] = "ALTER TABLE \"table_enum\" ADD CONSTRAINT \"table_enum_pkey\" PRIMARY KEY (\"table_pk\");";
   $Schema["CONSTRAINT"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"ufile_rel_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
   $Schema["CONSTRAINT"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pkey_idx\" PRIMARY KEY (\"upload_pk\");";
   $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\");";
