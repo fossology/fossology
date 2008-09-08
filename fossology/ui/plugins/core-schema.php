@@ -543,6 +543,8 @@ if (0)
     /************ Delete obsolete tables ************/
     if ($DB->TblExist("ufile")) { $DB->Action("DROP TABLE ufile CASCADE;"); }
     if ($DB->TblExist("proj")) { $DB->Action("DROP TABLE proj CASCADE;"); }
+    if ($DB->TblExist("log")) { $DB->Action("DROP TABLE log CASCADE;"); }
+    if ($DB->TblExist("table_enum")) { $DB->Action("DROP TABLE table_enum CASCADE;"); }
 
     /********************************************/
     /* Sequences can get out of sequence; Fix the sequences! */
