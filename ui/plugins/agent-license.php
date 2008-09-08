@@ -203,7 +203,8 @@ class agent_license extends FO_Plugin
     if (empty($jobqueuepk)) { return("Failed to insert filter_clean into job queue"); }
 
     /* job "license" has jobqueue item "sqlagent" */
-    $jqargs = "DROP TABLE $TempTable;";
+    /** This removes the temp table and flushes the cache **/
+    $jqargs = "DROP TABLE $TempTable; DELETE FROM report_cache WHERE report_cache_uploadfk = '$uploadpk';";
     $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert second sqlagent into job queue"); }
 
