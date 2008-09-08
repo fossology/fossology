@@ -1044,6 +1044,9 @@ LANGUAGE plpgsql;
     /* DO NOT DELETE: cannot map to tables I use. */
     /************************************/
 
+    /************************************/
+    /* Commit changes */
+    /************************************/
     print "  Committing changes...\n"; flush();
     $DB->Action("COMMIT;");
     if ($DB->Error)
@@ -1052,6 +1055,12 @@ LANGUAGE plpgsql;
       flush();
       exit(1);
       }
+
+    /************************************/
+    /* Flush any cached data. */
+    /************************************/
+    print "  Purging cached results\n"; flush();
+    ReportCachePurgeAll();
 
     /************************************/
     /* Initialize all remaining plugins. */
