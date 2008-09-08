@@ -80,24 +80,27 @@ int	ReadChild	(int Thread)
 	CM[Thread].DBJobKey = 0;
 	return(1);
 	}
-    else if (!strncmp(Cmd,"FATAL ",6) || !strncmp(Cmd,"WARNING ",8) ||
-	     !strncmp(Cmd,"ERROR ",6) || !strncmp(Cmd,"LOG ",4))
+    /* FATAL are fatal errors. Don't be surprised if the child dies. */
+    /* WARNING are non-fatal errors. The child should not die. */
+    /* ERRORS are non-fatal errors. But the child may still die. */
+    else if (!strncmp(Cmd,"FATAL ",6) || !strncmp(Cmd,"FATAL:",6))
 	{
-	/* FATAL are really bad, fatal errors. Don't be surprised if the
-	   child dies. */
-	/* WARNING are non-fatal errors. The child should not die. */
-	/* ERRORS are non-fatal errors. But the child may still die. */
-	/****
-	  Example:
-	  WARNING pfile 1234 This is the error message.\nIt is long.
-	 *****/
-	DBErrorWrite(Thread,0,Cmd);
+	DBErrorWrite(Thread,"FATAL",Cmd+6);
 	fprintf(stderr,"DEBUG[%d]: %s\n",Thread,Cmd);
 	}
-    else if (!strncmp(Cmd,"FATAL:",6) || !strncmp(Cmd,"WARNING:",8) ||
-	     !strncmp(Cmd,"ERROR:",6) || !strncmp(Cmd,"LOG:",4))
+    else if (!strncmp(Cmd,"ERROR ",6) || !strncmp(Cmd,"ERROR:",6))
 	{
-	DBErrorWrite(Thread,1,Cmd);
+	DBErrorWrite(Thread,"ERROR",Cmd+6);
+	fprintf(stderr,"DEBUG[%d]: %s\n",Thread,Cmd);
+	}
+    else if (!strncmp(Cmd,"WARNING ",8) || !strncmp(Cmd,"WARNING:",8))
+	{
+	DBErrorWrite(Thread,"WARNING",Cmd+8);
+	fprintf(stderr,"DEBUG[%d]: %s\n",Thread,Cmd);
+	}
+    else if (!strncmp(Cmd,"LOG ",4) || !strncmp(Cmd,"LOG:",4))
+	{
+	DBErrorWrite(Thread,"LOG",Cmd+8);
 	fprintf(stderr,"DEBUG[%d]: %s\n",Thread,Cmd);
 	}
     else if (!strcmp(Cmd,"Success"))	{ /* TBD success */ }
