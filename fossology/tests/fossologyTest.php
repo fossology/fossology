@@ -193,7 +193,10 @@ class fossologyTest extends WebTestCase
     $this->setmyCookie($cookie);
     $host = $this->getHost($URL);
     $this->mybrowser->setCookie('Login', $cookie, $host);
+    $url = $this->mybrowser->getUrl();
+    $page = $this->mybrowser->getContent($URL);
   }
+
   private function _repoDBlogin($browser = NULL)
   {
 

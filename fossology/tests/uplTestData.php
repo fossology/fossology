@@ -38,7 +38,7 @@
  */
 
 //require_once '/usr/local/simpletest/autorun.php';
-require_once ('fossologyWebTestCase.php');
+require_once ('fossologyTestCase.php');
 require_once ('TestEnvironment.php');
 
 global $URL;
@@ -50,13 +50,7 @@ class uploadTestDataTest extends fossologyTestCase
     function setUp()
   {
     global $URL;
-    $this->mybrowser = & new SimpleBrowser();
-    $this->assertTrue(is_object($this->mybrowser));
-    $page = $this->mybrowser->get($URL);
-    $this->assertTrue($page);
-    $cookie = $this->repoLogin($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login();
   }
 
   /**
@@ -64,17 +58,10 @@ class uploadTestDataTest extends fossologyTestCase
    */
   function testCreateTestingFolder()
   {
+    global $URL;
+    print "Creating testing folder\n";
     $page = $this->mybrowser->get($URL);
-    $page = $this->mybrowser->clickLink('Create');
-    $this->assertTrue($this->assertText($page, '/Create a new Fossology folder/'));
-    $this->assertTrue($this->mybrowser->setField('parentid', 1));
-    $this->assertTrue($this->mybrowser->setField('newname', 'Testing'));
-    $desc = 'Folder created by uplTestData as subfolder of Root Folder';
-    $this->assertTrue($this->mybrowser->setField('description', "$desc"));
-    $page = $this->mybrowser->clickSubmit('Create!');
-    $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, "/Folder Testing Created/"),
-                      "FAIL! Folder Testing Created not found\n");
+    $this->createFolder(null, 'Testing', null);
   }
 
   function testuploadTestDataTest()
@@ -92,12 +79,12 @@ class uploadTestDataTest extends fossologyTestCase
     /* upload the archives using the upload from file menu */
     foreach($uploadList as $upload)
     {
-      $this->uploadAFile($rootFolder, $upload, 'Testing', null, '1,2,3');
+      $this->uploadFile('Testing', $upload, 'Testing', null, '1,2,3');
     }
     /* Upload the urls using upload from url */
     foreach($urlList as $url)
     {
-      $this->uploadAUrl($rootFolder, $url, null, null, '1,2,3');
+      $this->uploadUrl($rootFolder, $url, null, null, '1,2,3');
     }
   }
 }

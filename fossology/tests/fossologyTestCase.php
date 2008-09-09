@@ -85,21 +85,28 @@ require_once('fossologyTest.php');
    * Reports: pass or fail.
    *
    */
-  public function createFolder($parent, $name, $description = null)
+  public function createFolder($parent=null, $name, $description=null)
   {
-    //print "createFolder is running\n";
-    //print "createFolder:Parameters: P:$parent N:$name D:$description\n";
+    global $URL;
+    $FolderId = 0;
 
     /* Need to check parameters */
+    if(is_null($parent))
+    {
+      $FolderId = 1;              // default is root folder
+    }
     if (is_null($description)) // set default if null
     {
       $description = "Folder $name created by testFolder as subfolder of $parent";
     }
-    $urlNow = $this->mybrowser->getUrl();
-    $page = $this->mybrowser->get($urlNow);
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Create');
     $this->assertTrue($this->myassertText($page,'/Create a new Fossology folder/'));
-    /* select the folder to create this folder under */
-    $FolderId = $this->getFolderId($parent, $page);
+    /* if $FolderId=0 select the folder to create this folder under */
+    if(!$FolderId)
+    {
+      $FolderId = $this->getFolderId($parent, $page);
+    }
     $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
     $this->assertTrue($this->mybrowser->setField('newname', $name));
     $this->assertTrue($this->mybrowser->setField('description', "$description"));
