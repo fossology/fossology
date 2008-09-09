@@ -317,14 +317,6 @@
   $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_schedinfo\" text;";
   $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_schedinfo\" DROP NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_repeat\" IS 'yes means re-queue this job until the query returns empty.  only meaningful when jq_runonpfile is set';";
-  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_repeat\" bpchar[3];";
-  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_repeat\" SET NOT NULL, ALTER COLUMN \"jq_repeat\" SET DEFAULT 'no'::bpchar;";
-
-  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_runonpfile\" IS 'when set, scheduler runs the jq_arg as sql and sends each row to the host indicated by the jq_runonpfile column (a pfile name)';";
-  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_runonpfile\" bpchar[12];";
-  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_runonpfile\" DROP NOT NULL;";
-
   $Schema["TABLE"]["jobqueue"]["jq_units"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_units\" IS 'the units name of jq_progress and jq_length';";
   $Schema["TABLE"]["jobqueue"]["jq_units"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_units\" varchar[32];";
   $Schema["TABLE"]["jobqueue"]["jq_units"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_units\" DROP NOT NULL;";
@@ -344,6 +336,14 @@
   $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_itemsprocessed\" IS 'sum of files processed by all agents';";
   $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_itemsprocessed\" int4;";
   $Schema["TABLE"]["jobqueue"]["jq_itemsprocessed"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_itemsprocessed\" DROP NOT NULL, ALTER COLUMN \"jq_itemsprocessed\" SET DEFAULT 0;";
+
+  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_repeat\" IS 'Should the job be repeated until no columns are returned? (yes or no)';";
+  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_repeat\" text;";
+  $Schema["TABLE"]["jobqueue"]["jq_repeat"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_repeat\" SET NOT NULL, ALTER COLUMN \"jq_repeat\" SET DEFAULT 'no'::text;";
+
+  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_runonpfile\" IS 'The column name for determining which host to run on';";
+  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_runonpfile\" text;";
+  $Schema["TABLE"]["jobqueue"]["jq_runonpfile"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_runonpfile\" DROP NOT NULL;";
 
 
   $Schema["TABLE"]["key"]["key_pk"]["DESC"] = "";
@@ -716,7 +716,6 @@
   $Schema["SEQUENCE"]["jobqueue_jq_pk_seq"] = "CREATE SEQUENCE \"jobqueue_jq_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["licgroup_grps_licgroup_grps_pk_seq"] = "CREATE SEQUENCE \"licgroup_grps_licgroup_grps_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["users_user_pk_seq"] = "CREATE SEQUENCE \"users_user_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["log_log_pk_seq"] = "CREATE SEQUENCE \"log_log_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"] = "CREATE SEQUENCE \"mimetype_mimetype_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pfile_pfile_pk_seq"] = "CREATE SEQUENCE \"pfile_pfile_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["upload_upload_pk_seq"] = "CREATE SEQUENCE \"upload_upload_pk_seq\" START 1;";
@@ -730,6 +729,7 @@
   $Schema["SEQUENCE"]["licterm_grps_licterm_grps_pk_seq"] = "CREATE SEQUENCE \"licterm_grps_licterm_grps_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["licterm_map_licterm_map_pk_seq"] = "CREATE SEQUENCE \"licterm_map_licterm_map_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["report_cache_report_cache_pk_seq"] = "CREATE SEQUENCE \"report_cache_report_cache_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["log_log_pk_seq"] = "CREATE SEQUENCE \"log_log_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["report_cache_user_report_cache_user_pk_seq"] = "CREATE SEQUENCE \"report_cache_user_report_cache_user_pk_seq\" START 1;";
 
   $Schema["CONSTRAINT"]["No duplicates"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"No duplicates\" UNIQUE (\"pfile_fk\",\"tok_pfile\",\"tok_match\",\"version\",\"tok_pfile_start\",\"tok_pfile_end\",\"tok_license_start\",\"tok_license_end\",\"tok_license\",\"lic_fk\");";
