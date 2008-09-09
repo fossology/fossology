@@ -71,7 +71,7 @@ class db_access extends FO_Plugin
    *******************************************************/
   function db_init()
     {
-    global $DATADIR, $PROJECT;
+    global $DATADIR, $PROJECT, $SYSCONFDIR;
     if (isset($this->_pg_conn)) { return(1); }
     $path="$SYSCONFDIR/$PROJECT/Db.conf";
     $this->_pg_conn = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
