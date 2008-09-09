@@ -7,7 +7,7 @@ include $(VARS)
 DIRS=images plugins common template
 FILES=`find . -type f | grep -v svn | grep -E "(php|css|htm|html|dtd|htc|gif|dat)$$"`
 # also set in Makefile.conf, but we override with a shorter version
-iPATHFILE=pathinclude.h.php
+iPATHFILE=pathinclude.php
 
 all:
 

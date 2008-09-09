@@ -31,7 +31,7 @@
 $GlobalReady = 1;
 
 /* Load all code */
-require_once("pathinclude.h.php");
+require_once("../lib/fossology/php/pathinclude.php");
 global $WEBDIR;
 $UI_CLI = 1; /* this is a command-line program */
 require_once("$WEBDIR/common/common.php");

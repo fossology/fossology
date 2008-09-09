@@ -60,7 +60,7 @@ function list_agents()
   $agent_list = menu_find("Agents", $depth);
   return($agent_list);
 }
-require_once("pathinclude.h.php");
+require_once("../lib/fossology/php/pathinclude.php");
 global $WEBDIR;
 $UI_CLI = 1;
 require_once("$WEBDIR/common/common.php");
