@@ -543,7 +543,7 @@
   $Schema["TABLE"]["report_cache_user"]["user_fk"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
 
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["DESC"] = "COMMENT ON COLUMN \"report_cache_user\".\"cache_on\" IS '''Y'' or ''N''';";
-  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ADD"] = "ALTER TABLE \"report_cache_user\" ADD COLUMN \"cache_on\" bpchar[1];";
+  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ADD"] = "ALTER TABLE \"report_cache_user\" ADD COLUMN \"cache_on\" bpchar;";
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"cache_on\" SET NOT NULL, ALTER COLUMN \"cache_on\" SET DEFAULT 'Y'::bpchar;";
 
 
