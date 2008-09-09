@@ -1004,11 +1004,13 @@ LANGUAGE plpgsql;
 	{
 	if ($Curr['TABLE'][$Table][$Column]['ADD'] != $Val['ADD'])
 	  {
+	  $Rename="";
 	  if ($DB->ColExist($Table,$Column))
 	    {
 	    /* The column exists, but it looks different!
 	       Solution: Delete the column! */
-	    $SQL = "ALTER TABLE \"$Table\" DROP COLUMN \"$Column\";";
+	    $Rename = $Column . "_old";
+	    $SQL = "ALTER TABLE \"$Table\" RENAME COLUMN \"$Column\" TO \"$Rename\";";
 	    if ($Debug) { print "$SQL\n"; }
 	    else { $DB->Action($SQL); }
             if ($DB->Error) { exit(1); }
@@ -1016,6 +1018,18 @@ LANGUAGE plpgsql;
 	  if ($Debug) { print $Val['ADD'] . "\n"; }
 	  else { $DB->Action($Val['ADD']); }
           if ($DB->Error) { exit(1); }
+	  if (!empty($Rename))
+	    {
+	    /* copy over the old data */
+	    $SQL = "UPDATE \"$Table\" SET \"$Column\" = \"$Rename\";";
+	    if ($Debug) { print "$SQL\n"; }
+	    else { $DB->Action($SQL); }
+            if ($DB->Error) { exit(1); }
+	    $SQL = "ALTER TABLE \"$Table\" DROP COLUMN \"$Rename\";";
+	    if ($Debug) { print "$SQL\n"; }
+	    else { $DB->Action($SQL); }
+            if ($DB->Error) { exit(1); }
+	    }
 	  }
 	if ($Curr['TABLE'][$Table][$Column]['ALTER'] != $Val['ALTER'])
 	  {
