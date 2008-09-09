@@ -35,10 +35,7 @@ require_once('fossologyTest.php');
   public $debug;
 
   /* possible methods to add */
-  public function uploadServer(){
-    return TRUE;
-  }
-  public function oneShotLicense(){
+  public function dbCheck(){
     return TRUE;
   }
   public function deleteFolder(){
@@ -47,25 +44,25 @@ require_once('fossologyTest.php');
   public function deleteUpload(){
     return TRUE;
   }
-  public function moveUpload(){
-    return TRUE;
-  }
-  public function rmLicAnalysis(){
-    return TRUE;
-  }
-  public function editFolder(){
-    return TRUE;
-  }
-  public function mvFolder(){
-    return TRUE;
-  }
   public function jobsSummary(){
     return TRUE;
   }
   public function jobsDetail(){
     return TRUE;
   }
-  public function dbCheck(){
+  public function mvFolder(){
+    return TRUE;
+  }
+  public function moveUpload(){
+    return TRUE;
+  }
+  public function oneShotLicense(){
+    return TRUE;
+  }
+  public function rmLicAnalysis(){
+    return TRUE;
+  }
+  public function uploadServer(){
     return TRUE;
   }
   /**
@@ -114,6 +111,46 @@ require_once('fossologyTest.php');
     $this->assertTrue(page);
     $this->assertTrue($this->myassertText($page, "/Folder $name Created/"),
      "createFolder Failed!\nPhrase 'Folder $name Created' not found\nDoes the Folder exist?\n");
+  }
+  /**
+   * editFolder
+   *
+   * @param string $folder the folder to edit
+   * @param string $newName the new name for the folder
+   * @param string $description Optional description, default
+   * description is always created, to overide the default, supply a
+   * descrtion.
+   *
+   * Assumes that the caller has already logged in.
+   */
+  public function editFolder($folder, $newName, $description=null)
+  {
+    global $URL;
+
+    /* Need to check parameters */
+    if(empty($folder))
+    {
+      return(FALSE);
+    }
+    if(empty($newName))
+    {
+      return(FALSE);
+    }
+    if (is_null($description)) // set default if null
+    {
+      $description = "Folder $newName edited by editFolder Test, this is the changed description";
+    }
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Edit Properties');
+    $this->assertTrue($this->myassertText($page,'/Edit Folder Properties/'));
+    $FolderId = $this->getFolderId($folder, $page);
+    $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
+    $this->assertTrue($this->mybrowser->setField('newname', $name));
+    $this->assertTrue($this->mybrowser->setField('newdesc', "$description"));
+    $page = $this->mybrowser->clickSubmit('Edit!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->myassertText($page, "/Folder Properties changed/"),
+     "editFolder Failed!\nPhrase 'Folder Properties changed' not found\n");
   }
 
  /**
