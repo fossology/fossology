@@ -116,8 +116,8 @@ require_once('fossologyTest.php');
      "createFolder Failed!\nPhrase 'Folder $name Created' not found\nDoes the Folder exist?\n");
   }
 
-  /**
-  * function uploadAFile
+ /**
+  * uploadFile
   * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
   *
   * Upload a file and optionally schedule the agents.
@@ -127,9 +127,6 @@ require_once('fossologyTest.php');
   * @param string $uploadFile the path to the file to upload
   * @param string $description=null optonal description
   * @param string $uploadName=null optional upload name
-  *
-  * @todo, add in selecting agents the parameter to this routine will
-  * need to be quoted if it contains commas.
   *
   * @todo add ability to specify uploadName
   *
@@ -155,7 +152,7 @@ require_once('fossologyTest.php');
     }
     if (is_null($description)) // set default if null
     {
-      $description = "File $uploadFile uploaded by test UploadAFileTest";
+      $description = "File $uploadFile uploaded by test UploadFileTest";
     }
     //print "starting uploadFile\n";
     $loggedIn = $this->mybrowser->get($URL);
@@ -163,16 +160,30 @@ require_once('fossologyTest.php');
     $page = $this->mybrowser->get("$URL?mod=upload_file");
     $this->assertTrue($this->myassertText($page, '/Upload a New File/'));
     $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
-    $this->assertTrue($this->mybrowser->setField('folder', $parentFolder), "FAIL! could not select Parent Folder!\n");
-    $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile"));
-    $this->assertTrue($this->mybrowser->setField('description', "$description"));
+    $FolderId = $this->getFolderId($parentFolder, $page);
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId),
+        "uploadFile FAILED! could not set 'folder' field!\n");
+    $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile"),
+        "uploadFile FAILED! could not set 'getfile' field!\n");
+    $this->assertTrue($this->mybrowser->setField('description', "$description"),
+        "uploadFile FAILED! could not set 'description' field!\n");
     /*
-     * the test breaks if the name is set to null $this->assertTrue
-     * ($this- >mybrowser- >setField ('name', $upload_name));
+     * the test will fail if name is set to null, so we special case it
+     * rather than just set it.
      */
-    /* Select agents to run, we just pass on the parameter to setAgents */
-    $rtn = $this->setAgents($agents);
-    if(is_null($rtn)) { $this->fail("FAIL: could not set agents in uploadAFILE test\n"); }
+    if(!(is_null($uploadName)))
+    {
+      $this->assertTrue($this->mybrowser->setField('name', "$uploadName"),
+          "uploadFile FAILED! could not set 'name' field!\n");
+    }
+    /*
+     * Select agents to run, we just pass on the parameter to setAgents,
+     * don't bother if null
+     */
+    if(!(is_null($agents)))
+    {
+      $this->setAgents($agents);
+    }
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
     //print "************* page after Upload! is *************\n$page\n";
