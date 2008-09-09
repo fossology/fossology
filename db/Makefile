@@ -9,7 +9,6 @@ all:
 
 install: all
 	$(INSTALL_DATA) fossologyinit.sql $(DESTDIR)$(AGENTTESTDDIR)/fossologyinit.sql
-	$(INSTALL_DATA) fossologyclear.sql $(DESTDIR)$(AGENTTESTDDIR)/fossologyclear.sql
 	@if [ ! -f "$(DESTDIR)/etc/cron.d/fossology" -o "$(OVERWRITE)" ]; then \
 	   mkdir -p $(DESTDIR)/etc/cron.d/; \
 	   echo "NOTE: using default version for $(DESTDIR)/etc/cron.d/fossology"; \
@@ -21,7 +20,6 @@ install: all
 
 uninstall:
 	rm -f $(DESTDIR)$(AGENTTESTDDIR)/fossologyinit.sql
-	rm -f $(DESTDIR)$(AGENTTESTDDIR)/fossologyclear.sql
 
 	@if [ -d $(DESTDIR)$(AGENTTESTDDIR) ]; then \
 	   if [ "`ls -A $(DESTDIR)$(AGENTTESTDDIR)`" ]; then \
