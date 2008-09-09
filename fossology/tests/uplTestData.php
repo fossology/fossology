@@ -77,9 +77,10 @@ class uploadTestDataTest extends fossologyTestCase
                      'http://www.gnu.org/licenses/agpl-3.0.txt');
 
     /* upload the archives using the upload from file menu */
+    $desciption = "File $upload uploaded by Upload Data Test";
     foreach($uploadList as $upload)
     {
-      $this->uploadFile('Testing', $upload, 'Testing', null, '1,2,3');
+      $this->uploadFile('Testing', $upload, $description, null, '1,2,3');
     }
     /* Upload the urls using upload from url */
     foreach($urlList as $url)
