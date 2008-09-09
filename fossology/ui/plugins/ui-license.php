@@ -340,7 +340,8 @@ class ui_license extends FO_Plugin
 		break;
 	}
 
-    $CacheKey = $_SERVER['REQUEST_URI'];
+    /* Use Traceback_parm_keep to ensure that all parameters are in order */
+    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder")) . "&show=$Show";
     $V = ReportCacheGet($CacheKey);
     if (empty($V) )  // no cache exists
     {
