@@ -5,7 +5,6 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-LIB=libcp2foss.h.php
 EXE=cp2foss.php fossinit.php fossjobs.php fosslic.php
 DOCS=cp2foss.pod fossjobs.pod
 MAN1FILES=$(DOCS:%.pod=%.1)
@@ -32,8 +31,6 @@ install: all
 		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(BINDIR)/$${file%.php}; \
 	done
 
-	$(INSTALL_DATA) $(LIB) $(DESTDIR)$(LIBDIR)/$(LIB)
-
 	for file in $(MAN1FILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MAN1DIR)/$$file; \
 	done
@@ -42,8 +39,6 @@ uninstall:
 	for file in $(EXE); do \
 		rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
 	done
-
-	rm -f $(DESTDIR)$(LIBDIR)/$(LIB)
 
 	for file in $(MAN1FILES); do \
 		rm -f $(DESTDIR)$(MAN1DIR)/$$file; \
