@@ -1602,7 +1602,10 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
 {
   int rc;
   int PlainCopy=0;
-  switch(CMD[CI->PI.Cmd].Type)
+  cmdtype Type;
+  Type = CMD[CI->PI.Cmd].Type;
+  if (CMD[CI->PI.Cmd].Status == 0) Type=CMD_DEFAULT;
+  switch(Type)
 	{
 	case CMD_PACK:
 	case CMD_RPM:
