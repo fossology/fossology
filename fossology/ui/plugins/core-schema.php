@@ -1106,6 +1106,7 @@ LANGUAGE plpgsql;
     /************************************/
     /* Delete indexes */
     /************************************/
+    $Curr = $this->GetSchema(); /* constraints and indexes are linked, recheck */
     if (!empty($Curr['INDEX']))
     foreach($Curr['INDEX'] as $Table => $IndexInfo)
       {
@@ -1148,6 +1149,7 @@ LANGUAGE plpgsql;
     /************************************/
     /* Add constraints (dependent on columns, views, and indexes) */
     /************************************/
+    $Curr = $this->GetSchema(); /* constraints and indexes are linked, recheck */
     if (!empty($Schema['CONSTRAINT']))
     foreach($Schema['CONSTRAINT'] as $Name => $SQL)
       {
