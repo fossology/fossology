@@ -270,7 +270,7 @@ class fossologyTest extends WebTestCase
   public function getFolderId($folderName, $page)
   {
     $found = preg_match("/.*value='([0-9].*?)'.*?;($folderName)<\//", $page, $matches);
-    //print "DB: matches is:\n";
+    //print "GFID: matches is:\n";
     //var_dump($matches) . "\n";
     return ($matches[1]);
   }

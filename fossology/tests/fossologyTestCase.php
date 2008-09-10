@@ -33,6 +33,7 @@ require_once('fossologyTest.php');
 {
   public $mybrowser;
   public $debug;
+  public $webProxy;
 
   /* possible methods to add */
   public function dbCheck(){
@@ -48,9 +49,6 @@ require_once('fossologyTest.php');
     return TRUE;
   }
   public function jobsDetail(){
-    return TRUE;
-  }
-  public function mvFolder(){
     return TRUE;
   }
   public function moveUpload(){
@@ -74,7 +72,8 @@ require_once('fossologyTest.php');
    * Assumes the caller is already logged into the Repository
    *
    * @param string $parent the parent folder name the folder will be
-   * created as a child of the parent folder.
+   * created as a child of the parent folder. If no name is supplied the
+   * root folder will be used for the parent folder.
    * @param string $name   the name of the folder to be created
    * @param string $description Optional user defined description, a
    * default description is always created.
@@ -94,7 +93,7 @@ require_once('fossologyTest.php');
     }
     if (is_null($description)) // set default if null
     {
-      $description = "Folder $name created by testFolder as subfolder of $parent";
+      $description = "Folder $name created by createFolder as subfolder of $parent";
     }
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Create');
@@ -110,7 +109,7 @@ require_once('fossologyTest.php');
     $page = $this->mybrowser->clickSubmit('Create!');
     $this->assertTrue(page);
     $this->assertTrue($this->myassertText($page, "/Folder $name Created/"),
-     "createFolder Failed!\nPhrase 'Folder $name Created' not found\nDoes the Folder exist?\n");
+     "createFolder Failed!\nPhrase 'Folder $name Created' not found\nDoes the Folder $name exist?\n");
   }
   /**
    * editFolder
@@ -132,10 +131,6 @@ require_once('fossologyTest.php');
     {
       return(FALSE);
     }
-    if(empty($newName))
-    {
-      return(FALSE);
-    }
     if (is_null($description)) // set default if null
     {
       $description = "Folder $newName edited by editFolder Test, this is the changed description";
@@ -145,12 +140,52 @@ require_once('fossologyTest.php');
     $this->assertTrue($this->myassertText($page,'/Edit Folder Properties/'));
     $FolderId = $this->getFolderId($folder, $page);
     $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
-    $this->assertTrue($this->mybrowser->setField('newname', $name));
+    if(!(empty($newName)))
+    {
+      $this->assertTrue($this->mybrowser->setField('newname', $newName));
+    }
     $this->assertTrue($this->mybrowser->setField('newdesc', "$description"));
     $page = $this->mybrowser->clickSubmit('Edit!');
     $this->assertTrue(page);
     $this->assertTrue($this->myassertText($page, "/Folder Properties changed/"),
      "editFolder Failed!\nPhrase 'Folder Properties changed' not found\n");
+  }
+
+  /**
+   * mvFolder
+   *
+   * Move a folder via the UI
+   *
+   * @param string $folder the folder name to move.
+   * @param string $destination the destination folder to move the
+   * folder to.  Default is the root folder.
+   *
+   */
+  public function mvFolder($folder, $destination)
+  {
+    global $URL;
+    if(empty($folder))
+    {
+      return(FALSE);
+    }
+    if(empty($destination))
+    {
+      $destination = 1;
+    }
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Move');
+    $this->assertTrue($this->myassertText($page,'/Move Folder/'));
+    $FolderId = $this->getFolderId($folder, $page);
+    $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
+    if($destination != 1)
+    {
+      $DfolderId = $this->getFolderId($destination, $page);
+    }
+    $this->assertTrue($this->mybrowser->setField('targetfolderid', $DfolderId));
+    $page = $this->mybrowser->clickSubmit('Move!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->myassertText($page, "/Moved folder $folder to folder $destination/"),
+     "moveFolder Failed!\nPhrase 'Move folder $folder to folder ....' not found\n");
   }
 
  /**
@@ -248,6 +283,7 @@ require_once('fossologyTest.php');
   public function uploadUrl($parentFolder=1, $url, $description=null, $uploadName=null, $agents=null)
   {
     global $URL;
+    global $PROXY;
     /*
      * check parameters:
      * default parent folder is root folder
@@ -268,6 +304,10 @@ require_once('fossologyTest.php');
       $description = "File $url uploaded by test UploadAUrl";
     }
     //print "starting UploadAUrl\n";
+    if(!(empty($this->webProxy)))
+    {
+      $this->mybrowser->useProxy($this->webProxy);
+    }
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
     $this->assertTrue($this->myassertText($loggedIn, '/From URL/'));
