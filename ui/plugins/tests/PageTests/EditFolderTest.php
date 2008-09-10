@@ -35,7 +35,7 @@ global $URL;
 
 class EditFolderTest extends fossologyTestCase
 {
-  public $folder_name;
+  public $editFolderName;
   public $mybrowser;
   public $newname;
 
@@ -43,21 +43,12 @@ class EditFolderTest extends fossologyTestCase
   {
     global $URL;
 
-    $this->Login($this->mybrowser);
+    $this->Login();
     /* create a folder, which is edited below */
-    $page = $this->mybrowser->get("$URL?mod=folder_create");
-    $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
-    /* select the folder to create this folder under */
     $FolderId = $this->getFolderId('Testing', $page);
-    $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
-    $this->folder_name = 'EditMe';
-    $this->assertTrue($this->mybrowser->setField('newname', $this->folder_name));
-    $desc = 'Folder created by EditFolderTest as subfolder of Testing';
-    $this->assertTrue($this->mybrowser->setField('description', "$desc"));
-    $page = $this->mybrowser->clickSubmit('Create!');
-    $this->assertTrue(page);
-    $this->assertTrue($this->myassertText($page, "/Folder $this->folder_name Created/"),
-                      "FAIL! Folder $this->folder_name Created not found\n");
+    $pid = getmypid();
+    $this->editFolderName = "EditMe-$pid";
+    $this->createFolder('Testing', $this->editFolderName);
   }
 
   function testEditFolder()
@@ -65,37 +56,22 @@ class EditFolderTest extends fossologyTestCase
     global $URL;
 
     print "starting EditFoldertest\n";
-
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'),
                       "FAIL! Could not find Organize menu\n");
     $this->assertTrue($this->myassertText($loggedIn, '/Folders /'));
     $this->assertTrue($this->myassertText($loggedIn, '/Edit Properties/'));
-    /* ok, this proves the text is on the page, let's see if we can
-     * go to the page and delete a folder
-     */
-    $page = $this->mybrowser->get("$URL?mod=folder_properties");
-    $this->assertTrue($this->myassertText($page, '/Edit Folder Properties/'));
-    $FolderId = $this->getFolderId('EditMe', $page);
-    $this->assertTrue($FolderId);
-    $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
-    /* edit the properties */
     $pid = getmypid();
-    $this->newname = "FolderEditedByTest-$pid";
-    $this->assertTrue($this->mybrowser->setField('newname', "$this->newname"));
-    $desc = 'Folder name/description changed by EditFolderTest as subfolder of Testing';
-    $this->assertTrue($this->mybrowser->setField('newdesc', "$desc"),
-                      "FAIL! Could not set description 'newdesc'\n");
-    $page = $this->mybrowser->clickSubmit('Edit!');
-    $this->assertTrue(page);
-    $this->assertTrue($this->myassertText($page, "/Folder Properties changed/"),
-                      "FAIL! Folder Properties changed not found\n");
+    $this->newname = "NewEditName-$pid";
+    $this->editFolder($this->editFolderName, $this->newname,
+                      "Folder name changed to $this->newname by testEditFolder");
     /* check the browse page */
     $page = $this->mybrowser->get("$URL?mod=browse");
     $this->assertTrue($this->myassertText($page, "/$this->newname/"),
-                       "FAIL! Folder $this->newname not found\n");
-    //print "************ page after Folder Delete! *************\n$page\n";
+                       "editFolderTest FAILED! Folder $this->newname not found\n");
+    //print "************ page after check for $this->newname *************\n$page\n";
   }
+
   function tearDown()
   {
     global $URL;
