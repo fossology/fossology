@@ -42,10 +42,12 @@ require_once ('fossologyTestCase.php');
 require_once ('TestEnvironment.php');
 
 global $URL;
+global $PROXY;
 
 class uploadTestDataTest extends fossologyTestCase
 {
   public $mybrowser;
+  public $webProxy;
 
     function setUp()
   {
@@ -67,6 +69,7 @@ class uploadTestDataTest extends fossologyTestCase
   function testuploadTestDataTest()
   {
     global $URL;
+    global $PROXY;
     print "starting testUploadTestData\n";
     $rootFolder = 1;
     $uploadList = array('TestData/archives/fossI16L499.tar.bz2',
@@ -82,7 +85,12 @@ class uploadTestDataTest extends fossologyTestCase
     {
       $this->uploadFile('Testing', $upload, $description, null, '1,2,3');
     }
-    /* Upload the urls using upload from url */
+    /* Upload the urls using upload from url.  Check if the user specificed a
+     * web proxy for the environment.  If so, set the attribute. */
+    if(!(empty($PROXY)))
+    {
+      $this->webProxy = $PROXY;
+    }
     foreach($urlList as $url)
     {
       $this->uploadUrl($rootFolder, $url, null, null, '1,2,3');

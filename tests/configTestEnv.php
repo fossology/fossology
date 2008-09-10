@@ -34,10 +34,14 @@
 // TODO : $usage = "$argv[0] Url User Password [path-to-suite]\n";
 
 // usage done this way as here doc's mess up eclipse colors.
-$U .= "Usage: $argv[0] Url User Password \nUrl is a full url with ending /\n";
-$U .= "e.g. http://someHost.somedomain/repo/\n";
-$U .= "Data-Base User and Data-Base Password\n";
-$U .= "Very little parameter checking is done.\n";
+$U .= "Usage: $argv[0] Url User Password [proxy]\n\nUrl is a full url with ending /\n";
+$U .= "e.g. http://someHost.somedomain/repo/\n\n";
+$U .= "Data-Base User and Data-Base Password\n\n";
+$U .= "Optional proxy in the form http://web-proxy.xx.com:80xx\n";
+$U .= "The proxy format is not checked, so make sure it's correct\n";
+$U .= "Very little parameter checking is done.\n\n";
+$U .= "For example,\n$argv[0] 'http://fossology.org/' dbuser dbpasswd 'http://web-proxy.somebody.com:8080'\n";
+$U .= "Note the single quotes to keep the shell happy.\n";
 $usage = $U;
 
 // simple parameter checks
@@ -47,8 +51,8 @@ if($argc < 4)
   exit(1);
 }
 
-list($me, $url, $user, $password, $Testpath) = $argv;
-//print "Params: U:$url USR:$user PW:password TP:$Testpath\n";
+list($me, $url, $user, $password, $proxy) = $argv;
+//print "Params: U:$url USR:$user PW:password PROX:$proxy\n";
 if(empty($url)) { exit(1); }
 if('http://' != substr($url,0,7))
 {
@@ -61,9 +65,20 @@ $startphp = "<?php\n";
 $fullUrl = "\$URL='$url';\n";
 $usr = "\$USER='$user';\n";
 $passwd = "\$PASSWORD='$password';\n";
+$useproxy = NULL;
 $endphp = "?>\n";
+if(!(empty($proxy)))
+{
+  $useproxy = "\$PROXY='$proxy';\n";
+  fwrite($FD, "$startphp$fullUrl$usr$passwd$useproxy$endphp");
+}
+else
+{
+  fwrite($FD, "$startphp$fullUrl$usr$passwd$endphp");
+}
 
-fwrite($FD, "$startphp$fullUrl$usr$passwd$endphp");
+
+
 fclose($FD);
 print "./TestEnvrionment.php created sucessfully\n";
 ?>
