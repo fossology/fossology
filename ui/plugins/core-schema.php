@@ -837,6 +837,8 @@ if (0)
       }
 
     /* Move it into place */
+    @chgrp($Realfile,"fossy");
+    @chmod($Realfile,0660);
     $CMD = "cat '$Tempfile' > '$Realfile'";
     if ($Debug) { print "$CMD\n"; }
     else
