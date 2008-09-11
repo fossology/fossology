@@ -30,7 +30,7 @@ class upload_file extends FO_Plugin
   public $Title      = "Upload a New File";
   public $Version    = "1.0";
   public $MenuList   = "Upload::From File";
-  public $Dependency = array("db","agent_unpack");
+  public $Dependency = array("db","agent_unpack","showjobs");
   public $DBaccess   = PLUGIN_DB_UPLOAD;
 
   /*********************************************
@@ -55,7 +55,7 @@ class upload_file extends FO_Plugin
     //echo "<pre>uploadfile: renaming uploaded file\n</pre>";
     if (!move_uploaded_file($TempFile,"$TempFile-uploaded"))
     {
-      echo "<pre>uploadfile: rename Failed!\n</pre>";
+      print "<pre>uploadfile: rename Failed!\n</pre>";
       return("Could not save uploaded file");
     }
     $UploadedFile = "$TempFile"  . "-uploaded";
@@ -78,6 +78,11 @@ class upload_file extends FO_Plugin
     $Unpack = &$Plugins[plugin_find_id("agent_unpack")];
     $Unpack->AgentAdd($uploadpk,array($jobqueuepk));
     AgentCheckBoxDo($uploadpk);
+
+    $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
+    print "The file has been uploaded. ";
+    print "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
+    print "<hr>\n";
     return(NULL);
   } // Upload()
 
