@@ -100,7 +100,7 @@ int	ReadChild	(int Thread)
 	}
     else if (!strncmp(Cmd,"LOG ",4) || !strncmp(Cmd,"LOG:",4))
 	{
-	DBErrorWrite(Thread,"LOG",Cmd+8);
+	DBErrorWrite(Thread,"LOG",Cmd+4);
 	fprintf(stderr,"DEBUG[%d]: %s\n",Thread,Cmd);
 	}
     else if (!strcmp(Cmd,"Success"))	{ /* TBD success */ }
