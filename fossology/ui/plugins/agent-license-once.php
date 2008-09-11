@@ -90,12 +90,19 @@ class agent_license_once extends FO_Plugin
 	else if (substr($Line,0,6) == "|A| = ")
 	  {
 	  $Bsam['Atok'] = intval(substr($Line,6));
-	  $Denominator += intval(substr($Line,6));
 	  }
 	else if (substr($Line,0,6) == "|B| = ")
 	  {
 	  $Bsam['Btok'] = intval(substr($Line,6));
-	  $Denominator += intval(substr($Line,6));
+	  }
+	else if (substr($Line,0,11) == "|Atotal| = ")
+	  {
+	  $Bsam['Atotal'] = intval(substr($Line,11));
+	  }
+	else if (substr($Line,0,11) == "|Btotal| = ")
+	  {
+	  $Bsam['Btotal'] = intval(substr($Line,11));
+	  $Denominator = intval(substr($Line,11));
 	  }
 	else if (substr($Line,0,11) == "max(AxB) = ")
 	  {
@@ -103,7 +110,7 @@ class agent_license_once extends FO_Plugin
 	  if ($Denominator > 0)
 	    {
 	    $Numerator = intval(substr($Line,11));
-	    $Match = intval($Numerator*200 / $Denominator) . "%";
+	    $Match = intval($Numerator*100 / $Denominator) . "%";
 	    }
 	  else { $Match = "0%"; }
 	  }
