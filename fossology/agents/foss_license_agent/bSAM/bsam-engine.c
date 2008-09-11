@@ -1345,6 +1345,9 @@ inline void	VerboseStats	(int Flag1SL)
 	  }
 	fputs("\n",stdout);
 
+	printf("|Atotal| = %d\n|Btotal| = %d\n",
+	  MS.Symbols[0].SymbolMax, MS.Symbols[1].SymbolMax);
+
 	printf("|A| = %d\n|B| = %d\nmax(AxB) = %d\n",
 	  (int)Alen, (int)Blen, MS.Matrix.MatrixMax);
 	if ((MS.Symbols[0].SymbolEnd==0) || (MS.Symbols[1].SymbolEnd==0))
@@ -1784,16 +1787,16 @@ int	ComputeMatrix	()
 
 #if 0
   printf("\n");
-  printf("Loaded:\n  A: %s (%s: %ld) :: %d - %d\n  B: %s (%s %ld) :: %d - %d\n",
-    MS.Label.Filename[0],MS.Label.Sectionname[0],MS.Symbols.SymbolMax[0],MinA,MaxA,
-    MS.Label.Filename[1],MS.Label.Sectionname[1],MS.Symbols.SymbolMax[1],MinB,MaxB);
+  printf("Loaded:\n  A: %s (%s: %d) :: %d - %d\n  B: %s (%s %d) :: %d - %d\n",
+    MS.Label[0].Filename,MS.Label[0].Sectionname,MS.Symbols[0].SymbolMax,MinA,MaxA,
+    MS.Label[1].Filename,MS.Label[1].Sectionname,MS.Symbols[1].SymbolMax,MinB,MaxB);
     printf("Matrix is %d x %d = %d   Using %d x %d\n",
-	(int)MS.Symbols.SymbolEnd[0],(int)MS.Symbols.SymbolEnd[1],
-	(int)(MS.Symbols.SymbolEnd[0]*MS.Symbols.SymbolEnd[1]),
+	(int)MS.Symbols[0].SymbolEnd,(int)MS.Symbols[0].SymbolEnd,
+	(int)(MS.Symbols[0].SymbolEnd*MS.Symbols[0].SymbolEnd),
 	MaxA-MinA,MaxB-MinB
 	);
-    if ((MS.Symbols.SymbolEnd[0] > MS.Symbols.SymbolMax[0]) ||
-	(MS.Symbols.SymbolEnd[1] > MS.Symbols.SymbolMax[1]))
+    if ((MS.Symbols[0].SymbolEnd > MS.Symbols[0].SymbolMax) ||
+	(MS.Symbols[1].SymbolEnd > MS.Symbols[1].SymbolMax))
 	printf("*** BAD MATRIX\n");
 #endif
 #if 0
