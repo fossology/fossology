@@ -77,7 +77,7 @@ class search_file_by_license extends FO_Plugin
         /* Load licenses */
         $Lics = array();
         $Offset = $Page*$Max;
-        LicenseGetAllFiles2($UploadTreePk,$Lics,$WantLic,$Max,$Offset);
+	$Lics = LicenseSearch($UploadTreePk,$WantLic,$Offset,$Max);
 
         /* Save the license results */
         $Count = count($Lics);
@@ -85,7 +85,7 @@ class search_file_by_license extends FO_Plugin
         /* Get the page menu */
         if (($Count >= $Max) || ($Page > 0))
         {
-          $VM = "<P />\n" . MenuPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
+          $VM = "<P />\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
           $V .= $VM;
         }
         else

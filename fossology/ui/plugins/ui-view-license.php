@@ -109,7 +109,7 @@ class ui_view_license extends FO_Plugin
 	FROM agent_lic_meta
 	INNER JOIN uploadtree ON uploadtree_pk = '$Item'
 	AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
-    INNER JOIN agent_lic_raw ON lic_pk=lic_fk
+	INNER JOIN agent_lic_raw ON lic_pk=lic_fk
 	WHERE lic_fk = $LicPk AND tok_pfile_start = $TokPfileStart
 	ORDER BY version DESC LIMIT 1;";
       $Results = $DB->Action($SQL);
@@ -169,11 +169,7 @@ class ui_view_license extends FO_Plugin
     if (empty($ModBack)) { $ModBack='license'; }
 
     /* Load licenses for this file */
-    $Results = $DB->Action("SELECT agent_lic_meta.*, lic_tokens FROM agent_lic_meta
-	INNER JOIN uploadtree ON uploadtree_pk = '$Item'
-    INNER JOIN agent_lic_raw ON lic_pk=lic_fk
-	AND uploadtree.pfile_fk = agent_lic_meta.pfile_fk
-	ORDER BY tok_pfile_start;");
+    $Results = LicenseGetForFile($Item);
 
     /* Process all licenses */
     if (count($Results) <= 0)
@@ -194,8 +190,7 @@ class ui_view_license extends FO_Plugin
 		{
 		$RefURL=Traceback() . "&lic=" . $R['lic_fk'] . "&licset=" . $R['tok_pfile_start'];
 		}
-	$LicName = LicenseGetName($R['agent_lic_meta_pk'],1);
-	$this->ConvertLicPathToHighlighting($R,$LicName,$RefURL);
+	$this->ConvertLicPathToHighlighting($R,$R['licterm_name'],$RefURL);
 	}
       }
 
