@@ -282,8 +282,7 @@ class ui_license_tree extends FO_Plugin
 
       /* Load licenses for the item */
       $Lics = array();
-      if ($IsContainer) { LicenseGetAll($C['uploadtree_pk'],$Lics); }
-      else { LicenseGet($C['pfile_fk'],$Lics); }
+      LicenseGetAll($C['uploadtree_pk'],$Lics);
 
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']))
