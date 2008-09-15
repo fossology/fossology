@@ -140,7 +140,7 @@ class ui_license extends FO_Plugin
     $ChildCount=0;
     $VF .= "<table border=0>";
     foreach($Children as $C)
-    {
+      {
       if (empty($C)) { continue; }
       /* Store the item information */
       $IsDir = Isdir($C['ufile_mode']);
@@ -148,24 +148,24 @@ class ui_license extends FO_Plugin
 
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
-	  {
-        $LinkUri = "$Uri&item=" . $C['uploadtree_pk'];
-        $LinkUri = preg_replace("/mod=license/","mod=view-license",$LinkUri);
-      }
+	{
+	$LinkUri = "$Uri&item=" . $C['uploadtree_pk'];
+	$LinkUri = preg_replace("/mod=license/","mod=view-license",$LinkUri);
+	}
       else
-      {
+	{
         $LinkUri = NULL;
-      }
+	}
 
       if (Iscontainer($C['ufile_mode']))
-      {
-        $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
-        $LicUri = "$Uri&item=" . $uploadtree_pk;
-      }
+	{
+	$uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
+	$LicUri = "$Uri&item=" . $uploadtree_pk;
+	}
       else
-      {
-        $LicUri = NULL;
-      }
+	{
+	$LicUri = NULL;
+	}
 
 
       /* Populate the output ($VF) - file list */
@@ -177,38 +177,40 @@ class ui_license extends FO_Plugin
        * number of licenses).
        */
       if ($LicTotal < 500)
-      {
+	{
         $LicCount = LicenseCount($C['uploadtree_pk']);
-      }
+	}
       else
+	{
         $LicCount = 0;
+	}
 
       $VF .= '<tr><td id="Lic-' . $LicCount . '" align="left">';
       $HasHref=0;
       if ($IsContainer)
-      {
+	{
         $VF .= "<a href='$LicUri'>";
         $VF .= "<b>";
         $HasHref=1;
-      }
+	}
       else if (!empty($LinkUri) && ($LicCount > 0))
-      {
+	{
         $VF .= "<a href='$LinkUri'>";
         $HasHref=1;
-      }
+	}
       $VF .= $C['ufile_name'];
       if ($IsDir) { $VF .= "/"; };
       if ($IsContainer) { $VF .= "<b>"; };
       if ($HasHref) { $VF .= "</a>"; }
       $VF .= "</td><td>";
       if ($LicCount)
-      {
-        $VF .= "[" . number_format($LicCount,0,"",",") . "&nbsp;";
-      //$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
-        $VF .= "license" . ($LicCount == 1 ? "" : "s");
-        $VF .= "</a>";
-        $VF .= "]";
-      }
+	{
+	$VF .= "[" . number_format($LicCount,0,"",",") . "&nbsp;";
+	//$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
+	$VF .= "license" . ($LicCount == 1 ? "" : "s");
+	$VF .= "</a>";
+	$VF .= "]";
+	}
       $VF .= "</td>";
       $VF .= "</tr>\n";
 
@@ -340,7 +342,8 @@ class ui_license extends FO_Plugin
 		break;
 	}
 
-    $CacheKey = $_SERVER['REQUEST_URI'];
+    /* Use Traceback_parm_keep to ensure that all parameters are in order */
+    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder")) . "&show=$Show";
     $V = ReportCacheGet($CacheKey);
     if (empty($V) )  // no cache exists
     {

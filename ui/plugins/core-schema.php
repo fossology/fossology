@@ -74,12 +74,12 @@ class core_schema extends FO_Plugin
        from having no default (technicality, but no implementation
        difference). */
     $SQLInfo = "SELECT table_name AS table,
-	ordinal_position AS ordinal
+	ordinal_position AS ordinal,
 	column_name AS column_name,
 	data_type AS type,
 	character_maximum_length AS modifier,
 	is_nullable AS notnull,
-	column_default AS default,
+	column_default AS default
 	FROM information_schema.columns
 	WHERE table_catalog = 'fossology'
 	AND table_schema = 'public';
@@ -113,6 +113,7 @@ class core_schema extends FO_Plugin
       else { $Schema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter DROP NOT NULL"; }
       if ($R['default'] != '')
 	{
+	// $R['default'] = preg_replace("/::.*/","",$R['default']);
 	$Schema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
 	}
       $Schema['TABLE'][$Table][$Column]['ALTER'] .= ";";
@@ -296,6 +297,172 @@ if (0)
     } // GetSchema()
 
   /***********************************************************
+   CompareSchema(): Get the current schema and display it to the screen.
+   ***********************************************************/
+  function CompareSchema($Filename)
+    {
+    $Red = '#FF8080';
+    $Blue = '#8080FF';
+    /**************************************/
+    /** BEGIN: Term list from ExportTerms() **/
+    /**************************************/
+    require_once($Filename); /* this will DIE if the file does not exist. */
+    /**************************************/
+    /** END: Term list from ExportTerms() **/
+    /**************************************/
+    $Current = $this->GetSchema();
+
+    print "<ul>\n";
+    print "<li><a href='#Table'>Tables</a>\n";
+    print "<li><a href='#Sequence'>Sequences</a>\n";
+    print "<li><a href='#View'>Views</a>\n";
+    print "<li><a href='#Index'>Indexes</a>\n";
+    print "<li><a href='#Constraint'>Constraints</a>\n";
+    if (count($Schema['FUNCTION']) > 0)
+      {
+      print "<li><a href='#Function'>Functions</a>\n";
+      }
+    print "</ul>\n";
+    print "<ul>\n";
+    print "<li><font color='$Red'>This color indicates the current schema (items that should be removed).</font>\n";
+    print "<li><font color='$Blue'>This color indicates the default schema (items that should be applies).</font>\n";
+    print "</ul>\n";
+
+    print "<a name='Table'></a><table width='100%' border='1'>\n";
+    $LastTableName="";
+    if (!empty($Schema['TABLE']))
+    foreach($Schema['TABLE'] as $TableName => $Columns)
+      {
+      if (empty($TableName)) { continue; }
+      foreach($Columns as $ColName => $Val)
+	{
+	if ($Val == $Current['TABLE'][$TableName][$ColName]) { continue; }
+	if ($LastTableName != $TableName)
+	  {
+	  print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>Alter SQL\n";
+	  $LastTableName = $TableName;
+	  }
+	if (empty($ColName)) { continue; }
+	print "<tr bgcolor='$Blue'><td>" . htmlentities($TableName);
+	print "<td>" . htmlentities($ColName);
+	print "<td>" . $Val['DESC'];
+	print "<td>" . $Val['ADD'];
+	print "<td>" . $Val['ALTER'];
+	print "\n";
+	}
+      }
+    if (!empty($Current['TABLE']))
+    foreach($Current['TABLE'] as $TableName => $Columns)
+      {
+      if (empty($TableName)) { continue; }
+      foreach($Columns as $ColName => $Val)
+	{
+	if ($Val == $Schema['TABLE'][$TableName][$ColName]) { continue; }
+	if ($LastTableName != $TableName)
+	  {
+	  print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>Alter SQL\n";
+	  $LastTableName = $TableName;
+	  }
+	if (empty($ColName)) { continue; }
+	print "<tr bgcolor='$Red'><td>" . htmlentities($TableName);
+	print "<td>" . htmlentities($ColName);
+	print "<td>" . $Val['DESC'];
+	print "<td>" . $Val['ADD'];
+	print "<td>" . $Val['ALTER'];
+	print "\n";
+	}
+      }
+    print "</table>\n";
+
+    print "<P/>\n";
+    print "<a name='Sequence'></a><table width='100%' border='1'>\n";
+    print "<th>Sequence<th>Definition\n";
+    if (!empty($Schema['SEQUENCE']))
+    foreach($Schema['SEQUENCE'] as $Name => $Description)
+      {
+      if (empty($Name)) { continue; }
+      if ($Description == $Current['SEQUENCE'][$Name]) { continue; }
+      print "<tr bgcolor='$Blue'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+      }
+    if (!empty($Current['SEQUENCE']))
+    foreach($Current['SEQUENCE'] as $Name => $Description)
+      {
+      if (empty($Name)) { continue; }
+      if ($Description == $Schema['SEQUENCE'][$Name]) { continue; }
+      print "<tr bgcolor='$Red'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+      }
+    print "</table>\n";
+
+
+    print "<P/>\n";
+    print "<a name='View'></a><table width='100%' border='1'>\n";
+    print "<th>View<th>Definition\n";
+    if (!empty($Schema['VIEW']))
+    foreach($Schema['VIEW'] as $Name => $Description)
+      {
+      if (empty($Name)) { continue; }
+      if ($Description == $Current['VIEW'][$Name]) { continue; }
+      print "<tr bgcolor='$Blue'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+      }
+    if (!empty($Current['VIEW']))
+    foreach($Current['VIEW'] as $Name => $Description)
+      {
+      if (empty($Name)) { continue; }
+      if ($Description == $Schema['VIEW'][$Name]) { continue; }
+      print "<tr bgcolor='$Red'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+      }
+    print "</table>\n";
+
+    print "<P/>\n";
+    print "<a name='Index'></a><table width='100%' border='1'>\n";
+    print "<th>Table<th>Index<th>Definition\n";
+    if (!empty($Schema['INDEX']))
+    foreach($Schema['INDEX'] as $Table => $Indexes)
+      {
+      if (empty($Table)) { continue; }
+      foreach($Indexes as $Index => $Define)
+	{
+	if ($Define == $Current['INDEX'][$Table][$Index]) { continue; }
+	print "<tr bgcolor='$Blue'><td>" . htmlentities($Table);
+	print "<td>" . htmlentities($Index);
+	print "<td>" . htmlentities($Define);
+	}
+      }
+    if (!empty($Current['INDEX']))
+    foreach($Current['INDEX'] as $Table => $Indexes)
+      {
+      if (empty($Table)) { continue; }
+      foreach($Indexes as $Index => $Define)
+	{
+	if ($Define == $Schema['INDEX'][$Table][$Index]) { continue; }
+	print "<tr bgcolor='$Red'><td>" . htmlentities($Table);
+	print "<td>" . htmlentities($Index);
+	print "<td>" . htmlentities($Define);
+	}
+      }
+    print "</table>\n";
+
+    print "<P/>\n";
+    print "<a name='Constraint'></a><table width='100%' border='1'>\n";
+    print "<th>Constraint<th>Definition\n";
+    if (!empty($Schema['CONSTRAINT']))
+    foreach($Schema['CONSTRAINT'] as $Name => $Description)
+      {
+      if (empty($Name)) { continue; }
+      if ($Description == $Current['CONSTRAINT'][$Name]) { continue; }
+      print "<tr bgcolor='$Blue'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+      }
+    if (!empty($Current['CONSTRAINT']))
+    foreach($Current['CONSTRAINT'] as $Name => $Description)
+      {
+      if (empty($Name)) { continue; }
+      if ($Description == $Schema['CONSTRAINT'][$Name]) { continue; }
+      print "<tr bgcolor='$Red'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+      }
+    print "</table>\n";
+    } // CompareSchema()
+
+  /***********************************************************
    ViewSchema(): Get the current schema and display it to the screen.
    ***********************************************************/
   function ViewSchema()
@@ -304,13 +471,6 @@ if (0)
 
     print "<ul>\n";
     print "<li><a href='#Table'>Tables</a>\n";
-    // print "<ol>\n";
-    // foreach($Schema['TABLE'] as $TableName => $Columns)
-    //   {
-    //   if (empty($TableName)) { continue; }
-    //   print "<li><a href='#Table-$TableName'>$TableName</a>\n";
-    //   }
-    // print "</ol>\n";
     print "<li><a href='#Sequence'>Sequences</a>\n";
     print "<li><a href='#View'>Views</a>\n";
     print "<li><a href='#Index'>Indexes</a>\n";
@@ -356,7 +516,6 @@ if (0)
       }
     print "</table>\n";
 
-    print "</table>\n";
     print "<P/>\n";
     print "<a name='View'></a><table width='100%' border='1'>\n";
     print "<th>View<th>Definition\n";
@@ -543,6 +702,8 @@ if (0)
     /************ Delete obsolete tables ************/
     if ($DB->TblExist("ufile")) { $DB->Action("DROP TABLE ufile CASCADE;"); }
     if ($DB->TblExist("proj")) { $DB->Action("DROP TABLE proj CASCADE;"); }
+    if ($DB->TblExist("log")) { $DB->Action("DROP TABLE log CASCADE;"); }
+    if ($DB->TblExist("table_enum")) { $DB->Action("DROP TABLE table_enum CASCADE;"); }
 
     /********************************************/
     /* Sequences can get out of sequence; Fix the sequences! */
@@ -676,6 +837,8 @@ if (0)
       }
 
     /* Move it into place */
+    @chgrp($Realfile,"fossy");
+    @chmod($Realfile,0660);
     $CMD = "cat '$Tempfile' > '$Realfile'";
     if ($Debug) { print "$CMD\n"; }
     else
@@ -843,9 +1006,32 @@ LANGUAGE plpgsql;
 	{
 	if ($Curr['TABLE'][$Table][$Column]['ADD'] != $Val['ADD'])
 	  {
+	  $Rename="";
+	  if ($DB->ColExist($Table,$Column))
+	    {
+	    /* The column exists, but it looks different!
+	       Solution: Delete the column! */
+	    $Rename = $Column . "_old";
+	    $SQL = "ALTER TABLE \"$Table\" RENAME COLUMN \"$Column\" TO \"$Rename\";";
+	    if ($Debug) { print "$SQL\n"; }
+	    else { $DB->Action($SQL); }
+            if ($DB->Error) { exit(1); }
+	    }
 	  if ($Debug) { print $Val['ADD'] . "\n"; }
 	  else { $DB->Action($Val['ADD']); }
           if ($DB->Error) { exit(1); }
+	  if (!empty($Rename))
+	    {
+	    /* copy over the old data */
+	    $SQL = "UPDATE \"$Table\" SET \"$Column\" = \"$Rename\";";
+	    if ($Debug) { print "$SQL\n"; }
+	    else { $DB->Action($SQL); }
+            if ($DB->Error) { exit(1); }
+	    $SQL = "ALTER TABLE \"$Table\" DROP COLUMN \"$Rename\";";
+	    if ($Debug) { print "$SQL\n"; }
+	    else { $DB->Action($SQL); }
+            if ($DB->Error) { exit(1); }
+	    }
 	  }
 	if ($Curr['TABLE'][$Table][$Column]['ALTER'] != $Val['ALTER'])
 	  {
@@ -922,6 +1108,7 @@ LANGUAGE plpgsql;
     /************************************/
     /* Delete indexes */
     /************************************/
+    $Curr = $this->GetSchema(); /* constraints and indexes are linked, recheck */
     if (!empty($Curr['INDEX']))
     foreach($Curr['INDEX'] as $Table => $IndexInfo)
       {
@@ -964,6 +1151,7 @@ LANGUAGE plpgsql;
     /************************************/
     /* Add constraints (dependent on columns, views, and indexes) */
     /************************************/
+    $Curr = $this->GetSchema(); /* constraints and indexes are linked, recheck */
     if (!empty($Schema['CONSTRAINT']))
     foreach($Schema['CONSTRAINT'] as $Name => $SQL)
       {
@@ -1042,6 +1230,9 @@ LANGUAGE plpgsql;
     /* DO NOT DELETE: cannot map to tables I use. */
     /************************************/
 
+    /************************************/
+    /* Commit changes */
+    /************************************/
     print "  Committing changes...\n"; flush();
     $DB->Action("COMMIT;");
     if ($DB->Error)
@@ -1050,6 +1241,12 @@ LANGUAGE plpgsql;
       flush();
       exit(1);
       }
+
+    /************************************/
+    /* Flush any cached data. */
+    /************************************/
+    print "  Purging cached results\n"; flush();
+    ReportCachePurgeAll();
 
     /************************************/
     /* Initialize all remaining plugins. */
@@ -1093,6 +1290,16 @@ LANGUAGE plpgsql;
 	    }
 	  $V .= "<hr>\n";
 	  }
+	$Init = GetParm('Compare',PARM_INTEGER);
+	if ($Init == 1)
+	  {
+	  $rc = $this->CompareSchema($this->Filename);
+	  if (!empty($rc))
+	    {
+	    $V .= PopupAlert($rc);
+	    }
+	  $V .= "<hr>\n";
+	  }
 	/* Undocumented parameter: Used for exporting the current terms. */
 	$Init = GetParm('Export',PARM_INTEGER);
 	if ($Init == 1)
@@ -1125,6 +1332,7 @@ LANGUAGE plpgsql;
 	$V .= "<P/>\n";
 	$V .= "<table width='100%' border='1'>\n";
 	$V .= "<tr><td width='2%'><input type='checkbox' value='1' name='View'><td>Check to view the current schema. The output generation is harmless, but extremely technical.<br>\n";
+	$V .= "<tr><td><input type='checkbox' value='1' name='Compare'><td>Highlight the differences between the default schema (blue) and current schema (red).<br>\n";
 	$V .= "<tr><td><input type='checkbox' value='1' name='Export'><td>Check to export the current schema. This will overwrite your default schema configuration file. Don't do this unless you know <i>exactly</i> what you are doing. The default configuration file is the only one that is supported. This will overwrite your default file.<br>\n";
 	$V .= "<tr><td><input type='checkbox' value='1' name='Apply'><td>Check to apply the last exported schema. This will overwrite and atempt to migrate your database schema according to the default configuration file. Non-standard columns, tables, constraints, and views can and will be destroyed.\n";
 	$V .= "</table>\n";

@@ -112,9 +112,9 @@ class upload_srv_files extends FO_Plugin {
     if (empty($ShortName)) { $ShortName = $Name; }
     // Create an upload record.
     $Mode = (1<<3); // code for "it came from web upload"
-    $upload_pk = JobAddUpload($ShortName,$SourceFiles,$Desc,$Mode,$FolderPk);
+    $uploadpk = JobAddUpload($ShortName,$SourceFiles,$Desc,$Mode,$FolderPk);
 
-    $jobq = JobAddJob($upload_pk, 'fosscp_agent', 0);
+    $jobq = JobAddJob($uploadpk, 'fosscp_agent', 0);
     if (empty($jobq) || ($jobpk < 0))
 	{
 	return("Failed to create job record");
@@ -126,7 +126,12 @@ class upload_srv_files extends FO_Plugin {
 	{
 	return("Failed to place fosscp_agent in job queue");
 	}
-    return;
+
+    $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
+    print "The upload has been scheduled. ";
+    print "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
+    print "<hr>\n";
+    return(NULL);
   } // Upload()
 
   /**

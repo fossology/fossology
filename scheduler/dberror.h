@@ -21,6 +21,6 @@
 
 void	DBErrorInit	();
 void	DBErrorClose	();
-void	DBErrorWrite	(int Thread, int GenericFlag, char *Message);
+void	DBErrorWrite	(int Thread, char *Type, char *Message);
 
 #endif

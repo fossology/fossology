@@ -1261,6 +1261,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   if (!Upload_Pk) return(-1); /* should never happen */
   // printf("=========== BEFORE ==========\n"); DebugContainerInfo(CI);
 
+#if 0
   /* Check if tree already exists for some other project */
   /** Same pfile = same tree **/
   if (CI->pfile_pk > 0)
@@ -1289,6 +1290,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
         }
       }
     } /* If pfile_pk is set */
+#endif
 
   /* Find record's mode */
   CI->ufile_mode = CI->Stat.st_mode & Mask;
@@ -1602,7 +1604,10 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
 {
   int rc;
   int PlainCopy=0;
-  switch(CMD[CI->PI.Cmd].Type)
+  cmdtype Type;
+  Type = CMD[CI->PI.Cmd].Type;
+  if (CMD[CI->PI.Cmd].Status == 0) Type=CMD_DEFAULT;
+  switch(Type)
 	{
 	case CMD_PACK:
 	case CMD_RPM:

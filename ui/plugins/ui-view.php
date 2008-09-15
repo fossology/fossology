@@ -376,9 +376,8 @@ class ui_view extends FO_Plugin
       $S = htmlentities($S);
       if ($Flowed)
 	{
-	$S = str_replace("\r\n","<br>\n",$S);
+	$S = str_replace("\r","",$S);
 	$S = str_replace("\n","<br>\n",$S);
-	$S = str_replace("\r","<br>\n",$S);
 	$S = str_replace("\t","&nbsp;&nbsp;",$S);
 	}
 
@@ -621,7 +620,7 @@ class ui_view extends FO_Plugin
 			$Format='flow';
 			break;
 		default:
-			$Format = 'hex';
+			$Format = 'flow';
 		}
 	  break;
 	}

@@ -30,6 +30,16 @@
 /* Have to set this or else plugins will not load. */
 $GlobalReady = 1;
 
+/* Must run as group fossy! */
+$GID = posix_getgrnam("fossy");
+posix_setgid($GID['gid']);
+$Group = `groups`;
+if (!preg_match("/\sfossy\s/",$Group) && (posix_getgid() != $GID['gid']))
+  {
+  print "ERROR: Unable to run as group 'fossy'\n";
+  return(1);
+  }
+
 /* Load all code */
 require_once(dirname(__FILE__) . '/../share/fossology/php/pathinclude.php');
 global $WEBDIR;
