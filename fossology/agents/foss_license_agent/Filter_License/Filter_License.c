@@ -1067,6 +1067,9 @@ int	PreprocessFile	(int UseRep)
 	LastC=-1;
 	}
 
+    /* Remove non-license-like printable characters */
+    else if (!isalnum(C) && !strchr(".,;?!-",C)) C=' ';
+
     /* NEXT STEP!  Clean up text */
     else if ((BytesLeft >= 2) && !strncasecmp((char *)(Rep->Mmap+i),"(c)",3))
 	{
@@ -1081,6 +1084,7 @@ int	PreprocessFile	(int UseRep)
 	C=-7;
 	strcpy(S,"Year");
 	}
+
     /* massive duplication */
     else if ((BytesLeft >= 3) && (C != ' ') && isprint(C) && !isalnum(C) &&
              (C == Rep->Mmap[i+1]) && (C == Rep->Mmap[i+2]))
