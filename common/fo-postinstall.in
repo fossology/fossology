@@ -160,11 +160,6 @@ chown {$PROJECTUSER}:{$PROJECTGROUP} $INIT
 echo "*** Initializing database tables ***"
 {$BINDIR}/fossinit
 
-# now that we know the database is available, (re)generate the
-# License.bsam file
-chown {$PROJECTUSER}:{$PROJECTGROUP} {$PROJECTSTATEDIR}/agents/License.bsam
-chmod 660 {$PROJECTSTATEDIR}/agents/License.bsam
-
 fi # end of DATABASE
 
 ########################################################################
