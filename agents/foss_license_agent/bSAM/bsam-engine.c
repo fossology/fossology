@@ -1491,10 +1491,8 @@ inline int	GetSeqRange	()
   MS.Matrix.MatrixBestMax = vBestEnd;
 
   /* check if threshold matches (this is -A and -B) */
-  a = MS.Matrix.MatrixMaxPos[0] - MS.Matrix.MatrixMinPos[0] + 1;
-  b = MS.Matrix.MatrixMaxPos[1] - MS.Matrix.MatrixMinPos[1] + 1;
-  if ((MS.Matrix.MatrixMax*100 < a*MatchThreshold[0]) ||
-      (MS.Matrix.MatrixMax*100 < b*MatchThreshold[1]))
+  if ((MS.Matrix.MatrixMax*100 < MS.Symbols[0].SymbolMax*MatchThreshold[0]) ||
+      (MS.Matrix.MatrixMax*100 < MS.Symbols[1].SymbolMax*MatchThreshold[1]))
 	{
 	return(0);
 	}
@@ -1778,8 +1776,8 @@ int	ComputeMatrix	()
 
 
   /* set range */
-  SkipA = MS.Symbols[0].SymbolEnd - ((MatchThreshold[0] * MS.Symbols[0].SymbolEnd) / 100);
-  SkipB = MS.Symbols[1].SymbolEnd - ((MatchThreshold[1] * MS.Symbols[1].SymbolEnd) / 100);
+  SkipA = MS.Symbols[0].SymbolEnd - ((MatchThreshold[0] * MS.Symbols[0].SymbolMax) / 100);
+  SkipB = MS.Symbols[1].SymbolEnd - ((MatchThreshold[1] * MS.Symbols[1].SymbolMax) / 100);
   MinA = MS.Symbols[0].SymbolStart;
   MinB = MS.Symbols[1].SymbolStart;
   MaxA = MS.Symbols[0].SymbolEnd;
