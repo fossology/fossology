@@ -68,13 +68,23 @@ class db_access extends FO_Plugin
    This is only called if the DB is needed.
    NOTE: There is no "db_close" since PHP automatically
    closes connections when everything closes.
+   "$Options" = an optional list of attributes for
+   connecting to the database. E.g.:
+     "dbname=text host=text user=text password=text"
    *******************************************************/
-  function db_init()
+  function db_init($Options="")
     {
     global $DATADIR, $PROJECT;
     if (isset($this->_pg_conn)) { return(1); }
     $path="$DATADIR/dbconnect/$PROJECT";
-    $this->_pg_conn = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
+    if (empty($Options))
+      {
+      $this->_pg_conn = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
+      }
+    else
+      {
+      $this->_pg_conn = pg_pconnect(str_replace(";", " ", $Options));
+      }
     if (!isset($this->_pg_conn)) return(0);
     $this->Error = 0;
     return(1);

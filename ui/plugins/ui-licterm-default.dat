@@ -157,22 +157,23 @@
   $Term["BSD"]["Term"][]="redistributed under the terms of the ucb bsd license";
   $Term["BSD"]["License"][0]="BSD/BSD.new/BSD new";
   $Term["BSD"]["License"][1]="BSD/BSD.new/BSD new short";
-  $Term["BSD"]["License"][2]="BSD/BSD.new/Cryptix";
-  $Term["BSD"]["License"][3]="BSD/BSD.new/CWI";
-  $Term["BSD"]["License"][4]="BSD/BSD.new/Entessa Public License";
-  $Term["BSD"]["License"][5]="BSD/BSD.new/Vovida Software License v1.0";
-  $Term["BSD"]["License"][6]="BSD/BSD.old/Boost Software License";
-  $Term["BSD"]["License"][7]="BSD/BSD.old/BSD As-Is clause";
-  $Term["BSD"]["License"][8]="BSD/BSD.old/BSD Harvard";
-  $Term["BSD"]["License"][9]="BSD/BSD.old/BSD NRL";
-  $Term["BSD"]["License"][10]="BSD/BSD.old/BSD old";
-  $Term["BSD"]["License"][11]="BSD/BSD.old/BSD UCRegents";
-  $Term["BSD"]["License"][12]="BSD/BSD.old/BSD UCRegents variant 2";
-  $Term["BSD"]["License"][13]="BSD/BSD.old/BSD zlib";
-  $Term["BSD"]["License"][14]="BSD/BSD.old/FreeBSD";
-  $Term["BSD"]["License"][15]="BSD/BSD.old/INRIA-OSL";
-  $Term["BSD"]["License"][16]="BSD/BSD.old/Intel-OSL";
-  $Term["BSD"]["License"][17]="Free/FreeWithCopyright/UC Regents free with copyright clause";
+  $Term["BSD"]["License"][2]="BSD/BSD.new/BSD variant";
+  $Term["BSD"]["License"][3]="BSD/BSD.new/Cryptix";
+  $Term["BSD"]["License"][4]="BSD/BSD.new/CWI";
+  $Term["BSD"]["License"][5]="BSD/BSD.new/Entessa Public License";
+  $Term["BSD"]["License"][6]="BSD/BSD.new/Vovida Software License v1.0";
+  $Term["BSD"]["License"][7]="BSD/BSD.old/Boost Software License";
+  $Term["BSD"]["License"][8]="BSD/BSD.old/BSD As-Is clause";
+  $Term["BSD"]["License"][9]="BSD/BSD.old/BSD Harvard";
+  $Term["BSD"]["License"][10]="BSD/BSD.old/BSD NRL";
+  $Term["BSD"]["License"][11]="BSD/BSD.old/BSD old";
+  $Term["BSD"]["License"][12]="BSD/BSD.old/BSD UCRegents";
+  $Term["BSD"]["License"][13]="BSD/BSD.old/BSD UCRegents variant 2";
+  $Term["BSD"]["License"][14]="BSD/BSD.old/BSD zlib";
+  $Term["BSD"]["License"][15]="BSD/BSD.old/FreeBSD";
+  $Term["BSD"]["License"][16]="BSD/BSD.old/INRIA-OSL";
+  $Term["BSD"]["License"][17]="BSD/BSD.old/Intel-OSL";
+  $Term["BSD"]["License"][18]="Free/FreeWithCopyright/UC Regents free with copyright clause";
   /* Canonical name: 174 */
   $Term["BSD Gov"]["Desc"]="";
   $Term["BSD Gov"]["License"][0]="BSD/BSD.old/BSD Gov";
@@ -950,10 +951,9 @@
   $Term["RPSL v1.0"]["Term"][]="rpsl";
   $Term["RPSL v1.0"]["License"][0]="GPL/v2/RealNetworks/RealNetworks Public Source License v1.0";
   $Term["RPSL v1.0"]["License"][1]="GPL/v2/RealNetworks/RealNetworks Public Source License v1.0 reference";
-  /* Canonical name: 101 */
-  $Term["RSA"]["Desc"]="RSA Commercial License";
-  $Term["RSA"]["Term"][0]="rsa";
-  $Term["RSA"]["License"][0]="Corporate/RSA/RSA MD5";
+  /* Canonical name: 413 */
+  $Term["RSA-Security"]["Desc"]="RSA Commercial License";
+  $Term["RSA-Security"]["Term"][0]="rsa";
   /* Canonical name: 360 */
   $Term["Ruby"]["Desc"]="";
   $Term["Ruby"]["License"][0]="MiscOSS/Ruby";
