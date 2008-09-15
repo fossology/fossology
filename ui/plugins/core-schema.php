@@ -780,7 +780,7 @@ if (0)
     $CMD = 'find . -type f | grep -v "\.meta" | sed -e "s@^./@@"';
     $Filelist = explode("\n",shell_exec($CMD));
     sort($Filelist);
-    $Realfile = "$DATADIR/agents/License.bsam";
+    $Realfile = "$PROJECTSTATEDIR/agents/License.bsam";
     $Tempfile = $Realfile . ".new";
     if (file_exists($Tempfile))
       {
