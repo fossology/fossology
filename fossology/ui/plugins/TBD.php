@@ -34,7 +34,6 @@ class tbd extends FO_Plugin
 
   function RegisterMenus()
     {
-    menu_insert("Main::Organize::Uploads::Edit Properties (TBD)");
     menu_insert("Main::Jobs::Analyze::Code Compare (TBD)");
     menu_insert("Main::Admin::Scheduler::Stop (TBD)");
     menu_insert("Main::Admin::Scheduler::Start (TBD)");
