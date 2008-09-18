@@ -90,10 +90,18 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1)
     $V .= htmlentities($Name);
     $V .= "</option>\n";
     }
-  $Results = $DB->Action("SELECT folder_pk FROM folderlist
-	WHERE parent=$ParentFolder
-	AND folder_pk IS NOT NULL
-	ORDER BY name;");
+    /* Load any subfolders */
+    $Results = $DB->Action("SELECT folder.folder_pk, folder.folder_name AS name, 
+                                   folder.folder_desc AS description, 
+                                   foldercontents.parent_fk AS parent, 
+                                   foldercontents.foldercontents_mode, 
+                                   NULL AS ts, NULL AS upload_pk, NULL AS pfile_fk, NULL AS ufile_mode
+                            FROM folder, foldercontents
+                            WHERE foldercontents.foldercontents_mode = 1
+                                  AND foldercontents.parent_fk =$ParentFolder
+                                  AND foldercontents.child_id = folder.folder_pk
+                                  AND folder.folder_pk is not null
+                            ORDER BY name");
   if (isset($Results[0]['folder_pk']))
     {
     $Hide="";
