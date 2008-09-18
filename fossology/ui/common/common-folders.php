@@ -248,10 +248,18 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
   $Desc = str_replace('"',"&quot;",$Desc);
 
   /* Load any subfolders */
-  $Results = $DB->Action("SELECT folder_pk FROM folderlist
-	WHERE parent=$ParentFolder
-	AND folder_pk IS NOT NULL
-	ORDER BY name;");
+  $Results = $DB->Action("SELECT folder.folder_pk, folder.folder_name AS name, 
+                                 folder.folder_desc AS description, 
+                                 foldercontents.parent_fk AS parent, 
+                                 foldercontents.foldercontents_mode, 
+                                 NULL AS ts, NULL AS upload_pk, NULL AS pfile_fk, NULL AS ufile_mode
+                          FROM folder, foldercontents
+                          WHERE foldercontents.foldercontents_mode = 1
+                                AND foldercontents.parent_fk =$ParentFolder
+                                AND foldercontents.child_id = folder.folder_pk
+                                AND folder.folder_pk is not null
+                          ORDER BY name");
+
   /* Now create the HTML */
   if (isset($Results[0]['folder_pk']))
     {
