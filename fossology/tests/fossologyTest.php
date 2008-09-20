@@ -65,6 +65,8 @@ class fossologyTest extends WebTestCase
     return ($this->cookie = $cookie);
   }
 
+
+
   /* Factory methods, still need to change methods */
   function pmm($test)
   {
@@ -74,6 +76,57 @@ class fossologyTest extends WebTestCase
   {
     return(new parseLicenseTbl($this));
   }
+
+  /* Methods */
+
+   /**
+   * getFolderId($folderNmae, $page)
+   *
+   * parse the folder id out of the html...
+   *
+   *@param string $folderName the name of the folder
+   *@param string $page the xhtml page to search
+   *
+   *@return string (the folder id)
+   *
+   *@todo check for empty and return null?
+   */
+  public function getFolderId($folderName, $page)
+  {
+    /*
+     * special case the folder called root, it's always folder id 1.
+     * This way we still don't have to query for the name.
+     *
+     * This will probably break when users are implimented.
+     */
+    if($folderName == 'root') { return(1); }
+    $efolderName = $this->escapeDots($folderName);
+    $found = preg_match("/.*value='([0-9].*?)'.*?;($efolderName)<\//", $page, $matches);
+    //print "GFID: matches is:\n";
+    //var_dump($matches) . "\n";
+    return ($matches[1]);
+  }
+  /**
+   * getUploadId($uploadName, $page)
+   *
+   * parse the folder id out of the html in $page
+   *
+   *@param string $uploadName the name of the upload
+   *@param string $page the xhtml page to search
+   *
+   *@return string (upload ID)
+   *
+   *@todo check for empty and return null?
+   */
+  public function getUploadId($uploadName, $page)
+  {
+    $euploadName = $this->escapeDots($uploadName);
+    $found = preg_match("/.*?value='([0-9].*?)'>($euploadName ).*?</", $page, $matches);
+    //print "GUID: matches is:\n";
+    //var_dump($matches) . "\n";
+    return ($matches[1]);
+  }
+
 
   public function myassertText($page, $pattern)
   {
@@ -203,7 +256,7 @@ class fossologyTest extends WebTestCase
     //print "repoLogin is running\n";
     if (is_null($browser))
     {
-      print "_repoDBlogin setting browser\n";
+      //print "_repoDBlogin setting browser\n";
       $browser = & new SimpleBrowser();
     }
     $this->setBrowser($browser);
@@ -258,30 +311,29 @@ class fossologyTest extends WebTestCase
     }
     return (parse_url($URL, PHP_URL_HOST)); // can return NULL
   }
-
   /**
-   * parse the folder id out of the html...
+   * escapeDots($string)
    *
-   *@param string $folderName the name of the folder
-   *@param string $page the xhtml page to search
-   *
-   *@return string (the folder id)
+   * Escape '.' in a string by replacing '.' with '\.'
+   * @param string $string the input string to escape.
+   * @return string $estring the escaped string or False.
    */
-  public function getFolderId($folderName, $page)
+  public function escapeDots($string)
   {
-    $found = preg_match("/.*value='([0-9].*?)'.*?;($folderName)<\//", $page, $matches);
-    //print "GFID: matches is:\n";
-    //var_dump($matches) . "\n";
-    return ($matches[1]);
+    if(empty($string)) { return(FALSE); }
+    $estring = preg_replace('/\./', '\\.', $string);
+    //print  "ED: string is:$string, estring is:$estring\n";
+    if($estring === NULL) { return(FALSE); }
+    return($estring);
   }
 
   /**
-   * getBrowserUri get the url fragment to display the upload from the
-   * xhtml page.
+   * getBrowserUri($name, $page)
+   *
+   * Get the url fragment to display the upload from the xhtml page.
    *
    * @param string $name the name of a folder or upload
    * @param string $page the xhtml page to search
-   *
    *
    * TODO: finish or scrap this method
    *

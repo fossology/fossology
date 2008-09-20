@@ -166,7 +166,7 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->myassertText($page, "/Folder Properties changed/"), "editFolder Failed!\nPhrase 'Folder Properties changed' not found\n");
   }
   /**
-   * moveUpload($oldfolder, $newfolder, $upload)
+   * moveUpload($oldfFolder, $destFolder, $upload)
    *
    * Moves an upload from one folder to another. Assumes the caller has
    * logged in.
@@ -181,32 +181,43 @@ class fossologyTestCase extends fossologyTest
   public function moveUpload($oldFolder, $destFolder, $upload)
   {
     global $URL;
-    $destFolder = 0;
-
+    print "mU: OF:$oldFolder DF:$destFolder U:$upload\n";
     if (empty ($oldFolder))
     {
       return FALSE;
     }
     if (empty ($destFolder))
     {
-      $destFolderId = 1; // default is root folder
+      $destFolder = 'root'; // default is root folder
     }
+    print "Starting moveUpload in FTC\n";
     $page = $this->mybrowser->get($URL);
     /* use the method below till you write a menu function */
     $page = $this->mybrowser->get("$URL?mod=upload_move");
     //$page = $this->mybrowser->clickLink('Move');
     $this->assertTrue($this->myassertText($page, '/Move upload to different folder/'));
-    $FolderId = $this->getFolderId($oldfolder, $page);
-    $this->assertTrue($this->mybrowser->setField('oldfolderid', $oldFolder));
-    if ($destFolderId != 1)
+    $oldFolderId = $this->getFolderId($oldFolder, $page);
+    print "FTC: oldFolderId is:$oldFolderId\n";
+    $this->assertTrue($this->mybrowser->setField('oldfolderid', $oldFolderId));
+    $uploadId = $this->getUploadId($upload, $page);
+    print "FTC: uploadId is:$uploadId\n";
+    if(empty($uploadId))
     {
-      $DfolderId = $this->getFolderId($destFolder, $page);
+      $this->fail("moveUpload FAILED! could not find upload id for upload" .
+                  "$upload\n is $upload in $oldFolder?\n");
     }
-    $this->assertTrue($this->mybrowser->setField('targetfolderid', $DfolderId));
+    $this->assertTrue($this->mybrowser->setField('uploadid', $uploadId));
+    $destFolderId = $this->getFolderId($destFolder, $page);
+    print "FTC: destFolderId is:$destFolderId\n";
+    $this->assertTrue($this->mybrowser->setField('targetfolderid', $destFolderId));
     $page = $this->mybrowser->clickSubmit('Move!');
     $this->assertTrue(page);
-    $this->assertTrue($this->myassertText($page, "/Moved $upload from folder $oldFolder to folder $destFolder/"),
-       "moveUpload Failed!\nPhrase 'Move $upload from folder $oldFolder to folder $destFolder' not found\n");
+    print "page after move is:\n$page\n";
+    $this->assertTrue($this->myassertText($page,
+       //"/Moved $upload from folder $oldFolder to folder $destFolder/"),
+       "/Moved $upload from folder /"),
+       "moveUpload Failed!\nPhrase 'Move $upload from folder $oldFolder " .
+       "to folder $destFolder' not found\n");
   }
 
   /**
