@@ -29,7 +29,10 @@ require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
 require_once ('../../../../tests/TestEnvironment.php');
+require_once('../../../../tests/testClasses/timer.php');
 
+$start = new timer();
+print "Startnig Page Functional Tests at: " . date('r') . "\n";
 $test = &new TestSuite('Fossology Repo UI Page Functional tests');
 
 $test->addTestFile('UploadFileTest.php');
@@ -43,13 +46,19 @@ $test->addTestFile('editFolderTest.php');
 $test->addTestFile('editFolderNameOnlyTest.php');
 $test->addTestFile('editFolderDescriptionOnlyTest.php');
 $test->addTestFile('moveFolderTest.php');
-$test->addTestFile('browseUploadedTest.php');
+//$test->addTestFile('browseUploadedTest.php');
 $test->addTestFile('DupFolderTest.php');
 $test->addTestFile('DupUploadTest.php');
 
 if (TextReporter::inCli())
 {
-  exit($test->run(new TextReporter()) ? 0 : 1);
+  $results = $test->run(new TextReporter()) ? 0 : 1;
+  print "Ending Page Tests at: " . date('r') . "\n";
+  $elapseTime = $start->TimeAgo($start->getStartTime());
+  print "The Page Tests took {$elapseTime}to run\n";
+  exit($results);
 }
 $test->run(new HtmlReporter());
+$elapseTime = $start->TimeAgo($start->getStartTime());
+print "The Page Functional Tests took {$elapseTime}to run\n";
 ?>
