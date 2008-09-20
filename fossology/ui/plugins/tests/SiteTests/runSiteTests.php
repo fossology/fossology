@@ -27,12 +27,16 @@ set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
-require_once ('../../../../tests/TestEnvironment.php');
+
+require_once('../../../../tests/TestEnvironment.php');
+require_once('../../../../tests/testClasses/timer.php');
 
 global $URL;
 global $USER;
 global $PASSWORD;
 
+$start = new timer();
+print "Startnig Site Tests at: " . date('r') . "\n";
 $test = &new TestSuite('Fossology Repo Site UI tests');
 $test->addTestFile('AboutMenuTest.php');
 $test->addTestFile('login.php');
@@ -55,7 +59,13 @@ $test->addTestFile('UploadUrlMenuTest.php');
 $test->addTestFile('UploadOne-ShotMenuTest.php');
 if (TextReporter::inCli())
 {
-  exit ($test->run(new TextReporter()) ? 0 : 1);
+  $results = $test->run(new TextReporter()) ? 0 : 1;
+  print "Ending Site Tests at: " . date('r') . "\n";
+  $elapseTime = $start->TimeAgo($start->getStartTime());
+  print "The Site Tests took {$elapseTime}to run\n";
+  exit($results);
 }
 $test->run(new HtmlReporter());
+$elapseTime = $start->TimeAgo($start->getStartTime());
+print "<pre>The Site Tests took {$elapseTime}to run</pre>\n";
 ?>
