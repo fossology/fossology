@@ -37,9 +37,13 @@ require_once SIMPLE_TEST . 'unit_tester.php';
 require_once SIMPLE_TEST . 'reporter.php';
 require_once SIMPLE_TEST . 'web_tester.php';
 
-require_once ('TestEnvironment.php');
+require_once('TestEnvironment.php');
+// adjust the path below as needed, the path below assumes ..fossology/tests
+require_once('testClasses/timer.php');
 
 /* replace the TestSuite string with one that describes what the test suite is */
+$start = new timer();
+print "Startnig xxxx Tests at: " . date('r') . "\n";
 $test = & new TestSuite("Run Fossology tests");
 /*
  * To run a test use addTestFile method. as many tests as needed can be run this way.
@@ -48,12 +52,18 @@ $test = & new TestSuite("Run Fossology tests");
  */
 $test->addTestFile('atest');
 /*
- * leave the code below alone, it allows the tests to be run either by
- * the cli or in a web browser
+ * edit the print statements as needed, but leave the code below alone,
+ * it allows the tests to be run either by the cli or in a web browser
  */
 if (TextReporter :: inCli())
 {
-  exit ($test->run(new TextReporter()) ? 0 : 1);
+  $results = $test->run(new TextReporter()) ? 0 : 1;
+  print "Ending xxx Tests at: " . date('r') . "\n";
+  $elapseTime = $start->TimeAgo($start->getStartTime());
+  print "The xxxx Tests took {$elapseTime}to run\n";
+  exit($results);
 }
 $test->run(new HtmlReporter());
+$elapseTime = $start->TimeAgo($start->getStartTime());
+print "<pre>The xxxx Tests took {$elapseTime}to run</pre>\n";
 ?>
