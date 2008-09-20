@@ -149,11 +149,16 @@ if (array_key_exists("s", $options))
   "/tmp/SiteFOSSologyTests-$date 2>&1", $dummy, $Srtn);
 }
 
-// Page
+// ******************** Page *******************************************
 if (array_key_exists("p", $options))
 {
-  print "Running PageSetUpTests\n";
-  if(!$setUp) { _runSetupPage(); }
+  print "Running PageTests\n";
+  if(!$setUp)
+  {
+    print "Setup for the Pages tests does not appear to have been run\n";
+    print "running....\n";
+    _runSetupPage();
+  }
   if(chdir($PageTests) === FALSE)
   {
     print "Page Tests ERROR: can't cd to $PageTests\n";
