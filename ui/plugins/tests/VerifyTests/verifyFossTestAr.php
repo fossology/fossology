@@ -24,7 +24,7 @@
  * Created on Aug 25, 2008
  */
 
-require_once('../../../../tests/fossologyWebTestCase.php');
+require_once('../../../../tests/fossologyTestCase.php');
 require_once('../../../../tests/TestEnvironment.php');
 require_once('../../../../tests/testClasses/parseBrowseMenu.php');
 require_once('../../../../tests/testClasses/parseMiniMenu.php');
@@ -33,7 +33,7 @@ require_once('../../../../tests/testClasses/parseLicenseTbl.php');
 
 global $URL;
 
-class verifyFossolyTest extends fossologyWebTestCase
+class verifyFossolyTest extends fossologyTestCase
 {
   public $mybrowser;
   public $host;
@@ -67,39 +67,39 @@ class verifyFossolyTest extends fossologyWebTestCase
 
     print "starting VerifyFossology test\n";
     $page = $this->mybrowser->get("$URL?mod=browse");
-    $this->assertTrue($this->assertText($page, '/Browse/'),
+    $this->assertTrue($this->myassertText($page, '/Browse/'),
                       "FAIL! Could not find Browse menu\n");
 
     /* Testing folder */
     $page = $this->mybrowser->clickLink('Testing');
     //print "************ Page after upload link *************\n$page\n";
-    $this->assertTrue($this->assertText($page, "/Browse/"),
+    $this->assertTrue($this->myassertText($page, "/Browse/"),
                       "FAIL! Browse Title not found\n");
-    $this->assertTrue($this->assertText($page, "/$name/"),
+    $this->assertTrue($this->myassertText($page, "/$name/"),
                       "FAIL! did not find fossarchive-T.tar.bz2\n");
-    $this->assertTrue($this->assertText($page, "/>View</"),
+    $this->assertTrue($this->myassertText($page, "/>View</"),
                       "FAIL! >View< not found\n");
-    $this->assertTrue($this->assertText($page, "/>Meta</"),
+    $this->assertTrue($this->myassertText($page, "/>Meta</"),
                       "FAIL! >Meta< not found\n");
-    $this->assertTrue($this->assertText($page, "/>Download</"),
+    $this->assertTrue($this->myassertText($page, "/>Download</"),
                       "FAIL! >Download< not found\n");
 
     /* Select 'fossarchive-T.tar.bz2' */
     $page = $this->mybrowser->clickLink('fossarchive-T.tar.bz2');
     //print "************ Page after select foss archive *************\n$page\n";
-    $this->assertTrue($this->assertText($page, "/fossology\//"));
+    $this->assertTrue($this->myassertText($page, "/fossology\//"));
 
     /* Select fossology link */
     $page = $this->mybrowser->clickLink('fossology/');
 
-    $this->assertTrue($this->assertText($page, "/Makefile/"));
-    $this->assertTrue($this->assertText($page, "/mkcheck\.sh/"),
+    $this->assertTrue($this->myassertText($page, "/Makefile/"));
+    $this->assertTrue($this->myassertText($page, "/mkcheck\.sh/"),
                       "FAIL! did not find mkcheck.sh\n");
-    $this->assertTrue($this->assertText($page, "/>View</"),
+    $this->assertTrue($this->myassertText($page, "/>View</"),
                       "FAIL! >View< not found\n");
-    $this->assertTrue($this->assertText($page, "/>Meta</"),
+    $this->assertTrue($this->myassertText($page, "/>Meta</"),
                       "FAIL! >Meta< not found\n");
-    $this->assertTrue($this->assertText($page, "/>Download</"),
+    $this->assertTrue($this->myassertText($page, "/>Download</"),
                       "FAIL! >Download< not found\n");
 
     /* Select the License link to View License Historgram */
@@ -108,9 +108,9 @@ class verifyFossolyTest extends fossologyWebTestCase
     $miniMenu = $mini->parseMiniMenu();
     $url = $this->makeUrl($this->host, $miniMenu['License']);
     $page = $this->mybrowser->get($url);
-    $this->assertTrue($this->assertText($page, '/License Browser/'),
+    $this->assertTrue($this->myassertText($page, '/License Browser/'),
                       "FAIL! License Browser not found\n");
-    $this->assertTrue($this->assertText($page, '/Total licenses: 499/'),
+    $this->assertTrue($this->myassertText($page, '/Total licenses: 499/'),
                       "FAIL! Total Licenses does not equal 499\n");
 
     // get the 'Show' links and License color links
