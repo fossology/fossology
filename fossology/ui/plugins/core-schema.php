@@ -93,7 +93,7 @@ class core_schema extends FO_Plugin
       if (preg_match('/[0-9]/',$Table)) { continue; }
       $Column = $R['column_name'];
       $Type = $R['type'];
-      if ($R['modifier'] > 0) { $Type .= '[' . $R['modifier'] . ']'; }
+      if ($R['modifier'] > 0) { $Type .= '(' . $R['modifier'] . ')'; }
       $Desc = str_replace("'","''",$R['description']);
 
       $Schema['TABLEID'][$Table][$R['ordinal']] = $Column;
