@@ -1181,69 +1181,6 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 } /* DBInsertPfile() */
 
 /***************************************************
- DBInsertUploadTreeRecurse(): Recursively copy an uploadtree.
- Copy the tree starting at the parent.  Inserts everything
- under the current Upload_Pk.
- ***************************************************/
-void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
-{
-  long UploadTree,pfile_fk,ufile_mode;
-  char *ufile_name;
-  void *DBR;	/* data base results */
-  int i,Max;
-
-  /* Get all (unique) children for this parent */
-  memset(SQL,'\0',MAXSQL);
-  /* uploadtree_pk is unique */
-  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk,pfile_fk,ufile_mode,ufile_name FROM uploadtree WHERE parent = '%ld';",CopyParent);
-  if (MyDBaccess(DBTREE,SQL) > 0) /* SELECT */
-    {
-    /* Insert each child under this tree */
-    DBR = DBmove(DBTREE);
-    Max = DBdatasize(DBR);
-    for(i=0; i<Max; i++)
-	{
-	UploadTree = atol(DBgetvalue(DBR,i,0));
-	pfile_fk = atol(DBgetvalue(DBR,i,1));
-	ufile_mode = atol(DBgetvalue(DBR,i,2));
-	ufile_name = DBTaintString(DBgetvalue(DBR,i,3));
-
-	/* Add the child to uploadtree */
-	memset(SQL,'\0',MAXSQL);
-	if (NewParent > 0)
-	  {
-	  snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,'%s',%s);",
-	    NewParent, pfile_fk, ufile_mode, ufile_name, Upload_Pk);
-	  }
-	else
-	  {
-	  snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,'%s',%s);",
-	    pfile_fk, ufile_mode, ufile_name, Upload_Pk);
-	  }
-	if (MyDBaccess(DBTREE,SQL) == 0) /* INSERT INTO uploadtree */
-	  {
-	  /* Find the new ID for this insertion */
-	  memset(SQL,'\0',MAXSQL);
-	  if (NewParent > 0)
-	    {
-	    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE parent = '%ld' AND upload_fk = '%s';",
-	    NewParent, Upload_Pk);
-	    }
-	  else
-	    {
-	    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE parent IS NULL AND upload_fk = '%s';",
-	    Upload_Pk);
-	    }
-	  MyDBaccess(DBTREE,SQL);
-	  /* Recurse! */
-	  DBInsertUploadTreeRecurse(atol(DBgetvalue(DBTREE,0,0)),UploadTree);
-	  }
-	}
-    DBclose(DBR);
-    }
-} /* DBInsertUploadTreeRecurse() */
-
-/***************************************************
  DBInsertUploadTree(): Insert an UploadTree record.
  If the tree is a duplicate, then we need to replicate
  all of the uploadtree records for the tree.
@@ -1253,44 +1190,11 @@ void	DBInsertUploadTreeRecurse	(long NewParent, long CopyParent)
  ***************************************************/
 int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 {
-  long CopyParent;
   char UfileName[1024];
-  int Exist=0;
   int rc;
 
   if (!Upload_Pk) return(-1); /* should never happen */
   // printf("=========== BEFORE ==========\n"); DebugContainerInfo(CI);
-
-#if 0
-  /* Check if tree already exists for some other project */
-  /** Same pfile = same tree **/
-  if (CI->pfile_pk > 0)
-    {
-    memset(SQL,'\0',MAXSQL);
-    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk,parent,upload_fk FROM uploadtree WHERE pfile_fk = '%ld';",
-	  CI->pfile_pk);
-    if ((MyDBaccess(DBTREE,SQL) == 1) && (DBdatasize(DBTREE) > 0)) /* SELECT */
-      {
-      int i,Max;
-      Max = DBdatasize(DBTREE);
-      Exist = (Max > 0);
-      /* See if this RECORD already exists */
-      if (Exist)
-        {
-        for(i=0; i<Max; i++)
-          {
-	  if (strcmp(DBgetvalue(DBTREE,i,2),Upload_Pk)) continue;
-	  CopyParent = atol(DBgetvalue(DBTREE,i,1));
-	  if ((CopyParent==CI->PI.uploadtree_pk) || ((CopyParent==0)&&(CI->PI.uploadtree_pk==0)))
-	    {
-	    printf("WARNING pfile %s Duplicate record exists for this project.\n",Pfile_Pk);
-	    return(1);
-	    }
-	  }
-        }
-      }
-    } /* If pfile_pk is set */
-#endif
 
   /* Find record's mode */
   CI->ufile_mode = CI->Stat.st_mode & Mask;
@@ -1352,30 +1256,12 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name='%s';",
     Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
-  rc=MyDBaccess(DBTREE,SQL);
+  rc=MyDBaccess(DBTREE,"SELECT currval('uploadtree_uploadtree_pk_seq');");
   CI->uploadtree_pk = atol(DBgetvalue(DBTREE,0,0));
   TotalItems++;
   // printf("=========== AFTER ==========\n"); DebugContainerInfo(CI);
 
-  if (Exist)
-    {
-    /* There is a duplicate, so I just need to copy that over.  I need to
-       find the duplicate's uploadtree_pk for the recursion. */
-
-    /* There is a problem: a pfile may have a ufile without an uploadtree
-       entry.  This can happen if we screwed up things by deleting from
-       uploadtree without deleting the ufile. */
-    memset(SQL,'\0',MAXSQL);
-    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE pfile_fk = %ld AND upload_fk != '%s' LIMIT 1;",
-	CI->pfile_pk,Upload_Pk);
-    MyDBaccess(DBTREE,SQL); /* SELECT */
-    if (DBdatasize(DBTREE) == 1)
-      {
-      CopyParent = atol(DBgetvalue(DBTREE,0,0));
-      DBInsertUploadTreeRecurse(CI->PI.uploadtree_pk,CopyParent);
-      }
-    }
-  return(Exist);
+  return(0);
 } /* DBInsertUploadTree() */
 
 /***************************************************
