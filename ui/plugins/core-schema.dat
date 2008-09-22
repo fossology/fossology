@@ -766,7 +766,6 @@
   $Schema["CONSTRAINT"]["agent_wc_pfile_fk_key"] = "ALTER TABLE \"agent_wc\" ADD CONSTRAINT \"agent_wc_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
   $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"dirmodemask\" UNIQUE (\"mimetype_name\");";
   $Schema["CONSTRAINT"]["licgroup_licgroup_name_key"] = "ALTER TABLE \"licgroup\" ADD CONSTRAINT \"licgroup_licgroup_name_key\" UNIQUE (\"licgroup_name\");";
-  $Schema["CONSTRAINT"]["licterm_licterm_desc_key"] = "ALTER TABLE \"licterm\" ADD CONSTRAINT \"licterm_licterm_desc_key\" UNIQUE (\"licterm_desc\");";
   $Schema["CONSTRAINT"]["licterm_licterm_name_key"] = "ALTER TABLE \"licterm\" ADD CONSTRAINT \"licterm_licterm_name_key\" UNIQUE (\"licterm_name\");";
   $Schema["CONSTRAINT"]["licterm_words_licterm_words_text_key"] = "ALTER TABLE \"licterm_words\" ADD CONSTRAINT \"licterm_words_licterm_words_text_key\" UNIQUE (\"licterm_words_text\");";
   $Schema["CONSTRAINT"]["md5_sha1_size"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"md5_sha1_size\" UNIQUE (\"pfile_md5\",\"pfile_sha1\",\"pfile_size\");";
