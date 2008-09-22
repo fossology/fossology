@@ -46,7 +46,7 @@ class ui_browse extends FO_Plugin
      The top-level folder must exist.
      ****************/
     /* check if the table needs population */
-    $SQL = "SELECT * FROM folder WHERE folder_pk=1;"
+    $SQL = "SELECT * FROM folder WHERE folder_pk=1;";
     $Results = $DB->Action($SQL);
     if (count($Results) == 0)
       {
