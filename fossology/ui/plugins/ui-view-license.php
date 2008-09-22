@@ -70,19 +70,20 @@ class ui_view_license extends FO_Plugin
     $View = &$Plugins[plugin_find_id("view")];
 
     $First=1;
+    if (!empty($Row['phrase_text']))
+	{
+	$LicName .= ": " . $Row['phrase_text'];
+	}
     foreach(split(",",$Row['pfile_path']) as $Segment)
 	{
 	if (!empty($Segment))
 	  {
 	  $Parts = split("-",$Segment,2);
 	  if (empty($Parts[1])) { $Parts[1] = $Parts[0]; }
-      if (empty($Row['lic_tokens']))
-        $Match = "";
-      else
-        $Match = (int)($Row['tok_match'] * 100 / ($Row['lic_tokens'])) . "%";
+	  if (empty($Row['lic_tokens'])) $Match = "100%";
+	  else $Match = (int)($Row['tok_match'] * 100 / ($Row['lic_tokens'])) . "%";
 	  if ($First) { $First = 0; $Color=-2; }
 	  else { $Color=-1; $LicName=NULL; }
-
 	  $View->AddHighlight($Parts[0],$Parts[1],$Color,$Match,$LicName,-1,$RefURL);
 	  }
 	}
@@ -105,7 +106,7 @@ class ui_view_license extends FO_Plugin
     /* Find the license path */
     if (!empty($Item))
       {
-      $SQL = "SELECT license_path,tok_match,tok_license, lic_tokens
+      $SQL = "SELECT license_path,tok_match,tok_license,lic_tokens
 	FROM agent_lic_meta
 	INNER JOIN uploadtree ON uploadtree_pk = '$Item'
 	AND agent_lic_meta.pfile_fk = uploadtree.pfile_fk
