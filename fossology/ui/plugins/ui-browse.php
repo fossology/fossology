@@ -35,6 +35,33 @@ class ui_browse extends FO_Plugin
   var $LoginFlag  = 0;
 
   /***********************************************************
+   Install(): Create and configure database tables
+   ***********************************************************/
+  function Install()
+  { 
+    global $DB;
+    if (empty($DB)) { return(1); } /* No DB */
+
+    /****************
+     The top-level folder must exist.
+     ****************/
+    /* check if the table needs population */
+    $SQL = "SELECT * FROM folder WHERE folder_pk=1;"
+    $Results = $DB->Action($SQL);
+    if (count($Results) == 0)
+      {
+      $SQL = "INSERT INTO folder (folder_pk,folder_name,folder_desc) VALUES (1,'Software Repository','Top Folder');";
+      $DB->Action($SQL);
+      $SQL = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES (1,0,0);";
+      $DB->Action($SQL);
+      /* Make sure auto-index is correct */
+      $SQL = "SELECT SETVAL('foldercontents_foldercontents_pk_seq',(SELECT MAX(folder_pk) FROM folder LIMIT 1));" 
+      $DB->Action($SQL);
+      }
+    return(0);
+  } // Install()
+
+  /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
   function RegisterMenus()
