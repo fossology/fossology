@@ -493,11 +493,11 @@
   $Schema["TABLE"]["pfile"]["pfile_pk"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_pk\" SET NOT NULL, ALTER COLUMN \"pfile_pk\" SET DEFAULT nextval('pfile_pfile_pk_seq'::regclass);";
 
   $Schema["TABLE"]["pfile"]["pfile_md5"]["DESC"] = "";
-  $Schema["TABLE"]["pfile"]["pfile_md5"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_md5\" bpchar(32);";
+  $Schema["TABLE"]["pfile"]["pfile_md5"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_md5\" char(32);";
   $Schema["TABLE"]["pfile"]["pfile_md5"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_md5\" SET NOT NULL;";
 
   $Schema["TABLE"]["pfile"]["pfile_sha1"]["DESC"] = "";
-  $Schema["TABLE"]["pfile"]["pfile_sha1"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_sha1\" bpchar(40);";
+  $Schema["TABLE"]["pfile"]["pfile_sha1"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_sha1\" char(40);";
   $Schema["TABLE"]["pfile"]["pfile_sha1"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_sha1\" SET NOT NULL;";
 
   $Schema["TABLE"]["pfile"]["pfile_size"]["DESC"] = "";
@@ -543,8 +543,8 @@
   $Schema["TABLE"]["report_cache_user"]["user_fk"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
 
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["DESC"] = "COMMENT ON COLUMN \"report_cache_user\".\"cache_on\" IS '''Y'' or ''N''';";
-  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ADD"] = "ALTER TABLE \"report_cache_user\" ADD COLUMN \"cache_on\" bpchar;";
-  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"cache_on\" SET NOT NULL, ALTER COLUMN \"cache_on\" SET DEFAULT 'Y'::bpchar;";
+  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ADD"] = "ALTER TABLE \"report_cache_user\" ADD COLUMN \"cache_on\" char;";
+  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"cache_on\" SET NOT NULL, ALTER COLUMN \"cache_on\" SET DEFAULT 'Y'::char;";
 
 
   $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"unique_scheduler\" IS 'unique id for the scheduler: gethostid()+getpid() for the scheduler';";
