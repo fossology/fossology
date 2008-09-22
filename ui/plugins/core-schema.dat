@@ -11,15 +11,15 @@
   $Schema["TABLE"]["agent"]["agent_pk"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_pk\" SET NOT NULL, ALTER COLUMN \"agent_pk\" SET DEFAULT nextval('agent_agent_pk_seq'::regclass);";
 
   $Schema["TABLE"]["agent"]["agent_name"]["DESC"] = "COMMENT ON COLUMN \"agent\".\"agent_name\" IS 'display name';";
-  $Schema["TABLE"]["agent"]["agent_name"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_name\" varchar[32];";
+  $Schema["TABLE"]["agent"]["agent_name"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_name\" varchar(32);";
   $Schema["TABLE"]["agent"]["agent_name"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_name\" SET NOT NULL;";
 
   $Schema["TABLE"]["agent"]["agent_rev"]["DESC"] = "COMMENT ON COLUMN \"agent\".\"agent_rev\" IS 'revision string';";
-  $Schema["TABLE"]["agent"]["agent_rev"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_rev\" varchar[32];";
+  $Schema["TABLE"]["agent"]["agent_rev"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_rev\" varchar(32);";
   $Schema["TABLE"]["agent"]["agent_rev"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_rev\" DROP NOT NULL;";
 
   $Schema["TABLE"]["agent"]["agent_desc"]["DESC"] = "COMMENT ON COLUMN \"agent\".\"agent_desc\" IS 'short description';";
-  $Schema["TABLE"]["agent"]["agent_desc"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_desc\" varchar[255];";
+  $Schema["TABLE"]["agent"]["agent_desc"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_desc\" varchar(255);";
   $Schema["TABLE"]["agent"]["agent_desc"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_desc\" DROP NOT NULL;";
 
   $Schema["TABLE"]["agent"]["agent_id"]["DESC"] = "COMMENT ON COLUMN \"agent\".\"agent_id\" IS 'agent ID (agents will have same ID regardless of revision)';";
@@ -40,11 +40,11 @@
   $Schema["TABLE"]["agent_lic_meta"]["tok_match"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"tok_match\" DROP NOT NULL;";
 
   $Schema["TABLE"]["agent_lic_meta"]["version"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"version\" IS 'Version of license agent - this should be replaced by a agent_fk';";
-  $Schema["TABLE"]["agent_lic_meta"]["version"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"version\" varchar[32];";
+  $Schema["TABLE"]["agent_lic_meta"]["version"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"version\" varchar(32);";
   $Schema["TABLE"]["agent_lic_meta"]["version"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"version\" DROP NOT NULL;";
 
   $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"phrase_text\" IS 'Section of the file containing the license.';";
-  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"phrase_text\" varchar[256];";
+  $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"phrase_text\" varchar(256);";
   $Schema["TABLE"]["agent_lic_meta"]["phrase_text"]["ALTER"] = "ALTER TABLE \"agent_lic_meta\" ALTER COLUMN \"phrase_text\" DROP NOT NULL;";
 
   $Schema["TABLE"]["agent_lic_meta"]["tok_pfile_start"]["DESC"] = "COMMENT ON COLUMN \"agent_lic_meta\".\"tok_pfile_start\" IS 'Offset of starting byte in the pfile (for display)';";
@@ -228,7 +228,7 @@
   $Schema["TABLE"]["job"]["job_pk"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_pk\" SET NOT NULL, ALTER COLUMN \"job_pk\" SET DEFAULT nextval('job_job_pk_seq'::regclass);";
 
   $Schema["TABLE"]["job"]["job_submitter"]["DESC"] = "COMMENT ON COLUMN \"job\".\"job_submitter\" IS 'job submitter name';";
-  $Schema["TABLE"]["job"]["job_submitter"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_submitter\" varchar[64];";
+  $Schema["TABLE"]["job"]["job_submitter"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_submitter\" varchar(64);";
   $Schema["TABLE"]["job"]["job_submitter"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_submitter\" SET NOT NULL;";
 
   $Schema["TABLE"]["job"]["job_queued"]["DESC"] = "";
@@ -318,7 +318,7 @@
   $Schema["TABLE"]["jobqueue"]["jq_schedinfo"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_schedinfo\" DROP NOT NULL;";
 
   $Schema["TABLE"]["jobqueue"]["jq_units"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_units\" IS 'the units name of jq_progress and jq_length';";
-  $Schema["TABLE"]["jobqueue"]["jq_units"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_units\" varchar[32];";
+  $Schema["TABLE"]["jobqueue"]["jq_units"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_units\" varchar(32);";
   $Schema["TABLE"]["jobqueue"]["jq_units"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_units\" DROP NOT NULL;";
 
   $Schema["TABLE"]["jobqueue"]["jq_statustime"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_statustime\" IS 'last time the agent gave a progress update, even when progress didn''t change';";
@@ -351,11 +351,11 @@
   $Schema["TABLE"]["key"]["key_pk"]["ALTER"] = "ALTER TABLE \"key\" ALTER COLUMN \"key_pk\" SET NOT NULL, ALTER COLUMN \"key_pk\" SET DEFAULT nextval('key_key_pk_seq'::regclass);";
 
   $Schema["TABLE"]["key"]["key_name"]["DESC"] = "COMMENT ON COLUMN \"key\".\"key_name\" IS 'displayed key name';";
-  $Schema["TABLE"]["key"]["key_name"]["ADD"] = "ALTER TABLE \"key\" ADD COLUMN \"key_name\" varchar[32];";
+  $Schema["TABLE"]["key"]["key_name"]["ADD"] = "ALTER TABLE \"key\" ADD COLUMN \"key_name\" varchar(32);";
   $Schema["TABLE"]["key"]["key_name"]["ALTER"] = "ALTER TABLE \"key\" ALTER COLUMN \"key_name\" SET NOT NULL;";
 
   $Schema["TABLE"]["key"]["key_desc"]["DESC"] = "COMMENT ON COLUMN \"key\".\"key_desc\" IS 'brief description of the key';";
-  $Schema["TABLE"]["key"]["key_desc"]["ADD"] = "ALTER TABLE \"key\" ADD COLUMN \"key_desc\" varchar[255];";
+  $Schema["TABLE"]["key"]["key_desc"]["ADD"] = "ALTER TABLE \"key\" ADD COLUMN \"key_desc\" varchar(255);";
   $Schema["TABLE"]["key"]["key_desc"]["ALTER"] = "ALTER TABLE \"key\" ALTER COLUMN \"key_desc\" DROP NOT NULL;";
 
   $Schema["TABLE"]["key"]["key_parent_fk"]["DESC"] = "COMMENT ON COLUMN \"key\".\"key_parent_fk\" IS 'parent key_pk (keys may be nested), 0 if no parent, 0 is used instead of null beause of unique constraint';";
@@ -493,11 +493,11 @@
   $Schema["TABLE"]["pfile"]["pfile_pk"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_pk\" SET NOT NULL, ALTER COLUMN \"pfile_pk\" SET DEFAULT nextval('pfile_pfile_pk_seq'::regclass);";
 
   $Schema["TABLE"]["pfile"]["pfile_md5"]["DESC"] = "";
-  $Schema["TABLE"]["pfile"]["pfile_md5"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_md5\" bpchar[32];";
+  $Schema["TABLE"]["pfile"]["pfile_md5"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_md5\" bpchar(32);";
   $Schema["TABLE"]["pfile"]["pfile_md5"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_md5\" SET NOT NULL;";
 
   $Schema["TABLE"]["pfile"]["pfile_sha1"]["DESC"] = "";
-  $Schema["TABLE"]["pfile"]["pfile_sha1"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_sha1\" bpchar[40];";
+  $Schema["TABLE"]["pfile"]["pfile_sha1"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_sha1\" bpchar(40);";
   $Schema["TABLE"]["pfile"]["pfile_sha1"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_sha1\" SET NOT NULL;";
 
   $Schema["TABLE"]["pfile"]["pfile_size"]["DESC"] = "";
