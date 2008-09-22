@@ -42,7 +42,7 @@ global $URL;
 class MoveFolderTest extends fossologyTestCase
 {
   public $upload2Move;
-  public $fromFolder=1;
+  public $fromFolder='root';
   public $toFolder;
   public $mybrowser;
 
@@ -62,7 +62,7 @@ class MoveFolderTest extends fossologyTestCase
   {
     global $URL;
 
-    print "starting MoveFoldertest\n";
+    print "starting MoveUploadtest\n";
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'),
                       "FAIL! Could not find Organize menu\n");
@@ -70,8 +70,10 @@ class MoveFolderTest extends fossologyTestCase
                 "testMoveUpload FAILED! coun not find Uploads menu\n");
     /* this assertion below is bogus, there are multiple Move (s) */
     $this->assertTrue($this->myassertText($loggedIn, '/Move/'));
-    $this->upload2move = 'glp-3\.0\.txt';
+    $this->upload2Move = 'gpl-3.0.txt';
     $this->toFolder    = 'Testing';
+    /* fromFolder is 'root' */
+    print "1st call: FF:$this->fromFolder TF:$this->toFolder U2M:$this->upload2Move\n";
     $this->moveUpload($this->fromFolder, $this->toFolder, $this->upload2Move);
     /* best we can do with simpletest is to see if the folder is still there.
      *
@@ -89,7 +91,7 @@ class MoveFolderTest extends fossologyTestCase
    */
   function tearDown()
   {
-    $this->moveUpload('Testing', 1, $this->upload2Move);
+    $this->moveUpload('Testing', 'root', $this->upload2Move);
   }
 }
 ?>
