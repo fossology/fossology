@@ -93,6 +93,7 @@ class core_schema extends FO_Plugin
       if (preg_match('/[0-9]/',$Table)) { continue; }
       $Column = $R['column_name'];
       $Type = $R['type'];
+      if ($Type == 'bpchar') { $Type = "char"; }
       if ($R['modifier'] > 0) { $Type .= '(' . $R['modifier'] . ')'; }
       $Desc = str_replace("'","''",$R['description']);
 
@@ -114,6 +115,7 @@ class core_schema extends FO_Plugin
       if ($R['default'] != '')
 	{
 	// $R['default'] = preg_replace("/::.*/","",$R['default']);
+	$R['default'] = preg_replace("/::bpchar/","::char",$R['default']);
 	$Schema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
 	}
       $Schema['TABLE'][$Table][$Column]['ALTER'] .= ";";
@@ -383,7 +385,7 @@ if (0)
     print "</ul>\n";
     print "<ul>\n";
     print "<li><font color='$Red'>This color indicates the current schema (items that should be removed).</font>\n";
-    print "<li><font color='$Blue'>This color indicates the default schema (items that should be applies).</font>\n";
+    print "<li><font color='$Blue'>This color indicates the default schema (items that should be applied).</font>\n";
     print "</ul>\n";
 
     print "<a name='Table'></a><table width='100%' border='1'>\n";
