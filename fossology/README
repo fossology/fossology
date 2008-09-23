@@ -360,26 +360,26 @@ login, or your favorite root-obtaining utility.
    default configuration files. You should see this final 
    message:
 
-     # Checking configuration files
-     Creating configuration /usr/local/share/fossology/dbconnect/fossology
-     Be sure to configure /usr/local/share/fossology/dbconnect/fossology for your environment.
-     The file /usr/local/share/fossology/repository/RepPath.conf points to the repository.
-       The repository can be a mount point, and should be a large disk space.
+   # Checking configuration files
+   Creating configration /usr/local/share/fossology/dbconnect/fossology
+   Be sure to configure /usr/local/share/fossology/dbconnect/fossology for your environment.
+   The file /usr/local/share/fossology/repository/RepPath.conf points to the repository.
+     The repository can be a mount point, and should be a large disk space.
        If you plan to process ISOs, then consider a terabyte of disk or larger.
-     You should check /usr/local/share/fossology/agents/scheduler.conf and
-     configure it to match your environment.
-     You should check /usr/local/share/fossology/agents/proxy.conf and
-     configure it to match your environment.
-     All files and configuration files have been placed on the system.
-     However, some configuration files needed to be created.
-     Check the configuration in the following files and directories:
-         /usr/local/share/fossology/dbconnect/fossology
-         /usr/local/share/fossology/repository
-         /usr/local/share/fossology/agents/scheduler.conf
-         /usr/local/share/fossology/agents/proxy.conf
-     Then re-run this script.
+       You should check /usr/local/share/fossology/agents/scheduler.conf and
+       configure it to match your environment.
+       You should check /usr/local/share/fossology/agents/proxy.conf and
+       configure it to match your environment.
+       All files and configuration files have been placed on the system.
+       However, some configuration files needed to be created.
+       Check the configuration in the following files and directories:
+           /usr/local/share/fossology/dbconnect/fossology
+           /usr/local/share/fossology/repository
+           /usr/local/share/fossology/agents/scheduler.conf
+           /usr/local/share/fossology/agents/proxy.conf
+       Then re-run this script.
 
-   The default configuration files which MUST BE EDITED.  This is described
+   The default configuration files MUST BE EDITED.  This is described
    in the following step.
 
 3) Edit the configuration files.
@@ -391,7 +391,9 @@ login, or your favorite root-obtaining utility.
 
     /usr/local/share/fossology/dbconnect/fossology
     This file is used by the UI to establish database connectivity.  The
-    format is:
+    default file put in place by install.sh will work for a basic single
+    system installation where the postgresql database server is running on
+    the local system where fossology runs.  The format is:
 
 	dbname=<dbname>;
 	host=<host running postgres server>;
@@ -415,7 +417,7 @@ login, or your favorite root-obtaining utility.
 
     /usr/local/share/fossology/agents/scheduler.conf
     This file is used by the scheduler for configuration.
-    The host names listed in Hosts.conf could match the host= strings
+    The host names listed in Hosts.conf must match the "host=" strings
     here. See the developers document 
     http://fossology.org/docs/scheduler#configuring_the_scheduler for a 
     discussion on how to specify the number of processes per host 
@@ -432,14 +434,27 @@ login, or your favorite root-obtaining utility.
 
    You should see this final message:
 
+     Initialization completed successfully.
+     # Checking database connectivity
      # Adding user www-data to group fossy
+     # Initializing agents
+       Initializing bsam-engine
+       Initializing engine-shell
+       Initializing filter_clean
+       Initializing Filter_License
+       Initializing mimetype
+       Initializing pkgmetagetta
+       Initializing scheduler
+       Initializing specagent
+       Initializing ununpack
+       Initializing wget_agent
      # Automated installation completed
      Be sure to:
        + Install PHP5
        + Configure your web server so /usr/local/share/fossology/www
          is used for the user interface.
-       + Add your web server user to group fossy in /etc/group
-         and restart your web server.
+       + Make sure your web server user is in group fossy in /etc/group
+         then restart your web server so it runs with the new group access.
        + Double check the configuration in the following files and directories:
          /usr/local/share/fossology/dbconnect/fossology
          /usr/local/share/fossology/repository
