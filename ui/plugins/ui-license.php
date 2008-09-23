@@ -33,6 +33,7 @@ class ui_license extends FO_Plugin
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
+  var $UpdCache   = 0;
 
   /***********************************************************
    RegisterMenus(): Customize submenus.
@@ -57,6 +58,41 @@ class ui_license extends FO_Plugin
 	}
       }
     } // RegisterMenus()
+
+ /***********************************************************
+   Initialize(): This is called before the plugin is used.
+   It should assume that Install() was already run one time
+   (possibly years ago and not during this object's creation).
+   Returns true on success, false on failure.
+   A failed initialize is not used by the system.
+   NOTE: This function must NOT assume that other plugins are installed.
+   ***********************************************************/
+  function Initialize()
+    {
+      global $_GET;
+    if ($this->State != PLUGIN_STATE_INVALID) { return(1); } // don't re-run
+    if ($this->Name !== "") // Name must be defined
+      {
+      global $Plugins;
+      $this->State=PLUGIN_STATE_VALID;
+      array_push($Plugins,$this);
+      }
+    
+    /* Remove "updcache" from the GET args and set $this->UpdCache
+     * This way all the url's based on the input args won't be 
+     * polluted with updcache
+     */
+    if ($_GET['updcache'])
+    {
+      $this->UpdCache = $_GET['updcache'];
+      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
+      unset($_GET['updcache']);
+    }
+    else
+      $this->UpdCache = 0;
+    return($this->State == PLUGIN_STATE_VALID);
+    } // Initialize()
+
 
   /***********************************************************
    SortName(): Given two elements sort them by name.
@@ -344,7 +380,14 @@ class ui_license extends FO_Plugin
 
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
     $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder")) . "&show=$Show";
-    $V = ReportCacheGet($CacheKey);
+    if ($this->UpdCache != 0)
+    {
+      $V = "";
+      $Err = ReportCachePurgeByKey($CacheKey);
+    }
+    else
+      $V = ReportCacheGet($CacheKey);
+
     if (empty($V) )  // no cache exists
     {
       switch($this->OutputType)
@@ -390,7 +433,7 @@ class ui_license extends FO_Plugin
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
     printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
-    if ($Cached) echo " <i>cached</i>";
+    if ($Cached) echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
     return;
   }
 
