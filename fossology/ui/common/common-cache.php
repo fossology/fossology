@@ -169,4 +169,19 @@ $UserCacheStat = 0;  // default, don't know
     $Result = $DB->Action("DELETE FROM report_cache WHERE report_cache_uploadfk = $UploadPK");
   } // ReportCachePurgeByUpload()
 
+  /***********************************************************
+   ReportCachePurgeByKey(): Purge from the report cache the
+   record with $CacheKey
+   ***********************************************************/
+  function ReportCachePurgeByKey($CacheKey)
+  {
+    global $DB;
+    $ParsedURI = array();
+    $EscKey = pg_escape_string($CacheKey);
+    parse_str($EscKey, $ParsedURI);
+
+    $Result = $DB->Action("DELETE FROM report_cache WHERE report_cache_key = '$EscKey'",$Err);
+    return $Err;
+  } // ReportCachePurgeByKey()
+
 ?>
