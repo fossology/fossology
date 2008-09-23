@@ -379,6 +379,7 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
   {
     $R = &$Listing[$i];
 
+    $Phrase='';
     if ($ShowPhrase && !empty($R['phrase_text']))
       {
       $Phrase = "<b>Phrase:</b> " . htmlentities($R['phrase_text']);
