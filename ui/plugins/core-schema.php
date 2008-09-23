@@ -93,7 +93,8 @@ class core_schema extends FO_Plugin
       if (preg_match('/[0-9]/',$Table)) { continue; }
       $Column = $R['column_name'];
       $Type = $R['type'];
-      if ($R['modifier'] > 0) { $Type .= '[' . $R['modifier'] . ']'; }
+      if ($Type == 'bpchar') { $Type = "char"; }
+      if ($R['modifier'] > 0) { $Type .= '(' . $R['modifier'] . ')'; }
       $Desc = str_replace("'","''",$R['description']);
 
       $Schema['TABLEID'][$Table][$R['ordinal']] = $Column;
@@ -114,6 +115,7 @@ class core_schema extends FO_Plugin
       if ($R['default'] != '')
 	{
 	// $R['default'] = preg_replace("/::.*/","",$R['default']);
+	$R['default'] = preg_replace("/::bpchar/","::char",$R['default']);
 	$Schema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
 	}
       $Schema['TABLE'][$Table][$Column]['ALTER'] .= ";";
@@ -213,8 +215,11 @@ class core_schema extends FO_Plugin
       }
 
     /* Save the constraint */
+    /** There are different types of constraints that must be stored in order **/
+    /** CONSTRAINT: PRIMARY KEY **/
     for($i=0; !empty($Results[$i]['constraint_name']); $i++)
       {
+      if ($Results[$i]['type'] != 'PRIMARY KEY') { continue; }
       $SQL = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
       $SQL .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
       $SQL .= " " . $Results[$i]['type'];
@@ -226,6 +231,61 @@ class core_schema extends FO_Plugin
 	}
       $SQL .= ";";
       $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
+      $Results[$i]['processed'] = 1;
+      }
+
+    /** CONSTRAINT: UNIQUE **/
+    for($i=0; !empty($Results[$i]['constraint_name']); $i++)
+      {
+      if ($Results[$i]['type'] != 'UNIQUE') { continue; }
+      $SQL = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
+      $SQL .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
+      $SQL .= " " . $Results[$i]['type'];
+      $SQL .= " (" . $Results[$i]['constraint_key'] . ")";
+      if (!empty($Results[$i]['references_table']))
+	{
+	$SQL .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
+	$SQL .= " (" . $Results[$i]['fk_constraint_key'] . ")";
+	}
+      $SQL .= ";";
+      $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
+      $Results[$i]['processed'] = 1;
+      }
+
+    /** CONSTRAINT: FOREIGN KEY **/
+    for($i=0; !empty($Results[$i]['constraint_name']); $i++)
+      {
+      if ($Results[$i]['type'] != 'FOREIGN KEY') { continue; }
+      $SQL = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
+      $SQL .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
+      $SQL .= " " . $Results[$i]['type'];
+      $SQL .= " (" . $Results[$i]['constraint_key'] . ")";
+      if (!empty($Results[$i]['references_table']))
+	{
+	$SQL .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
+	$SQL .= " (" . $Results[$i]['fk_constraint_key'] . ")";
+	}
+      $SQL .= ";";
+      $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
+      $Results[$i]['processed'] = 1;
+      }
+
+    /** CONSTRAINT: ALL OTHERS **/
+    for($i=0; !empty($Results[$i]['constraint_name']); $i++)
+      {
+      if ($Results[$i]['processed'] != 1) { continue; }
+      $SQL = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
+      $SQL .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
+      $SQL .= " " . $Results[$i]['type'];
+      $SQL .= " (" . $Results[$i]['constraint_key'] . ")";
+      if (!empty($Results[$i]['references_table']))
+	{
+	$SQL .= " REFERENCES \"" . $Results[$i]['references_table'] . "\"";
+	$SQL .= " (" . $Results[$i]['fk_constraint_key'] . ")";
+	}
+      $SQL .= ";";
+      $Schema['CONSTRAINT'][$Results[$i]['constraint_name']] = $SQL;
+      $Results[$i]['processed'] = 1;
       }
 
     /***************************/
@@ -325,7 +385,7 @@ if (0)
     print "</ul>\n";
     print "<ul>\n";
     print "<li><font color='$Red'>This color indicates the current schema (items that should be removed).</font>\n";
-    print "<li><font color='$Blue'>This color indicates the default schema (items that should be applies).</font>\n";
+    print "<li><font color='$Blue'>This color indicates the default schema (items that should be applied).</font>\n";
     print "</ul>\n";
 
     print "<a name='Table'></a><table width='100%' border='1'>\n";
@@ -1153,14 +1213,51 @@ LANGUAGE plpgsql;
     /************************************/
     $Curr = $this->GetSchema(); /* constraints and indexes are linked, recheck */
     if (!empty($Schema['CONSTRAINT']))
-    foreach($Schema['CONSTRAINT'] as $Name => $SQL)
       {
-      if (empty($Name)) { continue; }
-      if ($Curr['CONSTRAINT'][$Name] == $SQL) { continue; }
-      if ($Debug) { print "$SQL\n"; }
-      else { $DB->Action($SQL); }
-      if ($DB->Error) { exit(1); }
-      }
+      /* Constraints must be added in the correct order! */
+      /* CONSTRAINT: PRIMARY KEY */
+      foreach($Schema['CONSTRAINT'] as $Name => $SQL)
+        {
+        if (empty($Name)) { continue; }
+        if ($Curr['CONSTRAINT'][$Name] == $SQL) { continue; }
+	if (!preg_match("/PRIMARY KEY/",$SQL)) { continue; }
+        if ($Debug) { print "$SQL\n"; }
+        else { $DB->Action($SQL); }
+        if ($DB->Error) { exit(1); }
+        }
+      /* CONSTRAINT: UNIQUE */
+      foreach($Schema['CONSTRAINT'] as $Name => $SQL)
+        {
+        if (empty($Name)) { continue; }
+        if ($Curr['CONSTRAINT'][$Name] == $SQL) { continue; }
+	if (!preg_match("/UNIQUE/",$SQL)) { continue; }
+        if ($Debug) { print "$SQL\n"; }
+        else { $DB->Action($SQL); }
+        if ($DB->Error) { exit(1); }
+        }
+      /* CONSTRAINT: FOREIGN KEY */
+      foreach($Schema['CONSTRAINT'] as $Name => $SQL)
+        {
+        if (empty($Name)) { continue; }
+        if ($Curr['CONSTRAINT'][$Name] == $SQL) { continue; }
+	if (!preg_match("/FOREIGN KEY/",$SQL)) { continue; }
+        if ($Debug) { print "$SQL\n"; }
+        else { $DB->Action($SQL); }
+        if ($DB->Error) { exit(1); }
+        }
+      /* All other constraints */
+      foreach($Schema['CONSTRAINT'] as $Name => $SQL)
+        {
+        if (empty($Name)) { continue; }
+        if ($Curr['CONSTRAINT'][$Name] == $SQL) { continue; }
+	if (preg_match("/PRIMARY KEY/",$SQL)) { continue; }
+	if (preg_match("/UNIQUE/",$SQL)) { continue; }
+	if (preg_match("/FOREIGN KEY/",$SQL)) { continue; }
+        if ($Debug) { print "$SQL\n"; }
+        else { $DB->Action($SQL); }
+        if ($DB->Error) { exit(1); }
+        }
+      } /* Add constraints */
 
     /************************************/
     /* CREATE FUNCTIONS */

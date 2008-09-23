@@ -954,6 +954,7 @@
   $Term["RSA"]["Desc"]="RSA Commercial License";
   $Term["RSA"]["Term"][0]="rsa";
   $Term["RSA"]["License"][0]="Corporate/RSA/RSA MD5";
+  $Term["RSA-Security"]["License"][0]="Corporate/RSA/RSA-Security";
   /* Canonical name: 360 */
   $Term["Ruby"]["Desc"]="";
   $Term["Ruby"]["License"][0]="MiscOSS/Ruby";

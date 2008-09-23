@@ -110,6 +110,7 @@ require_once('fossologyTest.php');
   }
 
   /**
+<<<<<<< .working
   * function uploadAFile
   * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
   *
@@ -129,8 +130,120 @@ require_once('fossologyTest.php');
   * @return pass or fail
   */
   public function uploadFile($parentFolder, $uploadFile, $description=null, $uploadName=null, $agents=null)
+=======
+   * moveUpload($oldfFolder, $destFolder, $upload)
+   *
+   * Moves an upload from one folder to another. Assumes the caller has
+   * logged in.
+   * @param string $oldFolder the folder name where the upload currently
+   * is stored.
+   * @param string $destFolder the folder where the updload will be
+   * moved to.  If no folder specified, then the root folder will be
+   * used.
+   * @param string $upload The upload to move
+   *
+   */
+  public function moveUpload($oldFolder, $destFolder, $upload)
+>>>>>>> .merge-right.r1346
   {
     global $URL;
+<<<<<<< .working
+=======
+    print "mU: OF:$oldFolder DF:$destFolder U:$upload\n";
+    if (empty ($oldFolder))
+    {
+      return FALSE;
+    }
+    if (empty ($destFolder))
+    {
+      $destFolder = 'root'; // default is root folder
+    }
+    print "Starting moveUpload in FTC\n";
+    $page = $this->mybrowser->get($URL);
+    /* use the method below till you write a menu function */
+    $page = $this->mybrowser->get("$URL?mod=upload_move");
+    //$page = $this->mybrowser->clickLink('Move');
+    $this->assertTrue($this->myassertText($page, '/Move upload to different folder/'));
+    $oldFolderId = $this->getFolderId($oldFolder, $page);
+    print "FTC: oldFolderId is:$oldFolderId\n";
+    $this->assertTrue($this->mybrowser->setField('oldfolderid', $oldFolderId));
+    $uploadId = $this->getUploadId($upload, $page);
+    print "FTC: uploadId is:$uploadId\n";
+    if(empty($uploadId))
+    {
+      $this->fail("moveUpload FAILED! could not find upload id for upload" .
+                  "$upload\n is $upload in $oldFolder?\n");
+    }
+    $this->assertTrue($this->mybrowser->setField('uploadid', $uploadId));
+    $destFolderId = $this->getFolderId($destFolder, $page);
+    print "FTC: destFolderId is:$destFolderId\n";
+    $this->assertTrue($this->mybrowser->setField('targetfolderid', $destFolderId));
+    $page = $this->mybrowser->clickSubmit('Move!');
+    $this->assertTrue(page);
+    print "page after move is:\n$page\n";
+    $this->assertTrue($this->myassertText($page,
+       //"/Moved $upload from folder $oldFolder to folder $destFolder/"),
+       "/Moved $upload from folder /"),
+       "moveUpload Failed!\nPhrase 'Move $upload from folder $oldFolder " .
+       "to folder $destFolder' not found\n");
+  }
+
+  /**
+   * mvFolder
+   *
+   * Move a folder via the UI
+   *
+   * @param string $folder the folder name to move.
+   * @param string $destination the destination folder to move the
+   * folder to.  Default is the root folder.
+   *
+   */
+  public function mvFolder($folder, $destination)
+  {
+    global $URL;
+    if (empty ($folder))
+    {
+      return (FALSE);
+    }
+    if (empty ($destination))
+    {
+      $destination = 1;
+    }
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Move');
+    $this->assertTrue($this->myassertText($page, '/Move Folder/'));
+    $FolderId = $this->getFolderId($folder, $page);
+    $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
+    if ($destination != 1)
+    {
+      $DfolderId = $this->getFolderId($destination, $page);
+    }
+    $this->assertTrue($this->mybrowser->setField('targetfolderid', $DfolderId));
+    $page = $this->mybrowser->clickSubmit('Move!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->myassertText($page, "/Moved folder $folder to folder $destination/"), "moveFolder Failed!\nPhrase 'Move folder $folder to folder ....' not found\n");
+  }
+
+  /**
+   * uploadFile
+   * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
+   *
+   * Upload a file and optionally schedule the agents.
+   *
+   * @param string $parentFolder the parent folder name, default is root
+   * folder (1)
+   * @param string $uploadFile the path to the file to upload
+   * @param string $description=null optonal description
+   * @param string $uploadName=null optional upload name
+   *
+   * @todo add ability to specify uploadName
+   *
+   * @return pass or fail
+   */
+  public function uploadFile($parentFolder, $uploadFile, $description = null, $uploadName = null, $agents = null)
+  {
+    global $URL;
+>>>>>>> .merge-right.r1346
     /*
      * check parameters:
      * default parent folder is root folder

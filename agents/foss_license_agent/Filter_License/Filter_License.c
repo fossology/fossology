@@ -792,6 +792,13 @@ int	CopyrightYearCheck	(char *Mmap, fileoffset MaxLen)
  Loads global TH to contain the token-ready string.
  Tokens are generated each time TokClear is called.
  Returns: 1 on success, 0 on error
+
+ NOTE: In this code are a number of "C='char'; C=' ';"
+ This is intentional.
+ Originally, Filter_License kept non-letter symbols.
+ In September 2008, the decision was made to remove
+ non-alphanumeric characters.  Setting C=' ' removes it.
+ But, I didn't want to lose the old character.
  *********************************************/
 int	PreprocessFile	(int UseRep)
 {
@@ -957,12 +964,12 @@ int	PreprocessFile	(int UseRep)
       i++;
       if (C==0xC2) switch(Rep->Mmap[i])
         {
-	case 0xA1:	C='!'; break; /* inverted ! */
+	case 0xA1:	C='!'; C=' '; break; /* inverted ! */
 	case 0xA9:	C=-2; strcpy(S,"copyright"); break; /* copyright */
 	case 0xAE:	C=-3; strcpy(S,"Registered"); break; /* Registered */
 	case 0xB1:	C=-4; strcpy(S,"+-"); break; /* +/- */
-	case 0xB4:	C='\''; break; /* accent */
-	case 0xBF:	C='?'; break; /* inverted ? */
+	case 0xB4:	C='\''; C=' '; break; /* accent */
+	case 0xBF:	C='?'; C=' '; break; /* inverted ? */
 	default:	C=' ';	break;
 	}
       else C=' ';
@@ -979,9 +986,9 @@ int	PreprocessFile	(int UseRep)
           {
 	  case 0x95:	C='-'; break; /* horizonal bar */
 	  case 0x98: case 0x99: case 0x9A: case 0x9B:
-	  	C='\''; break;	/* different types of quotes */
+	  	C='\''; C=' '; break;	/* different types of quotes */
 	  case 0x9C: case 0x9D: case 0x9E: case 0x9F:
-	  	C='"'; break;	/* different types of quotes */
+	  	C='"'; C=' '; break;	/* different types of quotes */
 	  default:	C=' ';	break;
 	  }
 	}
@@ -1002,16 +1009,16 @@ int	PreprocessFile	(int UseRep)
       {
       switch(C)
         {
-	case 0x91:	C='\''; break; /* quote in */
-	case 0x92:	C='\''; break; /* quote out */
-	case 0x93:	C='"'; break; /* quote in */
-	case 0x99:	C=-5; strcpy(S,"TM"); break; /* trademark */
+	case 0x91:	C='\''; C=' '; break; /* quote in */
+	case 0x92:	C='\''; C=' '; break; /* quote out */
+	case 0x93:	C='"'; C=' '; break; /* quote in */
+	case 0x99:	C=-5; strcpy(S,"TM"); C=' '; break; /* trademark */
 	case 0xA0:	C=' '; break; /* alternate space */
 	case 0xA9:	C=-2; strcpy(S,"copyright"); break; /* Copyright */
-	case 0xAE:	C=-3; strcpy(S,"Registered"); break; /* Registered */
-	case 0xD5:	C='\''; break; /* single quote */
-	case 0xA7:	C=-6; strcpy(S,"SS"); break; /* legal notation */
-	case 0xC2:	C=-6; strcpy(S,"SS"); break; /* legal notation */
+	case 0xAE:	C=-3; strcpy(S,"Registered"); C=' '; break; /* Registered */
+	case 0xD5:	C='\''; C=' '; break; /* single quote */
+	case 0xA7:	C=-6; strcpy(S,"SS"); C=' '; break; /* legal notation */
+	case 0xC2:	C=-6; strcpy(S,"SS"); C=' '; break; /* legal notation */
 	case 0xE9:	C='e'; break; /* e with accent */
 	default:	C=' ';
 	}
@@ -1021,19 +1028,19 @@ int	PreprocessFile	(int UseRep)
     else if ((BytesLeft >= 5) && !strncasecmp((char *)(Rep->Mmap+i),"&copy;",6))
 	{ C=-2; strcpy(S,"copyright"); i+=5; }
     else if ((BytesLeft >= 5) && !strncasecmp((char *)(Rep->Mmap+i),"&quot;",6))
-	{ C='"'; i+=5; }
+	{ C='"'; C=' '; i+=5; }
     else if ((BytesLeft >= 4) && !strncasecmp((char *)(Rep->Mmap+i),"&amp;",5))
-	{ C='&'; i+=4; }
+	{ C='&'; C=' '; i+=4; }
     else if ((BytesLeft >= 5) && !strncasecmp((char *)(Rep->Mmap+i),"&nbsp;",6))
 	{ C=' '; i+=5; }
     else if ((BytesLeft >= 3) && !strncasecmp((char *)(Rep->Mmap+i),"&lt;",4))
-	{ C='<'; i+=3; }
+	{ C='<'; C=' '; i+=3; }
     else if ((BytesLeft >= 3) && !strncasecmp((char *)(Rep->Mmap+i),"&gt;",4))
-	{ C='>'; i+=3; }
+	{ C='>'; C=' '; i+=3; }
     else if ((BytesLeft >= 2) && !strncasecmp((char *)(Rep->Mmap+i),"<p>",3))
-	{ C='\n'; i+=2; }
+	{ C='\n'; C=' '; i+=2; }
     else if ((BytesLeft >= 3) && !strncasecmp((char *)(Rep->Mmap+i),"<br>",4))
-	{ C='\n'; i+=3; }
+	{ C='\n'; C=' '; i+=3; }
     else if (C=='<')
 	{
 	/* remove all tags */
@@ -1050,11 +1057,11 @@ int	PreprocessFile	(int UseRep)
 		}
 	}
 
-    /* check for poor-man's characters */
+    /* check for poor-man's quote characters */
     else if ((BytesLeft >2) && (Rep->Mmap[i]=='`') && (Rep->Mmap[i+1]=='`'))
-	{ C='"'; i+=1; }
+	{ C='"'; C=' '; i+=1; }
     else if ((BytesLeft >2) && (Rep->Mmap[i]=='\'') && (Rep->Mmap[i+1]=='\''))
-	{ C='"'; i+=1; }
+	{ C='"'; C=' '; i+=1; }
 
     else if (!isprint(C))
 	{

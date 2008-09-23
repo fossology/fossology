@@ -30,15 +30,22 @@ require_once '/usr/local/simpletest/reporter.php';
 
 require_once ('../../../../tests/fossologyWebTestCase.php');
 require_once ('../../../../tests/TestEnvironment.php');
+require_once('../../../../tests/testClasses/timer.php');
 
+$start = new timer();
+print "Startnig Verify Tests at: " . date('r') . "\n";
 $test = &new TestSuite('Fossology Repo UI Verification Functional tests');
 $test->addTestFile('verifyFossTestAr.php');
 
 if (TextReporter::inCli())
 {
-  exit ($test->run(new TextReporter()) ? 0 : 1);
+  $results = $test->run(new TextReporter()) ? 0 : 1;
+  print "Ending Verify Tests at: " . date('r') . "\n";
+  $elapseTime = $start->TimeAgo($start->getStartTime());
+  print "The Verify Tests took {$elapseTime}to run\n";
+  exit($results);
 }
 $test->run(new HtmlReporter());
-
-
+$elapseTime = $start->TimeAgo($start->getStartTime());
+print "The Verify Tests took {$elapseTime}to run\n";
 ?>

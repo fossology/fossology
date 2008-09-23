@@ -40,7 +40,7 @@ if (!isset($GlobalReady)) { exit; }
 class licterm_default extends FO_Plugin
   {
   var $Name       = "license_terms_default";
-  var $Title      = "Create Default License Terms";
+  var $Title      = "Reset Default License Terms";
   var $Version    = "1.0";
   var $MenuList   = "Organize::License::Default Terms";
   var $Dependency = array("db","licterm_manage");
@@ -260,14 +260,14 @@ class licterm_default extends FO_Plugin
 	$V .= "License terms associate common license names with canonical license names.\n";
 	$V .= "For example, the terms 'GPL' and 'Gnu Public License' are both commonly used to describe the Free Software Foundation's GNU General Public License. These terms are all commonly referred to be the canonical name 'GPL'.\n";
 	$V .= "<P />\n";
-	$V .= "This initialization creates the default license terms, canonical names, and associations between terms, license templates, and canonical names.";
+    $V .= "You shouldn't need to do this unless you have modified the default terms and want to reset them back to the way they were when you installed this software.  ";
+	$V .= "This will reset the default license terms, canonical names, and associations between terms, license templates, and canonical names.";
 	$V .= "<ul>\n";
 	$V .= "<li>The default license settings are <b>NOT</b> a recommendation or legal interpretation.\n";
 	$V .= "In particular, related terms, templates, and canonical names may have very different legal meanings.\n";
-	$V .= "<li>If you create these defaults twice, then any modification you made to the default settings <b>will be lost</b>.\n";
-	$V .= "<li>Creating the default settings will not impact any new terms or associations that you created.\n";
+	$V .= "<li>Resetting the default terms will not impact any new terms you have created or their associations.\n";
 	$V .= "</ul>\n";
-	$V .= "After the defaults are created, you can modify, edit, or delete the default groups with the ";
+	$V .= "You can modify, edit, or delete the default groups with the ";
 	$P = &$Plugins[plugin_find_id("licterm_manage")];
 	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->Title . "</a>";
 	$V .= " menu option.\n";
@@ -277,9 +277,9 @@ class licterm_default extends FO_Plugin
 
 	$V .= "<P/>\n";
 	// $V .= "<input type='checkbox' value='1' name='Export'>Check to export term-related information.<br>\n";
-	$V .= "<input type='checkbox' value='1' name='Default'>Check to create the default terms, canonical names, and license template associations.\n";
+	$V .= "<input type='checkbox' value='1' name='Default'>Check to revert back to the original default terms, canonical names, and license template associations.\n";
 	$V .= "<P/>\n";
-	$V .= "<input type='submit' value='Create!'>";
+	$V .= "<input type='submit' value='RESET!'>";
 	$V .= "</form>\n";
 	break;
       case "Text":
