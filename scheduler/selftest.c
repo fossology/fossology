@@ -83,7 +83,7 @@ int	SelfTest	()
       Thread = CheckAgent(Line[0]);
       if (Thread < 0)
         {
-	fprintf(stderr,"FATAL: Agent type '%s' not in scheduler.conf.\n",Line[0]);
+	fprintf(stderr,"FATAL: Agent type '%s' not in Scheduler.conf.\n",Line[0]);
 	rc=1;
 	}
       }

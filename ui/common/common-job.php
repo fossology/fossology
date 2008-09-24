@@ -336,7 +336,7 @@ function JobAddJob ($upload_pk, $job_name, $priority=0)
  * Insert a jobqueue item.
  * 
  * @param int    $job_pk the job primary key (returned by JobAddJob)
- * @param string $jq_type name of agent (should match a string in scheduler.conf
+ * @param string $jq_type name of agent (should match a string in Scheduler.conf
  * @param string $jq_args arguments to pass to the agent in the form of
  * $jq_args="folder_pk='$Folder' name='$Name' description='$Desc' ...";
  * @param string $jq_repeat values: yes or no
