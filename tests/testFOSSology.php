@@ -1,7 +1,5 @@
 #!/usr/bin/php
 <?php
-
-
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -46,15 +44,14 @@
  * @TODO: remove Testing Directory
  *
  */
-$u .= "Usage: $argv[0] [-a] | [-b] | [-h] | [-s] | [-p] | [-v]\n";
+$u .= "Usage: $argv[0] [-a] | [-b] | [-h] | [-s] | [-v]\n";
 $u .= "-a: Run all FOSSology Test Suites\n" .
-"-b: Run the basic test suite. This runs the SiteTests and any PageTests" .
+"-b: Run the basic test suite. This runs the SiteTests and any Tests" .
 "that don't depend on uploads\n" .
 "-h: Display Usage\n" .
 "-s: Run SiteTests only (this is a lightweight suite)" .
-"-p: Run fix this!...... are the UI functional tests, they " .
-"require files to uploaded before they are run, see the test documentation" .
-"for details\n";
+"-v: Run the Verify Tests.  These tests require uploads to be uploaded first." .
+"    See the test documentation for details\n";
 $usage = $u;
 
 static $setUp = FALSE;
@@ -65,10 +62,12 @@ $errors = 0;
  */
 $date = date('Y-m-d');
 $myname = $argv[0];
-$SiteTests = '../ui/plugins/tests/SiteTests';
-$PageTests = '../ui/plugins/tests/PageTests';
-$VerifTests = '../ui/plugins/tests/VerifyTests';
+$SiteTests = '../ui/tests/SiteTests';
+$BasicTests = '../ui/tests/BasicTests';
+$VerifTests = '../ui/tests/VerifyTests';
+
 $Home = getcwd();
+$pid = getmypid();
 
 $options = getopt('abhsp');
 if(empty($options))
@@ -88,7 +87,7 @@ if (array_key_exists('h', $options))
  * setups ran without error.
  *
  */
-function _runSetupPage()
+function _runSetupVerify()
 {
   global $date;
   global $myname;
@@ -96,7 +95,7 @@ function _runSetupPage()
 
   if(chdir($Home) === FALSE)
   {
-    print "_runSetupPage ERROR: can't cd to $Home\n";
+    print "_runSetupVerify ERROR: can't cd to $Home\n";
   }
   $SetupLast = exec("./uploadTestData.php >> /tmp/AllFOSSologyTests-$date 2>&1",$dummy,$SUrtn);
   // need to check the return on the setup and report accordingly.
@@ -112,7 +111,7 @@ function _runSetupPage()
     print "Monitor the job Q and when the setup jobs are done, run:\n";
     print "$myname -v\n";
   }
-} //_runSetupPage
+} //_runSetupVerify
 
 // ************ ALL ********************
 if (array_key_exists("a", $options))
@@ -129,14 +128,26 @@ if (array_key_exists("a", $options))
    * can do for now is to run the setup and then tell the tester to
    * run the page tests after the the setup is done.
    */
-  _runSetupPage();
+  _runSetupVerify();
 }
 
 // Basic
 if (array_key_exists("b", $options))
 {
-  print "Sorry, basic tests not yet operational\n";
-  exit (0);
+  print "Running Basic/SiteTests\n";
+  if(chdir($SiteTests) === FALSE)
+  {
+    print "Basic/Site Tests ERROR: can't cd to $SiteTests\n";
+  }
+  $SiteLast = exec("./runSiteTests.php > " .
+  "/tmp/BasicFOSSologyTests-$date 2>&1", $dummy, $Srtn);
+
+  if(chdir($BasicTests) === FALSE)
+  {
+    print "Basic Tests ERROR: can't cd to $BasicTests\n";
+  }
+  $BasicLast = exec("./runBasicTests.php > " .
+  "/tmp/BasicFOSSologyTests-$date 2>&1", $dummy, $Srtn);
 }
 if (array_key_exists("s", $options))
 {
@@ -148,37 +159,22 @@ if (array_key_exists("s", $options))
   $SiteLast = exec("./runSiteTests.php > " .
   "/tmp/SiteFOSSologyTests-$date 2>&1", $dummy, $Srtn);
 }
-
-// ******************** Page *******************************************
-if (array_key_exists("p", $options))
-{
-  print "Running PageTests\n";
-  if(!$setUp)
-  {
-    print "Setup for the Pages tests does not appear to have been run\n";
-    print "running....\n";
-    _runSetupPage();
-  }
-  if(chdir($PageTests) === FALSE)
-  {
-    print "Page Tests ERROR: can't cd to $PageTests\n";
-  }
-  $PageLast = exec("./runPageTests.php >> " .
-  "/tmp/PageFOSSologyTests-$date 2>&1", $dummy, $Prtn);
-}
-
-//Verify
+// ******************** Verify (and Setup)******************************
 if (array_key_exists("v", $options))
 {
-  print "would run:\n";
-  print "./runVerifyTests.php >> " .
-  "/tmp/VerifyFOSSologyTests-$date 2>&1, '', $Prtn);";
+  print "Checking Setup for Verify Tests\n";
+  if(!$setUp)
+  {
+    print "Setup for the Verify tests does not appear to have been run\n";
+    print "running....\n";
+    _runSetupVerify();
+  }
   if(chdir($VerifyTests) === FALSE)
   {
-    print "ERROR: can't cd to $VerifyTests\n";
+    print "Verify Tests ERROR: can't cd to $VerifyTests\n";
   }
-  //$VerifyLast = exec("./runVerifyTests.php >> " .
-  //"/tmp/VerifyFOSSologyTests-$date 2>&1", $dummy, $Prtn);
+  $VerifyLast = exec("./runVeriyTests.php >> " .
+  "/tmp/VerifyFOSSologyTests-$date 2>&1", $dummy, $Prtn);
 }
 
 /*
