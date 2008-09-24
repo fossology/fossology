@@ -38,7 +38,7 @@
  */
 
 //require_once '/usr/local/simpletest/autorun.php';
-require_once ('fossologyWebTestCase.php');
+require_once ('fossologyTestCase.php');
 require_once ('TestEnvironment.php');
 
 global $URL;
