@@ -266,6 +266,7 @@ long	Pfile[2] = {-1,-1};	/* pfile keys */
 int	Verbose=0;	/* debugging via '-v' */
 int	ShowStage1Flag=0;	/* debugging: show "same" matrix */
 int	ShowStage2Flag=0;	/* debugging: show "aligned" matrix */
+int	ShowStage3Flag=0;	/* debugging: show best "aligned" matrix */
 #endif
 int	ExhaustiveSearch=0;	/* should it do an exhaustive search? */
 
@@ -1486,7 +1487,7 @@ inline int	GetSeqRange	()
   MS.Matrix.MatrixMaxPos[1] = MS.Path.MatrixPath[1][vBestEnd];
   if (MS.Matrix.MatrixMaxPos[1] - MS.Matrix.MatrixMinPos[1] < MatchLen[1]) return(0);
 
-  MS.Matrix.MatrixMax = vBestEnd-vBestStart;
+  MS.Matrix.MatrixMax = vBestEnd-vBestStart+1;
   MS.Matrix.MatrixBestMin = vBestStart;
   MS.Matrix.MatrixBestMax = vBestEnd;
 
@@ -2776,6 +2777,13 @@ int	SAMfilesExhaustiveB	()
 		  PrintRanges("SET BEST",0,1);
 		  PrintRanges("SET BEST",1,1);
 		  }
+		if (ShowStage3Flag)
+		  {
+		  printf("Stage 3:\n  A: %s (%s: %d)\n  B: %s (%s: %d)\n",
+		    MS.Label[0].Filename,MS.Label[0].Sectionname,MS.Symbols[0].SymbolMax,
+		    MS.Label[1].Filename,MS.Label[1].Sectionname,MS.Symbols[1].SymbolMax);
+		  PrintMatrix(0,65536,0,65536);
+		  }
 #endif
 		CopyMatrixState(&MS,&BMS,1);
 		HasMatch=1;
@@ -2843,7 +2851,7 @@ int	SAMfilesExhaustiveB	()
 	  }
 #endif
 #if DEBUG_RECURSION
-	printf("%*s BEFORE: %ld - %ld\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
+	printf("%*s BEFORE: %d - %d\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
 	Depth++;
 #endif
 	HasMatch |= SAMfilesExhaustiveB();
@@ -2874,7 +2882,7 @@ int	SAMfilesExhaustiveB	()
 #endif
 	/* Here is the RECURSION! */
 #if DEBUG_RECURSION
-	printf("%*s AFTER: %ld - %ld\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
+	printf("%*s AFTER: %d - %d\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
 	Depth++;
 #endif
 	HasMatch |= SAMfilesExhaustiveB();
@@ -2891,7 +2899,7 @@ int	SAMfilesExhaustiveB	()
   FreeMatrixState(&RMS);
   FreeMatrixState(&BMS);
 #if DEBUG_RECURSION
-  printf("%*s OUT: %ld - %ld\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
+  printf("%*s OUT: %d - %d\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
 #endif
   return(HasMatch);
 } /* SAMfilesExhaustiveB() */
@@ -3061,6 +3069,7 @@ void	Usage	(char *Name)
   printf("    -v = Verbose (-vv = more verbose, etc.)\n");
   printf("    -1 = Show matrix stage 1 (same)\n");
   printf("    -2 = Show matrix stage 2 (align)\n");
+  printf("    -3 = Show matrix state 3: best matrix (as it finds it)\n");
 #endif
 } /* Usage() */
 
@@ -3071,7 +3080,7 @@ int	main	(int argc, char *argv[])
 {
   int c;
 
-  while((c = getopt(argc,argv,"A:B:C:EG:iL:M:O:T:t:v12")) != -1)
+  while((c = getopt(argc,argv,"A:B:C:EG:iL:M:O:T:t:v123")) != -1)
     {
     switch(c)
       {
@@ -3170,6 +3179,7 @@ int	main	(int argc, char *argv[])
 #if DEBUG
       case '1':	ShowStage1Flag=1;	break;
       case '2':	ShowStage2Flag=1;	break;
+      case '3':	ShowStage3Flag=1;	break;
       case 'v':	Verbose++;	break;
 #endif
       default:
