@@ -835,6 +835,7 @@ if (0)
     $CWD = getcwd();
     global $DATADIR;
     global $AGENTDIR;
+    global $PROJECTSTATEDIR;
     if ($Debug) { print "Going to $DATADIR/agents/licenses\n"; }
     chdir("$DATADIR/agents/licenses");
     $CMD = 'find . -type f | grep -v "\.meta" | sed -e "s@^./@@"';
