@@ -1075,7 +1075,7 @@ int	PreprocessFile	(int UseRep)
 	}
 
     /* NEXT STEP!  Clean up text */
-    else if ((BytesLeft >= 2) && !strncasecmp((char *)(Rep->Mmap+i),"(c)",3))
+    else if ((BytesLeft >= 3) && !strncasecmp((char *)(Rep->Mmap+i),"(c)",3))
 	{
 	i=i+2;
 	C=-2;
@@ -1102,6 +1102,9 @@ int	PreprocessFile	(int UseRep)
 	C=-8;
 	strcpy(S,"...");
 	}
+
+    /* Remove non-license-like printable characters */
+    else if (!isalnum(C) && !strchr(".,;?!-",C)) C=' ';
 
     /* NEXT STEP!  Final clean-up */
     if (!isprint(C) && (C >= 0))

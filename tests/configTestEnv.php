@@ -65,5 +65,5 @@ $endphp = "?>\n";
 
 fwrite($FD, "$startphp$fullUrl$usr$passwd$endphp");
 fclose($FD);
-print "./TestEnvrionment.php created sucessfully\n";
+print "./TestEnvironment.php created sucessfully\n";
 ?>

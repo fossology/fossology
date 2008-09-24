@@ -46,7 +46,6 @@ if (!isset($GlobalReady)) { exit; }
  ************************************************************/
 function LicenseNormalizeName	($LicName,$Confidence,$CanonicalName)
 {
-print "<pre>$LicName  $Confidence  $CanonicalName</pre>\n";
   /* Find the right name to use */
   $Name = $CanonicalName;
   if ($Confidence < 3)
@@ -266,6 +265,7 @@ function LicenseGetForFile(&$UploadtreePk)
 {
   global $DB;
 
+  /* Get every real item */
   $SQL = "SELECT
 	CASE
 	  WHEN lic_tokens IS NULL THEN licterm_name
@@ -286,9 +286,46 @@ function LicenseGetForFile(&$UploadtreePk)
 	  AND agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
 	  AND (lic_tokens IS NULL OR
 	    CAST(tok_match AS numeric)/CAST(lic_tokens AS numeric) > 0.5)
-	ORDER BY licterm_name
+	  AND licterm_name_confidence != 3
+	ORDER BY agent_lic_meta_pk,licterm_name
 	;";
   $Results = $DB->Action($SQL);
+
+  /* Get every item found by term */
+  $SQL = "SELECT
+	  licterm_name,
+	  agent_lic_meta.*,
+	  lic_tokens
+	  FROM uploadtree AS UT1, uploadtree as UT2,
+	  licterm_name, licterm, agent_lic_meta, agent_lic_raw
+	WHERE
+	  UT1.lft BETWEEN UT2.lft and UT2.rgt
+	  AND UT1.upload_fk=UT2.upload_fk
+	  AND UT2.uploadtree_pk=$UploadtreePk
+	  AND licterm_name.pfile_fk=UT1.pfile_fk
+	  AND licterm_pk=licterm_name.licterm_fk
+	  AND agent_lic_meta_pk = licterm_name.agent_lic_meta_fk
+	  AND agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
+	  AND (lic_tokens IS NULL OR
+	    CAST(tok_match AS numeric)/CAST(lic_tokens AS numeric) > 0.5)
+	  AND licterm_name_confidence = 3
+	ORDER BY agent_lic_meta_pk,licterm_name
+	;";
+  $R2 = $DB->Action($SQL);
+
+  /* Combine terms by name */
+  for($i=0; !empty($R2[$i]['licterm_name']); $i++)
+    {
+    if ($R2[$i]['agent_lic_meta_pk'] == $R2[$i+1]['agent_lic_meta_pk'])
+      {
+      $R2[$i+1]['licterm_name'] = $R2[$i]['licterm_name'] . ', ' . $R2[$i+1]['licterm_name'];
+      }
+    else
+      {
+      $R2[$i]['phrase_text'] = '';
+      $Results[] = $R2[$i];
+      }
+    }
   return($Results);
 } // LicenseGetForFile()
 

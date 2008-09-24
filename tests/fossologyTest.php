@@ -246,7 +246,10 @@ class fossologyTest extends WebTestCase
     $this->setmyCookie($cookie);
     $host = $this->getHost($URL);
     $this->mybrowser->setCookie('Login', $cookie, $host);
+    $url = $this->mybrowser->getUrl();
+    $page = $this->mybrowser->getContent($URL);
   }
+
   private function _repoDBlogin($browser = NULL)
   {
 
@@ -317,18 +320,11 @@ class fossologyTest extends WebTestCase
    */
   public function escapeDots($string)
   {
-<<<<<<< .working
-    $found = preg_match("/.*value='([0-9].*?)'.*?;($folderName)<\//", $page, $matches);
-    //print "DB: matches is:\n";
-    //var_dump($matches) . "\n";
-    return ($matches[1]);
-=======
     if(empty($string)) { return(FALSE); }
     $estring = preg_replace('/\./', '\\.', $string);
     //print  "ED: string is:$string, estring is:$estring\n";
     if($estring === NULL) { return(FALSE); }
     return($estring);
->>>>>>> .merge-right.r1346
   }
 
   /**

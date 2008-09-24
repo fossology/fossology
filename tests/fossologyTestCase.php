@@ -1,4 +1,5 @@
 <?php
+
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -20,52 +21,63 @@
  *
  * Base Class for all fossology tests.  All fossology tests should
  * extend this class.
- *
+ * @package fossologyTestCases
  * @version "$Id$"
  *
  * Created on Sep 1, 2008
  */
 
-require_once('TestEnvironment.php');
-require_once('fossologyTest.php');
+require_once ('TestEnvironment.php');
+require_once ('fossologyTest.php');
 
- class fossologyTestCase extends fossologyTest
+/**
+ * fossologyTestCase
+ *
+ * Base class for all fossology tests.  All fossology tests should
+ * extend this class.  This class contains methods to interact with the
+ * fossology UI menus and forms.
+ *
+ * @package fossologyTestCasesClass
+ *
+ */
+class fossologyTestCase extends fossologyTest
 {
   public $mybrowser;
   public $debug;
+  public $webProxy;
 
   /* possible methods to add */
-  public function uploadServer(){
+  public function dbCheck()
+  {
     return TRUE;
   }
-  public function oneShotLicense(){
+  public function deleteFolder()
+  {
     return TRUE;
   }
-  public function deleteFolder(){
+  public function deleteUpload()
+  {
     return TRUE;
   }
-  public function deleteUpload(){
+  public function jobsSummary()
+  {
     return TRUE;
   }
-  public function moveUpload(){
+  public function jobsDetail()
+  {
     return TRUE;
   }
-  public function rmLicAnalysis(){
+
+  public function oneShotLicense()
+  {
     return TRUE;
   }
-  public function editFolder(){
+  public function rmLicAnalysis()
+  {
     return TRUE;
   }
-  public function mvFolder(){
-    return TRUE;
-  }
-  public function jobsSummary(){
-    return TRUE;
-  }
-  public function jobsDetail(){
-    return TRUE;
-  }
-  public function dbCheck(){
+  public function uploadServer()
+  {
     return TRUE;
   }
   /**
@@ -77,7 +89,8 @@ require_once('fossologyTest.php');
    * Assumes the caller is already logged into the Repository
    *
    * @param string $parent the parent folder name the folder will be
-   * created as a child of the parent folder.
+   * created as a child of the parent folder. If no name is supplied the
+   * root folder will be used for the parent folder.
    * @param string $name   the name of the folder to be created
    * @param string $description Optional user defined description, a
    * default description is always created.
@@ -85,52 +98,74 @@ require_once('fossologyTest.php');
    * Reports: pass or fail.
    *
    */
-  public function createFolder($parent, $name, $description = null)
+  public function createFolder($parent = null, $name, $description = null)
   {
-    //print "createFolder is running\n";
-    //print "createFolder:Parameters: P:$parent N:$name D:$description\n";
+    global $URL;
+    $FolderId = 0;
 
     /* Need to check parameters */
+    if (is_null($parent))
+    {
+      $FolderId = 1; // default is root folder
+    }
     if (is_null($description)) // set default if null
     {
-      $description = "Folder $name created by testFolder as subfolder of $parent";
+      $description = "Folder $name created by createFolder as subfolder of $parent";
     }
-    $urlNow = $this->mybrowser->getUrl();
-    $page = $this->mybrowser->get($urlNow);
-    $this->assertTrue($this->myassertText($page,'/Create a new Fossology folder/'));
-    /* select the folder to create this folder under */
-    $FolderId = $this->getFolderId($parent, $page);
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Create');
+    $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
+    /* if $FolderId=0 select the folder to create this folder under */
+    if (!$FolderId)
+    {
+      $FolderId = $this->getFolderId($parent, $page);
+    }
     $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
     $this->assertTrue($this->mybrowser->setField('newname', $name));
     $this->assertTrue($this->mybrowser->setField('description', "$description"));
     $page = $this->mybrowser->clickSubmit('Create!');
     $this->assertTrue(page);
-    $this->assertTrue($this->myassertText($page, "/Folder $name Created/"),
-     "createFolder Failed!\nPhrase 'Folder $name Created' not found\nDoes the Folder exist?\n");
+    $this->assertTrue($this->myassertText($page, "/Folder $name Created/"), "createFolder Failed!\nPhrase 'Folder $name Created' not found\nDoes the Folder $name exist?\n");
   }
-
   /**
-<<<<<<< .working
-  * function uploadAFile
-  * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
-  *
-  * Upload a file and optionally schedule the agents.
-  *
-  * @param string $parentFolder the parent folder name, default is root
-  * folder (1)
-  * @param string $uploadFile the path to the file to upload
-  * @param string $description=null optonal description
-  * @param string $uploadName=null optional upload name
-  *
-  * @todo, add in selecting agents the parameter to this routine will
-  * need to be quoted if it contains commas.
-  *
-  * @todo add ability to specify uploadName
-  *
-  * @return pass or fail
-  */
-  public function uploadFile($parentFolder, $uploadFile, $description=null, $uploadName=null, $agents=null)
-=======
+   * editFolder
+   *
+   * @param string $folder the folder to edit
+   * @param string $newName the new name for the folder
+   * @param string $description Optional description, default
+   * description is always created, to overide the default, supply a
+   * descrtion.
+   *
+   * Assumes that the caller has already logged in.
+   */
+  public function editFolder($folder, $newName, $description = null)
+  {
+    global $URL;
+
+    /* Need to check parameters */
+    if (empty ($folder))
+    {
+      return (FALSE);
+    }
+    if (is_null($description)) // set default if null
+    {
+      $description = "Folder $newName edited by editFolder Test, this is the changed description";
+    }
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Edit Properties');
+    $this->assertTrue($this->myassertText($page, '/Edit Folder Properties/'));
+    $FolderId = $this->getFolderId($folder, $page);
+    $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
+    if (!(empty ($newName)))
+    {
+      $this->assertTrue($this->mybrowser->setField('newname', $newName));
+    }
+    $this->assertTrue($this->mybrowser->setField('newdesc', "$description"));
+    $page = $this->mybrowser->clickSubmit('Edit!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->myassertText($page, "/Folder Properties changed/"), "editFolder Failed!\nPhrase 'Folder Properties changed' not found\n");
+  }
+  /**
    * moveUpload($oldfFolder, $destFolder, $upload)
    *
    * Moves an upload from one folder to another. Assumes the caller has
@@ -144,11 +179,8 @@ require_once('fossologyTest.php');
    *
    */
   public function moveUpload($oldFolder, $destFolder, $upload)
->>>>>>> .merge-right.r1346
   {
     global $URL;
-<<<<<<< .working
-=======
     print "mU: OF:$oldFolder DF:$destFolder U:$upload\n";
     if (empty ($oldFolder))
     {
@@ -243,7 +275,6 @@ require_once('fossologyTest.php');
   public function uploadFile($parentFolder, $uploadFile, $description = null, $uploadName = null, $agents = null)
   {
     global $URL;
->>>>>>> .merge-right.r1346
     /*
      * check parameters:
      * default parent folder is root folder
@@ -261,7 +292,7 @@ require_once('fossologyTest.php');
     }
     if (is_null($description)) // set default if null
     {
-      $description = "File $uploadFile uploaded by test UploadAFileTest";
+      $description = "File $uploadFile uploaded by test UploadFileTest";
     }
     //print "starting uploadFile\n";
     $loggedIn = $this->mybrowser->get($URL);
@@ -269,16 +300,26 @@ require_once('fossologyTest.php');
     $page = $this->mybrowser->get("$URL?mod=upload_file");
     $this->assertTrue($this->myassertText($page, '/Upload a New File/'));
     $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
-    $this->assertTrue($this->mybrowser->setField('folder', $parentFolder), "FAIL! could not select Parent Folder!\n");
-    $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile"));
-    $this->assertTrue($this->mybrowser->setField('description', "$description"));
+    $FolderId = $this->getFolderId($parentFolder, $page);
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId), "uploadFile FAILED! could not set 'folder' field!\n");
+    $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile"), "uploadFile FAILED! could not set 'getfile' field!\n");
+    $this->assertTrue($this->mybrowser->setField('description', "$description"), "uploadFile FAILED! could not set 'description' field!\n");
     /*
-     * the test breaks if the name is set to null $this->assertTrue
-     * ($this- >mybrowser- >setField ('name', $upload_name));
+     * the test will fail if name is set to null, so we special case it
+     * rather than just set it.
      */
-    /* Select agents to run, we just pass on the parameter to setAgents */
-    $rtn = $this->setAgents($agents);
-    if(is_null($rtn)) { $this->fail("FAIL: could not set agents in uploadAFILE test\n"); }
+    if (!(is_null($uploadName)))
+    {
+      $this->assertTrue($this->mybrowser->setField('name', "$uploadName"), "uploadFile FAILED! could not set 'name' field!\n");
+    }
+    /*
+     * Select agents to run, we just pass on the parameter to setAgents,
+     * don't bother if null
+     */
+    if (!(is_null($agents)))
+    {
+      $this->setAgents($agents);
+    }
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
     //print "************* page after Upload! is *************\n$page\n";
@@ -303,9 +344,10 @@ require_once('fossologyTest.php');
   *
   * @return pass or fail
   */
-  public function uploadUrl($parentFolder=1, $url, $description=null, $uploadName=null, $agents=null)
+  public function uploadUrl($parentFolder = 1, $url, $description = null, $uploadName = null, $agents = null)
   {
     global $URL;
+    global $PROXY;
     /*
      * check parameters:
      * default parent folder is root folder
@@ -326,6 +368,10 @@ require_once('fossologyTest.php');
       $description = "File $url uploaded by test UploadAUrl";
     }
     //print "starting UploadAUrl\n";
+    if (!(empty ($this->webProxy)))
+    {
+      $this->mybrowser->useProxy($this->webProxy);
+    }
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
     $this->assertTrue($this->myassertText($loggedIn, '/From URL/'));
@@ -348,7 +394,10 @@ require_once('fossologyTest.php');
     }
     /* selects agents 1,2,3 license, mime, pkgmetagetta */
     $rtn = $this->setAgents($agents);
-    if(is_null($rtn)) { $this->fail("FAIL: could not set agents in uploadAFILE test\n"); }
+    if (is_null($rtn))
+    {
+      $this->fail("FAIL: could not set agents in uploadAFILE test\n");
+    }
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
     $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
