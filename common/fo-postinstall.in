@@ -110,6 +110,10 @@ if [ ! -d "{$PROJECTSTATEDIR}" ] ; then
    # FIXME: do we really need setgid?
    #chmod 2775 {$PROJECTSTATEDIR}
 fi
+if [ ! -d "{$PROJECTSTATEDIR}/agents" ] ; then
+   mkdir -p "{$PROJECTSTATEDIR}/agents"
+   chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}/agents
+fi
 
 ########################################################################
 
