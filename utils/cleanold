@@ -12,8 +12,11 @@ SAVE="/usr/local/share/fossology/agents/proxy.conf
 
 FILES="/usr/local/bin/cp2foss.php
 /usr/local/bin/diffm
+/usr/local/bin/fossinit
 /usr/local/bin/fossinit.php
+/usr/local/bin/fossjobs
 /usr/local/bin/fossjobs.php
+/usr/local/bin/fosslic
 /usr/local/bin/fosslic.php
 /usr/local/bin/GetFM
 /usr/local/bin/get-projects
@@ -33,6 +36,7 @@ FILES="/usr/local/bin/cp2foss.php
 "
 
 DIRS="/usr/local/fossology/
+/usr/local/lib/fossology/
 /usr/local/share/fossology/
 /usr/local/share/nomos3/"
 
