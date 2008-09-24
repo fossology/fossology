@@ -29,8 +29,8 @@
  */
 
 
-require_once ('../../../../tests/fossologyTestCase.php');
-require_once ('../../../../tests/TestEnvironment.php');
+require_once ('../../tests/fossologyTestCase.php');
+require_once ('../../tests/TestEnvironment.php');
 
 /* every test must use these globals, at least $URL */
 global $URL;
