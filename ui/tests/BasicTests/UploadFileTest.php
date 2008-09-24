@@ -27,8 +27,8 @@
  * Created on Aug 1, 2008
  */
 
-require_once ('../../../../tests/fossologyTestCase.php');
-require_once ('../../../../tests/TestEnvironment.php');
+require_once ('../../../tests/fossologyTestCase.php');
+require_once ('../../../tests/TestEnvironment.php');
 
 global $URL;
 
