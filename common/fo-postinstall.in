@@ -179,8 +179,7 @@ if [ $SCHEDULER ]; then
      mkdir -p "$REPO"
      chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
      # FIXME: which specific directories do we need setgid for?
-     #chmod 2770 $REPO
-     chmod 770 $REPO
+     chmod 2770 $REPO
    fi
 
    # scheduler config file
