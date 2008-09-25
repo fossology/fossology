@@ -29,7 +29,7 @@ class agent_license_once_compare extends FO_Plugin
   public $Name       = "agent_license_once_compare";
   public $Title      = "One-Shot License Comparison";
   public $Version    = "1.0";
-  public $Dependency = array("db","view","view-license");
+  public $Dependency = array("db","view","view-license","agent_license_once");
   public $NoHTML     = 0;
   /** To require login access, use: **/
   public $DBaccess   = PLUGIN_DB_ANALYZE;
@@ -87,119 +87,8 @@ class agent_license_once_compare extends FO_Plugin
 	system($Sys);
 	}
 
-    /* Create bsam results */
-    $Sys = "$AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -O t '$TempCache' '$TempLics'";
-    $Fin = popen($Sys,"r");
-    $LicSummary = array();
-    $LicNum = -1;
-    $Denominator = 0;
-    $Match = "0%";
-    while(!feof($Fin))
-      {
-      $Line = fgets($Fin);
-      // print "<pre>$Line</pre>";
-      if (strlen($Line) > 0)
-	{
-	// print "<pre>$Line</pre>";
-	if (substr($Line,0,4) == "A = ")
-	  {
-	  $Bsam = array(); /* clear the structure */
-	  $Bsam['Aname'] = trim(substr($Line,4));
-	  /* Initialize all other counters */
-	  $LicNum++;
-	  $Denominator = 0;
-	  $Match = "0%";
-	  }
-	else if (substr($Line,0,4) == "B = ")
-	  {
-	  $Bsam['Bname'] = trim(substr($Line,4));
-	  }
-	else if (substr($Line,0,6) == "|A| = ")
-	  {
-	  $Bsam['Atok'] = intval(substr($Line,6));
-	  $Denominator += intval(substr($Line,6));
-	  }
-	else if (substr($Line,0,6) == "|B| = ")
-	  {
-	  $Bsam['Btok'] = intval(substr($Line,6));
-	  $Denominator += intval(substr($Line,6));
-	  }
-	else if (substr($Line,0,11) == "max(AxB) = ")
-	  {
-	  $Bsam['ABmatch'] = intval(substr($Line,11));
-	  if ($Denominator > 0)
-	    {
-	    $Numerator = intval(substr($Line,11));
-	    $Match = intval($Numerator*200 / $Denominator) . "%";
-	    }
-	  else { $Match = "0%"; }
-	  }
-	else if (substr($Line,0,8) == "Apath = ")
-	  {
-	  $Bsam['Apath'] = trim(substr($Line,8));
-	  }
-	else if (substr($Line,0,8) == "Bpath = ")
-	  {
-	  $Bsam['Bpath'] = trim(substr($Line,8));
-	  /* This is the last record.  Generate the results. */
-	  $Sys = "$AGENTDIR/licinspect -X ";
-	  $Sys .= " '" . $Bsam['Aname'] . "' ";
-	  $Sys .= " '" . $Bsam['Bname'] . "' ";
-	  $Sys .= " '" . $Bsam['ABmatch'] . "' ";
-	  $Sys .= " '" . $Bsam['Atok'] . "' ";
-	  $Sys .= " '" . $Bsam['Btok'] . "' ";
-	  $Sys .= " '" . $Bsam['Apath'] . "' ";
-	  $Sys .= " '" . $Bsam['Bpath'] . "'";
-	  $Fin2 = popen($Sys,"r");
-	  $NameList = '';
-	  while(!feof($Fin2))
-	    {
-	    $Line = fgets($Fin2);
-	    $LicShort = trim($Line);
-	    if (strlen($LicShort) > 0)
-	      {
-	      $LicSummary[$LicShort] = 1;
-	      if (empty($NameList)) { $NameList = $LicShort; }
-	      else { $NameList .= ", $LicShort"; }
-	      }
-	    }
-	  pclose($Fin2);
-
-	  /* Add the namelist to the highlighting */
-	  foreach(split(",",$Bsam['Apath']) as $Segment)
-	    {
-	    if (empty($Segment)) { continue; }
-	    $Parts = split("-",$Segment,2);
-	    if (empty($Parts[1])) { $Parts[1] = $Parts[0]; }
-	    $View->AddHighlight($Parts[0],$Parts[1],$LicNum,$Match,$NameList);
-	    $NameList = NULL;
-	    }
-	  }
-	} /* while read a line */
-      } /* while read from bsam */
-    pclose($Fin);
-    unlink($TempLics);
-
-    if ($Highlight)
-      {
-      $Fin = fopen($TempFile,"r");
-      if ($Fin)
-        {
-	$View->SortHighlightMenu();
-        print "<center>";
-        print $View->GetHighlightMenu(-1);
-        print "</center>";
-        print "<hr />\n";
-        $View->ShowText($Fin,0,1,-1);
-        fclose($Fin);
-	}
-      }
-    else
-      {
-      $LicSummary = array_keys($LicSummary);
-      sort($LicSummary);
-      $V .= implode(", ",$LicSummary);
-      }
+    $OneShot =  &$Plugins[plugin_find_id("agent_license_once")];
+    $V .= $OneShot->AnalyzeOne($Highlight,$TempLics);
 
     /* Clean up */
     unlink($TempCache);
