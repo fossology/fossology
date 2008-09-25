@@ -41,11 +41,10 @@ class agent_license_once extends FO_Plugin
   /*********************************************
    AnalyzeOne(): Analyze one uploaded file.
    *********************************************/
-  function AnalyzeOne ($Highlight)
+  function AnalyzeOne ($Highlight,$LicCache)
   {
     global $Plugins;
     global $AGENTDIR;
-    global $DATADIR;
     $V = "";
     $View = &$Plugins[plugin_find_id("view")];
     $Bsam = array(); /* results from bSAM */
@@ -61,7 +60,7 @@ class agent_license_once extends FO_Plugin
     // print "Cached file $TempCache = " . filesize($TempCache) . " bytes.\n";
 
     /* Create bsam results */
-    $Sys = "$AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -O t '$TempCache' '$DATADIR/agents/License.bsam'";
+    $Sys = "$AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -O t '$TempCache' '$LicCache'";
     $Fin = popen($Sys,"r");
     $LicSummary = array();
     $LicNum = -1;
@@ -262,6 +261,8 @@ class agent_license_once extends FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     global $DB;
+    global $DATADIR;
+    $LicCache = "$DATADIR/agents/License.bsam";
     $V="";
     switch($this->OutputType)
     {
@@ -277,7 +278,7 @@ class agent_license_once extends FO_Plugin
 	  if ($_FILES['licfile']['size'] <= 1024*1024*10)
 	    {
 	    /* Size is not too big.  */
-	    print $this->AnalyzeOne($Highlight) . "\n";
+	    print $this->AnalyzeOne($Highlight,$LicCache) . "\n";
 	    }
 	  if (!empty($_FILES['licfile']['unlink_flag']))
 	    { unlink($_FILES['licfile']['tmp_name']); }
@@ -300,7 +301,7 @@ class agent_license_once extends FO_Plugin
 	    if ($_FILES['licfile']['size'] <= 1024*1024*10)
 	      {
 	      /* Size is not too big.  */
-	      print $this->AnalyzeOne($Highlight) . "\n";
+	      print $this->AnalyzeOne($Highlight,$LicCache) . "\n";
 	      }
 	    /* Do not unlink the or it will delete the repo file! */
 	    if (!empty($_FILES['licfile']['unlink_flag']))
