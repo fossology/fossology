@@ -352,6 +352,7 @@ class jobs_showjobs extends FO_Plugin
 	else { $V .= "</table>\n<P />\n"; }
 	$V .= "<table class='text' border=1 width='100%'>\n";
 	$JobName = $Row['upload_filename'];
+	$JobName = preg_replace("@^.*/@","",$JobName);
 	if (empty($JobName)) { $JobName = "[Default]"; }
 	if (!empty($Row['upload_desc'])) $JobName .= " (" . $Row['upload_desc'] . ")";
 	$Style = "style='background:#202020; color:white;}'";
@@ -439,8 +440,27 @@ class jobs_showjobs extends FO_Plugin
 	  {
 	  $V .= "  <td bgcolor='$Color'><table class='text' border=0 width='100%'><tr><td bgcolor='$Color'>";
 	  $t = number_format($Row['jq_itemsprocessed'], 0, "", ",");
-	  if ($t == 1) { $V .= "  <td>$t item<br />\n"; }
+	  if ($t == "1") { $V .= "  <td>$t item<br />\n"; }
 	  else { $V .= "  <td>$t items<br />\n"; }
+
+	  /* If it is a license analysis, show % completed */
+	  if (($Row['jq_type'] == 'license') && !empty($Row['jq_starttime']) && empty($Row['jq_endtime']))
+	    {
+	    $SQL = "SELECT SUM(size) FROM license_" . $Row['upload_pk'] . "
+		UNION
+		SELECT SUM(size) FROM license_" . $Row['upload_pk'] . "
+		INNER JOIN agent_lic_status
+		ON agent_lic_status.pfile_fk = Akey
+		WHERE agent_lic_status.inrepository IS TRUE
+		AND agent_lic_status.processed IS TRUE
+		ORDER BY sum;"; /* processed size / total size */
+	    $Res = $DB->action($SQL);
+	    if (intval($Res[1]['sum']) > 0)
+	      {
+	      $Percent = intval($Res[0]['sum']*10000.0 / $Res[1]['sum'])/100.0;
+	      $V .= $Percent . "% completed<br />\n";
+	      }
+	    }
 
 	  $V .= "Elapsed scheduled:<br />\n";
 	  $V .= "Elapsed running:</td>\n";
