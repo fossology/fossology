@@ -37,13 +37,13 @@ install: all $(VARS)
 	$(INSTALL_PROGRAM) departition $(DESTDIR)$(AGENTDIR)/departition
 	$(INSTALL_PROGRAM) checksum $(DESTDIR)$(AGENTDIR)/checksum
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(AGENTDIR)/ununpack
-	$(INSTALL_PROGRAM) UnMagic.mime $(DESTDIR)$(AGENTDIR)/UnMagic.mime
+	$(INSTALL_PROGRAM) UnMagic.mime $(DESTDIR)$(AGENTDATADIR)/UnMagic.mime
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(AGENTDIR)/departition
 	rm -f $(DESTDIR)$(AGENTDIR)/checksum
 	rm -f $(DESTDIR)$(AGENTDIR)/ununpack
-	rm -f $(DESTDIR)$(AGENTDIR)/UnMagic.mime
+	rm -f $(DESTDIR)$(AGENTDATADIR)/UnMagic.mime
 
 test: all
 	@echo "*** No tests available for agents/$(EXE) ***"
