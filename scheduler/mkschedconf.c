@@ -104,7 +104,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
 
   /** license analysis (uses bsam) ***/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -T license -O n -- - %s/License.bsam",AGENTDIR,PROJECTSTATEDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -T license -O n -- - %s/agents/License.bsam",AGENTDIR,PROJECTSTATEDIR);
   for(i=0; i<NumCPU1; i++)
     {
     fprintf(Fout,"agent=license %s| ",CmdHost);
