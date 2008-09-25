@@ -78,8 +78,8 @@ int	Verbose=0;	/* debugging via '-v' */
 int	ShowTerms=0;	/* output individual terms */
 
 /* Thresholds for confidence interval */
-float	ThresholdSame=97;	/* match == same */
-float	ThresholdSimilar=90;	/* match == similar */
+float	ThresholdSame=100;	/* match == same */
+float	ThresholdSimilar=0;	/* match == similar */
 float	ThresholdMissing=10;	/* subtract 10% for each missing term */
 
 
@@ -1002,8 +1002,8 @@ void	Usage	(char *Name)
   printf("             aname :: unknown file name\n");
   printf("             bname :: known file name (path in license raw directory)\n");
   printf("             match :: number of matched tokens\n");
-  printf("             atok  :: number of tokens in the unknown file\n");
-  printf("             btok  :: number of tokens in the known/license file\n");
+  printf("             atok  :: total number of tokens in the unknown file\n");
+  printf("             btok  :: total number of tokens in the known/license file\n");
   printf("             apath :: byte path through the unknown file\n");
   printf("             bpath :: byte path through the known file\n");
   printf("           For example:\n");

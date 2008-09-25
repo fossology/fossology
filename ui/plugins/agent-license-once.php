@@ -126,8 +126,8 @@ class agent_license_once extends FO_Plugin
 	  $Sys .= " '" . $Bsam['Aname'] . "' ";
 	  $Sys .= " '" . $Bsam['Bname'] . "' ";
 	  $Sys .= " '" . $Bsam['ABmatch'] . "' ";
-	  $Sys .= " '" . $Bsam['Atok'] . "' ";
-	  $Sys .= " '" . $Bsam['Btok'] . "' ";
+	  $Sys .= " '" . $Bsam['Atotal'] . "' ";
+	  $Sys .= " '" . $Bsam['Btotal'] . "' ";
 	  $Sys .= " '" . $Bsam['Apath'] . "' ";
 	  $Sys .= " '" . $Bsam['Bpath'] . "'";
 	  $Fin2 = popen($Sys,"r");
@@ -144,6 +144,13 @@ class agent_license_once extends FO_Plugin
 	      }
 	    }
 	  pclose($Fin2);
+
+	  /* Special case: if no "-style" and not >= 60%, then it must
+	     have matched the terms! Give it a 100% match. */
+	  if (!preg_match('/-style/',$NameList) && (intval($Match) < 60))
+	    {
+	    $Match='100%';
+	    }
 
 	  /* Add the namelist to the highlighting */
 	  foreach(split(",",$Bsam['Apath']) as $Segment)
