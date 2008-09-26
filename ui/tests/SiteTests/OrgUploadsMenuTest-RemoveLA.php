@@ -41,7 +41,7 @@ class UploadsRemoveLAMenuTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Uploads/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Delete Uploaded File/'));
-    $this->assertTrue($this->myassertText($loggedIn, '/Edit Properties \(TBD\)/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/Edit Properties/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Move/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Remove License Analysis/'));
     /* ok, this proves the text is on the page, let's see if we can
