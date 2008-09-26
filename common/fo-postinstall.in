@@ -12,7 +12,7 @@
 OPTS=`getopt -o aduseoh --long agent,database,ui,scheduler,everything,overwrite,help -n 'fo-postinstall' -- "$@"`
 
 if [ $? != 0 ]; then
-   echo "Bad option specified."
+   echo "ERROR: Bad option specified."
    OPTS="--help"
 fi
 
@@ -144,7 +144,7 @@ if [ $? = 0 ]; then
       echo "ERROR: unable to connect to database, please check $DBCONF"
       exit 1
    else
-      echo "Connect succeeded, database is working."
+      echo "NOTE: Connect succeeded, database is working."
    fi
 else
    echo "*** Initializing database ***"
@@ -176,14 +176,30 @@ if [ $SCHEDULER ]; then
    # really only create it if needed on the scheduler machine
    echo "*** Making sure repo exists with right ownership and permissions ***"
    if [ ! -d "$REPO" ] ; then
-     mkdir -p "$REPO"
-     chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
-     # FIXME: which specific directories do we need setgid for?
-     chmod 2770 $REPO
-     # make sure the parent dir has the right permissions too
-     chown {$PROJECTUSER}:{$PROJECTGROUP} $\{REPO%/*\}
-     chmod 2770 $\{REPO%/*\}
+      mkdir -p "$REPO"
+      chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
+      # FIXME: which specific directories do we need setgid for?
+      chmod 2770 $REPO
+      # make sure the parent dir has the right permissions too
+      chown {$PROJECTUSER}:{$PROJECTGROUP} $\{REPO%/*\}
+      chmod 2770 $\{REPO%/*\}
+   else
+      echo "NOTE: Repository already exists at $REPO"
    fi
+
+if [ -e "{$SYSCONFDIR}/fossology/Hosts.conf" ] ; then
+   grep -q "^localhost" {$SYSCONFDIR}/fossology/Hosts.conf
+   if [ $? == 0 ] ; then
+      if [ ! -d "$REPO/localhost" ] ; then
+         echo "NOTE: creating new $REPO/localhost directory"
+         mkdir $REPO/localhost
+         chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO/localhost
+         chmod 2770 $REPO/localhost
+      else
+         echo "NOTE: $REPO/localhost directory already exists"
+      fi
+   fi
+fi
 
    # scheduler config file
    # this has to be done after the database is setup
