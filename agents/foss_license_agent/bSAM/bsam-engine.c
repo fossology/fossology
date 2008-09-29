@@ -874,8 +874,24 @@ FindSeqPosReCheck:
   /* look for best across (best=furthest right) */
   aoffset = (A-1)*MS.Symbols[1].SymbolEnd;
 #if 0
-  printf("Range: A[%d]=[%d,%d][%d,%d]  B[%d]=[%d,%d][%d,%d]\n",A,MS.Matrix.MatrixMinPos[0],MS.Matrix.MatrixMaxPos[0],0,MS.Symbols[0].SymbolEnd,B,MS.Matrix.MatrixMinPos[1],MS.Matrix.MatrixMaxPos[1],0,MS.Symbols[1].SymbolEnd);
+  printf("Range: A[%d]=[%d,%d][%d,%d]  B[%d]=[%d,%d][%d,%d] :: looking for %d\n",A,MS.Matrix.MatrixMinPos[0],MS.Matrix.MatrixMaxPos[0],0,MS.Symbols[0].SymbolEnd,B,MS.Matrix.MatrixMinPos[1],MS.Matrix.MatrixMaxPos[1],0,MS.Symbols[1].SymbolEnd,V);
 #endif
+  /** Quick test: if the corner the best match? **/
+  if (Matrix[aoffset+B-1] == V)
+	{
+	*NewA = A-1;
+	*NewB = B-1;
+	if (CompSymbols(*NewA,*NewB))
+	  {
+	  MS.Path.MatrixPath[0][V] = *NewA;
+	  MS.Path.MatrixPath[1][V] = *NewB;
+#if 0
+	  printf("Corner match: [%d,%d] = %d  Best=%d\n",*NewA,*NewB,V,MS.Matrix.MatrixMax);
+#endif
+	  return(1);
+	  }
+	}
+
   /** Scan from furthest to nearest to find the smallest match **/
   for(b=B-1; b >= V-1; b--)
     {
@@ -1417,19 +1433,27 @@ inline int	GetSeqRange	()
 
   /* Now find the best big chunk */
   vStart = 0;
-  vEnd = -1;
+  vEnd = 0;
   vBestStart = 0;
   vBestEnd = 0;
   Seq[0]=0;
   Seq[1]=0;
-  for(v=0; v <= MS.Matrix.MatrixMax; v++)
+
+#if 0
+  printf(" === Want [0] %d - %d  [1] %d - %d\n",MS.Matrix.MatrixMinPos[0],MS.Matrix.MatrixMaxPos[0],MS.Matrix.MatrixMinPos[1],MS.Matrix.MatrixMaxPos[1]);
+  printf("[0]:");
+  for(v=1; v<=MS.Matrix.MatrixMax; v++) printf(" %d",MS.Path.MatrixPath[0][v]);
+  printf("\n[1]:");
+  for(v=1; v<=MS.Matrix.MatrixMax; v++) printf(" %d",MS.Path.MatrixPath[1][v]);
+  printf("\n");
+#endif
+
+  for(v=1; v <= MS.Matrix.MatrixMax; v++)
     {
     /* only scan within the selected range */
     if (MS.Path.MatrixPath[0][v] < MS.Matrix.MatrixMinPos[0]) continue;
     if (MS.Path.MatrixPath[0][v] > MS.Matrix.MatrixMaxPos[0]) continue;
 
-    if (vEnd < vStart) { vStart=v; vEnd=v; } /* if new sequence range */
-    else
       {
       /* Ok, we've started a sequence. */
 
@@ -1487,6 +1511,7 @@ inline int	GetSeqRange	()
   MS.Matrix.MatrixMaxPos[1] = MS.Path.MatrixPath[1][vBestEnd];
   if (MS.Matrix.MatrixMaxPos[1] - MS.Matrix.MatrixMinPos[1] < MatchLen[1]) return(0);
 
+  if (vBestEnd-vBestStart < MS.Matrix.MatrixMax)
   MS.Matrix.MatrixMax = vBestEnd-vBestStart+1;
   MS.Matrix.MatrixBestMin = vBestStart;
   MS.Matrix.MatrixBestMax = vBestEnd;
@@ -1849,9 +1874,9 @@ int	ComputeMatrix	()
 #endif
 
   /* fill out the outer edge for init */
-  for(a=MinA; a < MaxA; a++)
+  for(a=MinA; a <= MaxA; a++)
     Matrix[a*MS.Symbols[1].SymbolEnd] = CompSymbols(a,0);
-  for(b=MinB; b < MaxB; b++)
+  for(b=MinB; b <= MaxB; b++)
     Matrix[b] = CompSymbols(0,b);
 
   /* Neal says: pam was heavily optimized.
