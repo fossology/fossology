@@ -43,6 +43,7 @@ uint16_t *Symbol;	/* the set of symbols */
 u_int SymbolMax=0;	/* number of symbols */
 
 int	Verbose=0;	/* debugging via '-v' */
+int	Show1SL=1;	/* show 1sl */
 
 /* for multiple datasets per file... */
 int	FileHandle=-1;
@@ -129,7 +130,9 @@ int	LoadNextData	()
     	TokentypeLen = Length;
 	break;
       case 0x0108:	/* Function tokens */
+	if (Length % 2) { printf("ERROR: number of tokens is not divisible by two.\n"); }
 	SymbolMax = Length/2; /* 2 bytes per token */
+	printf("  Symbols: %d  (%d bytes)\n",SymbolMax,Length);
 	Symbol = (uint16_t *)(Mmap+Offset);
 	break;
       case 0x0118:	/* OR tokens */
@@ -154,13 +157,16 @@ int	LoadNextData	()
 	printf("  Offset record found: %d entries\n",Length);
 	break;
       case 0x0140:	/* Function's one-sentence license */
-	printf("  1SL: @ 0x%08lx - 0x%08lx '",RawStart,RawEnd);
-	for(i=Offset; Mmap[i] != '\0'; i++)
+	if (Show1SL)
+	  {
+	  printf("  1SL: @ 0x%08lx - 0x%08lx '",RawStart,RawEnd);
+	  for(i=Offset; Mmap[i] != '\0'; i++)
 		{
 		if (!Verbose && isspace(Mmap[i])) fputc(' ',stdout);
 		else fputc(Mmap[i],stdout);
 		}
-	printf("'\n");
+	  printf("'\n");
+	  }
 	break;
       case 0x01ff:	/* End of function */
 	if (Verbose) printf("EOF\n");
@@ -281,8 +287,7 @@ void	Usage	(char *Name)
   printf("  List contents of file1.\n");
   printf("  Debugging options:\n");
   printf("    -v = Verbose (-vv = more verbose, etc.)\n");
-  printf("    -1 = Show matrix stage 1 (same)\n");
-  printf("    -2 = Show matrix stage 2 (align)\n");
+  printf("    -1 = disable display of phrases (one-sentence licenses)\n");
 } /* Usage() */
 
 /**********************************************
@@ -292,11 +297,12 @@ int	main	(int argc, char *argv[])
 {
   int c;
 
-  while((c = getopt(argc,argv,"v")) != -1)
+  while((c = getopt(argc,argv,"v1")) != -1)
     {
     switch(c)
       {
       case 'v':	Verbose++;	break;
+      case '1': Show1SL=0;	break;
       default:
 	Usage(argv[0]);
 	exit(-1);
