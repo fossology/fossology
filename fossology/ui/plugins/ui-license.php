@@ -190,7 +190,7 @@ class ui_license extends FO_Plugin
 	}
       else
 	{
-        $LinkUri = NULL;
+	$LinkUri = NULL;
 	}
 
       if (Iscontainer($C['ufile_mode']))
@@ -206,33 +206,21 @@ class ui_license extends FO_Plugin
 
       /* Populate the output ($VF) - file list */
 
-      /* Find number of licenses in child 
-       * But only if there are <500 licenses in the parent.  This number
-       * is arbitrary but the idea is to save a whole bunch of LicenseCount
-       * calls when the license counts are not that interesting (due to the large
-       * number of licenses).
-       */
-      if ($LicTotal < 500)
-	{
-        $LicCount = LicenseCount($C['uploadtree_pk']);
-	}
-      else
-	{
-        $LicCount = 0;
-	}
+      /* Find number of licenses in child */
+      $LicCount = LicenseCount($C['uploadtree_pk']);
 
       $VF .= '<tr><td id="Lic-' . $LicCount . '" align="left">';
       $HasHref=0;
       if ($IsContainer)
 	{
-        $VF .= "<a href='$LicUri'>";
-        $VF .= "<b>";
-        $HasHref=1;
+	$VF .= "<a href='$LicUri'>";
+	$VF .= "<b>";
+	$HasHref=1;
 	}
       else if (!empty($LinkUri) && ($LicCount > 0))
 	{
-        $VF .= "<a href='$LinkUri'>";
-        $HasHref=1;
+	$VF .= "<a href='$LinkUri'>";
+	$HasHref=1;
 	}
       $VF .= $C['ufile_name'];
       if ($IsDir) { $VF .= "/"; };
