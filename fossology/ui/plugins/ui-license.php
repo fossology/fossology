@@ -30,7 +30,7 @@ class ui_license extends FO_Plugin
   var $Title      = "License Browser";
   var $Version    = "1.0";
   // var $MenuList= "Jobs::License";
-  var $Dependency = array("db","browse");
+  var $Dependency = array("db","browse","view-license");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
   var $UpdCache   = 0;
@@ -211,11 +211,11 @@ class ui_license extends FO_Plugin
 
       $VF .= '<tr><td id="Lic-' . $LicCount . '" align="left">';
       $HasHref=0;
+      $HasBold=0;
       if ($IsContainer)
 	{
-	$VF .= "<a href='$LicUri'>";
-	$VF .= "<b>";
-	$HasHref=1;
+	if ($LicCount > 0) { $VF .= "<a href='$LicUri'>"; $HasHref=1; }
+	$VF .= "<b>"; $HasBold=1;
 	}
       else if (!empty($LinkUri) && ($LicCount > 0))
 	{
@@ -224,7 +224,7 @@ class ui_license extends FO_Plugin
 	}
       $VF .= $C['ufile_name'];
       if ($IsDir) { $VF .= "/"; };
-      if ($IsContainer) { $VF .= "<b>"; };
+      if ($HasBold) { $VF .= "</b>"; }
       if ($HasHref) { $VF .= "</a>"; }
       $VF .= "</td><td>";
       if ($LicCount)
@@ -241,6 +241,20 @@ class ui_license extends FO_Plugin
       $ChildCount++;
       }
     $VF .= "</table>\n";
+
+    /***************************************
+     Problem: $ChildCount can be zero!
+     This happens if you have a container that does not
+     unpack to a directory.  For example:
+     file.gz extracts to archive.txt that contains a license.
+     Same problem seen with .pdf and .Z files.
+     Solution: if $ChildCount == 0, then just view the license!
+     ***************************************/
+    if ($ChildCount == 0)
+      {
+      $ModLicView = &$Plugins[plugin_find_id("view-license")];
+      return($ModLicView->Output() );
+      }
 
     /****************************************/
     /* List the licenses */
