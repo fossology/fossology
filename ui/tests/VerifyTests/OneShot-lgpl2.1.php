@@ -16,9 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * Upload a file from the server using the UI
+ * Perform a one-shot license analysis
  *
- *@TODO need to make sure testing folder exists....
  *@TODO needs setup and account to really work well...
  *
  * @version "$Id$"
@@ -26,8 +25,8 @@
  * Created on Aug 1, 2008
  */
 
-require_once ('../../../../tests/fossologyTestCase.php');
-require_once ('../../../../tests/TestEnvironment.php');
+require_once ('../../../tests/fossologyTestCase.php');
+require_once ('../../../tests/TestEnvironment.php');
 
 global $URL;
 
@@ -39,10 +38,10 @@ class OneShotgplv21Test extends fossologyTestCase
   {
     /* check to see if the user and material exist*/
     $this->assertTrue(file_exists('/home/fosstester/.bashrc'),
-                      "FAILURE! .bashrc not found\n");
+                      "OneShotgplv21Test FAILURE! .bashrc not found\n");
     $this->assertTrue(file_exists('/home/fosstester/ReadMe'),
-                      "FAILURE! Readme in ~fosstester not found\n");
-    $this->Login($browser);
+        "OneShotgplv21Test FAILURE! Readme in ~fosstester not found\n");
+    $this->Login();
   }
 
   function testOneShotgplv21()
@@ -52,30 +51,32 @@ class OneShotgplv21Test extends fossologyTestCase
     print "starting OneShotgplv21Test\n";
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
-                      "FAIL! Did not find Upload Menu\n");
+                      "OneShotgplv21Test FAILED! Did not find Upload Menu\n");
     $this->assertTrue($this->myassertText($loggedIn, '/One-Shot License/'),
-                      "FAIL! Did not find One-Shot License Menu\n");
+                      "OneShotgplv21Test FAILED! Did not find One-Shot License Menu\n");
 
     $page = $this->mybrowser->get("$URL?mod=agent_license_once");
     $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
-                      "FAIL! Did not find One-Shot License Analysis Title\n");
+    "OneShotgplv21Test FAILED! Did not find One-Shot License Analysis Title\n");
     $this->assertTrue($this->myassertText($page, '/The analysis is done in real-time/'),
-                      "FAIL! Did not find real-time Text\n");
+             "OneShotgplv21Test FAILED! Did not find real-time Text\n");
 
     $this->assertTrue($this->mybrowser->setField('licfile', '/home/fosstester/licenses/gplv2.1'));
     /* we won't select highlights' */
     $this->assertTrue($this->mybrowser->clickSubmit('Analyze!'),
-                      "FAIL! Count not click Analyze button\n");
+                      "FAILED! Count not click Analyze button\n");
     /* Check for the correct analysis.... */
     $page = $this->mybrowser->getContent();
     $this->assertTrue($this->myassertText($page, '/LGPL/'),
-                      "FAIL! Did not identify LGPL as LGPL\n");
+                      "OneShotgplv21Test FAILED! Did not identify LGPL as LGPL\n");
     $this->assertTrue($this->myassertText($page, '/v2\.1/'),
-                      "FAIL! Did not find v2.1 version string\n");
-        $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
-                      "FAIL! Did not find One-Shot License Analysis Title\n");
+    "OneShotgplv21Test FAILED! Did not find v2.1 version string\n");
+
+    $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
+    "OneShotgplv21Test FAILED! Did not find One-Shot License Analysis Title\n");
+
     $this->assertFalse($this->myassertText($page, '/-partial/'),
-                      "FAIL! Found -partial in a non partial license file\n");
+    "OneShotgplv21Test FAILED! Found -partial in a non partial license file\n");
 
     //print "************ page after Analysis! *************\n$page\n";
   }
