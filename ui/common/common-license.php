@@ -252,9 +252,15 @@ function LicenseCount($UploadtreePk)
   if (empty($DB)) { return 0; }
   if (empty($UploadtreePk)) { return 0; }
 
-  $Lics=array();
-  LicenseGetAll($UploadtreePk,$Lics);
-  return($Lics[' Total ']);
+  $SQL = "SELECT count(*) AS count
+	FROM uploadtree AS ut1
+	INNER JOIN licterm_name ON ut1.pfile_fk = licterm_name.pfile_fk
+	INNER JOIN uploadtree AS ut2 ON ut2.uploadtree_pk = $UploadtreePk
+	AND ut1.upload_fk = ut2.upload_fk
+	WHERE ut1.lft BETWEEN ut2.lft AND ut2.rgt
+	;";
+  $Results = $DB->Action($SQL);
+  return($Results[0]['count']);
 } // LicenseCount()
 
 /************************************************************
@@ -468,7 +474,7 @@ function LicenseGetAll	(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL)
 	FROM uploadtree AS UT1, uploadtree as UT2,
 	  licterm_name, licterm, agent_lic_meta, agent_lic_raw
 	WHERE
-	  UT1.lft BETWEEN UT2.lft and UT2.rgt
+	  UT1.lft BETWEEN UT2.lft AND UT2.rgt
 	  AND UT1.upload_fk=UT2.upload_fk
 	  AND UT2.uploadtree_pk=$UploadtreePk
 	  AND licterm_name.pfile_fk=UT1.pfile_fk
