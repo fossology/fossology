@@ -24,17 +24,19 @@ $path = '/usr/share/php' . PATH_SEPARATOR;
 set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
 /* simpletest includes */
-require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
-require_once ('../../../../tests/fossologyWebTestCase.php');
-require_once ('../../../../tests/TestEnvironment.php');
-require_once('../../../../tests/testClasses/timer.php');
+//require_once ('../../../tests/fossologyTestCase.php');
+require_once ('../../../tests/TestEnvironment.php');
+require_once('../../../tests/testClasses/timer.php');
 
 $start = new timer();
 print "Startnig Verify Tests at: " . date('r') . "\n";
 $test = &new TestSuite('Fossology Repo UI Verification Functional tests');
+//$test->addTestFile('browseUploadedTest.php');
+//$test->addTestFile('OneShot-lgpl2.1.php');
+//$test->addTestFile('OneShot-lgpl2.1-T.php');
 $test->addTestFile('verifyFossTestAr.php');
 
 if (TextReporter::inCli())
