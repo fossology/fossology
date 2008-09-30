@@ -43,7 +43,7 @@ class agent_license_reanalyze extends FO_Plugin
   {
     global $Plugins;
     global $AGENTDIR;
-    global $DATADIR;
+    global $PROJECTSTATEDIR;
     global $DB;
 
     print "<pre>";

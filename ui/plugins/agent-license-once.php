@@ -45,7 +45,7 @@ class agent_license_once extends FO_Plugin
   {
     global $Plugins;
     global $AGENTDIR;
-    global $DATADIR;
+    global $PROJECTSTATEDIR;
     $V = "";
     $View = &$Plugins[plugin_find_id("view")];
     $Bsam = array(); /* results from bSAM */

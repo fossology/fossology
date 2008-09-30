@@ -39,7 +39,7 @@ class admin_check_template extends FO_Plugin
    ************************************************/
   function ReadBsamUnique	($Verbose=0)
     {
-    global $DATADIR;
+    global $PROJECTSTATEDIR;
     $Fin = @fopen("$PROJECTSTATEDIR/agents/License.bsam","rb");
     if (!$Fin)
       {
