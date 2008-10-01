@@ -1093,11 +1093,7 @@ int	PreprocessFile	(int UseRep)
     else if ((BytesLeft >= 3) && (C != ' ') && isprint(C) && !isalnum(C) &&
              (C == Rep->Mmap[i+1]) && (C == Rep->Mmap[i+2]))
 	{
-	while((i < BytesLeft) && (Rep->Mmap[i] == C))
-		{
-		i++;
-		}
-	i=i-1;
+	for(i=i+1; (i+1 < BytesLeft) && (Rep->Mmap[i+1] == C); i++) { ; }
 	C=-8;
 	strcpy(S,"...");
 	}
