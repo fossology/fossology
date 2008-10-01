@@ -182,7 +182,7 @@ void	DBLoadGold	()
 	}
     /* Put the file in the "files" repository too */
     Path = RepMkPath("gold",Unique);
-    if (ForceGroup > 0) { chown(Path,-1,ForceGroup); }
+    if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
     } /* if GlobalImportGold */
   else /* if !GlobalImportGold */
     {
@@ -209,13 +209,8 @@ void	DBLoadGold	()
 	DBclose(DB);
 	exit(-1);
 	}
+  if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
   if (Path != GlobalTempFile) free(Path);
-  if (ForceGroup > 0)
-	{
-	Path = RepMkPath("files",Unique);
-	chown(Path,-1,ForceGroup);
-	free(Path);
-	}
 
   /* Now update the DB */
   /** Break out the sha1, md5, len components **/
@@ -541,6 +536,7 @@ void	Usage	(char *Name)
 {
   printf("Usage: %s [options] [OBJ]\n",Name);
   printf("  -i  :: Initialize the DB connection then exit (nothing downloaded)\n");
+  printf("  -g group :: Set the group on processed files (e.g., -g fossy).\n");
   printf("  -G  :: Do NOT copy the file to the gold repository.\n");
   printf("  -d dir :: directory to use file for temporary file storage\n");
   printf("  -k key :: upload key identifier (number)\n");
