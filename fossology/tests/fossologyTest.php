@@ -241,7 +241,7 @@ class fossologyTest extends WebTestCase
     $this->setBrowser($browser);
     $this->assertTrue(is_object($this->mybrowser), "FAIL! Login() internal failure did not get a browser object\n");
     $page = $this->mybrowser->get($URL);
-    $this->assertTrue($page);
+    $this->assertTrue($page,"Login FAILED! did not fetch a web page, can't login\n'");
     $cookie = $this->_repoDBlogin($this->mybrowser);
     $this->setmyCookie($cookie);
     $host = $this->getHost($URL);
@@ -272,6 +272,7 @@ class fossologyTest extends WebTestCase
     $cookieValue = $this->mybrowser->getCookieValue($host, '/', 'Login');
     // need to check $cookieValue for validity
     $this->mybrowser->setCookie('Login', $cookieValue, $host);
+    $page = $this->mybrowser->get($URL);
     $this->assertTrue($this->mybrowser->get("$URL?mod=auth&nopopup=1"));
     $this->assertTrue($this->mybrowser->setField('username', $USER));
     $this->assertTrue($this->mybrowser->setField('password', $PASSWORD));

@@ -368,21 +368,21 @@ class fossologyTestCase extends fossologyTest
       $description = "File $url uploaded by test UploadAUrl";
     }
     //print "starting UploadAUrl\n";
-    if (!(empty ($this->webProxy)))
-    {
-      $this->mybrowser->useProxy($this->webProxy);
-    }
     $loggedIn = $this->mybrowser->get($URL);
-    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
+    $this->assertFalse($this->myassertText($loggedIn, '/Network Error/'),
+    "uploadURL FAILED! there was a Newtwork Error (dns lookup?)\n");
+    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
+    "uploadURL FAILED! cannot file Upload menu, did we get a fossology page?\n");
     $this->assertTrue($this->myassertText($loggedIn, '/From URL/'));
     $page = $this->mybrowser->get("$URL?mod=upload_url");
+
     $this->assertTrue($this->myassertText($page, '/Upload from URL/'));
     $this->assertTrue($this->myassertText($page, '/Enter the URL to the file:/'));
     /* only look for the the folder id if it's not the root folder */
     $folderId = $parentFolder;
     if ($parentFolder != 1)
     {
-      $FolderId = $this->getFolderId($parentFolder, $page);
+      $folderId = $this->getFolderId($parentFolder, $page);
     }
     $this->assertTrue($this->mybrowser->setField('folder', $folderId));
     $this->assertTrue($this->mybrowser->setField('geturl', $url));

@@ -44,15 +44,14 @@
  * @TODO: remove Testing Directory
  *
  */
-$u .= "Usage: $argv[0] [-a] | [-b] | [-h] | [-s] | [-v]\n";
-$u .= "-a: Run all FOSSology Test Suites\n" .
+$usage .= "Usage: $argv[0] [-a] | [-b] | [-h] | [-s] | [-v]\n";
+$usage .= "-a: Run all FOSSology Test Suites\n" .
 "-b: Run the basic test suite. This runs the SiteTests and any Tests" .
 "that don't depend on uploads\n" .
 "-h: Display Usage\n" .
-"-s: Run SiteTests only (this is a lightweight suite)" .
+"-s: Run SiteTests only (this is a lightweight suite)\n" .
 "-v: Run the Verify Tests.  These tests require uploads to be uploaded first." .
 "    See the test documentation for details\n";
-$usage = $u;
 
 static $setUp = FALSE;
 $errors = 0;
@@ -64,12 +63,13 @@ $date = date('Y-m-d');
 $myname = $argv[0];
 $SiteTests = '../ui/tests/SiteTests';
 $BasicTests = '../ui/tests/BasicTests';
-$VerifTests = '../ui/tests/VerifyTests';
+$VerifyTests = '../ui/tests/VerifyTests';
 
 $Home = getcwd();
 $pid = getmypid();
 
-$options = getopt('abhsp');
+$options = getopt('abhsv');
+print "options is:\n"; print_r($options) . "\n";
 if(empty($options))
 {
   print "$usage\n";
@@ -116,6 +116,10 @@ function _runSetupVerify()
 // ************ ALL ********************
 if (array_key_exists("a", $options))
 {
+   if(chdir($Home) === FALSE)
+  {
+    print "All Tests ERROR: can't cd to $Home\n";
+  }
   print "Running All Tests\n";
   if(chdir($SiteTests) === FALSE)
   {
@@ -134,6 +138,10 @@ if (array_key_exists("a", $options))
 // Basic
 if (array_key_exists("b", $options))
 {
+  if(chdir($Home) === FALSE)
+  {
+    print "Basic Tests ERROR: can't cd to $Home\n";
+  }
   print "Running Basic/SiteTests\n";
   if(chdir($SiteTests) === FALSE)
   {
@@ -159,15 +167,13 @@ if (array_key_exists("s", $options))
   $SiteLast = exec("./runSiteTests.php > " .
   "/tmp/SiteFOSSologyTests-$date 2>&1", $dummy, $Srtn);
 }
-// ******************** Verify (and Setup)******************************
+
+// ******************** Verify ******************************
 if (array_key_exists("v", $options))
 {
-  print "Checking Setup for Verify Tests\n";
-  if(!$setUp)
+  if(chdir($Home) === FALSE)
   {
-    print "Setup for the Verify tests does not appear to have been run\n";
-    print "running....\n";
-    _runSetupVerify();
+    print "Verify Tests ERROR: can't cd to $Home\n";
   }
   if(chdir($VerifyTests) === FALSE)
   {
