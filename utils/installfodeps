@@ -83,13 +83,14 @@ if [ $BUILDTIME ]; then
          ;;
       Fedora)
          echo "Installing Fedora buildtime dependencies";
-         # F8=Werwolf F9=Sulphur F10=Cambridge dev=Rawhide;
+         # F8=Werwolf F9=Sulphur F10=Cambridge dev=Rawhide
          yum install \
             postgresql-devel \
             file-libs libxml2 libextractor-devel \
          ;;
-      RHEL)
+      RedHatEnterprise*)
          echo "Installing RHEL buildtime dependencies";
+         # 4=Nahant* 5=Tikanga*
          yum install \
             postgresql-devel \
             file-libs libxml2 \
@@ -123,10 +124,10 @@ if [ $RUNTIME ]; then
             postgresql postgresql-server \
             httpd \
             php php-pear php-pgsql \
-            file-libs libxml2 libextractor libextractor-plugins-base \
+            file-libs libxml2 libextractor libextractor-plugins \
             binutils bzip2 cabextract cpio genisoimage poppler-utils \
                rpm tar upx unzip gzip;
-         # F8=Werwolf F9=Sulphur F10=Cambridge dev=Rawhide;
+         # F8=Werwolf F9=Sulphur F10=Cambridge dev=Rawhide
          case "$CODENAME" in
             Werwolf|Sulphur)
                echo "NOTE: sleuthkit and unrar is not available in Fedora release $CODENAME,";
@@ -138,8 +139,9 @@ if [ $RUNTIME ]; then
             *) echo "ERROR: Unknown or Unsupported Fedora release"; exit 1;;
          esac
          ;;
-      RHEL)
+      RedHatEnterprise*)
          echo "Installing RHEL runtime dependencies";
+         # 4=Nahant* 5=Tikanga*
          yum install \
             postgresql postgresql-server \
             httpd \
