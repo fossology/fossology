@@ -81,6 +81,7 @@ class uploadTestDataTest extends fossologyTestCase
 
     /* upload the archives using the upload from file menu */
     $desciption = "File $upload uploaded by Upload Data Test";
+    print "Starting file uploads\n";
     foreach($uploadList as $upload)
     {
       $this->uploadFile('Testing', $upload, $description, null, '1,2,3');
@@ -91,6 +92,7 @@ class uploadTestDataTest extends fossologyTestCase
     {
       $this->webProxy = $PROXY;
     }
+    print "Starting Url uploads\n";
     foreach($urlList as $url)
     {
       $this->uploadUrl($rootFolder, $url, null, null, '1,2,3');
