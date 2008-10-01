@@ -70,7 +70,7 @@ class upload_file extends FO_Plugin
 
     /* Run wget_agent locally to import the file. */
     global $LIBEXECDIR;
-    $Prog = "$LIBEXECDIR/agents/wget_agent -k $uploadpk '$UploadedFile'";
+    $Prog = "$LIBEXECDIR/agents/wget_agent -g fossy -k $uploadpk '$UploadedFile'";
     system($Prog);
     unlink($UploadedFile);
 

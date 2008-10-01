@@ -31,6 +31,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
+#include <grp.h>
 
 #define lstat64(x,y) lstat(x,y)
 #define stat64(x,y) stat(x,y)
@@ -59,6 +60,7 @@ long GlobalUploadKey=-1;
 char GlobalTempFile[MAXCMD];
 char GlobalURL[MAXCMD];
 int GlobalImportGold=1;	/* set to 0 to not store file in gold repository */
+gid_t ForceGroup=-1;
 
 /* for heartbeat checking */
 long	HeartbeatCount=-1;	/* used to flag heartbeats */
@@ -143,6 +145,8 @@ void	DBLoadGold	()
 	}
   Sum = SumComputeFile(Fin);
   fclose(Fin);
+  if (ForceGroup > 0) { chown(GlobalTempFile,-1,ForceGroup); }
+
   if (!Sum)
 	{
 	printf("ERROR upload %ld Unable to compute checksum.\n",GlobalUploadKey);
@@ -178,6 +182,7 @@ void	DBLoadGold	()
 	}
     /* Put the file in the "files" repository too */
     Path = RepMkPath("gold",Unique);
+    if (ForceGroup > 0) { chown(Path,-1,ForceGroup); }
     } /* if GlobalImportGold */
   else /* if !GlobalImportGold */
     {
@@ -205,6 +210,12 @@ void	DBLoadGold	()
 	exit(-1);
 	}
   if (Path != GlobalTempFile) free(Path);
+  if (ForceGroup > 0)
+	{
+	Path = RepMkPath("files",Unique);
+	chown(Path,-1,ForceGroup);
+	free(Path);
+	}
 
   /* Now update the DB */
   /** Break out the sha1, md5, len components **/
@@ -554,12 +565,19 @@ int	main	(int argc, char *argv[])
   GlobalUploadKey = -1;
 
   /* Process command-line */
-  while((c = getopt(argc,argv,"d:ik:")) != -1)
+  while((c = getopt(argc,argv,"d:Gg:ik:")) != -1)
     {
     switch(c)
 	{
 	case 'd':
 		TempFileDir = optarg;
+		break;
+	case 'g':
+		{
+		struct group *SG;
+		SG = getgrnam(optarg);
+		if (SG) ForceGroup = SG->gr_gid;
+		}
 		break;
 	case 'G':
 		GlobalImportGold=0;
