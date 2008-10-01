@@ -684,7 +684,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 
   /* See what we got */
   Confidence=0;
-  if (!TermRemoved && !IsPhrase)
+  if (!TermRemoved && !IsPhrase && !TermAdded)
     {
     /* Got a great match */
     if (ConfidenceValue >= ThresholdSame)
@@ -717,7 +717,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
     if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,Confidence);
     }
 
-  if (TermAdded && (TermsCounterSize > 0))
+  else if (TermAdded && (TermsCounterSize > 0))
     {
     /* Got a great match on a term */
     memset(SQL,'\0',sizeof(SQL));
