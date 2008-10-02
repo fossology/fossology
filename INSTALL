@@ -127,6 +127,13 @@ External Commands:
   sources and:
    yum install binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip
 
+For those distributions where you can't get cabextract, unrar, or upx
+as prebuilt packages, you can choose to do without those, but if fossology
+encounters any of those container types it will be unable to scan them,
+possibly missing important results (especially in the case of important
+things like license scanning).
+
+
 Additional build dependencies:
 The fossology build requires gcc, make, perl, and other tools you'd
 expect to find on a development system. In addition the Text::Template
