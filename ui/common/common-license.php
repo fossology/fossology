@@ -349,7 +349,34 @@ function LicenseSearch	(&$UploadtreePk, $WantLic=NULL, $Offset=-1, $Max=0)
   /* Determine the license name */
   $LicName = preg_replace("/'(.*)'-style/",'${1}',$WantLic);
   $LicName = str_replace("'","''",$LicName);
-  if ($LicName == $WantLic)
+  if ($LicName == 'Phrase')
+    {
+    /* Phrases don't have a lic_tokens value */
+    $SQL = "SELECT
+	  licterm_name,
+	  agent_lic_meta.*,
+	  lic_tokens,
+	  UT1.pfile_fk AS pfile,
+	  UT1.*
+	  FROM uploadtree AS UT1, uploadtree as UT2,
+	  licterm_name, licterm, agent_lic_meta, agent_lic_raw
+	WHERE
+	  UT1.lft BETWEEN UT2.lft and UT2.rgt
+	  AND licterm.licterm_name = '$LicName'
+	  AND UT1.upload_fk=UT2.upload_fk
+	  AND UT2.uploadtree_pk=$UploadtreePk
+	  AND licterm_name.pfile_fk=UT1.pfile_fk
+	  AND licterm_pk=licterm_name.licterm_fk
+	  AND agent_lic_meta_pk = licterm_name.agent_lic_meta_fk
+	  AND agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
+	  AND licterm_name_confidence = 0
+
+	ORDER BY ufile_name,pfile";
+    if ($Offset > 0) { $SQL .= " OFFSET $Offset"; }
+    if ($Max > 0) { $SQL .= " LIMIT $Max"; }
+    $SQL .= ";";
+    }
+  else if ($LicName == $WantLic)
     {
     $SQL = "SELECT
 	CASE
