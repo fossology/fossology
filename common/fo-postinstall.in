@@ -160,11 +160,15 @@ INIT={$WEBDIR}/init.ui
 touch $INIT
 chown {$PROJECTUSER}:{$PROJECTGROUP} $INIT
 
-## Initialize the tables
+fi # end of DATABASE
+
+## Initialize the tables, License.bsam, and other setup
+# This is needed (and should be safe to do) on all machine types
+# In multi-system installs the database machine must be installed first
+# in order for this to work on other machines.
 echo "*** Initializing database tables ***"
 {$BINDIR}/fossinit
 
-fi # end of DATABASE
 
 ########################################################################
 
