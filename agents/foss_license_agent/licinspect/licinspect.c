@@ -593,6 +593,19 @@ void	StoreResults	(long PfilePk, long LicTermPk, long MetaPk,
 {
   if (LicTermPk <= 0) LicTermPk = GetLicTermPk(MetaPk);
 
+  /* Check if it exists first */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,MAXLINE,"SELECT * FROM licterm_name where licterm_fk = '%ld' AND agent_lic_meta_fk = '%ld';",
+	LicTermPk,MetaPk);
+  if (DBaccess(DB,SQL) < 0)
+    {
+    printf("ERROR: Unable to check results before insertion into database\n");
+    fflush(stdout);
+    DBclose(DB);
+    exit(1);
+    }
+  if (DBdatasize(DB) > 0) return; /* already exists; no duplicates */
+
   memset(SQL,'\0',sizeof(SQL));
   if (LicTermPk > 0)
     {
