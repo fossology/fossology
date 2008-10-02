@@ -24,12 +24,12 @@
  * Created on Aug 25, 2008
  */
 
-require_once('../../../../tests/fossologyTestCase.php');
-require_once('../../../../tests/TestEnvironment.php');
-require_once('../../../../tests/testClasses/parseBrowseMenu.php');
-require_once('../../../../tests/testClasses/parseMiniMenu.php');
-require_once('../../../../tests/testClasses/parseLicFileList.php');
-require_once('../../../../tests/testClasses/parseLicenseTbl.php');
+require_once('../../../tests/fossologyTestCase.php');
+require_once('../../../tests/TestEnvironment.php');
+require_once('../../../tests/testClasses/parseBrowseMenu.php');
+require_once('../../../tests/testClasses/parseMiniMenu.php');
+require_once('../../../tests/testClasses/parseLicFileList.php');
+require_once('../../../tests/testClasses/parseLicenseTbl.php');
 
 global $URL;
 
@@ -47,45 +47,51 @@ class verifyFossolyTest extends fossologyTestCase
      */
     global $URL;
 
-    $browser = & new SimpleBrowser();
-    $page = $browser->get($URL);
-    $this->assertTrue($page);
-    $this->assertTrue(is_object($browser));
-    $this->mybrowser = $browser;
-    $cookie = $this->repoLogin($this->mybrowser);
     $this->host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
-    /* still need to check for existense of archive */
+
+    $this->Login();
+
+    /* check for existense of archive */
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Browse');
+    $this->assertTrue($this->myassertText($page, '/Browse/'),
+     "verifyFossTestAr FAILED! Could not find Browse menu\n");
+    $page = $this->mybrowser->clickLink('Testing');
+    $this->assertTrue($this->myassertText($page, '/Testing/'),
+     "verifyFossTestAr FAILED! Could not find Testing folder\n");
+    $result = $this->myassertText($page, "/$name/");
+    if(!($result)) { exit(FALSE); }
   }
 
   function testVerifyFossology()
   {
     global $URL;
 
-    $name = 'fossarchive-T\.tar\.bz2';
-    // new name: $name = 'fossI16L499.tar.bz2';
+    //$name = 'fossarchive-T\.tar\.bz2';
+
+    $name = 'fossI16L499.tar.bz2';
+    $safeName = $this->escapeDots($name);
 
     print "starting VerifyFossology test\n";
-    $page = $this->mybrowser->get("$URL?mod=browse");
+    $page = $this->mybrowser->clickLink('Browse');
     $this->assertTrue($this->myassertText($page, '/Browse/'),
-                      "FAIL! Could not find Browse menu\n");
-
+             "verifyFossTestAr FAILED! Could not find Browse menu\n");
     /* Testing folder */
     $page = $this->mybrowser->clickLink('Testing');
     //print "************ Page after upload link *************\n$page\n";
     $this->assertTrue($this->myassertText($page, "/Browse/"),
-                      "FAIL! Browse Title not found\n");
-    $this->assertTrue($this->myassertText($page, "/$name/"),
-                      "FAIL! did not find fossarchive-T.tar.bz2\n");
+       "verifyFossTestAr FAILED! Browse Title not found\n");
+    $this->assertTrue($this->myassertText($page, "/$safeName/"),
+       "verifyFossTestAr FAILED! did not find $name\n");
     $this->assertTrue($this->myassertText($page, "/>View</"),
-                      "FAIL! >View< not found\n");
+       "verifyFossTestAr FAILED! >View< not found\n");
     $this->assertTrue($this->myassertText($page, "/>Meta</"),
-                      "FAIL! >Meta< not found\n");
+       "verifyFossTestAr FAILED! >Meta< not found\n");
     $this->assertTrue($this->myassertText($page, "/>Download</"),
-                      "FAIL! >Download< not found\n");
+       "verifyFossTestAr FAILED! >Download< not found\n");
 
-    /* Select 'fossarchive-T.tar.bz2' */
-    $page = $this->mybrowser->clickLink('fossarchive-T.tar.bz2');
+    /* Select archive */
+    $page = $this->mybrowser->clickLink($name);
     //print "************ Page after select foss archive *************\n$page\n";
     $this->assertTrue($this->myassertText($page, "/fossology\//"));
 
@@ -107,29 +113,35 @@ class verifyFossolyTest extends fossologyTestCase
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
     $url = $this->makeUrl($this->host, $miniMenu['License']);
+    if($url === NULL) { $this->fail("verifyFossTestAr Failed, host is not set"); }
+
     $page = $this->mybrowser->get($url);
+    //print "page after get of $url is:\n$page\n";
     $this->assertTrue($this->myassertText($page, '/License Browser/'),
-                      "FAIL! License Browser not found\n");
+          "verifyFossTestAr FAILED! License Browser Title not found\n");
     $this->assertTrue($this->myassertText($page, '/Total licenses: 499/'),
-                      "FAIL! Total Licenses does not equal 499\n");
+        "verifyFossTestAr FAILED! Total Licenses does not equal 499\n");
 
     // get the 'Show' links and License color links
     $licTbl = new parseLicenseTbl($page);
     $licTable = $licTbl->parseLicenseTbl();
+    //print "licTable is:\n"; print_r($licTable) . "\n";
 
-    /* Select show 'Public Domain, verify, select 'LGPL v2.1', verify */
+    /* FIX THIS Select show 'Public Domain, verify, select 'LGPL v2.1', verify */
     $pdURL = $this->makeUrl($this->host, $licTable['Public Domain'][0]);
-    $lgplURL = $this->makeUrl($this->host, $licTable['LGPL v2.1'][0]);
+    $lgplURL = $this->makeUrl($this->host, $licTable['\'LGPL v2.1\'-style'][0]);
 
     $page = $this->mybrowser->get($pdURL);
     $licFileList = new parseLicFileList($page);
     $tblList = $licFileList->parseLicFileList();
     $tableCnt = count($tblList);
+    print "Checking the number of files based on Public Domain\n";
     $this->assertEqual($tableCnt, 5);
 
     $page = $this->mybrowser->get($lgplURL);
     $licFileList->setPage($page);
     $flist = $licFileList->parseLicFileList();
+    print "Checking the number of files based on LGPL v2.1-style\n";
     $flistCnt = count($flist);
     $this->assertEqual($flistCnt, 3);
   }

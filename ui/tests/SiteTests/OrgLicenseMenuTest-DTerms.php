@@ -23,8 +23,8 @@
  *
  * Created on Jul 31, 2008
  */
-require_once ('../../../../tests/fossologyTestCase.php');
-require_once ('../../../../tests/TestEnvironment.php');
+require_once ('../../../tests/fossologyTestCase.php');
+require_once ('../../../tests/TestEnvironment.php');
 
 global $URL;
 
@@ -48,8 +48,8 @@ class LicenseDTermsMenuTest extends fossologyTestCase
      * get to the delete page.
      */
     $page = $this->mybrowser->get("$URL?mod=license_terms_default");
-    $this->assertTrue($this->myassertText($page, '/Create Default License Terms/'));
-    $this->assertTrue($this->myassertText($page, '/Check to create the default terms/'));
+    $this->assertTrue($this->myassertText($page, '/Reset Default License Terms/'));
+    $this->assertTrue($this->myassertText($page, '/Check to revert back to the original default terms/'));
   }
 }
 ?>

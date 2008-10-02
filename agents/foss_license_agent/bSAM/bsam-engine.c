@@ -266,6 +266,7 @@ long	Pfile[2] = {-1,-1};	/* pfile keys */
 int	Verbose=0;	/* debugging via '-v' */
 int	ShowStage1Flag=0;	/* debugging: show "same" matrix */
 int	ShowStage2Flag=0;	/* debugging: show "aligned" matrix */
+int	ShowStage3Flag=0;	/* debugging: show best "aligned" matrix */
 #endif
 int	ExhaustiveSearch=0;	/* should it do an exhaustive search? */
 
@@ -873,8 +874,24 @@ FindSeqPosReCheck:
   /* look for best across (best=furthest right) */
   aoffset = (A-1)*MS.Symbols[1].SymbolEnd;
 #if 0
-  printf("Range: A[%d]=[%d,%d][%d,%d]  B[%d]=[%d,%d][%d,%d]\n",A,MS.Matrix.MatrixMinPos[0],MS.Matrix.MatrixMaxPos[0],0,MS.Symbols[0].SymbolEnd,B,MS.Matrix.MatrixMinPos[1],MS.Matrix.MatrixMaxPos[1],0,MS.Symbols[1].SymbolEnd);
+  printf("Range: A[%d]=[%d,%d][%d,%d]  B[%d]=[%d,%d][%d,%d] :: looking for %d\n",A,MS.Matrix.MatrixMinPos[0],MS.Matrix.MatrixMaxPos[0],0,MS.Symbols[0].SymbolEnd,B,MS.Matrix.MatrixMinPos[1],MS.Matrix.MatrixMaxPos[1],0,MS.Symbols[1].SymbolEnd,V);
 #endif
+  /** Quick test: if the corner the best match? **/
+  if (Matrix[aoffset+B-1] == V)
+	{
+	*NewA = A-1;
+	*NewB = B-1;
+	if (CompSymbols(*NewA,*NewB))
+	  {
+	  MS.Path.MatrixPath[0][V] = *NewA;
+	  MS.Path.MatrixPath[1][V] = *NewB;
+#if 0
+	  printf("Corner match: [%d,%d] = %d  Best=%d\n",*NewA,*NewB,V,MS.Matrix.MatrixMax);
+#endif
+	  return(1);
+	  }
+	}
+
   /** Scan from furthest to nearest to find the smallest match **/
   for(b=B-1; b >= V-1; b--)
     {
@@ -1416,19 +1433,27 @@ inline int	GetSeqRange	()
 
   /* Now find the best big chunk */
   vStart = 0;
-  vEnd = -1;
+  vEnd = 0;
   vBestStart = 0;
   vBestEnd = 0;
   Seq[0]=0;
   Seq[1]=0;
-  for(v=0; v <= MS.Matrix.MatrixMax; v++)
+
+#if 0
+  printf(" === Want [0] %d - %d  [1] %d - %d\n",MS.Matrix.MatrixMinPos[0],MS.Matrix.MatrixMaxPos[0],MS.Matrix.MatrixMinPos[1],MS.Matrix.MatrixMaxPos[1]);
+  printf("[0]:");
+  for(v=1; v<=MS.Matrix.MatrixMax; v++) printf(" %d",MS.Path.MatrixPath[0][v]);
+  printf("\n[1]:");
+  for(v=1; v<=MS.Matrix.MatrixMax; v++) printf(" %d",MS.Path.MatrixPath[1][v]);
+  printf("\n");
+#endif
+
+  for(v=1; v <= MS.Matrix.MatrixMax; v++)
     {
     /* only scan within the selected range */
     if (MS.Path.MatrixPath[0][v] < MS.Matrix.MatrixMinPos[0]) continue;
     if (MS.Path.MatrixPath[0][v] > MS.Matrix.MatrixMaxPos[0]) continue;
 
-    if (vEnd < vStart) { vStart=v; vEnd=v; } /* if new sequence range */
-    else
       {
       /* Ok, we've started a sequence. */
 
@@ -1486,7 +1511,8 @@ inline int	GetSeqRange	()
   MS.Matrix.MatrixMaxPos[1] = MS.Path.MatrixPath[1][vBestEnd];
   if (MS.Matrix.MatrixMaxPos[1] - MS.Matrix.MatrixMinPos[1] < MatchLen[1]) return(0);
 
-  MS.Matrix.MatrixMax = vBestEnd-vBestStart;
+  if (vBestEnd-vBestStart < MS.Matrix.MatrixMax)
+  MS.Matrix.MatrixMax = vBestEnd-vBestStart+1;
   MS.Matrix.MatrixBestMin = vBestStart;
   MS.Matrix.MatrixBestMax = vBestEnd;
 
@@ -1850,9 +1876,9 @@ int	ComputeMatrix	()
 #endif
 
   /* fill out the outer edge for init */
-  for(a=MinA; a < MaxA; a++)
+  for(a=MinA; a <= MaxA; a++)
     Matrix[a*MS.Symbols[1].SymbolEnd] = CompSymbols(a,0);
-  for(b=MinB; b < MaxB; b++)
+  for(b=MinB; b <= MaxB; b++)
     Matrix[b] = CompSymbols(0,b);
 
   /* Neal says: pam was heavily optimized.
@@ -2778,6 +2804,13 @@ int	SAMfilesExhaustiveB	()
 		  PrintRanges("SET BEST",0,1);
 		  PrintRanges("SET BEST",1,1);
 		  }
+		if (ShowStage3Flag)
+		  {
+		  printf("Stage 3:\n  A: %s (%s: %d)\n  B: %s (%s: %d)\n",
+		    MS.Label[0].Filename,MS.Label[0].Sectionname,MS.Symbols[0].SymbolMax,
+		    MS.Label[1].Filename,MS.Label[1].Sectionname,MS.Symbols[1].SymbolMax);
+		  PrintMatrix(0,65536,0,65536);
+		  }
 #endif
 		CopyMatrixState(&MS,&BMS,1);
 		HasMatch=1;
@@ -2845,7 +2878,7 @@ int	SAMfilesExhaustiveB	()
 	  }
 #endif
 #if DEBUG_RECURSION
-	printf("%*s BEFORE: %ld - %ld\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
+	printf("%*s BEFORE: %d - %d\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
 	Depth++;
 #endif
 	HasMatch |= SAMfilesExhaustiveB();
@@ -2876,7 +2909,7 @@ int	SAMfilesExhaustiveB	()
 #endif
 	/* Here is the RECURSION! */
 #if DEBUG_RECURSION
-	printf("%*s AFTER: %ld - %ld\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
+	printf("%*s AFTER: %d - %d\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
 	Depth++;
 #endif
 	HasMatch |= SAMfilesExhaustiveB();
@@ -2893,7 +2926,7 @@ int	SAMfilesExhaustiveB	()
   FreeMatrixState(&RMS);
   FreeMatrixState(&BMS);
 #if DEBUG_RECURSION
-  printf("%*s OUT: %ld - %ld\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
+  printf("%*s OUT: %d - %d\n",Depth,"",MS.Symbols[0].SymbolStart,MS.Symbols[0].SymbolEnd);
 #endif
   return(HasMatch);
 } /* SAMfilesExhaustiveB() */
@@ -3063,6 +3096,7 @@ void	Usage	(char *Name)
   printf("    -v = Verbose (-vv = more verbose, etc.)\n");
   printf("    -1 = Show matrix stage 1 (same)\n");
   printf("    -2 = Show matrix stage 2 (align)\n");
+  printf("    -3 = Show matrix state 3: best matrix (as it finds it)\n");
 #endif
 } /* Usage() */
 
@@ -3073,7 +3107,7 @@ int	main	(int argc, char *argv[])
 {
   int c;
 
-  while((c = getopt(argc,argv,"A:B:C:EG:iL:M:O:T:t:v12")) != -1)
+  while((c = getopt(argc,argv,"A:B:C:EG:iL:M:O:T:t:v123")) != -1)
     {
     switch(c)
       {
@@ -3172,6 +3206,7 @@ int	main	(int argc, char *argv[])
 #if DEBUG
       case '1':	ShowStage1Flag=1;	break;
       case '2':	ShowStage2Flag=1;	break;
+      case '3':	ShowStage3Flag=1;	break;
       case 'v':	Verbose++;	break;
 #endif
       default:

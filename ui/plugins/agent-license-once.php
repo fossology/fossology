@@ -41,11 +41,10 @@ class agent_license_once extends FO_Plugin
   /*********************************************
    AnalyzeOne(): Analyze one uploaded file.
    *********************************************/
-  function AnalyzeOne ($Highlight)
+  function AnalyzeOne ($Highlight,$LicCache)
   {
     global $Plugins;
     global $AGENTDIR;
-    global $PROJECTSTATEDIR;
     $V = "";
     $View = &$Plugins[plugin_find_id("view")];
     $Bsam = array(); /* results from bSAM */
@@ -61,7 +60,7 @@ class agent_license_once extends FO_Plugin
     // print "Cached file $TempCache = " . filesize($TempCache) . " bytes.\n";
 
     /* Create bsam results */
-    $Sys = "$AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -O t '$TempCache' '$PROJECTSTATEDIR/agents/License.bsam'";
+    $Sys = "$AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -O t '$TempCache' '$LicCache'";
     $Fin = popen($Sys,"r");
     $LicSummary = array();
     $LicNum = -1;
@@ -126,8 +125,8 @@ class agent_license_once extends FO_Plugin
 	  $Sys .= " '" . $Bsam['Aname'] . "' ";
 	  $Sys .= " '" . $Bsam['Bname'] . "' ";
 	  $Sys .= " '" . $Bsam['ABmatch'] . "' ";
-	  $Sys .= " '" . $Bsam['Atok'] . "' ";
-	  $Sys .= " '" . $Bsam['Btok'] . "' ";
+	  $Sys .= " '" . $Bsam['Atotal'] . "' ";
+	  $Sys .= " '" . $Bsam['Btotal'] . "' ";
 	  $Sys .= " '" . $Bsam['Apath'] . "' ";
 	  $Sys .= " '" . $Bsam['Bpath'] . "'";
 	  $Fin2 = popen($Sys,"r");
@@ -144,6 +143,13 @@ class agent_license_once extends FO_Plugin
 	      }
 	    }
 	  pclose($Fin2);
+
+	  /* Special case: if no "-style" and not >= 60%, then it must
+	     have matched the terms! Give it a 100% match. */
+	  if (!preg_match('/-style/',$NameList) && (intval($Match) < 60))
+	    {
+	    $Match='100%';
+	    }
 
 	  /* Add the namelist to the highlighting */
 	  foreach(split(",",$Bsam['Apath']) as $Segment)
@@ -255,6 +261,8 @@ class agent_license_once extends FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     global $DB;
+    global $DATADIR;
+    $LicCache = "$DATADIR/agents/License.bsam";
     $V="";
     switch($this->OutputType)
     {
@@ -270,7 +278,7 @@ class agent_license_once extends FO_Plugin
 	  if ($_FILES['licfile']['size'] <= 1024*1024*10)
 	    {
 	    /* Size is not too big.  */
-	    print $this->AnalyzeOne($Highlight) . "\n";
+	    print $this->AnalyzeOne($Highlight,$LicCache) . "\n";
 	    }
 	  if (!empty($_FILES['licfile']['unlink_flag']))
 	    { unlink($_FILES['licfile']['tmp_name']); }
@@ -293,7 +301,7 @@ class agent_license_once extends FO_Plugin
 	    if ($_FILES['licfile']['size'] <= 1024*1024*10)
 	      {
 	      /* Size is not too big.  */
-	      print $this->AnalyzeOne($Highlight) . "\n";
+	      print $this->AnalyzeOne($Highlight,$LicCache) . "\n";
 	      }
 	    /* Do not unlink the or it will delete the repo file! */
 	    if (!empty($_FILES['licfile']['unlink_flag']))

@@ -252,9 +252,15 @@ function LicenseCount($UploadtreePk)
   if (empty($DB)) { return 0; }
   if (empty($UploadtreePk)) { return 0; }
 
-  $Lics=array();
-  LicenseGetAll($UploadtreePk,$Lics);
-  return($Lics[' Total ']);
+  $SQL = "SELECT count(*) AS count
+	FROM uploadtree AS ut1
+	INNER JOIN licterm_name ON ut1.pfile_fk = licterm_name.pfile_fk
+	INNER JOIN uploadtree AS ut2 ON ut2.uploadtree_pk = $UploadtreePk
+	AND ut1.upload_fk = ut2.upload_fk
+	WHERE ut1.lft BETWEEN ut2.lft AND ut2.rgt
+	;";
+  $Results = $DB->Action($SQL);
+  return($Results[0]['count']);
 } // LicenseCount()
 
 /************************************************************
@@ -346,27 +352,62 @@ function LicenseSearch	(&$UploadtreePk, $WantLic=NULL, $Offset=-1, $Max=0)
   if ($LicName == $WantLic)
     {
     $SQL = "SELECT
-	UT1.*,phrase_text
+	CASE
+	  WHEN lic_tokens IS NULL THEN licterm_name
+	  WHEN tok_match = lic_tokens THEN licterm_name
+	  ELSE '''' || licterm_name || '''-style'
+	END AS licterm_name,
+	agent_lic_meta.*,
+	lic_tokens,
+	UT1.pfile_fk AS pfile,
+	UT1.*
 	FROM uploadtree AS UT1, uploadtree as UT2,
 	  licterm_name, licterm, agent_lic_meta, agent_lic_raw
 	WHERE
 	  UT1.lft BETWEEN UT2.lft and UT2.rgt
+	  AND licterm.licterm_name = '$LicName'
 	  AND UT1.upload_fk=UT2.upload_fk
 	  AND UT2.uploadtree_pk=$UploadtreePk
-	  AND licterm.licterm_name = '$LicName'
 	  AND licterm_name.pfile_fk=UT1.pfile_fk
 	  AND licterm_pk=licterm_name.licterm_fk
 	  AND agent_lic_meta_pk = licterm_name.agent_lic_meta_fk
 	  AND agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
 	  AND (lic_tokens IS NULL OR
 	    CAST(tok_match AS numeric)/CAST(lic_tokens AS numeric) > 0.5)
-	  ORDER BY ufile_name,pfile_fk";
+	  AND licterm_name_confidence != 3
+	  AND tok_match = lic_tokens
+
+	UNION
+
+	SELECT
+	  licterm_name,
+	  agent_lic_meta.*,
+	  lic_tokens,
+	  UT1.pfile_fk AS pfile,
+	  UT1.*
+	  FROM uploadtree AS UT1, uploadtree as UT2,
+	  licterm_name, licterm, agent_lic_meta, agent_lic_raw
+	WHERE
+	  UT1.lft BETWEEN UT2.lft and UT2.rgt
+	  AND licterm.licterm_name = '$LicName'
+	  AND UT1.upload_fk=UT2.upload_fk
+	  AND UT2.uploadtree_pk=$UploadtreePk
+	  AND licterm_name.pfile_fk=UT1.pfile_fk
+	  AND licterm_pk=licterm_name.licterm_fk
+	  AND agent_lic_meta_pk = licterm_name.agent_lic_meta_fk
+	  AND agent_lic_meta.lic_fk = agent_lic_raw.lic_pk
+	  AND (lic_tokens IS NULL OR
+	    CAST(tok_match AS numeric)/CAST(lic_tokens AS numeric) > 0.5)
+	  AND licterm_name_confidence = 3
+
+	ORDER BY ufile_name,pfile";
     if ($Offset > 0) { $SQL .= " OFFSET $Offset"; }
     if ($Max > 0) { $SQL .= " LIMIT $Max"; }
     $SQL .= ";";
     }
   else
     {
+    /* Match for style */
     $SQL = "SELECT
 	UT1.*,phrase_text
 	FROM uploadtree AS UT1, uploadtree as UT2,
@@ -433,7 +474,7 @@ function LicenseGetAll	(&$UploadtreePk, &$Lics, $GetField=0, $WantLic=NULL)
 	FROM uploadtree AS UT1, uploadtree as UT2,
 	  licterm_name, licterm, agent_lic_meta, agent_lic_raw
 	WHERE
-	  UT1.lft BETWEEN UT2.lft and UT2.rgt
+	  UT1.lft BETWEEN UT2.lft AND UT2.rgt
 	  AND UT1.upload_fk=UT2.upload_fk
 	  AND UT2.uploadtree_pk=$UploadtreePk
 	  AND licterm_name.pfile_fk=UT1.pfile_fk

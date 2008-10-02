@@ -78,8 +78,8 @@ int	Verbose=0;	/* debugging via '-v' */
 int	ShowTerms=0;	/* output individual terms */
 
 /* Thresholds for confidence interval */
-float	ThresholdSame=97;	/* match == same */
-float	ThresholdSimilar=90;	/* match == similar */
+float	ThresholdSame=100;	/* match == same */
+float	ThresholdSimilar=0;	/* match == similar */
 float	ThresholdMissing=10;	/* subtract 10% for each missing term */
 
 
@@ -149,7 +149,7 @@ RepMmapStruct *	OpenFile	(char *Filename)
     /* Check if the file exists before trying to use it. */
     if (!RepExist("files",Filename))
 	{
-	fprintf(stderr,"WARNING: File not in the repository (%s %s)\n",
+	printf("WARNING: File not in the repository (%s %s)\n",
 		"files",Filename);
 	return(NULL);
 	}
@@ -158,9 +158,11 @@ RepMmapStruct *	OpenFile	(char *Filename)
 	{
 	/* Not able to open the repository file? */
 	/* It is in the repository but cannot be accessed */
-	fprintf(stderr,"ERROR: Unable to open repository (%s %s)\n",
+	printf("ERROR: Unable to open repository (%s %s)\n",
 		"files",Filename);
-	return(NULL);
+	fflush(stderr);
+	DBclose(DB);
+	exit(1);
 	}
     } /* if Type is set */
   return(Rep);
@@ -307,7 +309,13 @@ void	GetTerms	()
   TermsCounter = NULL;
   TermsCounterSize = 0;
   rc = DBaccess(DB,"SELECT licterm_words_pk,licterm_words_text,length(licterm_words_text) AS length FROM licterm_words ORDER BY length DESC;");
-  if (rc < 0) return;
+  if (rc < 0)
+	{
+	printf("ERROR: Unable to select terms from database.\n");
+	fflush(stdout);
+	DBclose(DB);
+	exit(1);
+	};
   if (DBdatasize(DB) <= 0)
     {
     fprintf(stderr,"ERROR: No terms in the database.\n");
@@ -528,7 +536,13 @@ void	PrintLicName	(char *LicName, FILE *Fout)
   /* Find the LicName in the DB and see what it is associated with */
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT DISTINCT licterm_name FROM licterm INNER JOIN licterm_maplic ON licterm_fk = licterm_pk INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE lic_name LIKE '%%/%s';",LicName);
-  DBaccess(DB,SQL);
+  if (DBaccess(DB,SQL) < 0)
+    {
+    printf("ERROR: Unable to select licterm_name from database\n");
+    fflush(stdout);
+    DBclose(DB);
+    exit(1);
+    }
   if (DBdatasize(DB) > 0)
     {
     fputs(DBgetvalue(DB,0,0),Fout);
@@ -559,7 +573,13 @@ long	GetLicTermPk	(long MetaPk)
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,MAXLINE,"SELECT licterm_pk FROM agent_lic_raw INNER JOIN agent_lic_meta ON agent_lic_meta_pk = %ld AND agent_lic_meta.lic_fk = lic_pk INNER JOIN licterm_maplic ON licterm_maplic.lic_fk = lic_id INNER JOIN licterm ON licterm_pk = licterm_fk;",
 	MetaPk);
-  DBaccess(DB,SQL);
+  if (DBaccess(DB,SQL) < 0)
+    {
+    printf("ERROR: Unable to select licterm_pk from database\n");
+    fflush(stdout);
+    DBclose(DB);
+    exit(1);
+    }
   if (DBdatasize(DB) < 1) return(0);
   return(atol(DBgetvalue(DB,0,0)));
 } /* GetLicTermPk() */
@@ -586,7 +606,13 @@ void	StoreResults	(long PfilePk, long LicTermPk, long MetaPk,
     snprintf(SQL,MAXLINE,"INSERT INTO licterm_name (pfile_fk,agent_lic_meta_fk,licterm_name_confidence) VALUES (%ld,%ld,%d);",
 	PfilePk,MetaPk,Confidence);
     }
-  DBaccess(DB,SQL);
+  if (DBaccess(DB,SQL) < 0)
+    {
+    printf("ERROR: Unable to store results in database\n");
+    fflush(stdout);
+    DBclose(DB);
+    exit(1);
+    }
 } /* StoreResults() */
 
 /*********************************************************
@@ -658,7 +684,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 
   /* See what we got */
   Confidence=0;
-  if (!TermRemoved && !IsPhrase)
+  if (!TermRemoved && !IsPhrase && !TermAdded)
     {
     /* Got a great match */
     if (ConfidenceValue >= ThresholdSame)
@@ -691,7 +717,7 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
     if (StoreDB) StoreResults(PfilePk,0,LicMetaPk,Confidence);
     }
 
-  if (TermAdded && (TermsCounterSize > 0))
+  else if (TermAdded && (TermsCounterSize > 0))
     {
     /* Got a great match on a term */
     memset(SQL,'\0',sizeof(SQL));
@@ -708,7 +734,13 @@ void	ComputeConfidence	(int IsPhrase, float LicPercent,
 	}
       }
     strcat(SQL," ORDER BY licterm_name;");
-    DBaccess(DB,SQL);
+    if (DBaccess(DB,SQL) < 0)
+      {
+      printf("ERROR: Unable to select licterm_pk,licterm_name from database\n");
+      fflush(stdout);
+      DBclose(DB);
+      exit(1);
+      }
     DBresults = DBmove(DB);
     First=1;
     for(i=0; i<DBdatasize(DBresults); i++)
@@ -802,7 +834,13 @@ void	ProcessTerms	()
   int IsPhrase;
   int MaxRangesCount;
 
-  DBaccess(DB,"BEGIN;");
+  if (DBaccess(DB,"BEGIN;") < 0)
+      {
+      printf("ERROR: Unable to begin database transaction\n");
+      fflush(stdout);
+      DBclose(DB);
+      exit(1);
+      }
 
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name WHERE pfile_fk = '%ld';",PfilePk);
@@ -816,7 +854,13 @@ void	ProcessTerms	()
   snprintf(SQL,sizeof(SQL),"SELECT agent_lic_meta_pk,pfile_path,license_path,lic_name,tok_match,tok_license,lic_unique,tok_pfile_start FROM agent_lic_meta INNER JOIN agent_lic_raw ON lic_pk = lic_fk WHERE pfile_fk = '%ld' ORDER BY tok_pfile_start;",PfilePk);
   if (!IsExplicit)
     {
-    DBaccess(DB,SQL);
+    if (DBaccess(DB,SQL) < 0)
+      {
+      printf("ERROR: Unable to select license segments from database\n");
+      fflush(stdout);
+      DBclose(DB);
+      exit(1);
+      }
     DBRanges = DBmove(DB);
     MaxRangesCount = DBdatasize(DBRanges);
     }
@@ -924,7 +968,13 @@ void	ProcessTerms	()
     }
 
   DBclose(DBRanges);
-  DBaccess(DB,"COMMIT;");
+  if (DBaccess(DB,"COMMIT;") < 0)
+      {
+      printf("ERROR: Unable to commit changes to database\n");
+      fflush(stdout);
+      DBclose(DB);
+      exit(1);
+      }
 } /* ProcessTerms() */
 
 /*********************************************************
@@ -944,7 +994,7 @@ void	GetAgentKey	()
 	printf("LOG: unable to select 'licinspect' from the database table 'agent'\n");
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(1);
 	}
   if (DBdatasize(DB) <= 0)
       {
@@ -956,7 +1006,7 @@ void	GetAgentKey	()
 	printf("LOG: unable to write 'licinspect' to the database table 'agent'\n");
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(1);
 	}
 #if 0
       /** Disabled: Database will take care of this **/
@@ -1002,8 +1052,8 @@ void	Usage	(char *Name)
   printf("             aname :: unknown file name\n");
   printf("             bname :: known file name (path in license raw directory)\n");
   printf("             match :: number of matched tokens\n");
-  printf("             atok  :: number of tokens in the unknown file\n");
-  printf("             btok  :: number of tokens in the known/license file\n");
+  printf("             atok  :: total number of tokens in the unknown file\n");
+  printf("             btok  :: total number of tokens in the known/license file\n");
   printf("             apath :: byte path through the unknown file\n");
   printf("             bpath :: byte path through the known file\n");
   printf("           For example:\n");
@@ -1146,7 +1196,13 @@ int	main	(int argc, char *argv[])
       PfilePk = atol(argv[optind]);
       memset(SQL,'\0',MAXLINE);
       snprintf(SQL,MAXLINE,"SELECT pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile FROM pfile WHERE pfile_pk = '%ld';",PfilePk);
-      DBaccess(DB,SQL);
+      if (DBaccess(DB,SQL) < 0)
+	{
+	printf("ERROR: Unable to select pfile information from database.\n");
+        fflush(stdout);
+        DBclose(DB);
+	exit(1);
+	}
       memset(PfileName,'\0',MAXLINE);
       strncpy(PfileName,DBgetvalue(DB,0,0),MAXLINE-1);
       if (Verbose) { printf("### Processing: pfile_pk=%ld '%s'\n",PfilePk,PfileName); }
@@ -1183,13 +1239,37 @@ int	main	(int argc, char *argv[])
       /* Mark it as processed */
       if (StoreDB)
 	{
-	DBaccess(DB,"BEGIN;");
+	if (DBaccess(DB,"BEGIN;") < 0)
+	  {
+	  printf("ERROR: Unable to begin database transaction.\n");
+          fflush(stdout);
+          DBclose(DB);
+	  exit(1);
+	  };
 	memset(SQL,'\0',sizeof(SQL));
 	snprintf(SQL,sizeof(SQL),"SELECT * FROM agent_lic_status WHERE pfile_fk = '%ld' FOR UPDATE;",PfilePk);
-	DBaccess(DB,SQL);
+	if (DBaccess(DB,SQL) < 0)
+	  {
+	  printf("ERROR: Unable to select agent_lic_status from database.\n");
+          fflush(stdout);
+          DBclose(DB);
+	  exit(1);
+	  };
 	snprintf(SQL,sizeof(SQL),"UPDATE agent_lic_status SET inspect_name = 'TRUE' WHERE pfile_fk = '%ld';",PfilePk);
-	DBaccess(DB,SQL);
-	DBaccess(DB,"COMMIT;");
+	if (DBaccess(DB,SQL) < 0)
+	  {
+	  printf("ERROR: Unable to update agent_lic_status from database.\n");
+          fflush(stdout);
+          DBclose(DB);
+	  exit(1);
+	  };
+	if (DBaccess(DB,"COMMIT;") < 0)
+	  {
+	  printf("ERROR: Unable to commit database transaction.\n");
+          fflush(stdout);
+          DBclose(DB);
+	  exit(1);
+	  };
 	}
 
       /* Off to the next item to process */

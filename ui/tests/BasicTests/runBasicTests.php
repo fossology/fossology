@@ -28,8 +28,8 @@ require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
-require_once ('../../../../tests/TestEnvironment.php');
-require_once('../../../../tests/testClasses/timer.php');
+require_once ('../../../tests/TestEnvironment.php');
+require_once('../../../tests/testClasses/timer.php');
 
 $start = new timer();
 print "Startnig Page Functional Tests at: " . date('r') . "\n";

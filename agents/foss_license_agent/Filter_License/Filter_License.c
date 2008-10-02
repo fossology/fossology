@@ -1092,13 +1092,7 @@ int	PreprocessFile	(int UseRep)
     else if ((BytesLeft >= 3) && (C != ' ') && isprint(C) && !isalnum(C) &&
              (C == Rep->Mmap[i+1]) && (C == Rep->Mmap[i+2]))
 	{
-	ii=i;
-	while((ii < Rep->MmapSize) && (Rep->Mmap[ii] == C))
-		{
-		ii++;
-		}
-	/* store the new offset */
-	if (ii > i) i=ii-1;
+	for(i=i+1; (i+1 < BytesLeft) && (Rep->Mmap[i+1] == C); i++) { ; }
 	C=-8;
 	strcpy(S,"...");
 	}

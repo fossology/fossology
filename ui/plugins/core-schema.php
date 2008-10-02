@@ -835,13 +835,17 @@ if (0)
     $CWD = getcwd();
     global $DATADIR;
     global $AGENTDIR;
-    global $PROJECTSTATEDIR;
     if ($Debug) { print "Going to $DATADIR/agents/licenses\n"; }
     chdir("$DATADIR/agents/licenses");
     $CMD = 'find . -type f | grep -v "\.meta" | sed -e "s@^./@@"';
     $Filelist = explode("\n",shell_exec($CMD));
     sort($Filelist);
-    $Realfile = "$PROJECTSTATEDIR/agents/License.bsam";
+
+    $Realdir = "$DATADIR/agents";
+    if (!is_dir($Realdir)) { die("ERROR: Directory '$Realdir' does not exist. Aborting.\n"); }
+    if (!is_writable($Realdir)) { die("ERROR: Directory '$Realdir' is not writable. Aborting.\n"); }
+
+    $Realfile = "$Realdir/License.bsam";
     $Tempfile = $Realfile . ".new";
     if (file_exists($Tempfile))
       {

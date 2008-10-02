@@ -28,7 +28,7 @@ require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 
-require_once ('../../../../tests/TestEnvironment.php');
+require_once ('../../../tests/TestEnvironment.php');
 
 $test = &new TestSuite('Fossology Repo UI Page Functional tests');
 
