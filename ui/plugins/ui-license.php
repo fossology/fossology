@@ -174,6 +174,7 @@ class ui_license extends FO_Plugin
     /* Get ALL the items under this UploadtreePk */
     $Children = DirGetList($Upload,$Item);
     $ChildCount=0;
+    $ChildLicCount=0;
     $VF .= "<table border=0>";
     foreach($Children as $C)
       {
@@ -214,7 +215,7 @@ class ui_license extends FO_Plugin
       $HasBold=0;
       if ($IsContainer)
 	{
-	if ($LicCount > 0) { $VF .= "<a href='$LicUri'>"; $HasHref=1; }
+	$VF .= "<a href='$LicUri'>"; $HasHref=1;
 	$VF .= "<b>"; $HasBold=1;
 	}
       else if (!empty($LinkUri)) //  && ($LicCount > 0))
@@ -234,6 +235,7 @@ class ui_license extends FO_Plugin
 	$VF .= "license" . ($LicCount == 1 ? "" : "s");
 	$VF .= "</a>";
 	$VF .= "]";
+	$ChildLicCount += $LicCount;
 	}
       $VF .= "</td>";
       $VF .= "</tr>\n";
@@ -241,6 +243,7 @@ class ui_license extends FO_Plugin
       $ChildCount++;
       }
     $VF .= "</table>\n";
+    // print "ChildCount=$ChildCount  ChildLicCount=$ChildLicCount\n";
 
     /***************************************
      Problem: $ChildCount can be zero!
