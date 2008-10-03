@@ -1,0 +1,50 @@
+FOSSology Multiple System Install
+=================================
+FOSSology is designed so that it is possible to divide functions up over
+several machines. You can have one function per machine, or you might
+choose to put multiple function on a machine.
+For example a common config is to have one machine running the database,
+scheduler, and ui and then have multiple machines running agents.
+There are more details of why you might want to do this and detailed
+instructions at
+  http://fossology.org/multi-system_setup
+This document is a short list of how to install.
+  
+To do a multi-system install:
+
+1) Follow the instructions in INSTALL for each machine to build and
+install FOSSology, but do not run the fo-postinstall script yet. If
+the machine will serve as a ui machine follow the apache and php
+configuration steps.
+
+2) On each machine edit the default Db.conf file that was installed and
+configure it to point at the database server. If one of the systems
+you are installing is the database server, on that machine configure
+Db.conf to point at "localhost"
+
+3) Run the fo-postinstall script on each machine using flags to indicate
+what functions the machine will serve. Here is the fo-postinstall usage text
+
+Usage: fo-postinstall [options]
+  -a or --agent      : agent specific actions
+  -d or --database   : database specific actions
+  -u or --ui         : ui specific actions
+  -s or --scheduler  : scheduler specific actions
+  -e or --everything : all actions (default)
+  -o or --overwrite  : overwrite config files with new versions
+  -h or --help       : this help text
+
+It is important that you run the fo-postinstall script on the machine
+that will serve as the database first in order to setup things that
+the other machines will need when they run fo-postinstall.
+
+4) Use mkschedconf to generate an appropriate Scheduler.conf file on
+the machine running the scheduler.
+
+5) Run /usr/local/lib/fossology/fossology-scheduler -t to test that
+your Scheduler.conf file is correct and that the scheduler can talk to
+all the agent and that they are also configured correctly. If not then
+adjust until it does.
+
+6) Start the scheduler
+  # /etc/init.d/fossology start
