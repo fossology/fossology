@@ -68,28 +68,26 @@ fi
 ########################################################################
 
 if [ $BUILDTIME ]; then
+   echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
-      Debian)
-         echo "Installing Debian buildtime dependencies";
+      Debian|Ubuntu)
          apt-get install \
             libmagic-dev libxml2-dev libextractor-dev \
             build-essential libtext-template-perl subversion;
          case "$CODENAME" in
-            etch) apt-get install postgresql-server-dev-8.1;;
-            lenny) apt-get install postgresql-server-dev-8.3;;
+            etch|dapper) apt-get install postgresql-server-dev-8.1;;
+            lenny|hardy) apt-get install postgresql-server-dev-8.3;;
             sid) apt-get install postgresql-server-dev-8.3;;
-            *) echo "ERROR: Unknown or Unsupported Debian release"; exit 1;;
+            *) echo "ERROR: Unknown or Unsupported $DISTRO release"; exit 1;;
          esac
          ;;
       Fedora)
-         echo "Installing Fedora buildtime dependencies";
          # F8=Werwolf F9=Sulphur F10=Cambridge dev=Rawhide
          yum install \
             postgresql-devel \
             file-libs libxml2 libextractor-devel \
          ;;
       RedHatEnterprise*)
-         echo "Installing RHEL buildtime dependencies";
          # 4=Nahant* 5=Tikanga*
          yum install \
             postgresql-devel \
@@ -103,23 +101,24 @@ fi
 ########################################################################
 
 if [ $RUNTIME ]; then
+   echo "*** Installing $DISTRO runtime dependencies ***";
    case "$DISTRO" in
-      Debian)
-         echo "Installing Debian runtime dependencies";
+      Debian|Ubuntu)
          apt-get install \
             apache2 \
             php5 php5-pgsql php-pear libapache2-mod-php5 \
-            libmagic1 libxml2 libextractor1c2a libextractor-plugins \
+            libmagic1 libxml2 libextractor1c2a \
             binutils bzip2 cabextract cpio sleuthkit mkisofs xpdf-utils \
                rpm tar upx-ucl unrar-free unzip;
          case "$CODENAME" in
-            etch) apt-get install postgresql-8.1;;
-            lenny) apt-get install postgresql-8.3;;
-            sid) apt-get install postgresql-8.3;;
+            dapper) apt-get install postgresql-8.1;;
+            etch) apt-get install postgresql-8.1 libextractor-plugins;;
+            lenny|hardy) apt-get install postgresql-8.3 libextractor-plugins;;
+            sid) apt-get install postgresql-8.3 libextractor-plugins;;
+            *) echo "ERROR: Unknown or Unsupported $DISTRO release"; exit 1;;
          esac
          ;;
       Fedora)
-         echo "Installing Fedora runtime dependencies";
          yum install \
             postgresql postgresql-server \
             httpd \
@@ -140,7 +139,6 @@ if [ $RUNTIME ]; then
          esac
          ;;
       RedHatEnterprise*)
-         echo "Installing RHEL runtime dependencies";
          # 4=Nahant* 5=Tikanga*
          yum install \
             postgresql postgresql-server \
