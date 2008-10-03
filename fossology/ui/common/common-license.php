@@ -244,7 +244,38 @@ function LicenseGet(&$PfilePk, &$Lics, $GetField=0)
  If uploadtree_pk is a container, the # of licenses contained
     in that container (and children) is returned.
  ************************************************************/
+$Licensecount_Prepared=0;
 function LicenseCount($UploadtreePk)
+{
+  global $Plugins;
+  global $DB;
+  global $LicenseCount_Prepared;
+
+  if (empty($DB)) { return 0; }
+  if (empty($UploadtreePk)) { return 0; }
+
+  if (!$LicenseCount_Prepared)
+    {
+    $DB->Prepare("LicenseCount",'SELECT count(*) AS count
+	FROM uploadtree AS ut1
+	INNER JOIN uploadtree AS ut2 ON ut2.uploadtree_pk = $1
+	  AND ut1.upload_fk = ut2.upload_fk
+	  AND ut1.lft BETWEEN ut2.lft AND ut2.rgt
+	INNER JOIN licterm_name ON ut1.pfile_fk = licterm_name.pfile_fk
+	;');
+    $LicenseCount_Prepared=1;
+    }
+  $Results = $DB->Execute("LicenseCount",array($UploadtreePk));
+  return($Results[0]['count']);
+} // LicenseCount()
+
+/************************************************************
+ LicenseCountChildren(): Return license count for all children
+ of an uploadtree_pk.
+ Returns list of children and the number of licenses each of
+ them have.
+ ************************************************************/
+function LicenseCountChildren($UploadtreePk)
 {
   global $Plugins;
   global $DB;
@@ -252,16 +283,24 @@ function LicenseCount($UploadtreePk)
   if (empty($DB)) { return 0; }
   if (empty($UploadtreePk)) { return 0; }
 
-  $SQL = "SELECT count(*) AS count
-	FROM uploadtree AS ut1
-	INNER JOIN licterm_name ON ut1.pfile_fk = licterm_name.pfile_fk
-	INNER JOIN uploadtree AS ut2 ON ut2.uploadtree_pk = $UploadtreePk
-	AND ut1.upload_fk = ut2.upload_fk
-	WHERE ut1.lft BETWEEN ut2.lft AND ut2.rgt
+  /** The inner SELECT is needed for counting rows **/
+  $SQL = "SELECT ut1.uploadtree_pk,
+	ut1.ufile_name,
+	ut1.ufile_mode,
+	COUNT(ut1.uploadtree_pk) AS count
+	FROM
+	(SELECT ut1.* FROM uploadtree AS ut1
+	INNER JOIN uploadtree AS ut2 ON ut1.parent = $UploadtreePk
+	  AND ut1.upload_fk = ut2.upload_fk
+	  AND ut2.lft BETWEEN ut1.lft AND ut1.rgt
+	INNER JOIN licterm_name ON ut2.pfile_fk = licterm_name.pfile_fk
+	) AS ut1
+	GROUP BY ut1.uploadtree_pk,ut1.ufile_name,ufile_mode
+	ORDER BY ut1.ufile_name
 	;";
   $Results = $DB->Action($SQL);
-  return($Results[0]['count']);
-} // LicenseCount()
+  return($Results);
+} // LicenseCountChildren()
 
 /************************************************************
  LicenseGetForFile(): Given an uploadtree_pk, return each
