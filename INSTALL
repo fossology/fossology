@@ -66,12 +66,19 @@ for more information about using multiple hosts.
 
 *** Dependencies ***
 FOSSology uses lots of different existing tools and software and
-expects to find it on the system, and also depends on certain system
-users existing, and other adjustments to the system config.
+expects to find it on the system.
 
 FOSSology depends on recent versions of the following software,
 dependencies needed when building fossology are labeled "build:" and
 dependencies needed at runtime are labeled "runtime:".
+
+Where we know them, commands are listed for installing on various
+distributions.
+* For Debian nearly all packages can be found in main, unless you want
+   the non-free version of unrar
+* For Ubuntu you will need a universe apt source setup
+* For RHEL you will need packages from EPEL
+    http://fedoraproject.org/wiki/EPEL
 
 We provide a script for helping install dependencies:
    utils/installfodeps
@@ -185,6 +192,9 @@ numbers into the build.
  On Debian (or a Debian derived distribution) you should be able to use 
  something like:
    build: apt-get install build-essential libtext-template-perl subversion
+ On Fedora/RHEL the equivalent is:
+   build: yum groupinstall 'Development Tools'
+          yum install perl-Text-Template subversion
 
 *** Adjusting the Kernel ***
 On modern large memory systems(>4gb), the linux kernel needs to be
