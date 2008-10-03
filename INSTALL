@@ -32,7 +32,7 @@ Really Short Install Instructions
    # /usr/local/lib/fossology/fo-postinstall
 9. Test that things are installed correctly
    # /usr/local/lib/fossology/fossology-scheduler -t
-10. Start the fososlogy scheduler daemon
+10. Start the fossology scheduler daemon
    # /etc/init.d/fossology start
 
 You're done, point your web browser at the new install and start using
@@ -42,7 +42,7 @@ FOSSology!
 Long Install Instructions
 =========================
 The rest of this file is the much more verbose instructions. Consult
-them if you have questions or need more explaination. If you are doing
+them if you have questions or need more explanation. If you are doing
 a multi-system install please also see the INSTALL.multi document.
 
 Preparing your system
