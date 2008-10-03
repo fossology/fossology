@@ -294,6 +294,7 @@ function LicenseCountChildren($UploadtreePk)
 	  AND ut1.upload_fk = ut2.upload_fk
 	  AND ut2.lft BETWEEN ut1.lft AND ut1.rgt
 	INNER JOIN licterm_name ON ut2.pfile_fk = licterm_name.pfile_fk
+	ORDER BY ut1.uploadtree_pk,ut1.ufile_name,ufile_mode
 	) AS ut1
 	GROUP BY ut1.uploadtree_pk,ut1.ufile_name,ufile_mode
 	ORDER BY ut1.ufile_name
