@@ -42,21 +42,17 @@ require_once ('fossologyTestCase.php');
 require_once ('TestEnvironment.php');
 
 global $URL;
+global $PROXY;
 
 class uploadTestDataTest extends fossologyTestCase
 {
   public $mybrowser;
+  public $webProxy;
 
     function setUp()
   {
     global $URL;
-    $this->mybrowser = & new SimpleBrowser();
-    $this->assertTrue(is_object($this->mybrowser));
-    $page = $this->mybrowser->get($URL);
-    $this->assertTrue($page);
-    $cookie = $this->repoLogin($this->mybrowser);
-    $host = $this->getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
+    $this->Login();
   }
 
   /**
@@ -64,22 +60,16 @@ class uploadTestDataTest extends fossologyTestCase
    */
   function testCreateTestingFolder()
   {
+    global $URL;
+    print "Creating testing folder\n";
     $page = $this->mybrowser->get($URL);
-    $page = $this->mybrowser->clickLink('Create');
-    $this->assertTrue($this->assertText($page, '/Create a new Fossology folder/'));
-    $this->assertTrue($this->mybrowser->setField('parentid', 1));
-    $this->assertTrue($this->mybrowser->setField('newname', 'Testing'));
-    $desc = 'Folder created by uplTestData as subfolder of Root Folder';
-    $this->assertTrue($this->mybrowser->setField('description', "$desc"));
-    $page = $this->mybrowser->clickSubmit('Create!');
-    $this->assertTrue(page);
-    $this->assertTrue($this->assertText($page, "/Folder Testing Created/"),
-                      "FAIL! Folder Testing Created not found\n");
+    $this->createFolder(null, 'Testing', null);
   }
 
   function testuploadTestDataTest()
   {
     global $URL;
+    global $PROXY;
     print "starting testUploadTestData\n";
     $rootFolder = 1;
     $uploadList = array('TestData/archives/fossI16L499.tar.bz2',
@@ -90,14 +80,22 @@ class uploadTestDataTest extends fossologyTestCase
                      'http://www.gnu.org/licenses/agpl-3.0.txt');
 
     /* upload the archives using the upload from file menu */
+    $desciption = "File $upload uploaded by Upload Data Test";
+    print "Starting file uploads\n";
     foreach($uploadList as $upload)
     {
-      $this->uploadAFile($rootFolder, $upload, 'Testing', null, '1,2,3');
+      $this->uploadFile('Testing', $upload, $description, null, '1,2,3');
     }
-    /* Upload the urls using upload from url */
+    /* Upload the urls using upload from url.  Check if the user specificed a
+     * web proxy for the environment.  If so, set the attribute. */
+    if(!(empty($PROXY)))
+    {
+      $this->webProxy = $PROXY;
+    }
+    print "Starting Url uploads\n";
     foreach($urlList as $url)
     {
-      $this->uploadAUrl($rootFolder, $url, null, null, '1,2,3');
+      $this->uploadUrl($rootFolder, $url, null, null, '1,2,3');
     }
   }
 }

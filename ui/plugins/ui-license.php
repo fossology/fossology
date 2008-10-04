@@ -220,7 +220,7 @@ class ui_license extends FO_Plugin
 	$VF .= "<a href='$LicUri'>"; $HasHref=1;
 	$VF .= "<b>"; $HasBold=1;
 	}
-      else if (!empty($LinkUri) && ($LicCount > 0))
+      else if (!empty($LinkUri)) //  && ($LicCount > 0))
 	{
 	$VF .= "<a href='$LinkUri'>"; $HasHref=1;
 	}

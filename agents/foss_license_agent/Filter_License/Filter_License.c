@@ -1088,6 +1088,7 @@ int	PreprocessFile	(int UseRep)
 	C=-7;
 	strcpy(S,"Year");
 	}
+
     /* massive duplication */
     else if ((BytesLeft >= 3) && (C != ' ') && isprint(C) && !isalnum(C) &&
              (C == Rep->Mmap[i+1]) && (C == Rep->Mmap[i+2]))
