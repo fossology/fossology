@@ -174,6 +174,7 @@ class ui_license extends FO_Plugin
     /* Get ALL the items under this UploadtreePk */
     $Children = DirGetList($Upload,$Item);
     $ChildCount=0;
+    $ChildLicCount=0;
     $VF .= "<table border=0>";
     foreach($Children as $C)
       {
@@ -207,20 +208,21 @@ class ui_license extends FO_Plugin
       /* Populate the output ($VF) - file list */
 
       /* Find number of licenses in child */
-      $LicCount = LicenseCount($C['uploadtree_pk']);
+      if ((sizeof($Children) < 20) || !$IsContainer)
+        { $LicCount = LicenseCount($C['uploadtree_pk']); }
+      else { $LicCount=0; }
 
       $VF .= '<tr><td id="Lic-' . $LicCount . '" align="left">';
       $HasHref=0;
       $HasBold=0;
       if ($IsContainer)
 	{
-	if ($LicCount > 0) { $VF .= "<a href='$LicUri'>"; $HasHref=1; }
+	$VF .= "<a href='$LicUri'>"; $HasHref=1;
 	$VF .= "<b>"; $HasBold=1;
 	}
       else if (!empty($LinkUri) && ($LicCount > 0))
 	{
-	$VF .= "<a href='$LinkUri'>";
-	$HasHref=1;
+	$VF .= "<a href='$LinkUri'>"; $HasHref=1;
 	}
       $VF .= $C['ufile_name'];
       if ($IsDir) { $VF .= "/"; };
@@ -234,6 +236,7 @@ class ui_license extends FO_Plugin
 	$VF .= "license" . ($LicCount == 1 ? "" : "s");
 	$VF .= "</a>";
 	$VF .= "]";
+	$ChildLicCount += $LicCount;
 	}
       $VF .= "</td>";
       $VF .= "</tr>\n";
@@ -241,6 +244,7 @@ class ui_license extends FO_Plugin
       $ChildCount++;
       }
     $VF .= "</table>\n";
+    // print "ChildCount=$ChildCount  ChildLicCount=$ChildLicCount\n";
 
     /***************************************
      Problem: $ChildCount can be zero!
