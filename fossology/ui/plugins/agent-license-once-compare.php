@@ -91,7 +91,7 @@ class agent_license_once_compare extends FO_Plugin
     $V .= $OneShot->AnalyzeOne($Highlight,$TempLics);
 
     /* Clean up */
-    unlink($TempCache);
+    if (file_exists($TempCache)) { unlink($TempCache); }
     return($V);
   } // AnalyzeOne()
 
