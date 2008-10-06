@@ -262,7 +262,8 @@ class agent_license_once extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) { return; }
     global $DB;
     global $DATADIR;
-    $LicCache = "$DATADIR/agents/License.bsam";
+    global $PROJECTSTATEDIR;
+    $LicCache = "$PROJECTSTATEDIR/agents/License.bsam";
     $V="";
     switch($this->OutputType)
     {
