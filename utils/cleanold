@@ -28,6 +28,7 @@ FILES="/usr/local/bin/cp2foss.php
 /usr/local/lib/lib_projxml.h.php
 /usr/local/share/man/man1/cp2foss.1
 /usr/local/bin/cp2foss
+/usr/local/bin/dbload
 /usr/local/bin/departition
 /usr/local/bin/p.sh
 /usr/local/bin/pathinclude.h.php
