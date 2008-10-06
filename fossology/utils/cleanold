@@ -40,7 +40,7 @@ DIRS="/usr/local/fossology/
 /usr/local/share/fossology/
 /usr/local/share/nomos3/"
 
-TMPDIR=`mktemp -d /tmp/fossology-configs.XXXX` || exit 1
+TMPDIR=`mktemp -d /tmp/fossology-configs.XXXXXX` || exit 1
 echo "*** Searching for old fossology config files ***"
 for conffile in $SAVE; do
    if [ -f "$conffile" ]; then
