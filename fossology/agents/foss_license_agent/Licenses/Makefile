@@ -1,38 +1,76 @@
-# Licenses Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-include ../../../Makefile.conf
+# FOSSology Makefile - agents/foss_license_agent/Licenses
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+TOP=../../..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
 
-EXE=License.bsam
+BSAM=../bSAM/bsam-engine ../bSAM/SeeSam
 
-all:
+all: mkbsamcache
 
-License.bsam:
-	chmod u+x ./MkCache
-	./MkCache
+# include the preprocessing stuff
+include $(TOP)/Makefile.process
+# generate the postinstall script
+mkbsamcache: mkbsamcache-process
+	chmod +x mkbsamcache
 
-Test1:	License.bsam
-	@echo "Testing to find the best match"
-	chmod u+x ./SelfTest
-	./SelfTest
+bsam-test1: bsam-test1-process
+	chmod +x bsam-test1
 
-Test2:	License.bsam
-	@echo "Testing to find all matches"
-	chmod u+x ./SelfTest2
-	./SelfTest2
+bsam-test2: bsam-test2-process
+	chmod +x bsam-test2
 
-InstallationCreate:
+install: all
+	@# first nuke the existing licenses. currently we only support
+	@# adding licenses as part of the build. eventually we will
+	@# support at runtime but in a user dir in /var so this will
+	@# continue to be ok
+	if [ -d "$(DESTDIR)$(AGENTDATADIR)/licenses/" ]; then \
+	   rm -rf $(DESTDIR)$(AGENTDATADIR)/licenses/; \
+	fi
+
 	find Raw -type f | grep -v svn | sed -e 's@^Raw/@@' | \
-	while read i ; do \
-	  $(MKDIR) -p ../../../install/$(AGENTDATADIR)/licenses/"$${i%/*}"; \
-	  $(CP) Raw/"$$i" ../../../install/$(AGENTDATADIR)/licenses/"$$i"; \
-	done
+        while read i ; do \
+           mkdir -p $(DESTDIR)$(AGENTDATADIR)/licenses/"$${i%/*}"; \
+           $(INSTALL_DATA) Raw/"$$i" $(DESTDIR)$(AGENTDATADIR)/licenses/"$$i"; \
+        done
 
-install: $(EXE)
-	$(CP) License.bsam $(AGENTDATADIR)
+	$(INSTALL_PROGRAM) mkbsamcache $(DESTDIR)$(AGENTDIR)/mkbsamcache
+	@# these don't work yet
+	@#$(INSTALL_PROGRAM) bsam-test1 $(DESTDIR)$(AGENTDIR)/bsam-test1
+	@#$(INSTALL_PROGRAM) bsam-test2 $(DESTDIR)$(AGENTDIR)/bsam-test2
 
 uninstall:
-	$(RM) $(AGENTDATADIR)/License.bsam
+	@# we only want to remove the licenses that we installed
+	find Raw -type f | grep -v svn | sed -e 's@^Raw/@@' | \
+        while read i ; do \
+           if [ -f $(DESTDIR)$(AGENTDATADIR)/licenses/"$$i" ]; then \
+              rm -f $(DESTDIR)$(AGENTDATADIR)/licenses/"$$i"; \
+	   fi; \
+	done
+	(if [ -d "$(DESTDIR)$(AGENTDATADIR)" ]; then \
+	   cd $(DESTDIR)$(AGENTDATADIR); \
+	   for dir in `find licenses -type d`; do \
+              rmdir --ignore-fail-on-non-empty -p $$dir; \
+	   done; \
+	fi)
+
+	@# try to remove the dir one time w/o error supression so
+	@# we get an error if the user has stuff in there
+	if [ -d "$(DESTDIR)$(AGENTDATADIR)/licenses/" ]; then \
+	   rmdir $(DESTDIR)$(AGENTDATADIR)/licenses/; \
+	fi
+
+	rm -f $(DESTDIR)$(AGENTDIR)/mkbsamcache
+	rm -f $(DESTDIR)$(AGENTDIR)/bsam-test1
+	rm -f $(DESTDIR)$(AGENTDIR)/bsam-test2
+
+	[ ! -d $(DESTDIR)$(AGENTDATADIR) ] || rmdir $(DESTDIR)$(AGENTDATADIR)
+	[ ! -d $(DESTDIR)$(DATADIR) ] || rmdir $(DESTDIR)$(DATADIR)
+	[ ! -d $(DESTDIR)$(AGENTDIR) ] || rmdir $(DESTDIR)$(AGENTDIR)
+	[ ! -d $(DESTDIR)$(LIBEXECDIR) ] || rmdir $(DESTDIR)$(LIBEXECDIR)
 
 clean:
-	$(RM) *.o core $(EXE)
+	rm -f *.o core mkbsamcache bsam-test1 bsam-test2
 
+.PHONY: all install uninstall clean test

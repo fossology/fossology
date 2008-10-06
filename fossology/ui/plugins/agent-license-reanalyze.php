@@ -43,7 +43,7 @@ class agent_license_reanalyze extends FO_Plugin
   {
     global $Plugins;
     global $AGENTDIR;
-    global $DATADIR;
+    global $PROJECTSTATEDIR;
     global $DB;
 
     print "<pre>";
@@ -83,7 +83,7 @@ class agent_license_reanalyze extends FO_Plugin
       $Results = $DB->Action("SELECT * FROM agent_lic_status WHERE pfile_fk = '$Akey' AND inrepository = TRUE AND processed = FALSE;");
       if (!empty($Results[0]['pfile_fk']))
 	{
-	$Cmd = "$CmdOk | $AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -T license -O n -- - $DATADIR/agents/License.bsam $CmdEnd";
+	$Cmd = "$CmdOk | $AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -T license -O n -- - $PROJECTSTATEDIR/agents/License.bsam $CmdEnd";
 	print "Finding licenses based on templates\n"; flush();
 	system($Cmd);
 

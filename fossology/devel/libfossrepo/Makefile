@@ -1,61 +1,44 @@
-# libfossrepo Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-include ../../Makefile.conf
+# FOSSology Makefile - devel/libfossrepo
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+TOP=../..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
 
-CC=gcc
-CFLAGS=-O -Wall -DFOSSREPO_CONF='"$(DATADIR)/repository"' -DFOSSGROUP='"$(PROJECTGROUP)"' $(CFLAGS2)
-#CFLAGS=-g -Wall -lefence -DFOSSREPO_CONF='"$(DATADIR)/repository"' $(CFLAGS2)
+CONFDEF=-DFOSSREPO_CONF='"$(SYSCONFDIR)/fossology"' -DFOSSGROUP='"$(PROJECTGROUP)"'
 LIB=libfossrepo.a
 EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck
 
 all: $(LIB) $(EXE)
 
-InstallationCreate:
-	@for i in $(EXE) ; do echo "$(CP) $$i ../../install/$(LIBEXECDIR)/$$i" ; $(CP) $$i ../../install/$(LIBEXECDIR)/$$i ; done
+$(LIB): %.a: %.c %.h
+	$(CC) -c $< $(CONFDEF) $(ALL_CFLAGS)
+	$(AR) cr $@ libfossrepo.o
 
-install: all
-	@for i in $(EXE) ; do echo "$(CP) $$i $(LIBEXECDIR)/$$i" ; $(CP) $$i $(LIBEXECDIR)/$$i ; chgrp osrb $(LIBEXECDIR)/$$i ; done
-	#$(CP) libfossrepo.a $(LIBDIR)
-	#$(CP) libfossrepo.h $(INCLUDEDIR)
+$(EXE): %: %.c $(LIB) $(VARS)
+	$(CC) $< $(CFLAGS_REPO) -o $@
 
+install: all $(VARS)
+	$(INSTALL_DATA) libfossrepo.a $(DESTDIR)$(LIBDIR)/libfossrepo.a
+	$(INSTALL_DATA) libfossrepo.h $(DESTDIR)$(INCLUDEDIR)/libfossrepo.h
+
+	for program in $(EXE); do \
+	   $(INSTALL_PROGRAM) $$program $(DESTDIR)$(LIBEXECDIR)/$$program; \
+	done
+
+# uninstall only cleans up the files, not the directories that might have
+# been created
 uninstall:
-	@for i in $(EXE) ; do echo "$(RM) $(BINDIR)/$$i" ; $(RM) $(BINDIR)/$$i ; done
-	#$(RM) $(LIBDIR)/libfossrepo.a
-	#$(RM) $(INCLUDEDIR)/libfossrepo.h
+	rm -f $(DESTDIR)$(LIBDIR)/libfossrepo.a
+	rm -f $(DESTDIR)$(INCLUDEDIR)/libfossrepo.h
 
-libfossrepo.a: libfossrepo.c libfossrepo.h
-	$(RM) libfossrepo.a
-	$(CC) $(CFLAGS) -c libfossrepo.c
-	$(AR) cr libfossrepo.a libfossrepo.o
-	if [ ! -d ../lib ] ; then mkdir ../lib ; fi
-	if [ ! -d ../include ] ; then mkdir ../include ; fi
-	$(CP) libfossrepo.a ../lib/
-	$(CP) libfossrepo.h ../include/
+	for program in $(EXE); do \
+	   rm -f $(DESTDIR)$(LIBEXECDIR)/$$program; \
+	done
 
-reppath: reppath.c $(LIB)
-	$(CC) $(CFLAGS) -o reppath reppath.c -L . -lfossrepo
-
-rephost: rephost.c $(LIB)
-	$(CC) $(CFLAGS) -o rephost rephost.c -L . -lfossrepo
-
-repwrite: repwrite.c $(LIB)
-	$(CC) $(CFLAGS) -o repwrite repwrite.c -L . -lfossrepo
-
-repcat: repcat.c $(LIB)
-	$(CC) $(CFLAGS) -o repcat repcat.c -L . -lfossrepo
-
-repexist: repexist.c $(LIB)
-	$(CC) $(CFLAGS) -o repexist repexist.c -L . -lfossrepo
-
-repcopyin: repcopyin.c $(LIB)
-	$(CC) $(CFLAGS) -o repcopyin repcopyin.c -L . -lfossrepo
-
-repremove: repremove.c $(LIB)
-	$(CC) $(CFLAGS) -o repremove repremove.c -L . -lfossrepo
-
-repmmapcheck: repmmapcheck.c $(LIB)
-	$(CC) $(CFLAGS) -o repmmapcheck repmmapcheck.c -L . -lfossrepo
+test: all
+	@echo "*** No tests available for libfossrepo ***"
 
 clean:
-	$(RM) $(LIB) $(EXE) *.o
+	rm -f $(LIB) $(EXE) *.o core
 
+.PHONY: all install uninstall clean test

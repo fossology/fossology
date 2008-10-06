@@ -38,8 +38,8 @@ class dashboard extends FO_Plugin
    ************************************************/
   function DiskFree()
   {
-    global $DATADIR;
-    $Cmd = "df -Pk `cat '$DATADIR/repository/RepPath.conf'`/*/* | sort -u | grep '%'";
+    global $SYSCONFDIR;
+    $Cmd = "df -Pk `cat '$SYSCONFDIR/fossology/RepPath.conf'`/*/* | sort -u | grep '%'";
     $Fin = popen($Cmd,"r");
 
     /* Read results */

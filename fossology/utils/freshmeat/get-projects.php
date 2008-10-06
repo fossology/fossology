@@ -57,7 +57,7 @@
  *    for that case.
  */
 // pathinclude below is dependent on having fossology installed.
-require_once "pathinclude.h.php";       // brings in global $VARDATADIR +
+require_once "pathinclude.h.php";       // brings in global $PROJECTSTATEDIR +
 global $LIBDIR;
 global $INCLUDEDIR;
 require_once("$LIBDIR/lib_projxml.h.php");
@@ -370,7 +370,7 @@ function create_cp2foss_ifile($uploads, $filename){
  * Determine how many wgets failed and how may projects where skipped.
  * Write results to STDOUT
  *
- * @param string $output_dir $VARDATADIR/goldenyymmdd/
+ * @param string $output_dir $PROJECTSTATEDIR/goldenyymmdd/
  *
  * output_dir is where the wget logs and the skipped file is
  */

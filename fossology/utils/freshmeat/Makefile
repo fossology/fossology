@@ -1,24 +1,16 @@
-# FOSSology CLI makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-#
-# VERSION: $Id: Makefile 1587 2007-12-14 02:48:04Z markd $
-#
-# Makefile for the freshmeat process.
+# FOSSology Makefile - utils/freshmeat
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+TOP=../..
+VARS=$(TOP)/Makefile.conf
+DEPS=$(TOP)/Makefile.deps
+include $(VARS)
 
-include ../../Makefile.conf
-include ../Makefile.utils
-
-SHELL=/bin/bash
-
-# FM process only
 LIBFILES=lib_projxml.h.php
-BINFILES="GetFM diffm.php get-projects.php mktop1k.php wrapGFM"
-MAN1SRC=
-MAN1FILES=
+BINFILES=GetFM diffm.php get-projects.php mktop1k.php wrapGFM
 fmPATHFILE=fm-paths.php
 FMDir=FMDir
 
-all: $(fmPATHFILE) MANpages
+all: $(fmPATHFILE)
 
 $(fmPATHFILE): ../Makefile.utils
 	@echo "Building $(fmPATHFILE)"
@@ -33,54 +25,33 @@ $(fmPATHFILE): ../Makefile.utils
 	@echo "\$$PATH=\"\$$LIBEXECDIR:\$$PATH:/usr/bin\";" >> $(fmPATHFILE)
 	@echo "?>" >> $(fmPATHFILE)
 
-MANpages:
-	@echo "MANpages target"
-# NOTE when man pages exist, add the man entries.  
-
-InstallationCreate:
-	for file in "${BINFILES}" ; do \
-		chmod a+x $${file} ; \
-		if \
-		[[ "$${file}" == *.php ]] ; then \
-			no_extention=$${file%.php} ; \
-			echo "Installing $${file} into ../../install/${BINDIR}/$${no_extention}"; \
-			cp $${file} ../../install/${BINDIR}/$${no_extention} ; \
-		 else \
-		 	echo "Installing $${file} into ../../install/${BINDIR}"; \
-			cp $${file} ../../install/${BINDIR} ; \
-		 fi \
-	 done
-	$(MKDIR) -p ../../install/$(LIBDIR)
-	$(MKDIR) -p ../../install/$(INCLUDEDIR)
-	$(CP) $(LIBFILES) ../../install/$(LIBDIR)
-#	$(CP) $(MAN1FILES) ../../install/$(MAN1DIR)
-	$(CP) $(fmPATHFILE) ../../install/$(INCLUDEDIR)
-	@echo "copy FMDir to the include dir";
-	$(CP) $(FMDir) ../../install/$(INCLUDEDIR)
-	
-install: all InstallationCreate
-	for file in ${BINFILES}; do \
-		chmod a+x $${file}; \
+install: all
+	for file in $(BINFILES); do \
+	   $(INSTALL_PROGRAM) $$file $(DESTDIR)$(BINDIR)/$${file%.php}; \
 	done
-	@$(MKDIR) -p $(MAN1DIR)
-	@$(MKDIR) -p $(INCLUDEDIR)
-	@$(MKDIR) -p $(BINDIR)
-	@$(MKDIR) -p $(LIBDIR)
-	@echo "FM->install target"
-	$(CP) $(BINFILES) $(BINDIR)
-	$(CP) $(LIBFILES) $(LIBDIR)
-#	$(CP) $(MAN1FILES) $(MAN1DIR)
-	$(CP) $(fmPATHFILE) $(INCLUDEDIR)
-	$(CP) $(FMDir) $(INCLUDEDIR)
-	
+
+	$(INSTALL_DATA) $(LIBFILES) $(DESTDIR)$(LIBDIR)/$(LIBFILES)
+
+	$(INSTALL_DATA) $(fmPATHFILE) $(DESTDIR)$(LIBDIR)/$(fmPATHFILE)
+	$(INSTALL_DATA) $(FMDir) $(DESTDIR)$(INCLUDEDIR)/$(FMDir)
+
+
 uninstall:
-	(cd $(BINDIR) ;     $(RM) $(BINFILES))
-	(cd $(LIBDIR) ;     $(RM) $(LIBFILES))
-#	(cd $(MAN1FILES);   $(RM) $(MAN1DIR))
-	(cd $(INCLUDEDIR) ; $(RM) $(fmPATHFILE))
-	(cd $(INCLUDEDIR) ; $(RM) $(FMDir))
+	for file in $(BINFILES); do \
+	   rm -f $(DESTDIR)$(BINDIR)/$${file%.php}; \
+	done
+
+	rm -f $(DESTDIR)$(LIBDIR)/$(LIBFILES)
+
+	rm -f $(DESTDIR)$(LIBDIR)/$(fmPATHFILE)
+	rm -f $(DESTDIR)$(INCLUDEDIR)/$(FMDir)
+
+test: all
+	@echo "*** No tests available for agents/$(EXE) ***"
 
 clean:
-	$(RM) $(fmPATHFILE)
-	$(RM) $(FMDir)	
+	rm -f $(fmPATHFILE) $(FMDir) *.o core
 
+include $(DEPS)
+
+.PHONY: all install uninstall clean test

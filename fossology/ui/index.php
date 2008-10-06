@@ -25,7 +25,7 @@
  ***************************************************************/
 $GlobalReady=1;
 
-require_once("pathinclude.h.php");
+require_once(dirname(__FILE__) . '/../php/pathinclude.php');
 require_once("common/common.php");
 
 /****************************************************

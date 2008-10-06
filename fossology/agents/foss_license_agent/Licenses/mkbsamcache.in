@@ -1,0 +1,44 @@
+#!/bin/sh
+# mkbsamcache - use Filter_License to generate the License.bsam cache
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+
+# first clean up any previous failed attempts
+if [ -f "{$PROJECTSTATEDIR}/agents/License.bsam.new" ]; then
+   rm -f {$PROJECTSTATEDIR}/agents/License.bsam.new
+fi
+
+if [ ! -d "{$PROJECTSTATEDIR}/agents/" ]; then
+   mkdir -p "{$PROJECTSTATEDIR}/agents/"
+fi
+
+# Create cached files
+cd {$AGENTDATADIR}/licenses/
+
+find . -type f | sed -e 's@^./@@' | grep -v \.meta | sort | while read i ; do
+   echo "Processing $i"
+   if [ -f "$i.meta" ] ; then
+      {$AGENTDIR}/Filter_License -Q -O -M "$i.meta" "$i" >> {$PROJECTSTATEDIR}/agents/License.bsam.new
+      if [ $? != 0 ] ; then
+         echo "ERROR processing $i."
+         exit 1
+      fi
+   else
+      {$AGENTDIR}/Filter_License -Q -O "$i" >> {$PROJECTSTATEDIR}/agents/License.bsam.new
+      if [ $? != 0 ] ; then
+         echo "ERROR processing $i."
+         exit 1
+      fi
+   fi
+done
+
+# Make sure the file is valid
+{$AGENTDIR}/bsam-engine -t "{$PROJECTSTATEDIR}/agents/License.bsam.new"
+if [ "$?" != "0" ] ; then
+   echo "ERROR processing licenses."
+   echo "  The bad result is {$PROJECTSTATEDIR}/agents/License.bsam.new"
+   echo "  Please determine what is wrong, fix the input problem, and rerun."
+   exit 1
+fi
+
+# Move the new one in to place
+mv {$PROJECTSTATEDIR}/agents/License.bsam.new {$PROJECTSTATEDIR}/agents/License.bsam

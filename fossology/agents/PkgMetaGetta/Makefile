@@ -1,28 +1,30 @@
-# PkgMetaGetta Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-include ../../Makefile.conf
+# FOSSology Makefile - agents/PkgMetaGetta
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+TOP=../..
+VARS=$(TOP)/Makefile.conf
+DEPS=$(TOP)/Makefile.deps
+include $(VARS)
 
-CC=gcc
-CFLAGS=-Wall -O2 $(CFLAGS2)
-#CFLAGS=-Wall -g -lefence $(CFLAGS2)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq -lextractor $(ALL_CFLAGS)
 EXE=pkgmetagetta
-INC=-I../../$(BUILDINC)
-LIB=-L../../$(BUILDLIB) -lfossrepo -lfossdb -lpq -lextractor
 
 all: $(EXE)
 
-pkgmetagetta: pkgmetagetta.c
-	$(CC) $(CFLAGS) pkgmetagetta.c -o pkgmetagetta $(INC) $(LIB)
-
-InstallationCreate:
-	$(CP) pkgmetagetta ../../install/$(AGENTDIR)
+$(EXE): %: %.c $(DB) $(REPO) $(VARS)
+	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 install: all
-	$(CP) pkgmetagetta $(AGENTDIR)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 uninstall:
-	$(RM) $(AGENTDIR)/pkgmetagetta
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+
+test: all
+	@echo "*** No tests available for agents/$(EXE) ***"
 
 clean:
-	$(RM) *.o core $(EXE)
+	rm -f $(EXE) *.o core
 
+include $(DEPS)
+
+.PHONY: all install uninstall clean test

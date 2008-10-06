@@ -1,54 +1,67 @@
-# FOSSology UI makefile
+# FOSSology Makefile - ui/
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-include ../Makefile.conf
+TOP=..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
 
-# These are likely to change slowly over time
-PHPCLI=/etc/php5/cli/php.ini
-PHPWEB=/etc/php5/apache2/php.ini
-iPATHFILE=pathinclude.h.php
+DIRS=images plugins common template
+FILES=`find . -type f | grep -v svn | grep -E "(php|css|htm|html|dtd|htc|gif|dat)$$"`
+# also set in Makefile.conf, but we override with a shorter version
+iPATHFILE=pathinclude.php
 
-all: $(iPATHFILE)
+all:
 
 $(iPATHFILE): ../Makefile.conf
 	@echo "Building $(iPATHFILE)"
 	@echo "<?php" > $(iPATHFILE)
 	@echo "global \$$GlobalReady;" >> $(iPATHFILE)
 	@echo "if (!isset(\$$GlobalReady)) { exit; }" >> $(iPATHFILE)
+	@echo "\$$BINDIR=\"$(BINDIR)\";" >> $(iPATHFILE)
+	@echo "\$$LIBDIR=\"$(LIBDIR)\";" >> $(iPATHFILE)
 	@echo "\$$LIBEXECDIR=\"$(LIBEXECDIR)\";" >> $(iPATHFILE)
+	@echo "\$$INCLUDEDIR=\"$(INCLUDEDIR)\";" >> $(iPATHFILE)
+	@echo "\$$MAN1DIR=\"$(MAN1DIR)\";" >> $(iPATHFILE)
 	@echo "\$$AGENTDIR=\"$(AGENTDIR)\";" >> $(iPATHFILE)
 	@echo "\$$SYSCONFDIR=\"$(SYSCONFDIR)\";" >> $(iPATHFILE)
 	@echo "\$$WEBDIR=\"$(WEBDIR)\";" >> $(iPATHFILE)
 	@echo "\$$PHPDIR=\"$(PHPDIR)\";" >> $(iPATHFILE)
-	@echo "\$$VARDATADIR=\"$(VARDATADIR)\";" >> $(iPATHFILE)
+	@echo "\$$PROJECTSTATEDIR=\"$(PROJECTSTATEDIR)\";" >> $(iPATHFILE)
 	@echo "\$$PROJECT=\"$(PROJECT)\";" >> $(iPATHFILE)
 	@echo "\$$DATADIR=\"$(DATADIR)\";" >> $(iPATHFILE)
-	@echo "\$$PATH=\"\$$LIBEXECDIR:\$$AGENTDIR:/bin:/usr/bin:/sbin:/usr/sbin\";" >> $(iPATHFILE)
+	@echo "\$$PATH=\"\$$LIBEXECDIR:\$$AGENTDIR:\$$PATH:/usr/bin\";" >> $(iPATHFILE)
 	@echo "\$$VERSION=\"$(VERSION)\";" >> $(iPATHFILE)
 	@echo "\$$SVN_REV=\"$(SVN_REV)\";" >> $(iPATHFILE)
 	@echo "?>" >> $(iPATHFILE)
 
-InstallationCreate: $(iPATHFILE)
-	mkdir -p ../install/$(WEBDIR)
-	chmod ug+w ../install/$(WEBDIR)
-	tar -cf - `find . -type f | grep -v svn | grep -E "(php|css|htm|html|dtd|htc|gif|dat)$$"` | (cd ../install/$(WEBDIR) ; tar -xvf -)
-	touch ../install/$(WEBDIR)/init.ui
+install: all $(iPATHFILE)
 
-install: all InstallationCreate
-	if [ -f $(PHPCLI) ] ; then \
-	grep -q '^extension.*=.*pgsql.so' $(PHPCLI) || \
-	    echo 'extension=pgsql.so' >> $(PHPCLI) ; \
-	fi
-	if [ -f $(PHPWEB) ] ; then \
-	grep -q '^extension.*=.*pgsql.so' $(PHPWEB) || \
-	    echo 'extension=pgsql.so' >> $(PHPWEB) ; \
-	fi
+	for dir in $(DIRS); do \
+		mkdir -p $(DESTDIR)$(WEBDIR)/$$dir; \
+	done
+
+	for file in $(FILES); do \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(WEBDIR)/$$file; \
+	done
+
+	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
 
 uninstall:
-	(cd $(BINDIR) ; $(RM) $(BINFILES))
-	(cd $(WEBPROJECT) ; $(RM) $(WEBFILES))
-	(cd $(PHPDIR) ; $(RM) $(LIBFILES))
-	(cd $(WEBDIR) ; $(RM) $(WEBFILES))
+	for file in $(FILES); do \
+		rm -f $(DESTDIR)$(WEBDIR)/$$file; \
+	done
+
+	$(INSTALL_DATA) $(iPATHFILE) $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
+
+	for dir in $(DIRS); do \
+		rmdir $(DESTDIR)$(WEBDIR)/$$dir; \
+	done
+
+	rm -f $(DESTDIR)$(PHPDIR)/$(iPATHFILE)
+
+test: all
+	@echo "*** Tests are still run by hand for ui/ ***"
 
 clean:
-	$(RM) $(iPATHFILE)
+	rm -f *.o core $(iPATHFILE)
 
+.PHONY: all install uninstall clean test
