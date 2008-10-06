@@ -1,26 +1,30 @@
-# engine-shell Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-include ../../Makefile.conf
+# FOSSology Makefile - agents/Shell
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+TOP=../..
+VARS=$(TOP)/Makefile.conf
+DEPS=$(TOP)/Makefile.deps
+include $(VARS)
 
-CC=gcc
-CFLAGS=-Wall -O2 $(CFLAGS2)
-#CFLAGS=-Wall -g $(CFLAGS2)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS)
 EXE=engine-shell
 
 all: $(EXE)
 
-engine-shell: engine-shell.c
-	$(CC) $(CFLAGS) engine-shell.c -o engine-shell
-
-InstallationCreate:
-	$(CP) engine-shell ../../install/$(AGENTDIR)
+$(EXE): %: %.c $(DB) $(REPO) $(VARS)
+	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 install: all
-	$(CP) engine-shell $(AGENTDIR)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 uninstall:
-	$(RM) $(AGENTDIR)/engine-shell
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+
+test: all
+	@echo "*** No tests available for agents/$(EXE) ***"
 
 clean:
-	$(RM) *.o core $(EXE)
+	rm -f $(EXE) *.o core
 
+include $(DEPS)
+
+.PHONY: all install uninstall clean test

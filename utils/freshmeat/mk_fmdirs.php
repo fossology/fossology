@@ -63,9 +63,9 @@ require_once("$PHPDIR/db_postgres.h.php");
 
 // if you do it yourself....use the lib...
 #$_pg_conn = pg_connect(str_replace(";", " ", 
-#	   file_get_contents("{$DATADIR}/dbconnect/{$PROJECT}")));
+#	   file_get_contents("{$SYSCONFDIR}/{$PROJECT}/Db.conf")));
 
-$path = "{$DATADIR}/dbconnect/{$PROJECT}";
+$path = "{$SYSCONFDIR}/$PROJECT}/Db.conf";
 $alpha_buckets = array('a-c',
                        'd-f',
                        'g-i',

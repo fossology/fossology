@@ -40,7 +40,7 @@
 int	SelfTest	()
 {
   FILE *Fin, *FData, *FTest;
-  char SelfTest[] = "echo 'test' | " BINDIR "/selftest -g -s"; /* -g for generate test data */
+  char SelfTest[] = "echo 'test' | " AGENTDIR "/selftest -g -s"; /* -g for generate test data */
   char MkConfig[] = BINDIR "/mkconfig -L 2>&1 | grep agent | sed 's/.*agent=\\(\\w*\\).*/\\1/' | sort -u"; /* get list of agents */
   int c,i;
   int Thread;
@@ -83,7 +83,7 @@ int	SelfTest	()
       Thread = CheckAgent(Line[0]);
       if (Thread < 0)
         {
-	fprintf(stderr,"FATAL: Agent type '%s' not in scheduler.conf.\n",Line[0]);
+	fprintf(stderr,"FATAL: Agent type '%s' not in Scheduler.conf.\n",Line[0]);
 	rc=1;
 	}
       }

@@ -1,36 +1,37 @@
-# Filter_license Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-include ../../../Makefile.conf
+# FOSSology Makefile - agents/foss_license_agent/Filter_License
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+TOP=../../..
+VARS=$(TOP)/Makefile.conf
+DEPS=$(TOP)/Makefile.deps
+include $(VARS)
 
-CC=gcc
-CFLAGS=-Wall -O2 $(CFLAGS2)
-#CFLAGS=-Wall -g -lefence $(CFLAGS2)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS:-g=)
 EXE=Filter_License filter_clean
-INC=-I../../../ununpack -I../../../$(BUILDINC)
-LIB=-L../../../$(BUILDLIB) -lfossrepo -lfossdb -lpq
+
+FLSRC=Filter_License.c 1sl.c wordcheck.c tokholder.c ../../ununpack/checksum.c ../../ununpack/md5.c ../../ununpack/sha1.c wordregex.c
 
 all: $(EXE)
 
-FLsrc=Filter_License.c 1sl.c wordcheck.c tokholder.c ../../ununpack/checksum.c ../../ununpack/md5.c ../../ununpack/sha1.c wordregex.c
+Filter_License: $(FLSRC) $(FLSRC:%.c=%.h) $(DB) $(REPO) $(VARS)
+	$(CC) $(FLSRC) -I../../ununpack $(CFLAGS_LOCAL) -o $@
 
-Filter_License: $(FLsrc)
-	$(CC) $(CFLAGS) $(FLsrc) -o Filter_License $(INC) $(LIB)
-
-filter_clean: filter_clean.c
-	$(CC) $(CFLAGS) $(INC) -o filter_clean filter_clean.c $(LIB)
-
-InstallationCreate:
-	$(CP) Filter_License ../../../install/$(AGENTDIR)
-	$(CP) filter_clean ../../../install/$(AGENTDIR)
+filter_clean: %: %.c $(DB) $(REPO)
+	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 install: all
-	$(CP) Filter_License $(AGENTDIR)
-	$(CP) filter_clean $(AGENTDIR)
+	$(INSTALL_PROGRAM) Filter_License $(DESTDIR)$(AGENTDIR)/Filter_License
+	$(INSTALL_PROGRAM) filter_clean $(DESTDIR)$(AGENTDIR)/filter_clean
 
 uninstall:
-	$(RM) $(AGENTDIR)/Filter_License
-	$(RM) $(AGENTDIR)/filter_clean
+	rm -f $(DESTDIR)$(AGENTDIR)/Filter_License
+	rm -f $(DESTDIR)$(AGENTDIR)/filter_clean
+
+test: all
+	@echo "*** No tests available for agents/foss_license_agent/Filter_License ***"
 
 clean:
-	$(RM) *.o core $(EXE)
+	rm -f $(EXE) *.o core
 
+include $(DEPS)
+
+.PHONY: all install uninstall clean test

@@ -1,0 +1,251 @@
+#!/bin/bash
+# FOSSology postinstall script
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+#
+# This script is for things that need to be done on the runtime system
+# after we've installed the bits on the filesystem. It needs to be
+# idempotent, meaning that running it repeatedly will still do the
+# right thing, regardless of the success of previous runs.
+
+## Options parsing and setup
+# parse options
+OPTS=`getopt -o aduseoh --long agent,database,ui,scheduler,everything,overwrite,help -n 'fo-postinstall' -- "$@"`
+
+if [ $? != 0 ]; then
+   echo "ERROR: Bad option specified."
+   OPTS="--help"
+fi
+
+eval set -- "$OPTS"
+
+# if no options or just -o then do everything
+if [ "$OPTS" = " --" -o "$OPTS" = " -o --" ]; then
+   EVERYTHING=1
+fi
+
+while true; do
+   case "$1" in
+      -a|--agent) AGENT=1; shift;;
+      -d|--database) DATABASE=1; shift;;
+      -u|--ui) UI=1; shift;;
+      -s|--scheduler) SCHEDULER=1; shift;;
+      -e|--everything) EVERYTHING=1; shift;;
+      -o|--overwrite) OVERWRITE=1; shift;;
+      -h|--help)
+         echo "Usage: fo-postinstall [options]";
+	 echo "  -a or --agent      : agent specific actions"
+	 echo "  -d or --database   : database specific actions"
+	 echo "  -u or --ui         : ui specific actions"
+	 echo "  -s or --scheduler  : scheduler specific actions"
+	 echo "  -e or --everything : all actions (default)"
+	 echo "  -o or --overwrite  : overwrite config files with new versions"
+	 echo "  -h or --help       : this help text"
+	 exit;;
+      --) shift; break;;
+      *) echo "Error: option $1 not recognised"; exit 1;;
+   esac
+done
+
+if [ $EVERYTHING ]; then
+   echo "*** Running postinstall for everything ***"
+   AGENT=1
+   DATABASE=1
+   UI=1
+   SCHEDULER=1
+fi
+
+# This must run as root.
+if [ `id -u` != "0" ] ; then
+   echo "ERROR: fo-postinstall must run as root."
+   echo "Aborting."
+   exit 1
+fi
+
+# get path to repo
+if [ -e "{$SYSCONFDIR}/fossology/RepPath.conf" ] ; then
+   REPO=`cat {$SYSCONFDIR}/fossology/RepPath.conf`
+fi
+
+## create user and group
+# These are needed on all system types.
+# Because we are doing these by name, in the multi-machine install case
+# we may end up with uid/gid being different across machines. This will
+# either need to be fixed by hand or with NFSv4 you can use rpc.idmapd
+# to do uid/gid mapping. More details will be provided in the multi-machine
+# documentation.
+
+
+# Make sure the user and group exist, if not then create
+# FIXME: need to check for adduser and use that if available
+echo "*** Creating user and group ***"
+if grep -q "^{$PROJECTGROUP}:" /etc/group; then
+   echo "NOTE: group '{$PROJECTGROUP}' already exists, good."
+else
+   groupadd "{$PROJECTGROUP}"
+   if [ "$?" != "0" ] ; then
+      echo "ERROR: Unable to create group '{$PROJECTGROUP}'"
+      exit 1
+   else
+      echo "NOTE: group '{$PROJECTGROUP}' created"
+   fi
+fi
+
+if grep -q "^{$PROJECTUSER}:" /etc/passwd; then
+   echo "NOTE: user '{$PROJECTUSER}' already exists, good."
+else
+   useradd -c "{$PROJECT}" -g "{$PROJECTGROUP}" -m -s /bin/bash -d "$\{REPO%/*\}" "{$PROJECTUSER}"
+   if [ "$?" != "0" ] ; then
+      echo "ERROR: Unable to create user '{$PROJECTUSER}'"
+      exit 1
+   else
+      echo "NOTE: user '{$PROJECTUSER}' created"
+   fi
+fi
+
+# check for existance/ownership/permissions of needed directories
+# PROJECTSTATEDIR is needed in all machine cases
+if [ ! -d "{$PROJECTSTATEDIR}" ] ; then
+   mkdir -p "{$PROJECTSTATEDIR}"
+   chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}
+   # FIXME: do we really need setgid?
+   #chmod 2775 {$PROJECTSTATEDIR}
+fi
+if [ ! -d "{$PROJECTSTATEDIR}/agents" ] ; then
+   mkdir -p "{$PROJECTSTATEDIR}/agents"
+   chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}/agents
+fi
+
+########################################################################
+
+if [ $DATABASE ]; then
+echo "*** Setting up database ***"
+
+DBCONF="{$SYSCONFDIR}/fossology/Db.conf"
+
+if [ ! -f "$DBCONF" -o "$OVERWRITE" ] ; then
+   echo "NOTE: using default version for $DBCONF"
+   echo "dbname={$PROJECT};" > "$DBCONF"
+   echo "host=localhost;" >> "$DBCONF"  # assume DB is local
+   echo "user={$PROJECTUSER};" >> "$DBCONF"
+   echo "password={$PROJECTUSER};" >> "$DBCONF"  # user WILL want to change this
+else
+  echo "WARNING: $DBCONF already exists."
+  echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option." 
+fi
+
+# first check to see if the db already exists
+su postgres -c 'psql -l' |grep -q fossology
+if [ $? = 0 ]; then
+   echo "NOTE: fossology database already exists, not creating"
+   echo "*** Checking database connectivity ***"
+   # next check that we can talk to the db
+   {$AGENTTESTDDIR}/dbcheck
+   if [ $? != 0 ]; then
+      echo "ERROR: unable to connect to database, please check $DBCONF"
+      exit 1
+   else
+      echo "NOTE: Connect succeeded, database is working."
+   fi
+else
+   echo "*** Initializing database ***"
+   su postgres -c "psql < {$AGENTTESTDDIR}/fossologyinit.sql"
+  if [ $? != 0 ] ; then
+    echo "ERROR: Database failed during configuration.\n"
+    exit 1
+  fi
+fi
+
+# touch the ui init semaphore FIXME: can this go away?
+INIT={$WEBDIR}/init.ui
+touch $INIT
+chown {$PROJECTUSER}:{$PROJECTGROUP} $INIT
+
+fi # end of DATABASE
+
+## Initialize the tables, License.bsam, and other setup
+# This is needed (and should be safe to do) on all machine types
+# In multi-system installs the database machine must be installed first
+# in order for this to work on other machines.
+echo "*** Initializing database tables ***"
+{$BINDIR}/fossinit
+
+
+########################################################################
+
+if [ $SCHEDULER ]; then
+   echo "*** Setting up scheduler ***"
+
+   # The repo dir is needed in all cases, but in a multi-machine install it
+   # will be nfs mounted from the machine with the scheduler, so we should
+   # really only create it if needed on the scheduler machine
+   echo "*** Making sure repo exists with right ownership and permissions ***"
+   if [ ! -d "$REPO" ] ; then
+      mkdir -p "$REPO"
+      chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO
+      # FIXME: which specific directories do we need setgid for?
+      chmod 2770 $REPO
+      # make sure the parent dir has the right permissions too
+      chown {$PROJECTUSER}:{$PROJECTGROUP} $\{REPO%/*\}
+      chmod 2770 $\{REPO%/*\}
+   else
+      echo "NOTE: Repository already exists at $REPO"
+   fi
+
+if [ -e "{$SYSCONFDIR}/fossology/Hosts.conf" ] ; then
+   grep -q "^localhost" {$SYSCONFDIR}/fossology/Hosts.conf
+   if [ $? == 0 ] ; then
+      if [ ! -d "$REPO/localhost" ] ; then
+         echo "NOTE: creating new $REPO/localhost directory"
+         mkdir $REPO/localhost
+         chown {$PROJECTUSER}:{$PROJECTGROUP} $REPO/localhost
+         chmod 2770 $REPO/localhost
+      else
+         echo "NOTE: $REPO/localhost directory already exists"
+      fi
+   fi
+fi
+
+   # scheduler config file
+   # this has to be done after the database is setup
+   # BTW- mkschedconf seems to be hardcoded to use localhost, if that
+   # is ever fixed this code might need to be too
+   echo "*** Checking Scheduler.conf ***"
+   SCHEDCONF={$SYSCONFDIR}/fossology/Scheduler.conf
+   if [ ! -f "$SCHEDCONF" -o "$OVERWRITE" ] ; then
+      mkdir -p `dirname $SCHEDCONF`
+      {$LIBEXECDIR}/mkschedconf -o $SCHEDCONF -L
+      echo "NOTE: default $SCHEDCONF created."
+      echo "  Please check that is it correct for your environment or"
+      echo "  create a different one with mkschedconf."
+   else
+      echo "WARNING: $SCHEDCONF already exists,"
+      echo "  consider checking it or recreating with mkschedconf."
+   fi
+
+fi # end of SCHEDULER
+
+########################################################################
+
+if [ $UI ]; then
+echo "*** Setting up UI ***"
+
+# See if web server user (www-data) exists, if so add to the group.
+grep -q "^www-data:" /etc/passwd
+if [ $? == 0 ] ; then
+  echo "NOTE: Adding user www-data to group {$PROJECTGROUP}"
+  # this is smart enough to not add multiple times so it's ok to repeat
+  usermod -G {$PROJECTGROUP} -a www-data
+fi
+
+fi # end of UI
+
+########################################################################
+
+if [ $AGENT ]; then
+   # nothing to do for agents yet
+   echo "*** Setting up agents ***"
+fi # end of AGENT
+
+
+echo "FOSSology postinstall complete, but sure to complete the remaining"
+echo "  steps in the INSTALL instructions."

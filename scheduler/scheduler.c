@@ -111,7 +111,7 @@ int SLOWDEATH=0;	/* exit politely: complete current jobs, then exit */
 void *DB=NULL;	/* the DB queue */
 
 #ifndef DEFAULTSETUP
-#define DEFAULTSETUP "scheduler.conf"
+#define DEFAULTSETUP "Scheduler.conf"
 #endif
 #ifndef PROJECTUSER
 #define PROJECTUSER "fossology"

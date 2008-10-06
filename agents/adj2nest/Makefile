@@ -1,28 +1,30 @@
-# sqlagent Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-include ../../Makefile.conf
+# FOSSology Makefile - agents/adj2nest
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+TOP=../..
+VARS=$(TOP)/Makefile.conf
+DEPS=$(TOP)/Makefile.deps
+include $(VARS)
 
-CC=gcc
-CFLAGS=-Wall -O2 $(CFLAGS2)
-#CFLAGS=-Wall -g -lefence $(CFLAGS2)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS)
 EXE=adj2nest
-INC=-I../../$(BUILDINC)
-LIB=-L../../$(BUILDLIB) -lfossdb -lpq
 
 all: $(EXE)
 
-adj2nest: adj2nest.c
-	$(CC) $(CFLAGS) adj2nest.c -o adj2nest $(INC) $(LIB)
-
-InstallationCreate:
-	$(CP) adj2nest ../../install/$(AGENTDIR)
+$(EXE): %: %.c $(DB) $(REPO) $(VARS)
+	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 install: all
-	$(CP) adj2nest $(AGENTDIR)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 uninstall:
-	$(RM) $(AGENTDIR)/adj2nest
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+
+test: all
+	@echo "*** No tests available for agents/$(EXE) ***"
 
 clean:
-	$(RM) *.o core $(EXE)
+	rm -f $(EXE) *.o core
 
+include $(DEPS)
+
+.PHONY: all install uninstall clean test

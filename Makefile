@@ -1,103 +1,75 @@
 # FOSSology Makefile
-# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-#
-# List directories in order of dependencies!
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+
+# pull in all our default variables
 include Makefile.conf
 
-DIRS=devel/libfossrepo devel/libfossdb scheduler agents/foss_license_agent/bSAM agents/foss_license_agent/licinspect agents/Shell agents/foss_license_agent/Filter_License agents/PkgMetaGetta agents/ununpack agents/wget_agent agents/foss_license_agent/Licenses agents/foss_license_agent/PkgMetaGetta agents/mimetype agents/specagent agents/sqlagent agents/delagent agents/selftest agents/adj2nest ui cli utils/freshmeat
+# the directories we do things in by default
+DIRS=devel db scheduler agents ui cli common
 
-UTILDIRS=utils/freshmeat
+# create lists of targets for various operations
+# these are phony targets (declared at bottom) of convenience so we can
+# run 'make $(operation)-$(subdir)'. Yet another convenience, a target of
+# '$(subdir)' is equivalent to 'build-$(subdir)'
+BUILDDIRS = $(DIRS:%=build-%)
+INSTALLDIRS = $(DIRS:%=install-%)
+UNINSTALLDIRS = $(DIRS:%=uninstall-%)
+CLEANDIRS = $(DIRS:%=clean-%)
+TESTDIRS = $(DIRS:%=test-%)
 
-all:
-	@echo "Project $(PROJECT) $(SVN_REV)"
-	@for i in $(DIRS) ; do if [ -d $$i ] ; then echo "Making $$i" ; (cd $$i ; $(MAKE)) ; fi ; done
+## Targets
+# build
+all: $(BUILDDIRS)
+$(DIRS): $(BUILDDIRS)
+$(BUILDDIRS):
+	$(MAKE) -C $(@:build-%=%)
 
-utils: all
-	@echo "Project $(PROJECT) $(SVN_REV)"
-	@echo "Make Fossology optional utilities"
-	@for i in $(UTILDIRS) ; do if [ -d $$i ] ; then echo "Making $$i" ; (cd $$i ; $(MAKE)) ; fi ; done
+# high level dependencies:
+# the scheduler and agents need the devel stuff built first
+build-scheduler: build-devel
+build-agents: build-devel
 
-MakeBuildDirs:
-	@for i in $(BUILDINC) $(BUILDLIB) ; do if [ ! -d $$i ] ; then echo "Making directory $$i" ; $(MKDIR) -p $$i ; fi ; done
+# cli needs the php include file built in ui
+build-cli: build-ui
 
-CreateInstallScript:
-	echo "Creating install script"
-	if [ ! -x ./mkinstall.sh ] ; then chmod u+x ./mkinstall.sh ; fi
-	./mkinstall.sh > install.sh
-	chmod a+x ./install.sh
-	if [ ! -x ./mkuninstall.sh ] ; then chmod u+x ./mkuninstall.sh ; fi
-	./mkuninstall.sh > uninstall.sh
-	chmod a+x ./uninstall.sh
-	if [ ! -x ./mkcheck.sh ] ; then chmod u+x ./mkcheck.sh ; fi
-	./mkcheck.sh > check.sh
-	chmod a+x ./check.sh
+# utils is a separate target, since it isn't built by default yet
+utils: build-utils
 
-InstallationRemove:
-	if [ -d install ] ; then $(RM) -rf install ; fi
-	$(RM) install.sh uninstall.sh check.sh
+# install depends on everything being built first
+install: all $(INSTALLDIRS)
+$(INSTALLDIRS):
+	$(MAKE) -C $(@:install-%=%) install
 
-InstallationCreate: all InstallationRemove
-	if [ ! -d install ] ; then $(MKDIR) install ; fi
-	# Create directories under the install tree.
-	$(MKDIR) -p install/$(LIBEXECDIR)
-	$(MKDIR) -p install/$(BINDIR)
-	$(MKDIR) -p install/$(LIBDIR)
-	$(MKDIR) -p install/$(DATADIR)
-	$(MKDIR) -p install/$(VARDATADIR)
-	$(MKDIR) -p install/$(MANDIR)
-	$(MKDIR) -p install/$(MAN1DIR)
-	$(MKDIR) -p install/$(WEBDIR)
-	$(MKDIR) -p install/$(PHPDIR)
-	$(MKDIR) -p install/$(AGENTDIR)
-	$(MKDIR) -p install/$(AGENTDATADIR)
-	$(MKDIR) -p install/$(AGENTTESTDDIR)
-	$(MKDIR) -p install/$(DATADIR)/dbconnect
-	$(MKDIR) -p install/$(DATADIR)/repository
-	# Populate directories
-	@for i in $(DIRS) ; do if [ -d $$i ] ; then echo "Installing template $$i" ; (cd $$i ; $(MAKE) InstallationCreate) ; fi ; done
+uninstall: $(UNINSTALLDIRS)
+$(UNINSTALLDIRS):
+	$(MAKE) -C $(@:uninstall-%=%) uninstall
 
-clean: InstallationRemove
-	@for i in $(DIRS) ; do if [ -d $$i ] ; then echo "Cleaning $$i" ; (cd $$i ; $(MAKE) clean) ; fi ; done
-	@for i in $(UTILDIRS) ; do if [ -d $$i ] ; then echo "Cleaning $$i" ; (cd $$i ; $(MAKE) clean) ; fi ; done
-	@for i in $(BUILDINC) $(BUILDLIB) ; do if [ -d $$i ] ; then echo "Cleaning directory $$i" ; $(RM) -rf $$i/* ; fi ; done
+# test depends on everything being built first
+test: all $(TESTDIRS)
+$(TESTDIRS):
+	$(MAKE) -C $(@:test-%=%) test
 
-install: InstallationCreate CreateInstallScript
-	@echo Project $(PROJECT)
-	./install.sh
-	
-InstallCreateUtils: utils
-	echo "MAIN-MK: Before InstallCreateUtils"
-	pwd
-	@ls install/$(BINDIR)
-	if [ ! -d install ] ; then $(MKDIR) install ; fi
-	# Create directories under the install tree.
-	$(MKDIR) -p install/$(INCLUDEDIR)
-	if [ ! -d $(BINDIR) ] ; then $(MKDIR) -p install/$(BINDIR) ; fi
-	# Populate directories
-	@for i in $(UTILDIRS) ; do if [ -d $$i ] ; then echo "Installing template $$i" ; (cd $$i ; $(MAKE) InstallationCreate) ; fi ; done
-	echo "MAIN-MK: After InstallCreateUtils"
-	pwd
-	@ls install/$(BINDIR)
-	
-installUtils: InstallCreateUtils CreateInstallScript
-	@echo "Installing utils into the staging area"
-	
+clean: $(CLEANDIRS)
+	rm -f variable.list fo-postinstall
 
-uninstall:
+$(CLEANDIRS):
+	$(MAKE) -C $(@:clean-%=%) clean
 
-
-Test:
-	# Debug the environment
-	@echo "SVNID=$(SVNID)"
-	@echo "SVN_REV=$(SVN_REV)"
-
-tar:
+# release stuff
+tar: dist-testing
+dist-testing:
 	# Package into a tar file.
 	chmod a+x ./mktar.sh
 	./mktar.sh -s
 
-tar-release:
+tar-release: dist
+dist:
 	# Package into a tar file.
 	chmod a+x ./mktar.sh
 	./mktar.sh
 
+
+.PHONY: $(BUILDDIRS) $(DIRS) $(INSTALLDIRS) $(UNINSTALLDIRS)
+.PHONY: $(TESTDIRS) $(CLEANDIRS)
+.PHONY: all install uninstall clean test utils
+.PHONY: dist dist-testing tar tar-release
