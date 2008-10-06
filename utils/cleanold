@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # cleanold - a utility to clean up old fossology installs
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
