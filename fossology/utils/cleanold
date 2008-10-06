@@ -28,7 +28,9 @@ FILES="/usr/local/bin/cp2foss.php
 /usr/local/lib/lib_projxml.h.php
 /usr/local/share/man/man1/cp2foss.1
 /usr/local/bin/cp2foss
+/usr/local/bin/departition
 /usr/local/bin/p.sh
+/usr/local/bin/pathinclude.h.php
 /usr/local/bin/ununpack
 /usr/local/bin/unrar
 /usr/local/bin/unrar-free
@@ -51,13 +53,16 @@ done
 
 echo "*** Cleaning up old fossology files ***"
 for file in $FILES; do
-   if [ -f "$file" ]; then
-      rm -f $file
+   if [ -f "$file" ] || [ -h "$file" ] ; then
+      rm -f "$file"
    fi
 done
 
 for dir in $DIRS; do
-   if [ -d "$dir" ]; then
-      rm -rf $dir
+   if [ -d "$dir" ] ; then
+      rm -rf "$dir"
+   elif [ -h "$dir" ] ; then
+      rm -f "$dir"
    fi
 done
+
