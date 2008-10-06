@@ -61,7 +61,9 @@ DISTRO=`lsb_release -is`
 CODENAME=`lsb_release -cs`
 
 if [ "$?" != "0" ]; then
-   echo "ERROR: this program requires the lsb_release command"
+   echo "ERROR: this program requires the lsb_release command. On Debian based"
+   echo "  systems this is probably in the lsb-release package, on"
+   echo "  Fedora/RedHat systems it is probably the redhat-lsb package."
    exit 1
 fi
 
