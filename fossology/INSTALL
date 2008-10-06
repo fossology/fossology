@@ -260,7 +260,7 @@ In the "[soap]" section add
 
 You should also edit /etc/php5/cli/php.ini to include the fossology directory
 in the php command line interface path:
-  include_path = ".:/usr/local/share/fossology/www"
+  include_path = ".:/usr/local/share/fossology/php"
 
 *** Configuring Apache ***
 1) You need to add something like the following to the apache config,
