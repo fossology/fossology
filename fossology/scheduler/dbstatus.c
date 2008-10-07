@@ -590,7 +590,7 @@ void	DBkillschedulers	()
   int SentKill=0;
 
   memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD-1,"SELECT unique_scheduler FROM scheduler_status WHERE unique_scheduler like '%s.%%' AND agent_number = '-1' AND record_update >= now() - interval '20';",Hostname);
+  snprintf(SQL,MAXCMD-1,"SELECT unique_scheduler FROM scheduler_status WHERE unique_scheduler like '%s.%%' AND agent_number = '-1' AND record_update <= now() - interval '20';",Hostname);
   DBLockAccess(DB,SQL);
   for(i=0; i<DBdatasize(DB); i++)
 	{
