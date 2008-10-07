@@ -588,6 +588,7 @@ void	DBkillschedulers	()
   int i;
   int Pid;
   int SentKill=0;
+  int rc;
 
   memset(SQL,'\0',MAXCMD);
   /* Kill all schedulers that have updated in the last minute */
@@ -600,9 +601,18 @@ void	DBkillschedulers	()
 	  {
 	  Value += strlen(Hostname)+1;
 	  Pid = atoi(Value);
-	  syslog(LOG_NOTICE,"Politely killing process %d\n",Pid);
-	  kill(Pid,SIGTERM);
-	  SentKill++;
+	  /* Make sure the process exists */
+	  rc=kill(Pid,SIGTERM);
+	  if (rc == -1)
+	    {
+	    if (errno == EPERM)
+	      syslog(LOG_WARNING,"Permission denied: cannot kill process %d\n",Pid);
+	    }
+	  else
+	    {
+	    syslog(LOG_NOTICE,"Politely killing process %d\n",Pid);
+	    SentKill++;
+	    }
 	  }
 	}
   if (!SentKill) return;  /* nothing to kill! */
@@ -618,10 +628,15 @@ void	DBkillschedulers	()
 	  {
 	  Value += strlen(Hostname)+1;
 	  Pid = atoi(Value);
-	  syslog(LOG_NOTICE,"Forcefully killing process %d\n",Pid);
 	  if (kill(Pid,SIGKILL) != 0)
 	    {
-	    perror("ERROR: Unable to kill process");
+	    if (errno == EPERM)
+	      syslog(LOG_WARNING,"Permission denied: cannot kill process %d\n",Pid);
+	    else if (errno != ESRCH) perror("ERROR: Unable to kill process");
+	    }
+	  else
+	    {
+	    syslog(LOG_NOTICE,"Forcefully killing process %d\n",Pid);
 	    }
 	  }
 	}
