@@ -638,11 +638,8 @@ int	main	(int argc, char *argv[])
 	}
       HeartbeatCount=-1;
       HeartbeatCounter=-1;
-      if (GlobalUploadKey != -1)
-	{
-	DBLoadGold();
-	unlink(GlobalTempFile);
-	}
+      if (GlobalUploadKey != -1) { DBLoadGold(); }
+      unlink(GlobalTempFile);
       alarm(0);
       }
     else /* must be a file */
