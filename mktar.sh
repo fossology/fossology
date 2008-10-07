@@ -77,11 +77,11 @@ rm Makefile.conf.svn
 )
 
 (
-# Create and copy over the pathinclude.h.php
+# Create and copy over the pathinclude.php
 cd ui
-rm pathinclude.h.php
+rm pathinclude.php
 make
-cp pathinclude.h.php ../../$TARBASE/ui/pathinclude.h.php
+cp pathinclude.php ../../$TARBASE/ui/pathinclude.php
 )
 
 # Create the tar
