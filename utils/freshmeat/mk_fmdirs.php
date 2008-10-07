@@ -32,13 +32,13 @@
 // NOTE: This code is not really used anymore !!!!!!!!!!!!!!!!!!!!!!
 
 // For now, assume previous process has determined if the archive has changed
-// and just calls this routine to do the load.  That is, this routine is 
+// and just calls this routine to do the load.  That is, this routine is
 // not expected to determine if the archive has changed.
 
 //issues:
 // what to do if all the data is not present.  For example, osrb projects
 // may not have a version, rank, or other data that is there for projects
-// from freshmeat.  Talk with Bob, use some sort of 'default' if there 
+// from freshmeat.  Talk with Bob, use some sort of 'default' if there
 // is no data.
 
 # 1. process parameter(s) and sanity check.
@@ -46,23 +46,24 @@
 # 3. If folder doesn't exist, create it.
 #    is it possible to make this recursive and do subfolders as well?
 # 4. After all needed folders are created,
-# things are a bit fuzzy below.... 
+# things are a bit fuzzy below....
 # 5. create upload record.
 # 6. unpack
 # 7. schedule nomos...
 # What else?
 /*
- * general process is: createfolders, then use createfoldercontents to 
+ * general process is: createfolders, then use createfoldercontents to
  * associate folders with each other....
  */
 
-require_once("./pathinclude.h.php");
+require_once("./pathinclude.php");
+/* the items below no longer exist, my this code is old.... */
 require_once("$PHPDIR/webcommon.h.php");
 require_once("$PHPDIR/jobs.h.php");
 require_once("$PHPDIR/db_postgres.h.php");
 
 // if you do it yourself....use the lib...
-#$_pg_conn = pg_connect(str_replace(";", " ", 
+#$_pg_conn = pg_connect(str_replace(";", " ",
 #	   file_get_contents("{$SYSCONFDIR}/{$PROJECT}/Db.conf")));
 
 $path = "{$SYSCONFDIR}/$PROJECT}/Db.conf";
@@ -83,12 +84,12 @@ if (!$_pg_conn) {
 }
 
 /*
- * Steps are: 
+ * Steps are:
  * 1. create top folder
- * using value returned from cratefolder, 
- * 2. use that in a loop to create the other folders.  
+ * using value returned from cratefolder,
+ * 2. use that in a loop to create the other folders.
  * 3. Other folders are created with
- * createrfolder, and then associated with parent folder with 
+ * createrfolder, and then associated with parent folder with
  * createfoldercontents.
  */
 
@@ -99,14 +100,14 @@ $sql = 'select users.root_folder_fk from users';
 $pfolder4user = db_query1($sql);
 
 // Create top level folder 'Freshmeat'
-$f_pk = createfolder($pfolder4user, 'Freshmeat', 
+$f_pk = createfolder($pfolder4user, 'Freshmeat',
                          "Top folder for FM Archives");
 
-$sql_fm = 
+$sql_fm =
   "select folder_pk, folder_name from folder where folder_name='Freshmeat'";
 $fm_pk = db_query1($sql_fm);
 
-// Create the alpha bucket folders and associate them with the 
+// Create the alpha bucket folders and associate them with the
 // Freshmeat folder.
 for ($num=0; $num < count($alpha_buckets); $num++){
 #echo "arraychunks: {$alpha_buckets[$num]}\n";

@@ -61,20 +61,20 @@
 * file that will be used by get-projects to retrieve them from the net.
 *
 */
-require_once("pathinclude.h.php");
+require_once("pathinclude.php");
 require_once("$LIBDIR/lib_projxml.h.php");
 
 $usage = <<< USAGE
 Usage: diffm [-h] -f <file1> <file2> [-o <dir-path>]
    Where <file1> path to an uncompressed top1000 Freshmeat rdf XML file
          <file2> path to an uncompressed top1000 Freshmeat rdf XML file
-         
+
          For the differences to be found as expected file1 should be the newer
          file.  E.g. f1.2008-1-14 f2.2008-1-13.
-         
+
          <dir-path> fully qualified path where output files will be placed.
          If no -o option given, the cwd is used for the output files.
-         
+
          Output files are: FM-projects2update and Update.fm.rdf
 
    See mktop1k to create a top1000 Freshmeat file from the master rdf file.
@@ -150,7 +150,7 @@ if (0 == $size = filesize($in_file2)){
   echo "Error, file $in_file2 is empty\n";
   exit(-1);
 }
-// open the files and get a project_name and version from each. 
+// open the files and get a project_name and version from each.
 
 $F1 = fopen($in_file1, 'r') or die("Can't open: $in_file1 $php_errormsg\n");
 $F2 = fopen($in_file2, 'r') or die("Can't open: $in_file2 $php_errormsg\n");
@@ -194,7 +194,7 @@ if ($diffs_found == 0){
   }
   exit($diffs_found);        // should be 0
 }
-// differences found, save them up in the files.  We only save from 
+// differences found, save them up in the files.  We only save from
 // file 1 as that is the newest file.
 write_hdr($Cxml);
 while( false != ($f1_line = fgets($F1, 1024))) {
