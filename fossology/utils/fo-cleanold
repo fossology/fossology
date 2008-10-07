@@ -1,5 +1,5 @@
 #!/bin/sh
-# cleanold - a utility to clean up old fossology installs
+# fo-cleanold - a utility to clean up old fossology installs
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
 SAVE="/usr/local/share/fossology/agents/proxy.conf
@@ -28,10 +28,7 @@ FILES="/usr/local/bin/cp2foss.php
 /usr/local/lib/lib_projxml.h.php
 /usr/local/share/man/man1/cp2foss.1
 /usr/local/bin/cp2foss
-/usr/local/bin/dbload
-/usr/local/bin/departition
 /usr/local/bin/p.sh
-/usr/local/bin/pathinclude.h.php
 /usr/local/bin/ununpack
 /usr/local/bin/unrar
 /usr/local/bin/unrar-free
@@ -43,7 +40,7 @@ DIRS="/usr/local/fossology/
 /usr/local/share/fossology/
 /usr/local/share/nomos3/"
 
-TMPDIR=`mktemp -d /tmp/fossology-configs.XXXXXX` || exit 1
+TMPDIR=`mktemp -d /tmp/fossology-configs.XXXX` || exit 1
 echo "*** Searching for old fossology config files ***"
 for conffile in $SAVE; do
    if [ -f "$conffile" ]; then
@@ -54,16 +51,13 @@ done
 
 echo "*** Cleaning up old fossology files ***"
 for file in $FILES; do
-   if [ -f "$file" ] || [ -h "$file" ] ; then
-      rm -f "$file"
+   if [ -f "$file" ]; then
+      rm -f $file
    fi
 done
 
 for dir in $DIRS; do
-   if [ -d "$dir" ] ; then
-      rm -rf "$dir"
-   elif [ -h "$dir" ] ; then
-      rm -f "$dir"
+   if [ -d "$dir" ]; then
+      rm -rf $dir
    fi
 done
-

@@ -15,8 +15,13 @@ may vary depending on where you install it).
 Really Short Install Instructions
 =================================
 (In examples, # is as root, $ is mortal)
+0. If you have any old fossology installs you want to remove from the
+   system you can run the fo-cleanold script
+   # utils/fo-cleanold
+   If you have an existing install that you want to transition, be sure
+   back up your repository, database, and config files before proceeding.
 1. install dependencies
-   # utils/installfodeps
+   # utils/fo-installdeps
 2. Adjust the kernel shmmax
    # echo 512000000 > /proc/sys/kernel/shmmax
    # echo "kernel.shmmax=512000000" >> /etc/sysctl.conf
@@ -81,7 +86,7 @@ distributions.
     http://fedoraproject.org/wiki/EPEL
 
 We provide a script for helping install dependencies:
-   utils/installfodeps
+   utils/fo-installdeps
 To install just the build dependencies use the -b flag.
 To install just the runtime dependencies use the -r flag.
 If this utility doesn't support the distro you are running (or fails
@@ -330,6 +335,12 @@ See the HACKING file for more info.
 NOTE: some commands are required to be run as the root user and are
 indicated so. You should be able to use sudo, "su -", a normal root
 login, or your favorite root-obtaining utility.
+
+0) If you have any old fossology installs you want to remove from the
+   system you can run the fo-cleanold script
+   # utils/fo-cleanold
+   If you have an existing install that you want to transition, be sure
+   back up your repository, database, and config files before proceeding.
 
 1) cd into the directory unpacking the tarball created
    (fossology-<version>/).
