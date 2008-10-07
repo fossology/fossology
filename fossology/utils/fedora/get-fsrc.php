@@ -48,7 +48,7 @@
 $path = '/usr/local/fossology/agents';
 set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
-require_once("pathinclude.h.php");
+require_once("pathinclude.php");
 global $WEBDIR;
 require_once("$WEBDIR/common/common-cli.php");
 
