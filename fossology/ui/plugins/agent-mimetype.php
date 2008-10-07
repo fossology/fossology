@@ -68,11 +68,11 @@ class agent_mimetype extends FO_Plugin
   function AgentAdd ($uploadpk,$Depends=NULL,$Priority=0)
   {
     global $DB;
-    /* Get dependency: "mimetype" require "unpack". */
+    /* Get dependency: "mimetype" require "adj2nest". */
     $SQL = "SELECT jq_pk FROM jobqueue
 	    INNER JOIN job ON job.job_upload_fk = '$uploadpk'
 	    AND job.job_pk = jobqueue.jq_job_fk
-	    WHERE jobqueue.jq_type = 'unpack';";
+	    WHERE jobqueue.jq_type = 'adj2nest';";
     $Results = $DB->Action($SQL);
     $Dep = $Results[0]['jq_pk'];
     if (empty($Dep))
