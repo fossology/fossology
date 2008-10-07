@@ -389,7 +389,7 @@ class ui_view extends FO_Plugin
 	$InColor=1;
 	if (!empty($this->Highlight[0]['Name']))
 	  {
-	  print "<a name='" . $this->Highlight[0]['Index'] . "'>" . $S . "</a>";
+	  print "<a name='" . $this->Highlight[0]['Index'] . "'></a>" . $S;
 	  }
 	else
 	  {
