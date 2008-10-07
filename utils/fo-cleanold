@@ -33,6 +33,8 @@ FILES="/usr/local/bin/cp2foss.php
 /usr/local/bin/unrar
 /usr/local/bin/unrar-free
 /usr/local/include/fm-paths.php
+/etc/default/fossology
+/etc/init.d/fossology
 "
 
 DIRS="/usr/local/fossology/
