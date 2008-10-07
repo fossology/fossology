@@ -92,6 +92,7 @@
 #include <sys/types.h>
 #include <grp.h>
 #include <pwd.h>
+#include <syslog.h>
 
 #include "scheduler.h"
 #include "spawn.h"
@@ -179,6 +180,8 @@ int	main	(int argc, char *argv[])
   char *LogFile=NULL;
   int Test=0; /* 1=test and continue, 2=test and quit */
 
+  openlog("fossology",LOG_CONS|LOG_PERROR|LOG_PID,LOG_USER);
+
   /* check args */
   while((c = getopt(argc,argv,"dkHiIL:vqRtT")) != -1)
     {
@@ -194,11 +197,12 @@ int	main	(int argc, char *argv[])
 	DB = DBopen();
 	if (!DB)
 	  {
-	  fprintf(stderr,"ERROR: Unable to connect to database\n");
+	  syslog(LOG_CRIT,"FATAL: Unable to connect to database\n");
 	  exit(-1);
 	  }
 	/* Nothing to initialize */
 	DBclose(DB);
+	closelog();
 	return(0);
       case 'I':
 	UseStdin=1;
@@ -251,14 +255,14 @@ int	main	(int argc, char *argv[])
       G = getgrnam(PROJECTGROUP);
       if (!G)
 	{
-	fprintf(stderr,"ERROR: Group '%s' not found.  Aborting.\n",PROJECTGROUP);
+	syslog(LOG_CRIT,"FATAL: Group '%s' not found.  Aborting.\n",PROJECTGROUP);
 	DBclose(DB);
 	exit(-1);
 	}
       setgroups(1,&(G->gr_gid));
       if ((setgid(G->gr_gid) != 0) || (setegid(G->gr_gid) != 0))
 	{
-	fprintf(stderr,"ERROR: Cannot run as group '%s'.  Aborting.\n",PROJECTGROUP);
+	syslog(LOG_CRIT,"FATAL: Cannot run as group '%s'.  Aborting.\n",PROJECTGROUP);
 	DBclose(DB);
 	exit(-1);
 	}
@@ -266,13 +270,13 @@ int	main	(int argc, char *argv[])
       P = getpwnam(PROJECTUSER);
       if (!P)
 	{
-	fprintf(stderr,"ERROR: User '%s' not found.  Will not run as root.  Aborting.\n",PROJECTUSER);
+	syslog(LOG_CRIT,"FATAL: User '%s' not found.  Will not run as root.  Aborting.\n",PROJECTUSER);
 	DBclose(DB);
 	exit(-1);
 	}
       if ((setuid(P->pw_uid) != 0) || (seteuid(P->pw_uid) != 0))
 	{
-	fprintf(stderr,"ERROR: Cannot run as user '%s'.  Will not run as root.  Aborting.\n",PROJECTUSER);
+	syslog(LOG_CRIT,"FATAL: Cannot run as user '%s'.  Will not run as root.  Aborting.\n",PROJECTUSER);
 	DBclose(DB);
 	exit(-1);
 	}
@@ -295,7 +299,7 @@ int	main	(int argc, char *argv[])
     Groups = (gid_t *)malloc(MaxGroup*sizeof(gid_t));
     if (!Groups)
       {
-      fprintf(stderr,"ERROR: Unable to allocate memory.\n");
+      syslog(LOG_CRIT,"FATAL: Unable to allocate memory.\n");
       DBclose(DB);
       exit(-1);
       }
@@ -308,7 +312,7 @@ int	main	(int argc, char *argv[])
     free(Groups);
     if (!Match)
       {
-      fprintf(stderr,"ERROR: You are not in group '%s'.  Aborting.\n",PROJECTGROUP);
+      syslog(LOG_CRIT,"FATAL: You are not in group '%s'.  Aborting.\n",PROJECTGROUP);
       DBclose(DB);
       exit(-1);
       }
@@ -327,13 +331,13 @@ int	main	(int argc, char *argv[])
     {
     if (freopen(LogFile,"wb",stdout) == NULL)
       {
-      fprintf(stderr,"ERROR: Unable to write to logfile '%s'\n",LogFile);
+      syslog(LOG_CRIT,"FATAL: Unable to write to logfile '%s'\n",LogFile);
       DBclose(DB);
       exit(-1);
       }
     if ((dup2(fileno(stdout),fileno(stderr))) < 0)
       {
-      fprintf(stderr,"ERROR: Unable to write to redirect stderr to log\n");
+      syslog(LOG_CRIT,"FATAL: Unable to write to redirect stderr to log\n");
       DBclose(DB);
       exit(-1);
       }
@@ -343,7 +347,7 @@ int	main	(int argc, char *argv[])
   DB = DBopen();
   if (!DB)
     {
-    fprintf(stderr,"ERROR: Unable to connect to database\n");
+    syslog(LOG_CRIT,"FATAL: Unable to connect to database\n");
     DBclose(DB);
     exit(-1);
     }
@@ -366,7 +370,7 @@ int	main	(int argc, char *argv[])
 	{
 	/* If someone has a start without an end, then it is a hung process */
 	DBLockAccess(DB,"UPDATE jobqueue SET jq_starttime=null WHERE jq_endtime is NULL;");
-	fprintf(stderr,"Job queue reset.\n");
+	syslog(LOG_NOTICE,"Job queue reset.\n");
 	}
 
   /* init storage */
@@ -377,7 +381,7 @@ int	main	(int argc, char *argv[])
   /* Check for good agents */
   if (SelfTest())
     {
-    fprintf(stderr,"FATAL: Inconsistent agent(s) detected.\n");
+    syslog(LOG_CRIT,"FATAL: Inconsistent agent(s) detected.\n");
     DBclose(DB);
     exit(-1);
     }
@@ -387,11 +391,12 @@ int	main	(int argc, char *argv[])
     {
     rc = TestEngines();
     /* rc = number of engine failures */
-    if (rc == 0) fprintf(stderr,"STATUS: All scheduler jobs appear to be functional.\n");
-    else fprintf(stderr,"STATUS: %d agents failed.\n",rc);
+    if (rc == 0) syslog(LOG_INFO,"STATUS: All scheduler jobs appear to be functional.\n");
+    else syslog(LOG_INFO,"STATUS: %d agents failed.\n",rc);
     if ((Test > 1) || rc)
 	{
 	DBclose(DB);
+	closelog();
 	return(rc);
 	}
     }
@@ -449,11 +454,11 @@ int	main	(int argc, char *argv[])
 	  }
 
 	/* Got a command! */
-	if (Verbose) fprintf(stderr,"Parent got command: %s\n",Input);
+	if (Verbose) syslog(LOG_DEBUG,"Parent got command: %s\n",Input);
 	Arg = strchr(Input,'|');
 	if (!Arg)
 		{
-		fprintf(stderr,"ERROR: Unknown command (len=%d) '%s'\n",Len,Input);
+		syslog(LOG_ERR,"ERROR: Unknown command (len=%d) '%s'\n",Len,Input);
 		continue; /* skip unknown lines */
 		}
 	Arg[0]='\0'; Arg++;	/* skip space */
@@ -480,7 +485,7 @@ int	main	(int argc, char *argv[])
 		  {
 		  ChangeStatus(Thread,ST_RUNNING);
 		  }
-		if (Verbose) fprintf(stderr,"(a) Feeding child[%d]: '%s'\n",Thread,Arg);
+		if (Verbose) syslog(LOG_DEBUG,"(a) Feeding child[%d]: '%s'\n",Thread,Arg);
 		memset(CM[Thread].Parm,'\0',MAXCMD);
 		strcpy(CM[Thread].Parm,Arg);
 		Input[Len++]='\n'; /* add a \n to end of Arg */
@@ -490,7 +495,7 @@ int	main	(int argc, char *argv[])
 	  /* Thread == -1 is a timeout -- retry the request */
 	  else if (Thread <= -2)
 		{
-		fprintf(stderr,"ERROR: No living engines for '%s'\n",Input);
+		syslog(LOG_ERR,"ERROR: No living engines for '%s'\n",Input);
 		Fed=1;	/* skip this bad command */
 		}
 	  } /* while not Fed */
@@ -527,7 +532,7 @@ int	main	(int argc, char *argv[])
     }
 
   /* tell children "no more food" by closing stdin */
-  if (Verbose) fprintf(stderr,"Telling all children: No more food.\n");
+  if (Verbose) syslog(LOG_DEBUG,"Telling all children: No more food.\n");
   for(Thread=0; Thread < MaxThread; Thread++)
     {
     if (CM[Thread].Status > ST_FREE) CheckClose(CM[Thread].ChildStdin);
@@ -563,13 +568,14 @@ int	main	(int argc, char *argv[])
       }
     }
 
-  fprintf(stderr,"Scheduler ending.\n");
+  syslog(LOG_NOTICE,"Scheduler ending.\n");
 
   /* print statistics */
   if (DB) DBErrorClose();
   DBQclose();
   DBclose(DB);
   DebugThreads(1);
+  closelog();
   return(0);
 } /* main() */
 

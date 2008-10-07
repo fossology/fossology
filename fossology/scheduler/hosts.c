@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <syslog.h>
 #include "scheduler.h"
 #include "hosts.h"
 
@@ -51,7 +52,7 @@ void	HostAdd	(char *Hostname, int MaxRunning, int MaxUrgent)
 {
   int i;
 
-  if (Verbose) fprintf(stderr,"Adding host: '%s' Max=%d Urgent=%d\n",Hostname,MaxRunning,MaxUrgent);
+  if (Verbose) syslog(LOG_DEBUG,"Adding host: '%s' Max=%d Urgent=%d\n",Hostname,MaxRunning,MaxUrgent);
 
   /* check for an update */
   for(i=0; i<MaxHostList; i++)
