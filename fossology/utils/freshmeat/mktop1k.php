@@ -36,21 +36,21 @@
  */
 
 $LIBDIR = '/usr/local/lib';
-require_once("pathinclude.h.php");
+require_once("pathinclude.php");
 require_once("$LIBDIR/lib_projxml.h.php");
 //require_once("./lib_projxml.h.php");            // dev copy
 
 
 $usage = <<< USAGE
 Usage: mktop1k [-h] -i <in-file> -o <out-file> [-n nnn]
-   Where: -h optional help, displays this message 
+   Where: -h optional help, displays this message
           <in-file> path to an uncompressed Freshmeat rdf XML file
           <out-file> path to filename where the xml output will be generated.
-          -n nnn optional parameter to indicate how many projects to 
-             extract.  
-             
+          -n nnn optional parameter to indicate how many projects to
+             extract.
+
              Default is 1000.
-             
+
              The projects are always extracted in priority order.
              For example, -n 10 will get the top 10 Freshmeat packages.
              A range of numbers is not supported.

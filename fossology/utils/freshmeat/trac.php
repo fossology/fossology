@@ -34,7 +34,10 @@
  * the file created.  e.g. some names have spaces and other have things
  * like eclipse-plugin: foobar  bla!
  *
- * Defect: does not detect projects with no urls correctly, FIX THIS.
+ * Defect: Does it detect not found in FM RDF?
+ *
+ * Defect: if proxy needs to be set, this thing just sits there...no
+ * error message or nothing....fix this!
  *
  * Created on Jun 6, 2008
  */
@@ -157,19 +160,31 @@ while ($line = $INF->GetLine($INF->file_resource))
  * Additionally, some of the url's may point to something that doesn't
  * really download.  Need to explore cURL.
  */
+print "DB: Looking for valid download urls\n";
 $projects = get_proj_url($found);
 
 $PF = fopen('ol-projects-in-FM', 'w') or die("Can't open file, $php_errormsg\n");
 foreach($projects as $line)
 {
-  if(false === fwrite($PF, $line))
+//  print "line is:$line\n";
+  if(fputcsv($PF, $line) === flase)
   {
     print "ERROR: can't write $line\n";
   }
 }
+fclose($PF);
+// for now just open the file and try to parse
+
+$PL = fopen('ol-projects-in-FM', 'r') or die("Can't open file, $php_errormsg\n");
+while ($tokens = fgetcsv($PL, 1024))
+{
+  print "tokens is:\n";
+  var_dump($tokens);
+}
+
 
 /**
- * functoin get_proj_url
+ * function get_proj_url
  *
  * Given an array of project names and possible url's' pick a url to
  * use.  Creates an array of strings.  The string is
@@ -178,7 +193,7 @@ foreach($projects as $line)
  * @param array $pdata array of projects and urls. see Class
  * FreshmeatRdfs::XtractProjInfo for the format of the array.
  *
- * @return array $projs array of strings.
+ * @return array $projs array of arrays.
  */
 function get_proj_url($pdata)
 {
@@ -211,25 +226,25 @@ function get_proj_url($pdata)
         */
         if (preg_match('/\/url_zip\/$/', $value))
         {
-          //print "DB:GPU: matched zip\n";
+          //print "DB:GPU: matched zip, value is:$value\n";
           $url = $value;
         }
         elseif (preg_match('/\/url_tgz\/$/', $value))
         {
-          //print "DB:GPU: matched tgz\n";
+          //print "DB:GPU: matched tgz, value is:$value\n";
           $url = $value;
         }
         elseif (preg_match('/\/url_bz2\/$/', $value))
         {
-          //print "DB:GPU: matched bz2\n";
+          //print "DB:GPU: matched bz2, value is:$value\n";
           $url = $value;
         }
         else
         {
-          //print "DB:GPU: Testing URL for NULL\n";
+          print "DB:GPU: Testing URL for NULL\n";
           if(is_null($url))
           {
-           //print "DB:GPU: URL is NULL\n";
+           print "DB:GPU: Setting URL is NULL\n";
            $url = 'NO URL FOR THIS PROJECT';
           }
         }
@@ -237,11 +252,12 @@ function get_proj_url($pdata)
     }
 
     //print "DB: GPU: pname url, version are:\n$proj_name\n$url\n$version\n";
-    $proj_string = "$proj_name " . "$url " . "$version" . "\n";
-    $projects[] = $proj_string;
+    $proj_data[0] = $proj_name;
+    $proj_data[1] = $url;
+    $proj_data[2] = $version;
+    $projects[] = $proj_data;
+    $url = NULL;
   }
-  // this does nothing...hmmmm
-  $url = NULL;
   //print "DB: projURL: the projects are:\n";
   //var_dump($projects);
   return ($projects);
