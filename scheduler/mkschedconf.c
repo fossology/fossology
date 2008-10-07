@@ -71,7 +71,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
 
   /** wget **/
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/wget_agent -d %s",AGENTDIR,PROJECTSTATEDIR);
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/wget_agent -d %s/agents",AGENTDIR,PROJECTSTATEDIR);
   fprintf(Fout,"agent=wget %s| ",CmdHost);
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
