@@ -41,7 +41,7 @@ int	SelfTest	()
 {
   FILE *Fin, *FData, *FTest;
   char SelfTest[] = "echo 'test' | " AGENTDIR "/selftest -g -s"; /* -g for generate test data */
-  char MkConfig[] = BINDIR "/mkconfig -L 2>&1 | grep agent | sed 's/.*agent=\\(\\w*\\).*/\\1/' | sort -u"; /* get list of agents */
+  char MkConfig[] = LIBEXECDIR "/mkschedconf -L 2>&1 | grep agent | sed 's/.*agent=\\(\\w*\\).*/\\1/' | sort -u"; /* get list of agents */
   int c,i;
   int Thread;
   int rc=0;
@@ -61,7 +61,7 @@ int	SelfTest	()
   Fin = popen(MkConfig,"r");
   if (!Fin)
     {
-    fprintf(stderr,"FATAL: Unable to run mkconfig for self-test.\n");
+    fprintf(stderr,"FATAL: Unable to run mkschedconf for self-test.\n");
     return(1);
     }
   /* read every line and check if the agent exists */
