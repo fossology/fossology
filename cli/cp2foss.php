@@ -249,7 +249,7 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription,$T
   if (!$Test) { system($Cmd); }
 
   /* Schedule the unpack */
-  $Cmd = "fossjobs.php -U '$UploadPk' -A agent_unpack";
+  $Cmd = "fossjobs -U '$UploadPk' -A agent_unpack";
   if ($Verbose) { print "CMD=$Cmd\n"; }
   if (!$Test) { system($Cmd); }
   if (!empty($QueueList))
@@ -259,10 +259,10 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription,$T
       case 'agent_unpack':	$Cmd=""; break; /* already scheduled */
       case 'ALL':
       case 'all':
-	$Cmd = "fossjobs.php -U '$UploadPk'";
+	$Cmd = "fossjobs -U '$UploadPk'";
 	break;
       default:
-	$Cmd = "fossjobs.php -U '$UploadPk' -A '$QueueList'";
+	$Cmd = "fossjobs -U '$UploadPk' -A '$QueueList'";
 	break;
       }
     if ($Verbose) { print "CMD=$Cmd\n"; }
@@ -318,7 +318,7 @@ for($i=1; $i < $argc; $i++)
 	$i++; $UploadName = $argv[$i];
 	break;
     case '-Q':
-	system("fossjobs.php -a");
+	system("fossjobs -a");
 	return(0);
     case '-q':
 	$i++; $QueueList = $argv[$i];
