@@ -24,6 +24,7 @@
 /* for signals */
 #include <sys/types.h>
 #include <signal.h>
+#include <syslog.h>
 
 #include <libfossdb.h>
 #include <libfossrepo.h>
@@ -99,7 +100,7 @@ void	DBMSQremove	(int i)
   int j;
 
   if (MSQ[i].JobId == -1) return; /* idiot checking */
-  if (Verbose) fprintf(stderr,"DBMSQremove: %d\n",i);
+  if (Verbose) syslog(LOG_DEBUG,"DBMSQremove: %d\n",i);
 
   /* free memory */
   DBclose(MSQ[i].DBQ);
@@ -142,7 +143,7 @@ int	DBMkAttr	(void *DB, int Row, char *Attr, int MaxAttr)
 	if (atoi(Value) >= 100) IsUrgent=1;
 	}
 
-  if (Verbose) fprintf(stderr,"Attr='%s'\n",Attr);
+  if (Verbose) syslog(LOG_DEBUG,"Attr='%s'\n",Attr);
   return(IsUrgent);
 } /* DBMkAttr() */
 
@@ -319,18 +320,18 @@ int	DBMSQinsert	(void *DBQ, int Row)
     /* Get the SQL results */
     DBUpdateJob(MSQ[i].JobId,0,NULL);
     if (Verbose)
-	fprintf(stderr,"SQL: '%s'\n",DBgetvaluename(DBQ,Row,"jq_args"));
+	syslog(LOG_DEBUG,"SQL: '%s'\n",DBgetvaluename(DBQ,Row,"jq_args"));
     switch(DBLockAccess(DB,DBgetvaluename(DBQ,Row,"jq_args")))
 	{
 	case 0: /* no data; mark it as done */
-		if (Verbose) fprintf(stderr,"SQL -- no data.\n");
+		if (Verbose) syslog(LOG_DEBUG,"SQL -- no data.\n");
 		DBUpdateJob(MSQ[i].JobId,1,"No data");
 		DBMSQremove(i);
 		break;
 	case 1:	/* got data -- save it */
 		MSQ[i].DBQ = DBmove(DB);
 		MSQ[i].MaxItems = DBdatasize(MSQ[i].DBQ);
-		if (Verbose) fprintf(stderr,"SQL -- %d items, inserted into MSQ[%d].\n",MSQ[i].MaxItems,i);
+		if (Verbose) syslog(LOG_DEBUG,"SQL -- %d items, inserted into MSQ[%d].\n",MSQ[i].MaxItems,i);
 		if (MSQ[i].MaxItems <= 0)
 			{
 			/* no data, mark it as done */
@@ -354,14 +355,14 @@ int	DBMSQinsert	(void *DBQ, int Row)
 		MSQpending++;
 		return(i);
 	case -3:	/* operation timeout */
-	  if (Verbose) fprintf(stderr,"SQL -- Timeout.\n");
-	  fprintf(stderr,"ERROR: job %d: SQL timeout (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
+	  if (Verbose) syslog(LOG_DEBUG,"SQL -- Timeout.\n");
+	  syslog(LOG_DEBUG,"ERROR: job %d: SQL timeout (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
 	  DBUpdateJob(MSQ[i].JobId,2,"Timeout");
 	  DBMSQremove(i);
 	  return(-1);
 	default: /* error */
-	  if (Verbose) fprintf(stderr,"SQL -- ERROR.\n");
-	  fprintf(stderr,"ERROR: job %d: SQL error (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
+	  if (Verbose) syslog(LOG_DEBUG,"SQL -- ERROR.\n");
+	  syslog(LOG_DEBUG,"ERROR: job %d: SQL error (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
 	  DBUpdateJob(MSQ[i].JobId,1,"Error");
 	  DBMSQremove(i);
 	  return(-1);
@@ -439,7 +440,7 @@ int	DBCheckPendingMSQ	()
 	if (MSQ[i].Processed[j] != ST_READY) continue;
 
 	/* found an item to process */
-	if (Verbose) fprintf(stderr,"MSQ: Checking items in MSQ[%d]\n",i);
+	if (Verbose) syslog(LOG_DEBUG,"MSQ: Checking items in MSQ[%d]\n",i);
 
 	DBMkArgCols(MSQ[i].DBQ,j,Arg,MAXCMD);
 	memset(Attr,'\0',MAXCMD);
@@ -469,7 +470,7 @@ int	DBCheckPendingMSQ	()
 	**/
 	if (MSQShiftWatch)
 		{
-		if (Verbose) fprintf(stderr,"MSQ shifted. Retrying.\n");
+		if (Verbose) syslog(LOG_DEBUG,"MSQ shifted. Retrying.\n");
 		return(DBCheckPendingMSQ());
 		}
 
@@ -477,7 +478,7 @@ int	DBCheckPendingMSQ	()
 	  {
 	  /* mark the DB queue item as taken */
 	  if (Verbose)
-		fprintf(stderr,"(b) Feeding child[%d][%d/%d][%d/%d]: attr='%s' | arg='%s'\n",Thread,i,MAXMSQ,j,MSQ[i].MaxItems,Attr,Arg);
+		syslog(LOG_DEBUG,"(b) Feeding child[%d][%d/%d][%d/%d]: attr='%s' | arg='%s'\n",Thread,i,MAXMSQ,j,MSQ[i].MaxItems,Attr,Arg);
 	  MSQ[i].Processed[j] = ST_RUNNING;
 	  if (CM[Thread].Status != ST_RUNNING)
 	    {
@@ -498,7 +499,7 @@ int	DBCheckPendingMSQ	()
 	} /* for each item j in the MSQ */
       } /* if MSQ[i].JobId >= 0 */
     } /* for each MSQ i */
-  if (Verbose) fprintf(stderr,"DBCheckPendingMSQ()=%d\n",rc);
+  if (Verbose) syslog(LOG_DEBUG,"DBCheckPendingMSQ()=%d\n",rc);
   return(rc);
 } /* DBCheckPendingMSQ() */
 
@@ -579,7 +580,7 @@ int	DBProcessQueue	()
     {
   rc = DBLockAccess(DB,"SELECT DISTINCT(jobqueue.*), job.* FROM jobqueue LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk LEFT JOIN jobqueue AS depends ON depends.jq_pk = jobdepends.jdep_jq_depends_fk LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk WHERE jobqueue.jq_starttime IS NULL AND ( (depends.jq_endtime IS NOT NULL AND depends.jq_end_bits < 2 ) OR jobdepends.jdep_jq_depends_fk IS NULL) ORDER BY job.job_priority DESC,job.job_queued ASC LIMIT 6;");
     }
-  if (Verbose) fprintf(stderr,"SQL: Getting queue = %d :: %d items\n",rc,DBdatasize(DB));
+  if (Verbose) syslog(LOG_DEBUG,"SQL: Getting queue = %d :: %d items\n",rc,DBdatasize(DB));
   if (rc == 1) /* if get list of queued items */
     {
     /* save results in DBQ since DB may be use for other requests */
@@ -632,7 +633,7 @@ int	DBProcessQueue	()
 	CM[Thread].DBJobKey = atoi(DBgetvaluename(DBQ,Row,"jq_pk"));
 	DBUpdateJob(CM[Thread].DBJobKey,0,"In progress"); /* mark it in use */
 	if (Verbose)
-		fprintf(stderr,"(c) Feeding child[%d]: attr='%s' | arg='%s'\n",Thread,Attr,Arg);
+		syslog(LOG_DEBUG,"(c) Feeding child[%d]: attr='%s' | arg='%s'\n",Thread,Attr,Arg);
 	memset(CM[Thread].Parm,'\0',MAXCMD);
 	strcpy(CM[Thread].Parm,Arg);
 	write(CM[Thread].ChildStdin,Arg,ArgLen);

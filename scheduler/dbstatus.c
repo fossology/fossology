@@ -24,6 +24,7 @@
 /* for signals */
 #include <sys/types.h>
 #include <signal.h>
+#include <syslog.h>
 
 #include <libfossdb.h>
 #include <libfossrepo.h>
@@ -187,7 +188,7 @@ void	DBLockReconnect	()
   DB = DBopen();
   if (!DB)
     {
-    fprintf(stderr,"FATAL: Scheduler unable to reconnect to the database.\n");
+    syslog(LOG_CRIT,"FATAL: Scheduler unable to reconnect to the database.\n");
     exit(-1);
     }
   sigprocmask(SIG_UNBLOCK,&OldMask,NULL);
@@ -258,14 +259,14 @@ void	DBUpdateJob	(int JobId, int UpdateType, char *Message)
     }
   Len = strlen(SQL);
   snprintf(SQL+Len,MAXCMD-Len," WHERE jq_pk = '%d';",JobId);
-  if (Verbose) fprintf(stderr,"SQL Update: '%s'\n",SQL);
+  if (Verbose) syslog(LOG_DEBUG,"SQL Update: '%s'\n",SQL);
   rc = DBLockAccess(DB,SQL);
   if (rc >= 0) return;
 
   /* How to handle a DB error? Right now, they are just logged per agent */
   /* TBD: This will be implemented when we have interprocess communication
      between the scheduler and UI. */
-  fprintf(stderr,"ERROR: Unable to process: '%s'\n",SQL);
+  syslog(LOG_ERR,"ERROR: Unable to process: '%s'\n",SQL);
   return;
 } /* DBUpdateJob() */
 
@@ -337,10 +338,9 @@ void	DBCheckSchedulerUnique	()
       DBattr = GetValueFromAttr(DBattr,"agent=");
       if (Attr && DBattr && !strcmp(Attr,DBattr))
 	{
-	fprintf(stderr,"WARNING: Competing scheduler for '%s' detected: %s ",
+	syslog(LOG_WARNING,"WARNING: Competing scheduler for '%s' detected: %s ",
 		Attr,DBgetvalue(DB,Row,0));
-	fprintf(stderr,"%s\n",
-		DBgetvalue(DB,Row,1));
+	syslog(LOG_WARNING,"%s\n",DBgetvalue(DB,Row,1));
 	DBattrChecked[Row] = 1; /* only report it once */
 	}
       }
@@ -382,7 +382,7 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
   rc = DBLockAccess(DB,SQL);
   if (rc < 0)
     {
-    fprintf(stderr,"FATAL: Scheduler failed to update status in DB. SQL was: \"%s\"\n",SQL);
+    syslog(LOG_CRIT,"FATAL: Scheduler failed to update status in DB. SQL was: \"%s\"\n",SQL);
     exit(-1);
     }
 
@@ -413,7 +413,7 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
     rc = DBLockAccess(DB,SQL);
     if (rc < 0)
       {
-      fprintf(stderr,"FATAL: Scheduler failed to insert status in DB.\n");
+      syslog(LOG_CRIT,"FATAL: Scheduler failed to insert status in DB.\n");
       exit(-1);
       }
     }
@@ -423,7 +423,7 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
     {
     if (DBDead > 3)
 	{
-	fprintf(stderr,"FATAL: Scheduler had too many database connection retries.\n");
+	syslog(LOG_CRIT,"FATAL: Scheduler had too many database connection retries.\n");
 	exit(-1);
 	}
 
@@ -437,15 +437,15 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
 	Now = time(NULL);
 	memset(Ctime,'\0',MAXCTIME);
 	ctime_r(&Now,Ctime);
-	fprintf(stderr,"ERROR: Scheduler lost connection to the database! %s",Ctime);
-	fprintf(stderr,"  Dumping debug information.\n");
+	syslog(LOG_ERR,"ERROR: Scheduler lost connection to the database! %s",Ctime);
+	syslog(LOG_INFO,"  Dumping debug information.\n");
 	DebugThreads(3);
-	fprintf(stderr,"INFO: Scheduler attempting to reconnect to the database.\n");
+	syslog(LOG_INFO,"INFO: Scheduler attempting to reconnect to the database.\n");
 	DBclose(DB);
 	DB = DBopen();
 	if (!DB)
 	  {
-	  fprintf(stderr,"FATAL: Scheduler unable to reconnect to the database.\n");
+	  syslog(LOG_CRIT,"FATAL: Scheduler unable to reconnect to the database.\n");
 	  exit(-1);
 	  }
 	DBDead++;
@@ -564,7 +564,7 @@ void	DBSaveJobStatus	(int Thread, int MSQid)
 	ProcessCount,(int)ElapseTime,(int)ProcessTime,JobPk);
     if (DBLockAccess(DB,SQL) < 0)
 	{
-	fprintf(stderr,"FATAL: Scheduler failed to update job status in DB.\n");
+	syslog(LOG_CRIT,"FATAL: Scheduler failed to update job status in DB.\n");
 	exit(-1);
 	}
     }
@@ -599,7 +599,7 @@ void	DBkillschedulers	()
 	  {
 	  Value += strlen(Hostname)+1;
 	  Pid = atoi(Value);
-	  fprintf(stderr,"Politely killing process %d\n",Pid);
+	  syslog(LOG_NOTICE,"Politely killing process %d\n",Pid);
 	  kill(Pid,SIGTERM);
 	  SentKill++;
 	  }
@@ -607,7 +607,7 @@ void	DBkillschedulers	()
   if (!SentKill) return;  /* nothing to kill! */
 
   /* wait 20 seconds, then make sure it is dead */
-  fprintf(stderr,"Waiting 20 seconds for %d processes to complete\n",SentKill);
+  syslog(LOG_NOTICE,"Waiting 20 seconds for %d processes to complete\n",SentKill);
   sleep(20);
   DBLockAccess(DB,SQL);
   for(i=0; i<DBdatasize(DB); i++)
@@ -617,7 +617,7 @@ void	DBkillschedulers	()
 	  {
 	  Value += strlen(Hostname)+1;
 	  Pid = atoi(Value);
-	  fprintf(stderr,"Forcefully killing process %d\n",Pid);
+	  syslog(LOG_NOTICE,"Forcefully killing process %d\n",Pid);
 	  if (kill(Pid,SIGKILL) != 0)
 	    {
 	    perror("ERROR: Unable to kill process");
@@ -637,24 +637,24 @@ void	DebugMSQ	()
   int i;
   char Arg[MAXCMD];
 
-  fprintf(stderr,"==============================================================\n");
+  syslog(LOG_DEBUG,"==============================================================\n");
   for(m=0; m < MAXMSQ; m++)
     {
-    fprintf(stderr,"Multi-SQL Queue #%d\n",m);
-    fprintf(stderr,"  Job (jq_pk) = %d\n",MSQ[m].JobId);
+    syslog(LOG_DEBUG,"Multi-SQL Queue #%d\n",m);
+    syslog(LOG_DEBUG,"  Job (jq_pk) = %d\n",MSQ[m].JobId);
     if (MSQ[m].JobId >= 0)
       {
-      fprintf(stderr,"  Is repeat (jq_repeat) = %d\n",MSQ[m].IsRepeat);
-      fprintf(stderr,"  Is urgent = %d\n",MSQ[m].IsUrgent);
-      fprintf(stderr,"  Items processed: %d out of %d\n",MSQ[m].ItemsDone,MSQ[m].MaxItems);
-      fprintf(stderr,"  Type='%s' (agent type %d)\n",MSQ[m].Type,MSQ[m].DBagent);
-      fprintf(stderr,"  Attr='%s'\n",MSQ[m].Attr);
-      fprintf(stderr,"  Host found by column '%s'\n",MSQ[m].HostCol);
+      syslog(LOG_DEBUG,"  Is repeat (jq_repeat) = %d\n",MSQ[m].IsRepeat);
+      syslog(LOG_DEBUG,"  Is urgent = %d\n",MSQ[m].IsUrgent);
+      syslog(LOG_DEBUG,"  Items processed: %d out of %d\n",MSQ[m].ItemsDone,MSQ[m].MaxItems);
+      syslog(LOG_DEBUG,"  Type='%s' (agent type %d)\n",MSQ[m].Type,MSQ[m].DBagent);
+      syslog(LOG_DEBUG,"  Attr='%s'\n",MSQ[m].Attr);
+      syslog(LOG_DEBUG,"  Host found by column '%s'\n",MSQ[m].HostCol);
       for(i=0; i<MSQ[m].MaxItems; i++)
 	{
 	DBMkArgCols(MSQ[m].DBQ,i,Arg,MAXCMD);
 	if (Arg[strlen(Arg)-1] == '\n')  Arg[strlen(Arg)-1]='\0';
-	fprintf(stderr,"    Item %d: State=%s  '%s'\n",i,StatusName[MSQ[m].Processed[i]],Arg);
+	syslog(LOG_DEBUG,"    Item %d: State=%s  '%s'\n",i,StatusName[MSQ[m].Processed[i]],Arg);
 	}
       }
     }

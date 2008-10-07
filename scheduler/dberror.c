@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <syslog.h>
 
 #include "libfossdb.h"
 #include "scheduler.h"
@@ -58,7 +59,7 @@ void	DBErrorClose	()
  ***********************************************************/
 void	DBErrorWrite	(int Thread, char *Type, char *Message)
 {
-  /* Until we rebuild the log table, send errors to stderr. */
-  fprintf(stderr,"%s: In thread %d: %s\n",Type,Thread,Message);
+  /* Until we rebuild the log table, log errors. */
+  syslog(LOG_ERR,"%s: In thread %d: %s\n",Type,Thread,Message);
 } /* DBErrorWrite() */
 
