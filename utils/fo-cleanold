@@ -2,12 +2,15 @@
 # fo-cleanold - a utility to clean up old fossology installs
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
+# currently we only save config files from old style installs
 SAVE="/usr/local/share/fossology/agents/proxy.conf
 /usr/local/share/fossology/agents/scheduler.conf
 /usr/local/share/fossology/dbconnect/fossology
 /usr/local/share/fossology/repository/Depth.conf
 /usr/local/share/fossology/repository/Hosts.conf
 /usr/local/share/fossology/repository/RepPath.conf"
+/etc/default/fossology
+/etc/init.d/fossology
 # NOTE: we don't bother to look for nomos3 conffiles
 
 FILES="/usr/local/bin/cp2foss.php
@@ -33,8 +36,6 @@ FILES="/usr/local/bin/cp2foss.php
 /usr/local/bin/unrar
 /usr/local/bin/unrar-free
 /usr/local/include/fm-paths.php
-/etc/default/fossology
-/etc/init.d/fossology
 "
 
 DIRS="/usr/local/fossology/
