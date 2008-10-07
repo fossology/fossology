@@ -49,6 +49,7 @@ int	SelfTest	()
   int *HostCheck; /* 0=not checked, 1=success, -1=failed */
   int HostId;
   char Line[2][1024];
+  int Lines=0;
 
   /* Prepare for the data */
   if (MaxHostList <= 0)
@@ -113,13 +114,15 @@ int	SelfTest	()
     }
 
   /* Store test data */
+  Lines=0;
   do
     {
     c = fgetc(Fin);
     if (c>=0) fputc(c,FData);
+    if (c=='\n') Lines++;
     } while(c >= 0);
   pclose(Fin);
-  if (ftell(FData) < 1)
+  if ((Lines < 5) || (ftell(FData) < 1))
     {
     syslog(LOG_CRIT,"FATAL: Unable to generate test data: '%s'.\n",SelfTest);
     fclose(FData);
