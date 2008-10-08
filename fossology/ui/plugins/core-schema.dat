@@ -542,9 +542,9 @@
   $Schema["TABLE"]["report_cache_user"]["user_fk"]["ADD"] = "ALTER TABLE \"report_cache_user\" ADD COLUMN \"user_fk\" int4;";
   $Schema["TABLE"]["report_cache_user"]["user_fk"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"user_fk\" SET NOT NULL;";
 
-  $Schema["TABLE"]["report_cache_user"]["cache_on"]["DESC"] = "COMMENT ON COLUMN \"report_cache_user\".\"cache_on\" IS '''Y'' or ''N''';";
-  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ADD"] = "ALTER TABLE \"report_cache_user\" ADD COLUMN \"cache_on\" char;";
-  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"cache_on\" SET NOT NULL, ALTER COLUMN \"cache_on\" SET DEFAULT 'Y'::char;";
+  $Schema["TABLE"]["report_cache_user"]["cache_on"]["DESC"] = "";
+  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ADD"] = "ALTER TABLE \"report_cache_user\" ADD COLUMN \"cache_on\" char(1);";
+  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"cache_on\" DROP NOT NULL;";
 
 
   $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"unique_scheduler\" IS 'unique id for the scheduler: gethostid()+getpid() for the scheduler';";
@@ -810,6 +810,8 @@
 
   $Schema["INDEX"]["attrib"]["attrib_key_fk_idx"] = "CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk);";
   $Schema["INDEX"]["attrib"]["attrib_pfile_fk_idx"] = "CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk);";
+
+  $Schema["INDEX"]["licterm_name"]["licterm_name_pfile_pk_key"] = "CREATE UNIQUE INDEX licterm_name_pfile_pk_key ON licterm_name USING btree (licterm_name_pk, pfile_fk);";
 
   $Schema["INDEX"]["pfile"]["pfile_mimetypefk_idx"] = "CREATE INDEX pfile_mimetypefk_idx ON pfile USING btree (pfile_mimetypefk);";
 
