@@ -40,8 +40,8 @@ Really Short Install Instructions
 10. Start the fossology scheduler daemon
    # /etc/init.d/fossology start
 
-You're done, point your web browser at the new install and start using
-FOSSology!
+You're done, point your web browser at the new install
+(http://localhost/repo/) and start using FOSSology!
 
 
 Long Install Instructions
