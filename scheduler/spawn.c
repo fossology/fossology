@@ -291,7 +291,7 @@ void	File2Syslog	(FILE *Fin)
     {
     memset(Line,'\0',sizeof(Line));
     c = fgetc(Fin);
-    for(i=0; (i<1023) && (c > 0); i++)
+    for(i=0; (i<1023) && (c > 0) && (c != '\n'); i++)
       {
       Line[i] = c;
       c = fgetc(Fin);
