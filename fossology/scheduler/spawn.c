@@ -619,9 +619,12 @@ void	CheckPids	()
   /* Dump any pending messages */
   if (MsgHolder)
     {
-    File2Syslog(MsgHolder);
-    fclose(MsgHolder);
+    FILE *Hold;
+    /* Rotate file handle so new signals go into a different file */
+    Hold = MsgHolder;
     MsgHolder=NULL;
+    File2Syslog(Hold);
+    fclose(Hold);
     }
 } /* CheckPids() */
 
