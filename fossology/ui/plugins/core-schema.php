@@ -987,7 +987,7 @@ BEGIN
   UTpk := uploadtree_pk_in;
 
     WHILE UTpk > 0 LOOP
-      sql := \'select * from uploadtree where uploadtree_pk=\' || UTpk;
+      sql := ' . "'" . 'select * from uploadtree where uploadtree_pk=' . "'" . ' || UTpk;
       execute sql into UTrec;
     
       IF ((UTrec.ufile_mode & (1<<28)) = 0) THEN RETURN NEXT UTrec; END IF;
