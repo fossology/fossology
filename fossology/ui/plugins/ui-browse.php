@@ -48,7 +48,7 @@ class ui_browse extends FO_Plugin
     /* check if the table needs population */
     $SQL = "SELECT * FROM folder WHERE folder_pk=1;";
     $Results = $DB->Action($SQL);
-    if (count($Results) == 0)
+    if ($Results[0]['folder_pk'] != "1")
       {
       $SQL = "INSERT INTO folder (folder_pk,folder_name,folder_desc) VALUES (1,'Software Repository','Top Folder');";
       $DB->Action($SQL);

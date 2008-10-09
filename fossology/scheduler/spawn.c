@@ -895,7 +895,6 @@ int	SpawnEngine	(int Thread)
   CM[Thread].DBMSQrow = 0;
 
   /* spawn the process */
-  closelog();
   Pid = fork();
   if (Pid==0) /* if child */
 	{
@@ -934,7 +933,6 @@ int	SpawnEngine	(int Thread)
   else
 	{
 	/*** Parent processing! ***/
-	openlog("fossology",LOG_CONS|LOG_PERROR|LOG_PID,LOG_USER);
 	if (Verbose) syslog(LOG_DEBUG,"Child[%d] (pid=%d) spawned\n",Thread,Pid);
 	SetHostRun(CM[Thread].HostId,1);
 	CM[Thread].ChildPid = Pid;
