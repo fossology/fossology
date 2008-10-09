@@ -1006,7 +1006,7 @@ LANGUAGE plpgsql;
    ApplySchema(): Apply the current schema from a file.
    NOTE: The order for add/delete is important!
    ***********************************************************/
-  function ApplySchema($Filename=NULL,$Debug=1)
+  function ApplySchema($Filename=NULL,$Debug=1,$Verbose=1)
     {
     global $DB;
     if (empty($DB)) { return("No database connection."); }
@@ -1354,7 +1354,7 @@ LANGUAGE plpgsql;
     /************************************/
     /* Initialize all remaining plugins. */
     /************************************/
-    if ($this->InitSchema($Debug))
+    if ($this->InitSchema($Verbose))
       {
       return("Unable to initialize the new schema.\n");
       }
@@ -1418,7 +1418,7 @@ LANGUAGE plpgsql;
 	if ($Init == 1)
 	  {
 	  print "<pre>";
-	  $rc = $this->ApplySchema($this->Filename,0);
+	  $rc = $this->ApplySchema($this->Filename,0,0);
 	  print "</pre>";
 	  if (!empty($rc))
 	    {
