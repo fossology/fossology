@@ -34,14 +34,14 @@ metahandle.c: metahandle.tab metahandle.pl
 	./metahandle.pl
 
 install: all $(VARS)
-	$(INSTALL_PROGRAM) departition $(DESTDIR)$(AGENTDIR)/departition
-	$(INSTALL_PROGRAM) checksum $(DESTDIR)$(AGENTDIR)/checksum
+	$(INSTALL_PROGRAM) departition $(DESTDIR)$(LIBEXECDIR)/departition
+	$(INSTALL_PROGRAM) checksum $(DESTDIR)$(LIBEXECDIR)/checksum
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(AGENTDIR)/ununpack
 	$(INSTALL_PROGRAM) UnMagic.mime $(DESTDIR)$(AGENTDATADIR)/UnMagic.mime
 
 uninstall: $(VARS)
-	rm -f $(DESTDIR)$(AGENTDIR)/departition
-	rm -f $(DESTDIR)$(AGENTDIR)/checksum
+	rm -f $(DESTDIR)$(LIBEXECDIR)/departition
+	rm -f $(DESTDIR)$(LIBEXECDIR)/checksum
 	rm -f $(DESTDIR)$(AGENTDIR)/ununpack
 	rm -f $(DESTDIR)$(AGENTDATADIR)/UnMagic.mime
 
