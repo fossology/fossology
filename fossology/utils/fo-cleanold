@@ -36,6 +36,9 @@ FILES="/usr/local/bin/cp2foss.php
 /usr/local/bin/unrar
 /usr/local/bin/unrar-free
 /usr/local/include/fm-paths.php
+/usr/local/lib/fossology/agents/checksum
+/usr/local/lib/fossology/agents/departition
+/usr/local/lib/fossology/agents/mkbsamcache
 "
 
 DIRS="/usr/local/fossology/
