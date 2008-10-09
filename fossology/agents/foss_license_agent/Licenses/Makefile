@@ -35,7 +35,7 @@ install: all
            $(INSTALL_DATA) Raw/"$$i" $(DESTDIR)$(AGENTDATADIR)/licenses/"$$i"; \
         done
 
-	$(INSTALL_PROGRAM) mkbsamcache $(DESTDIR)$(AGENTDIR)/mkbsamcache
+	$(INSTALL_PROGRAM) mkbsamcache $(DESTDIR)$(LIBEXECDIR)/mkbsamcache
 	@# these don't work yet
 	@#$(INSTALL_PROGRAM) bsam-test1 $(DESTDIR)$(AGENTDIR)/bsam-test1
 	@#$(INSTALL_PROGRAM) bsam-test2 $(DESTDIR)$(AGENTDIR)/bsam-test2
