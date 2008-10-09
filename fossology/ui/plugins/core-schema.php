@@ -822,9 +822,39 @@ if (0)
 	return(1);
 	}
       }
+    $this->InitAgents($Verbose);
     $this->InitDatafiles($Debug);
     return(0);
     } // InitSchema()
+
+  /***********************************************************
+   InitAgents(): Every agent program must be run one time with
+   a "-i" before being used.  This allows them to configure the DB
+   or insert any required DB fields.
+   Returns 0 on success, dies upon failure!
+   ***********************************************************/
+  function InitAgents($Debug=1)
+    {
+    print "  Initializing agents.\n"; flush();
+    global $AGENTDIR;
+    if (!is_dir($AGENTDIR)) { die("FATAL: Directory '$AGENTDIR' does not exist.\n"); }
+    $Dir = opendir($AGENTDIR);
+    if (! $Dir) { die("FATAL: Unable to access '$AGENTDIR'.\n"); }
+    while(($File = readdir($Dir)) !== false)
+      {
+      $File = "$AGENTDIR/$File";
+      /* skip directories; only process files */
+      if (is_file($File))
+        {
+	if ($Debug) { print "    Initializing agent: $File\n"; flush(); }
+	system("'$File' -i",$Status);
+	if ($Status != 0)
+	  {
+	  die("FATAL: '$File -i' failed to initialize\n");
+	  }
+	}
+      }
+    } // InitAgents()
 
   /***********************************************************
    InitDatafiles(): Initialize any datafiles.
@@ -843,8 +873,8 @@ if (0)
     sort($Filelist);
 
     $Realdir = "$PROJECTSTATEDIR/agents";
-    if (!is_dir($Realdir)) { die("ERROR: Directory '$Realdir' does not exist. Aborting.\n"); }
-    if (!is_writable($Realdir)) { die("ERROR: Directory '$Realdir' is not writable. Aborting.\n"); }
+    if (!is_dir($Realdir)) { die("FATAL: Directory '$Realdir' does not exist. Aborting.\n"); }
+    if (!is_writable($Realdir)) { die("FATAL: Directory '$Realdir' is not writable. Aborting.\n"); }
 
     $Realfile = "$Realdir/License.bsam";
     $Tempfile = $Realfile . ".new";
