@@ -180,7 +180,7 @@ int	main	(int argc, char *argv[])
   char *LogFile=NULL;
   int Test=0; /* 1=test and continue, 2=test and quit */
 
-  openlog("fossology",LOG_PERROR|LOG_PID,LOG_LOCAL1);
+  openlog("fossology",LOG_PERROR|LOG_PID,LOG_DAEMON);
 
   /* check args */
   while((c = getopt(argc,argv,"dkHiIL:vqRtT")) != -1)
