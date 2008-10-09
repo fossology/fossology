@@ -69,7 +69,6 @@ $Home = getcwd();
 $pid = getmypid();
 
 $options = getopt('abhsv');
-print "options is:\n"; print_r($options) . "\n";
 if(empty($options))
 {
   print "$usage\n";
