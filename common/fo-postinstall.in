@@ -110,15 +110,15 @@ fi
 # check for existance/ownership/permissions of needed directories
 # PROJECTSTATEDIR is needed in all machine cases
 if [ ! -d "{$PROJECTSTATEDIR}" ] ; then
-   mkdir -p "{$PROJECTSTATEDIR}"
-   chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}
-   chmod 2775 {$PROJECTSTATEDIR}
+   mkdir -m 2775 -p "{$PROJECTSTATEDIR}"
 fi
+chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}
+chmod 2775 {$PROJECTSTATEDIR}
 if [ ! -d "{$PROJECTSTATEDIR}/agents" ] ; then
-   mkdir -p "{$PROJECTSTATEDIR}/agents"
-   chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}/agents
-   chmod 2775 {$PROJECTSTATEDIR}/agents
+   mkdir -m 2775 -p "{$PROJECTSTATEDIR}/agents"
 fi
+chown root:{$PROJECTGROUP} {$PROJECTSTATEDIR}/agents
+chmod 2775 {$PROJECTSTATEDIR}/agents
 
 ########################################################################
 
