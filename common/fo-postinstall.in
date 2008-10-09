@@ -92,6 +92,11 @@ fi
 
 if grep -q "^{$PROJECTUSER}:" /etc/passwd; then
    echo "NOTE: user '{$PROJECTUSER}' already exists, good."
+   USERSHELL=`grep "^{$PROJECTUSER}:" /etc/passwd |cut -d: -f 7`
+   if [ "$USERSHELL" = "/bin/false" ]; then
+      echo "ERROR: {$PROJECTUSER} shell must be a real shell"
+      exit 1
+   fi
 else
    useradd -c "{$PROJECT}" -g "{$PROJECTGROUP}" -m -s /bin/bash -d "$\{REPO%/*\}" "{$PROJECTUSER}"
    if [ "$?" != "0" ] ; then
