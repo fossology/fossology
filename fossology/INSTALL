@@ -41,7 +41,7 @@ Really Short Install Instructions
    # /etc/init.d/fossology start
 
 You're done, point your web browser at the new install
-(http://localhost/repo/) and start using FOSSology!
+(http://yourhostname/repo/) and start using FOSSology!
 
 
 Long Install Instructions
