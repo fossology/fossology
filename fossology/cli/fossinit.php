@@ -64,6 +64,7 @@ if (array_key_exists('h',$Options))
   exit(0);
   }
 $Verbose = array_key_exists("v",$Options);
+if ($Verbose == "") { $Verbose=0; }
 
 global $DB;
 if (array_key_exists('d',$Options))
@@ -90,7 +91,7 @@ if (!file_exists($Filename))
   print "FAILED: Schema data file ($Filename) not found.\n";
   return(1);
   }
-$FailFlag = $Schema->ApplySchema($Filename,0);
+$FailFlag = $Schema->ApplySchema($Filename,$DB->Debug,$Verbose);
 
 /* Remove the "Need to initialize" flag */
 if (!$FailFlag)
