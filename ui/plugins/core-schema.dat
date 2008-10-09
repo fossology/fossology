@@ -544,7 +544,7 @@
 
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["DESC"] = "";
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["ADD"] = "ALTER TABLE \"report_cache_user\" ADD COLUMN \"cache_on\" char(1);";
-  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"cache_on\" DROP NOT NULL;";
+  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"cache_on\" DROP NOT NULL, ALTER COLUMN \"cache_on\" SET DEFAULT 'Y'::char;";
 
 
   $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"unique_scheduler\" IS 'unique id for the scheduler: gethostid()+getpid() for the scheduler';";
