@@ -6,13 +6,10 @@ include $(VARS)
 
 BSAM=../bSAM/bsam-engine ../bSAM/SeeSam
 
-all: mkbsamcache
+all:
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
-# generate the postinstall script
-mkbsamcache: mkbsamcache-process
-	chmod +x mkbsamcache
 
 bsam-test1: bsam-test1-process
 	chmod +x bsam-test1
@@ -35,7 +32,6 @@ install: all
            $(INSTALL_DATA) Raw/"$$i" $(DESTDIR)$(AGENTDATADIR)/licenses/"$$i"; \
         done
 
-	$(INSTALL_PROGRAM) mkbsamcache $(DESTDIR)$(LIBEXECDIR)/mkbsamcache
 	@# these don't work yet
 	@#$(INSTALL_PROGRAM) bsam-test1 $(DESTDIR)$(AGENTDIR)/bsam-test1
 	@#$(INSTALL_PROGRAM) bsam-test2 $(DESTDIR)$(AGENTDIR)/bsam-test2
@@ -61,7 +57,6 @@ uninstall:
 	   rmdir $(DESTDIR)$(AGENTDATADIR)/licenses/; \
 	fi
 
-	rm -f $(DESTDIR)$(AGENTDIR)/mkbsamcache
 	rm -f $(DESTDIR)$(AGENTDIR)/bsam-test1
 	rm -f $(DESTDIR)$(AGENTDIR)/bsam-test2
 
@@ -71,6 +66,6 @@ uninstall:
 	[ ! -d $(DESTDIR)$(LIBEXECDIR) ] || rmdir $(DESTDIR)$(LIBEXECDIR)
 
 clean:
-	rm -f *.o core mkbsamcache bsam-test1 bsam-test2
+	rm -f *.o core bsam-test1 bsam-test2
 
 .PHONY: all install uninstall clean test
