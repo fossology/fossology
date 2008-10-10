@@ -37,6 +37,8 @@ cli_Init();
 
 global $Plugins;
 
+error_reporting(E_NOTICE & E_STRICT);
+
 $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
   Options:
     -h       = this help message
@@ -128,7 +130,7 @@ function GetBucketFolder ($UploadName, $BucketGroupSize)
 
 /****************************************************
  GetFolder(): Given a folder path, return the folder_pk.
- NOTE: If any part of the folder path does not exist, then
+ NOTE: If any part of the folder path does not exist, thenscp cp2foss will
  create it.
  NOTE: This is recursive!
  ****************************************************/
@@ -138,14 +140,14 @@ function GetFolder	($FolderPath, $Parent=NULL)
   global $Verbose;
   global $Test;
 
-  //print "  Getting Folder path: '$FolderPath'\n";
-  //print "  Parent is: '$Parent'\n";
+  //print "  GetFolder: FolderPath is:$FolderPath\n";
   if (empty($Parent)) { $Parent = FolderGetTop(); }
+  /*/ indicates it's the root folder. Empty folder path ends recursion. */
+  if ($FolderPath == '/') { return($Parent); }
   if (empty($FolderPath)) { return($Parent); }
   list($Folder,$FolderPath) = split('/',$FolderPath,2);
   if (empty($Folder))
   {
-    //print "  Calling GetFolder with: '$FolderPath''$Parent'\n";
     return(GetFolder($FolderPath,$Parent));
   }
 
@@ -217,9 +219,7 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription,$T
     print "FATAL: '$UploadArchive' does not exist.\n";
     exit(1);
     }
-
   if (empty($UploadName)) { return; }
-
   /* Get the folder's primary key */
   global $OptionA; /* Should it use bucket names? */
   if ($OptionA)
@@ -228,8 +228,9 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription,$T
     $FolderPath .= "/" . GetBucketFolder($UploadName,$bucket_size);
     }
   $FolderPk = GetFolder($FolderPath);
+  if($FolderPk == 1) { print "  Uploading to folder: Software Repository\n"; }
+  else { print "  Uploading to folder: '$FolderPath'\n"; }
 
-  print "  Uploading to folder: '$FolderPath'\n";
   print "  Uploading as '$UploadName'\n";
   if (!empty($UploadDescription)) { print "  Upload description: '$UploadDescription'\n"; }
 
@@ -297,14 +298,15 @@ for($i=1; $i < $argc; $i++)
 	$i++; $FolderPath = $argv[$i];
 	/* idiot check for absolute paths */
   //print "  Before Idiot Checks: '$FolderPath'\n";
-	$FolderPath = preg_replace('@^/*@',"",$FolderPath);
-	$FolderPath = preg_replace('@/*$@',"",$FolderPath);
+  /* remove starting and ending / */
+  $FolderPath = preg_replace('@^/*@',"",$FolderPath);
+  $FolderPath = preg_replace('@/*$@',"",$FolderPath);
   /* Note: the pattern below should probably be generalized to remove everything
    * up to and including the 1st /, This pattern works in what I've
    * tested: @^.*\/@ ( I had to escape the / so the comment works!)
    */
-	$FolderPath = preg_replace("@^S.*? Repository/@","",$FolderPath);
-	$FolderPath = preg_replace('@//*@',"/",$FolderPath);
+  $FolderPath = preg_replace("@^S.*? Repository@","",$FolderPath);
+  $FolderPath = preg_replace('@//*@',"/",$FolderPath);
 	$FolderPath = '/' . $FolderPath;
   //print "  AFTER Idiot Checks: '$FolderPath'\n";
 	break;
