@@ -285,6 +285,9 @@ class FO_Plugin
 	break;
       case "HTML":
 	header('Content-type: text/html');
+	header("Pragma: no-cache"); /* for IE cache control */
+	header('Cache-Control: no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0'); /* prevent HTTP/1.1 caching */
+	header('Expires: Expires: Thu, 19 Nov 1981 08:52:00 GMT'); /* mark it as expired (value from Apache default) */
 	if ($this->NoHTML) { return; }
 	$V = "";
 	if (($this->NoMenu == 0) && ($this->Name != "menus"))
