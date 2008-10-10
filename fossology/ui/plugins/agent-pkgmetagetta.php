@@ -115,12 +115,12 @@ class agent_pkgmetagetta extends FO_Plugin
 
     /** jqargs wants EVERY pfile in this upload that hasn't been processed
         by pkgmetagetta. **/
-    $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,
+    $jqargs = "SELECT DISTINCT(pfile_pk) AS Akey,
 	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
 	INTO $TempTable
-    FROM pfile left outer join attrib on (attrib_key_fk='$attribkey' 
-      AND attrib.pfile_fk=pfile_pk and attrib_value is null)
-    INNER join uploadtree on (upload_fk='$uploadpk') and uploadtree.pfile_fk=pfile_pk;";
+    FROM pfile LEFT OUTER JOIN attrib ON (attrib_key_fk='$attribkey' 
+      AND attrib.pfile_fk=pfile_pk AND attrib_value is null)
+    INNER JOIN uploadtree ON upload_fk='$uploadpk' AND uploadtree.pfile_fk=pfile_pk;";
 
     /* Add job: job has jobqueue item "sqlagent" */
     /** sqlagent does not like newlines! **/
