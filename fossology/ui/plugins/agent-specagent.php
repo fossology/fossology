@@ -113,15 +113,21 @@ class agent_specagent extends FO_Plugin
 
     /** jqargs wants EVERY pfile in this upload that does not already
         have a specagent attribute. **/
-    $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,
-	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
-	FROM mimetype
-	INNER JOIN pfile ON pfile.pfile_mimetypefk = mimetype.mimetype_pk
-	  AND mimetype.mimetype_pk = '$mimetypepk'
-	INNER JOIN uploadtree ON upload_fk = '$uploadpk'
-	WHERE pfile.pfile_pk NOT IN
-	  (SELECT attrib.pfile_fk FROM attrib
-	  WHERE attrib_key_fk = '$attribkey')
+    $jqargs = "SELECT DISTINCT(pfile_pk) as Akey, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
+	FROM uploadtree
+	INNER JOIN pfile ON upload_fk = '$uploadpk'
+	AND uploadtree.pfile_fk = pfile_pk
+	AND pfile.pfile_mimetypefk = '$mimetypepk'
+	WHERE pfile_pk NOT IN
+		(
+		SELECT pfile_pk
+		FROM uploadtree
+		INNER JOIN pfile ON upload_fk = '$uploadpk'
+		AND uploadtree.pfile_fk = pfile_pk
+		AND pfile.pfile_mimetypefk = '$mimetypepk'
+		INNER JOIN attrib ON attrib.pfile_fk = pfile_pk
+		AND attrib_key_fk = '$attribkey'
+		)
 	LIMIT 5000;";
 
     /* Add job: job "Default Meta Agents" has jobqueue item "specagent" */
