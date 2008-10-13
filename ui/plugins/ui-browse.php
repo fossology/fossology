@@ -54,9 +54,6 @@ class ui_browse extends FO_Plugin
       $DB->Action($SQL);
       $SQL = "INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES (1,0,0);";
       $DB->Action($SQL);
-      /* Make sure auto-index is correct */
-      $SQL = "SELECT SETVAL('foldercontents_foldercontents_pk_seq',(SELECT MAX(folder_pk) FROM folder LIMIT 1));"; 
-      $DB->Action($SQL);
       }
     return(0);
   } // Install()
