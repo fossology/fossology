@@ -22,7 +22,16 @@ configure it to point at the database server. If one of the systems
 you are installing is the database server, on that machine configure
 Db.conf to point at "localhost"
 
-3) Run the fo-postinstall script on each machine using flags to indicate
+3) On the machine with the database server run the postinstall with the
+database flag
+  # /usr/local/lib/fossology/fo-postinstall -d
+This will create the database so that when you run the postinstall on
+the other machines they will be able to connect to it. (If your
+database resides on a remote server that you aren't installing
+FOSSology on then you can run the above command, by itself, on one of
+the other machines.)
+
+4) Run the fo-postinstall script on each machine using flags to indicate
 what functions the machine will serve. Here is the fo-postinstall usage text
 
 Usage: fo-postinstall [options]
@@ -34,17 +43,13 @@ Usage: fo-postinstall [options]
   -o or --overwrite  : overwrite config files with new versions
   -h or --help       : this help text
 
-It is important that you run the fo-postinstall script on the machine
-that will serve as the database first in order to setup things that
-the other machines will need when they run fo-postinstall.
-
-4) Use mkschedconf to generate an appropriate Scheduler.conf file on
+5) Use mkschedconf to generate an appropriate Scheduler.conf file on
 the machine running the scheduler.
 
-5) Run /usr/local/lib/fossology/fossology-scheduler -t to test that
+6) Run /usr/local/lib/fossology/fossology-scheduler -t to test that
 your Scheduler.conf file is correct and that the scheduler can talk to
 all the agent and that they are also configured correctly. If not then
 adjust until it does.
 
-6) Start the scheduler
+7) Start the scheduler
   # /etc/init.d/fossology start
