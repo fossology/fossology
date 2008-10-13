@@ -171,9 +171,13 @@ External Commands:
    http://www.gzip.org/
 
  On Debian (or a Debian derived distribution) you should be able to use 
- something like:
+   something like:
    runtime: apt-get install binutils bzip2 cabextract cpio sleuthkit \
-        mkisofs xpdf-utils rpm tar upx-ucl unrar-free unzip 
+        mkisofs xpdf-utils rpm tar upx-ucl unrar unzip
+   NOTE: If you are on etch, if you use unrar-free instead of unrar you
+   will need to create a symlink from unrar to unrar-free. Post-etch
+   both unrar packages install as "unrar".
+ 
  On Fedora, install sleuthkit and unrar from upstream sources and:
    runtime: yum install binutils bzip2 cabextract cpio genisoimage \
          poppler-utils rpm tar upx unzip gzip
