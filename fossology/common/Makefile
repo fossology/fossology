@@ -5,10 +5,10 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CONFFILES=Depth.conf RepPath.conf Hosts.conf Proxy.conf
+CONFFILES=Depth.conf RepPath.conf Hosts.conf Proxy.conf Db.conf
 CONFPATH=$(SYSCONFDIR)/fossology
 
-all: fo-postinstall
+all: fo-postinstall defconf/Db.conf
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
@@ -16,6 +16,8 @@ include $(TOP)/Makefile.process
 fo-postinstall: fo-postinstall-process
 	chmod +x fo-postinstall
 
+# generate the default Db.conf file
+defconf/Db.conf: defconf/Db.conf-process
 
 install: all
 	$(INSTALL_PROGRAM) fo-postinstall $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
@@ -52,11 +54,12 @@ uninstall:
 	@echo "      $(DESTDIR)$(CONFPATH)/Hosts.conf"
 	@echo "      $(DESTDIR)$(CONFPATH)/Proxy.conf"
 	@echo "      $(DESTDIR)$(CONFPATH)/RepPath.conf"
+	@echo "      $(DESTDIR)$(CONFPATH)/Db.conf"
 	@echo "  Remove by hand if you desire."
 
 
 clean:
-	rm -f fo-postinstall
+	rm -f fo-postinstall defconf/Db.conf
 
 test: all
 	@echo "NOTICE: no tests available for common"
