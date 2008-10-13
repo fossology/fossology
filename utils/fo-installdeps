@@ -111,7 +111,7 @@ if [ $RUNTIME ]; then
             php5 php5-pgsql php-pear libapache2-mod-php5 \
             libmagic1 libxml2 libextractor1c2a \
             binutils bzip2 cabextract cpio sleuthkit mkisofs xpdf-utils \
-               rpm tar upx-ucl unrar-free unzip;
+               rpm tar upx-ucl unrar unzip;
          case "$CODENAME" in
             dapper) apt-get install postgresql-8.1;;
             etch) apt-get install postgresql-8.1 libextractor-plugins;;
