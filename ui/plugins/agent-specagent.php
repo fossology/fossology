@@ -109,7 +109,15 @@ class agent_specagent extends FO_Plugin
     $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm-spec' LIMIT 1;";
     $Results = $DB->Action($SQL);
     $mimetypepk = $Results[0]['mimetype_pk'];
-    if (empty($mimetypepk)) { return("Specagent not installed."); }
+    if (empty($mimetypepk))
+      {
+      $SQL = "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-rpm-spec');";
+      $Results = $DB->Action($SQL);
+      $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm-spec' LIMIT 1;";
+      $Results = $DB->Action($SQL);
+      $mimetypepk = $Results[0]['mimetype_pk'];
+      }
+    if (empty($mimetypepk)) { return("Specagent mimetype not installed."); }
 
     /** jqargs wants EVERY pfile in this upload that does not already
         have a specagent attribute. **/
