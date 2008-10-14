@@ -183,7 +183,10 @@ class ui_browse extends FO_Plugin
       } /* foreach($Results as $Row) */
 
     $V .= "</table>\n";
-    if (!$ShowSomething) { $V .= "<b>No files</b>\n"; }
+    if (!$ShowSomething)
+	{
+	$V .= "<b>No files</b>\n";
+	}
     else
 	{
 	$V .= "<hr>\n";
@@ -387,18 +390,30 @@ class ui_browse extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<font class='text'>\n";
-
 	/************************/
 	/* Show the folder path */
 	/************************/
 	if (!empty($Item))
 	  {
+	  /* Make sure the item is not a file */
+	  $Results = $DB->Action("SELECT ufile_mode FROM uploadtree WHERE uploadtree_pk = '$Item';");
+	  if (!Iscontainer($Results[0]['ufile_mode']))
+	    {
+	    /* Not a container! */
+	    $View = &$Plugins[plugin_find_id("view")];
+	    if (!empty($View)) { return( $View->ShowView(NULL,"browse") ); }
+	    }
+	  $V .= "<font class='text'>\n";
 	  $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "\n";
 	  }
 	else if (!empty($Upload))
 	  {
+	  $V .= "<font class='text'>\n";
 	  $V .= Dir2BrowseUpload($this->Name,$Upload,NULL,1,"Browse") . "\n";
+	  }
+	else
+	  {
+	  $V .= "<font class='text'>\n";
 	  }
 
 	/******************************/
