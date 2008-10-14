@@ -21,7 +21,7 @@
 #
 # NOTE: assumes being executed from the sources!
 #
-# must be run as fosstester.
+# best if run as fosstester, root will work ok too.
 #
 thisdir=`pwd`
 error_cnt=0
@@ -54,6 +54,17 @@ else
 	let $error_cnt += 1
 fi
 
+mkdir ~fosstester/public_html
+if [ $? -ne 0 ]
+then
+	echo "ERROR!, could not create ~fosstester/public_html"
+fi
+
+cp ~fosstester/archives/fossDirsOnly.tar.bz2 ~fosstester/public_html
+if [ $? -ne 0 ]
+then
+	echo "ERROR!, could not copy fossDirsOnly.tar.bz2 to fosstester/public_html"
+fi
 
 if [ $error_cnt -ne 0 ]
 then
