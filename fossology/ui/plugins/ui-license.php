@@ -204,8 +204,13 @@ class ui_license extends FO_Plugin
     /* Get ALL the items under this UploadtreePk */
     $Children = DirGetList($Upload,$Item);
     $ChildCount=0;
-    $ChildDirCount=0;
     $ChildLicCount=0;
+    $ChildDirCount=0; /* total number of directory or containers */
+    foreach($Children as $C)
+      {
+      if (Iscontainer($C['ufile_mode'])) { $ChildDirCount++; }
+      }
+
     $VF .= "<table border=0>";
     foreach($Children as $C)
       {
@@ -248,7 +253,6 @@ class ui_license extends FO_Plugin
       $HasBold=0;
       if ($IsContainer)
 	{
-	$ChildDirCount++;
 	$VF .= "<a href='$LicUri'>"; $HasHref=1;
 	$VF .= "<b>"; $HasBold=1;
 	}
