@@ -289,9 +289,13 @@ class ui_license extends FO_Plugin
      file.gz extracts to archive.txt that contains a license.
      Same problem seen with .pdf and .Z files.
      Solution: if $ChildCount == 0, then just view the license!
+
+     $ChildCount can also be zero if the directory is empty.
      ***************************************/
     if ($ChildCount == 0)
       {
+      $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$Item';");
+      if (IsDir($Results[0]['ufile_mode'])) { return; }
       $ModLicView = &$Plugins[plugin_find_id("view-license")];
       return($ModLicView->Output() );
       }

@@ -651,6 +651,7 @@ class ui_view extends FO_Plugin
      Display file contents
      ***********************************/
     print $V;
+    $V = "";
     if (empty($Fin))
       { 
       $Fin = @fopen( RepPathItem($Item) ,"rb");
