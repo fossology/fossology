@@ -204,7 +204,8 @@ class agent_license extends FO_Plugin
 
     /* job "license" has jobqueue item "sqlagent" */
     /** This updates the license counts **/
-    $jqargs = "BEGIN; SELECT licterm_name.pfile_fk,COUNT(licterm_name.pfile_fk) AS count INTO TEMP $TempTable_1 FROM licterm_name INNER JOIN uploadtree ON upload_fk = $uploadpk AND licterm_name.pfile_fk = uploadtree.pfile_fk GROUP BY licterm_name.pfile_fk ORDER BY licterm_name.pfile_fk; UPDATE pfile SET pfile_liccount = $TempTable_1.count FROM $TempTable_1 WHERE pfile.pfile_pk = $TempTable_1.pfile_fk; DROP TABLE $TempTable_1; COMMIT;";
+    $TempTable2 = $TempTable . "_1";
+    $jqargs = "BEGIN; SELECT licterm_name.pfile_fk,COUNT(licterm_name.pfile_fk) AS count INTO TEMP $TempTable2 FROM licterm_name INNER JOIN uploadtree ON upload_fk = $uploadpk AND licterm_name.pfile_fk = uploadtree.pfile_fk GROUP BY licterm_name.pfile_fk ORDER BY licterm_name.pfile_fk; UPDATE pfile SET pfile_liccount = $TempTable2.count FROM $TempTable2 WHERE pfile.pfile_pk = $TempTable2.pfile_fk; DROP TABLE $TempTable2; COMMIT;";
     $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",array($jobqueuepk));
     if (empty($jobqueuepk)) { return("Failed to insert count-update sqlagent into job queue"); }
 
