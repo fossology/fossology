@@ -36,6 +36,7 @@ extern time_t	RespawnInterval;	/* 5 minutes */
 extern time_t	RespawnCount;		/* Up to two respawns every RespawnInterval */
 #define MINKILLTIME     20 /* seconds a child must be alive before killing */
 #define MAXKILLTIME     (15*60) /* seconds a child must be idle before killing */
+extern int	InChildSignalHandler;	/* don't uses syslog() when this is true! */
 
 /* Note: state used to be DEAD/DYING.  Changed to FREE/FREEING because
    the word "DEAD" scared people.  (I'm not kidding.) */
