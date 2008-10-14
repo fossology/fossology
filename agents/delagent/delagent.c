@@ -120,7 +120,7 @@ void	DeleteLicense	(long UploadId)
       MyDBaccess(DB,SQL);
 
       memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_liccount = NULL WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
+      snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_liccount = NULL FROM uploadtree WHERE upload_fk = '%ld' AND pfile_pk = pfile_fk AND pfile_liccount IS NOT NULL;",UploadId);
       MyDBaccess(DB,SQL);
 
       memset(SQL,'\0',sizeof(SQL));
