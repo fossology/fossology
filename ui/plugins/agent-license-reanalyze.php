@@ -90,6 +90,16 @@ class agent_license_reanalyze extends FO_Plugin
 	$Cmd = "$CmdOk | $AGENTDIR/licinspect $CmdEnd";
 	print "Finding license names based on terms and keywords\n"; flush();
 	system($Cmd);
+
+	/* Update license count */
+	$SQL = "SELECT count(*) AS count FROM licterm_name WHERE pfile_fk = $Akey;");
+	$Results = $DB->Action($SQL);
+	$Count = $Results[0]['count'];
+	if (!empty($Count))
+	  { 
+	  $SQL = "UPDATE pfile SET pfile_liccount = '$Count' WHERE pfile_pk = $Akey;";
+	  $DB->Action($SQL);
+	  }
 	}
       else
 	{
