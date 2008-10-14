@@ -259,14 +259,17 @@ void	DBUpdateJob	(int JobId, int UpdateType, char *Message)
     }
   Len = strlen(SQL);
   snprintf(SQL+Len,MAXCMD-Len," WHERE jq_pk = '%d';",JobId);
-  if (Verbose) syslog(LOG_DEBUG,"SQL Update: '%s'\n",SQL);
+  if (Verbose && !InChildSignalHandler) syslog(LOG_DEBUG,"SQL Update: '%s'\n",SQL);
   rc = DBLockAccess(DB,SQL);
   if (rc >= 0) return;
 
   /* How to handle a DB error? Right now, they are just logged per agent */
   /* TBD: This will be implemented when we have interprocess communication
      between the scheduler and UI. */
-  syslog(LOG_ERR,"ERROR: Unable to process: '%s'\n",SQL);
+  if (!InChildSignalHandler)
+    {
+    syslog(LOG_ERR,"ERROR: Unable to process: '%s'\n",SQL);
+    }
   return;
 } /* DBUpdateJob() */
 
