@@ -60,6 +60,7 @@ class agent_license_reanalyze extends FO_Plugin
     print "Removing previous license information.\n"; flush();
     $DB->Action("BEGIN;");
     $DB->Action("DELETE FROM licterm_name WHERE pfile_fk = '$Akey';");
+    $DB->Action("UPDATE pfile SET pfile_liccount = NULL WHERE pfile_pk = '$Akey';");
     $DB->Action("DELETE FROM agent_lic_meta WHERE pfile_fk = '$Akey';");
     $DB->Action("DELETE FROM agent_lic_status WHERE pfile_fk = '$Akey';");
     $DB->Action("COMMIT;");
@@ -92,7 +93,7 @@ class agent_license_reanalyze extends FO_Plugin
 	system($Cmd);
 
 	/* Update license count */
-	$SQL = "SELECT count(*) AS count FROM licterm_name WHERE pfile_fk = $Akey;");
+	$SQL = "SELECT count(*) AS count FROM licterm_name WHERE pfile_fk = $Akey;";
 	$Results = $DB->Action($SQL);
 	$Count = $Results[0]['count'];
 	if (!empty($Count))
