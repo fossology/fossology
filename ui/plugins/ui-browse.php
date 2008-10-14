@@ -255,9 +255,16 @@ class ui_browse extends FO_Plugin
 	  $ItemCount = number_format($SResults[0]['count'], 0, "", ",");
           $UploadtreePk = DirGetNonArtifact($Row['uploadtree_pk']);
           $V .= "<tr><td>";
-          $V .= "<a href='$Uri&upload=$UploadPk&folder=$Folder&item=$UploadtreePk&show=$Show'>";
-          $V .= "<b>" . $Name . "</b>";
-          $V .= "</a>";
+	  if (IsContainer($Row['ufile_mode']))
+	    {
+            $V .= "<a href='$Uri&upload=$UploadPk&folder=$Folder&item=$UploadtreePk&show=$Show'>";
+            $V .= "<b>" . $Name . "</b>";
+            $V .= "</a>";
+	    }
+	  else
+	    {
+            $V .= "<b>" . $Name . "</b>";
+	    }
 	  if ($Row['upload_mode'] & 1<<2) { $V .= "<br>Added by URL: " . htmlentities($Row['upload_filename']); }
 	  if ($Row['upload_mode'] & 1<<3) { $V .= "<br>Added by file upload: " . htmlentities($Row['upload_filename']); }
 	  if ($Row['upload_mode'] & 1<<4) { $V .= "<br>Added from filesystem: " . htmlentities($Row['upload_filename']); }
