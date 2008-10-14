@@ -178,7 +178,7 @@ if (array_key_exists("v", $options))
   {
     print "Verify Tests ERROR: can't cd to $VerifyTests\n";
   }
-  $VerifyLast = exec("./runVeriyTests.php >> " .
+  $VerifyLast = exec("./runVerifyTests.php >> " .
   "/tmp/VerifyFOSSologyTests-$date 2>&1", $dummy, $Prtn);
 }
 
