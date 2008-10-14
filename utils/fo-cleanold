@@ -8,9 +8,10 @@ SAVE="/usr/local/share/fossology/agents/proxy.conf
 /usr/local/share/fossology/dbconnect/fossology
 /usr/local/share/fossology/repository/Depth.conf
 /usr/local/share/fossology/repository/Hosts.conf
-/usr/local/share/fossology/repository/RepPath.conf"
+/usr/local/share/fossology/repository/RepPath.conf
 /etc/default/fossology
 /etc/init.d/fossology
+"
 # NOTE: we don't bother to look for nomos3 conffiles
 
 FILES="/usr/local/bin/cp2foss.php
