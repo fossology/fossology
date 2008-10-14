@@ -203,10 +203,17 @@ class agent_license extends FO_Plugin
     if (empty($jobqueuepk)) { return("Failed to insert filter_clean into job queue"); }
 
     /* job "license" has jobqueue item "sqlagent" */
+    /** This updates the license counts **/
+    $TempTable = 'count' . time() . '_' . rand();
+    $jqargs = "BEGIN; SELECT licterm_name.pfile_fk,COUNT(licterm_name.pfile_fk) AS count INTO TEMP $TempTable FROM licterm_name INNER JOIN uploadtree ON upload_fk = $uploadpk AND licterm_name.pfile_fk = uploadtree.pfile_fk GROUP BY licterm_name.pfile_fk ORDER BY licterm_name.pfile_fk; UPDATE pfile SET pfile_liccount = $TempTable.count FROM $TempTable WHERE pfile.pfile_pk = $TempTable.pfile_fk; DROP TABLE $TempTable; COMMIT;";
+    $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",array($jobqueuepk));
+    if (empty($jobqueuepk)) { return("Failed to insert count-update sqlagent into job queue"); }
+
+    /* job "license" has jobqueue item "sqlagent" */
     /** This removes the temp table and flushes the cache **/
     $jqargs = "DROP TABLE $TempTable; DELETE FROM report_cache WHERE report_cache_uploadfk = '$uploadpk';";
     $jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",array($jobqueuepk));
-    if (empty($jobqueuepk)) { return("Failed to insert second sqlagent into job queue"); }
+    if (empty($jobqueuepk)) { return("Failed to insert final sqlagent into job queue"); }
 
     return(NULL);
   } // AgentAdd()
