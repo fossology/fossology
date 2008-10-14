@@ -36,6 +36,34 @@ class ui_license extends FO_Plugin
   var $UpdCache   = 0;
 
   /***********************************************************
+   Install(): Create and configure database tables
+   ***********************************************************/
+  function Install()
+  { 
+    global $DB;
+    if (empty($DB)) { return(1); } /* No DB */
+
+    /* Update all license counts */
+    $TempTable = "counts" . time() . "_" . rand();
+    $SQL = "BEGIN;
+	SELECT pfile_fk,COUNT(pfile_fk) AS count INTO TEMP $TempTable
+	  FROM licterm_name
+	  INNER JOIN pfile ON pfile_liccount IS NULL
+	  AND pfile_fk = pfile_pk
+	  GROUP BY pfile_fk ORDER BY pfile_fk;
+	UPDATE pfile
+	  SET pfile_liccount = $TempTable.count
+	  FROM $TempTable
+	  WHERE pfile.pfile_pk = $TempTable.pfile_fk
+	  ;
+	DROP TABLE $TempTable;
+	COMMIT;
+	";
+    $DB->Action($SQL);
+    return(0);
+  } // Install()
+
+  /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
   function RegisterMenus()
@@ -59,7 +87,7 @@ class ui_license extends FO_Plugin
       }
     } // RegisterMenus()
 
- /***********************************************************
+  /***********************************************************
    Initialize(): This is called before the plugin is used.
    It should assume that Install() was already run one time
    (possibly years ago and not during this object's creation).
@@ -89,7 +117,9 @@ class ui_license extends FO_Plugin
       unset($_GET['updcache']);
     }
     else
+      {
       $this->UpdCache = 0;
+      }
     return($this->State == PLUGIN_STATE_VALID);
     } // Initialize()
 
@@ -174,6 +204,7 @@ class ui_license extends FO_Plugin
     /* Get ALL the items under this UploadtreePk */
     $Children = DirGetList($Upload,$Item);
     $ChildCount=0;
+    $ChildDirCount=0;
     $ChildLicCount=0;
     $VF .= "<table border=0>";
     foreach($Children as $C)
@@ -208,7 +239,7 @@ class ui_license extends FO_Plugin
       /* Populate the output ($VF) - file list */
 
       /* Find number of licenses in child */
-      if ((sizeof($Children) < 20) || !$IsContainer)
+      if (($ChildDirCount < 20) || (!$IsContainer))
         { $LicCount = LicenseCount($C['uploadtree_pk']); }
       else { $LicCount=0; }
 
@@ -217,6 +248,7 @@ class ui_license extends FO_Plugin
       $HasBold=0;
       if ($IsContainer)
 	{
+	$ChildDirCount++;
 	$VF .= "<a href='$LicUri'>"; $HasHref=1;
 	$VF .= "<b>"; $HasBold=1;
 	}

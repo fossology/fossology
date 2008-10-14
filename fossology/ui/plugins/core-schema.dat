@@ -512,6 +512,10 @@
   $Schema["TABLE"]["pfile"]["pfile_usecount"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_usecount\" int4;";
   $Schema["TABLE"]["pfile"]["pfile_usecount"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_usecount\" SET NOT NULL, ALTER COLUMN \"pfile_usecount\" SET DEFAULT 0;";
 
+  $Schema["TABLE"]["pfile"]["pfile_liccount"]["DESC"] = "COMMENT ON COLUMN \"pfile\".\"pfile_liccount\" IS 'Number of licenses associated with the pfile';";
+  $Schema["TABLE"]["pfile"]["pfile_liccount"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_liccount\" int4;";
+  $Schema["TABLE"]["pfile"]["pfile_liccount"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_liccount\" DROP NOT NULL;";
+
 
   $Schema["TABLE"]["report_cache"]["report_cache_pk"]["DESC"] = "";
   $Schema["TABLE"]["report_cache"]["report_cache_pk"]["ADD"] = "ALTER TABLE \"report_cache\" ADD COLUMN \"report_cache_pk\" int4;";

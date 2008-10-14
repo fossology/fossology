@@ -120,6 +120,10 @@ void	DeleteLicense	(long UploadId)
       MyDBaccess(DB,SQL);
 
       memset(SQL,'\0',sizeof(SQL));
+      snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_liccount = NULL WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
+      MyDBaccess(DB,SQL);
+
+      memset(SQL,'\0',sizeof(SQL));
       snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
       MyDBaccess(DB,SQL);
 
@@ -237,6 +241,11 @@ void	DeleteUpload	(long UploadId)
   if (Verbose) { printf("# Deleting from licterm_name\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name USING %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
+  MyDBaccess(DB,SQL);
+
+  if (Verbose) { printf("# Removing license counts\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_liccount = NULL FROM %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
   MyDBaccess(DB,SQL);
 
   if (Verbose) { printf("# Deleting from agent_lic_status\n"); }
