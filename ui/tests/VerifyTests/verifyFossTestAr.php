@@ -67,8 +67,7 @@ class verifyFossolyTest extends fossologyTestCase
   {
     global $URL;
 
-    //$name = 'fossarchive-T\.tar\.bz2';
-
+    // change the name to reflect the new results.
     $name = 'fossI16L499.tar.bz2';
     $safeName = $this->escapeDots($name);
 
@@ -98,6 +97,9 @@ class verifyFossolyTest extends fossologyTestCase
     /* Select fossology link */
     $page = $this->mybrowser->clickLink('fossology/');
 
+    /* need to check that there are 16 items */
+    /* check that all the [xxx] items add to 519 */
+
     $this->assertTrue($this->myassertText($page, "/Makefile/"));
     $this->assertTrue($this->myassertText($page, "/mkcheck\.sh/"),
                       "FAIL! did not find mkcheck.sh\n");
@@ -119,8 +121,8 @@ class verifyFossolyTest extends fossologyTestCase
     //print "page after get of $url is:\n$page\n";
     $this->assertTrue($this->myassertText($page, '/License Browser/'),
           "verifyFossTestAr FAILED! License Browser Title not found\n");
-    $this->assertTrue($this->myassertText($page, '/Total licenses: 499/'),
-        "verifyFossTestAr FAILED! Total Licenses does not equal 499\n");
+    $this->assertTrue($this->myassertText($page, '/Total licenses: 519/'),
+        "verifyFossTestAr FAILED! Total Licenses does not equal 519\n");
 
     // get the 'Show' links and License color links
     $licTbl = new parseLicenseTbl($page);
@@ -136,14 +138,14 @@ class verifyFossolyTest extends fossologyTestCase
     $tblList = $licFileList->parseLicFileList();
     $tableCnt = count($tblList);
     print "Checking the number of files based on Public Domain\n";
-    $this->assertEqual($tableCnt, 5);
+    $this->assertEqual($tableCnt, 4);
 
     $page = $this->mybrowser->get($lgplURL);
     $licFileList->setPage($page);
     $flist = $licFileList->parseLicFileList();
     print "Checking the number of files based on LGPL v2.1-style\n";
     $flistCnt = count($flist);
-    $this->assertEqual($flistCnt, 3);
+    $this->assertEqual($flistCnt, 16);
   }
 }
 ?>

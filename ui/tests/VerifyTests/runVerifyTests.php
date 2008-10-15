@@ -35,8 +35,8 @@ $start = new timer();
 print "Startnig Verify Tests at: " . date('r') . "\n";
 $test = &new TestSuite('Fossology Repo UI Verification Functional tests');
 //$test->addTestFile('browseUploadedTest.php');
-//$test->addTestFile('OneShot-lgpl2.1.php');
-//$test->addTestFile('OneShot-lgpl2.1-T.php');
+$test->addTestFile('OneShot-lgpl2.1.php');
+$test->addTestFile('OneShot-lgpl2.1-T.php');
 $test->addTestFile('verifyFossTestAr.php');
 
 if (TextReporter::inCli())

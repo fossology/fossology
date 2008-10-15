@@ -40,7 +40,8 @@ class OneShotgplv21Test extends fossologyTestCase
     $this->assertTrue(file_exists('/home/fosstester/.bashrc'),
                       "OneShotgplv21Test FAILURE! .bashrc not found\n");
     $this->assertTrue(file_exists('/home/fosstester/ReadMe'),
-        "OneShotgplv21Test FAILURE! Readme in ~fosstester not found\n");
+        "OneShotgplv21Test FAILURE! Readme in ~fosstester not found\n" .
+        "This means the the One-Shot analysis will probably fail\n");
     $this->Login();
   }
 
@@ -67,18 +68,14 @@ class OneShotgplv21Test extends fossologyTestCase
                       "FAILED! Count not click Analyze button\n");
     /* Check for the correct analysis.... */
     $page = $this->mybrowser->getContent();
-    $this->assertTrue($this->myassertText($page, '/LGPL/'),
-                      "OneShotgplv21Test FAILED! Did not identify LGPL as LGPL\n");
-    $this->assertTrue($this->myassertText($page, '/v2\.1/'),
-    "OneShotgplv21Test FAILED! Did not find v2.1 version string\n");
+    $this->assertTrue($this->myassertText($page, '/LGPL v2\.1, LGPL v2\.1\+/'),
+    "OneShotgplv21Test FAILED! Did not find exactly 'LGPL v2.1, LGPL v2.1+'\n");
 
     $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
     "OneShotgplv21Test FAILED! Did not find One-Shot License Analysis Title\n");
-
+    // should not see -partial anymore
     $this->assertFalse($this->myassertText($page, '/-partial/'),
     "OneShotgplv21Test FAILED! Found -partial in a non partial license file\n");
-
-    //print "************ page after Analysis! *************\n$page\n";
   }
 }
 ?>
