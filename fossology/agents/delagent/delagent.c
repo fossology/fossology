@@ -245,7 +245,7 @@ void	DeleteUpload	(long UploadId)
 
   if (Verbose) { printf("# Removing license counts\n"); }
   memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_liccount = NULL FROM %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
+  snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_liccount = NULL FROM %s_pfile WHERE %s_pfile.pfile_pk = pfile.pfile_pk;",TempTable,TempTable);
   MyDBaccess(DB,SQL);
 
   if (Verbose) { printf("# Deleting from agent_lic_status\n"); }
