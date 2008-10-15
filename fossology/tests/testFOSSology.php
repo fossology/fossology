@@ -126,10 +126,16 @@ if (array_key_exists("a", $options))
   }
   $SiteLast = exec("./runSiteTests.php > " .
   "/tmp/AllFOSSologyTests-$date 2>&1", $dummy , $Srtn);
+  if(chdir($BasicTests) === FALSE)
+  {
+    print "ALL Tests ERROR: can't cd to $BasicTests\n";
+  }
+  $BasicLast = exec("./runBasicTests.php >> " .
+  "/tmp/AllFOSSologyTests-$date 2>&1", $dummy , $Brtn);
   /*
-   * The page tests require that uploads be done first.  The best we
-   * can do for now is to run the setup and then tell the tester to
-   * run the page tests after the the setup is done.
+   * The verify tests require that uploads be done first.  The best we
+   * can do for now is to run the setup and then tell the tester to run
+   * the verify tests after the the setup is done.
    */
   _runSetupVerify();
 }
