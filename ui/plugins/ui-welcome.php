@@ -37,59 +37,140 @@ class ui_welcome extends FO_Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
+
     switch($this->OutputType)
       {
       case "XML":
 	break;
       case "HTML":
-	$V .= "<H1>The FOSSology Toolset</H1>
-FOSSology is a framework for software analysis tools. The current tools identify licenses in software, allow browsing uploaded file hierarchies, and extracts MIME type and meta data information.
-
-<H1>FOSSology's Graphical User Interface</H1>
-This website is an interface into the FOSSology project. With it, you can:
-<ul>
-<li>Upload files to analyze.";
-	if (@$_SESSION['UserLevel'] < PLUGIN_DB_UPLOAD)
+	if (plugin_find_id("browse") >= 0)
 	  {
-	  $V .= " (Login access required.)";
+	  $Browse = "<a href='" . Traceback_uri() . "?mod=browse'>Browse</a>";
 	  }
-	$V .= "
-<li>Unpack and store the data within the files for analysis.
-<li>Invoke specialized agents to scan and analyze the files.";
-	if (@$_SESSION['UserLevel'] < PLUGIN_DB_ANALYZE)
+	else { $Browse = "Browse"; }
+	if (plugin_find_id("search_file") >= 0)
 	  {
-	  $V .= " (Login access required.)";
+	  $Search = "<a href='" . Traceback_uri() . "?mod=search_file'>Search</a>";
 	  }
+	else { $Search = "Search"; }
+	if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
+	  {
+	  $Login = "<a href='" . Traceback_uri() . "?mod=auth'>Login</a>";
+	  }
+	else { $Login = "Login"; }
+
 	$V .= "
-<li>Store and display the analyzed results.
-</ul>
+<table width='100%' border='0'>
+  <tr> 
+    <td valign='top'> <h3><font color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'>The 
+        FOSSology Toolset</font></h3>
+      <blockquote> 
+        <p><font face='Arial, Helvetica, sans-serif'>FOSSology is a framework 
+          for software analysis tools. The current FOSSology tools can: <br>
+          <br>
+          <img src='images/right-point-bullet.gif'>Identify licenses in software<br>
+          <img src='images/right-point-bullet.gif'>Allow browsing uploaded file hierarchies<br>
+          <img src='images/right-point-bullet.gif'>Extract MIME type and meta data information</font></p>
+        <p>&nbsp;</p>
+      </blockquote></td>
+    <td><img src='images/mag-glass-molecule.png'></td>
+  </tr>
+</table>
 
-<H1>How to Begin.....</H1>
-The menu at the top contains all the primary capabilities of FOSSology.
-<ul>
-<li><b>Browse</b>: If you don't know where to start, try browsing the currently uploaded projects.
-<li><b>Search</b>: Look through the uploaded projects for specific files.
-<li><b>Login</b>: Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or even add new users.
-</ul>
+<table width='100%' border='0'>
+  <tr> 
+    <td><img src='images/logo2.png' align='right'></td>
+    <td valign='top'>
+      <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'>FOSSology's Graphical User Interface</font></h3>
+      <blockquote> 
+        <p> <font face='Arial, Helvetica, sans-serif'>This website is an interface 
+          into the FOSSology project. With it, you can:<br>
+          <br>
+          <img src='images/right-point-bullet.gif'>Upload files 
+          to analyze.<em> <font size='-1'>(Login access required.)</font> </em><br>
+          <img src='images/right-point-bullet.gif'>Unpack and store the data within the files for analysis. <br>
+          <img src='images/right-point-bullet.gif'>Invoke specialized agents to scan and analyze the files.<font size='-1'><em> (Login access required.)</em></font><br>
+          <img src='images/right-point-bullet.gif'>Store and display the analyzed results. </font><br>
+        </p>
+      </blockquote></td>
+  </tr>
+</table>
 
-<H1>Inside FOSSology</H1>
-Some parts of FOSSology helpful to know about are:
-<ul>
-<li>Software Repository - Stores files downloaded for analysis.
-<li>Database - Stores user accounts, file information, and analysis results.
-<li>Agents - Performs analysis of files and data found in the Software Repository and Database.
-<li>Scheduler - Runs the agents, making efficient use of available resources.
-<li>Web GUI ­ provides user access to FOSSology.
-</ul>
-Existing functionality is accessable from the user interface.
+<table width='100%' border='0'>
+  <tr> 
+    <td valign='top'> <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'>How 
+        to Begin</font></h3>
+      <blockquote> 
+        <p><font face='Arial, Helvetica, sans-serif'> The menu at the top contains 
+          all the primary capabilities of FOSSology. Most functions require you 
+          to log in before they can be accessed. The following functions are available 
+          without logging in:<br>
+          <br>
+          <strong><em>$Browse: </em></strong>If you don't know where to start, 
+          try browsing the currently uploaded projects. <br>
+          <strong><em>$Search:</em></strong> Look through the uploaded projects 
+          for specific files. <br>
+          <strong><em>$Login:</em></strong> If you log in, you can access additional 
+          capabilities. Depending on your account's access rights,<br>
+          you may be able to upload files, schedule analysis tasks, or even add 
+          new users.</font></p>
+      </blockquote></td>
+  </tr>
+</table>
 
-<H1>Need Help</H1>
-Try one of the following resources:
-<ul>
-<li>Help tab
-<li><a href='http://fossology.org/'>FOSSology documentation Wiki</a>
-<li><a href='http://fossbazaar.org/'>FOSSbazaar</a> web site
-</ul>";
+<table width='100%' border='0'>
+  <tr> 
+    <td valign='top'> <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'>Inside 
+        FOSSology</font></h3>
+      <blockquote> 
+        <p><font face='Arial, Helvetica, sans-serif'>Some parts of FOSSology helpful 
+          to know about are:<br>
+          <br>
+          <em><strong>Software Repository</strong></em> - Stores files downloaded 
+          for analysis.<br>
+          <em><strong>Database</strong></em> - Stores user accounts, file information, 
+          and analysis results.<br>
+          <em><strong>Agents</strong></em> - Perform analysis of files and data 
+          found in the Software Repository and Database.<br>
+          <em><strong>Scheduler</strong></em> - Runs the agents, making efficient 
+          use of available resources.<br>
+          <em><strong>Web GUI</strong></em> &shy; - Provides user access to FOSSology.</font></p>
+        <p><font face='Arial, Helvetica, sans-serif'><em>Existing functionality 
+          is accessable only from the user interface.</em></font><br>
+        </p>
+      </blockquote></td>
+    <td><img src='images/fossology-flow4.png'> </td>
+  </tr>
+</table>
+
+<table width='100%' border='0'>
+  <tr> 
+    <td valign='top'> <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'><img src='images/diving_board.gif' align='left'> 
+        Need Some Help?</font></h3>
+      <blockquote> 
+        <blockquote> 
+          <p><font face='Arial, Helvetica, sans-serif'>Now that you've been introduced 
+            to Fossology, try exploring it!<br>
+            The following resources will provide additional help and information: 
+            </font></p>
+          <blockquote>
+		  
+		  <!--  <font face='Arial, Helvetica, sans-serif'><em><strong>Help tab</strong></em> 
+              - Select this website's Help tab for software-related help and tips.
+              </font><br>-->
+            
+			  <font face='Arial, Helvetica, sans-serif'><em><strong><a href='http://fossology.org/'>FOSSology 
+              documentation wiki</a></strong></em> - Provides access to extended 
+              information about using Fossology.<br>
+              <em><strong><a href='https://fossbazaar.org/'>FOSSbazaar web site</a></strong></em></font> 
+              <font face='Arial, Helvetica, sans-serif'> - A community website 
+              with information about Free Open source Software.</font>
+          </blockquote>
+        </blockquote>
+      </blockquote></td>
+  </tr>
+</table>
+";
 	break;
       case "Text":
 	break;
