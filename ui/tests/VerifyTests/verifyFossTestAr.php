@@ -68,7 +68,7 @@ class verifyFossolyTest extends fossologyTestCase
     global $URL;
 
     // change the name to reflect the new results.
-    $name = 'fossI16L499.tar.bz2';
+    $name = 'fossI16L519.tar.bz2';
     $safeName = $this->escapeDots($name);
 
     print "starting VerifyFossology test\n";
