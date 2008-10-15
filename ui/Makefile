@@ -8,7 +8,7 @@ include $(VARS)
 iPATHFILE=pathinclude.php
 
 DIRS=images plugins common template
-FILES=`find . -type f | grep -v svn | grep -E "(php|css|htm|html|dtd|htc|gif|dat)$$" |grep -v $(iPATHFILE)`
+FILES=`find . -type f | grep -v svn | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat)$$" |grep -v $(iPATHFILE)`
 
 all:
 
