@@ -19,7 +19,7 @@
 /**
  * Verify special fossology test archive loaded correctly
  *
- * @version "$Id: browseUploadedTest.php 1153 2008-08-21 03:59:33Z rrando $"
+ * @version "$Id:  $"
  *
  * Created on Aug 25, 2008
  */
@@ -33,7 +33,12 @@ require_once('../../../tests/testClasses/parseLicenseTbl.php');
 
 global $URL;
 
-class verifyFossolyTest extends fossologyTestCase
+/**
+ * This test verifies that the archive foss23D1F1L is processed
+ * correctly.  The archive contains 23 directories (most empty),
+ * 1 File and 1 license.
+ */
+class verify23D1F1L extends fossologyTestCase
 {
   public $mybrowser;
   public $host;
@@ -42,14 +47,13 @@ class verifyFossolyTest extends fossologyTestCase
   {
     /*
      * This test requires that the fossology test archive has been
-     * loaded under the name fossarchive-T.tar.bz2 For now, the setup
-     * will just verify the material is there?
+     * loaded under the name foss23D1F1L.tar.bz2
      */
     global $URL;
     global $name;
     global $safeName;
 
-    $name = 'fossI16L519.tar.bz2';
+    $name = 'foss23D1F1L.tar.bz2';
     $safeName = $this->escapeDots($name);
     $this->host = $this->getHost($URL);
     $this->Login();
@@ -58,72 +62,69 @@ class verifyFossolyTest extends fossologyTestCase
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Browse');
     $this->assertTrue($this->myassertText($page, '/Browse/'),
-     "verifyFossTestAr FAILED! Could not find Browse menu\n");
+     "verify23D1F1L FAILED! Could not find Browse menu\n");
     $page = $this->mybrowser->clickLink('Testing');
     $this->assertTrue($this->myassertText($page, '/Testing/'),
-     "verifyFossTestAr FAILED! Could not find Testing folder\n");
-    $result = $this->myassertText($page, "/$safeName/");
+     "verify23D1F1L FAILED! Could not find Testing folder\n");
+    $result = $this->myassertText($page, "/$name/");
     if(!($result)) { exit(FALSE); }
   }
 
-  function testVerifyFossI16L519()
+  function testVerifyFossology()
   {
     global $URL;
     global $name;
     global $safeName;
 
-    print "starting VerifyFossI16L519 test\n";
+    print "starting VerifyFoss23D1F1L test\n";
     $page = $this->mybrowser->clickLink('Browse');
     $this->assertTrue($this->myassertText($page, '/Browse/'),
-             "verifyFossTestAr FAILED! Could not find Browse menu\n");
-    /* Testing folder */
+             "verify23D1F1L FAILED! Could not find Browse menu\n");
     $page = $this->mybrowser->clickLink('Testing');
     //print "************ Page after upload link *************\n$page\n";
     $this->assertTrue($this->myassertText($page, "/Browse/"),
-       "verifyFossTestAr FAILED! Browse Title not found\n");
+       "verify23D1F1L FAILED! Browse Title not found\n");
     $this->assertTrue($this->myassertText($page, "/$safeName/"),
-       "verifyFossTestAr FAILED! did not find $name\n");
+       "verify23D1F1L FAILED! did not find $name\n");
     $this->assertTrue($this->myassertText($page, "/>View</"),
-       "verifyFossTestAr FAILED! >View< not found\n");
+       "verifyfoss23D1F1L FAILED! >View< not found\n");
     $this->assertTrue($this->myassertText($page, "/>Meta</"),
-       "verifyFossTestAr FAILED! >Meta< not found\n");
+       "verifyFoss23D1F1L FAILED! >Meta< not found\n");
     $this->assertTrue($this->myassertText($page, "/>Download</"),
-       "verifyFossTestAr FAILED! >Download< not found\n");
+       "verifyFoss23D1F1L FAILED! >Download< not found\n");
 
     /* Select archive */
     $page = $this->mybrowser->clickLink($name);
     //print "************ Page after select foss archive *************\n$page\n";
-    $this->assertTrue($this->myassertText($page, "/fossology\//"));
+    $this->assertTrue($this->myassertText($page, "/foss23Dirs1File1Lic\//"),
+      "verifyfoss23D1F1L FAILED! 'foss23Dirs1File1Lic/' not found\n");
+    $this->assertTrue($this->myassertText($page, "/1 item/"),
+      "verifyfoss23D1F1L FAILED! '1 item' not found\n");
 
     /* Select fossology link */
-    $page = $this->mybrowser->clickLink('fossology/');
+    $page = $this->mybrowser->clickLink('foss23Dirs1File1Lic/');
 
-    /* need to check that there are 16 items */
-    /* check that all the [xxx] items add to 519 */
-
-    $this->assertTrue($this->myassertText($page, "/Makefile/"));
-    $this->assertTrue($this->myassertText($page, "/mkcheck\.sh/"),
-                      "FAIL! did not find mkcheck.sh\n");
-    $this->assertTrue($this->myassertText($page, "/>View</"),
-                      "FAIL! >View< not found\n");
-    $this->assertTrue($this->myassertText($page, "/>Meta</"),
-                      "FAIL! >Meta< not found\n");
-    $this->assertTrue($this->myassertText($page, "/>Download</"),
-                      "FAIL! >Download< not found\n");
+    /* need to check that there are 9 items */
+    $this->assertTrue($this->myassertText($page, "/9 items/"),
+      "verifyfoss23D1F1L FAILED! '9 items' not found\n");
+    $this->assertTrue($this->myassertText($page, "/agents/"),
+    "verify23D1F1L FAILED! did not find 'agents' directory\n");
+    $this->assertTrue($this->myassertText($page, "/scheduler/"),
+      "verify23D1F1L FAILED! did not find scheduler directory\n");
 
     /* Select the License link to View License Historgram */
     $browse = new parseBrowseMenu($page);
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
     $url = $this->makeUrl($this->host, $miniMenu['License']);
-    if($url === NULL) { $this->fail("verifyFossTestAr Failed, host is not set"); }
+    if($url === NULL) { $this->fail("verify23D1F1L Failed, host is not set"); }
 
     $page = $this->mybrowser->get($url);
     //print "page after get of $url is:\n$page\n";
     $this->assertTrue($this->myassertText($page, '/License Browser/'),
-          "verifyFossTestAr FAILED! License Browser Title not found\n");
-    $this->assertTrue($this->myassertText($page, '/Total licenses: 519/'),
-        "verifyFossTestAr FAILED! Total Licenses does not equal 519\n");
+          "verify23D1F1L FAILED! License Browser Title not found\n");
+    $this->assertTrue($this->myassertText($page, '/Total licenses: 2/'),
+        "verify23D1F1L FAILED! Total Licenses does not equal 2\n");
 
     // get the 'Show' links and License color links
     $licTbl = new parseLicenseTbl($page);
@@ -131,22 +132,14 @@ class verifyFossolyTest extends fossologyTestCase
     //print "licTable is:\n"; print_r($licTable) . "\n";
 
     /* FIX THIS Select show 'Public Domain, verify, select 'LGPL v2.1', verify */
-    $pdURL = $this->makeUrl($this->host, $licTable['Public Domain'][0]);
-    $lgplURL = $this->makeUrl($this->host, $licTable['\'LGPL v2.1\'-style'][0]);
+    $gplv2URL = $this->makeUrl($this->host, $licTable['\'GPL v2\'-style'][0]);
 
-    $page = $this->mybrowser->get($pdURL);
+    $page = $this->mybrowser->get($gplv2URL);
     $licFileList = new parseLicFileList($page);
     $tblList = $licFileList->parseLicFileList();
     $tableCnt = count($tblList);
-    print "Checking the number of files based on Public Domain\n";
-    $this->assertEqual($tableCnt, 4);
-
-    $page = $this->mybrowser->get($lgplURL);
-    $licFileList->setPage($page);
-    $flist = $licFileList->parseLicFileList();
-    print "Checking the number of files based on LGPL v2.1-style\n";
-    $flistCnt = count($flist);
-    $this->assertEqual($flistCnt, 16);
+    print "Checking the number of files based on 'GPL v2'-style\n";
+    $this->assertEqual($tableCnt, 1);
   }
 }
 ?>
