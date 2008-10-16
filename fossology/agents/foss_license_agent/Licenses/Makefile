@@ -14,8 +14,20 @@ include $(TOP)/Makefile.process
 bsam-test1: bsam-test1-process
 	chmod +x bsam-test1
 
+selftest: bsam-test1
+	chmod +x mkselftestcache
+	if [ ! -f License.bsam ] ; then ./mkselftestcache ; fi
+	@echo "Testing to find the best match"
+	./bsam-test1
+
 bsam-test2: bsam-test2-process
 	chmod +x bsam-test2
+
+selftest2: bsam-test2
+	chmod +x mkselftestcache
+	if [ ! -f License.bsam ] ; then ./mkselftestcache ; fi
+	@echo "Testing to find all matches"
+	./bsam-test2
 
 install: all
 	@# first nuke the existing licenses. currently we only support
