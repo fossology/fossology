@@ -100,8 +100,8 @@ function _runSetupVerify()
   // need to check the return on the setup and report accordingly.
   if ($SUrtn != 0)
   {
-    print "ERROR in Test Setup.  Some or all Page Tests may fail\n";
-    print "Check the file /tmp/SetUpFOSSologyTests-$date for details\n";
+    print "ERROR in Test Setup.  Some or all Verify Tests may fail\n";
+    print "Check the file /tmp/AllFOSSologyTests-$date for details\n";
     $errors++;
   }
   if($errors == 0)
@@ -126,7 +126,7 @@ if (array_key_exists("a", $options))
   }
   $SiteLast = exec("./runSiteTests.php > " .
   "/tmp/AllFOSSologyTests-$date 2>&1", $dummy , $Srtn);
-  if(chdir($BasicTests) === FALSE)
+  if(chdir('../BasicTests') === FALSE)
   {
     print "ALL Tests ERROR: can't cd to $BasicTests\n";
   }

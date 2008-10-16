@@ -24,6 +24,7 @@
  * Created on Oct. 15, 2008
  */
 
+require_once ('../../../tests/fossologyTest.php');
 require_once ('../../../tests/fossologyTestCase.php');
 require_once ('../../../tests/TestEnvironment.php');
 
@@ -46,7 +47,7 @@ class BasicFolderTest extends fossologyTestCase
     global $URL;
 
     print "starting BasicFoldertest\n";
-    $this->createTestFolder('Basic-Tests');
+    $this->createTestFolder('Basic-Testing');
   }
 }
 ?>

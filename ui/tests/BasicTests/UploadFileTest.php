@@ -51,16 +51,15 @@ class UploadFileTest extends fossologyTestCase
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
     $this->assertTrue($this->myassertText($loggedIn, '/From File/'));
-
     $page = $this->mybrowser->get("$URL?mod=upload_file");
+    //print "*********** Page after going to upload file **************\n$page\n";
     $this->assertTrue($this->myassertText($page, '/Upload a New File/'));
     $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
-    /* select Testing folder, filename based on pid */
 
     $id = $this->getFolderId('Basic-Testing', $page);
     $this->assertTrue($this->mybrowser->setField('folder', $id));
     $this->assertTrue($this->mybrowser->setField('getfile', '/home/fosstester/licenses/gpl-3.0.txt' ));
-    $desc = 'File gpl-3.0.txt uploaded by test UploadFileTest into Testing folder';
+    $desc = 'File gpl-3.0.txt uploaded by test UploadFileTest into Basic-Testing folder';
     $this->assertTrue($this->mybrowser->setField('description', "$desc" ));
     $id = getmypid();
     $upload_name = 'TestUploadFile-' . "$id";
@@ -69,7 +68,7 @@ class UploadFileTest extends fossologyTestCase
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
     $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
-    //print "*********** Page after upload **************\n$page\n";
+
   }
 }
 

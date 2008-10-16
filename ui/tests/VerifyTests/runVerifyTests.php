@@ -37,7 +37,9 @@ $test = &new TestSuite('Fossology Repo UI Verification Functional tests');
 //$test->addTestFile('browseUploadedTest.php');
 $test->addTestFile('OneShot-lgpl2.1.php');
 $test->addTestFile('OneShot-lgpl2.1-T.php');
-$test->addTestFile('verifyFossTestAr.php');
+$test->addTestFile('verifyFossI16L519.php');
+$test->addTestFile('verifyFoss23D1F1L.php');
+//$test->addTestFile('verifyFossDirsOnly.php');
 
 if (TextReporter::inCli())
 {
