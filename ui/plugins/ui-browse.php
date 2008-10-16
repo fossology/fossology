@@ -217,7 +217,7 @@ class ui_browse extends FO_Plugin
 	AND lft IS NOT NULL
 	WHERE upload_pk IN
 	(SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
-	ORDER BY upload_filename,upload_desc;";
+	ORDER BY upload_filename,upload_desc,upload_pk;";
     $Results = $DB->Action($Sql);
 
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
