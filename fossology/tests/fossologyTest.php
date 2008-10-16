@@ -79,6 +79,29 @@ class fossologyTest extends WebTestCase
 
   /* Methods */
 
+  /**
+   * createTestingFolder
+   *
+   * Create a folder for use in testing
+   *
+   * @param string $name the name of the folder to create
+   * @param string $parent the name of the parent folder.  This is an
+   * optoinal parameter, if none supplied, then the root folder is used.
+   *
+   * @return boolean
+   */
+   public function createTestFolder($name, $parent='root')
+   {
+    global $URL;
+    if ($parent == 'root') { $parent = null; }
+    if (empty($name)){
+      $pid = getmypid();
+      $name = 'Testing-' . $pid;
+    }
+    $page = $this->mybrowser->get($URL);
+    $this->createFolder($parent, $name, null);
+   }
+
    /**
    * getFolderId($folderNmae, $page)
    *
@@ -101,7 +124,7 @@ class fossologyTest extends WebTestCase
      */
     if($folderName == 'root') { return(1); }
     $efolderName = $this->escapeDots($folderName);
-    $found = preg_match("/.*value='([0-9].*?)'.*?;($efolderName)<\//", $page, $matches);
+    $found = preg_match("/.*value='([0-9].+)'.*?;($efolderName)<\//", $page, $matches);
     //print "GFID: matches is:\n";
     //var_dump($matches) . "\n";
     return ($matches[1]);
@@ -280,7 +303,7 @@ class fossologyTest extends WebTestCase
     $this->assertTrue($this->mybrowser->clickSubmit('Login'));
     $page = $this->mybrowser->getContent();
     preg_match('/User Logged In/', $page, $matches);
-    $this->assertTrue($matches, "Login PASSED");
+    $this->assertTrue($matches, "Failure! Login FAILED, did not see 'User Logged In'\n");
     $this->mybrowser->setCookie('Login', $cookieValue, $host);
     $page = $this->mybrowser->getContent();
     $NumMatches = preg_match('/User Logged Out/', $page, $matches);

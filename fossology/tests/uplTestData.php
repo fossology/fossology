@@ -61,9 +61,9 @@ class uploadTestDataTest extends fossologyTestCase
   function testCreateTestingFolder()
   {
     global $URL;
-    print "Creating testing folder\n";
+    print "Creating Testing folder\n";
     $page = $this->mybrowser->get($URL);
-    $this->createFolder(null, 'Testing', null);
+    $this->createTestFolder(null, 'Testing', null);
   }
 
   function testuploadTestDataTest()
