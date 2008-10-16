@@ -283,7 +283,7 @@ class ui_browse extends FO_Plugin
 	  if ($ItemCount != "1") { $V .= "items."; }
 	  else { $V .= "item."; }
 	  $V .= "</td>\n";
-          $V .= "<td align='right'>" . substr($Row['upload_ts'],0,16) . "</td></tr>\n";
+          $V .= "<td align='right'>" . substr($Row['upload_ts'],0,19) . "</td></tr>\n";
 
 	  /* Check job status */
 	  $Status = JobListSummary($UploadPk);
