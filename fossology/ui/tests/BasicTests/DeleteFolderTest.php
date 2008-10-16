@@ -29,8 +29,8 @@
  */
 
 
-require_once ('../../tests/fossologyTestCase.php');
-require_once ('../../tests/TestEnvironment.php');
+require_once ('../../../tests/fossologyTestCase.php');
+require_once ('../../../tests/TestEnvironment.php');
 
 /* every test must use these globals, at least $URL */
 global $URL;
@@ -50,7 +50,7 @@ class DeleteFolderTest extends fossologyTestCase
     $page = $this->mybrowser->get("$URL?mod=folder_create");
     $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
     /* select the folder to create this folder under */
-    $FolderId = $this->getFolderId('Testing', $page);
+    $FolderId = $this->getFolderId('Basic-Testing', $page);
     $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
     $this->folder_name = 'DeleteMe';
     $this->assertTrue($this->mybrowser->setField('newname', $this->folder_name));

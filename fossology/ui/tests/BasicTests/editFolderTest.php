@@ -45,10 +45,10 @@ class EditFolderTest extends fossologyTestCase
 
     $this->Login();
     /* create a folder, which is edited below */
-    $FolderId = $this->getFolderId('Testing', $page);
+    $FolderId = $this->getFolderId('Basic-Testing', $page);
     $pid = getmypid();
     $this->editFolderName = "EditMe-$pid";
-    $this->createFolder('Testing', $this->editFolderName);
+    $this->createFolder('Basic-Testing', $this->editFolderName);
   }
 
   function testEditFolder()

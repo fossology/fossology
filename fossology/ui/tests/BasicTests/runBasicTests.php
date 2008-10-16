@@ -17,7 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 /*
- * Runner script to run Page level tests
+ * Runner script to run Basic tests
  */
 // set the path for where simpletest is
 $path = '/usr/share/php' . PATH_SEPARATOR;
@@ -32,33 +32,31 @@ require_once ('../../../tests/TestEnvironment.php');
 require_once('../../../tests/testClasses/timer.php');
 
 $start = new timer();
-print "Startnig Page Functional Tests at: " . date('r') . "\n";
-$test = &new TestSuite('Fossology Repo UI Page Functional tests');
-
+print "Startnig Basic Functional Tests at: " . date('r') . "\n";
+$test = &new TestSuite('Fossology Repo UI Basic Functional tests');
+// Must run BasicSetup first, it creates the folder the other tests need.
+$test->addTestFile('BasicSetup.php');
 $test->addTestFile('UploadFileTest.php');
 $test->addTestFile('UploadUrlTest.php');
 $test->addTestFile('UploadSrvTest.php');
-$test->addTestFile('OneShot-lgpl2.1.php');
-$test->addTestFile('OneShot-lgpl2.1-T.php');
 $test->addTestFile('CreateFolderTest.php');
 $test->addTestFile('DeleteFolderTest.php');
 $test->addTestFile('editFolderTest.php');
 $test->addTestFile('editFolderNameOnlyTest.php');
 $test->addTestFile('editFolderDescriptionOnlyTest.php');
 $test->addTestFile('moveFolderTest.php');
-//$test->addTestFile('browseUploadedTest.php');
 $test->addTestFile('DupFolderTest.php');
 $test->addTestFile('DupUploadTest.php');
 
 if (TextReporter::inCli())
 {
   $results = $test->run(new TextReporter()) ? 0 : 1;
-  print "Ending Page Tests at: " . date('r') . "\n";
+  print "Ending Basic Tests at: " . date('r') . "\n";
   $elapseTime = $start->TimeAgo($start->getStartTime());
-  print "The Page Tests took {$elapseTime}to run\n";
+  print "The Basic Tests took {$elapseTime}to run\n";
   exit($results);
 }
 $test->run(new HtmlReporter());
 $elapseTime = $start->TimeAgo($start->getStartTime());
-print "The Page Functional Tests took {$elapseTime}to run\n";
+print "<pre>The Basic Functional Tests took {$elapseTime}to run</pre>\n";
 ?>
