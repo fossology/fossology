@@ -263,6 +263,13 @@ int	LoadRecords	(int RecMax, SAMDAT *Rec)
 	i += Len+1; /* skip name and newline */
 	SaveFunctionOffsets(Count,1);
 
+	/* Skip Atotal */
+	while((i<MmapSize) && (Mmap[i] != '\n')) i++;
+	i++;
+	/* Skip Btotal */
+	while((i<MmapSize) && (Mmap[i] != '\n')) i++;
+	i++;
+
 	/* Load the A token size */
 	i += 6;
 	if (i >= MmapSize) return(Count);
