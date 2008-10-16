@@ -71,7 +71,7 @@ class MoveFolderTest extends fossologyTestCase
     /* this assertion below is bogus, there are multiple Move (s) */
     $this->assertTrue($this->myassertText($loggedIn, '/Move/'));
     $this->upload2Move = 'gpl-3.0.txt';
-    $this->toFolder    = 'Testing';
+    $this->toFolder    = 'Basic-Testing';
     /* fromFolder is 'root' */
     print "1st call: FF:$this->fromFolder TF:$this->toFolder U2M:$this->upload2Move\n";
     $this->moveUpload($this->fromFolder, $this->toFolder, $this->upload2Move);
@@ -79,7 +79,7 @@ class MoveFolderTest extends fossologyTestCase
      *
      */
     $page = $this->mybrowser->clickLink('Browse');
-    $page = $this->mybrowser->clickLink('Testing');
+    $page = $this->mybrowser->clickLink('Basic-Testing');
     $this->assertTrue($this->myassertText($page, "/$this->upload2Move/"),
                        "moveUploadTest FAILED! Folder $this->upload2Move does not exist under Testing folder\n");
     //print "************ page after Move! *************\n$page\n";
@@ -91,7 +91,7 @@ class MoveFolderTest extends fossologyTestCase
    */
   function tearDown()
   {
-    $this->moveUpload('Testing', 'root', $this->upload2Move);
+    $this->moveUpload('Basic-Testing', 'root', $this->upload2Move);
   }
 }
 ?>

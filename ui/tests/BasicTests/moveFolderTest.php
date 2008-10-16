@@ -48,19 +48,19 @@ class MoveFolderTest extends fossologyTestCase
      */
     $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Move');
-    $FolderId = $this->getFolderId('Testing', $page);
+    $FolderId = $this->getFolderId('Basic-Testing', $page);
     if(empty($FolderId))
     {
       $this->fail("MoveFolderTest will fail, no Testing folder to use.\n Please correct and rerun\n");
     }
     $pid = getmypid();
     $this->moveFolder = "MoveTest-$pid";
-    $this->createFolder('Testing', $this->moveFolder);
+    $this->createFolder('Basic-Testing', $this->moveFolder);
 
     /* create a folder, which get's moved below */
     $pid = getmypid();
     $this->folder2Move = "MoveMe-$pid";
-    $this->createFolder('Testing', $this->folder2Move);
+    $this->createFolder('Basic-Testing', $this->folder2Move);
 
   }
   /**

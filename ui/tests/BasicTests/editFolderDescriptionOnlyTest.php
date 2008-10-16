@@ -48,7 +48,7 @@ class EditFolderDescriptionOnlyTest extends fossologyTestCase
     $page = $this->mybrowser->get("$URL?mod=folder_create");
     $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
     /* select the folder to create this folder under */
-    $FolderId = $this->getFolderId('Testing', $page);
+    $FolderId = $this->getFolderId('Basic-Testing', $page);
     $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
     $pid = getmypid();
     $this->folder_name = "EditDescription-$pid";
