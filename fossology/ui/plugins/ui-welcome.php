@@ -73,7 +73,7 @@ class ui_welcome extends FO_Plugin
           <img src='images/right-point-bullet.gif'>Extract MIME type and meta data information</font></p>
         <p>&nbsp;</p>
       </blockquote></td>
-    <td><img src='images/mag-glass-molecule.png'></td>
+    <td><img src='images/white.png'></td>
   </tr>
 </table>
 
@@ -145,7 +145,7 @@ class ui_welcome extends FO_Plugin
 
 <table width='100%' border='0'>
   <tr> 
-    <td valign='top'> <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'><img src='images/diving_board.gif' align='left'> 
+    <td valign='top'> <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'><img src='images/white.png' align='left'> 
         Need Some Help?</font></h3>
       <blockquote> 
         <blockquote> 
