@@ -373,6 +373,7 @@ function FolderGetFromUpload ($Uploadpk,$Folder=-1,$Stop=-1)
  FolderListUploads(): Returns an array of:
    upload_pk
    upload_desc
+   upload_ts
    ufile_name
  for all uploads in a given folder.
  This does NOT recurse.
@@ -389,20 +390,21 @@ function FolderListUploads($ParentFolder=-1)
 
   /* Get list of uploads */
   /** mode 1<<1 = upload_fk **/
-  $SQL = "SELECT upload_pk, upload_desc, ufile_name FROM foldercontents,uploadtree, upload
-	WHERE 
-	    foldercontents.parent_fk = '$ParentFolder'
+  $SQL = "SELECT upload_pk, upload_desc, upload_ts, ufile_name
+	FROM foldercontents,uploadtree,upload
+	WHERE foldercontents.parent_fk = '$ParentFolder'
 	AND foldercontents.foldercontents_mode = 2
-    AND foldercontents.child_id = upload.upload_pk
-    AND uploadtree.upload_fk = upload.upload_pk
-    AND uploadtree.parent is null
-	ORDER BY uploadtree.ufile_name,upload.upload_desc;";
+	AND foldercontents.child_id = upload.upload_pk
+	AND uploadtree.upload_fk = upload.upload_pk
+	AND uploadtree.parent IS NULL
+	ORDER BY uploadtree.ufile_name,upload_pk;";
   $Results = $DB->Action($SQL);
   foreach($Results as $R)
     {
     if (empty($R['upload_pk'])) { continue; }
     $New['upload_pk'] = $R['upload_pk'];
     $New['upload_desc'] = $R['upload_desc'];
+    $New['upload_ts'] = substr($R['upload_ts'],0,19);
     $New['name'] = $R['ufile_name'];
     array_push($List,$New);
     }

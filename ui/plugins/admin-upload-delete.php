@@ -132,6 +132,10 @@ class admin_upload_delete extends FO_Plugin
 	    {
 	    $V .= " (" . htmlentities($L['upload_desc']) . ")";
 	    }
+	  if (!empty($L['upload_ts']))
+	    {
+	    $V .= " :: " . substr($L['upload_ts'],0,19);
+	    }
 	  $V .= "</option>\n";
 	  }
 	$V .= "</select><P />\n";

@@ -52,12 +52,12 @@ class core_uploads extends FO_Plugin
     switch($this->OutputType)
       {
       case "XML":
-        break;
+	break;
       case "HTML":
 	$FolderId = GetParm("folder",PARM_INTEGER);
 	if (empty($FolderId)) { $FolderId = FolderGetTop(); }
 	$List = FolderListUploads($FolderId);
-        foreach($List as $L)
+	foreach($List as $L)
 	  {
 	  $V .= "<option value='" . $L['upload_pk'] . "'>";
 	  $V .= htmlentities($L['name']);
@@ -65,13 +65,17 @@ class core_uploads extends FO_Plugin
 		{
 		$V .= " (" . htmlentities($L['upload_desc']) . ")";
 		}
+	  if (!empty($L['upload_ts']))
+		{
+		$V .= " :: " . htmlentities($L['upload_ts']);
+		}
 	  $V .= "</option>\n";
 	  }
-        break;
+	break;
       case "Text":
-        break;
+	break;
       default:
-        break;
+	break;
       }
     if (!$this->OutputToStdout) { return($V); }
     print("$V");
