@@ -28,17 +28,17 @@ require_once('../../../tests/fossologyTestCase.php');
 require_once('../../../tests/TestEnvironment.php');
 require_once('../../../tests/testClasses/parseBrowseMenu.php');
 require_once('../../../tests/testClasses/parseMiniMenu.php');
-require_once('../../../tests/testClasses/parseLicFileList.php');
+require_once('../../../tests/testClasses/parseFolderPath.php');
 require_once('../../../tests/testClasses/parseLicenseTbl.php');
+require_once('../../../tests/testClasses/parseLicenseTblDirs.php');
 
 global $URL;
 
 /**
- * This test verifies that the archive foss23D1F1L is processed
- * correctly.  The archive contains 23 directories (most empty),
- * 1 File and 1 license.
+ * This test verifies that the archive fossDirsOnly is processed
+ * correctly. The archive contains only empty directories.
  */
-class verify23D1F1L extends fossologyTestCase
+class verifyDirsOnly extends fossologyTestCase
 {
   public $mybrowser;
   public $host;
@@ -53,7 +53,8 @@ class verify23D1F1L extends fossologyTestCase
     global $name;
     global $safeName;
 
-    $name = 'foss23D1F1L.tar.bz2';
+    print "starting verifyFossDirsOnly-SetUp\n";
+    $name = 'fossDirsOnly.tar.bz2';
     $safeName = $this->escapeDots($name);
     $this->host = $this->getHost($URL);
     $this->Login();
@@ -62,12 +63,13 @@ class verify23D1F1L extends fossologyTestCase
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Browse');
     $this->assertTrue($this->myassertText($page, '/Browse/'),
-     "verify23D1F1L FAILED! Could not find Browse menu\n");
-    $page = $this->mybrowser->clickLink('Testing');
-    $this->assertTrue($this->myassertText($page, '/Testing/'),
-     "verify23D1F1L FAILED! Could not find Testing folder\n");
-    $result = $this->myassertText($page, "/$name/");
-    if(!($result)) { exit(FALSE); }
+         "verifyDirsOnly FAILED! Could not find Browse menu\n");
+    $result = $this->myassertText($page, "/$safeName/");
+    if(!($result))
+    {
+      print "Failure, cannot find archive $name, Stopping test\n";
+      exit(FALSE);
+    }
   }
 
   function testVerifyFossology()
@@ -76,70 +78,110 @@ class verify23D1F1L extends fossologyTestCase
     global $name;
     global $safeName;
 
-    print "starting VerifyFoss23D1F1L test\n";
+    print "starting verifyFossDirsOnly test\n";
     $page = $this->mybrowser->clickLink('Browse');
     $this->assertTrue($this->myassertText($page, '/Browse/'),
-             "verify23D1F1L FAILED! Could not find Browse menu\n");
-    $page = $this->mybrowser->clickLink('Testing');
+             "verifyFossDirsOnly FAILED! Could not find Browse menu\n");
     //print "************ Page after upload link *************\n$page\n";
-    $this->assertTrue($this->myassertText($page, "/Browse/"),
-       "verify23D1F1L FAILED! Browse Title not found\n");
     $this->assertTrue($this->myassertText($page, "/$safeName/"),
-       "verify23D1F1L FAILED! did not find $name\n");
+       "verifyFossDirsOnly FAILED! did not find $name\n");
     $this->assertTrue($this->myassertText($page, "/>View</"),
-       "verifyfoss23D1F1L FAILED! >View< not found\n");
+       "verifyFossDirsOnly FAILED! >View< not found\n");
     $this->assertTrue($this->myassertText($page, "/>Meta</"),
-       "verifyFoss23D1F1L FAILED! >Meta< not found\n");
+       "verifyFossDirsOnly FAILED! >Meta< not found\n");
     $this->assertTrue($this->myassertText($page, "/>Download</"),
-       "verifyFoss23D1F1L FAILED! >Download< not found\n");
+       "verifyFossDirsOnly FAILED! >Download< not found\n");
 
     /* Select archive */
     $page = $this->mybrowser->clickLink($name);
     //print "************ Page after select foss archive *************\n$page\n";
-    $this->assertTrue($this->myassertText($page, "/foss23Dirs1File1Lic\//"),
-      "verifyfoss23D1F1L FAILED! 'foss23Dirs1File1Lic/' not found\n");
+    $this->assertTrue($this->myassertText($page, "/empty\//"),
+      "verifyFossDirsOnly FAILED! 'empty/' not found\n");
     $this->assertTrue($this->myassertText($page, "/1 item/"),
-      "verifyfoss23D1F1L FAILED! '1 item' not found\n");
+      "verifyFossDirsOnly FAILED! '1 item' not found\n");
 
-    /* Select fossology link */
-    $page = $this->mybrowser->clickLink('foss23Dirs1File1Lic/');
+    /* Select empty link */
+    $page = $this->mybrowser->clickLink('empty/');
 
     /* need to check that there are 9 items */
     $this->assertTrue($this->myassertText($page, "/9 items/"),
-      "verifyfoss23D1F1L FAILED! '9 items' not found\n");
+      "verifyFossDirsOnly FAILED! '9 items' not found\n");
     $this->assertTrue($this->myassertText($page, "/agents/"),
-    "verify23D1F1L FAILED! did not find 'agents' directory\n");
+    "verifyFossDirsOnly FAILED! did not find 'agents' directory\n");
     $this->assertTrue($this->myassertText($page, "/scheduler/"),
-      "verify23D1F1L FAILED! did not find scheduler directory\n");
+      "verifyFossDirsOnly FAILED! did not find scheduler directory\n");
 
     /* Select the License link to View License Historgram */
     $browse = new parseBrowseMenu($page);
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
     $url = $this->makeUrl($this->host, $miniMenu['License']);
-    if($url === NULL) { $this->fail("verify23D1F1L Failed, host is not set"); }
+    if($url === NULL) { $this->fail("verifyFossDirsOnly Failed, host is not set"); }
 
     $page = $this->mybrowser->get($url);
     //print "page after get of $url is:\n$page\n";
     $this->assertTrue($this->myassertText($page, '/License Browser/'),
-          "verify23D1F1L FAILED! License Browser Title not found\n");
-    $this->assertTrue($this->myassertText($page, '/Total licenses: 2/'),
-        "verify23D1F1L FAILED! Total Licenses does not equal 2\n");
+          "verifyFossDirsOnly FAILED! License Browser Title not found\n");
+    $this->assertTrue($this->myassertText($page, '/Total licenses: 0/'),
+        "verifyFossDirsOnly FAILED! Total Licenses does not equal 0\n");
 
-    // get the 'Show' links and License color links
-    $licTbl = new parseLicenseTbl($page);
-    $licTable = $licTbl->parseLicenseTbl();
-    //print "licTable is:\n"; print_r($licTable) . "\n";
-
-    /* FIX THIS Select show 'Public Domain, verify, select 'LGPL v2.1', verify */
-    $gplv2URL = $this->makeUrl($this->host, $licTable['\'GPL v2\'-style'][0]);
-
-    $page = $this->mybrowser->get($gplv2URL);
-    $licFileList = new parseLicFileList($page);
-    $tblList = $licFileList->parseLicFileList();
-    $tableCnt = count($tblList);
-    print "Checking the number of files based on 'GPL v2'-style\n";
-    $this->assertEqual($tableCnt, 1);
+    $dList = new parseLicenseTblDirs($page);
+    $dirList = $dList->parseLicenseTblDirs();
+    //print "dirList is:\n"; print_r($dirList) . "\n";
+    /*
+     * the directiory agents has 13 subdirectories all other directories
+     * are empty. we are going to loop through them, but for now just
+     * test a few of them out....
+     */
+    $url = $this->makeUrl($this->host, $dirList['scheduler/']);
+    $page = $this->mybrowser->get($url);
+    //print "page after scheduler is:\n$page\n";
+    $fList = new parseFolderPath($page);
+    $dirList = $fList->parseFolderPath();
+    // should only get one array back (i.e. one folder path)
+    //$folderCount = count($dirList);
+    $this->assertEqual(count($dirList), 1,
+    "verifyFossDirsOnly FAILED! did not get 1 folder path back\n");
+    // every entry but the last must have a non-null value (we assume parse
+    // routine worked)
+    $this->assertTrue($this->check4Links($dirList),
+      "verifyFossDirsOnly FAILED! something wrong with folder path\n" .
+      "See this url:\n$url\n");
   }
+  /**
+   * check4Links
+   *
+   * Check to see that the folder path array passed in is constructed
+   * properly.  It must consist of links till the leaf node, which
+   * should not have a link.
+   *
+   * @param array $folderPath
+   *
+   * @return boolean
+   *
+   */
+   function check4Links($folderPath)
+   {
+    $flistSize = count($folderPath[0]);
+    foreach($folderPath as $flist)
+    {
+      $i = 0;
+      foreach($flist as $folder => $link)
+      {
+        $i++;
+        // is it the last entry?
+        if ($i == $flistSize)
+        {
+          $this->assertTrue(is_null($link),
+          "verifyFossDirsOnly FAILED! Last entry is not null\n$folder $link\n");
+          continue;
+        }
+        $this->assertFalse(is_null($link),
+        "verifyFossDirsOnly FAILED! Found a folder with no link\n$folder $link\n");
+      }
+    }
+    return(TRUE);
+   }
+
 }
 ?>

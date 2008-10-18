@@ -32,6 +32,7 @@
  * include test files
  */
 require_once ('TestEnvironment.php');
+require_once ('commoneTestFuncs.php');
 /**#@-*/
 
 global $URL;
@@ -310,100 +311,5 @@ class fossologyTest extends WebTestCase
     $this->assertFalse($NumMatches, "User Logged out!, Login Failed! %s");
     return ($cookieValue);
   }
-  /********************************************************************
-    * Static methods
-    * Even though these are static, they should still be called with a
-    * $this-> in case they turn into non-static methods.
-    * ******************************************************************/
-  /**
-   * public function getHost
-   *
-   * returns the host (if present) from a URL
-   *
-   * @param string $URL a url in the form of http://somehost.xx.com/repo/
-   *
-   * @return string $host the somehost.xxx part is returned or
-   *         NULL, if there is no host in the uri
-   *
-   */
-
-  public function getHost($URL)
-  {
-    if (empty ($URL))
-    {
-      return (NULL);
-    }
-    return (parse_url($URL, PHP_URL_HOST)); // can return NULL
-  }
-  /**
-   * escapeDots($string)
-   *
-   * Escape '.' in a string by replacing '.' with '\.'
-   * @param string $string the input string to escape.
-   * @return string $estring the escaped string or False.
-   */
-  public function escapeDots($string)
-  {
-    if(empty($string)) { return(FALSE); }
-    $estring = preg_replace('/\./', '\\.', $string);
-    //print  "ED: string is:$string, estring is:$estring\n";
-    if($estring === NULL) { return(FALSE); }
-    return($estring);
-  }
-
-  /**
-   * getBrowserUri($name, $page)
-   *
-   * Get the url fragment to display the upload from the xhtml page.
-   *
-   * @param string $name the name of a folder or upload
-   * @param string $page the xhtml page to search
-   *
-   * TODO: finish or scrap this method
-   *
-   * @return $string the matching uri or null.
-   *
-   */
-  public function getBrowseUri($name, $page)
-  {
-    //print "DB: GBURI: page is:\n$page\n";
-    //$found = preg_match("/href='(.*?)'>($uploadName)<\/a>/", $page, $matches);
-    // doesn't work: '$found = preg_match("/href='(.*?)'>$name/", $page, $matches);
-    $found = preg_match("/href='((.*?)&show=detail).*?/", $page, $matches);
-    //$found = preg_match("/ class=.*?href='(.*?)'>$name/", $page, $matches);
-    print "DB: GBURI: found matches is:$found\n";
-    print "DB: GBURI: matches is:\n";
-    var_dump($matches) . "\n";
-    if ($found)
-    {
-      return ($matches[1]);
-    } else
-    {
-      return (NULL);
-    }
-  }
-  /**
-   * makeUrl($host,$query)
-   *
-   * Make a url from the host and query strings.
-   *
-   * @param $string $host the host (e.g. somehost.com, host.privatenet)
-   * @param $string $query the query to append to the host.
-   *
-   * @return the http string or NULL on error
-   */
-  public function makeUrl($host, $query)
-  {
-    if (empty ($host))
-    {
-      return (NULL);
-    }
-    if (empty ($query))
-    {
-      return (NULL);
-    }
-    return ("http://$host$query");
-  }
-
 } // fossolgyTest
 ?>

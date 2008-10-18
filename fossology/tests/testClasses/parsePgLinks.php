@@ -56,7 +56,7 @@ class parsePgLinks
    */
   function parsePgLinks()
   {
-    // The line below is great for pasring hrefs out of a page
+    // The line below is great for pasring hrefs out of a page, from the net
     $regExp = "<a\s[^>]*href=(\'??)([^\'>]*?)\\1[^>]*>(.*)<\/a>";
     $matches = preg_match_all("|$regExp|iU", $this->page, $links, PREG_SET_ORDER);
     print "links are:\n";
