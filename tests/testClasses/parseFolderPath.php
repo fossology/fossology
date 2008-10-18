@@ -32,18 +32,20 @@
  * @version "$Id$" Created on Aug 21, 2008
  */
 
+require_once ('../commonTestFunc.php');
+
 class parseFolderPath
 {
   public $page;
+  public $host;
   private $test;
 
-  function __construct($page)
+  function __construct($page, $url)
   {
-    if (empty ($page))
-    {
-      return;
-    }
+    if (empty ($page)) { return; }
     $this->page = $page;
+    if(empty($url)) { return; }
+    $this->host = getHost($url);
   }
   /**
    * function parseFolderPath
@@ -72,26 +74,29 @@ class parseFolderPath
     }
     foreach ($paths as $apath)
     {
-      // The line below is great for pasring hrefs out of a page
-      //$regExp = "<a\s[^>]*href=(\'??)([^\'>]*?)\\1[^>]*>(.*)<\/a>";
-      //$matches = preg_match_all("|$regExp|iU", $apath, $pathList, PREG_PATTERN_ORDER);
       $regExp = ".*?href='(.*?)'>(.*?)<\/a>(.*?)<";
       $matches = preg_match_all("|$regExp|i", $apath, $pathList, PREG_SET_ORDER);
-      print "pathList is:\n"; print_r($pathList) . "\n";
+      //print "pathList is:\n"; print_r($pathList) . "\n";
+    if ($matches > 0)
+    {
       $dirList[] = $this->_createRtnArray($pathList, $matches);
+      return ($dirList);
     }
-    return ($dirList);
+    else
+    {
+      return (array ());
+    }
+
+  }
   }
   function _createRtnArray($list, $matches)
   {
+    global $host;
     /*
      * if we have a match, the create return array, else return empty
      * array
      */
-    if ($matches > 0)
-    {
       $size = count($list);
-      print "size is:$size\n";
       /*
        * The last entry in the array is always a leaf name with no link
        * but it has to be cleaned up a bit....
@@ -99,9 +104,11 @@ class parseFolderPath
       for ($i = 0; $i < $size; $i++)
       {
         $cleanKey = trim($list[$i][2], "\/<>b");
-        $link = $list[$i][1];
         //print "after trim of html cleanKey is:$cleanKey\n";
         if (empty($cleanKey)) { continue; }
+        // Make a real link that can be used
+        $partLink = $list[$i][1];
+        $link = makeUrl($this->host, $partLink);
         $rtnList[$cleanKey] = $link;
         /* check for anything in the leaf entry, if there is, remove
          * the preceeding /
@@ -115,10 +122,6 @@ class parseFolderPath
         }
       }
       return ($rtnList);
-    } else
-    {
-      return (array ());
-    }
   }
 
   public function setPage($page)

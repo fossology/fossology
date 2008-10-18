@@ -29,6 +29,8 @@
  * Created on Aug 19, 2008
  */
 
+require_once ('../commonTestFunc.php');
+
 class parseBrowseMenu
 {
   public $page;

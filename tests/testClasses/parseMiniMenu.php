@@ -28,10 +28,14 @@
  * Can return an empty array indicating no mini menus found on the page.
  * Only menus with links are returned.
  *
+ * @todo add in link fixups and adjust consumers
+ *
  * @version "$Id$"
  *
  * Created on Aug 19, 2008
  */
+
+require_once ('../commonTestFunc.php');
 
 class parseMiniMenu
 {

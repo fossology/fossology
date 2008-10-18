@@ -28,7 +28,7 @@ require_once('../../../tests/fossologyTestCase.php');
 require_once('../../../tests/TestEnvironment.php');
 require_once('../../../tests/testClasses/parseBrowseMenu.php');
 require_once('../../../tests/testClasses/parseMiniMenu.php');
-require_once('../../../tests/testClasses/parseLicFileList.php');
+require_once('../../../tests/testClasses/parseFolderPath.php');
 require_once('../../../tests/testClasses/parseLicenseTbl.php');
 
 global $URL;
@@ -135,8 +135,8 @@ class verify23D1F1L extends fossologyTestCase
     $gplv2URL = $this->makeUrl($this->host, $licTable['\'GPL v2\'-style'][0]);
 
     $page = $this->mybrowser->get($gplv2URL);
-    $licFileList = new parseLicFileList($page);
-    $tblList = $licFileList->parseLicFileList();
+    $licFileList = new parseFolderPath($page);
+    $tblList = $licFileList->parseFolderPath();
     $tableCnt = count($tblList);
     print "Checking the number of files based on 'GPL v2'-style\n";
     $this->assertEqual($tableCnt, 1);

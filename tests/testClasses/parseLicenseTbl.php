@@ -26,9 +26,13 @@
  * @return assocative array with  Can return an empty array indicating
  * nothing on the page to browse.
  *
+ * @todo add in link fixups and adjust consumers
+ *
  * @version "$Id$"
  * Created on Aug 21, 2008
  */
+
+require_once ('../commonTestFunc.php');
 
 class parseLicenseTbl
 {
