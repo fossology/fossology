@@ -114,7 +114,7 @@ if [ -f "$TARBASE.tar.gz" ]; then
 fi
 
 echo "*** Creating tar ***"
-tar --anchored --exclude="debian" -czf "$TARBASE.tar.gz" "$TARBASE"
+tar --anchored --exclude=\*/debian -czf "$TARBASE.tar.gz" "$TARBASE"
 if [ $? != 0 ]; then
    echo "ERROR: unable to create ../$TARBASE.tar.gz, exiting."
    exit 4
