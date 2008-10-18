@@ -19,24 +19,20 @@
  ***********************************************************/
 
 /**
- * Given a fossology License Broswe page, parse it and return the
- * license table.  The rest of the page can be parsed by the browseMenu
- * class.
+ * Parse the part of the page that has the folder path and mini menu.
  *
  * @param string $page the xhtml page to parse
  *
- * @return assocative array with  Can return an empty array indicating
- * nothing on the page to browse.
+ * @return array of assocative arrays. Each associative array uses the
+ * folder or leaf name for the key and the value is a link (if there
+ * is one.)
  *
- * TODO: rename this class and methods to parseFolderPath, its more
- * general and I beieve it can parse the folder path at the top of the
- * License Browser Screen.
+ * Can return an empty array indicating nothing on the page to browse.
  *
- * @version "$Id$"
- * Created on Aug 21, 2008
+ * @version "$Id$" Created on Aug 21, 2008
  */
 
-class parseLicFileList
+class parseFolderPath
 {
   public $page;
   private $test;
@@ -50,16 +46,19 @@ class parseLicFileList
     $this->page = $page;
   }
   /**
-   * function parseLicFileList
-   * given a fossology List Files based on License page parse the
-   * list(s) on the page.
+   * function parseFolderPath
+   *
+	 * Parse the part of the page that has the folder path and mini-menu,
+   * this method only parses the folder path, see parseMiniMenu.
    *
    * @returns array of assocative arrays. Each assocative array
    * is ordered by folder names with the last key being the
-   * filename. An empty array is returned if no license paths on that
-   * page.
+   * leafname, which can be and empty directory.  Usually no link is
+   * associated with the leaf node, so it's typically NULL.
+   *
+   * An empty array is returned if no license paths on that page.
    */
-  function parseLicFileList()
+  function parseFolderPath()
   {
     /* Extract the folder path line from the page */
     $regExp = "Folder<\/b>:.*";
@@ -71,22 +70,17 @@ class parseLicFileList
         $paths[] = $path;
       }
     }
-    $cnt = count($paths);
-    //print "count for Folder paths is:$cnt\n";
-    //print "paths are:\n"; print_r($paths) . "\n";
     foreach ($paths as $apath)
     {
-      //print "before parse: path is:\n$apath\n";
       // The line below is great for pasring hrefs out of a page
-      $regExp = "<a\s[^>]*href=(\'??)([^\'>]*?)\\1[^>]*>(.*)<\/a>";
-      $matches = preg_match_all("|$regExp|iU", $apath, $pathList, PREG_PATTERN_ORDER);
-      //print "pathList is:\n";
-      //print_r($pathList) . "\n";
-      $lstFilesLic[] = $this->_createRtnArray($pathList, $matches);
+      //$regExp = "<a\s[^>]*href=(\'??)([^\'>]*?)\\1[^>]*>(.*)<\/a>";
+      //$matches = preg_match_all("|$regExp|iU", $apath, $pathList, PREG_PATTERN_ORDER);
+      $regExp = ".*?href='(.*?)'>(.*?)<\/a>(.*?)<";
+      $matches = preg_match_all("|$regExp|i", $apath, $pathList, PREG_SET_ORDER);
+      print "pathList is:\n"; print_r($pathList) . "\n";
+      $dirList[] = $this->_createRtnArray($pathList, $matches);
     }
-    //print "lstFilesLic is:\n";
-    //print_r($lstFilesLic) . "\n";
-    return ($lstFilesLic);
+    return ($dirList);
   }
   function _createRtnArray($list, $matches)
   {
@@ -96,16 +90,29 @@ class parseLicFileList
      */
     if ($matches > 0)
     {
-      $numPaths = count($list[3]);
-      //print "numPaths is:$numPaths\n";
-      //print "list is:\n";
-      //print_r($list) . "\n";
-
-      $rtnList = array ();
-      for ($i = 0; $i <= $numPaths-1 ; $i++)
+      $size = count($list);
+      print "size is:$size\n";
+      /*
+       * The last entry in the array is always a leaf name with no link
+       * but it has to be cleaned up a bit....
+       */
+      for ($i = 0; $i < $size; $i++)
       {
-        $cleanKey = trim($list[3][$i], "\/<>b");
-        $rtnList[$cleanKey] = $list[2][$i];
+        $cleanKey = trim($list[$i][2], "\/<>b");
+        $link = $list[$i][1];
+        //print "after trim of html cleanKey is:$cleanKey\n";
+        if (empty($cleanKey)) { continue; }
+        $rtnList[$cleanKey] = $link;
+        /* check for anything in the leaf entry, if there is, remove
+         * the preceeding /
+         */
+        if (!empty($list[$i][3]))
+        {
+          $cleanKey = trim($list[$i][3], "\/ ");
+          //print "after trim of / cleanKey is:$cleanKey\n";
+          if(empty($cleanKey)) { continue; }
+          $rtnList[$cleanKey] = NULL;
+        }
       }
       return ($rtnList);
     } else
