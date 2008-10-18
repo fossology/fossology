@@ -43,13 +43,30 @@ Usage: fo-postinstall [options]
   -o or --overwrite  : overwrite config files with new versions
   -h or --help       : this help text
 
-5) Use mkschedconf to generate an appropriate Scheduler.conf file on
+WARNING: the fo-postinstall script will create the fossy user on each
+machine, but it is important that the user's UID and GID are the same
+across machines so that NFS will work correctly (NFSv4's rpc.idmapd
+might be a solution for this)
+
+5) Setup NFS (or similar) on each agent machine to export it's repo
+directory to the other machines and mount all repos on all agent
+machines and the scheduler machine. For example:
+
+* an agent machine should have something like this in /etc/exports
+/srv/fossology/repository/agent1   192.168.8.0/24(rw,async,no_subtree_check)
+
+* the other agent machines and the scheduler would then have something
+like this in /etc/fstab
+agent1:/srv/fossology/repository/agent1 /srv/fossology/repository/agent1 \
+  nfs nfsvers=3,defaults,soft
+
+6) Use mkschedconf to generate an appropriate Scheduler.conf file on
 the machine running the scheduler.
 
-6) Run /usr/local/lib/fossology/fossology-scheduler -t to test that
+7) Run /usr/local/lib/fossology/fossology-scheduler -t to test that
 your Scheduler.conf file is correct and that the scheduler can talk to
 all the agent and that they are also configured correctly. If not then
 adjust until it does.
 
-7) Start the scheduler
+8) Start the scheduler
   # /etc/init.d/fossology start
