@@ -12,7 +12,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o rbeh --long runtime,buildtime,help -n 'fo-installdeps' -- "$@"`
+OPTS=`getopt -o rbeah --long runtime,buildtime,everything,agent,help -n 'fo-installdeps' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -31,11 +31,13 @@ while true; do
       -r|--runtime) RUNTIME=1; shift;;
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
+      -a|--agent) AGENT=1; shift;;
       -h|--help)
          echo "Usage: fo-installdeps [options]";
-	 echo "  -r or --runtime    : agent specific actions"
-	 echo "  -b or --buildtime  : database specific actions"
-	 echo "  -e or --everything : all actions (default)"
+	 echo "  -r or --runtime    : install runtime dependencies"
+	 echo "  -b or --buildtime  : install buildtime dependencies"
+	 echo "  -e or --everything : install all dependencies (default)"
+	 echo "  -a or --agent      : only install agent runtime dependencies (implies -r)"
 	 echo "  -h or --help       : this help text"
 	 exit;;
       --) shift; break;;
@@ -54,6 +56,11 @@ if [ $EVERYTHING ]; then
    echo "*** Installing both runtime and buildtime dependencies ***"
    RUNTIME=1
    BUILDTIME=1
+fi
+
+if [ $AGENT ]; then
+   # agent implies runtime
+   RUNTIME=1
 fi
 
 # figure out what distro we're on
@@ -106,24 +113,30 @@ if [ $RUNTIME ]; then
    echo "*** Installing $DISTRO runtime dependencies ***";
    case "$DISTRO" in
       Debian|Ubuntu)
+         [ $AGENT ] || apt-get install apache2 libapache2-mod-php5
          apt-get install \
-            apache2 \
-            php5 php5-pgsql php-pear libapache2-mod-php5 \
+            php5 php5-pgsql php-pear \
             libmagic1 libxml2 libextractor1c2a \
             binutils bzip2 cabextract cpio sleuthkit mkisofs xpdf-utils \
                rpm tar upx-ucl unrar unzip;
          case "$CODENAME" in
-            dapper) apt-get install postgresql-8.1;;
-            etch) apt-get install postgresql-8.1 libextractor-plugins;;
-            lenny|hardy) apt-get install postgresql-8.3 libextractor-plugins;;
-            sid) apt-get install postgresql-8.3 libextractor-plugins;;
+            dapper) [ $AGENT ] || apt-get install postgresql-8.1;;
+            etch)
+               [ $AGENT ] || apt-get install postgresql-8.1
+               apt-get install libextractor-plugins;;
+            lenny|hardy)
+               [ $AGENT ] || apt-get install postgresql-8.3
+               apt-get install libextractor-plugins;;
+            sid)
+               [ $AGENT ] || apt-get install postgresql-8.3
+               apt-get install libextractor-plugins;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO release"; exit 1;;
          esac
          ;;
       Fedora)
+         [ $AGENT ] || yum install postgresql-server httpd
          yum install \
-            postgresql postgresql-server \
-            httpd \
+            postgresql \
             php php-pear php-pgsql \
             file-libs libxml2 libextractor libextractor-plugins \
             binutils bzip2 cabextract cpio genisoimage poppler-utils \
@@ -142,9 +155,9 @@ if [ $RUNTIME ]; then
          ;;
       RedHatEnterprise*)
          # 4=Nahant* 5=Tikanga*
+         [ $AGENT ] || yum install postgresql-server httpd
          yum install \
-            postgresql postgresql-server \
-            httpd \
+            postgresql \
             php php-pear php-pgsql \
             file-libs libxml2 \
             binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip
