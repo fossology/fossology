@@ -70,3 +70,10 @@ clean:
 
 Now you can also make other targets (like "all") dependent on the
 "example" target.
+
+
+Clean up and testing:
+The utils/fo-cleanold utility is provided for users to be able to
+remove old fossology installs from their system, but it is also very
+useful in cleaning up a test system when testing installs. See the
+help text for additional flags to remove the database and repository.
