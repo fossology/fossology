@@ -64,6 +64,9 @@ fi
 # get path to repo
 if [ -e "{$SYSCONFDIR}/fossology/RepPath.conf" ] ; then
    REPO=`cat {$SYSCONFDIR}/fossology/RepPath.conf`
+else
+   echo "ERROR: Cannot find {$SYSCONFDIR}/fossology/RepPath.conf"
+   exit 1
 fi
 
 ## create user and group
