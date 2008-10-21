@@ -15,7 +15,9 @@ To do a multi-system install:
 1) Follow the instructions in INSTALL for each machine to build and
 install FOSSology, but do not run the fo-postinstall script yet. If
 the machine will serve as a ui machine follow the apache and php
-configuration steps.
+configuration steps. If using the fo-installdeps utility you can use
+the -a option for agent only machines to avoid installing unneeded
+things like the postgresql and apache servers.
 
 2) On each machine edit the default Db.conf file that was installed and
 configure it to point at the database server. If one of the systems
