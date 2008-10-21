@@ -10,47 +10,69 @@ looking to create packages.
 For extended discussion on how to use or tune the software, please see
 the User Documentation, available on the website.
 
-Really Short Install Instructions
-=================================
+This document is arranged  as follows:
+
+Section 1 - Short Installation Instructions
+Section 2 - Full Installation Instructions
+         2.1 - Preparing your system
+           2.1.1 Disk space
+           2.1.2 Dependencies
+           2.1.3 Adjusting the Kernel
+           2.1.4 Preparing Postgresql
+           2.1.5 Configuring PHP
+           2.1.6 Configuring Apache
+         2.2 - Building and Installing FOSSology
+           2.2.1 Build and Install Instructions
+           2.2.2 Automated Post-Installation
+           2.2.3 Detailed Post-Install Instructions
+           2.2.4 Checking the Default Configuration Files
+           2.2.5 Start the Scheduler
+Section 3 - After Installation 
+
+Section 1 - Short Installation Instructions
+===========================================
 (In examples, # is as root, $ is mortal)
-0. If you have any old fossology installs you want to remove from the
+1. If you have any old fossology installs you want to remove from the
    system you can run the fo-cleanold script
    # utils/fo-cleanold
    If you have an existing install that you want to transition, be sure
    back up your repository, database, and config files before proceeding.
-1. install dependencies
+2. install dependencies
    # utils/fo-installdeps
-2. Adjust the kernel shmmax
+3. Adjust the kernel shmmax (described in detail in section 2.1.3)
    # echo 512000000 > /proc/sys/kernel/shmmax
    # echo "kernel.shmmax=512000000" >> /etc/sysctl.conf
-3. Adjust postgresql config, details below
-4. Adjust PHP config, details below
-5. Add apache config for fossology, see below or use the example in
-  ui/fo-apache-example.conf, restart apache.
-6. Build fossology
+4. Adjust postgresql config (described in detail in section 2.1.4)
+5. Adjust PHP config (described in detail in section 2.1.5)
+6. Add apache config for fossology (described in detail in section 2.1.6)
+  There is an example config provided in ui/fo-apache-example.conf.
+  After adding the config restart apache.
+7. Build fossology
    $ make
-7. Install fossology
+8. Install fossology
    # make install
-8. Run the postinstall script
+9. Run the postinstall script
    # /usr/local/lib/fossology/fo-postinstall
-9. Test that things are installed correctly
+10. Test that things are installed correctly
    # /usr/local/lib/fossology/fossology-scheduler -t
-10. Start the fossology scheduler daemon
+11. Start the fossology scheduler daemon
    # /etc/init.d/fossology start
 
 You're done, point your web browser at the new install
 (http://yourhostname/repo/) and start using FOSSology!
 
 
-Long Install Instructions
-=========================
+Section 2 - Full Installation Instructions
+==========================================
 The rest of this file is the much more verbose instructions. Consult
 them if you have questions or need more explanation. If you are doing
 a multi-system install please also see the INSTALL.multi document.
 
-Preparing your system
-=====================
-*** Disk space ***
+Section 2.1 - Preparing your system
+***********************************
+
+2.1.1 - Disk Space
+------------------
 FOSSology stores uploaded data in a filesystem repository.  As you
 upload and analyze packages via FOSSology, the repository can grow very
 large.  The default location for a single system repository is
@@ -67,7 +89,8 @@ If you are using multiple hosts to store the repository, it is best to
 spread the repository data evenly across the hosts.  See the User Guide
 for more information about using multiple hosts.
 
-*** Dependencies ***
+2.1.2 - Dependencies
+--------------------
 FOSSology uses lots of different existing tools and software and
 expects to find it on the system.
 
@@ -90,8 +113,9 @@ To install just the runtime dependencies use the -r flag.
 If this utility doesn't support the distro you are running (or fails
 to install everything that's needed) please report a bug.
 
-Here are the things fossology depends on
 
+2.1.2.1 Service Dependencies
+````````````````````````````
 Postgresql:
  8.1 or newer
  On Debian (or a Debian derived distribution) you should be able to use 
@@ -118,7 +142,9 @@ PHP5:
  On Fedora:
   runtime: yum install php php-pear php-pgsql
 
-Libraries (see next section to install with apt-get):
+
+2.1.2.2  Library Dependencies
+`````````````````````````````
 * libmagic - for determining file types, from the "file" software
    ftp://ftp.astron.com/pub/file/file-4.02.tar.gz 
 * libxml2 - GNOME XML library
@@ -139,7 +165,8 @@ Libraries (see next section to install with apt-get):
   build: file-libs libxml2
   
 
-External Commands:
+2.1.2.3 External Commands
+`````````````````````````
 * ar - for extracting archives, from the binutils software
    http://www.gnu.org/software/binutils/
 * bzcat - bz2 decompressor, from the bzip2 software
@@ -189,7 +216,9 @@ encounters any of those container types it will be unable to scan them,
 possibly missing important results (especially in the case of important
 things like license scanning).
 
-Additional build dependencies:
+
+2.1.2.4 -  Additional Build Dependencies
+````````````````````````````````````````
 The fossology build requires gcc, binutils, glibc headers, make, perl,
 and other tools you'd expect to find on a development system. In
 addition, the Text::Template perl module is needed for processing files
@@ -203,7 +232,8 @@ numbers into the build.
    build: yum groupinstall 'Development Tools'
           yum install perl-Text-Template subversion
 
-*** Adjusting the Kernel ***
+2.1.3 Adjusting the Kernel
+--------------------------
 On modern large memory systems(>4gb), the linux kernel needs to be
 adjusted to give postgresql more SysV shared memory.
 
@@ -216,7 +246,8 @@ This number is the number of pages (usually 4k each), and is based on a
 fairly complicated formula, please see the postgresql tuning part of the
 user guide.
 
-*** Preparing Postgresql ***
+2.1.4 Preparing Postgresql
+--------------------------
 Your postgresql install should be configured and running. If you need
 help doing that consult the user documentation at
 http://www.postgresql.org/docs/manuals/. If you are using SSL in
@@ -245,7 +276,8 @@ Debian and the one used for the http://repo.fossology.org database:
 > log_min_duration_statement = -1	# -1 is disabled, 0 logs all statements
 > #log_line_prefix = ''			# Special values:
 
-*** Configuring PHP ***
+2.1.5 Configuring PHP
+---------------------
 Some php config variables need to be adjusted for FOSSology. We don't
 provide an automated way to do this because it can be specific to your
 particular install if you are using php for other things. Edit your
@@ -269,7 +301,8 @@ You should also edit /etc/php5/cli/php.ini to include the fossology directory
 in the php command line interface path:
   include_path = ".:/usr/local/share/fossology/php:/usr/local/share/fossology/www"
 
-*** Configuring Apache ***
+2.1.6 Configuring Apache
+------------------------
 1) You need to add something like the following to the apache config,
   and this will depend on
  A) How you have apache configured, you might be creating a new site
@@ -322,8 +355,8 @@ Note: the site won't work yet until we install FOSSology below.
 Your system should now be ready for installing FOSSology!
 
 
-Building FOSSology
-==================
+Section 2.2 - Building and Installing FOSSology
+***********************************************
 In the following steps, you will need to use files included in the
 fossology source.  If you haven't done so already, untar the
 fossology-<version>.tar.gz tarball into a staging directory.
@@ -338,22 +371,26 @@ NOTE: some commands are required to be run as the root user and are
 indicated so. You should be able to use sudo, "su -", a normal root
 login, or your favorite root-obtaining utility.
 
-0) If you have any old fossology installs you want to remove from the
+2.2.1   Build and Install Instructions 
+--------------------------------------
+1) If you have any old fossology installs you want to remove from the
    system you can run the fo-cleanold script
    # utils/fo-cleanold
    If you have an existing install that you want to transition, be sure
    back up your repository, database, and config files before proceeding.
 
-1) cd into the directory unpacking the tarball created
+2) cd into the directory unpacking the tarball created
    (fossology-<version>/).
 
-2) To build the software run "make".
+3) To build the software run "make".
 
-3) To install the software run "make install". You will need the proper
+4) To install the software run "make install". You will need the proper
    permissions to install to where the files will be install, which in
    most cases means this needs to be run by root.
 
-4) As part of the install a script was placed in
+2.2.2   Automated Post-Installation
+-----------------------------------
+As part of the install a script was placed in
   /usr/local/lib/fossology/fo-postinstall
 (by default, or similar if you configured a different install location).
 This script will help you finish the install, setting up things that
@@ -366,11 +403,13 @@ Run the postinstall script
 
   # /usr/local/lib/fossology/fo-postinstall
 
+2.2.3   Detailed Post-Install Instructions 
+------------------------------------------
 If you prefer to do these steps by hand or are curious of what the
 fo-postinstall script is doing, continue reading, otherwise skip to
-step 7.
+step 2.2.4.
 
-5) Setting up Users and Groups
+1) Setting up Users and Groups
 You are expected to already have a "postgres" user as part of the
 system postgresql install, and a "www-data" user as part of the
 apache2 install.
@@ -396,7 +435,7 @@ and group with the following commands as root:
 Alternatively, you can use the adduser command:
   adduser --gecos "FOSSology" --home /srv/fossology --system --group fossy
 
-6) Setting up the database
+2) Setting up the database
 A sample database schema file can be found either on the installed system
 at /usr/local/lib/fossology/test.d/fossologyinit.sql or in the tarball at
 fossology-<version>/db/fossologyinit.sql.  This will create the
@@ -466,7 +505,8 @@ Check to see the database server is running
       /var/log/postgresql/postgresql-8.1-main.log
 
 
-7) Checking the default configuration files
+2.2.4   Checking the Default Configuration Files
+------------------------------------------------
 On a fresh install you start with default versions of configuration
 files that contain reasonable defaults (where possible), or some files
 are generated via the post install script. You need to review and edit
@@ -503,14 +543,16 @@ where needed.
        http://fossology.org/docs/scheduler#configuring_the_scheduler
 
 
-8) Start the scheduler
-   As root, start the scheduler with:
-     /etc/init.d/fossology start
+2.2.5   Start the Scheduler
+---------------------------
+As root, start the scheduler with:
+   /etc/init.d/fossology start
 
 
-Install Complete
-================
+Section 3 - After Installation
+==============================
 Congratulations, FOSSology is now installed!
+
 For extended discussion on how to use or tune the software, please see
 the User Documentation, available on the website at
 
