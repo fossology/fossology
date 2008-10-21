@@ -150,6 +150,17 @@ if [ $? = 0 ]; then
       exit 1
    else
       echo "NOTE: Connect succeeded, database is working."
+      echo "*** Checking for plpgsql support ***"
+      su postgres -c 'createlang -l fossology' |grep plpgsql
+      if [ $? = 0 ]; then
+         echo "NOTE: plpgsql already exists in fossology database, good"
+      else
+         echo "NOTE: plpgsql doesn't exist, adding"
+         su postgres -c 'createlang plpgsql fossology'
+         if [ $? != 0 ]; then
+            echo "ERROR: failed to add plpgsql to fossology database"
+         fi
+      fi
    fi
 else
    echo "*** Initializing database ***"
