@@ -110,6 +110,9 @@ We provide a script for helping install dependencies:
    utils/fo-installdeps
 To install just the build dependencies use the -b flag.
 To install just the runtime dependencies use the -r flag.
+To install just the agent runtime dependencies use the -a flag
+   (and see INSTALL.multi)
+For more information run it with the --help flag.
 If this utility doesn't support the distro you are running (or fails
 to install everything that's needed) please report a bug.
 
@@ -378,6 +381,7 @@ login, or your favorite root-obtaining utility.
    # utils/fo-cleanold
    If you have an existing install that you want to transition, be sure
    back up your repository, database, and config files before proceeding.
+   For more information on what this utility can do use the --help flag.
 
 2) cd into the directory unpacking the tarball created
    (fossology-<version>/).
