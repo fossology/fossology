@@ -46,7 +46,6 @@ class CreateFolderTest extends fossologyTestCase
     global $URL;
 
     print "starting CreateFoldertest\n";
-
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'),
                       "FAIL! Could not find Organize menu\n");
@@ -65,7 +64,7 @@ class CreateFolderTest extends fossologyTestCase
     $this->folder_name = 'TestCreateFolder-' . "$id";
 
     $this->assertTrue($this->mybrowser->setField('newname', $this->folder_name));
-    $desc = 'Folder created by CreateFolderTest as subfolder of Testing';
+    $desc = 'Folder created by CreateFolderTest as subfolder of Basic-Testing';
     $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     $page = $this->mybrowser->clickSubmit('Create!');
     $this->assertTrue(page);
@@ -84,7 +83,7 @@ class CreateFolderTest extends fossologyTestCase
     $page = $this->mybrowser->clickSubmit('Delete!');
     $this->assertTrue(page);
     $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"),
-                      "MoveFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
+                      "CreateFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
   }
 }
 ?>

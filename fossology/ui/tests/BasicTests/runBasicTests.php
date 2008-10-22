@@ -32,7 +32,7 @@ require_once ('../../../tests/TestEnvironment.php');
 require_once('../../../tests/testClasses/timer.php');
 
 $start = new timer();
-print "Startnig Basic Functional Tests at: " . date('r') . "\n";
+print "Starting Basic Functional Tests at: " . date('r') . "\n";
 $test = &new TestSuite('Fossology Repo UI Basic Functional tests');
 // Must run BasicSetup first, it creates the folder the other tests need.
 $test->addTestFile('BasicSetup.php');

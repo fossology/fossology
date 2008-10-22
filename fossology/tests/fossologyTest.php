@@ -32,7 +32,7 @@
  * include test files
  */
 require_once ('TestEnvironment.php');
-require_once ('commoneTestFuncs.php');
+require_once ('commonTestFuncs.php');
 /**#@-*/
 
 global $URL;
@@ -123,11 +123,11 @@ class fossologyTest extends WebTestCase
      *
      * This will probably break when users are implimented.
      */
-    if($folderName == 'root') { return(1); }
-    $efolderName = $this->escapeDots($folderName);
-    $found = preg_match("/.*value='([0-9].+)'.*?;($efolderName)<\//", $page, $matches);
-    //print "GFID: matches is:\n";
-    //var_dump($matches) . "\n";
+    if(($folderName == 'root') || ($folderName == 1)) { return(1); }
+    $efolderName = escapeDots($folderName);
+    //rint "GFID: efolderName is:$efolderName\n";
+    $found = preg_match("/.*value='([0-9].*?)'.*?;($efolderName)<\//", $page, $matches);
+    //print "GFID: matches is:\n";     var_dump($matches) . "\n";
     return ($matches[1]);
   }
   /**
@@ -144,7 +144,7 @@ class fossologyTest extends WebTestCase
    */
   public function getUploadId($uploadName, $page)
   {
-    $euploadName = $this->escapeDots($uploadName);
+    $euploadName = escapeDots($uploadName);
     $found = preg_match("/.*?value='([0-9].*?)'>($euploadName ).*?</", $page, $matches);
     //print "GUID: matches is:\n";
     //var_dump($matches) . "\n";
@@ -268,7 +268,7 @@ class fossologyTest extends WebTestCase
     $this->assertTrue($page,"Login FAILED! did not fetch a web page, can't login\n'");
     $cookie = $this->_repoDBlogin($this->mybrowser);
     $this->setmyCookie($cookie);
-    $host = $this->getHost($URL);
+    $host = getHost($URL);
     $this->mybrowser->setCookie('Login', $cookie, $host);
     $url = $this->mybrowser->getUrl();
     $page = $this->mybrowser->getContent($URL);
@@ -290,7 +290,7 @@ class fossologyTest extends WebTestCase
     $page = NULL;
     $cookieValue = NULL;
 
-    $host = $this->getHost($URL);
+    $host = getHost($URL);
     $this->assertTrue(is_object($this->mybrowser));
     $this->mybrowser->useCookies();
     $cookieValue = $this->mybrowser->getCookieValue($host, '/', 'Login');

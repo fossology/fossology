@@ -32,25 +32,52 @@
  * @version "$Id$" Created on Aug 21, 2008
  */
 
-require_once ('../commonTestFunc.php');
-
 class parseFolderPath
 {
   public $page;
   public $host;
+  public $filesWithLicense;
   private $test;
 
   function __construct($page, $url)
   {
-    if (empty ($page)) { return; }
+    if (empty ($page))
+    {
+      return;
+    }
     $this->page = $page;
-    if(empty($url)) { return; }
+    if (empty ($url))
+    {
+      return;
+    }
     $this->host = getHost($url);
+    print "after getting host from url:$url, host is:$this->host\n";
   }
+
+  /**
+   * function countFiles()
+   *
+   * Parse  the part of the page that has the folder path and mini menu,
+   * return the count of 'Folder' items found.
+   *
+   * @param string $page the xhtml page to parse
+   *
+   * @return integer $count the count of items found, can be 0.
+   *
+   */
+   function countFiles()
+   {
+    /* Extract the folder path line from the page */
+    $regExp = "Folder<\/b>:.*";
+    $matches = preg_match_all("|$regExp|", $this->page, $pathLines, PREG_SET_ORDER);
+    $this->filesWithLicense = $pathLines;
+    return($matches);
+   }
+
   /**
    * function parseFolderPath
    *
-	 * Parse the part of the page that has the folder path and mini-menu,
+   * Parse the part of the page that has the folder path and mini-menu,
    * this method only parses the folder path, see parseMiniMenu.
    *
    * @returns array of assocative arrays. Each assocative array
@@ -62,10 +89,9 @@ class parseFolderPath
    */
   function parseFolderPath()
   {
-    /* Extract the folder path line from the page */
-    $regExp = "Folder<\/b>:.*";
-    $matches = preg_match_all("|$regExp|", $this->page, $pathLines, PREG_SET_ORDER);
-    foreach ($pathLines as $aptr)
+    /* Gather up the line(s) with Folder*/
+    $this->countFiles();
+    foreach ($this->filesWithLicense as $aptr)
     {
       foreach ($aptr as $path)
       {
@@ -76,18 +102,18 @@ class parseFolderPath
     {
       $regExp = ".*?href='(.*?)'>(.*?)<\/a>(.*?)<";
       $matches = preg_match_all("|$regExp|i", $apath, $pathList, PREG_SET_ORDER);
-      //print "pathList is:\n"; print_r($pathList) . "\n";
-    if ($matches > 0)
-    {
-      $dirList[] = $this->_createRtnArray($pathList, $matches);
-      return ($dirList);
-    }
-    else
-    {
-      return (array ());
-    }
+      print "pathList is:\n";
+      print_r($pathList) . "\n";
+      if ($matches > 0)
+      {
+        $dirList[] = $this->_createRtnArray($pathList, $matches);
+        return ($dirList);
+      } else
+      {
+        return (array ());
+      }
 
-  }
+    }
   }
   function _createRtnArray($list, $matches)
   {
@@ -96,37 +122,49 @@ class parseFolderPath
      * if we have a match, the create return array, else return empty
      * array
      */
-      $size = count($list);
-      /*
-       * The last entry in the array is always a leaf name with no link
-       * but it has to be cleaned up a bit....
-       */
-      for ($i = 0; $i < $size; $i++)
+    $size = count($list);
+    /*
+     * The last entry in the array is always a leaf name with no link
+     * but it has to be cleaned up a bit....
+     */
+    for ($i = 0; $i < $size; $i++)
+    {
+      $cleanKey = trim($list[$i][2], "\/<>b");
+      //print "after trim of html cleanKey is:$cleanKey\n";
+      if (empty ($cleanKey))
       {
-        $cleanKey = trim($list[$i][2], "\/<>b");
-        //print "after trim of html cleanKey is:$cleanKey\n";
-        if (empty($cleanKey)) { continue; }
-        // Make a real link that can be used
-        $partLink = $list[$i][1];
-        $link = makeUrl($this->host, $partLink);
-        $rtnList[$cleanKey] = $link;
-        /* check for anything in the leaf entry, if there is, remove
-         * the preceeding /
-         */
-        if (!empty($list[$i][3]))
-        {
-          $cleanKey = trim($list[$i][3], "\/ ");
-          //print "after trim of / cleanKey is:$cleanKey\n";
-          if(empty($cleanKey)) { continue; }
-          $rtnList[$cleanKey] = NULL;
-        }
+        continue;
       }
-      return ($rtnList);
+      // Make a real link that can be used
+      $partLink = $list[$i][1];
+      print "partLink is:$partLink\n";
+      print "Host is:$this->host\n";
+      $link = makeUrl($this->host, $partLink);
+      print "Link is:$link\n";
+      $rtnList[$cleanKey] = $link;
+      /* check for anything in the leaf entry, if there is, remove
+       * the preceeding /
+       */
+      if (!empty ($list[$i][3]))
+      {
+        $cleanKey = trim($list[$i][3], "\/ ");
+        print "after trim of / cleanKey is:$cleanKey\n";
+        if (empty ($cleanKey))
+        {
+          continue;
+        }
+        $rtnList[$cleanKey] = NULL;
+      }
+    }
+    return ($rtnList);
   }
 
   public function setPage($page)
   {
-    if(!empty($page)) {$this->page = $page; }
+    if (!empty ($page))
+    {
+      $this->page = $page;
+    }
   }
 }
 ?>
