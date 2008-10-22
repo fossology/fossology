@@ -77,3 +77,14 @@ The utils/fo-cleanold utility is provided for users to be able to
 remove old fossology installs from their system, but it is also very
 useful in cleaning up a test system when testing installs. See the
 help text for additional flags to remove the database and repository.
+
+Config Files:
+By default the install and postinstall do the right thing and don't
+overwrite your config files. But if you do happen to want to overwrite
+them there are ways to do that
+* When doing 'make install' you can set the OVERWRITE variable like so
+   # make OVERWRITE=yes install
+* When running the postinstall you can use the -o option like so
+   # /usr/local/lib/fossology/fo-postinstall -o
+These are also useful in testing if you want to make sure you are back
+at a basic install.
