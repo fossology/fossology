@@ -140,10 +140,12 @@ for conffile in $NEWSAVE; do
          echo "WARNING: found $conffile but not removing"
       fi
    fi
+done
+if [ $RMCONF ]; then
    if [ -d /usr/local/etc/fossology ]; then
       rmdir /usr/local/etc/fossology
    fi
-done
+fi
 
 echo "*** Cleaning up old fossology files ***"
 for file in $FILES; do
