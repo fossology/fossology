@@ -155,11 +155,11 @@ if (array_key_exists("b", $options))
   $SiteLast = exec("./runSiteTests.php > " .
   "/tmp/BasicFOSSologyTests-$date 2>&1", $dummy, $Srtn);
 
-  if(chdir($BasicTests) === FALSE)
+  if(chdir('../BasicTests') === FALSE)
   {
     print "Basic Tests ERROR: can't cd to $BasicTests\n";
   }
-  $BasicLast = exec("./runBasicTests.php > " .
+  $BasicLast = exec("./runBasicTests.php >> " .
   "/tmp/BasicFOSSologyTests-$date 2>&1", $dummy, $Srtn);
 }
 if (array_key_exists("s", $options))
@@ -184,7 +184,7 @@ if (array_key_exists("v", $options))
   {
     print "Verify Tests ERROR: can't cd to $VerifyTests\n";
   }
-  $VerifyLast = exec("./runVerifyTests.php >> " .
+  $VerifyLast = exec("./runVerifyTests.php > " .
   "/tmp/VerifyFOSSologyTests-$date 2>&1", $dummy, $Prtn);
 }
 

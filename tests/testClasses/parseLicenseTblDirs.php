@@ -32,7 +32,7 @@
  * Created on Oct. 17, 2008
  */
 
-require_once ('../commonTestFunc.php');
+//require_once ('../commonTestFuncs.php');
 
 class parseLicenseTblDirs
 {

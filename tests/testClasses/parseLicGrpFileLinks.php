@@ -33,7 +33,7 @@
  * Created on Aug 21, 2008
  */
 
-require_once ('../commonTestFunc.php');
+//require_once ('../commonTestFuncs.php');
 
 class parseLicenseGrpTbl
 {

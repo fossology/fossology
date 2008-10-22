@@ -106,7 +106,7 @@ class fossologyTestCase extends fossologyTest
     /* Need to check parameters */
     if (is_null($parent))
     {
-      $FolderId = 1; // default is root folder
+      $parent = 1; // default is root folder
     }
     if (is_null($description)) // set default if null
     {
@@ -125,7 +125,8 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->mybrowser->setField('description', "$description"));
     $page = $this->mybrowser->clickSubmit('Create!');
     $this->assertTrue(page);
-    $this->assertTrue($this->myassertText($page, "/Folder $name Created/"), "createFolder Failed!\nPhrase 'Folder $name Created' not found\nDoes the Folder $name exist?\n");
+    $this->assertTrue($this->myassertText($page, "/Folder $name Created/"),
+     "createFolder Failed!\nPhrase 'Folder $name Created' not found\nDoes the Folder $name exist?\n");
   }
   /**
    * editFolder

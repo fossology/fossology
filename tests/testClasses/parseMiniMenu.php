@@ -35,7 +35,7 @@
  * Created on Aug 19, 2008
  */
 
-require_once ('../commonTestFunc.php');
+//require_once ('../commonTestFuncs.php');
 
 class parseMiniMenu
 {
