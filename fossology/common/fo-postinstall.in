@@ -158,15 +158,20 @@ su postgres -c 'psql -l' |grep -q fossology
 if [ $? = 0 ]; then
    echo "NOTE: fossology database already exists, not creating"
    echo "*** Checking database connectivity ***"
-   # next check that we can talk to the db
-   {$AGENTTESTDDIR}/dbcheck
+   # check that we can talk to the db
+   if [ -x {$AGENTTESTDDIR}/dbcheck ]; then
+      {$AGENTTESTDDIR}/dbcheck
+   else
+      echo "ERROR: no {$AGENTTESTDDIR}/dbcheck, have you installed?"
+      exit 1
+   fi
    if [ $? != 0 ]; then
       echo "ERROR: unable to connect to database, please check $DBCONF"
       exit 1
    else
       echo "NOTE: Connect succeeded, database is working."
       echo "*** Checking for plpgsql support ***"
-      su postgres -c 'createlang -l fossology' |grep plpgsql
+      su postgres -c 'createlang -l fossology' |grep -q plpgsql
       if [ $? = 0 ]; then
          echo "NOTE: plpgsql already exists in fossology database, good"
       else
