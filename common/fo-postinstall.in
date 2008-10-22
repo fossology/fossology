@@ -77,14 +77,18 @@ fi
 # to do uid/gid mapping. More details will be provided in the multi-machine
 # documentation.
 
-
 # Make sure the user and group exist, if not then create
-# FIXME: need to check for adduser and use that if available
 echo "*** Creating user and group ***"
+# check for group
 if grep -q "^{$PROJECTGROUP}:" /etc/group; then
    echo "NOTE: group '{$PROJECTGROUP}' already exists, good."
 else
-   groupadd "{$PROJECTGROUP}"
+   # use addgroup if it exists since it supports --system
+   if which addgroup; then
+      addgroup --system {$PROJECTGROUP}
+   else
+      groupadd {$PROJECTGROUP}
+   fi
    if [ "$?" != "0" ] ; then
       echo "ERROR: Unable to create group '{$PROJECTGROUP}'"
       exit 1
@@ -93,6 +97,7 @@ else
    fi
 fi
 
+# check for user
 if grep -q "^{$PROJECTUSER}:" /etc/passwd; then
    echo "NOTE: user '{$PROJECTUSER}' already exists, good."
    USERSHELL=`grep "^{$PROJECTUSER}:" /etc/passwd |cut -d: -f 7`
@@ -103,7 +108,14 @@ if grep -q "^{$PROJECTUSER}:" /etc/passwd; then
 else
    # ensure that the full parent path of the HOME exists first
    mkdir -p $\{REPO%/*/*\}
-   useradd -c "{$PROJECT}" -g "{$PROJECTGROUP}" -m -s /bin/bash -d "$\{REPO%/*\}" "{$PROJECTUSER}"
+   # use adduser if it exists since it supports --system
+   if which adduser; then
+      adduser --gecos "{$PROJECT}" --ingroup {$PROJECTGROUP} --system \
+        --shell /bin/bash --home "$\{REPO%/*\}" {$PROJECTUSER}
+   else
+      useradd -c "{$PROJECT}" -g {$PROJECTGROUP} -m \
+        -s /bin/bash -d "$\{REPO%/*\}" {$PROJECTUSER}
+   fi
    if [ "$?" != "0" ] ; then
       echo "ERROR: Unable to create user '{$PROJECTUSER}'"
       exit 1
