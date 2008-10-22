@@ -19,7 +19,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o cdreh --long conffiles,database,repository,everything,help -n 'fo-cleanold' -- "$@"`
+OPTS=`getopt -o cdrueh --long conffiles,database,repository,user,everything,help -n 'fo-cleanold' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -33,12 +33,14 @@ case "$1" in
       -c|--config) RMCONF=1; shift;;
       -d|--database) RMDB=1; shift;;
       -r|--repository) RMREPO=1; shift;;
+      -u|--user) RMUSER=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
       -h|--help)
          echo "Usage: fo-cleanold [options]";
          echo "  -c or --conffiles  : remove configuration files"
          echo "  -d or --database   : remove database"
          echo "  -r or --repository : remove repository"
+         echo "  -u or --user       : remove user and group"
          echo "  -e or --everything : remove everything"
          echo "  -h or --help       : this help text"
          exit;;
@@ -52,6 +54,7 @@ if [ $EVERYTHING ]; then
    RMCONF=1
    RMDB=1
    RMREPO=1
+   RMUSER=1
 fi
 
 
@@ -196,5 +199,25 @@ if [ $RMREPO ]; then
       fi
    else
       echo "NOTE: repository does not exist, so not deleting"
+   fi
+fi
+
+## User and Group
+if [ $RMUSER ]; then
+   echo "*** Removing user and group ***"
+   if grep -q "^fossy:" /etc/passwd; then
+      userdel -r fossy
+      if [ $? != 0 ]; then
+         echo "ERROR: failed to remove user"
+         exit 1
+      fi
+   fi
+
+   if grep -q "^fossy:" /etc/group; then
+      groupdel fossy
+      if [ $? != 0 ]; then
+         echo "ERROR: failed to remove group"
+         exit 1
+      fi
    fi
 fi
