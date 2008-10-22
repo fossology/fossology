@@ -6,7 +6,7 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq -lmagic $(ALL_CFLAGS)
-UMDEF=-DUNMAGIC='"$(AGENTDATADIR)/UnMagic"'
+UMDEF=-DUNMAGIC='"$(AGENTDATADIR)/UnMagic.mime"'
 EXE=departition checksum ununpack
 
 CHKHDR= checksum.h md5.h sha1.h
@@ -22,7 +22,7 @@ checksum: $(CHKHDR) $(CHKSRC) $(VARS)
 departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
 
-ununpack: $(UUSRC) $(UUHDR) $(VARS)
+ununpack: $(UUSRC) $(UUHDR) $(VARS) $(DB) $(REPO)
 	$(CC) $(UUSRC) $(UMDEF) $(CFLAGS_LOCAL) -o $@
 
 metahandle.h: metahandle.tab metahandle.pl
