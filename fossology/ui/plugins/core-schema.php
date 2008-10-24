@@ -1065,6 +1065,7 @@ LANGUAGE plpgsql;
 	exit(1);
 	}
 
+    $DB->Action("SET statement_timeout = 0;"); /* turn off DB timeouts */
     $DB->Action("BEGIN;");
     $DB->Debug=1; /* show errors */
     $DB->Error=0; /* clear any previous errors */
@@ -1375,6 +1376,7 @@ LANGUAGE plpgsql;
       flush();
       exit(1);
       }
+    $DB->Action("SET statement_timeout = 120000;"); /* reset DB timeouts */
 
     /************************************/
     /* Flush any cached data. */
