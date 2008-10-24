@@ -101,6 +101,7 @@
   $Term["Apache Software License v2.0"]["Desc"]="";
   $Term["Apache Software License v2.0"]["License"][0]="BSD/BSD.new/Apache/Apache Software License v2.0";
   $Term["Apache Software License v2.0"]["License"][1]="BSD/BSD.new/Apache/Apache Software License v2.0 reference";
+  $Term["Apache Software License v2.0"]["License"][2]="BSD/BSD.new/Apache/Apache Software License v2.0 reference 2";
   /* Canonical name: 18 */
   $Term["Apache v2.0"]["Desc"]="Apache Software License v2.0";
   $Term["Apache v2.0"]["Term"][0]="apache license";
