@@ -186,6 +186,7 @@ class ui_view_license extends FO_Plugin
 	if (!empty($R['phrase_text']))
 		{
 		$RefURL = NULL;
+		if ($R['licterm_name'] != 'Phrase') { $R['phrase_text'] = ''; }
 		}
 	else
 		{
