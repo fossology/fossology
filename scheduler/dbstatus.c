@@ -339,7 +339,7 @@ void	DBCheckSchedulerUnique	()
       if (DBattrChecked[Row]) continue;
       DBattr = DBgetvalue(DB,Row,1);
       DBattr = GetValueFromAttr(DBattr,"agent=");
-      if (Attr && DBattr && !strcmp(Attr,DBattr))
+      if (DBattr && !strcmp(Attr,DBattr))
 	{
 	syslog(LOG_WARNING,"WARNING: Competing scheduler for '%s' detected: %s ",
 		Attr,DBgetvalue(DB,Row,0));
