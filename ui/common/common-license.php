@@ -344,7 +344,6 @@ function LicenseGetForFile(&$UploadtreePk)
       }
     else
       {
-      $R2[$i]['phrase_text'] = '';
       $Results[] = $R2[$i];
       }
     }
