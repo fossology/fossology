@@ -2039,7 +2039,10 @@ int	main	(int argc, char *argv[])
     exit(-1);
     }
 
-  if (magic_load(MagicCookie,UNMAGIC) != 0)
+  /* Debian is trying to depricate the added ".mime" suffix.
+     Check if it needs to be added. */
+  if ((magic_load(MagicCookie,UNMAGIC ".mime") != 0) &&
+      (magic_load(MagicCookie,UNMAGIC) != 0))
     {
     fprintf(stderr,"FATAL: Failed to load magic file: UnMagic\n");
     exit(-1);
