@@ -244,9 +244,10 @@ class ui_license extends FO_Plugin
       /* Populate the output ($VF) - file list */
 
       /* Find number of licenses in child */
-      if (($ChildDirCount < 20) || (!$IsContainer))
-        { $LicCount = LicenseCount($C['uploadtree_pk']); }
-      else { $LicCount=0; }
+//      if (($ChildDirCount < 20) || (!$IsContainer))
+//        { $LicCount = LicenseCount($C['uploadtree_pk']); }
+//      else { $LicCount=0; }
+      $LicCount=0;
 
       $VF .= '<tr><td id="Lic-' . $LicCount . '" align="left">';
       $HasHref=0;
