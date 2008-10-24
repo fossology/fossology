@@ -196,6 +196,7 @@ class FO_Plugin
     {
     global $Plugins;
     if ($this->State != PLUGIN_STATE_VALID) { return(0); } // don't run
+    if (empty($_SESSION['User']) && $this->LoginFlag) { return(0); }
     // Make sure dependencies are met
     foreach($this->Dependency as $key => $val)
       {

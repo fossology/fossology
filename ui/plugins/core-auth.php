@@ -49,6 +49,20 @@ class core_auth extends FO_Plugin
     /* No users with no seed and no perm -- make them read-only */
     $DB->Action("UPDATE users SET user_perm = " . PLUGIN_DB_READ . " WHERE user_perm IS NULL;");
 
+    /* There must always be at least one default user. */
+    $Results = $DB->Action("SELECT * FROM users WHERE user_name = 'Default User';");
+    if (empty($Results[0]['user_name']))
+	{
+	/* User "fossy" does not exist.  Create it. */
+	/* No valid username/password */
+	$Level = PLUGIN_DB_NONE;
+	$SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
+	VALUES ('Default User','Default User when nobody is logged in','Seed','Pass',$Level,NULL,1);";
+	$DB->Action($SQL);
+	print "*** Created default user: 'Default User'.\n";
+	}
+
+
     /* There must always be at least one user with user-admin access.
        If he does not exist, make it user "fossy".
        If user "fossy" does not exist, add him with the default password 'fossy'. */
@@ -211,6 +225,7 @@ class core_auth extends FO_Plugin
     global $DB;
     $V = "";
     if (empty($User))	{ return; }
+    if ($User == 'Default User')	{ return; }
     $User = str_replace("'","''",$User);	/* protect DB */
 
     /* See if the user exists */
@@ -301,7 +316,8 @@ class core_auth extends FO_Plugin
 		  $V .= "<P />\n";
 		  /* Check for a default user */
 		  global $DB;
-		  $Results = $DB->Action("SELECT * FROM users LIMIT 1;");
+		  $Level = PLUGIN_DB_USERADMIN;
+		  $Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Level LIMIT 1;");
 		  $R = &$Results[0];
 		  if (!is_array($R))
 			{
