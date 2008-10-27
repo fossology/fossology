@@ -62,13 +62,20 @@ like this in /etc/fstab
 agent1:/srv/fossology/repository/agent1 /srv/fossology/repository/agent1 \
   nfs nfsvers=3,defaults,soft
 
-6) Use mkschedconf to generate an appropriate Scheduler.conf file on
+6) On the scheduler machine as the fossy user use ssh-keygen to generate
+a ssh key that does not have a passphrase. Then copy the public half of
+that key to each of the agent machines' ~fossy/.ssh/authorized_keys file.
+Test that you can ssh from the scheduler machine, as the fossy user, to
+each of the agent machines without it prompting for a passphrase or
+password.
+
+7) Use mkschedconf to generate an appropriate Scheduler.conf file on
 the machine running the scheduler.
 
-7) Run /usr/local/lib/fossology/fossology-scheduler -t to test that
+8) Run /usr/local/lib/fossology/fossology-scheduler -t to test that
 your Scheduler.conf file is correct and that the scheduler can talk to
 all the agent and that they are also configured correctly. If not then
 adjust until it does.
 
-8) Start the scheduler
+9) Start the scheduler
   # /etc/init.d/fossology start
