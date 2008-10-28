@@ -282,13 +282,6 @@ function LicenseGetForFile(&$UploadtreePk)
 {
   global $DB;
 
-  /* Get the range */
-  $SQL = "SELECT lft,rgt,upload_fk FROM uploadtree WHERE uploadtree_pk = $UploadtreePk;";
-  $Results = $DB->Action($SQL);
-  $Lft = $Results[0]['lft'];
-  $Rgt = $Results[0]['rgt'];
-  $UploadFk = $Results[0]['upload_fk'];
-
   /* Get every real item */
   $SQL = "SELECT
 	CASE
@@ -301,8 +294,7 @@ function LicenseGetForFile(&$UploadtreePk)
 	FROM uploadtree AS UT1,
 	  licterm_name, licterm, agent_lic_meta, agent_lic_raw
 	WHERE
-	  UT1.lft BETWEEN $Lft AND $Rgt
-	  AND UT1.upload_fk = $UploadFk
+	  uploadtree_pk = $UploadtreePk
 	  AND licterm_name.pfile_fk = UT1.pfile_fk
 	  AND licterm_pk=licterm_name.licterm_fk
 	  AND agent_lic_meta_pk = licterm_name.agent_lic_meta_fk
@@ -322,8 +314,7 @@ function LicenseGetForFile(&$UploadtreePk)
 	  FROM uploadtree AS UT1,
 	  licterm_name, licterm, agent_lic_meta, agent_lic_raw
 	WHERE
-	  UT1.lft BETWEEN $Lft AND $Rgt
-	  AND UT1.upload_fk = $UploadFk
+	  uploadtree_pk = $UploadtreePk
 	  AND licterm_name.pfile_fk = UT1.pfile_fk
 	  AND licterm_pk=licterm_name.licterm_fk
 	  AND agent_lic_meta_pk = licterm_name.agent_lic_meta_fk
