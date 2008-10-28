@@ -43,7 +43,7 @@ install: all $(VARS)
 	fi
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(AGENTDIR)/ununpack
 	$(INSTALL_PROGRAM) checksum $(DESTDIR)$(LIBEXECDIR)/checksum
-	$(INSTALL_PROGRAM) UnMagic.mime $(DESTDIR)$(AGENTDATADIR)/UnMagic.mime
+	$(INSTALL_DATA) UnMagic.mime $(DESTDIR)$(AGENTDATADIR)/UnMagic.mime
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
