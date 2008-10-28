@@ -1,4 +1,5 @@
-=head1 
+
+=head1 NAME
 
 MANPAGENAME:
 

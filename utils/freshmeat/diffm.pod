@@ -16,7 +16,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ***********************************************************/
-# Version: "$Id: $"=head1 NAME
+# Version: "$Id: $"
+
+=head1 NAME
 
 diffm: find the differences between two Freshmeat Rdf format files and record
 the files that have differences and save the associated XML for that project 

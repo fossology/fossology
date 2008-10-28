@@ -16,6 +16,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # ***********************************************************/
 # Version: "$Id: $"
+
 =head1 NAME
 
 get-projects: Process a Freshmeat Rdf format XML file and get the projects
