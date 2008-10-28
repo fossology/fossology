@@ -11,7 +11,7 @@ LIB=libfossdb.a
 all: $(LIB) $(EXE)
 
 $(LIB): %.a: %.c %.h $(VARS)
-	$(CC) -c $< $(CONFDEF) $(ALL_CFLAGS)
+	$(CC) -c $< $(CONFDEF) -I`pg_config --includedir` $(ALL_CFLAGS)
 	$(AR) cr $@ libfossdb.o
 
 $(EXE): %: %.c $(LIB) $(VARS)

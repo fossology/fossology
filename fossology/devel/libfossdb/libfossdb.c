@@ -23,7 +23,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
-#include <postgresql/libpq-fe.h>
+#include <libpq-fe.h>
 #include "libfossdb.h"
 
 #ifdef SVN_REV
