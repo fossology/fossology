@@ -4,10 +4,10 @@
 # VERSION: $Id: foss-scheduler.pod 548 2008-05-03 01:37:52Z rrando $
 #
 
-=head1 foss-scheduler
+=head1 NAME
 
-The fossology scheduler daemon.  This daemon runs the fossogy job
-input queue and agents.
+foss-scheduler - The fossology scheduler daemon.  This daemon runs the
+fossogy job input queue and agents.
 
 =head1 SYNOPSIS
 

@@ -3,7 +3,9 @@
 #
 # VERSION: $Id$
 
-=head1 cp2foss: load one or more files or archives into the Fossology DB.
+=head1 NAME
+
+cp2foss - load one or more files or archives into the Fossology DB.
 
 =head1 SYNOPSIS
 

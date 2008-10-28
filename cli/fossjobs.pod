@@ -4,9 +4,9 @@
 # VERSION: $Id$
 #
 
-=head1 fossjobs
+=head1 NAME
 
-Display default fossology agents or upload id's and schedule default
+fossjobs - Display default fossology agents or upload id's and schedule default
 fossology agents on an upload id.
 
 =head1 SYNOPSIS
