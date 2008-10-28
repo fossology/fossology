@@ -39,7 +39,7 @@ what functions the machine will serve. Here is the fo-postinstall usage text
 Usage: fo-postinstall [options]
   -a or --agent      : agent specific actions
   -d or --database   : database specific actions
-  -u or --ui         : ui specific actions
+  -w or --web        : web interface specific actions
   -s or --scheduler  : scheduler specific actions
   -e or --everything : all actions (default)
   -o or --overwrite  : overwrite config files with new versions
