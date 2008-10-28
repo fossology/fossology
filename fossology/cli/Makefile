@@ -16,7 +16,7 @@ all: $(iPATHFILE) docs
 docs: $(DOCS) $(MAN1FILES) $(HTMLFILES) $(TEXTFILES)
 
 %.1: %.pod
-	pod2man --center="$*" --release="Version $(VERSION)" $< > $*.1
+	pod2man --name=$* --center="FOSSology" --release="Version $(VERSION)" $< > $*.1
 
 %.html: %.pod
 	pod2html --infile=$< --outfile=$*.html
