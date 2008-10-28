@@ -9,7 +9,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o aduseoh --long agent,database,ui,scheduler,everything,overwrite,help -n 'fo-postinstall' -- "$@"`
+OPTS=`getopt -o adwseoh --long agent,database,web,scheduler,everything,overwrite,help -n 'fo-postinstall' -- "$@"`
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -27,7 +27,7 @@ while true; do
    case "$1" in
       -a|--agent) AGENT=1; shift;;
       -d|--database) DATABASE=1; shift;;
-      -u|--ui) UI=1; shift;;
+      -w|--web) WEB=1; shift;;
       -s|--scheduler) SCHEDULER=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
       -o|--overwrite) OVERWRITE=1; shift;;
@@ -35,7 +35,7 @@ while true; do
          echo "Usage: fo-postinstall [options]";
 	 echo "  -a or --agent      : agent specific actions"
 	 echo "  -d or --database   : database specific actions"
-	 echo "  -u or --ui         : ui specific actions"
+	 echo "  -w or --web        : web interface specific actions"
 	 echo "  -s or --scheduler  : scheduler specific actions"
 	 echo "  -e or --everything : all actions (default)"
 	 echo "  -o or --overwrite  : overwrite config files with new versions"
@@ -50,7 +50,7 @@ if [ $EVERYTHING ]; then
    echo "*** Running postinstall for everything ***"
    AGENT=1
    DATABASE=1
-   UI=1
+   WEB=1
    SCHEDULER=1
 fi
 
@@ -262,8 +262,8 @@ fi # end of SCHEDULER
 
 ########################################################################
 
-if [ $UI ]; then
-echo "*** Setting up UI ***"
+if [ $WEB ]; then
+echo "*** Setting up the web interface ***"
 
 # See if web server user (www-data) exists, if so add to the group.
 grep -q "^www-data:" /etc/passwd
@@ -273,7 +273,7 @@ if [ $? == 0 ] ; then
   usermod -G {$PROJECTGROUP} -a www-data
 fi
 
-fi # end of UI
+fi # end of WEB
 
 ########################################################################
 
