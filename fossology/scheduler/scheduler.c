@@ -563,7 +563,6 @@ int	main	(int argc, char *argv[])
       CM[Thread].ChildStdout = 0;
       CM[Thread].ChildStdoutRev = 0;
       ChangeStatus(Thread,ST_FREE);
-      SetHostRun(CM[Thread].HostId,-1);
       if (CM[Thread].ChildPid) kill(CM[Thread].ChildPid,SIGKILL);
       }
     }
