@@ -969,7 +969,14 @@ CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
 DECLARE
   jqrec jobqueue;
   jqrec_test jobqueue;
-  jqcurse CURSOR FOR SELECT *  FROM jobqueue WHERE jq_starttime IS NULL AND jq_end_bits < 2;
+  jqcurse CURSOR FOR SELECT * 
+    FROM jobqueue
+    INNER JOIN job
+      ON jq_starttime IS NULL
+      AND jq_end_bits < 2
+      AND job_pk = jq_job_fk
+    ORDER BY job_priority DESC
+    ;
   jdep_row jobdepends;
   success integer;
 BEGIN
