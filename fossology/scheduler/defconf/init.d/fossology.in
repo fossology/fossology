@@ -37,7 +37,8 @@ case "$1" in
 	;;
   stop)
 	echo -n "Stopping $DESC: "
-	$DAEMON -k
+	# we don't really care about the exit code as long as it's stopped
+	$DAEMON -k || true
 	echo "$NAME."
 	;;
   #reload)
