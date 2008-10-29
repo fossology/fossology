@@ -205,7 +205,7 @@ fi # end of DATABASE
 echo "*** Initializing database tables ***"
 {$BINDIR}/fossinit
 if [ $? != 0 ] ; then
-  echo "ERROR: Unable to initialize.\n"
+  echo "ERROR: Unable to initialize."
   exit 1
 fi
 
