@@ -37,7 +37,7 @@ $Group = `groups`;
 if (!preg_match("/\sfossy\s/",$Group) && (posix_getgid() != $GID['gid']))
   {
   print "ERROR: Unable to run as group 'fossy'\n";
-  return(1);
+  exit(1);
   }
 
 /* Load all code */
@@ -81,7 +81,7 @@ $Schema = &$Plugins[plugin_find_id("schema")];
 if (empty($Schema))
   {
   print "FAILED: Unable to find the schema plugin.\n";
-  return(1);
+  exit(1);
   }
 
 global $WEBDIR;
@@ -89,7 +89,7 @@ $Filename = "$WEBDIR/plugins/core-schema.dat";
 if (!file_exists($Filename))
   {
   print "FAILED: Schema data file ($Filename) not found.\n";
-  return(1);
+  exit(1);
   }
 $FailFlag = $Schema->ApplySchema($Filename,$DB->Debug,$Verbose);
 
@@ -118,4 +118,5 @@ else
   {
   print "Initialization had errors.\n";
   }
+exit(0);
 ?>
