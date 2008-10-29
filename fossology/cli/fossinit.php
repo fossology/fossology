@@ -77,7 +77,7 @@ if (array_key_exists('D',$Options))
   }
 
 /* Initialize the system! */
-$Schema = &$Plugins[plugin_find_id("schema")];
+$Schema = &$Plugins[plugin_find_any_id("schema")];
 if (empty($Schema))
   {
   print "FAILED: Unable to find the schema plugin.\n";
