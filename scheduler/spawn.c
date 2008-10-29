@@ -307,6 +307,10 @@ void	ChangeStatus	(int Thread, int NewState)
 {
   time_t Now;
   Now = time(NULL);
+  if ((NewState < ST_SPAWNED) && (CM[Thread].Status >= ST_SPAWNED))
+	{ SetHostRun(CM[Thread].HostId,-1); }
+  else if ((NewState >= ST_SPAWNED) && (CM[Thread].Status < ST_SPAWNED))
+	{ SetHostRun(CM[Thread].HostId,1); }
   CM[Thread].StatusLast = CM[Thread].Status;
   CM[Thread].Status = NewState;
   CM[Thread].StatusLastDuration = Now - CM[Thread].StatusTime;
@@ -371,7 +375,6 @@ int	KillChild	(int Thread)
     CM[Thread].ChildStdout = 0;
     CM[Thread].ChildStdoutRev = 0;
     ChangeStatus(Thread,ST_FREE);
-    SetHostRun(CM[Thread].HostId,-1);
     }
   return(ActiveThread);
 } /* KillChild() */
@@ -573,7 +576,6 @@ void	CheckPids	()
 	CM[Thread].ChildPid = 0;
 	ChangeStatus(Thread,ST_FREE);
 	CM[Thread].IsDB=0; /* need to remove child */
-	SetHostRun(CM[Thread].HostId,-1);
 	} /*  matched thread */
     else /* if unknown process sent signal */
 	{
@@ -934,7 +936,6 @@ int	SpawnEngine	(int Thread)
 	{
 	/*** Parent processing! ***/
 	if (Verbose) syslog(LOG_DEBUG,"Child[%d] (pid=%d) spawned\n",Thread,Pid);
-	SetHostRun(CM[Thread].HostId,1);
 	CM[Thread].ChildPid = Pid;
 	ChangeStatus(Thread,ST_SPAWNED);
 	}
