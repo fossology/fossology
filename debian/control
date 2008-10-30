@@ -8,7 +8,8 @@ Homepage: http://fossology.org
 
 Package: fossology
 Architecture: all
-Depends: fossology-scheduler, fossology-db, fossology-agents, fossology-web
+Pre-Depend: fossology-db
+Depends: fossology-scheduler, fossology-agents, fossology-web
 Description: open and modular architecture for analyzing software
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
@@ -55,7 +56,7 @@ Description: architecture for analyzing software, scheduler
 
 Package: fossology-db
 Architecture: any
-Depends: fossology-common, postgresql-8.3 | postgresql-8.1, ${shlibs:Depends}, ${misc:Depends}
+Depends: postgresql-8.3 | postgresql-8.1, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, database
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
