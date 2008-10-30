@@ -106,7 +106,7 @@ class core_init extends FO_Plugin
 	  {
 	  $FailFlag=0;
 	  $Filename = getcwd() . "/init.ui";
-	  $Schema = &$Plugins[plugin_find_id("schema")];
+	  $Schema = &$Plugins[plugin_find_any_id("schema")];
 	  if (empty($Schema))
 	    {
 	    $V .= "Failed to find schema plugin.\n";
@@ -115,7 +115,7 @@ class core_init extends FO_Plugin
 	  else
 	    {
 	    print "<pre>";
-	    $FailFlag = $Schema->ApplySchema($Schema->Filename,0);
+	    $FailFlag = $Schema->ApplySchema($Schema->Filename,0,0);
 	    print "</pre>";
 	    }
 	  if (!$FailFlag)
