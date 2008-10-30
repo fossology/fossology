@@ -37,6 +37,8 @@ build-arch-stamp: configure-stamp
 build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp  
 
+	@# this currently doesn't do anything, but in case it does someday
+	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var build-db
 	touch $@
 
 clean: 
@@ -54,6 +56,9 @@ install-indep:
 	dh_testroot
 	dh_clean -k -i 
 	dh_installdirs -i
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-db \
+           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-db
 
 	dh_install -i
 
@@ -75,9 +80,6 @@ install-arch:
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-scheduler
-
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-db \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-db
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-agents \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-agents
