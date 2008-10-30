@@ -35,8 +35,8 @@
  *
  */
 
-$LIBDIR = '/usr/local/lib';
-require_once("pathinclude.php");
+// FIXME: this should bet a global from pathinclude? $LIBDIR = '/usr/local/lib';
+require_once("FIXMETOBERELATIVE/pathinclude.php");
 require_once("$LIBDIR/lib_projxml.h.php");
 //require_once("./lib_projxml.h.php");            // dev copy
 
