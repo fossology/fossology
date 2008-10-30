@@ -6,12 +6,13 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS)
+DEF=-DAGENTDATADIR='"$(AGENTDATADIR)"'
 EXE=licinspect
 
 all: $(EXE)
 
 $(EXE): %: %.c $(DB) $(REPO) $(VARS)
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+	$(CC) $< $(DEF) $(CFLAGS_LOCAL) -o $@
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
