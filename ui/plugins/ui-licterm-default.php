@@ -170,7 +170,7 @@ class licterm_default extends FO_Plugin
     /**************************************/
     /** BEGIN: Term list from ExportTerms() **/
     /**************************************/
-    require_once("plugins/ui-licterm-default.dat");
+    require_once("ui-licterm-default.dat");
     /**************************************/
     /** END: Term list from ExportTerms() **/
     /**************************************/
