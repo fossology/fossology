@@ -17,11 +17,18 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ******************************************************************/
 
-/* specify support for files > 2G */
-#define __USE_LARGEFILE64
-#define __USE_FILE_OFFSET64
+#define _LARGEFILE64_SOURCE
 
 #include <stdlib.h>
+
+/* specify support for files > 2G */
+#ifndef __USE_LARGEFILE64
+#define __USE_LARGEFILE64
+#endif
+#ifndef __USE_FILE_OFFSET64
+#define __USE_FILE_OFFSET64
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
 #include <limits.h>
@@ -36,6 +43,7 @@ char Version[]=SVN_REV;
 #endif
 
 int	Test=0;	/* set to 0 to extract, 1 to just be verbose */
+int	Verbose=0;
 
 /****************************************************
  ExtractKernel(): Extract a kernel file system.
@@ -145,20 +153,50 @@ void	ExtractKernel	(int Fin)
  ****************************************************/
 void	ExtractPartition	(int Fin, u_long Start, u_long Size)
 {
-  long Hold;
+  off64_t Hold;
   off_t ReadSize,WriteSize;
   unsigned char Buffer[655360], *Bp;
   /* file name */
   static int Counter=0;
   char Name[256];
   int Fout=-1;
+  struct stat64 Stat;
 
   if (Test) return;
 
+  /* Basic idiot test */
+  if (Size <= 0)
+	{
+	/* invalid */
+	if (Verbose) fprintf(stderr,"ERROR: Partition size is <= 0.\n");
+	return;
+	}
+
   /* save position */
-  Hold = lseek(Fin,0,SEEK_CUR);
-  if (Start < Hold) return;	/* invalid */
-  if (Size <= 0) return;	/* invalid */
+  Hold = lseek64(Fin,0,SEEK_CUR);
+  if (Start < Hold)
+	{
+	/* invalid */
+	if (Verbose) fprintf(stderr,"ERROR: Start is before the starting area.\n");
+	lseek64(Fin,Hold,SEEK_SET);	/* rewind file */
+	return;
+	}
+
+  /* Don't go beyond the end of file */
+  fstat64(Fin,&Stat);
+  if (Start > Stat.st_size)
+	{
+	/* invalid */
+	if (Verbose) fprintf(stderr,"ERROR: Partition start is after then end of file.\n");
+	lseek64(Fin,Hold,SEEK_SET);	/* rewind file */
+	return;
+	}
+  if (Start + Size > Stat.st_size)
+    {
+    /* permit partial files */
+    if (Verbose) fprintf(stderr,"WARNING: Partition end is after then end of file; partition is truncated.\n");
+    Size = Stat.st_size - Start;
+    }
 
   /* prepare file for writing */
   memset(Name,0,sizeof(Name));
@@ -177,20 +215,7 @@ void	ExtractPartition	(int Fin, u_long Start, u_long Size)
 
   /* Copy file */
   /*** Support very large disk space ***/
-  lseek(Fin,0,SEEK_SET);
-  while(Start > 0)
-    {
-    if (Start > INT_MAX)
-      	{
-	lseek(Fin,INT_MAX,SEEK_CUR);
-	Start = Start - INT_MAX;
-	}
-    else
-	{
-	lseek(Fin,(int)Start,SEEK_CUR);
-	Start = 0;
-	}
-    } /* while seeking position */
+  lseek64(Fin,(off64_t)Start,SEEK_SET);
 
   while(Size > 0)
     {
@@ -219,7 +244,7 @@ void	ExtractPartition	(int Fin, u_long Start, u_long Size)
   Counter++;
 
   /* reset position */
-  lseek(Fin,Hold,SEEK_SET);	/* rewind file */
+  lseek64(Fin,Hold,SEEK_SET);	/* rewind file */
 } /* ExtractPartition() */
 
 /****************************************************
@@ -326,7 +351,7 @@ int	ReadMBR	(int Fin, u_long MBRStart)
 	long S,E;
 	S=MBRStart+(Start)*SectorSize;
 	E=MBRStart+(Size)*SectorSize;
-printf("Extracting type %02x: start=%04lx  size=%lu\n",Type,S,E);
+	if (Verbose) fprintf(stderr,"Extracting type %02x: start=%04lx  size=%lu\n",Type,S,E);
 	ExtractPartition(Fin,S,E);
 	}
       }
@@ -341,6 +366,7 @@ void	Usage	(char *Filename)
 {
   fprintf(stderr,"Usage: %s [-t] diskimage\n",Filename);
   fprintf(stderr,"  -t = test -- do not actually extract.\n");
+  fprintf(stderr,"  -v = Verbose.\n");
 } /* Usage() */
 
 /*********************************************************************/
@@ -355,11 +381,12 @@ int	main	(int argc, char *argv[])
     exit(-1);
     }
 
-  while((c = getopt(argc,argv,"t")) != -1)
+  while((c = getopt(argc,argv,"tv")) != -1)
     {
     switch(c)
 	{
 	case 't':	Test=1; break;
+	case 'v':	Verbose++; break;
 	default:
 		Usage(argv[0]);
 		exit(-1);
