@@ -55,7 +55,7 @@ Description: architecture for analyzing software, scheduler
  This package contains the scheduler daemon.
 
 Package: fossology-db
-Architecture: any
+Architecture: all
 Depends: postgresql-8.3 | postgresql-8.1, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, database
  A web based tool that allows you to upload software to be picked apart
