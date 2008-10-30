@@ -80,7 +80,7 @@ class ui_view_license extends FO_Plugin
 	  {
 	  $Parts = split("-",$Segment,2);
 	  if (empty($Parts[1])) { $Parts[1] = $Parts[0]; }
-	  if (empty($Row['lic_tokens'])) $Match = "100%";
+	  if (empty($Row['lic_tokens'])) $Match = ""; /* No match for phrases */
 	  else $Match = (int)($Row['tok_match'] * 100 / ($Row['lic_tokens'])) . "%";
 	  if ($First) { $First = 0; $Color=-2; }
 	  else { $Color=-1; $LicName=NULL; }
