@@ -20,7 +20,9 @@ set -e
 
 case "$1" in
     configure)
-    /usr/lib/fossology/fo-postinstall -s
+    # since fossology-scheduler depends on fossology-agent, we don't need
+    # to run the agent stuff
+    /usr/lib/fossology/fo-postinstall --scheduler-only
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

@@ -20,7 +20,9 @@ set -e
 
 case "$1" in
     configure)
-    /usr/lib/fossology/fo-postinstall -w
+    # since fossology-web depends on fossology-agents, we don't need to run
+    # the agent stuff
+    /usr/lib/fossology/fo-postinstall --web-only
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
