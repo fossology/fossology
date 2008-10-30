@@ -22,7 +22,7 @@ Description: open and modular architecture for analyzing software
 
 Package: fossology-common
 Architecture: any
-Depends: fossology-agents, php5-pgsql, php-pear, php5-cli, ${shlibs:Depends}, ${misc:Depends}
+Depends: php5-pgsql, php-pear, php5-cli, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, common files
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
@@ -34,7 +34,7 @@ Description: architecture for analyzing software, common files
 
 Package: fossology-web
 Architecture: all
-Depends: fossology-common, apache2, libapache2-mod-php5
+Depends: fossology-agents, apache2, libapache2-mod-php5
 Description: architecture for analyzing software, web interface
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
@@ -45,7 +45,7 @@ Description: architecture for analyzing software, web interface
 
 Package: fossology-scheduler
 Architecture: any
-Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-agents, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, scheduler
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
