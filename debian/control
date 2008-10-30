@@ -8,7 +8,7 @@ Homepage: http://fossology.org
 
 Package: fossology
 Architecture: all
-Pre-Depend: fossology-db
+Pre-Depends: fossology-db
 Depends: fossology-scheduler, fossology-agents, fossology-web
 Description: open and modular architecture for analyzing software
  A web based tool that allows you to upload software to be picked apart
