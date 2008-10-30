@@ -1,0 +1,88 @@
+Source: fossology
+Section: utils
+Priority: extra
+Maintainer: Matt Taggart <taggart@debian.org>
+Build-Depends: debhelper (>= 5), postgresql-server-dev-8.3 | postgresql-server-dev-8.1, libmagic-dev, libxml2-dev, libextractor-dev, libtext-template-perl, subversion
+Standards-Version: 3.8.0
+Homepage: http://fossology.org
+
+Package: fossology
+Architecture: all
+Depends: fossology-scheduler, fossology-db, fossology-agents, fossology-web
+Description: open and modular architecture for analyzing software
+ A web based tool that allows you to upload software to be picked apart
+ and then analyzed by software agents which produce results that are
+ then browsable via the web interface. Existing agents include license
+ analysis, metadata extraction, and MIME type identification.
+ .
+ This metapackage depends on all the fossology component packages
+ needed for a single system install. For a multi-system install,
+ consult the README.Debian file in fossology-common.
+
+Package: fossology-common
+Architecture: any
+Depends: fossology-agents, php5-pgsql, php-pear, php5-cli, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, common files
+ A web based tool that allows you to upload software to be picked apart
+ and then analyzed by software agents which produce results that are
+ then browsable via the web interface. Existing agents include license
+ analysis, metadata extraction, and MIME type identification.
+ .
+ This package contains the resources needed by all of the other
+ fossology components.
+
+Package: fossology-web
+Architecture: all
+Depends: fossology-common, apache2, libapache2-mod-php5
+Description: architecture for analyzing software, web interface
+ A web based tool that allows you to upload software to be picked apart
+ and then analyzed by software agents which produce results that are
+ then browsable via the web interface. Existing agents include license
+ analysis, metadata extraction, and MIME type identification.
+ .
+ This package depends on the packages for the web interface.
+
+Package: fossology-scheduler
+Architecture: any
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, scheduler
+ A web based tool that allows you to upload software to be picked apart
+ and then analyzed by software agents which produce results that are
+ then browsable via the web interface. Existing agents include license
+ analysis, metadata extraction, and MIME type identification.
+ .
+ This package contains the scheduler daemon.
+
+Package: fossology-db
+Architecture: any
+Depends: fossology-common, postgresql-8.3 | postgresql-8.1, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, database
+ A web based tool that allows you to upload software to be picked apart
+ and then analyzed by software agents which produce results that are
+ then browsable via the web interface. Existing agents include license
+ analysis, metadata extraction, and MIME type identification.
+ .
+ This package contains the database resources.
+
+Package: fossology-agents
+Architecture: any
+Depends: fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage | mkisofs, xpdf-utils, rpm, upx-ucl, unrar-free, unzip, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, analysis agents
+ A web based tool that allows you to upload software to be picked apart
+ and then analyzed by software agents which produce results that are
+ then browsable via the web interface. Existing agents include license
+ analysis, metadata extraction, and MIME type identification.
+ .
+ This package contains the agent programs and their resources.
+
+Package: fossology-dev
+Architecture: any
+Depends: postgresql-server-dev-8.1, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, development files
+ A web based tool that allows you to upload software to be picked apart
+ and then analyzed by software agents which produce results that are
+ then browsable via the web interface. Existing agents include license
+ analysis, metadata extraction, and MIME type identification.
+ .
+ This package contains resources needed to developer with the
+ libfossdb and libfossrepo libraries.

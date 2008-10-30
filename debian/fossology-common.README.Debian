@@ -1,0 +1,51 @@
+fossology for Debian
+--------------------
+Single vs. Multi-system installs:
+The fossology software has been split into separate packages according
+to function in order to make it easy to do multi-system installs. If
+you want to run everything on a single system just install the
+"fossology" meta-package and it will do the right thing. If you
+want to do a multi-system install read INSTALL.multi and then install
+the appropriate package(s) on each machine. Be sure to pay attention to
+the note in INSTALL.multi about UID/GID, since we are using
+adduser/addgroup --system they aren't guaranteed to be the same. I
+might request the allocation of static UID/GID if this becomes too
+big of an issue.
+
+Setup:
+The Debian packages do most of what you need to install FOSSology. In
+addition to installing the packages you need to do the following steps
+from the upstream INSTALL document
+
+* Adjust the kernel shmmax (fossology-db)
+* Adjust the postgresql config (fossology-db)
+* Adjust the php config (fossology-web)
+* Adjust the apache config (fossology-web)
+
+All of these will be dependent on the goals of your local system and
+can't be reasonably automated, so you'll have to do them by hand.
+
+Scheduler:
+There is a potential issue with starting the scheduler automatically on
+upgrade. Before the scheduler is started we need the other packages to
+be installed and configured so they have run fossinit (and setup the
+database, repository, etc.). However, because the various fossology-*
+packages might exist on different machines, we can't declare Depends
+to ensure that this is done. So in the single machine case, when the
+scheduler is configured to be started automatically (ENABLE=1 in the
+default file), then the possibility exists that fossology-scheduler
+will be configured before the other packages and fail. The solution
+to fix this case it to either restart it by hand after the
+fossology-* packages are installed and configured, or not configure
+the scheduler to start automatically. In the future we might be able
+to fix this issue using dpkg trigger or another mechanism.
+
+Migrating from upstream:
+If you are migrating from an upstream install, you will need to run
+the upstream utils/fo-cleanold utility in order to clean off old
+binaries that would be in the PATH and really confuse things. You
+should be able to run it with no options, thus leaving your config
+files, database, and repository intact. Then install the packages and
+migrate any changes you made to config files to the new config files.
+
+ -- Matt Taggart <taggart@debian.org>  Fri, 17 Oct 2008 01:24:09 -0700

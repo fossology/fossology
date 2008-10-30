@@ -1,0 +1,35 @@
+Notes on the Debian packaging of FOSSology
+==========================================
+1.) The debian/ directory is kept in upstream SVN, but it is excluded
+from upstream release tarballs in order to prevent the messy
+situation of having to patch and merge this directory.
+
+2.) How to build packages. First prepare using one of the following
+ A.) svn export the whole tree and then have the most recent upstream
+   tarball unpacked as fossolog-<version>.orig
+ B.) * unpack the upstream tarball once for your working directory
+     * unpack it again as fossology-<version>.orig for the upstream
+     * export the debian directory and put it in the working dir
+ C.) use an existing debian source package
+Then hack away on the working directory and use normal methods for
+building the package (e.g. "debuild -rfakeroot").
+
+3.) Currently fossology-common and fossology-agents depend on each other.
+
+ A.) fossology-agents depends on fossology-common because it needs the
+  fo-postinstall script and the utilities that it uses.
+ B.) fossology-common depends on fossology-agents because the ui uses
+  License.bsam as part of the "one shot" license analysis. I hope in
+  the future this functionality delivered as a plugin and can go back
+  in the fossology-agents package.
+
+Because of this loop dpkg will need to break it. Debian Policy 7.2 says
+
+  "If one of the packages in the loop has no postinst script, then the
+  cycle will be broken at that package, so as to ensure that all
+  postinst scripts run with the dependencies properly configured if
+  this is possible."
+
+Because fossology-common doesn't have a postinst, it will be
+installed/upgraded first which solves A and B does not occur until
+ui runtime, so this works.
