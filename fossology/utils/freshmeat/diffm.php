@@ -61,7 +61,7 @@
 * file that will be used by get-projects to retrieve them from the net.
 *
 */
-require_once("pathinclude.php");
+require_once("FIXMETOBERELATIVE/pathinclude.php");
 require_once("$LIBDIR/lib_projxml.h.php");
 
 $usage = <<< USAGE
