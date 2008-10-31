@@ -23,17 +23,18 @@ INSTALL.multi document and then
  b) create the directory $REPO/<hostname> where that hostname is the
    name of the machine as listed in Hosts.conf. This directory should
    be root:fossy 2770.
-5) ensure that the fossy UID/GIDs that were created on those machines
+5) on the scheduler machine install fossology-scheduler
+6) ensure that the fossy UID/GIDs that were created on those machines
     are the same
-6) setup nfs so that each agent's $REPO/<hostname> directory is exported
+7) setup nfs so that each agent's $REPO/<hostname> directory is exported
     to all of the other agent/scheduler/web machines.
-7) on all the agent machine mount each of the other agents at
+8) on all the agent machine mount each of the other agents at
     $REPO/<hostname>
-8) on the scheduler and web machines mount each of all of the agent
+9) on the scheduler and web machines mount each of all of the agent
     machines at $REPO/<hostname>
-9) run '/usr/lib/fossology/fossology-scheduler -t' to test that
+10) run '/usr/lib/fossology/fossology-scheduler -t' to test that
     everything works
-10) start the scheduler '/etc/init.d/fossology start'
+11) start the scheduler '/etc/init.d/fossology start'
 
 
 Additional Setup:
