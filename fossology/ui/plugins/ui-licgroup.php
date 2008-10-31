@@ -723,6 +723,7 @@ class licgroup extends FO_Plugin
 	break;
       case "HTML":
 	$V .= "<font class='text'>\n";
+	$V .= "<center><b><font color='red'>WARNING: This functionality is a work in progress and is currently incomplete.</font></b></center><P>\n";
 
 	/************************/
 	/* Show the folder path */
