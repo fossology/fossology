@@ -41,7 +41,7 @@
 #include <grp.h>
 
 #ifndef FOSSREPO_CONF
-#define FOSSREPO_CONF "/etc/fossology/repository"
+#define FOSSREPO_CONF "/srv/fossology/repository"
 #endif
 #ifndef FOSSGROUP
 #define FOSSGROUP "fossology"

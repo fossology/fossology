@@ -17,19 +17,14 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
  **************************
- The repository assumes some directories are mounted.
- The layout looks like:
-
-  /etc/ossdb/repository/
+ Repository config files:
+  /etc/fossology/
      RepPath.conf # contains path to the mounted directory
 	# If it does not exist, then "." is used.
      Depth.conf	# contains a number for the current depth
      Hosts.conf	# list of hosts and hex ranges (used to find host with data)
 
-  Use $REPCONF to select a different location (other than
-  /etc/ossdb/repository).
-
-  Under the RepPath.conf directory:
+ The layout looks like:
      host1/	# Each host has a directory. This can be mounted or local
      host1/type/	# Type describes the repository (e.g., gold, file, license)
      host1/type/00/	# Directories are lowercase octets (00 to ff)
@@ -39,7 +34,6 @@
      host2/type/	# Type describes the repository (e.g., gold, file, license)
      host2/type/00/	# Directories are lowercase octets (00 to ff)
      host2/type/00/00/	# Directories are lowercase octets (00 to ff)
-  If "host" is not defined in Hosts.conf, then it is omitted.
  ************************************************************/
 
 #ifndef LIBFOSSREPO_H
