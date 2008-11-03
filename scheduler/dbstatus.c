@@ -188,7 +188,8 @@ void	DBLockReconnect	()
   DB = DBopen();
   if (!DB)
     {
-    syslog(LOG_CRIT,"FATAL: Scheduler unable to reconnect to the database.\n");
+    if (InSignalHandler) fprintf(MsgHolder,"FATAL: Scheduler unable to reconnect to the database.\n");
+    else syslog(LOG_CRIT,"FATAL: Scheduler unable to reconnect to the database.\n");
     exit(-1);
     }
   sigprocmask(SIG_UNBLOCK,&OldMask,NULL);
@@ -259,16 +260,21 @@ void	DBUpdateJob	(int JobId, int UpdateType, char *Message)
     }
   Len = strlen(SQL);
   snprintf(SQL+Len,MAXCMD-Len," WHERE jq_pk = '%d';",JobId);
-  if (Verbose && !InChildSignalHandler) syslog(LOG_DEBUG,"SQL Update: '%s'\n",SQL);
+  if (Verbose && !InSignalHandler)
+    {
+    if (InSignalHandler) fprintf(MsgHolder,"SQL Update: '%s'\n",SQL);
+    else syslog(LOG_DEBUG,"SQL Update: '%s'\n",SQL);
+    }
   rc = DBLockAccess(DB,SQL);
   if (rc >= 0) return;
 
   /* How to handle a DB error? Right now, they are just logged per agent */
   /* TBD: This will be implemented when we have interprocess communication
      between the scheduler and UI. */
-  if (!InChildSignalHandler)
+  if (!InSignalHandler)
     {
-    syslog(LOG_ERR,"ERROR: Unable to process: '%s'\n",SQL);
+    if (InSignalHandler) fprintf(MsgHolder,"ERROR: Unable to process: '%s'\n",SQL);
+    else syslog(LOG_ERR,"ERROR: Unable to process: '%s'\n",SQL);
     }
   return;
 } /* DBUpdateJob() */
@@ -341,9 +347,12 @@ void	DBCheckSchedulerUnique	()
       DBattr = GetValueFromAttr(DBattr,"agent=");
       if (DBattr && !strcmp(Attr,DBattr))
 	{
-	syslog(LOG_WARNING,"WARNING: Competing scheduler for '%s' detected: %s ",
+	if (InSignalHandler) fprintf(MsgHolder,"WARNING: Competing scheduler for '%s' detected: %s ",
 		Attr,DBgetvalue(DB,Row,0));
-	syslog(LOG_WARNING,"%s\n",DBgetvalue(DB,Row,1));
+	else syslog(LOG_WARNING,"WARNING: Competing scheduler for '%s' detected: %s ",
+		Attr,DBgetvalue(DB,Row,0));
+	if (InSignalHandler) fprintf(MsgHolder,"%s\n",DBgetvalue(DB,Row,1));
+	else syslog(LOG_WARNING,"%s\n",DBgetvalue(DB,Row,1));
 	DBattrChecked[Row] = 1; /* only report it once */
 	}
       }
@@ -385,7 +394,8 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
   rc = DBLockAccess(DB,SQL);
   if (rc < 0)
     {
-    syslog(LOG_CRIT,"FATAL: Scheduler failed to update status in DB. SQL was: \"%s\"\n",SQL);
+    if (InSignalHandler) fprintf(MsgHolder,"FATAL: Scheduler failed to update status in DB. SQL was: \"%s\"\n",SQL);
+    else syslog(LOG_CRIT,"FATAL: Scheduler failed to update status in DB. SQL was: \"%s\"\n",SQL);
     exit(-1);
     }
 
@@ -416,7 +426,8 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
     rc = DBLockAccess(DB,SQL);
     if (rc < 0)
       {
-      syslog(LOG_CRIT,"FATAL: Scheduler failed to insert status in DB.\n");
+      if (InSignalHandler) fprintf(MsgHolder,"FATAL: Scheduler failed to insert status in DB.\n");
+      else syslog(LOG_CRIT,"FATAL: Scheduler failed to insert status in DB.\n");
       exit(-1);
       }
     }
@@ -426,7 +437,8 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
     {
     if (DBDead > 3)
 	{
-	syslog(LOG_CRIT,"FATAL: Scheduler had too many database connection retries.\n");
+	if (InSignalHandler) fprintf(MsgHolder,"FATAL: Scheduler had too many database connection retries.\n");
+	else syslog(LOG_CRIT,"FATAL: Scheduler had too many database connection retries.\n");
 	exit(-1);
 	}
 
@@ -440,15 +452,19 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
 	Now = time(NULL);
 	memset(Ctime,'\0',MAXCTIME);
 	ctime_r(&Now,Ctime);
-	syslog(LOG_ERR,"ERROR: Scheduler lost connection to the database! %s",Ctime);
-	syslog(LOG_INFO,"  Dumping debug information.\n");
+	if (InSignalHandler) fprintf(MsgHolder,"ERROR: Scheduler lost connection to the database! %s",Ctime);
+	else syslog(LOG_ERR,"ERROR: Scheduler lost connection to the database! %s",Ctime);
+	if (InSignalHandler) fprintf(MsgHolder,"  Dumping debug information.\n");
+	else syslog(LOG_INFO,"  Dumping debug information.\n");
 	DebugThreads(3);
-	syslog(LOG_INFO,"INFO: Scheduler attempting to reconnect to the database.\n");
+	if (InSignalHandler) fprintf(MsgHolder,"INFO: Scheduler attempting to reconnect to the database.\n");
+	else syslog(LOG_INFO,"INFO: Scheduler attempting to reconnect to the database.\n");
 	DBclose(DB);
 	DB = DBopen();
 	if (!DB)
 	  {
-	  syslog(LOG_CRIT,"FATAL: Scheduler unable to reconnect to the database.\n");
+	  if (InSignalHandler) fprintf(MsgHolder,"FATAL: Scheduler unable to reconnect to the database.\n");
+	  else syslog(LOG_CRIT,"FATAL: Scheduler unable to reconnect to the database.\n");
 	  exit(-1);
 	  }
 	DBDead++;
@@ -567,7 +583,8 @@ void	DBSaveJobStatus	(int Thread, int MSQid)
 	ProcessCount,(int)ElapseTime,(int)ProcessTime,JobPk);
     if (DBLockAccess(DB,SQL) < 0)
 	{
-	syslog(LOG_CRIT,"FATAL: Scheduler failed to update job status in DB.\n");
+	if (InSignalHandler) fprintf(MsgHolder,"FATAL: Scheduler failed to update job status in DB.\n");
+	else syslog(LOG_CRIT,"FATAL: Scheduler failed to update job status in DB.\n");
 	exit(-1);
 	}
     }
@@ -609,11 +626,15 @@ void	DBkillschedulers	()
 	  if (rc == -1)
 	    {
 	    if (errno == EPERM)
-	      syslog(LOG_WARNING,"Permission denied: cannot kill process %d\n",Pid);
+	      {
+	      if (InSignalHandler) fprintf(MsgHolder,"Permission denied: cannot kill process %d\n",Pid);
+	      else syslog(LOG_WARNING,"Permission denied: cannot kill process %d\n",Pid);
+	      }
 	    }
 	  else
 	    {
-	    syslog(LOG_NOTICE,"Politely killing process %d\n",Pid);
+	    if (InSignalHandler) fprintf(MsgHolder,"Politely killing process %d\n",Pid);
+	    else syslog(LOG_NOTICE,"Politely killing process %d\n",Pid);
 	    SentKill++;
 	    }
 	  }
@@ -621,7 +642,8 @@ void	DBkillschedulers	()
   if (!SentKill) return;  /* nothing to kill! */
 
   /* wait 20 seconds, then make sure it is dead */
-  syslog(LOG_NOTICE,"Waiting 20 seconds for %d processes to complete\n",SentKill);
+  if (InSignalHandler) fprintf(MsgHolder,"Waiting 20 seconds for %d processes to complete\n",SentKill);
+  else syslog(LOG_NOTICE,"Waiting 20 seconds for %d processes to complete\n",SentKill);
   sleep(20);
   DBLockAccess(DB,SQL);
   for(i=0; i<DBdatasize(DB); i++)
@@ -634,12 +656,16 @@ void	DBkillschedulers	()
 	  if (kill(Pid,SIGKILL) != 0)
 	    {
 	    if (errno == EPERM)
-	      syslog(LOG_WARNING,"Permission denied: cannot kill process %d\n",Pid);
+	      {
+	      if (InSignalHandler) fprintf(MsgHolder,"Permission denied: cannot kill process %d\n",Pid);
+	      else syslog(LOG_WARNING,"Permission denied: cannot kill process %d\n",Pid);
+	      }
 	    else if (errno != ESRCH) perror("ERROR: Unable to kill process");
 	    }
 	  else
 	    {
-	    syslog(LOG_NOTICE,"Forcefully killing process %d\n",Pid);
+	    if (InSignalHandler) fprintf(MsgHolder,"Forcefully killing process %d\n",Pid);
+	    else syslog(LOG_NOTICE,"Forcefully killing process %d\n",Pid);
 	    }
 	  }
 	}
@@ -655,6 +681,8 @@ void	DebugMSQ	()
   int m;
   int i;
   char Arg[MAXCMD];
+
+  if (InSignalHandler) return;
 
   syslog(LOG_DEBUG,"==============================================================\n");
   for(m=0; m < MAXMSQ; m++)

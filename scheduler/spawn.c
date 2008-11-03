@@ -40,7 +40,7 @@
    The solution:
      Do NOT call syslog inside a SIGCHLD signal handler.
    The workaround:
-     Instead, set a global flag (InChildSignalHandler) and dump any
+     Instead, set a global flag (InSignalHandler) and dump any
      messages to a temp file (MsgHolder).  Later, dump the contents of
      the temp file to syslog.
      This is an ugly hack, but it works.
@@ -95,7 +95,7 @@ char *StatusName[] = {
 	NULL
 	};
 
-int	InChildSignalHandler=0;
+int	InSignalHandler=0;
 FILE	*MsgHolder=NULL;
 
 /************************************************************************/
@@ -124,7 +124,7 @@ void	ShowStates	(int Thread)
   Now = time(NULL);
   memset(Ctime,'\0',MAXCTIME);
   ctime_r(&Now,Ctime);
-  if (!InChildSignalHandler)
+  if (!InSignalHandler)
     {
     syslog(LOG_INFO,"Child[%d] '%s' state=%s(%d) @ %s",
 	Thread,CM[Thread].Attr,
@@ -138,7 +138,6 @@ void	ShowStates	(int Thread)
     }
   else
     {
-    if (!MsgHolder) MsgHolder = tmpfile();
     fprintf(MsgHolder,"Child[%d] '%s' state=%s(%d) @ %s",
 	Thread,CM[Thread].Attr,
 	StatusName[CM[Thread].Status],CM[Thread].Status,Ctime);
@@ -152,7 +151,7 @@ void	ShowStates	(int Thread)
 void	DebugThread	(int Thread)
 {
   char Ctime[MAXCTIME];
-  if (!InChildSignalHandler)
+  if (!InSignalHandler)
     {
     syslog(LOG_NOTICE,"\nThread %d:\n",Thread);
     syslog(LOG_NOTICE,"  PID:       %d\n",CM[Thread].ChildPid);
@@ -180,7 +179,6 @@ void	DebugThread	(int Thread)
     }
   else
     {
-    if (!MsgHolder) MsgHolder=tmpfile();
     fprintf(MsgHolder,"\nThread %d:\n",Thread);
     fprintf(MsgHolder,"  PID:       %d\n",CM[Thread].ChildPid);
     fprintf(MsgHolder,"  Pipes:     in=%d->%d / out=%d->%d\n",
@@ -213,7 +211,7 @@ void	DebugThread	(int Thread)
 void	DebugThreads	(int Flag)
 {
   int Thread;
-  if (InChildSignalHandler) return;
+  if (InSignalHandler) return;
   syslog(LOG_NOTICE,"==============================\n");
   /* BuildVersion has a \n at the end */
   syslog(LOG_NOTICE,"Scheduler %s",BuildVersion);
@@ -504,7 +502,7 @@ void	CheckPids	()
 	{
 	if (CM[Thread].Status != ST_FREEING)
 		{
-		if (!InChildSignalHandler)
+		if (!InSignalHandler)
 		  {
 #if USE_WAITID
 		  syslog(LOG_ERR,"ERROR: Child[%d] died prematurely (was state %s, signal was %d)\n",Thread,StatusName[CM[Thread].Status],Info.si_signo);
@@ -514,7 +512,6 @@ void	CheckPids	()
 		  }
 		else
 		  {
-		  if (!MsgHolder) MsgHolder = tmpfile();
 #if USE_WAITID
 		  fprintf(MsgHolder,"ERROR: Child[%d] died prematurely (was state %s, signal was %d)\n",Thread,StatusName[CM[Thread].Status],Info.si_signo);
 #else
@@ -525,13 +522,12 @@ void	CheckPids	()
 		}
 	if (Verbose)
 		{
-		if (!InChildSignalHandler)
+		if (!InSignalHandler)
 		  {
 		  syslog(LOG_NOTICE,"Child[%d] (pid=%d) found dead\n",Thread,CM[Thread].ChildPid);
 		  }
 		else
 		  {
-		  if (!MsgHolder) MsgHolder = tmpfile();
 		  fprintf(stderr,"Child[%d] (pid=%d) found dead\n",Thread,CM[Thread].ChildPid);
 		  }
 		}
@@ -582,14 +578,13 @@ void	CheckPids	()
 #if USE_WAITID
 	if (Info.si_signo != SIGCHLD) /* ignore unknown children */
 	  {
-	  if (!InChildSignalHandler)
+	  if (!InSignalHandler)
 	    {
 	    syslog(LOG_INFO,"INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
 		Info.si_signo, Info.si_pid, Info.si_status);
 	    }
 	  else
 	    {
-	    if (!MsgHolder) MsgHolder = tmpfile();
 	    fprintf(MsgHolder,"INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
 		Info.si_signo, Info.si_pid, Info.si_status);
 	    }
@@ -597,14 +592,13 @@ void	CheckPids	()
 #else
 	if (WTERMSIG(Status) != SIGCHLD) /* ignore unknown children */
 	  {
-	  if (!InChildSignalHandler)
+	  if (!InSignalHandler)
 	    {
 	    syslog(LOG_INFO,"INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
 		WTERMSIG(Status), Pid, Status);
 	    }
 	  else
 	    {
-	    if (!MsgHolder) MsgHolder = tmpfile();
 	    fprintf(MsgHolder,"INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
 		WTERMSIG(Status), Pid, Status);
 	    }
@@ -638,6 +632,9 @@ void	HandleSig	(int Signo, siginfo_t *Info, void *Context)
   int Thread;
   time_t Now;
 
+  InSignalHandler=1;
+  if (!MsgHolder) MsgHolder = tmpfile();
+
   /* Find the child... */
   Now = time(NULL);
   Thread=0;
@@ -661,7 +658,6 @@ void	HandleSig	(int Signo, siginfo_t *Info, void *Context)
   switch(Signo)
     {
     case SIGCHLD:
-	InChildSignalHandler=1;
 	/* we could decide to respawn the process... */
 	if (Verbose) fprintf(stderr,"Child[%d] (pid=%d) died?\n",Thread,Info->si_pid);
 	/***
@@ -670,15 +666,16 @@ void	HandleSig	(int Signo, siginfo_t *Info, void *Context)
 	 Source: http://www.xs4all.nl/~evbergen/unix-signals.html
 	 ***/
 	CheckPids();
-	InChildSignalHandler=0;
 	break;
     default:
-	syslog(LOG_WARNING,"*** Child[%d] did something unexpected (sig=%d)\n",
-		Info->si_pid,Signo);
+	fprintf(MsgHolder,"Child[%d] did something unexpected: signal=%d, state was %s(%d)\n",
+		Thread,Signo,
+		StatusName[CM[Thread].Status],CM[Thread].Status);
 	KillChild(Thread);
 	CheckPids();
 	break;
     } /* switch signal */
+  InSignalHandler=0;
 } /* HandleSig() */
 
 

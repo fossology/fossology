@@ -60,6 +60,7 @@ void	DBErrorClose	()
 void	DBErrorWrite	(int Thread, char *Type, char *Message)
 {
   /* Until we rebuild the log table, log errors. */
-  syslog(LOG_ERR,"%s: In thread %d: %s\n",Type,Thread,Message);
+  if (InSignalHandler) fprintf(MsgHolder,"%s: In thread %d: %s\n",Type,Thread,Message);
+  else syslog(LOG_ERR,"%s: In thread %d: %s\n",Type,Thread,Message);
 } /* DBErrorWrite() */
 
