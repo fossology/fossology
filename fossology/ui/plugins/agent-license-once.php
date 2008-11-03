@@ -148,7 +148,7 @@ class agent_license_once extends FO_Plugin
 	     have matched the terms! Give it a 100% match. */
 	  if (!preg_match('/-style/',$NameList) && (intval($Match) < 60))
 	    {
-	    $Match='100%';
+	    $Match='';
 	    }
 
 	  /* Add the namelist to the highlighting */
