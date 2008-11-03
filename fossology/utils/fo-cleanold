@@ -125,7 +125,7 @@ DIRS="/usr/local/fossology/
 TMPDIR=`mktemp -d /tmp/fossology-configs.XXXXXX` || exit 1
 echo "*** Searching for old fossology config files ***"
 for conffile in $OLDSAVE; do
-   if [ -e "$conffile" ]; then
+   if [ -e "$conffile" -o -L "$conffile" ]; then
       echo "NOTE: found old $conffile saving to $TMPDIR/ and removing"
       cp $conffile $TMPDIR/
       rm -f $conffile
@@ -134,7 +134,7 @@ done
 
 echo "*** Searching for new fossology config files ***"
 for conffile in $NEWSAVE; do
-   if [ -e "$conffile" ]; then
+   if [ -f "$conffile" -o -L "$conffile" ]; then
       if [ $RMCONF ]; then
          echo "NOTE: found $conffile saving to $TMPDIR/ and removing as requested"
          cp $conffile $TMPDIR/
@@ -152,13 +152,13 @@ fi
 
 echo "*** Cleaning up old fossology files ***"
 for file in $FILES; do
-   if [ -e "$file" ]; then
+   if [ -f "$file" -o -L "$file" ]; then
       rm -f $file
    fi
 done
 
 for dir in $DIRS; do
-   if [ -d "$dir" ]; then
+   if [ -d "$dir" -o -L "$dir" ]; then
       rm -rf $dir
    fi
 done
@@ -191,7 +191,7 @@ fi
 ## Repository
 if [ $RMREPO ]; then
    echo "*** Removing repository ***"
-   if [ -e /srv/fossology/repository ]; then
+   if [ -d /srv/fossology/repository ]; then
       rm -rf /srv/fossology
       if [ $? != 0 ]; then
          echo "ERROR: failed to remove repository"
