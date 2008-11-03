@@ -60,7 +60,11 @@ int	ReadChild	(int Thread)
     rc = ReadCmdFD(CM[Thread].ChildStdout,Cmd,MAXCMD);
     if (rc <= 0) return(rc);
 
-    if (Verbose) syslog(LOG_DEBUG,"Child[%d] says: %s\n",Thread,Cmd);
+    if (Verbose)
+	{
+	if (InSignalHandler) fprintf(MsgHolder,"Child[%d] says: %s\n",Thread,Cmd);
+	else syslog(LOG_DEBUG,"Child[%d] says: %s\n",Thread,Cmd);
+	}
     /* Here is where we process the child's reply.
        Stop when we get to a line saying "OK" */
     if (Cmd[0]=='\0')	return(0);	/* skip blank lines */
@@ -87,29 +91,37 @@ int	ReadChild	(int Thread)
     else if (!strncmp(Cmd,"FATAL ",6) || !strncmp(Cmd,"FATAL:",6))
 	{
 	DBErrorWrite(Thread,"FATAL",Cmd+6);
-	syslog(LOG_DEBUG,"DEBUG[%d]: %s\n",Thread,Cmd);
+	if (InSignalHandler) fprintf(MsgHolder,"DEBUG[%d]: %s\n",Thread,Cmd);
+	else syslog(LOG_DEBUG,"DEBUG[%d]: %s\n",Thread,Cmd);
 	}
     else if (!strncmp(Cmd,"ERROR ",6) || !strncmp(Cmd,"ERROR:",6))
 	{
 	DBErrorWrite(Thread,"ERROR",Cmd+6);
-	syslog(LOG_DEBUG,"DEBUG[%d]: %s\n",Thread,Cmd);
+	if (InSignalHandler) fprintf(MsgHolder,"DEBUG[%d]: %s\n",Thread,Cmd);
+	else syslog(LOG_DEBUG,"DEBUG[%d]: %s\n",Thread,Cmd);
 	}
     else if (!strncmp(Cmd,"WARNING ",8) || !strncmp(Cmd,"WARNING:",8))
 	{
 	DBErrorWrite(Thread,"WARNING",Cmd+8);
-	syslog(LOG_DEBUG,"DEBUG[%d]: %s\n",Thread,Cmd);
+	if (InSignalHandler) fprintf(MsgHolder,"DEBUG[%d]: %s\n",Thread,Cmd);
+	else syslog(LOG_DEBUG,"DEBUG[%d]: %s\n",Thread,Cmd);
 	}
     else if (!strncmp(Cmd,"LOG ",4) || !strncmp(Cmd,"LOG:",4))
 	{
 	DBErrorWrite(Thread,"LOG",Cmd+4);
-	syslog(LOG_DEBUG,"DEBUG[%d]: %s\n",Thread,Cmd);
+	if (InSignalHandler) fprintf(MsgHolder,"DEBUG[%d]: %s\n",Thread,Cmd);
+	else syslog(LOG_DEBUG,"DEBUG[%d]: %s\n",Thread,Cmd);
 	}
     else if (!strcmp(Cmd,"Success"))	{ /* TBD success */ }
     else if (!strncmp(Cmd,"Heartbeat",9))	{ /* Do nothing; just a heartbeat */ }
     else if (!strncmp(Cmd,"DB:",3))
 	{
 	/*** "DB:" is for debugging only!  Don't depend on it! ***/
-	if (Verbose) syslog(LOG_DEBUG,"Child[%d]: '%s'\n",Thread,Cmd);
+	if (Verbose)
+	  {
+	  if (InSignalHandler) fprintf(MsgHolder,"Child[%d]: '%s'\n",Thread,Cmd);
+	  else syslog(LOG_DEBUG,"Child[%d]: '%s'\n",Thread,Cmd);
+	  }
 #if 0
 	int PID;
 	PID = fork(); /* don't tie up the scheduler with minutia! */
@@ -134,7 +146,11 @@ int	ReadChild	(int Thread)
 
 	      MaxRow=DBdatasize(CM[Thread].DB);
 	      MaxCol=DBcolsize(CM[Thread].DB);
-	      if (Verbose) syslog(LOG_DEBUG,"Telling Child[%d]: DBSTART\n",Thread);
+	      if (Verbose)
+	        {
+		if (InSignalHandler) fprintf(MsgHolder,"Telling Child[%d]: DBSTART\n",Thread);
+		else syslog(LOG_DEBUG,"Telling Child[%d]: DBSTART\n",Thread);
+		}
 	      write(CM[Thread].ChildStdin,"DBSTART\n",8);
 	      for(Row=0; Row < MaxRow; Row++)
 	        {
@@ -147,20 +163,36 @@ int	ReadChild	(int Thread)
 		  V = DBgetvalue(CM[Thread].DB,Row,Col);
 		  write(CM[Thread].ChildStdin,V,strlen(V));
 		  write(CM[Thread].ChildStdin,"'",1);
-		  if (Verbose) syslog(LOG_DEBUG,"Telling Child[%d]: %s=%s\n",Thread,F,V);
+		  if (Verbose)
+		    {
+		    if (InSignalHandler) fprintf(MsgHolder,"Telling Child[%d]: %s=%s\n",Thread,F,V);
+		    else syslog(LOG_DEBUG,"Telling Child[%d]: %s=%s\n",Thread,F,V);
+		    }
 		  }
 	        write(CM[Thread].ChildStdin,"\n",1);
 	        } /* for each record */
-	      if (Verbose) syslog(LOG_DEBUG,"Telling Child[%d]: DBEOF\n",Thread);
+	      if (Verbose)
+	        {
+		if (InSignalHandler) fprintf(MsgHolder,"Telling Child[%d]: DBEOF\n",Thread);
+		else syslog(LOG_DEBUG,"Telling Child[%d]: DBEOF\n",Thread);
+		}
 	      write(CM[Thread].ChildStdin,"DBEOF\n",4);
 	      break;
 	    default:
 	      if (CM[Thread].Status != ST_RUNNING) break; /* could be dying */
-	      if (Verbose) syslog(LOG_INFO,"Telling Child[%d]: ERROR (%d)\n",Thread,rc);
+	      if (Verbose)
+	        {
+		if (InSignalHandler) fprintf(MsgHolder,"Telling Child[%d]: ERROR (%d)\n",Thread,rc);
+		else syslog(LOG_INFO,"Telling Child[%d]: ERROR (%d)\n",Thread,rc);
+		}
 	      write(CM[Thread].ChildStdin,"ERROR\n",6);
 	      break;
 	    } /* switch */
-	  if (Verbose) syslog(LOG_DEBUG,"Telling Child[%d]: OK\n",Thread);
+	  if (Verbose)
+	    {
+	    if (InSignalHandler) fprintf(MsgHolder,"Telling Child[%d]: OK\n",Thread);
+	    else syslog(LOG_DEBUG,"Telling Child[%d]: OK\n",Thread);
+	    }
 	  if (CM[Thread].Status == ST_RUNNING)
 		{
 		write(CM[Thread].ChildStdin,"OK\n",3);
@@ -177,13 +209,16 @@ int	ReadChild	(int Thread)
 	}
     else if (!strncmp(Cmd,"ECHO ",5))
 	{
-	syslog(LOG_DEBUG,"%s\n",Cmd+5); /* display command */
+	/* display command */
+	if (InSignalHandler) fprintf(MsgHolder,"%s\n",Cmd+5);
+	else syslog(LOG_DEBUG,"%s\n",Cmd+5);
 	return(0);
 	}
     else
 	{
 	/* Unknown reply.  Use it as a debug. */
-	syslog(LOG_DEBUG,"DEBUG[%d]: %s\n",Thread,Cmd);
+	if (InSignalHandler) fprintf(MsgHolder,"DEBUG[%d]: %s\n",Thread,Cmd);
+	else syslog(LOG_DEBUG,"DEBUG[%d]: %s\n",Thread,Cmd);
 	return(0);
 	}
     /** If we need to send stuff back to the DB, do it here! **/
@@ -282,7 +317,11 @@ void	StaleChild	()
 	CheckClose(CM[Thread].ChildStdinRev);
 	CM[Thread].ChildStdin=0;
 	CM[Thread].ChildStdinRev=0;
-	if (Verbose) syslog(LOG_DEBUG,"Scheduler: Closing old child[%d]\n",Thread);
+	if (Verbose)
+	  {
+	  if (InSignalHandler) fprintf(MsgHolder,"Scheduler: Closing old child[%d]\n",Thread);
+	  else syslog(LOG_DEBUG,"Scheduler: Closing old child[%d]\n",Thread);
+	  }
 	}
     }
 } /* StaleChild() */
@@ -345,7 +384,11 @@ int	GetChild	(char *Attr, int IsUrgent)
 
   HostId = GetHostFromAttr(Attr);
   Now=time(NULL);
-  if (Verbose > 1) syslog(LOG_DEBUG,"GetChild(): No running child (yet) -- want host=%d\n",HostId);
+  if (Verbose > 1)
+    {
+    if (InSignalHandler) fprintf(MsgHolder,"GetChild(): No running child (yet) -- want host=%d\n",HostId);
+    else syslog(LOG_DEBUG,"GetChild(): No running child (yet) -- want host=%d\n",HostId);
+    }
 
   /* This loop summarizes the status of all running children. */
   for(Thread=0; Thread < MaxThread; Thread++)
@@ -403,17 +446,29 @@ int	GetChild	(char *Attr, int IsUrgent)
 	{
 	if (SpawnEngine(PossibleDead))
 	  {
-	  if (Verbose) syslog(LOG_DEBUG,"Child[%d] spawned\n",PossibleDead);
+	  if (Verbose)
+	    {
+	    if (InSignalHandler) fprintf(MsgHolder,"Child[%d] spawned\n",PossibleDead);
+	    else syslog(LOG_DEBUG,"Child[%d] spawned\n",PossibleDead);
+	    }
 	  return(PossibleDead);
 	  }
-        if (Verbose) syslog(LOG_ERR,"ERROR: SpawnEngine[%d] failed.\n",PossibleDead);
+        if (Verbose)
+	  {
+	  if (InSignalHandler) fprintf(MsgHolder,"ERROR: SpawnEngine[%d] failed.\n",PossibleDead);
+	  else syslog(LOG_ERR,"ERROR: SpawnEngine[%d] failed.\n",PossibleDead);
+	  }
 	return(-2);
 	}
 
   /* Case: We can kill a child (only if nobody is dying) */
   if ((PossibleDying == -1) && (PossibleKill != -1))
 	{
-	if (Verbose > 1) syslog(LOG_DEBUG,"Scheduler: Need to kill child[%d].\n",PossibleKill);
+	if (Verbose > 1)
+	  {
+	  if (InSignalHandler) fprintf(MsgHolder,"Scheduler: Need to kill child[%d].\n",PossibleKill);
+	  else syslog(LOG_DEBUG,"Scheduler: Need to kill child[%d].\n",PossibleKill);
+	  }
 	/* Child claims ready but is not needed.  Kill it! (Close stdin) */
 	ChangeStatus(PossibleKill,ST_FREEING);
 	CheckClose(CM[PossibleKill].ChildStdin);
