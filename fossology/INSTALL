@@ -424,7 +424,7 @@ FOSSology requires a system user and a system group both named
 The /etc/passwd entries for these user should look
 something like (Note: your uid & gid values may be different):
 
-  fossy:x:1001:1001:FOSSology:/srv/fossology:/bin/false
+  fossy:x:1001:1001:FOSSology:/srv/fossology:/bin/bash
 
 and the /etc/group entry
 
