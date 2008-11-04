@@ -944,7 +944,7 @@ void	ProcessTerms	()
       IsPhrase = (strlen(DBgetvalue(DBRanges,MaxRanges,6)) <= 72); 
       Range = DBgetvalue(DBRanges,MaxRanges,2);
       LicNameTmp = DBgetvalue(DBRanges,MaxRanges,3);
-      snprintf(LicName,sizeof(LicName),"%s/licences/%s",AGENTDATADIR,LicNameTmp);
+      snprintf(LicName,sizeof(LicName),"%s/licenses/%s",AGENTDATADIR,LicNameTmp);
       }
 
     if (!IsPhrase)
