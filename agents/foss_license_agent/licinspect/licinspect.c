@@ -43,7 +43,7 @@ char Version[]=SVN_REV;
 #define PATHINC 128	/* how much to increment the Path.PathString */
 
 #ifndef AGENTDATADIR
-#define AGENTDATADIR	"/usr/local/share/fossology/agents/licenses"
+#define AGENTDATADIR	"/usr/local/share/fossology/agents"
 #endif
 
 /************************************************************
@@ -936,7 +936,7 @@ void	ProcessTerms	()
       else
 	{
 	Range = Bpath;
-	snprintf(LicName,sizeof(LicName),"%s/%s",AGENTDATADIR,Bname);
+	snprintf(LicName,sizeof(LicName),"%s/licenses/%s",AGENTDATADIR,Bname);
 	}
       }
     else /* not explicit */
@@ -944,7 +944,7 @@ void	ProcessTerms	()
       IsPhrase = (strlen(DBgetvalue(DBRanges,MaxRanges,6)) <= 72); 
       Range = DBgetvalue(DBRanges,MaxRanges,2);
       LicNameTmp = DBgetvalue(DBRanges,MaxRanges,3);
-      snprintf(LicName,sizeof(LicName),"%s/%s",AGENTDATADIR,LicNameTmp);
+      snprintf(LicName,sizeof(LicName),"%s/licences/%s",AGENTDATADIR,LicNameTmp);
       }
 
     if (!IsPhrase)
