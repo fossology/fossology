@@ -237,7 +237,7 @@ class core_auth extends FO_Plugin
     if (!empty($R['user_seed']) && !empty($R['user_pass']))
       {
       $Hash = sha1($R['user_seed'] . $Pass);
-      if ($Hash != $R['user_pass']) { return; }
+      if (strcmp($Hash,$R['user_pass']) != 0) { return; }
       }
     else if (!empty($R['user_seed']))
       {
