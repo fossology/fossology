@@ -241,6 +241,8 @@ int	main	(int argc, char *argv[])
 	exit(-1);
 	}
 
+  syslog(LOG_INFO,"*** Scheduler started\n");
+
   /* All config files require group access.  Validate access. */
   if (getuid() == 0)
     {
@@ -362,6 +364,7 @@ int	main	(int argc, char *argv[])
 	{
 	DBkillschedulers();
 	DBclose(DB);
+	syslog(LOG_INFO,"*** Scheduler completed\n");
 	exit(0); /* kill me too! */
 	}
 
@@ -397,6 +400,7 @@ int	main	(int argc, char *argv[])
 	{
 	DBclose(DB);
 	closelog();
+	syslog(LOG_INFO,"*** Scheduler completed\n");
 	return(rc);
 	}
     }
@@ -567,13 +571,12 @@ int	main	(int argc, char *argv[])
       }
     }
 
-  syslog(LOG_NOTICE,"Scheduler ending.\n");
-
   /* print statistics */
   if (DB) DBErrorClose();
   DBQclose();
   DBclose(DB);
   DebugThreads(1);
+  syslog(LOG_INFO,"*** Scheduler completed\n");
   closelog();
   return(0);
 } /* main() */

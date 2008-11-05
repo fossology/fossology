@@ -413,8 +413,8 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 	  if (CM[Thread].ChildPid) kill(CM[Thread].ChildPid,SIGKILL);
 	  }
 	/** if all children are dead, then I'll exit through signal handler */
-	syslog(LOG_NOTICE,"Done.\n");
 	DBclose(DB);
+	syslog(LOG_INFO,"*** Scheduler completed.\n");
 	exit(0);
 	break;
     case SIGHUP: /* Display stats */
@@ -438,6 +438,7 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 	syslog(LOG_CRIT,"CRASH DEAD! %s",Ctime);
 	raise(SIGABRT); /* generate a core dump */
 	DBclose(DB);
+	syslog(LOG_INFO,"*** Scheduler completed.\n");
 	exit(-1);
 	}
 	break;
@@ -864,22 +865,26 @@ int	SpawnEngine	(int Thread)
   if (fcntl(p2c[0],F_SETFL, fcntl(p2c[0],F_GETFL) ) != 0)
     {
     perror("FATAL: fcntl(p2c[0]) failed: ");
+    syslog(LOG_CRIT,"FATAL: fcntl(p2c[0]) failed.\n");
     exit(-1);
     }
   if (fcntl(p2c[1],F_SETFL, fcntl(p2c[1],F_GETFL) ) != 0)
     {
     perror("FATAL: fcntl(p2c[1]) failed: ");
+    syslog(LOG_CRIT,"FATAL: fcntl(p2c[1]) failed.\n");
     exit(-1);
     }
   /* Set child-to-parent pipes to be non-blocking */
   if (fcntl(c2p[0],F_SETFL, fcntl(c2p[0],F_GETFL) | O_NONBLOCK) != 0)
     {
     perror("FATAL: fcntl(c2p[0]) failed: ");
+    syslog(LOG_CRIT,"FATAL: fcntl(c2p[0]) failed.\n");
     exit(-1);
     }
   if (fcntl(c2p[1],F_SETFL, fcntl(c2p[1],F_GETFL) | O_NONBLOCK) != 0)
     {
     perror("FATAL: fcntl(c2p[1]) failed: ");
+    syslog(LOG_CRIT,"FATAL: fcntl(c2p[1]) failed.\n");
     exit(-1);
     }
 
@@ -927,6 +932,7 @@ int	SpawnEngine	(int Thread)
 	{
 	perror("FATAL: fork failed: ");
 	DBclose(DB);
+	syslog(LOG_CRIT,"FATAL: fork failed.\n");
 	exit(-1);
 	}
   else
@@ -1109,6 +1115,7 @@ int	ProcessCommand	(int Job_ID, char *Cmd)
 	DBUpdateJob(Job_ID,1,"Done");
 	syslog(LOG_DEBUG,"Command '%s' Done.\n",Cmd);
 	DBclose(DB);
+	syslog(LOG_INFO,"*** Scheduler completed by shutdown command.\n");
 	exit(0);
 	}
   else if (!strncmp(Cmd,"killjob ",8))
