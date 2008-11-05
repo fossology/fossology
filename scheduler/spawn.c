@@ -414,7 +414,7 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 	  }
 	/** if all children are dead, then I'll exit through signal handler */
 	DBclose(DB);
-	syslog(LOG_INFO,"*** Scheduler completed.\n");
+	syslog(LOG_INFO,"*** Scheduler completed (terminated by signal).\n");
 	exit(0);
 	break;
     case SIGHUP: /* Display stats */
