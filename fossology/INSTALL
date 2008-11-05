@@ -281,23 +281,14 @@ Debian and the one used for the http://repo.fossology.org database:
 
 2.1.5 Configuring PHP
 ---------------------
-Some php config variables need to be adjusted for FOSSology. We don't
+Some php config variables may need to be adjusted for FOSSology. We don't
 provide an automated way to do this because it can be specific to your
 particular install if you are using php for other things. Edit your
 php.ini file for apache (location dependent on how you installed, but probably
-something like /etc/php5/apache2/php.ini) and make the following
-changes by locating where the variable is set and adjusting:
+something like /etc/php5/apache2/php.ini) and make adjustments as
+recommended by your system administrator.  In particular, you must add
+an extension in the "[soap]" section like this:
 
-  max_execution_time = 90
-  memory_limit = 128M
-  error_reporting  =  E_ALL & E_STRICT
-  display_startup_errors = On
-  log_errors = On
-  log_errors_max_len = 0
-  error_log = /var/log/php5.log
-  post_max_size = 700M
-  upload_max_filesize = 701M
-In the "[soap]" section add
   extension=pgsql.so
 
 You should also edit /etc/php5/cli/php.ini to include the fossology directory
