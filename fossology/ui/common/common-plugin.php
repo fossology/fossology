@@ -132,7 +132,7 @@ function plugin_sort()
     }
 
   /* Now it is safe to sort */
-  usort($Plugins,plugin_cmp);
+  usort($Plugins,'plugin_cmp');
 } // plugin_sort()
 
 /*****************************************
