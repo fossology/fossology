@@ -29,7 +29,6 @@ $(iPATHFILE): ../Makefile.conf
 	@echo "\$$PROJECTSTATEDIR=\"$(PROJECTSTATEDIR)\";" >> $(iPATHFILE)
 	@echo "\$$PROJECT=\"$(PROJECT)\";" >> $(iPATHFILE)
 	@echo "\$$DATADIR=\"$(DATADIR)\";" >> $(iPATHFILE)
-	@echo "\$$PATH=\"\$$LIBEXECDIR:\$$AGENTDIR:\$$PATH:/usr/bin\";" >> $(iPATHFILE)
 	@echo "\$$VERSION=\"$(VERSION)\";" >> $(iPATHFILE)
 	@echo "\$$SVN_REV=\"$(SVN_REV)\";" >> $(iPATHFILE)
 	@echo "?>" >> $(iPATHFILE)
