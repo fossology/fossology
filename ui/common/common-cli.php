@@ -47,13 +47,12 @@ function cli_Init()
   /** The auth module hijacks and disables plugins, so turn it off. **/
   $P = &$Plugins[plugin_find_any_id("auth")];
   if (!empty($P)) { $P->State = PLUGIN_STATE_FAIL; }
+  $_SESSION['User'] = 'fossy';
 
   /* Initialize plugins */
   /** This registers plugins with the menu structure and start the DB
    connection. **/
   plugin_init(); /* this registers plugins with menus */
-  // Load the plugins
-  plugin_load("$WEBDIR/plugins");
 
   return(true);
 } // cli_Init()
