@@ -211,9 +211,10 @@ class agent_license_once_compare extends FO_Plugin
 	    { unlink($_FILES['licfile']['tmp_name']); }
 
 	/* Display instructions */
-	$V .= "This analyzer allows you to upload a single file for license analysis and select the licenses to compare against.\n";
+	$V .= "This analyzer allows you to compare a single file to a set of licenses selectable by you without having the results saved in the database.\n<br>";
+	$V .= "Typical uses include comparing one license to other licenses to see their similarity, and to compare a file to a license to see how this particular license matches.\n<br>";
 	$V .= "The analysis is done in real-time.\n";
-	$V .= "<P>The limitations:\n";
+	$V .= "<P>Limitations:\n";
 	$V .= "<ul>\n";
 	$V .= "<li>The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n";
 	$V .= "<li>The analysis is done in real-time. Selecting many licenses to compare against can take a long time.\n";
