@@ -13,4 +13,4 @@
 #ENABLED="0"
 
 # You can override scheduler options here
-#SCHEDULEROPT=" -d -L /var/log/fossology.log"
+#SCHEDULEROPT=""
