@@ -4,7 +4,7 @@ FOSSology is designed so that it is possible to divide functions up over
 several machines. You can have one function per machine, or you might
 choose to put multiple function on a machine.
 For example a common config is to have one machine running the database,
-scheduler, and ui and then have multiple machines running agents.
+scheduler, and web ui and then have multiple machines running agents.
 There are more details of why you might want to do this and detailed
 instructions at
   http://fossology.org/multi-system_setup
@@ -14,7 +14,7 @@ To do a multi-system install:
 
 1) Follow the instructions in INSTALL for each machine to build and
 install FOSSology, but do not run the fo-postinstall script yet. If
-the machine will serve as a ui machine follow the apache and php
+the machine will serve as a web ui machine follow the apache and php
 configuration steps. If using the fo-installdeps utility you can use
 the -a option for agent only machines to avoid installing unneeded
 things like the postgresql and apache servers.
@@ -61,6 +61,9 @@ machines and the scheduler machine. For example:
 like this in /etc/fstab
 agent1:/srv/fossology/repository/agent1 /srv/fossology/repository/agent1 \
   nfs nfsvers=3,defaults,soft
+
+6) On all machines setup the Hosts.conf file to specify how you have the
+repository split.
 
 6) On the scheduler machine as the fossy user use ssh-keygen to generate
 a ssh key that does not have a passphrase. Then copy the public half of
