@@ -284,16 +284,24 @@ Debian and the one used for the http://repo.fossology.org database:
 Some php config variables may need to be adjusted for FOSSology. We don't
 provide an automated way to do this because it can be specific to your
 particular install if you are using php for other things. Edit your
-php.ini file for apache (location dependent on how you installed, but probably
-something like /etc/php5/apache2/php.ini) and make adjustments as
-recommended by your system administrator.  In particular, you must add
-an extension in the "[soap]" section like this:
+php.ini file for apache (location dependent on your install, but
+probably something like /etc/php5/apache2/php.ini) and make adjustments
+that will work for your system and usage. Here are some things to
+consider:
 
-  extension=pgsql.so
+max_execution_time = 90
+  This controls how long, in seconds, a php process is allowed to run.
+  For "one shot" license analysis, particularly large jobs, or if your
+  system is slow you may need to increase this (the default is 30).
 
-You should also edit /etc/php5/cli/php.ini to include the fossology directory
-in the php command line interface path:
-  include_path = ".:/usr/local/share/fossology/php:/usr/local/share/fossology/www"
+memory_limit = 702M
+post_max_size = 701M
+upload_max_filesize = 700M
+  These control the size of file you will be able to upload via the
+  web interface. For very large uploads (for example DVD images) we
+  recommend using the command line upload method, but you might want
+  to increase these to handle up to CDROM sized uploads. (the defaults
+  are 128M, 8M, and 2M)
 
 2.1.6 Configuring Apache
 ------------------------
