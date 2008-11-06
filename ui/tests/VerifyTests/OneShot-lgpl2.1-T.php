@@ -67,8 +67,6 @@ class OneShotTablegplv21Test extends fossologyTestCase
     /* select highlights' */
     $this->assertTrue($this->mybrowser->setField('highlight', 1),
            "OneShotgplv21Test-Table FAILURE! Could not click  highlight\n");
-    $page = $this->getURL();
-    print "page before hitting Analyze:\n$page\n";
     $this->assertTrue($this->mybrowser->clickSubmit('Analyze!'),
            "OneShotgplv21Test-Table FAILURE! Could not click Analyze button\n");
     /* Check for the correct analysis....it should be 100% match, no partials */
