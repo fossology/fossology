@@ -54,33 +54,34 @@ class OneShotTablegplv21Test extends fossologyTestCase
 
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
-                      "FAIL! Did not find Upload Menu\n");
+           "OneShotgplv21Test-Table FAILURE! Did not find Upload Menu\n");
     $this->assertTrue($this->myassertText($loggedIn, '/One-Shot License/'),
-                      "FAIL! Did not find One-Shot License Menu\n");
+           "OneShotgplv21Test-Table FAILURE! Did not find One-Shot License Menu\n");
 
     $page = $this->mybrowser->get("$URL?mod=agent_license_once");
     $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
-                      "FAIL! Did not find One-Shot License Analysis Title\n");
+           "OneShotgplv21Test-Table FAILURE! Did not find One-Shot License Analysis Title\n");
     $this->assertTrue($this->myassertText($page, '/The analysis is done in real-time/'),
-                      "FAIL! Did not find real-time Text\n");
-
+           "OneShotgplv21Test-Table FAILURE! Did not find real-time Text\n");
     $this->assertTrue($this->mybrowser->setField('licfile', '/home/fosstester/licenses/gplv2.1'));
     /* select highlights' */
     $this->assertTrue($this->mybrowser->setField('highlight', 1),
-                      "FAIL! Count not click  highlight\n");
+           "OneShotgplv21Test-Table FAILURE! Could not click  highlight\n");
+    $page = $this->getURL();
+    print "page before hitting Analyze:\n$page\n";
     $this->assertTrue($this->mybrowser->clickSubmit('Analyze!'),
-                      "FAIL! Count not click Analyze button\n");
+           "OneShotgplv21Test-Table FAILURE! Could not click Analyze button\n");
     /* Check for the correct analysis....it should be 100% match, no partials */
     $page = $this->mybrowser->getContentAsText();
     //print "************ page a text (after analysis) *************\n$ct\n";
     $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
-                      "FAIL! Did not find One-Shot License Analysis Title\n");
+           "OneShotgplv21Test-Table FAILURE! Did not find One-Shot License Analysis Title\n");
     $this->assertTrue($this->myassertText($page, '/Match/'),
-                      "FAIL! Did not find text 'Match' \n");
+           "OneShotgplv21Test-Table FAILURE! Did not find text 'Match' \n");
     $this->assertTrue($this->myassertText($page, '/100% view LGPL v2\.1/'),
-                      "FAIL! Did not find '100% view LGPL v2.1' \n");
+           "OneShotgplv21Test-Table FAILURE! Did not find '100percent view LGPL v2.1' \n");
     $this->assertFalse($this->myassertText($page, '/-partial/'),
-                      "FAIL! Found -partial in a non partial license file\n");
+           "OneShotgplv21Test-Table FAILURE! Found -partial in a non partial license file\n");
   }
 }
 ?>

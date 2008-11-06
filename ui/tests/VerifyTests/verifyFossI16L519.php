@@ -25,6 +25,7 @@
  */
 
 require_once('../../../tests/fossologyTestCase.php');
+require_once('../../../tests/commonTestFuncs.php');
 require_once('../../../tests/TestEnvironment.php');
 require_once('../../../tests/testClasses/parseBrowseMenu.php');
 require_once('../../../tests/testClasses/parseMiniMenu.php');
@@ -50,8 +51,8 @@ class verifyFossolyTest extends fossologyTestCase
     global $safeName;
 
     $name = 'fossI16L519.tar.bz2';
-    $safeName = $this->escapeDots($name);
-    $this->host = $this->getHost($URL);
+    $safeName = escapeDots($name);
+    $this->host = getHost($URL);
     $this->Login();
 
     /* check for existense of archive */
@@ -115,7 +116,7 @@ class verifyFossolyTest extends fossologyTestCase
     $browse = new parseBrowseMenu($page);
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
-    $url = $this->makeUrl($this->host, $miniMenu['License']);
+    $url = makeUrl($this->host, $miniMenu['License']);
     if($url === NULL) { $this->fail("verifyFossI16L519 Failed, host is not set"); }
 
     $page = $this->mybrowser->get($url);
@@ -131,24 +132,22 @@ class verifyFossolyTest extends fossologyTestCase
     //print "licTable is:\n"; print_r($licTable) . "\n";
 
     /* FIX THIS Select show 'Public Domain, verify, select 'LGPL v2.1', verify */
-    $pdURL = $this->makeUrl($this->host, $licTable['Public Domain'][0]);
-    $lgplURL = $this->makeUrl($this->host, $licTable['\'LGPL v2.1\'-style'][0]);
+    $pdURL = makeUrl($this->host, $licTable['Public Domain'][0]);
+    $lgplURL = makeUrl($this->host, $licTable['\'LGPL v2.1\'-style'][0]);
 
     $page = $this->mybrowser->get($pdURL);
-    $licFileList = new parseFolderPath($page);
-    $tblList = $licFileList->parseFolderPath();
-    $tableCnt = count($tblList);
+    $licFileList = new parseFolderPath($page, $URL);
+    $fileCount = $licFileList->countFiles();
     print "Checking the number of files based on Public Domain\n";
-    $this->assertEqual($tableCnt, 4,
-    "verifyFossI16L519 FAILED! Should be 4 files based on Public Domain\n");
+    $this->assertEqual($fileCount, 4,
+    "verifyFossI16L519 FAILED! Should be 4 files based on Public Domain got:$fileCount\n");
 
     $page = $this->mybrowser->get($lgplURL);
     $licFileList->setPage($page);
-    $flist = $licFileList->parseFolderPath();
+    $flist = $licFileList->countFiles();
     print "Checking the number of files based on LGPL v2.1-style\n";
-    $flistCnt = count($flist);
-    $this->assertEqual($flistCnt, 16,
-    "verifyFossI16L519 FAILED! Should be 16 files based on LGPL v2.1-style\n");
+    $this->assertEqual($flist, 16,
+    "verifyFossI16L519 FAILED! Should be 16 files based on LGPL v2.1-style got:$flist\n");
   }
 }
 ?>
