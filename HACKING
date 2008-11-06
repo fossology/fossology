@@ -88,3 +88,19 @@ them there are ways to do that
    # /usr/local/lib/fossology/fo-postinstall -o
 These are also useful in testing if you want to make sure you are back
 at a basic install.
+
+
+Debugging php:
+If you are making changes to the web interface, you probably want to
+turn on error reporting. Edit the php.ini file (location dependent on
+your install, but probably something like /etc/php5/apache2/php.ini)
+and add something like:
+
+error_reporting  =  E_ALL & E_STRICT
+display_startup_errors = On
+log_errors = On
+log_errors_max_len = 0
+error_log = /var/log/apache2/php5.log
+
+The log location must be writable by the user the webserver is running
+as (probably www-data).
