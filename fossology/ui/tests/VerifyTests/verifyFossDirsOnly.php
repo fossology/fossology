@@ -25,6 +25,7 @@
  */
 
 require_once('../../../tests/fossologyTestCase.php');
+require_once('../../../tests/commonTestFuncs.php');
 require_once('../../../tests/TestEnvironment.php');
 require_once('../../../tests/testClasses/parseBrowseMenu.php');
 require_once('../../../tests/testClasses/parseMiniMenu.php');
@@ -55,8 +56,8 @@ class verifyDirsOnly extends fossologyTestCase
 
     print "starting verifyFossDirsOnly-SetUp\n";
     $name = 'fossDirsOnly.tar.bz2';
-    $safeName = $this->escapeDots($name);
-    $this->host = $this->getHost($URL);
+    $safeName = escapeDots($name);
+    $this->host = getHost($URL);
     $this->Login();
 
     /* check for existense of archive */
@@ -115,7 +116,7 @@ class verifyDirsOnly extends fossologyTestCase
     $browse = new parseBrowseMenu($page);
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
-    $url = $this->makeUrl($this->host, $miniMenu['License']);
+    $url = makeUrl($this->host, $miniMenu['License']);
     if($url === NULL) { $this->fail("verifyFossDirsOnly Failed, host is not set"); }
 
     $page = $this->mybrowser->get($url);
@@ -133,18 +134,18 @@ class verifyDirsOnly extends fossologyTestCase
      * are empty. we are going to loop through them, but for now just
      * test a few of them out....
      */
-    $url = $this->makeUrl($this->host, $dirList['scheduler/']);
+    $url = makeUrl($this->host, $dirList['scheduler/']);
     $page = $this->mybrowser->get($url);
     //print "page after scheduler is:\n$page\n";
-    $fList = new parseFolderPath($page);
-    $dirList = $fList->parseFolderPath();
-    // should only get one array back (i.e. one folder path)
-    //$folderCount = count($dirList);
-    $this->assertEqual(count($dirList), 1,
-    "verifyFossDirsOnly FAILED! did not get 1 folder path back\n");
+    $fList = new parseFolderPath($page, $url);
+    $dirCnt = $fList->countFiles();
+    // should only get one folder path)
+    $this->assertEqual((int)$dirCnt, 1,
+    "verifyFossDirsOnly FAILED! did not get 1 folder path back, got $dirCnt instead\n");
     // every entry but the last must have a non-null value (we assume parse
     // routine worked)
-    $this->assertTrue($this->check4Links($dirList),
+    $fpaths = $fList->parseFolderPath();
+    $this->assertTrue($this->check4Links($fpaths),
       "verifyFossDirsOnly FAILED! something wrong with folder path\n" .
       "See this url:\n$url\n");
   }
@@ -182,6 +183,5 @@ class verifyDirsOnly extends fossologyTestCase
     }
     return(TRUE);
    }
-
 }
 ?>

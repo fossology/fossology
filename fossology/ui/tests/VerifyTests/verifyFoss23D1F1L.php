@@ -25,6 +25,7 @@
  */
 
 require_once('../../../tests/fossologyTestCase.php');
+require_once('../../../tests/commonTestFuncs.php');
 require_once('../../../tests/TestEnvironment.php');
 require_once('../../../tests/testClasses/parseBrowseMenu.php');
 require_once('../../../tests/testClasses/parseMiniMenu.php');
@@ -54,8 +55,8 @@ class verify23D1F1L extends fossologyTestCase
     global $safeName;
 
     $name = 'foss23D1F1L.tar.bz2';
-    $safeName = $this->escapeDots($name);
-    $this->host = $this->getHost($URL);
+    $safeName = escapeDots($name);
+    $this->host = getHost($URL);
     $this->Login();
 
     /* check for existense of archive */
@@ -116,7 +117,7 @@ class verify23D1F1L extends fossologyTestCase
     $browse = new parseBrowseMenu($page);
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
-    $url = $this->makeUrl($this->host, $miniMenu['License']);
+    $url = makeUrl($this->host, $miniMenu['License']);
     if($url === NULL) { $this->fail("verify23D1F1L Failed, host is not set"); }
 
     $page = $this->mybrowser->get($url);
@@ -132,10 +133,10 @@ class verify23D1F1L extends fossologyTestCase
     //print "licTable is:\n"; print_r($licTable) . "\n";
 
     /* FIX THIS Select show 'Public Domain, verify, select 'LGPL v2.1', verify */
-    $gplv2URL = $this->makeUrl($this->host, $licTable['\'GPL v2\'-style'][0]);
+    $gplv2URL = makeUrl($this->host, $licTable['\'GPL v2\'-style'][0]);
 
     $page = $this->mybrowser->get($gplv2URL);
-    $licFileList = new parseFolderPath($page);
+    $licFileList = new parseFolderPath($page, $this->host);
     $tblList = $licFileList->parseFolderPath();
     $tableCnt = count($tblList);
     print "Checking the number of files based on 'GPL v2'-style\n";
