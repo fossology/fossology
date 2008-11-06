@@ -80,18 +80,21 @@ class agent_license_once_compare extends FO_Plugin
 	return(1);
 	}
     chdir("$DATADIR/agents/licenses/");
+    if (file_exists($TempLics)) { unlink($TempLics); }
     for($i=0; !empty($Lics[$i]['lic_name']); $i++)
 	{
 	$Filename = $Lics[$i]['lic_name'];
 	$Sys = "$AGENTDIR/Filter_License -O '$Filename' >> '$TempLics'";
 	system($Sys);
 	}
+    // print "Temp License.bsam file $TempLics = " . filesize($TempLics) . " bytes.\n";
 
     $OneShot =  &$Plugins[plugin_find_id("agent_license_once")];
     $V .= $OneShot->AnalyzeOne($Highlight,$TempLics);
 
     /* Clean up */
     if (file_exists($TempCache)) { unlink($TempCache); }
+    if (file_exists($TempLics)) { unlink($TempLics); }
     return($V);
   } // AnalyzeOne()
 
