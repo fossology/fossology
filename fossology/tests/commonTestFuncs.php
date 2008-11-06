@@ -34,7 +34,9 @@ function getHost($URL)
   {
     return (NULL);
   }
-  return (parse_url($URL, PHP_URL_HOST)); // can return NULL
+  $found = parse_url($URL, PHP_URL_HOST);
+  //print "DB: getHost: url is:$URL\nafter parse, found is:$found\n";
+  return ($found);
 }
 /**
  * escapeDots($string)

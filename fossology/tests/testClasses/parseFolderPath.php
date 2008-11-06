@@ -41,6 +41,7 @@ class parseFolderPath
 
   function __construct($page, $url)
   {
+    /* to do: check for http?  if not return null...)? */
     if (empty ($page))
     {
       return;
@@ -51,7 +52,6 @@ class parseFolderPath
       return;
     }
     $this->host = getHost($url);
-    print "after getting host from url:$url, host is:$this->host\n";
   }
 
   /**
@@ -69,9 +69,9 @@ class parseFolderPath
    {
     /* Extract the folder path line from the page */
     $regExp = "Folder<\/b>:.*";
-    $matches = preg_match_all("|$regExp|", $this->page, $pathLines, PREG_SET_ORDER);
+    $numberMatched = preg_match_all("|$regExp|", $this->page, $pathLines, PREG_SET_ORDER);
     $this->filesWithLicense = $pathLines;
-    return($matches);
+    return($numberMatched);
    }
 
   /**
@@ -102,8 +102,8 @@ class parseFolderPath
     {
       $regExp = ".*?href='(.*?)'>(.*?)<\/a>(.*?)<";
       $matches = preg_match_all("|$regExp|i", $apath, $pathList, PREG_SET_ORDER);
-      print "pathList is:\n";
-      print_r($pathList) . "\n";
+      //print "DB: number of link matches are:$matches\npathList is:\n";
+      //print_r($pathList) . "\n";
       if ($matches > 0)
       {
         $dirList[] = $this->_createRtnArray($pathList, $matches);
@@ -130,17 +130,14 @@ class parseFolderPath
     for ($i = 0; $i < $size; $i++)
     {
       $cleanKey = trim($list[$i][2], "\/<>b");
-      //print "after trim of html cleanKey is:$cleanKey\n";
       if (empty ($cleanKey))
       {
         continue;
       }
       // Make a real link that can be used
       $partLink = $list[$i][1];
-      print "partLink is:$partLink\n";
-      print "Host is:$this->host\n";
       $link = makeUrl($this->host, $partLink);
-      print "Link is:$link\n";
+      //print "Link is:$link\n";
       $rtnList[$cleanKey] = $link;
       /* check for anything in the leaf entry, if there is, remove
        * the preceeding /
@@ -148,7 +145,6 @@ class parseFolderPath
       if (!empty ($list[$i][3]))
       {
         $cleanKey = trim($list[$i][3], "\/ ");
-        print "after trim of / cleanKey is:$cleanKey\n";
         if (empty ($cleanKey))
         {
           continue;
