@@ -593,7 +593,7 @@ class ui_view extends FO_Plugin
     $Show = GetParm("show",PARM_STRING);
     $Item = GetParm("item",PARM_INTEGER);
     $Page = GetParm("page",PARM_INTEGER);
-    if (empty($Item) || empty($Upload)) { return; }
+    if (!$Fin && (empty($Item) || empty($Upload))) { return; }
     if (empty($Page)) { $Page=0; };
 
     switch(GetParm("format",PARM_STRING))
