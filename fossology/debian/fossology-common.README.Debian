@@ -5,7 +5,8 @@ The FOSSology software has been split into separate packages according
 to function in order to make it easy to split the work across machines.
 
 * If you want to run everything on a single system just install the
-"fossology" meta-package and it will do the right thing.
+"fossology" meta-package and it will do the right thing. See the
+Additional Setup section below.
 
 * If you want to do a multi-system install read the upstream
 INSTALL.multi document and then
@@ -48,6 +49,7 @@ from the upstream INSTALL document
 * Adjust the kernel shmmax (fossology-db)
 * Adjust the postgresql config (fossology-db)
 * Adjust the apache config (fossology-web)
+* Adjust the php config (fossology-web)
 
 All of these will be dependent on the goals of your local system and
 can't be reasonably automated, so you'll have to do them by hand.
