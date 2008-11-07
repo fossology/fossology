@@ -45,7 +45,8 @@ Description: architecture for analyzing software, web interface
 
 Package: fossology-scheduler
 Architecture: any
-Depends: fossology-agents, ${shlibs:Depends}, ${misc:Depends}
+Pre-Depends: fossology-agents
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, scheduler
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are

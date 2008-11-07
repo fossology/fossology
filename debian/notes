@@ -6,7 +6,7 @@ situation of having to patch and merge this directory.
 
 2.) How to build packages. First prepare using one of the following
  A.) svn export the whole tree and then have the most recent upstream
-   tarball unpacked as fossolog-<version>.orig
+   tarball unpacked as fossology-<version>.orig
  B.) * unpack the upstream tarball once for your working directory
      * unpack it again as fossology-<version>.orig for the upstream
      * export the debian directory and put it in the working dir
@@ -18,10 +18,10 @@ building the package (e.g. "debuild -rfakeroot").
 
  A.) fossology-agents depends on fossology-common because it needs the
   fo-postinstall script and the utilities that it uses.
- B.) fossology-common depends on fossology-agents because the ui uses
-  License.bsam as part of the "one shot" license analysis. I hope in
-  the future this functionality delivered as a plugin and can go back
-  in the fossology-agents package.
+ B.) fossology-common depends on fossology-agents because the web ui
+  uses License.bsam as part of the "one shot" license analysis. I hope
+  in the future this functionality delivered as a plugin and can go
+  back in the fossology-agents package.
 
 Because of this loop dpkg will need to break it. Debian Policy 7.2 says
 
@@ -31,5 +31,25 @@ Because of this loop dpkg will need to break it. Debian Policy 7.2 says
   this is possible."
 
 Because fossology-common doesn't have a postinst, it will be
-installed/upgraded first which solves A and B does not occur until
-ui runtime, so this works.
+installed/upgraded first which solves A, and B does not occur until
+web ui runtime, so this works.
+
+4.) fossology Pre-Depends on fossology-db to ensure that in the
+single system install the database is setup before any of the other
+packages postinstall's try to use it.
+
+5.) fossology-scheduler Pre-Depends on on fossology-agents to ensure
+that the agents are available and fossology-agents' postinstall has
+run before the scheduler is started.
+* In the single system case, combined with the above dependency, this
+  ensures that the database is setup, the common files are installed
+  (including conffiles), the agents are installed and configured, and
+  THEN the scheduler is installed and started. The fossology-web
+  package may not be configured yet, but that's ok.
+* In the multi system case, the user will install the database machine
+  first (maybe the same machine, maybe not). Then when they install
+  fossology-scheduler, the Pre-Depend will ensure that the common
+  files are installed, the agents installed and configured, and
+  THEN the scheduler is installed and started. The fossology-web
+  package may not be configured yet, but that's ok (and it may or
+  may not be on this system).
