@@ -31,14 +31,14 @@ build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp  
 
 	# Add here commands to compile the arch part of the package.
-	$(MAKE) SYSCONFDIR=/etc LOCALSTATEDIR=/var
+	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var
 	touch $@
 
 build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp  
 
 	@# this currently doesn't do anything, but in case it does someday
-	$(MAKE) SYSCONFDIR=/etc LOCALSTATEDIR=/var build-db
+	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var build-db
 	touch $@
 
 clean: 
