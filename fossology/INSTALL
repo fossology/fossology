@@ -32,7 +32,7 @@ Section 3 - After Installation
 Section 1 - Short Installation Instructions
 ===========================================
 (In examples, # is as root, $ is mortal)
-1. If you have any old fossology installs you want to remove from the
+1. If you have any old FOSSology installs you want to remove from the
    system you can run the fo-cleanold script
    # utils/fo-cleanold
    If you have an existing install that you want to transition, be sure
@@ -44,12 +44,12 @@ Section 1 - Short Installation Instructions
    # echo "kernel.shmmax=512000000" >> /etc/sysctl.conf
 4. Adjust postgresql config (described in detail in section 2.1.4)
 5. Adjust PHP config (described in detail in section 2.1.5)
-6. Add apache config for fossology (described in detail in section 2.1.6)
+6. Add apache config for FOSSology (described in detail in section 2.1.6)
   There is an example config provided in ui/fo-apache-example.conf.
   After adding the config restart apache.
-7. Build fossology
+7. Build FOSSology
    $ make
-8. Install fossology
+8. Install FOSSology
    # make install
 9. Run the postinstall script
    # /usr/local/lib/fossology/fo-postinstall
@@ -386,6 +386,10 @@ login, or your favorite root-obtaining utility.
    (fossology-<version>/).
 
 3) To build the software run "make".
+   If you are using an existing SVN tree that you have updated, you
+   might want to run a "make clean" first to get to a known good state.
+   The Makefiles are pretty good about declaring dependencies that
+   will make sure things get rebuilt, but to be sure use "make clean".
 
 4) To install the software run "make install". You will need the proper
    permissions to install to where the files will be install, which in
