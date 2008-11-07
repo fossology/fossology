@@ -35,12 +35,14 @@ If you are someone packaging for a distribution you want to use the paths
 defined by the FHS for distributions, and install to a pseudoroot so you
 can run your packaging results.
 
- $ make SYSCONFDIR=/etc; mkdir /tmp/foo; make DESTDIR=/tmp/foo \
-        PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var/
+ $ make PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var
+ $ make DESTDIR=/tmp/foo PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
+           install
 
-Note: SYSCONFDIR needs to be set during the build as the location of the
-configuration files is embedded in the binaries. But none of the other
-variables should need to be set at build time, only at install time.
+Note: SYSCONFDIR and LOCALSTATEDIR need to be set during the build as
+the location of the files using these is embedded in the binaries. But
+none of the other variables should need to be set at build time, only
+at install time.
 
 
 File Preprocessing:
@@ -74,7 +76,7 @@ Now you can also make other targets (like "all") dependent on the
 
 Clean up and testing:
 The utils/fo-cleanold utility is provided for users to be able to
-remove old fossology installs from their system, but it is also very
+remove old FOSSology installs from their system, but it is also very
 useful in cleaning up a test system when testing installs. See the
 help text for additional flags to remove the database and repository.
 
@@ -104,3 +106,14 @@ error_log = /var/log/apache2/php5.log
 
 The log location must be writable by the user the webserver is running
 as (probably www-data).
+
+Using SVN:
+The FOSSology build system is designed to properly clean up your tree of
+all built objects when you run a "make clean".
+
+If you want to see what outstanding differences you have to the tree
+you have checked out, run:
+  make clean
+  svn status
+If it returns nothing then you are clean, otherwise it will list
+files with differences and files that svn doesn't know about.
