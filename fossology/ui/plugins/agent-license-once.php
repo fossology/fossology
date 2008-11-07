@@ -204,8 +204,11 @@ class agent_license_once extends FO_Plugin
     $ShowHeader = GetParm('showheader',PARM_INTEGER);
     if (empty($ShowHeader)) { $ShowHeader=0; }
 
+    if (GetParm("mod",PARM_STRING) == $this->Name) { $ThisMod = 1; }
+    else { $ThisMod = 0; }
+
     /* Check for a wget post (wget cannot post to a variable name) */
-    if (empty($_POST['licfile']))
+    if ($ThisMod && empty($_POST['licfile']))
 	{
 	$Fin = fopen("php://input","r");
 	$Ftmp = tempnam(NULL,"fosslic-alo-");
@@ -229,7 +232,7 @@ class agent_license_once extends FO_Plugin
 	fclose($Fin);
 	}
 
-    if (file_exists(@$_FILES['licfile']['tmp_name']) &&
+    if ($ThisMod && file_exists(@$_FILES['licfile']['tmp_name']) &&
        ($Highlight != 1) && ($ShowHeader != 1))
       {
       $this->NoHTML=1;
