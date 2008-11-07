@@ -25,17 +25,19 @@ Or maybe you want to build the scheduler using electricfence
 
 
 Installation location:
-All installation locations are controlled by variables as well. Let's say
-you wanted to do a test install into a directory pseudoroot rather than
-on the system itself
+All installation locations are controlled by variables as well. You can
+adjust the paths on the system where various files live by setting
+variables from Makefile.conf. You can also install to a pseudoroot, for
+example let's say you wanted to do a test install into a pseudoroot
+rather than on the system itself
 
-  $ make; mkdir /tmp/foo; make DESTDIR=/tmp/foo install
+  $ make; make DESTDIR=/tmp/foo install
 
 If you are someone packaging for a distribution you want to use the paths
 defined by the FHS for distributions, and install to a pseudoroot so you
 can run your packaging results.
 
- $ make PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var
+ $ make SYSCONFDIR=/etc LOCALSTATEDIR=/var
  $ make DESTDIR=/tmp/foo PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
            install
 
@@ -117,3 +119,31 @@ you have checked out, run:
   svn status
 If it returns nothing then you are clean, otherwise it will list
 files with differences and files that svn doesn't know about.
+
+Coexisting installs:
+FOSSology is designed to support coexisting installations in different
+locations. For example you might have distribution packages of
+FOSSology installed under /usr, but decide you want to try a new
+version from SVN using the normal install process to /usr/local. This
+should work with the following caveats:
+* database
+  If you try to have two versions of FOSSology with different schema
+  use the same database, the older one won't work and you might even
+  break things.
+  If you have two schedulers running at the same time and using the
+  same database it will break.
+  You probably want to use two different databases, adjust the Db.conf
+  files to point at separate. The one exception might be if you are
+  testing a fix of two very similar versions of the code and only
+  have one active at a time.
+* scheduler init script
+  The FHS does not define how init scripts are supposed to coexist
+  for multiple versions of the same software.
+  FOSSology always installs in /etc/init.d/fossology
+  It's up to you to decide which you want started on boot. Adjust the
+  init script accordingly (note both the scheduler and default file
+  locations) or just start the scheduler by hand.
+* apache config
+  apache works fine for two running fossology instances, but they will
+  live in different locations on the filesystem and they can't both
+  live at the same URL. Adjust accordingly.
