@@ -37,11 +37,11 @@ If you are someone packaging for a distribution you want to use the paths
 defined by the FHS for distributions, and install to a pseudoroot so you
 can run your packaging results.
 
- $ make SYSCONFDIR=/etc LOCALSTATEDIR=/var
+ $ make PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var
  $ make DESTDIR=/tmp/foo PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
            install
 
-Note: SYSCONFDIR and LOCALSTATEDIR need to be set during the build as
+Note: PREFIX, SYSCONFDIR and LOCALSTATEDIR need to be set during the build as
 the location of the files using these is embedded in the binaries. But
 none of the other variables should need to be set at build time, only
 at install time.
