@@ -134,7 +134,7 @@ class agent_license_reanalyze extends FO_Plugin
     if (empty($_POST['licfile']))
 	{
 	$Fin = fopen("php://input","r");
-	$Ftmp = tempnam(NULL,"fosslic");
+	$Ftmp = tempnam(NULL,"fosslic-alr-");
 	$Fout = fopen($Ftmp,"w");
 	while(!feof($Fin))
 	  {

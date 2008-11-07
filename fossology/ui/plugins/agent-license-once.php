@@ -208,7 +208,7 @@ class agent_license_once extends FO_Plugin
     if (empty($_POST['licfile']))
 	{
 	$Fin = fopen("php://input","r");
-	$Ftmp = tempnam(NULL,"fosslic");
+	$Ftmp = tempnam(NULL,"fosslic-alo-");
 	$Fout = fopen($Ftmp,"w");
 	while(!feof($Fin))
 	  {
