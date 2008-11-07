@@ -310,8 +310,6 @@ class agent_license_once extends FO_Plugin
 	    return;
 	    }
 	  }
-	if (!empty($_FILES['licfile']['unlink_flag']))
-	      { unlink($_FILES['licfile']['tmp_name']); }
 
 	/* Display instructions */
 	$V .= "This analyzer allows you to upload a single file for license analysis.\n";
@@ -343,6 +341,8 @@ class agent_license_once extends FO_Plugin
       default:
 	break;
     }
+    if (!empty($_FILES['licfile']['unlink_flag']))
+	{ unlink($_FILES['licfile']['tmp_name']); }
     if (!$this->OutputToStdout) { return($V); }
     print($V);
     return;

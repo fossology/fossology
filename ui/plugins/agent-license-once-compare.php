@@ -210,8 +210,6 @@ class agent_license_once_compare extends FO_Plugin
 	    return;
 	    }
 	  }
-	if (!empty($_FILES['licfile']['unlink_flag']))
-	    { unlink($_FILES['licfile']['tmp_name']); }
 
 	/* Display instructions */
 	$V .= "This analyzer allows you to compare a single file to a set of licenses selectable by you without having the results saved in the database.\n<br>";
@@ -273,6 +271,8 @@ class agent_license_once_compare extends FO_Plugin
       default:
 	break;
     }
+    if (!empty($_FILES['licfile']['unlink_flag']))
+	{ unlink($_FILES['licfile']['tmp_name']); }
     if (!$this->OutputToStdout) { return($V); }
     print($V);
     return;
