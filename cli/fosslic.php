@@ -59,6 +59,9 @@ if (empty($Lic))
 	exit(1);
 	}
 
+global $PROJECTSTATEDIR;
+$LicCache = "$PROJECTSTATEDIR/agents/License.bsam";
+
 for($i=1; $i < $argc; $i++)
   {
   switch($argv[$i])
@@ -79,7 +82,7 @@ for($i=1; $i < $argc; $i++)
 	  }
 	$_FILES['licfile']['tmp_name'] = $argv[$i];
 	$_FILES['licfile']['size'] = filesize($argv[$i]);
-	$V = $Lic->AnalyzeOne(0);
+	$V = $Lic->AnalyzeOne(0,$LicCache);
 	print $argv[$i] . ": ";
 	if (empty($V)) { print "None"; }
 	else { print $V; }
