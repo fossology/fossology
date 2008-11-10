@@ -343,8 +343,8 @@ class ui_license extends FO_Plugin
 	  }
 	$VH .= "<td id='LicGroup-$GID'>";
 	$Uri = Traceback_uri() . "?mod=license_listing&item=$Item&lic=$GID";
-	$VH .= "<a href=\"javascript:LicColor('LicGroup-$GID','Lic-','" . trim($LicGID2Item[$GID]) . "','yellow'); ";
-	$VH .= "\">";
+	// $VH .= "<a href=\"javascript:LicColor('LicGroup-$GID','Lic-','" . trim($LicGID2Item[$GID]) . "','yellow'); ";
+	// $VH .= "\">";
 	$VH .= htmlentities($Key);
 	$VH .= "</a>";
 	$VH .= "</td></tr>\n";
