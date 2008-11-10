@@ -80,13 +80,17 @@ for($i=1; $i < $argc; $i++)
 	  print $Usage . "\n";
 	  return(1);
 	  }
-	$_FILES['licfile']['tmp_name'] = $argv[$i];
-	$_FILES['licfile']['size'] = filesize($argv[$i]);
-	$V = $Lic->AnalyzeOne(0,$LicCache);
-	print $argv[$i] . ": ";
-	if (empty($V)) { print "None"; }
-	else { print $V; }
-	print "\n";
+	if (!file_exists($argv[$i])) { print "ERROR: File '" . $argv[$i] . "' does not exist.\n"; }
+	else
+	  {
+	  $_FILES['licfile']['tmp_name'] = $argv[$i];
+	  $_FILES['licfile']['size'] = filesize($argv[$i]);
+	  $V = $Lic->AnalyzeOne(0,$LicCache);
+	  print $argv[$i] . ": ";
+	  if (empty($V)) { print "None"; }
+	  else { print $V; }
+	  print "\n";
+	  }
 	break;
     } /* switch */
   } /* for each parameter */
