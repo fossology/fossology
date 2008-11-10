@@ -304,7 +304,9 @@ class jobs_showjobs extends FO_Plugin
 	  }
 	}
 
-    if ($Count >= 10) { $VM = MenuEndlessPage($Page,1); }
+    /* Only show menu paging if we're viewing history. */
+    if (! $History) { $VM = ""; }
+    else if ($Count >= 10) { $VM = MenuEndlessPage($Page,1); }
     else if ($Page > 0) { $VM = MenuEndlessPage($Page,0); }
     else { $VM = ""; }
     if (!is_array($Results)) { return; }
