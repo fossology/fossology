@@ -14,8 +14,7 @@ situation of having to patch and merge this directory.
 Then hack away on the working directory and use normal methods for
 building the package (e.g. "debuild -rfakeroot").
 
-3.) Currently fossology-common and fossology-agents depend on each other.
-
+3.) Currently fossology-common and fossology-agents* depend on each other.
  A.) fossology-agents depends on fossology-common because it needs the
   fo-postinstall script and the utilities that it uses.
  B.) fossology-common depends on fossology-agents because the web ui
@@ -34,22 +33,31 @@ Because fossology-common doesn't have a postinst, it will be
 installed/upgraded first which solves A, and B does not occur until
 web ui runtime, so this works.
 
-4.) fossology Pre-Depends on fossology-db to ensure that in the
-single system install the database is setup before any of the other
-packages postinstall's try to use it.
+4.) Things need to happen in a certain order:
+  * All packages call fo-postinstall in the postinst scripts, and that
+      is provided by fossology-common
+  * The agents need to be installed before the scheduler can be started
+  * The agents need the database to exist before they run their postinstall
+  * It doesn't matter when the web ui is installed, but it may not
+      function while other things are being installed
+ So therefore
+  * fossology-db needs to installed before fossology-agents*, but only if
+      this is a single machine install
+  * fossology-common needs to be installed before fossology-agents* 
+  * fossology-agents need to be installed before fossology-scheduler
+ So that that results in the following Depends:
+  * fossology Depends on fossology-scheduler and fossology-web
+  * fossology-scheduler Depends on fossology-agents-single | fossology-agents
+  * fossology-agents-single Depends on fossology-db and fossology-common
+  * fossology-agents Depends on fossology-common
+  * fossology-agents-single Conflicts with fossology-agents
+ Other implications:
+  * fossology-web can't depends on fossology-agents*, because then in the
+     single case it means the scheduler won't start last.
+  * in the multi case, on the machine running the scheduler you need to
+     install fossology-agents before fossology-scheduler, and that is
+     what the instructions in README.Debian tell you to do.
 
-5.) fossology-scheduler Pre-Depends on on fossology-agents to ensure
-that the agents are available and fossology-agents' postinstall has
-run before the scheduler is started.
-* In the single system case, combined with the above dependency, this
-  ensures that the database is setup, the common files are installed
-  (including conffiles), the agents are installed and configured, and
-  THEN the scheduler is installed and started. The fossology-web
-  package may not be configured yet, but that's ok.
-* In the multi system case, the user will install the database machine
-  first (maybe the same machine, maybe not). Then when they install
-  fossology-scheduler, the Pre-Depend will ensure that the common
-  files are installed, the agents installed and configured, and
-  THEN the scheduler is installed and started. The fossology-web
-  package may not be configured yet, but that's ok (and it may or
-  may not be on this system).
+5.) Eventually I hope to split out the agents packages so you can pick
+only the ones you want, but it doesn't make sense yet. When I do then
+fossology-agents and fossology-agents-single could Recommends them.

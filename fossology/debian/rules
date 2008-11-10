@@ -83,6 +83,8 @@ install-arch:
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-agents \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-agents
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-agents-single \
+           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-agents
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-dev \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
