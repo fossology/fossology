@@ -8,8 +8,7 @@ Homepage: http://fossology.org
 
 Package: fossology
 Architecture: all
-Pre-Depends: fossology-db
-Depends: fossology-scheduler, fossology-agents, fossology-web
+Depends: fossology-scheduler, fossology-web
 Description: open and modular architecture for analyzing software
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
@@ -34,7 +33,7 @@ Description: architecture for analyzing software, common files
 
 Package: fossology-web
 Architecture: all
-Depends: fossology-agents, apache2, libapache2-mod-php5
+Depends: apache2, libapache2-mod-php5
 Description: architecture for analyzing software, web interface
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
@@ -45,8 +44,7 @@ Description: architecture for analyzing software, web interface
 
 Package: fossology-scheduler
 Architecture: any
-Pre-Depends: fossology-agents
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-agents-single | fossology-agents, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, scheduler
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
@@ -76,6 +74,18 @@ Description: architecture for analyzing software, analysis agents
  analysis, metadata extraction, and MIME type identification.
  .
  This package contains the agent programs and their resources.
+
+Package: fossology-agents-single
+Architecture: any
+Depends: fossology-db, fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage | mkisofs, xpdf-utils, rpm, upx-ucl, unrar-free, unzip, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, analysis agents
+ A web based tool that allows you to upload software to be picked apart
+ and then analyzed by software agents which produce results that are
+ then browsable via the web interface. Existing agents include license
+ analysis, metadata extraction, and MIME type identification.
+ .
+ This package contains the agent programs and their resources plus depends
+ on fossology-db in order to ensure the database is set up on this system.
 
 Package: fossology-dev
 Architecture: any
