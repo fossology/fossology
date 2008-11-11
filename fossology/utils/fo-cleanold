@@ -78,6 +78,7 @@ OLDSAVE="/usr/local/share/fossology/agents/proxy.conf
 "
 # config files from 1.0.0 and newer installs
 NEWSAVE="
+/etc/cron.d/fossology
 /etc/init.d/fossology
 /usr/local/etc/default/fossology
 /usr/local/etc/fossology/Db.conf
@@ -88,7 +89,10 @@ NEWSAVE="
 /usr/local/etc/fossology/Scheduler.conf
 "
 
-FILES="/usr/local/bin/cp2foss.php
+FILES="
+/usr/local/bin/cp2foss
+/usr/local/bin/cp2foss.php
+/usr/local/bin/departition
 /usr/local/bin/diffm
 /usr/local/bin/fossinit
 /usr/local/bin/fossinit.php
@@ -99,22 +103,24 @@ FILES="/usr/local/bin/cp2foss.php
 /usr/local/bin/GetFM
 /usr/local/bin/get-projects
 /usr/local/bin/mktop1k
+/usr/local/bin/p.sh
+/usr/local/bin/unrar
+/usr/local/bin/unrar-free
+/usr/local/bin/ununpack
 /usr/local/bin/wrapGFM
 /usr/local/include/FMDir
 /usr/local/include/fm-paths.php
+/usr/local/include/libfossdb.h
+/usr/local/include/libfossrepo.h
 /usr/local/lib/libcp2foss.h.php
+/usr/local/lib/libfossdb.a
+/usr/local/lib/libfossrepo.a
 /usr/local/lib/lib_projxml.h.php
-/usr/local/share/man/man1/cp2foss.1
-/usr/local/bin/cp2foss
-/usr/local/bin/departition
-/usr/local/bin/p.sh
-/usr/local/bin/ununpack
-/usr/local/bin/unrar
-/usr/local/bin/unrar-free
-/usr/local/include/fm-paths.php
 /usr/local/lib/fossology/agents/checksum
 /usr/local/lib/fossology/agents/departition
 /usr/local/lib/fossology/agents/mkbsamcache
+/usr/local/share/man/man1/cp2foss.1
+/usr/local/share/man/man1/fossjobs.1
 "
 
 DIRS="/usr/local/fossology/
