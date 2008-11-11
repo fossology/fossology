@@ -47,7 +47,7 @@ class BasicFolderTest extends fossologyTestCase
     global $URL;
 
     print "starting BasicFoldertest\n";
-    $this->createTestFolder('Basic-Testing');
+    $this->createFolder(null, 'Basic-Testing', null);
   }
 }
 ?>

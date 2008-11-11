@@ -55,7 +55,6 @@ class UploadFileTest extends fossologyTestCase
     //print "*********** Page after going to upload file **************\n$page\n";
     $this->assertTrue($this->myassertText($page, '/Upload a New File/'));
     $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
-
     $id = $this->getFolderId('Basic-Testing', $page);
     $this->assertTrue($this->mybrowser->setField('folder', $id));
     $this->assertTrue($this->mybrowser->setField('getfile', '/home/fosstester/licenses/gpl-3.0.txt' ));
