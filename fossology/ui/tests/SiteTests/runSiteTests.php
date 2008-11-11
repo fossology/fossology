@@ -36,7 +36,7 @@ global $USER;
 global $PASSWORD;
 
 $start = new timer();
-print "Startnig Site Tests at: " . date('r') . "\n";
+print "Starting Site Tests at: " . date('r') . "\n";
 $test = &new TestSuite('Fossology Repo Site UI tests');
 $test->addTestFile('AboutMenuTest.php');
 $test->addTestFile('login.php');
