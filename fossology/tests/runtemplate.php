@@ -43,7 +43,7 @@ require_once('testClasses/timer.php');
 
 /* replace the TestSuite string with one that describes what the test suite is */
 $start = new timer();
-print "Startnig xxxx Tests at: " . date('r') . "\n";
+print "Starting xxxx Tests at: " . date('r') . "\n";
 $test = & new TestSuite("Run Fossology tests");
 /*
  * To run a test use addTestFile method. as many tests as needed can be run this way.
@@ -55,11 +55,12 @@ $test->addTestFile('atest');
  * edit the print statements as needed, but leave the code below alone,
  * it allows the tests to be run either by the cli or in a web browser
  */
+ $elapseTime = $start->TimeAgo($start->getStartTime());
+
 if (TextReporter :: inCli())
 {
   $results = $test->run(new TextReporter()) ? 0 : 1;
   print "Ending xxx Tests at: " . date('r') . "\n";
-  $elapseTime = $start->TimeAgo($start->getStartTime());
   print "The xxxx Tests took {$elapseTime}to run\n";
   exit($results);
 }
