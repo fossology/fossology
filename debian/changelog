@@ -1,6 +1,6 @@
-fossology (1.0.0~20081111-1) unstable; urgency=low
+fossology (1.0.0~rc1-1) unstable; urgency=low
 
-  * unofficial svn build
+  * Upstream 1.0.0 release candidate 1
 
- -- Matt Taggart <taggart@debian.org>  Wed, 12 Nov 2008 01:27:56 -0800
+ -- Matt Taggart <taggart@debian.org>  Wed, 12 Nov 2008 03:01:48 -0800
 
