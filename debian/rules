@@ -111,6 +111,7 @@ binary-common:
 #	dh_installlogrotate	
 #	dh_installmime
 	DH_OPTIONS= dh_installinit -o -pfossology-scheduler --name=fossology
+	DH_OPTIONS= dh_installinit -o -pfossology-scheduler-single --name=fossology
 #	dh_installcron -pfossology-db
 	dh_installman
 #	dh_lintian
