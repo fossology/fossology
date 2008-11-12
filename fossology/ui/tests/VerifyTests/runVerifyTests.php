@@ -32,7 +32,7 @@ require_once ('../../../tests/TestEnvironment.php');
 require_once('../../../tests/testClasses/timer.php');
 
 $start = new timer();
-print "Startnig Verify Tests at: " . date('r') . "\n";
+print "Starting Verify Tests at: " . date('r') . "\n";
 $test = &new TestSuite('Fossology Repo UI Verification Functional tests');
 //$test->addTestFile('browseUploadedTest.php');
 $test->addTestFile('OneShot-lgpl2.1.php');
@@ -50,6 +50,7 @@ if (TextReporter::inCli())
   exit($results);
 }
 $test->run(new HtmlReporter());
+print "<pre>Ending Verify Tests at: " . date('r') . "</pre>\n";
 $elapseTime = $start->TimeAgo($start->getStartTime());
-print "The Verify Tests took {$elapseTime}to run\n";
+print "<pre>The Verify Tests took {$elapseTime}to run</pre>\n";
 ?>
