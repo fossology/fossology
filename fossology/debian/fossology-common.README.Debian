@@ -10,8 +10,8 @@ Additional Setup section below.
 
 * If you want to do a multi-system install read the upstream
 INSTALL.multi document and then
-1) on the database machine install fossology-db.
-2) on each of the web and agents machine(s)
+1) On the database machine: install fossology-db.
+2) On each of the agents machine(s):
  a) install fossology-common
  b) edit /etc/fossology/Db.conf and point it at the database machine
  c) if you like, edit /etc/fossology/Repo.conf to point at a non-default
@@ -19,26 +19,35 @@ INSTALL.multi document and then
  d) edit /etc/fossology/Hosts.conf and list the agent machines
     according to the format explained in the upstream documentation
     and to how you want to split the repository.
-3) on each of the web machine(s) install fossology-web
-4) on each of the agents machine(s)
- a) install fossology-agents
- b) create the directory $REPO/<hostname> where that hostname is the
+ e) create the directory $REPO/<hostname> where that hostname is the
    name of the machine as listed in Hosts.conf. This directory should
    be root:fossy 2770.
-5) on the scheduler machine install fossology-scheduler. Use
-   mkschedconf to generate a new Scheduler.conf with your preferences
-   for machines and CPU counts.
-6) ensure that the fossy UID/GIDs that were created on those machines
-    are the same
-7) setup nfs so that each agent's $REPO/<hostname> directory is exported
+ f) setup nfs so that each agent's $REPO/<hostname> directory is exported
     to all of the other agent/scheduler/web machines.
-8) on all the agent machine mount each of the other agents at
+ g) on all the agent machines mount each of the other agents at
     $REPO/<hostname>
-9) on the scheduler and web machines mount each of all of the agent
-    machines at $REPO/<hostname>
-10) run '/usr/lib/fossology/fossology-scheduler -t' to test that
-    everything works
-11) start the scheduler '/etc/init.d/fossology start'
+ i) install fossology-agents
+3) On each of the web machine(s):
+ a) install fossology-common
+ b) edit /etc/fossology/Db.conf and point it at the database machine
+ c) mount each of all of the agent machines at $REPO/<hostname>
+ d) install fossology-web
+4) On the scheduler machine:
+ a) install fossology-common
+ b) edit /etc/fossology/Db.conf and point it at the database machine
+ c) mount each of all of the agent machines at $REPO/<hostname>
+ d) install fossology-scheduler
+ e) Use mkschedconf to generate a new Scheduler.conf with your
+   preferences for machines and CPU counts.
+5) On all machines:
+ a) ensure that the fossy UID/GIDs that were created on all machines
+   are the same
+ b) make sure all nfs mounts are working and as fossy you can write to the
+   repository
+6) On the scheduler:
+ a) run '/usr/lib/fossology/fossology-scheduler -t' to test that
+   everything works
+ b) restart the scheduler '/etc/init.d/fossology restart'
 
 
 Additional Setup:
@@ -46,10 +55,10 @@ The Debian packages do most of what you need to install FOSSology. In
 addition to installing the packages you need to do the following steps
 from the upstream INSTALL document
 
-* Adjust the kernel shmmax (fossology-db)
-* Adjust the postgresql config (fossology-db)
-* Adjust the apache config (fossology-web)
-* Adjust the php config (fossology-web)
+* Adjust the kernel shmmax (database)
+* Adjust the postgresql config (database)
+* Adjust the apache config (web)
+* Adjust the php config (web)
 
 All of these will be dependent on the goals of your local system and
 can't be reasonably automated, so you'll have to do them by hand.

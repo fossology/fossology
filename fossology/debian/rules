@@ -80,6 +80,8 @@ install-arch:
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-scheduler
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler-single \
+           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-scheduler
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-agents \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-agents

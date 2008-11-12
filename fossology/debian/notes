@@ -14,7 +14,71 @@ situation of having to patch and merge this directory.
 Then hack away on the working directory and use normal methods for
 building the package (e.g. "debuild -rfakeroot").
 
-3.) Currently fossology-common and fossology-agents* depend on each other.
+3.) fossology is composed of several different components that may or
+may not be running on the same system. In packaging we want to support
+both and easy way to to install everything on a single system, but
+also allow for users to split things up if they want. This is pretty
+tricky because in some cases where we need packages to be configured
+in a certain order we can't rely on Depends to do so. In order to
+avoid Pre-Depends, counting on apt behavior when faced with an OR, and
+other nasty thing, I have chosen to deliver some packages twice with
+different names and dependencies. Here is an explanation of the
+situation...
+
+Things need to happen in a certain order:
+  * All packages call the upstream provided fo-postinstall (provided
+      by fossology-common) in their postinst scripts
+  * The agents need to be configured before the scheduler can be started
+  * The agents need the database to exist before they can be configured
+  * The web component can't be configured until the fossy group exists
+      (so we can add www-data to it), and that is created when
+      common is configured
+So therefore
+  * fossology-db needs to installed before fossology-agents*
+  * fossology-common needs to be installed before fossology-agents* 
+  * fossology-agents needs to be installed before fossology-scheduler
+  * fossology-agents needs to be installed before fossology-web
+But....
+  * For the single-system case we want dependencies to ensure that
+      everything is installed and in the right order
+  * For the multi-system case we don't want dependencies tying things
+      together
+We can resolve this by delivering two nearly identical sets of some
+  packages, one with the dependencies needed for the single-system
+  install and one without the dependencies, for the multi-system
+  install.
+So that that results in the following packages and relationships:
+  * fossology Depends on fossology-web-single
+  * fossology-web-single Depends on fossology-scheduler-single
+  * fossology-web does not depend on fossology-scheduler but does
+      Depends on fossology-agents
+  * fossology-web-single <- Conflicts -> fossology-web
+  * fossology-scheduler-single Depends on fossology-agents-single
+  * fossology-scheduler Depends on fossology-agents
+  * fossology-scheduler-single <- Conflicts -> fossology-scheduler
+  * fossology-agents-single Depends on fossology-db and fossology-common
+  * fossology-agents Depends on fossology-common
+  * fossology-agents-single <- Conflicts -> fossology-agents
+Other implications:
+  * in the multi case, the user needs to install the different systems
+     in a particular order since they are effectively doing the job
+     of the Depends. This is OK, and we tell them how in the
+     fossology-common README.Debian.
+  * The above relationships result in the following configure order for
+     the single-system install.
+     fossology-common and fossology-db -> fossology-agents-single ->
+       fossology-scheduler -> fossology-web-single -> fossology
+  * The above relationships result in the following configure orders for
+     the multi-system install.
+     On db: fossology-db
+     On agents: fossology-common (adjust Db.conf by hand)
+                fossology-agents
+     On web: fossology-common (adjust Db.conf by hand)
+             fossology-web
+     On scheduler: fossology-common (adjust Db.conf by hand)
+                   fossology-scheduler
+
+4.) Currently fossology-common and fossology-agents* depend on each other.
  A.) fossology-agents depends on fossology-common because it needs the
   fo-postinstall script and the utilities that it uses.
  B.) fossology-common depends on fossology-agents because the web ui
@@ -32,31 +96,6 @@ Because of this loop dpkg will need to break it. Debian Policy 7.2 says
 Because fossology-common doesn't have a postinst, it will be
 installed/upgraded first which solves A, and B does not occur until
 web ui runtime, so this works.
-
-4.) Things need to happen in a certain order:
-  * All packages call fo-postinstall in the postinst scripts, and that
-      is provided by fossology-common
-  * The agents need to be installed before the scheduler can be started
-  * The agents need the database to exist before they run their postinstall
-  * It doesn't matter when the web ui is installed, but it may not
-      function while other things are being installed
- So therefore
-  * fossology-db needs to installed before fossology-agents*, but only if
-      this is a single machine install
-  * fossology-common needs to be installed before fossology-agents* 
-  * fossology-agents need to be installed before fossology-scheduler
- So that that results in the following Depends:
-  * fossology Depends on fossology-scheduler and fossology-web
-  * fossology-scheduler Depends on fossology-agents-single | fossology-agents
-  * fossology-agents-single Depends on fossology-db and fossology-common
-  * fossology-agents Depends on fossology-common
-  * fossology-agents-single Conflicts with fossology-agents
- Other implications:
-  * fossology-web can't depends on fossology-agents*, because then in the
-     single case it means the scheduler won't start last.
-  * in the multi case, on the machine running the scheduler you need to
-     install fossology-agents before fossology-scheduler, and that is
-     what the instructions in README.Debian tell you to do.
 
 5.) Eventually I hope to split out the agents packages so you can pick
 only the ones you want, but it doesn't make sense yet. When I do then
