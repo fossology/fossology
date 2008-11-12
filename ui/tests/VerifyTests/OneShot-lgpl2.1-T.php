@@ -70,8 +70,9 @@ class OneShotTablegplv21Test extends fossologyTestCase
     $this->assertTrue($this->mybrowser->clickSubmit('Analyze!'),
            "OneShotgplv21Test-Table FAILURE! Could not click Analyze button\n");
     /* Check for the correct analysis....it should be 100% match, no partials */
-    $page = $this->mybrowser->getContentAsText();
-    //print "************ page a text (after analysis) *************\n$ct\n";
+    //$page = $this->mybrowser->getContentAsText();
+    $page = $this->mybrowser->getContent();
+    print "************ page a text (after analysis) *************\n$page\n";
     $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
            "OneShotgplv21Test-Table FAILURE! Did not find One-Shot License Analysis Title\n");
     $this->assertTrue($this->myassertText($page, '/Match/'),

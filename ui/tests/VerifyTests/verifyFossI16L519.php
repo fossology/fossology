@@ -129,11 +129,10 @@ class verifyFossolyTest extends fossologyTestCase
     // get the 'Show' links and License color links
     $licTbl = new parseLicenseTbl($page);
     $licTable = $licTbl->parseLicenseTbl();
-    //print "licTable is:\n"; print_r($licTable) . "\n";
 
     /* FIX THIS Select show 'Public Domain, verify, select 'LGPL v2.1', verify */
-    $pdURL = makeUrl($this->host, $licTable['Public Domain'][0]);
-    $lgplURL = makeUrl($this->host, $licTable['\'LGPL v2.1\'-style'][0]);
+    $pdURL = makeUrl($this->host, $licTable['Public Domain']);
+    $lgplURL = makeUrl($this->host, $licTable['\'LGPL v2.1\'-style']);
 
     $page = $this->mybrowser->get($pdURL);
     $licFileList = new parseFolderPath($page, $URL);
