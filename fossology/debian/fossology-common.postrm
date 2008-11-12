@@ -23,7 +23,7 @@ case "$1" in
     purge)
        # the users are created by the fossology-* packages, but we remove
        # them here since this package will be the last to be purged
-       deluser --system || true
+       deluser --system fossy || true
        delgroup --system fossy || true
        # we can't remove the repo because we can't know if that's what
        # the user wants
