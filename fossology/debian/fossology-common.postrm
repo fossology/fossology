@@ -23,10 +23,11 @@ case "$1" in
     purge)
        # the users are created by the fossology-* packages, but we remove
        # them here since this package will be the last to be purged
-       deluser --system --remove-home fossy || true
+       deluser --system || true
        delgroup --system fossy || true
-       # we can't remove the repo because we can't know if it's stored
-       # locally and can really go away
+       # we can't remove the repo because we can't know if that's what
+       # the user wants
+       echo "Not removing the FOSSology repository, please clean up by hand"
     ;;
 
     remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
