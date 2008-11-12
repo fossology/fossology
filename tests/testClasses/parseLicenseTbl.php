@@ -32,8 +32,6 @@
  * Created on Aug 21, 2008
  */
 
-//require_once ('../commonTestFunc.php');
-
 class parseLicenseTbl
 {
   public $page;
@@ -46,36 +44,28 @@ class parseLicenseTbl
   }
   /**
    * function parseLicenseTbl
-   * given a fossology license browse page parse the license table on
-   * the page.
+   * given a fossology license histogram, parse it.
    *
-   * @returns array of empty array if license table on that page.
+   * @returns array of empty array if no license histogram on that page,
+   * else returns an associative array of license names and the value is
+   * the link to that license.
    */
   function parseLicenseTbl()
   {
-    $matches = preg_match_all(
-  "|.*?align='right'.*?align='center'><a href='(.*?)'>(.*?)<.*?id='(.*?)'.*?a href=\"(.*?)\">(.*?)<|",
-    $this->page, $tableEntries, PREG_PATTERN_ORDER);
-   //print "PLTBL: tableEntries are:\n"; print_r($tableEntries) . "\n";
-   return($this->_createRtnLicTbl($tableEntries, $matches));
-  }
-
-  function _createRtnLicTbl($toCombine, $matches)
-  {
     /*
-    * if we have a match, the create return array, else return empty
-    * array.
-    */
+     * old pattern
+     * "|.*?align='right'.*?align='center'><a href='(.*?)'> (. *?)<. *? id='(.*?)'.*?a href=\"(.*?)\">(.*?)<|";
+     */
+    $pat = "|.*?align='right'.*?<a href='(.*?)'>(.*?)<.*?id='(.*?)'>(.*?)<|";
+    $matches = preg_match_all($pat, $this->page, $tableEntries, PREG_PATTERN_ORDER);
+    //print "PLTBL: tableEntries are:\n"; print_r($tableEntries) . "\n";
+    $rtnList = array ();
     if ($matches > 0)
     {
-      $numTblEntries = count($toCombine[1]);
-      $rtnList = array ();
+      $numTblEntries = count($tableEntries[1]);
       for ($i = 0; $i <= $numTblEntries-1; $i++)
       {
-        $links = array ();        // initialize/reset
-        $pushed = array_push($links ,$toCombine[1][$i], $toCombine[4][$i]);
-        if($pushed == 0) { print "parseLicenseTbl: Internal Error! Nothing Inserted!\n"; }
-        $rtnList[$toCombine[5][$i]] = $links;
+        $rtnList[$tableEntries[4][$i]] = $tableEntries[1][$i];
       }
       return ($rtnList);
     }
