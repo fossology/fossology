@@ -15,9 +15,10 @@ Description: open and modular architecture for analyzing software
  then browsable via the web interface. Existing agents include license
  analysis, metadata extraction, and MIME type identification.
  .
- This metapackage depends on all the fossology component packages
- needed for a single system install. For a multi-system install,
- consult the README.Debian file in fossology-common.
+ This metapackage ensures that the fossology component packages needed
+ for a single-system install are installed in the right order. For a
+ multi-system install, consult the README.Debian file included in the
+ fossology-common package.
 
 Package: fossology-common
 Architecture: any
@@ -33,7 +34,8 @@ Description: architecture for analyzing software, common files
 
 Package: fossology-web
 Architecture: all
-Depends: apache2, libapache2-mod-php5
+Depends: fossology-agents, apache2, libapache2-mod-php5
+Conflicts: fossology-web-single
 Description: architecture for analyzing software, web interface
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
@@ -42,9 +44,23 @@ Description: architecture for analyzing software, web interface
  .
  This package depends on the packages for the web interface.
 
+Package: fossology-web-single
+Architecture: all
+Depends: fossology-scheduler-single, apache2, libapache2-mod-php5
+Conflicts: fossology-web
+Description: architecture for analyzing software, web interface  (single machine case)
+ A web based tool that allows you to upload software to be picked apart
+ and then analyzed by software agents which produce results that are
+ then browsable via the web interface. Existing agents include license
+ analysis, metadata extraction, and MIME type identification.
+ .
+ This package depends on the packages needed for the web interface and
+ to make a single machine install properly.
+
 Package: fossology-scheduler
 Architecture: any
-Depends: fossology-agents-single | fossology-agents, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-agents, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: fossology-scheduler-single
 Description: architecture for analyzing software, scheduler
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
@@ -52,6 +68,19 @@ Description: architecture for analyzing software, scheduler
  analysis, metadata extraction, and MIME type identification.
  .
  This package contains the scheduler daemon.
+
+Package: fossology-scheduler-single
+Architecture: any
+Depends: fossology-agents-single, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: fossology-scheduler
+Description: architecture for analyzing software, scheduler (single machine case)
+ A web based tool that allows you to upload software to be picked apart
+ and then analyzed by software agents which produce results that are
+ then browsable via the web interface. Existing agents include license
+ analysis, metadata extraction, and MIME type identification.
+ .
+ This package contains the scheduler daemon and depends on the right
+ packages to make a single machine install properly.
 
 Package: fossology-db
 Architecture: all
@@ -67,6 +96,7 @@ Description: architecture for analyzing software, database
 Package: fossology-agents
 Architecture: any
 Depends: fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage | mkisofs, xpdf-utils, rpm, upx-ucl, unrar-free, unzip, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: fossology-agents-single
 Description: architecture for analyzing software, analysis agents
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
@@ -78,7 +108,8 @@ Description: architecture for analyzing software, analysis agents
 Package: fossology-agents-single
 Architecture: any
 Depends: fossology-db, fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage | mkisofs, xpdf-utils, rpm, upx-ucl, unrar-free, unzip, ${shlibs:Depends}, ${misc:Depends}
-Description: architecture for analyzing software, analysis agents
+Conflicts: fossology-agents
+Description: architecture for analyzing software, agents (single machine case)
  A web based tool that allows you to upload software to be picked apart
  and then analyzed by software agents which produce results that are
  then browsable via the web interface. Existing agents include license
