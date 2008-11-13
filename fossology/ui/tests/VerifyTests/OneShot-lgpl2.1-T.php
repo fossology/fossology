@@ -72,13 +72,15 @@ class OneShotTablegplv21Test extends fossologyTestCase
     /* Check for the correct analysis....it should be 100% match, no partials */
     //$page = $this->mybrowser->getContentAsText();
     $page = $this->mybrowser->getContent();
-    print "************ page a text (after analysis) *************\n$page\n";
+    //print "************ page a text (after analysis) *************\n$page\n";
     $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
            "OneShotgplv21Test-Table FAILURE! Did not find One-Shot License Analysis Title\n");
     $this->assertTrue($this->myassertText($page, '/Match/'),
            "OneShotgplv21Test-Table FAILURE! Did not find text 'Match' \n");
-    $this->assertTrue($this->myassertText($page, '/100% view LGPL v2\.1/'),
-           "OneShotgplv21Test-Table FAILURE! Did not find '100percent view LGPL v2.1' \n");
+    $this->assertTrue($this->myassertText($page, '/100%/'),
+           "OneShotgplv21Test-Table FAILURE! Did not find '100percent\n");
+    $this->assertTrue($this->myassertText($page, '/LGPL v2\.1 Preamble/'),
+               "OneShotgplv21Test-Table FAILURE! Did not find 'LGPL v2.1 Preamble' \n");
     $this->assertFalse($this->myassertText($page, '/-partial/'),
            "OneShotgplv21Test-Table FAILURE! Found -partial in a non partial license file\n");
   }
