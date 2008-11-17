@@ -43,6 +43,7 @@ class ui_license extends FO_Plugin
     global $DB;
     if (empty($DB)) { return(1); } /* No DB */
 
+// Stubbed out since pfile_liccount is currently not used.
     /* Update all license counts */
     $TempTable = "counts" . time() . "_" . rand();
     $SQL = "BEGIN;
@@ -59,7 +60,7 @@ class ui_license extends FO_Plugin
 	DROP TABLE $TempTable;
 	COMMIT;
 	";
-    $DB->Action($SQL);
+//    $DB->Action($SQL);
     return(0);
   } // Install()
 
