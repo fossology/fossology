@@ -1383,7 +1383,6 @@ LANGUAGE plpgsql;
       flush();
       exit(1);
       }
-    $DB->Action("SET statement_timeout = 120000;"); /* reset DB timeouts */
 
     /************************************/
     /* Flush any cached data. */
@@ -1399,6 +1398,7 @@ LANGUAGE plpgsql;
       return("Unable to initialize the new schema.\n");
       }
     print "New schema applied and initialization completed.\n";
+    $DB->Action("SET statement_timeout = 120000;"); /* reset DB timeouts */
     return;
     } // ApplySchema()
 
