@@ -28,6 +28,7 @@ then
 	FMDIR='/tmp'
 fi
 
+mkdir -p $FMDIR/Run-logs
 /usr/local/bin/GetFM > "$FMDIR/Run-logs/GetFM.log-$thisrun 2>&1"
 
 exit 0
