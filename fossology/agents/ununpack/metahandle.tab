@@ -112,7 +112,8 @@ Magic: "application/x-pdf"
 Magic: "application/x-zip"
   Cmd: "unzip"
   # the "-P none" prevents password-encrypted zip files from hanging
-  CmdPre: "-P none -o"
+  # the "-q" stops promps for user interaction.
+  CmdPre: "-q -P none -o"
   CmdPost: "-x / >/dev/null 2>&1"
   MetaCmd: ""
   Type: CMD_ARC
