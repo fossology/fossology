@@ -848,7 +848,7 @@ int	FindCmd	(char *Filename)
       MagicMatch("application/x-shellscript",Type))
 	{
 	int rc;
-	rc = RunCommand("unzip","-l",Filename,">/dev/null 2>&1",NULL,NULL);
+	rc = RunCommand("unzip","-q -l",Filename,">/dev/null 2>&1",NULL,NULL);
 	if ((rc==0) || (rc==1) || (rc==2) || (rc==51))
 	  {
 	  memset(Static,0,sizeof(Static));
