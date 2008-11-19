@@ -26,6 +26,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <grp.h>
 
 #include <libfossdb.h>
 #include <libfossrepo.h>
@@ -39,6 +40,7 @@ int Verbose=0;
 int Test=0;
 #define MAXSQL	1024
 #define MAXLINE	1024
+gid_t	Group=0;
 
 /* for DB */
 void	*DB=NULL;
@@ -252,6 +254,65 @@ int	CheckLicenses	()
 } /* CheckLicenses() */
 
 /*********************************************************
+ CheckPerm(): Make sure a specific repo path look correct.
+ Checks group owner, setgid, and access (rwx).
+ Parameters:
+   - Gid: Each path must have this group id.
+   - RepPath: Path to the repository.
+   - Host: Host in the repository.
+   - Repo: Directory on the host (gold, files, etc.)
+   - LogFlag: Some directories should be checked but not printed.
+     Items printed are compared against all agents.
+     Items not printed are only checked locally.
+     For example, RepPath/ununpack is host-specific.  Different agents
+     may not have this path.  (ununpack is not supposed to be mounted.)
+     Even though they can be different, if it exists then it should
+     be checked.
+ If Repo is null, then only RepPath/Host is checked.
+ If Host is null, then only RepPath is checked.
+ Returns 1 on success, 0 on failure.
+ *********************************************************/
+int	CheckPerm	(gid_t Gid, char *RepPath, char *Host, char *Repo,
+			 int LogFlag)
+{
+  char Path[1024];
+  struct stat Stat;
+  memset(Path,'\0',sizeof(Path));
+  if (Repo) snprintf(Path,sizeof(Path),"%s/%s/%s",RepPath,Host,Repo);
+  else if (Host) snprintf(Path,sizeof(Path),"%s/%s",RepPath,Host);
+  else snprintf(Path,sizeof(Path),"%s",RepPath);
+  if (!stat(Path,&Stat))
+    {
+    if (Stat.st_gid != Gid)
+        {
+	printf("FATAL: %s not in correct group.\n",Path);
+	fflush(stdout);
+	return(0);
+	}
+    if ((Stat.st_mode & 00070) != 00070)
+        {
+	printf("FATAL: Wrong group permissions for %s\n",Path);
+	fflush(stdout);
+	return(0);
+	}
+    if (!(Stat.st_mode & S_ISGID))
+        {
+	printf("FATAL: Setgid for group missing on %s\n",Path);
+	fflush(stdout);
+	return(0);
+	}
+    if (LogFlag)
+      {
+      printf("Permissions: OK RepPath.conf");
+      if (Host) printf(" %s",Host);
+      if (Repo) printf(" %s",Repo);
+      printf("\n");
+      }
+    }
+  return(1);
+} /* CheckPerm() */
+
+/*********************************************************
  CheckRepo(): Make sure the repo looks correct.
  List each repo line and the self-test contents (if it exists).
  Returns 1 on success, 0 on failure.
@@ -265,6 +326,17 @@ int	CheckRepo	()
   extern int RepDepth;
   char *RepPath;
   FILE *Fin;
+  struct group *Group;
+
+  /* Check group */
+  Group = getgrnam(PROJECTGROUP);
+  if (!Group)
+    {
+    printf("FATAL: Group '%s' does not exist.\n",PROJECTGROUP);
+    fflush(stdout);
+    return(0);
+    }
+  printf("Group: '%s' is %d\n",PROJECTGROUP,(int)Group->gr_gid);
 
   if (!RepOpen())
     {
@@ -315,6 +387,14 @@ int	CheckRepo	()
       fclose(Fin);
       }
     fputc('\n',stdout);
+
+    /* Check permissions on common repo directories */
+    if (!CheckPerm(Group->gr_gid,RepPath,NULL,NULL,1)) return(0);
+    if (!CheckPerm(Group->gr_gid,RepPath,Host,NULL,1)) return(0);
+    if (!CheckPerm(Group->gr_gid,RepPath,Host,"gold",1)) return(0);
+    if (!CheckPerm(Group->gr_gid,RepPath,Host,"files",1)) return(0);
+    if (!CheckPerm(Group->gr_gid,RepPath,Host,"license",1)) return(0);
+    if (!CheckPerm(Group->gr_gid,RepPath,"ununpack",NULL,0)) return(0);
     }
 
   free(RepPath);
