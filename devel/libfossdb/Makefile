@@ -24,7 +24,7 @@ install-lib: $(LIB)
 	$(INSTALL_DATA) libfossdb.h $(DESTDIR)$(INCLUDEDIR)/libfossdb.h
 
 install-exe: $(EXE)
-	$(INSTALL_PROGRAM) dbcheck $(DESTDIR)$(AGENTTESTDDIR)/dbcheck
+	$(INSTALL_PROGRAM) dbcheck $(DESTDIR)$(LIBEXECDIR)/dbcheck
 
 # uninstall only cleans up the files, not the directories that might have
 # been created
@@ -35,7 +35,7 @@ uninstall-lib:
 	rm -f $(DESTDIR)$(INCLUDEDIR)/libfossdb.h
 
 uninstall-exe:
-	rm -f $(DESTDIR)$(AGENTTESTDDIR)/dbcheck
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbcheck
 
 test: all
 	@echo "*** No tests available for libfossdb ***"
