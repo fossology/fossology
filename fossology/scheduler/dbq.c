@@ -24,7 +24,6 @@
 /* for signals */
 #include <sys/types.h>
 #include <signal.h>
-#include <syslog.h>
 
 #include <libfossdb.h>
 #include <libfossrepo.h>
@@ -102,8 +101,7 @@ void	DBMSQremove	(int i)
   if (MSQ[i].JobId == -1) return; /* idiot checking */
   if (Verbose)
     {
-    if (InSignalHandler) fprintf(MsgHolder,"DBMSQremove: %d\n",i);
-    else syslog(LOG_DEBUG,"DBMSQremove: %d\n",i);
+    fprintf(Log,"DBMSQremove: %d\n",i);
     }
 
   /* free memory */
@@ -149,8 +147,7 @@ int	DBMkAttr	(void *DB, int Row, char *Attr, int MaxAttr)
 
   if (Verbose)
     {
-    if (InSignalHandler) fprintf(MsgHolder,"Attr='%s'\n",Attr);
-    else syslog(LOG_DEBUG,"Attr='%s'\n",Attr);
+    fprintf(Log,"Attr='%s'\n",Attr);
     }
   return(IsUrgent);
 } /* DBMkAttr() */
@@ -329,16 +326,14 @@ int	DBMSQinsert	(void *DBQ, int Row)
     DBUpdateJob(MSQ[i].JobId,0,NULL);
     if (Verbose)
 	{
-	if (InSignalHandler) fprintf(MsgHolder,"SQL: '%s'\n",DBgetvaluename(DBQ,Row,"jq_args"));
-	else syslog(LOG_DEBUG,"SQL: '%s'\n",DBgetvaluename(DBQ,Row,"jq_args"));
+	fprintf(Log,"SQL: '%s'\n",DBgetvaluename(DBQ,Row,"jq_args"));
 	}
     switch(DBLockAccess(DB,DBgetvaluename(DBQ,Row,"jq_args")))
 	{
 	case 0: /* no data; mark it as done */
 		if (Verbose)
 		  {
-		  if (InSignalHandler) fprintf(MsgHolder,"SQL -- no data.\n");
-		  else syslog(LOG_DEBUG,"SQL -- no data.\n");
+		  fprintf(Log,"SQL -- no data.\n");
 		  }
 		DBUpdateJob(MSQ[i].JobId,1,"No data");
 		DBMSQremove(i);
@@ -348,8 +343,7 @@ int	DBMSQinsert	(void *DBQ, int Row)
 		MSQ[i].MaxItems = DBdatasize(MSQ[i].DBQ);
 		if (Verbose)
 		  {
-		  if (InSignalHandler) fprintf(MsgHolder,"SQL -- %d items, inserted into MSQ[%d].\n",MSQ[i].MaxItems,i);
-		  else syslog(LOG_DEBUG,"SQL -- %d items, inserted into MSQ[%d].\n",MSQ[i].MaxItems,i);
+		  fprintf(Log,"SQL -- %d items, inserted into MSQ[%d].\n",MSQ[i].MaxItems,i);
 		  }
 		if (MSQ[i].MaxItems <= 0)
 			{
@@ -376,22 +370,18 @@ int	DBMSQinsert	(void *DBQ, int Row)
 	case -3:	/* operation timeout */
 	  if (Verbose)
 	    {
-	    if (InSignalHandler) fprintf(MsgHolder,"SQL -- Timeout.\n");
-	    else syslog(LOG_DEBUG,"SQL -- Timeout.\n");
+	    fprintf(Log,"SQL -- Timeout.\n");
 	    }
-	  if (InSignalHandler) fprintf(MsgHolder,"ERROR: job %d: SQL timeout (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
-	  else syslog(LOG_DEBUG,"ERROR: job %d: SQL timeout (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
+	  fprintf(Log,"ERROR: job %d: SQL timeout (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
 	  DBUpdateJob(MSQ[i].JobId,2,"Timeout");
 	  DBMSQremove(i);
 	  return(-1);
 	default: /* error */
 	  if (Verbose)
 	    {
-	    if (InSignalHandler) fprintf(MsgHolder,"SQL -- ERROR.\n");
-	    else syslog(LOG_DEBUG,"SQL -- ERROR.\n");
+	    fprintf(Log,"SQL -- ERROR.\n");
 	    }
-	  if (InSignalHandler) fprintf(MsgHolder,"ERROR: job %d: SQL error (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
-	  else syslog(LOG_DEBUG,"ERROR: job %d: SQL error (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
+	  fprintf(Log,"ERROR: job %d: SQL error (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
 	  DBUpdateJob(MSQ[i].JobId,1,"Error");
 	  DBMSQremove(i);
 	  return(-1);
@@ -471,8 +461,7 @@ int	DBCheckPendingMSQ	()
 	/* found an item to process */
 	if (Verbose)
 	  {
-	  if (InSignalHandler) fprintf(MsgHolder,"MSQ: Checking items in MSQ[%d]\n",i);
-	  else syslog(LOG_DEBUG,"MSQ: Checking items in MSQ[%d]\n",i);
+	  fprintf(Log,"MSQ: Checking items in MSQ[%d]\n",i);
 	  }
 
 	DBMkArgCols(MSQ[i].DBQ,j,Arg,MAXCMD);
@@ -505,8 +494,7 @@ int	DBCheckPendingMSQ	()
 		{
 		if (Verbose)
 		  {
-		  if (InSignalHandler) fprintf(MsgHolder,"MSQ shifted. Retrying.\n");
-		  else syslog(LOG_DEBUG,"MSQ shifted. Retrying.\n");
+		  fprintf(Log,"MSQ shifted. Retrying.\n");
 		  }
 		return(DBCheckPendingMSQ());
 		}
@@ -516,8 +504,7 @@ int	DBCheckPendingMSQ	()
 	  /* mark the DB queue item as taken */
 	  if (Verbose)
 	  	{
-		if (InSignalHandler) fprintf(MsgHolder,"(b) Feeding child[%d][%d/%d][%d/%d]: attr='%s' | arg='%s'\n",Thread,i,MAXMSQ,j,MSQ[i].MaxItems,Attr,Arg);
-		else syslog(LOG_DEBUG,"(b) Feeding child[%d][%d/%d][%d/%d]: attr='%s' | arg='%s'\n",Thread,i,MAXMSQ,j,MSQ[i].MaxItems,Attr,Arg);
+		fprintf(Log,"(b) Feeding child[%d][%d/%d][%d/%d]: attr='%s' | arg='%s'\n",Thread,i,MAXMSQ,j,MSQ[i].MaxItems,Attr,Arg);
 		}
 	  MSQ[i].Processed[j] = ST_RUNNING;
 	  if (CM[Thread].Status != ST_RUNNING)
@@ -541,8 +528,7 @@ int	DBCheckPendingMSQ	()
     } /* for each MSQ i */
   if (Verbose)
     {
-    if (InSignalHandler) fprintf(MsgHolder,"DBCheckPendingMSQ()=%d\n",rc);
-    else syslog(LOG_DEBUG,"DBCheckPendingMSQ()=%d\n",rc);
+    fprintf(Log,"DBCheckPendingMSQ()=%d\n",rc);
     }
   return(rc);
 } /* DBCheckPendingMSQ() */
@@ -626,8 +612,7 @@ int	DBProcessQueue	()
     }
   if (Verbose)
     {
-    if (InSignalHandler) fprintf(MsgHolder,"SQL: Getting queue = %d :: %d items\n",rc,DBdatasize(DB));
-    else syslog(LOG_DEBUG,"SQL: Getting queue = %d :: %d items\n",rc,DBdatasize(DB));
+    fprintf(Log,"SQL: Getting queue = %d :: %d items\n",rc,DBdatasize(DB));
     }
   if (rc == 1) /* if get list of queued items */
     {
@@ -682,8 +667,7 @@ int	DBProcessQueue	()
 	DBUpdateJob(CM[Thread].DBJobKey,0,"In progress"); /* mark it in use */
 	if (Verbose)
 		{
-		if (InSignalHandler) fprintf(MsgHolder,"(c) Feeding child[%d]: attr='%s' | arg='%s'\n",Thread,Attr,Arg);
-		else syslog(LOG_DEBUG,"(c) Feeding child[%d]: attr='%s' | arg='%s'\n",Thread,Attr,Arg);
+		fprintf(Log,"(c) Feeding child[%d]: attr='%s' | arg='%s'\n",Thread,Attr,Arg);
 		}
 	memset(CM[Thread].Parm,'\0',MAXCMD);
 	strcpy(CM[Thread].Parm,Arg);

@@ -181,6 +181,8 @@ int	main	(int argc, char *argv[])
   int Test=0; /* 1=test and continue, 2=test and quit */
 
   openlog("fossology",LOG_PERROR|LOG_PID,LOG_DAEMON);
+  /* Prepare system logging */
+  Log2Syslog();
 
   /* check args */
   while((c = getopt(argc,argv,"dkHiIL:vqRtT")) != -1)
@@ -436,6 +438,7 @@ int	main	(int argc, char *argv[])
   while(KeepRunning)
     {
     SaveStatus();
+    Log2Syslog();
 
     /* check for data to process */
     if (UseStdin)
@@ -576,6 +579,7 @@ int	main	(int argc, char *argv[])
   DBQclose();
   DBclose(DB);
   DebugThreads(1);
+  Log2Syslog(); /* dump any final messages */
   syslog(LOG_INFO,"*** Scheduler completed\n");
   closelog();
   return(0);
