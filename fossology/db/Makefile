@@ -8,7 +8,7 @@ include $(VARS)
 all:
 
 install: all
-	$(INSTALL_DATA) fossologyinit.sql $(DESTDIR)$(AGENTTESTDDIR)/fossologyinit.sql
+	$(INSTALL_DATA) fossologyinit.sql $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
 	@if [ ! -f "$(DESTDIR)/etc/cron.d/fossology" -o "$(OVERWRITE)" ]; then \
 	   mkdir -p $(DESTDIR)/etc/cron.d/; \
 	   echo "NOTE: using default version for $(DESTDIR)/etc/cron.d/fossology"; \
@@ -19,15 +19,8 @@ install: all
 	fi
 
 uninstall:
-	rm -f $(DESTDIR)$(AGENTTESTDDIR)/fossologyinit.sql
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
 
-	@if [ -d $(DESTDIR)$(AGENTTESTDDIR) ]; then \
-	   if [ "`ls -A $(DESTDIR)$(AGENTTESTDDIR)`" ]; then \
-	      echo "WARNING: $(DESTDIR)$(AGENTTESTDDIR) not empty, not removing";\
-	   else \
-	      rmdir $(DESTDIR)$(AGENTTESTDDIR); \
-	   fi; \
-	fi
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 	   if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \
 	      echo "WARNING: $(DESTDIR)$(LIBEXECDIR) not empty, not removing";\
