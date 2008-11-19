@@ -249,6 +249,7 @@ void	Log2Syslog	()
   if (Log==NULL)
     {
     Log = tmpfile();
+    openlog("fossology",LOG_PERROR|LOG_PID,LOG_DAEMON);
     return;
     }
 
