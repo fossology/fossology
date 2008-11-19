@@ -393,6 +393,7 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 	/** if all children are dead, then I'll exit through signal handler */
 	DBclose(DB);
 	fprintf(Log,"*** Scheduler completed (terminated by signal).\n");
+	Log2Syslog();
 	exit(0);
 	break;
     case SIGHUP: /* Display stats */
@@ -733,6 +734,7 @@ void	MyExec	(int Thread, char *Cmd)
   fprintf(Log,"Exec failed: %s\n",Cmd);
   perror("Exec failure reason");
   DBclose(DB);
+  Log2Syslog();
   exit(1);
 } /* MyExec() */
 
@@ -799,12 +801,14 @@ int	SpawnEngine	(int Thread)
     {
     perror("FATAL: fcntl(p2c[0]) failed: ");
     fprintf(Log,"FATAL: fcntl(p2c[0]) failed.\n");
+    Log2Syslog();
     exit(-1);
     }
   if (fcntl(p2c[1],F_SETFL, fcntl(p2c[1],F_GETFL) ) != 0)
     {
     perror("FATAL: fcntl(p2c[1]) failed: ");
     fprintf(Log,"FATAL: fcntl(p2c[1]) failed.\n");
+    Log2Syslog();
     exit(-1);
     }
   /* Set child-to-parent pipes to be non-blocking */
@@ -812,12 +816,14 @@ int	SpawnEngine	(int Thread)
     {
     perror("FATAL: fcntl(c2p[0]) failed: ");
     fprintf(Log,"FATAL: fcntl(c2p[0]) failed.\n");
+    Log2Syslog();
     exit(-1);
     }
   if (fcntl(c2p[1],F_SETFL, fcntl(c2p[1],F_GETFL) | O_NONBLOCK) != 0)
     {
     perror("FATAL: fcntl(c2p[1]) failed: ");
     fprintf(Log,"FATAL: fcntl(c2p[1]) failed.\n");
+    Log2Syslog();
     exit(-1);
     }
 
@@ -859,6 +865,7 @@ int	SpawnEngine	(int Thread)
 	MyExec(Thread,CM[Thread].Command);
 	/* should never get here! */
 	DBclose(DB);
+	Log2Syslog();
 	exit(1);
 	}
   else if (Pid == -1)
