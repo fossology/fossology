@@ -36,8 +36,7 @@ extern time_t	RespawnInterval;	/* 5 minutes */
 extern time_t	RespawnCount;		/* Up to two respawns every RespawnInterval */
 #define MINKILLTIME     20 /* seconds a child must be alive before killing */
 #define MAXKILLTIME     (15*60) /* seconds a child must be idle before killing */
-extern int	InSignalHandler;	/* don't uses syslog() when this is true! */
-extern FILE	*MsgHolder;	/* Always valid when InSignalHandler */
+extern FILE	*Log;	/* Write to this for logging */
 
 /* Note: state used to be DEAD/DYING.  Changed to FREE/FREEING because
    the word "DEAD" scared people.  (I'm not kidding.) */
@@ -95,6 +94,7 @@ extern childmanager CM[MAXCHILD+1];	/* manage children */
 
 
 void	ShowStates	(int Thread);
+void	Log2Syslog	();
 void	DebugThreads	(int Flag);
 void	ChangeStatus	(int Thread, int NewState);
 void	SaveStatus	();
