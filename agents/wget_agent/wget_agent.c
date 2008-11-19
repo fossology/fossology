@@ -131,6 +131,7 @@ void	DBLoadGold	()
   long PfileKey;
   char *Path;
   FILE *Fin;
+  int rc;
 
   if (Debug) printf("Processing %s\n",GlobalTempFile);
   Fin = fopen(GlobalTempFile,"rb");
@@ -141,7 +142,7 @@ void	DBLoadGold	()
 		GlobalUploadKey,GlobalTempFile,GlobalURL);
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(1);
 	}
   Sum = SumComputeFile(Fin);
   fclose(Fin);
@@ -154,7 +155,7 @@ void	DBLoadGold	()
 		GlobalUploadKey,GlobalTempFile,GlobalURL);
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(2);
 	}
   if (Sum->DataLen <= 0)
 	{
@@ -163,7 +164,7 @@ void	DBLoadGold	()
 		GlobalUploadKey,GlobalURL,GlobalTempFile);
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(3);
 	}
   Unique = SumToString(Sum);
   if (Debug) printf("Unique %s\n",Unique);
@@ -171,14 +172,15 @@ void	DBLoadGold	()
   if (GlobalImportGold)
     {
     if (Debug) printf("Import Gold %s\n",Unique);
-    if (RepImport(GlobalTempFile,"gold",Unique,1) != 0)
+    rc = RepImport(GlobalTempFile,"gold",Unique,1);
+    if (rc != 0)
 	{
-	printf("ERROR upload %ld Failed to import file into the repository.\n",GlobalUploadKey);
+	printf("ERROR upload %ld Failed to import file into the repository (RepImport=%d).\n",GlobalUploadKey,rc);
 	printf("LOG upload %ld Failed to import %s from %s into gold %s\n",
 		GlobalUploadKey,GlobalTempFile,GlobalURL,Unique);
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(4);
 	}
     /* Put the file in the "files" repository too */
     Path = RepMkPath("gold",Unique);
@@ -197,7 +199,7 @@ void	DBLoadGold	()
 		GlobalUploadKey,Unique);
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(5);
 	}
   if (Debug) printf("Import files %s\n",Path);
   if (RepImport(Path,"files",Unique,1) != 0)
@@ -207,7 +209,7 @@ void	DBLoadGold	()
 		GlobalUploadKey,Unique,Path);
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(6);
 	}
   if (ForceGroup >= 0) { chown(Path,-1,ForceGroup); }
   if (Path != GlobalTempFile) free(Path);
@@ -227,7 +229,7 @@ void	DBLoadGold	()
 	printf("LOG upload %ld Unable to select from the database: %s\n",GlobalUploadKey,SQL);
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(7);
 	}
 
   /* See if pfile needs to be added */
@@ -243,7 +245,7 @@ void	DBLoadGold	()
 		printf("LOG upload %ld Unable to select from the database: %s\n",GlobalUploadKey,SQL);
 		fflush(stdout);
 		DBclose(DB);
-		exit(-1);
+		exit(8);
 		}
 	DBaccess(DB,"SELECT currval('pfile_pfile_pk_seq');");
 	}
@@ -265,7 +267,7 @@ void	DBLoadGold	()
 	printf("LOG upload %ld Unable to update the database: %s\n",GlobalUploadKey,SQL);
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(9);
 	}
   DBaccess(DB,"COMMIT;");
 
@@ -336,7 +338,7 @@ int	GetURL	(char *TempFile, char *URL)
 	printf("LOG: Failed to taint the URL '%s'\n",URL);
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(10);
 	}
 
   memset(CMD,'\0',MAXCMD);
@@ -372,7 +374,7 @@ int	GetURL	(char *TempFile, char *URL)
     printf("LOG upload %ld Failed to run command: %s\n",GlobalUploadKey,CMD);
     fflush(stdout);
     DBclose(DB);
-    exit(-1);
+    exit(11);
     }
 
   while(ReadLine(Fin,TmpLine,256) != -1)
@@ -393,7 +395,7 @@ int	GetURL	(char *TempFile, char *URL)
 	fflush(stdout);
 	unlink(GlobalTempFile);
 	DBclose(DB);
-	exit(-1);
+	exit(12);
 	}
 
   if (WIFEXITED(rc) && WIFSIGNALED(rc))
@@ -403,7 +405,7 @@ int	GetURL	(char *TempFile, char *URL)
 	fflush(stdout);
 	unlink(GlobalTempFile);
 	DBclose(DB);
-	exit(-1);
+	exit(13);
 	}
 
   if (WIFEXITED(rc) && WIFSIGNALED(rc))
@@ -413,7 +415,7 @@ int	GetURL	(char *TempFile, char *URL)
 	fflush(stdout);
 	unlink(GlobalTempFile);
 	DBclose(DB);
-	exit(-1);
+	exit(14);
 	}
 
   if (TempFile && TempFile[0] && !IsFile(TempFile,1))
@@ -422,7 +424,7 @@ int	GetURL	(char *TempFile, char *URL)
 	printf("LOG upload %ld File not created from command: %s\n",GlobalUploadKey,CMD);
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(15);
 	}
 
   printf("LOG upload %ld Downloaded %s to %s\n",GlobalUploadKey,URL,TempFile);
@@ -504,7 +506,7 @@ void	GetAgentKey	()
 	printf("ERROR upload %ld unable to access the database\n",GlobalUploadKey);
 	printf("LOG upload %ld unable to select wget_agent from the database table agent\n",GlobalUploadKey);
 	DBclose(DB);
-	exit(-1);
+	exit(16);
 	}
   if (DBdatasize(DB) <= 0)
       {
@@ -515,7 +517,7 @@ void	GetAgentKey	()
 	printf("ERROR upload %ld unable to write to the database\n",GlobalUploadKey);
 	printf("LOG upload %ld unable to write wget_agent to the database table agent\n",GlobalUploadKey);
 	DBclose(DB);
-	exit(-1);
+	exit(17);
 	}
       rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='wget_agent' ORDER BY agent_id DESC;");
       if (rc < 0)
@@ -523,7 +525,7 @@ void	GetAgentKey	()
 	printf("ERROR upload %ld unable to access the database\n",GlobalUploadKey);
 	printf("LOG upload %ld unable to select wget_agent from the database table agent\n",GlobalUploadKey);
 	DBclose(DB);
-	exit(-1);
+	exit(18);
 	}
       }
   Agent_pk = atoi(DBgetvalue(DB,0,0));
@@ -603,7 +605,7 @@ int	main	(int argc, char *argv[])
 	{
 	printf("FATAL: Unable to connect to database\n");
 	fflush(stdout);
-	exit(-1);
+	exit(20);
 	}
   GetAgentKey();
 
@@ -634,7 +636,7 @@ int	main	(int argc, char *argv[])
 	printf("ERROR: Download of %s failed.\n",GlobalURL);
 	fflush(stdout);
 	DBclose(DB);
-	exit(-1);
+	exit(21);
 	}
       HeartbeatCount=-1;
       HeartbeatCounter=-1;
@@ -679,7 +681,7 @@ int	main	(int argc, char *argv[])
 		printf("LOG upload %ld File retrieval failed: uploadpk=%ld tempfile=%s URL=%s\n",GlobalUploadKey,GlobalUploadKey,GlobalTempFile,GlobalURL);
 		fflush(stdout);
 		DBclose(DB);
-		exit(-1);
+		exit(22);
 		}
 	printf("OK\n"); /* inform scheduler that we are ready */
 	fflush(stdout);
