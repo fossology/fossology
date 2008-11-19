@@ -114,7 +114,14 @@ binary-common:
 	DH_OPTIONS= dh_installinit -o -pfossology-scheduler-single --name=fossology
 #	dh_installcron -pfossology-db
 	dh_installman
+
+# Do the lintian stuff by hand for now so we can depend on older debhelper to
+# make backports easier, switch when etch support dropped
 #	dh_lintian
+        cp debian/fossology-common.lintian-overrides debian/fossology-common/usr/share/lintian/overrides/fossology-common
+        cp debian/fossology-agents.lintian-overrides debian/fossology-agents/usr/share/lintian/overrides/fossology-agents
+        cp debian/fossology-agents-single.lintian-overrides debian/fossology-agents-single/usr/share/lintian/overrides/fossology-agents-single
+
 	dh_link
 	dh_strip
 	dh_compress
