@@ -78,24 +78,11 @@ Other implications:
      On scheduler: fossology-common (adjust Db.conf by hand)
                    fossology-scheduler
 
-4.) Currently fossology-common and fossology-agents* depend on each other.
- A.) fossology-agents depends on fossology-common because it needs the
-  fo-postinstall script and the utilities that it uses.
- B.) fossology-common depends on fossology-agents because the web ui
-  uses License.bsam as part of the "one shot" license analysis. I hope
-  in the future this functionality delivered as a plugin and can go
-  back in the fossology-agents package.
-
-Because of this loop dpkg will need to break it. Debian Policy 7.2 says
-
-  "If one of the packages in the loop has no postinst script, then the
-  cycle will be broken at that package, so as to ensure that all
-  postinst scripts run with the dependencies properly configured if
-  this is possible."
-
-Because fossology-common doesn't have a postinst, it will be
-installed/upgraded first which solves A, and B does not occur until
-web ui runtime, so this works.
+4.) If you install fossology-common but not one of fossology-agents*
+and then try to run fosslic, it won't work. fosslic needs to be moved
+to agents, but we need to come up with a way to solve this upstream.
+Just installing fossology-common and expecting anything to work is
+probably wrong anyway, but it would be nice to fix.
 
 5.) Eventually I hope to split out the agents packages so you can pick
 only the ones you want, but it doesn't make sense yet. When I do then
