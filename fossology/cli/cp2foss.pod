@@ -5,7 +5,7 @@
 
 =head1 NAME
 
-cp2foss - load one or more files or archives into the Fossology Data-Base.
+cp2foss - load one or more files or archives into the FOSSology Database.
 
 =head1 SYNOPSIS
 
@@ -15,7 +15,7 @@ cp2foss - load one or more files or archives into the Fossology Data-Base.
 
 =head1 DESCRIPTION
 
-B<cp2foss> (copy to foss) will load a single file or tar'ed archive into the
+B<cp2foss> (copy to foss) will load  one or more files or archives into the
 folder path specified by B<-f>.
 The folders in the I<folder-path> do not need to exist. B<cp2foss>
 will create them as needed.
@@ -29,14 +29,17 @@ A single hyphen means the archive list will come from standard in (stdin).
 
 =head2 Options
 
+B<NOTE:> The order of the options is significant. Options are processed in the
+order that they are used on the command line.
+
 =over
 
 =item B<-A>
 
-Turn on I<alpha-folders>.  Default is B<off>. When large amounts of
+Turn on I<alpha-folders>.  Default is B<off>. When many
 archives are loaded, navigating through all the folders can be
-difficult.  This option will group packages under alpha folders based
-on the 1st letter of the package name.  For example, your folder path
+difficult.  This option groups packages under alpha folders based
+on the first letter of the package name.  For example, your folder path
 is I<ProjX/pass1/>.  Using alpha-folders the
 archive C<andyroid> would end up under a folder path I<ProjX/pass/a-c/andyroid>.
 
@@ -45,22 +48,6 @@ archive C<andyroid> would end up under a folder path I<ProjX/pass/a-c/andyroid>.
 Specify the number of letters per folder (default: 3); implies -A. For
 example, using the default, the alpha folders would be a-c, d-f, g-i and
 so on.
-
-=item B<-Q>
-
-List all available processing agents.  All of the agents listed can
-be used with the B<-q> option or a subset of them.  See B<-q> for more details.
-
-=item B<-T>
-
-TEST. No database or repository updates are performed. Test mode enables
-verbose mode.  This is a trial run of the actions that cp2foss will do.
-
-=item B<-X>
-
-Item to exclude when archive is a directory. You can specify more than one -X.
-For example, to exclude all svn and cvs directories, include the following
-before the archive's directory path: -X .svn -X .cvs
 
 =item B<-d> I<description>
 
@@ -75,14 +62,21 @@ All paths are under I</Software Repository>.  If I</Software Repository> is
 used in the folder path, B<cp2foss> will correctly create all of the other
 other folders in the path under the top folder.
 
+=item B<-?> Help, see -h
+
 =item B<-h>
 
 Help, prints a verbose usage message.
 
 =item B<-n> I<name>
 
-An optoinal name that will be used to store the upload in the
-data-base.  The default is to name the upload using the name that was uploaded.
+An optional name that will be used to store the upload in the
+database.  The default name is the filename from the upload.
+
+=item B<-Q>
+
+List all available processing agents.  Any or all of the agents listed can
+be used with the B<-q> option.  See B<-q> for more details.
 
 =item B<-q> I<agent-list | all>
 
@@ -92,9 +86,20 @@ of agents), or the word I<all>.  If -q is not used, the item will still be
 uploaded and unpacked.  To schedule agent jobs later see B<fossjobs> or
 use the FOSSology web interface.
 
+=item B<-T>
+
+TEST. (for Debugging) No database or repository updates are performed. Test mode enables
+verbose mode.  This is a trial run of the actions that cp2foss will do.
+
 =item B<-v>
 
-Verbose.  Supply lots of feedback.  B<-T> turns this on automatically.
+Verbose (for debugging). Details the actions being performed.  B<-T> turns this on automatically.
+
+=item B<-X>
+
+Item to exclude when archive is a directory. You can specify more than one -X.
+For example, to exclude all svn and cvs directories, include the following
+before the archive's directory path: -X .svn -X .cvs
 
 =back
 
@@ -128,15 +133,17 @@ C<cp2foss -f Folder1 -d 'the first file' /tmp/file1 \
 Would load the archives I<file1> and I<file2> in the folder I<Folder> using the
 supplied descriptions for each upload.
 
-C<cp2foss -q all -pUbuntu -n GGibon -d 'Ubuntu Gutsy 7.10' 'http://ubuntu.cs.utah.edu/releases/gutsy/ubuntu-7.10-desktop-i386.iso' >
+C<cp2foss -q all -p Ubuntu -n 'Gutsy Gibon' -d 'Ubuntu Gutsy 7.10' 'http://ubuntu.cs.utah.edu/releases/gutsy/ubuntu-7.10-desktop-i386.iso' >
 
 The above example, B<cp2foss> will first get the archive using wget.  It will
-then load the downloaded archive into the data-base.
+then load the downloaded archive into the database calling the upload 'Gutsy Gibon'.
 
-C<cp2foss -pFedora/Fedora8 -n Fedora8  -d 'Fedora 8 Sources' -X .svn -X .cvs /bigdisk/fedora>
+C<cp2foss -A -f Fedora/Fedora8 -n Fedora8  -d 'Fedora 8 Sources' -X .svn -X .cvs /bigdisk/fedora>
 
-This example loads every file except directories named .svn and .cvs under
-/bigdisk/fedora on the server into the data-base.
+Loads every file under the /bigdisk/fedora directory, except files in
+the Subversion and CVS directories.  The files are placed in the
+UI under the folder "Fedora/Fedora8" and are grouped by the first letter
+of each file (a-c, d-f, g-h, etc.).
 
 =head1 AUTHOR
 
@@ -144,5 +151,5 @@ Neal Krawetz/Mark Donohoe for the Hewlett-Packard Company
 
 =head1 SEE ALSO
 
-wget
+wget, fossjobs, fosslic
 
