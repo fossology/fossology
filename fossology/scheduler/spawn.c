@@ -397,13 +397,16 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 	Log2Syslog();
 	exit(0);
 	break;
-    case SIGHUP: /* Display stats */
+    case SIGHUP: /* Redo config */
+	/* Currently: Does nothing. */
+	/* TBD: Rotate log file */
+	/* Someday in the future: Re-read config */
+	break;
+    case SIGUSR1: /* Display stats */
 	DebugThreads(3);
 	break;
-    case SIGUSR1: /* Display general stats */
+    case SIGUSR2: /* Display general stats and MSQ contents */
 	DebugThreads(1);
-	break;
-    case SIGUSR2: /* Display MSQ contents */
 	DebugMSQ();
 	break;
     case SIGSEGV: /* CRASH! */
