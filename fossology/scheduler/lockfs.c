@@ -59,7 +59,7 @@ pid_t	LockScheduler	()
   exit(1);
 #endif
 
-  Handle = shm_open("fossology-scheduler",O_RDWR|O_CREAT|O_EXCL,0700);
+  Handle = shm_open("fossology-scheduler",O_RDWR|O_CREAT|O_EXCL,0744);
 
   if (Handle >= 0)
     {
@@ -70,8 +70,26 @@ pid_t	LockScheduler	()
     return(0);
     }
 
+  /* Check why it failed... */
+  rc=errno;
+  switch(rc)
+    {
+    case EACCES:
+    case EINVAL:
+    case EMFILE:
+    case ENAMETOOLONG:
+    case ENFILE:
+    case ENOENT:
+	perror("FATAL shm_open");
+	fprintf(stderr,"FATAL: shm_open set errno=%d\n",rc);
+	exit(1);
+    case EEXIST:
+    default:
+	break;
+    }
+
   /* Someone else owns it!  Find out who! */
-  Handle = shm_open("fossology-scheduler",O_RDWR,0700);
+  Handle = shm_open("fossology-scheduler",O_RDONLY,0444);
   if (Handle < 0)
     {
     rc = errno;
