@@ -105,18 +105,18 @@ void	LogOpen	()
   if (stat(LogFile,&Stat) != 0)
     {
     /* Cannot stat it.  Assume it is a file. */
-    Log = fopen(LogFile,"w");
+    Log = fopen(LogFile,"a");
     }
   /* Check if it is a directory */
   else if (S_ISDIR(Stat.st_mode))
     {
     char Path[1024];
     snprintf(Path,sizeof(Path),"%s/fossology.log",LogFile);
-    Log = fopen(Path,"w");
+    Log = fopen(Path,"a");
     }
   else
     {
-    Log = fopen(LogFile,"w");
+    Log = fopen(LogFile,"a");
     }
 
   /* Check the logfile */
