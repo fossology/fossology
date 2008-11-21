@@ -24,6 +24,7 @@
 #include "scheduler.h"
 #include "spawn.h"
 #include "hosts.h"
+#include "logging.h"
 
 /**********************************************
  The Running/Urgent concept:
@@ -54,7 +55,7 @@ void	HostAdd	(char *Hostname, int MaxRunning, int MaxUrgent)
 
   if (Verbose)
     {
-    fprintf(Log,"Adding host: '%s' Max=%d Urgent=%d\n",Hostname,MaxRunning,MaxUrgent);
+    LogPrint("Adding host: '%s' Max=%d Urgent=%d\n",Hostname,MaxRunning,MaxUrgent);
     }
 
   /* check for an update */

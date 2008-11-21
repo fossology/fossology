@@ -28,6 +28,7 @@
 #include "dberror.h"
 #include "dbq.h"
 #include "dbstatus.h"
+#include "logging.h"
 
 /***********************************************************
  DBErrorInit(): Prepare the error table.
@@ -59,6 +60,6 @@ void	DBErrorClose	()
 void	DBErrorWrite	(int Thread, char *Type, char *Message)
 {
   /* Until we rebuild the log table, log errors. */
-  fprintf(Log,"%s: In thread %d: %s\n",Type,Thread,Message);
+  LogPrint("%s: In thread %d: %s\n",Type,Thread,Message);
 } /* DBErrorWrite() */
 

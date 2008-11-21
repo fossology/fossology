@@ -1,5 +1,5 @@
 /*******************************************************
- dbstatus: Functions for updating the DB status.
+ lockfs.h: Functions for locking the fossology scheduler.
 
  Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
  
@@ -16,24 +16,17 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *******************************************************/
-#ifndef DBSTATUS_H
-#define DBSTATUS_H
+#ifndef LOCKFS_H
+#define LOCKFS_H
 
-extern	char *Hostname;
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/types.h>
 
-void	DBSetHostname	();
-void	DBMkArgCols	(void *DB, int Row, char *Arg, int MaxArg);
+pid_t	LockScheduler	();
+pid_t	UnlockScheduler	();
 
-int	DBLockAccess	(void *VDB, char *SQL);
-void	DBLockReconnect	();
-void	DBUpdateJob	(int JobId, int UpdateType, char *Message);
-int	DBstrcatTaint	(char *V, char *S, int MaxS);
-
-void	DBCheckSchedulerUnique	();
-void	DBCheckStatus	();
-void	DBSaveSchedulerStatus	(int Thread, char *StateName);
-void	DBSaveJobStatus	(int Thread, int MSQid); /* if Thread != -1 then use it, otherwise use MSQid */
-
-void	DebugMSQ	();
 #endif
 

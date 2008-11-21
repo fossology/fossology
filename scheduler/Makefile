@@ -22,7 +22,7 @@ all: fossology-scheduler mkschedconf defconf/init.d/fossology
 
 fossology-scheduler: $(OBJ) $(REPOOBJ) $(VARS)
 	$(CC) $(OBJ) $(REPOOBJ) $(CFLAGS_DB) $(CFLAGS_REPO) \
-	-lpq $(ALL_CFLAGS) -o $@
+	-lrt -lpq $(ALL_CFLAGS) -o $@
 
 mkschedconf: mkschedconf.c $(REPO) $(VARS)
 	$(CC) $< $(MSCDEF) $(CFLAGS_REPO) $(ALL_CFLAGS) -o $@

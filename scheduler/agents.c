@@ -33,6 +33,7 @@
 #include "dbq.h"
 #include "dbstatus.h"
 #include "dberror.h"
+#include "logging.h"
 
 /************************************************************************/
 /************************************************************************/
@@ -61,7 +62,7 @@ int	ReadChild	(int Thread)
 
     if (Verbose)
 	{
-	fprintf(Log,"Child[%d] says: %s\n",Thread,Cmd);
+	LogPrint("Child[%d] says: %s\n",Thread,Cmd);
 	}
     /* Here is where we process the child's reply.
        Stop when we get to a line saying "OK" */
@@ -89,22 +90,22 @@ int	ReadChild	(int Thread)
     else if (!strncmp(Cmd,"FATAL ",6) || !strncmp(Cmd,"FATAL:",6))
 	{
 	DBErrorWrite(Thread,"FATAL",Cmd+6);
-	fprintf(Log,"DEBUG[%d]: %s\n",Thread,Cmd);
+	LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
 	}
     else if (!strncmp(Cmd,"ERROR ",6) || !strncmp(Cmd,"ERROR:",6))
 	{
 	DBErrorWrite(Thread,"ERROR",Cmd+6);
-	fprintf(Log,"DEBUG[%d]: %s\n",Thread,Cmd);
+	LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
 	}
     else if (!strncmp(Cmd,"WARNING ",8) || !strncmp(Cmd,"WARNING:",8))
 	{
 	DBErrorWrite(Thread,"WARNING",Cmd+8);
-	fprintf(Log,"DEBUG[%d]: %s\n",Thread,Cmd);
+	LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
 	}
     else if (!strncmp(Cmd,"LOG ",4) || !strncmp(Cmd,"LOG:",4))
 	{
 	DBErrorWrite(Thread,"LOG",Cmd+4);
-	fprintf(Log,"DEBUG[%d]: %s\n",Thread,Cmd);
+	LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
 	}
     else if (!strcmp(Cmd,"Success"))	{ /* TBD success */ }
     else if (!strncmp(Cmd,"Heartbeat",9))	{ /* Do nothing; just a heartbeat */ }
@@ -113,7 +114,7 @@ int	ReadChild	(int Thread)
 	/*** "DB:" is for debugging only!  Don't depend on it! ***/
 	if (Verbose)
 	  {
-	  fprintf(Log,"Child[%d]: '%s'\n",Thread,Cmd);
+	  LogPrint("Child[%d]: '%s'\n",Thread,Cmd);
 	  }
 #if 0
 	int PID;
@@ -141,7 +142,7 @@ int	ReadChild	(int Thread)
 	      MaxCol=DBcolsize(CM[Thread].DB);
 	      if (Verbose)
 	        {
-		fprintf(Log,"Telling Child[%d]: DBSTART\n",Thread);
+		LogPrint("Telling Child[%d]: DBSTART\n",Thread);
 		}
 	      write(CM[Thread].ChildStdin,"DBSTART\n",8);
 	      for(Row=0; Row < MaxRow; Row++)
@@ -157,14 +158,14 @@ int	ReadChild	(int Thread)
 		  write(CM[Thread].ChildStdin,"'",1);
 		  if (Verbose)
 		    {
-		    fprintf(Log,"Telling Child[%d]: %s=%s\n",Thread,F,V);
+		    LogPrint("Telling Child[%d]: %s=%s\n",Thread,F,V);
 		    }
 		  }
 	        write(CM[Thread].ChildStdin,"\n",1);
 	        } /* for each record */
 	      if (Verbose)
 	        {
-		fprintf(Log,"Telling Child[%d]: DBEOF\n",Thread);
+		LogPrint("Telling Child[%d]: DBEOF\n",Thread);
 		}
 	      write(CM[Thread].ChildStdin,"DBEOF\n",4);
 	      break;
@@ -172,14 +173,14 @@ int	ReadChild	(int Thread)
 	      if (CM[Thread].Status != ST_RUNNING) break; /* could be dying */
 	      if (Verbose)
 	        {
-		fprintf(Log,"Telling Child[%d]: ERROR (%d)\n",Thread,rc);
+		LogPrint("Telling Child[%d]: ERROR (%d)\n",Thread,rc);
 		}
 	      write(CM[Thread].ChildStdin,"ERROR\n",6);
 	      break;
 	    } /* switch */
 	  if (Verbose)
 	    {
-	    fprintf(Log,"Telling Child[%d]: OK\n",Thread);
+	    LogPrint("Telling Child[%d]: OK\n",Thread);
 	    }
 	  if (CM[Thread].Status == ST_RUNNING)
 		{
@@ -198,13 +199,13 @@ int	ReadChild	(int Thread)
     else if (!strncmp(Cmd,"ECHO ",5))
 	{
 	/* display command */
-	fprintf(Log,"%s\n",Cmd+5);
+	LogPrint("%s\n",Cmd+5);
 	return(0);
 	}
     else
 	{
 	/* Unknown reply.  Use it as a debug. */
-	fprintf(Log,"DEBUG[%d]: %s\n",Thread,Cmd);
+	LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
 	return(0);
 	}
     /** If we need to send stuff back to the DB, do it here! **/
@@ -305,7 +306,7 @@ void	StaleChild	()
 	CM[Thread].ChildStdinRev=0;
 	if (Verbose)
 	  {
-	  fprintf(Log,"Scheduler: Closing old child[%d]\n",Thread);
+	  LogPrint("Scheduler: Closing old child[%d]\n",Thread);
 	  }
 	}
     }
@@ -371,7 +372,7 @@ int	GetChild	(char *Attr, int IsUrgent)
   Now=time(NULL);
   if (Verbose > 1)
     {
-    fprintf(Log,"GetChild(): No running child (yet) -- want host=%d\n",HostId);
+    LogPrint("GetChild(): No running child (yet) -- want host=%d\n",HostId);
     }
 
   /* This loop summarizes the status of all running children. */
@@ -432,13 +433,13 @@ int	GetChild	(char *Attr, int IsUrgent)
 	  {
 	  if (Verbose)
 	    {
-	    fprintf(Log,"Child[%d] spawned\n",PossibleDead);
+	    LogPrint("Child[%d] spawned\n",PossibleDead);
 	    }
 	  return(PossibleDead);
 	  }
         if (Verbose)
 	  {
-	  fprintf(Log,"ERROR: SpawnEngine[%d] failed.\n",PossibleDead);
+	  LogPrint("ERROR: SpawnEngine[%d] failed.\n",PossibleDead);
 	  }
 	return(-2);
 	}
@@ -448,7 +449,7 @@ int	GetChild	(char *Attr, int IsUrgent)
 	{
 	if (Verbose > 1)
 	  {
-	  fprintf(Log,"Scheduler: Need to kill child[%d].\n",PossibleKill);
+	  LogPrint("Scheduler: Need to kill child[%d].\n",PossibleKill);
 	  }
 	/* Child claims ready but is not needed.  Kill it! (Close stdin) */
 	ChangeStatus(PossibleKill,ST_FREEING);

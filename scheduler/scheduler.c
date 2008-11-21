@@ -102,6 +102,8 @@
 #include "dbstatus.h"
 #include "dberror.h"
 #include "selftest.h"
+#include "logging.h"
+#include "lockfs.h"
 
 int Verbose=0;
 int ShowState=1;
@@ -140,6 +142,7 @@ void	Usage	(char *Name)
   fprintf(stderr,"  -I :: Use stdin and queue (default: use queue only)\n");
   fprintf(stderr,"  -v :: verbose (-v -v = more verbose)\n");
   fprintf(stderr,"  -L log :: send stdout and stderr to log\n");
+  fprintf(stderr,"  -l :: tell the running scheduler to redo its log file (for log rotation)\n");
   fprintf(stderr,"  -q :: turn off show stages\n");
   fprintf(stderr,"  -R :: reset the job queue in case something was hung.\n");
   fprintf(stderr,"  -t :: test every agent to see if it runs, then quit.\n");
@@ -176,14 +179,12 @@ int	main	(int argc, char *argv[])
   int RunAsDaemon=0;
   int ResetQueue=0;
   int KillSchedulers=0;
-  char *LogFile=NULL;
+  int HupSchedulers=0;
   int Test=0; /* 1=test and continue, 2=test and quit */
-
-  /* Prepare system logging */
-  Log2Syslog();
+  pid_t Pid;
 
   /* check args */
-  while((c = getopt(argc,argv,"dkHiIL:vqRtT")) != -1)
+  while((c = getopt(argc,argv,"dkHiIL:lvqRtT")) != -1)
     {
     switch(c)
       {
@@ -197,19 +198,20 @@ int	main	(int argc, char *argv[])
 	DB = DBopen();
 	if (!DB)
 	  {
-	  fprintf(Log,"FATAL: Unable to connect to database\n");
-	  Log2Syslog();
+	  LogPrint("FATAL: Unable to connect to database\n");
 	  exit(-1);
 	  }
 	/* Nothing to initialize */
 	DBclose(DB);
-	closelog();
 	return(0);
       case 'I':
 	UseStdin=1;
 	break;
       case 'k': /* kill the scheduler */
 	KillSchedulers=1;
+	break;
+      case 'l': /* tell the scheduler to redo logs */
+	HupSchedulers=1;
 	break;
       case 'L':
 	LogFile=optarg;
@@ -232,20 +234,16 @@ int	main	(int argc, char *argv[])
       default:
 	Usage(argv[0]);
 	DBclose(DB);
-	Log2Syslog();
 	exit(-1);
       }
     }
+
   if ((optind != argc-1) && (optind != argc))
 	{
 	Usage(argv[0]);
 	DBclose(DB);
-	Log2Syslog();
 	exit(-1);
 	}
-
-  fprintf(Log,"*** Scheduler started\n");
-  Log2Syslog();
 
   /* All config files require group access.  Validate access. */
   if (getuid() == 0)
@@ -261,33 +259,29 @@ int	main	(int argc, char *argv[])
       G = getgrnam(PROJECTGROUP);
       if (!G)
 	{
-	fprintf(Log,"FATAL: Group '%s' not found.  Aborting.\n",PROJECTGROUP);
+	fprintf(stderr,"FATAL: Group '%s' not found.  Aborting.\n",PROJECTGROUP);
 	DBclose(DB);
-	Log2Syslog();
 	exit(-1);
 	}
       setgroups(1,&(G->gr_gid));
       if ((setgid(G->gr_gid) != 0) || (setegid(G->gr_gid) != 0))
 	{
-	fprintf(Log,"FATAL: Cannot run as group '%s'.  Aborting.\n",PROJECTGROUP);
+	fprintf(stderr,"FATAL: Cannot run as group '%s'.  Aborting.\n",PROJECTGROUP);
 	DBclose(DB);
-	Log2Syslog();
 	exit(-1);
 	}
       /* Don't run as root */
       P = getpwnam(PROJECTUSER);
       if (!P)
 	{
-	fprintf(Log,"FATAL: User '%s' not found.  Will not run as root.  Aborting.\n",PROJECTUSER);
+	fprintf(stderr,"FATAL: User '%s' not found.  Will not run as root.  Aborting.\n",PROJECTUSER);
 	DBclose(DB);
-	Log2Syslog();
 	exit(-1);
 	}
       if ((setuid(P->pw_uid) != 0) || (seteuid(P->pw_uid) != 0))
 	{
-	fprintf(Log,"FATAL: Cannot run as user '%s'.  Will not run as root.  Aborting.\n",PROJECTUSER);
+	fprintf(stderr,"FATAL: Cannot run as user '%s'.  Will not run as root.  Aborting.\n",PROJECTUSER);
 	DBclose(DB);
-	Log2Syslog();
 	exit(-1);
 	}
       } /* if !!KillScheduler */
@@ -309,9 +303,8 @@ int	main	(int argc, char *argv[])
     Groups = (gid_t *)malloc(MaxGroup*sizeof(gid_t));
     if (!Groups)
       {
-      fprintf(Log,"FATAL: Unable to allocate memory.\n");
+      fprintf(stderr,"FATAL: Unable to allocate memory.\n");
       DBclose(DB);
-      Log2Syslog();
       exit(-1);
       }
     getgroups(MaxGroup,Groups);
@@ -323,15 +316,66 @@ int	main	(int argc, char *argv[])
     free(Groups);
     if (!Match)
       {
-      fprintf(Log,"FATAL: You are not in group '%s'.  Aborting.\n",PROJECTGROUP);
+      fprintf(stderr,"FATAL: You are not in group '%s'.  Aborting.\n",PROJECTGROUP);
       DBclose(DB);
-      Log2Syslog();
       exit(-1);
       }
     } /* check group access */
 
+  /* Lock the scheduler, so no other scheduler can run */
+  Pid = LockScheduler();
+  if (Pid)
+    {
+    if (!KillSchedulers && !HupSchedulers)
+      {
+      fprintf(stderr,"FATAL: Another scheduler is running (pid=%d).\n",Pid);
+      exit(1);
+      }
+
+    if (HupSchedulers)
+      {
+      rc = kill(Pid,SIGHUP);
+      if (rc == -1)
+	{
+	fprintf(stderr,"FATAL: Permission denied: cannot kill process %d\n",Pid);
+	exit(2);
+	}
+      return(0);
+      }
+
+    /* See if I can kill it! */
+    rc = kill(Pid,SIGTERM);
+    if (rc == -1)
+      {
+      fprintf(stderr,"FATAL: Permission denied: cannot kill process %d\n",Pid);
+      exit(2);
+      }
+    fprintf(stderr,"Waiting 20 seconds for process to complete\n");
+    sleep(20);
+    if (kill(Pid,SIGKILL) != 0)
+      {
+      if (errno == EPERM)
+        {
+	fprintf(stderr,"Permission denied: cannot kill process %d\n",Pid);
+	}
+      else if (errno != ESRCH) { perror("ERROR: Unable to kill process"); exit(2); }
+      }
+    return(0);
+    } /* if Pid of another scheduler is found */
+
+  if (KillSchedulers || HupSchedulers)
+    {
+    UnlockScheduler();
+    return(0);
+    }
+
+  /**** From here on, I am the only scheduler running ****/
+
+  /* Prepare logging */
+  LogPrint("*** Scheduler started\n");
+
   /* Become a daemon? (Not if I'm killing schedulers) */
-  if (!KillSchedulers && RunAsDaemon)
+  if (RunAsDaemon)
     {
     /* do not close stdout/stderr when using a LogFile */
     daemon(0,(LogFile!=NULL));
@@ -339,31 +383,19 @@ int	main	(int argc, char *argv[])
     }
 
   /* Log to file? (Not if I'm killing schedulers) */
-  if (!KillSchedulers && LogFile)
-    {
-    if (freopen(LogFile,"wb",stdout) == NULL)
+  if ((dup2(fileno(stdout),fileno(stderr))) < 0)
       {
-      fprintf(Log,"FATAL: Unable to write to logfile '%s'\n",LogFile);
+      LogPrint("FATAL: Unable to write to redirect stderr to log\n");
       DBclose(DB);
-      Log2Syslog();
       exit(-1);
       }
-    if ((dup2(fileno(stdout),fileno(stderr))) < 0)
-      {
-      fprintf(Log,"FATAL: Unable to write to redirect stderr to log\n");
-      DBclose(DB);
-      Log2Syslog();
-      exit(-1);
-      }
-    }
 
   /* init queue */
   DB = DBopen();
   if (!DB)
     {
-    fprintf(Log,"FATAL: Unable to connect to database\n");
+    LogPrint("FATAL: Unable to connect to database\n");
     DBclose(DB);
-    Log2Syslog();
     exit(-1);
     }
 
@@ -372,22 +404,12 @@ int	main	(int argc, char *argv[])
   /* Prepare for logging errors to DB */
   DBErrorInit();
 
-  /* If we're killing schedulers... */
-  if (KillSchedulers)
-	{
-	DBkillschedulers();
-	DBclose(DB);
-	fprintf(Log,"*** Scheduler completed\n");
-	Log2Syslog();
-	exit(0); /* kill me too! */
-	}
-
   /* If we're resetting the queue */
   if (ResetQueue)
 	{
 	/* If someone has a start without an end, then it is a hung process */
 	DBLockAccess(DB,"UPDATE jobqueue SET jq_starttime=null WHERE jq_endtime is NULL;");
-	fprintf(Log,"Job queue reset.\n");
+	LogPrint("Job queue reset.\n");
 	}
 
   /* init storage */
@@ -398,9 +420,8 @@ int	main	(int argc, char *argv[])
   /* Check for good agents */
   if (SelfTest())
     {
-    fprintf(Log,"FATAL: Inconsistent agent(s) detected.\n");
+    LogPrint("FATAL: Inconsistent agent(s) detected.\n");
     DBclose(DB);
-    Log2Syslog();
     exit(-1);
     }
 
@@ -409,13 +430,12 @@ int	main	(int argc, char *argv[])
     {
     rc = TestEngines();
     /* rc = number of engine failures */
-    if (rc == 0) fprintf(Log,"STATUS: All scheduler jobs appear to be functional.\n");
-    else fprintf(Log,"STATUS: %d agents failed.\n",rc);
+    if (rc == 0) LogPrint("STATUS: All scheduler jobs appear to be functional.\n");
+    else LogPrint("STATUS: %d agents failed.\n",rc);
     if ((Test > 1) || rc)
 	{
 	DBclose(DB);
-	closelog();
-	fprintf(Log,"*** Scheduler completed\n");
+	LogPrint("*** Scheduler completed\n");
 	return(rc);
 	}
     }
@@ -451,7 +471,6 @@ int	main	(int argc, char *argv[])
   while(KeepRunning)
     {
     SaveStatus();
-    Log2Syslog();
 
     /* check for data to process */
     if (UseStdin)
@@ -474,11 +493,11 @@ int	main	(int argc, char *argv[])
 	  }
 
 	/* Got a command! */
-	if (Verbose) fprintf(Log,"Parent got command: %s\n",Input);
+	if (Verbose) LogPrint("Parent got command: %s\n",Input);
 	Arg = strchr(Input,'|');
 	if (!Arg)
 		{
-		fprintf(Log,"ERROR: Unknown command (len=%d) '%s'\n",Len,Input);
+		LogPrint("ERROR: Unknown command (len=%d) '%s'\n",Len,Input);
 		continue; /* skip unknown lines */
 		}
 	Arg[0]='\0'; Arg++;	/* skip space */
@@ -505,7 +524,7 @@ int	main	(int argc, char *argv[])
 		  {
 		  ChangeStatus(Thread,ST_RUNNING);
 		  }
-		if (Verbose) fprintf(Log,"(a) Feeding child[%d]: '%s'\n",Thread,Arg);
+		if (Verbose) LogPrint("(a) Feeding child[%d]: '%s'\n",Thread,Arg);
 		memset(CM[Thread].Parm,'\0',MAXCMD);
 		strcpy(CM[Thread].Parm,Arg);
 		Input[Len++]='\n'; /* add a \n to end of Arg */
@@ -515,7 +534,7 @@ int	main	(int argc, char *argv[])
 	  /* Thread == -1 is a timeout -- retry the request */
 	  else if (Thread <= -2)
 		{
-		fprintf(Log,"ERROR: No living engines for '%s'\n",Input);
+		LogPrint("ERROR: No living engines for '%s'\n",Input);
 		Fed=1;	/* skip this bad command */
 		}
 	  } /* while not Fed */
@@ -552,7 +571,7 @@ int	main	(int argc, char *argv[])
     }
 
   /* tell children "no more food" by closing stdin */
-  if (Verbose) fprintf(Log,"Telling all children: No more food.\n");
+  if (Verbose) LogPrint("Telling all children: No more food.\n");
   for(Thread=0; Thread < MaxThread; Thread++)
     {
     if (CM[Thread].Status > ST_FREE) CheckClose(CM[Thread].ChildStdin);
@@ -592,8 +611,7 @@ int	main	(int argc, char *argv[])
   DBQclose();
   DBclose(DB);
   DebugThreads(1);
-  Log2Syslog(); /* dump any final messages */
-  fprintf(Log,"*** Scheduler completed\n");
+  LogPrint("*** Scheduler completed\n");
   return(0);
 } /* main() */
 

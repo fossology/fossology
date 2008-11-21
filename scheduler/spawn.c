@@ -38,13 +38,11 @@
    and the next parent call to syslog().
    This is a race condition.
    The solution:
-     Do NOT call syslog inside a SIGCHLD signal handler.
+     Do NOT use syslog.
    The workaround:
-     Instead, dump any messages to a temp file (Log).
-     Later, dump the contents of the temp file to syslog (Log2Syslog).
-     This is an ugly hack, but it works.
- Side note: this problem does not seem to appear when using "gcc".
- But it can be reliably reproduced when using "gcc -g".
+     Manage my own logfile.
+     -L overwrites the default location (see LogOpen).
+     SIGHUP tells the system to refresh the logfile (for log rotations).
  *******************************************************/
 
 #include <stdlib.h>
@@ -57,7 +55,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <fcntl.h>
-#include <syslog.h>
+#include <sys/stat.h>
+#include <stdarg.h>
 
 #include "debug.h"
 #include "scheduler.h"
@@ -67,6 +66,7 @@
 #include "dbq.h"
 #include "dbstatus.h"
 #include "hosts.h"
+#include "logging.h"
 
 #ifndef WEXITED
   /* For some odd reason, this is missing from older GCC headers */
@@ -94,8 +94,6 @@ char *StatusName[] = {
 	NULL
 	};
 
-FILE	*Log=NULL;
-
 /************************************************************************/
 /************************************************************************/
 /** Debug Functions *****************************************************/
@@ -122,14 +120,14 @@ void	ShowStates	(int Thread)
   Now = time(NULL);
   memset(Ctime,'\0',MAXCTIME);
   ctime_r(&Now,Ctime);
-  fprintf(Log,"Child[%d] '%s' state=%s(%d) @ %s",
+  LogPrint("Child[%d] '%s' state=%s(%d) @ %s",
 	Thread,CM[Thread].Attr,
 	StatusName[CM[Thread].Status],CM[Thread].Status,Ctime);
   if (CM[Thread].Status == ST_FAIL)
     {
-    fprintf(Log,"  Attr:    '%s'\n",CM[Thread].Attr);
-    fprintf(Log,"  Command: '%s'\n",CM[Thread].Command);
-    fprintf(Log,"  Parm:    '%s'\n",CM[Thread].Parm);
+    LogPrint("  Attr:    '%s'\n",CM[Thread].Attr);
+    LogPrint("  Command: '%s'\n",CM[Thread].Command);
+    LogPrint("  Parm:    '%s'\n",CM[Thread].Parm);
     }
   CM[Thread].StatusLast = CM[Thread].Status;
 } /* ShowStates() */
@@ -140,29 +138,29 @@ void	ShowStates	(int Thread)
 void	DebugThread	(int Thread)
 {
   char Ctime[MAXCTIME];
-  fprintf(Log,"\nThread %d:\n",Thread);
-  fprintf(Log,"  PID:       %d\n",CM[Thread].ChildPid);
-  fprintf(Log,"  Pipes:     in=%d->%d / out=%d->%d\n",
+  LogPrint("\nThread %d:\n",Thread);
+  LogPrint("  PID:       %d\n",CM[Thread].ChildPid);
+  LogPrint("  Pipes:     in=%d->%d / out=%d->%d\n",
 	CM[Thread].ChildStdinRev,CM[Thread].ChildStdin,
 	CM[Thread].ChildStdoutRev,CM[Thread].ChildStdout);
-  fprintf(Log,"  Attr:      '%s'\n",CM[Thread].Attr);
-  fprintf(Log,"  Command:   '%s'\n",CM[Thread].Command);
-  fprintf(Log,"  Parm:      '%s'\n",CM[Thread].Parm);
+  LogPrint("  Attr:      '%s'\n",CM[Thread].Attr);
+  LogPrint("  Command:   '%s'\n",CM[Thread].Command);
+  LogPrint("  Parm:      '%s'\n",CM[Thread].Parm);
   memset(Ctime,'\0',MAXCTIME);
   ctime_r(&(CM[Thread].Heartbeat),Ctime);
-  fprintf(Log,"  Heartbeat:  %s",Ctime);
+  LogPrint("  Heartbeat:  %s",Ctime);
   memset(Ctime,'\0',MAXCTIME);
   ctime_r(&(CM[Thread].StatusTime),Ctime);
-  fprintf(Log,"  State:      %s",Ctime);
-  fprintf(Log,"  Status:     %d (%s)\n",CM[Thread].Status,StatusName[CM[Thread].Status]);
+  LogPrint("  State:      %s",Ctime);
+  LogPrint("  Status:     %d (%s)\n",CM[Thread].Status,StatusName[CM[Thread].Status]);
   memset(Ctime,'\0',MAXCTIME);
   ctime_r(&(CM[Thread].SpawnTime),Ctime);
-  fprintf(Log,"  Spawn:      %d at %s",CM[Thread].SpawnCount,Ctime);
-  fprintf(Log,"  DB:\n");
-  fprintf(Log,"    IsDB:     %d\n",CM[Thread].IsDB);
-  fprintf(Log,"    DBJobKey: %d\n",CM[Thread].DBJobKey);
-  fprintf(Log,"    DBMSQrow: %d\n",CM[Thread].DBMSQrow);
-  fprintf(Log,"    DBagent:  %d\n",CM[Thread].DBagent);
+  LogPrint("  Spawn:      %d at %s",CM[Thread].SpawnCount,Ctime);
+  LogPrint("  DB:\n");
+  LogPrint("    IsDB:     %d\n",CM[Thread].IsDB);
+  LogPrint("    DBJobKey: %d\n",CM[Thread].DBJobKey);
+  LogPrint("    DBMSQrow: %d\n",CM[Thread].DBMSQrow);
+  LogPrint("    DBagent:  %d\n",CM[Thread].DBagent);
 } /* DebugThread() */
 
 /**********************************************
@@ -171,13 +169,13 @@ void	DebugThread	(int Thread)
 void	DebugThreads	(int Flag)
 {
   int Thread;
-  fprintf(Log,"==============================\n");
+  LogPrint("==============================\n");
   /* BuildVersion has a \n at the end */
-  fprintf(Log,"Scheduler %s",BuildVersion);
+  LogPrint("Scheduler %s",BuildVersion);
   if (Flag & 0x01)
     {
-    fprintf(Log,"Max Thread  = %d\n",MaxThread);
-    fprintf(Log,"Total Running = %d\n",RunCount);
+    LogPrint("Max Thread  = %d\n",MaxThread);
+    LogPrint("Total Running = %d\n",RunCount);
     }
   if (Flag & 0x02)
     {
@@ -234,48 +232,6 @@ void	SaveStatus	()
 /** Signals Functions ***************************************************/
 /************************************************************************/
 /************************************************************************/
-
-/********************************************
- Log2Syslog(): Dump the contents of the log file
- to syslog().  This rotates FILE *Log.
- ********************************************/
-void	Log2Syslog	()
-{
-  char Line[1024];
-  int i,c;
-  FILE *Fin;
-
-  /* Check for new Log */
-  if (Log==NULL)
-    {
-    Log = tmpfile();
-    openlog("fossology",LOG_PERROR|LOG_PID,LOG_DAEMON);
-    return;
-    }
-
-  /* Check for empty Log */
-  if (ftell(Log) == 0) return; 
-
-  /* There are messages! */
-  /* Rotate the message holder */
-  Fin = Log;
-  Log = tmpfile();
-
-  /* Dump the file contents */
-  rewind(Fin);
-  while(!feof(Fin))
-    {
-    memset(Line,'\0',sizeof(Line));
-    c = fgetc(Fin);
-    for(i=0; (i<1023) && (c > 0) && (c != '\n'); i++)
-      {
-      Line[i] = c;
-      c = fgetc(Fin);
-      }
-    if (i > 0) syslog(LOG_INFO,"%s",Line);
-    }
-  fclose(Fin);
-} /* Log2Syslog() */
 
 /********************************************
  ChangeStatus(): Change a thread's state.
@@ -376,31 +332,29 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 	}
 	break;
     case SIGINT: /* kill all children and exit */
-	if (Verbose) fprintf(Log,"Got slow death signal: %d\n",Signo);
+	if (Verbose) LogPrint("Got slow death signal: %d\n",Signo);
 	SLOWDEATH=1;
 	break;
     case SIGTERM: /* kill all children and exit (default kill signal) */
     case SIGQUIT: /* kill all children and exit */
     case SIGKILL: /* kill all children and exit (cannot trap this! but fun to try) */
-	if (Verbose) fprintf(Log,"Got signal %d\n",Signo);
+	if (Verbose) LogPrint("Got signal %d\n",Signo);
 	fclose(stdin);	/* no more input! */
 	SLOWDEATH=1;
 	signal(SIGCHLD,SIG_IGN); /* ignore screams of death */
-	fprintf(Log,"Sending kill signal to all child processes.\n");
+	LogPrint("Sending kill signal to all child processes.\n");
 	for(Thread=0; (Thread < MaxThread); Thread++)
 	  {
 	  if (CM[Thread].ChildPid) kill(CM[Thread].ChildPid,SIGKILL);
 	  }
 	/** if all children are dead, then I'll exit through signal handler */
 	DBclose(DB);
-	fprintf(Log,"*** Scheduler completed (terminated by signal).\n");
-	Log2Syslog();
+	LogPrint("*** Scheduler completed (terminated by signal).\n");
 	exit(0);
 	break;
     case SIGHUP: /* Redo config */
-	/* Currently: Does nothing. */
-	/* TBD: Rotate log file */
-	/* Someday in the future: Re-read config */
+	LogReopenFlag=1; /* Rotate log file */
+	/* TBD: Someday in the future: Re-read config */
 	break;
     case SIGUSR1: /* Display stats */
 	DebugThreads(3);
@@ -415,19 +369,18 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 	Now = time(NULL);
 	memset(Ctime,'\0',MAXCTIME);
 	ctime_r(&Now,Ctime);
-	fprintf(Log,"CRASH DEBUG! %s",Ctime);
-	fprintf(Log,"  DEBUG: %s :: %d\n",Debug.File,Debug.Line);
+	LogPrint("CRASH DEBUG! %s",Ctime);
+	LogPrint("  DEBUG: %s :: %d\n",Debug.File,Debug.Line);
 	DebugThreads(3);
-	fprintf(Log,"CRASH DEAD! %s",Ctime);
+	LogPrint("CRASH DEAD! %s",Ctime);
 	raise(SIGABRT); /* generate a core dump */
 	DBclose(DB);
-	fprintf(Log,"*** Scheduler completed.\n");
-	Log2Syslog();
+	LogPrint("*** Scheduler completed.\n");
 	exit(-1);
 	}
 	break;
     default:
-	if (Verbose) fprintf(Log,"Got unknown signal: %d\n",Signo);
+	if (Verbose) LogPrint("Got unknown signal: %d\n",Signo);
 	break;
     }
 } /* ParentSig() */
@@ -488,9 +441,9 @@ void	CheckPids	()
 	if (CM[Thread].Status != ST_FREEING)
 		{
 #if USE_WAITID
-		fprintf(Log,"ERROR: Child[%d] died prematurely (was state %s, signal was %d)\n",Thread,StatusName[CM[Thread].Status],Info.si_signo);
+		LogPrint("ERROR: Child[%d] died prematurely (was state %s, signal was %d)\n",Thread,StatusName[CM[Thread].Status],Info.si_signo);
 #else
-		fprintf(Log,"ERROR: Child[%d] died prematurely (was state %s, signal was %d)\n",Thread,StatusName[CM[Thread].Status],WTERMSIG(Status));
+		LogPrint("ERROR: Child[%d] died prematurely (was state %s, signal was %d)\n",Thread,StatusName[CM[Thread].Status],WTERMSIG(Status));
 #endif
 		DebugThread(Thread);
 		}
@@ -545,13 +498,13 @@ void	CheckPids	()
 #if USE_WAITID
 	if (Info.si_signo != SIGCHLD) /* ignore unknown children */
 	  {
-	  fprintf(Log,"INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
+	  LogPrint("INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
 		Info.si_signo, Info.si_pid, Info.si_status);
 	  }
 #else
 	if (WTERMSIG(Status) != SIGCHLD) /* ignore unknown children */
 	  {
-	  fprintf(Log,"INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
+	  LogPrint("INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
 		WTERMSIG(Status), Pid, Status);
 	  }
 #endif
@@ -562,9 +515,6 @@ void	CheckPids	()
 #else
     while(Pid > 0); /* while "Pid > 0"  == while got a signal */
 #endif
-
-  /* Dump any pending messages */
-  Log2Syslog();
 } /* CheckPids() */
 
 /********************************************
@@ -587,7 +537,7 @@ void	HandleSig	(int Signo, siginfo_t *Info, void *Context)
     /** NOTE: Some children send a sigchld way too late.  Ignore sigchld. **/
     if (Signo != SIGCHLD)
       {
-      fprintf(Log,"INFO: Signal from unknown process: pid=%d sig=%d\n",
+      LogPrint("INFO: Signal from unknown process: pid=%d sig=%d\n",
 	Info->si_pid,Signo);
       }
     CheckPids();
@@ -608,7 +558,7 @@ void	HandleSig	(int Signo, siginfo_t *Info, void *Context)
 	CheckPids();
 	break;
     default:
-	fprintf(Log,"Child[%d] did something unexpected: signal=%d, state was %s(%d)\n",
+	LogPrint("Child[%d] did something unexpected: signal=%d, state was %s(%d)\n",
 		Thread,Signo,
 		StatusName[CM[Thread].Status],CM[Thread].Status);
 	KillChild(Thread);
@@ -726,19 +676,18 @@ void	MyExec	(int Thread, char *Cmd)
   /* debug */
   if (Verbose)
     {
-    fprintf(Log,"Max Args = %d\n",a);
+    LogPrint("Max Args = %d\n",a);
     for(i=0; i<a; i++)
       {
-      fprintf(Log,"Arg[%d] = '%s'\n",i,Arg[i]);
+      LogPrint("Arg[%d] = '%s'\n",i,Arg[i]);
       }
     }
   execv(Arg[0],Arg);
 
   /* should never get here */
-  fprintf(Log,"Exec failed: %s\n",Cmd);
+  LogPrint("Exec failed: %s\n",Cmd);
   perror("Exec failure reason");
   DBclose(DB);
-  Log2Syslog();
   exit(1);
 } /* MyExec() */
 
@@ -761,7 +710,7 @@ int	SpawnEngine	(int Thread)
   if ((CM[Thread].Status == ST_FREE) &&
 	(CM[Thread].SpawnCount > RespawnCount))
 	{
-	fprintf(Log,"*** Child[%d] spawning too fast (%d in %d seconds)\n",
+	LogPrint("*** Child[%d] spawning too fast (%d in %d seconds)\n",
 		Thread,
 		CM[Thread].SpawnCount,(int)(NowTime-CM[Thread].SpawnTime));
 	ChangeStatus(Thread,ST_FAIL);
@@ -804,30 +753,26 @@ int	SpawnEngine	(int Thread)
   if (fcntl(p2c[0],F_SETFL, fcntl(p2c[0],F_GETFL) ) != 0)
     {
     perror("FATAL: fcntl(p2c[0]) failed: ");
-    fprintf(Log,"FATAL: fcntl(p2c[0]) failed.\n");
-    Log2Syslog();
+    LogPrint("FATAL: fcntl(p2c[0]) failed.\n");
     exit(-1);
     }
   if (fcntl(p2c[1],F_SETFL, fcntl(p2c[1],F_GETFL) ) != 0)
     {
     perror("FATAL: fcntl(p2c[1]) failed: ");
-    fprintf(Log,"FATAL: fcntl(p2c[1]) failed.\n");
-    Log2Syslog();
+    LogPrint("FATAL: fcntl(p2c[1]) failed.\n");
     exit(-1);
     }
   /* Set child-to-parent pipes to be non-blocking */
   if (fcntl(c2p[0],F_SETFL, fcntl(c2p[0],F_GETFL) | O_NONBLOCK) != 0)
     {
     perror("FATAL: fcntl(c2p[0]) failed: ");
-    fprintf(Log,"FATAL: fcntl(c2p[0]) failed.\n");
-    Log2Syslog();
+    LogPrint("FATAL: fcntl(c2p[0]) failed.\n");
     exit(-1);
     }
   if (fcntl(c2p[1],F_SETFL, fcntl(c2p[1],F_GETFL) | O_NONBLOCK) != 0)
     {
     perror("FATAL: fcntl(c2p[1]) failed: ");
-    fprintf(Log,"FATAL: fcntl(c2p[1]) failed.\n");
-    Log2Syslog();
+    LogPrint("FATAL: fcntl(c2p[1]) failed.\n");
     exit(-1);
     }
 
@@ -869,21 +814,19 @@ int	SpawnEngine	(int Thread)
 	MyExec(Thread,CM[Thread].Command);
 	/* should never get here! */
 	DBclose(DB);
-	Log2Syslog();
 	exit(1);
 	}
   else if (Pid == -1)
 	{
 	perror("FATAL: fork failed: ");
 	DBclose(DB);
-	fprintf(Log,"FATAL: fork failed.\n");
-	Log2Syslog();
+	LogPrint("FATAL: fork failed.\n");
 	exit(-1);
 	}
   else
 	{
 	/*** Parent processing! ***/
-	if (Verbose) fprintf(Log,"Child[%d] (pid=%d) spawned\n",Thread,Pid);
+	if (Verbose) LogPrint("Child[%d] (pid=%d) spawned\n",Thread,Pid);
 	CM[Thread].ChildPid = Pid;
 	ChangeStatus(Thread,ST_SPAWNED);
 	}
@@ -900,13 +843,12 @@ int	SpawnEngine	(int Thread)
   if (CM[Thread].Status != ST_READY)
 	{
 	/* assume the child failed to spawn */
-	fprintf(Log,"ERROR: Child[%d] failed to spawn after %d seconds\n",Thread,(int)(NowTime-SpawnTime));
-	fprintf(Log,"ERROR: Child[%d] failed command was: '%s'\n",Thread,CM[Thread].Command);
+	LogPrint("ERROR: Child[%d] failed to spawn after %d seconds\n",Thread,(int)(NowTime-SpawnTime));
+	LogPrint("ERROR: Child[%d] failed command was: '%s'\n",Thread,CM[Thread].Command);
 	ShowStates(Thread);
 	KillChild(Thread);
 	return(0);
 	}
-  Log2Syslog();
   return(1);
 } /* SpawnEngine() */
 
@@ -928,10 +870,9 @@ void	InitEngines	(char *ConfigName)
   Fin = fopen(ConfigName,"rb");
   if (!Fin)
     {
-    fprintf(Log,"FATAL: Unable to open configuration file: '%s'\n",
+    LogPrint("FATAL: Unable to open configuration file: '%s'\n",
 	ConfigName);
     DBclose(DB);
-    Log2Syslog();
     exit(-1);
     }
 
@@ -946,16 +887,15 @@ void	InitEngines	(char *ConfigName)
     else Arg=strchr(Cmd,'|');
     if (!Arg)
 	{
-	fprintf(Log,"FATAL: Bad command '%s' in '%s'\n",Cmd,ConfigName);
+	LogPrint("FATAL: Bad command '%s' in '%s'\n",Cmd,ConfigName);
 	DBclose(DB);
-	Log2Syslog();
 	exit(-1);
 	}
     if (Arg) { Arg[0]='\0'; Arg++; } /* skip space */
     while(Arg && isspace(Arg[0])) Arg++;
 
     /******************************************************/
-    if (Verbose) fprintf(Log,"Config:  Cmd='%s'  Arg='%s'\n",Cmd,Arg);
+    if (Verbose) LogPrint("Config:  Cmd='%s'  Arg='%s'\n",Cmd,Arg);
     /* process Parent commands */
     if (!strcmp(Cmd,"%Verbose"))
 	{
@@ -1006,10 +946,9 @@ void	InitEngines	(char *ConfigName)
   MaxThread = Thread;
   if (MaxThread <= 0)
     {
-    fprintf(Log,"FATAL: No agents found in the configuration file: '%s'\n",
+    LogPrint("FATAL: No agents found in the configuration file: '%s'\n",
 	ConfigName);
     DBclose(DB);
-    Log2Syslog();
     exit(-1);
     }
 } /* InitEngines() */
@@ -1027,13 +966,12 @@ int	TestEngines	()
     {
     if (!SpawnEngine(Thread))
       {
-      fprintf(Log,"FAILED: Could not run thread %d: %s\n",
+      LogPrint("FAILED: Could not run thread %d: %s\n",
         Thread,CM[Thread].Command);
       Failures++;
       }
     KillChild(Thread);
     }
-  Log2Syslog();
   return(Failures);
 } /* TestEngines() */
 
@@ -1063,10 +1001,9 @@ int	ProcessCommand	(int Job_ID, char *Cmd)
 	  KillChild(Thread);
 	  }
 	DBUpdateJob(Job_ID,1,"Done");
-	fprintf(Log,"Command '%s' Done.\n",Cmd);
+	LogPrint("Command '%s' Done.\n",Cmd);
 	DBclose(DB);
-	fprintf(Log,"*** Scheduler completed by shutdown command.\n");
-	Log2Syslog();
+	LogPrint("*** Scheduler completed by shutdown command.\n");
 	exit(0);
 	}
   else if (!strncmp(Cmd,"killjob ",8))
