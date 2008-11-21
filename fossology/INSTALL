@@ -307,9 +307,12 @@ upload_max_filesize = 700M
 ------------------------
 1) You need to add something like the following to the apache config,
   and this will depend on
- A) How you have apache configured, you might be creating a new site
+ A) How you have apache configured. You might be creating a new site
     config using apache's "sites-available"/a2ensite(8) mechanism or
-    editing a different config files you have setup.
+    editing and existing config you have setup. For example, on a
+    Debian apache2 install you would have site config files in
+    /etc/apache2/sites-available/ and you might be editing the default
+    one or creating a new one.
  B) The path you want the FOSSology UI to appear on the server, this
    example uses "/repo/"
  C) Where your FOSSology is installed, this example assumes the default
@@ -559,6 +562,9 @@ As root, start the scheduler with:
 Section 3 - After Installation
 ==============================
 Congratulations, FOSSology is now installed!
+
+You can now point your web browser at the new install
+(http://yourhostname/repo/) and start using FOSSology!
 
 For extended discussion on how to use or tune the software, please see
 the User Documentation, available on the website at
