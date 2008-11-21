@@ -33,6 +33,7 @@
 #include "agents.h"
 #include "dbq.h"
 #include "hosts.h"
+#include "logging.h"
 
 char Hostname[128]; /* should be 64 max, but overkill is fine */
 
@@ -187,8 +188,7 @@ void	DBLockReconnect	()
   DB = DBopen();
   if (!DB)
     {
-    fprintf(Log,"FATAL: Scheduler unable to reconnect to the database.\n");
-    Log2Syslog();
+    LogPrint("FATAL: Scheduler unable to reconnect to the database.\n");
     exit(-1);
     }
   sigprocmask(SIG_UNBLOCK,&OldMask,NULL);
@@ -261,7 +261,7 @@ void	DBUpdateJob	(int JobId, int UpdateType, char *Message)
   snprintf(SQL+Len,MAXCMD-Len," WHERE jq_pk = '%d';",JobId);
   if (Verbose)
     {
-    fprintf(Log,"SQL Update: '%s'\n",SQL);
+    LogPrint("SQL Update: '%s'\n",SQL);
     }
   rc = DBLockAccess(DB,SQL);
   if (rc >= 0) return;
@@ -269,7 +269,7 @@ void	DBUpdateJob	(int JobId, int UpdateType, char *Message)
   /* How to handle a DB error? Right now, they are just logged per agent */
   /* TBD: This will be implemented when we have interprocess communication
      between the scheduler and UI. */
-  fprintf(Log,"ERROR: Unable to process: '%s'\n",SQL);
+  LogPrint("ERROR: Unable to process: '%s'\n",SQL);
   return;
 } /* DBUpdateJob() */
 
@@ -341,9 +341,9 @@ void	DBCheckSchedulerUnique	()
       DBattr = GetValueFromAttr(DBattr,"agent=");
       if (DBattr && !strcmp(Attr,DBattr))
 	{
-	fprintf(Log,"WARNING: Competing scheduler for '%s' detected: %s ",
+	LogPrint("WARNING: Competing scheduler for '%s' detected: %s ",
 		Attr,DBgetvalue(DB,Row,0));
-	fprintf(Log,"%s\n",DBgetvalue(DB,Row,1));
+	LogPrint("%s\n",DBgetvalue(DB,Row,1));
 	DBattrChecked[Row] = 1; /* only report it once */
 	}
       }
@@ -385,8 +385,7 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
   rc = DBLockAccess(DB,SQL);
   if (rc < 0)
     {
-    fprintf(Log,"FATAL: Scheduler failed to update status in DB. SQL was: \"%s\"\n",SQL);
-    Log2Syslog();
+    LogPrint("FATAL: Scheduler failed to update status in DB. SQL was: \"%s\"\n",SQL);
     exit(-1);
     }
 
@@ -417,8 +416,7 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
     rc = DBLockAccess(DB,SQL);
     if (rc < 0)
       {
-      fprintf(Log,"FATAL: Scheduler failed to insert status in DB.\n");
-      Log2Syslog();
+      LogPrint("FATAL: Scheduler failed to insert status in DB.\n");
       exit(-1);
       }
     }
@@ -428,8 +426,7 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
     {
     if (DBDead > 3)
 	{
-	fprintf(Log,"FATAL: Scheduler had too many database connection retries.\n");
-	Log2Syslog();
+	LogPrint("FATAL: Scheduler had too many database connection retries.\n");
 	exit(-1);
 	}
 
@@ -443,16 +440,15 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
 	Now = time(NULL);
 	memset(Ctime,'\0',MAXCTIME);
 	ctime_r(&Now,Ctime);
-	fprintf(Log,"ERROR: Scheduler lost connection to the database! %s",Ctime);
-	fprintf(Log,"  Dumping debug information.\n");
+	LogPrint("ERROR: Scheduler lost connection to the database! %s",Ctime);
+	LogPrint("  Dumping debug information.\n");
 	DebugThreads(3);
-	fprintf(Log,"INFO: Scheduler attempting to reconnect to the database.\n");
+	LogPrint("INFO: Scheduler attempting to reconnect to the database.\n");
 	DBclose(DB);
 	DB = DBopen();
 	if (!DB)
 	  {
-	  fprintf(Log,"FATAL: Scheduler unable to reconnect to the database.\n");
-	  Log2Syslog();
+	  LogPrint("FATAL: Scheduler unable to reconnect to the database.\n");
 	  exit(-1);
 	  }
 	DBDead++;
@@ -571,8 +567,7 @@ void	DBSaveJobStatus	(int Thread, int MSQid)
 	ProcessCount,(int)ElapseTime,(int)ProcessTime,JobPk);
     if (DBLockAccess(DB,SQL) < 0)
 	{
-	fprintf(Log,"FATAL: Scheduler failed to update job status in DB.\n");
-	Log2Syslog();
+	LogPrint("FATAL: Scheduler failed to update job status in DB.\n");
 	exit(-1);
 	}
     }
@@ -580,82 +575,6 @@ void	DBSaveJobStatus	(int Thread, int MSQid)
   /* Done */
   sigprocmask(SIG_UNBLOCK,&OldMask,NULL);
 } /* DBSaveJobStatus() */
-
-/**********************************************
- DBkillschedulers(): Kill schedulers based on their
- status name in the DB.
- Only kill schedulers found on this server.
- TBD: Someday we will have interprocess communication
- between schedulers and the UI.  When that happens, this
- code will change to use that for killing ALL schedulers.
- **********************************************/
-void	DBkillschedulers	()
-{
-  char SQL[MAXCMD];
-  char *Value;
-  int i;
-  int Pid;
-  int SentKill=0;
-  int rc;
-
-  memset(SQL,'\0',MAXCMD);
-  /* Kill all schedulers that have updated in the last minute */
-  snprintf(SQL,MAXCMD-1,"SELECT unique_scheduler FROM scheduler_status WHERE unique_scheduler like '%s.%%' AND agent_number = '-1' AND record_update >= now() - interval '%d';",Hostname,60);
-  DBLockAccess(DB,SQL);
-  for(i=0; i<DBdatasize(DB); i++)
-	{
-	Value = DBgetvalue(DB,i,0);
-	if (Value)
-	  {
-	  Value += strlen(Hostname)+1;
-	  Pid = atoi(Value);
-	  /* Make sure the process exists */
-	  rc=kill(Pid,SIGTERM);
-	  if (rc == -1)
-	    {
-	    if (errno == EPERM)
-	      {
-	      fprintf(Log,"Permission denied: cannot kill process %d\n",Pid);
-	      }
-	    }
-	  else
-	    {
-	    fprintf(Log,"Politely killing process %d\n",Pid);
-	    SentKill++;
-	    }
-	  }
-	}
-  if (!SentKill) return;  /* nothing to kill! */
-
-  /* wait 20 seconds, then make sure it is dead */
-  fprintf(Log,"Waiting 20 seconds for %d processes to complete\n",SentKill);
-  Log2Syslog();
-  sleep(20);
-  DBLockAccess(DB,SQL);
-  for(i=0; i<DBdatasize(DB); i++)
-	{
-	Value = DBgetvalue(DB,i,0);
-	if (Value)
-	  {
-	  Value += strlen(Hostname)+1;
-	  Pid = atoi(Value);
-	  if (kill(Pid,SIGKILL) != 0)
-	    {
-	    if (errno == EPERM)
-	      {
-	      fprintf(Log,"Permission denied: cannot kill process %d\n",Pid);
-	      }
-	    else if (errno != ESRCH) perror("ERROR: Unable to kill process");
-	    }
-	  else
-	    {
-	    fprintf(Log,"Forcefully killing process %d\n",Pid);
-	    }
-	  }
-	}
-
-  /* DB should be open and running.  See if it hung */
-} /* DBkillschedulers() */
 
 /***********************************************************
  DebugMSQ(): Display the entire MSQ table for debugging.
@@ -666,24 +585,24 @@ void	DebugMSQ	()
   int i;
   char Arg[MAXCMD];
 
-  fprintf(Log,"==============================================================\n");
+  LogPrint("==============================================================\n");
   for(m=0; m < MAXMSQ; m++)
     {
-    fprintf(Log,"Multi-SQL Queue #%d\n",m);
-    fprintf(Log,"  Job (jq_pk) = %d\n",MSQ[m].JobId);
+    LogPrint("Multi-SQL Queue #%d\n",m);
+    LogPrint("  Job (jq_pk) = %d\n",MSQ[m].JobId);
     if (MSQ[m].JobId >= 0)
       {
-      fprintf(Log,"  Is repeat (jq_repeat) = %d\n",MSQ[m].IsRepeat);
-      fprintf(Log,"  Is urgent = %d\n",MSQ[m].IsUrgent);
-      fprintf(Log,"  Items processed: %d out of %d\n",MSQ[m].ItemsDone,MSQ[m].MaxItems);
-      fprintf(Log,"  Type='%s' (agent type %d)\n",MSQ[m].Type,MSQ[m].DBagent);
-      fprintf(Log,"  Attr='%s'\n",MSQ[m].Attr);
-      fprintf(Log,"  Host found by column '%s'\n",MSQ[m].HostCol);
+      LogPrint("  Is repeat (jq_repeat) = %d\n",MSQ[m].IsRepeat);
+      LogPrint("  Is urgent = %d\n",MSQ[m].IsUrgent);
+      LogPrint("  Items processed: %d out of %d\n",MSQ[m].ItemsDone,MSQ[m].MaxItems);
+      LogPrint("  Type='%s' (agent type %d)\n",MSQ[m].Type,MSQ[m].DBagent);
+      LogPrint("  Attr='%s'\n",MSQ[m].Attr);
+      LogPrint("  Host found by column '%s'\n",MSQ[m].HostCol);
       for(i=0; i<MSQ[m].MaxItems; i++)
 	{
 	DBMkArgCols(MSQ[m].DBQ,i,Arg,MAXCMD);
 	if (Arg[strlen(Arg)-1] == '\n')  Arg[strlen(Arg)-1]='\0';
-	fprintf(Log,"    Item %d: State=%s  '%s'\n",i,StatusName[MSQ[m].Processed[i]],Arg);
+	LogPrint("    Item %d: State=%s  '%s'\n",i,StatusName[MSQ[m].Processed[i]],Arg);
 	}
       }
     }

@@ -34,6 +34,7 @@
 #include "dbq.h"
 #include "dbstatus.h"
 #include "hosts.h"
+#include "logging.h"
 
 multisqlqueue MSQ[MAXMSQ];
 int	MSQpending=0;	/* how many are being held? */
@@ -101,7 +102,7 @@ void	DBMSQremove	(int i)
   if (MSQ[i].JobId == -1) return; /* idiot checking */
   if (Verbose)
     {
-    fprintf(Log,"DBMSQremove: %d\n",i);
+    LogPrint("DBMSQremove: %d\n",i);
     }
 
   /* free memory */
@@ -147,7 +148,7 @@ int	DBMkAttr	(void *DB, int Row, char *Attr, int MaxAttr)
 
   if (Verbose)
     {
-    fprintf(Log,"Attr='%s'\n",Attr);
+    LogPrint("Attr='%s'\n",Attr);
     }
   return(IsUrgent);
 } /* DBMkAttr() */
@@ -326,14 +327,14 @@ int	DBMSQinsert	(void *DBQ, int Row)
     DBUpdateJob(MSQ[i].JobId,0,NULL);
     if (Verbose)
 	{
-	fprintf(Log,"SQL: '%s'\n",DBgetvaluename(DBQ,Row,"jq_args"));
+	LogPrint("SQL: '%s'\n",DBgetvaluename(DBQ,Row,"jq_args"));
 	}
     switch(DBLockAccess(DB,DBgetvaluename(DBQ,Row,"jq_args")))
 	{
 	case 0: /* no data; mark it as done */
 		if (Verbose)
 		  {
-		  fprintf(Log,"SQL -- no data.\n");
+		  LogPrint("SQL -- no data.\n");
 		  }
 		DBUpdateJob(MSQ[i].JobId,1,"No data");
 		DBMSQremove(i);
@@ -343,7 +344,7 @@ int	DBMSQinsert	(void *DBQ, int Row)
 		MSQ[i].MaxItems = DBdatasize(MSQ[i].DBQ);
 		if (Verbose)
 		  {
-		  fprintf(Log,"SQL -- %d items, inserted into MSQ[%d].\n",MSQ[i].MaxItems,i);
+		  LogPrint("SQL -- %d items, inserted into MSQ[%d].\n",MSQ[i].MaxItems,i);
 		  }
 		if (MSQ[i].MaxItems <= 0)
 			{
@@ -370,18 +371,18 @@ int	DBMSQinsert	(void *DBQ, int Row)
 	case -3:	/* operation timeout */
 	  if (Verbose)
 	    {
-	    fprintf(Log,"SQL -- Timeout.\n");
+	    LogPrint("SQL -- Timeout.\n");
 	    }
-	  fprintf(Log,"ERROR: job %d: SQL timeout (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
+	  LogPrint("ERROR: job %d: SQL timeout (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
 	  DBUpdateJob(MSQ[i].JobId,2,"Timeout");
 	  DBMSQremove(i);
 	  return(-1);
 	default: /* error */
 	  if (Verbose)
 	    {
-	    fprintf(Log,"SQL -- ERROR.\n");
+	    LogPrint("SQL -- ERROR.\n");
 	    }
-	  fprintf(Log,"ERROR: job %d: SQL error (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
+	  LogPrint("ERROR: job %d: SQL error (%s)\n",MSQ[i].JobId,DBgetvaluename(DBQ,Row,"jq_args"));
 	  DBUpdateJob(MSQ[i].JobId,1,"Error");
 	  DBMSQremove(i);
 	  return(-1);
@@ -461,7 +462,7 @@ int	DBCheckPendingMSQ	()
 	/* found an item to process */
 	if (Verbose)
 	  {
-	  fprintf(Log,"MSQ: Checking items in MSQ[%d]\n",i);
+	  LogPrint("MSQ: Checking items in MSQ[%d]\n",i);
 	  }
 
 	DBMkArgCols(MSQ[i].DBQ,j,Arg,MAXCMD);
@@ -494,7 +495,7 @@ int	DBCheckPendingMSQ	()
 		{
 		if (Verbose)
 		  {
-		  fprintf(Log,"MSQ shifted. Retrying.\n");
+		  LogPrint("MSQ shifted. Retrying.\n");
 		  }
 		return(DBCheckPendingMSQ());
 		}
@@ -504,7 +505,7 @@ int	DBCheckPendingMSQ	()
 	  /* mark the DB queue item as taken */
 	  if (Verbose)
 	  	{
-		fprintf(Log,"(b) Feeding child[%d][%d/%d][%d/%d]: attr='%s' | arg='%s'\n",Thread,i,MAXMSQ,j,MSQ[i].MaxItems,Attr,Arg);
+		LogPrint("(b) Feeding child[%d][%d/%d][%d/%d]: attr='%s' | arg='%s'\n",Thread,i,MAXMSQ,j,MSQ[i].MaxItems,Attr,Arg);
 		}
 	  MSQ[i].Processed[j] = ST_RUNNING;
 	  if (CM[Thread].Status != ST_RUNNING)
@@ -528,7 +529,7 @@ int	DBCheckPendingMSQ	()
     } /* for each MSQ i */
   if (Verbose)
     {
-    fprintf(Log,"DBCheckPendingMSQ()=%d\n",rc);
+    LogPrint("DBCheckPendingMSQ()=%d\n",rc);
     }
   return(rc);
 } /* DBCheckPendingMSQ() */
@@ -612,7 +613,7 @@ int	DBProcessQueue	()
     }
   if (Verbose)
     {
-    fprintf(Log,"SQL: Getting queue = %d :: %d items\n",rc,DBdatasize(DB));
+    LogPrint("SQL: Getting queue = %d :: %d items\n",rc,DBdatasize(DB));
     }
   if (rc == 1) /* if get list of queued items */
     {
@@ -667,7 +668,7 @@ int	DBProcessQueue	()
 	DBUpdateJob(CM[Thread].DBJobKey,0,"In progress"); /* mark it in use */
 	if (Verbose)
 		{
-		fprintf(Log,"(c) Feeding child[%d]: attr='%s' | arg='%s'\n",Thread,Attr,Arg);
+		LogPrint("(c) Feeding child[%d]: attr='%s' | arg='%s'\n",Thread,Attr,Arg);
 		}
 	memset(CM[Thread].Parm,'\0',MAXCMD);
 	strcpy(CM[Thread].Parm,Arg);
