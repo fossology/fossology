@@ -151,6 +151,7 @@ int	LogPrint	(const char *fmt, ...)
   fprintf(Log,"%s scheduler[%d] : ",TimeString,getpid());
   rc=vfprintf(Log,fmt,Args);
   va_end(Args);
+  fflush(Log);
   return(rc);
 } /* LogPrint() */
 
