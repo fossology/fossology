@@ -72,7 +72,13 @@ pid_t	LockScheduler	()
 
   /* Someone else owns it!  Find out who! */
   Handle = shm_open("fossology-scheduler",O_RDWR,0700);
-  if (Handle < 0) { perror("FATAL: shm_open"); exit(1); }
+  if (Handle < 0)
+    {
+    rc = errno;
+    perror("FATAL: shm_open");
+    fprintf(stderr,"FATAL: shm_open failed with errno=%d\n",rc);
+    exit(1);
+    }
   read(Handle,S,10);
   Pid = atoi(S);
 
