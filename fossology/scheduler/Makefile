@@ -39,10 +39,11 @@ $(REPOOBJ): %.o: %.c %.h $(DB) $(REPO) $(VARS)
 	$(CC) -c $< $(CONFDEF) $(CFLAGS_REPOO) $(CFLAGS_DBO) $(ALL_CFLAGS)
 
 
-install: all
+install: all install-init
 	$(INSTALL_PROGRAM) fossology-scheduler $(DESTDIR)$(LIBEXECDIR)/fossology-scheduler
 	$(INSTALL_PROGRAM) mkschedconf $(DESTDIR)$(LIBEXECDIR)/mkschedconf
 
+install-default:
 	@ echo "Installing default file..."
 	if [ ! -f $(DESTDIR)$(SYSCONFDIR)/$(DEFFILE) -o "$(OVERWRITE)" ] ; then \
 		mkdir -p $(DESTDIR)$(SYSCONFDIR)/$(dir $(DEFFILE)); \
@@ -53,6 +54,7 @@ install: all
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi \
 
+install-init:
 	@ echo "Installing init script..."
 	@if [ ! -f $(DESTDIR)$(INITDIR)/$(INITFILE) -o "$(OVERWRITE)" ] ; then \
 		mkdir -p $(DESTDIR)$(INITDIR)/$(dir $(INITFILE)); \
