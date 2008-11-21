@@ -558,6 +558,9 @@ where needed.
 As root, start the scheduler with:
    /etc/init.d/fossology start
 
+The scheduler logs to /var/log/fossology/fossology.log by default, you
+can look there for scheduler activity or errors.
+
 
 Section 3 - After Installation
 ==============================
