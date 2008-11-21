@@ -5,10 +5,17 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-all:
+all: dbcreate
+
+# include the preprocessing stuff
+include $(TOP)/Makefile.process
+# generate the dbcreate script
+dbcreate: dbcreate-process
+	chmod +x dbcreate
 
 install: all
 	$(INSTALL_DATA) fossologyinit.sql $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
+	$(INSTALL_PROGRAM) dbcreate $(DESTDIR)$(LIBEXECDIR)/dbcreate
 	@if [ ! -f "$(DESTDIR)/etc/cron.d/fossology" -o "$(OVERWRITE)" ]; then \
 	   mkdir -p $(DESTDIR)/etc/cron.d/; \
 	   echo "NOTE: using default version for $(DESTDIR)/etc/cron.d/fossology"; \
@@ -20,6 +27,7 @@ install: all
 
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbcreate
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 	   if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \
@@ -34,7 +42,7 @@ uninstall:
 	@echo "  Remove by hand if you desire."
 
 clean:
-	rm -f core
+	rm -f core dbcreate
 
 test: all
 	@echo "NOTICE: no tests available for db"
