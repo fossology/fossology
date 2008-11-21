@@ -30,11 +30,11 @@ eval set -- "$OPTS"
 
 while true; do
 case "$1" in
-      -c|--config) RMCONF=1; shift;;
-      -d|--database) RMDB=1; shift;;
-      -r|--repository) RMREPO=1; shift;;
-      -u|--user) RMUSER=1; shift;;
-      -e|--everything) EVERYTHING=1; shift;;
+      --delete-config) RMCONF=1; shift;;
+      --delete-database) RMDB=1; shift;;
+      --delete-repository) RMREPO=1; shift;;
+      --delete-user) RMUSER=1; shift;;
+      --delete-everything) EVERYTHING=1; shift;;
       -h|--help)
          echo "Usage: fo-cleanold [options]";
          echo " By default fo-cleanold does not delete any data, but you can specify"
