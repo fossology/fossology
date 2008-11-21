@@ -103,6 +103,7 @@ int	MyDBaccess	(void *VDB, char *SQL)
 void	AlarmDisplay	(int Sig)
 {
   if (TotalItems > 0) printf("ItemsProcessed %ld\n",TotalItems);
+  else printf("Heartbeat\n");
   TotalItems=0;
   fflush(stdout);
   /* re-schedule itself */
