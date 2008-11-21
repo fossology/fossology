@@ -80,8 +80,16 @@ install-arch:
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-scheduler
+	@# install the optional defaults file
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler \
+           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
+	   -C scheduler install-default
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler-single \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-scheduler
+	@# install the optional defaults file
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler-single \
+           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
+	   -C scheduler install-default
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-agents \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-agents
@@ -108,7 +116,7 @@ binary-common:
 	dh_installdocs -pfossology-dev -pfossology-common
 	dh_installexamples
 #	dh_installdebconf	
-#	dh_installlogrotate	
+	dh_installlogrotate	
 #	dh_installmime
 	DH_OPTIONS= dh_installinit -o -pfossology-scheduler --name=fossology
 	DH_OPTIONS= dh_installinit -o -pfossology-scheduler-single --name=fossology

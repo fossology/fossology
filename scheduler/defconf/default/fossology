@@ -1,6 +1,5 @@
 # Defaults for fossology initscript
 # sourced by /etc/init.d/fossology
-# installed at /etc/default/fossology by the maintainer scripts
 
 #
 # This is a POSIX shell fragment
@@ -13,4 +12,4 @@
 #ENABLED="0"
 
 # You can override scheduler options here
-#SCHEDULEROPT=""
+#SCHEDULEROPT="-L /other/log/directory/"
