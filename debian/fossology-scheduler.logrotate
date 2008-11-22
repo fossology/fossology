@@ -1,0 +1,13 @@
+/var/log/fossology/*.log {
+        weekly
+        missingok
+        rotate 52
+        compress
+        delaycompress
+        notifempty
+        create 660 root fossy
+        sharedscripts
+        postrotate
+                /usr/lib/fossology/fossology-scheduler -l > /dev/null
+        endscript
+}
