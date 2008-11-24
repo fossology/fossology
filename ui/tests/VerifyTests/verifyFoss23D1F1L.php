@@ -130,13 +130,12 @@ class verify23D1F1L extends fossologyTestCase
     // get the 'Show' links and License color links
     $licTbl = new parseLicenseTbl($page);
     $licTable = $licTbl->parseLicenseTbl();
-    //print "licTable is:\n"; print_r($licTable) . "\n";
+    //print "DB: licTable is:\n"; print_r($licTable) . "\n";
 
-    /* FIX THIS Select show 'Public Domain, verify, select 'LGPL v2.1', verify */
-    $gplv2URL = makeUrl($this->host, $licTable['\'GPL v2\'-style'][0]);
-
+    /* Select show  'GPL v2-stype', verify */
+    $gplv2URL = makeUrl($this->host, $licTable['\'GPL v2\'-style']);
     $page = $this->mybrowser->get($gplv2URL);
-    $licFileList = new parseFolderPath($page, $this->host);
+    $licFileList = new parseFolderPath($page, $URL);
     $tblList = $licFileList->parseFolderPath();
     $tableCnt = count($tblList);
     print "Checking the number of files based on 'GPL v2'-style\n";
