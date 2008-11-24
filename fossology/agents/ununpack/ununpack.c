@@ -376,7 +376,7 @@ inline int	MkDirs	(char *Fname)
 	  }
 	else /* else, it does not exist */
 	  {
-	  rc=mkdir(Dir,0770); /* create this path segment */
+	  rc=mkdir(Dir,0770); /* create this path segment + Setgid */
 	  if (rc && (errno == EEXIST)) rc=0;
 	  if (rc)
 	    {
@@ -384,6 +384,7 @@ inline int	MkDirs	(char *Fname)
 	    fprintf(stderr,"FATAL: 'mkdir %s' failed with rc=%d\n",Dir,rc);
 	    SafeExit(7);
 	    }
+	  chmod(Dir,02770);
 	  } /* else */
 	Dir[i]='/';
 	}
@@ -396,6 +397,7 @@ inline int	MkDirs	(char *Fname)
 	fprintf(stderr,"FATAL: 'mkdir %s' failed with rc=%d\n",Dir,rc);
 	SafeExit(8);
 	}
+  chmod(Dir,02770);
   return(rc);
 } /* MkDirs() */
 
@@ -411,6 +413,7 @@ inline int	MkDir	(char *Fname)
     if (errno == EEXIST) return(0); /* failed because it exists is ok */
     return(MkDirs(Fname));
     }
+  chmod(Fname,02770);
   return(0);
 } /* MkDir() */
 
