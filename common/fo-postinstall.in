@@ -230,6 +230,17 @@ if [ $SCHEDULERONLY ]; then
       echo "  consider checking it or recreating with mkschedconf."
    fi
 
+   # Create the scheduler log directory.
+   if [ -f {$LOGDIR} ] ; then
+     # Must be a directory and not a file
+     rm -f {$LOGDIR}
+   fi
+   if [ ! -d {$LOGDIR} ] ; then
+     mkdir -p {$LOGDIR}
+   fi
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LOGDIR}
+   find {$LOGDIR} -type d | while read i ; do chmod 02770 "$i" ; done
+   find {$LOGDIR} -type f | while read i ; do chmod 02660 "$i" ; done
 fi # end of SCHEDULERONLY
 
 ########################################################################
