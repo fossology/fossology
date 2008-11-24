@@ -1905,7 +1905,7 @@ int	Traverse	(char *Filename, char *Basename,
 	CI.HasChild = 0;
 	DisplayContainerInfo(&CI,PI->Cmd);
 	}
-    printf("Unknown file type: %s\n",CI.Source);
+    printf("Skipping (not a file or directory): %s\n",CI.Source);
     }
 
 TraverseEnd:
