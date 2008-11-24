@@ -105,7 +105,7 @@ int	ExtractISO	(char *Source, char *Destination)
     if (MkDir(Cmd))
 	{
 	fprintf(stderr,"ERROR: Unable to mkdir(%s) in ExtractISO\n",Cmd);
-        if (!ForceContinue) exit(-1);
+        if (!ForceContinue) SafeExit(40);
 	}
     }
   pclose(Fin);

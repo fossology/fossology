@@ -49,6 +49,7 @@ char Version[]="0.9.9";
 
 int Verbose=0;
 int Quiet=0;
+int DebugHeartbeat=0; /* Enable heartbeat and print the time for each */
 int UnlinkSource=0;
 int UnlinkAll=0;
 int ForceContinue=0;
@@ -102,10 +103,22 @@ int	MyDBaccess	(void *VDB, char *SQL)
  *********************************************************/
 void	AlarmDisplay	(int Sig)
 {
-  if (TotalItems > 0) printf("ItemsProcessed %ld\n",TotalItems);
-  else printf("Heartbeat\n");
-  TotalItems=0;
+  time_t Now;
+  if (TotalItems > 0) printf("ItemsProcessed %ld",TotalItems);
+  else printf("Heartbeat");
+  if (DebugHeartbeat)
+    {
+    Now = time(NULL);
+    printf(" %s",ctime(&Now)); /* ctime() includes \n */
+    }
+  else
+    {
+    printf("\n");
+    }
   fflush(stdout);
+
+  /* Reset counters */
+  TotalItems=0;
   /* re-schedule itself */
   alarm(10);
 } /* AlarmDisplay() */
@@ -133,7 +146,7 @@ void	GetAgentKey	()
 	{
 	printf("ERROR: unable to access the database\n");
 	printf("LOG: unable to select 'unpack' from the database table 'agent'\n");
-	SafeExit(-1);
+	SafeExit(1);
 	}
   if (DBdatasize(DB) <= 0)
       {
@@ -143,14 +156,14 @@ void	GetAgentKey	()
 	{
 	printf("ERROR: unable to write to the database\n");
 	printf("LOG: unable to write 'unpack' to the database table 'agent'\n");
-	SafeExit(-1);
+	SafeExit(2);
 	}
       rc = MyDBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='unpack' ORDER BY agent_id DESC;");
       if (rc < 0)
 	{
 	printf("ERROR: unable to access the database\n");
 	printf("LOG: unable to select 'unpack' from the database table 'agent'\n");
-	SafeExit(-1);
+	SafeExit(3);
 	}
       }
   Agent_pk = atoi(DBgetvalue(DB,0,0));
@@ -185,7 +198,7 @@ ReGetCmd:
     if (rc < 0)
 	{
 	printf("ERROR: SQL '%s'\n",SQL);
-	SafeExit(-1);
+	SafeExit(4);
 	}
     else if (DBdatasize(DB) > 0) /* if there is a value */
 	{
@@ -199,7 +212,7 @@ ReGetCmd:
 	if (rc < 0)
 	  {
 	  printf("ERROR: SQL '%s'\n",SQL);
-	  SafeExit(-1);
+	  SafeExit(5);
 	  }
 	else goto ReGetCmd;
 	}
@@ -230,7 +243,7 @@ char *	DBTaintString	(char *S)
   if (!NewS)
 	{
 	printf("ERROR: Unable to allocate %d bytes for string.\n",NewLen);
-	SafeExit(-1);
+	SafeExit(6);
 	}
   j=0;
   for(i=0; S[i] != '\0'; i++)
@@ -369,7 +382,7 @@ inline int	MkDirs	(char *Fname)
 	    {
 	    perror("FATAL: ununpack");
 	    fprintf(stderr,"FATAL: 'mkdir %s' failed with rc=%d\n",Dir,rc);
-	    SafeExit(-1);
+	    SafeExit(7);
 	    }
 	  } /* else */
 	Dir[i]='/';
@@ -381,7 +394,7 @@ inline int	MkDirs	(char *Fname)
 	{
 	perror("FATAL: ununpack");
 	fprintf(stderr,"FATAL: 'mkdir %s' failed with rc=%d\n",Dir,rc);
-	SafeExit(-1);
+	SafeExit(8);
 	}
   return(rc);
 } /* MkDirs() */
@@ -635,7 +648,7 @@ int     ParentWait      ()
 	if (!ForceContinue)
 	  {
 	  printf("FATAL: Child had unnatural death\n");
-	  SafeExit(-1);
+	  SafeExit(9);
 	  }
 	Queue[i].ChildCorrupt=1;
 	Status = -1;
@@ -647,7 +660,7 @@ int     ParentWait      ()
 	  {
 	  printf("FATAL: Child had non-zero status: %d\n",Status);
 	  printf("FATAL: Child was to recurse on %s\n",Queue[i].ChildRecurse);
-	  SafeExit(-1);
+	  SafeExit(10);
 	  }
 	Queue[i].ChildCorrupt=1;
 	}
@@ -778,7 +791,7 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
   if (WIFSIGNALED(rc))
 	{
 	printf("ERROR: Process killed by signal (%d): %s\n",WTERMSIG(rc),Cmd1);
-	SafeExit(-1);
+	SafeExit(11);
 	}
   if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
   else rc=-1;
@@ -951,13 +964,13 @@ dirlist *	MakeDirList	(char *Fullname)
 	if (!dhead)
 	  {
 	  printf("FATAL: Failed to allocate dirlist memory\n");
-	  SafeExit(-1);
+	  SafeExit(12);
 	  }
 	dhead->Name = (char *)malloc(strlen(Entry->d_name)+1);
 	if (!dhead->Name)
 	  {
 	  printf("FATAL: Failed to allocate dirlist.Name memory\n");
-	  SafeExit(-1);
+	  SafeExit(13);
 	  }
 	memset(dhead->Name,'\0',strlen(Entry->d_name)+1);
 	strcpy(dhead->Name,Entry->d_name);
@@ -1111,7 +1124,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 	{
 	printf("FATAL: Database access error.\n");
 	printf("LOG: Database access error in ununpack: %s\n",SQL);
-	SafeExit(-1);
+	SafeExit(14);
 	}
 
   /* add it if it was not found */
@@ -1146,7 +1159,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 	{
 	printf("FATAL: Database access error.\n");
 	printf("LOG: Database access error in ununpack: %s\n",SQL);
-	SafeExit(-1);
+	SafeExit(15);
 	}
     }
 
@@ -1286,7 +1299,7 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
       if (RepImport(CI->Source,REP_FILES,Fuid,1) != 0)
 	  {
 	  fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",CI->Source,Fuid);
-	  SafeExit(-1);
+	  SafeExit(16);
 	  }
       }
     if (Verbose) fprintf(stderr,"Repository[%s]: insert '%s' as '%s'\n",
@@ -1486,6 +1499,7 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
 /***************************************************
  TraverseChild(): This is the child spawn for recursion.
  The child never leaves here!  It calls EXIT!
+ Exit is 0 on success, non-zero on failure.
  ***************************************************/
 void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
 {
@@ -1755,7 +1769,7 @@ int	Traverse	(char *Filename, char *Basename,
 		Queue[Index].ChildRecurse);
 	    if (!ForceContinue)
 	      {
-	      SafeExit(-1);
+	      SafeExit(17);
 	      }
 	    }
 	  if (CMD[CI.PI.Cmd].Type == CMD_PARTITION)
@@ -1814,7 +1828,7 @@ int	Traverse	(char *Filename, char *Basename,
       if (WIFSIGNALED(rc))
         {
         printf("ERROR: Process killed by signal (%d): %s\n",WTERMSIG(rc),Cmd);
-	SafeExit(-1);
+	SafeExit(18);
         }
       if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
       else rc=-1;
@@ -1843,7 +1857,7 @@ int	Traverse	(char *Filename, char *Basename,
 	if (Pid == -1)
 	  {
 	  perror("FATAL: Unable to fork child.\n");
-	  SafeExit(-1);
+	  SafeExit(19);
 	  }
 	Queue[Index].ChildPid = Pid;
 	Thread++;
@@ -2012,6 +2026,7 @@ void	Usage	(char *Name)
   fprintf(stderr,"      -A     :: do not set the initial DB container as an artifact.\n");
   fprintf(stderr,"      -f     :: force processing files that already exist in the DB.\n");
   fprintf(stderr,"  -q     :: quiet (generate no output).\n");
+  fprintf(stderr,"  -H     :: Debug heartbeat (turns it on and prints timestamps)\n");
   fprintf(stderr,"  -v     :: verbose (-vv = more verbose).\n");
   fprintf(stderr,"Currently identifies and processes:\n");
   fprintf(stderr,"  Compressed files: .Z .gz .bz .bz2 upx\n");
@@ -2049,7 +2064,7 @@ int	main	(int argc, char *argv[])
     exit(-1);
     }
 
-  while((c = getopt(argc,argv,"ACd:FfL:m:PQiqRr:T:t:vXx")) != -1)
+  while((c = getopt(argc,argv,"ACd:FfHL:m:PQiqRr:T:t:vXx")) != -1)
     {
     switch(c)
 	{
@@ -2058,6 +2073,11 @@ int	main	(int argc, char *argv[])
 	case 'd':	NewDir=optarg; break;
 	case 'F':	UseRepository=1; break;
 	case 'f':	ForceDuplicate=1; break;
+	case 'H':
+		DebugHeartbeat=1;
+		signal(SIGALRM,AlarmDisplay);
+		alarm(10);
+		break;
 	case 'L':	ListOutName=optarg; break;
 	case 'm':
 		MaxThread = atoi(optarg);
@@ -2071,7 +2091,7 @@ int	main	(int argc, char *argv[])
 		if (!DB)
 			{
 			fprintf(stderr,"FATAL: Unable to access database\n");
-			SafeExit(-1);
+			SafeExit(20);
 			}
 		GetAgentKey();
 		DBclose(DB);
@@ -2084,12 +2104,12 @@ int	main	(int argc, char *argv[])
 		if (!DB || !DBTREE)
 		  {
 		  fprintf(stderr,"FATAL: Unable to access database\n");
-		  SafeExit(-1);
+		  SafeExit(21);
 		  }
 		if (MyDBaccess(DBTREE,"BEGIN;") < 0)
 		  {
 		  printf("ERROR pfile %s Unable to 'BEGIN' database updates.\n",Pfile_Pk);
-		  SafeExit(-1);
+		  SafeExit(22);
 		  }
 		signal(SIGALRM,AlarmDisplay);
 		alarm(10);
@@ -2111,12 +2131,12 @@ int	main	(int argc, char *argv[])
 		if (DB && !Pfile)
 		  {
 		  printf("FATAL: Pfile not specified in environment.\n");
-		  SafeExit(-1);
+		  SafeExit(23);
 		  }
 		if (DB && !Pfile_Pk)
 		  {
 		  printf("FATAL: Pfile_Pk not specified in environment.\n");
-		  SafeExit(-1);
+		  SafeExit(24);
 		  }
 		InitCmd();
 		break;
@@ -2134,14 +2154,14 @@ int	main	(int argc, char *argv[])
 	case 'x':	UnlinkAll=1; break;
 	default:
 		Usage(argv[0]);
-		SafeExit(-1);
+		SafeExit(25);
 	}
     }
 
   if ((optind >= argc) && !UseRepository)
 	{
 	Usage(argv[0]);
-	SafeExit(-1);
+	SafeExit(26);
 	}
 
   /*** post-process args ***/
@@ -2161,7 +2181,7 @@ int	main	(int argc, char *argv[])
 		{
 		printf("WARNING pfile %s There was a processing error during a file-write\n",Pfile_Pk);
 		printf("LOG pfile %s Unable to write to %s\n",Pfile_Pk,ListOutName);
-		SafeExit(-1);
+		SafeExit(27);
 		}
 	else
 		{
@@ -2198,7 +2218,7 @@ int	main	(int argc, char *argv[])
 	if (RepImport(argv[optind],REP_FILES,argv[optind],1) != 0)
 	  {
 	  fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",argv[optind],argv[optind]);
-	  SafeExit(-1);
+	  SafeExit(28);
 	  }
 	}
       }
@@ -2214,7 +2234,7 @@ int	main	(int argc, char *argv[])
 		if (RepImport(Fname,REP_FILES,argv[optind],1) != 0)
 		  {
 		  fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",Fname,argv[optind]);
-		  SafeExit(-1);
+		  SafeExit(29);
 		  }
 		}
 	if (Fname)
@@ -2290,7 +2310,7 @@ int	main	(int argc, char *argv[])
 	if (RepImport(Fname,REP_FILES,Pfile,1) != 0)
 	  {
 	  fprintf(stderr,"ERROR: Failed to import '%s' as '%s' into the repository\n",Fname,Pfile);
-	  SafeExit(-1);
+	  SafeExit(30);
 	  }
 	}
     if (Fname)
@@ -2345,7 +2365,7 @@ int	main	(int argc, char *argv[])
 #endif
 	  {
 	  printf("ERROR pfile %s Unable to 'COMMIT' database updates.\n",Pfile_Pk);
-	  SafeExit(-1);
+	  SafeExit(31);
 	  }
 
 	if (DB)
