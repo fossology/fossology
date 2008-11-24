@@ -26,13 +26,13 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <syslog.h>
 
 #include "debug.h"
 #include "scheduler.h"
 #include "spawn.h"
 #include "agents.h"
 #include "sockets.h"
+#include "logging.h"
 
 /************************************************************************/
 /************************************************************************/
@@ -82,7 +82,7 @@ int	ReadCmdFD	(int Fin, char *Cmd, int MaxCmd)
 	  case EBADF:
 	  default:
 		perror("Read error from client:");
-		syslog(LOG_ERR,"READ ERROR: errno=%d  rc=%d  Bytes=%d '%s'\n",errno,rc,i,Cmd);
+		LogPrint("READ ERROR: errno=%d  rc=%d  Bytes=%d '%s'\n",errno,rc,i,Cmd);
 		return(i); /* huh? -- no data */
 	  }
 	}

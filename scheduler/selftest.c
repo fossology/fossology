@@ -24,12 +24,12 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <syslog.h>
 
 #include "scheduler.h"
 #include "agents.h"
 #include "hosts.h"
 #include "spawn.h"
+#include "logging.h"
 
 /**********************************************
  SelfTest(): Perform a self-test.
@@ -54,7 +54,7 @@ int	SelfTest	()
   /* Prepare for the data */
   if (MaxHostList <= 0)
     {
-    syslog(LOG_CRIT,"FATAL: No agent systems loaded for self-test.\n");
+    LogPrint("FATAL: No agent systems loaded for self-test.\n");
     return(1);
     }
 
@@ -63,7 +63,7 @@ int	SelfTest	()
   Fin = popen(MkConfig,"r");
   if (!Fin)
     {
-    syslog(LOG_CRIT,"FATAL: Unable to run mkschedconf for self-test.\n");
+    LogPrint("FATAL: Unable to run mkschedconf for self-test.\n");
     return(1);
     }
   /* read every line and check if the agent exists */
@@ -85,7 +85,7 @@ int	SelfTest	()
       Thread = CheckAgent(Line[0]);
       if (Thread < 0)
         {
-	syslog(LOG_CRIT,"FATAL: Agent type '%s' not in Scheduler.conf.\n",Line[0]);
+	LogPrint("FATAL: Agent type '%s' not in Scheduler.conf.\n",Line[0]);
 	rc=1;
 	}
       }
@@ -100,7 +100,7 @@ int	SelfTest	()
   FData = tmpfile();
   if (!FData)
     {
-    syslog(LOG_CRIT,"FATAL: Unable to open temporary file for self-test.\n");
+    LogPrint("FATAL: Unable to open temporary file for self-test.\n");
     return(1);
     }
 
@@ -108,7 +108,7 @@ int	SelfTest	()
   Fin = popen(SelfTest,"r");
   if (!Fin)
     {
-    syslog(LOG_CRIT,"FATAL: Unable to generate test data: '%s'.\n",SelfTest);
+    LogPrint("FATAL: Unable to generate test data: '%s'.\n",SelfTest);
     fclose(FData);
     return(1);
     }
@@ -124,7 +124,7 @@ int	SelfTest	()
   pclose(Fin);
   if ((Lines < 5) || (ftell(FData) < 1))
     {
-    syslog(LOG_CRIT,"FATAL: Unable to generate test data: '%s'.\n",SelfTest);
+    LogPrint("FATAL: Unable to generate test data: '%s'.\n",SelfTest);
     fclose(FData);
     return(1);
     }
@@ -141,7 +141,7 @@ int	SelfTest	()
     FTest = popen(Line[1],"r");
     if (!FTest)
       {
-      syslog(LOG_CRIT,"FATAL: Unable to test: %s | %s.\n",CM[Thread].Attr,CM[Thread].Command);
+      LogPrint("FATAL: Unable to test: %s | %s.\n",CM[Thread].Attr,CM[Thread].Command);
       fclose(FData);
       rc=1;
       }
@@ -163,7 +163,7 @@ int	SelfTest	()
 	  } while(!feof(FData) && (c >= 0) && (c!='\n') && (i<1023));
 	if (!strncmp(Line[0],"FATAL:",6))
 	  {
-	  syslog(LOG_CRIT,"FATAL: Scheduler error: %s\n",Line[0]+6);
+	  LogPrint("FATAL: Scheduler error: %s\n",Line[0]+6);
 	  fclose(FData);
 	  pclose(FTest);
 	  return(1);
@@ -182,17 +182,17 @@ int	SelfTest	()
 	/* See if they matched */
 	if (memcmp(Line[0],Line[1],1024))
 	  {
-	  syslog(LOG_CRIT,"FATAL: Configuration on agent '%s' differs from scheduler.\n",HostList[HostId].Hostname);
+	  LogPrint("FATAL: Configuration on agent '%s' differs from scheduler.\n",HostList[HostId].Hostname);
 	  if (Line[1])
 		{
 		if (Verbose)
 		  {
-		  syslog(LOG_CRIT,"FATAL: Difference: '%s' != '%s'\n",Line[0],Line[1]);
+		  LogPrint("FATAL: Difference: '%s' != '%s'\n",Line[0],Line[1]);
 		  }
 		for(i=0; (Line[1][i] != 0) && !strchr("=:",Line[1][i]); i++) ;
-		syslog(LOG_CRIT,"FATAL: The difference is %.*s\n",i,Line[1]);
-		syslog(LOG_CRIT,"  Observed: %s\n",Line[1]);
-		syslog(LOG_CRIT,"  Expected: %s\n",Line[0]);
+		LogPrint("FATAL: The difference is %.*s\n",i,Line[1]);
+		LogPrint("  Observed: %s\n",Line[1]);
+		LogPrint("  Expected: %s\n",Line[0]);
 		}
 	  rc=0;
 	  HostCheck[HostId] = -1;
@@ -201,7 +201,7 @@ int	SelfTest	()
 
       if (!feof(FData) != !feof(FTest))
 	{
-	syslog(LOG_CRIT,"FATAL: Configuration on agent '%s' differs from scheduler.\n",HostList[HostId].Hostname);
+	LogPrint("FATAL: Configuration on agent '%s' differs from scheduler.\n",HostList[HostId].Hostname);
 	rc=0;
 	HostCheck[HostId] = -1;
 	}
@@ -215,8 +215,8 @@ int	SelfTest	()
     {
     if (HostCheck[i] != 1)
       {
-      if (HostCheck[i] == 0) syslog(LOG_CRIT,"FATAL: Host '%s' missing self-test agent.\n",HostList[i].Hostname);
-      syslog(LOG_CRIT,"FATAL: Host '%s' failed self-test.\n",HostList[i].Hostname);
+      if (HostCheck[i] == 0) LogPrint("FATAL: Host '%s' missing self-test agent.\n",HostList[i].Hostname);
+      LogPrint("FATAL: Host '%s' failed self-test.\n",HostList[i].Hostname);
       rc=1;
       }
     }
