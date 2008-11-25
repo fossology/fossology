@@ -43,6 +43,7 @@ require_once '/usr/local/simpletest/unit_tester.php';
 require_once '/usr/local/simpletest/web_tester.php';
 require_once '/usr/local/simpletest/reporter.php';
 require_once ('TestEnvironment.php');
+require_once('testClasses/timer.php');
 
 global $URL;
 $start = new timer();
@@ -50,14 +51,16 @@ print "Starting Upload-Prep Tests at: " . date('r') . "\n";
 $test = &new TestSuite('Fossology Repo UI Upload-Prep Test');
 $test->addTestFile('uplTestData.php');
 
-$elapseTime = $start->TimeAgo($start->getStartTime());
-
 if (TextReporter::inCli())
 {
+  $results = $test->run(new TextReporter()) ? 0 : 1;
   print "Ending Upload-Prep Tests at: " . date('r') . "\n";
+  $elapseTime = $start->TimeAgo($start->getStartTime());
   print "The Upload-Prep Tests took {$elapseTime}to run\n";
-  exit ($test->run(new TextReporter()) ? 0 : 1);
+  exit ($results);
 }
 $test->run(new HtmlReporter());
+print "<pre>Ending Upload-Prep at: " . date('r') . "</pre>\n";
+$elapseTime = $start->TimeAgo($start->getStartTime());
 print "<pre>The Upload-Prep Tests took {$elapseTime}to run</pre>\n";
 ?>
