@@ -325,6 +325,8 @@ void	PrintKeys	(EXTRACTOR_KeywordList *keywords)
   for( ; keywords; keywords=keywords->next)
     {
     K = GetKey(keywords->keywordType);
+    /* Bugzilla 247: Don't process "Filename" attributes. Those have KeyIndex=1. */
+    if (KeywordTypes[K].KeyIndex == 1) continue;
 
     if (!DB || Verbose)
       {
@@ -332,6 +334,7 @@ void	PrintKeys	(EXTRACTOR_KeywordList *keywords)
       printf("%d: %s = ",KeywordTypes[K].KeyIndex,TaintString(KeywordTypes[K].Label));
       printf("'%s'\n",TaintString(keywords->keyword));
       }
+
     if (DB)
       {
       /* The attrib table permits duplicates. So check for dups first. */
@@ -342,6 +345,7 @@ void	PrintKeys	(EXTRACTOR_KeywordList *keywords)
 	Akey);
       if (Verbose > 1) { printf("SQL = %s\n",SQL); }
       DBaccess(DB,SQL);
+
       if (DBdatasize(DB) <= 0)
 	{
 	/* No duplicates?  Add it! */
