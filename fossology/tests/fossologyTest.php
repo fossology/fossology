@@ -103,6 +103,27 @@ class fossologyTest extends WebTestCase
     $this->createFolder($parent, $name, null);
    }
 
+/**
+ * parse select statement
+ *
+ * Parse a select html structures on a page
+ */
+
+ /*
+  * Here are my ideas:
+  * 1. Use the name field, it's always the 1st element and has a NULL
+  * value. This for now will serve as the name of the select.. a
+  * meaningful ID would be better.
+  * 2. Use the value as the key and the text as the value
+  */
+  public function parseSelectStmnt($page)
+  {
+    return(TRUE);
+  }
+
+  /**
+   * @todo: reexamine the two below in light of parseSS above...
+   */
    /**
    * getFolderId($folderNmae, $page)
    *
