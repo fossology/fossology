@@ -45,7 +45,7 @@
  */
 
 // put full path to Smarty.class.php
-require_once('/usr/share/php/smarty/libs/Smarty.class.php');
+require_once ('/usr/share/php/smarty/libs/Smarty.class.php');
 
 $smarty = new Smarty();
 
@@ -64,39 +64,21 @@ if (empty ($file))
 }
 */
 
-$file = '/tmp/AllFOSSologyTests-2008-11-24';
+$results = array();
+
+$fALL = '/tmp/AllFOSSologyTests-2008-11-24';
+$fVer = '/tmp/VerifyFOSSologyTests-2008-11-24';
 //rint "starting to process $file\n";
 
-$res = fileReport($file);
-//print "we got:\n"; print_r($res) . "\n";
+$res = fileReport($fALL);
+$rALL = globdata($results, $res);
 
-// results are in sets of 3
+$ver = fileReport($fVer);
+$results = globdata($rALL, $ver);
 
-$resSize = count($res);
-$results = array();
-for ($suite=0; $suite <= $resSize; $suite += 3)
-{
-  if(($suite+2) > $resSize) { break; }
-
-  //print "suite is:$suite\n";
-  $suiteName = parseSuiteName($res[$suite]);
-  array_push($results, $suiteName);
-  //print "parsed suite name:$suiteName\n";
-
-  $pfe_results = parseResults($res[$suite+1]);
-  $pfe = split(':',$pfe_results);
-  array_push($results, $pfe[0]);
-  array_push($results, $pfe[1]);
-  array_push($results, $pfe[2]);
-  //print "resutlts are:$results\n";
-
-  $etime = parseElapseTime($res[$suite+2]);
-  array_push($results, $etime);
-  //print "The elapse time was:$etime\n\n";
-}
 $cols = 5;
-$smarty->assign('results',$results);
-$smarty->assign('cols',$cols);
+$smarty->assign('results', $results);
+$smarty->assign('cols', $cols);
 $smarty->display('1run-report.tpl');
 
 /**
@@ -147,6 +129,43 @@ function fileReport($file)
 }
 
 /**
+ * globdata
+ *
+ * put all the data into one big glob and the smarty sort it out...
+ *
+ * @param array $data the data array to add to
+ * @param array $moData the data array to glob onto the other array
+ *
+ * @returns array the first parameter globed together with the second.
+ *
+ */
+function globdata($results, $moData)
+{
+  $dataSize = count($moData);
+  for ($suite = 0; $suite <= $dataSize; $suite += 3)
+  {
+    if (($suite +2) > $dataSize) { break; }
+
+    //print "suite is:$suite\n";
+    $suiteName = parseSuiteName($moData[$suite]);
+    array_push($results, $suiteName);
+    //print "parsed suite name:$suiteName\n";
+
+    $pfe_results = parseResults($moData[$suite +1]);
+    $pfe = split(':', $pfe_results);
+    array_push($results, $pfe[0]);
+    array_push($results, $pfe[1]);
+    array_push($results, $pfe[2]);
+    //print "resutlts are:$results\n";
+
+    $etime = parseElapseTime($moData[$suite +2]);
+    array_push($results, $etime);
+    //print "The elapse time was:$etime\n\n";
+  }
+  return($results);
+} //globdata
+
+/**
  * parseSuiteName
  *
  * parse a line of text, return the 2nd and 3rd token as a hyphonated
@@ -165,7 +184,7 @@ function parseSuiteName($string)
   $pat = '^Starting\s(.*?)\sat:';
   $matches = preg_match("/$pat/", $string, $matched);
   //print "matched is:{$matched[1]}\n";
-  return($matched[1]);
+  return ($matched[1]);
 }
 
 /**
@@ -213,7 +232,7 @@ function parseElapseTime($string)
   {
     return (FALSE);
   }
-  $parts = array();
+  $parts = array ();
   $pat = '.+took\s(.*?)\sto\srun$';
   $matches = preg_match("/$pat/", $string, $matched);
   //print "the array looks like:\n"; print_r($matched) . "\n";
@@ -222,10 +241,10 @@ function parseElapseTime($string)
   //$time = 'infinity';
   $sizep = count($parts);
   $etime = NULL;
-  for($i=0; $i<$sizep; $i++)
+  for ($i = 0; $i < $sizep; $i++)
   {
-   $etime .= $parts[$i] . substr($parts[$i+1],0,1) . ":";
-   $i++;
+    $etime .= $parts[$i] . substr($parts[$i +1], 0, 1) . ":";
+    $i++;
   }
   $etime = rtrim($etime, ':');
   return ($etime);
