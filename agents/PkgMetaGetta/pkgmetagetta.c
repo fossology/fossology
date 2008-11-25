@@ -325,7 +325,7 @@ void	PrintKeys	(EXTRACTOR_KeywordList *keywords)
   for( ; keywords; keywords=keywords->next)
     {
     K = GetKey(keywords->keywordType);
-    /* Bugzilla 247: Don't process "Filename" attributes. Those have KeyIndex=1. */
+    /* Bugzilla 250: Don't process "Filename" attributes. Those have KeyIndex=1. */
     if (KeywordTypes[K].KeyIndex == 1) continue;
 
     if (!DB || Verbose)
