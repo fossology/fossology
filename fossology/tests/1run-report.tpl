@@ -5,7 +5,7 @@
 <body>
 <h2>Latest Test Results 2008-11-24 svn version 1719</h2>
 <table border="1">
-	<th>Test/Date</th><th>Passes</th><th>Failures</th><th>Exceptions</th><th>Elapsed Time</th>
+	<th>Test Suite</th><th>Passes</th><th>Failures</th><th>Exceptions</th><th>Elapsed Time</th>
 	<!--
 	<tr><td align="left">{$test_name}</td><td align="center">{$passes}</td>
 	<td align="center">{$failures}</td><td align="center">{$exceptions}</td><td align="center">{$etime}</td>
