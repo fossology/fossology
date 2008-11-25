@@ -236,6 +236,7 @@ char *	DBTaintString	(char *S)
 	else if (!isprint(S[i])) NewLen += 4;
 	else if (S[i]=='\n') NewLen += 2;
 	else if (S[i]=='\t') NewLen += 2;
+	else if (S[i]=='\\') NewLen += 2;
 	else NewLen++;
 	}
 
@@ -252,10 +253,9 @@ char *	DBTaintString	(char *S)
       { NewS[j++]='\\'; NewS[j++]='x'; NewS[j++]='2'; NewS[j++]='7'; }
     else if (!isprint(S[i]))
       { sprintf(NewS+j,"\\x%02x",(unsigned char)(S[i])); j+=4; }
-    else if (S[i]=='\n')
-      { sprintf(NewS+j,"\\n"); j+=2; }
-    else if (S[i]=='\t')
-      { sprintf(NewS+j,"\\t"); j+=2; }
+    else if (S[i]=='\n') { sprintf(NewS+j,"\\n"); j+=2; }
+    else if (S[i]=='\t') { sprintf(NewS+j,"\\t"); j+=2; }
+    else if (S[i]=='\\') { sprintf(NewS+j,"\\\\"); j+=2; }
     else { NewS[j++] = S[i]; }
     }
   return(NewS);
@@ -263,7 +263,7 @@ char *	DBTaintString	(char *S)
 
 /*************************************************
  TaintString(): Protect strings intelligently.
- Prevents filenames containing ' or % from screwing
+ Prevents filenames containing ' or % or \ from screwing
  up system() and snprintf().  Even supports a "%s".
  NOTE: %s is assumed to be in single quotes!
  Returns: 0 on success, 1 on overflow.
@@ -287,15 +287,13 @@ int	TaintString	(char *Dest, int DestLen,
       d+=4;
       i++;
       }
-#if 0
-    else if (!ProtectQuotes && strchr("\"'`\\",Src[i]))
+    else if (!ProtectQuotes && strchr("\\",Src[i]))
       {
       if (d+2 >= DestLen) return(1);
       Dest[d] = '\\'; d++;
       Dest[d] = Src[i]; d++;
       i++;
       }
-#endif
     else if (Replace && (Src[i]=='%') && (Src[i+1]=='s'))
       {
       TaintString(Temp,sizeof(Temp),Replace,1,NULL);
