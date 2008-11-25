@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 
 
@@ -45,14 +44,28 @@
  * itself....?
  */
 
+// put full path to Smarty.class.php
+require_once('/usr/share/php/smarty/libs/Smarty.class.php');
+
+$smarty = new Smarty();
+
+$smarty->template_dir = '/home/markd/public_html/smarty/templates';
+$smarty->compile_dir = '/home/markd/public_html/smarty/templates_c';
+$smarty->cache_dir = '/home/markd/public_html/smarty/cache';
+$smarty->config_dir = '/home/markd/public_html/smarty/configs';
+
+/*
 list ($me, $file) = $argv;
 
 if (empty ($file))
 {
   print "usage: $me filepath\n";
+  exit(0);
 }
+*/
 
-print "starting to process $file\n";
+$file = '/tmp/AllFOSSologyTests-2008-11-24';
+//rint "starting to process $file\n";
 
 $res = fileReport($file);
 //print "we got:\n"; print_r($res) . "\n";
@@ -60,41 +73,37 @@ $res = fileReport($file);
 // results are in sets of 3
 
 $resSize = count($res);
+$results = array();
 for ($suite=0; $suite <= $resSize; $suite += 3)
 {
-
   if(($suite+2) > $resSize) { break; }
 
   //print "suite is:$suite\n";
   $suiteName = parseSuiteName($res[$suite]);
-  print "parsed suite name:$suiteName\n";
+  array_push($results, $suiteName);
+  //print "parsed suite name:$suiteName\n";
 
-  $m = parseResults($res[$suite+1]);
-  print "resutlts are:$m\n";
-  //print_r($m) . "\n";
+  $pfe_results = parseResults($res[$suite+1]);
+  $pfe = split(':',$pfe_results);
+  array_push($results, $pfe[0]);
+  array_push($results, $pfe[1]);
+  array_push($results, $pfe[2]);
+  //print "resutlts are:$results\n";
 
-  $t = parseElapseTime($res[$suite+2]);
-  print "The elapse time was:$t\n\n";
-
-
+  $etime = parseElapseTime($res[$suite+2]);
+  array_push($results, $etime);
+  //print "The elapse time was:$etime\n\n";
 }
+$cols = 5;
+$smarty->assign('results',$results);
+$smarty->assign('cols',$cols);
+$smarty->display('1run-report.tpl');
 
-/*
-$suiteName = parseSuiteName($res[0]);
-print "parsed suite name:$suiteName\n";
-
-$m = parseResults($res[1]);
-print "resutlts are:\n";
-print_r($m) . "\n";
-
-$t = parseElapseTime($res[2]);
-print "The elapse time was:$t\n";
-*/
 /**
  * fileReport
  *
  * read a file and return the number of passes, failures and
- * exceptions, elapse time?
+ * exceptions, elapse time.
  */
 
 /*
@@ -140,7 +149,7 @@ function fileReport($file)
 /**
  * parseSuiteName
  *
- * parse a line of text, return the 2nd and 3rd token as a hyponated
+ * parse a line of text, return the 2nd and 3rd token as a hyphonated
  * name.
  *
  * @param string $string the string to parse
@@ -204,14 +213,21 @@ function parseElapseTime($string)
   {
     return (FALSE);
   }
-  //$pat = '.*?took.(.?).minute.+(.?).seconds';
-  $pat = '.*?took.(.?).minute.*?\s(.?)\s';
+  $parts = array();
+  $pat = '.+took\s(.*?)\sto\srun$';
   $matches = preg_match("/$pat/", $string, $matched);
+  //print "the array looks like:\n"; print_r($matched) . "\n";
+  $parts = split(' ', $matched[1]);
+  //print "split array looks like:\n"; print_r($parts) . "\n";
   //$time = 'infinity';
-  if ($matches)
+  $sizep = count($parts);
+  $etime = NULL;
+  for($i=0; $i<$sizep; $i++)
   {
-    $time = '00h:' . $matched[1] . 'm:' . $matched[2] . 's';
+   $etime .= $parts[$i] . substr($parts[$i+1],0,1) . ":";
+   $i++;
   }
-  return ($time);
+  $etime = rtrim($etime, ':');
+  return ($etime);
 }
 ?>

@@ -102,8 +102,6 @@ class parseFolderPath
     {
       $regExp = ".*?href='(.*?)'>(.*?)<\/a>(.*?)<";
       $matches = preg_match_all("|$regExp|i", $apath, $pathList, PREG_SET_ORDER);
-      //print "DB: number of link matches are:$matches\npathList is:\n";
-      //print_r($pathList) . "\n";
       if ($matches > 0)
       {
         $dirList[] = $this->_createRtnArray($pathList, $matches);
