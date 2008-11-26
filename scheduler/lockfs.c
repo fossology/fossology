@@ -66,6 +66,7 @@ pid_t	LockScheduler	()
     /* This is my memory! Store PID */
     memset(S,'\0',sizeof(S));
     snprintf(S,sizeof(S),"%d",getpid());
+    if (Verbose) fprintf(stderr,"DEBUG: Storing PID[%s] in lock.\n",S); 
     write(Handle,S,10);
     return(0);
     }
@@ -99,12 +100,15 @@ pid_t	LockScheduler	()
     }
   read(Handle,S,10);
   Pid = atoi(S);
+  if (Verbose) fprintf(stderr,"DEBUG: Found PID[%s] in lock.\n",S); 
 
   /* See if pid exists */
+  if (Verbose) fprintf(stderr,"DEBUG: Killing PID[%d]\n",Pid); 
   rc = kill(Pid,0); /* no signal, just checking */
   if ((rc == -1) && (errno == ESRCH))
     {
     /* Does not exist.  Try again */
+    if (Verbose) fprintf(stderr,"DEBUG: PID[%d] is dead.\n",Pid); 
     if (UnlockScheduler() == 0)
       {
       Pid = LockScheduler();

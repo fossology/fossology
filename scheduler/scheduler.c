@@ -322,6 +322,14 @@ int	main	(int argc, char *argv[])
       }
     } /* check group access */
 
+  /* Become a daemon? (Not if I'm killing schedulers) */
+  if (RunAsDaemon)
+    {
+    /* do not close stdout/stderr when using a LogFile */
+    daemon(0,(LogFile!=NULL));
+    fclose(stdin);
+    }
+
   /* Lock the scheduler, so no other scheduler can run */
   Pid = LockScheduler();
   if (Pid)
@@ -373,14 +381,6 @@ int	main	(int argc, char *argv[])
 
   /* Prepare logging */
   LogPrint("*** Scheduler started\n");
-
-  /* Become a daemon? (Not if I'm killing schedulers) */
-  if (RunAsDaemon)
-    {
-    /* do not close stdout/stderr when using a LogFile */
-    daemon(0,(LogFile!=NULL));
-    fclose(stdin);
-    }
 
   /* Log to file? (Not if I'm killing schedulers) */
   if ((dup2(fileno(stdout),fileno(stderr))) < 0)
