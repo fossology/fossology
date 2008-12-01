@@ -128,6 +128,9 @@ Postgresql:
  On Fedora/RHEL:
   runtime: yum install postgresql postgresql-server
   build: yum install postgresql-devel
+ On Mandriva:
+  runtime: urpmi postgresql
+  build: urpmi postgresql-devel
 
 Apache2:
  FOSSology is currently developed using Apache2 version 2.2, but any
@@ -137,6 +140,8 @@ Apache2:
    runtime: apt-get install apache2
  On Fedora/RHEL:
    runtime: yum install httpd
+ On Mandriva:
+  runtime: urpmi httpd
 
 PHP5:
  On Debian (or a Debian derived distribution) you should be able to use 
@@ -144,6 +149,8 @@ PHP5:
   runtime: apt-get install php5 php5-pgsql php-pear libapache2-mod-php5
  On Fedora:
   runtime: yum install php php-pear php-pgsql
+ On Mandriva:
+  runtime: urpmi php php-pear php-pgsql
 
 
 2.1.2.2  Library Dependencies
@@ -166,6 +173,9 @@ PHP5:
  On RHEL, install libextractor from upstream sources and:
   runtime: yum install file-libs libxml2 
   build: file-libs libxml2
+ On Mandriva:
+  runtime: urpmi libextractor libextractor-plugins libxml2 
+  build: urpmi libextractor-devel libmagic-devel libxml2 
   
 
 2.1.2.3 External Commands
@@ -212,6 +222,9 @@ PHP5:
  On RHEL, install cabextract, sleuthkit, upx, and unrar from upstream
   sources and:
    yum install binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip
+ On Mandriva:
+  runtime: urpmi cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
+                 mkisofs poppler-utils rpm tar unzip gzip
 
 For those distributions where you can't get cabextract, unrar, or upx
 as prebuilt packages, you can choose to do without those, but if fossology
@@ -234,6 +247,8 @@ numbers into the build.
  On Fedora/RHEL the equivalent is:
    build: yum groupinstall 'Development Tools'
           yum install perl-Text-Template subversion
+ On Mandriva:
+   build: urpmi perl-Text-Template subversion gcc make perl 
 
 2.1.3 Adjusting the Kernel
 --------------------------

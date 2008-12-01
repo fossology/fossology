@@ -96,6 +96,13 @@ if [ $BUILDTIME ]; then
             postgresql-devel file-devel \
             libxml2 libextractor-devel \
          ;;
+      Mandriva)
+         # 2008.1 tested
+         urpmi \
+            postgresql-devel \
+            libextractor-devel libmagic-devel libxml2 \
+			perl-Text-Template subversion gcc make perl \
+         ;;
       RedHatEnterprise*)
          # 4=Nahant* 5=Tikanga*
          yum install \
@@ -132,6 +139,15 @@ if [ $RUNTIME ]; then
                apt-get install libextractor-plugins;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO release"; exit 1;;
          esac
+         ;;
+      Mandriva)
+         [ $AGENT ] || urpmi postgresql-server httpd
+		 urpmi php php-pear php-pgsql postgresql \
+		 	libextractor libextractor-plugins libxml2 \
+			cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
+			mkisofs poppler-utils rpm tar unzip gzip ;
+         echo "NOTE: unrar is available in PLF ,";
+         echo "   please install it via urpmi if the repository is configured or from http://plf.zarb.org/packages.php";;
          ;;
       Fedora)
          [ $AGENT ] || yum install postgresql-server httpd
