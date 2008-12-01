@@ -58,15 +58,11 @@ $(CLEANDIRS):
 # release stuff
 tar: dist-testing
 dist-testing:
-	# Package into a tar file.
-	chmod a+x ./mktar.sh
-	./mktar.sh -s
+	utils/fo-mktar -s
 
 tar-release: dist
 dist:
-	# Package into a tar file.
-	chmod a+x ./mktar.sh
-	./mktar.sh
+	utils/fo-mktar
 
 
 .PHONY: $(BUILDDIRS) $(DIRS) $(INSTALLDIRS) $(UNINSTALLDIRS)
