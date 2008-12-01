@@ -75,5 +75,9 @@ new config files.
 * If you are coming from a pre-1.0.0 install you have edits to php.ini
 that you will no longer need and should clean up. See the current
 upstream INSTALL document for what is still needed.
+* The upstream init script, default file, and apache config will be
+pointing at the upstream install locations. Because these are conffiles,
+you may still have the old versions after install and need to adjust
+them to point to the package locations.
 
  -- Matt Taggart <taggart@debian.org>  Fri, 17 Oct 2008 01:24:09 -0700
