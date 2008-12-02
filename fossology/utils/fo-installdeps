@@ -103,7 +103,7 @@ if [ $BUILDTIME ]; then
             libextractor-devel libmagic-devel libxml2 \
 			perl-Text-Template subversion gcc make perl \
          ;;
-      RedHatEnterprise*)
+      RedHatEnterprise*|CentOS)
          # 4=Nahant* 5=Tikanga*
          yum install \
             postgresql-devel \
@@ -169,7 +169,7 @@ if [ $RUNTIME ]; then
             *) echo "ERROR: Unknown or Unsupported Fedora release"; exit 1;;
          esac
          ;;
-      RedHatEnterprise*)
+      RedHatEnterprise*|CentOS)
          # 4=Nahant* 5=Tikanga*
          [ $AGENT ] || yum install postgresql-server httpd
          yum install \
