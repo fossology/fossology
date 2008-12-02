@@ -174,6 +174,14 @@ if [ $AGENT ]; then
       echo "NOTE: Repository already exists at $REPO"
    fi
 
+   # ununpack before svn 1715 created it's directory with wrong permissions
+   # if the directory already exists ensure that it's permissions are correct
+   # this can be removed in the next release after 1.0.0, assuming we will
+   # require pre-1.0.0 users to upgrade to 1.0.0 first
+   if [ -d "$REPO/ununpack" ]; then
+      chmod 2770 $REPO/ununpack
+   fi
+
    if [ -e "{$SYSCONFDIR}/fossology/Hosts.conf" ] ; then
       # if we have a default Hosts.conf file, check if $REPO/localhost
       # exists and if not then create it
