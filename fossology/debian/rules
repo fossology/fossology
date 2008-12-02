@@ -126,9 +126,12 @@ binary-common:
 # Do the lintian stuff by hand for now so we can depend on older debhelper to
 # make backports easier, switch when etch support dropped
 #	dh_lintian
-        cp debian/fossology-common.lintian-overrides debian/fossology-common/usr/share/lintian/overrides/fossology-common
-        cp debian/fossology-agents.lintian-overrides debian/fossology-agents/usr/share/lintian/overrides/fossology-agents
-        cp debian/fossology-agents-single.lintian-overrides debian/fossology-agents-single/usr/share/lintian/overrides/fossology-agents-single
+	mkdir -p debian/fossology-common/usr/share/lintian/overrides
+	cp debian/fossology-common.lintian-overrides debian/fossology-common/usr/share/lintian/overrides/fossology-common
+	mkdir -p debian/fossology-agents/usr/share/lintian/overrides
+	cp debian/fossology-agents.lintian-overrides debian/fossology-agents/usr/share/lintian/overrides/fossology-agents
+	mkdir -p debian/fossology-agents-single/usr/share/lintian/overrides
+	cp debian/fossology-agents-single.lintian-overrides debian/fossology-agents-single/usr/share/lintian/overrides/fossology-agents-single
 
 	dh_link
 	dh_strip
