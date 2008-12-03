@@ -64,21 +64,29 @@ if (empty ($file))
 }
 */
 
+global $Date;
+global $Time;
+global $Svn;
+
+/* Default is use data in Latest*/
+
+$Latest = '/home/markd/public_html/Test-Results/Data/Latest';
 $results = array();
 
-$fALL = '/tmp/AllFOSSologyTests-2008-11-24';
-$fVer = '/tmp/VerifyFOSSologyTests-2008-11-24';
-//rint "starting to process $file\n";
+foreach (new DirectoryIterator($Latest) as $file)
+{
+  if (! $file->isDot()){
+    $temp = fileReport($file->getPathname());
+    $results = globdata($results, $temp);
+  }
+}
 
-$res = fileReport($fALL);
-$rALL = globdata($results, $res);
-
-$ver = fileReport($fVer);
-$results = globdata($rALL, $ver);
-
+$dt = $Date . " " . $Time;
 $cols = 5;
 $smarty->assign('results', $results);
 $smarty->assign('cols', $cols);
+$smarty->assign('runDate', $dt);
+$smarty->assign('svnVer', $Svn);
 $smarty->display('1run-report.tpl');
 
 /**
@@ -95,7 +103,11 @@ $smarty->display('1run-report.tpl');
 
 function fileReport($file)
 {
-  $started = 0;
+  global $Date;
+  global $Time;
+  global $Svn;
+
+  $started = 0;         // ignore tests that print starting....
   $resultLines = array ();
   if (empty ($file))
   {
@@ -106,10 +118,14 @@ function fileReport($file)
   {
     if (preg_match('/^Starting/', $line))
     {
+      /* if we haven't seen the Starting on message then push and set the date and time */
       if (!$started)
       {
         array_push($resultLines, $line);
         $started = 1;
+        $DateTime = parseDateTime($line);
+        $Date = $DateTime[0];
+        $Time = $DateTime[1];
       }
     }
     elseif (preg_match('/^OK/', $line) || preg_match('/^FAILURES/', $line))
@@ -120,7 +136,13 @@ function fileReport($file)
       $line = fgets($FD, 1024);
       array_push($resultLines, $line);
       $started = 0;
-    } else
+    }
+    elseif (preg_match('/^Using Svn Version:/', $line))
+    {
+      $svnline = preg_split('/:/', $line);
+      $Svn = $svnline[1];
+    }
+    else
     {
       continue;
     }
@@ -165,6 +187,27 @@ function globdata($results, $moData)
   return($results);
 } //globdata
 
+
+/**
+ * parseDateTime
+ *
+ * Parse the start line from the test suite output, return the date and
+ * time
+ *
+ * @param string $line the line to parse
+ *
+ * @return array date and time.
+ */
+function parseDateTime($line)
+{
+  if(empty($line)) { return array(); }
+  $pat = '.+on:\s(.*?)\sat\s(.*?)$';
+  $matches = preg_match("/$pat/", $line, $matched);
+  $dateTime[] = $matched[1];
+  $dateTime[] = $matched[2];
+  //print "dateTime is:\n"; print_r($dateTime) . "\n";
+  return ($dateTime);
+}
 /**
  * parseSuiteName
  *
@@ -181,7 +224,7 @@ function parseSuiteName($string)
   {
     return (FALSE);
   }
-  $pat = '^Starting\s(.*?)\sat:';
+  $pat = '^Starting\s(.*?)\son:';
   $matches = preg_match("/$pat/", $string, $matched);
   //print "matched is:{$matched[1]}\n";
   return ($matched[1]);

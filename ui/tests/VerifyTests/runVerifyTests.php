@@ -31,8 +31,12 @@ require_once '/usr/local/simpletest/reporter.php';
 require_once ('../../../tests/TestEnvironment.php');
 require_once('../../../tests/testClasses/timer.php');
 
+$Svn = `svnversion`;
 $start = new timer();
-print "Starting Verify Tests at: " . date('r') . "\n";
+$date = date('Y-m-d');
+$time = date('h:i:s-a');
+print "Starting Verify Tests on: " . $date . " at " . $time . "\n";
+print "Using Svn Version:$Svn\n";
 $test = &new TestSuite('Fossology Repo UI Verification Functional tests');
 //$test->addTestFile('browseUploadedTest.php');
 $test->addTestFile('OneShot-lgpl2.1.php');

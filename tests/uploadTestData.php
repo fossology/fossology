@@ -47,7 +47,11 @@ require_once('testClasses/timer.php');
 
 global $URL;
 $start = new timer();
-print "Starting Upload-Prep Tests at: " . date('r') . "\n";
+$Svn = `svnversion`;
+$date = date('Y-m-d');
+$time = date('h:i:s-a');
+print "Starting Upload-Prep Tests on: " . $date . " at " . $time . "\n";
+print "Using Svn Version:$Svn\n";
 $test = &new TestSuite('Fossology Repo UI Upload-Prep Test');
 $test->addTestFile('uplTestData.php');
 
