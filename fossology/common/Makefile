@@ -5,7 +5,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CONFFILES=Depth.conf RepPath.conf Hosts.conf Proxy.conf Db.conf
+CONFFILES=Depth.conf RepPath.conf Hosts.conf Proxy.conf
 CONFPATH=$(SYSCONFDIR)/fossology
 
 all: fo-postinstall defconf/Db.conf
@@ -36,7 +36,13 @@ install: all
 			echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 		fi \
 	done
-
+	if [ ! -f $(DESTDIR)$(CONFPATH)/Db.conf -o "$(OVERWRITE)" ] ; then \
+		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/Db.conf"; \
+	 	$(INSTALL) -m 660 defconf/Db.conf $(DESTDIR)$(CONFPATH)/Db.conf; \
+	else \
+		echo "WARNING: $(DESTDIR)$(CONFPATH)/Db.conf already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+	fi \
 
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-postinstall

@@ -204,6 +204,32 @@ if [ $AGENT ]; then
       echo "  in $REPO and are {$PROJECTUSER}:{$PROJECTGROUP} and 2770."
    fi
 
+   ## check that the db is accessable
+   echo "*** Checking database connectivity ***"
+   DBCONF="{$SYSCONFDIR}/fossology/Db.conf"
+   if [ ! -f $DBCONF ]; then
+      echo "ERROR: missing $DBCONF, cannot proceed."
+   fi
+
+   # make install sets Db.conf's mode to 660, but can't chgrp it because
+   # the group doesn't exist until we create it above. So chgrp now
+   chgrp {$PROJECTGROUP} $DBCONF || echo "ERROR: failed to chgrp $DBCONF"
+
+   # check that we can talk to the db
+   if [ -x {$LIBEXECDIR}/dbcheck ]; then
+      {$LIBEXECDIR}/dbcheck
+   else
+      echo "ERROR: no {$LIBEXECDIR}/dbcheck, have you installed?"
+      exit 1
+   fi
+   if [ $? != 0 ]; then
+      echo "ERROR: unable to connect to database, please check {$SYSCONFDIR}/fossology/Db.conf"
+      exit 1
+   else
+      echo "NOTE: Connect succeeded, database is working."
+   fi
+
+
    ## Initialize the tables, License.bsam, and other setup done by fossinit
    # In multi-system installs the database machine must be installed first
    # in order for this to work on other machines.
