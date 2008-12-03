@@ -827,6 +827,7 @@
   $Term["Microsoft Shared Source License"]["License"][0]="Corporate/Microsoft/Microsoft Shared Source License";
   /* Canonical name: 146 */
   $Term["MIT"]["Desc"]="";
+  $Term["MIT"]["Term"][0]="mit license";
   $Term["MIT"]["License"][0]="MIT/MIT (modern)";
   $Term["MIT"]["License"][1]="MIT/MIT (modern) with sublicense";
   $Term["MIT"]["License"][2]="MIT/MIT (oldstyle)";
