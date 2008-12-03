@@ -188,6 +188,7 @@
   $Term["BSD"]["Desc"]="BSD";
   $Term["BSD"]["Term"][0]="boost software license";
   $Term["BSD"]["Term"][]="bsd";
+  $Term["BSD"]["Term"][]="bsd license";
   $Term["BSD"]["Term"][]="freebsd";
   $Term["BSD"]["Term"][]="openbsd";
   $Term["BSD"]["Term"][]="redistributed under the terms of the bsd license";
