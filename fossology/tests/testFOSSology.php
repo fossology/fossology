@@ -112,6 +112,13 @@ function _runSetupVerify()
   }
 } //_runSetupVerify
 
+function getSvnVer()
+{
+  return (`svnversion`);
+}
+
+$Svn = getSvnVer();
+
 // ************ ALL ********************
 if (array_key_exists("a", $options))
 {
@@ -119,7 +126,7 @@ if (array_key_exists("a", $options))
   {
     print "All Tests ERROR: can't cd to $Home\n";
   }
-  print "Running All Tests\n";
+  print "Running All Tests on $date subversion version: $Svn\n";
   if(chdir($SiteTests) === FALSE)
   {
     print "ALL Tests ERROR: can't cd to $SiteTests\n";

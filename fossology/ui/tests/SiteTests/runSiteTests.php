@@ -36,7 +36,11 @@ global $USER;
 global $PASSWORD;
 
 $start = new timer();
-print "Starting Site Tests at: " . date('r') . "\n";
+$Svn = `svnversion`;
+$date = date('Y-m-d');
+$time = date('h:i:s-a');
+print "Starting Site Tests on: " . $date . " at " . $time . "\n";
+print "Using Svn Version:$Svn\n";
 $test = &new TestSuite('Fossology Repo Site UI tests');
 $test->addTestFile('AboutMenuTest.php');
 $test->addTestFile('login.php');
