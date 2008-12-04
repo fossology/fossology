@@ -49,7 +49,7 @@ done
 if [ `id -u` != "0" ] ; then
    echo "ERROR: fo-installdeps must run as root."
    echo "Aborting."
-   #exit 1
+   exit 1
 fi
 
 if [ $EVERYTHING ]; then
@@ -82,7 +82,7 @@ if [ $BUILDTIME ]; then
       Debian|Ubuntu)
          apt-get install \
             libmagic-dev libxml2-dev libextractor-dev \
-            build-essential libtext-template-perl subversion;
+            build-essential libtext-template-perl subversion
          case "$CODENAME" in
             etch|dapper) apt-get install postgresql-server-dev-8.1;;
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
@@ -94,21 +94,21 @@ if [ $BUILDTIME ]; then
          # F8=Werwolf F9=Sulphur F10=Cambridge dev=Rawhide
          yum install \
             postgresql-devel file-devel \
-            libxml2 libextractor-devel \
+            libxml2 libextractor-devel
          ;;
       Mandriva)
          # 2008.1 tested
          urpmi \
             postgresql-devel \
             libextractor-devel libmagic-devel libxml2 \
-			perl-Text-Template subversion gcc make perl \
+            perl-Text-Template subversion gcc make perl
          ;;
       RedHatEnterprise*|CentOS)
          # 4=Nahant* 5=Tikanga*
          yum install \
             postgresql-devel \
             file libxml2 \
-            perl-Text-Template subversion;
+            perl-Text-Template subversion
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
@@ -125,7 +125,7 @@ if [ $RUNTIME ]; then
             php5 php5-pgsql php-pear \
             libmagic1 libxml2 libextractor1c2a \
             binutils bzip2 cabextract cpio sleuthkit mkisofs xpdf-utils \
-               rpm tar upx-ucl unrar unzip;
+               rpm tar upx-ucl unrar unzip
          case "$CODENAME" in
             dapper) [ $AGENT ] || apt-get install postgresql-8.1;;
             etch)
@@ -142,12 +142,12 @@ if [ $RUNTIME ]; then
          ;;
       Mandriva)
          [ $AGENT ] || urpmi postgresql-server httpd
-		 urpmi php php-pear php-pgsql postgresql \
-		 	libextractor libextractor-plugins libxml2 \
-			cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
-			mkisofs poppler-utils rpm tar unzip gzip ;
-         echo "NOTE: unrar is available in PLF ,";
-         echo "   please install it via urpmi if the repository is configured or from http://plf.zarb.org/packages.php";;
+            urpmi php php-pear php-pgsql postgresql \
+               libextractor libextractor-plugins libxml2 \
+               cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
+               mkisofs poppler-utils rpm tar unzip gzip
+         echo "NOTE: unrar is available in PLF, please install it via urpmi if"
+	 echo "   the repository is configured or from http://plf.zarb.org/packages.php"
          ;;
       Fedora)
          [ $AGENT ] || yum install postgresql-server httpd
@@ -156,16 +156,17 @@ if [ $RUNTIME ]; then
             php php-pear php-pgsql \
             file-libs libxml2 libextractor libextractor-plugins \
             binutils bzip2 cabextract cpio genisoimage poppler-utils \
-               rpm tar upx unzip gzip;
+               rpm tar upx unzip gzip
          # F8=Werwolf F9=Sulphur F10=Cambridge dev=Rawhide
          case "$CODENAME" in
             Werwolf|Sulphur)
                echo "NOTE: sleuthkit and unrar is not available in Fedora release $CODENAME,";
                echo "   please install from upstream sources.";;
             Cambridge|Rawhide)
-               yum install sleuthkit;
-               echo "NOTE: unrar is not available in Fedora release $CODENAME,";
-               echo "   please install from upstream sources.";;
+               yum install sleuthkit
+               echo "NOTE: unrar is not available in Fedora release $CODENAME,"
+               echo "   please install from upstream sources."
+	       ;;
             *) echo "ERROR: Unknown or Unsupported Fedora release"; exit 1;;
          esac
          ;;
