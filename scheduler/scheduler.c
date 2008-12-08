@@ -142,7 +142,9 @@ void	Usage	(char *Name)
   fprintf(stderr,"  -I :: Use stdin and queue (default: use queue only)\n");
   fprintf(stderr,"  -v :: verbose (-v -v = more verbose)\n");
   fprintf(stderr,"  -L log :: send stdout and stderr to log\n");
+#if 0
   fprintf(stderr,"  -l :: tell the running scheduler to redo its log file (for log rotation)\n");
+#endif
   fprintf(stderr,"  -q :: turn off show stages\n");
   fprintf(stderr,"  -R :: reset the job queue in case something was hung.\n");
   fprintf(stderr,"  -t :: test every agent to see if it runs, then quit.\n");
@@ -211,7 +213,11 @@ int	main	(int argc, char *argv[])
 	KillSchedulers=1;
 	break;
       case 'l': /* tell the scheduler to redo logs */
+#if 0
+	/* Disabled because SIGHUP causes the scheduler to hang.
+	   The -l option does nothing. */
 	HupSchedulers=1;
+#endif
 	break;
       case 'L':
 	LogFile=optarg;
@@ -457,7 +463,7 @@ int	main	(int argc, char *argv[])
   if (sigaction(SIGQUIT,&SigAct,NULL) != 0) perror("SIGQUIT");
   if (sigaction(SIGTERM,&SigAct,NULL) != 0) perror("SIGTERM");
   if (sigaction(SIGINT,&SigAct,NULL) != 0) perror("SIGINT");
-  if (sigaction(SIGHUP,&SigAct,NULL) != 0) perror("SIGHUP");
+//  if (sigaction(SIGHUP,&SigAct,NULL) != 0) perror("SIGHUP");
   if (sigaction(SIGUSR1,&SigAct,NULL) != 0) perror("SIGUSR1");
   if (sigaction(SIGUSR2,&SigAct,NULL) != 0) perror("SIGUSR2");
   if (sigaction(SIGALRM,&SigAct,NULL) != 0) perror("SIGALRM");
