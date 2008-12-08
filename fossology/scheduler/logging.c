@@ -57,6 +57,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <stdarg.h>
+#include <limits.h>
 
 #include <libfossdb.h>
 #include "debug.h"
@@ -68,14 +69,59 @@ FILE	*Log=NULL;
 char	*LogFile=LOGDIR;
 int	LogReopenFlag=0;
 int	LogUseSyslog=0;
+char	LogPath[PATH_MAX];
+int	LogPathIsSet=0;
+
+/********************************************
+ LogPathSet(): Set the log path filename.
+ This only needs to be called once.
+ ********************************************/
+void	LogPathSet	()
+{
+  struct stat Stat;
+  if (LogPathIsSet) return;
+  memset(LogPath,'\0',sizeof(LogPath));
+  if ((stat(LogFile,&Stat) == 0) && S_ISDIR(Stat.st_mode))
+    {
+    /* It is a directory */
+    snprintf(LogPath,sizeof(LogPath),"%s/fossology.log",LogFile);
+    }
+  else
+    {
+    /* Not a directory */
+    snprintf(LogPath,sizeof(LogPath),"%s",LogFile);
+    }
+  LogPathIsSet=1;
+} /* LogPathSet() */
+
+/********************************************
+ LogCheck(): Check if the log file exists.
+ Returns 1 on exists, 0 on does not exist.
+ ********************************************/
+int	LogCheck	()
+{
+  struct stat Stat;
+
+  if (!LogPathIsSet) LogPathSet();
+  if (Log == NULL) return(0);
+  if ((Log == stderr) || (Log == stdout)) return(1);
+
+  /* see if the file exists */
+  /* What am I looking at? File or directory... */
+  if (stat(LogPath,&Stat) != 0)
+    {
+    /* Cannot stat it. */
+    return(0);
+    }
+  return(1);
+} /* LogCheck() */
 
 /********************************************
  LogOpen(): Open or Re-open the system logfile.
  ********************************************/
 void	LogOpen	()
 {
-  struct stat Stat;
-
+  if (!LogPathIsSet) LogPathSet();
   if ((Log != NULL) && (Log != stderr) && (Log != stdout))
     {
     fclose(Log);
@@ -101,29 +147,14 @@ void	LogOpen	()
   if (!strcmp(LogFile,"stderr")) { Log = stderr; return; }
   if (!strcmp(LogFile,"stdout")) { Log = stdout; return; }
 
-  /* What am I looking at? File or directory... */
-  if (stat(LogFile,&Stat) != 0)
-    {
-    /* Cannot stat it.  Assume it is a file. */
-    Log = fopen(LogFile,"a");
-    }
-  /* Check if it is a directory */
-  else if (S_ISDIR(Stat.st_mode))
-    {
-    char Path[1024];
-    snprintf(Path,sizeof(Path),"%s/fossology.log",LogFile);
-    Log = fopen(Path,"a");
-    }
-  else
-    {
-    Log = fopen(LogFile,"a");
-    }
+  /* Open the log */
+  Log = fopen(LogPath,"a");
 
   /* Check the logfile */
   if (!Log)
     {
     perror("Logfile failure");
-    fprintf(stderr,"FATAL: Unable to log to logfile '%s'\n",LogFile);
+    fprintf(stderr,"FATAL: Unable to log to logfile '%s'\n",LogPath);
     exit(1);
     }
 
@@ -143,7 +174,7 @@ int	LogPrint	(const char *fmt, ...)
   struct tm *TimeData;
   char TimeString[40];
 
-  if (!Log || LogReopenFlag) LogOpen();
+  if (!Log || LogReopenFlag || !LogCheck()) LogOpen();
   if (!fmt) return(0);
 
   Now = time(NULL);
