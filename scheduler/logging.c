@@ -126,6 +126,8 @@ void	LogOpen	()
     fprintf(stderr,"FATAL: Unable to log to logfile '%s'\n",LogFile);
     exit(1);
     }
+
+  LogPrint("Log opened\n");
   return;
 } /* LogOpen() */
 
