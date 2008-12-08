@@ -128,6 +128,7 @@ void	LogOpen	()
     }
 
   LogPrint("Log opened\n");
+  LogReopenFlag=0;
   return;
 } /* LogOpen() */
 
@@ -142,7 +143,7 @@ int	LogPrint	(const char *fmt, ...)
   struct tm *TimeData;
   char TimeString[40];
 
-  if (!Log) LogOpen();
+  if (!Log || LogReopenFlag) LogOpen();
   if (!fmt) return(0);
 
   Now = time(NULL);
