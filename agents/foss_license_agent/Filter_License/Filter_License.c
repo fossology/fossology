@@ -45,6 +45,15 @@ int Verbose=0;	/* how verbose? (for debugging) */
 int AddToDB=0;  /* should the license be added to the license table? */
 int UpdateDB=1;	/* should process results go into the DB/repository? */
 
+/* From what we can tell, if a file has a license, it will appear
+   somewhere before the first 100K.  Let's round it to 500K.
+   By truncating the file, we speed up the entire license processing.
+   - Large files won't have distant sections written to cache files.
+     Fewer sections to analyze = faster analysis.
+   - Filter_License won't run for hours on extreme worst-case files.
+ */
+#define MAXLICSIZE	512000
+
 /**********************************************************************/
 /***** globals for printing *******************************************/
 /**********************************************************************/
@@ -854,7 +863,7 @@ int	PreprocessFile	(int UseRep)
   /* the BIG parsing loop! */
   /** This is slow for massive files.  It could take more than a minute.
       But we want to make sure it is alive. **/
-  for(i=0; i < Rep->MmapSize; i++)
+  for(i=0; (i < Rep->MmapSize) && (i < MAXLICSIZE); i++)
     {
     if (Verbose)
       {
