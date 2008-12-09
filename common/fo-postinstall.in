@@ -273,8 +273,8 @@ if [ $SCHEDULERONLY ]; then
      mkdir -p {$LOGDIR}
    fi
    chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LOGDIR}
-   find {$LOGDIR} -type d | while read i ; do chmod 02770 "$i" ; done
-   find {$LOGDIR} -type f | while read i ; do chmod 02660 "$i" ; done
+   chmod 2775 {$LOGDIR}
+   find {$LOGDIR} -type f | while read i ; do chmod 660 "$i" ; done
 fi # end of SCHEDULERONLY
 
 ########################################################################
