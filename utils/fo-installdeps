@@ -159,6 +159,14 @@ if [ $RUNTIME ]; then
             file-libs libxml2 libextractor libextractor-plugins \
             binutils bzip2 cabextract cpio genisoimage poppler-utils \
                rpm tar upx unzip gzip
+
+         # enable, possible init, and start postgresql
+         /sbin/chkconfig postgresql on
+         if [ ! -f /var/lib/pgsql/data/PG_VERSION ]; then
+            /sbin/service postgresql initdb
+         fi
+         /sbin/service postgresql start
+
          # F8=Werwolf F9=Sulphur F10=Cambridge dev=Rawhide
          case "$CODENAME" in
             Werwolf|Sulphur)
