@@ -272,7 +272,7 @@ function moveOptions(theSelFrom, theSelTo)
     $V = "";
     $V .= "Keyword terms and phrases are used during license analysis to better identify license names.\n";
     $V .= "Terms consist of two parts: a canonical name for the class of terms, and a list of words or phrases that are members of the class.\n";
-    $V .= "For example, the phrases 'GNU General Public License version 2' and 'GPL version 2' may both be parts of the 'GPLv2' class.\n"; 
+    $V .= "For example, the phrases 'GNU General Public License version 2' and 'GPL version 2' may both be parts of the 'GPLv2' class.\n";
     $V .= "<P />\n";
     $V .= "<b>Note #1</b>: Changes to this list will impact all new license analysis.\n";
     $V .= "However, all completed license analysis will be unchanged.\n";
@@ -294,6 +294,7 @@ function moveOptions(theSelFrom, theSelTo)
     $V .= "<td><select name='termkey' onChange='window.open(\"$Uri\"+this.value,\"_top\");'>\n";
     $V .= $this->LicTermCurrList($TermKey);
     $V .= "</select>\n";
+    $V .= "<br>\n";
     /* Permit delete */
     $V .= "<input type='checkbox' value='1' name='delete' onclick='ToggleForm(this.checked);'><b>Check to delete this canonical group!</b></td>\n";
     $V .= "</td>";
@@ -319,8 +320,8 @@ function moveOptions(theSelFrom, theSelTo)
     /* List these license terms */
     if (!empty($TermKey))
       {
-      $TermList = $DB->Action("SELECT licterm_words_text AS text FROM licterm_words INNER JOIN licterm_map ON licterm_words_pk = licterm_words_fk AND licterm_fk = '$TermKey' ORDER BY licterm_words_text;"); 
-      $TermAvailable = $DB->Action("SELECT licterm_words_text AS text FROM licterm_words WHERE licterm_words_pk NOT IN (SELECT licterm_words_fk FROM licterm_words INNER JOIN licterm_map ON licterm_words_pk = licterm_words_fk AND licterm_fk = '$TermKey') ORDER BY licterm_words_text;"); 
+      $TermList = $DB->Action("SELECT licterm_words_text AS text FROM licterm_words INNER JOIN licterm_map ON licterm_words_pk = licterm_words_fk AND licterm_fk = '$TermKey' ORDER BY licterm_words_text;");
+      $TermAvailable = $DB->Action("SELECT licterm_words_text AS text FROM licterm_words WHERE licterm_words_pk NOT IN (SELECT licterm_words_fk FROM licterm_words INNER JOIN licterm_map ON licterm_words_pk = licterm_words_fk AND licterm_fk = '$TermKey') ORDER BY licterm_words_text;");
       }
     else
       {
@@ -397,12 +398,12 @@ function moveOptions(theSelFrom, theSelTo)
 
     $V .= "<td>";
     $V .= "<table width='100%'>";
-    $V .= "<td align='center' width='45%'>Licenses associated with this canonical group</td><td width='10%'></td><td width='45%' align='center'>Known Licenses</td></tr>";
+    $V .= "<td align='center' width='45%'>Licenses associated with this canonical group</td><td width='10%'></td><td width='45%' align='center'>Unassociated Licenses</td></tr>";
 
     /* List these license terms */
     if (!empty($TermKey))
       {
-      $LicList = $DB->Action("SELECT lic_pk AS id, lic_name AS text FROM agent_lic_raw INNER JOIN licterm_maplic ON lic_pk = lic_fk AND licterm_fk = '$TermKey' AND lic_id = lic_pk ORDER BY lic_name;"); 
+      $LicList = $DB->Action("SELECT lic_pk AS id, lic_name AS text FROM agent_lic_raw INNER JOIN licterm_maplic ON lic_pk = lic_fk AND licterm_fk = '$TermKey' AND lic_id = lic_pk ORDER BY lic_name;");
       $LicAvailable = $DB->Action("SELECT lic_pk AS id, lic_name AS text FROM agent_lic_raw WHERE lic_id = lic_pk AND lic_pk NOT IN (SELECT lic_fk FROM licterm_maplic) ORDER BY lic_name;");
       }
     else
@@ -679,7 +680,7 @@ function moveOptions(theSelFrom, theSelTo)
             {
             /* Need to refresh the screen */
             $V .= PopupAlert('License term information updated.');
-            } 
+            }
           else
             {
             $V .= PopupAlert($rc);
