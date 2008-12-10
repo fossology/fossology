@@ -133,8 +133,9 @@ if [ $AGENT ]; then
    else
       # ensure that the full parent path of the HOME exists first
       mkdir -p $\{REPO%/*/*\}
-      # use adduser if it exists since it supports --system
-      if which adduser; then
+      # use adduser if it exists since it supports --system, but
+      # not if it's a symlink (probably to /usr/sbin/useradd)
+      if [ -f /usr/sbin/adduser -a -h /usr/sbin/adduser ]; then
          adduser --gecos "{$PROJECT}" --ingroup {$PROJECTGROUP} --system \
            --shell /bin/bash --home "$\{REPO%/*\}" {$PROJECTUSER}
       else
