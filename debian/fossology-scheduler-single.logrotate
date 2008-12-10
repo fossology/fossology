@@ -7,7 +7,4 @@
         notifempty
         create 660 fossy fossy
         sharedscripts
-        postrotate
-                /usr/lib/fossology/fossology-scheduler > /dev/null
-        endscript
 }
