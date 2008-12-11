@@ -59,7 +59,6 @@ class ui_browse extends FO_Plugin
       $Results = $DB->Action("SELECT max(folder_pk) AS max FROM folder LIMIT 1;");
       $Max = $Results[0]['max'];
       if (empty($Max)) { $Max = 1; }
-      else { $Max = $Max + 1; }
       $DB->Action("SELECT setval('folder_folder_pk_seq',$Max);");
       }
     return(0);
