@@ -788,9 +788,8 @@ if (0)
 	$Table = $Tables[$i]['table'];
 	$Column = $Tables[$i]['column'];
 	$Results = $DB->Action("SELECT max($Column) AS max FROM $Table LIMIT 1;");
-	$Max = $Results[0]['max'];
-	if (empty($Max)) { $Max = 1; }
-	else { $Max = $Max + 1; }
+	$Max = intval($Results[0]['max']);
+	if (empty($Max) || ($Max <= 0)) { $Max = 1; }
 	// print "Setting table($Table) column($Column) sequence($Seq) to $Max\n";
 	$DB->Action("SELECT setval('$Seq',$Max);");
 	}
