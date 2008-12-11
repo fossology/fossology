@@ -1,8 +1,8 @@
-fossology (1.0.0~rc2.1-1) unstable; urgency=low
+fossology (1.0.0~rc2.2-1) unstable; urgency=low
 
   * Unofficial version for testing
 
- -- Matt Taggart <taggart@debian.org>  Mon, 08 Dec 2008 17:35:14 -0800
+ -- Matt Taggart <taggart@debian.org>  Thu, 11 Dec 2008 01:29:03 -0800
 
 fossology (1.0.0~rc2-1) unstable; urgency=low
 
