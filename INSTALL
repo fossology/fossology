@@ -584,6 +584,10 @@ Congratulations, FOSSology is now installed!
 You can now point your web browser at the new install
 (http://yourhostname/repo/) and start using FOSSology!
 
+You should login to FOSSology with the default fossy/fossy user and
+password and create yourself a user with administrative privileges and
+then delete the fossy user (or at least change the password).
+
 For extended discussion on how to use or tune the software, please see
 the User Documentation, available on the website at
 
