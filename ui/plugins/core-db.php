@@ -182,11 +182,19 @@ class db_access extends FO_Plugin
 	   Otherwise, pg_last_error() returns nothing. */
 	pg_set_error_verbosity($this->_pg_conn,PGSQL_ERRORS_VERBOSE);
 	if ($this->Debug > 1) { print "DB.Execute('$Prep','$Command')\n"; }
+	if ($this->Debug > 1) { print "Command = " ; print_r($Command) ; print "\n"; }
 	}
     $result = pg_execute($this->_pg_conn,$Prep,$Command);
-    if (!isset($result))
+    if (!isset($result) || ($result === FALSE))
 	{
 	$this->Error=1;
+        $PGError = pg_last_error($this->_pg_conn);
+        if ($this->Debug)
+	  {
+	  print "--------\n";
+	  print "SQL failed: $Command\n";
+	  print $PGError;
+	  }
 	return;
 	}
     $this->Error=0;
