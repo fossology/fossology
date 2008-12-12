@@ -57,8 +57,9 @@ class ui_browse extends FO_Plugin
 
       /* Now fix the sequence number so the first insert does not fail */
       $Results = $DB->Action("SELECT max(folder_pk) AS max FROM folder LIMIT 1;");
-      $Max = $Results[0]['max'];
-      if (empty($Max)) { $Max = 1; }
+      $Max = intval($Results[0]['max']);
+      if (empty($Max) || ($Max < 1)) { $Max = 1; }
+      else { $Max++; }
       $DB->Action("SELECT setval('folder_folder_pk_seq',$Max);");
       }
     return(0);
