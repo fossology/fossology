@@ -296,7 +296,7 @@ class TestReport
     $this->smarty->cache_dir = '/home/markd/public_html/smarty/cache';
     $this->smarty->config_dir = '/home/markd/public_html/smarty/configs';
 
-    $this->smarty->display('testRun.tpl');
+    $this->smarty->display('trPage-Title.tpl');
     foreach (new DirectoryIterator($this->resultsPath) as $file)
     {
       if (!$file->isDot())
