@@ -1,11 +1,21 @@
+y
 <html>
 <head>
 <title>Fossology Test Results</title>
 </head>
 <body>
-<h2>Latest Test Results 2008-11-24 svn version 1719</h2>
+<h2>Fossology Test Results</h2>
 <table border="1">
-	<th>Test Suite</th><th>Passes</th><th>Failures</th><th>Exceptions</th><th>Elapsed Time</th>
+	<tr>
+		<td colspan="5" align="center">Test Results on {$runDate}: svn version {$svnVer}</td>
+	</tr>
+	<tr>
+		<th align="center">Test Suite</th>
+		<th align="center">Passes</th>
+		<th align="center">Failures</th>
+		<th align="center">Exceptions</th>
+		<th align="center">Elapsed Time</th>
+	</tr>
 	<!--
 	<tr><td align="left">{$test_name}</td><td align="center">{$passes}</td>
 	<td align="center">{$failures}</td><td align="center">{$exceptions}</td><td align="center">{$etime}</td>
@@ -14,13 +24,14 @@
 	{section name=tr loop=$results step=$cols}
   <tr>
     {section name=td start=$smarty.section.tr.index loop=$smarty.section.tr.index+$cols}
-    <td align="center">{$results[td]|default:"& nbsp;"}</td>
+    <td align="center">{$results[td]|default:"&nbsp;"}</td>
     {/section}
   </tr>
   {/section}
 </table>
 <h3>Test Run Notes</h3>
 <p>
-The 1 failure is expected.  It is the duplicated upload test....
+{$TestNotes}
+</p>
 </body>
 </html>
