@@ -1,12 +1,8 @@
 <html>
 <head>
-<title>Fossology Test Date and Version</title>
+<title>Fossology Test Results</title>
 </head>
 <body>
-<table border="1">
-	<tr>
-		<td colspan="5" align="center">Test Results on {$runDate}: svn version {$svnVer}</td>
-	</tr>
-</table>
+<h2>Fossology Test Results</h2>
 </body>
 </html>
