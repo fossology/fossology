@@ -34,20 +34,25 @@ class TestReport
   private $Date;
   private $Time;
   private $Svn;
+  private $results;
+  private $testRuns;
+  private $smarty;
   public $resultsPath;
   public $notesPath;
 
   public function __construct($resultsPath=NULL, $notesPath=NULL)
   {
+    $this->smarty = new Smarty();
+    // defaults for now...
     $Latest = '/home/fosstester/public_html/TestResults/Data/Latest';
     $NotesFile = '/home/fosstester/public_html/TestResults/Data/Latest/Notes';
 
     if (empty ($resultsPath))
     {
       /* Default is use data in Latest*/
-      $this-> $resultsPath = $Latest;
+      $this->resultsPath = $Latest;
     }
-    elseif (empty ($notesPath))
+    if (empty ($notesPath))
     {
       $this->notesPath = $NotesFile;
     }
@@ -65,24 +70,21 @@ class TestReport
    */
   public function displayReport()
   {
-    $smarty = new Smarty();
+    $this->smarty->template_dir = '/home/markd/public_html/smarty/templates';
+    $this->smarty->compile_dir = '/home/markd/public_html/smarty/templates_c';
+    $this->smarty->cache_dir = '/home/markd/public_html/smarty/cache';
+    $this->smarty->config_dir = '/home/markd/public_html/smarty/configs';
 
-    $smarty->template_dir = '/home/markd/public_html/smarty/templates';
-    $smarty->compile_dir = '/home/markd/public_html/smarty/templates_c';
-    $smarty->cache_dir = '/home/markd/public_html/smarty/cache';
-    $smarty->config_dir = '/home/markd/public_html/smarty/configs';
-
-    $notes = file_get_contents($this->$notesPath);
+    $notes = file_get_contents($this->notesPath);
     $dt = $this->Date . " " . $this->Time;
     $cols = 5;
-    $smarty->assign('results', $results);
-    //$smarty->assign('cols', $cols);
-    $smarty->assign('runDate', $dt);
-    $smarty->assign('svnVer', $Svn);
-    $smarty->assign('TestNotes', $notes);
-    //$smarty->display('1run-report.tpl');
-    $smarty->display('testRun.tpl');
-    $smarty->display('testResults.tpl');
+
+    $this->smarty->assign('runDate', $dt);
+    $this->smarty->assign('svnVer', $this->Svn);
+    $this->smarty->assign('cols', $cols);
+    $this->smarty->assign('results', $this->results);
+    $this->smarty->display('testResults.tpl');
+    //$smarty->assign('TestNotes', $notes);
   }
 
   /**
@@ -100,10 +102,6 @@ class TestReport
    */
   public function gatherData($file)
   {
-    global $Date;
-    global $Time;
-    global $Svn;
-
     $resultLines = array ();
     if (empty ($file))
     {
@@ -114,17 +112,19 @@ class TestReport
     {
       if (preg_match('/^Running\sAll/', $line))
       {
-        $DateTime = parseDateTime($line);
+        $DateTime = $this->parseDateTime($line);
+        //$this->testRuns['rundate'] = "{$DateTime[0]}" . "{$DateTime[1]}";
         list ($this->Date, $this->Time) = $DateTime;
         $svnline = preg_split('/:/', $line);
         //print "<pre>DB: SVN: svnline is:</pre>\n";
         //print "<pre>"; print_r($svnline) . "</pre>\n";
-        $Svn = $svnline[4];
+        //$this->testRuns['svnVer'] = $svnline[4];
+        $this->Svn = $svnline[4];
       }
       elseif (preg_match('/^Starting.*?on:/', $line))
       {
         array_push($resultLines, $line);
-        $suiteName = parseSuiteName($line);
+        $suiteName = $this->parseSuiteName($line);
       }
       elseif (preg_match('/^OK/', $line) || preg_match('/^FAILURES/', $line))
       {
@@ -162,18 +162,18 @@ class TestReport
         break;
       }
 
-      $suiteName = parseSuiteName($moData[$suite]);
+      $suiteName = $this->parseSuiteName($moData[$suite]);
       array_push($results, $suiteName);
       //print "parsed suite name:$suiteName\n";
 
-      $pfe_results = parseResults($moData[$suite +1]);
+      $pfe_results = $this->parseResults($moData[$suite +1]);
       $pfe = split(':', $pfe_results);
       array_push($results, $pfe[0]);
       array_push($results, $pfe[1]);
       array_push($results, $pfe[2]);
       //print "<pre>BD-GD: resutlts are:</pre>\n"; print "<pre>"; print_r($results) . "</pre>\n";
 
-      $etime = parseElapseTime($moData[$suite +2]);
+      $etime = $this->parseElapseTime($moData[$suite +2]);
       array_push($results, $etime);
       //print "The elapse time was:$etime\n\n";
     }
@@ -291,14 +291,25 @@ class TestReport
 
   public function readResultsFiles()
   {
-    $results = array ();
+    $this->smarty->template_dir = '/home/markd/public_html/smarty/templates';
+    $this->smarty->compile_dir = '/home/markd/public_html/smarty/templates_c';
+    $this->smarty->cache_dir = '/home/markd/public_html/smarty/cache';
+    $this->smarty->config_dir = '/home/markd/public_html/smarty/configs';
 
+    $this->smarty->display('testRun.tpl');
     foreach (new DirectoryIterator($this->resultsPath) as $file)
     {
       if (!$file->isDot())
       {
-        $temp = $this->gatherData($file->getPathname());
-        $results = $this->globdata($results, $temp);
+        $this->results = array ();
+        $filePath = $file->getPathname();
+        //print "<pre>DB: RRF:filepath is:$fp</pre>\n";
+        $name = basename($filePath);
+        if($name == 'Notes') { continue; }
+        $temp = $this->gatherData($filePath);
+        $this->results = $this->globdata($this->results, $temp);
+        //print "<pre>DB: RRF: results are:\n"; print_r($this->results) . "</pre>\n";
+        $this->displayReport();
       }
     }
   }
