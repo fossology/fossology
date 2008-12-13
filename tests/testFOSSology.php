@@ -1,5 +1,6 @@
 #!/usr/bin/php
 <?php
+
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -44,22 +45,31 @@
  * @TODO: remove Testing Directory
  *
  */
-$usage .= "Usage: $argv[0] [-a] | [-b] | [-h] | [-s] | [-v]\n";
+$usage .= "Usage: $argv[0] [-l path] {[-a] | [-b] | [-h] | [-s] | [-v -l]}\n";
 $usage .= "-a: Run all FOSSology Test Suites\n" .
 "-b: Run the basic test suite. This runs the SiteTests and any Tests" .
 "that don't depend on uploads\n" .
 "-h: Display Usage\n" .
+"-l path: test results file path \n" .
 "-s: Run SiteTests only (this is a lightweight suite)\n" .
-"-v: Run the Verify Tests.  These tests require uploads to be uploaded first." .
-"    See the test documentation for details\n";
+"-v -l: Run the Verify Tests.  These tests require uploads to be uploaded first." .
+"    See the test documentation for details\n" .
+"    You must specify a log file when using -v, best to use the same log file" .
+"    that was used in a previous run for example -a -l foo, then -v -l foo when" .
+"    all the files have been uploaded with -a.";
 
-static $setUp = FALSE;
-$errors = 0;
+global $logFile;
+global $LF;
+
 /*
  * process parameters and run the appropriate test suite,
  * redirect  outputs to log file
  */
+$setUp = FALSE;
+$errors = 0;
 $date = date('Y-m-d');
+$time = date('h:i:s-a');
+$defaultLog = "/FossTestResults-$date-$time";
 $myname = $argv[0];
 $SiteTests = '../ui/tests/SiteTests';
 $BasicTests = '../ui/tests/BasicTests';
@@ -68,8 +78,8 @@ $VerifyTests = '../ui/tests/VerifyTests';
 $Home = getcwd();
 $pid = getmypid();
 
-$options = getopt('abhsv');
-if(empty($options))
+$options = getopt('abhl:sv');
+if (empty ($options))
 {
   print "$usage\n";
   exit (0);
@@ -79,6 +89,21 @@ if (array_key_exists('h', $options))
   print "$usage\n";
   exit (0);
 }
+if (array_key_exists('l', $options))
+{
+  $logFile = $options['l'];
+  $logFileName = basename($logfile);
+} else
+{
+  // Default Log file, use full path to it
+  $cwd = getcwd();
+  $logFile = $cwd . $defaultLog;
+  $logFileName = $defaultLog;
+}
+
+//$LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
+//print "Using log file:$logFile\n";
+
 /**
  * _runSetupPage()
  *
@@ -91,24 +116,27 @@ function _runSetupVerify()
   global $date;
   global $myname;
   global $Home;
+  global $logFile;
+  global $LF;
 
-  if(chdir($Home) === FALSE)
+  if (chdir($Home) === FALSE)
   {
-    print "_runSetupVerify ERROR: can't cd to $Home\n";
+    LogAndPrint($LF, "_runSetupVerify ERROR: can't cd to $Home\n");
   }
-  $SetupLast = exec("./uploadTestData.php >> /tmp/AllFOSSologyTests-$date 2>&1",$dummy,$SUrtn);
+  print "\n";
+  $SetupLast = exec("./uploadTestData.php >> $logFile 2>&1", $dummy, $SUrtn);
   // need to check the return on the setup and report accordingly.
   if ($SUrtn != 0)
   {
-    print "ERROR in Test Setup.  Some or all Verify Tests may fail\n";
-    print "Check the file /tmp/AllFOSSologyTests-$date for details\n";
+    LogAndPrint($LF, "ERROR in Test Setup.  Some or all Verify Tests may fail\n");
+    LogAndPrint($LF, "Check the file $logFile for details\n");
     $errors++;
   }
-  if($errors == 0)
+  if ($errors == 0)
   {
     $setUp = TRUE;
     print "Monitor the job Q and when the setup jobs are done, run:\n";
-    print "$myname -v\n";
+    print "$myname -v -l $logFile\n";
   }
 } //_runSetupVerify
 
@@ -117,86 +145,151 @@ function getSvnVer()
   return (`svnversion`);
 }
 
+function LogAndPrint($FileHandle, $message)
+{
+  if (empty ($message))
+  {
+    return (FALSE);
+  }
+  if (empty ($FileHandle))
+  {
+    return (FALSE);
+  }
+  if (-1 == fwrite($FileHandle, $message))
+  {
+    print $message;            // if we don't do this nothing will print
+    return (FALSE);
+  }
+  print $message;
+  return (TRUE);
+}
+
 $Svn = getSvnVer();
 
-// ************ ALL ********************
+/************* ALL Tests **********************************************/
 if (array_key_exists("a", $options))
 {
-   if(chdir($Home) === FALSE)
+  $LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
+  print "Using log file:$logFile\n";
+
+  if (chdir($Home) === FALSE)
   {
-    print "All Tests ERROR: can't cd to $Home\n";
+    LogAndPrint($LF, "All Tests ERROR: can't cd to $Home\n");
   }
-  print "Running All Tests on $date subversion version: $Svn\n";
-  if(chdir($SiteTests) === FALSE)
+  LogAndPrint($LF,
+    "Running All Tests on: $date at $time using subversion version: $Svn\n");
+
+  if (chdir($SiteTests) === FALSE)
   {
-    print "ALL Tests ERROR: can't cd to $SiteTests\n";
+    LogandPrint($LF, "ALL Tests ERROR: can't cd to $SiteTests\n");
   }
-  $SiteLast = exec("./runSiteTests.php > " .
-  "/tmp/AllFOSSologyTests-$date 2>&1", $dummy , $Srtn);
-  if(chdir('../BasicTests') === FALSE)
+  $SiteLast = exec("./runSiteTests.php >> $logFile 2>&1", $dummy, $Srtn);
+  if (chdir('../BasicTests') === FALSE)
   {
-    print "ALL Tests ERROR: can't cd to $BasicTests\n";
+    LogAndPrint($LF, "ALL Tests ERROR: can't cd to $BasicTests\n");
   }
-  $BasicLast = exec("./runBasicTests.php >> " .
-  "/tmp/AllFOSSologyTests-$date 2>&1", $dummy , $Brtn);
+  $BasicLast = exec("./runBasicTests.php >> $logFile 2>&1", $dummy, $Brtn);
   /*
    * The verify tests require that uploads be done first.  The best we
    * can do for now is to run the setup and then tell the tester to run
    * the verify tests after the the setup is done.
    */
   _runSetupVerify();
+  fclose($LF);
 }
 
-// Basic
+/**************** Basic Tests (includes Site) *************************/
 if (array_key_exists("b", $options))
 {
-  if(chdir($Home) === FALSE)
-  {
-    print "Basic Tests ERROR: can't cd to $Home\n";
-  }
-  print "Running Basic/SiteTests\n";
-  if(chdir($SiteTests) === FALSE)
-  {
-    print "Basic/Site Tests ERROR: can't cd to $SiteTests\n";
-  }
-  $SiteLast = exec("./runSiteTests.php > " .
-  "/tmp/BasicFOSSologyTests-$date 2>&1", $dummy, $Srtn);
+  $LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
+  print "Using log file:$logFile\n";
 
-  if(chdir('../BasicTests') === FALSE)
+  if (chdir($Home) === FALSE)
   {
-    print "Basic Tests ERROR: can't cd to $BasicTests\n";
+    $BnoHome = "Basic Tests ERROR: can't cd to $Home\n";
+    LogAndPrint($LF, $BnoHome);
   }
-  $BasicLast = exec("./runBasicTests.php >> " .
-  "/tmp/BasicFOSSologyTests-$date 2>&1", $dummy, $Srtn);
+  $startB = "Running Basic/SiteTests on: $date at $time\n";
+  LogAndPrint($LF, $startB);
+
+  if (chdir($SiteTests) === FALSE)
+  {
+    $noBS = "Basic/Site Tests ERROR: can't cd to $SiteTests\n";
+    LogAndPrint($LF, $noBS);
+  }
+  print "\n";
+  $SiteLast = exec("./runSiteTests.php >> $logFile 2>&1", $dummy, $Srtn);
+
+  if (chdir('../BasicTests') === FALSE)
+  {
+    $noBT = "Basic Tests ERROR: can't cd to $BasicTests\n";
+    LogAndPrint($LF, $noBT);
+  }
+  print "\n";
+  $BasicLast = exec("./runBasicTests.php >> $logFile 2>&1", $dummy, $Srtn);
+  fclose($LF);
 }
+
+/***************** SiteTest Only **************************************/
 if (array_key_exists("s", $options))
 {
-  print "Running SiteTests\n";
-  if(chdir($SiteTests) === FALSE)
+  $LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
+  print "Using log file:$logFile\n";
+
+  $Sstart = "Running SiteTests on: $date at $time\n";
+  LogAndPrint($LF, $Sstart);
+
+  if (chdir($SiteTests) === FALSE)
   {
-    print "Site Tests ERROR: can't cd to $SiteTests\n";
+    $noST = "Site Tests ERROR: can't cd to $SiteTests\n";
+    LogAndPrint($LF, $noST);
   }
-  $SiteLast = exec("./runSiteTests.php > " .
-  "/tmp/SiteFOSSologyTests-$date 2>&1", $dummy, $Srtn);
+  $SiteLast = exec("./runSiteTests.php >> $logFile 2>&1", $dummy, $Srtn);
+  fclose($LF);
 }
 
-// ******************** Verify ******************************
+/******************** Verify ******************************************/
 if (array_key_exists("v", $options))
 {
-  if(chdir($Home) === FALSE)
+  if (array_key_exists("l", $options))
   {
-    print "Verify Tests ERROR: can't cd to $Home\n";
-  }
-  if(chdir($VerifyTests) === FALSE)
+    $logFile = $options['l'];
+  } else
   {
-    print "Verify Tests ERROR: can't cd to $VerifyTests\n";
+    print "Error, must supply a path to a log file with -v option\n";
+    print $usage;
+    exit (1);
   }
-  $VerifyLast = exec("./runVerifyTests.php > " .
-  "/tmp/VerifyFOSSologyTests-$date 2>&1", $dummy, $Prtn);
+
+  $VLF = fopen($logFile, 'a');
+  $Sstart = "\nRunning Verify Tests on: $date at $time\n";
+  LogAndPrint($VLF, $Sstart);
+
+  if (chdir($Home) === FALSE)
+  {
+    $noVhome = "Verify Tests ERROR: can't cd to $Home\n";
+    LogAndPrint($VLF, $noVhome);
+  }
+  if (chdir($VerifyTests) === FALSE)
+  {
+    $noVT = "Verify Tests ERROR: can't cd to $VerifyTests\n";
+    LogAndPrint($VLF, $noVT);
+  }
+  $VerifyLast = exec("./runVerifyTests.php >> $logFile 2>&1", $dummy, $Prtn);
+  fclose($VLF);
+
+  $resHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
+  $reportHome = "$resHome" . "$logFileName";
+  if (!rename($logFile, $reportHome))
+  {
+    print "Error, could not move\n$logFile\nto\n$resHome\n";
+    print "Please move it by hand so the reports will be current\n";
+  }
 }
 
 /*
- * this program should remove the testing folder, which will do a lot of
- * clean up for the tests.
+ * this program does not remove the testing folders in case there
+ * was a failure and it needs to be looked at.  Run the script/test
+ * runTestCleanup.php to clean things up.
  */
 ?>
