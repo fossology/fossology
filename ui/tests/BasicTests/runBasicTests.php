@@ -51,13 +51,14 @@ $test->addTestFile('editFolderDescriptionOnlyTest.php');
 $test->addTestFile('moveFolderTest.php');
 $test->addTestFile('DupFolderTest.php');
 $test->addTestFile('DupUploadTest.php');
+$test->addTestFile('createFldrDeleteIt.php');
 
 if (TextReporter::inCli())
 {
   $results = $test->run(new TextReporter()) ? 0 : 1;
   print "Ending Basic Tests at: " . date('r') . "\n";
   $elapseTime = $start->TimeAgo($start->getStartTime());
-  print "The Basic Tests took {$elapseTime}to run\n";
+  print "The Basic Tests took {$elapseTime}to run\n\n";
   exit($results);
 }
 $test->run(new HtmlReporter());
