@@ -278,21 +278,21 @@ is complicated and specific to your particular install goals. Here are
 the results of a diff between the default config file provided by
 Debian and the one used for the http://repo.fossology.org database:
 
-> #hba_file = 'ConfigDir/pg_hba.conf'	# host-based authentication file
-> #ident_file = 'ConfigDir/pg_ident.conf'	# IDENT configuration file
-> #external_pid_file = '(none)'		# write an extra pid file
-> listen_addresses = '*'
-> max_connections = 50
-> #shared_buffers = 1000		# min 16 or max_connections*2, 8KB each
-> shared_buffers = 32768
-> work_mem = 10240  
-> max_fsm_pages = 100000		# min max_fsm_relations*16, 6 bytes each
-> fsync = off   
-> full_page_writes = off		#recover from partial page writes
-> commit_delay = 1000 
-> effective_cache_size = 25000
-> log_min_duration_statement = -1	# -1 is disabled, 0 logs all statements
-> #log_line_prefix = ''			# Special values:
+ #hba_file = 'ConfigDir/pg_hba.conf'	# host-based authentication file
+ #ident_file = 'ConfigDir/pg_ident.conf'	# IDENT configuration file
+ #external_pid_file = '(none)'		# write an extra pid file
+ listen_addresses = '*'
+ max_connections = 50
+ #shared_buffers = 1000			# min 16 or max_connections*2, 8KB each
+ shared_buffers = 32768
+ work_mem = 102400 
+ max_fsm_pages = 100000			# min max_fsm_relations*16, 6 bytes each
+ fsync = off   
+ full_page_writes = off			#recover from partial page writes
+ commit_delay = 1000 
+ effective_cache_size = 25000
+ log_min_duration_statement = -1	# -1 is disabled, 0 logs all statements
+ log_line_prefix = '%t %h %c'		# prepend a time stamp to all log entries
 
 2.1.5 Configuring PHP
 ---------------------
