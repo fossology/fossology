@@ -40,9 +40,10 @@
  *
  * @param string either -a, -b, -s or -p
  *
- * @TODO: user specified log file (uses a default one now)
- * @TODO: -n option for 'no cleanup'?
- * @TODO: remove Testing Directory
+ * @TODO: check for a initial / in the logfile path name? to guard
+ * against the issue I ran into with it not writting to the correct
+ * logfile.
+ * @TODO: -c option for cleanup
  *
  */
 $usage .= "Usage: $argv[0] [-l path] {[-a] | [-b] | [-h] | [-s] | [-v -l]}\n";
@@ -92,13 +93,14 @@ if (array_key_exists('h', $options))
 if (array_key_exists('l', $options))
 {
   $logFile = $options['l'];
-  $logFileName = basename($logfile);
+  $logFileName = basename($logFile);
 } else
 {
   // Default Log file, use full path to it
   $cwd = getcwd();
   $logFile = $cwd . $defaultLog;
-  $logFileName = $defaultLog;
+  //$logFileName = $defaultLog;
+  $logFileName = basename($logFile);
 }
 
 //$LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
@@ -278,11 +280,15 @@ if (array_key_exists("v", $options))
   $VerifyLast = exec("./runVerifyTests.php >> $logFile 2>&1", $dummy, $Prtn);
   fclose($VLF);
 
+ if (chdir($Home) === FALSE)
+  {
+    $noVhome = "Verify Tests ERROR: can't cd to $Home\n";
+  }
   $resHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
   $reportHome = "$resHome" . "$logFileName";
   if (!rename($logFile, $reportHome))
   {
-    print "Error, could not move\n$logFile\nto\n$resHome\n";
+    print "Error, could not move\n$logFile\nto\n$reportHome\n";
     print "Please move it by hand so the reports will be current\n";
   }
 }
