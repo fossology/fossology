@@ -496,13 +496,13 @@ void	CheckPids	()
     else /* if unknown process sent signal */
 	{
 #if USE_WAITID
-	if (Info.si_signo != SIGCHLD) /* ignore unknown children */
+	if ((Info.si_signo != 0) && (Info.si_signo != SIGCHLD)) /* ignore unknown children */
 	  {
 	  LogPrint("INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
 		Info.si_signo, Info.si_pid, Info.si_status);
 	  }
 #else
-	if (WTERMSIG(Status) != SIGCHLD) /* ignore unknown children */
+	if ((WTERMSIG(Status) != 0) && (WTERMSIG(Status) != SIGCHLD)) /* ignore unknown children */
 	  {
 	  LogPrint("INFO: Received signal %d from unknown (old) process-id %d; child returned status %x\n",
 		WTERMSIG(Status), Pid, Status);
