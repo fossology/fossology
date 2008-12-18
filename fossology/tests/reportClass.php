@@ -21,6 +21,10 @@
  *
  *@param string $path the fully qualified path to the results file
  *
+ *@TODO: change the gather report data, as using the directory iterator
+ *doesn't work when there are multiple files.  The file list must be
+ *sorted by modify time?  something to look at.
+ *
  *@version "$Id$"
  *
  * Created on Dec 12, 2008
