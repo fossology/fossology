@@ -48,7 +48,7 @@
  */
 $usage .= "Usage: $argv[0] [-l path] {[-a] | [-b] | [-h] | [-s] | [-v -l]}\n";
 $usage .= "-a: Run all FOSSology Test Suites\n" .
-"-b: Run the basic test suite. This runs the SiteTests and any Tests" .
+"-b: Run the basic test suite. This runs the SiteTests and any Tests " .
 "that don't depend on uploads\n" .
 "-h: Display Usage\n" .
 "-l path: test results file path \n" .
