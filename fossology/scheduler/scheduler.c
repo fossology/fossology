@@ -385,6 +385,30 @@ int	main	(int argc, char *argv[])
 
   /**** From here on, I am the only scheduler running ****/
 
+  /**************************************/
+  /* catch signals */
+  /**************************************/
+  memset(&SigAct,0,sizeof(SigAct));
+  SigAct.sa_sigaction = HandleSig;
+  sigemptyset(&(SigAct.sa_mask));
+  SigAct.sa_flags = SA_SIGINFO | SA_RESTART;
+  sigaction(SIGCHLD,&SigAct,NULL);
+
+  /* handle signals to the parent */
+  SigAct.sa_flags = SA_SIGINFO | SA_RESTART;
+  SigAct.sa_sigaction = ParentSig;
+  if (sigaction(SIGSEGV,&SigAct,NULL) != 0) perror("SIGSEGV");
+  if (sigaction(SIGQUIT,&SigAct,NULL) != 0) perror("SIGQUIT");
+  if (sigaction(SIGTERM,&SigAct,NULL) != 0) perror("SIGTERM");
+  if (sigaction(SIGINT,&SigAct,NULL) != 0) perror("SIGINT");
+//  if (sigaction(SIGHUP,&SigAct,NULL) != 0) perror("SIGHUP");
+  if (sigaction(SIGUSR1,&SigAct,NULL) != 0) perror("SIGUSR1");
+  if (sigaction(SIGUSR2,&SigAct,NULL) != 0) perror("SIGUSR2");
+  if (sigaction(SIGALRM,&SigAct,NULL) != 0) perror("SIGALRM");
+  /* ignore dead pipes when using -lpq -- see http://archives.postgresql.org/pgsql-bugs/2003-03/msg00118.php */
+  signal(SIGPIPE,SIG_IGN);
+  signal(SIGALRM,SIG_IGN); /* ignore self-wakeups */
+
   /* Prepare logging */
   LogPrint("*** Scheduler started\n");
 
@@ -448,26 +472,6 @@ int	main	(int argc, char *argv[])
 
   /* Check for competing schedulers */
   DBCheckSchedulerUnique();
-
-  /* catch signals */
-  memset(&SigAct,0,sizeof(SigAct));
-  SigAct.sa_sigaction = HandleSig;
-  sigemptyset(&(SigAct.sa_mask));
-  SigAct.sa_flags = SA_SIGINFO | SA_RESTART;
-  sigaction(SIGCHLD,&SigAct,NULL);
-
-  /* handle signals to the parent */
-  SigAct.sa_flags = SA_SIGINFO | SA_RESTART;
-  SigAct.sa_sigaction = ParentSig;
-  if (sigaction(SIGSEGV,&SigAct,NULL) != 0) perror("SIGSEGV");
-  if (sigaction(SIGQUIT,&SigAct,NULL) != 0) perror("SIGQUIT");
-  if (sigaction(SIGTERM,&SigAct,NULL) != 0) perror("SIGTERM");
-  if (sigaction(SIGINT,&SigAct,NULL) != 0) perror("SIGINT");
-//  if (sigaction(SIGHUP,&SigAct,NULL) != 0) perror("SIGHUP");
-  if (sigaction(SIGUSR1,&SigAct,NULL) != 0) perror("SIGUSR1");
-  if (sigaction(SIGUSR2,&SigAct,NULL) != 0) perror("SIGUSR2");
-  if (sigaction(SIGALRM,&SigAct,NULL) != 0) perror("SIGALRM");
-  signal(SIGALRM,SIG_IGN); /* ignore self-wakeups */
 
   /**************************************/
   /* while there are commands to run... */
