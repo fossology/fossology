@@ -53,6 +53,7 @@ if($tonight->makeInstall() !== TRUE)
   print "There were Errors in the Installation examine make-install.out\n";
   exit(1);
 }
+$tonight->stopScheduler();
 /*
  * next steps:
  * run fo-postinstall
