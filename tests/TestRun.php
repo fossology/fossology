@@ -60,8 +60,17 @@ class TestRun
   {
     $pLast = NULL;
     $pLast = exec('ps -ef | grep scheduler | grep -v grep', $results, $rtn);
+    print "DB: CKSKED: pLast is:$pLast\n";
     if(is_null($pLast)) { return(FALSE); }
+    else { return(TRUE); }
+  }
 
+  private function getSchedPid()
+  {
+    $psLast = NULL;
+    $cmd = 'ps -ef | grep fossology-scheduler | grep -v grep';
+    $psLast = exec($cmd, $results, $rtn );
+    print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
   }
 
   public function makeInstall()
@@ -91,7 +100,7 @@ class TestRun
     }
     $mcLast = exec('make clean 2>&1', $results, $rtn);
     $makeLast = exec('make 2>&1', $results, $rtn);
-    if($rtn === 0 )
+    if($rtn == 0 )
       {
         //print "results of the make are:\n"; print_r($results) . "\n";
         if(array_search('Error', $results))
@@ -110,6 +119,23 @@ class TestRun
 
   }
 
+  /**
+   * startScheduler
+   *
+   * Check to see if the scheduler is running, if so stop it:
+   * 1. stop it with the standard /etc/initd./fossology stop
+   * 2. If it is still running find the pid and kill -9
+   */
+  public function startScheduler()
+  {
+    if($this->checkScheduler() === TRUE) { return(TRUE); }
+    else
+    {
+      $stdStart = exec('sudo /etc/init.d/fossology start', $results, $rtn);
+      print "DB: stdStart is:$stdStart\nresults are:\n"; print_r($results) . "\n";
+    }
+  }
+
   public function setSrcPath($path)
   {
 
@@ -124,10 +150,16 @@ class TestRun
    */
   public function stopScheduler()
   {
-    if(this->checkScheduler() === FALSE) { return(TRUE); }
+    if($this->checkScheduler() === FALSE) { return(TRUE); }
     else
     {
       $stdStop = exec('sudo /etc/init.d/fossology stop', $results, $rtn);
+      print "DB: stdStop is:$stdStop\nresults are:\n"; print_r($results) . "\n";
+    }
+    // still running, kill with -9
+    if($this->checkScheduler() === TRUE)
+    {
+      $this->schedulerPid = $this->getSchedPid();
     }
   }
 
@@ -140,9 +172,6 @@ class TestRun
    */
   public function svnUpdate()
   {
-    /*
-     * cd to the srcpath, svn update...
-     */
      if(!chdir($this->srcPath))
      {
        print "Error can't cd to $this->srcPath\n";
