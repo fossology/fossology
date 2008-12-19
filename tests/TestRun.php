@@ -49,6 +49,21 @@ class TestRun
     }
   }
 
+  /**
+   * checkScheduler
+   *
+   * Check to see if the scheduler is running, if so stop it:
+   * 1. stop it with the standard /etc/initd./fossology stop
+   * 2. If it is still running find the pid and kill -9
+   */
+  private function checkScheduler()
+  {
+    $pLast = NULL;
+    $pLast = exec('ps -ef | grep scheduler | grep -v grep', $results, $rtn);
+    if(is_null($pLast)) { return(FALSE); }
+
+  }
+
   public function makeInstall()
   {
     if(!chdir($this->srcPath))
@@ -90,7 +105,7 @@ class TestRun
     else { return(FALSE); }
   }
 
-  public function schedTest()
+  public function schedulerTest()
   {
 
   }
@@ -98,6 +113,22 @@ class TestRun
   public function setSrcPath($path)
   {
 
+  }
+
+  /**
+   * stopScheduler
+   *
+   * Check to see if the scheduler is running, if so stop it:
+   * 1. stop it with the standard /etc/initd./fossology stop
+   * 2. If it is still running find the pid and kill -9
+   */
+  public function stopScheduler()
+  {
+    if(this->checkScheduler() === FALSE) { return(TRUE); }
+    else
+    {
+      $stdStop = exec('sudo /etc/init.d/fossology stop', $results, $rtn);
+    }
   }
 
   /**

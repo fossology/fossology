@@ -44,6 +44,9 @@ if($tonight->makeSrcs() !== TRUE)
   print "There were Errors in the make of the sources examing make.out\n";
   exit(1);
 }
+/*
+ * need to add in stopping the scheduler...
+ */
 print "Installing fossology\n";
 if($tonight->makeInstall() !== TRUE)
 {
