@@ -32,6 +32,7 @@
 require_once('TestRun.php');
 
 $tonight = new TestRun();
+/*
 print "Updating svn sources\n";
 if($tonight->svnUpdate() !== TRUE)
 {
@@ -44,16 +45,26 @@ if($tonight->makeSrcs() !== TRUE)
   print "There were Errors in the make of the sources examing make.out\n";
   exit(1);
 }
-/*
- * need to add in stopping the scheduler...
- */
+//need to add in stopping the scheduler...
 print "Installing fossology\n";
 if($tonight->makeInstall() !== TRUE)
 {
   print "There were Errors in the Installation examine make-install.out\n";
   exit(1);
 }
-$tonight->stopScheduler();
+*/
+print "Starting Scheduler\n";
+if($tonight->startScheduler() !== TRUE)
+{
+  print "Error! Could not start fossology-scheduler\n";
+  exit(1);
+}
+print "Stoping Scheduler\n";
+if($tonight->stopScheduler() !== TRUE)
+{
+  print "Error! Could not stop fossology-scheduler\n";
+  exit(1);
+}
 /*
  * next steps:
  * run fo-postinstall

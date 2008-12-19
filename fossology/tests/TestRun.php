@@ -34,6 +34,8 @@
 class TestRun
 {
   public $srcPath;
+  private $NotRunning = FALSE;
+  private $Running    = TRUE;
 
   public function __construct($srcPath=NULL)
   {
@@ -60,9 +62,9 @@ class TestRun
   {
     $pLast = NULL;
     $pLast = exec('ps -ef | grep scheduler | grep -v grep', $results, $rtn);
-    print "DB: CKSKED: pLast is:$pLast\n";
-    if(is_null($pLast)) { return(FALSE); }
-    else { return(TRUE); }
+    //print "DB: CKS: pLast is:$pLast\n";
+    if(empty($pLast)) { return($this->NotRunning); }
+    else { return($this->Running); }
   }
 
   private function getSchedPid()
@@ -70,7 +72,10 @@ class TestRun
     $psLast = NULL;
     $cmd = 'ps -ef | grep fossology-scheduler | grep -v grep';
     $psLast = exec($cmd, $results, $rtn );
-    print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
+    //print "DB: psLast is:$psLast\nresults are:\n"; print_r($results) . "\n";
+    $parts = split(' ', $psLast);
+    //print "parts is:\n"; print_r($parts) . "\n";
+    return($parts[5]);
   }
 
   public function makeInstall()
@@ -128,11 +133,18 @@ class TestRun
    */
   public function startScheduler()
   {
-    if($this->checkScheduler() === TRUE) { return(TRUE); }
+    if($this->checkScheduler() === $this->Running) { return($this->Running); }
     else
     {
-      $stdStart = exec('sudo /etc/init.d/fossology start', $results, $rtn);
-      print "DB: stdStart is:$stdStart\nresults are:\n"; print_r($results) . "\n";
+      $stdStart = exec("sudo /etc/init.d/fossology start > /dev/null 2>&1 &", $results, $rtn);
+      sleep(5);
+      if($this->checkScheduler() === $this->Running)
+      {
+        return($this->Running);
+      }
+      else {
+        return($this->NotRunning);
+        }
     }
   }
 
@@ -150,17 +162,18 @@ class TestRun
    */
   public function stopScheduler()
   {
-    if($this->checkScheduler() === FALSE) { return(TRUE); }
+    if($this->checkScheduler() === $this->NotRunning) { return(TRUE); }
     else
     {
-      $stdStop = exec('sudo /etc/init.d/fossology stop', $results, $rtn);
-      print "DB: stdStop is:$stdStop\nresults are:\n"; print_r($results) . "\n";
+      $stdStop = exec('sudo /etc/init.d/fossology stop 2>&1', $results, $rtn);
     }
     // still running, kill with -9
-    if($this->checkScheduler() === TRUE)
+    if($this->checkScheduler() === $this->Running)
     {
       $this->schedulerPid = $this->getSchedPid();
+      $killLast = exec("sudo kill -9 $this->schedulerPid 2>&1", $results, $rtn);
     }
+    return(TRUE);
   }
 
   /**
