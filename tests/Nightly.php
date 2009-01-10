@@ -100,6 +100,11 @@ print "after running tests the output is\n";
 print_r($results) . "\n";
 
 /*
+ * ok, works for running -a, now need to figure out how to tell if all
+ * my jobs are done? then run the verifier part...
+ */
+
+/*
 print "Stoping Scheduler\n";
 if($tonight->stopScheduler() !== TRUE)
 {
