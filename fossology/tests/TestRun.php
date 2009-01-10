@@ -78,13 +78,27 @@ class TestRun
     return($parts[5]);
   }
 
+  public function foPostinstall()
+  {
+    if(!chdir($this->srcPath))
+    {
+      print "Error can't cd to $this->srcPath\n";
+    }
+    $foLast = exec('sudo /usr/local/lib/fossology/fo-postinstall > fop.out 2>&1', $results, $rtn);
+    if($rtn == 0)
+    {
+      return(TRUE);
+    }
+    else { return(FALSE); }
+  }
+
   public function makeInstall()
   {
     if(!chdir($this->srcPath))
     {
       print "Error can't cd to $this->srcPath\n";
     }
-    $miLast = exec('sudo make install 2>&1', $results, $rtn);
+    $miLast = exec('sudo make install > make-install.out 2>&1', $results, $rtn);
     if($rtn == 0)
     {
       if(array_search('Error', $results))
@@ -103,8 +117,8 @@ class TestRun
     {
       print "Error can't cd to $this->srcPath\n";
     }
-    $mcLast = exec('make clean 2>&1', $results, $rtn);
-    $makeLast = exec('make 2>&1', $results, $rtn);
+    $mcLast = exec('make clean > make-clean.out 2>&1', $results, $rtn);
+    $makeLast = exec('make > make.out 2>&1', $results, $rtn);
     if($rtn == 0 )
       {
         //print "results of the make are:\n"; print_r($results) . "\n";
@@ -120,6 +134,19 @@ class TestRun
   }
 
   public function schedulerTest()
+  {
+    $StLast = exec('sudo /usr/local/lib/fossology/fossology-scheduler -t -L stdout > ST.out 2>&1', $results, $rtn);
+    if($rtn != 0 )
+    {
+      if(array_search('FATAL', $results))
+      {
+          return(FALSE);
+      }
+      return(FALSE);
+    }
+    return(TRUE);
+  }
+ public function setSrcPath($path)
   {
 
   }
@@ -146,11 +173,6 @@ class TestRun
         return($this->NotRunning);
         }
     }
-  }
-
-  public function setSrcPath($path)
-  {
-
   }
 
   /**
