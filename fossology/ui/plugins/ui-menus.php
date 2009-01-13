@@ -276,7 +276,7 @@ class ui_menu extends FO_Plugin
 	/** Same height at FOSSology logo **/
 	$V .= "<table border=0 width='100%'>";
 	$V .= "<tr>";
-	$V .= "<td width='150' rowspan='2'><a href='/' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . Traceback_uri() . "images/fossology-logo.gif' border=0></a></td>";
+	$V .= "<td width='150' rowspan='2'><a href='http://fossology.org' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . Traceback_uri() . "images/fossology-logo.gif' border=0></a></td>";
 	$V .= "<td colspan='2'>";
 	$V .= $this->menu_html($Menu,0);
 	$V .= "</td>";
