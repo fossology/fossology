@@ -45,7 +45,7 @@ class ui_topnav extends FO_Plugin
 	$V .= "<table width='100%' border=0 cellpadding=0>\n";
 	$V .= "  <tr>\n";
 	$V .= "    <td width='15%'>";
-	$V .= "<a href='/' target='_top'><img src='${Uri}images/fossology-logo.gif' align=absmiddle border=0></a>";
+	$V .= "<a href='http://fossology.org' target='_top'><img src='${Uri}images/fossology-logo.gif' align=absmiddle border=0></a>";
 	$V .= "</td>\n";
 	$V .= "    <td valign='top'>";
 	$Menu = &$Plugins[plugin_find_id("menus")];
