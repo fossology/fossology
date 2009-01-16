@@ -88,7 +88,6 @@ function AgentCheckBoxDo($upload_pk)
       {
       $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
       if (empty($Agent)) { continue; }
-      if ($Agent->Name == $SkipAgent) { continue; }
       $rc = $Agent->AgentCheck($upload_pk);
       $Name = htmlentities($Agent->Name);
       $Parm = GetParm("Check_" . $Name,PARM_INTEGER);
