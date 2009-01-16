@@ -436,19 +436,22 @@ void	PrintRanges	(char *S, int Which, int ShowMatch)
 
   /* Convert scan range to actual byte offsets in the file */
   S1=MS.Label[Which].SectionStart;
-  for(i=0; i < MS.Symbols[Which].SymbolStart; i++)
+  if (MS.Symbols[Which].SymbolRealSize)
     {
-    S1 += MS.Symbols[Which].SymbolRealSize[i];
+    for(i=0; i < MS.Symbols[Which].SymbolStart; i++)
+      {
+      S1 += MS.Symbols[Which].SymbolRealSize[i];
+      }
+    for(S2=S1; i < MS.Symbols[Which].SymbolEnd; i++)
+      {
+      S2 += MS.Symbols[Which].SymbolRealSize[i];
+      }
+    for(S3=S2; i < MS.Symbols[Which].SymbolMax; i++)
+      {
+      S3 += MS.Symbols[Which].SymbolRealSize[i];
+      }
+    printf("  Scan Range bytes: %d - %d - %d (length: %d - %d)\n",S1,S2,S3,S2-S1,S3-S1);
     }
-  for(S2=S1; i < MS.Symbols[Which].SymbolEnd; i++)
-    {
-    S2 += MS.Symbols[Which].SymbolRealSize[i];
-    }
-  for(S3=S2; i < MS.Symbols[Which].SymbolMax; i++)
-    {
-    S3 += MS.Symbols[Which].SymbolRealSize[i];
-    }
-  printf("  Scan Range bytes: %d - %d - %d (length: %d - %d)\n",S1,S2,S3,S2-S1,S3-S1);
 
   if (ShowMatch)
     {
@@ -459,15 +462,18 @@ void	PrintRanges	(char *S, int Which, int ShowMatch)
 
     /* Convert match range to actual byte offsets */
     S1=MS.Label[Which].SectionStart;
-    for(i=0,S1=MS.Label[Which].SectionStart; i < MS.Matrix.MatrixMinPos[Which]; i++)
+    if (MS.Symbols[Which].SymbolRealSize)
       {
-      S1 += MS.Symbols[Which].SymbolRealSize[i];
+      for(i=0,S1=MS.Label[Which].SectionStart; i < MS.Matrix.MatrixMinPos[Which]; i++)
+        {
+        S1 += MS.Symbols[Which].SymbolRealSize[i];
+        }
+      for(S2=S1; i <= MS.Matrix.MatrixMaxPos[Which]; i++)
+        {
+        S2 += MS.Symbols[Which].SymbolRealSize[i];
+        }
+      printf("  Match bytes: %d - %d (length: %d)\n",S1,S2,S2-S1);
       }
-    for(S2=S1; i <= MS.Matrix.MatrixMaxPos[Which]; i++)
-      {
-      S2 += MS.Symbols[Which].SymbolRealSize[i];
-      }
-    printf("  Match bytes: %d - %d (length: %d)\n",S1,S2,S2-S1);
     }
 } /* PrintRanges() */
 
@@ -947,7 +953,7 @@ inline void	GetPathString	(int Which)
   int ThisIsTheEnd=0; /* am I at the end of a sequence? */
   int V; /* matrix values for computing the full path */
   int Len;
-  int i;
+  int i=0;
   int BaseOffset;
 
   BaseOffset = MS.Symbols[Which].SymbolStart;
@@ -973,20 +979,26 @@ inline void	GetPathString	(int Which)
   printf("Offset[%d] = %ld\n",Which,Pos);
   /* Display the path offsets */
   // printf("Before:");
-  for(i=0, Sum=0; i<MS.Path.MatrixPath[Which][MS.Matrix.MatrixBestMin]; i++)
+  if (MS.Symbols[Which].SymbolRealSize)
     {
-    // printf(" %d",MS.Symbols[Which].SymbolRealSize[i]);
-    Sum += MS.Symbols[Which].SymbolRealSize[i];
+    for(i=0, Sum=0; i<MS.Path.MatrixPath[Which][MS.Matrix.MatrixBestMin]; i++)
+      {
+      // printf(" %d",MS.Symbols[Which].SymbolRealSize[i]);
+      Sum += MS.Symbols[Which].SymbolRealSize[i];
+      }
     }
   // printf("\n");
   Start=Sum+Pos;
   printf("Total before: %ld\n",Sum+Pos);
 
   // printf("After:");
-  for( ; i<=MS.Path.MatrixPath[Which][MS.Matrix.MatrixBestMax]; i++)
+  if (MS.Symbols[Which].SymbolRealSize)
     {
-    // printf(" %d",MS.Symbols[Which].SymbolRealSize[i]);
-    Sum += MS.Symbols[Which].SymbolRealSize[i];
+    for( ; i<=MS.Path.MatrixPath[Which][MS.Matrix.MatrixBestMax]; i++)
+      {
+      // printf(" %d",MS.Symbols[Which].SymbolRealSize[i]);
+      Sum += MS.Symbols[Which].SymbolRealSize[i];
+      }
     }
   // printf("\n");
   printf("Total after: %ld\n",Sum+Pos);
@@ -1005,9 +1017,12 @@ inline void	GetPathString	(int Which)
 
   if (MS.Matrix.MatrixBestMin == 0) MS.Matrix.MatrixBestMin=1;
   V=MS.Matrix.MatrixBestMin;
-  for(Sym=0; Sym < MS.Path.MatrixPath[Which][V]; Sym++)
+  if (MS.Symbols[Which].SymbolRealSize)
     {
-    Pos += MS.Symbols[Which].SymbolRealSize[Sym];
+    for(Sym=0; Sym < MS.Path.MatrixPath[Which][V]; Sym++)
+      {
+      Pos += MS.Symbols[Which].SymbolRealSize[Sym];
+      }
     }
   PosStart=Pos;
   PosEnd=0;
@@ -1018,9 +1033,12 @@ inline void	GetPathString	(int Which)
   {
   /* Compute the path offsets before the first match */
   Pos=MS.Label[Which].SectionStart;
-  for(i=0; i < BaseOffset + MS.Path.MatrixPath[Which][MS.Matrix.MatrixBestMin]; i++)
+  if (MS.Symbols[Which].SymbolRealSize)
     {
-    Pos += MS.Symbols[Which].SymbolRealSize[i];
+    for(i=0; i < BaseOffset + MS.Path.MatrixPath[Which][MS.Matrix.MatrixBestMin]; i++)
+      {
+      Pos += MS.Symbols[Which].SymbolRealSize[i];
+      }
     }
 
   /* Compute path offsets within the path */
@@ -1030,9 +1048,12 @@ inline void	GetPathString	(int Which)
   for(V=MS.Matrix.MatrixBestMin; V <= MS.Matrix.MatrixBestMax; V++)
     {
     /* Add in the length of this segment */
-    for( ; i <= BaseOffset + MS.Path.MatrixPath[Which][V]; i++)
+    if (MS.Symbols[Which].SymbolRealSize)
       {
-      Pos += MS.Symbols[Which].SymbolRealSize[i];
+      for( ; i <= BaseOffset + MS.Path.MatrixPath[Which][V]; i++)
+        {
+        Pos += MS.Symbols[Which].SymbolRealSize[i];
+        }
       }
     PosEnd = Pos;
 
@@ -1076,7 +1097,8 @@ inline void	GetPathString	(int Which)
 	  snprintf(MS.Path.PathString[Which]+Len,40,"%ld-%ld",PosStart,PosEnd);
 	  }
 	/* Skip the part that is not in range */
-	if (V < MS.Matrix.MatrixBestMax)
+
+	if (MS.Symbols[Which].SymbolRealSize && (V < MS.Matrix.MatrixBestMax))
 	  {
 	  for( ; i < BaseOffset + MS.Path.MatrixPath[Which][V+1]; i++)
 	    {
@@ -1099,7 +1121,7 @@ void	GetStartEnd	(int Which, long *RealStart, long *RealEnd)
 #if DEBUG
   if (Verbose) PrintRanges("GetStartEnd",Which,1);
 #endif
-  if (MS.Label[Which].SectionEnd > 0)
+  if (MS.Symbols[Which].SymbolRealSize && (MS.Label[Which].SectionEnd > 0))
 	{
 	*RealStart = MS.Label[Which].SectionStart;
 	for(i=0; i < MS.Symbols[Which].SymbolStart + MS.Matrix.MatrixMinPos[Which]; i++)
