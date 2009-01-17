@@ -28,7 +28,8 @@
  *
  * @version "$Id: $"
  *
- * @TODO: add a parameter to allow for how long to wait?
+ * @TODO add method documentation
+ * @TODO create a subclass for doing longer waits (CheckandWait?)
  *
  * Created on Jan. 15, 2009
  */
@@ -52,13 +53,12 @@ class check4jobs {
   private $Db;
 
   function __construct() {
-    $myDB = new db();
-    $connection = $myDB->connect();
+    $this->Db = new db();
+    $connection = $this->Db->connect();
     if (!(is_resource($connection))) {
       print "{$argv[0]}:FATAL ERROR!, could not connect to the data-base\n";
       return(NULL);
     }
-    $this->dbConn = $connection;
     return;
   }
 
@@ -67,14 +67,10 @@ class check4jobs {
     return($this->jobCount);
   }
   private function _ck4j() {
-
     $results = $this->Db->dbQuery(SQL);
-    if (empty ($results)) {
-      $this->jobCount = 0;
-    } else {
-      $howMany = count($results);
-      $this->jobCount = $howMany;
-    }
+    $howMany = count($results);
+    $this->jobCount = $howMany;
+    return;
   }
 
   public function getJobCount() {
