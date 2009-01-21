@@ -46,6 +46,9 @@
  * @TODO: -c option for cleanup
  *
  */
+
+require_once('testClasses/check4jobs.php');
+
 $usage .= "Usage: $argv[0] [-l path] {[-a] | [-b] | [-h] | [-s] | [-v -l]}\n";
 $usage .= "-a: Run all FOSSology Test Suites\n" .
 "-b: Run the basic test suite. This runs the SiteTests and any Tests " .
@@ -60,6 +63,7 @@ $usage .= "-a: Run all FOSSology Test Suites\n" .
 "    all the files have been uploaded with -a.";
 
 global $logFile;
+global $logFileName;
 global $LF;
 
 /*
@@ -198,6 +202,24 @@ if (array_key_exists("a", $options))
    */
   _runSetupVerify();
   fclose($LF);
+
+  // wait for tests to finish
+
+  $jobsDone = wait4jobs();
+  if($jobDone != 0){
+    print "ERROR! jobs are not finished after two hours, not running" .
+          "verify tests, please investigate and run verify tests by hand\n";
+    exit(1);
+  }
+  if($jobDone == 1){
+    verifyUploads($logFile);
+  }
+
+  if(!is_null($rtn = saveResults())){
+    print "ERROR! could not save the test results, please save by hand\n";
+    exit(1);
+  }
+  exit(0);
 }
 
 /**************** Basic Tests (includes Site) *************************/
@@ -230,6 +252,7 @@ if (array_key_exists("b", $options))
   print "\n";
   $BasicLast = exec("./runBasicTests.php >> $logFile 2>&1", $dummy, $Srtn);
   fclose($LF);
+  exit(0);
 }
 
 /***************** SiteTest Only **************************************/
@@ -248,24 +271,67 @@ if (array_key_exists("s", $options))
   }
   $SiteLast = exec("./runSiteTests.php >> $logFile 2>&1", $dummy, $Srtn);
   fclose($LF);
+  exit(0);
 }
 
 /******************** Verify ******************************************/
-if (array_key_exists("v", $options))
-{
-  if (array_key_exists("l", $options))
-  {
+
+if (array_key_exists("v", $options)){
+  if (array_key_exists("l", $options)){
     $logFile = $options['l'];
-  } else
-  {
+  }
+  else{
     print "Error, must supply a path to a log file with -v option\n";
     print $usage;
     exit (1);
   }
 
-  $VLF = fopen($logFile, 'a');
-  $Sstart = "\nRunning Verify Tests on: $date at $time\n";
-  LogAndPrint($VLF, $Sstart);
+  if(!verifyUploads($logFile)){
+    print "ERROR! could not verify upload tests, please investigate\n";
+    exit(1);
+  }
+
+  if(!is_null($rtn = saveResults())){
+    print "ERROR! could not save the test results, please save by hand\n";
+    exit(1);
+  }
+  exit(0);
+}
+
+function saveResults(){
+
+  global $HOME;
+  global $logFileName;
+  global $LF;
+
+  $resHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
+
+  if (chdir($Home) === FALSE){
+    $nohome = "Save Data ERROR: can't cd to $Home\n";
+    LogAndPrint($LF, $nohome);
+    return($nohome);
+  }
+  $reportHome = "$resHome" . "$logFileName";
+  if (!rename($logFile, $reportHome)){
+    $E = "Error, could not move\n$logFile\nto\n$reportHome\n";
+    $E .= "Please move it by hand so the reports will be current\n";
+    return($E);
+  }
+  return(NULL);
+}
+
+function verifyUploads($logfile) {
+
+  global $HOME;
+  global $VerifyTests;
+
+  if(empty($logfile)){
+    return(FALSE);
+  }
+
+  $VLF = fopen($logfile, 'a');
+  $Vstart = "\nRunning Verify Tests on: $date at $time\n";
+  LogAndPrint($VLF, $Vstart);
 
   if (chdir($Home) === FALSE)
   {
@@ -279,18 +345,7 @@ if (array_key_exists("v", $options))
   }
   $VerifyLast = exec("./runVerifyTests.php >> $logFile 2>&1", $dummy, $Prtn);
   fclose($VLF);
-
- if (chdir($Home) === FALSE)
-  {
-    $noVhome = "Verify Tests ERROR: can't cd to $Home\n";
-  }
-  $resHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
-  $reportHome = "$resHome" . "$logFileName";
-  if (!rename($logFile, $reportHome))
-  {
-    print "Error, could not move\n$logFile\nto\n$reportHome\n";
-    print "Please move it by hand so the reports will be current\n";
-  }
+  return(TRUE);
 }
 
 /*
