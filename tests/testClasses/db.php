@@ -1,4 +1,6 @@
 <?php
+
+
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -29,78 +31,86 @@
  * Created on Jan 15, 2009
  */
 
- require_once(dirname(__FILE__) . '../TestEnvironment.php');
+require_once (dirname(__FILE__) . '/../TestEnvironment.php');
 
- class db
- {
-   private $_pg_conn;
-   private $pg_rows;
-   private $pg_Error;
-   private $dbName;
-   private $dbUser;
-   private $dbPassword;
-   private $dbHost;
+global $URL;
+global $USER;
+global $PASSWORD;
 
-   function __construct($options=NULL) {
-     if(isnull($options)) {
-        $this->dbHost = parse_url($URL, PHP_URL_HOST);
-        //$this->dbName   = $DBNAME;
-        $this->dbUser     = $USER;
-        $this->dbPassword = $PASSWORD;
+class db {
+  private $_pg_conn;
+  private $pg_rows;
+  private $pg_Error;
+  private $dbName;
+  private $dbUser;
+  private $dbPassword;
+  private $dbHost;
 
-        _docon();
-     }
-     else {
-        _docon($options);
-     }
-     if (!isset ($this->_pg_conn)) {
-       $this->pg_ERROR = 1;
-       return (FALSE);
-     }
-     $this->pg_Error = 0;
-     return (TRUE);
-   } // __construct
+  function __construct($options = NULL) {
+    global $URL;
+    global $USER;
+    global $PASSWORD;
 
-/**
- * connect
- *
- * public function to connect to the db, uses class properties or passed
- * in options.
- *
- * @param string $options e.g. "user=fonzy; password=thefonz;"
- *
- * @return connection resource
- */
-   public function connect($options=NULL) {
-    if (is_resource($this->_db_conn)) {
-      return($this->_db_conn);
+    if (is_null($options)) {
+      //$this->dbHost = parse_url($URL, PHP_URL_HOST);
+      $this->dbHost = 'localhost';
+      //$this->dbName   = $DBNAME;
+      $this->dbUser = $USER;
+      $this->dbPassword = $PASSWORD;
+
+      $this->_docon();
     }
     else {
-      _do_con();
-      return($this->_db_conn);
+      $this->_docon($options);
     }
-   } // connect
+    if (!isset ($this->_pg_conn)) {
+      $this->pg_ERROR = 1;
+      return (FALSE);
+    }
+    $this->pg_Error = 0;
+    return (TRUE);
+  } // __construct
 
-/**
- * _docon
- *
- * private function that creates a persistent connection to a data base.
- * Uses class properties for the connect parameters or accepts then as a
- * set of ; seperated strings.
- *
- * Sets _pg_conn and pg_Error
- */
+  /**
+   * connect
+   *
+   * public function to connect to the db, uses class properties or passed
+   * in options.
+   *
+   * @param string $options e.g. "user=fonzy; password=thefonz;"
+   *
+   * @return connection resource
+   */
+  public function connect($options = NULL) {
+    // need to deal with options!
+    if (is_resource($this->_pg_conn)) {
+      return ($this->_pg_conn);
+    }
+    else {
+      $this->_docon();
+      return ($this->_pg_conn);
+    }
+  } // connect
 
-   private function _docon($options=NULL) {
+  /**
+   * _docon
+   *
+   * private function that creates a persistent connection to a data base.
+   * Uses class properties for the connect parameters or accepts then as a
+   * set of ; seperated strings.
+   *
+   * Sets _pg_conn and pg_Error
+   */
+
+  private function _docon($options = NULL) {
     // fix the hardcode below, enhance create test env...
     $dbname = 'fossology';
 
-    if (isnull($options))
-    {
-      $this->_pg_conn = pg_pconnect("dbname=$dbname", "$host=$this->dbHost",
-       "user=$this->dbUser", "password=$this->dbPassword" );
-    } else
-    {
+    if (is_null($options)) {
+      $this->_pg_conn = pg_pconnect("host=$this->dbHost dbname=$dbname " .
+      "user=$this->dbUser password=$this->dbPassword");
+    }
+    else {
       $this->_pg_conn = pg_pconnect(str_replace(";", " ", $options));
     }
     if (!isset ($this->_pg_conn)) {
@@ -111,12 +121,15 @@
     return (1);
   }
   /**
-  * query
+  * dbQuery
   *
-  * perform a query, return any results.
+  * perform a query, return results
+  *
+  * @param string $Sql the SQL Query to perform
+  * @return array $rows can be empty array.
   */
 
-  public function dbQuery($sql) {
+  public function dbQuery($Sql) {
     /*
      * sql query's can return False on error or NULL (no error, no
      * results)
@@ -125,24 +138,26 @@
      * areas where better error checking can be done (e.g. where the @
      * is used)
      */
-    $this->pg_rows = array();
+    $this->pg_rows = array ();
     if (!$this->_pg_conn) {
-      return($rows);  // think about this, is false better?
+      return ($this->pg_rows); // think about this, is false better?
     }
-    if (empty($sql)) {
-      return($rows);    // same as above
+    if (empty ($Sql)) {
+      print "DB-QU: empty \$Sql!\n";
+      return ($this->pg_rows); // same as above
     }
 
-    @ $result = pg_query($this->_pg_conn, $Command);
+    @ $result = pg_query($this->_pg_conn, $Sql);
 
     /* Error handling */
     if ($result == FALSE) {
+      print "DB-QU: result is FALSE!\n";
       $this->Error = 1;
       //$PGError = pg_result_error_field($result, PGSQL_DIAG_SQLSTATE);
       $PGError = pg_last_error($this->_pg_conn);
       if ($this->Debug) {
         print "--------\n";
-        print "SQL failed: $Command\n";
+        print "DB-QU: SQL failed: $Sql\n";
         print $PGError;
       }
       $this->pg_rows = 0;
@@ -153,6 +168,7 @@
     }
     /* if the query returned nothing then just return*/
     if (!isset ($result)) {
+      print "DB-QU: result not set!\n";
       return;
     }
     @ $rows = pg_fetch_all($result);
@@ -160,8 +176,9 @@
     if (!is_array($rows)) {
       $rows = array ();
     }
+    //print "DB-QU: rows is\n"; print_r($rows) . "\n";
     @ pg_free_result($result);
     return $rows;
-  }
- } // class db
+  } // dbQuery
+} // class db
 ?>

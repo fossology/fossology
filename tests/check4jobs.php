@@ -22,6 +22,10 @@
 /**
  * Are there any jobs running?
  *
+ * usage: $ck4j = new check4jobs();
+ *        $count = $ck4j->getJobCount;
+ *        $count  = $ck4j->Check;
+ *
  * NOTE: this program depends on the UI testing infrastructure at this
  * point.
  * @return boolean (TRUE or FALSE)
@@ -59,6 +63,7 @@ class check4jobs {
       print "{$argv[0]}:FATAL ERROR!, could not connect to the data-base\n";
       return(NULL);
     }
+    $this->_ck4j();
     return;
   }
 
