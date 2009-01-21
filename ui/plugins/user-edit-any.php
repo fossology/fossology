@@ -226,10 +226,6 @@ class user_edit_any extends FO_Plugin
 	  if ($UserId == $Results[$i]['user_pk']) { $Selected = "selected"; }
 	  $V .= "<option $Selected value='" . $Results[$i]['user_pk'] . "'>";
 	  $V .= htmlentities($Results[$i]['user_name']);
-	  if (!empty($Results[$i]['user_desc']))
-	    {
-	    $V .= ' (' . htmlentities($Results[$i]['user_desc']) . ')';
-	    }
 	  }
 	$V .= "</select>\n";
 	$V .= "<P />\n";
