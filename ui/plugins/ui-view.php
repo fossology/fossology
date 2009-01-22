@@ -136,11 +136,10 @@ class ui_view extends FO_Plugin
 	}
     /* Now they are sorted by start offset */
     /* Make sure there are no overlaps */
-    $Start=-1; $End=-1;
+    $End=-1;
     for($i=0; !empty($this->Highlight[$i]); $i++)
       {
       if ($this->Highlight[$i]['Start'] <= $End) { $this->Highlight[$i]['Start'] = $End+1; }
-      $Start = $this->Highlight[$i]['Start'];
       $End = $this->Highlight[$i]['End'];
       }
     } // SortHighlightMenu()
