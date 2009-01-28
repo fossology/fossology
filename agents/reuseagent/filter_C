@@ -338,10 +338,12 @@ while($ARGV[0] ne "")
 	# Hash is only found in quoted strings, or on a compiler line.
 	# Since we handle strings separately...  Blow away the line!
 	$Junk = <FIN>;
+	$Junk =~ s/\r//;
 	chomp $Junk;
 	while($Junk =~ /\\$/)
 	  {
 	  $Junk = <FIN>;
+	  $Junk =~ s/\r//;
 	  chomp $Junk;
 	  }
 	$c="";
@@ -361,7 +363,7 @@ while($ARGV[0] ne "")
 			{
 			$c .= getc(FIN);
 			}
-		$Source .= $c;
+		if ($c ne "\r") { $Source .= $c; }
 		}
 	$Source .= ">'";	# save the unquote
 	$c="";
@@ -379,7 +381,7 @@ while($ARGV[0] ne "")
 			{
 			$c .= getc(FIN);
 			}
-		$Source .= $c;
+		if ($c ne "\r") { $Source .= $c; }
 		}
 	$Source .= ">\"";
 	$c="";
@@ -392,6 +394,7 @@ while($ARGV[0] ne "")
 		{
 		# it's a "//" so blow away the line.
 		$Junk = <FIN>;
+		$Junk =~ s/\r//;
 		$c="";
 		}
 	elsif ($c eq "*")
