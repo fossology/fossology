@@ -39,7 +39,7 @@ class ui_license extends FO_Plugin
    Install(): Create and configure database tables
    ***********************************************************/
   function Install()
-  { 
+  {
     global $DB;
     if (empty($DB)) { return(1); } /* No DB */
 
@@ -47,19 +47,19 @@ class ui_license extends FO_Plugin
     /* Update all license counts */
     $TempTable = "counts" . time() . "_" . rand();
     $SQL = "BEGIN;
-	SELECT pfile_fk,COUNT(pfile_fk) AS count INTO TEMP $TempTable
-	  FROM licterm_name
-	  INNER JOIN pfile ON pfile_liccount IS NULL
-	  AND pfile_fk = pfile_pk
-	  GROUP BY pfile_fk ORDER BY pfile_fk;
-	UPDATE pfile
-	  SET pfile_liccount = $TempTable.count
-	  FROM $TempTable
-	  WHERE pfile.pfile_pk = $TempTable.pfile_fk
-	  ;
-	DROP TABLE $TempTable;
-	COMMIT;
-	";
+  SELECT pfile_fk,COUNT(pfile_fk) AS count INTO TEMP $TempTable
+    FROM licterm_name
+    INNER JOIN pfile ON pfile_liccount IS NULL
+    AND pfile_fk = pfile_pk
+    GROUP BY pfile_fk ORDER BY pfile_fk;
+  UPDATE pfile
+    SET pfile_liccount = $TempTable.count
+    FROM $TempTable
+    WHERE pfile.pfile_pk = $TempTable.pfile_fk
+    ;
+  DROP TABLE $TempTable;
+  COMMIT;
+  ";
 //    $DB->Action($SQL);
     return(0);
   } // Install()
@@ -68,7 +68,7 @@ class ui_license extends FO_Plugin
    RegisterMenus(): Customize submenus.
    ***********************************************************/
   function RegisterMenus()
-    {
+  {
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
     $Item = GetParm("item",PARM_INTEGER);
@@ -76,17 +76,17 @@ class ui_license extends FO_Plugin
     if (!empty($Item) && !empty($Upload))
       {
       if (GetParm("mod",PARM_STRING) == $this->Name)
-	{
-	menu_insert("Browse::License",1);
-	menu_insert("Browse::[BREAK]",100);
-	menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
-	}
-      else
-	{
-	menu_insert("Browse::License",1,$URI,"View license histogram");
-	}
+      {
+       menu_insert("Browse::License",1);
+       menu_insert("Browse::[BREAK]",100);
+       menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
       }
-    } // RegisterMenus()
+      else
+      {
+       menu_insert("Browse::License",1,$URI,"View license histogram");
+      }
+    }
+  } // RegisterMenus()
 
   /***********************************************************
    Initialize(): This is called before the plugin is used.
@@ -106,9 +106,9 @@ class ui_license extends FO_Plugin
       $this->State=PLUGIN_STATE_VALID;
       array_push($Plugins,$this);
       }
-    
+
     /* Remove "updcache" from the GET args and set $this->UpdCache
-     * This way all the url's based on the input args won't be 
+     * This way all the url's based on the input args won't be
      * polluted with updcache
      */
     if ($_GET['updcache'])
@@ -127,8 +127,8 @@ class ui_license extends FO_Plugin
 
   /***********************************************************
    SortName(): Given two elements sort them by name.
-   Used for sorting the histogram.
-   ***********************************************************/
+   Callback Used for sorting the histogram.
+   **********************************************************/
   function SortName ($a,$b)
     {
     list($A0,$A1,$A2) = split("\|",$a,3);
@@ -191,14 +191,13 @@ class ui_license extends FO_Plugin
     $MapLic2GID = array(); /* every license should have an ID number */
 
     /*  Get the counts for each license under this UploadtreePk*/
-    $Lics = array();
     LicenseGetAll($Item,$Lics);   // key is license name, value is count
     $LicTotal = $Lics[' Total '];
 
     /* Ensure that every license is associated with an ID */
     /* MapLic2Gid key is license name, value is a sequence number (GID) */
     $MapNext=0;
-    foreach($Lics as $Key => $Val) $MapLic2GID[$Key] = $MapNext++; 
+    foreach($Lics as $Key => $Val) $MapLic2GID[$Key] = $MapNext++;
 
 
     /****************************************/
@@ -222,24 +221,24 @@ class ui_license extends FO_Plugin
 
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
-	{
-	$LinkUri = "$Uri&item=" . $C['uploadtree_pk'];
-	$LinkUri = preg_replace("/mod=license/","mod=view-license",$LinkUri);
-	}
+  {
+  $LinkUri = "$Uri&item=" . $C['uploadtree_pk'];
+  $LinkUri = preg_replace("/mod=license/","mod=view-license",$LinkUri);
+  }
       else
-	{
-	$LinkUri = NULL;
-	}
+  {
+  $LinkUri = NULL;
+  }
 
       if (Iscontainer($C['ufile_mode']))
-	{
-	$uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
-	$LicUri = "$Uri&item=" . $uploadtree_pk;
-	}
+  {
+  $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
+  $LicUri = "$Uri&item=" . $uploadtree_pk;
+  }
       else
-	{
-	$LicUri = NULL;
-	}
+  {
+  $LicUri = NULL;
+  }
 
 
       /* Populate the output ($VF) - file list */
@@ -254,28 +253,28 @@ class ui_license extends FO_Plugin
       $HasHref=0;
       $HasBold=0;
       if ($IsContainer)
-	{
-	$VF .= "<a href='$LicUri'>"; $HasHref=1;
-	$VF .= "<b>"; $HasBold=1;
-	}
+  {
+  $VF .= "<a href='$LicUri'>"; $HasHref=1;
+  $VF .= "<b>"; $HasBold=1;
+  }
       else if (!empty($LinkUri)) //  && ($LicCount > 0))
-	{
-	$VF .= "<a href='$LinkUri'>"; $HasHref=1;
-	}
+  {
+  $VF .= "<a href='$LinkUri'>"; $HasHref=1;
+  }
       $VF .= $C['ufile_name'];
       if ($IsDir) { $VF .= "/"; };
       if ($HasBold) { $VF .= "</b>"; }
       if ($HasHref) { $VF .= "</a>"; }
       $VF .= "</td><td>";
       if ($LicCount)
-	{
-	$VF .= "[" . number_format($LicCount,0,"",",") . "&nbsp;";
-	//$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
-	$VF .= "license" . ($LicCount == 1 ? "" : "s");
-	$VF .= "</a>";
-	$VF .= "]";
-	$ChildLicCount += $LicCount;
-	}
+  {
+  $VF .= "[" . number_format($LicCount,0,"",",") . "&nbsp;";
+  //$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
+  $VF .= "license" . ($LicCount == 1 ? "" : "s");
+  $VF .= "</a>";
+  $VF .= "]";
+  $ChildLicCount += $LicCount;
+  }
       $VF .= "</td>";
       $VF .= "</tr>\n";
 
@@ -332,24 +331,24 @@ class ui_license extends FO_Plugin
     foreach($Lics as $Key => $Val)
       {
       if ($Key != ' Total ')
-	{
-	$GID = $MapLic2GID[$Key];
-	$VH .= "<tr><td align='right'>$Val</td>";
-	$Total += $Val;
-	if ($SFbL >= 0)
-	  {
-	  $VH .= "<td align='center'><a href='";
-	  $VH .= Traceback_uri();
-	  $VH .= "?mod=search_file_by_license&item=$Item&lic=" . urlencode($Key) . "'>Show</a></td>";
-	  }
-	$VH .= "<td id='LicGroup-$GID'>";
-	$Uri = Traceback_uri() . "?mod=license_listing&item=$Item&lic=$GID";
-	// $VH .= "<a href=\"javascript:LicColor('LicGroup-$GID','Lic-','" . trim($LicGID2Item[$GID]) . "','yellow'); ";
-	// $VH .= "\">";
-	$VH .= htmlentities($Key);
-	$VH .= "</a>";
-	$VH .= "</td></tr>\n";
-	}
+  {
+  $GID = $MapLic2GID[$Key];
+  $VH .= "<tr><td align='right'>$Val</td>";
+  $Total += $Val;
+  if ($SFbL >= 0)
+    {
+    $VH .= "<td align='center'><a href='";
+    $VH .= Traceback_uri();
+    $VH .= "?mod=search_file_by_license&item=$Item&lic=" . urlencode($Key) . "'>Show</a></td>";
+    }
+  $VH .= "<td id='LicGroup-$GID'>";
+  $Uri = Traceback_uri() . "?mod=license_listing&item=$Item&lic=$GID";
+  // $VH .= "<a href=\"javascript:LicColor('LicGroup-$GID','Lic-','" . trim($LicGID2Item[$GID]) . "','yellow'); ";
+  // $VH .= "\">";
+  $VH .= htmlentities($Key);
+  $VH .= "</a>";
+  $VH .= "</td></tr>\n";
+  }
       }
     $VH .= "</table>\n";
     $VH .= "<br>\n";
@@ -416,15 +415,15 @@ class ui_license extends FO_Plugin
     $Item = GetParm("item",PARM_INTEGER);
 
     switch(GetParm("show",PARM_STRING))
-	{
-	case 'detail':
-		$Show='detail';
-		break;
-	case 'summary':
-	default:
-		$Show='summary';
-		break;
-	}
+  {
+  case 'detail':
+    $Show='detail';
+    break;
+  case 'summary':
+  default:
+    $Show='summary';
+    break;
+  }
 
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
     $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder")) . "&show=$Show";
@@ -441,33 +440,33 @@ class ui_license extends FO_Plugin
       switch($this->OutputType)
       {
       case "XML":
-	break;
+  break;
       case "HTML":
-	$V .= "<font class='text'>\n";
+  $V .= "<font class='text'>\n";
 
-	/************************/
-	/* Show the folder path */
-	/************************/
-	$V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
+  /************************/
+  /* Show the folder path */
+  /************************/
+  $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
 
-	/******************************/
-	/* Get the folder description */
-	/******************************/
-	if (!empty($Folder))
-	  {
-	  // $V .= $this->ShowFolder($Folder);
-	  }
-	if (!empty($Upload))
-	  {
-	  $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
-	  $V .= $this->ShowUploadHist($Upload,$Item,$Uri);
-	  }
-	$V .= "</font>\n";
-	break;
+  /******************************/
+  /* Get the folder description */
+  /******************************/
+  if (!empty($Folder))
+    {
+    // $V .= $this->ShowFolder($Folder);
+    }
+  if (!empty($Upload))
+    {
+    $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
+    $V .= $this->ShowUploadHist($Upload,$Item,$Uri);
+    }
+  $V .= "</font>\n";
+  break;
       case "Text":
-	break;
+  break;
       default:
-	break;
+  break;
       }
 
       $Cached = false;
