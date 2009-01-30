@@ -47,12 +47,9 @@ class debian_lics extends FO_Plugin
 	break;
       case "HTML":
         $Filename = GetParm("filename",PARM_STRING);
-        $Page = GetParm("page",PARM_INTEGER);
         $Uri = preg_replace("/&filename=[^&]*/","",Traceback());
-        $Uri = preg_replace("/&page=[^&]*/","",$Uri);
 
         /* Prompt for the string to search for */
-        $V .= "You can use '%' as a wild-card.\n";
         $V .= "<form action='$Uri' method='POST'>\n";
         $V .= "<ul>\n";
         $V .= "<li>Enter the string to search for:<P>";
