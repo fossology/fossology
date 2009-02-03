@@ -1,3 +1,9 @@
+fossology (1.0.1~20090203-1) unstable; urgency=low
+
+  * unofficial SVN version for testing
+
+ -- Matt Taggart <taggart@debian.org>  Tue, 03 Feb 2009 15:13:06 -0800
+
 fossology (1.0.0-2) unstable; urgency=low
 
   * Add explicit agents dependency on libextractor-plugins since
