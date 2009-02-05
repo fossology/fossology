@@ -1,8 +1,8 @@
-fossology (1.0.1~20090203-1) unstable; urgency=low
+fossology (1.1.0~20090205) unstable; urgency=low
 
-  * unofficial SVN version for testing
+  * unofficial SVN version for testing process
 
- -- Matt Taggart <taggart@debian.org>  Tue, 03 Feb 2009 15:13:06 -0800
+ -- Build User <build@cranky.manage>  Thu, 05 Feb 2009 10:17:08 -0800
 
 fossology (1.0.0-2) unstable; urgency=low
 
