@@ -36,7 +36,8 @@ class ui_folders extends FO_Plugin
   var $NoMenu     = 1;
 
   /***********************************************************
-   Output(): This function returns the scheduler status.
+   Output(): This function returns the FOSSology logo and 
+             Folder Navigation bar
    ***********************************************************/
   function Output()
     {
