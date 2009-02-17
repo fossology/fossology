@@ -109,7 +109,7 @@ if [ $AGENT ]; then
       echo "NOTE: group '{$PROJECTGROUP}' already exists, good."
    else
       # use addgroup if it exists since it supports --system
-      if which addgroup; then
+      if [ -f /usr/sbin/addgroup -a ! -L /usr/sbin/addgroup ]; then
          addgroup --system {$PROJECTGROUP}
       else
          groupadd {$PROJECTGROUP}
