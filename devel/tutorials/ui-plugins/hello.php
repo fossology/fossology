@@ -29,12 +29,10 @@ class ui_hello extends FO_Plugin
   var $Name       = "hello";
   var $Title      = "Hello World Example";
   var $Version    = "1.0";
-  var $MenuList   = "Help::hello";
+  var $MenuList   = "Help::Hello World";
   var $DBaccess   = PLUGIN_DB_NONE;
   var $LoginFlag  = 0;
 
-  var $_Project="FOSSology";
-  var $_Copyright="Copyright (C) 2007-2008 Hewlett-Packard Development Company, L.P.";
   var $_Text="Hello World";
 
   function Output()
@@ -44,22 +42,13 @@ class ui_hello extends FO_Plugin
     switch($this->OutputType)
       {
       case "XML":
-	$V .= "<project>$this->_Project</project>\n";
-	$V .= "<copyright>$this->_Copyright</copyright>\n";
 	$V .= "<text>$this->_Text</text>\n";
 	break;
       case "HTML":
-	global $VERSION;
-	global $SVN_REV;
-	$V .= "<b>FOSSology version $VERSION (code revision $SVN_REV)</b>\n";
-	$V .= "<P/>\n";
-	$V .= "$this->_Copyright<P>\n";
-	$V .= str_replace("\n","\n<b><P><\b>\n",$this->_Text);
+	$V .= "<b>$this->_Text</b>\n";
 	break;
       case "Text":
-	$V .= "$this->_Project\n";
-	$V .= "$this->_Copyright\n";
-	$V .= str_replace("\n","\n\n",$this->_Text) . "\n";
+	$V .= "$this->_Text\n";
 	break;
       default:
 	break;
