@@ -31,6 +31,7 @@ class upload_file extends FO_Plugin {
   public $MenuList = "Upload::From File";
   public $Dependency = array("db", "agent_unpack", "showjobs");
   public $DBaccess = PLUGIN_DB_UPLOAD;
+
   /*********************************************
   Upload(): Process the upload request.
   Returns NULL on success, string on failure.
@@ -66,15 +67,25 @@ class upload_file extends FO_Plugin {
     }
     //echo "<pre>uploadfile: File Chmod'ed\n</pre>";
     //echo "<pre>uploadfile: scheduling wget\n</pre>";
+
     /* Run wget_agent locally to import the file. */
     global $LIBEXECDIR;
     $Prog = "$LIBEXECDIR/agents/wget_agent -g fossy -k $uploadpk '$UploadedFile'";
     system($Prog);
     unlink($UploadedFile);
+
     global $Plugins;
     $Unpack = & $Plugins[plugin_find_id("agent_unpack") ];
     $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
     AgentCheckBoxDo($uploadpk);
+
+    if (CheckEnotification) {
+      $sched = scheduleEmailNotification($uploadpk);
+      if ($sched !== NULL) {
+        return($sched);
+      }
+    }
+
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
     print "The file has been uploaded. ";
     print "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
@@ -109,6 +120,7 @@ class upload_file extends FO_Plugin {
             $V.= PopupAlert("Upload failed: $rc");
           }
         }
+
         /* Set default values */
         if (empty($GetURL)) {
           $GetURL = 'http://';
@@ -119,6 +131,7 @@ class upload_file extends FO_Plugin {
         $V.= "Many browsers, including Microsoft's Internet Explorer, have trouble uploading ";
         $V.= "file larger than 650 Megabytes (a standard-size CD-ROM image).\n";
         $V.= "If your file is larger than 650 Megabytes, then choose one of the other upload options.";
+
         /* Display the form */
         $V.= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
