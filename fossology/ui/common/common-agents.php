@@ -106,4 +106,88 @@ function AgentCheckBoxDo($upload_pk)
   return($V);
 } // AgentCheckBoxDo()
 
+/**
+ * CheckEnotification
+ *
+ * Check if email notification is on for this user
+ *
+ * @return boolean, true or false.
+ */
+
+function CheckEnotification() {
+  if ($_SESSION['UserEnote'] == 'y') {
+    return(TRUE);
+  }
+  else {
+    return(FALSE);
+  }
+}
+
+/**
+ * scheduleEmailNotification
+ *
+ * Schedule email notification for analysis results
+ *
+ * This routine provides the upload_pk and TO: parameter as jobqueue args for the
+ * email_results agent.
+ *
+ * This routine should only be called if the user wants to be notified by email
+ * of analysis results. See CheckEnotification().
+ *
+ * @param int $upload_pk the upload_pk of the upload
+ *
+ * @return NULL on success, string on failure.
+ */
+
+function scheduleEmailNotification($upload_pk) {
+
+  global $DB;
+  if (empty($DB)) {
+    return;
+  }
+  if (empty($upload_pk)) {
+    return ('Invalid parameter (upload_pk)');
+  }
+
+  /* get the last job in the job table for this upload_pk */
+
+  $Sql = "SELECT job_upload_fk, job_pk, job_name FROM job WHERE " .
+  "job_upload_fk = $upload_pk order by job_pk desc;";
+  $Results = $DB->Action($Sql);
+  $Row = $Results[0];
+  $job_pk = $Row['job_pk'];
+  //print "<pre>SEN:Results for last job for this upload_pk :\n"; print_r($Results) . "\n</pre>";
+
+  $Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
+         "jq_job_fk = $job_pk order by jq_pk desc;";
+  $Results = $DB->Action($Sql);
+  $Row = $Results[0];
+  $Depends[] = $Row['jq_pk'];
+  //print "<pre>SEN: depends is:\n"; print_r($Depends) . "\n</pre>";
+
+  /* set up input for fossjobstat */
+  $To = "-t {$_SESSION['UserEmail']}";
+  $upload_id = trim($upload_pk);
+  $uploadId = "-u $upload_id";
+
+  // query for job status? Which job!?  Do you have to look at all sub jobs to
+  // determine if they all passed or can you look (where?!)
+
+  /* That job is who we are dependent on. Add the email_results agent into the
+   * job table and jobqueue
+   */
+    /* Prepare the job: job "email" */
+    $jobpk = JobAddJob($upload_pk,"fossjobstat");
+    if (empty($jobpk) || ($jobpk < 0)) {
+      return("Failed to insert job record");
+    }
+
+    /* Prepare the job: job "email_results" has jobqueue item "email_results" */
+    /** 2nd parameter is obsolete **/
+    $jobqueuepk = JobQueueAdd($jobpk,"fossjobstat","$To $uploadId","no",NULL,$Depends);
+    if (empty($jobqueuepk)) {
+      return("Failed to insert task 'fossjobstat' into job queue");
+    }
+    return(NULL);
+}
 ?>
