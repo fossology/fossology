@@ -92,6 +92,7 @@ class user_edit_self extends FO_Plugin {
     $Folder = GetParm('folder', PARM_INTEGER);
     $Email = GetParm('email', PARM_TEXT);
     $Email_notify = GetParm('enote', PARM_TEXT);
+
     /* Make sure username looks valid */
     if (empty($_SESSION['UserId'])) {
       return ("You must be logged in.");
@@ -151,7 +152,7 @@ class user_edit_self extends FO_Plugin {
       if ($GotUpdate) {
         $SQL.= ", ";
       }
-      $SQL.= " email_notif = '$Email_notify'";
+      $SQL.= " email_notify = '$Email_notify'";
       $GotUpdate = 1;
     }
     if (!empty($Pass1) && ($Pass0 != $Pass1) && ($Pass1 == $Pass2)) {
@@ -225,7 +226,7 @@ class user_edit_self extends FO_Plugin {
         $V.= "<input type='password' name='pass1' size=20><br />\n";
         $V.= "<input type='password' name='pass2' size=20></td>\n";
         $V.= "</tr>\n";
-        if (empty($R['email_notif'])) {
+        if (empty($R['email_notify'])) {
           $Checked = "";
         } else {
           $Checked = "checked='checked'";

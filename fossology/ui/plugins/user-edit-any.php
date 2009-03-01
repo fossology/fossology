@@ -55,7 +55,6 @@ class user_edit_any extends FO_Plugin {
     $Block = GetParm("block", PARM_INTEGER);
     $Blank = GetParm("blank", PARM_INTEGER);
     if (!empty($Email_notify)) {
-      print "<pre>email_notif is:$Email_notify\n</pre>";
     }
     /* Make sure username looks valid */
     if (empty($User)) {
@@ -99,16 +98,14 @@ class user_edit_any extends FO_Plugin {
     /* check email notification, if empty (box not checked), or if no email
     * specified for the user set to ''. (default value for field is 'y').
     */
-    print "<pre>R-email_notif is:{$R['email_notif']}\n</pre>";
-    print "<pre>Email_notif is:$Email_notify\n</pre>";
     if ($Email_notify != $R['email_notify']) {
       if ($Email_notify == 'on') {
         $Email_notify = 'y';
       }
-      print "<pre>Setting Email_notif to:$Email_notify\n</pre>";
-      $DB->Action("UPDATE users SET email_notif = '$Email_notify' WHERE user_pk = '$UserId';");
-    } elseif (empty($Email)) {
-      $DB->Action("UPDATE users SET email_notif = '' WHERE user_pk = '$UserId';");
+      $DB->Action("UPDATE users SET email_notify = '$Email_notify' WHERE user_pk = '$UserId';");
+    }
+    elseif (empty($Email)) {
+      $DB->Action("UPDATE users SET email_notify = '' WHERE user_pk = '$UserId';");
     }
     if ($Folder != $R['root_folder_fk']) {
       $DB->Action("UPDATE users SET root_folder_fk = '$Folder' WHERE user_pk = '$UserId';");
@@ -132,7 +129,8 @@ class user_edit_any extends FO_Plugin {
     }
     if (substr($R['user_pass'], 0, 1) == ' ') {
       $OldBlock = 1;
-    } else {
+    }
+    else {
       $OldBlock = 0;
     }
     if (empty($Block)) {
@@ -141,7 +139,8 @@ class user_edit_any extends FO_Plugin {
     if ($Block != $OldBlock) {
       if ($Block) {
         $DB->Action("UPDATE users SET user_pass = ' " . $R['user_pass'] . "' WHERE user_pk = '$UserId';");
-      } else {
+      }
+      else {
         $DB->Action("UPDATE users SET user_pass = '" . trim($R['user_pass']) . "' WHERE user_pk = '$UserId';");
       }
     }
@@ -168,12 +167,13 @@ class user_edit_any extends FO_Plugin {
           if (empty($rc)) {
             /* Need to refresh the screen */
             $V.= PopupAlert('User edited.');
-          } else {
+          }
+          else {
             $V.= PopupAlert($rc);
           }
         }
         /* Get the list of users */
-        $SQL = "SELECT user_pk,user_name,user_desc,user_pass,root_folder_fk,user_perm,user_email,email_notif FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' ORDER BY user_name;";
+        $SQL = "SELECT user_pk,user_name,user_desc,user_pass,root_folder_fk,user_perm,user_email,email_notify FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' ORDER BY user_name;";
         $Results = $DB->Action($SQL);
         /* Create JavaScript for updating users */
         $V.= "<script language='javascript'>\n";
@@ -199,7 +199,8 @@ class user_edit_any extends FO_Plugin {
           $V.= "Userperm[" . $Id . "] = '" . $R['user_perm'] . "';\n";
           if (substr($R['user_pass'], 0, 1) == ' ') {
             $Block = 1;
-          } else {
+          }
+          else {
             $Block = 0;
           }
           $V.= "Userblock[" . $Id . "] = '$Block';\n";
