@@ -194,7 +194,7 @@ class user_edit_any extends FO_Plugin {
           $V.= "Userdesc[" . $Id . '] = "' . $Val . "\";\n";
           $Val = str_replace('"', "\\\"", $R['user_email']);
           $V.= "Useremail[" . $Id . '] = "' . $Val . "\";\n";
-          $V.= "Userenote[" . $Id . '] = "' . $R['email_notif'] . "\";\n";
+          $V.= "Userenote[" . $Id . '] = "' . $R['email_notify'] . "\";\n";
           $V.= "Userfolder[" . $Id . "] = '" . $R['root_folder_fk'] . "';\n";
           $V.= "Userperm[" . $Id . "] = '" . $R['user_perm'] . "';\n";
           if (substr($R['user_pass'], 0, 1) == ' ') {
