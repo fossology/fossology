@@ -47,10 +47,10 @@ class user_add extends FO_Plugin {
     $Desc = str_replace("'", "''", GetParm('description', PARM_TEXT));
     $Perm = GetParm('permission', PARM_INTEGER);
     $Folder = GetParm('folder', PARM_INTEGER);
-    $Email_notif = GetParm('enote', PARM_TEXT);
+    $Email_notify = GetParm('enote', PARM_TEXT);
     $Email = str_replace("'", "''", GetParm('email', PARM_TEXT));
 
-    print "<pre>email_notif is:$Email_notif\n</pre>";
+    print "<pre>email_notif is:$Email_notify\n</pre>";
 
     /* Make sure username looks valid */
     if (empty($User)) {
@@ -75,20 +75,20 @@ class user_add extends FO_Plugin {
     /* check email notification, if empty (box not checked), or if no email
      * specified for the user set to 'n'.
      */
-    if(empty($Email_notif)) {
-      $Email_notif = '';
+    if(empty($Email_notify)) {
+      $Email_notify = '';
     }
     elseif(empty($Email)) {
-      $Email_notif = '';
+      $Email_notify = '';
     }
 
     /* Add the user */
-    print "<pre>Adding user, email_notif is:$Email_notif\n</pre>";
+    print "<pre>Adding user, email_notif is:$Email_notify\n</pre>";
     print "<pre>Adding user, Emai is:$Email\n</pre>";
     $SQL = "INSERT INTO users
-      (user_name,user_desc,user_seed,user_pass,user_perm,user_email,email_notif,root_folder_fk)
+      (user_name,user_desc,user_seed,user_pass,user_perm,user_email,email_notify,root_folder_fk)
 	     VALUES
-      ('$User','$Desc','$Seed','$Hash',$Perm,'$Email','$Email_notif',$Folder);";
+      ('$User','$Desc','$Seed','$Hash',$Perm,'$Email','$Email_notify',$Folder);";
     $Results = $DB->Action($SQL);
     /* Make sure it was added */
     $SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";

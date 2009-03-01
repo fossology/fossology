@@ -70,13 +70,14 @@ class core_auth extends FO_Plugin {
       $Results = $DB->Action("SELECT * FROM users WHERE user_name = 'fossy';");
       if (empty($Results[0]['user_name'])) {
         /* User "fossy" does not exist.  Create it. */
-        $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
-		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,NULL,1);";
+        $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass," .
+               "user_perm,user_email,email_notifyroot_folder_fk)
+		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,NULL,'y',1);";
         print "*** Created default administrator: 'fossy' with password 'fossy'.\n";
       }
       else {
         /* User "fossy" exists!  Update it. */
-        $SQL = "UPDATE users SET user_perm = $Perm WHERE user_name = 'fossy';";
+        $SQL = "UPDATE users SET user_perm = $Perm, email_notify = 'y' WHERE user_name = 'fossy';";
         print "*** Existing user 'fossy' promoted to default administrator.\n";
       }
       $DB->Action($SQL);
@@ -161,7 +162,7 @@ class core_auth extends FO_Plugin {
         $_SESSION['Folder'] = $R['root_folder_fk'];
         $_SESSION['UserLevel'] = $R['user_perm'];
         $_SESSION['UserEmail'] = $R['user_email'];
-        $_SESSION['UserEnote'] = $R['email_notif'];
+        $_SESSION['UserEnote'] = $R['email_notify'];
         $Level = @$_SESSION['UserLevel'];
         /* Check for instant logouts */
         if (empty($R['user_pass'])) {
@@ -370,7 +371,7 @@ class core_auth extends FO_Plugin {
       print ($V);
       return;
   } // Output()
-  
+
 };
 $NewPlugin = new core_auth;
 $NewPlugin->Initialize();
