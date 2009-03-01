@@ -71,7 +71,7 @@ class user_edit_self extends FO_Plugin {
     if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     } // don't run
-    
+
   } // RegisterMenus()
   /*********************************************
   Edit(): Alter a user.
@@ -91,6 +91,7 @@ class user_edit_self extends FO_Plugin {
     $Perm = GetParm('permission', PARM_INTEGER);
     $Folder = GetParm('folder', PARM_INTEGER);
     $Email = GetParm('email', PARM_TEXT);
+    $Email_notify = GetParm('enote', PARM_TEXT);
     /* Make sure username looks valid */
     if (empty($_SESSION['UserId'])) {
       return ("You must be logged in.");
@@ -144,6 +145,13 @@ class user_edit_self extends FO_Plugin {
         $SQL.= ", ";
       }
       $SQL.= " user_email = '$Email'";
+      $GotUpdate = 1;
+    }
+    if ($Email_notify != $R['email_notify']) {
+      if ($GotUpdate) {
+        $SQL.= ", ";
+      }
+      $SQL.= " email_notif = '$Email_notify'";
       $GotUpdate = 1;
     }
     if (!empty($Pass1) && ($Pass0 != $Pass1) && ($Pass1 == $Pass2)) {
@@ -216,6 +224,13 @@ class user_edit_self extends FO_Plugin {
         $V.= "$Style<th>4.</th><th>Change your password.<br>Re-enter your password.</th><td>";
         $V.= "<input type='password' name='pass1' size=20><br />\n";
         $V.= "<input type='password' name='pass2' size=20></td>\n";
+        $V.= "</tr>\n";
+        if (empty($R['email_notif'])) {
+          $Checked = "";
+        } else {
+          $Checked = "checked='checked'";
+        }
+        $V.= "$Style<th>5.</th><th>E-mail Notification</th><td><input type=checkbox " . "name='enote' value='y' $Checked>" . "Check to enable email notification of completed analysis.</td>\n";
         $V.= "</tr>\n";
         $V.= "</table><P />";
         $V.= "<input type='submit' value='Edit!'>\n";

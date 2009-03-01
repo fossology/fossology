@@ -51,11 +51,11 @@ class user_edit_any extends FO_Plugin {
     $Perm = GetParm('permission', PARM_INTEGER);
     $Folder = GetParm('folder', PARM_INTEGER);
     $Email = GetParm('email', PARM_TEXT);
-    $Email_notif = GetParm('enote', PARM_TEXT);
+    $Email_notify = GetParm('enote', PARM_TEXT);
     $Block = GetParm("block", PARM_INTEGER);
     $Blank = GetParm("blank", PARM_INTEGER);
-    if (!empty($Email_notif)) {
-      print "<pre>email_notif is:$Email_notif\n</pre>";
+    if (!empty($Email_notify)) {
+      print "<pre>email_notif is:$Email_notify\n</pre>";
     }
     /* Make sure username looks valid */
     if (empty($User)) {
@@ -100,13 +100,13 @@ class user_edit_any extends FO_Plugin {
     * specified for the user set to ''. (default value for field is 'y').
     */
     print "<pre>R-email_notif is:{$R['email_notif']}\n</pre>";
-    print "<pre>Email_notif is:$Email_notif\n</pre>";
-    if ($Email_notif != $R['email_notif']) {
-      if ($Email_notif == 'on') {
-        $Email_notif = 'y';
+    print "<pre>Email_notif is:$Email_notify\n</pre>";
+    if ($Email_notify != $R['email_notify']) {
+      if ($Email_notify == 'on') {
+        $Email_notify = 'y';
       }
-      print "<pre>Setting Email_notif to:$Email_notif\n</pre>";
-      $DB->Action("UPDATE users SET email_notif = '$Email_notif' WHERE user_pk = '$UserId';");
+      print "<pre>Setting Email_notif to:$Email_notify\n</pre>";
+      $DB->Action("UPDATE users SET email_notif = '$Email_notify' WHERE user_pk = '$UserId';");
     } elseif (empty($Email)) {
       $DB->Action("UPDATE users SET email_notif = '' WHERE user_pk = '$UserId';");
     }
