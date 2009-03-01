@@ -46,6 +46,7 @@ class core_auth extends FO_Plugin {
     $DB->Action("UPDATE users SET user_seed = " . rand() . " WHERE user_seed IS NULL;");
     /* No users with no seed and no perm -- make them read-only */
     $DB->Action("UPDATE users SET user_perm = " . PLUGIN_DB_READ . " WHERE user_perm IS NULL;");
+
     /* There must always be at least one default user. */
     $Results = $DB->Action("SELECT * FROM users WHERE user_name = 'Default User';");
     if (empty($Results[0]['user_name'])) {
@@ -72,7 +73,8 @@ class core_auth extends FO_Plugin {
         $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
 		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,NULL,1);";
         print "*** Created default administrator: 'fossy' with password 'fossy'.\n";
-      } else {
+      }
+      else {
         /* User "fossy" exists!  Update it. */
         $SQL = "UPDATE users SET user_perm = $Perm WHERE user_name = 'fossy';";
         print "*** Existing user 'fossy' promoted to default administrator.\n";
@@ -85,6 +87,7 @@ class core_auth extends FO_Plugin {
     } /* Failed to insert */
     return (0);
   } // Install()
+
   /******************************************
   GetIP(): Retrieve the user's IP address.
   Some proxy systems pass forwarded IP address info.
@@ -101,6 +104,7 @@ class core_auth extends FO_Plugin {
     }
     return (@$_SERVER['REMOTE_ADDR']);
   } // GetIP()
+
   /******************************************
   PostInitialize(): This is where the magic for
   Authentication happens.
@@ -136,6 +140,7 @@ class core_auth extends FO_Plugin {
       $_SESSION['Folder'] = NULL;
       $_SESSION['ip'] = $this->GetIP();
     }
+
     /* Enable or disable plugins based on login status */
     $Level = PLUGIN_DB_NONE;
     if (@$_SESSION['User']) {
@@ -156,6 +161,7 @@ class core_auth extends FO_Plugin {
         $_SESSION['Folder'] = $R['root_folder_fk'];
         $_SESSION['UserLevel'] = $R['user_perm'];
         $_SESSION['UserEmail'] = $R['user_email'];
+        $_SESSION['UserEnote'] = $R['email_notif'];
         $Level = @$_SESSION['UserLevel'];
         /* Check for instant logouts */
         if (empty($R['user_pass'])) {
@@ -181,6 +187,7 @@ class core_auth extends FO_Plugin {
         $Level = $Results[0]['user_perm'];
       }
     }
+
     /* Disable all plugins with >= $Level access */
     $LoginFlag = empty($_SESSION['User']);
     $Max = count($Plugins);
@@ -196,6 +203,7 @@ class core_auth extends FO_Plugin {
     }
     $this->State = PLUGIN_STATE_READY;
   } // PostInitialize()
+
   /******************************************
   CheckUser(): See if a username/password is valid.
   Returns string on match, or null on no-match.
@@ -210,6 +218,7 @@ class core_auth extends FO_Plugin {
       return;
     }
     $User = str_replace("'", "''", $User); /* protect DB */
+
     /* See if the user exists */
     $Results = $DB->Action("SELECT * FROM users WHERE user_name = '$User';");
     $R = $Results[0];
@@ -234,6 +243,7 @@ class core_auth extends FO_Plugin {
     $_SESSION['User'] = $R['user_name'];
     $_SESSION['UserId'] = $R['user_pk'];
     $_SESSION['UserEmail'] = $R['user_email'];
+    $_SESSION['UserEnote'] = $R['email_notif'];
     $_SESSION['Folder'] = $R['root_folder_fk'];
     $_SESSION['time_check'] = time() + 10 * 60;
     /* No specified permission means ALL permission */
@@ -269,6 +279,7 @@ class core_auth extends FO_Plugin {
     $V.= "</script>\n";
     return ($V);
   } // CheckUser()
+
   /******************************************
   Output(): This is only called when the user logs out.
   ******************************************/
