@@ -51,8 +51,12 @@ class user_edit_any extends FO_Plugin {
     $Perm = GetParm('permission', PARM_INTEGER);
     $Folder = GetParm('folder', PARM_INTEGER);
     $Email = GetParm('email', PARM_TEXT);
+    $Email_notif = GetParm('enote', PARM_TEXT);
     $Block = GetParm("block", PARM_INTEGER);
     $Blank = GetParm("blank", PARM_INTEGER);
+    if (!empty($Email_notif)) {
+      print "<pre>email_notif is:$Email_notif\n</pre>";
+    }
     /* Make sure username looks valid */
     if (empty($User)) {
       return ("Username must be specified. No change.");
@@ -91,6 +95,20 @@ class user_edit_any extends FO_Plugin {
     if (strcmp($Email, $R['user_email'])) {
       $Val = str_replace("'", "''", $Email);
       $DB->Action("UPDATE users SET user_email = '$Val' WHERE user_pk = '$UserId';");
+    }
+    /* check email notification, if empty (box not checked), or if no email
+    * specified for the user set to ''. (default value for field is 'y').
+    */
+    print "<pre>R-email_notif is:{$R['email_notif']}\n</pre>";
+    print "<pre>Email_notif is:$Email_notif\n</pre>";
+    if ($Email_notif != $R['email_notif']) {
+      if ($Email_notif == 'on') {
+        $Email_notif = 'y';
+      }
+      print "<pre>Setting Email_notif to:$Email_notif\n</pre>";
+      $DB->Action("UPDATE users SET email_notif = '$Email_notif' WHERE user_pk = '$UserId';");
+    } elseif (empty($Email)) {
+      $DB->Action("UPDATE users SET email_notif = '' WHERE user_pk = '$UserId';");
     }
     if ($Folder != $R['root_folder_fk']) {
       $DB->Action("UPDATE users SET root_folder_fk = '$Folder' WHERE user_pk = '$UserId';");
@@ -155,7 +173,7 @@ class user_edit_any extends FO_Plugin {
           }
         }
         /* Get the list of users */
-        $SQL = "SELECT user_pk,user_name,user_desc,user_pass,root_folder_fk,user_perm,user_email FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' ORDER BY user_name;";
+        $SQL = "SELECT user_pk,user_name,user_desc,user_pass,root_folder_fk,user_perm,user_email,email_notif FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' ORDER BY user_name;";
         $Results = $DB->Action($SQL);
         /* Create JavaScript for updating users */
         $V.= "<script language='javascript'>\n";
@@ -163,6 +181,7 @@ class user_edit_any extends FO_Plugin {
         $V.= "var Username = new Array();\n";
         $V.= "var Userdesc = new Array();\n";
         $V.= "var Useremail = new Array();\n";
+        $V.= "var Userenote = new Array();\n";
         $V.= "var Userperm = new Array();\n";
         $V.= "var Userblock = new Array();\n";
         $V.= "var Userfolder = new Array();\n";
@@ -175,6 +194,7 @@ class user_edit_any extends FO_Plugin {
           $V.= "Userdesc[" . $Id . '] = "' . $Val . "\";\n";
           $Val = str_replace('"', "\\\"", $R['user_email']);
           $V.= "Useremail[" . $Id . '] = "' . $Val . "\";\n";
+          $V.= "Userenote[" . $Id . '] = "' . $R['email_notif'] . "\";\n";
           $V.= "Userfolder[" . $Id . "] = '" . $R['root_folder_fk'] . "';\n";
           $V.= "Userperm[" . $Id . "] = '" . $R['user_perm'] . "';\n";
           if (substr($R['user_pass'], 0, 1) == ' ') {
@@ -193,6 +213,8 @@ class user_edit_any extends FO_Plugin {
         $V.= "  document.formy.folder.value = Userfolder[id];\n";
         $V.= "  if (Userblock[id] == 1) { document.formy.block.checked=true; }\n";
         $V.= "  else { document.formy.block.checked=false; }\n";
+        $V.= "  if (Userenote[id] == 'y') { document.formy.enote.checked=true; }\n";
+        $V.= "  else { document.formy.enote.checked=false; }\n";
         $V.= "}\n";
         $V.= "// -->\n";
         $V.= "</script>\n";
@@ -253,6 +275,8 @@ class user_edit_any extends FO_Plugin {
         $V.= "$Style<th>Change the user's password.</th><td><input type='password' name='pass1' size=20></td>\n";
         $V.= "</tr>\n";
         $V.= "<tr><th>Re-enter the user's password.</th><td><input type='password' name='pass2' size=20></td>\n";
+        $V.= "</tr>\n";
+        $V.= "$Style<th>E-mail Notification</th><td><input type=checkbox name='enote'" . "checked=document.formy.enote.checked>" . "Check to enable email notification of completed analysis.</td>\n";
         $V.= "</tr>\n";
         $V.= "</table><P />";
         $V.= "<input type='submit' value='Edit!'>\n";
