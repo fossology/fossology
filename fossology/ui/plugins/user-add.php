@@ -50,8 +50,6 @@ class user_add extends FO_Plugin {
     $Email_notify = GetParm('enote', PARM_TEXT);
     $Email = str_replace("'", "''", GetParm('email', PARM_TEXT));
 
-    print "<pre>email_notif is:$Email_notify\n</pre>";
-
     /* Make sure username looks valid */
     if (empty($User)) {
       return ("Username must be specified. Not added.");
@@ -83,8 +81,6 @@ class user_add extends FO_Plugin {
     }
 
     /* Add the user */
-    print "<pre>Adding user, email_notif is:$Email_notify\n</pre>";
-    print "<pre>Adding user, Emai is:$Email\n</pre>";
     $SQL = "INSERT INTO users
       (user_name,user_desc,user_seed,user_pass,user_perm,user_email,email_notify,root_folder_fk)
 	     VALUES
@@ -115,7 +111,6 @@ class user_add extends FO_Plugin {
         $User = GetParm('username', PARM_TEXT);
         if (!empty($User)) {
           $rc = $this->Add();
-          print "<pre>got rc of:$rc\n</pre>";
           if (empty($rc)) {
             /* Need to refresh the screen */
             $V.= PopupAlert('User added.');
