@@ -57,7 +57,6 @@ class upload_file extends FO_Plugin {
     /* move the temp file */
     //echo "<pre>uploadfile: renaming uploaded file\n</pre>";
     if (!move_uploaded_file($TempFile, "$TempFile-uploaded")) {
-      print "<pre>uploadfile: rename Failed!\n</pre>";
       return ("Could not save uploaded file");
     }
     $UploadedFile = "$TempFile" . "-uploaded";
@@ -71,12 +70,15 @@ class upload_file extends FO_Plugin {
     /* Run wget_agent locally to import the file. */
     global $LIBEXECDIR;
     $Prog = "$LIBEXECDIR/agents/wget_agent -g fossy -k $uploadpk '$UploadedFile'";
-    system($Prog);
+    $last = system($Prog,$rtn);
     unlink($UploadedFile);
 
     global $Plugins;
-    $Unpack = & $Plugins[plugin_find_id("agent_unpack") ];
+    //print "<pre>UPF: Plugins are:\n"; print_r($Plugins) . "\n</pre>";
+    $Unpack = &$Plugins[plugin_find_id("agent_unpack") ];
+
     $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
+    //rint "<pre>UPF: after looking for agent_unpack, Unpack is:$Unpack\n</pre>";
     AgentCheckBoxDo($uploadpk);
 
     if (CheckEnotification) {
@@ -85,7 +87,6 @@ class upload_file extends FO_Plugin {
         return($sched);
       }
     }
-
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
     print "The file has been uploaded. ";
     print "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";

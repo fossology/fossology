@@ -244,7 +244,7 @@ class core_auth extends FO_Plugin {
     $_SESSION['User'] = $R['user_name'];
     $_SESSION['UserId'] = $R['user_pk'];
     $_SESSION['UserEmail'] = $R['user_email'];
-    $_SESSION['UserEnote'] = $R['email_notif'];
+    $_SESSION['UserEnote'] = $R['email_notify'];
     $_SESSION['Folder'] = $R['root_folder_fk'];
     $_SESSION['time_check'] = time() + 10 * 60;
     /* No specified permission means ALL permission */
