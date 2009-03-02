@@ -148,22 +148,63 @@ function scheduleEmailNotification($upload_pk) {
   if (empty($upload_pk)) {
     return ('Invalid parameter (upload_pk)');
   }
-
   /* get the last job in the job table for this upload_pk */
 
   $Sql = "SELECT job_upload_fk, job_pk, job_name FROM job WHERE " .
   "job_upload_fk = $upload_pk order by job_pk desc;";
   $Results = $DB->Action($Sql);
-  $Row = $Results[0];
-  $job_pk = $Row['job_pk'];
-  //print "<pre>SEN:Results for last job for this upload_pk :\n"; print_r($Results) . "\n</pre>";
+  $jobs = count($Results);
+  print "<pre>SEN:jobs in job table, for upload $upload_pk\n"; print_r($Results) . "\n</pre>";
+  foreach($Results as $Row) {
+    foreach($Row as $col => $value) {
+      print "<pre>SEN:col is:$col\nValue is:$value\n</pre>";
+      if($value == 'license') {
+        print "<pre>SEN:found:$value\n</pre>";
+        $job_pk = $Row['job_pk'];
+        break 2;
+      }
+    }
+  }
+
+
+
+  //$Row = $Results[0];
+  //$job_pk = $Row['job_pk'];
+  print "<pre>SEN:job_pk is $job_pk\n";
 
   $Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
-         "jq_job_fk = $job_pk order by jq_pk desc;";
-  $Results = $DB->Action($Sql);
-  $Row = $Results[0];
-  $Depends[] = $Row['jq_pk'];
-  //print "<pre>SEN: depends is:\n"; print_r($Depends) . "\n</pre>";
+         "jq_job_fk = $job_pk order by jq_pk desc limit 1;";
+  $JobQueue = $DB->Action($Sql);
+  $jq_pk = $JobQueue[0]['jq_pk'];
+  print "<pre>SEN:Highest jq_pk for $job_pk is:$jq_pk\n</pre>";
+
+  $Depends[] = $jq_pk;
+
+  /*
+   * this approach does not work... the real dependency seems to be on license...
+   //Find the highest jobqueue for upload/job
+   // get what appears to be the hightest one
+   $Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
+   "jq_job_fk = $job_pk order by jq_pk desc ;";
+   $jobQ = $DB->Action($Sql);
+   $jq_pk = $jobQ[0]['jq_pk'];
+   print "<pre>SEN:jobqueues for job_pk $job_pk\n"; print_r($jobQ) . "\n</pre>";
+   print "<pre>SEN:Initial jobqueue is $jq_pk\n";
+   // Make sure it is
+   print "<pre>SEN:number of jobs:$jobs\n";
+   for ($i=0; $jobs > $i; $i++) {
+   $job_pk = $Results[$i]['job_pk'];
+   print "<pre>SEN:in loop job_pk:$job_pk\n";
+   print "<pre>SEN:JobQueue for job_pk $job_pk\n"; print_r($JobQueue) . "\n</pre>";
+   print "<pre>SEN:jq_pk is:$jq_pk\n";
+   print "<pre>SEN:JobQueue[jq_pk]:{$JobQueue[0]['jq_pk']}\n";
+   if($jq_pk < $JobQueue[0]['jq_pk']) {
+   print "<pre>SEN:setting jq_pk to:{$JobQueue[0]['jq_pk']}\n";
+   $jq_pk = $JobQueue[0]['jq_pk'];
+   }
+   }
+   print "<pre>SEN:highest jobqueue is $jq_pk\n";
+   */
 
   /* set up input for fossjobstat */
   $To = "-t {$_SESSION['UserEmail']}";
@@ -176,18 +217,18 @@ function scheduleEmailNotification($upload_pk) {
   /* That job is who we are dependent on. Add the email_results agent into the
    * job table and jobqueue
    */
-    /* Prepare the job: job "email" */
-    $jobpk = JobAddJob($upload_pk,"fossjobstat");
-    if (empty($jobpk) || ($jobpk < 0)) {
-      return("Failed to insert job record");
-    }
+  /* Prepare the job: job "fossjobstat" */
+  $jobpk = JobAddJob($upload_pk,"fossjobstat",-1);
+  if (empty($jobpk) || ($jobpk < 0)) {
+    return("Failed to insert job record, job fossjobstat not created");
+  }
 
-    /* Prepare the job: job "email_results" has jobqueue item "email_results" */
-    /** 2nd parameter is obsolete **/
-    $jobqueuepk = JobQueueAdd($jobpk,"fossjobstat","$To $uploadId","no",NULL,$Depends);
-    if (empty($jobqueuepk)) {
-      return("Failed to insert task 'fossjobstat' into job queue");
-    }
-    return(NULL);
+  /* Prepare the job: job fossjobstat has jobqueue item fossjobstat */
+  /** 2nd parameter is obsolete **/
+  $jobqueuepk = JobQueueAdd($jobpk,"fossjobstat","$To $uploadId","no",NULL,$Depends);
+  if (empty($jobqueuepk)) {
+    return("Failed to insert task 'fossjobstat' into job queue");
+  }
+  return(NULL);
 }
 ?>
