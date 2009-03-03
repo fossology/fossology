@@ -148,24 +148,46 @@ function scheduleEmailNotification($upload_pk) {
   if (empty($upload_pk)) {
     return ('Invalid parameter (upload_pk)');
   }
-  /* get the last job in the job table for this upload_pk */
 
+  /*
+   * Dependencies.  Jobs are layed out in dependency order NOT execution order.
+   * This makes scheduling the email notification much harder.
+   * If the license agent is part of the jobs, then that will finish last due to
+   * the time it takes adj2nest to run/complete.
+   *
+   * If there is no license agent, use the highest jq_pk for the highest job
+   * number.
+   */
+
+  /* get job list for this upload */
   $Sql = "SELECT job_upload_fk, job_pk, job_name FROM job WHERE " .
   "job_upload_fk = $upload_pk order by job_pk desc;";
   $Results = $DB->Action($Sql);
   $jobs = count($Results);
   print "<pre>SEN:jobs in job table, for upload $upload_pk\n"; print_r($Results) . "\n</pre>";
+  /* If there is a license job, use that job_pk to get the jobqueue item to be
+   * dependnt on.
+   */
+  $LicenseJob = FALSE;
   foreach($Results as $Row) {
     foreach($Row as $col => $value) {
-      print "<pre>SEN:col is:$col\nValue is:$value\n</pre>";
+      //print "<pre>SEN:col is:$col\nValue is:$value\n</pre>";
       if($value == 'license') {
-        print "<pre>SEN:found:$value\n</pre>";
+        //print "<pre>SEN:found:$value\n</pre>";
         $job_pk = $Row['job_pk'];
-        break 2;
+        $LicenseJob = TRUE;
+        //break 2;
       }
     }
   }
-
+  /* No license job, just use the last job*/
+  if(!$LicenseJob) {
+    $Sql = "SELECT job_upload_fk, job_pk, job_name FROM job WHERE " .
+           "job_upload_fk = $upload_pk order by job_pk desc limit 1;";
+    $Job = $DB->Action($Sql);
+    $job_pk = $Job[0]['job_pk'];
+    print "<pre>SEN:job_pk with No license job is $job_pk\n";
+  }
 
 
   //$Row = $Results[0];

@@ -71,7 +71,7 @@ class core_auth extends FO_Plugin {
       if (empty($Results[0]['user_name'])) {
         /* User "fossy" does not exist.  Create it. */
         $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass," .
-               "user_perm,user_email,email_notifyroot_folder_fk)
+               "user_perm,user_email,email_notify,root_folder_fk)
 		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,NULL,'y',1);";
         print "*** Created default administrator: 'fossy' with password 'fossy'.\n";
       }
