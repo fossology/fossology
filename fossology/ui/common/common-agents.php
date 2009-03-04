@@ -135,11 +135,12 @@ function CheckEnotification() {
  * of analysis results. See CheckEnotification().
  *
  * @param int $upload_pk the upload_pk of the upload
+ * @param array $list optional list of jobs (used by agent_add).
  *
  * @return NULL on success, string on failure.
  */
 
-function scheduleEmailNotification($upload_pk) {
+function scheduleEmailNotification($upload_pk,array($list) = NULL) {
 
   global $DB;
   if (empty($DB)) {
@@ -147,6 +148,11 @@ function scheduleEmailNotification($upload_pk) {
   }
   if (empty($upload_pk)) {
     return ('Invalid parameter (upload_pk)');
+  }
+  if(!empty($list)) {
+    /* process this list instead of what's in the db.*/
+    // for each job in the list, get the highest jq_pk.
+    // use the highest jq_pk as the dependency
   }
 
   /*
@@ -166,7 +172,7 @@ function scheduleEmailNotification($upload_pk) {
   $jobs = count($Results);
   print "<pre>SEN:jobs in job table, for upload $upload_pk\n"; print_r($Results) . "\n</pre>";
   /* If there is a license job, use that job_pk to get the jobqueue item to be
-   * dependnt on.
+   * dependent on.
    */
   $LicenseJob = FALSE;
   foreach($Results as $Row) {
@@ -188,7 +194,6 @@ function scheduleEmailNotification($upload_pk) {
     $job_pk = $Job[0]['job_pk'];
     print "<pre>SEN:job_pk with No license job is $job_pk\n";
   }
-
 
   //$Row = $Results[0];
   //$job_pk = $Row['job_pk'];

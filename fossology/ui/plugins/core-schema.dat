@@ -227,9 +227,9 @@
   $Schema["TABLE"]["job"]["job_pk"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_pk\" int4;";
   $Schema["TABLE"]["job"]["job_pk"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_pk\" SET NOT NULL, ALTER COLUMN \"job_pk\" SET DEFAULT nextval('job_job_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["job"]["job_submitter"]["DESC"] = "COMMENT ON COLUMN \"job\".\"job_submitter\" IS 'users_fk for submitter';";
-  /*$Schema["TABLE"]["job"]["job_submitter"]["ALTER"] = "ALTER TABLE \"job\" DROP COLUMN \"job_submitter\" ;"; */ 
-  $Schema["TABLE"]["job"]["job_submitter"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_submitter\" int4 ;"; 
+  $Schema["TABLE"]["job"]["job_user_fk"]["DESC"] = "COMMENT ON COLUMN \"job\".\"job_user_fk\" IS 'Job submitted by this user';";
+  $Schema["TABLE"]["job"]["job_user_fk"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_user_fk\" int4 ;";
+  /* $Schema["TABLE"]["job"]["job_user_fk"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_user_fk\" SET NOT NULL ;"; */
   
   $Schema["TABLE"]["job"]["job_queued"]["DESC"] = "";
   $Schema["TABLE"]["job"]["job_queued"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_queued\" timestamptz;";
@@ -706,7 +706,6 @@
   $Schema["TABLE"]["users"]["email_notify"]["DESC"] = "COMMENT ON COLUMN \"users\".\"email_notify\" IS 'Email notifcation';";
   $Schema["TABLE"]["users"]["email_notify"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"email_notify\" varchar(1);";
   $Schema["TABLE"]["users"]["email_notify"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"email_notify\" SET DEFAULT 'y';";
-
 
   $Schema["VIEW"]["keyagent"] = "CREATE VIEW \"keyagent\" AS SELECT \"key\".key_pk, \"key\".key_name, \"key\".key_desc, \"key\".key_parent_fk, \"key\".key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc, agent.agent_id FROM \"key\", agent WHERE (agent.agent_pk = \"key\".key_agent_fk);";
   $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::\"unknown\" AS ts, NULL::\"unknown\" AS upload_pk, NULL::\"unknown\" AS pfile_fk, NULL::\"unknown\" AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::\"unknown\" AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
