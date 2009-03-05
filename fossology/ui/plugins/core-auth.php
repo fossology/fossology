@@ -29,7 +29,7 @@ class core_auth extends FO_Plugin
   var $Name       = "auth";
   var $Title      = "Login";
   var $Version    = "1.0";
-  var $PluginLevel = 100; /* make this run first! */
+  var $PluginLevel = 1000; /* make this run first! */
   var $Dependency = array("db");
   var $LoginFlag  = 0;
 
