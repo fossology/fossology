@@ -703,6 +703,10 @@
   $Schema["TABLE"]["users"]["user_email"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_email\" text;";
   $Schema["TABLE"]["users"]["user_email"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_email\" DROP NOT NULL;";
 
+  $Schema["TABLE"]["users"]["email_notify"]["DESC"] = "COMMENT ON COLUMN \"users\".\"email_notify\" IS 'Email notification flag';";
+  $Schema["TABLE"]["users"]["email_notify"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"email_notify\" varchar(1);";
+  $Schema["TABLE"]["users"]["email_notify"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"email_notify\" DROP NOT NULL, ALTER COLUMN \"email_notify\" SET DEFAULT 'y'::character varying;";
+
 
 
   $Schema["VIEW"]["keyagent"] = "CREATE VIEW \"keyagent\" AS SELECT \"key\".key_pk, \"key\".key_name, \"key\".key_desc, \"key\".key_parent_fk, \"key\".key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc, agent.agent_id FROM \"key\", agent WHERE (agent.agent_pk = \"key\".key_agent_fk);";
