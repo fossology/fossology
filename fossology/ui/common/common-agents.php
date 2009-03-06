@@ -151,7 +151,6 @@ function FindDependent($UploadPk, $list=NULL) {
     // use the highest jq_pk as the dependency
     //return;
   }
-  print "  <pre>FD:uploadpk is:$UploadPk\n";
   /* get job list for this upload */
   $Sql = "SELECT job_upload_fk, job_pk, job_name FROM job WHERE " .
   "job_upload_fk = $UploadPk order by job_pk desc;";
@@ -228,7 +227,6 @@ $JobName=NULL,$list=NULL) {
     $Depends = FindDependent($upload_pk, $list);
   }
   else {
-    print "  SEN:calling FindDependent\n";
     $Depends = FindDependent($upload_pk);
   }
 
@@ -236,14 +234,11 @@ $JobName=NULL,$list=NULL) {
   $FJSparams = '';
   $To = '';
   if(empty($_SESSION['UserEmail'])) {
-    print "  SEN:setting To to fossy\n";
     $To = ' -e fossy';
   }
   else {
-    print "  SEN:setting To to:{$_SESSION['UserEmail']}\n";
     $To = " -e {$_SESSION['UserEmail']}";
   }
-
   /* Upload Pk */
   $upload_id = trim($upload_pk);
   $UploadId = "-u $upload_id";
@@ -251,21 +246,16 @@ $JobName=NULL,$list=NULL) {
   $FJSparams .= "$UploadId";
   /* look at this, should you favor email over Username passed in? (vavor email) */
   if (!empty($UserName)) {
-    print "  SEN:adding -n UserName\n";
     $FJSparams .= " -n $UserName";
   }
   if (!empty($JobName)) {
-    print "  SEN:adding -j JobName\n";
     $FJSparams .= " -j $JobName";
   }
   if(!empty($Email)) { // email optional parameter (used by cp2foss)
     /* if we got email, append it to the list (cli invocation)*/
     $FJSparams = "$To" . " $Email";
-    print "  SEN:after append of passed in email\nTo is:$FJSparams\n";
   }
   $FJSparams .= "$To";
-
-  print "<pre>SEN:FJSparams are:$FJSparams\n</pre>";
 
   /* Prepare the job: job "fossjobstat" */
   $jobpk = JobAddJob($upload_pk,"fossjobstat",-1);
