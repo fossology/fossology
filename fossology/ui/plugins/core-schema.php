@@ -1075,7 +1075,7 @@ LANGUAGE plpgsql;
 
     $DB->Action("SET statement_timeout = 0;"); /* turn off DB timeouts */
     $DB->Action("BEGIN;");
-    $DB->Debug=2; /* show errors */
+    $DB->Debug=1; /* show errors */
     $DB->Error=0; /* clear any previous errors */
     $Curr = $this->GetSchema();
     /* The gameplan: Make $Curr look like $Schema. */
