@@ -33,6 +33,10 @@ require_once ("$WEBDIR/common/common.php");
 cli_Init();
 global $Plugins;
 error_reporting(E_NOTICE & E_STRICT);
+
+global $Enotification;
+global $Email;
+
 $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
   Options:
     -h       = this help message
@@ -45,6 +49,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -A       = alphabet folders; organize uploads into folder a-c, d-f, etc.
     -AA num  = specify the number of letters per folder (default: 3); implies -A
     -n name  = (optional) name for the upload (default: name it after the file)
+    -e addr  = email results to addr
     -d desc  = (optional) description for the update
 
   FOSSology processing queue options:
@@ -90,6 +95,7 @@ $Test = 0;
 /************************************************************************/
 /************************************************************************/
 /************************************************************************/
+
 /****************************************************
  GetBucketFolder(): Given an upload name and the number
  of letters per bucket, return the bucket folder name.
@@ -177,6 +183,71 @@ function GetFolder($FolderPath, $Parent = NULL) {
   $Parent = $Results[0]['folder_pk'];
   return (GetFolder($FolderPath, $Parent));
 } /* GetFolder() */
+
+/**
+ * process email notifciation
+ *
+ * If being run as an agent, get the user name from the previous upload
+ *
+ * @param int $UploadPk the upload pk
+ * @return NULL on success, String on failure.
+ *
+ */
+function ProcEnote($UploadPk) {
+
+  global $Enotification;
+  global $Email;
+  global $DB;
+
+  print "  CP2::ProcEnote starting\n";
+
+  /* get the user name from the previous upload */
+  $previous = $UploadPk-1;
+  $Sql = "SELECT upload_pk,upload_userid,job_upload_fk,job_user_fk FROM upload,job WHERE " .
+           "job_upload_fk=$previous and upload_pk=$previous order by upload_pk desc;";
+  $Users = $DB->Action($Sql);
+  //print "  CP2::PE After 1st query\n";
+  //print "  CP2::PE Users[0] from query is:\n"; print_r($Users[0]) . "\n";
+  $UserPk = $Users[0]['job_user_fk'];
+  $UserId = $Users[0]['upload_userid'];
+  //print "  CP2::PE after 1st query to get user_pk, UserPk is:$UserPk upload-userid is:$UserId\n";
+  $Sql = "SELECT user_pk, user_name, email_notify FROM users WHERE " .
+             "user_pk=$UserPk; ";
+  $Uname= $DB->Action($Sql);
+  $UserName = $Uname[0]['user_name'];
+  //print "  CP2::PE after 2nd query to get Name, user name is:$UserName\n";
+
+  $Sql = "SELECT upload_pk,upload_userid,job_upload_fk,job_user_fk FROM upload,job WHERE " .
+           "job_upload_fk=$UploadPk and upload_pk=$UploadPk order by upload_pk desc;";
+  $Users = $DB->Action($Sql);
+  //print "  CP2::PE After Fossy.1 query\n";
+  //print "  CP2::PE Users[0] from query is:\n"; print_r($Users[0]) . "\n";
+  $UserPk = $Users[0]['job_user_fk'];
+  $UserId = $Users[0]['upload_userid'];
+  //print "  CP2::PE after 1st query to get user_pk, UserPk is:$UserPk upload-userid is:$UserId\n";
+  $Sql = "SELECT user_pk, user_name, email_notify FROM users WHERE " .
+             "user_pk=$UserPk; ";
+  $Fossy= $DB->Action($Sql);
+  $FossyName = $Fossy[0]['user_name'];
+  //print "  CP2::PE after 2nd query to get FName, user name is:$FossyName\n";
+
+  /* are we being run as an agent? */
+  if($UserId === NULL && $FossyName == 'fossy') {
+    print "  As AGENT: Scheduling email notification\n";
+    /* When run as agent, don't pass $Email, will get it from the db.*/
+    $sched = scheduleEmailNotification($UploadPk,NULL,$UserName);
+  }
+  else {
+    /* run as cli */
+    print "  As CLI: Scheduling email notification\n";
+    $sched = scheduleEmailNotification($UploadPk,$Email);
+  }
+  if ($sched !== NULL) {
+    return("Warning: Queueing email failed:\n$sched\n");
+  }
+  return(NULL);
+} // ProcEnote
+
 /****************************************************
  UploadOne(): Given one object (file or URL), upload it.
  This is a function because it is can also be recursive!
@@ -185,6 +256,9 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $Verbose;
   global $Test;
   global $QueueList;
+  global $Enotification;
+  global $Email;
+
   /* $Mode determines where it came from */
   if (preg_match("@^[a-zA-Z0-9_]+://@", $UploadArchive)) {
     $Mode = 1 << 2; /* Looks like a URL */
@@ -209,6 +283,12 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     system($Cmd);
     UploadOne($FolderPath, $Filename, $UploadName, $UploadDescription, $UploadArchive);
     unlink($Filename);
+    if($Enotification) {
+      $res = ProcEnote($UloadPk);
+      if(!is_null($res)) {
+        print $res;
+      }
+    }
     return;
   }
   else if (file_exists($UploadArchive)) {
@@ -268,6 +348,9 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     //print "CP2: CMD=$Cmd\n";
     system($Cmd);
   }
+//  $iam = exec('whoami', $dummy);
+//  print "  I am:$iam\n";
+
   if (!empty($QueueList)) {
     switch ($QueueList) {
       case 'agent_unpack':
@@ -288,26 +371,17 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     if (!$Test) {
       system($Cmd);
     }
-    /* $_SESSION may not be valid, go get the enotification flag */
-    global $DB;
-    print "  CP2: Before 1st query UploadPk is:$UploadPk\n";
-    $Sql = "SELECT upload_pk, job_upload_fk,job_user_fk FROM upload,job WHERE " .
-           "job_upload_fk=$UploadPk order by upload_pk desc;";
-    $Users = $DB->Action($Sql);
-    print "  CP2: After 1st query\n";
-    $UserPk = $Users[0]['job_user_fk'];
-    print "  CP2: after 1st query to get user_pk, UserPk is:$UserPk\n";
-    $Sql = "SELECT user_pk, user_name, email_notify FROM users WHERE " .
-           "user_pk=$UserPk; ";
-    //"user_pk=$UserPk and user_name='fossy'; ";
-    $Fossy= $DB->Action($Sql);
-    $EmailNote = $Fossy[0]['email_notify'];
-    print "  CP2: after 2nd query to get EN, EmailNote is:$EmailNote\n";
-    if ($EmailNote == 'y') {
-      print "  Scheduling email notification\n";
-      $sched = scheduleEmailNotification($UploadPk);
-      if ($sched !== NULL) {
-        return($sched);
+    /*
+     * this is gross: by the time you get here, the uploadPk is one more than the
+     * uploadPk reported to the user.  That's because the first upload pk is for
+     * the fosscp_agent, then the second (created in cp2foss) is for the rest
+     * of the processing.
+     */
+    if($Enotification) {
+      //print "  CP2::UP1:Calling ProcEnote using uploadpk:$UploadPk\n";
+      $res = ProcEnote($UploadPk);
+      if(!is_null($res)) {
+        print $res;
       }
     }
   }
@@ -361,6 +435,18 @@ for ($i = 1;$i < $argc;$i++) {
       $i++;
       $UploadDescription = $argv[$i];
       break;
+    case '-e': /* email notification wanted */
+      $i++;
+      $Email = $argv[$i];
+      // Make sure email looks valid
+      $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
+      if ($Check != $Email) {
+        print "Invalid email address. $Email\n";
+        print $Usage;
+        exit(1);
+      }
+      $Enotification = TRUE;
+      break;
     case '-n': /* specify upload name */
       $i++;
       $UploadName = $argv[$i];
@@ -404,6 +490,7 @@ for ($i = 1;$i < $argc;$i++) {
           if (empty($UploadName)) {
             $UploadName = basename($UploadArchive);
           }
+          //print "  CP2: Calling Upload1 from stdin\n";
           UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
           /* prepare for next parameter */
           $UploadName = "";
@@ -415,7 +502,7 @@ for ($i = 1;$i < $argc;$i++) {
       if (substr($argv[$i], 0, 1) == '-') {
         print "Unknown parameter: '" . $argv[$i] . "'\n";
         print $Usage . "\n";
-        return (1);
+        exit(1);
       }
       /* No break! No hyphen means it is a file! */
       $UploadArchive = $argv[$i];

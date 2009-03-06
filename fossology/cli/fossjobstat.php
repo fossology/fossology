@@ -43,7 +43,9 @@ error_reporting(E_NOTICE & E_STRICT);
 $Usage = "Usage: " . basename($argv[0]) . " [options]
   Options:
     -h             = this help message
-    -t             = who the email is to e.g. nobody@localhost, optional if -i is used.
+    -e <address>   = who the email is to e.g. nobody@localhost, optional if -i is used.
+    -j string      = optional, Name of the job to include in the email
+    -n string      = optional, user name to address email to
     -u <upload_id> = Upload ID.
     -i interactive mode, prints the message instead of sending it.
   ";
@@ -61,8 +63,8 @@ global $DB;
 $JobName   = "";
 $JobStatus = "";
 
-/* Process each parameter */
-$options = getopt("hit:u:");
+/* Process some of the parameters */
+$options = getopt("hie:n:j:u:");
 if (empty($options)) {
   print $Usage;
   exit(1);
@@ -73,18 +75,30 @@ if (array_key_exists("h",$options)) {
   exit(0);
 }
 
+/* -e and -i and mutually exclusive */
 $Interactive = 0;
 if (array_key_exists("i",$options)) {
   $Interactive = 1;
 }
-elseif (array_key_exists("t",$options)) {
-  $To = trim($options['t']);
+/* Default TO: is the users email */
+elseif (array_key_exists("e",$options)) {
+  $To = trim($options['e']);
   if (empty($To)) {
-    print "  DEBUG: fjs: FAILED on -t argument\n";
+    print "  DEBUG: fjs: FAILED on -e argument\n";
     print $Usage;
     exit(1);
   }
 }
+/* Optional TO: */
+if (array_key_exists("n",$options)) {
+  $UserName = $options['n'];
+  if (empty($UserName)) {
+    print "  DEBUG: fjs: FAILED on -n argument\n";
+        print $Usage;
+    exit(1);
+  }
+}
+
 if (array_key_exists("u",$options)) {
   $upload_id = $options['u'];
   if (empty($upload_id)) {
@@ -92,6 +106,9 @@ if (array_key_exists("u",$options)) {
     print $Usage;
     exit(1);
   }
+}
+if (empty($To)){
+  $To = $UserName;
 }
 /* gather the data from the db:
  * - User name
@@ -105,33 +122,39 @@ $Results = $DB->Action($Sql);
 if (!empty($Results[0]['user_name'])) {
   $UserName = $Results[0]['user_name'];
 }
-
 $Preamble = "Dear $UserName,\n" .
             "Do not reply to this message.  " .
             "This is an automattically generated message by the FOSSology system.\n\n";
 
-/* Get Upload Filename, use that as the 'job' name which is what the jobs display
- * screen does. */
-$Sql = "SELECT upload_filename FROM upload WHERE upload_pk = $upload_id;";
-$Results = $DB->Action($Sql);
-$Row = $Results[0];
-if (!empty($Results[0]['upload_filename'])) {
-  $JobName = $Row['upload_filename'];
+/* Optional Job Name */
+if (array_key_exists("j",$options)) {
+  $JobName = $option['j'];
 }
-else {
-  print "ERROR: $upload_id is not a valid upload Id. See fossjobs(1)\n";
-  exit(1);
+/* No job name supplied, go get it*/
+if(empty($JobName)) {
+  /* Get Upload Filename, use that as the 'job' name which is what the jobs display
+   * screen does. */
+  $Sql = "SELECT upload_filename FROM upload WHERE upload_pk = $upload_id;";
+  $Results = $DB->Action($Sql);
+  $Row = $Results[0];
+  if (!empty($Results[0]['upload_filename'])) {
+    $JobName = $Row['upload_filename'];
+  }
+  else {
+    print "ERROR: $upload_id is not a valid upload Id. See fossjobs(1)\n";
+    exit(1);
+  }
 }
 
 /* get job status */
 $summary = JobListSummary($upload_id);
-print "  DEBUG: summary for upload $upload_id is:\n"; print_r($summary) . "\n";
+//print "  DEBUG: summary for upload $upload_id is:\n"; print_r($summary) . "\n";
 
 /* Job aborted */
 if ($summary['total'] == 0 &&
-        $summary['completed'] == 0 &&
-        $summary['active'] == 0 &&
-        $summary['failed'] == 0 ) {
+    $summary['completed'] == 0 &&
+    $summary['active'] == 0 &&
+    $summary['failed'] == 0 ) {
   $MessagePart = "No results, your job $JobName was killed";
   if ($Interactive) {
     printMsg($MessagePart);
