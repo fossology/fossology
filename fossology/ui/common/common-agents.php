@@ -124,126 +124,149 @@ function CheckEnotification() {
 }
 
 /**
- * scheduleEmailNotification
+ * FindDependent
  *
- * Schedule email notification for analysis results
+ * find the job in the job table to be dependent on
  *
- * This routine provides the upload_pk and TO: parameter as jobqueue args for the
- * email_results agent.
- *
- * This routine should only be called if the user wants to be notified by email
- * of analysis results. See CheckEnotification().
- *
- * @param int $upload_pk the upload_pk of the upload
- * @param array $list optional list of jobs (used by agent_add).
- *
- * @return NULL on success, string on failure.
+ * @param int $UploadPk the upload PK
+ * @param array $list an optional array of jobs to use instead of all jobs
+ *        associated with the upload
+ * @return array $depends, array of dependencies
  */
-
-function scheduleEmailNotification($upload_pk,array($list) = NULL) {
-
-  global $DB;
-  if (empty($DB)) {
-    return;
-  }
-  if (empty($upload_pk)) {
-    return ('Invalid parameter (upload_pk)');
-  }
-  if(!empty($list)) {
-    /* process this list instead of what's in the db.*/
-    // for each job in the list, get the highest jq_pk.
-    // use the highest jq_pk as the dependency
-  }
-
+function FindDependent($UploadPk, $list=NULL) {
   /*
    * Dependencies.  Jobs are layed out in dependency order NOT execution order.
    * This makes scheduling the email notification much harder.
    * If the license agent is part of the jobs, then that will finish last due to
-   * the time it takes adj2nest to run/complete.
+   * the time it takes adj2nest to run/complete.  Be Dependent on license agent.
    *
    * If there is no license agent, use the highest jq_pk for the highest job
-   * number.
+   * number as your dependency.
    */
+  global $DB;
 
+  if(!empty($list)) {
+    /* process this list instead of what's in the db.*/
+    // for each job in the list, get the highest jq_pk.
+    // use the highest jq_pk as the dependency
+    //return;
+  }
+  print "  <pre>FD:uploadpk is:$UploadPk\n";
   /* get job list for this upload */
   $Sql = "SELECT job_upload_fk, job_pk, job_name FROM job WHERE " .
-  "job_upload_fk = $upload_pk order by job_pk desc;";
-  $Results = $DB->Action($Sql);
-  $jobs = count($Results);
-  print "<pre>SEN:jobs in job table, for upload $upload_pk\n"; print_r($Results) . "\n</pre>";
-  /* If there is a license job, use that job_pk to get the jobqueue item to be
+  "job_upload_fk = $UploadPk order by job_pk desc;";
+  $Jobs = $DB->Action($Sql);
+  /*
+   * If there is a license job, use that job_pk to get the jobqueue item to be
    * dependent on.
    */
   $LicenseJob = FALSE;
-  foreach($Results as $Row) {
+  foreach($Jobs as $Row) {
     foreach($Row as $col => $value) {
-      //print "<pre>SEN:col is:$col\nValue is:$value\n</pre>";
       if($value == 'license') {
-        //print "<pre>SEN:found:$value\n</pre>";
         $job_pk = $Row['job_pk'];
         $LicenseJob = TRUE;
-        //break 2;
       }
     }
   }
   /* No license job, just use the last job*/
   if(!$LicenseJob) {
-    $Sql = "SELECT job_upload_fk, job_pk, job_name FROM job WHERE " .
-           "job_upload_fk = $upload_pk order by job_pk desc limit 1;";
-    $Job = $DB->Action($Sql);
-    $job_pk = $Job[0]['job_pk'];
-    print "<pre>SEN:job_pk with No license job is $job_pk\n";
+    $job_pk = $Jobs[0]['job_pk'];
   }
 
-  //$Row = $Results[0];
-  //$job_pk = $Row['job_pk'];
-  print "<pre>SEN:job_pk is $job_pk\n";
-
+  /* Find the highest jq_pk for the job */
   $Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
          "jq_job_fk = $job_pk order by jq_pk desc limit 1;";
   $JobQueue = $DB->Action($Sql);
   $jq_pk = $JobQueue[0]['jq_pk'];
-  print "<pre>SEN:Highest jq_pk for $job_pk is:$jq_pk\n</pre>";
 
   $Depends[] = $jq_pk;
+  return($Depends);
+} // FindDependent
 
-  /*
-   * this approach does not work... the real dependency seems to be on license...
-   //Find the highest jobqueue for upload/job
-   // get what appears to be the hightest one
-   $Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE " .
-   "jq_job_fk = $job_pk order by jq_pk desc ;";
-   $jobQ = $DB->Action($Sql);
-   $jq_pk = $jobQ[0]['jq_pk'];
-   print "<pre>SEN:jobqueues for job_pk $job_pk\n"; print_r($jobQ) . "\n</pre>";
-   print "<pre>SEN:Initial jobqueue is $jq_pk\n";
-   // Make sure it is
-   print "<pre>SEN:number of jobs:$jobs\n";
-   for ($i=0; $jobs > $i; $i++) {
-   $job_pk = $Results[$i]['job_pk'];
-   print "<pre>SEN:in loop job_pk:$job_pk\n";
-   print "<pre>SEN:JobQueue for job_pk $job_pk\n"; print_r($JobQueue) . "\n</pre>";
-   print "<pre>SEN:jq_pk is:$jq_pk\n";
-   print "<pre>SEN:JobQueue[jq_pk]:{$JobQueue[0]['jq_pk']}\n";
-   if($jq_pk < $JobQueue[0]['jq_pk']) {
-   print "<pre>SEN:setting jq_pk to:{$JobQueue[0]['jq_pk']}\n";
-   $jq_pk = $JobQueue[0]['jq_pk'];
+/**
+ * ScheduleEmailNotification
+ *
+ * Schedule email notification for analysis results
+ *
+ * ScheduleEmailNotification determines the proper job dependency and schedules
+ * the email agent fossjobstat to send the message.
+ *
+ * This routine is called from a number of UI plugins and cp2foss.  The optional
+ * parameters are to accomdate the UI upload_srv_files and the agent_ add
+ * plugins.
+ *
+ * This routine should only be called if the user wants to be notified by email
+ * of analysis results. See CheckEnotification().
+ *
+ * @param int $upload_pk the upload_pk of the upload
+ * @param string $Email, an optional email address to pass on to fossjobstat.
+ * @param string $UserName, an optional User name to pass on to fossjobstat.
+ * @param string $JobName, an optional Job Name to pass on to fossjobstat.
+ * @param array $list optional list of jobs (supplied by agent add) agent_add).
+ *
+ * @return NULL on success, string on failure.
+ */
+
+function scheduleEmailNotification($upload_pk,$Email=NULL,$UserName=NULL,
+$JobName=NULL,$list=NULL) {
+
+  global $DB;
+  if (empty($DB)) {
+    return;
+  }
+  /*if(!is_array($list)) {
+   * or make it one?
+   return ('Invalid parameter type \$list must be an array');
    }
-   }
-   print "<pre>SEN:highest jobqueue is $jq_pk\n";
    */
+  if (empty($upload_pk)) {
+    return ('Invalid parameter (upload_pk)');
+  }
+  /* We got called by agent_add, use this list of jobs to determine dependencies*/
+  if(!empty($list)) {
+    $Depends = FindDependent($upload_pk, $list);
+  }
+  else {
+    print "  SEN:calling FindDependent\n";
+    $Depends = FindDependent($upload_pk);
+  }
 
   /* set up input for fossjobstat */
-  $To = "-t {$_SESSION['UserEmail']}";
+  $FJSparams = '';
+  $To = '';
+  if(empty($_SESSION['UserEmail'])) {
+    print "  SEN:setting To to fossy\n";
+    $To = ' -e fossy';
+  }
+  else {
+    print "  SEN:setting To to:{$_SESSION['UserEmail']}\n";
+    $To = " -e {$_SESSION['UserEmail']}";
+  }
+
+  /* Upload Pk */
   $upload_id = trim($upload_pk);
-  $uploadId = "-u $upload_id";
+  $UploadId = "-u $upload_id";
+  print "  SEN: To is:$To\nUploadID is:$UploadId\n";
+  $FJSparams .= "$UploadId";
+  /* look at this, should you favor email over Username passed in? (vavor email) */
+  if (!empty($UserName)) {
+    print "  SEN:adding -n UserName\n";
+    $FJSparams .= " -n $UserName";
+  }
+  if (!empty($JobName)) {
+    print "  SEN:adding -j JobName\n";
+    $FJSparams .= " -j $JobName";
+  }
+  if(!empty($Email)) { // email optional parameter (used by cp2foss)
+    /* if we got email, append it to the list (cli invocation)*/
+    $FJSparams = "$To" . " $Email";
+    print "  SEN:after append of passed in email\nTo is:$FJSparams\n";
+  }
+  $FJSparams .= "$To";
 
-  // query for job status? Which job!?  Do you have to look at all sub jobs to
-  // determine if they all passed or can you look (where?!)
+  print "<pre>SEN:FJSparams are:$FJSparams\n</pre>";
 
-  /* That job is who we are dependent on. Add the email_results agent into the
-   * job table and jobqueue
-   */
   /* Prepare the job: job "fossjobstat" */
   $jobpk = JobAddJob($upload_pk,"fossjobstat",-1);
   if (empty($jobpk) || ($jobpk < 0)) {
@@ -252,7 +275,7 @@ function scheduleEmailNotification($upload_pk,array($list) = NULL) {
 
   /* Prepare the job: job fossjobstat has jobqueue item fossjobstat */
   /** 2nd parameter is obsolete **/
-  $jobqueuepk = JobQueueAdd($jobpk,"fossjobstat","$To $uploadId","no",NULL,$Depends);
+  $jobqueuepk = JobQueueAdd($jobpk,"fossjobstat","$FJSparams","no",NULL,$Depends);
   if (empty($jobqueuepk)) {
     return("Failed to insert task 'fossjobstat' into job queue");
   }

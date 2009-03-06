@@ -336,16 +336,13 @@ function JobAddJob($upload_pk, $job_name, $priority = 0) {
     $job_user_fk = $Results[0]['user_pk'];
   }
 
-print "<pre>JAJ: job_user_fk is:$job_user_fk\n</pre>";
 if (!empty($_SESSION['UserEmail'])) {
   $job_email_notify = $_SESSION['UserEmail'];
 } else {
   $job_email_notify = 'fossy@localhost';
 }
-//print "<pre>JAJ: Job_email_notify is:$job_email_notify\n</pre>";
 $Job_email_notify = str_replace("'", "''", $job_email_notify);
 $Job_name = str_replace("'", "''", $job_name);
-print "<pre>JAJ: upload_pk is:$upload_pk\n</pre>";
 if (empty($upload_pk)) {
   $SQLInsert = "INSERT INTO job
     	(job_user_fk,job_queued,job_priority,job_email_notify,job_name) VALUES
@@ -355,18 +352,12 @@ if (empty($upload_pk)) {
     	(job_user_fk,job_queued,job_priority,job_email_notify,job_name,job_upload_fk) VALUES
      	('$job_user_fk',now(),'$priority','$Job_email_notify','$Job_name','$upload_pk');";
 }
-print "<pre>JAJ: SQL is:$SQLInsert\n</pre>";
-//print "<pre>JAJ: values are:JFK:$job_user_fk $p:$priority JEN:$Job_email_notify JN:$Job_name UPK:$upload_pk\n</pre>";
-//print "<pre>JAJ: job_name is:$job_name upload_pk is:$upload_pk\n</pre>";
 $jobpk = JobFindKey($upload_pk, $job_name);
-//print "<pre>JAJ: jobpk is:$jobpk\n</pre>";
 if ($jobpk >= 0) {
   return ($jobpk);
 }
-//print "<pre>JAJ: Doing insert\n</pre>";
 $DB->Action($SQLInsert);
 $jobpk = JobFindKey($upload_pk, $job_name);
-//print "<pre>JAJ: Before return: joppk is:$jobpk\n</pre>";
 return ($jobpk);
 } // JobAddJob()
 
