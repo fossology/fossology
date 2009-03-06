@@ -78,7 +78,7 @@ class upload_url extends FO_Plugin {
     $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
     AgentCheckBoxDo($uploadpk);
 
-    if (CheckEnotification) {
+    if (CheckEnotification()) {
       $sched = scheduleEmailNotification($uploadpk);
       if ($sched !== NULL) {
         return($sched);
