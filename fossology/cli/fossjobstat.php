@@ -83,19 +83,25 @@ if (array_key_exists("i",$options)) {
 /* Default TO: is the users email */
 elseif (array_key_exists("e",$options)) {
   $To = trim($options['e']);
+  print "  FJS: after -e processing To is:$To\n";
   if (empty($To)) {
     print "  DEBUG: fjs: FAILED on -e argument\n";
     print $Usage;
     exit(1);
   }
 }
+
 /* Optional TO: */
 if (array_key_exists("n",$options)) {
   $UserName = $options['n'];
+  print "  FJS: after -n processing To is:$To\n";
   if (empty($UserName)) {
     print "  DEBUG: fjs: FAILED on -n argument\n";
-        print $Usage;
+    print $Usage;
     exit(1);
+  }
+  if (empty($To)) {
+    print "  FJS: To is empty, could set to:$UserName\n";
   }
 }
 
@@ -108,23 +114,25 @@ if (array_key_exists("u",$options)) {
   }
 }
 if (empty($To)){
+  print "  FJS: check To is EMPTY!\n";
   $To = $UserName;
 }
+$Preamble = "Dear $To,\n" .
+            "Do not reply to this message.  " .
+            "This is an automattically generated message by the FOSSology system.\n\n";
+
 /* gather the data from the db:
  * - User name
  * - Job name
  * - job status
  */
-/* get the user name, set preamble */
+/* get the user name for this upload ? still need to do this? got it above....*/
 $Sql = "select job_submitter, user_pk, user_name from job, users " .
            "where job_upload_fk = $upload_id and user_pk = job_submitter limit 1;";
 $Results = $DB->Action($Sql);
 if (!empty($Results[0]['user_name'])) {
   $UserName = $Results[0]['user_name'];
 }
-$Preamble = "Dear $UserName,\n" .
-            "Do not reply to this message.  " .
-            "This is an automattically generated message by the FOSSology system.\n\n";
 
 /* Optional Job Name */
 if (array_key_exists("j",$options)) {
@@ -152,10 +160,11 @@ $summary = JobListSummary($upload_id);
 
 /* Job aborted */
 if ($summary['total'] == 0 &&
-    $summary['completed'] == 0 &&
-    $summary['active'] == 0 &&
-    $summary['failed'] == 0 ) {
+$summary['completed'] == 0 &&
+$summary['active'] == 0 &&
+$summary['failed'] == 0 ) {
   $MessagePart = "No results, your job $JobName was killed";
+  $Message = $Preamble . $MessagePart;
   if ($Interactive) {
     printMsg($MessagePart);
     exit(0);
@@ -168,20 +177,18 @@ if ($summary['total'] == 0 &&
  */
 /* Job is done, OK status */
 $Done = FALSE;
-if($Interactive) {
-  if ($summary['total'] == $summary['completed']) {
-    if ($summary['failed'] == 0) {
-      $Done = TRUE;
-    }
+
+if ($summary['total'] == $summary['completed']) {
+  if ($summary['failed'] == 0) {
+    $Done = TRUE;
   }
 }
-else {
-  if ($summary['total'] == $summary['completed']+1) {
-    if ($summary['failed'] == 0) {
-      $Done = TRUE;
-    }
+elseif ($summary['total'] == $summary['completed']+1) {
+  if ($summary['failed'] == 0) {
+    $Done = TRUE;
   }
 }
+
 if ($Done) {
   $JobStatus = "completed with no errors";
   $MessagePart = "Your requested FOSSology results are ready. " .
@@ -202,10 +209,11 @@ elseif ($summary['active'] > 0) {
     printMsg($MessagePart);
   }
 }
-
+//print "  FJS: after all job checks message:\n$Message\n";
 /* called as agent, send mail */
 if (!$Interactive) {
   /* use php mail to queue it up */
+  //print "  FJS: sending email to:$To with message:\n$Message\n";
   $Sender = "The FOSSology Application";
   $From = "root@localhost";
   $Recipient = $To;
