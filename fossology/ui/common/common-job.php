@@ -116,7 +116,7 @@ function JobGetType($upload_pk, $job_name) {
  * @return job_pk, NOTE: In case of duplicate jobs, this returns the oldest job.
  *************************************************************
  */
-function JobSetType($upload_pk, $job_name, $priority = 0, $job_user_pk = NULL, $job_email_notify = NULL) {
+function JobSetType($upload_pk, $job_name, $priority = 0, $job_user_fk = NULL, $job_email_notify = NULL) {
   global $DB;
   if (empty($DB)) {
     return;
@@ -126,10 +126,12 @@ function JobSetType($upload_pk, $job_name, $priority = 0, $job_user_pk = NULL, $
   if (!empty($JobPk)) {
     return ($JobPk);
   }
-  if (empty($job_submitter)) {
+  /* Set to the job_user_fk to the session UserId or fossy's */
+  if (empty($job_user_fk)) {
     if (!empty($_SESSION['UserEmail'])) {
-      $job_user_pk = $_SESSION['UserEnote'];
-    } else {
+      $job_user_fk = $_SESSION['UserId'];
+    }
+    else {
       $Sql = "SELECT user_pk FROM users WHERE user_name = 'fossy';";
       $Results = $DB->Action($Sql);
       $job_user_fk = $Results[0]['user_pk'];
