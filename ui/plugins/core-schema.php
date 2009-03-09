@@ -787,7 +787,7 @@ if (0)
 	$Seq = preg_replace("/.*'(.*)'.*/",'$1',$Seq);
 	$Table = $Tables[$i]['table'];
 	$Column = $Tables[$i]['column'];
-	$Results = $DB->Action("SELECT max($Column) AS max FROM $Table LIMIT 1;");
+	$Results = $DB->Action("SELECT max($Column) AS max FROM \"$Table\" LIMIT 1;");
 	$Max = intval($Results[0]['max']);
 	if (empty($Max) || ($Max <= 0)) { $Max = 1; }
 	else { $Max++; }
