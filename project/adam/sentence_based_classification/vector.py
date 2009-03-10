@@ -1,5 +1,5 @@
 import math
-import sparsevect.python.sparsevect as sv
+import sparsevect as sv
 
 class Vector():
     text_count = {}

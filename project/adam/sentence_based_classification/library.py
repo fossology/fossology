@@ -22,15 +22,11 @@
 import re
 import math
 from operator import itemgetter
-import difflib
 import os
-import lucene
 import htmllib
 import formatter
 import cStringIO
 import cPickle
-import opennlp
-#import maxentpy.postagger
 from maxent import MaxentModel
 
 def POSTagger(sentences):
@@ -123,33 +119,33 @@ def get_keywords():
     # }}}
     return keywords
 
-def sentences(document):
-    t = document.decode('ascii','ignore').encode('ascii','ignore')
-    t = re.sub('\r',' ',t)
-    t = re.sub('\n',' (SLASH_RETURN) ',t)
-    t = re.sub(r' (SLASH_RETURN) (?P<white>\W*) (SLASH_RETURN) ',' (SLASH_RETURN) \g<white> (SLASH_RETURN) (ADDED_THIS). ',t)
+# def sentences(document):
+#     t = document.decode('ascii','ignore').encode('ascii','ignore')
+#     t = re.sub('\r',' ',t)
+#     t = re.sub('\n',' (SLASH_RETURN) ',t)
+#     t = re.sub(r' (SLASH_RETURN) (?P<white>\W*) (SLASH_RETURN) ',' (SLASH_RETURN) \g<white> (SLASH_RETURN) (ADDED_THIS). ',t)
+# 
+#     a = opennlp.SentenceDetector(t)
+# 
+#     b = []
+# 
+#     # Fix, append small sentences to next sentence.
+#     for i in xrange(len(a)):
+#         #for aa in a:
+#         aa = a[i]
+#         aa = re.sub(r'\(ADDED_THIS\). ','',aa)
+#         aa = re.sub(r' *\(SLASH_RETURN\) *','\n',aa)
+#         if len(aa)==0:
+#             continue
+#         if len(b)>0 and len(re.split('\ ',b[-1]))<3:
+#             b[-1] = b[-1]+' '+aa
+#         else:
+#             b.append(aa)
+# 
+#     return b
 
-    a = opennlp.SentenceDetector(t)
-
-    b = []
-
-    # Fix, append small sentences to next sentence.
-    for i in xrange(len(a)):
-        #for aa in a:
-        aa = a[i]
-        aa = re.sub(r'\(ADDED_THIS\). ','',aa)
-        aa = re.sub(r' *\(SLASH_RETURN\) *','\n',aa)
-        if len(aa)==0:
-            continue
-        if len(b)>0 and len(re.split('\ ',b[-1]))<3:
-            b[-1] = b[-1]+' '+aa
-        else:
-            b.append(aa)
-
-    return b
-
-def tokensFromAnalysis(text,a=None):
-    if not a:
-        a = lucene.StandardAnalyzer()
-    b = [token.termText().encode('ascii','ignore') for token in a.tokenStream("contents", lucene.StringReader(text))]
-    return [t for t in b if len(t)>0]
+# def tokensFromAnalysis(text,a=None):
+#     if not a:
+#         a = lucene.StandardAnalyzer()
+#     b = [token.termText().encode('ascii','ignore') for token in a.tokenStream("contents", lucene.StringReader(text))]
+#     return [t for t in b if len(t)>0]
