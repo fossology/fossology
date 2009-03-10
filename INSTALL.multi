@@ -76,7 +76,7 @@ password.
 8) On the scheduler machine the default version of Scheduler.conf is
 for a single system install. You will need to change the "host=" lines
 and add additional entries for each agent. The easiest way to do this is
-with the mkconfig program.  
+with the mkschedconf program.  
 
 Use -C to identify the number of CPUs on the host, -R to specify the 
 remote-login command, and -H to create entries for a given hostname.
@@ -84,7 +84,7 @@ remote-login command, and -H to create entries for a given hostname.
 For example: if you have two machines (agent1 and agent2), one with 
 4 cpus and the other with 8, use the following command to generate the
 Scheduler.conf file in /usr/local/etc/fossology/Scheduler.conf: 
-  mkconfig -o /usr/local/etc/fossology/Scheduler.conf \
+  mkschedconf  -o /usr/local/etc/fossology/Scheduler.conf \
          -C 4 -R '/usr/bin/ssh fossy@agent1.foo.com "%s"' -H agent1 \
          -C 8 -R '/usr/bin/ssh fossy@agent2.foo.com "%s"' -H agent2
 
