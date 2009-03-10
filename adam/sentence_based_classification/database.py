@@ -1,11 +1,12 @@
 import library
-import lucene
 import vector
 import os
 import math
 import cPickle as pickle
 from datetime import datetime
 import random
+import parser
+from Stemmer import Stemmer
 
 use_fast_vector = True
 
@@ -16,21 +17,21 @@ class Database():
     _to_file = [] # a lookup table from sentence_id->template_file
     _to_position = [] # a lookup table from sentence_id->position in template file
     files = [] # file names
-    analyzer = None # the lucene analyzer we are using
     keywords = [] # a list of stemmed words to look for
     fingerprints = {} # file to vector dictionary. the vectors hold the sentences that occured in the template file
     binary_lookup = {} # a lookup table for 'word'->sentences.
     leaders = []
+    sentence_model = None
 
-    def __init__(self,files,analyzer,debug=False):
+    def __init__(self,files,sentence_model=None,debug=False):
         # files is a list of files to use as templates
         # analyzer is the analyzer to use to stem/parse words from a file
         # if debug is True then you get text pooped to the screen:)
 
+        self.sentence_model = sentence_model
+
         self.files = files[:]
         n = len(self.files)
-
-        self.analyzer = analyzer
 
         for i in xrange(n):
             if debug:
@@ -48,25 +49,24 @@ class Database():
             # fp holds vectors of similar sentences to template files. We can
             # then take dot products between templates files and target files.
 
-            sentences = library.sentences(text)
-            # sentences is a list of sentences that makeup the template
+            features = parser.features(text)
+            sent_index = parser.sentences(features,self.sentence_model,2,2)
+            sentences = parser.sentence_stem_arrays(features,sent_index)
+            byte_offsets = parser.sentence_byte_offsets(features,sent_index)
+            # sentences is a list of lists with the stemmed words that makeup the template
             for j in xrange(len(sentences)):
-                text_array = library.tokensFromAnalysis(sentences[j],self.analyzer)
-                # text_array is a list of processed words in order from the
-                # sentence.
-
                 # if the text in the sentence is below 4 words then insert it
                 # at the beginning of the next sentence.
-                if len(text_array)<4 and j<len(sentences)-1:
-                    sentences[j+1] = "%s %s" % (sentences[j],sentences[j+1])
-                    sentences[j] = ''
-                    text_array = []
+                if len(sentences[j])<4 and j<len(sentences)-1:
+                    sentences[j+1].extend(sentences[j])
+                    byte_offsets[j+1][0] = byte_offsets[j][0]
+                    sentences[j] = []
                     continue
 
                 # add everything to the database
-                self.sentences.append(sentences[j])
+                self.sentences.append(text[byte_offsets[j][0]:byte_offsets[j][1]])
                 fp.append(len(self.sentences)-1)
-                self.vectors.append(vector.Vector(text_array,fast=use_fast_vector))
+                self.vectors.append(vector.Vector(sentences[j],fast=use_fast_vector))
                 for k in self.vectors[-1].text_count.keys():
                     self.binary_lookup[k] = self.binary_lookup.get(k,[])
                     self.binary_lookup[k].append(len(self.sentences)-1)
@@ -83,7 +83,7 @@ class Database():
         
         # stem the list of words that define a license. This allows us to do a
         # quick lookup to see if a sentence has a license keyword.
-        self.keywords = library.tokensFromAnalysis(' '.join(library.get_keywords()),self.analyzer)
+        self.keywords = [parser.ENG_STEM.stemWord(t.lower()) for t in library.get_keywords()]
 
         # calculate leaders
         all = range(self.length)
@@ -108,11 +108,11 @@ class Database():
         poop._to_file = self._to_file[:]
         poop._to_position = self._to_position[:]
         poop.files = self.files[:]
-        poop.analyzer = self.analyzer
         poop.fingerprints = self.fingerprints.copy()
         poop.binary_lookup = self.binary_lookup.copy()
         poop.keywords = self.keywords[:]
         poop.leaders = self.leaders[:]
+        poop.sentence_model = self.sentence_model
 
         return poop
 
@@ -150,8 +150,12 @@ def calculate_matches(db,filename,thresh = 0.9,debug = False):
         text = open(filename).read()
 
     # split the file into sentneces
-    sentences = library.sentences(text)
-    
+    features = parser.features(text)
+    sent_index = parser.sentences(features,db.sentence_model,2,2)
+    text_arrays = parser.sentence_stem_arrays(features,sent_index)
+    byte_offsets = parser.sentence_byte_offsets(features,sent_index)
+    sentences = []
+
     # matches is a list of dictionaries, one for each sentence.
     matches = []
     # lc_sent is a list of indicators. If the indicator is True then this has a
@@ -161,40 +165,19 @@ def calculate_matches(db,filename,thresh = 0.9,debug = False):
     # a dictionary that holds all the unique template files we found matches in
     unique_hits = {}
 
-    for j in xrange(len(sentences)):
+    for j in xrange(len(text_arrays)):
 
-        text_array = library.tokensFromAnalysis(sentences[j],db.analyzer)
-        if len(text_array)<4 and j<len(sentences)-1:
-            sentences[j+1] = "%s %s" % (sentences[j],sentences[j+1])
-            sentences[j] = ''
-            text_array = []
+        if len(text_arrays[j])<4 and j<len(text_arrays)-1:
+            text_arrays[j+1].extend(text_arrays[j])
+            byte_offsets[j+1][0] = byte_offsets[j][0]
+            text_arrays[j] = []
+            continue
+        sentences.append(text[byte_offsets[j][0]:byte_offsets[j][1]])
         matches.append({})
         lc_sent.append(False)
-        if sum([(token in text_array) for token in db.keywords])>0:
+        if sum([(token in text_arrays[j]) for token in db.keywords])>0:
             lc_sent[-1] = True
-        v = vector.Vector(text_array,fast=use_fast_vector)
-        
-        # fast binary dot product. 
-        # un = list(set(text_array))
-        # b = {}
-        # for aa in xrange(len(un)):
-        #     a = un[aa]
-        #     for c in db.binary_lookup.get(a,[]):
-        #         b[c] = b.get(c,0.0) + 1.0
-        # for a in b.keys():
-        #     b[a] = b.get(a,0.0)/math.sqrt(len(un)*len(db.vectors[a].text_count.keys()))
-        # for index,value in library.sortdictionary(b):
-        #     if value<thresh:
-        #         break
-        #     matches[-1][db._to_file[index]] = (index,value)
-        #     unique_hits[db._to_file[index]] = unique_hits.get(db._to_file[index],0.0)+1.0
-        # normal dot product
-        # for i in b:
-        # for i in xrange(db.length):
-        #     dot = v.dot(db.vectors[i])
-        #     if dot>thresh:
-        #         matches[-1][db._to_file[i]] = (i,dot)
-        #         unique_hits[db._to_file[i]] = unique_hits.get(db._to_file[i],0.0)+1.0
+        v = vector.Vector(text_arrays[j],fast=use_fast_vector)
         
         m = 0.0
         k = 0
@@ -293,7 +276,7 @@ def calculate_matches(db,filename,thresh = 0.9,debug = False):
             M[hits[i][j]] = M.get(hits[i][j],0.0) + 1.0
             N[hits[i][j]] = float(len(db.fingerprints[hits[i][j]].text_array))
             S[hits[i][j]] = S.get(hits[i][j],0.0) + matches[i][hits[i][j]][1]
-    N['Unknown'] = float(len(sentences))
+    N['Unknown'] = float(len(text_arrays))
 
     score = {}
 
@@ -306,7 +289,7 @@ def calculate_matches(db,filename,thresh = 0.9,debug = False):
         score[k] = (M[k]/N[k] * S[k]/M[k])
 
     if debug:
-        print "Finished %s containing %s sentence in %s seconds." % (filename,len(sentences), datetime.now()-tic)
+        print "Finished %s containing %s sentence in %s seconds." % (filename,len(text_arrays), datetime.now()-tic)
     
     return sentences,matches,unique_hits,cover,maximum,hits,score,fp
 
@@ -315,13 +298,13 @@ def save(db,path):
 
     pickle.dump(db,open(path,'w'))
 
-def load(path,analyzer):
+def load(path,sentence_model):
     # Unpickles a database object. Must provide the same analyzer as the
     # database was created with. This is a sticky point.
 
     # TODO: remove dependency on lucene snowball analyzer.
 
     db = pickle.load(open(path))
-    db.analyzer = analyzer
+    db.sentence_model = sentence_model
     
     return db

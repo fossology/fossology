@@ -3,7 +3,7 @@
 import psyco
 psyco.full()
 
-import sys, os, time, lucene, library
+import sys, os, time, library
 import cPickle
 from datetime import datetime
 import re
@@ -12,6 +12,7 @@ from xml.sax.saxutils import escape
 import htmlentitydefs
 import traceback
 from optparse import OptionParser
+import maxent
 
 # fix funky characters so we can print our data into a nice xml formatted
 # document
@@ -27,12 +28,10 @@ def htmlentities(u):
 
 # converts crazy unicode stuff before converting funky characters
 def escape2(str):
-	s = str.encode('ascii','ignore')
+	s = str.decode('ascii','ignore')
 	s2 = escape(s)
 	s3 = htmlentities(s2)
 	return s3
-
-
 
 def main ():
     # Create a help message so Bob doesn't send me 50 emails asking how to use
@@ -53,11 +52,9 @@ def main ():
 
     (options, args) = parser.parse_args()
 
-    # Start the JVM so lucene doesn't crash:(
-    lucene.initVM(lucene.CLASSPATH)
-
-    # this stems and splits our files for us:)
-    analyzer = lucene.SnowballAnalyzer("English",lucene.StopAnalyzer.ENGLISH_STOP_WORDS)
+    # load sentence model.
+    sentence_model = maxent.MaxentModel()
+    sentence_model.load('../models/SentenceModel.dat')
 
     debug_on = False
     if options.debug:
@@ -77,14 +74,14 @@ def main ():
         print 'Creating Database...'
         tic = datetime.now()
         files = [line.rstrip() for line in open(options.templates)]
-        DB = database.Database(files,analyzer,debug=debug_on)
+        DB = database.Database(files,sentence_model=sentence_model,debug=debug_on)
         database.save(DB,options.database)
         toc = datetime.now()-tic
         print 'Database created in %s seconds.' % toc
     elif options.database:
         print 'Loading Database...'
         tic = datetime.now()
-        DB = database.load(options.database,analyzer)
+        DB = database.load(options.database,sentence_model)
         toc = datetime.now()-tic
         print 'Loaded Database in %s seconds.' % toc
     else:
