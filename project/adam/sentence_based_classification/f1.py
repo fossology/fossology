@@ -37,8 +37,10 @@ def main ():
     # Create a help message so Bob doesn't send me 50 emails asking how to use
     # this script.
 
-    usage = "usage: %prog [options] -D database -T template_file -o output_dir -f test_files"
+    usage = "usage: %prog [options] -S sentence_model -D database -T template_file -o output_dir -f test_files"
     parser = OptionParser(usage)
+    parser.add_option("-S", "--sentence_model", type="string",
+            help="path of the sentence model file")
     parser.add_option("-D", "--database", type="string",
             help="If the -T flag is spesified then a database cache file will be saved at the location specified. Otherwise, loads a pre-cached database model")
     parser.add_option("-T", "--templates", type="string",
@@ -53,8 +55,12 @@ def main ():
     (options, args) = parser.parse_args()
 
     # load sentence model.
+    if not options.sentence_model:
+        print >> sys.stderr, 'Sentence Model path not provided.'
+        parser.print_usage()
+        sys.exit(1)
     sentence_model = maxent.MaxentModel()
-    sentence_model.load('../models/SentenceModel.dat')
+    sentence_model.load(options.sentence_model)
 
     debug_on = False
     if options.debug:
@@ -156,7 +162,7 @@ def main ():
     index = '<html><head><title>Report Index</title></head><body>%s</body></html>' %links
     
     open('%s/index.html' % (options.output), 'w').write(index)
-    open('%s/default.xsl' % (options.output), 'w').write(open('default.xsl').read())
+    open('%s/default.xsl' % (options.output), 'w').write(open(os.path.dirname(sys.argv[0])+'/default.xsl').read())
     
     end = datetime.now()
     print "Finished: ", end-start
