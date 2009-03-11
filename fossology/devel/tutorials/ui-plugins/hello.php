@@ -21,25 +21,24 @@
  at the very beginning.
  This prevents hacking attempts.
  *************************************************/
-global $GlobalReady;
-if (!isset($GlobalReady)) { exit; }
+global $GlobalReady;                  /* Always include these two lines at the start to insure the plugin */
+if (!isset($GlobalReady)) { exit; }   /* is running on the same system on which the UI is running */
 
-class ui_hello extends FO_Plugin
-  {
-  var $Name       = "hello";
-  var $Title      = "Hello World Example";
-  var $Version    = "1.0";
-  var $MenuList   = "Help::Hello World";
-  var $DBaccess   = PLUGIN_DB_NONE;
-  var $LoginFlag  = 0;
+class ui_hello extends FO_Plugin             /* This is the class name (ui_hello) and */
+  {                                          /* it extends functionality of the FO_Plugin */
+  var $Name       = "hello";                 /* This is the name by which FOSSology identifies the plugin */
+  var $Title      = "Hello World Example";   /* This is the title that will be displayed in the UI */
+  var $MenuList   = "Help::Hello World";     /* This is the description that will be displayed in the pulldown menu */
+  var $LoginFlag  = 0;                       /* You do not need to be logged into the UI to execute this plugin */
 
-  var $_Text="Hello World";
+  var $_Text="Hello World";                  /* This is the output message that will be displayed in the UI */
 
   function Output()
     {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+    if ($this->State != PLUGIN_STATE_READY) { return; }   /* State is set by FO_Plugin */
     $V="";
-    switch($this->OutputType)
+    switch($this->OutputType)                             /* OutputType is set by FO_Plugin */
+
       {
       case "XML":
 	$V .= "<text>$this->_Text</text>\n";
@@ -53,12 +52,12 @@ class ui_hello extends FO_Plugin
       default:
 	break;
       }
-    if (!$this->OutputToStdout) { return($V); }
+    if (!$this->OutputToStdout) { return($V); }   /* OutputToStdout is a function defined by FO_Plugin */
     print($V);
     return;
     }
 
   };
 $NewPlugin = new ui_hello;
-$NewPlugin->Initialize();
+$NewPlugin->Initialize();                    /* Initialize is a function defined by FO_Plugin */
 ?>
