@@ -43,12 +43,19 @@ error_reporting(E_NOTICE & E_STRICT);
 $Usage = "Usage: " . basename($argv[0]) . " [options]
   Options:
     -h             = this help message
-    -e <address>   = who the email is to e.g. nobody@localhost, optional if -i is used.
+    -e <address>   = optional email address, e.g. nobody@localhost
     -j string      = optional, Name of the job to include in the email
-    -n string      = optional, user name to address email to
-    -u <upload_id> = Upload ID.
-    -i interactive mode, prints the message instead of sending it.
+    -n string      = optional, user name to address email to, this is not the email
+                     address.
+    -u <upload_id> = Upload ID. (required)
+
+    If not -e option is supplied, status is printed to standard out.
   ";
+
+/*
+ * NOTE: when called with both -e and -n, use the -e value as the ToEmail, and
+ * use the UserName for the Dear UserName,.....
+ */
 
 function printMsg($Message) {
   if (empty($Message)) {
@@ -64,7 +71,7 @@ $JobName   = "";
 $JobStatus = "";
 
 /* Process some of the parameters */
-$options = getopt("hie:n:j:u:");
+$options = getopt("he:n:j:u:");
 if (empty($options)) {
   print $Usage;
   exit(1);
@@ -75,17 +82,15 @@ if (array_key_exists("h",$options)) {
   exit(0);
 }
 
-/* -e and -i and mutually exclusive */
-$Interactive = 0;
-if (array_key_exists("i",$options)) {
-  $Interactive = 1;
+/* no -e implies interactive, just print to stdout */
+$Interactive = FALSE;
+if (!array_key_exists("e",$options)) {
+  $Interactive = TRUE;
 }
 /* Default TO: is the users email */
 elseif (array_key_exists("e",$options)) {
-  $To = trim($options['e']);
-  print "  FJS: after -e processing To is:$To\n";
-  if (empty($To)) {
-    print "  DEBUG: fjs: FAILED on -e argument\n";
+  $ToEmail = trim($options['e']);
+  if (empty($ToEmail)) {
     print $Usage;
     exit(1);
   }
@@ -94,45 +99,45 @@ elseif (array_key_exists("e",$options)) {
 /* Optional TO: */
 if (array_key_exists("n",$options)) {
   $UserName = $options['n'];
-  print "  FJS: after -n processing To is:$To\n";
   if (empty($UserName)) {
-    print "  DEBUG: fjs: FAILED on -n argument\n";
     print $Usage;
     exit(1);
-  }
-  if (empty($To)) {
-    print "  FJS: To is empty, could set to:$UserName\n";
   }
 }
 
 if (array_key_exists("u",$options)) {
   $upload_id = $options['u'];
   if (empty($upload_id)) {
-    print "  DEBUG: fjs: FAILED on -u argument\n";
     print $Usage;
     exit(1);
   }
 }
-if (empty($To)){
-  print "  FJS: check To is EMPTY!\n";
-  $To = $UserName;
+if (empty($UserName)){
+  $UserName = $ToEmail;
 }
-$Preamble = "Dear $To,\n" .
-            "Do not reply to this message.  " .
-            "This is an automattically generated message by the FOSSology system.\n\n";
-
 /* gather the data from the db:
  * - User name
  * - Job name
  * - job status
  */
-/* get the user name for this upload ? still need to do this? got it above....*/
-$Sql = "select job_submitter, user_pk, user_name from job, users " .
+if(empty($UserName)) {
+  /* no User name passed in, get the user name for this upload */
+  $Sql = "select job_submitter, user_pk, user_name from job, users " .
            "where job_upload_fk = $upload_id and user_pk = job_submitter limit 1;";
-$Results = $DB->Action($Sql);
-if (!empty($Results[0]['user_name'])) {
-  $UserName = $Results[0]['user_name'];
+  $Results = $DB->Action($Sql);
+  if (!empty($Results[0]['user_name'])) {
+    $UserName = $Results[0]['user_name'];
+  }
 }
+/********** Set Message Preamble ******************************************/
+/* if still no UserName, then use email address as the name */
+if (empty($UserName)){
+  //print "  FJS: check UserName is EMPTY!\n";
+  $UserName = $ToEmail;
+}
+$Preamble = "Dear $UserName,\n" .
+            "Do not reply to this message.  " .
+            "This is an automattically generated message by the FOSSology system.\n\n";
 
 /* Optional Job Name */
 if (array_key_exists("j",$options)) {
@@ -153,7 +158,6 @@ if(empty($JobName)) {
     exit(1);
   }
 }
-
 /* get job status */
 $summary = JobListSummary($upload_id);
 //print "  DEBUG: summary for upload $upload_id is:\n"; print_r($summary) . "\n";
@@ -170,10 +174,9 @@ $summary['failed'] == 0 ) {
     exit(0);
   }
 }
-
 /* NOTE: if run as an agent we assume we are the last job in the jobqueue, so
- * when we check status, completed should be 1 less than the total.  If the
- * assumption is not made, then the job is always reported as still active...
+ * when we check status, completed should be 1 less than the total.  If this
+ * check is not made, then the job is always reported as still active...
  */
 /* Job is done, OK status */
 $Done = FALSE;
@@ -210,17 +213,22 @@ elseif ($summary['active'] > 0) {
   }
 }
 //print "  FJS: after all job checks message:\n$Message\n";
-/* called as agent, send mail */
+/* called as agent, or -e passed in, send mail. */
 if (!$Interactive) {
   /* use php mail to queue it up */
-  //print "  FJS: sending email to:$To with message:\n$Message\n";
+  //print "  FJS: sending email to:$ToEmail with message:\n$Message\n";
   $Sender = "The FOSSology Application";
   $From = "root@localhost";
-  $Recipient = $To;
+  $Recipient = $ToEmail;
   $Mail_body = wordwrap($Message,72);
   $Subject = "FOSSology Results for $JobName";
   $Header = "From: " . $Sender . " <" . $From . ">\r\n";
-  $rtn = mail($Recipient, $Subject, $Mail_body, $Header);
+  if($rtn = mail($Recipient, $Subject, $Mail_body, $Header)){
+    exit(0);
+  }
+  else {
+    exit(1);
+  }
 }
 exit(0);
 ?>

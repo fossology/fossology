@@ -139,7 +139,6 @@ function GetFolder($FolderPath, $Parent = NULL) {
   global $DB;
   global $Verbose;
   global $Test;
-  //print "  GetFolder: FolderPath is:$FolderPath\n";
   if (empty($Parent)) {
     $Parent = FolderGetTop();
   }
@@ -199,46 +198,40 @@ function ProcEnote($UploadPk) {
   global $Email;
   global $DB;
 
-  print "  CP2::ProcEnote starting\n";
-
   /* get the user name from the previous upload */
   $previous = $UploadPk-1;
   $Sql = "SELECT upload_pk,upload_userid,job_upload_fk,job_user_fk FROM upload,job WHERE " .
            "job_upload_fk=$previous and upload_pk=$previous order by upload_pk desc;";
   $Users = $DB->Action($Sql);
-  //print "  CP2::PE After 1st query\n";
-  //print "  CP2::PE Users[0] from query is:\n"; print_r($Users[0]) . "\n";
   $UserPk = $Users[0]['job_user_fk'];
   $UserId = $Users[0]['upload_userid'];
-  //print "  CP2::PE after 1st query to get user_pk, UserPk is:$UserPk upload-userid is:$UserId\n";
-  $Sql = "SELECT user_pk, user_name, email_notify FROM users WHERE " .
+  $Sql = "SELECT user_pk, user_name, user_email, email_notify FROM users WHERE " .
              "user_pk=$UserPk; ";
   $Uname= $DB->Action($Sql);
   $UserName = $Uname[0]['user_name'];
-  //print "  CP2::PE after 2nd query to get Name, user name is:$UserName\n";
+  $UserEmail = $Uname[0]['user_email'];
 
+  /*
+   * If called as agent, current upload user name will be fossy with a upload_userid of NULL.
+   * Get the information to check that condition
+   */
   $Sql = "SELECT upload_pk,upload_userid,job_upload_fk,job_user_fk FROM upload,job WHERE " .
            "job_upload_fk=$UploadPk and upload_pk=$UploadPk order by upload_pk desc;";
   $Users = $DB->Action($Sql);
-  //print "  CP2::PE After Fossy.1 query\n";
-  //print "  CP2::PE Users[0] from query is:\n"; print_r($Users[0]) . "\n";
   $UserPk = $Users[0]['job_user_fk'];
   $UserId = $Users[0]['upload_userid'];
-  //print "  CP2::PE after 1st query to get user_pk, UserPk is:$UserPk upload-userid is:$UserId\n";
   $Sql = "SELECT user_pk, user_name, email_notify FROM users WHERE " .
              "user_pk=$UserPk; ";
   $Fossy= $DB->Action($Sql);
   $FossyName = $Fossy[0]['user_name'];
-  //print "  CP2::PE after 2nd query to get FName, user name is:$FossyName\n";
 
   /* are we being run as an agent? */
   if($UserId === NULL && $FossyName == 'fossy') {
-    print "  As AGENT: Scheduling email notification\n";
-    /* When run as agent, don't pass $Email, will get it from the db.*/
-    $sched = scheduleEmailNotification($UploadPk,NULL,$UserName);
+    /* When run as agent, fixme! */
+    $sched = scheduleEmailNotification($UploadPk,$UserEmail,$UserName);
   }
   else {
-    /* run as cli */
+    /* run as cli, what was I thinking when I wrote this?  sen is not a cli... */
     print "  As CLI: Scheduling email notification\n";
     $sched = scheduleEmailNotification($UploadPk,$Email);
   }
@@ -333,6 +326,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   /* Tell wget_agent to actually grab the upload */
   global $AGENTDIR;
   $Cmd = "$AGENTDIR/wget_agent -k '$UploadPk' '$UploadArchive'";
+  print "  CP2:$Cmd = $AGENTDIR/wget_agent -k $UploadPk $UploadArchive\n";
   if ($Verbose) {
     print "CMD=$Cmd\n";
   }
@@ -340,18 +334,24 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     system($Cmd);
   }
   /* Schedule the unpack */
+  print "  CP2:Scheduling unpack\n";
   $Cmd = "fossjobs -U '$UploadPk' -A agent_unpack";
   if ($Verbose) {
     print "CMD=$Cmd\n";
   }
   if (!$Test) {
-    //print "CP2: CMD=$Cmd\n";
+    print "CP2: CMD=$Cmd\n";
     system($Cmd);
+    print "  CP2:Checking ENote Unpack case\n";
+    if($Enotification) {
+      $res = ProcEnote($UploadPk);
+      if(!is_null($res)) {
+        print $res;
+      }
+    }
   }
-//  $iam = exec('whoami', $dummy);
-//  print "  I am:$iam\n";
-
   if (!empty($QueueList)) {
+    print "  CP2:In qlist\n";
     switch ($QueueList) {
       case 'agent_unpack':
         $Cmd = "";
@@ -364,7 +364,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
         $Cmd = "fossjobs -U '$UploadPk' -A '$QueueList'";
         break;
     }
-    //print "  CP2:CMD=$Cmd\n";
     if ($Verbose) {
       print "CMD=$Cmd\n";
     }
@@ -377,6 +376,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
      * the fosscp_agent, then the second (created in cp2foss) is for the rest
      * of the processing.
      */
+    //print "  CP2:At END of Upload1: Checking ENote\n";
     if($Enotification) {
       //print "  CP2::UP1:Calling ProcEnote using uploadpk:$UploadPk\n";
       $res = ProcEnote($UploadPk);
