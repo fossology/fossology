@@ -531,12 +531,12 @@ function JobQueueChangeStatus($jqpk, $Status) {
     case "reset":
       $SQL = "UPDATE jobqueue
       		SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
-      		WHERE jq_fk = '$jqpk'";
+      		WHERE jq_pk = '$jqpk'";
       break;
     case "reset_completed": /* reset the job if it is done */
       $SQL = "UPDATE jobqueue
       		SET jq_starttime=NULL,jq_endtime=NULL,jq_end_bits=0
-      		WHERE jq_fk = '$jqpk' AND jq_endtime IS NOT NULL";
+      		WHERE jq_pk = '$jqpk' AND jq_endtime IS NOT NULL";
       break;
     case "fail":
       $SQL = "UPDATE jobqueue
@@ -573,7 +573,7 @@ function JobQueueChangeStatus($jqpk, $Status) {
     default:
       return (-1);
   }
-  $DB->Action($SQL);
+  $R = $DB->Action($SQL);
   return (0);
 } // JobQueueChangeStatus()
 /************************************************************
