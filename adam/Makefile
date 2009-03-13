@@ -48,4 +48,6 @@ clean:
 	rm models/SentenceModel.dat
 	rm models/Database.dat
 	rm -rf output
+	rm $(TEMPLATE_FILE)
+	make -C sparsevect -f Makefile.old clean
 
