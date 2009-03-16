@@ -487,8 +487,8 @@ void    SetEnv  (char *S, char *TempFileDir)
     SLen++;
     }
 
-#if 0
-  printf("LOG upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s\n  URL=%s\n",GlobalUploadKey,
+#if 1
+  printf("  LOG upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s\n  URL=%s\n",GlobalUploadKey,
   	GlobalUploadKey,GlobalTempFile,GlobalURL);
 #endif
 } /* SetEnv() */

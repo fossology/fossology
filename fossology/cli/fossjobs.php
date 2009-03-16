@@ -1,27 +1,27 @@
 #!/usr/bin/php
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 /**
  * fossjobs
  *
- * list fossology agents that are configured in the ui or 
+ * list fossology agents that are configured in the ui or
  * run the default configured in the ui.
-  *
+ *
  * @param (optional) string -h standard help switch
  * @param (optional) string -v verbose debugging
  * @param (optional) string -a lists agents
@@ -31,22 +31,19 @@
  * @param int -U $upload_pk upload primary key to run agents on....
  *
  * @return 0 for success, string for failure....
- * 
+ *
  * @version "$Id$"
- * 
+ *
  * note: there is a user interface issue here in that the user has no
  * easy way to discover and specify what the upload_pk is.
  */
-
 // Have to set this or else plugins will not load.
 $GlobalReady = 1;
-
 /**********************************************************************
- **********************************************************************
- SUPPORT FUNCTIONS
- **********************************************************************
- **********************************************************************/
-
+**********************************************************************
+SUPPORT FUNCTIONS
+**********************************************************************
+**********************************************************************/
 /**
  * function: list agents
  *
@@ -55,23 +52,20 @@ $GlobalReady = 1;
  *
  * @return array $agent_list
  */
-function list_agents()
-{
+function list_agents() {
   $agent_list = menu_find("Agents", $depth);
-  return($agent_list);
+  return ($agent_list);
 }
-require_once(dirname(__FILE__) . '/../share/fossology/php/pathinclude.php');
+require_once (dirname(__FILE__) . '/../share/fossology/php/pathinclude.php');
 global $WEBDIR;
 $UI_CLI = 1;
-require_once("$WEBDIR/common/common.php");
+require_once ("$WEBDIR/common/common.php");
 cli_Init();
-
-
 /**********************************************************************
- **********************************************************************
- INITIALIZE THIS INTERFACE
- **********************************************************************
- **********************************************************************/
+**********************************************************************
+INITIALIZE THIS INTERFACE
+**********************************************************************
+**********************************************************************/
 $usage = basename($argv[0]) . " [options]
   Options:
   -h        :: help, this message
@@ -85,157 +79,128 @@ $usage = basename($argv[0]) . " [options]
 	       Or, use 'ALL' to specify all upload ids.
   -P num    :: priority for the jobs (higher = more important, default:0)
 ";
-
 //process parameters, see usage above
 $options = getopt("haA:P:uU:v");
 //print_r($options);
-if (empty($options))
-  {
+if (empty($options)) {
   echo $usage;
   exit(1);
-  }
-
-if (array_key_exists("h",$options))
-  {
+}
+if (array_key_exists("h", $options)) {
   echo $usage;
   exit(0);
-  }
-
-
+}
 global $Plugins;
 global $DB;
-if (empty($DB))
-  {
+if (empty($DB)) {
   print "ERROR: Unable to connect to the database.\n";
   exit(1);
-  }
-
-
+}
 /**********************************************************************
- **********************************************************************
- PROCESS COMMAND LINE SELECTION
- **********************************************************************
- **********************************************************************/
-
+**********************************************************************
+PROCESS COMMAND LINE SELECTION
+**********************************************************************
+**********************************************************************/
 $Verbose = 0;
-if (array_key_exists("v",$options))
-  {
+if (array_key_exists("v", $options)) {
   $Verbose = 1;
-  }
-
+}
 $Priority = 0;
-if (array_key_exists("P",$options))
-  {
+if (array_key_exists("P", $options)) {
   $Priority = intval($options["P"]);
-  }
-
+}
 // Get the list of registered agents
 $agent_list = list_agents();
-if (empty($agent_list))
-  {
+if (empty($agent_list)) {
   echo "ERROR! could not get list of agents\n";
   echo "Are Plugins configured?\n";
   exit(1);
-  }
-
+}
 /* If the user specified a list, then disable every agent not in the list */
-if (array_key_exists("A",$options))
-  {
+if (array_key_exists("A", $options)) {
   $agent_count = count($agent_list);
-  for($ac=0; $ac<$agent_count; $ac++)
-    {
-    $Found=0;
-    foreach(split(',',$options["A"]) as $Val)
-      {
-      if (!strcmp($Val,$agent_list[$ac]->URI)) { $Found=1; }
+  for ($ac = 0;$ac < $agent_count;$ac++) {
+    $Found = 0;
+    foreach(split(',', $options["A"]) as $Val) {
+      if (!strcmp($Val, $agent_list[$ac]->URI)) {
+        $Found = 1;
       }
-    if ($Found == 0) { $agent_list[$ac]->URI = NULL; }
+    }
+    if ($Found == 0) {
+      $agent_list[$ac]->URI = NULL;
     }
   }
-
+}
 /* List available agents */
-if (array_key_exists("a",$options))
-  {
-  if (empty($agent_list))
-    {
+if (array_key_exists("a", $options)) {
+  if (empty($agent_list)) {
     echo "No agents configured\n";
-    }
-  else
-    {
+  } else {
     echo "The available agents are:\n";
     $agent_count = count($agent_list);
-    for ($ac=0; $ac<$agent_count; $ac++)
-      {
+    for ($ac = 0;$ac < $agent_count;$ac++) {
       $agent = ($agent_list[$ac]->URI);
-      if (!empty($agent))
-	{
-	echo " $agent\n";
-	}
+      if (!empty($agent)) {
+        echo " $agent\n";
       }
     }
   }
-
+}
 /* List available uploads */
-if (array_key_exists("u",$options))
-  {
+if (array_key_exists("u", $options)) {
   $SQL = "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;";
   $Results = $DB->Action($SQL);
   print "# The following uploads are available (upload id: name)\n";
-  for($i=0; !empty($Results[$i]['upload_pk']); $i++)
-    {
+  for ($i = 0;!empty($Results[$i]['upload_pk']);$i++) {
     $Label = $Results[$i]['upload_filename'];
-    if (!empty($Results[$i]['upload_desc']))
-      {
-      $Label .= " (" . $Results[$i]['upload_desc'] . ')';
-      }
+    if (!empty($Results[$i]['upload_desc'])) {
+      $Label.= " (" . $Results[$i]['upload_desc'] . ')';
+    }
     print $Results[$i]['upload_pk'] . ": $Label\n";
-    if ($i==0) { $AllUploadPk = $Results[$i]['upload_pk']; }
-    else { $AllUploadPk .= "," . $Results[$i]['upload_pk']; }
+    if ($i == 0) {
+      $AllUploadPk = $Results[$i]['upload_pk'];
+    } else {
+      $AllUploadPk.= "," . $Results[$i]['upload_pk'];
     }
   }
-
+}
 $upload_pk_list = $options['U'];
-if ($upload_pk_list == 'ALL')
-  {
+if ($upload_pk_list == 'ALL') {
   $upload_pk_list = "";
   $SQL = "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;";
   $Results = $DB->Action($SQL);
-  for($i=0; !empty($Results[$i]['upload_pk']); $i++)
-    {
-    if ($i==0) { $upload_pk_list = $Results[$i]['upload_pk']; }
-    else { $upload_pk_list .= "," . $Results[$i]['upload_pk']; }
+  for ($i = 0;!empty($Results[$i]['upload_pk']);$i++) {
+    if ($i == 0) {
+      $upload_pk_list = $Results[$i]['upload_pk'];
+    } else {
+      $upload_pk_list.= "," . $Results[$i]['upload_pk'];
     }
   }
-
-if (!empty($upload_pk_list))
-  {
+}
+if (!empty($upload_pk_list)) {
   $reg_agents = array();
-  $results    = array();
+  $results = array();
   // Schedule them
   $agent_count = count($agent_list);
-  foreach(split(",",$upload_pk_list) as $upload_pk)
-    {
-    if (empty($upload_pk)) { continue; }
-    for ($ac=0; $ac<$agent_count; $ac++)
-      {
+  foreach(split(",", $upload_pk_list) as $upload_pk) {
+    if (empty($upload_pk)) {
+      continue;
+    }
+    for ($ac = 0;$ac < $agent_count;$ac++) {
       $agentname = $agent_list[$ac]->URI;
-      if (!empty($agentname))
-	{
-	$Agent = &$Plugins[plugin_find_id($agentname)];
-	$results = $Agent->AgentAdd($upload_pk,NULL,$Priority);
-	if (!empty($results))
-	  {
-	  echo "ERROR: Scheduling failed for Agent $agentname\n";
-	  echo "ERROR message: $results\n";
-	  exit(1);
-	  }
-	else if ($Verbose)
-	  {
-	  print "Scheduled: $upload_pk -> $agentname\n";
-	  }
-	}
-      } /* for $ac */
-    } /* for each $upload_pk */
-  } // if $upload_pk is defined
+      if (!empty($agentname)) {
+        $Agent = & $Plugins[plugin_find_id($agentname) ];
+        $results = $Agent->AgentAdd($upload_pk, NULL, $Priority);
+        if (!empty($results)) {
+          echo "ERROR: Scheduling failed for Agent $agentname\n";
+          echo "ERROR message: $results\n";
+          exit(1);
+        } else if ($Verbose) {
+          print "Scheduled: $upload_pk -> $agentname\n";
+        }
+      }
+    } /* for $ac */
+  } /* for each $upload_pk */
+} // if $upload_pk is defined
 exit(0);
 ?>

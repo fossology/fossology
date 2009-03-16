@@ -744,8 +744,8 @@ if (0)
       }
 
     /***************************  release 1.0  ********************************/
-    /* if pfile_fk or ufile_mode don't exist in table uploadtree 
-     * create them and populate them from ufile table    
+    /* if pfile_fk or ufile_mode don't exist in table uploadtree
+     * create them and populate them from ufile table
      * Drop the ufile columns */
     if ($DB->TblExist("ufile") && $DB->ColExist("upload", "ufile_fk"))
 	{
@@ -759,11 +759,12 @@ if (0)
 	$DB->Action("UPDATE uploadtree SET ufile_name = ufile.ufile_name FROM ufile WHERE uploadtree.ufile_name IS NULL AND uploadtree.ufile_fk = ufile.ufile_pk;");
 	}
 
-    /************ Delete obsolete tables ************/
+    /************ Delete obsolete tables and columns ************/
     if ($DB->TblExist("ufile")) { $DB->Action("DROP TABLE ufile CASCADE;"); }
     if ($DB->TblExist("proj")) { $DB->Action("DROP TABLE proj CASCADE;"); }
     if ($DB->TblExist("log")) { $DB->Action("DROP TABLE log CASCADE;"); }
     if ($DB->TblExist("table_enum")) { $DB->Action("DROP TABLE table_enum CASCADE;"); }
+    if ($DB->ColExist("job","job_submitter")) { $DB->Action("ALTER TABLE \"job\" DROP COLUMN \"job_submitter\" ;"); }
 
     /********************************************/
     /* Sequences can get out of sequence; Fix the sequences! */
@@ -969,7 +970,7 @@ CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
 DECLARE
   jqrec jobqueue;
   jqrec_test jobqueue;
-  jqcurse CURSOR FOR SELECT * 
+  jqcurse CURSOR FOR SELECT *
     FROM jobqueue
     INNER JOIN job
       ON jq_starttime IS NULL
@@ -1015,7 +1016,7 @@ LANGUAGE plpgsql;
      * the non-artifact parents of an uploadtree_pk
      ********************************************/
     $SQL = '
-CREATE or REPLACE function uploadtree2path(uploadtree_pk_in int) returns setof uploadtree as $$ 
+CREATE or REPLACE function uploadtree2path(uploadtree_pk_in int) returns setof uploadtree as $$
 DECLARE
   UTrec   uploadtree;
   UTpk    integer;
@@ -1027,13 +1028,13 @@ BEGIN
     WHILE UTpk > 0 LOOP
       sql := ' . "'" . 'select * from uploadtree where uploadtree_pk=' . "'" . ' || UTpk;
       execute sql into UTrec;
-    
+
       IF ((UTrec.ufile_mode & (1<<28)) = 0) THEN RETURN NEXT UTrec; END IF;
       UTpk := UTrec.parent;
     END LOOP;
   RETURN;
 END;
-$$ 
+$$
 LANGUAGE plpgsql;
     ';
     if ($Debug) { print "$SQL;\n"; }
@@ -1120,7 +1121,9 @@ LANGUAGE plpgsql;
 	    $SQL = "ALTER TABLE \"$Table\" RENAME COLUMN \"$Column\" TO \"$Rename\";";
 	    if ($Debug) { print "$SQL\n"; }
 	    else { $DB->Action($SQL); }
-            if ($DB->Error) { exit(1); }
+           if ($DB->Error) {
+             exit(1);
+           }
 	    }
 	  if ($Debug) { print $Val['ADD'] . "\n"; }
 	  else { $DB->Action($Val['ADD']); }
@@ -1403,7 +1406,7 @@ LANGUAGE plpgsql;
     } // ApplySchema()
 
   /***********************************************************
-   Output(): This function is called when user output is
+   (): This function is called when user output is
    requested.  This function is responsible for content.
    (OutputOpen and Output are separated so one plugin
    can call another plugin's Output.)
@@ -1417,7 +1420,7 @@ LANGUAGE plpgsql;
     global $Plugins;
 
     if ($this->State != PLUGIN_STATE_READY) { return; }
-    $V=""; 
+    $V="";
     switch($this->OutputType)
       {
       case "XML":
