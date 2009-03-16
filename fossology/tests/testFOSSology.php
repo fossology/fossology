@@ -205,7 +205,7 @@ if (array_key_exists("a", $options))
 
   // wait for tests to finish
 
-  $jobsDone = wait4jobs();
+  $last = exec('wait4jobs.php',$tossme, $jobsDone);
   if($jobDone != 0){
     print "ERROR! jobs are not finished after two hours, not running" .
           "verify tests, please investigate and run verify tests by hand\n";
