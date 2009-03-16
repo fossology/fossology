@@ -140,17 +140,17 @@ function plugin_sort()
  find the index to it in the $Plugins array, or
  return -1 if it is not found.
  *****************************************/
-function plugin_find_id($Name)
-{
+function plugin_find_id($Name) {
   global $Plugins;
-  foreach ($Plugins as $key => $val)
-    {
-    if (!strcmp($val->Name,$Name))
-	{
-	if ($val->State != PLUGIN_STATE_READY) return(-1);
-	return($key);
-	}
-    }
+
+  foreach ($Plugins as $key => $val) {
+    if (!strcmp($val->Name,$Name)) {
+	   if ($val->State != PLUGIN_STATE_READY) {
+	     return(-1);
+	   }
+	   return($key);
+	   }
+  }
   return(-1);
 } // plugin_find_id()
 
@@ -259,6 +259,11 @@ function plugin_unload()
 
   foreach($Plugins as $Key => $Val)
     {
+    /* The plugin stucture's last entry is -1 bogus class, which will
+     * cause the $P->Destroy to fail below. */
+    if($Key == -1) {
+      break;
+    }
     if (empty($Val)) { continue; }
     $P = &$Plugins[$Key];
     if ($P->State != PLUGIN_STATE_INVALID) { $P->Destroy(); }

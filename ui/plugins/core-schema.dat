@@ -227,10 +227,6 @@
   $Schema["TABLE"]["job"]["job_pk"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_pk\" int4;";
   $Schema["TABLE"]["job"]["job_pk"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_pk\" SET NOT NULL, ALTER COLUMN \"job_pk\" SET DEFAULT nextval('job_job_pk_seq'::regclass);";
 
-  $Schema["TABLE"]["job"]["job_submitter"]["DESC"] = "COMMENT ON COLUMN \"job\".\"job_submitter\" IS 'job submitter name';";
-  $Schema["TABLE"]["job"]["job_submitter"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_submitter\" varchar(64);";
-  $Schema["TABLE"]["job"]["job_submitter"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_submitter\" SET NOT NULL;";
-
   $Schema["TABLE"]["job"]["job_queued"]["DESC"] = "";
   $Schema["TABLE"]["job"]["job_queued"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_queued\" timestamptz;";
   $Schema["TABLE"]["job"]["job_queued"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_queued\" DROP NOT NULL;";
@@ -254,6 +250,10 @@
   $Schema["TABLE"]["job"]["job_folder_fk"]["DESC"] = "COMMENT ON COLUMN \"job\".\"job_folder_fk\" IS 'folder this job applies to';";
   $Schema["TABLE"]["job"]["job_folder_fk"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_folder_fk\" int4;";
   $Schema["TABLE"]["job"]["job_folder_fk"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_folder_fk\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["job"]["job_user_fk"]["DESC"] = "COMMENT ON COLUMN \"job\".\"job_user_fk\" IS 'Job submitted by this user';";
+  $Schema["TABLE"]["job"]["job_user_fk"]["ADD"] = "ALTER TABLE \"job\" ADD COLUMN \"job_user_fk\" int4;";
+  $Schema["TABLE"]["job"]["job_user_fk"]["ALTER"] = "ALTER TABLE \"job\" ALTER COLUMN \"job_user_fk\" DROP NOT NULL;";
 
 
   $Schema["TABLE"]["jobdepends"]["jdep_jq_fk"]["DESC"] = "COMMENT ON COLUMN \"jobdepends\".\"jdep_jq_fk\" IS 'jdep_jq_fk depends on jdep_jq_depends_fk';";
@@ -702,6 +702,10 @@
   $Schema["TABLE"]["users"]["user_email"]["DESC"] = "";
   $Schema["TABLE"]["users"]["user_email"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_email\" text;";
   $Schema["TABLE"]["users"]["user_email"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_email\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["users"]["email_notify"]["DESC"] = "COMMENT ON COLUMN \"users\".\"email_notify\" IS 'Email notification flag';";
+  $Schema["TABLE"]["users"]["email_notify"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"email_notify\" varchar(1);";
+  $Schema["TABLE"]["users"]["email_notify"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"email_notify\" DROP NOT NULL, ALTER COLUMN \"email_notify\" SET DEFAULT 'y'::character varying;";
 
 
 

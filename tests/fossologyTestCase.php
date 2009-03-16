@@ -334,16 +334,20 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->myassertText($page, '/Upload a New File/'));
     $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
     $FolderId = $this->getFolderId($parentFolder, $page);
-    $this->assertTrue($this->mybrowser->setField('folder', $FolderId), "uploadFile FAILED! could not set 'folder' field!\n");
-    $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile"), "uploadFile FAILED! could not set 'getfile' field!\n");
-    $this->assertTrue($this->mybrowser->setField('description', "$description"), "uploadFile FAILED! could not set 'description' field!\n");
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId),
+      "uploadFile FAILED! could not set 'folder' field!\n");
+    $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile"),
+      "uploadFile FAILED! could not set 'getfile' field!\n");
+    $this->assertTrue($this->mybrowser->setField('description', "$description"),
+      "uploadFile FAILED! could not set 'description' field!\n");
     /*
      * the test will fail if name is set to null, so we special case it
      * rather than just set it.
      */
     if (!(is_null($uploadName)))
     {
-      $this->assertTrue($this->mybrowser->setField('name', "$uploadName"), "uploadFile FAILED! could not set 'name' field!\n");
+      $this->assertTrue($this->mybrowser->setField('name', "$uploadName"),
+        "uploadFile FAILED! could not set 'name' field!\n");
     }
     /*
      * Select agents to run, we just pass on the parameter to setAgents,
@@ -356,7 +360,8 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
     //print "************* page after Upload! is *************\n$page\n";
-    $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
+    $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'),
+      "FAILURE:Did not find the message'Upload added to job queue'\n");
   }
   /**
   * function uploadUrl
