@@ -21,7 +21,7 @@
 /**
  * testFOSSology
  *
- * Run one or more FOSSoloyg test suites
+ * Run one or more FOSSology test suites
  *
  * @version "$Id:  $"
  *
@@ -29,7 +29,7 @@
  */
 
 /**
- * testFossology [-a] | [-b] | [-h] | [-s] | [-p]
+ * testFossology [-l path] {[-a] | [-b] | [-h] | [-s] | [-v -l]
  *
  * Run one or more FOSSology Test Suites
  * -a: run all tests suites.  -a overrides all other switches supplied.
@@ -205,7 +205,7 @@ if (array_key_exists("a", $options))
 
   // wait for tests to finish
 
-  $last = exec('wait4jobs.php',$tossme, $jobsDone);
+  $last = exec('./wait4jobs.php',$tossme, $jobsDone);
   if($jobDone != 0){
     print "ERROR! jobs are not finished after two hours, not running" .
           "verify tests, please investigate and run verify tests by hand\n";
@@ -279,6 +279,7 @@ if (array_key_exists("s", $options))
 if (array_key_exists("v", $options)){
   if (array_key_exists("l", $options)){
     $logFile = $options['l'];
+    $logFileName = basename($logFile);
   }
   else{
     print "Error, must supply a path to a log file with -v option\n";
@@ -300,9 +301,10 @@ if (array_key_exists("v", $options)){
 
 function saveResults(){
 
-  global $HOME;
+  global $Home;
   global $logFileName;
   global $LF;
+  global $logFile;
 
   $resHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
 
@@ -322,14 +324,16 @@ function saveResults(){
 
 function verifyUploads($logfile) {
 
-  global $HOME;
+  global $Home;
   global $VerifyTests;
+  global $date;
+  global $time;
 
   if(empty($logfile)){
     return(FALSE);
   }
 
-  $VLF = fopen($logfile, 'a');
+  $VLF = fopen($logfile, 'a') or die("Can't open $logfile, $phperrormsg");
   $Vstart = "\nRunning Verify Tests on: $date at $time\n";
   LogAndPrint($VLF, $Vstart);
 
@@ -343,7 +347,7 @@ function verifyUploads($logfile) {
     $noVT = "Verify Tests ERROR: can't cd to $VerifyTests\n";
     LogAndPrint($VLF, $noVT);
   }
-  $VerifyLast = exec("./runVerifyTests.php >> $logFile 2>&1", $dummy, $Prtn);
+  $VerifyLast = exec("./runVerifyTests.php >> $logfile 2>&1", $dummy, $Prtn);
   fclose($VLF);
   return(TRUE);
 }
