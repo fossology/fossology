@@ -326,7 +326,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   /* Tell wget_agent to actually grab the upload */
   global $AGENTDIR;
   $Cmd = "$AGENTDIR/wget_agent -k '$UploadPk' '$UploadArchive'";
-  print "  CP2:$Cmd = $AGENTDIR/wget_agent -k $UploadPk $UploadArchive\n";
   if ($Verbose) {
     print "CMD=$Cmd\n";
   }
@@ -334,15 +333,12 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     system($Cmd);
   }
   /* Schedule the unpack */
-  print "  CP2:Scheduling unpack\n";
   $Cmd = "fossjobs -U '$UploadPk' -A agent_unpack";
   if ($Verbose) {
     print "CMD=$Cmd\n";
   }
   if (!$Test) {
-    print "CP2: CMD=$Cmd\n";
     system($Cmd);
-    print "  CP2:Checking ENote Unpack case\n";
     if($Enotification) {
       $res = ProcEnote($UploadPk);
       if(!is_null($res)) {
@@ -351,7 +347,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     }
   }
   if (!empty($QueueList)) {
-    print "  CP2:In qlist\n";
     switch ($QueueList) {
       case 'agent_unpack':
         $Cmd = "";
@@ -376,7 +371,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
      * the fosscp_agent, then the second (created in cp2foss) is for the rest
      * of the processing.
      */
-    //print "  CP2:At END of Upload1: Checking ENote\n";
     if($Enotification) {
       //print "  CP2::UP1:Calling ProcEnote using uploadpk:$UploadPk\n";
       $res = ProcEnote($UploadPk);
