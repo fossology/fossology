@@ -118,7 +118,7 @@ class agent_license_reanalyze extends FO_Plugin
     /* check for email notification and schedule if needed */
     if (CheckEnotification()) {
       print "Scheduling email\n";
-      $last = exec("fossjobstat -u $UploadPk -e markd",$dummy,$rtn);
+      $last = exec("notify -u $UploadPk -e markd",$dummy,$rtn);
       if ($rtn != 0) {
         print "FAIL! Scheduling of email failed:\n$last\n";
         return;
