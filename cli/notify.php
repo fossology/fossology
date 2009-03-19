@@ -81,22 +81,27 @@ if (array_key_exists("h",$options)) {
   print $Usage;
   exit(0);
 }
+//print "  NOT: parameters passed in are:\n"; print_r($options) . "\n";
 
+/*
+ * Note the logic below makes -e a  required parameter... not what we want for
+ * interactive use.  Think about this.
+ */
 /* no -e implies interactive, just print to stdout */
 $Interactive = FALSE;
-if (!array_key_exists("e",$options)) {
-  $Interactive = TRUE;
-}
 /* Default TO: is the users email */
-elseif (array_key_exists("e",$options)) {
+if (array_key_exists("e",$options)) {
   $ToEmail = trim($options['e']);
   if (empty($ToEmail)) {
     print $Usage;
     exit(1);
   }
 }
+else {
+  $Interactive = TRUE;
+}
 
-/* Optional TO: */
+/* Optional Salutation */
 if (array_key_exists("n",$options)) {
   $UserName = $options['n'];
   if (empty($UserName)) {
@@ -212,11 +217,10 @@ elseif ($summary['active'] > 0) {
     printMsg($MessagePart);
   }
 }
-//print "  FJS: after all job checks message:\n$Message\n";
 /* called as agent, or -e passed in, send mail. */
 if (!$Interactive) {
   /* use php mail to queue it up */
-  //print "  FJS: sending email to:$ToEmail with message:\n$Message\n";
+  //print "  NOT: sending email to:$ToEmail with message:\n$Message\n";
   $Sender = "The FOSSology Application";
   $From = "root@localhost";
   $Recipient = $ToEmail;
@@ -224,9 +228,11 @@ if (!$Interactive) {
   $Subject = "FOSSology Results for $JobName";
   $Header = "From: " . $Sender . " <" . $From . ">\r\n";
   if($rtn = mail($Recipient, $Subject, $Mail_body, $Header)){
+    print "Mail has been queued by notify\n";
     exit(0);
   }
   else {
+    print "Warning: Mail was NOT queued by notify\n";
     exit(1);
   }
 }
