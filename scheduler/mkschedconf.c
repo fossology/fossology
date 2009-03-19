@@ -184,10 +184,10 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
   fprintf(Fout,Cmd,AGENTDIR,BINDIR);
   fprintf(Fout,"\n");
 
- /** fossjobstat **/
-  fprintf(Fout,"agent=fossjobstat %s| ",CmdHost);
+ /** notify **/
+  fprintf(Fout,"agent=notify %s| ",CmdHost);
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,Rcmd,"%s/engine-shell fossjobstat '%s/fossjobstat %{*}'");
+  snprintf(Cmd,sizeof(Cmd)-1,Rcmd,"%s/engine-shell notify '%s/notify %{*}'");
   fprintf(Fout,Cmd,AGENTDIR,BINDIR);
   fprintf(Fout,"\n");
 
