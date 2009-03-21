@@ -46,6 +46,73 @@ class fossologyTestCase extends fossologyTest
   public $debug;
   public $webProxy;
 
+
+  /**
+   * addUser
+   *
+   * Create a Fossology user
+   *
+   */
+  public function addUser($UserName, $Description=NULL, $Email=NULL, $Access=1,
+  $Folder=1, $Password=NULL, $EmailNotify='y'){
+
+    global $URL;
+
+    // check user name, everything else defaults (not a good idea to use defaults)
+    if(empty($UserName)) {
+      return("No User Name, cannot add user");
+    }
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Add');
+    $this->assertTrue($this->myassertText($page, '/Add A User/'),
+      "Did NOT find Title, 'Add A User'");
+
+    /* Set the user field */
+    $this->assertTrue($this->mybrowser->setField('username', $UserName),
+      "Could Not set the username field");
+    if(!empty($Description)) {
+      $this->assertTrue($this->mybrowser->setField('description', $Description),
+      "Could Not set the description field");
+    }
+    if(!empty($Email)) {
+      $this->assertTrue($this->mybrowser->setField('email', $Email),
+      "Could Not set the email field");
+    }
+    if(!empty($Access)) {
+      $this->assertTrue($this->mybrowser->setField('permission', $Access),
+      "Could Not set the permission field");
+    }
+    else {
+      return('FATAL: Access/permission is a required field');
+    }
+    if(!empty($Folder)) {
+      $this->assertTrue($this->mybrowser->setField('folder', $Folder),
+      "Could Not set the folder Field");
+    }
+    if(!empty($Password)) {
+      $this->assertTrue($this->mybrowser->setField('pass1', $Password),
+      "Could Not set the pass1 field");
+      $this->assertTrue($this->mybrowser->setField('pass2', $Password),
+      "Could Not set the pass2 field");
+    }
+    if(!empty($EmailNotifiy)) {
+      $this->assertTrue($this->mybrowser->setField('enote', $EmailNotify),
+      "Could Not set the enote Field");
+    }
+    /* all fields set, add the user */
+    $page = $this->mybrowser->clickSubmit('Add!',"Could not select the Add! button");
+    $this->assertTrue(page);
+    //print "<pre>page after clicking Add!\n"; print_r($page) . "\n</pre>";
+    if($this->myassertText($page, "/User added/")) {
+      return(NULL);
+    }
+    elseif($this->myassertText($page, "/User already exists\.  Not added/")) {
+      return('User already exists.  Not added');
+    }
+    //$this->assertTrue($this->myassertText($page, "/User added/"),
+    // "addUser Failed!\nPhrase 'User added' not found\n");
+    return;
+  }
   /**
    * createFolder
    * Uses the UI 'Create' menu to create a folder.  Always creates a
@@ -160,6 +227,37 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->myassertText($page, "/Deletion added to job queue/"),
      "delete Upload Failed!\nPhrase 'Deletion added to job queue' not found\n");
   }
+
+  /**
+   * Delete a fossology user
+   *
+   * @param string $User, the user name to remove
+   *
+   */
+  public function deleteUser($User) {
+
+    global $URL;
+
+    if(empty($User)) {
+      return('No User Specified');
+    }
+    print "dU: logging in\n";
+    $this->Login();
+    $page = $this->mybrowser->get("$URL?mod=user_del");
+    // need to call pss then get the userid so it can be set.
+    $select = $this->parseSelectStmnt($page, 'userid');
+    if(array_key_exists($User,$select['userid'])){
+      print "Du: key exists, will remove user {$select['userid'][$User]}";
+      $this->assertTrue($this->mybrowser->setField('userid',
+        $select['userid'][$User]));
+      $this->assertTrue($this->mybrowser->setField('confirm', 1));
+      $page = $this->mybrowser->clickSubmit('Delete!',
+        "Could not select the Delete! button");
+      $this->assertTrue(page);
+      $this->assertTrue($this->myassertText($page, "/User deleted/"),
+        "Delete User Failed!\nPhrase 'User deleted' not found\n");
+    }
+  }
   /**
    * editFolder
    *
@@ -247,7 +345,7 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue(page);
     print "page after move is:\n$page\n";
     $this->assertTrue($this->myassertText($page,
-       //"/Moved $upload from folder $oldFolder to folder $destFolder/"),
+    //"/Moved $upload from folder $oldFolder to folder $destFolder/"),
        "/Moved $upload from folder /"),
        "moveUpload Failed!\nPhrase 'Move $upload from folder $oldFolder " .
        "to folder $destFolder' not found\n");
@@ -364,24 +462,24 @@ class fossologyTestCase extends fossologyTest
       "FAILURE:Did not find the message'Upload added to job queue'\n");
   }
   /**
-  * function uploadUrl
-  * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
-  *
-  * Upload a file and optionally schedule the agents.  The web-site must
-  * already be logged into before using this method.
-  *
-  * @param string $parentFolder the parent folder name, default is root
-  * folder (1)
-  * @param string $url the url of the file to upload, no url sanity
-  * checking is done.
-  * @param string $description a default description is always used. It
-  * can be overridden by supplying a description.
-  * @param string $uploadName=null optional upload name
-  * @param string $agents=null agents to schedule, the default is to
-  * schedule license, pkgettametta, and mime.
-  *
-  * @return pass or fail
-  */
+   * function uploadUrl
+   * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
+   *
+   * Upload a file and optionally schedule the agents.  The web-site must
+   * already be logged into before using this method.
+   *
+   * @param string $parentFolder the parent folder name, default is root
+   * folder (1)
+   * @param string $url the url of the file to upload, no url sanity
+   * checking is done.
+   * @param string $description a default description is always used. It
+   * can be overridden by supplying a description.
+   * @param string $uploadName=null optional upload name
+   * @param string $agents=null agents to schedule, the default is to
+   * schedule license, pkgettametta, and mime.
+   *
+   * @return pass or fail
+   */
   public function uploadUrl($parentFolder = 1, $url, $description = null, $uploadName = null, $agents = null)
   {
     global $URL;
@@ -432,7 +530,7 @@ class fossologyTestCase extends fossologyTest
     }
     /* selects agents 1,2,3 license, mime, pkgmetagetta */
     $rtn = $this->setAgents($agents);
-    if (is_null($rtn))
+    if (!is_null($rtn))
     {
       $this->fail("FAIL: could not set agents in uploadAFILE test\n");
     }
@@ -442,7 +540,7 @@ class fossologyTestCase extends fossologyTest
     //print  "************ page after Upload! *************\n$page\n";
   } //uploadUrl
 
-    /* possible methods to add */
+  /* possible methods to add */
   public function dbCheck()
   {
     return TRUE;
