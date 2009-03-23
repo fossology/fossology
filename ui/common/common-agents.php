@@ -172,6 +172,8 @@ function FindDependent($UploadPk, $list=NULL) {
       }
     }
     //print "FD: list of job_pk's is:\n<br>"; print_r($JobPks) . "/n<br>";
+    $foo = array(MostRows($JobPks));
+    //print "FD: job_pk with MostRows is:\n<br>"; print_r($foo) . "/n<br>";
     return(array(MostRows($JobPks)));
   }
   else {
@@ -275,7 +277,7 @@ function MostRows($Jobs) {
  * Schedule email notification for analysis results
  *
  * ScheduleEmailNotification determines the proper job dependency and schedules
- * the email agent fossjobstat to send the message.
+ * the email agent notify to send the message.
  *
  * This routine is called from a number of UI plugins and cp2foss.  The optional
  * parameters are to accomdate the UI upload_srv_files and the agent_ add
@@ -285,9 +287,9 @@ function MostRows($Jobs) {
  * of analysis results. See CheckEnotification().
  *
  * @param int $upload_pk the upload_pk of the upload
- * @param string $Email, an optional email address to pass on to fossjobstat.
- * @param string $UserName, an optional User name to pass on to fossjobstat.
- * @param string $JobName, an optional Job Name to pass on to fossjobstat.
+ * @param string $Email, an optional email address to pass on to notify.
+ * @param string $UserName, an optional User name to pass on to notify.
+ * @param string $JobName, an optional Job Name to pass on to notify.
  * @param array $list optional list of jobs (supplied by agent add) agent_add).
  *
  * @return NULL on success, string on failure.
@@ -299,14 +301,6 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
   global $DB;
   $Depends = array();
 
-  /*
-   print "  SEN: FJSparams are:\n" .
-   "UploadPK:$upload_pk\n".
-   "Email:$Email\n".
-   "UserName:$UserName\n".
-   "JobName:$JobName\n"
-   ;
-   */
   if (empty($DB)) {
     return;
   }
@@ -324,8 +318,8 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
   else {
     $Depends = FindDependent($upload_pk);
   }
-  /* set up input for fossjobstat */
-  $FJSparams = '';
+  /* set up input for notify */
+  $Nparams = '';
   $To = NULL;
   /* If email is passed in, favor that over the session */
   if(!empty($Email)) {
@@ -336,41 +330,41 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
     //print "  SEN: Setting To to Email in session To:$To\n";
   }
   if(empty($To)) {
-    return('FATAL: no email address supplied, cannot send mail,' .
-             ' common-agents::scheduleEmailNotification');
+    return('FATAL: Email Notification: no email address supplied, cannot send mail,' .
+             ' common-agents::scheduleEmailNotification' .
+             'Your job should be scheduled, you will not get email notifying you it is done');
   }
-  $FJSparams .= "$To";
+  $Nparams .= "$To";
   /* Upload Pk */
   $upload_id = trim($upload_pk);
   $UploadId = "-u $upload_id";
-  $FJSparams .= " $UploadId";
+  $Nparams .= " $UploadId";
   /*
    * UserName is NOT the email address it's the description for the user field
    * in the Add A User screen..... need to fix that screen....
    */
   if (!empty($UserName)) {
-    $FJSparams .= " -n $UserName";
+    $Nparams .= " -n $UserName";
   }
   if (!empty($JobName)) {
-    $FJSparams .= " -j $JobName";
+    $Nparams .= " -j $JobName";
   }
-  //  print "  SEN: Before adding jobs, FJSparams are:$FJSparams\n";
 
-  /* Prepare the job: job "fossjobstat" */
-  $jobpk = JobAddJob($upload_pk,"fossjobstat",-1);
+  /* Prepare the job: job "notify" */
+  $jobpk = JobAddJob($upload_pk,"notify",-1);
   if (empty($jobpk) || ($jobpk < 0)) {
-    return("Failed to insert job record, job fossjobstat not created");
+    return("Failed to insert job record, job notify not created");
   }
 
-  /* Prepare the job: job fossjobstat has jobqueue item fossjobstat */
+  /* Prepare the job: job notify has jobqueue item notify */
   if ($Reschedule) {
-    $jobqueuepk = JobQueueAdd($jobpk,"fossjobstat","$FJSparams","no",NULL,$Depends,TRUE);
+    $jobqueuepk = JobQueueAdd($jobpk,"notify","$Nparams","no",NULL,$Depends,TRUE);
     if (empty($jobqueuepk)) {
-      return("Failed to insert task 'fossjobstat' into job queue");
+      return("Failed to insert task 'notify' into job queue");
     }
   }
   else {
-    $jobqueuepk = JobQueueAdd($jobpk,"fossjobstat","$FJSparams","no",NULL,$Depends,FALSE);
+    $jobqueuepk = JobQueueAdd($jobpk,"notify","$Nparams","no",NULL,$Depends,FALSE);
   }
   return(NULL);
 }
