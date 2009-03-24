@@ -115,10 +115,6 @@ class user_del extends FO_Plugin
 	    {
 	    $V .= "<option value='" . $Results[$i]['user_pk'] . "'>";
 	    $V .= $Results[$i]['user_name'];
-	    if (!empty($Results[$i]['user_desc']))
-	      {
-	      $V .= " (" . htmlentities($Results[$i]['user_name']) . ")";
-	      }
 	    $V .= "</option>\n";
 	    }
 	  $V .= "</select>\n";
