@@ -70,7 +70,6 @@ class uploadAgentDataTest extends fossologyTestCase {
     //$desciption = "File $upload uploaded by Upload Data Test";
     print "Starting file uploads\n";
     // we do them serially for now due to different parameters needed
-    print "AAD: first item in array is:{$LicenseList[0]}\n";
     $this->uploadFile('Agent-Test', $LicenseList[0],
          "File $LicenseList[0] uploaded by Upload Data Test", NULL, NULL);
     $this->uploadFile('Agent-Test', $LicenseList[1],
