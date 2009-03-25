@@ -45,11 +45,10 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
     -h             = this help message
     -e <address>   = optional email address, e.g. nobody@localhost
     -j string      = optional, Name of the job to include in the email
-    -n string      = optional, user name to address email to, this is not the email
-                     address.
+    -n string      = optional, user name to address email to, this is not the email address.
     -u <upload_id> = Upload ID. (required)
 
-    If not -e option is supplied, status is printed to standard out.
+    If no -e option is supplied, status is printed to standard out.
   ";
 
 /*

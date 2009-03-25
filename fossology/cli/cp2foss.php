@@ -36,6 +36,7 @@ error_reporting(E_NOTICE & E_STRICT);
 
 global $Enotification;
 global $Email;
+global $ME;
 
 $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
   Options:
@@ -197,6 +198,8 @@ function ProcEnote($UploadPk) {
   global $Enotification;
   global $Email;
   global $DB;
+  global $ME;
+
 
   /* get the user name from the previous upload */
   $previous = $UploadPk-1;
@@ -220,20 +223,26 @@ function ProcEnote($UploadPk) {
   $Users = $DB->Action($Sql);
   $UserPk = $Users[0]['job_user_fk'];
   $UserId = $Users[0]['upload_userid'];
+  /*
   $Sql = "SELECT user_pk, user_name, email_notify FROM users WHERE " .
              "user_pk=$UserPk; ";
   $Fossy= $DB->Action($Sql);
   $FossyName = $Fossy[0]['user_name'];
+  */
 
-  /* are we being run as an agent? */
-  if($UserId === NULL && $FossyName == 'fossy') {
-    /* When run as agent, fixme! */
+  /* are we being run as fossy?, either as agent or from command line */
+  if($UserId === NULL && $ME == 'fossy') {
+    /*
+     * When run as agent or fossy, pass in the UserEmail and UserName.  This
+     * ensures the email address is correct, the UserName is used for the
+     * salutation.
+     */
     $sched = scheduleEmailNotification($UploadPk,$UserEmail,$UserName);
   }
   else {
-    /* run as cli, what was I thinking when I wrote this?  sen is not a cli... */
-    print "  As CLI: Scheduling email notification\n";
-    $sched = scheduleEmailNotification($UploadPk,$Email);
+    /* run as cli, use the email passed in and $ME */
+    $sched = scheduleEmailNotification($UploadPk,$Email,$ME);
+    print "  Scheduling email notification for $Email\n";
   }
   if ($sched !== NULL) {
     return("Warning: Queueing email failed:\n$sched\n");
@@ -277,6 +286,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     UploadOne($FolderPath, $Filename, $UploadName, $UploadDescription, $UploadArchive);
     unlink($Filename);
     if($Enotification) {
+      print "  CP2: tar'ed file, called UploadOne\n";
       $res = ProcEnote($UloadPk);
       if(!is_null($res)) {
         print $res;
@@ -339,12 +349,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
   if (!$Test) {
     system($Cmd);
-    if($Enotification) {
-      $res = ProcEnote($UploadPk);
-      if(!is_null($res)) {
-        print $res;
-      }
-    }
   }
   if (!empty($QueueList)) {
     switch ($QueueList) {
@@ -369,147 +373,156 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
      * this is gross: by the time you get here, the uploadPk is one more than the
      * uploadPk reported to the user.  That's because the first upload pk is for
      * the fosscp_agent, then the second (created in cp2foss) is for the rest
-     * of the processing.
+     * of the processing.  Unless being run as a cli....  See ProcEnote.
      */
     if($Enotification) {
-      //print "  CP2::UP1:Calling ProcEnote using uploadpk:$UploadPk\n";
       $res = ProcEnote($UploadPk);
       if(!is_null($res)) {
         print $res;
       }
     }
   }
-} /* UploadOne() */
-/************************************************************************/
-/************************************************************************/
-/************************************************************************/
-/* Process each parameter */
-$FolderPath = "/";
-$UploadDescription = "";
-$UploadName = "";
-$QueueList = "";
-$TarExcludeList = "";
-$bucket_size = 3;
-for ($i = 1;$i < $argc;$i++) {
-  switch ($argv[$i]) {
-    case '-A': /* use alphabet buckets */
-      $OptionA = true;
-      break;
-    case '-AA': /* use alphabet buckets */
-      $OptionA = true;
-      $i++;
-      $bucket_size = intval($argv[$i]);
-      if ($bucket_size < 1) {
-        $bucket_size = 1;
+  else {
+    /* No other agents other than unpack scheduled, attach to unpack*/
+    if($Enotification) {
+      $res = ProcEnote($UploadPk);
+      if(!is_null($res)) {
+        print $res;
       }
-      break;
-    case '-f': /* folder path */
-    case '-p': /* depricated 'path' to folder */
-      $i++;
-      $FolderPath = $argv[$i];
-      /* idiot check for absolute paths */
-      //print "  Before Idiot Checks: '$FolderPath'\n";
-      /* remove starting and ending / */
-      $FolderPath = preg_replace('@^/*@', "", $FolderPath);
-      $FolderPath = preg_replace('@/*$@', "", $FolderPath);
-      /* Note: the pattern below should probably be generalized to remove everything
-       * up to and including the 1st /, This pattern works in what I've
-       * tested: @^.*\/@ ( I had to escape the / so the comment works!)
-       */
-      $FolderPath = preg_replace("@^S.*? Repository@", "", $FolderPath);
-      $FolderPath = preg_replace('@//*@', "/", $FolderPath);
-      $FolderPath = '/' . $FolderPath;
-      //print "  AFTER Idiot Checks: '$FolderPath'\n";
+    }
+  }
+    } /* UploadOne() */
+    /************************************************************************/
+    /************************************************************************/
+    /************************************************************************/
+    /* Process each parameter */
+    $FolderPath = "/";
+    $UploadDescription = "";
+    $UploadName = "";
+    $QueueList = "";
+    $TarExcludeList = "";
+    $bucket_size = 3;
+    $ME = exec('id -un',$toss,$rtn);
+    for ($i = 1;$i < $argc;$i++) {
+      switch ($argv[$i]) {
+        case '-A': /* use alphabet buckets */
+          $OptionA = true;
+          break;
+        case '-AA': /* use alphabet buckets */
+          $OptionA = true;
+          $i++;
+          $bucket_size = intval($argv[$i]);
+          if ($bucket_size < 1) {
+            $bucket_size = 1;
+          }
+          break;
+        case '-f': /* folder path */
+        case '-p': /* depricated 'path' to folder */
+          $i++;
+          $FolderPath = $argv[$i];
+          /* idiot check for absolute paths */
+          //print "  Before Idiot Checks: '$FolderPath'\n";
+          /* remove starting and ending / */
+          $FolderPath = preg_replace('@^/*@', "", $FolderPath);
+          $FolderPath = preg_replace('@/*$@', "", $FolderPath);
+          /* Note: the pattern below should probably be generalized to remove everything
+           * up to and including the 1st /, This pattern works in what I've
+           * tested: @^.*\/@ ( I had to escape the / so the comment works!)
+           */
+          $FolderPath = preg_replace("@^S.*? Repository@", "", $FolderPath);
+          $FolderPath = preg_replace('@//*@', "/", $FolderPath);
+          $FolderPath = '/' . $FolderPath;
+          //print "  AFTER Idiot Checks: '$FolderPath'\n";
 
-      break;
-    case '-R': /* obsolete: recurse directories */
-    case '-w': /* obsolete: URL switch to use wget */
-      break;
-    case '-d': /* specify upload description */
-      $i++;
-      $UploadDescription = $argv[$i];
-      break;
-    case '-e': /* email notification wanted */
-      $i++;
-      $Email = $argv[$i];
-      // Make sure email looks valid
-      $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
-      if ($Check != $Email) {
-        print "Invalid email address. $Email\n";
-        print $Usage;
-        exit(1);
-      }
-      $Enotification = TRUE;
-      break;
-    case '-n': /* specify upload name */
-      $i++;
-      $UploadName = $argv[$i];
-      break;
-    case '-Q':
-      system("fossjobs -a");
-      return (0);
-    case '-q':
-      $i++;
-      $QueueList = $argv[$i];
-      break;
-    case '-T': /* Test mode */
-      $Test = 1;
-      if (!$Verbose) {
-        $Verbose++;
-      }
-      break;
-    case '-v':
-      $Verbose++;
-      break;
-    case '-X':
-      if (!empty($TarExcludeList)) {
-        $TarExcludeList.= " ";
-      }
-      $i++;
-      $TarExcludeList.= "--exclude '" . $argv[$i] . "'";
-      break;
-    case '-h':
-    case '-?':
-      print $Usage . "\n";
-      return (0);
-    case '-a': /* it's an archive! */
-      /* ignore -a since the next name is a file. */
-      break;
-    case '-': /* it's an archive list from stdin! */
-      $Fin = fopen("php://stdin", "r");
-      while (!feof($Fin)) {
-        $UploadArchive = trim(fgets($Fin));
-        if (strlen($UploadArchive) > 0) {
+          break;
+        case '-R': /* obsolete: recurse directories */
+        case '-w': /* obsolete: URL switch to use wget */
+          break;
+        case '-d': /* specify upload description */
+          $i++;
+          $UploadDescription = $argv[$i];
+          break;
+        case '-e': /* email notification wanted */
+          $i++;
+          $Email = $argv[$i];
+          // Make sure email looks valid
+          $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
+          if ($Check != $Email) {
+            print "Invalid email address. $Email\n";
+            print $Usage;
+            exit(1);
+          }
+          $Enotification = TRUE;
+          break;
+        case '-n': /* specify upload name */
+          $i++;
+          $UploadName = $argv[$i];
+          break;
+        case '-Q':
+          system("fossjobs -a");
+          return (0);
+        case '-q':
+          $i++;
+          $QueueList = $argv[$i];
+          break;
+        case '-T': /* Test mode */
+          $Test = 1;
+          if (!$Verbose) {
+            $Verbose++;
+          }
+          break;
+        case '-v':
+          $Verbose++;
+          break;
+        case '-X':
+          if (!empty($TarExcludeList)) {
+            $TarExcludeList.= " ";
+          }
+          $i++;
+          $TarExcludeList.= "--exclude '" . $argv[$i] . "'";
+          break;
+        case '-h':
+        case '-?':
+          print $Usage . "\n";
+          return (0);
+        case '-a': /* it's an archive! */
+          /* ignore -a since the next name is a file. */
+          break;
+        case '-': /* it's an archive list from stdin! */
+          $Fin = fopen("php://stdin", "r");
+          while (!feof($Fin)) {
+            $UploadArchive = trim(fgets($Fin));
+            if (strlen($UploadArchive) > 0) {
+              print "Loading $UploadArchive\n";
+              if (empty($UploadName)) {
+                $UploadName = basename($UploadArchive);
+              }
+              //print "  CP2: Calling Upload1 from stdin\n";
+              UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
+              /* prepare for next parameter */
+              $UploadName = "";
+            }
+          }
+          fclose($Fin);
+          break;
+        default:
+          if (substr($argv[$i], 0, 1) == '-') {
+            print "Unknown parameter: '" . $argv[$i] . "'\n";
+            print $Usage . "\n";
+            exit(1);
+          }
+          /* No break! No hyphen means it is a file! */
+          $UploadArchive = $argv[$i];
           print "Loading $UploadArchive\n";
           if (empty($UploadName)) {
             $UploadName = basename($UploadArchive);
           }
-          //print "  CP2: Calling Upload1 from stdin\n";
+          //print "  CAlling UploadOne in 'main': '$FolderPath'\n";
           UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
           /* prepare for next parameter */
           $UploadName = "";
-        }
-      }
-      fclose($Fin);
-      break;
-    default:
-      if (substr($argv[$i], 0, 1) == '-') {
-        print "Unknown parameter: '" . $argv[$i] . "'\n";
-        print $Usage . "\n";
-        exit(1);
-      }
-      /* No break! No hyphen means it is a file! */
-      $UploadArchive = $argv[$i];
-      print "Loading $UploadArchive\n";
-      if (empty($UploadName)) {
-        $UploadName = basename($UploadArchive);
-      }
-      //print "  CAlling UploadOne in 'main': '$FolderPath'\n";
-      UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
-      /* prepare for next parameter */
-      $UploadName = "";
-      break;
-  } /* switch */
-} /* for each parameter */
-return (0);
-?>
+          break;
+      } /* switch */
+    } /* for each parameter */
+    return (0);
+    ?>
