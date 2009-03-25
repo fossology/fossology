@@ -74,9 +74,9 @@ class agent_add extends FO_Plugin
         $rc .= "Agent '" . htmlentities($agentlist[$al]) . "' not found.\n";
       }
     }
-    if (CheckEnotification) {
+    if (CheckEnotification()) {
       /* Create list for dependency checking by enotification */
-      $sched = scheduleEmailNotification($uploadpk,NULL,NULL,NULL,$Alist);
+      $sched = scheduleEmailNotification($uploadpk,NULL,NULL,NULL,$Alist,TRUE);
       if ($sched !== NULL) {
         return($sched);
       }
@@ -149,8 +149,7 @@ class agent_add extends FO_Plugin
         /*************************************************************/
         /* Display the form */
         $V .= "<form name='formy' method='post'>\n"; // no url = this url
-        $V .= "Select an uploaded file for license analysis.\n";
-        $V .= "Only uploads that are not already scheduled will be scheduled.\n";
+        $V .= "Select an uploaded file for additional analysis.\n";
 
         $V .= "<ol>\n";
         $V .= "<li>Select the folder containing the upload you wish to analyze:<br>\n";
@@ -174,7 +173,7 @@ class agent_add extends FO_Plugin
           $V .= "</option>\n";
         }
         $V .= "</select><P />\n";
-        $V .= "<li>Select one or more agents to schedule. Only available, unscheduled agents are listed.<br>\n";
+        $V .= "<li>Select additional analysis.<br>\n";
         $V .= "<select multiple size='10' id='agents' name='agents[]'></select>\n";
         $V .= "</ol>\n";
         $V .= "<input type='submit' value='Analyze!'>\n";
