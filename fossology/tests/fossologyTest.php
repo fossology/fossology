@@ -109,29 +109,101 @@ class fossologyTest extends WebTestCase
     $this->createFolder($parent, $name, null);
   }// createTestingFolder
   /**
-  * parseSelectStmnt
+  * getFolderId
   *
-  * Parse the specified select statement on the page
+  * parse the folder id out of the select statement
   *
-  * @param string $page the page to search
-  * @param string $selectName the name of the select
-  * @return array $select the name attribute of the select pointing to key value
-  * pairs in the options or NULL on error.
+  *@param string $folderName the name of the folder
+  *@param string $page the xhtml page to search
+  *@param string $selectName the name attribute of the select statement to
+  *parse
   *
-  * array returned: Array=>[select-name-attribute]=>Array[option text]=>
-  *                                                      [option value attribute]
+  *@return int $FolderId, NULL on error
   *
-  *
-  *or just do
-  *if (!is_null($optionText)){
-  *  if(array_key_exists(select[$selectName][$optionText]){
-  *    return(select[$selectName][$optionText]);
-  *  }
-  *}
-  *else {
-  *  return($select);
-  *}
   */
+  public function getFolderId($folderName, $page, $selectName) {
+    if(empty($folderName)) {
+      return(NULL);
+    }
+    else if (empty($page)) {
+      return(NULL);
+    }
+    else if (empty($selectName)) {
+      return(NULL);
+    }
+    /*
+     * special case the folder called root, it's always folder id 1.
+     * This way we still don't have to query for the name.
+     *
+     * This will probably break when users are implimented.
+     */
+    if(($folderName == 'root') || ($folderName == 1)) {
+      return(1);
+    }
+    $FolderId = $this->parseSelectStmnt($page, $selectName, $folderName);
+    //print "GFID: folderId is:$FolderId\n";
+    if(empty($FolderId)) {
+      return(NULL);
+    }
+    return($FolderId);
+  }
+  /**
+   * getUploadId($uploadName, $page, $selectName)
+   *
+   * parse the folder id out of the select in the $page
+   *
+   *@param string $uploadName the name of the upload
+   *@param string $page the xhtml page to search
+   *@param string $selectName the name attribute of the select statement to
+   *parse
+   *
+   *@return int $uploadId or NULL on errro
+   *
+   */
+  public function getUploadId($uploadName, $page, $selectName) {
+    if(empty($uploadName)) {
+      return(NULL);
+    }
+    else if (empty($page)) {
+      return(NULL);
+    }
+    else if (empty($selectName)) {
+      return(NULL);
+    }
+    print "GUPID: selname is:$selectName\nuploadName is:$uploadName\n";
+    $UploadId = $this->parseSelectStmnt($page, $selectName, $uploadName);
+    if(empty($UploadId)) {
+      return(NULL);
+    }
+    return ($UploadId);
+  }
+
+  public function myassertText($page, $pattern) {
+    $NumMatches = preg_match($pattern, $page, $matches);
+    //print "*** assertText: NumMatches is:$NumMatches\nmatches is:***\n";
+    //$this->dump($matches);
+    if ($NumMatches) {
+      return (TRUE);
+    }
+    return (FALSE);
+  }
+
+  /**
+   * parseSelectStmnt
+   *
+   * Parse the specified select statement on the page
+   *
+   * @param string $page the page to search
+   * @param string $selectName the name of the select
+   * @param string $optionText the text of the option statement
+   * @return mixed $select either array (if first two args present) or int if
+   * all three arguments present. NULL on error.
+   *
+   * Format of the array returned:
+   *
+   * array returned: Array=>[select-name-attribute]=>Array[option text]=>
+   *                                                      [option value attribute]
+   */
   public function parseSelectStmnt($page,$selectName,$optionText=NULL) {
     if(empty($page)) {
       return(NULL);
@@ -145,108 +217,102 @@ class fossologyTest extends WebTestCase
     /* get select and options */
     $selectList = $hpage->getElementsByTagName('select');
     $optionList = $hpage->getElementsByTagName('option');
-    //print "number of selects on this page:$selectList->length\n";
-    //print "number of options on this page:$optionList->length\n";
-    /* make sure parent node is select and matches $selectName */
-    $pn = $optionList->item(0)->parentNode->nodeName;
-    $sname = $selectList->item(0)->getAttribute('name');
+    print "number of selects on this page:$selectList->length\n";
+    print "number of options on this page:$optionList->length\n";
 
-    print "parent node of options with name is:$pn:$sname\n";
-    if($optionList->item(0)->parentNode->nodeName == 'select') {
-      if($selectList->item(0)->getAttribute('name') == $selectName){
-        /*
-         * build an array with the select name as the key to an array of
-         * key=>value pairs, where the key is the text of the select and
-         * the value is the value attribute.
-         */
-        for($i=0; $i< $optionList->length; $i++) {
-          $optionValue = $optionList->item($i)->getAttribute('value');
-          $select[$selectName][$optionList->item($i)->nodeValue] = $optionValue;
+    /*
+     * gather the section names and group the options with each section
+     * collect the data at the same time.  Assemble into the data structure.
+     */
+    for($i=0; $i < $selectList->length; $i++) {
+      $ChildList = $selectList->item($i)->childNodes;
+      foreach($ChildList as $child) {
+        $optionValue = $child->getAttribute('value');
+        $orig = $child->nodeValue;
+        /* need to clean up the string, to get rid of &nbsp codes */
+        $he = htmlentities($orig);
+        $htmlGone = preg_replace('/&.*?;/','',$he);
+        $cleanText = trim($htmlGone);
+        if(!empty($optionText)) {
+          $noDotOptText = escapeDots($optionText);
+          $match = preg_match("/^$noDotOptText/", $cleanText, $matches);
+          if($match) {
+            //print "Adding matches[0] to select array\n";
+            $Selects[$selectList->item($i)->getAttribute('name')][$matches[0]] = $optionValue;
+          }
+        }
+        else {
+          //print "Adding cleanText to select array\n";
+          $Selects[$selectList->item($i)->getAttribute('name')][$cleanText] = $optionValue;
         }
       }
-    }
-    //print "select array is:\n"; print_r($select) . "\n";
-    /*
-    * Future use, for converting getFolderId and the like...
-    * if optionText is given, then just return the array with only that
-    * option's value attribute.
-    *
-    *if (!is_null($optionText)){
-    *  if(array_key_exists($select[$selectName][$optionText]){
-    *    return(array(select[$selectName][$optionText]));
-    *  }
-    *}
-    *else {
-    *  return($select);
-    *}
-    */
-    if(!empty($optionText)) {
-      // do nothing for now...
-    }
-    return($select);
-  }
-  /**
-   * @todo: reexamine the two below in light of parseSS above...
-   */
-  /**
-   * getFolderId
-   *
-   * parse the folder id out of the html...
-   *
-   *@param string $folderName the name of the folder
-   *@param string $page the xhtml page to search
-   *
-   *@return string (the folder id)
-   *
-   *@todo check for empty and return null?
-   */
-  public function getFolderId($folderName, $page)
-  {
-    /*
-     * special case the folder called root, it's always folder id 1.
-     * This way we still don't have to query for the name.
-     *
-     * This will probably break when users are implimented.
-     */
-    if(($folderName == 'root') || ($folderName == 1)) { return(1); }
-    $efolderName = escapeDots($folderName);
-    //rint "GFID: efolderName is:$efolderName\n";
-    $found = preg_match("/.*value='([0-9].*?)'.*?;($efolderName)<\//", $page, $matches);
-    //print "GFID: matches is:\n";     var_dump($matches) . "\n";
-    return ($matches[1]);
-  }
-  /**
-   * getUploadId($uploadName, $page)
-   *
-   * parse the folder id out of the html in $page
-   *
-   *@param string $uploadName the name of the upload
-   *@param string $page the xhtml page to search
-   *
-   *@return string (upload ID)
-   *
-   *@todo check for empty and return null?
-   */
-  public function getUploadId($uploadName, $page)
-  {
-    $euploadName = escapeDots($uploadName);
-    $found = preg_match("/.*?value='([0-9].*?)'>($euploadName ).*?</", $page, $matches);
-    //print "GUID: matches is:\n";
-    //var_dump($matches) . "\n";
-    return ($matches[1]);
-  }
+      /*
+       //print "number of options on this page:$optionList->length\n";
+       ///make sure parent node is select and matches $selectName
+       $pn = $optionList->item($Found)->parentNode->nodeName;
+       $sname = $selectList->item($Found)->getAttribute('name');
+       //print "PSS: optionText is:$optionText\n";
+       if($optionList->item($Found)->parentNode->nodeName == 'select') {
+       //print "PSS: parent node is select\n";
+       $name = $selectList->item($Found)->getAttribute('name');
+       //print "PSS: node name attribute is:$name\n";
+       if($selectList->item($Found)->getAttribute('name') == $selectName){
 
-  public function myassertText($page, $pattern)
-  {
-    $NumMatches = preg_match($pattern, $page, $matches);
-    //print "*** assertText: NumMatches is:$NumMatches\nmatches is:***\n";
-    //$this->dump($matches);
-    if ($NumMatches)
-    {
-      return (TRUE);
+       * build an array with the select name as the key to an array of
+       * key=>value pairs, where the key is the text of the select and
+       * the value is the value attribute.
+
+       print "PSS: creating select array (matched $selectName)\n";
+       $select = array();
+       //print "PSS: optionText is:$optionText\n";
+       print "PSS: options length is:$optionList->length\n";
+       $start = $optionList->length - $optionStart;
+       print "PSS: starting at $start for options loop\n";
+       for($i=$start; $i< $optionList->length; $i++) {
+       $optionValue = $optionList->item($i)->getAttribute('value');
+       $orig = $optionList->item($i)->nodeValue;
+       /* need to clean up the string, to get rid of &nbsp codes
+       $he = htmlentities($orig);
+       $htmlGone = preg_replace('/&.*?;/','',$he);
+       //$nodots = escapeDots($htmlGone);
+       $cleanText = trim($htmlGone);
+       if(!empty($optionText)) {
+       $noDotOptText = escapeDots($optionText);
+       $match = preg_match("/^$noDotOptText/", $cleanText, $matches);
+       if($match) {
+       //print "Adding matches[0] to select array\n";
+       $select[$selectName][$matches[0]] = $optionValue;
+       }
+       }
+       else {
+       //print "Adding cleanText to select array\n";
+       $select[$selectName][$cleanText] = $optionValue;
+       }
+       }
+       }
+       }
+       */
     }
-    return (FALSE);
-  }
+    /* Return either an int, or an array */
+    print "PSS: Selects is:\n"; print_r($Selects) . "\n";
+    if (!is_null($optionText)){
+      if(array_key_exists($optionText,$Selects[$selectName])){
+        return($Selects[$selectName][$optionText]);
+      }
+      else {
+        return(NULL);
+      }
+    }
+    else {
+      if(array_key_exists($selectName,$Selects)){
+        return($Selects[$selectName]);
+      }
+      else {
+        return(NULL);     // didn't find any...
+      }
+    }
+  }  // parseSelectStmnt
+
   /**
    * function setAgents
    *
@@ -389,21 +455,10 @@ class fossologyTest extends WebTestCase
       $this->setUser($USER);
     }
     $loggedIn = $this->mybrowser->get($URL);
-    //print "Logout: page after login is:\n$loggedIn\n";
     $this->assertTrue($this->myassertText($loggedIn, "/User:<\/small> $User/"),
       "Did not find User:<\/small> $User");
-    print "LOGOUT: logging out user $User\n";
     $page = $this->mybrowser->get("$URL?mod=auth");
-    //print "Logout: page after $URL?mod=auth is:\n$page\n";
     $this->assertTrue($this->myassertText($page, "/User Logged Out/"));
-    //$this->assertTrue($this->mybrowser->clickLink('logout'));
-    //$page = $this->mybrowser->getContent();
-    //print "LOGOUT: page after LOGOUT:\n$page\n";
-    //$NumMatches = 0;
-    //$NumMatches = preg_match('/User Logged Out/', $page, $matches);
-    //if(!$NumMatches) {
-    //  $this->fail("FAILURE! User $this->User was not logged out\n");
-    //}
     $this->setUser(NULL);
     $this->setPassword(NULL);
   }
