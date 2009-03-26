@@ -170,7 +170,6 @@ class fossologyTest extends WebTestCase
     else if (empty($selectName)) {
       return(NULL);
     }
-    print "GUPID: selname is:$selectName\nuploadName is:$uploadName\n";
     $UploadId = $this->parseSelectStmnt($page, $selectName, $uploadName);
     if(empty($UploadId)) {
       return(NULL);
@@ -201,8 +200,7 @@ class fossologyTest extends WebTestCase
    *
    * Format of the array returned:
    *
-   * array returned: Array=>[select-name-attribute]=>Array[option text]=>
-   *                                                      [option value attribute]
+   * Array[option text]=>[option value attribute]
    */
   public function parseSelectStmnt($page,$selectName,$optionText=NULL) {
     if(empty($page)) {
@@ -217,9 +215,8 @@ class fossologyTest extends WebTestCase
     /* get select and options */
     $selectList = $hpage->getElementsByTagName('select');
     $optionList = $hpage->getElementsByTagName('option');
-    print "number of selects on this page:$selectList->length\n";
-    print "number of options on this page:$optionList->length\n";
-
+    //print "number of selects on this page:$selectList->length\n";
+    //print "number of options on this page:$optionList->length\n";
     /*
      * gather the section names and group the options with each section
      * collect the data at the same time.  Assemble into the data structure.
@@ -229,7 +226,10 @@ class fossologyTest extends WebTestCase
       foreach($ChildList as $child) {
         $optionValue = $child->getAttribute('value');
         $orig = $child->nodeValue;
-        /* need to clean up the string, to get rid of &nbsp codes */
+        /*
+         * need to clean up the string, to get rid of &nbsp codes, or the keys
+         * will not match.
+         */
         $he = htmlentities($orig);
         $htmlGone = preg_replace('/&.*?;/','',$he);
         $cleanText = trim($htmlGone);
@@ -237,67 +237,34 @@ class fossologyTest extends WebTestCase
           $noDotOptText = escapeDots($optionText);
           $match = preg_match("/^$noDotOptText/", $cleanText, $matches);
           if($match) {
+            /* Use the matched optionText instead of the whole string */
             //print "Adding matches[0] to select array\n";
             $Selects[$selectList->item($i)->getAttribute('name')][$matches[0]] = $optionValue;
           }
         }
         else {
+          /*
+           * Add the complete string contained in the <option>, any
+           * html & values should have been removed.
+           */
           //print "Adding cleanText to select array\n";
           $Selects[$selectList->item($i)->getAttribute('name')][$cleanText] = $optionValue;
         }
       }
-      /*
-       //print "number of options on this page:$optionList->length\n";
-       ///make sure parent node is select and matches $selectName
-       $pn = $optionList->item($Found)->parentNode->nodeName;
-       $sname = $selectList->item($Found)->getAttribute('name');
-       //print "PSS: optionText is:$optionText\n";
-       if($optionList->item($Found)->parentNode->nodeName == 'select') {
-       //print "PSS: parent node is select\n";
-       $name = $selectList->item($Found)->getAttribute('name');
-       //print "PSS: node name attribute is:$name\n";
-       if($selectList->item($Found)->getAttribute('name') == $selectName){
+    }
 
-       * build an array with the select name as the key to an array of
-       * key=>value pairs, where the key is the text of the select and
-       * the value is the value attribute.
-
-       print "PSS: creating select array (matched $selectName)\n";
-       $select = array();
-       //print "PSS: optionText is:$optionText\n";
-       print "PSS: options length is:$optionList->length\n";
-       $start = $optionList->length - $optionStart;
-       print "PSS: starting at $start for options loop\n";
-       for($i=$start; $i< $optionList->length; $i++) {
-       $optionValue = $optionList->item($i)->getAttribute('value');
-       $orig = $optionList->item($i)->nodeValue;
-       /* need to clean up the string, to get rid of &nbsp codes
-       $he = htmlentities($orig);
-       $htmlGone = preg_replace('/&.*?;/','',$he);
-       //$nodots = escapeDots($htmlGone);
-       $cleanText = trim($htmlGone);
-       if(!empty($optionText)) {
-       $noDotOptText = escapeDots($optionText);
-       $match = preg_match("/^$noDotOptText/", $cleanText, $matches);
-       if($match) {
-       //print "Adding matches[0] to select array\n";
-       $select[$selectName][$matches[0]] = $optionValue;
-       }
-       }
-       else {
-       //print "Adding cleanText to select array\n";
-       $select[$selectName][$cleanText] = $optionValue;
-       }
-       }
-       }
-       }
-       */
+    //print "PSS: Selects is:\n"; print_r($Selects) . "\n";
+    /*
+     * if there were no selects found, then we were passed something that
+     * doesn't exist.
+     */
+    if (empty($Selects)) {
+      return(NULL);
     }
     /* Return either an int, or an array */
-    print "PSS: Selects is:\n"; print_r($Selects) . "\n";
-    if (!is_null($optionText)){
+    if (!is_null($optionText)) {
       if(array_key_exists($optionText,$Selects[$selectName])){
-        return($Selects[$selectName][$optionText]);
+        return($Selects[$selectName][$optionText]);   // int
       }
       else {
         return(NULL);
@@ -305,7 +272,7 @@ class fossologyTest extends WebTestCase
     }
     else {
       if(array_key_exists($selectName,$Selects)){
-        return($Selects[$selectName]);
+        return($Selects[$selectName]);            // array
       }
       else {
         return(NULL);     // didn't find any...
