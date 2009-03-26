@@ -149,9 +149,8 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->clickLink('Create');
     $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
     /* if $FolderId=0 select the folder to create this folder under */
-    if (!$FolderId)
-    {
-      $FolderId = $this->getFolderId($parent, $page);
+    if (!$FolderId) {
+      $FolderId = $this->getFolderId($parent, $page, 'parentid');
     }
     $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
     $this->assertTrue($this->mybrowser->setField('newname', $name));
@@ -183,7 +182,7 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Delete Folder');
     $this->assertTrue($this->myassertText($page, '/Select the folder to delete/'));
-    $FolderId = $this->getFolderId($folder, $page);
+    $FolderId = $this->getFolderId($folder, $page, 'folder');
     if(empty($FolderId))    // not in the list of folders
     {
       return(true);
@@ -216,10 +215,10 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Delete Uploaded File');
     $this->assertTrue($this->myassertText($page, '/Select the uploaded file to delete/'));
-    $UploadId = $this->getUploadId($upload, $page);
+    $UploadId = $this->getUploadId($upload, $page, 'upload');
     if(empty($UploadId))    // not in the list of uploads on the root page
     {
-      return(true);
+      return(FALSE);
     }
     $this->assertTrue($this->mybrowser->setField('upload', $UploadId));
     $page = $this->mybrowser->clickSubmit('Delete!');
@@ -241,34 +240,36 @@ class fossologyTestCase extends fossologyTest
     if(empty($User)) {
       return('No User Specified');
     }
-    print "dU: logging in\n";
     $this->Login();
     $page = $this->mybrowser->get("$URL?mod=user_del");
-    // need to call pss then get the userid so it can be set.
-    $select = $this->parseSelectStmnt($page, 'userid');
-    if(array_key_exists($User,$select['userid'])){
-      print "Du: key exists, will remove user {$select['userid'][$User]}";
-      $this->assertTrue($this->mybrowser->setField('userid',
-        $select['userid'][$User]));
+    /* Get the user id */
+    $select = $this->parseSelectStmnt($page, 'userid',$User);
+    if(!is_null($select)) {
+      $this->assertTrue($this->mybrowser->setField('userid', $select));
       $this->assertTrue($this->mybrowser->setField('confirm', 1));
       $page = $this->mybrowser->clickSubmit('Delete!',
         "Could not select the Delete! button");
       $this->assertTrue(page);
-      $this->assertTrue($this->myassertText($page, "/User deleted/"),
-        "Delete User Failed!\nPhrase 'User deleted' not found\n");
+      if($this->myassertText($page, "/User deleted/")) {
+        print "User $User Deleted\n";
+        $this->pass();
+      }
+      else {
+        $this->fail("Delete User Failed!\nPhrase 'User deleted' not found\n");
+      }
     }
-  }
+  }  // Delete User
   /**
-   * editFolder
-   *
-   * @param string $folder the folder to edit
-   * @param string $newName the new name for the folder
-   * @param string $description Optional description, default
-   * description is always created, to overide the default, supply a
-   * descrtion.
-   *
-   * Assumes that the caller has already logged in.
-   */
+  * editFolder
+  *
+  * @param string $folder the folder to edit
+  * @param string $newName the new name for the folder
+  * @param string $description Optional description, default
+  * description is always created, to overide the default, supply a
+  * descrtion.
+  *
+  * Assumes that the caller has already logged in.
+  */
   public function editFolder($folder, $newName, $description = null)
   {
     global $URL;
@@ -285,7 +286,7 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Edit Properties');
     $this->assertTrue($this->myassertText($page, '/Edit Folder Properties/'));
-    $FolderId = $this->getFolderId($folder, $page);
+    $FolderId = $this->getFolderId($folder, $page, 'oldfolderid');
     $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
     if (!(empty ($newName)))
     {
@@ -298,6 +299,9 @@ class fossologyTestCase extends fossologyTest
   }
   /**
    * moveUpload($oldfFolder, $destFolder, $upload)
+   *
+   *NOTE: this routine was never finished, the screen uses java script.  SO only
+   *items in the root folder can be moved....
    *
    * Moves an upload from one folder to another. Assumes the caller has
    * logged in.
@@ -431,7 +435,7 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->get("$URL?mod=upload_file");
     $this->assertTrue($this->myassertText($page, '/Upload a New File/'));
     $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
-    $FolderId = $this->getFolderId($parentFolder, $page);
+    $FolderId = $this->getFolderId($parentFolder, $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId),
       "uploadFile FAILED! could not set 'folder' field!\n");
     $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile"),
@@ -518,7 +522,7 @@ class fossologyTestCase extends fossologyTest
     $folderId = $parentFolder;
     if ($parentFolder != 1)
     {
-      $folderId = $this->getFolderId($parentFolder, $page);
+      $folderId = $this->getFolderId($parentFolder, $page, 'folder');
     }
     $this->assertTrue($this->mybrowser->setField('folder', $folderId));
     $this->assertTrue($this->mybrowser->setField('geturl', $url));
