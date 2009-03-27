@@ -48,7 +48,7 @@ class MoveFolderTest extends fossologyTestCase
      */
     $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Move');
-    $FolderId = $this->getFolderId('Basic-Testing', $page);
+    $FolderId = $this->getFolderId('Basic-Testing', $page, 'oldfolderid');
     if(empty($FolderId))
     {
       $this->fail("MoveFolderTest will fail, no Testing folder to use.\n Please correct and rerun\n");
