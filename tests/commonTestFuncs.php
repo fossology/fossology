@@ -18,13 +18,13 @@
  ***********************************************************/
 
 /**
- * checkMail
+ * getMailSubjects
  *
  * Check to see if there is new mail for the user
  *
- * @param string $User the user whose mail will be checked.?
+ * NOTE: must be run by the user who owns the system mailbox in /var/mail
  *
- * @return array Headers a list of the headers in the mail box.?
+ * @return array Subjects, list of Fossology subjects that match.
  *
  */
 function getMailSubjects() {
@@ -34,13 +34,13 @@ function getMailSubjects() {
    */
   $MailFile = "/var/mail/";
 
-  //print 'CKM: I AM: ' . get_current_user() . "\n";
-  $user = get_current_user();
+  //$user = get_current_user();
+  $user = exec('id -un', $out, $rtn);
   $UserMail = $MailFile . $user;
   $FH = fopen($UserMail,'r') or die ("Cannot open $UserMail, $phperrormsg\n");
   while (! feof($FH)){
     $line = fgets($FH);
-    $matched = preg_match('/Subject:.*?$/',$line, $matches);
+    $matched = preg_match('/Subject:\sFOSSology Results.*?$/',$line, $matches);
     if($matched) {
       $Subjects[] = $line;
     }
