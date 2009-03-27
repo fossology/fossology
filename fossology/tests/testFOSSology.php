@@ -347,7 +347,6 @@ function verifyUploads($logfile) {
     $noVT = "Verify Tests ERROR: can't cd to $VerifyTests\n";
     LogAndPrint($VLF, $noVT);
   }
-  print "VT: running ./runVerifyTests.php >> $logfile 2>&1, $dummy, $Prtn)";
   $VerifyLast = exec("./runVerifyTests.php >> $logfile 2>&1", $dummy, $Prtn);
   fclose($VLF);
   return(TRUE);
