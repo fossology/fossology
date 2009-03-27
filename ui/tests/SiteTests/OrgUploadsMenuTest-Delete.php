@@ -35,7 +35,7 @@ class UploadsDeleteMenuTest extends fossologyTestCase
   {
     global $URL;
     print "starting UploadsDeleteMenuTest\n";
-    $this->Login($browser);
+    $this->Login();
     /* we get the home page to get rid of the user logged in page */
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Organize/'));

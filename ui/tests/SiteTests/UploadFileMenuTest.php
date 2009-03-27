@@ -35,7 +35,7 @@ class UploadFileMenuTest extends fossologyTestCase
   {
     global $URL;
     print "starting UploadFileMenuTest\n";
-    $this->Login($browser);
+    $this->Login();
     /* we get the home page to get rid of the user logged in page */
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
