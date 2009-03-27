@@ -223,12 +223,6 @@ function ProcEnote($UploadPk) {
   $Users = $DB->Action($Sql);
   $UserPk = $Users[0]['job_user_fk'];
   $UserId = $Users[0]['upload_userid'];
-  /*
-  $Sql = "SELECT user_pk, user_name, email_notify FROM users WHERE " .
-             "user_pk=$UserPk; ";
-  $Fossy= $DB->Action($Sql);
-  $FossyName = $Fossy[0]['user_name'];
-  */
 
   /* are we being run as fossy?, either as agent or from command line */
   if($UserId === NULL && $ME == 'fossy') {
