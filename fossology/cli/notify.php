@@ -18,12 +18,17 @@
  ***********************************************************/
 
 /**
- *  fossjobstat
+ *  fo-notify
  *
  * Report the status of a fossology job.  Either email analysis results to the
  * user or report the job status on the command line.
  *
  * @return 0 for success, 1 for failure.
+ *
+ * @TODO add in url to the history.... will need to get host and repo path
+ * will need to read Db.conf in either spot, and then check, if localhost, then
+ * just get the hostname, if not, use the entry...
+ * use this snipit: <a href='/repo/?mod=showjobs&history=1&upload=24'>upload #24</a>
  */
 
 /* Have to set this or else plugins will not load. */
@@ -171,14 +176,17 @@ if ($summary['total'] == 0 &&
 $summary['completed'] == 0 &&
 $summary['active'] == 0 &&
 $summary['failed'] == 0 ) {
-  $MessagePart = "No results, your job $JobName was killed";
+  $JobStatus = "was killed";
+  $MessagePart = "No results, your job $JobName $JobStatus";
   $Message = $Preamble . $MessagePart;
   if ($Interactive) {
     printMsg($MessagePart);
     exit(0);
   }
 }
-/* NOTE: if run as an agent we assume we are the last job in the jobqueue, so
+
+/*
+ * NOTE: if run as an agent we assume we are the last job in the jobqueue, so
  * when we check status, completed should be 1 less than the total.  If this
  * check is not made, then the job is always reported as still active...
  */
@@ -216,6 +224,17 @@ elseif ($summary['active'] > 0) {
     printMsg($MessagePart);
   }
 }
+/* Job Failed */
+elseif ($summary['failed'] > 0) {
+  $JobStatus = "Failed";
+  $MessagePart = "Your requested FOSSology results are  not ready. " .
+                 "Your job $JobName $JobStatus.";
+  $Message = $Preamble . $MessagePart;
+  if ($Interactive) {
+    printMsg($MessagePart);
+  }
+}
+
 /* called as agent, or -e passed in, send mail. */
 if (!$Interactive) {
   /* use php mail to queue it up */
@@ -224,7 +243,7 @@ if (!$Interactive) {
   $From = "root@localhost";
   $Recipient = $ToEmail;
   $Mail_body = wordwrap($Message,72);
-  $Subject = "FOSSology Results for $JobName";
+  $Subject = "FOSSology Results: $JobName $JobStatus";
   $Header = "From: " . $Sender . " <" . $From . ">\r\n";
   if($rtn = mail($Recipient, $Subject, $Mail_body, $Header)){
     print "Mail has been queued by notify\n";
