@@ -185,9 +185,9 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
   fprintf(Fout,"\n");
 
  /** notify **/
-  fprintf(Fout,"agent=notify %s| ",CmdHost);
+  fprintf(Fout,"agent=fo_notify %s| ",CmdHost);
   memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,Rcmd,"%s/engine-shell notify '%s/notify %{*}'");
+  snprintf(Cmd,sizeof(Cmd)-1,Rcmd,"%s/engine-shell fo_notify '%s/fo_notify %{*}'");
   fprintf(Fout,Cmd,AGENTDIR,BINDIR);
   fprintf(Fout,"\n");
 

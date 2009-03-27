@@ -287,10 +287,10 @@ function MostRows($Jobs) {
  * of analysis results. See CheckEnotification().
  *
  * @param int $upload_pk the upload_pk of the upload
- * @param string $Email, an optional email address to pass on to notify.
- * @param string $UserName, an optional User name to pass on to notify.
- * @param string $JobName, an optional Job Name to pass on to notify.
- * @param array $list optional list of jobs (supplied by agent add) agent_add).
+ * @param string $Email, an optional email address to pass on to fo-notify.
+ * @param string $UserName, an optional User name to pass on to fo-notify.
+ * @param string $JobName, an optional Job Name to pass on to fo-notify.
+ * @param array $list optional list of jobs (supplied by agent add).
  *
  * @return NULL on success, string on failure.
  */
@@ -318,7 +318,7 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
   else {
     $Depends = FindDependent($upload_pk);
   }
-  /* set up input for notify */
+  /* set up input for fo-notify */
   $Nparams = '';
   $To = NULL;
   /* If email is passed in, favor that over the session */
@@ -350,21 +350,21 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
     $Nparams .= " -j $JobName";
   }
 
-  /* Prepare the job: job "notify" */
-  $jobpk = JobAddJob($upload_pk,"notify",-1);
+  /* Prepare the job: job "fo-notify" */
+  $jobpk = JobAddJob($upload_pk,"fo_notify",-1);
   if (empty($jobpk) || ($jobpk < 0)) {
-    return("Failed to insert job record, job notify not created");
+    return("Failed to insert job record, job fo_notify not created");
   }
 
-  /* Prepare the job: job notify has jobqueue item notify */
+  /* Prepare the job: job fo-notify has jobqueue item fo-notify */
   if ($Reschedule) {
-    $jobqueuepk = JobQueueAdd($jobpk,"notify","$Nparams","no",NULL,$Depends,TRUE);
+    $jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,$Depends,TRUE);
     if (empty($jobqueuepk)) {
-      return("Failed to insert task 'notify' into job queue");
+      return("Failed to insert task 'fonotify' into job queue");
     }
   }
   else {
-    $jobqueuepk = JobQueueAdd($jobpk,"notify","$Nparams","no",NULL,$Depends,FALSE);
+    $jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,$Depends,FALSE);
   }
   return(NULL);
 }
