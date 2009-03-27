@@ -74,7 +74,7 @@ class UploadSrvTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, '/on the server to upload:/'),
                       'Did not find the sourcefile Selection Text');
     /* select Testing folder */
-    $FolderId = $this->getFolderId('Basic-Testing', $page);
+    $FolderId = $this->getFolderId('Basic-Testing', $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $this->assertTrue($this->mybrowser->setField('sourcefiles', '/home/fosstester/archives/simpletest_1.0.1.tar.gz'));
     $desc = 'File uploaded by test UploadSrvTest to folder Testing';

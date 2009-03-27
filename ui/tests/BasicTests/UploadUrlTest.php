@@ -55,7 +55,7 @@ class UploadUrlTest extends fossologyTestCase
 
     /* select Testing folder, filename based on pid or session number */
 
-    $FolderId = $this->getFolderId('Basic-Testing', $page);
+    $FolderId = $this->getFolderId('Basic-Testing', $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $simpletest = 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz';
     $this->assertTrue($this->mybrowser->setField('geturl', $simpletest));
