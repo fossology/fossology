@@ -53,12 +53,18 @@ class someTest extends fossologyTestCase
   public function testCheckCompletedJobs() {
     global $URL;
 
-    print "starting testckm\n";
+    print "starting CheckCOmpletedJobs\n";
 
     $headers = getMailSubjects();
+    if(empty($headers)){
+      print "No messages found\n";
+      $this->pass();
+      return(NULL);
+    }
     //print "Got back from checkMail:\n";print_r($headers) . "\n";
     /* find any duplicates, count them */
     $pattern = 'completed with no errors';
+
     foreach($headers as $header) {
       /* Make sure all say completed */
       $match = preg_match("/$pattern/",$header,$matches);
@@ -66,7 +72,7 @@ class someTest extends fossologyTestCase
         $failed[] = $header;
       }
     }
-    if(empty($failed)) {
+    if(!empty($failed)) {
       $this->fail("the following jobs did not report as completed\n");
       foreach($failed as $fail) {
         print "$fail\n";
