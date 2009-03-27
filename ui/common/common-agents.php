@@ -332,7 +332,7 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
   if(empty($To)) {
     return('FATAL: Email Notification: no email address supplied, cannot send mail,' .
              ' common-agents::scheduleEmailNotification' .
-             'Your job should be scheduled, you will not get email notifying you it is done');
+             ' Your job should be scheduled, you will not get email notifying you it is done');
   }
   $Nparams .= "$To";
   /* Upload Pk */
