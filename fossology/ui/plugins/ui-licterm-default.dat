@@ -808,6 +808,9 @@
   /* Canonical name: 293 */
   $Term["Microsoft EULA Software"]["Desc"]="";
   $Term["Microsoft EULA Software"]["License"][0]="Corporate/Microsoft/Microsoft EULA Software";
+  /* Canonical name: ??? */
+  $Term["Microsoft SDK EULA"]["Desc"]="";
+  $Term["Microsoft SDK EULA"]["License"][0]="Corporate/Microsoft/Microsoft SDK EULA";
   /* Canonical name: 294 */
   $Term["Microsoft Limited Public License"]["Desc"]="";
   $Term["Microsoft Limited Public License"]["License"][0]="Corporate/Microsoft/Microsoft Limited Public License";
