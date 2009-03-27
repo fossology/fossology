@@ -121,7 +121,7 @@ class fossologyTest extends WebTestCase
   *@return int $FolderId, NULL on error
   *
   */
-  public function getFolderId($folderName, $page, $selectName) {
+  public function getFolderId($folderName, $page, $selectName=NULL) {
     if(empty($folderName)) {
       return(NULL);
     }
@@ -382,12 +382,22 @@ class fossologyTest extends WebTestCase
   public function Login($User=NULL, $Password=NULL)
   {
     global $URL;
+    global $USER;
+    global $PASSWORD;
 
+    if(is_null($User)) {
+    }
     if(!empty($User)) {
       $this->setUser($User);
     }
+    else {
+      $this->setUser($USER);
+    }
     if(!empty($Password)) {
       $this->setPassword($Password);
+    }
+    else {
+      $this->setPassword($PASSWORD);
     }
     $browser = & new SimpleBrowser();
     $this->setBrowser($browser);
@@ -444,7 +454,6 @@ class fossologyTest extends WebTestCase
     global $PASSWORD;
     $page = NULL;
     $cookieValue = NULL;
-
     $host = getHost($URL);
     $this->assertTrue(is_object($this->mybrowser));
     $this->mybrowser->useCookies();

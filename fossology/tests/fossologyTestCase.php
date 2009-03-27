@@ -303,6 +303,8 @@ class fossologyTestCase extends fossologyTest
    *NOTE: this routine was never finished, the screen uses java script.  SO only
    *items in the root folder can be moved....
    *
+   *@TODO fix so it only does thnigs with the root folder :)
+   *
    * Moves an upload from one folder to another. Assumes the caller has
    * logged in.
    * @param string $oldFolder the folder name where the upload currently
@@ -331,19 +333,16 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->get("$URL?mod=upload_move");
     //$page = $this->mybrowser->clickLink('Move');
     $this->assertTrue($this->myassertText($page, '/Move upload to different folder/'));
-    $oldFolderId = $this->getFolderId($oldFolder, $page);
-    print "FTC: oldFolderId is:$oldFolderId\n";
+    $oldFolderId = $this->getFolderId($oldFolder, $page, 'oldfolderid');
     $this->assertTrue($this->mybrowser->setField('oldfolderid', $oldFolderId));
-    $uploadId = $this->getUploadId($upload, $page);
-    print "FTC: uploadId is:$uploadId\n";
+    $uploadId = $this->getUploadId($upload, $page, 'uploadid');
     if(empty($uploadId))
     {
       $this->fail("moveUpload FAILED! could not find upload id for upload" .
                   "$upload\n is $upload in $oldFolder?\n");
     }
     $this->assertTrue($this->mybrowser->setField('uploadid', $uploadId));
-    $destFolderId = $this->getFolderId($destFolder, $page);
-    print "FTC: destFolderId is:$destFolderId\n";
+    $destFolderId = $this->getFolderId($destFolder, $page, 'targetfolderid');
     $this->assertTrue($this->mybrowser->setField('targetfolderid', $destFolderId));
     $page = $this->mybrowser->clickSubmit('Move!');
     $this->assertTrue(page);
@@ -379,11 +378,11 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Move');
     $this->assertTrue($this->myassertText($page, '/Move Folder/'));
-    $FolderId = $this->getFolderId($folder, $page);
+    $FolderId = $this->getFolderId($folder, $page, 'oldfolderid');
     $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
     if ($destination != 1)
     {
-      $DfolderId = $this->getFolderId($destination, $page);
+      $DfolderId = $this->getFolderId($destination, $page, 'targetfolderid');
     }
     $this->assertTrue($this->mybrowser->setField('targetfolderid', $DfolderId));
     $page = $this->mybrowser->clickSubmit('Move!');
