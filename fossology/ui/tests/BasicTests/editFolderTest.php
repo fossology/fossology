@@ -77,7 +77,7 @@ class EditFolderTest extends fossologyTestCase
     global $URL;
     $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
     $this->assertTrue($this->myassertText($page, '/Delete Folder/'));
-    $FolderId = $this->getFolderId($this->newname, $page);
+    $FolderId = $this->getFolderId($this->newname, $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
     $this->assertTrue(page);

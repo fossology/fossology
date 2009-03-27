@@ -57,7 +57,7 @@ class CreateFolderTest extends fossologyTestCase
     $page = $this->mybrowser->get("$URL?mod=folder_create");
     $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
     /* select the folder to create this folder under */
-    $FolderId = $this->getFolderId('Basic-Testing', $page);
+    $FolderId = $this->getFolderId('Basic-Testing', $page, 'parentid');
     $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
     /* create unique name and insert into form */
     $id = getmypid();
@@ -78,7 +78,7 @@ class CreateFolderTest extends fossologyTestCase
     global $URL;
     $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
     $this->assertTrue($this->myassertText($page, '/Delete Folder/'));
-    $FolderId = $this->getFolderId($this->folder_name, $page);
+    $FolderId = $this->getFolderId($this->folder_name, $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
     $this->assertTrue(page);
