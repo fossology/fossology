@@ -43,7 +43,7 @@ class EditFolderNameOnlyTest extends fossologyTestCase
   {
     global $URL;
 
-    $this->Login($this->mybrowser);
+    $this->Login();
     /* create a folder, which is edited below */
     $page = $this->mybrowser->get("$URL?mod=folder_create");
     $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
@@ -75,7 +75,7 @@ class EditFolderNameOnlyTest extends fossologyTestCase
      */
     $page = $this->mybrowser->get("$URL?mod=folder_properties");
     $this->assertTrue($this->myassertText($page, '/Edit Folder Properties/'));
-    $FolderId = $this->getFolderId($this->folder_name, $page);
+    $FolderId = $this->getFolderId($this->folder_name, $page, 'oldfolderid');
     $this->assertTrue($FolderId);
     $this->assertTrue($this->mybrowser->setField('oldfolderid', $FolderId));
     /* edit the properties */

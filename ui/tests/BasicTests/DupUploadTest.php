@@ -60,7 +60,7 @@ class DupUploadTest extends fossologyTestCase
       $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
       /* select Testing folder, filename based on pid */
 
-      $id = $this->getFolderId('Basic-Testing', $page);
+      $id = $this->getFolderId('Basic-Testing', $page, 'folder');
       $this->assertTrue($this->mybrowser->setField('folder', $id));
       $this->assertTrue($this->mybrowser->setField('getfile', '/home/fosstester/licenses/Affero-v1.0'));
       $desc = 'File Affero-v1.0 uploaded by test UploadFileTest into Testing folder';
