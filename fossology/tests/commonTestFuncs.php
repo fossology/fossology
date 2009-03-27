@@ -16,27 +16,36 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
 /**
- * public function getHost
+ * checkMail
  *
- * returns the host (if present) from a URL
+ * Check to see if there is new mail for the user
  *
- * @param string $URL a url in the form of http://somehost.xx.com/repo/
+ * @param string $User the user whose mail will be checked.?
  *
- * @return string $host the somehost.xx.com part is returned or NULL,
- * if there is no host in the uri
+ * @return array Headers a list of the headers in the mail box.?
  *
  */
+function getMailSubjects() {
+  /*
+   * use grep, but the test must be run by the user who owns the email file
+   * in /var/mail.
+   */
+  $MailFile = "/var/mail/";
 
-function getHost($URL)
-{
-  if (empty ($URL))
-  {
-    return (NULL);
+  //print 'CKM: I AM: ' . get_current_user() . "\n";
+  $user = get_current_user();
+  $UserMail = $MailFile . $user;
+  $FH = fopen($UserMail,'r') or die ("Cannot open $UserMail, $phperrormsg\n");
+  while (! feof($FH)){
+    $line = fgets($FH);
+    $matched = preg_match('/Subject:.*?$/',$line, $matches);
+    if($matched) {
+      $Subjects[] = $line;
+    }
   }
-  $found = parse_url($URL, PHP_URL_HOST);
-  //print "DB: getHost: url is:$URL\nafter parse, found is:$found\n";
-  return ($found);
+  return($Subjects);
 }
 /**
  * escapeDots($string)
@@ -58,6 +67,29 @@ function escapeDots($string)
     return (FALSE);
   }
   return ($estring);
+}
+
+/**
+ * public function getHost
+ *
+ * returns the host (if present) from a URL
+ *
+ * @param string $URL a url in the form of http://somehost.xx.com/repo/
+ *
+ * @return string $host the somehost.xx.com part is returned or NULL,
+ * if there is no host in the uri
+ *
+ */
+
+function getHost($URL)
+{
+  if (empty ($URL))
+  {
+    return (NULL);
+  }
+  $found = parse_url($URL, PHP_URL_HOST);
+  //print "DB: getHost: url is:$URL\nafter parse, found is:$found\n";
+  return ($found);
 }
 
 /**
