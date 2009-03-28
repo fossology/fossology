@@ -279,7 +279,9 @@ if (array_key_exists("s", $options))
 if (array_key_exists("v", $options)){
   if (array_key_exists("l", $options)){
     $logFile = $options['l'];
+    print "Verify: logFile is:$logFile\n";
     $logFileName = basename($logFile);
+    print "Verify: logFileName is:$logFileName\n";
   }
   else{
     print "Error, must supply a path to a log file with -v option\n";
@@ -306,14 +308,16 @@ function saveResults(){
   global $LF;
   global $logFile;
 
-  $resHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
+  $resultsHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
 
   if (chdir($Home) === FALSE){
     $nohome = "Save Data ERROR: can't cd to $Home\n";
     LogAndPrint($LF, $nohome);
     return($nohome);
   }
-  $reportHome = "$resHome" . "$logFileName";
+  print "saveResults: logFileName is:$logFileName\n";
+  print "saveResults: resultsHome is:$resultsHome\n";
+  $reportHome = "$resultsHome" . "$logFileName";
   if (!rename($logFile, $reportHome)){
     $E = "Error, could not move\n$logFile\nto\n$reportHome\n";
     $E .= "Please move it by hand so the reports will be current\n";

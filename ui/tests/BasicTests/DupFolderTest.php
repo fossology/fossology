@@ -75,7 +75,6 @@ class DupFolderTest extends fossologyTestCase
         $this->assertTrue($this->myassertText($page, "/Folder $this->folder_name Created/"),
                 "FAIL! Folder $this->folder_name Created not found\n");
       }
-
       //print "************ page after Folder Create! *************\n$page\n";
     }
   }
@@ -85,11 +84,12 @@ class DupFolderTest extends fossologyTestCase
     global $URL;
     $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
     $this->assertTrue($this->myassertText($page, '/Delete Folder/'));
-    $FolderId = $this->getFolderId($this->folder_name, $page);
+    $FolderId = $this->getFolderId($this->folder_name, $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
     $this->assertTrue(page);
-    $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"), "MoveFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
+    $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"),
+     "DupFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
   }
 }
 ?>
