@@ -39,55 +39,18 @@ class CreateDeleteFldrTest extends fossologyTestCase
   {
     global $URL;
     $this->Login();
+    $this->folder_name = 'CreateDeleteFolderTest';
   }
 
-  function CreateFolder()
-  {
-    global $URL;
-
-    $loggedIn = $this->mybrowser->get($URL);
-    $this->assertTrue($this->myassertText($loggedIn, '/Organize/'),
-                      "FAIL! Could not find Organize menu\n");
-    $this->assertTrue($this->myassertText($loggedIn, '/Folders /'));
-    $this->assertTrue($this->myassertText($loggedIn, '/Create/'));
-    $page = $this->mybrowser->get("$URL?mod=folder_create");
-    $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
-    /* select the folder to create this folder under */
-    $this->assertTrue($this->mybrowser->setField('parentid', 1));
-    $this->folder_name = 'TestCreateDeleteFolder';
-
-    $this->assertTrue($this->mybrowser->setField('newname', $this->folder_name));
-    $desc = 'Folder created by CreateFolderTest as subfolder of Root Folder';
-    $this->assertTrue($this->mybrowser->setField('description', "$desc"));
-    $page = $this->mybrowser->clickSubmit('Create!');
-    $this->assertTrue(page);
-    $this->assertTrue($this->myassertText($page, "/Folder $this->folder_name Created/"),
-                      "FAIL! Folder $this->folder_name Created not found\nDoes $this->folder_name exist?\n");
-
-    //print "************ page after Folder Create! *************\n$page\n";
-  }
-  function DeleteFolder()
-  {
-    global $URL;
-    $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
-    $this->assertTrue($this->myassertText($page, '/Delete Folder/'));
-    $FolderId = $this->getFolderId($this->folder_name, $page, 'folder');
-    $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
-    $page = $this->mybrowser->clickSubmit('Delete!');
-    $this->assertTrue(page);
-    $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"),
-                      "DeleteFolder FAILED! Deletion of $this->folder_name not found\n");
-  }
-
-  function TestCreateDeleteFldr()
+  function testCreateDeleteFldr()
   {
     print "starting CreateDeleteFolderTest\n";
-    // create then remove 10 times....
-    for($i=0; $i<10; $i++)
-    {
-      $this->CreateFolder();
-      $this->DeleteFolder();
-      sleep(60);            // give delete job some time to remove it...
+    // create then remove 5 times....
+    for($i=0; $i<5; $i++) {
+      $this->createFolder(1,$this->folder_name,
+      'Folder created by CreateFolderTest as subfolder of Root Folder');
+      $this->deleteFolder($this->folder_name);
+      sleep(90);            // give delete job some time to remove it...
     }
   }
 }

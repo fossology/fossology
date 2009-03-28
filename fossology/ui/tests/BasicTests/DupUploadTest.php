@@ -18,10 +18,8 @@
 
 /**
  * Duplicate upload test, try to upload the same file twice into the
- * same folder.
+ * same folder.  This should pass.  It's allowed.
  *
- *
- *@TODO need to make sure testing folder exists....
  *
  * @version "$Id: $"
  *
@@ -71,16 +69,15 @@ class DupUploadTest extends fossologyTestCase
       /* we won't select any agents this time' */
       $page = $this->mybrowser->clickSubmit('Upload!');
       $this->assertTrue(page);
-            /* On the second try, we SHOULD NOT see Upload added to job queue */
-      if($i == 1)
-      {
+            /* On the second try, we SHOULD see Upload added to job queue */
+      if($i == 1) {
         $this->assertTrue($this->myassertText($page, "/Upload added to job queue/"),
-              "FAIL! A Duplicate Upload created!\nThe phrase 'Upload added to job queue' was NOT seen\n");
+              "FAIL! A Duplicate Upload was NOT created!\n" .
+              "The phrase 'Upload added to job queue' was NOT seen\n");
       }
-      else
-      {
-        $this->assertFalse($this->myassertText($page, "/Upload added to job queue/"),
-                "FAIL! Upload Failed?\nUpload added to job queue not found\n");
+      else{
+        $this->assertFalse($this->myassertText($page, "/Upload failed/"),
+                "FAIL! Upload Failed?\nPhrase 'Upload failed found\n");
       }
       //print "*********** Page after upload **************\n$page\n";
     }

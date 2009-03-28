@@ -141,7 +141,6 @@ if(empty($UserName)) {
 /********** Set Message Preamble ******************************************/
 /* if still no UserName, then use email address as the name */
 if (empty($UserName)){
-  //print "  FJS: check UserName is EMPTY!\n";
   $UserName = $ToEmail;
 }
 $Preamble = "Dear $UserName,\n" .
@@ -171,6 +170,29 @@ if(empty($JobName)) {
 $summary = JobListSummary($upload_id);
 //print "  DEBUG: summary for upload $upload_id is:\n"; print_r($summary) . "\n";
 
+/* Construct the URL for the message */
+/*
+ * check both locations for Db.conf, check package 1st, then upstream
+ * if local host, need to get hostname.
+ */
+$PackagePath = '/etc/fossology/Db.conf';
+$UpStreamPath = '/usr/local/etc/fossology/Db.conf';
+if(file_exists($PackagePath)) {
+  $contents = file_get_contents($PackagePath);
+}
+else if(file_exists($UpStreamPath)) {
+  $contents = file_get_contents($UpStreamPath);
+}
+// get rid of new lines
+$c = str_replace("\n",'',$contents);
+$hostLine = explode(';',$c);
+list($hostWord,$host) = split('=',$hostLine[1]);
+if($host == 'localhost') {
+  $hostname = exec('hostname --fqdn', $toss);
+}
+//print "hostname is:$hostname\n";
+$JobHistoryUrl = "http://$hostname/repo/?mod=showjobs&history=1&upload=$upload_id";
+
 /* Job aborted */
 if ($summary['total'] == 0 &&
 $summary['completed'] == 0 &&
@@ -180,6 +202,7 @@ $summary['failed'] == 0 ) {
   $MessagePart = "No results, your job $JobName $JobStatus";
   $Message = $Preamble . $MessagePart;
   if ($Interactive) {
+    $MessagePart .= " For more details, see: $JobHistoryUrl\n";
     printMsg($MessagePart);
     exit(0);
   }
@@ -192,12 +215,13 @@ $summary['failed'] == 0 ) {
  */
 /* Job is done, OK status */
 $Done = FALSE;
-
+/* running as cli */
 if ($summary['total'] == $summary['completed']) {
   if ($summary['failed'] == 0) {
     $Done = TRUE;
   }
 }
+/* As agent */
 elseif ($summary['total'] == $summary['completed']+1) {
   if ($summary['failed'] == 0) {
     $Done = TRUE;
@@ -210,6 +234,7 @@ if ($Done) {
                  "Your job $JobName has $JobStatus.";
   $Message = $Preamble . $MessagePart;
   if ($Interactive) {
+    $MessagePart .= "For more details, see: $JobHistoryUrl\n";
     printMsg($MessagePart);
   }
 }
@@ -221,6 +246,7 @@ elseif ($summary['active'] > 0) {
                  "Your job $JobName $JobStatus";
   $Message = $Preamble . $MessagePart;
   if ($Interactive) {
+    $MessagePart .= "For more details, see: $JobHistoryUrl\n";
     printMsg($MessagePart);
   }
 }
@@ -231,6 +257,7 @@ elseif ($summary['failed'] > 0) {
                  "Your job $JobName $JobStatus.";
   $Message = $Preamble . $MessagePart;
   if ($Interactive) {
+    $MessagePart .= "For more details, see: $JobHistoryUrl\n";
     printMsg($MessagePart);
   }
 }
@@ -242,15 +269,17 @@ if (!$Interactive) {
   $Sender = "The FOSSology Application";
   $From = "root@localhost";
   $Recipient = $ToEmail;
-  $Mail_body = wordwrap($Message,72);
+  $Mail_body = wordwrap($Message,75);
+  $JobHistoryUrl = "\n\nFor more details, see:\n<a href='$JobHistoryUrl'>upload #$upload_id</a>\n";
+  $Mail_body .= $JobHistoryUrl;
   $Subject = "FOSSology Results: $JobName $JobStatus";
   $Header = "From: " . $Sender . " <" . $From . ">\r\n";
   if($rtn = mail($Recipient, $Subject, $Mail_body, $Header)){
-    print "Mail has been queued by notify\n";
+    print "Mail has been queued by fo-notify\n";
     exit(0);
   }
   else {
-    print "Warning: Mail was NOT queued by notify\n";
+    print "Warning: Mail was NOT queued by fo-notify\n";
     exit(1);
   }
 }
