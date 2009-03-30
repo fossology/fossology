@@ -65,5 +65,12 @@ class noEmailUserTest extends fossologyTestCase {
     $this->assertTrue($_SESSION['UserEnote'] == NULL);
   } //testNoEmailUser
 
+  function tearDown(){
+    /* Cleanup: remove the user */
+    print "Logging out UserNoEmail\n";
+    $this->Logout('UserNoEmail');
+    print "Removing user UserNoEmail\n";
+    $this->deleteUser('UserNoEmail');
+  }
 }
 ?>

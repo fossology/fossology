@@ -33,6 +33,7 @@ global $URL;
 class AddUserTest extends fossologyTestCase
 {
   public $mybrowser;
+  private $UserName;
 
    function setUP()
   {
@@ -54,7 +55,15 @@ class AddUserTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, '/Add A User/'));
     $this->assertTrue($this->myassertText($page, '/To create a new user,/'));
     $pid = getmypid();
-    $result = $this->addUser('TestUser-' . "$pid",'Created for testing','fosstester',1,1,'test');
+    $this->UserName = 'TestUser-' . "$pid";
+    $result = $this->addUser($this->UserName,'Created for testing','fosstester',1,1,'test');
+  }
+ function tearDown(){
+    /* Cleanup: remove the user */
+    print "Logging out $this->UserName\n";
+    $this->Logout($this->UserName);
+    print "Removing user $this->UserName\n";
+    $this->deleteUser($this->UserName);
   }
 }
 
