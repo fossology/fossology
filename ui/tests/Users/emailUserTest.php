@@ -67,11 +67,14 @@ class EmailUserTest extends fossologyTestCase {
     $this->Login('UserwEmail','uwetest');
     print "Verifying Email Notification Setting\n";
     $this->assertTrue($_SESSION['UserEnote'] == NULL);
+  } //testEmailUser
+
+  function tearDown(){
     /* Cleanup: remove the user */
     print "Logging out UserwEmail\n";
     $this->Logout('UserwEmail');
     print "Removing user UserwEmail\n";
     $this->deleteUser('UserwEmail');
-  } //testEmailUser
+  }
 }
 ?>

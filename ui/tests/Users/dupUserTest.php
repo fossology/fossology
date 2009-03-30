@@ -39,6 +39,7 @@ class DupUserTest extends fossologyTestCase {
 
   function testDupUser() {
     global $URL;
+    private $UserName;
 
     print "starting DupUserTest\n";
 
@@ -48,12 +49,13 @@ class DupUserTest extends fossologyTestCase {
     $page = $this->mybrowser->get("$URL?mod=user_add");
     $this->assertTrue($this->myassertText($page, '/Add A User/'));
     $this->assertTrue($this->myassertText($page, '/To create a new user,/'));
-    $this->addUser('TestUserDup','Created for Duplicate user testing','fosstester',1,1,'test');
+    $this->UserName = 'TestUserDup';
+    $this->addUser($this->UserName,'Created for Duplicate user testing','fosstester',1,1,'test');
     /* Try to add the user again */
     $page = $this->mybrowser->get("$URL?mod=user_add");
     $this->assertTrue($this->myassertText($page, '/Add A User/'));
     $this->assertTrue($this->myassertText($page, '/To create a new user,/'));
-    $result = $this->addUser('TestUserDup','Created for Duplicate user testing',
+    $result = $this->addUser($this->UserName,'Created for Duplicate user testing',
                              'fosstester',1,1,'test');
     if(!empty($result)) {
       $pattern = "/User already exists\.  Not added/";
@@ -64,6 +66,11 @@ class DupUserTest extends fossologyTestCase {
         $this->fail("Did not match string, got:\n$result\n");
       }
     }
+  }
+ function tearDown(){
+    /* Cleanup: remove the user */
+    print "Removing user $this->UserName\n";
+    $this->deleteUser($this->UserName);
   }
 }
 
