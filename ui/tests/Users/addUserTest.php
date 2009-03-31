@@ -60,8 +60,6 @@ class AddUserTest extends fossologyTestCase
   }
  function tearDown(){
     /* Cleanup: remove the user */
-    print "Logging out $this->UserName\n";
-    $this->Logout($this->UserName);
     print "Removing user $this->UserName\n";
     $this->deleteUser($this->UserName);
   }
