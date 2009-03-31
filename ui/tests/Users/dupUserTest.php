@@ -31,6 +31,7 @@ global $URL;
 
 class DupUserTest extends fossologyTestCase {
   public $mybrowser;
+  private $UserName;
 
   function setUP() {
     global $URL;
@@ -39,7 +40,6 @@ class DupUserTest extends fossologyTestCase {
 
   function testDupUser() {
     global $URL;
-    private $UserName;
 
     print "starting DupUserTest\n";
 
