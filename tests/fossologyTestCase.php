@@ -52,6 +52,16 @@ class fossologyTestCase extends fossologyTest
    *
    * Create a Fossology user
    *
+   * @param string $UserName the user name
+   * @param string $Description a description of the user
+   * @param string $Email the email address for the user
+   * @param int    $Access, the access level for the user, valid values are:
+   *               0,1,2,3,4,5,6,7,10.
+   * @param string $Folder, the folder for the user....can be a 'number'
+   * @param string $Password the password for the user
+   * @param string $EmailNotify either null or 'y'.  Default is 'y'.
+   *
+   * @return null on success, prints error on fail.
    */
   public function addUser($UserName, $Description=NULL, $Email=NULL, $Access=1,
   $Folder=1, $Password=NULL, $EmailNotify='y'){
@@ -66,40 +76,10 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->clickLink('Add');
     $this->assertTrue($this->myassertText($page, '/Add A User/'),
       "Did NOT find Title, 'Add A User'");
+    $this->setUserFields($UserName,$Description, $Email, $Access, $Folder,
+                         NULL,NULL, $Password, $EmailNotify);
 
-    /* Set the user field */
-    $this->assertTrue($this->mybrowser->setField('username', $UserName),
-      "Could Not set the username field");
-    if(!empty($Description)) {
-      $this->assertTrue($this->mybrowser->setField('description', $Description),
-      "Could Not set the description field");
-    }
-    if(!empty($Email)) {
-      $this->assertTrue($this->mybrowser->setField('email', $Email),
-      "Could Not set the email field");
-    }
-    if(!empty($Access)) {
-      $this->assertTrue($this->mybrowser->setField('permission', $Access),
-      "Could Not set the permission field");
-    }
-    else {
-      return('FATAL: Access/permission is a required field');
-    }
-    if(!empty($Folder)) {
-      $this->assertTrue($this->mybrowser->setField('folder', $Folder),
-      "Could Not set the folder Field");
-    }
-    if(!empty($Password)) {
-      $this->assertTrue($this->mybrowser->setField('pass1', $Password),
-      "Could Not set the pass1 field");
-      $this->assertTrue($this->mybrowser->setField('pass2', $Password),
-      "Could Not set the pass2 field");
-    }
-    if(!empty($EmailNotifiy)) {
-      $this->assertTrue($this->mybrowser->setField('enote', $EmailNotify),
-      "Could Not set the enote Field");
-    }
-    /* all fields set, add the user */
+    /* fields set, add the user */
     $page = $this->mybrowser->clickSubmit('Add!',"Could not select the Add! button");
     $this->assertTrue(page);
     //print "<pre>page after clicking Add!\n"; print_r($page) . "\n</pre>";
@@ -109,10 +89,8 @@ class fossologyTestCase extends fossologyTest
     elseif($this->myassertText($page, "/User already exists\.  Not added/")) {
       return('User already exists.  Not added');
     }
-    //$this->assertTrue($this->myassertText($page, "/User added/"),
-    // "addUser Failed!\nPhrase 'User added' not found\n");
     return;
-  }
+  } // addUser
   /**
    * createFolder
    * Uses the UI 'Create' menu to create a folder.  Always creates a
@@ -297,6 +275,50 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue(page);
     $this->assertTrue($this->myassertText($page, "/Folder Properties changed/"), "editFolder Failed!\nPhrase 'Folder Properties changed' not found\n");
   }
+   /**
+   * addUser
+   *
+   * Edit a Fossology user
+   *
+   * @param string $UserName the user name
+   * @param string $Description a description of the user
+   * @param string $Email the email address for the user
+   * @param int    $Access, the access level for the user, valid values are:
+   *               0,1,2,3,4,5,6,7,10.
+   * @param string $Folder, the folder for the user....can be a 'number'
+   * @param string $Block, check box for blocking user, default is NULL
+   * @param string $Blank check box for blanking the users account, default is NULL
+   * @param string $Password the password for the user
+   * @param string $EmailNotify either null or 'y'.  Default is 'y'.
+   *
+   * @return null on success, prints error on fail.
+   */
+  public function editUser($UserName, $Description=NULL, $Email=NULL, $Access=1,
+                           $Folder=1, $Block=NULL, $Blank=NULL, $Password=NULL,
+                           $EmailNotify='y'){
+
+    global $URL;
+
+    // check user name, everything else defaults (not a good idea to use defaults)
+    if(empty($UserName)) {
+      return("No User Name, cannot add user");
+    }
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Edit Users');
+    $this->assertTrue($this->myassertText($page, '/Edit A User/'),
+      "Did NOT find Title, 'Edit A User'");
+    $this->setUserFields($UserName,$Description, $Email, $Access, $Folder,
+                         NULL,NULL, $Password, $EmailNotify);
+
+    /* fields set, edit the user */
+    $page = $this->mybrowser->clickSubmit('Edit!',"Could not select the Edit! button");
+    $this->assertTrue(page);
+    //print "<pre>page after clicking Add!\n"; print_r($page) . "\n</pre>";
+    if($this->myassertText($page, "/User edited/")) {
+      return(NULL);
+    }
+    return;
+  } // addUser
   /**
    * moveUpload($oldfFolder, $destFolder, $upload)
    *
@@ -387,8 +409,83 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->mybrowser->setField('targetfolderid', $DfolderId));
     $page = $this->mybrowser->clickSubmit('Move!');
     $this->assertTrue(page);
-    $this->assertTrue($this->myassertText($page, "/Moved folder $folder to folder $destination/"), "moveFolder Failed!\nPhrase 'Move folder $folder to folder ....' not found\n");
+    $this->assertTrue($this->myassertText($page, "/Moved folder $folder to folder $destination/"),
+        "moveFolder Failed!\nPhrase 'Move folder $folder to folder ....' not found\n");
   }
+
+  /**
+   * setUserFields
+   *
+   * utility function for the user methods.
+   *
+   * @param string $UserName
+   * @param
+   * @param
+   * @param
+   * @param
+   * @param
+   * @param
+   *
+   * @return NULL on pass, string on failure (for now only returns NULL)
+   */
+  private function setUserFields($UserName=NULL, $Description=NULL, $Email=NULL,
+                                 $Access=1, $Folder=1, $Block=NULL, $Blank=NULL,
+                                 $Password=NULL, $EmailNotify='y'){
+
+    $FailStrings = NULL;
+
+    /*
+    print "SUF: parameters are:\n";
+    print "SUF: user name:$UserName\n";
+    print "SUF: desc:$Description\n";
+    print "SUF: email:$Email\n";
+    print "SUF: access:$Access\n";
+    print "SUF: folder:$Folder\n";
+    */
+
+    if(!empty($UserName)) {
+      $this->assertTrue($this->mybrowser->setField('username', $UserName),
+      "Could Not set the username field");
+    }
+    if(!empty($Description)) {
+      $this->assertTrue($this->mybrowser->setField('description', $Description),
+      "Could Not set the description field");
+    }
+    if(!empty($Email)) {
+      $this->assertTrue($this->mybrowser->setField('email', $Email),
+      "Could Not set the email field");
+    }
+    if(!empty($Access)) {
+      $this->assertTrue($this->mybrowser->setField('permission', $Access),
+      "Could Not set the permission field");
+    }
+    else {
+      return('FATAL: Access/permission is a required field');
+    }
+    if(!empty($Folder)) {
+      $this->assertTrue($this->mybrowser->setField('folder', $Folder),
+      "Could Not set the folder Field");
+    }
+    if(!empty($Block)) {
+      $this->assertTrue($this->mybrowser->setField('block', $Block),
+      "Could Not set the block Field");
+    }
+    if(!empty($Blank)) {
+      $this->assertTrue($this->mybrowser->setField('blank', $Blank),
+      "Could Not set the blank Field");
+    }
+    if(!empty($Password)) {
+      $this->assertTrue($this->mybrowser->setField('pass1', $Password),
+      "Could Not set the pass1 field");
+      $this->assertTrue($this->mybrowser->setField('pass2', $Password),
+      "Could Not set the pass2 field");
+    }
+    if(!empty($EmailNotifiy)) {
+      $this->assertTrue($this->mybrowser->setField('enote', $EmailNotify),
+      "Could Not set the enote Field");
+    }
+    return(NULL);
+  } // setUserFields
 
   /**
    * uploadFile
