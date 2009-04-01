@@ -561,6 +561,87 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'),
       "FAILURE:Did not find the message'Upload added to job queue'\n");
   }
+    /**
+   * uploadServer
+   * ($parentFolder,$uploadPath,$description=null,$uploadName=null,$agents=null)
+   *
+   * Upload a file and optionally schedule the agents.  The web-site must
+   * already be logged into before using this method.
+   *
+   * @param string $parentFolder the parent folder name, default is root
+   * folder (1)
+   * @param string $uploadPath the path to upload data, can be a file or directory
+   * @param string $description a default description is always used. It
+   * can be overridden by supplying a description.
+   * @param string $uploadName=null optional upload name
+   * @param string $agents=null agents to schedule
+   *
+   * @return pass or fail
+   *
+   * @TODO determine if setting alpha folders is worth it.  Right now this routine
+   * does not use them.....
+   */
+  public function uploadServer($parentFolder = 1, $uploadPath, $description = null,
+                               $uploadName = null, $agents = null)
+  {
+    global $URL;
+    global $PROXY;
+    /*
+     * check parameters:
+     * default parent folder is root folder
+     * no uploadfile return false
+     * description and upload name are optonal
+     * future: agents are optional
+     */
+    if (empty ($parentFolder))
+    {
+      $parentFolder = 1;
+    }
+    if (empty ($uploadPath))
+    {
+      return (FALSE);
+    }
+    if (is_null($description)) // set default if null
+    {
+      $description = "File $uploadPath uploaded by test UploadAUrl";
+    }
+    //print "starting UploadAUrl\n";
+    $loggedIn = $this->mybrowser->get($URL);
+    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
+    "uploadURL FAILED! cannot file Upload menu, did we get a fossology page?\n");
+    $page = $this->mybrowser->clickLink("From Server");
+
+    $this->assertTrue($this->myassertText($page, '/Upload from Server/'));
+    $this->assertTrue($this->myassertText($page,
+      '/Select the directory or file\(s\) on the server to upload/'));
+    /* only look for the the folder id if it's not the root folder */
+    $folderId = $parentFolder;
+    if ($parentFolder != 1)
+    {
+      $folderId = $this->getFolderId($parentFolder, $page, 'folder');
+    }
+    $this->assertTrue($this->mybrowser->setField('folder', $folderId),
+      "Count not set folder field\n");
+    $this->assertTrue($this->mybrowser->setField('sourcefiles', $uploadPath),
+      "Count not set sourcefiles field\n");
+    $this->assertTrue($this->mybrowser->setField('description', "$description"),
+    "Count not set description field\n");
+    /* Set the name field if an upload name was passed in. */
+    if(!is_null($uploadName)) {
+      $this->assertTrue($this->mybrowser->setField('name', $uploadName));
+    }
+      /* selects agents */
+    $rtn = $this->setAgents($agents);
+    if (!is_null($rtn))
+    {
+      $this->fail("FAIL: could not set agents in uploadServer test\n");
+    }
+    $page = $this->mybrowser->clickSubmit('Upload!');
+    $this->assertTrue(page);
+    $this->assertTrue($this->myassertText($page, '/Upload jobs for .*? added to job queue/'));
+    //print  "************ page after Upload! *************\n$page\n";
+  } //uploadServer
+
   /**
    * function uploadUrl
    * ($parentFolder,$uploadFile,$description=null,$uploadName=null,$agents=null)
@@ -660,10 +741,6 @@ class fossologyTestCase extends fossologyTest
     return TRUE;
   }
   public function rmLicAnalysis()
-  {
-    return TRUE;
-  }
-  public function uploadServer()
   {
     return TRUE;
   }
