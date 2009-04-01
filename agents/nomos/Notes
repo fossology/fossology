@@ -1,0 +1,27 @@
+
+
+To Do's
+-------
+
+- Go back and edit CFLAGS options in Makefile to document and accurately
+  represent what is still operable.
+
+- Document all Makefile targets
+
+
+Changes
+-------
+
+- Changed ls_t to licSpec_t.
+
+Questions
+---------
+
+- Where the hell is checkstrings script? Do we want it?
+
+
+#defines Used
+-------------
+
+PROC_TRACE
+DEBUG
