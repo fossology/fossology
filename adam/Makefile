@@ -47,6 +47,9 @@ tests: sparsevect/python/sparsevect.so models/SentenceModel.dat models/Database.
 run_webapp: models/Database.dat models/SentenceModel.dat
 	webapp/manage.py runserver
 
+print_pythonpath:
+	echo $(PYTHONPATH)
+
 clean:
 	rm models/SentenceModel.dat
 	rm models/Database.dat
