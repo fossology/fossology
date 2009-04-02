@@ -26,12 +26,12 @@ if (!isset($GlobalReady)) { exit; }   /* is running on the same system on which 
 
 class ui_hello extends FO_Plugin             /* This is the class name (ui_hello) and */
   {                                          /* it extends functionality of the FO_Plugin */
-  var $Name       = "hello";                 /* This is the name by which FOSSology identifies the plugin */
-  var $Title      = "Hello World Example";   /* This is the title that will be displayed in the UI */
-  var $MenuList   = "Help::Hello World";     /* This is the description that will be displayed in the pulldown menu */
-  var $LoginFlag  = 0;                       /* You do not need to be logged into the UI to execute this plugin */
+  public $Name       = "hello";                 /* This is the name by which FOSSology identifies the plugin */
+  public $Title      = "Hello World Example";   /* This is the title that will be displayed in the UI */
+  public $MenuList   = "Help::Hello World";     /* This is the description that will be displayed in the pulldown menu */
+  public $LoginFlag  = 0;                       /* You do not need to be logged into the UI to execute this plugin */
 
-  var $_Text="Hello World";                  /* This is the output message that will be displayed in the UI */
+  protected $_Text="Hello World";               /* This is the output message that will be displayed in the UI */
 
   function Output()
     {
