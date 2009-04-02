@@ -1,9 +1,10 @@
 #!/bin/sh 
 #######
+#
 #  GENSEARCHDATA: Script to take STRINGS.in file and create _autodata.c
 #     and _autodefs.h files for initializing the search strings structure
 #     used to search for licenses.
-# 
+#
 #  Copyright (C) 2006,2009 Hewlett-Packard Development Company, L.P.
 #  
 #  This program is free software; you can redistribute it and/or
@@ -167,7 +168,7 @@ BEGIN {
 #####
 /^[	 ]*%STR%/ {
 	syntaxCheck($0);
-	cryptString = sprintf("%s", substr($0, RSTART, RLENGTH));
+	encodedString = sprintf("%s", substr($0, RSTART, RLENGTH));
 	gotStr++;
 }
 #####
@@ -233,8 +234,8 @@ BEGIN {
 		K=$0
 		close("_KEY");
 # process search-string (the paragraph)
-		CSlen = length(cryptString);
-		cmd = sprintf("echo %s > _STARGET", cryptString);
+		CSlen = length(encodedString);
+		cmd = sprintf("echo %s > _STARGET", encodedString);
 		system(cmd);
 		cmd = sprintf("./encode _STARGET > _STR");
 		system(cmd);
@@ -245,7 +246,7 @@ BEGIN {
 		printf("\n#if\t0\n  Seed[%s=#%03d]: (%d) %s\n", defined, \
 		    defineNo, KSlen-2, keyString) >> SRC;
 		printf("Phrase[%s=#%03d]: (%d) %s\n#endif\n", defined, \
-		    defineNo, CSlen-2, cryptString) >> SRC;
+		    defineNo, CSlen-2, encodedString) >> SRC;
 		printf("{/*Seed*/%s,\n /*Text*/%s},\n", K, S) >> SRC;
 # reset everything in preparation for the next line
 		close(SRC);
