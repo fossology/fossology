@@ -50,6 +50,11 @@ ENG_STEM = Stemmer('english')
 
 STOPWORDS = stopwords.english()
 
+def stemmed_words(text):
+    words = RE_WORD.findall(text)
+    stems = [ENG_STEM.stemWord(w.lower()) for w in words if not w.lower() in STOPWORDS]
+    return stems
+
 def features(text):
     stuff = RE_TOKENS.findall(text)
     n = len(stuff)

@@ -1,41 +1,19 @@
-## 
-## Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-## 
-## This program is free software; you can redistribute it and/or
-## modify it under the terms of the GNU General Public License
-## version 2 as published by the Free Software Foundation.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License along
-## with this program; if not, write to the Free Software Foundation, Inc.,
-## 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-##
-
-import lucense.database as database
-import lucene
-import lucense.library as libary
+import database
 from django.http import HttpResponse, HttpResponseRedirect
 import os
 import math
 from operator import itemgetter
 from xml.sax.saxutils import escape
+import sys
+import maxent
 
-# set path for opennlp
-database.library.opennlp.PATH = os.getcwd()+'/../'
-database.library.opennlp.classpath()
+path = os.path.dirname(sys.argv[0])+'/'
 
-# Start the JVM so lucene doesn't crash:(
-lucene.initVM(lucene.CLASSPATH)
-
-# this stems and splits our files for us:)
-analyzer = lucene.SnowballAnalyzer("English",lucene.StopAnalyzer.ENGLISH_STOP_WORDS)
-
-
-DB = database.load('../DB.dat',analyzer)
+print 'Loading Sentence Model...'
+sentence_model = maxent.MaxentModel()
+sentence_model.load(path+'../models/SentenceModel.dat')
+print 'Loading Database...'
+DB = database.load(path+'../models/Database.dat',sentence_model)
 
 # fix funky characters so we can print our data into a nice xml formatted
 # document
@@ -58,7 +36,7 @@ def escape2(str):
 
 def xml_style_sheet(request):
     response = HttpResponse(mimetype='application/xml')
-    response.write(open('../default.xsl').read())
+    response.write(open(path+'../sentence_based_classification/default.xsl').read())
     return response
 
 def index(request):
