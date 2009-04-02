@@ -8,11 +8,14 @@ To Do's
 
 - Document all Makefile targets
 
+- Remove all HP_INTERNAL and CUSTOMER_VERSION references.
+
 
 Changes
 -------
 
 - Changed ls_t to licSpec_t.
+- Changed lic_t to licText_t.
 
 Questions
 ---------
@@ -24,4 +27,8 @@ Questions
 -------------
 
 PROC_TRACE
+PROC_TRACE_SWITCH	Gives command option for tracing on/off
 DEBUG
+GLOBAL_DEBUG		Debug access to global variable structure
+MEMORY_TRACING		Use Debug Malloc wrapper
+
