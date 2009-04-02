@@ -44,6 +44,9 @@ tests: sparsevect/python/sparsevect.so models/SentenceModel.dat models/Database.
 	mkdir output
 	python sentence_based_classification/f1.py -S models/SentenceModel.dat -D models/Database.dat -f tests.txt -o output
 
+run_webapp: models/Database.dat models/SentenceModel.dat
+	webapp/manage.py runserver
+
 clean:
 	rm models/SentenceModel.dat
 	rm models/Database.dat
