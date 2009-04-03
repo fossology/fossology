@@ -824,7 +824,7 @@ if (0)
 	return(1);
 	}
       }
-    $this->InitAgents($Verbose);
+    $this->InitAgents($Debug);
     $this->InitDatafiles($Debug);
     return(0);
     } // InitSchema()
