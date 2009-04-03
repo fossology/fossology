@@ -218,5 +218,4 @@ class upload_srv_files extends FO_Plugin {
   }
 };
 $NewPlugin = new upload_srv_files;
-$NewPlugin->Initialize();
 ?>

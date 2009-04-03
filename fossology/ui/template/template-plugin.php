@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 
 /*************************************************
@@ -51,16 +51,16 @@ define("PLUGIN_DB_USERADMIN",10);	/* add/delete users */
 
 /*************************************************************
  This is the Plugin class.  All plugins should:
-   1. Use this class or extend this class.
-   2. After defining the necessary functions and values, the plugin
-      must add the new element to the Plugins array.
-      For example:
-	$NewPlugin = new Plugin;
-	$NewPlugin->Name="Fred";
-	if ($NewPlugin->Initialize() != 0) { destroy $NewPlugin; }
+ 1. Use this class or extend this class.
+ 2. After defining the necessary functions and values, the plugin
+ must add the new element to the Plugins array.
+ For example:
+ $NewPlugin = new Plugin;
+ $NewPlugin->Name="Fred";
+ if ($NewPlugin->Initialize() != 0) { destroy $NewPlugin; }
  *************************************************************/
 class FO_Plugin
-  {
+{
   // All public fields can be empty, indicating that it does not apply.
 
   var $State=PLUGIN_STATE_INVALID;
@@ -113,11 +113,11 @@ class FO_Plugin
    at the same level are sorted alphabetically by MenuName.
 
    For example, to define an "About" menu item under the "Help" menu:
-     $MenuList = "Help::About";
-     $MenuOrder=0;
+   $MenuList = "Help::About";
+   $MenuOrder=0;
    And a "delete" agent under the tool, administration menu would be:
-     $MenuList = "Tools::Administration::Delete";
-     $MenuOrder=0;
+   $MenuList = "Tools::Administration::Delete";
+   $MenuOrder=0;
 
    Since menus may link to results that belong in a specific window,
    $MenuTarget can identify the window.  If not defined, the UI will use
@@ -126,9 +126,9 @@ class FO_Plugin
    NOTES:
    1. If the MenuList location does not exist, then it will be created.
    2. If a plugin does not have a menulist item, then it will not appear
-      in any menus.
+   in any menus.
    3. MenuList is case and SPACE sensitive.  "Help :: About" defines
-      "Help " and " About".  While "Help::About" defines "Help" and "About".
+   "Help " and " About".  While "Help::About" defines "Help" and "About".
    *****/
   var $MenuList=NULL;
   var $MenuOrder=0;
@@ -154,9 +154,9 @@ class FO_Plugin
    and even then, be sure to check if $DB is NULL before using it.
    ***********************************************************/
   function Install()
-    {
+  {
     return(0);
-    } // Install()
+  } // Install()
 
   /***********************************************************
    Remove(): This function (when defined) is only called once,
@@ -168,29 +168,46 @@ class FO_Plugin
    This function must always succeed.
    ***********************************************************/
   function Remove()
-    {
+  {
     return;
-    } // Remove()
+  } // Remove()
 
-  /***********************************************************
-   Initialize(): This is called before the plugin is used.
-   It should assume that Install() was already run one time
-   (possibly years ago and not during this object's creation).
-   Returns true on success, false on failure.
-   A failed initialize is not used by the system.
-   NOTE: This function must NOT assume that other plugins are installed.
-   ***********************************************************/
-  function Initialize()
-    {
-    if ($this->State != PLUGIN_STATE_INVALID) { return(1); } // don't re-run
-    if ($this->Name !== "") // Name must be defined
-      {
-      global $Plugins;
+  /**
+   * base constructor.  Most plugins will just use this
+   *
+   * Makes sure the plugin is in the correct state.  If so, the plugin is
+   * inserted into the Plugins data structure.
+   *
+   * The constructor assumes that Install() was already run one time (possibly
+   * years ago and not during this object's creation).
+   *
+   * @return true on success, false on failure.
+   *
+   * On failure the plugin is not used by the system. NOTE: This function must
+   * NOT assume that other plugins are installed.  See PostInitialize.
+   *
+   */
+  public function __construct() {
+
+    global $Plugins;
+
+    if ($this->State != PLUGIN_STATE_INVALID) {
+      return(1); // don't re-run
+    }
+    if ($this->Name !== "") { // Name must be defined
       $this->State=PLUGIN_STATE_VALID;
       array_push($Plugins,$this);
-      }
+    }
     return($this->State == PLUGIN_STATE_VALID);
-    } // Initialize()
+  }
+
+  /***********************************************************
+   Initialize(): dummy stub till all references are removed.
+   ***********************************************************/
+  function Initialize()
+  {
+    return(TRUE);
+  } // Initialize()
 
   /***********************************************************
    PostInitialize(): This function is called before the plugin
@@ -201,16 +218,22 @@ class FO_Plugin
    NOTE: Do not assume that the plugin exists!  Actually check it!
    ***********************************************************/
   function PostInitialize()
-    {
+  {
     global $Plugins;
-    if ($this->State != PLUGIN_STATE_VALID) { return(0); } // don't run
-    if (empty($_SESSION['User']) && $this->LoginFlag) { return(0); }
+    if ($this->State != PLUGIN_STATE_VALID) {
+      return(0);
+    } // don't run
+    if (empty($_SESSION['User']) && $this->LoginFlag) {
+      return(0);
+    }
     // Make sure dependencies are met
-    foreach($this->Dependency as $key => $val)
-      {
+    foreach($this->Dependency as $key => $val) {
       $id = plugin_find_id($val);
-      if ($id < 0) { $this->Destroy(); return(0); }
+      if ($id < 0) {
+        $this->Destroy();
+        return(0);
       }
+    }
 
     // Put your code here!
     // If this fails, set $this->State to PLUGIN_STATE_INVALID.
@@ -219,12 +242,11 @@ class FO_Plugin
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
     // Add this plugin to the menu
-    if ($this->MenuList !== "")
-	{
-	menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
-	}
+    if ($this->MenuList !== "") {
+      menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+    }
     return($this->State == PLUGIN_STATE_READY);
-    } // PostInitialize()
+  } // PostInitialize()
 
   /***********************************************************
    RegisterMenus(): While menus can be added to any time at or after
@@ -235,11 +257,11 @@ class FO_Plugin
    for the main menu.
    ***********************************************************/
   function RegisterMenus()
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return(0); } // don't run
     // Add your own menu items here.
     // E.g., menu_insert("Menu_Name::Item");
-    }
+  }
 
   /***********************************************************
    Destroy(): This is a destructor called after the plugin
@@ -248,14 +270,14 @@ class FO_Plugin
    This function must always succeed.
    ***********************************************************/
   function Destroy()
-    {
+  {
     if ($this->State != PLUGIN_STATE_INVALID)
-      {
+    {
       ; // Put your cleanup here
-      }
+    }
     $this->State=PLUGIN_STATE_INVALID;
     return;
-    } // Destroy()
+  } // Destroy()
 
   /*********************************************************************/
   /*********************************************************************/
@@ -281,66 +303,66 @@ class FO_Plugin
    and used by other plugins.)
    ***********************************************************/
   function OutputOpen($Type,$ToStdout)
-    {
+  {
     global $Plugins;
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $this->OutputType=$Type;
     $this->OutputToStdout=$ToStdout;
     // Put your code here
     switch($this->OutputType)
-      {
+    {
       case "XML":
-	$V = "<xml>\n";
-	break;
+        $V = "<xml>\n";
+        break;
       case "HTML":
-	header('Content-type: text/html');
-	header("Pragma: no-cache"); /* for IE cache control */
-	header('Cache-Control: no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0'); /* prevent HTTP/1.1 caching */
-	header('Expires: Expires: Thu, 19 Nov 1981 08:52:00 GMT'); /* mark it as expired (value from Apache default) */
-	if ($this->NoHTML) { return; }
-	$V = "";
-	if (($this->NoMenu == 0) && ($this->Name != "menus"))
-	  {
-	  $Menu = &$Plugins[plugin_find_id("menus")];
-	  $Menu->OutputSet($Type,$ToStdout);
-	  }
-	else { $Menu = NULL; }
+        header('Content-type: text/html');
+        header("Pragma: no-cache"); /* for IE cache control */
+        header('Cache-Control: no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0'); /* prevent HTTP/1.1 caching */
+        header('Expires: Expires: Thu, 19 Nov 1981 08:52:00 GMT'); /* mark it as expired (value from Apache default) */
+        if ($this->NoHTML) { return; }
+        $V = "";
+        if (($this->NoMenu == 0) && ($this->Name != "menus"))
+        {
+          $Menu = &$Plugins[plugin_find_id("menus")];
+          $Menu->OutputSet($Type,$ToStdout);
+        }
+        else { $Menu = NULL; }
 
-	/* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
-	$V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
-	// $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
-	// $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
-	// $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "xhtml1-strict.dtd">' . "\n";
+        /* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
+        $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
+        // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
+        // $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
+        // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "xhtml1-strict.dtd">' . "\n";
 
-	$V .= "<html>\n";
-	$V .= "<head>\n";
-	if ($this->NoHeader == 0)
-	  {
-	  /** Known bug: DOCTYPE "should" be in the HEADER
-	      and the HEAD tags should come first.
-	      Also, IE will ignore <style>...</style> tags that are NOT
-	      in a <head>...</head> block.
-	   **/
-	  if (!empty($Title)) { $V .= "<title>" . htmlentities($Title) . "</title>\n"; }
-	  $V .= "<link rel='stylesheet' href='fossology.css'>\n";
-	  print $V; $V="";
-	  if (!empty($Menu)) { print $Menu->OutputCSS(); }
-	  $V .= "</head>\n";
+        $V .= "<html>\n";
+        $V .= "<head>\n";
+        if ($this->NoHeader == 0)
+        {
+          /** Known bug: DOCTYPE "should" be in the HEADER
+           and the HEAD tags should come first.
+           Also, IE will ignore <style>...</style> tags that are NOT
+           in a <head>...</head> block.
+           **/
+          if (!empty($Title)) { $V .= "<title>" . htmlentities($Title) . "</title>\n"; }
+          $V .= "<link rel='stylesheet' href='fossology.css'>\n";
+          print $V; $V="";
+          if (!empty($Menu)) { print $Menu->OutputCSS(); }
+          $V .= "</head>\n";
 
-	  $V .= "<body class='text'>\n";
-	  print $V; $V="";
-	  if (!empty($Menu)) { $Menu->Output($this->Title); }
-	  }
-	break;
+          $V .= "<body class='text'>\n";
+          print $V; $V="";
+          if (!empty($Menu)) { $Menu->Output($this->Title); }
+        }
+        break;
       case "Text":
-	break;
+        break;
       default:
-	break;
-      }
+        break;
+    }
     if (!$this->OutputToStdout) { return($V); }
     print $V;
     return;
-    } // OutputOpen()
+  } // OutputOpen()
 
   /***********************************************************
    OutputClose(): This function is called when user output is done.
@@ -353,31 +375,31 @@ class FO_Plugin
    and used by other plugins.)
    ***********************************************************/
   function OutputClose()
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     // Put your code here
     switch($this->OutputType)
-      {
+    {
       case "XML":
-	$V = "</xml>\n";
-	break;
+        $V = "</xml>\n";
+        break;
       case "HTML":
-	if ($this->NoHTML) { return; }
-	if (!$this->NoHeader)
-	  {
-	  $V = "</body>\n";
-	  $V .= "</html>\n";
-	  }
-	break;
+        if ($this->NoHTML) { return; }
+        if (!$this->NoHeader)
+        {
+          $V = "</body>\n";
+          $V .= "</html>\n";
+        }
+        break;
       case "Text":
-	break;
+        break;
       default:
-	break;
-      }
+        break;
+    }
     if (!$this->OutputToStdout) { return($V); }
     print $V;
     return;
-    } // OutputClose()
+  } // OutputClose()
 
   /***********************************************************
    OutputSet(): Similar to OutputOpen, this sets the output type
@@ -386,27 +408,27 @@ class FO_Plugin
    for another object.
    ***********************************************************/
   function OutputSet($Type,$ToStdout)
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $this->OutputType=$Type;
     $this->OutputToStdout=$ToStdout;
     // Put your code here
     switch($this->OutputType)
-      {
+    {
       case "XML":
-	$V = "<xml>\n";
-	break;
+        $V = "<xml>\n";
+        break;
       case "HTML":
-	break;
+        break;
       case "Text":
-	break;
+        break;
       default:
-	break;
-      }
+        break;
+    }
     if (!$this->OutputToStdout) { return($V); }
     print $V;
     return;
-    } // OutputSet()
+  } // OutputSet()
 
   /***********************************************************
    OutputUnSet(): Similar to OutputClose, this ends the output type
@@ -415,25 +437,25 @@ class FO_Plugin
    for another object.
    ***********************************************************/
   function OutputUnSet()
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     // Put your code here
     switch($this->OutputType)
-      {
+    {
       case "XML":
-	$V = "</xml>\n";
-	break;
+        $V = "</xml>\n";
+        break;
       case "HTML":
-	break;
+        break;
       case "Text":
-	break;
+        break;
       default:
-	break;
-      }
+        break;
+    }
     if (!$this->OutputToStdout) { return($V); }
     print $V;
     return;
-    } // OutputUnSet()
+  } // OutputUnSet()
 
   /***********************************************************
    Output(): This function is called when user output is
@@ -446,25 +468,25 @@ class FO_Plugin
    and used by other plugins.)
    ***********************************************************/
   function Output()
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     // Put your code here
     $V="";
     switch($this->OutputType)
-      {
+    {
       case "XML":
-	break;
+        break;
       case "HTML":
-	break;
+        break;
       case "Text":
-	break;
+        break;
       default:
-	break;
-      }
+        break;
+    }
     if (!$this->OutputToStdout) { return($V); }
     print $V;
     return;
-    } // Output()
+  } // Output()
 
   /*********************************************************************/
   /*********************************************************************/
@@ -482,11 +504,11 @@ class FO_Plugin
    $Command and return value are plugin specific.
    ***********************************************************/
   function Action($Command)
-    {
+  {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     // Put your code here
     return;
-    } // Action()
+  } // Action()
 
-  };
+};
 ?>

@@ -164,5 +164,4 @@ class upload_url extends FO_Plugin {
   }
 };
 $NewPlugin = new upload_url;
-$NewPlugin->Initialize();
 ?>
