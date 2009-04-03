@@ -50,7 +50,7 @@ class verifyFossolyTest extends fossologyTestCase
     global $name;
     global $safeName;
 
-    $name = 'fossI16L519.tar.bz2';
+    $name = 'fossI16L518.tar.bz2';
     $safeName = escapeDots($name);
     $this->host = getHost($URL);
     $this->Login();
@@ -59,37 +59,37 @@ class verifyFossolyTest extends fossologyTestCase
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Browse');
     $this->assertTrue($this->myassertText($page, '/Browse/'),
-     "verifyFossI16L519 FAILED! Could not find Browse menu\n");
+     "verifyFossI16L518 FAILED! Could not find Browse menu\n");
     $page = $this->mybrowser->clickLink('Testing');
     $this->assertTrue($this->myassertText($page, '/Testing/'),
-     "verifyFossI16L519 FAILED! Could not find Testing folder\n");
+     "verifyFossI16L518 FAILED! Could not find Testing folder\n");
     $result = $this->myassertText($page, "/$safeName/");
     if(!($result)) { exit(FALSE); }
   }
 
-  function testVerifyFossI16L519()
+  function testVerifyFossI16L518()
   {
     global $URL;
     global $name;
     global $safeName;
 
-    print "starting VerifyFossI16L519 test\n";
+    print "starting VerifyFossI16L518 test\n";
     $page = $this->mybrowser->clickLink('Browse');
     $this->assertTrue($this->myassertText($page, '/Browse/'),
-             "verifyFossI16L519 FAILED! Could not find Browse menu\n");
+             "verifyFossI16L518 FAILED! Could not find Browse menu\n");
     /* Testing folder */
     $page = $this->mybrowser->clickLink('Testing');
     //print "************ Page after upload link *************\n$page\n";
     $this->assertTrue($this->myassertText($page, "/Browse/"),
-       "verifyFossI16L519 FAILED! Browse Title not found\n");
+       "verifyFossI16L518 FAILED! Browse Title not found\n");
     $this->assertTrue($this->myassertText($page, "/$safeName/"),
-       "verifyFossI16L519 FAILED! did not find $name\n");
+       "verifyFossI16L518 FAILED! did not find $name\n");
     $this->assertTrue($this->myassertText($page, "/>View</"),
-       "verifyFossI16L519 FAILED! >View< not found\n");
+       "verifyFossI16L518 FAILED! >View< not found\n");
     $this->assertTrue($this->myassertText($page, "/>Meta</"),
-       "verifyFossI16L519 FAILED! >Meta< not found\n");
+       "verifyFossI16L518 FAILED! >Meta< not found\n");
     $this->assertTrue($this->myassertText($page, "/>Download</"),
-       "verifyFossI16L519 FAILED! >Download< not found\n");
+       "verifyFossI16L518 FAILED! >Download< not found\n");
 
     /* Select archive */
     $page = $this->mybrowser->clickLink($name);
@@ -117,14 +117,14 @@ class verifyFossolyTest extends fossologyTestCase
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
     $url = makeUrl($this->host, $miniMenu['License']);
-    if($url === NULL) { $this->fail("verifyFossI16L519 Failed, host is not set"); }
+    if($url === NULL) { $this->fail("verifyFossI16L518 Failed, host is not set"); }
 
     $page = $this->mybrowser->get($url);
     //print "page after get of $url is:\n$page\n";
     $this->assertTrue($this->myassertText($page, '/License Browser/'),
-          "verifyFossI16L519 FAILED! License Browser Title not found\n");
-    $this->assertTrue($this->myassertText($page, '/Total licenses: 519/'),
-        "verifyFossI16L519 FAILED! Total Licenses does not equal 519\n");
+          "verifyFossI16L518 FAILED! License Browser Title not found\n");
+    $this->assertTrue($this->myassertText($page, '/Total licenses: 518/'),
+        "verifyFossI16L518 FAILED! Total Licenses does not equal 518\n");
 
     // get the 'Show' links and License color links
     $licTbl = new parseLicenseTbl($page);
@@ -139,14 +139,14 @@ class verifyFossolyTest extends fossologyTestCase
     $fileCount = $licFileList->countFiles();
     print "Checking the number of files based on Public Domain\n";
     $this->assertEqual($fileCount, 4,
-    "verifyFossI16L519 FAILED! Should be 4 files based on Public Domain got:$fileCount\n");
+    "verifyFossI16L518 FAILED! Should be 4 files based on Public Domain got:$fileCount\n");
 
     $page = $this->mybrowser->get($lgplURL);
     $licFileList->setPage($page);
     $flist = $licFileList->countFiles();
     print "Checking the number of files based on LGPL v2.1-style\n";
     $this->assertEqual($flist, 16,
-    "verifyFossI16L519 FAILED! Should be 16 files based on LGPL v2.1-style got:$flist\n");
+    "verifyFossI16L518 FAILED! Should be 16 files based on LGPL v2.1-style got:$flist\n");
   }
 }
 ?>
