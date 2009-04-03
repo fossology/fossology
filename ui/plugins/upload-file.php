@@ -170,5 +170,4 @@ class upload_file extends FO_Plugin {
   }
 };
 $NewPlugin = new upload_file;
-$NewPlugin->Initialize();
 ?>
