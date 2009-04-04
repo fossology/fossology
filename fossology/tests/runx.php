@@ -20,7 +20,11 @@
 /**
  * run a test
  *
- * Run a test using simpletest, useful when working on a new test.
+ * Run one or more tests using simpletest
+ *
+ * @param string -l $list a quoted string with space seperated items
+ *
+ * @return the test results, passes and failure.
  *
  * @version "$Id: $"
  *
@@ -39,7 +43,8 @@ require_once SIMPLE_TEST . 'web_tester.php';
 
 require_once ('TestEnvironment.php');
 
-$Usage = "runx -l 'list of tests space seperated'\n";
+$Usage = "runx -l 'list of tests space seperated'\n or\n" .
+         "runx -l \"`ls`\"\n";
 
 $options = getopt("l:");
 if (empty($options)) {
@@ -47,6 +52,7 @@ if (empty($options)) {
   exit(1);
 }
 if (array_key_exists("l",$options)) {
+  /* split on spaces AND newlines so you can do a -l "`ls`" */
   $RunList = preg_split('/\s|\n/',$options['l']);
   //print "runx: runlist is:\n"; print_r($RunList) . "\n";
 }
@@ -56,8 +62,9 @@ else {
 }
 $Runtest = & new TestSuite("Fossology tests");
 /*
- * will this work?  in the loop all the tests get scheduled at once.... do they run
- * all at the same time or serially?
+ * tests will run serially...
+ *
+ * allow filenames without .php or with it
  */
 foreach($RunList as $ptest) {
   if(preg_match('/^.*?\.php/',$ptest)) {
@@ -66,7 +73,6 @@ foreach($RunList as $ptest) {
   else {
     $test = $ptest . ".php";
   }
-  //print "runx: test is:$test\n";
   $Runtest->addTestFile("$test");
 }
 
