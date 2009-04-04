@@ -82,12 +82,11 @@ class db {
    * @return connection resource
    */
   public function connect($options = NULL) {
-    // need to deal with options!
     if (is_resource($this->_pg_conn)) {
       return ($this->_pg_conn);
     }
     else {
-      $this->_docon();
+      $this->_docon($options);
       return ($this->_pg_conn);
     }
   } // connect

@@ -41,8 +41,10 @@ class uploadWoutEMailTest extends fossologyTestCase {
     $this->Login();
     $result = $this->createFolder(1, 'Enote', 'Folder for Email notification uploads');
     if(!is_null($result)) {
-      $this->fail("Failure! folder Enote does not exist, stopping test\n");
-      exit(1);
+      if($result != 'Folder Enote Exists') {
+        $this->fail("Failure! folder Enote does not exist, stopping test\n");
+        exit(1);
+      }
     }
     $this->Logout();
   }
@@ -51,8 +53,8 @@ class uploadWoutEMailTest extends fossologyTestCase {
 
     global $URL;
 
-    /* login fosstester*/
-    $this->Login('noemail','n0eeemale');
+    /* login noemail */
+    $this->Login('noemail','noemail');
     $page = $this->mybrowser->get($URL);
 
     $File = '/home/fosstester/licenses/gplv2.1';
