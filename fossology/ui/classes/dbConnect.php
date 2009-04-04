@@ -69,6 +69,7 @@
    {
     require_once(dirname(__FILE__) . '/../php/pathinclude.php');
     global $DATADIR, $PROJECT;
+
     $path="$DATADIR/dbconnect/$PROJECT";
     $myConnect = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
     if(is_resource($myConnect))
