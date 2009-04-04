@@ -45,8 +45,8 @@ class createUIUsers extends fossologyTestCase {
     $Users = array(
       'fosstester' =>
         'Primary Test User: runs test suites,fosstester,10,1,NULL,NULL,fosstester,y',
-      'NoENote' =>
-        'test user with NO Email notification,fosstester,10,1,NULL,NULL,fosstester,NULL',
+      'noemail' =>
+        'test user with NO Email notification,noemail,10,1,NULL,NULL,noemail,NULL',
     );
 
     print "Starting testcreateUIUsers\n";

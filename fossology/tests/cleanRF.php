@@ -17,24 +17,21 @@
  ***********************************************************/
 
 /**
- * Test checkMail function
+ * Clean up uploaded files from root folder (Software Repository)
  *
+ * @param ?
  *
- * @version "$Id:  $"
+ * @version "$Id: $"
  *
- * Created on March 26, 2009
+ * Created on March 25, 2009
  */
 
 require_once ('fossologyTestCase.php');
 require_once ('TestEnvironment.php');
 
-/* Globals for test use, most tests need $URL, only login needs the others */
 global $URL;
-global $USER;
-global $PASSWORD;
 
-class someTest extends fossologyTestCase
-{
+class cleanupRF extends fossologyTestCase {
   public $mybrowser;
 
   function setUp() {
@@ -42,33 +39,21 @@ class someTest extends fossologyTestCase
     $this->Login();
   }
 
-  public function testCheckCompletedJobs() {
+  function testRmRFContent() {
     global $URL;
-
-    print "starting CheckCompletedJobs\n";
-
-    $headers = getMailSubjects();
-    if(empty($headers)){
-      print "No messages found\n";
-      $this->pass();
-      return(NULL);
-    }
-    //print "Got back from checkMail:\n";print_r($headers) . "\n";
-    /* find any duplicates, count them */
-    $pattern = 'completed with no errors';
-
-    foreach($headers as $header) {
-      /* Make sure all say completed */
-      $match = preg_match("/$pattern/",$header,$matches);
-      if($match == 0) {
-        $failed[] = $header;
-      }
-    }
-    if(!empty($failed)) {
-      $this->fail("the following jobs did not report as completed\n");
-      foreach($failed as $fail) {
-        print "$fail\n";
-      }
+    print "Removing the content of the root folder (Software Repository)\n";
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Delete Uploaded File');
+    $this->assertTrue($this->myassertText($page, '/Select the uploaded file to delete/'));
+    $SRselect = $this->parseSelectStmnt($page,'upload');
+    //print "SRselect is:\n"; print_r($SRselect) . "\n";
+    foreach($SRselect as $uploadName => $uploadId){
+      print "Removing $uploadName...\n";
+       $this->assertTrue($this->mybrowser->setField('upload', $uploadId));
+       $page = $this->mybrowser->clickSubmit('Delete!');
+       $this->assertTrue(page);
+       $this->assertTrue($this->myassertText($page, "/Deletion added to job queue/"),
+       "delete Upload Failed!\nPhrase 'Deletion added to job queue' not found\n");
     }
   }
 }

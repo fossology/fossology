@@ -41,6 +41,7 @@ global $PROXY;
 class uploadAgentDataTest extends fossologyTestCase {
   public $mybrowser;
   public $webProxy;
+
   function setUp() {
     global $URL;
     $this->Login();
