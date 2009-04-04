@@ -24,23 +24,39 @@
 #
 # todo: add -f option so tests will run with data install errors?
 
-# add group
+# add groups
 groupadd -g 666777 fosstester
 if [ $? -ne 0 ]
 then
-	echo "ERROR! could not create fosstester group number 666777"
-	exit 1
+  echo "ERROR! could not create fosstester group number 666777"
+  exit 1
+fi
+groupadd -g 555777 noemail
+if [ $? -ne 0 ]
+then
+  echo "ERROR! could not create noemail group number 555777"
+  exit 1
 fi
 # useradd:
 # Name, home dir path, uid, initial group, other groups, create home, shell,
 # password (none) user-account
 
+# fosstester
 useradd -c 'Fossolgy Test User' -d /home/fosstester -u 666777 -g fosstester \
 -G fossy,sudo,users -m -s /bin/bash -p 'Brksumth1n' fosstester
 if [ $? -ne 0 ]
 then
-	echo "ERROR! could not create fosstester user UID:666777"
-	exit 1
+  echo "ERROR! could not create fosstester user UID:666777"
+  exit 1
+fi
+
+# noemail
+useradd -c 'Fossolgy Test User' -d /home/noemail -u 555777 -g noemail \
+-G fossy,sudo,users -m -s /bin/bash -p 'n0eeemale' noemail
+if [ $? -ne 0 ]
+then
+  echo "ERROR! could not create noemail user UID:555777"
+  exit 1
 fi
 
 if [ -x ./installTestData.sh ]

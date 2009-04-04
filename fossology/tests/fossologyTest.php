@@ -218,9 +218,9 @@ class fossologyTest extends WebTestCase
     //print "number of selects on this page:$selectList->length\n";
     //print "number of options on this page:$optionList->length\n";
     /*
-     * gather the section names and group the options with each section
-     * collect the data at the same time.  Assemble into the data structure.
-     */
+    * gather the section names and group the options with each section
+    * collect the data at the same time.  Assemble into the data structure.
+    */
     for($i=0; $i < $selectList->length; $i++) {
       $ChildList = $selectList->item($i)->childNodes;
       foreach($ChildList as $child) {
@@ -249,11 +249,13 @@ class fossologyTest extends WebTestCase
            */
           //print "Adding cleanText to select array\n";
           $Selects[$selectList->item($i)->getAttribute('name')][$cleanText] = $optionValue;
+          $foo = $selectList->item($i)->getAttribute('onload');
+          print "PSS: foo is:$foo\n";
         }
       }
     }
 
-    //print "PSS: Selects is:\n"; print_r($Selects) . "\n";
+    print "PSS: Selects is:\n"; print_r($Selects) . "\n";
     /*
      * if there were no selects found, then we were passed something that
      * doesn't exist.
@@ -294,8 +296,7 @@ class fossologyTest extends WebTestCase
    * @return NULL, or string on error
    *
    */
-  public function setAgents($agents = NULL)
-  {
+  public function setAgents($agents = NULL) {
     $agentList = array (
       'license' => 'Check_agent_license',
       'mimetype' => 'Check_agent_mimetype',
@@ -304,20 +305,15 @@ class fossologyTest extends WebTestCase
 
     );
     /* check parameters and parse */
-    if (is_null($agents))
-    {
+    if (is_null($agents)) {
       return NULL; // No agents to set
     }
-    /* see them all if 'all' */
-    if (0 === strcasecmp($agents, 'all'))
-    {
-      foreach ($agentList as $agent => $name)
-      {
-        if ($this->debug)
-        {
+    /* set them all if 'all' */
+    if (0 === strcasecmp($agents, 'all')) {
+      foreach ($agentList as $agent => $name) {
+        if ($this->debug) {
           print "SA: setting agents for 'all', agent name is:$name\n";
         }
-
         $this->assertTrue($this->mybrowser->setField($name, 1));
       }
       return (NULL);
@@ -329,16 +325,12 @@ class fossologyTest extends WebTestCase
     $numberList = explode(',', $agents);
     $numAgents = count($numberList);
 
-    if ($numAgents = 0)
-    {
+    if ($numAgents = 0) {
       return NULL; // no agents to schedule
     }
-    else
-    {
-      foreach ($numberList as $number)
-      {
-        switch ($number)
-        {
+    else {
+      foreach ($numberList as $number) {
+        switch ($number) {
           case 1 :
             $checklist[] = $agentList['license'];
             break;
@@ -354,15 +346,12 @@ class fossologyTest extends WebTestCase
         }
       } // foreach
 
-      if ($this->debug == 1)
-      {
+      if ($this->debug == 1) {
         print "the agent list is:\n";
       }
 
-      foreach ($checklist as $agent)
-      {
-        if ($this->debug)
-        {
+      foreach ($checklist as $agent) {
+        if ($this->debug) {
           print "DEBUG: $agent\n";
         }
         $this->assertTrue($this->mybrowser->setField($agent, 1));
@@ -370,6 +359,114 @@ class fossologyTest extends WebTestCase
     }
     return (NULL);
   } //setAgents
+
+  /**
+   * getSelectAttr
+   *
+   * get select attributes.
+   *
+   * @param string $page the page to parse
+   * @param string $selectName the name of the select,
+   *
+   * @return array an array of the attributes, with the attributes as the keys.
+   * NULL on errror.
+   *
+   */
+  protected function getSelectAttr($page, $selectName){
+
+    if(empty($page)) {
+      return(NULL);
+    }
+    if(empty($selectName)) {
+      return(NULL);
+    }
+    $hpage = new DOMDocument();
+    @$hpage->loadHTML($page);
+    /* get select */
+    $selectList = $hpage->getElementsByTagName('select');
+    //print "number of selects on this page:$selectList->length\n";
+    /*
+    * gather the section names and group the attributes with each section
+    * collect the data at the same time.  Assemble into the data structure.
+    */
+    $select = array();
+    for($i=0; $i < $selectList->length; $i++) {
+      $sname = $selectList->item($i)->getAttribute('name');
+      if($sname == $selectName) {
+        /* get some common interesting attributes needed */
+        $onload = $selectList->item($i)->getAttribute('onload');
+        $onchange = $selectList->item($i)->getAttribute('onchange');
+        $id = $selectList->item($i)->getAttribute('id');
+        $select[$sname] = array ('onload'   => $onload,
+                                 'onchange' => $onchange,
+                                 'id'       => $id
+                                );
+        break;            // all done
+      }
+    }
+    print "GSA: the select and attrs are:\n";print_r($select) . "\n";
+    return($select);
+  }
+
+ /**
+   * setSelectAttr
+   *
+   * set select attributes.
+   *
+   * @param string $page the page to parse
+   * @param string $selectName the name of the select
+   * @param string $attribute the name of the attribute to change, if the attribute
+   * is not already set, this method will not set it.
+   * @param string $value the value for the attribute
+   *
+   * @return TRUE on success, NULL on error
+   *
+   */
+  protected function setSelectAttr($page, $selectName, $attribute, $value=NULL){
+
+    if(empty($page)) {
+      return(NULL);
+    }
+    if(empty($selectName)) {
+      return(NULL);
+    }
+    if(empty($attribute)) {
+      return(NULL);
+    }
+    print "SSA: on entry value is:$value\n";
+    $hpage = new DOMDocument();
+    @$hpage->loadHTML($page);
+    /* get select */
+    $selectList = $hpage->getElementsByTagName('select');
+    print "SSA: number of selects on this page:$selectList->length\n";
+    /*
+    * gather the section names and group the attributes with each section
+    * collect the data at the same time.  Assemble into the data structure.
+    */
+    $select = array();
+    for($i=0; $i < $selectList->length; $i++) {
+      $sname = $selectList->item($i)->getAttribute('name');
+      if($sname == $selectName) {
+        $oldValue= $selectList->item($i)->getAttribute($attribute);
+        print "oldvalue is:$oldValue\n";
+        if(!empty($value)) {
+          //$node = $selectList->item($i)->set_attribute($attribute,$value);
+          print "setting value to:$value\n";
+          $node = $selectList->item($i)->setAttribute($attribute,$value);
+          print "After setAttr: nodes name is:$node->name\n";
+          print "After setAttr: nodes value is:$node->value\n";
+        }
+        break;      // all done
+      }
+    }
+    $setValue= $selectList->item($i)->getAttribute($attribute);
+    print "SSA: setValue is:$setValue\n";
+    if($setValue != $value) {
+      return(NULL);
+    }
+    return(TRUE);
+  }
+
 
   /**
    * Login to the FOSSology Repository, uses the globals set in
@@ -412,6 +509,7 @@ class fossologyTest extends WebTestCase
     $url = $this->mybrowser->getUrl();
     $page = $this->mybrowser->getContent($URL);
   }
+
   /**
    * Logout of the FOSSology Repository, uses the globals set in
    * TestEnvironment.php as the default or the user and password supplied.
