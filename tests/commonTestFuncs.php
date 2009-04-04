@@ -29,7 +29,7 @@
  */
 function getMailSubjects() {
   /*
-   * use grep, but the test must be run by the user who owns the email file
+   * use preg_match, but the test must be run by the user who owns the email file
    * in /var/mail.
    */
   $MailFile = "/var/mail/";

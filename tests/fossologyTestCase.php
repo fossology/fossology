@@ -77,7 +77,7 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->myassertText($page, '/Add A User/'),
       "Did NOT find Title, 'Add A User'");
     $this->setUserFields($UserName,$Description, $Email, $Access, $Folder,
-                         NULL,NULL, $Password, $EmailNotify);
+    NULL,NULL, $Password, $EmailNotify);
 
     /* fields set, add the user */
     $page = $this->mybrowser->clickSubmit('Add!',"Could not select the Add! button");
@@ -91,6 +91,55 @@ class fossologyTestCase extends fossologyTest
     }
     return;
   } // addUser
+
+  /**
+   * checkEmailNotification
+   *
+   * Verify that the user got the email they were supposed to and that it
+   * said all the jobs finished without errors.
+   *
+   * @param int $number is the number of emails that should have been received
+   *
+   * @return NULL on success, array on failure:
+   *  The array will with contain an error message starting with the string
+   *  ERROR! or it will contain a list of non compliant email headers.
+   *
+   * NOTE: this test uses the function getMailSubjects, which will fail:
+   * - if the user running this test is not the same user as the mail file
+   *   being checked, /var/mail/<user-name> is only readable by that user-name.
+   */
+  public function checkEmailNotification($number) {
+
+    if(empty($number)) {
+      return(array(0,'ERROR! Must supply a number to verify'));
+    }
+
+    $headers = getMailSubjects();
+    if(empty($headers)){
+      //print "No messages found\n";
+      $this->pass();
+      return(NULL);
+    }
+    //print "Got back from getMailSubjects:\n";print_r($headers) . "\n";
+
+    $pattern = 'completed with no errors';
+
+    $failed = array();
+    foreach($headers as $header) {
+      /* Make sure all say completed */
+      $match = preg_match("/$pattern/",$header,$matches);
+      if($match == 0) {
+        $failed[] = $header;
+      }
+    }
+    if(!empty($failed)) {
+      $this->fail("Failures! there were jobs that did not report as completed\n");
+      //foreach($failed as $fail) {
+      //  print "$fail\n";
+      return($failed);
+    }
+  }
+
   /**
    * createFolder
    * Uses the UI 'Create' menu to create a folder.  Always creates a
@@ -109,18 +158,16 @@ class fossologyTestCase extends fossologyTest
    * Reports: pass or fail.
    *
    */
-  public function createFolder($parent = null, $name, $description = null)
-  {
+  public function createFolder($parent = null, $name, $description = null) {
+
     global $URL;
     $FolderId = 0;
 
     /* Need to check parameters */
-    if (is_null($parent))
-    {
+    if (is_null($parent)) {
       $parent = 1; // default is root folder
     }
-    if (is_null($description)) // set default if null
-    {
+    if (is_null($description)) {   // set default if null
       $description = "Folder $name created by createFolder as subfolder of $parent";
     }
     $page = $this->mybrowser->get($URL);
@@ -135,8 +182,15 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->mybrowser->setField('description', "$description"));
     $page = $this->mybrowser->clickSubmit('Create!');
     $this->assertTrue(page);
-    $this->assertTrue($this->myassertText($page, "/Folder $name Created/"),
-     "createFolder Failed!\nPhrase 'Folder $name Created' not found\nDoes the Folder $name exist?\n");
+    if($this->myassertText($page, "/Folder $name Created/")) {
+      return(NULL);
+    }
+    if($this->myassertText($page, "/Folder $name Exists/")) {
+      return("Folder $name Exists");
+    }
+    else {
+      $this->fail('Failure! Unknown Error when creating folder $name\n');
+    }
   }
 
   /**
@@ -275,7 +329,7 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue(page);
     $this->assertTrue($this->myassertText($page, "/Folder Properties changed/"), "editFolder Failed!\nPhrase 'Folder Properties changed' not found\n");
   }
-   /**
+  /**
    * addUser
    *
    * Edit a Fossology user
@@ -294,8 +348,8 @@ class fossologyTestCase extends fossologyTest
    * @return null on success, prints error on fail.
    */
   public function editUser($UserName, $Description=NULL, $Email=NULL, $Access=1,
-                           $Folder=1, $Block=NULL, $Blank=NULL, $Password=NULL,
-                           $EmailNotify='y'){
+  $Folder=1, $Block=NULL, $Blank=NULL, $Password=NULL,
+  $EmailNotify='y'){
 
     global $URL;
 
@@ -308,7 +362,7 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->myassertText($page, '/Edit A User/'),
       "Did NOT find Title, 'Edit A User'");
     $this->setUserFields($UserName,$Description, $Email, $Access, $Folder,
-                         NULL,NULL, $Password, $EmailNotify);
+    NULL,NULL, $Password, $EmailNotify);
 
     /* fields set, edit the user */
     $page = $this->mybrowser->clickSubmit('Edit!',"Could not select the Edit! button");
@@ -320,23 +374,23 @@ class fossologyTestCase extends fossologyTest
     return;
   } // addUser
   /**
-   * moveUpload($oldfFolder, $destFolder, $upload)
-   *
-   *NOTE: this routine was never finished, the screen uses java script.  SO only
-   *items in the root folder can be moved....
-   *
-   *@TODO fix so it only does thnigs with the root folder :)
-   *
-   * Moves an upload from one folder to another. Assumes the caller has
-   * logged in.
-   * @param string $oldFolder the folder name where the upload currently
-   * is stored.
-   * @param string $destFolder the folder where the updload will be
-   * moved to.  If no folder specified, then the root folder will be
-   * used.
-   * @param string $upload The upload to move
-   *
-   */
+  * moveUpload($oldfFolder, $destFolder, $upload)
+  *
+  *NOTE: this routine was never finished, the screen uses java script.  SO only
+  *items in the root folder can be moved....
+  *
+  *@TODO fix so it only does thnigs with the root folder :)
+  *
+  * Moves an upload from one folder to another. Assumes the caller has
+  * logged in.
+  * @param string $oldFolder the folder name where the upload currently
+  * is stored.
+  * @param string $destFolder the folder where the updload will be
+  * moved to.  If no folder specified, then the root folder will be
+  * used.
+  * @param string $upload The upload to move
+  *
+  */
   public function moveUpload($oldFolder, $destFolder, $upload)
   {
     global $URL;
@@ -428,20 +482,20 @@ class fossologyTestCase extends fossologyTest
    *
    * @return NULL on pass, string on failure (for now only returns NULL)
    */
-  private function setUserFields($UserName=NULL, $Description=NULL, $Email=NULL,
-                                 $Access=1, $Folder=1, $Block=NULL, $Blank=NULL,
-                                 $Password=NULL, $EmailNotify='y'){
+  protected function setUserFields($UserName=NULL, $Description=NULL, $Email=NULL,
+  $Access=1, $Folder=1, $Block=NULL, $Blank=NULL,
+  $Password=NULL, $EmailNotify='y'){
 
     $FailStrings = NULL;
 
     /*
-    print "SUF: parameters are:\n";
-    print "SUF: user name:$UserName\n";
-    print "SUF: desc:$Description\n";
-    print "SUF: email:$Email\n";
-    print "SUF: access:$Access\n";
-    print "SUF: folder:$Folder\n";
-    */
+     print "SUF: parameters are:\n";
+     print "SUF: user name:$UserName\n";
+     print "SUF: desc:$Description\n";
+     print "SUF: email:$Email\n";
+     print "SUF: access:$Access\n";
+     print "SUF: folder:$Folder\n";
+     */
 
     if(!empty($UserName)) {
       $this->assertTrue($this->mybrowser->setField('username', $UserName),
@@ -561,7 +615,7 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'),
       "FAILURE:Did not find the message'Upload added to job queue'\n");
   }
-    /**
+  /**
    * uploadServer
    * ($parentFolder,$uploadPath,$description=null,$uploadName=null,$agents=null)
    *
@@ -582,7 +636,7 @@ class fossologyTestCase extends fossologyTest
    * does not use them.....
    */
   public function uploadServer($parentFolder = 1, $uploadPath, $description = null,
-                               $uploadName = null, $agents = null)
+  $uploadName = null, $agents = null)
   {
     global $URL;
     global $PROXY;
@@ -630,7 +684,7 @@ class fossologyTestCase extends fossologyTest
     if(!is_null($uploadName)) {
       $this->assertTrue($this->mybrowser->setField('name', $uploadName));
     }
-      /* selects agents */
+    /* selects agents */
     $rtn = $this->setAgents($agents);
     if (!is_null($rtn))
     {
@@ -720,6 +774,56 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
     //print  "************ page after Upload! *************\n$page\n";
   } //uploadUrl
+
+  /**
+   * wait4jobs
+   *
+   * Are there any jobs running?
+   *
+   * Wait for 2 hours for the test jobs to finish, check every 10 minutes
+   * to see if they are done.
+   *
+   * @return boolean TRUE/FALSE
+   *
+   * @version "$Id$"
+   *
+   * @TODO: make a general program that can wait an arbitrary time, should
+   * also allow for an interval, e.g. check for 2 hours every 7 min.
+   *
+   * Created on Jan. 15, 2009
+   */
+  public function wait4jobs() {
+
+    require_once('testClasses/check4jobs.php');
+
+    define("TenMIN", "600");
+
+    $Jq = new check4jobs();
+
+    /* wait at most 2 hours for test jobs to finish */
+    $done = FALSE;
+    for($i=1; $i<=12; $i++) {
+      //print "DB:W4Q: checking Q...\n";
+      $number = $Jq->Check();
+      if ($number != 0) {
+        //print "sleeping 10 min...\n";
+        sleep(TenMIN);
+      }
+      else {
+        print "$number jobs found in the Queue\n";
+        $done = TRUE;
+        break;
+      }
+    }
+    if($done === FALSE) {
+      print "{$argv[0]} waited for 2 hours and the jobs are still not done\n" .
+        "Please investigate\n";
+      return(FALSE);
+    }
+    if($done === TRUE){
+      return(TRUE);
+    }
+  } // wait4jobs
 
   /* possible methods to add */
   public function dbCheck()
