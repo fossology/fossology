@@ -80,7 +80,7 @@ class folder_create extends FO_Plugin
     $Results = $DB->Action($Sql);
     if ($Results[0]['name'] == $NewFolder)
     {
-      return (0);
+      return (4);
     }
 
     /* Create the folder
@@ -121,20 +121,17 @@ class folder_create extends FO_Plugin
         $ParentId = GetParm('parentid', PARM_INTEGER);
         $NewFolder = GetParm('newname', PARM_TEXT);
         $Desc = GetParm('description', PARM_TEXT);
-        if (!empty ($ParentId) && !empty ($NewFolder))
-        {
-          $rc = $this->Create($ParentId, $NewFolder, $Desc);
-          if ($rc == 1)
-          {
-            /* Need to refresh the screen */
-            $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
-            //print "<pre> calling PopupAlert</pre>\n";
-            $R .= PopupAlert("Folder $NewFolder Created", $Uri);
+        if (!empty ($ParentId) && !empty ($NewFolder)) {
 
-            /*
-             * $V .= "<script language='javascript'>\n"; $V .= "window.
-             * open('$Uri','_top');\n"; $V .= "</script>\n";
-             */
+          $rc = $this->Create($ParentId, $NewFolder, $Desc);
+
+          $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
+          if ($rc == 1) {
+            /* Need to refresh the screen */
+            $R .= PopupAlert("Folder $NewFolder Created", $Uri);
+          }
+          else if($rc == 4) {
+            $R .= PopupAlert("Folder $NewFolder Exists", $Uri);
           }
         }
         /* Display the form */
