@@ -73,7 +73,7 @@
 %STR%	"as[ -]is"
 #
 %ENTRY%	_KW_copyright
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"."
 #
 %ENTRY%	_KW_damages
@@ -288,7 +288,7 @@
 #
 %ENTRY%	_LT_AFFEROref2
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (agpl|affero gpl|(general a|a)ffero (general p|p)ublic licen[cs]e)"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (agpl|affero gpl|(general a|a)ffero (general p|p)ublic licen[cs]e)"
 #####
 # DELETED: ... that are embodied in the original work as furnished by
 # the licen[cs]or to make use sell and offer for sale the original work
@@ -375,11 +375,11 @@
 #
 %ENTRY%	_LT_APACHEref3
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= apach(e|e software) licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= apach(e|e software) licen[cs]e"
 #
 %ENTRY%	_LT_APACHESTYLEref
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (apache[ -]style|apache[ -]type|apache-?ish|apache[ -]like) licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (apache[ -]style|apache[ -]type|apache-?ish|apache[ -]like) licen[cs]e"
 #
 %ENTRY%	_LT_APPLE_2
 %KEY%	"\<ap(ache|ple)\>"
@@ -728,7 +728,7 @@
 #
 %ENTRY%	_LT_BOOSTref1
 %KEY%	"licen[cs]"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= boost software licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= boost software licen[cs]e"
 #
 %ENTRY%	_LT_BRAINSTORM_EULA
 %KEY%	"licen[cs]"
@@ -758,14 +758,14 @@
 #
 %ENTRY%	_LT_BSDref5
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (bsd|berkeley software distribution) licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (bsd|berkeley software distribution) licen[cs]e"
 #
 %ENTRY%	_LT_BSDSTYLEref1
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (BSD[ -]style|BSD[ -]type|BSD-?ish|BSD[ -]like) licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (BSD[ -]style|BSD[ -]type|BSD-?ish|BSD[ -]like) licen[cs]e"
 #
 %ENTRY%	_LT_BSDSTYLEref2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"copyright is =FEW= (BSD[ -]style|BSD[ -]type|BSD-?ish|BSD[ -]like) licen[cs]e"
 #####
 # ORIGINAL with those EXPENSIVE wild-cards:
@@ -901,7 +901,7 @@
 #
 %ENTRY%	_LT_CCA_ref
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons attribution =FEW= licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons attribution =FEW= licen[cs]e"
 #
 %ENTRY%	_LT_CCA_SA
 %KEY%	"distribut"
@@ -909,7 +909,7 @@
 #
 %ENTRY%	_LT_CCA_SAref
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons attribution[ -]share[ -]alike =FEW= licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons attribution[ -]share[ -]alike =FEW= licen[cs]e"
 #####
 # DELETED: ... you a world-?wide royalty-free non-?exclusive perpetual
 # for the duration of the applicable copyright licen[cs]e to exercise
@@ -1071,7 +1071,7 @@
 #
 %ENTRY%	_LT_CPLref1
 %KEY%	"licen[cs]"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= common public licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= common public licen[cs]e"
 #####
 # DELETED: ... to use or re-?distribute this =SOME= in text or binary form
 # as required only in conjunction with devices using a Cypress USB
@@ -1184,7 +1184,7 @@
 #
 %ENTRY%	_LT_ECLIPSEref
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= eclipse public licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= eclipse public licen[cs]e"
 #
 #####
 # DELETED: permission is ... this software and its documentation without
@@ -1508,7 +1508,7 @@
 %ALIAS%	_FREE_last_dist
 #
 %ENTRY%	_LT_FREE_42
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"everyone is permitted to do anything on this program including copying modifying improving as long as you don? t try to pretend that you wrote it ie the above copyright notice has to appear in all copies"
 %ALIAS%	_LT_FUJITSU
 %ALIAS%	_FREE_first_other
@@ -1516,11 +1516,11 @@
 # DELETED: notice and the disclaimer below are preserved without change
 #####
 %ENTRY%	_LT_FREE_43
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"every(body|one) is hereby grante(d|d the) rights? to use copy and modify this (file|product|program|sourc(e|e code)|software|work|code|document|page) provided only that this copyright"
 #
 %ENTRY%	_LT_FREE_44
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"are allowed to change and copy =SOME= if you keep the copyright message intact"
 #####
 # DELETED: ... it is a modified version and the person(s) who modified it
@@ -1655,7 +1655,7 @@
 # DELETED: ... the valuable property of =SOME= or its licen[cs]ors
 #####
 %ENTRY%	_LT_GEN_PROPRIETARY_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"copyright patent trade secret and other intellectual property rights =SOME= are and shall remain"
 #
 %ENTRY%	_LT_GEN_PROPRIETARY_2
@@ -1688,7 +1688,7 @@
 # A known copy of this licen[cs]e leaves off the "y" in "only" [sic]
 #####
 %ENTRY%	_LT_GLIDE_GPL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"subject to copyright protection and is offered only? pursuant to the 3dfx glide (general p|p)ublic licen[cs]e"
 #
 %ENTRY%	_LT_GNU_COPYLEFT
@@ -1785,7 +1785,7 @@
 #
 %ENTRY%	_LT_GPLref1
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= ([^l]gpl|GNU (g?eneral p|p)ublic licen[cs]e)"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= ([^l]gpl|GNU (g?eneral p|p)ublic licen[cs]e)"
 #####
 # DELETED: this =SOME= is free =SOME= ...
 #####
@@ -1886,7 +1886,7 @@ e /* (INFILE(j)) */
 # the terms =SOME= general public licen[cs]e
 #####
 %ENTRY%	_LT_GPL_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"applies to any program or other work which contains a notice placed by the copyright holder"
 #####
 # Almost identical to _LT_GS
@@ -1985,7 +1985,7 @@ e /* (INFILE(j)) */
 # and modify the software
 #####
 %ENTRY%	_LT_HP_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"includes copyrighted works of Hewlett-Packard Co for"
 #####
 # DELETED: permission to use copy and distribute this =SOME= ... 
@@ -2107,7 +2107,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_IDPLref
 %KEY%	"licen[cs]"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= initial developer[ ]?s public licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= initial developer[ ]?s public licen[cs]e"
 #
 %ENTRY%	_LT_IEEE_DOC
 %KEY%	"distribut"
@@ -2131,7 +2131,7 @@ e /* (INFILE(j)) */
 %STR%	"document and translations of it may be copied and/?o?r? furnished to others and derivative works"
 #
 %ENTRY%	_LT_IETF_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"copyrights defined in the Internet Standards process must be followed or as required to translate it into languages"
 #
 %ENTRY%	_LT_IETF_3
@@ -2143,7 +2143,7 @@ e /* (INFILE(j)) */
 # OASIS specifications
 #####
 %ENTRY%	_LT_IETF_4
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"modified in any way such as by removing the copyright notice"
 #
 %ENTRY%	_LT_IMAGEMAGICK
@@ -2153,47 +2153,67 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_INDEMN_1
 %KEY%	"in(demnif|tellect)"
 %STR%	"requir(e|ing) indemnification of licen[cs]ors? and authors? of that material by anyone"
+%ALIAS%	_INDEMNITY_first
 #
 %ENTRY%	_LT_INDEMN_2
 %NOCHECK%
 %KEY%	"in(demnif|tellect)"
-%STR%	"(you|will|shall|must|expense|(agrees?|required) t(o|o forever)) (defend and i|i)ndemnif(y|y and defend) =SOME= (from|for) (and against a|a)n(y|y and all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
+%STR%	"(you|will|shall|must|hereby|effectively|expense|(agrees?|required) t(o|o forever)) (defend and i|i)ndemnif(y|y and defend) =SOME= (from|for) (and against a|a)n(y|y and all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
 #
 %ENTRY%	_LT_INDEMN_3
 %NOCHECK%
 %KEY%	"in(demnif|tellect)"
-%STR%	"(you|will|shall|must|expense|(agrees?|required) t(o|o forever)) (defend and i|i)ndemnif(y|y and defend) =SOME= against an(y|y and all) (claim|cost|damage|demand|expense|fee|fine|judge?me?ent|lawsuit|legal|liabilit|loss|settle|suit|third)"
+%STR%	"(you|will|shall|must|hereby|effectively|expense|(agrees?|required) t(o|o forever)) (defend and i|i)ndemnif(y|y and defend) =SOME= against a(ny|ll|ny and all) (claim|cost|damage|demand|expense|fee|fine|judge?me?ent|lawsuit|legal|liabilit|loss|settle|suit|third)"
 #
 %ENTRY%	_LT_INDEMN_4
 %NOCHECK%
 %KEY%	"in(demnif|tellect)"
-%STR%	"(you|will|shall|must|expense|(agrees?|required) t(o|o forever)) (defend indemnify|indemnify defend|indemnify) and hold =SOME= harmless (from|for) (and against a|a)n(y|y and all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
+%STR%	"(you|will|shall|must|hereby|effectively|expense|(agrees?|required) t(o|o forever)) (defend and i|i)ndemnif(y|y and defend) =SOME= (city|coll|instit|univ) =SOME= against a(ny|ll|ny and all) (claim|cost|damage|demand|expense|fee|fine|judge?me?ent|lawsuit|legal|liabilit|loss|settle|suit|third)"
 #
 %ENTRY%	_LT_INDEMN_5
 %NOCHECK%
 %KEY%	"in(demnif|tellect)"
-%STR%	"(you|will|shall|must|expense|(agrees?|required) t(o|o forever)) (defend indemnify|indemnify defend|indemnify) and hold harmless =SOME= (from|for) (and against a|a)n(y|y and all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
+%STR%	"(you|will|shall|must|hereby|effectively|expense|(agrees?|required) t(o|o forever)) (defend indemnify|indemnify defend|indemnify) and hold =SOME= harmless (from|for) (and against a|a)n(y|y and all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
 #
 %ENTRY%	_LT_INDEMN_6
 %NOCHECK%
 %KEY%	"in(demnif|tellect)"
-%STR%	"(you|will|shall|must|expense|(agrees?|required) t(o|o forever)) (defend indemnify|indemnify defend|indemnify) and hold harmless =SOME= (from and a|a)gainst (any|all|any and all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
+%STR%	"(you|will|shall|must|hereby|effectively|expense|(agrees?|required) t(o|o forever)) (defend indemnify|indemnify defend|indemnify) and hold harmless =SOME= (from|for) (and against a|a)n(y|y and all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
 #
 %ENTRY%	_LT_INDEMN_7
+%NOCHECK%
 %KEY%	"in(demnif|tellect)"
-%STR%	"(you|will|shall|must|expense|(agrees?|required) t(o|o forever)) indemnify and keep =SOME= harmless (from|for) (and against a|a)n(y|y and all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
+%STR%	"(you|will|shall|must|hereby|effectively|expense|(agrees?|required) t(o|o forever)) (defend indemnify|indemnify defend|indemnify) and hold harmless =SOME= (city|coll|instit|univ) =SOME= (from|for) (and against a|a)n(y|y and all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
 #
 %ENTRY%	_LT_INDEMN_8
+%NOCHECK%
 %KEY%	"in(demnif|tellect)"
-%STR%	"(you|will|shall|must|(agrees?|required) t(o|o forever)) hold harmless indemnify and defend"
+%STR%	"(you|will|shall|must|hereby|effectively|expense|(agrees?|required) t(o|o forever)) (defend indemnify|indemnify defend|indemnify) and hold harmless =SOME= (from and a|a)gainst (any|all|any and all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
 #
 %ENTRY%	_LT_INDEMN_9
 %KEY%	"in(demnif|tellect)"
-%STR%	"(you|will|shall|must|expense|(agrees?|required) t(o|o forever)) indemnify =SOME= (from|for) (any|all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
+%STR%	"(you|will|shall|must|hereby|effectively|expense|(agrees?|required) t(o|o forever)) indemnify and keep =SOME= harmless (from|for) (and against a|a)n(y|y and all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
 #
 %ENTRY%	_LT_INDEMN_10
 %KEY%	"in(demnif|tellect)"
-%STR%	"(you|will|shall|must|expense|(agrees?|required) t(o|o forever)) indemnify and hold =SOME= free (of|from|for) (any|all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
+%STR%	"(you|will|shall|must|(agrees?|required) t(o|o forever)) hold harmless indemnify and defend"
+#
+%ENTRY%	_LT_INDEMN_11
+%KEY%	"in(demnif|tellect)"
+%STR%	"(you|will|shall|must|hereby|effectively|expense|(agrees?|required) t(o|o forever)) indemnify =SOME= (from|for) (any|all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
+#
+%ENTRY%	_LT_INDEMN_12
+%KEY%	"in(demnif|tellect)"
+%STR%	"(you|will|shall|must|hereby|effectively|expense|(agrees?|required) t(o|o forever)) indemnify and hold =SOME= free (of|from|for) (any|all) (claim|cost|damage|demand|expense|fee|fine|judge?ment|lawsuit|legal|liabilit|loss|settle|suit|third)"
+#
+%ENTRY%	_LT_INDEMN_13
+%KEY%	"in(demnif|tellect)"
+%STR%	"to indemnify =SOME= in the case of =FEW= third party"
+#
+%ENTRY%	_LT_INDEMN_14
+%KEY%	"in(demnif|tellect)"
+%STR%	"shall be indemnified and held harmless by any party"
+%ALIAS%	_INDEMNITY_last
 #
 %ENTRY%	_LT_INFOSEEK
 %KEY%	"permi[st]"
@@ -2398,7 +2418,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_LATEXref5
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (LaTeX project public licen[cs]e|lppl)"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (LaTeX project public licen[cs]e|lppl)"
 #####
 # DELETED: ... the terms of this agreement the aggregation of another 
 # unrelated program with this software or its derivative on a volume
@@ -2430,7 +2450,7 @@ e /* (INFILE(j)) */
 # modifications even if your work is unrelated to TeX
 #####
 %ENTRY%	_LT_LATEXPL_3
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"you may use this licen[cs]e for any work of which you hold the copyright and which you wish to distribute"
 #
 %ENTRY%	_LT_LATEXPLref1
@@ -2481,7 +2501,7 @@ e /* (INFILE(j)) */
 #####
 %ENTRY%	_LT_LGPLref2
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (lgpl|GN(U|U general) (lesser|library) (gpl|(general p|p)ublic licen[cs]e))"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (lgpl|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))"
 #
 %ENTRY%	_LT_LGPLref3
 %KEY%	"(condit|vers)ion"
@@ -2516,7 +2536,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_LGPLrefFSF
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (fsf|free software foundatio(n|n s)) (lesser|library) (gpl|(general p|p)ublic licen[cs]e)"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (fsf|free software foundatio(n|n s)) (lesser|library) (gpl|(general p|p)ublic licen[cs]e)"
 #
 %ENTRY%	_LT_LGPL_1
 %KEY%	"distribut"
@@ -2532,7 +2552,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_LGPL3ref
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (lgpl|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))(([v-]?| ?version) ?)3"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (lgpl|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))(([v-]?| ?version) ?)3"
 #
 %ENTRY%	_LT_LGPL_NAMED
 %KEY%	"licen[cs]"
@@ -2548,7 +2568,7 @@ e /* (INFILE(j)) */
 %STR%	"linuxdoc =FEW= itself does not have any limitations and it can be freely used modified and re-?distributed"
 #
 %ENTRY%	_LT_LINUX_HOWTO
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"unless otherwise stated Linux howto documents are copyrighted by their respective authors"
 #####
 # DELETED: ... to evaluate its suitability for your internal business
@@ -2635,7 +2655,7 @@ e /* (INFILE(j)) */
 # and its documentation for any purpose =SOME= is ...
 #####
 %ENTRY%	_LT_MIT_7
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"hereby (granted|granted without fee) provided that you agree to comply with the following copyright notices? and statement"
 #####
 # DELETED: ... is hereby granted provided that the above copyright
@@ -2661,7 +2681,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_MITref1
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= \<mit\> =FEW= licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= \<mit\> =FEW= licen[cs]e"
 #
 %ENTRY%	_LT_MITref2
 %KEY%	"licen[cs]"
@@ -2684,7 +2704,7 @@ e /* (INFILE(j)) */
 # as is or with
 #####
 %ENTRY%	_LT_MITRE_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"alterations provided that 1 alterations are clearly marked as alterations and 2 this copyright notice is included unmodified in any copy"
 #####
 # DELETED: ... =SOME= otherwise under any patents or trademarks of Motorola Inc
@@ -2835,7 +2855,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_MSCORP_SSLref
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (MS|microsoft) =FEW= shared source licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (MS|microsoft) =FEW= shared source licen[cs]e"
 #####
 # DELETED: you are free to ... entirely from the program and one or more
 # works each a FLOSS work licen[cs]ed under one or more of the licen[cs]es
@@ -2947,7 +2967,7 @@ e /* (INFILE(j)) */
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"(licen[cs]ed|governed|applicable|subject) =SOME= (NPL|netscape public licen[cs]e)"
 %ENTRY%	_LT_NVIDIA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"hereby granted a nonexclusive royalty-free copyright licen[cs]e"
 #
 %ENTRY%	_LT_NVIDIA_EULA
@@ -3213,7 +3233,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_PNG_ZLIBref1
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= zlib/libpng =FEW= licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= zlib/libpng =FEW= licen[cs]e"
 #
 %ENTRY%	_LT_PNG_ZLIBref2
 %KEY%	"licen[cs]"
@@ -3252,18 +3272,18 @@ e /* (INFILE(j)) */
 %STR%	"(on|is|are|with) publica?l?ly available"
 #
 %ENTRY%	_LT_PUBDOM_4
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"no =FEW= copyrights? (is|are|were|was|has) =FEW= (known|assert|claim|own|found)"
 #
 %ENTRY%	_LT_PUBDOM_5
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(this|the) (file|product|program|sourc(e|e code)|software|work|code|document|page) =FEW= not copyright"
 #####
 # Note the specific up-to-10-character pattern-match length here.
 #####
 %ENTRY%	_LT_PUBDOM_6
 %NOCHECK%
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(copyright.{0,10}(abandon|eliminat|disclaim|relinquish|remove|withdraw)|(abandon|eliminat|disclaim|relinquish|remove|withdraw).{0,10}copyright)"
 #
 %ENTRY%	_LT_PUBDOMNOTcpyrt
@@ -3312,7 +3332,7 @@ e /* (INFILE(j)) */
 # notice and this paragraph appear in all copies
 #####
 %ENTRY%	_LT_PYTHON_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"without fee for any purpose and by any individual or organi[sz]ation is hereby granted provided that the above copyright"
 #####
 # DELETED: ... for commercial use to sell copies of python in source or
@@ -3320,7 +3340,7 @@ e /* (INFILE(j)) */
 # python in some form
 #####
 %ENTRY%	_LT_PYTHON_3
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"if you honor the copyright rules it i?s ok to use python"
 #
 ##%ENTRY%	_LT_PYTHON22ref
@@ -3337,7 +3357,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_PYTHONref3
 %KEY%	"licen[cs]"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= python =FEW= licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= python =FEW= licen[cs]e"
 #
 %ENTRY%	_LT_PYTHONSTYLEref
 %KEY%	"licen[cs]"
@@ -3530,7 +3550,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_RUBYref1
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= ruby licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= ruby licen[cs]e"
 #
 %ENTRY%	_LT_RUBYref2
 %KEY%	"\<under\>"
@@ -3638,7 +3658,7 @@ e /* (INFILE(j)) */
 # of this =SOME= ...
 #####
 %ENTRY%	_LT_SPI
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"provided the copyright notice and this permission notice are preserved on all copies"
 #####
 # DELETED: ... the licen[cs]e you may not use this file except in
@@ -3656,7 +3676,7 @@ e /* (INFILE(j)) */
 %STR%	"use and re-?distribution for any purpose are granted as long as all copyright notices are retained re-?distribution with modification is allowed"
 #
 %ENTRY%	_LT_SSLEAY
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"copyright remains Eric Young =FEW= as such any copyright notices in the code are not to be removed"
 #####
 # DELETED: ... others to use object code copies of the program or
@@ -3709,14 +3729,14 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_SUN_PLref
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= sun public licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= sun public licen[cs]e"
 #
 %ENTRY%	_LT_SUN_PROPRIETARY
 %KEY%	"licen[cs]"
 %STR%	"sun considers =SOME= an unpublished proprietary trade secret and it is available only under strict licen[cs]e provisions"
 #
 %ENTRY%	_LT_SUN_SCA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"this agreement jointly assigns copyright over your work to yourself and to sun microsystems"
 #####
 # DELETED: source code of a compliant ... to another commercial use
@@ -3841,7 +3861,7 @@ e /* (INFILE(j)) */
 # information is retained its original form
 #####
 %ENTRY%	_LT_UBC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"provided that this copyright/licen[cs]e"
 #####
 # DELETED: user is granted the right without any fee or cost to use copy
@@ -3854,7 +3874,7 @@ e /* (INFILE(j)) */
 %STR%	"alter enhance and/?o?r? distribute this software"
 #
 %ENTRY%	_LT_UCAR_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"provided that the copyright notice and these paragraphs are preserved"
 #
 %ENTRY%	_LT_UCHICAGO
@@ -3928,7 +3948,7 @@ e /* (INFILE(j)) */
 # including binaries
 #####
 %ENTRY%	_LT_UUTAH
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"1 source code retains these copyright permission and disclaimer"
 #####
 # DELETED: under this licen[cs]e ... the original version and modified
@@ -4012,7 +4032,7 @@ e /* (INFILE(j)) */
 # is hereby ...
 #####
 %ENTRY%	_LT_W3C_6
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"granted in perpetuity provided that the above copyright notice and this paragraph appear in all copies"
 #####
 # VERY similar to W3C_2 and W3C_3, above...
@@ -4039,7 +4059,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_WTFPLref
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= what the =FEW= you want to public licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= what the =FEW= you want to public licen[cs]e"
 #
 %ENTRY%	_LT_WU_FTPD
 %KEY%	"distribut"
@@ -4118,7 +4138,7 @@ e /* (INFILE(j)) */
 %STR%	"decompile reverse engineer disassemble modify rent lease loan distribute or create derivative works"
 #
 %ENTRY%	_LT_ZEUS
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"may be used and/?o?r? copied freely provid(ed|ing) this copyright notice is not removed"
 #####
 # DELETED: ... of the software as described in the online documentation accompanying
@@ -4130,7 +4150,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_ZOPEref
 %KEY%	"licen[cs]"
-%STR%	"(free|distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= zope public licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= zope public licen[cs]e"
 #####
 # DELETED: zveno pty ltd makes this software and associated documentation
 # available free of charge ...
@@ -4142,7 +4162,7 @@ e /* (INFILE(j)) */
 #####
 # HEY!  Code in parse.c expects the %KEY% fields to be organized!  Make
 # sure all "distribut" keys are first (contiguously), then "licen[cs]"
-# (also contiguous), then "(©|copyright|&copy)" (yet again contiguously), and
+# (also contiguous), then "(©|\(c\)|copyright|&copy)" (yet again contiguously), and
 # THEN anything else you want to add goes at the end of the list.
 #####
 %ENTRY%	_LT_ZZGEN_1
@@ -4273,16 +4293,16 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_ZZGEN_31
 %NOCHECK%
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"include (the|this) (above c|below c|verbatim c|un(modifi|alter|chang)ed c|c)opyright"
 %ALIAS%	_ZZGEN_first_cpy
 k
 %ENTRY%	_LT_ZZGEN_32
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"copyright notices? (is|are) (retain|preserv|includ)"
 #
 %ENTRY%	_LT_ZZGEN_33
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"retain =SOME= copyright"
 %ALIAS%	_ZZGEN_last_cpy
 #
@@ -4314,7 +4334,7 @@ k
 %ENTRY%	_LT_ZZGEN_40
 %NOCHECK%
 %KEY%	"\<(see|sell|sale|sold|charge)\>"
-%STR%	"(can|can be|may|may be|to) (sell|sold)"
+%STR%	"(can \<sell\>|can be sold|may \<sell\>|may be sold|to \<sell\>|to be sold)"
 #
 %ENTRY%	_LT_ZZGEN_41
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -4490,7 +4510,7 @@ k
 %STR%	"see the (file =FEW= \<readme\>|\<readme\> file) =SOME= (distribut|dir|copy|us(e|age)|mod|free soft)"
 #
 ##%ENTRY%	_LT_SEEK_1
-##%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 ##%STR%	"&copy"
 #
 ##%ENTRY%	_LT_SEEK_2
@@ -4505,313 +4525,313 @@ k
 # prepended to them.  As a performance optimization, that text was cut.
 #####
 %ENTRY%	_CR_3DFX_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= 3dfx interactive"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= 3dfx interactive"
 %ALIAS%	_CR_first
 #
 %ENTRY%	_CR_3DFX_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"3dfx interactive =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) 3dfx interactive =SOME= =YEAR="
 #
 %ENTRY%	_CR_ABSOLUTEVALUE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= absolutevalue systems"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= absolutevalue systems"
 #
 %ENTRY%	_CR_ADAPTEC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= adaptec inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= adaptec inc"
 #
 %ENTRY%	_CR_ADOBE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= adobe systems"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= adobe systems"
 #
 %ENTRY%	_CR_AGE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= age logic"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= age logic"
 #
 %ENTRY%	_CR_ALADDIN
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= aladdin enterprises"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= aladdin enterprises"
 #
 %ENTRY%	_CR_AMD
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= advanced micro devices"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= advanced micro devices"
 #
 %ENTRY%	_CR_APACHE
 %KEY%	"\<ap(ache|ple)\>"
-%STR%	"=YEAR= =SOME= apache (group|software|foundation)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= apache (group|software|foundation)"
 #
 %ENTRY%	_CR_APOLLO
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= apollo computer inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= apollo computer inc"
 #
 %ENTRY%	_CR_APPLE
 %KEY%	"\<ap(ache|ple)\>"
-%STR%	"=YEAR= =SOME= apple (computer|software)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= apple (computer|software)"
 #
 %ENTRY%	_CR_ARJ
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= arj software inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= arj software inc"
 #
 %ENTRY%	_CR_ARPHIC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= arphic technolog"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= arphic technolog"
 #
 %ENTRY%	_CR_ARTIFEX
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= artifex software inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= artifex software inc"
 #
 %ENTRY%	_CR_ARTOFCODE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= artofcode llc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= artofcode llc"
 #
 %ENTRY%	_CR_ATI
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= ati technologies inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= ati technologies inc"
 #
 %ENTRY%	_CR_ATMEL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= atmel corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= atmel corp"
 #
 %ENTRY%	_CR_ATT
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= (at&t|american telephone =SOME= telegraph)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= (at&t|american telephone =SOME= telegraph)"
 #
 %ENTRY%	_CR_AUST_NATL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= the australian national unversity"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= the australian national unversity"
 #
 %ENTRY%	_CR_AVM
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= AVM (gmbh|ag)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= AVM (gmbh|ag)"
 #
 %ENTRY%	_CR_BANCTEC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= banctec ab"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= banctec ab"
 #
 %ENTRY%	_CR_BELLCORE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= bell communications research inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= bell communications research inc"
 #
 %ENTRY%	_CR_BH
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= bigelow (and|&) holmes inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= bigelow (and|&) holmes inc"
 #
 %ENTRY%	_CR_BIZNET
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= biznet poland inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= biznet poland inc"
 #
 %ENTRY%	_CR_BOOST
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"boostorg =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) boostorg =SOME= =YEAR="
 #
 %ENTRY%	_CR_BRISTOL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= university of bristol"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= university of bristol"
 #
 %ENTRY%	_CR_BROADCOM
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= broadcom corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= broadcom corp"
 #
 %ENTRY%	_CR_BROWN
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= brown university"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= brown university"
 #
 %ENTRY%	_CR_BSDCAL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= regents of the university of california"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= regents of the university of california"
 #
 %ENTRY%	_CR_CADENCE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= cadence research systems"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= cadence research systems"
 #
 %ENTRY%	_CR_CALDERA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= caldera (inc|systems inc)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= caldera (inc|systems inc)"
 #
 %ENTRY%	_CR_CAMBRIDGE_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= university of cambridge"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= university of cambridge"
 #
 %ENTRY%	_CR_CAMBRIDGE_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"university of cambridge =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) university of cambridge =SOME= =YEAR="
 #
 %ENTRY%	_CR_CATHARON
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= catharon productions"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= catharon productions"
 #
 %ENTRY%	_CR_CISCO
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= cisco systems inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= cisco systems inc"
 #
 %ENTRY%	_CR_CMU_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"carnegie mellon university copyright =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) carnegie mellon university copyright =SOME= =YEAR="
 #
 %ENTRY%	_CR_CMU_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= carnegie mellon university"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= carnegie mellon university"
 #
 %ENTRY%	_CR_COLUMBIA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= trustees of columbia university"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= trustees of columbia university"
 #
 %ENTRY%	_CR_COMPAQ_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= compaq computer corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= compaq computer corp"
 #
 %ENTRY%	_CR_COMPAQ_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"compaq computer corp =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) compaq computer corp =SOME= =YEAR="
 #
 %ENTRY%	_CR_COMPAQ_IT
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= compaq =SOME= information technologies"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= compaq =SOME= information technologies"
 #
 %ENTRY%	_CR_COMTROL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= comtrol corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= comtrol corp"
 #
 %ENTRY%	_CR_CONECTIVA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= conectiva inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= conectiva inc"
 #
 %ENTRY%	_CR_CRYPTIX
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= cryptix foundation"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= cryptix foundation"
 #
 %ENTRY%	_CR_CYBERNEKO
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= cyberneko"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= cyberneko"
 #
 %ENTRY%	_CR_CYGNUS
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= cygnus"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= cygnus"
 #
 %ENTRY%	_CR_CYLINK
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"cylink corp =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) cylink corp =SOME= =YEAR="
 #
 %ENTRY%	_CR_CYPRESS
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= cypress semiconductor corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= cypress semiconductor corp"
 #
 %ENTRY%	_CR_DARPA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= defense advanced research projects agency"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= defense advanced research projects agency"
 #
 %ENTRY%	_CR_DEC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= digital equipment corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= digital equipment corp"
 #
 %ENTRY%	_CR_DELAWARE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= university of delaware"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= university of delaware"
 #
 %ENTRY%	_CR_DMTF
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= distributed management task force inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= distributed management task force inc"
 #
 %ENTRY%	_CR_DPTC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= distributed processing technology corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= distributed processing technology corp"
 #
 %ENTRY%	_CR_DSCT
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= DSC technologies corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= DSC technologies corp"
 #
 %ENTRY%	_CR_EASYSW
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= easy software products"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= easy software products"
 #
 %ENTRY%	_CR_EBT
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= electronic bpook technologies inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= electronic bpook technologies inc"
 #
 %ENTRY%	_CR_EDINBURGH_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"university =SOME= edinburgh =SOME= copyright =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) university =SOME= edinburgh =SOME= copyright =SOME= =YEAR="
 #
 %ENTRY%	_CR_EDINBURGH_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= university =SOME= edinburgh"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= university =SOME= edinburgh"
 #
 %ENTRY%	_CR_EDS
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= electronic data systems"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= electronic data systems"
 #
 %ENTRY%	_CR_EMULEX
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= emulex corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= emulex corp"
 #
 %ENTRY%	_CR_ENTESSA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= entessa llc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= entessa llc"
 #
 %ENTRY%	_CR_EPINIONS
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= epinions inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= epinions inc"
 #
 %ENTRY%	_CR_FRAME
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= frame technology"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= frame technology"
 #
 %ENTRY%	_CR_FEDORA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= fedora project"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= fedora project"
 #
 %ENTRY%	_CR_FSF1
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"=YEAR= =SOME= free software foundation"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= free software foundation"
 #
 %ENTRY%	_CR_FSF2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"(free software foundation|\<fsf\>) =SOME= copyright =SOME= [0-9][0-9][0-9][0-9]"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(free software foundation|\<fsf\>) =SOME= copyright =SOME= (19|20)[0-9][0-9]"
 #
 %ENTRY%	_CR_FUJITSU
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= fujitsu (ltd|limited)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= fujitsu (ltd|limited)"
 #
 %ENTRY%	_CR_GPL_1
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"copyright =FEW= [^l]gpl"
 #
 %ENTRY%	_CR_GPL_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"copyright =SOME= gnu =SOME= public"
 #
 %ENTRY%	_CR_GPL_3
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"gnu =SOME= copyright =SOME= [0-9][0-9][0-9][0-9]"
 #
 %ENTRY%	_CR_GROUPE_BULL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= groupe? bull"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= groupe? bull"
 #
 %ENTRY%	_CR_HARTFORD
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= hartford"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= hartford"
 #
 %ENTRY%	_CR_HARVARD
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= president and fellows of harvard university"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= president and fellows of harvard university"
 #
 %ENTRY%	_CR_HP_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= (hewlett[ -]packard|\<HP\>)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= (hewlett[ -]packard|\<HP\>)"
 #
 %ENTRY%	_CR_HP_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"(hewlett[ -]packard|\<HP\>) =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) (hewlett[ -]packard|\<HP\>) =SOME= =YEAR="
 #
 %ENTRY%	_CR_HPDEV
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= (hewlett[ -]packard =SOME= dev =SOME= co|\<HPDC\>)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= (hewlett[ -]packard =SOME= dev =SOME= co|\<HPDC\>)"
 #
 %ENTRY%	_CR_HWAN
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= hwan design inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= hwan design inc"
 #####
 # package vnc-3.3.7 shows an IBM copyright where "corp" is proceeded by
 # a comma instead of a space, hence the funky pattern below.
@@ -4819,473 +4839,468 @@ k
 %ENTRY%	_CR_IBM_1
 %NOCHECK%
 %KEY%	"(\<i[. ]*b[. ]*m[. ]*\>|international business machines)"
-%STR%	"=YEAR= =SOME= (\<i[. ]*b[. ]*m[. ]*\>|international business machines) (corp|inc)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= (\<i[. ]*b[. ]*m[. ]*\>|international business machines) (corp|inc)"
 #
 %ENTRY%	_CR_IBM_2
 %KEY%	"(\<i[. ]*b[. ]*m[. ]*\>|international business machines)"
-%STR%	"(\<i[. ]*b[. ]*m[. ]*\>|international business machines) (corp|inc) =SOME= =YEAR="
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) (\<i[. ]*b[. ]*m[. ]*\>|international business machines) (corp|inc) =SOME= =YEAR="
 #
 %ENTRY%	_CR_IEEE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= (ieee|institute of electrical and electronics engineers)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= (ieee|institute of electrical and electronics engineers)"
 #
 %ENTRY%	_CR_IETF_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"the internet society =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) the internet society =SOME= =YEAR="
 #
 %ENTRY%	_CR_IETF_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= the internet society"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= the internet society"
 #
 %ENTRY%	_CR_ILLINOIS
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= university of illinois"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= university of illinois"
 #
 %ENTRY%	_CR_IMAGEMAGICK
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= imagemagick studio"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= imagemagick studio"
 #
 %ENTRY%	_CR_INFOSEEK
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= infoseek corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= infoseek corp"
 #
 %ENTRY%	_CR_INTEL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= intel corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= intel corp"
 #
 %ENTRY%	_CR_IOS
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"international organi[sz]ation for standardi[sz]ation =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) international organi[sz]ation for standardi[sz]ation =SOME= =YEAR="
 #
 %ENTRY%	_CR_IOSOFT
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"iosoft (ltd|limited) =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) iosoft (ltd|limited) =SOME= =YEAR="
 #####
 # IPA copyright says Japan, but leave that off (for now)
 #####
 %ENTRY%	_CR_IPA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= information[ -]technology promotion agency"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= information[ -]technology promotion agency"
 #
 %ENTRY%	_CR_IPTC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= (international press telecommunications council|\<iptc\>)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= (international press telecommunications council|\<iptc\>)"
 #
 %ENTRY%	_CR_ISC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= internet software consortium"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= internet software consortium"
 #
 %ENTRY%	_CR_ISO
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= international standards organi[sz]ation"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= international standards organi[sz]ation"
 #
 %ENTRY%	_CR_KEYSPAN
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= keyspan"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= keyspan"
 #
 %ENTRY%	_CR_KNUTH
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= d e knuth"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= d e knuth"
 #
 %ENTRY%	_CR_LACHMAN
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= lachman associates inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= lachman associates inc"
 #
 %ENTRY%	_CR_LEGATO
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= legato systems inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= legato systems inc"
 #
 %ENTRY%	_CR_LGPL_1
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"copyright =FEW= lgpl"
 #
 %ENTRY%	_CR_LGPL_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"copyright =SOME= (lesser|lib) =SOME= gnu =SOME= public"
 #
 %ENTRY%	_CR_LUCENT
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= lucent =SOME= tech"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= lucent =SOME= tech"
 #
 %ENTRY%	_CR_MELLANOX
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= mellanox technologies"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= mellanox technologies"
 #
 %ENTRY%	_CR_MICHIGAN
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= regents =SOME= university of michigan"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= regents =SOME= university of michigan"
 #
 %ENTRY%	_CR_MITEM
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= mitem =SOME= europe"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= mitem =SOME= europe"
 #
 %ENTRY%	_CR_MSCORP
 %KEY%	"\<micros(oft|ystems)\>"
-%STR%	"=YEAR= =SOME= microsoft corp"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= microsoft corp"
 #####
 # ORIGINAL: copyright =SOME= =YEAR= =SOME= mass =SOME= institute =SOME= tech
 #####
 %ENTRY%	_CR_MIT1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= massachusetts institute of technology"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= massachusetts institute of technology"
 #
 %ENTRY%	_CR_MIT2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"massachusetts institute of technology =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) massachusetts institute of technology =SOME= =YEAR="
 #
 %ENTRY%	_CR_MITRE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= the mitre corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= the mitre corp"
 #
 %ENTRY%	_CR_MOT_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= motorola =SOME= inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= motorola =SOME= inc"
 #
 %ENTRY%	_CR_MOT_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"motorola =SOME= inc =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) motorola =SOME= inc =SOME= =YEAR="
 #
 %ENTRY%	_CR_MYSQL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= mysql"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= mysql"
 #
 %ENTRY%	_CR_NAUMEN
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"naumen =SOME= and contributors"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) naumen =SOME= and contributors"
 #
 %ENTRY%	_CR_NCIPHER
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= ncipher corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= ncipher corp"
 #
 %ENTRY%	_CR_NEC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= NEC corp tokyo"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= NEC corp tokyo"
 #
 %ENTRY%	_CR_NETBSD
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= the netbsd foundation inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= the netbsd foundation inc"
 #
 %ENTRY%	_CR_NEXT
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= next computer inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= next computer inc"
 #
 %ENTRY%	_CR_NOTREDAME
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= university of notre dame"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= university of notre dame"
 #
 %ENTRY%	_CR_NONE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= (no[ -]one|no ?person|nobody|no (entity|being|human))"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= (no[ -]one|no ?person|nobody|no (entity|being|human))"
 #
 %ENTRY%	_CR_NOVELL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= novell inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= novell inc"
 #
 %ENTRY%	_CR_NRL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= naval research laboratory"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= naval research laboratory"
 #
 %ENTRY%	_CR_NVIDIA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= nvidia corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= nvidia corp"
 #
 %ENTRY%	_CR_OASIS
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= organi[sz]ation for the advancement of structured information standards"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= organi[sz]ation for the advancement of structured information standards"
 #
 %ENTRY%	_CR_OG
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= open group"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= open group"
 #
 %ENTRY%	_CR_OHIOSTATE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= the ohio state university"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= the ohio state university"
 #
 %ENTRY%	_CR_OMRON_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"omron (corporation|software co) =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) omron (corporation|software co) =SOME= =YEAR="
 #
 %ENTRY%	_CR_OMRON_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= omron (corporation|software co)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= omron (corporation|software co)"
 #
 %ENTRY%	_CR_OPENLDAP
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= the openldap foundation"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= the openldap foundation"
 #
 %ENTRY%	_CR_OPENSSL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= the openssl project"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= the openssl project"
 #
 %ENTRY%	_CR_OPENVISION
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= openvision technologies"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= openvision technologies"
 #
 %ENTRY%	_CR_ORACLE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= oracle corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= oracle corp"
 #
 %ENTRY%	_CR_OREILLY
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= o ?reilly (and|&) associates"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= o ?reilly (and|&) associates"
 #
 %ENTRY%	_CR_OSF
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= open software foundation inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= open software foundation inc"
 #
 %ENTRY%	_CR_OSI
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= open source initiative"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= open source initiative"
 #
 %ENTRY%	_CR_PARADIGM
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= paradigm associates inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= paradigm associates inc"
 #
 %ENTRY%	_CR_PIGEONPOINT
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= pigeon[ -]?point systems"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= pigeon[ -]?point systems"
 #
 %ENTRY%	_CR_PHORUM
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= the phorum development team"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= the phorum development team"
 #
 %ENTRY%	_CR_PHP
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= the php group"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= the php group"
 #
 %ENTRY%	_CR_PIRIFORM
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= piriform (ltd|limited)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= piriform (ltd|limited)"
 #
 %ENTRY%	_CR_POLYSERVE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= polyserve inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= polyserve inc"
 #
 %ENTRY%	_CR_PRINCETON
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= princeton university"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= princeton university"
 #
 %ENTRY%	_CR_PUBDOM
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= public[ -]domain"
+%KEY%	"p(atent|roduc|rofit|roject|ublic)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= public[ -]domain"
 #####
 # Python copyrights are various
 #####
 %ENTRY%	_CR_PYTHON
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= (PSF|python software foundation|CRNI|corporation for national research initiatives|CWI|stichting mathematisch centrum|BeOpen)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= (PSF|python software foundation|CRNI|corporation for national research initiatives|CWI|stichting mathematisch centrum|BeOpen)"
 #
 %ENTRY%	_CR_QLOGIC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= qlogic corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= qlogic corp"
 #
 %ENTRY%	_CR_QUARTERDECK
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= quarterdeck office systems"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= quarterdeck office systems"
 #####
 # RH copyrights include "red hat", "red hat software" and "red hat inc"
 #####
 %ENTRY%	_CR_REDHAT
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= red ?hat"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= red ?hat"
 #
 %ENTRY%	_CR_rms
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= richard =SOME= stallman"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= richard =SOME= stallman"
 #
 %ENTRY%	_CR_RIVERBANK
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= riverbank computing"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= riverbank computing"
 #
 %ENTRY%	_CR_RSA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= RSA data security inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= RSA data security inc"
 #
 %ENTRY%	_CR_RUTGERS
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= rutgers university"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= rutgers university"
 #
 %ENTRY%	_CR_SCITECH
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= scitech software inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= scitech software inc"
 #
 %ENTRY%	_CR_SCO
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= santa cruz"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= santa cruz"
 #
 %ENTRY%	_CR_SECRETLABS
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= secret labs ab"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= secret labs ab"
 #
 %ENTRY%	_CR_SENDMAIL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= sendmail inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= sendmail inc"
 #
-%ENTRY%	_CR_SGI_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= silicon graphics inc"
-#
-%ENTRY%	_CR_SGI_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= \<sgi\>"
+%ENTRY%	_CR_SGI
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= (silicon graphics inc|\<sgi\>)"
 #
 %ENTRY%	_CR_SLEEPYCAT
 %KEY%	"so(ftware|urce)"
-%STR%	"=YEAR= =SOME= sleepycat software"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= sleepycat software"
 #
 %ENTRY%	_CR_SPI
 %KEY%	"so(ftware|urce)"
-%STR%	"=YEAR= =SOME= software in the public interest inc"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= software in the public interest inc"
 #
 %ENTRY%	_CR_SPIKESOURCE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= spikesource inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= spikesource inc"
 #
 %ENTRY%	_CR_SRA
 %KEY%	"so(ftware|urce)"
-%STR%	"=YEAR= =SOME= software research assoc"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= software research assoc"
 #
 %ENTRY%	_CR_STANFORD
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= stanford =SOME= university"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= stanford =SOME= university"
 #
 %ENTRY%	_CR_SUN
 %KEY%	"\<micros(oft|ystems)\>"
-%STR%	"=YEAR= =SOME= sun microsystems inc"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= sun microsystems inc"
 #
 %ENTRY%	_CR_SUSE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= s[.]?u[.]?s[.]?e[.]? =SOME= (gmbh|ag)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= s[.]?u[.]?s[.]?e[.]? =SOME= (gmbh|ag)"
 #
 %ENTRY%	_CR_TEKTRONIX
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= tektronix inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= tektronix inc"
 #
 %ENTRY%	_CR_TROLLTECH
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= troll ?tech (as|inc)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= troll ?tech (as|inc)"
 #
 %ENTRY%	_CR_UBC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= university of british columbia"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= university of british columbia"
 #
 %ENTRY%	_CR_UCAR
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= univ =SOME= corporation for atmospheric research/unidata"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= univ =SOME= corporation for atmospheric research/unidata"
 #
 %ENTRY%	_CR_UCHICAGO
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= univ =SOME= chicago"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= univ =SOME= chicago"
 #
 %ENTRY%	_CR_UI
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= unix international"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= unix international"
 #
 %ENTRY%	_CR_UMONASH
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= electronic dictionary research =SOME= monash univ"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= electronic dictionary research =SOME= monash univ"
 #
 %ENTRY%	_CR_UNICODE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= unicode inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= unicode inc"
 #
 %ENTRY%	_CR_URA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= universities research association"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= universities research association"
 #
 %ENTRY%	_CR_USC
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= university of southern california"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= university of southern california"
 #
 %ENTRY%	_CR_USL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= unix system laboratories"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= unix system laboratories"
 #
 %ENTRY%	_CR_USL_EUR
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= unix system laboratories europe (ltd|limited)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= unix system laboratories europe (ltd|limited)"
 #
 %ENTRY%	_CR_UUTAH
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= university of utah"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= university of utah"
 #
 %ENTRY%	_CR_UWASHINGTON
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= university of washington"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= university of washington"
 #
 %ENTRY%	_CR_W3C
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= world wide web consortium"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= world wide web consortium"
 #
 %ENTRY%	_CR_VIXIE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= vixie enterprises"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= vixie enterprises"
 #
 %ENTRY%	_CR_VOVIDA
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= vovida networks inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= vovida networks inc"
 #
 %ENTRY%	_CR_WASHU
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= washington university =FEW= (st|saint) louis"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= washington university =FEW= (st|saint) louis"
 #
 %ENTRY%	_CR_WTI
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= WTI corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= WTI corp"
 #
 %ENTRY%	_CR_X11
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= x consortium"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= x consortium"
 #
 %ENTRY%	_CR_XEROX_1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= xerox corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= xerox corp"
 #
 %ENTRY%	_CR_XEROX_2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"xerox corp =SOME= =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) xerox corp =SOME= =YEAR="
 #
 %ENTRY%	_CR_XFREE86
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= xfree86 =SOME= project"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= xfree86 =SOME= project"
 #
 %ENTRY%	_CR_XILINX
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= xilinx inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= xilinx inc"
 #
 %ENTRY%	_CR_XIMIAN
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= ximian inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= ximian inc"
 #
 %ENTRY%	_CR_XNET
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= xnet inc"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= xnet inc"
 #
 %ENTRY%	_CR_XOPEN
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= x/open company l"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= x/open company l"
 #
 %ENTRY%	_CR_ZEUS
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"zeus technology limited =YEAR="
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) zeus technology limited =YEAR="
 #
 %ENTRY%	_CR_ZOPE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= zope corp"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= zope corp"
 #
 %ENTRY%	_CR_ZVENO
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"=YEAR= =SOME= zveno pty ltd"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= zveno pty ltd"
 #
 %ENTRY%	_CR_ZZZANY
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%	"(©|copyright|\<c\>[^:]|&copy) =SOME= [12][0-9][0-9][0-9]"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =SOME= (19|20)[0-9][0-9]"
 %ALIAS%	_CR_last
 #
 %ENTRY%	_CR_ZZZWRONG_1
-%NOCHECK%
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
-%STR%1	"([^0-9] \(C\) copyright [^0-9]|[^0-9] copyright \(C\) [^0-9])"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"([^0-9] \(C\) copyright [^0-9]|[^0-9] copyright \(C\) [^0-9])"
 #
 %ENTRY%	_CR_ZZZWRONG_2
 %KEY%	=NULL=
@@ -6474,7 +6489,7 @@ k
 %STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v30?\>|[^_-]versions? (three|\<3\>))|gpl[_-]?v?3) =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPLISH_SAMPLE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"yoyodyne inc hereby disclaims all copyright interest"
 #
 %ENTRY%	_PHR_GPL_COMPAT_1
@@ -6799,7 +6814,7 @@ k
 %STR%	"wxwindows library licen[cs]e"
 #
 %ENTRY%	_PHR_YAST_CR
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"yast =SOME= copyright"
 #
 %ENTRY%	_TEXT_ADOBE_FRAME
@@ -7276,7 +7291,7 @@ k
 %STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/cpl1\.?0"
 #
 %ENTRY%	_URL_CURL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"curl\.?haxx\.?se/docs/copyright.html"
 #
 %ENTRY%	_URL_GPL_1
@@ -7676,60 +7691,60 @@ k
 # opposed to 'copyright organization-name'
 #####
 %ENTRY%	_MIN3_AFFERO_V3
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(Affero_v3 cpy-instance|affero[ _-]?v3 =FEW= copyright|copyright =FEW= affero?[ _-]v3)"
 %ALIAS%	_MINcpyrt_first
 #
 %ENTRY%	_MIN3_AFFERO
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(Affero cpy-instance|affero =FEW= copyright|copyright =FEW= affero)"
 #
 %ENTRY%	_MIN3_APACHE_V2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(Apache_v2 cpy-instance|apache[ _-]?v2 =FEW= copyright|copyright =FEW= apache?[ _-]v2)"
 #
 %ENTRY%	_MIN3_APACHE
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(Apache cpy-instance|apache =FEW= copyright|copyright =FEW= apache)"
 #
 %ENTRY%	_MIN3_GFDL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(GFDL cpy-instance|gfdl =FEW= copyright|copyright =FEW= gfdl)"
 #
 %ENTRY%	_MIN3_GPL_V3
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %?STR%	"(GPL_v3 cpy-instance|[^l]gpl[ _v-]?3 =FEW= copyright|copyright =FEW= [^l]gpl[ _v-]?3)"
 #
 %ENTRY%	_MIN3_GPL_V2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(GPL_v2 cpy-instance|[^l]gpl[ _v-]?2 =FEW= copyright|copyright =FEW= [^l]gpl[ _v-]?2)"
 #
 %ENTRY%	_MIN3_GPL_V1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(GPL_v1 cpy-instance|[^l]gpl[ _v-]?1 =FEW= copyright|copyright =FEW= [^l]gpl[ _v-]?1)"
 #
 %ENTRY%	_MIN3_GPL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(GPL cpy-instance|[^l]gpl =FEW= copyright|copyright =FEW= [^l]gpl)"
 #
 %ENTRY%	_MIN3_LGPL_V3
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(LGPL_v3 cpy-instance|lgpl[ _v-]?3 =FEW= copyright|copyright =FEW= lgpl[ _v-]?3)"
 #
 %ENTRY%	_MIN3_LGPL_V21
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(LGPL_v2.1 cpy-instance|lgpl[ _v-]?21 =FEW= copyright|copyright =FEW= lgpl[ _v-]?21)"
 #
 %ENTRY%	_MIN3_LGPL_V2
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(LGPL_v2 cpy-instance|lgpl[ _v-]?2 =FEW= copyright|copyright =FEW= lgpl[ _v-]?2)"
 #
 %ENTRY%	_MIN3_LGPL_V1
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(LGPL_v1 cpy-instance|lgpl[ _v-]?1 =FEW= copyright|copyright =FEW= lgpl[ _v-]?1)"
 #
 %ENTRY%	_MIN3_LGPL
-%KEY%	"(©|copyright|\<c\>[^:]|&copy)"
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(LGPL cpy-instance|lgpl =FEW= copyright|copyright =FEW= lgpl)"
 %ALIAS%	_MINcpyrt_last
 #
@@ -7775,11 +7790,11 @@ k
 #
 %ENTRY%	_LEGAL_FILTER_TECH_2
 %KEY%	=NULL=
-%STR%	"(move the icon|regular expression|pixel cache|(file|inserte?d?) object|develop(er|ment) community|(java|user) (community|id)|prot_(read|write|exec)|following step|naming scheme|(as|must be|owned by) \<root\>|design doc|support (code|float)|free error|buil(d a|d) source|pilot schem|speed[ -]?(up|incr)|stack[ -]?frame|need[ -]?for[ -]?speed|/etc/?|cmyk? ink|being compress|on log(in|out)|(code|revision) control|underlying pars|tutorial arch|(allow|jacket|kernel|open[ -]?source) patch|running instance|sizeofheader|existing (fil|dir|ino)|gnu standard|(during|script) executi|(fix|report|send)i?n?g? bug|(also|quit) set|(appropriate|necessary|require[ds]?) (because|priv|trans)|system32 (fol|dir)|back-?up (dir|fol)|structured? net|skipping (file|ino)|heart-?beat area|as a (daemon|module|route)|(scsi|usb|mon| a) driver|modules? (defin|exist|par|select)|race condition|working dir|port access|(file|make) install|common spool|c-format|disabled? stat|info[ -]?buffer|header fi(le|eld)|class\{)"
+%STR%	"(move the icon|pixel cache|(file|inserte?d?) object|develop(er|ment) community|(java|user) (community|id)|prot_(read|write|exec)|following step|naming scheme|(as|must be|owned by) \<root\>|design doc|support (code|float)|free error|buil(d a|d) source|pilot schem|speed[ -]?(up|incr)|stack[ -]?frame|need[ -]?for[ -]?speed|/etc/?|cmyk? ink|being compress|on log(in|out)|(code|revision) control|underlying pars|tutorial arch|(allow|jacket|kernel|open[ -]?source) patch|running instance|sizeofheader|existing (fil|dir|ino)|gnu standard|(during|script) executi|(fix|report|send)i?n?g? bug|(also|quit) set|(appropriate|necessary|require[ds]?) (because|priv|trans)|system32 (fol|dir)|back-?up (dir|fol)|structured? net|skipping (file|ino)|heart-?beat area|as a (daemon|module|route)|(scsi|usb|mon| a) driver|modules? (defin|exist|par|select)|race condition|working dir|port access|(file|make) install|common spool|c-format|disabled? stat|info[ -]?buffer|header fi(le|eld)|class\{)"
 #
 %ENTRY%	_LEGAL_FILTER_TECH_3
 %KEY%	=NULL=
-%STR%	"(command\{|endi|nibbl)|deflate format|anon[- ]ftp|release note|boolean|display[ -](field|specific)|mailcap file|pop-?up|(borrowe?d?|exit) code|imap toolkit|command (line|hist|arg)|see RFC|rx doc|(package|probably) contain|packages file|(ordinary|plain) file|compiler warning|streaming (audio|sound|video)|fully conform|locall?y? alloc|text replac|proxy serv|(owner|strong) class|callback[_ ]grant|alternate (kern|driv|value)|system (admin|call|privil)|occupied inode|pcre_|(need to|must) be root|downloads? fail|/var/?|/usr/?|/bin/?|/opt/?|/proc/?|/root/?)"
+%STR%	"(command\{|endi|regular expression|nibbl)|deflate format|anon[- ]ftp|release note|boolean|display[ -](field|specific)|mailcap file|pop-?up|(borrowe?d?|exit) code|imap toolkit|command (line|hist|arg)|see RFC|rx doc|(package|probably) contain|packages file|(ordinary|plain) file|compiler warning|streaming (audio|sound|video)|fully conform|locall?y? alloc|text replac|proxy serv|(owner|strong) class|callback[_ ]grant|alternate (kern|driv|value)|system (admin|call|privil)|occupied inode|pcre_|(need to|must) be root|downloads? fail|/var/?|/usr/?|/bin/?|/opt/?|/proc/?|/root/?)"
 #
 %ENTRY%	_LEGAL_FILTER_OTHER_1
 %KEY%	=NULL=
@@ -8203,6 +8218,7 @@ k
 %DEF%	NDICTIONARY	(_DICT_last-_DICT_first+1)
 %DEF%	NZZGENERIC	(_ZZGEN_last-_ZZGEN_first+1)
 %DEF%	NFREECLAIM	(_FREECLAIM_last-_FREECLAIM_first+1)
+%DEF%	NINDEMNITY	(_INDEMNITY_last-_INDEMNITY_first+1)
 %DEF%	NMINlicense	(_MINlicense_last-_MINlicense_first+1)
 %DEF%	NMINsource	(_MINsource_last-_MINsource_first+1)
 %DEF%	NMINcpyrt	(_MINcpyrt_last-_MINcpyrt_first+1)
