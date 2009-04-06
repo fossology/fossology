@@ -195,11 +195,9 @@ function GetFolder($FolderPath, $Parent = NULL) {
  */
 function ProcEnote($UploadPk) {
 
-  global $Enotification;
   global $Email;
   global $DB;
   global $ME;
-
 
   /* get the user name from the previous upload */
   $previous = $UploadPk-1;
@@ -261,9 +259,19 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
   else if (is_dir($UploadArchive)) {
     /* It's a directory, tar it! */
-    global $VARDATADIR;
+    global $LIBEXECDIR;
     global $TarExcludeList;
-    $Filename = "$VARDATADIR/cp2foss-" . uniqid() . ".tar";
+
+    /*
+     * User reppath to get a path in the repository for temp storage.  Only
+     * use the part up to repository, as the path returned may not exist.
+     */
+    $FilePart = "cp2foss-" . uniqid() . ".tar";
+    exec("$LIBEXECDIR/reppath files $FilePart", $Path);
+    $FilePath = $Path[0];
+    $match = preg_match('/^(.*?repository)/', $FilePath, $matches);
+    $Filename = $matches[1] . '/' . $FilePart;
+
     if (empty($UploadName)) {
       $UploadName = basename($UploadArchive);
     }
@@ -279,13 +287,9 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     system($Cmd);
     UploadOne($FolderPath, $Filename, $UploadName, $UploadDescription, $UploadArchive);
     unlink($Filename);
-    if($Enotification) {
-      print "  CP2: tar'ed file, called UploadOne\n";
-      $res = ProcEnote($UloadPk);
-      if(!is_null($res)) {
-        print $res;
-      }
-    }
+    /* email notification will be scheduled below, above we just handed UploadOne
+     * a tar'ed up file.
+     */
     return;
   }
   else if (file_exists($UploadArchive)) {
@@ -344,6 +348,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   if (!$Test) {
     system($Cmd);
   }
+
   if (!empty($QueueList)) {
     switch ($QueueList) {
       case 'agent_unpack':
@@ -447,6 +452,8 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
             exit(1);
           }
           $Enotification = TRUE;
+          if($Enotification) {
+          }
           break;
         case '-n': /* specify upload name */
           $i++;
