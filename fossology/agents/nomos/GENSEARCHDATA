@@ -77,8 +77,11 @@ cat > $NEW_C <<@EOF@
 /* BEGIN ENCODED LICENSE-FOOTPRINTS SECTION */
 licSpec_t licSpec[NFOOTPRINTS] = {
 @EOF@
-#
-
+cat > _STRFILTER <<- @EOF@
+sed -e 's/ =FEW= /.{0,30}/g' -e 's/ =SOME= /.{0,60}/g' -e 's/ =ANY= /.*/g' \
+    -e 's/=YEAR=/(19|20)[0-9][0-9][ ,-]+/g'
+@EOF@
+chmod 755 _STRFILTER
 ## awk --lint '
 awk -v SRC=$NEW_C -v HDR=$NEW_H '
 #####
@@ -226,7 +229,7 @@ BEGIN {
 	if (inEntry && gotKey && gotStr) {
 # process search-key (seed)
 		KSlen = length(keyString);
-		cmd = sprintf("echo %s > _KTARGET", keyString);
+		cmd = sprintf("echo %s | ./_STRFILTER > _KTARGET", keyString);
 		system(cmd);
 		cmd = sprintf("./encode _KTARGET > _KEY");
 		system(cmd);
@@ -235,7 +238,7 @@ BEGIN {
 		close("_KEY");
 # process search-string (the paragraph)
 		CSlen = length(encodedString);
-		cmd = sprintf("echo %s > _STARGET", encodedString);
+		cmd = sprintf("echo %s | ./_STRFILTER > _STARGET", encodedString);
 		system(cmd);
 		cmd = sprintf("./encode _STARGET > _STR");
 		system(cmd);

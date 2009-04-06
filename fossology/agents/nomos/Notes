@@ -21,14 +21,22 @@ Questions
 ---------
 
 - Where the hell is checkstrings script? Do we want it?
+- SVN_REV #ifdef stolen from other agent code. Where does this get
+  #defined?
 
 
 #defines Used
 -------------
 
+BRIEF_LIST
+SHOW_LOCATION		Extra code to pinpoint license location. Should
+			always be true.
 PROC_TRACE
 PROC_TRACE_SWITCH	Gives command option for tracing on/off
 DEBUG
 GLOBAL_DEBUG		Debug access to global variable structure
 MEMORY_TRACING		Use Debug Malloc wrapper
+STOPWATCH		Performance Measurement
+TIMING			Performance Measurement (code has to be added to
+places where you want to measure).
 
