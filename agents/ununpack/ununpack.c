@@ -2061,7 +2061,8 @@ int	main	(int argc, char *argv[])
   if ((magic_load(MagicCookie,UNMAGIC ".mime") != 0) &&
       (magic_load(MagicCookie,UNMAGIC) != 0))
     {
-    fprintf(stderr,"FATAL: Failed to load magic file: UnMagic\n");
+    fprintf(stderr,"FATAL: Failed to load magic file: %s\n", UNMAGIC);
+    fprintf(stderr,"Error: %s\n", magic_error(MagicCookie));
     exit(-1);
     }
 
