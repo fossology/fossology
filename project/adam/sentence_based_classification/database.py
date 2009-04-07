@@ -45,7 +45,7 @@ class Database():
     def __init__(self,files,sentence_model=None,debug=False):
         # files is a list of files to use as templates
         # analyzer is the analyzer to use to stem/parse words from a file
-        # if debug is True then you get text pooped to the screen:)
+        # if debug is True then you get text printed to the screen:)
 
         self.sentence_model = sentence_model
 
@@ -120,20 +120,20 @@ class Database():
 
     # This method creates a copy of a database object.
     def copy(self):
-        poop = Database([],None)
-        poop.length = self.length
-        poop.vectors = self.vectors[:]
-        poop.sentences = self.sentences[:]
-        poop._to_file = self._to_file[:]
-        poop._to_position = self._to_position[:]
-        poop.files = self.files[:]
-        poop.fingerprints = self.fingerprints.copy()
-        poop.binary_lookup = self.binary_lookup.copy()
-        poop.keywords = self.keywords[:]
-        poop.leaders = self.leaders[:]
-        poop.sentence_model = self.sentence_model
+        temp = Database([],None)
+        temp.length = self.length
+        temp.vectors = self.vectors[:]
+        temp.sentences = self.sentences[:]
+        temp._to_file = self._to_file[:]
+        temp._to_position = self._to_position[:]
+        temp.files = self.files[:]
+        temp.fingerprints = self.fingerprints.copy()
+        temp.binary_lookup = self.binary_lookup.copy()
+        temp.keywords = self.keywords[:]
+        temp.leaders = self.leaders[:]
+        temp.sentence_model = self.sentence_model
 
-        return poop
+        return temp
 
     # used for pickling. NOTICE that the analyzer is not saved!!!
     def __getstate__(self):
@@ -157,7 +157,7 @@ def calculate_matches(db,filename,thresh = 0.9,debug = False):
     # db is the database object.
     # filename is filename of the target file.
     # thresh is a threshold for matching sentences
-    # if debug is set to true then you get lots of text pooped to the screen
+    # if debug is set to true then you get lots of text printed to the screen
 
     if debug:
         tic = datetime.now()
