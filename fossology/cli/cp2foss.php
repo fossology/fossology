@@ -196,9 +196,18 @@ function UploadOne ($FolderPath,$UploadArchive,$UploadName,$UploadDescription,$T
   else if (is_dir($UploadArchive))
     {
     /* It's a directory, tar it! */
-    global $VARDATADIR;
+    global $LIBEXECDIR;
     global $TarExcludeList;
-    $Filename = "$VARDATADIR/cp2foss-" . uniqid() . ".tar";
+    /*
+     * User reppath to get a path in the repository for temp storage.  Only
+     * use the part up to repository, as the path returned may not exist.
+     */
+    $FilePart = "cp2foss-" . uniqid() . ".tar";
+    exec("$LIBEXECDIR/reppath files $FilePart", $Path);
+    $FilePath = $Path[0];
+    $match = preg_match('/^(.*?repository)/', $FilePath, $matches);
+    $Filename = $matches[1] . '/' . $FilePart;
+
     if (empty($UploadName)) { $UploadName = basename($UploadArchive); }
     if ($Verbose > 1) { $TarArg = "-cvf"; }
     else { $TarArg = "-cf"; }
