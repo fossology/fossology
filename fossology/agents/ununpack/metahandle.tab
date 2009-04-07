@@ -123,6 +123,20 @@ Magic: "application/x-zip"
   MetaCmd: "unzip -Zhzv '%s' > '%s'"
   END
 
+Magic: "application/zip"
+  Cmd: "unzip"
+  # the "-P none" prevents password-encrypted zip files from hanging
+  # the "-q" stops promps for user interaction.
+  CmdPre: "-q -P none -o"
+  CmdPost: "-x / >/dev/null 2>&1"
+  MetaCmd: ""
+  Type: CMD_ARC
+  Status: 1
+  ModeMaskDir: 0177000
+  ModeMaskReg: 0177000
+  MetaCmd: "unzip -Zhzv '%s' > '%s'"
+  END
+
 Magic: "application/x-tar"
   Cmd: "tar"
   CmdPre: "-xSf"
@@ -227,6 +241,17 @@ Magic: "application/x-debian-package"
 # File systems -- this file represents a disk.
 ###############################################################
 Magic: "application/x-iso"
+  Cmd: ""
+  CmdPre: ""
+  CmdPost: ""
+  MetaCmd: "isoinfo -d -i '%s' > '%s'"
+  Type: CMD_ISO
+  Status: 1
+  ModeMaskDir: 0177777
+  ModeMaskReg: 0177777
+  END
+
+Magic: "application/x-iso9660-image"
   Cmd: ""
   CmdPre: ""
   CmdPost: ""
