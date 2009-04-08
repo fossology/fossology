@@ -21,7 +21,7 @@
  * same folder.  This should pass.  It's allowed.
  *
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Aug 28, 2008
  */
