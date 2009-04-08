@@ -48,7 +48,7 @@ run_webapp: models/Database.dat models/SentenceModel.dat
 	webapp/manage.py runserver
 
 print_pythonpath:
-	echo $(PYTHONPATH)
+	@echo $(PYTHONPATH)
 
 clean:
 	rm models/SentenceModel.dat
