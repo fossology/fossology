@@ -20,7 +20,7 @@
  *
  * Move an upload from root folder to Testing folder.
  *
- * @version "$Id: moveFolderTest.php 1297 2008-09-10 20:39:01Z rrando $"
+ * @version "$Id$"
  *
  * Created on Aug 1, 2008
  */

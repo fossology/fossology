@@ -19,7 +19,7 @@
 /**
  * Create a folder for use by the Basic tests
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Oct. 15, 2008
  */
