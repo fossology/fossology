@@ -29,26 +29,25 @@ require_once ('../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class uploadSrvDirTest extends fossologyTestCase {
+class uploadSrvFileTest extends fossologyTestCase {
 
   public $mybrowser;
 
   public function setUp() {
+
     global $URL;
     $this->Login();
     $this->CreateFolder(1, 'SrvUploads', 'Folder for upload from server tests');
   }
 
-  public function testUploadSrvDir() {
-
-    global $URL;
+  public function testUploadSrvFile() {
 
     $page = $this->mybrowser->get($URL);
 
-    $Dir = '/home/fosstester/licenses/Tdir';
-    $Dirdescription = "Directory of licenses";
+    $File = '/home/fosstester/licenses/ApacheLicense-v2.0';
+    $Filedescription = "File uploaded from Server";
 
-    $this->uploadServer('SrvUploads', $Dir, $Dirdescription, null, 'all');
+    $this->uploadServer('SrvUploads', $File, $Filedescription, null, 'all');
   }
 };
 ?>
