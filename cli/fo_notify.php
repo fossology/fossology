@@ -166,7 +166,7 @@ if(empty($JobName)) {
     exit(1);
   }
 }
-/* get job status */
+/********************** get job status **************************************/
 $summary = JobListSummary($upload_id);
 //print "  DEBUG: summary for upload $upload_id is:\n"; print_r($summary) . "\n";
 
@@ -238,23 +238,25 @@ if ($Done) {
     printMsg($MessagePart);
   }
 }
-
-/* Job is still active */
-elseif ($summary['active'] > 0) {
-  $JobStatus = "is still active.";
+/*
+ * Job Failed: the order of checks is important, you can still have pending jobs
+ * when a job fails, so check for failed first before pending or active.
+ */
+elseif ($summary['failed'] > 0) {
+  $JobStatus = "Failed";
   $MessagePart = "Your requested FOSSology results are  not ready. " .
-                 "Your job $JobName $JobStatus";
+                 "Your job $JobName $JobStatus.";
   $Message = $Preamble . $MessagePart;
   if ($Interactive) {
     $MessagePart .= "For more details, see: $JobHistoryUrl\n";
     printMsg($MessagePart);
   }
 }
-/* Job Failed */
-elseif ($summary['failed'] > 0) {
-  $JobStatus = "Failed";
+/* Job is still active */
+elseif ($summary['pending'] > 0 || $summary['active'] > 0) {
+  $JobStatus = "is still active.";
   $MessagePart = "Your requested FOSSology results are  not ready. " .
-                 "Your job $JobName $JobStatus.";
+                 "Your job $JobName $JobStatus";
   $Message = $Preamble . $MessagePart;
   if ($Interactive) {
     $MessagePart .= "For more details, see: $JobHistoryUrl\n";
