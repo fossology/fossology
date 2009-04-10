@@ -35,7 +35,7 @@
 
 /* License footprints */
 
-/* Indices of search strings for licenses (Naming Conventions) */
+/* Indices of search strings for licenses */
 /* _LT == License Text footprints */
 /* _KW == License Keywords */
 /* _CR == License Copyrights */
@@ -492,7 +492,7 @@
 #
 %ENTRY%	_LT_ASL11ref
 %KEY%	"\<ap(ache|ple)\>"
-%STR%	"based on the apache software licen[cs]e (v|version )11"
+%STR%	"based on the apache software licen[cs]e (v|version )1\.?1"
 #
 %ENTRY%	_LT_ASLref1
 %KEY%	"\<ap(ache|ple)\>"
@@ -518,7 +518,7 @@
 #
 %ENTRY%	_LT_ASL20ref
 %KEY%	"\<ap(ache|ple)\>"
-%STR%	"(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =SOME= apache licen[cs]e =SOME= (v|version )20"
+%STR%	"(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =SOME= apache licen[cs]e =SOME= (v|version )2\.?0"
 #####
 # DELETED: subject to the terms and conditions of this ...  =ANY= patent
 # licen[cs]e to make have made use offer to sell sell import and otherwise
@@ -938,7 +938,7 @@
 #####
 %ENTRY%	_LT_CDDL10ref
 %KEY%	"licen[cs]"
-%STR%	"(or|terms of) the common development and distribution licen[cs]e (v|version )10"
+%STR%	"(or|terms of) the common development and distribution licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_LT_CDDLref
 %KEY%	"licen[cs]"
@@ -1944,7 +1944,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_GSOAPref13
 %KEY%	"licen[cs]"
-%STR%	"subject to the gsoap public licen[cs]e (v|version )13"
+%STR%	"subject to the gsoap public licen[cs]e (v|version )1\.?3"
 #
 %ENTRY%	_LT_GSOAPref
 %KEY%	"licen[cs]"
@@ -3345,7 +3345,7 @@ e /* (INFILE(j)) */
 #
 ##%ENTRY%	_LT_PYTHON22ref
 ##%KEY%	"licen[cs]"
-##%STR%	"(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected) =SOME= python 22 licen[cs]e"
+##%STR%	"(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected) =SOME= python 2\.?2 licen[cs]e"
 #
 %ENTRY%	_LT_PYTHONref1
 %KEY%	"distribut"
@@ -4417,7 +4417,7 @@ k
 #
 %ENTRY%	_LT_SEE_OTHER_6
 %KEY%	"licen[cs]"
-%STR%	"(refer to|(read|see) the) licen[cs]ing information at (the ur[il] h|h)ttp "
+%STR%	"(refer to|(read|see) the) licen[cs]ing information at (the (ur[il]|w?e?b?site) h|h)ttp"
 #####
 # These MUST be the last 3 checks for license references in some "other" place
 #####
@@ -5317,7 +5317,7 @@ k
 #
 %ENTRY%	_TITLE_ADAPTIVE10
 %KEY%	"licen[cs]"
-%STR%	"adaptive public licen[cs]e =FEW= (v|version )10"
+%STR%	"adaptive public licen[cs]e =FEW= (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_ADOBE
 %KEY%	"licen[cs]"
@@ -5345,27 +5345,27 @@ k
 #
 %ENTRY%	_TITLE_AFL30
 %KEY%	"licen[cs]"
-%STR%	"academic free licen[cs]e =FEW= (30|(v|version )30)"
+%STR%	"academic free licen[cs]e =FEW= (3\.?0|(v|version )3\.?0)"
 #
 %ENTRY%	_TITLE_AFL21
 %KEY%	"licen[cs]"
-%STR%	"academic free licen[cs]e =FEW= (21|(v|version )21)"
+%STR%	"academic free licen[cs]e =FEW= (2\.?1|(v|version )2\.?1)"
 #
 %ENTRY%	_TITLE_AFL20
 %KEY%	"licen[cs]"
-%STR%	"academic free licen[cs]e =FEW= (20|(v|version )20)"
+%STR%	"academic free licen[cs]e =FEW= (2\.?0|(v|version )2\.?0)"
 #
 %ENTRY%	_TITLE_AFL12
 %KEY%	"licen[cs]"
-%STR%	"academic free licen[cs]e =FEW= (12|(v|version )12)"
+%STR%	"academic free licen[cs]e =FEW= (1\.?2|(v|version )1\.?2)"
 #
 %ENTRY%	_TITLE_AFL11
 %KEY%	"licen[cs]"
-%STR%	"academic free licen[cs]e =FEW= (11|(v|version )11)"
+%STR%	"academic free licen[cs]e =FEW= (1\.?1|(v|version )1\.?1)"
 #
 %ENTRY%	_TITLE_AFL10
 %KEY%	"licen[cs]"
-%STR%	"academic free licen[cs]e =FEW= (10|(v|version )10)"
+%STR%	"academic free licen[cs]e =FEW= (1\.?0|(v|version )1\.?0)"
 #
 %ENTRY%	_TITLE_AFL
 %KEY%	"licen[cs]"
@@ -5387,23 +5387,23 @@ k
 #####
 %ENTRY%	_TITLE_APSL20
 %KEY%	"\<ap(ache|ple)\>"
-%STR%	"apple public source licen[cs]e (v|version )20"
+%STR%	"apple public source licen[cs]e (v|version )2\.?0"
 #####
 # We don't have a date for the APSL version 1.2 (yet)
 #####
 %ENTRY%	_TITLE_APSL12
 %KEY%	"\<ap(ache|ple)\>"
-%STR%	"apple public source licen[cs]e (v|version )12"
+%STR%	"apple public source licen[cs]e (v|version )1\.?2"
 #####
 # DELETED: ... =SOME= april =SOME= 1999
 #####
 %ENTRY%	_TITLE_APSL11
 %KEY%	"\<ap(ache|ple)\>"
-%STR%	"apple public source licen[cs]e (v|version )11"
+%STR%	"apple public source licen[cs]e (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_APSL10
 %KEY%	"\<ap(ache|ple)\>"
-%STR%	"apple public source licen[cs]e (v|version )10"
+%STR%	"apple public source licen[cs]e (v|version )1\.?0"
 #####
 # Use "v" on the end to match "version" or "v1.3" (or similar)
 #####
@@ -5413,19 +5413,19 @@ k
 #
 %ENTRY%	_TITLE_APTANA_V10
 %KEY%	"licen[cs]"
-%STR%	"aptana public licen[cs]e =FEW= (10|(v|version )10)"
+%STR%	"aptana public licen[cs]e =FEW= (1\.?0|(v|version )1\.?0)"
 #
 %ENTRY%	_TITLE_ART20
 %KEY%	"licen[cs]"
-%STR%	"artistic licen[cs]e (20|(v|version )20)"
+%STR%	"artistic licen[cs]e (2\.?0|(v|version )2\.?0)"
 #
 %ENTRY%	_TITLE_ASL11
 %KEY%	"\<ap(ache|ple)\>"
-%STR%	"apache =FEW= licen[cs]e (11|(v|version )11)"
+%STR%	"apache =FEW= licen[cs]e (1\.?1|(v|version )1\.?1)"
 #
 %ENTRY%	_TITLE_ASL20
 %KEY%	"\<ap(ache|ple)\>"
-%STR%	"apache =FEW= licen[cs]e (20|(v|version )20)"
+%STR%	"apache =FEW= licen[cs]e (2\.?0|(v|version )2\.?0)"
 #
 %ENTRY%	_TITLE_ASL
 %KEY%	"\<ap(ache|ple)\>"
@@ -5441,31 +5441,31 @@ k
 #
 %ENTRY%	_TITLE_ATTR_V20
 %KEY%	"a(gree|ttribut|uthor)"
-%STR%	"attribution =FEW= 20"
+%STR%	"attribution =FEW= 2\.?0"
 #
 %ENTRY%	_TITLE_ATTR_V25
 %KEY%	"a(gree|ttribut|uthor)"
-%STR%	"attribution =FEW= 25"
+%STR%	"attribution =FEW= 2\.?5"
 #
 %ENTRY%	_TITLE_ATTR_V30
 %KEY%	"a(gree|ttribut|uthor)"
-%STR%	"attribution =FEW= 30"
+%STR%	"attribution =FEW= 3\.?0"
 #
 %ENTRY%	_TITLE_ATT_SRC_12D
 %KEY%	"(condit|vers)ion"
-%STR%	"source code agreement version 12d"
+%STR%	"source code agreement version 1\.?2d"
 #
 %ENTRY%	_TITLE_ATT_SRC_10
 %KEY%	"(condit|vers)ion"
-%STR%	"source code agreement version 10"
+%STR%	"source code agreement version 1\.?0"
 #
 %ENTRY%	_TITLE_BITTORRENT11
 %KEY%	"licen[cs]"
-%STR%	"bittorrent open source licen[cs]e (v|version )11"
+%STR%	"bittorrent open source licen[cs]e (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_BITTORRENT10
 %KEY%	"licen[cs]"
-%STR%	"bittorrent open source licen[cs]e (v|version )10"
+%STR%	"bittorrent open source licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_BOOST
 %KEY%	"licen[cs]"
@@ -5480,7 +5480,7 @@ k
 #
 %ENTRY%	_TITLE_CA11
 %KEY%	"licen[cs]"
-%STR%	"computer associates trusted open source licen[cs]e =FEW= (v|version )11"
+%STR%	"computer associates trusted open source licen[cs]e =FEW= (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_CATHARON
 %KEY%	"licen[cs]"
@@ -5501,15 +5501,15 @@ k
 #
 %ENTRY%	_TITLE_CCA_V10
 %KEY%	"a(gree|ttribut|uthor)"
-%STR%	"creative commons attribution 10 generic"
+%STR%	"creative commons attribution 1\.?0 generic"
 #
 %ENTRY%	_TITLE_CCA_V25
 %KEY%	"a(gree|ttribut|uthor)"
-%STR%	"creative commons attribution 25 generic"
+%STR%	"creative commons attribution 2\.?5 generic"
 #
 %ENTRY%	_TITLE_CCA_V30
 %KEY%	"a(gree|ttribut|uthor)"
-%STR%	"creative commons attribution 30 generic"
+%STR%	"creative commons attribution 3\.?0 generic"
 #
 %ENTRY%	_TITLE_CCA_SA
 %KEY%	"a(gree|ttribut|uthor)"
@@ -5517,15 +5517,15 @@ k
 #
 %ENTRY%	_TITLE_CCA_SA_V10
 %KEY%	"a(gree|ttribut|uthor)"
-%STR%	"creative commons attribution[ -]share[ -]alike 10 licen[cs]e"
+%STR%	"creative commons attribution[ -]share[ -]alike 1\.?0 licen[cs]e"
 #
 %ENTRY%	_TITLE_CCA_SA_V25
 %KEY%	"a(gree|ttribut|uthor)"
-%STR%	"creative commons attribution[ -]share[ -]alike 25 licen[cs]e"
+%STR%	"creative commons attribution[ -]share[ -]alike 2\.?5 licen[cs]e"
 #
 %ENTRY%	_TITLE_CCA_SA_V30
 %KEY%	"a(gree|ttribut|uthor)"
-%STR%	"creative commons attribution[ -]share[ -]alike 30 licen[cs]e"
+%STR%	"creative commons attribution[ -]share[ -]alike 3\.?0 licen[cs]e"
 #
 %ENTRY%	_TITLE_CCPL
 %KEY%	"licen[cs]"
@@ -5533,15 +5533,15 @@ k
 #
 %ENTRY%	_TITLE_CDDL_V10
 %KEY%	"licen[cs]"
-%STR%	"common development and distribution licen[cs]e cddl (v|version )10"
+%STR%	"common development and distribution licen[cs]e cddl (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_CECILL_V11
 %KEY%	"(condit|vers)ion"
-%STR%	"version 11 (of|dated)"
+%STR%	"version 1\.?1 (of|dated)"
 #
 %ENTRY%	_TITLE_CECILL_V20
 %KEY%	"(condit|vers)ion"
-%STR%	"version 20 (of|dated)"
+%STR%	"version 2\.?0 (of|dated)"
 #
 %ENTRY%	_TITLE_CECILL1
 %KEY%	"so(ftware|urce)"
@@ -5569,15 +5569,15 @@ k
 #
 %ENTRY%	_TITLE_CPAL10
 %KEY%	"licen[cs]"
-%STR%	"common public attribution licen[cs]e (v|version )10"
+%STR%	"common public attribution licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_CPL05
 %KEY%	"licen[cs]"
-%STR%	"common public licen[cs]e =FEW= (05|(cpl |v|version )05)"
+%STR%	"common public licen[cs]e =FEW= (0\.?5|(cpl |v|version )0\.?5)"
 #
 %ENTRY%	_TITLE_CPL10
 %KEY%	"licen[cs]"
-%STR%	"common public licen[cs]e =FEW= (10|(cpl |v|version )10)"
+%STR%	"common public licen[cs]e =FEW= (1\.?0|(cpl |v|version )1\.?0)"
 #
 %ENTRY%	_TITLE_CPL
 %KEY%	"licen[cs]"
@@ -5589,7 +5589,7 @@ k
 #
 %ENTRY%	_TITLE_CUA10
 %KEY%	"licen[cs]"
-%STR%	"CUA office public licen[cs]e =FEW= (10|(v|version )10)"
+%STR%	"CUA office public licen[cs]e =FEW= (1\.?0|(v|version )1\.?0)"
 #
 %ENTRY%	_TITLE_CUPS
 %KEY%	"licen[cs]"
@@ -5609,7 +5609,7 @@ k
 #
 %ENTRY%	_TITLE_ECLIPSE10
 %KEY%	"licen[cs]"
-%STR%	"eclipse public licen[cs]e =FEW= (10|(v|version )10)"
+%STR%	"eclipse public licen[cs]e =FEW= (1\.?0|(v|version )1\.?0)"
 #
 %ENTRY%	_TITLE_EIFFEL2
 %KEY%	"licen[cs]"
@@ -5641,11 +5641,11 @@ k
 #
 %ENTRY%	_TITLE_FLASH2XML10
 %KEY%	"licen[cs]"
-%STR%	"flash2xml public licen[cs]e (v|version )10"
+%STR%	"flash2xml public licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_FRAMEWORX10
 %KEY%	"licen[cs]"
-%STR%	"the frameworx open licen[cs]e 10"
+%STR%	"the frameworx open licen[cs]e 1\.?0"
 #
 %ENTRY%	_TITLE_FREETYPE
 %KEY%	"licen[cs]"
@@ -5665,21 +5665,21 @@ k
 #
 %ENTRY%	_TITLE_GFDL_V11_ONLY
 %KEY%	"(docume|warra)nt"
-#%STR%	"(v|[^_]version )11 March 2000"
-%STR%	"gnu free documentation ?licen[cs]e (v|version )11 mar"
+#%STR%	"(v|[^_]version )1\.?1 March 2000"
+%STR%	"gnu free documentation ?licen[cs]e (v|version )1\.?1 mar"
 #
 %ENTRY%	_TITLE_GFDL_V11_OR_LATER
 %KEY%	"(docume|warra)nt"
-%STR%	"gnu free documentation ?licen[cs](e|e gfdl) (v|version )11 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"gnu free documentation ?licen[cs](e|e gfdl) (v|version )1\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_TITLE_GFDL_V12_ONLY
 %KEY%	"(docume|warra)nt"
-#%STR%  "(v|[^_]version )12 November 2002"
-%STR%	"gnu free documentation ?licen[cs]e (v|version )12 nov"
+#%STR%	"(v|[^_]version )1\.?2 November 2002"
+%STR%	"gnu free documentation ?licen[cs]e (v|version )1\.?2 nov"
 #
 %ENTRY%	_TITLE_GFDL_V12_OR_LATER
 %KEY%	"(docume|warra)nt"
-%STR%	"gnu free documentation ?licen[cs](e|e gfdl) (v|version )12 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"gnu free documentation ?licen[cs](e|e gfdl) (v|version )1\.?2 =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_TITLE_GPDL
 %KEY%	"(docume|warra)nt"
@@ -5707,15 +5707,15 @@ k
 #
 %ENTRY%	_TITLE_GSOAP_V13
 %KEY%	"licen[cs]"
-%STR%	"gsoap public licen[cs]e version 13"
+%STR%	"gsoap public licen[cs]e version 1\.?3"
 #
 %ENTRY%	_TITLE_IBM_PL20
 %KEY%	"licen[cs]"
-%STR%	"ibm public licen[cs]e =FEW= (v|version )20"
+%STR%	"ibm public licen[cs]e =FEW= (v|version )2\.?0"
 #
 %ENTRY%	_TITLE_IBM_PL10
 %KEY%	"licen[cs]"
-%STR%	"ibm public licen[cs]e =FEW= (v|version )10"
+%STR%	"ibm public licen[cs]e =FEW= (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_IBM_PL
 %KEY%	"licen[cs]"
@@ -5723,7 +5723,7 @@ k
 #
 %ENTRY%	_TITLE_IDPL_V10
 %KEY%	"licen[cs]"
-%STR%	"initial developer[ ]?s public licen[cs]e =FEW= version 10"
+%STR%	"initial developer[ ]?s public licen[cs]e =FEW= version 1\.?0"
 #
 %ENTRY%	_TITLE_IDPL
 %KEY%	"licen[cs]"
@@ -5731,7 +5731,7 @@ k
 #
 %ENTRY%	_TITLE_INNERNET200
 %KEY%	"licen[cs]"
-%STR%	"the inner net licen[cs]e (v|version )2(0|00)"
+%STR%	"the inner net licen[cs]e (v|version )2\.?(0|0\.?0)"
 #
 %ENTRY%	_TITLE_INTERBASE
 %KEY%	"licen[cs]"
@@ -5755,31 +5755,31 @@ k
 #
 %ENTRY%	_TITLE_LATEX_PL10
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )10?"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?0?"
 #
 %ENTRY%	_TITLE_LATEX_PL11
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )11"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_LATEX_PL12
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )12"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?2"
 #
 %ENTRY%	_TITLE_LATEX_PL13
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )13"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?3"
 #
 %ENTRY%	_TITLE_LATEX_PL13A
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )13a"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?3a"
 #
 %ENTRY%	_TITLE_LATEX_PL13B
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )13b"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?3b"
 #
 %ENTRY%	_TITLE_LATEX_PL13C
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )13c"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?3c"
 #
 %ENTRY%	_TITLE_LDP1A
 %KEY%	"licen[cs]"
@@ -5787,7 +5787,7 @@ k
 #
 %ENTRY%	_TITLE_LDP20
 %KEY%	"(docume|warra)nt"
-%STR%	"linux documentation project licen[cs]e =FEW= v20 =SOME= january 1998"
+%STR%	"linux documentation project licen[cs]e =FEW= v2\.?0 =SOME= january 1998"
 #
 %ENTRY%	_TITLE_LGPLV2
 %KEY%	"(condit|vers)ion"
@@ -5795,7 +5795,7 @@ k
 #
 %ENTRY%	_TITLE_LGPLV21
 %KEY%	"(condit|vers)ion"
-%STR%	"version 21 February 1999"
+%STR%	"version 2\.?1 February 1999"
 #
 %ENTRY%	_TITLE_LGPL3
 %KEY%	"(condit|vers)ion"
@@ -5805,11 +5805,11 @@ k
 #####
 %ENTRY%	_TITLE_LUCENT102
 %KEY%	"licen[cs]"
-%STR%	"lucent public licen[cs]e =FEW= (v|version )102"
+%STR%	"lucent public licen[cs]e =FEW= (v|version )1\.?0\.?2"
 #
 %ENTRY%	_TITLE_LUCENT10
 %KEY%	"licen[cs]"
-%STR%	"lucent public licen[cs]e =FEW= (v|version )10"
+%STR%	"lucent public licen[cs]e =FEW= (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_MACROMEDIA_EULA
 %KEY%	"\<(end[ -]user|eula)\>"
@@ -5817,7 +5817,7 @@ k
 #
 %ENTRY%	_TITLE_MAJORDOMO11
 %KEY%	"licen[cs]"
-%STR%	"majordomo licen[cs]e agreement (v|version )11"
+%STR%	"majordomo licen[cs]e agreement (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_METROLINK
 %KEY%	"(docume|warra)nt"
@@ -5825,7 +5825,7 @@ k
 #
 %ENTRY%	_TITLE_MIBBLE_28
 %KEY%	"licen[cs]"
-%STR%	"mibble 28 mibble software licen[cs]e agreement"
+%STR%	"mibble 2\.?8 mibble software licen[cs]e agreement"
 #
 %ENTRY%	_TITLE_MINDTERM
 %KEY%	"licen[cs]"
@@ -5837,7 +5837,7 @@ k
 #
 %ENTRY%	_TITLE_MOTOSOTO091
 %KEY%	"licen[cs]"
-%STR%	"motosoto open source licen[cs]e =FEW= (v|version )091"
+%STR%	"motosoto open source licen[cs]e =FEW= (v|version )0\.?9\.?1"
 #
 %ENTRY%	_TITLE_MOZNET_PL
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
@@ -5849,31 +5849,31 @@ k
 #
 %ENTRY%	_TITLE_MPL10
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"mozilla public licen[cs]e =FEW= (10|(mpl |v|version )10)"
+%STR%	"mozilla public licen[cs]e =FEW= (1\.?0|(mpl |v|version )1\.?0)"
 #
 %ENTRY%	_TITLE_MPL11
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"mozilla public licen[cs]e =FEW= (11|(mpl |v|version )11)"
+%STR%	"mozilla public licen[cs]e =FEW= (1\.?1|(mpl |v|version )1\.?1)"
 #
 %ENTRY%	_TITLE_MPL11_OR_LATER
 %KEY%	"licen[cs]"
-%STR%	"mozilla public licen[cs]e =FEW= (11|(mpl |v|version )11) =SOME= or =SOME= (newer|later|subsequent|more recent)"
+%STR%	"mozilla public licen[cs]e =FEW= (1\.?1|(mpl |v|version )1\.?1) =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY%	_TITLE_MPL_EULA_20
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"mozilla =SOME= end[ -]user software licen[cs]e agreement (v|version)20"
+%STR%	"mozilla =SOME= end[ -]user software licen[cs]e agreement (v|version)2\.?0"
 #
 %ENTRY%	_TITLE_MPL_EULA_30
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"mozilla =SOME= end[ -]user software licen[cs]e agreement (v|version )30"
+%STR%	"mozilla =SOME= end[ -]user software licen[cs]e agreement (v|version )3\.?0"
 #
 %ENTRY%	_TITLE_MPL_EULA_11
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"mozilla =SOME= end[ -]user software licen[cs]e agreement (v|version )11"
+%STR%	"mozilla =SOME= end[ -]user software licen[cs]e agreement (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_MYSQL_V03
 %KEY%	"licen[cs]"
-%STR%	"mysql floss licen[cs]e exception version 03"
+%STR%	"mysql floss licen[cs]e exception version 0\.?3"
 #
 %ENTRY%	_TITLE_MYSQL_EXCEPT
 %KEY%	"so(ftware|urce)"
@@ -5885,7 +5885,7 @@ k
 #
 %ENTRY%	_TITLE_NASA13
 %KEY%	"(condit|vers)ion"
-%STR%	"nasa open source agreement version 13"
+%STR%	"nasa open source agreement version 1\.?3"
 #
 %ENTRY%	_TITLE_NAUMEN
 %KEY%	"licen[cs]"
@@ -5917,19 +5917,19 @@ k
 #
 %ENTRY%	_TITLE_NPL11
 %KEY%	"licen[cs]"
-%STR%	"netscape public licen[cs]e (v|version )11"
+%STR%	"netscape public licen[cs]e (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_NPL11_OR_LATER
 %KEY%	"licen[cs]"
-%STR%	"netscape public licen[cs]e =FEW= (11|(mpl |v|version )11) =SOME= or =SOME= (newer|later|subsequent|more recent)"
+%STR%	"netscape public licen[cs]e =FEW= (1\.?1|(mpl |v|version )1\.?1) =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY%	_TITLE_NPL10
 %KEY%	"licen[cs]"
-%STR%	"netscape public licen[cs]e (v|version )10"
+%STR%	"netscape public licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_NOKIA10A
 %KEY%	"licen[cs]"
-%STR%	"nokia open source licen[cs]e NOKOS licen[cs]e (v|version )10a"
+%STR%	"nokia open source licen[cs]e NOKOS licen[cs]e (v|version )1\.?0a"
 #
 %ENTRY%	_TITLE_NOVELL_EULA
 %KEY%	"licen[cs]"
@@ -5941,11 +5941,11 @@ k
 #
 %ENTRY%	_TITLE_OCLC20
 %KEY%	"licen[cs]"
-%STR%	"OCLC research public licen[cs]e 20"
+%STR%	"OCLC research public licen[cs]e 2\.?0"
 #
 %ENTRY%	_TITLE_OCLC10
 %KEY%	"licen[cs]"
-%STR%	"OCLC research public licen[cs]e 10"
+%STR%	"OCLC research public licen[cs]e 1\.?0"
 #
 %ENTRY%	_TITLE_OGPL
 %KEY%	"licen[cs]"
@@ -5961,7 +5961,7 @@ k
 #
 %ENTRY%	_TITLE_OPENCL10
 %KEY%	"licen[cs]"
-%STR%	"open ?content licen[cs]e (v|version )10"
+%STR%	"open ?content licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_OPENCL
 %KEY%	"licen[cs]"
@@ -5969,27 +5969,27 @@ k
 #
 %ENTRY%	_TITLE_OPENLDAP12
 %KEY%	"licen[cs]"
-%STR%	"openldap public licen[cs]e (v|version )12"
+%STR%	"openldap public licen[cs]e (v|version )1\.?2"
 #
 %ENTRY%	_TITLE_OPENLDAP14
 %KEY%	"licen[cs]"
-%STR%	"openldap public licen[cs]e (v|version )14"
+%STR%	"openldap public licen[cs]e (v|version )1\.?4"
 #
 %ENTRY%	_TITLE_OPENLDAP25
 %KEY%	"licen[cs]"
-%STR%	"openldap public licen[cs]e (v|version )25"
+%STR%	"openldap public licen[cs]e (v|version )2\.?5"
 #
 %ENTRY%	_TITLE_OPENLDAP26
 %KEY%	"licen[cs]"
-%STR%	"openldap public licen[cs]e (v|version )26"
+%STR%	"openldap public licen[cs]e (v|version )2\.?6"
 #
 %ENTRY%	_TITLE_OPENLDAP27
 %KEY%	"licen[cs]"
-%STR%	"openldap public licen[cs]e (v|version )27"
+%STR%	"openldap public licen[cs]e (v|version )2\.?7"
 #
 %ENTRY%	_TITLE_OPENLDAP28
 %KEY%	"licen[cs]"
-%STR%	"openldap public licen[cs]e (v|version )28"
+%STR%	"openldap public licen[cs]e (v|version )2\.?8"
 #
 %ENTRY%	_TITLE_OPENLDAP
 %KEY%	"licen[cs]"
@@ -5997,7 +5997,7 @@ k
 #
 %ENTRY%	_TITLE_OPENPL10
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
-%STR%	"open public licen[cs]e (v|version )10"
+%STR%	"open public licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_OPENPL
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
@@ -6005,7 +6005,7 @@ k
 #
 %ENTRY%	_TITLE_OPENPUBL10
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
-%STR%	"open publication licen[cs]e (v|version )10"
+%STR%	"open publication licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_OPENPUBL
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
@@ -6021,31 +6021,31 @@ k
 #
 %ENTRY%	_TITLE_OSL10
 %KEY%	"licen[cs]"
-%STR%	"open (source|software) licen[cs]e[^s] =FEW= (10|(osl |v|version )10)"
+%STR%	"open (source|software) licen[cs]e[^s] =FEW= (1\.?0|(osl |v|version )1\.?0)"
 #
 %ENTRY%	_TITLE_OSL11
 %KEY%	"licen[cs]"
-%STR%	"open (source|software) licen[cs]e[^s] =FEW= (11|(osl |v|version )11)"
+%STR%	"open (source|software) licen[cs]e[^s] =FEW= (1\.?1|(osl |v|version )1\.?1)"
 #
 %ENTRY%	_TITLE_OSL20
 %KEY%	"licen[cs]"
-%STR%	"open (source|software) licen[cs]e[^s] =FEW= (20|(osl |v|version )20)"
+%STR%	"open (source|software) licen[cs]e[^s] =FEW= (2\.?0|(osl |v|version )2\.?0)"
 #
 %ENTRY%	_TITLE_OSL21
 %KEY%	"licen[cs]"
-%STR%	"open (source|software) licen[cs]e[^s] =FEW= (21|(osl |v|version )21)"
+%STR%	"open (source|software) licen[cs]e[^s] =FEW= (2\.?1|(osl |v|version )2\.?1)"
 #
 %ENTRY%	_TITLE_OSL30
 %KEY%	"licen[cs]"
-%STR%	"open (source|software) licen[cs]e[^s] =FEW= (30|(osl |v|version )30)"
+%STR%	"open (source|software) licen[cs]e[^s] =FEW= (3\.?0|(osl |v|version )3\.?0)"
 #
 %ENTRY%	_TITLE_QPL10_1
 %KEY%	"licen[cs]"
-%STR%	"q public licen[cs]e (v|version )10"
+%STR%	"q public licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_QPL10_2
 %KEY%	"(condit|vers)ion"
-%STR%	"qpl version 10"
+%STR%	"qpl version 1\.?0"
 #
 %ENTRY%	_TITLE_QPL
 %KEY%	"licen[cs]"
@@ -6057,19 +6057,19 @@ k
 #
 %ENTRY%	_TITLE_PHP301
 %KEY%	"licen[cs]"
-%STR%	"the php licen[cs]e (v|version )301"
+%STR%	"the php licen[cs]e (v|version )3\.?0\.?1"
 #
 %ENTRY%	_TITLE_PHP30
 %KEY%	"licen[cs]"
-%STR%	"the php licen[cs]e (v|version )30"
+%STR%	"the php licen[cs]e (v|version )3\.?0"
 #
 %ENTRY%	_TITLE_PHP202
 %KEY%	"licen[cs]"
-%STR%	"the php licen[cs]e (v|version )202"
+%STR%	"the php licen[cs]e (v|version )2\.?0\.?2"
 #
 %ENTRY%	_TITLE_PUBUSE_V10
 %KEY%	"licen[cs]"
-%STR%	"public use licen[cs]e (v|version )10"
+%STR%	"public use licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_PYTHON
 %KEY%	"licen[cs]"
@@ -6077,43 +6077,43 @@ k
 #
 %ENTRY%	_TITLE_PYTHON201
 %KEY%	"licen[cs]"
-%STR%	"(licen[cs] agreement for python 201|python 201 licen[cs]e)"
+%STR%	"(licen[cs] agreement for python 2\.?0\.?1|python 2\.?0\.?1 licen[cs]e)"
 #
 %ENTRY%	_TITLE_PYTHON202
 %KEY%	"licen[cs]"
-%STR%	"(licen[cs] agreement for python 202|python 202 licen[cs]e)"
+%STR%	"(licen[cs] agreement for python 2\.?0\.?2|python 2\.?0\.?2 licen[cs]e)"
 #
 %ENTRY%	_TITLE_PYTHON211
 %KEY%	"licen[cs]"
-%STR%	"(licen[cs] agreement for python 211|python 211 licen[cs]e)"
+%STR%	"(licen[cs] agreement for python 2\.?1\.?1|python 2\.?1\.?1 licen[cs]e)"
 #
 %ENTRY%	_TITLE_PYTHON213
 %KEY%	"licen[cs]"
-%STR%	"(licen[cs] agreement for python 213|python 213 licen[cs]e)"
+%STR%	"(licen[cs] agreement for python 2\.?1\.?3|python 2\.?1\.?3 licen[cs]e)"
 #
 %ENTRY%	_TITLE_PYTHON22
 %KEY%	"licen[cs]"
-%STR%	"(licen[cs] agreement for python 22|python 22 licen[cs]e)"
+%STR%	"(licen[cs] agreement for python 2\.?2|python 2\.?2 licen[cs]e)"
 #
 %ENTRY%	_TITLE_PYTHON223
 %KEY%	"licen[cs]"
-%STR%	"(licen[cs] agreement for python 223|python 223 licen[cs]e)"
+%STR%	"(licen[cs] agreement for python 2\.?2\.?3|python 2\.?2\.?3 licen[cs]e)"
 #
 %ENTRY%	_TITLE_PYTHON227
 %KEY%	"licen[cs]"
-%STR%	"(licen[cs] agreement for python 227|python 227 licen[cs]e)"
+%STR%	"(licen[cs] agreement for python 2\.?2\.?7|python 2\.?2\.?7 licen[cs]e)"
 #
 %ENTRY%	_TITLE_PYTHON237
 %KEY%	"licen[cs]"
-%STR%	"(licen[cs]e agreement for python 237|python 237 licen[cs]e)"
+%STR%	"(licen[cs]e agreement for python 2\.?3\.?7|python 2\.?3\.?7 licen[cs]e)"
 #
 %ENTRY%	_TITLE_PYTHON23
 %KEY%	"licen[cs]"
-%STR%	"(licen[cs]e agreement for python 23|python 23 licen[cs]e)"
+%STR%	"(licen[cs]e agreement for python 2\.?3|python 2\.?3 licen[cs]e)"
 #
 %ENTRY%	_TITLE_PYTHON244
 %KEY%	"licen[cs]"
-%STR%	"(licen[cs] agreement for python 244|python 244 licen[cs]e)"
+%STR%	"(licen[cs] agreement for python 2\.?4\.?4|python 2\.?4\.?4 licen[cs]e)"
 #
 %ENTRY%	_TITLE_PYTHON2
 %KEY%	"licen[cs]"
@@ -6125,15 +6125,15 @@ k
 #
 %ENTRY%	_TITLE_RCSL_V30
 %KEY%	"licen[cs]"
-%STR%	"realnetworks community source licen[cs]e =FEW= (v|version )30"
+%STR%	"realnetworks community source licen[cs]e =FEW= (v|version )3\.?0"
 #
 %ENTRY%	_TITLE_RCSL_V20
 %KEY%	"licen[cs]"
-%STR%	"realnetworks community source licen[cs]e =FEW= (v|version )20"
+%STR%	"realnetworks community source licen[cs]e =FEW= (v|version )2\.?0"
 #
 %ENTRY%	_TITLE_RCSL_V10
 %KEY%	"licen[cs]"
-%STR%	"realnetworks community source licen[cs]e =FEW= (v|version )10"
+%STR%	"realnetworks community source licen[cs]e =FEW= (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_RCSL
 %KEY%	"licen[cs]"
@@ -6145,7 +6145,7 @@ k
 #
 %ENTRY%	_TITLE_RICOH10
 %KEY%	"licen[cs]"
-%STR%	"ricoh source code public licen[cs]e (v|version )10"
+%STR%	"ricoh source code public licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_RIVERBANK_EULA
 %KEY%	"licen[cs]"
@@ -6161,27 +6161,27 @@ k
 #
 %ENTRY%	_TITLE_RPL10
 %KEY%	"licen[cs]"
-%STR%	"reciprocal public licen[cs]e =FEW= (v|version )10"
+%STR%	"reciprocal public licen[cs]e =FEW= (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_RPL11
 %KEY%	"licen[cs]"
-%STR%	"reciprocal public licen[cs]e =FEW= (v|version )11"
+%STR%	"reciprocal public licen[cs]e =FEW= (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_RPL15
 %KEY%	"licen[cs]"
-%STR%	"reciprocal public licen[cs]e =FEW= (v|version )15"
+%STR%	"reciprocal public licen[cs]e =FEW= (v|version )1\.?5"
 #
 %ENTRY%	_TITLE_RPSL_V30
 %KEY%	"licen[cs]"
-%STR%	"realnetworks public source licen[cs]e =FEW= (v|version )30"
+%STR%	"realnetworks public source licen[cs]e =FEW= (v|version )3\.?0"
 #
 %ENTRY%	_TITLE_RPSL_V20
 %KEY%	"licen[cs]"
-%STR%	"realnetworks public source licen[cs]e =FEW= (v|version )20"
+%STR%	"realnetworks public source licen[cs]e =FEW= (v|version )2\.?0"
 #
 %ENTRY%	_TITLE_RPSL_V10
 %KEY%	"licen[cs]"
-%STR%	"realnetworks public source licen[cs]e =FEW= (v|version )10"
+%STR%	"realnetworks public source licen[cs]e =FEW= (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_RPSL
 %KEY%	"licen[cs]"
@@ -6189,23 +6189,23 @@ k
 #
 %ENTRY%	_TITLE_SCSL_V23
 %KEY%	"licen[cs]"
-%STR%	"sun community source licen[cs]e (v|version )23"
+%STR%	"sun community source licen[cs]e (v|version )2\.?3"
 #
 %ENTRY%	_TITLE_SCSL_V30
 %KEY%	"licen[cs]"
-%STR%	"sun community source licen[cs]e (v|version )30"
+%STR%	"sun community source licen[cs]e (v|version )3\.?0"
 #
 %ENTRY%	_TITLE_SGI_GLX_V10
 %KEY%	"licen[cs]"
-%STR%	"glx public licen[cs]e (v|version )10"
+%STR%	"glx public licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_SGI_V10
 %KEY%	"so(ftware|urce)"
-%STR%	"sgi free software licen[cs]e b (v|version )10"
+%STR%	"sgi free software licen[cs]e b (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_SGI_V11
 %KEY%	"so(ftware|urce)"
-%STR%	"sgi free software licen[cs]e b (v|version )11"
+%STR%	"sgi free software licen[cs]e b (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_SISSL
 %KEY%	"licen[cs]"
@@ -6213,7 +6213,7 @@ k
 #
 %ENTRY%	_TITLE_SISSL_V11
 %KEY%	"licen[cs]"
-%STR%	"su(n|n industry) standard(s|s source) licen[cs]e version 11"
+%STR%	"su(n|n industry) standard(s|s source) licen[cs]e version 1\.?1"
 #
 %ENTRY%	_TITLE_SKYPE
 %KEY%	"\<(end[ -]user|eula)\>"
@@ -6221,11 +6221,11 @@ k
 #
 %ENTRY%	_TITLE_SNIA_V11
 %KEY%	"licen[cs]"
-%STR%	"(snia|storage network industr(y|y assocation)) public licen[cs]e version 11"
+%STR%	"(snia|storage network industr(y|y assocation)) public licen[cs]e version 1\.?1"
 #
 %ENTRY%	_TITLE_SNIA_V10
 %KEY%	"licen[cs]"
-%STR%	"(snia|storage network industr(y|y assocation)) public licen[cs]e version 10"
+%STR%	"(snia|storage network industr(y|y assocation)) public licen[cs]e version 1\.?0"
 #
 %ENTRY%	_TITLE_SUGARCRM_PL
 %KEY%	"licen[cs]"
@@ -6245,7 +6245,7 @@ k
 #
 %ENTRY%	_TITLE_SUN_PL10
 %KEY%	"licen[cs]"
-%STR%	"sun public licen[cs]e =FEW= (v|version )10"
+%STR%	"sun public licen[cs]e =FEW= (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_SUN_SCSL_TSA
 %KEY%	"licen[cs]"
@@ -6253,11 +6253,11 @@ k
 #
 %ENTRY%	_TITLE_SYBASE10
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
-%STR%	"sybase open watcom public licen[cs]e (v|version )10"
+%STR%	"sybase open watcom public licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_TPL10
 %KEY%	"licen[cs]"
-%STR%	"terracotta public licen[cs]e version 10"
+%STR%	"terracotta public licen[cs]e version 1\.?0"
 #
 %ENTRY%	_TITLE_TPL
 %KEY%	"licen[cs]"
@@ -6265,7 +6265,7 @@ k
 #
 %ENTRY%	_TITLE_TSA_10
 %KEY%	"(condit|vers)ion"
-%STR%	"source licen[cs]e =SOME= version =SOME= TSA 10"
+%STR%	"source licen[cs]e =SOME= version =SOME= TSA 1\.?0"
 #
 %ENTRY%	_TITLE_VIM
 %KEY%	"licen[cs]"
@@ -6289,7 +6289,7 @@ k
 #
 %ENTRY%	_TITLE_XIMIANLOGO10
 %KEY%	"licen[cs]"
-%STR%	"ximian logo licen[cs]e (v|version )10"
+%STR%	"ximian logo licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_XIMIANLOGO
 %KEY%	"licen[cs]"
@@ -6305,11 +6305,11 @@ k
 #
 %ENTRY%	_TITLE_ZOPE_V10
 %KEY%	"licen[cs]"
-%STR%	"zope public licen[cs]e (v|version )10"
+%STR%	"zope public licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_TITLE_ZOPE_V20
 %KEY%	"licen[cs]"
-%STR%	"zope public licen[cs]e (v|version )20"
+%STR%	"zope public licen[cs]e (v|version )2\.?0"
 #
 %ENTRY%	_TITLE_ZOPE
 %KEY%	"licen[cs]"
@@ -6368,7 +6368,7 @@ k
 #
 %ENTRY%	_PHR_BOOST_V10
 %KEY%	"licen[cs]"
-%STR%	"boost software licen[cs]e (v|version )10"
+%STR%	"boost software licen[cs]e (v|version )1\.?0"
 #
 %ENTRY%	_PHR_CDDL
 %KEY%	"distribut"
@@ -6396,19 +6396,19 @@ k
 #
 %ENTRY%	_PHR_FSF_V11_ONLY
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation =SOME= (v|[^_-]version )11[^0-9]"
+%STR%	"by the free software foundation =SOME= (v|[^_-]version )1\.?1[^0-9]"
 #
 %ENTRY%	_PHR_FSF_V11_OR_LATER
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation ((either v|v)ersion 11 =SOME= or =SOME= (later|newer|subsequent|more recent))"
+%STR%	"by the free software foundation ((either v|v)ersion 1\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent))"
 #
 %ENTRY%	_PHR_FSF_V12_ONLY
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation =SOME= (v|[^_-]version )12[^0-9]"
+%STR%	"by the free software foundation =SOME= (v|[^_-]version )1\.?2[^0-9]"
 #
 %ENTRY%	_PHR_FSF_V12_OR_LATER
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation ((either v|v)ersion 12 =SOME= or =SOME= (later|newer|subsequent|more recent))"
+%STR%	"by the free software foundation ((either v|v)ersion 1\.?2 =SOME= or =SOME= (later|newer|subsequent|more recent))"
 #
 %ENTRY%	_PHR_FSF_V2_ONLY
 %KEY%	"so(ftware|urce)"
@@ -6420,11 +6420,11 @@ k
 #
 %ENTRY%	_PHR_FSF_V21_ONLY
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation =SOME= (v|[^_-]version )21[^0-9]"
+%STR%	"by the free software foundation =SOME= (v|[^_-]version )2\.?1[^0-9]"
 #
 %ENTRY%	_PHR_FSF_V21_OR_LATER
 %KEY%	"so(ftware|urce)"
-%STR%	"by the free software foundation ((either v|v)ersion 21 =SOME= or =SOME= (later|newer|subsequent|more recent))"
+%STR%	"by the free software foundation ((either v|v)ersion 2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent))"
 #
 %ENTRY%	_PHR_FSF_V3_ONLY
 %KEY%	"so(ftware|urce)"
@@ -6454,39 +6454,39 @@ k
 #####
 %ENTRY%	_PHR_GPL1_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v10?\>|[^_-]versions? (one|\<1\>))"
+%STR%	"([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v1\.?0?\>|[^_-]versions? (one|\<1\>))"
 #
 %ENTRY%	_PHR_GPL1_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v10?\>|[^_-]versions? (one|\<10?\>))|gpl[_-]?v?1) =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v1\.?0?\>|[^_-]versions? (one|\<1\.?0?\>))|gpl[_-]?v?1) =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL2_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v20?\>|[^_-]versions? (two|\<20?\>))"
+%STR%	"([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))"
 #
 %ENTRY%	_PHR_GPL2_OR_GPL3
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v20?\>|[^_-]versions? (two|\<20?\>))|gpl[_-]?v?2) or (\<v? ?30?\>|[^_-]versions? (three|\<30?\>)|gpl[_-]?v?3)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|gpl[_-]?v?2) or (\<v? ?3\.?0?\>|[^_-]versions? (three|\<3\.?0?\>)|gpl[_-]?v?3)"
 #
 %ENTRY%	_PHR_GPL2_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v20?\>|[^_-]versions? (two|\<20?\>))|gpl[_-]?v?2) =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|gpl[_-]?v?2) =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL21_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v21\>|[^_-]versions? (\<21\>))"
+%STR%	"([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?1\>|[^_-]versions? (\<2\.?1\>))"
 #
 %ENTRY%	_PHR_GPL21_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v21\>|[^_-]versions? (\<21\>))|gpl[_-]?v?21) =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?1\>|[^_-]versions? (\<2\.?1\>))|gpl[_-]?v?2\.?1) =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL3_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v30?\>|[^_-]versions? (three|\<3\>))"
+%STR%	"([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))"
 #
 %ENTRY%	_PHR_GPL3_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v30?\>|[^_-]versions? (three|\<3\>))|gpl[_-]?v?3) =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))|gpl[_-]?v?3) =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPLISH_SAMPLE
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -6530,7 +6530,7 @@ k
 #
 %ENTRY%	_PHR_LATEX_PL10_OR_LATER_1
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )10? =SOME= or =SOME= (newer|later|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?0? =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL10_OR_LATER_2
 %KEY%	"licen[cs]"
@@ -6538,75 +6538,75 @@ k
 #
 %ENTRY%	_PHR_LATEX_PL11
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )11"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?1"
 #
 %ENTRY%	_PHR_LATEX_PL11_OR_LATER_1
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )11 =SOME= or =SOME= (newer|later|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?1 =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL11_OR_LATER_2
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )11 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL12
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )12"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?2"
 #
 %ENTRY%	_PHR_LATEX_PL12_OR_LATER_1
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )12 =SOME= or =SOME= (newer|later|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?2 =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL12_OR_LATER_2
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )12 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?2 =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL13
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )13"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?3"
 #
 %ENTRY%	_PHR_LATEX_PL13_OR_LATER_1
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )13 =SOME= or =SOME= (newer|later|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?3 =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL13_OR_LATER_2
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )13 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?3 =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL13A
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )13a"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?3a"
 #
 %ENTRY%	_PHR_LATEX_PL13A_OR_LATER_1
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )13a =SOME= or =SOME= (newer|later|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?3a =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL13A_OR_LATER_2
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )13a =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?3a =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL13B
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )13b"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?3b"
 #
 %ENTRY%	_PHR_LATEX_PL13B_OR_LATER_1
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )13b =SOME= or =SOME= (newer|later|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?3b =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL13B_OR_LATER_2
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )13b =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?3b =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL13C
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )13c"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?3c"
 #
 %ENTRY%	_PHR_LATEX_PL13C_OR_LATER_1
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )13c =SOME= or =SOME= (newer|later|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?3c =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LATEX_PL13C_OR_LATER_2
 %KEY%	"licen[cs]"
-%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )13c =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(LaTeX project public licen[cs]e|lppl) =SOME= (from|in|under) =SOME= (v|version )1\.?3c =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LGPL1_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -6626,11 +6626,11 @@ k
 #
 %ENTRY%	_PHR_LGPL21_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )21"
+%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )2\.?1"
 #
 %ENTRY%	_PHR_LGPL21_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )21 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_LGPL3_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -6746,11 +6746,11 @@ k
 #
 %ENTRY%	_PHR_PHP_V20
 %KEY%	"(condit|vers)ion"
-%STR%	"version 20 of the php licen[cs]e"
+%STR%	"version 2\.?0 of the php licen[cs]e"
 #
 %ENTRY%	_PHR_PHP_V301
 %KEY%	"(condit|vers)ion"
-%STR%	"version 301 of the php licen[cs]e"
+%STR%	"version 3\.?01 of the php licen[cs]e"
 #
 %ENTRY%	_PHR_PYTHON_NOTGPL_1
 %KEY%	"distribut"
@@ -6938,7 +6938,7 @@ k
 #
 %ENTRY%	_TEXT_GNU_HELLO_23
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"gnu hello 23"
+%STR%	"gnu hello 2\.?3"
 #
 %ENTRY%	_TEXT_GNU_LIC_INFO
 %KEY%	"(condit|vers)ion"
@@ -6982,7 +6982,7 @@ k
 #
 %ENTRY%	_TEXT_LGPLV21
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"lgpl[ _-]?v?21"
+%STR%	"lgpl[ _-]?v?2\.?1"
 #
 %ENTRY%	_TEXT_LGPLV3
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -7149,7 +7149,7 @@ k
 #
 %ENTRY%	_FILE_LGPLv21
 %KEY%	"licen[cs]"
-%STR%	"(file|provide|refer|located|found|see) =FEW= /?usr/?share/?common-?licen[cs]es/?LGPL[ -_]?21"
+%STR%	"(file|provide|refer|located|found|see) =FEW= /?usr/?share/?common-?licen[cs]es/?LGPL[ -_]?2\.?1"
 #
 %ENTRY%	_FILE_LGPLv2
 %KEY%	"licen[cs]"
@@ -7169,11 +7169,11 @@ k
 #
 %ENTRY%	_FILE_MPL10
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"mpl-10txt"
+%STR%	"mpl-1\.?0txt"
 #
 %ENTRY%	_FILE_MPL11
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"mpl-11txt"
+%STR%	"mpl-1\.?1txt"
 #####
 # In URLs, make sure dots (\.) in URLs are followed by ? (e.g., "\.?") ...
 # this way, hey can be used for queries both in findPhrase() AND idxGrep().
@@ -7396,11 +7396,11 @@ k
 #
 %ENTRY%	_URL_SUN_BINARY
 %KEY%	"licen[cs]"
-%STR%	"sun\.?com/j2se/150/jdk =FEW= licen[cs]e"
+%STR%	"sun\.?com/j2se/1\.?5\.?0/jdk =FEW= licen[cs]e"
 #
 %ENTRY%	_URL_SUN_BINARY_V150
 %KEY%	"licen[cs]"
-%STR%	"sun\.?com/j2se/150/jdk-1_5_0_01-licen[cs]e"
+%STR%	"sun\.?com/j2se/1\.?5\.?0/jdk-1_5_0_0\.?1-licen[cs]e"
 #
 %ENTRY%	_URL_W3C
 %KEY%	"licen[cs]"
@@ -7495,7 +7495,7 @@ k
 #
 %ENTRY%	_MIN_LGPL_V21
 %KEY%	"licen[cs]"
-%STR%	"(LGPL_v2.1 lic-instance|lgpl[ _-]?v21 =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= lgpl[ _-]?v21|usr/?share/?common-licen[cs]es/?lgpl[._v-]?21)"
+%STR%	"(LGPL_v2.1 lic-instance|lgpl[ _-]?v2\.?1 =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= lgpl[ _-]?v2\.?1|usr/?share/?common-licen[cs]es/?lgpl[._v-]?2\.?1)"
 #
 %ENTRY%	_MIN_LGPL_V2
 %KEY%	"licen[cs]"
@@ -7632,7 +7632,7 @@ k
 #
 %ENTRY%	_MIN2_LGPL_V21
 %KEY%	"so(ftware|urce)"
-%STR%	"(LGPL_v2.1 src-instance|lgpl[ _-]?v21 =FEW= \<source\>|\<source\> =FEW= lgpl[ _-]?v21)"
+%STR%	"(LGPL_v2.1 src-instance|lgpl[ _-]?v2\.?1 =FEW= \<source\>|\<source\> =FEW= lgpl[ _-]?v2\.?1)"
 #
 %ENTRY%	_MIN2_LGPL_V2
 %KEY%	"so(ftware|urce)"
@@ -7733,7 +7733,7 @@ k
 #
 %ENTRY%	_MIN3_LGPL_V21
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
-%STR%	"(LGPL_v2.1 cpy-instance|lgpl[ _v-]?21 =FEW= copyright|copyright =FEW= lgpl[ _v-]?21)"
+%STR%	"(LGPL_v2.1 cpy-instance|lgpl[ _v-]?2\.?1 =FEW= copyright|copyright =FEW= lgpl[ _v-]?2\.?1)"
 #
 %ENTRY%	_MIN3_LGPL_V2
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
