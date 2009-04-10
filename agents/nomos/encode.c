@@ -26,8 +26,9 @@
 
 #define	myBUFSIZ	BUFSIZ
 
-char *encode(), *decode();
 extern void exit();
+#ifdef notdef
+char *encode(), *decode();
 
 char *encode(char *p, int len)
 {
@@ -45,6 +46,7 @@ char *encode(char *p, int len)
     cr_buf[i] = '\0';
     return(cr_buf);
 }
+#endif /* notdef */
 
 
 
@@ -85,19 +87,9 @@ main(int argc, char **argv)
     }
     len = strlen(str);
 
-#ifdef	DEBUG
-    printf("Starting, str == \"%s\"\n", str);
-#endif	/* DEBUG */
-
-    encoded_str = encode(str, len);
-
-#ifdef	DEBUG
-    printf("encoded = \"%s\"\n", encoded_str);
-#endif	/* DEBUG */
-
     printf("{%d, \"", len);
     for (i = 0; i < len; i++) {
-	printf("\\%o", encoded_str[i]);
+	printf("\\%o", str[i] & 0xff);
     }
     printf("\\0\"}\n");
 }

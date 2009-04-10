@@ -1,5 +1,5 @@
-***************************************************************
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+/***************************************************************
+ Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -14,4 +14,12 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
- ***************************************************************
+***************************************************************/
+#ifndef _LICENSES_H
+#define _LICENSES_H
+
+void licenseInit();
+int ignoreFileForScan(char *s);
+void licenseScan(list_t *l, int isPackage);
+
+#endif /* _LICENSES_H */
