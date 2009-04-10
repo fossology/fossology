@@ -1,4 +1,16 @@
 
+To Whom it May Concern: 
+-----------------------
+
+This directory in the FOSSology source tree
+(agents/nomos) contains work for a new license analysis agent. At this
+point in time, the code is not yet in a form where it can be integrated
+with the rest of FOSSology. 
+
+Comments with "CDB" in them are bread crumbs I've left to remind me to
+go back and check on that code later (CDB == my initials).
+
+
 
 To Do's
 -------
@@ -9,6 +21,11 @@ To Do's
 - Document all Makefile targets
 
 - Remove all HP_INTERNAL and CUSTOMER_VERSION references.
+
+- Remove code related to NOMOS_BASE env variable if it turns out we
+don't need that directory (should not).
+
+- Same thing for SHELL, NOMOS_CONF, and NOMOS_EXT
 
 
 Changes
@@ -23,6 +40,8 @@ Questions
 - Where the hell is checkstrings script? Do we want it?
 - SVN_REV #ifdef stolen from other agent code. Where does this get
   #defined?
+- Why does nomos set the LANG environment variable?
+- Implications of removing custom magic file?
 
 
 #defines Used

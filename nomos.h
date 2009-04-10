@@ -15,6 +15,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ***************************************************************/
+#ifndef _NOMOS_H
+#define _NOMOS_H 1
 #ifndef	_GNU_SOURCE
 #define	_GNU_SOURCE
 #endif	/* not defined _GNU_SOURCE */
@@ -35,6 +37,8 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
+#include <sys/time.h>
+
 /*
  * TO use our local version of debug-malloc(), compile -DMEMORY_TRACING
  */
@@ -60,26 +64,8 @@
 /*
  * Program options and flags
  */
-#define	OPTS_DEBUG	0x1
-#define	OPTS_GENLIC	0x2
-#define	OPTS_SRCONLY	0x4
-#define	OPTS_DIG	0x8
-#define	OPTS_PRTLIC	0x10
-#define	OPTS_PRTSCORE	0x20
-#define	OPTS_WEBKIT	0x40
-#define	OPTS_FASTSCAN	0x80
-#define	OPTS_SCANONLY	0x100
-#define	OPTS_UNPACK	0x200
-#define	OPTS_SUMMARY	0x400
-#define	OPTS_BINARY	0x800
-#define	OPTS_FATALCORR	0x10000	/* corruptions considered fatal */
-#define	OPTS_DUMPTEXT	0x20000
-#define	OPTS_RPMHDRS	0x40000
-#define	OPTS_TIMESTAMP	0x80000
-#define	OPTS_ALLFILES	0x100000
-#define	OPTS_NOREPORT	0x200000
-#define	OPTS_DOCTOR	0x400000
-#define	OPTS_RUNCHECKS	0x800000
+#define	OPTS_DEBUG		0x1
+#define	OPTS_TRACE_SWITCH	0x2
 /* */
 #define	FL_PACKAGES	0x1
 #define	FL_ARCHIVES	0x2
@@ -312,28 +298,28 @@ struct globals {
     char initwd[myBUFSIZ];
     char cwd[myBUFSIZ]; 
     char target[myBUFSIZ];
-    char confPath[myBUFSIZ]; 
+    /* char confPath[myBUFSIZ]; */
     char penDir[myBUFSIZ]; 
     char report[myBUFSIZ];
-    char extDir[myBUFSIZ]; 
+    /*    char extDir[myBUFSIZ]; */
     char pageName[myBUFSIZ]; 
-    char logfile[myBUFSIZ];
+    /*    char logfile[myBUFSIZ]; */
     char magicFile[myBUFSIZ];
     char cmdBuf[512]; 
     char dist[256]; 
     char prod[256]; 
     char prodName[256]; 
-    char bSpec[256];
-    char basedir[128]; 
+    /*    char bSpec[256]; */
+    /*    char basedir[128]; */
     char tmpdir[128]; 
     char shell[128]; 
-    char progName[64]; 
+    char progName[64];
     char user[64];
     char mntpath[64]; 
     char refVendor[32]; 
     char vendor[32]; 
     char arch[16]; 
-    char progVers[16];
+    /*    char progVers[16]; */
     char *licPara; 
     char *matchBase;
     int progOpts; 
@@ -348,8 +334,10 @@ struct globals {
     int fSearch; 
     int fSave; 
     int eSave; 
+    /*
     int firstPkg; 
     int lastPkg;
+    */
     int hasAntiWord; 
     int uPsize;
 #ifdef	GLOBAL_DEBUG
@@ -363,9 +351,11 @@ struct globals {
     int pagesize;
 #endif	/* USE_MMAP */
     double totBytes;
+    /*
     uid_t uid; 
     uid_t euid; 
     uid_t suid;
+    */
     size_t targetLen; 
     size_t pendirLen; 
     size_t cwdLen;
@@ -382,9 +372,9 @@ struct globals {
     list_t licHistList; 
     list_t pLicHistList;
     list_t unpFileList; 
-    list_t srcpList; 
-    list_t instpList; 
-    list_t allpList; 
+    /*    list_t srcpList; */
+    /*    list_t instpList; */
+    /*    list_t allpList; */
     list_t testpList;
     list_t sarchList; 
     list_t regfList; 
@@ -393,17 +383,17 @@ struct globals {
     list_t licClaimMap;
     list_t fLicFoundMap; 
     list_t parseList; 
-    list_t defPkgList; 
-    list_t defArchList;
+    /*    list_t defPkgList; */
+    /*    list_t defArchList; */
     list_t nestedNameList; 
     list_t dosNameList; 
     list_t hugeOkList; 
     list_t allLicList;
     list_t sHash; 
     list_t reportList; 
-    list_t bucketList; 
+    /*    list_t bucketList; */
     list_t *Bux; 
-    list_t printList; 
+    /*    list_t printList; */
 #ifdef BRIEF_LIST
     list_t briefList;
 #endif /* BRIEF_LIST */
@@ -449,7 +439,7 @@ struct fileHandler {
     int index, (*f)();
     char *suffix;
 };
-typedef struct fileHandler fh_t;
+typedef struct fileHandler fileHandler_t;
 
 /*
  * NULL values
@@ -555,3 +545,5 @@ void memFreeTagged();
 	START_TIMER;	/* optionally re-start timer */
 #endif	/* TIMING */
 #endif
+
+#endif /* _NOMOS_H */

@@ -1,5 +1,5 @@
-***************************************************************
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+/***************************************************************
+ Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -14,4 +14,15 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
- ***************************************************************
+***************************************************************/
+#ifndef _PROCESS_H
+#define _PROCESS_H
+
+void processDistribution();
+void makeFoundLicenseHistogram();
+void makeInventoryHistogram();
+void processRawSource();
+void processRegularFiles(char *pathname, int isDistro);
+int processSpareArchives(char *pathname, int isDistro);
+
+#endif /* _PROCESS_H */
