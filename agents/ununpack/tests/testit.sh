@@ -1,1 +1,1 @@
-../ununpack -C -d test.dir -Rx -L test.dir/test.iso.xml test.iso
+../ununpack -Cv -d test.dir -R -L test.dir/$1.xml $1
