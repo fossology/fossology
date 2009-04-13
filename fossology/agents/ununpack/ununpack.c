@@ -812,38 +812,6 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
 magic_t MagicCookie;
 
 /***************************************************
- MagicMatch(): Does a magic string match a real string?
- There is a problem with magic_load: It sets default values
- AND it loads my own magic file.
- There does not appear to be ANY WAY to remove the default values.
- As a result:
-   - "tar" uses the default, rather than the one I load!!!
-   - magic_file returns "," and ";" attributes!!!
- This function checks to see if it returns the string I want, rather
- than all of the bogus crap from the default settings.
- Returns: 1 = match, 0 = not match
- ***************************************************/
-int	MagicMatch	(char *Want, char *Have)
-{
-  int i;
-
-  i=0;
-  while((Want[i] != '\0') && (Have[i] != '\0') && (Want[i]==Have[i]))
-	{
-	i++;
-	}
-
-  if (Want[i]=='\0')
-    {
-    if (Have[i] == '\0') return(1);
-    if (Have[i] == ',') return(1);
-    if (Have[i] == ';') return(1);
-    if (Have[i] == ' ') return(1);
-    }
-  return(0);
-} /* MagicMatch() */
-
-/***************************************************
  FindCmd(): Given a file name, determine the type of
  extraction command.  This uses Magic.
  Returns index to command-type, or -1 on error.
@@ -859,8 +827,22 @@ int	FindCmd	(char *Filename)
   if (Type == NULL) return(-1);
 
   /* sometimes Magic is wrong... */
-  if (MagicMatch("application/x-exe",Type) ||
-      MagicMatch("application/x-shellscript",Type))
+  if (strstr(Type, "application/x-iso")) strcpy(Type, "application/x-iso");
+
+  if (strstr(Type, "octet" ))
+  {
+	int rc;
+	rc = RunCommand("zcat","-q -l",Filename,">/dev/null 2>&1",NULL,NULL);
+	if (rc==0)
+	{
+	  memset(Static,0,sizeof(Static));
+	  strcpy(Static,"application/x-gzip");
+	  Type=Static;
+    }
+  }
+ 
+  if (strstr(Type, "application/x-exe") ||
+      strstr(Type, "application/x-shellscript"))
 	{
 	int rc;
 	rc = RunCommand("unzip","-q -l",Filename,">/dev/null 2>&1",NULL,NULL);
@@ -881,7 +863,7 @@ int	FindCmd	(char *Filename)
 	    }
 	  }
 	} /* if was x-exe */
-  else if (MagicMatch("application/x-tar",Type))
+  else if (strstr(Type, "application/x-tar"))
 	{
 	if (RunCommand("tar","-tf",Filename,">/dev/null 2>&1",NULL,NULL) != 0)
 		return(-1); /* bad tar! (Yes, they do happen) */
@@ -890,15 +872,16 @@ int	FindCmd	(char *Filename)
   /* determine command for file */
   Match=-1;
   for(i=0; (CMD[i].Cmd != NULL) && (Match == -1); i++)
-      {
+  {
       if (CMD[i].Status == 0) continue; /* cannot check */
       if (CMD[i].Type == CMD_DEFAULT)
-      	{ 
-	Match=i; /* done! */
-	}
-      if (!MagicMatch(CMD[i].Magic,Type)) continue; /* not a match */
-      Match=i;
+      { 
+        Match=i; /* done! */
       }
+      else
+      if (!strstr(Type, CMD[i].Magic)) continue; /* not a match */
+      Match=i;
+  }
 
   if (Verbose > 0)
       {
@@ -2056,15 +2039,7 @@ int	main	(int argc, char *argv[])
     exit(-1);
     }
 
-  /* Debian is trying to depricate the added ".mime" suffix.
-     Check if it needs to be added. */
-  if ((magic_load(MagicCookie,UNMAGIC ".mime") != 0) &&
-      (magic_load(MagicCookie,UNMAGIC) != 0))
-    {
-    fprintf(stderr,"FATAL: Failed to load magic file: %s\n", UNMAGIC);
-    fprintf(stderr,"Error: %s\n", magic_error(MagicCookie));
-    exit(-1);
-    }
+  magic_load(MagicCookie,NULL);
 
   while((c = getopt(argc,argv,"ACd:FfHL:m:PQiqRr:T:t:vXx")) != -1)
     {
