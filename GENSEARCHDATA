@@ -54,7 +54,8 @@ cat > $NEW_H <<@EOF@
  *	  "_CR" == License Copyrights
  *	"_MISC" == Miscelleany in licenses
  */
-
+#ifndef _AUTODEFS_H
+#define _AUTODEFS_H
 @EOF@
 
 #####
@@ -283,6 +284,9 @@ cat >> ${NEW_C} <<@EOF@
 
 };
 /* END ENCODED LICENSE-FOOTPRINTS SECTION */
-lic_t licText[NFOOTPRINTS];
+licText_t licText[NFOOTPRINTS];
+@EOF@
+cat >> $NEW_H <<@EOF@
+#endif /* _AUTODEFS_H */
 @EOF@
 exit 0
