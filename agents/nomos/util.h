@@ -50,7 +50,6 @@ char *copyString(char *s, char *label);
 char *pathBasename(char *path);
 char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex, int recordOffsets);
 char *curDate();
-void suPrivs(int on);
 
 #ifdef	MEMSTATS
 void memStats(char *s);
@@ -63,6 +62,7 @@ int fileTypeIs(char *pathname, int index, char *magicData);
 int fileIsShar(char *textp, char *magicData);
 void printRegexMatch(int n, int cached);
 char *mmapFile(char *pathname);
+void mmapOpenListing();
 void munmapFile(void *ptr);
 int fileLineCount(char *pathname);
 char *fileMD5SUM(char *pathname);
@@ -72,6 +72,8 @@ void appendFile(char *pathname, char *str);
 void dumpFile(FILE *fp, char *pathname, int logFlag);
 int nftwFileFilter(char *pathname, struct stat *st, int onlySingleLink);
 void makeTempDir();
+void makePath(char *dirpath);
+void makeDir(char *dirpath);
 void forceRemoveDir(char *dir, int async);
 int mySystem(const char *fmt, ...);
 int isFILE(char *pathname);

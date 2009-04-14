@@ -192,6 +192,22 @@
 #define	LS_LICRONLY	"License-ref"
 #define	LS_PATRONLY	"Patent-ref"
 
+/*
+ * NULL values
+ */
+#define	NULL_ITEM	(item_t *) NULL
+#define	NULL_LIST	(list_t *) NULL
+#define	NULL_FH		(fh_t *) NULL
+#define	NULL_CHAR	'\0'
+#define	NULL_STR	(char *) NULL
+
+/*
+ * Macros needed across >1 source module
+ */
+#define	isEOL(x)	((x == '\n') || (x == '\r') || (x == '\v'))
+#define	IS_HUGE(x)	(x >= gl.blkUpperLimit)
+
+
 #define	NOMOS_TEMP	"/tmp/nomos.tempdir"
 #define	NOMOS_TLOCK	"/tmp/nomos.tempdir/.lock.tmp,"
 
@@ -303,7 +319,7 @@ struct globals {
     char report[myBUFSIZ];
     /*    char extDir[myBUFSIZ]; */
     char pageName[myBUFSIZ]; 
-    /*    char logfile[myBUFSIZ]; */
+    char logfile[myBUFSIZ];
     char magicFile[myBUFSIZ];
     char cmdBuf[512]; 
     char dist[256]; 
@@ -442,38 +458,6 @@ struct fileHandler {
 typedef struct fileHandler fileHandler_t;
 
 /*
- * NULL values
- */
-#define	NULL_ITEM	(item_t *) NULL
-#define	NULL_LIST	(list_t *) NULL
-#define	NULL_FH		(fh_t *) NULL
-#define	NULL_CHAR	(char) NULL
-#define	NULL_STR	(char *) NULL
-
-/*
- * Macros needed across >1 source module
- */
-#define	isEOL(x)	((x == '\n') || (x == '\r') || (x == '\v'))
-#define	IS_HUGE(x)	(x >= gl.blkUpperLimit)
-
-/*
- * Macros for timing - refer to findPhrase() for usage examples
- */
-/* need TIMING_DECL in the declarations section of function */
-#define	DECL_TIMER	struct timeval bTV, eTV; float proctime
-#define	ZERO_TIMER	memcpy((void *) &bTV, (void *) &eTV, sizeof(eTV))
-#define	RESET_TIMER	END_TIMER; ZERO_TIMER
-#define	START_TIMER	RECORD_TIMER(bTV)
-#define	END_TIMER 	RECORD_TIMER(eTV) ; \
-			proctime = (float) (eTV.tv_sec - bTV.tv_sec) + \
-			    ((float) (eTV.tv_usec - bTV.tv_usec) * 0.000001) 
-#define	RECORD_TIMER(x)	(void) gettimeofday(&x, (struct timezone *) NULL)
-#define	PRINT_TIMER(x,y)	printf("%11.6f seconds: %s\n", proctime, x); \
-			if (y) { DUMP_TIMERS; }
-#define	DUMP_TIMERS	printf("[1]: %d.%06d\n", bTV.tv_sec, bTV.tv_usec); \
-			printf("[2]: %d.%06d\n", eTV.tv_sec, eTV.tv_usec)
-
-/*
  * List-based memory tags
  */
 #define	MTAG_UNSORTKEY	"list/str (initially-UNsorted key)"
@@ -517,6 +501,20 @@ typedef struct fileHandler fileHandler_t;
 #define	LABEL_CNTS	"Counts:"
 #define LABEL_HOTW	"Hotword: "
 
+/*
+   Functions defined in nomos.c, used in other files
+*/
+void Bail(int exitval);
+
+/*
+  Global Declarations
+*/
+extern struct globals gl;
+extern licText_t licText[];
+
+/*
+  Declarations for using the memory debug stuff
+*/
 #ifdef	MEMORY_TRACING 
 char *memAllocTagged();
 void memFreeTagged();
@@ -526,6 +524,23 @@ void memFreeTagged();
 #define	memFree(x,/*notused*/y)	free(x)
 #define	memAlloc(x,y)		calloc(x, 1)
 #endif	/* NOT MEMORY_TRACING */
+
+/*
+ * Macros for timing - refer to findPhrase() for usage examples
+ */
+/* need TIMING_DECL in the declarations section of function */
+#define	DECL_TIMER	struct timeval bTV, eTV; float proctime
+#define	ZERO_TIMER	memcpy((void *) &bTV, (void *) &eTV, sizeof(eTV))
+#define	RESET_TIMER	END_TIMER; ZERO_TIMER
+#define	START_TIMER	RECORD_TIMER(bTV)
+#define	END_TIMER 	RECORD_TIMER(eTV) ; \
+			proctime = (float) (eTV.tv_sec - bTV.tv_sec) + \
+			    ((float) (eTV.tv_usec - bTV.tv_usec) * 0.000001) 
+#define	RECORD_TIMER(x)	(void) gettimeofday(&x, (struct timezone *) NULL)
+#define	PRINT_TIMER(x,y)	printf("%11.6f seconds: %s\n", proctime, x); \
+			if (y) { DUMP_TIMERS; }
+#define	DUMP_TIMERS	printf("[1]: %d.%06d\n", bTV.tv_sec, bTV.tv_usec); \
+			printf("[2]: %d.%06d\n", eTV.tv_sec, eTV.tv_usec)
 
 /*
  * Cut-and-paste this stuff to turn on timing
