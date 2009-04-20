@@ -81,7 +81,7 @@ class upload_file extends FO_Plugin {
     //rint "<pre>UPF: after looking for agent_unpack, Unpack is:$Unpack\n</pre>";
     AgentCheckBoxDo($uploadpk);
 
-    if (CheckEnotification) {
+    if (CheckEnotification()) {
       $sched = scheduleEmailNotification($uploadpk);
       if ($sched !== NULL) {
         return($sched);

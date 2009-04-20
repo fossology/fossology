@@ -113,7 +113,7 @@ class upload_srv_files extends FO_Plugin {
       return ("Failed to create job record");
     }
     /* Check for email notification and adjust jq_args as needed */
-    if (CheckEnotification) {
+    if (CheckEnotification()) {
       if(empty($_SESSION['UserEmail'])) {
         $Email = 'fossy@localhost';
       }
