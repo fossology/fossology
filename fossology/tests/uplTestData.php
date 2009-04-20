@@ -86,7 +86,6 @@ class uploadTestDataTest extends fossologyTestCase
     print "Starting file uploads\n";
     foreach($uploadList as $upload)
     {
-      print "uplTD: upload is:$upload";
       $this->uploadFile('Testing', $upload, $description, null, '1,2,3');
     }
     /* Upload the urls using upload from url.  Check if the user specificed a
