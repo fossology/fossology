@@ -1,0 +1,134 @@
+<chapter>
+   <title>
+      Addresses
+   </title>
+   <summary>
+      Gall llyfrau cyfeiriadau arbed llawer o amser a gwaith teipio. 
+      Gallwch gynnwys cyfeiriadaur bobl y byddwch yn ysgrifennu 
+      atynt amlaf ynddynt, au hailddefnyddio drosodd a throsodd.
+   </summary>
+   <description>
+      <p>
+      Mae llyfrau cyfeiriadau yn nodwedd gwych o ran arbed amser. 
+      Gallwch storio cyfeiriadau y byddwch yn eu defnyddion aml yma. 
+      Mae gweinyddwyr LDAP (syn cael eu defnyddion aml gan gwmnïau 
+      a phrifysgolion er mwyn gwneud cyfeiriadau ledled y sefydlia
+      d yn hawdd iw cael) yn cael eu cynnal hefyd.
+      </p>
+      <p>
+      Os yw eich Porwr yn cynnal Javascript yna efallai y byddwch 
+      chi eisiau galluogir llyfr cyfeiriadau JavaScript o dan yr 
+      eitem ddewislen Options. Mae hwn yn beth bach gwirioneddol 
+      hwylus syn neidio i fyny. Mae rhestri cyfeiriadau mewn HTML 
+      pur yn cael eu cynnal felly gall porwyr nad ydynt yn cael eu 
+      cynnal gan Javascript ddefnyddio SquirrelMail heb golli 
+      unrhyw un or swyddogaethau.
+      </p>
+   </description>
+</chapter>
+
+<section>
+   <title>
+      Nick Name
+   </title>
+   <description>
+      <p>
+      Rhowch enw cyfarwydd yma. Rhywbeth i roi proc ich cof. Unrhyw 
+      beth a fydd yn rhoi syniad cywir i chi o ran pwy syn berchen 
+      y cyfeiriad ebost yma.
+      </p>
+   </description>
+</section>
+
+<section>
+   <title>
+      Email Address
+   </title>
+   <description>
+      <p>
+      Rhaid i hwn fod yn gyfeiriad ebost llawn cymwysedig yr 
+      unigolyn hwnnw. Fydd dyfalun da i ddim i chi yma. Mae tair 
+      rhan i gyfe iriad ebost. Yn gyntaf y maer hyn syn nodir 
+      derbynnydd, "johnq" er enghraifft. Yn dilyn hynny y maer adran 
+      enw parth, allai fod ar ffurf "tayloru". Yn olaf dawr parth 
+      ar y lefel uchaf, allai fod yn un o lwyth o bethau fel au, 
+      cc, us, com, org, net neu allai edrych fel edu. Felly os rown 
+      nir holl bethau hynny at ei gilydd maen rhaid iddo fod ar 
+      ffurf johnq@tayloru.edu. Os yw hyn yn anghywir rydych chin 
+      debygol o gael eich post yn ôl ar ffurf neges wedi adlamu.
+      </p>
+   </description>
+</section>
+
+<section>
+   <title>
+      Info
+   </title>
+   <description>
+      <p>
+      Dyma faes arall lle y gallwch roi rhywbeth ynddo ich atgoffa 
+      pwy ywr unigolyn. Mae hwn wedi ei lunio i fod yn hwy nar 
+      "Llysenw". Er enghraifft, os ydych chin cyfarfod â chyswllt 
+      busnes, gallech roi Cyfarfod yn y Symposiwm Tomatos.
+      </p>
+   </description>
+</section>
+
+<section>
+   <title>
+      Edit or Delete
+   </title>
+   <description>
+      <p>
+      Maer ddau fotwm yman eich galluogi  chi i ddewis un 
+      cyfeiriad unigol ac yna newid unrhyw un or meysydd uchod, 
+      neu ddileur cofnod yn gyfangwbl. Dim ond un cofnod y gallwch 
+      ei ddewis ar un tro ar gyfer y botwm edit.
+      </p>
+   </description>
+</section>
+
+<section>
+   <title>
+      Add to Personal address book
+   </title>
+   <description>
+      <p>
+      Llenwch y meysydd fel ag y maent wedi eu rhestru. Rhaid llenwir 
+      tri cyntaf (Llysenw, cyfeiriad E-bost, ac Enw cyntaf). Maer 
+      Cyfenw ar Wybodaeth ychwanegol yn ddewisol.
+      </p>
+   </description>
+</section>
+
+<section>
+   <title>
+      LDAP
+   </title>
+   <description>
+      <p>
+      Mae LDAP yn brotocol ar gyfer storio deunydd yn unedig a 
+      chanolog ac i gael gafael ar wybodaeth o bell. Er 
+      enghraifft, gallai prifysgol ddefnyddio LDAP fel yr un man 
+      lle y mae cyfeiriadau pob myfyriwr, aelod o staff a 
+      chyfadrannau yn cael eu storio au rhoi o fewn cyrraedd. Os 
+      yw wedi ei ffurfweddu i ddefnyddio gweinyddwr LDAP y 
+      brifysgol, gallai  SquirrelMail wedyn restru pob cyfeiriad 
+      ebost ar y campws (ynghyd âr meysydd llyfrau cyfeiriadau 
+      eraill os ydynt ar gael). Maer modd y mae SquirrelMail yn 
+      defnyddio LDAP yn wirioneddol nerthol yn yr ystyr ei fod 
+      yn <i>cyfuno</I> eich llyfr cyfeiriadau lleol ar wybodaeth am 
+      gyfeiriadau ar weinyddwr yr LDAP i gyflwynor holl wybodaeth 
+      fel pe bae yn un llyfr cyfeiriadau unigol.
+      </p><p>
+      Gallwch ffurfweddur gosodiad LDAP i ddefnyddio unrhyw 
+      weinyddwr LDAP, neu ei analluogi fel nodwedd yn gyfangwbl. 
+      Bydd angen i chi siarad â gweinyddwr eich system yngln âr 
+      nodwedd yma os oes gennych gwestiynau penodol.
+      </p><p>
+      Mae gosodiadau LDAP yn effeithior system SquirrelMail yn 
+      gyfangwbl; o ganlyniad maen rhaid eu sefydlu neu eu newid gan 
+      rhywun sydd ag awdurdod gweinyddol.
+      </p>
+   </description>
+</section>

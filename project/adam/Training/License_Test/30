@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<stream:stream xmlns="jabber:client" xmlns:stream="http://etherx.jabber.org/streams" >
+<message to="yo@chloe" type="chat"><body>hola</body><html xmlns="html://www.w3.org/1999/xhtml"><body ichatballoncolor="#111111" ichattextcolor="#000000"><font face="Courier" ABSZ="3">hola</font></body></html><x xmlns="jabber:x:event"><composing /></x></message>
+</stream:stream>

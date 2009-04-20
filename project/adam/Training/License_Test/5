@@ -1,0 +1,108 @@
+/** @page blist-signals Buddy List Signals
+
+ @signals
+  @signal buddy-status-changed
+  @signal buddy-idle-changed
+  @signal buddy-signed-on
+  @signal buddy-signed-off
+  @signal update-idle
+  @signal blist-node-extended-menu
+  @signal buddy-added
+  @signal buddy-removed
+  @signal buddy-icon-changed
+  @signal blist-node-aliased
+ @endsignals
+
+ <hr>
+
+ @signaldef buddy-status-changed
+  @signalproto
+void (*buddy_away)(GaimBuddy *buddy, GaimStatus *old_status, GaimStatus *status);
+  @endsignalproto
+  @signaldesc
+   Emitted when a buddy on your buddy list goes away.
+  @param buddy      The buddy whose status changed.
+  @param old_status The status that the buddy just changed from.
+  @param status     The status that the buddy just changed to.
+ @endsignaldef
+
+ @signaldef buddy-idle-changed
+  @signalproto
+void (*buddy_idle)(GaimBuddy *buddy, gboolean old_idle, gboolean idle);
+  @endsignalproto
+  @signaldesc
+   Emitted when a buddy on your buddy list becomes idle.
+  @param buddy    The buddy whose idle status changed.
+  @param old_idle Whether the buddy was idle.
+  @param idle     Whether the buddy is currently idle.
+ @endsignaldef
+
+ @signaldef buddy-signed-on
+  @signalproto
+void (*buddy_signed_on)(GaimBuddy *buddy);
+  @endsignalproto
+  @signaldesc
+   Emitted when a buddy on your buddy list signs on.
+  @param buddy The buddy that signed on.
+ @endsignaldef
+
+ @signaldef buddy-signed-off
+  @signalproto
+void (*buddy_signed_off)(GaimBuddy *buddy);
+  @endsignalproto
+  @signaldesc
+   Emitted when a buddy on your buddy list signs off.
+  @param buddy The buddy that signed off.
+ @endsignaldef
+
+ @signaldef update-idle
+  @signalproto
+void (*update_idle)();
+  @endsignalproto
+  @signaldesc
+   Emitted when the buddy list is refreshed and the idle times are updated.
+ @endsignaldef
+
+ @signaldef blist-node-extended-menu
+  @signalproto
+void (*blist_node_extended_menu)(GaimBlistNode *node, GList **menu)
+  @endsignalproto
+  @signaldesc
+   Emitted when a buddlist menu is being constructed @a menu is a pointer to
+   a GList of GaimBlistNodeAction's allowing a plugin to add menu items
+ @endsignaldef
+
+ @signaldef buddy-added
+  @signalproto
+void (*buddy_added)(GaimBuddy *buddy)
+  @endsignalproto
+  @signaldesc
+   Emitted when a new buddy is added to the buddy list.
+  @endsignaldef
+
+ @signaldef buddy-icon-changed
+  @signalproto
+void (*buddy_icon_changed)(GaimBuddy *buddy)
+  @endsignalproto
+  @signaldesc
+   Emitted when a buddy's icon is set.
+  @endsignaldef
+
+ @signaldef buddy-removed
+  @signalproto
+void (*buddy_removed)(GaimBuddy *buddy)
+  @endsignalproto
+  @signaldesc
+   Emitted when a buddy is removed from the buddy list.
+  @endsignaldef
+
+ @signaldef blist-node-aliased
+  @signalproto
+void (*blist_node_aliased)(GaimBlistNode *node, const char *old_alias)
+  @endsignalproto
+  @signaldesc
+   Emitted when a blist node (buddy, chat, or contact) is aliased.
+  @endsignaldef
+
+ */
+// vim: syntax=c tw=75 et

@@ -1,0 +1,57 @@
+<chapter>
+   <title>
+      Pengantar SquirrelMail
+   </title>
+   <summary>
+	SquirrelMail menyediakan cara memeriksa Surat-E melalui Jelajah Jagad Jembar.	
+    </summary>
+   <description>
+      <p>
+	Jadi apa sesungguhnya <A HREF="http://www.squirrelmail.org/index.php3?from=1">SquirrelMail</A> itu?
+	Yaitu suatu antar muka web ke surate yang ditulis dengan <A HREF="http://www.php.net">PHP4</A>.
+	SquirrelMail dirancang untuk mengakses surate melalui server web Anda dari seluruh penjuru dunia. 
+	Informasi yang lebih lengkap tentang caranya serta protocol IMAP 
+	bisa ditemukan <A HREF="http://imap.org">di sini</A>.
+      </p>
+   </description>
+</chapter>   
+
+<section>
+   <title>
+      Yang Mendasar
+   </title>
+   <description>
+      <p>
+	Jika Anda punya pertanyaan singkat, Anda mungkin ingin melihat PSD 
+	(FAQ) .
+      </p>
+      <p>
+	SquirrelMail terdiri dari dua bagian utama yang disebut frame. Frame 
+	kiri berisi laci yang terdaftar. Informasi lebih lanjut tentang 
+	bagian ini dapat ditemukan di bagian "Laci" dari naskah panduan ini.
+      </p>
+      <p>
+	Di bagian kanan adalah tempat semua kejadian. Di sebelah 
+	atas adalah baris menu. "Keluar" akan membawa Anda keluar dari program 
+	dengan selamat saat Anda sudah selesai melihat surat. "Laci saat ini" 
+	menampilkan laci yang saat ini sedang Anda lihat. Segera setelah masuk , 
+	INBOX Anda akan terlihat di sini.
+      </p>
+      <p>
+	Di bawah baris atas berisi pilihan menu:
+         <ul>
+            <li><b>Tulis Surat</b> - Digunakan untuk menulis surat. 
+            <li><b>Alamat</b> - Di sini disimpan daftar alamat surat yang 
+				Anda simpan di buku alamat.
+            <li><b>Laci</b> - Semua manipulasi laci ada di sini. Anda 
+			      bisa menghapus, membuat, mengganti nama, 
+			      memasukkan, membuang suatu laci. 
+            <li><b>Pilihan</b> - Mengubah cara SquirrelMail tampil dan 
+				 konfigurasi lainnya. 
+            <li><b>Cari</b> - Dengan ini, Anda dapat mencari sesuatu kata 
+			      di kotak surat Anda dengan suatu kriteria tertentu. 
+            <li><b>Panduan</b> - Anda sedang berada di sini! 
+         </ul>
+      </p>
+   </description>
+</section>   

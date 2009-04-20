@@ -1,0 +1,29 @@
+/** @page cipher-signals Cipher Signals
+
+ @signals
+  @signal cipher-added
+  @signal cipher-removed
+ @endsignals
+
+ <hr>
+
+ @signaldef cipher-added
+  @signalproto
+void (*cipher_added)(GaimCipher *cipher);
+  @endsignalproto
+  @signaldesc
+   Emitted when a cipher is added.
+  @param cipher The cipher that was added.
+ @endsignaldef
+
+ @signaldef cipher-removed
+  @signalproto
+void (*cipher_removed)(GaimCipher *cipher);
+  @endsignalproto
+  @signaldesc
+   Emitted when a cipher is removed.
+  @param cipher The cipher that was removed.
+ @endsignaldef
+
+ */
+// vim: syntax=c tw=75 et

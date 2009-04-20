@@ -1,0 +1,20 @@
+For information on writing a plugin for Gaim, go
+http://gaim.sourceforge.net/api/ and see the HOWTOs in the
+"Related Pages" section.
+
+You can also generate this documentation locally by installing
+doxygen and graphviz dot, then running "make docs" in the Gaim
+source tree.  The documentation will be in the docs/html directory.
+
+This next paragraph is old and possibly out of date:
+Compilation of the plugins is fairly straight-forward; there is a
+Makefile in this directory that has a rule for making the .so file
+from a .c file. No modification of the Makefile should be necessary,
+unless if you simply want to type 'make' to have it made; otherwise,
+'make filename.so' will take filename.c and make the .so plugin from
+it. If you need to link in with extra libraries, you can set the
+environment variable PLUGIN_LIBS to be the libraries you want to link
+with.
+
+It should be possible to compile plugins outside of the Gaim source
+tree, which is a much cleaner solution.
