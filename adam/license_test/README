@@ -1,0 +1,26 @@
+license_test.py is a simple naive bayes classifier for determining whether a file contains a license or not.
+
+Training data:
+	Two files containing the paths of the positove and negative training files are needed. One line for each path. The standard license templates can be used for the positive training data. The following command can be used to create the needed file;
+	find ../../../fossology/agents/foss_license_agent/Licenses/Raw/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt
+	For the negative training file use the following command;
+	find ../Training/License_Test -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > neg.txt
+
+NOTE : $PYTHONPATH should include the utils directory contained in the parent of this directory.
+
+Usage: license_test.py -y yes_files -n no_files [ -h ] test_files...
+
+Options:
+  -h, --help         show this help message and exit
+  -y YES, --yes=YES  A text file with the paths to the yes training files.
+  -n NO, --no=NO     A text file with the paths to the no training files.
+  --lw=LW            Left window plus 1. Must be > 0.
+  --rw=RW            Right window plus 1. Must be > 0
+  --pr=PR            Prior probability of seeing a yes file. Must be between 0
+                     and 1
+
+Example:
+	export PYTHONPATH=../utils/
+	find ../../../fossology/agents/foss_license_agent/Licenses/Raw/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt
+	find ../Training/License_Test/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > neg.txt
+	python license_test.py -y pos.txt -n neg.txt `find /usr/share/doc/ -type f`
