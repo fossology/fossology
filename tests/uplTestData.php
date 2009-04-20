@@ -72,7 +72,7 @@ class uploadTestDataTest extends fossologyTestCase
     global $PROXY;
     print "starting testUploadTestData\n";
     $rootFolder = 1;
-    $uploadList = array('TestData/archives/fossI16L519.tar.bz2',
+    $uploadList = array('TestData/archives/fossI16L518.tar.bz2',
                         'TestData/archives/foss23D1F1L.tar.bz2',
                         'TestData/licenses/gplv2.1',
                         'TestData/licenses/Affero-v1.0');
@@ -82,10 +82,11 @@ class uploadTestDataTest extends fossologyTestCase
                      'http://snape.west/~fosstester/archives/fossDirsOnly.tar.bz2');
 
     /* upload the archives using the upload from file menu */
-    $desciption = "File $upload uploaded by Upload Data Test";
+    $description = "File $upload uploaded by Upload Data Test";
     print "Starting file uploads\n";
     foreach($uploadList as $upload)
     {
+      print "uplTD: upload is:$upload";
       $this->uploadFile('Testing', $upload, $description, null, '1,2,3');
     }
     /* Upload the urls using upload from url.  Check if the user specificed a
