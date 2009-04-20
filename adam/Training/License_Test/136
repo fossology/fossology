@@ -1,0 +1,28 @@
+This plugin is used to notify the user when a new mail arrives. There are
+several ways to do this. One is to play a sound through the browser whenever 
+the user has unseen messages flagged in the left window pane. There are options 
+available (on the options page of course) to disable this feature for each user, 
+and to select different media files from the users local computer. The default 
+is that this is NOT enabled, so you'll need to go to the options menu to turn 
+it on first! There are also options to show a popup window via JavaScript.
+
+Plugin options are visible only when JavaScript is enabled or detected by
+SquirrelMail JavaScript detection functions.
+
+From SquirrelMail 1.5.1 newmail plugin's site configuration can be stored in
+config/newmail_config.php or plugins/newmail/config.php.
+
+$allowsound setting is replaced with $newmail_allowsound and should be stored
+inside plugin's site configuration file.
+
+Plugin supports playback of WAV, SWF, MP3, OGG and SVG media files. Currently
+OGG and SVG files are played only by browsers that implement w3.org nested 
+objects correctly and browsers that can play <embed> objects. Internet Explorer 
+can't play them due to broken <object> implementation. OGG and SVG <object> 
+elements specific to IE are not implemented.
+
+CREDITS
+
+This plugin has been originally created by Mike Huttinger, with contributions by
+Tyler Akins and Seth Randall. It's now maintained by the SquirrelMail Project
+Team.

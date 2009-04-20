@@ -1,0 +1,328 @@
+<todo version="0.1.19">
+    <title>
+        Gaim TODO List
+    </title>
+    <note priority="high" time="1036029816">
+        UI stuff
+        <note priority="high" time="1053306672" done="1089237474">
+            need to be able to copy/paste smilies
+            <comment>
+                done some time ago
+            </comment>
+        </note>
+        <note priority="medium" time="1035996189" done="1089237564">
+            resizing text entry area below default doesn't work well.
+            <comment>
+                wysiwyg and changes from that time period fixed this
+            </comment>
+            <note priority="medium" time="1035996380" done="0">
+                some people report being unable to shrink it at all
+            </note>
+        </note>
+        <note priority="verylow" time="1036039515" done="1092939361">
+            copy grabs html as well as text.
+            <comment>
+                wysiwyg solved this
+            </comment>
+        </note>
+        <note priority="veryhigh" time="1035996049">
+            kicking someone in #name-extension causes a kick to display in #name as well and vice-versa
+        </note>
+        <note priority="veryhigh" time="1036028214">
+            SEARCH FUNCTION FOR LOG FILES
+            <note priority="veryhigh" time="1092939096">
+                current function only highlights every other entry (sf bug 980075)
+            </note>
+        </note>
+        <note priority="high" time="1036028245">
+            fix crash when someone writes just as you close the chat window.
+        </note>
+        <note priority="high" time="1066444991">
+            Save buddy icon option does not work, it saves a screenname.icon file which is not openable.
+        </note>
+        <note priority="medium" time="1036028206">
+            status report w/out being on own list
+        </note>
+        <note priority="medium" time="1036039939">
+            option not to raise windows on event while away
+        </note>
+        <note priority="medium" time="1036039961">
+            make entry widget height preference a relative size, that is it doesn't change the overall height of the window.
+        </note>
+        <note priority="medium" time="1036040014">
+            buddy pounce stuff
+            <note priority="medium" time="1036040050" done="1129562645">
+                drop down list of buddies
+                <comment>
+                    I think tab complete for the field solves this
+                </comment>
+            </note>
+        </note>
+        <note priority="medium" time="1036210515">
+            blist does not resize correctly on some platforms. this does not seem to be an issue on linux.
+        </note>
+        <note priority="medium" time="1036337817">
+            better gtk2-ified icons: maybe a send icon? review the ones we're using now. do they make sense?
+        </note>
+        <note priority="medium" time="1036361367">
+            do not automatically resize windows that have been manually resized.
+            <comment>
+                is this fixed?
+            </comment>
+            <note priority="medium" time="1036361428" done="1129562686">
+                when a new tab is created
+                <comment>
+                    I think this is solved now that tabs always display
+                </comment>
+            </note>
+            <note priority="medium" time="1036361397">
+                when a buddy icon is received
+            </note>
+            <note priority="medium" time="1036361407">
+                when an im image is received
+            </note>
+        </note>
+        <note priority="low" time="1036027907">
+            block buddy option from right click menu in blist
+        </note>
+        <note priority="low" time="1036346291">
+            blist short cuts apparently not working
+        </note>
+        <note priority="low" time="1092939253">
+            display status overlay for buddies on the blist that have been blocked
+        </note>
+        <note priority="verylow" time="1036039472">
+            option to have input box scroll instead of line wrap. input box only.
+        </note>
+        <note priority="verylow" time="1036040093">
+            Transparency for GtkIMHtml
+        </note>
+    </note>
+    <note priority="high" time="1036029923">
+        Prefs stuff
+        <note priority="veryhigh" time="1129562765">
+            make sure prefs save
+        </note>
+        <note priority="high" time="1129562791">
+            move plugins out of prefs to their own dialog
+        </note>
+        <note priority="medium" time="1036028226">
+            preference to set logfile path. (i think there is a patch to add this)
+        </note>
+        <note priority="low" time="1036027262">
+            add ircproxy option to proxy preferences.
+        </note>
+        <note priority="low" time="1036027278">
+            per-sn controls on how to compute idle time
+        </note>
+    </note>
+    <note priority="high" time="1036030165">
+        Core stuff
+        <note priority="low" time="1036038499" done="1129562864">
+            encryption and hash stuff currently in gaim consolidated to an api
+            <comment>
+                cipher api
+            </comment>
+        </note>
+        <note priority="veryhigh" time="1036027053">
+            PERMIT ONLY PEOPLE ON MY LIST TO IM ME IS NEEDED ASAP!!!!!!!!
+            <note priority="veryhigh" time="1036027074">
+                for yahoo
+            </note>
+            <note priority="veryhigh" time="1036027081">
+                icq
+            </note>
+            <note priority="medium" time="1036027095">
+                msn
+            </note>
+        </note>
+        <note priority="medium" time="1036026995">
+            documentation needed. (both online and not)
+        </note>
+        <note priority="medium" time="1036038388">
+            better privacy controls.
+        </note>
+        <note priority="medium" time="1036038411">
+            networking code rethink (libgnet?)
+        </note>
+        <note priority="low" time="1036038360">
+            Cancelable proxy_connect
+        </note>
+    </note>
+    <note priority="high" time="1036040208">
+        away rethink
+        <note priority="high" time="1129562952">
+            make it possible to create a state with exceptions
+        </note>
+        <note priority="high" time="1129562964">
+            make it possible to use a saved state
+        </note>
+        <note priority="medium" time="1036040310">
+            Away needs to be modified to include "show" and "status", i.e. you can have an away state, and an away message. This is exactly what ICQ does - you're "N/A" (show in Jabber) and your away message is "I'm gone." (status in Jabber). Since it only applies to ICQ and Jabber (and actually, currently only Jabber, since icqlib doesn't handle away messages yet), there should be some way of indicating that it can do both without breaking the others. My suggestion is to put "/" at the end of the "state", and when that's there, have it be a menu with all of the custom messages, e.g. in Jabber it'd return "Away/" as one of the states, and you'd see "Away" with a menu of all the away messages you have.
+        </note>
+    </note>
+    <link filename="src/protocols/gg/.todo" priority="medium" time="0"/>
+    <link filename="src/protocols/irc/.todo" priority="medium" time="0"/>
+    <link filename="src/protocols/jabber/.todo" priority="medium" time="0"/>
+    <link filename="src/protocols/msn/.todo" priority="medium" time="0"/>
+    <link filename="src/protocols/napster/.todo" priority="medium" time="0"/>
+    <link filename="src/protocols/oscar/.todo" priority="medium" time="0"/>
+    <link filename="src/protocols/yahoo/.todo" priority="medium" time="0"/>
+    <link filename="src/protocols/zephyr/.todo" priority="medium" time="0"/>
+    <note priority="medium" time="1036029726">
+        WinGaim specific stuff
+        <note priority="high" time="1035995058">
+            wingaim: Gtk windows that appear when you hover over a button, and just stay there and never close until you click on them once
+        </note>
+        <note priority="high" time="1037028106">
+            with 3 or more tabs, only the right most tab is closable. this appears to be a gtk for win32 problem
+        </note>
+        <note priority="medium" time="1035995010">
+            wingaim font issues
+        </note>
+        <note priority="medium" time="1035995227">
+            wingaim: sounds while away?
+        </note>
+        <note priority="low" time="1039544237">
+            Write a seperate program that implements multiple-users.  It should encrypt/decrypt .gaimrc's based on a provided password, then launch gaim -f, with that .gaimrc.
+        </note>
+    </note>
+    <note priority="medium" time="1036030029">
+        gaim-remote stuff
+        <note priority="low" time="1035996470">
+            GAIM-REMOTE: need a doc written up for gaim-remote on usage
+        </note>
+        <note priority="low" time="1035996488">
+            GAIM-REMOTE: need to implement everything listed in gaim-remote --help
+        </note>
+    </note>
+    <note priority="medium" time="1036030336">
+        In General (i don't know where this should be)
+        <note priority="medium" time="1036039588" done="1063208189">
+            person support
+            <comment>
+                faceprint added it
+            </comment>
+        </note>
+        <note priority="high" time="1036027886">
+            fix memory leaks
+        </note>
+        <note priority="medium" time="1036028233">
+            gzip storage of logs
+            <comment>
+                a plugin could do this now
+            </comment>
+        </note>
+        <note priority="medium" time="1036028352">
+            throwaway away message (unsaved) for single account (vs. set all away)
+        </note>
+        <note priority="medium" time="1037924676">
+            add state saving and hook it to session management and user dialogs
+        </note>
+        <note priority="low" time="1036027794">
+            importing/exporting blist files
+            <note priority="medium" time="1092939903">
+                export one account's worth of blist.xml
+            </note>
+            <note priority="medium" time="1092939932">
+                import whatever we export, to any account
+            </note>
+            <note priority="low" time="1036027810">
+                licq
+            </note>
+            <note priority="verylow" time="1063208225">
+                trillian
+            </note>
+        </note>
+        <note priority="low" time="1041997250">
+            adding and removing buddies needs cleaned up. basically, add_buddy should be calling ui_add_buddy and serv_add_buddy as needed (require an extra arg to add_buddy to tell  it what needs done) and the various ways a buddy can come to be needing added should be calling some type of request_add_buddy (this would be part of both the core&lt;-&gt;ui interface and the core&lt;-&gt;prpl interface)
+        </note>
+        <note priority="low" time="1043803149">
+            some way to ask about differences bettween server lists and local lists
+        </note>
+    </note>
+    <note priority="medium" time="1036030450">
+        Plugins/Scripts
+        <note priority="high" time="1129563228">
+            move to gobjects and gsignals
+        </note>
+        <note priority="medium" time="1036028091">
+            sean's plugin ideas
+            <note priority="medium" time="1036028108">
+                screenshot plugin
+            </note>
+            <note priority="medium" time="1036028113">
+                xmms remote plugin
+            </note>
+            <note priority="medium" time="1036028123">
+                statusimage plugin
+            </note>
+        </note>
+        <note priority="low" time="1037924600">
+            docklet stuff
+            <note priority="medium" time="1037924629">
+                make the docklet support blinking status icons where appropriate (requires setting up a better GAIM_STOCK_ICON framework)
+            </note>
+        </note>
+    </note>
+    <note priority="verylow" time="1036026433">
+        DISCUSSION: entries here are things i'm not sure are desirable or doable.
+        <note priority="low" time="1036026529" done="1089237962">
+            do we really need some of the preferences? (Ignore TIK messages. Does anyone use that method of retrieving Away messages anymore? no, but it is small and it would be a piece of history lost ;-))
+            <comment>
+                prefsslash04
+            </comment>
+        </note>
+        <note priority="low" time="1036026508">
+            "console beep" sound option should use different frequency beeps for different events, or at least give some way to allow this behavior.
+        </note>
+        <note priority="low" time="1036026609">
+            ximian serial numbers in rpms cause... problems.
+        </note>
+        <note priority="low" time="1036026691">
+            msn auth expires (better, but still not perfect)
+        </note>
+        <note priority="low" time="1036026746">
+            gaim should detect if message is sent and only log on success for protocols capable of offline messaging, this would always log, but aim messages would only be logged if sent to an online person. this would essentially entail making logging dependent on the return status of the serv send msg command.
+        </note>
+        <note priority="low" time="1036026818">
+            the privacy dialog has five different options now.  this looks rather ugly.  When we redesign the dialog, perhaps we should change the privacy setting to a combobox?
+        </note>
+        <note priority="verylow" time="1036026484">
+            protocol action to log into webmail for those that support such (aim, yahoo, msn)  maybe a right-click option to send to user(yahoo, msn)
+        </note>
+        <note priority="verylow" time="1036026538">
+            show alias in list of people in chat
+        </note>
+        <note priority="verylow" time="1036026552">
+            tab complete to alias, translate to nick on send for chat
+        </note>
+        <note priority="verylow" time="1036026597">
+            sorting of conversation tabs, if the ordering of left-to-right order by opening isn't good enough for you
+        </note>
+        <note priority="verylow" time="1036026772">
+            option to disable close for x seconds after receive im. this would short circuit missing messages as you close the window. make it an option that's off by default.
+        </note>
+        <note priority="verylow" time="1036026845">
+            options on key bindings. (different window managers map different things).
+            <note priority="verylow" time="1036026870">
+                make the control key switchable with the alt key or similar)
+            </note>
+            <note priority="verylow" time="1036026881">
+                maybe make control/alt+arrow optionally replace control+bracket (since control-pageup and control-pagedown work, i'm inclined not to do this)
+            </note>
+        </note>
+        <note priority="verylow" time="1036028335">
+            make the option to have escape close a window be global (error messages, account editor, etc.)
+        </note>
+    </note>
+    <note priority="verylow" time="1036027143">
+        autotools/gettext
+        <note priority="verylow" time="1036027169">
+            automake 1.4 support bug, non-root users can't get gaim to compile by putting the gtk2 and glib2 m4 files in the m4 dir
+        </note>
+        <note priority="verylow" time="1036027184">
+            automake 1.[56] support not perfect.
+        </note>
+    </note>
+</todo>

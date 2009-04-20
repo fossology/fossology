@@ -1,0 +1,111 @@
+<chapter>
+   <title>
+      Izdelava sporoèila
+   </title>
+   <summary>
+      Ta funkcija, vam omogoèa da napi¹ete novo sporoèilo in jo po¹ljete razliènim osebam.
+   </summary>
+   <description>
+      <p>
+      Ob kliku vas prenese na stran kjer napi¹ete novo sporoèilo. Videli boste veliko polj 
+	  in nekaj gumbov.
+	  </p>
+   </description>
+</chapter>
+
+<section>
+   <title>
+      Prejme (To)
+   </title>
+   <description>
+      <p>
+      Najprej je polje <B>Prejme:</B>.  V to polje vpi¹ete email naslov osebe, kateri
+	  je namenjeno to sporoèilo. Naslovov lahko vpi¹ete kolikor ¾elite, ampak se morajo
+	  konèati z vejico. En naèin je tudi da kliknete na gumb "Adresar". Ne skrbite èe
+	  se celoten naslov ne vidi.
+      </p>
+   </description>
+</section>
+
+<section>
+   <title>
+      Kopija (cc)
+   </title>
+   <description>
+      <p>
+      Naslednje je <B>Kopija (cc:)</B> polje.  CC je kraj¹ava za <B>C</B>arbon <B>C</B>opy.
+      Èe ¾elite poslati to enako sporoèilo ¹e komu, potem je to polje za vas. Vpi¹ete lahko
+      neomejeno ¹tevilo email naslovov, enako kot pri <B>Prejme(To):</B>
+      </p>
+   </description>
+</section>
+
+<section>
+   <title>
+     Osebna kopija (Bcc)
+   </title>
+   <description>
+      <p>
+      BCC je kraj¹ava za <B>B</B>lind <B>C</B>arbon <B>C</B>opy.
+      Uporabite to polje èe ¾elite poslati ¹e nekomu kopijo sporoèila <I>ne da bi</I>
+      prejemnik v <B>Prejme (To):</B> ali <B>Kopija(CC):</B> vedel za to.
+      </p>
+   </description>
+</section>
+
+<section>
+   <title>
+      Naslov
+   </title>
+   <description>
+      <p>
+      Napi¹ite naslov tukaj.  Zapomnite si, email vam lahko prihrani veliko èasa
+      in dober, logièen in zapeljiv naslov je velik korak.
+      </p>
+   </description>
+</section>
+
+<section>
+   <title>
+      Adresar Gumb
+   </title>
+   <description>
+      <p>
+      Ta gumb vam odpre Adresar po iskalnem polju.
+      Nekaj morate vpsiati v iskalno polje da bi dobili kak¹ne rezultate.
+      Èe so potrebni vsi naslovi iz Adresarja, vpi¹ite prostor tukaj in kliknite Iskanje gumb.
+      Dodatne informacije so na voljo v "Naslovi" razdelku.
+      </p>
+   </description>
+</section>
+
+<section>
+   <title>
+      Telo Sporoèila
+   </title>
+   <description>
+      <p>
+      Velik prazen prostor je namenjen za karkoli. Èe ste si shranili podpis, bo ta
+     podpisen viden tukaj. To polje je namenjeno za pisanje vsebine sporoèila.
+      </p>
+   </description>
+</section>
+
+<section>
+   <title>
+      Prilo¾i
+   </title>
+   <description>
+      <p>
+      Ta funkcija je namenjena da lahko prilo¾ite zraven sporoèila kak¹no datoteko.
+	  Datoteka mora biti na <i>lokalnem</i> ali mre¾nem raèunalniku. Browse gumb ima funkcijo
+	  da prei¹èete direktorije za va¹o datoteko in nato kliknte da jo prilo¾ite.
+	  V polje prilo¾i lahko tudi roèno vpi¹ete pot do datoteke. Nato enostavno
+	  kliknite Dodaj gumb da se bo ta datotka prilo¾ila k sporoèilu.
+      </p>
+      <p>
+      Takoj ko je datoteka pripeta, se pojavi nov gumb za pripenjanje nove datoteke.
+	  Brisanje prilo¾ene datoteke se izvr¹i ob izbiri datoteke, in nato kliknemo gumb "Pobri¹i izbrani dodatek".
+      <p>
+   </description>
+</section>
