@@ -15,9 +15,9 @@ fo_notify [-e email-address] [-h] [-j <job-name>] [-n user-name]  -u <upload-id>
 =head1 DESCRIPTION
 
 B<fo_notify> is a dual purpose command. The main purpose of
-B<fo_notify. is to act as the email notification agent when email notificiation is
+B<fo_notify> is to act as the email notification agent when email notificiation is
 turned on for a user account in the Graphical User Interface. The status is 
-send in email and is reported as aborted, failed, still active or done based on the job queue 
+sent in email and is reported as aborted, failed, still active or done based on the job queue 
 data-base entries for that upload.  The command can also be run as a cli to
 report the status of the upload or send email about it's status.  
 
@@ -39,7 +39,7 @@ on the email address format, make sure it's correct.
 
 Standard help flag, prints usage.
 
-=item B<-j <job-name>
+=item B<-j <job-name>>
 
 Optional job name.  Using this option will change the name of the job in the message.
 The job name supplied will be used instead of the name that was used for the upload 
