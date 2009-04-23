@@ -57,10 +57,19 @@ class check4jobs {
   private $Db;
 
   function __construct() {
-    $this->Db = new db();
+    /*
+     * always use the installed root user for the db.
+     */
+    if(file_exists('/etc/fossology/Db.conf')) {
+      $options = file_get_contents('/etc/fossology/Db.conf');
+    }
+    else if (file_exists('/usr/local/etc/fossology/Db.conf')) {
+      $options = file_get_contents('/usr/local/etc/fossology/Db.conf');
+    }
+    $this->Db = new db($options);
     $connection = $this->Db->connect();
     if (!(is_resource($connection))) {
-      print "{$argv[0]}:FATAL ERROR!, could not connect to the data-base\n";
+      print "check4jobs:FATAL ERROR!, could not connect to the data-base\n";
       return(NULL);
     }
     $this->_ck4j();
