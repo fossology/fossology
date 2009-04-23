@@ -250,12 +250,10 @@ class fossologyTest extends WebTestCase
           //print "Adding cleanText to select array\n";
           $Selects[$selectList->item($i)->getAttribute('name')][$cleanText] = $optionValue;
           $foo = $selectList->item($i)->getAttribute('onload');
-          print "PSS: foo is:$foo\n";
         }
       }
     }
 
-    print "PSS: Selects is:\n"; print_r($Selects) . "\n";
     /*
      * if there were no selects found, then we were passed something that
      * doesn't exist.
@@ -281,6 +279,24 @@ class fossologyTest extends WebTestCase
       }
     }
   }  // parseSelectStmnt
+
+  public function parseFossjobs() {
+    /* use fossjobs to get the upload ids */
+    $last = exec('fossjobs -u',$uploadList, $rtn);
+    //print "uploadList is:\n";print_r($uploadList) . "\n";
+    foreach ($uploadList as $upload) {
+      list($upId, $file, $comment) = split(' ', $upload);
+      print "UP:$upId, F:$file, C:$comment\n";
+      if($upId == '#') {
+        continue;
+      }
+      $uploadId = rtrim($upId, ':');
+      $Uploads[$uploadId] = $file;
+      $LastUploads[$file] = $uploadId;
+      print "uploads is:\n";print_r($Uploads) . "\n";
+      print "LastUploads is:\n";print_r($LastUploads) . "\n";
+    }
+  }
 
   /**
    * function setAgents
@@ -400,7 +416,7 @@ class fossologyTest extends WebTestCase
         $select[$sname] = array ('onload'   => $onload,
                                  'onchange' => $onchange,
                                  'id'       => $id
-                                );
+        );
         break;            // all done
       }
     }
@@ -408,7 +424,7 @@ class fossologyTest extends WebTestCase
     return($select);
   }
 
- /**
+  /**
    * setSelectAttr
    *
    * set select attributes.
@@ -440,9 +456,9 @@ class fossologyTest extends WebTestCase
     $selectList = $hpage->getElementsByTagName('select');
     print "SSA: number of selects on this page:$selectList->length\n";
     /*
-    * gather the section names and group the attributes with each section
-    * collect the data at the same time.  Assemble into the data structure.
-    */
+     * gather the section names and group the attributes with each section
+     * collect the data at the same time.  Assemble into the data structure.
+     */
     $select = array();
     for($i=0; $i < $selectList->length; $i++) {
       $sname = $selectList->item($i)->getAttribute('name');
