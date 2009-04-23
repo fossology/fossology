@@ -85,12 +85,7 @@ if (array_key_exists("h",$options)) {
   print $Usage;
   exit(0);
 }
-//print "  NOT: parameters passed in are:\n"; print_r($options) . "\n";
 
-/*
- * Note the logic below makes -e a  required parameter... not what we want for
- * interactive use.  Think about this.
- */
 /* no -e implies interactive, just print to stdout */
 $Interactive = FALSE;
 /* Default TO: is the users email */
@@ -234,7 +229,7 @@ if ($Done) {
                  "Your job $JobName has $JobStatus.";
   $Message = $Preamble . $MessagePart;
   if ($Interactive) {
-    $MessagePart .= "For more details, see: $JobHistoryUrl\n";
+    $MessagePart .= " For more details, see: $JobHistoryUrl\n";
     printMsg($MessagePart);
   }
 }
