@@ -48,7 +48,7 @@ class verifyDirsOnly extends fossologyTestCase
   {
     /*
      * This test requires that the fossology test archive has been
-     * loaded under the name foss23D1F1L.tar.bz2
+     * loaded under the name fossDirsOnly.tar.bz2
      */
     global $URL;
     global $name;
