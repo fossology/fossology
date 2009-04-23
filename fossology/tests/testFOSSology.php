@@ -44,6 +44,7 @@
  * against the issue I ran into with it not writting to the correct
  * logfile.
  * @TODO: -c option for cleanup
+ * @TODO switch to using fo-runTests for all tests.
  *
  */
 
@@ -66,19 +67,22 @@ global $logFile;
 global $logFileName;
 global $LF;
 
+
+$SiteTests = '../ui/tests/SiteTests';
+$BasicTests = '../ui/tests/BasicTests';
+$UserTests = '../ui/tests/Users';
+$EmailTests = '../ui/tests/EmailNotification';
+$VerifyTests = '../ui/tests/VerifyTests';
+
 /*
  * process parameters and run the appropriate test suite,
  * redirect  outputs to log file
  */
-$setUp = FALSE;
 $errors = 0;
 $date = date('Y-m-d');
 $time = date('h:i:s-a');
 $defaultLog = "/FossTestResults-$date-$time";
 $myname = $argv[0];
-$SiteTests = '../ui/tests/SiteTests';
-$BasicTests = '../ui/tests/BasicTests';
-$VerifyTests = '../ui/tests/VerifyTests';
 
 $Home = getcwd();
 $pid = getmypid();
@@ -107,17 +111,12 @@ if (array_key_exists('l', $options))
   $logFileName = basename($logFile);
 }
 
-//$LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
-//print "Using log file:$logFile\n";
-
 /**
- * _runSetupPage()
+ * _runSetupVerify()
  *
- * private helper function Sets the static variable $setUp if the test
- * setups ran without error.
  *
  */
-function _runSetupVerify()
+function _runTestEnvSetup()
 {
   global $date;
   global $myname;
@@ -125,26 +124,37 @@ function _runSetupVerify()
   global $logFile;
   global $LF;
 
+  $errors = 0;
+
   if (chdir($Home) === FALSE)
   {
-    LogAndPrint($LF, "_runSetupVerify ERROR: can't cd to $Home\n");
+    LogAndPrint($LF, "_runTestEnvSetup ERROR: can't cd to $Home\n");
   }
   print "\n";
-  $SetupLast = exec("./uploadTestData.php >> $logFile 2>&1", $dummy, $SUrtn);
+  $UpLast = exec("./uploadTestData.php >> $logFile 2>&1", $dummy, $SUrtn);
+  $AALast = exec("./fo-runTests.php -l AgentAddData.php >> $logFile 2>&1", $dummy, $AArtn);
+  $UIusers = exec("./fo-runTests.php -l createUIUsers.php >> $logFile 2>&1", $dummy, $UsrRtn);
+
   // need to check the return on the setup and report accordingly.
-  if ($SUrtn != 0)
-  {
-    LogAndPrint($LF, "ERROR in Test Setup.  Some or all Verify Tests may fail\n");
+  if ($SUrtn != 0){
+    LogAndPrint($LF, "ERROR when running uploadTestData.php\n");
     LogAndPrint($LF, "Check the file $logFile for details\n");
     $errors++;
   }
-  if ($errors == 0)
-  {
-    $setUp = TRUE;
-    print "Monitor the job Q and when the setup jobs are done, run:\n";
-    print "$myname -v -l $logFile\n";
+  if ($AArtn != 0){
+    LogAndPrint($LF, "ERROR when running AgentAddData.php\n");
+    LogAndPrint($LF, "Check the file $logFile for details\n");
+    $errors++;
   }
-} //_runSetupVerify
+  if ($UsrRtn != 0){
+    LogAndPrint($LF, "ERROR when running createUIUsers.php\n");
+    LogAndPrint($LF, "Check the file $logFile for details\n");
+    $errors++;
+  }
+  if ($errors != 0){
+    print "Warning! There were errors in the test setup, one or more test may fail as a result\n";
+  }
+} //_runTestEnvSetup
 
 function getSvnVer()
 {
@@ -200,18 +210,22 @@ if (array_key_exists("a", $options))
    * can do for now is to run the setup and then tell the tester to run
    * the verify tests after the the setup is done.
    */
-  _runSetupVerify();
+  _runTestEnvSetup();
   fclose($LF);
 
   // wait for tests to finish
 
   $last = exec('./wait4jobs.php',$tossme, $jobsDone);
-  if($jobDone != 0){
+  if($jobsDone != 0){
     print "ERROR! jobs are not finished after two hours, not running" .
           "verify tests, please investigate and run verify tests by hand\n";
+    print "Monitor the job Q and when the setup jobs are done, run:\n";
+    print "$myname -v -l $logFile\n";
     exit(1);
   }
-  if($jobDone == 1){
+  print "DB: jobs are done:jobsDone is:$jobsDone\n";
+  if($jobsDone == 0){
+    print "DB: calling verifyUploads with logFile:\n$logFile\n";
     verifyUploads($logFile);
   }
 
@@ -337,6 +351,7 @@ function verifyUploads($logfile) {
     return(FALSE);
   }
 
+  print "DB: VUP: opening logfile:\n$logfile\n";
   $VLF = fopen($logfile, 'a') or die("Can't open $logfile, $phperrormsg");
   $Vstart = "\nRunning Verify Tests on: $date at $time\n";
   LogAndPrint($VLF, $Vstart);
@@ -351,9 +366,10 @@ function verifyUploads($logfile) {
     $noVT = "Verify Tests ERROR: can't cd to $VerifyTests\n";
     LogAndPrint($VLF, $noVT);
   }
-  $VerifyLast = exec("./runVerifyTests.php >> $logfile 2>&1", $dummy, $Prtn);
   fclose($VLF);
-  return(TRUE);
+  print "DB: runing ./runVerifyTests.php >> $logfile 2>&1\n";
+  $VerifyLast = exec("./runVerifyTests.php >> $logfile 2>&1", $dummy, $Vrtn);
+  return($Vrtn);
 }
 
 /*
