@@ -41,8 +41,6 @@ class OneShotTablegplv21Test extends fossologyTestCase
     /* check to see if the user and material exist*/
     $this->assertTrue(file_exists('/home/fosstester/.bashrc'),
                       "FAILURE! .bashrc not found\n");
-    $this->assertTrue(file_exists('/home/fosstester/ReadMe'),
-                      "FAILURE! Readme in ~fosstester not found\n");
     $this->Login($browser);
   }
 

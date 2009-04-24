@@ -39,9 +39,6 @@ class OneShotgplv21Test extends fossologyTestCase
     /* check to see if the user and material exist*/
     $this->assertTrue(file_exists('/home/fosstester/.bashrc'),
                       "OneShotgplv21Test FAILURE! .bashrc not found\n");
-    $this->assertTrue(file_exists('/home/fosstester/ReadMe'),
-        "OneShotgplv21Test FAILURE! Readme in ~fosstester not found\n" .
-        "This means the the One-Shot analysis will probably fail\n");
     $this->Login();
   }
 
