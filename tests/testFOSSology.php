@@ -173,6 +173,19 @@ if (array_key_exists("a", $options)) {
   }
   LogAndPrint($LF, "Running All Tests on: $date at $time using subversion version: $Svn\n");
 
+  /*
+   * Create the test users first or nothing will work should this be somewhere else like
+   * in install?
+   */
+  $UIusers = exec("./fo-runTests.php -l createUIUsers.php >> $logFile 2>&1", $dummy, $UsrRtn);
+  if ($UsrRtn != 0) {
+    LogAndPrint($LF, "ERROR when running createUIUsers.php\n");
+    foreach($dummy as $ErrorLine) {
+      print "$ErrorLine\n";
+    }
+    LogAndPrint($LF, "The Email Notification tests mail fail as a result\n");
+  }
+
   if (chdir($SiteTests) === FALSE) {
     LogandPrint($LF, "ALL Tests ERROR: can't cd to $SiteTests\n");
   }
@@ -195,15 +208,6 @@ if (array_key_exists("a", $options)) {
   if (chdir($Home) === FALSE) {
     $cUInoHome = "All Tests ERROR: can't cd to $Home\n";
     LogAndPrint($LF, $cUInoHome);
-  }
-
-  $UIusers = exec("./fo-runTests.php -l createUIUsers.php >> $logFile 2>&1", $dummy, $UsrRtn);
-  if ($UsrRtn != 0) {
-    LogAndPrint($LF, "ERROR when running createUIUsers.php\n");
-    foreach($dummy as $ErrorLine) {
-      print "$ErrorLine\n";
-    }
-    LogAndPrint($LF, "The Email Notification tests mail fail as a result\n");
   }
 
   if (chdir($EmailTests) === FALSE) {
