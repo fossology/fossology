@@ -17,60 +17,152 @@
 #***********************************************************/
 #
 # simple script to create the test user needed for testing certain
-# test cases.n Also creates a file to indicate that the user exists and
+# test cases. Also creates a file to indicate that the user exists and
 # tests can proceed.
 #
 # Must be run as root or sudo
 #
 # todo: add -f option so tests will run with data install errors?
+## create user and group
+ # Because we are doing these by name, in the multi-machine install case
+ # we may end up with uid/gid being different across machines. This will
+ # either need to be fixed by hand or with NFSv4 you can use rpc.idmapd
+ # to do uid/gid mapping. More details will be provided in the multi-machine
+ # documentation.
+
+function add_group() {
+#
+# expects name of project group
+if [ -z $1 ]
+   then return 1
+else
+   groupname=$1
+fi
+   # check for group
+   if grep -q "^$groupname:" /etc/group; then
+      echo "NOTE: group '$groupname' already exists, good."
+      return 0
+   else
+      # use addgroup if it exists since it supports --system
+      if [ -f /usr/sbin/addgroup -a ! -L /usr/sbin/addgroup ]; then
+         addgroup --system $groupname
+      else
+         groupadd $groupname
+      fi
+      if [ "$?" != "0" ] ; then
+         echo "ERROR: Unable to create group '$groupname'"
+         return 1
+      else
+         echo "NOTE: group '$groupname' created"
+         return 0
+      fi
+   fi
+}  # add_group
+
+function add_user() {
+#
+# expects name of the user and groupname
+if [ -z $1 ]
+    then return 1
+else
+   username=$1   
+fi
+if [ -z $2 ]
+    then return 1
+else
+   groupname=$2  
+fi
+   # check for user
+   if grep -q "^$username:" /etc/passwd; then
+      echo "NOTE: user '$username' already exists, good."
+      USERSHELL=`grep "^$username:" /etc/passwd |cut -d: -f 7`
+      if [ "$USERSHELL" = "/bin/false" ]; then
+         echo "ERROR: $username shell must be a real shell"
+         return 1
+      fi
+      return 0
+   else
+      # use adduser if it exists since it supports --system, but
+      # not if it's a symlink (probably to /usr/sbin/useradd)
+      if [ -f /usr/sbin/adduser -a ! -L /usr/sbin/adduser ]; then
+         adduser --gecos "Fossolgy Test User" --ingroup $groupname --system \
+           --shell /bin/bash --home "/home/$username" $username
+      else
+         useradd -c "UI_Test" -g $groupname -m \
+           -s /bin/bash -d "/home/$username" $username
+      fi
+      if [ "$?" != "0" ] ; then
+         echo "ERROR: Unable to create user '$username'"
+         return 1
+      else
+         echo "NOTE: user '$username' created"
+         /usr/sbin/usermod -G fossy,sudo,users $username
+         return 0
+      fi
+   fi
+}
+
+##############################################################################
+# Main
+##############################################################################
+
+# This must run as root.
+if [ `id -u` != "0" ] ; then
+   echo "ERROR: $0 must run as root."
+   echo "Aborting."
+   exit 1
+fi
 
 # add groups
-/usr/sbin/groupadd -g 666777 fosstester
+
+add_group fosstester
 if [ $? -ne 0 ]
 then
-  echo "ERROR! could not create fosstester group number 666777"
+  echo "ERROR! could not create fosstester"
   exit 1
 fi
-/usr/sbin/groupadd -g 555777 noemail
+add_group noemail
 if [ $? -ne 0 ]
 then
-  echo "ERROR! could not create noemail group number 555777"
+  echo "ERROR! could not create noemail group"
   exit 1
 fi
-# useradd:
-# Name, home dir path, uid, initial group, other groups, create home, shell,
-# password (none) user-account
 
 # fosstester
-/usr/sbin/useradd -c 'Fossolgy Test User' -d /home/fosstester -u 666777 -g fosstester \
--G fossy,sudo,users -m -s /bin/bash -p 'Brksumth1n' fosstester
+add_user fosstester fosstester
 if [ $? -ne 0 ]
 then
-  echo "ERROR! could not create fosstester user UID:666777"
+  echo "ERROR! could not create fosstester user"
   exit 1
 fi
 
 # noemail
-/usr/sbin/useradd -c 'Fossolgy Test User' -d /home/noemail -u 555777 -g noemail \
--G fossy,sudo,users -m -s /bin/bash -p 'n0eeemale' noemail
+add_user noemail noemail
 if [ $? -ne 0 ]
 then
-  echo "ERROR! could not create noemail user UID:555777"
+  echo "ERROR! could not create noemail user"
   exit 1
 fi
 
-if [ -x ./installTestData.sh ]
-then
-	./installTestData.sh
-	if [ $? -ne 0 ]
-	then
-		echo "ERROR! durnig run of installTestData.sh"
-		exit 1
-	fi
-else
-	echo "ERROR! Either ./installTestData.sh doesn't exist or is not executable"
-	exit 1
-fi
+#
+# adjust the systems for checkout for fosstester
+#
+cd ~fosstester/.subversion
+cp servers.hp servers
+
+# remove this for now, don't want this script doing it.
+#if [ -x ./installTestData.sh ]
+##then
+#	./installTestData.sh
+#	if [ $? -ne 0 ]
+#	then
+#		echo "ERROR! durnig run of installTestData.sh"
+#		exit 1
+#	fi
+#else
+#	echo "ERROR! Either ./installTestData.sh doesn't exist or is not executable"
+#	exit 1
+#fi
 
 #
 # set up the all clear file
