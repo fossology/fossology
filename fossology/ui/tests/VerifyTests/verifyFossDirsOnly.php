@@ -66,10 +66,9 @@ class verifyDirsOnly extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, '/Browse/'),
          "verifyDirsOnly FAILED! Could not find Browse menu\n");
     $result = $this->myassertText($page, "/$safeName/");
-    if(!($result))
-    {
-      print "Failure, cannot find archive $name, Stopping test\n";
-      exit(FALSE);
+    if(!($result)) {
+      $this->fail("Failure, cannot find archive $name, Stopping test\n");
+      exit(1);
     }
   }
 
