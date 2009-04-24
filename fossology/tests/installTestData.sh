@@ -23,6 +23,7 @@
 #
 # best if run as fosstester, root will work ok too.
 #
+echo "This script should be run as either the fosstester or root user"
 thisdir=`pwd`
 error_cnt=0
 filelist='.bash_aliases .bashrc .subversion .svn'
@@ -31,7 +32,7 @@ if [ -r ./TestData/fosstester/ReadMe ]
 then
 	for file in $filelist
 	do
-		cp -r ./TestData/fosstester/$file /home/fosstester/
+		cp -r ./TestData/fosstester/$file /home/fosstester/ > /dev/null 2>&1
 	done
 else
 	echo "ERROR! fosstester environment could not be found in $thisdir/TestData/fosstester/"
@@ -40,7 +41,8 @@ fi
 
 if [ -d ./TestData/archives ]
 then
-	cp -R ./TestData/archives ~fosstester
+  # need to suppress .svn and .subversion errors as we are copying from source
+	cp -R ./TestData/archives ~fosstester > /dev/null 2>&1
 else
 	echo "ERROR! no $thisdir/TestData/archives directory found, could not install archives for testing"
 	let $error_cnt += 1
@@ -48,26 +50,40 @@ fi
 
 if [ -d ./TestData/licenses ]
 then
-	cp -R ./TestData/licenses ~fosstester
+	cp -R ./TestData/licenses ~fosstester > /dev/null 2>&1
 else
 	echo "ERROR! no $thisdir/TestData/license directory found, could not install licenses for testing"
 	let $error_cnt += 1
 fi
 
-mkdir ~fosstester/public_html
-if [ $? -ne 0 ]
+mkdir -p ~fosstester/public_html
+if [ "$?" -ne 0 ]
 then
 	echo "ERROR!, could not create ~fosstester/public_html"
+	let $error_cnt += 1
 fi
 
 cp ~fosstester/archives/fossDirsOnly.tar.bz2 ~fosstester/public_html
-if [ $? -ne 0 ]
+if [ "$?" -ne 0 ]
 then
 	echo "ERROR!, could not copy fossDirsOnly.tar.bz2 to fosstester/public_html"
+	let $error_cnt += 1
 fi
+
+cd ~fosstester
+chown -R fosstester:fosstester archives licenses public_html
+chmod -R a+rwx archives licenses public_html
+
+#
+# now make a test dir in licenses for server upload testing
+#
+cd ~fosstester/licenses
+mkdir -p Tdir
+cp BSD_style_* Tdir
 
 if [ $error_cnt -ne 0 ]
 then
 	echo "There were previous errors, will exit with 1 (Fail)"
 	exit 1
 fi
+exit 0
