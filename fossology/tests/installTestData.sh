@@ -75,7 +75,38 @@ fi
 cd ~fosstester/licenses
 mkdir -p Tdir
 cp BSD_style_* Tdir
+#
+# download simpletest into ~fosstester/archives
+#
+#
+cd /home/fosstester/archives
+if [ -r '/usr/local/etc/fossology/Proxy.conf' ]
+then 
+   sh -c ". /usr/local/etc/fossology/Proxy.conf; wget -q 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'"
+else
+if [ -r '/etc/fossology/Proxy.conf' ]
+then
+   sh -c . "/etc/fossology/Proxy.conf; wget -q 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'"
+fi
+fi
+#
+# make test automation reporting directories under public_html
+#
+echo "making reporting directories under ~fosstester/public_html"
 
+LPath='/home/fosstester/public_html/TestResults/Data/Latest'
+mkdir -p $LPath
+if [ "$?" -ne 0 ]
+then
+   echo "ERROR when creating $LPath"
+   exit 1
+fi
+Path='/home/fosstester/public_html/TestResults/Data'
+mdirs='01 02 03 04 05 06 07 08 09 10 11 12 2008'
+for dir in $mdirs
+do
+   mkdir -p "$Path/$dir"
+done
 #
 # make sure fosstester owns things and folks can read them.
 #
