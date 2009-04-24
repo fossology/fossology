@@ -69,17 +69,19 @@ then
 	echo "ERROR!, could not copy fossDirsOnly.tar.bz2 to fosstester/public_html"
 	let $error_cnt += 1
 fi
-
-cd ~fosstester
-chown -R fosstester:fosstester archives licenses public_html
-chmod -R a+rwx archives licenses public_html
-
 #
 # now make a test dir in licenses for server upload testing
 #
 cd ~fosstester/licenses
 mkdir -p Tdir
 cp BSD_style_* Tdir
+
+#
+# make sure fosstester owns things and folks can read them.
+#
+cd ~fosstester
+chown -R fosstester:fosstester archives licenses public_html
+chmod -R a+rwx archives licenses public_html
 
 if [ $error_cnt -ne 0 ]
 then
