@@ -16,9 +16,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * uploadSrvDirTest
+ * uploadSrvFileTest
  *
- * Upload a directory of information.  It should get tar'ed up and uploaded.
+ * Upload a File
  *
  * @version "$Id$"
  *
