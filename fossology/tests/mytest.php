@@ -19,7 +19,7 @@
 /**
  * Template to use for a simpletest test
  *
- * @version "$Id: templateTest.php 1210 2008-08-27 19:50:04Z rrando $"
+ * @version "$Id$"
  *
  * Created on Aug 1, 2008
  */

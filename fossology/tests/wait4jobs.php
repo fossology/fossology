@@ -28,7 +28,7 @@
  *
  * @return boolean (0 = success, 1 failure)
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * @TODO: make a general program that can wait an arbitrary time, should
  * also allow for an interval, e.g. check for 2 hours every 7 min.
