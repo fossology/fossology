@@ -144,12 +144,6 @@ then
   exit 1
 fi
 
-#
-# adjust the systems for checkout for fosstester
-#
-cd ~fosstester/.subversion
-cp servers.hp servers
-
 # remove this for now, don't want this script doing it.
 #if [ -x ./installTestData.sh ]
 ##then

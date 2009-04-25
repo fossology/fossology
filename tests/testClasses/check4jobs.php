@@ -53,7 +53,7 @@ define('SQL', "SELECT *
 
 class check4jobs {
 
-  private $jobCount;
+  protected $jobCount=NULL;
   private $Db;
 
   function __construct() {
