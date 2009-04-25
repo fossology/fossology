@@ -221,7 +221,19 @@ if (array_key_exists("a", $options)) {
   _runTestEnvSetup();
   fclose($LF);
   // wait for uploads to finish
+  print "DB: starting waitfor jobs\n";
+  if (chdir($Home) === FALSE) {
+    $UInoHome = "All Tests ERROR: can't cd to $Home\n";
+    LogAndPrint($LF, $UInoHome);
+  }
+  $h = getcwd();
+  print "DB: right before wait4, cwd is:$h\n";
   $last = exec('./wait4jobs.php', $tossme, $jobsDone);
+  print "DB: after wait4: last is:$last\n";
+  print "DB: after wait4: output is:\n";
+  foreach($tossme as $line){
+    print "$line\n";
+  }
   if ($jobsDone != 0) {
     print "ERROR! jobs are not finished after two hours, not running" . "verify tests, please investigate and run verify tests by hand\n";
     print "Monitor the job Q and when the setup jobs are done, run:\n";

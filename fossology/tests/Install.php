@@ -40,15 +40,17 @@ if($euid != 0) {
 }
 
 /* Create sym link to fo-runTests */
+$OK = array();
 print "installing fo-runTests into /usr/local/bin\n";
 $wd = getcwd();
-$last = exec("ln -s /usr/local/bin/fo-runtests $wd/fo-runTests.php",$tossme, $rtn);
-print "return code from symlink is:$rtn\n";
+$cmd = "ln -s /usr/local/bin/fo-runtests $wd/fo-runTests.php 2>&1";
+$last = exec($cmd, $tossme, $rtn);
 if($rtn != 0) {
-  print "Error, could not create sym link in /usr/local/bin for fo-runTests\n";
-  print "the link command returned:\n";
-  print_r($tossme) . "\n";
-  exit(1);
+  $OK = preg_grep('/File exists/', $tossme);
+  if(empty($OK)) {
+    print "Error, could not create sym link in /usr/local/bin for fo-runTests\n";
+    exit(1);
+  }
 }
 
 /*
@@ -56,6 +58,12 @@ if($rtn != 0) {
  */
 
 print "Creating fosstester and noemail users\n";
+if(!is_executable("./CreateTestUser.sh")) {
+  if(!chmod("./CreateTestUser.sh",0755)) {
+    print "FATAL, could not make ./CreateTestUser.sh executable\n";
+    exit(1);
+  }
+}
 $last = exec("./CreateTestUser.sh",$tossme, $rtn);
 if($rtn != 0) {
   print "Failuer? got $rtn from CreateTestUser, Investigate\n";
@@ -64,10 +72,25 @@ if($rtn != 0) {
 /* load data into fosstester account */
 print "loading test data into the fosstester home directory\n";
 $last = exec("./installTestData.sh",$tossme, $rtn);
+print "output from installTestData is:\n";
+foreach($tossme as $line){
+  print "$line\n";
+}
 if($rtn != 0) {
   print "Failuer? got $rtn from CreateTestUser, Investigate\n";
 }
 
+$Tconfig = getcwd();
+print "adjusting servers file in .subversion so checkouts work\n";
+if(chdir('/home/fosstester/.subversion') === TRUE) {
+  if(!copy('servers.hp', 'servers')) {
+    print "Warning! could not adjust servers file, may not be able to check out sources\n";
+  }
+}
+
+if(chdir($Tconfig) === FALSE){
+  print "Warning! cannot cd to $Tconfig, the next steps may fail\n";
+}
 /*
  * Create the UI users for the tests
  */

@@ -40,7 +40,7 @@ global $PASSWORD;
 class db {
   private $_pg_conn;
   private $pg_rows;
-  private $pg_Error;
+  protected $pg_Error;
   private $dbName;
   private $dbUser;
   private $dbPassword;
@@ -70,6 +70,10 @@ class db {
     $this->pg_Error = 0;
     return (TRUE);
   } // __construct
+
+  public function get_pg_ERROR() {
+    return($this->pg_ERROR);
+  }
 
   /**
    * connect
@@ -142,7 +146,6 @@ class db {
       return ($this->pg_rows); // think about this, is false better?
     }
     if (empty ($Sql)) {
-      print "DB-QU: empty \$Sql!\n";
       return ($this->pg_rows); // same as above
     }
 
@@ -150,7 +153,6 @@ class db {
 
     /* Error handling */
     if ($result == FALSE) {
-      print "DB-QU: result is FALSE!\n";
       $this->Error = 1;
       //$PGError = pg_result_error_field($result, PGSQL_DIAG_SQLSTATE);
       $PGError = pg_last_error($this->_pg_conn);

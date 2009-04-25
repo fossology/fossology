@@ -403,7 +403,6 @@ class fossologyTestCase extends fossologyTest
     {
       $destFolder = 'root'; // default is root folder
     }
-    print "Starting moveUpload in FTC\n";
     $page = $this->mybrowser->get($URL);
     /* use the method below till you write a menu function */
     $page = $this->mybrowser->get("$URL?mod=upload_move");
@@ -611,9 +610,8 @@ class fossologyTestCase extends fossologyTest
     }
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue(page);
-    //print "************* page after Upload! is *************\n$page\n";
     $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'),
-      "FAILURE:Did not find the message'Upload added to job queue'\n");
+      "FAILURE:Did not find the message 'Upload added to job queue'\n");
   }
   /**
    * uploadServer
