@@ -19,7 +19,7 @@
 /**
  * Verify special fossology test archive loaded correctly
  *
- * @version "$Id: browseUploadedTest.php 1153 2008-08-21 03:59:33Z rrando $"
+ * @version "$Id$"
  *
  * Created on Aug 25, 2008
  */
