@@ -97,6 +97,7 @@ fi
       else
          echo "NOTE: user '$username' created"
          /usr/sbin/usermod -G fossy,sudo,users $username
+         /usr/sbin/chpasswd <<< "$username:$username" 
          return 0
       fi
    fi

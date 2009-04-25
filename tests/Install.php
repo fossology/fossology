@@ -43,7 +43,7 @@ if($euid != 0) {
 $OK = array();
 print "installing fo-runTests into /usr/local/bin\n";
 $wd = getcwd();
-$cmd = "ln -s /usr/local/bin/fo-runtests $wd/fo-runTests.php 2>&1";
+$cmd = "ln -s $wd/fo-runTests.php /usr/local/bin/fo-runtests 2>&1";
 $last = exec($cmd, $tossme, $rtn);
 if($rtn != 0) {
   $OK = preg_grep('/File exists/', $tossme);
@@ -66,19 +66,18 @@ if(!is_executable("./CreateTestUser.sh")) {
 }
 $last = exec("./CreateTestUser.sh",$tossme, $rtn);
 if($rtn != 0) {
-  print "Failuer? got $rtn from CreateTestUser, Investigate\n";
+  print "CreateTestUser.sh Failed, Investigate, run by hand\n";
 }
 
 /* load data into fosstester account */
 print "loading test data into the fosstester home directory\n";
 $last = exec("./installTestData.sh",$tossme, $rtn);
+/*
 print "output from installTestData is:\n";
 foreach($tossme as $line){
   print "$line\n";
 }
-if($rtn != 0) {
-  print "Failuer? got $rtn from CreateTestUser, Investigate\n";
-}
+*/
 
 $Tconfig = getcwd();
 print "adjusting servers file in .subversion so checkouts work\n";
@@ -98,14 +97,14 @@ print "Creating UI test users fosstester and noemail\n";
 // fix this... should get the host name and domain and use that....
 $last = exec("./configTestEnv.php 'http://localhost/repo/' fossy fossy",$tossme, $rtn);
 if($rtn != 0) {
-  print "Failuer? got $rtn from configTestEnv, Investigate\n";
+  print "./configTestEnv.php Failed for fossy, Investigate\n";
 }
 $last = exec("./fo-runTests.php -l 'createUIUsers.php'",$tossme, $rtn);
 if($rtn != 0) {
-  print "Failuer? got $rtn from createUIUsers, Investigate\n";
+  print "./createUIUsers Failed!, Investigate\n";
 }
 $last = exec("./configTestEnv.php 'http://localhost/repo/' fosstester fosstester",$tossme, $rtn);
 if($rtn != 0) {
-  print "Failuer? got $rtn from configTestEnv, Investigate\n";
+  print "./configTestEnv.php Failed for fosstester, Investigate\n";
 }
 ?>
