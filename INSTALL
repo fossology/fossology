@@ -197,6 +197,13 @@ PHP5:
    http://www.foolabs.com/xpdf
 * rpm and rpm2cpio - for extracting software and metadata from rpm packages
    http://www.rpm.org/
+* sendmail - for sending notification emails (optional)
+   If you want to be able to receive notification emails about
+   fossology processing, you need an /usr/sbin/sendmail command that
+   fossology can use to send mail. All mail transport agents(MTA) (like
+   postfix, exim, sendmail, etc.) provide this command and you probably
+   already have it on your system, but you may need to configure the
+   MTA to be able to send the mail where you want it to go.
 * tar - tape archive decompressor
    http://www.gnu.org/software/tar/
 * upx-ucl - an executable compressor/decompressor

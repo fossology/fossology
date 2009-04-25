@@ -124,6 +124,7 @@ if [ $RUNTIME ]; then
       Debian|Ubuntu)
          [ $AGENT ] || apt-get install apache2 libapache2-mod-php5
          apt-get install \
+            mail-transport-agent \
             php5 php5-pgsql php-pear \
             libmagic1 libxml2 libextractor1c2a \
             binutils bzip2 cabextract cpio sleuthkit mkisofs xpdf-utils \
@@ -156,6 +157,7 @@ if [ $RUNTIME ]; then
          yum install \
             postgresql \
             php php-pear php-pgsql \
+            smtpdaemon \
             file-libs libxml2 libextractor libextractor-plugins \
             binutils bzip2 cabextract cpio genisoimage poppler-utils \
                rpm tar upx unzip gzip
@@ -186,6 +188,7 @@ if [ $RUNTIME ]; then
          yum install \
             postgresql \
             php php-pear php-pgsql \
+            smtpdaemon \
             file libxml2 \
             binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip
          echo "NOTE: libextractor, cabextract, sleuthkit, upx, and unrar are not"
