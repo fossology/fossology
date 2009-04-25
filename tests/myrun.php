@@ -22,7 +22,7 @@
  *
  * Run a test using simpletest, useful when working on a new test.
  *
- * @version "$Id: runtemplate.php 1210 2008-08-27 19:50:04Z rrando $"
+ * @version "$Id$"
  *
  * Created on Aug 27, 2008
  */

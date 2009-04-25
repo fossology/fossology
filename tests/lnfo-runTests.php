@@ -21,7 +21,7 @@
  *
  * Install a symlink in /usr/local/bin to the test run script
  *
- * @version "$Id:  $"
+ * @version "$Id$"
  *
  * Created on April 24, 2009
  */

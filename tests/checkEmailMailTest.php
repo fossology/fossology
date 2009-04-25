@@ -20,7 +20,7 @@
  * Test checkMail function
  *
  *
- * @version "$Id:  $"
+ * @version "$Id$"
  *
  * Created on March 26, 2009
  */

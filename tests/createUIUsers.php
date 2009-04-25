@@ -20,7 +20,7 @@
  * Create UI users for tests to use
  *
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on March 31, 2009
  */

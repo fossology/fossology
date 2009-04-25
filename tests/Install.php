@@ -21,7 +21,7 @@
  *
  * Install the fossology test suite support items
  *
- * @version "$Id:  $"
+ * @version "$Id$"
  *
  * Created on April 23, 2009
  */

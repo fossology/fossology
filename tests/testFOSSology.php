@@ -21,7 +21,7 @@
  *
  * Run one or more FOSSology test suites
  *
- * @version "$Id:  $"
+ * @version "$Id$"
  *
  * Created on Sept. 19, 2008
  */
