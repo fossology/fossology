@@ -19,7 +19,7 @@
  * Add a user using the UI, with no email notification,
  * verify it is set correctly in their session.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on March 17, 2009
  */

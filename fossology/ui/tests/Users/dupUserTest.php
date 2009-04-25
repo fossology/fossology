@@ -19,7 +19,7 @@
 /**
  * try to create a duplicate user using the UI
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on March 17, 2009
  */
