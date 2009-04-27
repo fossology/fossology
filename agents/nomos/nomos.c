@@ -924,7 +924,6 @@ int main(int argc, char *argv[])
 #endif /* notdef */
 
 #ifdef	USE_MMAP
-    **CDBREMOVE**
     gl.pagesize = getpagesize();
     printf("main: pagesize = %d\n", gl.pagesize);
 #endif	/* USE_MMAP */
@@ -944,14 +943,10 @@ int main(int argc, char *argv[])
     gl.blkUpperLimit = _MAXFILESIZE/512;
 
     /*
-     * We've saved the specified file to scan in 'gl.target'; now, normalize
+     * We've copied the specified file to scan to 'gl.target'; now, normalize
      * the pathname (in case we were passed a symlink to another dir).
      */
-    /*
-      CDB -- I don't understand the above. In parseOpts(), we copied the
-      target file to the NOMOS_TEMP directory.
-    */
-    // changeDir(gl.target);	/* see if we can chdir to the target */
+    changeDir(gl.target);	/* see if we can chdir to the target */
 #ifdef notdef
     changeDir(gl.tmpdir);
     getMasterLists();

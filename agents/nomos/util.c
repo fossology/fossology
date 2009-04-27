@@ -21,8 +21,9 @@
 #include "util.h"
 #include "list.h"
 #include "nomos_regex.h"
+/* CDB do we need this?
 #include "_autodefs.h"
-#include "md5.h"
+*/
 
 #define	MM_CACHESIZE	20
 
@@ -34,19 +35,9 @@ static char grepzone[10485760];	/* 10M for now, adjust if needed */
   File local variables
 */
 static va_list ap;
-static char pathname[myBUFSIZ]; 
 static char utilbuf[myBUFSIZ];
 static struct mm_cache mmap_data[MM_CACHESIZE];
-static uid_t myUID = -1;
-static FILE *newPkgsFp;
-static FILE *indexFp;
-static FILE *licenseFp;
-static FILE *licHistFp;
-static FILE *missingFp;
-static FILE *xrefFp;
-static FILE *unusedFp;
-static void cannotClose();
-static int makeRemovePerms();
+
 
 #ifdef	MEMORY_TRACING
 #define	MEMCACHESIZ	200000
@@ -74,44 +65,6 @@ void unbufferFile(FILE *fp)
     return;
 }
 
-/* Q: do we need isEMPTYDIR() ?? */
-int isEMPTYDIR(char *dpath)
-{
-    DIR *dirp;
-    struct dirent *dent;
-    int i = 0;
-#ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== isEMPTYDIR(%s)\n", dpath);
-#endif	/* PROC_TRACE */
-    if (!isDIR(dpath)) {
-	return(0);
-    }
-    if ((dirp = opendir(dpath)) == (DIR *) NULL) {
-	if (errno != ENOTDIR) {
-	    perror(dpath);
-	    Bail(1);
-	}
-	return(0);
-    }
-    /*
-     * quick-n-dirty brute force: look for an entry starting with ".." AND
-     * an entry starting with "."; other entries == directory NOT empty.
-     */
-    while ((dent = readdir(dirp)) != (struct dirent *) NULL) {
-	if (strcmp(dent->d_name, ".") == 0 ||
-	    strcmp(dent->d_name, "..") == 0) {
-	    continue;
-	}
-	i++;
-	break;
-    }
-    (void) closedir(dirp);
-    return(i == 0);
-}
-
 
 int isEMPTYFILE(char *fpath)
 {
@@ -121,6 +74,7 @@ int isEMPTYFILE(char *fpath)
 #endif	/* PROC_TRACE_SWITCH */
 	printf("== isEMPTYFILE(%s)\n", fpath);
 #endif	/* PROC_TRACE */
+
     if (!isFILE(fpath)) {
 	return(0);
     }
@@ -136,6 +90,7 @@ int isBLOCK(char *bpath)
 #endif	/* PROC_TRACE_SWITCH */
 	printf("== isBLOCK(%s)\n", bpath);
 #endif	/* PROC_TRACE */
+
     return(isINODE(bpath, S_IFBLK));
 }
 
@@ -229,38 +184,6 @@ char *newReloTarget(char *basename)
     return(newpath);
 }
 
-
-#ifdef notdef
-/*
-  Add an 's' to the string if count > 1
-
-  Note that we reuse the same buffer, so calling programs need to use
-  and/or copy the return value before calling this function again.
-*/
-char *pluralName(char *s, int count)
-{
-    static char name[128];
-    char *tempstr = name;
-
-#if	0
-#ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== pluralName(\"%s\", %d)\n", s, count);
-#endif	/* PROC_TRACE */
-#endif
-
-    while (*s) {
-	*tempstr++ = *s++;
-    }
-    if (count != 1) {
-	*tempstr++ = 's';
-    }
-    *tempstr = NULL_CHAR;
-    return(name);
-}
-#endif /* notdef */
 
 
 #ifdef	MEMORY_TRACING
@@ -1050,45 +973,6 @@ void memStats(char *s)
 #endif	/* MEMSTATS */
 
 
-static void cannotClose(char *descr)
-{
-    fprintf(stderr, "OOPS: cannot close %s file - not open\n", descr);
-    return;
-}
-
-
-void openLogFile()
-{
-#ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== openLogFile()\n");
-#endif	/* PROC_TRACE */
-    gl.logFp = fopenFile(gl.logfile, "w+");
-    unbufferFile(gl.logFp);
-    return;
-}
-
-
-void closeLogFile()
-{
-#ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== closeLogFile()\n");
-#endif	/* PROC_TRACE */
-    if (gl.logFp == (FILE *) NULL) {
-	cannotClose("log");
-    }
-    else {
-	(void) fclose(gl.logFp);
-    }
-    return;
-}
-
-
 void makeSymlink(char *path)
 {
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
@@ -1097,6 +981,7 @@ void makeSymlink(char *path)
 #endif	/* PROC_TRACE_SWITCH */
 	printf("== makeSymlink(%s)\n", path);
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
+
     (void) sprintf(gl.cmdBuf, ".%s", strrchr(path, '/'));
     if (symlink(path, gl.cmdBuf) < 0) {
 	perror(gl.cmdBuf);
@@ -1116,6 +1001,7 @@ int fileTypeIs(char *pathname, int index, char *magicData)
 #endif	/* PROC_TRACE_SWITCH */
 	printf("== fileTypeIs(%s, %d, \"%s\")\n", pathname, index,
 	       magicData);
+
 #ifndef	UNPACK_DEBUG
 	printf("... regex is \"%s\"\n", _REGEX(index));
 #endif	/* not UNPACK_DEBUG */
@@ -1162,8 +1048,16 @@ int fileIsShar(char *textp, char *magicData)
 }
 
 
+#ifdef notdef
 /*
-   CDB -- This func needs to be thoroughly vetted
+   CDB -- Need to review this code, particularly for the use of an
+   external file (Nomos.strings.txt). Despite the fact that variable 
+   is named debugStr, the file appears to be used for more than just
+   debugging.
+
+   Although it might be the case that it only gets called from debug
+   code. It does not appear to be called during a few test runs of
+   normal file scans that I tried.
 */
 void printRegexMatch(int n, int cached)
 {
@@ -1241,6 +1135,8 @@ void printRegexMatch(int n, int cached)
 #endif	/* DEBUG */
     return;
 }
+#endif /* notdef */
+
 
 /*
  * Blarg.  Files that are EXACTLY a multiple of the system pagesize do
@@ -1318,35 +1214,6 @@ char *mmapFile(char *pathname)	/* read-only for now */
     }
     (void) strcpy(mmp->label, pathname);
     if (gl.stbuf.st_size) {
-#ifdef	USE_MMAP
-	/*
-	 * mmap() is known to return NULL if the size of a MAP_PRIVATE region is
-	 * initially specified as zero
-	 */
-	mmp->size = gl.stbuf.st_size;
-#if	0
-	if ((mmp->size % gl.pagesize) == 0) {
-	    printf("*** %d is an exact multiple of %d\n",
-		   mmp->size, gl.pagesize);
-	    if (lseek(mmp->fd, SEEK_END, 1) < 0) {
-		perror("pathname");
-		Bail(1);
-	    }
-	    if (write(mmp->fd, " ", 1) < 0) {
-		perror("pathname");
-		Bail(1);
-	    }
-	    mmp->size++;
-	    gl.stbuf.st_size++;
-	}
-#endif
-	mmp->mmPtr = mmap((void *)0, (size_t) mmp->size, PROT_READ,
-			  MAP_PRIVATE, mmp->fd, (off_t) 0);
-	if (mmp->mmPtr != MAP_FAILED) {
-	    mmp->inUse = 1;
-	    return((char *) mmp->mmPtr);
-	}
-#else	/* not USE_MMAP */
 	mmp->size = gl.stbuf.st_size+1;
 	mmp->mmPtr = memAlloc(mmp->size, MTAG_MMAPFILE);
 #ifdef	DEBUG
@@ -1362,7 +1229,6 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	    rem -= n;
 	    cp += n;
 	}
-#endif	/* not USE_MMAP */
 	mmp->inUse = 1;
 	return((char *) mmp->mmPtr);
     }
@@ -1477,41 +1343,6 @@ int fileLineCount(char *pathname)
 }
 
 
-char *fileMD5SUM(char *pathname)
-{
-    static char md5buf[32];
-    static char *hexDigits = "0123456789abcdef";
-    static unsigned char MD5digest[16];
-    char *textp;
-    char *cp;
-    int i;
-    MD5_CTX md5;	/* thanks, Neal */
-
-#ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== fileMD5SUM(%s)\n", pathname);
-#endif	/* PROC_TRACE */
-
-    textp = mmapFile(pathname);
-    /* gl.stbuf.st_size is the # of bytes after mmapFile() */
-    /* md5sum goes into buf */
-    MD5_Init(&md5);
-    MD5_Update(&md5, textp, gl.stbuf.st_size);
-    MD5_Final(MD5digest,&md5);
-    for (i = 0, cp = md5buf; i < 16; i++) {
-	*cp++ = hexDigits[(MD5digest[i] & 0xf0) >> 4];
-	*cp++ = hexDigits[MD5digest[i] & 0x0f];
-    }
-    *cp = NULL_CHAR;
-    munmapFile(textp);
-#ifdef	DEBUG
-    Assert(NO, "Md5(%s): %s\n", pathname, md5buf);
-#endif	/* DEBUG */
-    return(md5buf);
-}
-
 int bufferLineCount(char *p, int len)
 {
     char *cp; 
@@ -1539,79 +1370,6 @@ int bufferLineCount(char *p, int len)
 #endif	/* DEBUG > 3 */
     return(i ? i : 1);
 }
-
-/*
- * Currently we don't use this (anymore).  If we do and we're NOT using
- * real mmap() support, we should just mmapFile() the 'frompath' file,
- * fopenFile() the 'topath' file, do a printf("%s") and be done.
- */
-#ifdef	USE_MMAP
-void copyFile(char *frompath, char *topath)
-{
-    char *readp;
-    char *rp;
-    char *writep;
-    char *wp;
-    int fd; 
-    int size; 
-    int i;
-
-#ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== copyFile(%s, %s)\n", frompath, topath);
-#endif	/* PROC_TRACE */
-
-    if ((readp = mmapFile(frompath)) == NULL_STR) {
-	if (errno != ENOENT) {	/* zero length file */
-	    (void) close(creat(topath, gl.stbuf.st_mode));
-	    return;
-	}
-	perror(frompath);
-	fprintf(stderr, "Cannot copy %s to %s\n", frompath, topath);
-	Bail(1);
-    }
-    size = (int) gl.stbuf.st_size;
-    if ((fd = open(topath, O_RDWR|O_CREAT|O_TRUNC, 0644)) < 0) {
-	perror(topath);
-	Bail(1);
-    }
-    /*
-     * lseek to $size-1 and then write 1 byte; resulting length is $size
-     */
-    if (lseek(fd, size-1, SEEK_SET) < 0) {
-	perror("lseek: copy-target");
-	Bail(1);
-    }
-    if (write(fd, readp, 1) < 0) {
-	perror("write: copy-target");
-	Bail(1);
-    }
-    /*
-     * Now write the new file with mmap
-     */
-    writep = (char *) mmap(0, (size_t) size, PROT_WRITE, MAP_SHARED, fd, 0);
-    if (writep == MAP_FAILED) {
-	perror("mmap: open copy-target");
-	Bail(1);
-    }
-    for (i = 0, rp = readp, wp = writep; i < size; i++) {
-	*wp++ = *rp++;
-    }
-    /*
-     * close what we opened 
-     */
-    munmapFile(readp);
-    if (munmap(writep, (size_t) size) < 0) {
-	fprintf(stderr, "Error in munmap()\n");
-	perror(topath);
-	Bail(1);
-    }
-    (void) close(fd);
-    return;
-}
-#endif	/* USE_MMAP */
 
 
 /*
@@ -1702,14 +1460,13 @@ void dumpFile(FILE *fp, char *pathname, int logFlag)
 	return;
     }
     fprintf(fp, "%s", filep);
-    if (logFlag) {
-	Log("%s", filep);
-    }
     munmapFile(filep);
     return;
 }
 
 
+#ifdef notdef
+/* CDB */
 /*
  * This is the filter routine called in nftw() callback functions.  The 
  * general rule is to return 1 if we DON'T want to unpack an inode.
@@ -1790,8 +1547,11 @@ int nftwFileFilter(char *pathname, struct stat *st, int onlySingleLink)
     }
     return(ret);
 }
+#endif
 
 
+#ifdef notdef
+/* CDB */
 void makeTempDir()
 {
 #if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
@@ -1810,15 +1570,13 @@ void makeTempDir()
 #endif	/* UNPACK_DEBUG */
 }
 
+#endif /* notdef */
+
 
 
 void makePath(char *dirpath)	/* e.g., the command "mkdir -p" */
 {
     char *cp = dirpath;
-    char *last = NULL_STR;
-    static int baseLen;
-    static int first = 1;
-    static char base[256];
 
 #if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
 #ifdef	PROC_TRACE_SWITCH
@@ -1828,31 +1586,10 @@ void makePath(char *dirpath)	/* e.g., the command "mkdir -p" */
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
     if (isDIR(dirpath)) {
-#if	(DEBUG > 1)
-	printf("makePath: \"%s\" exists\n", cp);
-#endif	/* DEBUG > 1 */
+	Warn("makePath: \"%s\" exists\n", cp);
 	return;
     }
-    /*
-     * Local optimization: if the pathname STARTS with the value of
-     * NOMOS_BASE *plus* an appended '/', we can skip that.  We know it
-     * exists, because we create it the FIRST time we're called here.
-     */
-#ifdef notdef
-    if (first) {
-	if ((baseLen = strlen(gl.basedir)+1) > sizeof(base)) {
-	    Fatal("makePath: base storage too small");
-	}
-	(void) sprintf(base, "%s/", gl.basedir);
-	first = 0;
-    }
-#endif /* notdef */
-    while (*cp && *cp == '/') {
-	last = cp++;
-    }
-    if (last != NULL_STR && strncmp(last, base, baseLen) == 0) {
-	cp += baseLen;
-    }
+
     while ((cp = strchr(cp, '/')) != NULL_STR) {
 	*cp = NULL_CHAR;
 	makeDir(dirpath);
@@ -1882,6 +1619,23 @@ void makeDir(char *dirpath)
     if (mkdir(dirpath, 0755) < 0) {
 	perror(dirpath);
 	Fatal("Failure in makeDir");
+    }
+    return;
+}
+
+
+void removeDir(char *dir)
+{
+
+#if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
+#ifdef	PROC_TRACE_SWITCH
+    if (gl.ptswitch)
+#endif	/* PROC_TRACE_SWITCH */
+	printf("== removeDir(%s)\n", dir);
+#endif	/* PROC_TRACE || UNPACK_DEBUG */
+
+    if (mySystem("rm -rf %s", dir)) {
+	Fatal("Cannot clean %s", dir);
     }
     return;
 }
@@ -1980,37 +1734,7 @@ void Msg(const char *fmt, ...)
     return;
 }
 
-/*
- * DO NOT automatically add \n to a string passed to Log(); in
- * parseDistro, we sometimes want to dump a partial line.
- */
-void Log(const char *fmt, ...)
-{
-    if (gl.logFp != (FILE *) NULL) {
-	va_start(ap, fmt);
-	(void) vfprintf(gl.logFp, fmt, ap);
-	va_end(ap);
-    }
-    return;
-}
 
-/*
- * DO NOT automatically add \n to a string passed to MsgLog(); in
- * parseDistro, we sometimes want to dump a partial line.
- */
-void MsgLog(const char *fmt, ...)
-{
-    va_start(ap, fmt);
-    (void) vsprintf(utilbuf, fmt, ap);
-    va_end(ap);
-    Msg("%s", utilbuf);
-    Log("%s", utilbuf);
-    return;
-}
-
-/*
- * NOTE statements get logged to stdout and to the logfile
- */
 void Note(const char *fmt, ...)
 {
     va_start(ap, fmt);
@@ -2026,13 +1750,11 @@ void Note(const char *fmt, ...)
 #endif  /* PROC_TRACE */
 
     (void) strcat(utilbuf, "\n");
-    MsgLog("%s", utilbuf);
+    Msg("%s", utilbuf);
     return;
 }
 
-/*
- * WARNING statements get logged to stdout and to the logfile
- */
+
 void Warn(const char *fmt, ...)
 {
     va_start(ap, fmt);
@@ -2048,13 +1770,11 @@ void Warn(const char *fmt, ...)
 #endif  /* PROC_TRACE */
 
     (void) strcat(utilbuf, "\n");
-    MsgLog("%s", utilbuf);
+    Msg("%s", utilbuf);
     return;
 }
 
-/*
- * ASSERT statements get logged to stdout and to the logfile
- */
+
 void Assert(int fatalFlag, const char *fmt, ...)
 {
     va_start(ap, fmt);
@@ -2070,16 +1790,14 @@ void Assert(int fatalFlag, const char *fmt, ...)
 #endif  /* PROC_TRACE */
 
     (void) strcat(utilbuf, "\n");
-    MsgLog("%s", utilbuf);
+    Msg("%s", utilbuf);
     if (fatalFlag) {
 	Bail(1);
     }
     return;
 }
 
-/*
- * ERROR statements get logged to stdout and to the logfile
- */
+
 void Error(const char *fmt, ...)
 {
     va_start(ap, fmt);
@@ -2095,13 +1813,11 @@ void Error(const char *fmt, ...)
 #endif  /* PROC_TRACE */
 
     (void) strcat(utilbuf, "\n");
-    MsgLog("%s", utilbuf);
+    Msg("%s", utilbuf);
     return;
 }
 
-/*
- * FATAL statements get logged to stdout and to the logfile
- */
+
 void Fatal(const char *fmt, ...)
 {
     va_start(ap, fmt);
@@ -2117,6 +1833,6 @@ void Fatal(const char *fmt, ...)
 #endif  /* PROC_TRACE */
 
     (void) strcat(utilbuf, "\n");
-    MsgLog("%s", utilbuf);
+    Msg("%s", utilbuf);
     Bail(1);
 }
