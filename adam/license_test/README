@@ -1,9 +1,16 @@
-license_test.py is a simple naive bayes classifier for determining whether a file contains a license or not.
+license_test.py is a simple naive bayes classifier for determining 
+whether a file contains a license or not.
 
 Training data:
-	Two files containing the paths of the positove and negative training files are needed. One line for each path. The standard license templates can be used for the positive training data. The following command can be used to create the needed file;
+	Two files containing the paths of the positive and negative training files 
+are needed. One line for each path.  The standard license templates can be used for 
+the positive training data.  The following command can be used to create the needed
+training files.
+
+List of files positive for licenses:
 	find ../../../fossology/agents/foss_license_agent/Licenses/Raw/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt
-	For the negative training file use the following command;
+
+List of files negative for licenses:
 	find ../Training/License_Test -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > neg.txt
 
 NOTE : $PYTHONPATH should include the utils directory contained in the parent of this directory.
