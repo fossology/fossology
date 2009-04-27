@@ -8,7 +8,7 @@ the positive training data.  The following command can be used to create the nee
 training files.
 
 List of files positive for licenses:
-	find ../../../fossology/agents/foss_license_agent/Licenses/Raw/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt
+	find ../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt
 
 List of files negative for licenses:
 	find ../Training/License_Test -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > neg.txt
