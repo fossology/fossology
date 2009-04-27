@@ -55,8 +55,6 @@ char *curDate();
 void memStats(char *s);
 #endif	/* MEMSTATS */
 
-void openLogFile();
-void closeLogFile();
 void makeSymlink(char *path);
 int fileTypeIs(char *pathname, int index, char *magicData);
 int fileIsShar(char *textp, char *magicData);
@@ -65,16 +63,14 @@ char *mmapFile(char *pathname);
 void mmapOpenListing();
 void munmapFile(void *ptr);
 int fileLineCount(char *pathname);
-char *fileMD5SUM(char *pathname);
 int bufferLineCount(char *p, int len);
 int fileCompare(char *f1, char *f2);
 void appendFile(char *pathname, char *str);
 void dumpFile(FILE *fp, char *pathname, int logFlag);
 int nftwFileFilter(char *pathname, struct stat *st, int onlySingleLink);
-void makeTempDir();
 void makePath(char *dirpath);
 void makeDir(char *dirpath);
-void forceRemoveDir(char *dir, int async);
+void removeDir(char *dir);
 int mySystem(const char *fmt, ...);
 int isFILE(char *pathname);
 int addEntry(char *pathname, int forceFlag, const char *fmt, ...);

@@ -1,19 +1,35 @@
-/*
- * (C) Copyright 2006 Hewlett-Packard Development Company, L.P.
- */
+/***************************************************************
+ Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
+ 
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+***************************************************************/
+
 #include "nomos.h"
+#include "list.h"
+#include "util.h"
 
 #define	DFL_STARTSIZE	100
 
-extern struct globals gl;
-extern char *copyString(), *pathBasename();
-static int strCompare(), strIcaseCompare(), strCompareBasename(),
-    valCompareDsc(), valCompareAsc(), bufCompare();
-void emptyList(), listDump(), listIterationReset();
-item_t *listGetItem(), *listAppend(), *listIterate(), *listLookupName(),
-    *listLookupAlias();
-static void listDoubleSize(), listValidate();
-int listCount(), listDelete();
+static int strCompare(item_t *, item_t *);
+static int strIcaseCompare(item_t *, item_t *);
+static int strCompareBasename(item_t *, item_t *);
+static int valCompareDsc(item_t *, item_t *);
+static int valCompareAsc(item_t *, item_t *);
+static int bufCompare(item_t *, item_t *);
+static void listDoubleSize(list_t *);
+static void listValidate(list_t *, int);
 
 #if	defined(PROC_TRACE) || defined(LIST_DEBUG)
 static void listDebugDetails();

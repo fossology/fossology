@@ -419,6 +419,36 @@ struct globals {
     list_t nocpyrtList;
 };
 
+
+struct curPkg {
+    char pathname[myBUFSIZ];
+    char claimlic[myBUFSIZ];
+    char cachelic[myBUFSIZ];
+    char compLic[myBUFSIZ];
+    char briefLic[myBUFSIZ];
+    char url[256];
+    char dosname[256];
+    char basename[128];
+    char name[128];
+    char version[128];
+    char source[128];
+    char srcname[128];
+    char srcvers[128];
+    char reportname[128];
+    char vendor[32];
+    char arch[16];
+    char format[16];
+    char ptype[8];
+    char debEpoch[8];
+    char md5sum[33];
+    int isSource;
+    int isRpm;
+    int noSrc;
+    int nLines;
+    int nWords;
+    int bucketType;
+};
+
 struct license {
     int len;
     char *patt;
@@ -510,7 +540,9 @@ void Bail(int exitval);
   Global Declarations
 */
 extern struct globals gl;
+extern struct curPkg cur;
 extern licText_t licText[];
+extern licSpec_t licSpec[];
 
 /*
   Declarations for using the memory debug stuff
