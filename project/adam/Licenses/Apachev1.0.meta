@@ -8,4 +8,4 @@ GPLv2compatible: No
 GPLv3compatible: No
 copyleft: 
 Fedora: Good
-notes:
+notes: According to the <a href="http://www.fsf.org/licensing/licenses/#apache1"> FSF </a> This is a simple, permissive non-copyleft free software license with an advertising clause. This creates practical problems like those of the original BSD license, including incompatibility with the GNU GPL.
