@@ -14,6 +14,7 @@ List of files negative for licenses:
 	find ../Training/License_Test -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > neg.txt
 
 NOTE : $PYTHONPATH should include the utils directory contained in the parent of this directory.
+NOTE : $PATH must include . or the License_Test directory
 
 Usage: license_test.py -y yes_files -n no_files [ -h ] test_files...
 
@@ -28,6 +29,6 @@ Options:
 
 Example:
 	export PYTHONPATH=../utils/
-	find ../../../fossology/agents/foss_license_agent/Licenses/Raw/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt
+	find ../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt
 	find ../Training/License_Test/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > neg.txt
 	python license_test.py -y pos.txt -n neg.txt `find /usr/share/doc/ -type f`
