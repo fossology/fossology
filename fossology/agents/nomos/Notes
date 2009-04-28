@@ -22,11 +22,6 @@ To Do's
 
 - Remove all HP_INTERNAL and CUSTOMER_VERSION references.
 
-- Remove code related to NOMOS_BASE env variable if it turns out we
-don't need that directory (should not).
-
-- Same thing for SHELL, NOMOS_CONF, and NOMOS_EXT
-
 - Check and remove all unused field of the gl global variable structure.
 
 - Change calls to asyncRemoveDir to forceRemoveDir (make sure it's valid first).

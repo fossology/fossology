@@ -18,11 +18,8 @@
 #ifndef _PROCESS_H
 #define _PROCESS_H
 
-void processDistribution();
-void makeFoundLicenseHistogram();
-void makeInventoryHistogram();
 void processRawSource();
-void processRegularFiles(char *pathname, int isDistro);
-int processSpareArchives(char *pathname, int isDistro);
+void processRegularFiles();
+void stripLine(char *textp, int offset, int size);
 
 #endif /* _PROCESS_H */

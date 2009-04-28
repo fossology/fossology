@@ -20,6 +20,6 @@
 
 void licenseInit();
 int ignoreFileForScan(char *s);
-void licenseScan(list_t *l, int isPackage);
+void licenseScan(list_t *l);
 
 #endif /* _LICENSES_H */

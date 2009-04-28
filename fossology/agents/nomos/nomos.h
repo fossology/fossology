@@ -82,7 +82,7 @@
  * Names of various files/dirs created/used
  */
 #define	FILE_TOC	**CDBREMOVE**
-#define	FILE_FOUND	**CDBREMOVE**
+#define	FILE_FOUND	"Found.txt"
 #define	FILE_WEBINDEX	**CDBREMOVE**
 #define	FILE_FILEINDEX	**CDBREMOVE**
 #define	FILE_CPYRIGHT	**CDBREMOVE**
@@ -92,7 +92,7 @@
 #define	FILE_INST	**CDBREMOVE**
 #define	FILE_INFO	**CDBREMOVE**
 #define	FILE_CORRUPTED	**CDBREMOVE**
-#define	FILE_SCORES	**CDBREMOVE**
+#define	FILE_SCORES	"_scores"
 #define	FILE_HISCORE	**CDBREMOVE**
 #define	FILE_IGNORED	**CDBREMOVE**
 #define	FILE_CONF	**CDBREMOVE**
@@ -104,7 +104,7 @@
 #define FILE_AUTOARCH	**CDBREMOVE**
 #define FILE_MANARCH	**CDBREMOVE**
 #define FILE_BADARCH	**CDBREMOVE**
-#define	RAW_DIR		**CDBREMOVE**
+#define	RAW_DIR		"raw"
 
 #define	MASTER_LISTS	**CDBREMOVE**
 #define	MASTER_PKGS	**CDBREMOVE**
@@ -168,7 +168,8 @@
 #define	DEVNULL		"/dev/null"
 #define	DEFLT_CONFDIR	"/usr/local/lib"
 #define	FAKE_MAGIC	**CDBREMOVE** /* "fake file(1)/magic(3) description" */
-#define	WHO_KNOWS	**CDBREMOVE** /* "undeterminable" */
+#define STR_NOTPKG      "None (not an rpm-format package)"
+#define	WHO_KNOWS	"undeterminable"
 
 /*
  * License-scanning limits
@@ -314,6 +315,7 @@ struct globals {
     char initwd[myBUFSIZ];
     char cwd[myBUFSIZ]; 
     char target[myBUFSIZ];
+    char targetFile[myBUFSIZ];
     /* char confPath[myBUFSIZ]; */
     char penDir[myBUFSIZ]; 
     char report[myBUFSIZ];
@@ -388,8 +390,8 @@ struct globals {
     list_t licHistList; 
     list_t pLicHistList;
     list_t unpFileList; 
-    /*    list_t srcpList; */
-    /*    list_t instpList; */
+    list_t srcpList;
+    list_t instpList;
     /*    list_t allpList; */
     list_t testpList;
     list_t sarchList; 

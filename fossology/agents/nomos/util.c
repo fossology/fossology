@@ -1048,7 +1048,6 @@ int fileIsShar(char *textp, char *magicData)
 }
 
 
-#ifdef notdef
 /*
    CDB -- Need to review this code, particularly for the use of an
    external file (Nomos.strings.txt). Despite the fact that variable 
@@ -1135,7 +1134,6 @@ void printRegexMatch(int n, int cached)
 #endif	/* DEBUG */
     return;
 }
-#endif /* notdef */
 
 
 /*
@@ -1465,8 +1463,7 @@ void dumpFile(FILE *fp, char *pathname, int logFlag)
 }
 
 
-#ifdef notdef
-/* CDB */
+/* CDB ?? Really needed ?? Can we get rid of it easily */
 /*
  * This is the filter routine called in nftw() callback functions.  The 
  * general rule is to return 1 if we DON'T want to unpack an inode.
@@ -1547,7 +1544,6 @@ int nftwFileFilter(char *pathname, struct stat *st, int onlySingleLink)
     }
     return(ret);
 }
-#endif
 
 
 #ifdef notdef
