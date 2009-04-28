@@ -1,31 +1,28 @@
-(c) Copyright 1988-1994 Adobe Systems Incorporated.
-All rights reserved.
+Adobe Systems Incorporated(r) Source Code License Agreement
+Copyright(c) 2006 Adobe Systems Incorporated. All rights reserved.
 
-Permission to use, copy, modify, distribute, and sublicense this software
-and its documentation for any purpose and without fee is hereby granted,
-provided that the above copyright notices appear in all copies and that
-both those copyright notices and this permission notice appear in
-supporting documentation and that the name of Adobe Systems Incorporated
-not be used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.  No trademark license
-to use the Adobe trademarks is hereby granted.  If the Adobe trademark
-"Display PostScript"(tm) is used to describe this software, its
-functionality or for any other purpose, such use shall be limited to a
-statement that this software works in conjunction with the Display
-PostScript system.  Proper trademark attribution to reflect Adobe's
-ownership of the trademark shall be given whenever any such reference to
-the Display PostScript system is made.
+Please read this Source Code License Agreement carefully before using
+the source code.
 
-ADOBE MAKES NO REPRESENTATIONS ABOUT THE SUITABILITY OF THE SOFTWARE FOR
-ANY PURPOSE.  IT IS PROVIDED "AS IS" WITHOUT EXPRESS OR IMPLIED WARRANTY.
-ADOBE DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
-IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NON- INFRINGEMENT OF THIRD PARTY RIGHTS.  IN NO EVENT SHALL ADOBE BE LIABLE
-TO YOU OR ANY OTHER PARTY FOR ANY SPECIAL, INDIRECT, OR CONSEQUENTIAL
-DAMAGES OR ANY DAMAGES WHATSOEVER WHETHER IN AN ACTION OF CONTRACT,
-NEGLIGENCE, STRICT LIABILITY OR ANY OTHER ACTION ARISING OUT OF OR IN
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.  ADOBE WILL NOT
-PROVIDE ANY TRAINING OR OTHER SUPPORT FOR THE SOFTWARE.
+Adobe Systems Incorporated grants to you a perpetual, worldwide, non-exclusive,
+no-charge, royalty-free, irrevocable copyright license, to reproduce,
+prepare derivative works of, publicly display, publicly perform, and
+distribute this source code and such derivative works in source or
+object code form without any attribution requirements.
 
-Adobe, PostScript, and Display PostScript are trademarks of Adobe Systems
-Incorporated which may be registered in certain jurisdictions
+The name "Adobe Systems Incorporated" must not be used to endorse or promote products derived from the source code without prior written permission.
+
+You agree to indemnify, hold harmless and defend Adobe Systems Incorporated from and against any loss, damage, claims or lawsuits, including attorney's fees that arise or result from your use or distribution of the source code.
+
+THIS SOURCE CODE IS PROVIDED "AS IS" AND "WITH ALL FAULTS", WITHOUT
+ANY TECHNICAL SUPPORT OR ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. ALSO, THERE IS NO WARRANTY OF
+NON-INFRINGEMENT, TITLE OR QUIET ENJOYMENT. IN NO EVENT SHALL MACROMEDIA
+OR ITS SUPPLIERS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOURCE CODE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
