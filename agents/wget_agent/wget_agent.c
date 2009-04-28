@@ -500,7 +500,7 @@ void	GetAgentKey	()
 {
   int rc;
 
-  rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='wget_agent' ORDER BY agent_id DESC;");
+  rc = DBaccess(DB,"SELECT agent_pk FROM agent WHERE agent_name ='wget_agent' ORDER BY agent_rev DESC;");
   if (rc < 0)
 	{
 	printf("ERROR upload %ld unable to access the database\n",GlobalUploadKey);
@@ -511,7 +511,7 @@ void	GetAgentKey	()
   if (DBdatasize(DB) <= 0)
       {
       /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('wget_agent','unknown','Sets pfile wget_agent from magic or filename extension');");
+      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('wget_agent',SVN_REV,'wget's file to add to repository');");
       if (rc < 0)
 	{
 	printf("ERROR upload %ld unable to write to the database\n",GlobalUploadKey);
@@ -519,7 +519,7 @@ void	GetAgentKey	()
 	DBclose(DB);
 	exit(17);
 	}
-      rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='wget_agent' ORDER BY agent_id DESC;");
+      rc = DBaccess(DB,"SELECT agent_pk FROM agent WHERE agent_name ='wget_agent' ORDER BY agent_pk DESC;");
       if (rc < 0)
 	{
 	printf("ERROR upload %ld unable to access the database\n",GlobalUploadKey);
