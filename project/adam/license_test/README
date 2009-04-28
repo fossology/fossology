@@ -27,8 +27,10 @@ Options:
   --pr=PR            Prior probability of seeing a yes file. Must be between 0
                      and 1
 
+Use --lw=2 --rw=2 --pr=0.6
+
 Example:
 	export PYTHONPATH=../utils/
 	find ../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt
 	find ../Training/License_Test/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > neg.txt
-	python license_test.py -y pos.txt -n neg.txt `find /usr/share/doc/ -type f`
+	python license_test.py --lw=2 --rw=2 --pr=0.6 -y pos.txt -n neg.txt `find /usr/share/doc/ -type f`
