@@ -38,7 +38,7 @@ void regexError(int ret, regex_t *regc, char *regex)
 	printf("== regexError(%d, %p, %s)\n", ret, regc, regex);
 #endif	/* PROC_TRACE */
 	(void) regerror(ret, regc, regexErrbuf, sizeof(regexErrbuf));
-	MsgLog("regex = \"%s\"\n", regex);
+	Msg("regex = \"%s\"\n", regex);
 	Fatal("regcomp failure: %s", regexErrbuf);
 }
 
