@@ -16,6 +16,8 @@
  along with this library; if not, write to the Free Software Foundation, Inc.0
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  **************************************************************/
+void    InitHeartbeat ();
+void    Heartbeat     (long NewItemsProcessed);
 void    ShowHeartbeat (int Sig);
 int     ReadLine      (FILE *Fin, char *Line, int MaxLine);
 int     IsFile        (char *Fname, int Link);
