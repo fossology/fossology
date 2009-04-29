@@ -2,13 +2,16 @@
 # Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
 TOP=../..
 VARS=$(TOP)/Makefile.conf
+DEPS=$(TOP)/Makefile.deps
 include $(VARS)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(ALL_CFLAGS)
+
 LIB=libfossagent.a
 
 all: $(LIB) $(VARS)
 
 $(LIB): %.a: %.c %.h $(VARS)
-	$(CC) -c $< $(ALL_CFLAGS)
+	$(CC) -c $< $(CFLAGS_LOCAL)
 	$(AR) cr $@ libfossagent.o
 
 install: install-lib 
@@ -33,5 +36,8 @@ test: all
 clean:
 	rm -f $(LIB) *.o core
 
+include $(DEPS)
+
 .PHONY: all clean test
 .PHONY: install install-lib uninstall uninstall-lib 
+
