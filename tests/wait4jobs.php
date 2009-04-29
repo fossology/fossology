@@ -40,6 +40,7 @@ require_once('TestEnvironment.php');
 require_once('testClasses/check4jobs.php');
 
 define("TenMIN", "600");
+//print "I am:{$argv[0]}\n";
 
 $Jq = new check4jobs();
 
