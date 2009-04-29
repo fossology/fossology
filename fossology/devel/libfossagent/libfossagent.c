@@ -1,5 +1,5 @@
 /***************************************************************
- wget_agent: Retrieve a file and put it in the database.
+ libfossagent: Set of generic functions handy for agent development.
 
  Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
  
