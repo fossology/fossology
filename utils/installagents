@@ -15,7 +15,7 @@ do
 scp $TARFILE $i:~/$TARFILE
 ssh $i "tar -xzvf $TARFILE;
         cd $TARDIR;
-        make ; make install;
-        sudo ./install.sh -u';"
+        make ; 
+        sudo make install; ./install.sh -u';"
 done
 
