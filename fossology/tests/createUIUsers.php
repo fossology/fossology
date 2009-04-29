@@ -46,7 +46,7 @@ class createUIUsers extends fossologyTestCase {
       'fosstester' =>
         'Primary Test User: runs test suites,fosstester,10,1,NULL,NULL,fosstester,y',
       'noemail' =>
-        'test user with NO Email notification,noemail,10,1,NULL,NULL,noemail,NULL',
+        'test user with NO Email notification,NULL,10,1,NULL,NULL,noemail,NULL',
     );
 
     print "Starting testcreateUIUsers\n";
