@@ -5,7 +5,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq -lextractor $(ALL_CFLAGS)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lextractor $(ALL_CFLAGS)
 EXE=specagent
 
 all: $(EXE)

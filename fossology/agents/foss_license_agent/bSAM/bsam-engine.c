@@ -235,6 +235,7 @@
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
+#include "libfossagent.h"
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
@@ -365,7 +366,6 @@ matrixstate MS;
 void	*DB=NULL;
 char	SQL[65536];	/* generic string buffer */
 char	SQL2[65536];	/* generic string buffer */
-int	Agent_pk=-1;	/* agent identifier */
 long	DBInsertCount=0;	/* how many inserts were done? */
 
 #if 0
@@ -386,31 +386,6 @@ int	DebugDBaccess	(void *a, char *b)
   fprintf(stderr,"DEBUG[%d] = %d: '%s'\n",getpid(),rc,b);
   return(rc);
 } /* DebugDBaccess() */
-
-long    HeartbeatValue=-1;
-long	LastHeartbeatValue=-1;
-
-/**************************************************
- ShowHeartbeat(): Given an alarm signal, display a
- heartbeat.
- **************************************************/
-void    ShowHeartbeat   (int Sig)
-{
-
-  /* IF we are tracking hearbeat values AND it has not changed,
-     THEN don't display a heartbeat message.
-     This can happen if I/O is hung, but alarms are still being processed.
-   */
-  if ((HeartbeatValue == -1) || (HeartbeatValue != LastHeartbeatValue))
-    {
-    LastHeartbeatValue = HeartbeatValue;
-    printf("Heartbeat\n");
-    fflush(stdout);
-    }
-
-  /* re-schedule itself */
-  alarm(60);
-} /* ShowHeartbeat() */
 
 
 /************************************************************/
@@ -2163,7 +2138,7 @@ int	LoadNextData	(const int Which, int Show0140)
   unsigned char *MapMax;	/* end of memory map */
   int i;
 
-  HeartbeatValue++;
+  Heartbeat(0);
   if (!RepFile[Which]) return(0);
   if ((Which == 1) && (MS.Symbols[0].SymbolEnd <= 0)) return(0);
 
@@ -2536,13 +2511,13 @@ char *	GetFieldValue	(char *Sin, char *Field, int FieldMax,
 } /* GetFieldValue() */
 
 /**********************************************
- ReadLine(): Read a single line from a file.
+ ReadFileLine(): Read a single line from a file.
  Used to read from stdin.
  Process line elements.
  Returns: 1 of read data, 0=no data, -1=EOF.
  NOTE: It only returns 1 if a filename changes!
  **********************************************/
-int	ReadLine	(FILE *Fin)
+int	ReadFileLine	(FILE *Fin)
 {
   int C='@';
   int i=0;	/* index */
@@ -2566,7 +2541,7 @@ int	ReadLine	(FILE *Fin)
   /* inform scheduler that we're ready for data */
   printf("OK\n");
   alarm(60);
-  HeartbeatValue = -1;
+  InitHeartbeat();
   fflush(stdout);
 
   if (feof(Fin))
@@ -2630,7 +2605,7 @@ int	ReadLine	(FILE *Fin)
     else if (!strcasecmp(Field,"Bkey")) { Pfile[1] = atol(Value); }
     }
   return(rc);
-} /* ReadLine() */
+} /* ReadFileLine() */
 
 /************************************************************/
 /************************************************************/
@@ -3030,52 +3005,6 @@ void	SAMfilesExhaustive	()
 /************************************************************/
 /************************************************************/
 
-/*********************************************************
- GetAgentKey(): Get the Agent Key from the database.
- TBD: When this engine is used for other things, we will need
- a switch statement for the different types of agents.
- *********************************************************/
-void	GetAgentKey	()
-{
-  int rc;
-
-  rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='license' ORDER BY agent_id DESC;");
-  if (rc < 0)
-	{
-	printf("ERROR: unable to access the database\n");
-	printf("LOG: unable to select 'license' from the database table 'agent'\n");
-	fflush(stdout);
-        DBclose(DB);
-	exit(-1);
-	}
-  if (DBdatasize(DB) <= 0)
-      {
-      /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('license','unknown','Analyze files for licenses');");
-      if (rc < 0)
-	{
-	printf("ERROR: unable to write to the database\n");
-	printf("LOG: unable to write 'license' to the database table 'agent'\n");
-	fflush(stdout);
-        DBclose(DB);
-	exit(-1);
-	}
-#if 0
-      /** Disabled: Database will take care of this **/
-      DBaccess(DB,"ANALYZE agent;");
-#endif
-      rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='license' ORDER BY agent_id DESC;");
-      if (rc < 0)
-	{
-	printf("ERROR: unable to access the database\n");
-	printf("LOG: unable to select 'license' from the database table 'agent'\n");
-	fflush(stdout);
-        DBclose(DB);
-	exit(-1);
-	}
-      }
-  Agent_pk = atoi(DBgetvalue(DB,0,0));
-} /* GetAgentKey() */
 
 /**********************************************
  Usage(): Display program usage.
@@ -3151,7 +3080,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"FATAL: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey();
+	GetAgentKey(DB, 0, SVN_REV);
 	DBSetPhrase();
 	DBclose(DB);
 	return(0);
@@ -3176,7 +3105,7 @@ int	main	(int argc, char *argv[])
 		  fprintf(stderr,"FATAL: Unable to open DB\n");
 		  exit(-1);
 		  }
-		GetAgentKey();
+		GetAgentKey(DB, 0, SVN_REV);
 		DBSetPhrase();
 		break;
 	  case 'N':
@@ -3189,7 +3118,7 @@ int	main	(int argc, char *argv[])
 		  exit(-1);
 		  }
 		if (RepType == NULL) RepType = RepDEFAULT[1];
-		GetAgentKey();
+		GetAgentKey(DB, 0, SVN_REV);
 		DBSetPhrase();
 		break;
 	  case 's':
@@ -3287,7 +3216,7 @@ int	main	(int argc, char *argv[])
     while(!feof(stdin))
       {
       FreeMatrix();
-      if (ReadLine(stdin) > 0)
+      if (ReadFileLine(stdin) > 0)
 	{
 	if (ExhaustiveSearch)	SAMfilesExhaustive();
 	else	SAMfiles();
@@ -3303,7 +3232,7 @@ int	main	(int argc, char *argv[])
 	while(!feof(stdin))
 	  {
 	  FreeMatrix();
-	  if (ReadLine(stdin) > 0)
+	  if (ReadFileLine(stdin) > 0)
 	    {
 	    if (ExhaustiveSearch)	SAMfilesExhaustive();
 	    else	SAMfiles();
@@ -3317,11 +3246,11 @@ int	main	(int argc, char *argv[])
     while(!feof(stdin))
       {
       FreeMatrix();
-      if (ReadLine(stdin) > 0)
+      if (ReadFileLine(stdin) > 0)
 	{
 	if (ExhaustiveSearch)	SAMfilesExhaustive();
 	else	SAMfiles();
-	} /* if readline */
+	} /* if ReadFileLine */
       } /* while data on stdin */
     } /* if both are - */
   FreeMatrix();

@@ -5,7 +5,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) -lpq $(ALL_CFLAGS)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
 EXE=sqlagent
 
 all: $(EXE)

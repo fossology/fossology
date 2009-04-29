@@ -5,7 +5,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -lpq $(ALL_CFLAGS)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
 STDEF=-DBSAMLIC='"$(PROJECTSTATEDIR)/agents/License.bsam"' -DLICDIR='"$(AGENTDATADIR)/licenses"' -DAGENTDIR='"$(AGENTDIR)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
 CKSRC=../ununpack/checksum.c ../ununpack/md5.c ../ununpack/sha1.c
 EXE=selftest

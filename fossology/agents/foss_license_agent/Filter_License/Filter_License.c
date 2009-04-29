@@ -30,6 +30,7 @@
 
 #include "libfossdb.h"
 #include "libfossrepo.h" /* repository functions */
+#include "libfossagent.h"
 #include "Filter_License.h"
 #include "tokholder.h"
 #include "1sl.h"
@@ -75,21 +76,6 @@ int	Agent_pk=-1;	/* the agent ID */
 /* for Meta information */
 FILE	*MetaFile=NULL;
 
-/**************************************************
- ShowHeartbeat(): Given an alarm signal, display a
- heartbeat.
- **************************************************/
-void    ShowHeartbeat   (int Sig)
-{
-
-  /* IF we are tracking hearbeat values AND it has not changed,
-     THEN don't display a heartbeat message.
-     This can happen if I/O is hung, but alarms are still being processed.
-   */
-  printf("Heartbeat\n");
-  fflush(stdout);
-  alarm(60);
-} /* ShowHeartbeat() */
 
 /***********************************************************************/
 /** Functions to tokenize words **/
@@ -1329,46 +1315,6 @@ Reread:
   goto ReRead;
 } /* EngineReadLine() */
 
-/*********************************************************
- GetAgentKey(): Get the Agent Key from the database.
- *********************************************************/
-void	GetAgentKey	()
-{
-  int rc;
-
-  rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='filter_license' ORDER BY agent_id DESC;");
-  if (rc < 0)
-	{
-	fprintf(stderr,"ERROR: unable to access the database\n");
-	fprintf(stderr,"LOG: unable to select 'filter_license' from the database table 'agent'\n");
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
-  if (DBdatasize(DB) <= 0)
-      {
-      /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('filter_license','unknown','Convert files to license cache files for bsam');");
-      if (rc < 0)
-	{
-	fprintf(stderr,"ERROR: unable to write to the database\n");
-	fprintf(stderr,"LOG: unable to write 'filter_license' to the database table 'agent'\n");
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
-      rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='filter_license' ORDER BY agent_id DESC;");
-      if (rc < 0)
-	{
-	fprintf(stderr,"ERROR: unable to access the database\n");
-	fprintf(stderr,"LOG: unable to select 'filter_license' from the database table 'agent'\n");
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
-      }
-  Agent_pk = atoi(DBgetvalue(DB,0,0));
-} /* GetAgentKey() */
 
 /****************************************
  Usage(): Display usage.
@@ -1409,7 +1355,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"ERROR: s Unable to open database connection\n");
 	  exit(-1);
 	  }
-	GetAgentKey();
+	GetAgentKey(DB,0,SVN_REV);
 	DBclose(DB);
 	return(0);
       case 'O': UpdateDB=0; break;
@@ -1454,7 +1400,7 @@ int	main	(int argc, char *argv[])
 	fprintf(stderr,"ERROR pfile %s Unable to open database connection\n",Pfile_fk);
 	exit(-1);
 	}
-  GetAgentKey();
+  GetAgentKey(DB,0,SVN_REV);
 
   if (DB && AddToDB) AddPhrase();
 

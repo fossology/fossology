@@ -29,6 +29,8 @@
 
 #include <libfossdb.h>
 #include <libfossrepo.h>
+#include "libfossagent.h"
+
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
@@ -47,25 +49,6 @@ char	SQL[MAXSQL];
 /* For heartbeats */
 long	ItemsProcessed=0;
 
-/**************************************************
- ShowHeartbeat(): Given an alarm signal, display a
- heartbeat.
- **************************************************/
-void    ShowHeartbeat   (int Sig)
-{
-  if (ItemsProcessed > 0)
-    {
-    printf("ItemsProcessed %ld\n",ItemsProcessed);
-    ItemsProcessed=0;
-    }
-  else
-    {
-    printf("Heartbeat\n");
-    }
-  fflush(stdout);
-  /* re-schedule itself */
-  alarm(60);
-} /* ShowHeartbeat() */
 
 /*********************************************
  MyDBaccess(): DBaccess with debugging.
@@ -131,6 +114,7 @@ void	DeleteLicense	(long UploadId)
       snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
       MyDBaccess(DB,SQL);
   ItemsProcessed+=DBdatasize(VDB);
+  Heartbeat(ItemsProcessed);
 
   /***********************************************/
   /* Commit the change! */
@@ -373,6 +357,7 @@ void	DeleteUpload	(long UploadId)
 	else RepRemove("gold",S);
 	}
       ItemsProcessed++;
+      Heartbeat(ItemsProcessed);
       }
     } /* if Test <= 1 */
   DBclose(VDB);
@@ -571,13 +556,13 @@ void	DeleteFolder	(long FolderId)
 /**********************************************************************/
 
 /**********************************************
- ReadLine(): Read a single line from a file.
+ ReadFileLine(): Read a single line from a file.
  Used to read from stdin.
  Process line elements.
  Returns: 1 of read data, 0=no data, -1=EOF.
  NOTE: It only returns 1 if a filename changes!
  **********************************************/
-int     ReadLine        (FILE *Fin)
+int     ReadFileLine        (FILE *Fin)
 {
   int C='@';
   int i=0;      /* index */
@@ -664,48 +649,8 @@ int     ReadLine        (FILE *Fin)
     }
 
   return(rc);
-} /* ReadLine() */
+} /* ReadFileLine() */
 
-/*********************************************************
- GetAgentKey(): Get the Agent Key from the database.
- *********************************************************/
-void	GetAgentKey	()
-{
-  int rc;
-
-  rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='delagent' ORDER BY agent_id DESC;");
-  if (rc < 0)
-	{
-	printf("ERROR: unable to access the database\n");
-	printf("LOG: unable to select 'delagent' from the database table 'agent'\n");
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
-  if (DBdatasize(DB) <= 0)
-      {
-      /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('delagent','unknown','Remove uploads and folders');");
-      if (rc < 0)
-	{
-	printf("ERROR: unable to write to the database\n");
-	printf("LOG: unable to write 'delagent' to the database table 'agent'\n");
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
-      rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='delagent' ORDER BY agent_id DESC;");
-      if (rc < 0)
-	{
-	printf("ERROR: unable to access the database\n");
-	printf("LOG: unable to select 'delagent' from the database table 'agent'\n");
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
-      }
-  Agent_pk = atoi(DBgetvalue(DB,0,0));
-} /* GetAgentKey() */
 
 /**********************************************************************/
 /**********************************************************************/
@@ -753,7 +698,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"ERROR: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey();
+	GetAgentKey(DB, 0, SVN_REV);
 	DBclose(DB);
 	return(0);
       case 'f': ListFolder=1; GotArg=1; break;
@@ -781,7 +726,7 @@ int	main	(int argc, char *argv[])
 	fprintf(stderr,"ERROR: Unable to open DB\n");
 	exit(-1);
 	}
-  GetAgentKey();
+  GetAgentKey(DB, 0, SVN_REV);
   signal(SIGALRM,ShowHeartbeat);
 
   if (ListProj) ListUploads();
@@ -795,7 +740,7 @@ int	main	(int argc, char *argv[])
   /* process from the scheduler */
   if (Scheduler)
     {
-    while(ReadLine(stdin) >= 0) ;
+    while(ReadFileLine(stdin) >= 0) ;
     }
 
   DBclose(DB);

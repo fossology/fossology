@@ -30,6 +30,7 @@
 
 #include <libfossdb.h>
 #include <libfossrepo.h>
+#include <libfossagent.h>
 #include <checksum.h>
 
 #ifdef SVN_REV
@@ -44,32 +45,8 @@ gid_t	Group=0;
 
 /* for DB */
 void	*DB=NULL;
-char	*Pfile_fk=NULL;
-int	Agent_pk=-1;	/* agent ID */
 char	SQL[MAXSQL];
 
-/* For heartbeats */
-long	ItemsProcessed=0;
-
-/**************************************************
- ShowHeartbeat(): Given an alarm signal, display a
- heartbeat.
- **************************************************/
-void    ShowHeartbeat   (int Sig)
-{
-  if (ItemsProcessed > 0)
-    {
-    printf("ItemsProcessed %ld\n",ItemsProcessed);
-    ItemsProcessed=0;
-    }
-  else
-    {
-    printf("Heartbeat\n");
-    }
-  fflush(stdout);
-  /* re-schedule itself */
-  alarm(60);
-} /* ShowHeartbeat() */
 
 /*********************************************
  MyDBaccess(): DBaccess with debugging.
@@ -466,12 +443,12 @@ void	GenerateTestData	()
 } /* GenerateTestData() */
 
 /**********************************************
- ReadLine(): Read a single line from a file.
+ ReadFileLine(): Read a single line from a file.
  Used to read from stdin.
  Process line elements.
  Returns: 1 of read data, 0=no data, -1=EOF.
  **********************************************/
-int     ReadLine        (FILE *Fin)
+int     ReadFileLine        (FILE *Fin)
 {
   int C='@';
   int i=0;      /* index */
@@ -514,48 +491,8 @@ int     ReadLine        (FILE *Fin)
 
   if (CheckRepo()) if (CheckLicenses()) CheckAgents(); 
   return(rc);
-} /* ReadLine() */
+} /* ReadFileLine() */
 
-/*********************************************************
- GetAgentKey(): Get the Agent Key from the database.
- *********************************************************/
-void    GetAgentKey     ()
-{
-  int rc;
-
-  rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='selftest' ORDER BY agent_id DESC;");
-  if (rc < 0)
-        {
-        printf("ERROR: unable to access the database\n");
-        printf("LOG: unable to select 'selftest' from the database table 'agent'\n");
-        fflush(stdout);
-        DBclose(DB);
-        exit(-1);
-        }
-  if (DBdatasize(DB) <= 0)
-      {
-      /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('selftest','unknown','Validate agent configuration');");
-      if (rc < 0)
-        {
-        printf("ERROR: unable to write to the database\n");
-        printf("LOG: unable to write 'selftest' to the database table 'agent'\n");
-        fflush(stdout);
-        DBclose(DB);
-        exit(-1);
-        }
-      rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='selftest' ORDER BY agent_id DESC;");
-      if (rc < 0)
-        {
-        printf("ERROR: unable to access the database\n");
-        printf("LOG: unable to select 'selftest' from the database table 'agent'\n");
-        fflush(stdout);
-        DBclose(DB);
-        exit(-1);
-        }
-      }
-  Agent_pk = atoi(DBgetvalue(DB,0,0));
-} /* GetAgentKey() */
 
 /*********************************************
  Usage():
@@ -593,7 +530,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"ERROR: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey();
+	GetAgentKey(DB, 0, SVN_REV);
 	DBclose(DB);
 	return(0);
       case 's': Scheduler=1; GotArg=1; break;
@@ -608,7 +545,7 @@ int	main	(int argc, char *argv[])
     printf("FATAL: Unable to access database.\n");
     return(1);
     }
-  GetAgentKey();
+  GetAgentKey(DB, 0, SVN_REV);
   signal(SIGALRM,ShowHeartbeat);
 
   alarm(60);  /* from this point on, handle the alarm */
@@ -616,7 +553,7 @@ int	main	(int argc, char *argv[])
   /* process from the scheduler */
   if (Scheduler)
     {
-    while(ReadLine(stdin) >= 0) ;
+    while(ReadFileLine(stdin) >= 0) ;
     }
   else /* !Scheduler */
     {
