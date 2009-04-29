@@ -49,11 +49,13 @@ extern long	HeartbeatCounter;	/* used to count heartbeats */
 /* for debugging */
 extern int Debug;
 
+#define FUNCTION 
+
 /**************************************************
  ShowHeartbeat(): Given an alarm signal, display a
  heartbeat.
  **************************************************/
-void    ShowHeartbeat   (int Sig)
+FUNCTION void    ShowHeartbeat   (int Sig)
 {
   if ((HeartbeatCount==-1) || (HeartbeatCount != HeartbeatCounter))
     {
@@ -70,7 +72,7 @@ void    ShowHeartbeat   (int Sig)
  If the line is empty, then try again.
  Returns line length, or -1 of EOF.
  **********************************************/
-int     ReadLine (FILE *Fin, char *Line, int MaxLine)
+FUNCTION int     ReadLine (FILE *Fin, char *Line, int MaxLine)
 {
   int C;
   int i;
@@ -104,7 +106,7 @@ int     ReadLine (FILE *Fin, char *Line, int MaxLine)
  Link: should it follow symbolic links?
  Returns 1=yes, 0=no.
  ***************************************************/
-int      IsFile  (char *Fname, int Link)
+FUNCTION int      IsFile  (char *Fname, int Link)
 {
   stat_t Stat;
   int rc;
@@ -119,7 +121,7 @@ int      IsFile  (char *Fname, int Link)
 /*********************************************************
  GetAgentKey(): Get the Agent Key from the database.
  *********************************************************/
-int	GetAgentKey	(void *DB, long Upload_pk, char *svn_rev)
+FUNCTION int	GetAgentKey	(void *DB, long Upload_pk, char *svn_rev)
 {
   int rc;
   int Agent_pk=-1;    /* agent identifier */
