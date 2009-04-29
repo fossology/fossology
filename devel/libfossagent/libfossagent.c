@@ -41,30 +41,57 @@ typedef struct stat stat_t;
 #include "libfossdb.h"
 #include "libfossagent.h"
 
-
-/* for heartbeat checking */
-extern long	HeartbeatCount;	/* used to flag heartbeats */
-extern long	HeartbeatCounter;	/* used to count heartbeats */
-
 /* for debugging */
 extern int Debug;
 
 #define FUNCTION 
 
+/*  For heartbeat  */
+long    HeartbeatValue=-1;
+long    LastHeartbeatValue=-1;
+long    HBItemsProcessed=0;
+int     AlarmSecs = 60;
+
 /**************************************************
- ShowHeartbeat(): Given an alarm signal, display a
- heartbeat.
- **************************************************/
-FUNCTION void    ShowHeartbeat   (int Sig)
+ *  NewHeartbeat(): Send heartbeat on next alarm
+ *    **************************************************/
+FUNCTION void InitHeartbeat   ()
 {
-  if ((HeartbeatCount==-1) || (HeartbeatCount != HeartbeatCounter))
-    {
-    printf("Heartbeat\n");
-    fflush(stdout);
-    }
-  /* re-schedule itself */
-  HeartbeatCounter=HeartbeatCount;
-  alarm(60);
+    HeartbeatValue = -1;
+    LastHeartbeatValue = -1;
+    HBItemsProcessed = 0;
+}
+
+/**************************************************
+ *  Heartbeat(): Update heartbeat counter and items processed
+ *    **************************************************/
+FUNCTION void Heartbeat (long NewItemsProcessed)
+{
+    HeartbeatValue++;
+    HBItemsProcessed = NewItemsProcessed;
+}
+
+/**************************************************
+ *  ShowHeartbeat(): Given an alarm signal, display a
+ *   heartbeat.
+ * **************************************************/
+FUNCTION void ShowHeartbeat   (int Sig)
+{
+
+  /* IF we are tracking hearbeat values AND it has not changed,
+     THEN don't display a heartbeat message.
+     This can happen if I/O is hung, but alarms are still being processed.
+   */
+   if ((HeartbeatValue == -1) || (HeartbeatValue != LastHeartbeatValue))
+   {
+     if (HBItemsProcessed > 0) printf("ItemsProcessed %ld\n", HBItemsProcessed);
+     LastHeartbeatValue = HeartbeatValue;
+     printf("Heartbeat\n");
+     fflush(stdout);
+   }
+
+   /* re-schedule itself */
+   alarm(AlarmSecs);
 } /* ShowHeartbeat() */
 
 /**********************************************
@@ -78,8 +105,8 @@ FUNCTION int     ReadLine (FILE *Fin, char *Line, int MaxLine)
   int i;
 
   if (!Fin) return(-1);
-  memset(Line,'\0',MaxLine);
   if (feof(Fin)) return(-1);
+  memset(Line,'\0',MaxLine);
   i=0;
   C=fgetc(Fin);
   if (C<0) return(-1);
