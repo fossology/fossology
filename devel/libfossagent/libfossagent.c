@@ -39,33 +39,15 @@ typedef struct stat stat_t;
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
+#include "libfossagent.h"
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
-#endif
-
-#define MAXCMD	2048
-char SQL[MAXCMD];
-
-/* for the DB */
-void *DBMime=NULL;	/* contents of mimetype table */
-int  MaxDBMime=0;	/* how many rows in DBMime */
-void *DB;
-int Agent_pk=-1;	/* agent identifier */
-
-/* input for this system */
-long GlobalUploadKey=-1;
-char GlobalTempFile[MAXCMD];
-char GlobalURL[MAXCMD];
-int GlobalImportGold=1;	/* set to 0 to not store file in gold repository */
-gid_t ForceGroup=-1;
 
 /* for heartbeat checking */
-long	HeartbeatCount=-1;	/* used to flag heartbeats */
-long	HeartbeatCounter=-1;	/* used to count heartbeats */
+extern long	HeartbeatCount;	/* used to flag heartbeats */
+extern long	HeartbeatCounter;	/* used to count heartbeats */
 
 /* for debugging */
-int Debug=0;
+extern int Debug;
 
 /**************************************************
  ShowHeartbeat(): Given an alarm signal, display a
@@ -137,37 +119,39 @@ int      IsFile  (char *Fname, int Link)
 /*********************************************************
  GetAgentKey(): Get the Agent Key from the database.
  *********************************************************/
-void	GetAgentKey	()
+int	GetAgentKey	(void *DB, long Upload_pk, char *svn_rev)
 {
   int rc;
+  int Agent_pk=-1;    /* agent identifier */
 
   rc = DBaccess(DB,"SELECT agent_pk FROM agent WHERE agent_name ='wget_agent' ORDER BY agent_rev DESC;");
   if (rc < 0)
 	{
-	printf("ERROR upload %ld unable to access the database\n",GlobalUploadKey);
-	printf("LOG upload %ld unable to select wget_agent from the database table agent\n",GlobalUploadKey);
+	printf("ERROR upload %ld unable to access the database\n",Upload_pk);
+	printf("LOG upload %ld unable to select wget_agent from the database table agent\n",Upload_pk);
 	DBclose(DB);
 	exit(16);
 	}
   if (DBdatasize(DB) <= 0)
       {
       /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('wget_agent',SVN_REV,'wget's file to add to repository');");
+      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('wget_agent',svn_rev,'wget's file to add to repository');");
       if (rc < 0)
 	{
-	printf("ERROR upload %ld unable to write to the database\n",GlobalUploadKey);
-	printf("LOG upload %ld unable to write wget_agent to the database table agent\n",GlobalUploadKey);
+	printf("ERROR upload %ld unable to write to the database\n",Upload_pk);
+	printf("LOG upload %ld unable to write wget_agent to the database table agent\n",Upload_pk);
 	DBclose(DB);
 	exit(17);
 	}
       rc = DBaccess(DB,"SELECT agent_pk FROM agent WHERE agent_name ='wget_agent' ORDER BY agent_pk DESC;");
       if (rc < 0)
 	{
-	printf("ERROR upload %ld unable to access the database\n",GlobalUploadKey);
-	printf("LOG upload %ld unable to select wget_agent from the database table agent\n",GlobalUploadKey);
+	printf("ERROR upload %ld unable to access the database\n",Upload_pk);
+	printf("LOG upload %ld unable to select wget_agent from the database table agent\n",Upload_pk);
 	DBclose(DB);
 	exit(18);
 	}
       }
   Agent_pk = atoi(DBgetvalue(DB,0,0));
+  return Agent_pk;
 } /* GetAgentKey() */
