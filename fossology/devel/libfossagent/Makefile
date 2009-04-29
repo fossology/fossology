@@ -7,8 +7,7 @@ LIB=libfossagent.a
 
 all: $(LIB) $(VARS)
 
-#$(LIB): %.a: %.c %.h $(VARS)
-$(LIB): %.a: %.c $(VARS)
+$(LIB): %.a: %.c %.h $(VARS)
 	$(CC) -c $< $(ALL_CFLAGS)
 	$(AR) cr $@ libfossagent.o
 
@@ -16,7 +15,7 @@ install: install-lib
 
 install-lib: $(LIB)
 	$(INSTALL_DATA) libfossagent.a $(DESTDIR)$(LIBDIR)/libfossagent.a
-#	$(INSTALL_DATA) libfossagent.h $(DESTDIR)$(INCLUDEDIR)/libfossagent.h
+	$(INSTALL_DATA) libfossagent.h $(DESTDIR)$(INCLUDEDIR)/libfossagent.h
 
 
 # uninstall only cleans up the files, not the directories that might have
@@ -25,7 +24,7 @@ uninstall: uninstall-lib
 
 uninstall-lib:
 	rm -f $(DESTDIR)$(LIBDIR)/libfossagent.a
-#	rm -f $(DESTDIR)$(INCLUDEDIR)/libfossagent.h
+	rm -f $(DESTDIR)$(INCLUDEDIR)/libfossagent.h
 
 
 test: all
