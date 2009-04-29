@@ -1,0 +1,147 @@
+/***********************************************************
+ Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+***********************************************************/
+
+.text
+  {
+  font:normal 10pt verdana, arial, helvetica;
+  }
+
+.mono
+  {
+  font:normal 10pt monospace;
+  }
+
+.dir
+  {
+  height:24px;
+  font:normal 10pt verdana, arial, helvetica;
+  border: thin black;
+  border-style: none none dotted none;
+  }
+
+table { border-spacing:0; }
+
+th { background:lightsteelblue; }
+
+a, a:visited, a:link
+  {
+  text-decoration:none;
+  color:blue;
+  }
+a:active, a:hover
+  {
+  color:red;
+  }
+
+div
+  {
+  padding:0;
+  margin:0;
+  }
+
+table
+  {
+  height:24px;
+  font:normal 10pt verdana, arial, helvetica;
+  }
+
+/* For tree views */
+.tree, a.tree
+  {
+  height:24px;
+  border-style: none;
+  border-left: thin dotted;
+  border-color: gray;
+  font:normal 10pt verdana, arial, helvetica;
+  text-decoration:none;
+  color:black;
+  }
+a.tree:active, a.tree:hover
+  {
+  color:red;
+  }
+
+.treehide
+  {
+  height:24px;
+  border-style: none;
+  border-left: thin dotted;
+  border-color: gray;
+  font:normal 10pt verdana, arial, helvetica;
+  text-decoration:none;
+  color:white;
+  }
+
+.treehide1
+  {
+  height:24px;
+  border-style: none;
+  border-left: thin dotted;
+  border-color: white;
+  font:normal 10pt verdana, arial, helvetica;
+  text-decoration:none;
+  color:white;
+  }
+
+.treebranch
+  {
+  height:24px;
+  border-style: none;
+  border-left: thin dotted;
+  border-color: gray;
+  font:normal 10pt verdana, arial, helvetica;
+  text-decoration:none; 
+  color:blue;
+  }
+
+.treearm
+  {
+  height:24px;
+  border-style: none;
+  border-left: thin dotted;
+  border-color: gray;
+  font:normal 10pt verdana, arial, helvetica;
+  text-decoration:none; 
+  color:gray;
+  }
+
+.treetext, a.treetext, a.treetext:link, a.treetext:visited
+  {
+  height:24px;
+  border-style: none;
+  border-left: thin dotted;
+  border-color: white;
+  font:normal 10pt verdana, arial, helvetica;
+  text-decoration:none; 
+  color:black;
+  }
+a.treetext:active, a.treetext:hover
+  {
+  color:red;
+  }
+
+/* Fun bug: When using the DTD, you need to define html and body
+   to be 100% AND div must be used.  Otherwise, iframe becomes
+   a default/fixed height. */
+html, body
+  {
+  margin:0;
+  padding:.25em;
+  height:100%;
+  background-color:white;
+  }
+

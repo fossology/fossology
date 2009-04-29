@@ -1,0 +1,6 @@
+#!/bin/sh
+# bsam-test2
+# Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+
+time ../bSAM/bsam-engine -O t -L 10 -A 0 -B 50 -G 10 -M 2 License.bsam License.bsam > out
+../bSAM/SeeSam -t F -P 10 -L 0 out > self-compare

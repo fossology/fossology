@@ -1,0 +1,16 @@
+#!/bin/sh
+# mkfilelist - make lists of installed files for sysadmin and distro cases
+rm -rf /tmp/fo-sysadmin
+mkdir /tmp/fo-sysadmin
+make clean
+make DESTDIR=/tmp/fo-sysadmin install
+(cd /tmp/fo-sysadmin; find . -type f -printf "%M %p\n"|sort -k2 >/tmp/new-sysadmin)
+
+rm -rf /tmp/fo-distro
+mkdir /tmp/fo-distro
+make clean
+make SYSCONFDIR=/etc LOCALSTATEDIR=/var install
+make DESTDIR=/tmp/fo-distro PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install
+(cd /tmp/fo-distro; find . -type f -printf "%M %p\n"|sort -k2 >/tmp/new-distro)
+
+make clean
