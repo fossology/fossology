@@ -39,6 +39,7 @@ typedef struct stat stat_t;
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
+#include "libfossagent.h"
 
 #include "../ununpack/checksum.h"
 
@@ -50,10 +51,7 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
 char SQL[MAXCMD];
 
 /* for the DB */
-void *DBMime=NULL;	/* contents of mimetype table */
-int  MaxDBMime=0;	/* how many rows in DBMime */
 void *DB;
-int Agent_pk=-1;	/* agent identifier */
 
 /* input for this system */
 long GlobalUploadKey=-1;
@@ -69,54 +67,6 @@ long	HeartbeatCounter=-1;	/* used to count heartbeats */
 /* for debugging */
 int Debug=0;
 
-/**************************************************
- ShowHeartbeat(): Given an alarm signal, display a
- heartbeat.
- **************************************************/
-void    ShowHeartbeat   (int Sig)
-{
-  if ((HeartbeatCount==-1) || (HeartbeatCount != HeartbeatCounter))
-    {
-    printf("Heartbeat\n");
-    fflush(stdout);
-    }
-  /* re-schedule itself */
-  HeartbeatCounter=HeartbeatCount;
-  alarm(60);
-} /* ShowHeartbeat() */
-
-/**********************************************
- ReadLine(): Read a command from a stream.
- If the line is empty, then try again.
- Returns line length, or -1 of EOF.
- **********************************************/
-int     ReadLine (FILE *Fin, char *Line, int MaxLine)
-{
-  int C;
-  int i;
-
-  if (!Fin) return(-1);
-  memset(Line,'\0',MaxLine);
-  if (feof(Fin)) return(-1);
-  i=0;
-  C=fgetc(Fin);
-  if (C<0) return(-1);
-  while(!feof(Fin) && (C>=0) && (i<MaxLine))
-    {
-    if (C=='\n')
-        {
-        if (i > 0) return(i);
-        /* if it is a blank line, then ignore it. */
-        }
-    else
-        {
-        Line[i]=C;
-        i++;
-        }
-    C=fgetc(Fin);
-    }
-  return(i);
-} /* ReadLine() */
 
 /*********************************************************
  DBLoadGold(): Insert a file into the database and repository.
@@ -275,21 +225,6 @@ void	DBLoadGold	()
   free(Sum);
 } /* DBLoadGold() */
 
-/***************************************************
- IsFile(): Given a filename, is it a file?
- Link: should it follow symbolic links?
- Returns 1=yes, 0=no.
- ***************************************************/
-int      IsFile  (char *Fname, int Link)
-{
-  stat_t Stat;
-  int rc;
-  if (!Fname || (Fname[0]=='\0')) return(0);  /* not a directory */
-  if (Link) rc = stat64(Fname,&Stat);
-  else rc = lstat64(Fname,&Stat);
-  if (rc != 0) return(0); /* bad name */
-  return(S_ISREG(Stat.st_mode));
-} /* IsFile() */
 
 /*********************************************************
  TaintURL(): Given a URL string, taint-protect it.
@@ -493,44 +428,6 @@ void    SetEnv  (char *S, char *TempFileDir)
 #endif
 } /* SetEnv() */
 
-/*********************************************************
- GetAgentKey(): Get the Agent Key from the database.
- *********************************************************/
-void	GetAgentKey	()
-{
-  int rc;
-
-  rc = DBaccess(DB,"SELECT agent_pk FROM agent WHERE agent_name ='wget_agent' ORDER BY agent_rev DESC;");
-  if (rc < 0)
-	{
-	printf("ERROR upload %ld unable to access the database\n",GlobalUploadKey);
-	printf("LOG upload %ld unable to select wget_agent from the database table agent\n",GlobalUploadKey);
-	DBclose(DB);
-	exit(16);
-	}
-  if (DBdatasize(DB) <= 0)
-      {
-      /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('wget_agent',SVN_REV,'wget's file to add to repository');");
-      if (rc < 0)
-	{
-	printf("ERROR upload %ld unable to write to the database\n",GlobalUploadKey);
-	printf("LOG upload %ld unable to write wget_agent to the database table agent\n",GlobalUploadKey);
-	DBclose(DB);
-	exit(17);
-	}
-      rc = DBaccess(DB,"SELECT agent_pk FROM agent WHERE agent_name ='wget_agent' ORDER BY agent_pk DESC;");
-      if (rc < 0)
-	{
-	printf("ERROR upload %ld unable to access the database\n",GlobalUploadKey);
-	printf("LOG upload %ld unable to select wget_agent from the database table agent\n",GlobalUploadKey);
-	DBclose(DB);
-	exit(18);
-	}
-      }
-  Agent_pk = atoi(DBgetvalue(DB,0,0));
-} /* GetAgentKey() */
-
 /***********************************************
  Usage():
  ***********************************************/
@@ -607,7 +504,7 @@ int	main	(int argc, char *argv[])
 	fflush(stdout);
 	exit(20);
 	}
-  GetAgentKey();
+  GetAgentKey(DB, GlobalUploadKey, SVN_REV);
 
   /* When initializing the DB, don't do anything else */
   if (InitFlag)
