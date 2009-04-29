@@ -56,6 +56,7 @@
 #include <signal.h>
 
 #include "libfossdb.h"
+#include "libfossagent.h"
 
 #define MAXCMD 4096
 char SQL[256];
@@ -65,7 +66,6 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif
 
 void *DB=NULL;
-int Agent_pk=-1;	/* agent table */
 int Verbose=0;
 
 struct uploadtree
@@ -301,50 +301,6 @@ void    ListUploads     ()
 /************************************************************/
 /************************************************************/
 
-/**************************************************
- ShowHeartbeat(): Given an alarm signal, display a
- heartbeat.
- **************************************************/
-void    ShowHeartbeat   (int Sig)
-{
-  printf("Heartbeat\n");
-  fflush(stdout);
-  /* re-schedule itself */
-  alarm(60);
-} /* ShowHeartbeat() */
-
-/**********************************************
- ReadLine(): Read a command from stdin.
- If the line is empty, then try again.
- Returns line length, or -1 of EOF.
- **********************************************/
-int	ReadLine	(FILE *Fin, char *Line, int MaxLine)
-{
-  int C;
-  int i;
-
-  memset(Line,'\0',MaxLine);
-  if (feof(Fin)) return(-1);
-  i=0;
-  C=fgetc(Fin);
-  if (C<0) return(-1);
-  while(!feof(Fin) && (C>=0) && (i<MaxLine))
-    {
-    if (C=='\n')
-        {
-        if (i > 0) return(i);
-        /* if it is a blank line, then ignore it. */
-        }
-    else
-        {
-        Line[i]=C;
-        i++;
-        }
-    C=fgetc(Fin);
-    }
-  return(i);
-} /* ReadLine() */
-
 /**********************************************
  MatchField(): Given a string that contains
  field='value' pairs, check if the field name
@@ -486,46 +442,6 @@ int	SetParm	(char *ParmName, char *Parm)
   return(1);
 } /* SetParm() */
 
-/*********************************************************
- GetAgentKey(): Get the Agent Key from the database.
- *********************************************************/
-void	GetAgentKey	()
-{
-  int rc;
-
-  rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='adj2nest' ORDER BY agent_id DESC;");
-  if (rc < 0)
-	{
-	printf("ERROR: unable to access the database\n");
-	printf("LOG: unable to select 'adj2nest' from the database table 'agent'\n");
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
-  if (DBdatasize(DB) <= 0)
-      {
-      /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('adj2nest','unknown','Analyze source rpm .spec files');");
-      if (rc < 0)
-	{
-	printf("ERROR: unable to write to the database\n");
-	printf("LOG: unable to write 'adj2nest' to the database table 'agent'\n");
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
-      rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='adj2nest' ORDER BY agent_id DESC;");
-      if (rc < 0)
-	{
-	printf("ERROR: unable to access the database\n");
-	printf("LOG: unable to select 'adj2nest' from the database table 'agent'\n");
-	fflush(stdout);
-	DBclose(DB);
-	exit(-1);
-	}
-      }
-  Agent_pk = atoi(DBgetvalue(DB,0,0));
-} /* GetAgentKey() */
 
 /*********************************************************
  Usage():
@@ -555,7 +471,7 @@ int	main	(int argc, char *argv[])
 	fflush(stdout);
 	exit(-1);
 	}
-  GetAgentKey();
+  GetAgentKey(DB, 0, SVN_REV);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"aiuv")) != -1)

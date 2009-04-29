@@ -19,6 +19,8 @@
 
 #include "ununpack.h"
 #include "ununpack-ar.h"
+#include "libfossagent.h"
+
 
 /***************************************************
  ExtractAR(): Given an AR file, extract the contents to the

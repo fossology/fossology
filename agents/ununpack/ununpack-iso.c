@@ -20,6 +20,8 @@
 
 #include "ununpack.h"
 #include "ununpack-disk.h"
+#include "libfossagent.h"
+
 
 /***************************************************
  GetISOMode(): Given a line in drwxrwxrwx format,

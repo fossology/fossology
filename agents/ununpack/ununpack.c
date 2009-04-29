@@ -36,6 +36,7 @@
 #include "metahandle.h"
 #include "libfossrepo.h"
 #include "libfossdb.h"
+#include "libfossagent.h"
 
 #include <sys/timeb.h>
 
@@ -134,40 +135,6 @@ void	SafeExit	(int rc)
   exit(rc);
 } /* SafeExit() */
 
-/*********************************************************
- GetAgentKey(): Get the Agent Key from the database.
- *********************************************************/
-void	GetAgentKey	()
-{
-  int rc;
-
-  rc = MyDBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='unpack' ORDER BY agent_id DESC;");
-  if (rc < 0)
-	{
-	printf("ERROR: unable to access the database\n");
-	printf("LOG: unable to select 'unpack' from the database table 'agent'\n");
-	SafeExit(1);
-	}
-  if (DBdatasize(DB) <= 0)
-      {
-      /* Not found? Add it! */
-      rc = MyDBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('unpack','unknown','Recursively extract files');");
-      if (rc < 0)
-	{
-	printf("ERROR: unable to write to the database\n");
-	printf("LOG: unable to write 'unpack' to the database table 'agent'\n");
-	SafeExit(2);
-	}
-      rc = MyDBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='unpack' ORDER BY agent_id DESC;");
-      if (rc < 0)
-	{
-	printf("ERROR: unable to access the database\n");
-	printf("LOG: unable to select 'unpack' from the database table 'agent'\n");
-	SafeExit(3);
-	}
-      }
-  Agent_pk = atoi(DBgetvalue(DB,0,0));
-} /* GetAgentKey() */
 
 /*************************************************
  InitCmd(): Initialize the metahandler CMD table.
@@ -430,22 +397,6 @@ inline int	IsDir	(char *Fname)
   return(S_ISDIR(Stat.st_mode));
 } /* IsDir() */
 
-/***************************************************
- IsFile(): Given a filename, is it a file?
- Link: should it follow symbolic links?
- Returns 1=yes, 0=no.
- (This is used by Disk extraction for getting a unique name...)
- ***************************************************/
-inline int	IsFile	(char *Fname, int Link)
-{
-  stat_t Stat;
-  int rc;
-  if (!Fname || (Fname[0]=='\0')) return(0);  /* not a directory */
-  if (Link) rc = stat64(Fname,&Stat);
-  else rc = lstat64(Fname,&Stat);
-  if (rc != 0) return(0); /* bad name */
-  return(S_ISREG(Stat.st_mode));
-} /* IsFile() */
 
 /***************************************************
  IsExe(): Check if the executable exists.
@@ -562,28 +513,6 @@ CopyFileEnd:
   close(Fin);
   return(rc);
 } /* CopyFile() */
-
-/***************************************************
- ReadLine(): Given a stream, read in one line.
- Return number of bytes read, or -1 on EOF.
- ***************************************************/
-int	ReadLine	(FILE *Fin, char *Line, int MaxLine)
-{
-  int C='@';
-  int i=0;      /* index */
-  memset(Line,0,MaxLine);
-  if (feof(Fin))        return(-1);
-  while(!feof(Fin) && (i < MaxLine-1) && (C != '\n') && (C>0))
-    {
-    C=fgetc(Fin);
-    if ((C>0) && (C!='\n'))
-      {
-      Line[i]=C;
-      i++;
-      }
-    }
-  return(i);
-} /* ReadLine() */
 
 
 /***************************************************************************/
@@ -2070,7 +1999,7 @@ int	main	(int argc, char *argv[])
 			fprintf(stderr,"FATAL: Unable to access database\n");
 			SafeExit(20);
 			}
-		GetAgentKey();
+		GetAgentKey(DB, 0, SVN_REV);
 		DBclose(DB);
 		return(0);
 		break; /* never reached */
@@ -2090,13 +2019,13 @@ int	main	(int argc, char *argv[])
 		  }
 		signal(SIGALRM,AlarmDisplay);
 		alarm(10);
-		GetAgentKey();
 		Pfile = getenv("ARG_pfile");
 		if (!Pfile) Pfile = getenv("pfile");
 		Pfile_Pk = getenv("ARG_pfile_fk");
 		if (!Pfile_Pk) Pfile_Pk = getenv("pfile_fk");
 		Upload_Pk = getenv("ARG_upload_pk");
 		if (!Upload_Pk) Upload_Pk = getenv("upload_pk");
+		GetAgentKey(DB, 0, Upload_Pk);
 
 		/* Check for all necessary parameters */
 		if (Verbose)

@@ -20,6 +20,7 @@
 
 #include "ununpack.h"
 #include "ununpack-disk.h"
+#include "libfossagent.h"
 
 #include <utime.h>
 

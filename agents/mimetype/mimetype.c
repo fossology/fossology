@@ -44,6 +44,7 @@
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
+#include "libfossagent.h"
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
@@ -69,50 +70,6 @@ magic_t MagicCookie;
 int Akey = 0;
 char A[MAXCMD];
 
-/**************************************************
- ShowHeartbeat(): Given an alarm signal, display a
- heartbeat.
- **************************************************/
-void    ShowHeartbeat   (int Sig)
-{
-  printf("Heartbeat\n");
-  fflush(stdout);
-  /* re-schedule itself */
-  alarm(60);
-} /* ShowHeartbeat() */
-
-/**********************************************
- ReadLine(): Read a command from stdin.
- If the line is empty, then try again.
- Returns line length, or -1 of EOF.
- **********************************************/
-int     ReadLine (FILE *Fin, char *Line, int MaxLine)
-{
-  int C;
-  int i;
-
-  if (!Fin) return(-1);
-  memset(Line,'\0',MaxLine);
-  if (feof(Fin)) return(-1);
-  i=0;
-  C=fgetc(Fin);
-  if (C<0) return(-1);
-  while(!feof(Fin) && (C>=0) && (i<MaxLine))
-    {
-    if (C=='\n')
-	{
-	if (i > 0) return(i);
-	/* if it is a blank line, then ignore it. */
-	}
-    else
-	{
-	Line[i]=C;
-	i++;
-	}
-    C=fgetc(Fin);
-    }
-  return(i);
-} /* ReadLine() */
 
 /*********************************************************
  TaintString(): Create a string with taint quoting.
@@ -531,43 +488,6 @@ void    SetEnv  (char *S)
     }
 } /* SetEnv() */
 
-/*********************************************************
- GetAgentKey(): Get the Agent Key from the database.
- *********************************************************/
-void	GetAgentKey	()
-{
-  int rc;
-
-  rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='mimetype' ORDER BY agent_id DESC;");
-  if (rc < 0)
-	{
-	printf("ERROR: unable to access the database\n");
-	printf("LOG: unable to select 'mimetype' from the database table 'agent'\n");
-	DBclose(DB);
-	exit(-1);
-	}
-  if (DBdatasize(DB) <= 0)
-      {
-      /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('mimetype','unknown','Sets pfile mimetype from magic or filename extension');");
-      if (rc < 0)
-	{
-	printf("ERROR: unable to write to the database\n");
-	printf("LOG: unable to write 'mimetype' to the database table 'agent'\n");
-	DBclose(DB);
-	exit(-1);
-	}
-      rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='mimetype' ORDER BY agent_id DESC;");
-      if (rc < 0)
-	{
-	printf("ERROR: unable to access the database\n");
-	printf("LOG: unable to select 'mimetype' from the database table 'agent'\n");
-	DBclose(DB);
-	exit(-1);
-	}
-      }
-  Agent_pk = atoi(DBgetvalue(DB,0,0));
-} /* GetAgentKey() */
 
 /***********************************************
  Usage():
@@ -597,7 +517,7 @@ int	main	(int argc, char *argv[])
 	fflush(stdout);
 	exit(-1);
 	}
-  GetAgentKey();
+  GetAgentKey(DB,0, SVN_REV);
 
   FMimetype = fopen("/etc/mime.types","rb");
   if (!FMimetype)

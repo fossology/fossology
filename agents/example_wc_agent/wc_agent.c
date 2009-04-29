@@ -34,6 +34,7 @@
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
+#include "libfossagent.h"
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
@@ -43,65 +44,11 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
 
 /* for the DB */
 void *DB=NULL;
-int Agent_pk=-1;        /* agent identifier */
 
 /* input for this system */
 long GlobalPfileFk=-1;	/* the pfile_fk to process */
 char GlobalPfile[MAXCMD];	/* the pfile (sha1.md5.len) to process */
 
-/* for heartbeat checking */
-long    HeartbeatCount=-1;      /* used to flag heartbeats */
-long    HeartbeatCounter=-1;    /* used to count heartbeats */
-
-/**************************************************
- ShowHeartbeat(): Given an alarm signal, display a
- heartbeat.  This allows the scheduler to tell when
- the agent is hung.
- **************************************************/
-void	ShowHeartbeat	(int Sig)
-{
-  if ((HeartbeatCount==-1) || (HeartbeatCount != HeartbeatCounter))
-    {
-    printf("Heartbeat\n");
-    fflush(stdout);
-    }
-  /* re-schedule itself */
-  HeartbeatCounter=HeartbeatCount;
-  alarm(60);
-} /* ShowHeartbeat() */
-
-/**********************************************
- ReadLine(): Read a command from a stream.
- If the line is empty, then try again.
- Returns line length, or -1 of EOF.
- **********************************************/
-int	ReadLine	(FILE *Fin, char *Line, int MaxLine)
-{
-  int C;
-  int i;
-
-  if (!Fin) return(-1);
-  memset(Line,'\0',MaxLine);
-  if (feof(Fin)) return(-1);
-  i=0;
-  C=fgetc(Fin);
-  if (C<0) return(-1);
-  while(!feof(Fin) && (C>=0) && (i<MaxLine))
-    {
-    if (C=='\n')
-	{
-	if (i > 0) return(i);
-	/* if it is a blank line, then ignore it. */
-	}
-    else
-	{
-	Line[i]=C;
-	i++;
-	}
-    C=fgetc(Fin);
-    }
-  return(i);
-} /* ReadLine() */
 
 /**********************************************
  GetFieldValue(): Given a string that contains
@@ -200,50 +147,6 @@ void	SetEnv	(char *S)
     }
 } /* SetEnv() */
 
-/*********************************************************
- GetAgentKey(): Get the Agent Key from the database.
- Every agent should be defined by a key in the database.
- This gets the key, or sets it if the key is missing.
- -----
- If you use this code for your own agent, be sure to use a
- unique agent name...
- Don't forget to change "wc_agent" to something else.
- *********************************************************/
-void	GetAgentKey	()
-{
-  int rc;
-
-  rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='wc_agent' ORDER BY agent_id DESC;");
-  if (rc < 0)
-	{
-	printf("ERROR: Unable to access the database\n");
-	printf("LOG: Unable to select wc_agent from the database table agent\n");
-	DBclose(DB);
-	exit(-1);
-	}
-  if (DBdatasize(DB) <= 0)
-      {
-      /* Not found? Add it! */
-      /**** Give the agent a good description ****/
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('wc_agent','unknown','Computes number of words and lines in a file');");
-      if (rc < 0)
-	{
-	printf("ERROR: Unable to write to the database\n");
-	printf("LOG: Unable to write wc_agent to the database table agent\n");
-	DBclose(DB);
-	exit(-1);
-	}
-      rc = DBaccess(DB,"SELECT agent_id FROM agent WHERE agent_name ='wc_agent' ORDER BY agent_id DESC;");
-      if (rc < 0)
-	{
-	printf("ERROR: Unable to access the database\n");
-	printf("LOG: Unable to select wc_agent from the database table agent\n");
-	DBclose(DB);
-	exit(-1);
-	}
-      }
-  Agent_pk = atoi(DBgetvalue(DB,0,0));
-} /* GetAgentKey() */
 
 /***********************************************
  ProcessData(): This function does the work.
@@ -367,7 +270,7 @@ int	main	(int argc, char *argv[])
 	fflush(stdout);
 	exit(-1);
 	}
-  GetAgentKey();
+  GetAgentKey(DB, 0, SVN_REV);
 
   /* When initializing the DB, don't do anything else */
   if (InitFlag)
@@ -383,15 +286,13 @@ int	main	(int argc, char *argv[])
 
     printf("OK\n"); /* inform scheduler that we are ready */
     fflush(stdout);
-    HeartbeatCount=-1;
     alarm(60);
     while(ReadLine(stdin,Parm,MAXCMD) >= 0)
 	{
 	if (Parm[0] != '\0')
 	  {
 	  alarm(0);       /* allow scheduler to know if this hangs */
-	  HeartbeatCount=0;
-	  HeartbeatCounter=-1;
+      Heartbeat(0);
 	  /* 2 parameters: pfile_fk and pfile */
 	  SetEnv(Parm); /* set globals */
 	  if (ProcessData(GlobalPfileFk,GlobalPfile) != 0)

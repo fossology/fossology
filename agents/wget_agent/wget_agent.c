@@ -60,10 +60,6 @@ char GlobalURL[MAXCMD];
 int GlobalImportGold=1;	/* set to 0 to not store file in gold repository */
 gid_t ForceGroup=-1;
 
-/* for heartbeat checking */
-long	HeartbeatCount=-1;	/* used to flag heartbeats */
-long	HeartbeatCounter=-1;	/* used to count heartbeats */
-
 /* for debugging */
 int Debug=0;
 
@@ -317,9 +313,9 @@ int	GetURL	(char *TempFile, char *URL)
 	/* Track if a line is read.
 	   If this does not change after a minute, then heartbeat will
 	   not display. This catches cases where wget hangs. */
-	HeartbeatCounter = !HeartbeatCount;
+	InitHeartbeat();
 	}
-  HeartbeatCount = -1;
+  InitHeartbeat();
 
   rc = pclose(Fin);  /* rc is the exit status */
 
@@ -514,6 +510,7 @@ int	main	(int argc, char *argv[])
 	}
 
   /* Run from the command-line (for testing) */
+  InitHeartbeat();
   signal(SIGALRM,ShowHeartbeat);
   for(arg=optind; arg < argc; arg++)
     {
@@ -525,8 +522,7 @@ int	main	(int argc, char *argv[])
     if (strstr(GlobalURL,"://"))
       {
       alarm(60);
-      HeartbeatCount=0;
-      HeartbeatCounter=-1;
+      Heartbeat(0);
       if (Debug) printf("It's a URL\n");
       if (GetURL(GlobalTempFile,GlobalURL) != 0)
 	{
@@ -535,8 +531,7 @@ int	main	(int argc, char *argv[])
 	DBclose(DB);
 	exit(21);
 	}
-      HeartbeatCount=-1;
-      HeartbeatCounter=-1;
+      InitHeartbeat();
       if (GlobalUploadKey != -1) { DBLoadGold(); }
       unlink(GlobalTempFile);
       alarm(0);
@@ -557,14 +552,13 @@ int	main	(int argc, char *argv[])
     {
     printf("OK\n"); /* inform scheduler that we are ready */
     fflush(stdout);
-    HeartbeatCount=-1;
+    InitHeartbeat();
     alarm(60);
     while(ReadLine(stdin,Parm,MAXCMD) >= 0)
       {
       if (Parm[0] != '\0')
 	{
-	HeartbeatCount=0;
-	HeartbeatCounter=-1;
+    Heartbeat(0);
 	/* 3 parameters: uploadpk downloadfile url */
 	SetEnv(Parm,TempFileDir); /* set globals */
 	if (GetURL(GlobalTempFile,GlobalURL) == 0)

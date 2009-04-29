@@ -232,27 +232,6 @@ void	CloseFile	()
   FileHandle=-1;
 } /* CloseFile() */
 
-/**********************************************
- ReadLine(): Read a single line from a file.
- Returns length of line, or -1 on EOF.
- **********************************************/
-int	ReadLine	(FILE *Fin, char *Line, int MaxLine)
-{
-  int C='@';
-  int i=0;	/* index */
-  memset(Line,0,MaxLine);
-  if (feof(Fin))	return(-1);
-  while(!feof(Fin) && (i < MaxLine-1) && (C != '\n') && (C>0))
-    {
-    C=fgetc(Fin);
-    if ((C>0) && (C!='\n'))
-      {
-      Line[i]=C;
-      i++;
-      }
-    }
-  return(i);
-} /* ReadLine() */
 
 /**********************************************
  ShowFiles(): Given two files, compute SAM.
