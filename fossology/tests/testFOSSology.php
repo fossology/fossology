@@ -44,6 +44,8 @@
  * @TODO switch to using fo-runTests for all tests.
  *
  */
+
+require_once ('TestEnvironment.php');
 require_once ('testClasses/check4jobs.php');
 
 $usage.= "Usage: $argv[0] [-l path] {[-a] | [-b] | [-h] | [-s] | [-v -l]}\n";
@@ -227,10 +229,7 @@ if (array_key_exists("a", $options)) {
     LogAndPrint($LF, $UInoHome);
   }
   $h = getcwd();
-  print "DB: right before wait4, cwd is:$h\n";
   $last = exec('./wait4jobs.php', $tossme, $jobsDone);
-  print "DB: after wait4: last is:$last\n";
-  print "DB: after wait4: output is:\n";
   foreach($tossme as $line){
     print "$line\n";
   }
