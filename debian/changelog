@@ -1,10 +1,10 @@
-fossology (1.1.0~20090205) unstable; urgency=low
+fossology (1.1.0~20090430) unstable; urgency=low
 
   * unofficial SVN version for testing process
 
- -- Build User <build@cranky.manage>  Thu, 05 Feb 2009 10:17:08 -0800
+ -- Build User <build@cranky.manage> Thu Apr 30 13:32:28 PDT 2009
 
-fossology (1.0.0-2) unstable; urgency=low
+fossology (1.1.0-1) unstable; urgency=low
 
   * Add explicit agents dependency on libextractor-plugins since
     shlibdeps doesn't automatically figure it out.
