@@ -354,6 +354,7 @@ function verifyUploads($logfile) {
   $VerifyLast = exec("./runVerifyTests.php >> $logfile 2>&1", $dummy, $Vrtn);
   return ($Vrtn);
 }
+
 /*
  * this program does not remove the testing folders in case there
  * was a failure and it needs to be looked at.  Run the script/test
