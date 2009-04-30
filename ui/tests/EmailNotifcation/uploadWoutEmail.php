@@ -23,7 +23,7 @@
  * Note: you must have at least local email delivery working on the system
  * that this test is run on.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on April 3, 2009
  */
@@ -54,6 +54,7 @@ class uploadWoutEMailTest extends fossologyTestCase {
     global $URL;
 
     /* login noemail */
+    print "Starting upload without email notificiation\n";
     $this->Login('noemail','noemail');
     $page = $this->mybrowser->get($URL);
 
@@ -69,11 +70,14 @@ class uploadWoutEMailTest extends fossologyTestCase {
     $this->uploadFile('Enote', $File, $Filedescription, null, '1');
     $this->uploadUrl('Enote', $Url, $Urldescription, null, '2');
     $this->uploadServer('Enote', $Srv, $Srvdescription, null, 'all');
+
+    /*
+     * need to check email when they finish....
+     */
+    print "waiting for jobs to finish\n";
+    $this->wait4jobs();
+    print "verifying  email was received\n";
+    $this->checkEmailNotification(0);
   }
-  /*
-   * at this point one could wait for the jobs to end and verify.  We will not
-   * do this at this time.  The suite will wait for the jobs to end and verify
-   * the email was received locally on the test system.
-   */
 };
 ?>
