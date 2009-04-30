@@ -65,5 +65,5 @@ if (TextReporter::inCli())
 }
 $test->run(new HtmlReporter());
 $elapseTime = $start->TimeAgo($start->getStartTime());
-print "<pre>The Basic Functional Tests took {$elapseTime}to run</pre>\n";
+print "<pre>The Basic Functional Tests took {$elapseTime}to run</pre>\n\n";
 ?>
