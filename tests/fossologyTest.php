@@ -22,8 +22,8 @@
  * extend this class.  A test could extend this class, but would not
  * have access to all the methods in fossologyTestCases.
  *
- * Only put methods in here that more than one fossologyTestCase use.
  *
+ * @package FOSSologyTest
  * @version "$Id$"
  *
  * Created on Sept. 1, 2008
@@ -38,6 +38,15 @@ require_once ('commonTestFuncs.php');
 global $URL;
 global $USER;
 global $PASSWORD;
+
+/**
+ * Base clase for fossologyTestCase.  Most FOSSology tests should not extend
+ * this class.  Extend fossologyTestCase instead.
+ *
+ * Only put methods in here that more than one fossologyTestCase can use.
+ *
+ * @author markd
+ */
 
 class fossologyTest extends WebTestCase
 {
