@@ -223,7 +223,6 @@ if (array_key_exists("a", $options)) {
   _runTestEnvSetup();
   fclose($LF);
   // wait for uploads to finish
-  print "DB: starting waitfor jobs\n";
   if (chdir($Home) === FALSE) {
     $UInoHome = "All Tests ERROR: can't cd to $Home\n";
     LogAndPrint($LF, $UInoHome);
@@ -320,8 +319,8 @@ function saveResults() {
     LogAndPrint($LF, $nohome);
     return ($nohome);
   }
-  print "saveResults: logFileName is:$logFileName\n";
-  print "saveResults: resultsHome is:$resultsHome\n";
+  //print "saveResults: logFileName is:$logFileName\n";
+  //print "saveResults: resultsHome is:$resultsHome\n";
   $reportHome = "$resultsHome" . "$logFileName";
   if (!rename($logFile, $reportHome)) {
     $E = "Error, could not move\n$logFile\nto\n$reportHome\n";
