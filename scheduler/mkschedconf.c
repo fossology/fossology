@@ -224,7 +224,9 @@ void	Usage	(char *ProgName)
   printf("              Do not use single-quotes around the '%%s'!\n");
   printf("  Output options:\n");
   printf("    -o file :: write output to file.  Use '-' for stdout.\n");
+  printf("       This option must be specified before -L, -H <host> or -B\n");
   printf("    -a file :: append output to file.  Use '-' for stdout.\n");
+  printf("       This option must be specified before -L, -H <host> or -B\n");
   printf("    -L      :: create output for running on localhost.\n");
   printf("    -H host :: create output for running on host.\n");
   printf("    -B      :: create output for running on no specified host (-B for blank).\n");
