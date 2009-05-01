@@ -227,7 +227,7 @@ if (array_key_exists("a", $options)) {
     $UInoHome = "All Tests ERROR: can't cd to $Home\n";
     LogAndPrint($LF, $UInoHome);
   }
-  $h = getcwd();
+  print "Waiting for jobs to finish...\n";
   $last = exec('./wait4jobs.php', $tossme, $jobsDone);
   foreach($tossme as $line){
     print "$line\n";
