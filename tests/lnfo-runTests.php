@@ -37,7 +37,7 @@ if($euid != 0) {
 $OK = array();
 print "installing fo-runTests into /usr/local/bin\n";
 $wd = getcwd();
-$cmd = "ln -s $wd/fo-runTests.php /usr/local/bin/fo-runtests 2>&1";
+$cmd = "ln -s $wd/fo-runTests.php /usr/local/bin/fo-runTests 2>&1";
 $last = exec($cmd, $tossme, $rtn);
 if($rtn != 0) {
   $OK = preg_grep('/File exists/', $tossme);

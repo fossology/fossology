@@ -107,4 +107,8 @@ $last = exec("./configTestEnv.php 'http://localhost/repo/' fosstester fosstester
 if($rtn != 0) {
   print "./configTestEnv.php Failed for fosstester, Investigate\n";
 }
+/* Remove the symlink in /usr/local/bin for fo-runTests it will get reestablished
+ * when fosstester user configures.
+ */
+$last = exec('sudo rm /usr/local/bin/fo-runTests', $tossme, $rtn);
 ?>

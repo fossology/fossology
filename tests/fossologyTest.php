@@ -22,8 +22,8 @@
  * extend this class.  A test could extend this class, but would not
  * have access to all the methods in fossologyTestCases.
  *
- * Only put methods in here that more than one fossologyTestCase use.
  *
+ * @package FOSSologyTest
  * @version "$Id$"
  *
  * Created on Sept. 1, 2008
@@ -38,6 +38,15 @@ require_once ('commonTestFuncs.php');
 global $URL;
 global $USER;
 global $PASSWORD;
+
+/**
+ * Base clase for fossologyTestCase.  Most FOSSology tests should not extend
+ * this class.  Extend fossologyTestCase instead.
+ *
+ * Only put methods in here that more than one fossologyTestCase can use.
+ *
+ * @author markd
+ */
 
 class fossologyTest extends WebTestCase
 {
@@ -280,21 +289,48 @@ class fossologyTest extends WebTestCase
     }
   }  // parseSelectStmnt
 
-  public function parseFossjobs() {
+
+  /**
+   * function parseFossjobs
+   *
+   * parse the output of fossjobs command, return an array with the information
+   *
+   * With no parameters parseFossnobs will return an associative array with
+   * the last uploads done on each file.  The array key is the filename, and upload
+   * is the value.  The array is reverse sorted by upload (higher uploads 1st).
+   *
+   * With the all parameter, all of the uploads are returned in an associative
+   * array.  The keys are the upload id's in assending order, the filename uploaded
+   * is the value.
+   *
+   * @param boolean $all, indicates all uploads are wanted.
+   *
+   * @return associative array
+   *
+   */
+  public function parseFossjobs($all=NULL) {
     /* use fossjobs to get the upload ids */
     $last = exec('fossjobs -u',$uploadList, $rtn);
     //print "uploadList is:\n";print_r($uploadList) . "\n";
     foreach ($uploadList as $upload) {
       list($upId, $file, $comment) = split(' ', $upload);
-      print "UP:$upId, F:$file, C:$comment\n";
       if($upId == '#') {
         continue;
       }
+      //print "UP:$upId, F:$file, C:$comment\n";
       $uploadId = rtrim($upId, ':');
       $Uploads[$uploadId] = $file;
+      /* gather up the last uploads done on each file (file is not unique)*/
       $LastUploads[$file] = $uploadId;
-      print "uploads is:\n";print_r($Uploads) . "\n";
-      print "LastUploads is:\n";print_r($LastUploads) . "\n";
+    }
+    $sorted = arsort(&$LastUploads);
+    if(!empty($all)) {
+      //print "uploads is:\n";print_r($Uploads) . "\n";
+      return($Uploads);               // return all uploads
+    }
+    else {
+      //print "LastUploads is:\n";print_r($LastUploads) . "\n";
+      return($LastUploads);           // default return
     }
   }
 

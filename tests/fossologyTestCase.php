@@ -1,5 +1,4 @@
 <?php
-
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -21,7 +20,8 @@
  *
  * Base Class for all fossology tests.  All fossology tests should
  * extend this class.
- * @package fossologyTestCases
+ *
+ * @package FOSSologyTest
  * @version "$Id$"
  *
  * Created on Sep 1, 2008
@@ -37,7 +37,6 @@ require_once ('fossologyTest.php');
  * extend this class.  This class contains methods to interact with the
  * fossology UI menus and forms.
  *
- * @package fossologyTestCasesClass
  *
  */
 class fossologyTestCase extends fossologyTest
@@ -99,6 +98,7 @@ class fossologyTestCase extends fossologyTest
    * said all the jobs finished without errors.
    *
    * @param int $number is the number of emails that should have been received
+   * @TODO actually write code that uses the number!
    *
    * @return NULL on success, array on failure:
    *  The array will with contain an error message starting with the string
@@ -778,7 +778,7 @@ class fossologyTestCase extends fossologyTest
    *
    * Are there any jobs running?
    *
-   * Wait for 2 hours for the test jobs to finish, check every 10 minutes
+   * Wait for 2 hours for the test jobs to finish, check every 5 minutes
    * to see if they are done.
    *
    * @return boolean TRUE/FALSE
@@ -794,21 +794,21 @@ class fossologyTestCase extends fossologyTest
 
     require_once('testClasses/check4jobs.php');
 
-    define("TenMIN", "600");
+    define("FiveMIN", "300");
 
     $Jq = new check4jobs();
 
     /* wait at most 2 hours for test jobs to finish */
     $done = FALSE;
-    for($i=1; $i<=12; $i++) {
+    for($i=1; $i<=24; $i++) {
       //print "DB:W4Q: checking Q...\n";
       $number = $Jq->Check();
       if ($number != 0) {
         //print "sleeping 10 min...\n";
-        sleep(TenMIN);
+        sleep(FiveMIN);
       }
       else {
-        print "$number jobs found in the Queue\n";
+        //print "$number jobs found in the Queue\n";
         $done = TRUE;
         break;
       }

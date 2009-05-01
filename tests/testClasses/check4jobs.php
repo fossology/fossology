@@ -1,7 +1,4 @@
-#!/usr/bin/php
 <?php
-
-
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -38,8 +35,7 @@
  * Created on Jan. 15, 2009
  */
 
-require_once ('TestEnvironment.php');
-require_once ('testClasses/db.php');
+require_once (TESTROOT . '/testClasses/db.php');
 
 define('SQL', "SELECT *
           FROM jobqueue

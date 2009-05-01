@@ -23,7 +23,7 @@
  * Note: you must have at least local email delivery working on the system
  * that this test is run on.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on April 3, 2009
  */
@@ -38,6 +38,7 @@ class uploadWEMailTest extends fossologyTestCase {
 
   public function setUp() {
     global $URL;
+
     $this->Login();
     $this->CreateFolder(1, 'Enote', 'Folder for Email notification uploads');
     $this->Logout();
@@ -47,6 +48,7 @@ class uploadWEMailTest extends fossologyTestCase {
 
     global $URL;
 
+    print "Starting UploadWEmail test...\n";
     /* login fosstester*/
     $this->Login('fosstester','fosstester');
     $page = $this->mybrowser->get($URL);
@@ -63,11 +65,41 @@ class uploadWEMailTest extends fossologyTestCase {
     $this->uploadFile('Enote', $File, $Filedescription, null, '1');
     $this->uploadUrl('Enote', $Url, $Urldescription, null, '2');
     $this->uploadServer('Enote', $Srv, $Srvdescription, null, 'all');
+    // need to get the upload id's of the files just uploaded.
+    sleep(10);   // wait for 2 min for jobs to start then check they got started
+    // use fossjobs to get the upload id
+    $jobs = $this->parseFossjobs();
+    //print "returned jobs from fossjobs is:\n";print_r($jobs) . "\n";
+
+    /* verify */
+    print "Verifying jobs exist\n";
+    if(array_key_exists($Srv,$jobs)) {
+      $this->pass();
+    }
+    else {
+      $this->fail("upload $Srv not found\n");
+    }
+    if(array_key_exists($Url,$jobs)) {
+      $this->pass();
+    }
+    else {
+      $this->fail("upload $Url not found\n");
+    }
+    /* upload from file only stores the filename */
+    $FileName = basename($File);
+    if(array_key_exists($FileName,$jobs)) {
+      $this->pass();
+    }
+    else {
+      $this->fail("upload $FileName not found\n");
+    }
+    /*
+     * uploads exist, but still, need to check email when they finish....
+     */
+    print "waiting for jobs to finish\n";
+    $this->wait4jobs();
+    print "verifying correct email was received\n";
+    $this->checkEmailNotification(3);
   }
-  /*
-   * at this point one could wait for the jobs to end and verify.  We will not
-   * do this at this time.  The suite will wait for the jobs to end and verify
-   * the email was received locally on the test system.
-   */
 };
 ?>

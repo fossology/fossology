@@ -67,18 +67,17 @@ $usr = "\$USER='$user';\n";
 $passwd = "\$PASSWORD='$password';\n";
 $useproxy = NULL;
 $endphp = "?>\n";
+$tests = getcwd();
+$define ="define('TESTROOT',\"$tests\");\n";
 if(!(empty($proxy)))
 {
   $useproxy = "\$PROXY='$proxy';\n";
-  fwrite($FD, "$startphp$fullUrl$usr$passwd$useproxy$endphp");
+  fwrite($FD, "$startphp$fullUrl$usr$passwd$useproxy$define$endphp");
 }
 else
 {
-  fwrite($FD, "$startphp$fullUrl$usr$passwd$endphp");
+  fwrite($FD, "$startphp$fullUrl$usr$passwd$define$endphp");
 }
-
-
-
 fclose($FD);
 print "./TestEnvironment.php created sucessfully\n";
 ?>
