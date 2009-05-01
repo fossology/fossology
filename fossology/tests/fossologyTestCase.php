@@ -1,5 +1,4 @@
 <?php
-
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -21,7 +20,8 @@
  *
  * Base Class for all fossology tests.  All fossology tests should
  * extend this class.
- * @package fossologyTestCases
+ *
+ * @package FOSSologyTest
  * @version "$Id$"
  *
  * Created on Sep 1, 2008
@@ -37,7 +37,6 @@ require_once ('fossologyTest.php');
  * extend this class.  This class contains methods to interact with the
  * fossology UI menus and forms.
  *
- * @package fossologyTestCasesClass
  *
  */
 class fossologyTestCase extends fossologyTest
