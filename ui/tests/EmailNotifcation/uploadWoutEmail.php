@@ -76,7 +76,7 @@ class uploadWoutEMailTest extends fossologyTestCase {
      */
     print "waiting for jobs to finish\n";
     $this->wait4jobs();
-    print "verifying  email was received\n";
+    print "verifying  NO email was received\n";
     $this->checkEmailNotification(0);
   }
 };
