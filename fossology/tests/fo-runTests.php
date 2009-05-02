@@ -62,10 +62,7 @@ if (array_key_exists("t",$options)) {
   $Title = $options['t'];
   //print "DB: Title is:$Title\n";
 }
-else {
-  print $Usage;
-  exit(1);
-}
+
 $Runtest = & new TestSuite("Fossology tests $Title");
 /*
  * tests will run serially...
