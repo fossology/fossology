@@ -124,6 +124,7 @@ class fossologyTestCase extends fossologyTest
     /* check for errors */
     if(preg_match('/ERROR/',$headers[0],$matches)) {
       $this->fail("{$headers[0]}\n");
+      $return($headers);
     }
     $pattern = 'completed with no errors';
 
