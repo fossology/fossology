@@ -37,7 +37,11 @@ function getMailSubjects() {
   //$user = get_current_user();
   $user = exec('id -un', $out, $rtn);
   $UserMail = $MailFile . $user;
-  $FH = fopen($UserMail,'r') or die ("Cannot open $UserMail, $phperrormsg\n");
+  //$FH = fopen($UserMail,'r') or die ("Cannot open $UserMail, $phperrormsg\n");
+  $FH = fopen($UserMail,'r');
+  if($FH === FALSE) {
+    return(array("ERROR! Cannot open $UserMail"));
+  }
   while (! feof($FH)){
     $line = fgets($FH);
     $matched = preg_match('/Subject:\sFOSSology Results.*?$/',$line, $matches);
