@@ -43,10 +43,11 @@ require_once SIMPLE_TEST . 'web_tester.php';
 
 require_once ('TestEnvironment.php');
 
-$Usage = "runx -l 'list of tests space seperated'\n or\n" .
-         "runx -l \"`ls`\"\n";
+$Usage = "$argv[0] -l 'list of tests space seperated'\n or\n" .
+         "$argv[0] -l \"`ls`\" to run everything in the directory\n".
+         "\n$argv[0] -t 'Title' to supply an optional title\n";
 
-$options = getopt("l:");
+$options = getopt("l:t:");
 if (empty($options)) {
   print $Usage;
   exit(1);
@@ -56,11 +57,16 @@ if (array_key_exists("l",$options)) {
   $RunList = preg_split('/\s|\n/',$options['l']);
   //print "runx: runlist is:\n"; print_r($RunList) . "\n";
 }
+$Title = NULL;
+if (array_key_exists("t",$options)) {
+  $Title = $options['t'];
+  //print "DB: Title is:$Title\n";
+}
 else {
   print $Usage;
   exit(1);
 }
-$Runtest = & new TestSuite("Fossology tests");
+$Runtest = & new TestSuite("Fossology tests $Title");
 /*
  * tests will run serially...
  *
