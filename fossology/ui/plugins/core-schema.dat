@@ -22,10 +22,6 @@
   $Schema["TABLE"]["agent"]["agent_desc"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_desc\" varchar(255);";
   $Schema["TABLE"]["agent"]["agent_desc"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_desc\" DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent"]["agent_id"]["DESC"] = "COMMENT ON COLUMN \"agent\".\"agent_id\" IS 'agent ID (agents will have same ID regardless of revision)';";
-  $Schema["TABLE"]["agent"]["agent_id"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_id\" int4;";
-  $Schema["TABLE"]["agent"]["agent_id"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_id\" SET NOT NULL, ALTER COLUMN \"agent_id\" SET DEFAULT currval('agent_agent_pk_seq'::regclass);";
-
 
   $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["DESC"] = "";
   $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["ADD"] = "ALTER TABLE \"agent_lic_meta\" ADD COLUMN \"pfile_fk\" int4;";
@@ -187,6 +183,39 @@
   $Schema["TABLE"]["attrib"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN \"attrib\".\"pfile_fk\" IS 'key of pfile record that attribute refers to';";
   $Schema["TABLE"]["attrib"]["pfile_fk"]["ADD"] = "ALTER TABLE \"attrib\" ADD COLUMN \"pfile_fk\" int4;";
   $Schema["TABLE"]["attrib"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"attrib\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
+
+
+  $Schema["TABLE"]["filelicense"]["fl_pk"]["DESC"] = "COMMENT ON COLUMN \"filelicense\".\"fl_pk\" IS 'Primary Key';";
+  $Schema["TABLE"]["filelicense"]["fl_pk"]["ADD"] = "ALTER TABLE \"filelicense\" ADD COLUMN \"fl_pk\" int8;";
+  $Schema["TABLE"]["filelicense"]["fl_pk"]["ALTER"] = "ALTER TABLE \"filelicense\" ALTER COLUMN \"fl_pk\" SET NOT NULL, ALTER COLUMN \"fl_pk\" SET DEFAULT nextval('\"FileLicense_fl_pk_seq\"'::regclass);";
+
+  $Schema["TABLE"]["filelicense"]["fl_start_byte"]["DESC"] = "COMMENT ON COLUMN \"filelicense\".\"fl_start_byte\" IS 'Byte offset of start of license';";
+  $Schema["TABLE"]["filelicense"]["fl_start_byte"]["ADD"] = "ALTER TABLE \"filelicense\" ADD COLUMN \"fl_start_byte\" int8;";
+  $Schema["TABLE"]["filelicense"]["fl_start_byte"]["ALTER"] = "ALTER TABLE \"filelicense\" ALTER COLUMN \"fl_start_byte\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["filelicense"]["fl_end_byte"]["DESC"] = "COMMENT ON COLUMN \"filelicense\".\"fl_end_byte\" IS 'Byte offset of license end (inclusive)';";
+  $Schema["TABLE"]["filelicense"]["fl_end_byte"]["ADD"] = "ALTER TABLE \"filelicense\" ADD COLUMN \"fl_end_byte\" int8;";
+  $Schema["TABLE"]["filelicense"]["fl_end_byte"]["ALTER"] = "ALTER TABLE \"filelicense\" ALTER COLUMN \"fl_end_byte\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["filelicense"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"filelicense\".\"rf_fk\" IS 'RefLicense fk, if NULL this file does not contain a license';";
+  $Schema["TABLE"]["filelicense"]["rf_fk"]["ADD"] = "ALTER TABLE \"filelicense\" ADD COLUMN \"rf_fk\" int8;";
+  $Schema["TABLE"]["filelicense"]["rf_fk"]["ALTER"] = "ALTER TABLE \"filelicense\" ALTER COLUMN \"rf_fk\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["filelicense"]["agent_fk"]["DESC"] = "COMMENT ON COLUMN \"filelicense\".\"agent_fk\" IS 'Agent fk that recorded this record';";
+  $Schema["TABLE"]["filelicense"]["agent_fk"]["ADD"] = "ALTER TABLE \"filelicense\" ADD COLUMN \"agent_fk\" int4;";
+  $Schema["TABLE"]["filelicense"]["agent_fk"]["ALTER"] = "ALTER TABLE \"filelicense\" ALTER COLUMN \"agent_fk\" SET NOT NULL;";
+
+  $Schema["TABLE"]["filelicense"]["rf_match_pct"]["DESC"] = "COMMENT ON COLUMN \"filelicense\".\"rf_match_pct\" IS 'match pct 1-100';";
+  $Schema["TABLE"]["filelicense"]["rf_match_pct"]["ADD"] = "ALTER TABLE \"filelicense\" ADD COLUMN \"rf_match_pct\" int4;";
+  $Schema["TABLE"]["filelicense"]["rf_match_pct"]["ALTER"] = "ALTER TABLE \"filelicense\" ALTER COLUMN \"rf_match_pct\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["filelicense"]["rf_timestamp"]["DESC"] = "COMMENT ON COLUMN \"filelicense\".\"rf_timestamp\" IS 'record add time';";
+  $Schema["TABLE"]["filelicense"]["rf_timestamp"]["ADD"] = "ALTER TABLE \"filelicense\" ADD COLUMN \"rf_timestamp\" timestamptz;";
+  $Schema["TABLE"]["filelicense"]["rf_timestamp"]["ALTER"] = "ALTER TABLE \"filelicense\" ALTER COLUMN \"rf_timestamp\" SET NOT NULL;";
+
+  $Schema["TABLE"]["filelicense"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["filelicense"]["pfile_fk"]["ADD"] = "ALTER TABLE \"filelicense\" ADD COLUMN \"pfile_fk\" int4;";
+  $Schema["TABLE"]["filelicense"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"filelicense\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
 
 
   $Schema["TABLE"]["folder"]["folder_pk"]["DESC"] = "";
@@ -517,6 +546,59 @@
   $Schema["TABLE"]["pfile"]["pfile_liccount"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_liccount\" DROP NOT NULL;";
 
 
+  $Schema["TABLE"]["reflicense"]["rf_pk"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_pk\" IS 'Primary Key';";
+  $Schema["TABLE"]["reflicense"]["rf_pk"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_pk\" int8;";
+  $Schema["TABLE"]["reflicense"]["rf_pk"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_pk\" SET NOT NULL, ALTER COLUMN \"rf_pk\" SET DEFAULT nextval('\"RefLicense_rf_pk_seq\"'::regclass);";
+
+  $Schema["TABLE"]["reflicense"]["rf_shortname"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_shortname\" IS 'GPL, APSL, MIT, ...';";
+  $Schema["TABLE"]["reflicense"]["rf_shortname"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_shortname\" text;";
+  $Schema["TABLE"]["reflicense"]["rf_shortname"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_shortname\" SET NOT NULL;";
+
+  $Schema["TABLE"]["reflicense"]["rf_text"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_text\" IS 'License text';";
+  $Schema["TABLE"]["reflicense"]["rf_text"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_text\" text;";
+  $Schema["TABLE"]["reflicense"]["rf_text"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_text\" SET NOT NULL;";
+
+  $Schema["TABLE"]["reflicense"]["rf_url"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_url\" IS 'URL of authoritative license text';";
+  $Schema["TABLE"]["reflicense"]["rf_url"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_url\" text;";
+  $Schema["TABLE"]["reflicense"]["rf_url"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_url\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["reflicense"]["rf_add_date"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_add_date\" IS 'Date License added to this table';";
+  $Schema["TABLE"]["reflicense"]["rf_add_date"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_add_date\" date;";
+  $Schema["TABLE"]["reflicense"]["rf_add_date"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_add_date\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["reflicense"]["rf_copyleft"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_copyleft\" IS 'Is license copyleft?';";
+  $Schema["TABLE"]["reflicense"]["rf_copyleft"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_copyleft\" bit;";
+  $Schema["TABLE"]["reflicense"]["rf_copyleft"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_copyleft\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["reflicense"]["rf_OSIapproved"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_OSIapproved\" IS 'Is license OSI approved? ';";
+  $Schema["TABLE"]["reflicense"]["rf_OSIapproved"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_OSIapproved\" bit;";
+  $Schema["TABLE"]["reflicense"]["rf_OSIapproved"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_OSIapproved\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["reflicense"]["rf_fullname"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_fullname\" IS 'GNU General Public License, Apple Public Source License, ...';";
+  $Schema["TABLE"]["reflicense"]["rf_fullname"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_fullname\" text;";
+  $Schema["TABLE"]["reflicense"]["rf_fullname"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_fullname\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["reflicense"]["rf_FSFfree"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_FSFfree\" IS 'Is license FSF free?';";
+  $Schema["TABLE"]["reflicense"]["rf_FSFfree"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_FSFfree\" bit;";
+  $Schema["TABLE"]["reflicense"]["rf_FSFfree"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_FSFfree\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["reflicense"]["rf_GPLv2compatible"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_GPLv2compatible\" IS 'Is license GPL v2 compatible';";
+  $Schema["TABLE"]["reflicense"]["rf_GPLv2compatible"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_GPLv2compatible\" bit;";
+  $Schema["TABLE"]["reflicense"]["rf_GPLv2compatible"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_GPLv2compatible\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["reflicense"]["rf_GPLv3compatible"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_GPLv3compatible\" IS 'Is license GPL v3 compatible';";
+  $Schema["TABLE"]["reflicense"]["rf_GPLv3compatible"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_GPLv3compatible\" bit;";
+  $Schema["TABLE"]["reflicense"]["rf_GPLv3compatible"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_GPLv3compatible\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["reflicense"]["rf_notes"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_notes\" IS 'General notes (public)';";
+  $Schema["TABLE"]["reflicense"]["rf_notes"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_notes\" text;";
+  $Schema["TABLE"]["reflicense"]["rf_notes"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_notes\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["reflicense"]["rf_Fedora"]["DESC"] = "COMMENT ON COLUMN \"reflicense\".\"rf_Fedora\" IS '\"Good\", \"Bad\", \"Unknown\"';";
+  $Schema["TABLE"]["reflicense"]["rf_Fedora"]["ADD"] = "ALTER TABLE \"reflicense\" ADD COLUMN \"rf_Fedora\" text;";
+  $Schema["TABLE"]["reflicense"]["rf_Fedora"]["ALTER"] = "ALTER TABLE \"reflicense\" ALTER COLUMN \"rf_Fedora\" DROP NOT NULL;";
+
+
   $Schema["TABLE"]["report_cache"]["report_cache_pk"]["DESC"] = "";
   $Schema["TABLE"]["report_cache"]["report_cache_pk"]["ADD"] = "ALTER TABLE \"report_cache\" ADD COLUMN \"report_cache_pk\" int4;";
   $Schema["TABLE"]["report_cache"]["report_cache_pk"]["ALTER"] = "ALTER TABLE \"report_cache\" ALTER COLUMN \"report_cache_pk\" SET NOT NULL, ALTER COLUMN \"report_cache_pk\" SET DEFAULT nextval('report_cache_report_cache_pk_seq'::regclass);";
@@ -709,8 +791,8 @@
 
 
 
-  $Schema["VIEW"]["keyagent"] = "CREATE VIEW \"keyagent\" AS SELECT \"key\".key_pk, \"key\".key_name, \"key\".key_desc, \"key\".key_parent_fk, \"key\".key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc, agent.agent_id FROM \"key\", agent WHERE (agent.agent_pk = \"key\".key_agent_fk);";
   $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::\"unknown\" AS ts, NULL::\"unknown\" AS upload_pk, NULL::\"unknown\" AS pfile_fk, NULL::\"unknown\" AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::\"unknown\" AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
+  $Schema["VIEW"]["keyagent"] = "CREATE VIEW \"keyagent\" AS SELECT \"key\".key_pk, \"key\".key_name, \"key\".key_desc, \"key\".key_parent_fk, \"key\".key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc FROM \"key\", agent WHERE (agent.agent_pk = \"key\".key_agent_fk);";
 
   $Schema["SEQUENCE"]["agent_agent_pk_seq"] = "CREATE SEQUENCE \"agent_agent_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["agent_lic_meta_agent_lic_meta_pk_seq"] = "CREATE SEQUENCE \"agent_lic_meta_agent_lic_meta_pk_seq\" START 1;";
@@ -739,7 +821,10 @@
   $Schema["SEQUENCE"]["report_cache_report_cache_pk_seq"] = "CREATE SEQUENCE \"report_cache_report_cache_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["log_log_pk_seq"] = "CREATE SEQUENCE \"log_log_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["report_cache_user_report_cache_user_pk_seq"] = "CREATE SEQUENCE \"report_cache_user_report_cache_user_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["RefLicense_rf_pk_seq"] = "CREATE SEQUENCE \"RefLicense_rf_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["FileLicense_fl_pk_seq"] = "CREATE SEQUENCE \"FileLicense_fl_pk_seq\" START 1;";
 
+  $Schema["CONSTRAINT"]["FileLicense_pkey"] = "ALTER TABLE \"filelicense\" ADD CONSTRAINT \"FileLicense_pkey\" PRIMARY KEY (\"fl_pk\");";
   $Schema["CONSTRAINT"]["agent_lic_meta_pkey"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"agent_lic_meta_pkey\" PRIMARY KEY (\"agent_lic_meta_pk\");";
   $Schema["CONSTRAINT"]["agent_pkey"] = "ALTER TABLE \"agent\" ADD CONSTRAINT \"agent_pkey\" PRIMARY KEY (\"agent_pk\");";
   $Schema["CONSTRAINT"]["attrib_pkey"] = "ALTER TABLE \"attrib\" ADD CONSTRAINT \"attrib_pkey\" PRIMARY KEY (\"attrib_pk\");";
@@ -761,6 +846,7 @@
   $Schema["CONSTRAINT"]["pfile_pkey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_pkey\" PRIMARY KEY (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["report_cache_pkey"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_pkey\" PRIMARY KEY (\"report_cache_pk\");";
   $Schema["CONSTRAINT"]["report_cache_user_pkey"] = "ALTER TABLE \"report_cache_user\" ADD CONSTRAINT \"report_cache_user_pkey\" PRIMARY KEY (\"report_cache_user_pk\");";
+  $Schema["CONSTRAINT"]["rf_pkpk"] = "ALTER TABLE \"reflicense\" ADD CONSTRAINT \"rf_pkpk\" PRIMARY KEY (\"rf_pk\");";
   $Schema["CONSTRAINT"]["scheduler_status_pkey"] = "ALTER TABLE \"scheduler_status\" ADD CONSTRAINT \"scheduler_status_pkey\" PRIMARY KEY (\"unique_scheduler\",\"agent_number\");";
   $Schema["CONSTRAINT"]["sqlagentproc_pkey"] = "ALTER TABLE \"sqlagentproc\" ADD CONSTRAINT \"sqlagentproc_pkey\" PRIMARY KEY (\"sap_pk\");";
   $Schema["CONSTRAINT"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"ufile_rel_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
@@ -803,7 +889,7 @@
   $Schema["CONSTRAINT"]["lictermname_pfile_exist"] = "ALTER TABLE \"licterm_name\" ADD CONSTRAINT \"lictermname_pfile_exist\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["lictermwords_exist"] = "ALTER TABLE \"licterm_map\" ADD CONSTRAINT \"lictermwords_exist\" FOREIGN KEY (\"licterm_words_fk\") REFERENCES \"licterm_words\" (\"licterm_words_pk\");";
   $Schema["CONSTRAINT"]["mimetype_fk"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"mimetype_fk\" FOREIGN KEY (\"pfile_mimetypefk\") REFERENCES \"mimetype\" (\"mimetype_pk\");";
-  $Schema["CONSTRAINT"]["pfile_fk"] = "ALTER TABLE \"agent_wc\" ADD CONSTRAINT \"pfile_fk\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
+  $Schema["CONSTRAINT"]["pfile_fk"] = "ALTER TABLE \"filelicense\" ADD CONSTRAINT \"pfile_fk\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\");";
 
   $Schema["INDEX"]["agent_lic_meta"]["lic_fk_btree"] = "CREATE INDEX lic_fk_btree ON agent_lic_meta USING btree (lic_fk);";
