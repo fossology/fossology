@@ -1,3 +1,11 @@
-Date: 2007-11-06 18:35:20
-URL: http://fedoraproject.org/wiki/Licensing/BSD
-Alias: BSD
+Date:
+URL: https://fedoraproject.org/wiki/Licensing/BSD
+shortname: FreeBSD (2 clause BSD)
+fullname: FreeBSD (2 clause BSD)
+OSIapproved:
+FSFfree: Yes
+GPLv2compatible: Yes
+GPLv3compatible: Yes
+copyleft: 
+Fedora: Good
+notes:
