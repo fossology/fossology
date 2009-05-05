@@ -1,17 +1,10 @@
 fossology (1.1.0~20090504-1) unstable; urgency=low
 
-  * unofficial SVN version for testing process, hope this entry is better,
-    still learning about changelog formats.
+  * unofficial SVN version for testing process
 
  -- Build User <build@cranky.manage>  Mon, 04 Apr 2009 18:55:25 -0800
 	
-fossology (1.1.0~20090504) unstable; urgency=low
-
-  * unofficial SVN version for testing process
-
- -- Build User <build@cranky.manage>  Mon, 04 Apr 2009 16:20:35 -0800
-
-fossology (1.1.0-2) unstable; urgency=low
+fossology (1.0.0-2) unstable; urgency=low
 
   * Add explicit agents dependency on libextractor-plugins since
     shlibdeps doesn't automatically figure it out.
