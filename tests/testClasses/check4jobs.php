@@ -45,7 +45,7 @@ define('SQL', "SELECT *
           WHERE (jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS
           NULL OR jobqueue.jq_end_bits > 1)
           ORDER BY upload_filename,upload.upload_pk,job.job_pk,jobqueue.jq_pk," .
-"jobdepends.jdep_jq_fk;");
+          "jobdepends.jdep_jq_fk;");
 
 class check4jobs {
 

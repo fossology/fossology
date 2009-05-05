@@ -88,7 +88,7 @@ class fossologyTestCase extends fossologyTest
     elseif($this->myassertText($page, "/User already exists\.  Not added/")) {
       return('User already exists.  Not added');
     }
-    return;
+    return(NULL);
   } // addUser
 
   /**
@@ -121,7 +121,11 @@ class fossologyTestCase extends fossologyTest
       return(NULL);
     }
     //print "Got back from getMailSubjects:\n";print_r($headers) . "\n";
-
+    /* check for errors */
+    if(preg_match('/ERROR/',$headers[0],$matches)) {
+      $this->fail("{$headers[0]}\n");
+      return($headers);
+    }
     $pattern = 'completed with no errors';
 
     $failed = array();

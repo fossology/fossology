@@ -181,9 +181,11 @@ if (array_key_exists("a", $options)) {
    */
   $UIusers = exec("./fo-runTests.php -l createUIUsers.php >> $logFile 2>&1", $dummy, $UsrRtn);
   if ($UsrRtn != 0) {
-    LogAndPrint($LF, "ERROR when running createUIUsers.php\n");
+    LogAndPrint($LF, "ERROR when running createUIUsers.php: return code:$UsrRtn\n");
+    LogAndPrint($LF, "ERROR when running createUIUsers.php: return code:$UsrRtn\n");
+    LogAndPrint($LF, "last line returned is:$UIusers\n");
     foreach($dummy as $ErrorLine) {
-      print "$ErrorLine\n";
+      LogAndPrint($LF,"$ErrorLine\n");
     }
     LogAndPrint($LF, "The Email Notification tests mail fail as a result\n");
   }
@@ -223,18 +225,18 @@ if (array_key_exists("a", $options)) {
   _runTestEnvSetup();
   fclose($LF);
   // wait for uploads to finish
-  print "DB: starting waitfor jobs\n";
   if (chdir($Home) === FALSE) {
     $UInoHome = "All Tests ERROR: can't cd to $Home\n";
     LogAndPrint($LF, $UInoHome);
   }
-  $h = getcwd();
+  print "Waiting for jobs to finish...\n";
   $last = exec('./wait4jobs.php', $tossme, $jobsDone);
   foreach($tossme as $line){
     print "$line\n";
   }
   if ($jobsDone != 0) {
-    print "ERROR! jobs are not finished after two hours, not running" . "verify tests, please investigate and run verify tests by hand\n";
+    print "ERROR! jobs are not finished after two hours, not running" .
+    "verify tests, please investigate and run verify tests by hand\n";
     print "Monitor the job Q and when the setup jobs are done, run:\n";
     print "$myname -v -l $logFile\n";
     exit(1);
@@ -320,8 +322,8 @@ function saveResults() {
     LogAndPrint($LF, $nohome);
     return ($nohome);
   }
-  print "saveResults: logFileName is:$logFileName\n";
-  print "saveResults: resultsHome is:$resultsHome\n";
+  //print "saveResults: logFileName is:$logFileName\n";
+  //print "saveResults: resultsHome is:$resultsHome\n";
   $reportHome = "$resultsHome" . "$logFileName";
   if (!rename($logFile, $reportHome)) {
     $E = "Error, could not move\n$logFile\nto\n$reportHome\n";

@@ -53,7 +53,14 @@ class createUIUsers extends fossologyTestCase {
     foreach($Users as $user => $params) {
       list($description, $email, $access, $folder,
        $block, $blank, $password, $Enote ) = split(',',$Users[$user]);
-      $this->addUser($user, $description, $email, $access, $folder, $password ,$Enote);
+      $added = $this->addUser($user, $description, $email, $access, $folder, $password ,$Enote);
+      if(preg_match('/User already exists/',$added, $matches)) {
+        $this->pass();
+        continue;
+      }
+      if(!empty($added)) {
+        $this->fail("User $user was not added to the fossology database\n");
+      }
     }
   }
 }
