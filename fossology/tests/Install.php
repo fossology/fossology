@@ -39,11 +39,60 @@ if($euid != 0) {
   exit(1);
 }
 
+/**
+ * installST
+ *
+ * install simpletest into /usr/local
+ *
+ * @return boolean
+ */
+function installST() {
+  $here = getcwd();
+  if (is_readable('/etc/fossology/Proxy.conf')) {
+    $cmd = ". /etc/fossology/Proxy.conf;" .
+    "wget -q 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'";
+  }
+  else if (is_readable('/usr/local/etc/fossology/Proxy.conf')) {
+    $cmd = ". /etc/fossology/Proxy.conf;" .
+    "wget -q 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'";
+  }
+  if(chdir('/usr/local/')) {
+    $last = exec($cmd, $out, $rtn);
+    if($rtn == 0) {  // download worked
+      $tar = 'tar -xf simpletest_1.0.1.tar.gz';
+      $last = exec($tar, $tout, $rtn);
+      if(is_readable('/usr/local/simpletest')) {
+        /* clean up, try to remove the downloaded archive, */
+        $rl = exec('rm simpletest_1.0.1.tar.gz', $toss, $notchecked);
+        chdir($here);
+        return(TRUE);  // un tar worked, installed.
+      }
+      else {
+        print "ERROR! failed to install simpletest into /usr/local\n";
+        print "Investigate and install simpletest into /usr/local then rerun this script\n";
+        return(FALSE);
+      }
+    }
+    else {
+      print "ERROR! problem with downloading simpletest, need a proxy?\n";
+      print "Investigate and install simpletest into /usr/local then rerun this script\n";
+      return(FALSE);
+    }
+  }
+  else {
+    print "ERROR! cannot cd to /usr/local\n";
+    print "Investigate and install simpletest into /usr/local then rerun this script\n";
+    return(FALSE);
+  }
+  chdir('$here'); // should never get here, but cd back just in case....
+  return(FALSE);
+}
+
 /* Create sym link to fo-runTests */
 $OK = array();
 print "installing fo-runTests into /usr/local/bin\n";
 $wd = getcwd();
-$cmd = "ln -s $wd/fo-runTests.php /usr/local/bin/fo-runtests 2>&1";
+$cmd = "ln -s $wd/fo-runTests.php /usr/local/bin/fo-runTests 2>&1";
 $last = exec($cmd, $tossme, $rtn);
 if($rtn != 0) {
   $OK = preg_grep('/File exists/', $tossme);
@@ -51,8 +100,34 @@ if($rtn != 0) {
     print "Error, could not create sym link in /usr/local/bin for fo-runTests\n";
     exit(1);
   }
+  else {   // link exists, remove and recreate
+    $rm = 'rm /usr/local/bin/fo-runTests';
+    $last = exec($rm, $tossme, $rtn);
+    if($rtn != 0) {
+      print "Error, could not remove /usr/local/bin/fo-runTests\n";
+      print "Remove by hand and remake the symbolic link to the appropriate test source\n";
+      exit(1);
+    }
+    $last = exec($cmd, $tossme, $rtn);
+    if($rtn != 0) {
+      print "Error, could not create sym link in /usr/local/bin for fo-runTests\n";
+      print "Investigate and remake the symbolic link to the appropriate test source\n";
+      exit(1);
+    }
+  }
 }
 
+/* Make sure simpletest is installed, if not, install it. */
+print "Check to see if simpletest is installed in /usr/local\n";
+
+if(!is_readable('/usr/local/simpletest')) {
+  print "Attempting to download and install simpletest into /usr/local\n";
+  $ok = installST();
+  if(!$ok) {
+    print "FATAL ERROR!, install simpletest into /usr/local, then rerun this script\n";
+    exit(1);
+  }
+}
 /*
  * Create the system users,
  */
@@ -73,11 +148,11 @@ if($rtn != 0) {
 print "loading test data into the fosstester home directory\n";
 $last = exec("./installTestData.sh",$tossme, $rtn);
 /*
-print "output from installTestData is:\n";
-foreach($tossme as $line){
-  print "$line\n";
-}
-*/
+ print "output from installTestData is:\n";
+ foreach($tossme as $line){
+ print "$line\n";
+ }
+ */
 
 $Tconfig = getcwd();
 print "adjusting servers file in .subversion so checkouts work\n";
