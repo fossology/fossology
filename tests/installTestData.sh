@@ -86,7 +86,7 @@ then
 else
 if [ -r '/etc/fossology/Proxy.conf' ]
 then
-   sh -c . "/etc/fossology/Proxy.conf; wget -q 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'"
+   sh -c " . /etc/fossology/Proxy.conf; wget -q 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'"
 fi
 fi
 #
