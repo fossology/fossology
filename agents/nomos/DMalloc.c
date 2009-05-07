@@ -122,7 +122,7 @@ static char   *memorycheck(char *ptr, char *fname, int line)
 
 char   *DMmemcheck(char *ptr, char *fname, int line)
 {
-    register int    i;
+    int    i;
 
     if (ptr != NULL) {
 	ptr = memorycheck(ptr, fname, line);
@@ -188,7 +188,7 @@ char   *DMcalloc(int size, int nitems, char *fname, int line)
 {
     char   *ptr;
     int     totalsize;
-    register int    i;
+    int    i;
     char   *tempptr;
 
     DMmemcheck(NULL, fname, line);
@@ -223,7 +223,7 @@ char   *DMcalloc(int size, int nitems, char *fname, int line)
  */
 static malloced(char *ptr)
 {
-    register int    i;
+    int    i;
 
     for (i = 0; i < TABSIZE; i++) {
 	if (__memtab[i] == NULL) {
@@ -245,7 +245,7 @@ static malloced(char *ptr)
  */
 static freed(char *ptr, char *fname, int line)
 {
-    register int    i;
+    int    i;
 
     for (i = 0; i < TABSIZE; i++) {
 	if (__memtab[i] == ptr) {

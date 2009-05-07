@@ -67,6 +67,9 @@
 #define	OPTS_DEBUG		0x1
 #define	OPTS_TRACE_SWITCH	0x2
 /* */
+/*
+  CDB - What do each of these mean?
+*/
 #define	FL_PACKAGES	0x1
 #define	FL_ARCHIVES	0x2
 #define	FL_DISTFILES	0x4
@@ -76,7 +79,6 @@
 #define	FL_FRAGMENT	0x40
 #define	FL_SHOWMATCH	0x80
 #define	FL_NOCOPYRIGHT	0x100
-#define	FL_HASCRYPTO	0x200
 
 /*
  * Names of various files/dirs created/used
@@ -87,7 +89,6 @@
 #define	FILE_FILEINDEX	**CDBREMOVE**
 #define	FILE_CPYRIGHT	**CDBREMOVE**
 #define	FILE_NOCPYRT	**CDBREMOVE**
-#define	FILE_CRYPTO	**CDBREMOVE**
 #define	FILE_EULA	**CDBREMOVE**
 #define	FILE_INST	**CDBREMOVE**
 #define	FILE_INFO	**CDBREMOVE**
@@ -422,6 +423,10 @@ struct globals {
 };
 
 
+/*
+  CDB - We don't really have a current package anymore.
+  Can we get rid of this ??
+*/
 struct curPkg {
     char pathname[myBUFSIZ];
     char claimlic[myBUFSIZ];
@@ -537,6 +542,7 @@ typedef struct fileHandler fileHandler_t;
    Functions defined in nomos.c, used in other files
 */
 void Bail(int exitval);
+int optionIsSet(int val);
 
 /*
   Global Declarations
@@ -575,6 +581,7 @@ void memFreeTagged();
 			if (y) { DUMP_TIMERS; }
 #define	DUMP_TIMERS	printf("[1]: %d.%06d\n", bTV.tv_sec, bTV.tv_usec); \
 			printf("[2]: %d.%06d\n", eTV.tv_sec, eTV.tv_usec)
+
 
 /*
  * Cut-and-paste this stuff to turn on timing

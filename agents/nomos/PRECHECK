@@ -151,7 +151,7 @@ extern void showLTCache();
 void preloadResults(char *filetext, char *ltsr)
 {
 #if	0
-	register int ret;	/* for possible debugging */
+	int ret;	/* for possible debugging */
 #endif
 /* */
 #ifdef	PROC_TRACE
