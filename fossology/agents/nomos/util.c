@@ -55,6 +55,7 @@ int isDIR(char *dpath)
 #endif	/* PROC_TRACE_SWITCH */
 	printf("== isDIR(%s)\n", dpath);
 #endif	/* PROC_TRACE */
+
     return(isINODE(dpath, S_IFDIR));
 }
 
@@ -134,12 +135,14 @@ int isSYMLINK(char *spath)
 int isINODE(char *ipath, int typ)
 {
     int ret;
+
 #ifdef	PROC_TRACE
 #ifdef	PROC_TRACE_SWITCH
     if (gl.ptswitch)
 #endif	/* PROC_TRACE_SWITCH */
 	printf("== isINODE(%s, 0x%x)\n", ipath, typ);
 #endif	/* PROC_TRACE */
+
     if ((ret = stat(ipath, &gl.stbuf)) < 0) {
 	/*
 	  IF we're trying to stat() a file that doesn't exist, 
@@ -995,7 +998,7 @@ int fileTypeIs(char *pathname, int index, char *magicData)
 {
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-    extern lic_t licText[];
+    extern licText_t licText[];
 #ifdef	PROC_TRACE_SWITCH
     if (gl.ptswitch) {
 #endif	/* PROC_TRACE_SWITCH */
@@ -1106,7 +1109,8 @@ void printRegexMatch(int n, int cached)
 		    Fatal("Cannot locate debug symbol");
 		}
 	    }
-	    (void) strncpy(misc, ++x, cp-x); /* CDB - Fix */
+	    ++x; /* CDB - Moved from line below. Hope this is what was intended.*/
+	    (void) strncpy(misc, x, cp - x); /* CDB - Fix */
 	    misc[cp-x] = NULL_CHAR;
 	} else {
 	    (void) strcpy(misc, "?");
@@ -1831,4 +1835,20 @@ void Fatal(const char *fmt, ...)
     (void) strcat(utilbuf, "\n");
     Msg("%s", utilbuf);
     Bail(1);
+}
+
+void traceFunc(char *fmtStr, ...)
+{
+    va_list args;
+
+#ifdef PROC_TRACE_SWITCH
+    if (gl.ptswitch)
+#endif /* PROC_TRACE_SWITCH */
+    va_start(args, fmtStr);
+
+    vprintf(fmtStr, args);
+    va_end(args);
+#ifdef PROC_TRACE_SWITCH
+}
+#endif /* PROC_TRACE_SWITCH */
 }

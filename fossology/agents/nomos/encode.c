@@ -22,43 +22,20 @@
 
 ***************************************************************/
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define	myBUFSIZ	BUFSIZ
 
-extern void exit();
-#ifdef notdef
-char *encode(), *decode();
 
-char *encode(char *p, int len)
+int main(int argc, char **argv)
 {
-    static char cr_buf[myBUFSIZ];
-    register char *cp;
-    register int i;
-
-#ifdef	PROC_TRACE
-    printf("encode(%s, %d)\n", p, len);
-#endif	/* PROC_TRACE */
-    (void) memset(cr_buf, 0, sizeof(cr_buf));
-    for (i = 0;  i < len; i++) {
-	cr_buf[i] = p[i];
-    }
-    cr_buf[i] = '\0';
-    return(cr_buf);
-}
-#endif /* notdef */
-
-
-
-main(int argc, char **argv)
-{
-    char str[myBUFSIZ], *encoded_str, *new, *cp;
-    int i, len = 0;
+    char str[myBUFSIZ];
+    char *cp;
+    int i;
+    int len = 0;
     FILE *fp;
 
-#ifdef	PROC_TRACE
-    printf("main(%d, **argv)\n", argc);
-#endif	/* PROC_TRACE */
     if (argc == 1) {
 	fprintf(stderr, "Usage: %s file\n", *argv);
 	exit(1);
@@ -67,11 +44,11 @@ main(int argc, char **argv)
     /*
       Open the file (or stdin)
     */
-    if (strcmp(*++argv, "-") == 0) {
+    if (strcmp(argv[1], "-") == 0) {
 	fp = stdin;
     }
-    else if ((fp = fopen(*argv, "r")) == (FILE *) NULL) {
-	perror(*argv);
+    else if ((fp = fopen(argv[1], "r")) == (FILE *) NULL) {
+	perror(argv[1]);
 	exit(1);
     }
 
@@ -79,7 +56,7 @@ main(int argc, char **argv)
        Read the first line and remove any trailing newline.
     */
     if (fgets(str, sizeof(str), fp) == (char *) EOF) {
-	perror(*argv);
+	perror(argv[1]);
 	exit(1);
     }
     if ((cp = strrchr(str, '\n')) != (char *) NULL) {
@@ -92,4 +69,6 @@ main(int argc, char **argv)
 	printf("\\%o", str[i] & 0xff);
     }
     printf("\\0\"}\n");
+
+    return 0;
 }

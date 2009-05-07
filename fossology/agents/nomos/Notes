@@ -1,19 +1,48 @@
 
 To Whom it May Concern: 
------------------------
+
+
+What This Is and How to Work It
+-------------------------------
 
 This directory in the FOSSology source tree
-(agents/nomos) contains work for a new license analysis agent. At this
-point in time, the code is not yet in a form where it can be integrated
-with the rest of FOSSology. 
+(agents/nomos) contains work for a new license analysis agent. This
+code originated from a standalone license-scanning tool called Nomos.
 
-Comments with "CDB" in them are bread crumbs I've left to remind me to
-go back and check on that code later (CDB == my initials).
+At this point in time, the code is not integrated with the rest of FOSSology. 
+It uses it's own non-standard Makefile to build a single standalone 
+executable.
+
+To try it out...
+
+   % make
+   % ./nomos <file_to_be_scanned>
+
+The file to be scanned should be a regular file (binary or text). In
+particular, it should not be an archive. No unpacking is done; the file
+is scanned as is.
+
+There are currently no command-line options.
+
+
+Note About the Source Code and Impending Changes
+------------------------------------------------
+
+Because this code came from another tool similar to FOSSology, but with
+different structure and conventions, the process of converting it into 
+a full-fledged FOSSology agent is ongoing.
+
+With that in mind, comments with "CDB" in them are bread crumbs I've 
+left in places where I was unsure about a change I made or to note a potential
+refinement (CDB == my initials).
 
 
 
 To Do's
 -------
+
+- Either add a command-line option to set gl.ptswitch or remove all the
+  PROC_TRACE_SWITCH #ifdefs
 
 - Go back and edit CFLAGS options in Makefile to document and accurately
   represent what is still operable.
@@ -24,7 +53,6 @@ To Do's
 
 - Check and remove all unused field of the gl global variable structure.
 
-- Change calls to asyncRemoveDir to forceRemoveDir (make sure it's valid first).
 
 
 Changes

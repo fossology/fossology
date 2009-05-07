@@ -20,6 +20,8 @@
 
 void processRawSource();
 void processRegularFiles();
+#ifdef DEAD_CODE
 void stripLine(char *textp, int offset, int size);
+#endif /* DEAD_CODE */
 
 #endif /* _PROCESS_H */

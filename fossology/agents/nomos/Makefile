@@ -53,7 +53,7 @@ SRC_DPKG=dpkg-source-1.13.25.tar.gz
 #	-DSAVE_REFLICENSES -Werror
 BASEFLAGS=-D_FILE_OFFSET_BITS=64 -DHP_INTERNAL -D__USE_LARGEFILE64 \
 	-DSHOW_LOCATION # -UDEBUG
-CFLAGS=-g $(BASEFLAGS) # -DDOCTOR_DEBUG -DLTSR_DEBUG -DUNPACK_DEBUG -DPHRASE_DEBUG -DUNKNOWN_CHECK_DEBUG -DLICENSE_DEBUG -DPACKAGE_DEBUG -DSTOPWATCH -DPARSE_STOPWATCH -DREPORT_DEBUG -DBUCKET_DEBUG -DMEMSTATS -O0 
+CFLAGS=-g -Wall $(BASEFLAGS) # -DDOCTOR_DEBUG -DLTSR_DEBUG -DUNPACK_DEBUG -DPHRASE_DEBUG -DUNKNOWN_CHECK_DEBUG -DLICENSE_DEBUG -DPACKAGE_DEBUG -DSTOPWATCH -DPARSE_STOPWATCH -DREPORT_DEBUG -DBUCKET_DEBUG -DMEMSTATS -O0 
 # LIBS=-lmagic -lpcreposix
 LIBS=-lmagic
 # CDB -- removed report.o, conf.o OBJS=_precheck.o conf.o _autodata.o licenses.o list.o md5.o nomos.o \
@@ -63,7 +63,7 @@ OBJS=_precheck.o _autodata.o licenses.o list.o nomos.o \
 	parse.o process.o regex.o util.o # sources.o DMalloc.o
 
 SRCS=$(OBJS:.o=.c)
-HDRS=nomos.h _autodefs.h md5.h # mtags.h
+HDRS=nomos.h _autodefs.h # mtags.h
 ALLSRC=$(SRCS) $(HDRS) encode.c
 LINTOPTS=-bufferoverflowhigh -predboolint -onlytrans -warnposix \
 	-shiftnegative -boolops +boolint -nullpass -mustfreeonly \
@@ -79,7 +79,7 @@ over:
 	$(MAKE)
 
 encode:	encode.c
-	$(CC) -o $@ $@.c
+	$(CC) $(CFLAGS) -o $@ $@.c
 
 $(PROG): $(OBJS) 
 	$(CC) -o $(PROG) $(LDFLAGS) $(CFLAGS) $(OBJS) $(LIBS)
