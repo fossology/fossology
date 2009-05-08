@@ -1214,7 +1214,7 @@ void	DBSaveLicense	(int Flag1SL, char *Unique,
   /* store phrase_text */
   if (Flag1SL) /* if 1SL */
     {
-    strcat(SQL,",'");
+    strcat(SQL,",E'");
     DBquote(MS.Label[1].Sectionname,250,SQL+strlen(SQL));
     strcat(SQL,"'");
     /* set the range for 1SL phrases */
