@@ -339,7 +339,7 @@ void	PrintKeys	(EXTRACTOR_KeywordList *keywords)
       {
       /* The attrib table permits duplicates. So check for dups first. */
       memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"SELECT * FROM attrib WHERE attrib_key_fk = '%d' AND attrib_value = '%s' AND pfile_fk = '%s';",
+      snprintf(SQL,sizeof(SQL),"SELECT * FROM attrib WHERE attrib_key_fk = '%d' AND attrib_value = E'%s' AND pfile_fk = '%s';",
 	KeywordTypes[K].DBIndex,
 	TaintString(keywords->keyword),
 	Akey);
@@ -352,7 +352,7 @@ void	PrintKeys	(EXTRACTOR_KeywordList *keywords)
 	/* NOTE: Postgres does not have an "UPDATE OR INSERT" function,
 	   so there is a race condition for duplicates. */
         memset(SQL,'\0',sizeof(SQL));
-        snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','%s','%s');",
+        snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d',E'%s',E'%s');",
 	  KeywordTypes[K].DBIndex,
 	  TaintString(keywords->keyword),
 	  Akey);
@@ -700,7 +700,7 @@ int	main	(int argc, char *argv[])
 		}
 	    /* Mark it as processed */
 	    memset(SQL,0,sizeof(SQL));
-	    snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','true','%s');",KeywordTypes[GetKey(-2)].DBIndex,getenv("ARG_akey"));
+	    snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','true',E'%s');",KeywordTypes[GetKey(-2)].DBIndex,getenv("ARG_akey"));
 	    DBaccess(DB,SQL);
 	    /* Make the table as processed */
 	    /** Without this, we need a "SELECT ... EXCEPT SELECT..." which
