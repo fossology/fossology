@@ -276,9 +276,9 @@ if (!$Interactive) {
     exit(0);
   }
   else {
-    print "Warning: Mail was NOT queued by fo-notify\n";
-    print "sendmail(1) must be installed and configured for this feature to work\n";
-    exit(1);
+    print "   WARNING Mail was NOT queued by fo-notify\n";
+    print "   WARNING sendmail(1) must be installed and configured for this feature to work\n";
+    exit(0);
   }
 }
 exit(0);

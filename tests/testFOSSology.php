@@ -293,14 +293,22 @@ if (array_key_exists("s", $options)) {
 if (array_key_exists("v", $options)) {
   if (array_key_exists("l", $options)) {
     $logFile = $options['l'];
-    print "Verify: logFile is:$logFile\n";
+    /*
+     * check if it starts with a slash, if not assume it's relative and make
+     * a complete path of it.  If you don't the results end up in the verifyTests
+     * directory.
+     */
+    $position = strpos($logFile,'/');
+    if($position === FALSE) {
+      $logFile = getcwd() . "/$logFile";
+    }
     $logFileName = basename($logFile);
-    print "Verify: logFileName is:$logFileName\n";
   } else {
     print "Error, must supply a path to a log file with -v option\n";
     print $usage;
     exit(1);
   }
+  print "calling verifyUploads with:$logFile\n";
   if (!verifyUploads($logFile)) {
     print "ERROR! could not verify upload tests, please investigate\n";
     exit(1);
@@ -353,7 +361,13 @@ function verifyUploads($logfile) {
   }
   fclose($VLF);
   $VerifyLast = exec("./runVerifyTests.php >> $logfile 2>&1", $dummy, $Vrtn);
-  return ($Vrtn);
+  print "last line is:$VerifyLast\n";
+  if($Vrtn == 0) {
+    return(TRUE);
+  }
+  else {
+    return(FALSE);
+  }
 }
 
 /*
