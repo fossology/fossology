@@ -144,6 +144,7 @@ while line:
 
 line = sys.stdin.readline().strip()
 while line:
+    (key, value) = re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]
     if key == 'file':
         score = model.test_file(value,pos_word_dict,pos_word_matrix,neg_word_dict,neg_word_matrix,pr,lw,rw)
         l = model.smooth_score(score)
@@ -155,3 +156,5 @@ while line:
         cursor.execute('''SELECT id FROM temp''')
         rows = cursor.fetchall()
         print rows[-1]
+    line = sys.stdin.readline().strip()
+
