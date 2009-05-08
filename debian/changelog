@@ -1,9 +1,9 @@
-fossology (1.1.0~rc1.1-1) unstable; urgency=low
+fossology (1.1.0~rc1.2-1) unstable; urgency=low
 
   * unofficial SVN version for testing process
 
- -- Build User <build@cranky.manage>  Thu, 07 May 2009 15:16:35 -0700
-	
+ -- Build User <build@cranky.manage>  Fri, 08 May 2009 16:12:45 -0700
+
 fossology (1.0.0-2) unstable; urgency=low
 
   * Add explicit agents dependency on libextractor-plugins since
