@@ -377,7 +377,7 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
   /* Not checking string size since I know MAXCMD is much larger */
   if (Thread >= 0) ctime_r((&(CM[Thread].StatusTime)),Ctime);
   DBstrcatTaint( (Thread >= 0) ? CM[Thread].Parm : "" , Args,MAXCMD);
-  sprintf(SQL,"UPDATE scheduler_status SET agent_status='%s', agent_status_date='%s', record_update=now(), agent_param='%s' WHERE unique_scheduler='%s.%d' AND agent_number='%d';",
+  sprintf(SQL,"UPDATE scheduler_status SET agent_status='%s', agent_status_date='%s', record_update=now(), agent_param=E'%s' WHERE unique_scheduler='%s.%d' AND agent_number='%d';",
 	StatusName,
 	(Thread >= 0) ? Ctime : "now()",
 	Args,
