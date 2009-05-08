@@ -32,8 +32,10 @@ import license_test_model as model
 # End of custom libraries
 
 import sys
+import os
 import math
 import re
+import psycopg2
 from optparse import OptionParser
 
 # default paramerters
@@ -124,15 +126,15 @@ while line:
         if os.path.isfile(value):
             try:
                 DB_conf = dict(re.findall('(?P<key>.*)=(?P<value>.*);',open(value).read()))
-                try:
-                    connection = psyco2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (DB_conf['dbname'],DB_conf['user'],DB_conf['host'],DB_conf['password']))
-                    break
-                except:
-                    sys.stderr.write('ERROR: Could not connect to database.\n' % (value,value))
-                    sys.exit(-1)
 
             except:
                 sys.stderr.write('ERROR: conf=%s; connot open %s.\n' % (value,value))
+                sys.exit(-1)
+            try:
+            	connection = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (DB_conf['dbname'],DB_conf['user'],DB_conf['host'],DB_conf['password']))
+            break
+            except:
+                sys.stderr.write('ERROR: Could not connect to database.\n')
                 sys.exit(-1)
 
         else:
