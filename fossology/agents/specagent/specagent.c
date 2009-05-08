@@ -208,7 +208,7 @@ int	DBGetKey	(int Index)
     if (DBdatasize(DB) <= 0)
 	{
 	memset(SQL,0,sizeof(SQL));
-	snprintf(SQL,sizeof(SQL),"INSERT INTO key (key_name,key_desc,key_parent_fk,key_agent_fk) values ('%s','%s',0,%d);",
+	snprintf(SQL,sizeof(SQL),"INSERT INTO key (key_name,key_desc,key_parent_fk,key_agent_fk) values ('%s',E'%s',0,%d);",
 		KeywordMeta.Label,KeywordMeta.Desc,Agent_pk);
 	DBaccess(DB,SQL);
 	DBaccess(DB,"SELECT currval('key_key_pk_seq'::regclass);");
@@ -234,7 +234,7 @@ int	DBGetKey	(int Index)
     if (DBdatasize(DB) <= 0)
 	{
 	memset(SQL,0,sizeof(SQL));
-	snprintf(SQL,sizeof(SQL),"INSERT INTO key (key_name,key_desc,key_parent_fk,key_agent_fk) values ('%s','%s',%d,%d);",
+	snprintf(SQL,sizeof(SQL),"INSERT INTO key (key_name,key_desc,key_parent_fk,key_agent_fk) values ('%s',E'%s',%d,%d);",
 		KeywordTypes[Index].Label,KeywordTypes[Index].Desc,
 		KeywordMeta.DBIndex,Agent_pk);
 	DBaccess(DB,SQL);
@@ -324,7 +324,7 @@ void	PrintKeys	(char *Filename, int SaveToDB)
       {
       /* Save the attribute to the database */
       memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d','%s','%d');",
+      snprintf(SQL,sizeof(SQL),"INSERT INTO attrib (attrib_key_fk,attrib_value,pfile_fk) VALUES ('%d',E'%s','%d');",
 	KeywordTypes[Key].DBIndex,
 	TaintString(Line+Len),
 	Akey);
