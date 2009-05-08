@@ -1241,7 +1241,7 @@ void	DBSaveLicense	(int Flag1SL, char *Unique,
     {
     strcat(SQL,",'");
     DBquote(MS.Label[1].Sectionname,250,SQL+strlen(SQL));
-    strcat(SQL,"'");
+    strcat(SQL,"E'");
     /* set the range for 1SL phrases */
     memset(MS.Path.PathString[0],'\0',MS.Path.PathStringMax[0]);
     sprintf(MS.Path.PathString[0],"%ld-%ld",RealStart[0],RealEnd[0]);
