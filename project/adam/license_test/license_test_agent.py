@@ -118,7 +118,7 @@ DB_conf = {}
 # read and parse the Db.conf file so know how to connect to the database.
 line = sys.stdin.readline().strip()
 while line:
-    (key, value) = re.findall('(?P<key>.*)=(?P<value>.*);',line)
+    (key, value) = re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]
 
     if key == 'conf':
         if os.path.isfile(value):
