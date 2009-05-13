@@ -120,6 +120,9 @@ DB_conf = {}
 # read and parse the Db.conf file so know how to connect to the database.
 line = sys.stdin.readline().strip()
 while line:
+    if not re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]:
+	sys.stderr.write('ERROR: unknown command: %s' % line)
+	continue
     (key, value) = re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]
 
     if key == 'conf':
@@ -132,7 +135,7 @@ while line:
                 sys.exit(-1)
             try:
             	connection = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (DB_conf['dbname'],DB_conf['user'],DB_conf['host'],DB_conf['password']))
-            break
+            	break
             except:
                 sys.stderr.write('ERROR: Could not connect to database.\n')
                 sys.exit(-1)
@@ -146,6 +149,9 @@ while line:
 
 line = sys.stdin.readline().strip()
 while line:
+    if not re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]:
+	sys.stderr.write('ERROR: unknown command: %s' % line)
+	continue
     (key, value) = re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]
     if key == 'file':
         score = model.test_file(value,pos_word_dict,pos_word_matrix,neg_word_dict,neg_word_matrix,pr,lw,rw)
