@@ -88,9 +88,6 @@ static int famOPENLDAP(char *, int ,int, int);
 static int checkUnclassified(char *, int, char *, int, int, int);
 static int checkPublicDomain(char *, int, int, int, int, int);
 static int dbgIdxGrep(int, char *, int);
-#ifdef  ALT_UNCLASSIFIED
-static int scoreUnclassified(char *);
-#endif  /* ALT_UNCLASSIFIED */
 #ifdef  LTSR_DEBUG
 void showLTCache(char *);
 #endif  /* LTSR_DEBUG */
@@ -193,6 +190,7 @@ static int lDiags = 0;  /* set this to non-zero for printing diagnostics */
 #define mCR_X11()       (INFILE(_CR_X11) || INFILE(_CR_XFREE86))
 
 
+
 static int fileHasPatt(int licTextIdx, char *filetext, int size, 
 		       int isML, int isPS, int qType)
 {
@@ -201,11 +199,8 @@ static int fileHasPatt(int licTextIdx, char *filetext, int size,
     item_t *ip;
 
 #ifdef PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== fileHasPatt(%d, %p, %d, %d, %d, %d)\n",
-	       licTextIdx, filetext, size, isML, isPS, qType);
+    traceFunc("== fileHasPatt(%d, %p, %d, %d, %d, %d)\n",
+	      licTextIdx, filetext, size, isML, isPS, qType);
 #endif  /* PROC_TRACE */
 
     /*
@@ -254,6 +249,7 @@ static int fileHasPatt(int licTextIdx, char *filetext, int size,
 }
 
 
+
 static int dbgIdxGrep(int licTextIdx, char *buf, int show)
 {
     int ret;
@@ -282,10 +278,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		    int isML, int isPS)
 {
     static int first = 1;
-#ifdef  SAVE_REFLICENSES
-    char pathnamebuf[myBUFSIZ];
-    item_t *p;
-#endif  /* SAVE_REFLICENSES */
     char *ftype = scp->ftype;
     char *cp;
     int i;
@@ -299,11 +291,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 #endif  /* PRECHECK */
 
 #if     defined(PROC_TRACE) || defined(DOCTOR_DEBUG)
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== parseLicenses(%p, %d, [%d, 0x%x], %d, %d, \"%s\")\n",
-	       filetext, size, score, kwbm, isML, isPS, ftype);
+    traceFunc("== parseLicenses(%p, %d, [%d, 0x%x], %d, %d, \"%s\")\n",
+	      filetext, size, score, kwbm, isML, isPS, ftype);
 #endif  /* PROC_TRACE || DOCTOR_DEBUG */
 
     if (size == 0) {
@@ -388,9 +377,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     refOffset = 0;
     (void) memset(ltsr, 0, sizeof(ltsr));
     (void) memset(lmem, 0, sizeof(lmem));
-#ifdef  SAVE_REFLICENSES
-    listInit(&flList, 0, "file-specific licenses list");
-#endif  /* SAVE_REFLICENSES */
 #if defined(DEBUG) && defined(LTSR_DEBUG)
     showLTCache("LTSR-results START:");
 #endif  /* DEBUG && LTSR_DEBUG */
@@ -538,46 +524,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING(lDebug ? "PHP(v2.0.2#2)" : "PHP_v2.0.2");
 	    lmem[_mPHP] = 1;
 	}
-#ifdef  VENDOR_LICENSE_REFS
-	else if (INFILE(_CR_OPENSSL)) {
-	    INTERESTING("OpenSSL");
-	}
-	else if (INFILE(_LT_SSLEAY)) {
-	    INTERESTING("SSLeay");
-	}
-	else if (INFILE(_CR_CYBERNEKO) || INFILE(_TITLE_CYBERNEKO)) {
-	    INTERESTING("CyberNeko");
-	}
-	else if (!lmem[_mISC] && INFILE(_CR_ISC)) {
-	    INTERESTING(lDebug ? "ISC(1)" : "ISC");
-	    lmem[_mISC] = 1;
-	}
-	else if (INFILE(_CR_CALDERA)) {
-	    INTERESTING("Caldera");
-	}
-	else if (INFILE(_CR_INTEL)) {
-	    INTERESTING(lDebug ? "Intel(1)" : "Intel");
-	}
-	else if (!lmem[_mSUN] && INFILE(_CR_SUN)) {
-	    INTERESTING(lDebug ? "Sun(1)" : "Sun");
-	    lmem[_mSUN] = 1;
-	}
-	else if (mCR_HP()) {
-	    INTERESTING(lDebug ? "HP(1)" : "HP");
-	}
-	else if (INFILE(_CR_MICHIGAN)) {
-	    INTERESTING("U-Michigan");
-	}
-	else if (INFILE(_CR_HARVARD)) {
-	    INTERESTING("U-Harvard");
-	}
-	else if (INFILE(_CR_ADAPTEC)) {
-	    INTERESTING(lDebug ? "Adaptec(1)" : "Adaptec");
-	}
-	else if (INFILE(_CR_CRYPTIX) || INFILE(_TITLE_CRYPTIX)) {
-	    INTERESTING("Cryptix");
-	}
-#endif  /* VENDOR_LICENSE_REFS */
 	else if (!lmem[_fOPENLDAP] && !TRYGROUP(famOPENLDAP)) {
 	    if (INFILE(_CR_BSDCAL)) {
 		INTERESTING(lDebug ? "BSD(1)" : "BSD");
@@ -612,25 +558,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	else if (INFILE(_PHR_HISTORICAL)) {
 	    INTERESTING("Historical");
 	}
-#ifdef  VENDOR_LICENSE_REFS
-	else if (!lmem[_mSUN] && INFILE(_CR_SUN)) {
-	    INTERESTING(lDebug ? "Sun(2)" : "Sun");
-	    lmem[_mSUN] = 1;
-	}
-	else if (INFILE(_CR_SECRETLABS)) {
-	    INTERESTING("SecretLabs");
-	}
-	else if (INFILE(_CR_TROLLTECH)) {
-	    INTERESTING("TrollTech");
-	}
-	else if (INFILE(_CR_LUCENT)) {
-	    INTERESTING("Lucent");
-	}
-	else if (INFILE(_CR_DEC)) {
-	    INTERESTING(lDebug ? "HP-DEC(1)" : "HP-DEC");
-	    lmem[_mHP_DEC] = 1;
-	}
-#endif  /* VENDOR_LICENSE_REFS */
 	else if (INFILE(_CR_BSDCAL)) {
 	    INTERESTING(lDebug ? "BSD(2)" : "BSD");
 	}
@@ -666,18 +593,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * such it should list it in the license-summary, yes?
      */
     else if (INFILE(_LT_BSD_5)) {
-#ifdef  VENDOR_LICENSE_REFS
-	if (!lmem[_fBSD] && mCR_CMU()) {
-	    INTERESTING(lDebug ? "CMU(1)" : "CMU");
-	    lmem[_mCMU] = 1;
-	}
-	else if (INFILE(_CR_UWASHINGTON)) {
-	    INTERESTING(lDebug ? "U-Wash(1)" : "U-Washington");
-	}
-	else if (!lmem[_fBSD] && !lmem[_mISC] && INFILE(_CR_ISC)) {
-	    INTERESTING(lDebug ? "ISC(2)" : "ISC");
-	}
-#endif  /* VENDOR_LICENSE_REFS */
 	if (!lmem[_mPYTHON] && INFILE(_CR_PYTHON)) {
 	    INTERESTING(lDebug ? "Python(2)" : "Python");
 	    lmem[_mPYTHON] = 1;
@@ -798,16 +713,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	INTERESTING(lDebug ? "BSD(url)" : "BSD");
 	lmem[_fBSD] = 1;
     }
-#ifdef  VENDOR_LICENSE_REFS
-    else if (INFILE(_CR_BSDCAL) && INFILE(_CR_SENDMAIL)) {
-	INTERESTING("BSD+Sendmail");
-	lmem[_fBSD] = 1;
-    }
-    else if (INFILE(_CR_BSDCAL) && INFILE(_LT_QUALCOMM)) {
-	INTERESTING("BSD+Qualcomm");
-	lmem[_fBSD] = 1;
-    }
-#endif  /* VENDOR_LICENSE_REFS */
     else if (INFILE(_LT_BSDSTYLEref1)) {
 	INTERESTING(lDebug ? "BSD-st(1)" : "BSD-style");
 	lmem[_fBSD] = 1;
@@ -1470,24 +1375,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    else if (INFILE(_CR_SPI)) {
 		INTERESTING("Debian-SPI");
 	    }
-#ifdef  VENDOR_LICENSE_REFS
-	    else if (INFILE(_TITLE_NCSA)) {
-		INTERESTING("NCSA");
-	    }
-	    else if (INFILE(_CR_XNET)) {
-		INTERESTING(lDebug ? "X.Net(1)" : "X.Net");
-	    }
-	    else if (INFILE(_TITLE_XNET)) {
-		INTERESTING(lDebug ? "X.Net(2)" : "X.Net");
-	    }
-	    else if (!lmem[_mHP_DEC] && INFILE(_CR_DEC)) {
-		INTERESTING(lDebug ? "HP-DEC(2)" : "HP-DEC");
-		lmem[_mHP_DEC] = 1;
-	    }
-	    else if (INFILE(_CR_ILLINOIS)) {
-		INTERESTING("U-Illinois");
-	    }
-#endif  /* VENDOR_LICENSE_REFS */
 	    else if (mCR_MIT() || INFILE(_TITLE_MIT)) {
 		INTERESTING(lDebug ? "MIT(1)" : "MIT");
 		lmem[_mMIT] = 1;
@@ -1504,14 +1391,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	else if (mCR_X11()) {
 	    INTERESTING("X11");
 	}
-#ifdef  VENDOR_LICENSE_REFS
-	else if (INFILE(_CR_IBM_1) || INFILE(_CR_IBM_2)) {
-	    INTERESTING(lDebug ? "IBM(4)" : "IBM");
-	}
-	else if (mCR_FSF()) {
-	    INTERESTING(lDebug ? "FSF(6)" : "FSF");
-	}
-#endif  /* VENDOR_LICENSE_REFS */
 	else if (!lmem[_mMPL] && INFILE(_LT_MPL_1)) {
 	    cp = MPLVERS(); /* NPL, too */
 	    INTERESTING(lDebug ? "MPL/NPL#5" : cp);
@@ -1562,40 +1441,21 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * Open Group, NEC, MIT use the same text in licenses
      */
     if (INFILE(_LT_MIT_6)) {
-#ifdef  VENDOR_LICENSE_REFS
-	if (!lmem[_mMIT] && mCR_MIT()) {
-	    INTERESTING(lDebug ? "MIT(4)" : "MIT");
+	if (INFILE(_CR_OG)) {
+	    INTERESTING(lDebug ? "OpenGroup(1)" : "OpenGroup");
+	}
+	else if (!lmem[_mCMU] && mCR_CMU()) {
+	    INTERESTING(lDebug ? "CMU(2)" : "CMU");
+	    lmem[_mCMU] = 1;
+	}
+	else if (!lmem[_mMIT] && mCR_MIT()) {
+	    INTERESTING(lDebug ? "MIT(5)" : "MIT");
 	    lmem[_mMIT] = 1;
 	}
-	else if (INFILE(_CR_NEC)) {
-	    INTERESTING("NEC");
+	else {
+	    INTERESTING(lDebug ? "MIT-style(4)" : "MIT-style");
+	    lmem[_mMIT] = 1;
 	}
-	else if (INFILE(_CR_REDHAT)) {
-	    INTERESTING(lDebug ? "RH(3)" : "RedHat");
-	}
-	else if (INFILE(_CR_OMRON_1) || INFILE(_CR_OMRON_2)) {
-	    INTERESTING(lDebug ? "OMRON(1)" : "OMRON");
-	}
-	else if (INFILE(_CR_OPENVISION)) {
-	    INTERESTING("OpenVision");
-	}
-	else
-#endif  /* VENDOR_LICENSE_REFS */
-	    if (INFILE(_CR_OG)) {
-		INTERESTING(lDebug ? "OpenGroup(1)" : "OpenGroup");
-	    }
-	    else if (!lmem[_mCMU] && mCR_CMU()) {
-		INTERESTING(lDebug ? "CMU(2)" : "CMU");
-		lmem[_mCMU] = 1;
-	    }
-	    else if (!lmem[_mMIT] && mCR_MIT()) {
-		INTERESTING(lDebug ? "MIT(5)" : "MIT");
-		lmem[_mMIT] = 1;
-	    }
-	    else {
-		INTERESTING(lDebug ? "MIT-style(4)" : "MIT-style");
-		lmem[_mMIT] = 1;
-	    }
     }
     else if (INFILE(_LT_MIT_7)) {
 	if (INFILE(_CR_OG)) {
@@ -5128,20 +4988,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	checkCornerCases(filetext, size, score, kwbm, isML, isPS,
 			 nw, NO);
     }
-#ifdef  ALL_ATTRIBUTIONS
-    /*
-     * At the end of the rainbow, ALWAYS check for attributions in the text;
-     * note that some licenses already have known attributions.
-     *****
-     * "powered-by", "attribution", "acknowledgement"
-     */
-    if (!lmem[_fATTRIB] && INFILE(_PHR_ATTRIBUTION)) {
-	INTERESTING("Misc-attribution");
-    }
-    else if (!lmem[_fATTRIB] && HASTEXT(_TEXT_ATTRIBUTION, 0)) {
-	INTERESTING("Attribution?");
-    }
-#endif  /* ALL_ATTRIBUTIONS */
 #ifdef  MEMSTATS
     printf("DEBUG: static lists in parseLicenses():\n");
     listDump(&searchList, -1);
@@ -5154,24 +5000,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 #ifdef  LTSR_DEBUG
     showLTCache("LTSR-results AFTER:");
 #endif  /* LTSR_DEBUG */
-#ifdef  SAVE_REFLICENSES
-    /*
-     * If we're saving reference-licenses, we're ONLY interested if there's a
-     * single license in this file -- and, our goal is to save the smallest
-     * reference-license-file.
-     */
-    if ((j = listCount(&flList)) == 1) {
-	if ((p = listIterate(&flList)) == NULL_ITEM) {
-	    Fatal("No elements in a list of 1?!");
-	}
-	(void) sprintf(pathnamebuf, "%s/%s", gl.refLicDir, p->str);
-	if (!isFILE(pathnamebuf) || gl.stbuf.st_size > size) {
-	    (void) mySystem("cp '%s/%s' '%s'", RAW_DIR,
-			    scp->relpath, pathnamebuf);
-	}
-    }
-    listClear(&flList, YES);
-#endif  /* SAVE_REFLICENSES */
 #ifdef  FLAG_NO_COPYRIGHT
     if (!SEEN(_CR_ZZZANY)) {
 	(void) INFILE(_CR_ZZZANY);
@@ -5197,10 +5025,7 @@ char *sisslVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
 
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== sisslVersion()\n");
+    traceFunc("== sisslVersion()\n");
 #endif  /* PROC_TRACE */
 
     if (INFILE(_TITLE_SISSL_V11)) {
@@ -5217,10 +5042,7 @@ static char *aslVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
 
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== aslVersion()\n");
+    traceFunc("== aslVersion()\n");
 #endif  /* PROC_TRACE */
 
     if (INFILE(_TITLE_PHORUM) || INFILE(_CR_PHORUM)) {
@@ -5266,14 +5088,11 @@ static char *aslVersion(char *filetext, int size, int isML, int isPS)
 static char *mplNplVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
-    /* */
+
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== mplNplVersion()\n");
+    traceFunc("== mplNplVersion()\n");
 #endif  /* PROC_TRACE */
-    /* */
+
     if (INFILE(_TITLE_NPL11_OR_LATER)) {
 	lstr = "NPL_v1.1+";
     }
@@ -5343,10 +5162,7 @@ static char *realVersion(char *filetext, int size, int isML, int isPS, int ref)
     char *lstr = NULL_STR;
 
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== realVersion()\n");
+    traceFunc("== realVersion()\n");
 #endif  /* PROC_TRACE */
 
     if (ref == _TITLE_RPSL) {
@@ -5389,10 +5205,7 @@ static char *pythonVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
       
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== pythonVersion()\n");
+    traceFunc("== pythonVersion()\n");
 #endif  /* PROC_TRACE */
 
     if (INFILE(_TITLE_PYTHON201)) {
@@ -5437,14 +5250,11 @@ static char *pythonVersion(char *filetext, int size, int isML, int isPS)
 static char *aflVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
-    /* */
+
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== aflVersion()\n");
+	traceFunc("== aflVersion()\n");
 #endif  /* PROC_TRACE */
-    /* */
+
     if (INFILE(_TITLE_AFL30)) {
 	lstr = lDebug? "AFL(v3.0#1)" : "AFL_v3.0";
     }
@@ -5475,10 +5285,7 @@ static char *oslVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
     /* */
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== oslVersion()\n");
+	traceFunc("== oslVersion()\n");
 #endif  /* PROC_TRACE */
     /* */
     if (INFILE(_TITLE_OSL30)) {
@@ -5508,10 +5315,7 @@ static char *cddlVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
     /* */
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== cddlVersion()\n");
+	traceFunc("== cddlVersion()\n");
 #endif  /* PROC_TRACE */
     /* */
     if (INFILE(_TITLE_CDDL_V10)) {
@@ -5535,10 +5339,7 @@ static char *lpplVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
     /* */
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== lpplVersion()\n");
+	traceFunc("== lpplVersion()\n");
 #endif  /* PROC_TRACE */
     /* */
     if (INFILE(_PHR_LATEX_PL13A_OR_LATER_1) ||
@@ -5637,10 +5438,7 @@ static char *agplVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
     /* */
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== agplVersion()\n");
+	traceFunc("== agplVersion()\n");
 #endif  /* PROC_TRACE */
     /* */
     /*
@@ -5693,10 +5491,7 @@ static char *gfdlVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
     /* */
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== gfdlVersion()\n");
+	traceFunc("== gfdlVersion()\n");
 #endif  /* PROC_TRACE */
     /* */
     /*
@@ -5736,10 +5531,7 @@ static char *lgplVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
     /* */
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== lgplVersion()\n");
+	traceFunc("== lgplVersion()\n");
 #endif  /* PROC_TRACE */
     /* */
     if (INFILE(_PHR_LGPL3_OR_LATER) || INFILE(_PHR_FSF_V3_OR_LATER)) {
@@ -5801,10 +5593,7 @@ static char *gplVersion(char *filetext, int size, int isML, int isPS)
     char *cp, *lstr = NULL_STR;
     /* */
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== gplVersion()\n");
+	traceFunc("== gplVersion()\n");
 #endif  /* PROC_TRACE */
     /* */
     if (GPL_INFILE(_PHR_GPL2_OR_GPL3)) {
@@ -5905,10 +5694,7 @@ static char *cplVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
     /* */
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== cplVersion()\n");
+	traceFunc("== cplVersion()\n");
 #endif  /* PROC_TRACE */
     /* */
     if (INFILE(_TITLE_CPL10)) {
@@ -5932,10 +5718,7 @@ static char *ccsaVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
     /* */
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== ccsaVersion()\n");
+	traceFunc("== ccsaVersion()\n");
 #endif  /* PROC_TRACE */
     /* */
     if (INFILE(_TITLE_CCA_SA_V10)) {
@@ -5974,10 +5757,7 @@ static char *ccVersion(char *filetext, int size, int isML, int isPS)
     char *lstr = NULL_STR;
     /* */
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== ccVersion()\n");
+	traceFunc("== ccVersion()\n");
 #endif  /* PROC_TRACE */
     /* */
     if (INFILE(_TITLE_CCA_V10)) {
@@ -6029,16 +5809,10 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 #endif  /* PARSE_STOPWATCH */
 
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG) || defined(DOCTOR_DEBUG)
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== findPhrase(%d, %p, %d, %d, %d, %d)\n", index, filetext,
+	traceFunc("== findPhrase(%d, %p, %d, %d, %d, %d)\n", index, filetext,
 	       size, isML, isPS, qType);
-	printf("... (regex) \"%s\"\n", _REGEX(index));
-	printf("... (seed) \"%s\"\n", _SEED(index));
-#ifdef  PROC_TRACE_SWITCH
-    }
-#endif  /* PROC_TRACE_SWITCH */
+	traceFunc("... (regex) \"%s\"\n", _REGEX(index));
+	traceFunc("... (seed) \"%s\"\n", _SEED(index));
 #endif  /* PROC_TRACE || PHRASE_DEBUG || DOCTOR_DEBUG */
 
     ltp = licText + index;                    /* &licText[index] */
@@ -6055,7 +5829,7 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
            ltp->tseed, searchList.used);
 #endif  /* DEBUG > 5 */
     /*
-     * See if the first-word of the reqeusted entry has been searched
+     * See if the first-word of the requested entry has been searched
      * previously.  The entry we get from listGetItem() refCount (val) field is:
      *      =0 if this is the first search for this word (non-zero == "seen it"!)
      *      <0 if the word was NOT FOUND
@@ -6491,14 +6265,8 @@ static void locateRegex(char *text, item_t *op, int index, int size, int sso, in
     char save;
 
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG)
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== locateRegex(%p, %p, %d, %d, %d, %d)\n", text, op, index,
+	traceFunc("== locateRegex(%p, %p, %d, %d, %d, %d)\n", text, op, index,
 	       size, sso, seo);
-#ifdef  PROC_TRACE_SWITCH
-    }
-#endif  /* PROC_TRACE_SWITCH */
 #endif  /* PROC_TRACE || PHRASE_DEBUG */
 
     /*
@@ -6764,14 +6532,8 @@ static void saveRegexLocation(int index, int offset, int length, int saveCache)
     item_t *sp;
 
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG)
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== saveRegexLocation(%d, %d, %d, %d)\n", index, offset, length,
+	traceFunc("== saveRegexLocation(%d, %d, %d, %d)\n", index, offset, length,
 	       saveCache);
-#ifdef  PROC_TRACE_SWITCH
-    }
-#endif  /* PROC_TRACE_SWITCH */
 #endif  /* PROC_TRACE || PHRASE_DEBUG */
 
     (void) sprintf(name, "reg%04d", index);
@@ -6796,13 +6558,7 @@ static void saveUnclBufLocation(int bufNum)
     list_t *lp;
 
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG)
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== saveUnclBufLocation(%d, %d, %d, %d)\n", bufNum);
-#ifdef  PROC_TRACE_SWITCH
-    }
-#endif  /* PROC_TRACE_SWITCH */
+	traceFunc("== saveUnclBufLocation(%d, %d, %d, %d)\n", bufNum);
 #endif  /* PROC_TRACE || PHRASE_DEBUG */
 
     listClear(&whereList, NO);      /* empty all prior matches */
@@ -6827,10 +6583,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
     int n;
 
 #if     defined(PROC_TRACE) || defined(DOCTOR_DEBUG)
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== doctorBuffer(%p, %d, %d, %d)\n", buf, isML, isPS, isCR);
+	traceFunc("== doctorBuffer(%p, %d, %d, %d)\n", buf, isML, isPS, isCR);
 #endif  /* PROC_TRACE || DOCTOR_DEBUG */
 
     /*
@@ -7194,15 +6947,9 @@ static void addRef(char *str, int interest)
     char *bp;
     char *sp = str;
     char *cp;
-#ifdef  BRIEF_LIST
-    char *x = NULL_STR;
-#endif  /* BRIEF_LIST */
 
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== addRef(\"%s\", %d)\n", str, interest);
+	traceFunc("== addRef(\"%s\", %d)\n", str, interest);
 #endif  /* PROC_TRACE */
 
 #if defined(DEBUG)
@@ -7228,21 +6975,18 @@ static void addRef(char *str, int interest)
     bp = licStr+refOffset;
     *bp++ = ',';
     cp = bp;        /* later->NOW! */
+    /*
+      CDB - Opportunity for optimization via memcpy
+    */
     while (*sp) {
-#ifdef  BRIEF_LIST
-	if (*sp == '(' && x == NULL_STR) {
-	    x = bp;
-	}
-#endif  /* BRIEF_LIST */
 	*bp++ = *sp++;
     }
     *bp = NULL_CHAR;
-    refOffset = bp-licStr;
+    refOffset = bp - licStr;
     /*
      * Stuff this license in to several lists:
      * - allLicList is dumped when --sum or --webkit is on the command-line
      * - parseList is used to create a package "computed license summary"
-     * - flList is used with the ifdef-SAVE_REFLICENSES code
      * - briefList is used to compute a "terse/brief" license summary
      */
     p = listGetItem(&gl.allLicList, str);
@@ -7252,25 +6996,7 @@ static void addRef(char *str, int interest)
 	p->iFlag++;
 	if (interest > IL_LOW) {
 	    p->iLevel = interest;
-#ifdef  SAVE_REFLICENSES
-	    if (interest == IL_HIGH) {
-		p = listGetItem(&flList, str);
-		p->refCount = 1;
-	    }
-#endif  /* SAVE_REFLICENSES */
 	}
-#ifdef  BRIEF_LIST
-	if (x) {        /* points currently to '(' */
-	    *x = NULL_CHAR;
-	}
-	p = listGetItem(&gl.briefList, cp);
-	if (interest) {
-	    p->refCount++;
-	}
-	if (x) {        /* change it BACK to '(' */
-	    *x = '(';
-	}
-#endif  /* BRIEF_LIST */
     }
     if (interest > maxInterest) {
 	maxInterest = interest;
@@ -7372,10 +7098,7 @@ static int checkUnclassified(char *filetext, int size, char *ftype,
     int i = 0;
 
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== checkUnclassified(%p, %d, %s, %d, %d, %d)\n", filetext,
+	traceFunc("== checkUnclassified(%p, %d, %s, %d, %d, %d)\n", filetext,
 	       size, ftype, isML, isPS, nw);
 #endif  /* PROC_TRACE */
 
@@ -7491,10 +7214,7 @@ static void checkFileReferences(char *filetext, int size, int score, int kwbm,
 {
 
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== checkFileReferences(%p, %d, %d, 0x%x, %d, %d)\n", filetext,
+	traceFunc("== checkFileReferences(%p, %d, %d, 0x%x, %d, %d)\n", filetext,
 	       size, score, kwbm, isML, isPS);
 #endif  /* PROC_TRACE */
 
@@ -7601,10 +7321,7 @@ static int checkPublicDomain(char *filetext, int size, int score, int kwbm,
     int ret;
 
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== checkPublicDomain(%p, %d, %d, 0x%x, %d, %d)\n", filetext,
+	traceFunc("== checkPublicDomain(%p, %d, %d, 0x%x, %d, %d)\n", filetext,
 	       size, score, kwbm, isML, isPS);
 #endif  /* PROC_TRACE */
 
@@ -7677,10 +7394,7 @@ static void checkCornerCases(char *filetext, int size, int score,
     int pri = (force ? IL_MED : IL_LOW);
 
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== checkCornerCases(%p, %d, %d, %d, %d, %d, %d, %d)\n",
+	traceFunc("== checkCornerCases(%p, %d, %d, %d, %d, %d, %d, %d)\n",
 	       filetext, size, score, kwbm, isML, isPS, nw, force);
 #endif  /* PROC_TRACE */
 
@@ -8228,10 +7942,7 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
     char *cp;
 
 #ifdef  PROC_TRACE
-#ifdef  PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif  /* PROC_TRACE_SWITCH */
-	printf("== match3(%d, %p, %d, %d, %d)\n", base, buf, save, isML, isPS);
+	traceFunc("== match3(%d, %p, %d, %d, %d)\n", base, buf, save, isML, isPS);
 #endif  /* PROC_TRACE */
 
     for (i = 1; i <= 3; i++) {
@@ -8252,12 +7963,6 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
      * to NOT be present in licenses...
      */
     if (save) {
-#ifdef  ALT_UNCLASSIFIED
-	ulScore = scoreUnclassified(buf);
-	if (lDiags) {
-	    printf("U-Score: %d\n", ulScore);
-	}
-#endif  /* ALT_UNCLASSIFIED */
 	if (dbgIdxGrep(_LEGAL_FILTER_TECH_1, buf, lDiags) ||
 	    dbgIdxGrep(_LEGAL_FILTER_TECH_2, buf, lDiags) ||
 	    dbgIdxGrep(_LEGAL_FILTER_TECH_3, buf, lDiags)) {
@@ -8369,52 +8074,6 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
 }
 
 
-#ifdef  ALT_UNCLASSIFIED
-static int scoreUnclassified(char *buf)
-{
-    int i;
-    int s = 0;
-    char *cp;
-
-    i = _LEGAL_VERBS;
-    for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
-	s++;
-	cp += gl.regm.rm_eo;
-    }
-    if (lDiags) {
-	printf("== _Verbs: %d\n",s);
-    }
-
-    i = _LEGAL_OWNERS;
-    for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
-	s++;
-	cp += gl.regm.rm_eo;
-    }
-    if (lDiags) {
-	printf("== _Owners: %d\n",s);
-    }
-    /* */
-    i = _LEGAL_OBJS;
-    for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
-	s++;
-	cp += gl.regm.rm_eo;
-    }
-    if (lDiags) {
-	printf("== _Objs: %d\n",s);
-    }
-    /* */
-    i = _LEGAL_PERMS;
-    for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
-	s++;
-	cp += gl.regm.rm_eo;
-    }
-    if (lDiags) {
-	printf("== _Perms: %d\n",s);
-    }
-    /* */
-    return(s);
-}
-#endif  /* ALT_UNCLASSIFIED */
 
 
 #ifdef  LTSR_DEBUG

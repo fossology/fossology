@@ -28,8 +28,6 @@
 #include "nomos_regex.h"
 #include "_autodefs.h"
 
-#define	DEF_SHELL	"/bin/sh"
-
 #ifdef	STOPWATCH
 DECL_TIMER;
 #endif	/* STOPWATCH */
@@ -121,6 +119,8 @@ static void parseOpts(int argc, char **argv)
     traceFunc("== parseOpts(%d, **argv)\n", argc);
 #endif  /* PROC_TRACE */
 
+    gl.uPsize = 6;
+
     argc--; /* CDB, Lame, but will fix in transition */
     *argv++; /* CDB, Ditto */
 	
@@ -165,107 +165,6 @@ static void parseOpts(int argc, char **argv)
     return;
 }
 
-static int fileDirScan(char *p, struct stat *st, int flag, struct FTW *s)
-{
-    char *cp;
-    char *textp;
-    char *md;
-    char *what;
-    item_t *ip;
-    item_t *xp;
-    int saveBasename = 1;
-    int isPackage = 0;
-    int notPkgFmt = 0;
-    list_t *l;
-
-    /*
-     * no PROC_TRACE support for this routine, but the nftwFileFilter()
-     * call WILL log something!
-     */
-    if (nftwFileFilter(p, st, NO)) {
-	return(0);
-    }
-    if ((st->st_mode & S_IRUSR) == 0) {
-	chmodInode(p, (st->st_mode | S_IRUSR));
-    }
-    if ((cp = pathBasename(p)) == NULL_STR) {
-	Fatal("%s: No '/' in %s!", gl.progName, p);
-    }
-    /*
-     * Experience shows we really cannot trust the name of a file.  Even if
-     * a file ends in deb or rpm, it's possible they're *corrupt* and later
-     * on, parsing a corrupt package leads to errors.
-     */
-    md = copyString(magic_file(gl.mcookie, p), MTAG_MAGICDATA);
-    if (idxGrep(_UTIL_FILESUFFIX, cp, REG_ICASE|REG_NEWLINE|REG_EXTENDED)) {
-	if (endsIn(cp, ".rpm") || endsIn(cp, ".mvl")) {
-	    if (idxGrep(_FTYP_RPM, md, REG_ICASE)) {
-		if (endsIn(cp, "src.rpm")) {
-		    l = &gl.srcpList;
-		    isPackage = 1;
-		} else {
-		    l = &gl.instpList;
-		    isPackage = 1;
-		}
-		gl.nRpm++;
-	    } else {
-		notPkgFmt++;
-		what = "RPM-format package";
-	    }
-	} else if (endsIn(cp, ".deb") || endsIn(cp, ".udeb")) {
-	    if (idxGrep(_FTYP_DEB, md, REG_ICASE)) {
-		l = &gl.instpList;
-		isPackage = 1;
-		gl.nDeb++;
-	    } else {
-		notPkgFmt++;
-		what = "Debian binary package";
-	    }
-	} else if (endsIn(cp, ".dsc")) {
-	    char *textp;
-	    textp = mmapFile(p);
-	    notPkgFmt++;
-	    what = "Debian-source spec";
-	    munmapFile(textp);
-	} else {
-	    l = &gl.sarchList;
-	}
-
-	if (notPkgFmt) {
-	    Note("%s: NOT %s", p, what);
-	    l = &gl.regfList;
-	    saveBasename--;
-	}
-    } else {			/* ASSUMPTION: we won't find a package here. */
-	textp = mmapFile(p);
-	if (fileIsShar(textp, md)) {
-	    l = &gl.sarchList;
-	} else {		/* regular: DON'T save the basename */
-	    l = &gl.regfList;
-	    saveBasename--;
-	}
-	munmapFile(textp);
-    }
-    memFree(md, MTAG_MAGICDATA);
-    /*
-     * Save the filename and it's basename in the appropriate list.
-     */
-    ip = listGetItem(l, p);
-    if (saveBasename) {
-	ip->buf = copyString(cp, MTAG_PATHBASE);
-    }
-    /*
-     * IF this is a package, count the # of instances/occurrences of 
-     * the reference to this file (e.g., an instance of the source package
-     * OR a binary package that's derived from the source).
-     */
-    if (isPackage) {
-	xp = listGetItem(&gl.uniqList, cp);
-	xp->refCount++;
-	isPackage = 0;
-    }
-    return(0);
-}
 
 static void printListToFile(list_t *l, char *filename, char *mode)
 {
@@ -293,12 +192,8 @@ static void getFileLists(char *dirpath)
 
     listInit(&gl.sarchList, 0, "source-archives list & md5sum map");
     listInit(&gl.regfList, 0, "regular-files list");
-    listInit(&gl.corrList, 0, "corrupt-sources list");
-    listInit(&gl.hugeOkList, 0, "huge-files-OK list");
     listInit(&gl.allLicList, 0, "all-licenses list");
-#ifdef	SHOW_LOCATION
     listInit(&gl.offList, 0, "buffer-offset list");
-#endif	/* SHOW_LOCATION */
 #ifdef	FLAG_NO_COPYRIGHT
     listInit(&gl.nocpyrtList, 0, "no-copyright list");
 #endif	/* FLAG_NO_COPYRIGHT */
@@ -310,30 +205,6 @@ static void getFileLists(char *dirpath)
     return;
 }
 
-
-static void setupEnviron(char *dirpath)
-{
-    char *cp;
-    
-    /*
-     * default setup, expect to be a raw source archive (not a distro).
-     */
-#ifdef	PROC_TRACE
-	traceFunc("== setupEnviron(%s)\n", dirpath);
-#endif	/* PROC_TRACE */
-
-    *gl.refVendor = NULL_CHAR;			/* default */
-    if ((cp = strrchr(dirpath, '/')) == NULL) {
-	Fatal("%s: directory has no slashes", gl.progName);
-    }
-    cp++;
-    strcpy(gl.arch, "");
-    (void) strcpy(gl.vendor, "source archive for");	/* default */
-    (void) strcpy(gl.prod, cp);
-    (void) strcpy(gl.prodName, cp);
-    (void) strcpy(gl.dist, dirpath);
-    return;
-}
 
 
 
@@ -381,16 +252,12 @@ int main(int argc, char **argv)
 	Fatal("Cannot obtain starting directory");
     }
     (void) strcpy(gl.cwd, gl.initwd);
-    cp = getenv("SHELL");
-    (void) strcpy(gl.shell, cp ? cp : DEF_SHELL);
     parseOpts(argc, argv);
-    /*
-     * chdir to target, call getcwd() to get real pathname; then, chdir back
-     */
     licenseInit();
-    gl.fSearch = gl.fSave = gl.eSave = gl.flags = 0;
+    gl.fSearch = 0;
+    gl.fSave = 0;
+    gl.flags = 0;
     gl.totBytes = 0.0;
-    gl.blkUpperLimit = _MAXFILESIZE/512;
 
     i = 0; /* CDB - Added so we don't have a custom Magic file */
     if ((gl.mcookie = magic_open(MAGIC_NONE)) == (magic_t) NULL) {
@@ -400,6 +267,9 @@ int main(int argc, char **argv)
 	Fatal("magic_load() fails!");
     }
     /*
+     * chdir to target, call getcwd() to get real pathname; then, chdir back
+     *
+     *
      * We've saved the specified directory in 'gl.target'; now, normalize
      * the pathname (in case we were passed a symlink to another dir).
      */
