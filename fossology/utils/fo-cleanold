@@ -102,6 +102,8 @@ FILES="
 /usr/local/bin/fossjobs.php
 /usr/local/bin/fosslic
 /usr/local/bin/fosslic.php
+/usr/local/bin/fo_notify
+/usr/local/bin/fo_notify.php
 /usr/local/bin/GetFM
 /usr/local/bin/get-projects
 /usr/local/bin/mktop1k

@@ -182,7 +182,6 @@ if (array_key_exists("a", $options)) {
   $UIusers = exec("./fo-runTests.php -l createUIUsers.php >> $logFile 2>&1", $dummy, $UsrRtn);
   if ($UsrRtn != 0) {
     LogAndPrint($LF, "ERROR when running createUIUsers.php: return code:$UsrRtn\n");
-    LogAndPrint($LF, "ERROR when running createUIUsers.php: return code:$UsrRtn\n");
     LogAndPrint($LF, "last line returned is:$UIusers\n");
     foreach($dummy as $ErrorLine) {
       LogAndPrint($LF,"$ErrorLine\n");
@@ -361,7 +360,6 @@ function verifyUploads($logfile) {
   }
   fclose($VLF);
   $VerifyLast = exec("./runVerifyTests.php >> $logfile 2>&1", $dummy, $Vrtn);
-  print "last line is:$VerifyLast\n";
   if($Vrtn == 0) {
     return(TRUE);
   }
