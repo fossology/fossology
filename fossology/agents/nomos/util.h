@@ -82,5 +82,6 @@ void Warn(const char *fmt, ...);
 void Assert(int fatalFlag, const char *fmt, ...);
 void Error(const char *fmt, ...);
 void Fatal(const char *fmt, ...);
+void traceFunc(char *fmtStr, ...);
 
 #endif /* _UTIL_H */

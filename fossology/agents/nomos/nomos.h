@@ -46,9 +46,7 @@
 #include "DMalloc.h"
 #endif	/* MEMORY_TRACING */
 
-#define	USE_DPKG_SOURCE **CDBREMOVE**
 #define	CONVERT_PS
-#define	PACKAGE_LABEL **CDBREMOVE**
 #define	PRECHECK
 #define	GPLV2_BEATS_GPLV3
 #define	SAVE_UNCLASSIFIED_LICENSES
@@ -66,12 +64,10 @@
  */
 #define	OPTS_DEBUG		0x1
 #define	OPTS_TRACE_SWITCH	0x2
-/* */
+
 /*
   CDB - What do each of these mean?
 */
-#define	FL_PACKAGES	0x1
-#define	FL_ARCHIVES	0x2
 #define	FL_DISTFILES	0x4
 #define	FL_TESTPKG	0x8
 #define	FL_HUGEOK	0x10
@@ -83,59 +79,12 @@
 /*
  * Names of various files/dirs created/used
  */
-#define	FILE_TOC	**CDBREMOVE**
 #define	FILE_FOUND	"Found.txt"
-#define	FILE_WEBINDEX	**CDBREMOVE**
-#define	FILE_FILEINDEX	**CDBREMOVE**
-#define	FILE_CPYRIGHT	**CDBREMOVE**
-#define	FILE_NOCPYRT	**CDBREMOVE**
-#define	FILE_EULA	**CDBREMOVE**
-#define	FILE_INST	**CDBREMOVE**
-#define	FILE_INFO	**CDBREMOVE**
-#define	FILE_CORRUPTED	**CDBREMOVE**
 #define	FILE_SCORES	"_scores"
-#define	FILE_HISCORE	**CDBREMOVE**
-#define	FILE_IGNORED	**CDBREMOVE**
-#define	FILE_CONF	**CDBREMOVE**
-#define	FILE_NOLIC	**CDBREMOVE**
-#define	PKG_CACHE	**CDBREMOVE**
-#define FILE_AUTOPKGS	**CDBREMOVE**
-#define FILE_MANPKGS	**CDBREMOVE**
-#define FILE_BADPKGS	**CDBREMOVE**
-#define FILE_AUTOARCH	**CDBREMOVE**
-#define FILE_MANARCH	**CDBREMOVE**
-#define FILE_BADARCH	**CDBREMOVE**
 #define	RAW_DIR		"raw"
 
-#define	MASTER_LISTS	**CDBREMOVE**
-#define	MASTER_PKGS	**CDBREMOVE**
-#define	NEW_PKGS	**CDBREMOVE**
-#define	DIST_LIST	**CDBREMOVE**
-#define	LAST_RUN	**CDBREMOVE**
-#define	INIT_CONTENTS	**CDBREMOVE**
-#define	UNPACK_IMAGE	**CDBREMOVE**
-#define	UNPACK_TEMPFILE	**CDBREMOVE**
-#define	UNPACK_STDERR	**CDBREMOVE**
-#define	UNPACK_TARGET	**CDBREMOVE**
-#define	PKGS_LIST	**CDBREMOVE**
-#define	MISC_SRCDIR	**CDBREMOVE**
-#define	MISC_FDIR	**CDBREMOVE**
-#define	MAGIC_FILE	**CDBREMOVE**
 
-/*
- * Elements of the 'License database'
- */
-#define	KNOWN_TESTPKGS	**CDBREMOVE**
-#define	KNOWN_HUGEOK	**CDBREMOVE**
-#define	LIC_GOOD	**CDBREMOVE**
-#define	LIC_BAD		**CDBREMOVE**
-#define	LIC_FRIENDLY	**CDBREMOVE**
-#define	LIC_NONOPEN	**CDBREMOVE**
-#define	LIC_NOTGPL	**CDBREMOVE**
-#define	LIC_OVRALL	**CDBREMOVE**
-#define	LIC_OVRSPEC	**CDBREMOVE**
-
-/* Pseudo-Boolean values */
+/* Symbolic Boolean values */
 #define	NO	0
 #define	YES	1
 
@@ -158,17 +107,15 @@
 /*
  * license-text search results (ltsr) stuff
  */
-#define	LTSR_RMASK	(char) 1	/* search-result mask */
-#define	LTSR_SMASK	(char) 2	/* search-made flag */
-#define	LTSR_YES	(char) 3	/* both searched, and matched */
+#define	LTSR_RMASK	((char) 1)	/* True if it's been matched */
+#define	LTSR_SMASK	((char) 2)	/* True if it's been searched for */
+#define	LTSR_YES	((char) 3)	/* both searched, and matched */
 #define	LTSR_NO		LTSR_SMASK	/* searched but not matched */
 
 /*
  * Miscellaneous strings used in various modules
  */
 #define	DEVNULL		"/dev/null"
-#define	DEFLT_CONFDIR	"/usr/local/lib"
-#define	FAKE_MAGIC	**CDBREMOVE** /* "fake file(1)/magic(3) description" */
 #define STR_NOTPKG      "None (not an rpm-format package)"
 #define	WHO_KNOWS	"undeterminable"
 
@@ -206,16 +153,17 @@
 /*
  * Macros needed across >1 source module
  */
-#define	isEOL(x)	((x == '\n') || (x == '\r') || (x == '\v'))
+#define	isEOL(x)	(((x == '\n') || (x == '\r') || (x == '\v')))
 #define	IS_HUGE(x)	(x >= gl.blkUpperLimit)
 
 
 #define	NOMOS_TEMP	"/tmp/nomos.tempdir"
 #define	NOMOS_TLOCK	"/tmp/nomos.tempdir/.lock.tmp,"
 
-#define	_EXECUTE_ANY	(S_IXUSR|S_IXGRP|S_IXOTH)
 
-
+/*
+  Caches memory-mapped files
+*/
 struct mm_cache {
     int inUse; 
     int fd; 
@@ -224,6 +172,12 @@ struct mm_cache {
     char label[myBUFSIZ];
 };
 
+
+/*
+  CDB - This is kind of lame, the way it uses the same fields for
+  different meanings. Should work out using unions instead #defines
+  for implementing this.
+*/
 struct listitem {
     /* 
        Meanings of val fields are dependent on the particular list --
@@ -268,11 +222,13 @@ struct list {
 };
 typedef	struct list list_t;
 
+
 struct searchString {
     int csLen;
     char *csData;
 };
 typedef struct searchString searchString_t;
+
 
 struct licenseSpec {
     searchString_t seed; 
@@ -285,7 +241,7 @@ typedef struct licenseSpec licSpec_t;
 */
 struct curFile {
     char pathname[myBUFSIZ]; 
-    char claimlic[myBUFSIZ]; 
+    char claimlic[myBUFSIZ]; /* CDB - doubtful */
     char cachelic[myBUFSIZ];
     char compLic[myBUFSIZ]; 
     char briefLic[myBUFSIZ]; 
@@ -302,7 +258,7 @@ struct curFile {
     char arch[16]; 
     char format[16];
     char ptypec[8]; 
-    char debEpoch[8]; 
+    /*     char debEpoch[8]; CDB */
     char md5sum[33];
     int isSource; 
     int isRpm;
@@ -317,47 +273,17 @@ struct globals {
     char cwd[myBUFSIZ]; 
     char target[myBUFSIZ];
     char targetFile[myBUFSIZ];
-    /* char confPath[myBUFSIZ]; */
-    char penDir[myBUFSIZ]; 
-    char report[myBUFSIZ];
-    /*    char extDir[myBUFSIZ]; */
-    char pageName[myBUFSIZ]; 
-    char logfile[myBUFSIZ];
     char magicFile[myBUFSIZ];
-    char cmdBuf[512]; 
-    char dist[256]; 
-    char prod[256]; 
-    char prodName[256]; 
-    /*    char bSpec[256]; */
-    /*    char basedir[128]; */
+    char prodName[256];
     char tmpdir[128]; 
-    char shell[128]; 
     char progName[64];
-    char user[64];
     char mntpath[64]; 
-    char refVendor[32]; 
-    char vendor[32]; 
-    char arch[16]; 
-    /*    char progVers[16]; */
     char *licPara; 
     char *matchBase;
     int progOpts; 
-    int blkUpperLimit; 
-    int nRpm; 
-    int nDeb; 
-    int nSpare; 
-    int isDebian; 
     int flags;
-    int delayed; 
-    int dosKludge; 
     int fSearch; 
-    int fSave; 
-    int eSave; 
-    /*
-    int firstPkg; 
-    int lastPkg;
-    */
-    int hasAntiWord; 
+    int fSave;  /* CDB - Needed? Set to a value, but never used. */
     int uPsize;
 #ifdef	GLOBAL_DEBUG
     int DEEBUG; 
@@ -369,57 +295,22 @@ struct globals {
 #ifdef	USE_MMAP
     int pagesize;
 #endif	/* USE_MMAP */
-    double totBytes;
-    /*
-    uid_t uid; 
-    uid_t euid; 
-    uid_t suid;
-    */
+    double totBytes; /* CDB - Needed? Set to a value, but never used. */
     size_t targetLen; 
-    size_t pendirLen; 
     size_t cwdLen;
-    FILE *logFp;
     struct stat stbuf;
     regex_t regc;
     regmatch_t regm;
     magic_t mcookie;
-    struct timeval startTime; 
-    struct timeval endTime;
-    list_t missList; 
-    list_t corrList; 
-    list_t orphList; 
     list_t licHistList; 
-    list_t pLicHistList;
-    list_t unpFileList; 
-    list_t srcpList;
-    list_t instpList;
-    /*    list_t allpList; */
-    list_t testpList;
     list_t sarchList; 
     list_t regfList; 
-    list_t uniqList; 
-    list_t licFoundMap; 
     list_t licClaimMap;
     list_t fLicFoundMap; 
-    list_t parseList; 
-    /*    list_t defPkgList; */
-    /*    list_t defArchList; */
-    list_t nestedNameList; 
-    list_t dosNameList; 
-    list_t hugeOkList; 
+    list_t parseList;  /* CDB - Can probably get rid of this */
     list_t allLicList;
     list_t sHash; 
-    list_t reportList; 
-    /*    list_t bucketList; */
-    list_t *Bux; 
-    /*    list_t printList; */
-#ifdef BRIEF_LIST
-    list_t briefList;
-#endif /* BRIEF_LIST */
-#ifdef SHOW_LOCATION
     list_t offList;
-#endif /* SHOW_LOCATION */
-    list_t nocpyrtList;
 };
 
 
