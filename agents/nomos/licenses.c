@@ -807,6 +807,9 @@ static void noLicenseFound(int isPackage)
     traceFunc("== noLicenseFound(%d)\n", isPackage);
 #endif	/* PROC_TRACE */
 
+    /*
+      CDB - Extraneous, because no way for FL_TESTPKG to ever be set.
+    */
     if (gl.flags & FL_TESTPKG) {
 	(void) sprintf(cur.compLic, "%s", WHO_KNOWS);
     } else if (isPackage && cur.isRpm) {
@@ -912,7 +915,10 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	 * have to as many directory entries to open each file... this works for
 	 * anything EXCEPT 'distribution files'.
 	 */
-
+	/*
+	  CDB - Need to review to see if we want to set the FL_DISTFILES
+	  flag. This is currently done by default in process.c.
+	*/
 	/* "cp" is the filename of the file we're scanning. */
 	cp = (gl.flags & FL_DISTFILES) ? scores[idx].fullpath :
 	    scores[idx].relpath-adj;

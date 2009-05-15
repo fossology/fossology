@@ -37,6 +37,7 @@ static char grepzone[10485760];	/* 10M for now, adjust if needed */
 static va_list ap;
 static char utilbuf[myBUFSIZ];
 static struct mm_cache mmap_data[MM_CACHESIZE];
+static char cmdBuf[512];
 
 
 #ifdef	MEMORY_TRACING
@@ -643,10 +644,8 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     static char *ibuf = NULL;
     static int bufmax = 0;
     char *sep = _REGEX(_UTIL_XYZZY);
-#ifdef	SHOW_LOCATION
     item_t *p;
     item_t *bp;
-#endif	/* SHOW_LOCATION */
     char *fileeof;
     char *start;
     char *end;
@@ -671,7 +670,6 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 #endif	/* PHRASE_DEBUG */
 	return(NULL_STR);
     }
-#ifdef	SHOW_LOCATION
     /*
      * The global 'offsets list' is indexed by the seed/key (a regex) that we
      * use for doctoring buffers... each entry will contain a list (containing
@@ -698,7 +696,6 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 	}
 #endif	/* QA_CHECKS */
     }
-#endif	/* SHOW_LOCATION */
 #ifdef	REUSE_STATIC_MEMORY
     if (ibuf == NULL_STR) {		/* first time, uninitialized */
 	ibuf = grepzone;
@@ -737,7 +734,6 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     curptr = textp;
     fileeof = (char *) (textp+size);
     while (notDone) {	/* curptr is the 'current block' ptr */
-#ifdef	SHOW_LOCATION
 	p->nMatch++;
 #ifdef	PHRASE_DEBUG
 	printf("... found Match #%d\n", p->nMatch);
@@ -746,7 +742,6 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 	    (void) sprintf(utilbuf, "buf%05d", p->nMatch);
 	    bp = listGetItem(p->bList, utilbuf);
 	}
-#endif	/* SHOW_LOCATION */
 	start = findBol(curptr+gl.regm.rm_so, textp);
 	/*
 	 * Go to the beggining of the current line and, if nBefore > 0, go 'up'
@@ -767,11 +762,9 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 #endif	/* PHRASE_DEBUG */
 	    }
 	}
-#ifdef	SHOW_LOCATION
 	if (recordOffsets) {
 	    bp->bStart = start-textp;
 	}
-#endif	/* SHOW_LOCATION */
 	/*
 	 * Now do what "grep -A $nAfter _filename+" does.
 	 *****
@@ -845,7 +838,6 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 	 */
 	save = *end;
 	*end = NULL_CHAR;	/* char PAST the newline! */
-#ifdef	SHOW_LOCATION
 	if (recordOffsets) {
 	    bp->bLen = end-start;
 	    bp->buf = copyString(start, MTAG_TEXTPARA);
@@ -856,7 +848,6 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 		   *(end-6), *(end-5), *(end-4), *(end-3), *(end-2));
 #endif	/* PHRASE_DEBUG */
 	}
-#endif	/* SHOW_LOCATION */
 	newDataLen = end-start+(notDone ? strlen(sep)+1 : 0);
 	while (buflen+newDataLen > bufmax) {
 	    char *new;
@@ -917,10 +908,8 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 #endif	/* PHRASE_DEBUG */
     }
 #if	0
-#ifdef	SHOW_LOCATION
     printf("\"%s\": matches == %d\n", p->str, p->nMatch);
     /*listDump(&gl.offList, YES);*/
-#endif	/* SHOW_LOCATION */
 #endif
 #if	defined(PHRASE_DEBUG) || defined(DOCTOR_DEBUG)
     printf("getInstances(\"%s\"): Found %d bytes of data...\n", regex,
@@ -985,10 +974,10 @@ void makeSymlink(char *path)
 	printf("== makeSymlink(%s)\n", path);
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
-    (void) sprintf(gl.cmdBuf, ".%s", strrchr(path, '/'));
-    if (symlink(path, gl.cmdBuf) < 0) {
-	perror(gl.cmdBuf);
-	Fatal("Failed: symlink(%s, %s)", path, gl.cmdBuf);
+    (void) sprintf(cmdBuf, ".%s", strrchr(path, '/'));
+    if (symlink(path, cmdBuf) < 0) {
+	perror(cmdBuf);
+	Fatal("Failed: symlink(%s, %s)", path, cmdBuf);
     }
     return;
 }
@@ -1645,32 +1634,32 @@ int mySystem(const char *fmt, ...)
 {
     int ret;
     va_start(ap, fmt);
-    (void) vsprintf(gl.cmdBuf, fmt, ap);
+    (void) vsprintf(cmdBuf, fmt, ap);
     va_end(ap);
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
 #ifdef	PROC_TRACE_SWITCH
     if (gl.ptswitch)
 #endif	/* PROC_TRACE_SWITCH */
-	printf("== mySystem('%s')\n", gl.cmdBuf);
+	printf("== mySystem('%s')\n", cmdBuf);
 #endif  /* PROC_TRACE || UNPACK_DEBUG */
 
-    ret = system(gl.cmdBuf);
+    ret = system(cmdBuf);
     if (WIFEXITED(ret)) {
 	ret = WEXITSTATUS(ret);
 #ifdef	DEBUG
 	if (ret) {
-	    Error("system(%s) returns %d", gl.cmdBuf, ret);
+	    Error("system(%s) returns %d", cmdBuf, ret);
 	}
 #endif	/* DEBUG */
     }
     else if (WIFSIGNALED(ret)) {
 	ret = WTERMSIG(ret);
-	Error("system(%s) died from signal %d", gl.cmdBuf, ret);
+	Error("system(%s) died from signal %d", cmdBuf, ret);
     }
     else if (WIFSTOPPED(ret)) {
 	ret = WSTOPSIG(ret);
-	Error("system(%s) stopped, signal %d", gl.cmdBuf, ret);
+	Error("system(%s) stopped, signal %d", cmdBuf, ret);
     }
 #if	0
     if (ret && isFILE(UNPACK_STDERR) && (int) gl.stbuf.st_size > 0) {

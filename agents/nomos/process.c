@@ -137,8 +137,6 @@ void processRawSource()
     changeDir(gl.target);
 
 #ifdef	PACKAGE_DEBUG
-    listDump(&gl.srcpList, NO);
-    listDump(&gl.instpList, NO);
     listDump(&gl.sarchList, NO);
     listDump(&gl.regfList, NO);
 #endif	/* PACKAGE_DEBUG */
