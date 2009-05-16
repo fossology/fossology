@@ -32,7 +32,8 @@ require_once('common/common.php');
  *   - Use user_pk to get all jobs for this user, getting the
  *     - job_upload_fk, job_name
  *     SELECT user_pk, user_name from users WHERE user_name=[session];
- *     SELECT job_pk,job_upload_fk,job_name from job WHERE job_user_fk=3;
+ *     ??SELECT job_pk,job_upload_fk,job_name from job WHERE job_user_fk=3;
+ *     SELECT job_upload_fk FROM job WHERE job_user_fk="$_SESSION[UserId]";
  *     SELECT job_upload_fk,upload_filename from job,upload WHERE job_user_fk=3
  *     and upload_pk=job_upload_fk order by upload_pk;
  *     that will get the data we need.  this gets used by the fill_table method
@@ -42,9 +43,10 @@ require_once('common/common.php');
  *  edits the dom to remove and insert the meta tag that does the refresh.
  *
  *  for bonus points, have a select type widget that allows you to set the
- *  refresh time. (can't go below 10 seconds).
+ *  refresh time. (can't go below 10 seconds?).
  */
 
+global $DB;
 /**
  * jobStatus
  *
@@ -58,7 +60,7 @@ require_once('common/common.php');
 class jobStatus extends FO_Plugin {
   public $Name       = "jobstat";
   public $Title      = "Job Status";
-  public $MenuList   = NULL;
+  public $MenuList   = "Jobs::MyJobs";
   public $MenuOrder  = 0;    // Don't appear in a menu (internal plugin)
   public $MenuTarget = 0;
   public $LoginFlag  = 1;    // Must be logged in
@@ -67,10 +69,9 @@ class jobStatus extends FO_Plugin {
   /**
    * displayJob
    *
-   *  Display in a new popup window the job status for the job associated with
-   *  the uploadId, (upload_pk).
+   *  Display the jobs the user has running, update the screen every 30 seconds
    *
-   *  This program outputs the javascript to make it happen.
+   * @param int $uploadId (upload_pk).
    *
    */
   public function displayJob($uploadId=NULL) {
@@ -78,14 +79,14 @@ class jobStatus extends FO_Plugin {
     $UploadPk = GetParm('upload',PARM_INTEGER);
     //print "<pre>upload is:$UploadPk\n</pre>";
     if(empty($UploadPk)) {
-      return;       // display nothing,
+      print "<h2 align='center'>Sorry, no Job Id supplied, I can't look up any jobs</h2>\n";
+      return;       // display nothing, fix this... should display an appropriate message.
     }
     else {
-      //$UploadPk++;  THe dam upload ID is one more than due to fo agent
       $status = JobListSummary($UploadPk);
       //print "<pre>jobstatus is:\n"; print_r($status) . "\n";
       $P = NULL;
-//      $P .= "\n</body>\n<body class='text' onload='settick'>\n";
+      //      $P .= "\n</body>\n<body class='text' onload='settick'>\n";
       $P .= "<table border=2 align='left' cellspacing=1 cellpadding=2>\n";
       $P .= "<th colspan=2 align='center'>Job Status for job ID $UploadPk</th>\n";
       $P .= "<tr>\n";
@@ -122,6 +123,36 @@ class jobStatus extends FO_Plugin {
       print $P;
     }
   }
+
+  protected function MakeJobTblRow() {
+
+    global $DB;
+    if(empty($DB)) {
+      print "<h3>some message</h3>\n";
+      return(FALSE);
+    }
+
+    $SqlUploadList = "SELECT  DISTINCT ON (job_upload_fk) job_upload_fk," .
+                     "upload_filename from job,upload " .
+                    "WHERE job_user_fk=$_SESSION[UserId] " .
+                    "AND upload_pk=job_upload_fk order by job_upload_fk;\n";
+    $JobPhase = array('total',
+                       'active',
+                       'completed',
+                       'pending',
+                       'failed');
+    $UploadList = $DB->Action($SqlUploadList);
+    print "";
+    // should be an array of uploadpk's
+    foreach($UploadPkList as $UploadPk) {
+      $status = JobListSummary($UploadPk);
+      // check the status if completed (no pending and no active?) the push
+      // to the completed job list else process as active job
+      foreach($JobPhase as $job) {
+        // do some stuff.
+      }
+    }
+  } // makeTbl4Job
 
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) { return; }   /* State is set by FO_Plugin */
