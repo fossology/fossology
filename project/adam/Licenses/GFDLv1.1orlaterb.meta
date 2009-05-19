@@ -1,4 +1,11 @@
-Date: 2007-11-19 08:59:04
-URL: none
-Source: man pages
-Alias: GFDL
+Date:
+URL: http://www.fsf.org/licensing/licenses/fdl.html
+shortname: GFDL v1.1
+fullname: GNU Free Documentation License v1.1
+OSIapproved:
+FSFfree: Yes
+GPLv2compatible:
+GPLv3compatible:
+copyleft:
+Fedora:
+notes:
