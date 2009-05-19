@@ -75,60 +75,34 @@ class jobStatus extends FO_Plugin {
    *
    */
   public function displayJob($uploadId=NULL) {
-    // fix this logic... it needs to check for an uploadid.
-    $UploadPk = GetParm('upload',PARM_INTEGER);
-    //print "<pre>upload is:$UploadPk\n</pre>";
-    if(empty($UploadPk)) {
-      print "<h2 align='center'>Sorry, no Job Id supplied, I can't look up any jobs</h2>\n";
-      return;       // display nothing, fix this... should display an appropriate message.
-    }
-    else {
-      $status = JobListSummary($UploadPk);
-      //print "<pre>jobstatus is:\n"; print_r($status) . "\n";
-      $P = NULL;
-      //      $P .= "\n</body>\n<body class='text' onload='settick'>\n";
-      $P .= "<table border=2 align='left' cellspacing=1 cellpadding=2>\n";
-      $P .= "<th colspan=2 align='center'>Job Status for job ID $UploadPk</th>\n";
-      $P .= "<tr>\n";
-      $P .= "<td>Tasks Scheduled</td>\n";
-      $P .= "<td>$status[total]</td>\n";
-      $P .= "</tr>\n";
-      $P .= "<tr>\n";
-      $P .= "<td>Tasks currently active</td>\n";
-      $P .= "<td>$status[active]</td>\n";
-      $P .= "</tr>\n";
-      $P .= "<tr>\n";
-      $P .= "<td>Tasks Pending</td>\n";
-      $P .= "<td>$status[pending]</td>\n";
-      $P .= "</tr>\n";
-      $P .= "<tr>\n";
-      $P .= "<td>Tasks Completed</td>\n";
-      $P .= "<td>$status[completed]</td>\n";
-      $P .= "</tr>\n";
-      $P .= "<tr>\n";
-      $P .= "<td>Tasks Failed</td>\n";
-      $P .= "<td>$status[failed]</td>\n";
-      $P .= "</tr>\n";
-      $P .= "<caption align='bottom'>Page will refresh every 30 seconds</caption>\n";
-      $P .= "</table>\n";
-      $P .= "<META HTTP-EQUIV='refresh' CONTENT=15>\n";
-      $P .= "<script type='text/javascript'>\n";
-      $P .= "function brefreshed() {
-                document.location.reload(true);
-             }\n";
-      $P .= "function settick() {
-                var Iclear = setInterval('berefreshed',5000);
-             }\n";
-      $P .= "</script>\n";
-      print $P;
-    }
+    // Create the style and heading
+    $Heading = "<table border=2 align='center' cellspacing=1 cellpadding=5>\n" .
+        "   <tr>\n" .
+        "     <th colspan=6 align='center'>Running Jobs</th>\n" .
+        "   </tr>\n" .
+        "   <tr>\n" .
+        "     <th align='center'>Job Name:Id</th>\n" .
+        "     <th align='center'>Total<br>Tasks</th>\n" .
+        "     <th align='center'>Completed<br>Tasks</th>\n" .
+        "     <th align='center'>Active<br>Tasks</th>\n" .
+        "     <th align='center'>Pending<br>Tasks</th>\n" .
+        "     <th align='center'>Failed<br>Tasks</th>\n" .
+        "   </tr>\n";
+
+    $Tbl = $this->MakeJobTblRow();
+    $Refresh = "<META HTTP-EQUIV='refresh' CONTENT=30 name='refresher'/>\n";
+    $RunningJobs = $Heading . $Tbl . $Refresh;
+    print $RunningJobs;
+    // At this point, format and display the completed jobs
   }
 
   protected function MakeJobTblRow() {
 
     global $DB;
+    global $CompletedJobs;
+
     if(empty($DB)) {
-      print "<h3>some message</h3>\n";
+      print "<h3 color='red'>Fatal internal ERROR! Cannot connect to the DataBase</h3>\n";
       return(FALSE);
     }
 
@@ -136,22 +110,45 @@ class jobStatus extends FO_Plugin {
                      "upload_filename from job,upload " .
                     "WHERE job_user_fk=$_SESSION[UserId] " .
                     "AND upload_pk=job_upload_fk order by job_upload_fk;\n";
-    $JobPhase = array('total',
-                       'active',
-                       'completed',
-                       'pending',
-                       'failed');
+    $JobPhase = array('total' => 'bgcolor="#FFFFCC"',
+                      'completed' => 'bgcolor="#D3D3D3"',
+                      'active' => 'bgcolor="#99FF99"',
+                      'pending' => 'bgcolor="#99FFFF"',
+                      'failed' => 'bgcolor="#FF6666"');
     $UploadList = $DB->Action($SqlUploadList);
-    print "";
-    // should be an array of uploadpk's
-    foreach($UploadPkList as $UploadPk) {
-      $status = JobListSummary($UploadPk);
+    $CompletedJobs = array();
+    //print "<pre>";
+    //print "UploadList is:\n"; print_r($UploadList) . "\n";
+    $T = '';
+    foreach($UploadList as $upload) {
+      //print "Upload is:\n"; print_r($upload) . "\n";
+      $status = JobListSummary($upload['job_upload_fk']);
       // check the status if completed (no pending and no active?) the push
       // to the completed job list else process as active job
-      foreach($JobPhase as $job) {
-        // do some stuff.
+      if ($status['total'] == $status['completed']) {
+        array_push(&$CompletedJobs,$upload);
+        continue;
       }
+      // build the table entry
+      $T .= "   <tr>\n";
+      $T .= "     <td>$upload[upload_filename]:$upload[job_upload_fk]</td>\n";
+      $color = "";
+      foreach($JobPhase as $phase => $color) {
+        //print "colur is:$colur\n";
+        /* Only cells with something going on get a color */
+        if($status[$phase] == 0){
+          $T .= "     <td align='center'>$status[$phase]</td>\n";
+        }
+        else {
+          $T .= "     <td align='center' $color>$status[$phase]</td>\n";
+        }
+      }
+      $T .= "   </tr>\n";      // close the row and table
     }
+    $Interval = 30;
+    $T .= "<caption align='bottom'>Page updates every $Interval seconds</caption>\n";
+    $T .= "</table>\n";
+    return($T);
   } // makeTbl4Job
 
   function Output() {
