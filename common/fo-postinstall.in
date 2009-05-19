@@ -261,7 +261,7 @@ if [ $SCHEDULERONLY ]; then
       echo "  Please check that is it correct for your environment or"
       echo "  create a different one with mkschedconf."
    else
-      echo "WARNING: $SCHEDCONF already exists,"
+      echo "NOTE: $SCHEDCONF already exists,"
       echo "  consider checking it or recreating with mkschedconf."
    fi
 
@@ -283,12 +283,20 @@ fi # end of SCHEDULERONLY
 if [ $WEBONLY ]; then
    echo "*** Setting up the web interface ***"
 
-   # See if web server user (www-data) exists, if so add to the group.
+   # See if web server user exists, if so add to the group.
+   # check for www-data (Debian, etc)
    grep -q "^www-data:" /etc/passwd
    if [ $? == 0 ] ; then
      echo "NOTE: Adding user www-data to group {$PROJECTGROUP}"
      # this is smart enough to not add multiple times so it's ok to repeat
      usermod -G {$PROJECTGROUP} -a www-data
+   fi
+   # check for apache (RHEL/CentOS, etc)
+   grep -q "^apache:" /etc/passwd
+   if [ $? == 0 ] ; then
+     echo "NOTE: Adding user apache to group {$PROJECTGROUP}"
+     # this is smart enough to not add multiple times so it's ok to repeat
+     usermod -G {$PROJECTGROUP} -a apache
    fi
 
 fi # end of WEBONLY

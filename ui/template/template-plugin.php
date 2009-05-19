@@ -49,6 +49,7 @@ define("PLUGIN_DB_DELETE",6);	/* record deletion permitted */
 define("PLUGIN_DB_DEBUG",7);	/* see and run debug code */
 define("PLUGIN_DB_USERADMIN",10);	/* add/delete users */
 
+error_reporting(E_NOTICE & E_STRICT);
 /*************************************************************
  This is the Plugin class.  All plugins should:
  1. Use this class or extend this class.
@@ -378,6 +379,7 @@ class FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     // Put your code here
+    $V = "";
     switch($this->OutputType)
     {
       case "XML":
@@ -413,6 +415,7 @@ class FO_Plugin
     $this->OutputType=$Type;
     $this->OutputToStdout=$ToStdout;
     // Put your code here
+    $V= "";
     switch($this->OutputType)
     {
       case "XML":
@@ -440,6 +443,7 @@ class FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     // Put your code here
+    $V = "";
     switch($this->OutputType)
     {
       case "XML":
