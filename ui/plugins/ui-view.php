@@ -54,6 +54,9 @@ class ui_view extends FO_Plugin
     $URI = preg_replace("/&format=[a-zA-Z0-9]*/","",$URI);
     $URI = preg_replace("/&page=[0-9]*/","",$URI);
 
+    $PageHex  = NULL;
+    $PageText = NULL;
+
     /***********************************
      If there is paging, compute page conversions.
      ***********************************/
@@ -412,7 +415,7 @@ class ui_view extends FO_Plugin
       $Length -= $ReadCount;
       $Start += $ReadCount;
       if (strlen(trim($S)) > 0) { $MadeOutput=1; }
- 
+
       if ($InColor && ($this->FindHighlight($Start) & 0x04))
 	{
 	print "</font>";
@@ -661,7 +664,7 @@ class ui_view extends FO_Plugin
     print $V;
     $V = "";
     if (empty($Fin))
-      { 
+      {
       $Fin = @fopen( RepPathItem($Item) ,"rb");
       if (empty($Fin))
 	{
