@@ -24,7 +24,8 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-require_once('common/common.php');
+global $WEBDIR;
+require_once("$WEBDIR/common/common.php");
 /*
  * Make this into a jobs menu item.  MyJobs
  * - get user name from session
@@ -43,7 +44,7 @@ require_once('common/common.php');
  *  edits the dom to remove and insert the meta tag that does the refresh.
  *
  *  for bonus points, have a select type widget that allows you to set the
- *  refresh time. (can't go below 10 seconds?).
+ *  refresh time. (can't go below 30 seconds?).
  */
 
 global $DB;
@@ -61,7 +62,7 @@ class jobStatus extends FO_Plugin {
   public $Name       = "jobstat";
   public $Title      = "Job Status";
   public $MenuList   = "Jobs::MyJobs";
-  public $MenuOrder  = 0;    // Don't appear in a menu (internal plugin)
+  public $MenuOrder  = 0;    // Don't appear in a menu (internal plugin) BUG!
   public $MenuTarget = 0;
   public $LoginFlag  = 1;    // Must be logged in
   public $Dependency = array('upload_file', 'upload_url', 'upload_srv_files');
