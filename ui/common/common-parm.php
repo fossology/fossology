@@ -94,6 +94,7 @@ function Traceback_uri()
  ************************************************************/
 function Traceback_parm($ShowMod=1)
 {
+  $V = array();
   $V = explode('?',@$_SERVER['REQUEST_URI'],2);
   $V = preg_replace("/^mod=/","",$V[1]);
   if (!$ShowMod)
