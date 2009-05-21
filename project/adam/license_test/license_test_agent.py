@@ -43,7 +43,7 @@ from optparse import OptionParser
 timer = None
 
 def heartbeat():
-    print "Still alive..."
+    print "Heartbeat"
     global timer
     timer.cancel()
     timer = threading.Timer(6,heartbeat)
@@ -110,6 +110,7 @@ if (param_dict.get('neg_files',False)):
         sys.stderr.write('ERROR: parameter [neg_files] is not a file.\n')
         sys.exit(-1)
 
+# initialize the dictionaries that will hold the stats about licenses and non-licenses
 pos_word_dict = {}   # P(word|license)
 neg_word_dict = {}    # P(word|non-license)
 pos_word_matrix = {} # P(word_i,word_i+1|license)
@@ -123,6 +124,7 @@ files = [line.strip() for line in open(pos_files)]
 files = [line.strip() for line in open(neg_files)]
 (neg_word_dict, neg_word_matrix) = model.train_word_dict(files)
 
+# smoothing makes the false negitive rate go down.
 if smoothing:
     for file in files:
         model.reweight(file,pos_word_dict,pos_word_matrix,neg_word_dict,neg_word_matrix,pr,lw,rw)
@@ -132,6 +134,7 @@ if smoothing:
 connection = None
 DB_conf = {}
 # read and parse the Db.conf file so know how to connect to the database.
+# we are expecting a command like """conf=Db.conf;\n""". If we dont get this then we print an error and continue reading stdin for a command of that sort
 line = sys.stdin.readline().strip()
 while line:
     if line.strip() == 'quit':
@@ -164,6 +167,7 @@ while line:
         sys.stderr.write('ERROR: looking for conf=configure file path; found %s=%s;\n')
     line = sys.stdin.readline().strip()
 
+# this is were we read stdin for files to test. We read commands from the command line in this format, """file=/media/disk/somefolder/file.txt;""". If we dont get that then we continue to look for it from stdin.
 line = sys.stdin.readline().strip()
 while line:
     if line.strip() == 'quit':
