@@ -36,7 +36,21 @@ import os
 import math
 import re
 import psycopg2
+import threading
 from optparse import OptionParser
+
+# set up heartbeat functionality.
+timer = None
+
+def heartbeat():
+    print "Still alive..."
+    global timer
+    timer.cancel()
+    timer = threading.Timer(6,heartbeat)
+    timer.start()
+
+timer = threading.Timer(60,heartbeat)
+timer.start()
 
 # default paramerters
 lw = 1
@@ -120,9 +134,12 @@ DB_conf = {}
 # read and parse the Db.conf file so know how to connect to the database.
 line = sys.stdin.readline().strip()
 while line:
-    if not re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]:
-	sys.stderr.write('ERROR: unknown command: %s' % line)
-	continue
+    if line.strip() == 'quit':
+        timer.cancel()
+        sys.exit(0)
+    if not re.findall('(?P<key>.*)=(?P<value>.*);',line):
+        sys.stderr.write('ERROR: unknown command: %s' % line)
+        continue
     (key, value) = re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]
 
     if key == 'conf':
@@ -149,9 +166,12 @@ while line:
 
 line = sys.stdin.readline().strip()
 while line:
-    if not re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]:
-	sys.stderr.write('ERROR: unknown command: %s' % line)
-	continue
+    if line.strip() == 'quit':
+        timer.cancel()
+        sys.exit(0)
+    if not re.findall('(?P<key>.*)=(?P<value>.*);',line):
+	    sys.stderr.write('ERROR: unknown command: %s' % line)
+	    continue
     (key, value) = re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]
     if key == 'file':
         score = model.test_file(value,pos_word_dict,pos_word_matrix,neg_word_dict,neg_word_matrix,pr,lw,rw)
