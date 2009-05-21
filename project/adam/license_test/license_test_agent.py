@@ -27,8 +27,8 @@
 
 # Import custom libraries. You should set $PYTHONPATH or make sure that python
 # can find these libraries.
-import parser
-import license_test_model as model
+import parser   # utils directory
+import license_test_model as model # current direcory
 # End of custom libraries
 
 import sys
@@ -40,6 +40,7 @@ import re
 #   http://www.python.org/dev/peps/pep-0249/
 #   http://initd.org/pub/software/psycopg/dbapi20programming.pdf
 #   /usr/share/doc/python-psycopg2/doc/extensions.rst.gz
+# apt-get install python-psycopg2
 import psycopg2
 
 import threading
@@ -48,20 +49,21 @@ from optparse import OptionParser
 # set up heartbeat functionality.
 timer = None
 
+# show heartbeat every 60 secs
 def heartbeat():
     print "Heartbeat"
     global timer
     timer.cancel()
-    timer = threading.Timer(6,heartbeat)
+    timer = threading.Timer(60,heartbeat)
     timer.start()
 
 timer = threading.Timer(60,heartbeat)
 timer.start()
 
 # default paramerters
-lw = 1
-rw = 1
-pw = 0.5
+lw = 3        # left window
+rw = 3        # right window
+pr = 0.4      # probability of finding a license in a random window
 smoothing = False
 pos_files = 'pos.txt'
 neg_files = 'neg.txt'
