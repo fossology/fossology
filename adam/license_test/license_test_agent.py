@@ -35,7 +35,13 @@ import sys
 import os
 import math
 import re
+
+# psycopg2 docs:
+#   http://www.python.org/dev/peps/pep-0249/
+#   http://initd.org/pub/software/psycopg/dbapi20programming.pdf
+#   /usr/share/doc/python-psycopg2/doc/extensions.rst.gz
 import psycopg2
+
 import threading
 from optparse import OptionParser
 
