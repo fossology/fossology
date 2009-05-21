@@ -67,6 +67,7 @@ pr = 0.4      # probability of finding a license in a random window
 smoothing = False
 pos_files = 'pos.txt'
 neg_files = 'neg.txt'
+cache_file = 'test_license.cache'
 
 # read params from somewhere.
 # assume that the file is something like key=value;\n
@@ -114,6 +115,13 @@ if (param_dict.get('pos_files',False)):
 if (param_dict.get('neg_files',False)):
     if os.path.isfile(param_dict['neg_files']):
         neg_files = param_dict['neg_files']
+    else:
+        sys.stderr.write('ERROR: parameter [neg_files] is not a file.\n')
+        sys.exit(-1)
+
+if (param_dict.get('cache_file',False)):
+    if os.path.isfile(param_dict['cache_file']):
+        cache_file = param_dict['cache_file']
     else:
         sys.stderr.write('ERROR: parameter [neg_files] is not a file.\n')
         sys.exit(-1)
