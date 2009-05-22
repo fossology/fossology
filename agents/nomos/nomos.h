@@ -236,6 +236,7 @@ struct licenseSpec {
 };
 typedef struct licenseSpec licSpec_t;
 
+#ifdef notdef
 /*
   CDB - Will probably want to get rid of some of these fields.
 */
@@ -267,6 +268,7 @@ struct curFile {
     int nWords;
     int bucketType;
 };
+#endif /* notdef */
 
 struct globals {
     char initwd[myBUFSIZ];

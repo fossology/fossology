@@ -166,6 +166,7 @@ int strGrep(char *regex, char *data, int flags)
     return(1);
 }
 
+
 /*
  * Return -1 on regex-compile failure, 1 if regex search fails, and 0 if
  * regex search is successful.
@@ -231,6 +232,8 @@ int idxGrep(int index, char *data, int flags)
     }
     return(1);
 }
+
+
 
 
 /*

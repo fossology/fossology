@@ -587,13 +587,11 @@ char *wordCount(char *textp)
 	}
     }
     (void) sprintf(wcbuf, "%d lines, %d words", lines, words);
-#ifdef notdef
     /*
      * Save these values for use elsewhere, too.
      */
     cur.nWords = words;
     cur.nLines = lines;
-#endif /* notdef */
     return(wcbuf);
 }
 
