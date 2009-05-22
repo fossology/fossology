@@ -929,6 +929,11 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	    Fatal("Null mmapFile(), path=%s", cp);
 	}
 	size = (int) gl.stbuf.st_size;
+	/*
+	  CDB - the wordCount function called here currently has the
+	  important side-effect of setting nLines and nWords in the
+	  global structure "cur".
+	*/
 	fprintf(linkFp, "Type: %s\n%s %s, %d bytes\n",
 		scores[idx].ftype, LABEL_CNTS, wordCount(textp), 
 		scores[idx].size);
