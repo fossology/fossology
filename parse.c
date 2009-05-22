@@ -5849,6 +5849,7 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 	return(0);
     }
     else if (sp->refCount == 0) {   /* e.g., first occurence */
+
 	/*
 	 * Since this is the first search of this word, see if it's in the text.
 	 * NOTE: getInstances() returns a pointer to static (non-allocated) storage
@@ -5931,7 +5932,7 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 	wordMatch++;
 	ret = 1;
     } else {
-	metaKludge = (qType == 2 && index == _LT_GPLref1);
+	metaKludge = ((qType == 2) && (index == _LT_GPLref1));
 	if (metaKludge || qType == 4) {
 	    saved = 1;
 	    gl.flags |= FL_SAVEBASE;
