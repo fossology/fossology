@@ -1,6 +1,5 @@
 <?php
-
-/***********************************************************
+/*
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
@@ -15,42 +14,54 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- ***********************************************************/
-
+*/
 /**
- * getMailSubjects
+ *  allFilePaths
  *
- * Check to see if there is new mail for the user
+ *  given a directory, iterate through it and all subdirectories returning
+ *  the absolute path to the files.
  *
- * NOTE: must be run by the user who owns the system mailbox in /var/mail
- *
- * @return array Subjects, list of Fossology subjects that match.
- *
+ * created: May 22, 2009
  */
-function getMailSubjects() {
-  /*
-   * use preg_match, but the test must be run by the user who owns the email file
-   * in /var/mail.
-   */
-  $MailFile = "/var/mail/";
 
-  //$user = get_current_user();
-  $user = exec('id -un', $out, $rtn);
-  $UserMail = $MailFile . $user;
-  //$FH = fopen($UserMail,'r') or die ("Cannot open $UserMail, $phperrormsg\n");
-  $FH = fopen($UserMail,'r');
-  if($FH === FALSE) {
-    return(array("ERROR! Cannot open $UserMail"));
+//ldir = '/home/markd/Eddy';
+//$ldir = '/home/fosstester/regression/license/eddy/GPL';
+/**
+ * allFilePaths
+ *
+ * given a directory, iterate through it and all subdirectories returning
+ * the absolute path to the files.
+ *
+ * @param string $dir the directory to start from either an absolute path or
+ * a relative one.
+ *
+ * @return array $fileList a list of the absolute path to the files or empty
+ * array on error.
+ */
+function allFilePaths($dir) {
+
+  $fileList = array();
+  if(empty($dir)) {
+    return($fileList);  // nothing to process, return empty list.
   }
-  while (! feof($FH)){
-    $line = fgets($FH);
-    $matched = preg_match('/Subject:\sFOSSology Results.*?$/',$line, $matches);
-    if($matched) {
-      $Subjects[] = $line;
+  try {
+    foreach(new recursiveIteratorIterator(
+    new recursiveDirectoryIterator($ldir)) as $file) {
+      //print "file is:$file\n";
+      $fileList[] = $file;
     }
+    //print "Fossology Results are:\n";print_r($FileList) . "\n";
+    return($fileList)
   }
-  return($Subjects);
+  /*
+   * if the directory does not exist or the directory or a sub directory
+   * does not have sufficent permissions for reading return an empty list
+   */
+  catch(Exception $e) {
+    return(array());
+  }
 }
+
 /**
  * escapeDots($string)
  *
@@ -94,39 +105,43 @@ function getHost($URL)
   $found = parse_url($URL, PHP_URL_HOST);
   //print "DB: getHost: url is:$URL\nafter parse, found is:$found\n";
   return ($found);
-}
+} // getHost
 
 /**
- * getBrowserUri($name, $page)
+ * getMailSubjects
  *
- * Get the url fragment to display the upload from the xhtml page.
+ * Check to see if there is new mail for the user
  *
- * @param string $name the name of a folder or upload
- * @param string $page the xhtml page to search
+ * NOTE: must be run by the user who owns the system mailbox in /var/mail
  *
- * TODO: finish or scrap this method
- *
- * @return $string the matching uri or null.
+ * @return array Subjects, list of Fossology subjects that match.
  *
  */
-function getBrowseUri($name, $page)
-{
-  //print "DB: GBURI: page is:\n$page\n";
-  //$found = preg_match("/href='(.*?)'>($uploadName)<\/a>/", $page, $matches);
-  // doesn't work: '$found = preg_match("/href='(.*?)'>$name/", $page, $matches);
-  $found = preg_match("/href='((.*?)&show=detail).*?/", $page, $matches);
-  //$found = preg_match("/ class=.*?href='(.*?)'>$name/", $page, $matches);
-  print "DB: GBURI: found matches is:$found\n";
-  print "DB: GBURI: matches is:\n";
-  var_dump($matches) . "\n";
-  if ($found)
-  {
-    return ($matches[1]);
-  } else
-  {
-    return (NULL);
+function getMailSubjects() {
+  /*
+   * use preg_match, but the test must be run by the user who owns the email file
+   * in /var/mail.
+   */
+  $MailFile = "/var/mail/";
+
+  //$user = get_current_user();
+  $user = exec('id -un', $out, $rtn);
+  $UserMail = $MailFile . $user;
+  //$FH = fopen($UserMail,'r') or die ("Cannot open $UserMail, $phperrormsg\n");
+  $FH = fopen($UserMail,'r');
+  if($FH === FALSE) {
+    return(array("ERROR! Cannot open $UserMail"));
   }
-}
+  while (! feof($FH)){
+    $line = fgets($FH);
+    $matched = preg_match('/Subject:\sFOSSology Results.*?$/',$line, $matches);
+    if($matched) {
+      $Subjects[] = $line;
+    }
+  }
+  return($Subjects);
+} //getMailSubjects
+
 /**
  * makeUrl($host,$query)
  *
