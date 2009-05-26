@@ -500,7 +500,7 @@ int     ReadFileLine        (FILE *Fin)
 void	Usage	(char *Name)
 {
   fprintf(stderr,"Usage: %s [options]\n",Name);
-  fprintf(stderr,"  List or delete uploads.\n");
+  fprintf(stderr,"  Validate repo, bsam licenses, and agents.\n");
   fprintf(stderr,"  Options\n");
   fprintf(stderr,"  -i   :: Initialize the DB, then exit.\n");
   fprintf(stderr,"  -g   :: Generate data for self-test.\n");
