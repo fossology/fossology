@@ -46,18 +46,19 @@ function allFilePaths($dir) {
   }
   try {
     foreach(new recursiveIteratorIterator(
-    new recursiveDirectoryIterator($ldir)) as $file) {
+    new recursiveDirectoryIterator($dir)) as $file) {
       //print "file is:$file\n";
-      $fileList[] = $file;
+      $fileList[] = $file->getPathName($file);
     }
-    //print "Fossology Results are:\n";print_r($FileList) . "\n";
-    return($fileList)
+    //print "Fossology Results are:\n";print_r($fileList) . "\n";
+    return($fileList);
   }
   /*
    * if the directory does not exist or the directory or a sub directory
    * does not have sufficent permissions for reading return an empty list
    */
   catch(Exception $e) {
+    //print "in exception!\n$e\n";
     return(array());
   }
 }
