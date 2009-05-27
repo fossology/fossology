@@ -64,6 +64,27 @@ All of these will be dependent on the goals of your local system and
 can't be reasonably automated, so you'll have to do them by hand.
 
 
+Differences between the single and multi packages:
+If you are using the 'fossology' meta-package, which depends on the
+right *-single packages to give you a working single system install, the
+packages make certain assumptions to make things 'just work'. One
+of these is that each time the fossology-scheduler-single package is
+upgraded, it automatically generates a new /etc/fossology/Scheduler.conf
+optimized for your system and the new version of fossology. If you have
+made any changes to your Scheduler.conf, they will be overwritten.
+
+If you are using the non *-single packages, because you have a multi
+system install (or just prefer them), your
+/etc/fossology/Scheduler.conf will NOT automatically be updated, because
+you have local edits and updating would break them. This means that
+after an upgrade, if there are new agents installed (or agents
+removed) your Scheduler.conf will need to be updated by hand to
+account for the changes.
+NOTE: Upstream is planning on eventually moving the things specified in
+this config file into the database and be managed via the web
+interface, which will allow for more seamless upgrades.
+
+
 Migrating from upstream:
 * If you are migrating from an upstream install, you will need to run
 the upstream utils/fo-cleanold utility in order to clean off old
