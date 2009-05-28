@@ -200,7 +200,7 @@ while line:
         score = model.test_file(value,pos_word_dict,pos_word_matrix,neg_word_dict,neg_word_matrix,pr,lw,rw)
         l = model.smooth_score(score)
         is_license = sum(l)>0
-        print "%s: %s" % (is_license,file)
+        print "%s: %s" % (is_license,value)
 
         # write our info into the database...
         cursor = connection.cursor()
