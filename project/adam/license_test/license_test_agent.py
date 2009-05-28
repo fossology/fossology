@@ -41,7 +41,10 @@ import re
 #   http://initd.org/pub/software/psycopg/dbapi20programming.pdf
 #   /usr/share/doc/python-psycopg2/doc/extensions.rst.gz
 # apt-get install python-psycopg2
-import psycopg2
+try: # if we dont have psycopg2 then try psycopg
+    import psycopg2 as psycopg
+except:
+	import psycopg
 
 import threading
 from optparse import OptionParser
@@ -170,7 +173,7 @@ while line:
                 sys.stderr.write('ERROR: conf=%s; connot open %s.\n' % (value,value))
                 sys.exit(-1)
             try:
-            	connection = psycopg2.connect("dbname='%s' user='%s' host='%s' password='%s'" % (DB_conf['dbname'],DB_conf['user'],DB_conf['host'],DB_conf['password']))
+            	connection = psycopg.connect("dbname='%s' user='%s' host='%s' password='%s'" % (DB_conf['dbname'],DB_conf['user'],DB_conf['host'],DB_conf['password']))
             	break
             except:
                 sys.stderr.write('ERROR: Could not connect to database.\n')
