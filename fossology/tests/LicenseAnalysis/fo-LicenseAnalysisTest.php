@@ -36,11 +36,31 @@
 //error_reporting(E_ALL & E_STRICT);
 
 require_once('../commonTestFuncs.php');
-//$ldir = '/home/fosstester/regression/license/eddy/GPL/GPL_v3';
-$ldir = '/home/fosstester/regression/license/eddy';
+$ldir = '/home/fosstester/regression/license/eddy/GPL/GPL_v3';
+//$ldir = '/home/fosstester/regression/license/eddy';
 
-/* Need to take parameters and validate them */
-
+/* process parameters
+$Usage = "{$argv[0]} [-h] {-f filepath | -d directorypath}\n" .
+$options = getopt("hf::d::");
+if (empty($options)) {
+  print $Usage;
+  exit(1);
+}
+if (array_key_exists("h",$options)) {
+  print $Usage;
+  exit(0);
+}
+if (array_key_exists("f",$options)) {
+  $file = $options['f'];
+}
+if (array_key_exists("d",$options)) {
+  $directory = $options['d'];
+}
+if (!array_key_exists("d",$options) && !array_key_exists("f",$options)) {
+  print $Usage;
+  exit(1);
+}
+*/
 $FileList = array();
 $FileList = allFilePaths($ldir);
 //print "allFilePaths returned:\n";print_r($FileList) . "\n";
@@ -58,11 +78,11 @@ foreach($BsamRaw as $file => $result) {
   $Bsam[$file] = preg_replace("/.*?:/",'',$result);
 }
 $Bsam = prepResults($Bsam);
-//print "bsam results are:\n";print_r($Bsam) . "\n";
+print "bsam results are:\n";print_r($Bsam) . "\n";
 
 $Cnomos = foLicenseAnalyis($FileList,'chanomos');
 $Cnomos = prepResults($Cnomos);
-//print "Cnomos results are:\n";print_r($Cnomos) . "\n";
+print "Cnomos results are:\n";print_r($Cnomos) . "\n";
 
 
 $diffs = compareResults($Bsam, $Cnomos);
@@ -87,6 +107,12 @@ foreach($diffs as $filename => $failed) {
  * @param array $result1 associative array of results, filename is the key.
  * @param array $result2 associative array of results, filename is the key.
  * @return array, either of results or an error, check the first key for 'Error'.
+ *
+ * TODO: rethink this routine.  It needs to compare against a 'master'.
+ * - do you have to always pass in both?
+ * - can this routine load the master or is it in the code?
+ *   - in the code to start with?
+ *   - thinking it should load it for final code.
  */
 function compareResults($result1, $result2){
 
@@ -100,6 +126,9 @@ function compareResults($result1, $result2){
   $somediff = array();
   foreach($result1 as $file => $res1) {
     $somediff = array_udiff($res1,$result2[$file],'_cres');
+    $diff = array_diff($res1,$result2[$file]);
+    print"diff (NOT udiff) is:\n";print_r($diff) . "\n";
+    $diff = array();
     if(empty($somediff)) continue;
     $diffs[$file] = $somediff;
     $somediff = array();
@@ -140,7 +169,7 @@ function foLicenseAnalyis($license,$agent) {
       return(_runAnalysis($license,$cmd));
       break;
     case 'nomos':
-      // good question, look at the perl script.
+      // either use the OSRB one or one installed
       return(NULL);
       break;
     default:
