@@ -32,6 +32,7 @@
  *  3. Create a report results routine.
  *
  * created: May 21, 2009
+ * @version "$Id: $"
  */
 //error_reporting(E_ALL & E_STRICT);
 
@@ -40,27 +41,27 @@ $ldir = '/home/fosstester/regression/license/eddy/GPL/GPL_v3';
 //$ldir = '/home/fosstester/regression/license/eddy';
 
 /* process parameters
-$Usage = "{$argv[0]} [-h] {-f filepath | -d directorypath}\n" .
-$options = getopt("hf::d::");
-if (empty($options)) {
-  print $Usage;
-  exit(1);
-}
-if (array_key_exists("h",$options)) {
-  print $Usage;
-  exit(0);
-}
-if (array_key_exists("f",$options)) {
-  $file = $options['f'];
-}
-if (array_key_exists("d",$options)) {
-  $directory = $options['d'];
-}
-if (!array_key_exists("d",$options) && !array_key_exists("f",$options)) {
-  print $Usage;
-  exit(1);
-}
-*/
+ $Usage = "{$argv[0]} [-h] {-f filepath | -d directorypath}\n" .
+ $options = getopt("hf::d::");
+ if (empty($options)) {
+ print $Usage;
+ exit(1);
+ }
+ if (array_key_exists("h",$options)) {
+ print $Usage;
+ exit(0);
+ }
+ if (array_key_exists("f",$options)) {
+ $file = $options['f'];
+ }
+ if (array_key_exists("d",$options)) {
+ $directory = $options['d'];
+ }
+ if (!array_key_exists("d",$options) && !array_key_exists("f",$options)) {
+ print $Usage;
+ exit(1);
+ }
+ */
 $FileList = array();
 $FileList = allFilePaths($ldir);
 //print "allFilePaths returned:\n";print_r($FileList) . "\n";
@@ -84,18 +85,19 @@ $Cnomos = foLicenseAnalyis($FileList,'chanomos');
 $Cnomos = prepResults($Cnomos);
 print "Cnomos results are:\n";print_r($Cnomos) . "\n";
 
-
+/* Cnomos is the standard (for now) */
 $diffs = compareResults($Bsam, $Cnomos);
 print "differences between Bsam and nomos are:\n";
-//print_r($diffs);
-foreach($diffs as $filename => $failed) {
-  foreach($failed as $reason) {
-    print "bsam failed on file: $filename\nBecause of string:$reason\n";
-  }
-}
+print_r($diffs) . "\n";
+//reset($diffs);
 /*
- $same = array_intersect_assoc($Bsam, $Cnomos);
- print "Matching Bsam and nomos entries are:\n";print_r($same);
+ foreach($diffs as $filename => $result) {
+ foreach($result as $pf => $res) {
+ if($result['failed']){
+ print "bsam failed on file: $filename\nBecause {$result['failed'][$res]}\n";
+ }
+ }
+ }
  */
 
 /**
@@ -116,6 +118,8 @@ foreach($diffs as $filename => $failed) {
  */
 function compareResults($result1, $result2){
 
+  /* Note result2 is the MASTER */
+
   if(!is_array($result1)) {
     return(array('Error' => 'Must supply an array as a parameter'));
   }
@@ -123,23 +127,36 @@ function compareResults($result1, $result2){
     return(array('Error' => 'Must supply an array as a parameter'));
   }
   $diffs = array();
-  $somediff = array();
+  $result = array();
+  /* for now, create the standard this way
+  foreach($result2 as $file => $res2) {
+    for($i=0; $i< count($res2); $i++) {
+      $result['standard'] = $result2[$file][$i];
+    }
+  }
+  */
+  /*
+   * each result is compared so we can keep track of passes and failures.
+   */
   foreach($result1 as $file => $res1) {
-    $somediff = array_udiff($res1,$result2[$file],'_cres');
-    $diff = array_diff($res1,$result2[$file]);
-    print"diff (NOT udiff) is:\n";print_r($diff) . "\n";
-    $diff = array();
-    if(empty($somediff)) continue;
-    $diffs[$file] = $somediff;
-    $somediff = array();
+    for($i=0; $i< count($res1); $i++) {
+      $res2 = $result2[$file];
+      for($r2=0; $r2< count($res2); $r2++) {
+        $result["standard$r2"] = $result2[$file][$r2];
+      }
+      print "resi is:{$res1[$i]}\n";
+      print "res2fi is:{$result2[$file][$i]}\n------------\n";
+      if($res1[$i] === $result2[$file][$i]) {
+        $result['pass'] = $res1[$i];
+      }
+      else {
+        $result['fail'] = $res1[$i];
+      }
+    }
+    $diffs[$file] = $result;
+    $result = array();
   }
   return($diffs);
-}
-
-function _cres($val1,$val2) {
-  if($val1 < $val2) return(-1);
-  if($val1 == $val2) return(0);
-  if($val1 > $val2) return(1);
 }
 
 /**
