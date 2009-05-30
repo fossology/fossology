@@ -22,7 +22,7 @@ case "$1" in
     configure)
     # since fossology-scheduler depends on fossology-agent, we don't need
     # to run the agent stuff
-    /usr/lib/fossology/fo-postinstall --scheduler-only
+    /usr/lib/fossology/fo-postinstall --scheduler-only --overwrite
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
