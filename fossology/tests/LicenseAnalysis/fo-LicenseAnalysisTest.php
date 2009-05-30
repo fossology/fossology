@@ -37,6 +37,8 @@
 //error_reporting(E_ALL & E_STRICT);
 
 require_once('../commonTestFuncs.php');
+require_once('testLicenseLib.php');
+
 $ldir = '/home/fosstester/regression/license/eddy/GPL/GPL_v3';
 //$ldir = '/home/fosstester/regression/license/eddy';
 
@@ -62,6 +64,27 @@ $ldir = '/home/fosstester/regression/license/eddy/GPL/GPL_v3';
  exit(1);
  }
  */
+$Master = array();
+
+/* load the results to compare against */
+$masterFile = 'OSRB-nomos-license-matches';
+$FD = fopen($masterFile, 'r') or die("can't open $masterFile, $phperrormsg\n");
+while(($line = fgets($FD, 1024)) !== FALSE) {
+  list($file,$result) = explode(' ',$line);
+  $Results = explode(',',$result);
+  /*
+   * a single result gets stored as a string, multiple results are stored as
+   * an array.
+   */
+  if((count($Results)) == 1){
+    $Master[$file] = $Results[0];
+  }
+  else {
+    $Master[$file] = $Results;
+  }
+}
+//print "Master results are:\n";print_r($Master) . "\n";
+
 $FileList = array();
 $FileList = allFilePaths($ldir);
 //print "allFilePaths returned:\n";print_r($FileList) . "\n";
@@ -78,17 +101,18 @@ if(empty($BsamRaw)) {
 foreach($BsamRaw as $file => $result) {
   $Bsam[$file] = preg_replace("/.*?:/",'',$result);
 }
-$Bsam = prepResults($Bsam);
+$Bsam = prepResults($Bsam,'bsam');
 print "bsam results are:\n";print_r($Bsam) . "\n";
 
 $Cnomos = foLicenseAnalyis($FileList,'chanomos');
-$Cnomos = prepResults($Cnomos);
-print "Cnomos results are:\n";print_r($Cnomos) . "\n";
+$Cnomos = prepResults($Cnomos,'nomos');
+//print "Cnomos results are:\n";print_r($Cnomos) . "\n";
 
 /* Cnomos is the standard (for now) */
-$diffs = compareResults($Bsam, $Cnomos);
-print "differences between Bsam and nomos are:\n";
-print_r($diffs) . "\n";
+$bsamDiffs = compareResults($Bsam, $Master);
+$CnomosDiffs = compareResults($Chanomos, $Master);
+print "differences between Bsam and Master(nomos) are:\n";
+print_r($bsamDiffs) . "\n";
 //reset($diffs);
 /*
  foreach($diffs as $filename => $result) {
@@ -103,61 +127,104 @@ print_r($diffs) . "\n";
 /**
  * compareResult
  *
- * given two assocative arrays, compare their results, return an array of
- * differences or a empty array
+ * Given two assocative arrays, compare the first array to the second return
+ * an array of differences or a empty array.
  *
  * @param array $result1 associative array of results, filename is the key.
- * @param array $result2 associative array of results, filename is the key.
+ * @param array $Master associative array of results, filename is the key.
  * @return array, either of results or an error, check the first key for 'Error'.
  *
- * TODO: rethink this routine.  It needs to compare against a 'master'.
- * - do you have to always pass in both?
- * - can this routine load the master or is it in the code?
- *   - in the code to start with?
- *   - thinking it should load it for final code.
+ * TODO: rethink this routine.
+ *
+ * it is mostly working... still need to think about reporting results, I
+ * think the double loop when both are arrays is confusing... think about this.
+ * look at debug output, there are missing entries for the master, why?
+ *
  */
-function compareResults($result1, $result2){
+function compareResults($result1, $Master){
 
   /* Note result2 is the MASTER */
 
   if(!is_array($result1)) {
     return(array('Error' => 'Must supply an array as a parameter'));
   }
-  if(!is_array($result2)) {
+  if(!is_array($Master)) {
     return(array('Error' => 'Must supply an array as a parameter'));
   }
   $diffs = array();
   $result = array();
-  /* for now, create the standard this way
-  foreach($result2 as $file => $res2) {
-    for($i=0; $i< count($res2); $i++) {
-      $result['standard'] = $result2[$file][$i];
-    }
-  }
-  */
+
   /*
-   * each result is compared so we can keep track of passes and failures.
+   * compare each result is compared so we can keep track of passes and failures.
    */
   foreach($result1 as $file => $res1) {
-    for($i=0; $i< count($res1); $i++) {
-      $res2 = $result2[$file];
-      for($r2=0; $r2< count($res2); $r2++) {
-        $result["standard$r2"] = $result2[$file][$r2];
+    print "processing $file\n";
+    $res2 = $Master[$file];
+    if(is_string($res2)) {
+      if(is_string($res1)) {
+        print "Both-Strings-Case:$file:res1i:$res1,res2:$res2\n";
+        $result["standard"] = $res2;
+        if($res1 == $res2) {
+          $result['pass'] = $res1;
+        }
+        else {
+          $result['fail'] = $res1;
+        }
       }
-      print "resi is:{$res1[$i]}\n";
-      print "res2fi is:{$result2[$file][$i]}\n------------\n";
-      if($res1[$i] === $result2[$file][$i]) {
-        $result['pass'] = $res1[$i];
+      else if(is_array($res1)){
+        for($i=0; $i< count($res1); $i++) {
+          $result["standard"] = $res2;
+          print "r1S-R2Array:$file:res1i:{$res1[$i]}\n";
+          print "R1S-R2Arrays:$file:res2i:$res2\n";
+          if($res1[$i] == $res2) {
+            $result['pass'] = $res1[$i];
+          }
+          else {
+            $result['fail'] = $res1[$i];
+          }
+        }
       }
-      else {
-        $result['fail'] = $res1[$i];
+    }
+    else if(is_array($res2)){
+      if(is_array($res1)){
+        for($i=0; $i< count($res1); $i++) {
+          for($r2=0; $r2< count($res2); $r2++) {
+            $result["standard$r2"] = $res2[$r2];
+            print "Both-Arrays:$file:res1i:{$res1[$i]}\n";
+            print "Both-Arrays:$file:res2i:{$res2[$i]}\n";
+            if($res1[$i] == $res2[$r2]) {
+              $result['pass'] = $res1[$i];
+            }
+            else {
+              $result['fail'] = $res1[$i];
+            }
+          }
+        }
       }
+      else {   // res1 a string
+        for($r2=0; $r2< count($res2); $r2++) {
+          $result["standard$r2"] = $res2[$r2];
+          print "res1-String/r2Array:$file:res1i:$res1,res2:$res2\n";
+          if($res1 == $res2[$r2]) {
+
+            $result['pass'] = $res1;
+          }
+          else {
+            $result['fail'] = $res1;
+          }
+        }
+      }
+    }
+    else {    // neither string nor array, no Master result, false id: fail
+      print "in fail case, no master result\n";
+      $result["standard"] = $res2;
+      $result['fail'] = $res1[$i];
     }
     $diffs[$file] = $result;
     $result = array();
   }
   return($diffs);
-}
+} // compareResults
 
 /**
  * foLicenseAnalyis
@@ -221,113 +288,49 @@ function _runAnalysis($licenseList,$cmd){
 }
 
 /**
- * getFossologySynonyms
- * taken from the nomos script license_vetter.pl
- *
- * @param string $string a string a license results
- * @return string $adjusted the adjusted results string
- */
-function getFossologySynonyms($string) {
-
-  $adjusted = str_replace('+',' or later',$string);
-
-  $adjusted = str_replace('Apache Software License','Apache',$string);
-  $adjusted = str_replace('Artistic License','Artistic',$string);
-
-  $adjusted = str_replace('Adobe AFM','AFM',$string);
-
-  #    $adjusted = str_replace('Adobe Product License Agreement','',$string);
-
-  $adjusted = str_replace('Affero GPL','Affero',$string);
-
-  $adjusted = str_replace('ATI Software EULA','ATI Commercial',$string);
-
-  $adjusted = str_replace('GNU Free Documentation License','GFDL',$string);
-
-  $adjusted = str_replace('Common Public License','CPL',$string);
-
-  $adjusted = str_replace('Eclipse Public License','EPL',$string);
-
-  $adjusted = str_replace('Microsoft Reference License','MRL',$string);
-  $adjusted = str_replace('Reciprocal Public License','RPL',$string);
-
-  $adjusted = str_replace('gSOAP Public License','GSOAP',$string);
-
-  $adjusted = str_replace('Apple Public Source License','APSL',$string);
-  $adjusted = str_replace('LaTeX Project Public License','LPPL',$string);
-  $adjusted = str_replace('World Wide Web.*','W3C',$string);
-
-  $adjusted = str_replace('IBM Public License','IBM\-PL',$string);
-
-  $adjusted = str_replace('MySQL AB Exception','MySQL',$string);
-  $adjusted = str_replace('NASA Open Source','NASA',$string);
-
-  $adjusted = str_replace('Sun Microsystems Binary Code License','SBCLA',$string);
-  $adjusted = str_replace('Sun Community Source License TSA','SCSL\-TSA',$string);
-  $adjusted = str_replace('Sun Community Source License','SCSL',$string);
-  $adjusted = str_replace('Sun Microsystems Sun Public License','SPL',$string);
-
-  $adjusted = str_replace('Sun GlassFish Software License','SGF',$string);
-  $adjusted = str_replace('Sun Contributor Agreement','Sun\-SCA',$string);
-
-  $adjusted = str_replace('Carnegie Mellon University','CMU',$string);
-
-  $adjusted = str_replace('Eclipse Public License','EPL',$string);
-  $adjusted = str_replace('Open Software License','OSL',$string);
-  $adjusted = str_replace('Open Public License','OPL',$string);
-
-  $adjusted = str_replace('Beerware','BEER\-WARE',$string);
-
-  //  commercial
-  $adjusted = str_replace('Nvidia License','Nvidia',$string);
-  $adjusted = str_replace('Agere LT Modem Driver License','Agere Commercial',$string);
-  $adjusted = str_replace('ATI Software EULA','ATA Commercial',$string);
-
-  $adjusted = str_replace('Python Software Foundation','Python',$string);
-
-  $adjusted = str_replace('RealNetworks Public Source License','RPSL',$string);
-  $adjusted = str_replace('RealNetworks Community Source Licensing','RCSL',$string);
-
-  $adjusted = str_replace('Creative Commons Public Domain','Public Domain',$string);
-
-  return($adjusted);
-} // getFossologySynonyms
-/**
  * prepResults
  *
  * create an array of the results.  If there are multiple results, they are
  * comma seperated.
  *
  * @param array $result the associative array with results
- * @return array $processed an associative array with results in an array, or
- * empty array on error.
+ * @param string $agent, one of 'bsam' or 'nomos'
+ * @return array $processed an associative array with results in a string or
+ * an array, or an empty array on error.
  */
-function prepResults($result) {
-  /*
-   * take a look at the perl script, it does a lot of adjusting of names for
-   * fossology, may need to incorporate that into here as well.
-   */
+function prepResults($result,$agent='nomos') {
 
+  $agent = strtolower($agent);
   $all       = array();
   $processed = array();
 
   if(empty($result)) return(array());
   foreach($result as $file => $rlist) {
     $tList = trim($rlist);
-    /*
-     * cleanup for bsam results:
-     * 1. change ,\s to ,
-     * 2. change spaces in words to _ (e.g. GPL v3 -> GPL_v3)
-     * 3. remove -style
-     * 4. remove ' around name
-     */
-    $noClist = str_replace(', ', ',', $tList);
-    $slist = str_replace(' ', '_', $noClist);
-    $qlist = str_replace('-style', '', $slist);
-    $alist = str_replace("'", '', $qlist);
-    $list = getFossologySynonyms($alist);
+    if($agent == 'nomos') {
+      $list = filterNomosResults($alist);
+    }
+    else if($agent == 'bsam'){
+      /*
+       * cleanup for bsam results:
+       * 1. change ,\s to ,
+       * 2. change spaces in words to _ (e.g. GPL v3 -> GPL_v3)
+       * 3. remove -style
+       * 4. remove ' around name
+       */
+      $noClist = str_replace(', ', ',', $tList);
+      $slist = str_replace(' ', '_', $noClist);
+      $qlist = str_replace('-style', '', $slist);
+      $alist = str_replace("'", '', $qlist);
+      $list = filterFossologyResults($alist);
+    }
     $all = explode(",",$list);
-    $processed[$file] = $all;
+    if((count($all)) == 1) {
+      $processed[$file] = $all[0];
+    }
+    else {
+      $processed[$file] = $all;
+    }
   }
   return($processed);
 }
