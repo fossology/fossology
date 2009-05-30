@@ -31,6 +31,7 @@
  */
 
 require_once('../testClasses/ReadInputFile.php');
+require_once('testLicenseLib.php');
 
 $file = "/home/markd/GnomosResults-2009-05-28";
 $resultList = array();
@@ -40,11 +41,11 @@ if($iFile) {
   while(FALSE !== ($line = $iFile->getLine($iFile->getFileResource()))){
     buildOutput($line,&$resultList);
     /*
-    if(!buildOutput($line,&$resultList)){
-      print "Error! could not add $line to the output\n";
-      exit(1);
-    }
-    */
+     if(!buildOutput($line,&$resultList)){
+     print "Error! could not add $line to the output\n";
+     exit(1);
+     }
+     */
   }
 }
 try{
@@ -58,8 +59,8 @@ catch(Exception $e){
   exit(1);
 }
 
-foreach($resultList as $file => $result){
-  $many = fwrite($Std, "$file $result\n");
+foreach($resultList as $file => $rlist){
+  $many = fwrite($Std, "$file $rlist\n");
 }
 fclose($Std);
 function buildOutput($line,&$resultList) {
@@ -71,6 +72,7 @@ function buildOutput($line,&$resultList) {
   $filePath = rtrim($filePath,':');
   $file = basename($filePath);
   $results = trim($results);
-  $resultList[$file] = $results;
+  $filtered = filterNomosResults($results);
+  $resultList[$file] = $filtered;
 }
 ?>
