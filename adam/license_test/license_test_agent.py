@@ -35,6 +35,7 @@ import sys
 import os
 import math
 import re
+import pickle
 
 # psycopg2 docs:
 #   http://www.python.org/dev/peps/pep-0249/
@@ -108,7 +109,22 @@ try: # wrap with a try block so if something bad happens we can stop the heartbe
         sys.stderr.write('ERROR: Could not connect to database.\n')
         sys.exit(-1)
 
-    # TODO: add code for getting the agents id
+    # code for getting the agents id
+    cursor = connection.cursor()
+    cursor.execute('''SELECT agent_pk, agent_rev FROM agent WHERE agent_name = 'license_test_agent' ORDER BY agent_rev DESC;''')
+    rows = cursor.fetchall()
+    if len(rows)<=0:
+        cursor.execute('''INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('license_test_agent',%s,'determines if a license exists in a file.');''' % version)
+        connection.commit()
+        cursor.execute('''SELECT agent_pk, agent_rev FROM agent WHERE agent_name = 'license_test_agent' ORDER BY agent_rev DESC;''')
+        rows = cursor.fetchall()
+    if rows[0][1] != version:
+        cursor.execute('''INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('license_test_agent',%s,'determines if a license exists in a file.');''' % version)
+        connection.commit()
+        cursor.execute('''SELECT agent_pk, agent_rev FROM agent WHERE agent_name = 'license_test_agent' ORDER BY agent_rev DESC;''')
+        rows = cursor.fetchall()
+    
+    agent_fk = rows[0][0]    
     
     print 'Okay...' # we are ready for input    
     
@@ -119,11 +135,11 @@ try: # wrap with a try block so if something bad happens we can stop the heartbe
         if line.strip() == 'quit':
             timer.cancel()
             sys.exit(0)
-        if not re.findall('(?P<key>.*), (?P<path>.*)\n',line):
-    	    sys.stderr.write('ERROR: unknown command: %s' % line)
+        if not re.findall('(?P<key>.*), (?P<path>.*)',line):
+    	    sys.stderr.write('ERROR: unknown command: %s\n' % line)
             line = sys.stdin.readline().strip()
     	    continue
-        (key, path) = re.findall('(?P<key>.*), (?P<path>.*)\n',line)[0]
+        (pfile_fk, path) = re.findall('(?P<key>.*), (?P<path>.*)',line)[0]
         if os.path.isfile(path):
             score = lt_model.test_file(path)
             l = lt_model.smooth_score(score)
@@ -132,9 +148,12 @@ try: # wrap with a try block so if something bad happens we can stop the heartbe
     
             # write our info into the database...
             cursor = connection.cursor()
-            cursor.execute('''SELECT id FROM temp''')
-            rows = cursor.fetchall()
-            print rows[-1]
+            if is_license:
+                cursor.execute('''INSERT INTO license_test (agent_fk, pfile_fk, lic_startbyte, lic_endbyte) VALUES (%s,%s,0,0);''' % (agent_fk, pfile_fk))
+            else:
+                cursor.execute('''INSERT INTO license_test (agent_fk, pfile_fk, lic_startbyte, lic_endbyte) VALUES (%s,%s,NULL,NULL);''' % (agent_fk, pfile_fk))
+
+            connection.commit()
         else:
             sys.stderr('ERROR: "%s" does not exist.' % path)
 
