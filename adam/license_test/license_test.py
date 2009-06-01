@@ -34,83 +34,93 @@ import license_test_model as model
 import sys
 import math
 import re
+import os
+import pickle
 from optparse import OptionParser
 
-usage = "usage: %prog -y yes_files -n no_files [ -h ] test_files..."
+usage = "usage: %prog -p pos_files -n neg_files [ -h ] test_files..."
 optparser = OptionParser(usage)
-optparser.add_option("-y", "--yes", type="string",
-        help="A text file with the paths to the yes training files.")
-optparser.add_option("-n", "--no", type="string",
-        help="A text file with the paths to the no training files.")
+optparser.add_option("-p", "--positive", type="string",
+        help="A text file with the paths to the positive training files.")
+optparser.add_option("-n", "--negative", type="string",
+        help="A text file with the paths to the negative training files.")
 optparser.add_option("--lw", type="int",
         help="Left window plus 1. Must be > 0.")
 optparser.add_option("--rw", type="int",
         help="Right window plus 1. Must be > 0")
 optparser.add_option("--pr", type="float",
         help="Prior probability of seeing a yes file. Must be between 0 and 1")
-# optparser.add_option("-l", "--highlight", action="store_true",
-#         help="Highlight the license, and output an html file to stdout.")
+optparser.add_option("--no-smoothing", action="store_false", dest="smoothing",
+        help="Prevent smoothing of the positive and negative weights.")
+optparser.add_option("--cache", type="string",
+        help="Location of the cache file.")
 
 (options, args) = optparser.parse_args()
 
-if not options.yes:
-    print "You must specify a set of yes files to train on."
-    optparser.print_usage()
-    sys.exit(1)
-
-# learning parameters
-lw = 1 # window size starting at word i to the left
-if options.lw:
-    if options.lw<1:
-        print 'The value of the left window must be greater than zero.'
+if options.cache and os.path.isfile(options.cache):
+    print "Loading cached model. Ignoring all other parameters."
+    lt_model = pickle.load(open(options.cache))
+else:
+    # default parameters
+    lw = 3        # left window
+    rw = 3        # right window
+    pr = 0.4      # probability of finding a license in a random window
+    smoothing = False
+    pos_files = []
+    neg_files = []
+    
+    if not options.positive:
+        print "You must specify a set of positive files to train on."
         optparser.print_usage()
         sys.exit(1)
-    lw = options.lw
-rw = 1 # window size starting at word i to the right
-if options.rw:
-    if options.rw<1:
-        print 'The value of the right window must be greater than zero.'
-        optparser.print_usage()
-        sys.exit(1)
-    rw = options.rw
-pr = 0.5 # prior probability of seeing a license
-if options.pr:
-    if options.pr<1 and options.pr>0:
-        pr = options.pr
     else:
-        print 'The value of the prior probability must be between 0 and 1. (Non-inclusive).'
+        pos_files = [line.strip() for line in open(options.positive)]
+    
+    if not options.negative:
+        print "You must specify a set of negative files to train on."
         optparser.print_usage()
         sys.exit(1)
-
-# We can output a highlighted license if we want.
-#if options.highlight:
-#    highlight = True
-#else:
-#    highlight = False
-
-yes_word_dict = {}   # P(word|license)
-no_word_dict = {}    # P(word|non-license)
-yes_word_matrix = {} # P(word_i,word_i+1|license)
-no_word_matrix = {}  # P(word_i,word_i+1|non-license)
-
-# Calculate P(*|license)
-files = [line.strip() for line in open(options.yes)]
-(yes_word_dict, yes_word_matrix) = model.train_word_dict(files,False)
-
-# Calculate P(*|non-license)
-files = [line.strip() for line in open(options.no)]
-(no_word_dict, no_word_matrix) = model.train_word_dict(files)
+    else:
+        neg_files = [line.strip() for line in open(options.negative)]
+    
+    # learning parameters
+    # window size starting at word i to the left
+    if options.lw:
+        if options.lw<1:
+            print 'The value of the left window must be greater than zero.'
+            optparser.print_usage()
+            sys.exit(1)
+        lw = options.lw
+    # window size starting at word i to the right
+    if options.rw:
+        if options.rw<1:
+            print 'The value of the right window must be greater than zero.'
+            optparser.print_usage()
+            sys.exit(1)
+        rw = options.rw
+    # prior probability of seeing a license
+    if options.pr:
+        if options.pr<1 and options.pr>0:
+            pr = options.pr
+        else:
+            print 'The value of the prior probability must be between 0 and 1. (Non-inclusive).'
+            optparser.print_usage()
+            sys.exit(1)
+    
+    if options.smoothing == False:
+        smoothing = False
+    
+    lt_model = model.LicenseTestModel(pos_files, neg_files, pr, lw, rw, smoothing)
+    lt_model.train()
+    
+    if options.cache:
+        pickle.dump(lt_model,open(options.cache,'w'))
 
 trues = 0
-for file in files:
-    model.reweight(file,yes_word_dict,yes_word_matrix,no_word_dict,no_word_matrix,pr,lw,rw)
-
-
 for file in args:
-    score = model.test_file(file,yes_word_dict,yes_word_matrix,no_word_dict,no_word_matrix,pr,lw,rw)
-    l = model.smooth_score(score)
+    score = lt_model.test_file(file)
+    l = lt_model.smooth_score(score)
 
     print "%s: %s" % (sum(l)>0,file)
     if sum(l)>0:
         trues += 1
-print '# of Trues: %d of %d.' % (trues, len(args))
