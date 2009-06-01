@@ -69,7 +69,7 @@ void Bail(int exitval)
      */
     if (isDIR(gl.mntpath)) {
 	(void) mySystem("%s %s > %s 2>&1", _REGEX(_UMNT_IMG),
-			gl.mntpath, DEVNULL);
+			gl.mntpath, "/dev/null");
 	if (rmdir(gl.mntpath)) {
 	    perror(gl.mntpath);
 	}
@@ -197,9 +197,6 @@ static void getFileLists(char *dirpath)
 #ifdef	FLAG_NO_COPYRIGHT
     listInit(&gl.nocpyrtList, 0, "no-copyright list");
 #endif	/* FLAG_NO_COPYRIGHT */
-#ifdef	SEARCH_CRYPTO
-    listInit(&gl.cryptoList, 0, "cryptography list");
-#endif	/* SEARCH_CRYPTO */
 
     listGetItem(&gl.regfList, gl.targetFile);
     return;

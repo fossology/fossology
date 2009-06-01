@@ -35,6 +35,7 @@ static void listValidate(list_t *, int);
 static void listDebugDetails();
 #endif	/* PROC_TRACE || LIST_DEBUG */
 
+
 void listInit(list_t *l, int size, char *label)
 {
 
@@ -215,7 +216,8 @@ void listValidate(list_t *l, int appendFlag)
 item_t *listGetItem(list_t *l, char *s)
 {
     item_t *p;
-    int i, x;
+    int i;
+    int x;
     
 #ifdef	PROC_TRACE
 #ifdef	PROC_TRACE_SWITCH
@@ -227,7 +229,7 @@ item_t *listGetItem(list_t *l, char *s)
     }
 #endif	/* PROC_TRACE_SWITCH */
 #endif	/* PROC_TRACE */
-    /* */
+
     listValidate(l, YES);	/* assume/setup for an 'add' */
     if (s == NULL_STR) {
 	Assert(NO, "listGetItem: Null string to insert!");

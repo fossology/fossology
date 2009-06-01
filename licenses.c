@@ -771,7 +771,6 @@ void licenseScan(list_t *l)
      * At this point, we don't need either the raw-source directory or the
      * unpacked results anymore, so get rid of 'em.
      */
-    removeDir(RAW_DIR);
     memFree((char *) scores, "scores table");
     return;
 }
@@ -807,12 +806,7 @@ static void noLicenseFound(int isPackage)
     traceFunc("== noLicenseFound(%d)\n", isPackage);
 #endif	/* PROC_TRACE */
 
-    /*
-      CDB - Extraneous, because no way for FL_TESTPKG to ever be set.
-    */
-    if (gl.flags & FL_TESTPKG) {
-	(void) sprintf(cur.compLic, "%s", WHO_KNOWS);
-    } else if (isPackage && cur.isRpm) {
+    if (isPackage && cur.isRpm) {
 	(void) sprintf(cur.compLic, "%s (RPM PkgHdr: %s)", LS_NOSUM,
 		       cur.claimlic);
     } else if (isPackage) {
@@ -841,12 +835,11 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     int size;
     int highScore = scores->score;
     int fCnt;
-    int adj;
     int isML = 0;
     int isPS = 0;
     int offset;
     int idx;
-    char *cp;
+    char *fileName;
     char *textp;
     FILE *linkFp;
     FILE *scoreFp;
@@ -867,7 +860,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 #ifdef	DEBUG
     printf("saveLicenseData: %d candidates\n", nCand);
 #endif	/* DEBUG */
-    adj = strlen(RAW_DIR)+1;
 
     changeDir("..");
     /*
@@ -915,18 +907,12 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	 * have to as many directory entries to open each file... this works for
 	 * anything EXCEPT 'distribution files'.
 	 */
-	/*
-	  CDB - Need to review to see if we want to set the FL_DISTFILES
-	  flag. This is currently done by default in process.c.
-	*/
-	/* "cp" is the filename of the file we're scanning. */
-	cp = (gl.flags & FL_DISTFILES) ? scores[idx].fullpath :
-	    scores[idx].relpath-adj;
+	fileName =  scores[idx].fullpath;
 	if (optionIsSet(OPTS_DEBUG)) {
-	    printf("File name: %s\n", cp);
+	    printf("File name: %s\n", fileName);
 	}
-	if ((textp = mmapFile(cp)) == NULL_STR) {
-	    Fatal("Null mmapFile(), path=%s", cp);
+	if ((textp = mmapFile(fileName)) == NULL_STR) {
+	    Fatal("Null mmapFile(), path=%s", fileName);
 	}
 	size = (int) gl.stbuf.st_size;
 	/*
@@ -1033,10 +1019,10 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	 * Interesting - copyString(parseLicenses(args), MTAG_FILELIC)...
 	 * will randomly segfault on 32-bit Debian releases.  Split the calls.
 	 */
-	cp = parseLicenses(textp, size, &scores[idx], isML, isPS);
-	scores[idx].licenses = copyString(cp, MTAG_FILELIC);
+	fileName = parseLicenses(textp, size, &scores[idx], isML, isPS);
+	scores[idx].licenses = copyString(fileName, MTAG_FILELIC);
 #ifdef	QA_CHECKS
-	if (cp == NULL_STR) {
+	if (fileName == NULL_STR) {
 	    Assert(NO, "Expected non-null parseLicenses return!");
 	}
 	if (scores[idx].licenses == NULL_STR) {
@@ -1084,6 +1070,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 #ifdef	PHRASE_DEBUG
 	listDump(&gl.offList, NO);
 #endif	/* PHRASE_DEBUG */
+	listDump(&gl.offList, NO); /* CDB */
 	while ((p = listIterate(&gl.offList)) != 0) {
 	    listClear(p->buf, YES);
 	}
