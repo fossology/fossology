@@ -45,10 +45,18 @@ class LicenseTestModel:
     
     # smoothing parameter
     epsilon = 1.0/100000.0
+
+    def __init__(self, pos_files, neg_files, pr, lw, rw, smoothing):
+        self.pos_files = pos_files
+        self.neg_files = neg_files
+        self.pr = pr
+        self.lw = lw
+        self.rw = rw
+        self.smoothing = smoothing
     
     # this caclculates the probabilities used to classify license.
     # if ignore is True then text wrapped in <LICENSE_SECTION> is removed
-    def train_word_dict(files,ignore=True):
+    def train_word_dict(self,files,ignore=True):
         word_dict = {}
         word_matrix = {}
         D = float(len(files))
@@ -83,7 +91,7 @@ class LicenseTestModel:
     
         return (word_dict, word_matrix)
     
-    def reweight(file):
+    def reweight(self, file):
         text = open(file).read().decode('ascii','ignore')
         text = RE_LS.sub('',text)
         if len(text)==0:
@@ -105,7 +113,7 @@ class LicenseTestModel:
                         self.no_word_matrix[stems[i]][stems[i+1]] = self.yes_word_matrix.get(stems[i],{}).get(stems[i+1],0.0) + 0.01
         
     
-    def smooth_score(score):
+    def smooth_score(self,score):
         if len(score)==0:
             return []
         s = [v>0 for v in score]
@@ -129,7 +137,7 @@ class LicenseTestModel:
     
         return l
             
-    def test_file(file, ignore=True):
+    def test_file(self, file, ignore=True):
         text = open(file).read().decode('ascii','ignore')
         if ignore:
             text = RE_LS.sub('',text)
@@ -143,26 +151,19 @@ class LicenseTestModel:
         score = []
     
         for i in xrange(w):
-            ylp = math.log(pr)
-            nlp = math.log(1.0-pr)
-            for j in xrange(-rw+1,lw):
+            ylp = math.log(self.pr)
+            nlp = math.log(1.0-self.pr)
+            for j in xrange(-self.rw+1,self.lw):
                 if i+j >= 0 and i+j < w:
-                    ylp += math.log(self.yes_word_dict.get(stems[i+j],0.0)+self.epsilon)
-                    nlp += math.log(self.no_word_dict.get(stems[i+j],0.0)+self.epsilon)
+                    ylp += math.log(self.pos_word_dict.get(stems[i+j],0.0)+self.epsilon)
+                    nlp += math.log(self.neg_word_dict.get(stems[i+j],0.0)+self.epsilon)
                     if i+j+1<w:
-                        ylp += math.log(self.yes_word_matrix.get(stems[i+j],{}).get(stems[i+j+1],0.0)+self.epsilon)
-                        nlp += math.log(self.no_word_matrix.get(stems[i+j],{}).get(stems[i+j+1],0.0)+self.epsilon)
+                        ylp += math.log(self.pos_word_matrix.get(stems[i+j],{}).get(stems[i+j+1],0.0)+self.epsilon)
+                        nlp += math.log(self.neg_word_matrix.get(stems[i+j],{}).get(stems[i+j+1],0.0)+self.epsilon)
             score.append(ylp-nlp)
         return score
 
-    def train(self, pos_files, neg_files, pr, lw, rw, smoothing):
-        self.pos_files = pos_files
-        self.neg_files = neg_files
-        self.pr = pr
-        self.lw = lw
-        self.rw = rw
-        self.smoothing = smoothing
-
+    def train(self):
 
         # Calculate P(*|license)
         (self.pos_word_dict, self.pos_word_matrix) = self.train_word_dict(self.pos_files,False)
@@ -170,6 +171,36 @@ class LicenseTestModel:
         # Calculate P(*|non-license)
         (self.neg_word_dict, self.neg_word_matrix) = self.train_word_dict(self.neg_files)
         
-        if smoothing:
+        if self.smoothing:
             for file in self.neg_files:
                 model.reweight(file)
+
+    # methods for pickling the license test model
+    def __getstate__(self):
+        return (
+            self.pos_word_dict.copy(),
+            self.neg_word_dict.copy(),
+            self.pos_word_matrix.copy(),
+            self.neg_word_matrix.copy(),
+            self.lw,
+            self.rw,
+            self.pr,
+            self.smoothing,
+            self.pos_files[:],
+            self.neg_files[:],
+            self.epsilon,
+        )
+
+    def __setstate__(self, state):
+        self.pos_word_dict = state[0].copy()
+        self.neg_word_dict = state[1].copy()
+        self.pos_word_matrix = state[2].copy()
+        self.neg_word_matrix = state[3].copy()
+        self.lw = state[4]
+        self.rw = state[5]
+        self.pr = state[6]
+        self.smoothing = state[7]
+        self.pos_files = state[8][:]
+        self.neg_files = state[9][:]
+        self.epsilon = state[10]
+        

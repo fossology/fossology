@@ -65,157 +65,81 @@ timer.start()
 
 try: # wrap with a try block so if something bad happens we can stop the heartbeat thread.
 
-    # default paramerters
-    lw = 3        # left window
-    rw = 3        # right window
-    pr = 0.4      # probability of finding a license in a random window
-    smoothing = False
-    pos_files = 'pos.txt'
-    neg_files = 'neg.txt'
-    cache_file = 'test_license.cache'
-    
     # read params from somewhere.
     # assume that the file is something like key=value;\n
     param_text = open('license_test.conf').read()
     param_dict = dict(re.findall('(?P<key>.*)=(?P<value>.*);',param_text))
     
-    if (param_dict.get('lw',False)):
-        if int(param_dict['lw'])>0:
-            lw = int(param_dict['lw'])
-        else:
-            sys.stderr.write('ERROR: parameter [lw] was non integer or less than 1.\n')
-            sys.exit(-1)
-    
-    if (param_dict.get('rw',False)):
-        if int(param_dict['rw'])>0:
-            rw = int(param_dict['rw'])
-        else:
-            sys.stderr.write('ERROR: parameter [rw] was non integer or less than 1.\n')
-            sys.exit(-1)
-    
-    if (param_dict.get('pr',False)):
-        if float(param_dict['pr'])>0.0 and float(param_dict['pr'])<1.0:
-            pr = float(param_dict['pr'])
-        else:
-            sys.stderr.write('ERROR: parameter [pr] was non float or not in range (0,1).\n')
-            sys.exit(-1)
-    
-    if (param_dict.get('smoothing',False)):
-        if param_dict['smoothing'] != 'True' and param_dict['smoothing'] != 'False':
-            sys.stderr.write('ERROR: parameter [smoothing] was not True or False.\n')
-            sys.exit(-1)
-        else:
-            if param_dict['smoothing'] == 'True':
-                smoothing = True
-            else:
-                smoothing = False
-    
-    if (param_dict.get('pos_files',False)):
-        if os.path.isfile(param_dict['pos_files']):
-            pos_files = param_dict['pos_files']
-        else:
-            sys.stderr.write('ERROR: parameter [pos_files] is not a file.\n')
-            sys.exit(-1)
-    
-    if (param_dict.get('neg_files',False)):
-        if os.path.isfile(param_dict['neg_files']):
-            neg_files = param_dict['neg_files']
-        else:
-            sys.stderr.write('ERROR: parameter [neg_files] is not a file.\n')
-            sys.exit(-1)
-    
     if (param_dict.get('cache_file',False)):
         if os.path.isfile(param_dict['cache_file']):
             cache_file = param_dict['cache_file']
         else:
-            sys.stderr.write('ERROR: parameter [neg_files] is not a file.\n')
+            sys.stderr.write('ERROR: parameter [cache_file] does not exist.\n')
             sys.exit(-1)
-    
-    # initialize the dictionaries that will hold the stats about licenses and non-licenses
-    pos_word_dict = {}   # P(word|license)
-    neg_word_dict = {}    # P(word|non-license)
-    pos_word_matrix = {} # P(word_i,word_i+1|license)
-    neg_word_matrix = {}  # P(word_i,word_i+1|non-license)
-    
-    # Calculate P(*|license)
-    files = [line.strip() for line in open(pos_files)]
-    (pos_word_dict, pos_word_matrix) = model.train_word_dict(files,False)
-    
-    # Calculate P(*|non-license)
-    files = [line.strip() for line in open(neg_files)]
-    (neg_word_dict, neg_word_matrix) = model.train_word_dict(files)
-    
-    # smoothing makes the false negitive rate go down.
-    if smoothing:
-        for file in files:
-            model.reweight(file,pos_word_dict,pos_word_matrix,neg_word_dict,neg_word_matrix,pr,lw,rw)
-    
-    print 'Okay...' # we are ready for input    
+    else:
+        sys.stderr.write('ERROR: [cache_file] parameter was not provided.\n')
+        sys.exit(-1)
 
+    if (param_dict.get('db_conf', False)):
+        if os.path.isfile(param_dict['db_conf']):
+            db_conf = param_dict['db_conf']
+        else:
+            sys.stderr.write('ERROR: parameter [db_conf] does not exist.\n')
+            sys.exit(-1)
+    else:
+        sys.stderr.write('ERROR: [db_conf] parameter was not provided.\n')
+        sys.exit(-1)
+    
+    if (param_dict.get('version', False)):
+        version = param_dict['version']
+    else:
+        sys.stderr.write('ERROR: [version] parameter was not provided.\n')
+        sys.exit(-1)
+
+    # load the cached model
+    lt_model = pickle.load(open(cache_file))
 
     # db connection
     connection = None
-    DB_conf = {}
-    # read and parse the Db.conf file so know how to connect to the database.
-    # we are expecting a command like """conf=Db.conf;\n""". If we dont get this then we print an error and continue reading stdin for a command of that sort
+    DB_conf = dict(re.findall('(?P<key>.*)=(?P<value>.*);',open(db_conf).read()))
+    try:
+       	connection = psycopg.connect("dbname='%s' user='%s' host='%s' password='%s'" % (DB_conf['dbname'],DB_conf['user'],DB_conf['host'],DB_conf['password']))
+    except:
+        sys.stderr.write('ERROR: Could not connect to database.\n')
+        sys.exit(-1)
+
+    # TODO: add code for getting the agents id
+    
+    print 'Okay...' # we are ready for input    
+    
+    # this is were we read stdin for files to test. We read commands from the
+    # command line in this format, """primary_ky, file_path\n""". If we dont get that then we continue to look for it from stdin.
     line = sys.stdin.readline().strip()
     while line:
         if line.strip() == 'quit':
             timer.cancel()
             sys.exit(0)
-        if not re.findall('(?P<key>.*)=(?P<value>.*);',line):
-            sys.stderr.write('ERROR: unknown command: %s' % line)
-            continue
-        (key, value) = re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]
-    
-        if key == 'conf':
-            if os.path.isfile(value):
-                try:
-                    DB_conf = dict(re.findall('(?P<key>.*)=(?P<value>.*);',open(value).read()))
-    
-                except:
-                    sys.stderr.write('ERROR: conf=%s; connot open %s.\n' % (value,value))
-                    sys.exit(-1)
-                try:
-                	connection = psycopg.connect("dbname='%s' user='%s' host='%s' password='%s'" % (DB_conf['dbname'],DB_conf['user'],DB_conf['host'],DB_conf['password']))
-                	break
-                except:
-                    sys.stderr.write('ERROR: Could not connect to database.\n')
-                    sys.exit(-1)
-    
-            else:
-                sys.stderr.write('ERROR: conf=%s; %s is not a file.\n' % (value,value))
-                sys.exit(-1)
-        else:
-            sys.stderr.write('ERROR: looking for conf=configure file path; found %s=%s;\n')
-        line = sys.stdin.readline().strip()
-    
-    # this is were we read stdin for files to test. We read commands from the command line in this format, """file=/media/disk/somefolder/file.txt;""". If we dont get that then we continue to look for it from stdin.
-    line = sys.stdin.readline().strip()
-    while line:
-        if line.strip() == 'quit':
-            timer.cancel()
-            sys.exit(0)
-        if not re.findall('(?P<key>.*)=(?P<value>.*);',line):
+        if not re.findall('(?P<key>.*), (?P<path>.*)\n',line):
     	    sys.stderr.write('ERROR: unknown command: %s' % line)
+            line = sys.stdin.readline().strip()
     	    continue
-        (key, value) = re.findall('(?P<key>.*)=(?P<value>.*);',line)[0]
-        if key == 'file':
-            # set file to the absolute path to the location of the file we want to
-            # test.
-            file = os.popen2('/usr/local/lib/fossology/reppath files %s' % value)[1].read().strip()
-            score = model.test_file(file,pos_word_dict,pos_word_matrix,neg_word_dict,neg_word_matrix,pr,lw,rw)
-            l = model.smooth_score(score)
+        (key, path) = re.findall('(?P<key>.*), (?P<path>.*)\n',line)[0]
+        if os.path.isfile(path):
+            score = lt_model.test_file(path)
+            l = lt_model.smooth_score(score)
             is_license = sum(l)>0
-            print "%s: %s" % (is_license,file)
+            print "%s: %s" % (is_license,path)
     
             # write our info into the database...
             cursor = connection.cursor()
             cursor.execute('''SELECT id FROM temp''')
             rows = cursor.fetchall()
             print rows[-1]
+        else:
+            sys.stderr('ERROR: "%s" does not exist.' % path)
+
         line = sys.stdin.readline().strip()
 
 except:
     timer.cancel()
-    raise   
+    raise 
