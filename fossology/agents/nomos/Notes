@@ -41,6 +41,9 @@ refinement (CDB == my initials).
 To Do's
 -------
 
+- Change all trace calls at beginning of functions to use traceFunc()
+  (defined in util.c)
+ 
 - Either add a command-line option to set gl.ptswitch or remove all the
   PROC_TRACE_SWITCH #ifdefs
 
@@ -52,6 +55,8 @@ To Do's
 - Remove all HP_INTERNAL and CUSTOMER_VERSION references.
 
 - Check and remove all unused field of the gl global variable structure.
+
+- Migrate to standard FOSSology makefile structure and system.
 
 
 

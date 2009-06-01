@@ -152,29 +152,20 @@ void processRawSource()
 
   CDB - This really isn't a list, there should only be a single file in
   regfList. 
-
-  CDB - look into getting rid of use of RAW_DIR
-
- */
+*/
 void processRegularFiles()
 {
 #ifdef  PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== processRegularFiles()\n");
+    traceFunc("== processRegularFiles()\n");
 #endif  /* PROC_TRACE */
     
-    gl.flags = FL_DISTFILES;
-    /* CDB - These are implicit now??
-       makePath(pathname);
-       changeDir(pathname);
-    */
+#ifdef notdef
     if (isDIR(RAW_DIR)) {	/* temp-unpack dir exists? */
 	removeDir(RAW_DIR);	/* clean up */
     }
     makeDir(RAW_DIR);
     changeDir(RAW_DIR);
+#endif notdef
     (void) strcpy(cur.ptype, "***");
     (void) sprintf(cur.basename, "%s-misc-files", gl.prodName);
     (void) sprintf(cur.pathname, "%s/(Various)", gl.target);
