@@ -46,7 +46,6 @@
 #include "DMalloc.h"
 #endif	/* MEMORY_TRACING */
 
-#define	CONVERT_PS
 #define	PRECHECK
 #define	GPLV2_BEATS_GPLV3
 #define	SAVE_UNCLASSIFIED_LICENSES
@@ -66,11 +65,8 @@
 #define	OPTS_TRACE_SWITCH	0x2
 
 /*
-  CDB - What do each of these mean?
+  Flags for program control
 */
-#define	FL_DISTFILES	0x4
-#define	FL_TESTPKG	0x8
-#define	FL_HUGEOK	0x10
 #define	FL_SAVEBASE	0x20
 #define	FL_FRAGMENT	0x40
 #define	FL_SHOWMATCH	0x80
@@ -81,7 +77,6 @@
  */
 #define	FILE_FOUND	"Found.txt"
 #define	FILE_SCORES	"_scores"
-#define	RAW_DIR		"raw"
 
 
 /* Symbolic Boolean values */
@@ -115,9 +110,7 @@
 /*
  * Miscellaneous strings used in various modules
  */
-#define	DEVNULL		"/dev/null"
 #define STR_NOTPKG      "None (not an rpm-format package)"
-#define	WHO_KNOWS	"undeterminable"
 
 /*
  * License-scanning limits
@@ -157,8 +150,9 @@
 #define	IS_HUGE(x)	(x >= gl.blkUpperLimit)
 
 
+
 #define	NOMOS_TEMP	"/tmp/nomos.tempdir"
-#define	NOMOS_TLOCK	"/tmp/nomos.tempdir/.lock.tmp,"
+#define	NOMOS_TLOCK	"/tmp/nomos.tempdir/.lock.tmp," /* CDB, This goes away. */
 
 
 /*
@@ -175,8 +169,8 @@ struct mm_cache {
 
 /*
   CDB - This is kind of lame, the way it uses the same fields for
-  different meanings. Should work out using unions instead #defines
-  for implementing this.
+  different meanings. If we had objects, we could subclass. It works
+  okay, but is just a PITA for debugging.
 */
 struct listitem {
     /* 
@@ -236,40 +230,12 @@ struct licenseSpec {
 };
 typedef struct licenseSpec licSpec_t;
 
-#ifdef notdef
-/*
-  CDB - Will probably want to get rid of some of these fields.
-*/
-struct curFile {
-    char pathname[myBUFSIZ]; 
-    char claimlic[myBUFSIZ]; /* CDB - doubtful */
-    char cachelic[myBUFSIZ];
-    char compLic[myBUFSIZ]; 
-    char briefLic[myBUFSIZ]; 
-    char url[256]; 
-    char dosname[256];
-    char basename[128]; 
-    char name[128]; 
-    char version[128]; 
-    char source[128]; 
-    char srcname[128];
-    char srcvers[128]; 
-    char reportname[128]; 
-    char vendor[32]; 
-    char arch[16]; 
-    char format[16];
-    char ptypec[8]; 
-    /*     char debEpoch[8]; CDB */
-    char md5sum[33];
-    int isSource; 
-    int isRpm;
-    int noSrc;
-    int nLines;
-    int nWords;
-    int bucketType;
-};
-#endif /* notdef */
 
+/*
+  CDB - Commenting to note which are true globals and which we will need on
+  a per-file basis. Fields followed by a comment of G are true globals. 
+  Otherwise, assume we need to re-initialize for each new file.
+*/
 struct globals {
     char initwd[myBUFSIZ];
     char cwd[myBUFSIZ]; 
@@ -318,7 +284,7 @@ struct globals {
 
 /*
   CDB - We don't really have a current package anymore.
-  Can we get rid of this ??
+  Would like to change to curFile for the sake of consistency.
 */
 struct curPkg {
     char pathname[myBUFSIZ];
@@ -380,12 +346,6 @@ struct scanResults {
     size_t nameOffset;
 };
 typedef	struct scanResults scanres_t;
-
-struct fileHandler {
-    int index, (*f)();
-    char *suffix;
-};
-typedef struct fileHandler fileHandler_t;
 
 /*
  * List-based memory tags
