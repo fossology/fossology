@@ -1,7 +1,7 @@
 # FOSSology Makefile - projects/adam/licens_test
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
-REV=`svnversion -nc ${PROJECT_DIR} | sed -e 's/^[^:]*://;s/[A-Za-z]//'`
+REV=`svnversion -nc | sed -e 's/^[^:]*://;s/[A-Za-z]//'`
 
 TOP=../../../fossology
 VARS=$(TOP)/Makefile.conf
@@ -13,9 +13,9 @@ CACHE=license_test.cache
 all: $(CONF) $(CACHE)
 
 $(CONF): $(CACHE)
-	echo $(SYSCONFDIR)/$(PROJECT)/Db.conf > $(CONF)
-	echo $(CACHE) >> $(CONF)
-	echo $(REV) >> $(CONF)
+	echo db_conf=$(SYSCONFDIR)/$(PROJECT)/Db.conf\; > $(CONF)
+	echo cache_file=$(CACHE)\; >> $(CONF)
+	echo version=$(REV)\; >> $(CONF)
 
 $(CACHE): license_test_model.py pos.txt neg.txt license_test.py license_test_agent.py
 	python license_test.py -p pos.txt -n neg.txt --cache $(CACHE)
