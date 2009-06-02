@@ -117,6 +117,9 @@ else:
         pickle.dump(lt_model,open(options.cache,'w'))
 
 for file in args:
-    is_license = lt_model.test_file(file)
+    text = open(file).read().decode('ascii','ignore')
+    is_license, license_offsets = lt_model.test_text(text)
 
     print "%s: %s" % (is_license,file)
+    for i in range(len(license_offsets)):
+        print "\t[%d, %d:%d] %s" % (i,license_offsets[i][0], license_offsets[i][1], text[license_offsets[i][0]:license_offsets[i][1]])
