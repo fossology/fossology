@@ -54,6 +54,29 @@ def stemmed_words(text):
     stems = [ENG_STEM.stemWord(w.lower()) for w in words if not w.lower() in STOPWORDS]
     return stems
 
+def stemmed_words_with_offsets(text):
+    tokens = RE_TOKENS.findall(text)
+    n = len(tokens)
+    starts = []
+    ends = []
+    offsets = []
+    stems = []
+    for i in range(n):
+        if i == 0:
+            starts.append(0)
+            ends.append(len(tokens[0]))
+        elif i == n-1:
+            starts.append(len(tokens[i-1])+starts[i-1])
+            ends.append(n)
+        else:
+            starts.append(len(tokens[i-1])+starts[i-1])
+            ends.append(len(tokens[i])+ends[i-1])
+
+        if not None == RE_WORD.match(tokens[i]) and not tokens[i].lower() in STOPWORDS:
+            stems.append(ENG_STEM.stemWord(tokens[i].lower()))
+            offsets.append((starts[i],ends[i]))
+    return stems, offsets
+
 def features(text):
     stuff = RE_TOKENS.findall(text)
     n = len(stuff)
