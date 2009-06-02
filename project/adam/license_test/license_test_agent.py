@@ -158,17 +158,20 @@ try: # wrap with a try block so if something bad happens we can stop the heartbe
     	    continue
         (pfile_fk, path) = re.findall('(?P<key>.*), (?P<path>.*)',line)[0]
         if os.path.isfile(path):
-            is_license = lt_model.test_file(path)
+            text = open(path).read().decode('ascii','ignore')
+            is_license, license_offsets = lt_model.test_file(text)
             print "%s: %s" % (is_license,path)
     
             # write our info into the database...
             cursor = connection.cursor()
             if is_license:
-                cursor.execute('''INSERT INTO license_test (agent_fk, pfile_fk, lic_startbyte, lic_endbyte) VALUES (%s,%s,0,0);''' % (agent_fk, pfile_fk))
+                for i in range(len(license_offsets)):
+                    cursor.execute('''INSERT INTO license_test (agent_fk, pfile_fk, lic_startbyte, lic_endbyte) VALUES (%d,%d,%d,%d);''' % (agent_fk, pfile_fk, license_offsets[i][0], license_offsets[i][1]))
+                    connection.commit()
             else:
-                cursor.execute('''INSERT INTO license_test (agent_fk, pfile_fk, lic_startbyte, lic_endbyte) VALUES (%s,%s,NULL,NULL);''' % (agent_fk, pfile_fk))
+                cursor.execute('''INSERT INTO license_test (agent_fk, pfile_fk, lic_startbyte, lic_endbyte) VALUES (%d,%d,NULL,NULL);''' % (agent_fk, pfile_fk))
+                connection.commit()
 
-            connection.commit()
             items += 1
             Heartbeat(items)
         else:

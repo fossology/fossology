@@ -137,15 +137,14 @@ class LicenseTestModel:
     
         return l
             
-    def test_file(self, file, ignore=True):
-        text = open(file).read().decode('ascii','ignore')
+    def test_text(self, text, ignore=True):
         if ignore:
             text = RE_LS.sub('',text)
         else:
             RE_LS.sub(r'\g<text>',text)
         if len(text)==0:
             return []
-        stems = parser.stemmed_words(text)
+        stems, offsets = parser.stemmed_words_with_offsets(text)
         w = len(stems)
         
         score = []
@@ -163,9 +162,19 @@ class LicenseTestModel:
             score.append(ylp-nlp)
 
         l = self.smooth_score(score)
+        license_offsets = []
         is_license = sum(l)>0
+        if is_license:
+            window = [-1,-1]
+            for i in range(len(l)):
+                if window[0]==-1 and l[i]==True:
+                    window[0] = offsets[i][0]
+                if window[0]!=-1 and l[i]==False:
+                    window[1] = offsets[i][0]-1
+                    license_offsets.append(window[:])
+                    window = [-1,-1]
 
-        return is_license
+        return is_license, license_offsets
 
     def train(self):
 
