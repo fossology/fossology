@@ -161,7 +161,11 @@ class LicenseTestModel:
                         ylp += math.log(self.pos_word_matrix.get(stems[i+j],{}).get(stems[i+j+1],0.0)+self.epsilon)
                         nlp += math.log(self.neg_word_matrix.get(stems[i+j],{}).get(stems[i+j+1],0.0)+self.epsilon)
             score.append(ylp-nlp)
-        return score
+
+        l = self.smooth_score(score)
+        is_license = sum(l)>0
+
+        return is_license
 
     def train(self):
 

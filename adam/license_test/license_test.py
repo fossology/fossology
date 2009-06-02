@@ -116,11 +116,7 @@ else:
     if options.cache:
         pickle.dump(lt_model,open(options.cache,'w'))
 
-trues = 0
 for file in args:
-    score = lt_model.test_file(file)
-    l = lt_model.smooth_score(score)
+    is_license = lt_model.test_file(file)
 
-    print "%s: %s" % (sum(l)>0,file)
-    if sum(l)>0:
-        trues += 1
+    print "%s: %s" % (is_license,file)

@@ -158,9 +158,7 @@ try: # wrap with a try block so if something bad happens we can stop the heartbe
     	    continue
         (pfile_fk, path) = re.findall('(?P<key>.*), (?P<path>.*)',line)[0]
         if os.path.isfile(path):
-            score = lt_model.test_file(path)
-            l = lt_model.smooth_score(score)
-            is_license = sum(l)>0
+            is_license = lt_model.test_file(path)
             print "%s: %s" % (is_license,path)
     
             # write our info into the database...
