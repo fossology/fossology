@@ -1,9 +1,9 @@
 # FOSSology Makefile - projects/adam/licens_test
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
-REV=`svnversion -n`
+REV=`svnversion -nc ${PROJECT_DIR} | sed -e 's/^[^:]*://;s/[A-Za-z]//'`
 
-TOP=../..
+TOP=../../../fossology
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
