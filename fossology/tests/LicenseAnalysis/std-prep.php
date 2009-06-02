@@ -24,7 +24,6 @@
  * is easily uploaded by a consumer, (e.g. LicenseRegression test).
  *
  * File format should be <filepath>: <results>, results can be comma seperated
- * results.
  *
  * created: May 28, 2009
  * @version "$Id:  $"

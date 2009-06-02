@@ -30,6 +30,7 @@
  *  2.1 Create master compare!
  *
  *  3. Create a report results routine.
+ *  4. document input format.
  *
  * created: May 21, 2009
  * @version "$Id: $"
@@ -149,7 +150,7 @@ function compareResults($result1, $Master){
     return(array('Error' => 'Must supply an array as a parameter'));
   }
   if(!is_array($Master)) {
-    return(array('Error' => 'Must supply an array as a parameter'));
+    return(array('Error' => 'Change this....:Must supply an array as a parameter'));
   }
   $diffs = array();
   $result = array();
@@ -196,12 +197,14 @@ function compareResults($result1, $Master){
               $result['pass'] = $res1[$i];
             }
             else {
-              $result['fail'] = $res1[$i];
+              $fail[] = $res1[$i];
+              //$result['fail'] = $res1[$i];
             }
           }
+          $result['fail'] = $fail;
         }
       }
-      else {   // res1 a string
+      else {   // res1 a string, master is a list (array).
         for($r2=0; $r2< count($res2); $r2++) {
           $result["standard$r2"] = $res2[$r2];
           print "res1-String/r2Array:$file:res1i:$res1,res2:$res2\n";
@@ -229,7 +232,7 @@ function compareResults($result1, $Master){
 /**
  * foLicenseAnalyis
  *
- * @param string or array $license a single file to analize or an array or file
+ * @param string or array $license a single file to analize or an array of file
  * paths.
  * @param string agent to use for analysis one of: bsam, chanomos or nomos
  *
@@ -237,7 +240,7 @@ function compareResults($result1, $Master){
  */
 function foLicenseAnalyis($license,$agent) {
 
-  $chanNomos = '../../agents/nomos/nomos';      // use this path for now
+  $chaNomos = '../../agents/nomos/nomos';      // use this path for now
   $bsam = array();
   switch($agent) {
     case 'bsam':
@@ -249,8 +252,7 @@ function foLicenseAnalyis($license,$agent) {
       break;
     case 'chanomos':
       print "Running chanomos analysis\n";
-      $cmd = "../../agents/nomos/nomos ";
-      return(_runAnalysis($license,$cmd));
+      return(_runAnalysis($license,$chaNomos));
       break;
     case 'nomos':
       // either use the OSRB one or one installed
@@ -299,6 +301,7 @@ function _runAnalysis($licenseList,$cmd){
  * an array, or an empty array on error.
  */
 function prepResults($result,$agent='nomos') {
+  /* fix this bug... it's can't be NOMOS....*/
 
   $agent = strtolower($agent);
   $all       = array();
