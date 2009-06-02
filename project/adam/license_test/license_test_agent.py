@@ -52,16 +52,32 @@ from optparse import OptionParser
 
 # set up heartbeat functionality.
 timer = None
+HeartbeatValue = -1
+LastHeartbeatValue = -1
+HBItemsProcessed = 0
 
-# show heartbeat every 60 secs
-def heartbeat():
-    print "Heartbeat"
+# Heartbeat(): Update heartbeat counter and items processed
+def Heartbeat(NewItemsProcessed):
+    global HeartbeatValue
+    global HBItemsProcessed
+    HeartbeatValue += 1
+    HBItemsProcessed = NewItemsProcessed
+
+# ShowHeartbeat(): Given an alarm signal, display a heartbeat.
+def ShowHeartbeat():
     global timer
+    global HeartbeatValue
+    global LastHeartbeatValue
+    global HBItemsProcessed
+    if ((HeartbeatValue == -1) or (HeartbeatValue != LastHeartbeatValue)):
+        print "Items Processed %ld" % HBItemsProcessed
+        LastHeartbeatValue = HeartbeatValue
+        print "Heartbeat"
     timer.cancel()
-    timer = threading.Timer(60,heartbeat)
+    timer = threading.Timer(60,ShowHeartbeat)
     timer.start()
 
-timer = threading.Timer(60,heartbeat)
+timer = threading.Timer(60,ShowHeartbeat)
 timer.start()
 
 try: # wrap with a try block so if something bad happens we can stop the heartbeat thread.
@@ -130,6 +146,7 @@ try: # wrap with a try block so if something bad happens we can stop the heartbe
     
     # this is were we read stdin for files to test. We read commands from the
     # command line in this format, """primary_ky, file_path\n""". If we dont get that then we continue to look for it from stdin.
+    items = 0
     line = sys.stdin.readline().strip()
     while line:
         if line.strip() == 'quit':
@@ -154,6 +171,8 @@ try: # wrap with a try block so if something bad happens we can stop the heartbe
                 cursor.execute('''INSERT INTO license_test (agent_fk, pfile_fk, lic_startbyte, lic_endbyte) VALUES (%s,%s,NULL,NULL);''' % (agent_fk, pfile_fk))
 
             connection.commit()
+            items += 1
+            Heartbeat(items)
         else:
             sys.stderr('ERROR: "%s" does not exist.' % path)
 
