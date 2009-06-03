@@ -1,3 +1,11 @@
-Date: 2004-12-01
+Date:
 URL: http://fedoraproject.org/wiki/Licensing/WTFPL
-Alias: Do What The F*ck You Want To Public License
+shortname: WTFPL
+fullname: Do What The F*ck You Want To Public License
+OSIapproved: No
+FSFfree: Yes
+GPLv2compatible: Yes
+GPLv3compatible: Yes
+copyleft: No
+Fedora: Good
+notes:
