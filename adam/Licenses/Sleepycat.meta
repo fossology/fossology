@@ -1,3 +1,11 @@
-Date: 2007-11-15 08:54:37
-URL: http://www.gnu.org/licenses/info/Sleepycat.html
-Alias: BSD
+Date:
+URL: http://opensource.org/licenses/sleepycat.php
+shortname: Sleepycat
+fullname: Sleepycat
+OSIapproved: Yes
+FSFfree: Yes
+GPLv2compatible: Yes
+GPLv3compatible: Yes
+copyleft: 
+Fedora: Good
+notes:
