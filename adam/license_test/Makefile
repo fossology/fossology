@@ -14,6 +14,11 @@ include $(VARS)
 CONF=license_test.conf
 CACHE=license_test.cache
 
+TEMP := $(shell find ../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt)
+TEMP := $(shell find ../Training/License_Test/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > neg.txt)
+TEMP := $(shell python ../date_files.py pos.txt pos.txt)
+TEMP := $(shell python ../date_files.py neg.txt neg.txt)
+
 all: $(CONF) $(CACHE)
 
 $(CONF): $(CACHE)
@@ -27,16 +32,14 @@ $(CACHE): license_test_model.py license_test.py license_test_agent.py pos.txt ne
 
 pos.txt:
 	find ../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt
-	python ../date_files.py pos.txt pos.txt
-
+	
 neg.txt:
 	find ../Training/License_Test/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > neg.txt
-	python ../date_files.py neg.txt neg.txt
-
+	
 test: all
 	@echo "*** No tests available for license_test ***"
 
 clean:
 	rm -f $(CACHE) $(CONF) pos.txt neg.txt
 
-.PHONY: all clean test pos.txt neg.txt
+.PHONY: all clean test
