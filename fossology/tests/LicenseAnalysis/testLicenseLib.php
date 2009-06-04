@@ -14,16 +14,164 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 /**
-*
-* testLicenseLib
-*
-* common routines for use by license regression tests
-*
-* created: May 29, 2009
-* @version "$Id:  $"
-*/
+ *
+ * testLicenseLib
+ *
+ * common routines for use by license regression tests
+ *
+ * created: May 29, 2009
+ * @version "$Id:  $"
+ */
+
+error_reporting(-1);
+/**
+ * compare2Master
+ *
+ * Compare license results to a master result list.
+ *
+ * @param array $results the license results to compare
+ * @param array $master the license Master results to compare to
+ *
+ * format for the input arrays is:
+ * filename is the key
+ * results is an array of one or more comma seperate results
+ *
+ * @return array $results an assoicative array of results, on error
+ * the first key will be 'Error' and the value will a string (the be error message).
+ *
+ */
+function compare2Master($results,$Master) {
+
+  error_reporting(-1);    // all errors
+
+  if(!is_array($results)) {
+    return(array('Error' => 'Must supply an array of arrays of results'));
+  }
+  if(!is_array($Master)) {
+    return(array('Error' => 'No Master Array supplied!'));
+  }
+  $pass        = array();
+  $fail        = array();
+  $comparisons = array();
+  $standard    = array();
+  foreach($results as $file => $testResults) {
+    //print "processing $file\n";
+    $masterResults = $Master[$file];
+    array_walk(&$testResults, 'trim_value');
+    array_walk(&$masterResults, 'trim_value');
+    print "TR is:\n";print_r($testResults) . "\n";
+    //print "MR is:\n";print_r($masterResults) . "\n";
+    //print "file is:$file\n";
+    //$compareSize = count($testResults);
+    //$masterSize = count($masterResults);
+    /* Array diff is the biggest pos that I have ever seen!  Useless*/
+    $allDiffs = array_diff($testResults,$masterResults);
+    //$c = count($allDiffs); print "allDiffs COUNT is:$c\n";
+    //print "allDiffs are:\n";print_r($allDiffs). "\n";
+    if(count($allDiffs) == 0) {
+      //print "allDiffs is ZERO\n";
+      $pass = _savePass($testResults);
+    }
+    else {
+      foreach($allDiffs as $diff) {
+        //print "diff is:$diff\n----------------\n";
+        $fail[] = $diff;
+
+        // remove all diffs from test results to get passes
+        $index = array_search($diff,$testResults);
+        print "index is:$index\n";
+        $testResults = array_splice($testResults,$index,$index);
+      }
+      $pass = _savePass($testResults);
+      $comparisons[$file] = $masterResults;
+      array_push($comparisons[$file],$pass);
+      array_push($comparisons[$file],$fail);
+      $allDiffs = array();
+      $pass = array();
+      $fail = array();
+    }
+    /*
+     if($compareSize === $masterSize) {
+     for($i=0; $i< $compareSize; $i++) {
+     //print "= does {$testResults[$i]} == {$masterResults[$i]}?\n";
+     if(trim($testResults[$i]) == trim($masterResults[$i])) {
+     $pass[] = $testResults[$i];
+     break;
+     }
+     else {
+     $fail[] = $testResults[$i];
+     }
+     }
+     /* gather up the master results for reporting
+     $comparisons[$file] = _saveStd($masterResults);
+     array_push($comparisons[$file],$pass);
+     array_push($comparisons[$file],$fail);
+     $pass = array();
+     $fail = array();
+     continue;
+     }
+     if($compareSize == 1) {
+     for($m=0; $m < $masterSize; $m++) {
+     //print "1 does {$testResults[0]} == {$masterResults[$m]}?\n";
+     if(trim($testResults[0]) == trim($masterResults[$m])) {
+     $pass[] = $testResults[0];
+     break;
+     }
+     else {
+     $fail[] = $testResults[0];
+     }
+     }
+     /* gather up the master results for reporting
+     $comparisons[$file] = _saveStd($masterResults);
+     array_push($comparisons[$file],$pass);
+     array_push($comparisons[$file],$fail);
+     $pass = array();
+     $fail = array();
+     continue;
+     }
+     for($i=0; $i< $compareSize; $i++) {
+     for($m=0; $m < $masterSize; $m++) {
+     //print ">1 does {$testResults[$i]} == {$masterResults[$m]}?\n";
+     if(trim($testResults[$i]) == trim($masterResults[$m])) {
+     $pass[] = $testResults[$i];
+     break;
+     }
+     else {
+     $fail[] = $testResults[$i];
+     }
+     }
+     $comparisons[$file] = _saveStd($masterResults);
+     }
+     array_push($comparisons[$file],$pass);
+     array_push($comparisons[$file],$fail);
+     $pass = array();
+     $fail = array();
+     */
+  }
+  return($comparisons);
+} // compare2Master
+
+function trim_value(&$value) {
+  $value = trim($value);
+}
+
+function _savePass($testResults) {
+
+  if(!is_array($testResults)) {
+    return(array());
+  }
+  $pass = array();
+  $size = count($testResults);
+  if($size == 0) {
+    return(array());
+  }
+  for($m=0; $m < $size; $m++) {
+    $pass[] = $testResults[$m];
+  }
+  return($pass);
+}
 
 /**
  * filterFossologyResults
@@ -165,4 +313,175 @@ function filterNomosResults($resultString) {
 
   return($resultString);
 } //fileterNomosResults
+
+/**
+ * foLicenseAnalyis
+ *
+ * @param string or array $license a single file to analize or an array of file
+ * paths.
+ * @param string agent to use for analysis one of: bsam, chanomos or nomos
+ *
+ * @return mixed, either a string or array, empty string or array on error
+ */
+function foLicenseAnalyis($license,$agent) {
+
+  $chaNomos = '../../agents/nomos/nomos';      // use this path for now
+  $bsam = array();
+  switch($agent) {
+    case 'bsam':
+      $cmd = "/usr/bin/fosslic ";
+      //      return(_runAnalysis($license,$cmd));
+      print "Running bsam analysis\n";
+      //$bsam = _runAnalysis($license,$cmd);
+      return(_runAnalysis($license,$cmd));
+      break;
+    case 'chanomos':
+      print "Running chanomos analysis\n";
+      return(_runAnalysis($license,$chaNomos));
+      break;
+    case 'nomos':
+      // either use the OSRB one or one installed
+      return(NULL);
+      break;
+    default:
+      return(NULL);
+  }
+} //foLicenseAnalysis
+
+/**
+ * _runAnalysis
+ *
+ * Run the license analysis
+ * @param mixed $licenseList as string or array of filepaths to licenses to
+ * analyze.
+ * @param string $cmd the command to run (e.g. /usr/bin/fosslic).
+ * @return mixed, either string or array depending on the first parameter.
+ */
+function _runAnalysis($licenseList,$cmd){
+
+  $Fossology = array();
+  if(is_array($licenseList)) {
+    foreach($licenseList as $license){
+      $license = trim($license);
+      $last = exec("$cmd $license 2>&1", $result, $rtn);
+      $Fossology[basename($license)] = $last;
+    }
+    return($Fossology);
+  }
+  else {
+    $last = exec("$cmd $file 2>&1", $result, $rtn);
+    return($last);
+  }
+} // _runAnalysis
+
+/**
+ * loadMasterResults
+ *
+ * load the master license analysis results from a file, return an array of
+ * results.
+ *
+ * @param string $file optional file name of results file, if no file is passed in
+ * the default filename of 'OSRB-nomos-license-matches' is used.
+ *
+ * @return array $Master the results or FALSE on error
+ *
+ * The format for the associative array is:
+ *
+ * key is the filename of the test file, a space, then one or more results strings
+ * seperated by comma.
+ *
+ * for example: Master['somefile'] => result1
+ *              Master['otherfile'] => resutlt1,resutl2,resultn....
+ *
+ */
+function loadMasterResults($file=NULL){
+
+  /* load the results to compare against */
+
+  if(strlen($file)) {
+    $masterFile = $file;
+  }
+  else { // default file
+    $masterFile = 'OSRB-nomos-license-matches';
+  }
+
+  try {
+    $FD = @fopen($masterFile, 'r');
+  }
+  catch (Exception $e){
+    print "can't open master file $masterFile\n";
+    print $e->getMessage();
+    debug_print_backtrace();
+    return(FALSE);
+  }
+  while(($line = fgets($FD, 1024)) !== FALSE) {
+    list($file,$result) = explode(' ',$line);
+    $Results = explode(',',$result);
+    $Master[$file] = $Results;
+  }
+  //print "Master results are:\n";print_r($Master) . "\n";
+  return($Master);
+} // loadMasterResults
+
+/**
+ * saveResults
+ *
+ * save the license test results, passed in as an associative array of arrays
+ *
+ * @param string $fileName the filepath/name to save the results to
+ * @param array $results the array of results to save
+ *
+ * @return boolean: True on success, False on failure
+ *
+ */
+function saveResults($fileName,$results) {
+
+  if(!strlen($fileName)) return(FALSE);
+  if(empty($results)) return(FALSE);
+
+  try{
+    $Std = @fopen($fileName,'w');
+    if($Std === FALSE) {
+      throw new Exception("Cannot Save Results to file $fileName\n");
+    }
+  }
+  catch(Exception $e){
+    print "FATAL!" . $e->getMessage();
+    print $e->getMessage();
+    return(FALSE);
+  }
+
+  //foreach($results as $filename => $resultArray) {
+  foreach($results as $filename => $resultArray) {
+    print "RA is:\n";print_r($resultArray) . "\n";
+    $oneResult = "file-name=$filename\n";
+    //if($hm > 0) {
+    foreach($resultArray as $results) {
+      if(!is_array($results)) {
+        print "Non-Array: results are:$results\n";
+        $oneResult .= "Standard=$results\n";
+      }
+      if(is_array($results)) {
+        print "results(ARRAY) is:\n";print_r($results) . "\n";
+        foreach($results as $answer) {
+          print "answer is:$answer\n";
+          if(empty($answer)) {
+            print "answer is empty\n";
+            $oneResult .= "answer=None\n";
+            continue;
+          }
+          $oneResult .= "(Array)answer=$answer\n-----\n";
+          //print "answer is:$answer\n";
+        }
+      }
+      //print "(Non Array): results is:$results\n";
+    }
+    //}
+    //$many = fwrite($Std, "$file $resultString\n");
+    print "oneResult is =>$oneResult\n";
+    $oneResult = '';
+  }
+  fclose($Std);
+  return(TRUE);
+}
 ?>
