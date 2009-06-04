@@ -34,6 +34,7 @@ require_once('../commonTestFuncs.php');
 require_once('testLicenseLib.php');
 
 $ldir = '/home/fosstester/regression/license/eddy/GPL/GPL_v3';
+//$ldir = '/home/fosstester/regression/license/eddy/GPL';
 //$ldir = '/home/fosstester/regression/license/eddy';
 
 /* load the master results to compare against */
@@ -56,16 +57,7 @@ if(empty($foNomosRaw)) {
   exit(1);
 }
 print "foNomos results are:\n";print_r($foNomosRaw) . "\n";
-/*
- * cleanup for bsam results:
- * 0. Remove filepath as part of the results
- * 1. change ,\s to ,
- * 2. change spaces in words to _ (e.g. GPL v3 -> GPL_v3)
- * 3. remove -style
- * 4. remove ' around name
- */
 
-/* remove the filepath as part of the resutls */
 foreach($foNomosRaw as $file => $result) {
   $tList = trim($result);
   $list = filterNomosResults($tList);     // name filter

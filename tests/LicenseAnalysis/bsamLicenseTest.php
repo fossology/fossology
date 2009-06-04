@@ -89,7 +89,7 @@ print "Comparison results are:\n";print_r($Results) . "\n";
 /* store comparison results in a file */
 $saveFile = 'Bsam-Results.' . date('YMd');
 print "save file would be:$saveFile\n";
-
+/*
 if(saveResults($saveFile, $Results)){
   print "Bsam results generated and saved in file:\n$saveFile\n";
 }
@@ -100,4 +100,5 @@ else {
   }
   exit(1);
 }
+*/
 ?>
