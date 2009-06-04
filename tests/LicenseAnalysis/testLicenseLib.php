@@ -44,7 +44,7 @@ error_reporting(-1);
  */
 function compare2Master($results,$Master) {
 
-  error_reporting(-1);    // all errors
+//  error_reporting(-1);    // all errors
 
   if(!is_array($results)) {
     return(array('Error' => 'Must supply an array of arrays of results'));
@@ -55,21 +55,15 @@ function compare2Master($results,$Master) {
   $pass        = array();
   $fail        = array();
   $comparisons = array();
-  $standard    = array();
   foreach($results as $file => $testResults) {
-    //print "processing $file\n";
     $masterResults = $Master[$file];
     array_walk(&$testResults, 'trim_value');
     array_walk(&$masterResults, 'trim_value');
     //print "TR is:\n";print_r($testResults) . "\n";
     //print "MR is:\n";print_r($masterResults) . "\n";
     //print "file is:$file\n";
-    //$compareSize = count($testResults);
-    //$masterSize = count($masterResults);
     /* Array diff is the biggest pos that I have ever seen!  Useless*/
     $allDiffs = array_diff($testResults,$masterResults);
-    //$c = count($allDiffs); print "allDiffs COUNT is:$c\n";
-    //print "allDiffs are:\n";print_r($allDiffs). "\n";
     if(count($allDiffs) == 0) {
       //print "allDiffs is ZERO\n";
       $pass = array_unique($testResults);
@@ -81,7 +75,6 @@ function compare2Master($results,$Master) {
 
         // remove all diffs from test results to get passes
         $index = array_search($diff,$testResults);
-        //print "index is:$index\n";
         $sliced = array_splice($testResults,$index,1);
         //print "TR After is:\n";print_r($testResults) . "\n";
       }
@@ -93,85 +86,12 @@ function compare2Master($results,$Master) {
     $allDiffs = array();
     $pass = array();
     $fail = array();
-    /*
-     if($compareSize === $masterSize) {
-     for($i=0; $i< $compareSize; $i++) {
-     //print "= does {$testResults[$i]} == {$masterResults[$i]}?\n";
-     if(trim($testResults[$i]) == trim($masterResults[$i])) {
-     $pass[] = $testResults[$i];
-     break;
-     }
-     else {
-     $fail[] = $testResults[$i];
-     }
-     }
-     /* gather up the master results for reporting
-     $comparisons[$file] = _saveStd($masterResults);
-     array_push($comparisons[$file],$pass);
-     array_push($comparisons[$file],$fail);
-     $pass = array();
-     $fail = array();
-     continue;
-     }
-     if($compareSize == 1) {
-     for($m=0; $m < $masterSize; $m++) {
-     //print "1 does {$testResults[0]} == {$masterResults[$m]}?\n";
-     if(trim($testResults[0]) == trim($masterResults[$m])) {
-     $pass[] = $testResults[0];
-     break;
-     }
-     else {
-     $fail[] = $testResults[0];
-     }
-     }
-     /* gather up the master results for reporting
-     $comparisons[$file] = _saveStd($masterResults);
-     array_push($comparisons[$file],$pass);
-     array_push($comparisons[$file],$fail);
-     $pass = array();
-     $fail = array();
-     continue;
-     }
-     for($i=0; $i< $compareSize; $i++) {
-     for($m=0; $m < $masterSize; $m++) {
-     //print ">1 does {$testResults[$i]} == {$masterResults[$m]}?\n";
-     if(trim($testResults[$i]) == trim($masterResults[$m])) {
-     $pass[] = $testResults[$i];
-     break;
-     }
-     else {
-     $fail[] = $testResults[$i];
-     }
-     }
-     $comparisons[$file] = _saveStd($masterResults);
-     }
-     array_push($comparisons[$file],$pass);
-     array_push($comparisons[$file],$fail);
-     $pass = array();
-     $fail = array();
-     */
   }
   return($comparisons);
 } // compare2Master
 
 function trim_value(&$value) {
   $value = trim($value);
-}
-
-function _savePass($testResults) {
-
-  if(!is_array($testResults)) {
-    return(array());
-  }
-  $pass = array();
-  $size = count($testResults);
-  if($size == 0) {
-    return(array());
-  }
-  for($m=0; $m < $size; $m++) {
-    $pass[] = $testResults[$m];
-  }
-  return($pass);
 }
 
 /**
