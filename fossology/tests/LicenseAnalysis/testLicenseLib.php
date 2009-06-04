@@ -61,7 +61,7 @@ function compare2Master($results,$Master) {
     $masterResults = $Master[$file];
     array_walk(&$testResults, 'trim_value');
     array_walk(&$masterResults, 'trim_value');
-    print "TR is:\n";print_r($testResults) . "\n";
+    //print "TR is:\n";print_r($testResults) . "\n";
     //print "MR is:\n";print_r($masterResults) . "\n";
     //print "file is:$file\n";
     //$compareSize = count($testResults);
@@ -72,7 +72,7 @@ function compare2Master($results,$Master) {
     //print "allDiffs are:\n";print_r($allDiffs). "\n";
     if(count($allDiffs) == 0) {
       //print "allDiffs is ZERO\n";
-      $pass = _savePass($testResults);
+      $pass = array_unique($testResults);
     }
     else {
       foreach($allDiffs as $diff) {
@@ -81,17 +81,18 @@ function compare2Master($results,$Master) {
 
         // remove all diffs from test results to get passes
         $index = array_search($diff,$testResults);
-        print "index is:$index\n";
-        $testResults = array_splice($testResults,$index,$index);
+        //print "index is:$index\n";
+        $sliced = array_splice($testResults,$index,1);
+        //print "TR After is:\n";print_r($testResults) . "\n";
       }
-      $pass = _savePass($testResults);
-      $comparisons[$file] = $masterResults;
-      array_push($comparisons[$file],$pass);
-      array_push($comparisons[$file],$fail);
-      $allDiffs = array();
-      $pass = array();
-      $fail = array();
+      $pass = array_unique($testResults);
     }
+    $comparisons[$file] = $masterResults;
+    array_push($comparisons[$file],$pass);
+    array_push($comparisons[$file],$fail);
+    $allDiffs = array();
+    $pass = array();
+    $fail = array();
     /*
      if($compareSize === $masterSize) {
      for($i=0; $i< $compareSize; $i++) {
