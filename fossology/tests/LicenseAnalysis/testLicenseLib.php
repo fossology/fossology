@@ -26,6 +26,29 @@
  */
 
 error_reporting(-1);
+
+/**
+ * array_implode
+ *
+ *  used for imploding multiple arrays into 1 array.  The resulting array
+ *  can then be passed to join to produce a string.
+ *
+ *  Taken from the PHP site (mjong)
+ *
+ * @param $arrays the arrays to implode
+ * @param $target the array to implode into
+ * @return $target
+ */
+function array_implode($arrays, &$target = array()) {
+  foreach ($arrays as $item) {
+    if (is_array($item)) {
+      array_implode($item, $target);
+    } else {
+      $target[] = $item;
+    }
+  }
+  return $target;
+}
 /**
  * compare2Master
  *
@@ -44,7 +67,7 @@ error_reporting(-1);
  */
 function compare2Master($results,$Master) {
 
-//  error_reporting(-1);    // all errors
+  //  error_reporting(-1);    // all errors
 
   if(!is_array($results)) {
     return(array('Error' => 'Must supply an array of arrays of results'));
@@ -80,12 +103,19 @@ function compare2Master($results,$Master) {
       }
       $pass = array_unique($testResults);
     }
-    $comparisons[$file] = $masterResults;
-    array_push($comparisons[$file],$pass);
-    array_push($comparisons[$file],$fail);
+    /* find any misses */
+    $misses = array_diff($masterResults,$testResults);
+    $comparisons[$file]['standard'] = $masterResults;
+    $comparisons[$file]['pass'] = $pass;
+    $comparisons[$file]['fail'] = $fail;
+    $comparisons[$file]['missed'] = $misses;
+    //array_push($comparisons[$file],$pass);
+    //array_push($comparisons[$file],$fail);
+    //array_push($comparisons[$file],$misses);
     $allDiffs = array();
     $pass = array();
     $fail = array();
+    $misses = array();
   }
   return($comparisons);
 } // compare2Master
@@ -371,35 +401,48 @@ function saveResults($fileName,$results) {
     print $e->getMessage();
     return(FALSE);
   }
-
-  //foreach($results as $filename => $resultArray) {
   foreach($results as $filename => $resultArray) {
-    print "RA is:\n";print_r($resultArray) . "\n";
     $oneResult = "file-name=$filename\n";
-    //if($hm > 0) {
-    foreach($resultArray as $results) {
-      if(!is_array($results)) {
-        print "Non-Array: results are:$results\n";
-        $oneResult .= "Standard=$results\n";
-      }
+    foreach($resultArray as $keyWord => $results) {
       if(is_array($results)) {
-        print "results(ARRAY) is:\n";print_r($results) . "\n";
-        foreach($results as $answer) {
-          print "answer is:$answer\n";
-          if(empty($answer)) {
-            print "answer is empty\n";
-            $oneResult .= "answer=None\n";
-            continue;
-          }
-          $oneResult .= "(Array)answer=$answer\n-----\n";
-          //print "answer is:$answer\n";
+        switch($keyWord) {
+          case 'standard':
+            $oneResult .= "standard=";
+            foreach($results as $res){
+              $oneResult .= "$res,";
+            }
+            $oneResult = rtrim($oneResult,',');
+            $oneResult .= "\n";
+            break;
+          case 'pass':
+            $oneResult .= "pass=";
+            foreach($results as $res){
+              $oneResult .= "$res,";
+            }
+            $oneResult = rtrim($oneResult,',');
+            $oneResult .= "\n";
+            break;
+          case 'fail':
+            $oneResult .= "fail=";
+            foreach($results as $res){
+              $oneResult .= "$res,";
+            }
+            $oneResult = rtrim($oneResult,',');
+            $oneResult .= "\n";
+            break;
+          case 'missed':
+            $oneResult .= "missed=";
+            foreach($results as $res){
+              $oneResult .= "$res,";
+            }
+            $oneResult = rtrim($oneResult,',');
+            $oneResult .= "\n";
+            break;
         }
       }
-      //print "(Non Array): results is:$results\n";
     }
-    //}
-    //$many = fwrite($Std, "$file $resultString\n");
-    print "oneResult is =>$oneResult\n";
+    $many = fwrite($Std, "$oneResult<----->\n");
+    //print "oneResult is:\n$oneResult\n";
     $oneResult = '';
   }
   fclose($Std);
