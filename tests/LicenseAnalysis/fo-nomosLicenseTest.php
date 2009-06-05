@@ -37,6 +37,30 @@ $ldir = '/home/fosstester/regression/license/eddy/GPL/GPL_v3';
 //$ldir = '/home/fosstester/regression/license/eddy/GPL';
 //$ldir = '/home/fosstester/regression/license/eddy';
 
+
+/* process parameters
+ $Usage = "{$argv[0]} [-h] {-f filepath | -d directorypath}\n" .
+ $options = getopt("hf::d::");
+ if (empty($options)) {
+ print $Usage;
+ exit(1);
+ }
+ if (array_key_exists("h",$options)) {
+ print $Usage;
+ exit(0);
+ }
+ if (array_key_exists("f",$options)) {
+ $file = $options['f'];
+ }
+ if (array_key_exists("d",$options)) {
+ $directory = $options['d'];
+ }
+ if (!array_key_exists("d",$options) && !array_key_exists("f",$options)) {
+ print $Usage;
+ exit(1);
+ }
+ */
+
 /* load the master results to compare against */
 $Master = array();
 $Master = loadMasterResults();
@@ -68,22 +92,20 @@ foreach($foNomosRaw as $file => $result) {
 
 /* Compare to master */
 $Results = compare2Master($foNomos, $Master);
-
-print "Comparison results are:\n";print_r($Results) . "\n";
+//print "Comparison results are:\n";print_r($Results) . "\n";
 
 /* store comparison results in a file */
 $saveFile = 'FoNomos-Results.' . date('YMd');
-print "save file would be:$saveFile\n";
-/*
+
 if(saveResults($saveFile, $Results)){
-  print "Bsam results generated and saved in file:\n$saveFile\n";
+  print "fo-nomos results generated and saved in file:\n$saveFile\n";
+  exit(0);
 }
 else {
   print "Error! could not save Bsam results, printing to the screen\n";
-  foreach($Bsam as $file => $result){
+  foreach($Result as $file => $result){
     print "$file: $result\n";
   }
   exit(1);
 }
-*/
 ?>

@@ -61,12 +61,6 @@ class TestReport
       $this->notesPath = $NotesFile;
     }
   }
-  /**
-  * fileReport
-  *
-  * read a file and return the number of passes, failures and
-  * exceptions, elapse time.
-  */
 
   /*
    * pattern is Starting < > Tests ... data followed by either OK or
@@ -79,7 +73,7 @@ class TestReport
     $this->smarty->cache_dir = '/home/markd/public_html/smarty/cache';
     $this->smarty->config_dir = '/home/markd/public_html/smarty/configs';
 
-    $notes = file_get_contents($this->notesPath);
+    //$notes = file_get_contents($this->notesPath);
     $dt = $this->Date . " " . $this->Time;
     $cols = 5;
 
@@ -92,13 +86,13 @@ class TestReport
   }
 
   /**
-  * gatherData
-  *
-  * read a file and return the number of passes, failures,exceptions
-  * and elapse time.
-  *
-  * Set $Date and $Time.
-  */
+   * gatherData
+   *
+   * read a file and return the number of passes, failures,exceptions
+   * and elapse time.
+   *
+   * Set $Date and $Time.
+   */
 
   /*
    * pattern is Starting < > Tests ... data followed by either OK or
@@ -145,15 +139,43 @@ class TestReport
     }
     return ($resultLines);
   }
+
+  /**
+   * getResult
+   *
+   * using the open file descriptor, read from the file and create a space
+   * seperated string of results.  A result is everything up to the string
+   * <----->.
+   *
+   * @param resource $FD opened file resource to the results file
+   * @return string $result the result string
+   *
+   */
+  protected function getResult($FD) {
+
+    if(!is_resource($FD)) {
+      return(FALSE);
+    }
+    while($line = fgets($FD,1024)) {
+      $line = trim($line);
+      if(strcasecmp($line,'<----->') == 0) {
+        break;  // all done
+      }
+      $result .= $line .' ';
+    }
+    return($result);
+  }
+
   /**
    * globdata
    *
-   * put all the data into one big glob and then let smarty display it
+   * Parse the data and then put all the data into one big array and then let
+   * smarty display it
    *
    * @param array $data the data array to add to
    * @param array $moData the data array to glob onto the other array
    *
-   * @returns array the first parameter globed together with the second.
+   * @return array the first parameter globed together with the second.
    *
    */
   function globdata($results, $moData)
@@ -208,6 +230,41 @@ class TestReport
     //print "matched is:\n"; print_r($matched) . "\n";
     return ($dateTime);
   }
+
+  /**
+   * parseLicenseResults
+   *
+   * read the results file and parse it.
+   *
+   * @param resource $FD opened file resource.
+   * @return $array array of all of the results
+   *
+   */
+  protected function parseLicenseResults($FD) {
+
+    if(!is_resource($FD)) {
+      return(FALSE);
+    }
+    $results = array();
+    // read till a seperator
+    while($line = getResult($FD)){
+      print "PLR: result is:$line\n";
+      $resultParts = split(' ',$line);
+      list($fnKey,$fileName) = split('=',$resultParts[0]);
+      $fileName = rtrim($fileName,'.txt');
+      list($fnKey,$std)      = split('=',$resultParts[1]);
+      $fileName = $fileName . str_replace(',',"\n",$std);
+      $results[] = $fileName
+      list($pKey,$pass)      = split('=',$resultParts[2]);
+      $results[] = str_replace(',',"\n",$pass);
+      list($fKey,$fail)      = split('=',$resultParts[3]);
+      $results[] = str_replace(',',"\n",$fail);
+      list($mKey,$misses)    = split('=',$resultParts[4]);
+      $results[] = str_replace(',',"\n",$misses);
+    }
+    return ($results);
+  }
+
   /**
    * parseSuiteName
    *
@@ -312,7 +369,7 @@ class TestReport
         if($name == 'Notes') { continue; }
         $temp = $this->gatherData($filePath);
         $this->results = $this->globdata($this->results, $temp);
-        //print "<pre>DB: RRF: results are:\n"; print_r($this->results) . "</pre>\n";
+        print "<pre>DB: RRF: results are:\n"; print_r($this->results) . "</pre>\n";
         $this->displayReport();
       }
     }
