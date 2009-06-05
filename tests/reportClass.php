@@ -246,7 +246,7 @@ class TestReport
       return(FALSE);
     }
     $results = array();
-    // read till a seperator
+    // do want to loop or just get 1 result with this method?
     while($line = getResult($FD)){
       print "PLR: result is:$line\n";
       $resultParts = split(' ',$line);
