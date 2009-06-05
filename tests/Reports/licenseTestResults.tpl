@@ -8,17 +8,21 @@
                 <td colspan="13" align="center"><strong>Fossology License Test Results</strong></td>
         </tr>
   <tr>
-    <th align="center" colspan="1">File/Vetted Name</th>
-    <th align="center" colspan="4">Nomos</th>
+    <th align="center" colspan="5">Nomos</th>
     <th align="center" colspan="4">BSam</th>
-    <th align="center" colspan="4">FoNomos</th>
+    <!-- <th align="center" colspan="4">FoNomos</th> -->
   </tr>
-        <tr>
-           <th align="center">Result</th>
-           <th align="center">Pass</th>
-           <th align="center">Fail</th>
-           <th align="center">Missed</th>
-        </tr>
+  <tr>
+    <th align="center" colspan="1">File/Vetted Name</th>
+    <th align="center">Result</th>
+    <th align="center">Pass</th>
+    <th align="center">Fail</th>
+    <th align="center">Missed</th>
+    <th align="center">Result</th>
+    <th align="center">Pass</th>
+    <th align="center">Fail</th>
+    <th align="center">Missed</th>
+ </tr>   
         <!--
         <tr>
           <td align="left">{$file_name}</td>

@@ -29,7 +29,10 @@
  *
  * Created on Dec 12, 2008
  */
-
+  /*
+   * pattern is Starting < > Tests ... data followed by either OK or
+   * FAILURES! then results, skip a line then elapse time.
+   */
 // put full path to Smarty.class.php
 require_once ('/usr/share/php/smarty/libs/Smarty.class.php');
 
@@ -38,14 +41,13 @@ class TestReport
   private $Date;
   private $Time;
   private $Svn;
-  private $results;
+  protected $results;
   private $testRuns;
   private $smarty;
   public $resultsPath;
   public $notesPath;
 
-  public function __construct($resultsPath=NULL, $notesPath=NULL)
-  {
+  public function __construct($resultsPath=NULL, $notesPath=NULL) {
     $this->smarty = new Smarty();
     // defaults for now...
     $Latest = '/home/fosstester/public_html/TestResults/Data/Latest';
@@ -62,10 +64,45 @@ class TestReport
     }
   }
 
-  /*
-   * pattern is Starting < > Tests ... data followed by either OK or
-   * FAILURES! then results, skip a line then elapse time.
-   */
+/**
+ * Display the licesense results table.
+ *
+ *  @param int $cols, the number of columns to use
+ *
+ *  @TODO make a general display routine (if possible)
+ *        - takes assoc array of things to assign (keys are smarty vars, values
+ *        are php vars).
+ *        - either uses the set template or takes one in as parameter impliment
+ *        set first.
+ *        - ?? what else
+ *
+ */
+  public function displayLicenseResults($cols,$result) {
+
+    if(empty($cols)) {
+      $cols = 5;   // default, nomos results only
+    }
+    if(!is_array($result)) {
+      return(FALSE);
+    }
+    if(count($result) == 0) {
+      return(FALSE);  // nothing to display
+    }
+
+    $this->smarty->template_dir = '/home/markd/public_html/smarty/templates';
+    $this->smarty->compile_dir = '/home/markd/public_html/smarty/templates_c';
+    $this->smarty->cache_dir = '/home/markd/public_html/smarty/cache';
+    $this->smarty->config_dir = '/home/markd/public_html/smarty/configs';
+
+    $dt = $this->Date . " " . $this->Time;
+
+    //$this->smarty->assign('runDate', $dt);
+    //$this->smarty->assign('svnVer', $this->Svn);
+    $this->smarty->assign('cols', $cols);
+    $this->smarty->assign('results', $result);
+    $this->smarty->display('licenseTestResults.tpl');
+  }
+
   public function displayReport()
   {
     $this->smarty->template_dir = '/home/markd/public_html/smarty/templates';
@@ -240,21 +277,23 @@ class TestReport
    * @return $array array of all of the results
    *
    */
-  protected function parseLicenseResults($FD) {
+  public function parseLicenseResults($FD) {
 
     if(!is_resource($FD)) {
       return(FALSE);
     }
     $results = array();
     // do want to loop or just get 1 result with this method?
-    while($line = getResult($FD)){
-      print "PLR: result is:$line\n";
+    // let's try returning in the loop for now
+    while($line = $this->getResult($FD)){
+      //$line = getResult($FD);
+      //print "PLR: result is:$line\n";
       $resultParts = split(' ',$line);
       list($fnKey,$fileName) = split('=',$resultParts[0]);
       $fileName = rtrim($fileName,'.txt');
       list($fnKey,$std)      = split('=',$resultParts[1]);
-      $fileName = $fileName . str_replace(',',"\n",$std);
-      $results[] = $fileName
+      $fileName = $fileName . "\n" .str_replace(',',"\n",$std);
+      $results[] = $fileName;
       list($pKey,$pass)      = split('=',$resultParts[2]);
       $results[] = str_replace(',',"\n",$pass);
       list($fKey,$fail)      = split('=',$resultParts[3]);
@@ -262,7 +301,7 @@ class TestReport
       list($mKey,$misses)    = split('=',$resultParts[4]);
       $results[] = str_replace(',',"\n",$misses);
     }
-    return ($results);
+    return($results);
   }
 
   /**
