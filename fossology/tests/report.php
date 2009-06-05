@@ -17,7 +17,8 @@
  ***********************************************************/
 
 /**
- * Driver to generate a report of this months test runs
+ * Driver to generate a report of this months test runs, well sorta!
+ * really is just my first try at using smarty. needs a lot of work.
  *
  * @param
  *
