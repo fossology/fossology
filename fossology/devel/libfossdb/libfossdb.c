@@ -162,7 +162,8 @@ void *	DBopen	()
   /* Got an open handle.  Set a delay of 2 minutes per command. */
   /* In milliseconds: 2*60*1000 = 120000 */
   /* Two minutes is too short for sqlagent, changing to 10 min 6/6/2008 bobg */
-  DBaccess(DB,"SET statement_timeout = 600000;");
+ // Use statement timeout in postgresql.conf 6/5/2009
+ // DBaccess(DB,"SET statement_timeout = 600000;");
   return((void *)DB);
 } /* DBopen() */
 
