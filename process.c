@@ -46,7 +46,6 @@ static void processNonPackagedFiles()
      * and hand it off to be processed.
      */
 #ifdef	UNPACK_DEBUG
-    listDump(&gl.sarchList, NO);
     listDump(&gl.regfList, NO);
 #endif	/* UNPACK_DEBUG */
 	/* CDB
@@ -54,24 +53,16 @@ static void processNonPackagedFiles()
 	   makePath(pathname);
 	   }
 	*/
-    /*
-      CDB - I think we want to try and get rid of gl.sarchlist cause
-      I believe it is not used.
-    */
-    if (gl.sarchList.used + gl.regfList.used == 0) {
+    if (!gl.regfList.used) {
 	printf("No-data!\n");
 	return;
-    }
-    if (gl.regfList.used) {
+    } else {
 	*cur.basename = NULL_CHAR;
 	processRegularFiles();
 	p = listGetItem(&gl.fLicFoundMap, BOGUS_MD5);
 	p->buf = copyString(cur.compLic, MTAG_COMPLIC);
-	p = listGetItem(&gl.licHistList, cur.compLic);
 	p->refCount++;
-	p = listAppend(&gl.sarchList, cur.basename);
 	p->buf = copyString(BOGUS_MD5, MTAG_MD5SUM);
-	listSort(&gl.sarchList, SORT_BY_ALIAS);
     }
     return;
 }
@@ -125,8 +116,6 @@ void stripLine(char *textp, int offset, int size)
 
 void processRawSource()
 {
-    /*    char targetdir[myBUFSIZ] = "."; CDB ?? Trying this out */
-
 #ifdef	PROC_TRACE
 #ifdef	PROC_TRACE_SWITCH
     if (gl.ptswitch)
@@ -137,12 +126,10 @@ void processRawSource()
     changeDir(gl.target);
 
 #ifdef	PACKAGE_DEBUG
-    listDump(&gl.sarchList, NO);
     listDump(&gl.regfList, NO);
 #endif	/* PACKAGE_DEBUG */
 
     (void) strcpy(cur.name, "(no package name)");
-    /* CDB	processNonPackagedFiles(targetdir, NO); */
     processNonPackagedFiles();
     return;
 }
@@ -167,7 +154,7 @@ void processRegularFiles()
     changeDir(RAW_DIR);
 #endif notdef
     (void) strcpy(cur.ptype, "***");
-    (void) sprintf(cur.basename, "%s-misc-files", gl.prodName);
+    (void) sprintf(cur.basename, "misc-files");
     (void) sprintf(cur.pathname, "%s/(Various)", gl.target);
     /* loop through the list here -- and delete files with link-count >1? */
     licenseScan(&gl.regfList);

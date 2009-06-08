@@ -6986,12 +6986,9 @@ static void addRef(char *str, int interest)
     refOffset = bp - licStr;
     /*
      * Stuff this license in to several lists:
-     * - allLicList is dumped when --sum or --webkit is on the command-line
      * - parseList is used to create a package "computed license summary"
      * - briefList is used to compute a "terse/brief" license summary
      */
-    p = listGetItem(&gl.allLicList, str);
-    p->refCount++;
     p = listGetItem(&gl.parseList, str);
     if (interest) {
 	p->iFlag++;
