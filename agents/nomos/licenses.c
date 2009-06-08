@@ -35,10 +35,10 @@
 static void prettyPrint(FILE *, char *, int);
 static void makeLicenseSummary(list_t *, int, char *, int);
 static void noLicenseFound(int);
-#ifdef DEADCODE
+#ifdef notdef
 static void licenseStringChecks();
 static void findLines(char *, char *, int, int, list_t *);
-#endif /* DEADCODE */
+#endif /* notdef */
 static int searchStrategy(int, char *, int);
 static void saveLicenseData(scanres_t *, int, int, int, int);
 static int scoreCompare(const void *, const void *);
@@ -615,8 +615,7 @@ void licenseScan(list_t *l)
 #endif	/* QA_CHECKS */
 	    continue;
 	}
-	scp->size = gl.stbuf.st_size; 
-	gl.totBytes += (double) scp->size;
+	scp->size = gl.stbuf.st_size; /* Where did this get set ? CDB */
 	(void) strcpy(scp->ftype, magic_buffer(gl.mcookie, textp,
 					       (size_t) scp->size));
 #ifdef	DEBUG
@@ -671,16 +670,6 @@ void licenseScan(list_t *l)
 #endif	/* PROC_TRACE */
 
     qsort(scores, (size_t) c, sizeof(*scp), scoreCompare);
-    /*
-     * record the highest score of license candidates; then, determine the
-     * minimum score we'll care about (which is based on high-score)
-     */
-    gl.fSearch += c;
-#ifdef	DEBUG
-    printf("Score = %d (%d %s searched)\n", scores->score, l->used,
-	   pluralName("file", l->used));
-    printf("... total files = %d\n", gl.fSearch);
-#endif	/* DEBUG */
     /*
      * Set up defaults for the minimum-scores for which we'll save files.
      * Try to ensure a minimum # of license files will be recorded for this
@@ -1070,7 +1059,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 #ifdef	PHRASE_DEBUG
 	listDump(&gl.offList, NO);
 #endif	/* PHRASE_DEBUG */
-	listDump(&gl.offList, NO); /* CDB */
 	while ((p = listIterate(&gl.offList)) != 0) {
 	    listClear(p->buf, YES);
 	}
@@ -1082,7 +1070,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 #endif	/* MEMSTATS */
 
     (void) fclose(scoreFp);
-    gl.fSave += nCand;
     listSort(&lList, SORT_BY_COUNT_DSC);
 
 #ifdef	QA_CHECKS
@@ -1376,7 +1363,7 @@ int findParagraph(char *textp, int size, scanres_t *scp,
 }
 
 
-#ifdef DEAD_CODE
+#ifdef notdef
 /*
  * These checks used to be performed on every run, but it makes better
  * sense to run this at compile-time.
@@ -1459,4 +1446,4 @@ static void licenseStringChecks()
     }
     return;
 }
-#endif /* DEAD_CODE */
+#endif /* notdef */

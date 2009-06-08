@@ -55,9 +55,6 @@ void Bail(int exitval)
     if (gl.mcookie != (magic_t) NULL) {
 	magic_close(gl.mcookie);
     }
-    if (isDIR(gl.tmpdir)) {
-	removeDir(gl.tmpdir);
-    }
 #if defined(MEMORY_TRACING) && defined(MEM_ACCT)
     if (exitval) {
 	memCacheDump("Mem-cache @ Bail() time:");
@@ -67,6 +64,7 @@ void Bail(int exitval)
      * Question: do we want to wait for any processes that might still
      * be executing?
      */
+#ifdef notdef
     if (isDIR(gl.mntpath)) {
 	(void) mySystem("%s %s > %s 2>&1", _REGEX(_UMNT_IMG),
 			gl.mntpath, "/dev/null");
@@ -74,6 +72,7 @@ void Bail(int exitval)
 	    perror(gl.mntpath);
 	}
     }
+#endif /* notdef */
     exit(exitval);
 }
 
@@ -190,9 +189,8 @@ static void getFileLists(char *dirpath)
     traceFunc("== getFileLists(%s)\n", dirpath);
 #endif	/* PROC_TRACE */
 
-    listInit(&gl.sarchList, 0, "source-archives list & md5sum map");
+    /*    listInit(&gl.sarchList, 0, "source-archives list & md5sum map"); */
     listInit(&gl.regfList, 0, "regular-files list");
-    listInit(&gl.allLicList, 0, "all-licenses list");
     listInit(&gl.offList, 0, "buffer-offset list");
 #ifdef	FLAG_NO_COPYRIGHT
     listInit(&gl.nocpyrtList, 0, "no-copyright list");
@@ -208,7 +206,6 @@ static void getFileLists(char *dirpath)
 int main(int argc, char **argv)
 {
     char *cp;
-    int i;
 
 #ifdef	PROC_TRACE
     traceFunc("== main(%d, %p)\n", argc, argv);
@@ -251,16 +248,12 @@ int main(int argc, char **argv)
     (void) strcpy(gl.cwd, gl.initwd);
     parseOpts(argc, argv);
     licenseInit();
-    gl.fSearch = 0;
-    gl.fSave = 0;
     gl.flags = 0;
-    gl.totBytes = 0.0;
 
-    i = 0; /* CDB - Added so we don't have a custom Magic file */
     if ((gl.mcookie = magic_open(MAGIC_NONE)) == (magic_t) NULL) {
 	Fatal("magic_open() fails!");
     }
-    if (magic_load(gl.mcookie, i ? gl.magicFile : NULL_STR)) {
+    if (magic_load(gl.mcookie, NULL_STR)) {
 	Fatal("magic_load() fails!");
     }
     /*
@@ -273,7 +266,6 @@ int main(int argc, char **argv)
     changeDir(gl.target);	/* see if we can chdir to the target */
     getFileLists(gl.target);
     changeDir(gl.initwd);
-    listInit(&gl.licHistList, 0, "found-licenses list");
     listInit(&gl.fLicFoundMap, 0, "file-license-found map");
     listInit(&gl.parseList, 0, "license-components list");
 

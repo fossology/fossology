@@ -24,7 +24,7 @@
 
 static char regexErrbuf[myBUFSIZ];
 
-regex_t regc[NFOOTPRINTS];
+regex_t idx_regc[NFOOTPRINTS];
 
 void regexError(int ret, regex_t *regc, char *regex)
 {
@@ -113,6 +113,7 @@ int textInFile(char *pathname, char *regex, int flags)
 
 int strGrep(char *regex, char *data, int flags)
 {
+    regex_t regc;
     int ret;
 #ifdef	PHRASE_DEBUG
     int i;
@@ -133,9 +134,9 @@ int strGrep(char *regex, char *data, int flags)
 	return(0);
     }
     /* DO NOT, repeat DO NOT add REG_EXTENDED as a default flag! */
-    if ((ret = regcomp(&gl.regc, regex, flags)) != 0) {
-	regexError(ret, &gl.regc, regex);
-	regfree(&gl.regc);
+    if ((ret = regcomp(&regc, regex, flags)) != 0) {
+	regexError(ret, &regc, regex);
+	regfree(&regc);
 	return(-1);	/* <0 indicates compile failure */
     }
     /*
@@ -143,8 +144,8 @@ int strGrep(char *regex, char *data, int flags)
      * regfree after the regexec call, else after a million or so regex
      * searches we'll have lost a LOT of memory. :)
      */
-    ret = regexec(&gl.regc, data, 1, &gl.regm, 0);
-    regfree(&gl.regc);
+    ret = regexec(&regc, data, 1, &gl.regm, 0);
+    regfree(&regc);
     if (ret) {
 	return(0);	/* >0 indicates search failure */
     }
@@ -176,8 +177,8 @@ int idxGrep(int index, char *data, int flags)
     int i;
     int ret;
     int show = flags & FL_SHOWMATCH;
-    licText_t *ltp = licText+index;
-    regex_t *rp = regc+index;
+    licText_t *ltp = licText + index;
+    regex_t *rp = idx_regc + index;
 
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG)
 #ifdef	PROC_TRACE_SWITCH
