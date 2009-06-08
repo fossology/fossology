@@ -57,7 +57,7 @@ To Do's
 - Check and remove all unused field of the gl global variable structure.
 
 - Migrate to standard FOSSology makefile structure and system.
-
+ 
 
 
 Changes

@@ -168,7 +168,7 @@ struct mm_cache {
 
 
 /*
-  CDB - This is kind of lame, the way it uses the same fields for
+  CDB - This is kind of tricky, the way it uses the same fields for
   different meanings. If we had objects, we could subclass. It works
   okay, but is just a PITA for debugging.
 */
@@ -232,27 +232,21 @@ typedef struct licenseSpec licSpec_t;
 
 
 /*
-  CDB - Commenting to note which are true globals and which we will need on
-  a per-file basis. Fields followed by a comment of G are true globals. 
-  Otherwise, assume we need to re-initialize for each new file.
+  CDB - Commenting to note purpose of the various fields so we can tell
+  which are true globals and which we will need on
+  a per-file basis. 
 */
 struct globals {
-    char initwd[myBUFSIZ];
-    char cwd[myBUFSIZ]; 
-    char target[myBUFSIZ];
-    char targetFile[myBUFSIZ];
-    char magicFile[myBUFSIZ];
-    char prodName[256];
-    char tmpdir[128]; 
-    char progName[64];
-    char mntpath[64]; 
-    char *licPara; 
-    char *matchBase;
-    int progOpts; 
-    int flags;
-    int fSearch; 
-    int fSave;  /* CDB - Needed? Set to a value, but never used. */
-    int uPsize;
+    char initwd[myBUFSIZ]; /* Global, plan to eliminate  */
+    char cwd[myBUFSIZ]; /* Global, will be unneeded */
+    char target[myBUFSIZ]; /* Global, can probably get rid of  */
+    char targetFile[myBUFSIZ]; /* Should be moved to perScan */
+    char progName[64]; /* Global, plan to eliminate */
+    char *licPara; /* Used, move to perScan */
+    char *matchBase; /* Used, move to perScan */
+    int progOpts; /* Global */
+    int flags; /* Global, merge with progOpts? */
+    int uPsize; /* Global */
 #ifdef	GLOBAL_DEBUG
     int DEEBUG; 
     int MEM_DEEBUG;
@@ -260,23 +254,14 @@ struct globals {
 #ifdef	PROC_TRACE_SWITCH
     int ptswitch;
 #endif	/* PROC_TRACE_SWITCH */
-#ifdef	USE_MMAP
-    int pagesize;
-#endif	/* USE_MMAP */
-    double totBytes; /* CDB - Needed? Set to a value, but never used. */
-    size_t targetLen; 
-    size_t cwdLen;
-    struct stat stbuf;
-    regex_t regc;
-    regmatch_t regm;
-    magic_t mcookie;
-    list_t licHistList; 
-    list_t sarchList; 
-    list_t regfList; 
-    list_t licClaimMap;
-    list_t fLicFoundMap; 
-    list_t parseList;  /* CDB - Can probably get rid of this */
-    list_t allLicList;
+    size_t targetLen; /* Used, will probably be eliminated, move to perScan */
+    size_t cwdLen; /* Used, will probably be eliminated, move to perScan */
+    struct stat stbuf; /* Horrible side-effect trap. move to perScan */
+    regmatch_t regm; /* Used, move to perScan */
+    magic_t mcookie; /* Global */
+    list_t regfList; /* perScan */
+    list_t fLicFoundMap; /* perScan */
+    list_t parseList; /* perScan */
     list_t sHash; 
     list_t offList;
 };
