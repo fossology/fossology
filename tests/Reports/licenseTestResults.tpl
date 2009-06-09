@@ -3,41 +3,46 @@
 <title>Fossology License Test Results</title>
 </head>
 <body>
-<table border="1">
+<table border="1" cellpadding="0">
         <tr>
-                <td colspan="13" align="center"><strong>Fossology License Test Results</strong></td>
+                <td colspan="5" align="center"><strong>Fossology License Test Results</strong></td>
         </tr>
   <tr>
-    <th align="center" colspan="5">Nomos</th>
-    <th align="center" colspan="4">BSam</th>
-    <!-- <th align="center" colspan="4">FoNomos</th> -->
+    <th align="center" colspan="2">Nomos</th>
+    <th align="center" colspan="3">BSam</th>
+    <!-- <th align="center" colspan="3">FoNomos</th> -->
   </tr>
   <tr>
-    <th align="center" colspan="1">File/Vetted Name</th>
-    <th align="center">Result</th>
+    <th align="center">File</th>
+    <th align="center">Vetted Name</th>
     <th align="center">Pass</th>
     <th align="center">Fail</th>
     <th align="center">Missed</th>
-    <th align="center">Result</th>
-    <th align="center">Pass</th>
-    <th align="center">Fail</th>
-    <th align="center">Missed</th>
- </tr>   
-        <!--
-        <tr>
-          <td align="left">{$file_name}</td>
-          <td align="center">{$pass}</td>
-          <td align="center">{$fail}</td>
-          <td align="center">{$missed}</td>
-        </tr>
-        -->
-        {section name=tr loop=$results step=$cols}
+  </tr>   
+    </tr>
+    {assign var=cntr value=0}
+    {section name=tr loop=$file}
   <tr>
-    {section name=td start=$smarty.section.tr.index loop=$smarty.section.tr.index+$cols}
-    <td align="center">{$results[td]|default:"&nbsp;"}</td>
+      <td align="left">{$file[tr]}</td>
+      <td align="center">{$vetted[tr]}</td>
+      {section name=td loop=$results max=3 }
+         {assign var=gre value=`$cntr%3`}
+         {if $results[$cntr] ne ''}
+           {* pass=0, fail=1, missed=2 *}
+           {if $gre eq 0}
+             <td align="center" style="color:#009900">{ $results[$cntr]}</td>
+           {elseif $gre eq 1}
+             <td align="center" style="color:red">{ $results[$cntr]}</td>
+           {elseif $gre eq 2}
+             <td align="center" style="color:#0000FF">{ $results[$cntr]}</td>
+           {/if}
+         {else}
+           <td align="center">{"&nbsp;"}</td>
+         {/if}
+        {assign var=cntr value=`$cntr+1`}
+      {/section}
+  </tr>
     {/section}
-  </tr>
-  {/section}
 </table>
 
 </body>

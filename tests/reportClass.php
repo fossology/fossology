@@ -98,8 +98,13 @@ class TestReport
 
     //$this->smarty->assign('runDate', $dt);
     //$this->smarty->assign('svnVer', $this->Svn);
+    $files   = $result[0];
+    $vetted  = $result[1];
+    $results = $result[2];
     $this->smarty->assign('cols', $cols);
-    $this->smarty->assign('results', $result);
+    $this->smarty->assign('file', $files);
+    $this->smarty->assign('vetted', $vetted);
+    $this->smarty->assign('results', $results);
     $this->smarty->display('licenseTestResults.tpl');
   }
 
@@ -282,26 +287,30 @@ class TestReport
     if(!is_resource($FD)) {
       return(FALSE);
     }
-    $results = array();
-    // do want to loop or just get 1 result with this method?
-    // let's try returning in the loop for now
+    $All        = array();
+    $FileName   = array();
+    $VettedName = array();
+    $results    = array();
     while($line = $this->getResult($FD)){
       //$line = getResult($FD);
       //print "PLR: result is:$line\n";
       $resultParts = split(' ',$line);
       list($fnKey,$fileName) = split('=',$resultParts[0]);
-      $fileName = rtrim($fileName,'.txt');
+      $FileName[] = rtrim($fileName,'.txt');
       list($fnKey,$std)      = split('=',$resultParts[1]);
-      $fileName = $fileName . "\n" .str_replace(',',"\n",$std);
-      $results[] = $fileName;
+      $VettedName[] = str_replace(',',",<br>",$std);
+
       list($pKey,$pass)      = split('=',$resultParts[2]);
-      $results[] = str_replace(',',"\n",$pass);
+      $results[]             = str_replace(',',",<br>",$pass);
       list($fKey,$fail)      = split('=',$resultParts[3]);
-      $results[] = str_replace(',',"\n",$fail);
+      $results[]             = str_replace(',',",<br>",$fail);
       list($mKey,$misses)    = split('=',$resultParts[4]);
-      $results[] = str_replace(',',"\n",$misses);
+      $results[]             = str_replace(',',",<br>",$misses);
     }
-    return($results);
+    $all[] = $FileName;
+    $all[] = $VettedName;
+    $all[] = $results;
+    return($all);
   }
 
   /**

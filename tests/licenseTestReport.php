@@ -41,10 +41,11 @@ require_once('reportClass.php');
 // for debugging, just dummy up some values
 $file = '/home/markd/Src/fossology/tests/LicenseAnalysis/Bsam-Results.2009Jun04';
 $report = new TestReport();
-$cols = 9;
+$cols = 5;
 $FD = fopen($file, 'r') or die("Cannot open $file $phperrormsg\n");
 $result = $report->parseLicenseResults($FD);
-print "<pre>result is:\n";print_r($result) . "\n</pre>";
+$bres = $result[2];
+//print "<pre>bres is:\n";print_r($bres) . "\n</pre>";
 $report->displayLicenseResults($cols,$result);
 
 exit(0);
