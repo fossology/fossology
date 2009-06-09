@@ -2,34 +2,34 @@
 # $Id$
 #
 
-Name:           PBREALPKG
-Version:        PBVER
-Release:        PBTAGPBSUF
-License:        PBLIC
-Group:          PBGRP
-Url:            PBURL
-Source:         PBREPO/PBSRC
+Name:           fossology
+Version:        1.1.0rc2
+Release:        0.20090604121009.centos5
+License:        GPLv2
+Group:          Applications/Engineering
+Url:            http://www.fossology.org
+Source:         ftp://ftp.project-builder.org/src/%{name}-%{version}.tar.gz
 #PBPATCHSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
-Requires:       postgresql php php-pear php-pgsql libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip httpd which PBDEP
-BuildRequires:  postgresql-devel libxml2 gcc make perl PBBUILDDEP
+Requires:       postgresql php php-pear php-pgsql libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip httpd which file postgresql-server smtp-server
+BuildRequires:  postgresql-devel libxml2 gcc make perl perl-Text-Template subversion file libextractor-devel
 Summary:        FOSSology is a licenses exploration tool
 Summary(fr):    FOSSology est un outil d'exploration de licenses
 
 %package devel
 Summary:        Devel part of FOSSology (a licenses exploration tool)
 Summary(fr):    Partie dedévelopment de FOSSology, outil d'exploration de licenses
-Group:          PBGRP
+Group:          Applications/Engineering
 
 %description
-PBDESC
+"FOSSology is a licenses exploration tool"
 
 %description -l fr
 FOSSology est un outil d'exploration de licenses
 
 %description devel
 Devel part.
-PBDESC
+"FOSSology is a licenses exploration tool"
 
 %description -l fr devel
 Partie développement de FOSSology, outil d'exploration de licenses
@@ -46,9 +46,9 @@ make SYSCONFDIR=%{_sysconfdir} PREFIX=%{_usr} LOCALSTATEDIR=%{_var}
 %{__rm} -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir} LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} install
 mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d
-cat > $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d/PBPROJ.conf << EOF
-Alias /repo/ /usr/share/PBPROJ/www/
-<Directory "/usr/share/PBPROJ/www">
+cat > $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d/fossology.conf << EOF
+Alias /repo/ /usr/share/fossology/www/
+<Directory "/usr/share/fossology/www">
 	AllowOverride None
 	Options FollowSymLinks MultiViews
 	Order allow,deny
@@ -58,9 +58,9 @@ Alias /repo/ /usr/share/PBPROJ/www/
 	#php_value error_reporting 2039
 </Directory>
 EOF
-cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
+cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/fossology/
 
-#rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/default/PBPROJ
+#rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/default/fossology
 
 %clean
 %{__rm} -rf $RPM_BUILD_ROOT
@@ -72,13 +72,13 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 #AUTHORS NEWS
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/*.conf
 %config(noreplace) %{_sysconfdir}/cron.d/*
-%config(noreplace) %{_sysconfdir}/PBPROJ/*
-%dir %{_sysconfdir}/PBPROJ
-%dir %{_usr}/lib/PBPROJ
-%dir %{_datadir}/PBPROJ
+%config(noreplace) %{_sysconfdir}/fossology/*
+%dir %{_sysconfdir}/fossology
+%dir %{_usr}/lib/fossology
+%dir %{_datadir}/fossology
 %{_sysconfdir}/init.d/*
-%{_usr}/lib/PBPROJ/*
-%{_datadir}/PBPROJ/*
+%{_usr}/lib/fossology/*
+%{_datadir}/fossology/*
 %{_bindir}/*
 %{_mandir}/man1/*
 
@@ -199,37 +199,38 @@ chkconfig --add postgresql
 sleep 2 
 
 # Adjust PHP config (described in detail in section 2.1.5)
-grep -qw memory_limit PBPHPINI
+grep -qw memory_limit /etc/php.ini
 if [ $? -eq 0 ]; then
-	perl -pi -e "s/^[#\s]*memory_limit.*=.*/memory_limit = 702M/" PBPHPINI
+	perl -pi -e "s/^[#\s]*memory_limit.*=.*/memory_limit = 702M/" /etc/php.ini
 else
-	echo "memory_limit = 702M" >> PBPHPINI
+	echo "memory_limit = 702M" >> /etc/php.ini
 fi
-grep -qw post_max_size PBPHPINI
+grep -qw post_max_size /etc/php.ini
 if [ $? -eq 0 ]; then
-	perl -pi -e "s/^[#\s]*post_max_size.*=.*/post_max_size = 702M/" PBPHPINI
+	perl -pi -e "s/^[#\s]*post_max_size.*=.*/post_max_size = 702M/" /etc/php.ini
 else
-	echo "post_max_size = 702M" >> PBPHPINI
+	echo "post_max_size = 702M" >> /etc/php.ini
 fi
-grep -qw upload_max_filesize PBPHPINI
+grep -qw upload_max_filesize /etc/php.ini
 if [ $? -eq 0 ]; then
-	perl -pi -e "s/^[#\s]*upload_max_filesize.*=.*/upload_max_filesize = 702M/" PBPHPINI
+	perl -pi -e "s/^[#\s]*upload_max_filesize.*=.*/upload_max_filesize = 702M/" /etc/php.ini
 else
-	echo "upload_max_filesize = 702M" >> PBPHPINI
+	echo "upload_max_filesize = 702M" >> /etc/php.ini
 fi
-grep -qw allow_call_time_pass_reference PBPHPINI
+grep -qw allow_call_time_pass_reference /etc/php.ini
 if [ $? -eq 0 ]; then
-	perl -pi -e "s/^[#\s]*allow_call_time_pass_reference.*=.*/allow_call_time_pass_reference = On/" PBPHPINI
+	perl -pi -e "s/^[#\s]*allow_call_time_pass_reference.*=.*/allow_call_time_pass_reference = On/" /etc/php.ini
 else
-	echo "allow_call_time_pass_reference = On" >> PBPHPINI
+	echo "allow_call_time_pass_reference = On" >> /etc/php.ini
 fi
 
 # Add apache config for fossology (described in detail in section 2.1.6) - done in install
 # Run the postinstall script
-/usr/lib/PBPROJ/fo-postinstall
+/usr/lib/fossology/fo-postinstall
 
+# Remove this part by Vincent, as this have been done by fo-postinstall
 # Adds user httpd to fossy group
-perl -pi -e 's/^fossy:x:([0-9]+):/fossy:x:$1:httpd/' /etc/group
+# perl -pi -e 's/^fossy:x:([0-9]+):/fossy:x:$1:httpd/' /etc/group
 
 # httpd
 LANGUAGE=C /etc/init.d/httpd status 2>&1 | grep -q stop
@@ -241,26 +242,27 @@ fi
 chkconfig --add httpd
 
 # Create logfile to avoid issues later on
-touch %{_var}/log/PBPROJ
+touch %{_var}/log/fossology
 # Handle logfile owner correctly
-chown fossy:fossy %{_var}/log/PBPROJ
+chown fossy:fossy %{_var}/log/fossology
 
 # Test that things are installed correctly
-/usr/lib/PBPROJ/fossology-scheduler -t
+/usr/lib/fossology/fossology-scheduler -t
 if [ $? -ne 0 ]; then
 	exit -1
 fi
 
-chkconfig --add PBPROJ
-/etc/init.d/PBPROJ start
+chkconfig --add fossology
+/etc/init.d/fossology start
 
 %preun
 # If FOSSology is running, stop it before removing.
-/etc/init.d/PBPROJ stop
-chkconfig --del PBPROJ 2>&1 > /dev/null
+/etc/init.d/fossology stop
+chkconfig --del fossology 2>&1 > /dev/null
 
 # We should do some cleanup here (fossy account ...)
-/usr/lib/PBPROJ/fo-cleanold
+/usr/lib/fossology/fo-cleanold
 
 %changelog
-PBLOG
+
+
