@@ -80,7 +80,6 @@ void licenseInit()
     strcpy(some, "=SOME=");
     strcpy(few, "=FEW=");
     strcpy(year, "=YEAR=");
-    listInit(&gl.sHash, 0, "search-cache");
 
     /*
      * Examine the search strings in licSpec looking for 3 corner-cases 
@@ -114,15 +113,7 @@ void licenseInit()
 #endif	/* FIX_STRINGS */
 	licText[i].tseed = licSpec[i].seed.csData;
 	/*
-	 * Step 2, add the search-seed to the search-cache
-	 */
-	if ((p = listGetItem(&gl.sHash, licText[i].tseed)) == NULL_ITEM) {
-	    Fatal("Cannot enqueue search-cache item \"%s\"",
-		  licText[i].tseed);
-	}
-	p->refCount++;
-	/*
-	 * Step 3, handle special cases of NULL seeds and (regex == seed)
+	 * Step 2, handle special cases of NULL seeds and (regex == seed)
 	 */
 	if (strcmp(licText[i].tseed, "=NULL=") == 0) {	/* null */
 #ifdef	OLD_DECRYPT
@@ -192,9 +183,6 @@ void licenseInit()
 	licText[i].nBelow = p->ssComp % 100;
     }
 
-#if	((DEBUG > 5) || defined LICENSE_DEBUG)
-    listDump(&gl.sHash, NO);
-#endif	/* (DEBUG>5 || LICENSE_DEBUG) */
 
     /*
      * Finally (if enabled), compare each of the search strings to see if
