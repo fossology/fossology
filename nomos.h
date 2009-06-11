@@ -248,11 +248,11 @@ struct globals {
     int flags; /* Global, merge with progOpts? */
     int uPsize; /* Global */
 #ifdef	GLOBAL_DEBUG
-    int DEEBUG; 
-    int MEM_DEEBUG;
+    int DEEBUG;   /* Global */
+    int MEM_DEEBUG;  /* Global */
 #endif	/* GLOBAL_DEBUG */
 #ifdef	PROC_TRACE_SWITCH
-    int ptswitch;
+    int ptswitch;  /* Global */
 #endif	/* PROC_TRACE_SWITCH */
     size_t targetLen; /* Used, will probably be eliminated, move to perScan */
     size_t cwdLen; /* Used, will probably be eliminated, move to perScan */
@@ -262,8 +262,7 @@ struct globals {
     list_t regfList; /* perScan */
     list_t fLicFoundMap; /* perScan */
     list_t parseList; /* perScan */
-    list_t sHash; 
-    list_t offList;
+    list_t offList; /* perScan */
 };
 
 
