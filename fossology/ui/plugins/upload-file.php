@@ -1,25 +1,25 @@
 <?php
 /***********************************************************
-Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ ***********************************************************/
 /*************************************************
-Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
+ Restrict usage: Every PHP file should have this
+ at the very beginning.
+ This prevents hacking attempts.
+ *************************************************/
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
@@ -33,9 +33,9 @@ class upload_file extends FO_Plugin {
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
   /*********************************************
-  Upload(): Process the upload request.
-  Returns NULL on success, string on failure.
-  *********************************************/
+   Upload(): Process the upload request.
+   Returns NULL on success, string on failure.
+   *********************************************/
   function Upload($Folder, $TempFile, $Desc, $Name) {
     /* See if the URL looks valid */
     if (empty($Folder)) {
@@ -70,7 +70,7 @@ class upload_file extends FO_Plugin {
     /* Run wget_agent locally to import the file. */
     global $LIBEXECDIR;
     $Prog = "$LIBEXECDIR/agents/wget_agent -g fossy -k $uploadpk '$UploadedFile'";
-    $last = system($Prog,$rtn);
+    $wgetLast = exec($Prog,$wgetOut,$wgetRtn);
     unlink($UploadedFile);
 
     global $Plugins;
@@ -84,14 +84,21 @@ class upload_file extends FO_Plugin {
     if (CheckEnotification()) {
       $sched = scheduleEmailNotification($uploadpk);
       if ($sched !== NULL) {
+        print displayMessage($sched);
         return($sched);
       }
     }
-    $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
-    print "The file has been uploaded. ";
-    print "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
-    print "<hr>\n";
-    return (NULL);
+    if($wgetRtn == 0) {
+      $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
+      $Msg = "The file $Name has been uploaded. It is ";
+      $keep = '<a href=' . $Url . '>upload #' . $uploadpk . "</a>.\n";
+      print displayMessage($Msg,$keep);
+      return (NULL);
+    }
+    else {
+      return($wgetOut[0]);
+    }
+    return(NULL);
   } // Upload()
   /*********************************************
   Output(): Generate the text for this plugin.
@@ -103,7 +110,7 @@ class upload_file extends FO_Plugin {
     $V = "";
     switch ($this->OutputType) {
       case "XML":
-      break;
+        break;
       case "HTML":
         /* If this is a POST, then process the request. */
         $Folder = GetParm('folder', PARM_INTEGER);
@@ -112,13 +119,13 @@ class upload_file extends FO_Plugin {
         if (file_exists(@$_FILES['getfile']['tmp_name']) && !empty($Folder)) {
           $rc = $this->Upload($Folder, @$_FILES['getfile']['tmp_name'], $Desc, $Name);
           if (empty($rc)) {
-            /* Need to refresh the screen */
-            $V.= PopupAlert('Upload added to job queue');
+            // reset form fields
             $GetURL = NULL;
             $Desc = NULL;
             $Name = NULL;
-          } else {
-            $V.= PopupAlert("Upload failed: $rc");
+          }
+          else {
+            $V.= displayMessage("Upload failed for file {$_FILES[getfile][name]}: $rc");
           }
         }
 
@@ -142,7 +149,9 @@ class upload_file extends FO_Plugin {
         $V.= "</select><P />\n";
         $V.= "<li>Select the file to upload:<br />\n";
         $V.= "<input name='getfile' size='60' type='file' /><br />\n";
-        $V.= "<b>NOTE</b>: If the file is larger than 650 Megs (one CD-ROM), then this method will not work with some browsers (e.g., Internet Explorer). Only attach files smaller than 650 Megs.<P />\n";
+        $V.= "<b>NOTE</b>: If the file is larger than 650 Megs (one CD-ROM)," .
+             "then this method will not work with some browsers (e.g., Internet Explorer)." .
+             " Only attach files smaller than 650 Megs.<P />\n";
         $V.= "<li>(Optional) Enter a description of this file:<br />\n";
         $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
         $V.= "<li>(Optional) Enter a viewable name for this file:<br />\n";
@@ -153,14 +162,15 @@ class upload_file extends FO_Plugin {
           $V.= AgentCheckBoxMake(-1, "agent_unpack");
         }
         $V.= "</ol>\n";
-        $V.= "It may take time to transmit the file from your computer to this server. Please be patient.<br>\n";
+        $V.= "It may take time to transmit the file from your computer to " .
+             "this server. Please be patient.<br>\n";
         $V.= "<input type='submit' value='Upload!'>\n";
         $V.= "</form>\n";
-      break;
+        break;
       case "Text":
-      break;
+        break;
       default:
-      break;
+        break;
     }
     if (!$this->OutputToStdout) {
       return ($V);
