@@ -32,8 +32,7 @@ if (!isset($GlobalReady)) { exit; }
 /*************************************************
  PopupAlert(): Generate a popup alert window.
  *************************************************/
-function PopupAlert	($Message)
-{
+function PopupAlert	($Message) {
   if (!empty($_SESSION['NoPopup']) && ($_SESSION['NoPopup'] == 1))
     {
     $HTML = "<H3>" . htmlentities($Message,ENT_QUOTES) . "</H3>\n";
@@ -46,6 +45,36 @@ function PopupAlert	($Message)
     }
   return($HTML);
 } // PopupAlert()
+
+/**
+ * displayMessage
+ *
+ * Display a message.  This is used to convey the results of button push like
+ * upload, submit, analyze, create, etc.
+ *
+ * @param string $Message the message to display
+ * @param string $keep a safe text string NOT run through htmlentities
+ * @return string $HTML the html to display (with embeded javascript)
+ */
+function displayMessage($Message,$keep=NULL) {
+
+  $HTML = NULL;
+  $HTML .= "\n<div id='dmessage' style='text-indent:75px'>\n";
+  $HTML .= "<button name='eraseme' value='close' onclick='rmMsg()'" .
+           " style='position:absolute;left:10px'>Close</button>\n";
+  $HTML .= "<p>" . htmlentities($Message,ENT_QUOTES) . "\n";
+  $HTML .= $keep . "\n</p>";
+  $HTML .= "  <hr>\n";
+  $HTML .= "</div>\n";
+  $HTML .= "<script type='text/javascript'>\n" .
+           "function rmMsg(){\n" .
+           "  var div = document.getElementById('dmessage');\n" .
+           "  var parent = div.parentNode;\n" .
+           "  parent.removeChild(div);\n" .
+           "}\n" .
+           "</script>\n";
+    return($HTML);
+}
 
 /*************************************************
  ActiveHTTPscript(): Given a function name, create the
