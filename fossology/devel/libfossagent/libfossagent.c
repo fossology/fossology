@@ -147,40 +147,47 @@ FUNCTION int      IsFile  (char *Fname, int Link)
 
 /*********************************************************
  GetAgentKey(): Get the Agent Key from the database.
+ Upload_pk is only used for error reporting.
  *********************************************************/
-FUNCTION int	GetAgentKey	(void *DB, long Upload_pk, char *svn_rev)
+FUNCTION int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn_rev, char *agent_desc)
 {
   int rc;
   int Agent_pk=-1;    /* agent identifier */
+  char sql[256];
 
-  rc = DBaccess(DB,"SELECT agent_pk FROM agent WHERE agent_name ='wget_agent' ORDER BY agent_rev DESC;");
+  sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name =%s ORDER BY agent_rev DESC", agent_name);
+  rc = DBaccess(DB, sql);
   if (rc < 0)
-	{
+  {
 	printf("ERROR upload %ld unable to access the database\n",Upload_pk);
-	printf("LOG upload %ld unable to select wget_agent from the database table agent\n",Upload_pk);
+	printf("LOG upload %ld unable to select %s from the database table agent\n",Upload_pk, agent_name);
 	DBclose(DB);
 	exit(16);
-	}
+  }
   if (DBdatasize(DB) <= 0)
-      {
-      /* Not found? Add it! */
-      rc = DBaccess(DB,"INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('wget_agent',svn_rev,'wget's file to add to repository');");
-      if (rc < 0)
+  {
+    /* Not found? Add it! */
+    sprintf(sql, "INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('%s',E'%s',E'%s')",
+              agent_name, svn_rev, agent_desc);
+    rc = DBaccess(DB,sql);
+    if (rc < 0)
 	{
 	printf("ERROR upload %ld unable to write to the database\n",Upload_pk);
-	printf("LOG upload %ld unable to write wget_agent to the database table agent\n",Upload_pk);
+	printf("LOG upload %ld unable to write %s to the database table agent\n",Upload_pk, agent_name);
 	DBclose(DB);
 	exit(17);
 	}
-      rc = DBaccess(DB,"SELECT agent_pk FROM agent WHERE agent_name ='wget_agent' ORDER BY agent_pk DESC;");
-      if (rc < 0)
+
+    sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='%s' ORDER BY agent_pk DESC", agent_name);
+    rc = DBaccess(DB,sql);
+    if (rc < 0)
 	{
-	printf("ERROR upload %ld unable to access the database\n",Upload_pk);
-	printf("LOG upload %ld unable to select wget_agent from the database table agent\n",Upload_pk);
-	DBclose(DB);
-	exit(18);
-	}
-      }
+      printf("ERROR upload %ld unable to access the database\n",Upload_pk);
+      printf("LOG upload %ld unable to select %s from the database table agent\n",Upload_pk, agent_name);
+      DBclose(DB);
+      exit(18);
+    }
+  }
   Agent_pk = atoi(DBgetvalue(DB,0,0));
   return Agent_pk;
 } /* GetAgentKey() */
