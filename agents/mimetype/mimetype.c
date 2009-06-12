@@ -508,6 +508,7 @@ int	main	(int argc, char *argv[])
   char Parm[MAXCMD];
   char *Path;
   int c;
+  char *agent_desc = "Determines mimetype for each file";
 
   /* Init */
   DB = DBopen();
@@ -517,7 +518,7 @@ int	main	(int argc, char *argv[])
 	fflush(stdout);
 	exit(-1);
 	}
-  GetAgentKey(DB,0, SVN_REV);
+  GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 
   FMimetype = fopen("/etc/mime.types","rb");
   if (!FMimetype)

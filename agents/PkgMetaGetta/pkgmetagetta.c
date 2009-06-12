@@ -491,6 +491,7 @@ int	main	(int argc, char *argv[])
   char *Path;
   char *Env;
   int rc;
+  char *agent_desc = "Use libextractor to retrieve general file metadata";
 
   /* Init extractor */
   extractors = EXTRACTOR_loadDefaultLibraries();
@@ -512,7 +513,7 @@ int	main	(int argc, char *argv[])
 			printf("FATAL: Unable to connect to database\n");
 			exit(-1);
 			}
-		Agent_pk = GetAgentKey(DB, 0, SVN_REV);
+		Agent_pk = GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 		/* insert EVERY meta type */
 		for(c=0; KeywordTypes[c].Label; c++)
 			GetKey(KeywordTypes[c].KeyIndex);
@@ -567,7 +568,7 @@ int	main	(int argc, char *argv[])
 	printf("FATAL: Unable to connect to database\n");
 	exit(-1);
 	}
-    Agent_pk = GetAgentKey(DB, 0, SVN_REV);
+    Agent_pk = GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 
     signal(SIGALRM,ShowHeartbeat);
     alarm(60);

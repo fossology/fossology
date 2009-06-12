@@ -3055,6 +3055,7 @@ void	Usage	(char *Name)
 int	main	(int argc, char *argv[])
 {
   int c;
+  char *agent_desc = "bSAM license analyzer";
 
   while((c = getopt(argc,argv,"A:B:C:EG:iL:M:O:T:t:v123")) != -1)
     {
@@ -3080,7 +3081,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"FATAL: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey(DB, 0, SVN_REV);
+	GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 	DBSetPhrase();
 	DBclose(DB);
 	return(0);
@@ -3105,7 +3106,7 @@ int	main	(int argc, char *argv[])
 		  fprintf(stderr,"FATAL: Unable to open DB\n");
 		  exit(-1);
 		  }
-		GetAgentKey(DB, 0, SVN_REV);
+        GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 		DBSetPhrase();
 		break;
 	  case 'N':
@@ -3118,7 +3119,7 @@ int	main	(int argc, char *argv[])
 		  exit(-1);
 		  }
 		if (RepType == NULL) RepType = RepDEFAULT[1];
-		GetAgentKey(DB, 0, SVN_REV);
+        GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 		DBSetPhrase();
 		break;
 	  case 's':

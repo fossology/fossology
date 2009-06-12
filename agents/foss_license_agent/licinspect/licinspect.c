@@ -1024,6 +1024,7 @@ int	main	(int argc, char *argv[])
   char *Needle=NULL;
   char *Haystack=NULL;
   int MustStoreDB=0;
+  char *agent_desc = "Looks for short license strings";
 
   while((c = getopt(argc,argv,"DiH:M:N:S:s:tvX")) != -1)
     {
@@ -1037,7 +1038,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"FATAL: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey(DB, 0, SVN_REV);
+	GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 	DBclose(DB);
 	return(0);
       case 'H':	Haystack = optarg; break;

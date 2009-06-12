@@ -686,6 +686,7 @@ int	main	(int argc, char *argv[])
   long DelUpload=0, DelFolder=0, DelLicense=0;
   int Scheduler=0; /* should it run from the scheduler? */
   int GotArg=0;
+  char *agent_desc = "Deletes upload.  Other list/delete options available from the command line.";
 
   while((c = getopt(argc,argv,"ifF:lL:sTuU:v")) != -1)
     {
@@ -698,7 +699,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"ERROR: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey(DB, 0, SVN_REV);
+	GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 	DBclose(DB);
 	return(0);
       case 'f': ListFolder=1; GotArg=1; break;
@@ -726,7 +727,7 @@ int	main	(int argc, char *argv[])
 	fprintf(stderr,"ERROR: Unable to open DB\n");
 	exit(-1);
 	}
-  GetAgentKey(DB, 0, SVN_REV);
+  GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
   signal(SIGALRM,ShowHeartbeat);
 
   if (ListProj) ListUploads();

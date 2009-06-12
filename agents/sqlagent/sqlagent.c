@@ -200,6 +200,7 @@ int	main	(int argc, char *argv[])
   char Parm[MAXCMD];
   char *ParmName=NULL;
   int c;
+  char *agent_desc = "Process sql";
 
   DB = DBopen();
   if (!DB)
@@ -208,7 +209,7 @@ int	main	(int argc, char *argv[])
 	fflush(stdout);
 	exit(-1);
 	}
-  GetAgentKey(DB, 0, SVN_REV);
+  GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"a:i")) != -1)

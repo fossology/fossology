@@ -359,6 +359,7 @@ int	main	(int argc, char *argv[])
   char Parm[MAXCMD];
   char *Path;
   int c;
+  char *agent_desc = "Pulls metadata out of RPM .spec files";
 
   DB = DBopen();
   if (!DB)
@@ -367,7 +368,7 @@ int	main	(int argc, char *argv[])
 	fflush(stdout);
 	exit(-1);
 	}
-  Agent_pk = GetAgentKey(DB, 0, SVN_REV);
+  Agent_pk = GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"i")) != -1)

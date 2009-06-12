@@ -450,6 +450,7 @@ int	main	(int argc, char *argv[])
   char *TempFileDir=NULL;
   int c;
   int InitFlag=0;
+  char *agent_desc = "Network downloader.  Uses wget(1).";
 
   memset(GlobalTempFile,'\0',MAXCMD);
   memset(GlobalURL,'\0',MAXCMD);
@@ -500,7 +501,6 @@ int	main	(int argc, char *argv[])
 	fflush(stdout);
 	exit(20);
 	}
-  GetAgentKey(DB, GlobalUploadKey, SVN_REV);
 
   /* When initializing the DB, don't do anything else */
   if (InitFlag)
@@ -508,6 +508,9 @@ int	main	(int argc, char *argv[])
 	DBclose(DB);
 	return(0);
 	}
+
+  /* Get the Agent Key from the DB */
+  GetAgentKey(DB, argv[0], GlobalUploadKey, SVN_REV, agent_desc);
 
   /* Run from the command-line (for testing) */
   InitHeartbeat();
