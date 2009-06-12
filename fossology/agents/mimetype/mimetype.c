@@ -41,6 +41,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <magic.h>
+#include <libgen.h>
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
@@ -513,12 +514,12 @@ int	main	(int argc, char *argv[])
   /* Init */
   DB = DBopen();
   if (!DB)
-	{
+  {
 	printf("FATAL: Unable to connect to database\n");
 	fflush(stdout);
 	exit(-1);
-	}
-  GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+  }
+  GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   FMimetype = fopen("/etc/mime.types","rb");
   if (!FMimetype)

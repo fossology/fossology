@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <sys/resource.h>  /* for rlimit */
 #include <time.h> /* for time() used when debugging performance */
+#include <libgen.h>
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
@@ -1038,7 +1039,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"FATAL: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+	GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 	DBclose(DB);
 	return(0);
       case 'H':	Haystack = optarg; break;

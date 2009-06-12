@@ -26,6 +26,7 @@
 #include <dirent.h>
 #include <time.h>
 #include <signal.h>
+#include <libgen.h>
 
 #include <libfossdb.h>
 #include <libfossrepo.h>
@@ -699,7 +700,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"ERROR: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+	GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 	DBclose(DB);
 	return(0);
       case 'f': ListFolder=1; GotArg=1; break;
@@ -727,7 +728,7 @@ int	main	(int argc, char *argv[])
 	fprintf(stderr,"ERROR: Unable to open DB\n");
 	exit(-1);
 	}
-  GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+  GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
   signal(SIGALRM,ShowHeartbeat);
 
   if (ListProj) ListUploads();

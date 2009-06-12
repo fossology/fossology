@@ -32,6 +32,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <grp.h>
+#include <libgen.h>
 
 #define lstat64(x,y) lstat(x,y)
 #define stat64(x,y) stat(x,y)
@@ -510,7 +511,7 @@ int	main	(int argc, char *argv[])
 	}
 
   /* Get the Agent Key from the DB */
-  GetAgentKey(DB, argv[0], GlobalUploadKey, SVN_REV, agent_desc);
+  GetAgentKey(DB, basename(argv[0]), GlobalUploadKey, SVN_REV, agent_desc);
 
   /* Run from the command-line (for testing) */
   InitHeartbeat();

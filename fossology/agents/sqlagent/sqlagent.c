@@ -29,6 +29,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
+#include <libgen.h>
 
 #include "libfossdb.h"
 #include "libfossagent.h"
@@ -209,7 +210,7 @@ int	main	(int argc, char *argv[])
 	fflush(stdout);
 	exit(-1);
 	}
-  GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+  GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   /* Process command-line */
   while((c = getopt(argc,argv,"a:i")) != -1)

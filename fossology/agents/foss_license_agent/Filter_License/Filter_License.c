@@ -27,6 +27,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <signal.h>
+#include <libgen.h>
 
 #include "libfossdb.h"
 #include "libfossrepo.h" /* repository functions */
@@ -1358,7 +1359,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"ERROR: s Unable to open database connection\n");
 	  exit(-1);
 	  }
-    GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+    GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 	DBclose(DB);
 	return(0);
       case 'O': UpdateDB=0; break;
@@ -1403,7 +1404,7 @@ int	main	(int argc, char *argv[])
 	fprintf(stderr,"ERROR pfile %s Unable to open database connection\n",Pfile_fk);
 	exit(-1);
 	}
-  GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+  GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   if (DB && AddToDB) AddPhrase();
 

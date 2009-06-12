@@ -28,6 +28,7 @@
 #include <extractor.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <libgen.h>
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
@@ -513,7 +514,7 @@ int	main	(int argc, char *argv[])
 			printf("FATAL: Unable to connect to database\n");
 			exit(-1);
 			}
-		Agent_pk = GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+		Agent_pk = GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 		/* insert EVERY meta type */
 		for(c=0; KeywordTypes[c].Label; c++)
 			GetKey(KeywordTypes[c].KeyIndex);
@@ -568,7 +569,7 @@ int	main	(int argc, char *argv[])
 	printf("FATAL: Unable to connect to database\n");
 	exit(-1);
 	}
-    Agent_pk = GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+    Agent_pk = GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 
     signal(SIGALRM,ShowHeartbeat);
     alarm(60);

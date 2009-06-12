@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <grp.h>
+#include <libgen.h>
 
 #include <libfossdb.h>
 #include <libfossrepo.h>
@@ -531,7 +532,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"ERROR: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+	GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 	DBclose(DB);
 	return(0);
       case 's': Scheduler=1; GotArg=1; break;
@@ -546,7 +547,7 @@ int	main	(int argc, char *argv[])
     printf("FATAL: Unable to access database.\n");
     return(1);
     }
-  GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+  GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
   signal(SIGALRM,ShowHeartbeat);
 
   alarm(60);  /* from this point on, handle the alarm */
