@@ -351,6 +351,7 @@ int	main	(int argc, char *argv[])
   int c;
   int ListProj=0;
   int GotArg=0;
+  char *agent_desc = "Remove files created by Filter_License";
 
   while((c = getopt(argc,argv,"iLSsTv")) != -1)
     {
@@ -363,7 +364,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"ERROR: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey(DB, 0, SVN_REV);
+	GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 	DBclose(DB);
 	return(0);
       case 'L': ListProj=1; GotArg=1; break;
@@ -387,7 +388,7 @@ int	main	(int argc, char *argv[])
 	fprintf(stderr,"ERROR: Unable to open DB\n");
 	exit(-1);
 	}
-  GetAgentKey(DB, 0, SVN_REV);
+	GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 
   if (ListProj) ListUploads(0);
 

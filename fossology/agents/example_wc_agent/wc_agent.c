@@ -247,6 +247,7 @@ int	main	(int argc, char *argv[])
   int c;
   int InitFlag=0; /* is the system just going to initialize? */
   char Parm[MAXCMD];
+  char *agent_desc = "File character, line, word count.";
 
   /* Process command-line */
   while((c = getopt(argc,argv,"i")) != -1)
@@ -270,7 +271,7 @@ int	main	(int argc, char *argv[])
 	fflush(stdout);
 	exit(-1);
 	}
-  GetAgentKey(DB, 0, SVN_REV);
+  GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 
   /* When initializing the DB, don't do anything else */
   if (InitFlag)

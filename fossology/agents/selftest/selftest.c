@@ -515,6 +515,7 @@ int	main	(int argc, char *argv[])
   int c;
   int Scheduler=0; /* should it run from the scheduler? */
   int GotArg=0;
+  char *agent_desc = "Validate repository and agents";
 
   while((c = getopt(argc,argv,"gisv")) != -1)
     {
@@ -530,7 +531,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"ERROR: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey(DB, 0, SVN_REV);
+	GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
 	DBclose(DB);
 	return(0);
       case 's': Scheduler=1; GotArg=1; break;
@@ -545,7 +546,7 @@ int	main	(int argc, char *argv[])
     printf("FATAL: Unable to access database.\n");
     return(1);
     }
-  GetAgentKey(DB, 0, SVN_REV);
+  GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
   signal(SIGALRM,ShowHeartbeat);
 
   alarm(60);  /* from this point on, handle the alarm */
