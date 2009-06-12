@@ -232,6 +232,7 @@
 #include <fcntl.h>
 #include <sys/resource.h>  /* for rlimit */
 #include <time.h> /* for time() used when debugging performance */
+#include <libgen.h> /* for time() used when debugging performance */
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
@@ -3081,7 +3082,7 @@ int	main	(int argc, char *argv[])
 	  fprintf(stderr,"FATAL: Unable to open DB\n");
 	  exit(-1);
 	  }
-	GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+	GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 	DBSetPhrase();
 	DBclose(DB);
 	return(0);
@@ -3106,7 +3107,7 @@ int	main	(int argc, char *argv[])
 		  fprintf(stderr,"FATAL: Unable to open DB\n");
 		  exit(-1);
 		  }
-        GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+        GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 		DBSetPhrase();
 		break;
 	  case 'N':
@@ -3119,7 +3120,7 @@ int	main	(int argc, char *argv[])
 		  exit(-1);
 		  }
 		if (RepType == NULL) RepType = RepDEFAULT[1];
-        GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+        GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 		DBSetPhrase();
 		break;
 	  case 's':

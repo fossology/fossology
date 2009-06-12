@@ -31,6 +31,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
+#include <libgen.h>
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
@@ -271,7 +272,7 @@ int	main	(int argc, char *argv[])
 	fflush(stdout);
 	exit(-1);
 	}
-  GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+  GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 
   /* When initializing the DB, don't do anything else */
   if (InitFlag)

@@ -27,6 +27,7 @@
 #define __USE_FILE_OFFSET64
 
 #include <stdio.h>
+#include <libgen.h>
 #include <unistd.h>
 
 #include "ununpack.h"
@@ -2015,7 +2016,7 @@ int	main	(int argc, char *argv[])
 			fprintf(stderr,"FATAL: Unable to access database\n");
 			SafeExit(20);
 			}
-		GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+		GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 		DBclose(DB);
 		return(0);
 		break; /* never reached */
@@ -2041,7 +2042,7 @@ int	main	(int argc, char *argv[])
 		if (!Pfile_Pk) Pfile_Pk = getenv("pfile_fk");
 		Upload_Pk = getenv("ARG_upload_pk");
 		if (!Upload_Pk) Upload_Pk = getenv("upload_pk");
-		GetAgentKey(DB, argv[0], 0, SVN_REV, agent_desc);
+		GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 
 		/* Check for all necessary parameters */
 		if (Verbose)
