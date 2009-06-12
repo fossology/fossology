@@ -84,11 +84,10 @@ class upload_url extends FO_Plugin {
         return($sched);
       }
     }
-
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
-    print "The upload has been scheduled. ";
-    print "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
-    print "<hr>\n";
+    $msg = "The upload $Name has been scheduled. It is ";
+    $keep =  "<a href='$Url'>upload #" . $uploadpk . "</a>.\n";
+    print displayMessage($msg,$keep);
     return (NULL);
   } // Upload()
   /*********************************************
@@ -112,12 +111,12 @@ class upload_url extends FO_Plugin {
           $rc = $this->Upload($Folder, $GetURL, $Desc, $Name);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $V.= PopupAlert('Upload added to job queue');
             $GetURL = NULL;
             $Desc = NULL;
             $Name = NULL;
-          } else {
-            $V.= PopupAlert("Upload failed: $rc");
+          }
+          else {
+            $V.= displayMessage("Upload failed for $GetUrl: $rc");
           }
         }
         /* Set default values */
