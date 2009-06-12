@@ -1,25 +1,25 @@
 <?php
 /***********************************************************
-Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ ***********************************************************/
 /*************************************************
-Restrict usage: Every PHP file should have this
-at the very beginning.
-This prevents hacking attempts.
-*************************************************/
+ Restrict usage: Every PHP file should have this
+ at the very beginning.
+ This prevents hacking attempts.
+ *************************************************/
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
@@ -35,12 +35,15 @@ class upload_srv_files extends FO_Plugin {
    *
    * Function: Upload()
    *
-   * Process the upload request.
+   * Process the upload request.  Call the upload by the Name passed in or by
+   * the filename if no name is supplied.
    *
-   * @param int $Folder parent folder fk
-   * @param string $dir_list list of files to upload
-   * @param string $Desc description
-   * @param string $Name Name for the upload
+   * @param int $FolderPk folder fk to load into
+   * @param string $SourceFiles files to upload, file, tar, directory, etc...
+   * @param string $GroupNames flag for indicating if group names were requested.
+   *        passed on as -A option to cp2foss.
+   * @param string $Desc optional description for the upload
+   * @param string $Name optional Name for the upload
    *
    * @return NULL on success, string on failure.
    */
@@ -129,10 +132,10 @@ class upload_srv_files extends FO_Plugin {
     if (empty($jobqueue_pk)) {
       return ("Failed to place fosscp_agent in job queue");
     }
-    $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
-    print "The upload has been scheduled. ";
-    print "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
-    print "<hr>\n";
+    $Url = Traceback_uri() . "?mod=jobstat&upload=$uploadpk";
+    $msg = "The upload for $SourceFiles has been scheduled. ";
+    $keep = "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
+    print displayMessage($msg,$keep);
     return (NULL);
   } // Upload()
 
@@ -148,7 +151,7 @@ class upload_srv_files extends FO_Plugin {
     $V = "";
     switch ($this->OutputType) {
       case "XML":
-      break;
+        break;
       case "HTML":
         $SourceFiles = GetParm('sourcefiles', PARM_STRING);
         $GroupNames = GetParm('groupnames', PARM_INTEGER);
@@ -158,10 +161,15 @@ class upload_srv_files extends FO_Plugin {
         if (!empty($SourceFiles) && !empty($FolderPk)) {
           $rc = $this->Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name);
           if (empty($rc)) {
-            // Need to refresh the screen
-            $V.= PopupAlert("Upload jobs for $SourceFiles added to job queue");
-          } else {
-            $V.= PopupAlert("Upload failed: $rc");
+            // clear form fileds
+            $SourceFiles = NULL;
+            $GroupNames  = NULL;
+            $FolderPk    = NULL;
+            $Desc        = NULL;
+            $Name        = NULL;
+          }
+          else {
+            $V.= displayMessage("Upload failed for $SourceFiles: $rc");
           }
         }
         /* Display instructions */
@@ -204,11 +212,11 @@ class upload_srv_files extends FO_Plugin {
         $V.= "</ol>\n";
         $V.= "<input type='submit' value='Upload!'>\n";
         $V.= "</form>\n";
-      break;
+        break;
       case "Text":
-      break;
+        break;
       default:
-      break;
+        break;
     }
     if (!$this->OutputToStdout) {
       return ($V);
