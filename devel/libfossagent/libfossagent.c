@@ -155,34 +155,27 @@ FUNCTION int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn
   int Agent_pk=-1;    /* agent identifier */
   char sql[256];
 
-  sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='%s' ORDER BY agent_rev DESC", agent_name);
+  /* get the exact agent rec requested */
+  sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='%s' and agent_rev='%s'", agent_name, svn_rev);
   rc = DBaccess(DB, sql);
-  if (rc < 0)
+  if ((rc <= 0) || (DBdatasize(DB) <= 0))
   {
-	printf("ERROR upload %ld unable to access the database\n",Upload_pk);
-	printf("LOG upload %ld unable to select %s from the database table agent\n",Upload_pk, agent_name);
-	DBclose(DB);
-	exit(16);
-  }
-
-  if (DBdatasize(DB) <= 0)
-  {
-    /* Not found? Add it! */
+    /* no exact match, so add an agent rec */
     sprintf(sql, "INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('%s',E'%s',E'%s')",
-              agent_name, svn_rev, agent_desc);
+            agent_name, svn_rev, agent_desc);
     rc = DBaccess(DB,sql);
     if (rc < 0)
-	{
-	printf("ERROR upload %ld unable to write to the database\n",Upload_pk);
-	printf("LOG upload %ld unable to write %s to the database table agent\n",Upload_pk, agent_name);
-	DBclose(DB);
-	exit(17);
-	}
+    {
+      printf("ERROR upload %ld unable to write to the database\n",Upload_pk);
+      printf("LOG upload %ld unable to write %s to the database table agent\n",Upload_pk, agent_name);
+      DBclose(DB);
+      exit(17);
+    }
 
-    sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='%s' ORDER BY agent_pk DESC", agent_name);
-    rc = DBaccess(DB,sql);
-    if (rc < 0)
-	{
+    sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='%s' and agent_rev='%s'", agent_name, svn_rev);
+   rc = DBaccess(DB,sql);
+   if (rc < 0)
+   {
       printf("ERROR upload %ld unable to access the database\n",Upload_pk);
       printf("LOG upload %ld unable to select %s from the database table agent\n",Upload_pk, agent_name);
       DBclose(DB);
