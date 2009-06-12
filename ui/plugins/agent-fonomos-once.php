@@ -39,9 +39,14 @@ class agent_fonomos_once extends FO_Plugin {
   /** To require login access, use: **/
   public $DBaccess = PLUGIN_DB_ANALYZE;
   public $LoginFlag = 1;
-  /*********************************************
-   AnalyzFile(): Analyze one uploaded file.
-   *********************************************/
+
+  /**
+   * AnalyzFile(): Analyze one uploaded file.
+   *
+   * @param string $FilePath the filepath to the file to analyze.
+   * @return string $V, html to display the results.
+   *
+   */
   function AnalyzeFile($FilePath) {
     global $Plugins;
     global $AGENTDIR;
@@ -50,16 +55,15 @@ class agent_fonomos_once extends FO_Plugin {
     $V = "";
     /* move the temp file */
     $TempFile = $_FILES['licfile']['tmp_name'];
-    //print "DB: TempFile=$TempFile\n";
     $V = exec("$foNomos $TempFile",$out,$rtn);
-    //print "DB: V is:$V   rtn is:$rtn\n";
     return ($V);
   } // AnalyzeFile()
+
   /*********************************************
-  RegisterMenus(): Change the type of output
-  based on user-supplied parameters.
-  Returns 1 on success.
-  *********************************************/
+   RegisterMenus(): Change the type of output
+   based on user-supplied parameters.
+   Returns 1 on success.
+   *********************************************/
   function RegisterMenus() {
     if ($this->State != PLUGIN_STATE_READY) {
       return (0);
@@ -75,9 +79,9 @@ class agent_fonomos_once extends FO_Plugin {
       $ThisMod = 0;
     }
     /*
-       Check for a wget post (wget cannot post to a variable name).  Sets the
-       unlink_flag if there is a temp file.
-    */
+     Check for a wget post (wget cannot post to a variable name).  Sets the
+     unlink_flag if there is a temp file.
+     */
     if ($ThisMod && empty($_POST['licfile'])) {
       $Fin = fopen("php://input", "r");
       $Ftmp = tempnam(NULL, "fosslic-alo-");
@@ -138,45 +142,6 @@ class agent_fonomos_once extends FO_Plugin {
       case "XML":
         break;
       case "HTML":
-        /*
-         You can also specify the file by uploadtree_pk as 'item',
-         note: rando can't find this in the form, so how did this ever work?
-         */
-        $Item = GetParm('item', PARM_INTEGER); // may be null
-        //print "<pre>The filename (licfile) is:{$_FILES['licfile']}\n</pre>";
-        if (file_exists(@$_FILES['licfile']['tmp_name'])) {
-          /*
-           * "A one shot license analysis shows the following license(s) in {filename}:"
-           */
-          print "<strong>A one shot license analysis shows the following license(s)" .
-            " in file </strong><em>{$_FILES['licfile']['name']}:</em> ";
-          print "<strong>" . $this->AnalyzeFile($_FILES['licfile']['tmp_name']) . "</strong><br>";
-
-          if (!empty($_FILES['licfile']['unlink_flag'])) {
-            unlink($_FILES['licfile']['tmp_name']);
-          }
-          return;
-        }
-        else if (!empty($Item) && !empty($DB)) {
-          /* Get the pfile info */
-          $Results = $DB->Action("SELECT * FROM pfile
-		        INNER JOIN uploadtree ON uploadtree_pk = $Item
-		        AND pfile_pk = pfile_fk;");
-          if (!empty($Results[0]['pfile_pk'])) {
-            global $LIBEXECDIR;
-            $Highlight = 1; /* processing a pfile? Always highlight. */
-            $Repo = $Results[0]['pfile_sha1'] . "." . $Results[0]['pfile_md5'] . "." . $Results[0]['pfile_size'];
-            $Repo = trim(shell_exec("$LIBEXECDIR/reppath files '$Repo'"));
-            $_FILES['licfile']['tmp_name'] = $Repo;
-            $_FILES['licfile']['size'] = $Results[0]['pfile_size'];
-            print $this->AnalyzeOne($pfilepath) . "\n";
-            /* Do not unlink the or it will delete the repo file! */
-            if (!empty($_FILES['licfile']['unlink_flag'])) {
-              unlink($_FILES['licfile']['tmp_name']);
-            }
-            return;
-          }
-        }
         /* Display instructions */
         $V.= "This analyzer allows you to upload a single file for license analysis.\n";
         $V.= "The limitations:\n";
@@ -198,6 +163,50 @@ class agent_fonomos_once extends FO_Plugin {
         $V.= "<input type='hidden' name='showheader' value='1'>";
         $V.= "<input type='submit' value='Analyze!'>\n";
         $V.= "</form>\n";
+
+        /*
+         You can also specify the file by uploadtree_pk as 'item',
+         note: rando can't find this in the form, so how did this ever work?
+         */
+        $Item = GetParm('item', PARM_INTEGER); // may be null
+        //print "<pre>The filename (licfile) is:{$_FILES['licfile']}\n</pre>";
+        if (file_exists(@$_FILES['licfile']['tmp_name'])) {
+          $keep = "<strong>A one shot license analysis shows the following license(s)" .
+            " in file </strong><em>{$_FILES['licfile']['name']}:</em> ";
+          $keep .= "<strong>" . $this->AnalyzeFile($_FILES['licfile']['tmp_name']) . "</strong><br>";
+          print displayMessage(NULL,$keep);
+          $_FILES['licfile'] = NULL;
+          print $V;
+
+          if (!empty($_FILES['licfile']['unlink_flag'])) {
+            unlink($_FILES['licfile']['tmp_name']);
+          }
+          return;
+        }
+        else if (!empty($Item) && !empty($DB)) {
+          /* Get the pfile info */
+          $Results = $DB->Action("SELECT * FROM pfile
+		        INNER JOIN uploadtree ON uploadtree_pk = $Item
+		        AND pfile_pk = pfile_fk;");
+          if (!empty($Results[0]['pfile_pk'])) {
+            global $LIBEXECDIR;
+            $Highlight = 1; /* processing a pfile? Always highlight. */
+            $Repo = $Results[0]['pfile_sha1'] . "." . $Results[0]['pfile_md5'] . "." . $Results[0]['pfile_size'];
+            $Repo = trim(shell_exec("$LIBEXECDIR/reppath files '$Repo'"));
+            $_FILES['licfile']['tmp_name'] = $Repo;
+            $_FILES['licfile']['size'] = $Results[0]['pfile_size'];
+            $keep = "<strong>A one shot license analysis shows the following license(s)" .
+            " in file </strong><em>{$_FILES['licfile']['name']}:</em> ";
+            $keep .= "<strong>" . $this->AnalyzeFile($_FILES['licfile']['tmp_name']) . "</strong><br>";
+            print displayMessage(NULL, $keep);
+            print $V;
+            /* Do not unlink the or it will delete the repo file! */
+            if (!empty($_FILES['licfile']['unlink_flag'])) {
+              unlink($_FILES['licfile']['tmp_name']);
+            }
+            return;
+          }
+        }
         break;
       case "Text":
         break;
