@@ -155,7 +155,7 @@ FUNCTION int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn
   int Agent_pk=-1;    /* agent identifier */
   char sql[256];
 
-  sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name =%s ORDER BY agent_rev DESC", agent_name);
+  sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='%s' ORDER BY agent_rev DESC", agent_name);
   rc = DBaccess(DB, sql);
   if (rc < 0)
   {
@@ -164,6 +164,7 @@ FUNCTION int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn
 	DBclose(DB);
 	exit(16);
   }
+
   if (DBdatasize(DB) <= 0)
   {
     /* Not found? Add it! */
