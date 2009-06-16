@@ -821,7 +821,7 @@ int	FindCmd	(char *Filename)
   char *Type;
   char Static[256];
   int Match;
-  int i;
+  int i, rc;
 
   Type = (char *)magic_file(MagicCookie,Filename);
   if (Type == NULL) return(-1);
@@ -831,13 +831,22 @@ int	FindCmd	(char *Filename)
 
   if (strstr(Type, "octet" ))
   {
-	int rc;
 	rc = RunCommand("zcat","-q -l",Filename,">/dev/null 2>&1",NULL,NULL);
 	if (rc==0)
 	{
 	  memset(Static,0,sizeof(Static));
 	  strcpy(Static,"application/x-gzip");
 	  Type=Static;
+    }
+    else  // zcat failed so try cpio (possibly from rpm2cpio)
+    {
+      rc = RunCommand("cpio","-t<",Filename,">/dev/null 2>&1",NULL,NULL);
+      if (rc==0)
+      {
+        memset(Static,0,sizeof(Static));
+        strcpy(Static,"application/x-cpio");
+        Type=Static;
+      }
     }
   }
  
