@@ -262,7 +262,6 @@ class core_auth extends FO_Plugin {
       $_SESSION['NoPopup'] = 0;
     }
     /* Need to refresh the screen */
-    $V.= PopupAlert('User Logged In');
     $V.= "<script language='javascript'>\n";
     /* Use the previous redirect, but only use it if it comes from this
     server's Traceback_uri().  (Ignore hostname.) */
@@ -354,7 +353,6 @@ class core_auth extends FO_Plugin {
           $_SESSION['UserLevel'] = NULL;
           $_SESSION['UserEmail'] = NULL;
           $_SESSION['Folder'] = NULL;
-          $V.= PopupAlert('User Logged Out');
           $Uri = Traceback_uri() . "?mod=refresh&remod=default";
           $V.= "<script language='javascript'>\n";
           $V.= "window.open('$Uri','_top');\n";
