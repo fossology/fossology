@@ -260,9 +260,9 @@ class ui_browse extends FO_Plugin
           if (empty($Desc)) { $Desc = "<i>No description</i>"; }
           $Name = $Row['ufile_name'];
           if (empty($Name)) { $Name = $Row['upload_filename']; }
-	  $Sql2 = "SELECT count(*) AS count FROM uploadtree WHERE upload_fk = '$UploadPk';";
-          $SResults = $DB->Action($Sql2);
-	  $ItemCount = number_format($SResults[0]['count'], 0, "", ",");
+//	  $Sql2 = "SELECT count(*) AS count FROM uploadtree WHERE upload_fk = '$UploadPk';";
+//          $SResults = $DB->Action($Sql2);
+//	  $ItemCount = number_format($SResults[0]['count'], 0, "", ",");
           $UploadtreePk = DirGetNonArtifact($Row['uploadtree_pk']);
           $V .= "<tr><td>";
 	  if (IsContainer($Row['ufile_mode']))
@@ -286,9 +286,9 @@ class ui_browse extends FO_Plugin
 	  $V .= menu_to_1list($MenuPfile,$Parm," "," ");
 
 	  $V .= "<br>" . $Desc;
-          $V .= "<br>Contains $ItemCount ";
-	  if ($ItemCount != "1") { $V .= "items."; }
-	  else { $V .= "item."; }
+//          $V .= "<br>Contains $ItemCount ";
+//	  if ($ItemCount != "1") { $V .= "items."; }
+//	  else { $V .= "item."; }
 	  $V .= "</td>\n";
           $V .= "<td align='right'>" . substr($Row['upload_ts'],0,19) . "</td></tr>\n";
 
