@@ -21,18 +21,19 @@ import re, sys, math
 import unicodedata
 from optparse import OptionParser
 import parser
+import maxent_utils
 from maxent import MaxentModel
 
 def train(files):
-    model = parser.train_sentences(files,MaxentModel(),2,2)
+    model = maxent_utils.train_sentences(files,MaxentModel(),2,2)
     return model
 
 def test(file,me):
     text = open(file).read()
 
     features = parser.features(text)
-    sents = parser.sentences(features,me,2,2)
-    byte_offsets = parser.sentence_byte_offsets(features,sents)
+    sents = maxent_utils.sentences(features,me,2,2)
+    byte_offsets = maxent_utils.sentence_byte_offsets(features,sents)
 
     n = len(byte_offsets)
 
@@ -63,7 +64,7 @@ def main():
     if options.mode == 'test':
         if not options.model_file:
             print >> sys.stderr, 'Model file not provided!'
-            parser.print_usage()
+            oparser.print_usage()
             sys.exit(1)
         me = MaxentModel()
         me.load(options.model_file)

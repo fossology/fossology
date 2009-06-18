@@ -28,15 +28,15 @@ sparsevect/python/sparsevect.so:
 	make -C sparsevect -f Makefile.old
 
 templates.txt:
-	find ../../fossology/agents/foss_license_agent/Licenses/Raw/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > templates.txt
+	find Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > templates.txt
 
 models/:
 	mkdir models
 
-models/SentenceModel.dat: sparsevect/python/sparsevect.so models/ $(SENTENCE_FILES)
+models/SentenceModel.dat: sparsevect/python/sparsevect.so $(SENTENCE_FILES)
 	python utils/sentence_trainner.py --mode train --model_file $@ $(SENTENCE_FILES)
 
-models/Database.dat: sparsevect/python/sparsevect.so models/ models/SentenceModel.dat $(TEMPLATE_FILE)
+models/Database.dat: sparsevect/python/sparsevect.so models/SentenceModel.dat $(TEMPLATE_FILE)
 	python sentence_based_classification/f1.py -d -S models/SentenceModel.dat -D $@ -T $(TEMPLATE_FILE)
 
 tests: sparsevect/python/sparsevect.so models/SentenceModel.dat models/Database.dat

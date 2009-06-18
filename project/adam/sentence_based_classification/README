@@ -17,7 +17,7 @@
 
 The main script for sentence based license classification is f1.py. Its has two functions. First to create a database of labeled sentences. Secondly the script uses the database to label unlabeled license.
 
-Note: The PYTHONPATH environment variable needs to contain the path to utils/parser.py, utils/maxent_util.py, and sparsevect/python/ to function correctly.
+Note: The PYTHONPATH environment variable needs to contain the path to utils/parser.py, utils/maxent_utils.py, and sparsevect/python/ to function correctly.
 
 Usage:
 	f1.py [-S sentence_model] [-D database] [-T template_file] [-o output_dir] [-f test_files]
@@ -30,7 +30,7 @@ Usage:
 
 Example: (assume that a sentence model exists at ../models/SentenceModel.dat)
 	export PYTHONPATH := ../utils:../sparsevect/python:../sentence_based_classification
-	find ../../../fossology/agents/foss_license_agent/Licenses/Raw/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > templates.txt
+	find ../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > templates.txt
 
 	python f1.py -d -S ../models/SentenceModel.dat -D ../models/Database.dat -T templates.txt
 	python f1.py -S ../models/SentenceModel.dat -D ../models/Database.dat -f tests.txt -o output
