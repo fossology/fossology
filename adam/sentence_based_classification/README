@@ -1,0 +1,36 @@
+## 
+## Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+## 
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## version 2 as published by the Free Software Foundation.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License along
+## with this program; if not, write to the Free Software Foundation, Inc.,
+## 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+##
+
+The main script for sentence based license classification is f1.py. Its has two functions. First to create a database of labeled sentences. Secondly the script uses the database to label unlabeled license.
+
+Note: The PYTHONPATH environment variable needs to contain the path to utils/parser.py, utils/maxent_util.py, and sparsevect/python/ to function correctly.
+
+Usage:
+	f1.py [-S sentence_model] [-D database] [-T template_file] [-o output_dir] [-f test_files]
+	-S, --sentence_model: path of the sentence model file
+	-D, --database: If the -T flag is specified then a database cache file will be saved at the location specified. Otherwise, loads a pre-cached database model.
+	-T, --templates: Path to a \\n delineated file with paths to license template files.
+	-o, --output: Output directory
+	-f, --files: Path to a \\n delineated file with paths to test files
+	-d, --debug: Turn debug output on
+
+Example: (assume that a sentence model exists at ../models/SentenceModel.dat)
+	export PYTHONPATH := ../utils:../sparsevect/python:../sentence_based_classification
+	find ../../../fossology/agents/foss_license_agent/Licenses/Raw/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > templates.txt
+
+	python f1.py -d -S ../models/SentenceModel.dat -D ../models/Database.dat -T templates.txt
+	python f1.py -S ../models/SentenceModel.dat -D ../models/Database.dat -f tests.txt -o output
