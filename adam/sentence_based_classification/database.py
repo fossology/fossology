@@ -25,6 +25,7 @@ import cPickle as pickle
 from datetime import datetime
 import random
 import parser
+import maxent_utils
 from Stemmer import Stemmer
 
 use_fast_vector = True
@@ -69,9 +70,9 @@ class Database():
             # then take dot products between templates files and target files.
 
             features = parser.features(text)
-            sent_index = parser.sentences(features,self.sentence_model,2,2)
-            sentences = parser.sentence_stem_arrays(features,sent_index)
-            byte_offsets = parser.sentence_byte_offsets(features,sent_index)
+            sent_index = maxent_utils.sentences(features,self.sentence_model,2,2)
+            sentences = maxent_utils.sentence_stem_arrays(features,sent_index)
+            byte_offsets = maxent_utils.sentence_byte_offsets(features,sent_index)
             # sentences is a list of lists with the stemmed words that makeup the template
             for j in xrange(len(sentences)):
                 # if the text in the sentence is below 4 words then insert it
@@ -170,9 +171,9 @@ def calculate_matches(db,filename,thresh = 0.9,debug = False):
 
     # split the file into sentneces
     features = parser.features(text)
-    sent_index = parser.sentences(features,db.sentence_model,2,2)
-    text_arrays = parser.sentence_stem_arrays(features,sent_index)
-    byte_offsets = parser.sentence_byte_offsets(features,sent_index)
+    sent_index = maxent_utils.sentences(features,db.sentence_model,2,2)
+    text_arrays = maxent_utils.sentence_stem_arrays(features,sent_index)
+    byte_offsets = maxent_utils.sentence_byte_offsets(features,sent_index)
     sentences = []
 
     # matches is a list of dictionaries, one for each sentence.

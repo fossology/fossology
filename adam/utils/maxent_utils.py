@@ -70,7 +70,7 @@ def train_sentences(files,model,left,right):
             file_features[file] = []
             file_sentences[file] = []
         for s in sentences:
-            f = features(''.join(s))
+            f = parser.features(''.join(s))
             file_sentences[file].append((len(f)-1)+(len(file_features[file])))
             file_features[file].extend(f)
 
