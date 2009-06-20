@@ -58,11 +58,37 @@ function array_implode($arrays, &$target = array()) {
  * @param array $master the license Master results to compare to
  *
  * format for the input arrays is:
- * filename is the key
- * results is an array of one or more comma seperate results
+ * dir/filename is the key
+ * results is an array of one or more comma separated results
  *
- * @return array $results an assoicative array of results, on error
- * the first key will be 'Error' and the value will a string (the be error message).
+ * @return array $allResults an array of two arrays, the first array is an
+ * associative totals array with 'pass' and 'fail' keys.   This records the
+ * total passes and failures.  The second array  is also an assoicative array
+ * of all the results for each file in the format:
+ *
+ * [license/filename] => Array
+ (
+ [standard] => Array
+ (
+ [0] => One or
+ [1] => more standards
+ )
+
+ [pass] => Array
+ (
+ [0] => On or more passes
+ )
+
+ [fail] => Array
+ (
+ [0] => On or more failures
+ )
+
+ standard is the agreed upon standard for reporting this license.  Initially
+ this standard is based on Nomos results, this could change in the future.
+ *
+ * on error  a single associative array is returned with the first key as
+ *  'Error' and the value will a string (the be error message).
  *
  */
 function compare2Master($results,$Master) {
@@ -78,14 +104,18 @@ function compare2Master($results,$Master) {
   $pass        = array();
   $fail        = array();
   $comparisons = array();
-  foreach($results as $file => $testResults) {
-    $masterResults = $Master[$file];
+  $Total       = array();
+  $Total['pass'] = 0;
+  $Total['fail'] = 0;
+  foreach($results as $licenseFile => $testResults) {
+    $licenseFile = rtrim($licenseFile,':');
+    $masterResults = $Master[$licenseFile];
     array_walk(&$testResults, 'trim_value');
     array_walk(&$masterResults, 'trim_value');
     //print "TR is:\n";print_r($testResults) . "\n";
     //print "MR is:\n";print_r($masterResults) . "\n";
-    //print "file is:$file\n";
-    /* Array diff is the biggest pos that I have ever seen!  Useless*/
+    //print "licenseFile is:$lisenseFile\n";
+    /* Array diff documentation is the biggest pos that I have ever seen! */
     $allDiffs = array_diff($testResults,$masterResults);
     if(count($allDiffs) == 0) {
       //print "allDiffs is ZERO\n";
@@ -94,6 +124,7 @@ function compare2Master($results,$Master) {
     else {
       foreach($allDiffs as $diff) {
         //print "diff is:$diff\n----------------\n";
+        $Total['fail'] += count($diff);
         $fail[] = $diff;
 
         // remove all diffs from test results to get passes
@@ -103,21 +134,17 @@ function compare2Master($results,$Master) {
       }
       $pass = array_unique($testResults);
     }
-    /* find any misses */
-    $misses = array_diff($masterResults,$testResults);
-    $comparisons[$file]['standard'] = $masterResults;
-    $comparisons[$file]['pass'] = $pass;
-    $comparisons[$file]['fail'] = $fail;
-    $comparisons[$file]['missed'] = $misses;
-    //array_push($comparisons[$file],$pass);
-    //array_push($comparisons[$file],$fail);
-    //array_push($comparisons[$file],$misses);
+    //print "MR before standard is:\n";print_r($masterResults) . "\n";
+    $Total['pass'] += count($pass);
+    $comparisons[$licenseFile]['standard'] = $masterResults;
+    $comparisons[$licenseFile]['pass'] = $pass;
+    $comparisons[$licenseFile]['fail'] = $fail;
     $allDiffs = array();
     $pass = array();
     $fail = array();
-    $misses = array();
   }
-  return($comparisons);
+  $allResults = array($Total,$comparisons);
+  return($allResults);
 } // compare2Master
 
 function trim_value(&$value) {
@@ -315,12 +342,19 @@ function _runAnalysis($licenseList,$cmd){
     foreach($licenseList as $license){
       $license = trim($license);
       $last = exec("$cmd $license 2>&1", $result, $rtn);
-      $Fossology[basename($license)] = $last;
+      $pathParts = pathinfo($license);
+      $ld = explode('/',$pathParts['dirname']);
+      $licenseDir = end($ld);
+      // filename is just the filename without the extension .txt, add it back in
+      $licenseKey = $licenseDir . '/' . trim($pathParts['filename'])
+      . '.' . $pathParts['extension'] . ':';
+      $Fossology[$licenseKey] = $last;
     }
     return($Fossology);
   }
+  // process the file
   else {
-    $last = exec("$cmd $file 2>&1", $result, $rtn);
+    $last = exec("$cmd $licenseList 2>&1", $result, $rtn);
     return($last);
   }
 } // _runAnalysis
@@ -348,7 +382,7 @@ function _runAnalysis($licenseList,$cmd){
 function loadMasterResults($file=NULL){
 
   /* load the results to compare against */
-
+  $Master = array();
   if(strlen($file)) {
     $masterFile = $file;
   }
@@ -366,7 +400,8 @@ function loadMasterResults($file=NULL){
     return(FALSE);
   }
   while(($line = fgets($FD, 1024)) !== FALSE) {
-    list($file,$result) = explode(' ',$line);
+    list($file,$result) = explode(':',$line);
+    $result = trim($result);
     $Results = explode(',',$result);
     $Master[$file] = $Results;
   }
@@ -375,7 +410,7 @@ function loadMasterResults($file=NULL){
 } // loadMasterResults
 
 /**
- * saveResults
+ * saveALLResults
  *
  * save the license test results, passed in as an associative array of arrays
  *
@@ -385,7 +420,7 @@ function loadMasterResults($file=NULL){
  * @return boolean: True on success, False on failure
  *
  */
-function saveResults($fileName,$results) {
+function saveAllResults($fileName,$results) {
 
   if(!strlen($fileName)) return(FALSE);
   if(empty($results)) return(FALSE);
@@ -401,8 +436,11 @@ function saveResults($fileName,$results) {
     print $e->getMessage();
     return(FALSE);
   }
-  foreach($results as $filename => $resultArray) {
-    $oneResult = "file-name=$filename\n";
+  foreach($results as $licenseFile => $resultArray) {
+    print "licenseFIle is:$licenseFile\n";
+    list($licenseType,$filename) = explode('/',$licenseFile);
+    $oneResult = "license-type=$licenseType;\n";
+    $oneResult .= "file-name=$filename;\n";
     foreach($resultArray as $keyWord => $results) {
       if(is_array($results)) {
         switch($keyWord) {
@@ -412,7 +450,7 @@ function saveResults($fileName,$results) {
               $oneResult .= "$res,";
             }
             $oneResult = rtrim($oneResult,',');
-            $oneResult .= "\n";
+            $oneResult .= ";\n";
             break;
           case 'pass':
             $oneResult .= "pass=";
@@ -420,7 +458,7 @@ function saveResults($fileName,$results) {
               $oneResult .= "$res,";
             }
             $oneResult = rtrim($oneResult,',');
-            $oneResult .= "\n";
+            $oneResult .= ";\n";
             break;
           case 'fail':
             $oneResult .= "fail=";
@@ -428,16 +466,17 @@ function saveResults($fileName,$results) {
               $oneResult .= "$res,";
             }
             $oneResult = rtrim($oneResult,',');
-            $oneResult .= "\n";
+            $oneResult .= ";\n";
             break;
-          case 'missed':
-            $oneResult .= "missed=";
-            foreach($results as $res){
-              $oneResult .= "$res,";
-            }
-            $oneResult = rtrim($oneResult,',');
-            $oneResult .= "\n";
-            break;
+            /*       case 'missed':
+             $oneResult .= "missed=";
+             foreach($results as $res){
+             $oneResult .= "$res,";
+             }
+             $oneResult = rtrim($oneResult,',');
+             $oneResult .= "\n";
+             break;
+             */
         }
       }
     }
@@ -446,6 +485,50 @@ function saveResults($fileName,$results) {
     $oneResult = '';
   }
   fclose($Std);
+  return(TRUE);
+} // saveAllResults
+
+/**
+ * saveTotals
+ *
+ * Save the license test totals in a file
+ *
+ * format is : seperated fields
+ * agent:pass:fail
+ * where agent is the agent name, e.g. fo-nomos
+ * pass is the total passes
+ * fail if the total failures
+ *
+ * @param string $filename the file name (path) to save the results to
+ * @param string $agent the agent name e.g. fo-nomos
+ * @param associative array $totals using pass and fail for keys the totals for
+ * each
+ * @return boolean
+ */
+function saveTotals($filename,$agent,$totals) {
+
+  if(!strlen($filename)) {
+    return(FALSE);
+  }
+  if(!strlen($agent)) {
+    return(FALSE);
+  }
+  if(empty($totals)) {
+    return(FALSE);
+  }
+  try{
+    $Total = @fopen($fileName,'w');
+    if($Total === FALSE) {
+      throw new Exception("Cannot Save Results to file $fileName\n");
+    }
+  }
+  catch(Exception $e){
+    print "FATAL!" . $e->getMessage();
+    return(FALSE);
+  }
+  $entry = $agent . ':' . $totals['pass'] . ':' . $totals['fail'] . "\n";
+  $many = fwrite($Total, $entry);
+  fclose($Total);
   return(TRUE);
 }
 ?>

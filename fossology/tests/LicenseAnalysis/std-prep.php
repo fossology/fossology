@@ -23,7 +23,10 @@
  * Read the output of osrb-nomos from a file and transform it into a form that
  * is easily uploaded by a consumer, (e.g. LicenseRegression test).
  *
- * File format should be <filepath>: <results>, results can be comma seperated
+ * Input file format should be <filepath>: <results>, multiple results comma separated
+ * Output file format is: dir/file: <results>,... multiple results comma separated
+ *
+ * @todo: add input parameter for file input and check.
  *
  * created: May 28, 2009
  * @version "$Id:  $"
@@ -35,18 +38,16 @@ require_once('testLicenseLib.php');
 $file = "/home/markd/GnomosResults-2009-05-28";
 $resultList = array();
 
+/*
+ build the output
+ */
 $iFile = new ReadInputFile($file);
 if($iFile) {
   while(FALSE !== ($line = $iFile->getLine($iFile->getFileResource()))){
     buildOutput($line,&$resultList);
-    /*
-     if(!buildOutput($line,&$resultList)){
-     print "Error! could not add $line to the output\n";
-     exit(1);
-     }
-     */
   }
 }
+
 try{
   $Std = @fopen('OSRB-nomos-license-matches','w');
   if($Std === FALSE) {
@@ -62,6 +63,18 @@ foreach($resultList as $file => $rlist){
   $many = fwrite($Std, "$file $rlist\n");
 }
 fclose($Std);
+
+/**
+ * buildOutput
+ *
+ * Build the output file in the format:
+ *
+ * dir/filename: result, multiple results separated by comma
+ *
+ * @param string $line the input line to process
+ * @param array ref $resultList the reference to array to build
+ * @return False on error, or void: builts the array passed in.
+ */
 function buildOutput($line,&$resultList) {
 
   if(!strlen($line)) {
@@ -69,9 +82,16 @@ function buildOutput($line,&$resultList) {
   }
   list($filePath, $results) = explode(' ', $line);
   $filePath = rtrim($filePath,':');
-  $file = basename($filePath);
+  //$file = basename($filePath);
+  $licenseFile = pathinfo($filePath);
+  $ld = explode('/',$licenseFile['dirname']);
+  $licenseDir = end($ld);
+  // filename is just the filename without the extension .txt, add it back in
+  $licenseKey = $licenseDir . '/' . trim($licenseFile['filename'])
+                . '.' . $licenseFile['extension'] . ':';
   $results = trim($results);
   $filtered = filterNomosResults($results);
-  $resultList[$file] = $filtered;
+  $filtered = trim($filtered);
+  $resultList[$licenseKey] = $filtered;
 }
 ?>

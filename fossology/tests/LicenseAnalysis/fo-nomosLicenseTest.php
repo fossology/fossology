@@ -33,8 +33,8 @@
 require_once('../commonTestFuncs.php');
 require_once('testLicenseLib.php');
 
-$ldir = '/home/fosstester/regression/license/eddy/GPL/GPL_v3';
-//$ldir = '/home/fosstester/regression/license/eddy/GPL';
+$ldir = '/home/fosstester/regression/license/eddy/GPL';
+//$ldir = '/home/fosstester/regression/license/eddy/GPL/GPL_v3'
 //$ldir = '/home/fosstester/regression/license/eddy';
 
 
@@ -80,7 +80,7 @@ if(empty($foNomosRaw)) {
   debug_print_backtrace();
   exit(1);
 }
-print "foNomos results are:\n";print_r($foNomosRaw) . "\n";
+//print "foNomos results are:\n";print_r($foNomosRaw) . "\n";
 
 foreach($foNomosRaw as $file => $result) {
   $tList = trim($result);
@@ -88,21 +88,36 @@ foreach($foNomosRaw as $file => $result) {
   $all = explode(",",$list);
   $foNomos[$file] = $all;
 }
-//print "foNomos results are:\n";print_r($foNomos) . "\n";
+//print "Filtered foNomos results are:\n";print_r($foNomos) . "\n";
 
 /* Compare to master */
 $Results = compare2Master($foNomos, $Master);
-//print "Comparison results are:\n";print_r($Results) . "\n";
 
+$totals     = $Results[0];
+$allResults = $Results[1];
+print "Comparison totals are:\n";print_r($totals) . "\n";
+print "Comparison results are:\n";print_r($allResults) . "\n";
 /* store comparison results in a file */
-$saveFile = 'FoNomos-Results.' . date('YMd');
+$saveFile = 'FoNomos-Results-Summary.' . date('YMd');
+if(saveResults($saveFile, $totals)){
+  print "fo-nomos Summary results generated and saved in file:\n$saveFile\n";
+  exit(0);
+}
+else {
+  print "Error! could not save results, printing to the screen\n";
+  foreach($totals as $file => $result){
+    print "$file: $result\n";
+  }
+  exit(1);
+}
 
-if(saveResults($saveFile, $Results)){
+$saveFile = 'FoNomos-All-Results.' . date('YMd');
+if(saveResults($saveFile, $allResults)){
   print "fo-nomos results generated and saved in file:\n$saveFile\n";
   exit(0);
 }
 else {
-  print "Error! could not save Bsam results, printing to the screen\n";
+  print "Error! could not save results, printing to the screen\n";
   foreach($Result as $file => $result){
     print "$file: $result\n";
   }
