@@ -5,19 +5,18 @@
 <body>
 <table border="1" cellpadding="0">
         <tr>
-                <td colspan="5" align="center"><strong>Fossology License Test Results</strong></td>
+                <td colspan="4" align="center"><strong>Fossology License Test Results</strong></td>
         </tr>
   <tr>
     <th align="center" colspan="2">Nomos</th>
-    <th align="center" colspan="3">BSam</th>
-    <!-- <th align="center" colspan="3">FoNomos</th> -->
+    <th align="center" colspan="2">BSam</th>
+    <!-- <th align="center" colspan="2">FoNomos</th> -->
   </tr>
   <tr>
     <th align="center">File</th>
     <th align="center">Vetted Name</th>
     <th align="center">Pass</th>
     <th align="center">Fail</th>
-    <th align="center">Missed</th>
   </tr>   
     </tr>
     {assign var=cntr value=0}
@@ -25,16 +24,14 @@
   <tr>
       <td align="left">{$file[tr]}</td>
       <td align="center">{$vetted[tr]}</td>
-      {section name=td loop=$results max=3 }
-         {assign var=gre value=`$cntr%3`}
+      {section name=td loop=$results max=2}
+         {assign var=gre value=`$cntr%2`}
          {if $results[$cntr] ne ''}
-           {* pass=0, fail=1, missed=2 *}
+           {* pass=0, fail=1*}
            {if $gre eq 0}
-             <td align="center" style="color:#009900">{ $results[$cntr]}</td>
+             <td align="center" style="color:#009900">{ $results[$cntr] }</td>
            {elseif $gre eq 1}
-             <td align="center" style="color:red">{ $results[$cntr]}</td>
-           {elseif $gre eq 2}
-             <td align="center" style="color:#0000FF">{ $results[$cntr]}</td>
+             <td align="center" style="color:red">{ $results[$cntr] }</td>
            {/if}
          {else}
            <td align="center">{"&nbsp;"}</td>

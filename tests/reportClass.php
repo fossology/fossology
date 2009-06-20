@@ -1,4 +1,4 @@
-<?php
+c<?php
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -29,10 +29,10 @@
  *
  * Created on Dec 12, 2008
  */
-  /*
-   * pattern is Starting < > Tests ... data followed by either OK or
-   * FAILURES! then results, skip a line then elapse time.
-   */
+/*
+ * pattern is Starting < > Tests ... data followed by either OK or
+ * FAILURES! then results, skip a line then elapse time.
+ */
 // put full path to Smarty.class.php
 require_once ('/usr/share/php/smarty/libs/Smarty.class.php');
 
@@ -64,19 +64,19 @@ class TestReport
     }
   }
 
-/**
- * Display the licesense results table.
- *
- *  @param int $cols, the number of columns to use
- *
- *  @TODO make a general display routine (if possible)
- *        - takes assoc array of things to assign (keys are smarty vars, values
- *        are php vars).
- *        - either uses the set template or takes one in as parameter impliment
- *        set first.
- *        - ?? what else
- *
- */
+  /**
+   * Display the licesense results table.
+   *
+   *  @param int $cols, the number of columns to use
+   *
+   *  @TODO make a general display routine (if possible)
+   *        - takes assoc array of things to assign (keys are smarty vars, values
+   *        are php vars).
+   *        - either uses the set template or takes one in as parameter impliment
+   *        set first.
+   *        - ?? what else
+   *
+   */
   public function displayLicenseResults($cols,$result) {
 
     if(empty($cols)) {
@@ -98,9 +98,9 @@ class TestReport
 
     //$this->smarty->assign('runDate', $dt);
     //$this->smarty->assign('svnVer', $this->Svn);
-    $files   = $result[0];
-    $vetted  = $result[1];
-    $results = $result[2];
+    $licenseFiles   = $result[0];
+    $vetted         = $result[1];
+    $results        = $result[2];
     $this->smarty->assign('cols', $cols);
     $this->smarty->assign('file', $files);
     $this->smarty->assign('vetted', $vetted);
@@ -125,6 +125,28 @@ class TestReport
     $this->smarty->assign('results', $this->results);
     $this->smarty->display('testResults.tpl');
     //$smarty->assign('TestNotes', $notes);
+  }
+
+  public function displayTotals($totals) {
+    // should check to see if totals is an array
+
+    $this->smarty->template_dir = '/home/markd/public_html/smarty/templates';
+    $this->smarty->compile_dir = '/home/markd/public_html/smarty/templates_c';
+    $this->smarty->cache_dir = '/home/markd/public_html/smarty/cache';
+    $this->smarty->config_dir = '/home/markd/public_html/smarty/configs';
+
+    $dt = $this->Date . " " . $this->Time;
+    $cols = 5;
+
+    foreach($totals as ) {
+
+    }
+
+    $this->smarty->assign('runDate', $dt);
+    $this->smarty->assign('svnVer', $this->Svn);
+    $this->smarty->assign('cols', $cols);
+    $this->smarty->assign('results', $this->results);
+    $this->smarty->display('licenseTR-totals.tpl');
   }
 
   /**
@@ -281,38 +303,69 @@ class TestReport
    * @param resource $FD opened file resource.
    * @return $array array of all of the results
    *
+   * @todo rename this to parsePassFailResults
+   *
    */
   public function parseLicenseResults($FD) {
 
     if(!is_resource($FD)) {
       return(FALSE);
     }
-    $All        = array();
-    $FileName   = array();
-    $VettedName = array();
-    $results    = array();
+
+    $All         = array();
+    $FileName    = array();
+    $LicenseType = array();
+    $VettedName  = array();
+    $results     = array();
+
     while($line = $this->getResult($FD)){
       //$line = getResult($FD);
-      //print "PLR: result is:$line\n";
-      $resultParts = split(' ',$line);
-      list($fnKey,$fileName) = split('=',$resultParts[0]);
+      $resultParts = split(';',$line);
+      list($lKey,$licenseType) = split('=',$resultParts[0]);
+      list($fnKey,$fileName)   = split('=',$resultParts[1]);
       $FileName[] = rtrim($fileName,'.txt');
-      list($fnKey,$std)      = split('=',$resultParts[1]);
-      $VettedName[] = str_replace(',',",<br>",$std);
-
-      list($pKey,$pass)      = split('=',$resultParts[2]);
-      $results[]             = str_replace(',',",<br>",$pass);
-      list($fKey,$fail)      = split('=',$resultParts[3]);
-      $results[]             = str_replace(',',",<br>",$fail);
-      list($mKey,$misses)    = split('=',$resultParts[4]);
-      $results[]             = str_replace(',',",<br>",$misses);
+      $LicenseType[$licenseType] = $FileName
+      //print "PLR: before = split results is:{$resultParts[1]}\n<br>";
+      list($fnKey,$std) = split('=',$resultParts[1]);
+      $VettedName[]     = str_replace(',',",<br>",$std);
+      list($pKey,$pass) = split('=',$resultParts[2]);
+      $results[]        = str_replace(',',",<br>",$pass);
+      list($fKey,$fail) = split('=',$resultParts[3]);
+      $results[]        = str_replace(',',",<br>",$fail);
     }
-    $all[] = $FileName;
-    $all[] = $VettedName;
-    $all[] = $results;
-    return($all);
+    $All[] = $LicenseType;
+    $All[] = $VettedName;
+    $All[] = $results;
+    return($All);
   }
 
+  /**
+   * parseLicenseTotals
+   *
+   *  parse the lis
+   *
+   */
+  public function parseLicenseTotals($FD) {
+
+    if(!is_resource($FD)) {
+      return(FALSE);
+    }
+    $agent = array();
+    $pass  = array();
+    $fail  = array();
+
+    // while there is something to read from the file
+    //   read a line, trim it,
+    //   explode it on :  & assign list($agent[],$pass[],$fail[]) = explode(':',$line);
+    // end while
+    // return them return(array($agent,$pass,$fail));
+    while (!feof($FD)) {
+        $line = trim(fgets($FD, 1024));
+        list($agent[],$pass[],$fail[]) = explode(':',$line);
+    }
+    fclose($FD);
+    return(array($agent,$pass,$fail));
+  }
   /**
    * parseSuiteName
    *
