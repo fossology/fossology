@@ -44,6 +44,8 @@ optparser.add_option("-p", "--positive", type="string",
         help="A text file with the paths to the positive training files.")
 optparser.add_option("-n", "--negative", type="string",
         help="A text file with the paths to the negative training files.")
+optparser.add_option("-f", "--training_files", type="string",
+        help="A test file with the paths to the training files.")
 optparser.add_option("--lw", type="int",
         help="Left window plus 1. Must be > 0.")
 optparser.add_option("--rw", type="int",
@@ -66,22 +68,14 @@ else:
     rw = 3        # right window
     pr = 0.4      # probability of finding a license in a random window
     smoothing = False
-    pos_files = []
-    neg_files = []
+    files = []
     
-    if not options.positive:
-        print "You must specify a set of positive files to train on."
+    if not options.training_files:
+        print "You must specify a set of files to train on."
         optparser.print_usage()
         sys.exit(1)
     else:
-        pos_files = [line.strip() for line in open(options.positive)]
-    
-    if not options.negative:
-        print "You must specify a set of negative files to train on."
-        optparser.print_usage()
-        sys.exit(1)
-    else:
-        neg_files = [line.strip() for line in open(options.negative)]
+        files = [line.strip() for line in open(options.training_files)]
     
     # learning parameters
     # window size starting at word i to the left
@@ -110,16 +104,16 @@ else:
     if options.smoothing == False:
         smoothing = False
     
-    lt_model = model.LicenseTestModel(pos_files, neg_files, pr, lw, rw, smoothing)
+    lt_model = model.LicenseTestModel(files, pr, lw, rw, smoothing)
     lt_model.train()
     
     if options.cache:
         pickle.dump(lt_model,open(options.cache,'w'))
 
 for file in args:
-    text = open(file).read().decode('ascii','ignore')
-    is_license, license_offsets = lt_model.test_text(text)
+    text = unicode(open(file).read(64000),errors='ignore')
+    is_license, l, license_offsets = lt_model.test_text(text)
 
     print "%s: %s" % (is_license,file)
-    for i in range(len(license_offsets)):
+    for i in xrange(len(license_offsets)):
         print "\t[%d, %d:%d] %s" % (i,license_offsets[i][0], license_offsets[i][1], text[license_offsets[i][0]:license_offsets[i][1]])

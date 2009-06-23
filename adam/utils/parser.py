@@ -49,32 +49,19 @@ ENG_STEM = Stemmer('english')
 
 STOPWORDS = stopwords.english()
 
-def stemmed_words(text):
+def stemmed_words(text,except_re=re.compile('^.$')):
     words = RE_WORD.findall(text)
-    stems = [ENG_STEM.stemWord(w.lower()) for w in words if not w.lower() in STOPWORDS]
+    stems = [ENG_STEM.stemWord(w.lower()) for w in words if not w.lower() in STOPWORDS or not except_re.match(w)==None]
     return stems
 
-def stemmed_words_with_offsets(text):
-    tokens = RE_TOKENS.findall(text)
-    n = len(tokens)
-    starts = []
-    ends = []
-    offsets = []
+def stemmed_words_with_offsets(text,except_re=re.compile('^.$')):
     stems = []
-    for i in range(n):
-        if i == 0:
-            starts.append(0)
-            ends.append(len(tokens[0]))
-        elif i == n-1:
-            starts.append(len(tokens[i-1])+starts[i-1])
-            ends.append(n)
-        else:
-            starts.append(len(tokens[i-1])+starts[i-1])
-            ends.append(len(tokens[i])+ends[i-1])
-
-        if not None == RE_WORD.match(tokens[i]) and not tokens[i].lower() in STOPWORDS:
-            stems.append(ENG_STEM.stemWord(tokens[i].lower()))
-            offsets.append((starts[i],ends[i]))
+    offsets = []
+    for iter in RE_WORD.finditer(text):
+        w = iter.group().lower()
+        if w not in STOPWORDS or not except_re.match(w)==None:
+            stems.append(ENG_STEM.stemWord(w))
+            offsets.append(iter.span())
     return stems, offsets
 
 def features(text):
