@@ -16,12 +16,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
- Normally, the pkgmetagetta agent pulls out meta data from an RPM file.
- However, what if the thing being analyzed is a pre-packaged RPM?
- In this case, there is no "RPM" to analyze.  But all of the meta data
- IS available in a file called "*.spec".  (E.g., if the directory is
- "neal" then the file is "neal.spec".)
- This agent identifies spec files and processes the meta data. 
+ This agent runs an sql command.
  ***************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
