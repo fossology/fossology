@@ -14,10 +14,8 @@ include $(VARS)
 CONF=license_test.conf
 CACHE=license_test.cache
 
-TEMP := $(shell find ../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt)
-TEMP := $(shell find ../Training/License_Test/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > neg.txt)
-TEMP := $(shell python ../date_files.py pos.txt pos.txt)
-TEMP := $(shell python ../date_files.py neg.txt neg.txt)
+TEMP := $(shell find ../Training/License_Test/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > training.txt)
+TEMP := $(shell python ../date_files.py training.txt training.txt)
 
 all: $(CONF) $(CACHE)
 
@@ -26,20 +24,14 @@ $(CONF): $(CACHE)
 	@echo cache_file=$(CACHE)\; >> $(CONF)
 	@echo version=$(REV)\; >> $(CONF)
 
-$(CACHE): license_test_model.py license_test.py license_test_agent.py pos.txt neg.txt
+$(CACHE): license_test_model.py license_test.py license_test_agent.py training.txt
 	rm -f $(CACHE)
-	python license_test.py -p pos.txt -n neg.txt --cache $(CACHE)
+	python license_test.py -f training.txt --cache $(CACHE)
 
-pos.txt:
-	find ../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > pos.txt
-	
-neg.txt:
-	find ../Training/License_Test/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > neg.txt
-	
 test: all
-	@echo "*** No tests available for license_test ***"
+	python license_test.py --cache $(CACHE) $(shell find /usr/share/doc/ -type f \( -regex ".*[Cc][Oo][Pp][Yy][Rr][Ii][Gg][Hh][Tt]$$" \))
 
 clean:
-	rm -f $(CACHE) $(CONF) pos.txt neg.txt
+	rm -f $(CACHE) $(CONF) training.txt
 
 .PHONY: all clean test
