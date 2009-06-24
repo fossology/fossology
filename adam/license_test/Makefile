@@ -15,6 +15,10 @@ CONF=license_test.conf
 CACHE=license_test.cache
 
 TEMP := $(shell find ../Training/License_Test/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > training.txt)
+TEMP := $(shell find ../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > licenses.txt)
+TEMP := $(shell mkdir tmp_licenses)
+TEMP := $(shell python wrap_licenses.py licenses.txt tmp_licenses)
+TEMP := $(shell find tmp_licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) >> training.txt)
 TEMP := $(shell python ../date_files.py training.txt training.txt)
 
 all: $(CONF) $(CACHE)
