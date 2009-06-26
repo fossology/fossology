@@ -219,11 +219,11 @@ static int fileHasPatt(int licTextIdx, char *filetext, int size,
 	    dumpMatch(filetext, "RAW-Text");
 #endif  /* DEBUG */
 	    printRegexMatch(licTextIdx, NO);
-	    saveRegexLocation(licTextIdx, gl.regm.rm_so,
-			      gl.regm.rm_eo-gl.regm.rm_so, YES);
+	    saveRegexLocation(licTextIdx, cur.regm.rm_so,
+			      cur.regm.rm_eo - cur.regm.rm_so, YES);
 #ifdef  DEBUG
 	    printf("WINDOW-RAW: offset %d, length %d\n",
-		   gl.regm.rm_so, gl.regm.rm_eo-gl.regm.rm_so);
+		   cur.regm.rm_so, cur.regm.rm_eo - cur.regm.rm_so);
 #endif  /* DEBUG */
 	}
 	return(ret);
@@ -265,8 +265,8 @@ static int dbgIdxGrep(int licTextIdx, char *buf, int show)
     ret = idxGrep(licTextIdx, buf, flags);
     if (lDiags && ret) {
 	printRegexMatch(licTextIdx, NO);
-	saveRegexLocation(licTextIdx, gl.regm.rm_so,
-			  gl.regm.rm_eo-gl.regm.rm_so, YES);
+	saveRegexLocation(licTextIdx, cur.regm.rm_so,
+			  cur.regm.rm_eo - cur.regm.rm_so, YES);
     }
     ltsr[licTextIdx] |= ret;
     return ret;
@@ -323,7 +323,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     cp = filetext;
     maxInterest = IL_INIT;
 #ifdef  SAVE_UNCLASSIFIED_LICENSES
-    gl.licPara = NULL_STR;  /* unclassified license data */
+    cur.licPara = NULL_STR;  /* unclassified license data */
     gl.flags &= ~FL_FRAGMENT;
 #endif  /* SAVE_UNCLASSIFIED_LICENSES */
 #ifdef FLAG_NO_COPYRIGHT
@@ -332,8 +332,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     (void) sprintf(name, "^[[]%s[]]$", LABEL_TEXT);
     if (strGrep(LABEL_TEXT, filetext, REG_ICASE|REG_NEWLINE)) {
 	char *x;
-	x = filetext+gl.regm.rm_eo;
-	cp = filetext+gl.regm.rm_eo;
+	x = filetext + cur.regm.rm_eo;
+	cp = filetext + cur.regm.rm_eo;
 	(void) sprintf(name, "^\\[%s\\]$", LABEL_ATTR);
 	if (strGrep(LABEL_ATTR, filetext, REG_ICASE|REG_NEWLINE) &&
 	    strGrep(LABEL_PATH, filetext, REG_ICASE) &&
@@ -346,12 +346,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    filetext = cp+1;
 	}
     } else if (strGrep(LABEL_HOTW, filetext, REG_ICASE|REG_NEWLINE)) {
-	if ((cp = findEol(filetext+gl.regm.rm_eo)) != NULL_STR) {
+	if ((cp = findEol(filetext + cur.regm.rm_eo)) != NULL_STR) {
 	    while (isEOL(*cp)) {
 		cp++;
 	    }
 	    if (*cp == strncmp(cp, "########", 8) == 0) { /* CDB ? Precedence */
-		filetext += gl.regm.rm_so;
+		filetext += cur.regm.rm_so;
 		if (lDiags) {
 		    Note("%s-generated hotword file",
 			 gl.progName);
@@ -4792,7 +4792,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 #ifdef  SAVE_UNCLASSIFIED_LICENSES
 	    if (lDiags) {
 		printf("[PERHAPS]\n%s\n[/PERHAPS]\n",
-		       gl.licPara);
+		       cur.licPara);
 	    }
 #endif  /* SAVE_UNCLASSIFIED_LICENSES */
 	    strcpy(name, LS_UNCL);
@@ -5905,7 +5905,7 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
      * We need populate the list of "paragraph matches" with offsets in the
      * doctored-up buffers; this seems the best place to do it.
      */
-    op = listGetItem(&gl.offList, sp->str);
+    op = listGetItem(&cur.offList, sp->str);
     if (op->nMatch <= 0) {
 	Fatal("File-offset list, nMatch(%s): bad entry", sp->str);
     }
@@ -5921,11 +5921,11 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 	    ptr = sp->buf;
 	    i = j = 0;      /* i is index, j is total offset */
 	    while (strGrep(" xyzzy ", ptr, REG_ICASE)) {
-		lp->items[i++].bDocLen = j + gl.regm.rm_so;
-		ptr += gl.regm.rm_eo;
-		j += gl.regm.rm_eo+7;   /* strlen(" xyzzy ") */
+		lp->items[i++].bDocLen = j + cur.regm.rm_so;
+		ptr += cur.regm.rm_eo;
+		j += (cur.regm.rm_eo + 7);   /* strlen(" xyzzy ") */
 	    }
-	    lp->items[i].bDocLen = n+7;     /* last paragraph */
+	    lp->items[i].bDocLen = n + 7;     /* last paragraph */
 	}
     }
     if  (ltp->tseed == ltp->regex) {        /* e.g., regex IS seed/key */
@@ -5940,15 +5940,15 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 	ret = HASREGEX(index, sp->buf);
 	if (saved) {
 	    if (ret) {
-		kludge.base = gl.matchBase;
-		kludge.sso = gl.regm.rm_so;
-		kludge.seo = gl.regm.rm_eo;
+		kludge.base = cur.matchBase;
+		kludge.sso = cur.regm.rm_so;
+		kludge.seo = cur.regm.rm_eo;
 	    }
 	    gl.flags &= ~FL_SAVEBASE;
 	}
     }
-    sso = gl.regm.rm_so;            /* do NOT modify this!! */
-    seo = gl.regm.rm_eo;            /* ... or this, either! */
+    sso = cur.regm.rm_so;            /* do NOT modify this!! */
+    seo = cur.regm.rm_eo;            /* ... or this, either! */
     if (ret && !wordMatch) {
 	*q = LTSR_YES;  /* remember this "yes" search result */
 
@@ -6040,8 +6040,8 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 		}
 #ifdef  GPLV2_BEATS_GPLV3
 		else if (strNbuf(sp->buf+sso, "version 2")) {
-		    if (sp->buf+sso+gl.regm.rm_eo <
-			sp->buf+seo) {
+		    if (sp->buf + sso + cur.regm.rm_eo <
+			sp->buf + seo) {
 			if (lDiags) {
 			    printf("... v%c!\n", *cp);
 			}
@@ -6094,9 +6094,9 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 		     ((index == _PHR_GPL3_ONLY) || (index == _PHR_LGPL3_ONLY))) {
 		if (strNbuf(sp->buf+sso, "version") ||
 		    strNbuf(sp->buf+sso, "v3")) {
-		    cp = sp->buf+gl.regm.rm_eo;
+		    cp = sp->buf + cur.regm.rm_eo;
 		} else {
-		    cp = sp->buf+seo;       /* "nil" loop */
+		    cp = sp->buf + seo;       /* "nil" loop */
 		}
 		for (ptr = sp->buf+seo; cp < ptr; cp++) {
 		    if (isdigit(*cp) && *cp != '3') {
@@ -6112,7 +6112,7 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 	    } else if (index == _PHR_FSF_V3_ONLY && qType == 2) {
 		if (strNbuf(sp->buf+sso, "version")) {
 #ifdef  GPLV2_BEATS_GPLV3
-		    ptr = sp->buf+sso+gl.regm.rm_so+7;
+		    ptr = sp->buf + sso + cur.regm.rm_so + 7;
 #endif  /* GPLV2_BEATS_GPLV3 */
 		    cp = strchr(sp->buf+sso, '3');
 		    if (strncasecmp(cp, "3 tlb", 5) == 0) {
@@ -6133,7 +6133,7 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 #endif  /* GPLV2_BEATS_GPLV3 */
 		}
 		else if (strNbuf(sp->buf+sso, "v3")) {
-		    cp = sp->buf+sso+gl.regm.rm_so;
+		    cp = sp->buf + sso + cur.regm.rm_so;
 		    if (strncasecmp(cp-4, "arm ", 4) == 0) {
 			if (lDiags) {
 			    printf("... arm v3\n");
@@ -6190,7 +6190,7 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 	      characters (signifying a year/datestamp)
 	     */
 		char *x;
-		x = cp = gl.matchBase + sso;
+		x = cp = cur.matchBase + sso;
 		ptr = cp - (sso < 100 ? sso : 100);
 		while (!isdigit(*cp)) {
 		    cp++;
@@ -6223,7 +6223,7 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 		 * frequency check.
 		 */
 		else if (index == _TEXT_GPLV3) {
-		    x = gl.matchBase+seo;
+		    x = cur.matchBase + seo;
 		    if (isdigit(*x) && *x != '0') {
 			if (lDiags) {
 			    printf("... v3#!0\n");
@@ -6275,8 +6275,8 @@ static void locateRegex(char *text, item_t *op, int index, int size, int sso, in
      * *might* be that easy (but not very often, it turns out.
      */
     if (idxGrep(index, text, REG_ICASE|REG_EXTENDED)) {
-	saveRegexLocation(index, gl.regm.rm_so,
-			  gl.regm.rm_eo-gl.regm.rm_so, YES);
+	saveRegexLocation(index, cur.regm.rm_so,
+			  cur.regm.rm_eo - cur.regm.rm_so, YES);
 	return;
     }
     /*
@@ -6401,11 +6401,11 @@ static void locateRegex(char *text, item_t *op, int index, int size, int sso, in
 #endif  /* DEBUG */
     while (strGrep(cp, ptr, REG_ICASE|REG_EXTENDED)) {
 	i++;
-	ptr += gl.regm.rm_eo;
-	j += gl.regm.rm_eo;
+	ptr += cur.regm.rm_eo;
+	j += cur.regm.rm_eo;
 #ifdef  DEBUG
 	printf("Found match (%d bytes) @ offset %d (%d tot)\n",
-	       gl.regm.rm_eo - gl.regm.rm_so, gl.regm.rm_so, j);
+	       cur.regm.rm_eo - cur.regm.rm_so, cur.regm.rm_so, j);
 #endif  /* DEBUG */
     }
 #ifdef  DEBUG
@@ -6482,8 +6482,8 @@ static void locateRegex(char *text, item_t *op, int index, int size, int sso, in
 	    ptr = sp->buf+sso;
 	    if (strGrep(_REGEX(index), ptr,
 			REG_ICASE|REG_EXTENDED)) {
-		len -= gl.regm.rm_so;
-		off += gl.regm.rm_so;
+		len -= cur.regm.rm_so;
+		off += cur.regm.rm_so;
 	    } else {
 		Note("Regex \"%s\" (foot-start) not in raw text",
 		     _REGEX(index));
@@ -6563,7 +6563,7 @@ static void saveUnclBufLocation(int bufNum)
 #endif  /* PROC_TRACE || PHRASE_DEBUG */
 
     listClear(&whereList, NO);      /* empty all prior matches */
-    p = listGetItem(&gl.offList, _REGEX(_LEGAL_first));
+    p = listGetItem(&cur.offList, _REGEX(_LEGAL_first));
     lp = (list_t *) p->bList;
     (void) sprintf(name, "buf%05d", bufNum);
     p = listGetItem(lp, name);
@@ -6668,7 +6668,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
 #ifdef  DOCTOR_DEBUG
 	dumpMatch(cp, "Found \"comment\"-text");
 #endif  /* DOCTOR_DEBUG */
-	cp += gl.regm.rm_so;
+	cp += cur.regm.rm_so;
 	switch (*cp) {
 	case '>':
 	    *cp++ = ' ';
@@ -6737,8 +6737,8 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
 #ifdef  DOCTOR_DEBUG
 	    dumpMatch(cp, "FOUND postscript-thingy");
 #endif  /* DOCTOR_DEBUG */
-	    x = cp+gl.regm.rm_so;
-	    cp += gl.regm.rm_eo;
+	    x = cp + cur.regm.rm_so;
+	    cp += cur.regm.rm_eo;
 	    while (x < cp) {
 		*x++ = ' '/*INVISIBLE*/;
 	    }
@@ -6837,12 +6837,12 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
      */
     for (cp = buf; idxGrep(_UTIL_HYPHEN, cp, REG_ICASE); /*nada*/) {
 #ifdef  DOCTOR_DEBUG
-	x = cp + gl.regm.rm_so;
+	x = cp + cur.regm.rm_so;
 	while ((x > cp) && !isspace(*x)) {
 	    x--;
 	}
 	printf("Hey! hyphenated-word [");
-	for (++x; x <= cp+gl.regm.rm_eo; x++) {
+	for (++x; x <= (cp + cur.regm.rm_eo); x++) {
 	    printf("%c", *x);
 	}
 	while (!isspace(*x)) {
@@ -6851,7 +6851,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
 	printf("]\n");
 
 #endif  /* DOCTOR_DEBUG */
-	cp += gl.regm.rm_so + 1;
+	cp += cur.regm.rm_so + 1;
 	*cp++ = INVISIBLE;
 	while (isspace(*cp)) {
 	    *cp++ = INVISIBLE;
@@ -6862,16 +6862,16 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
      *==>           perl -pe 's,[-_/]+ , ,g;s/print[_a-zA-Z]* //g;s/  / /g;'
      */
     for (cp = buf; idxGrep(_UTIL_MISCPUNCT, cp, REG_EXTENDED); /*nada*/) {
-	x = cp + gl.regm.rm_so;
-	cp += gl.regm.rm_eo - 1;  /* leave ' ' alone */
+	x = cp + cur.regm.rm_so;
+	cp += cur.regm.rm_eo - 1;  /* leave ' ' alone */
 	while (x < cp) {
 	    *x++ = ' ';
 	}
 	cp++;
     }
     for (cp = buf; idxGrep(_UTIL_LATEX, cp, REG_ICASE); /*nada*/) {
-	x = cp + gl.regm.rm_so;
-	cp += gl.regm.rm_eo;
+	x = cp + cur.regm.rm_so;
+	cp += cur.regm.rm_eo;
 	while (x <= cp) {
 	    *x++ = ' ';
 	}
@@ -6886,8 +6886,8 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
      * is named 'rprint' or tprint', we're spoofed.
      */
     for (cp = buf; idxGrep(_UTIL_PRINT, cp, REG_ICASE); /*nada*/) {
-	x = cp + gl.regm.rm_so;
-	cp += gl.regm.rm_eo - 1;
+	x = cp + cur.regm.rm_so;
+	cp += (cur.regm.rm_eo - 1);
 	if ((x > buf) && ((*(x-1) == 'r') || (*(x-1) == 't'))) {
 	    continue;
 	}
@@ -6989,7 +6989,7 @@ static void addRef(char *str, int interest)
      * - parseList is used to create a package "computed license summary"
      * - briefList is used to compute a "terse/brief" license summary
      */
-    p = listGetItem(&gl.parseList, str);
+    p = listGetItem(&cur.parseList, str);
     if (interest) {
 	p->iFlag++;
 	if (interest > IL_LOW) {
@@ -7158,7 +7158,7 @@ static int checkUnclassified(char *filetext, int size, char *ftype,
      */
     curptr = buf;
     while (idxGrep(_UTIL_XYZZY, curptr, 0)) {
-	cp = curptr+gl.regm.rm_so;
+	cp = curptr + cur.regm.rm_so;
 	*cp = NULL_CHAR;
 #ifdef  UNKNOWN_CHECK_DEBUG
 	printf("DEBUG: paragraph #%d:\n[START-PARA]\n%s\n[END-PARA]\n",
@@ -7852,7 +7852,7 @@ static void checkCornerCases(char *filetext, int size, int score,
 	/* Last chance for a copyright-looking-thingy */
 	if (force || !(*licStr)) {
 	    if (INFILE(_CR_ZZZANY)) {
-		printf("Match: %d:%d\n", gl.regm.rm_so, gl.regm.rm_eo);
+		printf("Match: %d:%d\n", cur.regm.rm_so, cur.regm.rm_eo);
 		addRef(LS_CPRTONLY, pri);
 	    }
 	    else if (INFILE(_CR_ZZZWRONG_1) ||
@@ -7872,14 +7872,14 @@ static void checkCornerCases(char *filetext, int size, int score,
 	int offset = 0;
 	do {
 #ifdef  DEBUG
-	    printf("Found @ %d [", gl.regm.rm_so);
-	    cp = filetext+offset+gl.regm.rm_so;
-	    while (cp < filetext+offset+gl.regm.rm_eo) {
+	    printf("Found @ %d [", cur.regm.rm_so);
+	    cp = filetext + offset + cur.regm.rm_so;
+	    while (cp < (filetext + offset + cur.regm.rm_eo)) {
 		printf("%c", *cp++);
 	    }
-	    printf("] (%d)\n", gl.regm.rm_eo);
+	    printf("] (%d)\n", cur.regm.rm_eo);
 #endif  /* DEBUG */
-	    offset += gl.regm.rm_eo;
+	    offset += cur.regm.rm_eo;
 	    cp = filetext+(offset > n ? offset-n : 0);
 #ifdef  DEBUG
 	    printf("offset = %d, look back to %d (%c%c%c%c%c)\n",
@@ -8055,9 +8055,9 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
 	/*
 	 * Convert double-line-feed chars ("\r" and "\n" combos) to a single "\n"
 	 */
-	if (gl.licPara == NULL_STR) {
+	if (cur.licPara == NULL_STR) {
 	    (void) strcpy(cp, buf); /* re-copy data */
-	    gl.licPara = cp;
+	    cur.licPara = cp;
 	    for (/*nada*/; *cp; cp++) {
 		if (((*cp == '\n') || (*cp == '\r')) &&
 		    ((*(cp+1) == '\r') || (*(cp+1) == '\n'))) {
@@ -8109,13 +8109,13 @@ void showLTCache(char *msg)
 
 static void dumpMatch(char *text, char *label)
 {
-    char *x = text + gl.regm.rm_so;
-    char *cp = text + gl.regm.rm_eo;
+    char *x = text + cur.regm.rm_so;
+    char *cp = text + cur.regm.rm_eo;
     /* */
     if (label) {
 	printf("%s ", label);
     }
-    printf("@ %d [", gl.regm.rm_so);
+    printf("@ %d [", cur.regm.rm_so);
     for (; x < cp; x++) {
 	if (!isEOL(*x)) {
 	    printf("%c", *x);

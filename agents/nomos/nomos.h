@@ -195,7 +195,6 @@ typedef	struct listitem item_t;
 #define num		val
 #define bStart		val
 #define iFlag		val
-#define	bucketType	val2
 #define	ssComp		val2
 #define	isProcessed	val2
 #define iLevel		val2
@@ -232,71 +231,51 @@ typedef struct licenseSpec licSpec_t;
 
 
 /*
-  CDB - Commenting to note purpose of the various fields so we can tell
-  which are true globals and which we will need on
-  a per-file basis. 
+  Structure holding data truly global in that it remains consistent
+  for each file scanned.
 */
 struct globals {
-    char initwd[myBUFSIZ]; /* Global, plan to eliminate  */
-    char cwd[myBUFSIZ]; /* Global, will be unneeded */
-    char target[myBUFSIZ]; /* Global, can probably get rid of  */
-    char targetFile[myBUFSIZ]; /* Should be moved to perScan */
-    char progName[64]; /* Global, plan to eliminate */
-    char *licPara; /* Used, move to perScan */
-    char *matchBase; /* Used, move to perScan */
-    int progOpts; /* Global */
-    int flags; /* Global, merge with progOpts? */
-    int uPsize; /* Global */
+    char initwd[myBUFSIZ]; /* CDB, would like to workaround/eliminate. */
+    char progName[64]; 
+    int progOpts; 
+    int flags; 
+    int uPsize;
 #ifdef	GLOBAL_DEBUG
-    int DEEBUG;   /* Global */
-    int MEM_DEEBUG;  /* Global */
+    int DEEBUG;  
+    int MEM_DEEBUG;
 #endif	/* GLOBAL_DEBUG */
 #ifdef	PROC_TRACE_SWITCH
-    int ptswitch;  /* Global */
+    int ptswitch;  
 #endif	/* PROC_TRACE_SWITCH */
-    size_t targetLen; /* Used, will probably be eliminated, move to perScan */
-    size_t cwdLen; /* Used, will probably be eliminated, move to perScan */
-    struct stat stbuf; /* Horrible side-effect trap. move to perScan */
-    regmatch_t regm; /* Used, move to perScan */
-    magic_t mcookie; /* Global */
-    list_t regfList; /* perScan */
-    list_t fLicFoundMap; /* perScan */
-    list_t parseList; /* perScan */
-    list_t offList; /* perScan */
+    magic_t mcookie;
 };
 
 
 /*
-  CDB - We don't really have a current package anymore.
-  Would like to change to curFile for the sake of consistency.
+  Struct that tracks state related to current file being scanned.
 */
-struct curPkg {
-    char pathname[myBUFSIZ];
-    char claimlic[myBUFSIZ];
-    char cachelic[myBUFSIZ];
+struct curScan {
+    char cwd[myBUFSIZ]; /* CDB, Would like to workaround and eliminate. */
+    char targetDir[myBUFSIZ]; /* Directory where file is */ /* check */
+    char targetFile[myBUFSIZ]; /* File we're scanning */ /* check */
+    char *licPara; 
+    char *matchBase; 
+    size_t targetLen; 
+    size_t cwdLen; 
+    struct stat stbuf; 
+    regmatch_t regm; 
+    list_t regfList;
+    list_t fLicFoundMap; 
+    list_t parseList;
+    list_t offList; 
+    list_t lList;
+    list_t cList; /* CDB - I don't think this is actually used. */
+    list_t eList; /* CDB - I don't think this is actually used. */
     char compLic[myBUFSIZ];
-    char briefLic[myBUFSIZ];
-    char url[256];
-    char dosname[256];
-    char basename[128];
-    char name[128];
-    char version[128];
-    char source[128];
-    char srcname[128];
-    char srcvers[128];
-    char reportname[128];
-    char vendor[32];
-    char arch[16];
-    char format[16];
-    char ptype[8];
-    char debEpoch[8];
-    char md5sum[33];
-    int isSource;
-    int isRpm;
-    int noSrc;
+    /*    char basename[128]; CDB, set but not used */
+    char name[128]; /* CDB, set, but not used. */
     int nLines;
-    int nWords;
-    int bucketType;
+    int nWords; /* CDB, set, but not used. */
 };
 
 struct license {
@@ -358,13 +337,11 @@ typedef	struct scanResults scanres_t;
 #define	MTAG_SRCHTEXT	"license-search text"
 #define	MTAG_MMAPFILE	"mmap-file data"
 #define	MTAG_MAGICDATA	"file magic description"
-#define	MTAG_BUCKETDATA	"bucket-data(copy)"
 #define	MTAG_PATTRS	"pkg-attr buffer"
 #define	MTAG_DOUBLED	"doubled (reallocated) data"
 #define	MTAG_SEARCHBUF	"initial search-data buffer"
 #define	MTAG_TOOSMALL	"too-small half-size buffer"
 #define	MTAG_TEXTPARA	"paragraph text"
-#define	MTAG_BUCKET	"extensible license bucket array"
 #define	MTAG_LIST	"dynamically-allocated list"
 #define	MTAG_ENV	"environment variable"
 #define	MTAG_SCANRES	"scan-results list"
@@ -385,7 +362,7 @@ int optionIsSet(int val);
   Global Declarations
 */
 extern struct globals gl;
-extern struct curPkg cur;
+extern struct curScan cur;
 extern licText_t licText[];
 extern licSpec_t licSpec[];
 

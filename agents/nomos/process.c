@@ -33,11 +33,8 @@ static void processNonPackagedFiles()
 {
     item_t *p;
 
-#if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== processNonPackagedFiles()\n");
+#if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
+    traceFunc("== processNonPackagedFiles()\n");
 #endif  /* PROC_TRACE || UNPACK_DEBUG */
 
     /*
@@ -46,20 +43,15 @@ static void processNonPackagedFiles()
      * and hand it off to be processed.
      */
 #ifdef	UNPACK_DEBUG
-    listDump(&gl.regfList, NO);
+    listDump(&cur.regfList, NO);
 #endif	/* UNPACK_DEBUG */
-	/* CDB
-	   if (!isDIR(pathname)) {
-	   makePath(pathname);
-	   }
-	*/
-    if (!gl.regfList.used) {
+    if (!cur.regfList.used) {
 	printf("No-data!\n");
 	return;
     } else {
-	*cur.basename = NULL_CHAR;
+	/* CDB *cur.basename = NULL_CHAR; */
 	processRegularFiles();
-	p = listGetItem(&gl.fLicFoundMap, BOGUS_MD5);
+	p = listGetItem(&cur.fLicFoundMap, BOGUS_MD5);
 	p->buf = copyString(cur.compLic, MTAG_COMPLIC);
 	p->refCount++;
 	p->buf = copyString(BOGUS_MD5, MTAG_MD5SUM);
@@ -69,7 +61,7 @@ static void processNonPackagedFiles()
 
 
 
-#ifdef DEAD_CODE
+#ifdef notdef
 /*
  * Remove the line at textp+offset from the buffer
  */
@@ -79,12 +71,9 @@ void stripLine(char *textp, int offset, int size)
     extern char *findBol();
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== stripLine(%s, %d, %d)\n", textp, offset, size);
+	traceFunc("== stripLine(%s, %d, %d)\n", textp, offset, size);
 #endif	/* PROC_TRACE */
-    /* */
+
     if ((end = findEol((char *)(textp+offset))) == NULL_STR) {
 	Assert(NO, "No EOL found!");
     }
@@ -111,22 +100,19 @@ void stripLine(char *textp, int offset, int size)
 #endif	/* DEBUG */
     return;
 }
-#endif /* DEAD_CODE */
+#endif /* notdef */
 
 
 void processRawSource()
 {
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== processRawSource()\n");
+	traceFunc("== processRawSource()\n");
 #endif	/* PROC_TRACE */
 
-    changeDir(gl.target);
+    changeDir(cur.targetDir);
 
 #ifdef	PACKAGE_DEBUG
-    listDump(&gl.regfList, NO);
+    listDump(&cur.regfList, NO);
 #endif	/* PACKAGE_DEBUG */
 
     (void) strcpy(cur.name, "(no package name)");
@@ -146,18 +132,9 @@ void processRegularFiles()
     traceFunc("== processRegularFiles()\n");
 #endif  /* PROC_TRACE */
     
-#ifdef notdef
-    if (isDIR(RAW_DIR)) {	/* temp-unpack dir exists? */
-	removeDir(RAW_DIR);	/* clean up */
-    }
-    makeDir(RAW_DIR);
-    changeDir(RAW_DIR);
-#endif notdef
-    (void) strcpy(cur.ptype, "***");
-    (void) sprintf(cur.basename, "misc-files");
-    (void) sprintf(cur.pathname, "%s/(Various)", gl.target);
+    /* CDB (void) sprintf(cur.basename, "misc-files"); */
     /* loop through the list here -- and delete files with link-count >1? */
-    licenseScan(&gl.regfList);
+    licenseScan(&cur.regfList);
     return;
 }
 

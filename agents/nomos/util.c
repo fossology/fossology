@@ -51,10 +51,7 @@ void memCacheDump();
 int isDIR(char *dpath)
 {
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== isDIR(%s)\n", dpath);
+	traceFunc("== isDIR(%s)\n", dpath);
 #endif	/* PROC_TRACE */
 
     return(isINODE(dpath, S_IFDIR));
@@ -71,26 +68,20 @@ void unbufferFile(FILE *fp)
 int isEMPTYFILE(char *fpath)
 {
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== isEMPTYFILE(%s)\n", fpath);
+	traceFunc("== isEMPTYFILE(%s)\n", fpath);
 #endif	/* PROC_TRACE */
 
     if (!isFILE(fpath)) {
 	return(0);
     }
-    return(gl.stbuf.st_size == 0);
+    return(cur.stbuf.st_size == 0);
 }
 
 
 int isBLOCK(char *bpath)
 {
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== isBLOCK(%s)\n", bpath);
+	traceFunc("== isBLOCK(%s)\n", bpath);
 #endif	/* PROC_TRACE */
 
     return(isINODE(bpath, S_IFBLK));
@@ -100,11 +91,9 @@ int isBLOCK(char *bpath)
 int isCHAR(char *cpath)
 {
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== isCHAR(%s)\n", cpath);
+	traceFunc("== isCHAR(%s)\n", cpath);
 #endif	/* PROC_TRACE */
+
     return(isINODE(cpath, S_IFCHR));
 }
 
@@ -112,11 +101,9 @@ int isCHAR(char *cpath)
 int isPIPE(char *ppath)
 {
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== isPIPE(%s)\n", ppath);
+	traceFunc("== isPIPE(%s)\n", ppath);
 #endif	/* PROC_TRACE */
+
     return(isINODE(ppath, S_IFIFO));
 }
 
@@ -124,11 +111,9 @@ int isPIPE(char *ppath)
 int isSYMLINK(char *spath)
 {
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== isSYMLINK(%s)\n", spath);
+	traceFunc("== isSYMLINK(%s)\n", spath);
 #endif	/* PROC_TRACE */
+
     return(isINODE(spath, S_IFLNK));
 }
 
@@ -138,13 +123,10 @@ int isINODE(char *ipath, int typ)
     int ret;
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== isINODE(%s, 0x%x)\n", ipath, typ);
+	traceFunc("== isINODE(%s, 0x%x)\n", ipath, typ);
 #endif	/* PROC_TRACE */
 
-    if ((ret = stat(ipath, &gl.stbuf)) < 0) {
+    if ((ret = stat(ipath, &cur.stbuf)) < 0) {
 	/*
 	  IF we're trying to stat() a file that doesn't exist, 
 	  that's no biggie.
@@ -160,7 +142,7 @@ int isINODE(char *ipath, int typ)
     if (typ == 0) {
 	return(1);
     }
-    return((int)(gl.stbuf.st_mode & S_IFMT & typ));
+    return((int)(cur.stbuf.st_mode & S_IFMT & typ));
 }
 
 
@@ -170,10 +152,7 @@ char *newReloTarget(char *basename)
     int i;
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== newReloTarget(%s)\n", basename);
+	traceFunc("== newReloTarget(%s)\n", basename);
 #endif	/* PROC_TRACE */
 
     for (i = 0; i < MAX_RENAME; i++) {
@@ -205,10 +184,7 @@ char *memAllocTagged(int size, char *name)
      */
 
 #if	defined(PROC_TRACE) || defined(MEM_ACCT)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== memAllocTagged(%d, \"%s\")\n", size, name);
+	traceFunc("== memAllocTagged(%d, \"%s\")\n", size, name);
 #endif	/* PROC_TRACE || MEM_ACCT */
 
     if (size < 1) {
@@ -250,10 +226,7 @@ void memFreeTagged(void *ptr, char *note)
     int i;
 
 #if	defined(PROC_TRACE) || defined(MEM_ACCT)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== memFree(%p, \"%s\")\n", ptr, note);
+	traceFunc("== memFree(%p, \"%s\")\n", ptr, note);
 #endif	/* PROC_TRACE || MEM_ACCT */
 
 #ifdef	MEMORY_TRACING
@@ -325,10 +298,7 @@ char *findBol(char *s, char *upperLimit)
     char *cp;
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== findBol(%p, %p)\n", s, upperLimit);
+	traceFunc("== findBol(%p, %p)\n", s, upperLimit);
 #endif	/* PROC_TRACE */
 
     if (s == NULL_STR || upperLimit == NULL_STR) {
@@ -360,10 +330,7 @@ char *findEol(char *s)
     char *cp;
     
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== findEol(%p)\n", s);
+	traceFunc("== findEol(%p)\n", s);
 #endif	/* PROC_TRACE */
     
     if (s == NULL_STR) {
@@ -388,23 +355,20 @@ void changeDir(char *pathname)
      */
 
 #if	defined(PROC_TRACE) || defined(UNPACK_DEBUG) || defined(CHDIR_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== changeDir(%s)\n", pathname);
+	traceFunc("== changeDir(%s)\n", pathname);
 #endif	/* PROC_TRACE || UNPACK_DEBUG || CHDIR_DEBUG */
 
     if (chdir(pathname) < 0) {
 	perror(pathname);
 	Fatal("chdir(\"%s\") fails", pathname);
     }
-    if (getcwd(gl.cwd, sizeof(gl.cwd)) == NULL_STR) {
+    if (getcwd(cur.cwd, sizeof(cur.cwd)) == NULL_STR) {
 	perror("getcwd(changeDir)");
 	Bail(1);
     }
-    gl.cwdLen = (int) strlen(gl.cwd);
+    cur.cwdLen = (int) strlen(cur.cwd);
 #ifdef	CHDIR_DEBUG
-    printf("DEBUG: now in \"%s\"\n", gl.cwd);
+    printf("DEBUG: now in \"%s\"\n", cur.cwd);
 #endif	/* CHDIR_DEBUG */
     return;
 }
@@ -417,10 +381,7 @@ void renameInode(char *oldpath, char *newpath)
      */
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== renameInode(%s, %s)\n", oldpath, newpath);
+	traceFunc("== renameInode(%s, %s)\n", oldpath, newpath);
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
 #ifdef	DEBUG
@@ -452,10 +413,7 @@ void unlinkFile(char *pathname)
      */
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== unlinkFile(%s)\n", pathname);
+	traceFunc("== unlinkFile(%s)\n", pathname);
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
     if (unlink(pathname) < 0) {
@@ -477,10 +435,7 @@ void chmodInode(char *pathname, int mode)
  */
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== chmodInode(%s, 0%o)\n", pathname, mode);
+	traceFunc("== chmodInode(%s, 0%o)\n", pathname, mode);
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
     if (chmod(pathname, mode) < 0) {
@@ -500,10 +455,7 @@ FILE *fopenFile(char *pathname, char *mode)
  */
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== fopenFile(%s, \"%s\")\n", pathname, mode);
+	traceFunc("== fopenFile(%s, \"%s\")\n", pathname, mode);
 #endif	/* PROC_TRACE */
 
     if ((fp = fopen(pathname, mode)) == (FILE *) NULL) {
@@ -523,10 +475,7 @@ FILE *popenProc(char *command, char *mode)
  */
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== popenProc(\"%s\", %s)\n", command, mode);
+	traceFunc("== popenProc(\"%s\", %s)\n", command, mode);
 #endif	/* PROC_TRACE */
 
     if ((pp = popen(command, mode)) == (FILE *) NULL) {
@@ -552,10 +501,7 @@ char *wordCount(char *textp)
     char *cp;
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== wordCount(%p)\n", textp);
+	traceFunc("== wordCount(%p)\n", textp);
 #endif	/* PROC_TRACE */
 
     words = 0;
@@ -602,10 +548,7 @@ char *copyString(char *s, char *label)
     int len;
     
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== copyString(%p, \"%s\")\n", s, label);
+	traceFunc("== copyString(%p, \"%s\")\n", s, label);
 #endif	/* PROC_TRACE */
     
     cp = memAlloc(len=(strlen(s)+1), label);
@@ -622,10 +565,7 @@ char *pathBasename(char *path)
     char *cp;
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== pathBasename(\"%s\")\n", path);
+	traceFunc("== pathBasename(\"%s\")\n", path);
 #endif	/* PROC_TRACE */
 
     cp = strrchr(path, '/');
@@ -655,10 +595,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     int regexFlags = REG_ICASE|REG_EXTENDED;
 
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG) || defined(DOCTOR_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== getInstances(%p, %d, %d, %d, \"%s\", %d)\n", textp, size,
+	traceFunc("== getInstances(%p, %d, %d, %d, \"%s\", %d)\n", textp, size,
 	       nBefore, nAfter, regex, recordOffsets);
 #endif	/* PROC_TRACE || PHRASE_DEBUG || DOCTOR_DEBUG */
 
@@ -674,8 +611,8 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
      * the "paragraphs" that match the key) AND its size (e.g., # of 'chunks'),
      * which also means, if there are N chunks, there are N-1 'xyzzy' separators.
      */
-    p = listGetItem(&gl.offList, regex);
-    p->seqNo = gl.offList.used;
+    p = listGetItem(&cur.offList, regex);
+    p->seqNo = cur.offList.used;
     p->nMatch = 0;
     if (recordOffsets) {
 	p->bList = (list_t *)memAlloc(sizeof(list_t), MTAG_LIST);
@@ -717,9 +654,9 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
      */
 #ifdef	PHRASE_DEBUG
     printf("getInstances: \"%s\" [#1] in buf [%d-%d]\n", regex,
-	   gl.regm.rm_so, gl.regm.rm_eo-1);
+	   cur.regm.rm_so, cur.regm.rm_eo-1);
     printf("Really in the buffer: [");
-    for (cp = textp+gl.regm.rm_so; cp < textp+gl.regm.rm_eo; cp++) {
+    for (cp = textp + cur.regm.rm_so; cp < (textp + cur.regm.rm_eo); cp++) {
 	printf("%c", *cp);
     }
     printf("]\n");
@@ -740,7 +677,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 	    (void) sprintf(utilbuf, "buf%05d", p->nMatch);
 	    bp = listGetItem(p->bList, utilbuf);
 	}
-	start = findBol(curptr+gl.regm.rm_so, textp);
+	start = findBol(curptr + cur.regm.rm_so, textp);
 	/*
 	 * Go to the beggining of the current line and, if nBefore > 0, go 'up'
 	 * in the text "$nBefore" lines.  Count 2-consecutive EOL-chars as one
@@ -779,7 +716,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 	 * have our pattern.
 	 */
 	do {
-	    curptr += gl.regm.rm_eo;
+	    curptr += cur.regm.rm_eo;
 	    if ((end = findEol(curptr)) < fileeof) {
 		end++;	/* first char past end-of-line */
 	    }
@@ -813,16 +750,16 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 	    if (notDone) {	/* another match? */
 #ifdef	PHRASE_DEBUG
 		printf("... next match @ %d:%d (end=%d)\n",
-		       curptr-textp+gl.regm.rm_so,
-		       curptr-textp+gl.regm.rm_eo-1, end-textp);
+		       curptr - textp + cur.regm.rm_so,
+		       curptr - textp + cur.regm.rm_eo - 1, end - textp);
 #endif	/* PHRASE_DEBUG */
 #ifdef	QA_CHECKS
-		if (curptr+gl.regm.rm_eo > fileeof) {
+		if ((curptr + cur.regm.rm_eo) > fileeof) {
 		    Assert(YES, "Too far into file!");
 		}
 #endif	/* QA_CHECKS */
 		/* next match OUTSIDE the text we've already saved? */
-		if (curptr+gl.regm.rm_eo > end) {
+		if ((curptr + cur.regm.rm_eo) > end) {
 		    break;
 		}
 		/* else, next match IS within the text we're looking at! */
@@ -905,11 +842,8 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 	       regex, strlen(ibuf), ibuf);
 #endif	/* PHRASE_DEBUG */
     }
-#if	0
-    printf("\"%s\": matches == %d\n", p->str, p->nMatch);
-    /*listDump(&gl.offList, YES);*/
-#endif
-#if	defined(PHRASE_DEBUG) || defined(DOCTOR_DEBUG)
+
+#if defined(PHRASE_DEBUG) || defined(DOCTOR_DEBUG)
     printf("getInstances(\"%s\"): Found %d bytes of data...\n", regex,
 	   buflen-1);
 #endif	/* PHRASE_DEBUG || DOCTOR_DEBUG */
@@ -966,10 +900,7 @@ void memStats(char *s)
 void makeSymlink(char *path)
 {
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== makeSymlink(%s)\n", path);
+	traceFunc("== makeSymlink(%s)\n", path);
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
     (void) sprintf(cmdBuf, ".%s", strrchr(path, '/'));
@@ -981,25 +912,9 @@ void makeSymlink(char *path)
 }
 
 
+#ifdef notdef
 int fileTypeIs(char *pathname, int index, char *magicData)
 {
-
-#if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-    extern licText_t licText[];
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== fileTypeIs(%s, %d, \"%s\")\n", pathname, index,
-	       magicData);
-
-#ifndef	UNPACK_DEBUG
-	printf("... regex is \"%s\"\n", _REGEX(index));
-#endif	/* not UNPACK_DEBUG */
-#ifdef	PROC_TRACE_SWITCH
-    }
-#endif	/* PROC_TRACE_SWITCH */
-#endif	/* PROC_TRACE || UNPACK_DEBUG */
-
     if (idxGrep(index, magicData, REG_ICASE|REG_EXTENDED)) {
 	return(1);
     }
@@ -1036,6 +951,7 @@ int fileIsShar(char *textp, char *magicData)
     return(0);
 #endif	/* not DEBUG */
 }
+#endif /* notdef */
 
 
 /*
@@ -1060,10 +976,7 @@ void printRegexMatch(int n, int cached)
     char *textp;
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== printRegexMatch(%d, %d)\n", n, cached);
+    traceFunc("== printRegexMatch(%d, %d)\n", n, cached);
 #endif	/* PROC_TRACE */
 
     if (*debugStr == NULL_CHAR) {
@@ -1072,8 +985,8 @@ void printRegexMatch(int n, int cached)
 	printf("File: %s\n", debugStr);
 #endif	/* DEBUG */
     }
-    save_so = gl.regm.rm_so;
-    save_eo = gl.regm.rm_eo;
+    save_so = cur.regm.rm_so;
+    save_eo = cur.regm.rm_eo;
     if (isFILE(debugStr)) {
 	if ((match = (gl.flags & FL_SAVEBASE))) { /* assignment is deliberate */
 	    gl.flags &= ~FL_SAVEBASE;
@@ -1086,10 +999,10 @@ void printRegexMatch(int n, int cached)
 	if (strGrep(misc, textp, REG_EXTENDED)) {
 #ifdef	DEBUG
 	    printf("Patt: %s\nMatch: %d:%d\n", misc,
-		   gl.regm.rm_so, gl.regm.rm_eo);
+		   cur.regm.rm_so, cur.regm.rm_eo);
 #endif	/* DEBUG */
-	    x = textp + gl.regm.rm_so;
-	    cp = textp + gl.regm.rm_so;
+	    x = textp + cur.regm.rm_so;
+	    cp = textp + cur.regm.rm_so;
 	    *x = NULL_CHAR;
 	    while (*--x != '[') {
 		if (x == textp) {
@@ -1107,11 +1020,11 @@ void printRegexMatch(int n, int cached)
 	    gl.flags |= FL_SAVEBASE;
 	}
 #ifdef	DEBUG
-	printf("RESTR [%d:%d]\n", gl.regm.rm_so, gl.regm.rm_eo);
+	printf("RESTR [%d:%d]\n", cur.regm.rm_so, cur.regm.rm_eo);
 #endif	/* DEBUG */
     }
-    gl.regm.rm_so = save_so;
-    gl.regm.rm_eo = save_eo;
+    cur.regm.rm_so = save_so;
+    cur.regm.rm_eo = save_eo;
     printf("%s regex %d ", cached ? "Cached" : "Found", n);
     if (x) {
 	printf("(%s) ", misc);
@@ -1143,10 +1056,7 @@ char *mmapFile(char *pathname)	/* read-only for now */
     char *cp;
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== mmapFile(%s)\n", pathname);
+	traceFunc("== mmapFile(%s)\n", pathname);
 #endif	/* PROC_TRACE */
 
     /* 
@@ -1192,18 +1102,18 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	(void) mySystem("ls -l %s", pathname);
 	Fatal("%s: open failure!", pathname);
     }
-    if (fstat(mmp->fd, &gl.stbuf) < 0) {
+    if (fstat(mmp->fd, &cur.stbuf) < 0) {
 	fprintf(stderr, "fstat failure!\n");
 	perror(pathname);
 	Bail(1);
     }
-    if (S_ISDIR(gl.stbuf.st_mode)) {
+    if (S_ISDIR(cur.stbuf.st_mode)) {
 	fprintf(stderr, "mmapFile(%s): is a directory\n", pathname);
 	Bail(1);
     }
     (void) strcpy(mmp->label, pathname);
-    if (gl.stbuf.st_size) {
-	mmp->size = gl.stbuf.st_size+1;
+    if (cur.stbuf.st_size) {
+	mmp->size = cur.stbuf.st_size + 1;
 	mmp->mmPtr = memAlloc(mmp->size, MTAG_MMAPFILE);
 #ifdef	DEBUG
 	printf("+MM: %d @ %p\n", mmp->size, mmp->mmPtr);
@@ -1259,10 +1169,7 @@ void munmapFile(void *ptr)
     int i;
     
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== munmapFile(%p)\n", ptr);
+	traceFunc("== munmapFile(%p)\n", ptr);
 #endif	/* PROC_TRACE */
 
     if (ptr == (void *) NULL) {
@@ -1317,16 +1224,13 @@ int fileLineCount(char *pathname)
      */
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== fileLineCount(%s)\n", pathname);
+	traceFunc("== fileLineCount(%s)\n", pathname);
 #endif	/* PROC_TRACE */
 
     if ((filep = mmapFile(pathname)) == NULL_STR) {
 	return(0);
     }
-    i = bufferLineCount(filep, gl.stbuf.st_size);
+    i = bufferLineCount(filep, cur.stbuf.st_size);
     munmapFile(filep);
     return(i);
 }
@@ -1339,10 +1243,7 @@ int bufferLineCount(char *p, int len)
     int i;
     
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== bufferLineCount(%p, %d)\n", p, len);
+	traceFunc("== bufferLineCount(%p, %d)\n", p, len);
 #endif	/* PROC_TRACE */
 
     if (eofaddr == p) {
@@ -1373,16 +1274,13 @@ int fileCompare(char *f1, char *f2)
     char *base2;
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== fileCompare(%s, %s)\n", f1, f2);
+	traceFunc("== fileCompare(%s, %s)\n", f1, f2);
 #endif	/* PROC_TRACE */
 
     base1 = mmapFile(f1);
-    size1 = (int) gl.stbuf.st_size;
+    size1 = (int) cur.stbuf.st_size;
     base2 = mmapFile(f2);
-    size2 = (int) gl.stbuf.st_size;
+    size2 = (int) cur.stbuf.st_size;
     if (size1 == 0 && size2 == 0) {
 	ret = 0;
     } else if (size1 < size2) {
@@ -1407,10 +1305,7 @@ void appendFile(char *pathname, char *str)
     FILE *fp;
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== appendFile(%s, \"%s\")\n", pathname, str);
+	traceFunc("== appendFile(%s, \"%s\")\n", pathname, str);
 #endif	/* PROC_TRACE */
 
     fp = fopenFile(pathname, "a+");
@@ -1419,21 +1314,17 @@ void appendFile(char *pathname, char *str)
     return;
 }
 
-
+/*
+  Dump the contents of a file -- this utility MAY go away later!
+*/
 void dumpFile(FILE *fp, char *pathname, int logFlag)
 {
     char *filep;
-    /*
-     * Dump the contents of a file -- this utility MAY go away later!
-     */
-    /* */
+
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== dumpFile(%p, %s, %d)\n", fp, pathname, logFlag);
+	traceFunc("== dumpFile(%p, %s, %d)\n", fp, pathname, logFlag);
 #endif	/* PROC_TRACE */
-    /* */
+
     if (!isFILE(pathname)) {
 #ifdef	DEBUG
 	printf("%s: NO SUCH FILE\n", pathname);
@@ -1441,7 +1332,7 @@ void dumpFile(FILE *fp, char *pathname, int logFlag)
 	perror(pathname);
 	return;
     }
-    if (gl.stbuf.st_size == 0) {
+    if (cur.stbuf.st_size == 0) {
 	printf("%s: EMPTY\n", pathname);
 	return;
     }
@@ -1477,10 +1368,7 @@ int nftwFileFilter(char *pathname, struct stat *st, int onlySingleLink)
 	return(1);
     }
 #if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== nftwFileFilter(\"%s\", %p)\n", pathname, st);
+	traceFunc("== nftwFileFilter(\"%s\", %p)\n", pathname, st);
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
     if (!S_ISREG(st->st_mode)) {
@@ -1537,39 +1425,13 @@ int nftwFileFilter(char *pathname, struct stat *st, int onlySingleLink)
 }
 
 
-#ifdef notdef
-/* CDB */
-void makeTempDir()
-{
-#if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== makeTempDir()\n");
-#endif	/* PROC_TRACE || UNPACK_DEBUG */
-    (void) strcpy(gl.tmpdir, "/tmp/pkgXXXXXX");
-    if (mkdtemp(gl.tmpdir) != gl.tmpdir) {
-	perror("mkdtemp");
-	Bail(1);
-    }
-#ifdef	UNPACK_DEBUG
-    printf("** mkdtemp() set dirname to \"%s\"\n", gl.tmpdir);
-#endif	/* UNPACK_DEBUG */
-}
-
-#endif /* notdef */
-
-
 
 void makePath(char *dirpath)	/* e.g., the command "mkdir -p" */
 {
     char *cp = dirpath;
 
 #if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== makePath(%s)\n", dirpath);
+	traceFunc("== makePath(%s)\n", dirpath);
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
     if (isDIR(dirpath)) {
@@ -1591,10 +1453,7 @@ void makePath(char *dirpath)	/* e.g., the command "mkdir -p" */
 void makeDir(char *dirpath)
 {
 #if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== makeDir(%s)\n", dirpath);
+	traceFunc("== makeDir(%s)\n", dirpath);
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
     if (isDIR(dirpath)) {
@@ -1615,10 +1474,7 @@ void removeDir(char *dir)
 {
 
 #if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== removeDir(%s)\n", dir);
+	traceFunc("== removeDir(%s)\n", dir);
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
     if (mySystem("rm -rf %s", dir)) {
@@ -1636,10 +1492,7 @@ int mySystem(const char *fmt, ...)
     va_end(ap);
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== mySystem('%s')\n", cmdBuf);
+	traceFunc("== mySystem('%s')\n", cmdBuf);
 #endif  /* PROC_TRACE || UNPACK_DEBUG */
 
     ret = system(cmdBuf);
@@ -1660,7 +1513,7 @@ int mySystem(const char *fmt, ...)
 	Error("system(%s) stopped, signal %d", cmdBuf, ret);
     }
 #if	0
-    if (ret && isFILE(UNPACK_STDERR) && (int) gl.stbuf.st_size > 0) {
+    if (ret && isFILE(UNPACK_STDERR) && (int) cur.stbuf.st_size > 0) {
 	dumpFile(stderr, UNPACK_STDERR, YES);
     }
 #endif
@@ -1672,14 +1525,12 @@ int isFILE(char *pathname)
 {
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== isFILE(%s)\n", pathname);
+	traceFunc("== isFILE(%s)\n", pathname);
 #endif	/* PROC_TRACE */
 
     return(isINODE(pathname, S_IFREG));
 }
+
 
 /*
  * addEntry() adds a line to the specified pathname if either:
@@ -1693,10 +1544,7 @@ int addEntry(char *pathname, int forceFlag, const char *fmt, ...)
     va_end(ap);
 
 #ifdef  PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== addEntry(%s, %d, \"%s\")\n", pathname, forceFlag, utilbuf);
+	traceFunc("== addEntry(%s, %d, \"%s\")\n", pathname, forceFlag, utilbuf);
 #endif  /* PROC_TRACE */
 
     if (pathname == NULL_STR) {
@@ -1730,10 +1578,7 @@ void Note(const char *fmt, ...)
     va_end(ap);
 
 #ifdef  PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== Warn(\"%s\")\n", utilbuf);
+	traceFunc("== Warn(\"%s\")\n", utilbuf);
 #endif  /* PROC_TRACE */
 
     (void) strcat(utilbuf, "\n");
@@ -1750,10 +1595,7 @@ void Warn(const char *fmt, ...)
     va_end(ap);
 
 #ifdef  PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== Warn(\"%s\")\n", utilbuf);
+	traceFunc("== Warn(\"%s\")\n", utilbuf);
 #endif  /* PROC_TRACE */
 
     (void) strcat(utilbuf, "\n");
@@ -1770,10 +1612,7 @@ void Assert(int fatalFlag, const char *fmt, ...)
     va_end(ap);
 
 #ifdef  PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("!! Assert(\"%s\")\n", utilbuf+strlen(gl.progName)+3);
+	traceFunc("!! Assert(\"%s\")\n", utilbuf+strlen(gl.progName)+3);
 #endif  /* PROC_TRACE */
 
     (void) strcat(utilbuf, "\n");
@@ -1793,10 +1632,7 @@ void Error(const char *fmt, ...)
     va_end(ap);
 
 #ifdef  PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== Error(\"%s\")\n");
+	traceFunc("== Error(\"%s\")\n");
 #endif  /* PROC_TRACE */
 
     (void) strcat(utilbuf, "\n");
@@ -1813,10 +1649,7 @@ void Fatal(const char *fmt, ...)
     va_end(ap);
 
 #ifdef  PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("!! Fatal(\"%s\")\n", utilbuf+strlen(gl.progName)+9);
+	traceFunc("!! Fatal(\"%s\")\n", utilbuf + strlen(gl.progName) + 9);
 #endif  /* PROC_TRACE */
 
     (void) strcat(utilbuf, "\n");
