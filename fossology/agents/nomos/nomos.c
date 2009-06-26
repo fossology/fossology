@@ -32,11 +32,18 @@
 DECL_TIMER;
 #endif	/* STOPWATCH */
 
+void freeAndClearScan(struct curScan *);
+
 struct globals gl;
-struct curPkg cur;
+struct curScan cur;
 extern licText_t licText[];
 
+char *files_to_be_scanned[];
+int file_count = 0;
+
 #define	_MAXFILESIZE	/* was 512000000-> 800000000 */	1600000000
+#define TEMPDIR_TEMPLATE "/tmp/nomos.agent.XXXXXX"
+
 
 void Bail(int exitval)
 {
@@ -60,19 +67,7 @@ void Bail(int exitval)
 	memCacheDump("Mem-cache @ Bail() time:");
     }
 #endif	/* MEMORY_TRACING && MEM_ACCT */
-    /*
-     * Question: do we want to wait for any processes that might still
-     * be executing?
-     */
-#ifdef notdef
-    if (isDIR(gl.mntpath)) {
-	(void) mySystem("%s %s > %s 2>&1", _REGEX(_UMNT_IMG),
-			gl.mntpath, "/dev/null");
-	if (rmdir(gl.mntpath)) {
-	    perror(gl.mntpath);
-	}
-    }
-#endif /* notdef */
+
     exit(exitval);
 }
 
@@ -110,57 +105,29 @@ int optionIsSet(int val)
 }
 
 
-static void parseOpts(int argc, char **argv)
+/*
+  At the moment, we really don't have any options, so all this is doing
+  is setting a variable (filenames) to the beginning of a list of filename
+  args passed in.
+*/
+static void parseOptsAndArgs(int argc, char **argv)
 {
-    char *cp;
+    int i;
 
 #ifdef  PROC_TRACE
-    traceFunc("== parseOpts(%d, **argv)\n", argc);
+    traceFunc("== parseOptsAndArgs(%d, **argv)\n", argc);
 #endif  /* PROC_TRACE */
 
-    gl.uPsize = 6;
-
-    argc--; /* CDB, Lame, but will fix in transition */
-    *argv++; /* CDB, Ditto */
-	
-    if (argc != 1) {
-	Fatal("Usage: %s <file>", gl.progName);
-    }
-
-    if (isDIR(NOMOS_TEMP)) {
-	if (isFILE(NOMOS_TLOCK)) {
-	    Fatal("Another %s instance is running!",
-		  gl.progName);
-	}
-	Fatal("Temp directory %s already exists!", NOMOS_TEMP);
-    }
-
-    if (!isFILE(*argv)) {
-	Fatal("\"%s\" is not a plain file", *argv);
-    }
-    if ((cp = strrchr(*argv, '/')) == NULL_STR) {
-	cp = *argv;
-    } else {
-	cp++;
+    if (argc <= 1) {
+	Fatal("Usage: %s <file> ...", gl.progName);
     }
     /*
-      CDB - Need to change this so that we use a unique temp
-      directory for each scan. Means we have to figure out how
-      to keep track of them.
+      Copy filename args into array
     */
-    if (mkdir(NOMOS_TEMP, 0755)) {
-	perror(NOMOS_TEMP);
-	Fatal("%s: cannot make temp directory %s", gl.progName);
+    for (i = 1; i < argc; i++) {
+	files_to_be_scanned[i-1] = argv[i];
+	file_count++;
     }
-    if (mySystem("cp '%s' %s", *argv, NOMOS_TEMP)) {
-	Fatal("Cannot copy %s to temp-directory", *argv);
-    }
-    strcpy(gl.target, NOMOS_TEMP);
-    strcpy(gl.targetFile, NOMOS_TEMP);
-    strcat(gl.targetFile, "/");
-    strcat(gl.targetFile, basename(*argv));
-
-    gl.targetLen = strlen(gl.target);
     return;
 }
 
@@ -179,33 +146,63 @@ static void printListToFile(list_t *l, char *filename, char *mode)
 }
 
 
+/*
+  CDB - Could probably roll this back into the main processing
+  loop or just put in a generic init func that initializes *all*
+  the lists.
+
+  Initialize regfList and offList.
+*/
+
 static void getFileLists(char *dirpath)
 {
-    /*
-     * Construct lists of source packages, installable-packages, plain files
-     * and source archives, and classify all files in the distribution.
-     */
 #ifdef	PROC_TRACE
     traceFunc("== getFileLists(%s)\n", dirpath);
 #endif	/* PROC_TRACE */
 
     /*    listInit(&gl.sarchList, 0, "source-archives list & md5sum map"); */
-    listInit(&gl.regfList, 0, "regular-files list");
-    listInit(&gl.offList, 0, "buffer-offset list");
+    listInit(&cur.regfList, 0, "regular-files list");
+    listInit(&cur.offList, 0, "buffer-offset list");
 #ifdef	FLAG_NO_COPYRIGHT
     listInit(&gl.nocpyrtList, 0, "no-copyright list");
 #endif	/* FLAG_NO_COPYRIGHT */
 
-    listGetItem(&gl.regfList, gl.targetFile);
+    listGetItem(&cur.regfList, cur.targetFile);
     return;
 }
 
 
+void freeAndClearScan(struct curScan *thisScan) {
+
+    /*
+      Remove scratch dir and contents
+    */
+    (void) mySystem("rm -rf %s", thisScan->targetDir);
+
+    /*
+      Change back to original working directory
+    */
+    changeDir(gl.initwd);
+
+    /*
+      Clear lists
+    */
+    listClear(&thisScan->regfList, DEALLOC_LIST);
+    listClear(&thisScan->offList, DEALLOC_LIST);
+    listClear(&thisScan->fLicFoundMap, DEALLOC_LIST);
+    listClear(&thisScan->parseList, DEALLOC_LIST);
+    listClear(&thisScan->lList, DEALLOC_LIST);
+    listClear(&thisScan->cList, DEALLOC_LIST);
+    listClear(&thisScan->eList, DEALLOC_LIST);
+
+}
 
 
 int main(int argc, char **argv)
 {
     char *cp;
+    int i;
+
 
 #ifdef	PROC_TRACE
     traceFunc("== main(%d, %p)\n", argc, argv);
@@ -220,9 +217,13 @@ int main(int argc, char **argv)
 #ifdef	STOPWATCH
     START_TIMER;
 #endif	/* STOPWATCH */
+
     /*
-     * Record the progname name
-     */
+      Set up variables global to the agent. Ones that are the
+      same for all scans.
+    */
+
+    /* Record the progname name */
     if ((cp = strrchr(*argv, '/')) == NULL_STR) {
 	(void) strcpy(gl.progName, *argv);
     } else {
@@ -238,44 +239,101 @@ int main(int argc, char **argv)
     }
     unbufferFile(stdout);
     (void) umask(022);
-    /*
-     * Grab miscellaneous things from the environent
-     */
+
+    /* Grab miscellaneous things from the environent */
     if (getcwd(gl.initwd, sizeof(gl.initwd)) == NULL_STR) {
 	perror("getcwd");
 	Fatal("Cannot obtain starting directory");
     }
-    (void) strcpy(gl.cwd, gl.initwd);
-    parseOpts(argc, argv);
+
+    gl.uPsize = 6;
+    parseOptsAndArgs(argc, argv);
     licenseInit();
     gl.flags = 0;
 
+    /*
+      CDB - Would eventually like to get rid of the file magic stuff
+      in the agent and let other parts of FOSSology handle it.
+    */
     if ((gl.mcookie = magic_open(MAGIC_NONE)) == (magic_t) NULL) {
 	Fatal("magic_open() fails!");
     }
     if (magic_load(gl.mcookie, NULL_STR)) {
 	Fatal("magic_load() fails!");
     }
-    /*
-     * chdir to target, call getcwd() to get real pathname; then, chdir back
-     *
-     *
-     * We've saved the specified directory in 'gl.target'; now, normalize
-     * the pathname (in case we were passed a symlink to another dir).
-     */
-    changeDir(gl.target);	/* see if we can chdir to the target */
-    getFileLists(gl.target);
-    changeDir(gl.initwd);
-    listInit(&gl.fLicFoundMap, 0, "file-license-found map");
-    listInit(&gl.parseList, 0, "license-components list");
+
+    /* CDB -- Start of perScan stuff */
+
+    /* 
+       For each file to be scanned
+    */
+    for (i = 0; i < file_count; i++) {
+	char *scan_file = files_to_be_scanned[i];
+	
+	/*
+	  Initialize. This stuff should probably be broken into a separate
+	  function, but for now, I'm leaving it all here.
+	*/
+	(void) strcpy(cur.cwd, gl.initwd);
+
+#ifdef notdef
+	CDB - WTF?
+	if ((cp = strrchr(scan_file, '/')) == NULL_STR) {
+	    cp = *argv;
+	} else {
+	    cp++;
+	}
+#endif /* notdef */
+
+	/*
+	  Create temporary directory for scratch space
+	  and copy target file to that directory.
+	*/
+	strcpy(cur.targetDir, TEMPDIR_TEMPLATE);
+	if (!mkdtemp(cur.targetDir)) {
+	    perror("mkdtemp");
+	    Fatal("%s: cannot make temp directory %s", gl.progName);
+	}
+	chmod(cur.targetDir, 0755);
+	if (mySystem("cp '%s' %s", scan_file, cur.targetDir)) {
+	    Fatal("Cannot copy %s to temp-directory", scan_file);
+	}
+	strcpy(cur.targetFile, cur.targetDir);
+	strcat(cur.targetFile, "/");
+	strcat(cur.targetFile, basename(scan_file));
+	cur.targetLen = strlen(cur.targetDir);
+
+	if (!isFILE(scan_file)) {
+	    Fatal("\"%s\" is not a plain file", *scan_file);
+	}
+ 
+	/*
+	  CDB - How much of this is still necessary?
+
+	  chdir to target, call getcwd() to get real pathname; then, chdir back
+	 
+	  We've saved the specified directory in 'gl.targetDir'; now, normalize
+	  the pathname (in case we were passed a symlink to another dir).
+	*/
+	changeDir(cur.targetDir);	/* see if we can chdir to the target */
+	getFileLists(cur.targetDir);
+	changeDir(gl.initwd);
+	listInit(&cur.fLicFoundMap, 0, "file-license-found map");
+	listInit(&cur.parseList, 0, "license-components list");
+	listInit(&cur.lList, 0, "license-list");
+	listInit(&cur.cList, 0, "copyright-list");
+	listInit(&cur.eList, 0, "eula-list");
+
 
 #ifdef	STOPWATCH
-    END_TIMER;
-    PRINT_TIMER("init", 0);
+	END_TIMER;
+	PRINT_TIMER("init", 0);
 #endif	/* STOPWATCH */
-    processRawSource();
-    changeDir("/tmp");
-    (void) mySystem("rm -rf %s", NOMOS_TEMP);
+
+	processRawSource();
+
+	freeAndClearScan(&cur);
+    }
     Bail(0);
 }
 

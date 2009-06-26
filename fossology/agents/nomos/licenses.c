@@ -34,13 +34,13 @@
 
 static void prettyPrint(FILE *, char *, int);
 static void makeLicenseSummary(list_t *, int, char *, int);
-static void noLicenseFound(int);
+static void noLicenseFound();
 #ifdef notdef
 static void licenseStringChecks();
 static void findLines(char *, char *, int, int, list_t *);
 #endif /* notdef */
 static int searchStrategy(int, char *, int);
-static void saveLicenseData(scanres_t *, int, int, int, int);
+static void saveLicenseData(scanres_t *, int, int, int);
 static int scoreCompare(const void *, const void *);
 
 static char miscbuf[myBUFSIZ];
@@ -386,14 +386,14 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
 		if (wildcardBad) {
 			Fatal("OOPS, regex %d, wild-card not allowed here", i);
 		}
-		if (*(cp+gl.regm.rm_eo) == NULL_CHAR) {
+		if (*(cp+cur.regm.rm_eo) == NULL_CHAR) {
 			Fatal("String %d ends in a wild-card", i);
 		}
-		else if (*(cp+gl.regm.rm_eo) == ' ') {
+		else if (*(cp+cur.regm.rm_eo) == ' ') {
 #ifdef	DEBUG
 			printf("BEFORE(any): %s\n", s);
 #endif	/* DEBUG */
-			cp += gl.regm.rm_so;
+			cp += cur.regm.rm_so;
 			*cp++ = '.';
 			*cp++ = '*';
 			memmove(cp, cp+len-1, strlen(cp+len)+2);
@@ -403,7 +403,7 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
 		}
 		else {
 			Note("Wild-card \"%s\" sub-string, phrase %d", wildCard, i);
-			cp += gl.regm.rm_eo;
+			cp += cur.regm.rm_eo;
 		}
 	}
 /*
@@ -415,14 +415,14 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
 		if (wildcardBad) {
 			Fatal("OOPS, regex %d, wild-card not allowed here", i);
 		}
-		if (*(cp+gl.regm.rm_eo) == NULL_CHAR) {
+		if (*(cp+cur.regm.rm_eo) == NULL_CHAR) {
 			Fatal("String %d ends in a wild-card", i);
 		}
-		else if (*(cp+gl.regm.rm_eo) == ' ') {
+		else if (*(cp+cur.regm.rm_eo) == ' ') {
 #ifdef	DEBUG
 			printf("BEFORE(some): %s\n", s);
 #endif	/* DEBUG */
-			cp += gl.regm.rm_so;
+			cp += cur.regm.rm_so;
 			*cp++ = '.';
 			*cp++ = '{';
 			*cp++ = '0';
@@ -437,7 +437,7 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
 		}
 		else {
 			Note("Wild-card \"%s\" sub-string, phrase %d", wildCard, i);
-			cp += gl.regm.rm_eo;
+			cp += cur.regm.rm_eo;
 		}
 	}
 /*
@@ -449,14 +449,14 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
 		if (wildcardBad) {
 			Fatal("OOPS, regex %d, wild-card not allowed here", i);
 		}
-		if (*(cp+gl.regm.rm_eo) == NULL_CHAR) {
+		if (*(cp+cur.regm.rm_eo) == NULL_CHAR) {
 			Fatal("String %d ends in a wild-card", i);
 		}
-		else if (*(cp+gl.regm.rm_eo) == ' ') {
+		else if (*(cp+cur.regm.rm_eo) == ' ') {
 #ifdef	DEBUG
 			printf("BEFORE(few): %s\n", s);
 #endif	/* DEBUG */
-			cp += gl.regm.rm_so;
+			cp += cur.regm.rm_so;
 			*cp++ = '.';
 			*cp++ = '{';
 			*cp++ = '0';
@@ -471,7 +471,7 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
 		}
 		else {
 			Note("Wild-card \"%s\" sub-string, phrase %d", wildCard, i);
-			cp += gl.regm.rm_eo;
+			cp += cur.regm.rm_eo;
 		}
 	}
 /*
@@ -484,7 +484,7 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
 		if (strlen(s)+25 >= size) {	/* 24 plus 1(NULL) */
 			Fatal("buffer overflow, text-spec %d", i);
 		}
-		cp = (char *)(s+gl.regm.rm_so);
+		cp = (char *)(s+cur.regm.rm_so);
 #ifdef	DEBUG
 		printf("BEFORE: %s\n", s);
 #endif	/* DEBUG */
@@ -566,6 +566,7 @@ void licenseScan(list_t *l)
     START_TIMER;
 #endif	/* STOPWATCH */
     lowest = nSkip = 0;
+#if !defined (notdef)
     for (scp = scores; (p = listIterate(l)) != NULL_ITEM; scp++) {
 #ifdef	QA_CHECKS
 	if (p->iFlag) {
@@ -578,11 +579,11 @@ void licenseScan(list_t *l)
 	 */
 	if (*(p->str) == '/') {
 	    (void) strcpy(scp->fullpath, p->str);
-	    scp->nameOffset = (size_t) (gl.targetLen+1);
+	    scp->nameOffset = (size_t) (cur.targetLen+1);
 	    cp = scp->fullpath;	/* full pathname */
 	} else {
-	    (void) sprintf(scp->fullpath, "%s/%s", gl.cwd, p->str);
-	    scp->nameOffset = (size_t) (gl.cwdLen+1);
+	    (void) sprintf(scp->fullpath, "%s/%s", cur.cwd, p->str);
+	    scp->nameOffset = (size_t) (cur.cwdLen+1);
 	    cp = p->str;	/* relative path == faster open() */
 	}
 #ifdef	DEBUG
@@ -603,7 +604,7 @@ void licenseScan(list_t *l)
 #endif	/* QA_CHECKS */
 	    continue;
 	}
-	scp->size = gl.stbuf.st_size; /* Where did this get set ? CDB */
+	scp->size = cur.stbuf.st_size; /* Where did this get set ? CDB */
 	(void) strcpy(scp->ftype, magic_buffer(gl.mcookie, textp,
 					       (size_t) scp->size));
 #ifdef	DEBUG
@@ -642,7 +643,64 @@ void licenseScan(list_t *l)
 	       scp->score);
 #endif	/* DEBUG > 5 */
     }
+#else /* notdef */
+
+    cp = cur.targetFile;
+
+    /*
+     * Zero-length files are of no interest; there's nothing in them!
+     *  CDB - We need to report this error somehow... and clean up
+     *  /tmp/nomos.tmpdir (or equivalent).
+     */
+    if ((textp = mmapFile(cp)) == NULL_STR) {
+	perror(cp);
+	fprintf(stderr, "Zero length file: %s\n", cp);
+#ifdef	QA_CHECKS
+	Assert(NO, "zero-length: %s", cp);
+	mySystem("ls -l '%s'", cp);
+#endif	/* QA_CHECKS */
+    }
+    scp->size = cur.stbuf.st_size; /* Where did this get set ? CDB */
+    (void) strcpy(scp->ftype, magic_buffer(gl.mcookie, textp,
+					   (size_t) scp->size));
+#ifdef	DEBUG
+    printf("Magic: %s\n", scp->ftype);
+#endif	/* DEBUG */
+    /*
+     * Disinterest #3 (discriminate-by-file-content):
+     * Files not of a known-good type (as reported by file(1)/magic(3)) should
+     * also be skipped (some are quite large!).  _UTIL_MAGIC (see _autodata.c)
+     * contains a regex for MOST of the files we're interested in, but there
+     * ARE some exceptions (logged below).
+     *****
+     * exception (A): patch/diff files are sometimes identified as "data".
+     *****
+     * FIX-ME: we don't currently use _UTIL_FILTER, which is set up to
+     * exclude some files by filename.
+     */
+    if (idxGrep(_UTIL_MAGIC, scp->ftype, REG_ICASE|REG_EXTENDED)) {
+	for (scp->kwbm = c = 0; c < NKEYWORDS; c++) {
+	    if (idxGrep(c+_KW_first, textp,
+			REG_EXTENDED|REG_ICASE)) {
+		scp->kwbm |= (1 << c);
+		scp->score++;
+#if	(DEBUG > 5)
+		printf("Keyword %d (\"%s\"): YES\n", c, _REGEX(c+_KW_first));
+#endif	/* DEBUG > 5 */
+	    }
+	}
+    } else {
+	scp->score = 0;
+    }
+    munmapFile(textp);
+#if	(DEBUG > 5)
+    printf("%s = %d\n", (char *)(scp->fullpath + scp->nameOffset),
+	   scp->score);
+#endif	/* DEBUG > 5 */
+#endif /* !notdef */
+
     c = l->used;
+
     /*
      * If we were invoked with a single-file-only option, just over-ride the
      * score calculation -- give the file any greater-than-zero score so it
@@ -686,26 +744,6 @@ void licenseScan(list_t *l)
 #endif	/* SCORE_DEBUG */
     for (scp = scores, i = nCand = 0; i < c; i++, scp++) {
 	scp->relpath = (char *)(scp->fullpath + scp->nameOffset);
-#if	0
-	if (idxGrep(_FN_DEBCPYRT, scp->relpath, REG_ICASE)) {
-	    scp->flag = 2;
-	}
-	else if (scp->flag == 0 && idxGrep(_FN_LICENSEPATT,
-					   pathBasename(scp->relpath), REG_ICASE|REG_EXTENDED)) {
-	    scp->flag = 1;
-	}
-	else if (scp->flag == 0 && scp->score >= lowWater) {
-	    scp->flag |= 1;
-	}
-	/*
-	 * If we want to save files based on their contents (e.g., specific words
-	 * such as "license" or "copyright", include this.
-	 */
-	if (idxGrep(_KW_license, textp, 0) ||
-	    idxGrep(_KW_copyright, textp, 0)) {
-	    scp->flag = 1;
-	}
-#endif
 	if (idxGrep(_FN_LICENSEPATT, pathBasename(scp->relpath),
 		    REG_ICASE|REG_EXTENDED)) {
 	    scp->flag = 1;
@@ -743,7 +781,7 @@ void licenseScan(list_t *l)
     /*
      * OF SPECIAL INTEREST: saveLicenseData() changes directory (to "..")!!!
      */
-    saveLicenseData(scores, nCand, c, lowWater, NO);
+    saveLicenseData(scores, nCand, c, lowWater);
     /*
      * At this point, we don't need either the raw-source directory or the
      * unpacked results anymore, so get rid of 'em.
@@ -776,21 +814,14 @@ static int scoreCompare(const void *arg1, const void *arg2)
     }
 }
 
-static void noLicenseFound(int isPackage)
+static void noLicenseFound()
 {
 
 #ifdef	PROC_TRACE
-    traceFunc("== noLicenseFound(%d)\n", isPackage);
+    traceFunc("== noLicenseFound\n");
 #endif	/* PROC_TRACE */
 
-    if (isPackage && cur.isRpm) {
-	(void) sprintf(cur.compLic, "%s (RPM PkgHdr: %s)", LS_NOSUM,
-		       cur.claimlic);
-    } else if (isPackage) {
-	(void) sprintf(cur.compLic, "%s (no DEB PkgHdr)", LS_NOSUM);
-    } else {
-	(void) strcpy(cur.compLic, LS_NOSUM);
-    }
+    (void) strcpy(cur.compLic, LS_NOSUM);
     return;
 }
 
@@ -804,7 +835,7 @@ static void noLicenseFound(int isPackage)
   CDB - Some initializations happen here for no particular reason
 */
 static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
-    int lowWater, int isPackage)
+    int lowWater)
 {
     int i;
     int c;
@@ -821,14 +852,10 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     FILE *linkFp;
     FILE *scoreFp;
     item_t *p;
-    static list_t lList;
-    static list_t cList;
-    static list_t eList;
-    static int firstFlag = 1;
     
 #ifdef	PROC_TRACE
     traceFunc("== saveLicenseData(%p, %d, %d, %d, %d)\n", scores, nCand,
-	      nElem, lowWater, isPackage);
+	      nElem, lowWater);
 #endif	/* PROC_TRACE */
     
     /*
@@ -839,17 +866,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 #endif	/* DEBUG */
 
     changeDir("..");
-    /*
-     * Question: should these 'static' lists move somewhere else?
-     * 
-     * CDB - Are they even used ?
-     */
-    if (firstFlag) {
-	listInit(&lList, 0, "license-list");
-	listInit(&cList, 0, "copyright-list");
-	listInit(&eList, 0, "eula-list");
-	firstFlag = 0;
-    }
 
     /* BE PERFORMANCE-CONSCIOUS WITHIN THIS LOOP (it runs a LOT!) */
     /*
@@ -891,7 +907,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	if ((textp = mmapFile(fileName)) == NULL_STR) {
 	    Fatal("Null mmapFile(), path=%s", fileName);
 	}
-	size = (int) gl.stbuf.st_size;
+	size = (int) cur.stbuf.st_size;
 	/*
 	  CDB - the wordCount function called here currently has the
 	  important side-effect of setting nLines and nWords in the
@@ -903,8 +919,8 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	/*
 	 * Report which package (if any) this file came from
 	 */
-	fprintf(linkFp, "Package: %s\n",
-		isPackage ? cur.basename : STR_NOTPKG);
+	fprintf(linkFp, "Package: %s\n", STR_NOTPKG);
+
 	/*
 	 * construct the list of keywords that matched in licenseScan()
 	 */
@@ -938,8 +954,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	/*
 	 * Print the license claim (e.g., what's listed in the package)
 	 */
-	fprintf(linkFp, "License Claim: %s\n",
-		isPackage ? cur.claimlic : STR_NOTPKG);
+	fprintf(linkFp, "License Claim: %s\n", STR_NOTPKG);
 	/*
 	 * determine licenses in the file, and record 'em; wrap up by including
 	 * the file contents
@@ -963,8 +978,8 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	printf("idxGrep(ML) returns %d\n", isML);
 	if (isML) {
 	    int n;
-	    printf("isMarkUp@%d: [", gl.regm.rm_so);
-	    for (n = gl.regm.rm_so; n <= gl.regm.rm_eo; n++) {
+	    printf("isMarkUp@%d: [", cur.regm.rm_so);
+	    for (n = cur.regm.rm_so; n <= cur.regm.rm_eo; n++) {
 		printf("%c", *(textp+n));
 	    }
 	    printf("]\n");
@@ -985,8 +1000,8 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	printf("idxGrep(PS) returns %d\n", isPS);
 	if (isPS) {
 	    int n;
-	    printf("isPostScript@%d: [", gl.regm.rm_so);
-	    for (n = gl.regm.rm_so; n <= gl.regm.rm_eo; n++) {
+	    printf("isPostScript@%d: [", cur.regm.rm_so);
+	    for (n = cur.regm.rm_so; n <= cur.regm.rm_eo; n++) {
 		printf("%c", *(scores[idx].ftype + n));
 	    }
 	    printf("]\n");
@@ -1011,25 +1026,25 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 #endif	/* STOPWATCH */
 #ifdef	FLAG_NO_COPYRIGHT
 	if (gl.flags & FL_NOCOPYRIGHT) {
-	    p = listGetItem(&gl.nocpyrtList, scores[idx].relpath);
+	    p = listGetItem(&cur.nocpyrtList, scores[idx].relpath);
 	    p->buf = copyString(scores[idx].linkname, MTAG_PATHBASE);
 	    p->num = scores[idx].score;
 	}
 #endif	/* FLAG_NO_COPYRIGHT */
 	fprintf(linkFp, "License(s) Found: %s\n", scores[idx].licenses);
 #ifdef	SAVE_UNCLASSIFIED_LICENSES
-	if (gl.licPara != NULL_STR) {
+	if (cur.licPara != NULL_STR) {
 	    if (gl.flags & FL_FRAGMENT) {
 		fprintf(linkFp,
 			"[- Pattern(fragment) text -]\n\"%s\"\n",
-			gl.licPara);
+			cur.licPara);
 	    } else {
 		fprintf(linkFp,
 			"[- Possible license text/snippet -]\n%s\n",
-			gl.licPara);
+			cur.licPara);
 	    }
-	    memFree(gl.licPara, MTAG_TEXTPARA);	/* be free! */
-	    gl.licPara = NULL_STR;			/* remember */
+	    memFree(cur.licPara, MTAG_TEXTPARA);	/* be free! */
+	    cur.licPara = NULL_STR;			/* remember */
 	}
 #endif	/* SAVE_UNCLASSIFIED_LICENSES */
 	fprintf(linkFp, "[%s]\n%s", LABEL_TEXT, textp);
@@ -1039,18 +1054,18 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	/*
 	 * Remember this license in this file... 
 	 */
-	p = listGetItem(&lList, scores[idx].licenses);
+	p = listGetItem(&cur.lList, scores[idx].licenses);
 	p->refCount++;
 	/*
 	 * Clear out the buffer-offsets list
 	 */
 #ifdef	PHRASE_DEBUG
-	listDump(&gl.offList, NO);
+	listDump(&cur.offList, NO);
 #endif	/* PHRASE_DEBUG */
-	while ((p = listIterate(&gl.offList)) != 0) {
+	while ((p = listIterate(&cur.offList)) != 0) {
 	    listClear(p->buf, YES);
 	}
-	listClear(&gl.offList, NO);
+	listClear(&cur.offList, NO);
     }
 
 #ifdef	MEMSTATS
@@ -1058,10 +1073,10 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 #endif	/* MEMSTATS */
 
     (void) fclose(scoreFp);
-    listSort(&lList, SORT_BY_COUNT_DSC);
+    listSort(&cur.lList, SORT_BY_COUNT_DSC);
 
 #ifdef	QA_CHECKS
-    if (lList.used == 0) {
+    if (cur.lList.used == 0) {
 	Assert(NO, "No entries in license-list");
     }
 #endif	/* QA_CHECKS */
@@ -1071,10 +1086,10 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
      * entries for None and LikelyNot; those are individual-file results
      * and we're making an 'aggregate summary' here.
      */
-    if (gl.parseList.used == 0) {
-	noLicenseFound(isPackage);
+    if (cur.parseList.used == 0) {
+	noLicenseFound();
     } else {
-	makeLicenseSummary(&gl.parseList, highScore, cur.compLic,
+	makeLicenseSummary(&cur.parseList, highScore, cur.compLic,
 			   sizeof(cur.compLic));
     }
     if (optionIsSet(OPTS_DEBUG)) {
@@ -1255,12 +1270,12 @@ static void findLines(char *path, char *textp, int tsize, int index,
     while (idxGrep(index, cp, REG_ICASE|REG_NEWLINE|REG_EXTENDED)) {
 #ifdef	PHRASE_DEBUG
 	printf("DEBUG: STR[");
-	for (i = gl.regm.rm_so; i < gl.regm.rm_eo; i++) {
+	for (i = cur.regm.rm_so; i < cur.regm.rm_eo; i++) {
 	    printf("%c", *(cp+i));
 	}
 	printf("]...\n");
 #endif	/* PHRASE_DEBUG */
-	cp += gl.regm.rm_so;
+	cp += cur.regm.rm_so;
 	start = findBol(cp, para);
 	if ((end = findEol(cp)) == NULL_STR) {
 	    Fatal("Searching for EOL is all for naught!");
@@ -1406,13 +1421,13 @@ static void licenseStringChecks()
 		Assert(NO, "Regex %d and %d are identical", i, j);
 	    }
 	}
-	if ((j = regcomp(&gl.regc, _REGEX(i),
+	if ((j = regcomp(&cur.regc, _REGEX(i),
 			 REG_EXTENDED|REG_NEWLINE|REG_ICASE)) != 0) {
 	    Assert(NO, "Regex-compile failed(%d), regex %d", j, i);
-	    regexError(j, &gl.regc, _REGEX(i));
+	    regexError(j, &cur.regc, _REGEX(i));
 	    printf("\"%s\"\n", _REGEX(i));
 	}
-	regfree(&gl.regc);
+	regfree(&cur.regc);
     }
     if (!optionIsSet(OPTS_DEBUG)) {
 	return;

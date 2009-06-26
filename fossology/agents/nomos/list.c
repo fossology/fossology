@@ -40,13 +40,7 @@ void listInit(list_t *l, int size, char *label)
 {
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== listInit(%p, %d, \"%s\")\n", l, size, label);
-#ifdef	PROC_TRACE_SWITCH
-    }
-#endif	/* PROC_TRACE_SWITCH */
+	traceFunc("== listInit(%p, %d, \"%s\")\n", l, size, label);
 #endif	/* PROC_TRACE */
 
     if (l == NULL_LIST) {
@@ -93,15 +87,9 @@ void listClear(list_t *l, int deallocFlag)
     int i;
     
 #if defined(PROC_TRACE) /* || defined(UNPACK_DEBUG) */
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== listClear(%p, %s)\n", l,
+	traceFunc("== listClear(%p, %s)\n", l,
 	       deallocFlag ? "DEALLOC" : "NOTOUCH");
 	listDebugDetails(l);
-#ifdef	PROC_TRACE_SWITCH
-    }
-#endif	/* PROC_TRACE_SWITCH */
 #endif	/* PROC_TRACE || UNPACK_DEBUG */
 
     if (l == NULL_LIST) {
@@ -220,14 +208,8 @@ item_t *listGetItem(list_t *l, char *s)
     int x;
     
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== listGetItem(%p, \"%s\")\n", l, s);
+	traceFunc("== listGetItem(%p, \"%s\")\n", l, s);
 	listDebugDetails(l);
-#ifdef	PROC_TRACE_SWITCH
-    }
-#endif	/* PROC_TRACE_SWITCH */
 #endif	/* PROC_TRACE */
 
     listValidate(l, YES);	/* assume/setup for an 'add' */
@@ -294,14 +276,8 @@ item_t *listAppend(list_t *l, char *s)
     item_t *p;	/* computed return value */
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== listAppend(%p, \"%s\")\n", l, s);
+	traceFunc("== listAppend(%p, \"%s\")\n", l, s);
 	listDebugDetails(l);
-#ifdef	PROC_TRACE_SWITCH
-    }
-#endif	/* PROC_TRACE_SWITCH */
 #endif	/* PROC_TRACE */
 
     listValidate(l, YES);
@@ -320,7 +296,7 @@ item_t *listAppend(list_t *l, char *s)
     return(p);
 }
 
-#ifdef DEAD_CODE
+#ifdef notdef
 /*
  * Look up an element in a list based on it's name (str) value and
  * return NULL if not found.
@@ -388,9 +364,9 @@ item_t *listLookupName(list_t *l, char *s)
     }
     return(NULL_ITEM);
 }
-#endif /* DEAD_CODE */
+#endif /* notdef */
 
-#ifdef DEAD_CODE
+#ifdef notdef
 /*
  * Look up an element in a list based on it's alias (buf) value and
  * return NULL if not found.
@@ -449,7 +425,7 @@ item_t *listLookupAlias(list_t *l, char *s)
     }
     return(NULL_ITEM);
 }
-#endif /* DEAD_CODE */
+#endif /* notdef */
 
 
 item_t *listIterate(list_t *l)
@@ -457,15 +433,9 @@ item_t *listIterate(list_t *l)
     item_t *p;
     
 #ifdef	LIST_DEBUG /* was PROC_TRACE */
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== listIterate(%p) -- %s (ix %d, used %d)\n", l, l->name,
+	traceFunc("== listIterate(%p) -- %s (ix %d, used %d)\n", l, l->name,
 	       l->ix, l->used);
 	listDebugDetails(l);
-#ifdef	PROC_TRACE_SWITCH
-    }
-#endif	/* PROC_TRACE_SWITCH */
 #endif	/* LIST_DEBUG, oh-so-formerly-PROC_TRACE */
     
 #if	defined(QA_CHECKS) || defined(LIST_DEBUG)
@@ -495,20 +465,15 @@ void listIterationReset(list_t *l)
 {
     
 #ifdef	LIST_DEBUG /* was PROC_TRACE */
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== listIterationReset(%p) -- %s (ix %d, used %d)\n", l, l->name,
+	traceFunc("== listIterationReset(%p) -- %s (ix %d, used %d)\n", l, l->name,
 	       l->ix, l->used);
 	listDebugDetails(l);
-#ifdef	PROC_TRACE_SWITCH
-    }
-#endif	/* PROC_TRACE_SWITCH */
 #endif	/* LIST_DEBUG, oh-so-formerly-PROC_TRACE */
 
 #if	defined(QA_CHECKS) || defined(LIST_DEBUG)
     listValidate(l, NO);
 #endif	/* QA_CHECKS || LIST_DEBUG */
+
     l->ix = -1;		/* reset index for listIterate() */
     return;
 }
@@ -520,14 +485,8 @@ int listDelete(list_t *l, item_t *p)
     item_t *base;
     
 #if defined(PROC_TRACE)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== listDelete(%p, %p)\n", l, p);
+	traceFunc("== listDelete(%p, %p)\n", l, p);
 	listDebugDetails(l);
-#ifdef	PROC_TRACE_SWITCH
-    }
-#endif	/* PROC_TRACE_SWITCH */
 #endif	/* PROC_TRACE */
     
 #if	defined(QA_CHECKS) || defined(LIST_DEBUG)
@@ -572,14 +531,8 @@ static void listDoubleSize(list_t *l)
     item_t *newptr;
     
 #if defined(PROC_TRACE)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== listDoubleSize(%p) -- %s\n", l, l->name);
+	traceFunc("== listDoubleSize(%p) -- %s\n", l, l->name);
 	listDebugDetails(l);
-#ifdef	PROC_TRACE_SWITCH
-    }
-#endif	/* PROC_TRACE_SWITCH */
 #endif	/* PROC_TRACE */
     
     sz = (size_t) (l->used * (int)sizeof(item_t));
@@ -704,10 +657,7 @@ void listSort(list_t *l, int sortType)
     }
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("=> invoking qsort(): callback is %s()\n", fName);
+	traceFunc("=> invoking qsort(): callback is %s()\n", fName);
 #endif	/* PROC_TRACE */
 
     qsort(l->items, (size_t) l->used, sizeof(item_t), f);
@@ -788,14 +738,8 @@ int listCount(list_t *l)
     int total;
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== listCount(%p)\n", l);
+	traceFunc("== listCount(%p)\n", l);
 	listDebugDetails(l);
-#ifdef	PROC_TRACE_SWITCH
-    }
-#endif	/* PROC_TRACE_SWITCH */
 #endif	/* PROC_TRACE */
 
 #if	defined(QA_CHECKS) || defined(LIST_DEBUG)
@@ -818,14 +762,8 @@ void listDump(list_t *l, int verbose)
     int max = (verbose ? l->size : l->used);
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch) {
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== listDump(%p, %d)\n", l, verbose);
+	traceFunc("== listDump(%p, %d)\n", l, verbose);
 	listDebugDetails(l);
-#ifdef	PROC_TRACE_SWITCH
-    }
-#endif	/* PROC_TRACE_SWITCH */
 #endif	/* PROC_TRACE */
 
     if (l == NULL_LIST) {

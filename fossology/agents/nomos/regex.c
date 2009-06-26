@@ -29,10 +29,7 @@ regex_t idx_regc[NFOOTPRINTS];
 void regexError(int ret, regex_t *regc, char *regex)
 {
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== regexError(%d, %p, %s)\n", ret, regc, regex);
+	traceFunc("== regexError(%d, %p, %s)\n", ret, regc, regex);
 #endif	/* PROC_TRACE */
 
     (void) regerror(ret, regc, regexErrbuf, sizeof(regexErrbuf));
@@ -50,10 +47,7 @@ int endsIn(char *s, char *suffix)
      * than calling regcomp() and regexec()!)
      */
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== endsIn(%s, %s)\n", s, suffix);
+	traceFunc("== endsIn(%s, %s)\n", s, suffix);
 #endif	/* PROC_TRACE */
 
     if (strncasecmp(s + slen-sufflen, suffix, (size_t) sufflen) == 0) {
@@ -68,10 +62,7 @@ int lineInFile(char *pathname, char *regex)
     char buf[myBUFSIZ];
 
 #ifdef  PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== lineInFile(%s, \"%s\")\n", pathname, regex);
+	traceFunc("== lineInFile(%s, \"%s\")\n", pathname, regex);
 #endif  /* PROC_TRACE */
 
     (void) sprintf(buf, "^%s$", regex);
@@ -85,10 +76,7 @@ int textInFile(char *pathname, char *regex, int flags)
     int ret;
 
 #ifdef	PROC_TRACE
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== textInFile(%s, \"%s\", 0x%x)\n", pathname, regex, flags);
+	traceFunc("== textInFile(%s, \"%s\", 0x%x)\n", pathname, regex, flags);
 #endif	/* PROC_TRACE */
 
     if ((pathname == NULL_STR) || (regex == NULL_STR)) {
@@ -124,10 +112,7 @@ int strGrep(char *regex, char *data, int flags)
      * regex search is successful.
      */
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== strGrep(\"%s\", %p, 0x%x)\n", regex, data, flags);
+	traceFunc("== strGrep(\"%s\", %p, 0x%x)\n", regex, data, flags);
 #endif	/* PROC_TRACE || PHRASE_DEBUG */
 
     if (data == NULL_STR || regex == NULL_STR) {
@@ -144,25 +129,25 @@ int strGrep(char *regex, char *data, int flags)
      * regfree after the regexec call, else after a million or so regex
      * searches we'll have lost a LOT of memory. :)
      */
-    ret = regexec(&regc, data, 1, &gl.regm, 0);
+    ret = regexec(&regc, data, 1, &cur.regm, 0);
     regfree(&regc);
     if (ret) {
 	return(0);	/* >0 indicates search failure */
     }
 #ifdef	QA_CHECKS
-    if (gl.regm.rm_so == gl.regm.rm_eo) {
+    if (cur.regm.rm_so == cur.regm.rm_eo) {
 	Assert(NO, "start/end offsets are identical in strGrep()");
     }
 #endif	/* QA_CHECKS */
 #ifdef	PHRASE_DEBUG
-    printf("strGrep MATCH(%s) @ %d! = {", regex, gl.regm.rm_so);
-    for (i = gl.regm.rm_so; i < gl.regm.rm_eo; i++) {
+    printf("strGrep MATCH(%s) @ %d! = {", regex, cur.regm.rm_so);
+    for (i = cur.regm.rm_so; i < cur.regm.rm_eo; i++) {
 	printf("%c", data[i]);
     }
     printf("}\n");
 #endif	/* PHRASE_DEBUG */
     if (gl.flags & FL_SAVEBASE) {
-	gl.matchBase = data;
+	cur.matchBase = data;
     }
     return(1);
 }
@@ -181,10 +166,7 @@ int idxGrep(int index, char *data, int flags)
     regex_t *rp = idx_regc + index;
 
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== idxGrep(%d, %p, 0x%x)\n... regex \"%s\"\n", index, data,
+	traceFunc("== idxGrep(%d, %p, 0x%x)\n... regex \"%s\"\n", index, data,
 	       flags, _REGEX(index));
 #endif	/* PROC_TRACE || PHRASE_DEBUG */
 
@@ -206,13 +188,13 @@ int idxGrep(int index, char *data, int flags)
 	regfree(rp);
 	return(-1);	/* <0 indicates compile failure */
     }
-    ret = regexec(rp, data, 1, &gl.regm, 0);
+    ret = regexec(rp, data, 1, &cur.regm, 0);
     regfree(rp);
     if (ret) {
 	return(0);
     }
 #ifdef	QA_CHECKS
-    if (gl.regm.rm_so == gl.regm.rm_eo) {
+    if (cur.regm.rm_so == cur.regm.rm_eo) {
 	Assert(NO, "start/end offsets are identical in idxGrep(%d)",
 	       index);
     }
@@ -222,14 +204,14 @@ int idxGrep(int index, char *data, int flags)
 #ifdef	DEBUG
 	printf("REGEX(%d) \"%s\"\n", index, ltp->regex);
 #endif	/* DEBUG */
-	printf("MATCH @ %d! = {", gl.regm.rm_so);
-	for (i = gl.regm.rm_so; i < gl.regm.rm_eo; i++) {
+	printf("MATCH @ %d! = {", cur.regm.rm_so);
+	for (i = cur.regm.rm_so; i < cur.regm.rm_eo; i++) {
 	    printf("%c", data[i]);
 	}
 	printf("}\n");
     }
     if (gl.flags & FL_SAVEBASE) {
-	gl.matchBase = data;
+	cur.matchBase = data;
     }
     return(1);
 }
@@ -256,10 +238,7 @@ int strNbuf(char *data, char *str)
     char firstx;
 
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG)
-#ifdef	PROC_TRACE_SWITCH
-    if (gl.ptswitch)
-#endif	/* PROC_TRACE_SWITCH */
-	printf("== strNbuf(%p, %p)\n", data, str);
+	traceFunc("== strNbuf(%p, %p)\n", data, str);
 #endif	/* PROC_TRACE || PHRASE_DEBUG */
 
     if (firstFlag) {
@@ -362,10 +341,10 @@ int strNbuf(char *data, char *str)
 	    break;
 	}
 	if (*pattp == NULL_CHAR) {
-	    gl.regm.rm_so = save;
-	    gl.regm.rm_eo = save + strlen(str);
+	    cur.regm.rm_so = save;
+	    cur.regm.rm_eo = save + strlen(str);
 	    if (gl.flags & FL_SAVEBASE) {
-		gl.matchBase = data;
+		cur.matchBase = data;
 	    }
 	    return(1);	/* end of pattern == success */
 	}
