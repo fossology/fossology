@@ -25,8 +25,9 @@
 #include <errno.h>
 #include <sys/types.h>
 
-pid_t	LockScheduler	();
-pid_t	UnlockScheduler	();
+pid_t	LockGetPID	(char *ProcessName);
+int  	UnlockName	(char *ProcessName);
+pid_t	LockName	(char *ProcessName);
 
 #endif
 

@@ -191,8 +191,8 @@ int	SelfTest	()
 		  }
 		for(i=0; (Line[1][i] != 0) && !strchr("=:",Line[1][i]); i++) ;
 		LogPrint("FATAL: The difference is %.*s\n",i,Line[1]);
-		LogPrint("  Observed: %s\n",Line[1]);
-		LogPrint("  Expected: %s\n",Line[0]);
+		LogPrint("  Observed on scheduler system: %s\n",Line[1]);
+		LogPrint("  Mismatch on %s: %s\n",HostList[HostId].Hostname, Line[0]);
 		}
 	  rc=0;
 	  HostCheck[HostId] = -1;

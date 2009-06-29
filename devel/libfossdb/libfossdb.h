@@ -24,6 +24,7 @@ void *	DBopen	();	/* returns void *DB handle! */
 void *  DBmove  (void *DB); /* move results to a different handle */
 
 int	DBaccess	(void *DB, char *SQL); /* pass an SQL command */
+int	DBaccess2   (void *DB, char *SQL); /* pass an SQL command */
 
 /*********************************************************************/
 /*********************************************************************/
@@ -31,14 +32,15 @@ int	DBaccess	(void *DB, char *SQL); /* pass an SQL command */
 /*********************************************************************/
 /*********************************************************************/
 
-int	DBdatasize	(void *DB);
-int	DBcolsize	(void *DB);
-int	DBrowsaffected	(void *DB);
-char *	DBgetcolname	(void *DB, int Col);
-int	DBgetcolnum	(void *DB, char *ColName);
-char *	DBgetvalue	(void *DB, int Row, int Col);
+char *DBerrmsg	(void *DB);
+char *DBstatus	(void *DB);
+int	  DBdatasize(void *DB);
+int	  DBcolsize	(void *DB);
+int	  DBrowsaffected(void *DB);
+char *DBgetcolname	(void *DB, int Col);
+int	  DBgetcolnum	(void *DB, char *ColName);
+char *DBgetvalue	(void *DB, int Row, int Col);
 #define	DBgetvaluename(DB,Row,Col)	DBgetvalue(DB,Row,DBgetcolnum(DB,Col))
-int	DBisnull	(void *DB, int Row, int Col);
-
+int	  DBisnull	(void *DB, int Row, int Col);
 #endif
 

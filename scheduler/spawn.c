@@ -206,8 +206,8 @@ void	SaveStatus	()
     LastReconnect = Now;
     }
 
-  /* Delete old schedule entries every 10 minutes. */
-  if ((Now - LastCheck) > 60*10)
+  /* Delete old schedule entries every 4 minutes. */
+  if ((Now - LastCheck) > 60*4)
     {
     DBCheckStatus();
     LastCheck = Now;

@@ -11,18 +11,23 @@ FODEF=$(DEF) -DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
 MSCDEF=$(DEF) -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"'
 
 # these objects need libfossdb
-OBJ=scheduler.o spawn.o sockets.o agents.o hosts.o debug.o dberror.o selftest.o logging.o lockfs.o
+OBJ=scheduler.o spawn.o sockets.o agents.o hosts.o debug.o dberror.o selftest.o logging.o lockfs.o 
+OBJFULL=$(OBJ) fo_watchdog.o
+
 # these objects need libfossrepo as well
 REPOOBJ=dbstatus.o dbq.o
 
 INITFILE=init.d/fossology
 DEFFILE=default/fossology
 
-all: fossology-scheduler mkschedconf defconf/init.d/fossology
+all: fossology-scheduler mkschedconf defconf/init.d/fossology fo_watchdog
 
-fossology-scheduler: $(OBJ) $(REPOOBJ) $(VARS)
+fossology-scheduler:  $(OBJ) $(REPOOBJ) $(VARS)
 	$(CC) $(OBJ) $(REPOOBJ) $(CFLAGS_DB) $(CFLAGS_REPO) \
 	-lrt -lpq $(ALL_CFLAGS) -o $@
+
+fo_watchdog: fo_watchdog.o logging.o lockfs.o $(VARS)
+	$(CC) fo_watchdog.o logging.o lockfs.o $(CFLAGS_DB) $(CFLAGS_REPO) $(DEF) $(ALL_CFLAGS) -lpq -lrt -o $@
 
 mkschedconf: mkschedconf.c $(REPO) $(VARS)
 	$(CC) $< $(MSCDEF) $(CFLAGS_REPO) $(ALL_CFLAGS) -o $@
@@ -32,7 +37,7 @@ include $(TOP)/Makefile.process
 defconf/init.d/fossology: defconf/init.d/fossology-process
 
 # targets for our needed objects
-$(OBJ): %.o: %.c %.h $(DB) $(VARS)
+$(OBJFULL): %.o: %.c %.h $(DB) $(VARS)
 	$(CC) -c $< $(CONFDEF) $(FODEF) $(CFLAGS_DBO) $(ALL_CFLAGS)
 
 $(REPOOBJ): %.o: %.c %.h $(DB) $(REPO) $(VARS)
@@ -41,6 +46,7 @@ $(REPOOBJ): %.o: %.c %.h $(DB) $(REPO) $(VARS)
 
 install: all install-init
 	$(INSTALL_PROGRAM) fossology-scheduler $(DESTDIR)$(LIBEXECDIR)/fossology-scheduler
+	$(INSTALL_PROGRAM) fo_watchdog $(DESTDIR)$(LIBEXECDIR)/fo_watchdog
 	$(INSTALL_PROGRAM) mkschedconf $(DESTDIR)$(LIBEXECDIR)/mkschedconf
 
 install-default:
@@ -68,6 +74,7 @@ install-init:
 
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fossology-scheduler
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fo_watchdog
 	rm -f $(DESTDIR)$(LIBEXECDIR)/mkschedconf
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
@@ -92,7 +99,7 @@ uninstall:
 	@echo "  Remove by hand if you desire."
 
 clean:
-	rm -f $(OBJ) $(REPOOBJ) core fossology-scheduler mkschedconf defconf/init.d/fossology
+	rm -f $(OBJ) $(REPOOBJ) core fossology-scheduler mkschedconf defconf/init.d/fossology fo_watchdog
 
 test: all
 	@echo "NOTICE: no tests available for scheduler"
