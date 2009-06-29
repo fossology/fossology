@@ -1,4 +1,4 @@
-/* 0.9.7 on Fri Aug  8 20:40:39 2008 */
+/* 0.9.7.2 on Mon Jun 29 09:20:33 2009 */
 
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
@@ -48,6 +48,8 @@ static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb); /*proto*
 
 static PyObject *__Pyx_GetName(PyObject *dict, PyObject *name); /*proto*/
 
+static PyObject *__Pyx_GetItemInt(PyObject *o, Py_ssize_t i); /*proto*/
+
 static PyObject *__Pyx_UnpackItem(PyObject *); /*proto*/
 static int __Pyx_EndUnpack(PyObject *); /*proto*/
 
@@ -93,7 +95,7 @@ static int __pyx_f_10sparsevect_12SparseVector___cinit__(PyObject *__pyx_v_self,
   if (!PyArg_ParseTupleAndKeywords(__pyx_args, __pyx_kwds, "O", __pyx_argnames, &__pyx_v_dim)) return -1;
   Py_INCREF(__pyx_v_self);
   Py_INCREF(__pyx_v_dim);
-  __pyx_1 = PyInt_AsLong(__pyx_v_dim); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 35; goto __pyx_L1;}
+  __pyx_1 = PyInt_AsLong(__pyx_v_dim); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 52; goto __pyx_L1;}
   ((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data = sv_new(__pyx_1);
 
   __pyx_r = 0;
@@ -156,42 +158,42 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___str__(PyObject *__pyx_v_s
   __pyx_v_s = Py_None; Py_INCREF(Py_None);
   __pyx_v_element = Py_None; Py_INCREF(Py_None);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":44 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":61 */
   Py_INCREF(__pyx_k4p);
   Py_DECREF(__pyx_v_s);
   __pyx_v_s = __pyx_k4p;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":45 */
-  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; goto __pyx_L1;}
-  __pyx_2 = PyObject_GetAttr(__pyx_v_self, __pyx_n_nonzeros); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; goto __pyx_L1;}
-  __pyx_3 = PyTuple_New(2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":62 */
+  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; goto __pyx_L1;}
+  __pyx_2 = PyObject_GetAttr(__pyx_v_self, __pyx_n_nonzeros); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; goto __pyx_L1;}
+  __pyx_3 = PyTuple_New(2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; goto __pyx_L1;}
   PyTuple_SET_ITEM(__pyx_3, 0, __pyx_1);
   PyTuple_SET_ITEM(__pyx_3, 1, __pyx_2);
   __pyx_1 = 0;
   __pyx_2 = 0;
-  __pyx_1 = PyNumber_Remainder(__pyx_k5p, __pyx_3); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; goto __pyx_L1;}
+  __pyx_1 = PyNumber_Remainder(__pyx_k5p, __pyx_3); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; goto __pyx_L1;}
   Py_DECREF(__pyx_3); __pyx_3 = 0;
-  __pyx_2 = PyNumber_Add(__pyx_v_s, __pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; goto __pyx_L1;}
+  __pyx_2 = PyNumber_Add(__pyx_v_s, __pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   Py_DECREF(__pyx_v_s);
   __pyx_v_s = __pyx_2;
   __pyx_2 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":47 */
-  __pyx_3 = PyObject_GetAttr(__pyx_v_self, __pyx_n_elements); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; goto __pyx_L1;}
-  __pyx_1 = PyObject_GetIter(__pyx_3); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":64 */
+  __pyx_3 = PyObject_GetAttr(__pyx_v_self, __pyx_n_elements); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; goto __pyx_L1;}
+  __pyx_1 = PyObject_GetIter(__pyx_3); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; goto __pyx_L1;}
   Py_DECREF(__pyx_3); __pyx_3 = 0;
   for (;;) {
     __pyx_2 = PyIter_Next(__pyx_1);
     if (!__pyx_2) {
-      if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 47; goto __pyx_L1;}
+      if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 64; goto __pyx_L1;}
       break;
     }
     Py_DECREF(__pyx_v_element);
     __pyx_v_element = __pyx_2;
     __pyx_2 = 0;
-    __pyx_3 = PyNumber_Remainder(__pyx_k6p, __pyx_v_element); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; goto __pyx_L1;}
-    __pyx_2 = PyNumber_Add(__pyx_v_s, __pyx_3); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; goto __pyx_L1;}
+    __pyx_3 = PyNumber_Remainder(__pyx_k6p, __pyx_v_element); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; goto __pyx_L1;}
+    __pyx_2 = PyNumber_Add(__pyx_v_s, __pyx_3); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; goto __pyx_L1;}
     Py_DECREF(__pyx_3); __pyx_3 = 0;
     Py_DECREF(__pyx_v_s);
     __pyx_v_s = __pyx_2;
@@ -199,13 +201,13 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___str__(PyObject *__pyx_v_s
   }
   Py_DECREF(__pyx_1); __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":49 */
-  __pyx_3 = PyNumber_Add(__pyx_v_s, __pyx_k7p); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 49; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":66 */
+  __pyx_3 = PyNumber_Add(__pyx_v_s, __pyx_k7p); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; goto __pyx_L1;}
   Py_DECREF(__pyx_v_s);
   __pyx_v_s = __pyx_3;
   __pyx_3 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":51 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":68 */
   Py_INCREF(__pyx_v_s);
   __pyx_r = __pyx_v_s;
   goto __pyx_L0;
@@ -240,26 +242,26 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector_inner(PyObject *__pyx_v_a, 
   if (!PyArg_ParseTupleAndKeywords(__pyx_args, __pyx_kwds, "O", __pyx_argnames, &__pyx_v_b)) return 0;
   Py_INCREF(__pyx_v_a);
   Py_INCREF(__pyx_v_b);
-  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_b), __pyx_ptype_10sparsevect_SparseVector, 1, "b")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 53; goto __pyx_L1;}
-  __pyx_1 = PyObject_GetAttr(__pyx_v_a, __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; goto __pyx_L1;}
-  __pyx_2 = PyObject_GetAttr(((PyObject *)__pyx_v_b), __pyx_n_dimension); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; goto __pyx_L1;}
-  if (PyObject_Cmp(__pyx_1, __pyx_2, &__pyx_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 54; goto __pyx_L1;}
+  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_b), __pyx_ptype_10sparsevect_SparseVector, 1, "b")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; goto __pyx_L1;}
+  __pyx_1 = PyObject_GetAttr(__pyx_v_a, __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; goto __pyx_L1;}
+  __pyx_2 = PyObject_GetAttr(((PyObject *)__pyx_v_b), __pyx_n_dimension); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; goto __pyx_L1;}
+  if (PyObject_Cmp(__pyx_1, __pyx_2, &__pyx_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; goto __pyx_L1;}
   __pyx_3 = __pyx_3 != 0;
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   Py_DECREF(__pyx_2); __pyx_2 = 0;
   if (__pyx_3) {
-    __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 55; goto __pyx_L1;}
+    __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 72; goto __pyx_L1;}
     Py_INCREF(__pyx_k8p);
     PyTuple_SET_ITEM(__pyx_1, 0, __pyx_k8p);
-    __pyx_2 = PyObject_CallObject(PyExc_ValueError, __pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 55; goto __pyx_L1;}
+    __pyx_2 = PyObject_CallObject(PyExc_ValueError, __pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 72; goto __pyx_L1;}
     Py_DECREF(__pyx_1); __pyx_1 = 0;
     __Pyx_Raise(__pyx_2, 0, 0);
     Py_DECREF(__pyx_2); __pyx_2 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 55; goto __pyx_L1;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 72; goto __pyx_L1;}
     goto __pyx_L2;
   }
   /*else*/ {
-    __pyx_1 = PyFloat_FromDouble(sv_inner(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_a)->data,__pyx_v_b->data)); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 57; goto __pyx_L1;}
+    __pyx_1 = PyFloat_FromDouble(sv_inner(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_a)->data,__pyx_v_b->data)); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; goto __pyx_L1;}
     __pyx_r = __pyx_1;
     __pyx_1 = 0;
     goto __pyx_L0;
@@ -291,26 +293,26 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector_multiply(PyObject *__pyx_v_
   Py_INCREF(__pyx_v_a);
   Py_INCREF(__pyx_v_b);
   __pyx_v_newvect = ((struct __pyx_obj_10sparsevect_SparseVector *)Py_None); Py_INCREF(Py_None);
-  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_b), __pyx_ptype_10sparsevect_SparseVector, 1, "b")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 59; goto __pyx_L1;}
+  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_b), __pyx_ptype_10sparsevect_SparseVector, 1, "b")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; goto __pyx_L1;}
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":62 */
-  __pyx_1 = PyInt_FromLong(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; goto __pyx_L1;}
-  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":79 */
+  __pyx_1 = PyInt_FromLong(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 79; goto __pyx_L1;}
+  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 79; goto __pyx_L1;}
   PyTuple_SET_ITEM(__pyx_2, 0, __pyx_1);
   __pyx_1 = 0;
-  __pyx_1 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect_SparseVector), __pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; goto __pyx_L1;}
+  __pyx_1 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect_SparseVector), __pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 79; goto __pyx_L1;}
   Py_DECREF(__pyx_2); __pyx_2 = 0;
   Py_DECREF(((PyObject *)__pyx_v_newvect));
   __pyx_v_newvect = ((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_1);
   __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":63 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":80 */
   sv_delete(__pyx_v_newvect->data);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":64 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":81 */
   __pyx_v_newvect->data = sv_element_multiply(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_a)->data,__pyx_v_b->data);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":66 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":83 */
   Py_INCREF(((PyObject *)__pyx_v_newvect));
   __pyx_r = ((PyObject *)__pyx_v_newvect);
   goto __pyx_L0;
@@ -345,27 +347,27 @@ static int __pyx_f_10sparsevect_12SparseVector___setitem__(PyObject *__pyx_v_sel
   Py_INCREF(__pyx_v_index);
   Py_INCREF(__pyx_v_value);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":69 */
-  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; goto __pyx_L1;}
-  if (PyObject_Cmp(__pyx_v_index, __pyx_1, &__pyx_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 69; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":86 */
+  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 86; goto __pyx_L1;}
+  if (PyObject_Cmp(__pyx_v_index, __pyx_1, &__pyx_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 86; goto __pyx_L1;}
   __pyx_2 = __pyx_2 >= 0;
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   if (__pyx_2) {
-    __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; goto __pyx_L1;}
+    __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; goto __pyx_L1;}
     Py_INCREF(__pyx_k9p);
     PyTuple_SET_ITEM(__pyx_1, 0, __pyx_k9p);
-    __pyx_3 = PyObject_CallObject(PyExc_IndexError, __pyx_1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; goto __pyx_L1;}
+    __pyx_3 = PyObject_CallObject(PyExc_IndexError, __pyx_1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; goto __pyx_L1;}
     Py_DECREF(__pyx_1); __pyx_1 = 0;
     __Pyx_Raise(__pyx_3, 0, 0);
     Py_DECREF(__pyx_3); __pyx_3 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 70; goto __pyx_L1;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; goto __pyx_L1;}
     goto __pyx_L2;
   }
   __pyx_L2:;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":71 */
-  __pyx_4 = PyInt_AsLong(__pyx_v_index); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; goto __pyx_L1;}
-  __pyx_5 = PyFloat_AsDouble(__pyx_v_value); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 71; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":88 */
+  __pyx_4 = PyInt_AsLong(__pyx_v_index); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; goto __pyx_L1;}
+  __pyx_5 = PyFloat_AsDouble(__pyx_v_value); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 88; goto __pyx_L1;}
   sv_set_element(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data,__pyx_4,__pyx_5);
 
   __pyx_r = 0;
@@ -396,27 +398,27 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___getitem__(PyObject *__pyx
   Py_INCREF(__pyx_v_self);
   Py_INCREF(__pyx_v_index);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":74 */
-  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; goto __pyx_L1;}
-  if (PyObject_Cmp(__pyx_v_index, __pyx_1, &__pyx_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 74; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":91 */
+  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; goto __pyx_L1;}
+  if (PyObject_Cmp(__pyx_v_index, __pyx_1, &__pyx_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; goto __pyx_L1;}
   __pyx_2 = __pyx_2 >= 0;
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   if (__pyx_2) {
-    __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; goto __pyx_L1;}
+    __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; goto __pyx_L1;}
     Py_INCREF(__pyx_k10p);
     PyTuple_SET_ITEM(__pyx_1, 0, __pyx_k10p);
-    __pyx_3 = PyObject_CallObject(PyExc_IndexError, __pyx_1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; goto __pyx_L1;}
+    __pyx_3 = PyObject_CallObject(PyExc_IndexError, __pyx_1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; goto __pyx_L1;}
     Py_DECREF(__pyx_1); __pyx_1 = 0;
     __Pyx_Raise(__pyx_3, 0, 0);
     Py_DECREF(__pyx_3); __pyx_3 = 0;
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 75; goto __pyx_L1;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; goto __pyx_L1;}
     goto __pyx_L2;
   }
   __pyx_L2:;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":76 */
-  __pyx_4 = PyInt_AsLong(__pyx_v_index); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; goto __pyx_L1;}
-  __pyx_1 = PyFloat_FromDouble(sv_get_element_value(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data,__pyx_4)); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 76; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":93 */
+  __pyx_4 = PyInt_AsLong(__pyx_v_index); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; goto __pyx_L1;}
+  __pyx_1 = PyFloat_FromDouble(sv_get_element_value(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data,__pyx_4)); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; goto __pyx_L1;}
   __pyx_r = __pyx_1;
   __pyx_1 = 0;
   goto __pyx_L0;
@@ -450,11 +452,11 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___mul__(PyObject *__pyx_v_a
   if (__pyx_1) {
     __pyx_1 = PyObject_TypeCheck(__pyx_v_b,__pyx_ptype_10sparsevect_SparseVector);
     if (__pyx_1) {
-      __pyx_2 = PyObject_GetAttr(__pyx_v_a, __pyx_n_inner); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; goto __pyx_L1;}
-      __pyx_3 = PyTuple_New(1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; goto __pyx_L1;}
+      __pyx_2 = PyObject_GetAttr(__pyx_v_a, __pyx_n_inner); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; goto __pyx_L1;}
+      __pyx_3 = PyTuple_New(1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; goto __pyx_L1;}
       Py_INCREF(__pyx_v_b);
       PyTuple_SET_ITEM(__pyx_3, 0, __pyx_v_b);
-      __pyx_4 = PyObject_CallObject(__pyx_2, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; goto __pyx_L1;}
+      __pyx_4 = PyObject_CallObject(__pyx_2, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; goto __pyx_L1;}
       Py_DECREF(__pyx_2); __pyx_2 = 0;
       Py_DECREF(__pyx_3); __pyx_3 = 0;
       __pyx_r = __pyx_4;
@@ -463,13 +465,13 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___mul__(PyObject *__pyx_v_a
       goto __pyx_L3;
     }
     /*else*/ {
-      __pyx_2 = __Pyx_GetName(__pyx_m, __pyx_n__scalar_mul); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; goto __pyx_L1;}
-      __pyx_3 = PyTuple_New(2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; goto __pyx_L1;}
+      __pyx_2 = __Pyx_GetName(__pyx_m, __pyx_n__scalar_mul); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; goto __pyx_L1;}
+      __pyx_3 = PyTuple_New(2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; goto __pyx_L1;}
       Py_INCREF(__pyx_v_a);
       PyTuple_SET_ITEM(__pyx_3, 0, __pyx_v_a);
       Py_INCREF(__pyx_v_b);
       PyTuple_SET_ITEM(__pyx_3, 1, __pyx_v_b);
-      __pyx_4 = PyObject_CallObject(__pyx_2, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; goto __pyx_L1;}
+      __pyx_4 = PyObject_CallObject(__pyx_2, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; goto __pyx_L1;}
       Py_DECREF(__pyx_2); __pyx_2 = 0;
       Py_DECREF(__pyx_3); __pyx_3 = 0;
       __pyx_r = __pyx_4;
@@ -480,13 +482,13 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___mul__(PyObject *__pyx_v_a
     goto __pyx_L2;
   }
   /*else*/ {
-    __pyx_2 = __Pyx_GetName(__pyx_m, __pyx_n__scalar_mul); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; goto __pyx_L1;}
-    __pyx_3 = PyTuple_New(2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; goto __pyx_L1;}
+    __pyx_2 = __Pyx_GetName(__pyx_m, __pyx_n__scalar_mul); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 108; goto __pyx_L1;}
+    __pyx_3 = PyTuple_New(2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 108; goto __pyx_L1;}
     Py_INCREF(__pyx_v_b);
     PyTuple_SET_ITEM(__pyx_3, 0, __pyx_v_b);
     Py_INCREF(__pyx_v_a);
     PyTuple_SET_ITEM(__pyx_3, 1, __pyx_v_a);
-    __pyx_4 = PyObject_CallObject(__pyx_2, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 91; goto __pyx_L1;}
+    __pyx_4 = PyObject_CallObject(__pyx_2, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 108; goto __pyx_L1;}
     Py_DECREF(__pyx_2); __pyx_2 = 0;
     Py_DECREF(__pyx_3); __pyx_3 = 0;
     __pyx_r = __pyx_4;
@@ -517,16 +519,16 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___div__(PyObject *__pyx_v_a
   PyObject *__pyx_2 = 0;
   PyObject *__pyx_3 = 0;
   Py_INCREF(__pyx_v_a);
-  __pyx_v_b = PyFloat_AsDouble(__pyx_arg_b); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; goto __pyx_L1;}
-  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_a), __pyx_ptype_10sparsevect_SparseVector, 1, "a")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 93; goto __pyx_L1;}
-  __pyx_1 = __Pyx_GetName(__pyx_m, __pyx_n__scalar_mul); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; goto __pyx_L1;}
-  __pyx_2 = PyFloat_FromDouble((1.0 / __pyx_v_b)); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; goto __pyx_L1;}
-  __pyx_3 = PyTuple_New(2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; goto __pyx_L1;}
+  __pyx_v_b = PyFloat_AsDouble(__pyx_arg_b); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 110; goto __pyx_L1;}
+  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_a), __pyx_ptype_10sparsevect_SparseVector, 1, "a")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 110; goto __pyx_L1;}
+  __pyx_1 = __Pyx_GetName(__pyx_m, __pyx_n__scalar_mul); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; goto __pyx_L1;}
+  __pyx_2 = PyFloat_FromDouble((1.0 / __pyx_v_b)); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; goto __pyx_L1;}
+  __pyx_3 = PyTuple_New(2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; goto __pyx_L1;}
   Py_INCREF(__pyx_v_a);
   PyTuple_SET_ITEM(__pyx_3, 0, __pyx_v_a);
   PyTuple_SET_ITEM(__pyx_3, 1, __pyx_2);
   __pyx_2 = 0;
-  __pyx_2 = PyObject_CallObject(__pyx_1, __pyx_3); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; goto __pyx_L1;}
+  __pyx_2 = PyObject_CallObject(__pyx_1, __pyx_3); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   Py_DECREF(__pyx_3); __pyx_3 = 0;
   __pyx_r = __pyx_2;
@@ -555,27 +557,27 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___add__(PyObject *__pyx_v_s
   Py_INCREF(__pyx_v_self);
   Py_INCREF(__pyx_v_other);
   __pyx_v_newvect = ((struct __pyx_obj_10sparsevect_SparseVector *)Py_None); Py_INCREF(Py_None);
-  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_10sparsevect_SparseVector, 1, "self")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 97; goto __pyx_L1;}
-  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_other), __pyx_ptype_10sparsevect_SparseVector, 1, "other")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 97; goto __pyx_L1;}
+  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_10sparsevect_SparseVector, 1, "self")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; goto __pyx_L1;}
+  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_other), __pyx_ptype_10sparsevect_SparseVector, 1, "other")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; goto __pyx_L1;}
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":100 */
-  __pyx_1 = PyInt_FromLong(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 100; goto __pyx_L1;}
-  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 100; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":117 */
+  __pyx_1 = PyInt_FromLong(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 117; goto __pyx_L1;}
+  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 117; goto __pyx_L1;}
   PyTuple_SET_ITEM(__pyx_2, 0, __pyx_1);
   __pyx_1 = 0;
-  __pyx_1 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect_SparseVector), __pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 100; goto __pyx_L1;}
+  __pyx_1 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect_SparseVector), __pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 117; goto __pyx_L1;}
   Py_DECREF(__pyx_2); __pyx_2 = 0;
   Py_DECREF(((PyObject *)__pyx_v_newvect));
   __pyx_v_newvect = ((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_1);
   __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":101 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":118 */
   sv_delete(__pyx_v_newvect->data);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":102 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":119 */
   __pyx_v_newvect->data = sv_add(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data,((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_other)->data);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":104 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":121 */
   Py_INCREF(((PyObject *)__pyx_v_newvect));
   __pyx_r = ((PyObject *)__pyx_v_newvect);
   goto __pyx_L0;
@@ -603,27 +605,27 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___sub__(PyObject *__pyx_v_s
   Py_INCREF(__pyx_v_self);
   Py_INCREF(__pyx_v_other);
   __pyx_v_newvect = ((struct __pyx_obj_10sparsevect_SparseVector *)Py_None); Py_INCREF(Py_None);
-  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_10sparsevect_SparseVector, 1, "self")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; goto __pyx_L1;}
-  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_other), __pyx_ptype_10sparsevect_SparseVector, 1, "other")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; goto __pyx_L1;}
+  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_self), __pyx_ptype_10sparsevect_SparseVector, 1, "self")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 123; goto __pyx_L1;}
+  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_other), __pyx_ptype_10sparsevect_SparseVector, 1, "other")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 123; goto __pyx_L1;}
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":109 */
-  __pyx_1 = PyInt_FromLong(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; goto __pyx_L1;}
-  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":126 */
+  __pyx_1 = PyInt_FromLong(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; goto __pyx_L1;}
+  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; goto __pyx_L1;}
   PyTuple_SET_ITEM(__pyx_2, 0, __pyx_1);
   __pyx_1 = 0;
-  __pyx_1 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect_SparseVector), __pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 109; goto __pyx_L1;}
+  __pyx_1 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect_SparseVector), __pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; goto __pyx_L1;}
   Py_DECREF(__pyx_2); __pyx_2 = 0;
   Py_DECREF(((PyObject *)__pyx_v_newvect));
   __pyx_v_newvect = ((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_1);
   __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":110 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":127 */
   sv_delete(__pyx_v_newvect->data);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":111 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":128 */
   __pyx_v_newvect->data = sv_subtract(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data,((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_other)->data);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":113 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":130 */
   Py_INCREF(((PyObject *)__pyx_v_newvect));
   __pyx_r = ((PyObject *)__pyx_v_newvect);
   goto __pyx_L0;
@@ -648,10 +650,10 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___iter__(PyObject *__pyx_v_
   PyObject *__pyx_1 = 0;
   PyObject *__pyx_2 = 0;
   Py_INCREF(__pyx_v_self);
-  __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; goto __pyx_L1;}
+  __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; goto __pyx_L1;}
   Py_INCREF(__pyx_v_self);
   PyTuple_SET_ITEM(__pyx_1, 0, __pyx_v_self);
-  __pyx_2 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect__SparseVectorIterator), __pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 116; goto __pyx_L1;}
+  __pyx_2 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect__SparseVectorIterator), __pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   __pyx_r = __pyx_2;
   __pyx_2 = 0;
@@ -674,7 +676,7 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector_9dimension___get__(PyObject
   PyObject *__pyx_r;
   PyObject *__pyx_1 = 0;
   Py_INCREF(__pyx_v_self);
-  __pyx_1 = PyInt_FromLong(sv_dimension(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data)); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; goto __pyx_L1;}
+  __pyx_1 = PyInt_FromLong(sv_dimension(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data)); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 137; goto __pyx_L1;}
   __pyx_r = __pyx_1;
   __pyx_1 = 0;
   goto __pyx_L0;
@@ -705,35 +707,35 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector_7indices___get__(PyObject *
   Py_INCREF(__pyx_v_self);
   __pyx_v_indices = Py_None; Py_INCREF(Py_None);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":126 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":143 */
   __pyx_v_c_indices = sv_indices(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":127 */
-  __pyx_1 = PyList_New(0); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 127; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":144 */
+  __pyx_1 = PyList_New(0); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; goto __pyx_L1;}
   Py_DECREF(__pyx_v_indices);
   __pyx_v_indices = __pyx_1;
   __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":128 */
-  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_nonzeros); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; goto __pyx_L1;}
-  __pyx_2 = PyInt_AsLong(__pyx_1); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":145 */
+  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_nonzeros); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; goto __pyx_L1;}
+  __pyx_2 = PyInt_AsLong(__pyx_1); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   for (__pyx_v_i = 0; __pyx_v_i < __pyx_2; ++__pyx_v_i) {
-    __pyx_1 = PyObject_GetAttr(__pyx_v_indices, __pyx_n_append); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 129; goto __pyx_L1;}
-    __pyx_3 = PyInt_FromLong((__pyx_v_c_indices[__pyx_v_i])); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 129; goto __pyx_L1;}
-    __pyx_4 = PyTuple_New(1); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 129; goto __pyx_L1;}
+    __pyx_1 = PyObject_GetAttr(__pyx_v_indices, __pyx_n_append); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; goto __pyx_L1;}
+    __pyx_3 = PyInt_FromLong((__pyx_v_c_indices[__pyx_v_i])); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; goto __pyx_L1;}
+    __pyx_4 = PyTuple_New(1); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; goto __pyx_L1;}
     PyTuple_SET_ITEM(__pyx_4, 0, __pyx_3);
     __pyx_3 = 0;
-    __pyx_3 = PyObject_CallObject(__pyx_1, __pyx_4); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 129; goto __pyx_L1;}
+    __pyx_3 = PyObject_CallObject(__pyx_1, __pyx_4); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; goto __pyx_L1;}
     Py_DECREF(__pyx_1); __pyx_1 = 0;
     Py_DECREF(__pyx_4); __pyx_4 = 0;
     Py_DECREF(__pyx_3); __pyx_3 = 0;
   }
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":130 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":147 */
   free(__pyx_v_c_indices);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":131 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":148 */
   Py_INCREF(__pyx_v_indices);
   __pyx_r = __pyx_v_indices;
   goto __pyx_L0;
@@ -757,7 +759,7 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector_8nonzeros___get__(PyObject 
   PyObject *__pyx_r;
   PyObject *__pyx_1 = 0;
   Py_INCREF(__pyx_v_self);
-  __pyx_1 = PyInt_FromLong(sv_nonzeros(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data)); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 135; goto __pyx_L1;}
+  __pyx_1 = PyInt_FromLong(sv_nonzeros(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data)); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; goto __pyx_L1;}
   __pyx_r = __pyx_1;
   __pyx_1 = 0;
   goto __pyx_L0;
@@ -787,41 +789,41 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector_8elements___get__(PyObject 
   Py_INCREF(__pyx_v_self);
   __pyx_v_elements = Py_None; Py_INCREF(Py_None);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":143 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":160 */
   __pyx_v_sv_elements = sv_get_elements(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":144 */
-  __pyx_1 = PyList_New(0); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 144; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":161 */
+  __pyx_1 = PyList_New(0); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 161; goto __pyx_L1;}
   Py_DECREF(__pyx_v_elements);
   __pyx_v_elements = __pyx_1;
   __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":145 */
-  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_nonzeros); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; goto __pyx_L1;}
-  __pyx_2 = PyInt_AsLong(__pyx_1); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":162 */
+  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_nonzeros); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 162; goto __pyx_L1;}
+  __pyx_2 = PyInt_AsLong(__pyx_1); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 162; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   for (__pyx_v_i = 0; __pyx_v_i < __pyx_2; ++__pyx_v_i) {
-    __pyx_1 = PyObject_GetAttr(__pyx_v_elements, __pyx_n_append); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; goto __pyx_L1;}
-    __pyx_3 = PyInt_FromLong((__pyx_v_sv_elements[__pyx_v_i]).i); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; goto __pyx_L1;}
-    __pyx_4 = PyFloat_FromDouble((__pyx_v_sv_elements[__pyx_v_i]).v); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; goto __pyx_L1;}
-    __pyx_5 = PyTuple_New(2); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; goto __pyx_L1;}
+    __pyx_1 = PyObject_GetAttr(__pyx_v_elements, __pyx_n_append); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; goto __pyx_L1;}
+    __pyx_3 = PyInt_FromLong((__pyx_v_sv_elements[__pyx_v_i]).i); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; goto __pyx_L1;}
+    __pyx_4 = PyFloat_FromDouble((__pyx_v_sv_elements[__pyx_v_i]).v); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; goto __pyx_L1;}
+    __pyx_5 = PyTuple_New(2); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; goto __pyx_L1;}
     PyTuple_SET_ITEM(__pyx_5, 0, __pyx_3);
     PyTuple_SET_ITEM(__pyx_5, 1, __pyx_4);
     __pyx_3 = 0;
     __pyx_4 = 0;
-    __pyx_3 = PyTuple_New(1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; goto __pyx_L1;}
+    __pyx_3 = PyTuple_New(1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; goto __pyx_L1;}
     PyTuple_SET_ITEM(__pyx_3, 0, __pyx_5);
     __pyx_5 = 0;
-    __pyx_4 = PyObject_CallObject(__pyx_1, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 146; goto __pyx_L1;}
+    __pyx_4 = PyObject_CallObject(__pyx_1, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 163; goto __pyx_L1;}
     Py_DECREF(__pyx_1); __pyx_1 = 0;
     Py_DECREF(__pyx_3); __pyx_3 = 0;
     Py_DECREF(__pyx_4); __pyx_4 = 0;
   }
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":147 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":164 */
   free(__pyx_v_sv_elements);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":148 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":165 */
   Py_INCREF(__pyx_v_elements);
   __pyx_r = __pyx_v_elements;
   goto __pyx_L0;
@@ -873,86 +875,86 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___reduce__(PyObject *__pyx_
   __pyx_v_i = Py_None; Py_INCREF(Py_None);
   __pyx_v_v = Py_None; Py_INCREF(Py_None);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":152 */
-  __pyx_1 = __Pyx_GetName(__pyx_m, __pyx_n__newvector); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 152; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":169 */
+  __pyx_1 = __Pyx_GetName(__pyx_m, __pyx_n__newvector); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; goto __pyx_L1;}
   Py_DECREF(__pyx_v_constructor);
   __pyx_v_constructor = __pyx_1;
   __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":153 */
-  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 153; goto __pyx_L1;}
-  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 153; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":170 */
+  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; goto __pyx_L1;}
+  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; goto __pyx_L1;}
   PyTuple_SET_ITEM(__pyx_2, 0, __pyx_1);
   __pyx_1 = 0;
   Py_DECREF(__pyx_v_args);
   __pyx_v_args = __pyx_2;
   __pyx_2 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":155 */
-  __pyx_1 = PyDict_New(); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 155; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":172 */
+  __pyx_1 = PyDict_New(); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; goto __pyx_L1;}
   Py_DECREF(__pyx_v_state);
   __pyx_v_state = __pyx_1;
   __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":159 */
-  __pyx_2 = __Pyx_GetName(__pyx_m, __pyx_n_StringIO); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 159; goto __pyx_L1;}
-  __pyx_1 = PyObject_GetAttr(__pyx_2, __pyx_n_StringIO); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 159; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":176 */
+  __pyx_2 = __Pyx_GetName(__pyx_m, __pyx_n_StringIO); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; goto __pyx_L1;}
+  __pyx_1 = PyObject_GetAttr(__pyx_2, __pyx_n_StringIO); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; goto __pyx_L1;}
   Py_DECREF(__pyx_2); __pyx_2 = 0;
-  __pyx_2 = PyObject_CallObject(__pyx_1, 0); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 159; goto __pyx_L1;}
+  __pyx_2 = PyObject_CallObject(__pyx_1, 0); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   Py_DECREF(__pyx_v_s);
   __pyx_v_s = __pyx_2;
   __pyx_2 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":160 */
-  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_elements); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 160; goto __pyx_L1;}
-  __pyx_2 = PyObject_GetIter(__pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 160; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":177 */
+  __pyx_1 = PyObject_GetAttr(__pyx_v_self, __pyx_n_elements); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; goto __pyx_L1;}
+  __pyx_2 = PyObject_GetIter(__pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   for (;;) {
     __pyx_1 = PyIter_Next(__pyx_2);
     if (!__pyx_1) {
-      if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 160; goto __pyx_L1;}
+      if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; goto __pyx_L1;}
       break;
     }
-    __pyx_3 = PyObject_GetIter(__pyx_1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 160; goto __pyx_L1;}
+    __pyx_3 = PyObject_GetIter(__pyx_1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; goto __pyx_L1;}
     Py_DECREF(__pyx_1); __pyx_1 = 0;
-    __pyx_1 = __Pyx_UnpackItem(__pyx_3); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 160; goto __pyx_L1;}
+    __pyx_1 = __Pyx_UnpackItem(__pyx_3); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; goto __pyx_L1;}
     Py_DECREF(__pyx_v_i);
     __pyx_v_i = __pyx_1;
     __pyx_1 = 0;
-    __pyx_1 = __Pyx_UnpackItem(__pyx_3); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 160; goto __pyx_L1;}
+    __pyx_1 = __Pyx_UnpackItem(__pyx_3); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; goto __pyx_L1;}
     Py_DECREF(__pyx_v_v);
     __pyx_v_v = __pyx_1;
     __pyx_1 = 0;
-    if (__Pyx_EndUnpack(__pyx_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 160; goto __pyx_L1;}
+    if (__Pyx_EndUnpack(__pyx_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; goto __pyx_L1;}
     Py_DECREF(__pyx_3); __pyx_3 = 0;
-    __pyx_1 = PyObject_GetAttr(__pyx_v_s, __pyx_n_write); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 161; goto __pyx_L1;}
-    __pyx_3 = PyTuple_New(2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 161; goto __pyx_L1;}
+    __pyx_1 = PyObject_GetAttr(__pyx_v_s, __pyx_n_write); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; goto __pyx_L1;}
+    __pyx_3 = PyTuple_New(2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; goto __pyx_L1;}
     Py_INCREF(__pyx_v_i);
     PyTuple_SET_ITEM(__pyx_3, 0, __pyx_v_i);
     Py_INCREF(__pyx_v_v);
     PyTuple_SET_ITEM(__pyx_3, 1, __pyx_v_v);
-    __pyx_4 = PyNumber_Remainder(__pyx_k11p, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 161; goto __pyx_L1;}
+    __pyx_4 = PyNumber_Remainder(__pyx_k11p, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; goto __pyx_L1;}
     Py_DECREF(__pyx_3); __pyx_3 = 0;
-    __pyx_3 = PyTuple_New(1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 161; goto __pyx_L1;}
+    __pyx_3 = PyTuple_New(1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; goto __pyx_L1;}
     PyTuple_SET_ITEM(__pyx_3, 0, __pyx_4);
     __pyx_4 = 0;
-    __pyx_4 = PyObject_CallObject(__pyx_1, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 161; goto __pyx_L1;}
+    __pyx_4 = PyObject_CallObject(__pyx_1, __pyx_3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; goto __pyx_L1;}
     Py_DECREF(__pyx_1); __pyx_1 = 0;
     Py_DECREF(__pyx_3); __pyx_3 = 0;
     Py_DECREF(__pyx_4); __pyx_4 = 0;
   }
   Py_DECREF(__pyx_2); __pyx_2 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":162 */
-  __pyx_1 = PyObject_GetAttr(__pyx_v_s, __pyx_n_getvalue); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 162; goto __pyx_L1;}
-  __pyx_3 = PyObject_CallObject(__pyx_1, 0); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 162; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":179 */
+  __pyx_1 = PyObject_GetAttr(__pyx_v_s, __pyx_n_getvalue); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; goto __pyx_L1;}
+  __pyx_3 = PyObject_CallObject(__pyx_1, 0); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
-  if (PyObject_SetItem(__pyx_v_state, __pyx_n_dump, __pyx_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 162; goto __pyx_L1;}
+  if (PyObject_SetItem(__pyx_v_state, __pyx_n_dump, __pyx_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; goto __pyx_L1;}
   Py_DECREF(__pyx_3); __pyx_3 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":164 */
-  __pyx_4 = PyTuple_New(3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 164; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":181 */
+  __pyx_4 = PyTuple_New(3); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; goto __pyx_L1;}
   Py_INCREF(__pyx_v_constructor);
   PyTuple_SET_ITEM(__pyx_4, 0, __pyx_v_constructor);
   Py_INCREF(__pyx_v_args);
@@ -1023,18 +1025,18 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___setstate__(PyObject *__py
   __pyx_v_i = Py_None; Py_INCREF(Py_None);
   __pyx_v_v = Py_None; Py_INCREF(Py_None);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":167 */
-  __pyx_1 = PyObject_GetAttr(__pyx_v_state, __pyx_n_has_key); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; goto __pyx_L1;}
-  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":184 */
+  __pyx_1 = PyObject_GetAttr(__pyx_v_state, __pyx_n_has_key); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; goto __pyx_L1;}
+  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; goto __pyx_L1;}
   Py_INCREF(__pyx_n_elements);
   PyTuple_SET_ITEM(__pyx_2, 0, __pyx_n_elements);
-  __pyx_3 = PyObject_CallObject(__pyx_1, __pyx_2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; goto __pyx_L1;}
+  __pyx_3 = PyObject_CallObject(__pyx_1, __pyx_2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   Py_DECREF(__pyx_2); __pyx_2 = 0;
-  __pyx_4 = PyObject_IsTrue(__pyx_3); if (__pyx_4 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 167; goto __pyx_L1;}
+  __pyx_4 = PyObject_IsTrue(__pyx_3); if (__pyx_4 < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; goto __pyx_L1;}
   Py_DECREF(__pyx_3); __pyx_3 = 0;
   if (__pyx_4) {
-    __pyx_1 = PyObject_GetItem(__pyx_v_state, __pyx_n_elements); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 169; goto __pyx_L1;}
+    __pyx_1 = PyObject_GetItem(__pyx_v_state, __pyx_n_elements); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; goto __pyx_L1;}
     Py_DECREF(__pyx_v_elements);
     __pyx_v_elements = __pyx_1;
     __pyx_1 = 0;
@@ -1042,82 +1044,82 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___setstate__(PyObject *__py
   }
   /*else*/ {
 
-    /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":172 */
-    __pyx_2 = PyList_New(0); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 172; goto __pyx_L1;}
+    /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":189 */
+    __pyx_2 = PyList_New(0); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; goto __pyx_L1;}
     Py_DECREF(__pyx_v_elements);
     __pyx_v_elements = __pyx_2;
     __pyx_2 = 0;
 
-    /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":173 */
-    __pyx_3 = PyObject_GetItem(__pyx_v_state, __pyx_n_dump); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; goto __pyx_L1;}
-    __pyx_1 = PyObject_GetAttr(__pyx_3, __pyx_n_splitlines); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; goto __pyx_L1;}
+    /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":190 */
+    __pyx_3 = PyObject_GetItem(__pyx_v_state, __pyx_n_dump); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; goto __pyx_L1;}
+    __pyx_1 = PyObject_GetAttr(__pyx_3, __pyx_n_splitlines); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; goto __pyx_L1;}
     Py_DECREF(__pyx_3); __pyx_3 = 0;
-    __pyx_2 = PyObject_CallObject(__pyx_1, 0); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; goto __pyx_L1;}
+    __pyx_2 = PyObject_CallObject(__pyx_1, 0); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; goto __pyx_L1;}
     Py_DECREF(__pyx_1); __pyx_1 = 0;
-    __pyx_3 = PyObject_GetIter(__pyx_2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; goto __pyx_L1;}
+    __pyx_3 = PyObject_GetIter(__pyx_2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; goto __pyx_L1;}
     Py_DECREF(__pyx_2); __pyx_2 = 0;
     for (;;) {
       __pyx_1 = PyIter_Next(__pyx_3);
       if (!__pyx_1) {
-        if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 173; goto __pyx_L1;}
+        if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; goto __pyx_L1;}
         break;
       }
       Py_DECREF(__pyx_v_line);
       __pyx_v_line = __pyx_1;
       __pyx_1 = 0;
 
-      /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":174 */
-      __pyx_2 = PyObject_GetAttr(__pyx_v_line, __pyx_n_split); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; goto __pyx_L1;}
-      __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; goto __pyx_L1;}
+      /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":191 */
+      __pyx_2 = PyObject_GetAttr(__pyx_v_line, __pyx_n_split); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 191; goto __pyx_L1;}
+      __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 191; goto __pyx_L1;}
       Py_INCREF(__pyx_k16p);
       PyTuple_SET_ITEM(__pyx_1, 0, __pyx_k16p);
-      __pyx_5 = PyObject_CallObject(__pyx_2, __pyx_1); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; goto __pyx_L1;}
+      __pyx_5 = PyObject_CallObject(__pyx_2, __pyx_1); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 191; goto __pyx_L1;}
       Py_DECREF(__pyx_2); __pyx_2 = 0;
       Py_DECREF(__pyx_1); __pyx_1 = 0;
-      __pyx_2 = PyObject_GetIter(__pyx_5); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; goto __pyx_L1;}
+      __pyx_2 = PyObject_GetIter(__pyx_5); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 191; goto __pyx_L1;}
       Py_DECREF(__pyx_5); __pyx_5 = 0;
-      __pyx_1 = __Pyx_UnpackItem(__pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; goto __pyx_L1;}
+      __pyx_1 = __Pyx_UnpackItem(__pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 191; goto __pyx_L1;}
       Py_DECREF(__pyx_v_index_s);
       __pyx_v_index_s = __pyx_1;
       __pyx_1 = 0;
-      __pyx_5 = __Pyx_UnpackItem(__pyx_2); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; goto __pyx_L1;}
+      __pyx_5 = __Pyx_UnpackItem(__pyx_2); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 191; goto __pyx_L1;}
       Py_DECREF(__pyx_v_value_s);
       __pyx_v_value_s = __pyx_5;
       __pyx_5 = 0;
-      if (__Pyx_EndUnpack(__pyx_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 174; goto __pyx_L1;}
+      if (__Pyx_EndUnpack(__pyx_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 191; goto __pyx_L1;}
       Py_DECREF(__pyx_2); __pyx_2 = 0;
 
-      /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":175 */
-      __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; goto __pyx_L1;}
+      /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":192 */
+      __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 192; goto __pyx_L1;}
       Py_INCREF(__pyx_v_index_s);
       PyTuple_SET_ITEM(__pyx_1, 0, __pyx_v_index_s);
-      __pyx_5 = PyObject_CallObject(((PyObject *)(&PyInt_Type)), __pyx_1); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; goto __pyx_L1;}
+      __pyx_5 = PyObject_CallObject(((PyObject *)(&PyInt_Type)), __pyx_1); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 192; goto __pyx_L1;}
       Py_DECREF(__pyx_1); __pyx_1 = 0;
       Py_DECREF(__pyx_v_index);
       __pyx_v_index = __pyx_5;
       __pyx_5 = 0;
 
-      /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":176 */
-      __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; goto __pyx_L1;}
+      /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":193 */
+      __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 193; goto __pyx_L1;}
       Py_INCREF(__pyx_v_value_s);
       PyTuple_SET_ITEM(__pyx_2, 0, __pyx_v_value_s);
-      __pyx_1 = PyObject_CallObject(((PyObject *)(&PyFloat_Type)), __pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; goto __pyx_L1;}
+      __pyx_1 = PyObject_CallObject(((PyObject *)(&PyFloat_Type)), __pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 193; goto __pyx_L1;}
       Py_DECREF(__pyx_2); __pyx_2 = 0;
       Py_DECREF(__pyx_v_value);
       __pyx_v_value = __pyx_1;
       __pyx_1 = 0;
 
-      /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":177 */
-      __pyx_5 = PyObject_GetAttr(__pyx_v_elements, __pyx_n_append); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; goto __pyx_L1;}
-      __pyx_2 = PyTuple_New(2); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; goto __pyx_L1;}
+      /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":194 */
+      __pyx_5 = PyObject_GetAttr(__pyx_v_elements, __pyx_n_append); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 194; goto __pyx_L1;}
+      __pyx_2 = PyTuple_New(2); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 194; goto __pyx_L1;}
       Py_INCREF(__pyx_v_index);
       PyTuple_SET_ITEM(__pyx_2, 0, __pyx_v_index);
       Py_INCREF(__pyx_v_value);
       PyTuple_SET_ITEM(__pyx_2, 1, __pyx_v_value);
-      __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; goto __pyx_L1;}
+      __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 194; goto __pyx_L1;}
       PyTuple_SET_ITEM(__pyx_1, 0, __pyx_2);
       __pyx_2 = 0;
-      __pyx_2 = PyObject_CallObject(__pyx_5, __pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; goto __pyx_L1;}
+      __pyx_2 = PyObject_CallObject(__pyx_5, __pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 194; goto __pyx_L1;}
       Py_DECREF(__pyx_5); __pyx_5 = 0;
       Py_DECREF(__pyx_1); __pyx_1 = 0;
       Py_DECREF(__pyx_2); __pyx_2 = 0;
@@ -1126,28 +1128,28 @@ static PyObject *__pyx_f_10sparsevect_12SparseVector___setstate__(PyObject *__py
   }
   __pyx_L2:;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":179 */
-  __pyx_5 = PyObject_GetIter(__pyx_v_elements); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":196 */
+  __pyx_5 = PyObject_GetIter(__pyx_v_elements); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; goto __pyx_L1;}
   for (;;) {
     __pyx_1 = PyIter_Next(__pyx_5);
     if (!__pyx_1) {
-      if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; goto __pyx_L1;}
+      if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; goto __pyx_L1;}
       break;
     }
-    __pyx_2 = PyObject_GetIter(__pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; goto __pyx_L1;}
+    __pyx_2 = PyObject_GetIter(__pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; goto __pyx_L1;}
     Py_DECREF(__pyx_1); __pyx_1 = 0;
-    __pyx_3 = __Pyx_UnpackItem(__pyx_2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; goto __pyx_L1;}
+    __pyx_3 = __Pyx_UnpackItem(__pyx_2); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; goto __pyx_L1;}
     Py_DECREF(__pyx_v_i);
     __pyx_v_i = __pyx_3;
     __pyx_3 = 0;
-    __pyx_1 = __Pyx_UnpackItem(__pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; goto __pyx_L1;}
+    __pyx_1 = __Pyx_UnpackItem(__pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; goto __pyx_L1;}
     Py_DECREF(__pyx_v_v);
     __pyx_v_v = __pyx_1;
     __pyx_1 = 0;
-    if (__Pyx_EndUnpack(__pyx_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 179; goto __pyx_L1;}
+    if (__Pyx_EndUnpack(__pyx_2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; goto __pyx_L1;}
     Py_DECREF(__pyx_2); __pyx_2 = 0;
-    __pyx_6 = PyInt_AsLong(__pyx_v_i); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 180; goto __pyx_L1;}
-    __pyx_7 = PyFloat_AsDouble(__pyx_v_v); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 180; goto __pyx_L1;}
+    __pyx_6 = PyInt_AsLong(__pyx_v_i); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; goto __pyx_L1;}
+    __pyx_7 = PyFloat_AsDouble(__pyx_v_v); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 197; goto __pyx_L1;}
     sv_set_element(((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_v_self)->data,__pyx_6,__pyx_7);
   }
   Py_DECREF(__pyx_5); __pyx_5 = 0;
@@ -1186,23 +1188,23 @@ static int __pyx_f_10sparsevect_21_SparseVectorIterator___init__(PyObject *__pyx
   if (!PyArg_ParseTupleAndKeywords(__pyx_args, __pyx_kwds, "O", __pyx_argnames, &__pyx_v_vector)) return -1;
   Py_INCREF(__pyx_v_self);
   Py_INCREF(__pyx_v_vector);
-  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_vector), __pyx_ptype_10sparsevect_SparseVector, 1, "vector")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 186; goto __pyx_L1;}
+  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_vector), __pyx_ptype_10sparsevect_SparseVector, 1, "vector")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 203; goto __pyx_L1;}
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":187 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":204 */
   ((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->cur_index = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":189 */
-  __pyx_1 = PyObject_GetAttr(((PyObject *)__pyx_v_vector), __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; goto __pyx_L1;}
-  __pyx_2 = PyInt_AsLong(__pyx_1); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":206 */
+  __pyx_1 = PyObject_GetAttr(((PyObject *)__pyx_v_vector), __pyx_n_dimension); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 206; goto __pyx_L1;}
+  __pyx_2 = PyInt_AsLong(__pyx_1); if (PyErr_Occurred()) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 206; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   ((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->vector_dim = __pyx_2;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":190 */
-  __pyx_1 = PyObject_GetAttr(((PyObject *)__pyx_v_vector), __pyx_n_elements); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; goto __pyx_L1;}
-  __pyx_3 = PyTuple_New(1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":207 */
+  __pyx_1 = PyObject_GetAttr(((PyObject *)__pyx_v_vector), __pyx_n_elements); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; goto __pyx_L1;}
+  __pyx_3 = PyTuple_New(1); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; goto __pyx_L1;}
   PyTuple_SET_ITEM(__pyx_3, 0, __pyx_1);
   __pyx_1 = 0;
-  __pyx_1 = PyObject_CallObject(((PyObject *)(&PyDict_Type)), __pyx_3); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 190; goto __pyx_L1;}
+  __pyx_1 = PyObject_CallObject(((PyObject *)(&PyDict_Type)), __pyx_3); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; goto __pyx_L1;}
   Py_DECREF(__pyx_3); __pyx_3 = 0;
   Py_DECREF(((PyObject *)((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->elements));
   ((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->elements = ((PyDictObject *)__pyx_1);
@@ -1235,35 +1237,35 @@ static PyObject *__pyx_f_10sparsevect_21_SparseVectorIterator___next__(PyObject 
   Py_INCREF(__pyx_v_self);
   __pyx_v_value = Py_None; Py_INCREF(Py_None);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":193 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":210 */
   __pyx_1 = (((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->cur_index >= ((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->vector_dim);
   if (__pyx_1) {
     __Pyx_Raise(PyExc_StopIteration, 0, 0);
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 194; goto __pyx_L1;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; goto __pyx_L1;}
     goto __pyx_L2;
   }
   __pyx_L2:;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":195 */
-  __pyx_2 = PyObject_GetAttr(((PyObject *)((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->elements), __pyx_n_get); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 195; goto __pyx_L1;}
-  __pyx_3 = PyInt_FromLong(((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->cur_index); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 195; goto __pyx_L1;}
-  __pyx_4 = PyFloat_FromDouble(0.0); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 195; goto __pyx_L1;}
-  __pyx_5 = PyTuple_New(2); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 195; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":212 */
+  __pyx_2 = PyObject_GetAttr(((PyObject *)((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->elements), __pyx_n_get); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 212; goto __pyx_L1;}
+  __pyx_3 = PyInt_FromLong(((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->cur_index); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 212; goto __pyx_L1;}
+  __pyx_4 = PyFloat_FromDouble(0.0); if (!__pyx_4) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 212; goto __pyx_L1;}
+  __pyx_5 = PyTuple_New(2); if (!__pyx_5) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 212; goto __pyx_L1;}
   PyTuple_SET_ITEM(__pyx_5, 0, __pyx_3);
   PyTuple_SET_ITEM(__pyx_5, 1, __pyx_4);
   __pyx_3 = 0;
   __pyx_4 = 0;
-  __pyx_3 = PyObject_CallObject(__pyx_2, __pyx_5); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 195; goto __pyx_L1;}
+  __pyx_3 = PyObject_CallObject(__pyx_2, __pyx_5); if (!__pyx_3) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 212; goto __pyx_L1;}
   Py_DECREF(__pyx_2); __pyx_2 = 0;
   Py_DECREF(__pyx_5); __pyx_5 = 0;
   Py_DECREF(__pyx_v_value);
   __pyx_v_value = __pyx_3;
   __pyx_3 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":196 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":213 */
   ((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->cur_index = (((struct __pyx_obj_10sparsevect__SparseVectorIterator *)__pyx_v_self)->cur_index + 1);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":197 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":214 */
   Py_INCREF(__pyx_v_value);
   __pyx_r = __pyx_v_value;
   goto __pyx_L0;
@@ -1292,10 +1294,10 @@ static PyObject *__pyx_f_10sparsevect__newvector(PyObject *__pyx_self, PyObject 
   static char *__pyx_argnames[] = {"dim",0};
   if (!PyArg_ParseTupleAndKeywords(__pyx_args, __pyx_kwds, "O", __pyx_argnames, &__pyx_v_dim)) return 0;
   Py_INCREF(__pyx_v_dim);
-  __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 200; goto __pyx_L1;}
+  __pyx_1 = PyTuple_New(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; goto __pyx_L1;}
   Py_INCREF(__pyx_v_dim);
   PyTuple_SET_ITEM(__pyx_1, 0, __pyx_v_dim);
-  __pyx_2 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect_SparseVector), __pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 200; goto __pyx_L1;}
+  __pyx_2 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect_SparseVector), __pyx_1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
   __pyx_r = __pyx_2;
   __pyx_2 = 0;
@@ -1325,26 +1327,26 @@ static PyObject *__pyx_f_10sparsevect__scalar_mul(PyObject *__pyx_self, PyObject
   if (!PyArg_ParseTupleAndKeywords(__pyx_args, __pyx_kwds, "Od", __pyx_argnames, &__pyx_v_vect, &__pyx_v_other)) return 0;
   Py_INCREF(__pyx_v_vect);
   __pyx_v_newvect = ((struct __pyx_obj_10sparsevect_SparseVector *)Py_None); Py_INCREF(Py_None);
-  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_vect), __pyx_ptype_10sparsevect_SparseVector, 1, "vect")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 202; goto __pyx_L1;}
+  if (!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_vect), __pyx_ptype_10sparsevect_SparseVector, 1, "vect")) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 219; goto __pyx_L1;}
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":205 */
-  __pyx_1 = PyInt_FromLong(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; goto __pyx_L1;}
-  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":222 */
+  __pyx_1 = PyInt_FromLong(1); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; goto __pyx_L1;}
+  __pyx_2 = PyTuple_New(1); if (!__pyx_2) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; goto __pyx_L1;}
   PyTuple_SET_ITEM(__pyx_2, 0, __pyx_1);
   __pyx_1 = 0;
-  __pyx_1 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect_SparseVector), __pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 205; goto __pyx_L1;}
+  __pyx_1 = PyObject_CallObject(((PyObject *)__pyx_ptype_10sparsevect_SparseVector), __pyx_2); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; goto __pyx_L1;}
   Py_DECREF(__pyx_2); __pyx_2 = 0;
   Py_DECREF(((PyObject *)__pyx_v_newvect));
   __pyx_v_newvect = ((struct __pyx_obj_10sparsevect_SparseVector *)__pyx_1);
   __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":206 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":223 */
   sv_delete(__pyx_v_newvect->data);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":207 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":224 */
   __pyx_v_newvect->data = sv_scalar_mult(__pyx_v_vect->data,__pyx_v_other);
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":208 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":225 */
   Py_INCREF(((PyObject *)__pyx_v_newvect));
   __pyx_r = ((PyObject *)__pyx_v_newvect);
   goto __pyx_L0;
@@ -1756,37 +1758,37 @@ PyMODINIT_FUNC initsparsevect(void) {
   PyObject *__pyx_1 = 0;
   __pyx_init_filenames();
   __pyx_m = Py_InitModule4("sparsevect", __pyx_methods, 0, 0, PYTHON_API_VERSION);
-  if (!__pyx_m) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; goto __pyx_L1;};
+  if (!__pyx_m) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; goto __pyx_L1;};
   Py_INCREF(__pyx_m);
   __pyx_b = PyImport_AddModule("__builtin__");
-  if (!__pyx_b) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; goto __pyx_L1;};
-  if (PyObject_SetAttrString(__pyx_m, "__builtins__", __pyx_b) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; goto __pyx_L1;};
-  if (__Pyx_InternStrings(__pyx_intern_tab) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; goto __pyx_L1;};
-  if (__Pyx_InitStrings(__pyx_string_tab) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; goto __pyx_L1;};
-  if (PyType_Ready(&__pyx_type_10sparsevect_SparseVector) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; goto __pyx_L1;}
-  if (PyObject_SetAttrString(__pyx_m, "SparseVector", (PyObject *)&__pyx_type_10sparsevect_SparseVector) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 31; goto __pyx_L1;}
+  if (!__pyx_b) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; goto __pyx_L1;};
+  if (PyObject_SetAttrString(__pyx_m, "__builtins__", __pyx_b) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; goto __pyx_L1;};
+  if (__Pyx_InternStrings(__pyx_intern_tab) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; goto __pyx_L1;};
+  if (__Pyx_InitStrings(__pyx_string_tab) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 18; goto __pyx_L1;};
+  if (PyType_Ready(&__pyx_type_10sparsevect_SparseVector) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; goto __pyx_L1;}
+  if (PyObject_SetAttrString(__pyx_m, "SparseVector", (PyObject *)&__pyx_type_10sparsevect_SparseVector) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; goto __pyx_L1;}
   __pyx_ptype_10sparsevect_SparseVector = &__pyx_type_10sparsevect_SparseVector;
   __pyx_type_10sparsevect__SparseVectorIterator.tp_free = _PyObject_GC_Del;
-  if (PyType_Ready(&__pyx_type_10sparsevect__SparseVectorIterator) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 182; goto __pyx_L1;}
-  if (PyObject_SetAttrString(__pyx_m, "_SparseVectorIterator", (PyObject *)&__pyx_type_10sparsevect__SparseVectorIterator) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 182; goto __pyx_L1;}
+  if (PyType_Ready(&__pyx_type_10sparsevect__SparseVectorIterator) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; goto __pyx_L1;}
+  if (PyObject_SetAttrString(__pyx_m, "_SparseVectorIterator", (PyObject *)&__pyx_type_10sparsevect__SparseVectorIterator) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; goto __pyx_L1;}
   __pyx_ptype_10sparsevect__SparseVectorIterator = &__pyx_type_10sparsevect__SparseVectorIterator;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":27 */
-  __pyx_1 = __Pyx_Import(__pyx_n_sys, 0); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; goto __pyx_L1;}
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_sys, __pyx_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 27; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":44 */
+  __pyx_1 = __Pyx_Import(__pyx_n_sys, 0); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; goto __pyx_L1;}
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_sys, __pyx_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 44; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":28 */
-  __pyx_1 = __Pyx_Import(__pyx_n_types, 0); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; goto __pyx_L1;}
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_types, __pyx_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 28; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":45 */
+  __pyx_1 = __Pyx_Import(__pyx_n_types, 0); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; goto __pyx_L1;}
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_types, __pyx_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 45; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":29 */
-  __pyx_1 = __Pyx_Import(__pyx_n_StringIO, 0); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; goto __pyx_L1;}
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_StringIO, __pyx_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 29; goto __pyx_L1;}
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":46 */
+  __pyx_1 = __Pyx_Import(__pyx_n_StringIO, 0); if (!__pyx_1) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; goto __pyx_L1;}
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_StringIO, __pyx_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 46; goto __pyx_L1;}
   Py_DECREF(__pyx_1); __pyx_1 = 0;
 
-  /* "/home/adam/Work/sparsevect/python/sparsevect.pyx":202 */
+  /* "/home/batesbad/trunk/project/adam/sparsevect/python/sparsevect.pyx":219 */
   return;
   __pyx_L1:;
   Py_XDECREF(__pyx_1);
@@ -1918,6 +1920,21 @@ static PyObject *__Pyx_GetName(PyObject *dict, PyObject *name) {
     if (!result)
         PyErr_SetObject(PyExc_NameError, name);
     return result;
+}
+
+static PyObject *__Pyx_GetItemInt(PyObject *o, Py_ssize_t i) {
+    PyTypeObject *t = o->ob_type;
+    PyObject *r;
+    if (t->tp_as_sequence && t->tp_as_sequence->sq_item)
+        r = PySequence_GetItem(o, i);
+    else {
+        PyObject *j = PyInt_FromLong(i);
+        if (!j)
+            return 0;
+        r = PyObject_GetItem(o, j);
+        Py_DECREF(j);
+    }
+    return r;
 }
 
 static void __Pyx_UnpackError(void) {
