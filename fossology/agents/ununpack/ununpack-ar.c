@@ -19,7 +19,6 @@
 
 #include "ununpack.h"
 #include "ununpack-ar.h"
-#include "libfossagent.h"
 
 
 /***************************************************
