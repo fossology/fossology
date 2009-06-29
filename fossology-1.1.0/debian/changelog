@@ -1,0 +1,32 @@
+fossology (1.1.0~rc2) unstable; urgency=low
+
+  * unofficial SVN version for testing process
+
+ -- Build User <build@cranky.manage>  Tue, 02 Jun 2009 17:02:42 -0700
+
+fossology (1.0.0-2) unstable; urgency=low
+
+  * Add explicit agents dependency on libextractor-plugins since
+    shlibdeps doesn't automatically figure it out.
+  * Add pointer in copyright to lgpl, thanks Frank Lichtenheld.
+
+ -- Matt Taggart <taggart@debian.org>  Mon, 26 Jan 2009 13:31:23 -0800
+
+fossology (1.0.0-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Matt Taggart <taggart@debian.org>  Wed, 17 Dec 2008 13:48:56 -0800
+
+fossology (1.0.0~rc2-1) unstable; urgency=low
+
+  * Upstream 1.0.0 release candidate 2
+
+ -- Matt Taggart <taggart@debian.org>  Tue, 02 Dec 2008 15:47:37 -0800
+
+fossology (1.0.0~rc1-1) unstable; urgency=low
+
+  * Upstream 1.0.0 release candidate 1
+
+ -- Matt Taggart <taggart@debian.org>  Wed, 12 Nov 2008 03:01:48 -0800
+
