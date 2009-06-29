@@ -49,18 +49,24 @@ if($euid != 0) {
 function installST() {
   $here = getcwd();
   if (is_readable('/etc/fossology/Proxy.conf')) {
+    print "Using proxy found in file /etc/fossology/Proxy.conf\n";
     $cmd = ". /etc/fossology/Proxy.conf;" .
-    "wget -q 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'";
+    "wget -nv -t 1 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'";
   }
   else if (is_readable('/usr/local/etc/fossology/Proxy.conf')) {
-    $cmd = ". /etc/fossology/Proxy.conf;" .
-    "wget -q 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'";
+    print "Using proxy found in file /usr/local/etc/fossology/Proxy.conf\n";
+    $cmd = ". /usr/local/etc/fossology/Proxy.conf;" .
+    "wget -nv -t 1 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'";
+  }
+  else {
+    print "No proxy used when attempting to download simpletest\n";
+   $cmd = "wget -nv -t 1 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'";
   }
   if(chdir('/usr/local/')) {
-    $last = exec($cmd, $out, $rtn);
+    $wLast = exec($cmd, $wgetOut, $rtn);
     if($rtn == 0) {  // download worked
       $tar = 'tar -xf simpletest_1.0.1.tar.gz';
-      $last = exec($tar, $tout, $rtn);
+      $tLast = exec($tar, $tout, $rtn);
       if(is_readable('/usr/local/simpletest')) {
         /* clean up, try to remove the downloaded archive, */
         $rl = exec('rm simpletest_1.0.1.tar.gz', $toss, $notchecked);
@@ -68,13 +74,15 @@ function installST() {
         return(TRUE);  // un tar worked, installed.
       }
       else {
-        print "ERROR! failed to install simpletest into /usr/local\n";
+        print "ERROR! failed to un-tar simpletest into /usr/local\n";
+        print "tar output was:$tLast\n";print_r($tout) . "\n";
         print "Investigate and install simpletest into /usr/local then rerun this script\n";
         return(FALSE);
       }
     }
     else {
-      print "ERROR! problem with downloading simpletest, need a proxy?\n";
+      print "ERROR! problem with downloading simpletest with wget, need a proxy?\n";
+      print "wget output was:$wLast\n";print_r($wgetOut) . "\n";
       print "Investigate and install simpletest into /usr/local then rerun this script\n";
       return(FALSE);
     }
