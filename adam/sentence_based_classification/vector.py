@@ -18,7 +18,11 @@
 ##
 
 import math
-import sparsevect as sv
+__FAST__ = True
+try:
+    import sparsevect as sv
+except:
+    __FAST__ = False
 
 class Vector():
     text_count = {}
@@ -54,7 +58,7 @@ class Vector():
                 self.text_count[k] = v
                 self.text_pos[k] = [0]
 
-        if fast:
+        if __FAST__:
             self.fast_vector = sv.SparseVector((2**31)-1)
             for k,v in self.text_count.items():
                 index = hash(k) & (2**31)-1
@@ -69,11 +73,34 @@ class Vector():
 
         pass
 
+    def get(self,key,default=None):
+        if not __FAST__:
+            return self.text_count.get(key,default)
+        else:
+            index = hash(key) & (2**31)-1
+            if index == (2**31)-1:
+                index -= 1
+            value = default
+            try:
+                value = self.fast_vector[index]
+            except:
+                value = default
+            return value
+    
+    def set(self,key,value):
+        if not __FAST__:
+            self.text_count[key] = value
+        else:
+            index = hash(key) & (2**31)-1
+            if index == (2**31)-1:
+                index -= 1
+            self.fast_vector[index] = value
+
     def getNorm(self):
         if self.norm != None:
             return self.norm
         self.norm = 0.0
-        if not self.fast_vector:
+        if not __FAST__:
             k = self.text_count.keys()
             for i in xrange(len(k)):
                 a = self.text_count.get(k[i],0.0)
@@ -85,13 +112,33 @@ class Vector():
 
         return self.norm
 
+    def inner(self,other):
+        if __FAST__:
+            return self.fast_vector.inner(other.fast_vector)
+        else:
+            a = self.text_count.keys()
+            b = other.text_count.keys()
+            k = []
+            if len(a)>len(b):
+                k = b
+            else:
+                k = a
+
+            tot = 0.0
+            for i in xrange(len(k)):
+                a = self.text_count.get(k[i],0.0)
+                b = other.text_count.get(k[i],0.0)
+                tot += a*b
+
+        return tot
+
     def dot(self,other):
         '''returns the dot product of the two vectors.'''
 
         if self.getNorm() == 0 or other.getNorm() == 0:
             return 0.0
         
-        if self.fast_vector and other.fast_vector:
+        if __FAST__:
             dot = self.fast_vector.inner(other.fast_vector)
         else:
             a = self.text_count.keys()
