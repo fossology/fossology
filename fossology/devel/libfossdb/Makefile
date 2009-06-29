@@ -15,7 +15,7 @@ $(LIB): %.a: %.c %.h $(VARS)
 	$(AR) cr $@ libfossdb.o
 
 $(EXE): %: %.c $(LIB) $(VARS)
-	$(CC) $< $(CFLAGS_DB) -lpq -o $@
+	$(CC) $< -lpq $(CFLAGS_DB) -o $@
 
 install: install-lib install-exe
 
