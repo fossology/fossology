@@ -17,71 +17,6 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-********************
- Scheduler is based off of a proof-of-concept spawning system
- called "spawner".  The basic idea: load the tasks to process and
- spawn them off as individual processes.  The scheduler is single-threaded,
- but the spawned processes make processing happen in parallel.
-
- About the spawner process...
- Originally I used a script to spawn processes, but I found a bug.
- Bash has a problem: spawned processes have their return code
- generated before output handles are flushed.
- This means, shell "wait" may return before data is written
- by stdout/stderr.  This leads to a tight race condition where
- data used by one shell script step is not yet available.
-
- Example bash race condition:
- =====
- #!/bin/sh
- # Sometimes the wait completes before the contents of "file" is written.
- export MaxThread=2
-
- # Repeat the test 10 times -- some should fail (if no fail, re-run this script)
- for loop in 1 2 3 4 5 6 7 8 9 10 ; do
- # Initialize
- rm -f file* > /dev/null 2>&1
- Thread=0
-
- # The loop
- echo test | while read i ; do
-  (date >> file$Thread) &
-  ((Thread=$Thread+1))
-  if [ "$Thread" -ge "$MaxThread" ] ; then
-	wait
-	Thread=0
-  fi
- done
- wait  # ensure that all processes finish!
- # sync # enable a call to sync after the wait in order to bypass the problem
-
- cat file[0-9]* > file
- # display file contents
- echo "File contains:"
- cat file
- echo "EOF"
- done # end of loop
- =====
-
- As a workaround: "spawner".
- This program took a command-line that says the number of processes to
- spawn at any given time.
- Then it reads commands from stdin -- one command per line.
- All output is sent to stdout WHEN THE PROCESS FINISHES!
- All error is sent to stderr AS IT HAPPENS!
-
- Spawner stops:
-   - When there is nothing left to stdin.
-   - When any application ends with a non-zero return code.
- Spawner returns:
-   - 0 if all processes ended with zero, or
-   - Return code from first failed process.
-
- How spawner became the scheduler:
-   - Data can come from stdin (for testing), but usually comes from the
-     database job queue.
-   - The jobs to spawn come from a configuration file.  The data only
-     identifies the type of job and the parameters for it.
  *******************************************************/
 
 #include <stdlib.h>
@@ -92,6 +27,9 @@
 #include <sys/types.h>
 #include <grp.h>
 #include <pwd.h>
+#include <assert.h>
+
+#include <libfossdb.h>
 
 #include "scheduler.h"
 #include "spawn.h"
@@ -111,6 +49,7 @@ int UseStdin=0;
 int IgnoreHost=0;
 int SLOWDEATH=0;	/* exit politely: complete current jobs, then exit */
 void *DB=NULL;	/* the DB queue */
+char ProcessName[]="fossology-scheduler";
 
 #ifndef DEFAULTSETUP
 #define DEFAULTSETUP "Scheduler.conf"
@@ -160,6 +99,61 @@ void	Usage	(char *Name)
 } /* Usage() */
 
 
+/************************************************************************
+ * Stop the scheduler, and its watchdog (fo_watchdog).
+ * Clean up the scheduler_status table
+ * Return  0 Success
+ *        -1 Failure (see log file for messages)
+ */
+int StopScheduler()
+{
+  char *WatchdogName = "fo_watchdog";
+  pid_t Pid;
+  int   rc;
+
+  /* kill the watchdog first */
+  Pid = LockGetPID(WatchdogName);
+  if (Pid)
+  {
+    rc = kill(Pid, SIGKILL);
+    if (rc == -1)
+      LogPrint("*** Unable to kill %s PID %d. %s  ***\n", WatchdogName, Pid, strerror(errno));
+    else
+      LogPrint("*** Exit %s PID %d  ***\n", WatchdogName, Pid);
+    if (UnlockName(WatchdogName))
+      LogPrint("*** Unlock %s PID %d failed. %s  ***\n", WatchdogName, Pid, strerror(errno));
+  }
+  else
+    LogPrint("*** Empty PID in %s lock file. If the %s process really is running, kill it manually.\n", WatchdogName, WatchdogName);
+
+
+  /* Kill the scheduler  */
+  Pid = LockGetPID(ProcessName);
+  if (Pid)
+  {
+    rc = kill(Pid, SIGTERM);
+    if (rc == -1)
+      LogPrint("*** Unable to kill Scheduler PID %d. %s  ***\n", Pid, strerror(errno));
+    else
+      LogPrint("*** Exit Scheduler PID %d  ***\n", Pid);
+    if (UnlockName(ProcessName))
+      LogPrint("*** Unlock %s PID %d failed. %s  ***\n", ProcessName, Pid, strerror(errno));
+  }
+  else
+    LogPrint("*** Empty PID in %s lock file. If the %s process really is running, kill it manually.\n", WatchdogName, ProcessName);
+
+  assert(DB);
+
+  /* remove all scheduler_status records except scheduler record
+   */
+  DBaccess2(DB, "DELETE from scheduler_status");
+  if (DBerrmsg(DB))
+    LogPrint("*** StopScheduler DELETE from scheduler_status. Status %s, %s ***\n", DBstatus(DB), DBerrmsg(DB));
+  
+  return(0);
+}
+
+
 /************************************************************************/
 /************************************************************************/
 /** Program *************************************************************/
@@ -181,7 +175,6 @@ int	main	(int argc, char *argv[])
   int RunAsDaemon=0;
   int ResetQueue=0;
   int KillSchedulers=0;
-  int HupSchedulers=0;
   int Test=0; /* 1=test and continue, 2=test and quit */
   pid_t Pid;
 
@@ -210,14 +203,15 @@ int	main	(int argc, char *argv[])
 	UseStdin=1;
 	break;
       case 'k': /* kill the scheduler */
-	KillSchedulers=1;
-	break;
+	       DB = DBopen();
+         if (!DB)
+         {
+           LogPrint("FATAL: Unable to connect to database\n");
+           exit(-1);
+         }
+         KillSchedulers=1;
+         break;
       case 'l': /* tell the scheduler to redo logs */
-#if 0
-	/* Disabled because SIGHUP causes the scheduler to hang.
-	   The -l option does nothing. */
-	HupSchedulers=1;
-#endif
 	break;
       case 'L':
 	LogFile=optarg;
@@ -250,6 +244,12 @@ int	main	(int argc, char *argv[])
 	DBclose(DB);
 	exit(-1);
 	}
+
+  if (KillSchedulers )
+  {
+    StopScheduler();
+    exit(0);
+  }
 
   /* All config files require group access.  Validate access. */
   if (getuid() == 0)
@@ -328,62 +328,41 @@ int	main	(int argc, char *argv[])
       }
     } /* check group access */
 
-  /* Become a daemon? (Not if I'm killing schedulers) */
+  /* Become a daemon?  */
   if (RunAsDaemon)
-    {
+  {
     /* do not close stdout/stderr when using a LogFile */
     daemon(0,(LogFile!=NULL));
     fclose(stdin);
-    }
+  }
 
   /* Lock the scheduler, so no other scheduler can run */
-  Pid = LockScheduler();
-  if (Pid)
-    {
-    if (!KillSchedulers && !HupSchedulers)
-      {
-      fprintf(stderr,"FATAL: Another scheduler is running (pid=%d).\n",Pid);
-      exit(1);
-      }
-
-    if (HupSchedulers)
-      {
-      rc = kill(Pid,SIGHUP);
-      if (rc == -1)
-	{
-	fprintf(stderr,"FATAL: Permission denied: cannot kill process %d\n",Pid);
-	exit(2);
-	}
-      return(0);
-      }
-
-    /* See if I can kill it! */
-    rc = kill(Pid,SIGTERM);
-    if (rc == -1)
-      {
-      fprintf(stderr,"FATAL: Permission denied: cannot kill process %d\n",Pid);
-      exit(2);
-      }
-    fprintf(stderr,"Waiting 20 seconds for process to complete\n");
-    sleep(20);
-    if (kill(Pid,SIGKILL) != 0)
-      {
-      if (errno == EPERM)
-        {
-	fprintf(stderr,"Permission denied: cannot kill process %d\n",Pid);
-	}
-      else if (errno != ESRCH) { perror("ERROR: Unable to kill process"); exit(2); }
-      }
-    return(0);
-    } /* if Pid of another scheduler is found */
-
-  if (KillSchedulers || HupSchedulers)
-    {
-    UnlockScheduler();
-    return(0);
+  rc = LockName(ProcessName);
+  if (rc > 0)
+  {
+    Pid = rc;
+  }
+  else if (rc == 0)
+  {
+    Pid = LockGetPID(ProcessName);
+    if (!Pid)
+    { 
+      LogPrint("*** %s lock error ***\n", ProcessName);
+      exit(-1);
     }
+  }
+  else
+  {
+    LogPrint("*** %s lock failed. ***\n", ProcessName);
+    exit(-1);
+  }
+
+  if (Verbose) 
+    LogPrint("*** %s successfully locked, pid %d  ***\n", ProcessName, Pid);
+
 
   /**** From here on, I am the only scheduler running ****/
+
 
   /**************************************/
   /* catch signals */
@@ -401,7 +380,6 @@ int	main	(int argc, char *argv[])
   if (sigaction(SIGQUIT,&SigAct,NULL) != 0) perror("SIGQUIT");
   if (sigaction(SIGTERM,&SigAct,NULL) != 0) perror("SIGTERM");
   if (sigaction(SIGINT,&SigAct,NULL) != 0) perror("SIGINT");
-//  if (sigaction(SIGHUP,&SigAct,NULL) != 0) perror("SIGHUP");
   if (sigaction(SIGUSR1,&SigAct,NULL) != 0) perror("SIGUSR1");
   if (sigaction(SIGUSR2,&SigAct,NULL) != 0) perror("SIGUSR2");
   if (sigaction(SIGALRM,&SigAct,NULL) != 0) perror("SIGALRM");
@@ -410,12 +388,12 @@ int	main	(int argc, char *argv[])
   signal(SIGALRM,SIG_IGN); /* ignore self-wakeups */
 
   /* Prepare logging */
-  LogPrint("*** Scheduler started\n");
+  LogPrint("*** Scheduler started, PID %d  ***\n", Pid);
 
   /* Log to file? (Not if I'm killing schedulers) */
   if ((dup2(fileno(stdout),fileno(stderr))) < 0)
       {
-      LogPrint("FATAL: Unable to write to redirect stderr to log\n");
+      LogPrint("FATAL: Unable to write to redirect stderr to log.  Exitting. \n");
       DBclose(DB);
       exit(-1);
       }
@@ -424,8 +402,7 @@ int	main	(int argc, char *argv[])
   DB = DBopen();
   if (!DB)
     {
-    LogPrint("FATAL: Unable to connect to database\n");
-    DBclose(DB);
+    LogPrint("FATAL: Unable to connect to database.  Exitting. \n");
     exit(-1);
     }
 
@@ -450,7 +427,7 @@ int	main	(int argc, char *argv[])
   /* Check for good agents */
   if (SelfTest())
     {
-    LogPrint("FATAL: Inconsistent agent(s) detected.\n");
+    LogPrint("FATAL: Self Test failed.  Inconsistent agent(s) detected.  Exitting. \n");
     DBclose(DB);
     exit(-1);
     }
@@ -465,13 +442,32 @@ int	main	(int argc, char *argv[])
     if ((Test > 1) || rc)
 	{
 	DBclose(DB);
-	LogPrint("*** Scheduler completed\n");
+	LogPrint("*** %d engine failures.  Scheduler exitting. \n", rc);
 	return(rc);
 	}
     }
 
   /* Check for competing schedulers */
-  DBCheckSchedulerUnique();
+  if (DBCheckSchedulerUnique())
+  {
+    /* Yes, a scheduler is running.  So log and exit.  */
+    LogPrint("*** Scheduler not starting since another currently running.  ***\n");
+    exit(0);
+  }
+  else
+    DBCheckStatus();  /* clean scheduler_status and jobqueue tables */
+
+  /* Start watchdog to make sure scheduler doesn't die. 
+   * If you want the scheduler to die, make sure you kill
+   * fo_watchdog.  You can do this with /etc/init.d/fossology stop (on debian).
+   * Manually killing the scheduler with -k will also kill fo_watchdog.
+   */
+  rc = system(LIBEXECDIR "/fo_watchdog");
+  if (-1 == rc)
+  {
+    LogPrint("*** scheduler failed to start fo_watchdog, %s  ***\n", strerror(errno));
+    LogPrint("*** Therefore, scheduler won't automatically restart if it hangs. ***\n");
+  }
 
   /**************************************/
   /* while there are commands to run... */
@@ -581,7 +577,7 @@ int	main	(int argc, char *argv[])
     }
 
   /* tell children "no more food" by closing stdin */
-  if (Verbose) LogPrint("Telling all children: No more food.\n");
+  if (Verbose) LogPrint("Telling all children: No more items to process.\n");
   for(Thread=0; Thread < MaxThread; Thread++)
     {
     if (CM[Thread].Status > ST_FREE) CheckClose(CM[Thread].ChildStdin);
@@ -621,7 +617,7 @@ int	main	(int argc, char *argv[])
   DBQclose();
   DBclose(DB);
   DebugThreads(1);
-  LogPrint("*** Scheduler completed\n");
+  LogPrint("*** Scheduler completed.  Exiting.  ***\n");
   return(0);
 } /* main() */
 
