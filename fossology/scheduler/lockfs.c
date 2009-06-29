@@ -32,88 +32,136 @@
 #include "logging.h"
 
 /********************************************
- UnlockScheduler(): Unlock the scheduler memory.
- Returns: 0 on success, non-zero on failure.
+ LockGetPID() returns PID of process that 
+ owns a lock (or zero if there is no lock).
  ********************************************/
-int	UnlockScheduler	()
+pid_t	LockGetPID	(char *ProcessName)
 {
-  return(shm_unlink("fossology-scheduler"));
-} /* UnlockScheduler() */
-
-/********************************************
- LockScheduler(): Make sure only one scheduler is
- running on this system.
- Returns 0 if the lock is set by this function.
- If the lock is not set, returns the PID of the
- scheduler that is holding the lock.
- ********************************************/
-pid_t	LockScheduler	()
-{
+  pid_t Pid = 0;
   int Handle;
-  int rc;
-  pid_t Pid;
   char S[10];
 
-#if 0
-  shm_unlink("fossology-scheduler");
-  exit(1);
-#endif
-
-  Handle = shm_open("fossology-scheduler",O_RDWR|O_CREAT|O_EXCL,0744);
-
-  if (Handle >= 0)
-    {
-    /* This is my memory! Store PID */
-    memset(S,'\0',sizeof(S));
-    snprintf(S,sizeof(S),"%d",getpid());
-    if (Verbose) fprintf(stderr,"DEBUG: Storing PID[%s] in lock.\n",S); 
-    write(Handle,S,10);
-    return(0);
-    }
-
-  /* Check why it failed... */
-  rc=errno;
-  switch(rc)
-    {
-    case EACCES:
-    case EINVAL:
-    case EMFILE:
-    case ENAMETOOLONG:
-    case ENFILE:
-    case ENOENT:
-	perror("FATAL shm_open");
-	fprintf(stderr,"FATAL: shm_open set errno=%d\n",rc);
-	exit(1);
-    case EEXIST:
-    default:
-	break;
-    }
-
-  /* Someone else owns it!  Find out who! */
-  Handle = shm_open("fossology-scheduler",O_RDONLY,0444);
+  Handle = shm_open(ProcessName,O_RDONLY,0444);
   if (Handle < 0)
-    {
-    rc = errno;
-    perror("FATAL: shm_open");
-    fprintf(stderr,"FATAL: shm_open failed with errno=%d\n",rc);
-    exit(1);
-    }
+  {
+    /* don't report error if lock file does not exist.  That may be normal.  */
+    if (errno != ENOENT)
+      LogPrint("*** failed to open lock file for %s (see LockGetPID). %s\n", ProcessName, strerror(errno));
+    return(0);
+  }
+
+  /* Find out who owns it.  */
   read(Handle,S,10);
   Pid = atoi(S);
-  if (Verbose) fprintf(stderr,"DEBUG: Found PID[%s] in lock.\n",S); 
+  if (Pid < 2)
+  {
+    /* bogus pid, remove lockfile */
+    if (shm_unlink(ProcessName) == -1)
+      LogPrint("*** failed to remove invalid lock file for %s (see LockGetPID). %s\n", ProcessName, strerror(errno));
+    return(0);
+  }
 
-  /* See if pid exists */
-  if (Verbose) fprintf(stderr,"DEBUG: Killing PID[%d]\n",Pid); 
-  rc = kill(Pid,0); /* no signal, just checking */
-  if ((rc == -1) && (errno == ESRCH))
+  if (Verbose) LogPrint("DEBUG: Successfully found PID[%s] in lock for %s.\n",S, ProcessName); 
+  return(Pid);
+} /* LockGetPID() */
+
+/********************************************
+ UnlockName(): Unlock the scheduler shared memory file.
+ Returns: 0 on success, non-zero on failure.
+ ********************************************/
+int	UnlockName	(char *ProcessName)
+{
+  return(shm_unlink(ProcessName));
+} /* UnlockName() */
+
+/********************************************
+ LockName(): Create a shm lock for ProcessName
+ Returns: 0 Success, the lock was set by this function.
+          >0 PID of the process that already has the lock.
+          <0 Error, see logfile
+ ********************************************/
+pid_t	LockName	(char *ProcessName)
+{
+  static int RecurseCheck=0;
+  int Handle;
+  int rc, rv;
+  pid_t Pid = 0;
+  char S[10];
+
+  /* Create the lock file */
+  Handle = shm_open(ProcessName,O_RDWR|O_CREAT|O_EXCL,0744);
+  if (-1 == Handle)
+  {
+    /* create failed */
+    if (errno == EEXIST)  /* create failed because file exists */
     {
-    /* Does not exist.  Try again */
-    if (Verbose) fprintf(stderr,"DEBUG: PID[%d] is dead.\n",Pid); 
-    if (UnlockScheduler() == 0)
+      /* At this point, we have an existing lock file.
+       * Make sure the pid in the lock file still exists.
+       * If it doesn't, remove the file and try to lock again.
+       */
+      Pid = LockGetPID(ProcessName);
+      if (!Pid) return (-1);
+
+      rc = kill(Pid,0); /* check if pid exists */
+      if (0 == rc)
       {
-      Pid = LockScheduler();
+        /* pid is good, lock is good, return the pid */
+        return(Pid);
+      }
+      else
+      {
+        /* PID in lock is stale.
+         * Remove the lock and try again (1 time).
+         */
+        LogPrint("*** PID[%d] (%s) may be stale. Attempt to unlock. \n",Pid, ProcessName);
+        if (UnlockName(ProcessName))
+        {
+          /* Unlock failed */
+          LogPrint("*** %s PID[%d] is stale.  Unlock failed %s\n",ProcessName, Pid, strerror(errno));
+          return (-1);
+        }
+        else
+          LogPrint("*** %s  Unlock successful ***\n",ProcessName);
+
+        /* File is unlocked, try, one time,  to lock again */
+        if (!RecurseCheck)
+        {
+          RecurseCheck = 1;
+          return (LockName(ProcessName));
+        }
+        else
+        {
+          LogPrint("*** %s Unlock failed (max recursion depth = 1)\n",ProcessName);
+          return (-1);
+        }
       }
     }
-  return(Pid);
-} /* LockScheduler() */
+    else
+    {
+      /* create failed for reasons besides the file already existing */
+      LogPrint("*** %s failed on shm_open. %s\n", ProcessName, strerror(errno));
+      return (-1);
+    }
+  }
+  else
+  {
+    /* New lock file created.
+       Store the PID and return.
+     */
+    snprintf(S,sizeof(S),"%d          ",getpid());
+    if (Verbose) fprintf(stderr,"DEBUG: Storing PID[%s] in lock for %s.\n",S, ProcessName); 
+    rv = write(Handle,S,10);
+    if (rv < 1)
+    {
+      LogPrint("*** %s failed to write pid to lock file.  %s\n", ProcessName, strerror(errno));
+      return(-1);
+    }
+    return(0);  // Successful new lock file
+  }
+
+  /* No execution path should get here  */
+  LogPrint("FATAL: LockName(%s) should't not be able to reach this code.\n", ProcessName);
+  return (-1);
+
+} /* LockName() */
 

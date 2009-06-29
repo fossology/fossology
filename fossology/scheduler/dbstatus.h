@@ -29,7 +29,7 @@ void	DBLockReconnect	();
 void	DBUpdateJob	(int JobId, int UpdateType, char *Message);
 int	DBstrcatTaint	(char *V, char *S, int MaxS);
 
-void	DBCheckSchedulerUnique	();
+int	DBCheckSchedulerUnique	();
 void	DBCheckStatus	();
 void	DBSaveSchedulerStatus	(int Thread, char *StateName);
 void	DBSaveJobStatus	(int Thread, int MSQid); /* if Thread != -1 then use it, otherwise use MSQid */

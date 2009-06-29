@@ -40,6 +40,7 @@ void	Usage	(char *Name);
 int	MatchOneAttr	(char *AttrList, char *Attr, int AttrLen);
 int	MatchAttr	(char *AttrList, char *Attr);
 int	SchedulerCommand	(char *Attr, char *Cmd);
+int StopScheduler();
 
 #define CheckClose(x)   { if (x) close(x); }
 

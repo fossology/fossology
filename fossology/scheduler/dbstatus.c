@@ -292,19 +292,21 @@ void	DBCheckStatus	()
   /** Delete anything older than 10 minutes **/
   DBLockAccess(DB,"SELECT unique_scheduler FROM scheduler_status WHERE record_update < now() - interval '600';");
   if (DBdatasize(DB) > 0)
-    {
+  {
     /* Reclaim the old scheduler jobs */
     DBs = DBmove(DB);
     for(i=0; i<DBdatasize(DBs); i++)
-      {
+    {
       memset(SQL,'\0',MAXCMD);
       snprintf(SQL,MAXCMD-1,"UPDATE jobqueue SET jq_starttime = NULL, jq_schedinfo = NULL, jq_endtext = 'Released for restart' WHERE jq_schedinfo = '%s' AND jq_starttime is not NULL AND jq_endtime is NULL;",DBgetvalue(DBs,i,0));
       DBLockAccess(DB,SQL);
-      }
-    DBclose(DBs);
-    /* Delete the old scheduler status */
-    DBLockAccess(DB,"DELETE FROM scheduler_status WHERE record_update < now() - interval '600';");
     }
+    DBclose(DBs);
+    /* Delete the old scheduler status (more than 4 min old) 
+     * Synchronized with fo_watchdog and spawn.c > SaveStatus()
+     * */
+    DBLockAccess(DB,"DELETE FROM scheduler_status WHERE record_update < now() - interval '240';");
+  }
 } /* DBCheckStatus() */
 
 /**********************************************
@@ -314,9 +316,11 @@ void	DBCheckStatus	()
  the same processes.
  This assumes: DB is open, DBSaveSchedulerStatus has NOT
  been called, and agent table is loaded.
+ Returns the number of warnings issued.
  **********************************************/
-void	DBCheckSchedulerUnique	()
+int	DBCheckSchedulerUnique	()
 {
+  int rv = 0;
   int Thread;
   int Row,MaxRow;
   char Attr[256];
@@ -331,24 +335,26 @@ void	DBCheckSchedulerUnique	()
   DBattrChecked = (int *)calloc(MaxRow,sizeof(int));
 
   for(Thread=0; Thread < MaxThread; Thread++)
-    {
+  {
     memset(Attr,0,sizeof(Attr));
     strncpy(Attr,GetValueFromAttr(CM[Thread].Attr,"agent="),sizeof(Attr)-1);
     for(Row=0; Row < MaxRow; Row++)
-      {
+    {
       if (DBattrChecked[Row]) continue;
       DBattr = DBgetvalue(DB,Row,1);
       DBattr = GetValueFromAttr(DBattr,"agent=");
       if (DBattr && !strcmp(Attr,DBattr))
-	{
-	LogPrint("WARNING: Competing scheduler for '%s' detected: %s ",
-		Attr,DBgetvalue(DB,Row,0));
-	LogPrint("%s\n",DBgetvalue(DB,Row,1));
-	DBattrChecked[Row] = 1; /* only report it once */
-	}
+      {
+        rv++;  // add up warnings
+        LogPrint("WARNING: Competing scheduler for '%s' detected: %s ",
+        Attr,DBgetvalue(DB,Row,0));
+        LogPrint("%s\n",DBgetvalue(DB,Row,1));
+        DBattrChecked[Row] = 1; /* only report it once */
       }
     }
+  }
   free(DBattrChecked);
+  return(rv);
 } /* DBCheckSchedulerUnique() */
 
 /**********************************************
