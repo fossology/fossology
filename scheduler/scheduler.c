@@ -434,18 +434,19 @@ int	main	(int argc, char *argv[])
 
   /* See if we're testing */
   if (Test)
-    {
+  {
     rc = TestEngines();
     /* rc = number of engine failures */
     if (rc == 0) LogPrint("STATUS: All scheduler jobs appear to be functional.\n");
     else LogPrint("STATUS: %d agents failed.\n",rc);
     if ((Test > 1) || rc)
-	{
-	DBclose(DB);
-	LogPrint("*** %d engine failures.  Scheduler exitting. \n", rc);
-	return(rc);
-	}
-    }
+	  {
+	    DBclose(DB);
+	    LogPrint("*** %d engine failures.  Scheduler exitting. \n", rc);
+      StopScheduler();
+	    return(rc);
+  	}
+  }
 
   /* Check for competing schedulers */
   if (DBCheckSchedulerUnique())
