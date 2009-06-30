@@ -36,6 +36,7 @@ class Database():
     sentences = [] # holds the text of the sentence from the template file
     _to_file = [] # a lookup table from sentence_id->template_file
     _to_position = [] # a lookup table from sentence_id->position in template file
+    byte_offsets = []
     files = [] # file names
     keywords = [] # a list of stemmed words to look for
     fingerprints = {} # file to vector dictionary. the vectors hold the sentences that occured in the template file
@@ -92,6 +93,7 @@ class Database():
                     self.binary_lookup[k].append(len(self.sentences)-1)
                 self._to_file.append(name)
                 self._to_position.append(j)
+                self.byte_offsets.append((byte_offsets[j][0],byte_offsets[j][1]))
                 self.length += 1
             # add the list of sentence ids to a vector and stick it into the
             # fingerprint dictionary
@@ -127,6 +129,7 @@ class Database():
         temp.sentences = self.sentences[:]
         temp._to_file = self._to_file[:]
         temp._to_position = self._to_position[:]
+        temp.byte_offsets = self.byte_offsets[:]
         temp.files = self.files[:]
         temp.fingerprints = self.fingerprints.copy()
         temp.binary_lookup = self.binary_lookup.copy()
@@ -138,7 +141,7 @@ class Database():
 
     # used for pickling. NOTICE that the analyzer is not saved!!!
     def __getstate__(self):
-        return (self.length, self.vectors[:], self.sentences[:], self._to_file[:], self._to_position[:], self.files[:], self.fingerprints.copy(), self.binary_lookup.copy(), self.keywords[:], self.leaders[:])
+        return (self.length, self.vectors[:], self.sentences[:], self._to_file[:], self._to_position[:], self.byte_offsets[:], self.files[:], self.fingerprints.copy(), self.binary_lookup.copy(), self.keywords[:], self.leaders[:])
 
     # used to unpickle a database object. analyzer is set to None!!!
     def __setstate__(self, state):
@@ -147,11 +150,12 @@ class Database():
         self.sentences = state[2][:]
         self._to_file = state[3][:]
         self._to_position = state[4][:]
-        self.files = state[5][:]
-        self.fingerprints = state[6].copy()
-        self.binary_lookup = state[7].copy()
-        self.keywords = state[8][:]
-        self.leaders = state[9][:]
+        self.byte_offsets = state[5][:]
+        self.files = state[6][:]
+        self.fingerprints = state[7].copy()
+        self.binary_lookup = state[8].copy()
+        self.keywords = state[9][:]
+        self.leaders = state[10][:]
 
 # this function does all the work. A lot happeneds in here.
 def calculate_matches(db,filename,thresh = 0.9,debug = False):
@@ -311,7 +315,7 @@ def calculate_matches(db,filename,thresh = 0.9,debug = False):
     if debug:
         print "Finished %s containing %s sentence in %s seconds." % (filename,len(text_arrays), datetime.now()-tic)
     
-    return sentences,matches,unique_hits,cover,maximum,hits,score,fp
+    return sentences,byte_offsets,matches,unique_hits,cover,maximum,hits,score,fp
 
 def save(db,path):
     # Pickles the database.
