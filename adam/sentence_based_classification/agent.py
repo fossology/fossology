@@ -26,8 +26,6 @@ import cPickle
 from datetime import datetime
 import re
 import vector, database
-from xml.sax.saxutils import escape
-import htmlentitydefs
 import traceback
 from optparse import OptionParser
 import maxent
