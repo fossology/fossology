@@ -99,27 +99,27 @@ def train_word_dict(files,lw,rw):
     # Normalize the probabilities so they sum to 1.
     ss = sum(pos_word_dict.values())
     for stem,value in pos_word_dict.items():
-        pos_word_dict[stem] = math.log(value/ss)
+        pos_word_dict[stem] = (value/ss)
     for stem in pos_bigram_dict:
         s = sum(pos_bigram_dict[stem].values())
         for k,v in pos_bigram_dict[stem].items():
-            pos_bigram_dict[stem][k] = math.log(v/s)
+            pos_bigram_dict[stem][k] = (v/s)
     for stem in pos_word_matrix:
         s = sum(pos_word_matrix[stem].values())
         for k,v in pos_word_matrix[stem].items():
-            pos_word_matrix[stem][k] = math.log(v/s)
+            pos_word_matrix[stem][k] = (v/s)
 
     ss = sum(neg_word_dict.values())
     for stem,value in neg_word_dict.items():
-        neg_word_dict[stem] = math.log(value/ss)
+        neg_word_dict[stem] = (value/ss)
     for stem in neg_bigram_dict:
         s = sum(neg_bigram_dict[stem].values())
         for k,v in neg_bigram_dict[stem].items():
-            neg_bigram_dict[stem][k] = math.log(v/s)
+            neg_bigram_dict[stem][k] = (v/s)
     for stem in neg_word_matrix:
         s = sum(neg_word_matrix[stem].values())
         for k,v in neg_word_matrix[stem].items():
-            neg_word_matrix[stem][k] = math.log(v/s)
+            neg_word_matrix[stem][k] = (v/s)
 
     return (pos_word_dict, pos_bigram_dict, pos_word_matrix, neg_word_dict, neg_bigram_dict, neg_word_matrix)
 
@@ -139,7 +139,7 @@ class LicenseTestModel:
     files = []
     
     # smoothing parameter
-    epsilon = math.log(1.0/10000.0)
+    epsilon = (1.0/1000000.0)
 
     def __init__(self, files, pr, lw, rw, smoothing):
         self.files = files
@@ -188,16 +188,24 @@ class LicenseTestModel:
     
         for i in xrange(w):
             lp = 0.0
-            lp += math.log(self.pr) - math.log(1.0-self.pr)
+            #lp += math.log(self.pr/(1.0-self.pr))
             for j in xrange(-self.lw+1,self.rw):
                 if feats[i].get(j,False):
-                    lp += self.pos_word_dict.get(feats[i][j],self.epsilon) - self.neg_word_dict.get(feats[i][j],self.epsilon)
+                    lp += self.pos_word_dict.get(feats[i][j],0)
                     if feats[i].get(j+1,False):
-                        lp += self.pos_bigram_dict.get(feats[i][j],{}).get(feats[i][j+1],self.epsilon) - self.neg_bigram_dict.get(feats[i][j],{}).get(feats[i][j+1],self.epsilon)
+                        lp += self.pos_bigram_dict.get(feats[i][j],{}).get(feats[i][j+1],0)
                     for k in xrange(-self.lw+1,self.rw):
                         if j == k or not feats[i].get(k,False):
                             continue
-                        lp += self.pos_word_matrix.get(feats[i][j],{}).get(feats[i][k],self.epsilon) - self.neg_word_matrix.get(feats[i][j],{}).get(feats[i][k],self.epsilon)
+                        lp += self.pos_word_matrix.get(feats[i][j],{}).get(feats[i][k],0)
+                    
+                    # lp += math.log(self.pos_word_dict.get(feats[i][j],self.epsilon)/self.neg_word_dict.get(feats[i][j],self.epsilon))
+                    # if feats[i].get(j+1,False):
+                    #     lp += math.log(self.pos_bigram_dict.get(feats[i][j],{}).get(feats[i][j+1],self.epsilon)/self.neg_bigram_dict.get(feats[i][j],{}).get(feats[i][j+1],self.epsilon))
+                    # for k in xrange(-self.lw+1,self.rw):
+                    #     if j == k or not feats[i].get(k,False):
+                    #         continue
+                    #     lp += math.log(self.pos_word_matrix.get(feats[i][j],{}).get(feats[i][k],self.epsilon)/self.neg_word_matrix.get(feats[i][j],{}).get(feats[i][k],self.epsilon))
             score.append(lp)
 
         l = self.smooth_score(score)
@@ -236,7 +244,7 @@ class LicenseTestModel:
         else:
             correct = float(len(misses)-(len(fn_words)+len(fp_words)))/float(len(misses))
         
-        return fn_words, fp_words, correct
+        return fn_words, fp_words, l, correct
         
     # methods for pickling the license test model
     def __getstate__(self):

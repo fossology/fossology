@@ -45,7 +45,9 @@ def POSTagger(sentences):
     return words,tags
 
 def determinefiletype(filename):
-    return os.popen('file --mime-type \"%s\"' % filename,'r').read().strip('\n')
+    out = os.popen('file --mime \"%s\"' % filename,'r').read().strip('\n')
+    params = out.split(' ')
+    return params[1].replace(';', '')
 
 def htmltotext(html):
     html = re.sub('\<\!--','',html)
