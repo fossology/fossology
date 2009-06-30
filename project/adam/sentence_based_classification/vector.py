@@ -24,7 +24,7 @@ try:
 except:
     __FAST__ = False
 
-class Vector():
+class Vector:
     text_count = {}
     text_pos = {}
     text_array = []

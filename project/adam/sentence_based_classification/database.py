@@ -30,7 +30,7 @@ from Stemmer import Stemmer
 
 use_fast_vector = True
 
-class Database():
+class Database:
     length = 0 # number of sentences in the database
     vectors = [] # holds our vectors in a list
     sentences = [] # holds the text of the sentence from the template file

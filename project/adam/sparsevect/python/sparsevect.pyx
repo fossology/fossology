@@ -42,7 +42,6 @@ cdef extern from "stdlib.h":
     void free(void *ptr)
 
 import sys
-import types
 import StringIO
 
 cdef class SparseVector:
@@ -142,7 +141,7 @@ cdef class SparseVector:
 
             c_indices = sv_indices(self.data)
             indices = []
-            for 0 <= i < self.nonzeros:
+            for i from 0 <= i < self.nonzeros:
                 indices.append(c_indices[i])
             free(c_indices)
             return indices
@@ -159,7 +158,7 @@ cdef class SparseVector:
 
             sv_elements = sv_get_elements(self.data)
             elements = []
-            for 0 <= i < self.nonzeros:
+            for i from 0 <= i < self.nonzeros:
                 elements.append((sv_elements[i].i, sv_elements[i].v))
             free(sv_elements)
             return elements
@@ -198,7 +197,7 @@ cdef class SparseVector:
 
 cdef class _SparseVectorIterator:
     cdef long int cur_index, vector_dim
-    cdef dict elements
+    cdef object elements
 
     def __init__(self, SparseVector vector):
         self.cur_index = 0

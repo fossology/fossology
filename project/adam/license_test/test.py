@@ -72,6 +72,10 @@ while (old_correct != new_correct):
         print '%s: %s/%s.' % (words[i], word_scores[i],n)
     old_correct = new_correct
     new_correct = max(word_scores)
-    idf.set(words[word_scores.index(new_correct)],idf.get(words[word_scores.index(new_correct)],0.0)+0.1)
+    for i in xrange(w):
+        if word_scores[i] == new_correct:
+            temp = idf.get(words[i],0.0)+0.1
+            print "Setting %s to %s" % (words[i],temp)
+            idf.set(words[i],temp)
     print '!'
     print new_correct

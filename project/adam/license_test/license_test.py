@@ -66,7 +66,7 @@ else:
     # default parameters
     lw = 3        # left window
     rw = 3        # right window
-    pr = 0.4      # probability of finding a license in a random window
+    pr = 0.2      # probability of finding a license in a random window
     smoothing = False
     files = []
     
