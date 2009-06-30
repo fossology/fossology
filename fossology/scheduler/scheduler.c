@@ -106,7 +106,7 @@ void	Usage	(char *Name)
  * Return  0 Success
  *        -1 Failure (see log file for messages)
  */
-int StopScheduler()
+int StopScheduler(int killsched)
 {
   char *WatchdogName = "fo_watchdog";
   pid_t Pid;
@@ -118,26 +118,38 @@ int StopScheduler()
   {
     rc = kill(Pid, SIGKILL);
     if (rc == -1)
-      LogPrint("*** Unable to kill %s PID %d. %s  ***\n", WatchdogName, Pid, strerror(errno));
+      fprintf(stderr, "*** Unable to kill %s PID %d. %s  ***\n", WatchdogName, Pid, strerror(errno));
     else
-      LogPrint("*** Exit %s PID %d  ***\n", WatchdogName, Pid);
+      fprintf(stderr, "*** Exit %s PID %d  ***\n", WatchdogName, Pid);
     if (UnlockName(WatchdogName))
-      LogPrint("*** Unlock %s PID %d failed. %s  ***\n", WatchdogName, Pid, strerror(errno));
+      fprintf(stderr, "*** Unlock %s PID %d failed. %s  ***\n", WatchdogName, Pid, strerror(errno));
   }
 
 
   /* Kill the scheduler  */
-  LockGetPID(ProcessName);
-  if (UnlockName(ProcessName))
-    LogPrint("*** Unlock %s PID %d failed. %s  ***\n", ProcessName, Pid, strerror(errno));
+  Pid = LockGetPID(ProcessName);
+  if (Pid)
+  {
+    if (killsched)
+    {
+      rc = kill(Pid, SIGTERM);
+      if (rc == -1)
+        fprintf(stderr, "*** Unable to kill %s PID %d. %s  ***\n", ProcessName, Pid, strerror(errno));
+      else
+        fprintf(stderr, "*** Exit %s PID %d  ***\n", ProcessName, Pid);
+    }
+
+    if (UnlockName(ProcessName))
+      fprintf(stderr, "*** Unlock %s PID %d failed. %s  ***\n", ProcessName, Pid, strerror(errno));
+  }
 
 
   /* remove all scheduler_status records except scheduler record
    */
   assert(DB);
   DBaccess2(DB, "DELETE from scheduler_status");
-  if (DBerrmsg(DB))
-    LogPrint("*** StopScheduler DELETE from scheduler_status. Status %s, %s ***\n", DBstatus(DB), DBerrmsg(DB));
+  if (!strstr(DBstatus(DB), "OK"))
+    fprintf(stderr, "*** StopScheduler DELETE from scheduler_status. Status %s, %s ***\n", DBstatus(DB), DBerrmsg(DB));
   
   return(0);
 }
@@ -163,11 +175,9 @@ int	main	(int argc, char *argv[])
   int KeepRunning=1;
   int RunAsDaemon=0;
   int ResetQueue=0;
-//  int KillSchedulers=0;
+  int KillScheduler=0;
   int Test=0; /* 1=test and continue, 2=test and quit */
   pid_t Pid;
-
-  LogPrint("Scheduler started.  %s\n", BuildVersion);
 
   /* check args */
   while((c = getopt(argc,argv,"dkHiIL:lvqRtT")) != -1)
@@ -184,7 +194,7 @@ int	main	(int argc, char *argv[])
 	DB = DBopen();
 	if (!DB)
 	  {
-	  LogPrint("FATAL: Unable to connect to database\n");
+	  fprintf(stderr, "FATAL: Unable to connect to database\n");
 	  exit(-1);
 	  }
 	/* Nothing to initialize */
@@ -194,14 +204,7 @@ int	main	(int argc, char *argv[])
 	UseStdin=1;
 	break;
       case 'k': /* kill the scheduler */
-	       DB = DBopen();
-         if (!DB)
-         {
-           LogPrint("FATAL: Unable to connect to database\n");
-           exit(-1);
-         }
-         StopScheduler();
-         exit(0);
+         KillScheduler = 1;
       case 'l': /* tell the scheduler to redo logs */
 	break;
       case 'L':
@@ -246,7 +249,7 @@ int	main	(int argc, char *argv[])
        be able to kill schedulers started by other users. */
     struct group *G;
     struct passwd *P;
-//    if (!KillSchedulers)
+    if (!KillScheduler)
       {
       G = getgrnam(PROJECTGROUP);
       if (!G)
@@ -314,18 +317,29 @@ int	main	(int argc, char *argv[])
       }
     } /* check group access */
 
+  if (KillScheduler)
+  {
+	  DB = DBopen();
+    if (!DB)
+    {
+	    fprintf(stderr, "FATAL: Unable to connect to database\n");
+      exit(-1);
+    }
+    StopScheduler(1);
+    exit(0);
+  }
+
   /* Become a daemon?  */
   if (RunAsDaemon)
   {
     /* do not close stdout/stderr when using a LogFile */
     rc = daemon(0,(LogFile!=NULL));
-/*    if (rc == -1) 
-      LogPrint("*** scheduler daemon start error %s\n", strerror(errno));
-    else
-      LogPrint("*** scheduler dameon started ***\n");
-*/
     fclose(stdin);
   }
+
+  /* must be after uid is set since this might create the log file */
+  LogPrint("Scheduler started.  %s\n", BuildVersion);
+
 
   /* Lock the scheduler, so no other scheduler can run */
   rc = LockName(ProcessName);
@@ -446,7 +460,7 @@ int	main	(int argc, char *argv[])
     if ((Test > 1) || rc)
 	  {
 	    LogPrint("*** %d agent failures.  Scheduler exiting. \n", rc);
-      StopScheduler();
+      StopScheduler(0);
       exit(0);
   	}
   }
