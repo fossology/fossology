@@ -64,7 +64,7 @@ char ProcessName[]="fossology-scheduler";
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #else
-char BuildVersion[]="Unknown\n";
+char BuildVersion[]="Build version: Unknown\n";
 #endif
 
 /**********************************************
@@ -102,6 +102,7 @@ void	Usage	(char *Name)
 /************************************************************************
  * Stop the scheduler, and its watchdog (fo_watchdog).
  * Clean up the scheduler_status table
+ * Caller must exit.
  * Return  0 Success
  *        -1 Failure (see log file for messages)
  */
@@ -123,29 +124,17 @@ int StopScheduler()
     if (UnlockName(WatchdogName))
       LogPrint("*** Unlock %s PID %d failed. %s  ***\n", WatchdogName, Pid, strerror(errno));
   }
-  else
-    LogPrint("*** Empty PID in %s lock file. If the %s process really is running, kill it manually.\n", WatchdogName, WatchdogName);
 
 
   /* Kill the scheduler  */
-  Pid = LockGetPID(ProcessName);
-  if (Pid)
-  {
-    rc = kill(Pid, SIGTERM);
-    if (rc == -1)
-      LogPrint("*** Unable to kill Scheduler PID %d. %s  ***\n", Pid, strerror(errno));
-    else
-      LogPrint("*** Exit Scheduler PID %d  ***\n", Pid);
-    if (UnlockName(ProcessName))
-      LogPrint("*** Unlock %s PID %d failed. %s  ***\n", ProcessName, Pid, strerror(errno));
-  }
-  else
-    LogPrint("*** Empty PID in %s lock file. If the %s process really is running, kill it manually.\n", WatchdogName, ProcessName);
+  LockGetPID(ProcessName);
+  if (UnlockName(ProcessName))
+    LogPrint("*** Unlock %s PID %d failed. %s  ***\n", ProcessName, Pid, strerror(errno));
 
-  assert(DB);
 
   /* remove all scheduler_status records except scheduler record
    */
+  assert(DB);
   DBaccess2(DB, "DELETE from scheduler_status");
   if (DBerrmsg(DB))
     LogPrint("*** StopScheduler DELETE from scheduler_status. Status %s, %s ***\n", DBstatus(DB), DBerrmsg(DB));
@@ -174,9 +163,11 @@ int	main	(int argc, char *argv[])
   int KeepRunning=1;
   int RunAsDaemon=0;
   int ResetQueue=0;
-  int KillSchedulers=0;
+//  int KillSchedulers=0;
   int Test=0; /* 1=test and continue, 2=test and quit */
   pid_t Pid;
+
+  LogPrint("Scheduler started.  %s\n", BuildVersion);
 
   /* check args */
   while((c = getopt(argc,argv,"dkHiIL:lvqRtT")) != -1)
@@ -209,8 +200,8 @@ int	main	(int argc, char *argv[])
            LogPrint("FATAL: Unable to connect to database\n");
            exit(-1);
          }
-         KillSchedulers=1;
-         break;
+         StopScheduler();
+         exit(0);
       case 'l': /* tell the scheduler to redo logs */
 	break;
       case 'L':
@@ -245,11 +236,6 @@ int	main	(int argc, char *argv[])
 	exit(-1);
 	}
 
-  if (KillSchedulers )
-  {
-    StopScheduler();
-    exit(0);
-  }
 
   /* All config files require group access.  Validate access. */
   if (getuid() == 0)
@@ -260,7 +246,7 @@ int	main	(int argc, char *argv[])
        be able to kill schedulers started by other users. */
     struct group *G;
     struct passwd *P;
-    if (!KillSchedulers)
+//    if (!KillSchedulers)
       {
       G = getgrnam(PROJECTGROUP);
       if (!G)
@@ -332,7 +318,12 @@ int	main	(int argc, char *argv[])
   if (RunAsDaemon)
   {
     /* do not close stdout/stderr when using a LogFile */
-    daemon(0,(LogFile!=NULL));
+    rc = daemon(0,(LogFile!=NULL));
+/*    if (rc == -1) 
+      LogPrint("*** scheduler daemon start error %s\n", strerror(errno));
+    else
+      LogPrint("*** scheduler dameon started ***\n");
+*/
     fclose(stdin);
   }
 
@@ -393,7 +384,7 @@ int	main	(int argc, char *argv[])
   /* Log to file? (Not if I'm killing schedulers) */
   if ((dup2(fileno(stdout),fileno(stderr))) < 0)
       {
-      LogPrint("FATAL: Unable to write to redirect stderr to log.  Exitting. \n");
+      LogPrint("FATAL: Unable to write to redirect stderr to log.  Exiting. \n");
       DBclose(DB);
       exit(-1);
       }
@@ -402,7 +393,7 @@ int	main	(int argc, char *argv[])
   DB = DBopen();
   if (!DB)
     {
-    LogPrint("FATAL: Unable to connect to database.  Exitting. \n");
+    LogPrint("FATAL: Unable to connect to database.  Exiting. \n");
     exit(-1);
     }
 
@@ -427,26 +418,10 @@ int	main	(int argc, char *argv[])
   /* Check for good agents */
   if (SelfTest())
     {
-    LogPrint("FATAL: Self Test failed.  Inconsistent agent(s) detected.  Exitting. \n");
+    LogPrint("FATAL: Self Test failed.  Inconsistent agent(s) detected.  Exiting. \n");
     DBclose(DB);
     exit(-1);
     }
-
-  /* See if we're testing */
-  if (Test)
-  {
-    rc = TestEngines();
-    /* rc = number of engine failures */
-    if (rc == 0) LogPrint("STATUS: All scheduler jobs appear to be functional.\n");
-    else LogPrint("STATUS: %d agents failed.\n",rc);
-    if ((Test > 1) || rc)
-	  {
-	    DBclose(DB);
-	    LogPrint("*** %d engine failures.  Scheduler exitting. \n", rc);
-      StopScheduler();
-	    return(rc);
-  	}
-  }
 
   /* Check for competing schedulers */
   if (DBCheckSchedulerUnique())
@@ -457,6 +432,24 @@ int	main	(int argc, char *argv[])
   }
   else
     DBCheckStatus();  /* clean scheduler_status and jobqueue tables */
+
+  /* See if we're testing */
+  if (Test)
+  {
+    rc = TestEngines();
+    /* rc = number of engine failures */
+    if (rc == 0) 
+      LogPrint("STATUS: All scheduler agents are operational.\n");
+    else 
+      LogPrint("STATUS: %d agents failed to initialize.\n",rc);
+
+    if ((Test > 1) || rc)
+	  {
+	    LogPrint("*** %d agent failures.  Scheduler exiting. \n", rc);
+      StopScheduler();
+      exit(0);
+  	}
+  }
 
   /* Start watchdog to make sure scheduler doesn't die. 
    * If you want the scheduler to die, make sure you kill
