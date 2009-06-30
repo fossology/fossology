@@ -132,7 +132,7 @@ def main ():
             # BOBG: this is where you should start
             # this is where everything happends.
             # look in database.py for more code...
-            sentences,matches,unique_hits,cover,maximum,hits,score,fp = database.calculate_matches(DB,f,debug=debug_on,thresh=0.7)
+            sentences,byte_offsets,matches,unique_hits,cover,maximum,hits,score,fp = database.calculate_matches(DB,f,debug=debug_on,thresh=0.7)
             
             # create and xml file for the output
             links += '<a href=\"%s.xml\">%s</a>\n<br>\n' % (i,name)

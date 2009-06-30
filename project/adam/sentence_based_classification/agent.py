@@ -65,7 +65,7 @@ def main():
         timer = threading.Timer(60,ShowHeartbeat)
         timer.start()
         
-        usage = "usage: %prog [options] -S sentence_model -D database -T template_file -o output_dir -f test_files"
+        usage = "usage: %prog [options] -S sentence_model -D database -T template_file"
         parser = OptionParser(usage)
         parser.add_option("-S", "--sentence_model", type="string",
                 help="path of the sentence model file")
@@ -141,10 +141,14 @@ def main():
             # BOBG: this is where you should start
             # this is where everything happends.
             # look in database.py for more code...
-            sentences,matches,unique_hits,cover,maximum,hits,score,fp = database.calculate_matches(DB,f,debug=debug_on,thresh=0.7)
+            sentences,byte_offsets,matches,unique_hits,cover,maximum,hits,score,fp = database.calculate_matches(DB,f,debug=debug_on,thresh=0.7)
             
-            for lic,scr in library.sortdictionary(score):
-                print "%s, %s" % (lic, int(round(scr*100.0)))
+            for j in xrange(len(sentences)):
+                for k in hits[j]:
+                    if k=='Unknown':
+                        print "Unknown: 100 [%d, %d], [0, 0]" % (byte_offsets[j][0],byte_offsets[j][1])
+                    else:
+                        print "%s: %d [%d, %d], [%d, %d]" % (k, int(round(matches[j][k][1]*100.0)), DB.byte_offsets[matches[j][k][0]][0], DB.byte_offsets[matches[j][k][0]][1], byte_offsets[j][0],byte_offsets[j][1])
         
             line = sys.stdin.readline().strip()
 
@@ -153,6 +157,7 @@ def main():
             exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
             p = repr(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
             sys.stderr.write("%s\n" % p)
+            line = sys.stdin.readline().strip()
     
 
     end = datetime.now()
