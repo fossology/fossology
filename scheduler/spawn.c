@@ -962,6 +962,7 @@ int	TestEngines	()
 {
   int Failures=0;
   int Thread;
+	signal(SIGCHLD,SIG_IGN); /* ignore child deaths */
   for(Thread=0; Thread < MaxThread; Thread++)
     {
     if (!SpawnEngine(Thread))
