@@ -567,7 +567,6 @@ class fossologyTest extends WebTestCase
    * TestEnvironment.php as the default or the user and password supplied.
    *
    * @param string $User the fossology user name
-   * @param string $Password the fossology user password
    *
    */
   public function Logout($User=NULL)
@@ -584,14 +583,19 @@ class fossologyTest extends WebTestCase
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, "/User:<\/small> $User/"),
       "Did not find User:<\/small> $User");
+    // must do 2 calls.  For some reason the ?mod=auth does not logout, but
+    // gets to a page where the logout link works.
     $page = $this->mybrowser->get("$URL?mod=auth");
-    $this->assertTrue($this->myassertText($page, "/User Logged Out/"));
+    $page = $this->mybrowser->clickLink('logout');
+    $this->assertTrue($this->myassertText($page,
+      "/This login uses HTTP/"),
+      "Did not find string 'This login uses HTTP', Is user logged out?\n");
     $this->setUser(NULL);
     $this->setPassword(NULL);
+    return(TRUE);
   }
 
-  private function _repoDBlogin($browser = NULL)
-  {
+  private function _repoDBlogin($browser = NULL) {
 
     if (is_null($browser))
     {
@@ -623,10 +627,9 @@ class fossologyTest extends WebTestCase
     $this->assertTrue($this->mybrowser->setField('password', $this->Password));
     $this->assertTrue($this->mybrowser->isSubmit('Login'));
     $this->assertTrue($this->mybrowser->clickSubmit('Login'));
-    $page = $this->mybrowser->getContent();
-    preg_match('/User Logged In/', $page, $matches);
-    $this->assertTrue($matches, "Failure! Login FAILED, did not see " .
-      "'User Logged In for user $this->User'\n");
+    $page = $this->mybrowser->get($URL);
+    $this->assertTrue($this->myassertText($page, "/User:<\/small>\s$this->User/"),
+      "Did not find User:<\/small> $this->User\nThe User may not be logged in\n");
     $this->mybrowser->setCookie('Login', $cookieValue, $host);
     $page = $this->mybrowser->getContent();
     $NumMatches = preg_match('/User Logged Out/', $page, $matches);
