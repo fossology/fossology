@@ -25,7 +25,7 @@ TEST_FILE = tests.txt
 all: models/ models/SentenceModel.dat models/Database.dat
 
 sparsevect/python/sparsevect.so:
-	make -C sparsevect -f Makefile.old
+	make -C sparsevect
 
 templates.txt:
 	find Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > templates.txt
