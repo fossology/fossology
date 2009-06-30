@@ -47,7 +47,7 @@ import StringIO
 cdef class SparseVector:
     cdef sv_vector data
 
-    def __cinit__(self, dim):
+    def __new__(self, dim):
         self.data = sv_new(dim)
 
     def __init__(self, dim):
