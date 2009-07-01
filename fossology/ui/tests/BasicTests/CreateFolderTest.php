@@ -67,7 +67,7 @@ class CreateFolderTest extends fossologyTestCase
     $desc = 'Folder created by CreateFolderTest as subfolder of Basic-Testing';
     $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     $page = $this->mybrowser->clickSubmit('Create!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Folder $this->folder_name Created/"),
                       "FAIL! Folder $this->folder_name Created not found\n");
 
@@ -81,7 +81,7 @@ class CreateFolderTest extends fossologyTestCase
     $FolderId = $this->getFolderId($this->folder_name, $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"),
                       "CreateFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
   }

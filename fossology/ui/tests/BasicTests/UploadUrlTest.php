@@ -66,7 +66,7 @@ class UploadUrlTest extends fossologyTestCase
     $this->assertTrue($this->mybrowser->setField('name', $upload_name));
     /* we won't select any agents this time' */
     $page = $this->mybrowser->clickSubmit('Upload!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
 
     //print  "************ page after Upload! *************\n$page\n";

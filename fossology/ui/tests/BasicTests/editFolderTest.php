@@ -80,7 +80,7 @@ class EditFolderTest extends fossologyTestCase
     $FolderId = $this->getFolderId($this->newname, $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->newname/"),
                       "EditFoldeTest tearDown FAILED! Deletion of $this->newname not found\n");
   }

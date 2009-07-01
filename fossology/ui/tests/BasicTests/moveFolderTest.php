@@ -100,7 +100,7 @@ class MoveFolderTest extends fossologyTestCase
     $FolderId = $this->getFolderId($this->moveFolder, $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->moveFolder/"),
                       "MoveFoldeTest tearDown FAILED! Phrase 'Deletion of $this->moveFolder' not found\n");
   }

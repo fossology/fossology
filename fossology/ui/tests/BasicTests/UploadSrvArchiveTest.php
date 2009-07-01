@@ -44,19 +44,15 @@ require_once ('../../../tests/TestEnvironment.php');
 
 global $URL;
 
-class UploadSrvTest extends fossologyTestCase
-{
-  function setUp()
-  {
+class UploadSrvTest extends fossologyTestCase {
+  function setUp() {
     /* check to see if the user and material exist*/
     $this->assertTrue(file_exists('/home/fosstester/.bashrc'),
                       "FAILURE! .bashrc not found\n");
-    $this->Login($browser);
+    $this->Login($this->mybrowser);
   }
 
-  function testUploadUSrv()
-  {
-
+  function testUploadUSrv() {
 
     global $URL;
 
@@ -79,7 +75,7 @@ class UploadSrvTest extends fossologyTestCase
     $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     /* we won't select any agents this time' */
     $page = $this->mybrowser->clickSubmit('Upload!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page,
                      '/Upload jobs for \/home\/fosstester\/archives\/simpletest_1\.0\.1\.tar\.gz/'),
                       "FAIL! Did not match Upload message\n");
