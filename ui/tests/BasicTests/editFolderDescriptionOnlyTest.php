@@ -56,7 +56,7 @@ class EditFolderDescriptionOnlyTest extends fossologyTestCase
     $desc = 'Folder created by EditFolderDesctriptionOnlyTest as subfolder of Testing';
     $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     $page = $this->mybrowser->clickSubmit('Create!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Folder $this->folder_name Created/"),
                       "FAIL! Folder $this->folder_name Created not found\n");
   }
@@ -81,7 +81,7 @@ class EditFolderDescriptionOnlyTest extends fossologyTestCase
     $this->assertTrue($this->mybrowser->setField('newdesc', "$desc"),
                       "FAIL! Could not set description 'newdesc'\n");
     $page = $this->mybrowser->clickSubmit('Edit!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Folder Properties changed/"),
                       "FAIL! Folder Properties changed not found\n");
     /* check the browse page */
@@ -98,7 +98,7 @@ class EditFolderDescriptionOnlyTest extends fossologyTestCase
     $FolderId = $this->getFolderId($this->folder_name, $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"),
                       "EditFolderDescriptionOnlyTest tearDown FAILED! Deletion of $this->folder_name not found\n");
   }

@@ -35,8 +35,10 @@ class FoldersDeleteMenuTest extends fossologyTestCase
 {
   public $mybrowser;
 
-  function testFolderDeleteMenu()
-  {
+  function testFolderDeleteMenu() {
+
+    global $URL;
+
     $this->Login();
     /* we get the home page to get rid of the user logged in page */
     $loggedIn = $this->mybrowser->get($URL);

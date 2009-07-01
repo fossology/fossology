@@ -55,7 +55,7 @@ class EditFolderNameOnlyTest extends fossologyTestCase
     $desc = "Folder $this->folder_name created by EditNameOnlyTest as subfolder of Testing";
     $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     $page = $this->mybrowser->clickSubmit('Create!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Folder $this->folder_name Created/"),
                       "FAIL! Folder $this->folder_name Created not found\n");
   }
@@ -84,7 +84,7 @@ class EditFolderNameOnlyTest extends fossologyTestCase
     $this->assertTrue($this->mybrowser->setField('newname', "$this->newname"),
                       "FAIL! Folder rename Failed\n");
     $page = $this->mybrowser->clickSubmit('Edit!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Folder Properties changed/"),
                       "FAIL! Folder Properties changed not found\n");
     /* check the browse page */
@@ -101,7 +101,7 @@ class EditFolderNameOnlyTest extends fossologyTestCase
     $FolderId = $this->getFolderId($this->newname, $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->newname/"),
                       "EditFolderOnlyTest tearDown FAILED! Deletion of $this->newname not found\n");
   }

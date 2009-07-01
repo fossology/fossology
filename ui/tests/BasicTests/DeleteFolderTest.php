@@ -57,7 +57,7 @@ class DeleteFolderTest extends fossologyTestCase
     $desc = 'Folder created by DeleteFolderTest as subfolder of Testing';
     $this->assertTrue($this->mybrowser->setField('description', "$desc"));
     $page = $this->mybrowser->clickSubmit('Create!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Folder $this->folder_name Created/"),
                       "FAIL! Folder $this->folder_name Created not found\n");
   }
@@ -81,7 +81,7 @@ class DeleteFolderTest extends fossologyTestCase
     $FolderId = $this->getFolderId('DeleteMe', $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"),
                       "FAIL! Deletion of $folder_name not found\n");
     /* go to sleep for 30 seconds to see if the folder get's deleted */

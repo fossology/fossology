@@ -63,7 +63,7 @@ class DupFolderTest extends fossologyTestCase
       $desc = 'Folder created by DupFolderTest as subfolder of RootFolder';
       $this->assertTrue($this->mybrowser->setField('description', "$desc"));
       $page = $this->mybrowser->clickSubmit('Create!');
-      $this->assertTrue(page);
+      $this->assertTrue($page);
       /* On the second try, we SHOULD NOT see Folder xxx Created */
       if($i == 1)
       {
@@ -87,7 +87,7 @@ class DupFolderTest extends fossologyTestCase
     $FolderId = $this->getFolderId($this->folder_name, $page, 'folder');
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"),
      "DupFoldeTest tearDown FAILED! Deletion of $this->folder_name not found\n");
   }

@@ -80,7 +80,7 @@ class fossologyTestCase extends fossologyTest
 
     /* fields set, add the user */
     $page = $this->mybrowser->clickSubmit('Add!',"Could not select the Add! button");
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     //print "<pre>page after clicking Add!\n"; print_r($page) . "\n</pre>";
     if($this->myassertText($page, "/User added/")) {
       return(NULL);
@@ -185,7 +185,7 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->mybrowser->setField('newname', $name));
     $this->assertTrue($this->mybrowser->setField('description', "$description"));
     $page = $this->mybrowser->clickSubmit('Create!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     if($this->myassertText($page, "/Folder $name Created/")) {
       return(NULL);
     }
@@ -225,7 +225,7 @@ class fossologyTestCase extends fossologyTest
     }
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Deletion of folder $folder added to job queue/"),
      "delete Folder Failed!\nPhrase 'Deletion of folder $folder added to job queue' not found\n");
   }
@@ -258,7 +258,7 @@ class fossologyTestCase extends fossologyTest
     }
     $this->assertTrue($this->mybrowser->setField('upload', $UploadId));
     $page = $this->mybrowser->clickSubmit('Delete!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Deletion added to job queue/"),
      "delete Upload Failed!\nPhrase 'Deletion added to job queue' not found\n");
   }
@@ -285,7 +285,7 @@ class fossologyTestCase extends fossologyTest
       $this->assertTrue($this->mybrowser->setField('confirm', 1));
       $page = $this->mybrowser->clickSubmit('Delete!',
         "Could not select the Delete! button");
-      $this->assertTrue(page);
+      $this->assertTrue($page);
       if($this->myassertText($page, "/User deleted/")) {
         print "User $User Deleted\n";
         $this->pass();
@@ -330,7 +330,7 @@ class fossologyTestCase extends fossologyTest
     }
     $this->assertTrue($this->mybrowser->setField('newdesc', "$description"));
     $page = $this->mybrowser->clickSubmit('Edit!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Folder Properties changed/"), "editFolder Failed!\nPhrase 'Folder Properties changed' not found\n");
   }
   /**
@@ -370,7 +370,7 @@ class fossologyTestCase extends fossologyTest
 
     /* fields set, edit the user */
     $page = $this->mybrowser->clickSubmit('Edit!',"Could not select the Edit! button");
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     //print "<pre>page after clicking Add!\n"; print_r($page) . "\n</pre>";
     if($this->myassertText($page, "/User edited/")) {
       return(NULL);
@@ -424,7 +424,7 @@ class fossologyTestCase extends fossologyTest
     $destFolderId = $this->getFolderId($destFolder, $page, 'targetfolderid');
     $this->assertTrue($this->mybrowser->setField('targetfolderid', $destFolderId));
     $page = $this->mybrowser->clickSubmit('Move!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     print "page after move is:\n$page\n";
     $this->assertTrue($this->myassertText($page,
     //"/Moved $upload from folder $oldFolder to folder $destFolder/"),
@@ -465,7 +465,7 @@ class fossologyTestCase extends fossologyTest
     }
     $this->assertTrue($this->mybrowser->setField('targetfolderid', $DfolderId));
     $page = $this->mybrowser->clickSubmit('Move!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Moved folder $folder to folder $destination/"),
         "moveFolder Failed!\nPhrase 'Move folder $folder to folder ....' not found\n");
   }
@@ -613,7 +613,7 @@ class fossologyTestCase extends fossologyTest
       $this->setAgents($agents);
     }
     $page = $this->mybrowser->clickSubmit('Upload!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'),
       "FAILURE:Did not find the message 'Upload added to job queue'\n");
   }
@@ -693,7 +693,7 @@ class fossologyTestCase extends fossologyTest
       $this->fail("FAIL: could not set agents in uploadServer test\n");
     }
     $page = $this->mybrowser->clickSubmit('Upload!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, '/Upload jobs for .*? added to job queue/'));
     //print  "************ page after Upload! *************\n$page\n";
   } //uploadServer
@@ -772,7 +772,7 @@ class fossologyTestCase extends fossologyTest
       $this->fail("FAIL: could not set agents in uploadAFILE test\n");
     }
     $page = $this->mybrowser->clickSubmit('Upload!');
-    $this->assertTrue(page);
+    $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
     //print  "************ page after Upload! *************\n$page\n";
   } //uploadUrl

@@ -51,7 +51,7 @@ class cleanupRF extends fossologyTestCase {
       print "Removing $uploadName...\n";
        $this->assertTrue($this->mybrowser->setField('upload', $uploadId));
        $page = $this->mybrowser->clickSubmit('Delete!');
-       $this->assertTrue(page);
+       $this->assertTrue($page);
        $this->assertTrue($this->myassertText($page, "/Deletion added to job queue/"),
        "delete Upload Failed!\nPhrase 'Deletion added to job queue' not found\n");
     }

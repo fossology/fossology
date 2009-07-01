@@ -68,7 +68,7 @@ class DupUploadTest extends fossologyTestCase
       $this->assertTrue($this->mybrowser->setField('name', $upload_name));
       /* we won't select any agents this time' */
       $page = $this->mybrowser->clickSubmit('Upload!');
-      $this->assertTrue(page);
+      $this->assertTrue($page);
             /* On the second try, we SHOULD see Upload added to job queue */
       if($i == 1) {
         $this->assertTrue($this->myassertText($page, "/Upload added to job queue/"),
