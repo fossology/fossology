@@ -79,7 +79,7 @@ class uploadTestDataTest extends fossologyTestCase
     $urlList = array('http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz',
                      'http://www.gnu.org/licenses/gpl-3.0.txt',
                      'http://www.gnu.org/licenses/agpl-3.0.txt',
-                     'http://snape.west/~fosstester/fossDirsOnly.tar.bz2');
+                     'http://osrb1-fc.hp.com/~fosstester/fossDirsOnly.tar.bz2');
 
     /* upload the archives using the upload from file menu */
     $description = "File $upload uploaded by Upload Data Test";

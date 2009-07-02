@@ -587,9 +587,8 @@ class fossologyTest extends WebTestCase
     $page = $this->mybrowser->clickLink('logout');
 
     //    $this->assertTrue($this->myassertText($page,;
-    if($this->myassertText($page,"/This login uses HTTP/" !== TRUE)) {
+    if($this->myassertText($page,"/This login uses HTTP/") !== TRUE) {
       $this->fail("Did not find string 'This login uses HTTP', Is user logged out?\n");
-      print "clearing User and Password\n";
       $this->setUser(NULL);
       $this->setPassword(NULL);
       return(FALSE);

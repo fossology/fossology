@@ -42,6 +42,7 @@ class EmailUserTest extends fossologyTestCase {
     global $URL;
     print "starting EmailUserTest\n";
     /* Create the user */
+    print "Creating user: UserwEmail\n";
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Admin/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Users/'));
@@ -64,9 +65,11 @@ class EmailUserTest extends fossologyTestCase {
      * Verify, login as the user just created and check their session.
      * TODO: look in the db
      */
+    print "Logging in as UserwEmail\n";
     $this->Login('UserwEmail','uwetest');
     print "Verifying Email Notification Setting\n";
-    $this->assertTrue($_SESSION['UserEnote'] == NULL);
+    $this->assertTrue($_SESSION['UserEnote'] == NULL,
+      "FAIL! No email notification setting for user UserwEmail\n");
   } //testEmailUser
 
   function tearDown(){
