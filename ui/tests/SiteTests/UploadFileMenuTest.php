@@ -43,7 +43,7 @@ class UploadFileMenuTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($loggedIn, '/From File/'));
     $this->assertTrue($this->myassertText($loggedIn, '/From Server/'));
     $this->assertTrue($this->myassertText($loggedIn, '/From URL/'));
-    $this->assertTrue($this->myassertText($loggedIn, '/One-Shot License/'));
+    $this->assertTrue($this->myassertText($loggedIn, '/One-Shot Analysis/'));
     /* ok, this proves the text is on the page, let's see if we can
      * get to the delete page.
      */
