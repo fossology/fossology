@@ -83,7 +83,7 @@ class DeleteFolderTest extends fossologyTestCase
     $page = $this->mybrowser->clickSubmit('Delete!');
     $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"),
-                      "FAIL! Deletion of $folder_name not found\n");
+                      "FAIL! Deletion of $this->folder_name not found\n");
     /* go to sleep for 30 seconds to see if the folder get's deleted */
     sleep(30);
     $page = $this->mybrowser->get("$URL?mod=browse");
