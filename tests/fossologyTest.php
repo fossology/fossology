@@ -534,15 +534,13 @@ class fossologyTest extends WebTestCase
     global $USER;
     global $PASSWORD;
 
-    if(is_null($User)) {
-    }
-    if(!empty($User)) {
+    if(strlen($User)) {
       $this->setUser($User);
     }
     else {
       $this->setUser($USER);
     }
-    if(!empty($Password)) {
+    if(!strlen($Password)) {
       $this->setPassword($Password);
     }
     else {
@@ -587,11 +585,15 @@ class fossologyTest extends WebTestCase
     // gets to a page where the logout link works.
     $page = $this->mybrowser->get("$URL?mod=auth");
     $page = $this->mybrowser->clickLink('logout');
-    $this->assertTrue($this->myassertText($page,
-      "/This login uses HTTP/"),
-      "Did not find string 'This login uses HTTP', Is user logged out?\n");
-    $this->setUser(NULL);
-    $this->setPassword(NULL);
+
+    //    $this->assertTrue($this->myassertText($page,;
+    if($this->myassertText($page,"/This login uses HTTP/" !== TRUE)) {
+      $this->fail("Did not find string 'This login uses HTTP', Is user logged out?\n");
+      print "clearing User and Password\n";
+      $this->setUser(NULL);
+      $this->setPassword(NULL);
+      return(FALSE);
+    }
     return(TRUE);
   }
 
@@ -617,10 +619,10 @@ class fossologyTest extends WebTestCase
     $page = $this->mybrowser->get($URL);
     $this->assertTrue($this->mybrowser->get("$URL?mod=auth&nopopup=1"));
     /* Use the test configured user if none specified */
-    if(empty($this->User)) {
+    if(!strlen($this->User)) {
       $this->setUser($USER);
     }
-    if(empty($this->Password)) {
+    if(!strlen($this->Password)) {
       $this->setPassword($PASSWORD);
     }
     $this->assertTrue($this->mybrowser->setField('username', $this->User));
