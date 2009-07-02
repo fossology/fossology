@@ -169,12 +169,14 @@ class fossologyTestCase extends fossologyTest
 
     /* Need to check parameters */
     if (is_null($parent)) {
-      $parent = 1; // default is root folder
+      $FolderId = 1; // default is root folder
     }
     if (is_null($description)) {   // set default if null
       $description = "Folder $name created by createFolder as subfolder of $parent";
     }
     $page = $this->mybrowser->get($URL);
+    // There is only 1 create menu, so just select it
+    // No need to make sure we are in folders menu.
     $page = $this->mybrowser->clickLink('Create');
     $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
     /* if $FolderId=0 select the folder to create this folder under */
@@ -614,9 +616,9 @@ class fossologyTestCase extends fossologyTest
     }
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue($page);
-    $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'),
-      "FAILURE:Did not find the message 'Upload added to job queue'\n");
-  }
+    $this->assertTrue($this->myassertText($page, '/The file .*? has been uploaded/'),
+      "FAILURE:Did not find the message 'The file .*? has been uploaded'\n");
+  } // uploadFile
   /**
    * uploadServer
    * ($parentFolder,$uploadPath,$description=null,$uploadName=null,$agents=null)
@@ -694,7 +696,8 @@ class fossologyTestCase extends fossologyTest
     }
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue($page);
-    $this->assertTrue($this->myassertText($page, '/Upload jobs for .*? added to job queue/'));
+    $this->assertTrue($this->myassertText($page, '/The upload for .*? has been scheduled/'),
+      "FAIL! did not see phrase The upload for .*? has been scheduled\n");
     //print  "************ page after Upload! *************\n$page\n";
   } //uploadServer
 
@@ -761,7 +764,7 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->mybrowser->setField('geturl', $url));
     $this->assertTrue($this->mybrowser->setField('description', "$description"));
     /* Set the name field if an upload name was passed in. */
-    if (!(is_null($upload_name)))
+    if (!(is_null($uploadName)))
     {
       $this->assertTrue($this->mybrowser->setField('name', $url));
     }
@@ -773,7 +776,8 @@ class fossologyTestCase extends fossologyTest
     }
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue($page);
-    $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
+    $this->assertTrue($this->myassertText($page, '/The upload .*? has been scheduled/'),
+      "FAIL! did find phrase The upload .*? has been scheduled\n");
     //print  "************ page after Upload! *************\n$page\n";
   } //uploadUrl
 
