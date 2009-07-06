@@ -66,12 +66,14 @@ class uploadTestDataTest extends fossologyTestCase
     $this->createFolder(null, 'Testing', null);
   }
 
-  function testuploadTestDataTest()
-  {
+  function testuploadTestDataTest() {
+
     global $URL;
     global $PROXY;
+
     print "starting testUploadTestData\n";
     $rootFolder = 1;
+    $upload = NULL;
     $uploadList = array('TestData/archives/fossI16L518.tar.bz2',
                         'TestData/archives/foss23D1F1L.tar.bz2',
                         'TestData/licenses/gplv2.1',
