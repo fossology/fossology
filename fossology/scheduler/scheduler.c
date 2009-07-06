@@ -32,6 +32,7 @@
 #include <libfossdb.h>
 
 #include "scheduler.h"
+#include "stopscheduler.h"
 #include "spawn.h"
 #include "sockets.h"
 #include "agents.h"

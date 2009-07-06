@@ -60,6 +60,7 @@
 
 #include "debug.h"
 #include "scheduler.h"
+#include "stopscheduler.h"
 #include "spawn.h"
 #include "agents.h"
 #include "sockets.h"
