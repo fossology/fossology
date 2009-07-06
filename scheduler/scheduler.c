@@ -99,61 +99,6 @@ void	Usage	(char *Name)
 } /* Usage() */
 
 
-/************************************************************************
- * Stop the scheduler, and its watchdog (fo_watchdog).
- * Clean up the scheduler_status table
- * Caller must exit.
- * Return  0 Success
- *        -1 Failure (see log file for messages)
- */
-int StopScheduler(int killsched)
-{
-  char *WatchdogName = "fo_watchdog";
-  pid_t Pid;
-  int   rc;
-
-  /* kill the watchdog first */
-  Pid = LockGetPID(WatchdogName);
-  if (Pid)
-  {
-    rc = kill(Pid, SIGKILL);
-    if (rc == -1)
-      fprintf(stderr, "*** Unable to kill %s PID %d. %s  ***\n", WatchdogName, Pid, strerror(errno));
-    else
-      fprintf(stderr, "*** Exit %s PID %d  ***\n", WatchdogName, Pid);
-    if (UnlockName(WatchdogName))
-      fprintf(stderr, "*** Unlock %s PID %d failed. %s  ***\n", WatchdogName, Pid, strerror(errno));
-  }
-
-
-  /* Kill the scheduler  */
-  Pid = LockGetPID(ProcessName);
-  if (Pid)
-  {
-    if (killsched)
-    {
-      rc = kill(Pid, SIGTERM);
-      if (rc == -1)
-        fprintf(stderr, "*** Unable to kill %s PID %d. %s  ***\n", ProcessName, Pid, strerror(errno));
-      else
-        fprintf(stderr, "*** Exit %s PID %d  ***\n", ProcessName, Pid);
-    }
-
-    if (UnlockName(ProcessName))
-      fprintf(stderr, "*** Unlock %s PID %d failed. %s  ***\n", ProcessName, Pid, strerror(errno));
-  }
-
-
-  /* remove all scheduler_status records except scheduler record
-   */
-  assert(DB);
-  DBaccess2(DB, "DELETE from scheduler_status");
-  if (!strstr(DBstatus(DB), "OK"))
-    fprintf(stderr, "*** StopScheduler DELETE from scheduler_status. Status %s, %s ***\n", DBstatus(DB), DBerrmsg(DB));
-  
-  return(0);
-}
-
 
 /************************************************************************/
 /************************************************************************/
@@ -239,83 +184,47 @@ int	main	(int argc, char *argv[])
 	exit(-1);
 	}
 
+  /* Run as PROJECTUSER:PROJECTGROUP only */
+  struct group *G;
+  struct passwd *P;
 
-  /* All config files require group access.  Validate access. */
-  if (getuid() == 0)
-    {
-    /* Don't run as root unless I'm trying to kill schedulers. */
-    /* It is alright for root to send kill signals to schedulers. */
-    /* Without this condition, Root would become PROJECTUSER and would not
-       be able to kill schedulers started by other users. */
-    struct group *G;
-    struct passwd *P;
-    if (!KillScheduler)
-      {
-      G = getgrnam(PROJECTGROUP);
-      if (!G)
-	{
-	fprintf(stderr,"FATAL: Group '%s' not found.  Aborting.\n",PROJECTGROUP);
-	DBclose(DB);
-	exit(-1);
-	}
-      setgroups(1,&(G->gr_gid));
-      if ((setgid(G->gr_gid) != 0) || (setegid(G->gr_gid) != 0))
-	{
-	fprintf(stderr,"FATAL: Cannot run as group '%s'.  Aborting.\n",PROJECTGROUP);
-	DBclose(DB);
-	exit(-1);
-	}
-      /* Don't run as root */
-      P = getpwnam(PROJECTUSER);
-      if (!P)
-	{
-	fprintf(stderr,"FATAL: User '%s' not found.  Will not run as root.  Aborting.\n",PROJECTUSER);
-	DBclose(DB);
-	exit(-1);
-	}
-      if ((setuid(P->pw_uid) != 0) || (seteuid(P->pw_uid) != 0))
-	{
-	fprintf(stderr,"FATAL: Cannot run as user '%s'.  Will not run as root.  Aborting.\n",PROJECTUSER);
-	DBclose(DB);
-	exit(-1);
-	}
-      } /* if !!KillScheduler */
-    }
-  else
-    {
-    /* Not running as root.  Am I in the right group? */
-    struct passwd *P;
-    struct group *G;
-    gid_t *Groups;
-    int MaxGroup=0;
-    int Match=0;
-    int i;
+  /* make sure group exists */
+  G = getgrnam(PROJECTGROUP);
+  if (!G)
+  {
+    fprintf(stderr,"FATAL: Group PROJECTGROUP '%s' not found.  Aborting.\n",PROJECTGROUP);
+    DBclose(DB);
+    exit(-1);
+  }
 
-    G = getgrnam(PROJECTGROUP); /* the group we want to match */
-    /* Get list of groups for this user. */
-    P = getpwuid(getuid());
-    getgrouplist(P->pw_name,getgid(),NULL,&MaxGroup);
-    Groups = (gid_t *)malloc(MaxGroup*sizeof(gid_t));
-    if (!Groups)
-      {
-      fprintf(stderr,"FATAL: Unable to allocate memory.\n");
-      DBclose(DB);
-      exit(-1);
-      }
-    getgroups(MaxGroup,Groups);
-    /* Now, check if the group matches */
-    for(i=0; i<MaxGroup; i++)
-      {
-      if (Groups[i] == G->gr_gid) Match=1;
-      }
-    free(Groups);
-    if (!Match)
-      {
-      fprintf(stderr,"FATAL: You are not in group '%s'.  Aborting.\n",PROJECTGROUP);
-      DBclose(DB);
-      exit(-1);
-      }
-    } /* check group access */
+  /* set PROJECTGROUP */
+  setgroups(1,&(G->gr_gid));
+  if ((setgid(G->gr_gid) != 0) || (setegid(G->gr_gid) != 0))
+  {
+    fprintf(stderr,"FATAL: Cannot run as group '%s'.  Aborting due to error: %s.\n",
+        PROJECTGROUP, strerror(errno));
+    DBclose(DB);
+    exit(-1);
+  }
+
+  /* make sure PROJECTUSER exists */
+  P = getpwnam(PROJECTUSER);
+  if (!P)
+  {
+     fprintf(stderr,"FATAL: User '%s' not found.  %s will not run as root.  Aborting.\n",
+          PROJECTUSER, ProcessName);
+     DBclose(DB);
+     exit(-1);
+  }
+
+  /* Run as PROJECTUSER, not root or any other user  */
+  if ((setuid(P->pw_uid) != 0) || (seteuid(P->pw_uid) != 0))
+  {
+    fprintf(stderr,"FATAL: You must run the %s as root or %s.  Aborting due to error: %s\n",
+            ProcessName, PROJECTUSER, strerror(errno));
+    DBclose(DB);
+    exit(-1);
+  }
 
   if (KillScheduler)
   {
@@ -325,9 +234,12 @@ int	main	(int argc, char *argv[])
 	    fprintf(stderr, "FATAL: Unable to connect to database\n");
       exit(-1);
     }
-    StopScheduler(1);
+
+    /* kill scheduler and watchdog */
+    StopScheduler(1, 1);
     exit(0);
   }
+
 
   /* Become a daemon?  */
   if (RunAsDaemon)
@@ -419,9 +331,9 @@ int	main	(int argc, char *argv[])
   /* If we're resetting the queue */
   if (ResetQueue)
 	{
-	/* If someone has a start without an end, then it is a hung process */
-	DBLockAccess(DB,"UPDATE jobqueue SET jq_starttime=null WHERE jq_endtime is NULL;");
-	LogPrint("Job queue reset.\n");
+    /* If someone has a start without an end, then it is a hung process */
+    DBLockAccess(DB,"UPDATE jobqueue SET jq_starttime=null WHERE jq_endtime is NULL;");
+    LogPrint("Job queue reset.\n");
 	}
 
   /* init storage */
@@ -460,7 +372,8 @@ int	main	(int argc, char *argv[])
     if ((Test > 1) || rc)
 	  {
 	    LogPrint("*** %d agent failures.  Scheduler exiting. \n", rc);
-      StopScheduler(0);
+      /* kill watchdog, scheduler will terminate with exit(0) */
+      StopScheduler(0, 1);
       exit(0);
   	}
   }
@@ -620,10 +533,14 @@ int	main	(int argc, char *argv[])
       }
     }
 
-  /* print statistics */
-  if (DB) DBErrorClose();
+  /* scheduler cleanup */
+  if (DB) DBErrorClose();  /* currently a noop */
   DBQclose();
-  DBclose(DB);
+
+  /* kill watchdog, scheduler will terminate with exit(0) */
+  StopScheduler(0, 1);
+
+  /* print statistics */
   DebugThreads(1);
   LogPrint("*** Scheduler completed.  Exiting.  ***\n");
   return(0);

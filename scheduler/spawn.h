@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
+typedef void (*sighandler_t)(int);
 
 #include <libfossdb.h>
 

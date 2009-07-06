@@ -37,6 +37,7 @@ int Verbose=0;
 #include <fcntl.h>
 
 #include "logging.h"
+#include "scheduler.h"
 #include "lockfs.h"
 #include <libfossdb.h>
 
@@ -52,7 +53,6 @@ int	main	(int argc, char *argv[])
   int rv;
   pid_t mypid = -1;
   char *ProcessName="fo_watchdog";
-  char *SchedulerName="fossology-scheduler";
 
   /* start as daemon */
   if (daemon(0,(LogFile!=NULL)) != 0)
@@ -79,7 +79,8 @@ int	main	(int argc, char *argv[])
   }
   else
   {
-    if (Verbose) LogPrint("*** %s (pid %d) already running.  No need to start another.  ***\n", ProcessName, rv);
+    if (Verbose) 
+      LogPrint("*** %s (pid %d) already running.  No need to start another.  ***\n", ProcessName, rv);
     exit(0);
   }
   
@@ -101,24 +102,14 @@ int	main	(int argc, char *argv[])
     DBaccess(DB, "SELECT record_update from scheduler_status where agent_number='-1' and (now()-record_update) > '4 minutes' ");
     if (DBdatasize(DB) > 0)
     {
-      // scheduler is dead.  
-      // Delete the scheduler status records
-      DBaccess2(DB, "DELETE from scheduler_status");
-      if (DBerrmsg(DB))
-        LogPrint("*** StopScheduler DELETE from scheduler_status. Status %s, %s ***\n", DBstatus(DB), DBerrmsg(DB));
-
-      // Log restart
-      LogPrint("*** Scheduler not responding: restarting ***\n");
+      /* scheduler is dead. Log restart */
+      LogPrint("*** Scheduler not responding: killing and restarting ***\n");
       
-      // Unlock scheduler
-      rv = UnlockName(SchedulerName);
-      if (-1 == rv)
-      {
-        LogPrint("*** Unlock %s failed.  %s  ***\n", SchedulerName, strerror(errno));
-      }
+      /* kill the scheduler and clean up locks, db */
+      StopScheduler(1,0);
 
       // Restart scheduler as daemon, reset job queue
-      rv = system( LIBEXECDIR "/fossology-scheduler -Rd");
+      rv = system( LIBEXECDIR "/fossology-scheduler -dR");
       if (-1 == rv)
       {
         LogPrint("*** Scheduler restart failed ***\n");
@@ -126,9 +117,8 @@ int	main	(int argc, char *argv[])
       }
       else
       {
-        LogPrint("*** Scheduler restarted successfully by %d ***\n", ProcessName);
+        LogPrint("*** Scheduler restarted successfully by %s ***\n", ProcessName);
       }
-      
     }
-  }
+  }    /* while(1) */
 } /* main() */
