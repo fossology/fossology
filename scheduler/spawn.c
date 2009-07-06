@@ -335,9 +335,9 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 	if (Verbose) LogPrint("Got slow death signal: %d\n",Signo);
 	SLOWDEATH=1;
 	break;
+    /* these are the nice kills */
     case SIGTERM: /* kill all children and exit (default kill signal) */
     case SIGQUIT: /* kill all children and exit */
-    case SIGKILL: /* kill all children and exit (cannot trap this! but fun to try) */
 	if (Verbose) LogPrint("Got signal %d\n",Signo);
 	fclose(stdin);	/* no more input! */
 	SLOWDEATH=1;
@@ -347,8 +347,11 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 	  {
 	  if (CM[Thread].ChildPid) kill(CM[Thread].ChildPid,SIGKILL);
 	  }
-	/** if all children are dead, then I'll exit through signal handler */
-	DBclose(DB);
+  /* clean up scheduler records and terminate the watchdog
+   * but exit through the signal handler (below) */
+	StopScheduler(0, 1);
+
+	/** since all children should be dead, I'll exit through signal handler */
 	LogPrint("*** Scheduler completed (terminated by signal).\n");
 	exit(0);
 	break;
@@ -962,7 +965,9 @@ int	TestEngines	()
 {
   int Failures=0;
   int Thread;
-	signal(SIGCHLD,SIG_IGN); /* ignore child deaths */
+  sighandler_t chldsig;
+
+	chldsig = signal(SIGCHLD,SIG_IGN); /* ignore child deaths */
   for(Thread=0; Thread < MaxThread; Thread++)
     {
     if (!SpawnEngine(Thread))
@@ -973,6 +978,7 @@ int	TestEngines	()
       }
     KillChild(Thread);
     }
+	signal(SIGCHLD,chldsig); /* restore SIGCHLD */
   return(Failures);
 } /* TestEngines() */
 
