@@ -126,7 +126,7 @@ int	main	(int argc, char *argv[])
       }
       else
       {
-        LogPrint("*** Scheduler restarted successfully by %d ***\n", ProcessName);
+        LogPrint("*** Scheduler restarted successfully by %s ***\n", ProcessName);
       }
       
     }
