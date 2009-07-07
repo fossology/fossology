@@ -202,8 +202,8 @@ int	main	(int argc, char *argv[])
   setgroups(1,&(G->gr_gid));
   if ((setgid(G->gr_gid) != 0) || (setegid(G->gr_gid) != 0))
   {
-    fprintf(stderr,"FATAL: Cannot run as group '%s'.  Aborting due to error: %s.\n",
-        PROJECTGROUP, strerror(errno));
+    fprintf(stderr,"FATAL: You need to run this as root or %s.  Cannot set group '%s'.  Aborting due to error: %s.\n",
+        PROJECTUSER, PROJECTGROUP, strerror(errno));
     DBclose(DB);
     exit(-1);
   }
