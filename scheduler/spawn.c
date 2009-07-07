@@ -979,7 +979,12 @@ int	TestEngines	()
       }
     KillChild(Thread);
     }
-	signal(SIGCHLD,chldsig); /* restore SIGCHLD */
+
+  /* give the agents some time to report their deaths */
+  sleep(10);
+
+  /* restore SIGCHLD */
+	signal(SIGCHLD,chldsig); 
   return(Failures);
 } /* TestEngines() */
 
