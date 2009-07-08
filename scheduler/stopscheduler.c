@@ -47,6 +47,7 @@ int StopScheduler(int killsched, int killwatch)
   pid_t Pid;
   int   rc;
 
+killwatch = 0;
   if (killwatch)
   {
     /* kill the watchdog first, so that it doesn't restart a purposly stopped scheduler */
