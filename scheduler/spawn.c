@@ -319,74 +319,79 @@ int	KillChild	(int Thread)
 void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
 {
   int Thread;
+  int KillWD = 0;
   char Ctime[MAXCTIME];
+  time_t Now;
 
   switch(Signo)
-    {
+  {
     case SIGALRM: /* alarm went off */
-	{
-	time_t Now;
-	Now = time(NULL);
-	memset(Ctime,'\0',MAXCTIME);
-	ctime_r(&Now,Ctime);
-	printf("ALARM at %s",Ctime);
-	}
-	break;
-    case SIGINT: /* kill all children and exit */
-	if (Verbose) LogPrint("Got slow death signal: %d\n",Signo);
-	SLOWDEATH=1;
-	break;
-    /* these are the nice kills */
-    case SIGTERM: /* kill all children and exit (default kill signal) */
-    case SIGQUIT: /* kill all children and exit */
-	if (Verbose) LogPrint("Got signal %d\n",Signo);
-	fclose(stdin);	/* no more input! */
-	SLOWDEATH=1;
-	signal(SIGCHLD,SIG_IGN); /* ignore screams of death */
-	LogPrint("Sending kill signal to all child processes.\n");
-	for(Thread=0; (Thread < MaxThread); Thread++)
-	  {
-	  if (CM[Thread].ChildPid) kill(CM[Thread].ChildPid,SIGKILL);
-	  }
-  /* clean up scheduler records and terminate the watchdog
-   * but exit through the signal handler (below) */
-	StopScheduler(0, 1);
+      Now = time(NULL);
+      memset(Ctime,'\0',MAXCTIME);
+      ctime_r(&Now,Ctime);
+      printf("ALARM at %s",Ctime);
+      break;
 
-	/** since all children should be dead, I'll exit through signal handler */
-	LogPrint("*** Scheduler completed (terminated by signal).\n");
-	exit(0);
-	break;
+    case SIGINT: /* kill all children and exit */
+      if (Verbose) LogPrint("Got slow death signal: %d\n",Signo);
+      SLOWDEATH=1;
+      break;
+
+    /* these are the nice kills */
+    case SIGQUIT: /* Same as SIGTERM, but don't exit the watchdog  */
+      KillWD = 0;
+    case SIGTERM: /* kill all children and exit (default kill signal) */
+      if (Signo == SIGTERM) KillWD = 1;
+      if (Verbose) LogPrint("Got signal %d\n",Signo);
+      fclose(stdin);	/* no more input! */
+      SLOWDEATH=1;
+      signal(SIGCHLD,SIG_IGN); /* ignore screams of death */
+      LogPrint("Sending kill signal to all child processes.\n");
+      for(Thread=0; (Thread < MaxThread); Thread++)
+      {
+      if (CM[Thread].ChildPid) kill(CM[Thread].ChildPid,SIGKILL);
+      }
+      /* clean up scheduler records and terminate the watchdog
+      * but exit through the signal handler (below) */
+      StopScheduler(0, KillWD);
+
+      /** since all children should be dead, I'll exit through signal handler */
+      LogPrint("*** Scheduler completed (terminated by signal).\n");
+      exit(0);
+      break;
+
     case SIGHUP: /* Redo config */
-	LogReopenFlag=1; /* Rotate log file */
-	/* TBD: Someday in the future: Re-read config */
-	break;
+      LogReopenFlag=1; /* Rotate log file */
+      /* TBD: Someday in the future: Re-read config */
+      break;
+
     case SIGUSR1: /* Display stats */
-	DebugThreads(3);
-	break;
+      DebugThreads(3);
+      break;
+
     case SIGUSR2: /* Display general stats and MSQ contents */
-	DebugThreads(1);
-	DebugMSQ();
-	break;
+      DebugThreads(1);
+      DebugMSQ();
+      break;
+
     case SIGSEGV: /* CRASH! */
-	{
-	time_t Now;
-	Now = time(NULL);
-	memset(Ctime,'\0',MAXCTIME);
-	ctime_r(&Now,Ctime);
-	LogPrint("CRASH DEBUG! %s",Ctime);
-	LogPrint("  DEBUG: %s :: %d\n",Debug.File,Debug.Line);
-	DebugThreads(3);
-	LogPrint("CRASH DEAD! %s",Ctime);
-	raise(SIGABRT); /* generate a core dump */
-	DBclose(DB);
-	LogPrint("*** Scheduler completed.\n");
-	exit(-1);
-	}
-	break;
+      Now = time(NULL);
+      memset(Ctime,'\0',MAXCTIME);
+      ctime_r(&Now,Ctime);
+      LogPrint("CRASH DEBUG! %s",Ctime);
+      LogPrint("  DEBUG: %s :: %d\n",Debug.File,Debug.Line);
+      DebugThreads(3);
+      LogPrint("CRASH DEAD! %s",Ctime);
+      raise(SIGABRT); /* generate a core dump */
+      DBclose(DB);
+      LogPrint("*** Scheduler completed.\n");
+      exit(-1);
+      break;
+
     default:
-	if (Verbose) LogPrint("Got unknown signal: %d\n",Signo);
-	break;
-    }
+      if (Verbose) LogPrint("Got unknown signal: %d\n",Signo);
+      break;
+  }
 } /* ParentSig() */
 
 /********************************************

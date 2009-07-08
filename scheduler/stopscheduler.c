@@ -74,30 +74,30 @@ int StopScheduler(int killsched, int killwatch)
     if (killsched)  /* kill sched if requested */
     {
       /* as long as the running scheduler is still responding to interrupts, 
-       * this will send SIGKILL's to each agent and run StopScheduler() from
-       * the "active" scheduler.
-       * NOTE, that at this point there may be one or two schedulers running.
+       * SIGQUIT will send SIGKILL's to each agent and run StopScheduler(0,0) from
+       * the "active" scheduler to do cleanup.  This recursion is really an artifact
+       * of StopScheduler being a general purpose function and getting called through
+       * multiple scheduler failure and quit modes.
+       * NOTE, that there may be one or two schedulers running.
        * One is the active (job running) scheduler, the other a scheduler started to kill the
-       * active scheduler (as in fossology-scheduler -k).  SIGTERM/KILL will stop the active.
-       * The active SIGTERM handler calls StopScheduler but with killsched = 0, so we don't
-       * get into a loop here.
+       * active scheduler (as in fossology-scheduler -k).  SIGTERM/QUIT/KILL will stop the active.
        */
-      rc = kill(Pid, SIGTERM);
+      rc = kill(Pid, SIGQUIT);
       if (rc == -1)
       {
-        fprintf(stderr, "*** Unable to TERMinate %s PID %d. %s  ***\n", SchedName, Pid, strerror(errno));
-        LogPrint("*** Unable to TERMinate %s PID %d. %s  ***\n", SchedName, Pid, strerror(errno));
+        fprintf(stderr, "*** Unable to SIGQUIT %s PID %d. %s  ***\n", SchedName, Pid, strerror(errno));
+        LogPrint("*** Unable to SIGQUIT %s PID %d. %s  ***\n", SchedName, Pid, strerror(errno));
       }
       else
       {
         fprintf(stderr, "*** Exiting %s PID %d  ***\n", SchedName, Pid);
-        LogPrint("*** Exiting %s PID %d TERMinated ***\n", SchedName, Pid);
+        LogPrint("*** Exiting %s PID %d QUIT ***\n", SchedName, Pid);
       }
-      sleep(30); /* give sigterm time to kill agents */
+      sleep(30); /* give sigquit time to kill agents */
       kill(Pid, SIGKILL);  /* just in case */
     }
 
-    /* ignore any unlock error since SIGTERM calls stopscheduler, the pid may have already
+    /* ignore any unlock error since SIGQUIT calls stopscheduler, the pid may have already
      * been unlocked.
      */
     UnlockName(SchedName);
