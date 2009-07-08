@@ -329,7 +329,8 @@ int	DBaccess2(void *VDB, char *SQL)
   }
 
   /* free old result */
-  PQclear(DB->Res);
+  if (DB->Res) PQclear(DB->Res);
+	DB->Res=NULL;
   DB->ErrMsg = empty;
   DB->ResStatus = empty;
   DB->RowsAffected = 0;
@@ -341,6 +342,7 @@ int	DBaccess2(void *VDB, char *SQL)
   DB->RowsAffected = atoi(PQcmdTuples(DB->Res));
   return(0);
 }
+
 
 /*********************************************************************/
 /*********************************************************************/
