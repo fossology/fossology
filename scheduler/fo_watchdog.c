@@ -38,6 +38,7 @@ int Verbose=0;
 
 #include "logging.h"
 #include "scheduler.h"
+#include "stopscheduler.h"
 #include "lockfs.h"
 #include <libfossdb.h>
 
@@ -99,8 +100,8 @@ int	main	(int argc, char *argv[])
     /* Check every 5 minutes to see if the scheduler is updating the scheduler_status table */
     sleep(5*60);
 
-    DBaccess(DB, "SELECT record_update from scheduler_status where agent_number='-1' and (now()-record_update) > '4 minutes' ");
-    if (DBdatasize(DB) > 0)
+    DBaccess(DB, "SELECT record_update from scheduler_status where agent_number='-1' and (now()-record_update) < '4 minutes' ");
+    if (DBdatasize(DB) == 0)
     {
       /* scheduler is dead. Log restart */
       LogPrint("*** Scheduler not responding: killing and restarting ***\n");
