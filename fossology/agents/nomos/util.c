@@ -683,10 +683,10 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 	 * in the text "$nBefore" lines.  Count 2-consecutive EOL-chars as one
 	 * line since some text files use <CR><LF> as line-terminators.
 	 */
-	if (nBefore > 0 && start > textp) {
-	    for (i = 0; i < nBefore && start > textp; i++) {
+	if ((nBefore > 0) && (start > textp)) {
+	    for (i = 0; (i < nBefore) && (start > textp); i++) {
 		start -= 2;
-		if (start > textp && isEOL(*start)) {
+		if ((start > textp) && isEOL(*start)) {
 		    start--;
 		}
 		if (start > textp) {
@@ -717,7 +717,8 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 	 */
 	do {
 	    curptr += cur.regm.rm_eo;
-	    if ((end = findEol(curptr)) < fileeof) {
+	    end = findEol(curptr);
+	    if (end < fileeof) {
 		end++;	/* first char past end-of-line */
 	    }
 	    if (nAfter > 0) {
@@ -725,7 +726,8 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 		    if (isEOL(*end)) {	/* double-EOL */
 			end++;		/* <CR><LF>? */
 		    }
-		    if ((end = findEol(end)) == NULL_STR) {
+		    end = findEol(end);
+		    if (end == NULL_STR) {
 			Fatal("lost the end-of-line");
 		    }
 		    if (*end == NULL_CHAR) {
@@ -735,7 +737,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 			break;
 		    }
 		}
-		if (end < fileeof && *end) {
+		if ((end < fileeof) && *end) {
 		    end++;	/* past newline-char */
 		}
 	    }

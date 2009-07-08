@@ -8,7 +8,7 @@ quickly get a local install up and running, or a distribution developer
 looking to create packages.
 
 For extended discussion on how to use or tune the software, please see
-the User Documentation, available on the website.
+the User Documentation, available at http://fossology.org/user_documentation
 
 This document is arranged  as follows:
 
@@ -103,8 +103,8 @@ distributions.
 * For Debian nearly all packages can be found in main, unless you want
    the non-free version of unrar
 * For Ubuntu you will need a universe apt source setup
-* For RHEL you will need packages from EPEL
-    http://fedoraproject.org/wiki/EPEL
+* For RHEL you can find needed packages from EPEL
+    (http://fedoraproject.org/wiki/EPEL) or rpm.pbone.net.
 
 We provide a script for helping install dependencies:
    utils/fo-installdeps
@@ -116,8 +116,51 @@ For more information run it with the --help flag.
 If this utility doesn't support the distro you are running (or fails
 to install everything that's needed) please report a bug.
 
+The fo-installdeps command provides output that can be helpful in 
+figuring out what dependent packages you will have to install either 
+from your distro or some other location.
 
-2.1.2.1 Service Dependencies
+2.1.2.1 - RHEL5 Dependencies
+----------------------------
+For RHEL5, the breakdown of dependencies for complete functionality
+(build, install, run) is as follows:
+
+Packages to install from distro media
+-------------------------------------
+postgresql-8.1.11-1.el5_1.1
+postgresql-devel-8.1.11-1.el5_1.1
+postgresql-server-8.1.11-1.el5_1.1
+httpd-2.2.3-22.el5
+php-common-5.1.6-23.el5
+php-cli-5.1.6-23.el5
+php-5.1.6-23.el5
+php-pear-1.4.9-4.el5.1
+php-pdo-5.1.6-23.el5
+php-pgsql-5.1.6-23.el5
+poppler-utils-0.5.4-4.4.el5_1
+
+
+Packages mentioned by fo-installdeps available on EPEL or rpm.pbone.net
+-----------------------------------------------------------------------
+perl-Text-Template-1.44-4.el5
+libtool-ltdl-1.5.22-6.1   # Required by libextractor, not mentioned by fo-installdeps
+mpeg2dec-0.4.0-8b.el5   # Required by libextractor, not mentioned by fo-installdeps
+libextractor-0.5.19a-1.el5
+cabextract-1.2-1.el5
+perl-DateManip-5.43a-1_12.0.el5 # Required by sleuthkit, not mentioned by fo-installdeps
+sleuthkit-2.01-oss_fc2_1
+ucl-1.02-2.el5 # Required by upx, not mentioned by fo-installdeps
+upx-2.03-1.el5 
+unrar-3.8.4-1.el5
+
+
+Packages not mentioned by fo-installdeps that were needed and found on rpm.pbone.net
+-------------------------------------
+libextractor-devel-05.19a-1.el5 
+
+
+
+2.1.2.2 Service Dependencies
 ````````````````````````````
 Postgresql:
  8.1 or newer
@@ -153,7 +196,7 @@ PHP5:
   runtime: urpmi php php-pear php-pgsql
 
 
-2.1.2.2  Library Dependencies
+2.1.2.3  Library Dependencies
 `````````````````````````````
 * libmagic - for determining file types, from the "file" software
    ftp://ftp.astron.com/pub/file/file-4.02.tar.gz 
@@ -178,7 +221,7 @@ PHP5:
   build: urpmi libextractor-devel libmagic-devel libxml2 
   
 
-2.1.2.3 External Commands
+2.1.2.4 External Commands
 `````````````````````````
 * ar - for extracting archives, from the binutils software
    http://www.gnu.org/software/binutils/
@@ -240,7 +283,7 @@ possibly missing important results (especially in the case of important
 things like license scanning).
 
 
-2.1.2.4 -  Additional Build Dependencies
+2.1.2.5 -  Additional Build Dependencies
 ````````````````````````````````````````
 The fossology build requires gcc, binutils, glibc headers, make, perl,
 and other tools you'd expect to find on a development system. In
@@ -256,6 +299,7 @@ numbers into the build.
           yum install perl-Text-Template subversion
  On Mandriva:
    build: urpmi perl-Text-Template subversion gcc make perl 
+
 
 2.1.3 Adjusting the Kernel
 --------------------------
@@ -402,7 +446,9 @@ login, or your favorite root-obtaining utility.
 --------------------------------------
 1) If you have any old fossology installs you want to remove from the
    system you can run the fo-cleanold script
+
    # utils/fo-cleanold
+
    If you have an existing install that you want to transition, be sure
    back up your repository, database, and config files before proceeding.
    For more information on what this utility can do use the --help flag.
@@ -425,26 +471,34 @@ login, or your favorite root-obtaining utility.
 As part of the install a script was placed in
   /usr/local/lib/fossology/fo-postinstall
 (by default, or similar if you configured a different install location).
-This script will help you finish the install, setting up things that
-can't be done by merely installing files on the filesystem. Because of
-the things it does, the script must be run as root. By default the
-script is designed to do everything you will need for a single machine
-install. If you are doing a multiple machine install, please see the
-INSTALL.multi document.
+
+Running this script to help finish the install is highly recommended, as
+it performs task that go beyond merely installing files on the filesystem. 
+The script must be run as root. By default the script does everything you 
+will need for a single machine install. If you are doing a multiple machine 
+install, please see the INSTALL.multi document.
+
 Run the postinstall script
 
   # /usr/local/lib/fossology/fo-postinstall
 
 2.2.3   Detailed Post-Install Instructions 
 ------------------------------------------
-If you prefer to do these steps by hand or are curious of what the
-fo-postinstall script is doing, continue reading, otherwise skip to
-step 2.2.4.
+It is highly recommended that you run the fo-postinstall script. However,
+you may want to know the details of what the script is doing. This may be out
+of academic curiousity, or more likely because you may have to troubleshoot
+something gone wrong.
+
+If you are confident that fo-postinstall has done all the right things,
+you may skip to step 2.2.4. Otherwise, continue reading...
 
 1) Setting up Users and Groups
 You are expected to already have a "postgres" user as part of the
 system postgresql install, and a "www-data" user as part of the
-apache2 install.
+apache2 install. Note that some versions of Apache (like the one
+shipped with RHEL) use the user apache, not www-data. Whichever user
+your Apache uses, make sure that the user (www-data or apache) gets
+added to the fossy group.
 
 FOSSology requires a system user and a system group both named
 "fossy".
