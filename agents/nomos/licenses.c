@@ -865,7 +865,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     printf("saveLicenseData: %d candidates\n", nCand);
 #endif	/* DEBUG */
 
-    changeDir("..");
+    /*    changeDir("..");*/ /* CDB- Why?!!!! */
 
     /* BE PERFORMANCE-CONSCIOUS WITHIN THIS LOOP (it runs a LOT!) */
     /*
@@ -1059,6 +1059,8 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	/*
 	 * Clear out the buffer-offsets list
 	 */
+#ifdef fix_later 
+/* CDB - need to move this code to a point after we save the license info */
 #ifdef	PHRASE_DEBUG
 	listDump(&cur.offList, NO);
 #endif	/* PHRASE_DEBUG */
@@ -1066,6 +1068,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	    listClear(p->buf, YES);
 	}
 	listClear(&cur.offList, NO);
+#endif /* fix_later */
     }
 
 #ifdef	MEMSTATS
@@ -1095,7 +1098,14 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     if (optionIsSet(OPTS_DEBUG)) {
 	printf("==> ");
     }
-    printf("%s\n", cur.compLic);
+    /* CDB - Debug code
+    listDump(&cur.offList, YES); 
+    while ((p = listIterate(&cur.offList)) != 0) {
+	listDump(p->buf, YES);
+    }
+    */
+    printf("File %s contains license(s) %s\n",
+	   basename(cur.targetFile), cur.compLic);
     return;
 }
 
