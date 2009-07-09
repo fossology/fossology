@@ -50,9 +50,9 @@ case "$1" in
   stop)
 	echo -n "Stopping $DESC: "
 	# we don't really care about the exit code as long as it's stopped
+    $WATCHDOG -k
 	$DAEMON -k || true
 	echo "$NAME."
-    $WATCHDOG -k
 	;;
   #reload)
 	#
@@ -73,15 +73,15 @@ case "$1" in
 	#	just the same as "restart" except that it does nothing if the
 	#   daemon isn't already running.
 	# check wether $DAEMON is running. If so, restart
-	$DAEMON -k
     $WATCHDOG -k
+	$DAEMON -k
 	$DAEMON $SCHEDULEROPT
     $WATCHDOG
 	;;
   restart)
     echo -n "Restarting $DESC: "
-	$DAEMON -k
     $WATCHDOG -k
+	$DAEMON -k
 	$DAEMON $SCHEDULEROPT
     $WATCHDOG
 	;;
