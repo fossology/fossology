@@ -19,12 +19,16 @@
 #ifndef DBAPI_H
 #define DBAPI_H
 
+#include <libpq-fe.h>
+
 void	DBclose	(void *DB);
 void *	DBopen	();	/* returns void *DB handle! */
 void *  DBmove  (void *DB); /* move results to a different handle */
 
 int	DBaccess	(void *DB, char *SQL); /* pass an SQL command */
-int	DBaccess2   (void *DB, char *SQL); /* pass an SQL command */
+
+PGresult *DBaccess2(void *DB, char *SQL); /* exec an SQL command */
+PGconn   *DBgetconn(void *DB);
 
 /*********************************************************************/
 /*********************************************************************/
