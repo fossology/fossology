@@ -1,0 +1,98 @@
+#/***********************************************************
+# get-projects.php
+# Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# ***********************************************************/
+# Version: "$Id: $"
+
+=head1 NAME
+
+get-projects: Process a Freshmeat Rdf format XML file and get the projects
+in that file from Freashmeat using wget.
+YOU ARE NOT DONE TILL THIS LINE IS REMOVED!
+
+=head1 SYNOPSIS
+
+get-projects [-h] -f <file>
+
+=head1 DESCRIPTION
+
+B<get-projects> reads an uncompressed XML file in Freshmeat Rdf format and
+attempts to get each project in the file from the Freshmeat site using 
+B<wget>.
+
+While processing the XML file, B<get-projects> creates a number of output files.
+
+All of the archives are placed in a directory called I<golden.yyyymmdd> where
+yyyymmdd is the year month day the program was run.  In the golden directory are
+3 other directories used to store log or input files.
+
+At the end of processing B<get-projects> prints a summary of it's efforts on
+standard out.
+
+Getting the archives can take a lot of space.  B<get-projects> gets the path
+for the golden directories from an environment variable  in the makefile Makefile.utils.
+The path is site specific and so the makefile B<must> be adjusted based on
+your site.
+
+=over
+
+=item I<wget-logs>
+
+Stores all of the wget logs.  These logs are needed to determine if the wget
+was successful.
+
+=item I<Log-Data>
+
+Contains files that record the wgets that failed and uploads that were skipped.
+The file names are I<failed-wgets> and I<skipped_uploads>.  The format for
+the I<failed-wgets> file is the package rank, name and archive on each line 
+seperated by spaces.  The format for the I<skipped_uploads> file is the project name
+and the path to the archive, both in single quotes seperated by a space.
+
+=back
+ 
+=head2 Options
+
+=over
+
+=item B<-h>
+
+Standard help flag. Displays the usage message.
+
+=item B<-f> I<file>
+
+Fully qualified path to the XML file.
+
+=back
+
+=head1 NOTES
+
+B<get-projects> is used as part of the suite of programs that process Freshmeat archives.
+
+=head1 EXAMPLES
+
+Process the XML file
+
+get-projects -f ./loadthis.rdf
+
+=head1 AUTHOR
+
+Mark Donohoe for the Hewlett-Packard Company
+
+=head1 SEE ALSO
+
+mktop1k(1), diffm(1), Readme and wiki.
+
