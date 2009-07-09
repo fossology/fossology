@@ -23,8 +23,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
-#include <libpq-fe.h>
-
 #include "libfossdb.h"
 
 #ifdef SVN_REV
@@ -48,8 +46,6 @@ typedef struct dbapi
   PGconn   *Conn;         /* DB specific connection */
   PGresult *Res;          /* result from query */
   int       RowsAffected;
-  char     *ResStatus;    /* string constant from enum status code */
-  char     *ErrMsg;       /* error message */
 } dbapi;
 
 
@@ -309,38 +305,30 @@ int	DBaccess	(void *VDB, char *SQL)
  error assumptions and DB->Res resets.
  Use this if you want to screw the libfossdb dbms
  abstraction and get to PGresult.
- Returns -1 if db not open.
- Else return 0
- Error message and status codes are set in DB.
+ Returns directly from PQexec
  *****************************************************/
-int	DBaccess2(void *VDB, char *SQL)
+PGresult *DBaccess2(void *VDB, char *SQL)
 {
   dbapi *DB;
-  static char *empty="";
-  static char *nosql = "No SQL passed to DBaccess2()";
 
   DB = (dbapi *)VDB;
 
-  if (!DB) return(-1);
-  if (!SQL) 
-  {
-    DB->ErrMsg = nosql;
-    return(0);
-  }
+  if (!DB) return(0);
+  if (!SQL) return(0);
 
-  /* free old result */
-  PQclear(DB->Res);
-  DB->ErrMsg = empty;
-  DB->ResStatus = empty;
-  DB->RowsAffected = 0;
-
-  /* execute command and save results */
+  /* execute command and return */
   DB->Res = PQexec(DB->Conn,SQL);
-  DB->ErrMsg = PQresultErrorMessage(DB->Res);
-  DB->ResStatus = PQresStatus(PQresultStatus(DB->Res));
-  DB->RowsAffected = atoi(PQcmdTuples(DB->Res));
-  return(0);
+  return(DB->Res);
 }
+
+/* return the conn */
+PGconn *DBgetconn(void *VDB)
+{
+  dbapi *DB;
+  DB = (dbapi *)VDB;
+  return (DB->Conn);
+}
+
 
 /*********************************************************************/
 /*********************************************************************/
@@ -357,7 +345,7 @@ char *DBerrmsg	(void *VDB)
   dbapi *DB;
   DB = (dbapi *)VDB;
   if (!DB || !DB->Res) return("");
-  return(DB->ErrMsg);
+  return(PQresultErrorMessage(DB->Res));
 } /* DBerrmsg() */
 
 /*****************************************************
@@ -369,7 +357,7 @@ char *DBstatus	(void *VDB)
   dbapi *DB;
   DB = (dbapi *)VDB;
   if (!DB || !DB->Res) return("");
-  return(DB->ResStatus);
+  return (PQresStatus(PQresultStatus(DB->Res)));
 } /* DBstatus() */
 
 /*****************************************************
