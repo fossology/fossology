@@ -23,47 +23,29 @@
 #include <assert.h>
 #include <signal.h>
 #include <errno.h>
+#include <pwd.h>
+#include <grp.h>
 
 #include <libfossdb.h>
 
-#include "stopscheduler.h"
+#include "sched_utils.h"
 #include "lockfs.h"
 #include "logging.h"
 
 char SchedName[]="fossology-scheduler";
 
-
 /************************************************************************
- * Stop the scheduler (killsched), and/or its watchdog (killwatch).
- * or just kill the watchdog and cleanup the scheduler (killsched = 0)
+ * Stop the scheduler (killsched =1)
+ * or just cleanup the scheduler (killsched = 0)
  * Clean up the scheduler_status table
- * Caller must exit.
  * Return  0 Success
  *        -1 Failure (see log file for messages)
  */
-int StopScheduler(int killsched, int killwatch)
+int StopScheduler(int killsched)
 {
-  char *WatchdogName = "fo_watchdog";
   pid_t Pid;
   int   rc;
-
-killwatch = 0;
-  if (killwatch)
-  {
-    /* kill the watchdog first, so that it doesn't restart a purposly stopped scheduler */
-    Pid = LockGetPID(WatchdogName);
-    if (Pid)
-    {
-      rc = kill(Pid, SIGKILL);
-      if (rc == -1)
-        fprintf(stderr, "*** Unable to kill %s PID %d. %s  ***\n", WatchdogName, Pid, strerror(errno));
-      else
-        fprintf(stderr, "*** Exit %s PID %d  ***\n", WatchdogName, Pid);
-      if (UnlockName(WatchdogName))
-        fprintf(stderr, "*** Unlock %s PID %d failed. %s  ***\n", WatchdogName, Pid, strerror(errno));
-    }
-  }
-
+  int   rv = 0;
 
   /* clean up the scheduler  
    * Note that if the pid in the lock file is stale, a scheduler
@@ -88,6 +70,7 @@ killwatch = 0;
       {
         fprintf(stderr, "*** Unable to SIGQUIT %s PID %d. %s  ***\n", SchedName, Pid, strerror(errno));
         LogPrint("*** Unable to SIGQUIT %s PID %d. %s  ***\n", SchedName, Pid, strerror(errno));
+        rv = -1;
       }
       else
       {
@@ -104,14 +87,92 @@ killwatch = 0;
     UnlockName(SchedName);
   }
 
-
-  /* remove all scheduler_status records
-   */
+  /* remove all scheduler_status records */
   assert(DB);
   DBaccess2(DB, "DELETE from scheduler_status");
   if (!strstr(DBstatus(DB), "OK"))
     fprintf(stderr, "*** StopScheduler DELETE from scheduler_status. Status %s, %s ***\n", DBstatus(DB), DBerrmsg(DB));
   
-	DBclose(DB);
-  return(0);
+  return(rv);
+}
+
+
+/************************************************************************
+ * Stop the scheduler watchdog.
+ * Return  0 Success
+ *        -1 any errors (see log file for messages)
+ */
+int StopWatchdog()
+{
+  char *WatchdogName = "fo_watchdog";
+  pid_t Pid;
+  int   rc;
+  int   rv = 0;
+
+  Pid = LockGetPID(WatchdogName);
+  if (Pid)
+  {
+    rc = kill(Pid, SIGKILL);
+    if (rc == -1)
+    {
+      fprintf(stderr, "*** Unable to kill %s PID %d. %s  ***\n", WatchdogName, Pid, strerror(errno));
+      rv = -1; 
+    } 
+    else 
+      fprintf(stderr, "*** Exit %s PID %d  ***\n", WatchdogName, Pid);
+
+    if (UnlockName(WatchdogName))
+    {
+      fprintf(stderr, "*** Unlock %s PID %d failed. %s  ***\n", WatchdogName, Pid, strerror(errno));
+      rv = -1;
+    }
+  }
+
+  return(rv);
+}
+
+
+/************************************************************************
+ * Set PROJECTUSER:PROJECTGROUP
+ * Returns none.  This exits if the user and group cannot be set
+ */
+void SetPuserPgrp(char *ProcessName)
+{
+  struct group *Grp;
+  struct passwd *Pwd;
+
+  /* make sure group exists */
+  Grp = getgrnam(PROJECTGROUP);
+  if (!Grp)
+  {
+    fprintf(stderr,"FATAL: Group PROJECTGROUP '%s' not found.  Aborting.\n",PROJECTGROUP);
+    exit(-1);
+  }
+
+  /* set PROJECTGROUP */
+  setgroups(1,&(Grp->gr_gid));
+  if ((setgid(Grp->gr_gid) != 0) || (setegid(Grp->gr_gid) != 0))
+  {
+    fprintf(stderr,"%s error: You need to run this as root or %s.  Set group '%s' aborting due to error: %s.\n",
+            ProcessName, PROJECTUSER, PROJECTGROUP, strerror(errno));
+    exit(-1);
+  }
+
+  /* run as PROJECTUSER */
+  /* make sure PROJECTUSER exists */
+  Pwd = getpwnam(PROJECTUSER);
+  if (!Pwd)
+  {
+    fprintf(stderr,"FATAL: User '%s' not found.  %s will not run as root.  Aborting.\n",
+          PROJECTUSER, ProcessName);
+    exit(-1);
+  }
+  
+  /* Run as PROJECTUSER, not root or any other user  */
+  if ((setuid(Pwd->pw_uid) != 0) || (seteuid(Pwd->pw_uid) != 0))
+  {   
+    fprintf(stderr,"%s error: You must run this as root or %s.  SETUID aborting due to error: %s\n",
+            ProcessName, PROJECTUSER, strerror(errno));
+    exit(-1);
+  } 
 }

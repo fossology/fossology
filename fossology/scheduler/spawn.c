@@ -60,7 +60,7 @@
 
 #include "debug.h"
 #include "scheduler.h"
-#include "stopscheduler.h"
+#include "sched_utils.h"
 #include "spawn.h"
 #include "agents.h"
 #include "sockets.h"
@@ -351,12 +351,15 @@ void	ParentSig	(int Signo, siginfo_t *Info, void *Context)
       {
       if (CM[Thread].ChildPid) kill(CM[Thread].ChildPid,SIGKILL);
       }
-      /* clean up scheduler records and terminate the watchdog
+      /* clean up scheduler records
       * but exit through the signal handler (below) */
-      StopScheduler(0, KillWD);
+      StopScheduler(0);
 
       /** since all children should be dead, I'll exit through signal handler */
-      LogPrint("*** Scheduler completed (terminated by signal).\n");
+      if (KillWD)
+        LogPrint("*** Scheduler and watchdog completed (terminated by signal).\n");
+      else
+        LogPrint("*** Scheduler completed (terminated by signal).\n");
       exit(0);
       break;
 

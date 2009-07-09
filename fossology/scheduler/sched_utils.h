@@ -23,7 +23,9 @@
 extern int Verbose;
 extern void *DB;	/* global DB handle for accessing the DB */
 
-int StopScheduler(int killsched, int killwatch);
+int StopScheduler(int killsched);
+int StopWatchdog();
+void SetPuserPgrp(char *ProcessName);
 
 
 #endif

@@ -25,14 +25,12 @@
 #include <ctype.h>
 /* for user and group permission */
 #include <sys/types.h>
-#include <grp.h>
-#include <pwd.h>
 #include <assert.h>
 
 #include <libfossdb.h>
 
 #include "scheduler.h"
-#include "stopscheduler.h"
+#include "sched_utils.h"
 #include "spawn.h"
 #include "sockets.h"
 #include "agents.h"
@@ -185,47 +183,8 @@ int	main	(int argc, char *argv[])
 	exit(-1);
 	}
 
-  /* Run as PROJECTUSER:PROJECTGROUP only */
-  struct group *G;
-  struct passwd *P;
-
-  /* make sure group exists */
-  G = getgrnam(PROJECTGROUP);
-  if (!G)
-  {
-    fprintf(stderr,"FATAL: Group PROJECTGROUP '%s' not found.  Aborting.\n",PROJECTGROUP);
-    DBclose(DB);
-    exit(-1);
-  }
-
-  /* set PROJECTGROUP */
-  setgroups(1,&(G->gr_gid));
-  if ((setgid(G->gr_gid) != 0) || (setegid(G->gr_gid) != 0))
-  {
-    fprintf(stderr,"FATAL: You need to run this as root or %s.  Cannot set group '%s'.  Aborting due to error: %s.\n",
-        PROJECTUSER, PROJECTGROUP, strerror(errno));
-    DBclose(DB);
-    exit(-1);
-  }
-
-  /* make sure PROJECTUSER exists */
-  P = getpwnam(PROJECTUSER);
-  if (!P)
-  {
-     fprintf(stderr,"FATAL: User '%s' not found.  %s will not run as root.  Aborting.\n",
-          PROJECTUSER, ProcessName);
-     DBclose(DB);
-     exit(-1);
-  }
-
-  /* Run as PROJECTUSER, not root or any other user  */
-  if ((setuid(P->pw_uid) != 0) || (seteuid(P->pw_uid) != 0))
-  {
-    fprintf(stderr,"FATAL: You must run the %s as root or %s.  Aborting due to error: %s\n",
-            ProcessName, PROJECTUSER, strerror(errno));
-    DBclose(DB);
-    exit(-1);
-  }
+  /* set to PROJECTUSER and PROJECTGROUP */
+  SetPuserPgrp(ProcessName);
 
   if (KillScheduler)
   {
@@ -236,11 +195,12 @@ int	main	(int argc, char *argv[])
       exit(-1);
     }
 
-    /* kill scheduler and watchdog */
-    StopScheduler(1, 1);
+    /* kill scheduler */
+    LogPrint("Scheduler kill requested.  Killing scheduler.\n");
+    StopScheduler(1);
+    StopWatchdog();
     exit(0);
   }
-
 
   /* Become a daemon?  */
   if (RunAsDaemon)
@@ -253,14 +213,13 @@ int	main	(int argc, char *argv[])
   /* must be after uid is set since this might create the log file */
   LogPrint("Scheduler started.  %s\n", BuildVersion);
 
-
   /* Lock the scheduler, so no other scheduler can run */
   rc = LockName(ProcessName);
-  if (rc > 0)
+  if (rc > 0)  /* already locked */
   {
     Pid = rc;
   }
-  else if (rc == 0)
+  else if (rc == 0)  /* new lock */
   {
     Pid = LockGetPID(ProcessName);
     if (!Pid)
@@ -373,23 +332,12 @@ int	main	(int argc, char *argv[])
     if ((Test > 1) || rc)
 	  {
 	    LogPrint("*** %d agent failures.  Scheduler exiting. \n", rc);
-      /* kill watchdog, scheduler will terminate with exit(0) */
-      StopScheduler(0, 1);
+      /* clean up scheduler */
+      StopScheduler(0);
       exit(0);
   	}
   }
 
-  /* Start watchdog to make sure scheduler doesn't die. 
-   * If you want the scheduler to die, make sure you kill
-   * fo_watchdog.  You can do this with /etc/init.d/fossology stop (on debian).
-   * Manually killing the scheduler with -k will also kill fo_watchdog.
-   */
-  rc = system(LIBEXECDIR "/fo_watchdog");
-  if (-1 == rc)
-  {
-    LogPrint("*** scheduler failed to start fo_watchdog, %s  ***\n", strerror(errno));
-    LogPrint("*** Therefore, scheduler won't automatically restart if it hangs. ***\n");
-  }
 
   /**************************************/
   /* while there are commands to run... */
@@ -472,7 +420,7 @@ int	main	(int argc, char *argv[])
 	/* this will pause if it detects a fast loop */
 	Fed = DBProcessQueue(DB);
 	}
-    if (Verbose) printf("Time: %d  Fed=%d\n",(int)time(NULL),Fed);
+//    if (Verbose) printf("Time: %d  Fed=%d\n",(int)time(NULL),Fed);
     if (Fed==0)
       {
       /* What happens if there was no job to process? */
@@ -538,8 +486,8 @@ int	main	(int argc, char *argv[])
   if (DB) DBErrorClose();  /* currently a noop */
   DBQclose();
 
-  /* kill watchdog, scheduler will terminate with exit(0) */
-  StopScheduler(0, 1);
+  /* cleanup scheduler */
+  StopScheduler(0);
 
   /* print statistics */
   DebugThreads(1);
