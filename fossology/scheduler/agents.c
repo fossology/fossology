@@ -56,160 +56,153 @@ int	ReadChild	(int Thread)
   if (Thread < 0) return(-1);
   if (CM[Thread].ChildStdout == 0) return(-1);
   while(1)
-    {
+  {
     rc = ReadCmdFD(CM[Thread].ChildStdout,Cmd,MAXCMD);
     if (rc <= 0) return(rc);
 
     if (Verbose)
-	{
-	LogPrint("Child[%d] says: %s\n",Thread,Cmd);
-	}
+	  {
+	    LogPrint("Child[%d] says: %s\n",Thread,Cmd);
+	  }
+
     /* Here is where we process the child's reply.
        Stop when we get to a line saying "OK" */
     if (Cmd[0]=='\0')	return(0);	/* skip blank lines */
     CM[Thread].Heartbeat = Now; /* heard from the child! */
+
     if (!strncmp(Cmd,"OK",2))
-	{
-	DBclose(CM[Thread].DB); CM[Thread].DB = NULL;
-	/* Keep track of how long it was in the previous !ST_READY state.
-	   This is used by DBremoveChild for logging durations. */
-	/* set number of processed items, if it is not already set */
-	if (CM[Thread].ItemsProcessed==0) CM[Thread].ItemsProcessed=1;
-	ChangeStatus(Thread,ST_READY);
-	if ((CM[Thread].StatusLast==ST_RUNNING) && (CM[Thread].IsDB==1))
 	  {
-	  DBSaveJobStatus(Thread,-1);
-	  }
-	if (CM[Thread].IsDB) DBremoveChild(Thread,0,"OK");
-	CM[Thread].DBJobKey = 0;
-	return(1);
-	}
+      DBclose(CM[Thread].DB); CM[Thread].DB = NULL;
+      /* Keep track of how long it was in the previous !ST_READY state.
+      This is used by DBremoveChild for logging durations. */
+      /* set number of processed items, if it is not already set */
+      if (CM[Thread].ItemsProcessed==0) CM[Thread].ItemsProcessed=1;
+      ChangeStatus(Thread,ST_READY);
+      if ((CM[Thread].StatusLast==ST_RUNNING) && (CM[Thread].IsDB==1))
+      {
+        DBSaveJobStatus(Thread,-1);
+      }
+      if (CM[Thread].IsDB) DBremoveChild(Thread,0,"OK");
+      CM[Thread].DBJobKey = 0;
+      return(1);
+    }
     /* FATAL are fatal errors. Don't be surprised if the child dies. */
     /* WARNING are non-fatal errors. The child should not die. */
     /* ERRORS are non-fatal errors. But the child may still die. */
     else if (!strncmp(Cmd,"FATAL ",6) || !strncmp(Cmd,"FATAL:",6))
-	{
-	DBErrorWrite(Thread,"FATAL",Cmd+6);
-	LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
-	}
+    {
+      DBErrorWrite(Thread,"FATAL",Cmd+6);
+      LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
+    }
     else if (!strncmp(Cmd,"ERROR ",6) || !strncmp(Cmd,"ERROR:",6))
-	{
-	DBErrorWrite(Thread,"ERROR",Cmd+6);
-	LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
-	}
+    {
+      DBErrorWrite(Thread,"ERROR",Cmd+6);
+      LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
+    }
     else if (!strncmp(Cmd,"WARNING ",8) || !strncmp(Cmd,"WARNING:",8))
-	{
-	DBErrorWrite(Thread,"WARNING",Cmd+8);
-	LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
-	}
+    {
+      DBErrorWrite(Thread,"WARNING",Cmd+8);
+      LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
+    }
     else if (!strncmp(Cmd,"LOG ",4) || !strncmp(Cmd,"LOG:",4))
-	{
-	DBErrorWrite(Thread,"LOG",Cmd+4);
-	LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
-	}
+    {
+      DBErrorWrite(Thread,"LOG",Cmd+4);
+      LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
+    }
     else if (!strcmp(Cmd,"Success"))	{ /* TBD success */ }
     else if (!strncmp(Cmd,"Heartbeat",9))	{ /* Do nothing; just a heartbeat */ }
     else if (!strncmp(Cmd,"DB:",3))
-	{
-	/*** "DB:" is for debugging only!  Don't depend on it! ***/
-	if (Verbose)
-	  {
-	  LogPrint("Child[%d]: '%s'\n",Thread,Cmd);
-	  }
+    {
+      /*** "DB:" is for debugging only!  Don't depend on it! ***/
+      if (Verbose)
+      {
+      LogPrint("Child[%d]: '%s'\n",Thread,Cmd);
+      }
 #if 0
 	int PID;
 	PID = fork(); /* don't tie up the scheduler with minutia! */
 	if (PID == 0) /* if child */
 #endif
-	  {
-	  int MaxCol, MaxRow;
-	  int Row,Col;
-	  char *V,*F;
-	  int rc;
-	  int Offset;
-	  if (!CM[Thread].DB) CM[Thread].DB=DBopen();
-	  Offset=3;
-	  while(isspace(Cmd[Offset])) Offset++;
-	  rc = DBLockAccess(CM[Thread].DB,Cmd+Offset);
-	  switch(rc)
-	    {
-	    case 0: /* no data */
-	      break;
-	    case 1: /* got data */
-	      if (CM[Thread].Status != ST_RUNNING) break; /* could be dying */
+      {
+      int MaxCol, MaxRow;
+      int Row,Col;
+      char *V,*F;
+      int rc;
+      int Offset;
+      if (!CM[Thread].DB) CM[Thread].DB=DBopen();
+      Offset=3;
+      while(isspace(Cmd[Offset])) Offset++;
+      rc = DBLockAccess(CM[Thread].DB,Cmd+Offset);
+      switch(rc)
+      {
+        case 0: /* no data */
+        break;
+        case 1: /* got data */
+        if (CM[Thread].Status != ST_RUNNING) break; /* could be dying */
+            
+        MaxRow=DBdatasize(CM[Thread].DB);
+        MaxCol=DBcolsize(CM[Thread].DB);
+        if (Verbose) LogPrint("Telling Child[%d]: DBSTART\n",Thread);
+        write(CM[Thread].ChildStdin,"DBSTART\n",8);
 
-	      MaxRow=DBdatasize(CM[Thread].DB);
-	      MaxCol=DBcolsize(CM[Thread].DB);
-	      if (Verbose)
-	        {
-		LogPrint("Telling Child[%d]: DBSTART\n",Thread);
-		}
-	      write(CM[Thread].ChildStdin,"DBSTART\n",8);
-	      for(Row=0; Row < MaxRow; Row++)
-	        {
-	        for(Col=0; Col < MaxCol; Col++)
-	          {
-		  if (Col > 0) write(CM[Thread].ChildStdin," ",1);
-		  F = DBgetcolname(CM[Thread].DB,Col);
-		  write(CM[Thread].ChildStdin,F,strlen(F));
-		  write(CM[Thread].ChildStdin,"='",2);
-		  V = DBgetvalue(CM[Thread].DB,Row,Col);
-		  write(CM[Thread].ChildStdin,V,strlen(V));
-		  write(CM[Thread].ChildStdin,"'",1);
-		  if (Verbose)
-		    {
-		    LogPrint("Telling Child[%d]: %s=%s\n",Thread,F,V);
-		    }
-		  }
-	        write(CM[Thread].ChildStdin,"\n",1);
-	        } /* for each record */
-	      if (Verbose)
-	        {
-		LogPrint("Telling Child[%d]: DBEOF\n",Thread);
-		}
-	      write(CM[Thread].ChildStdin,"DBEOF\n",4);
-	      break;
-	    default:
-	      if (CM[Thread].Status != ST_RUNNING) break; /* could be dying */
-	      if (Verbose)
-	        {
-		LogPrint("Telling Child[%d]: ERROR (%d)\n",Thread,rc);
-		}
-	      write(CM[Thread].ChildStdin,"ERROR\n",6);
-	      break;
-	    } /* switch */
-	  if (Verbose)
-	    {
-	    LogPrint("Telling Child[%d]: OK\n",Thread);
-	    }
-	  if (CM[Thread].Status == ST_RUNNING)
-		{
-		write(CM[Thread].ChildStdin,"OK\n",3);
-		}
+        for(Row=0; Row < MaxRow; Row++)
+        {
+          for(Col=0; Col < MaxCol; Col++)
+          {
+            if (Col > 0) write(CM[Thread].ChildStdin," ",1);
+            F = DBgetcolname(CM[Thread].DB,Col);
+            write(CM[Thread].ChildStdin,F,strlen(F));
+            write(CM[Thread].ChildStdin,"='",2);
+            V = DBgetvalue(CM[Thread].DB,Row,Col);
+            write(CM[Thread].ChildStdin,V,strlen(V));
+            write(CM[Thread].ChildStdin,"'",1);
+            if (Verbose) LogPrint("Telling Child[%d]: %s=%s\n",Thread,F,V);
+          }
+          write(CM[Thread].ChildStdin,"\n",1);
+        } /* for each record */
+  
+        if (Verbose) LogPrint("Telling Child[%d]: DBEOF\n",Thread);
+        write(CM[Thread].ChildStdin,"DBEOF\n",4);
+        break;
+
+        default:
+        if (CM[Thread].Status != ST_RUNNING) break; /* could be dying */
+        if (Verbose) LogPrint("Telling Child[%d]: ERROR (%d)\n",Thread,rc);
+        write(CM[Thread].ChildStdin,"ERROR\n",6);
+        break;
+      } /* switch */
+
+      if (Verbose) LogPrint("Telling Child[%d]: OK\n",Thread);
+      
+      if (CM[Thread].Status == ST_RUNNING)
+      {
+        write(CM[Thread].ChildStdin,"OK\n",3);
+      }
 #if 0
 	  exit(0);
 #endif
-	  } /* if child DB command */
-	/* else parent does nothing */
-	} /* if DB: */
+	    } /* if child DB command */
+    /* else parent does nothing */
+    } /* if DB: */
     else if (!strncmp(Cmd,"ItemsProcessed ",15))
-	{
-	CM[Thread].ItemsProcessed += atol(Cmd+15);
-	}
-    else if (!strncmp(Cmd,"ECHO ",5))
-	{
-	/* display command */
-	LogPrint("%s\n",Cmd+5);
-	return(0);
-	}
-    else
-	{
-	/* Unknown reply.  Use it as a debug. */
-	LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
-	return(0);
-	}
-    /** If we need to send stuff back to the DB, do it here! **/
+    {
+      CM[Thread].ItemsProcessed += atol(Cmd+15);
     }
+    else if (!strncmp(Cmd,"ECHO ",5))
+    {
+      /* display command */
+      LogPrint("%s\n",Cmd+5);
+      return(0);
+    }
+    else
+    {
+      /* Unknown reply.  Use it as a debug. */
+      LogPrint("DEBUG[%d]: %s\n",Thread,Cmd);
+      return(0);
+    }
+    /** If we need to send stuff back to the DB, do it here! **/
+  }
+
   /* Never gets here */
   return(-1);
 } /* ReadChild() */
