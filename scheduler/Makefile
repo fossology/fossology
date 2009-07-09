@@ -11,7 +11,7 @@ FODEF=$(DEF) -DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
 MSCDEF=$(DEF) -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"'
 
 # these objects need libfossdb
-OBJ=scheduler.o spawn.o sockets.o agents.o hosts.o debug.o dberror.o selftest.o logging.o lockfs.o stopscheduler.o
+OBJ=scheduler.o spawn.o sockets.o agents.o hosts.o debug.o dberror.o selftest.o logging.o lockfs.o sched_utils.o
 OBJFULL=$(OBJ) fo_watchdog.o
 
 # these objects need libfossrepo as well
@@ -26,8 +26,8 @@ fossology-scheduler:  $(OBJ) $(REPOOBJ) $(VARS)
 	$(CC) $(OBJ) $(REPOOBJ) $(CFLAGS_DB) $(CFLAGS_REPO) \
 	-lrt -lpq $(ALL_CFLAGS) -o $@
 
-fo_watchdog: fo_watchdog.o logging.o lockfs.o stopscheduler.o $(VARS)
-	$(CC) fo_watchdog.o logging.o lockfs.o stopscheduler.o $(CFLAGS_DB) $(CFLAGS_REPO) $(DEF) $(ALL_CFLAGS) -lpq -lrt -o $@
+fo_watchdog: fo_watchdog.o logging.o lockfs.o sched_utils.o $(VARS)
+	$(CC) fo_watchdog.o logging.o lockfs.o sched_utils.o -I`pg_config --includedir` $(CFLAGS_DB) $(CFLAGS_REPO) $(DEF) $(ALL_CFLAGS) -lpq -lrt -o $@
 
 mkschedconf: mkschedconf.c $(REPO) $(VARS)
 	$(CC) $< $(MSCDEF) $(CFLAGS_REPO) $(ALL_CFLAGS) -o $@
@@ -38,10 +38,10 @@ defconf/init.d/fossology: defconf/init.d/fossology-process
 
 # targets for our needed objects
 $(OBJFULL): %.o: %.c %.h $(DB) $(VARS)
-	$(CC) -c $< $(CONFDEF) $(FODEF) $(CFLAGS_DBO) $(ALL_CFLAGS)
+	$(CC) -c $< -I`pg_config --includedir` $(CONFDEF) $(FODEF) $(CFLAGS_DBO) $(ALL_CFLAGS) 
 
 $(REPOOBJ): %.o: %.c %.h $(DB) $(REPO) $(VARS)
-	$(CC) -c $< $(CONFDEF) $(CFLAGS_REPOO) $(CFLAGS_DBO) $(ALL_CFLAGS)
+	$(CC) -c $< -I`pg_config --includedir` $(CONFDEF) $(CFLAGS_REPOO) $(CFLAGS_DBO) $(ALL_CFLAGS)
 
 
 install: all install-init
