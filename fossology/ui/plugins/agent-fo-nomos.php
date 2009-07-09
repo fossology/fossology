@@ -116,7 +116,23 @@ class agent_fonomos extends FO_Plugin {
 	             WHERE uploadtree.pfile_fk = pfile.pfile_pk
 	             AND  uploadtree.upload_fk = '$uploadpk'
 	             LIMIT 5000;";
-    $jobqueuepk = JobQueueAdd($jobpk, "fonomos", $jqargs, "yes", "Pfilename", $Dep);
+
+    /*
+      Chan, after sending the email, looked at this are realized I was mistaken.
+      So the code below should find any pfile_pk and pfile that exist for this upload.
+      It should then format it into a string of pfilepk-value=Pfilename items.
+      It should work, I can't test it very well yet.
+     */
+    $pfilePKPfile = $DB->Action($jqargs);
+    //print "jq args is:$pfilePKPfile\n";
+    //print_r($pfilePKPfile) . "\n";
+    $jqString = NULL;
+
+    foreach($pfilePKPfile as $pfilePK => $pfile) {
+      $jqString .= ' ' . $pfilePK . '=' . $pfile . ' ';
+    }
+    //print "jqstring is:$jqstring\n";
+    $jobqueuepk = JobQueueAdd($jobpk, "fonomos", $jqString, "yes", "Pfilename", $Dep);
     if (empty($jobqueuepk)) {
       return ("Failed to insert fonomos into job queue");
     }
