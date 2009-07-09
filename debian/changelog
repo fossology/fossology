@@ -1,9 +1,9 @@
-fossology (1.1.0~rc4) unstable; urgency=low
+fossology (1.1.0~rc5) unstable; urgency=low
 
   * unofficial SVN version for testing process
   * 
 
- -- Build User <build@cranky.manage>  Mon, 06 Jul 2009 16:25:20 -0700
+ -- Build User <build@cranky.manage>  Wed, 08 Jul 2009 20:50:56 -0700
 
 fossology (1.0.0-2) unstable; urgency=low
 
