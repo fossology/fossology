@@ -72,12 +72,13 @@ char BuildVersion[]="Build version: Unknown\n";
 void	Usage	(char *Name)
 {
   fprintf(stderr,"Usage: %s [options] [setup.conf] < 'type command'\n",Name);
-  fprintf(stderr,"  -i :: Initialize the database, then exit.\n");
-  fprintf(stderr,"  -k :: Kill all running schedulers (on this system)\n");
-  fprintf(stderr,"        -k kills this process too.  All other options are ignored.\n");
   fprintf(stderr,"  -d :: Run as a daemon!  Still generates stdout and stderr\n");
+  fprintf(stderr,"  -i :: Initialize the database, then exit.\n");
+  fprintf(stderr,"  -h :: Print this usage message\n");
   fprintf(stderr,"  -H :: Ignore hosts for host-specific agent requests\n");
   fprintf(stderr,"  -I :: Use stdin and queue (default: use queue only)\n");
+  fprintf(stderr,"  -k :: Kill all running schedulers (on this system)\n");
+  fprintf(stderr,"        -k kills this process too.  All other options are ignored.\n");
   fprintf(stderr,"  -v :: verbose (-v -v = more verbose)\n");
   fprintf(stderr,"  -L log :: send stdout and stderr to log\n");
 #if 0
@@ -124,7 +125,7 @@ int	main	(int argc, char *argv[])
   pid_t Pid;
 
   /* check args */
-  while((c = getopt(argc,argv,"dkHiIL:lvqRtT")) != -1)
+  while((c = getopt(argc,argv,"dkHiIL:lvqRtTh")) != -1)
     {
     switch(c)
       {
@@ -169,6 +170,7 @@ int	main	(int argc, char *argv[])
       case 'v':
 	Verbose++;
 	break;
+      case 'h':
       default:
 	Usage(argv[0]);
 	DBclose(DB);
