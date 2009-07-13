@@ -76,15 +76,15 @@ void	Usage	(char *Name)
   fprintf(stderr,"  -i :: Initialize the database, then exit.\n");
   fprintf(stderr,"  -h :: Print this usage message\n");
   fprintf(stderr,"  -H :: Ignore hosts for host-specific agent requests\n");
-  fprintf(stderr,"  -I :: Use stdin and queue (default: use queue only)\n");
-  fprintf(stderr,"  -k :: Kill all running schedulers (on this system)\n");
+  fprintf(stderr,"  -I :: Use stdin and queue (default: use queue only).  This is only for debugging the scheduler.\n");
+  fprintf(stderr,"  -k :: Kill the running schedulers\n");
   fprintf(stderr,"        -k kills this process too.  All other options are ignored.\n");
   fprintf(stderr,"  -v :: verbose (-v -v = more verbose)\n");
   fprintf(stderr,"  -L log :: send stdout and stderr to log\n");
 #if 0
   fprintf(stderr,"  -l :: tell the running scheduler to redo its log file (for log rotation)\n");
 #endif
-  fprintf(stderr,"  -q :: turn off show stages\n");
+  fprintf(stderr,"  -q :: Run quietly.  Default shows all agent status (FREE, RUNNING, ...) changes.\n");
   fprintf(stderr,"  -R :: reset the job queue in case something was hung.\n");
   fprintf(stderr,"  -t :: test every agent to see if it runs, then quit.\n");
   fprintf(stderr,"  -T :: test every agent to see if it runs, then continue if no problems.\n");
@@ -93,7 +93,6 @@ void	Usage	(char *Name)
   fprintf(stderr,"  stdin lists type+data, one per line.\n");
   fprintf(stderr,"  stdout comes from threads, non-interlaced and only when thread ends.\n");
   fprintf(stderr,"  stderr comes from threads, interlaced and immediate.\n");
-  fprintf(stderr,"Each command is executed as a running engine.\n");
   fprintf(stderr,"Each stdin line is matched to a free engine of the same type.\n");
   fprintf(stderr,"If no engine is free, then it will pause until one is available.\n");
 } /* Usage() */
