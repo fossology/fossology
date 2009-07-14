@@ -1,0 +1,6 @@
+This is the beginnings of a C version of the sentence_based_classification algorithm. Currently the stemmer and tokenizer is working. The sentence trainer and parser are almost completed.
+
+Dependencies:
+	libstemmer from http://snowball.tartarus.org/download.php
+	libmaxent from http://homepages.inf.ed.ac.uk/lzhang10/maxent_toolkit.html
+

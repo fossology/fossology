@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "stem.h"
-#include "libstemmer.h"
+#include <libstemmer.h>
 
 struct sb_stemmer * stemmer = NULL;
 
