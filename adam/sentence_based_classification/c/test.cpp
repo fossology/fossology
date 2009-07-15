@@ -7,19 +7,24 @@
 #include "list.h"
 #include "re.h"
 #include "stem.h"
+#include "token.h"
 #include <maxent/maxentmodel.hpp>
 
 using namespace maxent;
 using namespace std;
 
 int main(int argc, char **argv) {
-    char p[] = "[A-Za-z0-9]+|[^A-Za-z0-9 ]+";
+    char sent_re[] = "<SENTENCE>(?P<text>.*?)</SENTENCE>";
+    char start_nonword_re[] = "^[^A-Za-z0-9]+";
+    char general_token_re[] = "[A-Za-z0-9]+|[^A-Za-z0-9 ]+";
+    char word_token_re[] = "[A-Za-z0-9][A-Za-z0-9]+";
     char * buffer;
     FILE *pFile;
     long lSize;
     size_t result;
-    int i;
-    default_list *list;
+    int i,j;
+    default_list *list = NULL;
+    default_list *token_list = NULL;
     cre *re;
 
     std::vector<pair<std::string, float> > context;
@@ -47,24 +52,73 @@ int main(int argc, char **argv) {
 
     fclose(pFile);
 
-    list = NULL;
-
-    i = re_compile(p,RE_DOTALL,&re);
+    i = re_compile(sent_re,RE_DOTALL,&re);
 
     if (i!=0) {
         re_print_error(i);
     }
 
-    i = re_find_all(re,buffer,&list,&stem_create_from_string);
+    i = re_find_all(re,buffer,&list,&token_create_from_string);
 
     if (i!=0) {
         re_print_error(i);
     }
 
-    default_list_print(&list,&stem_print);
+    i = re_compile(start_nonword_re,RE_DOTALL,&re);
+    
+    if (i!=0) {
+        re_print_error(i);
+    }
+
+    for (i = 1; i < default_list_length(&list); i++) {
+        token *t = NULL;
+        default_list *l = NULL;
+        if (default_list_get(&list,i,(void**)&t)==0) {
+            j = re_find_all(re,t->string,&l,&token_create_from_string);
+            if (j!=0) {
+                re_print_error(j);
+            } else if (default_list_length(&l)>0) {
+                token *t_1 = NULL;
+                token *t_2 = NULL;
+
+                default_list_get(&list,i-1,(void**)&t_1);
+                default_list_get(&l,0,(void**)&t_2);
+
+                // get the previous token and append the begging of this token
+                // to the end of it.
+                char *new_string = (char*)malloc(sizeof(char)*(strlen(t_1->string)+strlen(t_2->string)+1));
+                new_string[0] = '\0';
+                strcat(new_string,t_1->string);
+                strcat(new_string,t_2->string);
+                new_string[strlen(t_1->string)+strlen(t_2->string)] = '\0';
+                free(t_1->string);
+                t_1->string = new_string;
+
+                new_string = (char*)malloc(sizeof(char)*(strlen(t->string)-strlen(t_2->string)+1));
+                strcpy(new_string,t->string+strlen(t_2->string));
+                new_string[strlen(t->string)-strlen(t_2->string)] = '\0';
+                free(t->string);
+                t->string = new_string;
+
+                default_list_free(&l,&token_free);
+            }
+        }
+    }
+    
+    i = re_compile(general_token_re,RE_DOTALL,&re);
+    if (i!=0) { re_print_error(i); }
+    for (i = 0; i < default_list_length(&list); i++) {
+        token *t = NULL;
+        if (default_list_get(&list,i,(void**)&t)==0) {
+            j = re_find_all(re,t->string,&token_list,&token_create_from_string);
+            if (j!=0) { re_print_error(j); break; }
+        }
+    }
+
+    default_list_print(&token_list,&token_print);
 
     re_free(re);
     free(buffer);
-    default_list_free(&list, &stem_free);
+    default_list_free(&list, &token_free);
     return(0);
 }
