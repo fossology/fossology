@@ -4,7 +4,8 @@ utils=\
       utils/list.c \
       utils/re.c \
       utils/token.c \
-      utils/stem.c
+      utils/stem.c \
+      utils/feature_type.c
 
 all: utils/utils.a test
 
