@@ -26,7 +26,7 @@ fo_nomos: $(OBJS) $(DB) $(REPO) $(VARS)
 	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 $(OBJS): %.o: %.c %.h $(DB) $(VARS)
-	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB)
+	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB) $(CFLAGS_REPOO) $(CFLAGS_AGENT)
 
 #
 # Non "standard" preprocessing stuff starts here...
