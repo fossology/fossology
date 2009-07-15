@@ -51,7 +51,9 @@ class agent_fonomos extends FO_Plugin {
   *********************************************/
   function AgentCheck($uploadpk) {
     global $DB;
-    $SQL = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job ON job_upload_fk = '$uploadpk' AND job_pk = jq_job_fk AND jq_type = 'fonomos';";
+    $SQL = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job" .
+            "ON job_upload_fk = '$uploadpk'" .
+            "AND job_pk = jq_job_fk AND jq_type = 'fonomos';";
     $Results = $DB->Action($SQL);
     if (empty($Results[0]['jq_pk'])) {
       return (0);
@@ -70,7 +72,7 @@ class agent_fonomos extends FO_Plugin {
   *********************************************/
   function AgentAdd($uploadpk, $Depends = NULL, $Priority = 0) {
     global $DB;
-    /* Get dependency: "fonomos" require "adj2nest".
+    /* Get dependency: "fo_nomos" require "adj2nest".
      * clean this comment up, what is being checked?
      * */
     $SQL = "SELECT jq_pk FROM jobqueue
@@ -104,12 +106,12 @@ class agent_fonomos extends FO_Plugin {
     else if (!empty($Depends)) {
       $Dep[1] = $Depends;
     }
-    /* Prepare the job: job "fonomos" */
+    /* Prepare the job: job "fo_nomos" */
     $jobpk = JobAddJob($uploadpk, "Fo-Nomos License Analysis", $Priority);
     if (empty($jobpk) || ($jobpk < 0)) {
-      return ("Failed to insert job record for fonomos");
+      return ("Failed to insert job record for fo_nomos");
     }
-    /* Add job: job "Fo-Nomos License Analysis" has jobqueue item "fonomos" */
+    /* Add job: job "Fo-Nomos License Analysis" has jobqueue item "fo_nomos" */
     $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,
 	             pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS Pfilename
 	             FROM uploadtree,pfile
@@ -132,9 +134,9 @@ class agent_fonomos extends FO_Plugin {
       $jqString .= ' ' . $pfilePK . '=' . $pfile . ' ';
     }
     //print "jqstring is:$jqstring\n";
-    $jobqueuepk = JobQueueAdd($jobpk, "fonomos", $jqString, "yes", "Pfilename", $Dep);
+    $jobqueuepk = JobQueueAdd($jobpk, "fo_nomos", $jqString, "yes", "Pfilename", $Dep);
     if (empty($jobqueuepk)) {
-      return ("Failed to insert fonomos into job queue");
+      return ("Failed to insert fo_nomos into job queue");
     }
     return (NULL);
   } // AgentAdd()
