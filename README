@@ -28,10 +28,6 @@ installation packages available from the fossology.org site.  See
 
   http://fossology.org/download
   
-   or
-
-  http://sourceforge.net/projects/fossology/files/
-  
 Both RPM and Debian based systems are available.
 
 You can also build and install FOSSology manually from the source tar archive. 
