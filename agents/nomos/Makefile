@@ -26,12 +26,12 @@ fo_nomos: $(OBJS) $(DB) $(REPO) $(VARS)
 	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 $(OBJS): %.o: %.c %.h $(DB) $(VARS)
-	$(CC) -c $< $(DEF) $(CFLAGS_DB)
+	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB)
 
 #
 # Non "standard" preprocessing stuff starts here...
 #
-encode: encode.c
+encode: encode.o
 	$(CC) $(CFLAGS) -o $@ $@.c
 
 _autodefs.h _autodata.c:	$(SPEC) $(LICFIX)
@@ -60,7 +60,7 @@ test: all
 	@echo "*** No tests available for agent/$(EXE) ***"
 
 clean:
-	rm -f encode fo_nomos  *.o core
+	rm -f encode fo_nomos  *.o core _autodata.c _autodefs.c _autodefs.o _precheck.c _strings.data _STRFILTER
 
 include $(DEPS)
 
