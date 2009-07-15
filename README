@@ -23,10 +23,21 @@ information available on the website
 
 Installation
 ============
-Currently FOSSology needs to be built and installed manually. Please
-see the file INSTALL within the FOSSology source distribution for
-instructions. We plan to have distribution packages available soon,
-watch the mailing list for announcements
+FOSSology is available for  multiple versions of Linux.  There are 
+installation packages available from the fossology.org site.  See 
+
+  http://fossology.org/download
+  
+   or
+
+  http://sourceforge.net/projects/fossology/files/
+  
+Both RPM and Debian based systems are available.
+
+You can also build and install FOSSology manually from the source tar archive. 
+Please see the file INSTALL within the FOSSology source distribution for 
+instructions.
+
 
 Documentation
 =============
@@ -36,7 +47,7 @@ http://fossology.org/user_documentation
 Support
 =======
 Mailing lists, FAQs, Release Notes, and other useful things are available
-on the "User Resources" section of the website. We encourage all uses to
+on the "User Resources" section of the website. We encourage all users to
 join the mailing list and participate in discussions.
 There is also a #fossology IRC channel on the freenode IRC network if
 you'd like to talk to other FOSSology users and developers.
