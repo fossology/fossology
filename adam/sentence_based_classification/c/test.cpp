@@ -8,6 +8,7 @@
 #include "re.h"
 #include "stem.h"
 #include "token.h"
+#include "feature_type.h"
 #include <maxent/maxentmodel.hpp>
 
 using namespace maxent;
@@ -24,7 +25,8 @@ int main(int argc, char **argv) {
     size_t result;
     int i,j;
     default_list *list = NULL;
-    default_list *token_list = NULL;
+    default_list *feature_type_list = NULL;
+    default_list *label_list = NULL;
     cre *re;
 
     std::vector<pair<std::string, float> > context;
@@ -110,12 +112,28 @@ int main(int argc, char **argv) {
     for (i = 0; i < default_list_length(&list); i++) {
         token *t = NULL;
         if (default_list_get(&list,i,(void**)&t)==0) {
-            j = re_find_all(re,t->string,&token_list,&token_create_from_string);
+            token *t2 = NULL;
+            j = re_find_all(re,t->string,&feature_type_list,&feature_type_create_from_string);
             if (j!=0) { re_print_error(j); break; }
+            while (default_list_length(&label_list)<default_list_length(&feature_type_list)) {
+                t2 = (token*)malloc(sizeof(token));
+                t2->string = (char*)malloc(sizeof(char)*2);
+                strcpy(t2->string,"I");
+                default_list_append(&label_list,(void**)&t2);
+
+            }
+            t2->string[0] = 'E';
         }
     }
 
-    default_list_print(&token_list,&token_print);
+    default_list_print(&feature_type_list,&feature_type_print);
+    // for (i = 0; i < default_list_length(&stem_list); i++) {
+    //     token *t1 = NULL;
+    //     token *t2 = NULL;
+    //     default_list_get(&stem_list,i,(void**)&t1);
+    //     default_list_get(&label_list,i,(void**)&t2);
+    //     printf("'%s' -> %s\n", t1->string, t2->string);
+    // }
 
     re_free(re);
     free(buffer);
