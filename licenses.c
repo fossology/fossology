@@ -20,6 +20,7 @@
 #include <ctype.h>
 #include <time.h>
 #include <signal.h>
+#include <libgen.h>
 
 #include "nomos.h"
 #include "licenses.h"
