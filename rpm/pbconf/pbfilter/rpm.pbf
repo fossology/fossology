@@ -1,0 +1,25 @@
+#
+# $Id$
+#
+# Filter for rpm build
+#
+
+# PBGRP is replaced by the RPM group of apps
+#filter PBGRP = Applications/Archiving
+
+# PBLIC is replaced by the license of the application
+filter PBLIC = GPL
+
+# PBDEP is replaced by the list of dependencies
+filter PBDEP = smtpdaemon
+
+# PBBUILDDEP is replaced by the list of build dependencies
+filter PBBUILDDEP = 
+
+# PBSUF is replaced by the package suffix ($pb->{'suf'} in code)
+filter PBSUF = $pb->{'suf'}
+
+# PBOBS is replaced by the Obsolete line
+#filter PBOBS =
+
+filter PBPHPINI = /etc/php.ini
