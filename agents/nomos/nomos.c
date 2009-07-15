@@ -20,6 +20,7 @@
 #define	_GNU_SOURCE
 #endif	/* not defined _GNU_SOURCE */
 
+
 #include "nomos.h"
 #include "util.h"
 #include "list.h"
@@ -28,15 +29,21 @@
 #include "nomos_regex.h"
 #include "_autodefs.h"
 
-#ifdef	STOPWATCH
-DECL_TIMER;
-#endif	/* STOPWATCH */
+#include "libfossrepo.h"
+#include "libfossdb.h"
+#include "libfossagent.h"
+
+#ifdef SVN_REV
+char BuildVersion[]="Build version: " SVN_REV ".\n";
+#endif /* SVN_REV */
 
 void freeAndClearScan(struct curScan *);
 
+extern licText_t licText[]; /* Defined in _autodata.c */
 struct globals gl;
 struct curScan cur;
-extern licText_t licText[];
+void *DB = NULL;
+int schedulerMode = 0; /* Non-zero when being run from scheduler */
 
 char *files_to_be_scanned[];
 int file_count = 0;
@@ -45,19 +52,154 @@ int file_count = 0;
 #define TEMPDIR_TEMPLATE "/tmp/nomos.agent.XXXXXX"
 
 
+/*
+  getFieldValue(): Given a string that contains
+  field='value' pairs, save the items.
+  Returns: pointer to start of next field, or NULL at \0.
+*/
+char *getFieldValue(char *inStr, char *field, int fieldMax,
+			 char *value, int valueMax, char separator)
+{
+    int s;
+    int f;
+    int v;
+    int gotQuote;
+
+#ifdef	PROC_TRACE
+    traceFunc("== getFieldValue(inStr= %s fieldMax= %d separator= '%c'\n",
+	      inStr, fieldMax, separator);
+#endif	/* PROC_TRACE */
+
+    memset(field,0,fieldMax);
+    memset(value,0,valueMax);
+
+    /* Skip initial spaces */
+    while(isspace(inStr[0])) {
+	inStr++; 
+    }
+
+    if (inStr[0]=='\0') {
+	return(NULL);
+    }
+    f = 0; 
+    v = 0;
+
+    /* Skip to end of field name */
+    for(s = 0; (inStr[s] != '\0') && !isspace(inStr[s]) && (inStr[s] != '='); s++) {
+	field[f++] = inStr[s];
+    }
+
+    /* Skip spaces after field name */
+    while(isspace(inStr[s])) {
+	s++; 
+    }
+    /* If it is not a field, then just return it. */
+    if (inStr[s] != Separator) { 
+	return(inStr + s);
+    }
+    if (inStr[s]=='\0') {
+	return(NULL);
+    }
+    /* Skip '=' */
+    s++; 
+
+    /* Skip spaces after '=' */
+    while(isspace(inStr[s])) {
+	s++; 
+    }
+    if (inStr[s]=='\0') {
+	return(NULL);
+    }
+
+    gotQuote = '\0';
+    if ((inStr[s]=='\'') || (inStr[s]=='"')) {
+	gotQuote = inStr[s];
+	s++; /* skip quote */
+	if (inStr[s]=='\0') {
+	    return(NULL);
+	}
+    }
+
+    if (gotQuote) {
+	for( ; (inStr[s] != '\0') && (inStr[s] != GotQuote); s++) {
+	    if (inStr[s] == '\\') {
+		Value[v++] = inStr[++s];
+	    } else {
+		Value[v++]=inStr[s];
+	    }
+	}
+    } else {
+	/* if it gets here, then there is no quote */
+	for( ; (inStr[s] != '\0') && !isspace(inStr[s]); s++) {
+	    if (inStr[s]=='\\') {
+		Value[v++]=inStr[++s];
+	    } else {
+		Value[v++]=inStr[s];
+	    }
+	}
+    }
+    /* Skip spaces */
+    while(isspace(inStr[s])) {
+	s++;
+    }
+
+    return(inStr+s);
+}
+
+
+/*
+  parseSchedInput(): Convert input pairs from the scheduler
+  into globals.
+*/
+void parseSchedInput(char *s)
+{
+    char field[256];
+    char value[1024];
+    int gotOther=0;
+    char *origS;
+
+#ifdef	PROC_TRACE
+    traceFunc("== parseSchedInput(%s)\n", s);
+#endif	/* PROC_TRACE */
+
+    cur.pFileFk = -1;
+    memset(cur.pFile,'\0',MAXCMD);
+    if (!S) {
+	return;
+    }
+    origS = s;
+
+    while(s && (s[0] != '\0')) {
+	s = getFieldValue(s, field, 256, value, 1024, '=');
+	if (value[0] != '\0') {
+	    if (!strcasecmp(Field,"pfile_fk")) {
+		cur.pFileFk = atol(Value);
+	    } else if (!strcasecmp(field,"pfile")) {
+		strncpy(cur.pFile, Value, sizeof(cur.pFile));
+	    } else {
+		GotOther = 1;
+	    }
+        }
+    }
+
+    if (GotOther || (cur.pFileFk < 0) || (cur.pFile[0]=='\0')) {
+	printf("FATAL: Data is in an unknown format.\n");
+	printf("LOG: Unknown data: '%s'\n",origS);
+	printf("LOG: Nomos agent is exiting\n");
+	fflush(stdout);
+	DBclose(DB);
+	exit(-1);
+    }
+} 
+
+
+
 void Bail(int exitval)
 {
 #ifdef	PROC_TRACE
     traceFunc("== Bail(%d)\n", exitval);
 #endif	/* PROC_TRACE */
 
-#ifdef	DEBUG
-    printf("Bail(%d)\n", exitval);
-    if (exitval) {
-	printf("Bailing in dir \"%s\"\n", gl.cwd);
-	(void) mySystem("ls -lR");
-    }
-#endif	/* DEBUG */
     (void) chdir(gl.initwd);
     if (gl.mcookie != (magic_t) NULL) {
 	magic_close(gl.mcookie);
@@ -67,6 +209,11 @@ void Bail(int exitval)
 	memCacheDump("Mem-cache @ Bail() time:");
     }
 #endif	/* MEMORY_TRACING && MEM_ACCT */
+
+    fflush(stdout);
+    if (schedulerMode) {
+	DBclose(DB);
+    }
 
     exit(exitval);
 }
@@ -118,9 +265,6 @@ static void parseOptsAndArgs(int argc, char **argv)
     traceFunc("== parseOptsAndArgs(%d, **argv)\n", argc);
 #endif  /* PROC_TRACE */
 
-    if (argc <= 1) {
-	Fatal("Usage: %s <file> ...", gl.progName);
-    }
     /*
       Copy filename args into array
     */
@@ -172,6 +316,10 @@ static void getFileLists(char *dirpath)
 }
 
 
+/*
+  Clean-up all the per scan data structures, freeing any
+  old data.
+*/
 void freeAndClearScan(struct curScan *thisScan) {
 
     /*
@@ -198,10 +346,71 @@ void freeAndClearScan(struct curScan *thisScan) {
 }
 
 
+
+void processFile(char *fileToScan) {
+
+#ifdef	PROC_TRACE
+    traceFunc("== processFile(%s)\n", fileToScan);
+#endif	/* PROC_TRACE */
+
+    /*
+      Initialize. This stuff should probably be broken into a separate
+      function, but for now, I'm leaving it all here.
+    */
+    (void) strcpy(cur.cwd, gl.initwd);
+
+    /*
+      Create temporary directory for scratch space
+      and copy target file to that directory.
+    */
+    strcpy(cur.targetDir, TEMPDIR_TEMPLATE);
+    if (!mkdtemp(cur.targetDir)) {
+	perror("mkdtemp");
+	Fatal("%s: cannot make temp directory %s", gl.progName);
+    }
+    chmod(cur.targetDir, 0755);
+    if (mySystem("cp '%s' %s", scan_file, cur.targetDir)) {
+	Fatal("Cannot copy %s to temp-directory", scan_file);
+    }
+    strcpy(cur.targetFile, cur.targetDir);
+    strcat(cur.targetFile, "/");
+    strcat(cur.targetFile, basename(scan_file));
+    cur.targetLen = strlen(cur.targetDir);
+
+    if (!isFILE(scan_file)) {
+	Fatal("\"%s\" is not a plain file", *scan_file);
+    }
+ 
+    /*
+      CDB - How much of this is still necessary?
+
+      chdir to target, call getcwd() to get real pathname; then, chdir back
+	 
+      We've saved the specified directory in 'gl.targetDir'; now, normalize
+      the pathname (in case we were passed a symlink to another dir).
+    */
+    changeDir(cur.targetDir);	/* see if we can chdir to the target */
+    getFileLists(cur.targetDir);
+    changeDir(gl.initwd);
+    listInit(&cur.fLicFoundMap, 0, "file-license-found map");
+    listInit(&cur.parseList, 0, "license-components list");
+    listInit(&cur.lList, 0, "license-list");
+    listInit(&cur.cList, 0, "copyright-list");
+    listInit(&cur.eList, 0, "eula-list");
+
+    processRawSource();
+
+    freeAndClearScan(&cur);
+}
+
+
+
 int main(int argc, char **argv)
 {
     char *cp;
     int i;
+    char *agent_desc = "Nomos License Detection Agency";
+    char parm[myBUFSIZ];
 
 
 #ifdef	PROC_TRACE
@@ -214,14 +423,19 @@ int main(int argc, char **argv)
 #ifdef	GLOBAL_DEBUG
     gl.DEEBUG = gl.MEM_DEEBUG = 0;
 #endif	/* GLOBAL_DEBUG */
-#ifdef	STOPWATCH
-    START_TIMER;
-#endif	/* STOPWATCH */
 
     /*
       Set up variables global to the agent. Ones that are the
       same for all scans.
     */
+    DB = DBopen();
+    if (!DB) {
+	printf("FATAL: Nomos agent unable to connect to database, exiting...\n");
+	fflush(stdout);
+	exit(-1);
+    }
+    GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
+
 
     /* Record the progname name */
     if ((cp = strrchr(*argv, '/')) == NULL_STR) {
@@ -262,77 +476,57 @@ int main(int argc, char **argv)
 	Fatal("magic_load() fails!");
     }
 
-    /* CDB -- Start of perScan stuff */
 
-    /* 
-       For each file to be scanned
-    */
-    for (i = 0; i < file_count; i++) {
-	char *scan_file = files_to_be_scanned[i];
-	
-	/*
-	  Initialize. This stuff should probably be broken into a separate
-	  function, but for now, I'm leaving it all here.
+    if (file_count == 0) {
+	char *repFile;
+
+	/* 
+	   We're being run from the scheduler
 	*/
-	(void) strcpy(cur.cwd, gl.initwd);
+	schedulerMode = 1;
+	signal(SIGALRM, ShowHeartbeat);
+	printf("OK\n");
+	fflush(stdout);
+	alarm(60);
 
-#ifdef notdef
-	CDB - WTF?
-	if ((cp = strrchr(scan_file, '/')) == NULL_STR) {
-	    cp = *argv;
-	} else {
-	    cp++;
+	while (ReadLine(stdin, parm, myBUFSIZ) >= 0) {
+	    if (parm[0] != '\0') {
+		alarm(0);
+		Heartbeat(0);
+		/*
+		  Get the file arg and go ahead and process it
+		*/
+		parseSchedInput(parm);
+		repFile = RepMkPath("files", cur.pFile);
+		if (!repFile) {
+		    printf("FATAL pfile %ld Nomos unable to open file %s\n",
+			   cur.pFileFk, cur.pFile);
+		    fflush(stdout);
+		    DBclose(DB);
+		    exit(-1);
+		}
+		processFile(cur.pFile); 
+		printf("OK\n");
+		fflush(stdout);
+		alarm(60);
+		freeAndClearScan(&cur);
+	    }
 	}
-#endif /* notdef */
 
 	/*
-	  Create temporary directory for scratch space
-	  and copy target file to that directory.
+	  On EOF we fall through to the Bail() call at the end.
 	*/
-	strcpy(cur.targetDir, TEMPDIR_TEMPLATE);
-	if (!mkdtemp(cur.targetDir)) {
-	    perror("mkdtemp");
-	    Fatal("%s: cannot make temp directory %s", gl.progName);
-	}
-	chmod(cur.targetDir, 0755);
-	if (mySystem("cp '%s' %s", scan_file, cur.targetDir)) {
-	    Fatal("Cannot copy %s to temp-directory", scan_file);
-	}
-	strcpy(cur.targetFile, cur.targetDir);
-	strcat(cur.targetFile, "/");
-	strcat(cur.targetFile, basename(scan_file));
-	cur.targetLen = strlen(cur.targetDir);
 
-	if (!isFILE(scan_file)) {
-	    Fatal("\"%s\" is not a plain file", *scan_file);
-	}
- 
+    } else {
 	/*
-	  CDB - How much of this is still necessary?
-
-	  chdir to target, call getcwd() to get real pathname; then, chdir back
-	 
-	  We've saved the specified directory in 'gl.targetDir'; now, normalize
-	  the pathname (in case we were passed a symlink to another dir).
+	  Files on the command line
 	*/
-	changeDir(cur.targetDir);	/* see if we can chdir to the target */
-	getFileLists(cur.targetDir);
-	changeDir(gl.initwd);
-	listInit(&cur.fLicFoundMap, 0, "file-license-found map");
-	listInit(&cur.parseList, 0, "license-components list");
-	listInit(&cur.lList, 0, "license-list");
-	listInit(&cur.cList, 0, "copyright-list");
-	listInit(&cur.eList, 0, "eula-list");
-
-
-#ifdef	STOPWATCH
-	END_TIMER;
-	PRINT_TIMER("init", 0);
-#endif	/* STOPWATCH */
-
-	processRawSource();
-
-	freeAndClearScan(&cur);
+	/* 
+	   For each file to be scanned
+	*/
+	for (i = 0; i < file_count; i++) {
+	    processFile(files_to_be_scanned[i]);
+	}
     }
     Bail(0);
 }

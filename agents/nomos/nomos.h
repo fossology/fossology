@@ -258,6 +258,8 @@ struct curScan {
     char cwd[myBUFSIZ]; /* CDB, Would like to workaround and eliminate. */
     char targetDir[myBUFSIZ]; /* Directory where file is */ /* check */
     char targetFile[myBUFSIZ]; /* File we're scanning */ /* check */
+    long pFileFk;
+    char pFile[myBUFSIZ];
     char *licPara; 
     char *matchBase; 
     size_t targetLen; 
@@ -272,7 +274,6 @@ struct curScan {
     list_t cList; /* CDB - I don't think this is actually used. */
     list_t eList; /* CDB - I don't think this is actually used. */
     char compLic[myBUFSIZ];
-    /*    char basename[128]; CDB, set but not used */
     char name[128]; /* CDB, set, but not used. */
     int nLines;
     int nWords; /* CDB, set, but not used. */
@@ -363,8 +364,10 @@ int optionIsSet(int val);
 */
 extern struct globals gl;
 extern struct curScan cur;
+extern void *DB;
 extern licText_t licText[];
 extern licSpec_t licSpec[];
+extern int schedulerMode; /* Non-zero if being run by scheduler */
 
 /*
   Declarations for using the memory debug stuff
