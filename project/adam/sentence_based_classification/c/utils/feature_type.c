@@ -67,6 +67,8 @@ void* feature_type_create_from_string(char *string, int start, int end) {
     }
     t->stemmed[i+1] = '\0';
 
+    t->start = start;
+    t->end = end;
     t->length = end-start;
     
     return t;

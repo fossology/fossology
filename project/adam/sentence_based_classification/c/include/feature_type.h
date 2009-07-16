@@ -4,13 +4,15 @@
 // Our simple datatype
 typedef struct feature_type {
     char *string;
+    char *stemmed;
+    int start;
+    int end;
     int length;
     bool word;
     bool capped;
     bool upper;
     bool number;
     bool incnum;
-    char *stemmed;
 } feature_type;
 
 // This function frees all the internal data in the datatype.
