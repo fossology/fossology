@@ -24,6 +24,16 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+/**
+ * admin_folder_delete
+ *
+ * Delete a folder from the UI/DB.
+ *
+ * @author markd
+ *
+ * @version "$Id$"
+ *
+ */
 class admin_folder_delete extends FO_Plugin {
   public $Name = "admin_folder_delete";
   public $Title = "Delete Folder";
@@ -42,10 +52,14 @@ class admin_folder_delete extends FO_Plugin {
       } // don't run
 
     }
-    /*********************************************
-     Delete(): Given a folder_pk, add a job.
-     Returns NULL on success, string on failure.
-     *********************************************/
+
+    /**
+     * Delete
+     * Creates a job to detele the folder
+     *
+     * @param int $folderpk the folder_pk to remove
+     * @return NULL on success, string on failure.
+     */
     function Delete($folderpk, $Depends = NULL) {
       /* Can't remove top folder */
       if ($folderpk == FolderGetTop()) {
