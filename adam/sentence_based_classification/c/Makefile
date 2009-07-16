@@ -1,11 +1,12 @@
 CC=g++
-CFLAGS=-g -Iinclude -lpcre -lstemmer -Wno-deprecated
+CFLAGS=-g -Iinclude -lpcre -lstemmer -lmaxent -Wno-deprecated
 utils=\
       utils/list.c \
       utils/re.c \
       utils/token.c \
       utils/stem.c \
-      utils/feature_type.c
+      utils/feature_type.c \
+      utils/tokenizer.c
 
 all: utils/utils.a test
 
