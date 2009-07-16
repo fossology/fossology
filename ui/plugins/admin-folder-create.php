@@ -112,6 +112,7 @@ class folder_create extends FO_Plugin
       return;
     }
     $V = "";
+    $R = "";
     switch ($this->OutputType)
     {
       case "XML" :
@@ -128,13 +129,14 @@ class folder_create extends FO_Plugin
           $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
           if ($rc == 1) {
             /* Need to refresh the screen */
-            $R .= PopupAlert("Folder $NewFolder Created", $Uri);
+            $R .= displayMessage("Folder $NewFolder Created");
           }
           else if($rc == 4) {
-            $R .= PopupAlert("Folder $NewFolder Exists", $Uri);
+            $R .= displayMessage("Folder $NewFolder Exists");
           }
         }
         /* Display the form */
+        $V .= "$R\n";
         $V .= "<form method='POST'>\n"; // no url = this url
         $V .= "<ol>\n";
         $V .= "<li>Select the parent folder:  \n";
@@ -147,7 +149,6 @@ class folder_create extends FO_Plugin
         $V .= "<INPUT type='text' name='description' size=80 />\n";
         $V .= "</ol>\n";
         $V .= "<input type='submit' value='Create!'>\n";
-        $V .= "$R\n";
         $V .= "</form>\n";
         break;
       case "Text" :
