@@ -1,9 +1,13 @@
-fossology (1.1.0~rc5) unstable; urgency=low
+fossology (1.1.0-1) unstable; urgency=low
 
-  * unofficial SVN version for testing process
-  * 
+  * New upstream release (Closes: #521864 #531864 #531866 )
+  * fossology-scheduler-single now automatically gives the user a new
+    Scheduler.conf, to ensure that new agents get added.
+    fossology-scheduler still warns the user to review.
+  * Added mail-transport-agent Suggests since the new, but optional,
+    fo-notify needs sendmail(1).
 
- -- Build User <build@cranky.manage>  Wed, 08 Jul 2009 20:50:56 -0700
+ -- Matt Taggart <taggart@debian.org>  Thu, 16 Jul 2009 09:56:05 -0700
 
 fossology (1.0.0-2) unstable; urgency=low
 
