@@ -189,9 +189,24 @@ void create_model(MaxentModel& m, default_list **feature_type_list, default_list
         m.add_event(context, t->string);
     }
 }
+
+void label_sentences(MaxentModel& m, default_list **feature_type_list, default_list **label_list, int left_window, int right_window) {
+    int i,n;
+    me_context_type context;
+    feature_type *ft = NULL;
+    
+    n = default_list_length(feature_type_list);
+    for (i = 0; i<n; i++) {
+        default_list_get(feature_type_list,i,(void**)&ft);
+        create_context(feature_type_list,left_window,right_window,i,context);
+        printf("%1.3f:  %s\n",m.eval(context,"E"), ft->string);
+    }
+
+}
     
 int main(int argc, char **argv) {
     char * buffer;
+    char * test_buffer;
     FILE *pFile;
     long lSize;
     size_t result;
@@ -223,6 +238,29 @@ int main(int argc, char **argv) {
     }
 
     fclose(pFile);
+    
+    pFile = fopen(argv[2], "rb");
+    if (pFile==NULL) {
+        fputs("File error.\n", stderr);
+        exit(1);
+    }
+
+    fseek(pFile, 0, SEEK_END);
+    lSize = ftell(pFile);
+    rewind(pFile);
+
+    test_buffer = (char*)malloc(sizeof(char)*lSize);
+    if (test_buffer == NULL) {
+        fputs("Memory error.\n",stderr);
+        exit(2);
+    }
+
+    result = fread(test_buffer, 1, lSize, pFile);
+    if (result != lSize) {
+        fputs("Reading error",stderr); exit(3);
+    }
+
+    fclose(pFile);
 
     create_sentence_list(buffer,&sentence_list);
     create_features_from_sentences(&sentence_list,&feature_type_list, &label_list);
@@ -236,7 +274,15 @@ int main(int argc, char **argv) {
     m.end_add_event();
     m.train(1000, "lbfgs");
 
+    //default_list_free(&label_list, &token_free);
+    default_list_free(&feature_type_list, &feature_type_free);
+
+    feature_type_list = NULL;
+    create_features_from_buffer(test_buffer,&feature_type_list);
+    label_sentences(m, &feature_type_list, &label_list, left_window, right_window);
+
     free(buffer);
+    free(test_buffer);
     default_list_free(&sentence_list, &token_free);
     default_list_free(&label_list, &token_free);
     default_list_free(&feature_type_list, &feature_type_free);
