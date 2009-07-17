@@ -45,7 +45,7 @@ void* stem_create_from_string(char *string, int start, int end) {
     for (i = 0; stemmed[i] != 0; i++) {
         t->stemmed[i] = stemmed[i];
     }
-    t->stemmed[i+1] = '\0';
+    t->stemmed[i] = '\0';
     t->start = start;
     t->end = end;
     return t;

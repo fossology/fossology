@@ -81,6 +81,7 @@ void create_features_from_sentences(default_list **list, default_list **feature_
                 t2 = (token*)malloc(sizeof(token));
                 t2->string = (char*)malloc(sizeof(char)*2);
                 strcpy(t2->string,"I");
+                t2->string[1] = '\0';
                 default_list_append(label_list,(void**)&t2);
 
             }
