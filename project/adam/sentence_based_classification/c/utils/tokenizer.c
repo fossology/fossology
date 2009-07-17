@@ -91,3 +91,13 @@ void create_features_from_sentences(default_list **list, default_list **feature_
     re_free(re);
 }
 
+void create_features_from_buffer(char *buffer, default_list **feature_type_list) {
+    int i,j;
+    cre *re;
+
+    i = re_compile(general_token_re,RE_DOTALL,&re);
+    if (i!=0) { re_print_error(i); }
+    i = re_find_all(re,buffer,feature_type_list,&feature_type_create_from_string);
+    if (i!=0) { re_print_error(j); }
+    re_free(re);
+}
