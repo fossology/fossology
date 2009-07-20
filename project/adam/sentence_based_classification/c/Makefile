@@ -15,7 +15,7 @@ utils=\
 utils_o := $(patsubst %.cpp,%.o,$(utils))
 utils_o := $(patsubst %.c,%.o,$(utils_o))
 
-all: utils/utils.a train_sent_model test
+all: utils/utils.a train_sent_model label_sentences test
 
 utils/utils.a: $(utils_o)
 	$(AR) -cru $@ $^
@@ -24,6 +24,9 @@ test: test.o utils/utils.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
 train_sent_model: train_sent_model.o utils/utils.a
+	$(CPP) -o $@ $^ $(CPPFLAGS)
+
+label_sentences: label_sentences.o utils/utils.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
 clean:
