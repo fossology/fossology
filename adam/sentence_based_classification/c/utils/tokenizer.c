@@ -82,10 +82,12 @@ void create_features_from_sentences(default_list **list, default_list **feature_
                 t2->string = (char*)malloc(sizeof(char)*2);
                 strcpy(t2->string,"I");
                 t2->string[1] = '\0';
-                default_list_append(label_list,(void**)&t2);
+                if (default_list_length(label_list)+1==default_list_length(feature_type_list)) {
+                    t2->string[0] = 'E';
 
+                }
+                default_list_append(label_list,(void**)&t2);
             }
-            t2->string[0] = 'E';
         }
     }
     re_free(re);
