@@ -3,7 +3,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <ctype.h>
-#include "feature_type.h"
+#include <feature_type.h>
 #include <libstemmer.h>
 
 struct sb_stemmer * stemmer = NULL;
@@ -34,10 +34,10 @@ void* feature_type_create_from_string(char *string, int start, int end) {
     t->string[end-start] = '\0';
 
     t->capped = isupper(t->string[0]);
-    t->upper = true;
-    t->number = true;
-    t->incnum = false;
-    t->word = true;
+    t->upper = TRUE;
+    t->number = TRUE;
+    t->incnum = FALSE;
+    t->word = TRUE;
 
     for (i = 0; i<end-start; i++) {
         t->upper = t->upper && isupper(t->string[i]);
@@ -48,16 +48,16 @@ void* feature_type_create_from_string(char *string, int start, int end) {
         }
         if (('0' <= t->string[i] && t->string[i] <= '9') || ('a' <= b[i] && b[i] <= 'z')) {
             if ('0' <= t->string[i] && t->string[i] <= '9') {
-                t->incnum = t->incnum || true;
-                t->number = t->number && true;
+                t->incnum = t->incnum || TRUE;
+                t->number = t->number && TRUE;
             } else {
-                t->number = false;
+                t->number = FALSE;
             }
-            t->word = t->word && true;
+            t->word = t->word && TRUE;
         } else {
-            t->number = false;
-            t->word = false;
-            t->incnum = t->incnum || false;
+            t->number = FALSE;
+            t->word = FALSE;
+            t->incnum = t->incnum || FALSE;
         }
     }
     const sb_symbol * stemmed = sb_stemmer_stem(stemmer, b, end-start);
@@ -80,11 +80,11 @@ void feature_type_print(void *v) {
     printf("{\n");
     printf("  string:  '%s',\n", ft->string);
     printf("  stemmed: '%s',\n", ft->stemmed);
-    printf("  word:    '%s',\n", (ft->word)?"true":"false");
-    printf("  capped:  '%s',\n", (ft->capped)?"true":"false");
-    printf("  upper:   '%s',\n", (ft->upper)?"true":"false");
-    printf("  number:  '%s',\n", (ft->number)?"true":"false");
-    printf("  incnum:  '%s',\n", (ft->incnum)?"true":"false");
+    printf("  word:    '%s',\n", (ft->word==TRUE)?"true":"false");
+    printf("  capped:  '%s',\n", (ft->capped==TRUE)?"true":"false");
+    printf("  upper:   '%s',\n", (ft->upper==TRUE)?"true":"false");
+    printf("  number:  '%s',\n", (ft->number==TRUE)?"true":"false");
+    printf("  incnum:  '%s',\n", (ft->incnum==TRUE)?"true":"false");
     printf("  length:  '%d'\n", ft->length);
     printf("}\n");
 }
