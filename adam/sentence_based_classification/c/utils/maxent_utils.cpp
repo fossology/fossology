@@ -1,3 +1,20 @@
+/*********************************************************************
+Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*********************************************************************/
+
 #include "maxent_utils.h"
 #include "feature_type.h"
 
@@ -12,147 +29,24 @@ void create_context(default_list **feature_type_list, int left_window, int right
             feature_type *ft = NULL;
             default_list_get(feature_type_list, i+j, (void**)&ft);
             if (ft->word==TRUE) {
-                char k[100];
-                sprintf(k,"word_%d='%s'",j,ft->stemmed);
-                context.push_back(make_pair(string(k), 1.0));
-                sprintf(k,"capped_%d='%s'",j,(ft->capped==TRUE)?"true":"false");
-                context.push_back(make_pair(string(k), 1.0));
-                sprintf(k,"upper_%d='%s'",j,(ft->upper==TRUE)?"true":"false");
-                context.push_back(make_pair(string(k), 1.0));
-                sprintf(k,"number_%d='%s'",j,(ft->number==TRUE)?"true":"false");
-                context.push_back(make_pair(string(k), 1.0));
-                sprintf(k,"incnum_%d='%s'",j,(ft->incnum==TRUE)?"true":"false");
-                context.push_back(make_pair(string(k), 1.0));
+                char key[100];
+                sprintf(key,"word_%d='%s'",j,ft->stemmed);
+                context.push_back(make_pair(string(key), 1.0));
+                sprintf(key,"capped_%d='%s'",j,(ft->capped==TRUE)?"true":"false");
+                context.push_back(make_pair(string(key), 1.0));
+                sprintf(key,"upper_%d='%s'",j,(ft->upper==TRUE)?"true":"false");
+                context.push_back(make_pair(string(key), 1.0));
+                sprintf(key,"number_%d='%s'",j,(ft->number==TRUE)?"true":"false");
+                context.push_back(make_pair(string(key), 1.0));
+                sprintf(key,"incnum_%d='%s'",j,(ft->incnum==TRUE)?"true":"false");
+                context.push_back(make_pair(string(key), 1.0));
             } else {
-                float _n_ = 0.0; // \n
-                float _p_ = 0.0; // .
-                float _c_ = 0.0; // :
-                float _s_ = 0.0; // ;
-                float _e_ = 0.0; // !
-                float _m_ = 0.0; // ,
-                float _q_ = 0.0; // ?
-                float _d_ = 0.0; // $
-                float _a_ = 0.0; // @
-                float _l_ = 0.0; // /
-                float _rp_ = 0.0; // (
-                float _lp_ = 0.0; // )
-                float _rb_ = 0.0; // [
-                float _lb_ = 0.0; // ]
-                float _rc_ = 0.0; // {
-                float _lc_ = 0.0; // }
-                float _rw_ = 0.0; // <
-                float _lw_ = 0.0; // >
-                for (k = 0; k<strlen(ft->string); k++) {
-                    if (ft->string[k] == '\n') {
-                        _n_++;
-                    } else if (ft->string[k] == '.') {
-                        _p_++;
-                    } else if (ft->string[k] == ':') {
-                        _c_++;
-                    } else if (ft->string[k] == ';') {
-                        _s_++;
-                    } else if (ft->string[k] == '!') {
-                        _e_++;
-                    } else if (ft->string[k] == '?') {
-                        _q_++;
-                    } else if (ft->string[k] == ',') {
-                        _m_++;
-                    } else if (ft->string[k] == '$') {
-                        _d_++;
-                    } else if (ft->string[k] == '@') {
-                        _a_++;
-                    } else if (ft->string[k] == '/') {
-                        _l_++;
-                    } else if (ft->string[k] == '(') {
-                        _rp_++;
-                    } else if (ft->string[k] == ')') {
-                        _lp_++;
-                    } else if (ft->string[k] == '[') {
-                        _rb_++;
-                    } else if (ft->string[k] == ']') {
-                        _lb_++;
-                    } else if (ft->string[k] == '{') {
-                        _rc_++;
-                    } else if (ft->string[k] == '}') {
-                        _lc_++;
-                    } else if (ft->string[k] == '<') {
-                        _rw_++;
-                    } else if (ft->string[k] == '>') {
-                        _lw_++;
+                char key[100];
+                for (k = 0; k < FT_CHAR_MAP_LEN; k++) {
+                    if (ft->char_vector[k]>0) {
+                        sprintf(key,"char_%d='_%02d_'",j,k);
+                        context.push_back(make_pair(string(key), (float)ft->char_vector[k]));
                     }
-                }
-                char k[100];
-                if ( _n_ > 0.0 )  { 
-                    sprintf(k,"char_%d='_n_'",j);
-                    context.push_back(make_pair(string(k), _n_));
-                } 
-                if ( _p_ > 0.0 )  {
-                    sprintf(k,"char_%d='_p_'",j);
-                    context.push_back(make_pair(string(k), _p_));
-                }
-                if ( _c_ > 0.0 )  {
-                    sprintf(k,"char_%d='_c_'",j);
-                    context.push_back(make_pair(string(k), _c_));
-                }
-                if ( _s_ > 0.0 )  {
-                    sprintf(k,"char_%d='_s_'",j);
-                    context.push_back(make_pair(string(k), _s_));
-                }
-                if ( _e_ > 0.0 )  {
-                    sprintf(k,"char_%d='_e_'",j);
-                    context.push_back(make_pair(string(k), _e_));
-                }
-                if ( _m_ > 0.0 )  {
-                    sprintf(k,"char_%d='_m_'",j);
-                    context.push_back(make_pair(string(k), _m_));
-                }
-                if ( _q_ > 0.0 )  {
-                    sprintf(k,"char_%d='_q_'",j);
-                    context.push_back(make_pair(string(k), _q_));
-                }
-                if ( _d_ > 0.0 )  {
-                    sprintf(k,"char_%d='_d_'",j);
-                    context.push_back(make_pair(string(k), _d_));
-                }
-                if ( _a_ > 0.0 )  {
-                    sprintf(k,"char_%d='_a_'",j);
-                    context.push_back(make_pair(string(k), _a_));
-                }
-                if ( _l_ > 0.0 )  {
-                    sprintf(k,"char_%d='_l_'",j);
-                    context.push_back(make_pair(string(k), _l_));
-                }
-                if ( _rp_ > 0.0 ) {
-                    sprintf(k,"char_%d='_rp_'",j);
-                    context.push_back(make_pair(string(k), _rp_));
-                }
-                if ( _lp_ > 0.0 ) {
-                    sprintf(k,"char_%d='_lp_'",j);
-                    context.push_back(make_pair(string(k), _lp_));
-                }
-                if ( _rb_ > 0.0 ) {
-                    sprintf(k,"char_%d='_rp_'",j);
-                    context.push_back(make_pair(string(k), _rp_));
-                }
-                if ( _lb_ > 0.0 ) {
-                    sprintf(k,"char_%d='_lb_'",j);
-                    context.push_back(make_pair(string(k), _lb_));
-                }
-                if ( _rc_ > 0.0 ) {
-                    sprintf(k,"char_%d='_rc_'",j);
-                    context.push_back(make_pair(string(k), _rc_));
-                }
-                if ( _lc_ > 0.0 ) {
-                    sprintf(k,"char_%d='_lc_'",j);
-                    context.push_back(make_pair(string(k), _lc_));
-                }
-                if ( _rw_ > 0.0 ) {
-                    sprintf(k,"char_%d='_rw_'",j);
-                    context.push_back(make_pair(string(k), _rw_));
-                }
-                if ( _lw_ > 0.0 ) {
-                    sprintf(k,"char_%d='_lw_'",j);
-                    context.push_back(make_pair(string(k), _lw_));
                 }
             }
         }

@@ -1,12 +1,40 @@
+/*********************************************************************
+Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*********************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
 #include <ctype.h>
-#include <feature_type.h>
+#include "feature_type.h"
 #include <libstemmer.h>
 
 struct sb_stemmer * stemmer = NULL;
+
+int char_count(char *str, char c) {
+    char *char_ptr;
+    int count = 0;
+    for (char_ptr = str; *char_ptr != '\0'; char_ptr++) {
+        if (c==*char_ptr) {
+            count++;
+        }   
+    }
+    return count;
+}
 
 void feature_type_free(void *v) {
     feature_type *ft;
@@ -70,6 +98,12 @@ void* feature_type_create_from_string(char *string, int start, int end) {
     t->start = start;
     t->end = end;
     t->length = end-start;
+
+    if (t->word==FALSE) {
+        for (i=0; i<FT_CHAR_MAP_LEN; i++) {
+            t->char_vector[i] = char_count(t->string,FT_CHAR_MAP[i]);
+        }
+    }
     
     return t;
 }
