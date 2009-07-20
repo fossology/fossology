@@ -134,7 +134,7 @@ function addOption(theSel, theText, theValue)
   }
 
 function deleteOption(theSel, theIndex)
-{ 
+{
   var selLength = theSel.length;
   if(selLength>0)
   {
@@ -144,14 +144,14 @@ function deleteOption(theSel, theIndex)
 
 function moveOptions(theSelFrom, theSelTo)
 {
-  
+
   var selLength = theSelFrom.length;
   var selectedText = new Array();
   var selectedValues = new Array();
   var selectedCount = 0;
-  
+
   var i;
-  
+
   // Find the selected Options in reverse order
   // and delete them from the "from" Select.
   for(i=selLength-1; i>=0; i--)
@@ -164,7 +164,7 @@ function moveOptions(theSelFrom, theSelTo)
       selectedCount++;
     }
   }
-  
+
   // Add the selected text/values in reverse order.
   // This will add the Options to the "to" Select
   // in the same order as they were in the "from" Select.
@@ -173,7 +173,7 @@ function moveOptions(theSelFrom, theSelTo)
     addOption(theSelTo, selectedText[i], selectedValues[i]);
   }
   SortList(theSelTo); // NAK: Added sorting the destination list
-  
+
   if(NS4) history.go(0);
 }
 
@@ -584,11 +584,11 @@ function moveOptions(theSelFrom, theSelTo)
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= PopupAlert('License group information updated.');
+	    $V .= displayMessage('License group information updated.');
 	    }
 	  else
 	    {
-	    $V .= PopupAlert($rc);
+	    $V .= displayMessage($rc);
 	    }
 	  /* Reload the group list since it changed. */
 	  $this->LicGroupPlugin->MakeGroupTables();
@@ -609,5 +609,4 @@ function moveOptions(theSelFrom, theSelTo)
 
   };
 $NewPlugin = new licgroup_manage;
-$NewPlugin->Initialize();
 ?>

@@ -191,13 +191,13 @@ class user_edit_self extends FO_Plugin {
           $rc = $this->Edit();
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $V.= PopupAlert('User information updated.');
+            $V.= displayMessage('User information updated.');
             $V.= "<script language='javascript'>\n";
             $Uri = Traceback_uri() . "?mod=" . $this->Name;
             $V.= "window.open('$Uri','_top');\n";
             $V.= "</script>\n";
           } else {
-            $V.= PopupAlert($rc);
+            $V.= displayMessage($rc);
           }
         }
         /* Build HTML form */
@@ -250,5 +250,4 @@ class user_edit_self extends FO_Plugin {
   }
 };
 $NewPlugin = new user_edit_self;
-$NewPlugin->Initialize();
 ?>

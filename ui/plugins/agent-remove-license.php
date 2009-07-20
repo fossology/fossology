@@ -17,7 +17,7 @@
  ***********************************************************/
 /**
  * @Version: "$Id$"
- * 
+ *
  */
 
 /*************************************************
@@ -113,19 +113,19 @@ class agent_remove_licenseMeta extends FO_Plugin
             // Need to refresh the screen
 	    if ($Restart)
 	      {
-              $V .= PopupAlert('License data re-analysis added to job queue');
+              $V .= displayMessage('License data re-analysis added to job queue');
 	      }
 	    else
 	      {
-              $V .= PopupAlert('License data removal added to job queue');
+              $V .= displayMessage('License data removal added to job queue');
 	      }
           }
           else
           {
-            $V .= PopupAlert($rc);
+            $V .= displayMessage($rc);
           }
         }
-         
+
 
         /* Create the AJAX (Active HTTP) javascript for doing the reply
          and showing the response. */
@@ -195,5 +195,4 @@ class agent_remove_licenseMeta extends FO_Plugin
   }
 };
 $NewPlugin = new agent_remove_licenseMeta;
-$NewPlugin->Initialize();
 ?>

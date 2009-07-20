@@ -166,10 +166,10 @@ class user_edit_any extends FO_Plugin {
           $rc = $this->Edit();
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $V.= PopupAlert('User edited.');
+            $V.= displayMessage('User edited.');
           }
           else {
-            $V.= PopupAlert($rc);
+            $V.= displayMessage($rc);
           }
         }
         /* Get the list of users */
@@ -296,5 +296,4 @@ class user_edit_any extends FO_Plugin {
   }
 };
 $NewPlugin = new user_edit_any;
-$NewPlugin->Initialize();
 ?>

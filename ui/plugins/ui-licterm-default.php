@@ -241,7 +241,7 @@ class licterm_default extends FO_Plugin
 	  $rc = $this->DefaultTerms();
 	  if (!empty($rc))
 	    {
-	    $V .= PopupAlert($rc);
+	    $V .= displayMessage($rc);
 	    }
 	  }
 
@@ -252,7 +252,7 @@ class licterm_default extends FO_Plugin
 	  $rc = $this->ExportTerms();
 	  if (!empty($rc))
 	    {
-	    $V .= PopupAlert($rc);
+	    $V .= displayMessage($rc);
 	    }
 	  }
 
@@ -294,5 +294,4 @@ class licterm_default extends FO_Plugin
 
   };
 $NewPlugin = new licterm_default;
-$NewPlugin->Initialize();
 ?>

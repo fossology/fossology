@@ -231,5 +231,4 @@ class agent_license_reanalyze extends FO_Plugin
   }
 };
 $NewPlugin = new agent_license_reanalyze;
-$NewPlugin->Initialize();
 ?>

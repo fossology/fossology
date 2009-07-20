@@ -335,5 +335,4 @@ class agent_license_once extends FO_Plugin {
   }
 };
 $NewPlugin = new agent_license_once;
-$NewPlugin->Initialize();
 ?>

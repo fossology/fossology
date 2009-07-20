@@ -86,11 +86,11 @@ class user_del extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= PopupAlert('User deleted.');
+	    $V .= displayMessage('User deleted.');
 	    }
 	  else
 	    {
-	    $V .= PopupAlert($rc);
+	    $V .= displayMessage($rc);
 	    }
 	  }
 
@@ -137,5 +137,4 @@ class user_del extends FO_Plugin
   }
 };
 $NewPlugin = new user_del;
-$NewPlugin->Initialize();
 ?>

@@ -110,11 +110,11 @@ class agent_unpack extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= PopupAlert('Unpack added to job queue');
+	    $V .= displayMessage('Unpack added to job queue');
 	    }
 	  else
 	    {
-	    $V .= PopupAlert("Upload failed: $rc");
+	    $V .= displayMessage("Unpack of Upload failed: $rc");
 	    }
 	  }
 
@@ -173,5 +173,4 @@ class agent_unpack extends FO_Plugin
   }
 };
 $NewPlugin = new agent_unpack;
-$NewPlugin->Initialize();
 ?>
