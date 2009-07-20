@@ -19,6 +19,8 @@ int main(int argc, char **argv) {
     int left_window = 3;
     int right_window = 3;
 
+    // Create a maxent model object and tell it that we will start to add
+    // training data.
     MaxentModel m;
     m.begin_add_event();
     for (i = 1; i<argc; i++) {
@@ -30,6 +32,7 @@ int main(int argc, char **argv) {
         openfile(argv[i],&buffer);
         create_sentence_list(buffer,&sentence_list);
         create_features_from_sentences(&sentence_list,&feature_type_list, &label_list);
+        // This function adds the training data to the model.
         create_model(m, &feature_type_list, &label_list, left_window, right_window);
         free(buffer);
         default_list_free(&sentence_list,&token_free);
@@ -37,6 +40,7 @@ int main(int argc, char **argv) {
         default_list_free(&label_list,&token_free);
     }
     m.end_add_event();
+
     printf("Training MaxEnt model...\n");
     m.train(1000, "lbfgs");
     m.save("SentenceModel.dat");

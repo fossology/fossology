@@ -4,3 +4,11 @@ Dependencies:
 	libstemmer from http://snowball.tartarus.org/download.php
 	libmaxent from http://homepages.inf.ed.ac.uk/lzhang10/maxent_toolkit.html
 
+
+Applications:
+
+train_sent_model:
+	This application takes a set of files as input. Each file should have its sentences wrapped with <SENTENCE>...</SENTENCE> tags. The application outputs a model file called SentenceModel.dat. This model file can be used to label sentence breaks in unlabeled files.
+
+label_sentences:
+	This application uses an existing SentenceModel.dat model file to automatically label the sentence breaks in a file. The only argument is a single file to be labelled.
