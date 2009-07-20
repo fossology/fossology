@@ -118,7 +118,7 @@ class agent_pkgmetagetta extends FO_Plugin
     $jqargs = "SELECT DISTINCT(pfile_pk) AS Akey,
 	pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A
 	INTO $TempTable
-    FROM pfile LEFT OUTER JOIN attrib ON (attrib_key_fk='$attribkey' 
+    FROM pfile LEFT OUTER JOIN attrib ON (attrib_key_fk='$attribkey'
       AND attrib.pfile_fk=pfile_pk AND attrib_value is null)
     INNER JOIN uploadtree ON upload_fk='$uploadpk' AND uploadtree.pfile_fk=pfile_pk;";
 
@@ -162,11 +162,11 @@ class agent_pkgmetagetta extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= PopupAlert('Analysis added to job queue');
+	    $V .= displayMessage('Analysis added to job queue');
 	    }
 	  else
 	    {
-	    $V .= PopupAlert("Scheduling failed: $rc");
+	    $V .= displayMessage("Scheduling of Analysis failed: $rc");
 	    }
 	  }
 
@@ -219,5 +219,4 @@ class agent_pkgmetagetta extends FO_Plugin
   }
 };
 $NewPlugin = new agent_pkgmetagetta;
-$NewPlugin->Initialize();
 ?>

@@ -165,11 +165,11 @@ class agent_specagent extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= PopupAlert('Analysis added to job queue');
+	    $V .= displayMessage('Analysis added to job queue');
 	    }
 	  else
 	    {
-	    $V .= PopupAlert("Scheduling failed: $rc");
+	    $V .= displayMessage("Scheduling of Analysis failed: $rc");
 	    }
 	  }
 
@@ -222,5 +222,4 @@ class agent_specagent extends FO_Plugin
   }
 };
 $NewPlugin = new agent_specagent;
-$NewPlugin->Initialize();
 ?>

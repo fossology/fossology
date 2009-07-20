@@ -282,5 +282,4 @@ class agent_license_once_compare extends FO_Plugin
   }
 };
 $NewPlugin = new agent_license_once_compare;
-$NewPlugin->Initialize();
 ?>
