@@ -12,7 +12,6 @@ PDATA=_split_words
 LICFIX=GENSEARCHDATA
 
 
-#OBJS=_precheck.o _autodata.o licenses.o list.o nomos.o parse.o process.o regex.o util.o # sources.o DMalloc.o
 OBJS=licenses.o list.o nomos.o parse.o process.o nomos_regex.o util.o _precheck.o _autodata.o # sources.o DMalloc.o
 SRCS=$(OBJS:.o=.c)
 HDRS=_autodefs.h licenses.h list.h nomos.h nomos_regex.h parse.h process.h util.h
@@ -25,6 +24,9 @@ all: encode fo_nomos
 fo_nomos: $(OBJS) $(DB) $(REPO) $(VARS)
 	$(CC) $(OBJS) $(CFLAGS_LOCAL) -o $@
 #	$(CC) $< $(CFLAGS_LOCAL) -o $@
+
+_precheck.o:   _precheck.c
+	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB) $(CFLAGS_REPOO) $(CFLAGS_AGENTO)
 
 $(OBJS): %.o: %.c %.h $(DB) $(VARS)
 	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB) $(CFLAGS_REPOO) $(CFLAGS_AGENTO)
@@ -45,16 +47,17 @@ _precheck.c:	_autodata.c # $(PRE)
 	./$(CHECK)
 #	@$(MAKE) $(STRINGS) $(KEYS)
 
+
 #
 # Non "standard" preprocessing stuff ends here...
 #
 
 install: all
 	$(INSTALL_PROGRAM) fo_nomos $(DESTDIR)$(AGENTDIR)/fo_nomos
-	$(INSTALL_PROGRAM) encode  $(DESTDIR)$(AGENTDIR)/encode
+#	$(INSTALL_PROGRAM) encode  $(DESTDIR)$(AGENTDIR)/encode
 
 uninstall:
-	rm -f $(DESTDIR)$(AGENTDIR)/encode
+#	rm -f $(DESTDIR)$(AGENTDIR)/encode
 	rm -f $(DESTDIR)$(AGENTDIR)/fo_nomos
 
 test: all
