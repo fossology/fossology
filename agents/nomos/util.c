@@ -1241,7 +1241,7 @@ int fileLineCount(char *pathname)
 int bufferLineCount(char *p, int len)
 {
     char *cp; 
-    char *eofaddr;
+    char *eofaddr = NULL;
     int i;
     
 #ifdef	PROC_TRACE

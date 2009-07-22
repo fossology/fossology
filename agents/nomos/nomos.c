@@ -94,7 +94,7 @@ char *getFieldValue(char *inStr, char *field, int fieldMax,
 	s++; 
     }
     /* If it is not a field, then just return it. */
-    if (inStr[s] != Separator) { 
+    if (inStr[s] != separator) { 
 	return(inStr + s);
     }
     if (inStr[s]=='\0') {
@@ -121,20 +121,20 @@ char *getFieldValue(char *inStr, char *field, int fieldMax,
     }
 
     if (gotQuote) {
-	for( ; (inStr[s] != '\0') && (inStr[s] != GotQuote); s++) {
+	for( ; (inStr[s] != '\0') && (inStr[s] != gotQuote); s++) {
 	    if (inStr[s] == '\\') {
-		Value[v++] = inStr[++s];
+		value[v++] = inStr[++s];
 	    } else {
-		Value[v++]=inStr[s];
+		value[v++]=inStr[s];
 	    }
 	}
     } else {
 	/* if it gets here, then there is no quote */
 	for( ; (inStr[s] != '\0') && !isspace(inStr[s]); s++) {
 	    if (inStr[s]=='\\') {
-		Value[v++]=inStr[++s];
+		value[v++]=inStr[++s];
 	    } else {
-		Value[v++]=inStr[s];
+		value[v++]=inStr[s];
 	    }
 	}
     }
@@ -163,8 +163,8 @@ void parseSchedInput(char *s)
 #endif	/* PROC_TRACE */
 
     cur.pFileFk = -1;
-    memset(cur.pFile,'\0',MAXCMD);
-    if (!S) {
+    memset(cur.pFile,'\0',myBUFSIZ);
+    if (!s) {
 	return;
     }
     origS = s;
@@ -172,17 +172,17 @@ void parseSchedInput(char *s)
     while(s && (s[0] != '\0')) {
 	s = getFieldValue(s, field, 256, value, 1024, '=');
 	if (value[0] != '\0') {
-	    if (!strcasecmp(Field,"pfile_fk")) {
-		cur.pFileFk = atol(Value);
+	    if (!strcasecmp(field,"pfile_fk")) {
+		cur.pFileFk = atol(value);
 	    } else if (!strcasecmp(field,"pfile")) {
-		strncpy(cur.pFile, Value, sizeof(cur.pFile));
+		strncpy(cur.pFile, value, sizeof(cur.pFile));
 	    } else {
-		GotOther = 1;
+		gotOther = 1;
 	    }
         }
     }
 
-    if (GotOther || (cur.pFileFk < 0) || (cur.pFile[0]=='\0')) {
+    if (gotOther || (cur.pFileFk < 0) || (cur.pFile[0]=='\0')) {
 	printf("FATAL: Data is in an unknown format.\n");
 	printf("LOG: Unknown data: '%s'\n",origS);
 	printf("LOG: Nomos agent is exiting\n");
@@ -369,16 +369,16 @@ void processFile(char *fileToScan) {
 	Fatal("%s: cannot make temp directory %s", gl.progName);
     }
     chmod(cur.targetDir, 0755);
-    if (mySystem("cp '%s' %s", scan_file, cur.targetDir)) {
-	Fatal("Cannot copy %s to temp-directory", scan_file);
+    if (mySystem("cp '%s' %s", fileToScan, cur.targetDir)) {
+	Fatal("Cannot copy %s to temp-directory", fileToScan);
     }
     strcpy(cur.targetFile, cur.targetDir);
     strcat(cur.targetFile, "/");
-    strcat(cur.targetFile, basename(scan_file));
+    strcat(cur.targetFile, basename(fileToScan));
     cur.targetLen = strlen(cur.targetDir);
 
-    if (!isFILE(scan_file)) {
-	Fatal("\"%s\" is not a plain file", *scan_file);
+    if (!isFILE(fileToScan)) {
+	Fatal("\"%s\" is not a plain file", *fileToScan);
     }
  
     /*
