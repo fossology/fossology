@@ -13,20 +13,21 @@ LICFIX=GENSEARCHDATA
 
 
 #OBJS=_precheck.o _autodata.o licenses.o list.o nomos.o parse.o process.o regex.o util.o # sources.o DMalloc.o
-OBJS=licenses.o list.o nomos.o parse.o process.o regex.o util.o _precheck.o _autodata.o # sources.o DMalloc.o
+OBJS=licenses.o list.o nomos.o parse.o process.o nomos_regex.o util.o _precheck.o _autodata.o # sources.o DMalloc.o
 SRCS=$(OBJS:.o=.c)
 HDRS=_autodefs.h licenses.h list.h nomos.h nomos_regex.h parse.h process.h util.h
 
 DEF=-D_FILE_OFFSET_BITS=64 -D__USE_LARGEFILE64
-CFLAGS_LOCAL= $(DEF) $(CFLAGS_DB) -lpq -lmagic $(ALL_CFLAGS)
+CFLAGS_LOCAL= $(DEF) $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
 
 all: encode fo_nomos
 
 fo_nomos: $(OBJS) $(DB) $(REPO) $(VARS)
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+	$(CC) $(OBJS) $(CFLAGS_LOCAL) -o $@
+#	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 $(OBJS): %.o: %.c %.h $(DB) $(VARS)
-	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB) $(CFLAGS_REPOO) $(CFLAGS_AGENT)
+	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB) $(CFLAGS_REPOO) $(CFLAGS_AGENTO)
 
 #
 # Non "standard" preprocessing stuff starts here...
