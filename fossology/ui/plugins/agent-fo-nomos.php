@@ -131,9 +131,9 @@ class agent_fonomos extends FO_Plugin {
     $jqString = NULL;
 
     foreach($pfilePKPfile as $pfilePK => $pfile) {
-      $jqString .= ' ' . $pfilePK . '=' . $pfile . ' ';
+      $jqString .= 'pfile_fk ' . '=' . $pfilePK . ' pfile' '=' . $pfile . ' ';
     }
-    //print "jqstring is:$jqstring\n";
+    print "jqstring is:$jqString\n";
     $jobqueuepk = JobQueueAdd($jobpk, "fo_nomos", $jqString, "yes", "Pfilename", $Dep);
     if (empty($jobqueuepk)) {
       return ("Failed to insert fo_nomos into job queue");
