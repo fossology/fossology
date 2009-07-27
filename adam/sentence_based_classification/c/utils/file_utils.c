@@ -45,3 +45,32 @@ void openfile(char *filename, char **buffer) {
     fclose(pFile);
 }
 
+int readline(FILE *pFile, char **line) {
+    int max = 256;
+    int nch = 0;
+    int c;
+
+    *line = (char*)malloc(sizeof(char)*max);
+    if (*line == NULL) {
+        fputs("Memory error.\n",stderr);
+        exit(2);
+    }
+
+    while((c = getc(pFile)) != EOF) {
+        if (c == '\n') {
+            break;
+        }
+        if (nch < max) {
+            line[0][nch] = c;
+            nch++;
+        }
+    }
+
+    if (c == EOF && nch == 0) {
+        return EOF;
+    }
+
+    line[0][nch] = '\0';
+    return nch;
+}
+

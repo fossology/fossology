@@ -28,6 +28,7 @@ extern "C" {
 #endif
 
 void openfile(char *filename, char **buffer);
+int readline(FILE *pFile, char **line);
 
 #if defined(__cplusplus)
 }
