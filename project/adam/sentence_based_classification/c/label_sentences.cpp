@@ -1,18 +1,18 @@
 /*********************************************************************
-Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+  Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+  You should have received a copy of the GNU General Public License along
+  with this program; if not, write to the Free Software Foundation, Inc.,
+  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
 #include <stdio.h>
@@ -27,6 +27,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "maxent_utils.h"
 #include "file_utils.h"
 
+void print_usage(char *name) {
+    fprintf(stderr, "Usage: %s [options] file\n",name);
+	fprintf(stderr, "   This application uses an existing MaxEnt model file to automatically label the sentence breaks in a file. The only arguments are the model file and a single file to be labelled. The labeled file will be output to stdout.\n");
+    fprintf(stderr, "   -m model ::  MaxEnt model to use for labeling.\n");
+}
+
 int main(int argc, char **argv) {
     char *buffer;
     int i,j;
@@ -37,14 +43,51 @@ int main(int argc, char **argv) {
     feature_type *ft = NULL;
     int left_window = 3;
     int right_window = 3;
+    char *model_file;
+    int c;
+
+    opterr = 0;
+    while ((c = getopt(argc, argv, "m:")) != -1) {
+        switch (c) {
+            case 'm':
+                model_file = optarg;
+
+                FILE *file;
+                file = fopen(model_file, "rb");
+                if (file==NULL) {
+                    fprintf(stderr, "File provided to -m parameter does not exists.\n");
+                    exit(1);
+                }
+
+                break;
+            case '?':
+                if (optopt == 'm') {
+                    fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+                } else if (isprint(optopt)) {
+                    fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+                } else {
+                    fprintf(stderr, "Unknown option character `\\x%x'.\n",optopt);
+                }
+                exit(-1);
+            default:
+                print_usage(argv[0]);
+                exit(-1);
+        }
+    }
+
+    if (optind>=argc) {
+        print_usage(argv[0]);
+        fprintf(stderr, "\nNot file provided for labelling...\n");
+        exit(-1);
+    }
 
     MaxentModel m;
-    m.load("SentenceModel.dat");
+    m.load(model_file);
     buffer = NULL;
     sentence_list = NULL;
     feature_type_list = NULL;
     label_list = NULL;
-    openfile(argv[1],&buffer);
+    openfile(argv[optind],&buffer);
     create_features_from_buffer(buffer,&feature_type_list);
     label_sentences(m,&feature_type_list,&label_list,left_window,right_window);
 
