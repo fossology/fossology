@@ -192,6 +192,7 @@ class FO_Plugin
     global $Plugins;
 
     if ($this->State != PLUGIN_STATE_INVALID) {
+      //print "<pre>TDB: returning state invalid\n</pre>";
       return(1); // don't re-run
     }
     if ($this->Name !== "") { // Name must be defined
@@ -336,6 +337,7 @@ class FO_Plugin
 
         $V .= "<html>\n";
         $V .= "<head>\n";
+        $V .= "<meta name='description' content='The study of Open Source'>\n";
         if ($this->NoHeader == 0)
         {
           /** Known bug: DOCTYPE "should" be in the HEADER
@@ -343,7 +345,7 @@ class FO_Plugin
            Also, IE will ignore <style>...</style> tags that are NOT
            in a <head>...</head> block.
            **/
-          if (!empty($Title)) { $V .= "<title>" . htmlentities($Title) . "</title>\n"; }
+          if (!empty($this->Title)) { $V .= "<title>" . htmlentities($this->Title) . "</title>\n"; }
           $V .= "<link rel='stylesheet' href='fossology.css'>\n";
           print $V; $V="";
           if (!empty($Menu)) { print $Menu->OutputCSS(); }
@@ -378,6 +380,7 @@ class FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     // Put your code here
+    $V = "";
     switch($this->OutputType)
     {
       case "XML":
@@ -413,6 +416,7 @@ class FO_Plugin
     $this->OutputType=$Type;
     $this->OutputToStdout=$ToStdout;
     // Put your code here
+    $V= "";
     switch($this->OutputType)
     {
       case "XML":
@@ -440,6 +444,7 @@ class FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     // Put your code here
+    $V = "";
     switch($this->OutputType)
     {
       case "XML":
