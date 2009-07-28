@@ -35,7 +35,7 @@ $Svn = `svnversion`;
 $start = new timer();
 $date = date('Y-m-d');
 $time = date('h:i:s-a');
-print "Starting Verify Tests on: " . $date . " at " . $time . "\n";
+print "\nStarting Verify Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
 $test = &new TestSuite('Fossology Repo UI Verification Functional tests');
 //$test->addTestFile('browseUploadedTest.php');
@@ -50,7 +50,7 @@ if (TextReporter::inCli())
   $results = $test->run(new TextReporter()) ? 0 : 1;
   print "Ending Verify Tests at: " . date('r') . "\n";
   $elapseTime = $start->TimeAgo($start->getStartTime());
-  print "The Verify Tests took {$elapseTime}to run\n";
+  print "The Verify Tests took {$elapseTime}to run\n\n";
   exit($results);
 }
 $test->run(new HtmlReporter());
