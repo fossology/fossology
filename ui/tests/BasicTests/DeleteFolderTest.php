@@ -85,10 +85,10 @@ class DeleteFolderTest extends fossologyTestCase
     $this->assertTrue($this->myassertText($page, "/Deletion of folder $this->folder_name/"),
                       "FAIL! Deletion of $this->folder_name not found\n");
     /* go to sleep for 30 seconds to see if the folder get's deleted */
-    sleep(90);
+    sleep(120);
     $page = $this->mybrowser->get("$URL?mod=browse");
     $this->assertFalse($this->myassertText($page, '/DeleteMe/'),
-                       "NOTE: Folder DeleteMe still exists after 30 seconds");
+                       "NOTE: Folder DeleteMe still exists after 120 seconds");
     //print "************ page after Folder Delete! *************\n$page\n";
   }
 }
