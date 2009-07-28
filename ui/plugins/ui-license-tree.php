@@ -102,8 +102,8 @@ class ui_license_tree extends FO_Plugin {
            in a <head>...</head> block.
            *
            */
-          if (!empty($Title)) {
-            $V.= "<title>" . htmlentities($Title) . "</title>\n";
+          if (!empty($this->Title)) {
+            $V.= "<title>" . htmlentities($this->Title) . "</title>\n";
           }
           $V.= "<link rel='stylesheet' href='fossology.css'>\n";
           print $V;
