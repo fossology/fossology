@@ -17,25 +17,25 @@
 
 cdef extern from "../sparsevect.h":
     cdef struct sv_element:
-        long int i
+        unsigned long int i
         double v
 
     # This is an "opaque" pointer type
     ctypedef void * sv_vector
 
-    sv_vector sv_new(long int dim)
-    sv_element sv_get_element(sv_vector vect, long int i)
-    double sv_get_element_value(sv_vector vect, long int i)
-    int sv_set_element(sv_vector vect, long int i, double v)
+    sv_vector sv_new(unsigned long int dim)
+    sv_element sv_get_element(sv_vector vect, unsigned long int i)
+    double sv_get_element_value(sv_vector vect, unsigned long int i)
+    int sv_set_element(sv_vector vect, unsigned long int i, double v)
     double sv_inner(sv_vector a, sv_vector b)
     sv_vector sv_element_multiply(sv_vector a, sv_vector b)
     sv_vector sv_scalar_mult(sv_vector vect, double scalar)
     sv_vector sv_add(sv_vector vect, sv_vector vect)
     sv_vector sv_subtract(sv_vector vect, sv_vector vect)
-    long int sv_nonzeros(sv_vector vect)
-    long int sv_dimension(sv_vector vect)
+    unsigned long int sv_nonzeros(sv_vector vect)
+    unsigned long int sv_dimension(sv_vector vect)
     sv_element *sv_get_elements(sv_vector vect)
-    long int *sv_indices(sv_vector vect)
+    unsigned long int *sv_indices(sv_vector vect)
     void sv_delete(sv_vector vect)
 
 cdef extern from "stdlib.h":
@@ -137,7 +137,7 @@ cdef class SparseVector:
 
     property indices:
         def __get__(self):
-            cdef long int i, *c_indices
+            cdef unsigned long int i, *c_indices
 
             c_indices = sv_indices(self.data)
             indices = []
@@ -196,7 +196,7 @@ cdef class SparseVector:
             sv_set_element(self.data, i, v)
 
 cdef class _SparseVectorIterator:
-    cdef long int cur_index, vector_dim
+    cdef unsigned long int cur_index, vector_dim
     cdef object elements
 
     def __init__(self, SparseVector vector):

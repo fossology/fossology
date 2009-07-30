@@ -23,7 +23,7 @@
 #include "sparsevect.h"
 
 struct sv_node {
-    long int i;
+    unsigned long int i;
     double v;
     struct sv_node *prev;
     struct sv_node *next;
@@ -32,12 +32,12 @@ struct sv_node {
 struct sv_vector_internal {
     struct sv_node *first;
     struct sv_node *current;
-    long int dim;
-    long int nonzeros;
+    unsigned long int dim;
+    unsigned long int nonzeros;
 };
 
 /* Create a new sv_vector with dimension dim */
-sv_vector sv_new(long int dim) {
+sv_vector sv_new(unsigned long int dim) {
     sv_vector vect;
 
     if (dim <= 0) {
@@ -62,7 +62,7 @@ sv_vector sv_new(long int dim) {
  *
  * Return NULL if no node exists at that position.
  */
-static struct sv_node *sv_get_node(sv_vector vect, long int i) {
+static struct sv_node *sv_get_node(sv_vector vect, unsigned long int i) {
     struct sv_node *node;
 
     if (i < 0 || i >= vect->dim) {
@@ -85,7 +85,7 @@ static struct sv_node *sv_get_node(sv_vector vect, long int i) {
 }
 
 /* Return an sv_element struct for the element in vect at position i */
-struct sv_element sv_get_element(sv_vector vect, long int i) {
+struct sv_element sv_get_element(sv_vector vect, unsigned long int i) {
     struct sv_node *node;
     struct sv_element element;
 
@@ -106,7 +106,7 @@ struct sv_element sv_get_element(sv_vector vect, long int i) {
 }
 
 /* Get the value in vect at position i */
-double sv_get_element_value(sv_vector vect, long int i) {
+double sv_get_element_value(sv_vector vect, unsigned long int i) {
     struct sv_node *node;
     double v = 0.0;
 
@@ -200,7 +200,7 @@ static void delete_node(sv_vector vect, struct sv_node *node) {
  * allocating memory, it returns -1, and leaves errno alone, so the caller can
  * check the contents of errno.  Other errors result in program exit.
  */
-int sv_set_element(sv_vector vect, long int i, double v) {
+int sv_set_element(sv_vector vect, unsigned long int i, double v) {
     struct sv_node *vect_node;
     struct sv_node *node = NULL;
 
@@ -483,12 +483,12 @@ double sv_sum(sv_vector vect) {
 }
 
 /* Return the number of nonzero elements in vect */
-long int sv_nonzeros(sv_vector vect) {
+unsigned long int sv_nonzeros(sv_vector vect) {
     return vect->nonzeros;
 }
 
 /* Return the dimension of vect */
-long int sv_dimension(sv_vector vect) {
+unsigned long int sv_dimension(sv_vector vect) {
     return vect->dim;
 }
 
@@ -532,11 +532,11 @@ struct sv_element *sv_get_elements(sv_vector vect) {
  * If there is a memory allocation problem, this function returns NULL, leaving
  * errno intact.
  */
-long int *sv_indices(sv_vector vect) {
-    long int *indices, *cur_index;
+unsigned long int *sv_indices(sv_vector vect) {
+    unsigned long int *indices, *cur_index;
     struct sv_node *node;
 
-    indices = malloc(vect->nonzeros * sizeof(long int));
+    indices = malloc(vect->nonzeros * sizeof(unsigned long int));
     if (indices == NULL) {
         /* Return NULL, leaving errno intact */
         return NULL;
