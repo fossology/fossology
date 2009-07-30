@@ -603,3 +603,41 @@ void sv_delete(sv_vector vect) {
     }
     free(vect);
 }
+
+/*
+   Writes a binary version of the vector to a file pointer.
+*/
+int sv_dump(sv_vector vect, FILE *file) {
+    struct sv_node *node;
+
+    fwrite(&vect->dim, sizeof(unsigned long int),1,file);
+    fwrite(&vect->nonzeros, sizeof(unsigned long int),1,file);
+    node = vect->first;
+    while (node != NULL) {
+        fwrite(&node->i, sizeof(unsigned long int),1,file);
+        fwrite(&node->v, sizeof(double),1,file);
+        node = node->next;
+    }
+}
+
+/*
+   Loads a binary version of the vector from a file pointer.
+   Returns a sv_vector.
+*/
+sv_vector sv_load(FILE *file) {
+    sv_vector vect;
+    unsigned long int temp1, i, length;
+    double temp2;
+
+    fread(&temp1, sizeof(unsigned long int), 1, file);
+    vect = sv_new(temp1);
+    fread(&length, sizeof(unsigned long int), 1, file);
+
+    for (i = 0; i<length; i++) {
+        fread(&temp1, sizeof(unsigned long int), 1, file);
+        fread(&temp2, sizeof(double), 1, file);
+        sv_set_element(vect,temp1,temp2);
+    }
+    
+    return vect;
+}
