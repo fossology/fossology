@@ -17,7 +17,7 @@
 
 /* External representation of an element: i is the index, v is the value */
 struct sv_element {
-    long int i;
+    unsigned long int i;
     double v;
 };
 
@@ -33,13 +33,13 @@ typedef struct sv_vector_internal * sv_vector;
  * up to the caller to check for non-NULL-ness.  errno will be left intact, so
  * the user can see what malloc sets.
  */
-sv_vector sv_new(long int dim);
+sv_vector sv_new(unsigned long int dim);
 
 /* Return an sv_element struct for the element in vect at position i */
-struct sv_element sv_get_element(sv_vector vect, long int i);
+struct sv_element sv_get_element(sv_vector vect, unsigned long int i);
 
 /* Get the value in vect at position i */
-double sv_get_element_value(sv_vector vect, long int i);
+double sv_get_element_value(sv_vector vect, unsigned long int i);
 
 /* Set the element in vect at position i to value v
  *
@@ -47,7 +47,7 @@ double sv_get_element_value(sv_vector vect, long int i);
  * allocating memory, it returns -1, and leaves errno alone, so the caller can
  * check the contents of errno.  Other errors result in program exit.
  */
-int sv_set_element(sv_vector vect, long int i, double v);
+int sv_set_element(sv_vector vect, unsigned long int i, double v);
 
 /* Return the inner product of a and b */
 double sv_inner(sv_vector a, sv_vector b);
@@ -70,10 +70,10 @@ sv_vector sv_subtract(sv_vector a, sv_vector b);
 double sv_sum(sv_vector vect);
 
 /* Return the number of nonzero elements in vect */
-long int sv_nonzeros(sv_vector vect);
+unsigned long int sv_nonzeros(sv_vector vect);
 
 /* Return the dimension of vect */
-long int sv_dimension(sv_vector vect);
+unsigned long int sv_dimension(sv_vector vect);
 
 /* Return an array of sv_element structs of length sv_nonzeros(vect)
  *
@@ -97,7 +97,7 @@ struct sv_element *sv_get_elements(sv_vector vect);
  * If there is a memory allocation problem, this function returns NULL, leaving
  * errno intact.
  */
-long int *sv_indices(sv_vector vect);
+unsigned long int *sv_indices(sv_vector vect);
 
 /* Expand vect into a "dense" array of doubles
  *
