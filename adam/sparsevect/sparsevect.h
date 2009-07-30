@@ -113,3 +113,13 @@ void sv_print(sv_vector vect);
 
 /* Free all memory associated with vect */
 void sv_delete(sv_vector vect);
+
+/*
+   Writes a binary version of the vector to a file pointer.
+*/
+int sv_dump(sv_vector vect, FILE *file);
+/*
+   Loads a binary version of the vector from a file pointer.
+   Returns a sv_vector.
+*/
+sv_vector sv_load(FILE *file);
