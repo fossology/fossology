@@ -87,9 +87,9 @@ class ui_welcome extends FO_Plugin
           into the FOSSology project. With it, you can:<br>
           <br>
           <img src='images/right-point-bullet.gif'>Upload files 
-          to analyze.<em> <font size='-1'>(Login access required.)</font> </em><br>
+          to analyze.<br>
           <img src='images/right-point-bullet.gif'>Unpack and store the data within the files for analysis. <br>
-          <img src='images/right-point-bullet.gif'>Invoke specialized agents to scan and analyze the files.<font size='-1'><em> (Login access required.)</em></font><br>
+          <img src='images/right-point-bullet.gif'>Invoke specialized agents to scan and analyze the files.  <br>
           <img src='images/right-point-bullet.gif'>Store and display the analyzed results. </font><br>
         </p>
       </blockquote></td>
@@ -134,9 +134,8 @@ class ui_welcome extends FO_Plugin
           found in the Software Repository and Database.<br>
           <em><strong>Scheduler</strong></em> - Runs the agents, making efficient 
           use of available resources.<br>
-          <em><strong>Web GUI</strong></em> &shy; - Provides user access to FOSSology.</font></p>
-        <p><font face='Arial, Helvetica, sans-serif'><em>Existing functionality 
-          is accessable only from the user interface.</em></font><br>
+          <em><strong>Web GUI</strong></em> &shy; - Provides user access to FOSSology.<br>
+          <em><strong>Command line utilities</strong></em> &shy; - Provides scripting access to FOSSology.</font>
         </p>
       </blockquote></td>
     <td><img src='images/fossology-flow4.png'> </td>
@@ -160,11 +159,10 @@ class ui_welcome extends FO_Plugin
               </font><br>-->
             
 			  <font face='Arial, Helvetica, sans-serif'><em><strong><a href='http://fossology.org/'>FOSSology 
-              documentation wiki</a></strong></em> - Provides access to extended 
-              information about using Fossology.<br>
+              web site</a></strong></em> - Where you can find more information and get help on FOSSology.<br>
               <em><strong><a href='https://fossbazaar.org/'>FOSSbazaar web site</a></strong></em></font> 
               <font face='Arial, Helvetica, sans-serif'> - A community website 
-              with information about Free Open source Software.</font>
+              with information on Open Source Governance.</font>
           </blockquote>
         </blockquote>
       </blockquote></td>
