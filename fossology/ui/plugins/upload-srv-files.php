@@ -74,7 +74,8 @@ class upload_srv_files extends FO_Plugin {
       $Name = str_replace('`', '\`', $Name);
       $Name = str_replace('$', '\$', $Name);
       $CMD.= " -n \"$Name\"";
-    } else {
+    }
+    else {
       $Name = $SourceFiles;
     }
     /* Check for specified agent analysis */

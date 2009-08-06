@@ -34,6 +34,7 @@ class ui_browse extends FO_Plugin {
   );
   var $DBaccess = PLUGIN_DB_READ;
   var $LoginFlag = 0;
+
   /***********************************************************
   Install(): Create and configure database tables
   ***********************************************************/
@@ -66,6 +67,7 @@ class ui_browse extends FO_Plugin {
     }
     return (0);
   } // Install()
+
   /***********************************************************
   RegisterMenus(): Customize submenus.
   ***********************************************************/
@@ -101,6 +103,7 @@ class ui_browse extends FO_Plugin {
       menu_insert("Browse::Browse", 1, $URI);
     }
   } // RegisterMenus()
+
   /***********************************************************
   ShowItem(): Given a upload_pk, list every item in it.
   If it is an individual file, then list the file contents.
@@ -198,6 +201,7 @@ class ui_browse extends FO_Plugin {
     }
     return ($V);
   } // ShowItem()
+
   /***********************************************************
   ShowFolder(): Given a Folder_pk, list every upload in the folder.
   ***********************************************************/
@@ -216,7 +220,7 @@ class ui_browse extends FO_Plugin {
 	AND lft IS NOT NULL
 	WHERE upload_pk IN
 	(SELECT child_id FROM foldercontents WHERE foldercontents_mode & 2 != 0 AND parent_fk = $Folder)
-	ORDER BY upload_filename,upload_desc,upload_pk;";
+	ORDER BY upload_filename,upload_desc,upload_pk,upload_origin;";
     $Results = $DB->Action($Sql);
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     $V.= "<table border=1 width='100%'>";
@@ -252,6 +256,10 @@ class ui_browse extends FO_Plugin {
       if (empty($Name)) {
         $Name = $Row['upload_filename'];
       }
+      $uploadOrigin = $Row['upload_origin'];
+      //if(!strlen($uploadOrigin)) {
+      //  $uploadOrigin = $Name;
+      //}
       //	  $Sql2 = "SELECT count(*) AS count FROM uploadtree WHERE upload_fk = '$UploadPk';";
       //          $SResults = $DB->Action($Sql2);
       //	  $ItemCount = number_format($SResults[0]['count'], 0, "", ",");
@@ -266,13 +274,13 @@ class ui_browse extends FO_Plugin {
         $V.= "<b>" . $Name . "</b>";
       }
       if ($Row['upload_mode'] & 1 << 2) {
-        $V.= "<br>Added by URL: " . htmlentities($Row['upload_filename']);
+        $V.= "<br>Added by URL: " . htmlentities($uploadOrigin);
       }
       if ($Row['upload_mode'] & 1 << 3) {
-        $V.= "<br>Added by file upload: " . htmlentities($Row['upload_filename']);
+        $V.= "<br>Added by file upload: " . htmlentities($uploadOrigin);
       }
       if ($Row['upload_mode'] & 1 << 4) {
-        $V.= "<br>Added from filesystem: " . htmlentities($Row['upload_filename']);
+        $V.= "<br>Added from filesystem: " . htmlentities($uploadOrigin);
       }
       $V.= "<br>";
       $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
@@ -330,6 +338,7 @@ class ui_browse extends FO_Plugin {
     $V.= "</table>\n";
     return ($V);
   } /* ShowFolder() */
+
   /***********************************************************
   Output(): This function returns the scheduler status.
   ***********************************************************/
@@ -430,5 +439,4 @@ class ui_browse extends FO_Plugin {
     }
 };
 $NewPlugin = new ui_browse;
-$NewPlugin->Initialize();
 ?>
