@@ -44,13 +44,14 @@ class upload_file extends FO_Plugin {
     if (empty($Name)) {
       $Name = basename(@$_FILES['getfile']['name']);
     }
+    $originName = @$_FILES['getfile']['name'];
     $ShortName = basename($Name);
     if (empty($ShortName)) {
       $ShortName = $Name;
     }
     /* Create an upload record. */
     $Mode = (1 << 3); // code for "it came from web upload"
-    $uploadpk = JobAddUpload($ShortName, $Name, $Desc, $Mode, $Folder);
+    $uploadpk = JobAddUpload($ShortName, $originName, $Desc, $Mode, $Folder);
     if (empty($uploadpk)) {
       return ("Failed to insert upload record");
     }
@@ -64,8 +65,6 @@ class upload_file extends FO_Plugin {
     if (!chmod($UploadedFile, 0660)) {
       return ("ERROR! could not update permissions on downloaded file");
     }
-    //echo "<pre>uploadfile: File Chmod'ed\n</pre>";
-    //echo "<pre>uploadfile: scheduling wget\n</pre>";
 
     /* Run wget_agent locally to import the file. */
     global $LIBEXECDIR;
@@ -74,11 +73,9 @@ class upload_file extends FO_Plugin {
     unlink($UploadedFile);
 
     global $Plugins;
-    //print "<pre>UPF: Plugins are:\n"; print_r($Plugins) . "\n</pre>";
     $Unpack = &$Plugins[plugin_find_id("agent_unpack") ];
 
     $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
-    //rint "<pre>UPF: after looking for agent_unpack, Unpack is:$Unpack\n</pre>";
     AgentCheckBoxDo($uploadpk);
 
     if (CheckEnotification()) {

@@ -65,10 +65,17 @@ class upload_properties extends FO_Plugin {
         $oFN = $DB->Action($Sql);
         $oldFileName = basename($oFN[0]['ufile_name']);
 
+        /* Always keep ufile_name and upload_filename in sync */
         $Sql = "UPDATE uploadtree SET ufile_name='$NewName' ".
               "WHERE upload_fk=$uploadId AND pfile_fk=$pfileFk;";
         $Results = $DB->Action($Sql);
         $Row = $Results[0];
+
+        $Sql = "UPDATE upload SET upload_filename='$NewName' ".
+              "WHERE upload_pk=$uploadId AND pfile_fk=$pfileFk;";
+        $Results = $DB->Action($Sql);
+        $Row = $Results[0];
+
         $set = 1;
       }
       /* Note using this method, there is no way for the user to create a

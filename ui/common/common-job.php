@@ -195,15 +195,19 @@ function JobQueueAddDependency($JobQueueChild, $JobQueueParent) {
 /**
  * function:  JobAddUpload
  *
- * @abstract Insert a new upload record.
+ * Insert a new upload record, and update foldercontents table
  *
  * @param string $job_name   the name to associate with the job
+ * NOTE: $job_name is not used in this function!
  * @param string $filename   the path the to file to upload
  * @param string $desc       A meaningful description
  * @param int    $UploadMode e.g. 1<<2 = URL, 1<<3 = file upload, 1<<4 = filesystem
  * @param int    $FolderPk   The folder primary key
  *
  * @return upload_pk the upload primary key or null (failure)
+ *
+ * @todo fix the name of this function, it has nothing to do with scheduling
+ * a job.
  */
 function JobAddUpload($job_name, $filename, $desc, $UploadMode, $FolderPk) {
   global $DB;
@@ -224,19 +228,20 @@ function JobAddUpload($job_name, $filename, $desc, $UploadMode, $FolderPk) {
   $UserId = $_SESSION['UserId'];
   if (!empty($UserId)) {
     $DB->Action("INSERT INTO upload
-      (upload_desc,upload_filename,upload_userid,upload_mode) VALUES
-      ('$desc','$filename','$UserId','$UploadMode');");
+      (upload_desc,upload_filename,upload_userid,upload_mode,upload_origin) VALUES
+      ('$desc','$job_name','$UserId','$UploadMode','$filename');");
     $Results = $DB->Action("SELECT currval('upload_upload_pk_seq') as upload_pk FROM upload;");
     $uploadpk = $Results[0]['upload_pk'];
     if (empty($uploadpk)) {
       $DB->Action("ROLLBACK");
       return;
     }
-  } else {
+  }
+  else {
     /* Create the upload record WITHOUT upload_userid */
     $DB->Action("INSERT INTO upload
-      (upload_desc,upload_filename,upload_mode) VALUES
-      ('$desc','$filename','$UploadMode');");
+      (upload_desc,upload_filename,upload_mode,upload_origin) VALUES
+      ('$desc','$job_name','$UploadMode','$filename');");
     $Results = $DB->Action("SELECT currval('upload_upload_pk_seq') as upload_pk FROM upload;");
     $uploadpk = $Results[0]['upload_pk'];
     if (empty($uploadpk)) {
@@ -266,6 +271,7 @@ function JobAddUpload($job_name, $filename, $desc, $UploadMode, $FolderPk) {
   $DB->Action("COMMIT;");
   return ($uploadpk);
 } // JobAddUpload()
+
 /************************************************************
  JobQueueFindKey(): Given a job_pk and a jobqueue name, returns
  the jq_pk, or -1 if it does not exist.
@@ -338,29 +344,33 @@ function JobAddJob($upload_pk, $job_name, $priority = 0) {
     $job_user_fk = $Results[0]['user_pk'];
   }
 
-if (!empty($_SESSION['UserEmail'])) {
-  $job_email_notify = $_SESSION['UserEmail'];
-} else {
-  $job_email_notify = 'fossy@localhost';
-}
-$Job_email_notify = str_replace("'", "''", $job_email_notify);
-$Job_name = str_replace("'", "''", $job_name);
-if (empty($upload_pk)) {
-  $SQLInsert = "INSERT INTO job
+  if (!empty($_SESSION['UserEmail'])) {
+    $job_email_notify = $_SESSION['UserEmail'];
+  } else {
+    $job_email_notify = 'fossy@localhost';
+  }
+  $Job_email_notify = str_replace("'", "''", $job_email_notify);
+  $Job_name = str_replace("'", "''", $job_name);
+  if (empty($upload_pk)) {
+    $SQLInsert = "INSERT INTO job
     	(job_user_fk,job_queued,job_priority,job_email_notify,job_name) VALUES
     	('$job_user_fk',now(),'$priority','$Job_email_notify','$Job_name');";
-} else {
-  $SQLInsert = "INSERT INTO job
+  }
+  else {
+    $SQLInsert = "INSERT INTO job
     	(job_user_fk,job_queued,job_priority,job_email_notify,job_name,job_upload_fk) VALUES
      	('$job_user_fk',now(),'$priority','$Job_email_notify','$Job_name','$upload_pk');";
-}
-$jobpk = JobFindKey($upload_pk, $job_name);
-if ($jobpk >= 0) {
+  }
+  $jobpk = JobFindKey($upload_pk, $job_name);
+  /*
+     If the job already exists, just return the jobpk, don't insert
+   */
+  if ($jobpk >= 0) {
+    return ($jobpk);
+  }
+  $DB->Action($SQLInsert);
+  $jobpk = JobFindKey($upload_pk, $job_name);
   return ($jobpk);
-}
-$DB->Action($SQLInsert);
-$jobpk = JobFindKey($upload_pk, $job_name);
-return ($jobpk);
 } // JobAddJob()
 
 /**

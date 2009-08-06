@@ -31,10 +31,12 @@ class upload_url extends FO_Plugin {
   public $MenuList = "Upload::From URL";
   public $Dependency = array("db", "agent_unpack");
   public $DBaccess = PLUGIN_DB_UPLOAD;
+
   /*********************************************
    Upload(): Process the upload request.
    Returns NULL on success, string on failure.
    *********************************************/
+
   function Upload($Folder, $GetURL, $Desc, $Name) {
     /* See if the URL looks valid */
     if (empty($Folder)) {

@@ -272,6 +272,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     $match = preg_match('/^(.*?repository)/', $FilePath, $matches);
     $Filename = $matches[1] . '/' . $FilePart;
 
+
     if (empty($UploadName)) {
       $UploadName = basename($UploadArchive);
     }
@@ -391,6 +392,8 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     }
   }
     } /* UploadOne() */
+
+
     /************************************************************************/
     /************************************************************************/
     /************************************************************************/
@@ -402,6 +405,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     $TarExcludeList = "";
     $bucket_size = 3;
     $ME = exec('id -un',$toss,$rtn);
+
     for ($i = 1;$i < $argc;$i++) {
       switch ($argv[$i]) {
         case '-A': /* use alphabet buckets */
@@ -498,7 +502,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
               if (empty($UploadName)) {
                 $UploadName = basename($UploadArchive);
               }
-              //print "  CP2: Calling Upload1 from stdin\n";
               UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
               /* prepare for next parameter */
               $UploadName = "";
