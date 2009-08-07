@@ -84,6 +84,13 @@ NOTE: Upstream is planning on eventually moving the things specified in
 this config file into the database and be managed via the web
 interface, which will allow for more seamless upgrades.
 
+The FOSSology database:
+The fossology-db package Depends on postgresql and will create the
+fossology database when installed. This requires that postgresql is
+running and accessible when the package is installed. If you want to
+have FOSSology use a remote database or you want to create the
+fossology by hand, do not install fossology-db. Instead setup the
+database as you want it, and edit /etc/fossology/Db.conf accordingly.
 
 Migrating from upstream:
 * If you are migrating from an upstream install, you will need to run
