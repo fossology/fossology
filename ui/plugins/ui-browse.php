@@ -24,6 +24,10 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+global $WEBDIR;
+require_once("$WEBDIR/common/common.php");
+
 class ui_browse extends FO_Plugin {
   var $Name = "browse";
   var $Title = "Browse";
@@ -372,20 +376,20 @@ class ui_browse extends FO_Plugin {
     if (!empty($ReAnalyze) && !empty($UploadPk)) {
       $rc = $ReAnalyze->RemoveLicenseMeta($UploadPk, NULL, 1);
       if (empty($rc)) {
-        $V.= PopupAlert('License data re-analysis added to job queue');
+        $V.= displayMessage('License data re-analysis added to job queue');
       }
       else {
-        $V.= PopupAlert($rc);
+        $V.= displayMessage("Scheduling of re-analysis failed, return code: $rc");
       }
     }
     $UploadPk = GetParm("analyze", PARM_INTEGER);
     if (!empty($Analyze) && !empty($UploadPk)) {
       $rc = $Analyze->AgentAdd($UploadPk);
       if (empty($rc)) {
-        $V.= PopupAlert('License data analysis added to job queue');
+        $V.= displayMessage('License data analysis added to job queue');
       }
       else {
-        $V.= PopupAlert($rc);
+        $V.= displayMessage("Scheduling of re-analysis failed, return code: $rc");
       }
     }
     switch ($this->OutputType) {

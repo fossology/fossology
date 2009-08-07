@@ -522,6 +522,7 @@ class core_schema extends FO_Plugin {
   ***********************************************************/
   function ViewSchema() {
     $Schema = $this->GetSchema();
+    print "<pre>DB: CSchema: Schema array looks like:\n"; print_r($Schema) . "</pre>/n";
     print "<ul>\n";
     print "<li><a href='#Table'>Tables</a>\n";
     print "<li><a href='#Sequence'>Sequences</a>\n";
@@ -1518,7 +1519,8 @@ LANGUAGE plpgsql;
     if ($this->InitSchema($Verbose)) {
       return ("Unable to initialize the new schema.\n");
     }
-    print "New schema applied and initialization completed.\n";
+    $success = "New schema applied and initialization completed.\n";
+    print $success;
     $DB->Action("SET statement_timeout = 120000;"); /* reset DB timeouts */
     return;
   } // ApplySchema()
@@ -1546,7 +1548,7 @@ LANGUAGE plpgsql;
         if ($Init == 1) {
           $rc = $this->ViewSchema();
           if (!empty($rc)) {
-            $V.= PopupAlert($rc);
+            $V.= displayMessage($rc);
           }
           $V.= "<hr>\n";
         }
@@ -1554,7 +1556,7 @@ LANGUAGE plpgsql;
         if ($Init == 1) {
           $rc = $this->CompareSchema($this->Filename);
           if (!empty($rc)) {
-            $V.= PopupAlert($rc);
+            $V.= displayMessage($rc);
           }
           $V.= "<hr>\n";
         }
@@ -1563,7 +1565,7 @@ LANGUAGE plpgsql;
         if ($Init == 1) {
           $rc = $this->ExportSchema($this->Filename);
           if (!empty($rc)) {
-            $V.= PopupAlert($rc);
+            $V.= displayMessage($rc);
           }
           $V.= "<hr>\n";
         }
@@ -1573,7 +1575,7 @@ LANGUAGE plpgsql;
           $rc = $this->ApplySchema($this->Filename, 0, 0);
           print "</pre>";
           if (!empty($rc)) {
-            $V.= PopupAlert($rc);
+            $V.= displayMessage($rc);
           }
           $V.= "<hr>\n";
         }
@@ -1603,7 +1605,7 @@ LANGUAGE plpgsql;
     print ($V);
     return;
   } // Output()
-  
+
 }; // class core_schema
 $NewPlugin = new core_schema;
 $NewPlugin->Initialize();

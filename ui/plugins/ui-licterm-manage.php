@@ -679,11 +679,11 @@ function moveOptions(theSelFrom, theSelTo)
           if (empty($rc))
             {
             /* Need to refresh the screen */
-            $V .= PopupAlert('License term information updated.');
+            $V .= displayMessage('License term information updated.');
             }
           else
             {
-            $V .= PopupAlert($rc);
+            $V .= displayMessage("Could not add License term information, error code is:$rc");
             }
           }
         $TermKey = GetParm('termkey',PARM_INTEGER);
@@ -703,5 +703,4 @@ function moveOptions(theSelFrom, theSelTo)
 
   };
 $NewPlugin = new licterm_manage;
-$NewPlugin->Initialize();
 ?>

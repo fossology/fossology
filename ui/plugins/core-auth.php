@@ -122,7 +122,7 @@ class core_auth extends FO_Plugin {
     $Now = time();
     if (!empty($_SESSION['time'])) {
       /* Logins older than 60 minutes are auto-logout */
-      if (@$_SESSION['time'] + 60 * 60 < $Now) {
+      if (@$_SESSION['time'] + 60 * 240 < $Now) {
         $_SESSION['User'] = NULL;
         $_SESSION['UserId'] = NULL;
         $_SESSION['UserLevel'] = NULL;
@@ -154,7 +154,7 @@ class core_auth extends FO_Plugin {
       }
       /* Recheck the user in case he is suddenly blocked or changed. */
       if (empty($_SESSION['time_check'])) {
-        $_SESSION['time_check'] = time() + 10 * 60;
+        $_SESSION['time_check'] = time() + 240 * 60;
       }
       if (time() >= @$_SESSION['time_check']) {
         $Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';");
@@ -247,7 +247,7 @@ class core_auth extends FO_Plugin {
     $_SESSION['UserEmail'] = $R['user_email'];
     $_SESSION['UserEnote'] = $R['email_notify'];
     $_SESSION['Folder'] = $R['root_folder_fk'];
-    $_SESSION['time_check'] = time() + 10 * 60;
+    $_SESSION['time_check'] = time() + 240 * 60;
     /* No specified permission means ALL permission */
     if ("X" . $R['user_perm'] == "X") {
       $_SESSION['UserLevel'] = PLUGIN_DB_USERADMIN;
