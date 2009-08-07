@@ -522,7 +522,6 @@ class core_schema extends FO_Plugin {
   ***********************************************************/
   function ViewSchema() {
     $Schema = $this->GetSchema();
-    print "<pre>DB: CSchema: Schema array looks like:\n"; print_r($Schema) . "</pre>/n";
     print "<ul>\n";
     print "<li><a href='#Table'>Tables</a>\n";
     print "<li><a href='#Sequence'>Sequences</a>\n";
