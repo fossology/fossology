@@ -10,10 +10,11 @@ Package: fossology
 Architecture: all
 Depends: fossology-web-single
 Description: open and modular architecture for analyzing software
- A web based tool that allows you to upload software to be picked apart
- and then analyzed by software agents which produce results that are
- then browsable via the web interface. Existing agents include license
- analysis, metadata extraction, and MIME type identification.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
  .
  This metapackage ensures that the fossology component packages needed
  for a single-system install are installed in the right order. For a
@@ -24,10 +25,11 @@ Package: fossology-common
 Architecture: any
 Depends: php5-pgsql, php-pear, php5-cli, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, common files
- A web based tool that allows you to upload software to be picked apart
- and then analyzed by software agents which produce results that are
- then browsable via the web interface. Existing agents include license
- analysis, metadata extraction, and MIME type identification.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
  .
  This package contains the resources needed by all of the other
  fossology components.
@@ -37,10 +39,11 @@ Architecture: all
 Depends: fossology-agents, apache2, libapache2-mod-php5
 Conflicts: fossology-web-single
 Description: architecture for analyzing software, web interface
- A web based tool that allows you to upload software to be picked apart
- and then analyzed by software agents which produce results that are
- then browsable via the web interface. Existing agents include license
- analysis, metadata extraction, and MIME type identification.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
  .
  This package depends on the packages for the web interface.
 
@@ -49,10 +52,11 @@ Architecture: all
 Depends: fossology-scheduler-single, apache2, libapache2-mod-php5
 Conflicts: fossology-web
 Description: architecture for analyzing software, web interface  (single machine case)
- A web based tool that allows you to upload software to be picked apart
- and then analyzed by software agents which produce results that are
- then browsable via the web interface. Existing agents include license
- analysis, metadata extraction, and MIME type identification.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
  .
  This package depends on the packages needed for the web interface and
  to make a single machine install properly.
@@ -62,10 +66,11 @@ Architecture: any
 Depends: fossology-agents, ${shlibs:Depends}, ${misc:Depends}
 Conflicts: fossology-scheduler-single
 Description: architecture for analyzing software, scheduler
- A web based tool that allows you to upload software to be picked apart
- and then analyzed by software agents which produce results that are
- then browsable via the web interface. Existing agents include license
- analysis, metadata extraction, and MIME type identification.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
  .
  This package contains the scheduler daemon.
 
@@ -74,10 +79,11 @@ Architecture: any
 Depends: fossology-agents-single, ${shlibs:Depends}, ${misc:Depends}
 Conflicts: fossology-scheduler
 Description: architecture for analyzing software, scheduler (single machine case)
- A web based tool that allows you to upload software to be picked apart
- and then analyzed by software agents which produce results that are
- then browsable via the web interface. Existing agents include license
- analysis, metadata extraction, and MIME type identification.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
  .
  This package contains the scheduler daemon and depends on the right
  packages to make a single machine install properly.
@@ -86,10 +92,11 @@ Package: fossology-db
 Architecture: all
 Depends: postgresql-8.3 | postgresql-8.1, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, database
- A web based tool that allows you to upload software to be picked apart
- and then analyzed by software agents which produce results that are
- then browsable via the web interface. Existing agents include license
- analysis, metadata extraction, and MIME type identification.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
  .
  This package contains the database resources.
 
@@ -99,10 +106,11 @@ Depends: fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoi
 Suggests: mail-transport-agent
 Conflicts: fossology-agents-single
 Description: architecture for analyzing software, analysis agents
- A web based tool that allows you to upload software to be picked apart
- and then analyzed by software agents which produce results that are
- then browsable via the web interface. Existing agents include license
- analysis, metadata extraction, and MIME type identification.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
  .
  This package contains the agent programs and their resources.
 
@@ -112,10 +120,11 @@ Depends: fossology-db, fossology-common, binutils, bzip2, cabextract, cpio, sleu
 Suggests: mail-transport-agent
 Conflicts: fossology-agents
 Description: architecture for analyzing software, agents (single machine case)
- A web based tool that allows you to upload software to be picked apart
- and then analyzed by software agents which produce results that are
- then browsable via the web interface. Existing agents include license
- analysis, metadata extraction, and MIME type identification.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
  .
  This package contains the agent programs and their resources plus depends
  on fossology-db in order to ensure the database is set up on this system.
@@ -124,10 +133,11 @@ Package: fossology-dev
 Architecture: any
 Depends: postgresql-server-dev-8.3 | postgresql-server-dev-8.1, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, development files
- A web based tool that allows you to upload software to be picked apart
- and then analyzed by software agents which produce results that are
- then browsable via the web interface. Existing agents include license
- analysis, metadata extraction, and MIME type identification.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
  .
  This package contains resources needed to developer with the
  libfossdb and libfossrepo libraries.
