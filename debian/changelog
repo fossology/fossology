@@ -1,12 +1,21 @@
-fossology (1.1.1~20090716-1) unstable; urgency=low
+fossology (1.1.1~SVNBUILD-1) unstable; urgency=low
 
-  * Unofficial SVN build
+  * Unofficial SVN build.
 
- -- Matt Taggart <taggart@debian.org>  Thu, 16 Jul 2009 10:19:26 -0700
+ -- Matt Taggart <taggart@debian.org>  Fri, 07 Aug 2009 15:42:28 -0700
+
+fossology (1.1.0-2) unstable; urgency=low
+
+  * fix description to actually be a proper sentence (Closes: #539716 )
+  * change fossology-db to better explain that it will create the db
+    (Closes: #540252 )
+  * UNRELEASED
+
+ -- Matt Taggart <taggart@debian.org>  Fri, 07 Aug 2009 15:21:37 -0700
 
 fossology (1.1.0-1) unstable; urgency=low
 
-  * New upstream release (Closes: #521864 #531864 #531866 )
+  * New upstream release (Closes: #521864, #531864, #531866 )
   * fossology-scheduler-single now automatically gives the user a new
     Scheduler.conf, to ensure that new agents get added.
     fossology-scheduler still warns the user to review.
