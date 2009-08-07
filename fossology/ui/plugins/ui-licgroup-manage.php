@@ -588,7 +588,7 @@ function moveOptions(theSelFrom, theSelTo)
 	    }
 	  else
 	    {
-	    $V .= displayMessage($rc);
+	    $V .= displayMessage("Could not update License group information, error code is:$rc");
 	    }
 	  /* Reload the group list since it changed. */
 	  $this->LicGroupPlugin->MakeGroupTables();

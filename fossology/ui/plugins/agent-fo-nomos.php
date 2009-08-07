@@ -162,10 +162,10 @@ class agent_fonomos extends FO_Plugin {
           $rc = $this->AgentAdd($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $Page.= PopupAlert('Analysis added to job queue');
+            $Page.= displayMessage('fo_nomos analysis added to the job queue');
           }
           else {
-            $Page.= PopupAlert("Scheduling failed: $rc");
+            $Page.= displayMessage("Scheduling of fo_nomos failed: $rc");
           }
         }
         /* Get list of projects that are not scheduled for uploads */

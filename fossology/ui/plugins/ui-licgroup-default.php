@@ -264,7 +264,7 @@ class licgroup_default extends FO_Plugin
       $LicList[] = $Results[$i]['licgroup_pk'];
       }
     $LG->LicGroupInsert(-1,$GroupName,$GroupName,$GroupColor,NULL,$LicList);
-    
+
     print "Default Fedora groups created.\n<hr>\n";
     } // DefaultGroupsFedora()
 
@@ -540,7 +540,7 @@ class licgroup_default extends FO_Plugin
 	  $rc = $this->DefaultGroups();
 	  if (!empty($rc))
 	    {
-	    $V .= PopupAlert($rc);
+	    $V .= displayMessage("Could not obtain default license groups, error code is:$rc");
 	    }
 	  }
 
@@ -550,7 +550,7 @@ class licgroup_default extends FO_Plugin
 	  $rc = $this->DefaultGroupsFSF();
 	  if (!empty($rc))
 	    {
-	    $V .= PopupAlert($rc);
+      $V .= displayMessage("Could not obtain FSF license groups, error code is:$rc");
 	    }
 	  }
 
@@ -560,7 +560,7 @@ class licgroup_default extends FO_Plugin
 	  $rc = $this->DefaultGroupsFedora();
 	  if (!empty($rc))
 	    {
-	    $V .= PopupAlert($rc);
+	    $V .= displayMessage("Could not obtain Fedora license groups, error code is:$rc");
 	    }
 	  }
 
@@ -604,5 +604,4 @@ class licgroup_default extends FO_Plugin
 
   };
 $NewPlugin = new licgroup_default;
-$NewPlugin->Initialize();
 ?>
