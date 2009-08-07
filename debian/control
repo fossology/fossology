@@ -98,7 +98,12 @@ Description: architecture for analyzing software, database
  Existing agents include license analysis, metadata extraction, and MIME
  type identification.
  .
- This package contains the database resources.
+ This package contains the database resources and will create a
+ fossology database on the system (and requires that postgresql is
+ running at install time). If you prefer to use a remote database,
+ or want to create the database yourself, do not install this package
+ and consult the README.Debian file included in the fossology-common
+ package.
 
 Package: fossology-agents
 Architecture: any
