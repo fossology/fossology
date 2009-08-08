@@ -630,7 +630,7 @@
 
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["DESC"] = "";
   $Schema["TABLE"]["report_cache_user"]["cache_on"]["ADD"] = "ALTER TABLE \"report_cache_user\" ADD COLUMN \"cache_on\" char(1);";
-  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"cache_on\" DROP NOT NULL, ALTER COLUMN \"cache_on\" SET DEFAULT 'Y'::char;";
+  $Schema["TABLE"]["report_cache_user"]["cache_on"]["ALTER"] = "ALTER TABLE \"report_cache_user\" ALTER COLUMN \"cache_on\" DROP NOT NULL, ALTER COLUMN \"cache_on\" SET DEFAULT 'Y'::character(1);";
 
 
   $Schema["TABLE"]["scheduler_status"]["unique_scheduler"]["DESC"] = "COMMENT ON COLUMN \"scheduler_status\".\"unique_scheduler\" IS 'unique id for the scheduler: gethostid()+getpid() for the scheduler';";
@@ -719,6 +719,10 @@
   $Schema["TABLE"]["upload"]["pfile_fk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"pfile_fk\" int4;";
   $Schema["TABLE"]["upload"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
 
+  $Schema["TABLE"]["upload"]["upload_origin"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"upload_origin\" IS 'original filename or directory name or URL, depending on upload_mode';";
+  $Schema["TABLE"]["upload"]["upload_origin"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"upload_origin\" text;";
+  $Schema["TABLE"]["upload"]["upload_origin"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"upload_origin\" DROP NOT NULL;";
+
 
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["DESC"] = "";
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"uploadtree_pk\" int4;";
@@ -786,13 +790,13 @@
   $Schema["TABLE"]["users"]["user_email"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_email\" DROP NOT NULL;";
 
   $Schema["TABLE"]["users"]["email_notify"]["DESC"] = "COMMENT ON COLUMN \"users\".\"email_notify\" IS 'Email notification flag';";
-  $Schema["TABLE"]["users"]["email_notify"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"email_notify\" varchar(1);";
-  $Schema["TABLE"]["users"]["email_notify"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"email_notify\" DROP NOT NULL, ALTER COLUMN \"email_notify\" SET DEFAULT 'y'::character varying;";
+  $Schema["TABLE"]["users"]["email_notify"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"email_notify\" char(1);";
+  $Schema["TABLE"]["users"]["email_notify"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"email_notify\" DROP NOT NULL, ALTER COLUMN \"email_notify\" SET DEFAULT 'y'::character(1);";
 
 
 
-  $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::\"unknown\" AS ts, NULL::\"unknown\" AS upload_pk, NULL::\"unknown\" AS pfile_fk, NULL::\"unknown\" AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::\"unknown\" AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
-  $Schema["VIEW"]["keyagent"] = "CREATE VIEW \"keyagent\" AS SELECT \"key\".key_pk, \"key\".key_name, \"key\".key_desc, \"key\".key_parent_fk, \"key\".key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc FROM \"key\", agent WHERE (agent.agent_pk = \"key\".key_agent_fk);";
+  $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::unknown AS ts, NULL::unknown AS upload_pk, NULL::unknown AS pfile_fk, NULL::unknown AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::unknown AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
+  $Schema["VIEW"]["keyagent"] = "CREATE VIEW \"keyagent\" AS SELECT key.key_pk, key.key_name, key.key_desc, key.key_parent_fk, key.key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc FROM key, agent WHERE (agent.agent_pk = key.key_agent_fk);";
 
   $Schema["SEQUENCE"]["agent_agent_pk_seq"] = "CREATE SEQUENCE \"agent_agent_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["agent_lic_meta_agent_lic_meta_pk_seq"] = "CREATE SEQUENCE \"agent_lic_meta_agent_lic_meta_pk_seq\" START 1;";
