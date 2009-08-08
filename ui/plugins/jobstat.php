@@ -44,6 +44,8 @@ global $DB;
  * running jobs by the user (that should get default jobs like removing folders).
  *
  * @todo investigate how to tie cp2foss uploads to the user, is it possible?
+ *
+ * @version "Id: $"
  */
 class jobStatus extends FO_Plugin {
   public $Name       = "jobstat";
@@ -64,8 +66,6 @@ class jobStatus extends FO_Plugin {
    *
    */
   public function displayJob($uploadId=NULL) {
-
-    //$this->Interval = 7;
 
     // Create the style and heading
     $Heading = "<table border=2 align='center' cellspacing=1 cellpadding=5>\n" .
