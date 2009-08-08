@@ -27,24 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 global $WEBDIR;
 require_once("$WEBDIR/common/common.php");
 /*
- * Make this into a jobs menu item.  MyJobs
- * - get user name from session
- * - query db to get user_pk
- *   - Use user_pk to get all jobs for this user, getting the
- *     - job_upload_fk, job_name
- *     SELECT user_pk, user_name from users WHERE user_name=[session];
- *     ??SELECT job_pk,job_upload_fk,job_name from job WHERE job_user_fk=3;
- *     SELECT job_upload_fk FROM job WHERE job_user_fk="$_SESSION[UserId]";
- *     SELECT job_upload_fk,upload_filename from job,upload WHERE job_user_fk=3
- *     and upload_pk=job_upload_fk order by upload_pk;
- *     that will get the data we need.  this gets used by the fill_table method
- *     which will use the querys to get the data and fill in the table entry,
- *     returns big'o string that is the table entry for that job.
- *  - Need to create stop and start buttons with appropriate javascript that
- *  edits the dom to remove and insert the meta tag that does the refresh.
- *
- *  for bonus points, have a select type widget that allows you to set the
- *  refresh time. (can't go below 30 seconds?).
+ * jobjstat plugin
  */
 
 global $DB;
@@ -57,6 +40,10 @@ global $DB;
  *
  * @author markd
  *
+ * @todo Fix this defect: This code only uses upload_pk's it needs to find all
+ * running jobs by the user (that should get default jobs like removing folders).
+ *
+ * @todo investigate how to tie cp2foss uploads to the user, is it possible?
  */
 class jobStatus extends FO_Plugin {
   public $Name       = "jobstat";
@@ -66,6 +53,7 @@ class jobStatus extends FO_Plugin {
   public $MenuTarget = 0;
   public $LoginFlag  = 1;    // Must be logged in
   public $Dependency = array('upload_file', 'upload_url', 'upload_srv_files');
+  private $Interval  = 7;    // default refresh time
 
   /**
    * displayJob
@@ -76,6 +64,9 @@ class jobStatus extends FO_Plugin {
    *
    */
   public function displayJob($uploadId=NULL) {
+
+    //$this->Interval = 7;
+
     // Create the style and heading
     $Heading = "<table border=2 align='center' cellspacing=1 cellpadding=5>\n" .
         "   <tr>\n" .
@@ -91,10 +82,10 @@ class jobStatus extends FO_Plugin {
         "   </tr>\n";
 
     $Tbl = $this->MakeJobTblRow();
-    $Refresh = "<META HTTP-EQUIV='refresh' CONTENT=30 name='refresher'/>\n";
+    $Refresh = "<META HTTP-EQUIV='refresh' CONTENT=$this->Interval name='refresher'/>\n";
+
     $RunningJobs = $Heading . $Tbl . $Refresh;
     print $RunningJobs;
-    // At this point, format and display the completed jobs
   }
 
   protected function MakeJobTblRow() {
@@ -118,13 +109,10 @@ class jobStatus extends FO_Plugin {
                       'failed' => 'bgcolor="#FF6666"');
     $UploadList = $DB->Action($SqlUploadList);
     $CompletedJobs = array();
-    //print "<pre>";
-    //print "UploadList is:\n"; print_r($UploadList) . "\n";
     $T = '';
     foreach($UploadList as $upload) {
-      //print "Upload is:\n"; print_r($upload) . "\n";
       $status = JobListSummary($upload['job_upload_fk']);
-      // check the status if completed (no pending and no active?) the push
+      // check the status if completed (no pending and no active?) then push
       // to the completed job list else process as active job
       if ($status['total'] == $status['completed']) {
         array_push(&$CompletedJobs,$upload);
@@ -135,7 +123,6 @@ class jobStatus extends FO_Plugin {
       $T .= "     <td>$upload[upload_filename]:$upload[job_upload_fk]</td>\n";
       $color = "";
       foreach($JobPhase as $phase => $color) {
-        //print "colur is:$colur\n";
         /* Only cells with something going on get a color */
         if($status[$phase] == 0){
           $T .= "     <td align='center'>$status[$phase]</td>\n";
@@ -146,8 +133,8 @@ class jobStatus extends FO_Plugin {
       }
       $T .= "   </tr>\n";      // close the row and table
     }
-    $Interval = 30;
-    $T .= "<caption align='bottom'>Page updates every $Interval seconds</caption>\n";
+
+    $T .= "<caption align='bottom'>Page updates every $this->Interval seconds</caption>\n";
     $T .= "</table>\n";
     return($T);
   } // makeTbl4Job
@@ -159,7 +146,7 @@ class jobStatus extends FO_Plugin {
       case "XML":
         break;
       case "HTML":
-        $V .= $this->displayJob();
+          $this->displayJob(NULL);
         break;
       case "Text":
         break;
