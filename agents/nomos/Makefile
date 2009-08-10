@@ -25,11 +25,19 @@ fo_nomos: $(OBJS) $(DB) $(REPO) $(VARS)
 	$(CC) $(OBJS) $(CFLAGS_LOCAL) -o $@
 #	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
+$(OBJS): %.o: %.c $(HDRS) $(DB) $(VARS)
+	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB) $(CFLAGS_REPOO) $(CFLAGS_AGENTO)
+
 _precheck.o:   _precheck.c
 	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB) $(CFLAGS_REPOO) $(CFLAGS_AGENTO)
 
-$(OBJS): %.o: %.c %.h $(DB) $(VARS)
-	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB) $(CFLAGS_REPOO) $(CFLAGS_AGENTO)
+_precheck.c:	_autodata.c # $(PRE)
+#	@echo "NOTE: _autodata.c has changed --> regenerate _precheck.c"
+	./$(PRE)
+	./$(CHECK)
+#	@$(MAKE) $(STRINGS) $(KEYS)
+
+
 
 #
 # Non "standard" preprocessing stuff starts here...
@@ -40,12 +48,6 @@ encode: encode.o
 _autodefs.h _autodata.c:	$(SPEC) $(LICFIX)
 	@echo "NOTE: GENSEARCHDATA takes 1-2 minutes to run"
 	./$(LICFIX)
-
-_precheck.c:	_autodata.c # $(PRE)
-#	@echo "NOTE: _autodata.c has changed --> regenerate _precheck.c"
-	./$(PRE)
-	./$(CHECK)
-#	@$(MAKE) $(STRINGS) $(KEYS)
 
 
 #
