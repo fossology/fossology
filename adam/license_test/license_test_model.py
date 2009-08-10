@@ -20,6 +20,7 @@
 # Import custom libraries. You should set $PYTHONPATH or make sure that python
 # can find these libraries.
 import parser
+import vector
 # End of custom libraries
 
 import sys
@@ -139,7 +140,7 @@ class LicenseTestModel:
     files = []
     
     # smoothing parameter
-    epsilon = (1.0/1000000.0)
+    epsilon = math.log(1.0/1000000.0)
 
     def __init__(self, files, pr, lw, rw, smoothing):
         self.files = files
@@ -172,6 +173,19 @@ class LicenseTestModel:
         l = [v>2 for v in l]
     
         return l
+
+    def get_score(self, feats):
+        w = len(feats)
+        
+        score = []
+    
+        for i in xrange(w):
+            lp = 0.0
+            for j in xrange(-self.lw+1,self.rw):
+                if feats[i].get(j,False):
+                    lp += self.pos_word_dict.get(feats[i][j],0.0)
+            score.append(lp)
+        return score
             
     def test_text(self, text, ignore=False):
         if ignore:
@@ -184,30 +198,8 @@ class LicenseTestModel:
         feats = features(stems,self.lw,self.rw)
         w = len(feats)
         
-        score = []
+        score = self.get_score(feats)
     
-        for i in xrange(w):
-            lp = 0.0
-            #lp += math.log(self.pr/(1.0-self.pr))
-            for j in xrange(-self.lw+1,self.rw):
-                if feats[i].get(j,False):
-                    lp += self.pos_word_dict.get(feats[i][j],0)
-                    if feats[i].get(j+1,False):
-                        lp += self.pos_bigram_dict.get(feats[i][j],{}).get(feats[i][j+1],0)
-                    for k in xrange(-self.lw+1,self.rw):
-                        if j == k or not feats[i].get(k,False):
-                            continue
-                        lp += self.pos_word_matrix.get(feats[i][j],{}).get(feats[i][k],0)
-                    
-                    # lp += math.log(self.pos_word_dict.get(feats[i][j],self.epsilon)/self.neg_word_dict.get(feats[i][j],self.epsilon))
-                    # if feats[i].get(j+1,False):
-                    #     lp += math.log(self.pos_bigram_dict.get(feats[i][j],{}).get(feats[i][j+1],self.epsilon)/self.neg_bigram_dict.get(feats[i][j],{}).get(feats[i][j+1],self.epsilon))
-                    # for k in xrange(-self.lw+1,self.rw):
-                    #     if j == k or not feats[i].get(k,False):
-                    #         continue
-                    #     lp += math.log(self.pos_word_matrix.get(feats[i][j],{}).get(feats[i][k],self.epsilon)/self.neg_word_matrix.get(feats[i][j],{}).get(feats[i][k],self.epsilon))
-            score.append(lp)
-
         l = self.smooth_score(score)
         license_offsets = []
         is_license = sum(l)>0

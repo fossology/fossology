@@ -15,6 +15,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+#ifndef __SPARSEVECT_H__
+#define __SPARSEVECT_H__
 /* External representation of an element: i is the index, v is the value */
 struct sv_element {
     unsigned long int i;
@@ -123,3 +125,5 @@ int sv_dump(sv_vector vect, FILE *file);
    Returns a sv_vector.
 */
 sv_vector sv_load(FILE *file);
+
+#endif

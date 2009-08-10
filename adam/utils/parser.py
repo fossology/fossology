@@ -49,12 +49,12 @@ ENG_STEM = Stemmer('english')
 
 STOPWORDS = stopwords.english()
 
-def stemmed_words(text,except_re=re.compile('^.$|^['+N+']$')):
+def stemmed_words(text,except_re=re.compile('^.$|^['+N+']+$')):
     words = RE_WORD.findall(text)
     stems = [ENG_STEM.stemWord(w.lower()) for w in words if (not w.lower() in STOPWORDS) and (except_re.match(w)==None)]
     return stems
 
-def stemmed_words_with_offsets(text,except_re=re.compile('^.$|^['+N+']$')):
+def stemmed_words_with_offsets(text,except_re=re.compile('^.$|^['+N+']+$')):
     stems = []
     offsets = []
     for iter in RE_WORD.finditer(text):
