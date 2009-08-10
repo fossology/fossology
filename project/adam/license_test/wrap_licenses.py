@@ -14,7 +14,7 @@ except:
 for file in files:
     text = ''
     try:
-        text = '<LICENSE_SECTION>%s<?LICENSE_SECTION>' % open(file).read()
+        text = '<LICENSE_SECTION>%s</LICENSE_SECTION>' % open(file).read()
     except:
         sys.stderr.write('ERROR: Could not open %s.\n' % file)
     try:
