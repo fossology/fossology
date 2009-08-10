@@ -25,8 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 struct sb_stemmer * stemmer = NULL;
 
-int char_count(char *str, char c) {
-    char *char_ptr;
+int char_count(unsigned char *str, unsigned char c) {
+    unsigned char *char_ptr;
     int count = 0;
     for (char_ptr = str; *char_ptr != '\0'; char_ptr++) {
         if (c==*char_ptr) {
@@ -44,7 +44,7 @@ void feature_type_free(void *v) {
     free(ft);
 }
 
-void* feature_type_create_from_string(char *string, int start, int end) {
+void* feature_type_create_from_string(unsigned char *string, int start, int end) {
     int i = 0;
     feature_type *t = (feature_type*)malloc(sizeof(feature_type));
     sb_symbol * b = (sb_symbol *) malloc(end-start * sizeof(sb_symbol));
@@ -57,7 +57,7 @@ void* feature_type_create_from_string(char *string, int start, int end) {
     }
 
 
-    t->string = (char*)malloc(sizeof(char)*(end-start)+1);
+    t->string = (unsigned char*)malloc(sizeof(unsigned char)*(end-start)+1);
     strncpy(t->string,string+start,end-start);
     t->string[end-start] = '\0';
 
@@ -89,7 +89,7 @@ void* feature_type_create_from_string(char *string, int start, int end) {
         }
     }
     const sb_symbol * stemmed = sb_stemmer_stem(stemmer, b, end-start);
-    t->stemmed = (char*)malloc(sizeof(char)*(end-start)+1);
+    t->stemmed = (unsigned char*)malloc(sizeof(unsigned char)*(end-start)+1);
     for (i = 0; stemmed[i] != 0; i++) {
         t->stemmed[i] = stemmed[i];
     }

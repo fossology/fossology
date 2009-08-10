@@ -22,12 +22,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "token.h"
 #include "feature_type.h"
 
-char sent_re[] = "<SENTENCE>(?P<text>.*?)</SENTENCE>";
-char start_nonword_re[] = "^[^A-Za-z0-9]+";
-char general_token_re[] = "[A-Za-z0-9]+|[^A-Za-z0-9 ]+";
-char word_token_re[] = "[A-Za-z0-9][A-Za-z0-9]+";
+unsigned char sent_re[] = "<SENTENCE>(?P<text>.*?)</SENTENCE>";
+unsigned char start_nonword_re[] = "^[^A-Za-z0-9]+";
+unsigned char general_token_re[] = "[A-Za-z0-9]+|[^A-Za-z0-9 ]+";
+unsigned char word_token_re[] = "[A-Za-z0-9][A-Za-z0-9]+";
 
-void create_sentence_list(char* buffer, default_list **list) {
+void create_sentence_list(unsigned char* buffer, default_list **list) {
     int i,j;
     cre *re;
 
@@ -61,7 +61,7 @@ void create_sentence_list(char* buffer, default_list **list) {
 
                 // get the previous token and append the begging of this token
                 // to the end of it.
-                char *new_string = (char*)malloc(sizeof(char)*(strlen(t_1->string)+strlen(t_2->string)+1));
+                unsigned char *new_string = (unsigned char*)malloc(sizeof(unsigned char)*(strlen(t_1->string)+strlen(t_2->string)+1));
                 new_string[0] = '\0';
                 strcat(new_string,t_1->string);
                 strcat(new_string,t_2->string);
@@ -69,7 +69,7 @@ void create_sentence_list(char* buffer, default_list **list) {
                 free(t_1->string);
                 t_1->string = new_string;
 
-                new_string = (char*)malloc(sizeof(char)*(strlen(t->string)-strlen(t_2->string)+1));
+                new_string = (unsigned char*)malloc(sizeof(unsigned char)*(strlen(t->string)-strlen(t_2->string)+1));
                 strcpy(new_string,t->string+strlen(t_2->string));
                 new_string[strlen(t->string)-strlen(t_2->string)] = '\0';
                 free(t->string);
@@ -96,7 +96,7 @@ void create_features_from_sentences(default_list **list, default_list **feature_
             if (j!=0) { re_print_error(j); break; }
             while (default_list_length(label_list)<default_list_length(feature_type_list)) {
                 t2 = (token*)malloc(sizeof(token));
-                t2->string = (char*)malloc(sizeof(char)*2);
+                t2->string = (unsigned char*)malloc(sizeof(unsigned char)*2);
                 strcpy(t2->string,"I");
                 t2->string[1] = '\0';
                 if (default_list_length(label_list)+1==default_list_length(feature_type_list)) {
@@ -110,7 +110,7 @@ void create_features_from_sentences(default_list **list, default_list **feature_
     re_free(re);
 }
 
-void create_features_from_buffer(char *buffer, default_list **feature_type_list) {
+void create_features_from_buffer(unsigned char *buffer, default_list **feature_type_list) {
     int i,j;
     cre *re;
 

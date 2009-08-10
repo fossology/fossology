@@ -41,6 +41,8 @@ int default_list_length(default_list **list);
 int default_list_get(default_list **list, int index, void **data);
 void default_list_free(default_list **list, void (*freeFunc)(void *));
 void default_list_print(default_list **list, void (*printFunc)(void *));
+void default_list_dump(default_list **list, FILE *file, void (*func)(void *,FILE *));
+void deafult_list_load(default_list **list, FILE *file, void* (*func)(FILE*));
 
 #if defined(__cplusplus)
 }

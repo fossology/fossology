@@ -18,7 +18,7 @@
 CC=gcc
 CFLAGS=-g -Iinclude -lpcre -lstemmer -lmaxent
 CPP=g++
-CPPFLAGS=-g -Iinclude -lpcre -lstemmer -lmaxent -Wno-deprecated
+CPPFLAGS=-g -Iinclude -lpcre -lstemmer -lmaxent -Wno-deprecated -I../../sparsevect/
 utils=\
       utils/list.c \
       utils/re.c \
@@ -27,17 +27,18 @@ utils=\
       utils/feature_type.c \
       utils/tokenizer.c \
       utils/file_utils.c \
-      utils/maxent_utils.cpp
+      utils/maxent_utils.cpp \
+      utils/sentence_type.c
 
 utils_o := $(patsubst %.cpp,%.o,$(utils))
 utils_o := $(patsubst %.c,%.o,$(utils_o))
 
-all: utils/utils.a train_sent_model label_sentences test
+all: utils/utils.a train_sent_model label_sentences database test
 
 utils/utils.a: $(utils_o)
 	$(AR) -cru $@ $^
 
-test: test.o utils/utils.a
+test: test.o utils/utils.a ../../sparsevect/sparsevect.o
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
 train_sent_model: train_sent_model.o utils/utils.a
@@ -45,6 +46,12 @@ train_sent_model: train_sent_model.o utils/utils.a
 
 label_sentences: label_sentences.o utils/utils.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
+
+database: database.o utils/utils.a ../../sparsevect/sparsevect.o
+	$(CPP) -o $@ $^ $(CPPFLAGS)
+
+training.txt:
+	find ../../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > training.txt
 
 clean:
 	rm -f test *.o utils/*.o utils/*.a

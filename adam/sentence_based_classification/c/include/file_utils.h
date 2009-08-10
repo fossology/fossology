@@ -27,8 +27,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern "C" {
 #endif
 
-void openfile(char *filename, char **buffer);
-int readline(FILE *pFile, char **line);
+void openfile(unsigned char *filename, unsigned char **buffer);
+int readline(FILE *pFile, unsigned char **line);
 
 #if defined(__cplusplus)
 }

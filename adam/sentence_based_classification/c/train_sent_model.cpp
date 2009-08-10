@@ -42,7 +42,7 @@ void print_usage(char *name) {
 }
 
 int main(int argc, char *argv[]) {
-    char *buffer;
+    unsigned char *buffer;
     int i,j,c;
     default_list *sentence_list = NULL;
     default_list *feature_type_list = NULL;
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     // training data.
     MaxentModel m;
     m.begin_add_event();
-    char *filename = NULL;
+    unsigned char *filename = NULL;
     while (readline(pFile,&filename)!=EOF) {
         printf("Starting on %s...\n", filename);
         buffer = NULL;

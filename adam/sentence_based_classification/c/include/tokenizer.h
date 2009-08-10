@@ -29,9 +29,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern "C" {
 #endif
 
-void create_sentence_list(char* buffer, default_list **list);
+void create_sentence_list(unsigned char* buffer, default_list **list);
 void create_features_from_sentences(default_list **list, default_list **feature_type_list,default_list **label_list);
-void create_features_from_buffer(char *buffer, default_list **feature_type_list);
+void create_features_from_buffer(unsigned char *buffer, default_list **feature_type_list);
 
 #if defined(__cplusplus)
 }

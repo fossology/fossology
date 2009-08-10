@@ -15,42 +15,37 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
-#ifndef __FEATURE_TYPE__H_
-#define __FEATURE_TYPE__H_
+#include <sparsevect.h>
+
+#ifndef __SENTENCE_TYPE__H_
+#define __SENTENCE_TYPE__H_
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-typedef int c_bool;
-#define FALSE 0
-#define TRUE (1)
-#define FT_CHAR_MAP "\n.:;,/\\|~`!@#$%^&*-_=+?()[]{}<>"
-#define FT_CHAR_MAP_LEN 31
-
 // Our simple datatype
-typedef struct feature_type {
+typedef struct sentence_type {
     unsigned char *string;
-    unsigned char *stemmed;
     int start;
     int end;
-    int length;
-    c_bool word;
-    c_bool capped;
-    c_bool upper;
-    c_bool number;
-    c_bool incnum;
-    int char_vector[31];
-} feature_type;
+    int position;
+    unsigned char *filename;
+    unsigned char *licensename;
+    sv_vector *vector;
+} sentence_type;
 
 // This function frees all the internal data in the datatype.
-void feature_type_free(void *v);
+void sentence_type_free(void *v);
 
-// This function is used to create the datatype from a substring.
-void* feature_type_create_from_string(unsigned char *string, int start, int end);
+// This function is used to create the datatype.
+void* sentence_type_create(unsigned char *string, int start, int end, int position, unsigned char *filename, unsigned char *licensename, sv_vector *vector);
 
 // This function is used to print the datatype.
-void feature_type_print(void *v);
+void sentence_type_print(void *v);
+
+void sentence_type_dump(void *v, FILE *file);
+void* sentence_type_load(FILE *file);
 
 #if defined(__cplusplus)
 }
