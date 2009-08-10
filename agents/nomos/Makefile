@@ -13,7 +13,6 @@ LICFIX=GENSEARCHDATA
 
 
 OBJS=licenses.o list.o nomos.o parse.o process.o nomos_regex.o util.o _precheck.o _autodata.o # sources.o DMalloc.o
-SRCS=$(OBJS:.o=.c)
 HDRS=_autodefs.h licenses.h list.h nomos.h nomos_regex.h parse.h process.h util.h
 
 DEF=-D_FILE_OFFSET_BITS=64 -D__USE_LARGEFILE64
@@ -21,23 +20,17 @@ CFLAGS_LOCAL= $(DEF) $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(
 
 all: encode fo_nomos
 
-fo_nomos: $(OBJS) $(DB) $(REPO) $(VARS)
+fo_nomos: $(OBJS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
 	$(CC) $(OBJS) $(CFLAGS_LOCAL) -o $@
-#	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 $(OBJS): %.o: %.c $(HDRS) $(DB) $(VARS)
 	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB) $(CFLAGS_REPOO) $(CFLAGS_AGENTO)
 
-_precheck.o:   _precheck.c
-	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_DB) $(CFLAGS_REPOO) $(CFLAGS_AGENTO)
-
-_precheck.c:	_autodata.c # $(PRE)
+_precheck.c:	_autodata.c $(PRE) $(CHECK)
 #	@echo "NOTE: _autodata.c has changed --> regenerate _precheck.c"
 	./$(PRE)
 	./$(CHECK)
 #	@$(MAKE) $(STRINGS) $(KEYS)
-
-
 
 #
 # Non "standard" preprocessing stuff starts here...
@@ -66,7 +59,10 @@ test: all
 	@echo "*** No tests available for agent/$(EXE) ***"
 
 clean:
-	rm -f encode fo_nomos  *.o core _autodata.c _autodefs.c _autodefs.o _precheck.c _strings.data _STRFILTER
+	rm -f encode fo_nomos  *.o core \
+           _autodata.c _autodefs.c _autodefs.h _precheck.c \
+           _strings.data _STRFILTER strings.HISTOGRAM words.HISTOGRAM \
+           split.OTHER checkstr.OK
 
 include $(DEPS)
 
