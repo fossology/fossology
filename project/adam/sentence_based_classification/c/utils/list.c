@@ -82,3 +82,37 @@ void default_list_print(default_list **list, void (*printFunc)(void *)) {
     printf(" )\n");
 
 }
+
+void default_list_dump(default_list **list, FILE *file, void (*func)(void *,FILE*)) {
+    int temp;
+
+    temp = default_list_length(list);
+    fwrite(&temp, sizeof(int),1,file);
+
+    struct sglib_default_list_iterator  it;
+    default_list *l;
+    l=sglib_default_list_it_init(&it,list[0]);
+    if (l!=NULL) {
+        func(l->data,file);
+    }
+    for (l=sglib_default_list_it_next(&it); l!=NULL; l=sglib_default_list_it_next(&it)) {
+        func(l->data,file);
+    }
+
+}
+
+void deafult_list_load(default_list **list, FILE *file, void* (*func)(FILE*)) {
+
+    int n,i;
+    void *item = NULL;
+    fread(&n, sizeof(int),1,file);
+    for (i=0; i<n; i++) {
+        item = NULL;
+        item = func(file);
+        if (item == NULL) {
+            printf("func returned NULL in %s, %d\n" , __FILE__, __LINE__);  
+        }
+        default_list_append(list,&item);
+    }
+
+}

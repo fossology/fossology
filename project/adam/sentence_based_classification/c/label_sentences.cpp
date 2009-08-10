@@ -34,7 +34,7 @@ void print_usage(char *name) {
 }
 
 int main(int argc, char **argv) {
-    char *buffer;
+    unsigned char *buffer;
     int i,j;
     default_list *sentence_list = NULL;
     default_list *feature_type_list = NULL;
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
     sentence_list = NULL;
     feature_type_list = NULL;
     label_list = NULL;
-    openfile(argv[optind],&buffer);
+    openfile((unsigned char*)argv[optind],&buffer);
     create_features_from_buffer(buffer,&feature_type_list);
     label_sentences(m,&feature_type_list,&label_list,left_window,right_window);
 
