@@ -71,16 +71,16 @@ void sentence_type_dump(void *v, FILE *file) {
 
     temp = strlen(t->string)+1;
     fwrite(&temp, sizeof(int),1,file);
-    fwrite(&t->string, sizeof(unsigned char),temp,file);
+    fwrite(t->string, sizeof(unsigned char),temp,file);
     fwrite(&t->start, sizeof(int),1,file);
     fwrite(&t->end, sizeof(int),1,file);
     fwrite(&t->position, sizeof(int),1,file);
     temp = strlen(t->filename)+1;
     fwrite(&temp, sizeof(int),1,file);
-    fwrite(&t->filename, sizeof(unsigned char),strlen(t->filename)+1,file);
+    fwrite(t->filename, sizeof(unsigned char),strlen(t->filename)+1,file);
     temp = strlen(t->licensename)+1;
     fwrite(&temp, sizeof(int),1,file);
-    fwrite(&t->licensename, sizeof(unsigned char),strlen(t->licensename)+1,file);
+    fwrite(t->licensename, sizeof(unsigned char),strlen(t->licensename)+1,file);
     sv_dump(*t->vector,file);
 }
 
