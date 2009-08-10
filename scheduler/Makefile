@@ -27,7 +27,7 @@ fossology-scheduler:  $(OBJ) $(REPOOBJ) $(VARS)
 	-lrt -lpq $(ALL_CFLAGS) -o $@
 
 fo_watchdog: fo_watchdog.o logging.o lockfs.o sched_utils.o $(VARS)
-	$(CC) fo_watchdog.o logging.o lockfs.o sched_utils.o -I`pg_config --includedir` $(CFLAGS_DB) $(CFLAGS_REPO) $(DEF) $(ALL_CFLAGS) -lpq -lrt -o $@
+	$(CC) fo_watchdog.o logging.o lockfs.o sched_utils.o $(CFLAGS_DB) $(CFLAGS_REPO) $(DEF) $(ALL_CFLAGS) -lpq -lrt -o $@
 
 mkschedconf: mkschedconf.c $(REPO) $(VARS)
 	$(CC) $< $(MSCDEF) $(CFLAGS_REPO) $(ALL_CFLAGS) -o $@
@@ -38,10 +38,10 @@ defconf/init.d/fossology: defconf/init.d/fossology-process
 
 # targets for our needed objects
 $(OBJFULL): %.o: %.c %.h $(DB) $(VARS)
-	$(CC) -c $< -I`pg_config --includedir` $(CONFDEF) $(FODEF) $(CFLAGS_DBO) $(ALL_CFLAGS) 
+	$(CC) -c $< $(CONFDEF) $(FODEF) $(CFLAGS_DBO) $(ALL_CFLAGS) 
 
 $(REPOOBJ): %.o: %.c %.h $(DB) $(REPO) $(VARS)
-	$(CC) -c $< -I`pg_config --includedir` $(CONFDEF) $(CFLAGS_REPOO) $(CFLAGS_DBO) $(ALL_CFLAGS)
+	$(CC) -c $< $(CONFDEF) $(CFLAGS_REPOO) $(CFLAGS_DBO) $(ALL_CFLAGS)
 
 
 install: all install-init
