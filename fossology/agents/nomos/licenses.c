@@ -81,9 +81,7 @@ void licenseInit()
     strcpy(some, "=SOME=");
     strcpy(few, "=FEW=");
     strcpy(year, "=YEAR=");
-#ifdef notdef
-    listInit(gl->sHash, 0, "search-cache"); /* CDB - Added */
-#endif
+    listInit(&gl.sHash, 0, "search-cache"); /* CDB - Added */
 
     /*
      * Examine the search strings in licSpec looking for 3 corner-cases 
@@ -118,7 +116,6 @@ void licenseInit()
 
 	licText[i].tseed = licSpec[i].seed.csData;
 
-#ifdef notdef
 	/*---------------------------------------*/
 	/* CDB - This is the code that I inadvertently removed. */
 	/*
@@ -129,7 +126,6 @@ void licenseInit()
 		  licText[i].tseed);
 	}
 	p->refCount++;
-#endif
 
 	/*--------------------------------*/
 
@@ -174,11 +170,9 @@ void licenseInit()
 #endif	/* FIX_STRINGS */
 	    licText[i].regex = copyString(buf, MTAG_SRCHTEXT);
 	}
-#ifdef notdef
 	if (p->ssComp < (ssAbove*100)+ssBelow) {
 	    p->ssComp = (ssAbove*100)+ssBelow;
 	}
-#endif
 	licText[i].compiled = 0;
 	licText[i].plain = 1;	/* assume plain-text for now */
     }

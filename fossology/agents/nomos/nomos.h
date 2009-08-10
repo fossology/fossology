@@ -248,9 +248,7 @@ struct globals {
     int ptswitch;  
 #endif	/* PROC_TRACE_SWITCH */
     magic_t mcookie;
-#ifdef notdef
     list_t sHash;
-#endif
 };
 
 
