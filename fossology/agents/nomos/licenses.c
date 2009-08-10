@@ -81,6 +81,9 @@ void licenseInit()
     strcpy(some, "=SOME=");
     strcpy(few, "=FEW=");
     strcpy(year, "=YEAR=");
+#ifdef notdef
+    listInit(gl->sHash, 0, "search-cache"); /* CDB - Added */
+#endif
 
     /*
      * Examine the search strings in licSpec looking for 3 corner-cases 
@@ -112,9 +115,26 @@ void licenseInit()
 #ifdef	FIX_STRINGS
 	fixSearchString(buf, sizeof(buf), i, YES);
 #endif	/* FIX_STRINGS */
+
 	licText[i].tseed = licSpec[i].seed.csData;
+
+#ifdef notdef
+	/*---------------------------------------*/
+	/* CDB - This is the code that I inadvertently removed. */
 	/*
-	 * Step 2, handle special cases of NULL seeds and (regex == seed)
+	 * Step 2, add the search-seed to the search-cache
+	 */
+	if ((p = listGetItem(&gl.sHash, licText[i].tseed)) == NULL_ITEM) {
+	    Fatal("Cannot enqueue search-cache item \"%s\"",
+		  licText[i].tseed);
+	}
+	p->refCount++;
+#endif
+
+	/*--------------------------------*/
+
+	/*
+	 * Step 3, handle special cases of NULL seeds and (regex == seed)
 	 */
 	if (strcmp(licText[i].tseed, "=NULL=") == 0) {	/* null */
 #ifdef	OLD_DECRYPT
@@ -154,9 +174,11 @@ void licenseInit()
 #endif	/* FIX_STRINGS */
 	    licText[i].regex = copyString(buf, MTAG_SRCHTEXT);
 	}
+#ifdef notdef
 	if (p->ssComp < (ssAbove*100)+ssBelow) {
 	    p->ssComp = (ssAbove*100)+ssBelow;
 	}
+#endif
 	licText[i].compiled = 0;
 	licText[i].plain = 1;	/* assume plain-text for now */
     }
