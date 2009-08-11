@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     int c;
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "m:")) != -1) {
+    while ((c = getopt(argc, argv, "m:h")) != -1) {
         switch (c) {
             case 'm':
                 model_file = optarg;
@@ -60,7 +60,11 @@ int main(int argc, char **argv) {
                 }
 
                 break;
+            case 'h':
+                print_usage(argv[0]);
+                exit(0);
             case '?':
+                print_usage(argv[0]);
                 if (optopt == 'm') {
                     fprintf(stderr, "Option -%c requires an argument.\n", optopt);
                 } else if (isprint(optopt)) {

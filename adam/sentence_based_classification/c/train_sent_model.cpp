@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     char *model_file = NULL;
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "o:f:")) != -1) {
+    while ((c = getopt(argc, argv, "o:f:h")) != -1) {
         switch (c) {
             case 'f':
                 training_files = optarg;
@@ -69,7 +69,11 @@ int main(int argc, char *argv[]) {
             case 'o':
                 model_file = optarg;
                 break;
+            case 'h':
+                print_usage(argv[0]);
+                exit(0);
             case '?':
+                print_usage(argv[0]);
                 if (optopt == 'f' || optopt == 'o') {
                     fprintf(stderr, "Option -%c requires an argument.\n", optopt);
                 } else if (isprint(optopt)) {
