@@ -193,6 +193,16 @@ void parseSchedInput(char *s)
 } 
 
 
+void  Usage (char *Name)
+{ 
+    printf("Usage: %s [options] [file [file [...]]\n",Name);
+    printf("  -i   :: initialize the database, then exit.\n");
+    /*    printf("  -v   :: verbose (-vv = more verbose)\n"); */
+    printf("  file :: if files are listed, print the licenses detected within them.\n");
+    printf("  no file :: process data from the scheduler.\n");
+} /* Usage() */
+
+
 
 void Bail(int exitval)
 {
@@ -257,6 +267,7 @@ int optionIsSet(int val)
   is setting a variable (filenames) to the beginning of a list of filename
   args passed in.
 */
+#ifdef notdef
 static void parseOptsAndArgs(int argc, char **argv)
 {
     int i;
@@ -274,6 +285,7 @@ static void parseOptsAndArgs(int argc, char **argv)
     }
     return;
 }
+#endif /* notdef */
 
 
 static void printListToFile(list_t *l, char *filename, char *mode)
@@ -409,6 +421,7 @@ int main(int argc, char **argv)
 {
     char *cp;
     int i;
+    int c;
     char *agent_desc = "Nomos License Detection Agency";
     char parm[myBUFSIZ];
 
@@ -461,7 +474,32 @@ int main(int argc, char **argv)
     }
 
     gl.uPsize = 6;
-    parseOptsAndArgs(argc, argv);
+
+    /*
+      Deal with command line options
+    */
+    while((c = getopt(argc,argv,"i")) != -1) {
+    switch(c)
+	{
+	case 'i':
+	    /* "Initialize" */
+	    DBclose(DB);  /* DB was opened above, now close it and exit */
+	    exit(0);
+	default:
+	    Usage(argv[0]);
+	    DBclose(DB);
+	    exit(-1);
+	}
+    }
+
+    /*
+      Copy filename args (if any) into array
+    */
+    for (i = 1; i < argc; i++) {
+	files_to_be_scanned[i-1] = argv[i];
+	file_count++;
+    }
+
     licenseInit();
     gl.flags = 0;
 
