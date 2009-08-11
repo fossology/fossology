@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <malloc.h>
 #include "tokenizer.h"
 #include "list.h"
@@ -30,6 +31,8 @@ extern "C" {
 #include <limits.h>
 #include <sparsevect.h>
 #include "sentence_type.h"
+#include <time.h>
+#include <math.h>
 }
 
 void print_usage(char *name) {
@@ -70,7 +73,7 @@ int main(int argc, char **argv) {
     int c;
 
     opterr = 0;
-    while ((c = getopt(argc, argv, "o:f:m:")) != -1) {
+    while ((c = getopt(argc, argv, "o:f:m:h")) != -1) {
         switch (c) {
             case 'f':
                 training_files = optarg;
@@ -89,7 +92,11 @@ int main(int argc, char **argv) {
             case 'm':
                 maxent_model_file = optarg;
                 break;
+            case 'h':
+                print_usage(argv[0]);
+                exit(0);
             case '?':
+                print_usage(argv[0]);
                 if (optopt == 'f' || optopt == 'o' || optopt == 'm') {
                     fprintf(stderr, "Option -%c requires an argument.\n", optopt);
                 } else if (isprint(optopt)) {
@@ -141,6 +148,9 @@ int main(int argc, char **argv) {
             sv_set_element(*vect,index,v+1.0);
             if (strcmp(t->string, "E")==0 || i == default_list_length(&feature_type_list)-1) {
                 printf(".");
+                double norm = sqrt(sv_inner(*vect,*vect));
+                *vect = sv_scalar_mult(*vect,norm);
+
                 st = (sentence_type*)sentence_type_create(buffer,start,ft->end,i,filename,filename,vect);
 
                 default_list_append(&database_list,(void**)&st);
@@ -156,7 +166,23 @@ int main(int argc, char **argv) {
         printf("done.\n");
     }
 
-    printf("%d\n", default_list_length(&database_list));
+
+    /* make our leaders */
+    default_list *leader_list = NULL;
+    int n = default_list_length(&database_list);
+    int num_leaders = (int)log((float)n);
+    srand(time(NULL));
+    
+    for (i=0; i<num_leaders; i++) {
+        int *temp = (int*)malloc(sizeof(int));
+        *temp = rand()%n;
+        default_list_append(&leader_list,(void**)&temp);
+    }
+
+
+
+
+/* save the model */
     
     FILE *file;
     file = fopen(model_file, "w");
