@@ -237,6 +237,7 @@ typedef struct licenseSpec licSpec_t;
 struct globals {
     char initwd[myBUFSIZ]; /* CDB, would like to workaround/eliminate. */
     char progName[64]; 
+    int agentPk;
     int progOpts; 
     int flags; 
     int uPsize;
