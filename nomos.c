@@ -220,10 +220,9 @@ void Bail(int exitval)
     }
 #endif	/* MEMORY_TRACING && MEM_ACCT */
 
+    printf("LOG: Nomos agent is exiting\n");
     fflush(stdout);
-    if (schedulerMode) {
-	DBclose(DB);
-    }
+    DBclose(DB);
 
     exit(exitval);
 }
@@ -437,6 +436,7 @@ int main(int argc, char **argv)
     gl.DEEBUG = gl.MEM_DEEBUG = 0;
 #endif	/* GLOBAL_DEBUG */
 
+    printf("LOG: fo_nomos agent starting up from the beginning....");
     /*
       Set up variables global to the agent. Ones that are the
       same for all scans.
@@ -447,7 +447,7 @@ int main(int argc, char **argv)
 	fflush(stdout);
 	exit(-1);
     }
-    GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
+    gl.agentPk = GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 
 
     /* Record the progname name */
@@ -521,6 +521,7 @@ int main(int argc, char **argv)
 	/* 
 	   We're being run from the scheduler
 	*/
+	printf("LOG: fo_nomos agent starting up in scheduler mode....");
 	schedulerMode = 1;
 	signal(SIGALRM, ShowHeartbeat);
 	printf("OK\n");
@@ -529,25 +530,22 @@ int main(int argc, char **argv)
 
 	while (ReadLine(stdin, parm, myBUFSIZ) >= 0) {
 	    if (parm[0] != '\0') {
-		alarm(0);
-		Heartbeat(0);
 		/*
 		  Get the file arg and go ahead and process it
 		*/
 		parseSchedInput(parm);
 		repFile = RepMkPath("files", cur.pFile);
 		if (!repFile) {
-		    printf("FATAL pfile %ld Nomos unable to open file %s\n",
+		    printf("FATAL: pfile %ld Nomos unable to open file %s\n",
 			   cur.pFileFk, cur.pFile);
 		    fflush(stdout);
 		    DBclose(DB);
 		    exit(-1);
 		}
 		processFile(cur.pFile); 
+		freeAndClearScan(&cur);
 		printf("OK\n");
 		fflush(stdout);
-		alarm(60);
-		freeAndClearScan(&cur);
 	    }
 	}
 
