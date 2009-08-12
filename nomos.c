@@ -436,7 +436,7 @@ int main(int argc, char **argv)
     gl.DEEBUG = gl.MEM_DEEBUG = 0;
 #endif	/* GLOBAL_DEBUG */
 
-    printf("LOG: fo_nomos agent starting up from the beginning....");
+    printf("LOG: fo_nomos agent starting up from the beginning....\n");
     /*
       Set up variables global to the agent. Ones that are the
       same for all scans.
@@ -521,7 +521,7 @@ int main(int argc, char **argv)
 	/* 
 	   We're being run from the scheduler
 	*/
-	printf("LOG: fo_nomos agent starting up in scheduler mode....");
+	printf("LOG: fo_nomos agent starting up in scheduler mode....\n");
 	schedulerMode = 1;
 	signal(SIGALRM, ShowHeartbeat);
 	printf("OK\n");
