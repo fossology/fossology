@@ -113,7 +113,7 @@ class user_add extends FO_Plugin {
           $rc = $this->Add();
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $V.= displayMessage('User $User added.');
+            $V.= displayMessage("User $User added.");
           } else {
             $V.= displayMessage($rc);
           }
