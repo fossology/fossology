@@ -183,9 +183,9 @@ void parseSchedInput(char *s)
     }
 
     if (gotOther || (cur.pFileFk < 0) || (cur.pFile[0]=='\0')) {
-	printf("FATAL: Data is in an unknown format.\n");
-	printf("LOG: Unknown data: '%s'\n",origS);
-	printf("LOG: Nomos agent is exiting\n");
+	printf("   FATAL: Data is in an unknown format.\n");
+	printf("   LOG: Unknown data: '%s'\n",origS);
+	printf("   LOG: Nomos agent is exiting\n");
 	fflush(stdout);
 	DBclose(DB);
 	exit(-1);
@@ -220,7 +220,7 @@ void Bail(int exitval)
     }
 #endif	/* MEMORY_TRACING && MEM_ACCT */
 
-    printf("LOG: Nomos agent is exiting\n");
+    printf("   LOG: Nomos agent is exiting\n");
     fflush(stdout);
     DBclose(DB);
 
@@ -364,6 +364,8 @@ void processFile(char *fileToScan) {
     traceFunc("== processFile(%s)\n", fileToScan);
 #endif	/* PROC_TRACE */
 
+    printf("   DEBUG: fo_nomos scanning file %s.\n", fileToScan);
+
     /*
       Initialize. This stuff should probably be broken into a separate
       function, but for now, I'm leaving it all here.
@@ -436,14 +438,15 @@ int main(int argc, char **argv)
     gl.DEEBUG = gl.MEM_DEEBUG = 0;
 #endif	/* GLOBAL_DEBUG */
 
-    printf("LOG: fo_nomos agent starting up from the beginning....\n");
+    system("touch /tmp/nomos_start"); /* DEBUG */
+    printf("   LOG: fo_nomos agent starting up from the beginning....\n");
     /*
       Set up variables global to the agent. Ones that are the
       same for all scans.
     */
     DB = DBopen();
     if (!DB) {
-	printf("FATAL: Nomos agent unable to connect to database, exiting...\n");
+	printf("   FATAL: Nomos agent unable to connect to database, exiting...\n");
 	fflush(stdout);
 	exit(-1);
     }
@@ -521,7 +524,8 @@ int main(int argc, char **argv)
 	/* 
 	   We're being run from the scheduler
 	*/
-	printf("LOG: fo_nomos agent starting up in scheduler mode....\n");
+	system("touch /tmp/nomos_sched_run"); /* DEBUG */
+	printf("   LOG: fo_nomos agent starting up in scheduler mode....\n");
 	schedulerMode = 1;
 	signal(SIGALRM, ShowHeartbeat);
 	printf("OK\n");
@@ -536,7 +540,7 @@ int main(int argc, char **argv)
 		parseSchedInput(parm);
 		repFile = RepMkPath("files", cur.pFile);
 		if (!repFile) {
-		    printf("FATAL: pfile %ld Nomos unable to open file %s\n",
+		    printf("   FATAL: pfile %ld Nomos unable to open file %s\n",
 			   cur.pFileFk, cur.pFile);
 		    fflush(stdout);
 		    DBclose(DB);
