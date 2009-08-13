@@ -118,9 +118,6 @@ class agent_fonomos extends FO_Plugin {
 	             WHERE uploadtree.pfile_fk = pfile.pfile_pk
 	             AND  uploadtree.upload_fk = '$uploadpk'
 	             LIMIT 5000;";
-
-    print "DB: jqargs is:$jqargs\n";
-
     /*
       Bob says scheduler executes the jqargs query and gives the data to the
       agent, don't use wc-agent style.
