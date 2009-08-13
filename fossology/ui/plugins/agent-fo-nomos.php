@@ -53,7 +53,7 @@ class agent_fonomos extends FO_Plugin {
     global $DB;
     $SQL = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job" .
             "ON job_upload_fk = '$uploadpk'" .
-            "AND job_pk = jq_job_fk AND jq_type = 'fonomos';";
+            "AND job_pk = jq_job_fk AND jq_type = 'fo_nomos';";
     $Results = $DB->Action($SQL);
     if (empty($Results[0]['jq_pk'])) {
       return (0);
