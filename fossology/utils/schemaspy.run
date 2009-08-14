@@ -1,2 +1,0 @@
-java -jar /usr/local/bin/schemaSpy_3.1.1.jar -t pgsql -cp /usr/local/share/postgresql-8.0-320.jdbc3.jar -db ossdb -s public -host localhost -u ossdb -p OSSdb -o public_html
-
