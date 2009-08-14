@@ -71,10 +71,11 @@ class fossologyTestCase extends fossologyTest
     if(empty($UserName)) {
       return("No User Name, cannot add user");
     }
-    $page = $this->mybrowser->get($URL);
-    $page = $this->mybrowser->clickLink('Add');
-    $this->assertTrue($this->myassertText($page, '/Add A User/'),
-      "Did NOT find Title, 'Add A User'");
+
+    //$page = $this->mybrowser->get($URL);
+    //$page = $this->mybrowser->clickLink('Add');
+    //$this->assertTrue($this->myassertText($page, '/Add A User/'),
+    //  "Did NOT find Title, 'Add A User'");
     $this->setUserFields($UserName,$Description, $Email, $Access, $Folder,
     NULL,NULL, $Password, $EmailNotify);
 
@@ -82,10 +83,10 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->clickSubmit('Add!',"Could not select the Add! button");
     $this->assertTrue($page);
     //print "<pre>page after clicking Add!\n"; print_r($page) . "\n</pre>";
-    if($this->myassertText($page, "/User added/")) {
+    if($this->myassertText($page, "/User .*? added/")) {
       return(NULL);
     }
-    elseif($this->myassertText($page, "/User already exists\.  Not added/")) {
+    else if($this->myassertText($page, "/User already exists\.  Not added/")) {
       return('User already exists.  Not added');
     }
     return(NULL);
@@ -195,7 +196,7 @@ class fossologyTestCase extends fossologyTest
       return("Folder $name Exists");
     }
     else {
-      $this->fail('Failure! Unknown Error when creating folder $name\n');
+      $this->fail("Failure! Unknown Error when creating folder $name\n");
     }
   }
 
@@ -278,7 +279,7 @@ class fossologyTestCase extends fossologyTest
     if(empty($User)) {
       return('No User Specified');
     }
-    $this->Login();
+    // Should already be logged in... no need to call this: $this->Login();
     $page = $this->mybrowser->get("$URL?mod=user_del");
     /* Get the user id */
     $select = $this->parseSelectStmnt($page, 'userid',$User);
@@ -489,18 +490,44 @@ class fossologyTestCase extends fossologyTest
    */
   protected function setUserFields($UserName=NULL, $Description=NULL, $Email=NULL,
   $Access=1, $Folder=1, $Block=NULL, $Blank=NULL,
-  $Password=NULL, $EmailNotify='y'){
+  $Password=NULL, $EmailNotify=NULL){
 
     $FailStrings = NULL;
 
-    /*
-     print "SUF: parameters are:\n";
-     print "SUF: user name:$UserName\n";
-     print "SUF: desc:$Description\n";
-     print "SUF: email:$Email\n";
-     print "SUF: access:$Access\n";
-     print "SUF: folder:$Folder\n";
-     */
+    global $URL;
+
+    if(strtoupper($UserName) == 'NULL') {
+      $this->fail("setUserFields, FATAL! no user name to set\n");
+    }
+    if(strtoupper($Description) == 'NULL') {
+      $Description = '';
+    }
+    if(strtoupper($Email) == 'NULL') {
+      $Email = '';
+    }
+    if(strtoupper($Access) == 'NULL') {
+      $Access = 1;
+    }
+    if(strtoupper($Folder) == 'NULL') {
+      $Folder = 1;
+    }
+    if(strtoupper($Block) == 'NULL') {
+      $Block = '';
+    }
+    if(strtoupper($Blank) == 'NULL') {
+      $Blank = '';
+    }
+    if(strtoupper($Password) == 'NULL') {
+      $Password = '';
+    }
+    if(strtoupper($EmailNotify) == 'NULL'|| is_null($EmailNotify)) {
+      unset($EmailNotify);
+    }
+
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Add');
+    $this->assertTrue($this->myassertText($page, '/Add A User/'),
+      "Did NOT find Title, 'Add A User'");
 
     if(!empty($UserName)) {
       $this->assertTrue($this->mybrowser->setField('username', $UserName),
@@ -539,8 +566,12 @@ class fossologyTestCase extends fossologyTest
       $this->assertTrue($this->mybrowser->setField('pass2', $Password),
       "Could Not set the pass2 field");
     }
-    if(!empty($EmailNotifiy)) {
-      $this->assertTrue($this->mybrowser->setField('enote', $EmailNotify),
+    if(isset($EmailNotify)) {
+      $this->assertTrue($this->mybrowser->setField('enote', TRUE),
+      "Could Not set the enote Field to non default value");
+    }
+    else {
+      $this->assertTrue($this->mybrowser->setField('enote', FALSE),
       "Could Not set the enote Field");
     }
     return(NULL);
@@ -620,25 +651,25 @@ class fossologyTestCase extends fossologyTest
       "FAILURE:Did not find the message 'The file .*? has been uploaded'\n");
   } // uploadFile
   /**
-   * uploadServer
-   * ($parentFolder,$uploadPath,$description=null,$uploadName=null,$agents=null)
-   *
-   * Upload a file and optionally schedule the agents.  The web-site must
-   * already be logged into before using this method.
-   *
-   * @param string $parentFolder the parent folder name, default is root
-   * folder (1)
-   * @param string $uploadPath the path to upload data, can be a file or directory
-   * @param string $description a default description is always used. It
-   * can be overridden by supplying a description.
-   * @param string $uploadName=null optional upload name
-   * @param string $agents=null agents to schedule
-   *
-   * @return pass or fail
-   *
-   * @TODO determine if setting alpha folders is worth it.  Right now this routine
-   * does not use them.....
-   */
+  * uploadServer
+  * ($parentFolder,$uploadPath,$description=null,$uploadName=null,$agents=null)
+  *
+  * Upload a file and optionally schedule the agents.  The web-site must
+  * already be logged into before using this method.
+  *
+  * @param string $parentFolder the parent folder name, default is root
+  * folder (1)
+  * @param string $uploadPath the path to upload data, can be a file or directory
+  * @param string $description a default description is always used. It
+  * can be overridden by supplying a description.
+  * @param string $uploadName=null optional upload name
+  * @param string $agents=null agents to schedule
+  *
+  * @return pass or fail
+  *
+  * @TODO determine if setting alpha folders is worth it.  Right now this routine
+  * does not use them.....
+  */
   public function uploadServer($parentFolder = 1, $uploadPath, $description = null,
   $uploadName = null, $agents = null)
   {

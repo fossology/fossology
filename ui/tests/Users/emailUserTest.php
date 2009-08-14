@@ -25,12 +25,14 @@
  */
 require_once ('../../../tests/fossologyTestCase.php');
 require_once ('../../../tests/TestEnvironment.php');
+require_once (TESTROOT . '/testClasses/db.php');
 
 global $URL;
 
 class EmailUserTest extends fossologyTestCase {
 
   public $mybrowser;
+  protected $User;
 
   function setUP() {
 
@@ -50,7 +52,7 @@ class EmailUserTest extends fossologyTestCase {
     $this->assertTrue($this->myassertText($page, '/Add A User/'));
     $this->assertTrue($this->myassertText($page, '/To create a new user,/'));
     $result = $this->addUser('UserwEmail', 'email notification user',
-                                 'fosstester', 1, 1, 'uwetest', NULL);
+                                 'fosstester', 1, 1, 'uwetest', 'y');
     if (!is_null($result)) {
       /*
        * The test is just creating the user so we can verify that email
@@ -62,22 +64,15 @@ class EmailUserTest extends fossologyTestCase {
       }
     }
     /*
-     * Verify, login as the user just created and check their session.
-     * TODO: look in the db
+     * Verify, check the db entry for the user and make sure email_notify is set.
      */
-    print "Logging in as UserwEmail\n";
-    $this->Login('UserwEmail','uwetest');
-    print "Verifying Email Notification Setting\n";
-    $this->assertTrue($_SESSION['UserEnote'] == NULL,
-      "FAIL! No email notification setting for user UserwEmail\n");
+    print "Verifying User email notification\n";
+    $dlink = new db('host=localhost dbname=fossology user=fossy password=fossy');
+    $Sql = "SELECT user_name, email_notify FROM users WHERE user_name='UserwEmail';";
+    $User = $dlink->dbQuery($Sql);
+    //print "Entryies are: {$User[0]['user_name']}, {$User[0]['email_notify']}\n";
+    $this->assertEqual($User[0]['email_notify'],'y',
+      "Fail! User UserwEmail does not have email_notify set\n");
   } //testEmailUser
-
-  function tearDown(){
-    /* Cleanup: remove the user */
-    print "Logging out UserwEmail\n";
-    $this->Logout('UserwEmail');
-    print "Removing user UserwEmail\n";
-    $this->deleteUser('UserwEmail');
-  }
-}
+};
 ?>
