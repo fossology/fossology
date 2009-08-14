@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-***********************************************************/
+ ***********************************************************/
 
 /*************************************************
  Restrict usage: Every PHP file should have this
@@ -34,11 +34,11 @@ define("PARM_RAW",5);
  GetParm(): Plugins should not use globals to access HTTP variables.
  This is because HTTP variables may contain hostile code/values.
  This function will retrieve the variables and check data types.
-   PARM_INTEGER: Only integers are returned.
-   PARM_NUMBER: Only numbers (decimals are fine) are returned.
-   PARM_STRING: The variable is converted from URI encoding to text.
-   PARM_TEXT: Like PARM_STRING, but all safe quoting is removed.
-   PARM_RAW: Return the raw value.
+ PARM_INTEGER: Only integers are returned.
+ PARM_NUMBER: Only numbers (decimals are fine) are returned.
+ PARM_STRING: The variable is converted from URI encoding to text.
+ PARM_TEXT: Like PARM_STRING, but all safe quoting is removed.
+ PARM_RAW: Return the raw value.
  If the variable does not exist, OR is the wrong type (e.g., a string
  when it should be a number), then nothing is returned.
  NOTE: If a plugin wants to access these variable directly, it can.
@@ -51,22 +51,23 @@ function GetParm($Name,$Type)
   if (!isset($Var)) { $Var = @$_SERVER[$Name]; }
   if (!isset($Var)) { $Var = @$_SESSION[$Name]; }
   if (!isset($Var)) { $Var = @$_COOKIE[$Name]; }
-  if (!isset($Var)) { return; }
-
+  if (!isset($Var)) {
+    return;
+  }
   /* Convert $Var to a string */
   switch($Type)
-    {
+  {
     case PARM_INTEGER:
-	return(intval($Var));
+      return(intval($Var));
     case PARM_NUMBER:
-	return(floatval($Var));
+      return(floatval($Var));
     case PARM_TEXT:
-	return(stripslashes($Var));
+      return(stripslashes($Var));
     case PARM_STRING:
-	return(urldecode($Var));
+      return(urldecode($Var));
     case PARM_RAW:
-	return($Var);
-    }
+      return($Var);
+  }
   return;
 } // GetParm()
 
@@ -94,12 +95,19 @@ function Traceback_uri()
  ************************************************************/
 function Traceback_parm($ShowMod=1)
 {
+  $V = array();
   $V = explode('?',@$_SERVER['REQUEST_URI'],2);
+  /* need to check the size to avoid accessing past the array, there are
+   * request URI's that only have a single entry after the explode.
+   */
+  if(count($V) >= 2) {
+    $V = preg_replace("/^mod=/","",$V[1]);
+  }
   $V = preg_replace("/^mod=/","",$V[1]);
   if (!$ShowMod)
-    {
+  {
     $V = preg_replace("/^[^&]*/","",$V);
-    }
+  }
   return($V);
 } // Traceback_parm()
 
@@ -112,11 +120,11 @@ function Traceback_parm_keep($List)
   $Opt="";
   $Max = count($List);
   for($i=0; $i < $Max ; $i++)
-    {
+  {
     $L = &$List[$i];
     $Val = GetParm($L,PARM_STRING);
     if (!empty($Val)) { $Opt .= "&" . "$L=$Val"; }
-    }
+  }
   return($Opt);
 } // Traceback_parm_keep()
 
