@@ -7,7 +7,7 @@
 #	Modified for Debian by Ian Murdock <imurdock@gnu.ai.mit.edu>.
 #
 ### BEGIN INIT INFO
-# Provides:          ${PROJECT}
+# Provides:          {$PROJECT}
 # Required-Start:    $network $local_fs $remote_fs $syslog $named
 # Required-Stop:     $network $local_fs $remote_fs $syslog $named
 # Default-Start:     2 3 4 5
