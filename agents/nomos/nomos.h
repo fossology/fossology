@@ -304,6 +304,7 @@ struct scanResults {
     int kwbm; 
     int size; 
     int flag;
+    int dataOffset;
     char fullpath[myBUFSIZ]; 
     char ftype[256]; 
     char linkname[16]; 
