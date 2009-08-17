@@ -1523,6 +1523,64 @@ int mySystem(const char *fmt, ...)
 }
 
 
+/*
+ * If we can tell (from examining the file text) that we created this file,
+ * then return the offset of the "real data" relative to the start of the
+ * file that contains a nomos-header...
+ */
+int iMadeThis(char *textp)
+{
+	register char *cp, *x;
+	static char name[64];
+/* */
+#if defined(PROC_TRACE)
+#ifdef	PROC_TRACE_SWITCH
+    if (gl.ptswitch)
+#endif	/* PROC_TRACE_SWITCH */
+	printf("== iMadeThis('%p')\n", textp);
+#endif  /* PROC_TRACE */
+/* */
+	if (strGrep(LABEL_TEXT, textp, REG_ICASE|REG_NEWLINE|REG_EXTENDED)) {
+		x = textp+cur.regm.rm_eo;
+		cp = textp+cur.regm.rm_eo;
+		if (strGrep(LABEL_ATTR, textp, REG_ICASE|REG_NEWLINE) &&
+		    strGrep(LABEL_PATH, textp, REG_ICASE) &&
+		    strGrep(LABEL_CNTS, textp, REG_ICASE)) {
+			cp = strchr(x, '\n');
+#if	0
+			Note("%s-generated link, ignore header!", gl.progName);
+			for (x = cp+1; x < cp+100; x++) {
+				printf("%c", *x);
+			}
+			printf("\n");
+			/* textp = cp+1; */
+#endif
+			return(cp-textp+1);
+		}
+	}
+	else if (strGrep(LABEL_HOTW, textp, REG_ICASE|REG_NEWLINE)) {
+		if ((cp = findEol(textp+cur.regm.rm_eo)) != NULL_STR) {
+			while (isEOL(*cp)) {
+				cp++;
+			}
+			if (strncmp(cp, "###############", 15) == 0) {
+				if ((x = findEol(cp)) != NULL_STR &&
+				    strncmp(++x, "### ", 4) == 0) {
+#if	0
+					Note("%s-generated hotword file",
+					    gl.progName);
+					/* textp += gl.regm.rm_so; */
+#endif
+					return(cur.regm.rm_so);
+				}
+			}
+		}
+	}
+	return(0);
+}
+
+
+
 int isFILE(char *pathname)
 {
 
@@ -1674,3 +1732,22 @@ void traceFunc(char *fmtStr, ...)
 }
 #endif /* PROC_TRACE_SWITCH */
 }
+
+
+#ifdef	MEM_DEBUG
+char *memAllocLogged(int size)
+{
+	register void *ptr;
+/* */
+	ptr = calloc(size, 1);
+	printf("%p = calloc( %d , 1 )\n", ptr, size);
+	return(ptr);
+}
+
+void memFreeLogged(void *ptr)
+{
+	printf("free( %p )\n", ptr);
+	free(ptr);
+	return;
+}
+#endif	/* MEM_DEBUG */

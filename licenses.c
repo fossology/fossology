@@ -537,6 +537,7 @@ void licenseScan(list_t *l)
 {
     int i;
     int c;
+    int size;
     int lowWater;
     int lowest;
     int nCand;
@@ -621,6 +622,10 @@ void licenseScan(list_t *l)
 #endif	/* QA_CHECKS */
 	    continue;
 	}
+	if (scp->dataOffset = iMadeThis(textp)) {
+	    textp += scp->dataOffset;
+	    cur.stbuf.st_size = scp->dataOffset;
+	}
 	scp->size = cur.stbuf.st_size; /* Where did this get set ? CDB */
 	(void) strcpy(scp->ftype, magic_buffer(gl.mcookie, textp,
 					       (size_t) scp->size));
@@ -676,8 +681,13 @@ void licenseScan(list_t *l)
 	Assert(NO, "zero-length: %s", cp);
 	mySystem("ls -l '%s'", cp);
 #endif	/* QA_CHECKS */
+	continue;
     }
-    scp->size = cur.stbuf.st_size; /* Where did this get set ? CDB */
+    if (scp->dataOffset = iMadeThis(textp)) {
+	textp += scp->dataOffset;
+	cur.stbuf.st_size -= scp->dataOffset;
+    }
+    /* gl.totBytes += (double) (scp->size = cur.stbuf.st_size); CDB ??? */
     (void) strcpy(scp->ftype, magic_buffer(gl.mcookie, textp,
 					   (size_t) scp->size));
 #ifdef	DEBUG
@@ -854,6 +864,7 @@ static void noLicenseFound()
 static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     int lowWater)
 {
+    scanres_t *scp;
     int i;
     int c;
     int base;
@@ -925,6 +936,9 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	    Fatal("Null mmapFile(), path=%s", fileName);
 	}
 	size = (int) cur.stbuf.st_size;
+	if (scores[idx].dataOffset) {
+	    textp += scores[idx].dataOffset;
+	}
 	/*
 	  CDB - the wordCount function called here currently has the
 	  important side-effect of setting nLines and nWords in the
@@ -1374,7 +1388,7 @@ int findParagraph(char *textp, int size, scanres_t *scp,
     printf("findParagraph: looking for \"%s\" --> %s\n",
 	   _REGEX(index), pathname);
 #endif	/* PHRASE_DEBUG */
-    buf = getInstances(textp, size, 6, 6, _REGEX(index), YES);
+    buf = getInstances(textp, size, gl.uPsize, gl.uPsize, _REGEX(index), YES);
     if (buf == NULL_STR) {
 	return(0);
     }
@@ -1423,7 +1437,7 @@ static void licenseStringChecks()
 	    Assert(NO, "Lic %d tseed == regex", i);
 	}
 #endif	/* (DEBUG>5 || LICENSE_DEBUG) */
-	if (!strGrep(_SEED(i), _REGEX(i), REG_ICASE) &&
+	if (!strGrep(_SEED(i), _REGEX(i), REG_EXTENDED|REG_ICASE) &&
 	    !strNbuf(_REGEX(i), _SEED(i))) {
 	    Assert(NO, "Seed %d [\"%s\"] NOT a regex substring",
 		   i, _SEED(i));
