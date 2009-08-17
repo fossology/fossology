@@ -103,7 +103,7 @@ function Traceback_parm($ShowMod=1)
   if(count($V) >= 2) {
     $V = preg_replace("/^mod=/","",$V[1]);
   }
-  $V = preg_replace("/^mod=/","",$V[1]);
+
   if (!$ShowMod)
   {
     $V = preg_replace("/^[^&]*/","",$V);
