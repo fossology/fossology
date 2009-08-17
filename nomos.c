@@ -171,10 +171,11 @@ void parseSchedInput(char *s)
 
     while(s && (s[0] != '\0')) {
 	s = getFieldValue(s, field, 256, value, 1024, '=');
+	printf("   LOG: fo_nomos got %s = %s\n", field, value); /* DEBUG */
 	if (value[0] != '\0') {
-	    if (!strcasecmp(field,"pfile_fk")) {
+	    if (!strcasecmp(field,"akey")) {
 		cur.pFileFk = atol(value);
-	    } else if (!strcasecmp(field,"pfile")) {
+	    } else if (!strcasecmp(field,"pfilename")) {
 		strncpy(cur.pFile, value, sizeof(cur.pFile));
 	    } else {
 		gotOther = 1;
@@ -364,7 +365,7 @@ void processFile(char *fileToScan) {
     traceFunc("== processFile(%s)\n", fileToScan);
 #endif	/* PROC_TRACE */
 
-    printf("   DEBUG: fo_nomos scanning file %s.\n", fileToScan);
+    printf("   LOG: fo_nomos scanning file %s.\n", fileToScan); /* DEBUG */
 
     /*
       Initialize. This stuff should probably be broken into a separate
@@ -438,8 +439,7 @@ int main(int argc, char **argv)
     gl.DEEBUG = gl.MEM_DEEBUG = 0;
 #endif	/* GLOBAL_DEBUG */
 
-    system("touch /tmp/nomos_start"); /* DEBUG */
-    printf("   LOG: fo_nomos agent starting up from the beginning....\n");
+    printf("   LOG: fo_nomos agent starting up from the beginning....\n"); /* DEBUG */
     /*
       Set up variables global to the agent. Ones that are the
       same for all scans.
@@ -524,8 +524,7 @@ int main(int argc, char **argv)
 	/* 
 	   We're being run from the scheduler
 	*/
-	system("touch /tmp/nomos_sched_run"); /* DEBUG */
-	printf("   LOG: fo_nomos agent starting up in scheduler mode....\n");
+	printf("   LOG: fo_nomos agent starting up in scheduler mode....\n"); /* DEBUG */
 	schedulerMode = 1;
 	signal(SIGALRM, ShowHeartbeat);
 	printf("OK\n");
@@ -533,6 +532,7 @@ int main(int argc, char **argv)
 	alarm(60);
 
 	while (ReadLine(stdin, parm, myBUFSIZ) >= 0) {
+	    printf("    LOG: fo_nomos read %s\n", parm);
 	    if (parm[0] != '\0') {
 		/*
 		  Get the file arg and go ahead and process it
@@ -546,7 +546,7 @@ int main(int argc, char **argv)
 		    DBclose(DB);
 		    exit(-1);
 		}
-		processFile(cur.pFile); 
+		processFile(repFile); 
 		freeAndClearScan(&cur);
 		printf("OK\n");
 		fflush(stdout);
