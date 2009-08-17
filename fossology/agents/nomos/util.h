@@ -74,6 +74,7 @@ void makePath(char *dirpath);
 void makeDir(char *dirpath);
 void removeDir(char *dir);
 int mySystem(const char *fmt, ...);
+int iMadeThis(char *textp);
 int isFILE(char *pathname);
 int addEntry(char *pathname, int forceFlag, const char *fmt, ...);
 void Msg(const char *fmt, ...);
