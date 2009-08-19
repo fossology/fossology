@@ -25,16 +25,20 @@ extern "C" {
 // Our simple datatype
 typedef struct token {
     char *string;
+    int start;
+    int end;
+    int length;
 } token;
 
-// This function frees all the internal data in the datatype.
-void token_free(void *v);
-
-// This function is used to create the datatype from a substring.
-void* token_create_from_string(char *string, int start, int end);
-
-// This function is used to print the datatype.
-void token_print(void *v);
+int default_list_type_token(void);
+int default_list_type_token_init(void);
+void* default_list_type_function_token_create(void *v);
+void* default_list_type_function_token_copy(void *v);
+void default_list_type_function_token_destroy(void *v);
+void default_list_type_function_token_print(void *v, FILE *f);
+int default_list_type_function_token_dump(void *v, FILE *f);
+void* default_list_type_function_token_load(FILE *f);
+token* token_create_from_string(char *string, int start, int end);
 
 #if defined(__cplusplus)
 }

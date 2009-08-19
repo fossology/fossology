@@ -17,10 +17,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <string.h>
 #include <ctype.h>
-#include "list.h"
+#include <default_list.h>
 #include "re.h"
 
 int __RE__ERROR_OFFSET__ = 0;
@@ -55,14 +54,13 @@ void re_free(cre *re) {
     pcre_free(re);
 }
 
-int re_find_all(cre *re, char* subject, default_list **list,void* (*helpFunc)(char*, int, int)) {
+int re_find_all(cre *re, char* subject, default_list list,void* (*helpFunc)(char*, int, int)) {
     unsigned char *name_table;
     int namecount;
     int name_entry_size;
     int ovector[OVECCOUNT];
     int subject_length;
     int rc, i;
-    default_list *l;
 
     subject_length = (int)strlen(subject);
 
@@ -126,7 +124,7 @@ int re_find_all(cre *re, char* subject, default_list **list,void* (*helpFunc)(ch
         if (temp==NULL) {
             return 3;
         }
-        default_list_append(list, (void**)&temp);
+        default_list_append(list, temp);
 
     }      /* End of loop to find second and subsequent matches */
 

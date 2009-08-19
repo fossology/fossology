@@ -17,7 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <ctype.h>
 
 #ifndef __FILE_UTILS_H__
@@ -27,8 +26,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern "C" {
 #endif
 
-void openfile(unsigned char *filename, unsigned char **buffer);
-int readline(FILE *pFile, unsigned char **line);
+void openfile(char *filename, char **buffer);
+int readline(FILE *pFile, char **line);
 
 #if defined(__cplusplus)
 }

@@ -15,20 +15,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <string.h>
-#include <ctype.h>
-#include "list.h"
-#include <pcre.h>
-
 #ifndef _RE__h_
 #define _RE__h_
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <default_list.h>
+#include <pcre.h>
 
 typedef pcre cre;
 #define RE_DOTALL PCRE_DOTALL
@@ -37,7 +36,7 @@ typedef pcre cre;
 void re_print_error(int id);
 int re_compile(char *pattern, int options, cre **re);
 void re_free(cre *re);
-int re_find_all(cre *re, char* subject, default_list **list, void*(*helpFunc)(char*, int, int));
+int re_find_all(cre *re, char* subject, default_list list, void*(*helpFunc)(char*, int, int));
 
 #if defined(__cplusplus)
 }

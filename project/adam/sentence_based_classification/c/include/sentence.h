@@ -15,42 +15,37 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
-#ifndef __FEATURE_TYPE__H_
-#define __FEATURE_TYPE__H_
+#ifndef __SENTENCE_TYPE__H_
+#define __SENTENCE_TYPE__H_
+
+#include <sparsevect.h>
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-typedef int c_bool;
-#define FALSE 0
-#define TRUE (1)
-#define FT_CHAR_MAP "\n.:;,/\\|~`!@#$%^&*-_=+?()[]{}<>"
-#define FT_CHAR_MAP_LEN 31
-
 // Our simple datatype
-typedef struct feature_type {
-    unsigned char *string;
-    unsigned char *stemmed;
+typedef struct sentence {
+    char *string;
     int start;
     int end;
-    int length;
-    c_bool word;
-    c_bool capped;
-    c_bool upper;
-    c_bool number;
-    c_bool incnum;
-    int char_vector[31];
-} feature_type;
+    int position;
+    char *filename;
+    char *licensename;
+    sv_vector vector;
+} sentence;
 
-// This function frees all the internal data in the datatype.
-void feature_type_free(void *v);
+int default_list_type_sentence(void);
+int default_list_type_sentence_init(void);
+void* default_list_type_function_sentence_create(void *v);
+void* default_list_type_function_sentence_copy(void *v);
+void default_list_type_function_sentence_destroy(void *v);
+void default_list_type_function_sentence_print(void *v, FILE *f);
+int default_list_type_function_sentence_dump(void *v, FILE *f);
+void* default_list_type_function_sentence_load(FILE *f);
 
-// This function is used to create the datatype from a substring.
-void* feature_type_create_from_string(unsigned char *string, int start, int end);
-
-// This function is used to print the datatype.
-void feature_type_print(void *v);
+// This function is used to create the datatype.
+sentence* sentence_create(char *string, int start, int end, int position, char *filename, char *licensename, sv_vector vector);
 
 #if defined(__cplusplus)
 }

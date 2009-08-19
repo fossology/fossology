@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "file_utils.h"
 
-void openfile(unsigned char *filename, unsigned char **buffer) {
+void openfile(char *filename, char **buffer) {
     FILE *pFile;
     long lSize;
     size_t result;
@@ -31,7 +31,7 @@ void openfile(unsigned char *filename, unsigned char **buffer) {
     lSize = ftell(pFile);
     rewind(pFile);
 
-    *buffer = (unsigned char*)malloc(sizeof(unsigned char)*lSize+1);
+    *buffer = malloc(lSize+1);
     if (*buffer == NULL) {
         fputs("Memory error.\n",stderr);
         exit(2);
@@ -47,12 +47,12 @@ void openfile(unsigned char *filename, unsigned char **buffer) {
     fclose(pFile);
 }
 
-int readline(FILE *pFile, unsigned char **line) {
+int readline(FILE *pFile, char **line) {
     int max = 256;
     int nch = 0;
     int c;
 
-    *line = (unsigned char*)malloc(sizeof(unsigned char)*max);
+    *line = malloc(max);
     if (*line == NULL) {
         fputs("Memory error.\n",stderr);
         exit(2);

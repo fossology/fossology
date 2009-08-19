@@ -19,13 +19,14 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include "tokenizer.h"
-#include "list.h"
+#include "default_list.h"
 #include "re.h"
 #include "token.h"
-#include "feature_type.h"
+#include "token_feature.h"
 #include <maxent/maxentmodel.hpp>
 #include "maxent_utils.h"
 #include "file_utils.h"
+#include "config.h"
 
 void print_usage(char *name) {
     fprintf(stderr, "Usage: %s [options] file\n",name);
@@ -34,28 +35,22 @@ void print_usage(char *name) {
 }
 
 int main(int argc, char **argv) {
-    unsigned char *buffer;
+    char *buffer;
     int i,j;
-    default_list *sentence_list = NULL;
-    default_list *feature_type_list = NULL;
-    default_list *label_list = NULL;
-    token *t = NULL;
-    feature_type *ft = NULL;
-    int left_window = 3;
-    int right_window = 3;
-    char *model_file;
+    char *t = NULL;
+    token_feature *tf = NULL;
+    char model_file[255];
     int c;
 
-    opterr = 0;
     while ((c = getopt(argc, argv, "m:h")) != -1) {
         switch (c) {
             case 'm':
-                model_file = optarg;
+                strcpy(model_file,optarg);
 
                 FILE *file;
                 file = fopen(model_file, "rb");
                 if (file==NULL) {
-                    fprintf(stderr, "File provided to -m parameter does not exists.\n");
+                    fprintf(stderr, "File provided to -m parameter does not exists.\n\t'%s'\n", model_file);
                     exit(1);
                 }
 
@@ -79,38 +74,43 @@ int main(int argc, char **argv) {
         }
     }
 
+    printf("optind = %d\n", optind);
+
     if (optind>=argc) {
         print_usage(argv[0]);
-        fprintf(stderr, "\nNot file provided for labelling...\n");
+        fprintf(stderr, "No file provided for labelling...\n");
         exit(-1);
     }
 
     MaxentModel m;
     m.load(model_file);
     buffer = NULL;
-    sentence_list = NULL;
-    feature_type_list = NULL;
-    label_list = NULL;
-    openfile((unsigned char*)argv[optind],&buffer);
-    create_features_from_buffer(buffer,&feature_type_list);
-    label_sentences(m,&feature_type_list,&label_list,left_window,right_window);
+    openfile(argv[optind],&buffer);
+    default_list sentence_list = default_list_create(default_list_type_token());
+    default_list feature_type_list = default_list_create(default_list_type_token_feature());
+    default_list label_list = default_list_create(default_list_type_string());
+    create_features_from_buffer(buffer,feature_type_list);
+    label_sentences(m,feature_type_list,label_list,left_window,right_window);
 
     printf("<SENTENCE>");
-    for (i = 0; i<default_list_length(&feature_type_list); i++) {
-        default_list_get(&label_list,i,(void**)&t);
-        default_list_get(&feature_type_list,i,(void**)&ft);
+    int start = 0;
+    for (i = 0; i<default_list_length(feature_type_list); i++) {
+        t = (char *)default_list_get(label_list,i);
+        tf = (token_feature *)default_list_get(feature_type_list,i);
 
-        printf("%s ",ft->string);
-
-        if (strcmp("E",t->string)==0) {
-            printf("</SENTENCE><SENTENCE>");
+        if (strcmp("E",t)==0) {
+            char *temp = (char *)malloc(tf->end - start + 1);
+            strncpy(temp, (char *)buffer+start, tf->end - start);
+            temp[tf->end - start] = '\0';
+            printf("%s</SENTENCE><SENTENCE>", temp);
+            free(temp);
+            start = tf->end;
         }
     }
-    printf("</SENTENCE>");
+    printf("</SENTENCE>\n");
 
     free(buffer);
-    default_list_free(&sentence_list,&token_free);
-    default_list_free(&feature_type_list,&feature_type_free);
-    default_list_free(&label_list,&token_free);
+    default_list_destroy(feature_type_list);
+    default_list_destroy(label_list);
     return(0);
 }

@@ -16,38 +16,39 @@
 ######################################################################
 
 CC=gcc
-CFLAGS=-g -Iinclude -lpcre -lstemmer -lmaxent
+CFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O0
 CPP=g++
-CPPFLAGS=-g -Iinclude -lpcre -lstemmer -lmaxent -Wno-deprecated -I../../sparsevect/
+CPPFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O0 -Wno-deprecated -I../../sparsevect/
 utils=\
-      utils/list.c \
       utils/re.c \
       utils/token.c \
-      utils/stem.c \
-      utils/feature_type.c \
+      utils/token_feature.c \
       utils/tokenizer.c \
       utils/file_utils.c \
       utils/maxent_utils.cpp \
-      utils/sentence_type.c
+	  utils/sentence.c
 
 utils_o := $(patsubst %.cpp,%.o,$(utils))
 utils_o := $(patsubst %.c,%.o,$(utils_o))
 
 all: utils/utils.a train_sent_model label_sentences database test
 
+default_list/default_list.a:
+	make -C default_list default_list.a
+
 utils/utils.a: $(utils_o)
 	$(AR) -cru $@ $^
 
-test: test.o utils/utils.a ../../sparsevect/sparsevect.o
+test: test.o utils/utils.a ../../sparsevect/sparsevect.o default_list/default_list.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-train_sent_model: train_sent_model.o utils/utils.a
+train_sent_model: train_sent_model.o utils/utils.a default_list/default_list.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-label_sentences: label_sentences.o utils/utils.a
+label_sentences: label_sentences.o utils/utils.a default_list/default_list.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-database: database.o utils/utils.a ../../sparsevect/sparsevect.o
+database: database.o utils/utils.a ../../sparsevect/sparsevect.o default_list/default_list.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
 training.txt:
@@ -55,5 +56,8 @@ training.txt:
 
 clean:
 	rm -f test *.o utils/*.o utils/*.a
+	make -C default_list clean
 
 phony: all clean
+
+# vim: noet
