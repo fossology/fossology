@@ -42,7 +42,6 @@ void freeAndClearScan(struct curScan *);
 extern licText_t licText[]; /* Defined in _autodata.c */
 struct globals gl;
 struct curScan cur;
-void *DB = NULL;
 int schedulerMode = 0; /* Non-zero when being run from scheduler */
 
 char *files_to_be_scanned[];
@@ -188,7 +187,7 @@ void parseSchedInput(char *s)
 	printf("   LOG: Unknown data: '%s'\n",origS);
 	printf("   LOG: Nomos agent is exiting\n");
 	fflush(stdout);
-	DBclose(DB);
+	DBclose(gl.DB);
 	exit(-1);
     }
 } 
@@ -223,7 +222,7 @@ void Bail(int exitval)
 
     printf("   LOG: Nomos agent is exiting\n");
     fflush(stdout);
-    DBclose(DB);
+    DBclose(gl.DB);
 
     exit(exitval);
 }
@@ -444,13 +443,14 @@ int main(int argc, char **argv)
       Set up variables global to the agent. Ones that are the
       same for all scans.
     */
-    DB = DBopen();
-    if (!DB) {
+    gl.DB = DBopen();
+    if (!gl.DB) {
 	printf("   FATAL: Nomos agent unable to connect to database, exiting...\n");
 	fflush(stdout);
 	exit(-1);
     }
-    gl.agentPk = GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
+    gl.agentPk = GetAgentKey(gl.DB, basename(argv[0]), 0, SVN_REV, agent_desc);
+    gl.pgConn = DBgetconn(DB);
 
 
     /* Record the progname name */
@@ -486,11 +486,11 @@ int main(int argc, char **argv)
 	{
 	case 'i':
 	    /* "Initialize" */
-	    DBclose(DB);  /* DB was opened above, now close it and exit */
+	    DBclose(gl.DB);  /* DB was opened above, now close it and exit */
 	    exit(0);
 	default:
 	    Usage(argv[0]);
-	    DBclose(DB);
+	    DBclose(gl.DB);
 	    exit(-1);
 	}
     }
@@ -543,7 +543,7 @@ int main(int argc, char **argv)
 		    printf("   FATAL: pfile %ld Nomos unable to open file %s\n",
 			   cur.pFileFk, cur.pFile);
 		    fflush(stdout);
-		    DBclose(DB);
+		    DBclose(gl.DB);
 		    exit(-1);
 		}
 		processFile(repFile); 

@@ -39,6 +39,8 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 
+#include <libfossdb.h>
+
 /*
  * TO use our local version of debug-malloc(), compile -DMEMORY_TRACING
  */
@@ -237,7 +239,6 @@ typedef struct licenseSpec licSpec_t;
 struct globals {
     char initwd[myBUFSIZ]; /* CDB, would like to workaround/eliminate. */
     char progName[64]; 
-    int agentPk;
     int progOpts; 
     int flags; 
     int uPsize;
@@ -250,6 +251,10 @@ struct globals {
 #endif	/* PROC_TRACE_SWITCH */
     magic_t mcookie;
     list_t sHash;
+    /* Agent-specific Things */
+    int agentPk;
+    void *DB;
+    PGconn *pgConn;
 };
 
 
@@ -367,7 +372,6 @@ int optionIsSet(int val);
 */
 extern struct globals gl;
 extern struct curScan cur;
-extern void *DB;
 extern licText_t licText[];
 extern licSpec_t licSpec[];
 extern int schedulerMode; /* Non-zero if being run by scheduler */
