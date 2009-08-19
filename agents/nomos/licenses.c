@@ -584,7 +584,7 @@ void licenseScan(list_t *l)
     START_TIMER;
 #endif	/* STOPWATCH */
     lowest = nSkip = 0;
-#if !defined (notdef)
+
     for (scp = scores; (p = listIterate(l)) != NULL_ITEM; scp++) {
 #ifdef	QA_CHECKS
 	if (p->iFlag) {
@@ -661,65 +661,13 @@ void licenseScan(list_t *l)
 	       scp->score);
 #endif	/* DEBUG > 5 */
     }
-#else /* !notdef */
-
-    cp = cur.targetFile;
-
-    /*
-     * Zero-length files are of no interest; there's nothing in them!
-     *  CDB - We need to report this error somehow... and clean up
-     *  /tmp/nomos.tmpdir (or equivalent).
-     */
-    if ((textp = mmapFile(cp)) == NULL_STR) {
-	perror(cp);
-	fprintf(stderr, "Zero length file: %s\n", cp);
-#ifdef	QA_CHECKS
-	Assert(NO, "zero-length: %s", cp);
-	mySystem("ls -l '%s'", cp);
-#endif	/* QA_CHECKS */
-	continue;
-    }
-    /* gl.totBytes += (double) (scp->size = cur.stbuf.st_size); CDB ??? */
-    (void) strcpy(scp->ftype, magic_buffer(gl.mcookie, textp,
-					   (size_t) scp->size));
-#ifdef	DEBUG
-    printf("Magic: %s\n", scp->ftype);
-#endif	/* DEBUG */
-    /*
-     * Disinterest #3 (discriminate-by-file-content):
-     * Files not of a known-good type (as reported by file(1)/magic(3)) should
-     * also be skipped (some are quite large!).  _UTIL_MAGIC (see _autodata.c)
-     * contains a regex for MOST of the files we're interested in, but there
-     * ARE some exceptions (logged below).
-     *****
-     * exception (A): patch/diff files are sometimes identified as "data".
-     *****
-     * FIX-ME: we don't currently use _UTIL_FILTER, which is set up to
-     * exclude some files by filename.
-     */
-    if (idxGrep(_UTIL_MAGIC, scp->ftype, REG_ICASE|REG_EXTENDED)) {
-	for (scp->kwbm = c = 0; c < NKEYWORDS; c++) {
-	    if (idxGrep(c+_KW_first, textp,
-			REG_EXTENDED|REG_ICASE)) {
-		scp->kwbm |= (1 << c);
-		scp->score++;
-#if	(DEBUG > 5)
-		printf("Keyword %d (\"%s\"): YES\n", c, _REGEX(c+_KW_first));
-#endif	/* DEBUG > 5 */
-	    }
-	}
-    } else {
-	scp->score = 0;
-    }
-    munmapFile(textp);
-#if	(DEBUG > 5)
-    printf("%s = %d\n", (char *)(scp->fullpath + scp->nameOffset),
-	   scp->score);
-#endif	/* DEBUG > 5 */
-#endif /* !notdef */
 
     c = l->used;
 
+    /*
+     * CDB - It is always the case that we are doing one file at a time.
+     */
+     
     /*
      * If we were invoked with a single-file-only option, just over-ride the
      * score calculation -- give the file any greater-than-zero score so it
