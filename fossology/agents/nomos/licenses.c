@@ -622,10 +622,6 @@ void licenseScan(list_t *l)
 #endif	/* QA_CHECKS */
 	    continue;
 	}
-	if (scp->dataOffset = iMadeThis(textp)) {
-	    textp += scp->dataOffset;
-	    cur.stbuf.st_size = scp->dataOffset;
-	}
 	scp->size = cur.stbuf.st_size; /* Where did this get set ? CDB */
 	(void) strcpy(scp->ftype, magic_buffer(gl.mcookie, textp,
 					       (size_t) scp->size));
@@ -665,7 +661,7 @@ void licenseScan(list_t *l)
 	       scp->score);
 #endif	/* DEBUG > 5 */
     }
-#else /* notdef */
+#else /* !notdef */
 
     cp = cur.targetFile;
 
@@ -682,10 +678,6 @@ void licenseScan(list_t *l)
 	mySystem("ls -l '%s'", cp);
 #endif	/* QA_CHECKS */
 	continue;
-    }
-    if (scp->dataOffset = iMadeThis(textp)) {
-	textp += scp->dataOffset;
-	cur.stbuf.st_size -= scp->dataOffset;
     }
     /* gl.totBytes += (double) (scp->size = cur.stbuf.st_size); CDB ??? */
     (void) strcpy(scp->ftype, magic_buffer(gl.mcookie, textp,
