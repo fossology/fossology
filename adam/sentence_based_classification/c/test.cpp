@@ -116,16 +116,25 @@ int main(int argc, char **argv) {
     default_list_destroy(label_list);
     printf("done.\n");
 
+    double database_score[default_list_length(database_list)];
+    for (k = 0; k < default_list_length(database_list); k++) {
+        database_score[k] = 0.0;
+    }
     double vector_score[default_list_length(file_list)];
     default_list vector_index[default_list_length(file_list)];
-    for (k = 0; k < default_list_length(file_list)+1; k++) {
+    default_list vector_sents[default_list_length(file_list)];
+    default_list vector_cosin[default_list_length(file_list)];
+    for (k = 0; k < default_list_length(file_list); k++) {
         vector_score[k] = 0;
         vector_index[k] = default_list_create(default_list_type_int());
+        vector_sents[k] = default_list_create(default_list_type_int());
+        vector_cosin[k] = default_list_create(default_list_type_double());
     }
     double score[default_list_length(database_list)];
     for (i = 0; i < default_list_length(database_list); i++) {
         sentence_list = (default_list)default_list_get(database_list,i);
         double matrix[default_list_length(file_list)+1][default_list_length(sentence_list)+1];
+        double cosine[default_list_length(file_list)][default_list_length(sentence_list)];
         for (k = 0; k < default_list_length(file_list)+1; k++) {
             matrix[k][0] = 0;
         }
@@ -136,7 +145,8 @@ int main(int argc, char **argv) {
             a = (sentence *)default_list_get(sentence_list,j);
             for (k = 0; k < default_list_length(file_list); k++) {
                 b = (sentence *)default_list_get(file_list,k);
-                if (sv_inner(a->vector,b->vector)>0.7) {
+                cosine[k][j] = sv_inner(a->vector,b->vector);
+                if (cosine[k][j]>0.5) {
                     matrix[k+1][j+1] = matrix[k][j] + 1;
                 } else {
                     if (matrix[k][j+1] > matrix[k+1][j]) {
@@ -148,11 +158,13 @@ int main(int argc, char **argv) {
             }
         }
         double vector[default_list_length(file_list)];
+        int index[default_list_length(file_list)];
         for (k = 0; k < default_list_length(file_list); k++) {
             double m = 0.0;
             for (j = 0; j < default_list_length(sentence_list); j++) {
                 if (matrix[k+1][j+1] > m) {
                     m = matrix[k+1][j+1];
+                    index[k] = j;
                 }
             }
             vector[k] = m;
@@ -164,13 +176,28 @@ int main(int argc, char **argv) {
             } else {
                 m = vector[k];
             }
+        }
+        for (k = 0; k < default_list_length(file_list); k++) {
+            if (vector[k] != 0.0) {
+                vector[k] = m;
+            }
+        }
+        for (k = 0; k < default_list_length(file_list); k++) {
             if (vector[k] > vector_score[k]) {
                 vector_score[k] = vector[k];
                 default_list_destroy(vector_index[k]);
+                default_list_destroy(vector_sents[k]);
+                default_list_destroy(vector_cosin[k]);
                 vector_index[k] = default_list_create(default_list_type_int());
+                vector_sents[k] = default_list_create(default_list_type_int());
+                vector_cosin[k] = default_list_create(default_list_type_double());
                 default_list_append(vector_index[k],(void *)&i);
+                default_list_append(vector_sents[k],(void *)&index[k]);
+                default_list_append(vector_cosin[k],(void *)&cosine[k][index[k]]);
             } else if (vector[k] != 0 && vector[k] == vector_score[k]) {
                 default_list_append(vector_index[k],(void *)&i);
+                default_list_append(vector_sents[k],(void *)&index[k]);
+                default_list_append(vector_cosin[k],(void *)&cosine[k][index[k]]);
             }
         }
         score[i] = matrix[default_list_length(file_list)][default_list_length(sentence_list)];
@@ -178,11 +205,32 @@ int main(int argc, char **argv) {
 
     for (k = 0; k < default_list_length(file_list); k++) {
         int *index = NULL;
-        printf("%02d : %1.0f, ", k, vector_score[k]);
+        double *cosine = NULL;
         for (j = 0; j<default_list_length(vector_index[k]); j++) {
             index = (int *)default_list_get(vector_index[k],j);
-            printf("%03d ", *index);
+            cosine = (double *)default_list_get(vector_cosin[k],j);
+            database_score[*index] += *cosine;
         }
+    }
+
+    for (k = 0; k < default_list_length(file_list); k++) {
+        int *index = NULL;
+        int *index2 = NULL;
+        double *cosine = NULL;
+        printf("%02d : %1.0f, ", k, vector_score[k]);
+        st = (sentence *)default_list_get(file_list,k);
+        printf("[%05d, %05d] ", st->start, st->end);
+        int best_index = -1;
+        double best_match = 0.0;
+        for (j = 0; j<default_list_length(vector_index[k]); j++) {
+            index = (int *)default_list_get(vector_index[k],j);
+            index2 = (int *)default_list_get(vector_sents[k],j);
+            if (database_score[*index]>best_match) {
+                best_match = database_score[*index];
+                best_index = *index;
+            }
+        }
+        printf("%02d (%1.2f) ", best_index, best_match);
         printf("\n");
     }
 
