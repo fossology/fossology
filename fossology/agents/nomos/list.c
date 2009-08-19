@@ -105,6 +105,9 @@ void listClear(list_t *l, int deallocFlag)
 #endif	/* LIST_DEBUG */
 	return;
     }
+#ifdef LIST_DEBUG
+    listDump(l, YES)
+#endif LIST_DEBUG
 #ifdef	GLOBAL_DEBUG
     if (gl.MEM_DEEBUG) {
 	printf("... used %d size %d ix %d sorted %d items %p\n",
@@ -233,7 +236,7 @@ item_t *listGetItem(list_t *l, char *s)
     */
     for (p = l->items, i = 0; i < l->used; i++, p++) {
 #ifdef	LIST_DEBUG
-	printf("%p: i = %d, used = %d, size = %d\n", l, i, l->size,
+	printf("%p: check i = %d, used = %d, size = %d\n", l, i, l->used,
 	       l->size);
 #endif	/* LIST_DEBUG */
 	if ((x = strcmp(s, p->str)) == 0) {
