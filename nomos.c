@@ -417,6 +417,37 @@ void processFile(char *fileToScan) {
 }
 
 
+/*
+ * Write out the information about the scan to the FOSSology database.
+ * 
+ * curScan is passed as an arg even though it's available as a global, 
+ * in order to facilitate subsequent modularization of the code.
+ * 
+ * Returns: 0 if successful, -1 if not.
+ */
+int recordScanToDB(struct curScan *scanRecord) {
+    PGresult  *result;
+    char query[myBUFSIZ];
+
+    sprintf(query, "insert into license_file(agent_fk, pfile_fk) values(%d, %ld)",
+	    gl.agentPk, scanRecord->pFileFk);
+
+    result = PQexec(gl.pgConn, query);
+
+    if (PQresultStatus(result) != PGRES_COMMAND_OK) {
+	/* 
+	   Something went wrong.
+	*/
+	printf("   ERROR: Nomos agent got database error: %s\n", PQresultErrorMessage(result));
+	PQclear(result);
+	return(-1);
+    }
+
+    PQclear(result);
+    return(0);
+}
+
+
 
 int main(int argc, char **argv)
 {
@@ -450,7 +481,7 @@ int main(int argc, char **argv)
 	exit(-1);
     }
     gl.agentPk = GetAgentKey(gl.DB, basename(argv[0]), 0, SVN_REV, agent_desc);
-    gl.pgConn = DBgetconn(DB);
+    gl.pgConn = DBgetconn(gl.DB);
 
 
     /* Record the progname name */
@@ -547,6 +578,7 @@ int main(int argc, char **argv)
 		    exit(-1);
 		}
 		processFile(repFile); 
+		recordScanToDB(&cur);
 		freeAndClearScan(&cur);
 		printf("OK\n");
 		fflush(stdout);
