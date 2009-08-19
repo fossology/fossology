@@ -18,20 +18,18 @@
   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
-extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <unistd.h>
-}
-#include "tokenizer.h"
-#include "list.h"
-#include "re.h"
+#include <default_list.h>
 #include "token.h"
-#include "feature_type.h"
+#include "token_feature.h"
+#include "tokenizer.h"
+#include "re.h"
+#include "file_utils.h"
 #include <maxent/maxentmodel.hpp>
 #include "maxent_utils.h"
-#include "file_utils.h"
+#include "config.h"
 
 void print_usage(char *name) {
     fprintf(stderr, "Usage: %s [options]\n",name);
@@ -42,13 +40,8 @@ void print_usage(char *name) {
 }
 
 int main(int argc, char *argv[]) {
-    unsigned char *buffer;
+    char *buffer;
     int i,j,c;
-    default_list *sentence_list = NULL;
-    default_list *feature_type_list = NULL;
-    default_list *label_list = NULL;
-    int left_window = 3;
-    int right_window = 3;
     char *training_files = NULL;
     char *model_file = NULL;
 
@@ -99,23 +92,24 @@ int main(int argc, char *argv[]) {
     // training data.
     MaxentModel m;
     m.begin_add_event();
-    unsigned char *filename = NULL;
+    char *filename = NULL;
     while (readline(pFile,&filename)!=EOF) {
-        printf("Starting on %s...\n", filename);
+        default_list sentence_list = default_list_create(default_list_type_token());
+        default_list feature_type_list = default_list_create(default_list_type_token_feature());
+        default_list label_list = default_list_create(default_list_type_string());
         buffer = NULL;
-        sentence_list = NULL;
-        feature_type_list = NULL;
-        label_list = NULL;
+        printf("Starting on %s...\n", filename);
+        
         openfile(filename,&buffer);
-        create_sentence_list(buffer,&sentence_list);
-        create_features_from_sentences(&sentence_list,&feature_type_list, &label_list);
+        create_sentence_list(buffer,sentence_list);
+        create_features_from_sentences(sentence_list,feature_type_list, label_list);
         // This function adds the training data to the model.
-        create_model(m, &feature_type_list, &label_list, left_window, right_window);
+        create_model(m, feature_type_list, label_list, left_window, right_window);
         free(buffer);
         free(filename);
-        default_list_free(&sentence_list,&token_free);
-        default_list_free(&feature_type_list,&feature_type_free);
-        default_list_free(&label_list,&token_free);
+        default_list_destroy(sentence_list);
+        default_list_destroy(feature_type_list);
+        default_list_destroy(label_list);
     }
     m.end_add_event();
 
