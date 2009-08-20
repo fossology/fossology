@@ -121,19 +121,15 @@ If it returns nothing then you are clean, otherwise it will list
 files with differences and files that svn doesn't know about.
 
 Coexisting installs:
-FOSSology is designed to support coexisting installations in different
-locations. For example you might have distribution packages of
+FOSSology is designed to support coexisting installations in 
+different locations. For example you might have distribution packages of
 FOSSology installed under /usr, but decide you want to try a new
 version from SVN using the normal install process to /usr/local. This
 should work with the following caveats:
 * database
-  If you try to have two versions of FOSSology with different schema
-  use the same database, the older one won't work and you might even
-  break things.
-  You have to have two schedulers running on two different systems.
-  The scheduler now checks and prevents multiple schedulers running on
-  the same system.
-  You probably want to use two different databases, adjust the Db.conf
+  Your newer install may update the database.  So your older code
+  may not work, you may even break things.
+  If you use two different databases.  Adjust the Db.conf
   files to point at separate. The one exception might be if you are
   testing a fix of two very similar versions of the code and only
   have one active at a time.
