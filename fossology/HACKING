@@ -130,8 +130,9 @@ should work with the following caveats:
   If you try to have two versions of FOSSology with different schema
   use the same database, the older one won't work and you might even
   break things.
-  If you have two schedulers running at the same time and using the
-  same database it will break.
+  You have to have two schedulers running on two different systems.
+  The scheduler now checks and prevents multiple schedulers running on
+  the same system.
   You probably want to use two different databases, adjust the Db.conf
   files to point at separate. The one exception might be if you are
   testing a fix of two very similar versions of the code and only
@@ -147,3 +148,7 @@ should work with the following caveats:
   apache works fine for two running fossology instances, but they will
   live in different locations on the filesystem and they can't both
   live at the same URL. Adjust accordingly.
+* User interface
+  It's easy to have two different versions of the UI operate on the same
+  DB.  Just install the alternate UI in a new location and point your
+  web browser.  You will have to adjust pathinclude.php.
