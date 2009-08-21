@@ -361,7 +361,7 @@ function JobAddJob($upload_pk, $job_name, $priority = 0) {
     	(job_user_fk,job_queued,job_priority,job_email_notify,job_name,job_upload_fk) VALUES
      	('$job_user_fk',now(),'$priority','$Job_email_notify','$Job_name','$upload_pk');";
   }
-  $jobpk = JobFindKey($upload_pk, $job_name);
+  $jobpk = JobFindKey($upload_pk, $Job_name);
   /*
      If the job already exists, just return the jobpk, don't insert
    */
