@@ -60,11 +60,11 @@ int main(int argc, char **argv) {
     char *filename = argv[1];
 
     MaxentModel m;
-    m.load("SentenceModel.dat");
+    m.load("maxent.dat");
 
     printf("Load database...\n");
 
-    file = fopen("Database.dat", "r");
+    file = fopen("database.dat", "r");
     if (file==NULL) {
         fputs("File error. Could not read Database.dat\n", stderr);
         exit(1);
