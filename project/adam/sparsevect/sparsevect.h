@@ -17,6 +17,11 @@
 
 #ifndef __SPARSEVECT_H__
 #define __SPARSEVECT_H__
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 /* External representation of an element: i is the index, v is the value */
 struct sv_element {
     unsigned long int i;
@@ -125,5 +130,9 @@ int sv_dump(sv_vector vect, FILE *file);
    Returns a sv_vector.
 */
 sv_vector sv_load(FILE *file);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif

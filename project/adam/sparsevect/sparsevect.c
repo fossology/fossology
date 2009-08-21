@@ -455,6 +455,20 @@ double sv_inner(sv_vector a, sv_vector b) {
     return product;
 }
 
+/* Vector copy - return a new sv_vector */
+sv_vector sv_copy(sv_vector vect) {
+    sv_vector newvect;
+    struct sv_node *node;
+
+    newvect = sv_new(vect->dim);
+    node = vect->first;
+    while (node != NULL) {
+        sv_set_element(newvect, node->i, node->v);
+        node = node->next;
+    }
+    return newvect;
+}
+
 /* Scalar multiplication - return a new sv_vector */
 sv_vector sv_scalar_mult(sv_vector vect, double scalar) {
     sv_vector newvect;
