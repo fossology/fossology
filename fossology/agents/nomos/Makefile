@@ -32,8 +32,8 @@ fo_nomos: nomos.o $(OBJS) $(GENOBJS)
 nomos.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
 	$(CC) -c $< $(CFLAGS_LOCALO) 
 
-$(OBJS) $(GENOBJS): %.o: %.c $(HDRS) $(VARS)
-	$(CC) -c $< $(DEF) $(ALL_CFLAGS) $(CFLAGS_LOCALO)
+$(OBJS) $(GENOBJS): %.o: %.c $(HDRS) $(DB) $(VARS)
+	$(CC) -c $< $(DEF) $(CFLAGS_DBO) $(ALL_CFLAGS)
 
 #
 # Non "standard" preprocessing stuff starts here...
