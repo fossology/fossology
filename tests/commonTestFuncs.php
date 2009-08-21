@@ -115,7 +115,8 @@ function getHost($URL)
  *
  * NOTE: must be run by the user who owns the system mailbox in /var/mail
  *
- * @return array Subjects, list of Fossology subjects that match.
+ * @return array Subjects, list of Fossology subjects that match.  On error,
+ * the first entry in the array will start with the string 'ERROR!'
  *
  */
 function getMailSubjects() {
@@ -128,7 +129,9 @@ function getMailSubjects() {
   //$user = get_current_user();
   $user = exec('id -un', $out, $rtn);
   $UserMail = $MailFile . $user;
-  //$FH = fopen($UserMail,'r') or die ("Cannot open $UserMail, $phperrormsg\n");
+  if(file_exists($UserMail) === FALSE) {
+    return(array("ERROR! $UserMail does not exist"));
+  }
   $FH = fopen($UserMail,'r');
   if($FH === FALSE) {
     return(array("ERROR! Cannot open $UserMail"));

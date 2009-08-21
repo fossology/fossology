@@ -122,10 +122,16 @@ class fossologyTestCase extends fossologyTest
       return(NULL);
     }
     //print "Got back from getMailSubjects:\n";print_r($headers) . "\n";
-    /* check for errors */
+
+    /*
+       check for errors
+     */
+    /**
+     * @TODO use exceptions here, so you can indicated the correct item.
+     */
     if(preg_match('/ERROR/',$headers[0],$matches)) {
       $this->fail("{$headers[0]}\n");
-      return($headers);
+      return(FALSE);
     }
     $pattern = 'completed with no errors';
 
