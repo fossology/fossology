@@ -618,6 +618,7 @@ int sv_dump(sv_vector vect, FILE *file) {
         fwrite(&node->v, sizeof(double),1,file);
         node = node->next;
     }
+    return 0;
 }
 
 /*
