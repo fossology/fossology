@@ -1,5 +1,5 @@
 CC = /usr/bin/gcc
-CFLAGS = -Wall -g #-fPIC # Using -g so that gdb is actually useful
+CFLAGS = -Wall -g -O2 #-fPIC # Using -g so that gdb is actually useful
 OBJFILES = test.o sparsevect.o
 HFILES = sparsevect.h
 TARGET = test
