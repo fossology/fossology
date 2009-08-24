@@ -66,12 +66,14 @@ class uploadTestDataTest extends fossologyTestCase
     $this->createFolder(null, 'Testing', null);
   }
 
-  function testuploadTestDataTest()
-  {
+  function testuploadTestDataTest() {
+
     global $URL;
     global $PROXY;
+
     print "starting testUploadTestData\n";
     $rootFolder = 1;
+    $upload = NULL;
     $uploadList = array('TestData/archives/fossI16L518.tar.bz2',
                         'TestData/archives/foss23D1F1L.tar.bz2',
                         'TestData/licenses/gplv2.1',
@@ -79,13 +81,13 @@ class uploadTestDataTest extends fossologyTestCase
     $urlList = array('http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz',
                      'http://www.gnu.org/licenses/gpl-3.0.txt',
                      'http://www.gnu.org/licenses/agpl-3.0.txt',
-                     'http://snape.west/~fosstester/fossDirsOnly.tar.bz2');
+                     'http://osrb-1.fc.hp.com/~fosstester/fossDirsOnly.tar.bz2');
 
     /* upload the archives using the upload from file menu */
-    $description = "File $upload uploaded by Upload Data Test";
+
     print "Starting file uploads\n";
-    foreach($uploadList as $upload)
-    {
+    foreach($uploadList as $upload) {
+      $description = "File $upload uploaded by Upload Test Data Test";
       $this->uploadFile('Testing', $upload, $description, null, '1,2,3');
     }
     /* Upload the urls using upload from url.  Check if the user specificed a

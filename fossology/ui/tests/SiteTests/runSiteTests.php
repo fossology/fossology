@@ -39,7 +39,7 @@ $start = new timer();
 $Svn = `svnversion`;
 $date = date('Y-m-d');
 $time = date('h:i:s-a');
-print "Starting Site Tests on: " . $date . " at " . $time . "\n";
+print "\nStarting Site Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
 $test = &new TestSuite('Fossology Repo Site UI tests');
 $test->addTestFile('AboutMenuTest.php');
@@ -66,7 +66,7 @@ if (TextReporter::inCli())
   $results = $test->run(new TextReporter()) ? 0 : 1;
   print "Ending Site Tests at: " . date('r') . "\n";
   $elapseTime = $start->TimeAgo($start->getStartTime());
-  print "The Site Tests took {$elapseTime}to run\n";
+  print "The Site Tests took {$elapseTime}to run\n\n";
   exit($results);
 }
 $test->run(new HtmlReporter());

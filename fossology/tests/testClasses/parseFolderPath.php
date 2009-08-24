@@ -87,8 +87,10 @@ class parseFolderPath
    *
    * An empty array is returned if no license paths on that page.
    */
-  function parseFolderPath()
-  {
+  function parseFolderPath() {
+
+    $paths = array();
+
     /* Gather up the line(s) with Folder*/
     $this->countFiles();
     foreach ($this->filesWithLicense as $aptr)

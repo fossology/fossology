@@ -25,7 +25,7 @@
  * @version "$Id:  $"
  */
 
-error_reporting(-1);
+require_once('../commonTestFuncs.php');
 
 /**
  * array_implode
@@ -101,49 +101,65 @@ function compare2Master($results,$Master) {
   if(!is_array($Master)) {
     return(array('Error' => 'No Master Array supplied!'));
   }
-  $pass        = array();
-  $fail        = array();
-  $comparisons = array();
   $Total       = array();
   $Total['pass'] = 0;
   $Total['fail'] = 0;
-  foreach($results as $licenseFile => $testResults) {
-    $licenseFile = rtrim($licenseFile,':');
-    $masterResults = $Master[$licenseFile];
-    array_walk(&$testResults, 'trim_value');
-    array_walk(&$masterResults, 'trim_value');
-    //print "TR is:\n";print_r($testResults) . "\n";
-    //print "MR is:\n";print_r($masterResults) . "\n";
-    //print "licenseFile is:$lisenseFile\n";
-    /* Array diff documentation is the biggest pos that I have ever seen! */
-    $allDiffs = array_diff($testResults,$masterResults);
-    if(count($allDiffs) == 0) {
-      //print "allDiffs is ZERO\n";
-      $pass = array_unique($testResults);
-    }
-    else {
-      foreach($allDiffs as $diff) {
-        //print "diff is:$diff\n----------------\n";
-        $Total['fail'] += count($diff);
-        $fail[] = $diff;
 
-        // remove all diffs from test results to get passes
-        $index = array_search($diff,$testResults);
-        $sliced = array_splice($testResults,$index,1);
-        //print "TR After is:\n";print_r($testResults) . "\n";
+  foreach($results as $dirList) {
+    $pass        = array();
+    $fail        = array();
+    $comparisons = array();
+    $TotalByDir       = array();
+    $passByDir = 0;
+    $failByDir = 0;
+    foreach($dirList as $dirName => $fileList) {
+      foreach($fileList as $fileName => $testResults) {
+        print "TR is:\n";print_r($testResults) . "\n";
+        //print "MR is:\n";print_r($Master) . "\n";
+        print "fileName is:$fileName\n";
+        print "dirName is:$dirName\n";
+        $fileName = rtrim($fileName,':');
+        $masterResults = $Master[$dirName . '/' . $fileName];
+        array_walk(&$testResults, 'trim_value');
+        array_walk(&$masterResults, 'trim_value');
+        /* Array diff documentation is the biggest pos that I have ever seen! */
+        $allDiffs = array_diff($testResults,$masterResults);
+        if(count($allDiffs) == 0) {
+          //print "allDiffs is ZERO\n";
+          $pass = array_unique($testResults);
+        }
+        else {
+          foreach($allDiffs as $diff) {
+            //print "diff is:$diff\n----------------\n";
+            $failByDir += count($diff);
+            $fail[] = $diff;
+
+            // remove all diffs from test results to get passes
+            $index = array_search($diff,$testResults);
+            $sliced = array_splice($testResults,$index,1);
+            //print "TR After is:\n";print_r($testResults) . "\n";
+          }
+          $pass = array_unique($testResults);
+        }
+        //print "MR before standard is:\n";print_r($masterResults) . "\n";
+        $passByDir += count($pass);
+        $dirFile = $dirName . '/' . $fileName;
+        $comparisons[$dirFile]['standard'] = $masterResults;
+        $comparisons[$dirFile]['pass'] = $pass;
+        $comparisons[$dirFile]['fail'] = $fail;
+        $allDiffs = array();
+        $pass = array();
+        $fail = array();
       }
-      $pass = array_unique($testResults);
+      $TotalByDir[$dirName] = array($passByDir,$failByDir);
+      $Total['pass'] += $passByDir;
+      $Total['fail'] += $failByDir;
+      $passByDir  = 0;
+      $failByDir = 0;
     }
-    //print "MR before standard is:\n";print_r($masterResults) . "\n";
-    $Total['pass'] += count($pass);
-    $comparisons[$licenseFile]['standard'] = $masterResults;
-    $comparisons[$licenseFile]['pass'] = $pass;
-    $comparisons[$licenseFile]['fail'] = $fail;
-    $allDiffs = array();
-    $pass = array();
-    $fail = array();
   }
-  $allResults = array($Total,$comparisons);
+
+  $allResults = array($Total,$TotalByDir,$comparisons);
   return($allResults);
 } // compare2Master
 
@@ -304,7 +320,7 @@ function filterNomosResults($resultString) {
 function foLicenseAnalyis($license,$agent) {
 
   $chaNomos = '../../agents/nomos/nomos';      // use this path for now
-  $bsam = array();
+
   switch($agent) {
     case 'bsam':
       $cmd = "/usr/bin/fosslic ";
@@ -334,24 +350,39 @@ function foLicenseAnalyis($license,$agent) {
  * analyze.
  * @param string $cmd the command to run (e.g. /usr/bin/fosslic).
  * @return mixed, either string or array depending on the first parameter.
+ *
+ * If an array is returned it is in the format:
+ * DirName => array
+ *    fileName.txt => array
+ *       results
  */
 function _runAnalysis($licenseList,$cmd){
 
   $Fossology = array();
   if(is_array($licenseList)) {
-    foreach($licenseList as $license){
-      $license = trim($license);
-      $last = exec("$cmd $license 2>&1", $result, $rtn);
-      $pathParts = pathinfo($license);
-      $ld = explode('/',$pathParts['dirname']);
-      $licenseDir = end($ld);
-      // filename is just the filename without the extension .txt, add it back in
-      $licenseKey = $licenseDir . '/' . trim($pathParts['filename'])
-      . '.' . $pathParts['extension'] . ':';
-      $Fossology[$licenseKey] = $last;
+    //print "list is:\n";print_r($licenseList) . "\n";
+    foreach($licenseList as $path => $licenseFileList) {
+      //print "path is:$path\n";
+      //print "licenseFileList is:$licenseFileList\n"; print_r($licenseFileList) . "\n";
+      foreach($licenseFileList as $licenseFile) {
+        //print "licenseFile is:$licenseFile\n";
+        $licenseFile = trim($licenseFile);
+        $testFile = $path . "/" . $licenseFile;
+        //print "testFile is:$testFile\n";
+        $last = exec("$cmd $testFile 2>&1", $result, $rtn);
+        $licenseDir = lastDir($path);
+        //print "licenseDir is:$licenseDir\n";
+        $FN[$licenseFile] = $last;
+        //print "DB: FN is:\n";print_r($FN) . "\n";
+      }
+      $origPath = rtrim($path,"$licenseDir");
+      //print "origPath is:$origPath\n";
+      $Fossology[$origPath][$licenseDir] = $FN;
+      $FN = array();
     }
     return($Fossology);
   }
+
   // process the file
   else {
     $last = exec("$cmd $licenseList 2>&1", $result, $rtn);
@@ -437,7 +468,6 @@ function saveAllResults($fileName,$results) {
     return(FALSE);
   }
   foreach($results as $licenseFile => $resultArray) {
-    print "licenseFIle is:$licenseFile\n";
     list($licenseType,$filename) = explode('/',$licenseFile);
     $oneResult = "license-type=$licenseType;\n";
     $oneResult .= "file-name=$filename;\n";
@@ -505,9 +535,9 @@ function saveAllResults($fileName,$results) {
  * each
  * @return boolean
  */
-function saveTotals($filename,$agent,$totals) {
+function saveTotals($fileName,$agent,$totals) {
 
-  if(!strlen($filename)) {
+  if(!strlen($fileName)) {
     return(FALSE);
   }
   if(!strlen($agent)) {

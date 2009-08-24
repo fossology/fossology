@@ -48,11 +48,10 @@ class createUIUsers extends fossologyTestCase {
       'noemail' =>
         'test user with NO Email notification,NULL,10,1,NULL,NULL,noemail,NULL',
     );
-
     print "Starting testcreateUIUsers\n";
     foreach($Users as $user => $params) {
       list($description, $email, $access, $folder,
-       $block, $blank, $password, $Enote ) = split(',',$Users[$user]);
+      $block, $blank, $password, $Enote ) = split(',',$Users[$user]);
       $added = $this->addUser($user, $description, $email, $access, $folder, $password ,$Enote);
       if(preg_match('/User already exists/',$added, $matches)) {
         $this->pass();

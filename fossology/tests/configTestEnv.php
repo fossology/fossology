@@ -34,6 +34,7 @@
 // TODO : $usage = "$argv[0] Url User Password [path-to-suite]\n";
 
 // usage done this way as here doc's mess up eclipse colors.
+$U = NULL;
 $U .= "Usage: $argv[0] Url User Password [proxy]\n\nUrl is a full url with ending /\n";
 $U .= "e.g. http://someHost.somedomain/repo/\n\n";
 $U .= "Data-Base User and Data-Base Password\n\n";
@@ -45,7 +46,7 @@ $U .= "Note the single quotes to keep the shell happy.\n";
 $usage = $U;
 
 // simple parameter checks
-if($argc < 4)
+if((int)$argc < 4)
 {
   print $usage;
   exit(1);

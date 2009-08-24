@@ -109,10 +109,25 @@ foreach($BsamRaw as $file => $result) {
 $Results = compare2Master($Bsam, $Master);
 //print "Comparison results are:\n";print_r($Results) . "\n";
 
+$totals     = $Results[0];
+$allResults = $Results[1];
+print "Comparison totals are:\n";print_r($totals) . "\n";
+print "Comparison results are:\n";print_r($allResults) . "\n";
+/* store comparison results in a file */
+$saveFile = 'Bsam-Results-Summary.' . date('YMd');
+if(saveTotals($saveFile, 'bsam', $totals)){
+  print "Bsam Summary results generated and saved in file:\n$saveFile\n";
+}
+else {
+  print "Error! could not save results, printing to the screen\n";
+  foreach($totals as $file => $result){
+    print "$file: $result\n";
+  }
+}
 /* store comparison results in a file */
 $saveFile = 'Bsam-Results.' . date('YMd');
 
-if(saveResults($saveFile, $Results)){
+if(saveAllResults($saveFile, $allResults)){
   print "Bsam results generated and saved in file:\n$saveFile\n";
   exit(0);
 }

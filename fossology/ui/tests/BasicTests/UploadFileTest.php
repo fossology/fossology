@@ -66,8 +66,8 @@ class UploadFileTest extends fossologyTestCase
     /* we won't select any agents this time' */
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue($page);
-    $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'),
-      "FAILURE:Did not find the message'Upload added to job queue'\n");
+    $this->assertTrue($this->myassertText($page, '/The file .*? has been uploaded/'),
+      "FAILURE:Did not find the message 'The file .*? has been uploaded'\n");
 
   }
 }

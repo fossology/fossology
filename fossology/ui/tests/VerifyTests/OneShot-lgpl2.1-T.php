@@ -22,7 +22,7 @@
  * Upload a file from the server using the UI
  *
  *@TODO need to make sure testing folder exists....
- *@TODO needs setup and account to really work well...
+ *@TODO THis test is for bsam, change for fnomos, make a new one for bsam.
  *
  * @version "$Id$"
  *
@@ -41,7 +41,7 @@ class OneShotTablegplv21Test extends fossologyTestCase
     /* check to see if the user and material exist*/
     $this->assertTrue(file_exists('/home/fosstester/.bashrc'),
                       "FAILURE! .bashrc not found\n");
-    $this->Login($browser);
+    $this->Login();
   }
 
   function testOneShotTablegplv21()
@@ -53,8 +53,8 @@ class OneShotTablegplv21Test extends fossologyTestCase
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
            "OneShotgplv21Test-Table FAILURE! Did not find Upload Menu\n");
-    $this->assertTrue($this->myassertText($loggedIn, '/One-Shot License/'),
-           "OneShotgplv21Test-Table FAILURE! Did not find One-Shot License Menu\n");
+    $this->assertTrue($this->myassertText($loggedIn, '/One-Shot Analysis/'),
+           "OneShotgplv21Test-Table FAILURE! Did not find One-Shot Analysis Menu\n");
 
     $page = $this->mybrowser->get("$URL?mod=agent_license_once");
     $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),

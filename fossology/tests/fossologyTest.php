@@ -54,7 +54,7 @@ class fossologyTest extends WebTestCase
   public $cookie;
   public $debug;
   private $Url;
-  private $User = NULL;
+  protected $User = NULL;
   private $Password = NULL;
 
   /* Accesor methods */
@@ -94,6 +94,34 @@ class fossologyTest extends WebTestCase
   }
 
   /* Methods */
+
+
+  /**
+   * _browser
+   *
+   * internal method (singleton?) to make sure only one browser per test run
+   * is being used.
+   *
+   * @return resource
+   *
+   * TODO: fix returns so it's either a resource or ??
+   */
+  protected function _browser() {
+
+    if(is_object($this->mybrowser)) {
+      return($this->mybrowser);
+    }
+    else {
+      $browser = & new SimpleBrowser();
+      if(is_object($browser)) {
+        $this->setBrowser($browser);
+      }
+      else {
+        $this->fail("FAIL! Login() internal failure did not get a browser object\n");
+      }
+    }
+    return($this->mybrowser);
+  } //_browser
 
   /**
    * createTestingFolder
@@ -150,7 +178,6 @@ class fossologyTest extends WebTestCase
       return(1);
     }
     $FolderId = $this->parseSelectStmnt($page, $selectName, $folderName);
-    //print "GFID: folderId is:$FolderId\n";
     if(empty($FolderId)) {
       return(NULL);
     }
@@ -186,10 +213,144 @@ class fossologyTest extends WebTestCase
     return ($UploadId);
   }
 
+
+  /**
+   * Login to the FOSSology Repository, uses the globals set in
+   * TestEnvironment.php as the default or the user and password supplied.
+   *
+   * @param string $User the fossology user name
+   * @param string $Password the fossology user password
+   *
+   */
+  public function Login($User=NULL, $Password=NULL)
+  {
+    global $URL;
+    global $USER;
+    global $PASSWORD;
+
+    if(strlen($User)) {
+      $this->setUser($User);
+    }
+    else {
+      $this->setUser($USER);
+    }
+    if(!strlen($Password)) {
+      $this->setPassword($Password);
+    }
+    else {
+      $this->setPassword($PASSWORD);
+    }
+    $browser = $this->_browser();
+    $page = $this->mybrowser->get($URL);
+    $this->assertTrue($page,"Login FAILED! did not fetch a web page, can't login\n'");
+    $cookie = $this->_repoDBlogin($this->mybrowser);
+    $this->setmyCookie($cookie);
+    $host = getHost($URL);
+    $this->mybrowser->setCookie('Login', $cookie, $host);
+
+    $url = $this->mybrowser->getUrl();
+    $page = $this->mybrowser->getContent($url);
+    //$c = $this->__chopPage($page);
+    //print "*********************page at end of LOGIN is:*******\n$c\n";
+  }
+
+  /**
+   * Logout of the FOSSology Repository, uses the globals set in
+   * TestEnvironment.php as the default or the user and password supplied.
+   *
+   * @param string $User the fossology user name
+   *
+   */
+  public function Logout($User=NULL)
+  {
+    global $URL;
+    global $USER;
+
+    if(strlen($User)) {
+      $this->setUser($User);
+    }
+    /*
+    else {
+      $this->setUser($USER);
+    }
+    */
+    $url = $this->mybrowser->getUrl();
+    $loggedIn = $this->mybrowser->get($URL);
+    //$this->assertTrue($this->myassertText($loggedIn, "/User:<\/small> $User/"),
+    //  "Did not find User:<\/small> $User, is $User logged in?\n");
+    // must do 2 calls.  For some reason the ?mod=auth does not logout, but
+    // gets to a page where the logout link works.
+
+
+    $page = $this->mybrowser->get("$URL?mod=auth");
+    $page = $this->mybrowser->clickLink('logout');
+    $host = getHost($URL);
+    $clearCookie = $this->mybrowser->setCookie('Login', '', $host);
+    $page = $this->mybrowser->get("$URL?mod=Default");
+    //$p = $this->__chopPage($page);
+    //print "page after logout sequence is:$p\n";
+
+    if($this->myassertText($page,"/This login uses HTTP/") !== TRUE) {
+    //if($this->myassertText($page,"/Where to Begin\.\.\./") !== TRUE) {
+      $this->fail("FAIL! Did not find string 'This login uses HTTP', Is user logged out?\n");
+      //$this->fail("FAIL! Did not find string 'Where to Begin...', Is user logged out?\n");
+      $this->setUser(NULL);
+      $this->setPassword(NULL);
+      return(FALSE);
+    }
+    return(TRUE);
+  }
+
+  private function _repoDBlogin($browser = NULL) {
+
+    if (is_null($browser))
+    {
+      $this->_browser();
+    }
+
+    global $URL;
+    global $USER;
+    global $PASSWORD;
+
+    $page = NULL;
+    $cookieValue = NULL;
+
+    $host = getHost($URL);
+    $this->assertTrue(is_object($this->mybrowser));
+    $this->mybrowser->useCookies();
+    $cookieValue = $this->mybrowser->getCookieValue($host, '/', 'Login');
+    $this->mybrowser->setCookie('Login', $cookieValue, $host);
+    $page = $this->mybrowser->get("$URL?mod=auth&nopopup=1");
+    $this->assertTrue($page);
+
+    /* Use the test configured user if none specified */
+    if(!strlen($this->User)) {
+      $this->setUser($USER);
+    }
+    if(!strlen($this->Password)) {
+      $this->setPassword($PASSWORD);
+    }
+    $this->assertTrue($this->mybrowser->setField('username', $this->User),
+      "Fatal! could not set username field in login form for $this->User\n");
+    $this->assertTrue($this->mybrowser->setField('password', $this->Password),
+      "Fatal! could not set password field in login form for $this->User\n");
+    $this->assertTrue($this->mybrowser->isSubmit('Login'));
+    $page = $this->mybrowser->clickSubmit('Login');
+    $this->assertTrue($page,"FATAL! did not get a valid page back from Login\n");
+    $page = $this->mybrowser->get("$URL?mod=Default");
+    //$p = $this->__chopPage($page);
+    //print "DB: _RDBL: After Login ****page is:$p\n";
+    $this->assertTrue($this->myassertText($page, "/User:<\/small>\s$this->User/"),
+      "Did not find User:<\/small> $this->User\nThe User may not be logged in\n");
+    $this->mybrowser->setCookie('Login', $cookieValue, $host);
+    $page = $this->mybrowser->getContent();
+    $NumMatches = preg_match('/User Logged Out/', $page, $matches);
+    $this->assertFalse($NumMatches, "User Logged out!, Login Failed! %s");
+    return ($cookieValue);
+  } // _repoDBlogin
+
   public function myassertText($page, $pattern) {
     $NumMatches = preg_match($pattern, $page, $matches);
-    //print "*** assertText: NumMatches is:$NumMatches\nmatches is:***\n";
-    //$this->dump($matches);
     if ($NumMatches) {
       return (TRUE);
     }
@@ -219,13 +380,10 @@ class fossologyTest extends WebTestCase
       return(NULL);
     }
     $hpage = new DOMDocument();
-    //@$hpage->loadHTMLFile("/home/markd/deluser.html");
     @$hpage->loadHTML($page);
     /* get select and options */
     $selectList = $hpage->getElementsByTagName('select');
     $optionList = $hpage->getElementsByTagName('option');
-    //print "number of selects on this page:$selectList->length\n";
-    //print "number of options on this page:$optionList->length\n";
     /*
     * gather the section names and group the options with each section
     * collect the data at the same time.  Assemble into the data structure.
@@ -296,8 +454,9 @@ class fossologyTest extends WebTestCase
    * parse the output of fossjobs command, return an array with the information
    *
    * With no parameters parseFossnobs will return an associative array with
-   * the last uploads done on each file.  The array key is the filename, and upload
-   * is the value.  The array is reverse sorted by upload (higher uploads 1st).
+   * the last uploads done on each file.  The array key is the filename, and
+   * upload Id is the value.  The array is reverse sorted by upload
+   * (newest uploads 1st).
    *
    * With the all parameter, all of the uploads are returned in an associative
    * array.  The keys are the upload id's in assending order, the filename uploaded
@@ -309,21 +468,34 @@ class fossologyTest extends WebTestCase
    *
    */
   public function parseFossjobs($all=NULL) {
-    /* use fossjobs to get the upload ids */
+    /*
+       use fossjobs to get the upload ids
+     */
     $last = exec('fossjobs -u',$uploadList, $rtn);
-    //print "uploadList is:\n";print_r($uploadList) . "\n";
     foreach ($uploadList as $upload) {
-      list($upId, $file, $comment) = split(' ', $upload);
+      if(empty($upload)) {
+        continue;
+      }
+      /*
+         NOTE: the split below can sometimes cause a php notice, there is no
+         real error, and the notice can be ignored.  The third item in the list is
+         never used.  The coding to suppress the error is not worth it.
+       */
+      list($upId, $file, $restOfLine) = split(' ', $upload);
       if($upId == '#') {
         continue;
       }
-      //print "UP:$upId, F:$file, C:$comment\n";
+
       $uploadId = rtrim($upId, ':');
       $Uploads[$uploadId] = $file;
-      /* gather up the last uploads done on each file (file is not unique)*/
+      /*
+         gather up the last uploads done on each file (file is not unique)
+       */
       $LastUploads[$file] = $uploadId;
     }
-    $sorted = arsort(&$LastUploads);
+    $lastUp = &$LastUploads;
+    $sorted = arsort(&$lastUp);
+    //$sorted = arsort(&$LastUploads);
     if(!empty($all)) {
       //print "uploads is:\n";print_r($Uploads) . "\n";
       return($Uploads);               // return all uploads
@@ -456,7 +628,6 @@ class fossologyTest extends WebTestCase
         break;            // all done
       }
     }
-    print "GSA: the select and attrs are:\n";print_r($select) . "\n";
     return($select);
   }
 
@@ -485,12 +656,10 @@ class fossologyTest extends WebTestCase
     if(empty($attribute)) {
       return(NULL);
     }
-    print "SSA: on entry value is:$value\n";
     $hpage = new DOMDocument();
     @$hpage->loadHTML($page);
     /* get select */
     $selectList = $hpage->getElementsByTagName('select');
-    print "SSA: number of selects on this page:$selectList->length\n";
     /*
      * gather the section names and group the attributes with each section
      * collect the data at the same time.  Assemble into the data structure.
@@ -500,141 +669,36 @@ class fossologyTest extends WebTestCase
       $sname = $selectList->item($i)->getAttribute('name');
       if($sname == $selectName) {
         $oldValue= $selectList->item($i)->getAttribute($attribute);
-        print "oldvalue is:$oldValue\n";
         if(!empty($value)) {
           //$node = $selectList->item($i)->set_attribute($attribute,$value);
-          print "setting value to:$value\n";
           $node = $selectList->item($i)->setAttribute($attribute,$value);
-          print "After setAttr: nodes name is:$node->name\n";
-          print "After setAttr: nodes value is:$node->value\n";
         }
         break;      // all done
       }
     }
     $setValue= $selectList->item($i)->getAttribute($attribute);
-    print "SSA: setValue is:$setValue\n";
     if($setValue != $value) {
       return(NULL);
     }
     return(TRUE);
+  } // set SelectAttr
+
+/**
+ * __chopPage
+ *
+ * return the last 1.5K characters of the string, useful for just looking at
+ * the end of a returned page.
+ *
+ * @param string $page
+ * @return string
+ */
+private function __chopPage($page) {
+
+  if(!strlen($page)) {
+    return(FALSE);
   }
+  return(substr($page,-1536));
+} // chopPage
 
-
-  /**
-   * Login to the FOSSology Repository, uses the globals set in
-   * TestEnvironment.php as the default or the user and password supplied.
-   *
-   * @param string $User the fossology user name
-   * @param string $Password the fossology user password
-   *
-   */
-  public function Login($User=NULL, $Password=NULL)
-  {
-    global $URL;
-    global $USER;
-    global $PASSWORD;
-
-    if(is_null($User)) {
-    }
-    if(!empty($User)) {
-      $this->setUser($User);
-    }
-    else {
-      $this->setUser($USER);
-    }
-    if(!empty($Password)) {
-      $this->setPassword($Password);
-    }
-    else {
-      $this->setPassword($PASSWORD);
-    }
-    $browser = & new SimpleBrowser();
-    $this->setBrowser($browser);
-    $this->assertTrue(is_object($this->mybrowser),
-      "FAIL! Login() internal failure did not get a browser object\n");
-    $page = $this->mybrowser->get($URL);
-    $this->assertTrue($page,"Login FAILED! did not fetch a web page, can't login\n'");
-    $cookie = $this->_repoDBlogin($this->mybrowser);
-    $this->setmyCookie($cookie);
-    $host = getHost($URL);
-    $this->mybrowser->setCookie('Login', $cookie, $host);
-    $url = $this->mybrowser->getUrl();
-    $page = $this->mybrowser->getContent($URL);
-  }
-
-  /**
-   * Logout of the FOSSology Repository, uses the globals set in
-   * TestEnvironment.php as the default or the user and password supplied.
-   *
-   * @param string $User the fossology user name
-   *
-   */
-  public function Logout($User=NULL)
-  {
-    global $URL;
-    global $USER;
-
-    if(!empty($User)) {
-      $this->setUser($User);
-    }
-    else {
-      $this->setUser($USER);
-    }
-    $loggedIn = $this->mybrowser->get($URL);
-    $this->assertTrue($this->myassertText($loggedIn, "/User:<\/small> $User/"),
-      "Did not find User:<\/small> $User");
-    // must do 2 calls.  For some reason the ?mod=auth does not logout, but
-    // gets to a page where the logout link works.
-    $page = $this->mybrowser->get("$URL?mod=auth");
-    $page = $this->mybrowser->clickLink('logout');
-    $this->assertTrue($this->myassertText($page,
-      "/This login uses HTTP/"),
-      "Did not find string 'This login uses HTTP', Is user logged out?\n");
-    $this->setUser(NULL);
-    $this->setPassword(NULL);
-    return(TRUE);
-  }
-
-  private function _repoDBlogin($browser = NULL) {
-
-    if (is_null($browser))
-    {
-      //print "_repoDBlogin setting browser\n";
-      $browser = & new SimpleBrowser();
-    }
-    $this->setBrowser($browser);
-    global $URL;
-    global $USER;
-    global $PASSWORD;
-    $page = NULL;
-    $cookieValue = NULL;
-    $host = getHost($URL);
-    $this->assertTrue(is_object($this->mybrowser));
-    $this->mybrowser->useCookies();
-    $cookieValue = $this->mybrowser->getCookieValue($host, '/', 'Login');
-    // need to check $cookieValue for validity
-    $this->mybrowser->setCookie('Login', $cookieValue, $host);
-    $page = $this->mybrowser->get($URL);
-    $this->assertTrue($this->mybrowser->get("$URL?mod=auth&nopopup=1"));
-    /* Use the test configured user if none specified */
-    if(empty($this->User)) {
-      $this->setUser($USER);
-    }
-    if(empty($this->Password)) {
-      $this->setPassword($PASSWORD);
-    }
-    $this->assertTrue($this->mybrowser->setField('username', $this->User));
-    $this->assertTrue($this->mybrowser->setField('password', $this->Password));
-    $this->assertTrue($this->mybrowser->isSubmit('Login'));
-    $this->assertTrue($this->mybrowser->clickSubmit('Login'));
-    $page = $this->mybrowser->get($URL);
-    $this->assertTrue($this->myassertText($page, "/User:<\/small>\s$this->User/"),
-      "Did not find User:<\/small> $this->User\nThe User may not be logged in\n");
-    $this->mybrowser->setCookie('Login', $cookieValue, $host);
-    $page = $this->mybrowser->getContent();
-    $NumMatches = preg_match('/User Logged Out/', $page, $matches);
-    $this->assertFalse($NumMatches, "User Logged out!, Login Failed! %s");
-    return ($cookieValue);
-  }
 } // fossolgyTest
 ?>

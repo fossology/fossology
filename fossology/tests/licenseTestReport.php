@@ -19,7 +19,9 @@
 /**
  * Driver to generate a report of a license regression test run.
  *
- * e.g. ltr {-a bsam | fonomos} [-h] [-f file of filepaths] -r file-path ?? what else
+ * NOPE: e.g. ltr {-a bsam | fonomos} [-h] [-f file of filepaths] -r file-path ?? what else
+ *
+ * ltr -D <allresults> [-h] -S <summaryresults> -d <detail-results-file> -s <summary-results-file>
  * @param $file, license test results file created by the test
  *
  * @version "$Id: $"
@@ -39,17 +41,20 @@ require_once('reportClass.php');
 
 
 // for debugging, just dummy up some values
-$file = '/home/markd/Src/fossology/tests/LicenseAnalysis/Bsam-Results.2009Jun15';
+//$file = '/home/markd/Src/fossology/tests/LicenseAnalysis/Bsam-Results.2009Jun15';
+$file = '/home/markd/Src/fossology/tests/LicenseAnalysis/FoNomos-Results-Summary.2009Jun22';
 //$file = '/home/markd/Src/fossology/tests/LicenseAnalysis/FoNomos-Results.2009Jun15';
 $report = new TestReport();
 $FD = fopen($file, 'r') or die("Cannot open $file $phperrormsg\n");
-$result = $report->parseLicenseResults($FD);
-//print "<pre>result is:\n";print_r($result) . "\n</pre>";
+$summary = $report->parseLicenseTotals($FD);
+//$result = $report->parseLicenseResults($FD);
+//print "<pre>summary is:\n";print_r($summary) . "\n</pre>";
 //$bres = $result[2];
 //print "<pre>bres is:\n";print_r($bres) . "\n</pre>";
 // take a look at this... do you want cols or max?
-$cols = 1;
-$report->displayLicenseResults($cols,$result);
+//$cols = 1;
+//$report->displayLicenseResults($cols,$result);
+$report->displayTotals($summary);
 
 exit(0);
 ?>

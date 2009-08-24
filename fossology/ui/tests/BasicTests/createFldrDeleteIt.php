@@ -50,7 +50,7 @@ class CreateDeleteFldrTest extends fossologyTestCase
       $this->createFolder(1,$this->folder_name,
       'Folder created by CreateFolderTest as subfolder of Root Folder');
       $this->deleteFolder($this->folder_name);
-      sleep(90);            // give delete job some time to remove it...
+      sleep(120);            // give delete job some time to remove it...
     }
   }
 }

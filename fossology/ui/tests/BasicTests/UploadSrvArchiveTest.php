@@ -49,7 +49,7 @@ class UploadSrvTest extends fossologyTestCase {
     /* check to see if the user and material exist*/
     $this->assertTrue(file_exists('/home/fosstester/.bashrc'),
                       "FAILURE! .bashrc not found\n");
-    $this->Login($this->mybrowser);
+    $this->Login();
   }
 
   function testUploadUSrv() {
@@ -77,7 +77,7 @@ class UploadSrvTest extends fossologyTestCase {
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue($page);
     $this->assertTrue($this->myassertText($page,
-                     '/Upload jobs for \/home\/fosstester\/archives\/simpletest_1\.0\.1\.tar\.gz/'),
+                     '/The upload for \/home\/fosstester\/archives\/simpletest_1\.0\.1\.tar\.gz/'),
                       "FAIL! Did not match Upload message\n");
     //print "************ page after Upload! *************\n$page\n";
   }

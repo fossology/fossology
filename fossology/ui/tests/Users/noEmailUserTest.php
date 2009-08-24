@@ -25,7 +25,10 @@
  */
 require_once ('../../../tests/fossologyTestCase.php');
 require_once ('../../../tests/TestEnvironment.php');
+require_once (TESTROOT . '/testClasses/db.php');
+
 global $URL;
+
 class noEmailUserTest extends fossologyTestCase {
 
   public $mybrowser;
@@ -36,12 +39,12 @@ class noEmailUserTest extends fossologyTestCase {
   }
   function testNoEmailUser() {
     global $URL;
-    print "starting noEmailUserTest\n";
-    /* Create the user */
+
+    /* Check that the user exists */
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Admin/'));
     $this->assertTrue($this->myassertText($loggedIn, '/Users/'));
-    $page = $this->mybrowser->get("$URL?mod=user_add");
+      $page = $this->mybrowser->get("$URL?mod=user_add");
     $this->assertTrue($this->myassertText($page, '/Add A User/'));
     $this->assertTrue($this->myassertText($page, '/To create a new user,/'));
     $result = $this->addUser('UserNoEmail', 'No email notification user',
@@ -53,24 +56,24 @@ class noEmailUserTest extends fossologyTestCase {
        * there, for this test it's not an error.
        */
       if ($result != "User already exists.  Not added") {
-        $this->fail("Did not add user UserNoEmail result was:\n$result\n");
+        $this->fail("Did not add user UserwEmail result was:\n$result\n");
       }
     }
-    /*
-     * Verify, login as the user just created and check their session.
-     * TODO: look in the db
-     */
-    $this->Login('UserNoEmail','noetest');
-    print "Verifying Email Notification Setting\n";
-    $this->assertTrue($_SESSION['UserEnote'] == NULL);
-  } //testNoEmailUser
 
-  function tearDown(){
-    /* Cleanup: remove the user */
-    print "Logging out UserNoEmail\n";
-    $this->Logout('UserNoEmail');
-    print "Removing user UserNoEmail\n";
-    $this->deleteUser('UserNoEmail');
-  }
+    /*
+     * Verify, check the db for this user to ensure email_notify is NOT set.
+     */
+    $dlink = new db();
+    print "Verifying User email notification setting\n";
+    $Sql = "SELECT user_name, email_notify FROM users WHERE user_name='UserNoEmail';";
+    $User = $dlink->dbQuery($Sql);
+    if((int)$User[0]['email_notify'] == 0) {
+      $this->pass();
+    }
+    else {
+      $this->fail("Fail! User UserNoEmail email_notify is not NULL\n");
+      printf("in octal the entry for email_notify is:%o\n",$User[0]['email_notify']);
+    }
+  } //testNoEmailUser
 }
 ?>
