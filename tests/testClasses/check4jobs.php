@@ -62,11 +62,14 @@ class check4jobs {
     else if (file_exists('/usr/local/etc/fossology/Db.conf')) {
       $options = file_get_contents('/usr/local/etc/fossology/Db.conf');
     }
+    else {
+      return(FALSE);
+    }
     $this->Db = new db($options);
     $connection = $this->Db->connect();
     if (!(is_resource($connection))) {
       print "check4jobs:FATAL ERROR!, could not connect to the data-base\n";
-      return(NULL);
+      return(FALSE);
     }
     $this->_ck4j();
     return;

@@ -42,6 +42,8 @@ class uploadSrvFileTest extends fossologyTestCase {
 
   public function testUploadSrvFile() {
 
+    global $URL;
+
     $page = $this->mybrowser->get($URL);
 
     $File = '/home/fosstester/licenses/ApacheLicense-v2.0';

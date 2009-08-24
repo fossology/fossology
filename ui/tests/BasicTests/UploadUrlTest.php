@@ -44,7 +44,7 @@ class UploadUrlTest extends fossologyTestCase
 
     print "starting UploadUrlTest\n";
     //$this->useProxy('http://web-proxy.fc.hp.com:8088', 'web-proxy', '');
-    $this->Login($browser);
+    $this->Login();
 
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'));
@@ -67,9 +67,10 @@ class UploadUrlTest extends fossologyTestCase
     /* we won't select any agents this time' */
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue($page);
-    $this->assertTrue($this->myassertText($page, '/Upload added to job queue/'));
-
     //print  "************ page after Upload! *************\n$page\n";
+    $this->assertTrue($this->myassertText($page, '/has been scheduled. It is/'));
+
+
   }
 }
 ?>

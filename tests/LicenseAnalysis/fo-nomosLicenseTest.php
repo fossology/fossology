@@ -21,14 +21,11 @@
  *
  * run fo-nomos license analysis for eddy test files
  *
+ * Usage: [-h] {-f filepath | -d directorypath}
+ *
  * created: Jun 1, 2009
  * @version "$Id:  $"
  */
-
-// get input list
-// run fosslic
-// filter results
-// write results to a file.
 
 require_once('../commonTestFuncs.php');
 require_once('testLicenseLib.php');
@@ -38,28 +35,27 @@ $ldir = '/home/fosstester/regression/license/eddy/GPL';
 //$ldir = '/home/fosstester/regression/license/eddy';
 
 
-/* process parameters
- $Usage = "{$argv[0]} [-h] {-f filepath | -d directorypath}\n" .
- $options = getopt("hf::d::");
- if (empty($options)) {
- print $Usage;
- exit(1);
- }
- if (array_key_exists("h",$options)) {
- print $Usage;
- exit(0);
- }
- if (array_key_exists("f",$options)) {
- $file = $options['f'];
- }
- if (array_key_exists("d",$options)) {
- $directory = $options['d'];
- }
- if (!array_key_exists("d",$options) && !array_key_exists("f",$options)) {
- print $Usage;
- exit(1);
- }
- */
+/* process parameters */
+$Usage = "{$argv[0]} [-h] {-f filepath | -d directorypath}\n" .
+$options = getopt("hf:d:");
+if (empty($options)) {
+  print $Usage;
+  exit(1);
+}
+if (array_key_exists("h",$options)) {
+  print $Usage;
+  exit(0);
+}
+if (array_key_exists("f",$options)) {
+  $file = $options['f'];
+}
+if (array_key_exists("d",$options)) {
+  $directory = $options['d'];
+}
+if (!array_key_exists("d",$options) && !array_key_exists("f",$options)) {
+  print $Usage;
+  exit(1);
+}
 
 /* load the master results to compare against */
 $Master = array();
@@ -67,10 +63,14 @@ $Master = loadMasterResults();
 
 /* Get the list of input files */
 $FileList = array();
-$FileList = allFilePaths($ldir);
-//print "allFilePaths returned:\n";print_r($FileList) . "\n";
+$FL = allFilePaths($directory);
+//print "allFILEPATHS returned:\n";print_r($FL) . "\n";
+$FileList = filesByDir($directory);
+print "FilesByDir returned:\n";print_r($FileList) . "\n";
 
-/* use fosslic to analyze each file for possible licenses */
+exit(777);
+
+/* analyze each file for possible licenses */
 $all        = array();
 $foNomosRaw = array();
 
@@ -82,37 +82,50 @@ if(empty($foNomosRaw)) {
 }
 //print "foNomos results are:\n";print_r($foNomosRaw) . "\n";
 
-foreach($foNomosRaw as $file => $result) {
-  $tList = trim($result);
-  $list = filterNomosResults($tList);     // name filter
-  $all = explode(",",$list);
-  $foNomos[$file] = $all;
+// need to expand this and put it back together like it was passed in.
+$fileResults = array();
+foreach($foNomosRaw as $topDir => $results) {
+  foreach($results as $dir => $fileList) {
+    foreach($fileList as $file => $answer) {
+      $answer = trim($answer);
+      $list = filterNomosResults($answer);     // name filter
+      $all = explode(",",$list);
+      $fileResults[$file] = $all;
+    }
+    $dirResults[$dir] = $fileResults;
+    $fileResults = array();
+  }
+  $filtered[$topDir] = $dirResults;
+  $dirResults = array();
 }
-//print "Filtered foNomos results are:\n";print_r($foNomos) . "\n";
+//print "Filtered foNomos results are:\n";print_r($filtered) . "\n";
+
 
 /* Compare to master */
-$Results = compare2Master($foNomos, $Master);
+$Results = compare2Master($filtered, $Master);
 
 $totals     = $Results[0];
-$allResults = $Results[1];
+$tbyDir     = $Results[1];
+$allResults = $Results[2];
 print "Comparison totals are:\n";print_r($totals) . "\n";
+print "Totals by Dir are:\n";print_r($tbyDir) . "\n";
 print "Comparison results are:\n";print_r($allResults) . "\n";
+
+exit(777);
 /* store comparison results in a file */
 $saveFile = 'FoNomos-Results-Summary.' . date('YMd');
-if(saveResults($saveFile, $totals)){
+if(saveTotals($saveFile, 'foNomos', $totals)){
   print "fo-nomos Summary results generated and saved in file:\n$saveFile\n";
-  exit(0);
 }
 else {
   print "Error! could not save results, printing to the screen\n";
   foreach($totals as $file => $result){
     print "$file: $result\n";
   }
-  exit(1);
 }
 
 $saveFile = 'FoNomos-All-Results.' . date('YMd');
-if(saveResults($saveFile, $allResults)){
+if(saveAllResults($saveFile, $allResults)){
   print "fo-nomos results generated and saved in file:\n$saveFile\n";
   exit(0);
 }

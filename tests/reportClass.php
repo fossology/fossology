@@ -1,4 +1,5 @@
-c<?php
+c
+<?php
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -136,16 +137,23 @@ class TestReport
     $this->smarty->config_dir = '/home/markd/public_html/smarty/configs';
 
     $dt = $this->Date . " " . $this->Time;
-    $cols = 5;
 
-    foreach($totals as ) {
+    $agent = $totals[0];
+    $pass  = $totals[1];
+    $fail  = $totals[2];
 
-    }
+    /*
+     print "vars are, agent, pass, fail:\n";
+     print_r($agent) . "\n";
+     print_r($pass) . "\n";
+     print_r($fail) . "\n";
+     */
 
-    $this->smarty->assign('runDate', $dt);
-    $this->smarty->assign('svnVer', $this->Svn);
-    $this->smarty->assign('cols', $cols);
-    $this->smarty->assign('results', $this->results);
+    //$this->smarty->assign('runDate', $dt);
+    //this->smarty->assign('svnVer', $this->Svn);
+    $this->smarty->assign('agent', $agent);
+    $this->smarty->assign('pass', $pass);
+    $this->smarty->assign('fail', $fail);
     $this->smarty->display('licenseTR-totals.tpl');
   }
 
@@ -324,7 +332,7 @@ class TestReport
       list($lKey,$licenseType) = split('=',$resultParts[0]);
       list($fnKey,$fileName)   = split('=',$resultParts[1]);
       $FileName[] = rtrim($fileName,'.txt');
-      $LicenseType[$licenseType] = $FileName
+      $LicenseType[$licenseType] = $FileName;
       //print "PLR: before = split results is:{$resultParts[1]}\n<br>";
       list($fnKey,$std) = split('=',$resultParts[1]);
       $VettedName[]     = str_replace(',',",<br>",$std);
@@ -342,30 +350,31 @@ class TestReport
   /**
    * parseLicenseTotals
    *
-   *  parse the lis
+   *  parse the liscense total file
+   *
+   *  @param resource $FD opened file descriptor
+   *  @return array an array of 3 arrays, agent, pass, fail.
    *
    */
   public function parseLicenseTotals($FD) {
 
-    if(!is_resource($FD)) {
-      return(FALSE);
-    }
-    $agent = array();
-    $pass  = array();
-    $fail  = array();
+    if(is_resource($FD)) {
+      $agent = array();
+      $pass  = array();
+      $fail  = array();
 
-    // while there is something to read from the file
-    //   read a line, trim it,
-    //   explode it on :  & assign list($agent[],$pass[],$fail[]) = explode(':',$line);
-    // end while
-    // return them return(array($agent,$pass,$fail));
-    while (!feof($FD)) {
+      while (!feof($FD)) {
         $line = trim(fgets($FD, 1024));
         list($agent[],$pass[],$fail[]) = explode(':',$line);
+      }
+      fclose($FD);
+      return(array($agent,$pass,$fail));
     }
-    fclose($FD);
-    return(array($agent,$pass,$fail));
-  }
+    else {
+      return(FALSE);
+    }
+  } // parseLicenseTotals
+
   /**
    * parseSuiteName
    *

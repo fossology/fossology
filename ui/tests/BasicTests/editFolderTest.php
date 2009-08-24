@@ -44,8 +44,7 @@ class EditFolderTest extends fossologyTestCase
     global $URL;
 
     $this->Login();
-    /* create a folder, which is edited below */
-    $FolderId = $this->getFolderId('Basic-Testing', $page, 'parentid');
+    /* create a subfolder under Basic-Testing, which is edited below */
     $pid = getmypid();
     $this->editFolderName = "EditMe-$pid";
     $this->createFolder('Basic-Testing', $this->editFolderName);

@@ -48,6 +48,7 @@
 require_once ('TestEnvironment.php');
 require_once ('testClasses/check4jobs.php');
 
+$usage = NULL;
 $usage.= "Usage: $argv[0] [-l path] {[-a] | [-b] | [-h] | [-s] | [-v -l]}\n";
 $usage.= "-a: Run all FOSSology Test Suites\n" .
          "-b: Run the basic test suite. This runs the SiteTests and any Tests " .

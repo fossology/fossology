@@ -71,9 +71,9 @@ class DupUploadTest extends fossologyTestCase
       $this->assertTrue($page);
             /* On the second try, we SHOULD see Upload added to job queue */
       if($i == 1) {
-        $this->assertTrue($this->myassertText($page, "/Upload added to job queue/"),
+        $this->assertTrue($this->myassertText($page, "/The file $upload_name has been uploaded/"),
               "FAIL! A Duplicate Upload was NOT created!\n" .
-              "The phrase 'Upload added to job queue' was NOT seen\n");
+              "The phrase, The file $upload_name has been uploaded was NOT seen\n");
       }
       else{
         $this->assertFalse($this->myassertText($page, "/Upload failed/"),

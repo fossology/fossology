@@ -95,6 +95,9 @@ class MoveFolderTest extends fossologyTestCase
    */
   function tearDown()
   {
+
+    global $URL;
+
     $page = $this->mybrowser->get("$URL?mod=admin_folder_delete");
     $this->assertTrue($this->myassertText($page, '/Delete Folder/'));
     $FolderId = $this->getFolderId($this->moveFolder, $page, 'folder');

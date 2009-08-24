@@ -41,7 +41,6 @@ class uploadWEMailTest extends fossologyTestCase {
 
     $this->Login();
     $this->CreateFolder(1, 'Enote', 'Folder for Email notification uploads');
-    $this->Logout();
   }
 
   public function testUploadWEmail() {
@@ -50,7 +49,7 @@ class uploadWEMailTest extends fossologyTestCase {
 
     print "Starting UploadWEmail test...\n";
     /* login fosstester*/
-    $this->Login('fosstester','fosstester');
+    //$this->Login('fosstester','fosstester');
     $page = $this->mybrowser->get($URL);
 
     $File = '/home/fosstester/licenses/Apache-v1.1';
@@ -66,20 +65,23 @@ class uploadWEMailTest extends fossologyTestCase {
     $this->uploadUrl('Enote', $Url, $Urldescription, null, '2');
     $this->uploadServer('Enote', $Srv, $Srvdescription, null, 'all');
     // need to get the upload id's of the files just uploaded.
-    sleep(10);   // wait for 2 min for jobs to start then check they got started
+    sleep(60);   // wait for 2 min for jobs to start then check they got started
     // use fossjobs to get the upload id
     $jobs = $this->parseFossjobs();
-    //print "returned jobs from fossjobs is:\n";print_r($jobs) . "\n";
 
-    /* verify */
+    /* verify, use the basename as the upload name is stored as the basename of
+     * the upload path
+     */
     print "Verifying jobs exist\n";
-    if(array_key_exists($Srv,$jobs)) {
+    $srvFile = basename($Srv);
+    if(array_key_exists($srvFile,$jobs)) {
       $this->pass();
     }
     else {
       $this->fail("upload $Srv not found\n");
     }
-    if(array_key_exists($Url,$jobs)) {
+    $urlFile = basename($Url);
+    if(array_key_exists($urlFile,$jobs)) {
       $this->pass();
     }
     else {
@@ -99,7 +101,9 @@ class uploadWEMailTest extends fossologyTestCase {
     print "waiting for jobs to finish\n";
     $this->wait4jobs();
     print "verifying correct email was received\n";
-    $this->checkEmailNotification(3);
+    if(!($this->checkEmailNotification(3))) {
+      $this->fail("checkEmailNotification failed, is local email configured?\n");
+    }
   }
 };
 ?>

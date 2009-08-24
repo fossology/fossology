@@ -73,7 +73,6 @@ class MoveFolderTest extends fossologyTestCase
     $this->upload2Move = 'gpl-3.0.txt';
     $this->toFolder    = 'Basic-Testing';
     /* fromFolder is 'root' */
-    print "1st call: FF:$this->fromFolder TF:$this->toFolder U2M:$this->upload2Move\n";
     $this->moveUpload($this->fromFolder, $this->toFolder, $this->upload2Move);
     /* best we can do with simpletest is to see if the folder is still there.
      *
@@ -81,7 +80,7 @@ class MoveFolderTest extends fossologyTestCase
     $page = $this->mybrowser->clickLink('Browse');
     $page = $this->mybrowser->clickLink('Basic-Testing');
     $this->assertTrue($this->myassertText($page, "/$this->upload2Move/"),
-                       "moveUploadTest FAILED! Folder $this->upload2Move does not exist under Testing folder\n");
+                       "moveUploadTest FAILED! Folder $this->upload2Move does not exist under Basic-Testing folder\n");
     //print "************ page after Move! *************\n$page\n";
   }
 

@@ -38,7 +38,14 @@ class uploadWoutEMailTest extends fossologyTestCase {
 
   public function setUp() {
     global $URL;
+    $last = exec('./changeENV.php -s fosstester -c noemail', $out, $rtn);
+    if($rtn > 0) {
+      $this->fail("Could not change the test environment file, stopping test\n");
+      print "Failure, output from changeENV is:\n";print_r($out) . "\n";
+      exit(1);
+    }
     $this->Login();
+    //$this->Login();
     $result = $this->createFolder(1, 'Enote', 'Folder for Email notification uploads');
     if(!is_null($result)) {
       if($result != 'Folder Enote Exists') {
@@ -46,7 +53,6 @@ class uploadWoutEMailTest extends fossologyTestCase {
         exit(1);
       }
     }
-    $this->Logout();
   }
 
   public function testUploadWoutEmail() {
@@ -55,7 +61,6 @@ class uploadWoutEMailTest extends fossologyTestCase {
 
     /* login noemail */
     print "Starting upload without email notificiation\n";
-    $this->Login('noemail','noemail');
     $page = $this->mybrowser->get($URL);
 
     $File = '/home/fosstester/licenses/gplv2.1';
@@ -78,6 +83,16 @@ class uploadWoutEMailTest extends fossologyTestCase {
     $this->wait4jobs();
     print "verifying  NO email was received\n";
     $this->checkEmailNotification(0);
+  }
+
+  public function tearDown() {
+    print "Changing user back to fosstester";
+    $last = exec('./changeENV.php -s noemail -c fosstester', $out, $rtn);
+    if($rtn > 0) {
+      $this->fail("Could not change the test environment file, stopping test\n");
+      print "Failure, output from changeENV is:\n";print_r($out) . "\n";
+      exit(1);
+    }
   }
 };
 ?>
