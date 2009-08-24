@@ -28,11 +28,13 @@
  * @return 0 for OK, 1 for failure
  */
 
+$argv = array();
+$opts = array();
 
-$Usage = "{$argv[0]}: [-h] -s <subject-string> -c <change-string>\n";
+$Usage = "{$argv[0]}: [-h] -c <change-string>\n";
 
 print "changeENV starting....\n";
-$opts = getopt('hs:c:');
+$opts = getopt('hc:');
 //print "changeENV: opts is:\n";print_r($opts) . "\n";
 
 if (empty($opts)) {
@@ -44,18 +46,9 @@ if (array_key_exists("h",$opts)) {
   print $Usage;
   exit(0);
 }
-
-if (array_key_exists("s",$opts)) {
-  $subject = $opts['s'];
-  if(!strlen($subject)) {
-    print $Usage;
-    exit(1);
-  }
-}
-else {
-  print $Usage;
-  exit(1);
-}
+/*
+   Only required option, get it and check it
+ */
 if (array_key_exists("c",$opts)) {
   $change2 = $opts['c'];
   if(!strlen($change2)) {
@@ -69,7 +62,11 @@ else {
 }
 
 $testEnv = '../../../tests/TestEnvironment.php';
-$changed = exec("sed -e '1,\$s/$subject/$change2/' $testEnv", $out, $rtn);
+
+$sedLine = "sed -e \"1,$ s/USER=.*/USER='$change2';/\" ".
+               "-e \"1,$ s/WORD=.*/WORD='$change2';/\" $testEnv
+               ";
+$changed = exec($sedLine, $out, $rtn);
 //print "output is:\n";print_r($out) . "\n";
 
 $FH = fopen($testEnv, 'w') or die("Can't open $testEnv\n $phpErrorMsg");
