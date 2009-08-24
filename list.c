@@ -16,6 +16,8 @@
 
 ***************************************************************/
 
+/* Equivalent to core nomos v1.10 */
+
 #include "nomos.h"
 #include "list.h"
 #include "util.h"
