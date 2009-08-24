@@ -1,4 +1,4 @@
-# FOSSology Makefile - agent/fo_nomos
+# FOSSology Makefile - agent/nomos
 # Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
 TOP=../..
 VARS=$(TOP)/Makefile.conf
@@ -24,9 +24,9 @@ DEF=-D_FILE_OFFSET_BITS=64 -D__USE_LARGEFILE64
 CFLAGS_LOCAL= $(DEF) $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
 CFLAGS_LOCALO= $(DEF) $(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
 
-all: encode fo_nomos
+all: encode nomos
 
-fo_nomos: nomos.o $(OBJS) $(GENOBJS)
+nomos: nomos.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@
 
 nomos.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
@@ -57,18 +57,18 @@ _autodefs.h _autodata.c:	$(SPEC) $(LICFIX)
 #
 
 install: all
-	$(INSTALL_PROGRAM) fo_nomos $(DESTDIR)$(AGENTDIR)/fo_nomos
+	$(INSTALL_PROGRAM) nomos $(DESTDIR)$(AGENTDIR)/nomos
 #	$(INSTALL_PROGRAM) encode  $(DESTDIR)$(AGENTDIR)/encode
 
 uninstall:
 #	rm -f $(DESTDIR)$(AGENTDIR)/encode
-	rm -f $(DESTDIR)$(AGENTDIR)/fo_nomos
+	rm -f $(DESTDIR)$(AGENTDIR)/nomos
 
 test: all
 	@echo "*** No tests available for agent/$(EXE) ***"
 
 clean:
-	rm -f encode fo_nomos  *.o core \
+	rm -f encode nomos  *.o core \
            _autodata.c _autodefs.c _autodefs.h _precheck.c \
            _strings.data _STRFILTER strings.HISTOGRAM words.HISTOGRAM \
            split.OTHER checkstr.OK

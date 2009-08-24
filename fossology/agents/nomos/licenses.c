@@ -15,6 +15,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ***************************************************************/
+/* Equivalent to core nomos v1.48 */
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -622,6 +623,10 @@ void licenseScan(list_t *l)
 #endif	/* QA_CHECKS */
 	    continue;
 	}
+	if (scp->dataOffset = iMadeThis(textp)) {
+	    textp += scp->dataOffset;
+	    cur.stbuf.st_size -= scp->dataOffset;
+	}
 	scp->size = cur.stbuf.st_size; /* Where did this get set ? CDB */
 	(void) strcpy(scp->ftype, magic_buffer(gl.mcookie, textp,
 					       (size_t) scp->size));
@@ -844,6 +849,11 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     scoreFp = fopenFile(FILE_SCORES, "w");
     fCnt = 0;
     i = 1;
+
+    /*
+     * CDB -- This loop has been modified from the core such that occurrences
+     * of "scp->" should be replaced with "scores[idx]."
+     */
     for (idx = 0; i <= nCand; idx++) {
 	/*
 	 * If we didn't flag this file as needing to be saved, ignore it.
@@ -875,7 +885,8 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	if ((textp = mmapFile(fileName)) == NULL_STR) {
 	    Fatal("Null mmapFile(), path=%s", fileName);
 	}
-	size = (int) cur.stbuf.st_size;
+	/* CDB 	size = (int) cur.stbuf.st_size; */
+	size = scores[idx].size;
 	if (scores[idx].dataOffset) {
 	    textp += scores[idx].dataOffset;
 	}
@@ -939,11 +950,12 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	 FILTERPATTERNS="$FILTERPATTERNS|words.*|.*spelling.*|spell)$"
 	*/
 #if	defined(DEBUG) || defined(DOCTOR_DEBUG) || defined(LTSR_DEBUG)	\
-    || defined(BATCH_DEBUG) || defined(PARSE_STOPWATCH) || defined(MEMSTATS)
+    || defined(BATCH_DEBUG) || defined(PARSE_STOPWATCH) || defined(MEMSTATS) \
+    || defined(MEM_DEBUG) || defined(UNKNOWN_CHECK_DEBUG)
 	printf("*** PROCESS File: %s\n", scores[idx].relpath);
-	printf("... %d bytes, score %d, %s\n", size, scores[idx].score,
+	printf("... %d bytes, score %d, %s\n", scores[idx].size, scores[idx].score,
 	       scores[idx].ftype);
-#endif /* DEBUG || DOCTOR_DEBUG || LTSR_DEBUG || BATCH_DEBUG || PARSE_STOPWATCH || MEMSTATS */
+#endif /* DEBUG || DOCTOR_DEBUG || LTSR_DEBUG || BATCH_DEBUG || PARSE_STOPWATCH || MEMSTATS || MEM_DEBUG || defined(UNKNOWN_CHECK_DEBUG)*/
 	isML = idxGrep(_UTIL_MARKUP, textp, REG_ICASE|REG_EXTENDED);
 #ifdef	DOCTOR_DEBUG
 	printf("idxGrep(ML) returns %d\n", isML);
@@ -1003,7 +1015,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	}
 #endif	/* FLAG_NO_COPYRIGHT */
 	fprintf(linkFp, "License(s) Found: %s\n", scores[idx].licenses);
-#ifdef	SAVE_UNCLASSIFIED_LICENSES
 	if (cur.licPara != NULL_STR) {
 	    if (gl.flags & FL_FRAGMENT) {
 		fprintf(linkFp,
@@ -1017,7 +1028,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	    memFree(cur.licPara, MTAG_TEXTPARA);	/* be free! */
 	    cur.licPara = NULL_STR;			/* remember */
 	}
-#endif	/* SAVE_UNCLASSIFIED_LICENSES */
 	fprintf(linkFp, "[%s]\n%s", LABEL_TEXT, textp);
 	munmapFile(textp);
 	(void) fclose(linkFp);

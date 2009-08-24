@@ -15,6 +15,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ***************************************************************/
+/* Equivalent to core nomos v1.29 */
+
 #include <stdarg.h>
 #include <stdio.h>
 #include "nomos.h"
