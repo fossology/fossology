@@ -98,6 +98,10 @@ static void dumpMatch(char *, char *);
 static void locateRegex(char *, item_t *, int, int, int, int);
 static void saveRegexLocation(int, int, int, int);
 static void saveUnclBufLocation(int);
+#ifdef SAVE_UNCLASSIFIED_LICENSES
+/* CDB Is this necessary? */
+static void saveLicenseParagraph();
+#endif /* SAVE_UNCLASSIFIED_LICENSES */
 static char *cplVersion(char *, int, int, int);
 static char *gplVersion(char *, int, int, int);
 static char *lgplVersion(char *, int, int, int);
@@ -743,6 +747,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	}
 	else if (INFILE(_TITLE_ASL20)) {
 	    INTERESTING(lDebug ? "Apache(2.0#4)" : "Apache_v2.0");
+	}
+	else if (INFILE(_LT_APACHE_1)) {
+	    INTERESTING(lDebug ? "Apache(1)" : "Apache");
+	}
+	else if (INFILE(_LT_APACHE_2)) {
+	    INTERESTING(lDebug ? "Apache(2)" : "Apache");
 	}
 	else if (INFILE(_LT_APACHEref1)) {
 	    INTERESTING(lDebug ? "Apache(ref#1)" : "Apache");
@@ -1544,6 +1554,17 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING(lDebug ? "X11-style(4)" : "X11-style");
 	}
     }
+    else if (INFILE(_LT_X11_4)) {
+	if (mCR_X11()) {
+	    INTERESTING(lDebug ? "X11(5)" : "X11");
+	}
+	else {
+	    INTERESTING(lDebug ? "X11-style(5)" : "X11-style");
+	}
+    }
+    else if (INFILE(_LT_X11_STYLE)) {
+	INTERESTING(lDebug ? "X11-style(6)" : "X11-style");
+    }
     if (INFILE(_LT_W3C_1)) {
 	if (INFILE(_CR_W3C)) {
 	    INTERESTING(lDebug ? "W3C(1)" : "W3C");
@@ -2035,8 +2056,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING("Ms-indemnity");
 	    lmem[_fMSCORP] = 1;
 	}
-	else if (INFILE(_LT_MSCORP_IP)) {
-	    INTERESTING("Ms-IP");
+	else if (INFILE(_LT_MSCORP_IP_1)) {
+	    INTERESTING(lDebug ? "MS-IP(1)" : "Ms-IP");
+	    lmem[_fMSCORP] = 1;
+	}
+	else if (INFILE(_LT_MSCORP_IP_2)) {
+	    INTERESTING(lDebug ? "MS-IP(2)" : "Ms-IP");
 	    lmem[_fMSCORP] = 1;
 	}
 	else if (INFILE(_LT_MSCORP_PLref1)) {
@@ -2200,6 +2225,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING(lDebug ? "GPL(Ruby)" : "GPL");
 	}
     }
+    else if (INFILE(_LT_RUBYref5)) {
+	INTERESTING(lDebug ? "Ruby(ref5)" : "Ruby");
+	if (!lmem[_mGPL]) {
+	    INTERESTING(lDebug ? "GPL(Ruby)" : "GPL");
+	}
+    }
     /*
      * Python and EGenix.com look a bit alike
      * Q: should all these Python checks be a family-check like OpenLDAP?
@@ -2358,13 +2389,29 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	else if (INFILE(_LT_HP_PROPRIETARY_2)) {
 	    INTERESTING(lDebug ? "HP-prop(2)" : "HP-Proprietary");
 	}
-	else if (!lmem[_mHP_DEC] && INFILE(_CR_DEC) && INFILE(_LT_DEC)) {
-	    INTERESTING("HP-DEC");
+	else if (INFILE(_LT_HP_PROPRIETARY_3)) {
+	    INTERESTING(lDebug ? "HP-prop(3)" : "HP-Proprietary");
+	}
+	else if (INFILE(_LT_HP_IBM_1)) {
+	    INTERESTING(lDebug ? "HP+IBM(1)" : "HP+IBM");
+	}
+	else if (INFILE(_LT_HP_IBM_2)) {
+	    INTERESTING(lDebug ? "HP+IBM(2)" : "HP+IBM");
+	}
+	else if (!lmem[_mHP_DEC] && INFILE(_CR_DEC) && INFILE(_LT_DEC_1)) {
+	    INTERESTING(lDebug ? "HP-DEC(1)" : "HP-DEC");
+	    lmem[_mHP_DEC] = 1;
+	}
+	else if (!lmem[_mHP_DEC] && INFILE(_CR_DEC) && INFILE(_LT_DEC_2)) {
+	    INTERESTING(lDebug ? "HP-DEC(2)" : "HP-DEC");
 	    lmem[_mHP_DEC] = 1;
 	}
     }
-    else if (!lmem[_mHP_DEC] && INFILE(_LT_DEC)) {
+    else if (!lmem[_mHP_DEC] && INFILE(_LT_DEC_1)) {
 	INTERESTING(lDebug ? "HP-DEC-style(2)" : "HP-DEC-style");
+    }
+    else if (!lmem[_mHP_DEC] && INFILE(_LT_DEC_2)) {
+	INTERESTING(lDebug ? "HP-DEC-style(3)" : "HP-DEC-style");
     }
     else if (INFILE(_LT_HP_4)) {
 	INTERESTING(lDebug ? "HP-style(1)" : "HP-style");
@@ -2544,9 +2591,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	else if (INFILE(_LT_IBM_COURIER)) {
 	    INTERESTING("IBM-Courier");
 	}
-	else if (INFILE(_LT_IBM_MS)) {
-	    INTERESTING("IBM/MS");
-	}
 	else if (INFILE(_LT_IBM_EULA)) {
 	    INTERESTING(lDebug ? "IBM-EULA(1)" : "IBM-EULA");
 	}
@@ -2579,6 +2623,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_LT_JAVA_WSDL_ENUM)) {
 	INTERESTING("Java-WSDL-Spec");
+    }
+    else if (INFILE(_LT_MULTICORP_1)) {
+	INTERESTING(lDebug ? "Java-Multi(1)" : "Java-Multi-Corp");
+    }
+    else if (INFILE(_LT_MULTICORP_2)) {
+	INTERESTING(lDebug ? "Java-Multi(2)" : "Java-Multi-Corp");
     }
     /*
      * Mibble
@@ -3689,13 +3739,24 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     /*
      * Jabber, Motosoto
      */
-    if (INFILE(_LT_JABBER)) {
+    if (INFILE(_LT_JABBER_1)) {
 	if (INFILE(_TITLE_MOTOSOTO091)) {
 	    INTERESTING("Motosoto_v0.9.1");
 	}
 	else if (INFILE(_TITLE_JABBER)) {
 	    INTERESTING("Jabber");
 	}
+    }
+    else if (INFILE(_LT_JABBER_2)) {
+	if (INFILE(_TITLE_JABBER_V10)) {
+	    INTERESTING(lDebug ? "Jabber(1.0)" : "Jabber_v1.0");
+	}
+	else {
+	    INTERESTING(lDebug ? "Jabber(2)" : "Jabber");
+	}
+    }
+    else if (INFILE(_URL_JABBER)) {
+	INTERESTING(lDebug ? "Jabber(url)" : "Jabber");
     }
     /*
      * CPL, Lucent Public License, Eclipse PL
@@ -4077,6 +4138,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	INTERESTING("Paradigm");
     }
     /*
+     * Wintertree Software
+     */
+    if (INFILE(_LT_WINTERTREE)) {
+	INTERESTING("Wintertree");
+    }
+    /*
      * Genivia
      */
     if (INFILE(_LT_GENIVIAref)) {
@@ -4117,6 +4184,24 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      */
     if (INFILE(_LT_AOL_EULA)) {
 	INTERESTING("AOL-EULA");
+    }
+    /*
+     * Algorithmics
+     */
+    if (INFILE(_LT_ALGORITHMICS)) {
+	INTERESTING("Algorithmics");
+    }
+    /*
+     * Dyade
+     */
+    if (INFILE(_LT_DYADE)) {
+	INTERESTING("Dyade");
+    }
+    /*
+     * Pixware
+     */
+    if (INFILE(_LT_PIXWARE_EULA)) {
+	INTERESTING("Pixware-EULA");
     }
     /*
      * Compuserve
@@ -4597,6 +4682,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	INTERESTING("InfoSeek");
     }
     /*
+     * Trident Microsystems
+     */
+    if (INFILE(_LT_TRIDENT_EULA) && INFILE(_CR_TRIDENT)) {
+	INTERESTING("Trident-EULA");
+    }
+    /*
      * ARJ Software Inc
      */
     if (INFILE(_LT_ARJ) && INFILE(_CR_ARJ)) {
@@ -4619,6 +4710,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      */
     if (INFILE(_TITLE_SKYPE) && INFILE(_LT_SKYPE)) {
 	INTERESTING("Skype(Non-commercial)");
+    }
+    /*
+     * Hauppauge
+     */
+    if (INFILE(_LT_HAUPPAUGE)) {
+	INTERESTING("Hauppauge");
     }
     /*
      * Curl
@@ -4684,26 +4781,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * Ditto for phrase stating restrictions.
      */
     if (maxInterest != IL_HIGH) {
-	if (INFILE(_PHR_NO_WARRANTY_1)) {
-	    nw = _PHR_NO_WARRANTY_1;
-	}
-	else if (INFILE(_PHR_NO_WARRANTY_2)) {
-	    nw = _PHR_NO_WARRANTY_2;
-	}
-	else if (INFILE(_PHR_NO_WARRANTY_3)) {
-	    nw = _PHR_NO_WARRANTY_3;
-	}
-	else if (INFILE(_PHR_NO_WARRANTY_4)) {
-	    nw = _PHR_NO_WARRANTY_4;
-	}
-	else if (INFILE(_PHR_NO_WARRANTY_5)) {
-	    nw = _PHR_NO_WARRANTY_5;
-	}
-	else if (INFILE(_PHR_NO_WARRANTY_6)) {
-	    nw = _PHR_NO_WARRANTY_6;
-	}
-	else if (INFILE(_PHR_NO_WARRANTY_7)) {
-	    nw = _PHR_NO_WARRANTY_7;
+	for (i = 0; i < NNOWARRANTY; i++) {
+	    if (INFILE((j = _NO_WARRANTY_first+i))) {
+		nw = j;
+		break;
+	    }
 	}
 	if (HASTEXT(_PHR_RESTRICTIONS_1, REG_EXTENDED)) {
 	    rs = _PHR_RESTRICTIONS_1;
@@ -4748,9 +4830,20 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     /*
      * Some licenses say "licensed under the same terms as FOO".
      */
+    /* gl.flags |= FL_SAVEBASE; */
     if (*licStr == NULL_CHAR && INFILE(_LT_SAME_LICENSE)) {
 	INTERESTING("Same-license-as");
+#if defined(SAVE_UNCLASSIFIED_LICENSES) && defined(NOTDEF)
+	if (cur.licPara == NULL_STR) {
+	    saveLicenseParagraph(gl.matchBase, isML, isPS);
+	}
+	if (lDiags) {
+	    printf("[PERHAPS]\n%s\n[/PERHAPS]\n",
+		   cur.licPara);
+	}
+#endif	/* SAVE_UNCLASSIFIED_LICENSES && NOTDEF */
     }
+    /* gl.flags |= ~FL_SAVEBASE; */
     /*
      * ... and, there are several generic claims that "this is free software"
      */
@@ -4793,6 +4886,27 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    if (lDiags) {
 		printf("[PERHAPS]\n%s\n[/PERHAPS]\n",
 		       cur.licPara);
+		for (i = j = 0; i < NKEYWORDS; i++) {
+		    if (idxGrep(i+_KW_first, cur.licPara,
+				REG_EXTENDED|REG_ICASE)) {
+			j++;
+		    }
+		}
+		printf("SCORES: para %d, score %d == %5.2f%% ",
+		       j, scp->score,
+		       100.0 * (float) j / (float) scp->score);
+		/*
+		 * We guess that a unclassified-license paragraph candidate 
+		 * with a score * of at least 40% of the file's total score 
+		 * OR a score of at least 3 will vastly reduce the # of 
+		 * false-positives for UnclassifiedLicense guesses.
+		 */
+		if (j >= 3 || j*5 >= scp->score*2) {
+		    printf("(LIKELY unclassified?!)\n");
+		}
+		else {
+		    printf("(NOT likely unclassified)\n");
+		}
 	    }
 #endif  /* SAVE_UNCLASSIFIED_LICENSES */
 	    strcpy(name, LS_UNCL);
@@ -6795,7 +6909,17 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
 	case '?': case '`': case '"': case '\'':
 	    *cp = ' ';
 	    break;
-	case '(': case ')': case ',': case ':': case ';':
+	case '(':
+	    if ((*(cp+1) == 'C' || *(cp+1) == 'c') &&
+		*(cp+2) == ')') {
+		cp += 2;
+		continue;
+	    }
+	    else {
+		*cp = ' ';
+	    }
+	    break;
+	case ')': case ',': case ':': case ';':
 	    if (!isCR) {
 		*cp = ' ';
 	    }
@@ -7231,6 +7355,12 @@ static void checkFileReferences(char *filetext, int size, int score, int kwbm,
     else if (INFILE(_LT_SEE_COPYING_5)) {
 	INTERESTING(lDebug ? "Gen-CPY-5" : "See-file(COPYING)");
     }
+    else if (INFILE(_LT_SEE_COPYING_6)) {
+	INTERESTING(lDebug ? "Gen-CPY-6" : "See-file(COPYING)");
+    }
+    else if (INFILE(_LT_SEE_COPYING_7)) {
+	INTERESTING(lDebug ? "Gen-CPY-7" : "See-file(COPYING)");
+    }
     else if (INFILE(_LT_SEE_COPYING_LAST1)) {
 	INTERESTING(lDebug ? "Gen-CPY-L1" : "See-file(COPYING)");
     }
@@ -7252,6 +7382,12 @@ static void checkFileReferences(char *filetext, int size, int score, int kwbm,
     else if (INFILE(_LT_SEE_LICENSE_5)) {
 	INTERESTING(lDebug ? "Gen-LIC-5" : "See-file(LICENSE)");
     }
+    else if (INFILE(_LT_SEE_LICENSE_6)) {
+	INTERESTING(lDebug ? "Gen-LIC-6" : "See-file(LICENSE)");
+    }
+    else if (INFILE(_LT_SEE_LICENSE_7)) {
+	INTERESTING(lDebug ? "Gen-LIC-7" : "See-file(LICENSE)");
+    }
     else if (INFILE(_LT_SEE_LICENSE_LAST1)) {
 	INTERESTING(lDebug ? "Gen-LIC-L1" : "See-file(LICENSE)");
     }
@@ -7272,6 +7408,12 @@ static void checkFileReferences(char *filetext, int size, int score, int kwbm,
     }
     else if (INFILE(_LT_SEE_README_5)) {
 	INTERESTING(lDebug ? "Gen-RDM-5" : "See-file(README)");
+    }
+    else if (INFILE(_LT_SEE_README_6)) {
+	INTERESTING(lDebug ? "Gen-RDM-6" : "See-file(README)");
+    }
+    else if (INFILE(_LT_SEE_README_7)) {
+	INTERESTING(lDebug ? "Gen-RDM-7" : "See-file(README)");
     }
     else if (INFILE(_LT_SEE_README_LAST1)) {
 	INTERESTING(lDebug ? "Gen-RDM-L1" : "See-file(README)");
@@ -7296,6 +7438,15 @@ static void checkFileReferences(char *filetext, int size, int score, int kwbm,
     }
     else if (INFILE(_LT_SEE_OTHER_6)) {
 	INTERESTING(lDebug ? "Gen-OTH-6" : "See-doc(OTHER)");
+    }
+    else if (INFILE(_LT_SEE_OTHER_7)) {
+	INTERESTING(lDebug ? "Gen-OTH-7" : "See-doc(OTHER)");
+    }
+    else if (INFILE(_LT_SEE_OTHER_8)) {
+	INTERESTING(lDebug ? "Gen-OTH-8" : "See-doc(OTHER)");
+    }
+    else if (INFILE(_LT_SEE_OTHER_9)) {
+	INTERESTING(lDebug ? "Gen-OTH-9" : "See-doc(OTHER)");
     }
     else if (INFILE(_LT_SEE_OTHER_LAST1)) {
 	INTERESTING(lDebug ? "Gen-OTH-L1" : "See-doc(OTHER)");
@@ -7355,7 +7506,7 @@ static int checkPublicDomain(char *filetext, int size, int score, int kwbm,
     } else if (INFILE(_LT_PUBDOM_1)) {
 	LOWINTEREST(lDebug ? "Pubdom(1)" : LS_PD_CLM);
 	ret = 1;
-    } else if (INFILE(_LT_PUBDOM_2)) {
+    } else if (INFILE(_LT_PUBDOM_2) && !INFILE(_PHR_PUBLIC_FUNCT)) {
 	LOWINTEREST(lDebug ? "Pubdom(2)" : LS_PD_CLM);
 	ret = 1;
     } else if (INFILE(_LT_PUBDOM_3)) {
@@ -7666,6 +7817,9 @@ static void checkCornerCases(char *filetext, int size, int score,
 	if (INFILE(_CR_MELLANOX)) {
 	    addRef("(C)Mellanox", pri);
 	}
+	if (INFILE(_CR_TRIDENT)) {
+	    addRef("(C)Trident", pri);
+	}
 	if (INFILE(_CR_ARTIFEX)) {
 	    addRef("(C)Artifex", pri);
 	}
@@ -7713,6 +7867,12 @@ static void checkCornerCases(char *filetext, int size, int score,
 	}
 	if (INFILE(_CR_PIGEONPOINT)) {
 	    addRef("(C)PigeonPoint", pri);
+	}
+	if (INFILE(_CR_ALGORITHMICS)) {
+	    addRef("(C)Algorithmics", pri);
+	}
+	if (INFILE(_CR_WINTERTREE)) {
+	    addRef("(C)Wintertree", pri);
 	}
 	if (INFILE(_CR_MITEM)) {
 	    addRef("(C)MITEM", pri);
@@ -7852,7 +8012,6 @@ static void checkCornerCases(char *filetext, int size, int score,
 	/* Last chance for a copyright-looking-thingy */
 	if (force || !(*licStr)) {
 	    if (INFILE(_CR_ZZZANY)) {
-		printf("Match: %d:%d\n", cur.regm.rm_so, cur.regm.rm_eo);
 		addRef(LS_CPRTONLY, pri);
 	    }
 	    else if (INFILE(_CR_ZZZWRONG_1) ||
@@ -7961,55 +8120,43 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
      * to NOT be present in licenses...
      */
     if (save) {
-	if (dbgIdxGrep(_LEGAL_FILTER_TECH_1, buf, lDiags) ||
-	    dbgIdxGrep(_LEGAL_FILTER_TECH_2, buf, lDiags) ||
-	    dbgIdxGrep(_LEGAL_FILTER_TECH_3, buf, lDiags)) {
-	    if (lDiags) {
-		printf("... NO license, technical terms\n");
-	    }
-	    return(0);
+#ifdef	ALT_UNCLASSIFIED
+	ulScore = scoreUnclassified(buf);
+	if (lDiags) {
+	    printf("U-Score: %d\n", ulScore);
 	}
-	if (dbgIdxGrep(_LEGAL_FILTER_OTHER_1, buf, lDiags) ||
-	    dbgIdxGrep(_LEGAL_FILTER_OTHER_2, buf, lDiags) ||
-	    dbgIdxGrep(_LEGAL_FILTER_OTHER_3, buf, lDiags)) {
-	    if (lDiags) {
-		printf("... NO license, miscellaneous terms\n");
+#endif	/* ALT_UNCLASSIFIED */
+	for (i = 0; i < NFILTER; i++) {
+	    if (dbgIdxGrep(_FILTER_first+i, buf, lDiags)) {
+		if (lDiags) {
+		    printf("!! NO license, filter %d\n", i+1);
+		}
+		return(0);
 	    }
-	    return(0);
 	}
-	if (dbgIdxGrep(_LEGAL_FILTER_WORDS, buf, lDiags)) {
-	    if (lDiags) {
-		printf("... NO license, keywords found\n");
-	    }
-	    return(0);
-	}
-	if (dbgIdxGrep(_LEGAL_FILTER_FOREIGN, buf, lDiags)) {
-	    if (lDiags) {
-		printf("... NO license, foreign terms\n");
-	    }
-	    return(0);
-	}
-#ifdef  SAVE_UNCLASSIFIED_LICENSES
+#ifdef	SAVE_UNCLASSIFIED_LICENSES
 	for (eightbit = i = 0, cp = buf; *cp; i++, cp++) {
 	    if (*cp & 0200) {
 		eightbit++;
 	    }
 	}
-#ifdef  UNKNOWN_CHECK_DEBUG
+#ifdef	UNKNOWN_CHECK_DEBUG
 	printf("DEEBUG: %d bytes, %d 8-bit\n", i, eightbit);
-#endif  /* UNKNOWN_CHECK_DEBUG */
+#endif	/* UNKNOWN_CHECK_DEBUG */
 	if (eightbit >= (i/2)) {
 	    if (lDiags) {
-		printf("... >= 50 percent 8-bit characters\n");
+		printf("... >= 50% 8-bit characters\n");
 	    }
 	    return(0);
 	}
+#if	0
 	cp = copyString(buf, MTAG_TEXTPARA);
 	doctorBuffer(cp, isML, isPS, NO);
+#endif
 #if defined(UNKNOWN_CHECK_DEBUG) || defined(DOCTOR_DEBUG)
 	printf("doctored buf (para):\n<dr>\n%s\n</dr>\n", cp);
-#endif  /* UNKNOWN_CHECK_DEBUG || DOCTOR_DEBUG */
-#ifdef  NO_NW
+#endif	/* UNKNOWN_CHECK_DEBUG || DOCTOR_DEBUG */
+#ifdef	NO_NW
 	/*
 	 * If we detected a no-warraty statement earlier, "checknw" is != 0. Look
 	 * for a no-warrany statement in this candidate paragraph.  If we find it,
@@ -8021,12 +8168,11 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
 		    printf("... erase warranty regex %d\n",
 			   checknw);
 		}
-		memFree(cp, MTAG_TEXTPARA);
 		checknw = 0;
 		return(0);
 	    }
 	}
-#endif  /* NO_NW */
+#endif	/* NO_NW */
 	/*
 	 * False-positive-check: GNU/FSF template (often see in ".po" and ".c" files
 	 *****
@@ -8036,44 +8182,120 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
 	    if (lDiags) {
 		printf("... FSF-GNU template\n");
 	    }
-	    memFree(cp, MTAG_TEXTPARA);
 	    return(0);
 	}
 	/*
 	 * False-positive-check: GNU GPL preamble statements; these have been
 	 * "sprinkled" throughout files seen before, so check ALL of them.
 	 */
+	if (cur.licPara == NULL_STR) {
+	    saveLicenseParagraph(buf, isML, isPS);
+	}
 	if (dbgIdxGrep(_PHR_GNU_FREEDOM, cp, lDiags) ||
 	    dbgIdxGrep(_PHR_GNU_COPYING, cp, lDiags) ||
 	    dbgIdxGrep(_PHR_GNU_PROTECT, cp, lDiags)) {
 	    if (lDiags) {
 		printf("match3: GNU-GPL preamble\n");
 	    }
-	    memFree(cp, MTAG_TEXTPARA);
 	    return(0);
 	}
-	/*
-	 * Convert double-line-feed chars ("\r" and "\n" combos) to a single "\n"
-	 */
 	if (cur.licPara == NULL_STR) {
-	    (void) strcpy(cp, buf); /* re-copy data */
+	    saveLicenseParagraph(buf, isML, isPS);
+	}
+#if	0
+	cp = copyString(buf, MTAG_TEXTPARA);
+	doctorBuffer(cp, isML, isPS, NO);
+	if (cur.licPara == NULL_STR) {
+	    (void) strcpy(cp, buf);	/* re-copy data */
 	    cur.licPara = cp;
 	    for (/*nada*/; *cp; cp++) {
-		if (((*cp == '\n') || (*cp == '\r')) &&
-		    ((*(cp+1) == '\r') || (*(cp+1) == '\n'))) {
+		if ((*cp == '\n' || *cp == '\r') &&
+		    (*(cp+1) == '\r' || *(cp+1) == '\n')) {
 		    *cp = ' ';
 		    *(cp+1) = '\n';
 		}
 	    }
 	}
+#endif
     }
 #endif  /* SAVE_UNCLASSIFIED_LICENSES */
     return(1);
 }
 
+#ifdef	SAVE_UNCLASSIFIED_LICENSES
+static void saveLicenseParagraph(char *buf, int isML, int isPS)
+{
+	register char *cp;
+/* */
+#ifdef	PROC_TRACE
+#ifdef	PROC_TRACE_SWITCH
+    if (gl.ptswitch)
+#endif	/* PROC_TRACE_SWITCH */
+	printf("== saveLicenseParagraph(%p, %d, %d)\n", buf, isML, isPS);
+#endif	/* PROC_TRACE */
+/* */
+	cur.licPara = copyString(buf, MTAG_TEXTPARA);
+	doctorBuffer(cur.licPara, isML, isPS, NO);
+/*
+ * Convert double-line-feed chars ("\r" and "\n" combos) to a single "\n"
+ */
+	for (cp = cur.licPara; *cp; cp++) {
+		if ((*cp == '\n' || *cp == '\r') &&
+		    (*(cp+1) == '\r' || *(cp+1) == '\n')) {
+			*cp = ' ';
+			*(cp+1) = '\n';
+		}
+	}
+	return;
+}
+#endif	/* SAVE_UNCLASSIFIED_LICENSES */
 
+#ifdef	ALT_UNCLASSIFIED
+static int scoreUnclassified(char *buf)
+{
+	register int i, s = 0;
+	register char *cp;
+/* */
+	i = _LEGAL_VERBS;
+	for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
+		s++;
+		cp += gl.regm.rm_eo;
+	}
+	if (lDiags) {
+		printf("== _Verbs: %d\n",s);
+	}
+/* */
+	i = _LEGAL_OWNERS;
+	for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
+		s++;
+		cp += gl.regm.rm_eo;
+	}
+	if (lDiags) {
+		printf("== _Owners: %d\n",s);
+	}
+/* */
+	i = _LEGAL_OBJS;
+	for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
+		s++;
+		cp += gl.regm.rm_eo;
+	}
+	if (lDiags) {
+		printf("== _Objs: %d\n",s);
+	}
+/* */
+	i = _LEGAL_PERMS;
+	for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
+		s++;
+		cp += gl.regm.rm_eo;
+	}
+	if (lDiags) {
+		printf("== _Perms: %d\n",s);
+	}
+/* */
+	return(s);
+}
 
-
+#endif	/* ALT_UNCLASSIFIED */
 #ifdef  LTSR_DEBUG
 #define LT_TARGET       1299    /* set to -1 OR the string# to track */
 void showLTCache(char *msg)
