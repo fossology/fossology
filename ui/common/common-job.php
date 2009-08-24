@@ -310,12 +310,14 @@ function JobFindKey($UploadPk, $JobName) {
     $SQL = "SELECT job_pk FROM job WHERE job_upload_fk = '$UploadPk' AND job_name = '$JobName';";
   }
   $Results = $DB->Action($SQL);
-  $jobpk = $Results[0]['job_pk'];
-  if (!empty($jobpk)) {
-    return ($jobpk);
+  if(empty($Results)) {
+    return(-1);
   }
-  return (-1);
+  else {
+    return($Results[0]['job_pk']);
+  }
 } // JobFindKey()
+
 
 /**
  * function: JobAddJob
@@ -414,8 +416,8 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $D
   /* Check if the job exists */
   $Results = $DB->Action("SELECT jq_pk FROM jobqueue
   	WHERE jq_job_fk = '$job_pk' AND jq_type = '$jq_type' AND jq_args = '$jq_args';");
-  $jqpk = $Results[0]['jq_pk'];
-  if (empty($jqpk)) {
+  //$jqpk = $Results[0]['jq_pk'];
+  if (empty($Results)) {
     /* Add the job */
     $SQL = "INSERT INTO jobqueue ";
     $SQL.= "(jq_job_fk,jq_type,jq_args,jq_repeat,jq_runonpfile,jq_starttime,jq_endtime,jq_end_bits) VALUES ";
