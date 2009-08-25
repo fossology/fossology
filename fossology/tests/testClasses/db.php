@@ -45,6 +45,7 @@ class db {
   private $dbUser;
   private $dbPassword;
   private $dbHost;
+  public  $Debug;
 
   function __construct($options = NULL) {
     global $URL;
