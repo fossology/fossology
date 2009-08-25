@@ -48,7 +48,12 @@ class createUIUsers extends fossologyTestCase {
       'noemail' =>
         'test user with NO Email notification,NULL,10,1,NULL,NULL,noemail,NULL',
     );
-    print "Starting testcreateUIUsers\n";
+
+    $Svn = `svnversion`;
+    $date = date('Y-m-d');
+    $time = date('h:i:s-a');
+    print "Starting testcreateUIUsers on: " . $date . " at " . $time . "\n";
+    print "Using Svn Version:$Svn\n";
     foreach($Users as $user => $params) {
       list($description, $email, $access, $folder,
       $block, $blank, $password, $Enote ) = split(',',$Users[$user]);
