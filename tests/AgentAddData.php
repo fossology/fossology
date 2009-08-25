@@ -56,13 +56,18 @@ class uploadAgentDataTest extends fossologyTestCase {
     $this->createFolder(NULL, 'Agent-Test', NULL);
   }
   function testuploadAgentDataTest() {
-    global $URL;
+
     global $PROXY;
-    print "starting uploadAgentDataTest\n";
+    $Svn = `svnversion`;
+    $date = date('Y-m-d');
+    $time = date('h:i:s-a');
+    print "Starting uploadAgentDataTest on: " . $date . " at " . $time . "\n";
+    print "Using Svn Version:$Svn\n";
     $LicenseList = array('TestData/licenses/RCSL_v3.0_a.txt',
                             'TestData/licenses/BSD_style_a.txt',
                             'TestData/licenses/BSD_style_b.txt',
                             'TestData/licenses/BSD_style_c.txt',);
+
     $urlList = array('http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz',
                          'http://www.gnu.org/licenses/gpl-3.0.txt',
                          'http://www.gnu.org/licenses/agpl-3.0.txt',
@@ -85,7 +90,7 @@ class uploadAgentDataTest extends fossologyTestCase {
     if (!(empty($PROXY))) {
       $this->webProxy = $PROXY;
     }
-    print "Starting Url uploads\n";
+    print "Starting Url uploads";
     foreach($urlList as $url) {
       $this->uploadUrl('Agent-Test', $url, NULL, NULL, NULL);
     }
