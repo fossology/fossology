@@ -31,44 +31,34 @@ require_once ('TestEnvironment.php');
 
 global $URL;
 
-class cleanupTestData extends fossologyTestCase
-{
+class cleanupTestData extends fossologyTestCase {
   public $mybrowser;
   public $webProxy;
 
-    function setUp()
-  {
+    function setUp() {
     global $URL;
     $this->Login();
   }
 
-  function testRmTestingFolders()
-  {
+  function testRmTestingFolders() {
     global $URL;
-    print "Removing Basic-Testing and Testing folders\n";
+    print "Removing Testing folders\n";
     $page = $this->mybrowser->get($URL);
     $this->deleteFolder('Basic-Testing');
     $this->deleteFolder('Testing');
+    $this->deleteFolder('Agent-Test');
+    $this->deleteFolder('SrvUploads');
   }
 
-  function testRmUploadsTest()
-  {
-    global $URL;
-    global $PROXY;
-    print "starting testRmUploadsTest\n";
-    $rootFolder = 1;
-    $uploadList = array('simpletest_1.0.1.tar.gz',
-                     'gpl-3.0.txt',
-                     'agpl-3.0.txt',
-                     'fossDirsOnly.tar.bz2');
+  function testRmUploads() {
 
-    /* Remove the uploads in the root folder (best we can do for now). */
-    print "Starting removal of uploads\n";
-    foreach($uploadList as $upload)
-    {
-      $this->deleteUpload($upload);
-      print "$upload scheduled for removal\n";
-    }
+      print "Removing ALL uploads in the root folder\n";
+      $tr = TESTROOT;
+      if(!chdir(TESTROOT)) {
+        print "ERROR! could not cd to $tr\n";
+        print "please run $tr" . "/cleanRF.php by hand\n";
+      }
+      $uploadLast = exec("fo-runTests  cleanRF.php -n 'Clean Root Folder'", $dummy, $Urtn);
   }
 }
 ?>
