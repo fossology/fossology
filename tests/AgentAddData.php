@@ -90,7 +90,7 @@ class uploadAgentDataTest extends fossologyTestCase {
     if (!(empty($PROXY))) {
       $this->webProxy = $PROXY;
     }
-    print "Starting Url uploads";
+    print "Starting Url uploads\n";
     foreach($urlList as $url) {
       $this->uploadUrl('Agent-Test', $url, NULL, NULL, NULL);
     }
