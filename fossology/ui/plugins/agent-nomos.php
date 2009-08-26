@@ -72,7 +72,7 @@ class agent_fonomos extends FO_Plugin {
   *********************************************/
   function AgentAdd($uploadpk, $Depends = NULL, $Priority = 0) {
     global $DB;
-    /* Get dependency: "fo_nomos" require "adj2nest".
+    /* Get dependency: "nomos" require "adj2nest".
      * clean this comment up, what is being checked?
      * */
     $SQL = "SELECT jq_pk FROM jobqueue
@@ -130,15 +130,13 @@ class agent_fonomos extends FO_Plugin {
        Using the latest agent revision, find all the records still needing processing
        this requires knowing the agents fk. (See above)
      */
-    //left outer join license_file on (PF=pfile_fk and agent_fk=1 )
+
     $jqargs = "SELECT pfile_pk,
-                      pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename,
-                      pfile_size as size FROM
-                      (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE
-                       upload_fk=$uploadpk) as SS
-                      left outer join license_file on (PF=pfile_fk and agent_fk=$agentPk )
-                      inner join pfile on (PF=pfile_pk)
-                      WHERE fl_pk IS null;";
+              pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size  AS pfilename
+              FROM (SELECT distinct(pfile_fk) AS PF
+              FROM uploadtree WHERE upload_fk=$uploadpk) as SS
+              left outer join license_file on (PF=pfile_fk and agent_fk=$agentPk)
+              inner join pfile on (PF=pfile_pk) WHERE fl_pk IS null;";
 
     /*
       Hand of the SQL  to the scheduler
