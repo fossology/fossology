@@ -118,11 +118,11 @@ int	CheckLicenses	()
   Checksum = SumComputeFile(Fin);
   if (!Checksum)
 	{
-	printf("License.bsam: Not readable.\n");
+	printf("%s: Not readable.\n", BSAMLIC);
 	return(1);
 	}
   String = SumToString(Checksum);
-  printf("License.bsam: %s\n",String);
+  printf("%s: %s\n",BSAMLIC, String);
   free(String);
   free(Checksum);
   rewind(Fin);
@@ -263,13 +263,13 @@ int	CheckPerm	(gid_t Gid, char *RepPath, char *Host, char *Repo,
     {
     if (Stat.st_gid != Gid)
         {
-	printf("FATAL: %s not in correct group.\n",Path);
+	printf("FATAL: %s not in correct group. Expected %d, found %d\n",Path, (int)Gid, (int)Stat.st_gid);
 	fflush(stdout);
 	return(0);
 	}
     if ((Stat.st_mode & 00070) != 00070)
         {
-	printf("FATAL: Wrong group permissions for %s\n",Path);
+	printf("FATAL: Wrong group permissions for %s.\n   Expected Group rwx, found %o.\n",Path, Stat.st_mode );
 	fflush(stdout);
 	return(0);
 	}
