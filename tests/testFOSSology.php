@@ -124,7 +124,7 @@ function _runTestEnvSetup() {
   LogAndPrint($LF, "\n");
   $UpLast = exec("./uploadTestData.php >> $logFile 2>&1", $dummy, $SUrtn);
   LogAndPrint($LF, "\n");
-  $AALast = exec("./fo-runTests.php -l AgentAddData.php >> $logFile 2>&1", $dummy, $AArtn);
+  $AALast = exec("./fo-runTests.php AgentAddData.php -n 'Agent Add Uploads'>> $logFile 2>&1", $dummy, $AArtn);
   LogAndPrint($LF, "\n");
   // need to check the return on the setup and report accordingly.
   if ($SUrtn != 0) {
@@ -180,7 +180,8 @@ if (array_key_exists("a", $options)) {
    * Create the test users first or nothing will work should this be somewhere else like
    * in install?
    */
-  $UIusers = exec("./fo-runTests.php -l createUIUsers.php >> $logFile 2>&1", $dummy, $UsrRtn);
+  $cmd = "./fo-runTests.php createUIUsers.php -n 'Create UI Users Test' >> $logFile 2>&1";
+  $UIusers = exec($cmd, $dummy, $UsrRtn);
   if ($UsrRtn != 0) {
     LogAndPrint($LF, "ERROR when running createUIUsers.php: return code:$UsrRtn\n");
     LogAndPrint($LF, "last line returned is:$UIusers\n");
@@ -206,12 +207,7 @@ if (array_key_exists("a", $options)) {
   if (chdir('../Users') === FALSE) {
     LogAndPrint($LF, "ALL Tests ERROR: can't cd to $UserTests\n");
   }
-  $Svn = getSvnVer();
-  $date = date('Y-m-d');
-  $time = date('h:i:s-a');
-  print "Starting User Tests on: " . $date . " at " . $time . "\n";
-  print "Using Svn Version:$Svn\n";
-  $UsersLast = exec("fo-runTests -l \"`ls`\" >> $logFile 2>&1", $dummy, $Urtn);
+  $UsersLast = exec("fo-runTests -l \"`ls`\ -n 'User Tests' >> $logFile 2>&1", $dummy, $Urtn);
   LogAndPrint($LF, "\n");
 
   if (chdir($Home) === FALSE) {
@@ -222,12 +218,7 @@ if (array_key_exists("a", $options)) {
   if (chdir($EmailTests) === FALSE) {
     LogAndPrint($LF, "ALL Tests ERROR: can't cd to $EmailTests\n");
   }
-  $Svn = getSvnVer();
-  $date = date('Y-m-d');
-  $time = date('h:i:s-a');
-  print "Starting Email Tests on: " . $date . " at " . $time . "\n";
-  print "Using Svn Version:$Svn\n";
-  $EmailLast = exec("fo-runTests -l \"`ls`\" >> $logFile 2>&1", $dummy, $ENrtn);
+  $EmailLast = exec("fo-runTests -l \"`ls`\ -n 'Email Tests' >> $logFile 2>&1", $dummy, $ENrtn);
   LogAndPrint($LF, "\n");
   /*
    * The verify tests require that uploads be done first.

@@ -59,6 +59,8 @@ class cleanupTestData extends fossologyTestCase {
         print "please run $tr" . "/cleanRF.php by hand\n";
       }
       $uploadLast = exec("fo-runTests  cleanRF.php -n 'Clean Root Folder'", $dummy, $Urtn);
+      //print "DB: last line is:$uploadLast\n";
+      //print "DB: results are:\n";print_r($dummy) . "\n";
   }
 }
 ?>
