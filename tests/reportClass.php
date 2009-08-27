@@ -45,26 +45,74 @@ class TestReport
   protected $results;
   private $testRuns;
   private $smarty;
-  public $resultsPath;
+  public $resultsFile = NULL;
+  public $resultsPath = NULL;
   public $notesPath;
 
-  public function __construct($resultsPath=NULL, $notesPath=NULL) {
+  public function __construct($Path=NULL, $notesPath=NULL) {
+
+    /*
+     Fix this, don't think we need notes...
+     */
     $this->smarty = new Smarty();
     // defaults for now...
     $Latest = '/home/fosstester/public_html/TestResults/Data/Latest';
     $NotesFile = '/home/fosstester/public_html/TestResults/Data/Latest/Notes';
 
-    if (empty ($resultsPath))
-    {
+    if (empty ($Path)) {
       /* Default is use data in Latest*/
       $this->resultsPath = $Latest;
     }
-    if (empty ($notesPath))
-    {
+    else if(is_dir($Path)) {
+      $this->resultsPath = $Path;
+    }
+    else if(is_file($Path)) {
+      $this->resultsFILE = $Path;
+    }
+
+    if (empty ($notesPath)) {
       $this->notesPath = $NotesFile;
+    }
+  } // __construct
+
+  /**
+   * check4Exception
+   *
+   * Check the test output for exceptions in the results
+   *
+   *  @param array $suite the results for a particular test suite.
+   *
+   *  @return array $xList the list of exceptions (if any), can return an
+   *  empty array.
+   *
+   */
+
+  protected function check4Exception($suite) {
+
+    if(!is_array($suite)) {
+      return(FALSE);
     }
   }
 
+  /**
+   *  check4Failures
+   *
+   *  Check the test output for test failures in the results, capture the first
+   *  2 errors, the rest are usually a result of the first 1 or 2.
+   *
+   *  @param array $suite the results for a particular test suite.
+   *
+   *  @return array $xList the first 2 errors (if any), can return an
+   *  empty array.
+   *
+   */
+
+  protected function check4Failures($suite) {
+    if(!is_array($suite)) {
+      return(FALSE);
+    }
+
+  }
   /**
    * Display the licesense results table.
    *
@@ -163,25 +211,23 @@ class TestReport
    * read a file and return the number of passes, failures,exceptions
    * and elapse time.
    *
-   * Set $Date and $Time.
+   * Set attributes Date and Time.
    */
 
   /*
    * pattern is Starting < > Tests ... data followed by either OK or
    * FAILURES! then results, skip a line then elapse time.
    */
-  public function gatherData($file)
-  {
+  public function parseResultsFile($file) {
     $resultLines = array ();
-    if (empty ($file))
-    {
+    if (empty ($file)) {
       return FALSE;
     }
+    $suite = array();
+
     $FD = fopen($file, 'r');
-    while ($line = fgets($FD, 1024))
-    {
-      if (preg_match('/^Running\sAll/', $line))
-      {
+    while ($line = fgets($FD, 1024)) {
+      if (preg_match('/^Running\sAll/', $line)){
         $DateTime = $this->parseDateTime($line);
         //$this->testRuns['rundate'] = "{$DateTime[0]}" . "{$DateTime[1]}";
         list ($this->Date, $this->Time) = $DateTime;
@@ -190,27 +236,36 @@ class TestReport
         //print "<pre>"; print_r($svnline) . "</pre>\n";
         //$this->testRuns['svnVer'] = $svnline[4];
         $this->Svn = $svnline[4];
+        //print "DB: top stuff is:\ndate:$this->Date\ntime:$this->Time\nsvn:$this->Svn\n";
       }
-      elseif (preg_match('/^Starting.*?on:/', $line))
-      {
+      elseif (preg_match('/^Starting.*?on:/', $line)) {
         array_push($resultLines, $line);
+        $suite[] = $line;
         $suiteName = $this->parseSuiteName($line);
       }
-      elseif (preg_match('/^OK/', $line) || preg_match('/^FAILURES/', $line))
-      {
+      /*
+       The code below assumes that the next 3 lines are the results for that
+       suite.  This is bad, need to pattern match better.
+       */
+      elseif (preg_match('/^OK/', $line) || preg_match('/^FAILURES/', $line)) {
         $line = fgets($FD, 1024);
+        if (preg_match('/^Test cases run:/', $line))
         array_push($resultLines, $line);
+        $suite[] = $line;
         $tossme = fgets($FD, 1024);
         $line = fgets($FD, 1024);
         array_push($resultLines, $line);
-        $started = 0;
-      } else
-      {
+        $suite[] = $line;
+        // $failures = check4Failures($suite);
+        // $exceptions = check4Exception($suite);
+        print "DB: suite is:\n";print_r($suite) . "\n";
+      }
+      else {
         continue;
       }
     }
     return ($resultLines);
-  }
+  } // parseResultsFile
 
   /**
    * getResult
@@ -483,6 +538,10 @@ class TestReport
         $this->displayReport();
       }
     }
+  }
+
+  public function readTestResults() {
+
   }
 }
 ?>
