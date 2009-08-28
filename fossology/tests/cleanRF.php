@@ -47,6 +47,10 @@ class cleanupRF extends fossologyTestCase {
     $this->assertTrue($this->myassertText($page, '/Select the uploaded file to delete/'));
     $SRselect = $this->parseSelectStmnt($page,'upload');
     //print "SRselect is:\n"; print_r($SRselect) . "\n";
+    if(empty($SRselect)) {
+      $this->pass('Nothing to remove');
+      return;
+    }
     foreach($SRselect as $uploadName => $uploadId){
       print "Removing $uploadName...\n";
        $this->assertTrue($this->mybrowser->setField('upload', $uploadId));
