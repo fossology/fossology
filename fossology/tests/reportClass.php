@@ -1,4 +1,3 @@
-c
 <?php
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
@@ -39,9 +38,9 @@ require_once ('/usr/share/php/smarty/libs/Smarty.class.php');
 
 class TestReport
 {
-  private $Date;
-  private $Time;
-  private $Svn;
+  public $Date;
+  public $Time;
+  public $Svn;
   protected $results;
   private $testRuns;
   private $smarty;
@@ -93,10 +92,23 @@ class TestReport
      */
     $matched = preg_match_all('/^Exception\s[0-9]+.*?$/m',$suite, $matches);
     $pm = preg_match_all('/^Unexpected PHP error.*?$/m',$suite, $ematches);
-    print "DB: matched expections is:$matched\n";
-    print "DB: matches are:\n";print_r($matches);
-    print "DB: matched php is:$pm\n";
-    print "DB: ematches are:\n";print_r($ematches);
+
+    //print "DB: matched expections is:$matched\n";
+    //print "DB: matches are:\n";print_r($matches);
+    //print "DB: matched php is:$pm\n";
+    //print "DB: ematches are:\n";print_r($ematches);
+
+    $elist = array();
+    foreach($matches as $ex){
+      foreach($ex as $except) {
+        foreach ($ematches as $ematch){
+          foreach($ematch as $estring){
+            $elist[$except] = $estring;
+          }
+        }
+      }
+    }
+    return($elist);
   }
 
   /**
@@ -121,8 +133,15 @@ class TestReport
     // calls get errors, which looks for the next starting....?
     //$matched = preg_match('/^[0-9]+\).*?$/m',$suite, $matches);
     $matched = preg_match_all('/^[0-9]+\).*?$/m',$suite, $matches);
-    print "DB: matched errors is:$matched\n";
-    print "DB: matches are:\n";print_r($matches);
+    //print "DB: matched errors is:$matched\n";
+    //print "DB: matches are:\n";print_r($matches);
+    // unwind the array of arrays preg_match_all returns
+    foreach($matches as $flist){
+      foreach($flist as $failure){
+        $failList[] = $failure;
+      }
+    }
+    return($failList);
   }
 
   /**
@@ -236,6 +255,9 @@ class TestReport
       return FALSE;
     }
 
+    $failures   = array();
+    $exceptions = array();
+
     $FD = fopen($file, 'r');
     while ($line = fgets($FD, 1024)) {
       if (preg_match('/^Running\sAll/', $line)){
@@ -247,24 +269,48 @@ class TestReport
       }
       elseif (preg_match('/^Starting.*?on:/', $line)) {
         $aSuite = $this->getSuite($FD,$line);
-        $summary = $this->suiteSummary($aSuite);
-        list($pass, $fail, $except) = preg_split('/:/',$summary[1]);
+        $sum = $this->suiteSummary($aSuite);
+        list($pass, $fail, $except) = preg_split('/:/',$sum[1]);
         //print "DB: pass, fail, except are:$pass,$fail,$except\n";
         if($fail != 0) {
-          print "would call find errors\n";
-          $this->getFailures($aSuite);
+          $failures = $this->getFailures($aSuite);
+          //print "DB: failure list is:\n";print_r($failures);
         }
         if($except != 0) {
-          print "would call find exceptions\n";
-          $this->getException($aSuite);
+          $exceptions = $this->getException($aSuite);
+          //print "DB: exception list is:\n";print_r($exceptions);
         }
-        $results[] = $summary;
+        // unroll the summary array into a key value array of 1 level
+        //print "DB: sum is:\n";print_r($sum) . "\n";
+        for($i=0; $i < count($sum); $i++) {
+          $summary[$sum[$i]] = array($sum[$i+1]);
+          $i++;
+        }
+        //print "DB: summary is:\n";print_r($summary) . "\n";
+        if(empty($failures)) {
+          continue;
+        }
+        else {
+          $suite = $sum[0];
+          $summary[$suite][]  = array('failures' => $failures);
+          $failures   = array();
+        }
+        if(empty($exceptions)) {
+          continue;
+        }
+        else {
+          $suite = $sum[0];
+          $summary[$suite][] = array('exceptions' => $exceptions);
+          $exceptions = array();
+        }
       }
       else {
         continue;
       }
-    }
-    return ($results);
+    } // while
+
+    // return all 3
+    return ($summary);
   } // parseResultsFile
 
   /**
@@ -480,8 +526,7 @@ class TestReport
    *
    * @return boolean (false or a string)
    */
-  private function parseSuiteName($string)
-  {
+  private function parseSuiteName($string) {
     if (empty ($string))
     {
       return (FALSE);
