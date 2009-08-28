@@ -37,18 +37,55 @@ class TestRun
   private $NotRunning = FALSE;
   private $Running    = TRUE;
 
+
+  /**
+   *  constructor
+   *
+   * @param string $srcPath optional path to the fossology sources.
+   *        If fossology is being checked out for the first time, the path
+   *        should not include fossology, that will get created as part of the
+   *        checkout. For example, /home/testdir/tryit/.
+   *        Or this path indicates where fossology is located (if not using
+   *        the default location).  In this case fossology should be included in
+   *        the path.  For example, /home/mydir/fossology.
+   *
+   * @return resource object reference
+   *
+   */
   public function __construct($srcPath=NULL)
   {
     if(empty($srcPath))
     {
       // default
-      $this->srcPath = '/home/fosstester/Src/fossology';
+      $this->srcPath = '/home/fosstester/fossology';
     }
     else
     {
       $scrPath = rtrim($scrPath, '/');
       $this->srcPath = $srcPath . "/fossology";
     }
+    return;
+  }
+
+  public function checkOutTot() {
+
+    $Tot = 'svn co https://fossology.svn.sourceforge.net/svnroot/fossology/trunk/fossology';
+
+    $home = rtrim($this->srcPath, '/fossology');
+    if(chdir($home)){
+      $last = exec($Tot, $output, $rtn);
+      //print "checkout results are, last and output:$last\n";
+      //print_r($output) . "\n";
+      if ($rtn != 0) {
+        print "ERROR! Could not check out FOSSology sources at\n$Tot\n";
+        return(FALSE);
+      }
+    }
+    else {
+      print "ERROR! could not cd to $home\n";
+      return(FALSE);
+    }
+
   }
 
   /**
@@ -103,7 +140,7 @@ class TestRun
     {
       if(array_search('Error', $results))
       {
-         // TODO: write results out to: make-install.out
+        // TODO: write results out to: make-install.out
         //print "Found Error string in the Make output\n";
         return(FALSE);
       }
@@ -120,16 +157,16 @@ class TestRun
     $mcLast = exec('make clean > make-clean.out 2>&1', $results, $rtn);
     $makeLast = exec('make > make.out 2>&1', $results, $rtn);
     if($rtn == 0 )
+    {
+      //print "results of the make are:\n"; print_r($results) . "\n";
+      if(array_search('Error', $results))
       {
-        //print "results of the make are:\n"; print_r($results) . "\n";
-        if(array_search('Error', $results))
-        {
-          //print "Found Error string in the Make output\n";
-          // TODO: write results out to: make.out
-          return(FALSE);
-        }
-        else { return(TRUE); }
+        //print "Found Error string in the Make output\n";
+        // TODO: write results out to: make.out
+        return(FALSE);
       }
+      else { return(TRUE); }
+    }
     else { return(FALSE); }
   }
 
@@ -140,13 +177,13 @@ class TestRun
     {
       if(array_search('FATAL', $results))
       {
-          return(FALSE);
+        return(FALSE);
       }
       return(FALSE);
     }
     return(TRUE);
   }
- public function setSrcPath($path)
+  public function setSrcPath($path)
   {
 
   }
@@ -171,7 +208,7 @@ class TestRun
       }
       else {
         return($this->NotRunning);
-        }
+      }
     }
   }
 
@@ -207,10 +244,10 @@ class TestRun
    */
   public function svnUpdate()
   {
-     if(!chdir($this->srcPath))
-     {
-       print "Error can't cd to $this->srcPath\n";
-     }
+    if(!chdir($this->srcPath))
+    {
+      print "Error can't cd to $this->srcPath\n";
+    }
     $svnLast = exec('svn update', $results, $rtn);
     if($rtn != 0 ) { return(FALSE); }
     else { return(TRUE); }
