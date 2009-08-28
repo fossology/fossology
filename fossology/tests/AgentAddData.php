@@ -58,11 +58,7 @@ class uploadAgentDataTest extends fossologyTestCase {
   function testuploadAgentDataTest() {
 
     global $PROXY;
-    $Svn = `svnversion`;
-    $date = date('Y-m-d');
-    $time = date('h:i:s-a');
-    print "Starting uploadAgentDataTest on: " . $date . " at " . $time . "\n";
-    print "Using Svn Version:$Svn\n";
+
     $LicenseList = array('TestData/licenses/RCSL_v3.0_a.txt',
                             'TestData/licenses/BSD_style_a.txt',
                             'TestData/licenses/BSD_style_b.txt',
