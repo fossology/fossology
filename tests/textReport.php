@@ -22,8 +22,6 @@
  *
  * @param string $resultsFile -f <file>
  *
- * @return
- *
  * @version "$Id: $"
  *
  * Created on Aug. 25, 1009
@@ -33,9 +31,34 @@ require_once('reportClass.php');
 
 $res = '/home/markd/Src/fossology/tests/FossTestResults-2009-08-25-10:31:39-pm';
 
-$tr = new TestReport($res);
+$options = getopt("hf:");
 
-$results = $tr->parseResultsFile($res);
+$Usage = "$argv[0] [-h] -f <test-results-file>\n";
+
+if(empty($options)) {
+  print $Usage;
+  exit(1);
+}
+
+if(array_key_exists('h',$options)) {
+  print $Usage;
+  exit(0);
+}
+if(array_key_exists('f',$options)) {
+  $filePath = $options['f'];
+  if(!strlen($filePath)) {
+    print $Usage;
+    exit(1);
+  }
+  if(!file_exists($filePath)) {
+    print "Error! $filePath does not exist or is not readable\n";
+    exit(1);
+  }
+}
+
+$tr = new TestReport($filePath);
+
+$results = $tr->parseResultsFile($filePath);
 //print "got back the following from parseResultsFile:\n";
 //print_r($results) . "\n";
 
@@ -132,5 +155,5 @@ printf("%'-37s\n", '');
 //print "The following Test Suites had Exceptions:\n";
 printByType('Exceptions', $suiteExceptions);
 
-exit(777);
+exit(0);
 ?>
