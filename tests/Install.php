@@ -96,7 +96,9 @@ function installST() {
   return(FALSE);
 }
 
-/* Create sym link to fo-runTests */
+/* Create sym link to fo-runTests, the code below doesn't work well.  Just remove
+ * what is found and replace....
+ */
 $OK = array();
 print "installing fo-runTests into /usr/local/bin\n";
 $wd = getcwd();
@@ -136,9 +138,20 @@ if(!is_readable('/usr/local/simpletest')) {
     exit(1);
   }
 }
+
 /*
- * Create the system users,
+ * Create the db user and system users,
  */
+if(!is_executable("./makeDbUser")) {
+  if(!chmod("./makeDbUser",0755)) {
+    print "FATAL, could not make ./makeDbUser executable\n";
+    exit(1);
+  }
+}
+$last = exec("./makeDbUser",$tossme, $rtn);
+if($rtn != 0) {
+  print "makeDbUser Failed, Investigate, run by hand\n";
+}
 
 print "Creating fosstester and noemail users\n";
 if(!is_executable("./CreateTestUser.sh")) {
