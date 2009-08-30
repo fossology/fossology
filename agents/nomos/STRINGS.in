@@ -199,7 +199,7 @@
 #
 %ENTRY%	_LT_ADOBE_AFM
 %KEY%	"distribut"
-%STR%	"may be used copied and/?o?r? distributed for any purpose and without charge with or without modification provided that all copyright notices are retained"
+%STR%	"may be used copied and/?o?r? r?e?-?distributed for any purpose and without charge with or without modification provided that all copyright notices are retained"
 #####
 # DELETED (below): ... provided this copyright notice is maintained intact
 # and that the contents of this file are not altered in any way from its
@@ -313,7 +313,7 @@
 #####
 %ENTRY%	_LT_ALADDIN_RESTRICT
 %KEY%	"distribut"
-%STR%	"distributed under licen[cs]e and may not be copied modified or distributed except as expressly authori[sz]ed"
+%STR%	"distributed under licen[cs]e and may not be copied modified or r?e?-?distributed except as expressly authori[sz]ed"
 #####
 # DELETED: This software is the ... software provided this notice is not
 # removed or altered
@@ -335,7 +335,7 @@
 #
 %ENTRY%	_LT_APACHE_1
 %KEY%	"permi[st]"
-%STR%	"permission to copy in any form is granted provided this notice is included in all copies permission to r?e?-?distribute is granted provided this file is distributed untouched in all its parts and included files"
+%STR%	"permission to copy in any form is granted provided this notice is included in all copies permission to r?e?-?distribute is granted provided this file is r?e?-?distributed untouched in all its parts and included files"
 #
 %ENTRY%	_LT_APACHE_2
 %KEY%	"permi[st]"
@@ -418,7 +418,7 @@
 #
 %ENTRY%	_LT_ARTIFEX
 %KEY%	"\<under\>"
-%STR%	"distributed under licen[cs]e and may not be copied modified or distributed except as expressly authori[zs]ed"
+%STR%	"distributed under licen[cs]e and may not be copied modified or r?e?-?distributed except as expressly authori[zs]ed"
 #
 %ENTRY%	_LT_ARTref1
 %KEY%	"licen[cs]"
@@ -680,7 +680,7 @@
 #
 %ENTRY%	_LT_BOGUSTMPL
 %KEY%	"licen[cs]"
-%STR%	"This file is distributed under the same licen[cs]e as the package PACKAGE"
+%STR%	"This file is r?e?-?distributed under the same licen[cs]e as the package PACKAGE"
 #####
 # DELETED: (require|must) =SOME= ...
 #####
@@ -866,7 +866,7 @@
 #
 %ENTRY%	_LT_CATHARON
 %KEY%	"licen[cs]"
-%STR%	"shall only be used modified and/?o?r? distributed under the terms of the catharon open source licen[cs]e"
+%STR%	"shall only be used modified and/?o?r? r?e?-?distributed under the terms of the catharon open source licen[cs]e"
 #
 %ENTRY%	_LT_CC_GPL
 %KEY%	"licen[cs]"
@@ -1040,7 +1040,7 @@
 #####
 %ENTRY%	_LT_CPL_1
 %KEY%	"so(ftware|urce)"
-%STR%	"software distributed in conjunction with the program under"
+%STR%	"software r?e?-?distributed in conjunction with the program under"
 #####
 # DELETED: ... of publicly display publicly perform distribute and
 # sublicen[cs]e the contribution of such contributor if any and such
@@ -1149,7 +1149,7 @@
 #
 %ENTRY%	_LT_DSL
 %KEY%	"licen[cs]"
-%STR%	"where applicable is conspicuously published on all copies and a copy of this licen[cs]e is distributed along with the work"
+%STR%	"where applicable is conspicuously published on all copies and a copy of this licen[cs]e is r?e?-?distributed along with the work"
 #
 %ENTRY%	_LT_DYADE
 %KEY%	"so(ftware|urce)"
@@ -1289,7 +1289,7 @@
 #####
 %ENTRY%	_LT_FRAME
 %KEY%	"distribut"
-%STR%	"freely copied and/?o?r? distributed in conjunction"
+%STR%	"freely copied and/?o?r? r?e?-?distributed in conjunction"
 #####
 # DELETED: ... directly or indirectly made by you that contains or
 # depends for its intended functionality on the frameworx code base
@@ -1403,7 +1403,7 @@
 #
 %ENTRY%	_LT_FREE_20
 %KEY%	"permi[st]"
-%STR%	"permission is granted to copy and distribute modified versions of this program under the conditions for verbatim copying provided that the entire resulting derived work is distributed under the terms of a permission notice identical to this one"
+%STR%	"permission is granted to copy and distribute modified versions of this program under the conditions for verbatim copying provided that the entire resulting derived work is r?e?-?distributed under the terms of a permission notice identical to this one"
 #
 %ENTRY%	_LT_FREE_21
 %KEY%	"permi[st]"
@@ -1445,7 +1445,7 @@
 #
 %KEY%	"distribut"
 %ENTRY%	_LT_FREE_30
-%STR%	"permits unlimited r?e?-?distribution of source and binaries except that everyone always has the unconditional liberty to distribute binaries"
+%STR%	"permits unlimited r?e?-?distribution of source and binaries except that every(body|one) always has the unconditional liberty to distribute binaries"
 #
 %ENTRY%	_LT_FREE_31
 %KEY%	"distribut"
@@ -1481,7 +1481,7 @@
 #
 %ENTRY%	_LT_FREE_39
 %KEY%	"distribut"
-%STR%	"sourc(e|e code) (for|of) =FEW= is opene?d? and (it i|i)s distributed as free software you (can|may) obtain the sourc(e|e code) and improve"
+%STR%	"sourc(e|e code) (for|of) =FEW= is opene?d? and (it i|i)s r?e?-?distributed as free software you (can|may) obtain the sourc(e|e code) and improve"
 #####
 # DELETED: a copy of this software and associated documentation files
 # the Software ... persons to whom the Software is furnished to do so
@@ -1513,7 +1513,7 @@
 #
 %ENTRY%	_LT_FREE_46
 %KEY%	"distribut"
-%STR%	"freely distributed as long as (the|this) copyright (message|notice) (is included and r|r)emains (intact|without (mod|chang))"
+%STR%	"freely r?e?-?distributed as long as (the|this) copyright (message|notice) (is included and r|r)emains (intact|without (mod|chang))"
 #
 %ENTRY%	_LT_FREE_47
 %KEY%	"distribut"
@@ -1525,7 +1525,7 @@
 #
 %ENTRY%	_LT_FREE_49
 %KEY%	"distribut"
-%STR%	"may be freely copied mirrored modified =FEW= request is that this README file remain intact and be distributed along with any modified version"
+%STR%	"may be freely copied mirrored modified =FEW= request is that this README file remain intact and be r?e?-?distributed along with any modified version"
 #
 %ENTRY%	_LT_FREE_50
 %KEY%	"distribut"
@@ -1537,7 +1537,7 @@
 #
 %ENTRY%	_LT_FREE_52
 %KEY%	"distribut"
-%STR%	"softwar(e|e and documentation) may be distributed freely"
+%STR%	"softwar(e|e and documentation) may be r?e?-?distributed freely"
 #
 %ENTRY%	_LT_FREE_53
 %KEY%	"distribut"
@@ -1558,43 +1558,47 @@
 %ENTRY%	_LT_FREE_57
 %KEY%	"distribut"
 %STR%	"(can|may) be used modified copied r?e?-?distributed and sold in both source and binary form provided that the above copyright and these terms are retained"
-%ALIAS%	_FREE_last_dist
 #
 %ENTRY%	_LT_FREE_58
+%KEY%	"distribut"
+%STR%	"(can|may) be freely r?e?-?distributed provided that all copyright notices are retained"
+%ALIAS%	_FREE_last_dist
+#
+%ENTRY%	_LT_FREE_59
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
-%STR%	"everyone is permitted to do anything on this program including copying modifying improving as long as you don? t try to pretend that you wrote it ie the above copyright notice has to appear in all copies"
+%STR%	"every(body|one) is permitted to do anything on this program including copying modifying improving as long as you don? t try to pretend that you wrote it ie the above copyright notice has to appear in all copies"
 %ALIAS%	_LT_FUJITSU
 %ALIAS%	_FREE_first_other
 #####
 # DELETED: notice and the disclaimer below are preserved without change
 #####
-%ENTRY%	_LT_FREE_59
+%ENTRY%	_LT_FREE_60
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"every(body|one) is hereby grante(d|d the) rights? to use copy and modify this (file|product|program|sourc(e|e code)|software|work|code|document|page) provided only that this copyright"
 #
-%ENTRY%	_LT_FREE_60
+%ENTRY%	_LT_FREE_61
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"are allowed to change and copy =SOME= if you keep the copyright message intact"
 #####
 # DELETED: ... it is a modified version and the person(s) who modified it
 #####
-%ENTRY%	_LT_FREE_61
+%ENTRY%	_LT_FREE_62
 %KEY%	"so(ftware|urce)"
 %STR%	"free software you are allowed to use and distribute (it|them|this software) in any way you like you are also allowed to make modified versions of it but you (can|may) distribute a modified version only if you clearly indicate that"
 #
-%ENTRY%	_LT_FREE_62
+%ENTRY%	_LT_FREE_63
 %KEY%	"so(ftware|urce)"
 %STR%	"this software (can|may) be used freely for any purpose any derived versions? of this software must be clearly marked as such"
 #
-%ENTRY%	_LT_FREE_63
+%ENTRY%	_LT_FREE_64
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"is free you (can|may) do with it whatever you (want|like|desire|wish)"
 #
-%ENTRY%	_LT_FREE_64
+%ENTRY%	_LT_FREE_65
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"in this (release|directory|product|distribution) (is|are|are all) free software"
 #
-%ENTRY%	_LT_FREE_65
+%ENTRY%	_LT_FREE_66
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"free to use as you see fit"
 %ALIAS%	_FREE_last_other
@@ -1637,7 +1641,7 @@
 #
 %ENTRY%	_LT_FREETYPEref
 %KEY%	"distribut"
-%STR%	"part of the freetype project and may only be used modified and/?o?r? distributed under the terms of the freetype project licen[cs]e"
+%STR%	"part of the freetype project and may only be used modified and/?o?r? r?e?-?distributed under the terms of the freetype project licen[cs]e"
 #####
 # DELETED: free software =SOME= ... (as|so) long as this notice is preserved
 #####
@@ -1759,7 +1763,7 @@
 #
 %ENTRY%	_LT_GNU_3
 %KEY%	"permi[st]"
-%STR%	"everyone is granted permission to copy modify and r?e?-?distribute"
+%STR%	"every(body|one) is granted permission to copy modify and r?e?-?distribute"
 #
 %ENTRY%	_LT_GNU_4
 %KEY%	"licen[cs]"
@@ -1767,7 +1771,7 @@
 #
 %ENTRY%	_LT_GNU_PROJECTS
 %KEY%	"distribut"
-%STR%	"may only be used modified and distributed under the terms of the (emacs|gphoto) project licen[cs]e"
+%STR%	"may only be used modified and r?e?-?distributed under the terms of the (emacs|gphoto) project licen[cs]e"
 #
 %ENTRY%	_LT_GOOGLE_1
 %KEY%	"(condit|vers)ion"
@@ -1785,7 +1789,7 @@
 #
 %ENTRY%	_LT_GPL_ALT
 %KEY%	"licen[cs]"
-%STR%	"alternatively =SOME= may be (used|distributed) under the terms =SOME= (gnu|gnu general) =SOME= public licen[cs]e"
+%STR%	"alternatively =SOME= may be (used|r?e?-?distributed) under the terms =SOME= (gnu|gnu general) =SOME= public licen[cs]e"
 #####
 # DELETED: ... this file as part of a program that contains a
 # configuration script generated by Autoconf you may include it under
@@ -1800,7 +1804,7 @@
 #
 %ENTRY%	_LT_GPL_EXCEPT_2
 %KEY%	"licen[cs]"
-%STR%	"as a special exception to the GNU (general p|p)ublic licen[cs]e =SOME= may be distributed"
+%STR%	"as a special exception to the GNU (general p|p)ublic licen[cs]e =SOME= may be r?e?-?distributed"
 #
 %ENTRY%	_LT_GPL_EXCEPT_3
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -1816,7 +1820,7 @@
 #
 %ENTRY%	_LT_GPL_FSF
 %KEY%	"distribut"
-%STR%	"under the terms =SOME= GNU =FEW= general public licen[cs]e which is distributed along with =SOME= by the free software foundation"
+%STR%	"under the terms =SOME= GNU =FEW= general public licen[cs]e which is r?e?-?distributed along with =SOME= by the free software foundation"
 #
 %ENTRY%	_LT_GPL_META_DEBIAN
 %KEY%	"licen[cs]"
@@ -1851,7 +1855,7 @@
 %ENTRY%	_LT_GPLref3
 %NOCHECK%
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(can|may) be freely distributed and/?o?r? used according to the terms of the ([^l]gpl|GNU (general p|p)ublic licen[cs]e|GNU public licen[cs]e)"
+%STR%	"(can|may) be freely r?e?-?distributed and/?o?r? used according to the terms of the ([^l]gpl|GNU (general p|p)ublic licen[cs]e|GNU public licen[cs]e)"
 #
 %ENTRY%	_LT_GPLref4
 %KEY%	"licen[cs]"
@@ -1987,7 +1991,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_GS_GNU2
 %KEY%	"(condit|vers)ion"
-%STR%	"versions entitled gnu ghostscript are distributed with the gnu =SOME= (gpl|general public licen[cs]e)"
+%STR%	"versions entitled gnu ghostscript are r?e?-?distributed with the gnu =SOME= (gpl|general public licen[cs]e)"
 #####
 # Almost identical to _LT_GPL_2
 #####
@@ -2402,7 +2406,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_JAVA_WSDL_SCHEMA
 %KEY%	"permi[st]"
-%STR%	"authors grant permission to copy and distribute the WSDL schema files in any medium without fee or royalty as long as this notice and licen[cs]e are distributed with them"
+%STR%	"authors grant permission to copy and distribute the WSDL schema files in any medium without fee or royalty as long as this notice and licen[cs]e are r?e?-?distributed with them"
 #####
 # DELETED: readme file from the jpeg library =SOME= ...
 #####
@@ -2454,7 +2458,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_LACHMAN_SECRET
 %KEY%	"distribut"
-%STR%	"this is unpublished proprietary trade secret source code of Lachman Associates this source code may not be copied disclosed distributed demonstrated or licen[cs]ed"
+%STR%	"this is unpublished proprietary trade secret source code of Lachman Associates this source code may not be copied disclosed r?e?-?distributed demonstrated or licen[cs]ed"
 #####
 # DELETED: ... a true and complete copy including all copyright and
 # trademark notices
@@ -2483,7 +2487,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_LATEXref4
 %KEY%	"distribut"
-%STR%	"(can|may) be distributed freely for any purpose provided that their content and their names remain intact LaTeX Project Public Licen[cs]e"
+%STR%	"(can|may) be r?e?-?distributed freely for any purpose provided that their content and their names remain intact LaTeX Project Public Licen[cs]e"
 #
 %ENTRY%	_LT_LATEXref5
 %KEY%	"\<under\>"
@@ -2494,11 +2498,11 @@ e /* (INFILE(j)) */
 #####
 %ENTRY%	_LT_LATEX
 %KEY%	"distribut"
-%STR%	"any work distributed or published that in whole or in part contains or is a derivative of this software or any part thereof is subject to"
+%STR%	"any work r?e?-?distributed or published that in whole or in part contains or is a derivative of this software or any part thereof is subject to"
 #
 %ENTRY%	_LT_LATEX_PREAMBLE
 %KEY%	"distribut"
-%STR%	"LaTeX project public licen[cs]e =FEW= is the licen[cs]e under which the base LaTeX distribution is distributed"
+%STR%	"LaTeX project public licen[cs]e =FEW= is the licen[cs]e under which the base LaTeX distribution is r?e?-?distributed"
 #####
 # DELETED: ... are distributed in particular this means that KOMA-Script 
 # has to be distributed including
@@ -2512,7 +2516,7 @@ e /* (INFILE(j)) */
 #####
 %ENTRY%	_LT_LATEXPL_2
 %KEY%	"(condit|vers)ion"
-%STR%	"conditions under which modified versions of the program may be distributed individual files of the program may bear supplementary and/or superseding"
+%STR%	"conditions under which modified versions of the program may be r?e?-?distributed individual files of the program may bear supplementary and/or superseding"
 #####
 # DELETED: ... this licen[cs]e may be particularly suitable if your work is
 # TeX-related such as a LaTeX package but you may use it with small
@@ -2524,7 +2528,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_LATEXPLref1
 %KEY%	"distribut"
-%STR%	"r?e?-?distributed and/or modified under the terms of the LaTeX project public licen[cs]e"
+%STR%	"distributed and/or modified under the terms of the LaTeX project public licen[cs]e"
 #
 %ENTRY%	_LT_LATEXPLref2
 %KEY%	"distribut"
@@ -2557,7 +2561,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_LGPL_ALT
 %KEY%	"\<under\>"
-%STR%	"alternatively =SOME= may be (used|distributed) under the terms =SOME= gnu =SOME= (lesser|library) general =SOME= public licen[cs]e"
+%STR%	"alternatively =SOME= may be (used|r?e?-?distributed) under the terms =SOME= gnu =SOME= (lesser|library) general =SOME= public licen[cs]e"
 #####
 # DELETED: free =SOME= ...
 #####
@@ -2602,6 +2606,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_LGPLref9
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e =SOME= gnu (lgpl|(library|lesser) ((general p|p)ublic|general purpose) licen[cs]e)"
+#
+%ENTRY%	_LT_LGPLref10
+%KEY%	"\<under\>"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (GNU (lesser library|library lesser) (gpl|(general p|p)ublic licen[cs]e))"
 #
 %ENTRY%	_LT_LGPLrefFSF
 %KEY%	"\<under\>"
@@ -2660,7 +2668,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_MELLANOX
 %KEY%	"distribut"
-%STR%	"may be reproduced modified distributed republished or otherwise exploited in any form or by any means for any purpose without the prior written permission of Mellanox"
+%STR%	"may be reproduced modified r?e?-?distributed republished or otherwise exploited in any form or by any means for any purpose without the prior written permission of Mellanox"
 #####
 # DELETED: ... furnished with this package solely for your internal 
 # business purposes in the country in which the software was furnished
@@ -2746,7 +2754,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_MIT_10
 %KEY%	"distribut"
-%STR%	"is distributed freely and may be used freely under the following conditions"
+%STR%	"is r?e?-?distributed freely and may be used freely under the following conditions"
 #
 %ENTRY%	_LT_MITref1
 %KEY%	"\<under\>"
@@ -2760,7 +2768,7 @@ e /* (INFILE(j)) */
 #####
 %ENTRY%	_LT_MITEM
 %KEY%	"distribut"
-%STR%	"may be freely copied and/?o?r? distributed provided"
+%STR%	"may be freely copied and/?o?r? r?e?-?distributed provided"
 #####
 # DELETED: ... =SOME= copyright designation and this licen[cs]e in the
 # documentation and/or other materials provided with the distribution
@@ -2829,7 +2837,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_MSCORP_1
 %KEY%	"distribut"
-%STR%	"may be copied and/?o?r? distributed royalty-free subject to the following conditions"
+%STR%	"may be copied and/?o?r? r?e?-?distributed royalty-free subject to the following conditions"
 #
 %ENTRY%	_LT_MSCORP_2
 %KEY%	"distribut"
@@ -3018,7 +3026,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_NOT_OPENSOURCE
 %KEY%	"so(ftware|urce)"
-%STR%	"not ((released|distributed|covered) (under|with|by) an?) open[ -]?source"
+%STR%	"not ((released|r?e?-?distributed|covered) (under|with|by) an?) open[ -]?source"
 #
 %ENTRY%	_LT_NOVELL
 %KEY%	"in(demnif|tellect)"
@@ -3394,7 +3402,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_PUBDOM_USE
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
-%STR%	"the work may be freely reproduced distributed transmitted used modified built upon or otherwise exploited by anyone"
+%STR%	"the work may be freely reproduced r?e?-?distributed transmitted used modified built upon or otherwise exploited by anyone"
 #
 %ENTRY%	_LT_PUBLIC
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
@@ -3402,7 +3410,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_PUBLIC_USE
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
-%STR%	"the public use works may be reproduced and distributed in whole or in part in any medium"
+%STR%	"the public use works may be reproduced and r?e?-?distributed in whole or in part in any medium"
 #####
 # DELETED: subject to the terms and conditions of this =SOME= licen[cs]e
 # agreement =SOME= hereby grants licen[cs]ee a non-?exclusive royalty-free
@@ -3653,9 +3661,13 @@ e /* (INFILE(j)) */
 %KEY%	"\<under\>"
 %STR%	"is free software you (can|may) r?e?-?distribute and/or modify (this (file|program|sourc(e|e code))|it) under the (same t|t)erms as rub(y itself|y s licen[cs]e)"
 #
-%ENTRY%	_LT_SAME_LICENSE
+%ENTRY%	_LT_SAME_LICENSE_1
 %KEY%	"\<under\>"
 %STR%	"(released|licen[cs]ed|distributed) under (identical|the ((very s|s)ame|exact)) (licen[cs]e|term(s|s and conditions)) as"
+#
+%ENTRY%	_LT_SAME_LICENSE_2
+%KEY%	"(condit|vers)ion"
+%STR%	"subject t(o|o the) terms and conditions (contained|appearing|described|documented|listed|enumerated) in"
 #
 %ENTRY%	_LT_SCITECH
 %KEY%	"licen[cs]"
@@ -3833,7 +3845,7 @@ e /* (INFILE(j)) */
 #####
 %ENTRY%	_LT_SUN_SCSL_TSA
 %KEY%	"commerc"
-%STR%	"implementation authori[sz]ed for distribution for commercial use may be distributed only"
+%STR%	"implementation authori[sz]ed for distribution for commercial use may be r?e?-?distributed only"
 #
 %ENTRY%	_LT_SUN_SCSLref
 %KEY%	"licen[cs]"
@@ -4474,7 +4486,7 @@ k
 #####
 %ENTRY%	_LT_SEE_COPYING_2
 %KEY%	"(condit|vers)ion"
-%STR%	"under (certain|the) conditions (for details (read|read the|see|see the)|listed in the) (file =FEW= \<copying\>|\<copying\> file)"
+%STR%	"under (certain|the) conditions (refer t(o|o the)|for details (read|read the|refer t(o|o the)|see|see the)|listed in the) (file =FEW= \<copying\>|\<copying\> file)"
 #
 %ENTRY%	_LT_SEE_COPYING_3
 %KEY%	"licen[cs]"
@@ -4564,7 +4576,7 @@ k
 #
 %ENTRY%	_LT_SEE_LICENSE_2
 %KEY%	"(condit|vers)ion"
-%STR%	"under (certain|the) conditions (for details (read|read the|see|see the)|listed in the) (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
+%STR%	"under (certain|the) conditions (refer t(o|o the)|for details (read|read the|refer t(o|o the)|see|see the)|listed in the) (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
 #
 %ENTRY%	_LT_SEE_LICENSE_3
 %KEY%	"licen[cs]"
@@ -4617,7 +4629,7 @@ k
 #
 %ENTRY%	_LT_SEE_README_2
 %KEY%	"(condit|vers)ion"
-%STR%	"under (certain|the) conditions (for details (read|read the|see|see the)|listed in the) (file =FEW= \<readme\>|\<readme\> file)"
+%STR%	"under (certain|the) conditions (refer t(o|o the)|for details (read|read the|refer t(o|o the)|see|see the)|listed in the) (file =FEW= \<readme\>|\<readme\> file)"
 #
 %ENTRY%	_LT_SEE_README_3
 %KEY%	"licen[cs]"
@@ -5137,6 +5149,10 @@ k
 %ENTRY%	_CR_NOTREDAME
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= university of notre dame"
+#
+%ENTRY%	_CR_NOKIA
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= nokia"
 #
 %ENTRY%	_CR_NONE
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -6593,7 +6609,7 @@ k
 #
 %ENTRY%	_PHR_GNU_COPYING
 %KEY%	"(docume|warra)nt"
-%STR%	"everyone is permitted to copy and distribute verbatim copies of this licen[cs]e document but changing it is not allowed"
+%STR%	"every(body|one) is permitted to copy and distribute verbatim copies of this licen[cs]e document but changing it is not allowed"
 #
 %ENTRY%	_PHR_GNU_FREEDOM
 %KEY%	"licen[cs]"
@@ -6655,7 +6671,7 @@ k
 #
 %ENTRY%	_PHR_GPL_COMPAT_2
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"may be distributed (as|in) (a G|G)PL package"
+%STR%	"may be r?e?-?distributed (as|in) (a G|G)PL package"
 #
 %ENTRY%	_PHR_GPL_DESCRIPTIONS
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -6889,7 +6905,7 @@ k
 #
 %ENTRY%	_PHR_NOT_OPEN
 %KEY%	"licen[cs]"
-%STR%	"(licen[cs]e is not|not distributed) =SOME= open source licen[cs]e"
+%STR%	"(licen[cs]e is not|not r?e?-?distributed) =SOME= open source licen[cs]e"
 #
 %ENTRY%	_PHR_LIC_CHANGE
 %KEY%	"licen[cs]"
@@ -7425,9 +7441,17 @@ k
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/by-sa/3\.?0"
 #
+%ENTRY%	_URL_CCGPL
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/GPL"
+#
 %ENTRY%	_URL_CCGPL_V2
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/GPL/2"
+#
+%ENTRY%	_URL_CCLGPL
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/LGPL"
 #
 %ENTRY%	_URL_CCLGPL_V21
 %KEY%	"licen[cs]"
@@ -7937,7 +7961,7 @@ k
 #####
 %ENTRY%	_LEGAL_OWNERS
 %KEY%	=NULL=
-%STR%	"(\<(you|licen[cs]ees?|licen[cs]ors?|owners?|holders?|company|proprietors?|regents|universit(y|ies)|colleges?|authors?|contributors?|recipients?|persons?|anyone|everyone|distributors?)\>|re[mt]ain[eis]?|appear[eis]?}|as[ -]is|expressly|in (posession|any form))"
+%STR%	"(\<(you|licen[cs]ees?|licen[cs]ors?|owners?|holders?|company|proprietors?|regents|universit(y|ies)|colleges?|authors?|contributors?|recipients?|persons?|anyone|every(body|one)|distributors?)\>|re[mt]ain[eis]?|appear[eis]?}|as[ -]is|expressly|in (posession|any form))"
 #
 %ENTRY%	_LEGAL_OBJS
 %KEY%	=NULL=
@@ -7974,7 +7998,7 @@ k
 #
 %ENTRY%	_LEGAL_FILTER_5
 %KEY%	=NULL=
-%STR%	"(nothing important|th[eo]?s?e scenario|errors?[ -]detect|request[oe]?[rd]? field|regular expression|nibbl|(block|character|pipe|socket)[ -](device|special)|rubber stamp|phrases? insert|good thing|(final|side|following)[ -]?step|well[ -]suited|get to know|(want|faile?d? to|suggeste?d?) change|allow (application|disabl)|redundant warn|really (mean|intend)|provide similar|remember bring|be grate|set own|program depend|ad(vantages? of)|(concurrentl?y?|fax|specifically) request|excessive consum|(convenient|different) way|(feel|further) free|catch me|service do|clear on|pure horror|address (book|gap)|local copy|utility call|personal note|kill[ -]?power|another feature|as (they|you) go|highly recommend|normall?y? buil[dt]|page (up|do?w?n)|sent message|should (get|go|now|perform|work)|software engineer|makes? sense|th(is|e) flag|money saved|(best|first|great|last|recent|significant|worst) time|(local|maili?n?g?) (list|c(all|opy))|pointe?d? out)"
+%STR%	"(nothing important|th[eo]?s?e scenario|errors?[ -]detect|request[oe]?[rd]? field|regular expression|nibbl|(block|character|pipe|socket)[ -](device|special)|rubber stamp|phrases? insert|good thing|(final|side|following)[ -]?step|well[ -]suited|get to know|(want|faile?d? to|suggeste?d?) change|allow (application|disabl)|redundant warn|really (mean|intend)|provide similar|remember bring|be grate|set own|program depend|ad(vantages? of)|(concurrentl?y?|fax|specifically) request|excessive consum|(convenient|different) way|(feel|further) free|catch me|service do|clear on|pure horror|address (book|gap)|local copy|utility call|personal note|kill[ -]?power|another feature|as (they|you) go|highly recommend|normall?y? buil[dt]|page (up|do?w?n)|sent message|should (get|go|now|perform|work)|software engineer|makes? sense|th(is|e) flag|money saved|(best|first|great|last|recent|significant|substantial|worst) time|(local|maili?n?g?) (list|c(all|opy))|pointe?d? out)"
 #
 %ENTRY%	_LEGAL_FILTER_6
 %KEY%	=NULL=
@@ -7983,6 +8007,10 @@ k
 %ENTRY%	_LEGAL_FILTER_7
 %KEY%	=NULL=
 %STR%	"(language agent|password back|retain link|comment retain|(certain|var(ying|ied)) degree|equivalent symbol|variable cont|explicitl?y? copy|likely chance|often modif|owner die|instruction ref|names? suppl|way through|bundle-|signed[ -]off|dead code|change notifi|have run|relati(ve|onship)|down[ -]menu|created? earl|bottom[ -]line)"
+#
+%ENTRY%	_LEGAL_FILTER_ONE
+%KEY%	=NULL=
+%STR%	"follow(ing| the) sign[ -]off"
 # Foreign words
 %ENTRY%	_LEGAL_FILTER_8
 %KEY%	=NULL=
