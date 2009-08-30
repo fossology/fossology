@@ -15,6 +15,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ***************************************************************/
+/* Equivalent to version 1.77 of Core Nomos code. */
 #include <ctype.h>
 
 #include "nomos.h"
@@ -83,42 +84,41 @@ extern void preloadResults(char *filetext, char *ltsr);
 /*
     Local (static) Functions
 */
-static int findPhrase(int, char *,int, int, int, int);
-static int famOPENLDAP(char *, int ,int, int);
-static int checkUnclassified(char *, int, char *, int, int, int);
-static int checkPublicDomain(char *, int, int, int, int, int);
+int findPhrase(int, char *,int, int, int, int);
+int famOPENLDAP(char *, int ,int, int);
+int checkUnclassified(char *, int, int, char *, int, int, int);
+int checkPublicDomain(char *, int, int, int, int, int);
 static int dbgIdxGrep(int, char *, int);
 #ifdef  LTSR_DEBUG
 void showLTCache(char *);
 #endif  /* LTSR_DEBUG */
-static void checkCornerCases(char *, int, int, int, int, int, int, int);
-static void checkFileReferences(char *, int, int, int, int, int);
-static void  addRef(char *, int);
+void checkCornerCases(char *, int, int, int, int, int, int, int);
+void checkFileReferences(char *, int, int, int, int, int);
+void  addRef(char *, int);
 static void dumpMatch(char *, char *);
-static void locateRegex(char *, item_t *, int, int, int, int);
-static void saveRegexLocation(int, int, int, int);
-static void saveUnclBufLocation(int);
+void locateRegex(char *, item_t *, int, int, int, int);
+void saveRegexLocation(int, int, int, int);
+void saveUnclBufLocation(int);
 #ifdef SAVE_UNCLASSIFIED_LICENSES
-/* CDB Is this necessary? */
-static void saveLicenseParagraph();
+void saveLicenseParagraph(char *, int , int , int);
 #endif /* SAVE_UNCLASSIFIED_LICENSES */
-static char *cplVersion(char *, int, int, int);
+char *cplVersion(char *, int, int, int);
 static char *gplVersion(char *, int, int, int);
-static char *lgplVersion(char *, int, int, int);
-static char *agplVersion(char *, int, int, int);
-static char *gfdlVersion(char *, int, int, int);
-static char *lpplVersion(char *, int, int, int);
-static char *mplNplVersion(char *, int, int, int);
-static char *pythonVersion(char *, int, int, int);
+char *lgplVersion(char *, int, int, int);
+char *agplVersion(char *, int, int, int);
+char *gfdlVersion(char *, int, int, int);
+char *lpplVersion(char *, int, int, int);
+char *mplNplVersion(char *, int, int, int);
+char *pythonVersion(char *, int, int, int);
 static char *realVersion(char *, int, int, int, int);
 static char *sisslVersion(char *, int, int, int);
-static char *aslVersion(char *, int, int, int);
-static char *cddlVersion(char *, int, int, int);
-static char *ccVersion(char *, int, int, int);
-static char *ccsaVersion(char *, int, int, int);
-static char *oslVersion(char *, int, int, int);
-static char *aflVersion(char *, int, int, int);
-static int match3(int base, char *buf, int save, int isML, int isPS);
+char *aslVersion(char *, int, int, int);
+char *cddlVersion(char *, int, int, int);
+char *ccVersion(char *, int, int, int);
+char *ccsaVersion(char *, int, int, int);
+char *oslVersion(char *, int, int, int);
+char *aflVersion(char *, int, int, int);
+static int match3(int, char *, int, int, int, int);
 
 
 /*
@@ -137,9 +137,6 @@ static int refOffset;
 static int maxInterest;
 static int pd;     /* Flag for whether we've checked for a
 		      public domain "license" */
-#ifdef  ALT_UNCLASSIFIED
-static int ulScore;
-#endif  /* ALT_UNCLASSIFIED */
 #ifdef  NO_NW
 static int checknw;
 #endif  /* NO_NW */
@@ -1088,6 +1085,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		INTERESTING(lDebug ? "LGPL(ref9)" : cp);
 		lmem[_mLGPL] = 1;
 	    }
+	    else if (INFILE(_LT_LGPLref10) &&
+		     !INFILE(_PHR_NOT_UNDER_LGPL)) {
+		cp = LGPLVERS();
+		INTERESTING(lDebug ? "LGPL(ref10)" : cp);
+		lmem[_mLGPL] = 1;
+	    }
 	    else if (INFILE(_FILE_LGPL1) || INFILE(_FILE_LGPL2)) {
 		cp = LGPLVERS();
 		INTERESTING(lDebug ? "LGPL(deb)" : cp);
@@ -1349,7 +1352,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		    INTERESTING("GPL(rms)");
 		    lmem[_mGPL] = 1;
 		}
-		else if ( INFILE(_PHR_GPLISH_SAMPLE)) {
+		else if (INFILE(_PHR_GPLISH_SAMPLE)) {
 		    INTERESTING("GPL-or-LGPL");
 		    lmem[_mLGPL] = lmem[_mGPL] = 1;
 		}
@@ -4119,6 +4122,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	cp = CCSAVERS();
 	INTERESTING(lDebug ? "CCA-SA(url)" : cp);
     }
+    else if (URL_INFILE(_URL_CCLGPL)) {
+	cp = LGPLVERS();
+	INTERESTING(lDebug ? "CC-LGPL(url)" : cp);
+    }
+    else if (URL_INFILE(_URL_CCGPL)) {
+	cp = GPLVERS();
+	INTERESTING(lDebug ? "CC-GPL(url)" : cp);
+    }
     /*
      * SpikeSource
      */
@@ -4830,23 +4841,36 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     /*
      * Some licenses say "licensed under the same terms as FOO".
      */
-    /* gl.flags |= FL_SAVEBASE; */
-    if (*licStr == NULL_CHAR && INFILE(_LT_SAME_LICENSE)) {
-	INTERESTING("Same-license-as");
-#if defined(SAVE_UNCLASSIFIED_LICENSES) && defined(NOTDEF)
-	if (cur.licPara == NULL_STR) {
-	    saveLicenseParagraph(gl.matchBase, isML, isPS);
+    gl.flags |= FL_SAVEBASE; /* save match buffer (if any) */
+    if (*licStr == NULL_CHAR) {
+	i = 0;
+	if (INFILE(_LT_SAME_LICENSE_1)) {
+	    INTERESTING(lDebug ? "Same-lic-1" : "Same-license-as");
+	    i = 1;
 	}
-	if (lDiags) {
-	    printf("[PERHAPS]\n%s\n[/PERHAPS]\n",
-		   cur.licPara);
+	else if (INFILE(_LT_SAME_LICENSE_2)) {
+	    INTERESTING(lDebug ? "Same-lic-2" : "Same-license-as");
+	    i = 2;
 	}
-#endif	/* SAVE_UNCLASSIFIED_LICENSES && NOTDEF */
+#ifdef SAVE_UNCLASSIFIED_LICENSES	
+	if (i) {
+	    if (cur.licPara == NULL_STR) {
+		saveLicenseParagraph(cur.matchBase, isML, isPS,
+				     NO);
+	    }
+	    if (lDiags) {
+		printf("[PERHAPS]\n%s\n[/PERHAPS]\n",
+		       cur.licPara);
+	    }
+	}
+#endif	/* SAVE_UNCLASSIFIED_LICENSES */
     }
-    /* gl.flags |= ~FL_SAVEBASE; */
+    gl.flags |= ~FL_SAVEBASE; /* turn off, regardless */
     /*
-     * ... and, there are several generic claims that "this is free software"
-     */
+     * ... and, there are several generic claims that "this is free software".
+     * For lack of a better, more generally-accepted term, we called these
+     * claims "BSD-lite", after the notion of the BSD "gift" licenses.
+     */    
     if (*licStr == NULL_CHAR) {
 	for (i = 0; i < NFREECLAIM; i++) {
 	    if (CANSKIP(i, _KW_permission, _FREE_first_perm,
@@ -4878,35 +4902,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * will (currently) get flagged as an UnclassifiedLicense (so the check
      * for no-warranty was moved ABOVE this check in case we can use that info)
      */
-    if (*licStr == NULL_CHAR && !lmem[_fDOC]) {
+    if ((*licStr == NULL_CHAR) && !lmem[_fDOC]) {
 	pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
 	if (!pd && !HASREGEX(_UTIL_MSGCAT, ftype) &&
-	    checkUnclassified(filetext, size, ftype, isML, isPS, nw)) {
+	    checkUnclassified(filetext, size, scp->score, ftype, isML,
+			      isPS, nw)) {
 #ifdef  SAVE_UNCLASSIFIED_LICENSES
 	    if (lDiags) {
 		printf("[PERHAPS]\n%s\n[/PERHAPS]\n",
 		       cur.licPara);
-		for (i = j = 0; i < NKEYWORDS; i++) {
-		    if (idxGrep(i+_KW_first, cur.licPara,
-				REG_EXTENDED|REG_ICASE)) {
-			j++;
-		    }
-		}
-		printf("SCORES: para %d, score %d == %5.2f%% ",
-		       j, scp->score,
-		       100.0 * (float) j / (float) scp->score);
-		/*
-		 * We guess that a unclassified-license paragraph candidate 
-		 * with a score * of at least 40% of the file's total score 
-		 * OR a score of at least 3 will vastly reduce the # of 
-		 * false-positives for UnclassifiedLicense guesses.
-		 */
-		if (j >= 3 || j*5 >= scp->score*2) {
-		    printf("(LIKELY unclassified?!)\n");
-		}
-		else {
-		    printf("(NOT likely unclassified)\n");
-		}
 	    }
 #endif  /* SAVE_UNCLASSIFIED_LICENSES */
 	    strcpy(name, LS_UNCL);
@@ -4923,6 +4927,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 #endif  /* UNKNOWN_CHECK_DEBUG */
     }
     listClear(&whereList, NO);      /* clear "unused" matches */
+#if	0
+	if (*licStr == NULL_CHAR && !HASKW(kwbm, _KW_public_domain))
+#endif
     /*
      * And, If no other licenses are present but there's a reference to
      * something being non-commercial, better note it now.
@@ -5150,8 +5157,7 @@ char *sisslVersion(char *filetext, int size, int isML, int isPS)
     return lstr;
 }
 
-
-static char *aslVersion(char *filetext, int size, int isML, int isPS)
+char *aslVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
 
@@ -5199,7 +5205,7 @@ static char *aslVersion(char *filetext, int size, int isML, int isPS)
     return lstr;
 }
 
-static char *mplNplVersion(char *filetext, int size, int isML, int isPS)
+char *mplNplVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
 
@@ -5271,7 +5277,7 @@ static char *mplNplVersion(char *filetext, int size, int isML, int isPS)
 }
 
 
-static char *realVersion(char *filetext, int size, int isML, int isPS, int ref)
+char *realVersion(char *filetext, int size, int isML, int isPS, int ref)
 {
     char *lstr = NULL_STR;
 
@@ -5314,7 +5320,7 @@ static char *realVersion(char *filetext, int size, int isML, int isPS, int ref)
 }
 
 
-static char *pythonVersion(char *filetext, int size, int isML, int isPS)
+char *pythonVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
       
@@ -5361,7 +5367,7 @@ static char *pythonVersion(char *filetext, int size, int isML, int isPS)
     return lstr;
 }
 
-static char *aflVersion(char *filetext, int size, int isML, int isPS)
+char *aflVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
 
@@ -5394,7 +5400,7 @@ static char *aflVersion(char *filetext, int size, int isML, int isPS)
 }
 
 
-static char *oslVersion(char *filetext, int size, int isML, int isPS)
+char *oslVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
     /* */
@@ -5424,7 +5430,7 @@ static char *oslVersion(char *filetext, int size, int isML, int isPS)
 }
 
 
-static char *cddlVersion(char *filetext, int size, int isML, int isPS)
+char *cddlVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
     /* */
@@ -5448,7 +5454,7 @@ static char *cddlVersion(char *filetext, int size, int isML, int isPS)
 }
 
 
-static char *lpplVersion(char *filetext, int size, int isML, int isPS)
+char *lpplVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
     /* */
@@ -5547,7 +5553,7 @@ static char *lpplVersion(char *filetext, int size, int isML, int isPS)
 }
 
 
-static char *agplVersion(char *filetext, int size, int isML, int isPS)
+char *agplVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
     /* */
@@ -5600,7 +5606,7 @@ static char *agplVersion(char *filetext, int size, int isML, int isPS)
 }
 
 
-static char *gfdlVersion(char *filetext, int size, int isML, int isPS)
+char *gfdlVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
     /* */
@@ -5640,7 +5646,7 @@ static char *gfdlVersion(char *filetext, int size, int isML, int isPS)
 }
 
 
-static char *lgplVersion(char *filetext, int size, int isML, int isPS)
+char *lgplVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
     /* */
@@ -5663,7 +5669,7 @@ static char *lgplVersion(char *filetext, int size, int isML, int isPS)
 	     INFILE(_FILE_LGPLv21) || INFILE(_URL_LGPL_V21)) {
 	lstr = "LGPL_v2.1";
     }
-    else if ( INFILE(_PHR_LGPL2_OR_LATER) ||
+    else if (INFILE(_PHR_LGPL2_OR_LATER) ||
 	      RM_INFILE(_PHR_FSF_V2_OR_LATER)) {
 	lstr = "LGPL_v2+";
     }
@@ -5702,7 +5708,7 @@ static char *lgplVersion(char *filetext, int size, int isML, int isPS)
 }
 
 
-static char *gplVersion(char *filetext, int size, int isML, int isPS)
+char *gplVersion(char *filetext, int size, int isML, int isPS)
 {
     char *cp, *lstr = NULL_STR;
     /* */
@@ -5803,7 +5809,7 @@ static char *gplVersion(char *filetext, int size, int isML, int isPS)
 }
 
 
-static char *cplVersion(char *filetext, int size, int isML, int isPS)
+char *cplVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
     /* */
@@ -5827,7 +5833,7 @@ static char *cplVersion(char *filetext, int size, int isML, int isPS)
 }
 
 
-static char *ccsaVersion(char *filetext, int size, int isML, int isPS)
+char *ccsaVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
     /* */
@@ -5866,7 +5872,7 @@ static char *ccsaVersion(char *filetext, int size, int isML, int isPS)
 }
 
 
-static char *ccVersion(char *filetext, int size, int isML, int isPS)
+char *ccVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
     /* */
@@ -5898,7 +5904,7 @@ static char *ccVersion(char *filetext, int size, int isML, int isPS)
  * the search key provided; cache the search results of, as we are very
  * likely to be looking up the same word/phrase again.
  */
-static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
+int findPhrase(int index, char *filetext, int size, int isML, int isPS,
    int qType)
 {
     char *ptr = NULL_STR;
@@ -6365,7 +6371,7 @@ static int findPhrase(int index, char *filetext, int size, int isML, int isPS,
     return(ret);
 }
 
-static void locateRegex(char *text, item_t *op, int index, int size, int sso, int seo)
+void locateRegex(char *text, item_t *op, int index, int size, int sso, int seo)
 {
     int i;
     int j;
@@ -6641,7 +6647,7 @@ static void locateRegex(char *text, item_t *op, int index, int size, int sso, in
 }
 
 
-static void saveRegexLocation(int index, int offset, int length, int saveCache)
+void saveRegexLocation(int index, int offset, int length, int saveCache)
 {
     item_t *ip;
     item_t *sp;
@@ -6666,7 +6672,7 @@ static void saveRegexLocation(int index, int offset, int length, int saveCache)
 }
 
 
-static void saveUnclBufLocation(int bufNum)
+void saveUnclBufLocation(int bufNum)
 {
     item_t *p;
     item_t *bp;
@@ -7066,7 +7072,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
  * file being evaluated, and enqueues a list if components to help make
  * a package-level summary.
  */
-static void addRef(char *str, int interest)
+void addRef(char *str, int interest)
 {
     item_t *p;
     char *bp;
@@ -7144,7 +7150,7 @@ static void addRef(char *str, int interest)
  * footprints are used by OpenLDAP, we had to either duplicate code in
  * several places, or funnel it all into one function.
  */
-static int famOPENLDAP(char *filetext, int size, int isML, int isPS)
+int famOPENLDAP(char *filetext, int size, int isML, int isPS)
 {
     int ret = 0;
 
@@ -7208,7 +7214,7 @@ static int famOPENLDAP(char *filetext, int size, int isML, int isPS)
  * calling the corner-case license-check function.
  */
 
-static int checkUnclassified(char *filetext, int size, char *ftype,
+int checkUnclassified(char *filetext, int size, int score, char *ftype,
    int isML, int isPS, int nw)
 {
     char *buf;
@@ -7220,8 +7226,8 @@ static int checkUnclassified(char *filetext, int size, char *ftype,
     int i = 0;
 
 #ifdef  PROC_TRACE
-	traceFunc("== checkUnclassified(%p, %d, %s, %d, %d, %d)\n", filetext,
-	       size, ftype, isML, isPS, nw);
+	traceFunc("== checkUnclassified(%p, %d, %d %s, %d, %d, %d)\n", filetext,
+	       size, score ftype, isML, isPS, nw);
 #endif  /* PROC_TRACE */
 
     /*
@@ -7267,7 +7273,8 @@ static int checkUnclassified(char *filetext, int size, char *ftype,
      * Without examining each paragraph, make sure the file contains the
      * components we're looking for... if not, don't check any further.
      */
-    if (/*size > 102400 &&*/ !match3(_LEGAL_first, buf, NO, isML, isPS)) {
+    if (/*size > 102400 &&*/ 
+	!match3(_LEGAL_first, buf, score, NO, isML, isPS)) {
 #ifdef  UNKNOWN_CHECK_DEBUG
 	printf("... large file, first check fails\n");
 #endif  /* UNKNOWN_CHECK_DEBUG */
@@ -7292,12 +7299,13 @@ static int checkUnclassified(char *filetext, int size, char *ftype,
 	/*
 	 * Now that we have our 'paragraph span', check the contents of the
 	 * paragraph for the other 3 groups of words.  A match in EACH group
-	 * means we've likely found an as-of-yet unclassified license.
+	 * (plus other criteria checked, of course) means we've likely found
+	 * as-of-yet unclassified license.
 	 *****
 	 * A generic "no warranty" paragraph also looks like a license, so in
 	 * that case don't return a false positive.
 	 */
-	if (match3(_LEGAL_first, curptr, YES, isML, isPS)) {
+	if (match3(_LEGAL_first, curptr, score, YES, isML, isPS)) {
 	    saveUnclBufLocation(i);
 	    return(1);
 	}
@@ -7320,7 +7328,7 @@ static int checkUnclassified(char *filetext, int size, char *ftype,
     printf("DEBUG: %s paragraph (#%d):\n[START-PARA]\n%s\n[END-PARA]\n",
            pNum == 0 ? "ONLY" : "LAST", ++pNum, curptr);
 #endif  /* UNKNOWN_CHECK_DEBUG */
-    if (match3(_LEGAL_first, curptr, YES, isML, isPS)) {
+    if (match3(_LEGAL_first, curptr, score, YES, isML, isPS)) {
 	saveUnclBufLocation(++i);
 	return(1);
     }
@@ -7331,7 +7339,7 @@ static int checkUnclassified(char *filetext, int size, char *ftype,
 /*
  * Generic license-phrases referring to other files or running commands
  */
-static void checkFileReferences(char *filetext, int size, int score, int kwbm,
+void checkFileReferences(char *filetext, int size, int score, int kwbm,
    int isML, int isPS)
 {
 
@@ -7464,7 +7472,7 @@ static void checkFileReferences(char *filetext, int size, int score, int kwbm,
 }
 
 
-static int checkPublicDomain(char *filetext, int size, int score, int kwbm,
+int checkPublicDomain(char *filetext, int size, int score, int kwbm,
    int isML, int isPS)
 {
     int ret;
@@ -7535,7 +7543,7 @@ static int checkPublicDomain(char *filetext, int size, int score, int kwbm,
  * the word "trademark", "patent", etc. (and possibly other trivial (or
  * borderline-insignificant) legal stuff in this file.
  */
-static void checkCornerCases(char *filetext, int size, int score,
+void checkCornerCases(char *filetext, int size, int score,
    int kwbm, int isML, int isPS, int nw, int force)
 {
     char ccbuf[myBUFSIZ];
@@ -7747,6 +7755,9 @@ static void checkCornerCases(char *filetext, int size, int score,
 	}
 	if (INFILE(_CR_NEC)) {
 	    addRef("(C)NEC", pri);
+	}
+	if (INFILE(_CR_NOKIA)) {
+	    addRef("(C)Nokia", pri);
 	}
 	if (INFILE(_CR_APPLE)) {
 	    addRef("(C)Apple", pri);
@@ -8091,26 +8102,29 @@ static void checkCornerCases(char *filetext, int size, int score,
     return;
 }
 
-
-static int match3(int base, char *buf, int save, int isML, int isPS)
+int match3(int base, char *buf, int score, int save, int isML, int isPS)
 {
     int i;
-    int eightbit;
+    int j;
     char *cp;
-
-#ifdef  PROC_TRACE
-	traceFunc("== match3(%d, %p, %d, %d, %d)\n", base, buf, save, isML, isPS);
-#endif  /* PROC_TRACE */
-
+    /* */
+#ifdef	PROC_TRACE
+#ifdef	PROC_TRACE_SWITCH
+    if (gl.ptswitch)
+#endif	/* PROC_TRACE_SWITCH */
+	printf("== match3(%d, %p, %d, %d, %d, %d)\n", base, buf, score, save,
+	       isML, isPS);
+#endif	/* PROC_TRACE */
+    /* */
     for (i = 1; i <= 3; i++) {
 	if (dbgIdxGrep(base+i, buf, (save && lDiags)) == 0) {
 	    return(0);
 	}
     }
-#ifdef  UNKNOWN_CHECK_DEBUG
+#ifdef	UNKNOWN_CHECK_DEBUG
     printf("match3: Success (%s)!\n",
 	   (save ? "buffer-for-real" : "file-initial-check"));
-#endif  /* UNKNOWN_CHECK_DEBUG */
+#endif	/* UNKNOWN_CHECK_DEBUG */
     /*
      * Some "possible licenses" are technical descriptions that share some words
      * that typically appear in licenses (distribution, terms, permission(s)).
@@ -8120,32 +8134,18 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
      * to NOT be present in licenses...
      */
     if (save) {
-#ifdef	ALT_UNCLASSIFIED
-	ulScore = scoreUnclassified(buf);
-	if (lDiags) {
-	    printf("U-Score: %d\n", ulScore);
-	}
-#endif	/* ALT_UNCLASSIFIED */
-	for (i = 0; i < NFILTER; i++) {
-	    if (dbgIdxGrep(_FILTER_first+i, buf, lDiags)) {
-		if (lDiags) {
-		    printf("!! NO license, filter %d\n", i+1);
-		}
-		return(0);
-	    }
-	}
 #ifdef	SAVE_UNCLASSIFIED_LICENSES
-	for (eightbit = i = 0, cp = buf; *cp; i++, cp++) {
+	for (j = i = 0, cp = buf; *cp; i++, cp++) {
 	    if (*cp & 0200) {
-		eightbit++;
+		j++;
 	    }
 	}
 #ifdef	UNKNOWN_CHECK_DEBUG
-	printf("DEEBUG: %d bytes, %d 8-bit\n", i, eightbit);
+	printf("DEEBUG: %d bytes, %d 8-bit\n", i, j);
 #endif	/* UNKNOWN_CHECK_DEBUG */
-	if (eightbit >= (i/2)) {
+	if (j >= (i/2)) {
 	    if (lDiags) {
-		printf("... >= 50% 8-bit characters\n");
+		printf("... >= 50 percent 8-bit characters\n");
 	    }
 	    return(0);
 	}
@@ -8158,9 +8158,10 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
 #endif	/* UNKNOWN_CHECK_DEBUG || DOCTOR_DEBUG */
 #ifdef	NO_NW
 	/*
-	 * If we detected a no-warraty statement earlier, "checknw" is != 0. Look
-	 * for a no-warrany statement in this candidate paragraph.  If we find it,
-	 * report failure for the paragraph and remember finding the no--warranty.
+	  If we detected a no-warraty statement earlier, "checknw" is != 0. 
+	  Look for a no-warrany statement in this candidate paragraph.  
+	  If we find it, report failure for the paragraph and remember 
+	  finding the no--warranty.
 	 */
 	if (checknw) {
 	    if (idxGrep(checknw, cp, REG_ICASE|REG_EXTENDED)) {
@@ -8174,9 +8175,11 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
 	}
 #endif	/* NO_NW */
 	/*
-	 * False-positive-check: GNU/FSF template (often see in ".po" and ".c" files
-	 *****
-	 * "This file is distributed under the same license as the package PACKAGE"
+	  False-positive-check: GNU/FSF template (often see in ".po" 
+	  and ".c" files
+	 
+	  "This file is distributed under the same license as the 
+	  package PACKAGE"
 	 */
 	if (dbgIdxGrep(_LT_BOGUSTMPL, cp, NO)) {
 	    if (lDiags) {
@@ -8188,9 +8191,6 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
 	 * False-positive-check: GNU GPL preamble statements; these have been
 	 * "sprinkled" throughout files seen before, so check ALL of them.
 	 */
-	if (cur.licPara == NULL_STR) {
-	    saveLicenseParagraph(buf, isML, isPS);
-	}
 	if (dbgIdxGrep(_PHR_GNU_FREEDOM, cp, lDiags) ||
 	    dbgIdxGrep(_PHR_GNU_COPYING, cp, lDiags) ||
 	    dbgIdxGrep(_PHR_GNU_PROTECT, cp, lDiags)) {
@@ -8199,103 +8199,114 @@ static int match3(int base, char *buf, int save, int isML, int isPS)
 	    }
 	    return(0);
 	}
+	if (lDiags) {
+	    printf("<POSSIBLE>\n%s\n</POSSIBLE>\n", buf);
+	    for (i = j = 0; i < NKEYWORDS; i++) {
+		if (idxGrep(i+_KW_first, buf,
+			    REG_EXTENDED|REG_ICASE)) {
+		    printf("%s", j ? ", " : "KEYWORDS: ");
+		    printf("%s", _REGEX(i+_KW_first));
+		    j++;
+		}
+	    }
+	    if (j) {
+		printf("\n");
+	    }
+	    printf("SCORES: para %d, score %d == %05.2f%% ", j,
+		   score, 100.0 * (float) j / (float) score);
+	    /*
+	      We guess that an UnclassifiedLicense exists in a paragraph when:
+	      + a paragraph has a keyword-score of at least 3 -OR-
+	      + ... a keyword-score of 2 *AND* is >= 50% of the file's total 
+	      score.
+	     
+	      Minimal imperical studying shows a success-rate of 40% doesn't 
+	      tend to find "real" licenses.  And it's likely we'll see a 
+	      few false-positives with a keyword-score of 2 but there are 
+	      cases where this works. And finally, a keyword-score of 1 is 
+	      hardly ever 'interesting'.
+	     */
+	    if (j == 0) {	/* no license-like keywords */
+		printf("(ZERO legal keywords)\n");
+		return(0);
+	    }
+	    if ((j >= 3) || ((j == 2) && ((j * 2) >= score))) {
+		printf("(LIKELY unclassified: ");
+		if (j >= 3) {
+		    printf("para-score >= 3)\n");
+		}
+		else {
+		    printf("local percentage)\n");
+		}
+	    }
+	    else {
+		printf("(NOT likely unclassified)\n");
+		return(0);
+	    }
+	}
 	if (cur.licPara == NULL_STR) {
-	    saveLicenseParagraph(buf, isML, isPS);
+	    saveLicenseParagraph(buf, isML, isPS, YES);
 	}
 #if	0
-	cp = copyString(buf, MTAG_TEXTPARA);
-	doctorBuffer(cp, isML, isPS, NO);
-	if (cur.licPara == NULL_STR) {
-	    (void) strcpy(cp, buf);	/* re-copy data */
-	    cur.licPara = cp;
-	    for (/*nada*/; *cp; cp++) {
-		if ((*cp == '\n' || *cp == '\r') &&
-		    (*(cp+1) == '\r' || *(cp+1) == '\n')) {
-		    *cp = ' ';
-		    *(cp+1) = '\n';
+	for (i = 0; i < NFILTER; i++) {
+	    if (dbgIdxGrep(_FILTER_first+i, buf, lDiags)) {
+		if (lDiags) {
+		    printf("!! NO license, filter %d\n", i+1);
 		}
+		return(0);
 	    }
 	}
 #endif
     }
-#endif  /* SAVE_UNCLASSIFIED_LICENSES */
+#endif	/* SAVE_UNCLASSIFIED_LICENSES */
     return(1);
 }
 
-#ifdef	SAVE_UNCLASSIFIED_LICENSES
-static void saveLicenseParagraph(char *buf, int isML, int isPS)
+#ifdef	SAVE_UNCLASSIFIED_LICENSES 
+void saveLicenseParagraph(char *buf, int isML, int isPS, int entireBuf)
 {
-	register char *cp;
+    char *cp;
+    char *start = buf;
+    int len;
 /* */
 #ifdef	PROC_TRACE
 #ifdef	PROC_TRACE_SWITCH
     if (gl.ptswitch)
 #endif	/* PROC_TRACE_SWITCH */
-	printf("== saveLicenseParagraph(%p, %d, %d)\n", buf, isML, isPS);
+	printf("== saveLicenseParagraph(%p, %d, %d, %d)\n", buf, isML, isPS, entireBuf);
 #endif	/* PROC_TRACE */
 /* */
+    if (entireBuf) {
 	cur.licPara = copyString(buf, MTAG_TEXTPARA);
-	doctorBuffer(cur.licPara, isML, isPS, NO);
+    } else {
+	if (cur.regm.rm_so < 50) {
+	    len = cur.regm.rm_eo + 80;
+	} else {
+	    len = cur.regm.rm_eo + 130 - cur.regm.rm_so;
+	    start += cur.regm.rm_so - 50;
+	}
+	cur.licPara = memAlloc(len + 9, MTAG_TEXTPARA);
+	(void) strcpy(cur.licPara, "... ");
+	(void) strncpy(cur.licPara + 4, start, len);
+	(void) strcpy(cur.licPara + len + 4, " ...");
+    }
+#ifdef 0
+    doctorBuffer(cur.licPara, isML, isPS, NO);
+#endif
 /*
  * Convert double-line-feed chars ("\r" and "\n" combos) to a single "\n"
  */
-	for (cp = cur.licPara; *cp; cp++) {
-		if ((*cp == '\n' || *cp == '\r') &&
-		    (*(cp+1) == '\r' || *(cp+1) == '\n')) {
-			*cp = ' ';
-			*(cp+1) = '\n';
-		}
+    for (cp = cur.licPara; *cp; cp++) {
+	if ((*cp == '\n' || *cp == '\r') &&
+	    (*(cp+1) == '\r' || *(cp+1) == '\n')) {
+	    *cp = ' ';
+	    *(cp+1) = '\n';
 	}
-	return;
+    }
+    return;
 }
 #endif	/* SAVE_UNCLASSIFIED_LICENSES */
 
-#ifdef	ALT_UNCLASSIFIED
-static int scoreUnclassified(char *buf)
-{
-	register int i, s = 0;
-	register char *cp;
-/* */
-	i = _LEGAL_VERBS;
-	for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
-		s++;
-		cp += gl.regm.rm_eo;
-	}
-	if (lDiags) {
-		printf("== _Verbs: %d\n",s);
-	}
-/* */
-	i = _LEGAL_OWNERS;
-	for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
-		s++;
-		cp += gl.regm.rm_eo;
-	}
-	if (lDiags) {
-		printf("== _Owners: %d\n",s);
-	}
-/* */
-	i = _LEGAL_OBJS;
-	for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
-		s++;
-		cp += gl.regm.rm_eo;
-	}
-	if (lDiags) {
-		printf("== _Objs: %d\n",s);
-	}
-/* */
-	i = _LEGAL_PERMS;
-	for (cp = buf; idxGrep(i, cp, REG_ICASE|REG_EXTENDED); /* nada */) {
-		s++;
-		cp += gl.regm.rm_eo;
-	}
-	if (lDiags) {
-		printf("== _Perms: %d\n",s);
-	}
-/* */
-	return(s);
-}
-
-#endif	/* ALT_UNCLASSIFIED */
 #ifdef  LTSR_DEBUG
 #define LT_TARGET       1299    /* set to -1 OR the string# to track */
 void showLTCache(char *msg)
@@ -8328,8 +8339,7 @@ void showLTCache(char *msg)
 }
 #endif  /* LTSR_DEBUG */
 
-
-static void dumpMatch(char *text, char *label)
+void dumpMatch(char *text, char *label)
 {
     char *x = text + cur.regm.rm_so;
     char *cp = text + cur.regm.rm_eo;
@@ -8346,4 +8356,9 @@ static void dumpMatch(char *text, char *label)
     printf("]\n");
     return;
 }
+
+
+
+
+
 
