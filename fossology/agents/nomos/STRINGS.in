@@ -34,7 +34,7 @@
 %ALIAS%	_KW_first
 #
 %ENTRY%	_KW_agreement
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"agreement"
 #
 %ENTRY%	_KW_as_is
@@ -80,6 +80,10 @@
 %KEY%	"licen[cs]"
 %STR%	"."
 #
+%ENTRY%	_KW_misrepresent
+%KEY%	=NULL=
+%STR%	"mis-?represent"
+#
 %ENTRY%	_KW_open_source
 %KEY%	"so(ftware|urce)"
 %STR%	"open source"
@@ -121,6 +125,10 @@
 %ENTRY%	_KW_warrant
 %KEY%	"(docume|warra)nt"
 %STR%	"warrant"
+#
+%ENTRY%	_KW_without
+%KEY%	=NULL=
+%STR%	"without (fee|restrict|limit)"
 %ALIAS%	_KW_last
 #####
 # Filenames
@@ -306,7 +314,7 @@
 #
 %ENTRY%	_LT_ALGORITHMICS
 %KEY%	"permi[st]"
-%STR%	"Algorithmics gives permission for anyone to use and modify this file without any obligation or license condition except that you retain this copyright message in any source redistribution in whole or part"
+%STR%	"Algorithmics gives permission for anyone to use and modify this file without any obligation or licen[cs]e condition except that you retain this copyright message in any source r?e?-?distribution in whole or part"
 #####
 # DELETED: ... under the terms of the licen[cs]e contained in the file
 # LICEN[CS]E in this distribution
@@ -323,7 +331,7 @@
 %STR%	"property of Advanced Micro Devices Inc AMD which specifically grants the user the right to modify use and/?o?r? distribute this"
 #
 %ENTRY%	_LT_AOL_EULA
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"constitutes your acceptance and agreement with america online inc aol as follows"
 #####
 # DELETED: ... =ANY= in consideration of your agreement to the following
@@ -1407,11 +1415,11 @@
 #
 %ENTRY%	_LT_FREE_21
 %KEY%	"permi[st]"
-%STR%	"permission is given to freely copy redistribute or change =FEW= provided this notice is retained intact"
+%STR%	"permission is given to freely copy r?e?-?distribute or change =FEW= provided this notice is retained intact"
 #
 %ENTRY%	_LT_FREE_22
 %KEY%	"permi[st]"
-%STR%	"permission is hereby granted to copy reproduce redistribute or otherwise use this software (as long as|provided)"
+%STR%	"permission is hereby granted to copy reproduce r?e?-?distribute or otherwise use this software (as long as|provided)"
 #
 %ENTRY%	_LT_FREE_23
 %KEY%	"permi[st]"
@@ -1696,6 +1704,10 @@
 %ENTRY%	_LT_GENIVIAref
 %KEY%	"commerc"
 %STR%	"Genivia =FEW= licen[cs]e for commercial use"
+#
+%ENTRY%	_LT_GEN_EULA
+%KEY%	"licen[cs]"
+%STR%	"use of =SOME= is (under|govern|control|disribut|offer|cover|availabl|protect|subject|comes|\<is\>) =FEW= licen[cs]e"
 #
 %ENTRY%	_LT_GEN_IP_1
 %KEY%	"in(demnif|tellect)"
@@ -2354,6 +2366,14 @@ e /* (INFILE(j)) */
 %KEY%	"legal"
 %STR%	"this end[ -]user licen[cs]e agreement eula is a legal agreement between you either an individual or an entity and interlink networks inc for the product identified above"
 #
+%ENTRY%	_LT_INTRANET_ONLY
+%KEY%	"distribut"
+%STR%	"may only r?e?-?distribute =FEW= internally within your (company|department|(work[ -]?g|g)roup|organization) for example on (an?|your|the) intranet"
+#
+%ENTRY%	_LT_NOT_INTERNET
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
+%STR%	"may not make =FEW= available to =FEW= over the internet"
+#
 %ENTRY%	_LT_IOS
 %KEY%	"permi[st]"
 %STR%	"permission to copy in any form is granted for use with =SOME= as defined in =FEW= provided"
@@ -2445,7 +2465,7 @@ e /* (INFILE(j)) */
 %STR%	"permission is hereby granted for the distribution of"
 #
 %ENTRY%	_LT_KNUTH_1
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"copying of this file is authori[sz]ed only if 1 you are D E Knuth or if 2 you make absolutely no changes to your copy"
 #
 %ENTRY%	_LT_KNUTH_2
@@ -2453,7 +2473,7 @@ e /* (INFILE(j)) */
 %STR%	"is copyright and you are explicitly granted a licen[cs]e which gives you the user of the software legal permission to copy distribute and/or modify"
 #
 %ENTRY%	_LT_KNUTH_STYLE
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"copying (of t|t)his file is authori[sz]ed only if 1 you are =FEW= or if 2 you make absolutely no changes to your copy"
 #
 %ENTRY%	_LT_LACHMAN_SECRET
@@ -2556,7 +2576,7 @@ e /* (INFILE(j)) */
 # purpose of porting
 #####
 %ENTRY%	_LT_LEGATO_2
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"as necessary but are not authori[sz]ed to licen[cs]e it to anyone else"
 #
 %ENTRY%	_LT_LGPL_ALT
@@ -3134,7 +3154,7 @@ e /* (INFILE(j)) */
 # DELETED: re-?distribution and use in source and binary forms =SOME= ...
 #####
 %ENTRY%	_LT_OPENLDAP_2
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"are permitted only as authori[sz]ed by the OpenLDAP Public licen[cs]e"
 #
 %ENTRY%	_LT_OPENMKT
@@ -4025,7 +4045,7 @@ e /* (INFILE(j)) */
 %STR%	"recipient is granted the right to make copies in any form for internal distribution and to freely use the information supplied in the creation of products supporting =FEW= Unicode"
 #
 %ENTRY%	_LT_UNICODE_3
-%KEY%	"\<file\>"
+%KEY%	"\<files?\>"
 %STR%	"Unicode inc hereby grants the right to freely use the information supplied in this file in the creation of products supporting the unicode standard and to make copies"
 #
 %ENTRY%	_LT_USGOVT
@@ -4479,6 +4499,7 @@ k
 %ENTRY%	_LT_SEE_COPYING_1
 %KEY%	"licen[cs]"
 %STR%	"under the terms of the licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<copying\>|\<copying\> file)"
+%ALIAS%	_SEECOPYING_first
 #####
 # DELETED:
 # - free software and you are welcome to re-?distribute it ...
@@ -4494,7 +4515,7 @@ k
 #
 %ENTRY%	_LT_SEE_COPYING_4
 %NOCHECK%
-%KEY%	"\<file\>"
+%KEY%	"\<files?\>"
 %STR%	"subject to =SOME= in the (file =FEW= \<copying\>|\<copying\> file)"
 #
 %ENTRY%	_LT_SEE_COPYING_5
@@ -4511,17 +4532,24 @@ k
 #####
 # These MUST be the last 2 checks for license references in the file "copying"
 #####
-%ENTRY%	_LT_SEE_COPYING_LAST1
+%ENTRY%	_LT_SEE_COPYING_FINAL1
 %KEY%	"\<(see|sell|sale|sold|charge)\>"
 %STR%	"(distribut|copy|mod) =SOME= for details see the (file =FEW= \<copying\>|\<copying\> file)"
 #
-%ENTRY%	_LT_SEE_COPYING_LAST2
+%ENTRY%	_LT_SEE_COPYING_FINAL2
 %KEY%	"\<(see|sell|sale|sold|charge)\>"
 %STR%	"see the (file =FEW= \<copying\>|\<copying\> file) =SOME= (distribut|dir|copy|us(e|age)|mod|free soft)"
+#
+%ENTRY%	_LT_SEE_COPYING_FINAL3
+%NOCHECK%
+%KEY%	"\<files?\>"
+%STR%	"(distribut|copy|mod) =SOME= contained in the (file =FEW= \<copying\>|\<copying\> file)"
+%ALIAS%	_SEECOPYING_last
 #####
 %ENTRY%	_LT_SEE_OTHER_1
 %KEY%	"licen[cs]"
 %STR%	"under the terms of the licen[cs]e (contained|listed|described|set (out|forth)|given|found) (at|in) th(e (ur[il]|file)|e =FEW= (file|dir|media|note|pub|doc))"
+%ALIAS%	_SEEOTHER_first
 #
 %ENTRY%	_LT_SEE_OTHER_2
 %KEY%	"(condit|vers)ion"
@@ -4537,7 +4565,7 @@ k
 #
 %ENTRY%	_LT_SEE_OTHER_5
 %NOCHECK%
-%KEY%	"\<file\>"
+%KEY%	"\<files?\>"
 %STR%	"subject to =SOME= (at|in) th(e (ur[il]|file)|e =FEW= (file|dir|media|note|pub|doc))"
 #
 %ENTRY%	_LT_SEE_OTHER_6
@@ -4558,21 +4586,23 @@ k
 #####
 # These MUST be the last 3 checks for license references in some "other" place
 #####
-%ENTRY%	_LT_SEE_OTHER_LAST1
+%ENTRY%	_LT_SEE_OTHER_FINAL1
 %KEY%	"\<(see|sell|sale|sold|charge)\>"
 %STR%	"(distribut|copy|mod) =SOME= for details see th(e (ur[il]|file)|e =FEW= (file|dir|media|note|pub|doc))"
 #
-%ENTRY%	_LT_SEE_OTHER_LAST2
+%ENTRY%	_LT_SEE_OTHER_FINAL2
 %KEY%	"\<(see|sell|sale|sold|charge)\>"
 %STR%	"see th(e (ur[il]|file)|e =FEW= (file|dir|media|note|pub|doc)) =SOME= (distribut|dir|copy|us(e|age)|mod|free soft)"
 #
-%ENTRY%	_LT_SEE_OTHER_LAST3
+%ENTRY%	_LT_SEE_OTHER_FINAL3
 %KEY%	"\<(see|sell|sale|sold|charge)\>"
 %STR%	"see the (ur[il]|file) =SOME= (distribut|dir|copy|us(e|age)|mod|free soft)"
+%ALIAS%	_SEEOTHER_last
 #####
 %ENTRY%	_LT_SEE_LICENSE_1
 %KEY%	"licen[cs]"
 %STR%	"under the terms of the licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
+%ALIAS%	_SEELICENSE_first
 #
 %ENTRY%	_LT_SEE_LICENSE_2
 %KEY%	"(condit|vers)ion"
@@ -4584,7 +4614,7 @@ k
 #
 %ENTRY%	_LT_SEE_LICENSE_4
 %NOCHECK%
-%KEY%	"\<file\>"
+%KEY%	"\<files?\>"
 %STR%	"subject to =SOME= in the (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
 #
 %ENTRY%	_LT_SEE_LICENSE_5
@@ -4601,13 +4631,19 @@ k
 #####
 # These MUST be the last 2 checks for license references in the file "license"
 #####
-%ENTRY%	_LT_SEE_LICENSE_LAST1
+%ENTRY%	_LT_SEE_LICENSE_FINAL1
 %KEY%	"\<(see|sell|sale|sold|charge)\>"
 %STR%	"(distribut|copy|mod) =SOME= for details see the (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
 #
-%ENTRY%	_LT_SEE_LICENSE_LAST2
+%ENTRY%	_LT_SEE_LICENSE_FINAL2
 %KEY%	"\<(see|sell|sale|sold|charge)\>"
 %STR%	"see the (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file) =SOME= (distribut|dir|copy|us(e|age)|mod|free soft)"
+#
+%ENTRY%	_LT_SEE_LICENSE_FINAL3
+%NOCHECK%
+%KEY%	"\<files?\>"
+%STR%	"(distribut|copy|mod) =SOME= contained in the (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
+%ALIAS%	_SEELICENSE_last
 #####
 %ENTRY%	_LT_SEE_OUTPUT_1
 %KEY%	"so(ftware|urce)"
@@ -4615,17 +4651,18 @@ k
 #
 ##%ENTRY%	_LT_SEE_OUTPUT_2
 ##%NOCHECK%
-##%KEY%	"\<file\>"
+##%KEY%	"\<files?\>"
 ##%STR%	"(distribut|copy|mod) =SOME= (to see|for) (condition|detail) =FEW= (run|type|execute)"
 #
 ##%ENTRY%	_LT_SEE_OUTPUT_3
 ##%NOCHECK%
-##%KEY%	"\<file\>"
+##%KEY%	"\<files?\>"
 ##%STR%	"for details (run|type|execute) =SOME= (distribut|copy|mod|free soft)"
 #####
 %ENTRY%	_LT_SEE_README_1
 %KEY%	"licen[cs]"
 %STR%	"under the terms of the licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<readme\>|\<readme\> file)"
+%ALIAS%	_SEEREADME_first
 #
 %ENTRY%	_LT_SEE_README_2
 %KEY%	"(condit|vers)ion"
@@ -4637,7 +4674,7 @@ k
 #
 %ENTRY%	_LT_SEE_README_4
 %NOCHECK%
-%KEY%	"\<file\>"
+%KEY%	"\<files?\>"
 %STR%	"subject to =SOME= in the (file =FEW= \<readme\>|\<readme\> file)"
 #
 %ENTRY%	_LT_SEE_README_5
@@ -4654,13 +4691,19 @@ k
 #####
 # These MUST be the last 2 checks for license references in the file "readme"
 #####
-%ENTRY%	_LT_SEE_README_LAST1
+%ENTRY%	_LT_SEE_README_FINAL1
 %KEY%	"\<(see|sell|sale|sold|charge)\>"
 %STR%	"(distribut|copy|mod) =SOME= for details see the (file =FEW= \<readme\>|\<readme\> file)"
 #
-%ENTRY%	_LT_SEE_README_LAST2
+%ENTRY%	_LT_SEE_README_FINAL2
 %KEY%	"\<(see|sell|sale|sold|charge)\>"
 %STR%	"see the (file =FEW= \<readme\>|\<readme\> file) =SOME= (distribut|dir|copy|us(e|age)|mod|free soft)"
+#
+%ENTRY%	_LT_SEE_README_FINAL3
+%NOCHECK%
+%KEY%	"\<files?\>"
+%STR%	"(distribut|copy|mod) =SOME= contained in the (file =FEW= \<readme\>|\<readme\> file)"
+%ALIAS%	_SEEREADME_last
 #
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -5083,10 +5126,11 @@ k
 %ENTRY%	_CR_LUCENT
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= lucent =SOME= tech"
-#
+# Mellanox copyrights have been known to include a Month (e.g., Jan. 2004)
 %ENTRY%	_CR_MELLANOX
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
-%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= mellanox technologies"
+#%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= mellanox technologies"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy).{0,10} =YEAR= =SOME= mellanox technologies"
 #
 %ENTRY%	_CR_MICHIGAN
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -5241,6 +5285,10 @@ k
 %ENTRY%	_CR_POLYSERVE
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= polyserve inc"
+#
+%ENTRY%	_CR_PLATFORM_COMP
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= platform computing corp"
 #
 %ENTRY%	_CR_PRINCETON
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -5609,15 +5657,15 @@ k
 %STR%	"attribution assurance licen[cs]e"
 #
 %ENTRY%	_TITLE_ATTR_V20
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution =FEW= 2\.?0"
 #
 %ENTRY%	_TITLE_ATTR_V25
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution =FEW= 2\.?5"
 #
 %ENTRY%	_TITLE_ATTR_V30
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution =FEW= 3\.?0"
 #
 %ENTRY%	_TITLE_ATT_SRC_12D
@@ -5664,36 +5712,36 @@ k
 %STR%	"creative commons gnu (lesser|library) general public licen[cs]e"
 #
 %ENTRY%	_TITLE_CCA
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 #%STR%	"creative commons attribution =FEW= generic"
 %STR%	"creative commons attribution"
 #
 %ENTRY%	_TITLE_CCA_V10
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"creative commons attribution 1\.?0 generic"
 #
 %ENTRY%	_TITLE_CCA_V25
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"creative commons attribution 2\.?5 generic"
 #
 %ENTRY%	_TITLE_CCA_V30
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"creative commons attribution 3\.?0 generic"
 #
 %ENTRY%	_TITLE_CCA_SA
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"creative commons attribution[ -]share[ -]alike"
 #
 %ENTRY%	_TITLE_CCA_SA_V10
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"creative commons attribution[ -]share[ -]alike 1\.?0 licen[cs]e"
 #
 %ENTRY%	_TITLE_CCA_SA_V25
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"creative commons attribution[ -]share[ -]alike 2\.?5 licen[cs]e"
 #
 %ENTRY%	_TITLE_CCA_SA_V30
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"creative commons attribution[ -]share[ -]alike 3\.?0 licen[cs]e"
 #
 %ENTRY%	_TITLE_CCPL
@@ -6536,7 +6584,7 @@ k
 %STR%	"licen[cs]es Perl allows itself to be r?e?-?distributed and/or modified for the other one th(e perl|e) artistic licen[cs]e"
 #
 %ENTRY%	_PHR_ATTRIBUTION
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution =SOME= (present|provide|display|include)"
 #
 %ENTRY%	_PHR_BOOST_V10
@@ -6690,7 +6738,7 @@ k
 %STR%	"this document is an internet-draft and is in full conformance"
 #
 %ENTRY%	_PHR_KDE_FILE
-%KEY%	"\<file\>"
+%KEY%	"\<files?\>"
 %STR%	"this file is (a p|p)art of (the KDE project|KDE)"
 #
 %ENTRY%	_PHR_LATEX_GPL_INAPPROPRIATE
@@ -6887,7 +6935,7 @@ k
 %STR%	"no warrant =FEW= (extend|appl[iy])"
 #
 %ENTRY%	_PHR_NO_WARRANTY_5
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"author =FEW= (can ?|may|shall) not be held (liable|responsible)"
 #
 %ENTRY%	_PHR_NO_WARRANTY_6
@@ -6964,7 +7012,7 @@ k
 %STR%	"(restricted from|prohibited to|can ?not|must not|will not|shall not|not allow) =FEW= (cop[iy]|modif|distribut|sell|profit|translat)"
 #
 %ENTRY%	_PHR_RESTRICTIONS_2
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"unauthori[sz]ed (reproduc|distribut|use|usage) =FEW= (prog|soft|doc) =SOME= result =SOME= penalt"
 #####
 # The Stallman paper, "Why Software Should be Free" looks a little licen[cs]e-ish
@@ -7014,7 +7062,7 @@ k
 %STR%	"\<apple\>"
 #
 %ENTRY%	_TEXT_ATTRIBUTION
-%KEY%	"a(gree|ttribut|uthor)"
+%KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution"
 #
 %ENTRY%	_TEXT_AUTHORSHIP
@@ -7965,7 +8013,7 @@ k
 #
 %ENTRY%	_LEGAL_OBJS
 %KEY%	=NULL=
-%STR%	"(\<copyright\>|\<licen[cs]e\>|\<terms\>|\<agreement\>|\<program\>|\<software\>|\<library\>|\<source\>|\<binary\>|\<document\>|\<manual\>|\<file\>|derivat|modification|change|representation)"
+%STR%	"(\<copyright\>|\<licen[cs]e\>|\<terms\>|\<agreement\>|\<program\>|\<software\>|\<library\>|\<source\>|\<binary\>|\<document\>|\<manual\>|\<files?\>|derivat|modification|change|representation)"
 #
 %ENTRY%	_LEGAL_PERMS
 %KEY%	=NULL=
@@ -7981,45 +8029,17 @@ k
 #####
 %ENTRY%	_LEGAL_FILTER_1
 %KEY%	=NULL=
-%STR%	"(case[ -]insensitive|array|s?u?b?-?routine|(binary|set)[ -](dat|encod|log)|re-?entran|operat[ei]|back([_ ]grant|space|slash)|inter(active|net[ -]draft|rupt)|initialize|recurs[ie]|buildi?n?g?[ -]?(block|root|script|service|solution|the)|lookup|(local|remote)[ -]?host|debug|(en|de)crypt|security[ -](con[cs]|desc|hole|id|relate)|widget|core ?dump|dump core|(folder|port|faste?r?|unintended|immediate|read|write) (acce|perm)|https? (response|url)|compiler? (parameter|under|warning)|(configure|chat|magic|setup) script|standard x11r|invalid ident|online gnomemeeting|meta[ -]?(contact|data|info|robot)|(common|to) spool|deprecated? func|(portability|bug) fixes|unknown (except|u(ser|id))|parti(cular (linux|unix)|al (fulfil|revel))|(main|host|linux|real|unix)[ -](name|sys)|be (careful|write?able|grate)|increased to|cleanl?y? u?n?-?instal|profiling data|longprogramopt\{|anti-spam|throw except|windows (install|machine|sys|workst)|rpm[ -]base|[ -]byte)"
+%STR%	"(follow(ing| the) sign[ -]off|old mechanism|future changes)"
 %ALIAS%	_FILTER_first
-#
-%ENTRY%	_LEGAL_FILTER_2
-%KEY%	=NULL=
-%STR%	"(move the icon|prot_(read|write|exec)|following (step|form)|(pilot|naming) schem|(as|(must|need to) be|owned by) \<root\>|design doc|support (code|float)|free (world|time)|buil(d a|d) source|speed[ -]?(up|incr)|stack[ -]?frame|need[ -]?(for[ -]?speed|r?e?-?generat)|/etc/?|(free|syntax) (file|error)|cmyk? ink|being compress|on log(in|out)|(code|revision) control|underlying pars|tutorial arch|(allow|jacket|kernel|open[ -]?source) (patch|sect|application|disabl)|running instance|sizeofheader|(back-?up|skipping|existing|working|container|occupied|system3?2?) (f[io]l|ser|dir|ino|copy)|gnu standard|(during|script|usually) execut|(fix|report|send)i?n?g? bug|(also|quit) set|(appropriate|necessary|require[ds]?) (because|priv|trans)|system3?2? (ser|fol|dir)|structured? net|heart-?beat area|as a (daemon|module|route)|(scsi|usb|mon| a) driver|(modules?|does ?n[o ]t) (defin|exist|par|select)|race condition|(file|make) install|disabled? stat|info[ -]?buffer|header fi(le|eld)|class\{)"
-#
-%ENTRY%	_LEGAL_FILTER_3
-%KEY%	=NULL=
-%STR%	"(command(\{|[ -]?(line|hist|arg))|(pixel |file ?)cache|develop(er|ment) community|(java|user) (community|id)|(file|inserte?d?) (time|object)|(base|similar) templ|read([ -]?only|y spoke)|endi|prim(ary mana|itive)|document[. ]?write|(deflate |target |c-)format|director(y|ies) (above|below)|key (dist|pair)|non[ -]?(contig|ftp)|corrupt ans|new (config|arg|index)|awk program|(personal|release note)|boolean|play[ -](together|field|specific)|pop-?up|(borrowe?d?|exit) code|(added|defined?|environment) varia|imap toolkit|see RFC|rx doc|(package|probably) (want|contain)|(mailcap|packages?|ordinary|release|plain|personal|uploade?d?) (note|file)|compiler warning|streaming (audio|sound|video)|fully conform|(locall?y? |de-?)alloc|text replac|(comprehensive|proxy) serv|(owner|strong) (class|die)|alternate (kern|driv|value)|system[ -]?(admin|call|privil|wide)|pcre_|no[nt]-root|root[ -](auth|file|fs)|downloads? fail|/var/?|/usr/?|/bin/?|/opt/?|/proc/?|/root/?)"
-#
-%ENTRY%	_LEGAL_FILTER_4
-%KEY%	=NULL=
-%STR%	"(\<check[ -]?box\>|pr(actice|roblem|rompt|istine)|[^=]middle|co(nvers|mplain|mmitt[eo]r)|pseudo|unbalanc|travers|typing|mask|render|listen|attack|comp(lain|etency)|wrapper|zone|audit|tuition|(education|wildcard) exp|elemental|dimension|delight|applause|fraction|spacing|(document|rights|some) element|(control|force)[ -]char|arbitrary sound|potentially unstable|sp[iu]n-?off|about:credit|important feature|stylesheets written|(page|top) level|(allow|string)[ -]update|speciali[sz]ation|unique string|the (appreciation|state)|(dis[ck]|extra|free|names?|work)[ -]?(space|suppl)|mostly ?clean|pythagor|mathematics department|of (the rectangle|utilities)|will monitor|farm rental|angle[ -]bracket|format internally|(i|we) guess|in[ -]?depth knowledge|partial (fulfil|revel)|does ?n[o ]t exist|non-?contiguous|news(letter| appear)|extremely (rare|slow)|perhaps you|(any|most) (folk|people|exten)|si(ngle|lly) (foot|line)|often[ -](req|modif)|grateful|mere mortal|(not |un-?)usual)"
-#
-%ENTRY%	_LEGAL_FILTER_5
-%KEY%	=NULL=
-%STR%	"(nothing important|th[eo]?s?e scenario|errors?[ -]detect|request[oe]?[rd]? field|regular expression|nibbl|(block|character|pipe|socket)[ -](device|special)|rubber stamp|phrases? insert|good thing|(final|side|following)[ -]?step|well[ -]suited|get to know|(want|faile?d? to|suggeste?d?) change|allow (application|disabl)|redundant warn|really (mean|intend)|provide similar|remember bring|be grate|set own|program depend|ad(vantages? of)|(concurrentl?y?|fax|specifically) request|excessive consum|(convenient|different) way|(feel|further) free|catch me|service do|clear on|pure horror|address (book|gap)|local copy|utility call|personal note|kill[ -]?power|another feature|as (they|you) go|highly recommend|normall?y? buil[dt]|page (up|do?w?n)|sent message|should (get|go|now|perform|work)|software engineer|makes? sense|th(is|e) flag|money saved|(best|first|great|last|recent|significant|substantial|worst) time|(local|maili?n?g?) (list|c(all|opy))|pointe?d? out)"
-#
-%ENTRY%	_LEGAL_FILTER_6
-%KEY%	=NULL=
-%STR%	"(th(is|[eo]se) table|this (thesis|dissert)|entire map|written beyond|quarantine|to feed|fiscall?y? correct|no user|an arti|main goal|(more|very) value?able|note at|pre(-?emphasis|ss clip)|undergo|horribl|minimi[sz]e|to earth|(feeds?|stems?) from|credit union|(extra|servlet) (layer|path)|library staff|tedious|kind[ -]heart|(large|medium|small)[ -]size|success story|book(keep|-?sell)|(design|my|rx) (art|book|doc)|cookie[ -]jar|strip out|locatable|sections? on liability|full percent|some counter|we try|(device|not) (attempt|initial|ready|synchroni)|entity licen[cs]e|adde?d? euro|built[ -]?in|emphasize it|double[ -]?check|(left|middle|right) (column|loc)|(daily|monthly|weekly) job|(page|step|mouse) (aside|back|over|down|up|to|but)|(first|last|recent)[ -]?boot|remote[ -]?control|repel visit|tools? call|free/busy|p(ast|resent) employ|(second|third) group|ticket sys|legall?y? (order|paper)|any extension|process (content|occur)|segmentation|bibliograph|superfluous|theoretical|target audience)"
-#
-%ENTRY%	_LEGAL_FILTER_7
-%KEY%	=NULL=
-%STR%	"(language agent|password back|retain link|comment retain|(certain|var(ying|ied)) degree|equivalent symbol|variable cont|explicitl?y? copy|likely chance|often modif|owner die|instruction ref|names? suppl|way through|bundle-|signed[ -]off|dead code|change notifi|have run|relati(ve|onship)|down[ -]menu|created? earl|bottom[ -]line)"
-#
-%ENTRY%	_LEGAL_FILTER_ONE
-%KEY%	=NULL=
-%STR%	"follow(ing| the) sign[ -]off"
 # Foreign words
-%ENTRY%	_LEGAL_FILTER_8
+%ENTRY%	_LEGAL_FILTER_FOREIGN
 %KEY%	=NULL=
 %STR%	"(dokumentation|\<geschrieben\>|\<definitionen\>|\<dokumentu\>|\<dokumentazio\>|\<bitte\>|\<avec\>|\<sous\>|\<distinguir\>|\<donde\>|\<memorizzate\>|\<administativos\>)"
-# "Complete" words
-%ENTRY%	_LEGAL_FILTER_9
-%KEY%	=NULL=
-%STR%	"(\<repository\>|\<d?ichotomy\>|\<granular\>|\<generate\>|\<glues?\>|\<bits?\>|\<set[gu]id\>|a \<c[iy]pher\>|\<plug-?in\>|\<connections?\>|\<tokens?\>|\<hooks?\>|\<defects?\>|\<integers?\>|\<pointers?\>|\<vectors?\>|\<bios\>|\<protocols?\>|\<stringlist\>|\<newline\>|\<dial-?up\>|\<faq\>|\<std(in|out|err)\>|\<status\>|\<pleas(e[ds]|ing)\>|\<preparations?\>|\<latenc(y|ies)\>|\<literally\>|\<profil(e[ds]?|ing)\>|\<hacking\>|\<greet(ings?)\>|\<position\>|\<holistic\>|\<pre-?remove\>)"
 %ALIAS%	_FILTER_last
+# "Complete" words
+##%ENTRY%	_LEGAL_FILTER_9
+##%KEY%	=NULL=
+##%STR%	"(\<repository\>|\<d?ichotomy\>|\<granular\>|\<generate\>|\<glues?\>|\<bits?\>|\<set[gu]id\>|a \<c[iy]pher\>|\<plug-?in\>|\<connections?\>|\<tokens?\>|\<hooks?\>|\<defects?\>|\<integers?\>|\<pointers?\>|\<vectors?\>|\<bios\>|\<protocols?\>|\<stringlist\>|\<newline\>|\<dial-?up\>|\<faq\>|\<std(in|out|err)\>|\<status\>|\<pleas(e[ds]|ing)\>|\<preparations?\>|\<latenc(y|ies)\>|\<literally\>|\<profil(e[ds]?|ing)\>|\<hacking\>|\<greet(ings?)\>|\<position\>|\<holistic\>|\<pre-?remove\>)"
 #
 %ENTRY%	_HOT_prohibit
 %KEY%	=NULL=
@@ -8425,6 +8445,10 @@ k
 %DEF%	NFREECLAIM	(_FREECLAIM_last-_FREECLAIM_first+1)
 %DEF%	NINDEMNITY	(_INDEMNITY_last-_INDEMNITY_first+1)
 %DEF%	NNOWARRANTY	(_NO_WARRANTY_last-_NO_WARRANTY_first+1)
+%DEF%	NSEECOPYING	(_SEECOPYING_last-_SEECOPYING_first+1)
+%DEF%	NSEEOTHER	(_SEEOTHER_last-_SEEOTHER_first+1)
+%DEF%	NSEELICENSE	(_SEELICENSE_last-_SEELICENSE_first+1)
+%DEF%	NSEEREADME	(_SEEREADME_last-_SEEREADME_first+1)
 %DEF%	NFILTER		(_FILTER_last-_FILTER_first+1)
 %DEF%	NMINlicense	(_MINlicense_last-_MINlicense_first+1)
 %DEF%	NMINsource	(_MINsource_last-_MINsource_first+1)
