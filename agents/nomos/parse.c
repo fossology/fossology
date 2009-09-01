@@ -15,7 +15,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ***************************************************************/
-/* Equivalent to version 1.77 of Core Nomos code. */
+/* Equivalent to version 1.78 of Core Nomos code. */
 #include <ctype.h>
 
 #include "nomos.h"
@@ -99,9 +99,7 @@ static void dumpMatch(char *, char *);
 void locateRegex(char *, item_t *, int, int, int, int);
 void saveRegexLocation(int, int, int, int);
 void saveUnclBufLocation(int);
-#ifdef SAVE_UNCLASSIFIED_LICENSES
 void saveLicenseParagraph(char *, int , int , int);
-#endif /* SAVE_UNCLASSIFIED_LICENSES */
 char *cplVersion(char *, int, int, int);
 static char *gplVersion(char *, int, int, int);
 char *lgplVersion(char *, int, int, int);
@@ -274,7 +272,6 @@ static int dbgIdxGrep(int licTextIdx, char *buf, int show)
 }
 
 
-
 char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		    int isML, int isPS)
 {
@@ -323,10 +320,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     pd = -1;        /* unchecked */
     cp = filetext;
     maxInterest = IL_INIT;
-#ifdef  SAVE_UNCLASSIFIED_LICENSES
     cur.licPara = NULL_STR;  /* unclassified license data */
     gl.flags &= ~FL_FRAGMENT;
-#endif  /* SAVE_UNCLASSIFIED_LICENSES */
 #ifdef FLAG_NO_COPYRIGHT
     gl.flags &= ~FL_NOCOPYRIGHT;
 #endif /* FLAG_NO_COPYRIGHT */
@@ -1014,7 +1009,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	}
 	if (!lmem[_mLGPL]) {            /* no FSF/GPL-like match yet */
 	    /*
-	     * NOTE: search for LGPL before GPL; the latter matches occurrences of former
+	      NOTE: search for LGPL before GPL; the latter matches 
+	      occurrences of former
 	     */
 	    if (INFILE(_LT_GPL_FONT1) && INFILE(_LT_GPL_FONT2)) {
 		INTERESTING(lDebug ? "GPL(fonts)" : "GPL-exception");
@@ -2889,7 +2885,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		}
 	    }
 	    else if (INFILE(_LT_ALADDIN_RESTRICT)) {
-		INTERESTING("Aladdin-restricted");
+		INTERESTING("Aladdin(RESTRICTED)");
 	    }
 	}
 	else if (INFILE(_LT_AFPL)) {
@@ -2927,7 +2923,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * ADAPTEC
      */
     if (INFILE(_LT_ADAPTEC_OBJ)) {
-	INTERESTING("Adaptec-restricted");
+	INTERESTING("Adaptec(RESTRICTED)");
     }
     else if (INFILE(_CR_ADAPTEC) && INFILE(_LT_ADAPTEC_GPL)) {
 	INTERESTING("Adaptec-GPL");
@@ -3464,7 +3460,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	 * AGFA Monotype
 	 */
 	if (INFILE(_LT_AGFA)) {
-	    INTERESTING("AGFA-restricted");
+	    INTERESTING("AGFA(RESTRICTED)");
 	}
 	else if (INFILE(_LT_AGFA_EULA)) {
 	    INTERESTING("AGFA-EULA");
@@ -4308,23 +4304,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	lmem[_mCMU] = 1;
     }
     /*
-     * The U.S. Gummint
-     */
-    if (INFILE(_LT_USGOVT)) {
-	if (INFILE(_CR_URA)) {
-	    INTERESTING("URA(gov't)");
-	}
-	else {
-	    INTERESTING("Gov't-work");
-	}
-    }
-    else if (INFILE(_LT_USGOVT_RIGHTS1) && INFILE(_LT_PUBLIC)) {
-	INTERESTING(lDebug ? "US-Govt-1" : "Gov't-rights");
-    }
-    else if (INFILE(_LT_USGOVT_RIGHTS2)) {
-	INTERESTING(lDebug ? "US-Govt-2" : "Gov't-rights");
-    }
-    /*
      * University of Chicago
      */
     if (INFILE(_CR_UCHICAGO) && INFILE(_LT_UCHICAGO)) {
@@ -4729,6 +4708,22 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	INTERESTING("Hauppauge");
     }
     /*
+     * Platform Computing Corp (or a generic on-your-intranet-only restriction)
+     */
+    if (INFILE(_LT_INTRANET_ONLY)) {
+	if (INFILE(_CR_PLATFORM_COMP)) {
+	    INTERESTING(lDebug ? "Platfm(1)" : "Platform-Computing(RESTRICTED)");
+	} else {
+	    MEDINTEREST("Intranet-only");
+	}
+    } else if (INFILE(_LT_NOT_INTERNET)) {
+	if (INFILE(_CR_PLATFORM_COMP)) {
+	    INTERESTING(lDebug ? "Platfm(2)" : "Platform-Computing(RESTRICTED)");
+	} else {
+	    MEDINTEREST("Not-Internet");
+	}
+    }
+    /*
      * Curl
      */
     if (URL_INFILE(_URL_CURL)) {
@@ -4773,6 +4768,21 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	INTERESTING("Link-exception");
     }
     /*
+     * The U.S. Gummint
+     */
+    if (INFILE(_LT_USGOVT)) {
+	if (INFILE(_CR_URA)) {
+	    MEDINTEREST("URA(gov't)");
+	} else {
+	    MEDINTEREST("Gov't-work");
+	}
+    } else if (INFILE(_LT_USGOVT_RIGHTS1) && INFILE(_LT_PUBLIC)) {
+	MEDINTEREST(lDebug ? "US-Govt-1" : "Gov't-rights");
+    }
+    else if (INFILE(_LT_USGOVT_RIGHTS2)) {
+	MEDINTEREST(lDebug ? "US-Govt-2" : "Gov't-rights");
+    }
+    /*
      * Check for indemnification statements/requirements
      */
     if HASKW(kwbm, _KW_indemnify) {
@@ -4782,7 +4792,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		    if (lDebug) {
 			(void) sprintf(name+9, "(%d)", i+1);
 		    }
-		    INTERESTING(name);      /* MEDINTEREST? */
+		    MEDINTEREST(name);      /* MEDINTEREST? */
 		    break;
 		}
 	    }
@@ -4847,23 +4857,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	if (INFILE(_LT_SAME_LICENSE_1)) {
 	    INTERESTING(lDebug ? "Same-lic-1" : "Same-license-as");
 	    i = 1;
-	}
-	else if (INFILE(_LT_SAME_LICENSE_2)) {
+	} else if (INFILE(_LT_SAME_LICENSE_2)) {
 	    INTERESTING(lDebug ? "Same-lic-2" : "Same-license-as");
 	    i = 2;
 	}
-#ifdef SAVE_UNCLASSIFIED_LICENSES	
 	if (i) {
 	    if (cur.licPara == NULL_STR) {
-		saveLicenseParagraph(cur.matchBase, isML, isPS,
-				     NO);
-	    }
-	    if (lDiags) {
-		printf("[PERHAPS]\n%s\n[/PERHAPS]\n",
-		       cur.licPara);
+		saveLicenseParagraph(cur.matchBase, isML, isPS, NO);
 	    }
 	}
-#endif	/* SAVE_UNCLASSIFIED_LICENSES */
     }
     gl.flags |= ~FL_SAVEBASE; /* turn off, regardless */
     /*
@@ -4902,17 +4904,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * will (currently) get flagged as an UnclassifiedLicense (so the check
      * for no-warranty was moved ABOVE this check in case we can use that info)
      */
-    if ((*licStr == NULL_CHAR) && !lmem[_fDOC]) {
+    if (maxInterest != IL_HIGH && !lmem[_fDOC]) {
 	pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
 	if (!pd && !HASREGEX(_UTIL_MSGCAT, ftype) &&
 	    checkUnclassified(filetext, size, scp->score, ftype, isML,
 			      isPS, nw)) {
-#ifdef  SAVE_UNCLASSIFIED_LICENSES
-	    if (lDiags) {
-		printf("[PERHAPS]\n%s\n[/PERHAPS]\n",
-		       cur.licPara);
-	    }
-#endif  /* SAVE_UNCLASSIFIED_LICENSES */
 	    strcpy(name, LS_UNCL);
 	    if (isPS) {
 		strcat(name, "(PS)");
@@ -4927,29 +4923,29 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 #endif  /* UNKNOWN_CHECK_DEBUG */
     }
     listClear(&whereList, NO);      /* clear "unused" matches */
-#if	0
-	if (*licStr == NULL_CHAR && !HASKW(kwbm, _KW_public_domain))
-#endif
     /*
      * And, If no other licenses are present but there's a reference to
      * something being non-commercial, better note it now.
      */
-    if (maxInterest != IL_HIGH && !HASKW(kwbm, _KW_public_domain) &&
-	!INFILE(_PHR_COMMERC_NONCOMM)) {
-	if (INFILE(_LT_NONCOMMERCIAL_1)) {
-	    INTERESTING(lDebug ? "NonC(1)" : "Non-commercial!");
+#if	0
+    if (*licStr == NULL_CHAR && !HASKW(kwbm, _KW_public_domain))
+#endif
+	if (maxInterest != IL_HIGH && !HASKW(kwbm, _KW_public_domain) &&
+	    !INFILE(_PHR_COMMERC_NONCOMM)) {
+	    if (INFILE(_LT_NONCOMMERCIAL_1)) {
+		INTERESTING(lDebug ? "NonC(1)" : "Non-commercial!");
+	    }
+	    else if (INFILE(_LT_ZZNON_COMMERC1)) {
+		INTERESTING(lDebug ? "NonC(2)" : "Non-commercial!");
+	    }
+	    else if (INFILE(_LT_ZZNON_COMMERC2)) {
+		INTERESTING(lDebug ? "NonC(3)" : "Non-commercial!");
+	    }
+	    else if (HASTEXT(_TEXT_COMMERC, 0) &&
+		     INFILE(_PHR_NONCOMMERCIAL)) {
+		INTERESTING(lDebug ? "NonC(4)" : "Non-commercial!");
+	    }
 	}
-	else if (INFILE(_LT_ZZNON_COMMERC1)) {
-	    INTERESTING(lDebug ? "NonC(2)" : "Non-commercial!");
-	}
-	else if (INFILE(_LT_ZZNON_COMMERC2)) {
-	    INTERESTING(lDebug ? "NonC(3)" : "Non-commercial!");
-	}
-	else if (HASTEXT(_TEXT_COMMERC, 0) &&
-		 INFILE(_PHR_NONCOMMERCIAL)) {
-	    INTERESTING(lDebug ? "NonC(4)" : "Non-commercial!");
-	}
-    }
     if (INFILE(_LT_NOT_OPENSOURCE)) {
 	INTERESTING("Not-OpenSource!");
     }
@@ -6392,7 +6388,7 @@ void locateRegex(char *text, item_t *op, int index, int size, int sso, int seo)
 
     /*
      * First step, simplest case - try to locate the regex in the file.  It
-     * *might* be that easy (but not very often, it turns out.
+     * *might* be that easy (but not very often, it turns out).
      */
     if (idxGrep(index, text, REG_ICASE|REG_EXTENDED)) {
 	saveRegexLocation(index, cur.regm.rm_so,
@@ -6935,6 +6931,11 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
 		*cp = INVISIBLE;
 	    }
 	    break;
+	case '<':
+	    if (strncasecmp(cp, "<string", 7) == 0) {
+		(void) strncpy(cp, "          ", 7);
+	    }
+	    /* CDB - Big #ifdef 0 left out */
 	case '\001': case '\002': case '\003': case '\004':
 	case '\005': case '\006': case '\016': case '\017':
 	case '\020': case '\021': case '\022': case '\023':
@@ -7247,6 +7248,18 @@ int checkUnclassified(char *filetext, int size, int score, char *ftype,
 	INTERESTING("Debian-social-DFSG");
 	return(0);
     }
+    /*
+     * A Generic EULA 'qualifies' as an UnclassifiedLicense, too... check this
+     * one before trying the word-matching magic checks (below).
+     */
+    gl.flags |= FL_SAVEBASE;	/* save match buffer (if any) */
+    if (INFILE(_LT_GEN_EULA)) {
+	if (cur.licPara == NULL_STR) {
+	    saveLicenseParagraph(cur.matchBase, isML, isPS, NO);
+	}
+	return(1);
+    }
+    gl.flags &= ~FL_SAVEBASE;	/* turn off, regardless */
 #ifdef  NO_NW
     checknw = nw;
 #endif  /* NO_NW */
@@ -7342,12 +7355,73 @@ int checkUnclassified(char *filetext, int size, int score, char *ftype,
 void checkFileReferences(char *filetext, int size, int score, int kwbm,
    int isML, int isPS)
 {
+    int i;
 
 #ifdef  PROC_TRACE
 	traceFunc("== checkFileReferences(%p, %d, %d, 0x%x, %d, %d)\n", filetext,
 	       size, score, kwbm, isML, isPS);
 #endif  /* PROC_TRACE */
+	for (i = 0; i < NSEECOPYING; i++) {
+	    if (INFILE(_SEECOPYING_first+i)) {
+		if (lDebug) {
+		    (void) sprintf(name, "Gen-CPY-%d", ++i);
+		    INTERESTING(name);
+		} else {
+		    INTERESTING("See-file(COPYING)");
+		}
+		return;
+	    }
+	}
+/* */
+	for (i = 0; i < NSEELICENSE; i++) {
+	    if (INFILE(_SEELICENSE_first+i)) {
+		if (lDebug) {
+		    (void) sprintf(name, "Gen-CPY-%d", ++i);
+		    INTERESTING(name);
+		} else {
+		    INTERESTING("See-file(LICENSE)");
+		}
+		return;
+	    }
+	}
+/* */
+	for (i = 0; i < NSEEREADME; i++) {
+	    if (INFILE(_SEEREADME_first+i)) {
+		if (lDebug) {
+		    (void) sprintf(name, "Gen-CPY-%d", ++i);
+		    INTERESTING(name);
+		} else {
+		    INTERESTING("See-file(README)");
+		}
+		return;
+	    }
+	}
+	/* */
+	for (i = 0; i < NSEEOTHER; i++) {
+	    if (INFILE(_SEEOTHER_first+i)) {
+		if (lDebug) {
+		    (void) sprintf(name, "Gen-CPY-%d", ++i);
+		    INTERESTING(name);
+		} else {
+		    INTERESTING("See-doc(OTHER)");
+		}
+		return;
+	    }
+	}
+	/* */
+	if (INFILE(_LT_SEE_OUTPUT_1)) {
+	    INTERESTING(lDebug ? "Gen-EXC-1" : "GNU-style(EXECUTE)");
+	}
+#if	0
+	else if (INFILE(_LT_SEE_OUTPUT_2)) {
+	    INTERESTING(lDebug ? "Gen-EXC-2" : "Free-SW(run-COMMAND)");
+	} else if (INFILE(_LT_SEE_OUTPUT_3)) {
+	    INTERESTING(lDebug ? "Gen-EXC-3" : "Free-SW(run-COMMAND)");
+	}
+#endif
+	return;
 
+#ifdef OLD_VERSION
     if (INFILE(_LT_SEE_COPYING_1)) {
 	INTERESTING(lDebug ? "Gen-CPY-1" : "See-file(COPYING)");
     }
@@ -7469,6 +7543,7 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
 	INTERESTING(lDebug ? "Gen-EXC-1" : "GNU-style(interactive)");
     }
     return;
+#endif  /* OLD_VERSION */
 }
 
 
@@ -8031,7 +8106,7 @@ void checkCornerCases(char *filetext, int size, int score,
 	    }
 	}
     }
-    if (nw && maxInterest < IL_MED) {
+    if (nw && maxInterest < IL_MED) { /* not HIGH, nor MEDIUM */
 	LOWINTEREST("No-warranty");
     }
     /*
@@ -8134,7 +8209,6 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
      * to NOT be present in licenses...
      */
     if (save) {
-#ifdef	SAVE_UNCLASSIFIED_LICENSES
 	for (j = i = 0, cp = buf; *cp; i++, cp++) {
 	    if (*cp & 0200) {
 		j++;
@@ -8200,7 +8274,10 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
 	    return(0);
 	}
 	if (lDiags) {
+#if 0
 	    printf("<POSSIBLE>\n%s\n</POSSIBLE>\n", buf);
+#endif
+	    printf("... candidate paragraph analysis:\n");
 	    for (i = j = 0; i < NKEYWORDS; i++) {
 		if (idxGrep(i+_KW_first, buf,
 			    REG_EXTENDED|REG_ICASE)) {
@@ -8247,7 +8324,6 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
 	if (cur.licPara == NULL_STR) {
 	    saveLicenseParagraph(buf, isML, isPS, YES);
 	}
-#if	0
 	for (i = 0; i < NFILTER; i++) {
 	    if (dbgIdxGrep(_FILTER_first+i, buf, lDiags)) {
 		if (lDiags) {
@@ -8256,13 +8332,10 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
 		return(0);
 	    }
 	}
-#endif
     }
-#endif	/* SAVE_UNCLASSIFIED_LICENSES */
     return(1);
 }
 
-#ifdef	SAVE_UNCLASSIFIED_LICENSES 
 void saveLicenseParagraph(char *buf, int isML, int isPS, int entireBuf)
 {
     char *cp;
@@ -8290,9 +8363,6 @@ void saveLicenseParagraph(char *buf, int isML, int isPS, int entireBuf)
 	(void) strncpy(cur.licPara + 4, start, len);
 	(void) strcpy(cur.licPara + len + 4, " ...");
     }
-#ifdef 0
-    doctorBuffer(cur.licPara, isML, isPS, NO);
-#endif
 /*
  * Convert double-line-feed chars ("\r" and "\n" combos) to a single "\n"
  */
@@ -8303,9 +8373,11 @@ void saveLicenseParagraph(char *buf, int isML, int isPS, int entireBuf)
 	    *(cp+1) = '\n';
 	}
     }
+    if (lDiags) {
+	printf("[PERHAPS]\n%s\n[/PERHAPS]\n", cur.licPara);
+    }
     return;
 }
-#endif	/* SAVE_UNCLASSIFIED_LICENSES */
 
 #ifdef  LTSR_DEBUG
 #define LT_TARGET       1299    /* set to -1 OR the string# to track */
@@ -8356,9 +8428,5 @@ void dumpMatch(char *text, char *label)
     printf("]\n");
     return;
 }
-
-
-
-
 
 
