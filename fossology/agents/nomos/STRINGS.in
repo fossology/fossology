@@ -69,6 +69,10 @@
 %KEY%	"in(demnif|tellect)"
 %STR%	"indemnif[iy]"
 %ALIAS%	_HOT_indemnif
+#
+%ENTRY%	_KW_intellect_prop
+%KEY%	"in(demnif|tellect)"
+%STR%	"intellectual propert"
 #####
 # We're interesting in liability, but NOT reliability
 #####
@@ -217,6 +221,10 @@
 %KEY%	"permi[st]"
 %STR%	"permission is granted for r?e?-?distribution of this file"
 #
+%ENTRY%	_LT_ADOBE_EULA
+%KEY%	"licen[cs]"
+%STR%	"and is subject to all restrictions on such code as contained in the end[ -]user licen[cs]e agreement accompanying this product"
+#
 %ENTRY%	_LT_ADOBE_OTHER
 %KEY%	"distribut"
 %STR%	"adobe permits you to use modify and distribute this file in accordance with the terms of the licen[cs]e agreement accompanying it"
@@ -329,6 +337,10 @@
 %ENTRY%	_LT_AMD
 %KEY%	"distribut"
 %STR%	"property of Advanced Micro Devices Inc AMD which specifically grants the user the right to modify use and/?o?r? distribute this"
+#
+%ENTRY%	_LT_AMD_EULA
+%KEY%	"distribut"
+%STR%	"regardless of the media upon which it is distributed the software is licen[cs]ed to you for use solely in conjunction with AMD hardware products"
 #
 %ENTRY%	_LT_AOL_EULA
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
@@ -694,7 +706,7 @@
 #####
 %ENTRY%	_LT_BOOKPURCHASE
 %KEY%	"\<b(y|ook)\>"
-%STR%	"(possess|purchase|buy|own) =SOME= copy of =SOME= book"
+%STR%	"(must|require) =FEW= (possess|purchase|buy|own) =SOME= copy of =SOME= book"
 #####
 # DELETED: ... =ANY= to use reproduce display distribute execute and
 # transmit the software
@@ -1205,7 +1217,7 @@
 #####
 %ENTRY%	_LT_EDS_1
 %KEY%	"so(ftware|urce)"
-%STR%	"all right title and interest in and to the software the software and the accompanying documentation or materials the documentation including all"
+%STR%	"all right title and interest in and to the software the software and (the a|a)ccompanying documentation or materials the documentation including all"
 #####
 # DELETED: ... is granted by implication or otherwise.
 #####
@@ -1569,10 +1581,19 @@
 #
 %ENTRY%	_LT_FREE_58
 %KEY%	"distribut"
-%STR%	"(can|may) be freely r?e?-?distributed provided that all copyright notices are retained"
-%ALIAS%	_FREE_last_dist
+%STR%	"unlimited permission is granted to use copy and distribute =FEW= with or without modification either commercially and noncommercially"
+%ALIAS%	_LT_MPLUS_FONT
 #
 %ENTRY%	_LT_FREE_59
+%KEY%	"distribut"
+%STR%	"(can|may) be freely r?e?-?distributed provided that all copyright notices are retained"
+#
+%ENTRY%	_LT_FREE_60
+%KEY%	"distribut"
+%STR%	"distribute and use freely there are no restrictions on further dissemination and usage except those imposed by the laws of your country of residence"
+%ALIAS%	_FREE_last_dist
+#
+%ENTRY%	_LT_FREE_61
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"every(body|one) is permitted to do anything on this program including copying modifying improving as long as you don? t try to pretend that you wrote it ie the above copyright notice has to appear in all copies"
 %ALIAS%	_LT_FUJITSU
@@ -1580,33 +1601,33 @@
 #####
 # DELETED: notice and the disclaimer below are preserved without change
 #####
-%ENTRY%	_LT_FREE_60
+%ENTRY%	_LT_FREE_62
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"every(body|one) is hereby grante(d|d the) rights? to use copy and modify this (file|product|program|sourc(e|e code)|software|work|code|document|page) provided only that this copyright"
 #
-%ENTRY%	_LT_FREE_61
+%ENTRY%	_LT_FREE_63
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"are allowed to change and copy =SOME= if you keep the copyright message intact"
 #####
 # DELETED: ... it is a modified version and the person(s) who modified it
 #####
-%ENTRY%	_LT_FREE_62
+%ENTRY%	_LT_FREE_64
 %KEY%	"so(ftware|urce)"
 %STR%	"free software you are allowed to use and distribute (it|them|this software) in any way you like you are also allowed to make modified versions of it but you (can|may) distribute a modified version only if you clearly indicate that"
 #
-%ENTRY%	_LT_FREE_63
+%ENTRY%	_LT_FREE_65
 %KEY%	"so(ftware|urce)"
 %STR%	"this software (can|may) be used freely for any purpose any derived versions? of this software must be clearly marked as such"
 #
-%ENTRY%	_LT_FREE_64
+%ENTRY%	_LT_FREE_66
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"is free you (can|may) do with it whatever you (want|like|desire|wish)"
 #
-%ENTRY%	_LT_FREE_65
+%ENTRY%	_LT_FREE_67
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"in this (release|directory|product|distribution) (is|are|are all) free software"
 #
-%ENTRY%	_LT_FREE_66
+%ENTRY%	_LT_FREE_68
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"free to use as you see fit"
 %ALIAS%	_FREE_last_other
@@ -4741,6 +4762,10 @@ k
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= adobe systems"
 #
+%ENTRY%	_CR_ADOBE_MACROMEDIA
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= adobe macromedia"
+#
 %ENTRY%	_CR_AGE
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= age logic"
@@ -5139,6 +5164,10 @@ k
 %ENTRY%	_CR_MITEM
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= mitem =SOME= europe"
+#
+%ENTRY%	_CR_MPLUS
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= m\+ fonts project"
 #
 %ENTRY%	_CR_MSCORP
 %KEY%	"\<micros(oft|ystems)\>"
@@ -5595,6 +5624,10 @@ k
 %ENTRY%	_TITLE_ALFRESCO
 %KEY%	"licen[cs]"
 %STR%	"alfresco software =FEW= FLOSS licen[cs]e exception"
+#
+%ENTRY%	_TITLE_AMD_EULA
+%KEY%	"licen[cs]"
+%STR%	"AMD software =FEW= end[ -]user licen[cs]e agreement"
 #
 %ENTRY%	_TITLE_APPLE_SLA
 %KEY%	"\<ap(ache|ple)\>"
@@ -7320,7 +7353,7 @@ k
 %KEY%	"so(ftware|urce)"
 %STR%	"source"
 #
-%ENTRY%	_TEXT_SUN
+%ENTRY%	_TEXT_MICROSYSTEMS
 %KEY%	"\<micros(oft|ystems)\>"
 %STR%	"\<microsystems\>"
 #
@@ -8013,7 +8046,7 @@ k
 #
 %ENTRY%	_LEGAL_OBJS
 %KEY%	=NULL=
-%STR%	"(\<copyright\>|\<licen[cs]e\>|\<terms\>|\<agreement\>|\<program\>|\<software\>|\<library\>|\<source\>|\<binary\>|\<document\>|\<manual\>|\<files?\>|derivat|modification|change|representation)"
+%STR%	"(\<copyright\>|\<patent\>|\<trade(mark| ?dress)\>|\<licen[cs]e\>|\<terms\>|\<agreement\>|\<program\>|\<software\>|\<library\>|\<source\>|\<binary\>|\<document\>|\<manual\>|\<product\>|\<files?\>|derivat|modification|change|representation)"
 #
 %ENTRY%	_LEGAL_PERMS
 %KEY%	=NULL=
@@ -8029,7 +8062,7 @@ k
 #####
 %ENTRY%	_LEGAL_FILTER_1
 %KEY%	=NULL=
-%STR%	"(follow(ing| the) sign[ -]off|old mechanism|future changes)"
+%STR%	"(follow(ing| the) sign[ -]off|old mechanism|future changes|master system|(en|de)crypt|cryptograph|posix[ -]mode|home[ -]?page|completed)"
 %ALIAS%	_FILTER_first
 # Foreign words
 %ENTRY%	_LEGAL_FILTER_FOREIGN
@@ -8055,7 +8088,7 @@ k
 #
 %ENTRY%	_UTIL_BOL_MAGIC
 %KEY%	=NULL=
-%STR%	"^(dnl|COMMENT[	 ]|XCOMM|REM[	 ]|//|%%copyright:|@[ac]|>|\\\\par)"
+%STR%	"^(dnl|COMMENT[	 ]|XCOMM|REM[	 ]|//|%%copyright:|@[acr]|>|\\\\par)"
 #
 %ENTRY%	_UTIL_SHAR
 %KEY%	=NULL=
