@@ -15,7 +15,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ***************************************************************/
-/* Equivalent to version 1.79 of Core Nomos code. */
+/* Equivalent to version 1.81 of Core Nomos code. */
 #include <ctype.h>
 
 #include "nomos.h"
@@ -4935,6 +4935,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		strcat(name, "(PS)");
 	    }
 	    MEDINTEREST(name);
+	    checkCornerCases(filetext, size, score, kwbm, isML, isPS, nw, YES);
 	}
 #ifdef  UNKNOWN_CHECK_DEBUG
 	else {
@@ -7362,6 +7363,11 @@ int checkUnclassified(char *filetext, int size, int score, char *ftype,
 	    saveUnclBufLocation(i);
 	    return(1);
 	}
+#ifdef	UNKNOWN_CHECK_DEBUG
+	else {
+	    printf("DEBUG: match() returns 0, look again\n");
+	}
+#endif	/* UNKNOWN_CHECK_DEBUG */
 	/*
 	 * NO-match means this paragraph doesn't contain the magic words we
 	 * seek.  However, this file still _may_ contain the magic paragraph --
@@ -8386,10 +8392,18 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
 #endif	/* PROC_TRACE_SWITCH */
 	printf("== match3(%d, %p, %d, %d, %d, %d)\n", base, buf, score, save,
 	       isML, isPS);
-#endif	/* PROC_TRACE */
+#else	/* not PROC_TRACE */
+#ifdef	UNKNOWN_CHECK_DEBUG
+	printf("== match3(%d, %p, %d, %d, %d, %d)\n", base, buf, score, save,
+	    isML, isPS);
+#endif	/* UNKNOWN_CHECK_DEBUG */
+#endif	/* not PROC_TRACE */
     /* */
     for (i = 1; i <= 3; i++) {
 	if (dbgIdxGrep(base+i, buf, (save && lDiags)) == 0) {
+#ifdef	UNKNOWN_CHECK_DEBUG
+	    printf("match3: FAILED regex (%d)!\n", base+i);
+#endif	/* UNKNOWN_CHECK_DEBUG */
 	    return(0);
 	}
     }
@@ -8420,24 +8434,25 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
 	    }
 	    return(0);
 	}
-#if	0
+	/*
+	  We need to allocate space for a doctored-up version of the candidate
+	  unknown-license paragraph, but it's ONLY used in this function.  E.g.,
+	  make darn sure we free it up before exiting this function...
+	*/
 	cp = copyString(buf, MTAG_TEXTPARA);
 	doctorBuffer(cp, isML, isPS, NO);
-#if defined(UNKNOWN_CHECK_DEBUG) || defined(DOCTOR_DEBUG)
-	printf("doctored buf (para):\n<dr>\n%s\n</dr>\n", cp);
-#endif	/* UNKNOWN_CHECK_DEBUG || DOCTOR_DEBUG */
-#endif
 	/*
 	  If we detected a no-warraty statement earlier, "checknw" is != 0. 
 	  Look for a no-warrany statement in this candidate paragraph.  
 	  If we find it, report failure for the paragraph and remember 
 	  finding the no--warranty.
 	 */
-	if (checknw && idxGrep(checknw, buf, REG_ICASE|REG_EXTENDED)) {
+	if (checknw && idxGrep(checknw, cp, REG_ICASE|REG_EXTENDED)) {
 	    if (lDiags) {
 		printf("... no, warranty regex %d\n", checknw);
 	    }
 	    checknw = 0;
+	    memFree(cp, MTAG_TEXTPARA);
 	    return(0);
 	}
 	/*
@@ -8447,10 +8462,11 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
 	  "This file is distributed under the same license as the 
 	  package PACKAGE"
 	 */
-	if (dbgIdxGrep(_LT_BOGUSTMPL, cp, NO)) {
+	if (dbgIdxGrep(_LT_BOGUSTMPL, cp, lDiags)) {
 	    if (lDiags) {
 		printf("... no, FSF-GNU template\n");
 	    }
+	    memFree(cp, MTAG_TEXTPARA);
 	    return(0);
 	}
 	/*
@@ -8463,88 +8479,107 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
 	    if (lDiags) {
 		printf("... no, GNU-GPL preamble\n");
 	    }
+	    memFree(cp, MTAG_TEXTPARA);
 	    return(0);
 	}
 	if (lDiags) {
 	    printf("... candidate paragraph analysis:\n");
-	    for (i = j = 0; i < NKEYWORDS; i++) {
-		if (idxGrep(i+_KW_first, buf,
-			    REG_EXTENDED|REG_ICASE)) {
+	}
+	for (i = j = 0; i < NKEYWORDS; i++) {
+	    if (idxGrep(i+_KW_first, cp, REG_EXTENDED|REG_ICASE)) {
+		if (lDiags) {
 		    printf("%s", j ? ", " : "KEYWORDS: ");
 		    printf("%s", _REGEX(i+_KW_first));
-		    j++;
 		}
+		j++;
 	    }
+	}
+	if (lDiags) {
 	    if (j) {
 		printf("\n");
 	    }
-	    printf("SCORES: para %d, score %d == %05.2f%% ", j,
+	    printf("SCORES: para %d, file %d == %05.2f%% ", j,
 		   score, 100.0 * (float) j / (float) score);
-	    /*
-	      We guess that an UnclassifiedLicense exists in a paragraph when:
-	      + a paragraph has a keyword-score of at least 3 -OR-
-	      + ... a keyword-score of 2 *AND* is >= 50% of the file's total 
-	      score.
-	     
-	      Minimal imperical studying shows a success-rate of 40% doesn't 
-	      tend to find "real" licenses.  And it's likely we'll see a 
-	      few false-positives with a keyword-score of 2 but there are 
-	      cases where this works. And finally, a keyword-score of 1 is 
-	      hardly ever 'interesting'.
-	     */
-	    if (j == 0) {	/* no license-like keywords */
-		printf("(ZERO legal keywords)\n");
-		return(0);
-	    }
-	    if ((j >= 3) || ((j == 2) && ((j * 2) >= score))) {
-		if (j >= 3) {
-		    printf("LIKELY: para-score >= 3)\n");
-		}
-		else {
-		    printf("(MAYBE: local percentage)\n");
-		}
-	    }
-	    else {
-		printf("(NOT LIKELY a license)\n");
-		printf("[FAILED]\n%s\n[/FAILED]\n", buf);
-		return(0);
-	    }
 	}
 	/*
-	  Sure, there ARE paragraphs with these words that do NOT constitute 
-	  a real license.  Look for key words and phrases of them HERE.  
-	  This list of filters will likely grow over time.
+	  Here, we guess that an UnclassifiedLicense exists in a paragraph 
+	  when: 
+	     + a paragraph has a keyword-score of at least 3 -OR-
+	     + ... a keyword-score of 2 *AND* is >= 50% of the file's 
+	       total score
+	
+	  It's likely we'll see a few false-positives with a 
+	  keyword-score of 2 but there are cases where this works.  
+	  We can filter out the 2-scores we see
+	  with the FILTER checks below...
+	 */
+	if (j == 0) {	/* no license-like keywords */
+	    if (lDiags) {
+		printf("(ZERO legal keywords)\n");
+	    }
+	    memFree(cp, MTAG_TEXTPARA);
+	    return(0);
+	}
+	if (j >= 3 || (j == 2 && j*2 >= score)) {
+	    if (j >= 3 && lDiags) {
+		printf("(LIKELY: para-score >= 2)\n");
+	    }
+	    else if (lDiags) {
+		printf("(MAYBE: local percentage)\n");
+	    }
+	}
+	else {
+	    if (lDiags) {
+		printf("(NOT LIKELY a license)\n");
+#if	0
+#endif
+		printf("[FAILED]\n%s\n[/FAILED]\n", buf);
+	    }
+	    memFree(cp, MTAG_TEXTPARA);
+	    return(0);
+	}
+	/*
+	  Sure, there ARE paragraphs with these words that do NOT constitute a
+	  real license.  Look for key words and phrases of them HERE.  This list
+	  of filters will likely grow over time.
 	 */
 	for (i = 0; i < NFILTER; i++) {
 	    if (dbgIdxGrep(_FILTER_first+i, buf, lDiags)) {
 		if (lDiags) {
 		    printf("!! NO-LIC: filter %d\n", ++i);
 		}
+		memFree(cp, MTAG_TEXTPARA);
 		return(0);
 	    }
 	}
 	if (cur.licPara == NULL_STR) {
 	    saveLicenseParagraph(buf, isML, isPS, YES);
 	}
+	memFree(cp, MTAG_TEXTPARA);
     }
+#ifdef	UNKNOWN_CHECK_DEBUG
+    else {
+	printf("match3: Initial-check only (save == %d)\n", save);
+    }
+#endif	/* UNKNOWN_CHECK_DEBUG */
     return(1);
 }
 
-void saveLicenseParagraph(char *buf, int isML, int isPS, int entireBuf)
+void saveLicenseParagraph(char *mtext, int isML, int isPS, int entireBuf)
 {
     char *cp;
-    char *start = buf;
+    char *start = mtext;
     int len;
 /* */
 #ifdef	PROC_TRACE
 #ifdef	PROC_TRACE_SWITCH
     if (gl.ptswitch)
 #endif	/* PROC_TRACE_SWITCH */
-	printf("== saveLicenseParagraph(%p, %d, %d, %d)\n", buf, isML, isPS, entireBuf);
+	printf("== saveLicenseParagraph(%p, %d, %d, %d)\n", mtext, isML, isPS, entireBuf);
 #endif	/* PROC_TRACE */
 /* */
     if (entireBuf) {
-	cur.licPara = copyString(buf, MTAG_TEXTPARA);
+	cur.licPara = copyString(mtext, MTAG_TEXTPARA);
     } else {
 	if (cur.regm.rm_so < 50) {
 	    len = cur.regm.rm_eo + 80;
@@ -8568,7 +8603,7 @@ void saveLicenseParagraph(char *buf, int isML, int isPS, int entireBuf)
 	}
     }
     if (lDiags) {
-	printf("[PERHAPS]\n%s\n[/PERHAPS]\n", cur.licPara);
+	printf("[PERHAPS] (%p)\n%s\n[/PERHAPS]\n", cur.licPara, cur.licPara);
     }
     return;
 }
