@@ -134,7 +134,7 @@ class agent_fonomos extends FO_Plugin {
     $jqargs = "SELECT pfile_pk,
               pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size  AS pfilename
               FROM (SELECT distinct(pfile_fk) AS PF
-              FROM uploadtree WHERE upload_fk=$uploadpk) as SS
+              FROM uploadtree WHERE upload_fk=$uploadpk and (ufile_mode&x'3C000000'::int)=0) as SS
               left outer join license_file on (PF=pfile_fk and agent_fk=$agentPk)
               inner join pfile on (PF=pfile_pk) WHERE fl_pk IS null;";
 
