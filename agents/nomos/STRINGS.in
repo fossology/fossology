@@ -122,6 +122,10 @@
 %KEY%	"so(ftware|urce)"
 %STR%	"source code"
 #
+%ENTRY%	_KW_subject_to
+%KEY%	=NULL=
+%STR%	"subject \<to\>"
+#
 %ENTRY%	_KW_terms_conditions
 %KEY%	"(condit|vers)ion"
 %STR%	"terms and conditions"
@@ -3704,7 +3708,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_SAME_LICENSE_1
 %KEY%	"\<under\>"
-%STR%	"(released|licen[cs]ed|distributed) under (identical|the ((very s|s)ame|exact)) (licen[cs]e|term(s|s and conditions)) as"
+%STR%	"(released|licen[cs]ed|distributed) under (identical|the ((very s|s)ame|exact)) ((restrictions? and l|l)icen[cs]es?|term(s|s and conditions)) (that|as)"
 #
 %ENTRY%	_LT_SAME_LICENSE_2
 %KEY%	"(condit|vers)ion"
@@ -4519,7 +4523,7 @@ k
 #####
 %ENTRY%	_LT_SEE_COPYING_1
 %KEY%	"licen[cs]"
-%STR%	"under the terms of the licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<copying\>|\<copying\> file)"
+%STR%	"under th(e|e terms of the) licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<copying\>|\<copying\> file)"
 %ALIAS%	_SEECOPYING_first
 #####
 # DELETED:
@@ -4550,6 +4554,10 @@ k
 %ENTRY%	_LT_SEE_COPYING_7
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"maintains copyright as (list|mention|outline|contain|state|describe|set out) =SOME= ((file|doc) =FEW= \<copying\>|\<copying\> (file|doc))"
+#
+%ENTRY%	_LT_SEE_COPYING_8
+%KEY%	"(condit|vers)ion"
+%STR%	"you agree to the terms and conditions (set forth|listed|contained|presented|described) in the (file =FEW= \<copying\>|\<copying\> file)"
 #####
 # These MUST be the last 2 checks for license references in the file "copying"
 #####
@@ -4569,7 +4577,7 @@ k
 #####
 %ENTRY%	_LT_SEE_OTHER_1
 %KEY%	"licen[cs]"
-%STR%	"under the terms of the licen[cs]e (contained|listed|described|set (out|forth)|given|found) (at|in) th(e (ur[il]|file)|e =FEW= (file|dir|media|note|pub|doc))"
+%STR%	"under th(e|e terms of the) licen[cs]e (contained|listed|described|set (out|forth)|given|found) (at|in) th(e (ur[il]|file)|e =FEW= (file|dir|media|note|pub|doc))"
 %ALIAS%	_SEEOTHER_first
 #
 %ENTRY%	_LT_SEE_OTHER_2
@@ -4622,7 +4630,7 @@ k
 #####
 %ENTRY%	_LT_SEE_LICENSE_1
 %KEY%	"licen[cs]"
-%STR%	"under the terms of the licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
+%STR%	"under th(e|e terms of the) licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
 %ALIAS%	_SEELICENSE_first
 #
 %ENTRY%	_LT_SEE_LICENSE_2
@@ -4649,6 +4657,10 @@ k
 %ENTRY%	_LT_SEE_LICENSE_7
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"maintains copyright as (list|mention|outline|contain|state|describe|set out) =SOME= ((file|doc) =FEW= \<licen[cs]e\>|\<licen[cs]e\> (file|doc))"
+#
+%ENTRY%	_LT_SEE_LICENSE_8
+%KEY%	"(condit|vers)ion"
+%STR%	"you agree to the terms and conditions (set forth|listed|contained|presented|described) in the (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
 #####
 # These MUST be the last 2 checks for license references in the file "license"
 #####
@@ -4682,7 +4694,7 @@ k
 #####
 %ENTRY%	_LT_SEE_README_1
 %KEY%	"licen[cs]"
-%STR%	"under the terms of the licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<readme\>|\<readme\> file)"
+%STR%	"under th(e|e terms of the) licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<readme\>|\<readme\> file)"
 %ALIAS%	_SEEREADME_first
 #
 %ENTRY%	_LT_SEE_README_2
@@ -4709,6 +4721,10 @@ k
 %ENTRY%	_LT_SEE_README_7
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"maintains copyright as (list|mention|outline|contain|state|describe|set out) =SOME= ((file|doc) =FEW= \<readme\>|\<readme\> (file|doc))"
+#
+%ENTRY%	_LT_SEE_README_8
+%KEY%	"(condit|vers)ion"
+%STR%	"you agree to the terms and conditions (set forth|listed|contained|presented|described) in the (file =FEW= \<readme\>|\<readme\> file)"
 #####
 # These MUST be the last 2 checks for license references in the file "readme"
 #####
@@ -6949,37 +6965,45 @@ k
 #####
 %ENTRY%	_PHR_NO_WARRANTY_1
 %KEY%	"(docume|warra)nt"
-##%STR%	"as[ -]is =SOME= warrant =SOME= limited =SOME= implied"
-%STR%	"warrant =SOME= limited =SOME= implied"
+%STR%	"implied warrant(y|ies) of merchantability (and|or|and/or) fitness for a particular purpose"
 %ALIAS%	_NO_WARRANTY_first
 #
+#####
 %ENTRY%	_PHR_NO_WARRANTY_2
+%KEY%	"(docume|warra)nt"
+%STR%	"warrant =SOME= limited =SOME= implied"
+#
+%ENTRY%	_PHR_NO_WARRANTY_3
 %KEY%	"(docume|warra)nt"
 ##%STR%	"as[ -]is =FEW= (with no|without|without a|without any) =SOME= warrant"
 %STR%	"((provides?|has|is|with|absolutely) no|withou(t|t a)) =SOME= warrant"
 #
-%ENTRY%	_PHR_NO_WARRANTY_3
+%ENTRY%	_PHR_NO_WARRANTY_4
 %KEY%	"(docume|warra)nt"
 ##%STR%	"as[ -]is =FEW= (with no|without|without a|without any) =FEW= expresse?d? =SOME= warrant"
 %STR%	"(with no|without|without a|without any) =FEW= expresse?d? =SOME= warrant"
 #
-%ENTRY%	_PHR_NO_WARRANTY_4
+%ENTRY%	_PHR_NO_WARRANTY_5
 %KEY%	"(docume|warra)nt"
 %STR%	"no warrant =FEW= (extend|appl[iy])"
 #
-%ENTRY%	_PHR_NO_WARRANTY_5
+%ENTRY%	_PHR_NO_WARRANTY_6
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"author =FEW= (can ?|may|shall) not be held (liable|responsible)"
 #
-%ENTRY%	_PHR_NO_WARRANTY_6
+%ENTRY%	_PHR_NO_WARRANTY_7
 %KEY%	"(condit|vers)ion"
 %STR%	"version of =FEW= or any supplier of any of such parties be liable to any person for any"
 #
-%ENTRY%	_PHR_NO_WARRANTY_7
+%ENTRY%	_PHR_NO_WARRANTY_8
 %KEY%	"(condit|vers)ion"
 %STR%	"is no warranty for =FEW= to the extent permitted by (applicable l|l)aw"
 #
-%ENTRY%	_PHR_NO_WARRANTY_8
+%ENTRY%	_PHR_NO_WARRANTY_9
+%KEY%	"(docume|warra)nt"
+%STR%	"no warranty expresse?d? or implied is made"
+#
+%ENTRY%	_PHR_NO_WARRANTY_10
 %KEY%	"licen[cs]"
 %STR%	"is licen[cs]ed free of charge (and t|t)here is no warranty for"
 %ALIAS%	_NO_WARRANTY_last
@@ -6994,7 +7018,7 @@ k
 #
 %ENTRY%	_PHR_NOT_UNDER_GPL
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"\<not\> =SOME= (free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|\<(and|or|by)\>) =SOME= ([^l]gpl|(general p|p)ublic licen[cs]e)"
+%STR%	"\<not\> =FEW= (free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|\<(and|or|by)\>) =SOME= ([^l]gpl|(general p|p)ublic licen[cs]e)"
 #
 %ENTRY%	_PHR_NOT_UNDER_LGPL
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -8026,7 +8050,7 @@ k
 #
 %ENTRY%	_LEGAL_VERBS
 %KEY%	=NULL=
-%STR%	"(r?e?-?distribut(e|ion)|deploy|publish|replicat|[^/]\<cop(y|ied)\>|contribut|execute|execution|sublicen[cs]\<r?e?-?sell\>|\<sold\>|<reserve[ds]?\>|(term|condition)s? appl(y|ies)|for sale|ma[dk]e available|copyleft|retain|confer|convey|\<provided?>\>)"
+%STR%	"(r?e?-?distribut(e|ion)|deploy|publish|replicat|[^/]\<cop(y|ied)\>|contribut|execute|execution|sublicen[cs]\<r?e?-?sell\>|\<sold\>|<reserve[ds]?\>|(term|condition)s? appl(y|ies)|for sale|ma[dk]e available|copyleft|retain|confer|convey|licen[cs]ed|\<provided?>\>)"
 %ALIAS%	_LEGAL_first
 #####
 # Interesting observation -- some licenses are actually worded with NO "owner"
@@ -8062,7 +8086,7 @@ k
 #####
 %ENTRY%	_LEGAL_FILTER_1
 %KEY%	=NULL=
-%STR%	"(follow(ing| the) sign[ -]off|old mechanism|future changes|master system|(en|de)crypt|cryptograph|posix[ -]mode|home[ -]?page|completed)"
+%STR%	"(follow(ing| the) sign[ -]off|old mechanism|future changes|master system|(en|de)crypt|cryptograph|posix[ -]mode|home[ -]?page|completed|building[ -]block|then generally|to switch)"
 %ALIAS%	_FILTER_first
 # Foreign words
 %ENTRY%	_LEGAL_FILTER_FOREIGN
