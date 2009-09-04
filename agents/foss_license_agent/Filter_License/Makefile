@@ -5,7 +5,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS:-g=)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS:-g=) -fno-stack-protector
 EXE=Filter_License filter_clean
 
 FLSRC=Filter_License.c 1sl.c wordcheck.c tokholder.c ../../ununpack/checksum.c ../../ununpack/md5.c ../../ununpack/sha1.c wordregex.c
