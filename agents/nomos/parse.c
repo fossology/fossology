@@ -15,7 +15,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ***************************************************************/
-/* Equivalent to version 1.81 of Core Nomos code. */
+/* Equivalent to version 1.83 of Core Nomos code. */
 #include <ctype.h>
 
 #include "nomos.h"
@@ -182,10 +182,11 @@ static int lDiags = 0;  /* set this to non-zero for printing diagnostics */
 #define mCR_CMU()       (INFILE(_CR_CMU_1) || INFILE(_CR_CMU_2))
 #define mCR_EDIN()      (INFILE(_CR_EDINBURGH_1) || INFILE(_CR_EDINBURGH_2))
 #define mCR_FSF()       (INFILE(_CR_FSF1) || INFILE(_CR_FSF2))
-#define mCR_HP()        (INFILE(_CR_HP_1)|| INFILE(_CR_HP_2) || INFILE(_CR_DEC))
+#define mCR_HP()        (INFILE(_CR_HP_1)|| INFILE(_CR_HP_2) || INFILE(_CR_DEC) || INFILE(_CR_EDS))
 #define mCR_IETF()      (INFILE(_CR_IETF_1) || INFILE(_CR_IETF_2))
 #define mCR_MIT()       (INFILE(_CR_MIT1) || INFILE(_CR_MIT2))
 #define mCR_X11()       (INFILE(_CR_X11) || INFILE(_CR_XFREE86))
+#define mCR_IPTC()      (INFILE(_CR_IPTC1) || INFILE(_CR_IPTC2))
 
 
 
@@ -328,7 +329,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 #ifdef FLAG_NO_COPYRIGHT
     gl.flags &= ~FL_NOCOPYRIGHT;
 #endif /* FLAG_NO_COPYRIGHT */
-    (void) sprintf(name, "^[[]%s[]]$", LABEL_TEXT);
+	if (scp->dataOffset && lDiags) {
+		Note("%s-generated link, ignore header (%d bytes)!",
+		    gl.progName, scp->dataOffset);
+	}
+#if	0
     if (strGrep(LABEL_TEXT, filetext, REG_ICASE|REG_NEWLINE)) {
 	char *x;
 	x = filetext + cur.regm.rm_eo;
@@ -358,6 +363,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    }
 	}
     }
+#endif
 
     /*
      * It's been observed over time that the file-magic() stuff doesn't always
@@ -1090,6 +1096,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		INTERESTING(lDebug ? "LGPL(ref10)" : cp);
 		lmem[_mLGPL] = 1;
 	    }
+	    else if (INFILE(_LT_LGPLref11)) {
+		cp = LGPLVERS();
+		INTERESTING(lDebug ? "LGPL(ref11)" : cp);
+		lmem[_mLGPL] = 1;
+	    }
 	    else if (INFILE(_FILE_LGPL1) || INFILE(_FILE_LGPL2)) {
 		cp = LGPLVERS();
 		INTERESTING(lDebug ? "LGPL(deb)" : cp);
@@ -1120,7 +1131,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		lmem[_mGPL] = 1;
 	    }
 	    else if (!lmem[_mLIBRE] && GPL_INFILE(_LT_GPLref1)
-		     && !INFILE(_PHR_NOT_UNDER_GPL)) {
+		     && !INFILE(_PHR_NOT_UNDER_GPL) 
+		     && !INFILE(_LT_LGPLref2)) {
 		/*
 		 * Special exceptions:
 		 * (1) LaTeX uses the following phrase:
@@ -1210,7 +1222,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		INTERESTING(lDebug ? "GPL(ref13)" : cp);
 		lmem[_mGPL] = 1;
 	    }
-	    else if (GPL_INFILE(_LT_GPLref14)) {
+	    else if (GPL_INFILE(_LT_GPLref14) &&
+		     !INFILE(_LT_LGPLref2)) {
 		cp = GPLVERS();
 		INTERESTING(lDebug ? "GPL(ref14)" : cp);
 		lmem[_mGPL] = 1;
@@ -1242,6 +1255,16 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		    cp = GPLVERS();
 		    INTERESTING(lDebug ? "GPL(ref18)" : cp);
 		}
+		lmem[_mGPL] = 1;
+	    }
+	    else if (INFILE(_LT_GPLref19)) {
+		cp = GPLVERS();
+		INTERESTING(lDebug ? "GPL(ref19)" : cp);
+		lmem[_mGPL] = 1;
+	    }
+	    else if (INFILE(_LT_GPLref20)) {
+		cp = GPLVERS();
+		INTERESTING(lDebug ? "GPL(ref20)" : cp);
 		lmem[_mGPL] = 1;
 	    }
 	    else if (!LVAL(_TEXT_GNU_LIC_INFO) &&
@@ -2462,6 +2485,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING(lDebug ? "Sun(7)" : "Sun");
 	    lmem[_mSUN] = 1;
 	}
+	else if (INFILE(_LT_SUN_6)) {
+	    INTERESTING(lDebug ? "Sun(8)" : "Sun");
+	    lmem[_mSUN] = 1;
+	}
 	else if (INFILE(_LT_SUN_NC)) {
 	    INTERESTING("Sun(Non-commercial)");
 	    lmem[_mSUN] = 1;
@@ -2910,7 +2937,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     /*
      * IPTC (International Press Telecommunications Council)
      */
-    else if (INFILE(_LT_IPTC) && INFILE(_CR_IPTC)) {
+    else if (INFILE(_LT_IPTC) && mCR_IPTC()) {
 	INTERESTING("IPTC");
     }
     /*
@@ -2924,6 +2951,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      */
     else if (INFILE(_LT_ONTOPIA) && INFILE(_TITLE_ONTOPIA)) {
 	INTERESTING("Ontopia");
+    }
+    /*
+     * Ascender
+     */
+    if (INFILE(_LT_ASCENDER_EULA) && INFILE(_TITLE_ASCENDER_EULA)) {
+	INTERESTING("Ascender-EULA");
     }
     /*
      * JPNIC
@@ -3030,8 +3063,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_LT_LDP)) {
 	INTERESTING(lDebug ? "LDP(1)" : "LDP");
     }
-    else if (INFILE(_LT_LDPref)) {
-	INTERESTING(lDebug ? "LDP(ref)" : "LDP");
+    else if (INFILE(_LT_LDPref1)) {
+	INTERESTING(lDebug ? "LDP(ref1)" : "LDP");
+    }
+    else if (INFILE(_LT_LDPref2)) {
+	INTERESTING(lDebug ? "LDP(ref2)" : "LDP");
     }
     else if (INFILE(_LT_MANPAGE)) {
 	INTERESTING("GNU-Manpages");
@@ -3310,6 +3346,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	}
 	else if (INFILE(_LT_APPLE_FONTFORGE)) {
 	    INTERESTING("Apple(FontForge)");
+	}
+	else if (INFILE(_LT_APPLE_SAMPLE)) {
+	    INTERESTING("Apple(Sample)");
 	}
 	else if (INFILE(_LT_APSLref1) || INFILE(_LT_APSLref2) ||
 		 INFILE(_TITLE_APSL)) {
@@ -4257,6 +4296,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    }
 	}
     }
+    else if (INFILE(_LT_METROLINKref)) {
+	INTERESTING(lDebug ? "MetroLink(ref)" : "MetroLink");
+    }
     /*
      * University of Edinburgh (and a CMU derivative)
      */
@@ -4316,6 +4358,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_LT_CMU_5)) {
 	INTERESTING(lDebug ? "CMU(9)" : "CMU");
+	lmem[_mCMU] = 1;
+    }
+    else if (INFILE(_LT_CMU_6)) {
+	INTERESTING(lDebug ? "CMU(10)" : "CMU");
 	lmem[_mCMU] = 1;
     }
     /*
@@ -4775,6 +4821,30 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	INTERESTING(lDebug ? "TeX-except" : "TeX-exception");
     }
     /*
+     * The U.S. Gummint
+     */
+    if (INFILE(_LT_USGOVT_1)) {
+	if (INFILE(_CR_URA)) {
+	    MEDINTEREST("URA(gov't)");
+	} else {
+	    MEDINTEREST(lDebug ? "Govt-Wk(1)" : "Gov't-work");
+	}
+    }
+    else if (INFILE(_LT_USGOVT_2)) {
+	MEDINTEREST(lDebug ? "Govt-Wk(2)" : "Gov't-work");
+    } else if (INFILE(_LT_USGOVT_RIGHTS1) && INFILE(_LT_PUBLIC)) {
+	MEDINTEREST(lDebug ? "US-Govt(1)" : "Gov't-rights");
+    }
+    else if (INFILE(_LT_USGOVT_RIGHTS2)) {
+	MEDINTEREST(lDebug ? "US-Govt(2)" : "Gov't-rights");
+    }
+    /*
+     * AACA (Ada Conformity Assessment Authority)
+     */
+    if (INFILE(_LT_ACAA_RIGHTS) && INFILE(_LT_PUBLIC)) {
+	INTERESTING("ACAA");
+    }
+    /*
      * The Stallman paper "Why Software Should Be Free" is a red-herring.
      * His 1986 interview in Byte magazine also is, too.
      */
@@ -4787,21 +4857,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (!lmem[_mGPL] && INFILE(_LT_EXCEPT_1)) {
 	INTERESTING("Link-exception");
-    }
-    /*
-     * The U.S. Gummint
-     */
-    if (INFILE(_LT_USGOVT)) {
-	if (INFILE(_CR_URA)) {
-	    MEDINTEREST("URA(gov't)");
-	} else {
-	    MEDINTEREST("Gov't-work");
-	}
-    } else if (INFILE(_LT_USGOVT_RIGHTS1) && INFILE(_LT_PUBLIC)) {
-	MEDINTEREST(lDebug ? "US-Govt-1" : "Gov't-rights");
-    }
-    else if (INFILE(_LT_USGOVT_RIGHTS2)) {
-	MEDINTEREST(lDebug ? "US-Govt-2" : "Gov't-rights");
     }
     /*
      * Check for indemnification statements/requirements
@@ -7264,6 +7319,7 @@ int checkUnclassified(char *filetext, int size, int score, char *ftype,
     char *buf;
     char *curptr;
     char *cp;
+    int m = 0;
 #ifdef  UNKNOWN_CHECK_DEBUG
     int pNum = 0;
 #endif  /* UNKNOWN_CHECK_DEBUG */
@@ -7296,13 +7352,14 @@ int checkUnclassified(char *filetext, int size, int score, char *ftype,
      * one before trying the word-matching magic checks (below).
      */
     gl.flags |= FL_SAVEBASE;	/* save match buffer (if any) */
-    if (INFILE(_LT_GEN_EULA)) {
+    m = INFILE(_LT_GEN_EULA);
+    gl.flags & ~FL_SAVEBASE; /* CDB -- This makes no sense, given line above */
+    if (m) {
 	if (cur.licPara == NULL_STR) {
 	    saveLicenseParagraph(cur.matchBase, isML, isPS, NO);
 	}
 	return(1);
     }
-    gl.flags &= ~FL_SAVEBASE;	/* turn off, regardless */
     checknw = nw;
     /*
      * Look for paragraphs of text that could be licenses.  We'll check the
@@ -7794,7 +7851,7 @@ void checkCornerCases(char *filetext, int size, int score,
 	    addRef("(C)Xilinx", pri);
 	    force = 0;
 	}
-	if (INFILE(_CR_IPTC)) {
+	if (mCR_IPTC()) {
 	    addRef("(C)IPTC", pri);
 	    force = 0;
 	}
