@@ -88,6 +88,17 @@ field* read_field(FILE *fptr) {
     return f;
 }
 
+// returns 1 if the field is true otherwise 0
+int convert_bool_field(char *value) {
+    if (strcmp(value,"True") == 0 || strcmp(value,"true") == 0 ||
+            strcmp(value,"Yes") == 0 || strcmp(value,"yes") == 0 ||
+            strcmp(value,"1") == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 int main (int argc, char **argv) {
     DIR *dp;
     struct dirent *ep;
@@ -197,31 +208,31 @@ int main (int argc, char **argv) {
                 } else if (strcmp(f->key,"fullname") == 0) {
                     strcpy(data.fullname,f->value);
                 } else if (strcmp(f->key,"OSIapproved") == 0) {
-                    if (strcmp(f->value,"True") == 0 || strcmp(f->value,"true") == 0) {
+                    if (convert_bool_field(f->value)==1) {
                         strcpy(data.OSIapproved,"1");
                     } else {
                         strcpy(data.OSIapproved,"0");
                     }
                 } else if (strcmp(f->key,"FSFfree") == 0) {
-                    if (strcmp(f->value,"True") == 0 || strcmp(f->value,"true") == 0) {
+                    if (convert_bool_field(f->value)==1) {
                         strcpy(data.FSFfree,"1");
                     } else {
                         strcpy(data.FSFfree,"0");
                     }
                 } else if (strcmp(f->key,"GPLv2compatible") == 0) {
-                    if (strcmp(f->value,"True") == 0 || strcmp(f->value,"true") == 0) {
+                    if (convert_bool_field(f->value)==1) {
                         strcpy(data.GPLv2compatible,"1");
                     } else {
                         strcpy(data.GPLv2compatible,"0");
                     }
                 } else if (strcmp(f->key,"GPLv3compatible") == 0) {
-                    if (strcmp(f->value,"True") == 0 || strcmp(f->value,"true") == 0) {
+                    if (convert_bool_field(f->value)==1) {
                         strcpy(data.GPLv3compatible,"1");
                     } else {
                         strcpy(data.GPLv3compatible,"0");
                     }
                 } else if (strcmp(f->key,"copyleft") == 0) {
-                    if (strcmp(f->value,"True") == 0 || strcmp(f->value,"true") == 0) {
+                    if (convert_bool_field(f->value)==1) {
                         strcpy(data.copyleft,"1");
                     } else {
                         strcpy(data.copyleft,"0");
