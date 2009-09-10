@@ -35,32 +35,38 @@ class cleanupTestData extends fossologyTestCase {
   public $mybrowser;
   public $webProxy;
 
-    function setUp() {
+  function setUp() {
     global $URL;
     $this->Login();
   }
 
   function testRmTestingFolders() {
     global $URL;
+
+    $folderList = array('Basic-Testing',
+                        'Testing',
+                        'Agent-Test',
+                        'SrvUploads',
+                        'Enote');
+
     print "Removing Testing folders\n";
     $page = $this->mybrowser->get($URL);
-    $this->deleteFolder('Basic-Testing');
-    $this->deleteFolder('Testing');
-    $this->deleteFolder('Agent-Test');
-    $this->deleteFolder('SrvUploads');
+    foreach($folderList as $folder) {
+      $this->deleteFolder($folder);
+    }
   }
 
   function testRmUploads() {
 
-      print "Removing ALL uploads in the root folder\n";
-      $tr = TESTROOT;
-      if(!chdir(TESTROOT)) {
-        print "ERROR! could not cd to $tr\n";
-        print "please run $tr" . "/cleanRF.php by hand\n";
-      }
-      $uploadLast = exec("fo-runTests  cleanRF.php -n 'Clean Root Folder'", $dummy, $Urtn);
-      //print "DB: last line is:$uploadLast\n";
-      //print "DB: results are:\n";print_r($dummy) . "\n";
+    print "Removing ALL uploads in the root folder\n";
+    $tr = TESTROOT;
+    if(!chdir(TESTROOT)) {
+      print "ERROR! could not cd to $tr\n";
+      print "please run $tr" . "/cleanRF.php by hand\n";
+    }
+    $uploadLast = exec("fo-runTests  cleanRF.php -n 'Clean Root Folder'", $dummy, $Urtn);
+    //print "DB: last line is:$uploadLast\n";
+    //print "DB: results are:\n";print_r($dummy) . "\n";
   }
 }
 ?>
