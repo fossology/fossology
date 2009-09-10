@@ -44,9 +44,9 @@ define("TenMIN", "600");
 
 $Jq = new check4jobs();
 
-/* wait at most 2 hours for test jobs to finish */
+/* check every 10 minutes, wait at most 3 hours for test jobs to finish */
 $done = FALSE;
-for($i=1; $i<=12; $i++) {
+for($i=1; $i<=18; $i++) {
   //print "DB:W4Q: checking Q...\n";
   $number = $Jq->Check();
   if ($number != 0) {
