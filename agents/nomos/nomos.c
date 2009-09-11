@@ -1,6 +1,6 @@
 /***************************************************************
  Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -15,6 +15,15 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ***************************************************************/
+/**
+   \file nomos.c
+   \brief Main for the nomos agent
+
+   Nomos detects licenses and copyrights in a file.  Depending on how it is
+   invoked, it either stores it's findings in the FOSSology data base or
+   reports them to standard out.
+
+*/
 /* CDB - What is this define for??? */
 #ifndef	_GNU_SOURCE
 #define	_GNU_SOURCE
@@ -74,13 +83,13 @@ char *getFieldValue(char *inStr, char *field, int fieldMax,
 
     /* Skip initial spaces */
     while(isspace(inStr[0])) {
-	inStr++; 
+	inStr++;
     }
 
     if (inStr[0]=='\0') {
 	return(NULL);
     }
-    f = 0; 
+    f = 0;
     v = 0;
 
     /* Skip to end of field name */
@@ -90,21 +99,21 @@ char *getFieldValue(char *inStr, char *field, int fieldMax,
 
     /* Skip spaces after field name */
     while(isspace(inStr[s])) {
-	s++; 
+	s++;
     }
     /* If it is not a field, then just return it. */
-    if (inStr[s] != separator) { 
+    if (inStr[s] != separator) {
 	return(inStr + s);
     }
     if (inStr[s]=='\0') {
 	return(NULL);
     }
     /* Skip '=' */
-    s++; 
+    s++;
 
     /* Skip spaces after '=' */
     while(isspace(inStr[s])) {
-	s++; 
+	s++;
     }
     if (inStr[s]=='\0') {
 	return(NULL);
@@ -190,11 +199,11 @@ void parseSchedInput(char *s)
 	DBclose(gl.DB);
 	exit(-1);
     }
-} 
+}
 
 
 void  Usage (char *Name)
-{ 
+{
     printf("Usage: %s [options] [file [file [...]]\n",Name);
     printf("  -i   :: initialize the database, then exit.\n");
     /*    printf("  -v   :: verbose (-vv = more verbose)\n"); */
@@ -393,12 +402,12 @@ void processFile(char *fileToScan) {
     if (!isFILE(fileToScan)) {
 	Fatal("\"%s\" is not a plain file", *fileToScan);
     }
- 
+
     /*
       CDB - How much of this is still necessary?
 
       chdir to target, call getcwd() to get real pathname; then, chdir back
-	 
+
       We've saved the specified directory in 'gl.targetDir'; now, normalize
       the pathname (in case we were passed a symlink to another dir).
     */
@@ -419,10 +428,10 @@ void processFile(char *fileToScan) {
 
 /*
  * Write out the information about the scan to the FOSSology database.
- * 
- * curScan is passed as an arg even though it's available as a global, 
+ *
+ * curScan is passed as an arg even though it's available as a global,
  * in order to facilitate subsequent modularization of the code.
- * 
+ *
  * Returns: 0 if successful, -1 if not.
  */
 int recordScanToDB(struct curScan *scanRecord) {
@@ -435,7 +444,7 @@ int recordScanToDB(struct curScan *scanRecord) {
     result = PQexec(gl.pgConn, query);
 
     if (PQresultStatus(result) != PGRES_COMMAND_OK) {
-	/* 
+	/*
 	   Something went wrong.
 	*/
 	printf("   ERROR: Nomos agent got database error: %s\n", PQresultErrorMessage(result));
@@ -552,7 +561,7 @@ int main(int argc, char **argv)
     if (file_count == 0) {
 	char *repFile;
 
-	/* 
+	/*
 	   We're being run from the scheduler
 	*/
 	printf("   LOG: nomos agent starting up in scheduler mode....\n"); /* DEBUG */
@@ -577,7 +586,7 @@ int main(int argc, char **argv)
 		    DBclose(gl.DB);
 		    exit(-1);
 		}
-		processFile(repFile); 
+		processFile(repFile);
 		recordScanToDB(&cur);
 		freeAndClearScan(&cur);
 		printf("OK\n");
@@ -593,7 +602,7 @@ int main(int argc, char **argv)
 	/*
 	  Files on the command line
 	*/
-	/* 
+	/*
 	   For each file to be scanned
 	*/
 	for (i = 0; i < file_count; i++) {
