@@ -1,12 +1,12 @@
 CFLAGS = -g -I`pg_config --includedir`
 
-all: test
+all: loader
 
-test: test.o
-	$(CC) -o test test.o -lpq
+loader: loader.o
+	$(CC) -o loader loader.o -lpq
 
 clean:
-	rm -f test.o test
+	rm -f loader.o loader
 
 phony: all clean
 
