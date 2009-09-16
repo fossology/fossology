@@ -458,11 +458,40 @@ int recordAgentStatus() {
   createAgentStatus
 
   create an entry in the agent_runstatus table, inserting agent_pk and upload_fk.
+  Assumes parseSchedInput has been called and that gl.agentPk and curScan.pFileFk
+  is set.
 
   returns 0 on success and -1 on failure.
  */
 int createAgentStatus() {
-	return(0);
+	PGresult *result;
+	char query[myBUFSIZ];
+	int numtuples = 0;
+
+	printf("   LOG: nomos: createAgentStatus starting\n");
+	/* get the upload_fk*/
+
+	sprintf(query,
+			"SELECT pfile_fk, upload_fk FROM uploadtree WHERE pfile_fk=%ld",
+			cur.pFileFk);
+
+	result = PQexec(gl.pgConn, query);
+	numtuples = PQntuples(result);
+	printf("   LOG: nomos:number of tuples from query is:%d",numtuples);
+    PQprint(stdout, result, PQprintOpt* po);
+
+	if (PQresultStatus(result) != PGRES_COMMAND_OK) {
+		/*
+		 Something went wrong.
+		 */
+		printf("   ERROR: Nomos agent got database error: %s\n",
+				PQresultErrorMessage(result));
+		PQclear(result);
+		return (-1);
+	}
+
+	PQclear(result);
+	return (0);
 }
 
 int main(int argc, char **argv) {
@@ -598,6 +627,7 @@ int main(int argc, char **argv) {
 					DBclose(gl.DB);
 					exit(-1);
 				}
+				createAgentStatus();
 				processFile(repFile);
 				recordScanToDB(&cur);
 				freeAndClearScan(&cur);
