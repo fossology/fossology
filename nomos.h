@@ -1,6 +1,6 @@
 /***************************************************************
  Copyright (C) 2006,2009 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -161,8 +161,8 @@
   Caches memory-mapped files
 */
 struct mm_cache {
-    int inUse; 
-    int fd; 
+    int inUse;
+    int fd;
     int size;
     void *mmPtr;
     char label[myBUFSIZ];
@@ -175,11 +175,11 @@ struct mm_cache {
   okay, but is just a PITA for debugging.
 */
 struct listitem {
-    /* 
+    /*
        Meanings of val fields are dependent on the particular list --
        See #defines below for examples.
     */
-    int val; 
+    int val;
     int val2;
     int val3;
     char *str;		/* primary key for list-element */
@@ -188,8 +188,8 @@ struct listitem {
 typedef	struct listitem item_t;
 
 
-/* 
-   Defines for the list val fields 
+/*
+   Defines for the list val fields
 */
 #define	seqNo		val
 #define	foundTool	val
@@ -208,10 +208,10 @@ typedef	struct listitem item_t;
 
 struct list {
     char name[64];
-    int used; 
-    int size; 
-    int ix; 
-    int sorted; 
+    int used;
+    int size;
+    int ix;
+    int sorted;
     int desc;
     item_t *items;
 };
@@ -226,7 +226,7 @@ typedef struct searchString searchString_t;
 
 
 struct licenseSpec {
-    searchString_t seed; 
+    searchString_t seed;
     searchString_t text;
 };
 typedef struct licenseSpec licSpec_t;
@@ -238,21 +238,23 @@ typedef struct licenseSpec licSpec_t;
 */
 struct globals {
     char initwd[myBUFSIZ]; /* CDB, would like to workaround/eliminate. */
-    char progName[64]; 
-    int progOpts; 
-    int flags; 
+    char progName[64];
+    int progOpts;
+    int flags;
     int uPsize;
 #ifdef	GLOBAL_DEBUG
-    int DEEBUG;  
+    int DEEBUG;
     int MEM_DEEBUG;
 #endif	/* GLOBAL_DEBUG */
 #ifdef	PROC_TRACE_SWITCH
-    int ptswitch;  
+    int ptswitch;
 #endif	/* PROC_TRACE_SWITCH */
     magic_t mcookie;
     list_t sHash;
     /* Agent-specific Things */
     int agentPk;
+    long uploadFk;
+    int arsPk;
     void *DB;
     PGconn *pgConn;
 };
@@ -267,16 +269,16 @@ struct curScan {
     char targetFile[myBUFSIZ]; /* File we're scanning */ /* check */
     long pFileFk;
     char pFile[myBUFSIZ];
-    char *licPara; 
-    char *matchBase; 
-    size_t targetLen; 
-    size_t cwdLen; 
-    struct stat stbuf; 
-    regmatch_t regm; 
+    char *licPara;
+    char *matchBase;
+    size_t targetLen;
+    size_t cwdLen;
+    struct stat stbuf;
+    regmatch_t regm;
     list_t regfList;
-    list_t fLicFoundMap; 
+    list_t fLicFoundMap;
     list_t parseList;
-    list_t offList; 
+    list_t offList;
     list_t lList;
     list_t cList; /* CDB - I don't think this is actually used. */
     list_t eList; /* CDB - I don't think this is actually used. */
@@ -292,11 +294,11 @@ struct license {
 };
 
 struct licensetext {
-    char *regex; 
+    char *regex;
     char *tseed;	/* unencrypted license text */
-    int nAbove; 
-    int nBelow; 
-    int compiled; 
+    int nAbove;
+    int nBelow;
+    int compiled;
     int plain;
 };
 typedef struct licensetext licText_t;
@@ -305,15 +307,15 @@ typedef struct licensetext licText_t;
 #define	_SEED(x)	licText[x].tseed
 
 struct scanResults {
-    int score; 
-    int kwbm; 
-    int size; 
+    int score;
+    int kwbm;
+    int size;
     int flag;
     int dataOffset;
-    char fullpath[myBUFSIZ]; 
-    char ftype[256]; 
-    char linkname[16]; 
-    char *licenses; 
+    char fullpath[myBUFSIZ];
+    char ftype[256];
+    char linkname[16];
+    char *licenses;
     char *relpath;
     size_t nameOffset;
 };
@@ -379,7 +381,7 @@ extern int schedulerMode; /* Non-zero if being run by scheduler */
 /*
   Declarations for using the memory debug stuff
 */
-#ifdef	MEMORY_TRACING 
+#ifdef	MEMORY_TRACING
 char *memAllocTagged();
 void memFreeTagged();
 #define	memFree(x,y)		memFreeTagged(x, y)
@@ -399,7 +401,7 @@ void memFreeTagged();
 #define	START_TIMER	RECORD_TIMER(bTV)
 #define	END_TIMER 	RECORD_TIMER(eTV) ; \
 			proctime = (float) (eTV.tv_sec - bTV.tv_sec) + \
-			    ((float) (eTV.tv_usec - bTV.tv_usec) * 0.000001) 
+			    ((float) (eTV.tv_usec - bTV.tv_usec) * 0.000001)
 #define	RECORD_TIMER(x)	(void) gettimeofday(&x, (struct timezone *) NULL)
 #define	PRINT_TIMER(x,y)	printf("%11.6f seconds: %s\n", proctime, x); \
 			if (y) { DUMP_TIMERS; }
