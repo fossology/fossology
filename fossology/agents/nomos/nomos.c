@@ -451,6 +451,24 @@ int recordScanToDB(struct curScan *scanRecord) {
  */
 
 int recordAgentStatus() {
+	PGresult *result;
+	char query[myBUFSIZ];
+
+	printf("   LOG: agentPK from globals is:%d\n",gl.agentPk);
+	sprintf(query,
+			"UPDATE ONLY agent_runstatus SET ars_complete = 't' WHERE agent_runstatus.upload_fk=%ld;",gl.uploadFk);
+	result = PQexec(gl.pgConn, query);
+	if (PQresultStatus(result) != PGRES_COMMAND_OK) {
+		/*
+		 Something went wrong.
+		 */
+		printf("   ERROR: Nomos agent got database error in recordAgentSatus: %s\n",
+				PQresultErrorMessage(result));
+		PQclear(result);
+		return (-1);
+	}
+
+	PQclear(result);
 	return(0);
 }
 
@@ -467,24 +485,43 @@ int createAgentStatus() {
 	PGresult *result;
 	char query[myBUFSIZ];
 	int numtuples = 0;
+	int numfields = 0;
+	char *fname;
+	char *upvalue;
+	int i;
 
-	printf("   LOG: nomos: createAgentStatus starting\n");
 	/* get the upload_fk*/
 
 	sprintf(query,
-			"SELECT pfile_fk, upload_fk FROM uploadtree WHERE pfile_fk=%ld",
-			cur.pFileFk);
+			"SELECT pfile_fk, upload_fk FROM uploadtree, pfile WHERE pfile_fk=%ld AND pfile_pk=%ld ORDER BY upload_fk DESC LIMIT 1;",
+			cur.pFileFk,cur.pFileFk);
+
+	printf("   LOG: current pfile_fk is:%ld\n",cur.pFileFk);
 
 	result = PQexec(gl.pgConn, query);
 	numtuples = PQntuples(result);
-	printf("   LOG: nomos:number of tuples from query is:%d",numtuples);
-    PQprint(stdout, result, PQprintOpt* po);
+	/*
+	 MD: numtuples should always come back as 1, check it?
+	 */
+	printf("   LOG: nomos:number of tuples from query is:%d\n",numtuples);
+	numfields = PQnfields(result);
+	printf("   LOG: nomos:number of fields from query is:%d\n",numfields);
+
+	upvalue = PQgetvalue(result, 0, 1);
+	/* printf("   LOG: value of tup0, field1 is:%s\n",i,upvalue); */
+	gl.uploadFk = atol(upvalue);
+	printf("   LOG: value of uploadFk:%ld\n",gl.uploadFk);
+	sprintf(query,
+			"INSERT INTO agent_runstatus(agent_fk, upload_fk) VALUES(%d, %ld);",
+			gl.agentPk, gl.uploadFk);
+
+	result = PQexec(gl.pgConn, query);
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK) {
 		/*
 		 Something went wrong.
 		 */
-		printf("   ERROR: Nomos agent got database error: %s\n",
+		printf("   ERROR: Nomos agent got database error in createAgentSatus: %s\n",
 				PQresultErrorMessage(result));
 		PQclear(result);
 		return (-1);
@@ -631,6 +668,7 @@ int main(int argc, char **argv) {
 				processFile(repFile);
 				recordScanToDB(&cur);
 				freeAndClearScan(&cur);
+				recordAgentStatus();
 				printf("OK\n");
 				fflush(stdout);
 			}
