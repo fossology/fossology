@@ -1,6 +1,6 @@
 /***************************************************************
  Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -37,7 +37,16 @@ static void listValidate(list_t *, int);
 static void listDebugDetails();
 #endif	/* PROC_TRACE || LIST_DEBUG */
 
-
+/**
+ * \brief intialize a list, if the list is not empty, empty it (initialize it to
+ * zero's).
+ *
+ * sets l->name to label\n
+ *      l->size to DFL_STARTSIZE
+ *
+ * NOTE: label can't be longer than l->name (64)
+ *
+ */
 void listInit(list_t *l, int size, char *label)
 {
 
@@ -87,7 +96,7 @@ void listClear(list_t *l, int deallocFlag)
 {
     item_t *p;
     int i;
-    
+
 #if defined(PROC_TRACE) /* || defined(UNPACK_DEBUG) */
 	traceFunc("== listClear(%p, %s)\n", l,
 	       deallocFlag ? "DEALLOC" : "NOTOUCH");
@@ -211,7 +220,7 @@ item_t *listGetItem(list_t *l, char *s)
     item_t *p;
     int i;
     int x;
-    
+
 #ifdef	PROC_TRACE
 	traceFunc("== listGetItem(%p, \"%s\")\n", l, s);
 	listDebugDetails(l);
@@ -232,7 +241,7 @@ item_t *listGetItem(list_t *l, char *s)
      * Now we KNOW we have at least one opening in the list; see if the
      * requested string already exists in the list
      */
-    /* 
+    /*
        CDB -- Change so that there is only one loop variable in the
        for loop
     */
@@ -436,13 +445,13 @@ item_t *listLookupAlias(list_t *l, char *s)
 item_t *listIterate(list_t *l)
 {
     item_t *p;
-    
+
 #ifdef	LIST_DEBUG /* was PROC_TRACE */
 	traceFunc("== listIterate(%p) -- %s (ix %d, used %d)\n", l, l->name,
 	       l->ix, l->used);
 	listDebugDetails(l);
 #endif	/* LIST_DEBUG, oh-so-formerly-PROC_TRACE */
-    
+
 #if	defined(QA_CHECKS) || defined(LIST_DEBUG)
     listValidate(l, NO);
     if (l->used == 0) {	/* empty list? */
@@ -468,7 +477,7 @@ item_t *listIterate(list_t *l)
 
 void listIterationReset(list_t *l)
 {
-    
+
 #ifdef	LIST_DEBUG /* was PROC_TRACE */
 	traceFunc("== listIterationReset(%p) -- %s (ix %d, used %d)\n", l, l->name,
 	       l->ix, l->used);
@@ -488,12 +497,12 @@ int listDelete(list_t *l, item_t *p)
 {
     int index;
     item_t *base;
-    
+
 #if defined(PROC_TRACE)
 	traceFunc("== listDelete(%p, %p)\n", l, p);
 	listDebugDetails(l);
 #endif	/* PROC_TRACE */
-    
+
 #if	defined(QA_CHECKS) || defined(LIST_DEBUG)
     listValidate(l, NO);
 #endif	/* QA_CHECKS || LIST_DEBUG */
@@ -534,12 +543,12 @@ static void listDoubleSize(list_t *l)
 {
     int sz;
     item_t *newptr;
-    
+
 #if defined(PROC_TRACE)
 	traceFunc("== listDoubleSize(%p) -- %s\n", l, l->name);
 	listDebugDetails(l);
 #endif	/* PROC_TRACE */
-    
+
     sz = (size_t) (l->used * (int)sizeof(item_t));
 #ifdef	LIST_DEBUG
     printf("LIST: %s FULL (%d) @ addr %p! -- %d -> %d\n", l->name,
@@ -575,7 +584,7 @@ void listSort(list_t *l, int sortType)
 #endif	/* PROC_TRACE_SWITCH */
 	printf("== listSort(%p, %d", l, sortType);
 	switch (sortType) {
-	case SORT_BY_NAME: 
+	case SORT_BY_NAME:
 	    printf("(NAME)");
 	    break;
 	case SORT_BY_COUNT_DSC:
