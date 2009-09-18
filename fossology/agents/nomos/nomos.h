@@ -176,21 +176,25 @@ struct mm_cache {
   different meanings. If we had objects, we could subclass. It works
   okay, but is just a PITA for debugging.
 */
+
+/**
+   listitem item_t
+   \brief tricky data structure used for a list of 'items'
+
+   Meanings of val fields are dependent on the particular list --
+   See #defines below for examples.
+*/
 struct listitem {
-    /*
-       Meanings of val fields are dependent on the particular list --
-       See #defines below for examples.
-    */
     int val;
     int val2;
     int val3;
-    char *str;		/* primary key for list-element */
-    void *buf;		/* alias, extra data, whatever */
+    char *str;		/**< primary key for list-element */
+    void *buf;		/**< alias, extra data, whatever */
 };
 typedef	struct listitem item_t;
 
 
-/*
+/**
    Defines for the list val fields
 */
 #define	seqNo		val
@@ -209,7 +213,7 @@ typedef	struct listitem item_t;
 #define bList		buf
 
 /**
- list type
+ list
  \brief my guess: general list type used to keep track of things. (e.g. there are
  multiple lists).
 
@@ -259,7 +263,7 @@ struct globals {
 #endif	/* PROC_TRACE_SWITCH */
     magic_t mcookie;
     list_t sHash;
-    /* Agent-specific Things */
+    /** Agent-specific Things */
     int agentPk;
     long uploadFk;
     int arsPk;
@@ -273,11 +277,11 @@ struct globals {
   \brief Struct that tracks state related to current file being scanned.
 */
 struct curScan {
-    char cwd[myBUFSIZ]; /* CDB, Would like to workaround and eliminate. */
-    char targetDir[myBUFSIZ]; /* Directory where file is */ /* check */
-    char targetFile[myBUFSIZ]; /* File we're scanning */ /* check */
-    long pFileFk;
-    char pFile[myBUFSIZ];
+    char cwd[myBUFSIZ]; 		/**< CDB, Would like to workaround and eliminate. */
+    char targetDir[myBUFSIZ]; 	/**< Directory where file is */ /* check */
+    char targetFile[myBUFSIZ]; 	/**< File we're scanning */ /* check */
+    long pFileFk;				/**< [in] pfile_fk from scheduler */
+    char pFile[myBUFSIZ];       /**< [in] pfilename from scheduler */
     char *licPara;
     char *matchBase;
     size_t targetLen;
@@ -289,12 +293,12 @@ struct curScan {
     list_t parseList;
     list_t offList;
     list_t lList;
-    list_t cList; /* CDB - I don't think this is actually used. */
-    list_t eList; /* CDB - I don't think this is actually used. */
-    char compLic[myBUFSIZ];
-    char name[128]; /* CDB, set, but not used. */
+    list_t cList; 				/**< CDB - I don't think this is actually used. */
+    list_t eList; 				/**< CDB - I don't think this is actually used. */
+    char compLic[myBUFSIZ];  	/**< the lisense found? */
+    char name[128]; 			/* CDB, set, but not used. */
     int nLines;
-    int nWords; /* CDB, set, but not used. */
+    int nWords; 				/**< CDB, set, but not used. */
 };
 
 struct license {
@@ -304,7 +308,7 @@ struct license {
 
 struct licensetext {
     char *regex;
-    char *tseed;	/* unencrypted license text */
+    char *tseed;	/**< unencrypted license text */
     int nAbove;
     int nBelow;
     int compiled;
@@ -330,7 +334,7 @@ struct scanResults {
 };
 typedef	struct scanResults scanres_t;
 
-/*
+/**
  * List-based memory tags
  */
 #define	MTAG_UNSORTKEY	"list/str (initially-UNsorted key)"
@@ -350,7 +354,7 @@ typedef	struct scanResults scanres_t;
 #define	MTAG_URLCOPY	"list/buf (pkg URL copy)"
 #define	MTAG_FILELIC	"list/buf (file-license copy)"
 #define	MTAG_FIXNAME	"list/buf (fixed-package name)"
-/*
+/**
  * Miscellaneous memory tags
  */
 #define	MTAG_SEEDTEXT	"search-seed text"
@@ -372,7 +376,7 @@ typedef	struct scanResults scanres_t;
 #define	LABEL_CNTS	"Counts:"
 #define LABEL_HOTW	"Hotword: "
 
-/*
+/**
    Functions defined in nomos.c, used in other files
 */
 void Bail(int exitval);
@@ -387,7 +391,7 @@ extern licText_t licText[];
 extern licSpec_t licSpec[];
 extern int schedulerMode; /* Non-zero if being run by scheduler */
 
-/*
+/**
   Declarations for using the memory debug stuff
 */
 #ifdef	MEMORY_TRACING
