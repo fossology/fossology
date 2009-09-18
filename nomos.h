@@ -74,14 +74,16 @@
 #define	FL_SHOWMATCH	0x80
 #define	FL_NOCOPYRIGHT	0x100
 
-/*
+/**
  * Names of various files/dirs created/used
  */
 #define	FILE_FOUND	"Found.txt"
 #define	FILE_SCORES	"_scores"
 
 
-/* Symbolic Boolean values */
+/**
+ *  Symbolic Boolean values
+ */
 #define	NO	0
 #define	YES	1
 
@@ -206,11 +208,17 @@ typedef	struct listitem item_t;
 #define bIndex		val3
 #define bList		buf
 
+/**
+ list type
+ \brief my guess: general list type used to keep track of things. (e.g. there are
+ multiple lists).
+
+ */
 struct list {
     char name[64];
-    int used;
+    int used; /**< is this item used? 0 is empty list, 1 is used? */
     int size;
-    int ix;
+    int ix;      /**< the index of the item */
     int sorted;
     int desc;
     item_t *items;
@@ -232,8 +240,8 @@ struct licenseSpec {
 typedef struct licenseSpec licSpec_t;
 
 
-/*
-  Structure holding data truly global in that it remains consistent
+/**
+  \brief Structure holding data truly global in that it remains consistent
   for each file scanned.
 */
 struct globals {
@@ -260,8 +268,9 @@ struct globals {
 };
 
 
-/*
-  Struct that tracks state related to current file being scanned.
+/**
+  curScan
+  \brief Struct that tracks state related to current file being scanned.
 */
 struct curScan {
     char cwd[myBUFSIZ]; /* CDB, Would like to workaround and eliminate. */
@@ -369,7 +378,7 @@ typedef	struct scanResults scanres_t;
 void Bail(int exitval);
 int optionIsSet(int val);
 
-/*
+/**
   Global Declarations
 */
 extern struct globals gl;
