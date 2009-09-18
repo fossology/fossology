@@ -405,16 +405,16 @@ void processFile(char *fileToScan) {
 }
 
 /**
-   recordScanToDb
+ recordScanToDb
 
-   Write out the information about the scan to the FOSSology database.
+ Write out the information about the scan to the FOSSology database.
 
-   curScan is passed as an arg even though it's available as a global,
-   in order to facilitate subsequent modularization of the code.
+ curScan is passed as an arg even though it's available as a global,
+ in order to facilitate subsequent modularization of the code.
 
-   Returns: 0 if successful, -1 if not.
+ Returns: 0 if successful, -1 if not.
 
-   \todo need to insert results of the analysis.
+ \todo need to insert results of the analysis.
  */
 int recordScanToDB(struct curScan *scanRecord) {
 	PGresult *result;
@@ -441,12 +441,12 @@ int recordScanToDB(struct curScan *scanRecord) {
 }
 
 /**
-   recordAgentStatus
-   updates the agent_runstatus table:
-     - No error: updates ars_complete and ars_ts
-     - error: updates ars_status with the error text.
+ recordAgentStatus
+ updates the agent_runstatus table:
+ - No error: updates ars_complete and ars_ts
+ - error: updates ars_status with the error text.
 
-   returns 0 on success -1 on failure
+ returns 0 on success -1 on failure
 
  */
 
@@ -454,32 +454,35 @@ int recordAgentStatus() {
 	PGresult *result;
 	char query[myBUFSIZ];
 
-	printf("   LOG: agentPK from globals is:%d\n",gl.agentPk);
-	sprintf(query,
-			"UPDATE ONLY agent_runstatus SET ars_complete = 't' WHERE agent_runstatus.upload_fk=%ld;",gl.uploadFk);
+	printf("   LOG: agentPK from globals is:%d\n", gl.agentPk);
+	sprintf(
+			query,
+			"UPDATE ONLY agent_runstatus SET ars_complete = 't' WHERE agent_runstatus.upload_fk=%ld;",
+			gl.uploadFk);
 	result = PQexec(gl.pgConn, query);
 	if (PQresultStatus(result) != PGRES_COMMAND_OK) {
 		/*
 		 Something went wrong.
 		 */
-		printf("   ERROR: Nomos agent got database error in recordAgentSatus: %s\n",
+		printf(
+				"   ERROR: Nomos agent got database error in recordAgentSatus: %s\n",
 				PQresultErrorMessage(result));
 		PQclear(result);
 		return (-1);
 	}
 
 	PQclear(result);
-	return(0);
+	return (0);
 }
 
 /**
-  createAgentStatus
+ createAgentStatus
 
-  create an entry in the agent_runstatus table, inserting agent_pk and upload_fk.
-  Assumes parseSchedInput has been called and that gl.agentPk and curScan.pFileFk
-  is set.
+ create an entry in the agent_runstatus table, inserting agent_pk and upload_fk.
+ Assumes parseSchedInput has been called and that gl.agentPk and curScan.pFileFk
+ is set.
 
-  returns 0 on success and -1 on failure.
+ returns 0 on success and -1 on failure.
  */
 int createAgentStatus() {
 	PGresult *result;
@@ -492,26 +495,28 @@ int createAgentStatus() {
 
 	/* get the upload_fk*/
 
-	sprintf(query,
+	sprintf(
+			query,
 			"SELECT pfile_fk, upload_fk FROM uploadtree, pfile WHERE pfile_fk=%ld AND pfile_pk=%ld ORDER BY upload_fk DESC LIMIT 1;",
-			cur.pFileFk,cur.pFileFk);
+			cur.pFileFk, cur.pFileFk);
 
-	printf("   LOG: current pfile_fk is:%ld\n",cur.pFileFk);
+	printf("   LOG: current pfile_fk is:%ld\n", cur.pFileFk);
 
 	result = PQexec(gl.pgConn, query);
 	numtuples = PQntuples(result);
 	/*
 	 MD: numtuples should always come back as 1, check it?
 	 */
-	printf("   LOG: nomos:number of tuples from query is:%d\n",numtuples);
+	printf("   LOG: nomos:number of tuples from query is:%d\n", numtuples);
 	numfields = PQnfields(result);
-	printf("   LOG: nomos:number of fields from query is:%d\n",numfields);
+	printf("   LOG: nomos:number of fields from query is:%d\n", numfields);
 
 	upvalue = PQgetvalue(result, 0, 1);
 	/* printf("   LOG: value of tup0, field1 is:%s\n",i,upvalue); */
 	gl.uploadFk = atol(upvalue);
-	printf("   LOG: value of uploadFk:%ld\n",gl.uploadFk);
-	sprintf(query,
+	printf("   LOG: value of uploadFk:%ld\n", gl.uploadFk);
+	sprintf(
+			query,
 			"INSERT INTO agent_runstatus(agent_fk, upload_fk) VALUES(%d, %ld);",
 			gl.agentPk, gl.uploadFk);
 
@@ -521,7 +526,8 @@ int createAgentStatus() {
 		/*
 		 Something went wrong.
 		 */
-		printf("   ERROR: Nomos agent got database error in createAgentSatus: %s\n",
+		printf(
+				"   ERROR: Nomos agent got database error in createAgentSatus: %s\n",
 				PQresultErrorMessage(result));
 		PQclear(result);
 		return (-1);
@@ -633,13 +639,13 @@ int main(int argc, char **argv) {
 		 We're being run from the scheduler
 
 		 \todo need to add:
-		       1. insert into agent_runstatus that we have started: agent_pk and
-		       upload_fk, ars_ts? (ask bob)
-		       2. need to complete recordScanToDb
-		       3. need to insert into agent_runstatus:
-		          - if complete (no error) set ars_complete to true
-		          - if setting ars_complete, set ars_ts
-		          - Error? set ars_status with the error text.
+		 1. insert into agent_runstatus that we have started: agent_pk and
+		 upload_fk, ars_ts? (ask bob)
+		 2. need to complete recordScanToDb
+		 3. need to insert into agent_runstatus:
+		 - if complete (no error) set ars_complete to true
+		 - if setting ars_complete, set ars_ts
+		 - Error? set ars_status with the error text.
 		 */
 		printf("   LOG: nomos agent starting up in scheduler mode....\n"); /* DEBUG */
 		schedulerMode = 1;
@@ -678,7 +684,8 @@ int main(int argc, char **argv) {
 		 On EOF we fall through to the Bail() call at the end.
 		 */
 
-	} else {
+	}
+	else {
 		/*
 		 Files on the command line
 		 */
