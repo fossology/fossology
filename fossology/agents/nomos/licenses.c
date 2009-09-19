@@ -1,6 +1,6 @@
 /***************************************************************
  Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -73,11 +73,11 @@ void licenseInit()
     item_t *p;
     char *cp;
     char buf[myBUFSIZ];
-    
+
 #ifdef	PROC_TRACE
     traceFunc("== licenseInit()\n");
 #endif	/* PROC_TRACE */
-    
+
     strcpy(any, "=ANY=");
     strcpy(some, "=SOME=");
     strcpy(few, "=FEW=");
@@ -85,7 +85,7 @@ void licenseInit()
     listInit(&gl.sHash, 0, "search-cache"); /* CDB - Added */
 
     /*
-     * Examine the search strings in licSpec looking for 3 corner-cases 
+     * Examine the search strings in licSpec looking for 3 corner-cases
      * to optimize all the regex-searches we'll be making:
      * (a) the seed string is the same as the text-search string
      * (b) the text-search string has length 1 and contents == "."
@@ -552,11 +552,11 @@ void licenseScan(list_t *l)
 #ifdef	SCORE_DEBUG
     FILE *scoreFp;
 #endif	/* SCORE_DEBUG */
-    
+
 #ifdef	PROC_TRACE
     traceFunc("== licenseScan(%p, %d)\n", l);
 #endif	/* PROC_TRACE */
-    
+
 #ifdef	MEMSTATS
     printf("... allocating %d bytes for scanres_t[] array\n",
 	   sizeof(*scp)*l->used);
@@ -672,7 +672,7 @@ void licenseScan(list_t *l)
     /*
      * CDB - It is always the case that we are doing one file at a time.
      */
-     
+
     /*
      * If we were invoked with a single-file-only option, just over-ride the
      * score calculation -- give the file any greater-than-zero score so it
@@ -825,12 +825,12 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     FILE *linkFp;
     FILE *scoreFp;
     item_t *p;
-    
+
 #ifdef	PROC_TRACE
     traceFunc("== saveLicenseData(%p, %d, %d, %d, %d)\n", scores, nCand,
 	      nElem, lowWater);
 #endif	/* PROC_TRACE */
-    
+
     /*
      * Save the necessary licensing information in a list of files...
      */
@@ -873,7 +873,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	printf("name: %s\n[%s]\n", scores[idx].relpath, scores[idx].fullpath);
 #endif	/* DEBUG > 5 */
 	/*
-	 * Kludge up the pointer to the relative-path in scores[idx].fullpath 
+	 * Kludge up the pointer to the relative-path in scores[idx].fullpath
 	 * so we don't
 	 * have to as many directory entries to open each file... this works for
 	 * anything EXCEPT 'distribution files'.
@@ -896,7 +896,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	  global structure "cur".
 	*/
 	fprintf(linkFp, "Type: %s\n%s %s, %d bytes\n",
-		scores[idx].ftype, LABEL_CNTS, wordCount(textp), 
+		scores[idx].ftype, LABEL_CNTS, wordCount(textp),
 		scores[idx].size);
 	/*
 	 * Report which package (if any) this file came from
@@ -926,7 +926,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	if (optionIsSet(OPTS_DEBUG)) {
 	    printf("File type: %s\n", scores[idx].ftype);
 	    printf("File score: %d (0x%06x)\n",
-		   (scores[idx].kwbm ? scores[idx].score : scores[idx].kwbm), 
+		   (scores[idx].kwbm ? scores[idx].score : scores[idx].kwbm),
 		   scores[idx].kwbm);
 	    if (scores[idx].kwbm) {
 		printf("%s\n", miscbuf);
@@ -990,7 +990,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	    printf("]\n");
 	}
 #endif	/* DOCTOR_DEBUG */
-	/* 
+	/*
 	 * Interesting - copyString(parseLicenses(args), MTAG_FILELIC)...
 	 * will randomly segfault on 32-bit Debian releases.  Split the calls.
 	 */
@@ -1033,14 +1033,14 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	(void) fclose(linkFp);
 
 	/*
-	 * Remember this license in this file... 
+	 * Remember this license in this file...
 	 */
 	p = listGetItem(&cur.lList, scores[idx].licenses);
 	p->refCount++;
 	/*
 	 * Clear out the buffer-offsets list
 	 */
-#ifdef fix_later 
+#ifdef fix_later
 /* CDB - need to move this code to a point after we save the license info */
 #ifdef	PHRASE_DEBUG
 	listDump(&cur.offList, NO);
@@ -1080,7 +1080,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 	printf("==> ");
     }
     /* CDB - Debug code
-    listDump(&cur.offList, YES); 
+    listDump(&cur.offList, YES);
     while ((p = listIterate(&cur.offList)) != 0) {
 	listDump(p->buf, YES);
     }
@@ -1103,7 +1103,7 @@ static void prettyPrint(FILE *fp, char *s, int indentLen)
     char *cp1 = pbuf;
     char *cp2;
     int len;
-    
+
     if ((len = strlen(s)) > sizeof(pbuf)) {
 	Warn("buffer contents \"%s\"", s);
 	Fatal("Pretty-print data too long (%d)!", len);
@@ -1157,6 +1157,16 @@ static void prettyPrint(FILE *fp, char *s, int indentLen)
  * We need to be VERY careful in this routine about the length of the
  * license-summary created; they COULD be indefinitely long!  For now,
  * just check to see if we're going to overrun the buffer...
+ */
+
+/**
+  \brief Construct a 'computed license'.
+
+  Wherever possible, leave off the entries for None and LikelyNot; those are
+  individual-file results and we're making an 'aggregate summary' here.
+
+  This function adds licenses to cur.compLic
+
  */
 static void makeLicenseSummary(list_t *l, int highScore, char *target, int size)
 {
@@ -1242,11 +1252,11 @@ static void findLines(char *path, char *textp, int tsize, int index,
 #ifdef	PHRASE_DEBUG
     int i;
 #endif	/* PHRASE_DEBUG */
-    
+
 #if defined PROC_TRACE || defined PHRASE_DEBUG
     traceFunc("== findLines(%p, %d, %d, %p)\n", textp, tsize, index, list);
 #endif	/* PROC_TRACE || PHRASE_DEBUG */
-    
+
     if (_SEED(index) == NULL_STR) {
 	Assert(NO, "Empty (NULL) key for search-regex %d", index);
     }
