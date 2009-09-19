@@ -50,9 +50,9 @@ void freeAndClearScan(struct curScan *);
 extern licText_t licText[]; /* Defined in _autodata.c */
 struct globals gl;
 struct curScan cur;
-int schedulerMode = 0; /* Non-zero when being run from scheduler */
+int schedulerMode = 0; /**< Non-zero when being run from scheduler */
 
-char *files_to_be_scanned[];
+char *files_to_be_scanned[];  /**< The list of files to scan */
 int file_count = 0;
 
 #define	_MAXFILESIZE	/* was 512000000-> 800000000 */	1600000000
@@ -293,12 +293,15 @@ static void printListToFile(list_t *l, char *filename, char *mode) {
 	return;
 }
 
-/*
- CDB - Could probably roll this back into the main processing
+/**
+ getFileLists
+ \brief Initialize the lists: regular-files list cur.regfList and buffer-offset
+ list cur.offList.
+
+ \todo CDB - Could probably roll this back into the main processing
  loop or just put in a generic init func that initializes *all*
  the lists.
 
- Initialize regfList and offList.
  */
 
 static void getFileLists(char *dirpath) {
