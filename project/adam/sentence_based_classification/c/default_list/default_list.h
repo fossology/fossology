@@ -106,6 +106,12 @@ extern "C" {
     int default_list_append(default_list list, void *data);
     
     /*
+        Removes an item from the list.
+        Returns a non zero if an error occurred.
+    */
+    int default_list_remove(default_list list, int index);
+    
+    /*
         Inserts and element at the position provided.
         Returns a non zero if an error occurred.
     */
