@@ -18,6 +18,7 @@ int char_count(char *str, char c) {
             count++;
         }
     }
+    return count;
 }
 
 int default_list_type_token_feature(void) {
@@ -218,14 +219,13 @@ token_feature* token_feature_create_from_string(char *string, int start, int end
     int i = 0;
     token_feature *t = malloc(sizeof(token_feature));
     sb_symbol * b = (sb_symbol *) malloc(end-start * sizeof(sb_symbol));
-
+    
     if (end<=start) {
         return NULL;
     }
     if (stemmer==NULL) {
         stemmer = sb_stemmer_new("english", NULL);
     }
-
 
     t->string = malloc((end-start)+1);
     strncpy(t->string,string+start,end-start);
@@ -273,6 +273,10 @@ token_feature* token_feature_create_from_string(char *string, int start, int end
         for (i=0; i<FT_CHAR_MAP_LEN; i++) {
             t->char_vector[i] = char_count(t->string,FT_CHAR_MAP[i]);
         }
+    } else {
+        for (i=0; i<FT_CHAR_MAP_LEN; i++) {
+            t->char_vector[i] = 0;
+        }        
     }
     
     return t;

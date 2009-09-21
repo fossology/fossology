@@ -26,7 +26,8 @@ utils=\
       utils/tokenizer.c \
       utils/file_utils.c \
       utils/maxent_utils.cpp \
-      utils/sentence.c
+      utils/sentence.c \
+      utils/repr.c
 
 utils_o := $(patsubst %.cpp,%.o,$(utils))
 utils_o := $(patsubst %.c,%.o,$(utils_o))
@@ -39,7 +40,7 @@ default_list/default_list.a:
 #utils/utils.a: $(utils_o) ../../sparsevect/sparsevect.o
 #	$(AR) -cru $@ $^
 
-test: test.o $(utils_o) ../../sparsevect/sparsevect.o default_list/default_list.a
+test_app: test_app.o $(utils_o) ../../sparsevect/sparsevect.o default_list/default_list.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
 f1: f1.o $(utils_o) ../../sparsevect/sparsevect.o default_list/default_list.a
@@ -70,7 +71,7 @@ database.dat: database maxent.dat training.txt
 	./database -f training.txt -m maxent.dat -o database.dat
 
 clean:
-	rm -f test *.o utils/*.o utils/*.a
+	rm -f test_app f1 database train_sent_model label_sentences *.o utils/*.o utils/*.a
 	make -C default_list clean
 
 phony: all clean ../../sparsevect/sparsevect.o

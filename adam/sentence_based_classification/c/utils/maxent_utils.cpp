@@ -19,9 +19,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <default_list.h>
 #include "token.h"
 #include "token_feature.h"
+#include "repr.h"
+#include <limits.h>
+#include "hash.h"
 
-void create_context(default_list feature_type_list, int left_window, int right_window, int i, me_context_type& context) {
+unsigned long create_context(default_list feature_type_list, int left_window, int right_window, int i, me_context_type& context) {
     int j, k, n;
+    string hash_string;
     n = default_list_length(feature_type_list);
     context.clear();
     for (j=-left_window+1; j<right_window; j++) {
@@ -30,56 +34,74 @@ void create_context(default_list feature_type_list, int left_window, int right_w
         } else {
             token_feature *ft = (token_feature *)default_list_get(feature_type_list, i+j);
             char key[1024];
-            //char *ptr = ft->string;
-            //sprintf(key,"token_%d='",j);
-            //for (ptr = ft->string; *ptr != '\0'; ptr++) {
-            //    sprintf(key,"%s0%xx",key,*ptr);
-            //}
-            //sprintf(key,"%s'",key);
-            //if (strlen(key)>1023) {
-            //    fprintf(stderr,"Error: string overflow at %s:%s\n" __FILE__, __LINE__);
-            //}
-            //context.push_back(make_pair(string(key), 1.0));
-            sprintf(key,"capped_%d",j);
-            if (ft->capped==TRUE) {
-                context.push_back(make_pair(string(key), 1.0));
-            } else {
-                context.push_back(make_pair(string(key), 0.0));
+            char rstr[1024];
+            
+            for (k = 0; k < FT_CHAR_MAP_LEN; k++) {
+                sprintf(key,"char_%d[%03d]",j,k);
+                context.push_back(make_pair(string(key), (float)ft->char_vector[k]));
+                sprintf(key,"char_%d[%03d]=%d ",j,k,ft->char_vector[k]);
+                hash_string.append(key);
             }
-            sprintf(key,"upper_%d",j);
-            if (ft->upper==TRUE) {
-                context.push_back(make_pair(string(key), 1.0));
-            } else {
-                context.push_back(make_pair(string(key), 0.0));
-            }
-            sprintf(key,"number_%d",j);
-            if (ft->number==TRUE) {
-                context.push_back(make_pair(string(key), 1.0));
-            } else {
-                context.push_back(make_pair(string(key), 0.0));
-            }
-            sprintf(key,"incnum_%d",j);
-            if (ft->incnum==TRUE) {
-                context.push_back(make_pair(string(key), 1.0));
-            } else {
-                context.push_back(make_pair(string(key), 0.0));
-            }
-            sprintf(key,"word_%d",j);
             if (ft->word==TRUE) {
+                sprintf(key,"word_%d",j);
                 context.push_back(make_pair(string(key), 1.0));
-                sprintf(key,"stem_%d='%s'",j,ft->stemmed);
-                context.push_back(make_pair(string(key), 1.0));
-            } else {
-                context.push_back(make_pair(string(key), 0.0));
-                sprintf(key,"stem_%d=''",j);
-                context.push_back(make_pair(string(key), 1.0));
+                sprintf(key,"word_%d=1 ",j);
+                hash_string.append(key);
             }
-            //for (k = 0; k < FT_CHAR_MAP_LEN; k++) {
-            //    sprintf(key,"char_%d='_%02d_'",j,k);
-            //    context.push_back(make_pair(string(key), (float)ft->char_vector[k]));
+            if (ft->number==TRUE) {
+                sprintf(key,"number_%d",j);
+                context.push_back(make_pair(string(key), 1.0));
+                sprintf(key,"number_%d=1 ",j);
+                hash_string.append(key);
+            }
+            //char key[1024];
+            //char rstr[1024];
+            //repr_string(rstr,ft->string);
+            //sprintf(key,"token_%d='%s'",j,rstr);
+            //context.push_back(make_pair(string(key), 1.0));
+            
+            //sprintf(key,"word_%d",j);
+            //if (ft->word==TRUE) {
+            //    context.push_back(make_pair(string(key), 1.0));
+            //    sprintf(key,"stem_%d='%s'",j,ft->stemmed);
+            //    context.push_back(make_pair(string(key), 1.0));
+            //    sprintf(key,"capped_%d",j);
+            //    if (ft->capped==TRUE) {
+            //        context.push_back(make_pair(string(key), 1.0));
+            //    } else {
+            //        context.push_back(make_pair(string(key), 0.0));
+            //    }
+            //    sprintf(key,"upper_%d",j);
+            //    if (ft->upper==TRUE) {
+            //        context.push_back(make_pair(string(key), 1.0));
+            //    } else {
+            //        context.push_back(make_pair(string(key), 0.0));
+            //    }
+            //    sprintf(key,"number_%d",j);
+            //    if (ft->number==TRUE) {
+            //        context.push_back(make_pair(string(key), 1.0));
+            //    } else {
+            //        context.push_back(make_pair(string(key), 0.0));
+            //    }
+            //    sprintf(key,"incnum_%d",j);
+            //    if (ft->incnum==TRUE) {
+            //        context.push_back(make_pair(string(key), 1.0));
+            //    } else {
+            //        context.push_back(make_pair(string(key), 0.0));
+            //    }
+            //} else {
+            //    context.push_back(make_pair(string(key), 0.0));
+            //    //sprintf(key,"stem_%d=''",j);
+            //    //context.push_back(make_pair(string(key), 1.0));
+            //    for (k = 1; k < FT_CHAR_MAP_LEN; k++) {
+            //        sprintf(key,"char_%d='_%03d_'",j,k);
+            //        context.push_back(make_pair(string(key), (float)ft->char_vector[k]));
+            //    }
             //}
         }
     }
+    // cout << hash_string << "\n" << sdbm_string(hash_string) << endl;
+    return sdbm_string(hash_string);
 }
 
 void create_model(MaxentModel& m, default_list feature_type_list, default_list label_list, int left_window, int right_window) {
@@ -87,12 +109,44 @@ void create_model(MaxentModel& m, default_list feature_type_list, default_list l
     me_context_type context;
     me_outcome_type outcome;
 
+    sv_vector vect_E = sv_new(ULONG_MAX);
+    sv_vector vect_I = sv_new(ULONG_MAX);
+
     n = default_list_length(feature_type_list);
     for (i = 0; i<n; i++) {
         char *c = (char *)default_list_get(label_list, i);
         token_feature *tf = (token_feature *)default_list_get(feature_type_list,i);
-        create_context(feature_type_list,left_window,right_window,i,context);
-        m.add_event(context, c);
+        if (tf->word != TRUE && tf->char_vector[0] != tf->length) {
+            unsigned long index = create_context(feature_type_list,left_window,right_window,i,context);
+            if (strcmp("E",c) == 0) {
+                double v = sv_get_element_value(vect_E,index);
+                sv_set_element(vect_E,index,v+1.0);
+            } else {
+                double v = sv_get_element_value(vect_I,index);
+                sv_set_element(vect_I,index,v+1.0);
+            }
+        }
+    }
+
+    for (i = 0; i<n; i++) {
+        char *c = (char *)default_list_get(label_list, i);
+        token_feature *tf = (token_feature *)default_list_get(feature_type_list,i);
+        if (tf->word != TRUE && tf->char_vector[0] != tf->length) {
+            unsigned long index = create_context(feature_type_list,left_window,right_window,i,context);
+            if (strcmp("E",c) == 0) {
+                double v = sv_get_element_value(vect_E,index);
+                if (v > 0) {
+                    m.add_event(context,c,v);
+                }
+                sv_set_element(vect_E,index,0);
+            } else {
+                double v = sv_get_element_value(vect_I,index);
+                if (v > 0) {
+                    m.add_event(context,c,v);
+                }
+                sv_set_element(vect_I,index,0);
+            }
+        }
     }
 }
 
@@ -107,7 +161,7 @@ void label_sentences(MaxentModel& m, default_list feature_type_list, default_lis
         token_feature *tf = (token_feature *)default_list_get(feature_type_list,i);
         float p = 0.0;
         
-        if (tf->word == FALSE) {
+        if (tf->word != TRUE && tf->char_vector[0] != tf->length) {
             create_context(feature_type_list,left_window,right_window,i,context);
             p = m.eval(context,"E");
             if (p>=0.4) {

@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
             for (k = 0; k < default_list_length(file_list); k++) {
                 b = (sentence *)default_list_get(file_list,k);
                 cosine[k][j] = sv_inner(a->vector,b->vector);
-                if (cosine[k][j]>0.8) {
+                if (cosine[k][j]>0.7) {
                     matrix[k+1][j+1] = matrix[k][j] + 1;
                 } else {
                     if (matrix[k][j+1] > matrix[k+1][j]) {

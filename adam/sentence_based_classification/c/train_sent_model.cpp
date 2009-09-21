@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     m.end_add_event();
 
     printf("Training MaxEnt model...\n");
-    m.train(1000, "lbfgs");
+    m.train(2000, "lbfgs");
     m.save(model_file);
 
     return(0);

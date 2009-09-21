@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <sparsevect.h>
 #include <math.h>
 #include "sentence.h"
+#include "hash.h"
 #include "config.h"
 
 void print_usage(char *name) {
@@ -38,16 +39,6 @@ void print_usage(char *name) {
     fprintf(stderr, "   -f path ::  Read the paths of the training files from a file.\n");
     fprintf(stderr, "   -m path ::  Path to the MaxEnt sentence ending model.\n");
     fprintf(stderr, "   -o path ::  Save sentence model at the specified path.\n");
-}
-
-static unsigned long sdbm(char *str) {
-    unsigned long hash = 0;
-    int c;
-
-    while (c = *str++)
-        hash = c + (hash << 6) + (hash << 16) - hash;
-
-    return hash;
 }
 
 int main(int argc, char **argv) {

@@ -1,2 +1,2 @@
-#define right_window 2
-#define left_window 2
+#define right_window 3
+#define left_window 3
