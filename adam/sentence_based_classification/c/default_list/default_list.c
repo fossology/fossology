@@ -226,6 +226,51 @@ int default_list_append(default_list list, void *data) {
     return 0;
 }
 
+int default_list_remove(default_list list, int pos) {
+    default_list_node *a = NULL;
+    
+    if (list->length == 0) {
+        return -1;
+    }
+
+    if (pos >= list->length || pos < 0) {
+        return 1;
+    }
+
+    if (abs(pos - list->index) > abs(list->index - pos)) {
+        while(default_list_move_current_right(list) != pos);        
+    } else {
+        while(default_list_move_current_left(list) != pos);
+    }
+
+    a = list->current;
+
+    if (a->prev != NULL) {
+        a->prev->next = a->next;
+    } else {
+        list->head = a->next;
+        if (a->next != NULL) {
+            a->next->prev = NULL;
+        }
+    }
+    if (a->next != NULL) {
+        a->next->prev = a->prev;
+    } else {
+        list->tail = a->prev;
+        if (a->prev != NULL) {
+            a->prev->next = NULL;
+        }
+    }
+
+    list->current = list->head;
+
+    default_list_type_registry_list[list->type].destroy(a->data);
+    free(a);
+
+    list->length--;
+    
+    return 0;
+}
 int default_list_insert(default_list list, int pos, void *data) {
     default_list_node *a = NULL;
     default_list_node *b = NULL;
