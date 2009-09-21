@@ -100,7 +100,7 @@ Package.  </SENTENCE><SENTENCE>If such scripts or library files are aggregated w
 Package via the so-called "undump" or "unexec" methods of producing a
 binary executable image, then distribution of such an image shall
 neither be construed as a distribution of this Package nor shall it
-fall under the restrictions of Paragraphs 3 and 4, provided that you </SENTENCE><SENTENCE>do
+fall under the restrictions of Paragraphs 3 and 4, provided that you do
 not represent such an executable image as a Standard Version of this
 Package.
 
@@ -121,7 +121,7 @@ construed as a distribution of this Package.
 </SENTENCE><SENTENCE>The name of the Copyright Holder may not be used to endorse or promote
 products derived from this software without specific prior written permission.
 
- </SENTENCE><SENTENCE>THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS </SENTENCE><SENTENCE>OR
+ </SENTENCE><SENTENCE>THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
 IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 

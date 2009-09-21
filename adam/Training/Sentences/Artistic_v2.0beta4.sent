@@ -1,4 +1,4 @@
-<SENTENCE>                            The Artistic </SENTENCE><SENTENCE>License
+<SENTENCE>                            The Artistic License
                          Version 2.0beta4, October 2000
 
                          </SENTENCE><SENTENCE>Copyright (C) 2000, Larry Wall.
@@ -43,7 +43,7 @@
          </SENTENCE><SENTENCE>Permission for Use and Modification Without Redistribution
 
   (</SENTENCE><SENTENCE>1) You are permitted to use the Standard Version and create and use
-      </SENTENCE><SENTENCE>Modified </SENTENCE><SENTENCE>Versions for any purpose without restriction, provided that
+      Modified Versions for any purpose without restriction, provided that
       you do not redistribute the Modified Version to others outside of your
       company or organization.
 
@@ -93,7 +93,7 @@
            some specific way.                                               
 
       </SENTENCE><SENTENCE>If Your Modified Version is in turn derived from a Modified Version
-      made by a third party, then You are still required to ensure that </SENTENCE><SENTENCE>Your
+      made by a third party, then You are still required to ensure that Your
       Modified Version complies with the requirements of this license.
 
 
@@ -103,7 +103,7 @@
       versions of the Standard Version of the Package, provided that you
       include complete instructions on where to get the source code of the
       Standard Version.  </SENTENCE><SENTENCE>Such instructions must be valid at the time of Your
-      distribution.  </SENTENCE><SENTENCE>If these instructions, at any time while </SENTENCE><SENTENCE>You are
+      distribution.  </SENTENCE><SENTENCE>If these instructions, at any time while You are
       carrying our such distribution, become invalid, you must provide new
       instructions on demand or cease further distribution.  </SENTENCE><SENTENCE>If You cease
       distribution within thirty days after You become aware that the
@@ -117,7 +117,7 @@
        (</SENTENCE><SENTENCE>a) include a copy of the corresponding source code for the Modified
            Version under the terms indicated in (4).
 
-       (b) ensure that the installation of Your non-source Modified Version
+       (</SENTENCE><SENTENCE>b) ensure that the installation of Your non-source Modified Version
            does not conflict in any way with an installation of the Standard
            Version, include for each program installed by the Modified
            Version clear documentation describing how it differs from the
@@ -172,7 +172,7 @@
       distribute the Standard or Modified Versions of the Package.  </SENTENCE><SENTENCE>These
       actions are prohibited by copyright law if you do not accept this
       License.  </SENTENCE><SENTENCE>Therefore, by copying, modifying or distributing Standard
-      and </SENTENCE><SENTENCE>Modified Versions of the Package, you indicate your acceptance of
+      and Modified Versions of the Package, you indicate your acceptance of
       the license of the Package.
 
 
