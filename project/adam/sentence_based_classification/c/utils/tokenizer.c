@@ -23,8 +23,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 char sent_re[] = "<SENTENCE>(?P<text>.*?)</SENTENCE>";
 char start_nonword_re[] = "^[^A-Za-z0-9]+";
-char general_token_re[] = "[A-Za-z0-9][A-Za-z0-9]+|[^A-Za-z0-9 ]+";
+char general_token_re[] = "[A-Za-z0-9]+|[^A-Za-z0-9]+";
 char word_token_re[] = "[A-Za-z0-9][A-Za-z0-9]+";
+
+void remove_bad_tokens(feature_type_list) {
+#ifdef REMOVE_SPACES
+    int i;
+    for (i = 0; i < default_list_length(feature_type_list); i++) {
+        token_feature *tf = default_list_get(feature_type_list,i);
+        if (tf->char_vector[0] == tf->length) {
+            default_list_remove(feature_type_list,i);
+            i--;
+        }
+    }
+#endif
+}
 
 void create_sentence_list(char* buffer, default_list list) {
     int i,j;
@@ -92,6 +105,7 @@ void create_features_from_sentences(default_list list, default_list feature_type
         if (t != NULL) {
             j = re_find_all(re,t->string,feature_type_list,&token_feature_create_from_string);
             if (j!=0) { re_print_error(j); break; }
+            remove_bad_tokens(feature_type_list);
             while (default_list_length(label_list)<default_list_length(feature_type_list)) {
                 if (default_list_length(label_list)+1==default_list_length(feature_type_list)) {
                     default_list_append(label_list,E);
@@ -101,6 +115,7 @@ void create_features_from_sentences(default_list list, default_list feature_type
             }
         }
     }
+    
     re_free(re);
 }
 
@@ -112,5 +127,8 @@ void create_features_from_buffer(char *buffer, default_list feature_type_list) {
     if (i!=0) { re_print_error(i); }
     i = re_find_all(re,buffer,feature_type_list,&token_feature_create_from_string);
     if (i!=0) { re_print_error(j); }
+
+    remove_bad_tokens(feature_type_list);
+
     re_free(re);
 }

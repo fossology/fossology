@@ -15,10 +15,12 @@ extern "C" {
 typedef int c_bool;
 #define FALSE 0
 #define TRUE (1)
-#define FT_CHAR_MAP "\n.!?"
-#define FT_CHAR_MAP_LEN 4
-// #define FT_CHAR_MAP "\n.:;,/\\|~`!@#$%^&*-_=+?()[]{}<>"
-// #define FT_CHAR_MAP_LEN 31
+// #define FT_CHAR_MAP " \n.!?"
+// #define FT_CHAR_MAP_LEN 5
+//#define FT_CHAR_MAP " \n.:;,/\\|~`!@#$%^&*-_=+?()[]{}<>"
+//#define FT_CHAR_MAP_LEN 32
+#define FT_CHAR_MAP " \n.:;,!?"
+#define FT_CHAR_MAP_LEN 8
 
 // Our simple datatype
 typedef struct token_feature {
