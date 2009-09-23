@@ -123,58 +123,50 @@ int main (int argc, char **argv) {
     char file_list[MAX_FILES][MAX_FILENAME];
     int file_count = 0;
     int i,j;
+    FILE *File;
+    char filename[MAX_PATHNAME];
 
     if (argc < 2) {
-        fprintf(stderr, "Please provide a directory to import reference licenses from.\n");
+        fprintf(stderr, "ERROR: Please provide a file with .meta file paths to import.\n");
+        fprintf(stderr, "       The file should have a path on each line.\n");
         exit(1);
     }
 
-    strncpy(path, argv[1], MAX_FILENAME-2);
-    path[MAX_FILENAME-2] = '\0';
-    if (path[strlen(path)-1] != '/') {
-        path[strlen(path)] = '/';
-        path[strlen(path)+1] = '\0';
+    File = fopen(argv[1], "rb");
+    if (File == NULL) {
+        fprintf(stderr, "ERROR: Could not open %s for reading.\n", argv[1]);
+        exit(1);
     }
 
-    // Get a list of the directory
-    dp = opendir(path);
-    if (dp != NULL)
-    {
-        while (ep = readdir (dp)) {
-            strncpy(file_list[file_count],ep->d_name,MAX_FILENAME-1);
-            file_list[file_count][MAX_FILENAME-1] = '\0';
-            file_count++;
-        }
-        (void) closedir (dp);
-    } else {
-        perror ("Couldn't open the directory");
+    if (argc > 2 && strcmp(argv[2],"test")==0) {
+        fprintf(stderr, "WARNING: We are running in testing mode. No data is being written to the database.\n");
     }
-
     // search for .meta files and their corresponding license files.
     // print an error if we cant find a license file.
-    for (i = 0; i < file_count; i++) {
+    while (fgets(filename,MAX_PATHNAME-1,File)) {
         char license_file[MAX_PATHNAME];
         char license_meta[MAX_PATHNAME];
         meta_data data;
         FILE *meta_fptr;
         FILE *file_fptr;
         char *file_buffer;
-        int len = strlen(file_list[i]);
+        int len = strlen(filename)-1;
         long lSize;
         size_t result;
         field *f = NULL;
         int errors = 0;
+        filename[len] = '\0';
 
-        if (strcmp(file_list[i]+(len-5),".meta") != 0) {
+        if (strcmp(filename+(len-5),".meta") != 0) {
+            fprintf(stderr, "ERROR: %s is not a .meta file.\n", filename);
             continue;
         }
 
-        strcpy(license_meta, path);
-        strcat(license_meta, file_list[i]);
+        strcpy(license_meta, filename);
         strncpy(license_file, license_meta, strlen(license_meta)-5);
         license_file[strlen(license_meta)-5] = '\0';
        
-        printf("Starting on:\n\t%s\n\t%s\n", license_meta, license_file);
+        // printf("Starting on:\n\t%s\n\t%s\n", license_meta, license_file);
 
         meta_fptr = fopen(license_meta,"rb");
         if (meta_fptr == NULL) {
@@ -188,23 +180,25 @@ int main (int argc, char **argv) {
                 break;
             } else {
                 if (strcmp(f->key,"Date") == 0) {
+                    int warning = 0;
                     char format[11] = "####-##-##";
                     if (strlen(f->value) == 0) {
                         data.date[0] = '\0';
                     } else {
                         if (strlen(f->value) != 10) {
                             fprintf(stderr, "WARNING: date field is incorrect format. Should be %s, trying to continue...\n", format);
+                            warning = 1;
                         }
                         for (j = 0; j<10; j++) {
                             if (format[j] == '#') {
                                 if (f->value[j] < '0' || f->value[j] > '9') {
-                                    fprintf(stderr, "Error processing Date field: Incorrect format. Should be '%s', got '%s'.\n", format, f->value);
+                                    fprintf(stderr, "ERROR: processing Date field: Incorrect format. Should be '%s', got '%s'.\n", format, f->value);
                                     errors++;
                                     break;
                                 }
                             } else {
                                 if (f->value[j] != '-') {
-                                    fprintf(stderr, "Error processing Date field: Incorrect format. Should be '%s', got '%s'.\n", format, f->value);
+                                    fprintf(stderr, "ERROR: processing Date field: Incorrect format. Should be '%s', got '%s'.\n", format, f->value);
                                     errors++;
                                     break;
 
@@ -218,6 +212,9 @@ int main (int argc, char **argv) {
                     }
                     strncpy(data.date,f->value,10);
                     data.date[10] = '\0';
+                    if (warning == 1) {
+                        fprintf(stderr, "       Able to continue with provided date.\n");
+                    }
                 } else if (strcmp(f->key,"URL") == 0) {
                     strcpy(data.URL,f->value);
                 } else if (strcmp(f->key,"shortname") == 0) {
@@ -225,31 +222,41 @@ int main (int argc, char **argv) {
                 } else if (strcmp(f->key,"fullname") == 0) {
                     strcpy(data.fullname,f->value);
                 } else if (strcmp(f->key,"OSIapproved") == 0) {
-                    if (convert_bool_field(f->value)==1) {
+                    if (strlen(f->value) == 0) {
+                        strcpy(data.OSIapproved,"");
+                    } else if (convert_bool_field(f->value)==1) {
                         strcpy(data.OSIapproved,"1");
                     } else {
                         strcpy(data.OSIapproved,"0");
                     }
                 } else if (strcmp(f->key,"FSFfree") == 0) {
-                    if (convert_bool_field(f->value)==1) {
+                    if (strlen(f->value) == 0) {
+                        strcpy(data.FSFfree,"");
+                    } else if (convert_bool_field(f->value)==1) {
                         strcpy(data.FSFfree,"1");
                     } else {
                         strcpy(data.FSFfree,"0");
                     }
                 } else if (strcmp(f->key,"GPLv2compatible") == 0) {
-                    if (convert_bool_field(f->value)==1) {
+                    if (strlen(f->value) == 0) {
+                        strcpy(data.GPLv2compatible,"");
+                    } else if (convert_bool_field(f->value)==1) {
                         strcpy(data.GPLv2compatible,"1");
                     } else {
                         strcpy(data.GPLv2compatible,"0");
                     }
                 } else if (strcmp(f->key,"GPLv3compatible") == 0) {
-                    if (convert_bool_field(f->value)==1) {
+                    if (strlen(f->value) == 0) {
+                        strcpy(data.GPLv3compatible,"");
+                    } else if (convert_bool_field(f->value)==1) {
                         strcpy(data.GPLv3compatible,"1");
                     } else {
                         strcpy(data.GPLv3compatible,"0");
                     }
                 } else if (strcmp(f->key,"copyleft") == 0) {
-                    if (convert_bool_field(f->value)==1) {
+                    if (strlen(f->value) == 0) {
+                        strcpy(data.copyleft,"");
+                    } else if (convert_bool_field(f->value)==1) {
                         strcpy(data.copyleft,"1");
                     } else {
                         strcpy(data.copyleft,"0");
@@ -259,7 +266,7 @@ int main (int argc, char **argv) {
                 } else if (strcmp(f->key,"notes") == 0) {
                     strcpy(data.notes,f->value);
                 } else {
-                    fprintf(stderr, "Unknown META field in %s\n\t%s\n", license_meta, f->key);
+                    fprintf(stderr, "ERROR: Unknown META field in %s\n\t%s\n", license_meta, f->key);
                     errors++;
                 }
             }
@@ -267,8 +274,8 @@ int main (int argc, char **argv) {
 
         file_fptr = fopen(license_file, "rb");
         if (file_fptr==NULL) {
-            fprintf(stderr, "File error, opening %s.\n", license_file);
-            exit(1);
+            fprintf(stderr, "ERROR: File error, opening %s.\n", license_file);
+            errors++;
         }
 
         fseek(file_fptr, 0, SEEK_END);
@@ -277,26 +284,31 @@ int main (int argc, char **argv) {
 
         file_buffer = malloc(lSize+1);
         if (file_buffer == NULL) {
-            fputs("Memory error.\n",stderr);
-            exit(2);
-        }
+            fprintf(stderr, "ERROR: Could not allocate enough memory for license file.\n",stderr);
+            errors++;
+        } else {
 
-        result = fread(file_buffer, 1, lSize, file_fptr);
-        if (result != lSize) {
-            fputs("Reading error",stderr);
-            exit(3);
-        }
+            result = fread(file_buffer, 1, lSize, file_fptr);
+            if (result != lSize) {
+                fprintf(stderr, "ERROR: Reading error, filesize and byte read do not equal.");
+                errors++;
+            }
 
-        file_buffer[result] = '\0';
-        fclose(file_fptr);
+            file_buffer[result] = '\0';
+            fclose(file_fptr);
+        }
 
         if (errors > 0) {
-            fprintf(stderr, "Not writing data to database due to errors.\n");
+            fprintf(stderr, "WARNING: %s had errors. Not writing data to database due to errors.\n", license_meta);
         } else {
+            if (argc > 2 && strcmp(argv[2],"test")==0) {
+                continue;
+            }
             char *conninfo = "dbname = 'fossology' user = 'fossy' password = 'fossy'";
             PGconn     *conn;
             PGresult   *res;
             const char *paramValues[12];
+            int i;
 
             char sql_text[] = "INSERT INTO \"public\".\"license_ref\" (\"rf_pk\", \"rf_shortname\", \"rf_text\", \"rf_url\", \"rf_add_date\", \"rf_copyleft\", \"rf_OSIapproved\", \"rf_fullname\", \"rf_FSFfree\", \"rf_GPLv2compatible\", \"rf_GPLv3compatible\", \"rf_notes\", \"rf_Fedora\") VALUES (nextval('license_ref_rf_pk_seq'::regclass), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);";
 
@@ -308,14 +320,10 @@ int main (int argc, char **argv) {
                         PQerrorMessage(conn));
             }
 
-            paramValues[0]  = data.shortname; // rf_shortname
-            paramValues[1]  = file_buffer; // rf_text
-            paramValues[2]  = data.URL; // rf_url
-            if (strlen(data.date)==0) {
-                paramValues[3]  = NULL; // rf_add_date
-            } else {
-                paramValues[3]  = data.date; // rf_add_date
-            }
+            paramValues[0] = data.shortname; // rf_shortname
+            paramValues[1] = file_buffer; // rf_text
+            paramValues[2] = data.URL; // rf_url
+            paramValues[3] = data.date; // rf_add_date
             paramValues[4]  = data.copyleft; // rf_copyleft
             paramValues[5]  = data.OSIapproved; // rf_OSIapproved
             paramValues[6]  = data.fullname; // rf_fullname
@@ -324,6 +332,12 @@ int main (int argc, char **argv) {
             paramValues[9]  = data.GPLv3compatible; // rf_GPLv3compatible
             paramValues[10] = data.notes; // rf_notes
             paramValues[11] = data.Fedora; // rf_Fedora
+
+            for (i = 0; i < 12; i++) {
+                if (strlen(paramValues[i]) == 0) {
+                    paramValues[i] = NULL;
+                }
+            }
 
             res = PQexecParams(conn,
                     sql_text,
@@ -343,6 +357,8 @@ int main (int argc, char **argv) {
             PQfinish(conn);
         }
     }
+
+    fclose(File);
 
     return 0;
 }
