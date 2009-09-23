@@ -126,7 +126,7 @@ class upload_url extends FO_Plugin {
           $GetURL = 'http://';
         }
         /* Display instructions */
-        $V.= "This option permits uploading a file from a remote web for FTP server to FOSSology.\n";
+        $V.= "This option permits uploading a file from a remote web or FTP server to FOSSology.\n";
         $V.= "The file to upload must be accessible via a URL and must not require human interaction ";
         $V.= "such as login credentials.\n";
         /* Display the form */
