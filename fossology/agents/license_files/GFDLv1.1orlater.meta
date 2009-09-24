@@ -1,6 +1,5 @@
 Date:
 URL: none
-Source: man pages
 URL: http://www.fsf.org/licensing/licenses/fdl.html
 shortname: GFDL v1.1
 fullname: GNU Free Documentation License v1.1
@@ -10,4 +9,4 @@ GPLv2compatible:
 GPLv3compatible:
 copyleft:
 Fedora:
-notes:
+notes: man pages
