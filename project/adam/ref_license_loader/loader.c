@@ -272,6 +272,11 @@ int main (int argc, char **argv) {
             }
         }
 
+        if (strlen(data.shortname) == 0) {
+            fprintf(stderr, "ERROR: shortname field must not be NULL.\n");
+            errors++;
+        }
+
         file_fptr = fopen(license_file, "rb");
         if (file_fptr==NULL) {
             fprintf(stderr, "ERROR: File error, opening %s.\n", license_file);
@@ -316,8 +321,8 @@ int main (int argc, char **argv) {
 
             if (PQstatus(conn) != CONNECTION_OK)
             {
-                fprintf(stderr, "Connection to database failed: %s",
-                        PQerrorMessage(conn));
+                fprintf(stderr, "Connection to database failed: %s.\n\tWorking on %s\n",
+                        PQerrorMessage(conn), license_meta);
             }
 
             paramValues[0] = data.shortname; // rf_shortname
@@ -350,7 +355,7 @@ int main (int argc, char **argv) {
 
             if (PQresultStatus(res) != PGRES_COMMAND_OK)
             {
-                fprintf(stderr, "INSERT failed: %s\n", PQerrorMessage(conn));
+                fprintf(stderr, "INSERT failed: %s.\n\tWorking on %s\n", PQerrorMessage(conn), license_meta);
                 PQclear(res);
             }
 
