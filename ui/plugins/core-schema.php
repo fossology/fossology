@@ -1289,6 +1289,13 @@ LANGUAGE plpgsql;
       if (empty($Table)) {
         continue;
       }
+
+    if (!array_key_exists($Table, $Schema["TABLE"]))
+    {
+      // echo "skipping orphan table: $Table<br>";
+      continue;  // skip orphan table
+    }
+
       foreach($IndexInfo as $Name => $SQL) {
         if (empty($Name)) {
           continue;
