@@ -416,7 +416,7 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_repeat, $jq_runonpfile, $D
   /* Check if the job exists */
   $Results = $DB->Action("SELECT jq_pk FROM jobqueue
   	WHERE jq_job_fk = '$job_pk' AND jq_type = '$jq_type' AND jq_args = '$jq_args';");
-  //$jqpk = $Results[0]['jq_pk'];
+  $jqpk = $Results[0]['jq_pk'];
   if (empty($Results)) {
     /* Add the job */
     $SQL = "INSERT INTO jobqueue ";

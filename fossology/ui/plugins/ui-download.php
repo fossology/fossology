@@ -57,11 +57,78 @@ class ui_download extends FO_Plugin
     global $DB;
     $Item = GetParm("item",PARM_INTEGER);
     if (empty($Item))
-	{
-	$this->OutputType = "corrupt";
-	return;
-	}
+	    {
+	    $this->OutputType = "corrupt";
+	    return;
+	    }
+    /* Added by vincent to implement when click donwload link, the file not in the repository, add a page to ask user if want to reunpack */
+    /** Begin:  **/
+    $Fin = NULL;
+    if (empty($Fin))
+      {
+      $Fin = @fopen( RepPathItem($Item) ,"rb");
+      if (empty($Fin))
+	      {  
+        $this->NoHeader = 0;
+        switch($this->OutputType)
+          {
+          case "XML":
+            $V = "<xml>\n";
+          break;
+          case "HTML":
+            header('Content-type: text/html');
+            header("Pragma: no-cache"); /* for IE cache control */
+            header('Cache-Control: no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0'); /* prevent HTTP/1.1 caching */
+            header('Expires: Expires: Thu, 19 Nov 1981 08:52:00 GMT'); /* mark it as expired (value from Apache default) */
+            if ($this->NoHTML) { return; }
+            $V = "";
+            if (($this->NoMenu == 0) && ($this->Name != "menus"))
+              {
+              $Menu = &$Plugins[plugin_find_id("menus")];
+              $Menu->OutputSet($Type,$ToStdout);
+              }
+            else { $Menu = NULL; }
 
+            /* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
+            $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
+            // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
+            // $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
+            // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "xhtml1-strict.dtd">' . "\n";
+
+            $V .= "<html>\n";
+            $V .= "<head>\n";
+            $V .= "<meta name='description' content='The study of Open Source'>\n";
+            if ($this->NoHeader == 0)
+              {
+              /** Known bug: DOCTYPE "should" be in the HEADER
+              and the HEAD tags should come first.
+              Also, IE will ignore <style>...</style> tags that are NOT
+              in a <head>...</head> block.
+              **/
+              if (!empty($this->Title)) { $V .= "<title>" . htmlentities($this->Title) . "</title>\n"; }
+              $V .= "<link rel='stylesheet' href='fossology.css'>\n";
+              print $V; $V="";
+              if (!empty($Menu)) { print $Menu->OutputCSS(); }
+              $V .= "</head>\n";
+  
+              $V .= "<body class='text'>\n";
+              print $V; $V="";
+              if (!empty($Menu)) { $Menu->Output($this->Title); }
+              }
+          break;
+          case "Text":
+          break;
+          default:
+          break;
+          }
+        $this->OutputType = "corrupt";
+     
+        $P = &$Plugins[plugin_find_id("view")];
+        $P->ShowView(NULL,"browse");
+	      return;
+	     }
+      }
+    /** END **/
     /* Get filename */
     /** By using pfile and ufile, we cut down the risk of users blindly
         guessing in order to download arbitrary files.
