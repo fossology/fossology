@@ -668,9 +668,34 @@ class ui_view extends FO_Plugin
       $Fin = @fopen( RepPathItem($Item) ,"rb");
       if (empty($Fin))
 	{
-	print "File contents are not available in the repository.\n";
-	return;
-	}
+	  /* Added by vincent implement when view files which not in repository, ask user if want to reunpack*/
+	  /** BEGIN **/
+		/* If this is a POST, then process the request. */
+	   $uploadpk = GetParm('uploadunpack',PARM_INTEGER);
+	   $flag = 0;
+	   if (!empty($uploadpk))
+	     {
+	       $P = &$Plugins[plugin_find_id("ui_reunpack")];
+	       $rc = $P->AgentAdd($uploadpk);
+	       if (empty($rc))
+	       {
+	         /* Need to refresh the screen */
+	         $V .= displayMessage('Unpack added to job queue');
+	         $flag = 1;
+	       }
+	       else
+	       {
+	         $V .= displayMessage("Unpack of Upload failed: $rc");
+	       }
+	       print $V;
+	     }
+	  
+	   print "File contents are not available in the repository.\n";
+	   $P = &$Plugins[plugin_find_id("ui_reunpack")];
+     print $P->ShowReunpackView($Item,$flag);
+	   return;
+	   }
+	  /** END **/ 
       }
     rewind($Fin);
     $Pages = "";
