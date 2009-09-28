@@ -1178,6 +1178,19 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 	free(S);
 	}
 
+// Begin add by vincent
+  memset(SQL,'\0',MAXSQL);
+  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name='%s';",
+    Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
+  rc=MyDBaccess(DB,SQL);
+  if (rc < 0)
+	{
+	printf("FATAL: Database access error.\n");
+	printf("LOG: Database access error in ununpack: %s\n",SQL);
+	SafeExit(14);
+	}
+  if(DBdatasize(DB) <= 0)
+  {
   /* Get the parent ID */
   /* Two cases -- depending on if the parent exists */
   memset(SQL,'\0',MAXSQL);
@@ -1201,9 +1214,11 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
   rc=MyDBaccess(DBTREE,"SELECT currval('uploadtree_uploadtree_pk_seq');");
   CI->uploadtree_pk = atol(DBgetvalue(DBTREE,0,0));
-  TotalItems++;
+  //TotalItems++;
   // printf("=========== AFTER ==========\n"); DebugContainerInfo(CI);
-
+ } 
+//End add by Vincent
+  TotalItems++;
   return(0);
 } /* DBInsertUploadTree() */
 
