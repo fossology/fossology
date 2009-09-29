@@ -121,7 +121,7 @@ class core_auth extends FO_Plugin {
     session_start();
     $Now = time();
     if (!empty($_SESSION['time'])) {
-      /* Logins older than 60 secs * 480 = 8 hr minutes are auto-logout */
+      /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
       if (@$_SESSION['time'] + (60 * 480) < $Now) {
         $_SESSION['User'] = NULL;
         $_SESSION['UserId'] = NULL;
