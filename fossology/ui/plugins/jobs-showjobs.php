@@ -145,7 +145,7 @@ class jobs_showjobs extends FO_Plugin
     $Results = $DB->Action($Sql);
     $Row = $Results[0];
     if (empty($Row['jq_pk'])) { return; }
-    $V .= "<table class='text' border=1>\n";
+    $V .= "<table class='text' border=1 name='jobtable1'>\n";
     $V .= "<tr><th>Field</th><th>Value</th></tr>\n";
     foreach($Fields as $F)
       {
@@ -224,6 +224,7 @@ class jobs_showjobs extends FO_Plugin
     {
     global $Plugins;
     global $DB;
+    $V = '';
 
     if ($History == 1) { $Where = ""; }
     else { $Where = "WHERE (jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1)"; }
@@ -254,7 +255,7 @@ class jobs_showjobs extends FO_Plugin
     else { $WherePage = ""; }
 
     /** NOTE: Results are NOT in alphabetical order.  They are in
-        LC_COLLATE order.  Changing LC_COLLATE requires re-running 
+        LC_COLLATE order.  Changing LC_COLLATE requires re-running
 	postgresql's initdb. **/
     $Sql = "
     SELECT *
@@ -278,7 +279,7 @@ class jobs_showjobs extends FO_Plugin
 	$Count++;
       }
 
-    if (($Upload < 0) && (!is_array($Results) || ($Count < 10)))
+    if (($UploadPk < 0) && (!is_array($Results) || ($Count < 10)))
 	{
 	if ($History == 1) { $Where = ""; }
 	else { $Where = "WHERE jobqueue.jq_starttime IS NULL OR jobqueue.jq_endtime IS NULL OR jobqueue.jq_end_bits > 1"; }
@@ -352,7 +353,7 @@ class jobs_showjobs extends FO_Plugin
 	$Upload = $Row['upload_pk'];
 	if ($First) { $First=0; }
 	else { $V .= "</table>\n<P />\n"; }
-	$V .= "<table class='text' border=1 width='100%'>\n";
+	$V .= "<table class='text' border=1 width='100%' name='jobtable'>\n";
 	$JobName = $Row['upload_filename'];
 	$JobName = preg_replace("@^.*/@","",$JobName);
 	if (empty($JobName)) { $JobName = "[Default]"; }
