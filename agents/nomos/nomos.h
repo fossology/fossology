@@ -86,6 +86,8 @@
  */
 #define	NO	0
 #define	YES	1
+#define TRUE YES
+#define FALSE NO
 
 /* List-sorting flags */
 #define	UNSORTED		0
@@ -295,7 +297,7 @@ struct curScan {
     list_t lList;
     list_t cList; 				/**< CDB - I don't think this is actually used. */
     list_t eList; 				/**< CDB - I don't think this is actually used. */
-    char compLic[myBUFSIZ];  	/**< the lisense found? */
+    char compLic[myBUFSIZ];  	/**< the lisense found, None or NotLikely */
     char name[128]; 			/* CDB, set, but not used. */
     int nLines;
     int nWords; 				/**< CDB, set, but not used. */
