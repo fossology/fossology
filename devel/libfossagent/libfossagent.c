@@ -2,7 +2,7 @@
  libfossagent: Set of generic functions handy for agent development.
 
  Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -44,7 +44,7 @@ typedef struct stat stat_t;
 /* for debugging */
 extern int Debug;
 
-#define FUNCTION 
+#define FUNCTION
 
 /*  For heartbeat  */
 long    HeartbeatValue=-1;
@@ -156,13 +156,15 @@ FUNCTION int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn
   char sql[256];
 
   /* get the exact agent rec requested */
-  sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='%s' and agent_rev='%s'", agent_name, svn_rev);
+  sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='%s' "
+		  "AND agent_rev='%s' AND agent_enabled = true; ",
+		  agent_name, svn_rev);
   rc = DBaccess(DB, sql);
   if ((rc <= 0) || (DBdatasize(DB) <= 0))
   {
     /* no exact match, so add an agent rec */
-    sprintf(sql, "INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('%s',E'%s',E'%s')",
-            agent_name, svn_rev, agent_desc);
+    sprintf(sql, "INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('%s',E'%s',E'%s','%d')",
+            agent_name, svn_rev, agent_desc, 1);
     rc = DBaccess(DB,sql);
     if (rc < 0)
     {
@@ -172,7 +174,9 @@ FUNCTION int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn
       exit(17);
     }
 
-    sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='%s' and agent_rev='%s'", agent_name, svn_rev);
+    sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='%s' "
+    		"AND agent_rev='%s' AND agent_enabled=true",
+    		agent_name, svn_rev);
    rc = DBaccess(DB,sql);
    if (rc < 0)
    {
