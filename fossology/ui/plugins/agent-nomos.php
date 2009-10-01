@@ -71,7 +71,10 @@ class agent_fonomos extends FO_Plugin {
   Returns NULL on success, string on failure.
   *********************************************/
   function AgentAdd($uploadpk, $Depends = NULL, $Priority = 0) {
+
     global $DB;
+    global $SVN_REV;
+
     /* Get dependency: "nomos" require "adj2nest".
      * clean this comment up, what is being checked?
      * */
@@ -113,14 +116,18 @@ class agent_fonomos extends FO_Plugin {
     }
 
     /*
-       Get the agent pk for the agent to be scheduled.
-     */
+       Get the agent pk for the agent to be scheduled, the C version of this
+       routine, has the svn_rev set to: VERSION,SVN_REV. GetAgentKey fixes this,
+       just pass in SVN_REV.
 
     $Sql = "SELECT agent_pk FROM agent WHERE agent_name='nomos' ORDER BY
                 agent_rev DESC LIMIT 1;";
 
     $agents = $DB->Action($Sql);
     $agentPk = $agents[0]['agent_pk'];
+    */
+
+    $agentPk = GetAgentKey('nomos', $uploadpk, $SVN_REV, 'Nomos License Detection Agency' );
 
     if(strlen($agentPk) == 0) {
       return ("FATAL! Could not find Agent Nomos in the Agent Table");

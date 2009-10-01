@@ -91,6 +91,11 @@ function AgentCheckBoxDo($upload_pk)
   $V = "";
   if (!empty($AgentList)) {
     foreach($AgentList as $AgentItem) {
+      /*
+         The URI below contains the agent name e.g agent_license, this is
+         not be confused with the Name attribute in the class, for example,
+         the Name attribute for agent_license is: Schedule License Analysis
+       */
       $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
       if (empty($Agent)) {
         continue;
@@ -200,6 +205,62 @@ function FindDependent($UploadPk, $list=NULL) {
   $Depends[] = Largestjq_pk($job_pk);
   return($Depends);
 } // FindDependent
+
+/**
+ * GetAgentKey
+ * \brief, get the agent_pk, based on the agent_rev.
+ *
+ * @param string $agentName the name of the agent e.g. nomos
+ * @param int upload_pk, only used for error reporting
+ * @param string svnRev the svn revision
+ * @param string agentDesc the agent_desc colunm
+ *
+ * @return -1 or agent_pk
+ */
+
+function GetAgentKey($agentName, $uploadFK, $svnRev, $agentDesc) {
+
+  global $DB;
+  global $SVN_REV;
+  global $VERSION;
+
+  /* check SVN_REV, has to match what is in pathinclude.php */
+  if($SVN_REV == $svnRev) {
+    $svnRev = $VERSION . ", " . $svnRev;
+  }
+  else {
+    return(-1);
+  }
+
+
+  /* must have an exact match */
+  $Sql = "SELECT agent_pk FROM agent WHERE agent_name ='$agentName' AND" .
+         "agent_rev='svnRev' AND agent_enabled=true;";
+
+  $agentKey = $DB->action($Sql);
+  /* no match, add to table and return agent_pk */
+  if(empty($agentKey)) {
+    //print("DB: No agent match, inserting\n");
+    $Sql = "INSERT INTO agent (agent_name,agent_rev,agent_desc,agent_enabled)
+            VALUES('$agentName', '$svnRev', '$agentDesc', 1);";
+    $insert = $DB->action($Sql);
+    if(is_null($insert)) {   // db error or some sort
+      return(-1);
+    }
+    $Sql = "SELECT agent_pk from agent WHERE agent_name = '$agentName' AND ".
+           "agent_rev = '$svnRev' AND agent_enabled=true;";
+    $agent = $DB->action($Sql);
+    if(empty($agent)) {
+      return(-1);
+    }
+    else {
+      return($agent[0]['agent_pk']);
+    }
+  }
+  else {
+    return($agentKey[0]['agent_pk']);
+  }
+} // GetAgentKey
 
 /**
  * Largestjq_pk
