@@ -163,7 +163,7 @@ FUNCTION int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn
   if ((rc <= 0) || (DBdatasize(DB) <= 0))
   {
     /* no exact match, so add an agent rec */
-    sprintf(sql, "INSERT INTO agent (agent_name,agent_rev,agent_desc) VALUES ('%s',E'%s',E'%s','%d')",
+    sprintf(sql, "INSERT INTO agent (agent_name,agent_rev,agent_desc,agent_enabled) VALUES ('%s',E'%s',E'%s','%d')",
             agent_name, svn_rev, agent_desc, 1);
     rc = DBaccess(DB,sql);
     if (rc < 0)
