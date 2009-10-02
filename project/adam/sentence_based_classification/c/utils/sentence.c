@@ -89,6 +89,7 @@ void* default_list_type_function_sentence_create(void *v) {
         temp->string = NULL;
         temp->filename = NULL;
         temp->licensename = NULL;
+        temp->id = 0;
         temp->vector = NULL;
         temp->start = 0;
         temp->end = 0;
@@ -133,6 +134,7 @@ void* default_list_type_function_sentence_copy(void *v) {
             return NULL;
         }
         strcpy(temp->licensename,s->licensename);
+        temp->id = s->id;
 
         temp->vector = sv_copy(s->vector);
 
@@ -176,6 +178,7 @@ int default_list_type_function_sentence_dump(void *v, FILE *f) {
     temp = strlen(t->licensename)+1;
     fwrite(&temp, sizeof(int),1,f);
     fwrite(t->licensename, sizeof(char),strlen(t->licensename)+1,f);
+    fwrite(&t->id, sizeof(int),1,f);
     sv_dump(t->vector,f);
     return 0;
 }
@@ -223,13 +226,14 @@ void* default_list_type_function_sentence_load(FILE *f) {
         return NULL;
     }
     fread(temp->licensename,1,len,f);
+    fread(&temp->id,sizeof(int),1,f);
 
     temp->vector = sv_load(f);
 
     return (void *)temp;
 }
 
-sentence* sentence_create(char *string, int start, int end, int position, char *filename, char *licensename, sv_vector vector) {
+sentence* sentence_create(char *string, int start, int end, int position, char *filename, char *licensename, int id, sv_vector vector) {
     sentence *temp = (sentence*)malloc(sizeof(sentence));
     if (temp == NULL) {
         fprintf(stderr, "Memory error at line %d in file %s.\n",
@@ -267,6 +271,8 @@ sentence* sentence_create(char *string, int start, int end, int position, char *
         return NULL;
     }
     strcpy(temp->licensename,licensename);
+
+    temp->id = id;
     
     temp->start = start;
     temp->end = end;

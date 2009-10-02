@@ -15,6 +15,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
+#include <string.h>
 #include "maxent_utils.h"
 #include <default_list.h>
 #include "token.h"
@@ -22,6 +23,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "repr.h"
 #include <limits.h>
 #include "hash.h"
+#include <math.h>
+#include "sentence.h"
 
 unsigned long create_context(default_list feature_type_list, int left_window, int right_window, int i, me_context_type& context) {
     int j, k, n;
@@ -173,5 +176,46 @@ void label_sentences(MaxentModel& m, default_list feature_type_list, default_lis
             default_list_append(label_list,I);
         }
     }
+}
+
+int create_sentences(MaxentModel& m, default_list sentence_list, char *buffer, default_list feature_type_list, default_list label_list, char *filename, char *licensename, int id) {
+    token_feature *ft = NULL;
+    char *t = NULL;
+    sv_vector vect;
+    sentence *st = NULL;
+    int i;
+
+    vect = sv_new(ULONG_MAX);
+    ft = (token_feature *)default_list_get(feature_type_list,0);
+    int start = ft->start;
+    for (i = 0; i<default_list_length(feature_type_list); i++) {
+        ft = (token_feature *)default_list_get(feature_type_list,i);
+        t = (char *)default_list_get(label_list,i);
+        if (ft->word == TRUE) {
+            double v = 0;
+            unsigned long int index = 0;
+            index = sdbm(ft->stemmed);
+            v = sv_get_element_value(vect,index);
+            sv_set_element(vect,index,v+1.0);
+        }
+        if (strcmp(t, "E")==0 || i == default_list_length(feature_type_list)-1) {
+            if (i < default_list_length(feature_type_list)-1 && sv_nonzeros(vect)<2) {
+
+            } else {
+                double norm = sqrt(sv_inner(vect,vect));
+                if (norm == 0) {
+                    continue;
+                }
+                vect = sv_scalar_mult(vect,1.0/norm);
+                st = sentence_create(buffer,start,ft->end,i,filename,licensename,id,vect);
+
+                default_list_append(sentence_list,st);
+
+                vect = sv_new(ULONG_MAX);
+                start = ft->end;
+            }
+        }
+    }
+    return 0;
 }
 

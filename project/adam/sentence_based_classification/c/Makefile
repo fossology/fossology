@@ -16,9 +16,9 @@
 ######################################################################
 
 CC=gcc
-CFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O0 -I../../sparsevect/
+CFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O3 -I../../sparsevect/
 CPP=g++
-CPPFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O0 -Wno-deprecated -I../../sparsevect/
+CPPFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../../sparsevect/
 utils=\
       utils/re.c \
       utils/token.c \

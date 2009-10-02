@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "token.h"
 #include "token_feature.h"
 
-char sent_re[] = "<SENTENCE>(?P<text>.*?)</SENTENCE>";
+char sent_re[] = "<[sS][eE][nN][tT][eE][nN][cC][eE]>(?P<text>.*?)</[sS][eE][nN][tT][eE][nN][cC][eE]>";
 char start_nonword_re[] = "^[^A-Za-z0-9]+";
 char general_token_re[] = "[A-Za-z0-9]+|[^A-Za-z0-9]+";
 char word_token_re[] = "[A-Za-z0-9][A-Za-z0-9]+";

@@ -32,6 +32,7 @@ typedef struct sentence {
     int position;
     char *filename;
     char *licensename;
+    int id;
     sv_vector vector;
 } sentence;
 
@@ -45,7 +46,7 @@ int default_list_type_function_sentence_dump(void *v, FILE *f);
 void* default_list_type_function_sentence_load(FILE *f);
 
 // This function is used to create the datatype.
-sentence* sentence_create(char *string, int start, int end, int position, char *filename, char *licensename, sv_vector vector);
+sentence* sentence_create(char *string, int start, int end, int position, char *filename, char *licensename, int id, sv_vector vector);
 
 #if defined(__cplusplus)
 }

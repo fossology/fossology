@@ -37,8 +37,9 @@ using namespace std;
 typedef MaxentModel::context_type me_context_type;
 typedef MaxentModel::outcome_type me_outcome_type;
 
-unsigned long create_context(default_list feature_type_list, int left_window, int right_window, int i, me_context_type& context);
-void create_model(MaxentModel& m, default_list feature_type_list, default_list label_list, int left_window, int right_window);
-void label_sentences(MaxentModel& m, default_list feature_type_list, default_list label_list, int left_window, int right_window);
+unsigned long create_context(default_list feature_type_list, int l_window, int r_window, int i, me_context_type& context);
+void create_model(MaxentModel& m, default_list feature_type_list, default_list label_list, int l_window, int r_window);
+void label_sentences(MaxentModel& m, default_list feature_type_list, default_list label_list, int l_window, int r_window);
+int create_sentences(MaxentModel& m, default_list sentence_list, char *buffer, default_list feature_type_list, default_list label_list, char *filename, char *licensename, int id);
 
 #endif
