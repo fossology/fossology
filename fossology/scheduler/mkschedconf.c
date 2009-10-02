@@ -2,7 +2,7 @@
  mkschedconf: Create a scheduler configuration file.
 
  Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -112,15 +112,25 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
     fprintf(Fout,"\n");
     }
 
+  /** nomos license inspection Agency */
+    memset(Cmd,'\0',sizeof(Cmd));
+    snprintf(Cmd,sizeof(Cmd)-1,"%s/nomos",AGENTDIR);
+    for(i=0; i<NumCPU1; i++)
+      {
+      fprintf(Fout,"agent=nomos %s| ",CmdHost);
+      fprintf(Fout,Rcmd,Cmd);
+      fprintf(Fout,"\n");
+      }
+
   /** license inspector (uses licinspect) ***/
-  memset(Cmd,'\0',sizeof(Cmd));
-  snprintf(Cmd,sizeof(Cmd)-1,"%s/licinspect",AGENTDIR);
-  for(i=0; i<NumCPU1; i++)
-    {
-    fprintf(Fout,"agent=licinspect %s| ",CmdHost);
-    fprintf(Fout,Rcmd,Cmd);
-    fprintf(Fout,"\n");
-    }
+    memset(Cmd,'\0',sizeof(Cmd));
+    snprintf(Cmd,sizeof(Cmd)-1,"%s/licinspect",AGENTDIR);
+    for(i=0; i<NumCPU1; i++)
+      {
+      fprintf(Fout,"agent=licinspect %s| ",CmdHost);
+      fprintf(Fout,Rcmd,Cmd);
+      fprintf(Fout,"\n");
+      }
 
   /** mimetype ***/
   memset(Cmd,'\0',sizeof(Cmd));
