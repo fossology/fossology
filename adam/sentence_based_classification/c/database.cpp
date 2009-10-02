@@ -51,7 +51,6 @@ int main(int argc, char **argv) {
     char *t = NULL;
     token_feature *ft = NULL;
     sentence *st = NULL;
-    sv_vector vect;
     char *training_files = NULL;
     char *model_file = NULL;
     char *maxent_model_file = NULL;
@@ -107,8 +106,8 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    vect = sv_new(ULONG_MAX);
     char *filename = NULL;
+    i = 0;
     while (readline(pFile,&filename)!=EOF) {
         printf("Starting on %s", filename);
         buffer = NULL;
@@ -119,28 +118,8 @@ int main(int argc, char **argv) {
         create_features_from_buffer(buffer,feature_type_list);
         label_sentences(m,feature_type_list,label_list,left_window,right_window);
     
-        ft = (token_feature *)default_list_get(feature_type_list,0);
-        int start = ft->start;
-        for (i = 0; i<default_list_length(feature_type_list); i++) {
-            double v = 0;
-            unsigned long int index = 0;
-            ft = (token_feature *)default_list_get(feature_type_list,i);
-            t = (char *)default_list_get(label_list,i);
-            index = sdbm(ft->stemmed);
-            v = sv_get_element_value(vect,index);
-            sv_set_element(vect,index,v+1.0);
-            if (strcmp(t, "E")==0 || i == default_list_length(feature_type_list)-1) {
-                printf(".");
-                double norm = 1.0/sqrt(sv_inner(vect,vect));
-                vect = sv_scalar_mult(vect,norm);
-                st = sentence_create(buffer,start,ft->end,i,filename,filename,vect);
-
-                default_list_append(sentence_list,st);
-
-                vect = sv_new(ULONG_MAX);
-                start = ft->end;
-            }
-        }
+        create_sentences(m, sentence_list, buffer, feature_type_list, label_list, filename, "", i);
+        
         default_list_append(database_list,sentence_list);
         
         free(buffer);
@@ -149,6 +128,7 @@ int main(int argc, char **argv) {
         default_list_destroy(sentence_list);
 
         printf("done.\n");
+        i++;
     }
 
     int num = default_list_length(database_list);
