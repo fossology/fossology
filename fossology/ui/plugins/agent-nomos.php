@@ -52,8 +52,8 @@ class agent_fonomos extends FO_Plugin {
   function AgentCheck($uploadpk) {
     global $DB;
     $SQL = "SELECT jq_pk,jq_starttime,jq_endtime FROM jobqueue INNER JOIN job" .
-            "ON job_upload_fk = '$uploadpk'" .
-            "AND job_pk = jq_job_fk AND jq_type = 'nomos';";
+            " ON job_upload_fk = '$uploadpk'" .
+            " AND job_pk = jq_job_fk AND jq_type = 'nomos';";
     $Results = $DB->Action($SQL);
     if (empty($Results[0]['jq_pk'])) {
       return (0);
@@ -78,9 +78,8 @@ class agent_fonomos extends FO_Plugin {
     /* Get dependency: "nomos" require "adj2nest".
      * clean this comment up, what is being checked?
      * */
-    $SQL = "SELECT jq_pk FROM jobqueue
-	    INNER JOIN job ON job.job_upload_fk = '$uploadpk'
-	    AND job.job_pk = jobqueue.jq_job_fk
+    $SQL = "SELECT jq_pk FROM jobqueue INNER JOIN job ON
+      job.job_upload_fk = $uploadpk AND job.job_pk = jobqueue.jq_job_fk
 	    WHERE jobqueue.jq_type = 'adj2nest';";
     $Results = $DB->Action($SQL);
     $Dep = $Results[0]['jq_pk'];

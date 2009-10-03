@@ -235,7 +235,7 @@ function GetAgentKey($agentName, $uploadFK, $svnRev, $agentDesc) {
 
   /* must have an exact match */
   $Sql = "SELECT agent_pk FROM agent WHERE agent_name ='$agentName' AND" .
-         "agent_rev='svnRev' AND agent_enabled=true;";
+         " agent_rev='$svnRev' AND agent_enabled=true;";
 
   $agentKey = $DB->action($Sql);
   /* no match, add to table and return agent_pk */
