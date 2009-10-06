@@ -152,7 +152,8 @@ function LicenseList($namestr, $filter)
     $ob .= "<td align=center><a href='";
     $ob .= Traceback_uri();
     $ob .= "?mod=" . $this->Name . 
-           "&rf_pk=$row[rf_pk]'><image border=0 src=images/button_edit.png></a></td>";
+           "&rf_pk=$row[rf_pk]' >".
+           "<image border=0 src=images/button_edit.png></a></td>";
 
     $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
 /* to allow editing in line
@@ -163,7 +164,8 @@ function LicenseList($namestr, $filter)
 
     $ob .= "<td>$row[rf_shortname]</td>";
     $ob .= "<td>$row[rf_fullname]</td>";
-    $ob .= "<td>".substr($row[rf_text], 0, 30)."</td>";
+    $vetext = htmlspecialchars($row[rf_text]);
+    $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$vetext</textarea></td>";
     $ob .= "<td>$row[rf_url]</td>";
     $ob .= "</tr>";
   }
@@ -219,8 +221,10 @@ function Updatefm($rf_pk)
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $ob .= "<td align=right>Short name<br>(read only)</td>";
-    $ob .= "<td><input readonly='readonly' type='text' name='rf_shortname' value='$row[rf_shortname]' size=80></td>";
+//    $ob .= "<td align=right>Short name<br>(read only)</td>";
+//    $ob .= "<td><input readonly='readonly' type='text' name='rf_shortname' value='$row[rf_shortname]' size=80></td>";
+    $ob .= "<td align=right>Short name</td>";
+    $ob .= "<td><input type='text' name='rf_shortname' value='$row[rf_shortname]' size=80></td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
@@ -231,11 +235,12 @@ function Updatefm($rf_pk)
     $ob .= "<tr>";
     $ro = ($row['rf_text_updatable'] == 't') ? "": "<br>(read only)";
     $ob .= "<td align=right>License Text $ro</td>";
-    $ob .= "<td><textarea name='rf_text' rows=5 cols=80 readonly='readonly'>".$row[rf_text]. "</textarea></td>";
+    $ob .= "<td><textarea name='rf_text' rows=10 cols=80 readonly='readonly'>".$row[rf_text]. "</textarea></td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $ob .= "<td align=right>URL</td>";
+    $ob .= "<td align=right>URL";
+    $ob .= "<a href='$row[rf_url]'><image border=0 src=images/right-point-bullet.gif></a></td>";
     $ob .= "<td><input type='text' name='rf_url' value='$row[rf_url]' size=80></td>";
     $ob .= "</tr>";
 
