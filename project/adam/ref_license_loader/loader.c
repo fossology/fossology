@@ -139,7 +139,7 @@ int main (int argc, char **argv) {
     }
 
     if (argc > 2 && strcmp(argv[2],"test")==0) {
-        fprintf(stderr, "WARNING: We are running in testing mode. No data is being written to the database.\n");
+        fprintf(stderr, "\nWARNING: We are running in testing mode. No data is being written to the database.\n\n\n");
     }
     // search for .meta files and their corresponding license files.
     // print an error if we cant find a license file.
@@ -156,6 +156,7 @@ int main (int argc, char **argv) {
         field *f = NULL;
         int errors = 0;
         filename[len] = '\0';
+        int line = 0;
 
         if (strcmp(filename+(len-5),".meta") != 0) {
             fprintf(stderr, "ERROR: %s is not a .meta file.\n", filename);
@@ -175,6 +176,7 @@ int main (int argc, char **argv) {
         }
         
         while (1) {
+            line++;
             f = read_field(meta_fptr);
             if (f == NULL) {
                 break;
@@ -186,19 +188,21 @@ int main (int argc, char **argv) {
                         data.date[0] = '\0';
                     } else {
                         if (strlen(f->value) != 10) {
-                            fprintf(stderr, "WARNING: date field is incorrect format. Should be %s, trying to continue...\n", format);
+                            // fprintf(stderr, "WARNING: date field is incorrect format. Should be %s, trying to continue...\n", format);
                             warning = 1;
                         }
                         for (j = 0; j<10; j++) {
                             if (format[j] == '#') {
                                 if (f->value[j] < '0' || f->value[j] > '9') {
-                                    fprintf(stderr, "ERROR: processing Date field: Incorrect format. Should be '%s', got '%s'.\n", format, f->value);
+                                    fprintf(stderr, "ERROR in %s:%d,\n\t", license_meta, line);
+                                    fprintf(stderr, "Incorrect date format. Should be YYYY-MM-DD, got '%s'.\n", f->value);
                                     errors++;
                                     break;
                                 }
                             } else {
                                 if (f->value[j] != '-') {
-                                    fprintf(stderr, "ERROR: processing Date field: Incorrect format. Should be '%s', got '%s'.\n", format, f->value);
+                                    fprintf(stderr, "ERROR in %s:%d,\n\t", license_meta, line);
+                                    fprintf(stderr, "Incorrect date format. Should be YYYY-MM-DD, got '%s'.\n", f->value);
                                     errors++;
                                     break;
 
@@ -212,9 +216,9 @@ int main (int argc, char **argv) {
                     }
                     strncpy(data.date,f->value,10);
                     data.date[10] = '\0';
-                    if (warning == 1) {
-                        fprintf(stderr, "       Able to continue with provided date.\n");
-                    }
+                    //if (warning == 1) {
+                    //    fprintf(stderr, "       Able to continue with provided date.\n");
+                    //}
                 } else if (strcmp(f->key,"URL") == 0) {
                     strcpy(data.URL,f->value);
                 } else if (strcmp(f->key,"shortname") == 0) {
@@ -266,14 +270,16 @@ int main (int argc, char **argv) {
                 } else if (strcmp(f->key,"notes") == 0) {
                     strcpy(data.notes,f->value);
                 } else {
-                    fprintf(stderr, "ERROR: Unknown META field in %s\n\t%s\n", license_meta, f->key);
+                    fprintf(stderr, "ERROR in %s:%d,\n\t", license_meta, line);
+                    fprintf(stderr, "Unknown META field %s\n", license_meta, f->key);
                     errors++;
                 }
             }
         }
 
         if (strlen(data.shortname) == 0) {
-            fprintf(stderr, "ERROR: shortname field must not be NULL.\n");
+            fprintf(stderr, "ERROR in %s:%d,\n\t", license_meta, line);
+            fprintf(stderr, "shortname field must not be NULL.\n");
             errors++;
         }
 
@@ -289,13 +295,13 @@ int main (int argc, char **argv) {
 
         file_buffer = malloc(lSize+1);
         if (file_buffer == NULL) {
-            fprintf(stderr, "ERROR: Could not allocate enough memory for license file.\n",stderr);
+            fprintf(stderr, "ERROR: memory allocation failed for %s.\n", license_file);
             errors++;
         } else {
 
             result = fread(file_buffer, 1, lSize, file_fptr);
             if (result != lSize) {
-                fprintf(stderr, "ERROR: Reading error, filesize and byte read do not equal.");
+                fprintf(stderr, "ERROR: Read error in %s, filesize and byte read do not equal.\n", license_file);
                 errors++;
             }
 
@@ -304,7 +310,8 @@ int main (int argc, char **argv) {
         }
 
         if (errors > 0) {
-            fprintf(stderr, "WARNING: %s had errors. Not writing data to database due to errors.\n", license_meta);
+            fprintf(stderr, "NOT WRITING %s!!! HAS ERRORS.\n", license_meta);
+            fprintf(stderr, "********************************************************************************\n\n");
         } else {
             if (argc > 2 && strcmp(argv[2],"test")==0) {
                 continue;
