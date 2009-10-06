@@ -82,7 +82,7 @@ field* read_field(FILE *fptr) {
 
     n = 0;
     while ((c = getc(fptr)) != EOF && n<MAX_LINE) {
-        if (c == ' ') {
+        if (n == 0 && c == ' ') {
             continue;
         }
         f->value[n] = c;
