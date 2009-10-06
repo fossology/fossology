@@ -1088,7 +1088,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     printf("LOG: File %s contains license(s) %s\n",
 	   basename(cur.targetFile), cur.compLic);
     return;
-}
+} /* saveLicenseData */
 
 
 /*

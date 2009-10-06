@@ -1,6 +1,6 @@
 /***************************************************************
  Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -22,6 +22,15 @@
 #include "nomos_regex.h"
 #include "util.h"
 
+
+/**
+ * \file nomos_regex.c
+ * \brief search using regex functions
+ *
+ * Functions for dealing with the regex clib functions.  Performs the
+ * regex searchs on the data.
+ *
+ */
 static char regexErrbuf[myBUFSIZ];
 
 regex_t idx_regc[NFOOTPRINTS];
@@ -153,8 +162,14 @@ int strGrep(char *regex, char *data, int flags)
 }
 
 
-/*
- * Return -1 on regex-compile failure, 1 if regex search fails, and 0 if
+/* idxGrep
+ * \brief compile a regex, and perform the search (on data?)
+ *
+ * @param int index ??
+ * @param char* data, the data to search
+ * @param int flags regcomp cflags
+ *
+ * @return -1 on regex-compile failure, 1 if regex search fails, and 0 if
  * regex search is successful.
  */
 int idxGrep(int index, char *data, int flags)
@@ -215,9 +230,6 @@ int idxGrep(int index, char *data, int flags)
     }
     return(1);
 }
-
-
-
 
 /*
  * This is our own internal, case-insensitive version of strstr().  No
