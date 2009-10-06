@@ -1,6 +1,6 @@
 /***************************************************************
  Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -24,6 +24,14 @@
 #include "util.h"
 #include "nomos_regex.h"
 #include "_autodefs.h"
+
+/**
+ * \file parse.c
+ * \brief searches for licenses
+ *
+ * The main workhorse of nomos. This file contains most of the logic for finding
+ * licenses in nomos.
+ */
 
 #define INVISIBLE       (int) '\377'
 
@@ -190,7 +198,7 @@ static int lDiags = 0;  /* set this to non-zero for printing diagnostics */
 
 
 
-static int fileHasPatt(int licTextIdx, char *filetext, int size, 
+static int fileHasPatt(int licTextIdx, char *filetext, int size,
 		       int isML, int isPS, int qType)
 {
     int ret;
@@ -1018,7 +1026,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	}
 	if (!lmem[_mLGPL]) {            /* no FSF/GPL-like match yet */
 	    /*
-	      NOTE: search for LGPL before GPL; the latter matches 
+	      NOTE: search for LGPL before GPL; the latter matches
 	      occurrences of former
 	     */
 	    if (INFILE(_LT_GPL_FONT1) && INFILE(_LT_GPL_FONT2)) {
@@ -1131,7 +1139,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		lmem[_mGPL] = 1;
 	    }
 	    else if (!lmem[_mLIBRE] && GPL_INFILE(_LT_GPLref1)
-		     && !INFILE(_PHR_NOT_UNDER_GPL) 
+		     && !INFILE(_PHR_NOT_UNDER_GPL)
 		     && !INFILE(_LT_LGPLref2)) {
 		/*
 		 * Special exceptions:
@@ -4948,7 +4956,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * ... and, there are several generic claims that "this is free software".
      * For lack of a better, more generally-accepted term, we called these
      * claims "BSD-lite", after the notion of the BSD "gift" licenses.
-     */    
+     */
     if (*licStr == NULL_CHAR) {
 	for (i = 0; i < NFREECLAIM; i++) {
 	    if (CANSKIP(i, _KW_permission, _FREE_first_perm,
@@ -5396,7 +5404,7 @@ char *realVersion(char *filetext, int size, int isML, int isPS, int ref)
 char *pythonVersion(char *filetext, int size, int isML, int isPS)
 {
     char *lstr = NULL_STR;
-      
+
 #ifdef  PROC_TRACE
     traceFunc("== pythonVersion()\n");
 #endif  /* PROC_TRACE */
@@ -5971,12 +5979,24 @@ char *ccVersion(char *filetext, int size, int isML, int isPS)
     return lstr;
 }
 
-
-/*
- * check for the presence of a phrase in a file by first searching for
- * the search key provided; cache the search results of, as we are very
- * likely to be looking up the same word/phrase again.
+/**
+ * findPhrase
+ * \brief Check for the presence of a phrase in a file by first searching for
+ * the search key provided.
+ *
+ * Cache the search results of, as we are very likely to be looking up the
+ * same word/phrase again.
+ *
+ * @param int index, index of the phrase to be searched for
+ * @param char *filetext, the text to search
+ * @param int size the size of??
+ * @param int isML medium level interest??
+ * @param int isPS postscript file??
+ * @param int qtype ??
+ *
+ * @return int ?? 0 means ??
  */
+
 int findPhrase(int index, char *filetext, int size, int isML, int isPS,
    int qType)
 {
@@ -6378,8 +6398,8 @@ int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 		*q = LTSR_NO;
 	    } else if (qType == 4) {
 	    /*
-	      Special filter #4: look for a numerical version 
-	      number IFF NOT IN a  string of (at least) 4 numerical 
+	      Special filter #4: look for a numerical version
+	      number IFF NOT IN a  string of (at least) 4 numerical
 	      characters (signifying a year/datestamp)
 	     */
 		char *x;
@@ -6840,7 +6860,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
 	    }
 	    /* Don't remove text in an HTML comment (e.g., turn the flag off) */
 	    else if ((*cp == '!') &&
-		     f && 
+		     f &&
 		     (cp != buf) &&
 		     (*(cp-1) == ' ')) {
 		*cp = ' ';
@@ -6982,7 +7002,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
 	}
 	switch (*cp) {
 	    /*
-	      Convert eol-characters AND some other miscellaneous 
+	      Convert eol-characters AND some other miscellaneous
 	      characters into spaces (due to comment-styles, etc.)
 	    */
 	case '\a': case '\t': case '\n': case '\r':
@@ -6993,7 +7013,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
 	    *cp = ' ';
 	    break;
 	    /* allow + only within the regex " [Mm]\+ " */
-	case '+':	
+	case '+':
 	    if (cp > buf+1 && (*(cp-1) == 'M' ||
 			       *(cp-1) == 'm') && *(cp-2) == ' ' &&
 		*(cp+1) == ' ') {
@@ -7384,7 +7404,7 @@ int checkUnclassified(char *filetext, int size, int score, char *ftype,
      * Without examining each paragraph, make sure the file contains the
      * components we're looking for... if not, don't check any further.
      */
-    if (/*size > 102400 && */ 
+    if (/*size > 102400 && */
 	!match3(_LEGAL_first, buf, score, NO, isML, isPS)) {
 #ifdef  UNKNOWN_CHECK_DEBUG
 	printf("... first check fails\n");
@@ -8499,9 +8519,9 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
 	cp = copyString(buf, MTAG_TEXTPARA);
 	doctorBuffer(cp, isML, isPS, NO);
 	/*
-	  If we detected a no-warraty statement earlier, "checknw" is != 0. 
-	  Look for a no-warrany statement in this candidate paragraph.  
-	  If we find it, report failure for the paragraph and remember 
+	  If we detected a no-warraty statement earlier, "checknw" is != 0.
+	  Look for a no-warrany statement in this candidate paragraph.
+	  If we find it, report failure for the paragraph and remember
 	  finding the no--warranty.
 	 */
 	if (checknw && idxGrep(checknw, cp, REG_ICASE|REG_EXTENDED)) {
@@ -8513,10 +8533,10 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
 	    return(0);
 	}
 	/*
-	  False-positive-check: GNU/FSF template (often see in ".po" 
+	  False-positive-check: GNU/FSF template (often see in ".po"
 	  and ".c" files
-	 
-	  "This file is distributed under the same license as the 
+
+	  "This file is distributed under the same license as the
 	  package PACKAGE"
 	 */
 	if (dbgIdxGrep(_LT_BOGUSTMPL, cp, lDiags)) {
@@ -8559,14 +8579,14 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
 		   score, 100.0 * (float) j / (float) score);
 	}
 	/*
-	  Here, we guess that an UnclassifiedLicense exists in a paragraph 
-	  when: 
+	  Here, we guess that an UnclassifiedLicense exists in a paragraph
+	  when:
 	     + a paragraph has a keyword-score of at least 3 -OR-
-	     + ... a keyword-score of 2 *AND* is >= 50% of the file's 
+	     + ... a keyword-score of 2 *AND* is >= 50% of the file's
 	       total score
-	
-	  It's likely we'll see a few false-positives with a 
-	  keyword-score of 2 but there are cases where this works.  
+
+	  It's likely we'll see a few false-positives with a
+	  keyword-score of 2 but there are cases where this works.
 	  We can filter out the 2-scores we see
 	  with the FILTER checks below...
 	 */

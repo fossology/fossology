@@ -93,18 +93,51 @@ int addNewLicense(char *licenseName) {
 	sprintf(
 			query,
 			"insert into license_ref(rf_shortname, rf_text) values('%s', '%s')",
-			cur.compLic, specialLicenseText);
+			licenseName, specialLicenseText);
 
 	result = PQexec(gl.pgConn, query);
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK) {
-		printf("   ERROR: Nomos agent got database error: %s\n",
-				PQresultErrorMessage(result));
+		printf("   ERROR: Nomos agent got database error adding a new license "
+				"to the reference table:\n%s\n", PQresultErrorMessage(result));
 		PQclear(result);
 		return (FALSE);
 	}
 	return (TRUE);
 }
+
+
+/**
+ checkPQresult
+
+ check the result status of the query with PQresultStatus
+
+ @param PGresult *result
+
+ @return NULL on OK, PgresultErrorMessage on failure
+
+ \todo Add second parameter to indicate either select or insert/update,
+ as the returned item is different (PGRES_COMMAND_OK).
+ */
+char * checkPQresult(PGresult *result) {
+	/* PGresult *result; */
+	char *failMessage;
+
+	failMessage = NULL_CHAR;
+
+	if (PQresultStatus(result) != PGRES_TUPLES_OK) {
+		/*
+		 Something went wrong.
+		 */
+		printf("   DB: Data Base Query Failed!\n");
+		sprintf(failMessage, "   ERROR: Nomos agent got database error: %s\n",
+				PQresultErrorMessage(result));
+		/* printf("   DB: Error message is:%s\n", PQresultErrorMessage(result)); */
+		PQclear(result);
+		return (failMessage);
+	}
+	return (NULL_CHAR);
+} /* checkPQresult */
 
 /**
  getFieldValue
@@ -203,36 +236,38 @@ char *getFieldValue(char *inStr, char *field, int fieldMax, char *value,
 /**
  parseLicenseList
  \brief parse the comma separated list of license names found
-  Uses cur.compLic and sets cur.licenseList
+ Uses cur.compLic and sets cur.licenseList
 
-  void?
+ void?
  */
 
 void parseLicenseList() {
 
 	int numNames = 0;
-	int i;
+	char *saveptr;
 
 	/* check for a single name */
-	if(strstr(cur.compLic, ",") == NULL_CHAR) {
-		cur.licenseList[numNames] = *(cur.compLic);
+	if (strstr(cur.compLic, ",") == NULL_CHAR) {
+		cur.licenseList[numNames] = &cur.compLic;
 	}
-	if(cur.compLic == NULL_CHAR){
+	if (cur.compLic == NULL_CHAR) {
 		return;
 	}
 
-	cur.licenseList[numNames] = strtok(cur.compLic, ",");
+	cur.licenseList[numNames] = strtok_r(cur.compLic, ",", &saveptr);
 
-	while(cur.licenseList[numNames] != NULL) {
+	/* printf("DB: PLL: after first strtoc_r call, name is:%s\n",cur.licenseList[numNames]); */
+
+	while (cur.licenseList[numNames] != NULL) {
 		numNames++;
-		cur.licenseList[numNames] = strtok(NULL, ",");
+		cur.licenseList[numNames] = strtok_r(NULL, ",", &saveptr);
 	}
 	/*
-	printf("DB: name:%s\n",cur.licenseList[i]);
-	for(i=0; i < numNames; i++) {
-		printf("DB: name:%s\n",cur.licenseList[i]);
-	}
-	*/
+	 printf("DB: name:%s\n",cur.licenseList[i]);
+	 for(i=0; i < numNames; i++) {
+	 printf("DB: name:%s\n",cur.licenseList[i]);
+	 }
+	 */
 	return;
 } /* parseLicenseList */
 
@@ -342,10 +377,53 @@ static void setOption(int val) {
 
  */
 
-int checkRefLicense(char *licenseNames[]) {
+int checkRefLicense(char *licenseName) {
 
-/* will use the hash */
-}
+	PGresult *result;
+
+	char query[myBUFSIZ];
+	char *pqCkResult;
+
+	int rfFk = -1;
+	int numRows = 0;
+
+	if(strlen(licenseName) == 0) {
+		printf("ERROR! checkRefLicense, empty name: %s\n", licenseName);
+		return(-1);
+	}
+
+	/* will use the hash, for now just look in the db. */
+
+	sprintf(
+			query,
+			"SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_shortname = '%s';",
+			licenseName);
+	printf("   DB: CKRefLic: query is:\n%s\n", query);
+
+	result = PQexec(gl.pgConn, query);
+	pqCkResult = checkPQresult(result);
+	if (pqCkResult != NULL_CHAR) {
+		printf(
+				"   ERROR: Nomos agent got database error getting ref license name: %s\n",
+				pqCkResult);
+		return (-1);
+	}
+	numRows = PQntuples(result);
+	/* no match */
+	if(numRows == 0) {
+		printf("   LOG: NOTICE! License name: %s not found in Reference Table\n",
+				licenseName);
+		printf("   DB: rows returned by query were: %d\n", numRows);
+		return(-1);
+	}
+	/* found one, return key */
+	else {
+		/* printf("DB: CKREFLIC: converting rfFk\n"); */
+		rfFk = atoi(PQgetvalue(result, 0, 0));
+		/* printf("DB: CKREFLIC: returning rfFk: %d\n", rfFk); */
+		return(rfFk);
+	}
+} /* checkRefLicense */
 
 static void unsetOption(int val) {
 #ifdef	PROC_TRACE
@@ -437,15 +515,22 @@ int getReferenceLicenses() {
 	return (TRUE);
 }
 
+/**
+ * updateLicenseFile
+ * \brief, insert rf_fk, agent_fk and pfile_fk into license_file table
+ *
+ * @param long rfPK the reference file foreign key
+ *
+ * returns boolean (True or False)
+ */
 int updateLicenseFile(long rfPk) {
 
 	PGresult *result;
 	char query[myBUFSIZ];
 
-	if(rfPk <= 0) {
-		return(-1);
+	if (rfPk <= 0) {
+		return (FALSE);
 	}
-
 	sprintf(query,
 			"INSERT INTO license_file(rf_fk, agent_fk, pfile_fk) VALUES(%ld, %d, %ld)",
 			rfPk, gl.agentPk, cur.pFileFk);
@@ -456,9 +541,9 @@ int updateLicenseFile(long rfPk) {
 		printf("   ERROR: Nomos agent got database error, insert of license_file: %s\n",
 				PQresultErrorMessage(result));
 		PQclear(result);
-		return(-1);
+		return (FALSE);
 	}
-	return(TRUE);
+	return (TRUE);
 } /* updateLicenseFile */
 
 /*
@@ -549,40 +634,6 @@ void processFile(char *fileToScan) {
 } /* Process File */
 
 /**
- checkPQresult
-
- check the result status of the query with PQresultStatus
-
- @param PGresult *result
-
- @return NULL on OK, PgresultErrorMessage on failure
-
- \todo Add second parameter to indicate either select or insert/update,
- as the returned item is different (PGRES_COMMAND_OK).
- */
-char * checkPQresult(PGresult *result) {
-	/* PGresult *result; */
-	char *failMessage;
-
-	failMessage = NULL_CHAR;
-
-	printf("   DB: Starting checkPQresult, doing status....\n");
-
-	if (PQresultStatus(result) != PGRES_TUPLES_OK) {
-		/*
-		 Something went wrong.
-		 */
-		printf("   DB: Data Base Query Failed!\n");
-		sprintf(failMessage, "   ERROR: Nomos agent got database error: %s\n",
-				PQresultErrorMessage(result));
-		/* printf("   DB: Error message is:%s\n", PQresultErrorMessage(result)); */
-		PQclear(result);
-		return (failMessage);
-	}
-	return (NULL_CHAR);
-} /* checkPQresult */
-
-/**
  recordScanToDb
 
  Write out the information about the scan to the FOSSology database.
@@ -595,17 +646,17 @@ char * checkPQresult(PGresult *result) {
  \todo need to insert results of the analysis.
  */
 int recordScanToDB(struct curScan *scanRecord) {
+
 	PGresult *result;
+
 	char query[myBUFSIZ];
 	char *pqCkResult;
-	char *licenseName;
-	char *rfFK;
 	char *noneFound;
 	char *tname;
 
 	long numrows;
 	long numcols;
-	long rf_fk;
+	long rfFk;
 	long rf_pk;
 
 	printf("   LOG: DB: Starting recordScanToDb\n");
@@ -624,28 +675,30 @@ int recordScanToDB(struct curScan *scanRecord) {
 		result = PQexec(gl.pgConn, query);
 		pqCkResult = checkPQresult(result);
 		if (pqCkResult != NULL_CHAR) {
-			printf("   ERROR: Nomos agent got database error getting No License Found: %s\n",
+			printf(
+					"   ERROR: Nomos agent got database error getting No License Found: %s\n",
 					pqCkResult);
 			return (-1);
 		}
 		numrows = PQntuples(result);
-		printf("   LOG: nomos:number of row from query for no lice found is:%ld\n",
+		printf(
+				"   LOG: nomos:number of row from query for no lice found is:%ld\n",
 				numrows);
 		numcols = PQnfields(result);
-		printf("   LOG: nomos:number of columns from query for no lice found is:%ld\n",
+		printf(
+				"   LOG: nomos:number of columns from query for no lice found is:%ld\n",
 				numcols);
 
-		 rf_pk = PQgetvalue(result,0,0);
-		 printf("   LOG: value of tup0, field0 (rf_pk) is:%ld\n", rf_pk);
-		 tname = PQgetvalue(result, 0,1);
-		 printf("   LOG: value of tup0, field1 (rf_sn) is:%s\n", tname);
+		rf_pk = PQgetvalue(result, 0, 0);
+		printf("   LOG: value of tup0, field0 (rf_pk) is:%ld\n", rf_pk);
+		tname = PQgetvalue(result, 0, 1);
+		printf("   LOG: value of tup0, field1 (rf_sn) is:%s\n", tname);
 
-		 if(updateLicenseFile(rf_pk)) {
-			 return(0);
-		 }
-		 else {
-			 return (-1);
-		 }
+		if (updateLicenseFile(rf_pk)) {
+			return (0);
+		} else {
+			return (-1);
+		}
 	} /* No license found */
 
 	/* Do we match a reference license?
@@ -653,83 +706,58 @@ int recordScanToDB(struct curScan *scanRecord) {
 	 * and stores it in a either a hash for faster lookup.
 	 */
 
-    /* we have one or more license names, parse them */
+	/* we have one or more license names, parse them */
 
 	printf("   DB: parsing license names\n");
 	parseLicenseList();
-	printf("   DB: checking for reference license\n");
-	sprintf(
-			query,
-			"SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_shortname = '%s';",
-			scanRecord->compLic);
-	printf("   DB: query is:%s\n", query);
 
-	result = PQexec(gl.pgConn, query);
-	pqCkResult = checkPQresult(result);
-	if (pqCkResult != NULL_CHAR) {
-		printf(
-				"   ERROR: Nomos agent got database error getting ref license name: %s\n",
-				pqCkResult);
-		return (-1);
-	}
+	int numLicenses;
+	for (numLicenses = 0; cur.licenseList[numLicenses] != NULL; numLicenses++) {
+		/* printf("cur.licenseList[%d] is:%s\n",numLicenses, cur.licenseList[numLicenses]); */
 
-	/*
-	 Take a look at the logic here (look at your paper notes).  I think the else
-	 clause below is wrong, in either case we want to add the license found to
-	 the license file table.
-	 */
-	numrows = PQntuples(result);
-	/* printf("   DB: nomos:number of rows from query for ref license is:%ld\n",
-			numrows); */
-	numcols = PQnfields(result);
-	/* printf(
-			"   DB: nomos:number of columns from query for ref licenses is:%ld\n",
-			numcols); */
+		printf("   DB: checking for reference license:%s\n",cur.licenseList[numLicenses]);
 
-	if (numrows == 0) {
-		printf("   DB: adding the not found license to the reference table.\n");
-		if (!addNewLicense(scanRecord->compLic)) {
-			printf("   LOG: FAILURE! could not add new license name to ref table\n");
-			return (-1);
+		rfFk = checkRefLicense(cur.licenseList[numLicenses]);
+
+		if (rfFk == -1) {
+			printf("   DB: adding %s license to the reference table.\n",
+					cur.licenseList[numLicenses]);
+			if (!addNewLicense(cur.licenseList[numLicenses])) {
+				printf("   LOG: FAILURE! could not add new license %s to ref table\n",
+						cur.licenseList[numLicenses]);
+				return (-1);
+			}
+			/* get ref lic pk, better be there! */
+			rfFk = checkRefLicense(cur.licenseList[numLicenses]);
+			if (rfFk == -1) {
+				printf("FATAL: could not get rf_fk from just added license %s\n",
+					cur.licenseList[numLicenses]);
+				return(-1);
+			}
+			 /* updateLicenseFile */
+			if(updateLicenseFile(rfFk) == FALSE){
+				return(-1);
+			}
 		}
-		return (0);
-	}
-	else {
+		else {
 
-		/*
-		 NOTE: this WILL NOT WORK in cli mode, as written!  There is no pfile_fk
-		 when run from the cli.  Need to special case it and go get the pfile_pk
-		 associated with the ?? wait, if run from the command line, it's not in
-		 the repo... issue here. talk with bob.
-		*/
-		printf("   DB: inserting license ref_fk into license_file table\n");
-		licenseName = PQgetvalue(result, 0, 1);
-		rf_fk = atoi(PQgetvalue(result, 0, 0));
-		printf("   DB: value of tup0, field1 (licenseName) is:%s\n",
-				licenseName);
-		printf("   DB: value of tup0, field0 (rf_fk) is:%ld\n", rf_fk);
-
-		sprintf(query,
-				"INSERT INTO license_file(rf_fk, agent_fk, pfile_fk) VALUES(%ld, %d, %ld)",
-				rf_fk, gl.agentPk, scanRecord->pFileFk);
-
-		result = PQexec(gl.pgConn, query);
-
-		if (PQresultStatus(result) != PGRES_COMMAND_OK) {
-			printf("   ERROR: Nomos agent got database error, insert of license_file: %s\n",
-					PQresultErrorMessage(result));
-			PQclear(result);
+			/*
+			 * use rfFk set above and updateLicenseFile
+			 */
+			/*
+			 NOTE: this WILL NOT WORK in cli mode, as written!  There is no pfile_fk
+			 when run from the cli.  Need to special case it and go get the pfile_pk
+			 associated with the ?? wait, if run from the command line, it's not in
+			 the repo... I will propose for 1.2 that we don't update DB in cli mode
+			 that matches the current behavior today.  Next release we fix it.
+			 */
+			if(updateLicenseFile(rfFk) == FALSE) {
+				return (-1);
+			}
 		}
-        /*
-		pqCkResult = checkPQresult(result);
-		if (pqCkResult != NULL_CHAR) {
-			printf("   ERROR: Nomos agent got database error: %s\n", pqCkResult);
-			return (-1);
-		}
-		*/
-	}
-	return (0);
-}
+
+	} /* for */
+} /* recordScanToDb */
 
 int main(int argc, char **argv) {
 	char *cp;
@@ -892,6 +920,7 @@ int main(int argc, char **argv) {
 		 */
 		for (i = 0; i < file_count; i++) {
 			processFile(files_to_be_scanned[i]);
+			/* \todo remove the call to recordScanToDb */
 			recordScanToDB(&cur);
 			freeAndClearScan(&cur);
 		}
