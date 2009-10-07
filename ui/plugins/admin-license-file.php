@@ -43,7 +43,9 @@ function RegisterMenus()
 
   // micro-menu
   $URL = $this->Name."&add=y";
-  menu_insert($this->Name."::AddLicense",0, $URL, "Add new license");
+  menu_insert($this->Name."::Add License",0, $URL, "Add new license");
+  $URL = $this->Name;
+  menu_insert($this->Name."::Select License",0, $URL, "Select license family");
 }
 
 
@@ -183,7 +185,7 @@ function LicenseList($namestr, $filter)
  Updatefm(): Update forms
 
  Params:
-  $rf_pk is the license_ref table rf_pk
+  $rf_pk for the license to update, empty to add
  
  Return: The input form as a string
  ************************************************/
@@ -193,26 +195,34 @@ function Updatefm($rf_pk)
 
   $ob = "";     // output buffer
   $ob .= "<FORM name='Updatefm' action='?mod=" . $this->Name."' method='POST'>";
-
-  $sql = "select * from license_ref where rf_pk='$rf_pk'";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-  // print simple message if we have no results
-  if (pg_num_rows($result) ==0)
-  {
-    $ob .= "<br>No licenses matching this key ($rf_pk) was found.<br>";
-    return $ob;
-  }
-
-  $ob .= "<input type=hidden name=updateit value=true>";
   $ob .= "<input type=hidden name=rf_pk value='$rf_pk'>";
   $ob .= "<input type=hidden name=req_marydone value='$_GET[req_marydone]'>";
   $ob .= "<input type=hidden name=req_shortname value='$_GET[req_shortname]'>";
-
   $ob .= "<table>";
-  while ($row = pg_fetch_assoc($result))
+
+  if ($rf_pk)  // true if this is an update
   {
+    $sql = "select * from license_ref where rf_pk='$rf_pk'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    // print simple message if we have no results
+    if (pg_num_rows($result) ==0)
+    {
+      $ob .= "</table>";
+      $ob .= "<br>No licenses matching this key ($rf_pk) was found.<br>";
+      return $ob;
+    }
+    $ob .= "<input type=hidden name=updateit value=true>";
+    $row = pg_fetch_assoc($result);
+  }
+  else  // this is an add new rec
+  {
+    $ob .= "<input type=hidden name=addit value=true>";
+    $row = array();
+  }
+
+
     $ob .= "<tr>";
     $active = ($row['rf_active'] == 't') ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_active", $active);
@@ -240,9 +250,26 @@ function Updatefm($rf_pk)
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $ro = ($row['rf_text_updatable'] == 't') ? "": "<br>(read only)";
-    $ob .= "<td align=right>License Text $ro</td>";
-    $ob .= "<td><textarea name='rf_text' rows=10 cols=80 readonly='readonly'>".$row[rf_text]. "</textarea></td>";
+    $updatable = ($row['rf_text_updatable'] == 't') ? true : false;
+    if (empty($rf_pk) || $updatable)
+    {
+      $rotext = '';
+      $rooption = '';
+    }
+    else
+    {
+      $rotext = "<br>(read only)";
+      $rooption = "readonly='readonly'";
+    }
+    $ob .= "<td align=right>License Text $rotext</td>";
+    $ob .= "<td><textarea name='rf_text' rows=10 cols=80 $rooption>".$row[rf_text]. "</textarea></td>";
+    $ob .= "</tr>";
+
+    $ob .= "<tr>";
+    $tupable = ($row['rf_text_updatable'] == 't') ? "Yes" : "No";
+    $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_text_updatable", $tupable);
+    $ob .= "<td align=right>Text Updatable</td>";
+    $ob .= "<td align=left>$select</td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
@@ -255,9 +282,12 @@ function Updatefm($rf_pk)
     $ob .= "<td align=right>Public Notes</td>";
     $ob .= "<td><textarea name='rf_notes' rows=5 cols=80>" .$row[rf_notes]. "</textarea></td>";
     $ob .= "</tr>";
-  }
+  
   $ob .= "</table>";
-  $ob .= "<INPUT type='submit' value='Update'>\n";
+  if ($rf_pk)
+    $ob .= "<INPUT type='submit' value='Update'>\n";
+  else
+    $ob .= "<INPUT type='submit' value='Add License'>\n";
   $ob .= "</FORM>\n";
   return $ob;
 }
@@ -275,13 +305,18 @@ function Updatedb()
   $ob = "";     // output buffer
 
   $notes = pg_escape_string($_POST['rf_notes']);
+  $text = pg_escape_string($_POST['rf_text']);
+  $licmd5 = md5($text);
   $sql = "UPDATE license_ref set 
                  rf_active='$_POST[rf_active]', 
                  marydone='$_POST[marydone]',
                  rf_shortname='$_POST[rf_shortname]',
                  rf_fullname='$_POST[rf_fullname]',
                  rf_url='$_POST[rf_url]',
-                 rf_notes='$notes'
+                 rf_notes='$notes',
+                 rf_text_updatable='$_POST[rf_text_updatable]',
+                 rf_text='$_POST[rf_text]',
+                 rf_md5='$licmd5'
             WHERE rf_pk='$_POST[rf_pk]'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -289,6 +324,57 @@ function Updatedb()
   $ob = "License $_POST[rf_shortname] updated.<p>";
   return $ob;
 }
+
+
+/************************************************
+ Adddb(): Add a new license_ref to the database
+
+ Return: An add status string
+ ************************************************/
+function Adddb()
+{
+  global $PG_CONN;
+
+  $ob = "";     // output buffer
+
+  $notes = pg_escape_string($_POST['rf_notes']);
+  $text = pg_escape_string($_POST['rf_text']);
+  $licmd5 = md5($text);
+  $sql = "INSERT into license_ref (
+                 rf_active, marydone, rf_shortname, rf_fullname,
+                 rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable) 
+                 VALUES (
+                 '$_POST[rf_active]',
+                 '$_POST[marydone]',
+                 '$_POST[rf_shortname]',
+                 '$_POST[rf_fullname]',
+                 '$_POST[rf_url]',
+                 '$notes', '$licmd5', '$text',
+                 '$_POST[rf_text_updatable]')";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  
+  $ob = "License $_POST[rf_shortname] added.<p>";
+  return $ob;
+}
+
+/*
+// tmp fcn to initally load md5s into ref table
+function popmd5()
+{
+  global $PG_CONN;
+  $sql = "select rf_pk, rf_text from license_ref where rf_md5 is null";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  while ($row = pg_fetch_assoc($result))
+  {
+    $licmd5 = md5($row['rf_text']);
+    $sql = "UPDATE license_ref set rf_md5='$licmd5' where rf_pk='$row[rf_pk]'";
+    $updresult = pg_query($PG_CONN, $sql);
+    DBCheckResult($updresult, $sql, __FILE__, __LINE__);
+  }
+}
+*/
 
 
 /************************************************
@@ -305,6 +391,7 @@ function Output()
   if ($this->State != PLUGIN_STATE_READY) { return; }
   $V="";
     
+// tmp  $this->popmd5();
   switch($this->OutputType)
   {
     case "XML":
@@ -312,7 +399,12 @@ function Output()
     case "Text":
 	  break;
     case "HTML":
+      // micro menus
       $V .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
+
+//debugprint($_REQUEST, "_REQUEST");
+
+      // update the db
       if ($_POST["updateit"])
       {
         $V .= $this->Updatedb($_POST);
@@ -322,6 +414,23 @@ function Output()
         break;
       }
     
+      if ($_REQUEST['add'] == 'y')
+      {
+        $V .= $this->Updatefm(0);
+        break;
+      }
+
+      // Add new rec to db
+      if ($_POST["addit"])
+      {
+        $V .= $this->Adddb($_POST);
+        $V .= $this->Inputfm();
+        if ($_POST["req_shortname"]) 
+          $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
+        break;
+      }
+
+      // bring up the update form
       $rf_pk = $_REQUEST['rf_pk'];
       if ($rf_pk)
       {
