@@ -125,7 +125,7 @@ function LicenseList($namestr, $filter)
   // print simple message if we have no results
   if (pg_num_rows($result) == 0)
   {
-    $ob .= "<br>No licenses matching this the name pattern  ($namestr) was found.<br>";
+    $ob .= "<br>No licenses matching the filter ($filter) and name pattern ($namestr) were found.<br>";
     return $ob;
   }
 
