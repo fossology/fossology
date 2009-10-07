@@ -25,6 +25,13 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 $DB = NULL; /* global pointer used by everyone... */
+
+/* $PG_CONN is the global postgres connection object.
+   This is to break the database abstraction so common 
+   php postgres functions can be used.
+ */
+$PG_CONN = NULL;
+
 class db_access extends FO_Plugin
   {
   var $Name="db";
@@ -75,6 +82,8 @@ class db_access extends FO_Plugin
   function db_init($Options="")
     {
     global $DATADIR, $PROJECT, $SYSCONFDIR;
+    global $PG_CONN;
+
     if (isset($this->_pg_conn)) { return(1); }
     $path="$SYSCONFDIR/$PROJECT/Db.conf";
     if (empty($Options))
@@ -87,6 +96,7 @@ class db_access extends FO_Plugin
       }
     if (!isset($this->_pg_conn)) return(0);
     $this->Error = 0;
+    $PG_CONN = $this->_pg_conn;
     return(1);
     }
 
