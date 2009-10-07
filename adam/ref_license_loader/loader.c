@@ -144,6 +144,7 @@ int main (int argc, char **argv) {
     // search for .meta files and their corresponding license files.
     // print an error if we cant find a license file.
     while (fgets(filename,MAX_PATHNAME-1,File)) {
+        char license_name[MAX_PATHNAME];
         char license_file[MAX_PATHNAME];
         char license_meta[MAX_PATHNAME];
         meta_data data;
@@ -178,8 +179,7 @@ int main (int argc, char **argv) {
         strcpy(license_meta, filename);
         strncpy(license_file, license_meta, strlen(license_meta)-5);
         license_file[strlen(license_meta)-5] = '\0';
-       
-        // printf("Starting on:\n\t%s\n\t%s\n", license_meta, license_file);
+        strcpy(license_name,strrchr(license_file,'/')+1);
 
         meta_fptr = fopen(license_meta,"rb");
         if (meta_fptr == NULL) {
@@ -292,36 +292,35 @@ int main (int argc, char **argv) {
         // check to see if there is a shortname. If not then use the filename.
         if (strlen(data.shortname) == 0) {
             fprintf(stderr, "WARNING in %s:%d,\n\t", license_meta, line);
-            fprintf(stderr, "shortname field must not be NULL.\n\t * Using filename.\n");
-            strcpy(data.shortname,license_file);
+            fprintf(stderr, "shortname field must not be NULL.\n\t * Using filename: %s\n", license_name);
+            strcpy(data.shortname,license_name);
         }
 
         file_fptr = fopen(license_file, "rb");
         if (file_fptr==NULL) {
             fprintf(stderr, "ERROR: File error, opening %s.\n", license_file);
             errors++;
-        }
-
-        fseek(file_fptr, 0, SEEK_END);
-        lSize = ftell(file_fptr);
-        rewind(file_fptr);
-
-        file_buffer = malloc(lSize+1);
-        if (file_buffer == NULL) {
-            fprintf(stderr, "ERROR: memory allocation failed for %s.\n", license_file);
-            errors++;
         } else {
+            fseek(file_fptr, 0, SEEK_END);
+            lSize = ftell(file_fptr);
+            rewind(file_fptr);
 
-            result = fread(file_buffer, 1, lSize, file_fptr);
-            if (result != lSize) {
-                fprintf(stderr, "ERROR: Read error in %s, filesize and byte read do not equal.\n", license_file);
+            file_buffer = malloc(lSize+1);
+            if (file_buffer == NULL) {
+                fprintf(stderr, "ERROR: memory allocation failed for %s.\n", license_file);
                 errors++;
+            } else {
+
+                result = fread(file_buffer, 1, lSize, file_fptr);
+                if (result != lSize) {
+                    fprintf(stderr, "ERROR: Read error in %s, filesize and byte read do not equal.\n", license_file);
+                    errors++;
+                }
+
+                file_buffer[result] = '\0';
+                fclose(file_fptr);
             }
-
-            file_buffer[result] = '\0';
-            fclose(file_fptr);
         }
-
         if (errors > 0) {
             fprintf(stderr, "NOT WRITING %s!!! HAS ERRORS.\n", license_meta);
             fprintf(stderr, "********************************************************************************\n\n");
