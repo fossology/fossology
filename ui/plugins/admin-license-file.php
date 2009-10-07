@@ -135,6 +135,9 @@ function LicenseList($namestr, $filter)
     return $ob;
   }
 
+  $plural = (pg_num_rows($result) == 1) ? "" : "s";
+  $ob .= pg_num_rows($result) . " license$plural found.";
+
   //$ob .= "<table style='border: thin dotted gray'>";
   $ob .= "<table rules='rows' cellpadding='3'>";
   $ob .= "<tr>";
