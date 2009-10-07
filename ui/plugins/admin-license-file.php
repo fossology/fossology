@@ -64,9 +64,12 @@ function Inputfm()
   $V.= "<p>";
   $V.= "Filter: ";
   $V.= "<SELECT name='req_marydone'>\n";
-  $V.= "<option value='all'> All </option>";
-  $V.= "<option value='done'> Mary is done </option>";
-  $V.= "<option value='notdone'> Mary is not done </option>";
+  $Selected =  ($_REQUEST['req_marydone'] == 'all') ? " SELECTED ": "";
+  $V.= "<option value='all' $Selected> All </option>";
+  $Selected =  ($_REQUEST['req_marydone'] == 'done') ? " SELECTED ": "";
+  $V.= "<option value='done' $Selected> Mary is done </option>";
+  $Selected =  ($_REQUEST['req_marydone'] == 'notdone') ? " SELECTED ": "";
+  $V.= "<option value='notdone' $Selected> Mary is not done </option>";
   $V.= "</SELECT>";
   $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
@@ -75,7 +78,8 @@ function Inputfm()
   //$Shortnamearray = DB2KeyValArray("license_ref", "rf_pk", "rf_shortname");
   $Shortnamearray = $this->FamilyNames();
   $Shortnamearray = array("All"=>"All") + $Shortnamearray;
-  $Pulldown = Array2SingleSelect($Shortnamearray, "req_shortname");
+  $Selected = $_REQUEST['req_shortname'];
+  $Pulldown = Array2SingleSelect($Shortnamearray, "req_shortname", $Selected);
   $V.= $Pulldown;
   $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
   $V.= "<INPUT type='submit' value='Find'>\n";
@@ -152,8 +156,9 @@ function LicenseList($namestr, $filter)
     $ob .= "<td align=center><a href='";
     $ob .= Traceback_uri();
     $ob .= "?mod=" . $this->Name . 
-           "&rf_pk=$row[rf_pk]' >".
-           "<image border=0 src=images/button_edit.png></a></td>";
+           "&rf_pk=$row[rf_pk]".
+           "&req_marydone=$_REQUEST[req_marydone]&req_shortname=$_REQUEST[req_shortname]' >".
+           "<img border=0 src='images/button_edit.png'></a></td>";
 
     $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
 /* to allow editing in line
@@ -202,6 +207,8 @@ function Updatefm($rf_pk)
 
   $ob .= "<input type=hidden name=updateit value=true>";
   $ob .= "<input type=hidden name=rf_pk value='$rf_pk'>";
+  $ob .= "<input type=hidden name=req_marydone value='$_GET[req_marydone]'>";
+  $ob .= "<input type=hidden name=req_shortname value='$_GET[req_shortname]'>";
 
   $ob .= "<table>";
   while ($row = pg_fetch_assoc($result))
@@ -298,11 +305,6 @@ function Output()
   if ($this->State != PLUGIN_STATE_READY) { return; }
   $V="";
     
-  $POSTnames = array('rf_pk', 'rf_shortname', 'rf_text', 'rf_url', 'rf_add_date', 'rf_copyleft', 
-                     'rf_OSIapproved', 'rf_fullname', 'rf_FSFfree', 'rf_GPLv2compatible', 
-                     'rf_GPLv3compatible', 'rf_notes', 'rf_Fedora', 
-                     'req_marydone', 'req_shortname');
-  
   switch($this->OutputType)
   {
     case "XML":
@@ -314,7 +316,9 @@ function Output()
       if ($_POST["updateit"])
       {
         $V .= $this->Updatedb($_POST);
-        $V .= $this->Inputfm($_POST);
+        $V .= $this->Inputfm();
+        if ($_POST["req_shortname"]) 
+          $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
         break;
       }
     
@@ -325,7 +329,7 @@ function Output()
         break;
       }
 
-      $V .= $this->Inputfm($_POST);
+      $V .= $this->Inputfm();
       if ($_POST["req_shortname"]) 
         $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
 	  break;
