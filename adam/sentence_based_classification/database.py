@@ -39,7 +39,7 @@ class Database:
     byte_offsets = []
     files = [] # file names
     keywords = [] # a list of stemmed words to look for
-    fingerprints = {} # file to vector dictionary. the vectors hold the sentences that occured in the template file
+    fingerprints = {} # file to vector dictionary. The vectors hold the sentences that occurred in the template file
     binary_lookup = {} # a lookup table for 'word'->sentences.
     leaders = []
     sentence_model = None
@@ -286,7 +286,7 @@ def calculate_matches(db,filename,thresh = 0.9,debug = False):
     # compare the similarity of template and a license. k is the template name
     # fp[k] is the vector that holds the sentence ids for license k that
     # matched. To determine the similarity between the targets matched
-    # sentences againest a template you can do:
+    # sentences against a template you can do:
     # fp[k].dot(db.fingerprints[k])
     # unique_hits is a set of licenses that had sentences within __thresh__(0.7
     # by default) similarity.
