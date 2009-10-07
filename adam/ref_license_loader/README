@@ -13,7 +13,7 @@ META format:
 
 	Date: The date that the license was added. This should be in YYYY-MM-DD format. Defaults to NULL.
 	URL: The source url. Defaults to NULL.
-	shortname: The shortened name or abbreviated name. For example General Public License would have the shortname GPL. REQUIRED. Must NOT be NULL.
+	shortname: The shortened name or abbreviated name. For example General Public License would have the shortname GPL. REQUIRED. Currently defaults to the license filename.
 	fullname: The full name of the given license. Defaults to NULL.
 	OSIapproved: A boolean field which accepts Yes(1), No(0), True(1), or False(0). Defaults to NULL.
 	FSFfree: A boolean field which accepts Yes(1), No(0), True(1), or False(0). Defaults to NULL.
