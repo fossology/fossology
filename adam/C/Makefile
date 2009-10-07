@@ -16,9 +16,9 @@
 ######################################################################
 
 CC=gcc
-CFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O3 -I../../sparsevect/
+CFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O3 -I../sparsevect/
 CPP=g++
-CPPFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../../sparsevect/
+CPPFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../sparsevect/
 utils=\
       utils/re.c \
       utils/token.c \
@@ -37,32 +37,32 @@ all: train_sent_model label_sentences database test f1
 default_list/default_list.a:
 	make -C default_list default_list.a
 
-#utils/utils.a: $(utils_o) ../../sparsevect/sparsevect.o
+#utils/utils.a: $(utils_o) ../sparsevect/sparsevect.o
 #	$(AR) -cru $@ $^
 
-test_app: test_app.o $(utils_o) ../../sparsevect/sparsevect.o default_list/default_list.a
+test_app: test_app.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-f1: f1.o $(utils_o) ../../sparsevect/sparsevect.o default_list/default_list.a
+f1: f1.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-train_sent_model: train_sent_model.o $(utils_o) ../../sparsevect/sparsevect.o default_list/default_list.a
+train_sent_model: train_sent_model.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-label_sentences: label_sentences.o $(utils_o) ../../sparsevect/sparsevect.o default_list/default_list.a
+label_sentences: label_sentences.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-database: database.o $(utils_o) ../../sparsevect/sparsevect.o default_list/default_list.a
+database: database.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-../../sparsevect/sparsevect.o:
-	make -C ../../sparsevect/
+../sparsevect/sparsevect.o:
+	make -C ../sparsevect/
 
 maxent.txt:
-	find ../../Training/Sentences/*.sent > maxent.txt
+	find ../Training/Sentences/*.sent > maxent.txt
 
 training.txt:
-	find ../../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > training.txt
+	find ../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > training.txt
 
 maxent.dat: train_sent_model maxent.txt
 	./train_sent_model -f maxent.txt -o maxent.dat
@@ -74,6 +74,6 @@ clean:
 	rm -f test_app f1 database train_sent_model label_sentences *.o utils/*.o utils/*.a
 	make -C default_list clean
 
-phony: all clean ../../sparsevect/sparsevect.o
+phony: all clean ../sparsevect/sparsevect.o
 
 # vim: noet
