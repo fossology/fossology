@@ -158,6 +158,18 @@ int main (int argc, char **argv) {
         filename[len] = '\0';
         int line = 0;
 
+        data.date[0] = '\0';
+        data.URL[0] = '\0';
+        data.shortname[0] = '\0';
+        data.fullname[0] = '\0';
+        data.OSIapproved[0] = '\0';
+        data.FSFfree[0] = '\0';
+        data.GPLv2compatible[0] = '\0';
+        data.GPLv3compatible[0] = '\0';
+        data.copyleft[0] = '\0';
+        data.Fedora[0] = '\0';
+        data.notes[0] = '\0';
+
         if (strcmp(filename+(len-5),".meta") != 0) {
             fprintf(stderr, "ERROR: %s is not a .meta file.\n", filename);
             continue;
