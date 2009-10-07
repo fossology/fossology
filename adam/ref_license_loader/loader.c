@@ -289,10 +289,11 @@ int main (int argc, char **argv) {
             }
         }
 
+        // check to see if there is a shortname. If not then use the filename.
         if (strlen(data.shortname) == 0) {
-            fprintf(stderr, "ERROR in %s:%d,\n\t", license_meta, line);
-            fprintf(stderr, "shortname field must not be NULL.\n");
-            errors++;
+            fprintf(stderr, "WARNING in %s:%d,\n\t", license_meta, line);
+            fprintf(stderr, "shortname field must not be NULL.\n\t * Using filename.\n");
+            strcpy(data.shortname,license_file);
         }
 
         file_fptr = fopen(license_file, "rb");
