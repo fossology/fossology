@@ -869,18 +869,16 @@ int main(int argc, char **argv) {
 		}
 	}
 
-
 	/*
 	 Copy filename args (if any) into array
 	 */
-	/*
-	printf("after parse args, argc is:%d\n",argc);
+
 	for (i = 1; i < argc; i++) {
-		printf("argv's are:%s",argv[i]);
+		printf("argv's are:%s\n",argv[i]);
 		files_to_be_scanned[i-1] = argv[i];
 		file_count++;
 	}
-	*/
+	printf("after parse args, argc is:%d\n",argc);
 
 	licenseInit();
 	gl.flags = 0;
