@@ -62,9 +62,20 @@
 
 /*
  * Program options and flags
+ *
+ * MD: I think these are used when making nomos
  */
 #define	OPTS_DEBUG		0x1
 #define	OPTS_TRACE_SWITCH	0x2
+
+/*
+ * debug variable, used by everyone, put it here.
+ *
+ * 0 = off
+ * !0 = on
+ */
+int mdDebug;
+char debugStr[myBUFSIZ];
 
 /*
   Flags for program control
@@ -79,6 +90,7 @@
  */
 #define	FILE_FOUND	"Found.txt"
 #define	FILE_SCORES	"_scores"
+#define DEBUGLOG    "/tmp/NomosDebugLog"
 
 
 /**
