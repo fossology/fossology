@@ -767,17 +767,12 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
 			 the repo... I will propose for 1.2 that we don't update DB in cli mode
 			 that matches the current behavior today.  Next release we fix it.
 			 */
-			if (cli) {
-				return (TRUE);
-			} else {
-				printf(" RS2DB: updating LicenseFile with fk and text\n");
-				if (updateLicenseFile(rfFk) == FALSE) {
-					printf(" RS2DB: updateLicenseFile failed on the found license (last)\n");
-					return (-1);
-				}
+			printf(" RS2DB: updating LicenseFile with fk and text\n");
+			if (updateLicenseFile(rfFk) == FALSE) {
+				printf(" RS2DB: updateLicenseFile failed on the found license (last)\n");
+				return (-1);
 			}
 		}
-
 	} /* for */
 } /* recordScanToDb */
 
@@ -939,7 +934,7 @@ int main(int argc, char **argv) {
 				}
 				/* createAgentStatus(); */
 				processFile(repFile);
-				recordScanToDB(&cur,0);
+				recordScanToDB(&cur, 0);
 				freeAndClearScan(&cur);
 				/* recordAgentStatus(); */
 				printf("OK\n");
@@ -955,11 +950,11 @@ int main(int argc, char **argv) {
 		/*
 		 Files on the command line
 		 */
+		printf("Main: running in cli mode, processing file(s)\n");
 		int cli = 1;
 		for (i = 0; i < file_count; i++) {
 			processFile(files_to_be_scanned[i]);
-			/** \todo remove the call to recordScanToDb */
-			recordScanToDB(&cur, cli);
+			/* recordScanToDB(&cur, cli); */
 			freeAndClearScan(&cur);
 		}
 	}
