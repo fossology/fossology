@@ -45,7 +45,6 @@
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif /* SVN_REV */
 
-
 void freeAndClearScan(struct curScan *);
 
 extern licText_t licText[]; /* Defined in _autodata.c */
@@ -104,13 +103,12 @@ int addNewLicense(char *licenseName) {
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK) {
 		printf("   ERROR: Nomos agent got database error adding a new license "
-				"to the reference table:\n%s\n", PQresultErrorMessage(result));
+			"to the reference table:\n%s\n", PQresultErrorMessage(result));
 		PQclear(result);
 		return (FALSE);
 	}
 	return (TRUE);
 }
-
 
 /**
  checkPQresult
@@ -396,9 +394,9 @@ int checkRefLicense(char *licenseName) {
 	int rfFk = -1;
 	int numRows = 0;
 
-	if(strlen(licenseName) == 0) {
+	if (strlen(licenseName) == 0) {
 		printf("ERROR! checkRefLicense, empty name: %s\n", licenseName);
-		return(-1);
+		return (-1);
 	}
 
 	/* will use the hash, for now just look in the db. */
@@ -420,17 +418,18 @@ int checkRefLicense(char *licenseName) {
 	numRows = PQntuples(result);
 	/* no match */
 	printf("   DB: rows returned by query were: %d\n", numRows);
-	if(numRows == 0) {
-		printf("   LOG: NOTICE! License name: %s not found in Reference Table\n",
+	if (numRows == 0) {
+		printf(
+				"   LOG: NOTICE! License name: %s not found in Reference Table\n",
 				licenseName);
-		return(-1);
+		return (-1);
 	}
 	/* found one, return key */
 	else {
 		/* printf("DB: CKREFLIC: converting rfFk\n"); */
 		rfFk = atoi(PQgetvalue(result, 0, 0));
 		/* printf("DB: CKREFLIC: returning rfFk: %d\n", rfFk); */
-		return(rfFk);
+		return (rfFk);
 	}
 } /* checkRefLicense */
 
@@ -541,14 +540,16 @@ int updateLicenseFile(long rfPk) {
 		return (FALSE);
 	}
 	printf("UPLicFile: updating license_file\n");
-	sprintf(query,
+	sprintf(
+			query,
 			"INSERT INTO license_file(rf_fk, agent_fk, pfile_fk) VALUES(%ld, %d, %ld)",
 			rfPk, gl.agentPk, cur.pFileFk);
 
 	result = PQexec(gl.pgConn, query);
 
 	if (PQresultStatus(result) != PGRES_COMMAND_OK) {
-		printf("   ERROR: Nomos agent got database error, insert of license_file: %s\n",
+		printf(
+				"   ERROR: Nomos agent got database error, insert of license_file: %s\n",
 				PQresultErrorMessage(result));
 		PQclear(result);
 		return (FALSE);
@@ -656,7 +657,7 @@ void processFile(char *fileToScan) {
 
  \todo need to insert results of the analysis.
  */
-int recordScanToDB(struct curScan *scanRecord) {
+int recordScanToDB(struct curScan *scanRecord, int cli) {
 
 	PGresult *result;
 
@@ -669,7 +670,6 @@ int recordScanToDB(struct curScan *scanRecord) {
 	long numcols;
 	long rfFk;
 	long rf_pk;
-
 
 	/*
 	 * need to check for None and then add the appropriate items to license_file
@@ -724,11 +724,12 @@ int recordScanToDB(struct curScan *scanRecord) {
 
 	int numLicenses;
 	for (numLicenses = 0; cur.licenseList[numLicenses] != NULL; numLicenses++) {
-		printf("processing cur.licenseList[%d]:%s\n",numLicenses, cur.licenseList[numLicenses]);
+		printf("processing cur.licenseList[%d]:%s\n", numLicenses,
+				cur.licenseList[numLicenses]);
 
 		int nameLen;
 		nameLen = strlen(cur.licenseList[numLicenses]);
-		printf("   DB: length of license name found is:%d",nameLen);
+		printf("   DB: length of license name found is:%d", nameLen);
 
 		rfFk = checkRefLicense(cur.licenseList[numLicenses]);
 		printf("rfFk returned from checkRefLic is:%ld\n", rfFk);
@@ -737,23 +738,24 @@ int recordScanToDB(struct curScan *scanRecord) {
 			printf("   DB: adding %s license to the reference table.\n",
 					cur.licenseList[numLicenses]);
 			if (!addNewLicense(cur.licenseList[numLicenses])) {
-				printf("   LOG: FAILURE! could not add new license %s to ref table\n",
+				printf(
+						"   LOG: FAILURE! could not add new license %s to ref table\n",
 						cur.licenseList[numLicenses]);
 				return (-1);
 			}
 			/* get ref lic pk, better be there! */
 			rfFk = checkRefLicense(cur.licenseList[numLicenses]);
 			if (rfFk == -1) {
-				printf("FATAL: could not get rf_fk from just added license %s\n",
-					cur.licenseList[numLicenses]);
-				return(-1);
+				printf(
+						"FATAL: could not get rf_fk from just added license %s\n",
+						cur.licenseList[numLicenses]);
+				return (-1);
 			}
-			 /* updateLicenseFile */
-			if(updateLicenseFile(rfFk) == FALSE){
-				return(-1);
+			/* updateLicenseFile */
+			if (updateLicenseFile(rfFk) == FALSE) {
+				return (-1);
 			}
-		}
-		else {
+		} else {
 
 			/*
 			 * use rfFk set above and updateLicenseFile
@@ -765,10 +767,14 @@ int recordScanToDB(struct curScan *scanRecord) {
 			 the repo... I will propose for 1.2 that we don't update DB in cli mode
 			 that matches the current behavior today.  Next release we fix it.
 			 */
-			printf(" RS2DB: updating LicenseFile with fk and text\n");
-			if(updateLicenseFile(rfFk) == FALSE) {
-				printf(" RS2DB: updateLicenseFile failed on the found license (last)\n");
-				return (-1);
+			if (cli) {
+				return (TRUE);
+			} else {
+				printf(" RS2DB: updating LicenseFile with fk and text\n");
+				if (updateLicenseFile(rfFk) == FALSE) {
+					printf(" RS2DB: updateLicenseFile failed on the found license (last)\n");
+					return (-1);
+				}
 			}
 		}
 
@@ -845,10 +851,10 @@ int main(int argc, char **argv) {
 	 */
 	while ((c = getopt(argc, argv, "id")) != -1) {
 
-		printf("start of while; argc is:%d\n",argc);
-		 /* for(i=0; i<argc; i++){
-			printf("args passed in:%s\n",argv[i]);
-		}*/
+		printf("start of while; argc is:%d\n", argc);
+		/* for(i=0; i<argc; i++){
+		 printf("args passed in:%s\n",argv[i]);
+		 }*/
 		switch (c) {
 		case 'i':
 			/* "Initialize" */
@@ -861,7 +867,7 @@ int main(int argc, char **argv) {
 			mdDebug = 1;
 			argc--;
 			++argv;
-            break;
+			break;
 		default:
 			Usage(argv[0]);
 			DBclose(gl.DB);
@@ -874,11 +880,11 @@ int main(int argc, char **argv) {
 	 */
 
 	for (i = 1; i < argc; i++) {
-		printf("argv's are:%s\n",argv[i]);
+		printf("argv's are:%s\n", argv[i]);
 		files_to_be_scanned[i-1] = argv[i];
 		file_count++;
 	}
-	printf("after parse args, argc is:%d\n",argc);
+	printf("after parse args, argc is:%d\n", argc);
 
 	licenseInit();
 	gl.flags = 0;
@@ -924,7 +930,8 @@ int main(int argc, char **argv) {
 				parseSchedInput(parm);
 				repFile = RepMkPath("files", cur.pFile);
 				if (!repFile) {
-					printf("   FATAL: pfile %ld Nomos unable to open file %s\n",
+					printf(
+							"   FATAL: pfile %ld Nomos unable to open file %s\n",
 							cur.pFileFk, cur.pFile);
 					fflush(stdout);
 					DBclose(gl.DB);
@@ -932,7 +939,7 @@ int main(int argc, char **argv) {
 				}
 				/* createAgentStatus(); */
 				processFile(repFile);
-				recordScanToDB(&cur);
+				recordScanToDB(&cur,0);
 				freeAndClearScan(&cur);
 				/* recordAgentStatus(); */
 				printf("OK\n");
@@ -948,18 +955,11 @@ int main(int argc, char **argv) {
 		/*
 		 Files on the command line
 		 */
-		/*
-		 Copy filename args (if any) into array
-		 */
-
-
-		/*
-		 For each file to be scanned
-		 */
+		int cli = 1;
 		for (i = 0; i < file_count; i++) {
 			processFile(files_to_be_scanned[i]);
 			/** \todo remove the call to recordScanToDb */
-			/* recordScanToDB(&cur); */
+			recordScanToDB(&cur, cli);
 			freeAndClearScan(&cur);
 		}
 	}
