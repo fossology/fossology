@@ -45,6 +45,7 @@
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif /* SVN_REV */
 
+
 void freeAndClearScan(struct curScan *);
 
 extern licText_t licText[]; /* Defined in _autodata.c */
@@ -74,6 +75,10 @@ int file_count = 0;
  \todo Change this routine to take an array of licenses (array of char pointers)
  and make the loop a commit rollback loop, any error during an insert causes the
  whole transaction to fail (multiple license names).
+
+ \todo track changes in tables and design.  For example, this routine will
+ have to compute the md5 of the text and compare against that before adding a
+ license.
 
  \todo this function must also update the reference hash so that the hash and
  table stay in sync.  The table must be updated first so that rf_pk's can be
@@ -327,6 +332,7 @@ void parseSchedInput(char *s) {
 void Usage(char *Name) {
 	printf("Usage: %s [options] [file [file [...]]\n", Name);
 	printf("  -i   :: initialize the database, then exit.\n");
+	printf("  -d   :: turn on debugging to a logfile (NomosDebugLog)\n");
 	/*    printf("  -v   :: verbose (-vv = more verbose)\n"); */
 	printf("  file :: if files are listed, print the licenses detected within them.\n");
 	printf("  no file :: process data from the scheduler.\n");
@@ -375,6 +381,9 @@ static void setOption(int val) {
 
  @return rf_pk of the matched license or -1
 
+ \todo may need to compute the md5 of the text found instead of using the
+ rf_shortname
+
  */
 
 int checkRefLicense(char *licenseName) {
@@ -410,10 +419,10 @@ int checkRefLicense(char *licenseName) {
 	}
 	numRows = PQntuples(result);
 	/* no match */
+	printf("   DB: rows returned by query were: %d\n", numRows);
 	if(numRows == 0) {
 		printf("   LOG: NOTICE! License name: %s not found in Reference Table\n",
 				licenseName);
-		printf("   DB: rows returned by query were: %d\n", numRows);
 		return(-1);
 	}
 	/* found one, return key */
@@ -531,6 +540,7 @@ int updateLicenseFile(long rfPk) {
 	if (rfPk <= 0) {
 		return (FALSE);
 	}
+	printf("UPLicFile: updating license_file\n");
 	sprintf(query,
 			"INSERT INTO license_file(rf_fk, agent_fk, pfile_fk) VALUES(%ld, %d, %ld)",
 			rfPk, gl.agentPk, cur.pFileFk);
@@ -543,6 +553,7 @@ int updateLicenseFile(long rfPk) {
 		PQclear(result);
 		return (FALSE);
 	}
+	printf("UPLicFile: returning true\n");
 	return (TRUE);
 } /* updateLicenseFile */
 
@@ -659,7 +670,7 @@ int recordScanToDB(struct curScan *scanRecord) {
 	long rfFk;
 	long rf_pk;
 
-	printf("   LOG: DB: Starting recordScanToDb\n");
+
 	/*
 	 * need to check for None and then add the appropriate items to license_file
 	 * (e.g. rf_pk, agent_fk, and pfile_fk).
@@ -713,11 +724,14 @@ int recordScanToDB(struct curScan *scanRecord) {
 
 	int numLicenses;
 	for (numLicenses = 0; cur.licenseList[numLicenses] != NULL; numLicenses++) {
-		/* printf("cur.licenseList[%d] is:%s\n",numLicenses, cur.licenseList[numLicenses]); */
+		printf("processing cur.licenseList[%d]:%s\n",numLicenses, cur.licenseList[numLicenses]);
 
-		printf("   DB: checking for reference license:%s\n",cur.licenseList[numLicenses]);
+		int nameLen;
+		nameLen = strlen(cur.licenseList[numLicenses]);
+		printf("   DB: length of license name found is:%d",nameLen);
 
 		rfFk = checkRefLicense(cur.licenseList[numLicenses]);
+		printf("rfFk returned from checkRefLic is:%ld\n", rfFk);
 
 		if (rfFk == -1) {
 			printf("   DB: adding %s license to the reference table.\n",
@@ -751,7 +765,9 @@ int recordScanToDB(struct curScan *scanRecord) {
 			 the repo... I will propose for 1.2 that we don't update DB in cli mode
 			 that matches the current behavior today.  Next release we fix it.
 			 */
+			printf(" RS2DB: updating LicenseFile with fk and text\n");
 			if(updateLicenseFile(rfFk) == FALSE) {
+				printf(" RS2DB: updateLicenseFile failed on the found license (last)\n");
 				return (-1);
 			}
 		}
@@ -777,7 +793,6 @@ int main(int argc, char **argv) {
 	gl.DEEBUG = gl.MEM_DEEBUG = 0;
 #endif	/* GLOBAL_DEBUG */
 
-	printf("   LOG: nomos agent starting up from the beginning....\n"); /* DEBUG */
 	/*
 	 Set up variables global to the agent. Ones that are the
 	 same for all scans.
@@ -789,7 +804,7 @@ int main(int argc, char **argv) {
 		exit(-1);
 	}
 
-	/* move the call the GetAgentKey to the -i code? does that cause other
+	/* MD: move the call the GetAgentKey to the -i code? does that cause other
 	 * issues?
 	 */
 
@@ -824,12 +839,29 @@ int main(int argc, char **argv) {
 	/*
 	 Deal with command line options
 	 */
-	while ((c = getopt(argc, argv, "i")) != -1) {
+
+	/* MD: if you keep -d, then this code needs fixing as it doesn't leave argc
+	 * in the correct state (number of args).
+	 */
+	while ((c = getopt(argc, argv, "id")) != -1) {
+
+		printf("start of while; argc is:%d\n",argc);
+		 /* for(i=0; i<argc; i++){
+			printf("args passed in:%s\n",argv[i]);
+		}*/
 		switch (c) {
 		case 'i':
 			/* "Initialize" */
 			DBclose(gl.DB); /* DB was opened above, now close it and exit */
 			exit(0);
+		case 'd':
+			/* turn on the debug log and set debug flag, useful for debugging
+			 * with the scheduler
+			 */
+			mdDebug = 1;
+			argc--;
+			++argv;
+            break;
 		default:
 			Usage(argv[0]);
 			DBclose(gl.DB);
@@ -837,13 +869,18 @@ int main(int argc, char **argv) {
 		}
 	}
 
+
 	/*
 	 Copy filename args (if any) into array
 	 */
+	/*
+	printf("after parse args, argc is:%d\n",argc);
 	for (i = 1; i < argc; i++) {
+		printf("argv's are:%s",argv[i]);
 		files_to_be_scanned[i-1] = argv[i];
 		file_count++;
 	}
+	*/
 
 	licenseInit();
 	gl.flags = 0;
@@ -858,7 +895,6 @@ int main(int argc, char **argv) {
 	if (magic_load(gl.mcookie, NULL_STR)) {
 		Fatal("magic_load() fails!");
 	}
-
 	if (file_count == 0) {
 		char *repFile;
 
@@ -890,8 +926,7 @@ int main(int argc, char **argv) {
 				parseSchedInput(parm);
 				repFile = RepMkPath("files", cur.pFile);
 				if (!repFile) {
-					printf(
-							"   FATAL: pfile %ld Nomos unable to open file %s\n",
+					printf("   FATAL: pfile %ld Nomos unable to open file %s\n",
 							cur.pFileFk, cur.pFile);
 					fflush(stdout);
 					DBclose(gl.DB);
@@ -916,12 +951,17 @@ int main(int argc, char **argv) {
 		 Files on the command line
 		 */
 		/*
+		 Copy filename args (if any) into array
+		 */
+
+
+		/*
 		 For each file to be scanned
 		 */
 		for (i = 0; i < file_count; i++) {
 			processFile(files_to_be_scanned[i]);
-			/* \todo remove the call to recordScanToDb */
-			recordScanToDB(&cur);
+			/** \todo remove the call to recordScanToDb */
+			/* recordScanToDB(&cur); */
 			freeAndClearScan(&cur);
 		}
 	}
