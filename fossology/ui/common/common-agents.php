@@ -242,7 +242,7 @@ function GetAgentKey($agentName, $uploadFK, $svnRev, $agentDesc) {
   if(empty($agentKey)) {
     //print("DB: No agent match, inserting\n");
     $Sql = "INSERT INTO agent (agent_name,agent_rev,agent_desc,agent_enabled)
-            VALUES('$agentName', '$svnRev', '$agentDesc', 1);";
+            VALUES('$agentName', '$svnRev', '$agentDesc', 't');";
     $insert = $DB->action($Sql);
     if(is_null($insert)) {   // db error or some sort
       return(-1);
