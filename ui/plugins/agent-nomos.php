@@ -116,7 +116,7 @@ class agent_fonomos extends FO_Plugin {
 
     /*
        Get the agent pk for the agent to be scheduled, the C version of this
-       routine, has the svn_rev set to: VERSION,SVN_REV. GetAgentKey fixes this,
+       routine, has the svn_rev set to: VERSION, SVN_REV. GetAgentKey fixes this,
        just pass in SVN_REV.
 
     $Sql = "SELECT agent_pk FROM agent WHERE agent_name='nomos' ORDER BY
@@ -128,7 +128,7 @@ class agent_fonomos extends FO_Plugin {
 
     $agentPk = GetAgentKey('nomos', $uploadpk, $SVN_REV, 'Nomos License Detection Agency' );
 
-    if(strlen($agentPk) == 0) {
+    if($agentPk == -1) {
       return ("FATAL! Could not find Agent Nomos in the Agent Table");
     }
 
