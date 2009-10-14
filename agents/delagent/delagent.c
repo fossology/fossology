@@ -248,6 +248,19 @@ void	DeleteUpload	(long UploadId)
   snprintf(SQL,sizeof(SQL),"DELETE FROM attrib USING %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
   MyDBaccess(DB,SQL);
 
+  /* delete pfiles in the license_file table */
+  if (Verbose) { printf("# Deleting from licese_file\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM license_file USING %s_pfile "
+	   "WHERE pfile_fk = pfile_pk;",TempTable);
+  MyDBaccess(DB,SQL);
+
+  /* delete the upload from agent_runstatus */
+  if (Verbose) { printf("# Deleting from agent_runstatus\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM ONLY agent_runstatus "
+		   "WHERE upload_fk = %ld;",UploadId);
+  MyDBaccess(DB,SQL);
   /***********************************************/
   /*** Everything above is slow, everything below is fast ***/
   /***********************************************/
