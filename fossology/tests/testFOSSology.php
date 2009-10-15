@@ -23,6 +23,8 @@
  *
  * @version "$Id$"
  *
+ * \todo rewrite this POS, what was I thinking....?
+ *
  * Created on Sept. 19, 2008
  */
 /**
@@ -246,8 +248,12 @@ if (array_key_exists("a", $options)) {
     verifyUploads($logFile);
     if (!is_null($rtn = saveResults())) {
       print "ERROR! could not save the test results, please save by hand\n";
+      print "saveResults returned the following error:\n$rtn\n";
       exit(1);
     }
+    $resultsHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
+    $reportHome = "$resultsHome" . "$logFileName";
+    $last = exec("./textReport.php -f $reportHome", $tossme, $rptGen);
   }
   exit(0);
 }
@@ -311,7 +317,7 @@ if (array_key_exists("v", $options)) {
   }
   print "calling verifyUploads with:$logFile\n";
   if (!verifyUploads($logFile)) {
-    print "ERROR! could not verify upload tests, please investigate\n";
+    print "ERROR! verify upload tests had errors, please investigate\n";
     exit(1);
   }
   if (!is_null($rtn = saveResults())) {
@@ -321,10 +327,12 @@ if (array_key_exists("v", $options)) {
   exit(0);
 }
 function saveResults() {
+
   global $Home;
   global $logFileName;
   global $LF;
   global $logFile;
+
   $resultsHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
   if (chdir($Home) === FALSE) {
     $nohome = "Save Data ERROR: can't cd to $Home\n";
