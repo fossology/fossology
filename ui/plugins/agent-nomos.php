@@ -118,16 +118,10 @@ class agent_fonomos extends FO_Plugin {
        Get the agent pk for the agent to be scheduled, the C version of this
        routine, has the svn_rev set to: VERSION, SVN_REV. GetAgentKey fixes this,
        just pass in SVN_REV.
-
-    $Sql = "SELECT agent_pk FROM agent WHERE agent_name='nomos' ORDER BY
-                agent_rev DESC LIMIT 1;";
-
-    $agents = $DB->Action($Sql);
-    $agentPk = $agents[0]['agent_pk'];
     */
 
     $agentPk = GetAgentKey('nomos', $uploadpk, $SVN_REV, 'Nomos License Detection Agency' );
-
+    
     if($agentPk == -1) {
       return ("FATAL! Could not find Agent Nomos in the Agent Table");
     }
@@ -187,14 +181,12 @@ class agent_fonomos extends FO_Plugin {
         $SQL = "SELECT upload_pk,upload_desc,upload_filename
                 FROM upload
                  WHERE upload_pk NOT IN
-                (
-                SELECT upload_pk FROM upload
+                (SELECT upload_pk FROM upload
                 INNER JOIN job ON job.job_upload_fk = upload.upload_pk
                 INNER JOIN jobqueue ON jobqueue.jq_job_fk = job.job_pk
                 AND job.job_name = 'license'
                 AND jobqueue.jq_type = 'filter_clean'
-                ORDER BY upload_pk
-                )
+                ORDER BY upload_pk)
                 ORDER BY upload_desc,upload_filename;";
         $Results = $DB->Action($SQL);
         if (empty($Results[0]['upload_pk'])) {

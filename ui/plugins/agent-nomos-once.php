@@ -20,6 +20,13 @@
  at the very beginning.
  This prevents hacking attempts.
  *************************************************/
+
+/**
+ * agent-nomos-once
+ * \brief Run an analysis for a single file, do not store results in the DB.
+ * 
+ * @version "$Id$"
+ */
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
