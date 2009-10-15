@@ -20,15 +20,14 @@
 /**
  *  fo-notify
  *
- * Report the status of a fossology job.  Either email analysis results to the
+ * \brief Report the status of a fossology job.  
+ * 
+ * Either email analysis results to the
  * user or report the job status on the command line.
  *
  * @return 0 for success, 1 for failure.
  *
- * @TODO add in url to the history.... will need to get host and repo path
- * will need to read Db.conf in either spot, and then check, if localhost, then
- * just get the hostname, if not, use the entry...
- * use this snipit: <a href='/repo/?mod=showjobs&history=1&upload=24'>upload #24</a>
+ * @version "$Id$"
  */
 
 /* Have to set this or else plugins will not load. */
