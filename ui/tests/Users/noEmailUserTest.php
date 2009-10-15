@@ -63,10 +63,11 @@ class noEmailUserTest extends fossologyTestCase {
     /*
      * Verify, check the db for this user to ensure email_notify is NOT set.
      */
-    $dlink = new db();
+    $dlink = new db('host=localhost dbname=fossology user=fosstester password=fosstester;');
     print "Verifying User email notification setting\n";
     $Sql = "SELECT user_name, email_notify FROM users WHERE user_name='UserNoEmail';";
     $User = $dlink->dbQuery($Sql);
+    print "DB: User(SQL results) are:\n";print_r($User) . "\n";
     if((int)$User[0]['email_notify'] == 0) {
       $this->pass();
     }
