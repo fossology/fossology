@@ -20,11 +20,19 @@
  at the very beginning.
  This prevents hacking attempts.
  *************************************************/
+
+/**
+ * upload-file
+ * \brief Upload a file from the users computer using the UI.
+ * 
+ * @version "$Id: $"
+ */
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
 class upload_file extends FO_Plugin {
+	
   public $Name = "upload_file";
   public $Title = "Upload a New File";
   public $Version = "1.0";
@@ -32,10 +40,12 @@ class upload_file extends FO_Plugin {
   public $Dependency = array("db", "agent_unpack", "showjobs");
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
-  /*********************************************
-   Upload(): Process the upload request.
-   Returns NULL on success, string on failure.
-   *********************************************/
+  /** Upload 
+   * \brief Process the upload request.
+   * 
+   * @return NULL on success, string on failure.
+   */
+  
   function Upload($Folder, $TempFile, $Desc, $Name) {
     /* See if the URL looks valid */
     if (empty($Folder)) {
@@ -67,14 +77,18 @@ class upload_file extends FO_Plugin {
     }
 
     /* Run wget_agent locally to import the file. */
+    
     global $LIBEXECDIR;
+    
     $Prog = "$LIBEXECDIR/agents/wget_agent -g fossy -k $uploadpk '$UploadedFile'";
     $wgetLast = exec($Prog,$wgetOut,$wgetRtn);
     unlink($UploadedFile);
 
     global $Plugins;
+    
     $Unpack = &$Plugins[plugin_find_id("agent_unpack") ];
 
+    $jobqueuepk = NULL;
     $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
     AgentCheckBoxDo($uploadpk);
 
@@ -97,6 +111,7 @@ class upload_file extends FO_Plugin {
     }
     return(NULL);
   } // Upload()
+  
   /*********************************************
   Output(): Generate the text for this plugin.
   *********************************************/
