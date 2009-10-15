@@ -15,31 +15,42 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-/*************************************************
+/**
+ * common-job
+ * \brief library of functions used by the ui to manage 'jobs'
+ * 
+ * @version "$Id: $"
+ */
+/*
  Restrict usage: Every PHP file should have this
  at the very beginning.
  This prevents hacking attempts.
- *************************************************/
+ */
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
-/************************************************************
+
+/*
  Terminology:
  Scheduled jobs are divided into a specific heirarchy.
+ 
  "Job"
  This is the highest level and assigns a name to the class of
  tasks that need to be performed.
+ 
  "JobQueue"
  Each job may require multiple "JobQueue" tasks.
  JobQueue tasks may have dependencies upon the completion of
  other JobQueue tasks.
+ 
  "Tasks"
  A single JobQueue items may define hundreds of individual operations.
  The scheduler handles the splitting of JobQueue items into tasks
  for processing.
  The Task may be a single operation, or a multi-SQL query (MSQ).
  (See the documentation for managing the jobqueue for the scheduler.
+ 
  As an example:
  The "license" job requires three jobqueue items:
  - Filter_License: For each file, pre-process the file contents.
@@ -55,7 +66,8 @@ if (!isset($GlobalReady)) {
 
  The jobqueue tasks for a specific job may vary based on the
  item being processed.
- ************************************************************/
+ */
+
 /*
  * funcion: JobSetPriority
  *
@@ -632,7 +644,9 @@ function JobListSummary($upload_pk) {
     } else {
       $State|= 0x04;
     }
-    $i++;
+    if(count($Results) > 1) {
+      $i++;
+    }
     if ($Results[$i]['job_pk'] != $JobId) {
       $Status['total']++;
       if ($State & 0x01) {
