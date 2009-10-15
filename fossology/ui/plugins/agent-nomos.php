@@ -20,6 +20,13 @@ Restrict usage: Every PHP file should have this
 at the very beginning.
 This prevents hacking attempts.
 *************************************************/
+
+/**
+ * agent-nomos
+ * \brief run the nomos license agent
+ * 
+ * @version "$Id$"
+ */
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
