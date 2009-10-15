@@ -50,8 +50,8 @@ class OneShotgplv21Test extends fossologyTestCase
     $loggedIn = $this->mybrowser->get($URL);
     $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
                       "OneShotgplv21Test FAILED! Did not find Upload Menu\n");
-    $this->assertTrue($this->myassertText($loggedIn, '/One-Shot License/'),
-                      "OneShotgplv21Test FAILED! Did not find One-Shot License Menu\n");
+    $this->assertTrue($this->myassertText($loggedIn, '/One-Shot Analysis/'),
+                      "OneShotgplv21Test FAILED! Did not find One-Shot Analysis Menu\n");
 
     $page = $this->mybrowser->get("$URL?mod=agent_license_once");
     $this->assertTrue($this->myassertText($page, '/One-Shot License Analysis/'),
