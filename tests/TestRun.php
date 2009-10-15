@@ -48,6 +48,7 @@ class TestRun {
    *
    */
   public function __construct($srcPath = NULL) {
+
     if (empty($srcPath)) {
       // default
       $this->srcPath = '/home/fosstester/fossology';
@@ -59,8 +60,12 @@ class TestRun {
     return;
   }
   public function checkOutTot() {
+
     $Tot = 'svn co https://fossology.svn.sourceforge.net/svnroot/fossology/trunk/fossology';
+
+    /* remove fossology from the path so we don't get fossology/fossology */
     $home = rtrim($this->srcPath, '/fossology');
+
     if (chdir($home)) {
       $last = exec($Tot, $output, $rtn);
       //print "checkout results are, last and output:$last\n";
@@ -74,6 +79,7 @@ class TestRun {
       print "ERROR! could not cd to $home\n";
       return (FALSE);
     }
+    return(TRUE);
   }
   /**
    * checkScheduler
@@ -134,11 +140,15 @@ class TestRun {
     }
   }
   public function makeSrcs() {
+
+    print "DB: TR: srcPath is:$this->srcPath\n";
     if (!chdir($this->srcPath)) {
       print "Error can't cd to $this->srcPath\n";
     }
     $mcLast = exec('make clean > make-clean.out 2>&1', $results, $rtn);
+    print "results of the make clean are:$rtn, $mcLast\n";
     $makeLast = exec('make > make.out 2>&1', $results, $rtn);
+    print "results of the make are:$rtn, $makeLast\n"; print_r($results) . "\n";
     if ($rtn == 0) {
       //print "results of the make are:\n"; print_r($results) . "\n";
       if (array_search('Error', $results)) {
@@ -153,7 +163,8 @@ class TestRun {
     else {
       return (FALSE);
     }
-  }
+  } // makeSrcs
+
   public function schedulerTest() {
     $StLast = exec('sudo /usr/local/lib/fossology/fossology-scheduler -t -L stdout > ST.out 2>&1', $results, $rtn);
     if ($rtn != 0) {

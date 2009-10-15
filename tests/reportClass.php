@@ -21,10 +21,6 @@
  *
  *@param string $path the fully qualified path to the results file
  *
- *@TODO: change the gather report data, as using the directory iterator
- *doesn't work when there are multiple files.  The file list must be
- *sorted by modify time?  something to look at.
- *
  *@version "$Id$"
  *
  * Created on Dec 12, 2008
@@ -33,11 +29,8 @@
  * pattern is Starting < > Tests ... data followed by either OK or
  * FAILURES! then results, skip a line then elapse time.
  */
-// put full path to Smarty.class.php
-require_once ('/usr/share/php/smarty/libs/Smarty.class.php');
 
-class TestReport
-{
+class TestReport {
   public $Date;
   public $Time;
   public $Svn;
@@ -46,17 +39,11 @@ class TestReport
   private $smarty;
   public $resultsFile = NULL;
   public $resultsPath = NULL;
-  public $notesPath;
 
   public function __construct($Path=NULL, $notesPath=NULL) {
 
-    /*
-     Fix this, don't think we need notes...
-     */
-    $this->smarty = new Smarty();
     // defaults for now...
     $Latest = '/home/fosstester/public_html/TestResults/Data/Latest';
-    $NotesFile = '/home/fosstester/public_html/TestResults/Data/Latest/Notes';
 
     if (empty ($Path)) {
       /* Default is use data in Latest*/
@@ -69,9 +56,6 @@ class TestReport
       $this->resultsFILE = $Path;
     }
 
-    if (empty ($notesPath)) {
-      $this->notesPath = $NotesFile;
-    }
   } // __construct
 
   /**
@@ -87,6 +71,7 @@ class TestReport
    */
 
   protected function getException($suite) {
+
     /*
      * Execptions can be identified by ^Exception\s[0-9]+!
      */
@@ -144,97 +129,8 @@ class TestReport
     return($failList);
   }
 
-  /**
-   * Display the licesense results table.
-   *
-   *  @param int $cols, the number of columns to use
-   *
-   *  @TODO make a general display routine (if possible)
-   *        - takes assoc array of things to assign (keys are smarty vars, values
-   *        are php vars).
-   *        - either uses the set template or takes one in as parameter impliment
-   *        set first.
-   *        - ?? what else
-   *
-   */
-  public function displayLicenseResults($cols,$result) {
 
-    if(empty($cols)) {
-      $cols = 5;   // default, nomos results only
-    }
-    if(!is_array($result)) {
-      return(FALSE);
-    }
-    if(count($result) == 0) {
-      return(FALSE);  // nothing to display
-    }
 
-    $this->smarty->template_dir = '/home/markd/public_html/smarty/templates';
-    $this->smarty->compile_dir = '/home/markd/public_html/smarty/templates_c';
-    $this->smarty->cache_dir = '/home/markd/public_html/smarty/cache';
-    $this->smarty->config_dir = '/home/markd/public_html/smarty/configs';
-
-    $dt = $this->Date . " " . $this->Time;
-
-    //$this->smarty->assign('runDate', $dt);
-    //$this->smarty->assign('svnVer', $this->Svn);
-    $licenseFiles   = $result[0];
-    $vetted         = $result[1];
-    $results        = $result[2];
-    $this->smarty->assign('cols', $cols);
-    $this->smarty->assign('file', $files);
-    $this->smarty->assign('vetted', $vetted);
-    $this->smarty->assign('results', $results);
-    $this->smarty->display('licenseTestResults.tpl');
-  }
-
-  public function displayReport()
-  {
-    $this->smarty->template_dir = '/home/markd/public_html/smarty/templates';
-    $this->smarty->compile_dir = '/home/markd/public_html/smarty/templates_c';
-    $this->smarty->cache_dir = '/home/markd/public_html/smarty/cache';
-    $this->smarty->config_dir = '/home/markd/public_html/smarty/configs';
-
-    //$notes = file_get_contents($this->notesPath);
-    $dt = $this->Date . " " . $this->Time;
-    $cols = 5;
-
-    $this->smarty->assign('runDate', $dt);
-    $this->smarty->assign('svnVer', $this->Svn);
-    $this->smarty->assign('cols', $cols);
-    $this->smarty->assign('results', $this->results);
-    $this->smarty->display('testResults.tpl');
-    //$smarty->assign('TestNotes', $notes);
-  }
-
-  public function displayTotals($totals) {
-    // should check to see if totals is an array
-
-    $this->smarty->template_dir = '/home/markd/public_html/smarty/templates';
-    $this->smarty->compile_dir = '/home/markd/public_html/smarty/templates_c';
-    $this->smarty->cache_dir = '/home/markd/public_html/smarty/cache';
-    $this->smarty->config_dir = '/home/markd/public_html/smarty/configs';
-
-    $dt = $this->Date . " " . $this->Time;
-
-    $agent = $totals[0];
-    $pass  = $totals[1];
-    $fail  = $totals[2];
-
-    /*
-     print "vars are, agent, pass, fail:\n";
-     print_r($agent) . "\n";
-     print_r($pass) . "\n";
-     print_r($fail) . "\n";
-     */
-
-    //$this->smarty->assign('runDate', $dt);
-    //this->smarty->assign('svnVer', $this->Svn);
-    $this->smarty->assign('agent', $agent);
-    $this->smarty->assign('pass', $pass);
-    $this->smarty->assign('fail', $fail);
-    $this->smarty->display('licenseTR-totals.tpl');
-  }
 
   /**
    * gatherData
@@ -602,30 +498,6 @@ class TestReport
     return ($etime);
   }
 
-  public function readResultsFiles()
-  {
-    $this->smarty->template_dir = '/home/markd/public_html/smarty/templates';
-    $this->smarty->compile_dir = '/home/markd/public_html/smarty/templates_c';
-    $this->smarty->cache_dir = '/home/markd/public_html/smarty/cache';
-    $this->smarty->config_dir = '/home/markd/public_html/smarty/configs';
-
-    $this->smarty->display('trPage-Title.tpl');
-    foreach (new DirectoryIterator($this->resultsPath) as $file)
-    {
-      if (!$file->isDot())
-      {
-        $this->results = array ();
-        $filePath = $file->getPathname();
-        //print "<pre>DB: RRF:filepath is:$fp</pre>\n";
-        $name = basename($filePath);
-        if($name == 'Notes') { continue; }
-        $temp = $this->gatherData($filePath);
-        $this->results = $this->globdata($this->results, $temp);
-        print "<pre>DB: RRF: results are:\n"; print_r($this->results) . "</pre>\n";
-        $this->displayReport();
-      }
-    }
-  }
 
   /**
    * suiteSummary

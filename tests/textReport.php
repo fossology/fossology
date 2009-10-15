@@ -18,7 +18,11 @@
  ***********************************************************/
 
 /**
- * Driver to generate a summary report from a single test run
+ * textReport
+ * \brief Generate a summary report from a single test run
+ *
+ * Takes the raw results file produced by the tests, parses it and generates
+ * the summary on stdout.
  *
  * @param string $resultsFile -f <file>
  *
@@ -29,7 +33,7 @@
 
 require_once('reportClass.php');
 
-$res = '/home/markd/Src/fossology/tests/FossTestResults-2009-08-25-10:31:39-pm';
+//$res = '/home/markd/Src/fossology/tests/FossTestResults-2009-08-25-10:31:39-pm';
 
 $options = getopt("hf:");
 
@@ -117,6 +121,7 @@ function printByType($typeName, $typeList) {
 } // printByType
 
 // summarize the results for this run.  Note failures and exceptions by suite
+
 foreach($results as $suite => $result) {
   foreach($result as $partResult) {
 

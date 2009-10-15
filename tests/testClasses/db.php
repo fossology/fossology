@@ -26,7 +26,7 @@
  *
  * @param string $options e.g. db parameters user=foobar; password=ha;
  *
-  * @version "$Id: $"
+ * @version "$Id: $"
  *
  * Created on Jan 15, 2009
  */
@@ -64,12 +64,14 @@ class db {
     else {
       $this->_docon($options);
     }
-    if (!isset ($this->_pg_conn)) {
+    if(is_resource($this->_pg_conn)) {
+      $this->pg_Error = 0;
+      return (TRUE);
+    }
+    else {
       $this->pg_ERROR = 1;
       return (FALSE);
     }
-    $this->pg_Error = 0;
-    return (TRUE);
   } // __construct
 
   public function get_pg_ERROR() {
@@ -100,8 +102,8 @@ class db {
    * _docon
    *
    * private function that creates a persistent connection to a data base.
-   * Uses class properties for the connect parameters or accepts then as a
-   * set of ; seperated strings.
+   * Uses class properties for the connect parameters or accepts them as a
+   * set of key value pairs terminated with a ;.
    *
    * Sets _pg_conn and pg_Error
    */
@@ -112,10 +114,26 @@ class db {
 
     if (is_null($options)) {
       $this->_pg_conn = pg_pconnect("host=$this->dbHost dbname=$dbname " .
-      "user=$this->dbUser password=$this->dbPassword");
+                        "user=$this->dbUser password=$this->dbPassword");
     }
     else {
       $this->_pg_conn = pg_pconnect(str_replace(";", " ", $options));
+    }
+    $res = pg_last_error($this->_pg_conn);
+    print "DB: the last error was:$res\n";
+
+    print "_pg_conn is:$this->_pg_conn\n";
+
+    if(is_null($this->_pg_conn)) {
+      $this->pg_Error = TRUE;
+      print "DB: could not connect to the db, connection is NULL\n";
+      return(FALSE);
+    }
+
+    if($this->_pg_conn === FALSE) {
+      $this->pg_Error = TRUE;
+      print "DB: could not connect to the db, connect is FALSE\n";
+      return(FALSE);
     }
     if (!isset ($this->_pg_conn)) {
       $this->pg_Error = 1;
@@ -125,13 +143,13 @@ class db {
     return (1);
   }
   /**
-  * dbQuery
-  *
-  * perform a query, return results
-  *
-  * @param string $Sql the SQL Query to perform
-  * @return array $rows can be empty array.
-  */
+   * dbQuery
+   *
+   * perform a query, return results
+   *
+   * @param string $Sql the SQL Query to perform
+   * @return array $rows can be empty array.
+   */
 
   public function dbQuery($Sql) {
     /*

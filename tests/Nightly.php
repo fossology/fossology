@@ -24,6 +24,8 @@
  *
  * @return
  *
+ * @todo add parameters, e.g. -c for checkout?  what else?
+ *
  * @version "$Id$"
  *
  * Created on Dec 18, 2008
@@ -31,7 +33,7 @@
 
 require_once('TestRun.php');
 
-// Using the standard source path /home/fosstester/Src/fossology
+// Using the standard source path /home/fosstester/fossology
 $tonight = new TestRun();
 
 // Step 1 update sources
@@ -42,6 +44,9 @@ if($tonight->svnUpdate() !== TRUE)
   exit(1);
 }
 
+/*
+ * TODO: remove all log files as sudo
+ */
 // Step 2 make clean and make sources
 print "Making sources\n";
 if($tonight->makeSrcs() !== TRUE)
@@ -50,6 +55,7 @@ if($tonight->makeSrcs() !== TRUE)
   exit(1);
 }
 //try to stop the scheduler before the make install step.
+print "Stopping Scheduler before install\n";
 if($tonight->stopScheduler() !== TRUE)
 {
   print "Could not stop fossology-scheduler, maybe it wasn't running?\n";
@@ -64,12 +70,18 @@ if($tonight->makeInstall() !== TRUE)
 }
 
 // Step 5 run the post install process
+/*
+ NOTE: this is commented out for now, as for most updates you don't have to
+ remake the db and license cache.  It should be an command line option.
+
 print "Running fo-postinstall\n";
 if($tonight->foPostinstall() !== TRUE)
 {
   print "There were errors in the postinstall process check fop.out\n";
   exit(1);
 }
+
+*/
 
 // Step 6 run the scheduler test to make sure everything is clean
 print "Starting Scheduler Test\n";
@@ -95,14 +107,34 @@ if(!chdir($testPath))
        exit(1);
      }
 
+
+/*
+ * This fails if run by fosstester as Db.conf if not world readable and the
+ * script is not running a fossy... need to think about this...
+ *
+ */
 $TestLast = exec('./testFOSSology.php -a', $results, $rtn);
 print "after running tests the output is\n";
 print_r($results) . "\n";
 
 /*
+   In either case, need to isolate the results file name so we can feed it to
+   the results summary program(s).
+ */
+
+/*
  * ok, works for running -a, now need to figure out how to tell if all
  * my jobs are done? then run the verifier part...
+ *
+ * need to grep for message about jobs not done and isolate the run line and
+ * use it.
  */
+
+
+/*
+ * At this point should have results, generate the results summary and email it.
+ */
+
 
 /*
 print "Stoping Scheduler\n";
