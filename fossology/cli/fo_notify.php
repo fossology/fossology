@@ -71,6 +71,7 @@ function printMsg($Message) {
 /* Load command-line options */
 global $DB;
 
+
 $JobName   = "";
 $JobStatus = "";
 
@@ -170,13 +171,10 @@ $summary = JobListSummary($upload_id);
  * check both locations for Db.conf, check package 1st, then upstream
  * if local host, need to get hostname.
  */
-$PackagePath = '/etc/fossology/Db.conf';
-$UpStreamPath = '/usr/local/etc/fossology/Db.conf';
-if(file_exists($PackagePath)) {
-  $contents = file_get_contents($PackagePath);
-}
-else if(file_exists($UpStreamPath)) {
-  $contents = file_get_contents($UpStreamPath);
+global $SYSCONFDIR;
+
+if(file_exists("$SYSCONFDIR/Db.conf") {
+  $contents = file_get_contents("$SYSCONFDIR/Db.conf");
 }
 // get rid of new lines
 $c = str_replace("\n",'',$contents);
@@ -190,9 +188,9 @@ $JobHistoryUrl = "http://$hostname/repo/?mod=showjobs&history=1&upload=$upload_i
 
 /* Job aborted */
 if ($summary['total'] == 0 &&
-$summary['completed'] == 0 &&
-$summary['active'] == 0 &&
-$summary['failed'] == 0 ) {
+    $summary['completed'] == 0 &&
+    $summary['active'] == 0 &&
+    $summary['failed'] == 0 ) {
   $JobStatus = "was killed";
   $MessagePart = "No results, your job $JobName $JobStatus";
   $Message = $Preamble . $MessagePart;
