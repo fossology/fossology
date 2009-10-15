@@ -67,7 +67,7 @@ class EmailUserTest extends fossologyTestCase {
      * Verify, check the db entry for the user and make sure email_notify is set.
      */
     print "Verifying User email notification\n";
-    $dlink = new db('host=localhost dbname=fossology user=fossy password=fossy');
+    $dlink = new db('host=localhost dbname=fossology user=fosstester password=fosstester');
     $Sql = "SELECT user_name, email_notify FROM users WHERE user_name='UserwEmail';";
     $User = $dlink->dbQuery($Sql);
     //print "Entryies are: {$User[0]['user_name']}, {$User[0]['email_notify']}\n";
