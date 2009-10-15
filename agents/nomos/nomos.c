@@ -94,8 +94,7 @@ int addNewLicense(char *licenseName) {
     if (licenseName == NULL_CHAR) {
         return (FALSE);
     }
-    sprintf(
-            query,
+    sprintf(query,
             "insert into license_ref(rf_shortname, rf_text) values('%s', '%s')",
             licenseName, specialLicenseText);
 
