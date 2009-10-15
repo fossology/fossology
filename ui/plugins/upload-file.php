@@ -25,7 +25,7 @@
  * upload-file
  * \brief Upload a file from the users computer using the UI.
  * 
- * @version "$Id: $"
+ * @version "$Id$"
  */
 global $GlobalReady;
 if (!isset($GlobalReady)) {
