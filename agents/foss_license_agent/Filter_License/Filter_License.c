@@ -460,11 +460,9 @@ int	PrintTokens	(tokentype *Token, fileoffset *TokenOffsets,
   char SectionString[256];
   char *Unique=NULL;
 
-  printf("TokenCount = %ld\n", TokenCount);
   if (TokenCount < 3) return(0); /* too few tokens */
   if (!GetGoodWordRange(Token,TokenCount,&Start,&End)) return(0);
   Length = End - Start;
-  printf("Start = %d, End = %d, Length = %d\n", Start, End, Length);
   if (Length < 12) return(0); /* too short; min = "this is free" */
   if (Length > TokenCount) return(0); /* no strings of one-characters */
 
