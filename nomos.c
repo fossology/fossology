@@ -663,8 +663,10 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
 
     long numrows;
     long numcols;
-    long rfFk;
-    long rf_pk;
+
+    char pad[myBUFSIZ];
+    long rfFk = 0;
+    /* long rf_pk; */
 
     /*
      * need to check for None and then add the appropriate items to license_file
@@ -686,22 +688,31 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
             return (-1);
         }
         numrows = PQntuples(result);
-        /* printf("   LOG: nomos:number of rows from query for no lice found is:%ld\n",
-                numrows); */
+
+        /*
+        printf("   LOG: nomos:number of rows from query for no lice found is:%ld\n",
+                numrows);
         numcols = PQnfields(result);
-        /* printf("   LOG: nomos:number of columns from query for no lice found is:%ld\n",
-                numcols); */
+          printf("   LOG: nomos:number of columns from query for no lice found is:%ld\n",
+                numcols);
+        */
+
         if(numrows == 0) {
             return(-1);
         }
 
-        rf_pk = PQgetvalue(result, 0, 0);
+        rfFk = atoi(PQgetvalue(result, 0, 0));
+        /* printf("rfFk returned is:%ld\n", rfFk); */
+        if(rfFk > 10000){
+            printf("FATAL: cound not get a valid rf_pk from License_ref\n");
+            return(-1);
+        }
         /* printf("   LOG: value of tup0, field0 (rf_pk) is:%ld\n", rf_pk);
         tname = PQgetvalue(result, 0, 1);
         printf("   LOG: value of tup0, field1 (rf_sn) is:%s\n", tname);
         */
 
-        if (updateLicenseFile(rf_pk)) {
+        if (updateLicenseFile(rfFk)) {
             return(0);
         }
         else {
