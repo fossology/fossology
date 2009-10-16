@@ -319,8 +319,8 @@ void parseSchedInput(char *s) {
             }
         }
     }
-    printf("   LOG: nomos got:\npfilePk:%ld\npFile:%s\n",
-            cur.pFileFk , cur.pFile); /* DEBUG */
+    /* printf("   LOG: nomos got:\npfilePk:%ld\npFile:%s\n",
+            cur.pFileFk , cur.pFile);  DEBUG */
 
     if (gotOther || (cur.pFileFk < 0) || (cur.pFile[0] == '\0')) {
         printf("   FATAL: Data is in an unknown format.\n");
@@ -589,7 +589,7 @@ void processFile(char *fileToScan) {
     traceFunc("== processFile(%s)\n", fileToScan);
 #endif	/* PROC_TRACE */
 
-    printf("   LOG: nomos scanning file %s.\n", fileToScan); /* DEBUG */
+    /* printf("   LOG: nomos scanning file %s.\n", fileToScan);  DEBUG */
 
     /*
      Initialize. This stuff should probably be broken into a separate
@@ -651,7 +651,6 @@ void processFile(char *fileToScan) {
 
  Returns: 0 if successful, -1 if not.
 
- \todo need to insert results of the analysis.
  */
 int recordScanToDB(struct curScan *scanRecord, int cli) {
 
@@ -674,7 +673,7 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
     noneFound = strstr(scanRecord->compLic, LS_NONE);
     if (noneFound != NULL_CHAR) {
         /* no license found */
-        printf("   DB: No license found\n");
+        /* printf("   DB: No license found\n"); */
         sprintf(query, "SELECT rf_pk, rf_shortname FROM license_ref WHERE "
             "rf_shortname = 'No License Found';");
         /* printf("   DB: query was:%s\n", query); */
@@ -682,30 +681,31 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
         result = PQexec(gl.pgConn, query);
         pqCkResult = checkPQresult(result);
         if (pqCkResult != NULL_CHAR) {
-            printf(
-                    "   ERROR: Nomos agent got database error getting No License Found: %s\n",
+            printf("   ERROR: Nomos agent got database error getting No License Found: %s\n",
                     pqCkResult);
             return (-1);
         }
         numrows = PQntuples(result);
-        printf(
-                "   LOG: nomos:number of row from query for no lice found is:%ld\n",
-                numrows);
+        /* printf("   LOG: nomos:number of rows from query for no lice found is:%ld\n",
+                numrows); */
         numcols = PQnfields(result);
-        printf(
-                "   LOG: nomos:number of columns from query for no lice found is:%ld\n",
-                numcols);
+        /* printf("   LOG: nomos:number of columns from query for no lice found is:%ld\n",
+                numcols); */
+        if(numrows == 0) {
+            return(-1);
+        }
 
         rf_pk = PQgetvalue(result, 0, 0);
-        printf("   LOG: value of tup0, field0 (rf_pk) is:%ld\n", rf_pk);
+        /* printf("   LOG: value of tup0, field0 (rf_pk) is:%ld\n", rf_pk);
         tname = PQgetvalue(result, 0, 1);
         printf("   LOG: value of tup0, field1 (rf_sn) is:%s\n", tname);
+        */
 
         if (updateLicenseFile(rf_pk)) {
-            return (0);
+            return(0);
         }
         else {
-            return (-1);
+            return(-1);
         }
     } /* No license found */
 
@@ -720,15 +720,16 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
 
     int numLicenses;
     for (numLicenses = 0; cur.licenseList[numLicenses] != NULL; numLicenses++) {
-        printf("processing cur.licenseList[%d]:%s\n", numLicenses,
+         /* printf("processing cur.licenseList[%d]:%s\n", numLicenses,
                 cur.licenseList[numLicenses]);
+                */
 
         rfFk = checkRefLicense(cur.licenseList[numLicenses]);
         /* printf("rfFk returned from checkRefLic is:%ld\n", rfFk); */
 
         if (rfFk == -1) {
-            printf("   LOG: adding %s license to the reference table.\n",
-                    cur.licenseList[numLicenses]);
+            /* printf("   LOG: adding %s license to the reference table.\n",
+                    cur.licenseList[numLicenses]); */
             if (!addNewLicense(cur.licenseList[numLicenses])) {
                 printf("   LOG: FAILURE! could not add new license %s to ref table\n",
                         cur.licenseList[numLicenses]);
@@ -841,7 +842,7 @@ int main(int argc, char **argv) {
      */
     while ((c = getopt(argc, argv, "id")) != -1) {
 
-        printf("start of while; argc is:%d\n", argc);
+        /* printf("start of while; argc is:%d\n", argc); */
         /* for(i=0; i<argc; i++){
          printf("args passed in:%s\n",argv[i]);
          }*/
@@ -874,7 +875,7 @@ int main(int argc, char **argv) {
         files_to_be_scanned[i - 1] = argv[i];
         file_count++;
     }
-    printf("after parse args, argc is:%d\n", argc);
+     /* printf("after parse args, argc is:%d\n", argc); DEBUG */
 
     licenseInit();
     gl.flags = 0;
@@ -904,7 +905,7 @@ int main(int argc, char **argv) {
          - if setting ars_complete, set ars_ts
          - Error? set ars_status with the error text.
          */
-        printf("   LOG: nomos agent starting up in scheduler mode....\n"); /* DEBUG */
+        /* printf("   LOG: nomos agent starting up in scheduler mode....\n");  DEBUG */
         schedulerMode = 1;
         signal(SIGALRM, ShowHeartbeat);
         printf("OK\n");
@@ -912,7 +913,7 @@ int main(int argc, char **argv) {
         alarm(60);
 
         while (ReadLine(stdin, parm, myBUFSIZ) >= 0) {
-            printf("    LOG: nomos read %s\n", parm);
+            /* printf("    LOG: nomos read %s\n", parm); DEBUG */
             if (parm[0] != '\0') {
                 /*
                  Get the file arg and go ahead and process it
