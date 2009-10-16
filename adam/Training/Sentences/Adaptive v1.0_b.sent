@@ -52,7 +52,7 @@ Section 2.2 below and Part 6 of Exhibit A.</sentence>
     <sentence>1.6. "GOVERNING JURISDICTION" means the state, province or other
     legal jurisdiction identified in Part 3 of Exhibit A.</sentence>
 
-    </sentence>1.7. "INDEPENDENT MODULE" means a separate module of software
+    <sentence>1.7. "INDEPENDENT MODULE" means a separate module of software
     and/or data that is not a derivative work of or copied from the
     Licensed Work or any portion thereof.</sentence><sentence> In addition, a module does
     not qualify as an Independent Module but instead forms part of the
@@ -186,7 +186,7 @@ Section 2.2 below and Part 6 of Exhibit A.</sentence>
         Contributor distributes or makes available (as the case may be)
         such future copies under this License.</sentence>
 
-        /sentence>(c) If any Recipient receives or obtains one or more copies of
+        <sentence>(c) If any Recipient receives or obtains one or more copies of
         the Initial Work or any other portion of the Licensed Work
         under the Patents-Included License, then all licensing of such
         copies under this License shall include the terms in paragraphs
@@ -259,7 +259,7 @@ Section 2.2 below and Part 6 of Exhibit A.</sentence>
         and the accompanying Supplement File) with each copy of the
         Licensed Work distributed.</sentence><sentence> In particular, this License must be
         prominently distributed with the Licensed Work in a file called
-        "license.txt."</sentence>/sentence> In addition, the License Notice in Part 5 of
+        "license.txt."</sentence><sentence> In addition, the License Notice in Part 5 of
         Exhibit A must be included at the beginning of all Source Code
         files, and viewable to a user in any executable such that the
         License Notice is reasonably brought to the attention of any
