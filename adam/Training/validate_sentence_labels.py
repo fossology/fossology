@@ -44,10 +44,10 @@ def main():
 
     print "Fixing tag placement..."
     for f in sys.argv[1:]:
-        text = open(f).readlines()
+        text = open(f).read()
         text = FIX.sub("\g<m>\g<s>\g<e>",text)
         open(f,'w').write(text)
-
+    print "Finished...\n\nGood Bye;)"
 
 if __name__ == "__main__":
     main()

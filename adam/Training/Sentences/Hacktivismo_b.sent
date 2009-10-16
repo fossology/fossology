@@ -6,9 +6,9 @@ Source Software License Agreement ," ("HESSLA") or any confusingly similar
 name, trademark or service-mark, in connection with any license agreement that
 is not either </sentence><sentence>(1) a verbatim copy of this License Agreement,</sentence><sentence> or (2) a license
 agreement that contains only additional terms expressly permitted by The
-HESSLA.</sentence>
-<sentence>INTRODUCTORY STATEMENT</sentence>
-<sentence>Software that Hacktivismo releases under this License Agreement is
+HESSLA.
+</sentence><sentence>INTRODUCTORY STATEMENT
+</sentence><sentence>Software that Hacktivismo releases under this License Agreement is
 intended to promote our political objectives.</sentence><sentence> And, likewise, the purpose of
 this License Agreement itself is political:</sentence><sentence> Namely, to compliment the
 software's intended political function.</sentence><sentence> Hacktivismo itself exists to develop
@@ -17,9 +17,9 @@ of end-users.</sentence><sentence> Hacktivismo also seeks to enlist the active p
 involvement of people around the world, to help us improve these software
 tools, and to take other actions (including actions that involve using and
 distributing our software, and the advancement of similarly-minded software
-projects of others) that promote human rights and freedom worldwide.</sentence>
+projects of others) that promote human rights and freedom worldwide.
      
-<sentence>Because of our non-commercial objective of promoting end-users' freedoms,
+</sentence><sentence>Because of our non-commercial objective of promoting end-users' freedoms,
 Hacktivismo has some special, and admittedly ambitious, licensing needs.</sentence><sentence> This
 License Agreement enhances the benefits of published source code by backing up
 our human rights projects with appropriate remedies enforceable in court.</sentence><sentence>
@@ -41,18 +41,18 @@ public scrutiny and review, technology-based censorship mechanisms are
 especially suspect and dangerous to civil society. </sentence><sentence>When repressive governments
 and other institutions of power seek to deprive people of this basic freedom,
 people have the right to secure, employ and deploy the tools necessary to
-reclaim the freedoms to which they are justifiably entitled.</sentence>
+reclaim the freedoms to which they are justifiably entitled.
      
-<sentence>Freedom of Collective Action and Association:</sentence><sentence> People have and should have the
+</sentence><sentence>Freedom of Collective Action and Association:</sentence><sentence> People have and should have the
 "freedom of peaceful assembly and association."</sentence><sentence> This freedom includes the
 right of people to work together to secure constructive change in their
 personal, economic, and political circumstances.</sentence><sentence> When repressive governments or
 other institutions of power seek to deprive people (including users of the
 Internet) of their freedoms of voluntary assembly, association, and common
 enterprise, people have the right to secure, employ and deploy technologies
-that reclaim the freedoms to which they are justifiably entitled.</sentence>
+that reclaim the freedoms to which they are justifiably entitled.
      
-<sentence>Freedoms of Thought, Conscience, Sexuality, and Religion:</sentence><sentence> People have and
+</sentence><sentence>Freedoms of Thought, Conscience, Sexuality, and Religion:</sentence><sentence> People have and
 should have the freedom of "thought, conscience, and religion."</sentence><sentence> This right
 "includes freedom to change religion or belief, and freedom, either alone or in
 community with others, in public or private, to manifest any religion or belief
@@ -67,10 +67,10 @@ women to control all aspects of their health, in particular their own
 fertility, is basic to their empowerment."</sentence><sentence> When repressive governments and
 other institutions of power seek to deprive people of these basic freedoms,
 they have the right to secure, employ and deploy the tools necessary to reclaim
-the freedoms to which they are justifiably entitled.</sentence>
+the freedoms to which they are justifiably entitled.
      
-     <sentence>Conference on Women (Sept. 15, 1995).</sentence>
-<sentence>Freedom of Privacy:</sentence><sentence> Every person has the right to be free from "subject[ion] to
+     </sentence><sentence>Conference on Women (Sept. 15, 1995).
+</sentence><sentence>Freedom of Privacy:</sentence><sentence> Every person has the right to be free from "subject[ion] to
 arbitrary interference with his [or her] privacy, family, home or
 correspondence" -- digitally, or by any other means or methodology.</sentence><sentence> This
 freedom of privacy includes the right to be free from governmental or private
@@ -80,17 +80,17 @@ people to reclaim their freedoms, all end-users have and should have the right
 to secure and use tools that are free from the surreptitious insertion into
 their software of "backdoors," "spy-ware," escrow mechanisms, or other code or
 techniques that might promote surveillance, or subvert security (including
-cryptographic security), confidentiality, anonymity, authenticity and/or trust.</sentence>
+cryptographic security), confidentiality, anonymity, authenticity and/or trust.
      
-<sentence>Reasons For Enhancing "Free" and "Open-Source" Licensing: Developing a new
+</sentence><sentence>Reasons For Enhancing "Free" and "Open-Source" Licensing: Developing a new
 software license is never a trivial task and this License Agreement has
 presented special challenges for Hacktivismo.</sentence><sentence> Because of our human rights
 objectives, this License Agreement includes some specific terms and conditions
 that, as a technical matter, depart from the previously-recognized and
 established definitions of "free" software and "open source"
-software.</sentence>
+software.
      
-<sentence>We have therefore coined the term "enhanced source" to describe this License
+</sentence><sentence>We have therefore coined the term "enhanced source" to describe this License
 Agreement because we have sought to combine most of the freedom-promoting
 benefits of "free" or "open-source" software (including mandatory disclosure of
 any changes or modifications Licensees make to the source code, whenever they
@@ -102,38 +102,38 @@ including contractual terms that empower both Hacktivismo and qualified end-
 users with greater flexibility and leverage to maintain and recover human
 rights, through the mechanism of the contract itself including terms that are
 designed to enhance both our enforcement posture and that of qualified end-
-users in court.</sentence>
-<sentence>To be sure, Hacktivismo enthusiastically endorses and supports the goals and
+users in court.
+</sentence><sentence>To be sure, Hacktivismo enthusiastically endorses and supports the goals and
 objectives of the Free Software movement and those of the open source
 community.</sentence><sentence> In particular, we owe a special debt of gratitude to the Free
 Software Foundation, to the Open Source Initiative, and to many exceedingly
 talented people who have contributed to Free Software and open source projects
-and endeavors over the years.</sentence>
-<sentence>Ultimately, however, after reviewing the field of possibilities among
+and endeavors over the years.
+</sentence><sentence>Ultimately, however, after reviewing the field of possibilities among
 previously-existing "open source" and "free" licenses, Hacktivismo has
 concluded that none of them fully meets our requirements.</sentence><sentence> Writing our own
 License Agreement enables us to pursue our human rights objectives more
 effectively.</sentence><sentence> This licensing endeavor represents a first step toward achieving
 our objectives, and no doubt informed feedback, scholarship, and learned
 commentary will enable us to pursue our objectives even more effectively in the
-future.</sentence>
-<sentence>Benefits That Carry Over From Free Software:</sentence><sentence> Before we explain how an "enhanced
+future.
+</sentence><sentence>Benefits That Carry Over From Free Software:</sentence><sentence> Before we explain how an "enhanced
 source" License Agreement specifically differs from a "free" or "open source"
 license, we believe it is helpful to explain in greater detail what the
-principal advantages, and freedom-enhancing aspects, of "free" software are.</sentence>
-<sentence>When we speak of "free software," we refer to important personal freedoms, and
+principal advantages, and freedom-enhancing aspects, of "free" software are.
+</sentence><sentence>When we speak of "free software," we refer to important personal freedoms, and
 not price.</sentence><sentence> In addition to terms that are intended to promote the freedoms of
 Expression, Thought, Collective Action and Privacy (along with other human
 rights) of all end-users, the Hacktivismo Enhanced-Source Software License
 Agreement is also designed and intended to promote the following freedoms:</sentence><sentence>
 ·You have the freedom to distribute copies of the software (and charge for this
-service if You wish);</sentence>
-<sentence>·You have the freedom of access to the source code, to inspect and verify (and
+service if You wish);
+</sentence><sentence>·You have the freedom of access to the source code, to inspect and verify (and
 even to improve, if You can) the integrity and functionality of the software;</sentence><sentence>
 ·So long as You do not subvert or infringe the freedoms of end-users by doing
 so, You have the freedom to change the software or to use parts of it in new
-Programs;</sentence>
-<sentence>·You have the freedom to know You can do these things.</sentence><sentence>
+Programs;
+</sentence><sentence>·You have the freedom to know You can do these things.</sentence><sentence>
 The licenses for most computer software programs are designed to take away Your
 freedom to share software or change source code.</sentence><sentence> This kind of software is
 designated as proprietary or "closed."</sentence><sentence> The Hacktivismo Enhanced-Source Software
@@ -144,8 +144,8 @@ Your right under this License Agreement to look at the source not only enables
 You to contribute Your own efforts to Hacktivismo's human rights projects, but
 also serves as an additional level of assurance to You as an end-user that
 unwelcome, hidden surprises have not been inserted into the software, that
-could compromise Your rights and freedoms when You use the software.</sentence>
-<sentence>HESSLA Helps Safeguard Additional End-User Freedoms:</sentence><sentence> In order to understand why
+could compromise Your rights and freedoms when You use the software.
+</sentence><sentence>HESSLA Helps Safeguard Additional End-User Freedoms:</sentence><sentence> In order to understand why
 this License Agreement must be described as "enhanced source," and cannot
 strictly speaking be considered either a "free" or "open source" license
 agreement, it is helpful to consider the possibility that a programmer might
@@ -161,9 +161,9 @@ behavior meaning that any licensee who violates the prohibition against
 malicious code can be sued by the licensor (or by third-party beneficiaries who
 the licensor has explicitly identified as alternate or additional enforcers of
 the agreement) for money damages and a court order forbidding any continued
-violation.</sentence>
+violation.
      
-<sentence>Previous Licenses Provide More Limited Protection Against Government and Other
+</sentence><sentence>Previous Licenses Provide More Limited Protection Against Government and Other
 Surveillance:</sentence><sentence> No software license agreement that qualifies as "free" or "open
 source" may contain any restriction as a term of the license agreement that in
 any way qualifies any Licensee's prerogative (no matter who they are or what
@@ -173,15 +173,15 @@ a term that prohibits the insertion of destructive viruses or "trojan horses"
 into derivative code.</sentence><sentence> Likewise, no "free" or "open source" license agreement
 can in any way contain (as a license term) any restriction on the use of
 software not even a prohibition against unlawful surveillance or other
-malicious uses of the software.</sentence>
-<sentence>The "open source" and "Free Software" communities rely principally on voluntary
+malicious uses of the software.
+</sentence><sentence>The "open source" and "Free Software" communities rely principally on voluntary
 compliance with the disclosure provisions of license agreements (although
 many "free" and "open source" license agreements, such as BSD-style licenses,
 do not require changed code to be disclosed, and in fact enable modified
 versions of programs to be "taken proprietary") and on social mechanisms of
-enforcement, as means to detect, prevent, deter, and remedy abuses.</sentence>
+enforcement, as means to detect, prevent, deter, and remedy abuses.
      
-<sentence>The Hacktivismo Enhanced-Source Software License Agreement does not in any way
+</sentence><sentence>The Hacktivismo Enhanced-Source Software License Agreement does not in any way
 sacrifice or surrender the enforcement techniques and safeguards available
 under license agreements such as the GNU General Public License.</sentence><sentence> Rather, the
 HESSLA enhances the options available to Hacktivismo and to qualified end-
@@ -189,28 +189,28 @@ users, by providing additional enforcement options.</sentence><sentence> Moreove
 of promoting the freedoms of both programers and end-users, through the
 enforced mandatory disclosure of code modified by third-parties, this License
 Agreement has advantages over many of the licenses (such as BSD-style licenses)
-that fully qualify as "free" or "open-source" license agreements.</sentence>
-<sentence>What makes this License Agreement an "enhanced source" License Agreement,
+that fully qualify as "free" or "open-source" license agreements.
+</sentence><sentence>What makes this License Agreement an "enhanced source" License Agreement,
 instead of a "free software" license agreement, is that the Hacktivismo
 Enhanced-Source Software License Agreement contains specific, very limited
 restrictions on modification and use of software by Licensees, as part of a
 calculated trade-off of rights and responsibilities that is intended to promote
-the freedom of end-users.</sentence>
-<sentence>The Enhanced-Source Bargain Reinforces End-User Freedoms:</sentence><sentence> To protect Your
+the freedom of end-users.
+</sentence><sentence>The Enhanced-Source Bargain Reinforces End-User Freedoms:</sentence><sentence> To protect Your
 rights, we need to make restrictions that forbid anyone to deny You specific
 rights or to ask You to surrender these rights.</sentence><sentence> To protect Your human rights as
 an end-user of this program or any work based on it, we need to make
 restrictions that forbid You and all other Licensees of this software
 (including, without limitation, any government Licensees) from using this code
-to subvert the human rights of any end-user.</sentence>
-<sentence>We protect Your rights and the rights of all end-users with two steps:</sentence><sentence> (1)
+to subvert the human rights of any end-user.
+</sentence><sentence>We protect Your rights and the rights of all end-users with two steps:</sentence><sentence> (1)
 copyright the software,</sentence><sentence> and (2) offer You this License Agreement which gives
-You qualified legal permission to copy, distribute and/or modify the software.</sentence>
-<sentence>The restrictions shared by all Licensees translate into certain
+You qualified legal permission to copy, distribute and/or modify the software.
+</sentence><sentence>The restrictions shared by all Licensees translate into certain
 responsibilities for You and for everyone else (including governmental entities
 everywhere) if You distribute copies of the software, if You use it, or if You
-modify it.</sentence>
-<sentence>In this regard, the methodology we employ is not materially different from the
+modify it.
+</sentence><sentence>In this regard, the methodology we employ is not materially different from the
 methodology Free Software Foundation employs in the GNU General Public License
 (the "GPL").</sentence><sentence> The methodology is to exchange the Author's permission to copy,
 change, and/or distribute a copyrighted work, for every Licensee's acceptance
@@ -229,8 +229,8 @@ as well as discriminating against "propertizing" behavior such as might violate
 the GPL.</sentence><sentence> Subject to these narrow restrictions, Licensees under either license
 agreement enjoy very broad latitude to change, use, explore, modify, and
 distribute the software much broader than they would enjoy with typical
-"proprietary" software packages.</sentence>
-<sentence>As with "copyleft" licenses such as the GPL, under the Hacktivismo Enhanced
+"proprietary" software packages.
+</sentence><sentence>As with "copyleft" licenses such as the GPL, under the Hacktivismo Enhanced
 Source Software License Agreement, programmers (including, most importantly,
 programmers working for governments) do not have unfettered or completely
 unlimited "freedom" for purposes of what they can do with HESSLA-licensed code.</sentence><sentence>
@@ -238,8 +238,8 @@ Just as with the GPL, they do not have the "freedom" to convert HESSLA-licensed
 code into "closed" or "proprietary" code.</sentence><sentence> People who create derivative works
 based on an HESSLA-licensed program and distribute those works have a
 corresponding obligation to "give back," and not merely to "take," HESSLA-
-licensed code.</sentence>
-<sentence>If You distribute copies of such an HESSLA-licensed program, whether gratis or
+licensed code.
+</sentence><sentence>If You distribute copies of such an HESSLA-licensed program, whether gratis or
 for a fee, You must give the recipients all the rights and responsibilities
 that You have.</sentence><sentence> You must ensure that they, too, are told of the terms of this
 License Agreement, including the freedoms they have, and the kinds of uses and
@@ -255,9 +255,9 @@ broader range of human rights than the specific copyright-related rights with
 which the GPL is principally concerned.</sentence><sentence> But, while we are concerned with the
 entire field of human rights rather than a subset, we want to make it perfectly
 clear that we also embrace, share, and seek to promote, the goals we share with
-the Free Software movement.</sentence>
+the Free Software movement.
      
-<sentence>Compared with the GPL, aspects of the HESSLA give both end-users and
+</sentence><sentence>Compared with the GPL, aspects of the HESSLA give both end-users and
 programmers (including, most importantly, governmental end-users and
 programmers) marginally less leeway to make malicious use of the program, or to
 insert malicious code into a program, than they would have under a traditional
@@ -266,30 +266,30 @@ requirement that the program cannot be used to violate human rights, or
 forbidding the insertion of "spy-ware" or surveillance mechanisms into
 derivative works) are included because our ultimate objective is to preserve
 and promote the human rights of end-users, including their privacy and their
-right of free expression.</sentence>
-<sentence>In other words, unlike many programmers, we are not just in the business of
+right of free expression.
+</sentence><sentence>In other words, unlike many programmers, we are not just in the business of
 developing and distributing open-standards technologies.</sentence><sentence> We're also trying to
 empower end-users (including end-users in totalitarian regimes) with software
 tools that promote fundamental freedoms while also seeking as best we can to
 protect these end-users from being arrested, beaten, or worse.</sentence><sentence> Our objective of
 promoting end-user freedoms, including the freedoms of people in politically
 repressive countries, is precisely the factor that has led Hacktivismo to
-develop this License Agreement instead of using another.</sentence>
-<sentence>The HESSLA Also Includes Features To Enhance Government Accountability:</sentence><sentence> To this
+develop this License Agreement instead of using another.
+</sentence><sentence>The HESSLA Also Includes Features To Enhance Government Accountability:</sentence><sentence> To this
 end, we have sought and intend to ensure, to the fullest extent that law
 (including, without limitation, the law of contract and of copyright licensing)
 enables us to do so, that no government or other institution may do
 anything with this computer software or the underlying source code without
 becoming a Licensee bound by the terms of this License Agreement, subject to
-the same restrictions on modification and use as anyone else.</sentence>
+the same restrictions on modification and use as anyone else.
      
-<sentence>Accordingly, this License Agreement includes several terms that are aimed
+</sentence><sentence>Accordingly, this License Agreement includes several terms that are aimed
 explicitly at governmental entities, in order to maximize enforceability
 against such entities.</sentence><sentence> Respect for the Rule of Law means that no governmental
 entity is above the law, and that no governmental entity should be permitted to
 use its status as a mechanism for circumventing the requirements of this
-License Agreement.</sentence>
-<sentence>Any use, copying or modification of this software by any governmental official
+License Agreement.
+</sentence><sentence>Any use, copying or modification of this software by any governmental official
 or governmental entity anywhere in the world is a voluntary act, which act the
 governmental official or entity is free to forego if it does not wish to be
 bound by this License Agreement.</sentence><sentence> This License Agreement seeks to establish as
@@ -303,8 +303,8 @@ such government or governmental official not only subjects itself to
 enforcement action in its own courts, but also explicitly and voluntarily
 subjects itself to enforcement action in the courts of other nations that are
 likely to be more objective, for the purpose of giving effect to the terms of
-this License Agreement.</sentence>
-<sentence>Mechanism of Contract Acceptance:</sentence><sentence> This License Agreement treats any use of the
+this License Agreement.
+</sentence><sentence>Mechanism of Contract Acceptance:</sentence><sentence> This License Agreement treats any use of the
 software as acceptance of the terms of this License Agreement.</sentence><sentence> To understand
 the significance of this, it is important to distinguish between the law
 governing copyright and the law governing offer and acceptance for the purpose
@@ -325,8 +325,8 @@ use, modification, copying, or distribution by anyone constitutes acceptance of
 the License Agreement, for purposes of contract law.</sentence><sentence> In other words, the
 License Agreement is designed so that there is no loophole permitting anyone to
 claim the ability to use, copy, distribute, or modify the Program or any
-Software based on it without subjecting themselves voluntarily to its terms.</sentence>
-<sentence>On "Shrinkwrap," "Click-Wrap," "Use-Wrap" and "Copy-Wrap" License Agreements:</sentence><sentence>
+Software based on it without subjecting themselves voluntarily to its terms.
+</sentence><sentence>On "Shrinkwrap," "Click-Wrap," "Use-Wrap" and "Copy-Wrap" License Agreements:</sentence><sentence>
 Arguably, some kinds of software license agreements have more in common with
 legislation than they do with the bargained-for, negotiated agreements that
 come to mind when most people think of "contracts."</sentence><sentence> Particularly if a software
@@ -363,8 +363,8 @@ certain that everyone understands that there is no warranty for this software.</
 And, if the software is modified by someone else and passed on, we want its
 recipients to know that what they have is not the original, so that any
 problems introduced by others will not reflect on the original authors'
-reputations.</sentence>
-<sentence>Software Patents:</sentence><sentence> Software patents constantly threaten any project such as this
+reputations.
+</sentence><sentence>Software Patents:</sentence><sentence> Software patents constantly threaten any project such as this
 one.</sentence><sentence> We wish to avoid the danger that redistributors of a HESSLA-licensed
 program will individually obtain patent licenses, in effect making the program
 proprietary.</sentence><sentence> To prevent this, we have included terms by which any Author must,
@@ -373,8 +373,8 @@ any Program or Software released under this License Agreement, grant all HESSLA
 Licensees of the Program or Software a royalty-free license of that technology.</sentence><sentence>
 Any Licensees who release derivative works, as permitted by this License
 Agreement, are required to grant a royalty-free patent license of any patented
-technology.</sentence>
-<sentence>Anyone Can Release Original Software Under The HESSLA:</sentence><sentence> Although this License
+technology.
+</sentence><sentence>Anyone Can Release Original Software Under The HESSLA:</sentence><sentence> Although this License
 Agreement is drafted with Hacktivismo's objectives in mind, perhaps it will
 meet other authors' needs as well.</sentence><sentence> If You are considering using this License
 Agreement for Your own software (meaning the code is not a work based on
@@ -388,13 +388,13 @@ considerable body of interpretive literature and community custom has grown up
 around that License Agreement.</sentence><sentence> The Open Software License, see < http://
 www.rosenlaw.com/osl.html >, is newer and has less of a track record.</sentence><sentence> But You
 may also want to consider that licensing option (as well as the option of
-concurrent OSL/HESSLA licensing).</sentence>
-<sentence>Any author of original software can release that software under this License
+concurrent OSL/HESSLA licensing).
+</sentence><sentence>Any author of original software can release that software under this License
 Agreement, if You choose to do so;</sentence><sentence> not just Hacktivismo.</sentence><sentence> Hacktivismo is the
 author and owner of software released by Hacktivismo under this License
 Agreement.</sentence><sentence> But original software released by other Authors would be owned and
-licensed by them.</sentence>
-<sentence>Ultimately, we think it is important to emphasize to other Authors that
+licensed by them.
+</sentence><sentence>Ultimately, we think it is important to emphasize to other Authors that
 Programs they have written can be released under both the HESSLA and some other
 license simultaneously (for, example, a program that is presently GPLed by its
 Author can be released simultaneously under both the GPL and the HESSLA, at the
@@ -419,36 +419,36 @@ Author.</sentence><sentence> If another Author has released code under the HESSL
 has primary decision-making authority about the manner in which his her or its
 software is licensed, but Hacktivismo is happy to field any questions hat may
 be posed by such an Author or by any developer who is building on another
-Author's HESSLAed code.</sentence>
-<sentence>License Revisions:</sentence><sentence> This License Agreement is subject to revision, prior to the
+Author's HESSLAed code.
+</sentence><sentence>License Revisions:</sentence><sentence> This License Agreement is subject to revision, prior to the
 release of the Hacktivismo Enhanced-Source Software License Agreement, Version
 1.0. We invite interested parties from the international academic and legal
 communities to offer comments and suggestions on ways to improve this License
-Agreement, prior to the time that The HESSLA version 1.0 is released.</sentence>
-<sentence>The terms of the latest and most up-to-date version of this License Agreement,
+Agreement, prior to the time that The HESSLA version 1.0 is released.
+</sentence><sentence>The terms of the latest and most up-to-date version of this License Agreement,
 up to and including version 1.0, shall be deemed automatically to supersede the
 terms of any lower-numbered version of this License Agreement with respect to
 any Licensee who became a Licensee under the lower-numbered version of the
-HESSLA.</sentence>
-<sentence>The terms of the latest and most up-to-date version of this License Agreement
+HESSLA.
+</sentence><sentence>The terms of the latest and most up-to-date version of this License Agreement
 will always be published on the Hacktivismo Website, http://
 www.hacktivismo.com/.</sentence><sentence>
 The precise terms and conditions for copying, distribution, use and
-modification follow.</sentence>
-<sentence>TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION, USE AND/OR MODIFICATION
+modification follow.
+</sentence><sentence>TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION, USE AND/OR MODIFICATION
 0. DEFINITIONS.</sentence><sentence> The following are defined terms that, whenever used in this
 License Agreement, have the following meanings:</sentence><sentence>
 0.1 Author: "Author" shall mean the copyright holder of an Original Work (the
-"Program") released by the Author under this License Agreement.</sentence>
-<sentence>0.2 Copy: "Copy" shall mean everything and anything that constitutes a copy
+"Program") released by the Author under this License Agreement.
+</sentence><sentence>0.2 Copy: "Copy" shall mean everything and anything that constitutes a copy
 according to copyright law, without limitation.</sentence><sentence> A "copy" does not become
 anything other than a "copy" merely because, for example, a governmental or
 institutional employee duplicates the Program or a part of it for another
 employee of the same institution or Governmental Entity, or merely because it
 is copied from one computer to another, or from one medium to another, or
 multiple copies are made on the same medium, within the same institutional or
-Governmental Entity.</sentence>
-<sentence>0.3 Derivative Work: A "Derivative Work" or "work based on the Program" shall
+Governmental Entity.
+</sentence><sentence>0.3 Derivative Work: A "Derivative Work" or "work based on the Program" shall
 mean either the Program itself or any work containing the Program or a portion
 of it, either verbatim or with modifications and/or translated into another
 language. </sentence><sentence>(Hereinafter, translation is included without limitation in the term
@@ -460,23 +460,23 @@ most encompassing possible definition either the contractual definition of
 "Derivative Work," or any broader and more encompassing statutory or legal
 definition, shall control.</sentence><sentence> Acceptance of this contractually-defined scope of
 the term "Derivative Work" is a mandatory pre-condition for You to receive any
-of the benefits offered by this License Agreement.</sentence>
-<sentence>0.3.1 Mere aggregation of another work not based on the Program with the
+of the benefits offered by this License Agreement.
+</sentence><sentence>0.3.1 Mere aggregation of another work not based on the Program with the
 Program (or with a Derivative Work based on the Program) on a volume of a
 storage or distribution medium does not bring the other work under the scope of
-this License Agreement.</sentence>
-<sentence>0.4 License Agreement:</sentence><sentence> When used in this License Agreement, the terms "this
+this License Agreement.
+</sentence><sentence>0.4 License Agreement:</sentence><sentence> When used in this License Agreement, the terms "this
 License" or "this License Agreement" shall mean The Hactivismo Enhanced-Source
 Software License Agreement, v. 0.1, or any subsequent version made applicable
-under the terms of Section 15.</sentence>
-<sentence>0.5 Licensee: The term "Licensee" shall mean You or any other Licensee, whether
-or not a Qualified Licensee.</sentence>
-<sentence>0.6 Original Work:</sentence><sentence> "Original Work" shall mean a Program or other work of
-authorship, or portion thereof, that is not a Derivative Work.</sentence>
-<sentence>0.7 Program:</sentence><sentence> The "Program," to which this License Agreement applies, is the
+under the terms of Section 15.
+</sentence><sentence>0.5 Licensee: The term "Licensee" shall mean You or any other Licensee, whether
+or not a Qualified Licensee.
+</sentence><sentence>0.6 Original Work:</sentence><sentence> "Original Work" shall mean a Program or other work of
+authorship, or portion thereof, that is not a Derivative Work.
+</sentence><sentence>0.7 Program:</sentence><sentence> The "Program," to which this License Agreement applies, is the
 Original Work (including, but not limited to, computer software) released by
-the Author under this License Agreement.</sentence>
-<sentence>0.8 Qualified Licensee:</sentence><sentence> A "Qualified Licensee" means a Licensee that remains in
+the Author under this License Agreement.
+</sentence><sentence>0.8 Qualified Licensee:</sentence><sentence> A "Qualified Licensee" means a Licensee that remains in
 full compliance with all terms and conditions of this License Agreement.</sentence><sentence> You
 are no longer a Qualified Licensee if, at any time, You violate any terms of
 this License Agreement.</sentence><sentence> Neither the Program nor any Software based on the
@@ -488,23 +488,23 @@ violation as set forth herein. </sentence><sentence>Loss of the status of Qualif
 signifies that violation of any terms of the License Agreement subjects a
 Licensee to loss of most of the benefits that Qualified Licensees enjoy under
 this License Agreement, and to additional remedies for all violations occurring
-after the first violation.</sentence>
-<sentence>0.9 Software:</sentence><sentence> "Software" or "the Software" shall mean the Program, any
+after the first violation.
+</sentence><sentence>0.9 Software:</sentence><sentence> "Software" or "the Software" shall mean the Program, any
 Derivative Work based on the Program or a portion thereof, and/or any modified
 version of the Program or portion thereof, without limitation.</sentence><sentence>
 0.10 Source Code:</sentence><sentence> The term "Source Code" shall mean the preferred form of a
 Program or Original Work for making modifications to it and all available
 documentation describing how to access and modify that Program or Original
-Work.</sentence>
-<sentence>0.10.1 For an executable work, complete Source Code means all the Source Code
+Work.
+</sentence><sentence>0.10.1 For an executable work, complete Source Code means all the Source Code
 for all modules it contains, plus any associated interface definition files,
 plus the scripts used to control compilation and installation of the
 executable.</sentence><sentence> However, as a special exception, the Source Code distributed need
 not include anything that is normally distributed (in either source or binary
 form) with the major components (compiler, kernel, and so on) of the operating
 system on which the executable runs, unless that component itself accompanies
-the executable.</sentence>
-<sentence>0.10.2 "Object Code:"</sentence><sentence> Because of certain peculiarities of current export-
+the executable.
+</sentence><sentence>0.10.2 "Object Code:"</sentence><sentence> Because of certain peculiarities of current export-
 control rules, "object code" of the Program, or any modified version of the
 Program, or Derivative Work based on the Program, must not be exported except
 by way of distribution that is ancillary to the distribution of the Source
@@ -514,16 +514,16 @@ ancillary component of any such export distribution.</sentence><sentence>
 0.11 Strong Cryptography:</sentence><sentence> "Strong Cryptography" shall mean cryptography no less
 secure than (for example, and without limitation) a 2048-bit minimum key size
 for RSA encryption, 1024-bit minimum key size for Diffie-Hellman (El Gamal), or
-a 256-bit minimum key size for AES and similar symmetric ciphers.</sentence>
-<sentence>0.12 Substandard Key-Selection Technique:</sentence><sentence> The term "Substandard Key-Selection
+a 256-bit minimum key size for AES and similar symmetric ciphers.
+</sentence><sentence>0.12 Substandard Key-Selection Technique:</sentence><sentence> The term "Substandard Key-Selection
 Technique" shall mean a method or technique to cause encryption keys to be more
 easily guessed or less secure, such as by</sentence><sentence> (i) causing the selection of keys to
 be less than random, </sentence><sentence>or (ii) employing a selection process that selects among
 only a subset of possible keys, instead of from among the largest set of
 possible keys that can securely be used consistent with contemporary knowledge
 about the cryptographic techniques employed by You.</sentence><sentence> The following illustrations
-elaborate on the foregoing definition:</sentence>
-<sentence>0.12.1 If the key-generation or key-selection technique for the encryption
+elaborate on the foregoing definition:
+</sentence><sentence>0.12.1 If the key-generation or key-selection technique for the encryption
 algorithm You employ involves the selection of one or more prime numbers, or
 involves one or more mathematical functions or concatenations performed on one
 or more prime numbers, then each prime number should be selected from a very
@@ -538,8 +538,8 @@ for maximizing the security associated with the key-generation or key-selection
 technique for the cryptosystem You select, then (with attention also to the
 requirements of Section 0.11), You should employ a key-generation or selection
 technique no less secure than the customary industry standard for secure use of
-the cryptosystem.</sentence>
-<sentence>0.12.2 If the key-generation or key-selection technique for the encryption
+the cryptosystem.
+</sentence><sentence>0.12.2 If the key-generation or key-selection technique for the encryption
 algorithm You employ involves the selection of a random integer, or the
 transformation of a random integer through one or more mathematical processes,
 then the selection of the integer shall be at random from the largest possible
@@ -548,8 +548,8 @@ encryption algorithm.</sentence><sentence> It shall not be selected from an arti
 of integers (e.g., if a 256-bit random integer serves as the key, then You
 could not set 200 of the 256 bits as "0," and randomly generate only the
 remaining 56 bits producing effectively a 56-bit keylength instead of using the
-full 256 bits).</sentence>
-<sentence>0.12.3 In other words, Your key-generation technique must promote security to
+full 256 bits).
+</sentence><sentence>0.12.3 In other words, Your key-generation technique must promote security to
 the maximum extent permitted by the cryptographic method(s) and keylength You
 elect to employ, rather than facilitating eavesdropping or surveillance in any
 way.</sentence><sentence> The example of GSM telephones, in which 16 of 56 bits in each encryption
@@ -557,13 +557,13 @@ key were set at "0," thereby reducing the security of the system by a factor of
 65,536, is particularly salient.</sentence><sentence> Such artificial techniques to reduce the
 security of a cryptosystem by selecting keys from only a less-secure or
 suboptimal subset of possible keys, is prohibited and will violate this License
-Agreement if any such technique is employed in any Software.</sentence>
-<sentence>0.13 You: Each Licensee (including, without limitation, Licensees that have
+Agreement if any such technique is employed in any Software.
+</sentence><sentence>0.13 You: Each Licensee (including, without limitation, Licensees that have
 violated the License Agreement and who are no longer Qualified Licensees, but
 who nevertheless remain subject to all requirements of this License Agreement
 and to all cumulative remedies for each successive violation), is referred to
-as "You."</sentence>
-<sentence>0.13.1 Governmental Entity:</sentence><sentence> "You" explicitly includes any and all "Governmental
+as "You."
+</sentence><sentence>0.13.1 Governmental Entity:</sentence><sentence> "You" explicitly includes any and all "Governmental
 Entities," without limitation.</sentence><sentence> "Governmental Entity" or "Governmental
 Entities," when used in this License Agreement, shall mean national
 governments, sub-national governments (for example, and without limitation,
@@ -573,36 +573,36 @@ subunits (without limitation, governmental agencies, offices, departments,
 government corporations, and the like), supra-national governmental entities
 such as the European Union, and entities through which one or more governments
 perform governmental functions or exercise governmental power in coordination,
-cooperation or unison.</sentence>
-<sentence>0.13.2 Governmental Person:</sentence><sentence> "You" also explicitly includes "Governmental
+cooperation or unison.
+</sentence><sentence>0.13.2 Governmental Person:</sentence><sentence> "You" also explicitly includes "Governmental
 Persons."</sentence><sentence> The terms "Governmental Person" or "Governmental Persons," when used
 in this License Agreement, shall mean the officials, officers, employees,
-representatives, contractors and agents of any Governmental Entity.</sentence>
-<sentence>1. Application of License Agreement.</sentence><sentence> This License Agreement applies to any
+representatives, contractors and agents of any Governmental Entity.
+</sentence><sentence>1. Application of License Agreement.</sentence><sentence> This License Agreement applies to any
 Program or other Original Work of authorship that contains a notice placed by
 the Author saying it may be distributed under the terms of this License
 Agreement.</sentence><sentence> The preferred manner of placing such a notice is to include the
 following statement immediately after the copyright notice for such an Original
-Work:</sentence>
-     <sentence>"Licensed under the Hacktivismo Enhanced-Source Software License
-     Agreement, Version 0.1"</sentence>
-<sentence>2. Means of Acceptance Use, Copying, Distribution or Modification By Anyone
+Work:
+     </sentence><sentence>"Licensed under the Hacktivismo Enhanced-Source Software License
+     Agreement, Version 0.1"
+</sentence><sentence>2. Means of Acceptance Use, Copying, Distribution or Modification By Anyone
 Constitutes Acceptance.</sentence><sentence> Subject to Section 14.1 (concerning the special case of
 certain Governmental Entities) any copying, modification, distribution, or use
 by You of the Program or any Software, shall constitute Your acceptance of all
-terms and conditions of this License Agreement.</sentence>
-<sentence>2.1 As a Licensee, You may not authorize, permit, or enable any person to use
+terms and conditions of this License Agreement.
+</sentence><sentence>2.1 As a Licensee, You may not authorize, permit, or enable any person to use
 the Program or any Software or Derivative Work based on it (including any use
 of Your copy or copies of the Program) unless such person has accepted this
 License Agreement and has become a Licensee subject to all its terms and
-conditions.</sentence>
-<sentence>2.2 You may not make any copy for Your own use unless You have accepted this
-License Agreement and subjected yourself to all its terms and conditions.</sentence>
-<sentence>2.3 You may not make a copy for the use of any other person, or transfer a copy
+conditions.
+</sentence><sentence>2.2 You may not make any copy for Your own use unless You have accepted this
+License Agreement and subjected yourself to all its terms and conditions.
+</sentence><sentence>2.3 You may not make a copy for the use of any other person, or transfer a copy
 to any other person, unless such person is a Licensee that has accepted this
 License Agreement and such person is subject to all terms and conditions of
-this License Agreement.</sentence>
-<sentence>2.4 It is not the position of Hacktivismo that copyright law confers an
+this License Agreement.
+</sentence><sentence>2.4 It is not the position of Hacktivismo that copyright law confers an
 exclusive right to use, as opposed to the exclusive right to copy the Software.</sentence><sentence>
 However, for purposes of contract law, any use of the Software shall be
 considered to constitute acceptance of this License Agreement.</sentence><sentence> Moreover, all
@@ -613,13 +613,13 @@ first accepting the terms and conditions of this License Agreement, use by non-
 Licensees is effectively prohibited contractually because nobody can obtain a
 copy of, or access to a copy of, any Software without</sentence><sentence> (1) accepting the License
 Agreement through use, </sentence><sentence>and (2) triggering some Licensee's obligation to require
-acceptance as a precondition of copying or access.</sentence>
-<sentence>3. "Qualified Licensee" Requirement:</sentence><sentence> Neither the Program nor any Software or
+acceptance as a precondition of copying or access.
+</sentence><sentence>3. "Qualified Licensee" Requirement:</sentence><sentence> Neither the Program nor any Software or
 Derivative Work based on the Program may be copied, distributed, displayed,
 performed, used or modified by You, even for Your own purposes, unless You are
 a "Qualified Licensee." </sentence><sentence>To remain a Qualified Licensee, You must remain in full
-compliance with all terms and conditions of this License Agreement.</sentence>
-<sentence>4. License Agreement Is Exclusive Source of All Your Rights:</sentence><sentence>
+compliance with all terms and conditions of this License Agreement.
+</sentence><sentence>4. License Agreement Is Exclusive Source of All Your Rights:</sentence><sentence>
 4.1 You may not copy, modify, or distribute the Program, or obtain any copy,
 except as expressly provided under this License Agreement.</sentence><sentence> Any attempt
 otherwise to copy, modify, obtain a copy, sublicense or distribute the Program
@@ -630,31 +630,31 @@ have received copies from You (and thereby have received rights from the
 Author) under this License Agreement, and who would otherwise qualify as
 Qualified Licensees, will not have their rights under their License Agreements
 suspended or restricted on account of anything You do, so long as such parties
-remain in full compliance.</sentence>
-<sentence>4.2 You are not required to accept this License Agreement and prior to the time
+remain in full compliance.
+</sentence><sentence>4.2 You are not required to accept this License Agreement and prior to the time
 You elect to become a Licensee and accept this License Agreement, You may
 always elect instead not to copy, use, modify, distribute, compile, or perform
 the Program or any Software released under this License Agreement.</sentence><sentence> However,
 nothing else grants You permission to copy, to obtain or possess a copy, to
 compile a copy in object code or executable code from a copy in source code, to
-modify, or to distribute the Program or any Software based on the Program.</sentence>
-<sentence>These actions are prohibited by law if You do not accept this License
+modify, or to distribute the Program or any Software based on the Program.
+</sentence><sentence>These actions are prohibited by law if You do not accept this License
 Agreement.</sentence><sentence> Additionally, as set forth in Section 2, any use, copying or
 modification of the Software constitutes acceptance of this License Agreement
-by You.</sentence>
-<sentence>4.3 Each time You redistribute the Program (or any Software or Derivative Work
+by You.
+</sentence><sentence>4.3 Each time You redistribute the Program (or any Software or Derivative Work
 based on the Program), the recipient automatically receives a License Agreement
 from the Author to copy, distribute, modify, perform or display the Software,
 subject to the terms and conditions of this License Agreement.</sentence><sentence> You may not
 impose any further restrictions on the recipients' exercise of the rights
 granted herein.</sentence><sentence> You are not responsible for enforcing compliance by third
 parties to this License Agreement.</sentence><sentence> Enforcement is the responsibility of the
-Author.</sentence>
-<sentence>5. Grant of Source Code License.</sentence>
-<sentence>5.1 Source Code Always Available from Author:</sentence><sentence> Author hereby promises and agrees
+Author.
+</sentence><sentence>5. Grant of Source Code License.
+</sentence><sentence>5.1 Source Code Always Available from Author:</sentence><sentence> Author hereby promises and agrees
 except to the extent prohibited by export-control law to provide a machine-
-readable copy of the Source Code of the Program at the request of any Licensee.</sentence>
-<sentence>Author reserves the right to satisfy this obligation by placing a machine-
+readable copy of the Source Code of the Program at the request of any Licensee.
+</sentence><sentence>Author reserves the right to satisfy this obligation by placing a machine-
 readable copy of the Source Code of the most current version of the Program in
 an information repository reasonably calculated to permit inexpensive and
 convenient access by You for so long as Author continues to distribute the
@@ -666,38 +666,38 @@ ancillary distribution of compiled Object Code, but the continued availability
 of the Source Code from the Author addresses the possibility that You might
 have (for any reason) not received from someone else a complete, current, copy
 of the Source Code (lack of which would, for example, prevent You from
-exporting copies to others without violating this license, see Section 8).</sentence>
-<sentence>5.2 Grant of License.</sentence><sentence> If and only if, and for so long as You remain a Qualified
+exporting copies to others without violating this license, see Section 8).
+</sentence><sentence>5.2 Grant of License.</sentence><sentence> If and only if, and for so long as You remain a Qualified
 Licensee, in accordance with Section 3 of this License Agreement, Author hereby
 grants You a world-wide, royalty-free, non-exclusive, non-sublicensable
-copyright license to do the following:</sentence>
-<sentence>5.2.1 to reproduce the Source Code of the Program in copies;</sentence><sentence>
+copyright license to do the following:
+</sentence><sentence>5.2.1 to reproduce the Source Code of the Program in copies;</sentence><sentence>
 5.2.2 to prepare Derivative Works based upon the Program and to edit or modify
 the Source Code in the process of preparing such Derivative Works;</sentence><sentence>
 5.2.3 to distribute copies of the Source Code of the Original Work and/or of
 Derivative Works to others, with the proviso that copies of Original Work or
 Derivative Works that You distribute shall be licensed under this License
 Agreement, and that You shall fully inform all recipients of the terms of this
-License Agreement.</sentence>
-<sentence>6. Grant of Copyright License.</sentence><sentence> If and only if, and for so long as You remain a
+License Agreement.
+</sentence><sentence>6. Grant of Copyright License.</sentence><sentence> If and only if, and for so long as You remain a
 Qualified Licensee, in accordance with Section 3 of this License Agreement,
 Author hereby grants You a world-wide, royalty-free, non-exclusive, non-
-sublicensable license to do the following:</sentence>
-<sentence>6.1 to reproduce the Program in copies;</sentence>
-<sentence>6.2 to prepare Derivative Works based upon the Program, or upon Software that
-itself is based on the Program;</sentence>
-<sentence>6.3 to distribute (either by distributing the Source Code, or by distributing
+sublicensable license to do the following:
+</sentence><sentence>6.1 to reproduce the Program in copies;
+</sentence><sentence>6.2 to prepare Derivative Works based upon the Program, or upon Software that
+itself is based on the Program;
+</sentence><sentence>6.3 to distribute (either by distributing the Source Code, or by distributing
 compiled Object Code, but any export of Object Code must be ancillary to a
 distribution of Source Code) copies of the Program and Derivative Works to
 others, with the proviso that copies of the Program or Derivative Works that
 You distribute shall be licensed under this License Agreement, that You shall
 fully inform all recipients of the terms of this License Agreement;</sentence><sentence>
-6.4 to perform the Program or a Derivative Work publicly;</sentence>
-<sentence>6.5 to display the Program or a Derivative Work publicly; and</sentence><sentence>
+6.4 to perform the Program or a Derivative Work publicly;
+</sentence><sentence>6.5 to display the Program or a Derivative Work publicly; and</sentence><sentence>
 6.6 to charge a fee for the physical act of transferring a copy of the Program
 (You may also, at Your option, offer warranty protection in exchange for a
-fee).</sentence>
-<sentence>7. Grant of Patent License.</sentence><sentence> If and only if, and for so long as You remain a
+fee).
+</sentence><sentence>7. Grant of Patent License.</sentence><sentence> If and only if, and for so long as You remain a
 Qualified Licensee, in accordance with Section 3 of this License Agreement,
 Author hereby grants You a world-wide, royalty-free, non-exclusive, non-
 sublicensable license Agreement, under patent claims owned or controlled by the
@@ -707,8 +707,8 @@ proviso that You grant all Licensees a world-wide, non-exclusive, royalty-free
 license under any patent claims embodied in any Derivative Work furnished by
 You, Author hereby grants You a world-wide, royalty-free, non-exclusive, non-
 sublicensable license under the Licensed Claims to make, use, sell and offer
-for sale Derivative Works.</sentence>
-<sentence>8. Exclusions From License Agreement Grants.</sentence><sentence> Nothing in this License Agreement
+for sale Derivative Works.
+</sentence><sentence>8. Exclusions From License Agreement Grants.</sentence><sentence> Nothing in this License Agreement
 shall be deemed to grant any rights to trademarks, copyrights, patents, trade
 secrets or any other intellectual property of Licensor except as expressly
 stated herein.</sentence><sentence> No patent license is granted to make, use, sell or offer to sell
@@ -717,8 +717,8 @@ Section 7.</sentence><sentence> No right is granted to the trademarks of Author 
 are included in the Program.</sentence><sentence> Nothing in this License Agreement shall be
 interpreted to prohibit Author from licensing under additional or different
 terms from this License Agreement any Original Work, Program, or Derivative
-Work that Author otherwise would have a right to License.</sentence>
-<sentence>8.1 Implied Endorsements Prohibited.</sentence><sentence> Neither the name of the Author (in the
+Work that Author otherwise would have a right to License.
+</sentence><sentence>8.1 Implied Endorsements Prohibited.</sentence><sentence> Neither the name of the Author (in the
 case of Programs and Original Works released by Hacktivismo, the name
 "Hacktivismo"), nor the names of contributors who helped produce the Program
 may be used to endorse or promote modifications of the Program, any Derivative
@@ -726,17 +726,17 @@ Work, or any Software other than the Program, without specific prior written
 permission of the Author.</sentence><sentence> Neither the name of Hacktivismo nor the names of any
 contributors who helped write the Program may be used to endorse or promote any
 Program or Software released under this License Agreement by any person other
-than Hacktivismo.</sentence>
-<sentence>9. Modifications and Derivative Works.</sentence><sentence> Only Qualified Licensees may modify the
+than Hacktivismo.
+</sentence><sentence>9. Modifications and Derivative Works.</sentence><sentence> Only Qualified Licensees may modify the
 Software or prepare or distribute Derivative Works.</sentence><sentence> If You are a Qualified
 Licensee, Your authorization to modify the Software or prepare or distribute
 Derivative Works (including permission to prepare and/or distribute Derivative
 Works, as provided in Sections 5.2.2, 5.2.3, 6.2, 6.3, and 6.6) is subject to
 each and all of the following mandatory terms and conditions (9.1 through 9.6,
-inclusive):</sentence>
-<sentence>9.1 You must cause the modified files to carry prominent notices stating that
-You changed the files and the date of any change;</sentence>
-<sentence>9.2 If the modified Software normally reads commands interactively when run,
+inclusive):
+</sentence><sentence>9.1 You must cause the modified files to carry prominent notices stating that
+You changed the files and the date of any change;
+</sentence><sentence>9.2 If the modified Software normally reads commands interactively when run,
 You must cause it, when started running for such interactive use in the most
 ordinary way, to print or display an announcement including an appropriate
 copyright notice and a notice that there is no warranty (or else, saying that
@@ -744,65 +744,65 @@ You provide a warranty) and that users may redistribute the program under this
 License Agreement, and telling the user how to view a copy of this License
 Agreement.</sentence><sentence> (Exception: if the Program itself is interactive but does not
 normally print such an announcement, Your Derivative Work based on the Program
-is not required to print an announcement.);</sentence>
-<sentence>9.3 Any Program, Software, or modification thereof copied or distributed by
+is not required to print an announcement.);
+</sentence><sentence>9.3 Any Program, Software, or modification thereof copied or distributed by
 You, that incorporates any portion of the Original Work, must not contain any
 code or functionality that subverts the security of the Software or the end-
 user's expectations of privacy, anonymity, confidentiality, authenticity, and
 trust, including (without limitation) any code or functionality that introduces
 any "backdoor," escrow mechanism, "spy-ware," or surveillance techniques or
-methods into any such Program, Software, or modification thereof;</sentence>
-<sentence>9.4 Any Program, Software, or modification thereof copied or distributed by
+methods into any such Program, Software, or modification thereof;
+</sentence><sentence>9.4 Any Program, Software, or modification thereof copied or distributed by
 You, that employs any cryptographic or other security, privacy,
 confidentiality, authenticity, and/or trust methods or techniques, including
 without limitation any Derivative Work that includes any changes or
 modifications to any cryptographic techniques in the Program, shall employ
-Strong Cryptography.</sentence>
-<sentence>9.5 Any Program, Software, or modification thereof copied or distributed by
+Strong Cryptography.
+</sentence><sentence>9.5 Any Program, Software, or modification thereof copied or distributed by
 You, if it contains any key-generation or selection technique, must not employ
-any Substandard Key-Selection Technique.</sentence>
-<sentence>9.6 No Program or Software copied or distributed by You may transmit or
+any Substandard Key-Selection Technique.
+</sentence><sentence>9.6 No Program or Software copied or distributed by You may transmit or
 communicate any symmetric key, any "private key" if an asymmetric cryptosystem
 is employed, or any part of such key, nor may it otherwise make any such key or
 part of such key known, to any person other than the end-user who generated the
-key, without the active consent and participation of that individual end-user.</sentence>
-<sentence>If a private or symmetric key is stored or recorded in any manner, it must not
+key, without the active consent and participation of that individual end-user.
+</sentence><sentence>If a private or symmetric key is stored or recorded in any manner, it must not
 be stored or recorded in plaintext, and it must be protected from reading (at a
 minimum) by use of a password.</sentence><sentence> Use of steganography or other techniques to
 disguise the fact that a private or symmetric key is even stored is strongly
-encouraged, but not absolutely required.</sentence>
-<sentence>10. Use Restrictions:</sentence><sentence> Human Rights Violations Prohibited.</sentence>
-<sentence>10.1 Neither the Program, nor any Software or Derivative Work based on the
+encouraged, but not absolutely required.
+</sentence><sentence>10. Use Restrictions:</sentence><sentence> Human Rights Violations Prohibited.
+</sentence><sentence>10.1 Neither the Program, nor any Software or Derivative Work based on the
 Program may used by You for any of the following purposes (10.1.1 through
-10.1.5, inclusive):</sentence>
-<sentence>10.1.1 to violate or infringe any human rights or to deprive any person of
+10.1.5, inclusive):
+</sentence><sentence>10.1.1 to violate or infringe any human rights or to deprive any person of
 human rights, including, without limitation, rights of privacy, security,
 collective action, expression, political freedom, due process of law, and
-individual conscience;</sentence>
-<sentence>10.1.2 to gather evidence against any person to be used to deprive any person
-of human rights;</sentence>
-<sentence>10.1.3 any other use as a part of any project or activity to deprive any person
+individual conscience;
+</sentence><sentence>10.1.2 to gather evidence against any person to be used to deprive any person
+of human rights;
+</sentence><sentence>10.1.3 any other use as a part of any project or activity to deprive any person
 of human rights, including not only the above-listed rights, but also rights of
 physical security, liberty from physical restraint or incarceration, freedom
 from slavery, freedom from torture, freedom to take part in government, either
 directly or through lawfully elected representatives, and/or freedom from self-
-incrimination;</sentence>
-<sentence>10.1.4 any surveillance, espionage, or monitoring of individuals, whether done
+incrimination;
+</sentence><sentence>10.1.4 any surveillance, espionage, or monitoring of individuals, whether done
 by a Governmental Entity, a Governmental Person, or by any non-governmental
-person or entity;</sentence>
-<sentence>10.1.5 censorship or "filtering" of any published information or expression.</sentence><sentence>
+person or entity;
+</sentence><sentence>10.1.5 censorship or "filtering" of any published information or expression.</sentence><sentence>
 10.2 Additionally, the Program, any modification of it, or any Software or
 Derivative Work based on the Program may not be used by any Governmental Entity
 or other institution that has any policy or practice (whether official or
-unofficial) of violating the human rights of any persons.</sentence>
-<sentence>10.3 You may not authorize, permit, or enable any person (including, without
+unofficial) of violating the human rights of any persons.
+</sentence><sentence>10.3 You may not authorize, permit, or enable any person (including, without
 limitation, any Governmental Entity or Governmental Person) to use the Program
 or any Software or Derivative Work based on it (including any use of Your copy
 or copies of the Program) unless such person has accepted this License
 Agreement and has become a Licensee subject to all its terms and conditions,
 including (without limitation) the use restrictions embodied in Section 10.1
-and 10.2, inclusive.</sentence>
-<sentence>11. All Export Distributions Must Consist of or Be Ancillary to Distribution of
+and 10.2, inclusive.
+</sentence><sentence>11. All Export Distributions Must Consist of or Be Ancillary to Distribution of
 Source Code.</sentence><sentence> Because of certain peculiarities of current export-control law,
 any distribution by You of the Program or any Software may be in the form of
 Source Code only, or in the form or Source Code accompanied by compiled Object
@@ -810,8 +810,8 @@ Code, but You may not export any Software in the form of compiled Object Code
 only.</sentence><sentence> Such an export distribution of compiled executable code must in all cases
 be ancillary to a distribution of the complete corresponding machine-readable
 source code, which must be distributed on a medium, or by a method, customarily
-used for software interchange.</sentence>
-<sentence>12. EXPORT LAWS:</sentence><sentence> THIS LICENSE AGREEMENT ADDS NO RESTRICTIONS TO THE EXPORT LAWS
+used for software interchange.
+</sentence><sentence>12. EXPORT LAWS:</sentence><sentence> THIS LICENSE AGREEMENT ADDS NO RESTRICTIONS TO THE EXPORT LAWS
 OF YOUR JURISDICTION.</sentence><sentence> It is Your responsibility to comply with any export
 regulations applicable in Your jurisdiction.</sentence><sentence> From the United States, Canada, or
 many countries in Europe, export or transmission of this Software to certain
@@ -827,8 +827,8 @@ consult the current laws of any and all countries whose laws may apply to You,
 before exporting this Software to any destination.</sentence><sentence> Special care should be taken
 to avoid export to any embargoed destination.</sentence><sentence> An Author other than Hacktivismo
 may substitute that Author's legal name for "Hacktivismo" in this Paragraph, in
-relation to any Program released by that Author under this Paragraph.</sentence>
-<sentence>13. Contrary Judgments, Settlements and Court Orders.</sentence><sentence> If, as a consequence of a
+relation to any Program released by that Author under this Paragraph.
+</sentence><sentence>13. Contrary Judgments, Settlements and Court Orders.</sentence><sentence> If, as a consequence of a
 court judgment or allegation of patent infringement or for any other reason
 (not limited to patent issues), conditions are imposed on You (whether by court
 order, agreement or otherwise) that contradict the conditions of this License
@@ -839,8 +839,8 @@ then as a consequence You may not distribute the Software at all.</sentence><sen
 if a patent license would not permit royalty-free redistribution of the Program
 by all those who receive copies directly or indirectly through You, then the
 only way You could satisfy both it and this License Agreement would be to
-refrain entirely from distribution of the Program.</sentence>
-<sentence>It is not the purpose of this Section 13 to induce You to infringe any patents
+refrain entirely from distribution of the Program.
+</sentence><sentence>It is not the purpose of this Section 13 to induce You to infringe any patents
 or other property right claims or to contest validity of any such claims;</sentence><sentence> this
 Section has the sole purpose of protecting the integrity of the software
 distribution system reflected in this License Agreement, which is implemented
@@ -848,15 +848,15 @@ by public license practices.</sentence><sentence> Many people have made generous
 the wide range of software distributed through related distribution systems, in
 reliance on consistent application of such distribution systems;</sentence><sentence> it is up to
 the Author/donor to decide if he or she is willing to distribute software
-through any other system and a Licensee cannot impose that choice.</sentence>
-<sentence>14. Governmental Entities:</sentence><sentence> Any Governmental Entity ("Governmental Entity" is
+through any other system and a Licensee cannot impose that choice.
+</sentence><sentence>14. Governmental Entities:</sentence><sentence> Any Governmental Entity ("Governmental Entity" is
 defined broadly as set forth in Section 0.13.1) or Governmental Person (as
 "Governmental Person" is defined broadly in Section 0.13.2), that uses,
 modifies, changes, copies, displays, performs, or distributes the Program, or
 any Software or Derivative Work based on the Program, may do so if and only if
 all of the following terms and conditions (14.1 through 14.10, inclusive) are
-agreed to and fully met:</sentence>
-<sentence>14.1 If it is the position of any Governmental Entity (or, in the case of any
+agreed to and fully met:
+</sentence><sentence>14.1 If it is the position of any Governmental Entity (or, in the case of any
 "Governmental Person," if it is the position of that Governmental Person's
 Governmental Entity) that any doctrine or doctrines of law (including, without
 limitation, any doctrine(s) of immunity or any formalities of contract
@@ -888,20 +888,20 @@ distribution following written notice under this Paragraph, but without the
 implementation of an agreement as provided herein, shall constitute an
 irrevocable and conclusive waiver by the Governmental Entity (and any and all
 Governmental Persons of such Governmental Entity) of any and all reliance on
-any legal doctrine either referenced in such written notice or omitted from it.</sentence>
-<sentence>14.2 Any Governmental Entity that uses, copies, changes, modifies, or
+any legal doctrine either referenced in such written notice or omitted from it.
+</sentence><sentence>14.2 Any Governmental Entity that uses, copies, changes, modifies, or
 distributes, the Software or any part or portion thereof, or any Governmental
 Person who does so (whether that person's Governmental Entity contends the
 person's action was, or was not, authorized or official), permanently and
 irrevocably waives any defense based on sovereign immunity, official immunity,
 the Act of State Doctrine, or any other form of immunity, that might otherwise
 apply as a defense to, or a bar against, any legal action based on the terms of
-this License Agreement.</sentence>
-<sentence>14.2.1 With respect to any enforcement action brought by the Author in a United
+this License Agreement.
+</sentence><sentence>14.2.1 With respect to any enforcement action brought by the Author in a United
 States court against a foreign Governmental Entity, the waiver by any
 Governmental Entity as provided in Subparagraphs 14.1 and 14.2 is hereby
-expressly acknowledged by each such Governmental Entity to constitute a "case .</sentence>
-<sentence>. . in which the foreign state has waived its immunity," within the scope of 28
+expressly acknowledged by each such Governmental Entity to constitute a "case .
+</sentence><sentence>. . in which the foreign state has waived its immunity," within the scope of 28
 U.S.C.  1605(a)(1) of the Foreign Sovereign Immunities Act of 1976 (as
 amended).</sentence><sentence> Each such Governmental Entity also specifically agrees and concedes
 that the "commercial activity" exceptions to the FSIA, 28 U.S.C.  1605(a)(2),
@@ -909,13 +909,13 @@ that the "commercial activity" exceptions to the FSIA, 28 U.S.C.  1605(a)(2),
 States or any United States Governmental Entity, in the courts of any country,
 the U.S. Governmental Entity shall be understood to have voluntarily agreed to
 a corresponding waiver of immunity from actions in the courts of any other
-sovereign.</sentence>
-<sentence>14.2.2 With respect to any enforcement action brought by an authorized end-user
+sovereign.
+</sentence><sentence>14.2.2 With respect to any enforcement action brought by an authorized end-user
 (as a third-party beneficiary, under the terms of Subparagraphs 14.3 and 14.10)
 in a United States court against a foreign Governmental Entity, the waiver by
 any Governmental Entity as provided in Subparagraphs 14.1 and 14.2 is hereby
-expressly acknowledged by each such Governmental Entity to constitute a "case .</sentence>
-<sentence>. . in which the foreign state has waived its immunity," within the scope of 28
+expressly acknowledged by each such Governmental Entity to constitute a "case .
+</sentence><sentence>. . in which the foreign state has waived its immunity," within the scope of 28
 U.S.C.  1605(a)(1) of the Foreign Sovereign Immunities Act of 1976 (as
 amended). </sentence><sentence>. Each such Governmental Entity also specifically agrees and concedes
 that the "commercial activity" exceptions to the FSIA, 28 U.S.C.  1605(a)(2),
@@ -923,8 +923,8 @@ that the "commercial activity" exceptions to the FSIA, 28 U.S.C.  1605(a)(2),
 States or any United States Governmental Entity, in the courts of any country,
 the U.S. Governmental Entity shall be understood to have voluntarily agreed to
 a corresponding waiver of immunity from actions in the courts of any other
-sovereign.</sentence>
-<sentence>14.2.3 With respect to any action or effort by the Author in the United States
+sovereign.
+</sentence><sentence>14.2.3 With respect to any action or effort by the Author in the United States
 to execute a judgment against a foreign Governmental Entity, by attaching or
 executing process against the property of such Governmental Entity, the waiver
 by any Governmental Entity as provided in Subparagraphs 14.1 and 14.2 is hereby
@@ -937,8 +937,8 @@ exceptions to the FSIA, 28 U.S.C.</sentence><sentence>  1610(a)(2), (d) are als
 respect to an action brought against the United States or any United States
 Governmental Entity, in the courts of any country, the U.S. Governmental Entity
 shall be understood to have voluntarily agreed to a corresponding waiver of
-immunity from actions in the courts of any other sovereign.</sentence>
-<sentence>14.2.4 With respect to any action or effort brought by an authorized end-user
+immunity from actions in the courts of any other sovereign.
+</sentence><sentence>14.2.4 With respect to any action or effort brought by an authorized end-user
 (as a third-party beneficiary, in accordance with Subparagraphs 14.3 and 14.10)
 in the United States to execute a judgment against a foreign Governmental
 Entity, by attaching or executing process against the property of such
@@ -953,8 +953,8 @@ and concedes that the "commercial activity" exceptions to the FSIA, 28 U.S.C.</s
 the United States or any United States Governmental Entity, in the courts of
 any country, the U.S. Governmental Entity shall be understood to have
 voluntarily agreed to a corresponding waiver of immunity from actions in the
-courts of any other sovereign.</sentence>
-<sentence>14.3 Any Governmental Entity that uses, copies, changes, modifies, displays,
+courts of any other sovereign.
+</sentence><sentence>14.3 Any Governmental Entity that uses, copies, changes, modifies, displays,
 performs, or distributes the Software or any part thereof, or any Governmental
 Person who does so (whether that person's Governmental Entity contends the
 person's action was, or was not, authorized or official), and thereby violates
@@ -981,8 +981,8 @@ and each and every such Governmental Entity or Person conclusively waives all
 restrictions on the amount of punitive damages, and all defenses to the award
 of punitive damages to the extend such limitations or defenses depend upon or
 are a function of such person or entity's status as a Governmental Person or
-Governmental Entity.</sentence>
-<sentence>14.4 Any State of the United States, or any subunit or Governmental Entity
+Governmental Entity.
+</sentence><sentence>14.4 Any State of the United States, or any subunit or Governmental Entity
 thereof, that uses, copies, changes, modifies, displays, performs, or
 distributes the Software of any part thereof, or any of whose Governmental
 Persons does so (whether that person's Governmental Entity contends the
@@ -993,8 +993,8 @@ invoke any of the third-party beneficiary rights set forth in Section 14.3 -
 - any immunity under the Eleventh Amendment of the United States Constitution
 or any other immunity doctrine (such as sovereign immunity or qualified, or
 other, official immunity) that may apply to state governments, subunits, or to
-their Governmental Persons.</sentence>
-<sentence>14.5 Any Governmental Entity (including, without limitation, any State of the
+their Governmental Persons.
+</sentence><sentence>14.5 Any Governmental Entity (including, without limitation, any State of the
 United States), that uses, copies, changes, modifies, performs, displays, or
 distributes the Software or any part thereof, or any of whose Governmental
 Persons does so (whether that person's Governmental Entity contends the
@@ -1010,8 +1010,8 @@ limited exception for purposes of remedies.</sentence><sentence> The remedies ag
 governmental entities and persons shall explicitly include money damages,
 additional damages, statutory damages, consequential damages, exemplary
 damages, punitive damages, costs and fees that might otherwise be barred or
-limited in amount on account of governmental status.</sentence>
-<sentence>14.6 Any Governmental Entity that uses, copies, changes, modifies, displays,
+limited in amount on account of governmental status.
+</sentence><sentence>14.6 Any Governmental Entity that uses, copies, changes, modifies, displays,
 performs, or distributes the Software or any part thereof, or any of whose
 Governmental Persons does so (whether that person's Governmental Entity
 contends the person's action was, or was not, authorized or official),
@@ -1021,15 +1021,15 @@ copyright, </sentence><sentence>or (iii) to invoke any of the third-party benefi
 forth in Section 14.3 any and all reliance on the Act of State doctrine,
 sovereign immunity, international comity, or any other doctrine of immunity
 whether such doctrine is recognized in that government's own courts, or in the
-courts of any other government or nation.</sentence>
-<sentence>14.6.1 Consistent with Subparagraphs 14.2.1 through 14.2.4, this waiver shall
+courts of any other government or nation.
+</sentence><sentence>14.6.1 Consistent with Subparagraphs 14.2.1 through 14.2.4, this waiver shall
 explicitly be understood to constitute a waiver not only against suit, but also
 against execution against property, for purposes of the Foreign Sovereign
 Immunities Act of 1976 (as amended).</sentence><sentence> All United States Governmental Entities
 shall be understood to have agreed to a corresponding waiver of immunity
 against </sentence><sentence>(i) suit in the courts of other sovereigns, </sentence><sentence>and (ii) execution against
-property of the United States located within the territory of other countries.</sentence>
-<sentence>14.7 Governmental Persons, </sentence><sentence>(i) who violate this License Agreement (whether that
+property of the United States located within the territory of other countries.
+</sentence><sentence>14.7 Governmental Persons, </sentence><sentence>(i) who violate this License Agreement (whether that
 person's Governmental Entity contends the person's action was, or was not,
 authorized or official), </sentence><sentence>or (ii) who are personally involved in any activity,
 policy or practice of a governmental entity that violates this License
@@ -1040,8 +1040,8 @@ thereof, when their Governmental Entity is not permitted to do so, or is not a
 Qualified Licensee, or has violated the terms of this License Agreement, each
 and all individually waive and shall not be permitted to assert any defense of
 official immunity, "good faith" immunity, qualified immunity, absolute
-immunity, or other immunity based on his or her governmental status.</sentence>
-<sentence>14.8 No Governmental Entity, nor any Governmental Person thereof may, by
+immunity, or other immunity based on his or her governmental status.
+</sentence><sentence>14.8 No Governmental Entity, nor any Governmental Person thereof may, by
 legislative, regulatory, or other action, exempt such Governmental Entity,
 subunit, or person, from the terms of this License Agreement, if the
 Governmental Entity or any such person has voluntarily used, modified, copied,
@@ -1059,8 +1059,8 @@ Governmental Entity hereby waives all objections to personal jurisdiction, all
 objections based on international comity, all objections based on the doctrine
 of forum non conveniens, and all objections based on sovereign or governmental
 status or immunity that might otherwise be asserted in the courts of some other
-sovereign.</sentence>
-<sentence>14.9.1 The Waiver by any Governmental Entity of a country other than the United
+sovereign.
+</sentence><sentence>14.9.1 The Waiver by any Governmental Entity of a country other than the United
 States shall be understood explicitly to constitute a waiver for purposes of
 the Foreign Sovereign Immunities Act of 1976 (see Subparagraphs 14.2.1to
 14.2.4, inclusive, supra), and all United States Governmental Entities shall be
@@ -1078,8 +1078,8 @@ third-party claim, any end-user asserting rights under Subparagraphs 14.3 and
 brought in the United States District Court for the Southern District of New
 York, or the United States District Court for the Northern District of
 California, as a direct substitute for the United States District Court for the
-District of Columbia, for all purposes of this Subparagraph.</sentence>
-<sentence>14.9.3 Forum Selection U.S. Governmental Entities.</sentence><sentence> All United States
+District of Columbia, for all purposes of this Subparagraph.
+</sentence><sentence>14.9.3 Forum Selection U.S. Governmental Entities.</sentence><sentence> All United States
 Governmental Entities shall be subject to suit, and agree to be subject to
 suit, in the following (non-exclusive) list of fora:</sentence><sentence> Ottawa, Canada, London,
 England, and Paris, France.</sentence><sentence> The Author or an authorized end-user may bring
@@ -1091,8 +1091,8 @@ States or a governmental subunit thereof.</sentence><sentence> Except as provide
 wherever applicable rules of personal jurisdiction and venue shall permit such
 suit to be filed, but no such United States Governmental Person may assert any
 defense based on forum non conveniens or international comity, to the selection
-of any particular lawful venue.</sentence>
-<sentence>14.10 Enforcement Of Claims For Human Rights Violations.</sentence><sentence> By using, copying,
+of any particular lawful venue.
+</sentence><sentence>14.10 Enforcement Of Claims For Human Rights Violations.</sentence><sentence> By using, copying,
 modifying, changing, performing, displaying or distributing the Software
 covered by this License Agreement, any Governmental Entity, or Governmental
 Person hereby voluntarily and irrevocably consents</sentence><sentence> -- for purposes of any
@@ -1105,13 +1105,13 @@ Agreement are enforceable.</sentence><sentence> The Governmental Entity or Perso
 objections to personal jurisdiction, all objections based on international
 comity, all objections based on the doctrine of forum non conveniens, and all
 objections based on sovereign or governmental status or immunity that might
-otherwise be asserted in the courts of some other sovereign.</sentence>
-<sentence>14.10.1 Waiver of Immunity and Forum Selection.</sentence><sentence> The presumptively valid and
+otherwise be asserted in the courts of some other sovereign.
+</sentence><sentence>14.10.1 Waiver of Immunity and Forum Selection.</sentence><sentence> The presumptively valid and
 preferred fora identified in Subparagraphs 14.9.2 and 14.9.3 shall also apply
 for purposes of Subparagraph 14.10. All Governmental Entities are subject to
 the same Waiver of Immunity as set forth in Subparagraphs 14.2.1 to 14.2.4,
-inclusive.</sentence>
-<sentence>15. Subsequent Versions of HESSLA.</sentence><sentence> Hacktivismo may publish revised and/or new
+inclusive.
+</sentence><sentence>15. Subsequent Versions of HESSLA.</sentence><sentence> Hacktivismo may publish revised and/or new
 versions of the Hacktivismo Enhanced-Source Software License Agreement from
 time to time.</sentence><sentence> Such new versions will be similar in spirit to the present
 version, but may differ in detail to address new problems or concerns.</sentence><sentence>
@@ -1122,8 +1122,8 @@ Source Software License Agreement, once Version 1.0 is formally released.</sente
 to Version 1.0, any Software released by Hacktivismo or a Licensee of
 Hacktivismo under a lower-numbered version of the HESSLA shall be considered
 automatically to be subject to a higher-number version of the HESSLA, whenever
-a later-numbered version has been released.</sentence>
-<sentence>Concerning the work of any other Author, if the Program specifies a version
+a later-numbered version has been released.
+</sentence><sentence>Concerning the work of any other Author, if the Program specifies a version
 number of this License Agreement which applies to it and "any later version,"
 You have the option of following the terms and conditions either of that
 version or of any later version published by Hacktivismo.</sentence><sentence> If the Program does
@@ -1134,8 +1134,8 @@ Software License Agreement then published by Hacktivismo.</sentence><sentence> I
 released by another Author, specifies only a version number, then that version
 number only shall apply.</sentence><sentence> If "the latest version," is specified, then the latest
 version of the HESSLA published on the Hacktivismo Website shall always apply
-at all times.</sentence>
-<sentence>16. DISCLAIMER OF WARRANTY.</sentence><sentence> THE SOFTWARE IS PROVIDED UNDER THIS LICENSE ON AN
+at all times.
+</sentence><sentence>16. DISCLAIMER OF WARRANTY.</sentence><sentence> THE SOFTWARE IS PROVIDED UNDER THIS LICENSE ON AN
 "AS IS" BASIS, WITHOUT WARRANTY, EITHER EXPRESS OR IMPLIED, INCLUDING, WITHOUT
 LIMITATION, THE WARRANTY OF NON-INFRINGEMENT AND WARRANTIES THAT THE ORIGINAL
 WORK IS MERCHANTABLE OR FIT FOR A PARTICULAR PURPOSE.</sentence><sentence> THE SOFTWARE IS PROVIDED
@@ -1143,8 +1143,8 @@ WITH ALL FAULTS.</sentence><sentence> THE ENTIRE RISK AS TO THE QUALITY OF THE O
 YOU.</sentence><sentence> SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY
 SERVICING, REPAIR OR CORRECTION.</sentence><sentence> THIS DISCLAIMER OF WARRANTY CONSTITUTES AN
 ESSENTIAL PART OF THIS LICENSE.</sentence><sentence> NO LICENSE TO ORIGINAL WORK IS GRANTED
-HEREUNDER EXCEPT UNDER THIS DISCLAIMER.</sentence>
-<sentence>17. LIMITATION OF LIABILITY.</sentence><sentence> UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY,
+HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
+</sentence><sentence>17. LIMITATION OF LIABILITY.</sentence><sentence> UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY,
 WHETHER TORT (INCLUDING THE AUTHOR'S NEGLIGENCE), CONTRACT, OR OTHERWISE, SHALL
 THE AUTHOR BE LIABLE TO ANY PERSON FOR ANY DIRECT, INDIRECT, SPECIAL,
 INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF ANY CHARACTER ARISING AS A RESULT OF
@@ -1156,8 +1156,8 @@ NOT APPLY TO LIABILITY FOR DEATH OR PERSONAL INJURY RESULTING FROM SUCH PARTY'S
 NEGLIGENCE TO THE EXTENT APPLICABLE LAW PROHIBITS SUCH LIMITATION, BUT SHALL
 EXCLUDE SUCH LIABILITY TO THE EXTENT PERMITTED BY LAW. </sentence><sentence>SOME JURISDICTIONS DO
 NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES,
-SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.</sentence>
-<sentence>18. ENCRYPTION KEYS AND PUBLIC KEY INFRASTRUCTURE.</sentence><sentence> SOFTWARE RELEASED UNDER THIS
+SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
+</sentence><sentence>18. ENCRYPTION KEYS AND PUBLIC KEY INFRASTRUCTURE.</sentence><sentence> SOFTWARE RELEASED UNDER THIS
 LICENSE AGREEMENT MAY REQUIRE A DIGITAL CERTIFICATE, OR AN ENCRYPTION KEY
 "SIGNED" BY A TRUSTED PARTY, TO FUNCTION.</sentence><sentence> AUTHOR UNDERTAKES NO RESPONSIBILITY
 FOR THE PROPER, SECURE, AND ADEQUATE FUNCTIONING OF ANY CRYPTOGRAPHIC SYSTEMS,
@@ -1169,9 +1169,9 @@ USER'S CERTIFICATION AUTHORITY DOES NOT INCLUDE OR ENCOMPASS ANY LEGAL
 RELATIONSHIP WITH THE AUTHOR, AND IS GOVERNED SOLELY AND EXCLUSIVELY BY THE
 CERTIFICATION AUTHORITY'S CERTIFICATION PRACTICE STATEMENT AND CERTIFICATION
 AGREEMENTS.</sentence><sentence> AUTHOR ASSUMES NO RESPONSIBILITY FOR THE ACTIONS OR OMISSIONS OF
-ANY END-USER OR ANY CERTIFICATION AUTHORITY.</sentence>
-<sentence>18. Saving Clause.</sentence><sentence> If any portion of this License Agreement is held invalid or
+ANY END-USER OR ANY CERTIFICATION AUTHORITY.
+</sentence><sentence>18. Saving Clause.</sentence><sentence> If any portion of this License Agreement is held invalid or
 unenforceable under any particular circumstance, the balance of the License
 Agreement is intended to apply and the License Agreement as a whole is intended
-to apply in other circumstances.</sentence>
-<sentence>END OF TERMS AND CONDITIONS</sentence>
+to apply in other circumstances.
+</sentence><sentence>END OF TERMS AND CONDITIONS</sentence>
