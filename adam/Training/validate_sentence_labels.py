@@ -46,6 +46,7 @@ def main():
     for f in sys.argv[1:]:
         text = open(f).readlines()
         text = FIX.sub("\g<m>\g<s>\g<e>",text)
+        open(f,'w').write(text)
 
 
 if __name__ == "__main__":
