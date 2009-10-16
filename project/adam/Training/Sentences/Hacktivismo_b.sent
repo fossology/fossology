@@ -510,7 +510,7 @@ Program, or Derivative Work based on the Program, must not be exported except
 by way of distribution that is ancillary to the distribution of the Source
 Code.</sentence><sentence> The "Source Code" shall be understood as the primary content transferred
 or exported by You, and the "object code" shall be considered as merely an
-ancillary component of any such export distribution.</sentence></sentence>
+ancillary component of any such export distribution.</sentence><sentence>
 0.11 Strong Cryptography:</sentence><sentence> "Strong Cryptography" shall mean cryptography no less
 secure than (for example, and without limitation) a 2048-bit minimum key size
 for RSA encryption, 1024-bit minimum key size for Diffie-Hellman (El Gamal), or
