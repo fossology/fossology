@@ -1,6 +1,6 @@
-<sentence>This is the LEGAL NOTICE pertaining to the Lucida fonts from Bigelow & Holmes:</sentence>
+<sentence>This is the LEGAL NOTICE pertaining to the Lucida fonts from Bigelow & Holmes:
 
-	<sentence>NOTICE TO USER: The source code, including the glyphs or icons 
+	</sentence><sentence>NOTICE TO USER: The source code, including the glyphs or icons 
 	forming a par of the OPEN LOOK TM Graphic User Interface, on this 
 	tape and in these files is copyrighted under U.S. and international
 	laws.</sentence><sentence> Sun Microsystems, Inc. of Mountain View, California owns
@@ -21,31 +21,31 @@
 	tape.</sentence><sentence> Users are granted a royalty-free, nonexclusive license to use
 	the trademark only to identify the fonts and bit-mapped images if, 
 	and only if, the fonts and bit-mapped images are not modified in any
-	way by the user.</sentence> 
+	way by the user. 
 
 
-	<sentence>Any use of this source code must include, in the user documentation 
+	</sentence><sentence>Any use of this source code must include, in the user documentation 
 	and internal comments to the code, notices to the end user as  
-	follows:</sentence>
+	follows:
 
 
-	<sentence>(c) Copyright 1989 Sun Microsystems, Inc. Sun design patents
+	</sentence><sentence>(c) Copyright 1989 Sun Microsystems, Inc. Sun design patents
 	pending in the U.S. and foreign countries.</sentence><sentence> OPEN LOOK is a 
-	trademark of AT&T.</sentence><sentence> Used by written permission of the owners.</sentence>
+	trademark of AT&T.</sentence><sentence> Used by written permission of the owners.
 
 
- 	<sentence>(c) Copyright Bigelow & Holmes 1986, 1985.</sentence><sentence> Lucida is a registered 
+ 	</sentence><sentence>(c) Copyright Bigelow & Holmes 1986, 1985.</sentence><sentence> Lucida is a registered 
 	trademark of Bigelow & Holmes.</sentence><sentence> Permission to use the Lucida 
 	trademark is hereby granted only in association with the images 
-	and fonts described in this file.</sentence>
+	and fonts described in this file.
 
 
 
-	<sentence>SUN MICROSYSTEMS, INC., AT&T, AND BIGELOW & HOLMES 
+	</sentence><sentence>SUN MICROSYSTEMS, INC., AT&T, AND BIGELOW & HOLMES 
 	MAKE NO REPRESENTATIONS ABOUT THE SUITABILITY OF
  	THIS SOURCE CODE FOR ANY PURPOSE.</sentence><sentence> IT IS PROVIDED "AS IS" 
-	WITHOUT EXPRESS OR IMPLIED WARRANTY OF ANY KIND.</sentence> 
-	<sentence>SUN  MICROSYSTEMS, INC., AT&T AND BIGELOW  & HOLMES, 
+	WITHOUT EXPRESS OR IMPLIED WARRANTY OF ANY KIND. 
+	</sentence><sentence>SUN  MICROSYSTEMS, INC., AT&T AND BIGELOW  & HOLMES, 
 	SEVERALLY AND INDIVIDUALLY, DISCLAIM ALL WARRANTIES 
 	WITH REGARD TO THIS SOURCE CODE, INCLUDING ALL IMPLIED
 	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A

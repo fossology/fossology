@@ -1,97 +1,97 @@
-<sentence>ATI Software End User License Agreement</sentence>
+<sentence>ATI Software End User License Agreement
 
-<sentence>PLEASE  READ  THIS  LICENSE  CAREFULLY  BEFORE  USING   THE   SOFTWARE.</sentence><sentence>   BY
+</sentence><sentence>PLEASE  READ  THIS  LICENSE  CAREFULLY  BEFORE  USING   THE   SOFTWARE.</sentence><sentence>   BY
 DOWNLOADING, INSTALLING, COPYING OR USING THE SOFTWARE, YOU ARE AGREEING  TO
 BE BOUND BY THE TERMS OF THIS LICENSE.</sentence><sentence>  IF YOU ARE  ACCESSING  THE  SOFTWARE
 ELECTRONICALLY,  SIGNIFY  YOUR  AGREEMENT  BY  CLICKING  THE  "AGREE/ACCEPT"
 BUTTON.</sentence><sentence>  IF YOU DO NOT AGREE TO THE TERMS OF THIS LICENSE,  PROMPTLY  RETURN
 THE SOFTWARE TO THE PLACE WHERE YOU OBTAINED IT  AND  (IF  APPLICABLE)  YOUR
 MONEY WILL BE REFUNDED OR IF THE SOFTWARE WAS ACCESSED ELECTRONICALLY  CLICK
-"DISAGREE/DECLINE".</sentence>
+"DISAGREE/DECLINE".
 
-<sentence>1. License.</sentence><sentence>  ATI Technologies Inc., on behalf of  itself,  its  subsidiaries
+</sentence><sentence>1. License.</sentence><sentence>  ATI Technologies Inc., on behalf of  itself,  its  subsidiaries
 and licensors (referred collectively as "ATI") grants to you  the  following
 non-exclusive,  right  to  use  the  software  accompanying   this   License
-(hereinafter "Software") subject to the following terms and limitations:</sentence>
+(hereinafter "Software") subject to the following terms and limitations:
 
-<sentence>(a)   Regardless of the media upon which it is distributed, the Software  is
+</sentence><sentence>(a)   Regardless of the media upon which it is distributed, the Software  is
 licensed to you for use solely in conjunction with ATI hardware products  to
-which the Software relates ("ATI Hardware").</sentence>
+which the Software relates ("ATI Hardware").
 
-<sentence>(b)   You own the medium on which the Software is recorded, but ATI and,  if
+</sentence><sentence>(b)   You own the medium on which the Software is recorded, but ATI and,  if
 applicable,  its  licensors  retain  title  to  the  Software  and   related
-documentation.</sentence>
+documentation.
 
-<sentence>(c)   You may:</sentence>
+</sentence><sentence>(c)   You may:
 
-  <sentence>i) use the Software solely in  connection  with  the  ATI  Hardware  on  a
-   single computer;</sentence>
+  </sentence><sentence>i) use the Software solely in  connection  with  the  ATI  Hardware  on  a
+   single computer;
 
-  <sentence>ii) make one copy of the Software  in  machine-readable  form  for  backup
+  </sentence><sentence>ii) make one copy of the Software  in  machine-readable  form  for  backup
    purposes only.</sentence><sentence> You must reproduce on such copy ATI's copyright notice and
    any other proprietary legends that were  on  the  original  copy  of  the
-   Software;</sentence>
+   Software;
 
-  <sentence>iii) transfer all your license rights in the Software  provided  you  must
+  </sentence><sentence>iii) transfer all your license rights in the Software  provided  you  must
    also transfer a copy of this License, the backup copy  of  the  Software,
    the ATI Hardware and the related documentation  and  provided  the  other
    party reads and agrees  to  accept  the  terms  and  conditions  of  this
-   License.</sentence><sentence>  Upon such transfer your license rights are then terminated.</sentence>
+   License.</sentence><sentence>  Upon such transfer your license rights are then terminated.
 
-<sentence>(d)   In addition to the license terms above, with respect  to  portions  of
+</sentence><sentence>(d)   In addition to the license terms above, with respect  to  portions  of
 the Software in source code or binary  form  designed  exclusively  for  use
 with the Linux operating system ("ATI Linux Code"), you  may  use,  display,
 modify, copy, distribute, allow others to  re-distribute,  package  and  re-
 package such ATI Linux Code  for  commercial  and  non-commercial  purposes,
-provided that:</sentence>
+provided that:
 
-   <sentence>i) all binary components of the ATI Linux Code are not  modified  in  any
-   way;</sentence>
+   </sentence><sentence>i) all binary components of the ATI Linux Code are not  modified  in  any
+   way;
 
-   <sentence>ii) the ATI Linux Code is only used  as  part  of  the  Software  and  in
-   connection with ATI Hardware;</sentence>
+   </sentence><sentence>ii) the ATI Linux Code is only used  as  part  of  the  Software  and  in
+   connection with ATI Hardware;
 
-   <sentence>iii) all copyright notices of ATI are reproduced and you refer  to  these
-   license terms;</sentence>
+   </sentence><sentence>iii) all copyright notices of ATI are reproduced and you refer  to  these
+   license terms;
 
-   <sentence>iv) you  may  not  offer  or  impose any terms on the use  of  ATI  Linux
-   Code that alter or restrict this License; and</sentence>
+   </sentence><sentence>iv) you  may  not  offer  or  impose any terms on the use  of  ATI  Linux
+   Code that alter or restrict this License; and
 
-   <sentence>v) if you have modified the ATI Linux Code, such  modifications  will  be
+   </sentence><sentence>v) if you have modified the ATI Linux Code, such  modifications  will  be
    made publicly available and are licensed under the  same  terms  provided
    herein to ATI or any  other  third  party  without  further  restriction,
-   royalty or any other license requirement;</sentence>
+   royalty or any other license requirement;
 
-   <sentence>vi) to  the  extent  there  is  any ATI sample or  control  panel  source
+   </sentence><sentence>vi) to  the  extent  there  is  any ATI sample or  control  panel  source
    code included in the ATI Linux Code, no rights are granted to modify such
    code except for portions thereof that  may  be  subject  to  third  party
-   license terms that grant such rights; and</sentence>
+   license terms that grant such rights; and
 
-   <sentence>vii) ATI is not obligated to provide any maintenance or technical support
-   for any code resulting from ATI Linux Code.</sentence>
+   </sentence><sentence>vii) ATI is not obligated to provide any maintenance or technical support
+   for any code resulting from ATI Linux Code.
 
-<sentence>2.  Restrictions.</sentence><sentence>  The Software contains copyrighted and patented  material,
+</sentence><sentence>2.  Restrictions.</sentence><sentence>  The Software contains copyrighted and patented  material,
 trade secrets and other proprietary material.</sentence><sentence>  In  order  to  protect  them,
 and except as permitted by this license or applicable legislation,  you  may
-not:</sentence>
+not:
 
-  <sentence>a) decompile,  reverse  engineer,  disassemble  or  otherwise  reduce  the
-   Software to a human-perceivable form;</sentence>
+  </sentence><sentence>a) decompile,  reverse  engineer,  disassemble  or  otherwise  reduce  the
+   Software to a human-perceivable form;
 
-  <sentence>b) modify, network, rent, lend,  loan,  distribute  or  create  derivative
-   works based upon the Software in whole or in part; or</sentence>
+  </sentence><sentence>b) modify, network, rent, lend,  loan,  distribute  or  create  derivative
+   works based upon the Software in whole or in part; or
 
-  <sentence>c) electronically transmit the Software from one computer  to  another  or
+  </sentence><sentence>c) electronically transmit the Software from one computer  to  another  or
    over a network or otherwise transfer the Software except as permitted  by
-   this License.</sentence>
-i<sentence>3.  Termination.</sentence><sentence>  This License  is  effective  until  terminated.</sentence><sentence>   You  may
+   this License.
+i</sentence><sentence>3.  Termination.</sentence><sentence>  This License  is  effective  until  terminated.</sentence><sentence>   You  may
 terminate this License at any  time  by  destroying  the  Software,  related
 documentation  and  all  copies  thereof.</sentence><sentence>   This  License   will   terminate
 immediately without  notice  from  ATI  if  you  fail  to  comply  with  any
 provision of this License.</sentence><sentence>  Upon termination you must destroy the  Software,
-related documentation and all copies thereof.</sentence>
+related documentation and all copies thereof.
 
-<sentence>4.  Government End Users.</sentence><sentence> If you are acquiring the  Software  on  behalf  of
+</sentence><sentence>4.  Government End Users.</sentence><sentence> If you are acquiring the  Software  on  behalf  of
 any  unit  or  agency  of  the  United  States  Government,  the   following
 provisions apply.</sentence><sentence>  The Government  agrees  the  Software  and  documentation
 were  developed  at  private  expense  and  are  provided  with  "RESTRICTED
@@ -99,21 +99,21 @@ RIGHTS".</sentence><sentence>  Use, duplication, or disclosure by the Government
 restrictions as set forth in DFARS 227.7202-1(a) and  227.7202-3(a)  (1995),
 DFARS 252.227-7013(c)(1)(ii) (Oct 1988), FAR  12.212(a)(1995),  FAR  52.227-
 19, (June 1987) or FAR 52.227-14(ALT III) (June 1987),as amended  from  time
-to time.</sentence> <sentence> In the event that this License, or any  part  thereof,  is  deemed
+to time. </sentence><sentence> In the event that this License, or any  part  thereof,  is  deemed
 inconsistent with the minimum rights identified  in  the  Restricted  Rights
-provisions, the minimum rights shall prevail.</sentence>
+provisions, the minimum rights shall prevail.
 
-<sentence>5.  No Other License.</sentence><sentence>  No rights or licenses are granted by ATI  under  this
+</sentence><sentence>5.  No Other License.</sentence><sentence>  No rights or licenses are granted by ATI  under  this
 License, expressly or  by  implication,  with  respect  to  any  proprietary
 information  or  patent,  copyright,  trade  secret  or  other  intellectual
 property right owned or controlled by ATI, except as expressly  provided  in
-this License.</sentence>
+this License.
 
-<sentence>6.  Additional Licenses.</sentence><sentence>  DISTRIBUTION  OR  USE  OF  THE  SOFTWARE  WITH  AN
+</sentence><sentence>6.  Additional Licenses.</sentence><sentence>  DISTRIBUTION  OR  USE  OF  THE  SOFTWARE  WITH  AN
 OPERATING SYSTEM MAY REQUIRE ADDITIONAL LICENSES FROM THE  OPERATING  SYSTEM
-VENDOR.</sentence>
+VENDOR.
 
-<sentence>7.  Disclaimer of Warranty  on  Software.</sentence><sentence>   You  expressly  acknowledge  and
+</sentence><sentence>7.  Disclaimer of Warranty  on  Software.</sentence><sentence>   You  expressly  acknowledge  and
 agree that use of the Software is at  your  sole  risk.</sentence><sentence>   The  Software  and
 related documentation are provided "AS IS" and without warranty of any  kind
 and ATI EXPRESSLY DISCLAIMS ALL WARRANTIES, EXPRESS AND IMPLIED,  INCLUDING,
@@ -134,9 +134,9 @@ ATI'S AUTHORIZED REPRESENTATIVE) ASSUME THE ENTIRE  COST  OF  ALL  NECESSARY
 SERVICING, REPAIR OR CORRECTION.</sentence><sentence>  THE SOFTWARE IS NOT INTENDED  FOR  USE  IN
 MEDICAL, LIFE SAVING OR LIFE SUSTAINING  APPLICATIONS.</sentence><sentence>   SOME  JURISDICTIONS
 DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES,  SO  THE  ABOVE  EXCLUSION
-MAY NOT APPLY TO YOU.</sentence>
+MAY NOT APPLY TO YOU.
 
-<sentence>8.  Limitation of Liability.</sentence><sentence> TO THE MAXIMUM EXTENT PERMITTED BY  LAW,  UNDER
+</sentence><sentence>8.  Limitation of Liability.</sentence><sentence> TO THE MAXIMUM EXTENT PERMITTED BY  LAW,  UNDER
 NO  CIRCUMSTANCES  INCLUDING  NEGLIGENCE,  SHALL  ATI,  OR  ITS   DIRECTORS,
 OFFICERS, EMPLOYEES  OR  AGENTS,  BE  LIABLE  TO  YOU  FOR  ANY  INCIDENTAL,
 INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES (INCLUDING DAMAGES  FOR  LOSS  OF
@@ -152,11 +152,11 @@ MAY NOT APPLY TO YOU.</sentence><sentence>  ATI will not be liable for </sentenc
 your records or data or</sentence><sentence> 2) any damages claimed by you  based  on  any  third
 party claim.</sentence><sentence>   In no event shall  ATI's  total  liability  to  you  for  all
 damages, losses, and causes of action (whether in contract, tort  (including
-negligence) or otherwise) exceed the amount paid by you  for  the  Software.</sentence>
-<sentence>The foregoing limitations will apply even if  the  above  stated  limitation
-fails of its essential purpose.</sentence>
+negligence) or otherwise) exceed the amount paid by you  for  the  Software.
+</sentence><sentence>The foregoing limitations will apply even if  the  above  stated  limitation
+fails of its essential purpose.
 
-<sentence>9.  Controlling Law and Severability.</sentence><sentence>  This License  shall  be  governed  by
+</sentence><sentence>9.  Controlling Law and Severability.</sentence><sentence>  This License  shall  be  governed  by
 and construed under the laws of the  Province  of  Ontario,  Canada  without
 reference to its conflict of law principles.</sentence><sentence>   Any  dispute  related  hereto
 will be brought only in the courts in  Toronto,  Ontario,  Canada  and  such
@@ -169,9 +169,9 @@ reason a court  of  competent  jurisdiction  finds  any  provision  of  this
 License or portion thereof, to  be  unenforceable,  that  provision  of  the
 License shall be enforced to the maximum extent permissible so as to  effect
 the intent of the parties, and the remainder of this License shall  continue
-in full force and effect.</sentence>
+in full force and effect.
 
-<sentence>10.  Complete Agreement.</sentence><sentence>  This  License  constitutes  the  entire  agreement
+</sentence><sentence>10.  Complete Agreement.</sentence><sentence>  This  License  constitutes  the  entire  agreement
 between the parties with respect to the use of the Software and the  related
 documentation, and supersedes all prior  or  contemporaneous  understandings
 or  agreements,  written  or  oral,  regarding  such  subject  matter.</sentence><sentence>    No
