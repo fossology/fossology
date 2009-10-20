@@ -1078,14 +1078,12 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	}
 	first = 0;
     }
-    /* CDB - Changed this. Could possibly have broken it. */
-    i = 0;
-    for (mmp = mmap_data; i < MM_CACHESIZE; mmp++) {
-	if (mmp->inUse == 0) {
-	    break;
-	}
-	i++;
+    for (mmp = mmap_data, i = 0; i < MM_CACHESIZE; i++, mmp++) {
+        if (mmp->inUse == 0) {
+            break;
+        }
     }
+
     if (i == MM_CACHESIZE) {
 	fprintf(stderr, "mmap-cache too small [%d]!\n", MM_CACHESIZE);
 	mmapOpenListing();
