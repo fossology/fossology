@@ -1,7 +1,7 @@
 CC=gcc
-CFLAGS=-g -I../include -I../default_list -lpcre -lstemmer -lmaxent -O3 -I../../../sparsevect/
+CFLAGS=-g -I../include -I../default_list -lpcre -lstemmer -lmaxent -O3 -I../../sparsevect/
 CPP=g++
-CPPFLAGS=-g -I../include -I../default_list -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../../../sparsevect/
+CPPFLAGS=-g -I../include -I../default_list -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../../sparsevect/
 
 utils=\
 	  ../utils/file_utils.o \
@@ -15,10 +15,10 @@ utils=\
 
 all: test_tokenizer test_sentences
 
-test_tokenizer: test_tokenizer.o ../default_list/default_list.a ../../../sparsevect/sparsevect.o $(utils)
+test_tokenizer: test_tokenizer.o ../default_list/default_list.a ../../sparsevect/sparsevect.o $(utils)
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-test_sentences: test_sentences.o ../default_list/default_list.a ../../../sparsevect/sparsevect.o $(utils)
+test_sentences: test_sentences.o ../default_list/default_list.a ../../sparsevect/sparsevect.o $(utils)
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
 ../default_list/default_list.a:

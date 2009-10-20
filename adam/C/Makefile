@@ -16,7 +16,7 @@
 ######################################################################
 
 CC=gcc
-CFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O3 -I../sparsevect/
+CFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -O3 -I../sparsevect/
 CPP=g++
 CPPFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../sparsevect/
 utils=\
@@ -25,14 +25,12 @@ utils=\
       utils/token_feature.c \
       utils/tokenizer.c \
       utils/file_utils.c \
-      utils/maxent_utils.cpp \
-      utils/sentence.c \
       utils/repr.c
 
 utils_o := $(patsubst %.cpp,%.o,$(utils))
 utils_o := $(patsubst %.c,%.o,$(utils_o))
 
-all: train_sent_model label_sentences database test f1
+all: train_sent_model label_sentences database test f1 gld
 
 default_list/default_list.a:
 	make -C default_list default_list.a
@@ -40,19 +38,25 @@ default_list/default_list.a:
 #utils/utils.a: $(utils_o) ../sparsevect/sparsevect.o
 #	$(AR) -cru $@ $^
 
-test_app: test_app.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a
+test_app: test_app.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a utils/maxent_utils.o utils/maxent_utils.o
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-f1: f1.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a
+gld: gld.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a ../../../fossology/devel/libfossdb/libfossdb.o ../../../fossology/devel/libfossagent/libfossagent.o ../../../fossology/devel/libfossrepo/libfossrepo.o
+	$(CC) -o $@ $^ $(CFLAGS) -I../../../fossology/devel/libfossagent/ -I../../../fossology/devel/libfossdb/ -I../../../fossology/devel/libfossrepo/ -I`pg_config --includedir` -lpq
+
+gld.o: gld.c
+	$(CC) -o $@ -c $^ $(CFLAGS) -I../../../fossology/devel/libfossagent/ -I../../../fossology/devel/libfossdb/ -I../../../fossology/devel/libfossrepo/ -DSVN_REV $(SVN_REV) -I`pg_config --includedir`
+
+f1: f1.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a utils/sentence.o utils/maxent_utils.o
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-train_sent_model: train_sent_model.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a
+train_sent_model: train_sent_model.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a utils/maxent_utils.o utils/sentence.o
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-label_sentences: label_sentences.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a
+label_sentences: label_sentences.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a utils/maxent_utils.o utils/sentence.o
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-database: database.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a
+database: database.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a utils/sentence.o utils/maxent_utils.o
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
 ../sparsevect/sparsevect.o:
