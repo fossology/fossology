@@ -79,17 +79,94 @@ class ui_reunpack extends FO_Plugin
     print("$V");
     return;
   }
+  
+   /*********************************************
+   CheckStatus(): Given an uploadpk and job_name
+   to check if an reunpack/rewget job is running.
+   Returns 0 no reunpack/rewget job running;
+           1 reunpack/rewget job failed
+           2 reunpack/rewget job completed
+           3 reunpack/rewget job running
+           4 reunpack/rewget job pending
+   *********************************************/ 
+  function CheckStatus ($uploadpk, $job_name, $jobqueue_type)
+  {
+    global $DB;
+    if (empty($DB)) {return;}
+    
+    $SQLcheck = "SELECT jq_pk,jq_starttime,jq_endtime,jq_end_bits FROM jobqueue
+    LEFT OUTER JOIN job ON jobqueue.jq_job_fk = job.job_pk
+  	WHERE job.job_upload_fk = '$uploadpk'
+  	AND job.job_name = '$job_name'
+  	AND jobqueue.jq_type = '$jobqueue_type';";
+    
+    $Results = $DB->Action($SQLcheck);
+    if(empty($Results)) {
+      print $SQLcheck;
+      return(0);
+    }
+    else {
+      $i = 0;
+      $State = 0;
+      while (!empty($Results[$i]['jq_pk'])) {
+        if ($Results[$i]['jq_end_bits'] == 2) {
+          $State = 1;
+          break;
+        }
+        if (!empty($Results[$i]['jq_starttime'])) {
+          if (!empty($Results[$i]['jq_endtime'])) {
+            $State = 2;
+          } else {
+            $State = 3;
+            break;
+          }
+        } else {
+          $State = 4;
+          break;
+        }
+        $i++;
+      }
+      return ($State);
+    }
+  }
     /*********************************************
    AgentAdd(): Given an uploadpk, add a job.
    $Depends is for specifying other dependencies.
    $Depends can be a jq_pk, or an array of jq_pks, or NULL.
    Returns NULL on success, string on failure.
    *********************************************/
-  function AgentAdd ($uploadpk,$Depends=NULL,$Priority=0)
+  function AgentAdd ($uploadpk,$Depends=NULL,$priority=0)
   {
-    /* Prepare the job: job "unpack" */
-    $jobpk = JobAddJob($uploadpk,"unpack",$Priority);
-    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
+    global $DB;
+    if (empty($DB)) {
+      return;
+    }
+    
+    $Job_name = str_replace("'", "''", "unpack");
+
+    if (empty($uploadpk)) {
+      $SQLInsert = "INSERT INTO job
+    	 (job_queued,job_priority,job_name) VALUES
+    	 (now(),'$priority','$Job_name');";
+    }
+    else {
+      $SQLInsert = "INSERT INTO job
+    	 (job_queued,job_priority,job_name,job_upload_fk) VALUES
+     	  (now(),'$priority','$Job_name','$uploadpk');";
+    }
+
+    $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk is NULL;";
+    $Results = $DB->Action($SQLcheck);
+    if (!empty($Results)){
+      $jobpk = $Results[0]['job_pk'];
+    } else {
+      $DB->Action($SQLInsert);
+      $SQLcheck = "SELECT job_pk FROM job WHERE job_upload_fk = '$uploadpk' AND job_name = '$Job_name' AND job_user_fk is NULL;";
+      $Results = $DB->Action($SQLcheck);
+      $jobpk = $Results[0]['job_pk']; 
+    }      
+  
+    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record! $SQLInsert"); }
     if (!empty($Depends) && !is_array($Depends)) { $Depends = array($Depends); }
 
     /* job "unpack" has jobqueue item "unpack" */
@@ -102,10 +179,14 @@ class ui_reunpack extends FO_Plugin
     if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
 
     /* job "unpack" has jobqueue item "adj2nest" */
-    $jqargs = "$uploadpk";
-    $jobqueuepk = JobQueueAdd($jobpk,"adj2nest",$jqargs,"no","",array($jobqueuepk));
-    if (empty($jobqueuepk)) { return("Failed to insert adj2nest into job queue"); }
+    //$jqargs = "$uploadpk";
+    //$jobqueuepk = JobQueueAdd($jobpk,"adj2nest",$jqargs,"no","",array($jobqueuepk));
+    //if (empty($jobqueuepk)) { return("Failed to insert adj2nest into job queue"); }
 
+    /* job "sqlagent" has jobqueue item "unpack" sqlagent to clean up reunpack jobqueue*/
+    //$jqargs = "DELETE FROM jobdepends WHERE jdep_jq_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$jobpk') OR jdep_jq_depends_fk IN (SELECT jq_pk FROM jobqueue WHERE jq_job_fk = '$jobpk');DELETE FROM jobqueue WHERE jq_job_fk = '$jobpk';DELETE FROM job WHERE job_pk = '$jobpk'; ";
+    //$jobqueuepk = JobQueueAdd($jobpk,"sqlagent",$jqargs,"no","",array($jobqueuepk));
+    //if (empty($jobqueuepk)) { return("Failed to insert delete sqlagent into job queue"); }
     return(NULL);
   } // AgentAdd()
   /*********************************************
