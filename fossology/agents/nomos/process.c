@@ -29,6 +29,12 @@ extern void memStats();
 #define	BOGUS_MD5	"wwww0001xxxx0002yyyy0004zzzz0008"
 
 
+/**
+ * processNonPackageFiles
+ *
+ * \callgraph
+ */
+
 static void processNonPackagedFiles()
 {
     item_t *p;
@@ -103,6 +109,12 @@ void stripLine(char *textp, int offset, int size)
 #endif /* notdef */
 
 
+/**
+ * processRawSource
+ *
+ * \callgraph
+ *
+ */
 void processRawSource()
 {
 #ifdef	PROC_TRACE
@@ -120,9 +132,11 @@ void processRawSource()
     return;
 }
 
-/*
-  Process a list of regular files.
-
+/**
+ * processRegularFiles
+ * \brief Process a list of regular files.
+ *
+ *  \callgraph
   CDB - This really isn't a list, there should only be a single file in
   regfList. 
 */
