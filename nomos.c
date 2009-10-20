@@ -94,7 +94,8 @@ int addNewLicense(char *licenseName) {
     if (licenseName == NULL_CHAR) {
         return (FALSE);
     }
-    sprintf(query,
+    sprintf(
+            query,
             "insert into license_ref(rf_shortname, rf_text) values('%s', '%s')",
             licenseName, specialLicenseText);
 
@@ -120,6 +121,8 @@ int addNewLicense(char *licenseName) {
 
  \todo Add second parameter to indicate either select or insert/update,
  as the returned item is different (PGRES_COMMAND_OK).
+
+ \callgraph
  */
 char * checkPQresult(PGresult *result) {
     /* PGresult *result; */
@@ -146,6 +149,8 @@ char * checkPQresult(PGresult *result) {
  \brief Given a string that contains field='value' pairs, save the items.
 
  @return pointer to start of next field, or NULL at \0.
+
+ \callgraph
  */
 char *getFieldValue(char *inStr, char *field, int fieldMax, char *value,
         int valueMax, char separator) {
@@ -286,6 +291,7 @@ void parseLicenseList() {
 
  return void
 
+ \callgraph
  */
 void parseSchedInput(char *s) {
     char field[256];
@@ -320,7 +326,7 @@ void parseSchedInput(char *s) {
         }
     }
     /* printf("   LOG: nomos got:\npfilePk:%ld\npFile:%s\n",
-            cur.pFileFk , cur.pFile);  DEBUG */
+     cur.pFileFk , cur.pFile);  DEBUG */
 
     if (gotOther || (cur.pFileFk < 0) || (cur.pFile[0] == '\0')) {
         printf("   FATAL: Data is in an unknown format.\n");
@@ -388,6 +394,8 @@ static void setOption(int val) {
  \todo may need to compute the md5 of the text found instead of using the
  rf_shortname
 
+ \callgraph
+
  */
 
 int checkRefLicense(char *licenseName) {
@@ -407,21 +415,24 @@ int checkRefLicense(char *licenseName) {
 
     /* will use the hash, for now just look in the db. */
 
-    sprintf(query,
+    sprintf(
+            query,
             "SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_shortname = '%s';",
             licenseName);
 
     result = PQexec(gl.pgConn, query);
     pqCkResult = checkPQresult(result);
     if (pqCkResult != NULL_CHAR) {
-        printf("   ERROR: Nomos agent got database error getting ref license name: %s\n",
+        printf(
+                "   ERROR: Nomos agent got database error getting ref license name: %s\n",
                 pqCkResult);
         return (-1);
     }
     numRows = PQntuples(result);
     /* no match */
     if (numRows == 0) {
-        printf("   LOG: NOTICE! License name: %s not found in Reference Table\n",
+        printf(
+                "   LOG: NOTICE! License name: %s not found in Reference Table\n",
                 licenseName);
         return (-1);
     }
@@ -455,8 +466,7 @@ int optionIsSet(int val) {
  args passed in.
  */
 #ifdef notdef
-static void parseOptsAndArgs(int argc, char **argv)
-{
+static void parseOptsAndArgs(int argc, char **argv) {
     int i;
 
 #ifdef  PROC_TRACE
@@ -495,6 +505,7 @@ static void printListToFile(list_t *l, char *filename, char *mode) {
  loop or just put in a generic init func that initializes *all*
  the lists.
 
+ \callgraph
  */
 
 static void getFileLists(char *dirpath) {
@@ -530,6 +541,8 @@ int getReferenceLicenses() {
  * @param long rfPK the reference file foreign key
  *
  * returns boolean (True or False)
+ *
+ * \callgraph
  */
 int updateLicenseFile(long rfPk) {
 
@@ -539,14 +552,16 @@ int updateLicenseFile(long rfPk) {
     if (rfPk <= 0) {
         return (FALSE);
     }
-    sprintf(query,
+    sprintf(
+            query,
             "INSERT INTO license_file(rf_fk, agent_fk, pfile_fk) VALUES(%ld, %d, %ld)",
             rfPk, gl.agentPk, cur.pFileFk);
 
     result = PQexec(gl.pgConn, query);
 
     if (PQresultStatus(result) != PGRES_COMMAND_OK) {
-        printf("   ERROR: Nomos agent got database error, insert of license_file: %s\n",
+        printf(
+                "   ERROR: Nomos agent got database error, insert of license_file: %s\n",
                 PQresultErrorMessage(result));
         PQclear(result);
         return (FALSE);
@@ -554,9 +569,11 @@ int updateLicenseFile(long rfPk) {
     return (TRUE);
 } /* updateLicenseFile */
 
-/*
- Clean-up all the per scan data structures, freeing any
- old data.
+/**
+ * freeAndClearScan
+ * \brief Clean-up all the per scan data structures, freeing any old data.
+ *
+ * \callgraph
  */
 void freeAndClearScan(struct curScan *thisScan) {
 
@@ -583,6 +600,12 @@ void freeAndClearScan(struct curScan *thisScan) {
 
 }
 
+/**
+ * processFile
+ * \brief process a single file
+ *
+ * \callgraph
+ */
 void processFile(char *fileToScan) {
 
 #ifdef	PROC_TRACE
@@ -651,6 +674,7 @@ void processFile(char *fileToScan) {
 
  Returns: 0 if successful, -1 if not.
 
+  \callgraph
  */
 int recordScanToDB(struct curScan *scanRecord, int cli) {
 
@@ -683,40 +707,41 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
         result = PQexec(gl.pgConn, query);
         pqCkResult = checkPQresult(result);
         if (pqCkResult != NULL_CHAR) {
-            printf("   ERROR: Nomos agent got database error getting No License Found: %s\n",
+            printf(
+                    "   ERROR: Nomos agent got database error getting No License Found: %s\n",
                     pqCkResult);
             return (-1);
         }
         numrows = PQntuples(result);
 
         /*
-        printf("   LOG: nomos:number of rows from query for no lice found is:%ld\n",
-                numrows);
-        numcols = PQnfields(result);
-          printf("   LOG: nomos:number of columns from query for no lice found is:%ld\n",
-                numcols);
-        */
+         printf("   LOG: nomos:number of rows from query for no lice found is:%ld\n",
+         numrows);
+         numcols = PQnfields(result);
+         printf("   LOG: nomos:number of columns from query for no lice found is:%ld\n",
+         numcols);
+         */
 
-        if(numrows == 0) {
-            return(-1);
+        if (numrows == 0) {
+            return (-1);
         }
 
         rfFk = atoi(PQgetvalue(result, 0, 0));
         /* printf("rfFk returned is:%ld\n", rfFk); */
-        if(rfFk > 10000){
+        if (rfFk > 10000) {
             printf("FATAL: cound not get a valid rf_pk from License_ref\n");
-            return(-1);
+            return (-1);
         }
         /* printf("   LOG: value of tup0, field0 (rf_pk) is:%ld\n", rf_pk);
-        tname = PQgetvalue(result, 0, 1);
-        printf("   LOG: value of tup0, field1 (rf_sn) is:%s\n", tname);
-        */
+         tname = PQgetvalue(result, 0, 1);
+         printf("   LOG: value of tup0, field1 (rf_sn) is:%s\n", tname);
+         */
 
         if (updateLicenseFile(rfFk)) {
-            return(0);
+            return (0);
         }
         else {
-            return(-1);
+            return (-1);
         }
     } /* No license found */
 
@@ -731,25 +756,27 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
 
     int numLicenses;
     for (numLicenses = 0; cur.licenseList[numLicenses] != NULL; numLicenses++) {
-         /* printf("processing cur.licenseList[%d]:%s\n", numLicenses,
-                cur.licenseList[numLicenses]);
-                */
+        /* printf("processing cur.licenseList[%d]:%s\n", numLicenses,
+         cur.licenseList[numLicenses]);
+         */
 
         rfFk = checkRefLicense(cur.licenseList[numLicenses]);
         /* printf("rfFk returned from checkRefLic is:%ld\n", rfFk); */
 
         if (rfFk == -1) {
             /* printf("   LOG: adding %s license to the reference table.\n",
-                    cur.licenseList[numLicenses]); */
+             cur.licenseList[numLicenses]); */
             if (!addNewLicense(cur.licenseList[numLicenses])) {
-                printf("   LOG: FAILURE! could not add new license %s to ref table\n",
+                printf(
+                        "   LOG: FAILURE! could not add new license %s to ref table\n",
                         cur.licenseList[numLicenses]);
                 return (-1);
             }
             /* get ref lic pk, better be there! */
             rfFk = checkRefLicense(cur.licenseList[numLicenses]);
             if (rfFk == -1) {
-                printf("FATAL: could not get rf_fk from just added license %s\n",
+                printf(
+                        "FATAL: could not get rf_fk from just added license %s\n",
                         cur.licenseList[numLicenses]);
                 return (-1);
             }
@@ -773,7 +800,8 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
              \todo add in logic to skip this step if run in cli mode.
              */
             if (updateLicenseFile(rfFk) == FALSE) {
-                printf("FATAL: updateLicenseFile failed to update license_file "
+                printf(
+                        "FATAL: updateLicenseFile failed to update license_file "
                             "with license %s\n", cur.licenseList[numLicenses]);
                 return (-1);
             }
@@ -886,7 +914,7 @@ int main(int argc, char **argv) {
         files_to_be_scanned[i - 1] = argv[i];
         file_count++;
     }
-     /* printf("after parse args, argc is:%d\n", argc); DEBUG */
+    /* printf("after parse args, argc is:%d\n", argc); DEBUG */
 
     licenseInit();
     gl.flags = 0;
