@@ -27,6 +27,7 @@ extern "C" {
 #endif
 
 void openfile(char *filename, char **buffer);
+void readtomax(char *filename, char **buffer, size_t max);
 int readline(FILE *pFile, char **line);
 
 #if defined(__cplusplus)

@@ -11,6 +11,7 @@ static unsigned long sdbm(char *str) {
     return hash;
 }
 
+#if defined(__cplusplus)
 static unsigned long sdbm_string(string s) {
     unsigned long hash = 0;
     int c;
@@ -23,4 +24,5 @@ static unsigned long sdbm_string(string s) {
 
     return hash;
 }
+#endif
 #endif
