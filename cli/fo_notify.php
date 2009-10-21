@@ -172,7 +172,7 @@ $summary = JobListSummary($upload_id);
  */
 global $SYSCONFDIR;
 
-if(file_exists("$SYSCONFDIR/Db.conf") {
+if(file_exists("$SYSCONFDIR/Db.conf")) {
   $contents = file_get_contents("$SYSCONFDIR/Db.conf");
 }
 // get rid of new lines
