@@ -122,6 +122,9 @@ function printByType($typeName, $typeList) {
 
 // summarize the results for this run.  Note failures and exceptions by suite
 
+$suiteFailures   = array();
+$suiteExceptions = array();
+
 foreach($results as $suite => $result) {
   foreach($result as $partResult) {
 
