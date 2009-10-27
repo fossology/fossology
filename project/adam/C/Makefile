@@ -16,9 +16,9 @@
 ######################################################################
 
 CC=gcc
-CFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -O3 -I../sparsevect/
+CFLAGS=-g -Iutils -Idefault_list -lpcre -lstemmer -O3 -I../sparsevect/
 CPP=g++
-CPPFLAGS=-g -Iinclude -Idefault_list -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../sparsevect/
+CPPFLAGS=-g -Iutils -Idefault_list -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../sparsevect/
 utils=\
       utils/re.c \
       utils/token.c \
@@ -30,7 +30,7 @@ utils=\
 utils_o := $(patsubst %.cpp,%.o,$(utils))
 utils_o := $(patsubst %.c,%.o,$(utils_o))
 
-all: train_sent_model label_sentences database test f1 gld
+all: train_sent_model label_sentences database test f1
 
 default_list/default_list.a:
 	make -C default_list default_list.a
