@@ -50,7 +50,7 @@ void classify_file(char *filename, default_list database_list, MaxentModel m) {
     label_list = default_list_create(default_list_type_string());
     file_list = default_list_create(default_list_type_sentence());
     
-    openfile(filename,&buffer);
+    readtomax(filename,&buffer,32768);
     create_features_from_buffer(buffer,feature_type_list);
     label_sentences(m,feature_type_list,label_list,left_window,right_window);
 
@@ -133,9 +133,9 @@ void classify_file(char *filename, default_list database_list, MaxentModel m) {
                 vector[i][k] = 0;
                 match_percent[i][k] = 0.0;
             }
-            printf("%02.2f ", match_percent[i][k]/10.0);
+            //printf("%02.2f ", match_percent[i][k]/10.0);
         }
-        printf("\n");
+        //printf("\n");
     }
 
     for (i = 0; i < default_list_length(file_list); i++) {
@@ -151,11 +151,11 @@ void classify_file(char *filename, default_list database_list, MaxentModel m) {
         }
     }
 
-    printf("\n");
+    //printf("\n");
     for (i = 0; i < default_list_length(file_list); i++) {
-        printf("%02.2f ", score[i]/10.0);
+        //printf("%02.2f ", score[i]/10.0);
     }
-    printf("\n");
+    //printf("\n");
     
     for (i = 1; i < default_list_length(file_list)-1; i++) {
         if (i == 1) {
@@ -175,18 +175,18 @@ void classify_file(char *filename, default_list database_list, MaxentModel m) {
         }
     }
 
-    printf("\n");
+    //printf("\n");
     for (i = 0; i < default_list_length(file_list); i++) {
-        printf("%02.2f ", score[i]/10.0);
+        //printf("%02.2f ", score[i]/10.0);
     }
-    printf("\n");
+    //printf("\n");
     for (i = 0; i < default_list_length(file_list); i++) {
         if (score[i] == 0) {
             score_index[i] = 0;
         }
-        printf("%04d ", score_index[i]);
+        //printf("%04d ", score_index[i]);
     }
-    printf("\n");
+    //printf("\n");
 
     int prev_index = -1;
     int start_byte = 0;
@@ -198,7 +198,7 @@ void classify_file(char *filename, default_list database_list, MaxentModel m) {
                 start_byte = st->start;
                 end_byte = st->end;
             } else if (prev_index != score_index[i]) {
-                printf("%d [%05d, %05d] 1\n", prev_index, start_byte, end_byte);
+                printf("%d [%05d, %05d]\n", prev_index, start_byte, end_byte);
                 start_byte = st->start;
                 end_byte = st->end;
             } else if (prev_index == score_index[i]) {
@@ -207,7 +207,7 @@ void classify_file(char *filename, default_list database_list, MaxentModel m) {
             prev_index = score_index[i];
         } else {
             if (prev_index > -1) {
-                printf("%d [%05d, %05d] 2\n", prev_index, start_byte, end_byte);
+                printf("%d [%05d, %05d]\n", prev_index, start_byte, end_byte);
             }
             prev_index = -1;
             start_byte = 0;
@@ -215,7 +215,7 @@ void classify_file(char *filename, default_list database_list, MaxentModel m) {
         }
     }
     if (prev_index != -1) {
-        printf("%d [%05d, %05d] 3\n", prev_index, start_byte, end_byte);
+        printf("%d [%05d, %05d]\n", prev_index, start_byte, end_byte);
     }
 }
 

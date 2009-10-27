@@ -182,6 +182,8 @@ int main(int argc, char **argv) {
     /* Data written to the DB needs to be tagged with a unique identifier specifying 
      * what agent wrote the data.  GetAgentKey() from libfossagent, gets you the key. */
     Agent_pk = GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
+    // BOBG said to do this!!!
+    Agent_pk = 1;
 
     /* Process command-line */
     while((c = getopt(argc,argv,"itm")) != -1)
