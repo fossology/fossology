@@ -74,8 +74,14 @@
  * 0 = off
  * !0 = on
  */
+
+/*
+ * Mark's variables (for now)
+ */
 int mdDebug;
 char debugStr[myBUFSIZ];
+char dbErrString[myBUFSIZ];
+char saveLics[myBUFSIZ];
 
 /*
   Flags for program control
@@ -228,16 +234,18 @@ typedef	struct listitem item_t;
 
 /**
  list
- \brief my guess: general list type used to keep track of things. (e.g. there are
+ \brief list_t type structure used to keep various lists. (e.g. there are
  multiple lists).
 
  */
 struct list {
-    char name[64];
-    int used; /**< is this item used? 0 is empty list, 1 is used? */
-    int size;
-    int ix;      /**< the index of the item */
-    int sorted;
+    char name[64];  /**< name of the list */
+    int used;       /**< number of items found, 0 is empty list */
+    int size;       /**< what size is this? (MD) */
+    int ix;         /**< the index for the items below */
+    int sorted;     /**< flag to indicate how ?? (the list or the items in the
+                         list?) things are sorted: SORT_BY_NAME or
+                         SORT_BY_NAME_ICASE */
     int desc;
     item_t *items;
 };
@@ -315,7 +323,9 @@ struct curScan {
     char name[128]; 			/* CDB, set, but not used. */
     int nLines;
     int nWords; 				/**< CDB, set, but not used. */
-    char *licenseList[];		/**< list of license names found, can be a single name */
+    int cliMode;                /**< boolean to indicate running from command line */
+    char *tmpLics;              /**< pointer to storage for parsed names */
+    char *licenseList[512];     /**< list of license names found, can be a single name */
 };
 
 struct license {
