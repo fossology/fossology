@@ -11,7 +11,7 @@ Url:            PBURL
 Source:         PBREPO/PBSRC
 #PBPATCHSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
-Requires:       postgresql >= 8.1.11 php >= 5.1.6 php-pear >= 5.16 php-pgsql >= 5.1.6 libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip httpd which PBDEP
+Requires:       postgresql >= 8.1.11 php >= 5.1.6 php-pear >= 5.16 php-pgsql >= 5.1.6 libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip p7zip httpd which PBDEP
 BuildRequires:  postgresql-devel >= 8.1.11 libxml2 gcc make perl PBBUILDDEP
 Summary:        FOSSology is a licenses exploration tool
 Summary(fr):    FOSSology est un outil d'exploration de licenses
