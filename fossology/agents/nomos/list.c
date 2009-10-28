@@ -26,6 +26,8 @@
  * listitem strunctures defined in nomos.h.  It also supplies the
  * str*Compare* and valCompare* functions.
  *
+ * @version "$Id$"
+ *
  */
 
 #include "nomos.h"

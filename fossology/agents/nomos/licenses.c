@@ -16,6 +16,14 @@
 
  ***************************************************************/
 /* Equivalent to core nomos v1.48 */
+
+/**
+ * \file licenses.c
+ * \brief utilities to scan, score and save license found data
+ *
+ * @version "$Id$"
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>

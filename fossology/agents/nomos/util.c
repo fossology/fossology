@@ -17,6 +17,12 @@
 ***************************************************************/
 /* Equivalent to core nomos v1.29 */
 
+/**
+ * \file utilc
+ * \brief misc utilites
+ *
+ * @version "$Id$"
+ */
 #include <stdarg.h>
 #include <stdio.h>
 #include "nomos.h"
@@ -362,7 +368,7 @@ void changeDir(char *pathname)
 
     if (chdir(pathname) < 0) {
 	perror(pathname);
-	Fatal("chdir(\"%s\") fails", pathname);
+	Fatal("changeDir: chdir(\"%s\") fails", pathname);
     }
     if (getcwd(cur.cwd, sizeof(cur.cwd)) == NULL_STR) {
 	perror("getcwd(changeDir)");
