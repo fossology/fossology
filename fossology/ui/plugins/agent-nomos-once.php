@@ -31,7 +31,7 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
-class agent_fonomos_once extends FO_Plugin {
+class agent_nomos_once extends FO_Plugin {
 
   public $Name = "agent_nomos_once";
   public $Title = "One-Shot License Analysis";
@@ -55,17 +55,20 @@ class agent_fonomos_once extends FO_Plugin {
    *
    */
   function AnalyzeFile($FilePath) {
+  	
     global $Plugins;
     global $AGENTDIR;
+    
+    $licenses = array();
 
     $licenseResult = "";
     /* move the temp file */
     $TempFile = $_FILES['licfile']['tmp_name'];
     $licenseResult = exec("$AGENTDIR/nomos $TempFile",$out,$rtn);
-    print "<pre>DB: fo_nomos output:\n"; print_r($out) . "\n";
-    print "</pre>";
-    //return ($licenseResult);
-    return ($out[1]);
+    $licenses = explode(' ',$out[0]);
+    $last = end($licenses);
+    return ($last);
+    
   } // AnalyzeFile()
 
   /*********************************************
@@ -230,5 +233,5 @@ class agent_fonomos_once extends FO_Plugin {
     return;
   }
 };
-$NewPlugin = new agent_fonomos_once;
+$NewPlugin = new agent_nomos_once;
 ?>
