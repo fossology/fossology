@@ -128,7 +128,7 @@ if [ $RUNTIME ]; then
             php5 php5-pgsql php-pear \
             libmagic1 libxml2 libextractor1c2a \
             binutils bzip2 cabextract cpio sleuthkit mkisofs xpdf-utils \
-               rpm tar upx-ucl unrar unzip
+               rpm tar upx-ucl unrar unzip p7zip
          case "$CODENAME" in
             dapper) [ $AGENT ] || apt-get install postgresql-8.1;;
             etch)
@@ -148,7 +148,7 @@ if [ $RUNTIME ]; then
             urpmi php php-pear php-pgsql postgresql \
                libextractor libextractor-plugins libxml2 \
                cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
-               mkisofs poppler-utils rpm tar unzip gzip
+               mkisofs p7zip poppler-utils rpm tar unzip gzip
          echo "NOTE: unrar is available in PLF, please install it via urpmi if"
 	 echo "   the repository is configured or from http://plf.zarb.org/packages.php"
          ;;
@@ -159,8 +159,8 @@ if [ $RUNTIME ]; then
             php php-pear php-pgsql \
             smtpdaemon \
             file-libs libxml2 libextractor libextractor-plugins \
-            binutils bzip2 cabextract cpio genisoimage poppler-utils \
-               rpm tar upx unzip gzip
+            binutils bzip2 cabextract cpio genisoimage p7zip \
+               poppler-utils rpm tar upx unzip gzip
 
          # enable, possible init, and start postgresql
          /sbin/chkconfig postgresql on
@@ -190,7 +190,7 @@ if [ $RUNTIME ]; then
             php php-pear php-pgsql \
             smtpdaemon \
             file libxml2 \
-            binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip
+            binutils bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip
          echo "NOTE: libextractor, cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources.";;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;

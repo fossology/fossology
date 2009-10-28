@@ -762,27 +762,37 @@ int	FindCmd	(char *Filename)
 
   if (strstr(Type, "octet" ))
   {
-	rc = RunCommand("zcat","-q -l",Filename,">/dev/null 2>&1",NULL,NULL);
-	if (rc==0)
-	{
-	  memset(Static,0,sizeof(Static));
-	  strcpy(Static,"application/x-gzip");
-	  Type=Static;
+    rc = RunCommand("zcat","-q -l",Filename,">/dev/null 2>&1",NULL,NULL);
+    if (rc==0)
+    {
+      memset(Static,0,sizeof(Static));
+      strcpy(Static,"application/x-gzip");
+      Type=Static;
     }
     else  // zcat failed so try cpio (possibly from rpm2cpio)
     {
-	  rc = RunCommand("cpio","-t<",Filename,">/dev/null 2>&1",NULL,NULL);
-	  if (rc==0)
+      rc = RunCommand("cpio","-t<",Filename,">/dev/null 2>&1",NULL,NULL);
+      if (rc==0)
       {
-	    memset(Static,0,sizeof(Static));
-	    strcpy(Static,"application/x-cpio");
-	    Type=Static;
-      }
-      else
-      {
-        // only here to validate other octet file types
-        printf("octet mime type, file: %s\n", Filename);
-      }
+        memset(Static,0,sizeof(Static));
+        strcpy(Static,"application/x-cpio");
+        Type=Static;
+       }
+       else  // cpio failed so try 7zr (possibly from p7zip)
+       {
+         rc = RunCommand("7zr","x -y",Filename,">/dev/null 2>&1",NULL,NULL);
+         if (rc==0)
+         {
+           memset(Static,0,sizeof(Static));
+           strcpy(Static,"application/x-7z-compressed");
+           Type=Static;
+         }
+         else
+         {
+           // only here to validate other octet file types
+           printf("octet mime type, file: %s\n", Filename);
+         }
+       }
     }
   }
  
