@@ -59,6 +59,107 @@ int file_count = 0;
 #define TEMPDIR_TEMPLATE "/tmp/nomos.agent.XXXXXX"
 
 /**
+ checkPQresult
+
+ check the result status of the query with PQresultStatus
+
+ @param PGresult *result
+
+ @return NULL on OK, PgresultErrorMessage on failure
+
+ \todo Add second parameter to indicate either select or insert/update,
+ as the returned item is different (PGRES_COMMAND_OK).
+
+ \callgraph
+ */
+char * checkPQresult(PGresult *result) {
+
+    dbErrString[0] = NULL_CHAR;
+
+    if (PQresultStatus(result) != PGRES_TUPLES_OK) {
+        /*
+         Something went wrong.
+         */
+        printf("checkPQresult: Data Base Query Failed!\n");
+        sprintf(dbErrString, "   ERROR: Nomos agent got database error: %s\n",
+                PQresultErrorMessage(result));
+        printf("checkPQresult: Error message is:%s\n", dbErrString);
+        /* printf("checkPQresult: Error message is:%s\n", PQresultErrorMessage(result)); */
+        PQclear(result);
+        return (dbErrString);
+    }
+    return (NULL_CHAR);
+} /* checkPQresult */
+
+/**
+ checkRefLicense
+ \brief check the reference license data for a license match.
+
+ @param char *licenseNames[]
+
+ @return rf_pk of the matched license or -1
+
+ \todo may need to compute the md5 of the text found instead of using the
+ rf_shortname
+
+ \callgraph
+
+ */
+
+int checkRefLicense(char *licenseName) {
+
+    PGresult *result;
+
+    char query[myBUFSIZ];
+    char *pqCkResult;
+
+    int rfFk = -1;
+    int numRows = 0;
+
+    if (strlen(licenseName) == 0) {
+        printf("ERROR! checkRefLicense, empty name: %s\n", licenseName);
+        return (-1);
+    }
+
+    /* will use the hash, for now just look in the db. */
+
+    /*
+    printf("checkRefLicense: licenseName is:%s\n",licenseName);
+    int len;
+    len = strlen(licenseName);
+    printf("legnth of licenseName is:%d\n",len);
+    */
+
+    sprintf(query,
+            "SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_shortname "
+            "= '%s';",licenseName);
+
+    /* printf("checkRefLicense: query is:\n%s\n",query); */
+
+    pqCkResult = dbErrString;
+    result = PQexec(gl.pgConn, query);
+    pqCkResult = checkPQresult(result);
+    if (pqCkResult != NULL_CHAR) {
+        printf("   ERROR: Nomos agent got database error getting ref license name: %s\n",
+                pqCkResult);
+        return (-1);
+    }
+    numRows = PQntuples(result);
+    /* no match */
+    if (numRows == 0) {
+        printf("   LOG: NOTICE! License name: %s not found in Reference Table\n",
+                licenseName);
+        return (-1);
+    }
+    /* found one, return key */
+    else {
+        rfFk = atoi(PQgetvalue(result, 0, 0));
+        /* printf("DB: CKREFLIC: returning rfFk: %d\n", rfFk); */
+        return (rfFk);
+    }
+} /* checkRefLicense */
+
+/**
  addNewLicense
  \brief Add a new license name to license_ref table.
 
@@ -75,10 +176,6 @@ int file_count = 0;
  and make the loop a commit rollback loop, any error during an insert causes the
  whole transaction to fail (multiple license names).
 
- \todo track changes in tables and design.  For example, this routine will
- have to compute the md5 of the text and compare against that before adding a
- license.
-
  \todo this function must also update the reference hash so that the hash and
  table stay in sync.  The table must be updated first so that rf_pk's can be
  put in the hash.
@@ -87,7 +184,10 @@ int addNewLicense(char *licenseName) {
 
     PGresult *result;
     char query[myBUFSIZ];
+    char fatalMsg[myBUFSIZ];
     char *specialLicenseText;
+
+    long rfFk;
 
     specialLicenseText = "New License name inserted by Agent Nomos";
 
@@ -102,47 +202,22 @@ int addNewLicense(char *licenseName) {
     result = PQexec(gl.pgConn, query);
 
     if (PQresultStatus(result) != PGRES_COMMAND_OK) {
-        printf("   ERROR: Nomos agent got database error adding a new license "
+        printf("ERROR: Nomos agent got database error adding a new license "
             "to the reference table:\n%s\n", PQresultErrorMessage(result));
         PQclear(result);
         return (FALSE);
     }
+    /* get ref lic pk, better be there! */
+    rfFk = checkRefLicense(licenseName);
+    if (rfFk == -1) {
+        sprintf(fatalMsg, "could not get rf_fk from just added license %s\n",
+                licenseName);
+        /* we die here, this is a fatal condtion */
+        Fatal(fatalMsg);
+        return (FALSE);
+    }
     return (TRUE);
 }
-
-/**
- checkPQresult
-
- check the result status of the query with PQresultStatus
-
- @param PGresult *result
-
- @return NULL on OK, PgresultErrorMessage on failure
-
- \todo Add second parameter to indicate either select or insert/update,
- as the returned item is different (PGRES_COMMAND_OK).
-
- \callgraph
- */
-char * checkPQresult(PGresult *result) {
-    /* PGresult *result; */
-    char *failMessage;
-
-    failMessage = NULL_CHAR;
-
-    if (PQresultStatus(result) != PGRES_TUPLES_OK) {
-        /*
-         Something went wrong.
-         */
-        printf("   DB: Data Base Query Failed!\n");
-        sprintf(failMessage, "   ERROR: Nomos agent got database error: %s\n",
-                PQresultErrorMessage(result));
-        /* printf("   DB: Error message is:%s\n", PQresultErrorMessage(result)); */
-        PQclear(result);
-        return (failMessage);
-    }
-    return (NULL_CHAR);
-} /* checkPQresult */
 
 /**
  getFieldValue
@@ -253,31 +328,51 @@ char *getFieldValue(char *inStr, char *field, int fieldMax, char *value,
 
 void parseLicenseList() {
 
-    int numNames = 0;
-    char *saveptr;
+    int numLics = 0;
 
-    /* check for a single name */
-    if (strstr(cur.compLic, ",") == NULL_CHAR) {
-        cur.licenseList[numNames] = &cur.compLic;
-    }
-    if (cur.compLic == NULL_CHAR) {
+    /* char saveLics[myBUFSIZ]; */
+    char *saveptr;              /* used for strtok_r */
+    char *saveLicsPtr;
+
+    if ((strlen(cur.compLic)) == 0) {
         return;
     }
 
-    cur.licenseList[numNames] = strtok_r(cur.compLic, ",", &saveptr);
-
-    /* printf("DB: PLL: after first strtoc_r call, name is:%s\n",cur.licenseList[numNames]); */
-
-    while (cur.licenseList[numNames] != NULL) {
-        numNames++;
-        cur.licenseList[numNames] = strtok_r(NULL, ",", &saveptr);
+    /* check for a single name  FIX THIS!*/
+    if (strstr(cur.compLic, ",") == NULL_CHAR) {
+        cur.licenseList[0] = cur.compLic;
+        cur.licenseList[1] = NULL;
+        return;
     }
+
+    saveLicsPtr = strcpy(saveLics, cur.compLic);
+
+    cur.tmpLics = strtok_r(saveLicsPtr, ",", &saveptr);
+
+    cur.licenseList[numLics] = cur.tmpLics;
+    numLics++;
+
+    saveLicsPtr = NULL;
+    while (cur.tmpLics){
+        cur.tmpLics = strtok_r(saveLicsPtr, ",", &saveptr);
+        if(cur.tmpLics == NULL) {
+            break;
+        }
+        cur.licenseList[numLics] = cur.tmpLics;
+        numLics++;
+    }
+    cur.licenseList[numLics] = NULL;
+    numLics++;
+
     /*
-     printf("DB: name:%s\n",cur.licenseList[i]);
-     for(i=0; i < numNames; i++) {
-     printf("DB: name:%s\n",cur.licenseList[i]);
-     }
-     */
+    int i;
+    for(i=0; i<numLics; i++){
+        printf("cur.licenseList[%d] is:%s\n",i,cur.licenseList[i]);
+    }
+
+    printf("parseLicenseList: returning\n");
+    */
+
     return;
 } /* parseLicenseList */
 
@@ -382,67 +477,6 @@ static void setOption(int val) {
     gl.progOpts |= val;
     return;
 } /* alreadyDone */
-
-/**
- checkRefLicense
- \brief check the reference license data for a license match.
-
- @param char *licenseNames[]
-
- @return rf_pk of the matched license or -1
-
- \todo may need to compute the md5 of the text found instead of using the
- rf_shortname
-
- \callgraph
-
- */
-
-int checkRefLicense(char *licenseName) {
-
-    PGresult *result;
-
-    char query[myBUFSIZ];
-    char *pqCkResult;
-
-    int rfFk = -1;
-    int numRows = 0;
-
-    if (strlen(licenseName) == 0) {
-        printf("ERROR! checkRefLicense, empty name: %s\n", licenseName);
-        return (-1);
-    }
-
-    /* will use the hash, for now just look in the db. */
-
-    sprintf(
-            query,
-            "SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_shortname = '%s';",
-            licenseName);
-
-    result = PQexec(gl.pgConn, query);
-    pqCkResult = checkPQresult(result);
-    if (pqCkResult != NULL_CHAR) {
-        printf(
-                "   ERROR: Nomos agent got database error getting ref license name: %s\n",
-                pqCkResult);
-        return (-1);
-    }
-    numRows = PQntuples(result);
-    /* no match */
-    if (numRows == 0) {
-        printf(
-                "   LOG: NOTICE! License name: %s not found in Reference Table\n",
-                licenseName);
-        return (-1);
-    }
-    /* found one, return key */
-    else {
-        rfFk = atoi(PQgetvalue(result, 0, 0));
-        /* printf("DB: CKREFLIC: returning rfFk: %d\n", rfFk); */
-        return (rfFk);
-    }
-} /* checkRefLicense */
 
 static void unsetOption(int val) {
 #ifdef	PROC_TRACE
@@ -585,6 +619,7 @@ void freeAndClearScan(struct curScan *thisScan) {
     /*
      Change back to original working directory
      */
+    /* DBug: printf("freeAndClearScan: changing back to gl.initwd\n"); */
     changeDir(gl.initwd);
 
     /*
@@ -661,7 +696,7 @@ void processFile(char *fileToScan) {
 
     processRawSource();
 
-    freeAndClearScan(&cur);
+    /* freeAndClearScan(&cur); */
 } /* Process File */
 
 /**
@@ -669,40 +704,38 @@ void processFile(char *fileToScan) {
 
  Write out the information about the scan to the FOSSology database.
 
+ NOTE: this function should NOT be called in cli mode.  updateLicenseFile
+ will fail if it is called from cli mode.
+
  curScan is passed as an arg even though it's available as a global,
  in order to facilitate subsequent modularization of the code.
 
  Returns: 0 if successful, -1 if not.
 
-  \callgraph
+ \callgraph
  */
-int recordScanToDB(struct curScan *scanRecord, int cli) {
+int recordScanToDB(struct curScan *scanRecord) {
 
     PGresult *result;
 
     char query[myBUFSIZ];
     char *pqCkResult;
     char *noneFound;
-    char *tname;
 
     long numrows;
-    long numcols;
-
-    char pad[myBUFSIZ];
     long rfFk = 0;
-    /* long rf_pk; */
 
     /*
      * need to check for None and then add the appropriate items to license_file
      * (e.g. rf_pk, agent_fk, and pfile_fk).
      */
     noneFound = strstr(scanRecord->compLic, LS_NONE);
-    if (noneFound != NULL_CHAR) {
+    if (noneFound != NULL) {
         /* no license found */
-        /* printf("   DB: No license found\n"); */
+        /* printf("recordScan2DB: No license found\n"); */
         sprintf(query, "SELECT rf_pk, rf_shortname FROM license_ref WHERE "
             "rf_shortname = 'No License Found';");
-        /* printf("   DB: query was:%s\n", query); */
+        /* printf("recordScan2DB: query was:%s\n", query); */
 
         result = PQexec(gl.pgConn, query);
         pqCkResult = checkPQresult(result);
@@ -714,11 +747,11 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
         }
         numrows = PQntuples(result);
 
-        /*
-         printf("   LOG: nomos:number of rows from query for no lice found is:%ld\n",
+        /* DBug:
+         printf("recordScan2DB: nomos:number of rows from query for no lice found is:%ld\n",
          numrows);
          numcols = PQnfields(result);
-         printf("   LOG: nomos:number of columns from query for no lice found is:%ld\n",
+         printf("recordScan2DB: nomos:number of columns from query for no lice found is:%ld\n",
          numcols);
          */
 
@@ -727,16 +760,20 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
         }
 
         rfFk = atoi(PQgetvalue(result, 0, 0));
-        /* printf("rfFk returned is:%ld\n", rfFk); */
+        /* printf("recordScan2DB: rfFk returned is:%ld\n", rfFk); */
         if (rfFk > 10000) {
             printf("FATAL: cound not get a valid rf_pk from License_ref\n");
             return (-1);
         }
-        /* printf("   LOG: value of tup0, field0 (rf_pk) is:%ld\n", rf_pk);
+        /* DBug:
+         char *tname;
+         printf("recordScan2DB: value of tup0, field0 (rf_pk) is:%ld\n", rf_pk);
          tname = PQgetvalue(result, 0, 1);
-         printf("   LOG: value of tup0, field1 (rf_sn) is:%s\n", tname);
+         printf("recordScan2DB: value of tup0, field1 (rf_sn) is:%s\n", tname);
          */
-
+        if (cur.cliMode) {
+            return (0);
+        }
         if (updateLicenseFile(rfFk)) {
             return (0);
         }
@@ -745,74 +782,63 @@ int recordScanToDB(struct curScan *scanRecord, int cli) {
         }
     } /* No license found */
 
+    /* we have one or more license names, parse them */
+    parseLicenseList();
     /* Do we match a reference license?
      * for now just query the table.  Need to create a routine that gets the table
      * and stores it in a either a hash for faster lookup.
      */
-
-    /* we have one or more license names, parse them */
-
-    parseLicenseList();
-
     int numLicenses;
     for (numLicenses = 0; cur.licenseList[numLicenses] != NULL; numLicenses++) {
-        /* printf("processing cur.licenseList[%d]:%s\n", numLicenses,
-         cur.licenseList[numLicenses]);
-         */
 
-        rfFk = checkRefLicense(cur.licenseList[numLicenses]);
-        /* printf("rfFk returned from checkRefLic is:%ld\n", rfFk); */
+        /*
+         printf("recordScan2DB: processing cur.licenseList[%d]:%s\n", numLicenses,
+         cur.licenseList[numLicenses]);
+        */
+
+         rfFk = checkRefLicense(cur.licenseList[numLicenses]);
 
         if (rfFk == -1) {
-            /* printf("   LOG: adding %s license to the reference table.\n",
+            /* printf("recordScan2DB: adding %s license to the reference table.\n",
              cur.licenseList[numLicenses]); */
             if (!addNewLicense(cur.licenseList[numLicenses])) {
-                printf(
-                        "   LOG: FAILURE! could not add new license %s to ref table\n",
+                printf("LOG: FAILURE! could not add new license %s to ref table\n",
                         cur.licenseList[numLicenses]);
                 return (-1);
             }
-            /* get ref lic pk, better be there! */
+            /*
+             NOTE: at this point the new license is there, addNewLicense will
+             cause nomos to stop with a fatal error if it can't get the rfFk
+             back from the table.  So no need to check the value of rfFk below.
+             */
             rfFk = checkRefLicense(cur.licenseList[numLicenses]);
-            if (rfFk == -1) {
-                printf(
-                        "FATAL: could not get rf_fk from just added license %s\n",
-                        cur.licenseList[numLicenses]);
-                return (-1);
-            }
-            /* updateLicenseFile */
             if (updateLicenseFile(rfFk) == FALSE) {
                 return (-1);
             }
         }
         else {
-
             /*
-             * use rfFk set above and updateLicenseFile
+             * use rfFk set above
              */
-            /*
-             NOTE: this WILL NOT WORK in cli mode, as written!  There is no pfile_fk
-             when run from the cli.  Need to special case it and go get the pfile_pk
-             associated with the ?? wait, if run from the command line, it's not in
-             the repo... I will propose for 1.2 that we don't update DB in cli mode
-             that matches the current behavior today.  Next release we fix it.
-
-             \todo add in logic to skip this step if run in cli mode.
-             */
+            if(cur.cliMode){
+                continue;
+            }
             if (updateLicenseFile(rfFk) == FALSE) {
-                printf(
-                        "FATAL: updateLicenseFile failed to update license_file "
+                printf("FATAL: updateLicenseFile failed to update license_file "
                             "with license %s\n", cur.licenseList[numLicenses]);
                 return (-1);
             }
         }
     } /* for */
+    return(0);
 } /* recordScanToDb */
 
 int main(int argc, char **argv) {
-    char *cp;
+
     int i;
     int c;
+
+    char *cp;
     char *agent_desc = "Nomos License Detection Agency";
     char parm[myBUFSIZ];
 
@@ -833,8 +859,7 @@ int main(int argc, char **argv) {
      */
     gl.DB = DBopen();
     if (!gl.DB) {
-        printf(
-                "   FATAL: Nomos agent unable to connect to database, exiting...\n");
+        printf("   FATAL: Nomos agent unable to connect to database, exiting...\n");
         fflush(stdout);
         exit(-1);
     }
@@ -869,6 +894,7 @@ int main(int argc, char **argv) {
         perror("getcwd");
         Fatal("Cannot obtain starting directory");
     }
+    /* DBug: printf("After getcwd in main, starting dir is:\n%s\n", gl.initwd); */
 
     gl.uPsize = 6;
 
@@ -884,7 +910,8 @@ int main(int argc, char **argv) {
         /* printf("start of while; argc is:%d\n", argc); */
         /* for(i=0; i<argc; i++){
          printf("args passed in:%s\n",argv[i]);
-         }*/
+         }
+         */
         switch (c) {
         case 'i':
             /* "Initialize" */
@@ -910,7 +937,7 @@ int main(int argc, char **argv) {
      */
 
     for (i = 1; i < argc; i++) {
-        printf("argv's are:%s\n", argv[i]);
+        /* printf("argv's are:%s\n", argv[i]); */
         files_to_be_scanned[i - 1] = argv[i];
         file_count++;
     }
@@ -969,7 +996,7 @@ int main(int argc, char **argv) {
                 }
                 /* createAgentStatus(); */
                 processFile(repFile);
-                recordScanToDB(&cur, 0);
+                recordScanToDB(&cur);
                 freeAndClearScan(&cur);
                 /* recordAgentStatus(); */
                 printf("OK\n");
@@ -987,10 +1014,14 @@ int main(int argc, char **argv) {
          Files on the command line
          */
         /* printf("Main: running in cli mode, processing file(s)\n"); */
-        int cli = 1;
+        cur.cliMode = 1;
         for (i = 0; i < file_count; i++) {
             processFile(files_to_be_scanned[i]);
-            /* recordScanToDB(&cur, cli); */
+            /*
+             * \todo ask bob about updating ref table in cli mode...
+             * basically its the same loop as in recordScanToDB.
+             */
+            recordScanToDB(&cur);
             freeAndClearScan(&cur);
         }
     }
