@@ -18,6 +18,16 @@
 
 /* Equivalent to core nomos v1.10 */
 
+/**
+ * \file list.c
+ * \brief list manipulation functions and str/val Compare functions
+ *
+ * list.c supplies all of the functions needed to manipulate the list and
+ * listitem strunctures defined in nomos.h.  It also supplies the
+ * str*Compare* and valCompare* functions.
+ *
+ */
+
 #include "nomos.h"
 #include "list.h"
 #include "util.h"
@@ -213,6 +223,21 @@ void listValidate(list_t *l, int appendFlag) {
 	return;
 }
 
+
+/**
+ * listGetItem
+ * \brief get an item from the itemlist.  If the item is not in the itemlist,
+ * then add it to the itemlist.
+ *
+ * This function searches the str member in the listitem structure, if found,
+ * a pointer to that item is returned.  If not found, the item is added to the
+ * list of items 'in the middle' of the list.
+ *
+ * @param list_t *list the list to search/update
+ * @param *s pointer to the string to search for.
+ *
+ * @return pointer to the item
+ */
 item_t *listGetItem(list_t *l, char *s) {
 	item_t *p;
 	int i;
@@ -435,7 +460,19 @@ item_t *listLookupAlias(list_t *l, char *s)
 }
 #endif /* notdef */
 
+/**
+ * listIterate
+ * \brief return a pointer to listitem, returns a NULL_ITEM when no more items
+ * to return.
+ *
+ * @param list_t *list a point to a list
+ *
+ * NOTE: this routine increments the ix member! (bad boy)
+ *
+ * \todo remove/fix the fact that this routine increments ix.
+ */
 item_t *listIterate(list_t *l) {
+
 	item_t *p;
 
 #ifdef	LIST_DEBUG /* was PROC_TRACE */
@@ -744,6 +781,15 @@ int listCount(list_t *l) {
 	return (total);
 }
 
+/**
+ * listDump
+ * \brief print the passed in list
+ *
+ * @param *l the list to dump
+ * @param verbose flag, print more
+ *
+ * \callgraph
+ */
 void listDump(list_t *l, int verbose) {
 	item_t *p;
 	int i;
@@ -754,6 +800,7 @@ void listDump(list_t *l, int verbose) {
 	listDebugDetails(l);
 #endif	/* PROC_TRACE */
 
+	/*MD: why should an empty list be fatal?  Just return....? */
 	if (l == NULL_LIST) {
 		Fatal("NULL list passed to listDump()");
 	}
@@ -794,7 +841,7 @@ void listDump(list_t *l, int verbose) {
 		}
 	}
 	return;
-}
+} /* listDump */
 
 #if	defined(PROC_TRACE) || defined(LIST_DEBUG)
 void listDebugDetails(list_t *l)
