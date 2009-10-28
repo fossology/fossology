@@ -107,7 +107,7 @@ Description: architecture for analyzing software, database
 
 Package: fossology-agents
 Architecture: any
-Depends: fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage | mkisofs, xpdf-utils, rpm, upx-ucl, unrar-free, unzip, libextractor-plugins, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage | mkisofs, xpdf-utils, rpm, upx-ucl, unrar-free, unzip, libextractor-plugins, p7zip, ${shlibs:Depends}, ${misc:Depends}
 Suggests: mail-transport-agent
 Conflicts: fossology-agents-single
 Description: architecture for analyzing software, analysis agents
@@ -121,7 +121,7 @@ Description: architecture for analyzing software, analysis agents
 
 Package: fossology-agents-single
 Architecture: any
-Depends: fossology-db, fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage | mkisofs, xpdf-utils, rpm, upx-ucl, unrar-free, unzip, libextractor-plugins, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-db, fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage | mkisofs, xpdf-utils, rpm, upx-ucl, unrar-free, unzip, libextractor-plugins, p7zip, ${shlibs:Depends}, ${misc:Depends}
 Suggests: mail-transport-agent
 Conflicts: fossology-agents
 Description: architecture for analyzing software, agents (single machine case)
