@@ -26,11 +26,19 @@ CFLAGS_LOCALO= $(DEF) $(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAG
 
 all: encode nomos
 
+debug: nomos-gl 
+
 nomos: nomos.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@
 
 nomos.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) -c $< $(CFLAGS_LOCALO) 
+	$(CC) -c $< $(CFLAGS_LOCALO)
+	
+nomos-gl: nomos-g.o $(OBJS) $(GENOBJS)
+	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $@
+
+nomos-g.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
+	$(CC) -c  -l /usr/lib/libefence.a $< $(CFLAGS_LOCALO) 
 
 $(OBJS) $(GENOBJS): %.o: %.c $(HDRS) $(DB) $(VARS)
 	$(CC) -c $< $(DEF) $(CFLAGS_DBO) $(ALL_CFLAGS)
