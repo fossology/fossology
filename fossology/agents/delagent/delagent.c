@@ -104,10 +104,6 @@ void	DeleteLicense	(long UploadId)
       MyDBaccess(DB,SQL);
 
       memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_liccount = NULL FROM uploadtree WHERE upload_fk = '%ld' AND pfile_pk = pfile_fk AND pfile_liccount IS NOT NULL;",UploadId);
-      MyDBaccess(DB,SQL);
-
-      memset(SQL,'\0',sizeof(SQL));
       snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
       MyDBaccess(DB,SQL);
 
@@ -188,7 +184,7 @@ void	DeleteUpload	(long UploadId)
   /** These are all pfiles in the upload_fk that only appear once. **/
   memset(SQL,'\0',sizeof(SQL));
   if (Verbose) { printf("# Getting list of pfiles to delete\n"); }
-  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile,0 AS count INTO %s_pfile FROM uploadtree INNER JOIN pfile ON upload_fk = %ld AND pfile_fk = pfile_pk;",TempTable,UploadId);
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO %s_pfile FROM uploadtree INNER JOIN pfile ON upload_fk = %ld AND pfile_fk = pfile_pk;",TempTable,UploadId);
   MyDBaccess(DB,SQL);
 
   /* Remove pfiles with reuse */
@@ -222,15 +218,10 @@ void	DeleteUpload	(long UploadId)
   MyDBaccess(DB,SQL);
 
   /***********************************************/
-  /* delete pfiles that are missing reuse in the DB */
+  /* delete pfile references from all the pfile dependent tables */
   if (Verbose) { printf("# Deleting from licterm_name\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name USING %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
-  MyDBaccess(DB,SQL);
-
-  if (Verbose) { printf("# Removing license counts\n"); }
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_liccount = NULL FROM %s_pfile WHERE %s_pfile.pfile_pk = pfile.pfile_pk;",TempTable,TempTable);
   MyDBaccess(DB,SQL);
 
   if (Verbose) { printf("# Deleting from agent_lic_status\n"); }
