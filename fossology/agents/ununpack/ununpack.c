@@ -790,7 +790,7 @@ int	FindCmd	(char *Filename)
          else
          {
            // only here to validate other octet file types
-           printf("octet mime type, file: %s\n", Filename);
+           if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
          }
        }
     }
