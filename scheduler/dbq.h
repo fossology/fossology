@@ -34,7 +34,7 @@ struct multisqlqueue
   int IsRepeat; /* queue "jq_repeat" -- is this a repeat request? (1=yes) */
   int IsUrgent; /* queue is urgent? (1=yes) */
   void *DBQ;    /* results of the multi-SQL */
-  int DBagent;  /* type of agent needed */
+  int DBagent;  /* agent_pk of agent needed */
 
   /* Metrics */
   long ProcessCount;	/* how many have been processed? */
@@ -53,7 +53,7 @@ struct multisqlqueue
   int MaxItems;	/* number of results (for quick index) */
   int ItemsDone;	/* number of results (for quick index) */
   int *Processed;       /* Processed[MaxItems] = CHILD_STATUS */
-  char Type[MAXCMD];    /* jq_type */
+  char Type[MAXCMD];    /* jq_type, aka  agent.agent_name */
   char Attr[MAXCMD];    /* common attributes */
   char HostCol[MAXCMD]; /* column containing the "host=" attribute variable */
   };
