@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <strings.h>
+#include <ctype.h>
 #include <dirent.h>
 #include <ftw.h>
 #include <regex.h>

@@ -103,7 +103,7 @@ void showLTCache(char *);
 void checkCornerCases(char *, int, int, int, int, int, int, int);
 void checkFileReferences(char *, int, int, int, int, int);
 void  addRef(char *, int);
-static void dumpMatch(char *, char *);
+/* static void dumpMatch(char *, char *); */
 void locateRegex(char *, item_t *, int, int, int, int);
 void saveRegexLocation(int, int, int, int);
 void saveUnclBufLocation(int);
@@ -7373,7 +7373,7 @@ int checkUnclassified(char *filetext, int size, int score, char *ftype,
      */
     gl.flags |= FL_SAVEBASE;	/* save match buffer (if any) */
     m = INFILE(_LT_GEN_EULA);
-    gl.flags & ~FL_SAVEBASE; /* CDB -- This makes no sense, given line above */
+    /* gl.flags & ~FL_SAVEBASE;  CDB -- This makes no sense, given line above */
     if (m) {
 	if (cur.licPara == NULL_STR) {
 	    saveLicenseParagraph(cur.matchBase, isML, isPS, NO);
@@ -8717,11 +8717,15 @@ void showLTCache(char *msg)
 }
 #endif  /* LTSR_DEBUG */
 
+/*
+ *
+ save this, only used in ifdefs, now, but could be useful for debuggin.
+
 void dumpMatch(char *text, char *label)
 {
     char *x = text + cur.regm.rm_so;
     char *cp = text + cur.regm.rm_eo;
-    /* */
+
     if (label) {
 	printf("%s ", label);
     }
@@ -8734,5 +8738,6 @@ void dumpMatch(char *text, char *label)
     printf("]\n");
     return;
 }
+*/
 
 
