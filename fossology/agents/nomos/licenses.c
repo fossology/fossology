@@ -72,11 +72,12 @@ char timerName[64];
 #define	MIN(a, b)	((a) < (b) ? a : b)
 
 void licenseInit() {
+
     int i;
     int len;
     int same;
-    int ssAbove;
-    int ssBelow;
+    int ssAbove = 0;
+    int ssBelow = 0;
     item_t *p;
     char *cp;
     char buf[myBUFSIZ];
@@ -553,9 +554,9 @@ static void fixSearchString(char *s, int size, int i, int wildcardBad)
  *
  */
 void licenseScan(list_t *licenseList) {
+
     int i;
     int c;
-    int size;
     int lowWater;
     int lowest;
     int nCand;
@@ -628,7 +629,7 @@ void licenseScan(list_t *licenseList) {
             printf("Zero length file: %s\n", cp);
             continue;
         }
-        if (scp->dataOffset = iMadeThis(textp)) {
+        if (scp->dataOffset == iMadeThis(textp)) {
             textp += scp->dataOffset;
             cur.stbuf.st_size -= scp->dataOffset;
         }

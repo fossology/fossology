@@ -458,8 +458,11 @@ void Bail(int exitval) {
     }
 #endif	/* MEMORY_TRACING && MEM_ACCT */
 
-    printf("   LOG: Nomos agent is exiting\n");
-    fflush(stdout);
+    if(!cur.cliMode) {
+        printf("   LOG: Nomos agent is exiting\n");
+        fflush(stdout);
+    }
+
     DBclose(gl.DB);
 
     exit(exitval);
@@ -469,22 +472,6 @@ void alreadyDone(char *pathname) {
     fprintf(stderr, "%s: %s already processed\n", gl.progName, pathname);
     Bail(0);
 }
-
-static void setOption(int val) {
-#ifdef	PROC_TRACE
-    traceFunc("== setOption(%x)\n", val);
-#endif	/* PROC_TRACE */
-    gl.progOpts |= val;
-    return;
-} /* alreadyDone */
-
-static void unsetOption(int val) {
-#ifdef	PROC_TRACE
-    traceFunc("== unsetOption(%x)\n", val);
-#endif /* PROC_TRACE */
-    gl.progOpts &= ~val;
-    return;
-} /* unsetOption */
 
 int optionIsSet(int val) {
 #ifdef	PROC_TRACE
@@ -517,18 +504,6 @@ static void parseOptsAndArgs(int argc, char **argv) {
     return;
 }
 #endif /* notdef */
-
-static void printListToFile(list_t *l, char *filename, char *mode) {
-    FILE *fp;
-    item_t *ip;
-
-    fp = fopenFile(filename, mode);
-    while ((ip = listIterate(l)) != NULL_ITEM) {
-        fprintf(fp, "%s\n", ip->str);
-    }
-    (void) fclose(fp);
-    return;
-}
 
 /**
  getFileLists
@@ -657,8 +632,10 @@ void processFile(char *fileToScan) {
 
     /*
      Create temporary directory for scratch space
-     and copy target file to that directory.
+     and copy target file to that directory.  Save the original filepath for
+     reporting results.
      */
+    strcpy(cur.filePath, fileToScan);
     strcpy(cur.targetDir, TEMPDIR_TEMPLATE);
     if (!mkdtemp(cur.targetDir)) {
         perror("mkdtemp");

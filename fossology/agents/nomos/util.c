@@ -473,6 +473,22 @@ FILE *fopenFile(char *pathname, char *mode)
     return(fp);
 }
 
+/*
+ *
+ Save for now, could be useful for debugging
+
+static void printListToFile(list_t *l, char *filename, char *mode) {
+    FILE *fp;
+    item_t *ip;
+
+    fp = fopenFile(filename, mode);
+    while ((ip = listIterate(l)) != NULL_ITEM) {
+        fprintf(fp, "%s\n", ip->str);
+    }
+    (void) fclose(fp);
+    return;
+}
+*/
 
 FILE *popenProc(char *command, char *mode)
 {
@@ -1536,8 +1552,9 @@ int mySystem(const char *fmt, ...)
  */
 int iMadeThis(char *textp)
 {
-	register char *cp, *x;
-	static char name[64];
+
+	char *cp, *x;
+
 /* */
 #if defined(PROC_TRACE)
 #ifdef	PROC_TRACE_SWITCH

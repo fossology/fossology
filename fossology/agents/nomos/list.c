@@ -132,7 +132,8 @@ void listClear(list_t *l, int deallocFlag) {
 	}
 #ifdef LIST_DEBUG
 	listDump(l, YES)
-#endif LIST_DEBUG
+#endif /* LIST_DEBUG */
+
 #ifdef	GLOBAL_DEBUG
 	if (gl.MEM_DEEBUG) {
 		printf("... used %d size %d ix %d sorted %d items %p\n",
@@ -597,6 +598,7 @@ static void listDoubleSize(list_t *l) {
 }
 
 void listSort(list_t *l, int sortType) {
+
 	int (*f)();
 
 #ifdef	PROC_TRACE
@@ -813,9 +815,9 @@ void listDump(list_t *l, int verbose) {
 		return;
 	}
 	if (verbose < 0) {
-		printf("** %s (size %d, used %d, ix %d, sort %d desc %d) == %d\n",
-				l->name, l->size, l->used, l->ix, l->sorted, l->desc, l->size
-						*sizeof(item_t));
+		printf("** %s (size %d, used %d, ix %d, sort %d desc %d) == %ld\n",
+				l->name, l->size, l->used, l->ix, l->sorted, l->desc,
+						sizeof(item_t));
 		return;
 	}
 	if (verbose || max) {
