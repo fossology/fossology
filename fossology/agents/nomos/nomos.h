@@ -301,7 +301,8 @@ struct globals {
 struct curScan {
     char cwd[myBUFSIZ]; 		/**< CDB, Would like to workaround and eliminate. */
     char targetDir[myBUFSIZ]; 	/**< Directory where file is */ /* check */
-    char targetFile[myBUFSIZ]; 	/**< File we're scanning */ /* check */
+    char targetFile[myBUFSIZ]; 	/**< File we're scanning (tmp file)*/ /* check */
+    char filePath[myBUFSIZ];    /**< the original file path passed in */
     long pFileFk;				/**< [in] pfile_fk from scheduler */
     char pFile[myBUFSIZ];       /**< [in] pfilename from scheduler */
     char *licPara;
