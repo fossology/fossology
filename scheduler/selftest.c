@@ -136,8 +136,16 @@ int	SelfTest	()
     HostId = GetHostFromAttr(CM[Thread].Attr);
     if (HostId < 0) continue; /* no host */
     if (HostCheck[HostId] != 0) continue; /* already checked */
+
     memset(Line[1],'\0',1024);
     snprintf(Line[1],1024,"echo 'test' | %s",CM[Thread].Command);
+
+		if (Verbose)
+    {
+      LogPrint("DEBUG: %s:%d HostID: %d, CM[%d].Attr= %s\n", __FILE__,__LINE__,HostId, Thread, CM[Thread].Attr);
+      LogPrint("DEBUG: %s:%d popen: %s\n", __FILE__,__LINE__,Line[1]);
+    }
+
     FTest = popen(Line[1],"r");
     if (!FTest)
       {
@@ -212,14 +220,15 @@ int	SelfTest	()
 
   /* Check if every host has been validated */
   for(i=0; i<MaxHostList; i++)
-    {
+  {
+    if (Verbose)  LogPrint("DEBUG: HostCheck[%d] = %d\n", i, HostCheck[i]);
     if (HostCheck[i] != 1)
       {
-      if (HostCheck[i] == 0) LogPrint("FATAL: Host '%s' missing self-test agent.\n",HostList[i].Hostname);
+      if (HostCheck[i] == 0) LogPrint("FATAL: Host[%d'] '%s' missing self-test agent.\n",i,HostList[i].Hostname);
       LogPrint("FATAL: Host '%s' failed self-test.\n",HostList[i].Hostname);
       rc=1;
       }
-    }
+  }
   free(HostCheck);
 
   fclose(FData);
