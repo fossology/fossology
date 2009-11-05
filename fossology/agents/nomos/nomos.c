@@ -112,10 +112,6 @@ int checkRefLicense(char *licenseName) {
 
     char query[myBUFSIZ];
     char *pqCkResult;
-    char *cs;
-    char *sep;
-    char *back2lic;
-    char wkSpace[myBUFSIZ];
     char sqlClean[myBUFSIZ];
 
     int rfFk = -1;
