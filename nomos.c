@@ -108,13 +108,21 @@ char * checkPQresult(PGresult *result) {
 
 int checkRefLicense(char *licenseName) {
 
+#define squote '\047'
+
     PGresult *result;
 
     char query[myBUFSIZ];
     char *pqCkResult;
+    char *cs;
+    char *sep;
+    char *back2lic;
+    char wkSpace[myBUFSIZ];
+    char sqlClean[myBUFSIZ];
 
     int rfFk = -1;
     int numRows = 0;
+    size_t len;
 
     if (strlen(licenseName) == 0) {
         printf("ERROR! checkRefLicense, empty name: %s\n", licenseName);
@@ -123,16 +131,28 @@ int checkRefLicense(char *licenseName) {
 
     /* will use the hash, for now just look in the db. */
 
-    /*
-    printf("checkRefLicense: licenseName is:%s\n",licenseName);
-    int len;
-    len = strlen(licenseName);
-    printf("legnth of licenseName is:%d\n",len);
-    */
+    /* check for a ' in the string, if there need to make it a '' so
+     * sql/postgres is happy.
+     */
+    if (strstr(licenseName, "'") != NULL) {
+        cs = strcpy(wkSpace, licenseName);
+        sep = strsep(&cs, "'");
+        len = strlen(wkSpace);
+        back2lic = strcpy(sqlClean, wkSpace);
+
+        back2lic += len;
+        *back2lic = squote;
+        back2lic++;
+        *back2lic = squote;
+        back2lic++;
+
+        sep = strcpy(back2lic, cs);
+        licenseName = sqlClean;
+    }
 
     sprintf(query,
             "SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_shortname "
-            "= '%s';",licenseName);
+                "= '%s';", licenseName);
 
     /* printf("checkRefLicense: query is:\n%s\n",query); */
 
@@ -140,14 +160,16 @@ int checkRefLicense(char *licenseName) {
     result = PQexec(gl.pgConn, query);
     pqCkResult = checkPQresult(result);
     if (pqCkResult != NULL_CHAR) {
-        printf("   ERROR: Nomos agent got database error getting ref license name: %s\n",
+        printf(
+                "   ERROR: Nomos agent got database error getting ref license name: %s\n",
                 pqCkResult);
         return (-1);
     }
     numRows = PQntuples(result);
     /* no match */
     if (numRows == 0) {
-        printf("   LOG: NOTICE! License name: %s not found in Reference Table\n",
+        printf(
+                "   LOG: NOTICE! License name: %s not found in Reference Table\n",
                 licenseName);
         return (-1);
     }
@@ -331,7 +353,7 @@ void parseLicenseList() {
     int numLics = 0;
 
     /* char saveLics[myBUFSIZ]; */
-    char *saveptr;              /* used for strtok_r */
+    char *saveptr; /* used for strtok_r */
     char *saveLicsPtr;
 
     if ((strlen(cur.compLic)) == 0) {
@@ -353,9 +375,9 @@ void parseLicenseList() {
     numLics++;
 
     saveLicsPtr = NULL;
-    while (cur.tmpLics){
+    while (cur.tmpLics) {
         cur.tmpLics = strtok_r(saveLicsPtr, ",", &saveptr);
-        if(cur.tmpLics == NULL) {
+        if (cur.tmpLics == NULL) {
             break;
         }
         cur.licenseList[numLics] = cur.tmpLics;
@@ -365,13 +387,13 @@ void parseLicenseList() {
     numLics++;
 
     /*
-    int i;
-    for(i=0; i<numLics; i++){
-        printf("cur.licenseList[%d] is:%s\n",i,cur.licenseList[i]);
-    }
+     int i;
+     for(i=0; i<numLics; i++){
+     printf("cur.licenseList[%d] is:%s\n",i,cur.licenseList[i]);
+     }
 
-    printf("parseLicenseList: returning\n");
-    */
+     printf("parseLicenseList: returning\n");
+     */
 
     return;
 } /* parseLicenseList */
@@ -458,7 +480,7 @@ void Bail(int exitval) {
     }
 #endif	/* MEMORY_TRACING && MEM_ACCT */
 
-    if(!cur.cliMode) {
+    if (!cur.cliMode) {
         printf("   LOG: Nomos agent is exiting\n");
         fflush(stdout);
     }
@@ -771,15 +793,16 @@ int recordScanToDB(struct curScan *scanRecord) {
         /*
          printf("recordScan2DB: processing cur.licenseList[%d]:%s\n", numLicenses,
          cur.licenseList[numLicenses]);
-        */
+         */
 
-         rfFk = checkRefLicense(cur.licenseList[numLicenses]);
+        rfFk = checkRefLicense(cur.licenseList[numLicenses]);
 
         if (rfFk == -1) {
             /* printf("recordScan2DB: adding %s license to the reference table.\n",
              cur.licenseList[numLicenses]); */
             if (!addNewLicense(cur.licenseList[numLicenses])) {
-                printf("LOG: FAILURE! could not add new license %s to ref table\n",
+                printf(
+                        "LOG: FAILURE! could not add new license %s to ref table\n",
                         cur.licenseList[numLicenses]);
                 return (-1);
             }
@@ -797,17 +820,18 @@ int recordScanToDB(struct curScan *scanRecord) {
             /*
              * use rfFk set above
              */
-            if(cur.cliMode){
+            if (cur.cliMode) {
                 continue;
             }
             if (updateLicenseFile(rfFk) == FALSE) {
-                printf("FATAL: updateLicenseFile failed to update license_file "
+                printf(
+                        "FATAL: updateLicenseFile failed to update license_file "
                             "with license %s\n", cur.licenseList[numLicenses]);
                 return (-1);
             }
         }
     } /* for */
-    return(0);
+    return (0);
 } /* recordScanToDb */
 
 int main(int argc, char **argv) {
@@ -836,7 +860,8 @@ int main(int argc, char **argv) {
      */
     gl.DB = DBopen();
     if (!gl.DB) {
-        printf("   FATAL: Nomos agent unable to connect to database, exiting...\n");
+        printf(
+                "   FATAL: Nomos agent unable to connect to database, exiting...\n");
         fflush(stdout);
         exit(-1);
     }
