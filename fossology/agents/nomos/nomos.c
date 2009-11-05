@@ -108,8 +108,6 @@ char * checkPQresult(PGresult *result) {
 
 int checkRefLicense(char *licenseName) {
 
-#define squote '\047'
-
     PGresult *result;
 
     char query[myBUFSIZ];
@@ -122,37 +120,24 @@ int checkRefLicense(char *licenseName) {
 
     int rfFk = -1;
     int numRows = 0;
+    int *error;
     size_t len;
+    size_t finalLen;
 
-    if (strlen(licenseName) == 0) {
+    if ((len = strlen(licenseName)) == 0) {
         printf("ERROR! checkRefLicense, empty name: %s\n", licenseName);
         return (-1);
     }
 
     /* will use the hash, for now just look in the db. */
 
-    /* check for a ' in the string, if there need to make it a '' so
-     * sql/postgres is happy.
-     */
-    if (strstr(licenseName, "'") != NULL) {
-        cs = strcpy(wkSpace, licenseName);
-        sep = strsep(&cs, "'");
-        len = strlen(wkSpace);
-        back2lic = strcpy(sqlClean, wkSpace);
+    /* pass every name to the postgres function to escape thing properly */
 
-        back2lic += len;
-        *back2lic = squote;
-        back2lic++;
-        *back2lic = squote;
-        back2lic++;
-
-        sep = strcpy(back2lic, cs);
-        licenseName = sqlClean;
-    }
+    finalLen = PQescapeStringConn(gl.pgConn, sqlClean, licenseName, len, error);
 
     sprintf(query,
             "SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_shortname "
-                "= '%s';", licenseName);
+                "= '%s';", sqlClean);
 
     /* printf("checkRefLicense: query is:\n%s\n",query); */
 
