@@ -30,110 +30,135 @@
 require_once('../commonTestFuncs.php');
 require_once('testLicenseLib.php');
 
-$ldir = '/home/fosstester/regression/license/eddy/GPL';
-//$ldir = '/home/fosstester/regression/license/eddy/GPL/GPL_v3'
-//$ldir = '/home/fosstester/regression/license/eddy';
-
+$masterPath = NULL;
 
 /* process parameters */
 $Usage = "{$argv[0]} [-h] {-f filepath | -d directorypath}\n" .
-$options = getopt("hf:d:");
+$options = getopt("hf:d:m:");
 if (empty($options)) {
-  print $Usage;
-  exit(1);
+	print $Usage;
+	exit(1);
 }
 if (array_key_exists("h",$options)) {
-  print $Usage;
-  exit(0);
+	print $Usage;
+	exit(0);
 }
 if (array_key_exists("f",$options)) {
-  $file = $options['f'];
+	$file = $options['f'];
 }
 if (array_key_exists("d",$options)) {
-  $directory = $options['d'];
+	$dir = $options['d'];
+	$directory = rtrim($dir, '/');
+
+	global $directory;
+}
+if (array_key_exists("m",$options)) {
+	$mPath = $options['m'];
+	$masterPath = rtrim($mPath, '/');
 }
 if (!array_key_exists("d",$options) && !array_key_exists("f",$options)) {
-  print $Usage;
-  exit(1);
+	print $Usage;
+	exit(1);
 }
+/*
+ * bug: where is a single file processed?
+ */
 
-/* load the master results to compare against */
+/* load the master results to compare against, the results are filtered
+ * as part of the load
+ */
 $Master = array();
-$Master = loadMasterResults();
+$Master = loadMasterResults($masterPath);
 
-/* Get the list of input files */
-$FileList = array();
-$FL = allFilePaths($directory);
-//print "allFILEPATHS returned:\n";print_r($FL) . "\n";
-$FileList = filesByDir($directory);
-print "FilesByDir returned:\n";print_r($FileList) . "\n";
+//print "Master file is:\n";print_r($Master) . "\n";
 
-exit(777);
+/*
+ Use a trick here.  Since the subdir paths for the eddy tests must be the
+ same as the master results file, we can cheat.  using the directory passed in
+ all we have to do is pass in the path from the master file, since they must
+ be the same, it will be the correct path and don't have to actually do
+ any processing of the directory passed in.
+ */
 
+/* Get the list of input files, using the subdir path as the key
+ $FileList = array();
+ $FL = allFilePaths($directory);
+ print "allFilePaths returned:\n";print_r($FL) . "\n";
+
+ $FileList = filesByDir($directory);
+ //print "FilesByDir returned:\n";print_r($FileList) . "\n";
+ */
 /* analyze each file for possible licenses */
-$all        = array();
-$foNomosRaw = array();
+$all          = array();
+$nomosResults = array();
 
-$foNomosRaw = foLicenseAnalyis($FileList,'chanomos');
-if(empty($foNomosRaw)) {
-  print "FATAL! fo-nomos analysis Failed!\n";
-  debug_print_backtrace();
-  exit(1);
+// need file logic here....
+$nomosResults = foLicenseAnalyis($Master, 'nomos');
+
+//print "Nomos results are:\n";print_r($nomosResults) . "\n";
+
+if(empty($nomosResults)) {
+	print "FATAL! nomos analysis Failed!\n";
+	debug_print_backtrace();
+	exit(1);
 }
-//print "foNomos results are:\n";print_r($foNomosRaw) . "\n";
 
-// need to expand this and put it back together like it was passed in.
-$fileResults = array();
-foreach($foNomosRaw as $topDir => $results) {
-  foreach($results as $dir => $fileList) {
-    foreach($fileList as $file => $answer) {
-      $answer = trim($answer);
-      $list = filterNomosResults($answer);     // name filter
-      $all = explode(",",$list);
-      $fileResults[$file] = $all;
-    }
-    $dirResults[$dir] = $fileResults;
-    $fileResults = array();
-  }
-  $filtered[$topDir] = $dirResults;
-  $dirResults = array();
-}
-//print "Filtered foNomos results are:\n";print_r($filtered) . "\n";
-
-
-/* Compare to master */
-$Results = compare2Master($filtered, $Master);
+$Results = compare2Master($nomosResults, $Master);
 
 $totals     = $Results[0];
-$tbyDir     = $Results[1];
-$allResults = $Results[2];
-print "Comparison totals are:\n";print_r($totals) . "\n";
-print "Totals by Dir are:\n";print_r($tbyDir) . "\n";
-print "Comparison results are:\n";print_r($allResults) . "\n";
+$allResults = $Results[1];
 
+//print "Comparison results are:\n";print_r($allResults) . "\n";
+
+print "Nomos license match results:\n";
+print "\tPasses: {$totals['pass']}\n";
+print "\tFailures: {$totals['fail']}\n";
+
+if($totals['fail'] != 0) {
+	print "Failures are:\n";
+	foreach($allResults as $fpath => $results) {
+		foreach($results as $key => $lic) {
+			if($key === 'fail') {
+				if(empty($lic)) {
+					continue;
+				}
+				else {
+					print "$fpath:\n";
+					foreach($lic as $failure) {
+						print "    $failure\n";
+					}
+				}
+			}
+		} // foreach
+	} // foreach
+} // if
+
+//print "Comparison results are:\n";print_r($allResults) . "\n";
 exit(777);
+
+
 /* store comparison results in a file */
 $saveFile = 'FoNomos-Results-Summary.' . date('YMd');
 if(saveTotals($saveFile, 'foNomos', $totals)){
-  print "fo-nomos Summary results generated and saved in file:\n$saveFile\n";
+	print "fo-nomos Summary results generated and saved in file:\n$saveFile\n";
 }
 else {
-  print "Error! could not save results, printing to the screen\n";
-  foreach($totals as $file => $result){
-    print "$file: $result\n";
-  }
+	print "Error! could not save results, printing to the screen\n";
+	foreach($totals as $file => $result){
+		print "$file: $result\n";
+	}
 }
 
-$saveFile = 'FoNomos-All-Results.' . date('YMd');
+$saveFile = 'Nomos-Eddy-Results.' . date('YMd');
 if(saveAllResults($saveFile, $allResults)){
-  print "fo-nomos results generated and saved in file:\n$saveFile\n";
-  exit(0);
+	print "nomos results generated and saved in file:\n$saveFile\n";
+	exit(0);
 }
 else {
-  print "Error! could not save results, printing to the screen\n";
-  foreach($Result as $file => $result){
-    print "$file: $result\n";
-  }
-  exit(1);
+	print "Error! could not save results, printing to the screen\n";
+	foreach($Result as $file => $result){
+		print "$file: $result\n";
+	}
+	exit(1);
 }
 ?>
