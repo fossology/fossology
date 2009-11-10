@@ -56,10 +56,13 @@ void memStats(char *s);
 #endif	/* MEMSTATS */
 
 void makeSymlink(char *path);
+
 #ifdef notdef
 int fileTypeIs(char *pathname, int index, char *magicData);
 int fileIsShar(char *textp, char *magicData);
 #endif /* notdef */
+
+void freeAndClearScan(struct curScan *thisScan);
 void printRegexMatch(int n, int cached);
 char *mmapFile(char *pathname);
 void mmapOpenListing();
