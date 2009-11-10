@@ -1724,8 +1724,8 @@ void Error(const char *fmt, ...)
 }
 
 
-void Fatal(const char *fmt, ...)
-{
+void Fatal(const char *fmt, ...) {
+
     va_start(ap, fmt);
     (void) sprintf(utilbuf, "%s: FATAL: ", gl.progName);
     (void) vsprintf(utilbuf+strlen(utilbuf), fmt, ap);
@@ -1737,6 +1737,7 @@ void Fatal(const char *fmt, ...)
 
     (void) strcat(utilbuf, "\n");
     Msg("%s", utilbuf);
+    freeAndClearScan(&cur);
     Bail(1);
 }
 
