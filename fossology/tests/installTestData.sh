@@ -23,7 +23,11 @@
 #
 # best if run as fosstester, root will work ok too.
 #
-echo "This script should be run as either the fosstester or root user"
+
+#
+# NOTE: This script should be run as either the fosstester or root user
+#
+
 thisdir=`pwd`
 error_cnt=0
 filelist='.bash_aliases .bashrc .subversion .svn'
@@ -76,18 +80,20 @@ cd ~fosstester/licenses
 mkdir -p Tdir
 cp BSD_style_* Tdir
 #
-# download simpletest into ~fosstester/archives
-#
+# download simpletest into ~fosstester/archives, don't depend on the user
+# to have set a proxy.  Just set it.
 #
 cd /home/fosstester/archives
-if [ -r '/usr/local/etc/fossology/Proxy.conf' ]
-then 
-   sh -c ". /usr/local/etc/fossology/Proxy.conf; wget -q 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'"
-else
-if [ -r '/etc/fossology/Proxy.conf' ]
+
+if [ -e 'simpletest_1.0.1.tar.gz' ]
 then
-   sh -c " . /etc/fossology/Proxy.conf; wget -q 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'"
-fi
+   echo "NOTE: simpletest already downloaded, skipping" 
+else
+   export export https_proxy='http://lart.fc.hp.com:3128/'
+   export http_proxy=http://lart.fc.hp.com:3128/
+   export ftp_proxy=http://lart.fc.hp.com:3128/
+   echo "downloading simpletest" 
+   sh -c "wget -q 'http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz'" 
 fi
 #
 # make test automation reporting directories under public_html
