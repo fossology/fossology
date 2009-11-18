@@ -124,7 +124,7 @@ pid_t	LockName	(char *ProcessName)
   if (-1 == Handle)
   {
     /* create failed */
-    LogPrint("*** %s failed on shm_open. %s\n", ProcessName, strerror(errno));
+    LogPrint("*** lock %s failed on shm_open (probably in /dev/shm). %s\n", ProcessName, strerror(errno));
     return (-1);
   }
   

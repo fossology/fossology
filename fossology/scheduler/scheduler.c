@@ -231,7 +231,7 @@ int	main	(int argc, char *argv[])
   }
   else
   {
-    LogPrint("*** %s lock failed. ***\n", ProcessName);
+    LogPrint("*** %s lock failed.  Scheduler exitting. ***\n", ProcessName);
     exit(-1);
   }
 

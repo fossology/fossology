@@ -64,6 +64,7 @@ int	SelfTest	()
   if (!Fin)
     {
     LogPrint("FATAL: Unable to run mkschedconf for self-test.\n");
+    LogPrint("FATAL: %s\n", MkConfig);
     return(1);
     }
   /* read every line and check if the agent exists */
@@ -199,8 +200,9 @@ int	SelfTest	()
 		  }
 		for(i=0; (Line[1][i] != 0) && !strchr("=:",Line[1][i]); i++) ;
 		LogPrint("FATAL: The difference is %.*s\n",i,Line[1]);
-		LogPrint("  Observed on scheduler system: %s\n",Line[1]);
-		LogPrint("  Mismatch on %s: %s\n",HostList[HostId].Hostname, Line[0]);
+		LogPrint("  Observed on scheduler system: %s\n",Line[0]);
+		LogPrint("  Scheduler system command: %s\n",SelfTest);
+		LogPrint("  Mismatch on %s: %s\n",HostList[HostId].Hostname, Line[1]);
 		}
 	  rc=0;
 	  HostCheck[HostId] = -1;

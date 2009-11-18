@@ -461,7 +461,7 @@ void	CheckPids	()
 		}
 	if (Verbose)
 		{
-		fprintf(stderr,"Child[%d] (pid=%d) found dead\n",Thread,CM[Thread].ChildPid);
+		LogPrint("INFO: Child[%d] (pid=%d) found dead\n",Thread,CM[Thread].ChildPid);
 		}
 	if (CM[Thread].Status==ST_RUNNING)
 		{
@@ -561,7 +561,7 @@ void	HandleSig	(int Signo, siginfo_t *Info, void *Context)
     {
     case SIGCHLD:
 	/* we could decide to respawn the process... */
-	if (Verbose) fprintf(stderr,"Child[%d] (pid=%d) died?\n",Thread,Info->si_pid);
+	if (Verbose) LogPrint("INFO: Child[%d] (pid=%d) died?\n",Thread,Info->si_pid);
 	/***
 	 Problem: SIGCHLD indicates that "one or more" children died.
 	 Solution: Check for any other dead children.
