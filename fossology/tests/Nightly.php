@@ -133,6 +133,9 @@ print_r($results) . "\n";
 
 /*
  * At this point should have results, generate the results summary and email it.
+ * 
+ * 10-29-2009: the results are generated in testFOSSology.php and mailed there
+ * for now.... it should be done here.
  */
 
 

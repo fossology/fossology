@@ -209,7 +209,7 @@ if (array_key_exists("a", $options)) {
   if (chdir('../Users') === FALSE) {
     LogAndPrint($LF, "ALL Tests ERROR: can't cd to $UserTests\n");
   }
-  $UsersLast = exec("fo-runTests -l \"`ls`\ -n 'User Tests' >> $logFile 2>&1", $dummy, $Urtn);
+  $UsersLast = exec("fo-runTests -l \"`ls`\" -n 'User Tests' >> $logFile 2>&1", $dummy, $Urtn);
   LogAndPrint($LF, "\n");
 
   if (chdir($Home) === FALSE) {
@@ -220,7 +220,7 @@ if (array_key_exists("a", $options)) {
   if (chdir($EmailTests) === FALSE) {
     LogAndPrint($LF, "ALL Tests ERROR: can't cd to $EmailTests\n");
   }
-  $EmailLast = exec("fo-runTests -l \"`ls`\ -n 'Email Tests' >> $logFile 2>&1", $dummy, $ENrtn);
+  $EmailLast = exec("fo-runTests -l \"`ls`\" -n 'Email Tests' >> $logFile 2>&1", $dummy, $ENrtn);
   LogAndPrint($LF, "\n");
   /*
    * The verify tests require that uploads be done first.
@@ -237,6 +237,7 @@ if (array_key_exists("a", $options)) {
   foreach($tossme as $line){
     print "$line\n";
   }
+  print "testFOSSology: jobsDone is:$jobsDone\n";
   if ($jobsDone != 0) {
     print "ERROR! jobs are not finished after two hours, not running" .
     "verify tests, please investigate and run verify tests by hand\n";
@@ -253,7 +254,9 @@ if (array_key_exists("a", $options)) {
     }
     $resultsHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
     $reportHome = "$resultsHome" . "$logFileName";
-    $last = exec("./textReport.php -f $reportHome", $tossme, $rptGen);
+    print "testFOSSology: reportHOME is:$reportHome\n";
+    $last = exec("./textReport.php -f $reportHome | 
+    mailx -s \"test results\" mark.donohoe@hp.com", $tossme, $rptGen);
   }
   exit(0);
 }
