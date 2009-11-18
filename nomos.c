@@ -52,7 +52,7 @@ struct globals gl;
 struct curScan cur;
 int schedulerMode = 0; /**< Non-zero when being run from scheduler */
 
-char *files_to_be_scanned[]; /**< The list of files to scan */
+char **files_to_be_scanned; /**< The list of files to scan */
 int file_count = 0;
 
 #define	_MAXFILESIZE	/* was 512000000-> 800000000 */	1600000000
@@ -116,7 +116,7 @@ int checkRefLicense(char *licenseName) {
 
     int rfFk = -1;
     int numRows = 0;
-    int *error;
+    int error;
     size_t len;
     size_t finalLen;
 
@@ -129,7 +129,7 @@ int checkRefLicense(char *licenseName) {
 
     /* pass every name to the postgres function to escape thing properly */
 
-    finalLen = PQescapeStringConn(gl.pgConn, sqlClean, licenseName, len, error);
+    finalLen = PQescapeStringConn(gl.pgConn, sqlClean, licenseName, len, &error);
 
     sprintf(query,
             "SELECT rf_pk, rf_shortname FROM license_ref WHERE rf_shortname "
@@ -334,7 +334,7 @@ void parseLicenseList() {
     int numLics = 0;
 
     /* char saveLics[myBUFSIZ]; */
-    char *saveptr; /* used for strtok_r */
+    char *saveptr = 0; /* used for strtok_r */
     char *saveLicsPtr;
 
     if ((strlen(cur.compLic)) == 0) {
@@ -819,6 +819,7 @@ int main(int argc, char **argv) {
 
     int i;
     int c;
+    long recs_processed = 0;
 
     char *cp;
     char *agent_desc = "Nomos License Detection Agency";
@@ -957,9 +958,9 @@ int main(int argc, char **argv) {
         /* printf("   LOG: nomos agent starting up in scheduler mode....\n");  DEBUG */
         schedulerMode = 1;
         signal(SIGALRM, ShowHeartbeat);
-        printf("OK\n");
+
+        printf("OK %d\n", gl.agentPk);
         fflush(stdout);
-        alarm(60);
 
         while (ReadLine(stdin, parm, myBUFSIZ) >= 0) {
             /* printf("    LOG: nomos read %s\n", parm); DEBUG */
@@ -981,6 +982,12 @@ int main(int argc, char **argv) {
                 processFile(repFile);
                 recordScanToDB(&cur);
                 freeAndClearScan(&cur);
+
+                recs_processed++;
+                
+                /* update progress for scheduler */
+                Heartbeat(recs_processed);
+
                 /* recordAgentStatus(); */
                 printf("OK\n");
                 fflush(stdout);
@@ -1009,5 +1016,9 @@ int main(int argc, char **argv) {
         }
     }
     Bail(0);
+
+    /* this will never execute but prevents a compiler warning about reaching 
+       the end of a non-void function */
+    return(0);
 }
 
