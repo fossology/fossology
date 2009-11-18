@@ -72,7 +72,12 @@ int	ReadChild	(int Thread)
 
     if (!strncmp(Cmd,"OK",2))
 	  {
-      DBclose(CM[Thread].DB); CM[Thread].DB = NULL;
+      DBclose(CM[Thread].DB); 
+      CM[Thread].DB = NULL;
+
+      /* v 1.2 OK can be followed by the agent_pk */
+      if (atoi(Cmd+2) > 0) CM[Thread].DBagent = atoi(Cmd+2);
+
       /* Keep track of how long it was in the previous !ST_READY state.
       This is used by DBremoveChild for logging durations. */
       /* set number of processed items, if it is not already set */
@@ -329,7 +334,7 @@ void	CheckChildren	(time_t Now)
         (CM[Thread].Heartbeat + MAXHEARTBEAT < Now))
 	{
 	/* No sound from the child; assume child is hung */
-	printf("ERROR[%d]: No heartbeat from child.\n",Thread);
+	LogPrint("ERROR:[%d] No heartbeat from child.\n",Thread);
 	KillChild(Thread);
 	}
 #endif

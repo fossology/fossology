@@ -197,7 +197,11 @@ void	DBremoveChild	(int Thread, int Status, char *Message)
 	  } /* foreach MSQ */
 	} /* if MSQ request */
   /* MSQ only gets here if all jobs are done. */
-  if (CM[Thread].IsDB)	DBUpdateJob(CM[Thread].DBJobKey,UpdateType,Message);
+  if (CM[Thread].IsDB)	
+  {
+    if (Verbose) LogPrint("%s %d All jobs done, CM[%d].DBJobKey: %d, UpdateType: %d\n", __FILE__, __LINE__, Thread, CM[Thread].DBJobKey, UpdateType);
+    DBUpdateJob(CM[Thread].DBJobKey,UpdateType,Message);
+  }
 
   CM[Thread].IsDB = 0; /* no longer a DB request */
   CM[Thread].IsDBRepeat = 0; /* no longer a repeat request */
@@ -209,8 +213,10 @@ void	DBremoveChild	(int Thread, int Status, char *Message)
  If the agent does not exist, then add it.
  Attribute fields that are used: agent= and version=.
  Either may be any string!  (NULL or non-numbers are fine!)
+ As of 1.2, this should only be called when the agent did
+ not use the new "OK agent_pk" syntax.
  **********************************************/
-int	DBGetAgentIndex	(char *Attr, int HasAgent)
+int	DBGetAgentIndex(char *Attr, int HasAgent)
 {
   char SQL[MAXCMD];
   char *Val;
@@ -253,11 +259,16 @@ int	DBGetAgentIndex	(char *Attr, int HasAgent)
  DBQ and row = queue item being processed.
  Returns MSQ index, or -1 on failure (not enough room).
  ***********************************************************/
-int	DBMSQinsert	(void *DBQ, int Row)
+int	DBMSQinsert	(void *DBQ, int Row, int Thread)
 {
   int i,j;
   void *DBtmp;
   int CountJobType;
+  char *sql;
+  char *strptr;
+  char *sqljq_args;
+  char  sqlbuf[4096];
+  int  rs;
 #if 0
   char *RunOnPfile;
 #endif
@@ -311,7 +322,20 @@ int	DBMSQinsert	(void *DBQ, int Row)
   MSQ[i].IsRepeat = !strcasecmp(DBgetvaluename(DBQ,Row,"jq_repeat"),"yes");
   MSQ[i].IsUrgent = DBMkAttr(DBQ,Row,MSQ[i].Attr,MAXCMD);
   strncpy(MSQ[i].HostCol,DBgetvaluename(DBQ,Row,"jq_runonpfile"),MAXCMD-1);
-  MSQ[i].DBagent = DBGetAgentIndex(MSQ[i].Type,0);
+  if (Thread >= 0)
+  {
+    if (CM[Thread].DBagent > 0)
+    {
+      MSQ[i].DBagent = CM[Thread].DBagent;
+      if (Verbose) LogPrint("DEBUG: Set MSQ[%d].DBagent = CM[%d].DBagent (%d)\n", i, Thread, CM[Thread].DBagent);
+    }
+  }
+  else
+  {
+    MSQ[i].DBagent = DBGetAgentIndex(MSQ[i].Type,0);
+    if (Verbose) LogPrint("DEBUG: Set MSQ[%d].DBagent to %d \n", i, MSQ[i].DBagent);
+  }
+
   while(isspace(MSQ[i].HostCol[strlen(MSQ[i].HostCol)-1]))
 	{
 	MSQ[i].HostCol[strlen(MSQ[i].HostCol)-1] = '\0';
@@ -327,9 +351,28 @@ int	DBMSQinsert	(void *DBQ, int Row)
     DBUpdateJob(MSQ[i].JobId,0,NULL);
     if (Verbose)
 	{
-	LogPrint("SQL: '%s'\n",DBgetvaluename(DBQ,Row,"jq_args"));
+	LogPrint("SQL (jq_args): '%s'\n",DBgetvaluename(DBQ,Row,"jq_args"));
 	}
-    switch(DBLockAccess(DB,DBgetvaluename(DBQ,Row,"jq_args")))
+
+  /* substitute !agent_pk! (length 10) in jq_args for the real agent_pk */
+  sqljq_args = DBgetvaluename(DBQ,Row,"jq_args");
+  /* sql will contain the substituted string, 10 is arbitrary to 
+     insure string is long enough for the substitution */
+  strptr = strstr(sqljq_args, "!agent_pk!");
+  if (strptr)
+  {
+    *strptr = 0;
+    sprintf(sqlbuf, "%s'%d' %s", sqljq_args, MSQ[i].DBagent, strptr+10);
+    sql = sqlbuf;
+    if (Verbose) LogPrint("sql after !agent_pk! substitution: %s\n",sql);
+  }
+  else
+  {
+    sql = sqljq_args;
+  }
+
+    rs = (DBLockAccess(DB,sql));
+    switch(rs)
 	{
 	case 0: /* no data; mark it as done */
 		if (Verbose)
@@ -459,12 +502,6 @@ int	DBCheckPendingMSQ	()
 	{ /* process segment */
 	if (MSQ[i].Processed[j] != ST_READY) continue;
 
-	/* found an item to process */
-	if (Verbose)
-	  {
-	  LogPrint("MSQ: Checking items in MSQ[%d]\n",i);
-	  }
-
 	DBMkArgCols(MSQ[i].DBQ,j,Arg,MAXCMD);
 	memset(Attr,'\0',MAXCMD);
 	strcpy(Attr,MSQ[i].Attr);
@@ -527,7 +564,7 @@ int	DBCheckPendingMSQ	()
 	} /* for each item j in the MSQ */
       } /* if MSQ[i].JobId >= 0 */
     } /* for each MSQ i */
-  if (Verbose)
+  if (Verbose > 1)
     {
     LogPrint("DBCheckPendingMSQ()=%d\n",rc);
     }
@@ -559,8 +596,9 @@ int	DBProcessQueue	()
   int Thread;
   void *DBQ;	/* the database queue results */
   char *Value;
-  static time_t Poll=0;	/* time for next poll */
+  static time_t Poll=0;  /* time for next poll */
   time_t Now;
+
   int Job_Id;
 
   /***********************************
@@ -568,17 +606,19 @@ int	DBProcessQueue	()
    ***********************************/
   IsProcess = DBCheckPendingMSQ(DB);
 
-  /* prevent fast spawning! */
+  /* prevent fast polling! 
+     Take this out and there will be continuous polling
+     which will consume a cpu and do lots of database I/O */
   Now = time(NULL);
-  if (Poll >= Now-10)
+  if (Poll >= Now-1)
     {
     if (IsProcess > 1) return(2);
     /* ok, nothing processed, and it is too soon to poll the DB */
     if (SelectAnyData(0,0) == 0)
-	{
-	/* no running processes?  Just sleep... */
-	usleep(100000); /* one tenth of a second */
-	}
+ {
+ /* no running processes?  Just sleep... */
+ usleep(100000); /* one tenth of a second */
+ }
     return(IsProcess);
     }
   Poll=Now;
@@ -587,7 +627,7 @@ int	DBProcessQueue	()
      new ones. */
   if (SLOWDEATH) return(IsProcess);
 
-  if (Verbose) printf("Checking DB\n");
+  //if (Verbose) printf("Checking DB\n");
 
   /***********************************
    Get the queue, and prioritize it by job_priority.
@@ -611,10 +651,7 @@ int	DBProcessQueue	()
     {
   rc = DBLockAccess(DB,"SELECT DISTINCT(jobqueue.*), job.* FROM jobqueue LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk LEFT JOIN jobqueue AS depends ON depends.jq_pk = jobdepends.jdep_jq_depends_fk LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk WHERE jobqueue.jq_starttime IS NULL AND ( (depends.jq_endtime IS NOT NULL AND depends.jq_end_bits < 2 ) OR jobdepends.jdep_jq_depends_fk IS NULL) ORDER BY job.job_priority DESC,job.job_queued ASC LIMIT 6;");
     }
-  if (Verbose)
-    {
-    LogPrint("SQL: Getting queue = %d :: %d items\n",rc,DBdatasize(DB));
-    }
+
   if (rc == 1) /* if get list of queued items */
     {
     /* save results in DBQ since DB may be use for other requests */
@@ -622,7 +659,7 @@ int	DBProcessQueue	()
     if (!IsProcess) IsProcess=1; /* there is something in the queue */
     MaxRow = DBdatasize(DBQ);
     if (MaxRow <= 0) return(0);
-    if (Verbose) printf("Items in queue: %d\n",MaxRow); fflush(stdout);
+//    if (Verbose) printf("Items in queue: %d\n",MaxRow); fflush(stdout);
     for(Row=0; Row < MaxRow; Row++)
       {
       if (SLOWDEATH) return(IsProcess);
@@ -639,23 +676,23 @@ int	DBProcessQueue	()
 
       /* check if this is a multi-SQL result */
       Value = DBgetvaluename(DBQ,Row,"jq_runonpfile");
-      /* if jq_runonpfile is defined, then it is a MSQ request */
-      if (Value && (Value[0] != '\0'))
-        {
-	/* found another high-priority item -- add it and check it */
-	DBMSQinsert(DBQ,Row);
-	if (DBCheckPendingMSQ(DB) == 2) IsProcess=2;
-	continue;
-	}
-
-      /** If it gets here, it is not a multi-SQL (MSQ) request **/
 
       /* convert DBQ request into a queue request */
       IsUrgent = DBMkAttr(DBQ,Row,Attr,sizeof(Attr));
       DBMkArg(DBQ,Row,Arg,MAXCMD);
       ArgLen = strlen(Arg);
-
       Thread = GetChild(Attr,IsUrgent);
+
+      /* if jq_runonpfile is defined, then it is a MSQ request */
+      if (Value && (Value[0] != '\0'))
+        {
+	/* found another high-priority item -- add it and check it */
+	DBMSQinsert(DBQ,Row, Thread);
+	if (DBCheckPendingMSQ(DB) == 2) IsProcess=2;
+	continue;
+	}
+
+      /** If it gets here, it is not a multi-SQL (MSQ) request **/
       if (Thread >= 0)
 	{
 	/* mark the DB queue item as taken */
