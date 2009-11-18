@@ -122,18 +122,6 @@ class agent_fonomos extends FO_Plugin {
     }
 
     /*
-       Get the agent pk for the agent to be scheduled, the C version of this
-       routine, has the svn_rev set to: VERSION, SVN_REV. GetAgentKey fixes this,
-       just pass in SVN_REV.
-    */
-
-    $agentPk = GetAgentKey('nomos', $uploadpk, $SVN_REV, 'Nomos License Detection Agency' );
-    
-    if($agentPk == -1) {
-      return ("FATAL! Could not find Agent Nomos in the Agent Table");
-    }
-
-    /*
        Using the latest agent revision, find all the records still needing processing
        this requires knowing the agents fk. (See above)
      */
@@ -142,8 +130,9 @@ class agent_fonomos extends FO_Plugin {
               pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size  AS pfilename
               FROM (SELECT distinct(pfile_fk) AS PF
               FROM uploadtree WHERE upload_fk=$uploadpk and (ufile_mode&x'3C000000'::int)=0) as SS
-              left outer join license_file on (PF=pfile_fk and agent_fk=$agentPk)
-              inner join pfile on (PF=pfile_pk) WHERE fl_pk IS null LIMIT 5000;";
+              left outer join license_file on (PF=pfile_fk and agent_fk=!agent_pk!)
+              inner join pfile on (pf=pfile_pk)
+              WHERE fl_pk IS null LIMIT 5000;";
 
     /*
       Hand of the SQL  to the scheduler
