@@ -40,25 +40,25 @@
  */
 function allFilePaths($dir) {
 
-  $fileList = array();
-  if(empty($dir)) {
-    return($fileList);  // nothing to process, return empty list.
-  }
-  try {
-    foreach(new recursiveIteratorIterator(
-    new recursiveDirectoryIterator($dir)) as $file) {
-      $fileList[] = $file->getPathName($file);
-    }
-    return($fileList);
-  }
-  /*
-   * if the directory does not exist or the directory or a sub directory
-   * does not have sufficent permissions for reading return an empty list
-   */
-  catch(Exception $e) {
-    print $e->getMessage();
-    return(array());
-  }
+	$fileList = array();
+	if(empty($dir)) {
+		return($fileList);  // nothing to process, return empty list.
+	}
+	try {
+		foreach(new recursiveIteratorIterator(
+		new recursiveDirectoryIterator($dir)) as $file) {
+			$fileList[] = $file->getPathName($file);
+		}
+		return($fileList);
+	}
+	/*
+	 * if the directory does not exist or the directory or a sub directory
+	 * does not have sufficent permissions for reading return an empty list
+	 */
+	catch(Exception $e) {
+		print $e->getMessage();
+		return(array());
+	}
 }
 
 /**
@@ -70,17 +70,17 @@ function allFilePaths($dir) {
  */
 function escapeDots($string)
 {
-  if (empty ($string))
-  {
-    return (FALSE);
-  }
-  $estring = preg_replace('/\./', '\\.', $string);
-  //print  "ED: string is:$string, estring is:$estring\n";
-  if ($estring === NULL)
-  {
-    return (FALSE);
-  }
-  return ($estring);
+	if (empty ($string))
+	{
+		return (FALSE);
+	}
+	$estring = preg_replace('/\./', '\\.', $string);
+	//print  "ED: string is:$string, estring is:$estring\n";
+	if ($estring === NULL)
+	{
+		return (FALSE);
+	}
+	return ($estring);
 }
 
 /**
@@ -97,13 +97,13 @@ function escapeDots($string)
 
 function getHost($URL)
 {
-  if (empty ($URL))
-  {
-    return (NULL);
-  }
-  $found = parse_url($URL, PHP_URL_HOST);
-  //print "DB: getHost: url is:$URL\nafter parse, found is:$found\n";
-  return ($found);
+	if (empty ($URL))
+	{
+		return (NULL);
+	}
+	$found = parse_url($URL, PHP_URL_HOST);
+	//print "DB: getHost: url is:$URL\nafter parse, found is:$found\n";
+	return ($found);
 } // getHost
 
 /**
@@ -118,37 +118,37 @@ function getHost($URL)
  *
  */
 function getMailSubjects() {
-  /*
-   * use preg_match, but the test must be run by the user who owns the email file
-   * in /var/mail.
-   */
-  $MailFile = "/var/mail/";
+	/*
+	 * use preg_match, but the test must be run by the user who owns the email file
+	 * in /var/mail.
+	 */
+	$MailFile = "/var/mail/";
 
-  //$user = get_current_user();
-  $user = exec('id -un', $out, $rtn);
-  $UserMail = $MailFile . $user;
-  if(file_exists($UserMail) === FALSE) {
-    return(array("ERROR! $UserMail does not exist"));
-  }
-  $FH = fopen($UserMail,'r');
-  if($FH === FALSE) {
-    return(array("ERROR! Cannot open $UserMail"));
-  }
-  while (! feof($FH)){
-    $line = fgets($FH);
-    $matched = preg_match('/Subject:\sFOSSology Results.*?$/',$line, $matches);
-    if($matched) {
-      $Subjects[] = $line;
-    }
-  }
-  return($Subjects);
+	//$user = get_current_user();
+	$user = exec('id -un', $out, $rtn);
+	$UserMail = $MailFile . $user;
+	if(file_exists($UserMail) === FALSE) {
+		return(array("ERROR! $UserMail does not exist"));
+	}
+	$FH = fopen($UserMail,'r');
+	if($FH === FALSE) {
+		return(array("ERROR! Cannot open $UserMail"));
+	}
+	while (! feof($FH)){
+		$line = fgets($FH);
+		$matched = preg_match('/Subject:\sFOSSology Results.*?$/',$line, $matches);
+		if($matched) {
+			$Subjects[] = $line;
+		}
+	}
+	return($Subjects);
 } //getMailSubjects
 
 function lastDir($dirpath) {
-  // can't have a tailing slash, remove it if there
-  $dirpath = rtrim($dirpath, '/');
-  $directories = explode('/',$dirpath);
-  return(end($directories));
+	// can't have a tailing slash, remove it if there
+	$dirpath = rtrim($dirpath, '/');
+	$directories = explode('/',$dirpath);
+	return(end($directories));
 }
 
 /**
@@ -162,85 +162,97 @@ function lastDir($dirpath) {
  * @return the http string or NULL on error
  */
 function makeUrl($host, $query) {
-  if (empty ($host)) {
-    return (NULL);
-  }
-  if (empty ($query)) {
-    return (NULL);
-  }
-  return ("http://$host$query");
+	if (empty ($host)) {
+		return (NULL);
+	}
+	if (empty ($query)) {
+		return (NULL);
+	}
+	return ("http://$host$query");
 }
+
+
+/**
+ * \brief given a directory name, return a array of subdir paths and an array of
+ * the files under the last subdir.
+ *
+ * @param string $dir
+ * @return array ByDir, an array of arrays.
+ *
+ * array[dirpath]=>(array)list of files under leaf dir
+ * 
+ * \todo test this routine with files other than the leaf dirs, does it work?
+ *
+ */
 
 function filesByDir($dir) {
 
-  $ByDir = array();
-  $fileList = array();
-  if(empty($dir)) {
-    return($fileList);  // nothing to process, return empty list.
-  }
-  $curDir = lastDir($dir);
-  print "DB: at the top curDir is:$curDir\n";
-  try {
-    //foreach(new recursiveIteratorIterator(new recursiveDirectoryIterator($dir)) as $file) {
-    $dirObjects = new recursiveIteratorIterator(new recursiveDirectoryIterator($dir),RecursiveIteratorIterator::SELF_FIRST);
-    // dirobjs is recusiveIteratorIterator object
-    foreach($dirObjects as $name => $obj) {
-      print "name is:$name\n";
-      //print "obj is:$obj\n";
-      continue;
-      $f = new recursiveDirectoryIterator($dir);
-      $sb = $f->getSubPath();
-      $sbn = $f->getSubPathName();
-      print "DB: subpath is:$sb\n";
-      print "DB: subpathname is:$sbn\n";
-      $dirpath = $file->getPath();
-      print "DB: dirpath is:$dirpath\n";
-      /*
-       if($dirpath !== $dir) {
-       //filesByDir($dirpath);
-       $dirs = explode('/',$dirpath);
-       $last = end($dirs);
-       $curDir = prev($dirs);
-       print "DB: (prev) adjusted curDir is:$curDir\n";
-       }
-       */
-      print "DB: dirpath is:$dirpath\n";
-      $lastDir = lastDir($dirpath);
-      //print "DB: lastDir is:$lastDir\n";
-      if($curDir == $lastDir) {
-        $fileList[] = $file->getFilename();
-      }
-      else {
-        /*
-         The check below is for the first time through the loop.  If the check
-         is not there, then the first entry in the final array is always empty.
-         */
-        if(empty($fileList)) {
-          $curDir = $lastDir;
-          continue;
-        }
-        print "DB: dir is:$dir\n";
-        $dir = rtrim($dir, '/');
-        print "DB: in loop curDir is:$curDir\n";
-        $key = $dir . "/$curDir";
-        print "DB: key is:$key\n";
-        $ByDir[$key] = $fileList;
-        $curDir = $lastDir;
-        $fileList = array();
-        // add the current entry in
-        $fileList[] = $file->getFilename();
-      }
-    }
-    return($ByDir);
-    }
+	$ByDir = array();
+	$fileList = array();
+	$subPath = '';
 
-    /*
-     if the directory does not exist or the directory or a sub directory
-     does not have sufficent permissions for reading return an empty list
-     */
-    catch(Exception $e) {
-      //print "in exception!\n$e\n";
-      return(array());
-    }
-  } // fileByDir
-  ?>
+	if(empty($dir)) {
+		return($fileList);  // nothing to process, return empty list.
+	}
+
+	try {
+		$dirObject = new recursiveIteratorIterator(
+		new recursiveDirectoryIterator($dir),RecursiveIteratorIterator::SELF_FIRST);
+		// dirobjs is recusiveIteratorIterator object
+		foreach($dirObject as $name) {
+				
+			$aSubPath = $dirObject->getSubPath();
+				
+			/*
+			 * if we changed subpaths, we are in a new sub-dir, reset the file list
+			 */
+			if($aSubPath != $subPath) {
+				//print "DB: fileByDir: asb != sb, Init fileList!\n";
+				$fileList = array();
+			}
+
+			if(is_file($name)) {
+				$subPath = $dirObject->getSubPath();
+				$spn = $dirObject->getSubPathName();
+				$subDir = dirname($spn);
+				if($subDir == $aSubPath) {
+					$fileName = $dirObject->getFilename();
+					$fileList[] = $fileName;
+				}
+			}
+			if (empty($subPath)){
+				continue;
+			}
+			else {
+				if(empty($fileList)){
+					continue;
+				}
+				$ByDir[$subPath] = $fileList;
+			}
+
+			/* Debug
+			 *
+			 $subPath = $dirObject->getSubPath();
+			 print "DB: fileByDir: subpath is:$subPath\n";
+			 $sbn = $dirObject->getSubPathName();
+			 print "DB: fileByDir: subpathname is:$sbn\n";
+			 $dirpath = $dirObject->getPath();
+			 print "DB: fileByDir: dirpath is:$dirpath\n";
+			 	
+			 */
+
+		} // foreach
+		//print "DB: fileByDir: ByDir is:\n ";print_r($ByDir) . "\n";
+		return($ByDir);
+	}
+
+	/*
+	 if the directory does not exist or the directory or a sub directory
+	 does not have sufficent permissions for reading return an empty list
+	 */
+	catch(Exception $e) {
+		//print "in exception!\n$e\n";
+		return(array());
+	}
+} // fileByDir
+?>
