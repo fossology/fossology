@@ -1,1 +1,16 @@
-test.py: Takes a path to a file to analyze. The emails address, dates, urls, times and floating point numbers are printed. 
+prototype.py: 
+    takes a list of training files, i.e. `find data/*.label > trainingdata`,
+    and a file to be analyzed.
+
+    The copyright holders are output on a lines with the following format:
+        ... token_{-2} token_{-1} * copyright holder
+
+    Example:
+        $ find data/*.label > trainingdata
+        $ ./prototype.py trainingdata /usr/share/doc/apache2/copyright
+
+    TODO:
+        * Currently the byte offsets get mangled when extracting the emails and
+        urls. Once this is resolved the byte offsets of the copyright holders
+        can be returned.
+        * Convert into C.
