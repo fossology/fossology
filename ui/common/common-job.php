@@ -627,6 +627,7 @@ function JobListSummary($upload_pk) {
   	AND job_upload_fk = '$upload_pk'
   	ORDER BY job_pk;";
   $Results = $DB->Action($SQL);
+  if (empty($Results)) return $Status;
   /* Scan and track the results */
   $JobId = $Results[0]['job_pk'];
   $i = 0;
