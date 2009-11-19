@@ -82,6 +82,7 @@ $UserCacheStat = 0;  // default, don't know
 
     // Get the cached data
     $Result = $DB->Action("SELECT report_cache_value FROM report_cache WHERE report_cache_key='$EscKey'");
+    if (empty($Result)) return;  // no cache records
 
     return $Result[0]['report_cache_value'];
   } // ReportCacheGet()
