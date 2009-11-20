@@ -149,7 +149,7 @@ FUNCTION int      IsFile  (char *Fname, int Link)
  GetAgentKey(): Get the Agent Key from the database.
  Upload_pk is only used for error reporting.
  *********************************************************/
-FUNCTION int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn_rev, char *agent_desc)
+FUNCTION int	GetAgentKey	(void *DB, char * agent_name, char *agent_desc)
 {
   int rc;
   int Agent_pk=-1;    /* agent identifier */
@@ -157,19 +157,18 @@ FUNCTION int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn
   char sqlselect[256];
 
   /* get the exact agent rec requested */
-  sprintf(sqlselect, "SELECT agent_pk FROM agent WHERE agent_name ='%s' ",
+  sprintf(sqlselect, "SELECT agent_pk FROM agent WHERE agent_name ='%s' order by agent_ts desc limit 1",
 		  agent_name );
   rc = DBaccess(DB, sqlselect);
   if ((rc <= 0) || (DBdatasize(DB) <= 0))
   {
     /* no match, so add an agent rec */
-    sprintf(sql, "INSERT INTO agent (agent_name,agent_rev,agent_desc,agent_enabled) VALUES ('%s',E'%s',E'%s','%d')",
-            agent_name, svn_rev, agent_desc, 1);
+    sprintf(sql, "INSERT INTO agent (agent_name,agent_desc,agent_enabled) VALUES ('%s',E'%s','%d')",
+            agent_name, agent_desc, 1);
     rc = DBaccess(DB,sql);
     if (rc < 0)
     {
-      printf("ERROR upload %ld unable to write to the database\n",Upload_pk);
-      printf("LOG upload %ld unable to write %s to the database table agent\n",Upload_pk, agent_name);
+      printf("ERROR: %s %d  GetAgentKey unable to write to the database. %s\n",__FILE__, __LINE__, sql);
       DBclose(DB);
       exit(17);
     }
@@ -177,8 +176,7 @@ FUNCTION int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn
    rc = DBaccess(DB,sqlselect);
    if (rc < 0)
    {
-      printf("ERROR upload %ld unable to access the database\n",Upload_pk);
-      printf("LOG upload %ld unable to select %s from the database table agent\n",Upload_pk, agent_name);
+      printf("ERROR: %s %d  GetAgentKey unable to write to the database. %s\n",__FILE__, __LINE__, sqlselect);
       DBclose(DB);
       exit(18);
     }
