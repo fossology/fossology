@@ -154,6 +154,45 @@ FUNCTION int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn
   int rc;
   int Agent_pk=-1;    /* agent identifier */
   char sql[256];
+  char sqlselect[256];
+
+  /* get the exact agent rec requested */
+  sprintf(sqlselect, "SELECT agent_pk FROM agent WHERE agent_name ='%s' ",
+		  agent_name );
+  rc = DBaccess(DB, sqlselect);
+  if ((rc <= 0) || (DBdatasize(DB) <= 0))
+  {
+    /* no match, so add an agent rec */
+    sprintf(sql, "INSERT INTO agent (agent_name,agent_rev,agent_desc,agent_enabled) VALUES ('%s',E'%s',E'%s','%d')",
+            agent_name, svn_rev, agent_desc, 1);
+    rc = DBaccess(DB,sql);
+    if (rc < 0)
+    {
+      printf("ERROR upload %ld unable to write to the database\n",Upload_pk);
+      printf("LOG upload %ld unable to write %s to the database table agent\n",Upload_pk, agent_name);
+      DBclose(DB);
+      exit(17);
+    }
+
+   rc = DBaccess(DB,sqlselect);
+   if (rc < 0)
+   {
+      printf("ERROR upload %ld unable to access the database\n",Upload_pk);
+      printf("LOG upload %ld unable to select %s from the database table agent\n",Upload_pk, agent_name);
+      DBclose(DB);
+      exit(18);
+    }
+  }
+  Agent_pk = atoi(DBgetvalue(DB,0,0));
+  return Agent_pk;
+} /* GetAgentKey() */
+
+/****** v1.3 version of GetAgentKey  *****/
+FUNCTION int	GetAgentKeyv13	(void *DB, char * agent_name, long Upload_pk, char *svn_rev, char *agent_desc)
+{
+  int rc;
+  int Agent_pk=-1;    /* agent identifier */
+  char sql[256];
 
   /* get the exact agent rec requested */
   sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='%s' "
