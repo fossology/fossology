@@ -21,5 +21,5 @@ void    Heartbeat     (long NewItemsProcessed);
 void    ShowHeartbeat (int Sig);
 int     ReadLine      (FILE *Fin, char *Line, int MaxLine);
 int     IsFile        (char *Fname, int Link);
-int     GetAgentKey   (void *DB, char *agent_name, char *agent_desc);
+int     GetAgentKey   (void *DB, char *agent_name, long unused, char *cpunused, char *agent_desc);
 

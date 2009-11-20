@@ -149,7 +149,7 @@ FUNCTION int      IsFile  (char *Fname, int Link)
  GetAgentKey(): Get the Agent Key from the database.
  Upload_pk is only used for error reporting.
  *********************************************************/
-FUNCTION int	GetAgentKey	(void *DB, char * agent_name, char *agent_desc)
+FUNCTION int	GetAgentKey(void *DB, char * agent_name, long Upload_pk, char *svn_rev, char *agent_desc)
 {
   int rc;
   int Agent_pk=-1;    /* agent identifier */
