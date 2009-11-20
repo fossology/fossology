@@ -208,58 +208,39 @@ function FindDependent($UploadPk, $list=NULL) {
 
 /**
  * GetAgentKey
- * \brief, get the agent_pk, based on the agent_rev.
+ * \brief, get the agent_pk for a given agent,
+ *  This needs to match the C version of same function in libfossagent
  *
  * @param string $agentName the name of the agent e.g. nomos
- * @param int upload_pk, only used for error reporting
- * @param string svnRev the svn revision
  * @param string agentDesc the agent_desc colunm
  *
  * @return -1 or agent_pk
  */
 
-function GetAgentKey($agentName, $uploadFK, $svnRev, $agentDesc) {
+function GetAgentKey($agentName, $agentDesc) 
+{
+  global $PG_CONN;
 
-  global $DB;
-  global $SVN_REV;
-  global $VERSION;
+  /* get the exact agent rec requested */
+  $sqlselect = "SELECT agent_pk FROM agent WHERE agent_name ='$agentName' order by agent_ts desc limit 1";
+  $result = pg_query($PG_CONN, $sqlselect);
+  DBCheckResult($result, $sqlselect, __FILE__, __LINE__);
 
-  /* check SVN_REV, has to match what is in pathinclude.php */
-  if($SVN_REV == $svnRev) {
-    $svnRev = $VERSION . ", " . $svnRev;
+  if (pg_num_rows($result) == 0)
+  {
+    /* no match, so add an agent rec */
+    $sql = "INSERT INTO agent (agent_name,agent_desc,agent_enabled) VALUES ('$agentName',E'$agentDesc',1)";
+    $result = pg_query($PG_CONN, $sqlselect);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    /* get inserted agent_pk */
+    $result = pg_query($PG_CONN, $sqlselect);
+    DBCheckResult($result, $sqlselect, __FILE__, __LINE__);
   }
-  else {
-    return(-1);
-  }
 
+  $row = pg_fetch_assoc($result);
+  return $row["agent_pk"];
 
-  /* must have an exact match */
-  $Sql = "SELECT agent_pk FROM agent WHERE agent_name ='$agentName' AND" .
-         " agent_rev='$svnRev' AND agent_enabled=true;";
-
-  $agentKey = $DB->action($Sql);
-  /* no match, add to table and return agent_pk */
-  if(empty($agentKey)) {
-    //print("DB: No agent match, inserting\n");
-    $Sql = "INSERT INTO agent (agent_name,agent_rev,agent_desc,agent_enabled)
-            VALUES('$agentName', '$svnRev', '$agentDesc', 't');";
-    $insert = $DB->action($Sql);
-    if(is_null($insert)) {   // db error or some sort
-      return(-1);
-    }
-    $Sql = "SELECT agent_pk from agent WHERE agent_name = '$agentName' AND ".
-           "agent_rev = '$svnRev' AND agent_enabled=true;";
-    $agent = $DB->action($Sql);
-    if(empty($agent)) {
-      return(-1);
-    }
-    else {
-      return($agent[0]['agent_pk']);
-    }
-  }
-  else {
-    return($agentKey[0]['agent_pk']);
-  }
 } // GetAgentKey
 
 /**
