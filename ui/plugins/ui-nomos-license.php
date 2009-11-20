@@ -137,21 +137,9 @@ class ui_nomos_license extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
-/********  REPLACE all this with a call to GetAgentpk() in common.php
- ********  after agent_runstatus is implemented in the scheduler */
-    /*  Get latest nomos license agent_pk 
-        Find the last enabled agent_pk that analyzed this upload.
-        1. check the latest enabled agent version and see if it analyzed
-           this upload.  This is a quick check and if successful, we are done.
-        2. If 1. is not successful, find the agent_pk's that analyzed this upload,
-           and pick the latest one.
-     */
-    $sql = "select agent_pk from agent where agent_name='nomos' and agent_enabled=true order by agent_ts desc limit 1";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $Agent_pk = $row["agent_pk"];
-    pg_free_result($result);
+    $Agent_name = "nomos";
+    $Agent_desc = "nomos license agent";
+    $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
     /*  Get the counts for each license under this UploadtreePk*/
     $sql = "SELECT distinct(rf_shortname) as licname, 
