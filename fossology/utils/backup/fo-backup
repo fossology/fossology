@@ -1,0 +1,270 @@
+#!/bin/bash
+# FOSSology data backup script
+# Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+#
+# fo-backup.sh backs up the fossology database and repository.
+# This runs while the fossology system.
+#
+# Warning Notes: 1.This script backs up the entire db cluster, not just the fossology database
+#                2.The Scheduler will stop when this script running, please don't start the scheduler while the script running
+
+# user variables
+BACKUPDIR=/home/fossy/backup               # Directory on the backup server to store backup data
+KEY=/srv/fossology/.ssh/id_dsa             # ssh public key about backup user 'fossy' 
+SOURCEDIR=/srv/fossology/                  # Source directory to backup 
+PGBACKUPDIR=/srv/fossology/db              # Directory to store database backup data
+BACKUPUSER=fossy@192.168.10.129            # Backup user and hostname/ip
+EXCLUDES=(./backup_include_a ./backup_include_b)     # Exclude files to exclude or include backup directory and files
+# path variables
+CP=/bin/cp;
+MK=/bin/mkdir;
+SSH=/usr/bin/ssh;
+DATE=/bin/date;
+RM=/bin/rm;
+GREP=/bin/grep;
+RSYNC=/usr/bin/rsync;
+TOUCH=/bin/touch;
+
+## Options parsing and setup
+# parse options
+OPTS=`getopt -o bevh --long fostart,backup,everything,verbose,help -n 'fo-backup' -- "$@"`
+
+if [ $? != 0 ]; then
+   echo "ERROR: Bad option specified."
+   OPTS="--help"
+fi
+
+eval set -- "$OPTS"
+
+# if no options or just -v option then do everything
+if [ "$OPTS" = " --" -o "$OPTS" = " -v --" ]; then
+   EVERYTHING=1	
+fi
+
+while true; do 
+   case "$1" in
+      --fostart) FOSTART=1; shift;;
+      -b|--backup) BACKUP=1; shift;;
+      -e|--everything) EVERYTHING=1; shift;;
+      -v|--verbose) VERBOSE=1;shift;;
+      -h|--help)
+	 echo "Usage: fo-backup [options] ";
+         echo "  --fostart               : start fossology scheduler when backup is finished successfully"
+         echo "  -b or --backup          : backup fossology database and repository to backup server, don't start scheduler"
+         echo "  -e or --everything      : run complete backup (default)"
+         echo "  -v or --verbose         : verbose"
+	 echo "  -h or --help            : show this help, then exit"
+         exit;;
+      --) shift; break;;
+      *) echo "Error: option $1 not recognised"; exit 1;;
+   esac
+done
+
+#This must run as root.
+if [ `id -u` != "0" ] ; then
+   echo "ERROR: fo-backup must run as root."
+   echo "Aborting."
+   exit 1
+fi
+
+if [ $BACKUP ]; then
+   REPOFIRST=1
+fi
+
+if [ $EVERYTHING ]; then
+   if [ $VERBOSE ]; then
+      echo "*** Running all backup steps ***"
+   fi
+   REPOFIRST=1
+   FOSTART=1
+fi 
+
+# Before stop Scheduler, First rsync the Repository when FOSSology running
+# When the 1st Rsync finished, Run Step1-Step4
+
+if [ $REPOFIRST ]; then
+   if [ $VERBOSE ]; then
+      echo "Begin 1st Rysnc repository without stop scheduler:"
+      echo "Begin at"
+      $DATE   
+   fi
+
+   i=0
+   for EXCLUDE in ${EXCLUDES[@]};do
+   	su fossy -c "$RSYNC -a --delete --exclude-from=\"$EXCLUDE\" -e \"$SSH -i $KEY\" $SOURCEDIR $BACKUPUSER:/$BACKUPDIR/current" &
+   	pids[i]=$!
+        if [ $VERBOSE ]; then
+   	   echo "${pids[i]} is Running"		
+   	fi
+        let i+=1
+   done
+
+   while true
+   do
+	flag=0
+	for pid in ${pids[@]};do
+		result=`ps -ef|grep -v "grep"|grep $pid|wc -l`
+		if [ $result = "0" ];then
+			let flag+=1
+		fi
+	done
+	if [ $flag -eq ${#pids[@]} ];then	
+   		FOSTOP=1
+   		DBBACKUP=1
+   		REPOBACKUP=1
+		break
+	fi
+	sleep 60		
+   done
+if [ $VERBOSE ]; then
+   echo "Initial rsync finished at" 
+   $DATE
+fi
+fi
+
+# Step1 Stop Scheduler
+if [ $FOSTOP ]; then
+   if [ $VERBOSE ]; then
+      echo "Begin to stop FOSSology scheduler:"
+   fi
+   /etc/init.d/fossology stop
+
+   if [ $? -ne 0 ];then
+      echo "FOSSology scheduler stop failed!"	
+      exit 1
+   fi
+
+   if [ $VERBOSE ]; then
+      echo "FOSSology scheduler stop successful!"
+   fi
+fi
+
+# Step2 Backup database
+if [ $DBBACKUP ]; then
+   if [ $VERBOSE ]; then
+      echo "Begin backup database"	
+   fi
+   if [ ! -d $PGBACKUPDIR ]; then
+      if [ $VERBOSE ]; then
+         echo "Postgres backup directory $PGBACKUPDIR does not exist!Creating..."
+      fi
+      $MK $PGBACKUPDIR	
+      if [ $VERBOSE ]; then
+         echo "Create Postgres backup directory $PGBACKUPDIR success!"
+      fi
+   fi
+   if [ ! -w $PGBACKUPDIR ]; then
+      echo "Postgres backup directory $PGBACKUPDIR is not writable!"
+      exit 1
+   fi
+   
+   su postgres -c 'pg_dumpall' | gzip > $PGBACKUPDIR/fo_dbbackup.gz
+
+   if [ $? -ne 0 ];then
+      echo "Database backup failed!"
+      exit 1
+   fi
+   if [ $VERBOSE ]; then
+      echo "Database backup successful!"
+   fi
+fi
+
+# Step3 Backup database and repository to Remote Server
+if [ $REPOBACKUP ]; then
+   if [ $VERBOSE ]; then
+      echo "Begin 2nd backup Repository"
+   fi
+   NOW=`$DATE '+%Y-%m'-%d_%H:%M`
+   MKDIR=$BACKUPDIR/$NOW/
+
+   #create new backupdir
+   $SSH -i $KEY $BACKUPUSER "$MK $MKDIR"
+
+   #check ssh mkdir correct
+   if [ $? -ne 0 ];then
+      echo "Create new date backupdir failed!"
+      exit 1
+   fi
+
+   # Run RSYNC
+   if [ $VERBOSE ]; then
+      $DATE '+%Y-%m'-%d_%H:%M:%S   
+   fi
+   i=0
+   for EXCLUDE in ${EXCLUDES[@]};do
+        su fossy -c "$RSYNC -a --delete --exclude-from=\"$EXCLUDE\" -e \"$SSH -i $KEY\" $SOURCEDIR $BACKUPUSER:/$BACKUPDIR/current" &
+        pids[i]=$!
+        if [ $VERBOSE ]; then
+           echo "${pids[i]} is Running"            
+        fi
+        let i+=1
+   done
+
+   while true
+   do
+        flag=0
+        for pid in ${pids[@]};do
+                result=`ps -ef|grep -v "grep"|grep $pid|wc -l`
+                if [ $result = "0" ];then
+                        let flag+=1
+                fi
+        done
+        if [ $flag -eq ${#pids[@]} ];then
+                break
+        fi
+        sleep 60
+   done
+   
+   if [ $VERBOSE ]; then
+      $DATE '+%Y-%m'-%d_%H:%M:%S
+   fi
+   # Update the mtime to refelct the snapshot time
+   su fossy -c "$SSH -i $KEY $BACKUPUSER \"$TOUCH $BACKUPDIR/current\""
+   
+   if [ $? -ne 0 ];then
+      echo "SSH Touch directory  failed!"
+      exit 1
+   fi
+
+   if [ $VERBOSE ]; then
+      echo "Backup Repository successful!"
+   fi
+fi
+
+# Step4 Start Scheduler
+if [ $FOSTART ]; then
+   if [ $VERBOSE ]; then
+      echo "Begin to start FOSSology scheduler:"
+   fi
+   /etc/init.d/fossology start
+
+   if [ $? -ne 0 ];then
+      echo "FOSSology scheduler start failed!"
+     
+      # Make hardlink copy
+      su fossy -c "$SSH -i $KEY $BACKUPUSER \"$CP -al $BACKUPDIR/current/* $MKDIR\""
+      if [ $? -ne 0 ];then
+         echo "Make hardlink copy failed!"
+         exit 1
+      fi
+      if [ $VERBOSE ]; then
+         echo "Backup Finished at:"
+         $DATE '+%Y-%m'-%d_%H:%M:%S
+      fi
+      exit 1
+   fi
+
+   if [ $VERBOSE ]; then
+      echo "FOSSology scheduler start successful!"
+   fi
+   # Make hardlink copy
+   su fossy -c "$SSH -i $KEY $BACKUPUSER \"$CP -al $BACKUPDIR/current/* $MKDIR\""   
+   if [ $? -ne 0 ];then
+      echo "Make hardlink copy failed!"
+      exit 1
+   fi
+   if [ $VERBOSE ]; then
+      echo "Backup Finished at:"
+      $DATE '+%Y-%m'-%d_%H:%M:%S
+   fi
+fi
