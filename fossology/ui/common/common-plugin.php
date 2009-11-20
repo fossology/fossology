@@ -144,6 +144,7 @@ function plugin_find_id($Name) {
   global $Plugins;
 
   foreach ($Plugins as $key => $val) {
+    if (empty($val)) continue;
     if (!strcmp($val->Name,$Name)) {
 	   if ($val->State != PLUGIN_STATE_READY) {
 	     return(-1);
