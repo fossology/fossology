@@ -20,18 +20,28 @@
 #
 # quick and dirty, like all shell scripts.
 
-# should take parms and check it/them... later.
+# should take parms and check it/them... should also check for root, as 
+# the old nomos liked to run as root......later.
 
-nomos="/root/nomos/nomos"
+nomos="/OSRB/bin/nomos"
 #eddyfileroot="/home/markd/all/GPL/GPL_v3"
 eddyfileroot="/home/markd/all"
 results="/home/markd/GnomosResults-`date '+%F'`"
-#echo "res:$results"
-
+raw="/home/markd/GnomosResults-`date '+%F'`.raw"
+# since we append to raw, remove it so the next run is clean
+rm $raw
+#
+# note, this will create a file with a long line of junk at the top, just 
+# remove it.with an editor.
 cd /home/markd
 filelist="`find $eddyfileroot -type f`"
 for file in $filelist
 do
-    echo -n "$file: " >> $results
-    $nomos --file $file >> $results
+    echo -n "$file: " >> $raw
+    $nomos --file $file >> $raw
 done
+
+#
+# sed the raw results into final form
+#
+sed -e '1,$s/\/home\/markd\/all\///' $raw > $results
