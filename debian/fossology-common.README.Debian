@@ -1,5 +1,10 @@
 FOSSology for Debian
 --------------------
+FOSSology is a web based application. In addition to installing the
+fossology packages you need to configure some other services on your
+system like a webserver and database. Then you access FOSSology with
+your web browser.
+
 Single vs. Multi-system installs:
 The FOSSology software has been split into separate packages according
 to function in order to make it easy to split the work across machines.
@@ -62,6 +67,11 @@ from the upstream INSTALL document
 
 All of these will be dependent on the goals of your local system and
 can't be reasonably automated, so you'll have to do them by hand.
+
+After you have installed the packages and done the above adjustments,
+you can point your web browser at at the new install
+  http://yourhostname/repo/
+and start using FOSSology!
 
 
 Differences between the single and multi packages:
