@@ -108,18 +108,23 @@ int textInFile(char *pathname, char *regex, int flags)
 }
 
 
+/**
+ * strGrep
+ * \brief General-purpose grep function, used for one-time-only searches.
+ *
+ * @return -1 on regex-compile failure, 1 if regex search fails, and 0 if
+ * regex search is successful.
+ */
+
 int strGrep(char *regex, char *data, int flags)
 {
     regex_t regc;
     int ret;
+
 #ifdef	PHRASE_DEBUG
     int i;
 #endif	/* PHRASE_DEBUG */
-    /*
-     * General-purpose grep function, used for one-time-only searches.
-     * Return -1 on regex-compile failure, 1 if regex search fails, and 0 if
-     * regex search is successful.
-     */
+
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG)
 	traceFunc("== strGrep(\"%s\", %p, 0x%x)\n", regex, data, flags);
 #endif	/* PROC_TRACE || PHRASE_DEBUG */

@@ -187,9 +187,13 @@ int addNewLicense(char *licenseName) {
 
     PGresult *result;
     char query[myBUFSIZ];
+    char eClean[myBUFSIZ];
     char fatalMsg[myBUFSIZ];
     char *specialLicenseText;
 
+    int elen;
+    int len;
+    int error;
     long rfFk;
 
     specialLicenseText = "New License name inserted by Agent Nomos";
@@ -197,10 +201,16 @@ int addNewLicense(char *licenseName) {
     if (licenseName == NULL_CHAR) {
         return (FALSE);
     }
-    sprintf(
-            query,
+    if ((len = strlen(licenseName)) == 0) {
+         printf("ERROR! addNewLicense, empty name: %s\n", licenseName);
+         return (-1);
+     }
+
+    // escape the name
+    elen = PQescapeStringConn(gl.pgConn, eClean, licenseName, len, &error);
+    sprintf( query,
             "insert into license_ref(rf_shortname, rf_text) values('%s', '%s')",
-            licenseName, specialLicenseText);
+            eClean, specialLicenseText);
 
     result = PQexec(gl.pgConn, query);
 
