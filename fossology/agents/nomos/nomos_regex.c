@@ -252,7 +252,7 @@ int strNbuf(char *data, char *str)
     char *pattp;
     char *mark;
     char x;
-    char firstx;
+    char firstx = 0;
 
 #if defined(PROC_TRACE) || defined(PHRASE_DEBUG)
 	traceFunc("== strNbuf(%p, %p)\n", data, str);

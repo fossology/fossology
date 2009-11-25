@@ -6002,7 +6002,7 @@ int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 {
     char *ptr = NULL_STR;
     char *q = ltsr+index;
-    char *cp;
+    char *cp = 0;
     int ret;
     int i;
     int j;

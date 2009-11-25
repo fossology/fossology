@@ -744,6 +744,7 @@ void licenseScan(list_t *licenseList) {
      * At this point, we don't need either the raw-source directory or the
      * unpacked results anymore, so get rid of 'em.
      */
+    if (scores->licenses) free(scores->licenses);
     memFree((char *) scores, "scores table");
     return;
 } /* licenseScan */
@@ -797,7 +798,6 @@ static void noLicenseFound() {
  */
 static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
         int lowWater) {
-    scanres_t *scp;
     int i;
     int c;
     int base;
@@ -839,10 +839,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     fCnt = 0;
     i = 1;
 
-    /*
-     * CDB -- This loop has been modified from the core such that occurrences
-     * of "scp->" should be replaced with "scores[idx]."
-     */
     for (idx = 0; i <= nCand; idx++) {
         /*
          * If we didn't flag this file as needing to be saved, ignore it.

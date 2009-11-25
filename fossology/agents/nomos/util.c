@@ -607,7 +607,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     static int bufmax = 0;
     char *sep = _REGEX(_UTIL_XYZZY);
     item_t *p;
-    item_t *bp;
+    item_t *bp = 0;
     char *fileeof;
     char *start;
     char *end;
@@ -639,6 +639,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     p->seqNo = cur.offList.used;
     p->nMatch = 0;
     if (recordOffsets) {
+    if (p->bList) free(p->bList);
 	p->bList = (list_t *)memAlloc(sizeof(list_t), MTAG_LIST);
 	(void) sprintf(utilbuf, "\"%c%c%c%c%c%c%c%c%c%c\" match-list",
 		       *regex, *(regex+1), *(regex+2), *(regex+3), *(regex+4),
@@ -877,7 +878,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     printf("getInstances(\"%s\"): buffer %p --------\n%s\n========\n",
 	   regex, ibuf, ibuf);
 #endif	/* PHRASE_DEBUG */
-    return(ibuf);
+  return(ibuf);
 }
 
 

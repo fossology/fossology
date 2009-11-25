@@ -52,9 +52,6 @@ struct globals gl;
 struct curScan cur;
 int schedulerMode = 0; /**< Non-zero when being run from scheduler */
 
-char **files_to_be_scanned; /**< The list of files to scan */
-int file_count = 0;
-
 #define	_MAXFILESIZE	/* was 512000000-> 800000000 */	1600000000
 #define TEMPDIR_TEMPLATE "/tmp/nomos.agent.XXXXXX"
 
@@ -158,6 +155,7 @@ int checkRefLicense(char *licenseName) {
     else {
         rfFk = atoi(PQgetvalue(result, 0, 0));
         /* printf("DB: CKREFLIC: returning rfFk: %d\n", rfFk); */
+        PQclear(result);
         return (rfFk);
     }
 } /* checkRefLicense */
@@ -220,6 +218,8 @@ int addNewLicense(char *licenseName) {
         PQclear(result);
         return (FALSE);
     }
+    PQclear(result);
+
     /* get ref lic pk, better be there! */
     rfFk = checkRefLicense(licenseName);
     if (rfFk == -1) {
@@ -494,29 +494,6 @@ int optionIsSet(int val) {
     return (gl.progOpts & val);
 } /* optionIsSet */
 
-/*
- At the moment, we really don't have any options, so all this is doing
- is setting a variable (filenames) to the beginning of a list of filename
- args passed in.
- */
-#ifdef notdef
-static void parseOptsAndArgs(int argc, char **argv) {
-    int i;
-
-#ifdef  PROC_TRACE
-    traceFunc("== parseOptsAndArgs(%d, **argv)\n", argc);
-#endif  /* PROC_TRACE */
-
-    /*
-     Copy filename args into array
-     */
-    for (i = 1; i < argc; i++) {
-        files_to_be_scanned[i-1] = argv[i];
-        file_count++;
-    }
-    return;
-}
-#endif /* notdef */
 
 /**
  getFileLists
@@ -588,6 +565,7 @@ int updateLicenseFile(long rfPk) {
         PQclear(result);
         return (FALSE);
     }
+    PQclear(result);
     return (TRUE);
 } /* updateLicenseFile */
 
@@ -746,10 +724,12 @@ int recordScanToDB(struct curScan *scanRecord) {
          */
 
         if (numrows == 0) {
+            PQclear(result);
             return (-1);
         }
 
         rfFk = atoi(PQgetvalue(result, 0, 0));
+        PQclear(result);
         /* printf("recordScan2DB: rfFk returned is:%ld\n", rfFk); */
         if (rfFk > 10000) {
             printf("FATAL: cound not get a valid rf_pk from License_ref\n");
@@ -834,6 +814,8 @@ int main(int argc, char **argv) {
     char *cp;
     char *agent_desc = "Nomos License Detection Agency";
     char parm[myBUFSIZ];
+    char **files_to_be_scanned; /**< The list of files to scan */
+    int file_count = 0;
 
 #ifdef	PROC_TRACE
     traceFunc("== main(%d, %p)\n", argc, argv);
@@ -845,6 +827,8 @@ int main(int argc, char **argv) {
 #ifdef	GLOBAL_DEBUG
     gl.DEEBUG = gl.MEM_DEEBUG = 0;
 #endif	/* GLOBAL_DEBUG */
+
+    files_to_be_scanned = calloc(argc, sizeof(char *));
 
     /*
      Set up variables global to the agent. Ones that are the
