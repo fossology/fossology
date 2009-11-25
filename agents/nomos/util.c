@@ -647,7 +647,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
 #ifdef	PHRASE_DEBUG
 	printf("Creating %s\n", utilbuf);
 #endif	/* PHRASE_DEBUG */
-	listInit(p->bList, 0, utilbuf);
+	listInit(p->bList, 0, utilbuf); /*  <- MEMORY LEAK from p->bList->items not freed */
 #ifdef	QA_CHECKS
 	p->val3++;	/* sanity-check -- should never be >1 ! */
 	if (p->val3 > 1) {
@@ -878,6 +878,7 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     printf("getInstances(\"%s\"): buffer %p --------\n%s\n========\n",
 	   regex, ibuf, ibuf);
 #endif	/* PHRASE_DEBUG */
+
   return(ibuf);
 }
 
