@@ -5,12 +5,12 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lextractor $(ALL_CFLAGS)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lextractor -Wl,-rpath /usr/lib/libextractor/ $(ALL_CFLAGS)
 EXE=pkgmetagetta
 
 all: $(EXE)
 
-$(EXE): %: %.c $(DB) $(REPO) $(VARS)
+$(EXE): %: %.c $(DB) $(REPO) $(AGENTLIB) $(VARS)
 	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 install: all
