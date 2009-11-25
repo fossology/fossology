@@ -9,6 +9,8 @@ fossology (1.1.0-2) unstable; urgency=low
   * fix description to actually be a proper sentence (Closes: #539716 )
   * change fossology-db to better explain that it will create the db
     (Closes: #540252 )
+  * switch agent packages to depend on poppler-utils since xpdf-utils
+      might not ship with squeeze. (Closes: #550653 )
   * UNRELEASED
 
  -- Matt Taggart <taggart@debian.org>  Fri, 07 Aug 2009 15:21:37 -0700

@@ -238,8 +238,8 @@ PHP5:
    cdrkit implementation http://debburn.alioth.debian.org/
 * 7zr - for uncompressing 7zip files
    p7zip implementation http://p7zip.sourceforge.net/
-* pdftotext - from the xpdf software
-   http://www.foolabs.com/xpdf
+* pdftotext - from the poppler software
+   http://poppler.freedesktop.org/
 * rpm and rpm2cpio - for extracting software and metadata from rpm packages
    http://www.rpm.org/
 * sendmail - for sending notification emails (optional)
