@@ -6077,7 +6077,12 @@ int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 	    i = 3;
 	    j = 6;
 	}
-	ptr = getInstances(filetext, size, i, j, sp->str, YES);
+
+  /* change to not get record offsets since there is a good sized memory
+     leak in that code */
+	//ptr = getInstances(filetext, size, i, j, sp->str, YES);
+	ptr = getInstances(filetext, size, i, j, sp->str, NO);
+
 	if (ptr == NULL_STR) {
 	    sp->refCount = -1;
 	    /* sp->buf = NULL_STR; */
@@ -6127,7 +6132,7 @@ int findPhrase(int index, char *filetext, int size, int isML, int isPS,
 #endif  /* DEBUG>5 */
     n = strlen(sp->buf);
     lp = (list_t *)op->bList;
-    if (lp->items[0].bDocLen == 0) {
+    if ((lp) && (lp->items[0].bDocLen == 0)) {
 	if (op->nMatch == 1) {
 	    lp->items[0].bDocLen = n;
 	} else {

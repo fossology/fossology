@@ -78,7 +78,7 @@ void listInit(list_t *l, int size, char *label) {
 	if (strlen(label) > sizeof(l->name)) {
 		Fatal("List name \"%s\" too long", label);
 	}
-	(void) strcpy(l->name, label);
+  if (l->name != label) (void) strcpy(l->name, label);
 	if (size == 0) {
 #ifdef	LIST_DEBUG
 		printf("LIST: (%p) initialize %s to %d elements\n", l,

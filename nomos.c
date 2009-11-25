@@ -693,6 +693,19 @@ int recordScanToDB(struct curScan *scanRecord) {
     long numrows;
     long rfFk = 0;
 
+#ifdef SIMULATESCHED
+/* BOBG: This allows a developer to simulate the scheduler
+   with a load file for testing/debugging.  Like:
+     cat myloadfile | ./nomos
+   myloadfile is same as what scheduler sends:
+   pfile_pk=311667 pfilename=9A96127E7D3B2812B50BF7732A2D0FF685EF6D6A.78073D1CA7B4171F8AFEA1497E4C6B33.183
+   pfile_pk=311727 pfilename=B7F5EED9ECB679EE0F980599B7AA89DCF8FA86BD.72B00E1B419D2C83D1050C66FA371244.368
+   etc.
+*/
+printf("%s\n",scanRecord->compLic);
+return(0);
+#endif
+
     /*
      * need to check for None and then add the appropriate items to license_file
      * (e.g. rf_pk, agent_fk, and pfile_fk).
@@ -953,9 +966,8 @@ int main(int argc, char **argv) {
         schedulerMode = 1;
         signal(SIGALRM, ShowHeartbeat);
 
-        printf("OK %d\n", gl.agentPk);
+        printf("OK\n");
         fflush(stdout);
-
         while (ReadLine(stdin, parm, myBUFSIZ) >= 0) {
             /* printf("    LOG: nomos read %s\n", parm); DEBUG */
             if (parm[0] != '\0') {
