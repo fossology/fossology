@@ -37,7 +37,7 @@ extern void memStats();
 
 static void processNonPackagedFiles()
 {
-    item_t *p;
+    /* item_t *p;  doesn't look like this is used */
 
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
     traceFunc("== processNonPackagedFiles()\n");
@@ -57,10 +57,14 @@ static void processNonPackagedFiles()
     } else {
 	/* CDB *cur.basename = NULL_CHAR; */
 	processRegularFiles();
+  /* since p isn't used, reduce the following to just the listGetItem
+     since it mods the global cur
 	p = listGetItem(&cur.fLicFoundMap, BOGUS_MD5);
 	p->buf = copyString(cur.compLic, MTAG_COMPLIC);
 	p->refCount++;
 	p->buf = copyString(BOGUS_MD5, MTAG_MD5SUM);
+  */
+	listGetItem(&cur.fLicFoundMap, BOGUS_MD5);
     }
     return;
 }

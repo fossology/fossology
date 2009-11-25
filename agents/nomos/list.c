@@ -599,7 +599,7 @@ static void listDoubleSize(list_t *l) {
 
 void listSort(list_t *l, int sortType) {
 
-	int (*f)();
+	int (*f)() = 0;
 
 #ifdef	PROC_TRACE
 	char *fName;
@@ -815,7 +815,7 @@ void listDump(list_t *l, int verbose) {
 		return;
 	}
 	if (verbose < 0) {
-		printf("** %s (size %d, used %d, ix %d, sort %d desc %d) == %ld\n",
+		printf("** %s (size %d, used %d, ix %d, sort %d desc %d) == %ud\n",
 				l->name, l->size, l->used, l->ix, l->sorted, l->desc,
 						sizeof(item_t));
 		return;
