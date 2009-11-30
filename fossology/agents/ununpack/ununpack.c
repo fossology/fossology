@@ -1190,7 +1190,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 
 // Begin add by vincent
   memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name='%s';",
+  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name=E'%s';",
     Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
   rc=MyDBaccess(DB,SQL);
   if (rc < 0)
@@ -1220,7 +1220,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     }
   /* Find the inserted child */
   memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name='%s';",
+  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name=E'%s';",
     Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
   rc=MyDBaccess(DBTREE,"SELECT currval('uploadtree_uploadtree_pk_seq');");
   CI->uploadtree_pk = atol(DBgetvalue(DBTREE,0,0));
