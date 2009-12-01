@@ -24,7 +24,11 @@
  *
  * @return
  *
- * @todo add parameters, e.g. -c for checkout?  what else?
+ * \todo add parameters, e.g. -c for checkout?  -d for run fo-postinstall
+ * but these parameters should have a + or - ?  as they are switches for 
+ * indicating don't do this.... as all actions are on be default.
+ * 
+ * \todo save the fossology log file and start with a fresh one each night.
  *
  * @version "$Id$"
  *
@@ -71,8 +75,9 @@ if($tonight->makeInstall() !== TRUE)
 
 // Step 5 run the post install process
 /*
- NOTE: this is commented out for now, as for most updates you don't have to
- remake the db and license cache.  It should be an command line option.
+ for most updates you don't have to remake the db and license cache.  Need to 
+ add a -d for turning it off.
+ */
 
 print "Running fo-postinstall\n";
 if($tonight->foPostinstall() !== TRUE)
@@ -80,8 +85,6 @@ if($tonight->foPostinstall() !== TRUE)
   print "There were errors in the postinstall process check fop.out\n";
   exit(1);
 }
-
-*/
 
 // Step 6 run the scheduler test to make sure everything is clean
 print "Starting Scheduler Test\n";
