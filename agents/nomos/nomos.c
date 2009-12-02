@@ -56,6 +56,25 @@ int schedulerMode = 0; /**< Non-zero when being run from scheduler */
 #define TEMPDIR_TEMPLATE "/tmp/nomos.agent.XXXXXX"
 
 /**
+ buildLicRefTbl
+
+ \brief build a hash table from the license ref db table.
+
+ buildLicRefTbl builds a global hash table using the rf_shortname as the key
+ and the rf_pk as the value.  The hash table will be used for reference license
+ lookups instead of querying the db as during a large nomos run there could be
+ thousands of queries.
+
+ @return
+
+ */
+
+int buildLicRefTbl() {
+
+    return(1);
+}
+
+/**
  checkPQresult
 
  check the result status of the query with PQresultStatus
@@ -67,7 +86,6 @@ int schedulerMode = 0; /**< Non-zero when being run from scheduler */
  \todo Add second parameter to indicate either select or insert/update,
  as the returned item is different (PGRES_COMMAND_OK).
 
- \callgraph
  */
 char * checkPQresult(PGresult *result) {
 
@@ -95,9 +113,6 @@ char * checkPQresult(PGresult *result) {
  @param char *licenseNames[]
 
  @return rf_pk of the matched license or -1
-
- \todo may need to compute the md5 of the text found instead of using the
- rf_shortname
 
  \callgraph
 
@@ -225,7 +240,7 @@ int addNewLicense(char *licenseName) {
     if (rfFk == -1) {
         sprintf(fatalMsg, "could not get rf_fk from just added license %s\n",
                 licenseName);
-        /* we die here, this is a fatal condtion */
+        /* we die here, this is a fatal condition */
         Fatal(fatalMsg);
         return (FALSE);
     }
@@ -822,13 +837,14 @@ int main(int argc, char **argv) {
 
     int i;
     int c;
-    long recs_processed = 0;
+    int file_count = 0;
 
     char *cp;
     char *agent_desc = "Nomos License Detection Agency";
     char parm[myBUFSIZ];
     char **files_to_be_scanned; /**< The list of files to scan */
-    int file_count = 0;
+
+    extern int AlarmSecs;
 
 #ifdef	PROC_TRACE
     traceFunc("== main(%d, %p)\n", argc, argv);
@@ -962,14 +978,16 @@ int main(int argc, char **argv) {
          - if setting ars_complete, set ars_ts
          - Error? set ars_status with the error text.
          */
-        /* printf("   LOG: nomos agent starting up in scheduler mode....\n");  DEBUG */
+        /* DEBUG printf("   LOG: nomos agent starting up in scheduler mode....\n"); */
         schedulerMode = 1;
         signal(SIGALRM, ShowHeartbeat);
+        /*alarm(AlarmSecs); */
 
         printf("OK\n");
         fflush(stdout);
         while (ReadLine(stdin, parm, myBUFSIZ) >= 0) {
-            /* printf("    LOG: nomos read %s\n", parm); DEBUG */
+            /* printf("NOMOSDB: nomos read %s\n", parm); DEBUG */
+            fflush(stdout);
             if (parm[0] != '\0') {
                 /*
                  Get the file arg and go ahead and process it
@@ -977,25 +995,18 @@ int main(int argc, char **argv) {
                 parseSchedInput(parm);
                 repFile = RepMkPath("files", cur.pFile);
                 if (!repFile) {
-                    printf(
-                            "   FATAL: pfile %ld Nomos unable to open file %s\n",
+                    printf("   FATAL: pfile %ld Nomos unable to open file %s\n",
                             cur.pFileFk, cur.pFile);
                     fflush(stdout);
                     DBclose(gl.DB);
                     exit(-1);
                 }
-                /* createAgentStatus(); */
                 processFile(repFile);
                 recordScanToDB(&cur);
                 freeAndClearScan(&cur);
 
-                recs_processed++;
-                
-                /* update progress for scheduler */
-                Heartbeat(recs_processed);
-
-                /* recordAgentStatus(); */
-                printf("OK\n");
+                printf("OK\n");        /* tell scheduler ready for more data */
+                alarm(AlarmSecs);
                 fflush(stdout);
             }
         }
