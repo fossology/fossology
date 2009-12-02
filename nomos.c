@@ -838,13 +838,14 @@ int main(int argc, char **argv) {
     int i;
     int c;
     int file_count = 0;
+    long recs_processed = 0;
+
+    extern int AlarmSecs;
 
     char *cp;
     char *agent_desc = "Nomos License Detection Agency";
     char parm[myBUFSIZ];
     char **files_to_be_scanned; /**< The list of files to scan */
-
-    extern int AlarmSecs;
 
 #ifdef	PROC_TRACE
     traceFunc("== main(%d, %p)\n", argc, argv);
@@ -866,7 +867,7 @@ int main(int argc, char **argv) {
     gl.DB = DBopen();
     if (!gl.DB) {
         printf(
-                "   FATAL: Nomos agent unable to connect to database, exiting...\n");
+                "FATAL: Nomos agent unable to connect to database, exiting...\n");
         fflush(stdout);
         exit(-1);
     }
@@ -981,7 +982,7 @@ int main(int argc, char **argv) {
         /* DEBUG printf("   LOG: nomos agent starting up in scheduler mode....\n"); */
         schedulerMode = 1;
         signal(SIGALRM, ShowHeartbeat);
-        /*alarm(AlarmSecs); */
+        alarm(AlarmSecs); 
 
         printf("OK\n");
         fflush(stdout);
@@ -995,7 +996,7 @@ int main(int argc, char **argv) {
                 parseSchedInput(parm);
                 repFile = RepMkPath("files", cur.pFile);
                 if (!repFile) {
-                    printf("   FATAL: pfile %ld Nomos unable to open file %s\n",
+                    printf("FATAL: pfile %ld Nomos unable to open file %s\n",
                             cur.pFileFk, cur.pFile);
                     fflush(stdout);
                     DBclose(gl.DB);
@@ -1005,8 +1006,10 @@ int main(int argc, char **argv) {
                 recordScanToDB(&cur);
                 freeAndClearScan(&cur);
 
+                recs_processed++;
+                Heartbeat(recs_processed);
+
                 printf("OK\n");        /* tell scheduler ready for more data */
-                alarm(AlarmSecs);
                 fflush(stdout);
             }
         }
