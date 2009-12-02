@@ -78,6 +78,7 @@ FUNCTION void Heartbeat (long NewItemsProcessed)
 FUNCTION void ShowHeartbeat   (int Sig)
 {
 
+#ifdef NEWSCHEDULER
   /* IF we are tracking hearbeat values AND it has not changed,
      THEN don't display a heartbeat message.
      This can happen if I/O is hung, but alarms are still being processed.
@@ -89,6 +90,11 @@ FUNCTION void ShowHeartbeat   (int Sig)
      printf("Heartbeat\n");
      fflush(stdout);
    }
+#else
+   if (HBItemsProcessed > 0) printf("ItemsProcessed %ld\n", HBItemsProcessed);
+   printf("Heartbeat\n");
+   fflush(stdout);
+#endif
 
    /* re-schedule itself */
    alarm(AlarmSecs);
