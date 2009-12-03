@@ -838,9 +838,9 @@ int main(int argc, char **argv) {
     int i;
     int c;
     int file_count = 0;
-    long recs_processed = 0;
 
     extern int AlarmSecs;
+    extern long HBItemsProcessed;
 
     char *cp;
     char *agent_desc = "Nomos License Detection Agency";
@@ -1006,8 +1006,9 @@ int main(int argc, char **argv) {
                 recordScanToDB(&cur);
                 freeAndClearScan(&cur);
 
-                recs_processed++;
-                Heartbeat(recs_processed);
+                Heartbeat(++HBItemsProcessed);  /* kludge for 1.1 scheduler
+                                                   which needs incremental items
+                                                   processed */
 
                 printf("OK\n");        /* tell scheduler ready for more data */
                 fflush(stdout);
