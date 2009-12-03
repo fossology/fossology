@@ -50,7 +50,7 @@ extern int Debug;
 long    HeartbeatValue=-1;
 long    LastHeartbeatValue=-1;
 long    HBItemsProcessed=0;
-int     AlarmSecs = 60;
+int     AlarmSecs = 15;
 
 /**************************************************
  *  NewHeartbeat(): Send heartbeat on next alarm
@@ -91,7 +91,12 @@ FUNCTION void ShowHeartbeat   (int Sig)
      fflush(stdout);
    }
 #else
-   if (HBItemsProcessed > 0) printf("ItemsProcessed %ld\n", HBItemsProcessed);
+   if (HBItemsProcessed > 0)
+   {
+     printf("ItemsProcessed %ld\n", HBItemsProcessed);
+     HBItemsProcessed = 0;  /* 1.1 scheduler must be given incremental updates */
+   }
+
    printf("Heartbeat\n");
    fflush(stdout);
 #endif
