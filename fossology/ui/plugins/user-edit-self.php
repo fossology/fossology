@@ -153,6 +153,7 @@ class user_edit_self extends FO_Plugin {
         $SQL.= ", ";
       }
       $SQL.= " email_notify = '$Email_notify'";
+      $_SESSION['UserEnote'] = $Email_notify;
       $GotUpdate = 1;
     }
     if (!empty($Pass1) && ($Pass0 != $Pass1) && ($Pass1 == $Pass2)) {
@@ -192,10 +193,14 @@ class user_edit_self extends FO_Plugin {
           if (empty($rc)) {
             /* Need to refresh the screen */
             $V.= displayMessage('User information updated.');
+            /*
+             Remove this code for now... it wipes out the status message
+             
             $V.= "<script language='javascript'>\n";
             $Uri = Traceback_uri() . "?mod=" . $this->Name;
             $V.= "window.open('$Uri','_top');\n";
             $V.= "</script>\n";
+            */
           } else {
             $V.= displayMessage($rc);
           }
