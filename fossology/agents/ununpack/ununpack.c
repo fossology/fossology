@@ -59,6 +59,7 @@ int ForceDuplicate=0;	/* when using db, should it process duplicates? */
 int PruneFiles=0;
 int SetContainerArtifact=1;	/* should initial container be an artifact? */
 FILE *ListOutFile=NULL;
+int ReunpackSwitch=0;
 
 /* for the repository */
 int UseRepository=0;
@@ -1189,17 +1190,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 	}
 
 // Begin add by vincent
-  memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name=E'%s';",
-    Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
-  rc=MyDBaccess(DB,SQL);
-  if (rc < 0)
-	{
-	printf("FATAL: Database access error.\n");
-	printf("LOG: Database access error in ununpack: %s\n",SQL);
-	SafeExit(14);
-	}
-  if(DBdatasize(DB) <= 0)
+  if(ReunpackSwitch)
   {
   /* Get the parent ID */
   /* Two cases -- depending on if the parent exists */
@@ -1226,7 +1217,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   CI->uploadtree_pk = atol(DBgetvalue(DBTREE,0,0));
   //TotalItems++;
   // printf("=========== AFTER ==========\n"); DebugContainerInfo(CI);
- } 
+  } 
 //End add by Vincent
   TotalItems++;
   return(0);
@@ -2149,7 +2140,24 @@ int	main	(int argc, char *argv[])
 	   of order.  Solution?  When using XML, only use 1 thread. */
 	MaxThread=1;
 	}
-
+  //Begin add by vincent
+  if (!ReunpackSwitch)
+	{
+	memset(SQL,'\0',MAXSQL);
+  	snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s limit 1;",Upload_Pk);
+  	int result=MyDBaccess(DB,SQL);
+  	if (result < 0)
+        	{
+        	printf("FATAL: Database access error.\n");
+        	printf("LOG: Database access error in ununpack: %s\n",SQL);
+        	SafeExit(14);
+        	}
+  	if(DBdatasize(DB) <= 0)
+  		{
+		ReunpackSwitch=1;
+		}
+	}
+  //End add by vincent
   /*** process files ***/
   for( ; optind<argc; optind++)
     {
