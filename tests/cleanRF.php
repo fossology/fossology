@@ -44,7 +44,9 @@ class cleanupRF extends fossologyTestCase {
     print "Removing the content of the root folder (Software Repository)\n";
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Delete Uploaded File');
-    $this->assertTrue($this->myassertText($page, '/Select the uploaded file to delete/'));
+    $this->assertTrue($this->myassertText($page, '/Select the uploaded file to delete/'),
+        "Could not select an uploaded file, (did not see the text)\n" . 
+        "Make sure you are logged in a fossy\n");
     $SRselect = $this->parseSelectStmnt($page,'upload');
     //print "SRselect is:\n"; print_r($SRselect) . "\n";
     if(empty($SRselect)) {
