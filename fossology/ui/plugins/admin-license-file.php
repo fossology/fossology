@@ -389,7 +389,7 @@ function Output()
   global $Plugins;
   
   // make sure there is a db connection since I've pierced the core-db abstraction
-  if (!$PG_CONN) { $dbok = $DB->db_init(); if (!dbok) echo "NO DB connection"; }
+  if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
     
   if ($this->State != PLUGIN_STATE_READY) { return; }
   $V="";

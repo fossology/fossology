@@ -30,7 +30,7 @@ class ui_nomos_license extends FO_Plugin
   var $Title      = "Nomos License Browser";
   var $Version    = "1.0";
   // var $MenuList= "Jobs::License";
-  var $Dependency = array("db","browse","view-license");
+  var $Dependency = array("db","browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
   var $UpdCache   = 0;
@@ -171,7 +171,7 @@ class ui_nomos_license extends FO_Plugin
 
       $VLic .= "<td align='center'><a href='";
       $VLic .= Traceback_uri();
-      $VLic .= "?mod=search_file_by_license&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']) . "'>Show</a></td>";
+      $VLic .= "?mod=list_lic_files&agent=$Agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']) . "'>Show</a></td>";
 
       $VLic .= "<td align='left'> $row[licname]</td>";
       $VLic .= "</tr>\n";

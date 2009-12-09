@@ -211,7 +211,7 @@ class ui_view extends FO_Plugin
 	  $V .= "<th align='left'>Item</th>";
 	  $V .= "</tr>\n";
 	  }
-	$V .= "<tr bgcolor='" . $this->HighlightColors[$H['Color']] . "'>\n";
+    $V .= "<tr bgcolor='" . $this->HighlightColors[$H['Color']] . "'>\n";
 	$V .= "<td align='right'>" . $H['Match'] . "</td>\n";
 
 	$V .= "<td>";
@@ -604,6 +604,7 @@ class ui_view extends FO_Plugin
     $Show = GetParm("show",PARM_STRING);
     $Item = GetParm("item",PARM_INTEGER);
     $Page = GetParm("page",PARM_INTEGER);
+    $agent_pk = GetParm("agent",PARM_INTEGER);
     if (!$Fin && (empty($Item) || empty($Upload))) { return; }
     if (empty($Page)) { $Page=0; };
 
@@ -711,9 +712,19 @@ class ui_view extends FO_Plugin
     rewind($Fin);
     $Pages = "";
     $Uri = preg_replace('/&page=[0-9]*/','',Traceback());
+    $HighlightMenu = "";
+
+    $HighlightMenu .= "</center>";  // some fcn left a dangling center
+    $HighlightMenu .= "<b>The Nomos license detector found the following: </b>";
+    $pfile_pk = 0;  // unknown, only have uploadtree_pk aka $Item
+    $NomosLics = GetFileLicenses_string($agent_pk, $pfile_pk, $Item);
+    $HighlightMenu .= $NomosLics;
+
+    $HighlightMenu .= "<p><b>The bSAM license detector found the following: </b>";
+    $HighlightMenu .= "<br>Note: Only bSAM results are highlighted.";
     if ($Format == 'hex')
 	{
-	$HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_HEX);
+	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_HEX);
 	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
 	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_HEX,$Uri);
 	$PageSize = VIEW_BLOCK_HEX * $Page;
@@ -723,7 +734,7 @@ class ui_view extends FO_Plugin
 	}
     else if ($Format == 'text')
 	{
-	$HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
+	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
 	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
 	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
 	$PageSize = VIEW_BLOCK_TEXT * $Page;
@@ -733,7 +744,7 @@ class ui_view extends FO_Plugin
 	}
     else if ($Format == 'flow')
 	{
-	$HighlightMenu = $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
+	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
 	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
 	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
 	$PageSize = VIEW_BLOCK_TEXT * $Page;
