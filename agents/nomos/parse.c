@@ -3254,7 +3254,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING(lDebug ? "ND(1)" : "NotreDame");
 	}
 	else {
-	    INTERESTING(lDebug ? "ND-style(1)" : "ND-style");
+	    INTERESTING(lDebug ? "ND-style(1)" : "NotreDame-style");
 	}
     }
     else if (INFILE(_LT_ND_2)) {
@@ -3262,7 +3262,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING(lDebug ? "ND(2)" : "NotreDame");
 	}
 	else {
-	    INTERESTING(lDebug ? "ND-style(2)" : "ND-style");
+	    INTERESTING(lDebug ? "ND-style(2)" : "NotreDame-style");
 	}
     }
     else if (INFILE(_LT_ND_3)) {
@@ -3270,7 +3270,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING(lDebug ? "ND(3)" : "NotreDame");
 	}
 	else {
-	    INTERESTING(lDebug ? "ND-style(3)" : "ND-style");
+	    INTERESTING(lDebug ? "ND-style(3)" : "NotreDame-style");
 	}
     }
     /*
