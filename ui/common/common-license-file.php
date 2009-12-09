@@ -122,7 +122,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   $upload_pk = $row["upload_fk"];
   pg_free_result($result);
 
-  $shortname = pg_escape_string(urldecode($rf_shortname));
+  $shortname = pg_escape_string($rf_shortname);
 
   $sql = "select uploadtree_pk, pfile_fk, ufile_name
           from license_ref,license_file,
@@ -165,7 +165,7 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   $upload_pk = $row["upload_fk"];
   pg_free_result($result);
 
-  $shortname = pg_escape_string(urldecode($rf_shortname));
+  $shortname = pg_escape_string($rf_shortname);
 
   $sql = "select count(*)
           from license_ref,license_file,
