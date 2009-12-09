@@ -113,6 +113,26 @@ function DBCheckResult($result, $sql="", $filenm, $lineno)
 }
 
 
+/*****************************************
+ Fatal: 
+   Write message to stdout and die.
+
+ Params:
+   $msg     Message to write
+   $filenm  File name (__FILE__)
+   $lineno  Line number of the caller (__LINE__)
+
+ Returns:
+   None, prints error, file, and line number, then exits(1)
+ *****************************************/
+function Fatal($msg, $filenm, $lineno)
+{
+  echo "<hr>FATAL error, File: $filenm, Line number: $lineno<br>";
+  echo "$msg<hr>";
+  exit(1);
+}
+
+
 function debugprint($val, $title)
 {
   echo $title, "<pre>";
@@ -127,3 +147,14 @@ function HumanSize( $bytes )
     return( round( $bytes, 2 ) . " " . $types[$i] );
 }
 
+/************************************
+ Return File Extension (text after last period)
+ ************************************/
+function GetFileExt($fname)
+{
+  $extpos = strrpos($fname, '.') + 1;
+  $extension = strtolower(substr($fname, $extpos, strlen($fname) - $extpos));
+  return $extension;
+}
+
+?>
