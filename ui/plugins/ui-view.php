@@ -715,13 +715,20 @@ class ui_view extends FO_Plugin
     $HighlightMenu = "";
 
     $HighlightMenu .= "</center>";  // some fcn left a dangling center
-    $HighlightMenu .= "<b>The Nomos license detector found the following: </b>";
-    $pfile_pk = 0;  // unknown, only have uploadtree_pk aka $Item
-    $NomosLics = GetFileLicenses_string($agent_pk, $pfile_pk, $Item);
-    $HighlightMenu .= $NomosLics;
 
-    $HighlightMenu .= "<p><b>The bSAM license detector found the following: </b>";
-    $HighlightMenu .= "<br>Note: Only bSAM results are highlighted.";
+    /* only display nomos results if we know the agent_pk 
+       Otherwise, we don't know what results to display.  */
+    if (!empty($agent_pk))
+    {
+      $HighlightMenu .= "<b>The Nomos license detector found the following: </b>";
+      $pfile_pk = 0;  // unknown, only have uploadtree_pk aka $Item
+      $NomosLics = GetFileLicenses_string($agent_pk, $pfile_pk, $Item);
+      $HighlightMenu .= $NomosLics;
+
+      $HighlightMenu .= "<p><b>The bSAM license detector found the following: </b>";
+      $HighlightMenu .= "<br>Note: Only bSAM results are highlighted.";
+    }
+
     if ($Format == 'hex')
 	{
 	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_HEX);
