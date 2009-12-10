@@ -119,7 +119,7 @@ class list_lic_files extends FO_Plugin
     if (!empty($Excl)) $V .= "<br>Display excludes files with these extensions: $Excl";
 
 	/* Get the page menu */
-	if (($Count >= $Max) && ($Page > 0))
+	if (($Count >= $Max) && ($Page >= 0))
 	{
 	  $VM = "<P />\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
 	  $V .= $VM;
