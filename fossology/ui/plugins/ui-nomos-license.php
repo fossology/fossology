@@ -123,7 +123,7 @@ class ui_nomos_license extends FO_Plugin
     global $DB;
 
 //  ***** CHANGE TO view-nomos-license when available *******
-//    $ModLicView = &$Plugins[plugin_find_id("view-license")];
+    $ModLicView = &$Plugins[plugin_find_id("view-license")];
 
     /*******  Get license names and counts  ******/
     /* Find lft and rgt bounds for this $Uploadtree_pk  */
@@ -207,8 +207,8 @@ class ui_nomos_license extends FO_Plugin
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
   {
-  $LinkUri = "$Uri&item=" . $C['uploadtree_pk'];
-  $LinkUri = preg_replace("/mod=license/","mod=view-license",$LinkUri);
+    $LinkUri = Traceback_uri();
+    $LinkUri .= "?mod=view-license&agent=$Agent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
   }
       else
   {
