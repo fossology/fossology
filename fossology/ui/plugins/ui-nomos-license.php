@@ -25,7 +25,7 @@ global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
 class ui_nomos_license extends FO_Plugin
-  {
+{
   var $Name       = "nomoslicense";
   var $Title      = "Nomos License Browser";
   var $Version    = "1.0";
@@ -56,7 +56,7 @@ class ui_nomos_license extends FO_Plugin
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     if (!empty($Item) && !empty($Upload))
-      {
+    {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
        menu_insert("Browse::Nomos License",1);
@@ -70,6 +70,7 @@ class ui_nomos_license extends FO_Plugin
     }
   } // RegisterMenus()
 
+
   /***********************************************************
    Initialize(): This is called before the plugin is used.
    It should assume that Install() was already run one time
@@ -79,15 +80,16 @@ class ui_nomos_license extends FO_Plugin
    NOTE: This function must NOT assume that other plugins are installed.
    ***********************************************************/
   function Initialize()
-    {
-      global $_GET;
+  {
+    global $_GET;
+
     if ($this->State != PLUGIN_STATE_INVALID) { return(1); } // don't re-run
     if ($this->Name !== "") // Name must be defined
-      {
+    {
       global $Plugins;
       $this->State=PLUGIN_STATE_VALID;
       array_push($Plugins,$this);
-      }
+    }
 
     /* Remove "updcache" from the GET args and set $this->UpdCache
      * This way all the url's based on the input args won't be
@@ -100,11 +102,11 @@ class ui_nomos_license extends FO_Plugin
       unset($_GET['updcache']);
     }
     else
-      {
+    {
       $this->UpdCache = 0;
-      }
+    }
     return($this->State == PLUGIN_STATE_VALID);
-    } // Initialize()
+  } // Initialize()
 
 
   /***********************************************************
@@ -122,7 +124,6 @@ class ui_nomos_license extends FO_Plugin
     global $Plugins;
     global $DB;
 
-//  ***** CHANGE TO view-nomos-license when available *******
     $ModLicView = &$Plugins[plugin_find_id("view-license")];
 
     /*******  Get license names and counts  ******/
@@ -192,38 +193,39 @@ class ui_nomos_license extends FO_Plugin
     $ChildLicCount=0;
     $ChildDirCount=0; /* total number of directory or containers */
     foreach($Children as $C)
-      {
+    {
       if (Iscontainer($C['ufile_mode'])) { $ChildDirCount++; }
-      }
+    }
 
     $VF .= "<table border=0>";
     foreach($Children as $C)
-      {
+    {
       if (empty($C)) { continue; }
+
       /* Store the item information */
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
 
       /* Determine the hyperlinks */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
-  {
-    $LinkUri = Traceback_uri();
-    $LinkUri .= "?mod=view-license&agent=$Agent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
-  }
+      {
+        $LinkUri = Traceback_uri();
+        $LinkUri .= "?mod=view-license&agent=$Agent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
+      }
       else
-  {
-  $LinkUri = NULL;
-  }
+      {
+        $LinkUri = NULL;
+      }
 
       if (Iscontainer($C['ufile_mode']))
-  {
-  $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
-  $LicUri = "$Uri&item=" . $uploadtree_pk;
-  }
+      {
+        $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
+        $LicUri = "$Uri&item=" . $uploadtree_pk;
+      }
       else
-  {
-  $LicUri = NULL;
-  }
+      {
+        $LicUri = NULL;
+      }
 
       /* Populate the output ($VF) - file list */
       $LicCount=0;
@@ -232,33 +234,34 @@ class ui_nomos_license extends FO_Plugin
       $HasHref=0;
       $HasBold=0;
       if ($IsContainer)
-  {
-  $VF .= "<a href='$LicUri'>"; $HasHref=1;
-  $VF .= "<b>"; $HasBold=1;
-  }
+      {
+        $VF .= "<a href='$LicUri'>"; $HasHref=1;
+        $VF .= "<b>"; $HasBold=1;
+      }
       else if (!empty($LinkUri)) //  && ($LicCount > 0))
-  {
-  $VF .= "<a href='$LinkUri'>"; $HasHref=1;
-  }
+      {
+        $VF .= "<a href='$LinkUri'>"; $HasHref=1;
+      }
       $VF .= $C['ufile_name'];
       if ($IsDir) { $VF .= "/"; };
       if ($HasBold) { $VF .= "</b>"; }
       if ($HasHref) { $VF .= "</a>"; }
       $VF .= "</td><td>";
+
       if ($LicCount)
-  {
-  $VF .= "[" . number_format($LicCount,0,"",",") . "&nbsp;";
-  //$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
-  $VF .= "license" . ($LicCount == 1 ? "" : "s");
-  $VF .= "</a>";
-  $VF .= "]";
-  $ChildLicCount += $LicCount;
-  }
+      {
+        $VF .= "[" . number_format($LicCount,0,"",",") . "&nbsp;";
+        //$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
+        $VF .= "license" . ($LicCount == 1 ? "" : "s");
+        $VF .= "</a>";
+        $VF .= "]";
+        $ChildLicCount += $LicCount;
+      }
       $VF .= "</td>";
       $VF .= "</tr>\n";
 
       $ChildCount++;
-      }
+    }
     $VF .= "</table>\n";
     // print "ChildCount=$ChildCount  ChildLicCount=$ChildLicCount\n";
 
@@ -273,12 +276,12 @@ class ui_nomos_license extends FO_Plugin
      $ChildCount can also be zero if the directory is empty.
      ***************************************/
     if ($ChildCount == 0)
-      {
+    {
       $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$Item';");
       if (IsDir($Results[0]['ufile_mode'])) { return; }
       $ModLicView = &$Plugins[plugin_find_id("view-license")];
       return($ModLicView->Output() );
-      }
+    }
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
@@ -286,7 +289,7 @@ class ui_nomos_license extends FO_Plugin
     $V .= "</table>\n";
     $V .= "<hr />\n";
     return($V);
-    } // ShowUploadHist()
+  } // ShowUploadHist()
 
   /***********************************************************
    Output(): This function returns the scheduler status.
@@ -301,18 +304,17 @@ class ui_nomos_license extends FO_Plugin
     $Item = GetParm("item",PARM_INTEGER);
 
     switch(GetParm("show",PARM_STRING))
-  {
-  case 'detail':
-    $Show='detail';
-    break;
-  case 'summary':
-  default:
-    $Show='summary';
-    break;
-  }
+    {
+    case 'detail':
+      $Show='detail';
+      break;
+    case 'summary':
+    default:
+      $Show='summary';
+    }
 
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
-/********  disable cache while I'm creating this plugin *****
+/********  disable cache to see if this is fast enough without it *****
     $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder")) . "&show=$Show";
     if ($this->UpdCache != 0)
     {
@@ -328,37 +330,29 @@ class ui_nomos_license extends FO_Plugin
       switch($this->OutputType)
       {
       case "XML":
-  break;
+        break;
       case "HTML":
-  $V .= "<font class='text'>\n";
+        $V .= "<font class='text'>\n";
 
-  /************************/
-  /* Show the folder path */
-  /************************/
-  $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
+        /************************/
+        /* Show the folder path */
+        /************************/
+        $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse") . "<P />\n";
 
-  /******************************/
-  /* Get the folder description */
-  /******************************/
-  if (!empty($Folder))
-    {
-    // $V .= $this->ShowFolder($Folder);
-    }
-  if (!empty($Upload))
-    {
-    $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
-    $V .= $this->ShowUploadHist($Item,$Uri);
-    }
-  $V .= "</font>\n";
-  break;
+        if (!empty($Upload))
+        {
+          $Uri = preg_replace("/&item=([0-9]*)/","",Traceback());
+          $V .= $this->ShowUploadHist($Item,$Uri);
+        }
+        $V .= "</font>\n";
+        break;
       case "Text":
-  break;
+        break;
       default:
-  break;
       }
 
       /*  Cache Report */
-/********  disable cache while I'm creating this plugin *****
+/********  disable cache to see if this is fast enough without it *****
       $Cached = false;
       ReportCachePut($CacheKey, $V);
 **************************************************/
@@ -370,13 +364,15 @@ class ui_nomos_license extends FO_Plugin
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
     printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
-/********  disable cache while I'm creating this plugin *****
+
+/********  disable cache to see if this is fast enough without it *****
     if ($Cached) echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
 **************************************************/
     return;
   }
 
 };
+
 $NewPlugin = new ui_nomos_license;
 $NewPlugin->Initialize();
 
