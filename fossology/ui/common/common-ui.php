@@ -129,9 +129,17 @@ function Fatal($msg, $filenm, $lineno)
 {
   echo "<hr>FATAL error, File: $filenm, Line number: $lineno<br>";
   echo "$msg<hr>";
+  debugbacktrace();
   exit(1);
 }
 
+
+function debugbacktrace()
+{
+  echo "<pre>";
+  debug_print_backtrace();
+  echo "</pre>";
+}
 
 function debugprint($val, $title)
 {

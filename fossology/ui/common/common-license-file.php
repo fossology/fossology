@@ -35,6 +35,8 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk)
 {
   global $PG_CONN;
 
+  if (empty($agent_pk)) Fatal("Missing parameter: agent_pk", __FILE__, __LINE__);
+
   // if $pfile_pk, then return the licenses for that one file
   if ($pfile_pk)
   {
