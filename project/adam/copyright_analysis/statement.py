@@ -111,13 +111,9 @@ def main():
     
     files = [line.rstrip() for line in open(sys.argv[2]).readlines()]
     for file in files:
-        print "%s:" % file
-
-        text = open(file,'r').read()
+        text = open(file).read()
         
-        print '1'
         stuff = library.parsetext(text)
-        print '2'
         tokens = stuff['tokens']
         n = len(tokens)
         tokens.insert(0,['XXXdocstartXXX',-1,-1])
@@ -129,7 +125,6 @@ def main():
         ends = []
         steps = 0
         in_copyright = False
-        print '3'
         for i in range(2,n+2):
             v = tokens[i-2][0]
             w = tokens[i-1][0]
@@ -171,7 +166,6 @@ def main():
             else:
                 ends.append(False)
 
-        print '5'
         tokens = library.replace_placeholders(tokens,stuff)
         i = 0
         inside = False
@@ -187,7 +181,6 @@ def main():
                 inside = False
                 print "%s [%d:%d] ''%r''" % (file, begining, finish, text[begining:finish])
             i += 1
-        print '6'
     
 if __name__ == '__main__':
     main()

@@ -58,32 +58,19 @@ def token_sort(x,y):
 def parsetext(text):
     stuff = {}
     
-    print 'a'
     text = RE_ANDOR.sub('and or',text)
-    print 'a'
     (temp, text) = findall_erase(RE_COMMENT, text)
 
-    print 'a'
     (stuff['start'], text) = findall_erase(RE_START, text)
-    print 'a'
     (stuff['end'], text) = findall_erase(RE_END, text)
-    print 'a'
     (stuff['email'], text) = findall_erase(RE_EMAIL, text)
-    print 'a'
     (stuff['url'], text) = findall_erase(RE_URL, text)
-    print 'a'
     (stuff['path'], text) = findall_erase(RE_PATH, text)
-    print 'a'
     (stuff['date'], text) = findall_erase(RE_DATE, text)
-    print 'a'
     (stuff['time'], text) = findall_erase(RE_TIME, text)
-    print 'a'
     (stuff['year'], text) = findall_erase(RE_YEAR, text)
-    print 'a'
     (stuff['float'], text) = findall_erase(RE_FLOAT, text)
-    print 'a'
     (stuff['copyright'], text) = findall_erase(RE_COPYRIGHT, text)
-    print 'a'
     (stuff['tokens'], text) = findall_erase(RE_TOKEN, text)
 
     stuff['tokens'].extend([['XXXstartXXX', stuff['start'][i][1], stuff['start'][i][2]] for i in range(len(stuff['start']))])
