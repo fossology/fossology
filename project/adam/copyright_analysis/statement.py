@@ -83,10 +83,10 @@ def main():
         tokens = stuff['tokens']
         inside = False
         for t in tokens:
-            if t == 'XXXstartXXX':
+            if t[0] == 'XXXstartXXX':
                 inside = True
                 continue
-            if t == 'XXXendXXX':
+            if t[0] == 'XXXendXXX':
                 inside = False
                 continue
             if inside:
@@ -109,12 +109,15 @@ def main():
         P_outside[k] = norm*P_outside[k]
     norm = norm_bigram_hash(bigram_hash)
     
-    for file in sys.argv[2:]:
+    files = [line.rstrip() for line in open(sys.argv[2]).readlines()]
+    for file in files:
         print "%s:" % file
 
-        text = open(file).read()
+        text = open(file,'r').read()
         
+        print '1'
         stuff = library.parsetext(text)
+        print '2'
         tokens = stuff['tokens']
         n = len(tokens)
         tokens.insert(0,['XXXdocstartXXX',-1,-1])
@@ -124,6 +127,9 @@ def main():
         
         starts = []
         ends = []
+        steps = 0
+        in_copyright = False
+        print '3'
         for i in range(2,n+2):
             v = tokens[i-2][0]
             w = tokens[i-1][0]
@@ -146,9 +152,26 @@ def main():
                 ends.append(False)
                 continue
         
-            starts.append(P_v_w_s > P_v_w_x)
-            ends.append(P_e_y_z > P_x_y_z)
+            if P_v_w_s > P_v_w_x:
+                starts.append(True)
+                in_copyright = True
+                steps = 0
+            else:
+                starts.append(False)
+                steps += 1
+
+            #if P_e_y_z > P_x_y_z:
+            #    ends.append(True)
+            #else:
+            #    ends.append(False)
         
+            if in_copyright and steps > 10:
+                in_copyright = False
+                ends.append(True)
+            else:
+                ends.append(False)
+
+        print '5'
         tokens = library.replace_placeholders(tokens,stuff)
         i = 0
         inside = False
@@ -164,6 +187,7 @@ def main():
                 inside = False
                 print "%s [%d:%d] ''%r''" % (file, begining, finish, text[begining:finish])
             i += 1
+        print '6'
     
 if __name__ == '__main__':
     main()
