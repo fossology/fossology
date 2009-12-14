@@ -22,6 +22,7 @@
 #endif	/* not defined _GNU_SOURCE */
 #include <stdio.h>
 #include <stdlib.h>
+#include <search.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
@@ -80,9 +81,12 @@
  * Mark's variables (for now)
  */
 int mdDebug;
+
 char debugStr[myBUFSIZ];
 char dbErrString[myBUFSIZ];
 char saveLics[myBUFSIZ];
+
+size_t hashEntries;
 
 /*
   Flags for program control
