@@ -21,6 +21,9 @@ import re
 import sys
 import library
 
+import psyco
+psyco.full()
+
 def calc_bigram_prob(bigram_hash, word1, word2, word3, default = 0.0):
     p = bigram_hash.get('%s %s %s' % (word1, word2, word3),0.0)
     return p + default
@@ -111,7 +114,7 @@ def main():
     
     files = [line.rstrip() for line in open(sys.argv[2]).readlines()]
     for file in files:
-        text = open(file).read()
+        text = open(file).read(64000)
         
         stuff = library.parsetext(text)
         tokens = stuff['tokens']
