@@ -168,13 +168,21 @@ class ui_nomos_license extends FO_Plugin
     {
       $UniqueLicCount++;
       $LicCount += $row['liccount'];
+
+      /*  Count  */
       $VLic .= "<tr><td align='right'>$row[liccount]</td>";
 
+      /*  Show  */
       $VLic .= "<td align='center'><a href='";
       $VLic .= Traceback_uri();
       $VLic .= "?mod=list_lic_files&agent=$Agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']) . "'>Show</a></td>";
 
-      $VLic .= "<td align='left'> $row[licname]</td>";
+      /*  License name  */
+      $VLic .= "<td align='left'>";
+      $rf_shortname = rawurlencode($row['rf_shortname']);
+      $VLic .= "<a id='$rf_shortname' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filelic&agent=$Agent_pk&item=$Uploadtree_pk&lic=$rf_shortname\")'";
+      $VLic .= ">$row[licname] </a>";
+      $VLic .= "</td>";
       $VLic .= "</tr>\n";
       if ($row['licname'] == "No License Found") $NoLicFound =  $row['liccount'];
     }
@@ -186,7 +194,7 @@ class ui_nomos_license extends FO_Plugin
     pg_free_result($result);
 
 
-    /****************************************/
+    /*******    File Listing     ************/
     /* Get ALL the items under this Uploadtree_pk */
     $Children = DirGetList($upload_pk,$Uploadtree_pk);
     $ChildCount=0;
@@ -202,11 +210,10 @@ class ui_nomos_license extends FO_Plugin
     {
       if (empty($C)) { continue; }
 
-      /* Store the item information */
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
 
-      /* Determine the hyperlinks */
+      /* Determine the hyperlink for non-containers to view-license  */
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
       {
         $LinkUri = Traceback_uri();
@@ -217,6 +224,7 @@ class ui_nomos_license extends FO_Plugin
         $LinkUri = NULL;
       }
 
+      /* Determine link for containers */
       if (Iscontainer($C['ufile_mode']))
       {
         $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
@@ -228,9 +236,10 @@ class ui_nomos_license extends FO_Plugin
       }
 
       /* Populate the output ($VF) - file list */
+      /* id of each element is its uploadtree_pk */
       $LicCount=0;
 
-      $VF .= '<tr><td id="Lic-' . $LicCount . '" align="left">';
+      $VF .= "<tr><td id='$C[uploadtree_pk]' align='left'>";
       $HasHref=0;
       $HasBold=0;
       if ($IsContainer)
@@ -283,11 +292,66 @@ class ui_nomos_license extends FO_Plugin
       return($ModLicView->Output() );
     }
 
+    $V .= ActiveHTTPscript("FileColor");
+
+    /* Add javascript for color highlighting 
+       This is the response script needed by ActiveHTTPscript 
+       responseText is license name',' followed by a comma seperated list of uploadtree_pk's */
+    $script = "
+      <script type=\"text/javascript\" charset=\"utf-8\">
+        var Lastutpks='';   /* save last list of uploadtree_pk's */
+        var LastLic='';   /* save last License (short) name */
+        var color = '#4bfe78';
+        function FileColor_Reply()
+        {
+          if ((FileColor.readyState==4) && (FileColor.status==200))
+          {
+            /* remove previous highlighting */
+            var numpks = Lastutpks.length;
+            if (numpks > 0) document.getElementById(LastLic).style.backgroundColor='white';
+            while (numpks)
+            {
+              document.getElementById(Lastutpks[--numpks]).style.backgroundColor='white';
+            }
+
+            utpklist = FileColor.responseText.split(',');
+            LastLic = utpklist.shift();
+            numpks = utpklist.length;
+            Lastutpks = utpklist;
+
+            /* apply new highlighting */
+            elt = document.getElementById(LastLic);
+            if (elt != null) elt.style.backgroundColor=color;
+            while (numpks)
+            {
+              document.getElementById(utpklist[--numpks]).style.backgroundColor=color;
+            }
+          }
+          return;
+        }
+/* bobg fooling with wait icon 
+    var myGlobalHandlers = {
+        onCreate: function(){
+            Element.show('ajax_waiting');
+        },
+
+        onComplete: function() {
+            if(Ajax.activeRequestCount == 0){
+                Element.hide('ajax_waiting');
+            }
+        }
+    };
+*/
+      </script>
+    ";
+    $V .= $script;
+
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
     $V .= "<tr><td valign='top' width='50%'>$VLic</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
+
     return($V);
   } // ShowUploadHist()
 
@@ -345,6 +409,7 @@ class ui_nomos_license extends FO_Plugin
           $V .= $this->ShowUploadHist($Item,$Uri);
         }
         $V .= "</font>\n";
+/*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>Loading...</div>"; */
         break;
       case "Text":
         break;

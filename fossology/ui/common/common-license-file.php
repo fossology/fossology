@@ -21,6 +21,7 @@
   license_file and license_ref tables.
  ************************************************************/
 
+
 /*
  * Return all the licenses for a single file or uploadtree
  * Inputs:
@@ -50,8 +51,8 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk)
   else if ($uploadtree_pk)
   {
     /* Find lft and rgt bounds for this $uploadtree_pk  */
-    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree 
-              WHERE uploadtree_pk = $uploadtree_pk";
+    $sql = "SELECT lft, rgt, upload_fk FROM uploadtree 
+                   WHERE uploadtree_pk = $uploadtree_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
@@ -115,7 +116,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   
   /* Find lft and rgt bounds for this $uploadtree_pk  */
   $sql = "SELECT lft, rgt, upload_fk FROM uploadtree 
-            WHERE uploadtree_pk = '$uploadtree_pk'";
+                 WHERE uploadtree_pk = $uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
@@ -129,14 +130,15 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   $sql = "select uploadtree_pk, pfile_fk, ufile_name
           from license_ref,license_file,
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
-                 where upload_fk=$upload_pk 
+                 where upload_fk=$upload_pk
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
           where PF=pfile_fk and agent_fk=$agent_pk and rf_fk=rf_pk
                 and rf_shortname='$shortname'
           $order limit $limit offset $offset";
-  $result = pg_query($PG_CONN, $sql);
+  $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
+//echo "<br>$sql<br>";
   return $result;
 }
 
@@ -147,18 +149,20 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
  *   $rf_shortname
  *   $uploadtree_pk   sets scope of request
  *   $PkgsOnly        if true, only list packages, default is false (all files are listed)
- *                    $PkgsOnly is not yet implemented.
+ *                    $PkgsOnly is not yet implemented.  Default is false.
+ *   $CheckOnly       if true, sets LIMIT 1 to check if uploadtree_pk has 
+ *                    any of the given license.  Default is false.
  * Returns:
  *   number of files with this shortname.
  */
 function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk, 
-                             $PkgsOnly=false)
+                             $PkgsOnly=false, $CheckOnly=false)
 {
   global $PG_CONN;
   
   /* Find lft and rgt bounds for this $uploadtree_pk  */
   $sql = "SELECT lft, rgt, upload_fk FROM uploadtree 
-            WHERE uploadtree_pk = '$uploadtree_pk'";
+                 WHERE uploadtree_pk = $uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
@@ -168,15 +172,17 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   pg_free_result($result);
 
   $shortname = pg_escape_string($rf_shortname);
+  $chkonly = ($CheckOnly) ? " LIMIT 1" : "";
 
   $sql = "select count(*)
           from license_ref,license_file,
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
-                 where upload_fk=$upload_pk 
+                 where upload_fk=$upload_pk
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
           where PF=pfile_fk and agent_fk=$agent_pk and rf_fk=rf_pk
-                and rf_shortname='$shortname'";
-  $result = pg_query($PG_CONN, $sql);
+                and rf_shortname='$shortname' $chkonly";
+
+  $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   
   $LicCount = pg_fetch_result($result, 0, 0);
@@ -184,8 +190,45 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   return $LicCount;
 }
 
+
 /*
- * Given an uploadtree_pk, return all the counts and licenses for that subtree.
- * This is the license histogram.
+ * Return which uploadtree_pk's in the top level of $uploadtree_pk
+ * have license $rf_shortname.
+ *
+ * Inputs:
+ *   $agent_pk
+ *   $rf_shortname
+ *   $uploadtree_pk   sets scope of request
+ *   $PkgsOnly        if true, only list packages, default is false (all files are listed)
+ *                    $PkgsOnly is not yet implemented.
+ * Returns:
+ *   Array of uploadtree_pk ==> ufile_name
  */
+function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=false)
+{
+  global $PG_CONN;
+  $pkarray = array();
+
+  $sql = "select uploadtree_pk, ufile_name from uploadtree where parent=$uploadtree_pk";
+  $TopUTpks = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
+  DBCheckResult($TopUTpks, $sql, __FILE__, __LINE__);
+  
+  /* Loop throught each top level uploadtree_pk */
+  $offset = 0;
+  $limit = 1;
+  $order = "";
+  while ($row = pg_fetch_assoc($TopUTpks))
+  {
+//$uTime2 = microtime(true);
+    $result = GetFilesWithLicense($agent_pk, $rf_shortname, $row['uploadtree_pk'], 
+                             $PkgsOnly, $offset, $limit, $order);
+//$Time = microtime(true) - $uTime2;
+//printf( "GetFilesWithLicense($row[ufile_name]) time: %.2f seconds<br>", $Time);
+
+    if (pg_num_rows($result) > 0) $pkarray[$row['uploadtree_pk']] = $row['ufile_name'];
+    pg_free_result($result);
+  }
+  return $pkarray;
+}
+
 ?>
