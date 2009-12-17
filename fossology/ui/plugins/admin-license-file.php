@@ -200,7 +200,7 @@ function Updatefm($rf_pk)
   $ob .= "<FORM name='Updatefm' action='?mod=" . $this->Name."' method='POST'>";
   $ob .= "<input type=hidden name=rf_pk value='$rf_pk'>";
   $ob .= "<input type=hidden name=req_marydone value='$_GET[req_marydone]'>";
-  $ob .= "<input type=hidden name=req_shortname value='$_GET[req_shortname]'>";
+  $ob .= "<input type=hidoen name=req_shortname value='$_GET[req_shortname]'>";
   $ob .= "<table>";
 
   if ($rf_pk)  // true if this is an update
@@ -276,6 +276,13 @@ function Updatefm($rf_pk)
     $ob .= "</tr>";
 
     $ob .= "<tr>";
+    $dettype = ($row['rf_detector_type'] == '1') ? "Reference License" : "Nomos";
+    $select = Array2SingleSelect(array("1"=>"Reference License", "2"=>"Nomos"), "rf_detector_type", $dettype);
+    $ob .= "<td align=right>Detector Type</td>";
+    $ob .= "<td align=left>$select</td>";
+    $ob .= "</tr>";
+
+    $ob .= "<tr>";
     $ob .= "<td align=right>URL";
     $ob .= "<a href='$row[rf_url]'><image border=0 src=images/right-point-bullet.gif></a></td>";
     $ob .= "<td><input type='text' name='rf_url' value='$row[rf_url]' size=80></td>";
@@ -318,6 +325,7 @@ function Updatedb()
                  rf_url='$_POST[rf_url]',
                  rf_notes='$notes',
                  rf_text_updatable='$_POST[rf_text_updatable]',
+                 rf_detector_type='$_POST[rf_detector_type]',
                  rf_text='$_POST[rf_text]',
                  rf_md5='$licmd5'
             WHERE rf_pk='$_POST[rf_pk]'";
@@ -345,7 +353,8 @@ function Adddb()
   $licmd5 = md5($text);
   $sql = "INSERT into license_ref (
                  rf_active, marydone, rf_shortname, rf_fullname,
-                 rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable) 
+                 rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable,
+                 rf_detector_type) 
                  VALUES (
                  '$_POST[rf_active]',
                  '$_POST[marydone]',
@@ -353,7 +362,8 @@ function Adddb()
                  '$_POST[rf_fullname]',
                  '$_POST[rf_url]',
                  '$notes', '$licmd5', '$text',
-                 '$_POST[rf_text_updatable]')";
+                 '$_POST[rf_text_updatable]',
+                 '$_POST[rf_detector_type]')";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   
