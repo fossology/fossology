@@ -71,7 +71,13 @@ function AgentCheckBoxMake($upload_pk,$SkipAgent=NULL) {
       if ($rc == 0) {
         $Name = htmlentities($Agent->Name);
         $Desc = htmlentities($AgentItem->Name);
-        $V .= "<input type='checkbox' name='Check_$Name' value='1' />$Desc<br />\n";
+
+        // kludge to auto select the correct license analysis agent 
+        if (strstr($Desc, "Nomos"))
+           $Selected = " checked ";
+        else
+           $Selected = "";
+        $V .= "<input type='checkbox' name='Check_$Name' value='1' $Selected />$Desc<br />\n";
       }
     }
   }
