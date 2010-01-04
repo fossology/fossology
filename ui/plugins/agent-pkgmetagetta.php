@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class agent_pkgmetagetta extends FO_Plugin
 {
   public $Name       = "agent_pkgmetagetta";
-  public $Title      = "Schedule Metadata Analysis";
+  public $Title      = "Schedule Metadata Analysis (not needed for license analysis)";
   // public $MenuList   = "Jobs::Agents::Metadata Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
