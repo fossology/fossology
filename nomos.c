@@ -241,7 +241,7 @@ FUNCTION void lrcache_print(cacheroot_t *pcroot)
     if (pcnode->rf_pk != 0L) 
     {
       hashval = lrcache_hash(pcroot, pcnode->rf_shortname);
-      printf("%ld, %ld, %s\n", hashval, pcnode->rf_pk, pcnode->rf_shortname);
+      // printf("%ld, %ld, %s\n", hashval, pcnode->rf_pk, pcnode->rf_shortname);
     }
     pcnode++;
   }
@@ -1069,7 +1069,7 @@ int main(int argc, char **argv) {
         printf("OK\n");
         fflush(stdout);
         while (ReadLine(stdin, parm, myBUFSIZ) >= 0) {
-            printf("NOMOSDB: nomos read %s\n", parm);
+ //           printf("NOMOSDB: nomos read %s\n", parm);
             fflush(stdout);
             if (parm[0] != '\0') {
                 /*
