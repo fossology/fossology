@@ -27,9 +27,9 @@ if (!isset($GlobalReady)) { exit; }
 class core_debug_fileloc extends FO_Plugin
 {
   var $Name       = "debug-fileloc";
-  var $Title      = "File Locations";
+  var $Title      = "Global Variables";
   var $Version    = "1.0";
-  var $MenuList   = "Help::Debug::File Locations";
+  var $MenuList   = "Help::Debug::Global Variables";
   var $DBaccess   = PLUGIN_DB_DEBUG;
 
   /******************************************
