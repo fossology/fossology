@@ -275,7 +275,7 @@ char *	RepGetHost	(char *Type, char *Filename)
 } /* RepGetHost() */
 
 /***********************************************
- _RepMkPath(): Given a filename, construct the full
+ RepMkPathTmp(): Given a filename, construct the full
  path to the file.
  Allocates and returns a string.
  This does NOT make the actual file or modify the file system!
