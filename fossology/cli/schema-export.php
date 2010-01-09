@@ -17,6 +17,14 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+/**
+ * schema-export
+ * \brief export the fossology schema to a file
+ * 
+ * @param string $Filename path to file
+ * 
+ * @version "$Id$"
+ */
 global $GlobalReady;
 $GlobalReady = 1;
 
