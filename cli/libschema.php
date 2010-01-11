@@ -186,8 +186,8 @@ function GetSchema()
 	/***************************/
 	/* Get Views */
 	/***************************/
-	//$SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'fossy';";
-	$SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'rando';";
+	$SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'fossy';";
+	//$SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'rando';";
 	$result = pg_query($SQL);
 	checkresult($result, $SQL, __LINE__);
 	$Results = pg_fetch_all($result);
