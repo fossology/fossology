@@ -5,8 +5,9 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-EXE=cp2foss.php fossinit.php fossjobs.php fo_notify.php fosslic.php
+EXE=cp2foss.php fossinit.php fossjobs.php fo_notify.php fosslic.php schema-update.php schema-export.php
 DOCS=cp2foss.pod fossjobs.pod fosslic.pod fo_notify.pod
+LIBS=libschema.php
 MAN1FILES=$(DOCS:%.pod=%.1)
 HTMLFILES=$(DOCS:%.pod=%.html)
 TEXTFILES=$(DOCS:%.pod=%.txt)
@@ -34,6 +35,12 @@ install: all
 	for file in $(MAN1FILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MAN1DIR)/$$file; \
 	done
+	
+	#for file in $(LIBS); do \
+	#	$(INSTALL_PROGRAM) $$file $(DESTDIR)$(LIBEXECDIR)/$$file; \
+	#	done
+
+	$(INSTALL_PROGRAM) libschema.php $(DESTDIR)$(LIBEXECDIR)/libschema.php 
 
 uninstall:
 	for file in $(EXE); do \
