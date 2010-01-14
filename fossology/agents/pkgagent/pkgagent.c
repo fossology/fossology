@@ -18,10 +18,12 @@
 /**
  * file pkgagent.c
  * The package metadata agent puts data about each package (rpm and deb) into the database.
+ * 
+ * Pkgagent get RPM package info from rpm files using rpm library,
+ * Build pkgagent.c need "rpm" and "librpm-dev", running binary just need "rpm".
  */
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
@@ -32,6 +34,7 @@
 #include "libfossdb.h"
 #include "libfossagent.h"
 #include "rpmlib.h"
+#include "rpmts.h"
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
@@ -154,6 +157,7 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
 /**
  * parseSchedInput (char *s)
  *
+ * Expect 2 field from the scheduler, 'pfile_pk' and 'mimetype_name'
  */
 void    parseSchedInput (char *s)
 {
@@ -191,7 +195,7 @@ void    parseSchedInput (char *s)
     }
   }
   printf ("mimetyp:%s\n",mimetype);
-  if (!strcasecmp(mimetype, "14")) {
+  if (!strcasecmp(mimetype, "application/x-rpm")) {
     rpmpi.pFileFk = pfilefk;
     strncpy(rpmpi.pFile, pfilename, sizeof(rpmpi.pFile));
     PKG_RPM = 1;
@@ -200,7 +204,7 @@ void    parseSchedInput (char *s)
 
 /**
  * readHeaderInfo(Header header)
- * get RPM package info from rpm file header
+ * get RPM package info from rpm file header use rpm library
  */
 void readHeaderInfo(Header header) 
 {
@@ -304,8 +308,9 @@ void readHeaderInfo(Header header)
       rpmpi.req_size = data_size;
     } 
   }
-
-}
+  printf("Name:%s\n",rpmpi.sourceRPM);
+} /* readHeadinfo() */
+   
 /**
  * getMetadata(char *pkg)
  *
@@ -319,8 +324,11 @@ int	getMetadata	(char *pkg)
     rpmRC rpmrc;
     Header header;
     rpmts ts;
+    rpmVSFlags vsflags;
 
+    vsflags = RPMVSF_DEFAULT;
     ts = (rpmts) rpmtsCreate();
+
     fd = Fopen(pkg,"r");
     if ( fd == NULL ||Ferror(fd)){
       rpmError(RPMERR_OPEN, "open of %s failed: %s\n", pkg, Fstrerror(fd));
@@ -330,18 +338,30 @@ int	getMetadata	(char *pkg)
       return FALSE;
     }
 
+    vsflags |= _RPMVSF_NOSIGNATURES;
+    vsflags |= _RPMVSF_NODIGESTS;
+    vsflags |= RPMVSF_NOHDRCHK;
+    vsflags |= RPMVSF_NEEDPAYLOAD;
+    
+    rpmtsSetVSFlags(ts, vsflags);
+
     rpmrc = rpmReadPackageFile(ts, fd, pkg, &header);
     Fclose(fd);
-    if (rpmrc != RPMRC_OK) {
-      if (rpmrc != RPMRC_NOKEY){
+    ts = (rpmts) rpmtsFree(ts);
+
+    switch (rpmrc) {
+    case RPMRC_OK:
+    case RPMRC_NOKEY:
+    case RPMRC_NOTTRUSTED:
+        break;
+    case RPMRC_NOTFOUND:
+    case RPMRC_FAIL:
+    default:
         rpmError(RPMERR_OPEN, "%s cannot be read\n", pkg);
         return FALSE;
-      }
     }
-
     readHeaderInfo(header);
     header = headerFree(header);
-    ts = (rpmts) rpmtsFree(ts); 
   }
   return TRUE;
 } /* getMetadata */
@@ -369,11 +389,13 @@ void	recordMetadataRPM	(struct rpmpkginfo *pi)
   }
   if (DBdatasize(DB) <=0)
   {
-    memset(SQL,0,sizeof(SQL));  
+    memset(SQL,0,sizeof(SQL));
+    DBaccess(DB,"BEGIN;");  
     snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm (pkg_name,pkg_alias,pkg_arch,version,rpm_filename,license,pkg_group,packager,release,build_date,vendor,url,source_rpm,summary,description,pfile_fk) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%ld);",pi->pkgName,pi->pkgAlias,pi->pkgArch,pi->version,pi->rpmFilename,pi->license,pi->group,pi->packager,pi->release,pi->buildDate,pi->vendor,pi->url,pi->sourceRPM,pi->summary,pi->description,pi->pFileFk);
     rc = DBaccess(DB,SQL);
     if (rc < 0)
     {
+      DBaccess(DB,"ROLLBACK;");
       printf("ERROR pfile %s Unable to access database.\n",pi->pFile);
       printf("LOG pfile %s ERROR: %s\n",pi->pFile,SQL);
       fflush(stdout);
@@ -393,12 +415,14 @@ void	recordMetadataRPM	(struct rpmpkginfo *pi)
       rc = DBaccess(DB,SQL);
       if (rc < 0)
       {
+        DBaccess(DB,"ROLLBACK;");
         printf("LOG pkg %d ERROR: %s\n",pkg_pk,SQL);
         fflush(stdout);
         DBclose(DB);
         exit(-1);
       }
     }
+    DBaccess(DB,"COMMIT;");
   }
 }
 
