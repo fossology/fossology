@@ -19,7 +19,7 @@
 /**
  * libschema
  * \brief utility functions needed by the schema* programs
- * 
+ *
  * @version "$Id$"
  */
 
@@ -356,7 +356,7 @@ function GetSchema()
 	}
 	//print "GetSchema: Schema at this point is:\n";print_r($Schema) . "\n";
 	//print "GetSchemaDB: before Get Index Results are:\n";print_r($Results) . "\n";
-	
+
 	/***************************/
 	/* Get Index */
 	/***************************/
@@ -409,6 +409,286 @@ function GetSchema()
 	//print "GetSchema: schema returned is:\n";print_r($Schema) . "\n";
 	return ($Schema);
 } // GetSchema()
+
+/**
+ * initAgents()
+ * \brief Every agent program must be run one time with a "-i" before
+ * being used.  This allows them to configure the DB or insert any required
+ * DB fields.
+ *
+ * @param string $Debug, debug flag
+ * @return 0 on success, dies upon failure!
+ *
+ */
+function initAgents($Debug = 1) {
+	print "  Initializing agents.\n";
+	flush();
+	global $AGENTDIR;
+	if (!is_dir($AGENTDIR)) {
+		die("FATAL: Directory '$AGENTDIR' does not exist.\n");
+	}
+	$Dir = opendir($AGENTDIR);
+	if (!$Dir) {
+		die("FATAL: Unable to access '$AGENTDIR'.\n");
+	}
+	while (($File = readdir($Dir)) !== false) {
+		$File = "$AGENTDIR/$File";
+		/* skip directories; only process files */
+		if (is_file($File)) {
+			if ($Debug) {
+				print "    Initializing agent: $File\n";
+				flush();
+			}
+			system("'$File' -i", $Status);
+			if ($Status != 0) {
+				die("FATAL: '$File -i' failed to initialize\n");
+			}
+		}
+	}
+	return(0);
+} // InitAgents()
+
+/**
+ * initBsamFiles
+ * \brief Initialize bSam license cache datafiles.
+ *
+ * @param string $Debug, debug flag
+ *
+ */
+
+function initBsamFiles($Debug = 1)
+{
+	print "  Initializing data files.  This may take a few minutes.\n";
+	flush();
+	$CWD = getcwd();
+	global $DATADIR;
+	global $AGENTDIR;
+	global $PROJECTSTATEDIR;
+	if ($Debug) {
+		print "Going to $DATADIR/agents/licenses\n";
+	}
+	chdir("$DATADIR/agents/licenses");
+	$CMD = 'find . -type f | grep -v "\.meta" | sed -e "s@^./@@"';
+	$Filelist = explode("\n", shell_exec($CMD));
+	sort($Filelist);
+	$Realdir = "$PROJECTSTATEDIR/agents";
+	if (!is_dir($Realdir)) {
+		die("FATAL: Directory '$Realdir' does not exist. Aborting.\n");
+	}
+	if (!is_writable($Realdir)) {
+		die("FATAL: Directory '$Realdir' is not writable. Aborting.\n");
+	}
+	$Realfile = "$Realdir/License.bsam";
+	$Tempfile = $Realfile . ".new";
+	if (file_exists($Tempfile)) {
+		if (!unlink($Tempfile)) {
+			print "initBsamFiles: Unable to delete '$Tempfile'\n";
+			flush();
+			return(1);
+		}
+	}
+	$Count = 0;
+	print "    Processing " . (count($Filelist) - 1) . " license templates.\n";
+	flush();
+	print "    ";
+	foreach($Filelist as $File) {
+		if (empty($File)) {
+			continue;
+		}
+		$Count++;
+		if (file_exists($File . ".meta")) {
+			$CMD = "$AGENTDIR/Filter_License -Q -O -M '" . $File . ".meta' '$File' >> $Tempfile";
+		}
+		else {
+			$CMD = "$AGENTDIR/Filter_License -Q -O '$File' >> $Tempfile";
+		}
+		if ($Debug) {
+			print "$CMD\n";
+		}
+		else {
+			print ".";
+			flush();
+			if (($Count % 50) == 0) {
+				print "$Count\n    ";
+				flush();
+			}
+			system($CMD, $rc);
+			if ($rc != 0) {
+				print "Command failed: '$CMD'. Aborting.\n";
+				flush();
+				return(1);
+			}
+		}
+	}
+	/* Test the new file */
+	$CMD = "$AGENTDIR/bsam-engine -t '$Tempfile'";
+	if ($Debug) {
+		print "$CMD\n";
+	}
+	else {
+		system($CMD, $rc);
+		if ($rc != 0) {
+			print "FAILED: Unable to validate the new cache file.\n";
+			print "Command failed: '$CMD'. Aborting.\n";
+			flush();
+			return(1);
+		}
+	}
+	/* Move it into place */
+	@chgrp($Realfile, "fossy");
+	@chmod($Realfile, 0660);
+	$CMD = "cat '$Tempfile' > '$Realfile'";
+	if ($Debug) {
+		print "$CMD\n";
+	}
+	else {
+		system($CMD, $rc);
+		unlink($Tempfile);
+		if ($rc != 0) {
+			print "Command failed: '$CMD'. Aborting.\n";
+			flush();
+			return(1);
+		}
+	}
+	print "!\n";
+	flush();
+	return(0);
+} // initBsamFiles()
+
+/**
+ * initPlugins
+ * \brief Initialize the UI plugins
+ *
+ * @return 0 on success,1 on failure
+ */
+function initPlugins($Verbose, $Debug)
+{
+	global $Plugins;
+
+	$Max = count($Plugins);
+	$FailFlag = 0;
+	if($Verbose)
+	{
+		print "  Initializing plugins\n";
+		flush();
+	}
+	for ($i = 0;$i < $Max;$i++) {
+		$P = & $Plugins[$i];
+		/* Init ALL plugins */
+		if ($Debug) {
+			print "    Initializing plugin '" . $P->Name . "'\n";
+		}
+		$State = $P->Install();
+		if ($State != 0) {
+			$FailFlag = 1;
+			print "FAILED: " . $P->Name . " failed to install.\n";
+			flush();
+			return (1);
+		}
+	}
+	return (0);
+} // initPlugins()
+
+/**
+ * MakeFunctions
+ * \brief Create any required DB functions.
+ */
+function MakeFunctions($Debug) {
+
+	global $PGCONN;
+
+	print "  Applying database functions\n";
+	flush();
+	/********************************************
+	 GetRunnable() is a DB function for listing the runnable items
+	 in the jobqueue. This is used by the scheduler.
+	 ********************************************/
+	$SQL = '
+CREATE or REPLACE function getrunnable() returns setof jobqueue as $$
+DECLARE
+  jqrec jobqueue;
+  jqrec_test jobqueue;
+  jqcurse CURSOR FOR SELECT *
+    FROM jobqueue
+    INNER JOIN job
+      ON jq_starttime IS NULL
+      AND jq_end_bits < 2
+      AND job_pk = jq_job_fk
+    ORDER BY job_priority DESC
+    ;
+  jdep_row jobdepends;
+  success integer;
+BEGIN
+  open jqcurse;
+<<MYLABEL>>
+  LOOP
+    FETCH jqcurse INTO jqrec;
+    IF FOUND
+    THEN -- check all dependencies
+      success := 1;
+      <<DEPLOOP>>
+      FOR jdep_row IN SELECT *  FROM jobdepends WHERE jdep_jq_fk=jqrec.jq_pk LOOP
+  -- has the dependency been satisfied?
+  SELECT INTO jqrec_test * FROM jobqueue WHERE jdep_row.jdep_jq_depends_fk=jq_pk AND jq_endtime IS NOT NULL AND jq_end_bits < 2;
+  IF NOT FOUND
+  THEN
+    success := 0;
+    EXIT DEPLOOP;
+  END IF;
+      END LOOP DEPLOOP;
+
+      IF success=1 THEN RETURN NEXT jqrec; END IF;
+    ELSE EXIT;
+    END IF;
+  END LOOP MYLABEL;
+RETURN;
+END;
+$$
+LANGUAGE plpgsql;
+    ';
+	if ($Debug) {
+		print "$SQL;\n";
+	}
+	else {
+		$result = pg_query($SQL);
+		checkresult($result, $SQL, __LINE__);
+	}
+	/********************************************
+	 * uploadtree2path(uploadtree_pk integer) is a DB function that returns
+	 * the non-artifact parents of an uploadtree_pk
+	 ********************************************/
+	$SQL = '
+CREATE or REPLACE function uploadtree2path(uploadtree_pk_in int) returns setof uploadtree as $$
+DECLARE
+  UTrec   uploadtree;
+  UTpk    integer;
+  sql     varchar;
+BEGIN
+
+  UTpk := uploadtree_pk_in;
+
+    WHILE UTpk > 0 LOOP
+      sql := ' . "'" . 'select * from uploadtree where uploadtree_pk=' . "'" . ' || UTpk;
+      execute sql into UTrec;
+
+      IF ((UTrec.ufile_mode & (1<<28)) = 0) THEN RETURN NEXT UTrec; END IF;
+      UTpk := UTrec.parent;
+    END LOOP;
+  RETURN;
+END;
+$$
+LANGUAGE plpgsql;
+    ';
+	if ($Debug) {
+		print "$SQL;\n";
+	}
+	else {
+		$result = pg_query($SQL);
+		checkresult($result, $SQL, __LINE__);
+	}
+	return;
+} // MakeFunctions()
+
 
 function TblExist($Table)
 {
