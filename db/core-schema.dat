@@ -187,9 +187,13 @@
   $Schema["TABLE"]["agent_runstatus"]["ars_status"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"ars_status\" text;";
   $Schema["TABLE"]["agent_runstatus"]["ars_status"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"ars_status\" DROP NOT NULL;";
 
-  $Schema["TABLE"]["agent_runstatus"]["ars_ts"]["DESC"] = "COMMENT ON COLUMN \"agent_runstatus\".\"ars_ts\" IS 'time record was added.  Update if ars_complete is set to true';";
-  $Schema["TABLE"]["agent_runstatus"]["ars_ts"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"ars_ts\" timestamptz;";
-  $Schema["TABLE"]["agent_runstatus"]["ars_ts"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"ars_ts\" SET NOT NULL, ALTER COLUMN \"ars_ts\" SET DEFAULT now();";
+  $Schema["TABLE"]["agent_runstatus"]["ars_starttime"]["DESC"] = "COMMENT ON COLUMN \"agent_runstatus\".\"ars_starttime\" IS 'time record was added.';";
+  $Schema["TABLE"]["agent_runstatus"]["ars_starttime"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"ars_starttime\" timestamptz;";
+  $Schema["TABLE"]["agent_runstatus"]["ars_starttime"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"ars_starttime\" SET NOT NULL, ALTER COLUMN \"ars_starttime\" SET DEFAULT now();";
+
+  $Schema["TABLE"]["agent_runstatus"]["ars_endtime"]["DESC"] = "COMMENT ON COLUMN \"agent_runstatus\".\"ars_endtime\" IS 'time when agent completed';";
+  $Schema["TABLE"]["agent_runstatus"]["ars_endtime"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"ars_endtime\" timestamptz;";
+  $Schema["TABLE"]["agent_runstatus"]["ars_endtime"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"ars_endtime\" DROP NOT NULL;";
 
 
   $Schema["TABLE"]["agent_wc"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN \"agent_wc\".\"pfile_fk\" IS 'pfile key';";
@@ -327,7 +331,7 @@
   $Schema["TABLE"]["jobqueue"]["jq_job_fk"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_job_fk\" int4;";
   $Schema["TABLE"]["jobqueue"]["jq_job_fk"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_job_fk\" SET NOT NULL;";
 
-  $Schema["TABLE"]["jobqueue"]["jq_type"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_type\" IS 'text agent name - THIS SHOULD BE REPLACED BY agent_fk';";
+  $Schema["TABLE"]["jobqueue"]["jq_type"]["DESC"] = "COMMENT ON COLUMN \"jobqueue\".\"jq_type\" IS 'agent.agent_name';";
   $Schema["TABLE"]["jobqueue"]["jq_type"]["ADD"] = "ALTER TABLE \"jobqueue\" ADD COLUMN \"jq_type\" text;";
   $Schema["TABLE"]["jobqueue"]["jq_type"]["ALTER"] = "ALTER TABLE \"jobqueue\" ALTER COLUMN \"jq_type\" SET NOT NULL;";
 
@@ -474,7 +478,7 @@
   $Schema["TABLE"]["license_ref"]["rf_shortname"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_shortname\" text;";
   $Schema["TABLE"]["license_ref"]["rf_shortname"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_shortname\" SET NOT NULL;";
 
-  $Schema["TABLE"]["license_ref"]["rf_text"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_text\" IS 'License text';";
+  $Schema["TABLE"]["license_ref"]["rf_text"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_text\" IS 'reference License text, or regex';";
   $Schema["TABLE"]["license_ref"]["rf_text"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_text\" text;";
   $Schema["TABLE"]["license_ref"]["rf_text"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_text\" SET NOT NULL;";
 
@@ -517,6 +521,26 @@
   $Schema["TABLE"]["license_ref"]["rf_Fedora"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_Fedora\" IS '\"Good\", \"Bad\", \"Unknown\"';";
   $Schema["TABLE"]["license_ref"]["rf_Fedora"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_Fedora\" text;";
   $Schema["TABLE"]["license_ref"]["rf_Fedora"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_Fedora\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["license_ref"]["marydone"]["DESC"] = "";
+  $Schema["TABLE"]["license_ref"]["marydone"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"marydone\" bool;";
+  $Schema["TABLE"]["license_ref"]["marydone"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"marydone\" SET NOT NULL, ALTER COLUMN \"marydone\" SET DEFAULT false;";
+
+  $Schema["TABLE"]["license_ref"]["rf_active"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_active\" IS 'change this to false if you don''t want this reference license to be used in new analyses (does  not apply to nomos agent)';";
+  $Schema["TABLE"]["license_ref"]["rf_active"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_active\" bool;";
+  $Schema["TABLE"]["license_ref"]["rf_active"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_active\" SET NOT NULL, ALTER COLUMN \"rf_active\" SET DEFAULT true;";
+
+  $Schema["TABLE"]["license_ref"]["rf_text_updatable"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_text_updatable\" IS 'true if the license text can be updated (eg written by nomos)';";
+  $Schema["TABLE"]["license_ref"]["rf_text_updatable"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_text_updatable\" bool;";
+  $Schema["TABLE"]["license_ref"]["rf_text_updatable"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_text_updatable\" SET NOT NULL, ALTER COLUMN \"rf_text_updatable\" SET DEFAULT false;";
+
+  $Schema["TABLE"]["license_ref"]["rf_md5"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_md5\" IS 'md5 of the license text, used to keep duplicates out of the system';";
+  $Schema["TABLE"]["license_ref"]["rf_md5"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_md5\" char(32);";
+  $Schema["TABLE"]["license_ref"]["rf_md5"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_md5\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["license_ref"]["rf_detector_type"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_detector_type\" IS '1 uses reference license, 2 nomos';";
+  $Schema["TABLE"]["license_ref"]["rf_detector_type"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_detector_type\" int4;";
+  $Schema["TABLE"]["license_ref"]["rf_detector_type"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_detector_type\" SET NOT NULL;";
 
 
   $Schema["TABLE"]["license_test"]["lt_pk"]["DESC"] = "";
@@ -909,7 +933,7 @@
 
   $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::unknown AS ts, NULL::unknown AS upload_pk, NULL::unknown AS pfile_fk, NULL::unknown AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::unknown AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
   $Schema["VIEW"]["keyagent"] = "CREATE VIEW \"keyagent\" AS SELECT key.key_pk, key.key_name, key.key_desc, key.key_parent_fk, key.key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc FROM key, agent WHERE (agent.agent_pk = key.key_agent_fk);";
-  $Schema["VIEW"]["runstat_up_agent"] = "CREATE VIEW \"runstat_up_agent\" AS SELECT agent_runstatus.ars_status, agent_runstatus.ars_complete, agent_runstatus.ars_pk, agent_runstatus.ars_ts, agent_runstatus.agent_fk, agent.agent_desc, agent.agent_name, agent.agent_parms, agent.agent_enabled AS agent_enable, agent.agent_pk, agent.agent_ts, agent.agent_rev, upload.upload_desc, upload.upload_filename, upload.pfile_fk, upload.upload_pk FROM ((agent_runstatus JOIN agent ON ((agent_runstatus.agent_fk = agent.agent_pk))) JOIN upload ON ((agent_runstatus.upload_fk = upload.upload_pk)));";
+  $Schema["VIEW"]["runstat_up_agent"] = "CREATE VIEW \"runstat_up_agent\" AS SELECT agent_runstatus.ars_status, agent_runstatus.ars_complete, agent_runstatus.ars_pk, agent_runstatus.ars_starttime AS ars_ts, agent_runstatus.agent_fk, agent.agent_desc, agent.agent_name, agent.agent_parms, agent.agent_enabled AS agent_enable, agent.agent_pk, agent.agent_ts, agent.agent_rev, upload.upload_desc, upload.upload_filename, upload.pfile_fk, upload.upload_pk FROM ((agent_runstatus JOIN agent ON ((agent_runstatus.agent_fk = agent.agent_pk))) JOIN upload ON ((agent_runstatus.upload_fk = upload.upload_pk)));";
 
   $Schema["SEQUENCE"]["jobqueue_jq_pk_seq"] = "CREATE SEQUENCE \"jobqueue_jq_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["uploadtree_uploadtree_pk_seq"] = "CREATE SEQUENCE \"uploadtree_uploadtree_pk_seq\" START 1;";
@@ -996,6 +1020,7 @@
   $Schema["CONSTRAINT"]["only_one_licterm_maplic"] = "ALTER TABLE \"licterm_maplic\" ADD CONSTRAINT \"only_one_licterm_maplic\" UNIQUE (\"licterm_fk\",\"lic_fk\");";
   $Schema["CONSTRAINT"]["only_one_licterm_name"] = "ALTER TABLE \"licterm_name\" ADD CONSTRAINT \"only_one_licterm_name\" UNIQUE (\"licterm_fk\",\"agent_lic_meta_fk\");";
   $Schema["CONSTRAINT"]["report_cache_report_cache_key_key"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_report_cache_key_key\" UNIQUE (\"report_cache_key\");";
+  $Schema["CONSTRAINT"]["rf_md5unique"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_md5unique\" UNIQUE (\"rf_md5\");";
   $Schema["CONSTRAINT"]["user_user_name_key"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_user_name_key\" UNIQUE (\"user_name\");";
   $Schema["CONSTRAINT"]["agent_lic_meta_pfile_fk_fkey"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"agent_lic_meta_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["agent_lic_status_pfile_fk_fkey"] = "ALTER TABLE \"agent_lic_status\" ADD CONSTRAINT \"agent_lic_status_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
@@ -1037,6 +1062,8 @@
   $Schema["INDEX"]["license_file"]["fl_rf_fk"] = "CREATE INDEX fl_rf_fk ON license_file USING btree (rf_fk);";
   $Schema["INDEX"]["license_file"]["lf_pfile_fk"] = "CREATE INDEX lf_pfile_fk ON license_file USING btree (pfile_fk);";
 
+  $Schema["INDEX"]["license_ref"]["rf_shortname_idx"] = "CREATE INDEX rf_shortname_idx ON license_ref USING btree (rf_shortname);";
+
   $Schema["INDEX"]["license_test"]["pfilefk"] = "CREATE INDEX pfilefk ON license_test USING btree (pfile_fk);";
 
   $Schema["INDEX"]["licterm_name"]["licterm_name_pfile_pk_idx"] = "CREATE UNIQUE INDEX licterm_name_pfile_pk_idx ON licterm_name USING btree (licterm_name_pk, pfile_fk);";
@@ -1049,9 +1076,6 @@
   $Schema["INDEX"]["uploadtree"]["parent"] = "CREATE INDEX parent ON uploadtree USING btree (parent);";
   $Schema["INDEX"]["uploadtree"]["projtree_projid_idx"] = "CREATE INDEX projtree_projid_idx ON uploadtree USING btree (upload_fk);";
   $Schema["INDEX"]["uploadtree"]["uploadtree_pfile_fk_idx"] = "CREATE INDEX uploadtree_pfile_fk_idx ON uploadtree USING btree (pfile_fk);";
-
-  $Schema["INDEX"]["uploadtree_65"]["up_65_pfile"] = "CREATE INDEX up_65_pfile ON uploadtree_65 USING btree (pfile_fk);";
-  $Schema["INDEX"]["uploadtree_65"]["up_65_pk"] = "CREATE INDEX up_65_pk ON uploadtree_65 USING btree (uploadtree_pk);";
 
 
 ?>
