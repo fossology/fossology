@@ -118,8 +118,7 @@ function _aSchema($Verbose)
 	global $LIBEXECDIR;
 	global $WEBDIR;
 
-	// FIXME: for now use the file in plugins:
-	$datFile = "$LILBEXECDIR/core-schema.dat";
+	$datFile = "$LIBEXECDIR/core-schema.dat";
 	if (!file_exists($datFile))
 	{
 		print "FAILED: Schema data file ($datFile) not found.\n";
