@@ -80,6 +80,9 @@ fi
 
 if [ $DATABASE ]; then
    {$LIBEXECDIR}/dbcreate
+   # DB server needs to create the db and initialize the plugins and agents
+   {$BINDIR}/fossinit -d -i
+   
 fi # end of DATABASE
 
 ########################################################################
@@ -235,7 +238,7 @@ if [ $AGENT ]; then
    # In multi-system installs the database machine must be installed first
    # in order for this to work on other machines.
    echo "*** Initializing database tables ***"
-   {$BINDIR}/fossinit
+   {$BINDIR}/fossinit -b
    if [ $? != 0 ] ; then
      echo "ERROR: Unable to initialize."
      exit 1
