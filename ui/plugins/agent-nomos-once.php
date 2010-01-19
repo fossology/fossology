@@ -131,9 +131,9 @@ class agent_nomos_once extends FO_Plugin {
           "item"
           ));
           menu_insert("View::[BREAK]", 100);
-          menu_insert("View::One-Shot", 101, $URI, "One-shot, real-time license analysis");
+          menu_insert("View::Nomos One-Shot", 101, $URI, "Nomos One-shot, real-time license analysis");
           menu_insert("View-Meta::[BREAK]", 100);
-          menu_insert("View-Meta::One-Shot", 101, $URI, "One-shot, real-time license analysis");
+          menu_insert("View-Meta::Nomos One-Shot", 101, $URI, "Nomos One-shot, real-time license analysis");
       }
     }
   } // RegisterMenus()

@@ -47,13 +47,13 @@ class ui_view_license extends FO_Plugin
       {
       if (GetParm("mod",PARM_STRING) == $this->Name)
 	{
-	menu_insert("View::License",1);
-	menu_insert("View-Meta::License",1);
+	menu_insert("View::bsam License",1);
+	menu_insert("View-Meta::bsam License",1);
 	}
       else
 	{
-	menu_insert("View::License",1,$URI,"View license histogram");
-	menu_insert("View-Meta::License",1,$URI,"View license histogram");
+	menu_insert("View::bsam License",1,$URI,"View license histogram");
+	menu_insert("View-Meta::bsam License",1,$URI,"View license histogram");
 	}
       }
     $Lic = GetParm("lic",PARM_INTEGER);
