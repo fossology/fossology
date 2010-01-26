@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #***************************************************************
 # Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
 # 
@@ -164,7 +164,7 @@ void preloadResults(char *filetext, char *ltsr)
 @EOF@
 	rm -f split_[0-9]*
 	printf '*** START: %s license-text strings ***\n' $(wc -l < $OUT)
-	let I=1
+	I=1
 	cp $OUT $MASTER
 	for WORD in $WORDLIST ; do
 # make sure the word regex-matches the string and NOT the tag
@@ -190,7 +190,7 @@ void preloadResults(char *filetext, char *ltsr)
 			grep -Fv "$LINE" $OUT > X
 			mv -f X $OUT
 		done
-		let I++
+		I=$((I+1))
 		cat >> $C <<@EOF@
 	if (!strGrep("$WORD", filetext, REG_ICASE)) {	/* match count $WC */
 #ifdef	LTSR_DEBUG
