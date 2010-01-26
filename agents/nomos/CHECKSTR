@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #**************************************************************
 # Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
 # 
@@ -21,7 +21,7 @@ PROG=$(basename $0)
 DATA=_strings.data
 PASS=checkstr.OK
 WC=$(wc -l < $DATA) || exit 1
-let ERRS=0
+ERRS=0
 # echo "$PROG: validating phrase seeds in license strings..."
 for i in $(seq 1 $WC) ; do
 	LINE=$(head -n $i $DATA | tail -n 1)
@@ -47,7 +47,7 @@ for i in $(seq 1 $WC) ; do
 		else 
 			echo "$PROG: Key \"$KEY\" NOT FOUND in entry below:"
 			echo "$LINE"
-			let ERRS++
+			ERRS=$((ERRS+1))
 		fi
 	fi
 done
