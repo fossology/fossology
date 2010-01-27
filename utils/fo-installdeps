@@ -82,7 +82,7 @@ if [ $BUILDTIME ]; then
       Debian|Ubuntu)
          apt-get install \
             libmagic-dev libxml2-dev libextractor-dev \
-            build-essential libtext-template-perl subversion
+            build-essential libtext-template-perl subversion librpm-dev
          case "$CODENAME" in
             etch|dapper) apt-get install postgresql-server-dev-8.1;;
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
@@ -96,20 +96,20 @@ if [ $BUILDTIME ]; then
          yum install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
-            libxml2 libextractor-devel
+            libxml2 libextractor-devel rpm-devel
          ;;
       Mandriva)
          # 2008.1 tested
          urpmi \
             postgresql-devel \
-            libextractor-devel libmagic-devel libxml2 \
+            libextractor-devel libmagic-devel libxml2 rpm-devel \
             perl-Text-Template subversion gcc make perl
          ;;
       RedHatEnterprise*|CentOS)
          # 4=Nahant* 5=Tikanga*
          yum install \
             postgresql-devel \
-            file libxml2 \
+            file libxml2 rpm-devel \
             perl-Text-Template subversion
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;

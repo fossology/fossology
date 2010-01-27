@@ -204,21 +204,23 @@ PHP5:
    http://gnome.org
 * libextractor - GNU file meta-data extractor
    http://www.gnunet.org/libextractor/
+* librpm - for extracting software and metadata from rpm packages
+   http://www.rpm.org/
 
  On Debian (or a Debian derived distribution) you should be able to use
  something like:
   runtime: apt-get install libmagic1 libxml2 libextractor1c2a \
-	libextractor-plugins
-  build: apt-get install libmagic-dev libxml2-dev libextractor-dev
+	libextractor-plugins librpm4.4
+  build: apt-get install libmagic-dev libxml2-dev libextractor-dev librpm-dev
  On Fedora:
   runtime: yum install file-libs libxml2 libextractor libextractor-plugins-base
-  build: file-libs libxml2 libextractor-devel
+  build: file-libs libxml2 libextractor-devel rpm-devel
  On RHEL, install libextractor from upstream sources and:
   runtime: yum install file-libs libxml2 
-  build: file-libs libxml2
+  build: file-libs libxml2 rpm-devel
  On Mandriva:
   runtime: urpmi libextractor libextractor-plugins libxml2 
-  build: urpmi libextractor-devel libmagic-devel libxml2 
+  build: urpmi libextractor-devel libmagic-devel libxml2 rpm-devel
   
 
 2.1.2.4 External Commands
