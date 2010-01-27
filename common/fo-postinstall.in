@@ -152,7 +152,8 @@ function allServers
       echo "NOTE: Connect succeeded, database is working."
    fi
 
-} # end allServers
+} 
+# end allServers
 
 ## Options parsing and setup
 # parse options
@@ -250,7 +251,7 @@ if [ $AGENT ]; then
    ## Initialize the tables, License.bsam, and other setup done by fossinit
    # In multi-system installs the database machine must be installed first
    # in order for this to work on other machines.
-   echo "*** Initializing database tables ***"
+   echo "*** Initializing License Cache Files ***"
    {$BINDIR}/fossinit -b
    if [ $? != 0 ] ; then
      echo "ERROR: Unable to initialize."
