@@ -14,7 +14,7 @@
 #
 # returns 0 for success and 1 for an error
 function allServers
-{
+\{
 	
    ## create user and group
    # Because we are doing these by name, in the multi-machine install case
@@ -152,7 +152,7 @@ function allServers
       echo "NOTE: Connect succeeded, database is working."
    fi
 
-} 
+\} 
 # end allServers
 
 ## Options parsing and setup
