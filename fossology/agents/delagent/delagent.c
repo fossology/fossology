@@ -239,6 +239,27 @@ void	DeleteUpload	(long UploadId)
   snprintf(SQL,sizeof(SQL),"DELETE FROM attrib USING %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
   MyDBaccess(DB,SQL);
 
+  /* delete package info table */
+  if (Verbose) { printf("# Deleting pkg_deb_req\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM pkg_deb_req USING pkg_deb,%s_pfile WHERE pkg_fk = pkg_pk AND pfile_fk = pfile_pk;",TempTable);
+  MyDBaccess(DB,SQL);
+
+  if (Verbose) { printf("# Deleting pkg_deb\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM pkg_deb USING %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
+  MyDBaccess(DB,SQL);
+
+  if (Verbose) { printf("# Deleting pkg_rpm_req\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM pkg_rpm_req USING pkg_rpm,%s_pfile WHERE pkg_fk = pkg_pk AND pfile_fk = pfile_pk;",TempTable);
+  MyDBaccess(DB,SQL);
+
+  if (Verbose) { printf("# Deleting pkg_rpm\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM pkg_rpm USING %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
+  MyDBaccess(DB,SQL);
+
   /* delete pfiles in the license_file table */
   if (Verbose) { printf("# Deleting from licese_file\n"); }
   memset(SQL,'\0',sizeof(SQL));
