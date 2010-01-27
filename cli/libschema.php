@@ -464,6 +464,9 @@ function initBsamFiles($Debug = 1)
 	global $DATADIR;
 	global $AGENTDIR;
 	global $PROJECTSTATEDIR;
+	
+	print "DEBUG: initBsFiles: PROJECTSTATEDIR is:$PROJECTSTATEDIR\n";
+	
 	if ($Debug) {
 		print "Going to $DATADIR/agents/licenses\n";
 	}
