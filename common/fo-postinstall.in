@@ -227,9 +227,13 @@ fi
 ########################################################################
 
 if [ $DATABASE ]; then
+	echo "In DATABASE clause"
+	echo "calling {$LIBEXECDIR}/dbcreate"
    {$LIBEXECDIR}/dbcreate
    # DB server needs to create the db and initialize the plugins and agents
+   echo "calling allSevers"
    allServers
+   echo "calling fossinit -d -i"
    {$BINDIR}/fossinit -d -i
    
 fi # end of DATABASE
