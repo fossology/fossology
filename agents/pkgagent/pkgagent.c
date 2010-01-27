@@ -21,6 +21,8 @@
  * 
  * Pkgagent get RPM package info from rpm files using rpm library,
  * Build pkgagent.c need "rpm" and "librpm-dev", running binary just need "rpm".
+ *
+ * Pkgagent get Debian binary package info from .deb binary control file.
  */
 #include <stdlib.h>
 #include <stdio.h>
@@ -68,7 +70,25 @@ struct rpmpkginfo {
   char **requires;
   int req_size;
 };
-struct rpmpkginfo rpmpi;
+struct rpmpkginfo *glb_rpmpi;
+
+struct debpkginfo {
+  char pkgName[128];
+  char source[128];
+  char version[32];
+  char section[64];
+  char priority[16];
+  char pkgArch[32];
+  int installedSize;
+  char maintainer[128];
+  char homepage[128];
+  char description[MAXCMD];
+  long pFileFk;
+  char pFile[MAXCMD];
+  char **depends;
+  int dep_size; 
+};
+struct debpkginfo *glb_debpi;
 
 int_32 tag[15] = {RPMTAG_NAME,
 		RPMTAG_EPOCH,
@@ -91,6 +111,9 @@ int_32 tag[15] = {RPMTAG_NAME,
 void *DB=NULL;
 int Agent_pk;
 int PKG_RPM = 0; /**< Non-zero when it's RPM package */
+int PKG_DEB = 0; /**< Non-zero when it's DEBINE package */
+
+int Verbose = 0;
 
 /**********************************************
  GetFieldValue(): Given a string that contains
@@ -155,11 +178,15 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
 
 
 /**
- * parseSchedInput (char *s)
+ * ParseSchedInput (char *s , struct rpmpkginfo *pi, struct debpkginfo *dpi)
  *
- * Expect 2 field from the scheduler, 'pfile_pk' and 'mimetype_name'
+ * Expect 3 field from the scheduler, 'pfile_pk' 'pfilename' and 'mimetype'
+ * Parameters:
+ * 		s   string send from scheduler
+ * 		pi  rpmpkginfo global pointer
+ * 		dpi debpkginfo global pointer
  */
-void    parseSchedInput (char *s)
+void    ParseSchedInput (char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi)
 {
   char field[256];
   char value[1024];
@@ -168,6 +195,8 @@ void    parseSchedInput (char *s)
   char pfilename[MAXCMD];
   long uploadpk;
   char mimetype[128];
+  PKG_RPM = 0;
+  PKG_DEB = 0;
 
   if (!s) {
     return;
@@ -194,19 +223,35 @@ void    parseSchedInput (char *s)
       }
     }
   }
-  printf ("mimetyp:%s\n",mimetype);
-  if (!strcasecmp(mimetype, "application/x-rpm")) {
-    rpmpi.pFileFk = pfilefk;
-    strncpy(rpmpi.pFile, pfilename, sizeof(rpmpi.pFile));
+  if (Verbose) { printf ("mimetype:%s\n",mimetype);}
+  
+  /*  
+   * if mimetyp='application/x-rpm' set PKG_RPM=1
+   * if mimetyp='application/x-debian-package' set PKG_DEB=1
+   * */  
+  if (!strcasecmp(mimetype,"application/x-rpm")) {
+    pi->pFileFk = pfilefk;
+    strncpy(pi->pFile, pfilename, sizeof(pi->pFile));
     PKG_RPM = 1;
   }
-}/*parseSchedInput (char *s)*/
+  else if (!strcasecmp(mimetype, "application/x-debian-package")){
+    dpi->pFileFk = pfilefk;
+    strncpy(dpi->pFile, pfilename, sizeof(dpi->pFile));
+    PKG_DEB = 1;
+  } else {
+    printf("LOG: Not RPM and DEBIAN package!\n");
+  } 
+}/*ParseSchedInput (char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi)*/
 
 /**
- * readHeaderInfo(Header header)
+ * ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
  * get RPM package info from rpm file header use rpm library
+ *
+ * Parameters:
+ * 		header rpm header
+ * 		*pi    rpmpkginfo global pointer
  */
-void readHeaderInfo(Header header) 
+void ReadHeaderInfo(Header header, struct rpmpkginfo *pi) 
 {
   int_32 type;
   void* pointer;
@@ -215,7 +260,7 @@ void readHeaderInfo(Header header)
   
   if (header_status) {
     if (type == RPM_STRING_TYPE) {
-      strncpy(rpmpi.pkgName,pointer,sizeof(rpmpi.pkgName));
+      strncpy(pi->pkgName,pointer,sizeof(pi->pkgName));
     } 
   }
 
@@ -223,99 +268,105 @@ void readHeaderInfo(Header header)
   
   if (header_status) {
     if (type == RPM_STRING_TYPE) {
-      strncpy(rpmpi.pkgAlias,pointer,sizeof(rpmpi.pkgAlias));
+      strncpy(pi->pkgAlias,pointer,sizeof(pi->pkgAlias));
     } 
   }
 
   header_status = headerGetEntry(header,tag[2],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_TYPE) 
-      strncpy(rpmpi.pkgArch,pointer,sizeof(rpmpi.pkgArch));
+      strncpy(pi->pkgArch,pointer,sizeof(pi->pkgArch));
   }
 
   header_status = headerGetEntry(header,tag[3],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_TYPE) 
-      strncpy(rpmpi.version,pointer,sizeof(rpmpi.version));
+      strncpy(pi->version,pointer,sizeof(pi->version));
   }
 
   header_status = headerGetEntry(header,tag[4],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_TYPE) 
-      strncpy(rpmpi.license,pointer,sizeof(rpmpi.license));
+      strncpy(pi->license,pointer,sizeof(pi->license));
   }
 
   header_status = headerGetEntry(header,tag[5],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_TYPE) 
-      strncpy(rpmpi.group,pointer,sizeof(rpmpi.group));
+      strncpy(pi->group,pointer,sizeof(pi->group));
   }
 
   header_status = headerGetEntry(header,tag[6],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_TYPE) 
-      strncpy(rpmpi.packager,pointer,sizeof(rpmpi.packager));
+      strncpy(pi->packager,pointer,sizeof(pi->packager));
   }
 
   header_status = headerGetEntry(header,tag[7],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_TYPE) 
-      strncpy(rpmpi.release,pointer,sizeof(rpmpi.release));
+      strncpy(pi->release,pointer,sizeof(pi->release));
   }
 
   header_status = headerGetEntry(header,tag[8],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_INT32_TYPE){
-      strncpy(rpmpi.buildDate,asctime(gmtime((time_t*)pointer)),sizeof(rpmpi.buildDate));
+      strncpy(pi->buildDate,asctime(gmtime((time_t*)pointer)),sizeof(pi->buildDate));
     }
   }
 
   header_status = headerGetEntry(header,tag[9],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_TYPE) 
-      strncpy(rpmpi.vendor,pointer,sizeof(rpmpi.vendor));
+      strncpy(pi->vendor,pointer,sizeof(pi->vendor));
   }
 
   header_status = headerGetEntry(header,tag[10],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_TYPE) 
-      strncpy(rpmpi.url,pointer,sizeof(rpmpi.url));
+      strncpy(pi->url,pointer,sizeof(pi->url));
   }
 
   header_status = headerGetEntry(header,tag[11],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_TYPE) 
-      strncpy(rpmpi.sourceRPM,pointer,sizeof(rpmpi.sourceRPM));
+      strncpy(pi->sourceRPM,pointer,sizeof(pi->sourceRPM));
   }
 
   header_status = headerGetEntry(header,tag[12],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_TYPE) 
-      strncpy(rpmpi.summary,pointer,sizeof(rpmpi.summary));
+      strncpy(pi->summary,pointer,sizeof(pi->summary));
   }
 
   header_status = headerGetEntry(header,tag[13],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_TYPE) 
-      strncpy(rpmpi.description,pointer,sizeof(rpmpi.description));
+      strncpy(pi->description,pointer,sizeof(pi->description));
   }
 
   header_status = headerGetEntry(header,tag[14],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_ARRAY_TYPE) {
-      rpmpi.requires = calloc(data_size, sizeof(char *));
-      rpmpi.requires = (char **) pointer;
-      rpmpi.req_size = data_size;
+      pi->requires = calloc(data_size, sizeof(char *));
+      pi->requires = (char **) pointer;
+      pi->req_size = data_size;
     } 
   }
-  printf("Name:%s\n",rpmpi.sourceRPM);
-} /* readHeadinfo() */
+  if (Verbose) { printf("Name:%s\n",pi->sourceRPM);}
+} /* ReadHeaderInfo(Header header, struct rpmpkginfo *pi) */
    
 /**
- * getMetadata(char *pkg)
- *
+ * GetMetadata(char *pkg, struct rpmpkginfo *pi)
+ * 
+ * Get RPM package info.
+ * Parameters:
+ * 		pkg  path of repo pfile
+ * 		*pi  rpmpkginfo global pointer
+ * Returns:
+ * 		True for success
  */
-int	getMetadata	(char *pkg)
+int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
 {
   //rpmpi.pFileFk = 4234634;
   if (PKG_RPM)
@@ -360,17 +411,18 @@ int	getMetadata	(char *pkg)
         rpmError(RPMERR_OPEN, "%s cannot be read\n", pkg);
         return FALSE;
     }
-    readHeaderInfo(header);
+    ReadHeaderInfo(header, pi);
     header = headerFree(header);
   }
   return TRUE;
-} /* getMetadata */
+} /* GetMetadata(char *pkg, struct rpmpkginfo *pi) */
 
 /**
- *recordMetadata()
+ * RecordMetadata(struct rpmpkginfo *pi)
  *
+ * Store rpm package info into database
  */
-void	recordMetadataRPM	(struct rpmpkginfo *pi)
+void	RecordMetadataRPM	(struct rpmpkginfo *pi)
 {
   char SQL[MAXCMD];
   int rc;
@@ -406,7 +458,7 @@ void	recordMetadataRPM	(struct rpmpkginfo *pi)
     DBaccess(DB,"SELECT currval('pkg_rpm_pkg_pk_seq'::regclass);");
     pkg_pk = atoi(DBgetvalue(DB,0,0));
 
-    printf("pkg_pk:%d\n",pkg_pk);
+    if (Verbose) { printf("pkg_pk:%d\n",pkg_pk);}
     int i;
     for (i=0;i<pi->req_size;i++)
     {
@@ -424,7 +476,236 @@ void	recordMetadataRPM	(struct rpmpkginfo *pi)
     }
     DBaccess(DB,"COMMIT;");
   }
-}
+} /* RecordMetadata(struct rpmpkginfo *pi) */
+
+
+/* 
+ * ParseDebFile(char *Sin, char *Field, char *Value)
+ *
+ * parse debian bianry control file with Field/Value pairs
+ *
+ * */
+char * ParseDebFile(char *Sin, char *Field, char *Value)
+{
+  int s,f,v;
+
+  memset(Field,0,256);
+  memset(Value,0,1024);
+
+  f=0; v=0;
+  if(!isspace(Sin[0]))
+  {
+    for(s=0; (Sin[s] != '\0') && !isspace(Sin[s]) && (Sin[s] != ':'); s++)
+    {
+      Field[f++] = Sin[s];
+    }
+    while(isspace(Sin[s])) s++;
+    if (Sin[s] != ':')
+    {
+      return(Sin+s);
+    }
+    s++;
+    while(isspace(Sin[s])) s++;
+
+    for( ; Sin[s] != '\0'; s++)
+    {
+      Value[v++]=Sin[s];
+    }
+      if (Verbose) { printf("Field is %s and Value is %s", Field, Value);}
+      return(Sin+s);
+  } else
+  {
+    if (Verbose) { printf("ExValue is %s", Sin);}
+    return(Sin);
+  }
+} /* ParseDebFile(char *Sin, char *Field, char *Value) */
+
+/**
+ * GetMetadataDebBinary(struct debpkginfo *pi)
+ *
+ * get debian binary package info
+ */
+void	GetMetadataDebBinary	(struct debpkginfo *pi)
+{
+  char *repfile =NULL;
+  char *filename = NULL;
+  char SQL[MAXCMD];
+  int rc;
+  
+  FILE *fp;
+  char field[256];
+  char value[1024];
+  char line[MAXCMD];
+  char *s = NULL;
+  char temp[MAXCMD];
+
+  /* Get the debian/control file's rep path */
+  memset(SQL,0,sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT pfile_fk,ufile_name FROM uploadtree WHERE parent IN (SELECT uploadtree_pk FROM uploadtree WHERE parent IN (SELECT uploadtree_pk FROM uploadtree WHERE parent IN (SELECT uploadtree_pk FROM uploadtree WHERE parent IN (SELECT uploadtree_pk FROM uploadtree WHERE parent IN (SELECT uploadtree_pk FROM uploadtree WHERE pfile_fk = %ld))))) AND ufile_name = 'control') TEMP INNER JOIN pfile ON TEMP.pfile_fk = pfile_pk;", pi->pFileFk);
+  rc = DBaccess(DB,SQL);
+  if (rc < 0)
+  {
+    printf("LOG ERROR: %s\n",SQL);
+    fflush(stdout);
+    DBclose(DB);
+    exit(-1);
+  }
+  filename = DBgetvalue(DB,0,0);
+  if (filename)
+  {
+    repfile = RepMkPath("files", filename);
+    if (!repfile) {
+      printf("FATAL: PkgAgent unable to open file %s\n",filename);
+      fflush(stdout);
+      DBclose(DB);
+      exit(-1);
+    }
+  } else {
+    printf("FATAL: Unable to find debian/control file!\n");
+    fflush(stdout);
+    DBclose(DB);
+    exit(-1);
+  }
+
+  /* Parse the debian/control file to get every Field and Value */
+  if ((fp = fopen(repfile, "r")) == NULL){
+    printf("FATAL: Unable to open debian/control file %s\n",repfile);
+    fflush(stdout);
+    exit(-1);
+  }
+
+  while (fgets(line,2048,fp)!=NULL)
+  {
+    s = ParseDebFile(line,field,value);
+    if (!strcasecmp(field, "Description")) {
+       strcpy(temp, value);
+    }
+    if ((s[0] != '\0') && (temp!=NULL))
+      strcat(temp,s);
+
+    if (!strcasecmp(field, "Package")) {
+       strncpy(pi->pkgName, value, sizeof(pi->pkgName));
+    }
+
+    if (!strcasecmp(field, "Version")) {
+       strncpy(pi->version, value, sizeof(pi->version));
+    }
+  
+    if (!strcasecmp(field, "Architecture")) {
+       strncpy(pi->pkgArch,  value, sizeof(pi->pkgArch));
+    }
+
+    if (!strcasecmp(field, "Maintainer")) {
+       strncpy(pi->maintainer, value, sizeof(pi->maintainer));
+    }
+
+    if (!strcasecmp(field, "Installed-Size")) {
+       pi->installedSize=atol(value);
+    }
+
+    if (!strcasecmp(field, "Section")) {
+       strncpy(pi->section, value, sizeof(pi->section));
+    }
+    if (!strcasecmp(field, "Priority")) {
+       strncpy(pi->priority, value, sizeof(pi->priority));
+    }
+
+    if (!strcasecmp(field, "Homepage")) {
+       strncpy(pi->homepage, value, sizeof(pi->homepage));
+    }
+ 
+    if (!strcasecmp(field, "Depends")) {
+       char *depends = NULL;
+       char tempvalue[1024];
+       int size,i;
+       size = 0;
+
+       strncpy(tempvalue, value, sizeof(tempvalue));
+       depends = strtok(value, ",");
+       while (depends && (depends[0] != '\0')) {
+         depends = strtok(NULL, ",");
+         size++;
+       }
+       if (Verbose) { printf("SIZE:%d\n", size);}
+       
+       pi->depends = calloc(size, sizeof(char *));
+       pi->depends[0] = calloc(256, sizeof(char));
+       strcpy(pi->depends[0],strtok(tempvalue,","));
+       for (i=1;i<size;i++){
+         pi->depends[i] = calloc(256, sizeof(char));
+         strcpy(pi->depends[i],strtok(NULL, ","));
+       }
+       pi->dep_size = size;
+    }
+  }
+  if (temp!=NULL)
+    strncpy(pi->description, temp, sizeof(pi->description));
+
+  fclose(fp);
+}/* GetMetadataDebBinary(struct debpkginfo *pi) */
+
+/**
+ * RecordMetadataDEB(struct debpkginfo *pi)
+ * 
+ * Store debian package info into database
+ */
+void    RecordMetadataDEB       (struct debpkginfo *pi)
+{
+  char SQL[MAXCMD];
+  int rc;
+  int pkg_pk;
+
+  memset(SQL,0,sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT pfile_fk FROM pkg_deb WHERE pfile_fk = %ld;",pi->pFileFk);
+  rc = DBaccess(DB,SQL);
+  if (rc < 0)
+  {
+    printf("ERROR pfile %s Unable to access database.\n",pi->pFile);
+    printf("LOG pfile %s ERROR: %s\n",pi->pFile,SQL);
+    fflush(stdout);
+    DBclose(DB);
+    exit(-1);
+  }
+  if (DBdatasize(DB) <=0)
+  {
+    memset(SQL,0,sizeof(SQL));
+    DBaccess(DB,"BEGIN;");
+    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,description,pfile_fk) values ('%s','%s','%s','%s',%d,'%s','%s','%s','%s','%s',%ld);",pi->pkgName,pi->pkgArch,pi->version,pi->maintainer,pi->installedSize,pi->section,pi->priority,pi->homepage,pi->source,pi->description,pi->pFileFk);
+    rc = DBaccess(DB,SQL);
+    if (rc < 0)
+    {
+      DBaccess(DB,"ROLLBACK;");
+      printf("ERROR pfile %s Unable to access database.\n",pi->pFile);
+      printf("LOG pfile %s ERROR: %s\n",pi->pFile,SQL);
+      fflush(stdout);
+      DBclose(DB);
+      exit(-1);
+    }
+
+    DBaccess(DB,"SELECT currval('pkg_deb_pkg_pk_seq'::regclass);");
+    pkg_pk = atoi(DBgetvalue(DB,0,0));
+
+    if (Verbose) { printf("pkg_pk:%d\n",pkg_pk);}
+    int i;
+    for (i=0;i<pi->dep_size;i++)
+    {
+      memset(SQL,0,sizeof(SQL));
+      snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb_req (pkg_fk,req_value) values (%d,'%s');",pkg_pk,pi->depends[i]);
+      if (Verbose) { printf("DEPENDS:%s\n",pi->depends[i]);}
+      rc = DBaccess(DB,SQL);
+      if (rc < 0)
+      {
+        DBaccess(DB,"ROLLBACK;");
+        printf("LOG pkg %d ERROR: %s\n",pkg_pk,SQL);
+        fflush(stdout);
+        DBclose(DB);
+        exit(-1);
+      }
+    }
+    DBaccess(DB,"COMMIT;");
+  }
+}/* RecordMetadataDEB(struct debpkginfo *pi) */
+
 
 /***********************************************
  Usage():
@@ -440,7 +721,7 @@ void	Usage	(char *Name)
   printf("Usage: %s [options] [file [file [...]]\n",Name);
   printf("  -i   :: initialize the database, then exit.\n");
   printf("  -v   :: verbose (-vv = more verbose)\n");
-  printf("  file :: if files are rpm or debian package listed, display their meta data.\n");
+  printf("  file :: if files are rpm package listed, display their meta data.\n");
   printf("  no file :: process data from the scheduler.\n");
 } /* Usage() */
 
@@ -451,6 +732,8 @@ int	main	(int argc, char *argv[])
   int c;
   char *agent_desc = "Pulls metadata out of RPM or DEBIAN packages";
   int i;
+  glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+  glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
 
   DB = DBopen();
   if (!DB)
@@ -470,6 +753,7 @@ int	main	(int argc, char *argv[])
                 DBclose(DB);  /* DB was opened above, now close it and exit */
                 exit(0);
         case 'v':
+                Verbose++;
                 break;
 	default:
 		Usage(argv[0]);
@@ -490,25 +774,28 @@ int	main	(int argc, char *argv[])
 
     while(ReadLine(stdin,Parm,MAXCMD) >= 0)
     {
-      printf("PKG: pkgagent read %s\n", Parm);
+      if (Verbose) { printf("PKG: pkgagent read %s\n", Parm);}
       fflush(stdout);
 
       if (Parm[0] != '\0') 
       {
-	parseSchedInput(Parm);
+	ParseSchedInput(Parm,glb_rpmpi,glb_debpi);
         if (PKG_RPM) {
-          repFile = RepMkPath("files", rpmpi.pFile);
+          repFile = RepMkPath("files", glb_rpmpi->pFile);
 	  if (!repFile) {
 	    printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
-                            rpmpi.pFileFk, rpmpi.pFile);
+                            glb_rpmpi->pFileFk, glb_rpmpi->pFile);
             fflush(stdout);
             DBclose(DB);
             exit(-1);
 	  }
-          getMetadata(repFile);
-          recordMetadataRPM(&rpmpi);
+          GetMetadata(repFile,glb_rpmpi);
+          RecordMetadataRPM(glb_rpmpi);
+        } else if (PKG_DEB) {
+          GetMetadataDebBinary(glb_debpi);
+          RecordMetadataDEB(glb_debpi);
         } else {
-	  /* Deal with the debian package*/
+	  /* Deal with the other package*/
 	}
         printf("OK\n");
         fflush(stdout);
@@ -517,12 +804,12 @@ int	main	(int argc, char *argv[])
   }
   else
   {
-    /* printf("Main: running in cli mode, processing file(s)\n"); */
+    /* printf("DEBUG: running in cli mode, processing file(s)\n"); */
     for (i = 1; i < argc; i++)
     {
        PKG_RPM=1;
-       getMetadata(argv[i]);
-       recordMetadataRPM(&rpmpi);
+       GetMetadata(argv[i],glb_rpmpi);
+       //RecordMetadataRPM(glb_rpmpi);
     }
   }
 

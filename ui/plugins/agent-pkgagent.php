@@ -95,7 +95,7 @@ class agent_pkgagent extends FO_Plugin
 
     /* "pkgagent" needs to know what? */
     
-    /* "pkgagent" needs to know the mimetype for 'application/x-rpm' */
+    /* "pkgagent" needs to know the mimetype for 'application/x-rpm' and 'application/x-debian-package'*/
     $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm' LIMIT 1;";
     $Results = $DB->Action($SQL);
     $mimetypepk = $Results[0]['mimetype_pk'];
@@ -107,15 +107,30 @@ class agent_pkgagent extends FO_Plugin
       $Results = $DB->Action($SQL);
       $mimetypepk = $Results[0]['mimetype_pk'];
       }
-    if (empty($mimetypepk)) { return("pkgagent mimetype not installed."); }
+    if (empty($mimetypepk)) { return("pkgagent rpm mimetype not installed."); }
+
+    $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;";
+    $Results = $DB->Action($SQL);
+    $debmimetypepk = $Results[0]['mimetype_pk'];
+    if (empty($debmimetypepk))
+      {
+      $SQL = "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-package');";
+      $Results = $DB->Action($SQL);
+      $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;";
+      $Results = $DB->Action($SQL);
+      $debmimetypepk = $Results[0]['mimetype_pk'];
+      }
+    if (empty($debmimetypepk)) { return("pkgagent deb mimetype not installed."); }
 
     /** jqargs wants EVERY RPM and DEBIAN pfile in this upload **/
-    $jqargs = "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, pfile_mimetypefk AS mimetype
+    $jqargs = "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name AS mimetype
 	FROM uploadtree
 	INNER JOIN pfile ON upload_fk = '$uploadpk'
+	INNER JOIN mimetype ON (mimetype_pk = '$mimetypepk' OR mimetype_pk = '$debmimetypepk')
 	AND uploadtree.pfile_fk = pfile_pk
-	AND pfile.pfile_mimetypefk = '$mimetypepk'
+	AND pfile.pfile_mimetypefk = mimetype.mimetype_pk
 	AND pfile_pk NOT IN (SELECT pkg_rpm.pfile_fk FROM pkg_rpm)
+        AND pfile_pk NOT IN (SELECT pkg_deb.pfile_fk FROM pkg_deb)
 	LIMIT 5000;";
 
     /* Add job: job "Package Agents" has jobqueue item "pkgagent" */
