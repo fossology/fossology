@@ -25,6 +25,11 @@
 
 #include "buckets.h"
 
+#ifdef SVN_REV
+char BuildVersion[]="Build version: " SVN_REV ".\n";
+#endif /* SVN_REV */
+
+
 /****************************************************
  walkTree
 
@@ -238,50 +243,6 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, long pfile_pk)
 }
 
 
-/****************************************************
- checkPQresult
-
- check the result status of a postgres SELECT
- If an error occured, write the error to stdout
-
- @param PGresult *result
- @param char *sql the sql query
- @param char * FcnName the function name of the caller
- @param int LineNumb the line number of the caller
-
- @return 0 on OK, -1 on failure.
- On failure, result will be freed.
-
- NOTE: this function should be moved to a std library
-****************************************************/
- FUNCTION int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb)
- {
-   if (!result)
-   {
-     printf("Error: %s.%s(%d) - checkPQresult called with invalid parameter",
-             __FILE__, FcnName, __LINE__);
-     return 0;
-   }
-
-   /* If no error, return */
-   if (PQresultStatus(result) == PGRES_TUPLES_OK) return 0;
-
-   printf("ERROR: %s.%s:%d, %s\nOn: %s", 
-          __FILE__, FcnName, __LINE__, PQresultErrorMessage(result), sql);
-   PQclear(result);
-   return (-1);
-} /* checkPQresult */
-
-FUNCTION void Usage(char *Name) 
-{
-  printf("Usage: %s [options] [uploadtree_pk]\n", Name);
-  printf("  -i   :: Initialize the database, then exit.\n");
-  printf("  -v   :: verbose (-vv = more verbose)\n"); 
-  printf("  -d   :: Write results to database instead of stdout.\n");
-  printf("  uploadtree_pk :: Find buckets in this tree\n");
-} /* Usage() */
-
-
 /****************************************************/
 int main(int argc, char **argv) 
 {
@@ -295,6 +256,9 @@ int main(int argc, char **argv)
   PGresult *result;
   char sqlbuf[128];
   int agent_pk = 0;
+  int bucketpool_pk = 0;
+  int upload_pk = 0;
+  char *bucketpool_name;
   long pfile_pk = 0;
   pbucketdef_t *bucketDefList = 0;
 
@@ -311,18 +275,60 @@ int main(int argc, char **argv)
   pgConn = DBgetconn(DB);
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "ivd")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "din:p:t:u:v")) != -1) 
   {
     switch (cmdopt) 
     {
+      case 'd': /* write results to db instead of stdout  */
+            writeDB = 1;
+            break;
       case 'i': /* "Initialize" */
             DBclose(DB); /* DB was opened above, now close it and exit */
             exit(0);
+      case 'n': /* bucketpool_name  */
+            bucketpool_name = optarg;
+            /* find the highest rev active bucketpool_pk */
+            if (!bucketpool_pk)
+            {
+              bucketpool_pk = getBucketpool_pk(pgConn, bucketpool_name);
+              if (!bucketpool_pk)
+                printf("%s is not an active bucketpool name.\n", bucketpool_name);
+            }
+            break;
+      case 'p': /* bucketpool_pk */
+            bucketpool_pk = atoi(optarg);
+            /* validate bucketpool_pk */
+            sprintf(sqlbuf, "select bucketpool_pk from bucketpool where bucketpool_pk=%d and active='Y'", bucketpool_pk);
+            bucketpool_pk = validate_pk(pgConn, sqlbuf);
+            if (!bucketpool_pk)
+              printf("%d is not an active bucketpool_pk.\n", atoi(optarg));
+            break;
+      case 't': /* uploadtree_pk */
+            head_uploadtree_pk = atoi(optarg);
+            /* validate bucketpool_pk */
+            sprintf(sqlbuf, "select uploadtree_pk from uploadtree where uploadtree_pk=%ld", head_uploadtree_pk);
+            head_uploadtree_pk = validate_pk(pgConn, sqlbuf);
+            if (!head_uploadtree_pk)
+              printf("%d is not an active uploadtree_pk.\n", atoi(optarg));
+            break;
+      case 'u': /* upload_pk */
+            if (!head_uploadtree_pk)
+            {
+              upload_pk = atoi(optarg);
+              /* validate upload_pk  and get uploadtree_pk  */
+              sprintf(sqlbuf, "select upload_pk from upload where upload_pk=%d", upload_pk);
+              upload_pk = validate_pk(pgConn, sqlbuf);
+              if (!upload_pk)
+                printf("%d is not an valid upload_pk.\n", atoi(optarg));
+              else
+              {
+                sprintf(sqlbuf, "select uploadtree_pk from uploadtree where upload_fk=%d and parent is null", upload_pk);
+                head_uploadtree_pk = validate_pk(pgConn, sqlbuf);
+              }
+            }
+            break;
       case 'v': /* verbose output for debugging  */
             verbose++;
-            break;
-      case 'd': /* write results to db instead of stdout  */
-            writeDB = 1;
             break;
       default:
             Usage(argv[0]);
@@ -330,15 +336,28 @@ int main(int argc, char **argv)
             exit(-1);
     }
   }
-  head_uploadtree_pk = atol(argv[argc-1]);
+
+  /* validate command line */
+  if (!bucketpool_pk)
+  {
+    printf("You must specify an active bucketpool.\n");
+    Usage(argv[0]);
+    exit(-1);
+  }
+  if (!head_uploadtree_pk)
+  {
+    printf("You must specify a valid uploadtree_pk or upload_pk.\n");
+    Usage(argv[0]);
+    exit(-1);
+  }
 
   /* get agent pk 
    * Note, if GetAgentKey fails, this process will exit.
    */
   agent_pk = GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agentDesc);
 
-  /* get the pfile for head_uploadtree_pk 
-     we need this to check if its already been processed */
+  /* Get the pfile for head_uploadtree_pk so we can
+     check if its already been processed */
   sprintf(sqlbuf, "select pfile_fk from uploadtree where uploadtree_pk=%ld", head_uploadtree_pk);
   result = PQexec(pgConn, sqlbuf);
   if (checkPQresult(result, sqlbuf, agentDesc, __LINE__)) return -1;
@@ -351,7 +370,7 @@ int main(int argc, char **argv)
   pfile_pk = atol(PQgetvalue(result, 0, 0));
   PQclear(result);
 
-  /* check if this has already been processed */
+  /* Has it already been processed?  If so, we are done */
   if (processed(pgConn, agent_pk, pfile_pk)) return 0;
 
   if (writeDB)
@@ -365,6 +384,9 @@ int main(int argc, char **argv)
   // Heartbeat(++HBItemsProcessed);
   // printf("OK\n"); /* tell scheduler ready for more data */
   // fflush(stdout);
+
+  /* Initialize the Bucket Definition List bucketDefList  */
+  bucketDefList = initBuckets(pgConn, bucketpool_pk);
 
   /* process the tree for buckets */
   walkTree(pgConn, bucketDefList, agent_pk, head_uploadtree_pk);
