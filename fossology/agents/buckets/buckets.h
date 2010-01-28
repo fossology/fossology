@@ -37,10 +37,6 @@
 
 #define FUNCTION
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
-#endif /* SVN_REV */
-
 /* Bucket definition */
 struct bucketdef_struct 
 {
@@ -52,14 +48,20 @@ struct bucketdef_struct
 };
 typedef struct bucketdef_struct *pbucketdef_t;
 
+/* in nomos.c */
 int walkTree(PGconn *pgConn, pbucketdef_t *bdeflist, int agent_pk, long uploadtree_pk);
 int processLeaf(PGconn *pgConn, pbucketdef_t *bdeflist, long pfile_pk, int agent_pk);
 long *getLeafBuckets(PGconn *pgConn, pbucketdef_t *bdeflist, long pfile_pk);
 long *getContainerBuckets(PGconn *pgConn, pbucketdef_t *bdeflist, long pfile_pk);
 int writeBuckets(PGconn *pgConn, long pfile_pk, long *bucketList, int agent_pk);
-int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb);
 int processed(PGconn *pgConn, int agent_pk, long pfile_pk);
 int processRootNode(PGconn *pgConn, pbucketdef_t *bucketDefList, int agent_pk, long uploadtree_pk);
 
+/* in validate.c */
+int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb);
+pbucketdef_t *initBuckets(PGconn *pgConn, int bucketpool_pk);
+int getBucketpool_pk(PGconn *pgConn, char * bucketpool_name);
+int validate_pk(PGconn *pgConn, char *sql);
+void Usage(char *Name);
 
 #endif /* _BUCKETS_H */

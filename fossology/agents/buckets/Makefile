@@ -6,12 +6,19 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
+CFLAGS_LOCALO=$(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
+
 EXE=buckets
+OBJS=validate.o
+HDRS=buckets.h
 
 all: $(EXE)
 
-$(EXE): %: %.c $(DB) $(REPO) $(VARS)
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+$(EXE): %: %.c $(DB) $(REPO) $(VARS) $(OBJS) $(HDRS)
+	$(CC) $(OBJS) $< $(CFLAGS_LOCAL) -o $@
+
+validate.o: $(DB) $(REPO) $(VARS) $(HDRS) validate.c
+	$(CC) -c $(CFLAGS_LOCALO) validate.c
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
