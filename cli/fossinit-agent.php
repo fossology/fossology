@@ -18,9 +18,10 @@
  */
 
 /**
- * fossinit
- * \brief Initialize the FOSSology system (no UI required). This should be
- * used immediately after an install, and before starting up the scheduler.
+ * fossinit-agent
+ * \brief Initialize the FOSSology agent machines, things that need to be
+ * done individually on each agent machine. This should be used after 
+ * installing, and before starting up the scheduler.
  *
  * @param string $flags various options for the program, see usage.
  *
@@ -62,9 +63,7 @@ $Debug = NULL;
 function _all($Verbose)
 {
 	$res = NULL;
-	$res = _aSchema($Verbose);
 	$res = _bSamInit($Verbose,$Debug);
-	$res = _initPA($Verbose,$Debug);
 	return($res);
 }
 
@@ -85,84 +84,12 @@ function _bSamInit($Verbose,$Debug)
 	return($res);
 } // _bSamInit()
 
-/**
- * _initPA
- * \brief initialize plugins and agents, this should only be needed on the db
- * server.
- *
- * @param string $Verbose
- * @return php default
- */
-function _initPA($Verbose,$Debug)
-{
-	$res = NULL;
-
-	if($Verbose)
-	{
-		print "  Initializing plugins and agents\n";
-		flush();
-		$res = initPlugins($Verbose,$Debug);
-		$res = initAgents($Verbose,$Debug);
-	}
-	else
-	{
-		$res = initPlugins($Verbose,$Debug);
-		$res = initAgents($Verbose,$Debug);
-	}
-	return($res);
-}
-
-function _aSchema($Verbose)
-{
-
-	global $LIBEXECDIR;
-	global $WEBDIR;
-
-	$datFile = "$LIBEXECDIR/core-schema.dat";
-	if (!file_exists($datFile))
-	{
-		print "FAILED: Schema data file ($datFile) not found.\n";
-		exit(1);
-	}
-
-	// run schema-update
-	$result = NULL;
-
-	if($Verbose)
-	{
-		print "  Initializing Data Base Schema\n";
-		flush();
-		system("$LIBEXECDIR/schema-update -f $datFile",$result);
-	}
-	else
-	{
-		system("$LIBEXECDIR/schema-update -f $datFile",$result);
-	}
-
-	/* Make sure every upload has left and right indexes set. */
-	// run adj2nest
-	if($Verbose)
-	{
-		print "  Initializing new tables and columns\n";
-		flush();
-		system("$LIBEXECDIR/agents/adj2nest -a", $result);
-	}
-	else
-	{
-		system("$LIBEXECDIR/agents/adj2nest -a",$result);
-	}
-
-	return($result);
-} // _aSchema()
-
 
 $usage = "Usage: " . basename($argv[0]) . " [options]
-  -a  = perform all actions (b,d,i)
+  -a  = perform all actions (b)
   -b  = crate bsam license cache
-  -d  = create the database schema
   -D  = enable debug 
   -h  = this help usage;
-  -i  = initialize plugins and agents
   -v  = enable verbose mode (lists each module being processed)";
 
 /* Load command-line options */
@@ -183,13 +110,6 @@ $Verbose=TRUE;
 if (array_key_exists('a',$Options))
 {
 	$FailFlag = _all($Verbose);
-
-}
-if (array_key_exists('d',$Options))
-{
-	// apply schema
-	// run adj2nest
-	$FailFlag = _aSchema($Verbose);
 }
 
 if (array_key_exists('b',$Options))
@@ -198,41 +118,9 @@ if (array_key_exists('b',$Options))
 	$FailFlag = _bSamInit($Verbose,$Debug);
 }
 
-if (array_key_exists('i',$Options))
-{
-	// init plugins and agents
-	$FailFlag = _initPA($Verbose,$Debug);
-}
-
 if (array_key_exists('D',$Options))
 {
 	$Debug = TRUE;
-}
-
-/* Remove the "Need to initialize" flag */
-if (!$FailFlag)
-{
-	$Filename = "$WEBDIR/init.ui";
-	$State = 1;
-	if (file_exists($Filename))
-	{
-		if ($Verbose) { print "Removing flag '$Filename'\n"; }
-		if (is_writable($WEBDIR)) { $State = unlink($Filename); }
-		else { $State = 0; }
-	}
-	if (!$State)
-	{
-		print "Failed to remove $Filename\n";
-		print "Remove this file to complete the initialization.\n";
-	}
-	else
-	{
-		print "Initialization completed successfully.\n";
-	}
-}
-else
-{
-	print "Initialization had errors.\n";
 }
 
 exit(0);

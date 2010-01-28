@@ -7,15 +7,93 @@
 # idempotent, meaning that running it repeatedly will still do the
 # right thing, regardless of the success of previous runs.
 
-#
-# allServers
-# \brief tasks that need to be done on most if not all servers (web is the 
-# exception).
-#
-# returns 0 for success and 1 for an error
-function allServers
-\{
-	
+## Options parsing and setup
+# parse options
+OPTS=`getopt -o adwseoh --long agent,database,web,web-only,scheduler,scheduler-only,everything,overwrite,help -n 'fo-postinstall' -- "$@"`
+
+if [ $? != 0 ]; then
+   echo "ERROR: Bad option specified."
+   OPTS="--help"
+fi
+
+eval set -- "$OPTS"
+
+# if no options or just -o then do everything
+if [ "$OPTS" = " --" -o "$OPTS" = " -o --" ]; then
+   EVERYTHING=1
+fi
+
+while true; do
+   case "$1" in
+      -a|--agent) AGENT=1; shift;;
+      -d|--database) DATABASE=1; shift;;
+      -w|--web) WEB=1; shift;;
+      --web-only) WEBONLY=1; shift;;
+      -s|--scheduler) SCHEDULER=1; shift;;
+      --scheduler-only) SCHEDULERONLY=1; shift;;
+      -e|--everything) EVERYTHING=1; shift;;
+      -o|--overwrite) OVERWRITE=1; shift;;
+      -h|--help)
+         echo "Usage: fo-postinstall [options]";
+	 echo "  -a or --agent      : agent specific actions"
+	 echo "  -d or --database   : database specific actions"
+	 echo "  -w or --web        : web interface specific actions"
+	 echo "  -s or --scheduler  : scheduler specific actions"
+	 echo "  -e or --everything : all actions (default)"
+	 echo "  -o or --overwrite  : overwrite config files with new versions"
+	 echo "  -h or --help       : this help text"
+         echo " Special options"
+         echo "  --web-only         : web, but exclude normal agent actions"
+         echo "  --scheduler-only   : scheduler, but exclude normal agent actions"
+	 exit;;
+      --) shift; break;;
+      *) echo "Error: option $1 not recognised"; exit 1;;
+   esac
+done
+
+# the scheduler and web machines needs the agent stuff done too
+if [ $SCHEDULER ]; then
+   AGENT=1
+   SCHEDULERONLY=1
+fi
+if [ $WEB ]; then
+   AGENT=1
+   WEBONLY=1
+fi
+
+if [ $EVERYTHING ]; then
+   echo "*** Running postinstall for everything ***"
+   AGENT=1
+   DATABASE=1
+   WEBONLY=1
+   SCHEDULERONLY=1
+fi
+
+# This must run as root.
+if [ `id -u` != "0" ] ; then
+   echo "ERROR: fo-postinstall must run as root."
+   echo "Aborting."
+   exit 1
+fi
+
+########################################################################
+
+if [ $DATABASE ]; then
+   {$LIBEXECDIR}/dbcreate
+fi # end of DATABASE
+
+########################################################################
+
+if [ $AGENT ]; then
+
+   ## get path to repo
+   if [ -e "{$SYSCONFDIR}/fossology/RepPath.conf" ] ; then
+      REPO=`cat {$SYSCONFDIR}/fossology/RepPath.conf`
+   else
+      echo "ERROR: Cannot find {$SYSCONFDIR}/fossology/RepPath.conf"
+      exit 1
+   fi
+
    ## create user and group
    # Because we are doing these by name, in the multi-machine install case
    # we may end up with uid/gid being different across machines. This will
@@ -152,111 +230,11 @@ function allServers
       echo "NOTE: Connect succeeded, database is working."
    fi
 
-\} 
-# end allServers
 
-## Options parsing and setup
-# parse options
-OPTS=`getopt -o adwseoh --long agent,database,web,web-only,scheduler,scheduler-only,everything,overwrite,help -n 'fo-postinstall' -- "$@"`
-
-if [ $? != 0 ]; then
-   echo "ERROR: Bad option specified."
-   OPTS="--help"
-fi
-
-eval set -- "$OPTS"
-
-# if no options or just -o then do everything
-if [ "$OPTS" = " --" -o "$OPTS" = " -o --" ]; then
-   EVERYTHING=1
-fi
-
-while true; do
-   case "$1" in
-      -a|--agent) AGENT=1; shift;;
-      -d|--database) DATABASE=1; shift;;
-      -w|--web) WEB=1; shift;;
-      --web-only) WEBONLY=1; shift;;
-      -s|--scheduler) SCHEDULER=1; shift;;
-      --scheduler-only) SCHEDULERONLY=1; shift;;
-      -e|--everything) EVERYTHING=1; shift;;
-      -o|--overwrite) OVERWRITE=1; shift;;
-      -h|--help)
-         echo "Usage: fo-postinstall [options]";
-	 echo "  -a or --agent      : agent specific actions"
-	 echo "  -d or --database   : database specific actions"
-	 echo "  -w or --web        : web interface specific actions"
-	 echo "  -s or --scheduler  : scheduler specific actions"
-	 echo "  -e or --everything : all actions (default)"
-	 echo "  -o or --overwrite  : overwrite config files with new versions"
-	 echo "  -h or --help       : this help text"
-         echo " Special options"
-         echo "  --web-only         : web, but exclude normal agent actions"
-         echo "  --scheduler-only   : scheduler, but exclude normal agent actions"
-	 exit;;
-      --) shift; break;;
-      *) echo "Error: option $1 not recognised"; exit 1;;
-   esac
-done
-
-# the scheduler and web machines needs the agent stuff done too
-if [ $SCHEDULER ]; then
-   AGENT=1
-   SCHEDULERONLY=1
-fi
-if [ $WEB ]; then
-   AGENT=1
-   WEBONLY=1
-fi
-
-if [ $EVERYTHING ]; then
-   echo "*** Running postinstall for everything ***"
-   AGENT=1
-   DATABASE=1
-   WEBONLY=1
-   SCHEDULERONLY=1
-fi
-
-# This must run as root.
-if [ `id -u` != "0" ] ; then
-   echo "ERROR: fo-postinstall must run as root."
-   echo "Aborting."
-   exit 1
-fi
-
-########################################################################
-
-if [ $DATABASE ]; then
-	echo "In DATABASE clause"
-	echo "calling {$LIBEXECDIR}/dbcreate"
-   {$LIBEXECDIR}/dbcreate
-   # DB server needs to create the db and initialize the plugins and agents
-   echo "calling allSevers"
-   allServers
-   #echo "calling fossinit -d -i"
-   #{$BINDIR}/fossinit -d -i
-   
-fi # end of DATABASE
-
-########################################################################
-
-if [ $AGENT ]; then
-
-   ## get path to repo
-   if [ -e "{$SYSCONFDIR}/fossology/RepPath.conf" ] ; then
-      REPO=`cat {$SYSCONFDIR}/fossology/RepPath.conf`
-   else
-      echo "ERROR: Cannot find {$SYSCONFDIR}/fossology/RepPath.conf"
-      exit 1
-   fi
-   
-   allServers
-
-   ## Initialize the tables, License.bsam, and other setup done by fossinit
-   # In multi-system installs the database machine must be installed first
-   # in order for this to work on other machines.
-   echo "*** Initializing License Cache Files ***"
-   {$BINDIR}/fossinit -b
+   ## Do the initialization required for each agent (currently just creating
+   # the License.bsam cache.
+   echo "*** Initializing agent ***"
+   {$BINDIR}/fossinit-agent
    if [ $? != 0 ] ; then
      echo "ERROR: Unable to initialize."
      exit 1
@@ -268,6 +246,17 @@ fi # end of AGENT
 
 if [ $SCHEDULERONLY ]; then
    echo "*** Setting up scheduler ***"
+
+   ## Do the initialization required once for the whole instance
+   #  (currently applying the schema and initializing the agents)
+   # In multi-system installs the database machine must be installed first
+   # in order for this to work on other machines.
+   echo "*** Initializing database and agents ***"
+   {$BINDIR}/fossinit-common
+   if [ $? != 0 ] ; then
+     echo "ERROR: Unable to initialize."
+     exit 1
+   fi
 
    # scheduler config file
    # this has to be done after the database is setup
