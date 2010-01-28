@@ -233,8 +233,8 @@ if [ $DATABASE ]; then
    # DB server needs to create the db and initialize the plugins and agents
    echo "calling allSevers"
    allServers
-   echo "calling fossinit -d -i"
-   {$BINDIR}/fossinit -d -i
+   #echo "calling fossinit -d -i"
+   #{$BINDIR}/fossinit -d -i
    
 fi # end of DATABASE
 
