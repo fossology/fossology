@@ -5,7 +5,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-EXE=cp2foss.php fossinit.php fossjobs.php fo_notify.php fosslic.php 
+EXE=cp2foss.php fossinit-common.php fossinit-agent.php fossjobs.php fo_notify.php fosslic.php 
 DOCS=cp2foss.pod fossjobs.pod fosslic.pod fo_notify.pod
 SCHEMA=schema-update.php schema-export.php
 LIBS=libschema.php
