@@ -38,7 +38,4 @@ else
       echo "ERROR: Database failed during configuration.\n"
       exit 1
    fi
-   echo "*** Applying Data Base Schema ***"
-   echo "dbcreate: calling fossinit-common -d"
-   {$BINDIR}/fossinit-common -d
 fi
