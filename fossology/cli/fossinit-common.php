@@ -153,19 +153,6 @@ function _aSchema($Verbose)
 		system("$LIBEXECDIR/schema-update -f $datFile",$result);
 	}
 
-	/* Make sure every upload has left and right indexes set. */
-	// run adj2nest
-	if($Verbose)
-	{
-		print "  Initializing new tables and columns\n";
-		flush();
-		system("$LIBEXECDIR/agents/adj2nest -a", $result);
-	}
-	else
-	{
-		system("$LIBEXECDIR/agents/adj2nest -a",$result);
-	}
-
 	return($result);
 } // _aSchema()
 
