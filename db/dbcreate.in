@@ -40,5 +40,5 @@ else
    fi
    echo "*** Applying Data Base Schema ***"
    echo "dbcreate: calling fossinit-common -d"
-   {$BINDIR}/fossinit -d
+   {$BINDIR}/fossinit-common -d
 fi
