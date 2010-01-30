@@ -286,6 +286,11 @@ if [ $SCHEDULERONLY ]; then
    chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LOGDIR}
    chmod 2775 {$LOGDIR}
    find {$LOGDIR} -type f | while read i ; do chmod 660 "$i" ; done
+   
+   echo "*** Applying Data Base Schema ***"
+   echo "dbcreate: calling fossinit-common -d"
+   {$BINDIR}/fossinit-common -d
+   
 fi # end of SCHEDULERONLY
 
 ########################################################################
