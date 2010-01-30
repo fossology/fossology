@@ -234,7 +234,7 @@ if [ $AGENT ]; then
    ## Do the initialization required for each agent (currently just creating
    # the License.bsam cache.
    echo "*** Initializing agent ***"
-   {$BINDIR}/fossinit-agent
+   {$BINDIR}/fossinit-agent -a
    if [ $? != 0 ] ; then
      echo "ERROR: Unable to initialize."
      exit 1
@@ -252,7 +252,7 @@ if [ $SCHEDULERONLY ]; then
    # In multi-system installs the database machine must be installed first
    # in order for this to work on other machines.
    echo "*** Initializing database and agents ***"
-   {$BINDIR}/fossinit-common
+   {$BINDIR}/fossinit-common -a
    if [ $? != 0 ] ; then
      echo "ERROR: Unable to initialize."
      exit 1
@@ -286,11 +286,6 @@ if [ $SCHEDULERONLY ]; then
    chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LOGDIR}
    chmod 2775 {$LOGDIR}
    find {$LOGDIR} -type f | while read i ; do chmod 660 "$i" ; done
-   
-   echo "*** Applying Data Base Schema ***"
-   echo "dbcreate: calling fossinit-common -d"
-   {$BINDIR}/fossinit-common -d
-   
 fi # end of SCHEDULERONLY
 
 ########################################################################
