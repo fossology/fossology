@@ -40,28 +40,36 @@
 /* Bucket definition */
 struct bucketdef_struct 
 {
+  int      bucket_pk;
+  char    *bucket_name;
   int      bucket_type;
-  regex_t  compRegex;     /* compiled regex if type=3 */
-  char    *execFilename;  /* name of file to exec if type=4.  Files are in DATADIR */
-  int     *match_only;    /* array of rf_pk's if type=2 */
-  int    **match_every;   /* array of arrays of rf_pk's if type=1 */
+  char    *regex;           /* regex string */
+  regex_t  compRegex;       /* compiled regex if type=3 */
+  char    *execFilename;    /* name of file to exec if type=4.  Files are in DATADIR */
+  int     *match_only;      /* array of rf_pk's if type=2 */
+  int    **match_every;     /* array of arrays of rf_pk's if type=1 */
+  char     stopon;          /* Y to stop procecessing if this bucket matches */
+  int      nomos_agent_pk;  /* nomos agent_pk whose results this bucket analsis is using */
+  int      bucket_agent_pk; /* bucket agent_pk */
 };
-typedef struct bucketdef_struct *pbucketdef_t;
+typedef struct bucketdef_struct bucketdef_t, *pbucketdef_t;
 
-/* in nomos.c */
-int walkTree(PGconn *pgConn, pbucketdef_t *bdeflist, int agent_pk, long uploadtree_pk);
-int processLeaf(PGconn *pgConn, pbucketdef_t *bdeflist, long pfile_pk, int agent_pk);
-long *getLeafBuckets(PGconn *pgConn, pbucketdef_t *bdeflist, long pfile_pk);
-long *getContainerBuckets(PGconn *pgConn, pbucketdef_t *bdeflist, long pfile_pk);
-int writeBuckets(PGconn *pgConn, long pfile_pk, long *bucketList, int agent_pk);
-int processed(PGconn *pgConn, int agent_pk, long pfile_pk);
-int processRootNode(PGconn *pgConn, pbucketdef_t *bucketDefList, int agent_pk, long uploadtree_pk);
+/* nomos.c */
+int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, int uploadtree_pk);
+int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, int agent_pk);
+int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk);
+int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk);
+int writeBuckets(PGconn *pgConn, int pfile_pk, int *bucketList, int agent_pk);
+int processed(PGconn *pgConn, int agent_pk, int pfile_pk);
 
-/* in validate.c */
-int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb);
-pbucketdef_t *initBuckets(PGconn *pgConn, int bucketpool_pk);
-int getBucketpool_pk(PGconn *pgConn, char * bucketpool_name);
-int validate_pk(PGconn *pgConn, char *sql);
-void Usage(char *Name);
+/* validate.c */
+int checkPQresult    (PGresult *result, char *sql, char *FcnName, int LineNumb);
+pbucketdef_t initBuckets   (PGconn *pgConn, int bucketpool_pk);
+int *getMatchOnly    (PGconn *pgConn, int bucketpool_pk, char *filename);
+int **getMatchEvery  (PGconn *pgConn, int bucketpool_pk, char *filename);
+int getBucketpool_pk (PGconn *pgConn, char * bucketpool_name);
+int validate_pk      (PGconn *pgConn, char *sql);
+int licDataAvailable (PGconn *pgConn, int uploadtree_pk);
+void Usage           (char *Name);
 
 #endif /* _BUCKETS_H */

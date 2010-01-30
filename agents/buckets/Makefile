@@ -11,14 +11,15 @@ CFLAGS_LOCALO=$(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
 EXE=buckets
 OBJS=validate.o
 HDRS=buckets.h
+DEF=-DDATADIR='"$(DATADIR)"'
 
 all: $(EXE)
 
 $(EXE): %: %.c $(DB) $(REPO) $(VARS) $(OBJS) $(HDRS)
-	$(CC) $(OBJS) $< $(CFLAGS_LOCAL) -o $@
+	$(CC) $(OBJS) $< $(DEF) $(CFLAGS_LOCAL) -o $@
 
 validate.o: $(DB) $(REPO) $(VARS) $(HDRS) validate.c
-	$(CC) -c $(CFLAGS_LOCALO) validate.c
+	$(CC) $(DEF) -c $(CFLAGS_LOCALO) validate.c
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
