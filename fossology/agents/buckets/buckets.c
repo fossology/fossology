@@ -37,29 +37,29 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
  
  @param PGconn pgConn   The database connection object.
  @param int  agent_pk   The agent_pk
- @param long uploadtree_pk
+ @param int  uploadtree_pk
 
  @return 0 on OK, -1 on failure.
  Errors are written to stdout.
 ****************************************************/
-FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t * bucketDefList, int agent_pk, long uploadtree_pk)
+FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, int  uploadtree_pk)
 {
   char *fcnName = "walkTree";
   char sqlbuf[128];
   PGresult *result;
-  long  lft, rgt, pfile_pk, ufile_mode;
-  long  child_uploadtree_pk, child_lft, child_rgt, child_pfile_pk, child_ufile_mode;
+  int  lft, rgt, pfile_pk, ufile_mode;
+  int  child_uploadtree_pk, child_lft, child_rgt, child_pfile_pk, child_ufile_mode;
   int   numChildren, childIdx;
   int   rv = 0;
-  long  *bucketList;  // null terminated list of bucket_pk's
+  int  *bucketList;  // null terminated list of bucket_pk's
 
   /* get uploadtree rec for uploadtree_pk */
-  sprintf(sqlbuf, "select pfile_fk, lft, rgt, ufile_mode from uploadtree where uploadtree_pk=%ld", uploadtree_pk);
+  sprintf(sqlbuf, "select pfile_fk, lft, rgt, ufile_mode from uploadtree where uploadtree_pk=%d", uploadtree_pk);
   result = PQexec(pgConn, sqlbuf);
   if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return -1;
   if (PQntuples(result) == 0) 
   {
-    printf("FATAL: %s.%s missing uploadtree_pk %ld\n", __FILE__, fcnName, uploadtree_pk);
+    printf("FATAL: %s.%s missing uploadtree_pk %d\n", __FILE__, fcnName, uploadtree_pk);
     return -1;
   }
   pfile_pk = atol(PQgetvalue(result, 0, 0));
@@ -75,21 +75,21 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t * bucketDefList, int agent_pk
   if (rgt == (lft+1))
   {
     if (((ufile_mode & 1<<28) == 0) && (pfile_pk > 0))
-      return  processLeaf(pgConn, bucketDefList, pfile_pk, agent_pk);
+      return  processLeaf(pgConn, bucketDefArray, pfile_pk, agent_pk);
     else
       return 0;  /* case of empty directory or artifact */
   }
 
   /* Since uploadtree_pk isn't a leaf, find its children and process (if child is leaf) 
      or recurse */
-  sprintf(sqlbuf, "select uploadtree_pk,pfile_fk, lft, rgt, ufile_mode from uploadtree where parent=%ld", 
+  sprintf(sqlbuf, "select uploadtree_pk,pfile_fk, lft, rgt, ufile_mode from uploadtree where parent=%d", 
           uploadtree_pk);
   result = PQexec(pgConn, sqlbuf);
   if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return -1;
   numChildren = PQntuples(result);
   if (numChildren == 0) 
   {
-    printf("FATAL: %s.%s: Inconsistent uploadtree. uploadtree_pk %ld should have children based on lft and rgt\n", 
+    printf("FATAL: %s.%s: Inconsistent uploadtree. uploadtree_pk %d should have children based on lft and rgt\n", 
            __FILE__, fcnName, uploadtree_pk);
     return -1;
   }
@@ -110,12 +110,12 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t * bucketDefList, int agent_pk
     if (child_rgt == (child_lft+1)) 
     {
       if (((child_ufile_mode & 1<<28) == 0) && (child_pfile_pk > 0))
-        processLeaf(pgConn, bucketDefList, child_pfile_pk, agent_pk);
+        processLeaf(pgConn, bucketDefArray, child_pfile_pk, agent_pk);
       continue;
     }
 
     /* not a leaf so recurse */
-    rv = walkTree(pgConn, bucketDefList, agent_pk, child_uploadtree_pk);
+    rv = walkTree(pgConn, bucketDefArray, agent_pk, child_uploadtree_pk);
   }
 
   /* done processing children, now processes (find buckets) for the container
@@ -123,7 +123,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t * bucketDefList, int agent_pk
    */
   if (((ufile_mode & 1<<28) == 0) && (pfile_pk > 0))
   {
-    bucketList = getContainerBuckets(pgConn, bucketDefList, pfile_pk);
+    bucketList = getContainerBuckets(pgConn, bucketDefArray, pfile_pk);
     rv = writeBuckets(pgConn, pfile_pk, bucketList, agent_pk);
   }
 
@@ -137,16 +137,16 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t * bucketDefList, int agent_pk
  determine which bucket(s) a leaf node is in and write results
 
  @param PGconn *pgConn  postgresql connection
- @param long pfile_pk  
+ @param int pfile_pk  
 
  @return 0=success, else error
 ****************************************************/
-FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t *bdeflist, long pfile_pk, int agent_pk)
+FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, int agent_pk)
 {
   int rv = 0;
-  long *bucketList;
+  int *bucketList;
 
-  bucketList = getLeafBuckets(pgConn, bdeflist, pfile_pk);
+  bucketList = getLeafBuckets(pgConn, bucketDefArray, pfile_pk);
   rv = writeBuckets(pgConn, pfile_pk, bucketList, agent_pk);
   return rv;
 }
@@ -158,15 +158,80 @@ FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t *bdeflist, long pfile_pk, 
  given a pfile and bucketdef, determine what buckets the pfile is in
 
  @param PGconn *pgConn  postgresql connection
- @param long uploadtree_pk  
+ @param pbucketdef_t bucketDefArray
+ @param int uploadtree_pk  
 
- @return array of bucket_pk's
+ @return array of bucket_pk's, or 0 if error
 ****************************************************/
-FUNCTION long *getLeafBuckets(PGconn *pgConn, pbucketdef_t *bdeflist, long pfile_pk)
+FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int pfile_pk)
 {
-  long *bucket_pk_list = 0;
+  char *fcnName = "getLeafBuckets";
+  int  *bucket_pk_list = 0;
+  char  sql[256];
+  PGresult *result;
+  int   numLics, licNumb;
+  int   numBucketDefs = 0;
+  int   rv;
+  char *licName;
+  pbucketdef_t bucketDefArray;
 
-printf("getting buckets for leaf %ld\n",pfile_pk);
+  /*** count how many elements are in in_bucketDefArray   ***/
+  for (bucketDefArray = in_bucketDefArray; bucketDefArray->bucket_pk; bucketDefArray++)
+    numBucketDefs++;
+
+  /* allocate return array to hold max number of bucket_pk's */
+  bucket_pk_list = calloc(numBucketDefs+1, sizeof(int));
+  if (bucket_pk_list == 0)
+  {
+    printf("FATAL: out of memory allocating int array of %d elements\n", numBucketDefs+1);
+    return 0;
+  }
+  
+  /*** select all the licenses for pfile_pk and agent_pk ***/
+  bucketDefArray = in_bucketDefArray;
+  snprintf(sql, sizeof(sql), 
+           "select rf_shortname from license_file, license_ref where agent_fk=%d and pfile_fk=%d and rf_fk=rf_pk",
+           bucketDefArray->nomos_agent_pk, pfile_pk);
+  result = PQexec(pgConn, sql);
+  if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
+  numLics = PQntuples(result);
+printf("found %d licenses for pfile_pk: %d\n", numLics, pfile_pk);
+  
+  while (bucketDefArray->bucket_pk != 0)
+  {
+    switch (bucketDefArray->bucket_type)
+    {
+      case 1:  /* match every */
+        break;
+      case 2:  /* match only */
+        break;
+      case 3:  /* match this regex against each license names for this pfile */
+        for (licNumb=0; licNumb < numLics; licNumb++)
+        {
+          licName = PQgetvalue(result, licNumb, 0);
+printf("checking license: %s, against regex: %s\n", licName, bucketDefArray->regex);
+          rv = regexec(&bucketDefArray->compRegex, licName, 0, 0, 0);
+          if (rv == 0)
+          {
+            /* regex matched!  */
+printf("pfile: %d, license: %s matched bucket: %s\n", pfile_pk, licName, bucketDefArray->bucket_name);
+            *bucket_pk_list = bucketDefArray->bucket_pk;
+            bucket_pk_list++;
+            continue;
+          }
+        }
+        break;
+      case 4:  /* exec   */
+        break;
+      case 99:  /* match every */
+        break;
+      default:  /* unknown bucket type */
+        break;
+    }
+    bucketDefArray++;
+  }
+
+  PQclear(result);
   return bucket_pk_list;
 }
 
@@ -177,15 +242,15 @@ printf("getting buckets for leaf %ld\n",pfile_pk);
  given a container pfile and bucketdef, determine what buckets the pfile is in
 
  @param PGconn *pgConn  postgresql connection
- @param long uploadtree_pk  
+ @param int uploadtree_pk  
 
  @return array of bucket_pk's
 ****************************************************/
-FUNCTION long *getContainerBuckets(PGconn *pgConn, pbucketdef_t *bdeflist, long pfile_pk)
+FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk)
 {
-  long *bucket_pk_list = 0;
+  int *bucket_pk_list = 0;
 
-printf("getting container buckets for %ld\n",pfile_pk);
+printf("getting container buckets for %d\n",pfile_pk);
   return bucket_pk_list;
 }
 
@@ -196,15 +261,15 @@ printf("getting container buckets for %ld\n",pfile_pk);
  Write bucket results to either db or stdout
 
  @param PGconn *pgConn  postgresql connection
- @param long pfile_pk  
+ @param int pfile_pk  
 
  @return 0=success, else error
 ****************************************************/
-FUNCTION int writeBuckets(PGconn *pgConn, long pfile_pk, long *bucketList, int agent_pk)
+FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int *bucketList, int agent_pk)
 {
   int rv = 0;
 
-printf("write buckets %ld\n", pfile_pk);
+printf("write buckets %d\n", pfile_pk);
   return rv;
 }
 
@@ -217,11 +282,11 @@ printf("write buckets %ld\n", pfile_pk);
 
  @param PGconn *pgConn  postgresql connection
  @param int *agent_pk   agent ID
- @param long pfile_pk  
+ @param int pfile_pk  
 
  @return 1=yes, 0=no
 ****************************************************/
-FUNCTION int processed(PGconn *pgConn, int agent_pk, long pfile_pk)
+FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk)
 {
   char *fcnName = "processed";
   int numRecs;
@@ -231,7 +296,7 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, long pfile_pk)
   /* Skip file if it has already been processed for buckets. */
   if (pfile_pk)
   {
-    sprintf(sqlbuf, "select bf_pk from bucket_file where pfile_fk=%ld and agent_fk=%d limit 1", 
+    sprintf(sqlbuf, "select bf_pk from bucket_file where pfile_fk=%d and bucket_agent_fk=%d limit 1", 
             pfile_pk, agent_pk);
     result = PQexec(pgConn, sqlbuf);
     if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return -1;
@@ -250,17 +315,18 @@ int main(int argc, char **argv)
   int cmdopt;
   int verbose = 0;
   int writeDB = 0;
-  long head_uploadtree_pk = 0;
+  int head_uploadtree_pk = 0;
   void *DB;   // DB object from agent
   PGconn *pgConn;
   PGresult *result;
   char sqlbuf[128];
   int agent_pk = 0;
+  int nomos_agent_pk = 0;
   int bucketpool_pk = 0;
   int upload_pk = 0;
   char *bucketpool_name;
-  long pfile_pk = 0;
-  pbucketdef_t *bucketDefList = 0;
+  int pfile_pk = 0;
+  pbucketdef_t bucketDefArray = 0;
 
   extern int AlarmSecs;
 //  extern long HBItemsProcessed;
@@ -306,7 +372,7 @@ int main(int argc, char **argv)
       case 't': /* uploadtree_pk */
             head_uploadtree_pk = atoi(optarg);
             /* validate bucketpool_pk */
-            sprintf(sqlbuf, "select uploadtree_pk from uploadtree where uploadtree_pk=%ld", head_uploadtree_pk);
+            sprintf(sqlbuf, "select uploadtree_pk from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
             head_uploadtree_pk = validate_pk(pgConn, sqlbuf);
             if (!head_uploadtree_pk)
               printf("%d is not an active uploadtree_pk.\n", atoi(optarg));
@@ -337,7 +403,7 @@ int main(int argc, char **argv)
     }
   }
 
-  /* validate command line */
+  /*** validate command line ***/
   if (!bucketpool_pk)
   {
     printf("You must specify an active bucketpool.\n");
@@ -356,14 +422,14 @@ int main(int argc, char **argv)
    */
   agent_pk = GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agentDesc);
 
-  /* Get the pfile for head_uploadtree_pk so we can
-     check if its already been processed */
-  sprintf(sqlbuf, "select pfile_fk from uploadtree where uploadtree_pk=%ld", head_uploadtree_pk);
+  /*** Get the pfile for head_uploadtree_pk so we can
+     check if its already been processed ***/
+  sprintf(sqlbuf, "select pfile_fk from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
   result = PQexec(pgConn, sqlbuf);
   if (checkPQresult(result, sqlbuf, agentDesc, __LINE__)) return -1;
   if (PQntuples(result) == 0) 
   {
-    printf("FATAL: %s.%s missing root uploadtree_pk %ld\n", 
+    printf("FATAL: %s.%s missing root uploadtree_pk %d\n", 
            __FILE__, agentDesc, head_uploadtree_pk);
     return -1;
   }
@@ -372,6 +438,15 @@ int main(int argc, char **argv)
 
   /* Has it already been processed?  If so, we are done */
   if (processed(pgConn, agent_pk, pfile_pk)) return 0;
+
+  /*** Make sure there is  license data available from the latest nomos agent ***/
+  nomos_agent_pk = licDataAvailable(pgConn, head_uploadtree_pk);
+  if (nomos_agent_pk == 0)
+  {
+    printf("WARNING: Bucket agent called on treeitem (%d), but the latest nomos agent hasn't created any license data for this tree.\n",
+          head_uploadtree_pk);
+    return -1;
+  }
 
   if (writeDB)
   {
@@ -385,11 +460,19 @@ int main(int argc, char **argv)
   // printf("OK\n"); /* tell scheduler ready for more data */
   // fflush(stdout);
 
-  /* Initialize the Bucket Definition List bucketDefList  */
-  bucketDefList = initBuckets(pgConn, bucketpool_pk);
+  /* Initialize the Bucket Definition List bucketDefArray  */
+  bucketDefArray = initBuckets(pgConn, bucketpool_pk);
+  if (bucketDefArray == 0)
+  {
+    printf("FATAL: %s.%d Bucket definition for pool %d could not be initialized.\n",
+           __FILE__, __LINE__, bucketpool_pk);
+    return -1;
+  }
+  bucketDefArray->nomos_agent_pk = nomos_agent_pk;
+  bucketDefArray->bucket_agent_pk = agent_pk;
 
   /* process the tree for buckets */
-  walkTree(pgConn, bucketDefList, agent_pk, head_uploadtree_pk);
+  walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk);
 
   return (0);
 }
