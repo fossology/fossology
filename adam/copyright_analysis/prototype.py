@@ -19,7 +19,7 @@
 
 import re
 import sys
-import library
+import copyright_library as library
 
 def calc_bigram_prob(bigram_hash, word1, word2, word3, default = 0.0):
     p = bigram_hash.get('%s %s %s' % (word1, word2, word3),0.0)
