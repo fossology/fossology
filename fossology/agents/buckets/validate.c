@@ -161,9 +161,14 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk)
 #ifdef DEBUG
   for (rowNum=0; rowNum<numRows; rowNum++)
   {
-    printf("bucket_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_pk);
+    printf("\nbucket_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_pk);
+    printf("bucket_name[%d] = %s\n", rowNum, bucketDefList[rowNum].bucket_name);
+    printf("bucket_type[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_type);
     printf("execFilename[%d] = %s\n", rowNum, bucketDefList[rowNum].execFilename);
     printf("stopon[%d] = %c\n", rowNum, bucketDefList[rowNum].stopon);
+    printf("nomos_agent_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].nomos_agent_pk);
+    printf("bucket_agent_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_agent_pk);
+    printf("regex[%d] = %s\n", rowNum, bucketDefList[rowNum].regex);
   }
 #endif
 

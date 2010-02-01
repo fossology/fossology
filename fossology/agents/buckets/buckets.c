@@ -167,11 +167,13 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
 {
   char *fcnName = "getLeafBuckets";
   int  *bucket_pk_list = 0;
+  int  *bucket_pk_list_start;
   char  sql[256];
   PGresult *result;
   int   numLics, licNumb;
   int   numBucketDefs = 0;
   int   rv;
+  int   match = 0;   // bucket match
   char *licName;
   pbucketdef_t bucketDefArray;
 
@@ -180,12 +182,13 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
     numBucketDefs++;
 
   /* allocate return array to hold max number of bucket_pk's */
-  bucket_pk_list = calloc(numBucketDefs+1, sizeof(int));
-  if (bucket_pk_list == 0)
+  bucket_pk_list_start = calloc(numBucketDefs+1, sizeof(int));
+  if (bucket_pk_list_start == 0)
   {
     printf("FATAL: out of memory allocating int array of %d elements\n", numBucketDefs+1);
     return 0;
   }
+  bucket_pk_list = bucket_pk_list_start;
   
   /*** select all the licenses for pfile_pk and agent_pk ***/
   bucketDefArray = in_bucketDefArray;
@@ -195,7 +198,6 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   result = PQexec(pgConn, sql);
   if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
   numLics = PQntuples(result);
-printf("found %d licenses for pfile_pk: %d\n", numLics, pfile_pk);
   
   while (bucketDefArray->bucket_pk != 0)
   {
@@ -209,14 +211,15 @@ printf("found %d licenses for pfile_pk: %d\n", numLics, pfile_pk);
         for (licNumb=0; licNumb < numLics; licNumb++)
         {
           licName = PQgetvalue(result, licNumb, 0);
-printf("checking license: %s, against regex: %s\n", licName, bucketDefArray->regex);
+//printf("checking license: %s, against regex: %s\n", licName, bucketDefArray->regex);
           rv = regexec(&bucketDefArray->compRegex, licName, 0, 0, 0);
           if (rv == 0)
           {
             /* regex matched!  */
-printf("pfile: %d, license: %s matched bucket: %s\n", pfile_pk, licName, bucketDefArray->bucket_name);
+//printf("pfile: %d, license: %s matched bucket: %s\n", pfile_pk, licName, bucketDefArray->bucket_name);
             *bucket_pk_list = bucketDefArray->bucket_pk;
             bucket_pk_list++;
+            match++;
             continue;
           }
         }
@@ -224,15 +227,22 @@ printf("pfile: %d, license: %s matched bucket: %s\n", pfile_pk, licName, bucketD
       case 4:  /* exec   */
         break;
       case 99:  /* match every */
+        if (!match) 
+        {
+          *bucket_pk_list = bucketDefArray->bucket_pk;
+          bucket_pk_list++;
+          match++;
+        }
         break;
       default:  /* unknown bucket type */
         break;
     }
+    if (match && bucketDefArray->stopon == 'Y') break;
     bucketDefArray++;
   }
 
   PQclear(result);
-  return bucket_pk_list;
+  return bucket_pk_list_start;
 }
 
 
@@ -262,6 +272,9 @@ printf("getting container buckets for %d\n",pfile_pk);
 
  @param PGconn *pgConn  postgresql connection
  @param int pfile_pk  
+ @param int *bucketList   null terminated array of bucket_pks 
+                          that match this pfile
+ @param int agent_pk  
 
  @return 0=success, else error
 ****************************************************/
@@ -269,7 +282,16 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int *bucketList, int age
 {
   int rv = 0;
 
-printf("write buckets %d\n", pfile_pk);
+printf("write buckets for pfile=%d : ", pfile_pk);
+  if (bucketList)
+  {
+    while(*bucketList)
+    {
+printf(" %d", *bucketList);
+      bucketList++;
+    }
+  }
+printf("\n");
   return rv;
 }
 
