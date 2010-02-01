@@ -160,3 +160,129 @@ def features(tokens):
 
     return data, attribs
 
+def calc_bigram_prob(bigram_hash, word1, word2, word3, default = 0.0):
+    p = bigram_hash.get('%s %s %s' % (word1, word2, word3),0.0)
+    return p + default
+
+def norm_bigram_hash(bigram_hash):
+    n = sum([bigram_hash[k] for k in bigram_hash.keys()])
+    for k in bigram_hash.keys():
+        bigram_hash[k] = bigram_hash[k] / n
+    return n
+
+def create_bigram_hash(tokens, bigram_hash = {}):
+    for i in range(1,len(tokens)-1):
+        bigram = '%s %s %s' % (tokens[i-1][0], tokens[i][0], tokens[i+1][0])
+        bigram_hash[bigram] = bigram_hash.get(bigram,0.0) + 1.0
+    return bigram_hash
+
+def create_model(files):
+    bigram_hash = {}
+    P_inside = {}
+    P_outside = {}
+    for file in files:
+        text = open(file).read()
+        stuff = parsetext(text)
+        tokens = stuff['tokens']
+        inside = False
+        for t in tokens:
+            if t[0] == 'XXXstartXXX':
+                inside = True
+                continue
+            if t[0] == 'XXXendXXX':
+                inside = False
+                continue
+            if inside:
+                P_inside[t[0]] = P_inside.get(t[0],0.0) + 1.0
+            else:
+                P_outside[t[0]] = P_outside.get(t[0],0.0) + 1.0
+    
+        tokens.insert(0,['XXXdocstartXXX',-1,-1])
+        tokens.insert(0,['XXXdocstartXXX',-1,-1])
+        tokens.append(['XXXdocendXXX',len(text),len(text)])
+        tokens.append(['XXXdocendXXX',len(text),len(text)])
+    
+        bigram_hash = create_bigram_hash(tokens,bigram_hash)
+    
+    norm = 1.0 / sum([P_inside[k] for k in P_inside.keys()])
+    for k in P_inside.keys():
+        P_inside[k] = norm*P_inside[k]
+    norm = 1.0 / sum([P_outside[k] for k in P_outside.keys()])
+    for k in P_outside.keys():
+        P_outside[k] = norm*P_outside[k]
+    norm = norm_bigram_hash(bigram_hash)
+
+    return {"bigram_hash": bigram_hash, "P_inside": P_inside, "P_outside": P_outside, "norm": norm}
+
+def label_file(file, model):
+        text = open(file).read(64000)
+        
+        stuff = parsetext(text)
+        tokens = stuff['tokens']
+        n = len(tokens)
+        tokens.insert(0,['XXXdocstartXXX',-1,-1])
+        tokens.insert(0,['XXXdocstartXXX',-1,-1])
+        tokens.append(['XXXdocendXXX',len(text),len(text)])
+        tokens.append(['XXXdocendXXX',len(text),len(text)])
+        
+        starts = []
+        ends = []
+        steps = 0
+        in_copyright = False
+        for i in range(2,n+2):
+            v = tokens[i-2][0]
+            w = tokens[i-1][0]
+            x = tokens[i+0][0]
+            y = tokens[i+1][0]
+            z = tokens[i+2][0]
+            s = 'XXXstartXXX'
+            e = 'XXXendXXX'
+        
+            P_v_w_x = calc_bigram_prob(model['bigram_hash'], v, w, x, model['norm'])
+            P_v_w_s = calc_bigram_prob(model['bigram_hash'], v, w, s, model['norm'])
+            P_e_y_z = calc_bigram_prob(model['bigram_hash'], e, y, z, model['norm'])
+            P_x_y_z = calc_bigram_prob(model['bigram_hash'], x, y, z, model['norm'])
+            if re.match('^[^A-Z]',x):
+                P_e_y_z += 0.2*model['P_outside'].get(x,0.0)
+                P_x_y_z += 0.8*model['P_inside'].get(x,0.0)
+        
+            if (x in ['the', 'and']):
+                starts.append(False)
+                ends.append(False)
+                continue
+        
+            if P_v_w_s > P_v_w_x:
+                starts.append(True)
+                in_copyright = True
+                steps = 0
+            else:
+                starts.append(False)
+                steps += 1
+
+            #if P_e_y_z > P_x_y_z:
+            #    ends.append(True)
+            #else:
+            #    ends.append(False)
+        
+            if in_copyright and steps > 10:
+                in_copyright = False
+                ends.append(True)
+            else:
+                ends.append(False)
+
+        tokens = replace_placeholders(tokens,stuff)
+        i = 0
+        inside = False
+        begining = 0
+        finish = 0
+        while (i < len(starts)):
+            if starts[i] and not inside:
+                begining = tokens[i][1]
+                inside = True
+            if inside:
+                finish = tokens[i+2][2]
+            if ends[i] and inside:
+                inside = False
+                print "[%d:%d] ''%r''" % (begining, finish, text[begining:finish])
+            i += 1
+    

@@ -19,7 +19,7 @@
 
 import re
 import sys
-import library
+import copyright_library as library
 
 import psyco
 psyco.full()
@@ -112,7 +112,8 @@ def main():
         P_outside[k] = norm*P_outside[k]
     norm = norm_bigram_hash(bigram_hash)
     
-    files = [line.rstrip() for line in open(sys.argv[2]).readlines()]
+    #files = [line.rstrip() for line in open(sys.argv[2]).readlines()]
+    files = sys.argv[2:]
     for file in files:
         text = open(file).read(64000)
         
@@ -182,7 +183,7 @@ def main():
                 finish = tokens[i+2][2]
             if ends[i] and inside:
                 inside = False
-                print "%s [%d:%d] ''%r''" % (file, begining, finish, text[begining:finish])
+                print "[%d:%d] ''%r''" % (begining, finish, text[begining:finish])
             i += 1
     
 if __name__ == '__main__':
