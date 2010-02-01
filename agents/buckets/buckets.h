@@ -64,12 +64,13 @@ int processed(PGconn *pgConn, int agent_pk, int pfile_pk);
 
 /* validate.c */
 int checkPQresult    (PGresult *result, char *sql, char *FcnName, int LineNumb);
+int validate_pk      (PGconn *pgConn, char *sql);
+void Usage           (char *Name);
+
+/* inits.c */
 pbucketdef_t initBuckets   (PGconn *pgConn, int bucketpool_pk);
 int *getMatchOnly    (PGconn *pgConn, int bucketpool_pk, char *filename);
 int **getMatchEvery  (PGconn *pgConn, int bucketpool_pk, char *filename);
 int getBucketpool_pk (PGconn *pgConn, char * bucketpool_name);
-int validate_pk      (PGconn *pgConn, char *sql);
 int licDataAvailable (PGconn *pgConn, int uploadtree_pk);
-void Usage           (char *Name);
-
 #endif /* _BUCKETS_H */
