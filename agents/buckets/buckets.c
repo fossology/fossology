@@ -349,6 +349,7 @@ int main(int argc, char **argv)
   char *bucketpool_name;
   int pfile_pk = 0;
   pbucketdef_t bucketDefArray = 0;
+  cacheroot_t  cacheroot;
 
   extern int AlarmSecs;
 //  extern long HBItemsProcessed;
@@ -368,6 +369,7 @@ int main(int argc, char **argv)
     switch (cmdopt) 
     {
       case 'd': /* write results to db instead of stdout  */
+                /* Note: license_ref may get written to even if writeDB=0 */
             writeDB = 1;
             break;
       case 'i': /* "Initialize" */
@@ -469,6 +471,19 @@ int main(int argc, char **argv)
           head_uploadtree_pk);
     return -1;
   }
+
+  /*** Initialize the license_ref table cache ***/
+  /* Build the license ref cache to hold 2**11 (2048) licenses.
+     This MUST be a power of 2.
+   */
+  cacheroot.maxnodes = 2<<11;
+  cacheroot.nodes = calloc(cacheroot.maxnodes, sizeof(cachenode_t));
+  if (!lrcache_init(pgConn, &cacheroot))
+  {
+    printf("FATAL: Bucket agent could not allocate license_ref table cache.\n");
+    exit(1);
+  }
+
 
   if (writeDB)
   {

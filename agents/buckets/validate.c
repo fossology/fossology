@@ -22,7 +22,6 @@
 
 #include "buckets.h"
 
-
 /****************************************************
  validate_pk
 
@@ -48,41 +47,6 @@ FUNCTION int validate_pk(PGconn *pgConn, char *sql)
   return pk;
 }
 
-
-
-/****************************************************
- checkPQresult
-
- check the result status of a postgres SELECT
- If an error occured, write the error to stdout
-
- @param PGresult *result
- @param char *sql the sql query
- @param char * FcnName the function name of the caller
- @param int LineNumb the line number of the caller
-
- @return 0 on OK, -1 on failure.
- On failure, result will be freed.
-
- NOTE: this function should be moved to a std library
-****************************************************/
-FUNCTION int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb)
-{
-   if (!result)
-   {
-     printf("Error: %s.%s(%d) - checkPQresult called with invalid parameter.\n",
-             __FILE__, FcnName, __LINE__);
-     return 0;
-   }
-
-   /* If no error, return */
-   if (PQresultStatus(result) == PGRES_TUPLES_OK) return 0;
-
-   printf("ERROR: %s.%s:%d, %s\nOn: %s\n", 
-          __FILE__, FcnName, __LINE__, PQresultErrorMessage(result), sql);
-   PQclear(result);
-   return (-1);
-} /* checkPQresult */
 
 FUNCTION void Usage(char *Name) 
 {

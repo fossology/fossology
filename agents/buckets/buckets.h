@@ -34,7 +34,7 @@
 #include "libfossdb.h"
 #include "libfossagent.h"
 #include "libfossrepo.h"
-
+#include "liccache.h"
 #define FUNCTION
 
 /* Bucket definition */
@@ -53,6 +53,7 @@ struct bucketdef_struct
   int      bucket_agent_pk; /* bucket agent_pk */
 };
 typedef struct bucketdef_struct bucketdef_t, *pbucketdef_t;
+
 
 /* nomos.c */
 int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, int uploadtree_pk);
@@ -73,4 +74,5 @@ int *getMatchOnly    (PGconn *pgConn, int bucketpool_pk, char *filename);
 int **getMatchEvery  (PGconn *pgConn, int bucketpool_pk, char *filename);
 int getBucketpool_pk (PGconn *pgConn, char * bucketpool_name);
 int licDataAvailable (PGconn *pgConn, int uploadtree_pk);
+
 #endif /* _BUCKETS_H */
