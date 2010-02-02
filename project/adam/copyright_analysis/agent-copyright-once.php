@@ -62,7 +62,7 @@ class agent_copyright_once extends FO_Plugin {
                 //print $Line;
                 //print "--------------------------------------------------------------------------------\n";
                 $match = array();
-                preg_match_all("/\[(?P<start>\d+)\:(?P<end>\d+)\]/", $Line, $match);
+                preg_match_all("/\t[(?P<start>\d+)\:(?P<end>\d+)\]/", $Line, $match);
                 //print_r($match);
                 $View->AddHighlight($match['start'][0], $match['end'][0], 0);
             }

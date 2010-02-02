@@ -215,74 +215,77 @@ def create_model(files):
     return {"bigram_hash": bigram_hash, "P_inside": P_inside, "P_outside": P_outside, "norm": norm}
 
 def label_file(file, model):
-        text = open(file).read(64000)
-        
-        stuff = parsetext(text)
-        tokens = stuff['tokens']
-        n = len(tokens)
-        tokens.insert(0,['XXXdocstartXXX',-1,-1])
-        tokens.insert(0,['XXXdocstartXXX',-1,-1])
-        tokens.append(['XXXdocendXXX',len(text),len(text)])
-        tokens.append(['XXXdocendXXX',len(text),len(text)])
-        
-        starts = []
-        ends = []
-        steps = 0
-        in_copyright = False
-        for i in range(2,n+2):
-            v = tokens[i-2][0]
-            w = tokens[i-1][0]
-            x = tokens[i+0][0]
-            y = tokens[i+1][0]
-            z = tokens[i+2][0]
-            s = 'XXXstartXXX'
-            e = 'XXXendXXX'
-        
-            P_v_w_x = calc_bigram_prob(model['bigram_hash'], v, w, x, model['norm'])
-            P_v_w_s = calc_bigram_prob(model['bigram_hash'], v, w, s, model['norm'])
-            P_e_y_z = calc_bigram_prob(model['bigram_hash'], e, y, z, model['norm'])
-            P_x_y_z = calc_bigram_prob(model['bigram_hash'], x, y, z, model['norm'])
-            if re.match('^[^A-Z]',x):
-                P_e_y_z += 0.2*model['P_outside'].get(x,0.0)
-                P_x_y_z += 0.8*model['P_inside'].get(x,0.0)
-        
-            if (x in ['the', 'and']):
-                starts.append(False)
-                ends.append(False)
-                continue
-        
-            if P_v_w_s > P_v_w_x:
-                starts.append(True)
-                in_copyright = True
-                steps = 0
-            else:
-                starts.append(False)
-                steps += 1
-
-            #if P_e_y_z > P_x_y_z:
-            #    ends.append(True)
-            #else:
-            #    ends.append(False)
-        
-            if in_copyright and steps > 10:
-                in_copyright = False
-                ends.append(True)
-            else:
-                ends.append(False)
-
-        tokens = replace_placeholders(tokens,stuff)
-        i = 0
-        inside = False
-        begining = 0
-        finish = 0
-        while (i < len(starts)):
-            if starts[i] and not inside:
-                begining = tokens[i][1]
-                inside = True
-            if inside:
-                finish = tokens[i+2][2]
-            if ends[i] and inside:
-                inside = False
-                print "[%d:%d] ''%r''" % (begining, finish, text[begining:finish])
-            i += 1
+    text = open(file).read(64000)
     
+    stuff = parsetext(text)
+    tokens = stuff['tokens']
+    n = len(tokens)
+    tokens.insert(0,['XXXdocstartXXX',-1,-1])
+    tokens.insert(0,['XXXdocstartXXX',-1,-1])
+    tokens.append(['XXXdocendXXX',len(text),len(text)])
+    tokens.append(['XXXdocendXXX',len(text),len(text)])
+    
+    starts = []
+    ends = []
+    steps = 0
+    in_copyright = False
+    for i in range(2,n+2):
+        v = tokens[i-2][0]
+        w = tokens[i-1][0]
+        x = tokens[i+0][0]
+        y = tokens[i+1][0]
+        z = tokens[i+2][0]
+        s = 'XXXstartXXX'
+        e = 'XXXendXXX'
+    
+        P_v_w_x = calc_bigram_prob(model['bigram_hash'], v, w, x, model['norm'])
+        P_v_w_s = calc_bigram_prob(model['bigram_hash'], v, w, s, model['norm'])
+        P_e_y_z = calc_bigram_prob(model['bigram_hash'], e, y, z, model['norm'])
+        P_x_y_z = calc_bigram_prob(model['bigram_hash'], x, y, z, model['norm'])
+        if re.match('^[^A-Z]',x):
+            P_e_y_z += 0.2*model['P_outside'].get(x,0.0)
+            P_x_y_z += 0.8*model['P_inside'].get(x,0.0)
+    
+        if (x in ['the', 'and']):
+            starts.append(False)
+            ends.append(False)
+            continue
+    
+        if P_v_w_s > P_v_w_x:
+            starts.append(True)
+            in_copyright = True
+            steps = 0
+        else:
+            starts.append(False)
+            steps += 1
+
+        #if P_e_y_z > P_x_y_z:
+        #    ends.append(True)
+        #else:
+        #    ends.append(False)
+    
+        if in_copyright and steps > 10:
+            in_copyright = False
+            ends.append(True)
+        else:
+            ends.append(False)
+    
+    offsets = []
+    tokens = replace_placeholders(tokens,stuff)
+    i = 0
+    inside = False
+    beginning = 0
+    finish = 0
+    while (i < len(starts)):
+        if starts[i] and not inside:
+            beginning = tokens[i][1]
+            inside = True
+        if inside:
+            finish = tokens[i+2][2]
+        if ends[i] and inside:
+            inside = False
+            offsets.append([beginning, finish])
+            # print "[%d:%d] ''%r''" % (beginning, finish, text[beginning:finish])
+        i += 1
+    
+    return offsets
