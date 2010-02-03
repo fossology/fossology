@@ -30,7 +30,7 @@ char LibraryBuildVersion[]="Library libfossdb Build version: " SVN_REV ".\n";
 #endif
 
 #ifndef FOSSDB_CONF
-#define FOSSDB_CONF "/etc/ossdb/dbconnect/ossdb"
+#define FOSSDB_CONF "/etc/fossology/Db.conf"
 #endif
 
 /****
@@ -88,6 +88,9 @@ void *	DBopen	()
 
   /* Env FOSSDBCONF = debugging override for the config file */
   Env = getenv("FOSSDBCONF");
+
+  printf("Debug: ENV is:%s\n",Env);
+  printf("Debug: FOSSDB_CONF is:%s\n",FOSSDB_CONF);
   if (Env)
     {
     Fconf = fopen(Env,"r");
