@@ -327,6 +327,19 @@ Magic: "application/x-x86_boot"
   ModeMaskDir: 0177000
   ModeMaskReg: 0177000
   END
+###############################################################
+# Debian Source files
+###############################################################
+Magic: "application/x-debian-source"
+  Cmd: "dpkg-source"
+  CmdPre: "-x"
+  CmdPost: "'%s' >/dev/null 2>&1"
+  MetaCmd: ""
+  Type: CMD_DEB
+  Status: 1
+  ModeMaskDir: 0177000
+  ModeMaskReg: 0177000
+  END
 
 ###############################################################
 # Default -- if all else fails.

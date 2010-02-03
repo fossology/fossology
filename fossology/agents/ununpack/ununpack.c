@@ -626,6 +626,7 @@ void	CheckCommands	(int Show)
 	  {
 	  case CMD_PACK:
 	  case CMD_RPM:
+	  case CMD_DEB:
 	  case CMD_ARC:
 	  case CMD_AR:
 	  case CMD_PARTITION:
@@ -757,6 +758,19 @@ int	FindCmd	(char *Filename)
 
   Type = (char *)magic_file(MagicCookie,Filename);
   if (Type == NULL) return(-1);
+
+  /* Set .dsc file magic as application/x-debian-source */
+  char *pExt;
+  pExt = strrchr(Filename, '.');
+  if ( pExt != NULL)
+  {
+    if (strcmp(pExt, ".dsc")==0)
+    {
+      memset(Static,0,sizeof(Static));
+      strcpy(Static,"application/x-debian-source");
+      Type=Static;
+    }	
+  }
 
   /* sometimes Magic is wrong... */
   if (strstr(Type, "application/x-iso")) strcpy(Type, "application/x-iso");
@@ -1486,6 +1500,11 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
 	  /* unpack a DISK: source file, FS type, and destination directory */
 	  rc=ExtractDisk(CI->Source,CMD[CI->PI.Cmd].Cmd,Queue[Index].ChildRecurse);
 	  break;
+	case CMD_DEB:
+	  /* unpack a DEBIAN source:*/
+	  rc=RunCommand(CMD[CI->PI.Cmd].Cmd,CMD[CI->PI.Cmd].CmdPre,CI->Source,
+             CMD[CI->PI.Cmd].CmdPost,CI->PartnameNew,CI->Partdir);
+	  break;
 	case CMD_DEFAULT:
 	default:
 	  /* use the original name */
@@ -1575,6 +1594,10 @@ int	Traverse	(char *Filename, char *Basename,
   strcpy(CI.Partname,CI.Source+i+1);
   strcpy(CI.PartnameNew,CI.Partname);
 
+#if 0 
+  fprintf(stderr,"TEST-> %s\n",CI.Partname);
+#endif
+ 
   /***********************************************/
   /* ignore anything that is not a directory or a file */
   /***********************************************/
@@ -1721,6 +1744,7 @@ int	Traverse	(char *Filename, char *Basename,
 		Queue[Index].PI.ChildRecurseArtifact=2;
 	  break;
 	case CMD_PACK:
+	case CMD_DEB:
 	case CMD_RPM:
 	  CI.HasChild=1;
 	  IsContainer=1;
@@ -1864,13 +1888,38 @@ TraverseEnd:
 #endif
     if (!NewDir)
       {
-      if (IsDir(CI.Source)) rmdir(CI.Source);
-      else unlink(CI.Source);
+      if (IsDir(CI.Source)) RemoveDir(CI.Source);
+//    else unlink(CI.Source);
       }
     }
   return(IsContainer);
 } /* Traverse() */
+/***************************************************
+ RemoveDir(char* dirpath) Remove all files under dirpath
+ ***************************************************/
+int RemoveDir(char *dirpath)
+{
+  struct dirent *d;
+  DIR *dir;
+  char buf[256];
 
+  dir = opendir(dirpath);
+
+  if (dir != NULL)
+  {
+    while((d = readdir(dir)))
+    {
+      sprintf(buf, "%s/%s", dirpath, d->d_name);
+      remove(buf);
+    }
+    closedir(dir);
+    rmdir(dirpath);
+    return 0;
+  }else{
+      fprintf(stderr,"Can't open directory %s\n",dirpath);
+      return 1;
+  }
+} /* RemoveDir() */
 /***************************************************
  TraverseStart(): Find all files (assuming a directory)
  and process all of them.
@@ -2059,7 +2108,7 @@ int	main	(int argc, char *argv[])
 		Upload_Pk = getenv("ARG_upload_pk");
 		if (!Upload_Pk) Upload_Pk = getenv("upload_pk");
 		GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
-
+	
 		/* Check for all necessary parameters */
 		if (Verbose)
 		  {

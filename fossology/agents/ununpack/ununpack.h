@@ -84,6 +84,7 @@ enum cmdtype
   CMD_PARTITION, /* File system partition table (special case CMD_ARC) */
   CMD_ISO,	/* ISO9660 */
   CMD_DISK,	/* File system disk */
+  CMD_DEB,	/* Debian source package */
   CMD_DEFAULT	/* Default action */
   };
 typedef enum cmdtype cmdtype;
@@ -100,6 +101,6 @@ inline int	IsFile	(char *Fname, int Link);
 int	IsExe	(char *Exe, int Quiet);
 int	CopyFile	(char *Src, char *Dst);
 int	ReadLine	(FILE *Fin, char *Line, int MaxLine);
-
+inline int	RemoveDir	(char *dirpath);
 #endif
 
