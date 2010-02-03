@@ -34,6 +34,7 @@
 #include "libfossdb.h"
 #include "libfossagent.h"
 #include "libfossrepo.h"
+#include "dbcommon.h"
 
 #define FUNCTION
 

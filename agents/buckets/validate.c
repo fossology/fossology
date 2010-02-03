@@ -23,6 +23,39 @@
 #include "buckets.h"
 
 /****************************************************
+ arrayAinB
+
+ Verify that all the values in array A are also in B
+
+ @param int *arrayA   null terminated array of ints
+ @param int *arrayB   null terminated array of ints
+
+ @return true (!0) if all the elements in A are also in B
+ else return false (0)
+****************************************************/
+FUNCTION int arrayAinB(int *arrayA, int *arrayB)
+{
+  int *arrayBHead;
+
+  if (!arrayA || !arrayB) return 0;
+
+  arrayBHead = arrayB;
+  while(*arrayA)
+  {
+    arrayB = arrayBHead;
+    while (*arrayB)
+    {
+      if (*arrayA == *arrayB) break;
+      arrayB++;
+    }
+    if (!*arrayB) return 0;
+    arrayA++;
+  }
+  return 1;
+}
+
+
+/****************************************************
  validate_pk
 
  Verify a primary key exists and is active

@@ -23,5 +23,5 @@
 #include "libfossdb.h"
 #define FUNCTION
 
-int validate_pk  (PGconn *pgConn, char *sql);
+int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb);
 #endif /* _DBCOMMON_H */

@@ -174,6 +174,10 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   int   numBucketDefs = 0;
   int   rv;
   int   match = 0;   // bucket match
+  int   foundmatch; 
+  int   *pmatch_array;
+  int  **ppmatch_array;
+  int  *pfile_rfpks;
   char *licName;
   pbucketdef_t bucketDefArray;
 
@@ -181,7 +185,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   for (bucketDefArray = in_bucketDefArray; bucketDefArray->bucket_pk; bucketDefArray++)
     numBucketDefs++;
 
-  /* allocate return array to hold max number of bucket_pk's */
+  /* allocate return array to hold max number of bucket_pk's + 1 for null terminator */
   bucket_pk_list_start = calloc(numBucketDefs+1, sizeof(int));
   if (bucket_pk_list_start == 0)
   {
@@ -193,21 +197,77 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   /*** select all the licenses for pfile_pk and agent_pk ***/
   bucketDefArray = in_bucketDefArray;
   snprintf(sql, sizeof(sql), 
-           "select rf_shortname from license_file, license_ref where agent_fk=%d and pfile_fk=%d and rf_fk=rf_pk",
+           "select rf_shortname, rf_pk from license_file, license_ref where agent_fk=%d and pfile_fk=%d and rf_fk=rf_pk",
            bucketDefArray->nomos_agent_pk, pfile_pk);
   result = PQexec(pgConn, sql);
   if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
   numLics = PQntuples(result);
   
+  /* make int array of rf_pk's for this pfile */
+  pfile_rfpks = calloc(numLics+1, sizeof(int));
+  if (pfile_rfpks == 0)
+  {
+    printf("FATAL: out of memory allocating int array of %d rf_pk elements\n", numLics+1);
+    return 0;
+  }
+  for (licNumb=0; licNumb < numLics; licNumb++) 
+    pfile_rfpks[licNumb] = atoi(PQgetvalue(result, licNumb, 1));
+  
   while (bucketDefArray->bucket_pk != 0)
   {
     switch (bucketDefArray->bucket_type)
     {
-      case 1:  /* match every */
+      /***  1  MATCH_EVERY  ***/
+      case 1:
+        ppmatch_array = bucketDefArray->match_every;
+        if (!ppmatch_array) break;  
+        foundmatch = 1;  
+        while (*ppmatch_array)
+        {
+          /* is match_array contained in pfile_rfpks?  */
+          if (arrayAinB(*ppmatch_array, pfile_rfpks))
+          {
+            *bucket_pk_list = bucketDefArray->bucket_pk;
+            bucket_pk_list++;
+            match++;
+            break;
+          }
+          ++ppmatch_array;
+        }
         break;
-      case 2:  /* match only */
+        
+      /***  2  MATCH_ONLY  ***/
+      case 2: 
+        foundmatch = 1;  
+        /* loop through pfile licenses to see if they are all found in the match_only list  */
+        for (licNumb=0; licNumb < numLics; licNumb++) 
+        {
+          /* if rf_pk doesn't match any value in match_only, 
+             then pfile is not in this bucket              */
+          pmatch_array = bucketDefArray->match_only;
+          while (*pmatch_array)
+          {
+            if (pfile_rfpks[licNumb] == *pmatch_array) break;
+            pmatch_array++;
+          }
+          if (!*pmatch_array) 
+          {
+            /* no match, so pfile is not in this bucket */
+            foundmatch = 0;
+            break;  /* break out of for loop */
+          }
+        }
+        if (foundmatch)
+        {
+          *bucket_pk_list = bucketDefArray->bucket_pk;
+          bucket_pk_list++;
+          match++;
+        }
         break;
+
+      /***  3  REGEX  ***/
       case 3:  /* match this regex against each license names for this pfile */
+        /* loop through pfile licenses */
         for (licNumb=0; licNumb < numLics; licNumb++)
         {
           licName = PQgetvalue(result, licNumb, 0);
@@ -224,9 +284,13 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
           }
         }
         break;
+
+      /***  4  EXEC  ***/
       case 4:  /* exec   */
         break;
-      case 99:  /* match every */
+
+      /*** 99 DEFAULT bucket. aka not in any other bucket ***/
+      case 99:
         if (!match) 
         {
           *bucket_pk_list = bucketDefArray->bucket_pk;
@@ -234,8 +298,12 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
           match++;
         }
         break;
-      default:  /* unknown bucket type */
-        break;
+
+      /*** UNKNOWN BUCKET TYPE  ***/
+      default:  
+        printf("FATAL: Unknown bucket type %d, exiting...\n",
+                bucketDefArray->bucket_type);
+        exit(-1);
     }
     if (match && bucketDefArray->stopon == 'Y') break;
     bucketDefArray++;
@@ -498,7 +566,7 @@ int main(int argc, char **argv)
   // fflush(stdout);
 
   /* Initialize the Bucket Definition List bucketDefArray  */
-  bucketDefArray = initBuckets(pgConn, bucketpool_pk);
+  bucketDefArray = initBuckets(pgConn, bucketpool_pk, &cacheroot);
   if (bucketDefArray == 0)
   {
     printf("FATAL: %s.%d Bucket definition for pool %d could not be initialized.\n",

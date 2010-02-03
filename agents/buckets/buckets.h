@@ -55,7 +55,7 @@ struct bucketdef_struct
 typedef struct bucketdef_struct bucketdef_t, *pbucketdef_t;
 
 
-/* nomos.c */
+/* buckets.c */
 int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, int uploadtree_pk);
 int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, int agent_pk);
 int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk);
@@ -64,15 +64,17 @@ int writeBuckets(PGconn *pgConn, int pfile_pk, int *bucketList, int agent_pk);
 int processed(PGconn *pgConn, int agent_pk, int pfile_pk);
 
 /* validate.c */
-int checkPQresult    (PGresult *result, char *sql, char *FcnName, int LineNumb);
+int arrayAinB        (int *arrayA, int *arrayB);
 int validate_pk      (PGconn *pgConn, char *sql);
 void Usage           (char *Name);
 
 /* inits.c */
-pbucketdef_t initBuckets   (PGconn *pgConn, int bucketpool_pk);
-int *getMatchOnly    (PGconn *pgConn, int bucketpool_pk, char *filename);
-int **getMatchEvery  (PGconn *pgConn, int bucketpool_pk, char *filename);
+pbucketdef_t initBuckets   (PGconn *pgConn, int bucketpool_pk, cacheroot_t *pcroot);
+int *getMatchOnly    (PGconn *pgConn, int bucketpool_pk, char *filename, cacheroot_t *pcroot);
+int **getMatchEvery  (PGconn *pgConn, int bucketpool_pk, char *filename, cacheroot_t *pcroot);
 int getBucketpool_pk (PGconn *pgConn, char * bucketpool_name);
 int licDataAvailable (PGconn *pgConn, int uploadtree_pk);
+int *getLicsInStr    (PGconn *pgConn, char *nameStr, cacheroot_t *pcroot);
+
 
 #endif /* _BUCKETS_H */

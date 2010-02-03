@@ -60,11 +60,12 @@ FUNCTION int getBucketpool_pk(PGconn *pgConn, char *bucketpool_name)
 
  @param PGconn *pgConn  Database connection object
  @param int bucketpool_pk
+ @param cacheroot_t *pcroot  license cache root
 
  @return an array of bucket definitions (in eval order)
  or 0 if error.
 ****************************************************/
-FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk)
+FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t *pcroot)
 {
   char *fcnName = "initBuckets";
   char sqlbuf[256];
@@ -72,7 +73,6 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk)
   pbucketdef_t bucketDefList = 0;
   int  numRows, rowNum;
   int  rv, numErrors=0;
-  int *prv, **pprv;
 
   /* reasonable input validation  */
   if ((!pgConn) || (!bucketpool_pk)) 
@@ -122,10 +122,12 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk)
     bucketDefList[rowNum].execFilename = strdup(PQgetvalue(result, rowNum, 3));
 
     if (bucketDefList[rowNum].bucket_type == 1)
-      pprv = getMatchEvery(pgConn, bucketpool_pk, bucketDefList[rowNum].execFilename);
+      bucketDefList[rowNum].match_every = getMatchEvery(pgConn, bucketpool_pk, bucketDefList[rowNum].execFilename, pcroot);
 
     if (bucketDefList[rowNum].bucket_type == 2)
-      prv = getMatchOnly(pgConn, bucketpool_pk, bucketDefList[rowNum].execFilename);
+    {
+      bucketDefList[rowNum].match_only = getMatchOnly(pgConn, bucketpool_pk, bucketDefList[rowNum].execFilename, pcroot);
+    }
 
     bucketDefList[rowNum].stopon = *PQgetvalue(result, rowNum, 4);
     bucketDefList[rowNum].bucket_name = strdup(PQgetvalue(result, rowNum, 5));
@@ -158,48 +160,237 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk)
 
  @param PGconn *pgConn  Database connection object
  @param int bucketpool_pk
- @param char *filename
+ @param char *filename  File name of match_only file
 
  @return an array of rf_pk's that match the licenses
  in filename.
  or 0 if error.
 ****************************************************/
-FUNCTION int *getMatchOnly(PGconn *pgConn, int bucketpool_pk, char *filename )
+FUNCTION int *getMatchOnly(PGconn *pgConn, int bucketpool_pk, 
+                             char *filename, cacheroot_t *pcroot)
 {
-  char filepath[256];
+  char *fcnName = "getMatchOnly";
+  char *delims = ",\t\n\r";
+  char *sp;
+  char filepath[256];  
+  char inbuf[256];
+  int *match_only = 0;
+  int  line_count = 0;
+  int  lr_pk;
+  int  matchNumb = 0;
+  FILE *fin;
 
+  /* put together complete file path to match_only file */
   snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
            DATADIR, bucketpool_pk, filename);
 
-printf("MATCH_ONLY: filepath: %s\n", filepath);
-printf("wait for Glen's response about parsing this file\n");
-return 0;
+  /* open filepath */
+  fin = fopen(filepath, "r");
+  if (!fin)
+  {
+    printf("FATAL: %s.%s.%d Failure to initialize bucket %s (pool=%d).\nError: %s\n",
+           __FILE__, fcnName, __LINE__, filepath, bucketpool_pk, strerror(errno));
+    return 0;
+  }
+
+  /* count lines in file */
+  while (fgets(inbuf, sizeof(inbuf), fin)) line_count++;
+  
+  /* calloc match_only array as lines+1.  This set the array to 
+     the max possible size +1 for null termination */
+  match_only = calloc(line_count+1, sizeof(int));
+  if (!match_only)
+  {
+    printf("FATAL: %s.%s.%d Unable to allocate %d int array.\n",
+           __FILE__, fcnName, __LINE__, line_count+1);
+    return 0;
+  }
+
+  /* read each line fgets 
+     A match_only file has one license per line, no leading whitespace.
+     Comments start with leading #
+   */
+  rewind(fin);
+  while (fgets(inbuf, sizeof(inbuf), fin)) 
+  {
+    /* input string should only contain 1 token (license name) */
+    sp = strtok(inbuf, delims);
+
+    /* comment? */
+    if ((sp == 0) || (*sp == '#')) continue;
+
+    /* look up license rf_pk */
+    lr_pk = lrcache_lookup(pcroot, sp);
+    if (lr_pk)
+    {
+      /* save rf_pk in match_only array */
+      match_only[matchNumb++] = lr_pk;
+//printf("MATCH_ONLY license: %s, FOUND\n", sp);
+    }
+    else
+    {
+//printf("MATCH_ONLY license: %s, NOT FOUND in DB - ignored\n", sp);
+    }
+  }
+
+return match_only;
 }
 
 
 /****************************************************
  getMatchEvery
 
- Read the match every file (bucket type 1)
+ Read the match every file filename, for bucket type 1
 
  @param PGconn *pgConn  Database connection object
  @param int bucketpool_pk
  @param char *filename
+ @param cacheroot_t *pcroot  License cache
 
- @return an array of rf_pk's that match the licenses
- in filename.
+ @return an array of arrays of rf_pk's that define a 
+ match_every combination.
  or 0 if error.
 ****************************************************/
-FUNCTION int **getMatchEvery(PGconn *pgConn, int bucketpool_pk, char *filename )
+FUNCTION int **getMatchEvery(PGconn *pgConn, int bucketpool_pk, 
+                             char *filename, cacheroot_t *pcroot)
 {
-  char filepath[256];
+  char *fcnName = "getMatchEvery";
+  char filepath[256];  
+  char inbuf[256];
+  int **match_every = 0;
+  int **match_every_head = 0;
+  int  line_count = 0;
+  int  *lr_pkArray;
+  int  matchNumb = 0;
+  FILE *fin;
 
+  /* put together complete file path to match_every file */
   snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
            DATADIR, bucketpool_pk, filename);
 
-printf("MATCH_EVERY: filepath: %s\n", filepath);
-printf("wait for Glen's response about parsing this file\n");
-return 0;
+  /* open filepath */
+  fin = fopen(filepath, "r");
+  if (!fin)
+  {
+    printf("FATAL: %s.%s.%d Failure to initialize bucket %s (pool=%d).\nError: %s\n",
+           __FILE__, fcnName, __LINE__, filepath, bucketpool_pk, strerror(errno));
+    return 0;
+  }
+
+  /* count lines in file */
+  while (fgets(inbuf, sizeof(inbuf), fin)) line_count++;
+  
+  /* calloc match_every array as lines+1.  This sets the array to 
+     the max possible size +1 for null termination */
+  match_every = calloc(line_count+1, sizeof(int *));
+  if (!match_every)
+  {
+    printf("FATAL: %s.%s.%d Unable to allocate %d int array.\n",
+           __FILE__, fcnName, __LINE__, line_count+1);
+    return 0;
+  }
+  match_every_head = match_every;
+
+  /* read each line fgets 
+     A match_every file has 1-n licenses per line
+     Comments start with leading #
+   */
+  rewind(fin);
+  while (fgets(inbuf, sizeof(inbuf), fin)) 
+  {
+    /* comment? */
+    if (inbuf[0] == '#') continue;
+    lr_pkArray = getLicsInStr(pgConn, inbuf, pcroot);
+    if (lr_pkArray)
+    {
+      /* save rf_pk in match_every array */
+      match_every[matchNumb++] = lr_pkArray;
+    }
+  }
+
+  if (!matchNumb)
+  {
+    free(match_every_head);
+    match_every_head = 0;
+  }
+return match_every_head;
+}
+
+
+/****************************************************
+ getLicsInStr
+
+ Given a string with | separated license names
+ return an integer array of rf_pk's
+
+ @param PGconn *pgConn  Database connection object
+ @param char *nameStr   string of lic names eg "bsd | gpl"
+ @param cacheroot_t *pcroot  License cache
+
+ @return an array of rf_pk's that match the names in nameStr
+ 
+ if nameStr contains a license name that is not in
+ the license_ref file, then 0 is returned since there
+ is no way to match all the listed licenses.
+****************************************************/
+FUNCTION int *getLicsInStr(PGconn *pgConn, char *nameStr,
+                             cacheroot_t *pcroot)
+{
+  char *fcnName = "getLicsInStr";
+  char *delims = "|\n\r ";
+  char *sp;
+  int *pkArray;
+  int *pkArrayHead = 0;
+  int  lic_count = 1;
+  int  lr_pk;
+  int  matchNumb = 0;
+
+  if (!nameStr) return 0;
+
+  /* count how many seperators are in nameStr
+     number of licenses is the count +1 */
+  sp = nameStr;
+  while (*sp) if (*sp++ == *delims) lic_count++;
+
+  /* we need lic_count+1 int array.  This sets the array to 
+     the max possible size +1 for null termination */
+  pkArray = calloc(lic_count+1, sizeof(int));
+  if (!pkArray)
+  {
+    printf("FATAL: %s.%s.%d Unable to allocate %d int array.\n",
+           __FILE__, fcnName, __LINE__, lic_count+1);
+    return 0;
+  }
+  pkArrayHead = pkArray;  /* save head of array */
+
+  /* read each line then read each license in the line
+     Comments start with leading #
+   */
+  while ((sp = strtok(nameStr, delims)) != 0)
+  {
+    /* look up license rf_pk */
+    lr_pk = lrcache_lookup(pcroot, sp);
+    if (lr_pk)
+    {
+      /* save rf_pk in match_every array */
+      pkArray[matchNumb++] = lr_pk;
+    }
+    else
+    {
+      /* license not found in license_ref table, so this can never match */
+      matchNumb = 0;
+      break;
+    }
+    nameStr = 0;  // for strtok
+  }
+
+  if (matchNumb == 0)
+  {
+    free(pkArrayHead);
+    pkArrayHead = 0;
+  }
+
+  return pkArrayHead;
 }
 
 
