@@ -56,11 +56,11 @@ typedef struct bucketdef_struct bucketdef_t, *pbucketdef_t;
 
 
 /* buckets.c */
-int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, int uploadtree_pk);
-int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, int agent_pk);
+int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, int uploadtree_pk, int writeDB);
+int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, int agent_pk, int writeDB);
 int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk);
 int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk);
-int writeBuckets(PGconn *pgConn, int pfile_pk, int *bucketList, int agent_pk);
+int writeBuckets(PGconn *pgConn, int pfile_pk, int *bucketList, int agent_pk, int writeDB);
 int processed(PGconn *pgConn, int agent_pk, int pfile_pk);
 
 /* validate.c */

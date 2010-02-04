@@ -38,11 +38,13 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
  @param PGconn pgConn   The database connection object.
  @param int  agent_pk   The agent_pk
  @param int  uploadtree_pk
+ @param int  writeDB    true to write results to db, false writes to stdout
 
  @return 0 on OK, -1 on failure.
  Errors are written to stdout.
 ****************************************************/
-FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, int  uploadtree_pk)
+FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, 
+                      int  uploadtree_pk, int writeDB)
 {
   char *fcnName = "walkTree";
   char sqlbuf[128];
@@ -75,7 +77,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   if (rgt == (lft+1))
   {
     if (((ufile_mode & 1<<28) == 0) && (pfile_pk > 0))
-      return  processLeaf(pgConn, bucketDefArray, pfile_pk, agent_pk);
+      return  processLeaf(pgConn, bucketDefArray, pfile_pk, agent_pk, writeDB);
     else
       return 0;  /* case of empty directory or artifact */
   }
@@ -110,12 +112,12 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
     if (child_rgt == (child_lft+1)) 
     {
       if (((child_ufile_mode & 1<<28) == 0) && (child_pfile_pk > 0))
-        processLeaf(pgConn, bucketDefArray, child_pfile_pk, agent_pk);
+        processLeaf(pgConn, bucketDefArray, child_pfile_pk, agent_pk, writeDB);
       continue;
     }
 
     /* not a leaf so recurse */
-    rv = walkTree(pgConn, bucketDefArray, agent_pk, child_uploadtree_pk);
+    rv = walkTree(pgConn, bucketDefArray, agent_pk, child_uploadtree_pk, writeDB);
   }
 
   /* done processing children, now processes (find buckets) for the container
@@ -124,7 +126,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   if (((ufile_mode & 1<<28) == 0) && (pfile_pk > 0))
   {
     bucketList = getContainerBuckets(pgConn, bucketDefArray, pfile_pk);
-    rv = writeBuckets(pgConn, pfile_pk, bucketList, agent_pk);
+    rv = writeBuckets(pgConn, pfile_pk, bucketList, agent_pk, writeDB);
   }
 
   return rv;
@@ -136,18 +138,22 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
 
  determine which bucket(s) a leaf node is in and write results
 
- @param PGconn *pgConn  postgresql connection
- @param int pfile_pk  
+ @param PGconn      *pgConn          postgresql connection
+ @param pbucketdef_t bucketDefArray  Bucket Definitions
+ @param int          pfile_pk  
+ @param int          agent_pk
+ @param int          writeDB         True writes to DB, False writes results to stdout
 
  @return 0=success, else error
 ****************************************************/
-FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, int agent_pk)
+FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, 
+                         int pfile_pk, int agent_pk, int writeDB)
 {
   int rv = 0;
   int *bucketList;
 
   bucketList = getLeafBuckets(pgConn, bucketDefArray, pfile_pk);
-  rv = writeBuckets(pgConn, pfile_pk, bucketList, agent_pk);
+  rv = writeBuckets(pgConn, pfile_pk, bucketList, agent_pk, writeDB);
   return rv;
 }
 
@@ -344,22 +350,43 @@ printf("getting container buckets for %d\n",pfile_pk);
                           that match this pfile
  @param int agent_pk  
 
- @return 0=success, else error
+ @return 0=success, errors are FATAL and will exit process.
 ****************************************************/
-FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int *bucketList, int agent_pk)
+FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int *bucketList, int agent_pk, 
+                          int writeDB)
 {
+  char     *fcnName = "writeBuckets";
+  char      sql[256];
+  PGresult *result;
   int rv = 0;
 
-printf("write buckets for pfile=%d : ", pfile_pk);
+  if (!writeDB) printf("write buckets for pfile=%d : ", pfile_pk);
+
   if (bucketList)
   {
     while(*bucketList)
     {
-printf(" %d", *bucketList);
+      if (writeDB)
+      {
+        snprintf(sql, sizeof(sql), 
+                 "insert into bucket_file (bucket_fk, pfile_fk, bucket_agent_fk) \
+                  values(%d,%d,%d)", *bucketList, pfile_pk, agent_pk);
+        result = PQexec(pgConn, sql);
+        if (PQresultStatus(result) != PGRES_COMMAND_OK) 
+        {
+          printf("ERROR: %s.%s.%d:  Failed to add bucket to bucket_file. %s:%s/n: %s/n",
+                  __FILE__,fcnName, __LINE__, PQresultErrorField(result, PG_DIAG_SQLSTATE),
+                  PQresultErrorMessage(result), sql);
+          PQclear(result);
+        }
+      }
+      else
+        printf(" %d", *bucketList);
       bucketList++;
     }
   }
-printf("\n");
+
+  if (!writeDB) printf("\n");
   return rv;
 }
 
@@ -577,7 +604,7 @@ int main(int argc, char **argv)
   bucketDefArray->bucket_agent_pk = agent_pk;
 
   /* process the tree for buckets */
-  walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk);
+  walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB);
 
   return (0);
 }
