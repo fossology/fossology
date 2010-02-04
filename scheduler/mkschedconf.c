@@ -186,6 +186,16 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
     fprintf(Fout,Rcmd,Cmd);
     fprintf(Fout,"\n");
     }
+  
+  /** pkgagent **/
+  memset(Cmd,'\0',sizeof(Cmd));
+  snprintf(Cmd,sizeof(Cmd)-1,"%s/pkgagent",AGENTDIR);
+  for(i=0; i<NumCPU; i++)
+    {
+    fprintf(Fout,"agent=pkgagent %s| ",CmdHost);
+    fprintf(Fout,Rcmd,Cmd);
+    fprintf(Fout,"\n");
+    }
 
   /** fosscp **/
   fprintf(Fout,"agent=fosscp_agent %s| ",CmdHost);
