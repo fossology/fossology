@@ -95,7 +95,7 @@ class agent_pkgagent extends FO_Plugin
 
     /* "pkgagent" needs to know what? */
     
-    /* "pkgagent" needs to know the mimetype for 'application/x-rpm' and 'application/x-debian-package'*/
+    /* "pkgagent" needs to know the mimetype for 'application/x-rpm' and 'application/x-debian-package' and 'application/x-debian-source'*/
     $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm' LIMIT 1;";
     $Results = $DB->Action($SQL);
     $mimetypepk = $Results[0]['mimetype_pk'];
@@ -122,11 +122,24 @@ class agent_pkgagent extends FO_Plugin
       }
     if (empty($debmimetypepk)) { return("pkgagent deb mimetype not installed."); }
 
+    $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;";
+    $Results = $DB->Action($SQL);
+    $debsrcmimetypepk = $Results[0]['mimetype_pk'];
+    if (empty($debsrcmimetypepk))
+      {
+      $SQL = "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-source');";
+      $Results = $DB->Action($SQL);
+      $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;";
+      $Results = $DB->Action($SQL);
+      $debsrcmimetypepk = $Results[0]['mimetype_pk'];
+      }
+    if (empty($debsrcmimetypepk)) { return("pkgagent deb source mimetype not installed."); }
+
     /** jqargs wants EVERY RPM and DEBIAN pfile in this upload **/
     $jqargs = "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name AS mimetype
 	FROM uploadtree
 	INNER JOIN pfile ON upload_fk = '$uploadpk'
-	INNER JOIN mimetype ON (mimetype_pk = '$mimetypepk' OR mimetype_pk = '$debmimetypepk')
+	INNER JOIN mimetype ON (mimetype_pk = '$mimetypepk' OR mimetype_pk = '$debmimetypepk' OR mimetype_pk = '$debsrcmimetypepk')
 	AND uploadtree.pfile_fk = pfile_pk
 	AND pfile.pfile_mimetypefk = mimetype.mimetype_pk
 	AND pfile_pk NOT IN (SELECT pkg_rpm.pfile_fk FROM pkg_rpm)
