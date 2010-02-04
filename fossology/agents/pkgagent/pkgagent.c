@@ -23,6 +23,8 @@
  * Build pkgagent.c need "rpm" and "librpm-dev", running binary just need "rpm".
  *
  * Pkgagent get Debian binary package info from .deb binary control file.
+ *
+ * Pkgagent get Debian source package info from .dsc file.
  */
 #include <stdlib.h>
 #include <stdio.h>
@@ -73,20 +75,24 @@ struct rpmpkginfo {
 struct rpmpkginfo *glb_rpmpi;
 
 struct debpkginfo {
-  char pkgName[128];
-  char source[128];
-  char version[32];
-  char section[64];
+  char pkgName[96];
+  char source[96];
+  char version[64];
+  char section[32];
   char priority[16];
   char pkgArch[32];
   int installedSize;
   char maintainer[128];
   char homepage[128];
+  char summary[128];
   char description[MAXCMD];
   long pFileFk;
   char pFile[MAXCMD];
   char **depends;
-  int dep_size; 
+  int dep_size;
+  char uploaders[128];
+  char format[16];
+  char standardsVersion[32];
 };
 struct debpkginfo *glb_debpi;
 
@@ -112,7 +118,7 @@ void *DB=NULL;
 int Agent_pk;
 int PKG_RPM = 0; /**< Non-zero when it's RPM package */
 int PKG_DEB = 0; /**< Non-zero when it's DEBINE package */
-
+int PKG_DEB_SRC = 0; /**< Non-zero when it's DEBINE source package */
 int Verbose = 0;
 
 /**********************************************
@@ -197,6 +203,7 @@ void    ParseSchedInput (char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi)
   char mimetype[128];
   PKG_RPM = 0;
   PKG_DEB = 0;
+  PKG_DEB_SRC = 0;
 
   if (!s) {
     return;
@@ -226,8 +233,9 @@ void    ParseSchedInput (char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi)
   if (Verbose) { printf ("mimetype:%s\n",mimetype);}
   
   /*  
-   * if mimetyp='application/x-rpm' set PKG_RPM=1
-   * if mimetyp='application/x-debian-package' set PKG_DEB=1
+   * if mimetype='application/x-rpm' set PKG_RPM=1
+   * if mimetype='application/x-debian-package' set PKG_DEB=1
+   * if mimetype='application/x-debian-source' set PKG_DEB_SRC=1
    * */  
   if (!strcasecmp(mimetype,"application/x-rpm")) {
     pi->pFileFk = pfilefk;
@@ -238,6 +246,11 @@ void    ParseSchedInput (char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi)
     dpi->pFileFk = pfilefk;
     strncpy(dpi->pFile, pfilename, sizeof(dpi->pFile));
     PKG_DEB = 1;
+  }
+  else if (!strcasecmp(mimetype, "application/x-debian-source")){
+    dpi->pFileFk = pfilefk;
+    strncpy(dpi->pFile, pfilename, sizeof(dpi->pFile));
+    PKG_DEB_SRC = 1;	
   } else {
     printf("LOG: Not RPM and DEBIAN package!\n");
   } 
@@ -578,42 +591,38 @@ void	GetMetadataDebBinary	(struct debpkginfo *pi)
   {
     s = ParseDebFile(line,field,value);
     if (!strcasecmp(field, "Description")) {
-       strcpy(temp, value);
+       strncpy(pi->summary, value, sizeof(pi->summary));
+       strcpy(temp, "");
     }
     if ((s[0] != '\0') && (temp!=NULL))
       strcat(temp,s);
-
     if (!strcasecmp(field, "Package")) {
        strncpy(pi->pkgName, value, sizeof(pi->pkgName));
     }
-
     if (!strcasecmp(field, "Version")) {
        strncpy(pi->version, value, sizeof(pi->version));
     }
-  
     if (!strcasecmp(field, "Architecture")) {
        strncpy(pi->pkgArch,  value, sizeof(pi->pkgArch));
     }
-
     if (!strcasecmp(field, "Maintainer")) {
        strncpy(pi->maintainer, value, sizeof(pi->maintainer));
     }
-
     if (!strcasecmp(field, "Installed-Size")) {
        pi->installedSize=atol(value);
     }
-
     if (!strcasecmp(field, "Section")) {
        strncpy(pi->section, value, sizeof(pi->section));
     }
     if (!strcasecmp(field, "Priority")) {
        strncpy(pi->priority, value, sizeof(pi->priority));
     }
-
     if (!strcasecmp(field, "Homepage")) {
        strncpy(pi->homepage, value, sizeof(pi->homepage));
     }
- 
+    if (!strcasecmp(field, "Source")) {
+       strncpy(pi->source, value, sizeof(pi->source));
+    }
     if (!strcasecmp(field, "Depends")) {
        char *depends = NULL;
        char tempvalue[1024];
@@ -670,7 +679,7 @@ void    RecordMetadataDEB       (struct debpkginfo *pi)
   {
     memset(SQL,0,sizeof(SQL));
     DBaccess(DB,"BEGIN;");
-    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,description,pfile_fk) values ('%s','%s','%s','%s',%d,'%s','%s','%s','%s','%s',%ld);",pi->pkgName,pi->pkgArch,pi->version,pi->maintainer,pi->installedSize,pi->section,pi->priority,pi->homepage,pi->source,pi->description,pi->pFileFk);
+    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,summary,description,format,uploaders,standards_version,pfile_fk) values ('%s','%s','%s','%s',%d,'%s','%s','%s','%s','%s','%s','%s','%s','%s',%ld);",pi->pkgName,pi->pkgArch,pi->version,pi->maintainer,pi->installedSize,pi->section,pi->priority,pi->homepage,pi->source,pi->summary,pi->description,pi->format,pi->uploaders,pi->standardsVersion,pi->pFileFk);
     rc = DBaccess(DB,SQL);
     if (rc < 0)
     {
@@ -706,6 +715,82 @@ void    RecordMetadataDEB       (struct debpkginfo *pi)
   }
 }/* RecordMetadataDEB(struct debpkginfo *pi) */
 
+/**
+ * GetMetadataDebSource(char *repFile, struct debpkginfo *pi)
+ *
+ * get debian source package info from .dsc file
+ **/
+void	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
+{ 
+  FILE *fp;
+  char field[256];
+  char value[1024];
+  char line[MAXCMD];
+  char *s = NULL;
+
+  /*  Parse the debian .dsc file to get every Field and Value */
+  if ((fp = fopen(repFile, "r")) == NULL){
+    printf("FATAL: Unable to open .dsc file %s\n",repFile);
+    fflush(stdout);
+    exit(-1);
+  }
+
+  while (fgets(line,2048,fp)!=NULL)
+  {
+    s = ParseDebFile(line,field,value);
+
+    if (!strcasecmp(field, "Format")) {
+       strncpy(pi->format, value, sizeof(pi->format));
+    }
+    if (!strcasecmp(field, "Source")) {
+       strncpy(pi->source, value, sizeof(pi->source));
+    }
+    if (!strcasecmp(field, "Binary")) {
+       strncpy(pi->pkgName, value, sizeof(pi->pkgName));
+    }
+    if (!strcasecmp(field, "Architecture")) {
+       strncpy(pi->pkgArch,  value, sizeof(pi->pkgArch));
+    }
+    if (!strcasecmp(field, "Version")) {
+       if (strlen(pi->version) == 0)
+         strncpy(pi->version, value, sizeof(pi->version));
+    }
+    if (!strcasecmp(field, "Maintainer")) {
+       strncpy(pi->maintainer, value, sizeof(pi->maintainer));
+    }
+    if (!strcasecmp(field, "Uploaders")) {
+       strncpy(pi->uploaders, value, sizeof(pi->uploaders));
+    }
+    if (!strcasecmp(field, "Standards-Version")) {
+       strncpy(pi->standardsVersion, value, sizeof(pi->standardsVersion));
+    }
+    if (!strcasecmp(field, "Build-Depends")) {
+       char *depends = NULL;
+       char tempvalue[1024];
+       int size,i;
+       size = 0;
+
+       strncpy(tempvalue, value, sizeof(tempvalue));
+       depends = strtok(value, ",");
+       while (depends && (depends[0] != '\0')) {
+         depends = strtok(NULL, ",");
+         size++;
+       }
+       if (Verbose) { printf("SIZE:%d\n", size);}
+       
+       pi->depends = calloc(size, sizeof(char *));
+       pi->depends[0] = calloc(256, sizeof(char));
+       strcpy(pi->depends[0],strtok(tempvalue,","));
+       for (i=1;i<size;i++){
+         pi->depends[i] = calloc(256, sizeof(char));
+         strcpy(pi->depends[i],strtok(NULL, ","));
+       }
+       pi->dep_size = size;
+    }
+  }
+
+  fclose(fp);
+}/*  GetMetadataDebSource(char *repFile, struct debpkginfo *pi) */
 
 /***********************************************
  Usage():
@@ -794,6 +879,17 @@ int	main	(int argc, char *argv[])
         } else if (PKG_DEB) {
           GetMetadataDebBinary(glb_debpi);
           RecordMetadataDEB(glb_debpi);
+	} else if (PKG_DEB_SRC) {
+	  repFile = RepMkPath("files", glb_debpi->pFile);
+	  if (!repFile) {
+	    printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
+                            glb_debpi->pFileFk, glb_debpi->pFile);
+            fflush(stdout);
+            DBclose(DB);
+            exit(-1);
+          }
+	  GetMetadataDebSource(repFile,glb_debpi);
+	  RecordMetadataDEB(glb_debpi);
         } else {
 	  /* Deal with the other package*/
 	}

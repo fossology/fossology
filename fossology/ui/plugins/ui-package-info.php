@@ -235,6 +235,9 @@ class ui_package_info extends FO_Plugin
             $V .= "<tr><td align='right'>$Count</td><td>Source";
             $V .= "</td><td>" . htmlentities($R['source']) . "</td></tr>\n";
             $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Summary";
+            $V .= "</td><td>" . htmlentities($R['summary']) . "</td></tr>\n";
+            $Count++;
             $V .= "<tr><td align='right'>$Count</td><td>Description";
             $V .= "</td><td>" . htmlentities($R['description']) . "</td></tr>\n";
             $Count++;
@@ -257,6 +260,71 @@ class ui_package_info extends FO_Plugin
        $V .= "</table>\n";
        $Count--;
        }
+
+    else if ($MIMETYPE == "application/x-debian-source")
+       {
+       $V .= "Debian Source Package\n";
+
+       $SQL = "SELECT *
+                FROM pkg_deb
+                INNER JOIN uploadtree ON uploadtree_pk = $Item
+                AND uploadtree.pfile_fk = pkg_deb.pfile_fk;";
+       $Results = $DB->Action($SQL);
+       $Count=1;
+
+       $V .= "<table width='100%' border='1'>\n";
+       $V .= "<tr><th width='5%'>Item</th><th width='20%'>Type</th><th>Value</th></tr>\n";
+
+       $V .= $Results[$i]['pkg_pk'];
+       for($i=0; !empty($Results[$i]['pkg_pk']); $i++)
+            {
+            $R = &$Results[$i];
+            $Require = $R['pkg_pk'];
+
+            $V .= "<tr><td align='right'>$Count</td><td>Format";
+            $V .= "</td><td>" . htmlentities($R['format']) . "</td></tr>\n";
+            $Count++;
+
+            $V .= "<tr><td align='right'>$Count</td><td>Source";
+            $V .= "</td><td>" . htmlentities($R['source']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Binary";
+            $V .= "</td><td>" . htmlentities($R['pkg_name']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Architecture";
+            $V .= "</td><td>" . htmlentities($R['pkg_arch']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Version";
+            $V .= "</td><td>" . htmlentities($R['version']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Maintainer";
+            $V .= "</td><td>" . htmlentities($R['maintainer']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Uploaders";
+            $V .= "</td><td>" . htmlentities($R['uploaders']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Standards-Version";
+            $V .= "</td><td>" . htmlentities($R['standards_version']) . "</td></tr>\n";
+            $Count++;
+            }
+
+       $SQL = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
+       $Results = $DB->Action($SQL);
+
+       for($i=0; !empty($Results[$i]['req_pk']); $i++)
+            {
+            $R = &$Results[$i];
+            $V .= "<tr><td align='right'>$Count</td><td>Build-Depends";
+            $Val = htmlentities($R['req_value']);
+            $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
+            $V .= "</td><td>$Val</td></tr>\n";
+            $Count++;
+            }
+
+       $V .= "</table>\n";
+       $Count--;
+       }
+
     else
        {
        $V .= "NOT RPM/DEBIAN Package.";	
