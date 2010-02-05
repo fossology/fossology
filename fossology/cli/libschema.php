@@ -464,6 +464,7 @@ function initBsamFiles($Debug = 1)
 	global $DATADIR;
 	global $AGENTDIR;
 	global $PROJECTSTATEDIR;
+	global $PROJECTUSER;
 	
 	print "DEBUG: initBsFiles: PROJECTSTATEDIR is:$PROJECTSTATEDIR\n";
 	
@@ -492,19 +493,20 @@ function initBsamFiles($Debug = 1)
 			return(1);
 		}
 	}
-	/* before using the temp file, make sure fossy is the owner */
+	/* before using the temp file, make sure fossy is the owner 
 	if(!(touch($Tempfile))) 
 	{
 	print "    FATAL! Cannot create file $Tempfile\n";
 		flush();
 		return(1);
 	}
-	if(!(chown($Tempfile, 'fossy')))
+	if(!(chown($Tempfile, $PROJECTUSER)))
 	{
-		print "    FATAL! Cannot chown  $Tempfile to \n";
+		print "    FATAL! Cannot chown $Tempfile to $PROJECTUSER\n";
 		flush();
 		return(1);
 	}
+	*/
 	$Count = 0;
 	print "    Processing " . (count($Filelist) - 1) . " license templates.\n";
 	flush();
