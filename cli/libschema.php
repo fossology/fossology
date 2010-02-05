@@ -492,6 +492,19 @@ function initBsamFiles($Debug = 1)
 			return(1);
 		}
 	}
+	/* before using the temp file, make sure fossy is the owner */
+	if(!(touch($Tempfile))) 
+	{
+	print "    FATAL! Cannot create file $Tempfile\n";
+		flush();
+		return(1);
+	}
+	if(!(chown($Tempfile, 'fossy')))
+	{
+		print "    FATAL! Cannot chown  $Tempfile to \n";
+		flush();
+		return(1);
+	}
 	$Count = 0;
 	print "    Processing " . (count($Filelist) - 1) . " license templates.\n";
 	flush();
