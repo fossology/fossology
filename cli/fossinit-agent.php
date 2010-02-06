@@ -123,5 +123,5 @@ if (array_key_exists('D',$Options))
 	$Debug = TRUE;
 }
 
-exit(0);
+exit($FailFlag);
 ?>
