@@ -84,6 +84,51 @@ fi # end of DATABASE
 
 ########################################################################
 
+if [ $SCHEDULERONLY ]; then
+   echo "*** Setting up scheduler ***"
+
+   ## Do the initialization required once for the whole instance
+   #  (currently applying the schema and initializing the agents)
+   # In multi-system installs the database machine must be installed first
+   # in order for this to work on other machines.
+   echo "*** Initializing database and agents ***"
+   {$BINDIR}/fossinit-common -a
+   if [ $? != 0 ] ; then
+     echo "ERROR: Unable to initialize."
+     exit 1
+   fi
+
+   # scheduler config file
+   # this has to be done after the database is setup
+   # BTW- mkschedconf seems to be hardcoded to use localhost, if that
+   # is ever fixed this code might need to be too
+   echo "*** Checking Scheduler.conf ***"
+   SCHEDCONF={$SYSCONFDIR}/fossology/Scheduler.conf
+   if [ ! -f "$SCHEDCONF" -o "$OVERWRITE" ] ; then
+      mkdir -p `dirname $SCHEDCONF`
+      {$LIBEXECDIR}/mkschedconf -o $SCHEDCONF -L
+      echo "NOTE: default $SCHEDCONF created."
+      echo "  Please check that is it correct for your environment or"
+      echo "  create a different one with mkschedconf."
+   else
+      echo "NOTE: $SCHEDCONF already exists,"
+      echo "  consider checking it or recreating with mkschedconf."
+   fi
+
+   # Create the scheduler log directory.
+   if [ -f {$LOGDIR} ] ; then
+     # Must be a directory and not a file
+     rm -f {$LOGDIR}
+   fi
+   if [ ! -d {$LOGDIR} ] ; then
+     mkdir -p {$LOGDIR}
+   fi
+   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LOGDIR}
+   chmod 2775 {$LOGDIR}
+   find {$LOGDIR} -type f | while read i ; do chmod 660 "$i" ; done
+fi # end of SCHEDULERONLY
+
+########################################################################
 if [ $AGENT ]; then
 
    ## get path to repo
@@ -241,52 +286,6 @@ if [ $AGENT ]; then
    fi
 
 fi # end of AGENT
-
-########################################################################
-
-if [ $SCHEDULERONLY ]; then
-   echo "*** Setting up scheduler ***"
-
-   ## Do the initialization required once for the whole instance
-   #  (currently applying the schema and initializing the agents)
-   # In multi-system installs the database machine must be installed first
-   # in order for this to work on other machines.
-   echo "*** Initializing database and agents ***"
-   {$BINDIR}/fossinit-common -a
-   if [ $? != 0 ] ; then
-     echo "ERROR: Unable to initialize."
-     exit 1
-   fi
-
-   # scheduler config file
-   # this has to be done after the database is setup
-   # BTW- mkschedconf seems to be hardcoded to use localhost, if that
-   # is ever fixed this code might need to be too
-   echo "*** Checking Scheduler.conf ***"
-   SCHEDCONF={$SYSCONFDIR}/fossology/Scheduler.conf
-   if [ ! -f "$SCHEDCONF" -o "$OVERWRITE" ] ; then
-      mkdir -p `dirname $SCHEDCONF`
-      {$LIBEXECDIR}/mkschedconf -o $SCHEDCONF -L
-      echo "NOTE: default $SCHEDCONF created."
-      echo "  Please check that is it correct for your environment or"
-      echo "  create a different one with mkschedconf."
-   else
-      echo "NOTE: $SCHEDCONF already exists,"
-      echo "  consider checking it or recreating with mkschedconf."
-   fi
-
-   # Create the scheduler log directory.
-   if [ -f {$LOGDIR} ] ; then
-     # Must be a directory and not a file
-     rm -f {$LOGDIR}
-   fi
-   if [ ! -d {$LOGDIR} ] ; then
-     mkdir -p {$LOGDIR}
-   fi
-   chown -R {$PROJECTUSER}:{$PROJECTGROUP} {$LOGDIR}
-   chmod 2775 {$LOGDIR}
-   find {$LOGDIR} -type f | while read i ; do chmod 660 "$i" ; done
-fi # end of SCHEDULERONLY
 
 ########################################################################
 
