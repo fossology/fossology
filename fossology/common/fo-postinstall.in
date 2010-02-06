@@ -53,8 +53,8 @@ done
 
 # the scheduler and web machines needs the agent stuff done too
 if [ $SCHEDULER ]; then
-   AGENT=1
    SCHEDULERONLY=1
+   AGENT=1
 fi
 if [ $WEB ]; then
    AGENT=1
@@ -63,10 +63,10 @@ fi
 
 if [ $EVERYTHING ]; then
    echo "*** Running postinstall for everything ***"
+   SCHEDULERONLY=1
    AGENT=1
    DATABASE=1
    WEBONLY=1
-   SCHEDULERONLY=1
 fi
 
 # This must run as root.
