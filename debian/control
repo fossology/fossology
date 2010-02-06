@@ -63,7 +63,7 @@ Description: architecture for analyzing software, web interface  (single machine
 
 Package: fossology-scheduler
 Architecture: any
-Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-agents, ${shlibs:Depends}, ${misc:Depends}
 Conflicts: fossology-scheduler-single
 Description: architecture for analyzing software, scheduler
  The FOSSology project is a web based framework that allows you to
@@ -76,7 +76,7 @@ Description: architecture for analyzing software, scheduler
 
 Package: fossology-scheduler-single
 Architecture: any
-Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-agents-single, ${shlibs:Depends}, ${misc:Depends}
 Conflicts: fossology-scheduler
 Description: architecture for analyzing software, scheduler (single machine case)
  The FOSSology project is a web based framework that allows you to
