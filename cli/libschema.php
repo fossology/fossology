@@ -391,7 +391,7 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 	/* CREATE FUNCTIONS */
 	/************************************/
 	MakeFunctions($Debug);
-	
+
 	/* Reload current since CASCADE during migration may have changed things */
 	$Curr = GetSchema();
 	/************************************/
@@ -464,23 +464,46 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 	$results = pg_query($PGCONN, "COMMIT;");
 	checkresult($results, $SQL, __LINE__);
 	echo "Success!\n";
-	
+
 	/************************************/
-    /* Flush any cached data. */
-    /************************************/
-    print "  Purging cached results\n";
-    flush();
-    ReportCachePurgeAll();
-    /************************************/
-    /* Initialize all remaining plugins. */
-    /************************************/
-    if ($this->InitSchema($Verbose)) {
-      return ("Unable to initialize the new schema.\n");
-    }
-    $success = "New schema applied and initialization completed.\n";
-    print $success;
-    /* reset DB timeouts */
-    $results = pg_query($PGCONN, "SET statement_timeout = 120000;");
+	/* Flush any cached data. */
+	/************************************/
+	print "  Purging cached results\n";
+	flush();
+	ReportCachePurgeAll();
+	/************************************/
+	/* Initialize all remaining plugins. */
+	/************************************/
+
+	$initFail = FALSE;
+
+	if(initPlugins($Debug) != 0)
+	{
+		print "FATAL! cannot initialize UI Plugins\n";
+		$initFail = TRUE;
+	}
+	if(initAgents($Debug) != 0)
+	{
+		print "FATAL! cannot initialize Agents\n";
+		$initFail = TRUE;
+	}
+
+	if(initBsamFiles($Debug) != 0)
+	{
+		print "FATAL! cannot initialize bsam license cache\n";
+		$initFail = TRUE;
+	}
+	if($initFail !== FALSE;)
+	{
+	  print "One or more steps in the system initialization failed\n"
+	  return(1);
+	}
+	else
+	{
+	  print "Initialization completed.\n";
+	}
+	/* reset DB timeouts */
+	$results = pg_query($PGCONN, "SET statement_timeout = 120000;");
 	checkresult($results, $SQL, __LINE__);
 
 	return;
@@ -928,9 +951,9 @@ function initBsamFiles($Debug = 1)
 	global $AGENTDIR;
 	global $PROJECTSTATEDIR;
 	global $PROJECTUSER;
-	
+
 	print "DEBUG: initBsFiles: PROJECTSTATEDIR is:$PROJECTSTATEDIR\n";
-	
+
 	if ($Debug) {
 		print "Going to $DATADIR/agents/licenses\n";
 	}
@@ -956,20 +979,7 @@ function initBsamFiles($Debug = 1)
 			return(1);
 		}
 	}
-	/* before using the temp file, make sure fossy is the owner 
-	if(!(touch($Tempfile))) 
-	{
-	print "    FATAL! Cannot create file $Tempfile\n";
-		flush();
-		return(1);
-	}
-	if(!(chown($Tempfile, $PROJECTUSER)))
-	{
-		print "    FATAL! Cannot chown $Tempfile to $PROJECTUSER\n";
-		flush();
-		return(1);
-	}
-	*/
+
 	$Count = 0;
 	print "    Processing " . (count($Filelist) - 1) . " license templates.\n";
 	flush();
