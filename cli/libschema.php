@@ -487,7 +487,6 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 		print "FATAL! cannot initialize Agents\n";
 		$initFail = TRUE;
 	}
-
 	if(initBsamFiles($Debug) != 0)
 	{
 		print "FATAL! cannot initialize bsam license cache\n";
@@ -495,18 +494,17 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 	}
 	if($initFail !== FALSE)
 	{
-	  print "One or more steps in the system initialization failed\n"
+	  print "One or more steps in the system initialization failed\n";
 	  return(1);
 	}
 	else
 	{
 	  print "Initialization completed.\n";
+	  /* reset DB timeouts */
+	  $results = pg_query($PGCONN, "SET statement_timeout = 120000;");
+	  checkresult($results, $SQL, __LINE__);
+	  return;
 	}
-	/* reset DB timeouts */
-	$results = pg_query($PGCONN, "SET statement_timeout = 120000;");
-	checkresult($results, $SQL, __LINE__);
-
-	return;
 } // ApplySchema()
 
 function ColExist($Table,$Col)
