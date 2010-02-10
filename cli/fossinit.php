@@ -53,6 +53,8 @@ global $Plugins;
 global $LIBEXECDIR;
 require_once("$LIBEXECDIR/libschema.php");
 
+global $PGCONN;
+
 $usage = "Usage: " . basename($argv[0]) . " [options]
   -v  = enable verbose mode (lists each module being processed)
   -d  = enable debug database (lists every DB error)
@@ -95,7 +97,9 @@ if (!file_exists($Filename))
   print "FAILED: Schema data file ($Filename) not found.\n";
   exit(1);
   }
-$FailFlag = ApplySchema($Filename,$DB->Debug,$Verbose);
+  
+$PGCONN = dbConnect(NULL);
+$FailFlag = ApplySchema($Filename,$Debug,$Verbose);
 
 /* Remove the "Need to initialize" flag */
 if (!$FailFlag)
