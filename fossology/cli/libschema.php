@@ -464,6 +464,25 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 	$results = pg_query($PGCONN, "COMMIT;");
 	checkresult($results, $SQL, __LINE__);
 	echo "Success!\n";
+	
+	/************************************/
+    /* Flush any cached data. */
+    /************************************/
+    print "  Purging cached results\n";
+    flush();
+    ReportCachePurgeAll();
+    /************************************/
+    /* Initialize all remaining plugins. */
+    /************************************/
+    if ($this->InitSchema($Verbose)) {
+      return ("Unable to initialize the new schema.\n");
+    }
+    $success = "New schema applied and initialization completed.\n";
+    print $success;
+    /* reset DB timeouts */
+    $results = pg_query($PGCONN, "SET statement_timeout = 120000;");
+	checkresult($results, $SQL, __LINE__);
+
 	return;
 } // ApplySchema()
 
