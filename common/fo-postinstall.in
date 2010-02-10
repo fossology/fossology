@@ -87,17 +87,6 @@ fi # end of DATABASE
 if [ $SCHEDULERONLY ]; then
    echo "*** Setting up scheduler ***"
 
-   ## Do the initialization required once for the whole instance
-   #  (currently applying the schema and initializing the agents)
-   # In multi-system installs the database machine must be installed first
-   # in order for this to work on other machines.
-   echo "*** Initializing database and agents ***"
-   {$BINDIR}/fossinit-common -a
-   if [ $? != 0 ] ; then
-     echo "ERROR: Unable to initialize."
-     exit 1
-   fi
-
    # scheduler config file
    # this has to be done after the database is setup
    # BTW- mkschedconf seems to be hardcoded to use localhost, if that
@@ -276,10 +265,11 @@ if [ $AGENT ]; then
    fi
 
 
-   ## Do the initialization required for each agent (currently just creating
-   # the License.bsam cache.
-   echo "*** Initializing agent ***"
-   {$BINDIR}/fossinit-agent -a
+   ## Initialize the tables, License.bsam, and other setup done by fossinit
+   # In multi-system installs the database machine must be installed first
+   # in order for this to work on other machines.
+   echo "*** Initializing database tables ***"
+   {$BINDIR}/fossinit
    if [ $? != 0 ] ; then
      echo "ERROR: Unable to initialize."
      exit 1
