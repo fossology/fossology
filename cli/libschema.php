@@ -950,7 +950,6 @@ function initBsamFiles($Debug = 1)
 	global $PROJECTSTATEDIR;
 	global $PROJECTUSER;
 
-	print "DEBUG: initBsFiles: PROJECTSTATEDIR is:$PROJECTSTATEDIR\n";
 
 	if ($Debug) {
 		print "Going to $DATADIR/agents/licenses\n";
@@ -967,9 +966,9 @@ function initBsamFiles($Debug = 1)
 		die("FATAL: Directory '$Realdir' is not writable. Aborting.\n");
 	}
 	$Realfile = "$Realdir/License.bsam";
-	print "DBUG: initBsFiles: Realfile is:$Realfile\n";
+	//print "DBUG: initBsFiles: Realfile is:$Realfile\n";
 	$Tempfile = $Realfile . ".new";
-	print "DBUG: initBsFiles: Tempfile is:$Tempfile\n";
+	//print "DBUG: initBsFiles: Tempfile is:$Tempfile\n";
 	if (file_exists($Tempfile)) {
 		if (!unlink($Tempfile)) {
 			print "initBsamFiles: Unable to delete '$Tempfile'\n";
