@@ -42,12 +42,17 @@ if (!preg_match("/\sfossy\s/",$Group) && (posix_getgid() != $GID['gid']))
 
 /* Load all code */
 require_once(dirname(__FILE__) . '/../share/fossology/php/pathinclude.php');
-global $WEBDIR;
+
+
 $UI_CLI = 1; /* this is a command-line program */
-require_once("$WEBDIR/common/common.php");
 cli_Init();
 
+global $WEBDIR;
+require_once("$WEBDIR/common/common.php");
+
 global $Plugins;
+global $LIBEXECDIR;
+require_once("$LIBEXECDIR/libschema.php");
 
 $usage = "Usage: " . basename($argv[0]) . " [options]
   -v  = enable verbose mode (lists each module being processed)
@@ -91,7 +96,7 @@ if (!file_exists($Filename))
   print "FAILED: Schema data file ($Filename) not found.\n";
   exit(1);
   }
-$FailFlag = $Schema->ApplySchema($Filename,$DB->Debug,$Verbose);
+$FailFlag = ApplySchema($Filename,$DB->Debug,$Verbose);
 
 /* Remove the "Need to initialize" flag */
 if (!$FailFlag)
