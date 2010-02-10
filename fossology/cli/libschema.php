@@ -493,7 +493,7 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 		print "FATAL! cannot initialize bsam license cache\n";
 		$initFail = TRUE;
 	}
-	if($initFail !== FALSE;)
+	if($initFail !== FALSE)
 	{
 	  print "One or more steps in the system initialization failed\n"
 	  return(1);
