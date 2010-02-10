@@ -477,7 +477,7 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 
 	$initFail = FALSE;
 
-	if(initPlugins($Debug) != 0)
+	if(initPlugins($Verbose, $Debug) != 0)
 	{
 		print "FATAL! cannot initialize UI Plugins\n";
 		$initFail = TRUE;
