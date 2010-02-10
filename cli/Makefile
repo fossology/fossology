@@ -34,6 +34,8 @@ install: all
 	for file in $(MAN1FILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MAN1DIR)/$$file; \
 	done
+	
+	$(INSTALL_PROGRAM) libschema.php $(DESTDIR)$(LIBEXECDIR)/libschema.php
 
 uninstall:
 	for file in $(EXE); do \
