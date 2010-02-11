@@ -175,7 +175,7 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 		if (!empty($Curr['VIEW'][$Name]))
 		{
 			/* Delete it if it exists and looks different */
-			$SQL1 = "DROP VIEW '$Name'";
+			$SQL1 = "DROP VIEW $Name;";
 			if ($Debug)
 			{
 				print "$SQL1\n";
