@@ -49,7 +49,8 @@ class user_add extends FO_Plugin {
     $Folder = GetParm('folder', PARM_INTEGER);
     $Email_notify = GetParm('enote', PARM_TEXT);
     $Email = str_replace("'", "''", GetParm('email', PARM_TEXT));
-
+    $agentList = userAgents();
+    
     /* Make sure username looks valid */
     if (empty($User)) {
       return ("Username must be specified. Not added.");
@@ -82,9 +83,10 @@ class user_add extends FO_Plugin {
 
     /* Add the user */
     $SQL = "INSERT INTO users
-      (user_name,user_desc,user_seed,user_pass,user_perm,user_email,email_notify,root_folder_fk)
-	     VALUES
-      ('$User','$Desc','$Seed','$Hash',$Perm,'$Email','$Email_notify',$Folder);";
+      (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
+       email_notify,user_agent_list,root_folder_fk)
+	     VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
+	             '$Email_notify','$agentList',$Folder);";
     $Results = $DB->Action($SQL);
     /* Make sure it was added */
     $SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
@@ -122,7 +124,7 @@ class user_add extends FO_Plugin {
         $V.= "<form name='formy' method='POST'>\n"; // no url = this url
         $V.= "To create a new user, enter the following information:<P />\n";
         $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
-        $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
+        $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='75%'>";
         $Val = htmlentities(GetParm('username', PARM_TEXT), ENT_QUOTES);
         $V.= "$Style<th width='5%'>1.</th><th width='25%'>Enter the username.</th>";
         $V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
@@ -162,6 +164,12 @@ class user_add extends FO_Plugin {
         $V .= "$Style<th>8.</th><th>E-mail Notification</th><td><input type='checkbox'" .
                 "name='enote' value='y' checked='checked'>" .
                 "Check to enable email notification of completed analysis.</td>\n";
+        $V.= "</tr>\n";
+        $V .= "$Style<th>9.</th><th>Default Agents: Select the ". 
+              "agent(s) to automatically run when uploading data. These" .
+              " selections can be changed on the upload screens.\n</th><td> ";
+        $V.= AgentCheckBoxMake(-1, "agent_unpack");
+        $V .= "</td>\n";
         $V .= "</tr>\n";
         $V.= "</table border=0><P />";
         $V.= "<input type='submit' value='Add!'>\n";
