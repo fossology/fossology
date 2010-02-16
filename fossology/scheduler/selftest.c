@@ -199,7 +199,7 @@ int	SelfTest	()
 		  LogPrint("FATAL: Difference: '%s' != '%s'\n",Line[0],Line[1]);
 		  }
 		for(i=0; (Line[1][i] != 0) && !strchr("=:",Line[1][i]); i++) ;
-		LogPrint("FATAL: The difference is %.*s\n",i,Line[1]);
+		LogPrint("FATAL: The difference is %d.%s\n",i,Line[1]);
 		LogPrint("  Observed on scheduler system: %s\n",Line[0]);
 		LogPrint("  Scheduler system command: %s\n",SelfTest);
 		LogPrint("  Mismatch on %s: %s\n",HostList[HostId].Hostname, Line[1]);
