@@ -435,7 +435,8 @@ void	GenerateTestData	()
       printf("FATAL: Unable to write to repository.\n");
       exit(-1);
       }
-    fprintf(Fout,"%s",ctime(&Time));
+    //fprintf(Fout,"%s",ctime(&Time));
+    fprintf(Fout,"\n");
     fclose(Fout);
     }
 
