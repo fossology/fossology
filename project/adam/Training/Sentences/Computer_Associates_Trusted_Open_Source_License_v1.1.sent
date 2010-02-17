@@ -116,18 +116,18 @@ from the Contributor with information on how and where to obtain the
 source code. </SENTENCE><SENTENCE>A Contributor may choose to distribute the Program in
 object code form under its own license agreement, provided that:
 
-</SENTENCE><SENTENCE>a. </sentence><sentence>it complies with the terms and conditions of this License; </sentence><sentence>and 
+</SENTENCE><sentence>a. it complies with the terms and conditions of this License; </sentence><sentence>and 
 b. </sentence><sentence>its license agreement: 
-	</SENTENCE><SENTENCE>i. </sentence><sentence>effectively disclaims on behalf of all Contributors all warranties and 
+	</SENTENCE><sentence>i. effectively disclaims on behalf of all Contributors all warranties and 
 	conditions, express and implied, including warranties or conditions of title
 	and non-infringement, and implied warranties or conditions of 
 	merchantability and fitness for a particular purpose, to the maximum extent
 	permitted by applicable law;</sentence><sentence>
-	ii. </sentence><sentence>effectively excludes on behalf of all Contributors all liability for 
+	ii. effectively excludes on behalf of all Contributors all liability for 
 	damages, including direct, indirect, special, incidental and consequential 
 	damages, such as lost profits, to the maximum extent permitted by applicable
 	law; 
-	</SENTENCE><SENTENCE>iii. </sentence><sentence>states that any provisions which are inconsistent with this License are
+	</SENTENCE><sentence>iii. states that any provisions which are inconsistent with this License are
 	offered by that Contributor alone and not by any other party; </sentence><sentence>and 
 	iv. </sentence><sentence>states that source code for the Program is available from such 
 	Contributor at the cost of distribution, and informs licensees how to obtain
@@ -135,7 +135,7 @@ b. </sentence><sentence>its license agreement:
 
 </SENTENCE><SENTENCE>3.2 When the Program is made available in source code form:
 
-</SENTENCE><SENTENCE>a. </sentence><sentence>it must be made available under this License; </sentence><sentence>and 
+</SENTENCE><sentence>a. it must be made available under this License; </sentence><sentence>and 
 b. </sentence><sentence>a copy of this License must be included with each copy of the Program.
 
 </SENTENCE><SENTENCE>3.3 This License is intended to facilitate the commercial distribution
