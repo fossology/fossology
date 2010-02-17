@@ -56,17 +56,17 @@ with all of the restrictions set forth in this License and provided, further,
 that you distribute an unmodified copy of this License with the Program:
 
 
-(</SENTENCE><SENTENCE>a)
+(</SENTENCE><sentence>a)
 
 
-</SENTENCE><SENTENCE>You may copy and distribute literal (i.e., verbatim) copies of the Program's
+You may copy and distribute literal (i.e., verbatim) copies of the Program's
 source code as you receive it throughout the world, in any medium.
 
 
-(</SENTENCE><SENTENCE>b)
+(</SENTENCE><sentence>b)
 
 
-</SENTENCE><SENTENCE>You may modify the Program, create works based on the Program and distribute
+You may modify the Program, create works based on the Program and distribute
 copies of such throughout the world, in any medium.
 
 
@@ -90,10 +90,10 @@ of this restriction:
 
 
 
-(</SENTENCE><SENTENCE>i)
+(</SENTENCE><sentence>i)
 
 
-</SENTENCE><SENTENCE>Posting the Program on a public access information storage and retrieval
+Posting the Program on a public access information storage and retrieval
 service for which a fee is received for retrieving information (such as
 an on-line service), provided that the fee is not content-dependent (i.e.,
 the fee would be the same for retrieving the same volume of information
@@ -104,10 +104,10 @@ is operated by a company and that is only available to customers of that
 company. (</SENTENCE><SENTENCE>This is not an exhaustive enumeration.)
 
 
-(</SENTENCE><SENTENCE>ii)
+(</SENTENCE><sentence>ii)
 
 
-</SENTENCE><SENTENCE>Distributing the Program on removable computer-readable media, provided
+Distributing the Program on removable computer-readable media, provided
 that the files containing the Program are reproduced entirely and verbatim
 on such media, that all information on such media be redistributable for
 non-commercial purposes without charge, and that such media are distributed
@@ -131,36 +131,36 @@ constitute a work based on the Program (independent of having been made
 by running the Program).
 
 
-(</SENTENCE><SENTENCE>c)
+(</SENTENCE><sentence>c)
 
 
-</SENTENCE><SENTENCE>You must meet all of the following conditions with respect to any work
+You must meet all of the following conditions with respect to any work
 that you distribute or publish that in whole or in part contains or is
 derived from the Program or any part thereof ("the Work"):
 
 
 
-(</SENTENCE><SENTENCE>i)
+(</SENTENCE><sentence>i)
 
 
-</SENTENCE><SENTENCE>If you have modified the Program, you must cause the Work to carry prominent
+If you have modified the Program, you must cause the Work to carry prominent
 notices stating that you have modified the Program's files and the date
 of any change. </SENTENCE><SENTENCE>In each source file that you have modified, you must include
 a prominent notice that you have modified the file, including your name,
 your e-mail address (if any), and the date and purpose of the change;
 
 
-(</SENTENCE><SENTENCE>ii)
+(</SENTENCE><sentence>ii)
 
 
-</SENTENCE><SENTENCE>You must cause the Work to be licensed as a whole and at no charge to all
+You must cause the Work to be licensed as a whole and at no charge to all
 third parties under the terms of this License;
 
 
-(</SENTENCE><SENTENCE>iii)
+(</SENTENCE><sentence>iii)
 
 
-</SENTENCE><SENTENCE>If the Work normally reads commands interactively when run, you must cause
+If the Work normally reads commands interactively when run, you must cause
 it, at each time the Work commences operation, to print or display an announcement
 including an appropriate copyright notice and a notice that there is no
 warranty (or else, saying that you provide a warranty). </SENTENCE><SENTENCE>Such notice must
@@ -174,10 +174,10 @@ interactive but does not normally print such an announcement, the Work
 is not required to print an announcement.);
 
 
-(</SENTENCE><SENTENCE>iv)
+(</SENTENCE><sentence>iv)
 
 
-</SENTENCE><SENTENCE>You must accompany the Work with the complete corresponding machine-readable
+You must accompany the Work with the complete corresponding machine-readable
 source code, delivered on a medium customarily used for software interchange.
 </SENTENCE><SENTENCE>The source code for a work means the preferred form of the work for making
 modifications to it. </SENTENCE><SENTENCE>For an executable work, complete source code means
@@ -200,10 +200,10 @@ written instructions for printing and/or displaying the copy of the License
 on the distribution medium;
 
 
-(</SENTENCE><SENTENCE>vi)
+(</SENTENCE><sentence>vi)
 
 
-</SENTENCE><SENTENCE>You may not impose any further restrictions on the recipient's exercise
+You may not impose any further restrictions on the recipient's exercise
 of the rights granted herein.
 
 
