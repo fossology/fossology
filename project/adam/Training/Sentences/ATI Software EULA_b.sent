@@ -9,7 +9,7 @@ THE SOFTWARE TO THE PLACE WHERE YOU OBTAINED IT  AND  (IF  APPLICABLE)  YOUR
 MONEY WILL BE REFUNDED OR IF THE SOFTWARE WAS ACCESSED ELECTRONICALLY  CLICK
 "DISAGREE/DECLINE".
 
-</sentence><sentence>1. License.</sentence><sentence>  ATI Technologies Inc., on behalf of  itself,  its  subsidiaries
+</sentence><sentence>1. </sentence><sentence>License.</sentence><sentence>  ATI Technologies Inc., on behalf of  itself,  its  subsidiaries
 and licensors (referred collectively as "ATI") grants to you  the  following
 non-exclusive,  right  to  use  the  software  accompanying   this   License
 (hereinafter "Software") subject to the following terms and limitations:
@@ -70,7 +70,7 @@ provided that:
    </sentence><sentence>vii) ATI is not obligated to provide any maintenance or technical support
    for any code resulting from ATI Linux Code.
 
-</sentence><sentence>2.  Restrictions.</sentence><sentence>  The Software contains copyrighted and patented  material,
+</sentence><sentence>2. </sentence><sentence> Restrictions.</sentence><sentence>  The Software contains copyrighted and patented  material,
 trade secrets and other proprietary material.</sentence><sentence>  In  order  to  protect  them,
 and except as permitted by this license or applicable legislation,  you  may
 not:
@@ -84,14 +84,14 @@ not:
   </sentence><sentence>c) electronically transmit the Software from one computer  to  another  or
    over a network or otherwise transfer the Software except as permitted  by
    this License.
-i</sentence><sentence>3.  Termination.</sentence><sentence>  This License  is  effective  until  terminated.</sentence><sentence>   You  may
+</sentence><sentence>3. </sentence><sentence> Termination.</sentence><sentence>  This License  is  effective  until  terminated.</sentence><sentence>   You  may
 terminate this License at any  time  by  destroying  the  Software,  related
 documentation  and  all  copies  thereof.</sentence><sentence>   This  License   will   terminate
 immediately without  notice  from  ATI  if  you  fail  to  comply  with  any
 provision of this License.</sentence><sentence>  Upon termination you must destroy the  Software,
 related documentation and all copies thereof.
 
-</sentence><sentence>4.  Government End Users.</sentence><sentence> If you are acquiring the  Software  on  behalf  of
+</sentence><sentence>4. </sentence><sentence> Government End Users.</sentence><sentence> If you are acquiring the  Software  on  behalf  of
 any  unit  or  agency  of  the  United  States  Government,  the   following
 provisions apply.</sentence><sentence>  The Government  agrees  the  Software  and  documentation
 were  developed  at  private  expense  and  are  provided  with  "RESTRICTED
@@ -103,17 +103,17 @@ to time. </sentence><sentence> In the event that this License, or any  part  the
 inconsistent with the minimum rights identified  in  the  Restricted  Rights
 provisions, the minimum rights shall prevail.
 
-</sentence><sentence>5.  No Other License.</sentence><sentence>  No rights or licenses are granted by ATI  under  this
+</sentence><sentence>5. </sentence><sentence> No Other License.</sentence><sentence>  No rights or licenses are granted by ATI  under  this
 License, expressly or  by  implication,  with  respect  to  any  proprietary
 information  or  patent,  copyright,  trade  secret  or  other  intellectual
 property right owned or controlled by ATI, except as expressly  provided  in
 this License.
 
-</sentence><sentence>6.  Additional Licenses.</sentence><sentence>  DISTRIBUTION  OR  USE  OF  THE  SOFTWARE  WITH  AN
+</sentence><sentence>6. </sentence><sentence> Additional Licenses.</sentence><sentence>  DISTRIBUTION  OR  USE  OF  THE  SOFTWARE  WITH  AN
 OPERATING SYSTEM MAY REQUIRE ADDITIONAL LICENSES FROM THE  OPERATING  SYSTEM
 VENDOR.
 
-</sentence><sentence>7.  Disclaimer of Warranty  on  Software.</sentence><sentence>   You  expressly  acknowledge  and
+</sentence><sentence>7. </sentence><sentence> Disclaimer of Warranty  on  Software.</sentence><sentence>   You  expressly  acknowledge  and
 agree that use of the Software is at  your  sole  risk.</sentence><sentence>   The  Software  and
 related documentation are provided "AS IS" and without warranty of any  kind
 and ATI EXPRESSLY DISCLAIMS ALL WARRANTIES, EXPRESS AND IMPLIED,  INCLUDING,
@@ -136,7 +136,7 @@ MEDICAL, LIFE SAVING OR LIFE SUSTAINING  APPLICATIONS.</sentence><sentence>   SO
 DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES,  SO  THE  ABOVE  EXCLUSION
 MAY NOT APPLY TO YOU.
 
-</sentence><sentence>8.  Limitation of Liability.</sentence><sentence> TO THE MAXIMUM EXTENT PERMITTED BY  LAW,  UNDER
+</sentence><sentence>8. </sentence><sentence> Limitation of Liability.</sentence><sentence> TO THE MAXIMUM EXTENT PERMITTED BY  LAW,  UNDER
 NO  CIRCUMSTANCES  INCLUDING  NEGLIGENCE,  SHALL  ATI,  OR  ITS   DIRECTORS,
 OFFICERS, EMPLOYEES  OR  AGENTS,  BE  LIABLE  TO  YOU  FOR  ANY  INCIDENTAL,
 INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES (INCLUDING DAMAGES  FOR  LOSS  OF
@@ -156,7 +156,7 @@ negligence) or otherwise) exceed the amount paid by you  for  the  Software.
 </sentence><sentence>The foregoing limitations will apply even if  the  above  stated  limitation
 fails of its essential purpose.
 
-</sentence><sentence>9.  Controlling Law and Severability.</sentence><sentence>  This License  shall  be  governed  by
+</sentence><sentence>9. </sentence><sentence> Controlling Law and Severability.</sentence><sentence>  This License  shall  be  governed  by
 and construed under the laws of the  Province  of  Ontario,  Canada  without
 reference to its conflict of law principles.</sentence><sentence>   Any  dispute  related  hereto
 will be brought only in the courts in  Toronto,  Ontario,  Canada  and  such
@@ -171,7 +171,7 @@ License shall be enforced to the maximum extent permissible so as to  effect
 the intent of the parties, and the remainder of this License shall  continue
 in full force and effect.
 
-</sentence><sentence>10.  Complete Agreement.</sentence><sentence>  This  License  constitutes  the  entire  agreement
+</sentence><sentence>10. </sentence><sentence> Complete Agreement.</sentence><sentence>  This  License  constitutes  the  entire  agreement
 between the parties with respect to the use of the Software and the  related
 documentation, and supersedes all prior  or  contemporaneous  understandings
 or  agreements,  written  or  oral,  regarding  such  subject  matter.</sentence><sentence>    No

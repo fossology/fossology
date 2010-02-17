@@ -58,7 +58,7 @@
 </sentence><sentence>Legal Terms
 ===========
 
-</sentence><sentence>0. Definitions
+</sentence><sentence>0. </sentence><sentence>Definitions
 --------------
 
   </sentence><sentence>Throughout this license,  the terms `package', `FreeType Project',
@@ -84,7 +84,7 @@
   Robert Wilhelm, and Werner Lemberg.</sentence><sentence>  All rights reserved except as
   specified below.
 
-</sentence><sentence>1. No Warranty
+</sentence><sentence>1. </sentence><sentence>No Warranty
 --------------
 
   </sentence><sentence>THE FREETYPE PROJECT  IS PROVIDED `AS IS' WITHOUT  WARRANTY OF ANY
@@ -94,7 +94,7 @@
   BE LIABLE  FOR ANY DAMAGES CAUSED  BY THE USE OR  THE INABILITY TO
   USE, OF THE FREETYPE PROJECT.
 
-</sentence><sentence>2. Redistribution
+</sentence><sentence>2. </sentence><sentence>Redistribution
 -----------------
 
   </sentence><sentence>This  license  grants  a  worldwide, royalty-free,  perpetual  and
@@ -123,7 +123,7 @@
   our work, you  must acknowledge us.</sentence><sentence>  However, no  fee need be paid
   to us.
 
-</sentence><sentence>3. Advertising
+</sentence><sentence>3. </sentence><sentence>Advertising
 --------------
 
   </sentence><sentence>Neither the  FreeType authors and  contributors nor you  shall use
@@ -143,7 +143,7 @@
   Project, you indicate that you understand and accept all the terms
   of this license.
 
-</sentence><sentence>4. Contacts
+</sentence><sentence>4. </sentence><sentence>Contacts
 -----------
 
   </sentence><sentence>There are two mailing lists related to FreeType:

@@ -11,10 +11,10 @@ modification, are permitted provided that the conditions below are met.
 thousands of dollars in otherwise billable time invested in writing
 this and other freely available, open-source software.
 
-</sentence><sentence>1. Redistributions of source code, in whole or part and with or without
+</sentence><sentence>1. </sentence><sentence>Redistributions of source code, in whole or part and with or without
 modification (the "Code"), must prominently display this GPG-signed
 text in verifiable form.
-</sentence><sentence>2. Redistributions of the Code in binary form must be accompanied by
+</sentence><sentence>2. </sentence><sentence>Redistributions of the Code in binary form must be accompanied by
 this GPG-signed text in any documentation and, each time the resulting
 executable program or a program dependent thereon is launched, a
 prominent display (e.g., splash screen or banner text) of the Author's
@@ -22,10 +22,10 @@ attribution information, which includes:</sentence><sentence>
 (a) Name ("AUTHOR"),
 </sentence><sentence>(b) Professional identification ("PROFESSIONAL IDENTIFICATION"), and
 </sentence><sentence>(c) URL ("URL").
-</sentence><sentence>3. Neither the name nor any trademark of the Author may be used to
+</sentence><sentence>3. </sentence><sentence>Neither the name nor any trademark of the Author may be used to
 endorse or promote products derived from this software without specific
 prior written permission.
-</sentence><sentence>4. Users are entirely responsible, to the exclusion of the Author and
+</sentence><sentence>4. </sentence><sentence>Users are entirely responsible, to the exclusion of the Author and
 any other persons, for compliance with</sentence><sentence> (1) regulations set by owners or
 administrators of employed equipment,</sentence><sentence> (2) licensing terms of any other
 software, and</sentence><sentence> (3) local regulations regarding use, including those

@@ -21,9 +21,9 @@ of Exhibit A; (b) for the selected definition of Third Party see Part 4
 of Exhibit A; and (c) for selected patent licensing terms (if any) see
 Section 2.2 below and Part 6 of Exhibit A.
 
-</sentence><sentence>1. DEFINITIONS.
+</sentence><sentence>1. </sentence><sentence>DEFINITIONS.
 
-   </sentence><sentence> 1.1. "CONTRIBUTION" means:
+   </sentence><sentence> 1.1. </sentence><sentence>"CONTRIBUTION" means:
 
         </sentence><sentence>(a) In the case of the Initial Contributor, the Initial Work
         distributed under this License by the Initial Contributor; and
@@ -34,25 +34,25 @@ Section 2.2 below and Part 6 of Exhibit A.
 
 
 </sentence><sentence>
-    1.2. "DESIGNATED WEB SITE" means the web site having the URL
+    1.2. </sentence><sentence>"DESIGNATED WEB SITE" means the web site having the URL
     identified in Part 1 of Exhibit A, which URL may be changed by the
     Initial Contributor by posting on the current Designated Web Site
     the new URL for at least sixty (60) days.
 
-    </sentence><sentence>1.3. "DISTRIBUTOR" means any Person that distributes the Licensed
+    </sentence><sentence>1.3. </sentence><sentence>"DISTRIBUTOR" means any Person that distributes the Licensed
     Work or any portion thereof to at least one Third Party.
 
-    </sentence><sentence>1.4. "ELECTRONIC DISTRIBUTION MECHANISM" means any mechanism
+    </sentence><sentence>1.4. </sentence><sentence>"ELECTRONIC DISTRIBUTION MECHANISM" means any mechanism
     generally accepted in the software development community for the
     electronic transfer of data.
 
-    </sentence><sentence>1.5. "EXECUTABLE" means the Licensed Work in any form other than
+    </sentence><sentence>1.5. </sentence><sentence>"EXECUTABLE" means the Licensed Work in any form other than
     Source Code.
 
-    </sentence><sentence>1.6. "GOVERNING JURISDICTION" means the state, province or other
+    </sentence><sentence>1.6. </sentence><sentence>"GOVERNING JURISDICTION" means the state, province or other
     legal jurisdiction identified in Part 3 of Exhibit A.
 
-    </sentence><sentence>1.7. "INDEPENDENT MODULE" means a separate module of software
+    </sentence><sentence>1.7. </sentence><sentence>"INDEPENDENT MODULE" means a separate module of software
     and/or data that is not a derivative work of or copied from the
     Licensed Work or any portion thereof.</sentence><sentence> In addition, a module does
     not qualify as an Independent Module but instead forms part of the
@@ -61,45 +61,45 @@ Section 2.2 below and Part 6 of Exhibit A.
     contained, in whole or in part, within a file directory or
     subdirectory actually containing files making up the Licensed Work
 
-    </sentence><sentence>1.8. "INITIAL CONTRIBUTOR" means the Person or entity identified as
+    </sentence><sentence>1.8. </sentence><sentence>"INITIAL CONTRIBUTOR" means the Person or entity identified as
     the Initial Contributor in the notice required by Part 1 of Exhibit
     A.
 </sentence><sentence>
-    1.9. "INITIAL WORK" means the initial Source Code, object code (if
+    1.9. </sentence><sentence>"INITIAL WORK" means the initial Source Code, object code (if
     any) and documentation for the computer program identified in Part
     2 of Exhibit A, as such Source Code, object code and documentation
     is distributed under this License by the Initial Contributor.
 
-    </sentence><sentence>1.10. "LARGER WORK" means a work that combines the Licensed Work or
+    </sentence><sentence>1.10. </sentence><sentence>"LARGER WORK" means a work that combines the Licensed Work or
     portions thereof with code not governed by this License.
 
-    </sentence><sentence>1.11. "LICENSED WORK" means the Initial Work and/or any Subsequent
+    </sentence><sentence>1.11. </sentence><sentence>"LICENSED WORK" means the Initial Work and/or any Subsequent
     Work, in each case including portions thereof.
 
-    </sentence><sentence>1.12. "LICENSE NOTICE" has the meaning assigned in Part 5 of
+    </sentence><sentence>1.12. </sentence><sentence>"LICENSE NOTICE" has the meaning assigned in Part 5 of
     Exhibit A.
 
-    </sentence><sentence>1.13. "MODIFICATION" or "MODIFICATIONS" means any change to and/or
+    </sentence><sentence>1.13. </sentence><sentence>"MODIFICATION" or "MODIFICATIONS" means any change to and/or
     addition to the Licensed Work.
 
-   </sentence><sentence> 1.14. "PERSON" means an individual or other legal entity, including
+   </sentence><sentence> 1.14. </sentence><sentence>"PERSON" means an individual or other legal entity, including
     a corporation, partnership or other body.
 
-    </sentence><sentence>1.15. "RECIPIENT" means any Person who receives or obtains the
+    </sentence><sentence>1.15. </sentence><sentence>"RECIPIENT" means any Person who receives or obtains the
     Licensed Work under this License (by way of example, without
     limiting the foregoing, any Subsequent Contributor or Distributor).
 
-    </sentence><sentence>1.16. "SOURCE CODE" means the source code for a computer program,
+    </sentence><sentence>1.16. </sentence><sentence>"SOURCE CODE" means the source code for a computer program,
     including the source code for all modules and components of the
     computer program, plus any associated interface definition files,
     and scripts used to control compilation and installation of an
     executable.
 
-    </sentence><sentence>1.17. "SUBSEQUENT CONTRIBUTOR" means any Person that makes or
+    </sentence><sentence>1.17. </sentence><sentence>"SUBSEQUENT CONTRIBUTOR" means any Person that makes or
     contributes to the making of any Subsequent Work and that
     distributes that Subsequent Work to at least one Third Party.
 
-    </sentence><sentence>1.18. "SUBSEQUENT WORK" means a work that has resulted or arises
+    </sentence><sentence>1.18. </sentence><sentence>"SUBSEQUENT WORK" means a work that has resulted or arises
     from changes to and/or additions to:
 
         </sentence><sentence>(a) the Initial Work;
@@ -110,7 +110,7 @@ Section 2.2 below and Part 6 of Exhibit A.
         Subsequent Work;
 
         </sentence><sentence>where such changes and/or additions originate from a Subsequent
-        Contributor. A Subsequent Work will "originate" from a
+        Contributor. </sentence><sentence>A Subsequent Work will "originate" from a
         Subsequent Contributor if the Subsequent Work was a result of
         efforts by such Subsequent Contributor</sentence><sentence> (or anyone acting on
         such Subsequent Contributor's behalf, such as, a contractor or
@@ -119,15 +119,15 @@ Section 2.2 below and Part 6 of Exhibit A.
         Work expressly excludes and shall not capture within its
         meaning any Independent Module.
 
-    </sentence><sentence>1.19. "SUPPLEMENT FILE" means a file distributed with the Licensed
+    </sentence><sentence>1.19. </sentence><sentence>"SUPPLEMENT FILE" means a file distributed with the Licensed
     Work having a file name "suppfile.txt".
 
-    </sentence><sentence>1.20. "THIRD PARTY" has the meaning assigned in Part 4 of Exhibit
+    </sentence><sentence>1.20. </sentence><sentence>"THIRD PARTY" has the meaning assigned in Part 4 of Exhibit
     A.
 
-</sentence><sentence>2. LICENSE.
+</sentence><sentence>2. </sentence><sentence>LICENSE.
 
-    </sentence><sentence>2.1. COPYRIGHT LICENSE FROM INITIAL AND SUBSEQUENT CONTRIBUTORS
+    </sentence><sentence>2.1. </sentence><sentence>COPYRIGHT LICENSE FROM INITIAL AND SUBSEQUENT CONTRIBUTORS
 
         </sentence><sentence>(a) Subject to the terms of this License, the Initial
         Contributor hereby grants each Recipient a world-wide,
@@ -161,7 +161,7 @@ Section 2.2 below and Part 6 of Exhibit A.
         Modifications, on an unmodified basis, or as part of a Larger
         Work.
 
-    </sentence><sentence>2.2. PATENT LICENSE FROM INITIAL AND SUBSEQUENT CONTRIBUTORS.
+    </sentence><sentence>2.2. </sentence><sentence>PATENT LICENSE FROM INITIAL AND SUBSEQUENT CONTRIBUTORS.
 
         </sentence><sentence>(a) This License does not include or grant any patent license
         whatsoever from the Initial Contributor, Subsequent
@@ -214,7 +214,7 @@ Section 2.2 below and Part 6 of Exhibit A.
         include the terms in paragraphs A, B, C, D and E from Part 6 of
         Exhibit A.
 
-    </sentence><sentence>2.3. ACKNOWLEDGEMENT AND DISCLAIMER.
+    </sentence><sentence>2.3. </sentence><sentence>ACKNOWLEDGEMENT AND DISCLAIMER.
 
     </sentence><sentence>Recipient understands and agrees that although Initial Contributor
     and each Subsequent Contributor grants the licenses to its
@@ -234,16 +234,16 @@ Section 2.2 below and Part 6 of Exhibit A.
     the Licensed Work, it is Recipient's responsibility to acquire that
     license before distributing the Licensed Work.
 
-    </sentence><sentence>2.4. RESERVATION.
+    </sentence><sentence>2.4. </sentence><sentence>RESERVATION.
 
     </sentence><sentence>Nothing in this License shall be deemed to grant any rights to
     trademarks, copyrights, patents, trade secrets or any other
     intellectual property of Initial Contributor, Subsequent
     Contributor, or Distributor except as expressly stated herein.
 
-</sentence><sentence>3. DISTRIBUTION OBLIGATIONS.
+</sentence><sentence>3. </sentence><sentence>DISTRIBUTION OBLIGATIONS.
 
-    </sentence><sentence>3.1. DISTRIBUTION GENERALLY.
+    </sentence><sentence>3.1. </sentence><sentence>DISTRIBUTION GENERALLY.
 
         </sentence><sentence>(a) A Subsequent Contributor shall make that Subsequent
         Contributor's Subsequent Work(s) available to the public via an
@@ -265,7 +265,7 @@ Section 2.2 below and Part 6 of Exhibit A.
         License Notice is reasonably brought to the attention of any
         party using the Licensed Work.
 
-    </sentence><sentence>3.2. EXECUTABLE DISTRIBUTIONS OF THE LICENSED WORK.
+    </sentence><sentence>3.2. </sentence><sentence>EXECUTABLE DISTRIBUTIONS OF THE LICENSED WORK.
 
     </sentence><sentence>A Distributor may choose to distribute the Licensed Work, or any
     portion thereof, in Executable form (an "EXECUTABLE DISTRIBUTION")
@@ -300,7 +300,7 @@ Section 2.2 below and Part 6 of Exhibit A.
     combination with a Larger Work or Independent Modules, or in some
     other combination.
 
-    </sentence><sentence>3.3. SOURCE CODE DISTRIBUTIONS.
+    </sentence><sentence>3.3. </sentence><sentence>SOURCE CODE DISTRIBUTIONS.
 
     </sentence><sentence>When a Distributor makes the Licensed Work, or any portion thereof,
     available to any Person in Source Code form, it must be made
@@ -313,7 +313,7 @@ Section 2.2 below and Part 6 of Exhibit A.
     copy, which charge shall be no more than the cost of physically
     performing source distribution.
 
-    </sentence><sentence>3.4. REQUIRED NOTICES IN SOURCE CODE.
+    </sentence><sentence>3.4. </sentence><sentence>REQUIRED NOTICES IN SOURCE CODE.
 
     </sentence><sentence>Each Subsequent Contributor must ensure that the notice set out in
     Part 5 of Exhibit A is included in each file of the Source Code for
@@ -325,7 +325,7 @@ Section 2.2 below and Part 6 of Exhibit A.
     relevant directory in which the file is stored) where a user would
     be likely to look for such a notice.
 
-    </sentence><sentence>3.5. NO DISTRIBUTION REQUIREMENTS FOR INTERNALLY USED
+    </sentence><sentence>3.5. </sentence><sentence>NO DISTRIBUTION REQUIREMENTS FOR INTERNALLY USED
     MODIFICATIONS.
 
     </sentence><sentence>Notwithstanding Sections 3.2, 3.3 and 3.4, Recipient may,
@@ -349,14 +349,14 @@ Section 2.2 below and Part 6 of Exhibit A.
     distributed and made available to third parties in accordance with
     the terms of Sections 3.1 to 3.4 inclusive.
 
-    </sentence><sentence>3.6. INDEPENDENT MODULES.
+    </sentence><sentence>3.6. </sentence><sentence>INDEPENDENT MODULES.
 
     </sentence><sentence>This License shall not apply to Independent Modules of any Initial
     Contributor, Subsequent Contributor, Distributor or any Recipient,
     and such Independent Modules may be licensed or made available
     under one or more separate license agreements.
 
-    </sentence><sentence>3.7. LARGER WORKS.
+    </sentence><sentence>3.7. </sentence><sentence>LARGER WORKS.
 
     </sentence><sentence>Any Distributor or Recipient may create or contribute to a Larger
     Work by combining any of the Licensed Work with other code not
@@ -366,7 +366,7 @@ Section 2.2 below and Part 6 of Exhibit A.
     the requirements of this License are fulfilled for the Licensed
     Work portion of the Larger Work.
 
-    </sentence><sentence>3.8. DESCRIPTION OF DISTRIBUTED MODIFICATIONS.
+    </sentence><sentence>3.8. </sentence><sentence>DESCRIPTION OF DISTRIBUTED MODIFICATIONS.
 
         </sentence><sentence>(a) Each Subsequent Contributor (including the Initial
         Contributor where the Initial Contributor also qualifies as a
@@ -426,13 +426,13 @@ Section 2.2 below and Part 6 of Exhibit A.
         the Supplement File with the copies of the Initial Work
         distributed under this License.
 
-</sentence><sentence>3.9. USE OF DISTRIBUTOR NAME.
+</sentence><sentence>3.9. </sentence><sentence>USE OF DISTRIBUTOR NAME.
 
     </sentence><sentence>The name of a Distributor may not be used by any other Distributor
     to endorse or promote the Licensed Work or products derived from
     the Licensed Work, without prior written permission.
 
-    </sentence><sentence>3.10. LIMITED RECOGNITION OF INITIAL CONTRIBUTOR.
+    </sentence><sentence>3.10. </sentence><sentence>LIMITED RECOGNITION OF INITIAL CONTRIBUTOR.
 
         </sentence><sentence>(a) As a modest attribution to the Initial Contributor, in the
         hope that its promotional value may help justify the time,
@@ -470,7 +470,7 @@ Section 2.2 below and Part 6 of Exhibit A.
         circumstances otherwise permitted by law, or as expressly set
         out in this License.
 
-    </sentence><sentence>3.11. For greater certainty, any description or attribution
+    </sentence><sentence>3.11. </sentence><sentence>For greater certainty, any description or attribution
     provisions contained within a Supplement File may only be used to
     specify the nature of the description or attribution requirements,
     as the case may be.</sentence><sentence> Any provision in a Supplement File that
@@ -478,9 +478,9 @@ Section 2.2 below and Part 6 of Exhibit A.
     obligation or representation contained herein shall be deemed void
     to that extent, and shall be of no force or effect.
 
-</sentence><sentence>4. COMMERCIAL USE AND INDEMNITY.
+</sentence><sentence>4. </sentence><sentence>COMMERCIAL USE AND INDEMNITY.
 
-    </sentence><sentence>4.1. COMMERCIAL SERVICES.
+    </sentence><sentence>4.1. </sentence><sentence>COMMERCIAL SERVICES.
 
     </sentence><sentence>A Recipient ("COMMERCIAL RECIPIENT") may choose to offer, and to
     charge a fee for, warranty, support, indemnity or liability
@@ -502,7 +502,7 @@ Section 2.2 below and Part 6 of Exhibit A.
     physically performing Source Code or Executable distribution (as
     the case may be)).
 
-    </sentence><sentence>4.2. INDEMNITY.
+    </sentence><sentence>4.2. </sentence><sentence>INDEMNITY.
 
     </sentence><sentence>Commercial distributors of software may accept certain
     responsibilities with respect to end users, business partners and
@@ -530,15 +530,15 @@ Section 2.2 below and Part 6 of Exhibit A.
     negotiations.</sentence><sentence> The Indemnified Party may participate in any such
     claim at its own expense.
 
-</sentence><sentence>5. VERSIONS OF THE LICENSE.
+</sentence><sentence>5. </sentence><sentence>VERSIONS OF THE LICENSE.
 
-    </sentence><sentence>5.1. NEW VERSIONS.
+    </sentence><sentence>5.1. </sentence><sentence>NEW VERSIONS.
 
     </sentence><sentence>The Initial Contributor may publish revised and/or new versions of
-    the License from time to time. Each version will be given a
+    the License from time to time. </sentence><sentence>Each version will be given a
     distinguishing version number.
 
-    </sentence><sentence>5.2. EFFECT OF NEW VERSIONS.
+    </sentence><sentence>5.2. </sentence><sentence>EFFECT OF NEW VERSIONS.
 
     </sentence><sentence>Once the Licensed Work or any portion thereof has been published by
     Initial Contributor under a particular version of the License,
@@ -553,9 +553,9 @@ Section 2.2 below and Part 6 of Exhibit A.
     the Licensed Work.</sentence><sentence> No one other than the Initial Contributor has
     the right to modify the terms applicable to the Licensed Work
 
-</sentence><sentence>6. DISCLAIMER OF WARRANTY.
+</sentence><sentence>6. </sentence><sentence>DISCLAIMER OF WARRANTY.
 
-    </sentence><sentence>6.1. GENERAL DISCLAIMER.
+    </sentence><sentence>6.1. </sentence><sentence>GENERAL DISCLAIMER.
 
     </sentence><sentence>EXCEPT AS EXPRESSLY SET FORTH IN THIS LICENSE, THE LICENSED WORK IS
     PROVIDED UNDER THIS LICENSE ON AN "AS IS" BASIS, WITHOUT ANY
@@ -571,7 +571,7 @@ Section 2.2 below and Part 6 of Exhibit A.
     LICENSE.</sentence><sentence> NO USE OF ANY LICENSED WORK IS AUTHORIZED HEREUNDER EXCEPT
     UNDER THIS LICENSE INCLUDING WITHOUT LIMITATION THIS DISCLAIMER.
 
-    </sentence><sentence>6.2. RESPONSIBILITY OF RECIPIENTS.
+    </sentence><sentence>6.2. </sentence><sentence>RESPONSIBILITY OF RECIPIENTS.
 
     </sentence><sentence>Each Recipient is solely responsible for determining the
     appropriateness of using and distributing the Licensed Work and
@@ -581,15 +581,15 @@ Section 2.2 below and Part 6 of Exhibit A.
     of data, programs or equipment, and unavailability or interruption
     of operations.
 
-</sentence><sentence>7. TERMINATION.
+</sentence><sentence>7. </sentence><sentence>TERMINATION.
 
-    </sentence><sentence>7.1. This License shall continue until terminated in accordance
+    </sentence><sentence>7.1. </sentence><sentence>This License shall continue until terminated in accordance
     with the express terms herein.
 
-    </sentence><sentence>7.2. Recipient may choose to terminate this License automatically
+    </sentence><sentence>7.2. </sentence><sentence>Recipient may choose to terminate this License automatically
     at any time.
 
-    </sentence><sentence>7.3. This License, including without limitation the rights granted
+    </sentence><sentence>7.3. </sentence><sentence>This License, including without limitation the rights granted
     hereunder to a particular Recipient, will terminate automatically
     if such Recipient is in material breach of any of the terms of this
     License and fails to cure such breach within sixty (60) days of
@@ -598,7 +598,7 @@ Section 2.2 below and Part 6 of Exhibit A.
     under which such Recipient is granted any rights to the Licensed
     Work shall constitute a material breach of this License.
 
-    </sentence><sentence>7.4. Upon termination of this License by or with respect to a
+    </sentence><sentence>7.4. </sentence><sentence>Upon termination of this License by or with respect to a
     particular Recipient for any reason, all rights granted hereunder
     and under any other License to that Recipient shall terminate.</sentence><sentence>
     However, all sublicenses to the Licensed Work which were previously
@@ -611,19 +611,19 @@ Section 2.2 below and Part 6 of Exhibit A.
     (i.e. other Recipients) remain in compliance with the terms of the
     copy of this License under which such sublicensees received rights
     to the Licensed Work.</sentence><sentence> Any termination of such Other Licenses shall
-    be pursuant to their respective Section 7, mutatis mutandis.
+    be pursuant to their respective Section 7, mutatis mutandis.</sentence><sentence>
     Provisions which, by their nature, must remain in effect beyond the
     termination of this License shall survive.
 
-    </sentence><sentence>7.5. Upon any termination of this License by or with respect to a
+    </sentence><sentence>7.5. </sentence><sentence>Upon any termination of this License by or with respect to a
     particular Recipient, Sections 4.1, 4.2, 6.1, 6.2, 7.4, 7.5, 8.1,
     and 8.2, together with all provisions of this License necessary for
     the interpretation and enforcement of same, shall expressly survive
     such termination.
 
-</sentence><sentence>8. LIMITATION OF LIABILITY.
+</sentence><sentence>8. </sentence><sentence>LIMITATION OF LIABILITY.
 
-    </sentence><sentence>8.1. IN NO EVENT SHALL ANY OF INITIAL CONTRIBUTOR, ITS
+    </sentence><sentence>8.1. </sentence><sentence>IN NO EVENT SHALL ANY OF INITIAL CONTRIBUTOR, ITS
     SUBSIDIARIES, OR AFFILIATES, OR ANY OF ITS OR THEIR RESPECTIVE
     OFFICERS, DIRECTORS, EMPLOYEES, AND/OR AGENTS (AS THE CASE MAY BE),
     HAVE ANY LIABILITY FOR ANY DIRECT DAMAGES, INDIRECT DAMAGES,
@@ -648,7 +648,7 @@ Section 2.2 below and Part 6 of Exhibit A.
     HEREUNDER EXCEPT UNDER THIS LICENSE INCLUDING WITHOUT LIMITATION
     THE LIMITATIONS SET FORTH IN THIS SECTION 8.1.
 
-    </sentence><sentence>8.2. EXCEPT AS EXPRESSLY SET FORTH IN THIS LICENSE, EACH RECIPIENT
+    </sentence><sentence>8.2. </sentence><sentence>EXCEPT AS EXPRESSLY SET FORTH IN THIS LICENSE, EACH RECIPIENT
     SHALL NOT HAVE ANY LIABILITY FOR ANY EXEMPLARY, OR CONSEQUENTIAL
     DAMAGES (INCLUDING WITHOUT LIMITATION LOST PROFITS), HOWEVER CAUSED
     AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
@@ -660,9 +660,9 @@ Section 2.2 below and Part 6 of Exhibit A.
     PARTY'S NEGLIGENCE TO THE EXTENT APPLICABLE LAW PROHIBITS SUCH
     LIMITATION.
 
-</sentence><sentence>9. GOVERNING LAW AND LEGAL ACTION.
+</sentence><sentence>9. </sentence><sentence>GOVERNING LAW AND LEGAL ACTION.
 
-    </sentence><sentence>9.1. This License shall be governed by and construed in accordance
+    </sentence><sentence>9.1. </sentence><sentence>This License shall be governed by and construed in accordance
     with the laws of the Governing Jurisdiction assigned in Part 3 of
     Exhibit A, without regard to its conflict of law provisions.</sentence><sentence> No
     party may bring a legal action under this License more than one
@@ -672,7 +672,7 @@ Section 2.2 below and Part 6 of Exhibit A.
     assigned in Part 3 of Exhibit A, then the Governing Jurisdiction
     shall be the State of New York.
 
-    </sentence><sentence>9.2. The courts of the Governing Jurisdiction shall have
+    </sentence><sentence>9.2. </sentence><sentence>The courts of the Governing Jurisdiction shall have
     jurisdiction, but not exclusive jurisdiction, to entertain and
     determine all disputes and claims, whether for specific
     performance, injunction, damages or otherwise, both at law and in
@@ -682,54 +682,54 @@ Section 2.2 below and Part 6 of Exhibit A.
     irrevocably attorns to and accepts the jurisdiction of the courts
     of the Governing Jurisdiction for such purposes.
 
-    </sentence><sentence>9.3. Except as expressly set forth elsewhere herein, in the event
+    </sentence><sentence>9.3. </sentence><sentence>Except as expressly set forth elsewhere herein, in the event
     of any action or proceeding brought by any party against another
     under this License the prevailing party shall be entitled to
     recover all costs and expenses including the fees of its attorneys
     in such action or proceeding in such amount as the court may
     adjudge reasonable.
 
-</sentence><sentence>10. MISCELLANEOUS.
+</sentence><sentence>10. </sentence><sentence>MISCELLANEOUS.
 
-    </sentence><sentence>10.1. The obligations imposed by this License are for the benefit
+    </sentence><sentence>10.1. </sentence><sentence>The obligations imposed by this License are for the benefit
     of the Initial Contributor and any Recipient, and each Recipient
     acknowledges and agrees that the Initial Contributor and/or any
     other Recipient may enforce the terms and conditions of this
     License against any Recipient.
 
-    </sentence><sentence>10.2. This License represents the complete agreement concerning
+    </sentence><sentence>10.2. </sentence><sentence>This License represents the complete agreement concerning
     subject matter hereof, and supersedes and cancels all previous oral
     and written communications, representations, agreements and
     understandings between the parties with respect to the subject
     matter hereof.
 
-    </sentence><sentence>10.3. The application of the United Nations Convention on Contracts
+    </sentence><sentence>10.3. </sentence><sentence>The application of the United Nations Convention on Contracts
     for the International Sale of Goods is expressly excluded.
 
-    </sentence><sentence>10.4. The language in all parts of this License shall be in all
+    </sentence><sentence>10.4. </sentence><sentence>The language in all parts of this License shall be in all
     cases construed simply according to its fair meaning, and not
     strictly for or against any of the parties hereto.</sentence><sentence> Any law or
     regulation which provides that the language of a contract shall be
     construed against the drafter shall not apply to this License.
 
-    </sentence><sentence>10.5. If any provision of this License is invalid or unenforceable
+    </sentence><sentence>10.5. </sentence><sentence>If any provision of this License is invalid or unenforceable
     under the laws of the Governing Jurisdiction, it shall not affect
     the validity or enforceability of the remainder of the terms of
     this License, and without further action by the parties hereto,
     such provision shall be reformed to the minimum extent necessary to
     make such provision valid and enforceable.
 
-    </sentence><sentence>10.6. The paragraph headings of this License are for reference and
+    </sentence><sentence>10.6. </sentence><sentence>The paragraph headings of this License are for reference and
     convenience only and are not a part of this License, and they shall
     have no effect upon the construction or interpretation of any part
     hereof.
 
-    </sentence><sentence>10.7. Each of the terms "including", "include" and "includes", when
+    </sentence><sentence>10.7. </sentence><sentence>Each of the terms "including", "include" and "includes", when
     used in this License, is not limiting whether or not non-limiting
     language (such as "without limitation" or "but not limited to" or
     words of similar import) is used with reference thereto.
 
-    </sentence><sentence>10.8. The parties hereto acknowledge they have expressly required
+    </sentence><sentence>10.8. </sentence><sentence>The parties hereto acknowledge they have expressly required
     that this License and notices relating thereto be drafted in the
     English language.</sentence>
 

@@ -422,7 +422,7 @@ be posed by such an Author or by any developer who is building on another
 Author's HESSLAed code.
 </sentence><sentence>License Revisions:</sentence><sentence> This License Agreement is subject to revision, prior to the
 release of the Hacktivismo Enhanced-Source Software License Agreement, Version
-1.0. We invite interested parties from the international academic and legal
+1.0. </sentence><sentence>We invite interested parties from the international academic and legal
 communities to offer comments and suggestions on ways to improve this License
 Agreement, prior to the time that The HESSLA version 1.0 is released.
 </sentence><sentence>The terms of the latest and most up-to-date version of this License Agreement,
@@ -436,7 +436,7 @@ www.hacktivismo.com/.</sentence><sentence>
 The precise terms and conditions for copying, distribution, use and
 modification follow.
 </sentence><sentence>TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION, USE AND/OR MODIFICATION
-0. DEFINITIONS.</sentence><sentence> The following are defined terms that, whenever used in this
+0. </sentence><sentence>DEFINITIONS.</sentence><sentence> The following are defined terms that, whenever used in this
 License Agreement, have the following meanings:</sentence><sentence>
 0.1 Author: "Author" shall mean the copyright holder of an Original Work (the
 "Program") released by the Author under this License Agreement.
@@ -578,7 +578,7 @@ cooperation or unison.
 Persons."</sentence><sentence> The terms "Governmental Person" or "Governmental Persons," when used
 in this License Agreement, shall mean the officials, officers, employees,
 representatives, contractors and agents of any Governmental Entity.
-</sentence><sentence>1. Application of License Agreement.</sentence><sentence> This License Agreement applies to any
+</sentence><sentence>1. </sentence><sentence>Application of License Agreement.</sentence><sentence> This License Agreement applies to any
 Program or other Original Work of authorship that contains a notice placed by
 the Author saying it may be distributed under the terms of this License
 Agreement.</sentence><sentence> The preferred manner of placing such a notice is to include the
@@ -586,7 +586,7 @@ following statement immediately after the copyright notice for such an Original
 Work:
      </sentence><sentence>"Licensed under the Hacktivismo Enhanced-Source Software License
      Agreement, Version 0.1"
-</sentence><sentence>2. Means of Acceptance Use, Copying, Distribution or Modification By Anyone
+</sentence><sentence>2. </sentence><sentence>Means of Acceptance Use, Copying, Distribution or Modification By Anyone
 Constitutes Acceptance.</sentence><sentence> Subject to Section 14.1 (concerning the special case of
 certain Governmental Entities) any copying, modification, distribution, or use
 by You of the Program or any Software, shall constitute Your acceptance of all
@@ -614,12 +614,12 @@ Licensees is effectively prohibited contractually because nobody can obtain a
 copy of, or access to a copy of, any Software without</sentence><sentence> (1) accepting the License
 Agreement through use, </sentence><sentence>and (2) triggering some Licensee's obligation to require
 acceptance as a precondition of copying or access.
-</sentence><sentence>3. "Qualified Licensee" Requirement:</sentence><sentence> Neither the Program nor any Software or
+</sentence><sentence>3. </sentence><sentence>"Qualified Licensee" Requirement:</sentence><sentence> Neither the Program nor any Software or
 Derivative Work based on the Program may be copied, distributed, displayed,
 performed, used or modified by You, even for Your own purposes, unless You are
 a "Qualified Licensee." </sentence><sentence>To remain a Qualified Licensee, You must remain in full
 compliance with all terms and conditions of this License Agreement.
-</sentence><sentence>4. License Agreement Is Exclusive Source of All Your Rights:</sentence><sentence>
+</sentence><sentence>4.</sentence><sentence> License Agreement Is Exclusive Source of All Your Rights:</sentence><sentence>
 4.1 You may not copy, modify, or distribute the Program, or obtain any copy,
 except as expressly provided under this License Agreement.</sentence><sentence> Any attempt
 otherwise to copy, modify, obtain a copy, sublicense or distribute the Program
@@ -650,7 +650,7 @@ impose any further restrictions on the recipients' exercise of the rights
 granted herein.</sentence><sentence> You are not responsible for enforcing compliance by third
 parties to this License Agreement.</sentence><sentence> Enforcement is the responsibility of the
 Author.
-</sentence><sentence>5. Grant of Source Code License.
+</sentence><sentence>5.</sentence><sentence> Grant of Source Code License.
 </sentence><sentence>5.1 Source Code Always Available from Author:</sentence><sentence> Author hereby promises and agrees
 except to the extent prohibited by export-control law to provide a machine-
 readable copy of the Source Code of the Program at the request of any Licensee.
@@ -679,7 +679,7 @@ Derivative Works to others, with the proviso that copies of Original Work or
 Derivative Works that You distribute shall be licensed under this License
 Agreement, and that You shall fully inform all recipients of the terms of this
 License Agreement.
-</sentence><sentence>6. Grant of Copyright License.</sentence><sentence> If and only if, and for so long as You remain a
+</sentence><sentence>6.</sentence><sentence> Grant of Copyright License.</sentence><sentence> If and only if, and for so long as You remain a
 Qualified Licensee, in accordance with Section 3 of this License Agreement,
 Author hereby grants You a world-wide, royalty-free, non-exclusive, non-
 sublicensable license to do the following:
@@ -697,7 +697,7 @@ fully inform all recipients of the terms of this License Agreement;</sentence><s
 6.6 to charge a fee for the physical act of transferring a copy of the Program
 (You may also, at Your option, offer warranty protection in exchange for a
 fee).
-</sentence><sentence>7. Grant of Patent License.</sentence><sentence> If and only if, and for so long as You remain a
+</sentence><sentence>7.</sentence><sentence> Grant of Patent License.</sentence><sentence> If and only if, and for so long as You remain a
 Qualified Licensee, in accordance with Section 3 of this License Agreement,
 Author hereby grants You a world-wide, royalty-free, non-exclusive, non-
 sublicensable license Agreement, under patent claims owned or controlled by the
@@ -708,7 +708,7 @@ license under any patent claims embodied in any Derivative Work furnished by
 You, Author hereby grants You a world-wide, royalty-free, non-exclusive, non-
 sublicensable license under the Licensed Claims to make, use, sell and offer
 for sale Derivative Works.
-</sentence><sentence>8. Exclusions From License Agreement Grants.</sentence><sentence> Nothing in this License Agreement
+</sentence><sentence>8.</sentence><sentence> Exclusions From License Agreement Grants.</sentence><sentence> Nothing in this License Agreement
 shall be deemed to grant any rights to trademarks, copyrights, patents, trade
 secrets or any other intellectual property of Licensor except as expressly
 stated herein.</sentence><sentence> No patent license is granted to make, use, sell or offer to sell
@@ -727,7 +727,7 @@ permission of the Author.</sentence><sentence> Neither the name of Hacktivismo n
 contributors who helped write the Program may be used to endorse or promote any
 Program or Software released under this License Agreement by any person other
 than Hacktivismo.
-</sentence><sentence>9. Modifications and Derivative Works.</sentence><sentence> Only Qualified Licensees may modify the
+</sentence><sentence>9.</sentence><sentence> Modifications and Derivative Works.</sentence><sentence> Only Qualified Licensees may modify the
 Software or prepare or distribute Derivative Works.</sentence><sentence> If You are a Qualified
 Licensee, Your authorization to modify the Software or prepare or distribute
 Derivative Works (including permission to prepare and/or distribute Derivative
@@ -771,7 +771,7 @@ be stored or recorded in plaintext, and it must be protected from reading (at a
 minimum) by use of a password.</sentence><sentence> Use of steganography or other techniques to
 disguise the fact that a private or symmetric key is even stored is strongly
 encouraged, but not absolutely required.
-</sentence><sentence>10. Use Restrictions:</sentence><sentence> Human Rights Violations Prohibited.
+</sentence><sentence>10.</sentence><sentence> Use Restrictions:</sentence><sentence> Human Rights Violations Prohibited.
 </sentence><sentence>10.1 Neither the Program, nor any Software or Derivative Work based on the
 Program may used by You for any of the following purposes (10.1.1 through
 10.1.5, inclusive):
@@ -802,7 +802,7 @@ or copies of the Program) unless such person has accepted this License
 Agreement and has become a Licensee subject to all its terms and conditions,
 including (without limitation) the use restrictions embodied in Section 10.1
 and 10.2, inclusive.
-</sentence><sentence>11. All Export Distributions Must Consist of or Be Ancillary to Distribution of
+</sentence><sentence>11.</sentence><sentence> All Export Distributions Must Consist of or Be Ancillary to Distribution of
 Source Code.</sentence><sentence> Because of certain peculiarities of current export-control law,
 any distribution by You of the Program or any Software may be in the form of
 Source Code only, or in the form or Source Code accompanied by compiled Object
@@ -811,7 +811,7 @@ only.</sentence><sentence> Such an export distribution of compiled executable co
 be ancillary to a distribution of the complete corresponding machine-readable
 source code, which must be distributed on a medium, or by a method, customarily
 used for software interchange.
-</sentence><sentence>12. EXPORT LAWS:</sentence><sentence> THIS LICENSE AGREEMENT ADDS NO RESTRICTIONS TO THE EXPORT LAWS
+</sentence><sentence>12.</sentence><sentence> EXPORT LAWS:</sentence><sentence> THIS LICENSE AGREEMENT ADDS NO RESTRICTIONS TO THE EXPORT LAWS
 OF YOUR JURISDICTION.</sentence><sentence> It is Your responsibility to comply with any export
 regulations applicable in Your jurisdiction.</sentence><sentence> From the United States, Canada, or
 many countries in Europe, export or transmission of this Software to certain
@@ -828,7 +828,7 @@ before exporting this Software to any destination.</sentence><sentence> Special 
 to avoid export to any embargoed destination.</sentence><sentence> An Author other than Hacktivismo
 may substitute that Author's legal name for "Hacktivismo" in this Paragraph, in
 relation to any Program released by that Author under this Paragraph.
-</sentence><sentence>13. Contrary Judgments, Settlements and Court Orders.</sentence><sentence> If, as a consequence of a
+</sentence><sentence>13.</sentence><sentence> Contrary Judgments, Settlements and Court Orders.</sentence><sentence> If, as a consequence of a
 court judgment or allegation of patent infringement or for any other reason
 (not limited to patent issues), conditions are imposed on You (whether by court
 order, agreement or otherwise) that contradict the conditions of this License
@@ -849,7 +849,7 @@ the wide range of software distributed through related distribution systems, in
 reliance on consistent application of such distribution systems;</sentence><sentence> it is up to
 the Author/donor to decide if he or she is willing to distribute software
 through any other system and a Licensee cannot impose that choice.
-</sentence><sentence>14. Governmental Entities:</sentence><sentence> Any Governmental Entity ("Governmental Entity" is
+</sentence><sentence>14.</sentence><sentence> Governmental Entities:</sentence><sentence> Any Governmental Entity ("Governmental Entity" is
 defined broadly as set forth in Section 0.13.1) or Governmental Person (as
 "Governmental Person" is defined broadly in Section 0.13.2), that uses,
 modifies, changes, copies, displays, performs, or distributes the Program, or
@@ -1108,10 +1108,10 @@ objections based on sovereign or governmental status or immunity that might
 otherwise be asserted in the courts of some other sovereign.
 </sentence><sentence>14.10.1 Waiver of Immunity and Forum Selection.</sentence><sentence> The presumptively valid and
 preferred fora identified in Subparagraphs 14.9.2 and 14.9.3 shall also apply
-for purposes of Subparagraph 14.10. All Governmental Entities are subject to
+for purposes of Subparagraph 14.10.</sentence><sentence> All Governmental Entities are subject to
 the same Waiver of Immunity as set forth in Subparagraphs 14.2.1 to 14.2.4,
 inclusive.
-</sentence><sentence>15. Subsequent Versions of HESSLA.</sentence><sentence> Hacktivismo may publish revised and/or new
+</sentence><sentence>15. </sentence><sentence>Subsequent Versions of HESSLA.</sentence><sentence> Hacktivismo may publish revised and/or new
 versions of the Hacktivismo Enhanced-Source Software License Agreement from
 time to time.</sentence><sentence> Such new versions will be similar in spirit to the present
 version, but may differ in detail to address new problems or concerns.</sentence><sentence>
@@ -1135,7 +1135,7 @@ released by another Author, specifies only a version number, then that version
 number only shall apply.</sentence><sentence> If "the latest version," is specified, then the latest
 version of the HESSLA published on the Hacktivismo Website shall always apply
 at all times.
-</sentence><sentence>16. DISCLAIMER OF WARRANTY.</sentence><sentence> THE SOFTWARE IS PROVIDED UNDER THIS LICENSE ON AN
+</sentence><sentence>16.</sentence><sentence> DISCLAIMER OF WARRANTY.</sentence><sentence> THE SOFTWARE IS PROVIDED UNDER THIS LICENSE ON AN
 "AS IS" BASIS, WITHOUT WARRANTY, EITHER EXPRESS OR IMPLIED, INCLUDING, WITHOUT
 LIMITATION, THE WARRANTY OF NON-INFRINGEMENT AND WARRANTIES THAT THE ORIGINAL
 WORK IS MERCHANTABLE OR FIT FOR A PARTICULAR PURPOSE.</sentence><sentence> THE SOFTWARE IS PROVIDED
@@ -1144,7 +1144,7 @@ YOU.</sentence><sentence> SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COS
 SERVICING, REPAIR OR CORRECTION.</sentence><sentence> THIS DISCLAIMER OF WARRANTY CONSTITUTES AN
 ESSENTIAL PART OF THIS LICENSE.</sentence><sentence> NO LICENSE TO ORIGINAL WORK IS GRANTED
 HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
-</sentence><sentence>17. LIMITATION OF LIABILITY.</sentence><sentence> UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY,
+</sentence><sentence>17.</sentence><sentence> LIMITATION OF LIABILITY.</sentence><sentence> UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY,
 WHETHER TORT (INCLUDING THE AUTHOR'S NEGLIGENCE), CONTRACT, OR OTHERWISE, SHALL
 THE AUTHOR BE LIABLE TO ANY PERSON FOR ANY DIRECT, INDIRECT, SPECIAL,
 INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF ANY CHARACTER ARISING AS A RESULT OF
@@ -1157,7 +1157,7 @@ NEGLIGENCE TO THE EXTENT APPLICABLE LAW PROHIBITS SUCH LIMITATION, BUT SHALL
 EXCLUDE SUCH LIABILITY TO THE EXTENT PERMITTED BY LAW. </sentence><sentence>SOME JURISDICTIONS DO
 NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES,
 SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
-</sentence><sentence>18. ENCRYPTION KEYS AND PUBLIC KEY INFRASTRUCTURE.</sentence><sentence> SOFTWARE RELEASED UNDER THIS
+</sentence><sentence>18.</sentence><sentence> ENCRYPTION KEYS AND PUBLIC KEY INFRASTRUCTURE.</sentence><sentence> SOFTWARE RELEASED UNDER THIS
 LICENSE AGREEMENT MAY REQUIRE A DIGITAL CERTIFICATE, OR AN ENCRYPTION KEY
 "SIGNED" BY A TRUSTED PARTY, TO FUNCTION.</sentence><sentence> AUTHOR UNDERTAKES NO RESPONSIBILITY
 FOR THE PROPER, SECURE, AND ADEQUATE FUNCTIONING OF ANY CRYPTOGRAPHIC SYSTEMS,
@@ -1170,7 +1170,7 @@ RELATIONSHIP WITH THE AUTHOR, AND IS GOVERNED SOLELY AND EXCLUSIVELY BY THE
 CERTIFICATION AUTHORITY'S CERTIFICATION PRACTICE STATEMENT AND CERTIFICATION
 AGREEMENTS.</sentence><sentence> AUTHOR ASSUMES NO RESPONSIBILITY FOR THE ACTIONS OR OMISSIONS OF
 ANY END-USER OR ANY CERTIFICATION AUTHORITY.
-</sentence><sentence>18. Saving Clause.</sentence><sentence> If any portion of this License Agreement is held invalid or
+</sentence><sentence>18.</sentence><sentence> Saving Clause.</sentence><sentence> If any portion of this License Agreement is held invalid or
 unenforceable under any particular circumstance, the balance of the License
 Agreement is intended to apply and the License Agreement as a whole is intended
 to apply in other circumstances.

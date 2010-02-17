@@ -5,7 +5,7 @@
 </sentence><sentence>AGREEMENT TERMS
 </sentence><sentence>The Frameworx Company and You have agreed as follows:
 
-</sentence><sentence>1. Definitions.</sentence><sentence> The following terms have the following respective meanings:
+</sentence><sentence>1. </sentence><sentence>Definitions.</sentence><sentence> The following terms have the following respective meanings:
 
 </sentence><sentence>(a)     Frameworx Code Base means the software developed by The Frameworx Company and made available under this License Agreement
 
@@ -23,7 +23,7 @@
 
 </sentence><sentence>(d)     release, distribute or make available, either generally or to any specific third-party, any of the foregoing in Source Code or binary form.
 
-</sentence><sentence>3. License Conditions.</sentence><sentence> The grant of the License under Section 1 hereof, and your exercise of all rights in connection with this License Agreement, will remain subject to the following terms and conditions, as well as to the other provisions hereof:
+</sentence><sentence>3. </sentence><sentence>License Conditions.</sentence><sentence> The grant of the License under Section 1 hereof, and your exercise of all rights in connection with this License Agreement, will remain subject to the following terms and conditions, as well as to the other provisions hereof:
 
 </sentence><sentence>(a)     Complete Source Code for any Downstream Distribution directly or indirectly made by You that contains, or depends for its intended functionality on, the Frameworx Code Base, or any portion or element thereof, shall be made freely available to all users thereof on terms and conditions no more restrictive, and no less favorable for any user (including, without limitation, with regard to Source Code availability and royalty-free use) than those terms and conditions provided in this License Agreement.
 
@@ -31,7 +31,7 @@
 
                               </sentence><sentence> (i)            include all portions and elements of the Frameworx Code Base required to build the Source Code of such Downstream Distribution into a fully functional machine-executable system, or additional build scripts or comparable software necessary and sufficient for such purposes;
 
-                            </sentence><sentence> (ii)            include, in each file containing any portion or element of the Frameworx Code Base, the following identifying legend:</sentence><sentence> This file contains software that has been made available under The Frameworx Open License 1.0. Use and distribution hereof are subject to the restrictions set forth therein.
+                            </sentence><sentence> (ii)            include, in each file containing any portion or element of the Frameworx Code Base, the following identifying legend:</sentence><sentence> This file contains software that has been made available under The Frameworx Open License 1.0. </sentence><sentence>Use and distribution hereof are subject to the restrictions set forth therein.
 
                             </sentence><sentence>(iii)            include all other copyright notices, authorship credits, warranty disclaimers (including that provided in Section 6 below), legends, documentation, annotations and comments contained in the Frameworx Code Base as provided to You hereunder;
 
@@ -49,9 +49,9 @@
 
 </sentence><sentence>The Frameworx Company hereby grants to you all rights to sub-license your rights hereunder as necessary to fully effect the intent and purpose of this Section 4 above, provided, however, that your rights and obligations hereunder shall be unaffected by any such sublicensing.</sentence><sentence> In addition, The Frameworx Company expressly retains all rights to take all appropriate action (including legal action) against any such direct or indirect sub-licensee to ensure its full compliance with the intent and purposes of this License Agreement.
 
-</sentence><sentence>5. Intellectual Property.</sentence><sentence> Except as expressly provided herein, this License Agreement preserves and respects Your and The Frameworx Companys respective intellectual property rights, including, in the case of The Frameworx Company, its copyrights and patent rights relating to the Frameworx Code Base.6.</sentence><sentence> Warranty Disclaimer.</sentence><sentence> THE SOFTWARE LICENSED HEREUNDER IS PROVIDED ``AS IS.''</sentence><sentence> ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT, ARE HEREBY DISCLAIMED.</sentence><sentence> IN NO EVENT SHALL THE LICENSOR OF THIS SOFTWARE, BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES INCLUDING (BUT NOT LIMITED TO) PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;</sentence><sentence> LOSS OF USE, DATA, OR PROFITS; </sentence><sentence>OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+</sentence><sentence>5. </sentence><sentence>Intellectual Property.</sentence><sentence> Except as expressly provided herein, this License Agreement preserves and respects Your and The Frameworx Companys respective intellectual property rights, including, in the case of The Frameworx Company, its copyrights and patent rights relating to the Frameworx Code Base.6.</sentence><sentence> Warranty Disclaimer.</sentence><sentence> THE SOFTWARE LICENSED HEREUNDER IS PROVIDED ``AS IS.''</sentence><sentence> ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT, ARE HEREBY DISCLAIMED.</sentence><sentence> IN NO EVENT SHALL THE LICENSOR OF THIS SOFTWARE, BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES INCLUDING (BUT NOT LIMITED TO) PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;</sentence><sentence> LOSS OF USE, DATA, OR PROFITS; </sentence><sentence>OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-</sentence><sentence>7. License Violation.</sentence><sentence> The License, and all of your rights thereunder, shall be deemed automatically terminated and void as of any Downstream Distribution directly or indirectly made or facilitated by You that violates the provisions of this License Agreement, provided, however, that this License Agreement shall survive any such termination in order to remedy the effects of such violation.</sentence><sentence> This License Agreement shall be binding on the legal successors and assigns of the parties hereto.
+</sentence><sentence>7. </sentence><sentence>License Violation.</sentence><sentence> The License, and all of your rights thereunder, shall be deemed automatically terminated and void as of any Downstream Distribution directly or indirectly made or facilitated by You that violates the provisions of this License Agreement, provided, however, that this License Agreement shall survive any such termination in order to remedy the effects of such violation.</sentence><sentence> This License Agreement shall be binding on the legal successors and assigns of the parties hereto.
 
 </sentence><sentence>Your agreement to the foregoing as of the date hereof has been evidenced by your acceptance of the relevant software distribution hereunder.
 

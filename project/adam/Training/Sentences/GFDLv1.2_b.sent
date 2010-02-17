@@ -8,7 +8,7 @@
  of this license document, but changing it is not allowed.
 
 
-</sentence><sentence>0. PREAMBLE
+</sentence><sentence>0. </sentence><sentence>PREAMBLE
 
 </sentence><sentence>The purpose of this License is to make a manual, textbook, or other
 functional and useful document "free" in the sense of freedom: to
@@ -32,14 +32,14 @@ whether it is published as a printed book.</sentence><sentence>  We recommend th
 principally for works whose purpose is instruction or reference.
 
 
-</sentence><sentence>1. APPLICABILITY AND DEFINITIONS
+</sentence><sentence>1. </sentence><sentence>APPLICABILITY AND DEFINITIONS
 
 </sentence><sentence>This License applies to any manual or other work, in any medium, that
 contains a notice placed by the copyright holder saying it can be
 distributed under the terms of this License.</sentence><sentence>  Such a notice grants a
 world-wide, royalty-free license, unlimited in duration, to use that
 work under the conditions stated herein.</sentence><sentence>  The "Document", below,
-refers to any such manual or work.  Any member of the public is a
+refers to any such manual or work.  </sentence><sentence>Any member of the public is a
 licensee, and is addressed as "you".</sentence><sentence>  You accept the license if you
 copy, modify or distribute the work in a way requiring permission
 under copyright law.
@@ -83,7 +83,7 @@ to text formatters.</sentence><sentence>  A copy made in an otherwise Transparen
 format whose markup, or absence of markup, has been arranged to thwart
 or discourage subsequent modification by readers is not Transparent.</sentence><sentence>
 An image format is not Transparent if used for any substantial amount
-of text.  A copy that is not "Transparent" is called "Opaque".
+of text.  </sentence><sentence>A copy that is not "Transparent" is called "Opaque".
 
 </sentence><sentence>Examples of suitable formats for Transparent copies include plain
 ASCII without markup, Texinfo input format, LaTeX input format, SGML
@@ -119,7 +119,7 @@ implication that these Warranty Disclaimers may have is void and has
 no effect on the meaning of this License.
 
 
-</sentence><sentence>2. VERBATIM COPYING
+</sentence><sentence>2. </sentence><sentence>VERBATIM COPYING
 
 </sentence><sentence>You may copy and distribute the Document in any medium, either
 commercially or noncommercially, provided that this License, the
@@ -135,7 +135,7 @@ number of copies you must also follow the conditions in section 3.
 you may publicly display copies.
 
 
-</sentence><sentence>3. COPYING IN QUANTITY
+</sentence><sentence>3. </sentence><sentence>COPYING IN QUANTITY
 
 </sentence><sentence>If you publish printed copies (or copies in media that commonly have
 printed covers) of the Document, numbering more than 100, and the
@@ -173,7 +173,7 @@ Document well before redistributing any large number of copies, to give
 them a chance to provide you with an updated version of the Document.
 
 
-</sentence><sentence>4. MODIFICATIONS
+</sentence><sentence>4. </sentence><sentence>MODIFICATIONS
 
 </sentence><sentence>You may copy and distribute a Modified Version of the Document under
 the conditions of sections 2 and 3 above, provided that you release
@@ -182,53 +182,53 @@ Version filling the role of the Document, thus licensing distribution
 and modification of the Modified Version to whoever possesses a copy
 of it.</sentence><sentence>  In addition, you must do these things in the Modified Version:
 
-</sentence><sentence>A. Use in the Title Page (and on the covers, if any) a title distinct
+</sentence><sentence>A. </sentence><sentence>Use in the Title Page (and on the covers, if any) a title distinct
    from that of the Document, and from those of previous versions
    (which should, if there were any, be listed in the History section
    of the Document).</sentence><sentence>  You may use the same title as a previous version
    if the original publisher of that version gives permission.
-</sentence><sentence>B. List on the Title Page, as authors, one or more persons or entities
+</sentence><sentence>B. </sentence><sentence>List on the Title Page, as authors, one or more persons or entities
    responsible for authorship of the modifications in the Modified
    Version, together with at least five of the principal authors of the
    Document (all of its principal authors, if it has fewer than five),
    unless they release you from this requirement.
-</sentence><sentence>C. State on the Title page the name of the publisher of the
+</sentence><sentence>C. </sentence><sentence>State on the Title page the name of the publisher of the
    Modified Version, as the publisher.
-</sentence><sentence>D. Preserve all the copyright notices of the Document.
-</sentence><sentence>E. Add an appropriate copyright notice for your modifications
+</sentence><sentence>D. </sentence><sentence>Preserve all the copyright notices of the Document.
+</sentence><sentence>E. </sentence><sentence>Add an appropriate copyright notice for your modifications
    adjacent to the other copyright notices.
-</sentence><sentence>F. Include, immediately after the copyright notices, a license notice
+</sentence><sentence>F. </sentence><sentence>Include, immediately after the copyright notices, a license notice
    giving the public permission to use the Modified Version under the
    terms of this License, in the form shown in the Addendum below.
-</sentence><sentence>G. Preserve in that license notice the full lists of Invariant Sections
+</sentence><sentence>G. </sentence><sentence>Preserve in that license notice the full lists of Invariant Sections
    and required Cover Texts given in the Document's license notice.
-</sentence><sentence>H. Include an unaltered copy of this License.
-</sentence><sentence>I. Preserve the section Entitled "History", Preserve its Title, and add
+</sentence><sentence>H. </sentence><sentence>Include an unaltered copy of this License.
+</sentence><sentence>I. </sentence><sentence>Preserve the section Entitled "History", Preserve its Title, and add
    to it an item stating at least the title, year, new authors, and
    publisher of the Modified Version as given on the Title Page.</sentence><sentence>  If
    there is no section Entitled "History" in the Document, create one
    stating the title, year, authors, and publisher of the Document as
    given on its Title Page, then add an item describing the Modified
    Version as stated in the previous sentence.
-</sentence><sentence>J. Preserve the network location, if any, given in the Document for
+</sentence><sentence>J. </sentence><sentence>Preserve the network location, if any, given in the Document for
    public access to a Transparent copy of the Document, and likewise
    the network locations given in the Document for previous versions
-   it was based on.</sentence><sentence>  These may be placed in the "History" section.
+   it was based on.</sentence><sentence>  These may be placed in the "History" section.</sentence><sentence>
    You may omit a network location for a work that was published at
    least four years before the Document itself, or if the original
    publisher of the version it refers to gives permission.
-</sentence><sentence>K. For any section Entitled "Acknowledgements" or "Dedications",
+</sentence><sentence>K. </sentence><sentence>For any section Entitled "Acknowledgements" or "Dedications",
    Preserve the Title of the section, and preserve in the section all
    the substance and tone of each of the contributor acknowledgements
    and/or dedications given therein.
-</sentence><sentence>L. Preserve all the Invariant Sections of the Document,
+</sentence><sentence>L. </sentence><sentence>Preserve all the Invariant Sections of the Document,
    unaltered in their text and in their titles.</sentence><sentence>  Section numbers
    or the equivalent are not considered part of the section titles.
-</sentence><sentence>M. Delete any section Entitled "Endorsements".</sentence><sentence>  Such a section
+</sentence><sentence>M. </sentence><sentence>Delete any section Entitled "Endorsements".</sentence><sentence>  Such a section
    may not be included in the Modified Version.
-</sentence><sentence>N. Do not retitle any existing section to be Entitled "Endorsements"
+</sentence><sentence>N. </sentence><sentence>Do not retitle any existing section to be Entitled "Endorsements"
    or to conflict in title with any Invariant Section.
-</sentence><sentence>O. Preserve any Warranty Disclaimers.
+</sentence><sentence>O. </sentence><sentence>Preserve any Warranty Disclaimers.
 
 </sentence><sentence>If the Modified Version includes new front-matter sections or
 appendices that qualify as Secondary Sections and contain no material
@@ -258,7 +258,7 @@ give permission to use their names for publicity for or to assert or
 imply endorsement of any Modified Version.
 
 
-</sentence><sentence>5. COMBINING DOCUMENTS
+</sentence><sentence>5. </sentence><sentence>COMBINING DOCUMENTS
 
 </sentence><sentence>You may combine the Document with other documents released under this
 License, under the terms defined in section 4 above for modified
@@ -283,7 +283,7 @@ and any sections Entitled "Dedications".</sentence><sentence>  You must delete a
 Entitled "Endorsements".
 
 
-</sentence><sentence>6. COLLECTIONS OF DOCUMENTS
+</sentence><sentence>6. </sentence><sentence>COLLECTIONS OF DOCUMENTS
 
 </sentence><sentence>You may make a collection consisting of the Document and other documents
 released under this License, and replace the individual copies of this
@@ -297,7 +297,7 @@ License into the extracted document, and follow this License in all
 other respects regarding verbatim copying of that document.
 
 
-</sentence><sentence>7. AGGREGATION WITH INDEPENDENT WORKS
+</sentence><sentence>7. </sentence><sentence>AGGREGATION WITH INDEPENDENT WORKS
 
 </sentence><sentence>A compilation of the Document or its derivatives with other separate
 and independent documents or works, in or on a volume of a storage or
@@ -317,7 +317,7 @@ electronic equivalent of covers if the Document is in electronic form.
 aggregate.
 
 
-</sentence><sentence>8. TRANSLATION
+</sentence><sentence>8. </sentence><sentence>TRANSLATION
 
 </sentence><sentence>Translation is considered a kind of modification, so you may
 distribute translations of the Document under the terms of section 4.</sentence><sentence>
@@ -338,7 +338,7 @@ its Title (section 1) will typically require changing the actual
 title.
 
 
-</sentence><sentence>9. TERMINATION
+</sentence><sentence>9. </sentence><sentence>TERMINATION
 
 </sentence><sentence>You may not copy, modify, sublicense, or distribute the Document except
 as expressly provided for under this License.</sentence><sentence>  Any other attempt to
@@ -349,7 +349,7 @@ License will not have their licenses terminated so long as such
 parties remain in full compliance.
 
 
-</sentence><sentence>10. FUTURE REVISIONS OF THIS LICENSE
+</sentence><sentence>10. </sentence><sentence>FUTURE REVISIONS OF THIS LICENSE
 
 </sentence><sentence>The Free Software Foundation may publish new, revised versions
 of the GNU Free Documentation License from time to time.</sentence><sentence>  Such new

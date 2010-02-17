@@ -51,7 +51,7 @@ modification follow.
 		    </sentence><sentence>GNU GENERAL PUBLIC LICENSE
    </sentence><sentence>TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 
-  </sentence><sentence>0. This License Agreement applies to any program or other work which
+  </sentence><sentence>0. </sentence><sentence>This License Agreement applies to any program or other work which
 contains a notice placed by the copyright holder saying it may be
 distributed under the terms of this General Public License.</sentence><sentence>  The
 "Program", below, refers to any such program or work, and a "work based
@@ -59,7 +59,7 @@ on the Program" means either the Program or any work containing the
 Program or a portion of it, either verbatim or with modifications. </sentence><sentence> Each
 licensee is addressed as "you".
 
-  </sentence><sentence>1. You may copy and distribute verbatim copies of the Program's source
+  </sentence><sentence>1. </sentence><sentence>You may copy and distribute verbatim copies of the Program's source
 code as you receive it, in any medium, provided that you conspicuously and
 appropriately publish on each copy an appropriate copyright notice and
 disclaimer of warranty;</sentence><sentence> keep intact all the notices that refer to this
@@ -68,7 +68,7 @@ other recipients of the Program a copy of this General Public License
 along with the Program. </sentence><sentence> You may charge a fee for the physical act of
 transferring a copy.
 
-  </sentence><sentence>2. You may modify your copy or copies of the Program or any portion of
+  </sentence><sentence>2. </sentence><sentence>You may modify your copy or copies of the Program or any portion of
 it, and copy and distribute such modifications under the terms of Paragraph
 1 above, provided that you also do the following:
 
@@ -98,8 +98,8 @@ it, and copy and distribute such modifications under the terms of Paragraph
 </sentence><sentence>Mere aggregation of another independent work with the Program (or its
 derivative) on a volume of a storage or distribution medium does not bring
 the other work under the scope of these terms.
-</sentence><sentence>
-  3. You may copy and distribute the Program (or a portion or derivative of
+</sentence><sentence>
+  3. </sentence><sentence>You may copy and distribute the Program (or a portion or derivative of
 it, under Paragraph 2) in object code or executable form under the terms of
 Paragraphs 1 and 2 above provided that you also do one of the following:
 
@@ -126,7 +126,7 @@ libraries that accompany the operating system on which the executable
 file runs, or for standard header files or definitions files that
 accompany that operating system.
 
-  </sentence><sentence>4. You may not copy, modify, sublicense, distribute or transfer the
+  </sentence><sentence>4. </sentence><sentence>You may not copy, modify, sublicense, distribute or transfer the
 Program except as expressly provided under this General Public License.
 </sentence><sentence>Any attempt otherwise to copy, modify, sublicense, distribute or transfer
 the Program is void, and will automatically terminate your rights to use
@@ -135,17 +135,17 @@ copies, or rights to use copies, from you under this General Public
 License will not have their licenses terminated so long as such parties
 remain in full compliance.
 
-  </sentence><sentence>5. By copying, distributing or modifying the Program (or any work based
+  </sentence><sentence>5. </sentence><sentence>By copying, distributing or modifying the Program (or any work based
 on the Program) you indicate your acceptance of this license to do so,
 and all its terms and conditions.
 
-  </sentence><sentence>6. Each time you redistribute the Program (or any work based on the
+  </sentence><sentence>6. </sentence><sentence>Each time you redistribute the Program (or any work based on the
 Program), the recipient automatically receives a license from the original
 licensor to copy, distribute or modify the Program subject to these
-terms and conditions.  You may not impose any further restrictions on the
+terms and conditions. </sentence><sentence> You may not impose any further restrictions on the
 recipients' exercise of the rights granted herein.
 
-  </sentence><sentence>7. The Free Software Foundation may publish revised and/or new versions
+  </sentence><sentence>7. </sentence><sentence>The Free Software Foundation may publish revised and/or new versions
 of the General Public License from time to time.</sentence><sentence>  Such new versions will
 be similar in spirit to the present version, but may differ in detail to
 address new problems or concerns.
@@ -158,7 +158,7 @@ Software Foundation.</sentence><sentence>  If the Program does not specify a ver
 the license, you may choose any version ever published by the Free Software
 Foundation.
 
-  </sentence><sentence>8. If you wish to incorporate parts of the Program into other free
+  </sentence><sentence>8. </sentence><sentence>If you wish to incorporate parts of the Program into other free
 programs whose distribution conditions are different, write to the author
 to ask for permission.</sentence><sentence>  For software which is copyrighted by the Free
 Software Foundation, write to the Free Software Foundation;</sentence><sentence> we sometimes
@@ -168,7 +168,7 @@ of promoting the sharing and reuse of software generally.
 
 			    </sentence><sentence>NO WARRANTY
 
-  </sentence><sentence>9. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+  </sentence><sentence>9. </sentence><sentence>BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
 FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.</sentence><sentence>  EXCEPT WHEN
 OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
 PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
@@ -178,7 +178,7 @@ TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.</sentence><sentence> 
 PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
 REPAIR OR CORRECTION.
 
-  </sentence><sentence>10. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+  </sentence><sentence>10. </sentence><sentence>IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
 WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
 REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,
 INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING

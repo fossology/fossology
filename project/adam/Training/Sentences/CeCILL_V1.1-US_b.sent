@@ -140,7 +140,7 @@ protection of the rights over said Software.
 ----------------------
 
 
-</sentence><sentence>3.1. The  Licensee  shall  be  deemed  as  having  accepted  the  terms  and
+</sentence><sentence>3.1. </sentence><sentence>The  Licensee  shall  be  deemed  as  having  accepted  the  terms  and
 conditions of  this  Agreement  by  the  occurrence  of  the  first  of  the
 following events:
 - </sentence><sentence>(i) loading the Software by any or all means, notably,  by  downloading
@@ -148,7 +148,7 @@ following events:
 - </sentence><sentence>(ii) the first time the Licensee exercises any of  the  rights  granted
   hereunder.
 
-</sentence><sentence>3.2. One copy  of  the  Agreement,  containing  a  notice  relating  to  the
+</sentence><sentence>3.2. </sentence><sentence>One copy  of  the  Agreement,  containing  a  notice  relating  to  the
 specific nature of the  Software,  to  the  limited  warranty,  and  to  the
 limitation to use by experienced users has been  provided  to  the  Licensee
 prior to its acceptance as set forth in Article  3.1  hereinabove,  and  the
@@ -159,12 +159,12 @@ Licensee hereby acknowledges that it is aware thereof.
 -----------------------------------
 
 
-</sentence><sentence>4.1. EFFECTIVE DATE
+</sentence><sentence>4.1. </sentence><sentence>EFFECTIVE DATE
 
 </sentence><sentence>The Agreement shall become effective on the date when it is accepted by  the
 Licensee as set forth in Article 3.1.
 
-</sentence><sentence>4.2. TERM
+</sentence><sentence>4.2. </sentence><sentence>TERM
 
 </sentence><sentence>The Agreement  shall  remain  in  force  during  the  whole  legal  term  of
 protection of the economic rights over the Software.
@@ -183,7 +183,7 @@ hereinafter.
 rights on  the  patents  he  holds  on  whole  or  part  of  the  inventions
 implemented in the Software.
 
-</sentence><sentence>5.1. RIGHTS OF USE
+</sentence><sentence>5.1. </sentence><sentence>RIGHTS OF USE
 
 </sentence><sentence>The Licensee is authorized to use the Software, unrestrictedly,  as  regards
 the fields of application, with it being  hereinafter  specified  that  this
@@ -199,7 +199,7 @@ relates to:
   transmission or storage operation as regards the Software, that it  is
   entitled to carry out hereunder.
 
-</sentence><sentence>5.2. entitlement to make CONTRIBUTIONS
+</sentence><sentence>5.2. </sentence><sentence>entitlement to make CONTRIBUTIONS
 
 </sentence><sentence>The right to make Contributions includes  the  right  to  translate,  adapt,
 arrange, or make any or all modification to the Software, and the  right  to
@@ -209,7 +209,7 @@ reproduce the resulting Software.
 provided that it  explicitly  mentions  its  name  as  the  author  of  said
 Contribution and the date of the development thereof.
 
-</sentence><sentence>5.3. DISTRIBUTION AND PUBLICATION RIGHTS
+</sentence><sentence>5.3. </sentence><sentence>DISTRIBUTION AND PUBLICATION RIGHTS
 
 </sentence><sentence>In particular, the right of distribution and publication includes the  right
 to transmit and communicate the Software to the general  public  on  any  or
@@ -220,7 +220,7 @@ by means of any or all process.
 or  unmodified  Software  to  third  parties  according  to  the  terms  and
 conditions set forth hereinafter.
 
-</sentence><sentence>5.3.1. REDISTRIBUTION OF SOFTWARE WITHOUT MODIFICATION
+</sentence><sentence>5.3.1. </sentence><sentence>REDISTRIBUTION OF SOFTWARE WITHOUT MODIFICATION
 
 </sentence><sentence>The Licensee is authorized to redistribute true copies of  the  Software  in
 Source Code or Object Code form, provided that said redistribution  complies
@@ -235,7 +235,7 @@ conditions for access thereto, it being understood that the additional  cost
 of acquiring the Source Code shall not exceed the cost of  transferring  the
 data.
 
-</sentence><sentence>5.3.2. REDISTRIBUTION OF MODIFIED  SOFTWARE
+</sentence><sentence>5.3.2. </sentence><sentence>REDISTRIBUTION OF MODIFIED  SOFTWARE
 
 </sentence><sentence>When the Licensee makes a  Contribution  to  the  Software,  the  terms  and
 conditions for the redistribution of the Modified  Software  shall  then  be
@@ -255,13 +255,13 @@ cost of acquiring the Source Code shall not exceed the cost of  transferring
 the data.
 
 
-</sentence><sentence>5.3.3. redistribution OF DYNAMIC MODULES
+</sentence><sentence>5.3.3. </sentence><sentence>redistribution OF DYNAMIC MODULES
 
 </sentence><sentence>When the Licensee has developed a Dynamic Module, the terms  and  conditions
 hereof do not apply to said Dynamic Module, that  may  be  distributed under 
 a separate Licensing Agreement.
 
-</sentence><sentence>5.3.4. COMPATIBILITY WITH THE GPL LICENSE
+</sentence><sentence>5.3.4. </sentence><sentence>COMPATIBILITY WITH THE GPL LICENSE
 
 </sentence><sentence>In the event that the Modified or unmodified Software is included in a code
 that is subject to the provisions of the GPL License, the Licensee is
@@ -276,7 +276,7 @@ redistribute the Modified Software under the GPL License.
 ----------------------------------
 
 
-</sentence><sentence>6.1. OVER THE INITIAL SOFTWARE
+</sentence><sentence>6.1. </sentence><sentence>OVER THE INITIAL SOFTWARE
 
 </sentence><sentence>The Holder owns the economic rights over the Initial Software.</sentence><sentence>  Any  or  all
 use of the Initial Software is subject to  compliance  with  the  terms  and
@@ -288,26 +288,26 @@ terms and conditions for the distribution of said Initial Software.
 under the conditions of  the  Agreement,  for  the  duration  set  forth  in
 article 4.2..
 
-</sentence><sentence>6.2. OVER THE CONTRIBUTIONS
+</sentence><sentence>6.2. </sentence><sentence>OVER THE CONTRIBUTIONS
 
 </sentence><sentence>The intellectual property rights over the Contributions belong to  the
 holder of the economic rights as designated by effective legislation.
 
-</sentence><sentence>6.3. OVER THE DYNAMIC MODULES
+</sentence><sentence>6.3. </sentence><sentence>OVER THE DYNAMIC MODULES
 
 </sentence><sentence>The Licensee having  developed  a  Dynamic  Module  is  the  holder  of  the
 intellectual property rights over said Dynamic Module and is free to  choose
 the agreement that shall govern its distribution.
 
-</sentence><sentence>6.4. JOINT PROVISIONS
+</sentence><sentence>6.4. </sentence><sentence>JOINT PROVISIONS
 
-</sentence><sentence>6.4.1. The Licensee expressly undertakes:
+</sentence><sentence>6.4.1. </sentence><sentence>The Licensee expressly undertakes:
 - </sentence><sentence>not to remove, or modify, in  any  or  all  manner,  the  intellectual
   property notices affixed to the Software;
 - </sentence><sentence>to reproduce said notices, in an identical manner, in  the  copies  of
   the Software.
 
-</sentence><sentence>6.4.2. The Licensee undertakes not to directly or  indirectly  infringe  the
+</sentence><sentence>6.4.2. </sentence><sentence>The Licensee undertakes not to directly or  indirectly  infringe  the
 intellectual property rights of the Holder and/or Contributors and to  take,
 where applicable, vis-à-vis its staff,  any  or  all  measures  required  to
 ensure respect for said intellectual property rights of  the  Holder  and/or
@@ -318,7 +318,7 @@ Contributors.
 -----------------------------
 
 
-</sentence><sentence>7.1. Under no circumstances shall  the  Agreement  oblige  the  Licensor  to
+</sentence><sentence>7.1. </sentence><sentence>Under no circumstances shall  the  Agreement  oblige  the  Licensor  to
 provide technical assistance or maintenance services for the Software.
 
 </sentence><sentence>However, the Licensor is entitled to offer  this  type  of  service.</sentence><sentence> The
@@ -327,7 +327,7 @@ maintenance, shall then be set forth in  a  separate  instrument.</sentence><sen
 Licensor offering said  maintenance  and/or  technical  assistance  services
 shall incur liability therefor.
 
-</sentence><sentence>7.2. Similarly, any or all Licensor  shall  be  entitled  to  offer  to  its
+</sentence><sentence>7.2. </sentence><sentence>Similarly, any or all Licensor  shall  be  entitled  to  offer  to  its
 Licensees, under its own responsibility, a  warranty,  that  shall  only  be
 binding upon itself, for the  redistribution  of  the  Software  and/or  the
 Modified Software, under terms and conditions  that  it  shall  decide  upon
@@ -340,12 +340,12 @@ Licensor and the Licensee.
 ----------------------
 
 
-</sentence><sentence>8.1. Subject to the provisions of Article 8.2, should the Licensor  fail  to
+</sentence><sentence>8.1. </sentence><sentence>Subject to the provisions of Article 8.2, should the Licensor  fail  to
 fulfill all or part of its obligations  hereunder,  the  Licensee  shall  be
 entitled to claim compensation for the direct loss suffered  as a result of
 a fault on the part of the Licensor, subject to providing evidence of it. 
 
-</sentence><sentence>8.2. The Licensor's liability is limited to the commitments made under  this
+</sentence><sentence>8.2. </sentence><sentence>The Licensor's liability is limited to the commitments made under  this
 Licensing Agreement and shall not be incurred as a result ,  in  particular:
 </sentence><sentence>(i) of loss due the Licensee's total  or  partial  failure  to  fulfill  its
 obligations,</sentence><sentence> (ii) direct or consequential loss due to the Software's use  or
@@ -364,7 +364,7 @@ all compensation from the Licensor.
 ---------------------
 
 
-</sentence><sentence>9.1. The  Licensee  acknowledges  that  the  current  situation  as  regards
+</sentence><sentence>9.1. </sentence><sentence>The  Licensee  acknowledges  that  the  current  situation  as  regards
 scientific and  technical  know-how  at  the  time  when  the  Software  was
 distributed did not enable all possible uses to be tested and verified,  nor
 for the presence of any or all faults to be detected.</sentence><sentence> In this  respect,  the
@@ -377,11 +377,11 @@ product's suitability for its requirements, its due and proper  functioning,
 and for ensuring that it  shall  not  cause  damage  to  either  persons  or
 property.
 
-</sentence><sentence>9.2. The Licensor hereby represents, in good faith, that it is  entitled  to
+</sentence><sentence>9.2. </sentence><sentence>The Licensor hereby represents, in good faith, that it is  entitled  to
 grant all the rights on the  Software (including in  particular  the  rights
 set forth in Article 5 hereof over the Software).
 
-</sentence><sentence>9.3. The Licensee acknowledges that the Software is supplied "as is" by  the
+</sentence><sentence>9.3. </sentence><sentence>The Licensee acknowledges that the Software is supplied "as is" by  the
 Licensor without any or all other express  or  tacit  warranty,  other  than
 that provided for in Article 9.2 and, in  particular,  without  any  or  all
 warranty as to its market  value,  its  secured,  innovative  or  relevant
@@ -392,7 +392,7 @@ any or all error, that it shall  operate  continuously,  that  it  shall  be
 compatible  with   the   Licensee's   own   equipment   and   its   software
 configuration, nor that it shall meet the Licensee's requirements.
 
-</sentence><sentence>9.4. The Licensor does not either expressly  or  tacitly  warrant  that  the
+</sentence><sentence>9.4. </sentence><sentence>The Licensor does not either expressly  or  tacitly  warrant  that  the
 Software does not  infringe  any  or  all  third  party  intellectual  right
 relating to a patent, software or  to  any  or  all  other  property  right.
 </sentence><sentence>Moreover, the Licensor shall not hold the Licensee harmless against  any  or
@@ -412,12 +412,12 @@ Software and as regards the existence of a trademark.
 -------------------------
 
 
-</sentence><sentence>10.1. In  the  event  of  a  breach  by  the  Licensee  of  its  obligations
+</sentence><sentence>10.1. </sentence><sentence>In  the  event  of  a  breach  by  the  Licensee  of  its  obligations
 hereunder, the Licensor may automatically terminate  this  Agreement  thirty
 (30) days after notice has been  sent  to  the  Licensee  and  has  remained
 ineffective.
 
-</sentence><sentence>10.2. The  Licensee  whose  Agreement  is  terminated  shall  no  longer  be
+</sentence><sentence>10.2. </sentence><sentence>The  Licensee  whose  Agreement  is  terminated  shall  no  longer  be
 authorized to use, modify or distribute the Software.</sentence><sentence> However,  any  or  all
 licenses that it may have granted prior to  termination  of  the  Agreement
 shall remain valid subject to their having been granted in  compliance  with
@@ -428,7 +428,7 @@ the terms and conditions hereof.
 --------------------------------------
 
 
-</sentence><sentence>11.1. EXCUSABLE EVENTS
+</sentence><sentence>11.1. </sentence><sentence>EXCUSABLE EVENTS
 
 </sentence><sentence>Neither Party shall be liable for any or all delay, or  failure  to  perform
 the Agreement, that may be attributable to an event  of  force  majeure,  an
@@ -438,19 +438,19 @@ blocking of the network following a virus attack, the  intervention  of  the
 government authorities, natural disasters, water damage, earthquakes,  fire,
 explosions, strikes and labor unrest, war, etc.
 
-</sentence><sentence>11.2. The fact that either Party may fail, on one or several  occasions,  to
+</sentence><sentence>11.2. </sentence><sentence>The fact that either Party may fail, on one or several  occasions,  to
 invoke  one  or  several  of  the  provisions   hereof,   shall   under   no
 circumstances be interpreted as being a waiver by the  interested  Party  of
 its entitlement to invoke said provision(s) subsequently.
 
-</sentence><sentence>11.3. The Agreement cancels and replaces  any  or  all  previous  agreement,
+</sentence><sentence>11.3. </sentence><sentence>The Agreement cancels and replaces  any  or  all  previous  agreement,
 whether written or oral, between the Parties and having  the  same  purpose,
 and  constitutes  the  entirety  of  the  agreement  between  said   Parties
 concerning said purpose.</sentence><sentence> No supplement or  modification  to  the  terms  and
 conditions hereof shall be effective as regards the  Parties  unless  it  is
 made in writing and signed by their duly authorized representatives.
 
-</sentence><sentence>11.4. In the event that one or several of  the  provisions  hereof  were  to
+</sentence><sentence>11.4. </sentence><sentence>In the event that one or several of  the  provisions  hereof  were  to
 conflict with a current or future applicable act or legislative  text,  said
 act or legislative text shall take precedence, and the  Parties  shall  make
 the necessary amendments so  as  to  be  in  compliance  with  said  act  or
@@ -459,7 +459,7 @@ legislative  text.</sentence><sentence>  All  the  other  provisions  shall   re
 void, for any reason whatsoever, shall not cause the Agreement  as  a  whole
 to be null and void.
 
-</sentence><sentence>11.5. LANGUAGE
+</sentence><sentence>11.5. </sentence><sentence>LANGUAGE
 
 </sentence><sentence>The Agreement is drafted in both French and  English.</sentence><sentence>  In  the  event  of  a
 conflict as  regards  construction,  the  French  version  shall  be  deemed
@@ -470,16 +470,16 @@ authentic.
 -------------------------------------------
 
 
-</sentence><sentence>12.1. Any or all person is authorized to duplicate and distribute copies  of
+</sentence><sentence>12.1. </sentence><sentence>Any or all person is authorized to duplicate and distribute copies  of
 this Agreement.
 
-</sentence><sentence>12.2. So as to ensure coherence, the wording of this Agreement is  protected
+</sentence><sentence>12.2. </sentence><sentence>So as to ensure coherence, the wording of this Agreement is  protected
 and may only be modified by the authors of the  License,  that  reserve  the
 right to periodically publish updates or  new  versions  of  the  Agreement,
 each with a separate number.</sentence><sentence> These subsequent versions may address new issues
 encountered by Free Software.
 
-</sentence><sentence>12.3. Any  or  all  Software  distributed  under  a  given  version  of  the
+</sentence><sentence>12.3. </sentence><sentence>Any  or  all  Software  distributed  under  a  given  version  of  the
 Agreement may only be subsequently distributed under  the  same  version  of
 the Agreement, or  a  subsequent  version,  subject  to  the  provisions  of
 article 5.3.4.
@@ -489,11 +489,11 @@ article 5.3.4.
 -------------------------------------------
 
 
-</sentence><sentence>13.1. The Agreement is  governed  by  French  law.</sentence><sentence>   The  Parties  agree  to
+</sentence><sentence>13.1. </sentence><sentence>The Agreement is  governed  by  French  law.</sentence><sentence>   The  Parties  agree  to
 endeavor to settle the disagreements or disputes that may arise  during  the
 performance of the Agreement out-of-court.
 
-</sentence><sentence>13.2. In the absence of an out-of-court settlement within two (2) months  as
+</sentence><sentence>13.2. </sentence><sentence>In the absence of an out-of-court settlement within two (2) months  as
 from their occurrence, and unless emergency proceedings are  necessary,  the
 disagreements or disputes shall be  referred  to  the  Paris  Courts  having
 jurisdiction, by the first Party to take action.

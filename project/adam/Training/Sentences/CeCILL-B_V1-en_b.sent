@@ -185,13 +185,13 @@ forth in this paragraph.
 as to its fields of application, with it being hereinafter specified
 that this comprises:
 
-   </sentence><sentence>1. permanent or temporary reproduction of all or part of the Software
+   </sentence><sentence>1. </sentence><sentence>permanent or temporary reproduction of all or part of the Software
       by any or all means and in any or all form.
 
-   </sentence><sentence>2. loading, displaying, running, or storing the Software on any or
+   </sentence><sentence>2. </sentence><sentence>loading, displaying, running, or storing the Software on any or
       all medium.
 
-   </sentence><sentence>3. entitlement to observe, study or test its operation so as to
+   </sentence><sentence>3. </sentence><sentence>entitlement to observe, study or test its operation so as to
       determine the ideas and principles behind any or all constituent
       elements of said Software.</sentence><sentence> This shall apply when the Licensee
       carries out any or all loading, displaying, running, transmission
@@ -229,9 +229,9 @@ conditions set forth hereinafter.
 Source Code or Object Code form, provided that said distribution
 complies with all the provisions of the Agreement and is accompanied by:
 
-   </sentence><sentence>1. a copy of the Agreement,
+   </sentence><sentence>1. </sentence><sentence>a copy of the Agreement,
 
-   </sentence><sentence>2. a notice relating to the limitation of both the Licensor's
+   </sentence><sentence>2. </sentence><sentence>a notice relating to the limitation of both the Licensor's
       warranty and liability as set forth in Articles 8 and 9,
 
 and that, in the event that only the Object Code of the Software is
@@ -262,20 +262,20 @@ may be distributed under a separate license agreement.
 </sentence><sentence>Any Licensee who may distribute a Modified Software hereby expressly
 agrees to:
 
-   </sentence><sentence>1. indicate in the related documentation that it is based on the
+   </sentence><sentence>1. </sentence><sentence>indicate in the related documentation that it is based on the
       Software licensed hereunder, and reproduce the intellectual
       property notice for the Software,
 
-   </sentence><sentence>2. ensure that written indications of the Software intended use,
+   </sentence><sentence>2. </sentence><sentence>ensure that written indications of the Software intended use,
       intellectual property notice and license hereunder are included in
       easily accessible format from the Modified Software interface,
 
-   </sentence><sentence>3. mention, on a freely accessible website describing the Modified
+   </sentence><sentence>3. </sentence><sentence>mention, on a freely accessible website describing the Modified
       Software, at least throughout the distribution term thereof, that
       it is based on the Software licensed hereunder, and reproduce the
       Software intellectual property notice,
 
-   </sentence><sentence>4. where it is distributed to a third party that may distribute a
+   </sentence><sentence>4. </sentence><sentence>where it is distributed to a third party that may distribute a
       Modified Software without having to make its source code
       available, make its best efforts to ensure that said third party
       agrees to comply with the obligations set forth in this Article .
@@ -328,10 +328,10 @@ govern its distribution.
 
 </sentence><sentence>The Licensee expressly undertakes:
 
-   </sentence><sentence>1. not to remove, or modify, in any manner, the intellectual property
+   </sentence><sentence>1. </sentence><sentence>not to remove, or modify, in any manner, the intellectual property
       notices attached to the Software;
 
-   </sentence><sentence>2. to reproduce said notices, in an identical manner, in the copies
+   </sentence><sentence>2. </sentence><sentence>to reproduce said notices, in an identical manner, in the copies
       of the Software modified or not.
 
 </sentence><sentence>The Licensee undertakes not to directly or indirectly infringe the
@@ -418,11 +418,11 @@ relating to a patent, software or any other property right.</sentence><sentence>
 the Licensor disclaims any and all liability towards the Licensee
 arising out of any or all proceedings for infringement that may be
 instituted in respect of the use, modification and redistribution of the
-Software. Nevertheless, should such proceedings be instituted against
+Software. </sentence><sentence>Nevertheless, should such proceedings be instituted against
 the Licensee, the Licensor shall provide it with technical and legal
 assistance for its defense.</sentence><sentence> Such technical and legal assistance shall be
 decided on a case-by-case basis between the relevant Licensor and the
-Licensee pursuant to a memorandum of understanding. The Licensor
+Licensee pursuant to a memorandum of understanding. </sentence><sentence>The Licensor
 disclaims any and all liability as regards the Licensee's use of the
 name of the Software.</sentence><sentence> No warranty is given as regards the existence of
 prior rights over the name of the Software or as regards the existence
@@ -492,7 +492,7 @@ Agreement.
 </sentence><sentence>12.2 So as to ensure coherence, the wording of this Agreement is
 protected and may only be modified by the authors of the License, who
 reserve the right to periodically publish updates or new versions of the
-Agreement, each with a separate number. These subsequent versions may
+Agreement, each with a separate number. </sentence><sentence>These subsequent versions may
 address new issues encountered by Free Software.
 
 </sentence><sentence>12.3 Any Software distributed under a given version of the Agreement may
@@ -502,7 +502,7 @@ or a subsequent version.
 
     </sentence><sentence>Article 13 - GOVERNING LAW AND JURISDICTION
 
-</sentence><sentence>13.1 The Agreement is governed by French law. The Parties agree to
+</sentence><sentence>13.1 The Agreement is governed by French law. </sentence><sentence>The Parties agree to
 endeavor to seek an amicable solution to any disagreements or disputes
 that may arise during the performance of the Agreement.
 

@@ -1,7 +1,7 @@
 <sentence>3DFX GLIDE Source Code General Public License
 
 
-</sentence><sentence>1. PREAMBLE
+</sentence><sentence>1. </sentence><sentence>PREAMBLE
 
 	</sentence><sentence>This license is for software that provides a 3D graphics application 
 	program interface (API).</sentence><sentence>The license is intended to offer terms similar
@@ -25,7 +25,7 @@
 	distribution and modification follow.
 
 
-</sentence><sentence>2. DEFINITIONS
+</sentence><sentence>2. </sentence><sentence>DEFINITIONS
 
 	</sentence><sentence>2.1 This License applies to any program (or other "work") which 
 	contains a notice placed by the copyright holder saying it may be 
@@ -56,7 +56,7 @@
 	</sentence><sentence>2.7 "3dfx" means 3dfx Interactive, Inc.
 
 
-</sentence><sentence>3. LICENSED ACTIVITIES
+</sentence><sentence>3. </sentence><sentence>LICENSED ACTIVITIES
 
 	</sentence><sentence>3.1 COPYING - You may copy and distribute verbatim copies of the 
 	Program's Source Code as you receive it, in any medium, subject to the
@@ -205,7 +205,7 @@
 	parties remain in full compliance.
 
  
-</sentence><sentence>4. MISCELLANEOUS
+</sentence><sentence>4. </sentence><sentence>MISCELLANEOUS
 
 	</sentence><sentence>4.1 Acceptance of this License is voluntary.</sentence><sentence> By using, modifying or
 	distributing the Program or any Derivative Work, you indicate your 
@@ -229,7 +229,7 @@
 	provisions of this License.
 
 
-</sentence><sentence>5. NO WARRANTIES
+</sentence><sentence>5. </sentence><sentence>NO WARRANTIES
 
 	</sentence><sentence>5.1 TO THE EXTENT PERMITTED BY APPLICABLE LAW, THERE IS NO WARRANTY
 	FOR THE PROGRAM.</sentence><sentence> OR DERIVATIVE WORKS THE COPYRIGHT HOLDERS AND/OR
