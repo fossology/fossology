@@ -33,7 +33,7 @@
 "</SENTENCE><SENTENCE>Compiled" form means the compiled bytecode, object code, binary, or any other form resulting from mechanical transformation or translation of the Source form.
 </SENTENCE><SENTENCE>Permission for Use and Modification Without Distribution
 
-(</SENTENCE><SENTENCE>1) You are permitted to use the Standard Version and create and use Modified Versions for any purpose without restriction, provided that you do not Distribute the Modified Version.
+(</SENTENCE><SENTENCE>1) You are permitted to use the Standard Version and create and use Modified Versions for any purpose without restriction, provided that you do not Distribute the Modified Version.</sentence><sentence>
 Permissions for Redistribution of the Standard Version
 
 (</SENTENCE><SENTENCE>2) You may Distribute verbatim copies of the Source form of the Standard Version of this Package in any medium without restriction, either gratis or for a Distributor Fee, provided that you duplicate all of the original copyright notices and associated disclaimers. </SENTENCE><SENTENCE>At your discretion, such verbatim copies may or may not include a Compiled form of the Package.
@@ -50,7 +50,7 @@ Permissions for Redistribution of the Standard Version
 (ii) a license that permits the licensee to freely copy, modify and redistribute the Modified Version using the same licensing terms that apply to the copy that the licensee received, and requires that the Source form of the Modified Version, and of any works derived from it, be made freely available in that license fees are prohibited but Distributor Fees are allowed.
 </SENTENCE><SENTENCE>Distribution of Compiled Forms of the Standard Version or Modified Versions without the Source
 
-(</SENTENCE><SENTENCE>5) You may Distribute Compiled forms of the Standard Version without the Source, provided that you include complete instructions on how to get the Source of the Standard Version. Such instructions must be valid at the time of your distribution. </SENTENCE><SENTENCE>If these instructions, at any time while you are carrying out such distribution, become invalid, you must provide new instructions on demand or cease further distribution. </SENTENCE><SENTENCE>If you provide valid instructions or cease distribution within thirty days after you become aware that the instructions are invalid, then you do not forfeit any of your rights under this license.
+(</SENTENCE><SENTENCE>5) You may Distribute Compiled forms of the Standard Version without the Source, provided that you include complete instructions on how to get the Source of the Standard Version. </sentence><sentence>Such instructions must be valid at the time of your distribution. </SENTENCE><SENTENCE>If these instructions, at any time while you are carrying out such distribution, become invalid, you must provide new instructions on demand or cease further distribution. </SENTENCE><SENTENCE>If you provide valid instructions or cease distribution within thirty days after you become aware that the instructions are invalid, then you do not forfeit any of your rights under this license.
 
 (</SENTENCE><SENTENCE>6) You may Distribute a Modified Version in Compiled form without the Source, provided that you comply with Section 4 with respect to the Source of the Modified Version.
 </SENTENCE><SENTENCE>Aggregating or Linking the Package

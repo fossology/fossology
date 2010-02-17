@@ -11,13 +11,13 @@ distribute the complete modified source code.</sentence><sentence>  Modification
 be distributed as patches to the released version.</sentence><sentence>  Permission to
 distribute binaries produced by compiling modified sources is granted,
 provided you
-  </sentence><sentence>1. distribute the corresponding source modifications from the
+  </sentence><sentence>1. </sentence><sentence>distribute the corresponding source modifications from the
    released version in the form of a patch file along with the binaries,
-  </sentence><sentence>2. add special version identification to distinguish your version
+  </sentence><sentence>2. </sentence><sentence>add special version identification to distinguish your version
    in addition to the base release version number,
-  </sentence><sentence>3. provide your name and address as the primary contact for the
+  </sentence><sentence>3. </sentence><sentence>provide your name and address as the primary contact for the
    support of your modified version, and
-  </sentence><sentence>4. retain our contact information in regard to use of the base
+  </sentence><sentence>4. </sentence><sentence>retain our contact information in regard to use of the base
    software.
 </sentence><sentence>Permission to distribute the released version of the source code along
 with corresponding source modifications in the form of a patch file is

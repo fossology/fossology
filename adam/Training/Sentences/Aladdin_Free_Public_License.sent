@@ -50,7 +50,7 @@ OR WORKS BASED ON IT.</SENTENCE><SENTENCE> NOTHING OTHER THAN THIS LICENSE GRANT
 ARE PROHIBITED BY LAW. </SENTENCE><SENTENCE>IF YOU DO NOT ACCEPT THESE TERMS AND CONDITIONS,
 DO NOT MODIFY OR DISTRIBUTE THE PROGRAM.
 
-</SENTENCE><SENTENCE>1. Licenses.
+</SENTENCE><SENTENCE>1. </sentence><sentence>Licenses.
 </SENTENCE><SENTENCE>Licensor hereby grants you the following rights, provided that you comply
 with all of the restrictions set forth in this License and provided, further,
 that you distribute an unmodified copy of this License with the Program:
@@ -71,7 +71,7 @@ copies of such throughout the world, in any medium.
 
 
 
-</SENTENCE><SENTENCE>2. Restrictions.
+</SENTENCE><SENTENCE>2. </sentence><sentence>Restrictions.
 </SENTENCE><SENTENCE>This license is subject to the following restrictions:
 
 
@@ -213,7 +213,7 @@ to copy the source code from the same place counts as distribution of the
 source code, even though third parties are not compelled to copy the source
 code along with the object code.
 
-</SENTENCE><SENTENCE>3. Reservation of Rights.
+</SENTENCE><SENTENCE>3. </sentence><sentence>Reservation of Rights.
 </SENTENCE><SENTENCE>No rights are granted to the Program except as expressly set forth herein.
 </SENTENCE><SENTENCE>You may not copy, modify, sublicense, or distribute the Program except
 as expressly provided under this License. </SENTENCE><SENTENCE>Any attempt otherwise to copy,
@@ -222,21 +222,21 @@ terminate your rights under this License. </SENTENCE><SENTENCE>However, parties 
 copies, or rights, from you under this License will not have their licenses
 terminated so long as such parties remain in full compliance.
 
-</SENTENCE><SENTENCE>4. Other Restrictions.
+</SENTENCE><SENTENCE>4. </sentence><sentence>Other Restrictions.
 </SENTENCE><SENTENCE>If the distribution and/or use of the Program is restricted in certain
 countries for any reason, Licensor may add an explicit geographical distribution
 limitation excluding those countries, so that distribution is permitted
 only in or among countries not thus excluded. </SENTENCE><SENTENCE>In such case, this License
 incorporates the limitation as if written in the body of this License.
 
-</SENTENCE><SENTENCE>5. Limitations.
+</SENTENCE><SENTENCE>5. </sentence><sentence>Limitations.
 </SENTENCE><SENTENCE>THE PROGRAM IS PROVIDED TO YOU "AS IS," WITHOUT WARRANTY. </SENTENCE><SENTENCE>THERE IS NO
 WARRANTY FOR THE PROGRAM, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
 PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. </SENTENCE><SENTENCE>THE ENTIRE
 RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. </SENTENCE><SENTENCE>SHOULD
 THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
-REPAIR OR CORRECTION.
+REPAIR OR CORRECTION.</sentence><sentence>
 IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
 WILL LICENSOR, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE THE
 PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
@@ -247,7 +247,7 @@ THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
 EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGES.
 
-</SENTENCE><SENTENCE>6. General.
+</SENTENCE><SENTENCE>6. </sentence><sentence>General.
 </SENTENCE><SENTENCE>This License is governed by the laws of the State of California, U.S.A.,
 excluding choice of law rules.
 </SENTENCE><SENTENCE>If any part of this License is found to be in conflict with the law,

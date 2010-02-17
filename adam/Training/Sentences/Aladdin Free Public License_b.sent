@@ -3,7 +3,7 @@ Menlo Park, California, U.S.A. All rights reserved.
 
 </sentence><sentence>NOTE: This License is not the same as any of the GNU
 Licenses published by the Free Software
-Foundation. Its terms are substantially different from those of the
+Foundation. </sentence><sentence>Its terms are substantially different from those of the
 GNU Licenses.</sentence><sentence> If you are familiar with the GNU Licenses, please read this
 license with extra care.
 
@@ -30,7 +30,7 @@ so, while retaining for the developer(s) of the Program the power to make
 those who use the Program to enhance the value of commercial products pay
 for the privilege of doing so.
 
-</sentence><sentence>0. Subject Matter
+</sentence><sentence>0. </sentence><sentence>Subject Matter
 </sentence><sentence>This License applies to the computer programs known as "AFPL Ghostscript",
 "AFPL Ghostscript PCL5e", "AFPL Ghostscript PCL5c", and "AFPL Ghostscript
 PXL".&nbsp; The "Program", below, refers to such program.</sentence><sentence> The Program is
@@ -46,11 +46,11 @@ BY MODIFYING OR DISTRIBUTING THE PROGRAM (OR ANY WORK BASED ON THE
 PROGRAM), YOU INDICATE YOUR ACCEPTANCE OF THIS LICENSE TO DO SO, AND ALL
 ITS TERMS AND CONDITIONS FOR COPYING, DISTRIBUTING OR MODIFYING THE PROGRAM
 OR WORKS BASED ON IT.</sentence><sentence> NOTHING OTHER THAN THIS LICENSE GRANTS YOU PERMISSION
-TO MODIFY OR DISTRIBUTE THE PROGRAM OR ITS DERIVATIVE WORKS. THESE ACTIONS
+TO MODIFY OR DISTRIBUTE THE PROGRAM OR ITS DERIVATIVE WORKS. </sentence><sentence>THESE ACTIONS
 ARE PROHIBITED BY LAW.</sentence><sentence> IF YOU DO NOT ACCEPT THESE TERMS AND CONDITIONS,
 DO NOT MODIFY OR DISTRIBUTE THE PROGRAM.
 
-</sentence><sentence>1. Licenses.
+</sentence><sentence>1. </sentence><sentence>Licenses.
 </sentence><sentence>Licensor hereby grants you the following rights, provided that you comply
 with all of the restrictions set forth in this License and provided, further,
 that you distribute an unmodified copy of this License with the Program:
@@ -71,7 +71,7 @@ copies of such throughout the world, in any medium.
 
 
 
-</sentence><sentence>2. Restrictions.
+</sentence><sentence>2. </sentence><sentence>Restrictions.
 </sentence><sentence>This license is subject to the following restrictions:
 
 
@@ -112,7 +112,7 @@ that the files containing the Program are reproduced entirely and verbatim
 on such media, that all information on such media be redistributable for
 non-commercial purposes without charge, and that such media are distributed
 by themselves (except for accompanying documentation) independent of any
-other product or service. Examples of such media include CD-ROM, magnetic
+other product or service. </sentence><sentence>Examples of such media include CD-ROM, magnetic
 tape, and optical storage media.</sentence><sentence> (This is not intended to be an exhaustive
 list.)</sentence><sentence> An example of a distribution that does not fall under this section
 is a CD-ROM included in a book or magazine.</sentence><sentence> (This is not an exhaustive
@@ -212,8 +212,8 @@ to copy the source code from the same place counts as distribution of the
 source code, even though third parties are not compelled to copy the source
 code along with the object code.
 
-</sentence><sentence>3. Reservation of Rights.
-</sentence><sentence>No rights are granted to the Program except as expressly set forth herein.
+</sentence><sentence>3. </sentence><sentence>Reservation of Rights.
+</sentence><sentence>No rights are granted to the Program except as expressly set forth herein.</sentence><sentence>
 You may not copy, modify, sublicense, or distribute the Program except
 as expressly provided under this License.</sentence><sentence> Any attempt otherwise to copy,
 modify, sublicense or distribute the Program is void, and will automatically
@@ -221,14 +221,14 @@ terminate your rights under this License.</sentence><sentence> However, parties 
 copies, or rights, from you under this License will not have their licenses
 terminated so long as such parties remain in full compliance.
 
-</sentence><sentence>4. Other Restrictions.
+</sentence><sentence>4. </sentence><sentence>Other Restrictions.
 </sentence><sentence>If the distribution and/or use of the Program is restricted in certain
 countries for any reason, Licensor may add an explicit geographical distribution
 limitation excluding those countries, so that distribution is permitted
 only in or among countries not thus excluded.</sentence><sentence> In such case, this License
 incorporates the limitation as if written in the body of this License.
 
-</sentence><sentence>5. Limitations.
+</sentence><sentence>5. </sentence><sentence>Limitations.
 </sentence><sentence>THE PROGRAM IS PROVIDED TO YOU "AS IS," WITHOUT WARRANTY.</sentence><sentence> THERE IS NO
 WARRANTY FOR THE PROGRAM, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT
 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -246,7 +246,7 @@ THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
 EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGES.
 
-</sentence><sentence>6. General.
+</sentence><sentence>6. </sentence><sentence>General.
 </sentence><sentence>This License is governed by the laws of the State of California, U.S.A.,
 excluding choice of law rules.
 </sentence><sentence>If any part of this License is found to be in conflict with the law,

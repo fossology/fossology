@@ -1,50 +1,50 @@
 <sentence>gSOAP Public License
 Version 1.3a
-</sentence><sentence>The gSOAP public license is derived from the Mozilla Public License (MPL1.1).</sentence><sentence> The sections that were deleted from the original MPL1.1 text are 1.0.1, 2.1.(c),(d), 2.2.(c),(d), 8.2.(b), 10, and 11. Section 3.8 was added.</sentence><sentence> The modified sections are 2.1.(b), 2.2.(b), 3.2 (simplified), 3.5 (deleted the last sentence), and 3.6 (simplified).
+</sentence><sentence>The gSOAP public license is derived from the Mozilla Public License (MPL1.1).</sentence><sentence> The sections that were deleted from the original MPL1.1 text are 1.0.1, 2.1.(c),(d), 2.2.(c),(d), 8.2.(b), 10, and 11. </sentence><sentence>Section 3.8 was added.</sentence><sentence> The modified sections are 2.1.(b), 2.2.(b), 3.2 (simplified), 3.5 (deleted the last sentence), and 3.6 (simplified).
 </sentence><sentence>1  DEFINITIONS.
 
     </sentence><sentence>sep 0mm
 1.0.1.
-</sentence><sentence>1.1. "Contributor"
+</sentence><sentence>1.1. </sentence><sentence>"Contributor"
     means each entity that creates or contributes to the creation of Modifications.
-</sentence><sentence>1.2. "Contributor Version"
+</sentence><sentence>1.2. </sentence><sentence>"Contributor Version"
     means the combination of the Original Code, prior Modifications used by a Contributor, and the Modifications made by that particular Contributor.
-</sentence><sentence>1.3. "Covered Code"
+</sentence><sentence>1.3. </sentence><sentence>"Covered Code"
     means the Original Code, or Modifications or the combination of the Original Code, and Modifications, in each case including portions thereof.
-</sentence><sentence>1.4. "Electronic Distribution Mechanism"
+</sentence><sentence>1.4. </sentence><sentence>"Electronic Distribution Mechanism"
     means a mechanism generally accepted in the software development community for the electronic transfer of data.
-</sentence><sentence>1.5. "Executable"
+</sentence><sentence>1.5. </sentence><sentence>"Executable"
     means Covered Code in any form other than Source Code.
-</sentence><sentence>1.6. "Initial Developer"
+</sentence><sentence>1.6. </sentence><sentence>"Initial Developer"
     means the individual or entity identified as the Initial Developer in the Source Code notice required by Exhibit A.
-</sentence><sentence>1.7. "Larger Work"
+</sentence><sentence>1.7. </sentence><sentence>"Larger Work"
     means a work which combines Covered Code or portions thereof with code not governed by the terms of this License.
-</sentence><sentence>1.8. "License"
+</sentence><sentence>1.8. </sentence><sentence>"License"
     means this document.
-</sentence><sentence>1.8.1. "Licensable"
+</sentence><sentence>1.8.1. </sentence><sentence>"Licensable"
     means having the right to grant, to the maximum extent possible, whether at the time of the initial grant or subsequently acquired, any and all of the rights conveyed herein.
-</sentence><sentence>1.9. "Modifications"</sentence><sentence>
+</sentence><sentence>1.9. </sentence><sentence>"Modifications"</sentence><sentence>
     means any addition to or deletion from the substance or structure of either the Original Code or any previous Modifications.</sentence><sentence> When Covered Code is released as a series of files, a Modification is:
 
         </sentence><sentence>sep 0mm
-    A.
+    A.</sentence><sentence>
         Any addition to or deletion from the contents of a file containing Original Code or previous Modifications.
-    </sentence><sentence>B.
+    </sentence><sentence>B.</sentence><sentence>
         Any new file that contains any part of the Original Code, or previous Modifications. 
 
-</sentence><sentence>1.10. "Original Code"</sentence><sentence>
+</sentence><sentence>1.10. </sentence><sentence>"Original Code"</sentence><sentence>
     means Source Code of computer software code which is described in the Source Code notice required by Exhibit A as Original Code, and which, at the time of its release under this License is not already Covered Code governed by this License.
-</sentence><sentence>1.10.1. "Patent Claims"
+</sentence><sentence>1.10.1. </sentence><sentence>"Patent Claims"
     means any patent claim(s), now owned or hereafter acquired, including without limitation, method, process, and apparatus claims, in any patent Licensable by grantor.
-</sentence><sentence>1.11. "Source Code"
+</sentence><sentence>1.11. </sentence><sentence>"Source Code"
     means the preferred form of the Covered Code for making modifications to it, including all modules it contains, plus any associated interface definition files, scripts used to control compilation and installation of an Executable, or source code differential comparisons against either the Original Code or another well known, available Covered Code of the Contributor's choice.</sentence><sentence> The Source Code can be in a compressed or archival form, provided the appropriate decompression or de-archiving software is widely available for no charge.
-</sentence><sentence>1.12. "You" (or "Your")
+</sentence><sentence>1.12. </sentence><sentence>"You" (or "Your")
     means an individual or a legal entity exercising rights under, and complying with all of the terms of, this License or a future version of this License issued under Section 6.1.</sentence><sentence> For legal entities, "You" includes any entity which controls, is controlled by, or is under common control with You.</sentence><sentence> For purposes of this definition, "control" means</sentence><sentence> (a) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, </sentence><sentence>or (b) ownership of more than fifty percent (50%) of the outstanding shares or beneficial ownership of such entity.
 
 </sentence><sentence>2  SOURCE CODE LICENSE.
 
     </sentence><sentence>sep 0mm
-2.1. The Initial Developer Grant.
+2.1. </sentence><sentence>The Initial Developer Grant.
 
     </sentence><sentence>The Initial Developer hereby grants You a world-wide, royalty-free, non-exclusive license, subject to third party intellectual property claims:
 
@@ -56,7 +56,7 @@ Version 1.3a
    </sentence><sentence> (c)
     (d)
 
-</sentence><sentence>2.2. Contributor Grant.
+</sentence><sentence>2.2.</sentence><sentence> Contributor Grant.
 
     </sentence><sentence>Subject to third party intellectual property claims, each Contributor hereby grants You a world-wide, royalty-free, non-exclusive license
         </sentence><sentence>sep 0mm
@@ -70,16 +70,16 @@ Version 1.3a
 </sentence><sentence>3  DISTRIBUTION OBLIGATIONS.
 
     </sentence><sentence>sep 0mm
-3.1. Application of License.
+3.1. </sentence><sentence>Application of License.
 
     </sentence><sentence>The Modifications which You create or to which You contribute are governed by the terms of this License, including without limitation Section 2.2.</sentence><sentence> The Source Code version of Covered Code may be distributed only under the terms of this License or a future version of this License released under Section 6.1, and You must include a copy of this License with every copy of the Source Code You distribute.</sentence><sentence> You may not offer or impose any terms on any Source Code version that alters or restricts the applicable version of this License or the recipients' rights hereunder.</sentence><sentence> However, You may include an additional document offering the additional rights described in Section 3.5.
-</sentence><sentence>3.2. Availability of Source Code.
+</sentence><sentence>3.2. </sentence><sentence>Availability of Source Code.
 
     </sentence><sentence>Any Modification created by You will be provided to the Initial Developer in Source Code form and are subject to the terms of the License.
-</sentence><sentence>3.3. Description of Modifications.
+</sentence><sentence>3.3. </sentence><sentence>Description of Modifications.
 
     </sentence><sentence>You must cause all Covered Code to which You contribute to contain a file documenting the changes You made to create that Covered Code and the date of any change.</sentence><sentence> You must include a prominent statement that the Modification is derived, directly or indirectly, from Original Code provided by the Initial Developer and including the name of the Initial Developer in (a) the Source Code, and (b) in any notice in an Executable version or related documentation in which You describe the origin or ownership of the Covered Code.
-</sentence><sentence>3.4. Intellectual Property Matters.
+</sentence><sentence>3.4. </sentence><sentence>Intellectual Property Matters.
 
         </sentence><sentence>sep 0mm
     (a) Third Party Claims.
@@ -88,16 +88,16 @@ Version 1.3a
     </sentence><sentence>(c) Representations.
         </sentence><sentence>Contributor represents that, except as disclosed pursuant to Section 3.4(a) above, Contributor believes that Contributor's Modifications are Contributor's original creation(s) and/or Contributor has sufficient rights to grant the rights conveyed by this License. 
 
-</sentence><sentence>3.5. Required Notices.
+</sentence><sentence>3.5. </sentence><sentence>Required Notices.
 
     </sentence><sentence>You must duplicate the notice in Exhibit A in each file of the Source Code.</sentence><sentence> If it is not possible to put such notice in a particular Source Code file due to its structure, then You must include such notice in a location (such as a relevant directory) where a user would be likely to look for such a notice.</sentence><sentence> If You created one or more Modification(s) You may add your name as a Contributor to the notice described in Exhibit A.</sentence><sentence> You must also duplicate this License in any documentation for the Source Code where You describe recipients' rights or ownership rights relating to Covered Code.</sentence><sentence> You may choose to offer, and to charge a fee for, warranty, support, indemnity or liability obligations to one or more recipients of Covered Code.</sentence><sentence> However, You may do so only on Your own behalf, and not on behalf of the Initial Developer or any Contributor.
-</sentence><sentence>3.6. Distribution of Executable Versions.
+</sentence><sentence>3.6. </sentence><sentence>Distribution of Executable Versions.
 
     </sentence><sentence>You may distribute Covered Code in Executable form only if the requirements of Section 3.1-3.5 have been met for that Covered Code.</sentence><sentence> You may distribute the Executable version of Covered Code or ownership rights under a license of Your choice, which may contain terms different from this License, provided that You are in compliance with the terms of this License and that the license for the Executable version does not attempt to limit or alter the recipient's rights in the Source Code version from the rights set forth in this License.</sentence><sentence> If You distribute the Executable version under a different license You must make it absolutely clear that any terms which differ from this License are offered by You alone, not by the Initial Developer or any Contributor.</sentence><sentence> If you distribute executable versions containing Covered Code as part of a product, you must reproduce the notice in Exhibit B in the documentation and/or other materials provided with the product.
-</sentence><sentence>3.7. Larger Works.
+</sentence><sentence>3.7. </sentence><sentence>Larger Works.
 
     </sentence><sentence>You may create a Larger Work by combining Covered Code with other code not governed by the terms of this License and distribute the Larger Work as a single product.</sentence><sentence> In such a case, You must make sure the requirements of this License are fulfilled for the Covered Code.
-</sentence><sentence>3.8. Restrictions.
+</sentence><sentence>3.8. </sentence><sentence>Restrictions.
 
     </sentence><sentence>You may not remove any product identification, copyright, proprietary notices or labels from gSOAP.
 
@@ -108,26 +108,26 @@ Version 1.3a
 </sentence><sentence>6  VERSIONS OF THE LICENSE.
 
     </sentence><sentence>sep 0mm
-6.1. New Versions.
+6.1. </sentence><sentence>New Versions.
 
     </sentence><sentence>Grantor may publish revised and/or new versions of the License from time to time. </sentence><sentence>Each version will be given a distinguishing version number.</sentence><sentence>
-6.2. Effect of New Versions.
+6.2. </sentence><sentence>Effect of New Versions.
 
     </sentence><sentence>Once Covered Code has been published under a particular version of the License, You may always continue to use it under the terms of that version.</sentence><sentence> You may also choose to use such Covered Code under the terms of any subsequent version of the License.
-</sentence><sentence>6.3. Derivative Works.
+</sentence><sentence>6.3. </sentence><sentence>Derivative Works.
 
     </sentence><sentence>If You create or use a modified version of this License (which you may only do in order to apply it to code which is not already Covered Code governed by this License),</sentence><sentence> You must (a) rename Your license so that the phrase "gSOAP" or any confusingly similar phrase do not appear in your license (except to note that your license differs from this License) </sentence><sentence>and (b) otherwise make it clear that Your version of the license contains terms which differ from the gSOAP Public License.</sentence><sentence> (Filling in the name of the Initial Developer, Original Code or Contributor in the notice described in Exhibit A shall not of themselves be deemed to be modifications of this License.)
 
 </sentence><sentence>7  DISCLAIMER OF WARRANTY.
-</sentence><sentence>COVERED CODE IS PROVIDED UNDER THIS LICENSE ON AN "AS IS" BASIS, WITHOUT WARRANTY OF ANY KIND, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, OF FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY RIGHTS, AND ANY WARRANTY THAT MAY ARISE BY REASON OF TRADE USAGE, CUSTOM, OR COURSE OF DEALING.</sentence><sentence> WITHOUT LIMITING THE FOREGOING, YOU ACKNOWLEDGE THAT THE SOFTWARE IS PROVIDED "AS IS" AND THAT THE AUTHORS DO NOT WARRANT THE SOFTWARE WILL RUN UNINTERRUPTED OR ERROR FREE.</sentence><sentence> LIMITED LIABILITY THE ENTIRE RISK AS TO RESULTS AND PERFORMANCE OF THE SOFTWARE IS ASSUMED BY YOU.</sentence><sentence> UNDER NO CIRCUMSTANCES WILL THE AUTHORS BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES OF ANY KIND OR NATURE WHATSOEVER, WHETHER BASED ON CONTRACT, WARRANTY, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, ARISING OUT OF OR IN ANY WAY RELATED TO THE SOFTWARE, EVEN IF THE AUTHORS HAVE BEEN ADVISED ON THE POSSIBILITY OF SUCH DAMAGE OR IF SUCH DAMAGE COULD HAVE BEEN REASONABLY FORESEEN, AND NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY EXCLUSIVE REMEDY PROVIDED.</sentence><sentence> SUCH LIMITATION ON DAMAGES INCLUDES, BUT IS NOT LIMITED TO, DAMAGES FOR LOSS OF GOODWILL, LOST PROFITS, LOSS OF DATA OR SOFTWARE, WORK STOPPAGE, COMPUTER FAILURE OR MALFUNCTION OR IMPAIRMENT OF OTHER GOODS.</sentence><sentence> IN NO EVENT WILL THE AUTHORS BE LIABLE FOR THE COSTS OF PROCUREMENT OF SUBSTITUTE SOFTWARE OR SERVICES.</sentence><sentence> YOU ACKNOWLEDGE THAT THIS SOFTWARE IS NOT DESIGNED FOR USE IN ON-LINE EQUIPMENT IN HAZARDOUS ENVIRONMENTS SUCH AS OPERATION OF NUCLEAR FACILITIES, AIRCRAFT NAVIGATION OR CONTROL, OR LIFE-CRITICAL APPLICATIONS.</sentence><sentence> THE AUTHORS EXPRESSLY DISCLAIM ANY LIABILITY RESULTING FROM USE OF THE SOFTWARE IN ANY SUCH ON-LINE EQUIPMENT IN HAZARDOUS ENVIRONMENTS AND ACCEPTS NO LIABILITY IN RESPECT OF ANY ACTIONS OR CLAIMS BASED ON THE USE OF THE SOFTWARE IN ANY SUCH ON-LINE EQUIPMENT IN HAZARDOUS ENVIRONMENTS BY YOU.</sentence><sentence> FOR PURPOSES OF THIS PARAGRAPH, THE TERM "LIFE-CRITICAL APPLICATION" MEANS AN APPLICATION IN WHICH THE FUNCTIONING OR MALFUNCTIONING OF THE SOFTWARE MAY RESULT DIRECTLY OR INDIRECTLY IN PHYSICAL INJURY OR LOSS OF HUMAN LIFE.</sentence><sentence> THIS DISCLAIMER OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS LICENSE. NO USE OF ANY COVERED CODE IS AUTHORIZED HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
+</sentence><sentence>COVERED CODE IS PROVIDED UNDER THIS LICENSE ON AN "AS IS" BASIS, WITHOUT WARRANTY OF ANY KIND, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, OF FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY RIGHTS, AND ANY WARRANTY THAT MAY ARISE BY REASON OF TRADE USAGE, CUSTOM, OR COURSE OF DEALING.</sentence><sentence> WITHOUT LIMITING THE FOREGOING, YOU ACKNOWLEDGE THAT THE SOFTWARE IS PROVIDED "AS IS" AND THAT THE AUTHORS DO NOT WARRANT THE SOFTWARE WILL RUN UNINTERRUPTED OR ERROR FREE.</sentence><sentence> LIMITED LIABILITY THE ENTIRE RISK AS TO RESULTS AND PERFORMANCE OF THE SOFTWARE IS ASSUMED BY YOU.</sentence><sentence> UNDER NO CIRCUMSTANCES WILL THE AUTHORS BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES OF ANY KIND OR NATURE WHATSOEVER, WHETHER BASED ON CONTRACT, WARRANTY, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, ARISING OUT OF OR IN ANY WAY RELATED TO THE SOFTWARE, EVEN IF THE AUTHORS HAVE BEEN ADVISED ON THE POSSIBILITY OF SUCH DAMAGE OR IF SUCH DAMAGE COULD HAVE BEEN REASONABLY FORESEEN, AND NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY EXCLUSIVE REMEDY PROVIDED.</sentence><sentence> SUCH LIMITATION ON DAMAGES INCLUDES, BUT IS NOT LIMITED TO, DAMAGES FOR LOSS OF GOODWILL, LOST PROFITS, LOSS OF DATA OR SOFTWARE, WORK STOPPAGE, COMPUTER FAILURE OR MALFUNCTION OR IMPAIRMENT OF OTHER GOODS.</sentence><sentence> IN NO EVENT WILL THE AUTHORS BE LIABLE FOR THE COSTS OF PROCUREMENT OF SUBSTITUTE SOFTWARE OR SERVICES.</sentence><sentence> YOU ACKNOWLEDGE THAT THIS SOFTWARE IS NOT DESIGNED FOR USE IN ON-LINE EQUIPMENT IN HAZARDOUS ENVIRONMENTS SUCH AS OPERATION OF NUCLEAR FACILITIES, AIRCRAFT NAVIGATION OR CONTROL, OR LIFE-CRITICAL APPLICATIONS.</sentence><sentence> THE AUTHORS EXPRESSLY DISCLAIM ANY LIABILITY RESULTING FROM USE OF THE SOFTWARE IN ANY SUCH ON-LINE EQUIPMENT IN HAZARDOUS ENVIRONMENTS AND ACCEPTS NO LIABILITY IN RESPECT OF ANY ACTIONS OR CLAIMS BASED ON THE USE OF THE SOFTWARE IN ANY SUCH ON-LINE EQUIPMENT IN HAZARDOUS ENVIRONMENTS BY YOU.</sentence><sentence> FOR PURPOSES OF THIS PARAGRAPH, THE TERM "LIFE-CRITICAL APPLICATION" MEANS AN APPLICATION IN WHICH THE FUNCTIONING OR MALFUNCTIONING OF THE SOFTWARE MAY RESULT DIRECTLY OR INDIRECTLY IN PHYSICAL INJURY OR LOSS OF HUMAN LIFE.</sentence><sentence> THIS DISCLAIMER OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS LICENSE. </sentence><sentence>NO USE OF ANY COVERED CODE IS AUTHORIZED HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
 </sentence><sentence>8  TERMINATION.
 
 </sentence><sentence>8.1.</sentence><sentence>
     This License and the rights granted hereunder will terminate automatically if You fail to comply with terms herein and fail to cure such breach within 30 days of becoming aware of the breach.</sentence><sentence> All sublicenses to the Covered Code which are properly granted shall survive any termination of this License.</sentence><sentence> Provisions which, by their nature, must remain in effect beyond the termination of this License shall survive.
 </sentence><sentence>8.2.
-</sentence><sentence>8.3.
+</sentence><sentence>8.3.</sentence><sentence>
     If You assert a patent infringement claim against Participant alleging that such Participant's Contributor Version directly or indirectly infringes any patent where such claim is resolved (such as by license or settlement) prior to the initiation of patent infringement litigation, then the reasonable value of the licenses granted by such Participant under Sections 2.1 or 2.2 shall be taken into account in determining the amount or value of any payment or license.
-</sentence><sentence>8.4.
+</sentence><sentence>8.4.</sentence><sentence>
     In the event of termination under Sections 8.1 or 8.2 above, all end user license agreements (excluding distributors and resellers) which have been validly granted by You or any distributor hereunder prior to termination shall survive termination.
 
 </sentence><sentence>9  LIMITATION OF LIABILITY.

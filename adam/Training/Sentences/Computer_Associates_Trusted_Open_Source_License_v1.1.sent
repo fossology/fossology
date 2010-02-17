@@ -116,31 +116,31 @@ from the Contributor with information on how and where to obtain the
 source code. </SENTENCE><SENTENCE>A Contributor may choose to distribute the Program in
 object code form under its own license agreement, provided that:
 
-</SENTENCE><SENTENCE>a. it complies with the terms and conditions of this License; and 
-b. its license agreement: 
-	</SENTENCE><SENTENCE>i. effectively disclaims on behalf of all Contributors all warranties and 
+</SENTENCE><SENTENCE>a. </sentence><sentence>it complies with the terms and conditions of this License; </sentence><sentence>and 
+b. </sentence><sentence>its license agreement: 
+	</SENTENCE><SENTENCE>i. </sentence><sentence>effectively disclaims on behalf of all Contributors all warranties and 
 	conditions, express and implied, including warranties or conditions of title
 	and non-infringement, and implied warranties or conditions of 
 	merchantability and fitness for a particular purpose, to the maximum extent
-	permitted by applicable law;
-	ii. effectively excludes on behalf of all Contributors all liability for 
+	permitted by applicable law;</sentence><sentence>
+	ii. </sentence><sentence>effectively excludes on behalf of all Contributors all liability for 
 	damages, including direct, indirect, special, incidental and consequential 
 	damages, such as lost profits, to the maximum extent permitted by applicable
 	law; 
-	</SENTENCE><SENTENCE>iii. states that any provisions which are inconsistent with this License are
-	offered by that Contributor alone and not by any other party; and 
-	iv. states that source code for the Program is available from such 
+	</SENTENCE><SENTENCE>iii. </sentence><sentence>states that any provisions which are inconsistent with this License are
+	offered by that Contributor alone and not by any other party; </sentence><sentence>and 
+	iv. </sentence><sentence>states that source code for the Program is available from such 
 	Contributor at the cost of distribution, and informs licensees how to obtain
 	it in a reasonable manner.
 
 </SENTENCE><SENTENCE>3.2 When the Program is made available in source code form:
 
-</SENTENCE><SENTENCE>a. it must be made available under this License; and 
-b. a copy of this License must be included with each copy of the Program.
+</SENTENCE><SENTENCE>a. </sentence><sentence>it must be made available under this License; </sentence><sentence>and 
+b. </sentence><sentence>a copy of this License must be included with each copy of the Program.
 
 </SENTENCE><SENTENCE>3.3 This License is intended to facilitate the commercial distribution
 of the Program by any Contributor. </SENTENCE><SENTENCE>However, Contributors may only charge
-</SENTENCE><SENTENCE>Recipients a one-time, upfront fee for the distribution of the Program.
+</SENTENCE><SENTENCE>Recipients a one-time, upfront fee for the distribution of the Program.</sentence><sentence>
 Contributors may not charge Recipients any recurring charge, license
 fee, or any ongoing royalty for the Recipients exercise of its rights
 under this License to the Program. </SENTENCE><SENTENCE>Contributors shall make the source
@@ -199,7 +199,7 @@ each Contributor must identify itself as the originator of its
 Contribution, if any, in a manner that reasonably allows subsequent
 Recipients to identify the originator of the Contribution.
 
-</SENTENCE><SENTENCE>4. CONTRIBUTION RESTRICTIONS
+</SENTENCE><SENTENCE>4. </sentence><sentence>CONTRIBUTION RESTRICTIONS
 
 </SENTENCE><SENTENCE>4.1 Each Contributor must cause the Program to which the Contributor
 provides a Contribution to contain a file documenting the changes the
@@ -343,7 +343,7 @@ present contrat et tous les documents associes soient rediges en
 anglais.
 
 </SENTENCE><SENTENCE>11.6 The Program is subject to all export and import laws, restrictions
-and regulations of the country in which Recipient receives the Program.
+and regulations of the country in which Recipient receives the Program.</sentence><sentence>
 Recipient is solely responsible for complying with and ensuring that
 Recipient does not export, re-export, or import the Program in violation
 of such laws, restrictions or regulations, or without any necessary
