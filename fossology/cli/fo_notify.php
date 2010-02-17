@@ -140,7 +140,7 @@ if (empty($UserName)){
 }
 $Preamble = "Dear $UserName,\n" .
             "Do not reply to this message.  " .
-            "This is an automattically generated message by the FOSSology system.\n\n";
+            "This is an automatically generated message by the FOSSology system.\n\n";
 
 /* Optional Job Name */
 if (array_key_exists("j",$options)) {
