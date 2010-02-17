@@ -1891,6 +1891,14 @@
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"gpl (plus|with) a( special|n|n added) exception"
 #
+%ENTRY%	_LT_GPL_EXCEPT_CLASSPATH_1
+%KEY%	"classpath"
+%STR%	"classpath exception"
+#
+%ENTRY%	_LT_GPL_EXCEPT_CLASSPATH_2
+%KEY%	"independent"
+%STR%	"special exception permission to link this library with independent modules to produce an executable"
+#
 %ENTRY%	_LT_GPL_FONT1
 %KEY%	"permi[st]"
 %STR%	"give you permission to combine this code with free software libraries that are released under the GNU LGPL"
