@@ -1323,6 +1323,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	 * Listed _explictly_ as an exception to the GPL -- this is NOT an 'else'
 	 * clause!
 	 */
+	if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_1)) {
+	    INTERESTING(lDebug ? "GPL-except-classpath_1" : "GPL-classpath-exception");
+	}
+  else
+	if (INFILE(_LT_GPL_EXCEPT_CLASSPATH_2)) {
+	    INTERESTING(lDebug ? "GPL-except-classpath_2" : "GPL-classpath-exception");
+	}
+  else
 	if (INFILE(_LT_GPL_EXCEPT_1)) {
 	    INTERESTING(lDebug ? "GPL-except-1" : "GPL-exception");
 	}
