@@ -52,7 +52,7 @@ class agent_copyright_once extends FO_Plugin {
         $V = "";
         $View = & $Plugins[plugin_find_id("view") ];
         $TempFile = $_FILES['licfile']['tmp_name'];
-        $Sys = "$AGENTDIR/copyright.py --model model.dat --analyze-from-command-line $TempFile";
+        $Sys = "$AGENTDIR/statement.py $AGENTDIR/files $TempFile";
         $Fin = popen($Sys, "r");
         //print "<pre>";
         //print $Sys."\n";
@@ -62,7 +62,7 @@ class agent_copyright_once extends FO_Plugin {
                 //print $Line;
                 //print "--------------------------------------------------------------------------------\n";
                 $match = array();
-                preg_match_all("/\t[(?P<start>\d+)\:(?P<end>\d+)\]/", $Line, $match);
+                preg_match_all("/\[(?P<start>\d+)\:(?P<end>\d+)\]/", $Line, $match);
                 //print_r($match);
                 $View->AddHighlight($match['start'][0], $match['end'][0], 0);
             }
