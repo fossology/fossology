@@ -91,7 +91,7 @@ if [ $BUILDTIME ]; then
          esac
          ;;
       Fedora)
-         # F8=Werwolf F9=Sulphur F10=Cambridge dev=Rawhide
+         # F8=Werwolf F9=Sulphur F10=Cambridge F11=Leonidas F12=Constantine dev=Rawhide
          yum groupinstall "Development Tools"
          yum install \
             perl-Text-Template subversion \
@@ -169,17 +169,21 @@ if [ $RUNTIME ]; then
          fi
          /sbin/service postgresql start
 
-         # F8=Werwolf F9=Sulphur F10=Cambridge dev=Rawhide
+         # F8=Werwolf F9=Sulphur F10=Cambridge F11=Leonidas F12=Constantine dev=Rawhide
          case "$CODENAME" in
             Werwolf|Sulphur)
                echo "NOTE: sleuthkit and unrar is not available in Fedora release $CODENAME,";
                echo "   please install from upstream sources.";;
-            Cambridge|Rawhide)
+            Cambridge|Rawhide|Leonidas|Constantine)
                yum install sleuthkit
                echo "NOTE: unrar is not available in Fedora release $CODENAME,"
                echo "   please install from upstream sources."
 	       ;;
-            *) echo "ERROR: Unknown or Unsupported Fedora release"; exit 1;;
+            *) echo "ERROR: Unknown Fedora release, please report a bug. Attempting to install anyway";
+               yum install sleuthkit
+               echo "NOTE: unrar is not available in Fedora release $CODENAME,"
+               echo "   please install from upstream sources."
+               ;;
          esac
          ;;
       RedHatEnterprise*|CentOS)
