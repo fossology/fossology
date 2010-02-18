@@ -17,8 +17,16 @@
 ## 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ##
 
-import re
+import datetime
+tmp = open('/tmp/copyright.log', 'w')
+tmp.write('Started %s.\n' % datetime.datetime.now().isoformat(' '))
+tmp.flush()
+
 import sys
+#sys.path.insert(0,'/usr/lib/fossology/agents/')
+
+import re
+import traceback
 import copyright_library as library
 import cPickle as pickle
 from optparse import OptionParser
@@ -26,6 +34,7 @@ import libfosspython
 
 import psyco
 psyco.full()
+
 
 def main():
     #         ------------------------------------------------------------
@@ -65,8 +74,24 @@ def main():
             help="Creates the tables for copyright analysis that the fossology database needs.")
     optparser.add_option("--agent", action="store_true",
             help="Starts up in agent mode. Files will be read from stdin.")
+    optparser.add_option("-i", "--init", action="store_true",
+            help="Creates a connection to the database and quits.")
+    optparser.add_option("-v", "--verbose", action="store_true",
+            help="")
 
     (options, args) = optparser.parse_args()
+    
+    tmp.write('Options:\n%s\nArgs:\n%s\n' % (options, args))
+    tmp.flush()
+
+    if options.init:
+        db = None
+        try:
+            db = libfosspython.FossDB()
+        except:
+            print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
+            return 1
+        return 0
 
     if options.setup_database:
         return(setup_database())
@@ -110,37 +135,94 @@ def main():
                 print "\t[%d:%d]" % (results[i][0], results[i][1])
 
     if options.agent:
-         return(agent())   
+         return(agent(model))   
 
-def agent():
-    db = None
+def agent(model):
     try:
-        db = libfosspython.FossDB()
+        tmp.write('Running as agent...\n')
+        tmp.flush()
+        db = None
+        try:
+            db = libfosspython.FossDB()
+        except:
+            print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
+            return 1
+
+        if libfosspython.repOpen() != 1:
+            print >> sys.stderr, 'ERROR: Something is broken. Could not open Repo.'
+            return 1
+
+        agent_pk = db.getAgentKey('copyright', '1', 'copyright agent')
+        
+        count = 0
+
+        line = 'start'
+        while line:
+            tmp.write('Got:\n%r\n' % line)
+            tmp.flush()
+            line = line.strip()
+            re_str = "pfile_pk=\"([0-9]+)\" pfilename=\"([0-9a-fA-F]+\.[0-9a-fA-F]+\.[0-9]+)\""
+            if re.match(re_str, line):
+                tmp.write("Got a file to analyze.\n")
+                tmp.flush()
+                (pfile, file) = re.findall(re_str, line)[0]
+                pfile = int(pfile)
+                tmp.write("pfile := %s\nfile := %s\n" % (pfile, file))
+                tmp.flush()
+                path = libfosspython.repMkPath('files', file)
+                tmp.write("path := %s\n" % path)
+                tmp.flush()
+                offsets = library.label_file(path,model)
+                tmp.write("offsets := \n%s\n" % str(offsets))
+                tmp.flush()
+                if len(offsets) == 0:
+                    result = db.access("INSERT INTO copyright_test (agent_fk, pfile_fk, copy_startbyte, copy_endbyte)"
+                        "VALUES (%d, %d, NULL, NULL);" % (agent_pk, pfile))
+                else:
+                    for i in range(len(offsets)):
+                        result = db.access("INSERT INTO copyright_test (agent_fk, pfile_fk, copy_startbyte, copy_endbyte)"
+                            "VALUES (%d, %d, %d, %d);" % (agent_pk, pfile, offsets[i][0], offsets[i][1]))
+                # update the heartbeat count
+                count += 1
+                #libfosspython.updateHeartbeat(count)
+                sys.stdout.write("OK\n")
+                sys.stdout.flush()
+                sys.stdout.write("ItemsProcessed %ld\n" % count)
+                sys.stdout.flush()
+            elif re.match("quit", line):
+                print "BYE."
+                break
+            elif re.match("start", line):
+                sys.stdout.write("OK\n")
+                sys.stdout.flush()
+                #libfosspython.initHeartbeat()
+                count = 0
+            #elif re.match("again", line):
+                #libfosspython.initHeartbeat()
+                #libfosspython.updateHeartbeat(count)
+
+            try:
+                line = sys.stdin.readline()
+            except:
+                line = "quit"
+                tmp.write('Running as agent...\n')
+                tmp.flush()
+                exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+                p = repr(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
+                tmp.write("%s\n" % p)
+                tmp.flush()
+
     except:
-        print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
+        tmp.write('Running as agent...\n')
+        tmp.flush()
+        exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+        p = repr(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
+        tmp.write("%s\n" % p)
+        tmp.flush()
         return 1
 
-    line = sys.stdin.readline().strip()
-    while line:
-        if re.match("[0-9]+ [0-9a-f]+\.[0-9a-f]+\.[0-9]+", line):
-            (pfile, file) = re.findall("([0-9]+) ([0-9a-f]+\.[0-9a-f]+\.[0-9]+)", line)[0]
-            path = libfosspython.repMkPath('files', file)
-            offsets = library.label_file(file,model)
-            if len(offsets) == 0:
-                result = db.access("INSERT INTO copyright_test (agent_fk, pfile_fk, copy_startbyte, copy_endbyte)"
-                    "VALUES (1, '%s', NULL, NULL);" % (pfile))
-            else:
-                for i in range(len(offsets)):
-                    result = db.access("INSERT INTO copyright_test (agent_fk, pfile_fk, copy_startbyte, copy_endbyte)"
-                        "VALUES (1, '%s', %d, %d);" % (pfile, offsets[i][0], offsets[i][1]))
-        elif re.match("quit", line):
-            print "BYE."
-            break
-        else:
-            print >> sys.stderr, "ERROR: unrecognized command."
-
-        line = sys.stdin.readline().strip()
-
+    libfosspython.repClose()
+    
     return 0
 
 def setup_database():
