@@ -91,18 +91,11 @@ class ui_view_copyright extends FO_Plugin
             print $View->GetHighlightMenu(-1);
             print "</center>";
         }
-        $Results = $DB->Action("SELECT * FROM pfile WHERE pfile_pk = $Item;");
-        $Text = "";
-        if (!empty($Results[0]['pfile_pk'])) {
-            global $LIBEXECDIR;
-            $Repo = $Results[0]['pfile_sha1'] . "." . $Results[0]['pfile_md5'] . "." . $Results[0]['pfile_size'];
-            $Repo = trim(shell_exec("$LIBEXECDIR/reppath files '$Repo'"));
-            $Size = $Results[0]['pfile_size'];
-            $Text = fopen($Repo, "r");
-            //fclose($);
-        }
-
-        $View->ShowText($Text, 0, 1, -1);
+        
+        $filename = RepPath($Item);
+        $handle = fopen($filename, "r");
+        $View->ShowText($handle, 0, 1, -1);
+        fclose($handle);
 
         return;
     } // Output()
