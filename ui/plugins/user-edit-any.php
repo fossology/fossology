@@ -52,6 +52,7 @@ class user_edit_any extends FO_Plugin {
 		$Folder = GetParm('folder', PARM_INTEGER);
 		$Email = GetParm('email', PARM_TEXT);
 		$Email_notify = GetParm('enote', PARM_TEXT);
+		$agentList = userAgents();
 		$Block = GetParm("block", PARM_INTEGER);
 		$Blank = GetParm("blank", PARM_INTEGER);
 		if (!empty($Email_notify)) {
@@ -146,6 +147,12 @@ class user_edit_any extends FO_Plugin {
 				$DB->Action("UPDATE users SET user_pass = '" . trim($R['user_pass']) . "' WHERE user_pk = '$UserId';");
 			}
 		}
+		// update user_agent_list
+		if (strcmp($agentList, $R['user_agent_list'])) {
+			$Val = str_replace("'", "''", $agentList);
+			$DB->Action("UPDATE users SET user_agent_list = '$Val' WHERE user_pk = '$UserId';");
+		}
+
 		$Results = $DB->Action($SQL);
 		return (NULL);
 	} // Edit()
@@ -156,9 +163,11 @@ class user_edit_any extends FO_Plugin {
 		if ($this->State != PLUGIN_STATE_READY) {
 			return;
 		}
+
 		global $DB;
 		$V = "";
-		switch ($this->OutputType) {
+
+		switch($this->OutputType) {
 			case "XML":
 				break;
 			case "HTML":
@@ -167,23 +176,29 @@ class user_edit_any extends FO_Plugin {
 				if (!empty($UserId)) {
 					$rc = $this->Edit();
 					if (empty($rc)) {
-						/* Need to refresh the screen */
-						$V.= displayMessage('User edited.');
+						$SQL = "SELECT user_pk, user_name FROM users WHERE user_pk=$UserId;";
+						$qResults = $DB->Action($SQL);
+						$userName = $qResults[0]['user_name'];
+						// display status
+						$V.= displayMessage("User $userName edited.");
 					}
 					else {
 						$V.= displayMessage($rc);
 					}
 				}
 				/* Get the list of users */
-				$SQL = "SELECT user_pk,user_name,user_desc,user_pass,root_folder_fk,user_perm,user_email,email_notify FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' ORDER BY user_name;";
+				$SQL = "SELECT user_pk,user_name,user_desc,user_pass,
+                                root_folder_fk,user_perm,user_email,email_notify,
+                                user_agent_list FROM users WHERE 
+                                user_pk != '" . @$_SESSION['UserId'] . "' ORDER BY user_name;";
 				$Results = $DB->Action($SQL);
 				/* Create JavaScript for updating users */
-				$V.= "<script language='javascript'>\n";
-				$V.= "<!--\n";
+				$V.= "\n<script language='javascript'>\n";
 				$V.= "var Username = new Array();\n";
 				$V.= "var Userdesc = new Array();\n";
 				$V.= "var Useremail = new Array();\n";
 				$V.= "var Userenote = new Array();\n";
+				$V.= "var Useragents = new String(\"\");\n";
 				$V.= "var Userperm = new Array();\n";
 				$V.= "var Userblock = new Array();\n";
 				$V.= "var Userfolder = new Array();\n";
@@ -197,8 +212,9 @@ class user_edit_any extends FO_Plugin {
 					$Val = str_replace('"', "\\\"", $R['user_email']);
 					$V.= "Useremail[" . $Id . '] = "' . $Val . "\";\n";
 					$V.= "Userenote[" . $Id . '] = "' . $R['email_notify'] . "\";\n";
-					$V.= "Userfolder[" . $Id . "] = '" . $R['root_folder_fk'] . "';\n";
-					$V.= "Userperm[" . $Id . "] = '" . $R['user_perm'] . "';\n";
+					$V.= "Useragents[" . $Id . '] = "' . $R['user_agent_list'] . "\";\n";
+					$V.= "Userfolder[" . $Id . '] = "' . $R['root_folder_fk'] . "\";\n";
+					$V.= "Userperm[" . $Id . '] = "' . $R['user_perm'] . "\";\n";
 					if (substr($R['user_pass'], 0, 1) == ' ') {
 						$Block = 1;
 					}
@@ -207,27 +223,108 @@ class user_edit_any extends FO_Plugin {
 					}
 					$V.= "Userblock[" . $Id . "] = '$Block';\n";
 				}
-				$V.= "function SetInfo(id)\n";
-				$V.= "{\n";
-				$V.= "  document.formy.username.value = Username[id];\n";
-				$V.= "  document.formy.email.value = Useremail[id];\n";
-				$V.= "  document.formy.description.value = Userdesc[id];\n";
-				$V.= "  document.formy.permission.value = Userperm[id];\n";
-				$V.= "  document.formy.folder.value = Userfolder[id];\n";
-				$V.= "  if (Userblock[id] == 1) { document.formy.block.checked=true; }\n";
-				$V.= "  else { document.formy.block.checked=false; }\n";
-				$V.= "  if (Userenote[id] == 'y') { document.formy.enote.checked=true; }\n";
-				$V.= "  else { document.formy.enote.checked=false; }\n";
-				$V.= "}\n";
-				$V.= "// -->\n";
+
+				$V.= "
+              function clearBoxes()
+              {
+                var cbList = document.getElementsByTagName('input');
+                for(j=0; j<cbList.length; j++)
+                {
+                  if(cbList[j].getAttribute('type') == 'checkbox')
+                  {
+                    var aname = cbList[j].getAttribute('name');
+                    if(String.search('Check_agent', aname) != -1)
+                    {
+                      continue;
+                    }
+                    else
+                    {
+                      cbList[j].checked=false;
+                    }
+                   } 
+                  }
+                }
+                                 
+                function SetBoxes(id)
+                {
+                  if(!id) { return; }
+
+                  var prefix='Check_';
+                  var agents = Useragents[id].split(',');
+
+                  var cbList = document.getElementsByTagName('input');
+                  for(j=0; j<cbList.length; j++)
+                  {
+                    if(cbList[j].getAttribute('type') == 'checkbox')
+                    {
+                      uiName = cbList[j].getAttribute('name');
+                      if(uiName.search(/Check_agent/) != -1)
+                      {
+                        for(i=0; i<agents.length; i++)
+                        {
+                          aName = prefix + agents[i];
+                          // need to remove Check_ from the name
+                          noCheck = uiName.replace(/Check_/, '');
+                          if(agents.indexOf(noCheck) == -1)
+                          {
+                            cbList[j].checked=false;
+                            continue; 
+                          }
+                          else 
+                          {
+                            cbList[j].checked=true;
+                            continue;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                
+                function SetInfo(id)
+                {
+                  if(id == 0) { clearBoxes(); }
+                  document.userEditAny.username.value = Username[id];
+                  document.userEditAny.email.value = Useremail[id];
+                  document.userEditAny.description.value = Userdesc[id];
+                  document.userEditAny.permission.value = Userperm[id];
+                  document.userEditAny.folder.value = Userfolder[id];
+                  if (Userblock[id] == 1) { document.userEditAny.block.checked=true; }
+                  else { document.userEditAny.block.checked=false; }
+                  if (Userenote[id] == \"\") { document.userEditAny.enote.checked=false; }
+                  else { document.userEditAny.enote.checked=true; }
+                  
+                  if(Useragents[id].length == 0) 
+                  { 
+                      clearBoxes(); 
+                    }
+                    else
+                    {
+                        SetBoxes(id); 
+                    }          
+              }
+              ";
+
 				$V.= "</script>\n";
 				/* Build HTML form */
-				$V.= "<form name='formy' method='POST'>\n"; // no url = this url
-				$V.= "Select the user to edit: ";
+				$V.= "<form name='userEditAny' method='POST'>\n"; // no url = this url
+
 				if (empty($UserId)) {
 					$UserId = $Results[0]['user_pk'];
 				}
-				$V.= "<select name='userid' onload='SetInfo($UserId);' onchange='SetInfo(this.value);'>\n";
+				$Uri = Traceback_uri();
+				$V.= "<P />\n";
+				$V.= "To edit <strong>another</strong> user on this system, alter
+              any of the following information.<P />\n";
+
+				$V.= "To edit <strong>your</strong> account settings, use
+         <a href='${Uri}?mod=user_edit_self'>Account Settings.</a><P />\n";
+
+				$V.= "Select the user to edit: ";
+				$V.= "<select name='userid' onClick='SetInfo(this.value);'
+				       onchange='SetInfo(this.value);'>\n";
+
+				$V .= "<option value='0'>Nobody\n";
 				for ($i = 0;!empty($Results[$i]['user_pk']);$i++) {
 					$Selected = "";
 					if ($UserId == $Results[$i]['user_pk']) {
@@ -237,8 +334,6 @@ class user_edit_any extends FO_Plugin {
 					$V.= htmlentities($Results[$i]['user_name']);
 				}
 				$V.= "</select>\n";
-				$V.= "<P />\n";
-				$V.= "To edit another user on this system, alter any of the following information.<P />\n";
 				$Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 				$V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
 				$Val = htmlentities(GetParm('username', PARM_TEXT), ENT_QUOTES);
@@ -281,21 +376,28 @@ class user_edit_any extends FO_Plugin {
 				$V.= "</tr>\n";
 				$V.= "$Style<th>E-mail Notification</th><td><input type=checkbox name='enote'" . "checked=document.formy.enote.checked>" . "Check to enable email notification of completed analysis.</td>\n";
 				$V.= "</tr>\n";
+				$V.= "</tr>\n";
+				$V .= "$Style<th>Default Agents: Select the ".
+              "agent(s) to automatically run when uploading data. These" .
+              " selections can be changed on the upload screens.\n</th><td> ";
+				$V.= AgentCheckBoxMake(-1, "agent_unpack");
+				$V .= "</td>\n";
+				$V .= "</tr>\n";
 				$V.= "</table><P />";
 				$V.= "<input type='submit' value='Edit!'>\n";
 				$V.= "</form>\n";
 				break;
-			case "Text":
-				break;
-			default:
-				break;
-		}
-		if (!$this->OutputToStdout) {
-			return ($V);
-		}
-		print ("$V");
-		return;
+		case "Text":
+			break;
+		default:
+			break;
 	}
+	if (!$this->OutputToStdout) {
+		return ($V);
+	}
+	print ("$V");
+	return;
+}
 };
 $NewPlugin = new user_edit_any;
 ?>
