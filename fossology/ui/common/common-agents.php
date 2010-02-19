@@ -67,10 +67,13 @@ function AgentCheckBoxMake($upload_pk,$SkipAgent=NULL) {
 		$SQL = "SELECT user_name, user_agent_list FROM users WHERE
 				    user_name='$userName';";
 		$uList = $DB->Action($SQL);
-		//print "query returned:\n";print_r($uList) . "\n";
+		
+		// Ulist should never be empty, if it is, something really wrong,
+		// like the user_agent_list column is missing.
 		if(empty($uList))
 		{
-			return('<h3 style="color:red">Fatal! could not get list of agents</h3>');
+			return("<h3 style='color:red'>Fatal! Query Failed getting 
+			        user_agent_list for user $UserName</h3>");
 		}
 		$list = explode(',',$uList[0]['user_agent_list']);
 
@@ -475,13 +478,11 @@ function userAgents()
 			$Parm = GetParm("Check_" . $Name,PARM_INTEGER);
 			if ($Parm == 1) {
 				// save the name
-				print "<pre>userAgnetsDB: name is $Name\n";
 				$agentsChecked .= $Name . ',';
 			}
 		}
 		// remove , from last name
 		$agentsChecked = trim($agentsChecked, ',');
-		print "list of agents selected is:$agentsChecked\n";
 	}
 	return($agentsChecked);
 }
