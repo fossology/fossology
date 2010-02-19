@@ -1147,6 +1147,10 @@
   $Schema["TABLE"]["users"]["email_notify"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"email_notify\" varchar(1);";
   $Schema["TABLE"]["users"]["email_notify"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"email_notify\" DROP NOT NULL, ALTER COLUMN \"email_notify\" SET DEFAULT 'y'::character varying;";
 
+  $Schema["TABLE"]["users"]["user_agent_list"]["DESC"] = "COMMENT ON COLUMN \"users\".\"user_agent_list\" IS 'list of user agents to automatically run on upload';";
+  $Schema["TABLE"]["users"]["user_agent_list"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_agent_list\" text;";
+  $Schema["TABLE"]["users"]["user_agent_list"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_agent_list\" DROP NOT NULL;";
+
 
 
   $Schema["VIEW"]["keyagent"] = "CREATE VIEW \"keyagent\" AS SELECT key.key_pk, key.key_name, key.key_desc, key.key_parent_fk, key.key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc FROM key, agent WHERE (agent.agent_pk = key.key_agent_fk);";
