@@ -202,14 +202,6 @@ class user_edit_self extends FO_Plugin {
 					if (empty($rc)) {
 						/* Need to refresh the screen */
 						$V.= displayMessage('User information updated.');
-						/*
-						 Remove this code for now... it wipes out the status message
-						  
-						 $V.= "<script language='javascript'>\n";
-						 $Uri = Traceback_uri() . "?mod=" . $this->Name;
-						 $V.= "window.open('$Uri','_top');\n";
-						 $V.= "</script>\n";
-						 */
 					} else {
 						$V.= displayMessage($rc);
 					}
@@ -250,8 +242,24 @@ class user_edit_self extends FO_Plugin {
 				$V.= "</tr>\n";
 				$V .= "$Style<th>6.</th><th>Default Agents: Select the ".
               "agent(s) to automatically run when uploading data. These" .
-              " selections can be changed on the upload screens.\n</th><td> ";
-				$V.= AgentCheckBoxMake(-1, "agent_unpack");
+              " selections can be changed on the upload screens.\n</th><td>\n";
+        /*
+         * added this code so the form makes sense.  You can have an admin define default agents
+         * but if you don't have Analyze or better permissions, then those agents are not available to
+         * you!  With out this code the default agent text was there, but nothing else... this way
+         * the form at least makes sense.   Turns out agent unpack is always around so both
+         * conditions must be checked.
+         */
+				$AgentList = menu_find("Agents",$Depth);
+				foreach($AgentList as $AgentItem) {
+				$uri = $AgentItem->URI;
+				}
+				if($uri == "agent_unpack" && count($AgentList) == 1 ) {
+					$V .= "<h3>You do not have permission to change your default agents</h3>\n";
+				}
+				else {
+					$V.= AgentCheckBoxMake(-1, "agent_unpack");
+				}
 				$V .= "</td>\n";
 				$V .= "</tr>\n";
 				$V.= "</table><P />";
