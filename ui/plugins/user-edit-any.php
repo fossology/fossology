@@ -321,17 +321,17 @@ class user_edit_any extends FO_Plugin {
          <a href='${Uri}?mod=user_edit_self'>Account Settings.</a><P />\n";
 
 				$V.= "Select the user to edit: ";
-				$V.= "<select name='userid' onClick='SetInfo(this.value);'
-				       onchange='SetInfo(this.value);'>\n";
+				$V.= "<select name='userid' onClick='SetInfo(this.value);' onchange='SetInfo(this.value);'>\n";
 
-				$V .= "<option value='0'>Nobody\n";
+				//$V .= "<option selected value='0'>--select user--</option>\n";
 				for ($i = 0;!empty($Results[$i]['user_pk']);$i++) {
 					$Selected = "";
 					if ($UserId == $Results[$i]['user_pk']) {
-						$Selected = "selected";
+						 $Selected = "selected";
 					}
 					$V.= "<option $Selected value='" . $Results[$i]['user_pk'] . "'>";
 					$V.= htmlentities($Results[$i]['user_name']);
+					$V.= "</option>\n";
 				}
 				$V.= "</select>\n";
 				$Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
