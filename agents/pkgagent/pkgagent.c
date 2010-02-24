@@ -34,11 +34,13 @@
 #include <libgen.h>
 #include <time.h>
 
+
 #include "libfossrepo.h"
 #include "libfossdb.h"
 #include "libfossagent.h"
 #include "rpmlib.h"
 #include "rpmts.h"
+#include "rpmlog.h"
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
@@ -96,7 +98,7 @@ struct debpkginfo {
 };
 struct debpkginfo *glb_debpi;
 
-int_32 tag[15] = {RPMTAG_NAME,
+int tag[15] = {RPMTAG_NAME,
 		RPMTAG_EPOCH,
 		RPMTAG_ARCH,
 		RPMTAG_VERSION,
@@ -266,98 +268,85 @@ void    ParseSchedInput (char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi)
  */
 void ReadHeaderInfo(Header header, struct rpmpkginfo *pi) 
 {
-  int_32 type;
+  char fmt[128];
+  const char * msgstr;
+  const char * errstr;
+  int i,j;
+  long *tp,t;
+  int header_status;
+
+#ifdef _RPM_4_4 
   void* pointer;
-  int_32 data_size;
-  int header_status = headerGetEntry(header,tag[0],&type,&pointer,&data_size);
-  
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) {
-      strncpy(pi->pkgName,pointer,sizeof(pi->pkgName));
-    } 
-  }
+  int_32 type, data_size;
+#endif /* RPM4.4 version*/
 
-  header_status = headerGetEntry(header,tag[1],&type,&pointer,&data_size);
-  
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) {
-      strncpy(pi->pkgAlias,pointer,sizeof(pi->pkgAlias));
-    } 
-  }
+#ifdef _RPM_4_4_COMPAT
+  struct rpmtd_s req;
+  rpm_count_t data_size;
+#endif /* After RPM4.4 version*/
 
-  header_status = headerGetEntry(header,tag[2],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) 
-      strncpy(pi->pkgArch,pointer,sizeof(pi->pkgArch));
-  }
+  for (i = 0; i < 14; i++) {
+    fmt[0] = '\0';
+    strcat( fmt, "%{");
+    strcat( fmt, tagName(tag[i]));
+    strcat( fmt, "}\n");
 
-  header_status = headerGetEntry(header,tag[3],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) 
-      strncpy(pi->version,pointer,sizeof(pi->version));
-  }
-
-  header_status = headerGetEntry(header,tag[4],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) 
-      strncpy(pi->license,pointer,sizeof(pi->license));
-  }
-
-  header_status = headerGetEntry(header,tag[5],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) 
-      strncpy(pi->group,pointer,sizeof(pi->group));
-  }
-
-  header_status = headerGetEntry(header,tag[6],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) 
-      strncpy(pi->packager,pointer,sizeof(pi->packager));
-  }
-
-  header_status = headerGetEntry(header,tag[7],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) 
-      strncpy(pi->release,pointer,sizeof(pi->release));
-  }
-
-  header_status = headerGetEntry(header,tag[8],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_INT32_TYPE){
-      strncpy(pi->buildDate,asctime(gmtime((time_t*)pointer)),sizeof(pi->buildDate));
+    msgstr = headerSprintf(header, fmt, rpmTagTable, rpmHeaderFormats, &errstr);
+    if (msgstr != NULL){
+      if (Verbose) { printf("%s:%s",tagName(tag[i]),msgstr);}
+      switch (tag[i]) {
+      case RPMTAG_NAME:
+        strncpy(pi->pkgName,msgstr,sizeof(pi->pkgName));
+        break;
+      case RPMTAG_EPOCH:
+        strncpy(pi->pkgAlias,msgstr,sizeof(pi->pkgAlias));
+        break;
+      case RPMTAG_ARCH:
+        strncpy(pi->pkgArch,msgstr,sizeof(pi->pkgArch));
+        break;
+      case RPMTAG_VERSION:
+        strncpy(pi->version,msgstr,sizeof(pi->version));
+        break;
+      case RPMTAG_LICENSE:
+        strncpy(pi->license,msgstr,sizeof(pi->license));
+        break;
+      case RPMTAG_GROUP:
+        strncpy(pi->group,msgstr,sizeof(pi->group));
+        break;
+      case RPMTAG_PACKAGER:
+        strncpy(pi->packager,msgstr,sizeof(pi->packager));
+        break;
+      case RPMTAG_RELEASE:
+        strncpy(pi->release,msgstr,sizeof(pi->release));
+        break;
+      case RPMTAG_BUILDTIME:	
+	tp = malloc(sizeof(long));
+	t = atol(msgstr);
+	tp = &t;
+	strncpy(pi->buildDate,asctime(gmtime((time_t*)tp)),sizeof(pi->buildDate));
+	break;
+      case RPMTAG_VENDOR:
+	strncpy(pi->vendor,msgstr,sizeof(pi->vendor));
+	break;
+      case RPMTAG_URL:
+	strncpy(pi->url,msgstr,sizeof(pi->url));
+	break;
+      case RPMTAG_SOURCERPM:
+	strncpy(pi->sourceRPM,msgstr,sizeof(pi->sourceRPM));
+	break;
+      case RPMTAG_SUMMARY:
+	strncpy(pi->summary,msgstr,sizeof(pi->summary));
+	break;
+      case RPMTAG_DESCRIPTION:
+	strncpy(pi->description,msgstr,sizeof(pi->description));
+	break;
+      default:
+	break;
+      }
     }
-  }
-
-  header_status = headerGetEntry(header,tag[9],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) 
-      strncpy(pi->vendor,pointer,sizeof(pi->vendor));
-  }
-
-  header_status = headerGetEntry(header,tag[10],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) 
-      strncpy(pi->url,pointer,sizeof(pi->url));
-  }
-
-  header_status = headerGetEntry(header,tag[11],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) 
-      strncpy(pi->sourceRPM,pointer,sizeof(pi->sourceRPM));
-  }
-
-  header_status = headerGetEntry(header,tag[12],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) 
-      strncpy(pi->summary,pointer,sizeof(pi->summary));
-  }
-
-  header_status = headerGetEntry(header,tag[13],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_TYPE) 
-      strncpy(pi->description,pointer,sizeof(pi->description));
-  }
-
+  }      
+  if (Verbose) { printf("Name:%s\n",pi->buildDate);}
+#ifdef _RPM_4_4
   header_status = headerGetEntry(header,tag[14],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_ARRAY_TYPE) {
@@ -366,7 +355,29 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
       pi->req_size = data_size;
     } 
   }
-  if (Verbose) { printf("Name:%s\n",pi->sourceRPM);}
+#endif/* RPM4.4 version*/
+#ifdef _RPM_4_4_COMPAT
+  header_status = headerGet(header, tag[14], &req, HEADERGET_DEFAULT);
+  if (header_status) {
+    data_size = rpmtdCount(&req);
+    pi->requires = calloc(data_size, sizeof(char *));
+    for (j=0; j<data_size;j++){
+      const char * temp = rpmtdNextString(&req);
+      pi->requires[j] = malloc(MAXCMD);
+      strcpy(pi->requires[j],temp);  
+    }
+    pi->req_size = data_size;
+    rpmtdFreeData(&req);
+  }
+#endif/* After RPM4.4 version*/
+
+  if (Verbose) { 
+    printf("Size:%d\n",pi->req_size);
+    for (j=0; j<pi->req_size;j++){
+      printf("REQ:%s\n",pi->requires[j]);
+    }
+    printf("Name:%s\n",pi->sourceRPM);
+  }
 } /* ReadHeaderInfo(Header header, struct rpmpkginfo *pi) */
    
 /**
@@ -395,7 +406,7 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
 
     fd = Fopen(pkg,"r");
     if ( fd == NULL ||Ferror(fd)){
-      rpmError(RPMERR_OPEN, "open of %s failed: %s\n", pkg, Fstrerror(fd));
+      rpmlog(RPMLOG_ERR, "open of %s failed: %s\n", pkg, Fstrerror(fd));
       if (fd){
         Fclose(fd);
       }
@@ -409,7 +420,8 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
     
     rpmtsSetVSFlags(ts, vsflags);
 
-    rpmrc = rpmReadPackageFile(ts, fd, pkg, &header);
+    rpmReadConfigFiles(NULL, NULL);
+    rpmrc = rpmReadPackageFile(ts, fd, pkg,&header);
     Fclose(fd);
     ts = (rpmts) rpmtsFree(ts);
 
@@ -421,7 +433,7 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
     case RPMRC_NOTFOUND:
     case RPMRC_FAIL:
     default:
-        rpmError(RPMERR_OPEN, "%s cannot be read\n", pkg);
+        rpmlog(RPMLOG_ERR, "%s cannot be read\n", pkg);
         return FALSE;
     }
     ReadHeaderInfo(header, pi);

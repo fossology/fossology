@@ -7,11 +7,16 @@ include $(VARS)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -I/usr/include/rpm -lpq -lrpm $(ALL_CFLAGS)
 EXE=pkgagent
+CFLAGS_LOCAL_RPM_4_4=$(CFLAGS_LOCAL) -D_RPM_4_4
+CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 
 all: $(EXE)
-
 $(EXE): %: %.c $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+	if [[ `rpm --version|awk '{print $$3}'` < "4.5" ]] ; then \
+	$(CC) $< $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
+	else \
+	$(CC) $< $(CFLAGS_LOCAL_RPM) -o $@; \
+	fi
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
