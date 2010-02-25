@@ -103,7 +103,7 @@ class ui_package_info extends FO_Plugin
        $Results = $DB->Action($SQL);
        foreach($Results as $R)
 	  {
-	  if(!empty($R['source_rpm']))
+	  if((!empty($R['source_rpm']))and(trim($R['source_rpm']) != "(none)"))
 	      {
 	      $V .= "RPM Binary Package";
 	      }
@@ -142,7 +142,7 @@ class ui_package_info extends FO_Plugin
           $V .= "</td><td>" . htmlentities($R['license']) . "</td></tr>\n";
           $Count++;
           $V .= "<tr><td align='right'>$Count</td><td>Group";
-          $V .= "</td><td>" . htmlentities($R['group']) . "</td></tr>\n";
+          $V .= "</td><td>" . htmlentities($R['pkg_group']) . "</td></tr>\n";
           $Count++;
           $V .= "<tr><td align='right'>$Count</td><td>Packager";
           $V .= "</td><td>" . htmlentities($R['packager']) . "</td></tr>\n";
