@@ -1891,6 +1891,7 @@ TraverseEnd:
       if (IsDir(CI.Source)) RemoveDir(CI.Source);
 //    else unlink(CI.Source);
       }
+    else RemoveDir(NewDir);
     }
   return(IsContainer);
 } /* Traverse() */
@@ -1899,26 +1900,13 @@ TraverseEnd:
  ***************************************************/
 int RemoveDir(char *dirpath)
 {
-  struct dirent *d;
-  DIR *dir;
-  char buf[256];
-
-  dir = opendir(dirpath);
-
-  if (dir != NULL)
-  {
-    while((d = readdir(dir)))
-    {
-      sprintf(buf, "%s/%s", dirpath, d->d_name);
-      remove(buf);
-    }
-    closedir(dir);
-    rmdir(dirpath);
-    return 0;
-  }else{
-      fprintf(stderr,"Can't open directory %s\n",dirpath);
-      return 1;
-  }
+  char RMcmd[FILENAME_MAX];
+  int rc;
+  memset(RMcmd, '\0', sizeof(RMcmd));
+  strcat(RMcmd,"rm -rf ");
+  strcat(RMcmd,dirpath);
+  rc = system(RMcmd);
+  return rc;
 } /* RemoveDir() */
 /***************************************************
  TraverseStart(): Find all files (assuming a directory)
