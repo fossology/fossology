@@ -83,7 +83,7 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
   }
 
   /* get bucket defs from db */
-  sprintf(sqlbuf, "select bucket_pk, bucket_type, bucket_regex, bucket_filename, stopon, bucket_name from bucket where bucketpool_fk=%d order by bucket_evalorder asc", bucketpool_pk);
+  sprintf(sqlbuf, "select bucket_pk, bucket_type, bucket_regex, bucket_filename, stopon, bucket_name from bucket_def where bucketpool_fk=%d order by bucket_evalorder asc", bucketpool_pk);
   result = PQexec(pgConn, sqlbuf);
   if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return 0;
   numRows = PQntuples(result);
@@ -441,4 +441,50 @@ FUNCTION int licDataAvailable(PGconn *pgConn, int uploadtree_pk)
     return 0;
   }
   return nomos_agent_pk;
+}
+
+
+/****************************************************
+ childParent
+
+ Given an uploadtree_pk of a container, find the
+ uploadtree_pk of it's children (i.e. scan down through
+ artifacts to get the children's parent
+
+ @param PGconn *pgConn  Database connection object
+ @param int    *uploadtree_pk  
+
+ @return uploadtree_pk of children's parent.
+         Or 0 if there are no children (empty container or non-container)
+         
+ NOTE: This function writes error to stdout
+****************************************************/
+FUNCTION int childParent(PGconn *pgConn, int uploadtree_pk)
+{
+  char *fcnName = "childParent";
+  char sql[256];
+  PGresult *result;
+  int  childParent_pk = 0;   /* uploadtree_pk */
+
+  do
+  {
+    snprintf(sql, sizeof(sql),
+           "select uploadtree_pk,ufile_mode from uploadtree where parent=%d limit 1", 
+           uploadtree_pk);
+    result = PQexec(pgConn, sql);
+    if (checkPQresult(result, sql, fcnName, __LINE__)) break;
+    if (PQntuples(result) == 0) break;  /* empty container */
+
+    /* not an artifact? */
+    if ((atoi(PQgetvalue(result, 0, 1)) & 1<<28) == 0)
+    {
+      childParent_pk = uploadtree_pk;
+      break;
+    }
+    uploadtree_pk = atoi(PQgetvalue(result, 0, 0));
+    PQclear(result);
+  } while (childParent_pk == 0);
+
+  PQclear(result);
+  return childParent_pk;
 }
