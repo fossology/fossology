@@ -54,6 +54,30 @@ FUNCTION int arrayAinB(int *arrayA, int *arrayB)
   return 1;
 }
 
+/****************************************************
+ intAinB
+
+ Verify that all the value A is a member of array B
+
+ @param int  intA     int to match
+ @param int *arrayB   null terminated array of ints
+
+ @return true (!0) if intA is in B
+ else return false (0)
+****************************************************/
+FUNCTION int intAinB(int intA, int *arrayB)
+{
+
+  if (!arrayB) return 0;
+
+  while(*arrayB)
+  {
+    if (intA == *arrayB) return 1;
+    arrayB++;
+  }
+  return 0;
+}
+
 
 /****************************************************
  validate_pk

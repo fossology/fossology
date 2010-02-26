@@ -54,17 +54,33 @@ struct bucketdef_struct
 };
 typedef struct bucketdef_struct bucketdef_t, *pbucketdef_t;
 
+/* Bucket pool */
+struct bucketpool_struct
+{
+  int  bucketpool_pk;
+  int  bucketpool_name;
+  int  bucketpool_version;
+  int  nomos_agent_pk;
+  int  bucket_agent_pk;
+  pbucketdef_t pbucketdef;
+};
+typedef struct bucketpool_struct bucketpool_t, *pbucketpool_t;
+
 
 /* buckets.c */
-int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, int uploadtree_pk, int writeDB);
-int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, int agent_pk, int writeDB);
+int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, 
+             int uploadtree_pk, int writeDB, int skipProcessedCheck);
+int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, 
+                int uploadtree_pk, int agent_pk, int writeDB);
 int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk);
-int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk);
-int writeBuckets(PGconn *pgConn, int pfile_pk, int *bucketList, int agent_pk, int writeDB);
-int processed(PGconn *pgConn, int agent_pk, int pfile_pk);
+int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int uploadtree_pk);
+int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
+                 int *bucketList, int agent_pk, int writeDB);
+int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk);
 
 /* validate.c */
 int arrayAinB        (int *arrayA, int *arrayB);
+int intAinB          (int intA, int *arrayB);
 int validate_pk      (PGconn *pgConn, char *sql);
 void Usage           (char *Name);
 
@@ -75,6 +91,8 @@ int **getMatchEvery  (PGconn *pgConn, int bucketpool_pk, char *filename, cachero
 int getBucketpool_pk (PGconn *pgConn, char * bucketpool_name);
 int licDataAvailable (PGconn *pgConn, int uploadtree_pk);
 int *getLicsInStr    (PGconn *pgConn, char *nameStr, cacheroot_t *pcroot);
+int childParent      (PGconn *pgConn, int uploadtree_pk);
+
 
 
 #endif /* _BUCKETS_H */
