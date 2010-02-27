@@ -101,9 +101,23 @@ function getHost($URL)
 	{
 		return (NULL);
 	}
-	$found = parse_url($URL, PHP_URL_HOST);
+	$host = parse_url($URL, PHP_URL_HOST);
 	//print "DB: getHost: url is:$URL\nafter parse, found is:$found\n";
-	return ($found);
+   /*
+     * if the host is localhost, this won't work, so we go get the real
+     * host name.  This is due to the fact that on a server where
+     * the db and and scheduler are on the same system, the Db.conf 
+     * file can have localhost for the hostname.  
+     */
+    if ($host == 'localhost')
+    {
+      $realHost = exec("hostname -f", $out, $rtn);
+      if($rtn == 0)
+      {
+        $host = $realHost;
+      }
+    }
+	return ($host);
 } // getHost
 
 /**
