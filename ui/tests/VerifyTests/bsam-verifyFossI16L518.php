@@ -19,7 +19,7 @@
 /**
  * Verify special fossology test archive loaded correctly
  *
- * @version "$Id$"
+ * @version "$Id: verifyFossI16L518.php 2019 2009-04-25 03:05:10Z rrando $"
  *
  * Created on Aug 25, 2008
  */
@@ -117,39 +117,38 @@ class verifyFossolyTest extends fossologyTestCase
     $browse = new parseBrowseMenu($page);
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
-    $url = makeUrl($this->host, $miniMenu['Nomos License']);
+    print "DEBUG: miniMenu is:\n";print_r($miniMenu) . "\n";
+    $url = makeUrl($this->host, $miniMenu['License']);
     if($url === NULL) { $this->fail("verifyFossI16L518 Failed, host is not set"); }
 
     $page = $this->mybrowser->get($url);
     //print "page after get of $url is:\n$page\n";
-    $this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
-          "verifyFossI16L518 FAILED! Nomos License Browser Title not found\n");
-    $this->assertTrue($this->myassertText($page, '/Total licenses: 337/'),
-        "verifyFossI16L518 FAILED! Total Licenses does not equal 337\n");
-    $this->assertTrue($this->myassertText($page, '/Unique licenses: 29/'),
-        "verifyFossI16L518 FAILED! Unique Licenses does not equal 29\n");
-    
+    $this->assertTrue($this->myassertText($page, '/License Browser/'),
+          "verifyFossI16L518 FAILED! License Browser Title not found\n");
+    $this->assertTrue($this->myassertText($page, '/Total licenses: 518/'),
+        "verifyFossI16L518 FAILED! Total Licenses does not equal 518\n");
+
     // get the 'Show' links and License color links
     $licTbl = new parseLicenseTbl($page);
     $licTable = $licTbl->parseLicenseTbl();
 
     /* FIX THIS Select show 'Public Domain, verify, select 'LGPL v2.1', verify */
-    $pdURL = makeUrl($this->host, $licTable['Public-domain-claim']);
-    $lgplURL = makeUrl($this->host, $licTable['LGPL_v2.1']);
+    $pdURL = makeUrl($this->host, $licTable['Public Domain']);
+    $lgplURL = makeUrl($this->host, $licTable['\'LGPL v2.1\'-style']);
 
     $page = $this->mybrowser->get($pdURL);
     $licFileList = new parseFolderPath($page, $URL);
     $fileCount = $licFileList->countFiles();
-    print "Checking the number of files based on Public-domain-claim\n";
-    $this->assertEqual($fileCount, 2,
-    "verifyFossI16L518 FAILED! Should be 2 files based on Public-domain-claim got:$fileCount\n");
+    print "Checking the number of files based on Public Domain\n";
+    $this->assertEqual($fileCount, 4,
+    "verifyFossI16L518 FAILED! Should be 4 files based on Public Domain got:$fileCount\n");
 
     $page = $this->mybrowser->get($lgplURL);
     $licFileList->setPage($page);
     $flist = $licFileList->countFiles();
-    print "Checking the number of files based on LGPL_v2.1\n";
-    $this->assertEqual($flist, 18,
-    "verifyFossI16L518 FAILED! Should be 18 files based on LGPL_v2.1 got:$flist\n");
+    print "Checking the number of files based on LGPL v2.1-style\n";
+    $this->assertEqual($flist, 16,
+    "verifyFossI16L518 FAILED! Should be 16 files based on LGPL v2.1-style got:$flist\n");
   }
 }
 ?>
