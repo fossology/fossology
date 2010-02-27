@@ -17,15 +17,14 @@
  ***********************************************************/
 
 /**
- * uplTestData
- * \brief Upload Test data to the repo
- * 
- * Upload using upload from file, url.  Sets Mime-type, nomos and package
- * agents.
-  *
+ * bsam-uploads.php
+ *
+ *\brief (deprecated) bsam uploads.  Used by other tests to make sure
+ * bsam  license counts are correct.  Sets mime, metadata and bsam license.
+ *
  * @param URL obtained from the test enviroment globals
  *
- * @version "$Id$"
+ * @version "$Id: uplTestData.php 2472 2009-08-24 19:35:52Z rrando $"
  *
  * Created on Aug 15, 2008
  */
@@ -89,7 +88,7 @@ class uploadTestDataTest extends fossologyTestCase
     print "Starting file uploads\n";
     foreach($uploadList as $upload) {
       $description = "File $upload uploaded by Upload Test Data Test";
-      $this->uploadFile('Testing', $upload, $description, null, '1,3,4');
+      $this->uploadFile('Testing', $upload, $description, null, '1,2,6');
     }
     /* Upload the urls using upload from url.  Check if the user specificed a
      * web proxy for the environment.  If so, set the attribute. */
@@ -100,7 +99,7 @@ class uploadTestDataTest extends fossologyTestCase
     print "Starting Url uploads\n";
     foreach($urlList as $url)
     {
-      $this->uploadUrl($rootFolder, $url, null, null, '1,3,4');
+      $this->uploadUrl($rootFolder, $url, null, null, '1,2,6');
     }
   }
 }
