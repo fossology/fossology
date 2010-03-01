@@ -19,7 +19,7 @@
 /**
  * Verify special fossology test archive loaded correctly
  *
- * @version "$Id$"
+ * @version "$Id: verifyFoss23D1F1L.php 2019 2009-04-25 03:05:10Z rrando $"
  *
  * Created on Aug 25, 2008
  */
@@ -117,15 +117,15 @@ class verify23D1F1L extends fossologyTestCase
     $browse = new parseBrowseMenu($page);
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
-    $url = makeUrl($this->host, $miniMenu['Nomos License']);
+    $url = makeUrl($this->host, $miniMenu['License']);
     if($url === NULL) { $this->fail("verify23D1F1L Failed, host is not set"); }
 
     $page = $this->mybrowser->get($url);
     //print "page after get of $url is:\n$page\n";
-    $this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
+    $this->assertTrue($this->myassertText($page, '/License Browser/'),
           "verify23D1F1L FAILED! License Browser Title not found\n");
-    $this->assertTrue($this->myassertText($page, '/Total licenses: 1/'),
-        "verify23D1F1L FAILED! Total Licenses does not equal 1\n");
+    $this->assertTrue($this->myassertText($page, '/Total licenses: 2/'),
+        "verify23D1F1L FAILED! Total Licenses does not equal 2\n");
 
     // get the 'Show' links and License color links
     $licTbl = new parseLicenseTbl($page);
@@ -133,12 +133,12 @@ class verify23D1F1L extends fossologyTestCase
     //print "DB: licTable is:\n"; print_r($licTable) . "\n";
 
     /* Select show  'GPL v2-stype', verify */
-    $gplv2URL = makeUrl($this->host, $licTable['GPL_v2']);
+    $gplv2URL = makeUrl($this->host, $licTable['\'GPL v2\'-style']);
     $page = $this->mybrowser->get($gplv2URL);
     $licFileList = new parseFolderPath($page, $URL);
     $tblList = $licFileList->parseFolderPath();
     $tableCnt = count($tblList);
-    print "Checking the number of files based on 'GPL_v2'\n";
+    print "Checking the number of files based on 'GPL v2'-style\n";
     $this->assertEqual($tableCnt, 1);
   }
 }
