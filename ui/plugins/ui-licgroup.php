@@ -723,7 +723,7 @@ class licgroup extends FO_Plugin
 	break;
       case "HTML":
 	$V .= "<font class='text'>\n";
-	$V .= "<center><b><font color='red'>WARNING: This functionality is a work in progress and is currently incomplete.</font></b></center><P>\n";
+	$V .= "<center><b><font color='red'>WARNING: Licence groups only work for the bsam license scanner and do not use the results from licterm.  This functionality has been superceded in v 1.2 by 'buckets' based on the nomos license scanner.</font></b></center><P>\n";
 
 	/************************/
 	/* Show the folder path */
