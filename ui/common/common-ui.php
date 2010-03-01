@@ -66,18 +66,24 @@ function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where="")
  Params:
    $KeyValArray   Assoc array.  Use key/val pairs for list
    $SLName        Select list name (default is "unnamed")
-   $SelectedVal   Initially selected value (optional)
+   $SelectedVal   Initially selected value or key, depends 
+                  on $SelElt
    $FirstEmpty    True if the list starts off with an empty choice
                   (default is false)
+   $SelElt        True (default) if $SelectedVal is a value
+                  False if $SelectedVal is a key
  *****************************************/
 function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "", 
-                            $FirstEmpty=false)
+                            $FirstEmpty=false, $SelElt=true)
 {
   $str ="\n<select name='$SLName'>\n";
   if ($FirstEmpty) $str .= "<option value='' > \n";
   foreach ($KeyValArray as $key => $val)
   {
-    $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
+    if ($SelElt == true)
+      $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
+    else
+      $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
     $str .= "<option value='$key' $SELECTED>$val\n";
   }
   $str .= "</select>";

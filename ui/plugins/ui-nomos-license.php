@@ -140,7 +140,10 @@ class ui_nomos_license extends FO_Plugin
 
     $Agent_name = "nomos";
     $Agent_desc = "nomos license agent";
-    $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
+    if (array_key_exists("agent_pk", $_POST))
+      $Agent_pk = $_POST["agent_pk"];
+    else
+      $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
     /*  Get the counts for each license under this UploadtreePk*/
     $sql = "SELECT distinct(rf_shortname) as licname, 
@@ -154,6 +157,13 @@ class ui_nomos_license extends FO_Plugin
               order by liccount desc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    /* Get agent list */
+    $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
+
+    $AgentSelect = AgentSelect($Agent_name, $upload_pk, "license_file", true, "agent_pk", $Agent_pk);
+    $VLic .= $AgentSelect;
+    $VLic .= "<input type='submit' value='Go'>";
 
     /* Write license histogram to $VLic  */
     $LicCount = 0;
