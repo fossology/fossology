@@ -156,11 +156,11 @@ def agent(model):
                 path = libfosspython.repMkPath('files', file)
                 offsets = library.label_file(path,model)
                 if len(offsets) == 0:
-                    result = db.access("INSERT INTO copyright_test (agent_fk, pfile_fk, copy_startbyte, copy_endbyte)"
+                    result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte)"
                         "VALUES (%d, %d, NULL, NULL);" % (agent_pk, pfile))
                 else:
                     for i in range(len(offsets)):
-                        result = db.access("INSERT INTO copyright_test (agent_fk, pfile_fk, copy_startbyte, copy_endbyte)"
+                        result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte)"
                             "VALUES (%d, %d, %d, %d);" % (agent_pk, pfile, offsets[i][0], offsets[i][1]))
                 # update the heartbeat count
                 count += 1

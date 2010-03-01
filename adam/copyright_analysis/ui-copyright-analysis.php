@@ -151,7 +151,7 @@ class ui_copyright_analysis extends FO_Plugin
     $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
     /*  Get the counts for each copyright under this UploadtreePk*/
-    $sql = "SELECT distinct(pfile_fk) FROM copyright_test, 
+    $sql = "SELECT distinct(pfile_fk) FROM copyright, 
         (SELECT distinct(pfile_fk) as PF from uploadtree 
         where upload_fk=$upload_pk 
         and uploadtree.lft BETWEEN $lft and $rgt) as SS 
@@ -181,7 +181,7 @@ class ui_copyright_analysis extends FO_Plugin
         $row = pg_fetch_assoc($result);
         pg_free_result($result);
         $sub_info['name'] = $row['ufile_name'];
-        $sql = "SELECT count(ct_pk) FROM copyright_test WHERE copy_startbyte IS NOT NULL and pfile_fk=".$sub_info['pfile_fk'].";";
+        $sql = "SELECT count(ct_pk) FROM copyright WHERE copy_startbyte IS NOT NULL and pfile_fk=".$sub_info['pfile_fk'].";";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         $row = pg_fetch_assoc($result);

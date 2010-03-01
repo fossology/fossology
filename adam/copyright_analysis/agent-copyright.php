@@ -130,7 +130,7 @@ class agent_copyright extends FO_Plugin {
               pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size  AS pfilename
               FROM (SELECT distinct(pfile_fk) AS PF
               FROM uploadtree WHERE upload_fk=$uploadpk and (ufile_mode&x'3C000000'::int)=0) as SS
-              left outer join copyright_test on (PF=pfile_fk and agent_fk=$agent_pk)
+              left outer join copyright on (PF=pfile_fk and agent_fk=$agent_pk)
               inner join pfile on (pf=pfile_pk)
               WHERE ct_pk IS null LIMIT 5000;";
 
