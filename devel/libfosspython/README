@@ -1,0 +1,39 @@
+Creates hooks into Python for the C libfoss library functions.
+
+Wrapped functions:
+	From libfossdb.c:
+		void *	DBopen()
+		void	DBclose(void *VDB)
+		void *	DBmove(void *VDB)
+		int 	DBaccess(void *VDB, char *SQL)
+		char *	DBerrmsg(void *VDB)
+		char *	DBstatus(void *VDB)
+		int 	DBdatasize(void *VDB)
+		int 	DBcolsize(void *VDB)
+		int 	DBrowsaffected(void *VDB)
+		char *  DBgetcolname(void *VDB, int Col)
+		int 	DBgetcolnum(void *VDB, char *ColName)
+		char *  DBgetvalue(void *VDB, int Row, int Col)
+		int 	DBisnull(void *VDB, int Row, int Col)
+	
+	From libfossrepo.c:
+		int	RepOpen()
+		void    RepClose()
+		char *  RepGetRepPath()
+		int     RepHostExist(char *Type, char *Host)
+		char *	RepGetHost(char *Type, char *Filename)
+		char *	RepMkPath(char *Type, char *Filename)
+		int     RepExist(char *Type, char *Filename)
+		int     RepRemove(char *Type, char *Filename)
+		int	RepImport(char *Source, char *Type, char *Filename, int Link)
+
+	From libfossagent.c:
+		void InitHeartbeat()
+		void ShowHeartbeat(int Sig)
+		void Heartbeat(long NewItemsProcessed)
+		int  GetAgentKey(void *DB, char * agent_name, long Upload_pk, char *svn_rev, char *agent_desc)
+
+build:
+	python setup.py build_ext --inplace
+
+	creates libfosspython.so
