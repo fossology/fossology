@@ -3,35 +3,29 @@
 TOP=../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
+DEPS=$(TOP)/Makefile.deps
 
 CONFDEF=-DFOSSDB_CONF='"$(SYSCONFDIR)/$(PROJECT)/Db.conf"'
 LIB=libfosspython.so
 
 all: $(LIB) $(VARS)
 
-$(LIB): ../libfossagent/libfossagent.o ../libfossdb/libfossdb.o ../libfossrepo/libfossrepo.o
+$(LIB): $(DB) $(REPO) $(AGENTLIB)
 	python setup.py build_ext --inplace
-
-../libfossagent/libfossagent.o:
-	make -C ../libfossagent/ libfossagent.o
-    
-../libfossdb/libfossdb.o: 
-	make -C ../libfossdb/ libfossdb.o 
-    
-../libfossrepo/libfossrepo.o:
-	make -C ../libfossrepo/ libfossrepo.o
 
 install: install-lib
 
 install-lib: $(LIB)
-	$(INSTALL_DATA) libfosspython.so $(DESTDIR)$(LIBDIR)/libfosspython.so
+	mkdir -p $(DESTDIR)$(LIBDIR)/libfosspython/
+	$(INSTALL_DATA) libfosspython.so $(DESTDIR)$(LIBDIR)/libfosspython/libfosspython.so
 
 # uninstall only cleans up the files, not the directories that might have
 # been created
 uninstall: uninstall-lib
 
 uninstall-lib:
-	rm -f $(DESTDIR)$(LIBDIR)/libfosspython.so
+	rm -f $(DESTDIR)$(LIBDIR)/libfosspython/libfosspython.so
+	rmdir $(DESTDIR)$(LIBDIR)/libfosspython/
 
 test: all
 	@echo "*** No tests available for libfosspython ***"
@@ -41,5 +35,7 @@ clean:
 
 .PHONY: all clean test
 .PHONY: install install-lib uninstall uninstall-lib
+
+include $(DEPS)
 
 # vim: noet
