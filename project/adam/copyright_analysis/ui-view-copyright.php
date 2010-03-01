@@ -78,7 +78,7 @@ class ui_view_copyright extends FO_Plugin
         $Item = GetParm("item",PARM_INTEGER);
         $Upload = GetParm("upload", PARM_INTEGER);
 
-        $sql = "SELECT * FROM copyright_test WHERE copy_startbyte IS NOT NULL
+        $sql = "SELECT * FROM copyright WHERE copy_startbyte IS NOT NULL
             and pfile_fk=".$Item.";";
         $result = $DB->Action($sql);
         if (!empty($result[0]['copy_startbyte'])) {
