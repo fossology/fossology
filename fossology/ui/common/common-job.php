@@ -648,6 +648,8 @@ function JobListSummary($upload_pk) {
     if(count($Results) > 1) {
       $i++;
     }
+    if (array_key_exists($i, $Results) && array_key_exists('job_pk',$Results[$i]))
+    {
     if ($Results[$i]['job_pk'] != $JobId) {
       $Status['total']++;
       if ($State & 0x01) {
@@ -661,6 +663,7 @@ function JobListSummary($upload_pk) {
       }
       $State = 0;
       $JobId = $Results[$i]['job_pk'];
+    }
     }
   }
   return ($Status);
