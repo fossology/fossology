@@ -1,5 +1,8 @@
 Creates hooks into Python for the C libfoss library functions.
 
+To build this library the python-pyrex (version 0.9.8 or greater) is needed.
+You will also need python 2.5 and python distutils (for the setup script).
+
 Wrapped functions:
 	From libfossdb.c:
 		void *	DBopen()
