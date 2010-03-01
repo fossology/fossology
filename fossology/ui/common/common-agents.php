@@ -277,6 +277,99 @@ function GetAgentKey($agentName, $agentDesc)
 
 } // GetAgentKey
 
+
+/**
+ * GetAgentList
+ * \brief
+ *  GetAgentList() returns an array that has info on each the version of an
+ *  agent ($agentName), and if that version was used to analyze $upload_pk.
+ *  Disabled agents will not show up in the result.
+ *
+ * @param string $agentName the name of the agent e.g. nomos
+ * @param int    $upload_pk
+ * @param string $tablename - name of table to check for data.  Must have column "agent_fk"
+ * @param boolean $dataonly - if true (default), only return the latest agent and agent revs 
+ *                            that have data for this upload_pk
+ *                            if false, return all the agent_revs
+ *
+ * @return 0 on error
+ *         Success returns an array of assoc array with the following elements:
+ *         agent_pk, agent_rev, agent_desc, agent_ts, data
+ *         The definitions for the agent_ elements are the same as in the agent table.
+ *         "data" is 0 if the upload has no data from this agent_pk
+ *                   1 if the upload has data from this agent_pk
+ *         Agents recs are ordered from the most recent to the least.
+ */
+
+function GetAgentList($agentName, $upload_pk, $tablename, $dataonly=true)
+{
+	global $PG_CONN;
+    
+    $agentList = array();
+    $colstr = "agent_pk, agent_name, agent_rev, agent_desc, agent_ts";
+    $colarray = explode(',', $colstr);
+
+	/* get the agent recs */
+	$sql = "SELECT $colstr FROM agent WHERE agent_name ='$agentName' and agent_enabled=true order by agent_ts desc";
+	$result = pg_query($PG_CONN, $sql);
+	DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    $first = true;  // first rec is always returned, regardless of $dataonly
+	while ($row = pg_fetch_assoc($result)) 
+    {
+      // see if this agent has any data for this upload_pk
+	  $sql = "SELECT agent_fk FROM $tablename, uploadtree WHERE agent_fk ='$row[agent_pk]' and upload_fk='$upload_pk' and $tablename.pfile_fk=uploadtree.pfile_fk limit 1";
+	  $result2 = pg_query($PG_CONN, $sql);
+	  DBCheckResult($result2, $sql, __FILE__, __LINE__);
+      
+      if ( $first || ($dataonly == false) || ($dataonly && (pg_num_rows($result2) > 0)))
+      {
+        $row['data'] = pg_num_rows($result2);
+        $agentList[] = $row;
+      }
+
+      pg_free_result($result2);
+      $first = false;
+    }
+    pg_free_result($result);
+
+	return $agentList;
+} // GetAgentList
+
+/**
+ * AgentSelect
+ * \brief
+ *  Return html for Agent select list
+ *
+ * @param string $AgentName the name of the agent e.g. nomos
+ * @param int    $upload_pk
+ * @param string $tablename - name of table to check for data.  Must have column "agent_fk"
+ * @param boolean $dataonly - if true (default), only return the latest agent and agent revs 
+ *                            that have data for this upload_pk
+ *                            if false, return all the agent_revs
+ * @param string $SLName - select list element name
+ * @param string *SelectedKey - selected key (optional), if absent the latest agent with 
+ *                              results is selected.
+ *
+ * @return agent select list
+ *      or 0 on error
+ */
+function AgentSelect($AgentName, $upload_pk, $tablename, $dataonly=true, $SLName, $SelectedKey="")
+{
+  $AgentList = GetAgentList($AgentName, $upload_pk, $tablename);
+  $SelArray = array();
+
+  if ($SelectedKey == "") $SelectedKey = $AgentList[0]['agent_pk'];
+
+  /* create key/val array for pulldown */
+  foreach($AgentList as $AgentRec)
+  {
+    $DataInd = ($AgentRec['data']) ? "" : ", NO DATA AVAILABLE";
+    $SelArray[$AgentRec['agent_pk']] = "$AgentRec[agent_name] rev: $AgentRec[agent_rev]$DataInd";
+  }
+  return "Results from:" . Array2SingleSelect($SelArray, $SLName, $SelectedKey, false, false);
+}
+
 /**
  * Largestjq_pk
  *
