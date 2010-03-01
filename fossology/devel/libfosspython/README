@@ -36,4 +36,4 @@ Wrapped functions:
 build:
 	python setup.py build_ext --inplace
 
-	creates python-libfoss.so
+	creates libfosspython.so

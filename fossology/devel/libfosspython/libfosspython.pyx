@@ -15,7 +15,7 @@
 
 import signal
 
-cdef extern from "devel/libfossagent/libfossagent.h":
+cdef extern from "../libfossagent/libfossagent.h":
     void InitHeartbeat()
     void ShowHeartbeat(int Sig)
     void Heartbeat(long NewItemsProcessed)
@@ -50,7 +50,7 @@ def updateHeartbeat(newItemsProcessed):
     """
     Heartbeat(newItemsProcessed)
 
-cdef extern from "devel/libfossdb/libfossdb.h":
+cdef extern from "../libfossdb/libfossdb.h":
     void *DBopen()
     void DBclose(void *VDB)
     void *DBmove(void *VDB)
@@ -210,7 +210,7 @@ cdef class FossDB:
         """
         return DBisnull(self.DB, row, col)
 
-cdef extern from "devel/libfossrepo/libfossrepo.h":
+cdef extern from "../libfossrepo/libfossrepo.h":
     int	    RepOpen()
     void    RepClose()
     char *  RepGetRepPath()
