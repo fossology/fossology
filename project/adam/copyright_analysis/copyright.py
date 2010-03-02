@@ -155,16 +155,15 @@ def agent(model):
                 pfile = int(pfile)
                 path = libfosspython.repMkPath('files', file)
                 offsets = library.label_file(path,model)
+                text = open(path).read()
                 if len(offsets) == 0:
-                    result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte)"
-                        "VALUES (%d, %d, NULL, NULL);" % (agent_pk, pfile))
+                    result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, type) "
+                        "VALUES (%d, %d, NULL, NULL, NULL, 'statement');" % (agent_pk, pfile))
                 else:
                     for i in range(len(offsets)):
-                        result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte)"
-                            "VALUES (%d, %d, %d, %d);" % (agent_pk, pfile, offsets[i][0], offsets[i][1]))
-                # update the heartbeat count
+                        result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, type) "
+                            "VALUES (%d, %d, %d, %d, '%s', 'statement');" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.sub("'","''",text[offsets[i][0]:offsets[i][1]])))
                 count += 1
-                #libfosspython.updateHeartbeat(count)
                 sys.stdout.write("OK\n")
                 sys.stdout.flush()
                 sys.stdout.write("ItemsProcessed %ld\n" % count)
@@ -175,11 +174,7 @@ def agent(model):
             elif re.match("start", line):
                 sys.stdout.write("OK\n")
                 sys.stdout.flush()
-                #libfosspython.initHeartbeat()
                 count = 0
-            #elif re.match("again", line):
-                #libfosspython.initHeartbeat()
-                #libfosspython.updateHeartbeat(count)
 
             try:
                 line = sys.stdin.readline()
@@ -209,80 +204,49 @@ def setup_database():
         print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
         sys.exit(1)
 
-    result = db.access("SELECT * FROM copyright_agent_fk_seq LIMIT 1;")
-    if (result == 0):
-        result = db.access("CREATE SEQUENCE copyright_agent_fk_seq "
-            "START WITH 1 "
-            "INCREMENT BY 1 "
-            "NO MAXVALUE "
-            "NO MINVALUE "
-            "CACHE 1;")
-        if result != 0:
-            print >> sys.stderr, "ERROR: Couldn't create copyright_agent_fk_seq."
-            sys.exit(1)
+    result = db.access("CREATE SEQUENCE copyright_ct_pk_seq "
+        "START WITH 1 "
+        "INCREMENT BY 1 "
+        "NO MAXVALUE "
+        "NO MINVALUE "
+        "CACHE 1;")
+    if result != 0:
+        print >> sys.stderr, "ERROR: Couldn't create copyright_agent_fk_seq."
 
-        result = db.access("ALTER TABLE public.copyright_agent_fk_seq OWNER TO fossy;")
-        if result != 0:
-            print >> sys.stderr, "ERROR: Couldn't alter copyright_agent_fk_seq."
-            sys.exit(1)
-    else:
-        print >> sys.stdout, 'WARNING: Table copyright_agent_fk_seq already exists. Skipping.'
+    result = db.access("ALTER TABLE public.copyright_agent_fk_seq OWNER TO fossy;")
+    if result != 0:
+        print >> sys.stderr, "ERROR: Couldn't alter copyright_agent_fk_seq."
 
-    result = db.access("SELECT * FROM copyright_ct_pk_seq LIMIT 1;")
-    if (result == 0):
-        result = db.access("CREATE SEQUENCE copyright_ct_pk_seq "
-            "START WITH 1 "
-            "INCREMENT BY 1 "
-            "NO MAXVALUE "
-            "NO MINVALUE "
-            "CACHE 1;")
-        if result != 0:
-            print >> sys.stderr, "ERROR: Couldn't create copyright_ct_pk_seq."
-            sys.exit(1)
+    result = db.access("CREATE TYPE copyright_type AS ENUM ('statement', 'email', 'url');")
 
-        result = db.access("ALTER TABLE public.copyright_ct_pk_seq OWNER TO fossy;")
-        if result != 0:
-            print >> sys.stderr, "ERROR: Couldn't alter copyright_ct_pk_seq."
-            sys.exit(1)
-    else:
-        print >> sys.stdout, 'WARNING: Table copyright_ct_pk_seq already exists. Skipping.'
+    result = db.access("CREATE TABLE copyright ( "
+        "ct_pk bigint DEFAULT nextval('copyright_ct_pk_seq'::regclass) NOT NULL, "
+        "agent_fk bigint NOT NULL, "
+        "pfile_fk bigint NOT NULL, "
+        "content text, "
+        "type copyright_type NOT NULL, "
+        "copy_startbyte integer, "
+        "copy_endbyte integer);")
+    if result != 0:
+        print >> sys.stderr, "ERROR: Couldn't create license table."
 
-    result = db.access("SELECT * FROM copyright_pfile_fk_seq LIMIT 1;")
-    if (result == 0):
-        result = db.access("CREATE SEQUENCE copyright_pfile_fk_seq "
-            "START WITH 1 "
-            "INCREMENT BY 1 "
-            "NO MAXVALUE "
-            "NO MINVALUE "
-            "CACHE 1;")
-        if result != 0:
-            print >> sys.stderr, "ERROR: Couldn't create copyright_pfile_fk_seq."
-            sys.exit(1)
+    result = db.access("ALTER TABLE public.copyright OWNER TO fossy;")
+    if result != 0:
+        print >> sys.stderr, "ERROR: Couldn't alter copyright table."
 
-        result = db.access("ALTER TABLE public.copyright_pfile_fk_seq OWNER TO fossy;")
-        if result != 0:
-            print >> sys.stderr, "ERROR: Couldn't alter copyright_pfile_fk_seq."
-            sys.exit(1)
-    else:
-        print >> sys.stdout, 'WARNING: Table copyright_pfile_fk_seq already exists. Skipping.'
-
-    result = db.access("SELECT * FROM copyright LIMIT 1;")
-    if (result == 0):
-        result = db.access("CREATE TABLE copyright ( "
-            "ct_pk bigint DEFAULT nextval('copyright_ct_pk_seq'::regclass) NOT NULL, "
-            "agent_fk bigint DEFAULT nextval('copyright_agent_fk_seq'::regclass) NOT NULL, "
-            "pfile_fk bigint DEFAULT nextval('copyright_pfile_fk_seq'::regclass) NOT NULL, "
-            "copy_startbyte integer, "
-            "copy_endbyte integer);")
-        if result != 0:
-            print >> sys.stderr, "ERROR: Couldn't create license table."
-            sys.exit(1)
-
-        result = db.access("ALTER TABLE public.copyright OWNER TO fossy;")
-        if result != 0:
-            print >> sys.stderr, "ERROR: Couldn't alter copyright table."
-            sys.exit(1)
-    else:
-        print >> sys.stdout, 'WARNING: Table copyright already exists. Skipping.'
+    result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
+            "copyright_pkey PRIMARY KEY (ct_pk);")
+    if result != 0:
+        print >> sys.stderr, "ERROR: Couldn't add constraint 'pfile' to copyright table."
+    
+    result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
+            "pfile_fk FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk);")
+    if result != 0:
+        print >> sys.stderr, "ERROR: Couldn't add constraint 'pfile' to copyright table."
+    
+    result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
+            "agent_fk FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);")
+    if result != 0:
+        print >> sys.stderr, "ERROR: Couldn't add constraint 'pfile' to copyright table."
 
 if __name__ == '__main__':
