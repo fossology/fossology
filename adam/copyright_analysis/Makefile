@@ -3,7 +3,7 @@ include Makefile.conf
 
 all: model.dat copyright
 
-copyright:
+copyright: copyright.py
 	cat copyright.py > copyright
 	echo -n "    sys.path.append('" >> copyright
 	echo -n $(DESTDIR)$(LIBDIR) >> copyright
