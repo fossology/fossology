@@ -734,8 +734,13 @@ FUNCTION int updateLicenseFile(long rfPk) {
     if (rfPk <= 0) {
         return (FALSE);
     }
-    sprintf(
-            query,
+
+    /* If files are comming from command line instead of fossology repo,
+       then there are no pfiles.  So don't update the db
+    */
+    if (cur.cliMode == 1) return (TRUE);
+
+    sprintf(query,
             "INSERT INTO license_file(rf_fk, agent_fk, pfile_fk) VALUES(%ld, %d, %ld)",
             rfPk, gl.agentPk, cur.pFileFk);
 
