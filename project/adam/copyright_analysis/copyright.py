@@ -76,6 +76,7 @@ def main():
 
     (options, args) = optparser.parse_args()
     
+    print "Source hash: %s" % hex(hash(open(sys.argv[0]).read()))
     if options.init:
         db = None
         try:
@@ -101,6 +102,7 @@ def main():
 
     try:
         model = pickle.load(open(options.model))
+        print 'Model hash: %s' % hex(hash(str(model)))
     except:
         print >> sys.stderr, 'You must specify a training file to create a model.\n\n'
         optparser.print_usage()
@@ -142,7 +144,7 @@ def agent(model):
             print >> sys.stderr, 'ERROR: Something is broken. Could not open Repo.'
             return 1
 
-        agent_pk = db.getAgentKey('copyright', '1', 'copyright agent')
+        agent_pk = db.getAgentKey('copyright', '1.0 source_hash(%s) model_hash(%s)' % (hex(hash(open(sys.argv[0]).read())), hex(hash(str(model)))), 'copyright agent')
         
         count = 0
 
@@ -159,14 +161,18 @@ def agent(model):
                 if len(offsets) == 0:
                     result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, type) "
                         "VALUES (%d, %d, NULL, NULL, NULL, 'statement');" % (agent_pk, pfile))
+                    if result != 0:
+                        print >> sys.sdterr, "ERROR: DB Access error,\n%s" % db.status()
                 else:
                     for i in range(len(offsets)):
                         result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, type) "
-                            "VALUES (%d, %d, %d, %d, '%s', 'statement');" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.sub("'","''",text[offsets[i][0]:offsets[i][1]])))
+                            "VALUES (%d, %d, %d, %d, E'%s', 'statement');" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]])))
+                        if result != 0:
+                            print >> sys.sdterr, "ERROR: DB Access error,\n%s" % db.status()
                 count += 1
                 sys.stdout.write("OK\n")
                 sys.stdout.flush()
-                sys.stdout.write("ItemsProcessed %ld\n" % count)
+                sys.stdout.write("ItemsProcessed %ld\n" % 1)
                 sys.stdout.flush()
             elif re.match("quit", line):
                 print "BYE."
