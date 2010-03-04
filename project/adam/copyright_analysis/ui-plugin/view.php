@@ -78,10 +78,20 @@ class copyright_view extends FO_Plugin
         $Item = GetParm("item",PARM_INTEGER);
         $Upload = GetParm("upload", PARM_INTEGER);
 
-        $sql = "SELECT * FROM copyright WHERE copy_startbyte IS NOT NULL
-            and pfile_fk=".$Item.";";
+        $pfile = 0;
+
+        $sql = "SELECT * FROM uploadtree WHERE uploadtree_pk = ".$Item.";";
         $result = $DB->Action($sql);
-        if (!empty($result[0]['copy_startbyte'])) {
+        if ($result && !empty($result[0]['pfile_fk'])) {
+            $pfile = $result[0]['pfile_fk'];
+        } else {
+            print "Could not locate the corresponding pfile.";
+        }
+
+        $sql = "SELECT * FROM copyright WHERE copy_startbyte IS NOT NULL
+            and pfile_fk=".$pfile.";";
+        $result = $DB->Action($sql);
+        if ($result && !empty($result[0]['copy_startbyte'])) {
             foreach ($result as $row) {
                 $View->AddHighlight($row['copy_startbyte'], $row['copy_endbyte'], 0);
             }
@@ -92,7 +102,7 @@ class copyright_view extends FO_Plugin
             print "</center>";
         }
         
-        $filename = RepPath($Item);
+        $filename = RepPath($pfile);
         $handle = fopen($filename, "r");
         $View->ShowText($handle, 0, 1, -1);
         fclose($handle);

@@ -27,5 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 require($WEBDIR.'/plugins/copyright/hist.php');
 require($WEBDIR.'/plugins/copyright/list.php');
 require($WEBDIR.'/plugins/copyright/view.php');
+require($WEBDIR.'/plugins/copyright/oneshot.php');
+require($WEBDIR.'/plugins/copyright/agent.php');
 
 ?>
