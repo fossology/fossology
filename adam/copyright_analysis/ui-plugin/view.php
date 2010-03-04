@@ -24,9 +24,9 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
-class ui_view_copyright extends FO_Plugin
+class copyright_view extends FO_Plugin
 {
-    var $Name       = "view-copyright";
+    var $Name       = "copyrightview";
     var $Title      = "View Copyright";
     var $Version    = "1.0";
     var $Dependency = array("db","browse","view");
@@ -101,6 +101,6 @@ class ui_view_copyright extends FO_Plugin
     } // Output()
 
 };
-$NewPlugin = new ui_view_copyright;
+$NewPlugin = new copyright_view;
 $NewPlugin->Initialize();
 ?>
