@@ -271,6 +271,10 @@ def label_file(file, model):
             ends.append(False)
     
     offsets = []
+    for email in stuff['email']:
+        offsets.append([email[1],email[2],'email'])
+    for url in stuff['url']:
+        offsets.append([url[1],url[2],'url'])
     tokens = replace_placeholders(tokens,stuff)
     i = 0
     inside = False
@@ -284,7 +288,7 @@ def label_file(file, model):
             finish = tokens[i+2][2]
         if ends[i] and inside:
             inside = False
-            offsets.append([beginning, finish])
+            offsets.append([beginning, finish, 'statement'])
             # print "[%d:%d] ''%r''" % (beginning, finish, text[beginning:finish])
         i += 1
     

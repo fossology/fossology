@@ -20,7 +20,6 @@
 import sys
 import re
 import traceback
-import copyright_library as library
 import cPickle as pickle
 from optparse import OptionParser
 
@@ -166,7 +165,7 @@ def agent(model):
                 else:
                     for i in range(len(offsets)):
                         result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, type) "
-                            "VALUES (%d, %d, %d, %d, E'%s', 'statement');" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]])))
+                            "VALUES (%d, %d, %d, %d, E'%s', '%s');" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]]), offsets[i][2]))
                         if result != 0:
                             print >> sys.sdterr, "ERROR: DB Access error,\n%s" % db.status()
                 count += 1

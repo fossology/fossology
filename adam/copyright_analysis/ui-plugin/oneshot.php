@@ -49,10 +49,11 @@ class agent_copyright_once extends FO_Plugin {
     function AnalyzeOne($Highlight, $LicCache) {
         global $Plugins;
         global $AGENTDIR;
+        global $DATADIR;
         $V = "";
         $View = & $Plugins[plugin_find_id("view") ];
         $TempFile = $_FILES['licfile']['tmp_name'];
-        $Sys = "$AGENTDIR/statement.py $AGENTDIR/files $TempFile";
+        $Sys = $AGENTDIR."/copyright --model ".$DATADIR."/model.dat --analyze-from-command-line $TempFile";
         $Fin = popen($Sys, "r");
         //print "<pre>";
         //print $Sys."\n";
@@ -60,11 +61,12 @@ class agent_copyright_once extends FO_Plugin {
             $Line = fgets($Fin);
             if (strlen($Line) > 0) {
                 //print $Line;
-                //print "--------------------------------------------------------------------------------\n";
                 $match = array();
                 preg_match_all("/\[(?P<start>\d+)\:(?P<end>\d+)\]/", $Line, $match);
                 //print_r($match);
-                $View->AddHighlight($match['start'][0], $match['end'][0], 0);
+                if (!empty($match['start'])) {
+                    $View->AddHighlight($match['start'][0], $match['end'][0], 0);
+                }
             }
         }
         //print "</pre>";
