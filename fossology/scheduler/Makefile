@@ -22,8 +22,6 @@ DEFFILE=default/fossology
 
 all: fossology-scheduler mkschedconf defconf/init.d/fossology fo_watchdog
 
-
-
 fossology-scheduler:  $(OBJ) $(REPOOBJ) $(VARS)
 	$(CC) $(OBJ) $(REPOOBJ) $(CFLAGS_DB) $(CFLAGS_REPO) \
 	-lrt -lpq $(ALL_CFLAGS) -o $@
