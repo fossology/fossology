@@ -83,7 +83,7 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
   }
 
   /* get bucket defs from db */
-  sprintf(sqlbuf, "select bucket_pk, bucket_type, bucket_regex, bucket_filename, stopon, bucket_name from bucket_def where bucketpool_fk=%d order by bucket_evalorder asc", bucketpool_pk);
+  sprintf(sqlbuf, "select bucket_pk, bucket_type, bucket_regex, bucket_filename, stopon, bucket_name, applies_to from bucket_def where bucketpool_fk=%d order by bucket_evalorder asc", bucketpool_pk);
   result = PQexec(pgConn, sqlbuf);
   if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return 0;
   numRows = PQntuples(result);
@@ -119,18 +119,27 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
     }
     bucketDefList[rowNum].regex = strdup(PQgetvalue(result, rowNum, 2));
 
-    bucketDefList[rowNum].execFilename = strdup(PQgetvalue(result, rowNum, 3));
+    bucketDefList[rowNum].dataFilename = strdup(PQgetvalue(result, rowNum, 3));
 
+    /* MATCH_EVERY */
     if (bucketDefList[rowNum].bucket_type == 1)
-      bucketDefList[rowNum].match_every = getMatchEvery(pgConn, bucketpool_pk, bucketDefList[rowNum].execFilename, pcroot);
+      bucketDefList[rowNum].match_every = getMatchEvery(pgConn, bucketpool_pk, bucketDefList[rowNum].dataFilename, pcroot);
 
+    /* MATCH_ONLY */
     if (bucketDefList[rowNum].bucket_type == 2)
     {
-      bucketDefList[rowNum].match_only = getMatchOnly(pgConn, bucketpool_pk, bucketDefList[rowNum].execFilename, pcroot);
+      bucketDefList[rowNum].match_only = getMatchOnly(pgConn, bucketpool_pk, bucketDefList[rowNum].dataFilename, pcroot);
+    }
+
+    /* REGEX-FILE */
+    if (bucketDefList[rowNum].bucket_type == 5)
+    {
+      bucketDefList[rowNum].regex_row = getRegexFile(pgConn, bucketpool_pk, bucketDefList[rowNum].dataFilename, pcroot);
     }
 
     bucketDefList[rowNum].stopon = *PQgetvalue(result, rowNum, 4);
     bucketDefList[rowNum].bucket_name = strdup(PQgetvalue(result, rowNum, 5));
+    bucketDefList[rowNum].applies_to = *PQgetvalue(result, rowNum, 6);
   }
   PQclear(result);
   if (numErrors) return 0;
@@ -141,8 +150,9 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
     printf("\nbucket_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_pk);
     printf("bucket_name[%d] = %s\n", rowNum, bucketDefList[rowNum].bucket_name);
     printf("bucket_type[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_type);
-    printf("execFilename[%d] = %s\n", rowNum, bucketDefList[rowNum].execFilename);
+    printf("dataFilename[%d] = %s\n", rowNum, bucketDefList[rowNum].dataFilename);
     printf("stopon[%d] = %c\n", rowNum, bucketDefList[rowNum].stopon);
+    printf("applies_to[%d] = %c\n", rowNum, bucketDefList[rowNum].applies_to);
     printf("nomos_agent_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].nomos_agent_pk);
     printf("bucket_agent_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_agent_pk);
     printf("regex[%d] = %s\n", rowNum, bucketDefList[rowNum].regex);
@@ -318,6 +328,173 @@ return match_every_head;
 
 
 /****************************************************
+ getRegexFile
+
+ Parse filename, for bucket type 5 REGEX-FILE
+ Lines are in format:
+  {ftype1} {regex1} {op} {ftype2} {regex2}
+
+ ftype is either "license" or "filename"
+ op is either "and" (1) or "or" (2) or "not" (3)
+ The op clause is optional.
+ For example:
+   license bsd.*clause 
+   license (GPL_?v3|Affero_v3) and filename .*mypkg
+
+ @param PGconn *pgConn  Database connection object
+ @param int bucketpool_pk
+ @param char *filename
+ @param cacheroot_t *pcroot  License cache
+
+ @return an array of arrays of regex_file_t's that 
+         represent the rows in filename.
+ or 0 if error.
+****************************************************/
+FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk, 
+                             char *filename, cacheroot_t *pcroot)
+{
+  char *fcnName = "getRegexFile";
+  char filepath[256];  
+  char inbuf[256];
+  regex_file_t *regex_row_head = 0;
+  int  line_count = 0;
+  int  rv;
+  int  rowNumb = 0;
+  char *Delims = " \t\n\r";
+  char *token;
+  char *saveptr;
+  FILE *fin;
+
+  /* put together complete file path to match_every file */
+  snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
+           DATADIR, bucketpool_pk, filename);
+
+  /* open filepath */
+  fin = fopen(filepath, "r");
+  if (!fin)
+  {
+    printf("FATAL: %s.%s.%d Failure to initialize bucket %s (pool=%d).\nError: %s\n",
+           __FILE__, fcnName, __LINE__, filepath, bucketpool_pk, strerror(errno));
+    return 0;
+  }
+
+  /* count lines in file */
+  while (fgets(inbuf, sizeof(inbuf), fin)) line_count++;
+  
+  /* calloc array as lines+1.  This sets the array to 
+     the max possible size +1 for null termination */
+  regex_row_head = calloc(line_count+1, sizeof(regex_file_t));
+  if (!regex_row_head)
+  {
+    printf("FATAL: %s.%s.%d Unable to allocate %d regex_file_t array.\n",
+           __FILE__, fcnName, __LINE__, line_count+1);
+    return 0;
+  }
+
+  /* read each line fgets 
+     File has 1-n expressions per line
+     Comments start with leading #
+   */
+  rewind(fin);
+  while (fgets(inbuf, sizeof(inbuf), fin)) 
+  {
+    /* comment? */
+    if (inbuf[0] == '#') continue;
+
+    /* get first token ftype1 */
+    token = strtok_r(inbuf, Delims, &saveptr);
+
+    /* empty line? */
+    if (token[0] == 0) continue;
+
+    regex_row_head[rowNumb].ftype1 = getRegexFiletype(token, filepath);
+    if (regex_row_head[rowNumb].ftype1 == 0) break;
+
+    /* get regex1 */
+    token = strtok_r(NULL, Delims, &saveptr);
+    regex_row_head[rowNumb].regex1 = strdup(token);
+    rv = regcomp(&regex_row_head[rowNumb].compRegex1, token, REG_NOSUB | REG_ICASE);
+    if (rv != 0)
+    {
+      printf("ERROR: %s.%s.%d Invalid regular expression for file: %s, [%s], row: %d\n",
+              __FILE__, fcnName, __LINE__, filepath, token, rowNumb);
+      break;
+    }
+
+    /* get optional operator 'and'=1 or 'or'=2 'not'=3 */
+    token = strtok_r(NULL, Delims, &saveptr);
+    if (!token)
+    {
+      rowNumb++;
+      continue;
+    }
+    else
+    {
+      if (strcasecmp(token, "and") == 0) regex_row_head[rowNumb].op = 1;
+      else
+      if (strcasecmp(token, "or") == 0) regex_row_head[rowNumb].op = 2;
+      else
+      if (strcasecmp(token, "not") == 0) regex_row_head[rowNumb].op = 3;
+      else
+      {
+        printf("ERROR: %s.%s.%d Invalid operator in file: %s, [%s], row: %d\n",
+               __FILE__, fcnName, __LINE__, filepath, token, rowNumb);
+        break;
+      }
+    }
+
+    /* get token ftype2 */
+    token = strtok_r(NULL, Delims, &saveptr);
+    regex_row_head[rowNumb].ftype2 = getRegexFiletype(token, filepath);
+    if (regex_row_head[rowNumb].ftype2 == 0) break;
+
+    /* get regex2 */
+    token = strtok_r(NULL, Delims, &saveptr);
+    regex_row_head[rowNumb].regex2 = strdup(token);
+    rv = regcomp(&regex_row_head[rowNumb].compRegex2, token, REG_NOSUB | REG_ICASE);
+    if (rv != 0)
+    {
+      printf("ERROR: %s.%s.%d Invalid regular expression for file: %s, [%s], row: %d\n",
+              __FILE__, fcnName, __LINE__, filepath, token, rowNumb);
+      break;
+    }
+
+    rowNumb++;
+  }
+
+  if (!rowNumb)
+  {
+    free(regex_row_head);
+    regex_row_head = 0;
+  }
+  return regex_row_head;
+}
+
+
+/****************************************************
+ getRegexFiletype
+
+ Given a filetype token from REGEX-FILE
+ return the token int representation.
+
+ @param char *token  
+ @param char *filepath  path of REGEX-FILE data file.
+                        used for error reporting only.
+
+ @return 1=filename, 2=license
+****************************************************/
+FUNCTION int getRegexFiletype(char *token, char *filepath)
+{
+  if (strcasecmp(token, "filename") == 0) return(1);
+  else
+  if (strcasecmp(token, "license") == 0) return(2);
+  printf("FATAL: Invalid bucket file (%s), unknown filetype (%s)\n",
+       filepath, token);
+  return(0);
+}
+
+
+/****************************************************
  getLicsInStr
 
  Given a string with | separated license names
@@ -434,12 +611,10 @@ FUNCTION int licDataAvailable(PGconn *pgConn, int uploadtree_pk)
   snprintf(sql, sizeof(sql),
            "select fl_pk from license_file where agent_fk=%d limit 1",
            nomos_agent_pk);
+  result = PQexec(pgConn, sql);
   if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
-  if (PQntuples(result) == 0)
-  {
-    PQclear(result);
-    return 0;
-  }
+  if (PQntuples(result) == 0) nomos_agent_pk = 0;
+  PQclear(result);
   return nomos_agent_pk;
 }
 

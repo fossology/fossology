@@ -45,18 +45,21 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
                         processed() call.  The call is unnecessary during 
                         recursion and it's an DB query, so best to avoid
                         doing an unnecessary call.
+ @param char *fileName  uplaodtree_pk ufile_name
 
  @return 0 on OK, -1 on failure.
  Errors are written to stdout.
 ****************************************************/
 FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, 
-                      int  uploadtree_pk, int writeDB, int skipProcessedCheck)
+                      int  uploadtree_pk, int writeDB, int skipProcessedCheck,
+                      char *fileName)
 {
   char *fcnName = "walkTree";
   char sqlbuf[128];
   PGresult *result;
   int  lft, rgt, pfile_pk, ufile_mode;
   int  child_uploadtree_pk, child_lft, child_rgt, child_pfile_pk, child_ufile_mode;
+  char *child_ufile_name;
   int   numChildren, childIdx;
   int   rv = 0;
   int  *bucketList;  // null terminated list of bucket_pk's
@@ -89,14 +92,15 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   if (rgt == (lft+1))
   {
     if (((ufile_mode & 1<<28) == 0) && (pfile_pk > 0))
-      return  processLeaf(pgConn, bucketDefArray, pfile_pk, uploadtree_pk, agent_pk, writeDB);
+      return  processLeaf(pgConn, bucketDefArray, pfile_pk, uploadtree_pk, agent_pk, 
+                          writeDB, fileName);
     else
       return 0;  /* case of empty directory or artifact */
   }
 
   /* Since uploadtree_pk isn't a leaf, find its children and process (if child is leaf) 
      or recurse */
-  sprintf(sqlbuf, "select uploadtree_pk,pfile_fk, lft, rgt, ufile_mode from uploadtree where parent=%d", 
+  sprintf(sqlbuf, "select uploadtree_pk,pfile_fk, lft, rgt, ufile_mode, ufile_name from uploadtree where parent=%d", 
           uploadtree_pk);
   result = PQexec(pgConn, sqlbuf);
   if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return -1;
@@ -118,6 +122,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
     child_lft = atoi(PQgetvalue(result, childIdx, 2));
     child_rgt = atoi(PQgetvalue(result, childIdx, 3));
     child_ufile_mode = atoi(PQgetvalue(result, childIdx, 4));
+    child_ufile_name = PQgetvalue(result, childIdx, 5);
 
     /* if child is a leaf, just process rather than recurse 
     */
@@ -125,12 +130,14 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
     {
       //if (((child_ufile_mode & 1<<28) == 0) && (child_pfile_pk > 0))
       if (child_pfile_pk > 0)
-        processLeaf(pgConn, bucketDefArray, child_pfile_pk, child_uploadtree_pk, agent_pk, writeDB);
+        processLeaf(pgConn, bucketDefArray, child_pfile_pk, child_uploadtree_pk, 
+                    agent_pk, writeDB, child_ufile_name);
       continue;
     }
 
     /* not a leaf so recurse */
-    rv = walkTree(pgConn, bucketDefArray, agent_pk, child_uploadtree_pk, writeDB, 1);
+    rv = walkTree(pgConn, bucketDefArray, agent_pk, child_uploadtree_pk, writeDB, 
+                  1, child_ufile_name);
 
     /* done processing children, now processes (find buckets) for the container
        ignore artifacts
@@ -159,17 +166,19 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
  @param int          uploadtree_pk  
  @param int          agent_pk
  @param int          writeDB         True writes to DB, False writes results to stdout
+ @param char        *fileName        uploadtree_pk ufile_name
 
  @return 0=success, else error
 ****************************************************/
 FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, 
-                         int pfile_pk, int uploadtree_pk, int agent_pk, int writeDB)
+                         int pfile_pk, int uploadtree_pk, int agent_pk, int writeDB,
+                         char *fileName)
 {
   int rv = 0;
   int *bucketList;
 
   if (debug) printf("processLeaf() pfile: %d\n", pfile_pk);
-  bucketList = getLeafBuckets(pgConn, bucketDefArray, pfile_pk);
+  bucketList = getLeafBuckets(pgConn, bucketDefArray, pfile_pk, fileName);
   if (bucketList) 
   {
     if (debug)
@@ -192,26 +201,28 @@ FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray,
  @param PGconn *pgConn  postgresql connection
  @param pbucketdef_t bucketDefArray
  @param int uploadtree_pk  
+ @param char *fileName   uploadtree_pk ufile_name
 
  @return array of bucket_pk's, or 0 if error
 ****************************************************/
-FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int pfile_pk)
+FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int pfile_pk,
+                             char *fileName)
 {
   char *fcnName = "getLeafBuckets";
   int  *bucket_pk_list = 0;
   int  *bucket_pk_list_start;
   char  sql[256];
   PGresult *result;
+  PGresult *resultpkg = 0;
   int   numLics, licNumb;
   int   numBucketDefs = 0;
-  int   rv;
   int   match = 0;   // bucket match
-  int   foundmatch; 
+  int   foundmatch, foundmatch2; 
   int   *pmatch_array;
   int  **ppmatch_array;
   int  *pfile_rfpks;
-  char *licName;
   pbucketdef_t bucketDefArray;
+  regex_file_t *regex_row;
 
   if (debug) printf("debug: %s  pfile: %d\n", fcnName, pfile_pk);
   /*** count how many elements are in in_bucketDefArray   ***/
@@ -246,15 +257,32 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   for (licNumb=0; licNumb < numLics; licNumb++) 
     pfile_rfpks[licNumb] = atoi(PQgetvalue(result, licNumb, 1));
   
+  /* loop through all the bucket defs in this pool */
   while (bucketDefArray->bucket_pk != 0)
   {
+    /* if this def is restricted to package (applies_to=2), 
+       then skip if this is not a package.
+       NOTE DEPENDENCY ON PKG ANALYSIS!
+    */
+    if (bucketDefArray->applies_to == 2)
+    {
+      snprintf(sql, sizeof(sql), 
+           "select pkg_name from pkg_deb where pfile_fk='%d' \
+            union all \
+            select pkg_name from pkg_rpm where pfile_fk='%d' ",
+            pfile_pk, pfile_pk);
+      resultpkg = PQexec(pgConn, sql);
+      if (checkPQresult(resultpkg, sql, fcnName, __LINE__)) return 0;
+      numLics = PQntuples(resultpkg);
+      if (numLics < 1) continue;
+    }
+
     switch (bucketDefArray->bucket_type)
     {
       /***  1  MATCH_EVERY  ***/
       case 1:
         ppmatch_array = bucketDefArray->match_every;
         if (!ppmatch_array) break;  
-        foundmatch = 1;  
         while (*ppmatch_array)
         {
           /* is match_array contained in pfile_rfpks?  */
@@ -299,25 +327,85 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
         break;
 
       /***  3  REGEX  ***/
-      case 3:  /* match this regex against each license names for this pfile */
-        /* loop through pfile licenses */
-        for (licNumb=0; licNumb < numLics; licNumb++)
+      case 3:  /* does this regex match any license names for this pfile */
+        if (matchAnyLic(result, numLics, &bucketDefArray->compRegex))
         {
-          licName = PQgetvalue(result, licNumb, 0);
-          rv = regexec(&bucketDefArray->compRegex, licName, 0, 0, 0);
-          if (rv == 0)
-          {
-            /* regex matched!  */
-            *bucket_pk_list = bucketDefArray->bucket_pk;
-            bucket_pk_list++;
-            match++;
-            continue;
-          }
+          /* regex matched!  */
+          *bucket_pk_list = bucketDefArray->bucket_pk;
+          bucket_pk_list++;
+          match++;
         }
         break;
 
       /***  4  EXEC  ***/
       case 4:  /* exec   */
+        break;
+
+      /***  5  REGEX-FILE  ***/
+      /* File format is:
+         {filetype1} {regex1} {op} {filetype2} {regex2}
+         filetype == 1 is filename
+         filetype == 2 is license
+         op to end of line is optional.
+         e.g. filename COPYRIGHT and license BSD.*clause
+      */
+      case 5:  /* loop through each regex_row */
+        regex_row = bucketDefArray->regex_row;
+        foundmatch = 0;
+        foundmatch2 = 0;
+        while (regex_row->ftype1)
+        {
+          /* switches do not have a default since values have already been validated
+             see init.c
+          */
+          switch (regex_row->ftype1)
+          {
+            case 1: // check regex against filename
+              foundmatch = !regexec(&regex_row->compRegex1, fileName, 0, 0, 0);
+              break;
+            case 2: // check regex against licenses
+              foundmatch = matchAnyLic(result, numLics, &regex_row->compRegex1);
+              break;
+          }
+
+          /* no sense in evaluating last half if first have is a match and
+             op is an OR
+          */
+          if ((regex_row->op == 2) || !foundmatch)
+            if (regex_row->op)
+            {
+              switch (regex_row->ftype2)
+              {
+                case 1: // check regex against filename
+                  foundmatch2 = !regexec(&regex_row->compRegex2, fileName, 0, 0, 0);
+                  break;
+                case 2: // check regex against licenses
+                  foundmatch2 = matchAnyLic(result, numLics, &regex_row->compRegex2);
+                  break;
+              }
+            }
+
+          switch (regex_row->op)
+          {
+            case 1: // AND
+              foundmatch = (foundmatch && foundmatch2) ? 1 : 0;
+              break;
+            case 2: // OR
+              foundmatch = (foundmatch || foundmatch2) ? 1 : 0;
+              break;
+            case 3: // Not
+              foundmatch = (foundmatch && !foundmatch2) ? 1 : 0;
+              break;
+          }
+
+          if (foundmatch)
+          {
+            *bucket_pk_list = bucketDefArray->bucket_pk;
+            bucket_pk_list++;
+            match++;
+          }
+          regex_row++;
+        }
         break;
 
       /*** 99 DEFAULT bucket. aka not in any other bucket ***/
@@ -341,7 +429,33 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   }
 
   PQclear(result);
+  if (resultpkg) PQclear(resultpkg);
   return bucket_pk_list_start;
+}
+
+
+/****************************************************
+ matchAnyLic
+
+ Does this regex match any license name for this pfile?
+
+ @param PGresult result    results from select of lic names for this pfile
+ @param int      numLics   number of lics in result
+ @param regex_t *compRegex ptr to compiled regex to check
+
+ @return 1=true, 0=false
+****************************************************/
+FUNCTION int matchAnyLic(PGresult *result, int numLics, regex_t *compRegex)
+{
+  int   licNumb;
+  char *licName;
+
+  for (licNumb=0; licNumb < numLics; licNumb++)
+  {
+    licName = PQgetvalue(result, licNumb, 0);
+    if (0 == regexec(compRegex, licName, 0, 0, 0)) return 1;
+  }
+  return 0;
 }
 
 
@@ -579,6 +693,7 @@ int main(int argc, char **argv)
   int nomos_agent_pk = 0;
   int bucketpool_pk = 0;
   int upload_pk = 0;
+  char *fileName;  // head_uploadtree_pk ufile_name
   char *bucketpool_name;
   int pfile_pk = 0;
   int *bucketList;
@@ -689,7 +804,7 @@ int main(int argc, char **argv)
 
   /*** Get the pfile for head_uploadtree_pk so we can
      check if its already been processed ***/
-  sprintf(sqlbuf, "select pfile_fk from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
+  sprintf(sqlbuf, "select pfile_fk, ufile_name from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
   result = PQexec(pgConn, sqlbuf);
   if (checkPQresult(result, sqlbuf, agentDesc, __LINE__)) return -1;
   if (PQntuples(result) == 0) 
@@ -699,6 +814,7 @@ int main(int argc, char **argv)
     return -1;
   }
   pfile_pk = atol(PQgetvalue(result, 0, 0));
+  fileName = PQgetvalue(result, 0, 1);
   PQclear(result);
 
   /* Has it already been processed?  If so, we are done */
@@ -750,9 +866,10 @@ int main(int argc, char **argv)
   bucketDefArray->bucket_agent_pk = agent_pk;
 
   /* process the tree for buckets */
-  walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0);
+  walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0, fileName);
   bucketList = getContainerBuckets(pgConn, bucketDefArray, head_uploadtree_pk);
   writeBuckets(pgConn, pfile_pk, head_uploadtree_pk, bucketList, agent_pk, writeDB);
 
+  PQfinish(pgConn);
   return (0);
 }
