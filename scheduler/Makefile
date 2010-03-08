@@ -5,7 +5,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-DEF=-DBINDIR='"$(BINDIR)"' -DLIBEXECDIR='"$(LIBEXECDIR)"' -DAGENTDIR='"$(AGENTDIR)"' -DLOGDIR='"$(LOGDIR)"'
+DEF=-DBINDIR='"$(BINDIR)"' -DLIBEXECDIR='"$(LIBEXECDIR)"' -DAGENTDIR='"$(AGENTDIR)"' -DLOGDIR='"$(LOGDIR)"' -DDATADIR='"$(DATADIR)"'
 CONFDEF=-DDEFAULTSETUP='"$(SYSCONFDIR)/fossology/Scheduler.conf"'
 FODEF=$(DEF) -DPROJECTUSER='"$(PROJECTUSER)"' -DPROJECTGROUP='"$(PROJECTGROUP)"'
 MSCDEF=$(DEF) -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"'
@@ -21,6 +21,8 @@ INITFILE=init.d/fossology
 DEFFILE=default/fossology
 
 all: fossology-scheduler mkschedconf defconf/init.d/fossology fo_watchdog
+
+
 
 fossology-scheduler:  $(OBJ) $(REPOOBJ) $(VARS)
 	$(CC) $(OBJ) $(REPOOBJ) $(CFLAGS_DB) $(CFLAGS_REPO) \
