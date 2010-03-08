@@ -37,6 +37,21 @@
 #include "liccache.h"
 #define FUNCTION
 
+/* REGEX-FILE bucket type
+   The ftypes tell you what data to apply the regex to.
+ */
+struct regex_file_struct
+{
+  int      ftype1;          /* 1=filename, 2=license */
+  char    *regex1;          /* regex1 string */
+  regex_t  compRegex1;
+  int      op;              /* 0=end of expression, 1=and, 2=or  */
+  int      ftype2;          /* 1=filename, 2=license */
+  char    *regex2;          /* regex2 string */
+  regex_t  compRegex2;
+};
+typedef struct regex_file_struct regex_file_t, *pregex_file_t;
+
 /* Bucket definition */
 struct bucketdef_struct 
 {
@@ -45,16 +60,21 @@ struct bucketdef_struct
   int      bucket_type;
   char    *regex;           /* regex string */
   regex_t  compRegex;       /* compiled regex if type=3 */
-  char    *execFilename;    /* name of file to exec if type=4.  Files are in DATADIR */
+  char    *dataFilename;    /* File in DATADIR */
   int     *match_only;      /* array of rf_pk's if type=2 */
-  int    **match_every;     /* array of arrays of rf_pk's if type=1 */
+  int    **match_every;     /* list of arrays of rf_pk's if type=1 */
+  regex_file_t *regex_row;  /* array of regex_file_structs if type=5 */
   char     stopon;          /* Y to stop procecessing if this bucket matches */
+  char     applies_to;      /* 1=every file, 2=packages only  */
   int      nomos_agent_pk;  /* nomos agent_pk whose results this bucket analsis is using */
   int      bucket_agent_pk; /* bucket agent_pk */
 };
 typedef struct bucketdef_struct bucketdef_t, *pbucketdef_t;
 
 /* Bucket pool */
+/***** This struct is not currently used.  When it is, move 
+  nomos_agent_pk, bucket_agent_pk to here and remove from bucketdef
+*/
 struct bucketpool_struct
 {
   int  bucketpool_pk;
@@ -62,21 +82,24 @@ struct bucketpool_struct
   int  bucketpool_version;
   int  nomos_agent_pk;
   int  bucket_agent_pk;
-  pbucketdef_t pbucketdef;
+  pbucketdef_t pbucketdef;  /* array of bucketdef's which define all the buckets for 
+                               this pool  */
 };
 typedef struct bucketpool_struct bucketpool_t, *pbucketpool_t;
 
 
 /* buckets.c */
 int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, 
-             int uploadtree_pk, int writeDB, int skipProcessedCheck);
+             int uploadtree_pk, int writeDB, int skipProcessedCheck, char *fileName);
 int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, 
-                int uploadtree_pk, int agent_pk, int writeDB);
-int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk);
+                int uploadtree_pk, int agent_pk, int writeDB, char *fileName);
+int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, char *fileName);
 int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int uploadtree_pk);
 int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
                  int *bucketList, int agent_pk, int writeDB);
 int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk);
+int matchAnyLic(PGresult *result, int numLics, regex_t *compRegex);
+
 
 /* validate.c */
 int arrayAinB        (int *arrayA, int *arrayB);
@@ -88,11 +111,11 @@ void Usage           (char *Name);
 pbucketdef_t initBuckets   (PGconn *pgConn, int bucketpool_pk, cacheroot_t *pcroot);
 int *getMatchOnly    (PGconn *pgConn, int bucketpool_pk, char *filename, cacheroot_t *pcroot);
 int **getMatchEvery  (PGconn *pgConn, int bucketpool_pk, char *filename, cacheroot_t *pcroot);
+regex_file_t *getRegexFile  (PGconn *pgConn, int bucketpool_pk, char *filename, cacheroot_t *pcroot);
+int getRegexFiletype (char *token, char *filepath);
 int getBucketpool_pk (PGconn *pgConn, char * bucketpool_name);
 int licDataAvailable (PGconn *pgConn, int uploadtree_pk);
 int *getLicsInStr    (PGconn *pgConn, char *nameStr, cacheroot_t *pcroot);
 int childParent      (PGconn *pgConn, int uploadtree_pk);
-
-
 
 #endif /* _BUCKETS_H */
