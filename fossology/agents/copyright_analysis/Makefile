@@ -7,7 +7,7 @@ copyright: copyright.py
 	cat copyright.py > copyright
 	echo -n "    sys.path.append('" >> copyright
 	echo -n $(DESTDIR)$(LIBDIR) >> copyright
-	echo -n "/python_fossology/')\n    import libfosspython\n    import copyright_library as library\n    main()\n" >> copyright
+	echo -e "/python_fossology/')\n    import libfosspython\n    import copyright_library as library\n    main()\n" >> copyright
 	chmod a+x copyright
 
 model.dat: copyright training_files
