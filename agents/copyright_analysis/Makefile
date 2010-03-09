@@ -1,9 +1,13 @@
-# pull in all our default variables
-include Makefile.conf
+# FOSSology Makefile - agents/copyright_analysis
+# Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+TOP=../..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
+DEPS=$(TOP)/Makefile.deps
 
 all: model.dat copyright
 
-copyright: copyright.py
+copyright: copyright.py $(PYTHONLIB)
 	cat copyright.py > copyright
 	echo -n "    sys.path.append('" >> copyright
 	echo -n $(DESTDIR)$(LIBDIR) >> copyright
@@ -31,5 +35,12 @@ uninstall:
 	rm -rf $(DATADIR)/model.dat
 	make -C ui-plugin uninstall
 
+test: all
+	@echo "*** No tests available for agents/copyright_analysis ***"
+
 clean:
-	rm copyright model.dat training_files
+	rm -f copyright model.dat training_files
+
+include $(DEPS)
+
+.PHONY: all install uninstall clean test
