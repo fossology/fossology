@@ -11,7 +11,7 @@ EXE=reppath repwrite repcat repexist repcopyin repremove rephost repmmapcheck
 all: $(LIB) $(EXE) $(VARS)
 
 $(LIB): %.a: %.c %.h
-	$(CC) -c $< $(CONFDEF) $(ALL_CFLAGS)
+	$(CC) -c $< $(CONFDEF) -fPIC $(ALL_CFLAGS)
 	$(AR) cr $@ libfossrepo.o
 
 $(EXE): %: %.c $(LIB) $(VARS)
