@@ -83,7 +83,7 @@ if [ $BUILDTIME ]; then
          apt-get install \
             libmagic-dev libxml2-dev libextractor-dev \
             build-essential libtext-template-perl subversion librpm-dev \
-            python-pyrex
+            python python-dev python-pyrex
          case "$CODENAME" in
             etch|dapper) apt-get install postgresql-server-dev-8.1;;
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
@@ -97,7 +97,8 @@ if [ $BUILDTIME ]; then
          yum install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
-            libxml2 libextractor-devel rpm-devel Pyrex
+            libxml2 libextractor-devel rpm-devel Pyrex \
+            python python-devel
          ;;
       Mandriva)
          # 2008.1 tested
