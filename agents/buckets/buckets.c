@@ -45,7 +45,7 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
                         processed() call.  The call is unnecessary during 
                         recursion and it's an DB query, so best to avoid
                         doing an unnecessary call.
- @param char *fileName  uplaodtree_pk ufile_name
+ @param char *fileName  uploadtree_pk ufile_name
 
  @return 0 on OK, -1 on failure.
  Errors are written to stdout.
@@ -92,8 +92,10 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   if (rgt == (lft+1))
   {
     if (((ufile_mode & 1<<28) == 0) && (pfile_pk > 0))
+    {
       return  processLeaf(pgConn, bucketDefArray, pfile_pk, uploadtree_pk, agent_pk, 
                           writeDB, fileName);
+    }
     else
       return 0;  /* case of empty directory or artifact */
   }
@@ -140,7 +142,6 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
                   1, child_ufile_name);
 
     /* done processing children, now processes (find buckets) for the container
-       ignore artifacts
        Need to process artifacts as a regular directory so that buckets cascade
        up without interruption.
      */
@@ -211,6 +212,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   char *fcnName = "getLeafBuckets";
   int  *bucket_pk_list = 0;
   int  *bucket_pk_list_start;
+  char  filepath[256];
   char  sql[256];
   PGresult *result;
   PGresult *resultpkg = 0;
@@ -221,8 +223,14 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   int   *pmatch_array;
   int  **ppmatch_array;
   int  *pfile_rfpks;
+  int   rv;
   pbucketdef_t bucketDefArray;
   regex_file_t *regex_row;
+  char *argv[2];
+  char *envp[5];
+  char  envbuf[256];
+  char *pkgvers=0, *vendor=0;
+  pid_t pid;
 
   if (debug) printf("debug: %s  pfile: %d\n", fcnName, pfile_pk);
   /*** count how many elements are in in_bucketDefArray   ***/
@@ -267,14 +275,16 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
     if (bucketDefArray->applies_to == 2)
     {
       snprintf(sql, sizeof(sql), 
-           "select pkg_name from pkg_deb where pfile_fk='%d' \
+           "select pkg_name, version, "" as vendor  from pkg_deb where pfile_fk='%d' \
             union all \
-            select pkg_name from pkg_rpm where pfile_fk='%d' ",
+            select pkg_name, version, vendor from pkg_rpm where pfile_fk='%d' ",
             pfile_pk, pfile_pk);
       resultpkg = PQexec(pgConn, sql);
       if (checkPQresult(resultpkg, sql, fcnName, __LINE__)) return 0;
       numLics = PQntuples(resultpkg);
       if (numLics < 1) continue;
+      pkgvers = PQgetvalue(result, 0, 1);
+      vendor = PQgetvalue(result, 0, 2);
     }
 
     switch (bucketDefArray->bucket_type)
@@ -338,8 +348,73 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
         break;
 
       /***  4  EXEC  ***/
-      case 4:  /* exec   */
-        break;
+      case 4:  
+        /* file to exec bucketDefArray->dataFilename
+         * Exec'd file returns 0 on true (file is in bucket)
+         * environment: FILENAME, LICENSES, PKGVERS, VENDOR
+         * FILENAME: name of file being checked
+         * LICENSES: pipe seperated list of licenses for this file.
+         * PKGVERS: Package version from pkg header
+         * VENDOR: Vendor from pkg header
+         */
+        /* put together complete file path to file */
+        snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
+                 DATADIR, bucketDefArray->bucketpool_pk, bucketDefArray->dataFilename);
+			if ((pid = fork()) < 0)
+      {
+        printf("FATAL: fork failure, %s\n", strerror(errno));
+			}
+			else 
+      if (pid == 0)  /* in child */
+      {
+				/* set up environment variables */
+        argv[0] = strdup(bucketDefArray->dataFilename);
+        argv[1] = 0;
+        sprintf(envbuf, "FILENAME=%s", fileName);
+        envp[0] = strdup(envbuf);
+        /* create pipe seperated list of licenses */
+        strcpy(envbuf, "LICENSES=");
+        for (licNumb=0; licNumb < numLics; licNumb++) 
+        {
+          if (envbuf[9]) strcat(envbuf, "|");
+          strcat(envbuf, PQgetvalue(result, licNumb, 0));
+        }
+        envp[1] = strdup(envbuf);
+        sprintf(envbuf, "PKGVERS=%s", pkgvers);
+        envp[2] = strdup(envbuf); 
+        sprintf(envbuf, "VENDOR=%s", vendor);
+        envp[3] =strdup(envbuf); 
+        envp[4] = 0;
+        execve(filepath, argv, envp);
+				perror("FATAL: buckets execve failed");
+        exit(1);
+			}
+
+      /* wait for exit */
+			if (waitpid(pid, &rv, 0) < 0) 
+      {
+        printf("FATAL: waitpid, %s\n", strerror(errno));
+			}
+			if (WIFSIGNALED(rv)) 
+      {
+        printf("FATAL: child %d died from signal %d", pid, WTERMSIG(rv));
+      }
+			else 
+      if (WIFSTOPPED(rv)) 
+      {
+        printf("FATAL: child %d stopped, signal %d", pid, WSTOPSIG(rv));
+      }
+			else 
+      if (WIFEXITED(rv)) 
+      {
+				if (WEXITSTATUS(rv) == 0) 
+        {
+          *bucket_pk_list = bucketDefArray->bucket_pk;
+          bucket_pk_list++;
+          match++;
+				}
+			}
+      break;
 
       /***  5  REGEX-FILE  ***/
       /* File format is:
@@ -349,10 +424,11 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
          op to end of line is optional.
          e.g. filename COPYRIGHT and license BSD.*clause
       */
-      case 5:  /* loop through each regex_row */
+      case 5:  
         regex_row = bucketDefArray->regex_row;
         foundmatch = 0;
         foundmatch2 = 0;
+        /* loop through each regex_row */
         while (regex_row->ftype1)
         {
           /* switches do not have a default since values have already been validated
@@ -594,7 +670,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
   int rv = 0;
   if (debug) printf("debug: %s pfile: %d, uploadtree_pk: %d\n", fcnName, pfile_pk, uploadtree_pk);
 
-  if (!writeDB) printf("write buckets for pfile=%d uploadtree_pk=%d: ", pfile_pk, uploadtree_pk);
+  if (!writeDB) printf("write buckets for pfile=%d, uploadtree_pk=%d: ", pfile_pk, uploadtree_pk);
 
   if (bucketList)
   {

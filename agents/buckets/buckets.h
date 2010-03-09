@@ -30,6 +30,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 #include "libfossdb.h"
 #include "libfossagent.h"
@@ -45,7 +46,7 @@ struct regex_file_struct
   int      ftype1;          /* 1=filename, 2=license */
   char    *regex1;          /* regex1 string */
   regex_t  compRegex1;
-  int      op;              /* 0=end of expression, 1=and, 2=or  */
+  int      op;              /* 0=end of expression, 1=and, 2=or, 3=not  */
   int      ftype2;          /* 1=filename, 2=license */
   char    *regex2;          /* regex2 string */
   regex_t  compRegex2;
@@ -68,6 +69,7 @@ struct bucketdef_struct
   char     applies_to;      /* 1=every file, 2=packages only  */
   int      nomos_agent_pk;  /* nomos agent_pk whose results this bucket analsis is using */
   int      bucket_agent_pk; /* bucket agent_pk */
+  int      bucketpool_pk;
 };
 typedef struct bucketdef_struct bucketdef_t, *pbucketdef_t;
 
