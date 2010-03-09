@@ -51,7 +51,7 @@ class copyright_list extends FO_Plugin
     // micro-menu
 	$agent_pk = GetParm("agent",PARM_INTEGER);
 	$uploadtree_pk = GetParm("item",PARM_INTEGER);
-	$rf_shortname = GetParm("content",PARM_RAW);
+	$content = GetParm("content",PARM_RAW);
 	$Page = GetParm("page",PARM_INTEGER);
 	$Excl = GetParm("excl",PARM_RAW);
 
