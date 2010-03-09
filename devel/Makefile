@@ -3,7 +3,7 @@
 #
 
 # the directories we do things in by default
-DIRS = libfossdb libfossrepo libfossagent
+DIRS = libfossdb libfossrepo libfossagent libfosspython
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
