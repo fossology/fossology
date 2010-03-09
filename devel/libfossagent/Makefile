@@ -4,7 +4,7 @@ TOP=../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(ALL_CFLAGS)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) -fPIC $(ALL_CFLAGS)
 
 LIB=libfossagent.a
 
