@@ -34,7 +34,7 @@ training_files:
 	find data -type f > training_files
 
 install: all
-	./copyright --setup
+	./copyright-build --setup
 	$(INSTALL_PROGRAM) copyright $(DESTDIR)$(AGENTDIR)/copyright
 	mkdir -p $(DESTDIR)$(LIBDIR)/python_fossology/
 	$(INSTALL_PROGRAM) copyright_library.py $(DESTDIR)$(LIBDIR)/python_fossology/copyright_library.py
