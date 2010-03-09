@@ -1,5 +1,5 @@
 # pull in all our default variables
-include ../Makefile.conf
+include ../../../Makefile.conf
 
 install:
 	mkdir -p $(DESTDIR)$(WEBDIR)/plugins/
