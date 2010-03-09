@@ -108,6 +108,7 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
   {
     bucketDefList[rowNum].bucket_pk = atoi(PQgetvalue(result, rowNum, 0));
     bucketDefList[rowNum].bucket_type = atoi(PQgetvalue(result, rowNum, 1));
+    bucketDefList[rowNum].bucketpool_pk = bucketpool_pk;
 
     rv = regcomp(&bucketDefList[rowNum].compRegex, PQgetvalue(result, rowNum, 2), 
                  REG_NOSUB | REG_ICASE);
