@@ -16,16 +16,16 @@ $(LIB): $(DB) $(REPO) $(AGENTLIB)
 install: install-lib
 
 install-lib: $(LIB)
-	mkdir -p $(DESTDIR)$(LIBDIR)/libfosspython/
-	$(INSTALL_DATA) libfosspython.so $(DESTDIR)$(LIBDIR)/libfosspython/libfosspython.so
+	mkdir -p $(DESTDIR)$(LIBDIR)/python_fossology/
+	$(INSTALL_DATA) libfosspython.so $(DESTDIR)$(LIBDIR)/python_fossology/libfosspython.so
 
 # uninstall only cleans up the files, not the directories that might have
 # been created
 uninstall: uninstall-lib
 
 uninstall-lib:
-	rm -f $(DESTDIR)$(LIBDIR)/libfosspython/libfosspython.so
-	rmdir $(DESTDIR)$(LIBDIR)/libfosspython/
+	rm -f $(DESTDIR)$(LIBDIR)/python_fossology/libfosspython.so
+	rmdir $(DESTDIR)$(LIBDIR)/python_fossology/
 
 test: all
 	@echo "*** No tests available for libfosspython ***"
