@@ -7,15 +7,28 @@ DEPS=$(TOP)/Makefile.deps
 
 all: model.dat copyright
 
+copyright-build: copyright.py $(PYTHONLIB)
+	cat copyright.py > copyright-build
+	echo -n "    sys.path.append('" >> copyright-build
+	echo -n $(PYTHONLIBPATH) >> copyright-build
+	echo    "')" >> copyright-build
+	echo    "    import libfosspython" >> copyright-build
+	echo    "    import copyright_library as library" >> copyright-build
+	echo    "    main()" >> copyright-build
+	chmod a+x copyright-build
+
 copyright: copyright.py $(PYTHONLIB)
 	cat copyright.py > copyright
 	echo -n "    sys.path.append('" >> copyright
 	echo -n $(DESTDIR)$(LIBDIR) >> copyright
-	echo -e "/python_fossology/')\n    import libfosspython\n    import copyright_library as library\n    main()\n" >> copyright
+	echo    "/python_fossology/')" >> copyright
+	echo    "    import libfosspython" >> copyright
+	echo    "    import copyright_library as library" >> copyright
+	echo    "    main()" >> copyright
 	chmod a+x copyright
 
-model.dat: copyright training_files
-	./copyright --model model.dat --training training_files
+model.dat: copyright-build training_files
+	./copyright-build --model model.dat --training training_files
 	
 training_files:
 	find data -type f > training_files
@@ -39,7 +52,7 @@ test: all
 	@echo "*** No tests available for agents/copyright_analysis ***"
 
 clean:
-	rm -f copyright model.dat training_files
+	rm -f copyright copyright-build model.dat training_files
 
 include $(DEPS)
 
