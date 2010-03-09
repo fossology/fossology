@@ -32,6 +32,7 @@ test: all
 
 clean:
 	rm -f $(LIB) *.c core
+	rm -rf build
 
 .PHONY: all clean test
 .PHONY: install install-lib uninstall uninstall-lib
