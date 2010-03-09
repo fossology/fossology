@@ -296,7 +296,7 @@ class ui_nomos_license extends FO_Plugin
      ***************************************/
     if ($ChildCount == 0)
     {
-      $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$Item';");
+      $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$Uploadtree_pk';");
       if (IsDir($Results[0]['ufile_mode'])) { return; }
       $ModLicView = &$Plugins[plugin_find_id("view-license")];
       return($ModLicView->Output() );
