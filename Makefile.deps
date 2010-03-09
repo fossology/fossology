@@ -16,6 +16,7 @@ $(REPO):
 
 $(AGENTLIB):
 	$(MAKE) -C $(AGENTLIBPATH) libfossagent.a
+	$(MAKE) -C $(AGENTLIBPATH) libfosspython.so
 
 # the php stuff uses the single include that we build in ui/
 $(iPATHFILE):
