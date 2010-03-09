@@ -82,7 +82,8 @@ if [ $BUILDTIME ]; then
       Debian|Ubuntu)
          apt-get install \
             libmagic-dev libxml2-dev libextractor-dev \
-            build-essential libtext-template-perl subversion librpm-dev
+            build-essential libtext-template-perl subversion librpm-dev \
+            python-pyrex
          case "$CODENAME" in
             etch|dapper) apt-get install postgresql-server-dev-8.1;;
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
