@@ -24,6 +24,8 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+global $WEBDIR;
+
 require($WEBDIR.'/plugins/copyright/hist.php');
 require($WEBDIR.'/plugins/copyright/list.php');
 require($WEBDIR.'/plugins/copyright/view.php');
