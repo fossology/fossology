@@ -31,11 +31,10 @@
 $argv = array();
 $opts = array();
 
-$Usage = "{$argv[0]}: [-h] -c <change-string>\n";
-
 print "changeENV starting....\n";
 $opts = getopt('hc:');
 //print "changeENV: opts is:\n";print_r($opts) . "\n";
+$Usage = "{$argv[0]}: [-h] -c <change-string>\n";
 
 if (empty($opts)) {
   print $Usage;
