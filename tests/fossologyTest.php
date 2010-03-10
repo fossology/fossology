@@ -522,11 +522,13 @@ class fossologyTest extends WebTestCase
    */
   public function setAgents($agents = NULL) {
     $agentList = array (
-      'license' => 'Check_agent_license',
+      'copyright' => 'Check_agent_copyright',
       'mimetype' => 'Check_agent_mimetype',
-      'pkgmetagetta' => 'Check_agent_pkgmetagetta',
+      'metadata' => 'Check_agent_pkgmetagetta',
+      'nomos' => 'Check_agent_nomos',
+      'package' => 'Check_agent_pkgagent',
       'specagent' => 'Check_agent_specagent',
-
+      'license' => 'Check_agent_license',
     );
     /* check parameters and parse */
     if (is_null($agents)) {
@@ -555,17 +557,26 @@ class fossologyTest extends WebTestCase
     else {
       foreach ($numberList as $number) {
         switch ($number) {
-          case 1 :
-            $checklist[] = $agentList['license'];
+        	case 1 :
+          	$checklist[] = $agentList['copyright'];
             break;
           case 2 :
-            $checklist[] = $agentList['mimetype'];
+          	$checklist[] = $agentList['mimetype'];
             break;
-          case 3 :
-            $checklist[] = $agentList['pkgmetagetta'];
+        	case 3 :
+            $checklist[] = $agentList['metadata'];
             break;
           case 4 :
+            $checklist[] = $agentList['nomos'];
+            break;
+        	case 5 :
+          	$checklist[] = $agentList['package'];
+            break;
+          case 6 :
             $checklist[] = $agentList['specagent'];
+            break;
+          case 7:
+            $checklist[] = $agentList['license'];
             break;
         }
       } // foreach
