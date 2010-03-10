@@ -65,8 +65,10 @@ class parseLicenseTbl
       $numTblEntries = count($tableEntries[1]);
       for ($i = 0; $i <= $numTblEntries-1; $i++)
       {
-        $rtnList[$tableEntries[4][$i]] = $tableEntries[1][$i];
+      	$cleanName = trim($tableEntries[4][$i]);
+        $rtnList[$cleanName] = $tableEntries[1][$i];
       }
+      //print "PLTBL: returning this array:\n"; print_r($rtnList) . "\n";
       return ($rtnList);
     }
     else
