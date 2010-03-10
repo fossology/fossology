@@ -32,53 +32,54 @@
  * Created on Oct. 17, 2008
  */
 
-//require_once ('../commonTestFuncs.php');
-
 class parseLicenseTblDirs
 {
-  public $page;
-  private $test;
+	public $page;
+	private $test;
 
-  function __construct($page)
-  {
-    if (empty ($page)) { return; }
-    $this->page = $page;
-  }
-  /**
-   * function parseLicenseTbl
-   * given a fossology license browse page parse the license table on
-   * the page.
-   *
-   * @returns array of empty array if license table on that page.
-   */
-  function parseLicenseTblDirs()
-  {
-    $pat ='|.*?id="Lic-.?" align="left"><a href=\'(.*?)\'><b>(.*?)<\/b>|';
-    $matches = preg_match_all($pat, $this->page, $tableEntries, PREG_PATTERN_ORDER);
-    //print "PLTDIR: tableEntries are:\n"; print_r($tableEntries) . "\n";
-    return($this->_createDirList($tableEntries, $matches));
-  }
+	function __construct($page)
+	{
+		if (empty ($page)) { return; }
+		$this->page = $page;
+	}
+	/**
+	 * function parseLicenseTblDirs
+	 * given a fossology license browse page parse the directory artifacts
+	 * on the page.  This is the listing to the right of the table.
+	 *
+	 * @returns associative array of dirnames and their links. 
+	 */
+	function parseLicenseTblDirs()
+	{
 
-  function _createDirList($toCombine, $matches)
-  {
-    /*
-    * if we have a match, the create return array, else return empty
-    * array.
-    */
-    if ($matches > 0)
-    {
-      $numTblEntries = count($toCombine[1]);
-      $rtnList = array ();
-      for ($i = 0; $i <= $numTblEntries-1; $i++)
-      {
-        $rtnList[$toCombine[2][$i]] = $toCombine[1][$i];
-      }
-      return ($rtnList);
-    }
-    else
-    {
-      return (array ());
-    }
-  }
+		// old bsam table$pat ='|.*?id="Lic-.+" align="left"><a href=\'(.*?)\'><b>(.*?)<\/b>|';
+		$pat = "|.*id='[0-9]+'.*align='left'.*href='(.*?)'>(.*?)<\/a>|";
+		$matches = preg_match_all($pat, $this->page, $tableEntries, PREG_PATTERN_ORDER);
+		//print "PLTDIR: Matches is:$matches\ntableEntries are:\n"; print_r($tableEntries) . "\n";
+		return($this->_createDirList($tableEntries, $matches));
+	}
+
+	function _createDirList($toCombine, $matches)
+	{
+		/*
+		 * if we have a match, the create return array, else return empty
+		 * array.
+		 */
+		if ($matches > 0)
+		{
+			$numTblEntries = count($toCombine[1]);
+			$rtnList = array ();
+			for ($i = 0; $i <= $numTblEntries-1; $i++)
+			{
+				$clean = strip_tags($toCombine[2][$i]);
+				$rtnList[$clean] = $toCombine[1][$i];
+			}
+			return ($rtnList);
+		}
+		else
+		{
+			return (array ());
+		}
+	}
 }
 ?>
