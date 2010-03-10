@@ -71,6 +71,9 @@ class parseFolderPath
     $regExp = "Folder<\/b>:.*";
     $numberMatched = preg_match_all("|$regExp|", $this->page, $pathLines, PREG_SET_ORDER);
     $this->filesWithLicense = $pathLines;
+    //print "PFP:countFiles:matched is:$numberMatched\nFilesWithLicense:\n";
+    //print_r($this->filesWithLicense) . "\n";
+    
     return($numberMatched);
    }
 
@@ -137,7 +140,6 @@ class parseFolderPath
       // Make a real link that can be used
       $partLink = $list[$i][1];
       $link = makeUrl($this->host, $partLink);
-      //print "Link is:$link\n";
       $rtnList[$cleanKey] = $link;
       /* check for anything in the leaf entry, if there is, remove
        * the preceeding /

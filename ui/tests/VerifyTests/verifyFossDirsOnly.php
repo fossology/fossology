@@ -115,19 +115,18 @@ class verifyDirsOnly extends fossologyTestCase
     $browse = new parseBrowseMenu($page);
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
-    $url = makeUrl($this->host, $miniMenu['License']);
+    $url = makeUrl($this->host, $miniMenu['Nomos License']);
     if($url === NULL) { $this->fail("verifyFossDirsOnly Failed, host is not set"); }
 
     $page = $this->mybrowser->get($url);
     //print "page after get of $url is:\n$page\n";
-    $this->assertTrue($this->myassertText($page, '/License Browser/'),
-          "verifyFossDirsOnly FAILED! License Browser Title not found\n");
+    $this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
+          "verifyFossDirsOnly FAILED! Nomos License Browser Title not found\n");
     $this->assertTrue($this->myassertText($page, '/Total licenses: 0/'),
         "verifyFossDirsOnly FAILED! Total Licenses does not equal 0\n");
 
     $dList = new parseLicenseTblDirs($page);
     $dirList = $dList->parseLicenseTblDirs();
-    //print "dirList is:\n"; print_r($dirList) . "\n";
     /*
      * the directiory agents has 13 subdirectories all other directories
      * are empty. we are going to loop through them, but for now just
@@ -136,14 +135,14 @@ class verifyDirsOnly extends fossologyTestCase
     $url = makeUrl($this->host, $dirList['scheduler/']);
     $page = $this->mybrowser->get($url);
     //print "page after scheduler is:\n$page\n";
-    $fList = new parseFolderPath($page, $url);
-    $dirCnt = $fList->countFiles();
+    $folders = new parseFolderPath($page, $url);
+    $dirCnt = $folders->countFiles();
     // should only get one folder path)
     $this->assertEqual((int)$dirCnt, 1,
     "verifyFossDirsOnly FAILED! did not get 1 folder path back, got $dirCnt instead\n");
     // every entry but the last must have a non-null value (we assume parse
     // routine worked)
-    $fpaths = $fList->parseFolderPath();
+    $fpaths = $folders->parseFolderPath();
     $this->assertTrue($this->check4Links($fpaths),
       "verifyFossDirsOnly FAILED! something wrong with folder path\n" .
       "See this url:\n$url\n");
