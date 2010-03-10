@@ -43,16 +43,52 @@ FUNCTION int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineN
 {
    if (!result)
    {
-     printf("Error: %s.%s(%d) - checkPQresult called with invalid parameter.\n",
-             __FILE__, FcnName, __LINE__);
+     printf("Error: %s:%d - checkPQresult called with invalid parameter.\n",
+             FcnName, LineNumb);
      return 0;
    }
 
    /* If no error, return */
    if (PQresultStatus(result) == PGRES_TUPLES_OK) return 0;
 
-   printf("ERROR: %s.%s:%d, %s\nOn: %s\n", 
-          __FILE__, FcnName, __LINE__, PQresultErrorMessage(result), sql);
+   printf("ERROR: %s:%d, %s\nOn: %s\n", 
+          FcnName, LineNumb, PQresultErrorMessage(result), sql);
    PQclear(result);
    return (-1);
 } /* checkPQresult */
+
+
+/****************************************************
+ checkPQcommand
+
+ check the result status of a postgres commands (not select)
+ If an error occured, write the error to stdout
+
+ @param PGresult *result
+ @param char *sql the sql query
+ @param char * FcnName the function name of the caller
+ @param int LineNumb the line number of the caller
+
+ @return 0 on OK, -1 on failure.
+ On failure, result will be freed.
+
+ NOTE: this function should be moved to a std library
+****************************************************/
+FUNCTION int checkPQcommand(PGresult *result, char *sql, char *FcnName, int LineNumb)
+{
+   if (!result)
+   {
+     printf("Error: %s:%d - checkPQcommand called with invalid parameter.\n",
+             FcnName, LineNumb);
+     return 0;
+   }
+
+   /* If no error, return */
+   if (PQresultStatus(result) == PGRES_COMMAND_OK) return 0;
+
+   printf("ERROR: %s:%d, %s\nOn: %s\n", 
+          FcnName, LineNumb, PQresultErrorMessage(result), sql);
+   PQclear(result);
+   return (-1);
+} /* checkPQcommand */
+
