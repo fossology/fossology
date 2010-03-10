@@ -24,4 +24,5 @@
 #define FUNCTION
 
 int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb);
+int checkPQcommand(PGresult *result, char *sql, char *FcnName, int LineNumb);
 #endif /* _DBCOMMON_H */

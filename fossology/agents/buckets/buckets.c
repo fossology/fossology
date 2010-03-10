@@ -63,6 +63,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   int   numChildren, childIdx;
   int   rv = 0;
   int  *bucketList;  // null terminated list of bucket_pk's
+  int  bucketpool_pk = bucketDefArray->bucketpool_pk;
 
   if (debug) printf("---- START walkTree, uploadtree_pk=%d ----\n",uploadtree_pk);
   /* get uploadtree rec for uploadtree_pk */
@@ -82,7 +83,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
 
   /* Skip file if it has already been processed for buckets. */
   if (!skipProcessedCheck)
-    if (processed(pgConn, agent_pk, pfile_pk, uploadtree_pk)) return rv;
+    if (processed(pgConn, agent_pk, pfile_pk, uploadtree_pk, bucketpool_pk)) return rv;
 
   /* If this is a leaf node, and not an artifact process it 
      (i.e. determine what bucket it belongs in).
@@ -119,7 +120,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   {
     child_uploadtree_pk = atol(PQgetvalue(result, childIdx, 0));
     child_pfile_pk = atol(PQgetvalue(result, childIdx, 1));
-    if (processed(pgConn, agent_pk, child_pfile_pk, child_uploadtree_pk)) continue;
+    if (processed(pgConn, agent_pk, child_pfile_pk, child_uploadtree_pk, bucketpool_pk)) continue;
 
     child_lft = atoi(PQgetvalue(result, childIdx, 2));
     child_rgt = atoi(PQgetvalue(result, childIdx, 3));
@@ -386,7 +387,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
         envp[3] =strdup(envbuf); 
         envp[4] = 0;
         execve(filepath, argv, envp);
-				perror("FATAL: buckets execve failed");
+        printf("FATAL: buckets execve (%s) failed, %s\n", filepath, strerror(errno));
         exit(1);
 			}
 
@@ -563,7 +564,7 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray
                                   int uploadtree_pk)
 {
   char *fcnName = "getContainerBuckets";
-  char  sql[256];
+  char  sql[512];
   int  *bucket_pk_list = 0;
   int  *bucket_pk_list_start = 0;
   int   numBucketDefs = 0;
@@ -589,8 +590,17 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray
   /* Get all the bucket_fk's from the immediate children  
      That is, what buckets are the children in */
   snprintf(sql, sizeof(sql), 
-           "select distinct(bucket_fk) from uploadtree,bucket_file where parent=%d and (bucket_file.pfile_fk=uploadtree.pfile_fk or bucket_file.uploadtree_fk=uploadtree_pk) and bucket_agent_fk=%d",
-           childParent_pk, in_bucketDefArray->bucket_agent_pk);
+           "select distinct(bucket_fk) from uploadtree,bucket_container, bucket_def \
+             where parent='%d' and bucket_container.uploadtree_fk=uploadtree_pk \
+                   and bucket_fk=bucket_pk and agent_fk='%d' and bucketpool_fk='%d'\
+            union\
+            select distinct(bucket_fk) from uploadtree, bucket_file, bucket_def \
+             where parent='%d' and bucket_file.pfile_fk=uploadtree.pfile_fk \
+                   and bucket_fk=bucket_pk and agent_fk='%d' and bucketpool_fk='%d'",
+           childParent_pk, in_bucketDefArray->bucket_agent_pk, 
+           in_bucketDefArray->bucketpool_pk,
+           childParent_pk, in_bucketDefArray->bucket_agent_pk, 
+           in_bucketDefArray->bucketpool_pk);
   result = PQexec(pgConn, sql);
   if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
   numLics = PQntuples(result);
@@ -650,7 +660,7 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray
 /****************************************************
  writeBuckets
 
- Write bucket results to either db (bucket_file) or stdout.
+ Write bucket results to either db (bucket_file, bucket_container) or stdout.
 
  @param PGconn *pgConn  postgresql connection
  @param int pfile_pk  
@@ -681,7 +691,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
         if (pfile_pk)
         {
           snprintf(sql, sizeof(sql), 
-                 "insert into bucket_file (bucket_fk, pfile_fk, bucket_agent_fk) \
+                 "insert into bucket_file (bucket_fk, pfile_fk, agent_fk) \
                   values(%d,%d,%d)", *bucketList, pfile_pk, agent_pk);
           result = PQexec(pgConn, sql);
           if (PQresultStatus(result) != PGRES_COMMAND_OK) 
@@ -696,12 +706,12 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
         else
         {
           snprintf(sql, sizeof(sql), 
-                 "insert into bucket_file (bucket_fk, uploadtree_fk, bucket_agent_fk) \
+                 "insert into bucket_container (bucket_fk, uploadtree_fk, agent_fk) \
                   values(%d,%d,%d)", *bucketList, uploadtree_pk, agent_pk);
           result = PQexec(pgConn, sql);
           if (PQresultStatus(result) != PGRES_COMMAND_OK) 
           {
-            printf("ERROR: %s.%s.%d:  Failed to add bucket to bucket_file. %s:%s\n: %s\n",
+            printf("ERROR: %s.%s.%d:  Failed to add bucket to bucket_container. %s:%s\n: %s\n",
                     __FILE__,fcnName, __LINE__, PQresultErrorField(result, PG_DIAG_SQLSTATE),
                     PQresultErrorMessage(result), sql);
             PQclear(result);
@@ -724,25 +734,36 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
  processed
 
  Has this pfile or uploadtree_pk already been bucket processed?
- This only works if the bucket has been recorded in table bucket_file.
+ This only works if the bucket has been recorded in table 
+ bucket_file, or bucket_container.
 
  @param PGconn *pgConn  postgresql connection
  @param int *agent_pk   agent ID
  @param int pfile_pk  
  @param int uploadtree_pk  
+ @param int bucketpool_pk  
 
  @return 1=yes, 0=no
 ****************************************************/
-FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk)
+FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk,
+                       int bucketpool_pk)
 {
   char *fcnName = "processed";
   int numRecs=0;
-  char sqlbuf[128];
+  char sqlbuf[512];
   PGresult *result;
 
-  /* Skip file if it has already been processed for buckets. */
-  sprintf(sqlbuf, "select bf_pk from bucket_file where (pfile_fk=%d or uploadtree_fk=%d) and bucket_agent_fk=%d limit 1", 
-          pfile_pk, uploadtree_pk, agent_pk);
+  /* Skip file if it has already been processed for buckets. 
+     See if this pfile or uploadtree_pk has any buckets. */
+  sprintf(sqlbuf,
+    "select bf_pk from bucket_file, bucket_def \
+      where pfile_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+            and bucket_fk=bucket_pk \
+     union \
+     select bf_pk from bucket_container, bucket_def \
+      where uploadtree_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+            and bucket_fk=bucket_pk limit 1",
+    pfile_pk, agent_pk, bucketpool_pk, uploadtree_pk, agent_pk, bucketpool_pk);
   result = PQexec(pgConn, sqlbuf);
   if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return -1;
   numRecs = PQntuples(result);
@@ -894,7 +915,7 @@ int main(int argc, char **argv)
   PQclear(result);
 
   /* Has it already been processed?  If so, we are done */
-  if (processed(pgConn, agent_pk, pfile_pk, head_uploadtree_pk)) return 0;
+  if (processed(pgConn, agent_pk, pfile_pk, head_uploadtree_pk, bucketpool_pk)) return 0;
 
   /*** Make sure there is  license data available from the latest nomos agent ***/
   nomos_agent_pk = licDataAvailable(pgConn, head_uploadtree_pk);
@@ -942,9 +963,16 @@ int main(int argc, char **argv)
   bucketDefArray->bucket_agent_pk = agent_pk;
 
   /* process the tree for buckets */
+  /* all or nothing database update */
+  result = PQexec(pgConn, "begin");
+  if (checkPQcommand(result, "begin", __FILE__, __LINE__)) return -1;
+
   walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0, fileName);
   bucketList = getContainerBuckets(pgConn, bucketDefArray, head_uploadtree_pk);
   writeBuckets(pgConn, pfile_pk, head_uploadtree_pk, bucketList, agent_pk, writeDB);
+
+  result = PQexec(pgConn, "commit");
+  if (checkPQcommand(result, "commit", __FILE__, __LINE__)) return -1;
 
   PQfinish(pgConn);
   return (0);
