@@ -1,5 +1,8 @@
-# pull in all our default variables
-include ../../../Makefile.conf
+# FOSSology Makefile - agents/copyright_analysis/ui-plugin
+# Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+TOP=../../..
+VARS=$(TOP)/Makefile.conf
+include $(VARS)
 
 install:
 	mkdir -p $(DESTDIR)$(WEBDIR)/plugins/
@@ -16,3 +19,4 @@ uninstall:
 	rmdir $(DESTDIR)$(WEBDIR)/plugins/
 	rm -rf $(DESTDIR)$(WEBDIR)/plugins/copyright/
     
+.PHONY: install uninstall
