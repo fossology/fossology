@@ -120,9 +120,6 @@ class db {
       $this->_pg_conn = pg_pconnect(str_replace(";", " ", $options));
     }
     $res = pg_last_error($this->_pg_conn);
-    print "DB: the last error was:$res\n";
-
-    print "_pg_conn is:$this->_pg_conn\n";
 
     if(is_null($this->_pg_conn)) {
       $this->pg_Error = TRUE;
