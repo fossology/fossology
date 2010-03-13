@@ -6,7 +6,6 @@ DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
-UMDEF=-DUNMAGIC='"$(AGENTDATADIR)/UnMagic"'
 EXE=departition checksum ununpack
 
 CHKHDR= checksum.h md5.h sha1.h
@@ -23,7 +22,7 @@ departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
 
 ununpack: $(UUSRC) $(UUHDR) $(VARS) $(DB) $(REPO)
-	$(CC) $(UUSRC) $(UMDEF) $(CFLAGS_LOCAL) -o $@
+	$(CC) $(UUSRC) $(CFLAGS_LOCAL) -o $@
 
 metahandle.h: metahandle.tab metahandle.pl
 	if [ ! -x metahandle.pl ] ; then chmod u+x metahandle.pl; fi
@@ -43,13 +42,11 @@ install: all $(VARS)
 	fi
 	$(INSTALL_PROGRAM) ununpack $(DESTDIR)$(AGENTDIR)/ununpack
 	$(INSTALL_PROGRAM) checksum $(DESTDIR)$(LIBEXECDIR)/checksum
-	$(INSTALL_DATA) UnMagic.mime $(DESTDIR)$(AGENTDATADIR)/UnMagic.mime
 
 uninstall: $(VARS)
 	rm -f $(DESTDIR)$(BINDIR)/departition
 	rm -f $(DESTDIR)$(LIBEXECDIR)/checksum
 	rm -f $(DESTDIR)$(AGENTDIR)/ununpack
-	rm -f $(DESTDIR)$(AGENTDATADIR)/UnMagic.mime
 
 test: all
 	@echo "*** No tests available for agents/$(EXE) ***"
