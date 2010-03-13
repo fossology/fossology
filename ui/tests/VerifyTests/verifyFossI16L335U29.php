@@ -30,7 +30,8 @@ require_once('../../../tests/TestEnvironment.php');
 require_once('../../../tests/testClasses/parseBrowseMenu.php');
 require_once('../../../tests/testClasses/parseMiniMenu.php');
 require_once('../../../tests/testClasses/parseFolderPath.php');
-require_once('../../../tests/testClasses/parseLicenseTbl.php');
+//require_once('../../../tests/testClasses/parseLicenseTbl.php');
+require_once('../../../tests/testClasses/dom-parseLicenseTable.php');
 
 global $URL;
 
@@ -164,15 +165,17 @@ class verifyFossolyTest extends fossologyTestCase
         "verifyFossI16L518 FAILED! Unique Licenses does not equal 29\n");
 
 		// get the license names and 'Show' links
-		$licHistogram = new parseLicenseTbl($page);
-		//print "VFI16DB: libTable is:\n";print_r($licHistogram->histoList) . "\n";
+		$licHistogram = new domParseLicenseTbl($page);
 		// create list of Show urls
 		$urls = array();
-		foreach ($licHistogram->histoList as $licName => $url) {
-			$urls[$licName] = makeUrl($this->host, $url);
+		foreach ($licHistogram->hList as $license) {
+			$urls[$license['licName']] = makeUrl($this->host, $license['showLink']);
 		}
-		//print "VFI16DB: urls are:\n";print_r($urls) . "\n";
-
+		if(empty($urls)) {
+			$this->fail("FATAL! no urls to process, there should be many for"
+			. " this test, Stopping the test");
+			return;
+		}
 		// verify every row against the standard
 		foreach($urls as $lic => $showUrl){
 			$page = $this->mybrowser->get($showUrl);
