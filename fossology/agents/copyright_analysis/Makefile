@@ -27,12 +27,9 @@ copyright: copyright.py $(PYTHONLIB)
 	echo    "    main()" >> copyright
 	chmod a+x copyright
 
-model.dat: copyright-build training_files
-	./copyright-build --model model.dat --training training_files
+model.dat: copyright-build copyright_library.py data.txt
+	./copyright-build --model model.dat --training data.txt
 	
-training_files:
-	find data -type f > training_files
-
 install: all
 	./copyright-build --setup
 	$(INSTALL_PROGRAM) copyright $(DESTDIR)$(AGENTDIR)/copyright

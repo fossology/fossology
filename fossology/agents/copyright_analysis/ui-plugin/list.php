@@ -51,11 +51,12 @@ class copyright_list extends FO_Plugin
     // micro-menu
 	$agent_pk = GetParm("agent",PARM_INTEGER);
 	$uploadtree_pk = GetParm("item",PARM_INTEGER);
-	$content = GetParm("content",PARM_RAW);
+	$hash = GetParm("hash",PARM_RAW);
+	$type = GetParm("type",PARM_RAW);
 	$Page = GetParm("page",PARM_INTEGER);
 	$Excl = GetParm("excl",PARM_RAW);
 
-    $URL = $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&content=$content&page=-1";
+    $URL = $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
     if (!empty($Excl)) $URL .= "&excl=$Excl";
     menu_insert($this->Name."::Show All",0, $URL, "Show All Files");
 
@@ -81,10 +82,10 @@ class copyright_list extends FO_Plugin
     /*  Input parameters */
 	$agent_pk = GetParm("agent",PARM_INTEGER);
 	$uploadtree_pk = GetParm("item",PARM_INTEGER);
-	$content = GetParm("content",PARM_RAW);
+	$hash = GetParm("hash",PARM_RAW);
+	$type = GetParm("type",PARM_RAW);
 	$Excl = GetParm("excl",PARM_RAW);
-	$content = rawurldecode($content);
-	if (empty($uploadtree_pk) || empty($content)) 
+	if (empty($uploadtree_pk) || empty($hash) || empty($type)) 
     {
       echo $this->Name . " is missing required parameters.";
       return;
@@ -100,21 +101,33 @@ class copyright_list extends FO_Plugin
       // micro menus
       $V .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
-	/* Get License Name */
+    $sql = "SELECT DISTINCT ON (count(content),content, hash, type, pfile_fk) content, hash, type, count(content) as copyright_count
+              from copyright WHERE hash='$hash' AND type='$type' AND agent_fk='$agent_pk' 
+              group by content, hash, type, pfile_fk 
+              order by copyright_count desc";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if ($row = pg_fetch_assoc($result)) {
+        $copyright_name = $row['content'];
+    } else {
+        $copyright_name = "";
+    }
+
+    /* Get License Name */
 	$V .= "The following files contain the copyright '<b>";
-	$V .= $content;
+	$V .= $copyright_name;
 	$V .= "</b>'.\n";
 
 	/* Load licenses */
 	$Offset = ($Page < 0) ? 0 : $Page*$Max;
     $order = "";
     $PkgsOnly = false;
-    $Count = CountFilesWithCopyright($agent_pk, $content, $uploadtree_pk, $PkgsOnly);
+    $Count = CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk, $PkgsOnly);
     $V.= "<br>$Count files found with this copyright ";
     if ($Count < (1.25 * $Max)) $Max = $Count;
     $limit = ($Page < 0) ? "ALL":$Max;
     $order = " order by ufile_name asc";
-    $filesresult = GetFilesWithCopyright($agent_pk, $content, $uploadtree_pk,
+    $filesresult = GetFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
                                 $PkgsOnly, $Offset, $limit, $order);
     $NumFiles = pg_num_rows($filesresult);
 //    $V .= "($NumFiles shown)";

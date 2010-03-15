@@ -16,6 +16,7 @@
 ##
 
 import re
+import math
 
 def findall(RE, text):
     found = []
@@ -47,13 +48,6 @@ RE_START = re.compile('(<s>)')
 RE_END = re.compile('(<\/s>)')
 RE_TOKEN = re.compile('([A-Za-z0-9]+)')
 RE_ANYTHING = re.compile('.', re.DOTALL)
-
-def token_sort(x,y):
-    if (x[1] < y[1]):
-        return -1
-    if (x[1] > y[1]):
-        return 1
-    return 0
 
 def parsetext(text):
     stuff = {}
@@ -100,196 +94,181 @@ def replace_placeholders(tokens,stuff):
                 count += 1
     return t
 
+def token_sort(x,y):
+    if (x[1] < y[1]):
+        return -1
+    if (x[1] > y[1]):
+        return 1
+    return 0
 
-def tokens_and_labels_from_text(text):
-    a = re.findall('[IO], .*',text)
-    labels = []
-    tokens = []
-    for i in range(len(a)):
-        label = a[i][0]
-        token = a[i][3:]
-        labels.append(label)
-        tokens.append(token)
+def tokens_to_BIO(tokens):
+    n = len(tokens)
+    t = []
+    l = []
     
-    return (tokens, labels)
+    s = 'O'
+    for token in tokens:
+        if token == 'XXXstartXXX':
+            s = 'B'
+            continue
+        elif token == 'XXXendXXX':
+            s = 'O'
+            continue
+        t.append(token)
+        l.append(s)
+        if s == 'B':
+            s = 'I'
 
-def features(tokens):
-    left = 2
-    right = 2
-    data = []
-    ts = []
-    attribs = set()
-    for i in range(len(tokens)):
-        d = {}
-        t = []
-        for j in range(-left,right+1):
-            if -1 > i+j or i+j < len(tokens):
-                t.append(tokens[i+j])
-                a = "%s_%d" % (tokens[i+j], j+left)
-                d[a] = 'TRUE'
-            else:
-                t.append("XXXblankXXX")
-                a = "%s_%d" % ('XXXblankXXX', j+left)
-                d[a] = 'TRUE'
-        data.append(d)
-        ts.append(t)
+    return (t,l)
+
+def train_nb(data):
+    n = len(data)
+
+    classes = ['B', 'I', 'O',]
+    features = ['current_word', 'previous_label', 'previous_word', 'next_word']
+    PFC = {} # P(F_{i}|C) accessed as PFC[C][F][i] for simplicity.
+    # initialize our model
+    for c in classes:
+        PFC[c] = {'class':0.0}
+        for f in features:
+            PFC[c][f] = {}
+
+    for i in xrange(n):
+        (tokens, labels) = data[i]
+        nn = len(tokens)
+        for j in xrange(nn):
+            c = labels[j]
+            w = tokens[j]
+            PFC[c]['class'] += 1.0
+            PFC[c]['current_word'][w] = PFC[c]['current_word'].get(w, 0.0) + 1.0
+            c_1 = ''
+            if j != 0:
+                c_1 = labels[j-1]
+            PFC[c]['previous_label'][c_1] = PFC[c]['previous_label'].get(c_1, 0.0) + 1.0
+            w_1 = ''
+            if j != 0:
+                w_1 = tokens[j-1]
+            PFC[c]['previous_word'][w_1] = PFC[c]['previous_word'].get(w_1, 0.0) + 1.0
+            w_1 = ''
+            if j != nn-1:
+                w_1 = tokens[j+1]
+            PFC[c]['next_word'][w_1] = PFC[c]['next_word'].get(w_1, 0.0) + 1.0
+
+    # normalize everything
+    for c in classes:
+        for f in features:
+            s = sum(PFC[c][f].values())
+            for (k,v) in PFC[c][f].iteritems():
+                PFC[c][f][k] = math.log(v/s)
+
+    s = 0.0
+    for c in classes:
+        s += PFC[c]['class']
+    for c in classes:
+        PFC[c]['class'] = math.log(PFC[c]['class']/s)
+
+    return PFC
+
+def label_nb(PFC, tokens, debug=False):
+    L = []
+    P = []
+
+    classes = PFC.keys()
+    features = ['current_word', 'previous_label', 'previous_word', 'next_word']
+    minimums = {}
+    minimums['B'] = {'current_word':math.log(1e-23), 'previous_label':math.log(1e-23), 'previous_word':math.log(1e-23), 'next_word':math.log(1e-23)}
+    minimums['I'] = {'current_word':math.log(1e-10), 'previous_label':math.log(1e-23), 'previous_word':math.log(1e-10), 'next_word':math.log(1e-10)}
+    minimums['O'] = {'current_word':math.log(1e-10), 'previous_label':math.log(1e-10), 'previous_word':math.log(1e-10), 'next_word':math.log(1e-10)}
+
+    for t in xrange(len(tokens)):
+        fv = {}
+        fv['current_word'] = tokens[t]
+        fv['previous_label'] = ''
+        if t > 0:
+            fv['previous_label'] = L[-1]
+        fv['previous_word'] = ''
+        if t > 0:
+            fv['previous_word'] = tokens[t-1]
+        fv['next_word'] = ''
+        if t < len(tokens)-1:
+            fv['next_word'] = tokens[t+1]
+
+        p = dict([(c,0.0) for c in classes])
+        for c in classes:
+            p[c] += PFC[c]['class']
+            for f in features:
+                p[c] += PFC[c][f].get(fv[f],minimums[c][f])
     
-    for i in range(len(data)):
-        n = len(data[i])
-        keys = data[i].keys()
-        for k in range(left+right+1):
-            if re.match('^[A-Z].*', ts[i][k]):
-                data[i]['first_capped_%d' % k] = 'TRUE'
-            else:
-                data[i]['first_capped_%d' % k] = 'FALSE'
-            if re.match('^[A-Z]+', ts[i][k]):
-                data[i]['all_capped_%d' % k] = 'TRUE'
-            else:
-                data[i]['all_capped_%d' % k] = 'FALSE'
-            if re.match('[0-9]', ts[i][k]):
-                data[i]['contains_number_%d' % k] = 'TRUE'
-            else:
-                data[i]['contains_number_%d' % k] = 'FALSE'
-            if re.match('^[0-9]+$', ts[i][k]):
-                data[i]['is_number_%d' % k] = 'TRUE'
-            else:
-                data[i]['is_number_%d' % k] = 'FALSE'
-            #data[i]['length_%d' % k] = len(ts[i][k])
+        i = 'O'
+        if t == 0:
+            if p['B'] > p['O']:
+                i = 'B'
+        elif L[-1] == 'O':
+            if p['B'] > p['O']:
+                i = 'B'
+        elif L[-1] == 'B':
+            if p['B'] > max([p['O'], p['I']]):
+                i = 'B'
+            elif p['I'] > p['O']:
+                i = 'I'
+        elif L[-1] == 'I':
+            if p['I'] > max([p['O'], p['B']]):
+                i = 'I'
+            elif p['B'] > p['O']:
+                i = 'B'
 
-        [attribs.add(k) for k in data[i].keys()]
+        P.append(p)
+        L.append(i)
 
-    return data, attribs
+    if debug:
+        return L,P
+    return L
 
-def calc_bigram_prob(bigram_hash, word1, word2, word3, default = 0.0):
-    p = bigram_hash.get('%s %s %s' % (word1, word2, word3),0.0)
-    return p + default
+def create_model(training_data):
+    n = len(training_data)
+    # need to convert the string data into BIO labels and tokens.
+    parsed_data = [parsetext(text) for text in training_data]
+    tokens = [[parsed_data[i]['tokens'][j][0] for j in xrange(len(parsed_data[i]['tokens']))] for i in xrange(n)]
+    bio_data = [tokens_to_BIO(tokens[i]) for i in xrange(n)]
 
-def norm_bigram_hash(bigram_hash):
-    n = sum([bigram_hash[k] for k in bigram_hash.keys()])
-    for k in bigram_hash.keys():
-        bigram_hash[k] = bigram_hash[k] / n
-    return n
+    # create the naive Bayes model
+    PFC = train_nb(bio_data)
 
-def create_bigram_hash(tokens, bigram_hash = {}):
-    for i in range(1,len(tokens)-1):
-        bigram = '%s %s %s' % (tokens[i-1][0], tokens[i][0], tokens[i+1][0])
-        bigram_hash[bigram] = bigram_hash.get(bigram,0.0) + 1.0
-    return bigram_hash
+    model = {'id':hex(abs(hash(str(PFC)))), 'P(F|C)':PFC}
 
-def create_model(files):
-    bigram_hash = {}
-    P_inside = {}
-    P_outside = {}
-    for file in files:
-        text = open(file).read()
-        stuff = parsetext(text)
-        tokens = stuff['tokens']
-        inside = False
-        for t in tokens:
-            if t[0] == 'XXXstartXXX':
-                inside = True
-                continue
-            if t[0] == 'XXXendXXX':
-                inside = False
-                continue
-            if inside:
-                P_inside[t[0]] = P_inside.get(t[0],0.0) + 1.0
-            else:
-                P_outside[t[0]] = P_outside.get(t[0],0.0) + 1.0
-    
-        tokens.insert(0,['XXXdocstartXXX',-1,-1])
-        tokens.insert(0,['XXXdocstartXXX',-1,-1])
-        tokens.append(['XXXdocendXXX',len(text),len(text)])
-        tokens.append(['XXXdocendXXX',len(text),len(text)])
-    
-        bigram_hash = create_bigram_hash(tokens,bigram_hash)
-    
-    norm = 1.0 / sum([P_inside[k] for k in P_inside.keys()])
-    for k in P_inside.keys():
-        P_inside[k] = norm*P_inside[k]
-    norm = 1.0 / sum([P_outside[k] for k in P_outside.keys()])
-    for k in P_outside.keys():
-        P_outside[k] = norm*P_outside[k]
-    norm = norm_bigram_hash(bigram_hash)
-
-    return {"bigram_hash": bigram_hash, "P_inside": P_inside, "P_outside": P_outside, "norm": norm}
+    return model
 
 def label_file(file, model):
-    text = open(file).read(64000)
-    
-    stuff = parsetext(text)
-    tokens = stuff['tokens']
-    n = len(tokens)
-    tokens.insert(0,['XXXdocstartXXX',-1,-1])
-    tokens.insert(0,['XXXdocstartXXX',-1,-1])
-    tokens.append(['XXXdocendXXX',len(text),len(text)])
-    tokens.append(['XXXdocendXXX',len(text),len(text)])
+    PFC = model['P(F|C)']
+    text = open(file).read()
+
+    # parse the file and get the tokens
+    parsed_text = parsetext(text)
+    tokens = [parsed_text['tokens'][j][0] for j in xrange(len(parsed_text['tokens']))]
+
+    offsets = []
     
     starts = []
     ends = []
-    steps = 0
-    in_copyright = False
-    for i in range(2,n+2):
-        v = tokens[i-2][0]
-        w = tokens[i-1][0]
-        x = tokens[i+0][0]
-        y = tokens[i+1][0]
-        z = tokens[i+2][0]
-        s = 'XXXstartXXX'
-        e = 'XXXendXXX'
-    
-        P_v_w_x = calc_bigram_prob(model['bigram_hash'], v, w, x, model['norm'])
-        P_v_w_s = calc_bigram_prob(model['bigram_hash'], v, w, s, model['norm'])
-        P_e_y_z = calc_bigram_prob(model['bigram_hash'], e, y, z, model['norm'])
-        P_x_y_z = calc_bigram_prob(model['bigram_hash'], x, y, z, model['norm'])
-        if re.match('^[^A-Z]',x):
-            P_e_y_z += 0.2*model['P_outside'].get(x,0.0)
-            P_x_y_z += 0.8*model['P_inside'].get(x,0.0)
-    
-        if (x in ['the', 'and']):
-            starts.append(False)
-            ends.append(False)
-            continue
-    
-        if P_v_w_s > P_v_w_x:
-            starts.append(True)
-            in_copyright = True
-            steps = 0
-        else:
-            starts.append(False)
-            steps += 1
+    L = label_nb(PFC, tokens)
+    for l in xrange(len(L)):
+        if L[l] == 'B':
+            starts.append(parsed_text['tokens'][l][1])
+        if l>0 and L[l-1] == 'B' and L[l] == 'O':
+            starts.pop()
+        elif l>0 and L[l-1] != 'O' and L[l] == 'O':
+            ends.append(parsed_text['tokens'][l-1][2])
+        elif l>0 and L[l-1] == 'I' and L[l] == 'B':
+            ends.append(parsed_text['tokens'][l-1][2])
+    if len(starts)>len(ends):
+        ends.append(parsed_text['tokens'][-1][2])
 
-        #if P_e_y_z > P_x_y_z:
-        #    ends.append(True)
-        #else:
-        #    ends.append(False)
-    
-        if in_copyright and steps > 10:
-            in_copyright = False
-            ends.append(True)
-        else:
-            ends.append(False)
-    
-    offsets = []
-    for email in stuff['email']:
-        offsets.append([email[1],email[2],'email'])
-    for url in stuff['url']:
-        offsets.append([url[1],url[2],'url'])
-    tokens = replace_placeholders(tokens,stuff)
-    i = 0
-    inside = False
-    beginning = 0
-    finish = 0
-    while (i < len(starts)):
-        if starts[i] and not inside:
-            beginning = tokens[i][1]
-            inside = True
-        if inside:
-            finish = tokens[i+2][2]
-        if ends[i] and inside:
-            inside = False
-            offsets.append([beginning, finish, 'statement'])
-            # print "[%d:%d] ''%r''" % (beginning, finish, text[beginning:finish])
-        i += 1
-    
+    for i in xrange(len(starts)):
+        offsets.append((starts[i], ends[i], 'statement'))
+
+    for item in parsed_text['email']:
+        offsets.append((item[1], item[2], 'email'))
+    for item in parsed_text['url']:
+        offsets.append((item[1], item[2], 'url'))
+
     return offsets
