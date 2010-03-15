@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class copyright_view extends FO_Plugin
 {
     var $Name       = "copyrightview";
-    var $Title      = "View Copyright";
+    var $Title      = "View Copyright/Email/Url Analysis";
     var $Version    = "1.0";
     var $Dependency = array("db","browse","view");
     var $DBaccess   = PLUGIN_DB_READ;
@@ -47,13 +47,13 @@ class copyright_view extends FO_Plugin
         {
             if (GetParm("mod",PARM_STRING) == $this->Name)
             {
-                menu_insert("View::View Copyright",1);
-                menu_insert("View-Meta::View Copyright",1);
+                menu_insert("View::View Copyright/Email/Url",1);
+                menu_insert("View-Meta::View Copyright/Email/Url",1);
             }
             else
             {
-                menu_insert("View::View Copyright",1,$URI,"View Copyright info");
-                menu_insert("View-Meta::View Copyright",1,$URI,"View Copyright info");
+                menu_insert("View::View Copyright/Email/Url",1,$URI,"View Copyright/Email/Url info");
+                menu_insert("View-Meta::View Copyright/Email/Url",1,$URI,"View Copyright/Email/Url info");
             }
         }
         $Lic = GetParm("lic",PARM_INTEGER);

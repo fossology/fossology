@@ -21,12 +21,6 @@ at the very beginning.
 This prevents hacking attempts.
 *************************************************/
 
-/**
- * agent-nomos
- * \brief run the nomos license agent
- * 
- * @version "$Id: agent-nomos.php 2649 2009-11-20 23:05:56Z bobgo $"
- */
 global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
@@ -34,8 +28,7 @@ if (!isset($GlobalReady)) {
 class agent_copyright extends FO_Plugin {
 
   public $Name = "agent_copyright";
-  public $Title = "Schedule Copyright Analysis";
-  // public $MenuList   = "Jobs::Agents::Copyright Analysis";
+  public $Title = "Schedule Copyright/Email/Url Analysis";
   public $Version = "1.0";
   public $Dependency = array("db");
   public $DBaccess = PLUGIN_DB_ANALYZE;
@@ -167,10 +160,10 @@ class agent_copyright extends FO_Plugin {
           $rc = $this->AgentAdd($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $Page.= displayMessage('copyright analysis added to the job queue');
+            $Page.= displayMessage('copyright/email/url analysis added to the job queue');
           }
           else {
-            $Page.= displayMessage("Scheduling of copyright failed: $rc");
+            $Page.= displayMessage("Scheduling of copyright/email/url analysis failed: $rc");
           }
         }
         /* Get list of projects that are not scheduled for uploads */

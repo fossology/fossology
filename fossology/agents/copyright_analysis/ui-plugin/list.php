@@ -35,7 +35,7 @@ require($WEBDIR.'/plugins/copyright/library.php');
 class copyright_list extends FO_Plugin
 {
   var $Name       = "copyrightlist";
-  var $Title      = "List Files for Copyright";
+  var $Title      = "List Files for Copyright/Email/Url";
   var $Version    = "1.0";
   var $Dependency = array("db","copyrighthist");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -114,7 +114,14 @@ class copyright_list extends FO_Plugin
     }
 
     /* Get License Name */
-	$V .= "The following files contain the copyright '<b>";
+    switch ($type) {
+        case "statement":
+            $V .= "The following files contain the copyright '<b>";
+        case "email":
+            $V .= "The following files contain the email '<b>";
+        case "url":
+            $V .= "The following files contain the url '<b>";
+    }
 	$V .= $copyright_name;
 	$V .= "</b>'.\n";
 
@@ -123,7 +130,7 @@ class copyright_list extends FO_Plugin
     $order = "";
     $PkgsOnly = false;
     $Count = CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk, $PkgsOnly);
-    $V.= "<br>$Count files found with this copyright ";
+    $V.= "<br>$Count files found ";
     if ($Count < (1.25 * $Max)) $Max = $Count;
     $limit = ($Page < 0) ? "ALL":$Max;
     $order = " order by ufile_name asc";

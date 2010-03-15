@@ -26,7 +26,7 @@ if (!isset($GlobalReady)) {
 }
 class agent_copyright_once extends FO_Plugin {
     public $Name = "agent_copyright_once";
-    public $Title = "One-Shot Copyright Analysis";
+    public $Title = "One-Shot Copyright/Email/Url Analysis";
     // Note: menuList is not needed for this plugin, it inserts into the menu
     // in the code below.
     //public $MenuList = "Upload::One-Shot Bsam";
@@ -139,7 +139,7 @@ class agent_copyright_once extends FO_Plugin {
         if (!empty($_SESSION['User'])) {
             // Debugging changes to license analysis NOTE: this comment doesn't make sense.
             if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
-                menu_insert("Main::Upload::One-Shot Copyright", $this->MenuOrder, $this->Name, $this->MenuTarget);
+                menu_insert("Main::Upload::One-Shot Copyright/Email/Url", $this->MenuOrder, $this->Name, $this->MenuTarget);
             }
             // Debugging changes to license analysis
             if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG) {
@@ -148,9 +148,9 @@ class agent_copyright_once extends FO_Plugin {
                     "item"
                 ));
                 menu_insert("View::[BREAK]", 100);
-                menu_insert("View::bsam One-Shot", 101, $URI, "bsam One-shot, real-time license analysis");
+                menu_insert("View::One-Shot Copyright/Email/Url", 101, $URI, "Copyright/Email/Url One-shot, real-time analysis");
                 menu_insert("View-Meta::[BREAK]", 100);
-                menu_insert("View-Meta::bsam One-Shot", 101, $URI, "bsam One-shot, real-time license analysis");
+                menu_insert("View-Meta::One-Shot Copyright/Email/Url", 101, $URI, "Copyright/Email/Url One-shot, real-time analysis");
             }
         }
     } // RegisterMenus()
@@ -164,7 +164,6 @@ class agent_copyright_once extends FO_Plugin {
         global $DB;
         global $DATADIR;
         global $PROJECTSTATEDIR;
-        $LicCache = "$PROJECTSTATEDIR/agents/License.bsam";
         $V = "";
         switch ($this->OutputType) {
         case "XML":
@@ -208,11 +207,11 @@ class agent_copyright_once extends FO_Plugin {
                 }
             }
             /* Display instructions */
-            $V.= "This analyzer allows you to upload a single file for license analysis.\n";
+            $V.= "This analyzer allows you to upload a single file for copyright/email/url analysis.\n";
             $V.= "The limitations:\n";
             $V.= "<ul>\n";
             $V.= "<li>The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n";
-            $V.= "<li>Files that contain files are <b>not</b> unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n";
+            $V.= "<li>Files that contain files are <b>not</b> unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for copyright/email/urls and nothing will likely be found.\n";
             $V.= "<li>Results are <b>not</b> stored. As soon as you get your results, your uploaded file is removed from the system.\n";
             $V.= "</ul>\n";
             /* Display the form */

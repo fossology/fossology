@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class copyright_hist extends FO_Plugin
 {
   var $Name       = "copyrighthist";
-  var $Title      = "Copyright Browser";
+  var $Title      = "Copyright/Email/Url Browser";
   var $Version    = "1.0";
   var $Dependency = array("db","browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -58,55 +58,16 @@ class copyright_hist extends FO_Plugin
     {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-       menu_insert("Browse::Copyright",1);
+       menu_insert("Browse::Copyright/Email/Url",1);
        menu_insert("Browse::[BREAK]",100);
        //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
       }
       else
       {
-       menu_insert("Browse::Copyright",10,$URI,"View copyright histogram");
+       menu_insert("Browse::Copyright/Email/Url",10,$URI,"View copyright/email/url histogram");
       }
     }
   } // RegisterMenus()
-
-
-  /***********************************************************
-   Initialize(): This is called before the plugin is used.
-   It should assume that Install() was already run one time
-   (possibly years ago and not during this object's creation).
-   Returns true on success, false on failure.
-   A failed initialize is not used by the system.
-   NOTE: This function must NOT assume that other plugins are installed.
-   ***********************************************************/
-  // function Initialize()
-  // {
-  //   global $_GET;
-
-  //   if ($this->State != PLUGIN_STATE_INVALID) { return(1); } // don't re-run
-  //   if ($this->Name !== "") // Name must be defined
-  //   {
-  //     global $Plugins;
-  //     $this->State=PLUGIN_STATE_VALID;
-  //     array_push($Plugins,$this);
-  //   }
-
-  //   /* Remove "updcache" from the GET args and set $this->UpdCache
-  //    * This way all the url's based on the input args won't be
-  //    * polluted with updcache
-  //    */
-  //   if ($_GET['updcache'])
-  //   {
-  //     $this->UpdCache = $_GET['updcache'];
-  //     $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
-  //     unset($_GET['updcache']);
-  //   }
-  //   else
-  //   {
-  //     $this->UpdCache = 0;
-  //   }
-  //   return($this->State == PLUGIN_STATE_VALID);
-  // } // Initialize()
-
 
   /***********************************************************
    ShowUploadHist(): Given an $Uploadtree_pk, display:
@@ -349,60 +310,6 @@ class copyright_hist extends FO_Plugin
       $ModLicView = &$Plugins[plugin_find_id("view-license")];
       return($ModLicView->Output() );
     }
-
-    $V .= ActiveHTTPscript("FileColor");
-
-    /* Add javascript for color highlighting 
-       This is the response script needed by ActiveHTTPscript 
-       responseText is license name',' followed by a comma seperated list of uploadtree_pk's */
-    $script = "
-      <script type=\"text/javascript\" charset=\"utf-8\">
-        var Lastutpks='';   /* save last list of uploadtree_pk's */
-        var LastLic='';   /* save last License (short) name */
-        var color = '#4bfe78';
-        function FileColor_Reply()
-        {
-          if ((FileColor.readyState==4) && (FileColor.status==200))
-          {
-            /* remove previous highlighting */
-            var numpks = Lastutpks.length;
-            if (numpks > 0) document.getElementById(LastLic).style.backgroundColor='white';
-            while (numpks)
-            {
-              document.getElementById(Lastutpks[--numpks]).style.backgroundColor='white';
-            }
-
-            utpklist = FileColor.responseText.split(',');
-            LastLic = utpklist.shift();
-            numpks = utpklist.length;
-            Lastutpks = utpklist;
-
-            /* apply new highlighting */
-            elt = document.getElementById(LastLic);
-            if (elt != null) elt.style.backgroundColor=color;
-            while (numpks)
-            {
-              document.getElementById(utpklist[--numpks]).style.backgroundColor=color;
-            }
-          }
-          return;
-        }
-/* bobg fooling with wait icon 
-    var myGlobalHandlers = {
-        onCreate: function(){
-            Element.show('ajax_waiting');
-        },
-
-        onComplete: function() {
-            if(Ajax.activeRequestCount == 0){
-                Element.hide('ajax_waiting');
-            }
-        }
-    };
-*/
-      </script>
-    ";
-    $V .= $script;
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
