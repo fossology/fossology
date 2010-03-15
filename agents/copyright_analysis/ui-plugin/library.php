@@ -21,7 +21,6 @@
   copyright ui plugin.
  ************************************************************/
 
-
 /*
  * Return all the copyrights for a single file or uploadtree
  * Inputs:
