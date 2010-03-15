@@ -622,7 +622,7 @@ function GetSchema()
   AND adnum = attnum
   ORDER BY class.relname,attr.attnum;
   ";
-	$result = pg_query($SQL);
+	$result = pg_query($PGCONN, $SQL);
 	checkresult($result, $SQL, __LINE__);
 	$Results = pg_fetch_all($result);
 
@@ -672,7 +672,7 @@ function GetSchema()
 	/***************************/
 	$SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'fossy';";
 	//$SQL = "SELECT viewname,definition FROM pg_views WHERE viewowner = 'rando';";
-	$result = pg_query($SQL);
+	$result = pg_query($PGCONN,$SQL);
 	checkresult($result, $SQL, __LINE__);
 	$Results = pg_fetch_all($result);
 	for ($i = 0;!empty($Results[$i]['viewname']);$i++) {
@@ -691,7 +691,7 @@ function GetSchema()
   WHERE nspname NOT LIKE 'pg_%'
   AND nspname != 'information_schema'
   );";
-	$result = pg_query($SQL);
+	$result = pg_query($PGCONN, $SQL);
 	checkresult($result, $SQL, __LINE__);
 	$Results = pg_fetch_all($result);
 	for ($i = 0;!empty($Results[$i]['relname']);$i++) {
@@ -736,7 +736,7 @@ function GetSchema()
   LEFT JOIN pg_class AS t2 ON c.confrelid = t2.oid
   ORDER BY constraint_name,table_name;
   ";
-	$result = pg_query($SQL);
+	$result = pg_query($PGCONN, $SQL);
 	checkresult($result, $SQL, __LINE__);
 	$Results = pg_fetch_all($result);
 	/* Constraints use indexes into columns.  Covert those to column names. */
@@ -852,7 +852,7 @@ function GetSchema()
   AND schemaname = 'public'
   ORDER BY tablename,indexname;
   ";
-	$result = pg_query($SQL);
+	$result = pg_query($PGCONN, $SQL);
 	checkresult($result, $SQL, __LINE__);
 	$Results = pg_fetch_all($result);
 	for ($i = 0;!empty($Results[$i]['table']);$i++) {
@@ -878,7 +878,7 @@ function GetSchema()
   INNER JOIN pg_language AS lang ON proc.prolang = lang.oid
   WHERE lang.lanname = 'plpgsql'
   ORDER BY proname;";
-		$result = pg_query($SQL);
+		$result = pg_query($PGCONN, $SQL);
 		checkresult($result, $SQL, __LINE__);
 		$Results = pg_fetch_all($result);
 		for ($i = 0;!empty($Results[$i]['proname']);$i++) {
@@ -1140,7 +1140,7 @@ LANGUAGE plpgsql;
 		print "$SQL;\n";
 	}
 	else {
-		$result = pg_query($SQL);
+		$result = pg_query($PGCONN, $SQL);
 		checkresult($result, $SQL, __LINE__);
 	}
 	/********************************************
@@ -1173,7 +1173,7 @@ LANGUAGE plpgsql;
 		print "$SQL;\n";
 	}
 	else {
-		$result = pg_query($SQL);
+		$result = pg_query($PGCONN, $SQL);
 		checkresult($result, $SQL, __LINE__);
 	}
 	return;
@@ -1192,5 +1192,4 @@ function TblExist($Table)
 	}
 	return(0);
 }
-
 ?>
