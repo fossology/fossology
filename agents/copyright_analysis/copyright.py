@@ -59,7 +59,7 @@ def main():
     optparser.add_option("-m", "--model", type="string",
             help="Path to the model file.")
     optparser.add_option("-t", "--training", type="string",
-            help="List of training files.")
+            help="List of training data.")
     optparser.add_option("-f", "--analyze-from-file", type="string",
             help="Path to the files to analyze.")
     optparser.add_option("-c", "--analyze-from-command-line", action="store_true",
@@ -75,7 +75,7 @@ def main():
 
     (options, args) = optparser.parse_args()
     
-    print "Source hash: %s" % hex(hash(open(sys.argv[0]).read()))
+    print "Source hash: %s" % hex(abs(hash(open(sys.argv[0]).read())))
     if options.init:
         db = None
         try:
@@ -95,13 +95,13 @@ def main():
 
     model = {}
     if options.training:
-        files = [line.rstrip() for line in open(options.training).readlines()]
-        model = library.create_model(files)
+        training_data = [eval(line) for line in open(options.training).readlines()]
+        model = library.create_model(training_data)
         pickle.dump(model, open(options.model,'w'))
 
     try:
         model = pickle.load(open(options.model))
-        print 'Model hash: %s' % hex(hash(str(model)))
+        print 'Model hash: %s' % (model['id'])
     except:
         print >> sys.stderr, 'You must specify a training file to create a model.\n\n'
         optparser.print_usage()
@@ -158,16 +158,16 @@ def agent(model):
                 offsets = library.label_file(path,model)
                 text = open(path).read()
                 if len(offsets) == 0:
-                    result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, type) "
-                        "VALUES (%d, %d, NULL, NULL, NULL, 'statement');" % (agent_pk, pfile))
+                    result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
+                        "VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement');" % (agent_pk, pfile))
                     if result != 0:
-                        print >> sys.sdterr, "ERROR: DB Access error,\n%s" % db.status()
+                        print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
                 else:
                     for i in range(len(offsets)):
-                        result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, type) "
-                            "VALUES (%d, %d, %d, %d, E'%s', '%s');" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]]), offsets[i][2]))
+                        result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
+                            "VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s');" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]]), hex(abs(hash(re.escape(text[offsets[i][0]:offsets[i][1]])))), offsets[i][2]))
                         if result != 0:
-                            print >> sys.sdterr, "ERROR: DB Access error,\n%s" % db.status()
+                            print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
                 count += 1
                 sys.stdout.write("OK\n")
                 sys.stdout.flush()
@@ -229,6 +229,7 @@ def setup_database():
         "agent_fk bigint NOT NULL, "
         "pfile_fk bigint NOT NULL, "
         "content text, "
+        "hash text, "
         "type copyright_type NOT NULL, "
         "copy_startbyte integer, "
         "copy_endbyte integer);")

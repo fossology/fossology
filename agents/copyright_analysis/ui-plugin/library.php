@@ -41,7 +41,7 @@ function GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk)
   // if $pfile_pk, then return the licenses for that one file
   if ($pfile_pk)
   {
-    $sql = "SELECT content
+    $sql = "SELECT *
               from copyright
               where pfile_fk='$pfile_pk' and agent_fk=$agent_pk
               order by content desc";
@@ -62,14 +62,13 @@ function GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk)
     pg_free_result($result);
 
     /*  Get the counts for each license under this UploadtreePk*/
-    $sql = "SELECT distinct(content) as copyright_name, 
-                   count(content) as copyright_count, content
+    $sql = "SELECT DISTINCT ON (count(content),content, hash, type, pfile_fk) content, hash, type, pfile_fk count(content) as copyright_count
               from copyright,
                   (SELECT distinct(pfile_fk) as PF from uploadtree 
                      where upload_fk=$upload_pk 
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$Agent_pk 
-              group by content 
+              group by content, hash, type, pfile_fk 
               order by copyright_count desc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -110,7 +109,7 @@ function GetFileCopyrights_string($agent_pk, $pfile_pk, $uploadtree_pk)
  *   pg_query result.  See $sql for fields returned.
  *   Caller should use pg_free_result to free.
  */
-function GetFilesWithCopyright($agent_pk, $content, $uploadtree_pk, 
+function GetFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk, 
                              $PkgsOnly=false, $offset=0, $limit="ALL",
                              $order="")
 {
@@ -135,7 +134,7 @@ function GetFilesWithCopyright($agent_pk, $content, $uploadtree_pk,
                  where upload_fk=$upload_pk
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
           where PF=pfile_fk and agent_fk=$agent_pk
-                and content='$econtent'
+                and hash='$hash' and type='$type'
           $order limit $limit offset $offset";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -157,7 +156,7 @@ function GetFilesWithCopyright($agent_pk, $content, $uploadtree_pk,
  * Returns:
  *   number of files with this shortname.
  */
-function CountFilesWithCopyright($agent_pk, $content, $uploadtree_pk, 
+function CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk, 
                              $PkgsOnly=false, $CheckOnly=false)
 {
   global $PG_CONN;
@@ -176,13 +175,10 @@ function CountFilesWithCopyright($agent_pk, $content, $uploadtree_pk,
   $econtent = pg_escape_string($content);
   $chkonly = ($CheckOnly) ? " LIMIT 1" : "";
 
-  $sql = "select count(*)
-          from copyright,
-              (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
-                 where upload_fk=$upload_pk
-                   and uploadtree.lft BETWEEN $lft and $rgt) as SS
-          where PF=pfile_fk and agent_fk=$agent_pk
-                and content='$econtent' $chkonly";
+  $sql = "SELECT count(DISTINCT pfile_fk) from copyright,
+            (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
+                where upload_fk=$upload_pk and uploadtree.lft BETWEEN $lft and $rgt) as SS
+            where PF=pfile_fk and agent_fk=$agent_pk and hash='$hash' and type='$type' $chkonly";
 
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -206,7 +202,7 @@ function CountFilesWithCopyright($agent_pk, $content, $uploadtree_pk,
  * Returns:
  *   Array of uploadtree_pk ==> ufile_name
  */
-function Level1WithCopyright($agent_pk, $content, $uploadtree_pk, $PkgsOnly=false)
+function Level1WithCopyright($agent_pk, $hash, $type, $uploadtree_pk, $PkgsOnly=false)
 {
   global $PG_CONN;
   $pkarray = array();
@@ -222,7 +218,7 @@ function Level1WithCopyright($agent_pk, $content, $uploadtree_pk, $PkgsOnly=fals
   while ($row = pg_fetch_assoc($TopUTpks))
   {
 //$uTime2 = microtime(true);
-    $result = GetFilesWithCopyright($agent_pk, $content, $row['uploadtree_pk'], 
+    $result = GetFilesWithCopyright($agent_pk, $hash, $type, $row['uploadtree_pk'], 
                              $PkgsOnly, $offset, $limit, $order);
 //$Time = microtime(true) - $uTime2;
 //printf( "GetFilesWithLicense($row[ufile_name]) time: %.2f seconds<br>", $Time);

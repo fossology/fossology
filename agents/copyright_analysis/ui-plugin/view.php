@@ -78,6 +78,9 @@ class copyright_view extends FO_Plugin
         $Item = GetParm("item",PARM_INTEGER);
         $Upload = GetParm("upload", PARM_INTEGER);
 
+        $ModBack = GetParm("modback",PARM_STRING);
+        if (empty($ModBack)) { $ModBack='copyright'; }
+
         $pfile = 0;
 
         $sql = "SELECT * FROM uploadtree WHERE uploadtree_pk = ".$Item.";";
@@ -91,22 +94,20 @@ class copyright_view extends FO_Plugin
         $sql = "SELECT * FROM copyright WHERE copy_startbyte IS NOT NULL
             and pfile_fk=".$pfile.";";
         $result = $DB->Action($sql);
+        $colors = Array();
+        $colors['statement'] = 0;
+        $colors['email'] = 1;
+        $colors['url'] = 2;
         if ($result && !empty($result[0]['copy_startbyte'])) {
             foreach ($result as $row) {
-                $View->AddHighlight($row['copy_startbyte'], $row['copy_endbyte'], 0);
+                $View->AddHighlight($row['copy_startbyte'], $row['copy_endbyte'], $colors[$row['type']], '', $row['content'],-1, 
+                    Traceback_uri()."?mod=copyrightlist&agent=".$row['agent_fk']."&item=$Item&hash=" . $row['hash'] . "&type=" . $row['type']);
             }
         
             $View->SortHighlightMenu();
-            print "<center>";
-            print $View->GetHighlightMenu(-1);
-            print "</center>";
         }
         
-        $filename = RepPath($pfile);
-        $handle = fopen($filename, "r");
-        $View->ShowText($handle, 0, 1, -1);
-        fclose($handle);
-
+        $View->ShowView(NULL,$ModBack);
         return;
     } // Output()
 

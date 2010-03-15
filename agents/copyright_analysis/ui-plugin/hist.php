@@ -145,14 +145,13 @@ class copyright_hist extends FO_Plugin
       $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
     /*  Get the counts for each license under this UploadtreePk*/
-    $sql = "SELECT distinct(content) as copyright_name, 
-                   count(content) as copyright_count, content
+    $sql = "SELECT DISTINCT ON (count(content),content, hash, type) content, hash, type, count(content) as copyright_count
               from copyright,
                   (SELECT distinct(pfile_fk) as PF from uploadtree 
                      where upload_fk=$upload_pk 
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$Agent_pk 
-              group by content 
+              group by content, hash, type 
               order by copyright_count desc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -165,46 +164,91 @@ class copyright_hist extends FO_Plugin
     $VLic .= "<input type='submit' value='Go'>";
 
     /* Write license histogram to $VLic  */
-    $LicCount = 0;
-    $UniqueLicCount = 0;
-    $NoLicFound = 0;
-    $VLic .= "<table border=1 width='100%'>\n";
-    $VLic .= "<tr><th width='10%'>Count</th>";
-    $VLic .= "<th width='10%'>Files</th>";
-    $VLic .= "<th>License</th></tr>\n";
+    $CopyrightCount = 0;
+    $UniqueCopyrightCount = 0;
+    $NoCopyrightFound = 0;
+    $VCopyright .= "<table border=1 width='100%'>\n";
+    $VCopyright .= "<tr><th width='10%'>Count</th>";
+    $VCopyright .= "<th width='10%'>Files</th>";
+    $VCopyright .= "<th>Copyright</th></tr>\n";
+
+    $EmailCount = 0;
+    $UniqueEmailCount = 0;
+    $NoEmailFound = 0;
+    $VEmail .= "<table border=1 width='100%'>\n";
+    $VEmail .= "<tr><th width='10%'>Count</th>";
+    $VEmail .= "<th width='10%'>Files</th>";
+    $VEmail .= "<th>Email</th></tr>\n";
+
+    $UrlCount = 0;
+    $UniqueUrlCount = 0;
+    $NoUrlFound = 0;
+    $VUrl .= "<table border=1 width='100%'>\n";
+    $VUrl .= "<tr><th width='10%'>Count</th>";
+    $VUrl .= "<th width='10%'>Files</th>";
+    $VUrl .= "<th>URL</th></tr>\n";
 
     while ($row = pg_fetch_assoc($result))
     {
 
-        if ($row['copyright_name'] == '') {
+        if ($row['content'] == '') {
             continue;
         }
 
-        $UniqueLicCount++;
-        $LicCount += $row['copyright_count'];
-
-        /*  Count  */
-        $VLic .= "<tr><td align='right'>$row[copyright_count]</td>";
-
-        /*  Show  */
-        $VLic .= "<td align='center'><a href='";
-        $VLic .= Traceback_uri();
-        $VLic .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&content=" . urlencode($row['content']) . "'>Show</a></td>";
-
-        /*  License name  */
-        $VLic .= "<td align='left'>";
-        //$rf_shortname = rawurlencode($row['rf_shortname']);
-        //$VLic .= "<a id='$rf_shortname' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filelic&agent=$Agent_pk&item=$Uploadtree_pk&lic=$rf_shortname\")'>";
-        $VLic .= "$row[copyright_name]";
-        //$Vlic .= "</a>";
-        $VLic .= "</td>";
-        $VLic .= "</tr>\n";
+        if ($row['type'] == 'statement') {
+            $UniqueCopyrightCount++;
+            $CopyrightCount += $row['copyright_count'];
+            $VCopyright .= "<tr><td align='right'>$row[copyright_count]</td>";
+            $VCopyright .= "<td align='center'><a href='";
+            $VCopyright .= Traceback_uri();
+            $VCopyright .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
+            $VCopyright .= "<td align='left'>";
+            $VCopyright .= $row[content];
+            $VCopyright .= "</td>";
+            $VCopyright .= "</tr>\n";
+        } else if ($row['type'] == 'email') {
+            $UniqueEmailCount++;
+            $EmailCount += $row['copyright_count'];
+            $VEmail .= "<tr><td align='right'>$row[copyright_count]</td>";
+            $VEmail .= "<td align='center'><a href='";
+            $VEmail .= Traceback_uri();
+            $VEmail .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
+            $VEmail .= "<td align='left'>";
+            $VEmail .= $row[content];
+            $VEmail .= "</td>";
+            $VEmail .= "</tr>\n";
+        } else if ($row['type'] == 'url') {
+            $UniqueUrlCount++;
+            $UrlCount += $row['copyright_count'];
+            $VUrl .= "<tr><td align='right'>$row[copyright_count]</td>";
+            $VUrl .= "<td align='center'><a href='";
+            $VUrl .= Traceback_uri();
+            $VUrl .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
+            $VUrl .= "<td align='left'>";
+            $VUrl .= $row[content];
+            $VUrl .= "</td>";
+            $VUrl .= "</tr>\n";
+        }
     }
-    $VLic .= "</table>\n";
-    $VLic .= "<p>\n";
-    $VLic .= "Unique Copyrights: $UniqueLicCount<br>\n";
-    $NetLic = $LicCount;
-    $VLic .= "Total Copyroghts: $NetLic";
+
+    $VCopyright .= "</table>\n";
+    $VCopyright .= "<p>\n";
+    $VCopyright .= "Unique Copyrights: $UniqueCopyrightCount<br>\n";
+    $NetCopyright = $CopyrightCount;
+    $VCopyright .= "Total Copyrights: $NetCopyright";
+
+    $VEmail .= "</table>\n";
+    $VEmail .= "<p>\n";
+    $VEmail .= "Unique Emails: $UniqueEmailCount<br>\n";
+    $NetEmail = $EmailCount;
+    $VEmail .= "Total Emails: $NetEmail";
+
+    $VUrl .= "</table>\n";
+    $VUrl .= "<p>\n";
+    $VUrl .= "Unique URLs: $UniqueUrlCount<br>\n";
+    $NetUrl = $UrlCount;
+    $VUrl .= "Total URLs: $NetUrl";
+
     pg_free_result($result);
 
 
@@ -362,7 +406,12 @@ class copyright_hist extends FO_Plugin
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VLic</td><td valign='top'>$VF</td></tr>\n";
+    $V .= "<tr><td>Copyrights</td><td></td></tr>\n";
+    $V .= "<tr><td valign='top' width='50%'>$VCopyright</td><td valign='top'>$VF</td></tr>\n";
+    $V .= "<tr><td>Emails</td><td></td></tr>\n";
+    $V .= "<tr><td valign='top' width='50%'>$VEmail</td><td valign='top'></td></tr>\n";
+    $V .= "<tr><td>URLs</td><td></td></tr>\n";
+    $V .= "<tr><td valign='top' width='50%'>$VUrl</td><td valign='top'></td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
 
