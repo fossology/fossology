@@ -149,7 +149,7 @@ class ui_buckets extends FO_Plugin
         Because buckets roll up, the counts will be high (a bucket will be counted
         for the container and everything under the container).
      */
-$bucketpool_pk=1; // TEMPORARY
+$bucketpool_pk=1; // TEMPORARY until a "switch buckets" pulldown is implemented
     $sql = "SELECT distinct(bucket_fk) as bucket_pk, 
                    count(bucket_fk) as bucketcount
               from bucket_file, bucket_def,
@@ -166,12 +166,12 @@ $bucketpool_pk=1; // TEMPORARY
 
     /* get array of bucket_pk, bucket_name since I don't see how to put this in the
        above query. */
-    $sql = "select bucket_pk, bucket_name from bucket_def where bucketpool_fk=$bucketpool_pk";
+    $sql = "select * from bucket_def where bucketpool_fk=$bucketpool_pk";
     $result_name = pg_query($PG_CONN, $sql);
     DBCheckResult($result_name, $sql, __FILE__, __LINE__);
-    $fk_name = array();
+    $bucketDefArray = array();
     while ($name_row = pg_fetch_assoc($result_name)) 
-      $fk_name[$name_row['bucket_pk']] = $name_row['bucket_name'];
+      $bucketDefArray[$name_row['bucket_pk']] = $name_row;
     pg_free_result($result_name);
 
     /* Get agent list */
@@ -194,19 +194,20 @@ $bucketpool_pk=1; // TEMPORARY
     {
       $Uniquebucketcount++;
       $bucketcount += $row['bucketcount'];
+      $bucket_pk = $row['bucket_pk'];
+      $bucket_name = $bucketDefArray[$bucket_pk]['bucket_name'];
+      $bucket_color = $bucketDefArray[$bucket_pk]['bucket_color'];
 
       /*  Count  */
-      $VLic .= "<tr><td align='right'>$row[bucketcount]</td>";
+      $VLic .= "<tr><td align='right' style='background-color:$bucket_color'>$row[bucketcount]</td>";
 
       /*  Show  */
       $VLic .= "<td align='center'><a href='";
       $VLic .= Traceback_uri();
-      $VLic .= "?mod=list_lic_files&agent=$Agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['bucket_pk']) . "'>Show</a></td>";
+      $VLic .= "?mod=list_bucket_files&agent=$Agent_pk&item=$Uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk" . "'>Show</a></td>";
 
       /*  Bucket name  */
       $VLic .= "<td align='left'>";
-      $bucket_pk = $row['bucket_pk'];
-      $bucket_name = $fk_name[$bucket_pk];
       $VLic .= "<a id='$bucket_pk' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filebucket&agent=$Agent_pk&item=$Uploadtree_pk&bucket_pk=$bucket_pk\")'";
       $VLic .= ">$bucket_name </a>";
       $VLic .= "</td>";
@@ -217,7 +218,7 @@ $bucketpool_pk=1; // TEMPORARY
     $VLic .= "<p>\n";
     $VLic .= "Unique buckets: $Uniquebucketcount<br>\n";
     $NetLic = $bucketcount - $NoLicFound;
-    $VLic .= "Total buckets: $NetLic";
+    $VLic .= "Total: $NetLic";
     pg_free_result($result);
 
 
