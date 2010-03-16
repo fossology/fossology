@@ -802,10 +802,22 @@ int	FindCmd	(char *Filename)
            strcpy(Static,"application/x-7z-compressed");
            Type=Static;
          }
-         else
+         else // .deb and .udeb as application/x-debian-package
          {
-           // only here to validate other octet file types
-           if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
+  	     if ( pExt != NULL)
+             {
+    		if ((strcmp(pExt, ".deb")==0) || (strcmp(pExt, ".udeb")==0))
+    		{
+      		  memset(Static,0,sizeof(Static));
+      		  strcpy(Static,"application/x-debian-package");
+      		  Type=Static;
+    		}
+  	     }
+	     else 
+	     {		
+           	// only here to validate other octet file types
+           	if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
+	     }
          }
        }
     }
