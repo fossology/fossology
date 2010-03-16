@@ -149,7 +149,8 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
     if ((ufile_mode & 1<<29) )
     {
       bucketList = getContainerBuckets(pgConn, bucketDefArray, child_uploadtree_pk);
-      rv = writeBuckets(pgConn, child_pfile_pk, child_uploadtree_pk, bucketList, agent_pk, writeDB);
+      rv = writeBuckets(pgConn, child_pfile_pk, child_uploadtree_pk, bucketList, 
+                        agent_pk, writeDB, bucketDefArray->nomos_agent_pk);
     }
   }
 
@@ -189,7 +190,8 @@ FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray,
       for (rv=0;bucketList[rv];rv++) printf("%d ",bucketList[rv]);
       printf("\n");
     }
-    rv = writeBuckets(pgConn, pfile_pk, uploadtree_pk, bucketList, agent_pk, writeDB);
+    rv = writeBuckets(pgConn, pfile_pk, uploadtree_pk, bucketList, agent_pk, 
+                      writeDB, bucketDefArray->nomos_agent_pk);
   }
   return rv;
 }
@@ -672,7 +674,7 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray
  @return 0=success, errors are FATAL and will exit process.
 ****************************************************/
 FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
-                          int *bucketList, int agent_pk, int writeDB)
+                          int *bucketList, int agent_pk, int writeDB, int nomosagent_pk)
 {
   char     *fcnName = "writeBuckets";
   char      sql[256];
@@ -691,8 +693,8 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
         if (pfile_pk)
         {
           snprintf(sql, sizeof(sql), 
-                 "insert into bucket_file (bucket_fk, pfile_fk, agent_fk) \
-                  values(%d,%d,%d)", *bucketList, pfile_pk, agent_pk);
+                 "insert into bucket_file (bucket_fk, pfile_fk, agent_fk, nomosagent_pk) \
+                  values(%d,%d,%d,%d)", *bucketList, pfile_pk, agent_pk, nomosagent_pk);
           result = PQexec(pgConn, sql);
           if (PQresultStatus(result) != PGRES_COMMAND_OK) 
           {
@@ -706,8 +708,8 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
         else
         {
           snprintf(sql, sizeof(sql), 
-                 "insert into bucket_container (bucket_fk, uploadtree_fk, agent_fk) \
-                  values(%d,%d,%d)", *bucketList, uploadtree_pk, agent_pk);
+                 "insert into bucket_container (bucket_fk, uploadtree_fk, agent_fk, nomosagent_pk) \
+                  values(%d,%d,%d,%d)", *bucketList, uploadtree_pk, agent_pk, nomosagent_pk);
           result = PQexec(pgConn, sql);
           if (PQresultStatus(result) != PGRES_COMMAND_OK) 
           {
@@ -969,7 +971,8 @@ int main(int argc, char **argv)
 
   walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0, fileName);
   bucketList = getContainerBuckets(pgConn, bucketDefArray, head_uploadtree_pk);
-  writeBuckets(pgConn, pfile_pk, head_uploadtree_pk, bucketList, agent_pk, writeDB);
+  writeBuckets(pgConn, pfile_pk, head_uploadtree_pk, bucketList, agent_pk, 
+               writeDB, bucketDefArray->nomos_agent_pk);
 
   result = PQexec(pgConn, "commit");
   if (checkPQcommand(result, "commit", __FILE__, __LINE__)) return -1;

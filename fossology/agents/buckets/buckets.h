@@ -98,7 +98,7 @@ int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk,
 int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, char *fileName);
 int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int uploadtree_pk);
 int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
-                 int *bucketList, int agent_pk, int writeDB);
+                 int *bucketList, int agent_pk, int writeDB, int nomosagent_pk);
 int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk, int bucketpool_pk);
 int matchAnyLic(PGresult *result, int numLics, regex_t *compRegex);
 
