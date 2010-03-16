@@ -693,7 +693,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
         if (pfile_pk)
         {
           snprintf(sql, sizeof(sql), 
-                 "insert into bucket_file (bucket_fk, pfile_fk, agent_fk, nomosagent_pk) \
+                 "insert into bucket_file (bucket_fk, pfile_fk, agent_fk, nomosagent_fk) \
                   values(%d,%d,%d,%d)", *bucketList, pfile_pk, agent_pk, nomosagent_pk);
           result = PQexec(pgConn, sql);
           if (PQresultStatus(result) != PGRES_COMMAND_OK) 
@@ -708,7 +708,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
         else
         {
           snprintf(sql, sizeof(sql), 
-                 "insert into bucket_container (bucket_fk, uploadtree_fk, agent_fk, nomosagent_pk) \
+                 "insert into bucket_container (bucket_fk, uploadtree_fk, agent_fk, nomosagent_fk) \
                   values(%d,%d,%d,%d)", *bucketList, uploadtree_pk, agent_pk, nomosagent_pk);
           result = PQexec(pgConn, sql);
           if (PQresultStatus(result) != PGRES_COMMAND_OK) 
