@@ -31,7 +31,6 @@ model.dat: copyright-build copyright_library.py data.txt
 	./copyright-build --model model.dat --training data.txt
 	
 install: all
-	./copyright-build --setup
 	$(INSTALL_PROGRAM) copyright $(DESTDIR)$(AGENTDIR)/copyright
 	mkdir -p $(DESTDIR)$(LIBDIR)/python_fossology/
 	$(INSTALL_PROGRAM) copyright_library.py $(DESTDIR)$(LIBDIR)/python_fossology/copyright_library.py
