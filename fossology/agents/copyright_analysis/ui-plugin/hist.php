@@ -128,7 +128,7 @@ class copyright_hist extends FO_Plugin
     $CopyrightCount = 0;
     $UniqueCopyrightCount = 0;
     $NoCopyrightFound = 0;
-    $VCopyright .= "<table border=1 width='100%'>\n";
+    $VCopyright .= "<table border=1 width='100%' id='copyright'>\n";
     $VCopyright .= "<tr><th width='10%'>Count</th>";
     $VCopyright .= "<th width='10%'>Files</th>";
     $VCopyright .= "<th>Copyright</th></tr>\n";
@@ -136,7 +136,7 @@ class copyright_hist extends FO_Plugin
     $EmailCount = 0;
     $UniqueEmailCount = 0;
     $NoEmailFound = 0;
-    $VEmail .= "<table border=1 width='100%'>\n";
+    $VEmail .= "<table border=1 width='100%'id='copyrightemail'>\n";
     $VEmail .= "<tr><th width='10%'>Count</th>";
     $VEmail .= "<th width='10%'>Files</th>";
     $VEmail .= "<th>Email</th></tr>\n";
@@ -144,7 +144,7 @@ class copyright_hist extends FO_Plugin
     $UrlCount = 0;
     $UniqueUrlCount = 0;
     $NoUrlFound = 0;
-    $VUrl .= "<table border=1 width='100%'>\n";
+    $VUrl .= "<table border=1 width='100%' id='copyrighturl'>\n";
     $VUrl .= "<tr><th width='10%'>Count</th>";
     $VUrl .= "<th width='10%'>Files</th>";
     $VUrl .= "<th>URL</th></tr>\n";
