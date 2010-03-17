@@ -66,6 +66,8 @@ def main():
             help="File to be analyzed will be passed over the command line.")
     optparser.add_option("--setup-database", action="store_true",
             help="Creates the tables for copyright analysis that the fossology database needs.")
+    optparser.add_option("--drop", action="store_true",
+            help="Drops the tables before creating them for copyright analysis agent.")
     optparser.add_option("--agent", action="store_true",
             help="Starts up in agent mode. Files will be read from stdin.")
     optparser.add_option("-i", "--init", action="store_true",
@@ -83,10 +85,16 @@ def main():
         except:
             print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
             return 1
+
+        if db.access('SELECT count(ct_pk) FROM copyright;') != 1:
+            print >> sys.stderr, 'WARNING: Could not find copyright table. Will try to setup automatically. If you continue to have trouble try using %s --setup-database'
+
+            return setup_database()
+
         return 0
 
     if options.setup_database:
-        return(setup_database())
+        return(setup_database(options.drop))
 
     if not options.model:
         print >> sys.stderr, 'You must specify a model file for all phases of the algorithm.\n\n'
@@ -201,13 +209,24 @@ def agent(model):
     
     return 0
 
-def setup_database():
+def setup_database(drop=False):
     db = None
     try:
         db = libfosspython.FossDB()
     except:
         print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
         sys.exit(1)
+
+    if drop:
+        result = db.access("DROP TABLE copyright CASCADE;")
+        if result != 0:
+            print >> sys.stderr, "ERROR: Could not drop copyright."
+        result = db.access("DROP TYPE copyright_type;")
+        if result != 0:
+            print >> sys.stderr, "ERROR: Could not drop copyright_type."
+        result = db.access("DROP TYPE copyright_ct_pk_seq CASCADE;")
+        if result != 0:
+            print >> sys.stderr, "ERROR: Could not drop copyright_ct_pk_seq."
 
     result = db.access("CREATE SEQUENCE copyright_ct_pk_seq "
         "START WITH 1 "
@@ -217,6 +236,7 @@ def setup_database():
         "CACHE 1;")
     if result != 0:
         print >> sys.stderr, "ERROR: Couldn't create copyright_agent_fk_seq."
+        print >> sys.stderr, "\tTry using --drop"
 
     result = db.access("ALTER TABLE public.copyright_agent_fk_seq OWNER TO fossy;")
     if result != 0:
@@ -235,6 +255,7 @@ def setup_database():
         "copy_endbyte integer);")
     if result != 0:
         print >> sys.stderr, "ERROR: Couldn't create license table."
+        print >> sys.stderr, "\tTry using --drop"
 
     result = db.access("ALTER TABLE public.copyright OWNER TO fossy;")
     if result != 0:
