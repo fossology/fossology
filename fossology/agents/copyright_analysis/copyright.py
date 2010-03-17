@@ -86,10 +86,9 @@ def main():
             print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
             return 1
 
-        if db.access('SELECT count(ct_pk) FROM copyright;') != 1:
-            print >> sys.stderr, 'WARNING: Could not find copyright table. Will try to setup automatically. If you continue to have trouble try using %s --setup-database'
-
-            return setup_database()
+        tr = table_check(db)
+        if tr != 0:
+            return tr
 
         return 0
 
@@ -146,6 +145,10 @@ def agent(model):
         except:
             print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
             return 1
+
+        tr = table_check(db)
+        if tr != 0:
+            return tr
 
         if libfosspython.repOpen() != 1:
             print >> sys.stderr, 'ERROR: Something is broken. Could not open Repo.'
@@ -207,6 +210,13 @@ def agent(model):
 
     libfosspython.repClose()
     
+    return 0
+
+def table_check(db):
+    if db.access('SELECT count(ct_pk) FROM copyright;') != 1:
+        print >> sys.stderr, 'WARNING: Could not find copyright table. Will try to setup automatically. If you continue to have trouble try using %s --setup-database'
+
+        return setup_database()
     return 0
 
 def setup_database(drop=False):
