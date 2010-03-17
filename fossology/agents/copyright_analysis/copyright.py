@@ -245,14 +245,21 @@ def setup_database(drop=False):
         "NO MINVALUE "
         "CACHE 1;")
     if result != 0:
-        print >> sys.stderr, "ERROR: Couldn't create copyright_agent_fk_seq."
+        print >> sys.stderr, "ERROR: Couldn't create copyright_ct_pk_seq."
         print >> sys.stderr, "\tTry using --drop"
 
-    result = db.access("ALTER TABLE public.copyright_agent_fk_seq OWNER TO fossy;")
+    result = db.access("ALTER TABLE public.copyright_ct_pk_seq OWNER TO fossy;")
     if result != 0:
-        print >> sys.stderr, "ERROR: Couldn't alter copyright_agent_fk_seq."
+        print >> sys.stderr, "ERROR: Couldn't alter copyright_ct_pk_seq."
 
     result = db.access("CREATE TYPE copyright_type AS ENUM ('statement', 'email', 'url');")
+    if result != 0:
+        print >> sys.stderr, "ERROR: Couldn't create copyright_type."
+        print >> sys.stderr, "\tTry using --drop"
+
+    result = db.access("ALTER TYPE copyright_type OWNER TO fossy;")
+    if result != 0:
+        print >> sys.stderr, "ERROR: Couldn't alter copyright_type."
 
     result = db.access("CREATE TABLE copyright ( "
         "ct_pk bigint DEFAULT nextval('copyright_ct_pk_seq'::regclass) NOT NULL, "
