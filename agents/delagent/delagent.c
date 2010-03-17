@@ -267,12 +267,6 @@ void	DeleteUpload	(long UploadId)
 	   "WHERE pfile_fk = pfile_pk;",TempTable);
   MyDBaccess(DB,SQL);
 
-  /* delete the upload from agent_runstatus */
-  if (Verbose) { printf("# Deleting from agent_runstatus\n"); }
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"DELETE FROM ONLY agent_runstatus "
-		   "WHERE upload_fk = %ld;",UploadId);
-  MyDBaccess(DB,SQL);
   /***********************************************/
   /*** Everything above is slow, everything below is fast ***/
   /***********************************************/
