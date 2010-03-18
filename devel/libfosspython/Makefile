@@ -10,7 +10,7 @@ LIB=libfosspython.so
 
 all: $(LIB) $(VARS)
 
-$(LIB): $(DB) $(REPO) $(AGENTLIB)
+$(LIB): $(DB) $(REPO) $(AGENTLIB) libfosspython.pyx
 	python setup.py build_ext --inplace
 
 install: install-lib

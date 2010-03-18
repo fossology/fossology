@@ -14,6 +14,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import signal
+import re
 
 cdef extern from "../libfossagent/libfossagent.h":
     void InitHeartbeat()
@@ -50,20 +51,34 @@ def updateHeartbeat(newItemsProcessed):
     """
     Heartbeat(newItemsProcessed)
 
+cdef extern from "libpq-fe.h":
+    ctypedef struct PGconn
+    ctypedef struct PGresult
+    ctypedef struct PQresult
+    
+    void PQclear(PGresult *res)
+    int PQresultStatus(PGresult *res)
+
+ctypedef struct dbapi:
+    PGconn *Conn
+    PGresult *Res
+    int RowsAffected
+
 cdef extern from "../libfossdb/libfossdb.h":
     void *DBopen()
     void DBclose(void *VDB)
     void *DBmove(void *VDB)
     int DBaccess(void *VDB, char *SQL)
-    char *DBerrmsg	(void *VDB)
-    char *DBstatus  (void *VDB)
-    int DBdatasize  (void *VDB)
-    int DBcolsize   (void *VDB)
-    int DBrowsaffected  (void *VDB)
-    char *  DBgetcolname    (void *VDB, int Col)
-    int DBgetcolnum (void *VDB, char *ColName)
-    char *  DBgetvalue  (void *VDB, int Row, int Col)
-    int DBisnull    (void *VDB, int Row, int Col)
+    PGresult *DBaccess2(void *VDB, char *SQL)
+    char *DBerrmsg(void *VDB)
+    char *DBstatus(void *VDB)
+    int DBdatasize(void *VDB)
+    int DBcolsize(void *VDB)
+    int DBrowsaffected(void *VDB)
+    char *DBgetcolname(void *VDB, int Col)
+    int DBgetcolnum(void *VDB, char *ColName)
+    char *DBgetvalue(void *VDB, int Row, int Col)
+    int DBisnull(void *VDB, int Row, int Col)
 
 cdef class FossDB:
     """
@@ -125,13 +140,46 @@ cdef class FossDB:
         """
         return DBaccess(self.DB, sql)
 
+    def access2(self, sql):
+        """
+        FossDB.access2(sql) -> int (error id)
+
+        Write to the DB and read results.
+        Stripped down version of DBaccess without all the
+        error assumptions.
+
+         * where `sql' is a string.
+        """
+        cdef dbapi *DB
+        DB = <dbapi *>self.DB
+
+        if not DB or not sql:
+            return -1
+
+        if DB.Res:
+            PQclear(DB.Res)
+            DB.Res = NULL
+        
+        DB.Res = DBaccess2(self.DB, sql)
+        
+        if (DB.Res == NULL):
+            return -1
+
+        status = self.status()
+        if status in ['PGRES_COMMAND_OK', 'PGRES_EMPTY_QUERY', 'PGRES_COPY_IN', 'PGRES_COPY_OUT']:
+            return 0
+        elif status == 'PGRES_TUPLES_OK':
+            return 1
+
+        return -1
+
     def errmsg(self):
         """
         FossDB.errmsg() -> string (error message)
 
         Return the last error message or empty string if db not open or no result available
         """
-        return DBerrmsg(self.DB)
+        return re.sub('ERROR: +', '', DBerrmsg(self.DB)).rstrip()
 
     def status(self):
         """
