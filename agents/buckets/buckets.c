@@ -964,18 +964,10 @@ int main(int argc, char **argv)
   bucketDefArray->nomos_agent_pk = nomos_agent_pk;
   bucketDefArray->bucket_agent_pk = agent_pk;
 
-  /* process the tree for buckets */
-  /* all or nothing database update */
-  result = PQexec(pgConn, "begin");
-  if (checkPQcommand(result, "begin", __FILE__, __LINE__)) return -1;
-
   walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0, fileName);
   bucketList = getContainerBuckets(pgConn, bucketDefArray, head_uploadtree_pk);
   writeBuckets(pgConn, pfile_pk, head_uploadtree_pk, bucketList, agent_pk, 
                writeDB, bucketDefArray->nomos_agent_pk);
-
-  result = PQexec(pgConn, "commit");
-  if (checkPQcommand(result, "commit", __FILE__, __LINE__)) return -1;
 
   PQfinish(pgConn);
   return (0);
