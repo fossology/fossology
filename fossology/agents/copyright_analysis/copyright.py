@@ -169,13 +169,13 @@ def agent(model):
                 offsets = library.label_file(path,model)
                 text = open(path).read()
                 if len(offsets) == 0:
-                    result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
+                    result = db.access2("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
                         "VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement');" % (agent_pk, pfile))
                     if result != 0:
                         print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
                 else:
                     for i in range(len(offsets)):
-                        result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
+                        result = db.access2("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
                             "VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s');" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]]), hex(abs(hash(re.escape(text[offsets[i][0]:offsets[i][1]])))), offsets[i][2]))
                         if result != 0:
                             print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
@@ -213,10 +213,39 @@ def agent(model):
     return 0
 
 def table_check(db):
-    if db.access('SELECT count(ct_pk) FROM copyright;') != 1:
-        print >> sys.stderr, 'WARNING: Could not find copyright table. Will try to setup automatically. If you continue to have trouble try using %s --setup-database'
+    if db.access2('SELECT count(ct_pk) FROM copyright;') != 1:
+        error = db.errmsg()
+        if error == 'relation "copyright" does not exist':
+            print >> sys.stderr, 'WARNING: Could not find copyright table. Will try to setup automatically. If you continue to have trouble try using %s --setup-database' % sys.argv[0]
+            return setup_database()
 
-        return setup_database()
+        print >> sys.stderr, 'ERROR: Could not select table copyright. Database said: "%s"' % error
+    return -1
+
+def drop_database():
+    db = None
+    try:
+        db = libfosspython.FossDB()
+    except:
+        print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
+        sys.exit(1)
+
+    result = db.access2("DROP TABLE copyright CASCADE;")
+    if result != 0:
+        error = db.errmsg()
+        if error != 'table "copyright" does not exist':
+            print >> sys.stderr, "ERROR: Could not drop copyright. Database said: '%s'" % error
+    result = db.access2("DROP TYPE copyright_type;")
+    if result != 0:
+        error = db.errmsg()
+        if error != 'type "copyright_type" does not exist':
+            print >> sys.stderr, "ERROR: Could not drop copyright_type. Database said: '%s'" % error
+    result = db.access2("DROP SEQUENCE copyright_ct_pk_seq CASCADE;")
+    if result != 0:
+        error = db.errmsg()
+        if error != 'sequence "copyright_ct_pk_seq" does not exist':
+            print >> sys.stderr, "ERROR: Could not drop copyright_ct_pk_seq. Database said: '%s'" % error
+    
     return 0
 
 def setup_database(drop=False):
@@ -228,40 +257,47 @@ def setup_database(drop=False):
         sys.exit(1)
 
     if drop:
-        result = db.access("DROP TABLE copyright CASCADE;")
-        if result != 0:
-            print >> sys.stderr, "ERROR: Could not drop copyright."
-        result = db.access("DROP TYPE copyright_type;")
-        if result != 0:
-            print >> sys.stderr, "ERROR: Could not drop copyright_type."
-        result = db.access("DROP TYPE copyright_ct_pk_seq CASCADE;")
-        if result != 0:
-            print >> sys.stderr, "ERROR: Could not drop copyright_ct_pk_seq."
+        drop_database()
 
-    result = db.access("CREATE SEQUENCE copyright_ct_pk_seq "
-        "START WITH 1 "
-        "INCREMENT BY 1 "
-        "NO MAXVALUE "
-        "NO MINVALUE "
+    #
+    exists = False
+    result = db.access2("CREATE SEQUENCE copyright_ct_pk_seq "
+        "START WITH 1 INCREMENT BY 1 NO MAXVALUE NO MINVALUE "
         "CACHE 1;")
     if result != 0:
-        print >> sys.stderr, "ERROR: Couldn't create copyright_ct_pk_seq."
-        print >> sys.stderr, "\tTry using --drop"
+        error = db.errmsg()
+        if error != 'relation "copyright_ct_pk_seq" already exists':
+            print >> sys.stderr, "ERROR: Could not create copyright_ct_pk_seq. Database said: '%s'" % error
+            return -1
+        else:
+            exists = True
+    
+    if not exists:
+        result = db.access2("ALTER TABLE public.copyright_ct_pk_seq OWNER TO fossy;")
+        if result != 0:
+            error = db.errmsg()
+            print >> sys.stderr, "ERROR: Could not alter copyright_ct_pk_seq. Database said: '%s'" % error
+            return -1
 
-    result = db.access("ALTER TABLE public.copyright_ct_pk_seq OWNER TO fossy;")
+    exists = False
+    result = db.access2("CREATE TYPE copyright_type AS ENUM ('statement', 'email', 'url');")
     if result != 0:
-        print >> sys.stderr, "ERROR: Couldn't alter copyright_ct_pk_seq."
+        error = db.errmsg()
+        if error != 'type "copyright_type" already exists':
+            print >> sys.stderr, "ERROR: Could not create copyright_type. Database said: '%s'" % error
+            return -1
+        else:
+            exists = True
 
-    result = db.access("CREATE TYPE copyright_type AS ENUM ('statement', 'email', 'url');")
-    if result != 0:
-        print >> sys.stderr, "ERROR: Couldn't create copyright_type."
-        print >> sys.stderr, "\tTry using --drop"
+    if not exists:
+        result = db.access2("ALTER TYPE copyright_type OWNER TO fossy;")
+        if result != 0:
+            error = db.errmsg()
+            print >> sys.stderr, "ERROR: Could not alter copyright_type. Database said: '%s'" % error
+            return -1
 
-    result = db.access("ALTER TYPE copyright_type OWNER TO fossy;")
-    if result != 0:
-        print >> sys.stderr, "ERROR: Couldn't alter copyright_type."
-
-    result = db.access("CREATE TABLE copyright ( "
+    exists = False
+    result = db.access2("CREATE TABLE copyright ( "
         "ct_pk bigint DEFAULT nextval('copyright_ct_pk_seq'::regclass) NOT NULL, "
         "agent_fk bigint NOT NULL, "
         "pfile_fk bigint NOT NULL, "
@@ -271,26 +307,39 @@ def setup_database(drop=False):
         "copy_startbyte integer, "
         "copy_endbyte integer);")
     if result != 0:
-        print >> sys.stderr, "ERROR: Couldn't create license table."
-        print >> sys.stderr, "\tTry using --drop"
+        error = db.errmsg()
+        if error != 'relation "copyright" already exists':
+            print >> sys.stderr, "ERROR: Could not create table copyright. Database said: '%s'" % error
+            return -1
+        else:
+            exists = True
 
-    result = db.access("ALTER TABLE public.copyright OWNER TO fossy;")
-    if result != 0:
-        print >> sys.stderr, "ERROR: Couldn't alter copyright table."
+    if not exists:
+        result = db.access2("ALTER TABLE public.copyright OWNER TO fossy;")
+        if result != 0:
+            error = db.errmsg()
+            print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            return -1
 
-    result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
-            "copyright_pkey PRIMARY KEY (ct_pk);")
-    if result != 0:
-        print >> sys.stderr, "ERROR: Couldn't add constraint 'pfile' to copyright table."
-    
-    result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
-            "pfile_fk FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk);")
-    if result != 0:
-        print >> sys.stderr, "ERROR: Couldn't add constraint 'pfile' to copyright table."
-    
-    result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
-            "agent_fk FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);")
-    if result != 0:
-        print >> sys.stderr, "ERROR: Couldn't add constraint 'pfile' to copyright table."
+        result = db.access2("ALTER TABLE ONLY copyright ADD CONSTRAINT "
+                "copyright_pkey PRIMARY KEY (ct_pk);")
+        if result != 0:
+            error = db.errmsg()
+            print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            return -1
+        
+        result = db.access2("ALTER TABLE ONLY copyright ADD CONSTRAINT "
+                "pfile_fk FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk);")
+        if result != 0:
+            error = db.errmsg()
+            print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            return -1
+        
+        result = db.access2("ALTER TABLE ONLY copyright ADD CONSTRAINT "
+                "agent_fk FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);")
+        if result != 0:
+            error = db.errmsg()
+            print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            return -1
 
 if __name__ == '__main__':
