@@ -964,10 +964,22 @@ int main(int argc, char **argv)
   bucketDefArray->nomos_agent_pk = nomos_agent_pk;
   bucketDefArray->bucket_agent_pk = agent_pk;
 
+   /* process the tree for buckets 
+      Do this as a single transaction, therefore this agent must be 
+      run as a single thread.  This will prevent the scheduler from
+      consuming excess time (this is a fast agent), and allow this
+      process to update bucket_ars.
+    */
+   result = PQexec(pgConn, "begin");
+   if (checkPQcommand(result, "begin", __FILE__, __LINE__)) return -1;
+
   walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0, fileName);
   bucketList = getContainerBuckets(pgConn, bucketDefArray, head_uploadtree_pk);
   writeBuckets(pgConn, pfile_pk, head_uploadtree_pk, bucketList, agent_pk, 
                writeDB, bucketDefArray->nomos_agent_pk);
+
+   result = PQexec(pgConn, "commit");
+   if (checkPQcommand(result, "commit", __FILE__, __LINE__)) return -1;
 
   PQfinish(pgConn);
   return (0);
