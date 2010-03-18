@@ -1054,18 +1054,7 @@ int main(int argc, char **argv) {
     if (file_count == 0) {
         char *repFile;
 
-        /*
-         We're being run from the scheduler
-
-         \todo need to add:
-         1. insert into agent_runstatus that we have started: agent_pk and
-         upload_fk, ars_ts? (ask bob)
-         2. need to complete recordScanToDb
-         3. need to insert into agent_runstatus:
-         - if complete (no error) set ars_complete to true
-         - if setting ars_complete, set ars_ts
-         - Error? set ars_status with the error text.
-         */
+        /* We're being run from the scheduler */
         /* DEBUG printf("   LOG: nomos agent starting up in scheduler mode....\n"); */
         schedulerMode = 1;
         signal(SIGALRM, ShowHeartbeat);
