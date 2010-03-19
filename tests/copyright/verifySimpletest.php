@@ -19,7 +19,7 @@
 /**
  * Verify special fossology test archive loaded correctly
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on March 17, 2010
  */
