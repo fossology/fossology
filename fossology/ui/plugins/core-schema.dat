@@ -5,6 +5,7 @@
   global $GlobalReady;
   if (!isset($GlobalReady)) { exit; }
 
+  global $DATADIR;
   $Schema=array();
   $Schema["TABLE"]["agent"]["agent_pk"]["DESC"] = "COMMENT ON COLUMN \"agent\".\"agent_pk\" IS 'Primary key';";
   $Schema["TABLE"]["agent"]["agent_pk"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_pk\" int4;";
@@ -247,62 +248,66 @@
   $Schema["TABLE"]["attrib"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"attrib\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
 
 
-  $Schema["TABLE"]["bucket"]["bucket_pk"]["DESC"] = "";
-  $Schema["TABLE"]["bucket"]["bucket_pk"]["ADD"] = "ALTER TABLE \"bucket\" ADD COLUMN \"bucket_pk\" int4;";
-  $Schema["TABLE"]["bucket"]["bucket_pk"]["ALTER"] = "ALTER TABLE \"bucket\" ALTER COLUMN \"bucket_pk\" SET NOT NULL, ALTER COLUMN \"bucket_pk\" SET DEFAULT nextval('bucket_bucket_pk_seq'::regclass);";
-
-  $Schema["TABLE"]["bucket"]["bucket_name"]["DESC"] = "";
-  $Schema["TABLE"]["bucket"]["bucket_name"]["ADD"] = "ALTER TABLE \"bucket\" ADD COLUMN \"bucket_name\" text;";
-  $Schema["TABLE"]["bucket"]["bucket_name"]["ALTER"] = "ALTER TABLE \"bucket\" ALTER COLUMN \"bucket_name\" SET NOT NULL;";
-
-  $Schema["TABLE"]["bucket"]["bucket_color"]["DESC"] = "COMMENT ON COLUMN \"bucket\".\"bucket_color\" IS 'color name or value.  eg \"red\" or \"#fe0922\", used to highlight reports, may also be ''url''';";
-  $Schema["TABLE"]["bucket"]["bucket_color"]["ADD"] = "ALTER TABLE \"bucket\" ADD COLUMN \"bucket_color\" text;";
-  $Schema["TABLE"]["bucket"]["bucket_color"]["ALTER"] = "ALTER TABLE \"bucket\" ALTER COLUMN \"bucket_color\" SET NOT NULL, ALTER COLUMN \"bucket_color\" SET DEFAULT 'yellow'::text;";
-
-  $Schema["TABLE"]["bucket"]["bucket_reportorder"]["DESC"] = "COMMENT ON COLUMN \"bucket\".\"bucket_reportorder\" IS 'sort order (ascending) for reporting this bucket';";
-  $Schema["TABLE"]["bucket"]["bucket_reportorder"]["ADD"] = "ALTER TABLE \"bucket\" ADD COLUMN \"bucket_reportorder\" int4;";
-  $Schema["TABLE"]["bucket"]["bucket_reportorder"]["ALTER"] = "ALTER TABLE \"bucket\" ALTER COLUMN \"bucket_reportorder\" SET NOT NULL, ALTER COLUMN \"bucket_reportorder\" SET DEFAULT 50;";
-
-  $Schema["TABLE"]["bucket"]["bucket_evalorder"]["DESC"] = "COMMENT ON COLUMN \"bucket\".\"bucket_evalorder\" IS 'sort order (ascending) for evaluating this bucket relative to the others in the pool.';";
-  $Schema["TABLE"]["bucket"]["bucket_evalorder"]["ADD"] = "ALTER TABLE \"bucket\" ADD COLUMN \"bucket_evalorder\" int4;";
-  $Schema["TABLE"]["bucket"]["bucket_evalorder"]["ALTER"] = "ALTER TABLE \"bucket\" ALTER COLUMN \"bucket_evalorder\" SET NOT NULL, ALTER COLUMN \"bucket_evalorder\" SET DEFAULT 50;";
-
-  $Schema["TABLE"]["bucket"]["bucketpool_fk"]["DESC"] = "";
-  $Schema["TABLE"]["bucket"]["bucketpool_fk"]["ADD"] = "ALTER TABLE \"bucket\" ADD COLUMN \"bucketpool_fk\" int4;";
-  $Schema["TABLE"]["bucket"]["bucketpool_fk"]["ALTER"] = "ALTER TABLE \"bucket\" ALTER COLUMN \"bucketpool_fk\" SET NOT NULL;";
-
-  $Schema["TABLE"]["bucket"]["bucket_type"]["DESC"] = "COMMENT ON COLUMN \"bucket\".\"bucket_type\" IS '1=MATCH_EVERY (aka STR-FILE), 2=MATCH_ONLY (aka COMP-FILE), 3=REGEX, 4=exec, 99=Not in any other bucket';";
-  $Schema["TABLE"]["bucket"]["bucket_type"]["ADD"] = "ALTER TABLE \"bucket\" ADD COLUMN \"bucket_type\" int4;";
-  $Schema["TABLE"]["bucket"]["bucket_type"]["ALTER"] = "ALTER TABLE \"bucket\" ALTER COLUMN \"bucket_type\" SET NOT NULL;";
-
-  $Schema["TABLE"]["bucket"]["bucket_regex"]["DESC"] = "COMMENT ON COLUMN \"bucket\".\"bucket_regex\" IS 'if type=3, this is the regex, else null';";
-  $Schema["TABLE"]["bucket"]["bucket_regex"]["ADD"] = "ALTER TABLE \"bucket\" ADD COLUMN \"bucket_regex\" text;";
-  $Schema["TABLE"]["bucket"]["bucket_regex"]["ALTER"] = "ALTER TABLE \"bucket\" ALTER COLUMN \"bucket_regex\" DROP NOT NULL;";
-
-  $Schema["TABLE"]["bucket"]["bucket_filename"]["DESC"] = "COMMENT ON COLUMN \"bucket\".\"bucket_filename\" IS 'if type != 3, this is the name of the file in $DATADIR/{bucketpool name}';";
-  $Schema["TABLE"]["bucket"]["bucket_filename"]["ADD"] = "ALTER TABLE \"bucket\" ADD COLUMN \"bucket_filename\" text;";
-  $Schema["TABLE"]["bucket"]["bucket_filename"]["ALTER"] = "ALTER TABLE \"bucket\" ALTER COLUMN \"bucket_filename\" DROP NOT NULL;";
-
-  $Schema["TABLE"]["bucket"]["stopon"]["DESC"] = "COMMENT ON COLUMN \"bucket\".\"stopon\" IS 'if ''N'' continue evaluating buckets even if this one matches.  If ''Y'' stop bucket processing loop if this matches';";
-  $Schema["TABLE"]["bucket"]["stopon"]["ADD"] = "ALTER TABLE \"bucket\" ADD COLUMN \"stopon\" char(1);";
-  $Schema["TABLE"]["bucket"]["stopon"]["ALTER"] = "ALTER TABLE \"bucket\" ALTER COLUMN \"stopon\" SET NOT NULL, ALTER COLUMN \"stopon\" SET DEFAULT 'N'::char;";
-
-
-  $Schema["TABLE"]["bucket_container"]["bcon_pk"]["DESC"] = "";
-  $Schema["TABLE"]["bucket_container"]["bcon_pk"]["ADD"] = "ALTER TABLE \"bucket_container\" ADD COLUMN \"bcon_pk\" int4;";
-  $Schema["TABLE"]["bucket_container"]["bcon_pk"]["ALTER"] = "ALTER TABLE \"bucket_container\" ALTER COLUMN \"bcon_pk\" SET NOT NULL, ALTER COLUMN \"bcon_pk\" SET DEFAULT nextval('bucket_container_bcon_pk_seq'::regclass);";
-
-  $Schema["TABLE"]["bucket_container"]["uploadtree_fk"]["DESC"] = "";
-  $Schema["TABLE"]["bucket_container"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"bucket_container\" ADD COLUMN \"uploadtree_fk\" int4;";
-  $Schema["TABLE"]["bucket_container"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"bucket_container\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL;";
-
   $Schema["TABLE"]["bucket_container"]["bucket_fk"]["DESC"] = "";
   $Schema["TABLE"]["bucket_container"]["bucket_fk"]["ADD"] = "ALTER TABLE \"bucket_container\" ADD COLUMN \"bucket_fk\" int4;";
   $Schema["TABLE"]["bucket_container"]["bucket_fk"]["ALTER"] = "ALTER TABLE \"bucket_container\" ALTER COLUMN \"bucket_fk\" SET NOT NULL;";
 
-  $Schema["TABLE"]["bucket_container"]["bucket_agent_fk"]["DESC"] = "";
-  $Schema["TABLE"]["bucket_container"]["bucket_agent_fk"]["ADD"] = "ALTER TABLE \"bucket_container\" ADD COLUMN \"bucket_agent_fk\" int4;";
-  $Schema["TABLE"]["bucket_container"]["bucket_agent_fk"]["ALTER"] = "ALTER TABLE \"bucket_container\" ALTER COLUMN \"bucket_agent_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["bucket_container"]["agent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_container"]["agent_fk"]["ADD"] = "ALTER TABLE \"bucket_container\" ADD COLUMN \"agent_fk\" int4;";
+  $Schema["TABLE"]["bucket_container"]["agent_fk"]["ALTER"] = "ALTER TABLE \"bucket_container\" ALTER COLUMN \"agent_fk\" SET NOT NULL;";
+
+  $Schema["TABLE"]["bucket_container"]["uploadtree_fk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_container"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"bucket_container\" ADD COLUMN \"uploadtree_fk\" int4;";
+  $Schema["TABLE"]["bucket_container"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"bucket_container\" ALTER COLUMN \"uploadtree_fk\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["bucket_container"]["bf_pk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_container"]["bf_pk"]["ADD"] = "ALTER TABLE \"bucket_container\" ADD COLUMN \"bf_pk\" int4;";
+  $Schema["TABLE"]["bucket_container"]["bf_pk"]["ALTER"] = "ALTER TABLE \"bucket_container\" ALTER COLUMN \"bf_pk\" SET NOT NULL, ALTER COLUMN \"bf_pk\" SET DEFAULT nextval('bucket_container_bf_pk_seq'::regclass);";
+
+  $Schema["TABLE"]["bucket_container"]["nomosagent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_container"]["nomosagent_fk"]["ADD"] = "ALTER TABLE \"bucket_container\" ADD COLUMN \"nomosagent_fk\" int4;";
+  $Schema["TABLE"]["bucket_container"]["nomosagent_fk"]["ALTER"] = "ALTER TABLE \"bucket_container\" ALTER COLUMN \"nomosagent_fk\" SET NOT NULL;";
+
+
+  $Schema["TABLE"]["bucket_def"]["bucket_pk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_def"]["bucket_pk"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucket_pk\" int4;";
+  $Schema["TABLE"]["bucket_def"]["bucket_pk"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucket_pk\" SET NOT NULL, ALTER COLUMN \"bucket_pk\" SET DEFAULT nextval('bucket_bucket_pk_seq'::regclass);";
+
+  $Schema["TABLE"]["bucket_def"]["bucket_name"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_def"]["bucket_name"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucket_name\" text;";
+  $Schema["TABLE"]["bucket_def"]["bucket_name"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucket_name\" SET NOT NULL;";
+
+  $Schema["TABLE"]["bucket_def"]["bucket_color"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"bucket_color\" IS 'color name or value.  eg \"red\" or \"#fe0922\", used to highlight reports, may also be ''url''';";
+  $Schema["TABLE"]["bucket_def"]["bucket_color"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucket_color\" text;";
+  $Schema["TABLE"]["bucket_def"]["bucket_color"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucket_color\" SET NOT NULL, ALTER COLUMN \"bucket_color\" SET DEFAULT 'yellow'::text;";
+
+  $Schema["TABLE"]["bucket_def"]["bucket_reportorder"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"bucket_reportorder\" IS 'sort order (ascending) for reporting this bucket';";
+  $Schema["TABLE"]["bucket_def"]["bucket_reportorder"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucket_reportorder\" int4;";
+  $Schema["TABLE"]["bucket_def"]["bucket_reportorder"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucket_reportorder\" SET NOT NULL, ALTER COLUMN \"bucket_reportorder\" SET DEFAULT 50;";
+
+  $Schema["TABLE"]["bucket_def"]["bucket_evalorder"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"bucket_evalorder\" IS 'sort order (ascending) for evaluating this bucket relative to the others in the pool.';";
+  $Schema["TABLE"]["bucket_def"]["bucket_evalorder"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucket_evalorder\" int4;";
+  $Schema["TABLE"]["bucket_def"]["bucket_evalorder"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucket_evalorder\" SET NOT NULL, ALTER COLUMN \"bucket_evalorder\" SET DEFAULT 50;";
+
+  $Schema["TABLE"]["bucket_def"]["bucketpool_fk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_def"]["bucketpool_fk"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucketpool_fk\" int4;";
+  $Schema["TABLE"]["bucket_def"]["bucketpool_fk"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucketpool_fk\" SET NOT NULL;";
+
+  $Schema["TABLE"]["bucket_def"]["bucket_type"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"bucket_type\" IS '1=MATCH_EVERY (aka STR-FILE), 2=MATCH_ONLY (aka COMP-FILE), 3=REGEX, 4=exec, 99=Not in any other bucket';";
+  $Schema["TABLE"]["bucket_def"]["bucket_type"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucket_type\" int4;";
+  $Schema["TABLE"]["bucket_def"]["bucket_type"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucket_type\" SET NOT NULL;";
+
+  $Schema["TABLE"]["bucket_def"]["bucket_regex"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"bucket_regex\" IS 'if type=3, this is the regex, else null';";
+  $Schema["TABLE"]["bucket_def"]["bucket_regex"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucket_regex\" text;";
+  $Schema["TABLE"]["bucket_def"]["bucket_regex"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucket_regex\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["bucket_def"]["bucket_filename"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"bucket_filename\" IS 'if type != 3, this is the name of the file in $DATADIR/{bucketpool name}';";
+  $Schema["TABLE"]["bucket_def"]["bucket_filename"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucket_filename\" text;";
+  $Schema["TABLE"]["bucket_def"]["bucket_filename"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucket_filename\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["bucket_def"]["stopon"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"stopon\" IS 'if ''N'' continue evaluating buckets even if this one matches.  If ''Y'' stop bucket processing loop if this matches';";
+  $Schema["TABLE"]["bucket_def"]["stopon"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"stopon\" char(1);";
+  $Schema["TABLE"]["bucket_def"]["stopon"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"stopon\" SET NOT NULL, ALTER COLUMN \"stopon\" SET DEFAULT 'N'::char;";
 
 
   $Schema["TABLE"]["bucket_file"]["bf_pk"]["DESC"] = "";
@@ -315,11 +320,15 @@
 
   $Schema["TABLE"]["bucket_file"]["pfile_fk"]["DESC"] = "";
   $Schema["TABLE"]["bucket_file"]["pfile_fk"]["ADD"] = "ALTER TABLE \"bucket_file\" ADD COLUMN \"pfile_fk\" int4;";
-  $Schema["TABLE"]["bucket_file"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"bucket_file\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["bucket_file"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"bucket_file\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
 
-  $Schema["TABLE"]["bucket_file"]["bucket_agent_fk"]["DESC"] = "";
-  $Schema["TABLE"]["bucket_file"]["bucket_agent_fk"]["ADD"] = "ALTER TABLE \"bucket_file\" ADD COLUMN \"bucket_agent_fk\" int4;";
-  $Schema["TABLE"]["bucket_file"]["bucket_agent_fk"]["ALTER"] = "ALTER TABLE \"bucket_file\" ALTER COLUMN \"bucket_agent_fk\" SET NOT NULL;";
+  $Schema["TABLE"]["bucket_file"]["agent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_file"]["agent_fk"]["ADD"] = "ALTER TABLE \"bucket_file\" ADD COLUMN \"agent_fk\" int4;";
+  $Schema["TABLE"]["bucket_file"]["agent_fk"]["ALTER"] = "ALTER TABLE \"bucket_file\" ALTER COLUMN \"agent_fk\" SET NOT NULL;";
+
+  $Schema["TABLE"]["bucket_file"]["nomosagent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_file"]["nomosagent_fk"]["ADD"] = "ALTER TABLE \"bucket_file\" ADD COLUMN \"nomosagent_fk\" int4;";
+  $Schema["TABLE"]["bucket_file"]["nomosagent_fk"]["ALTER"] = "ALTER TABLE \"bucket_file\" ALTER COLUMN \"nomosagent_fk\" SET NOT NULL;";
 
 
   $Schema["TABLE"]["bucketpool"]["bucketpool_pk"]["DESC"] = "";
@@ -1191,14 +1200,14 @@
   $Schema["SEQUENCE"]["report_cache_user_report_cache_user_pk_seq"] = "CREATE SEQUENCE \"report_cache_user_report_cache_user_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["sqlagentproc_sap_pk_seq"] = "CREATE SEQUENCE \"sqlagentproc_sap_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["users_user_pk_seq"] = "CREATE SEQUENCE \"users_user_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["bucket_file_bf_pk_seq"] = "CREATE SEQUENCE \"bucket_file_bf_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_rpm_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_pkg_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["bucketpool_bucketpool_pk_seq"] = "CREATE SEQUENCE \"bucketpool_bucketpool_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["bucket_bucket_pk_seq"] = "CREATE SEQUENCE \"bucket_bucket_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["bucket_container_bcon_pk_seq"] = "CREATE SEQUENCE \"bucket_container_bcon_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_rpm_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_req_req_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_deb_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_pkg_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_deb_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_req_req_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["bucket_container_bf_pk_seq"] = "CREATE SEQUENCE \"bucket_container_bf_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["bucket_file_bf_pk_seq"] = "CREATE SEQUENCE \"bucket_file_bf_pk_seq\" START 1;";
 
   $Schema["CONSTRAINT"]["FileLicense_pkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"FileLicense_pkey\" PRIMARY KEY (\"fl_pk\");";
   $Schema["CONSTRAINT"]["agent_lic_meta_pkey"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"agent_lic_meta_pkey\" PRIMARY KEY (\"agent_lic_meta_pk\");";
@@ -1206,9 +1215,9 @@
   $Schema["CONSTRAINT"]["agent_runstatus_pkey"] = "ALTER TABLE \"agent_runstatus\" ADD CONSTRAINT \"agent_runstatus_pkey\" PRIMARY KEY (\"ars_pk\");";
   $Schema["CONSTRAINT"]["attachments_pkey"] = "ALTER TABLE \"attachments\" ADD CONSTRAINT \"attachments_pkey\" PRIMARY KEY (\"attachment_pk\");";
   $Schema["CONSTRAINT"]["attrib_pkey"] = "ALTER TABLE \"attrib\" ADD CONSTRAINT \"attrib_pkey\" PRIMARY KEY (\"attrib_pk\");";
-  $Schema["CONSTRAINT"]["bucket_container_pkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_pkey\" PRIMARY KEY (\"bcon_pk\");";
+  $Schema["CONSTRAINT"]["bucket_container_pkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_pkey\" PRIMARY KEY (\"bf_pk\");";
   $Schema["CONSTRAINT"]["bucket_file_pkey"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_pkey\" PRIMARY KEY (\"bf_pk\");";
-  $Schema["CONSTRAINT"]["bucket_pkey"] = "ALTER TABLE \"bucket\" ADD CONSTRAINT \"bucket_pkey\" PRIMARY KEY (\"bucket_pk\");";
+  $Schema["CONSTRAINT"]["bucket_pkey"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucket_pkey\" PRIMARY KEY (\"bucket_pk\");";
   $Schema["CONSTRAINT"]["bucketpool_pkey"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_pkey\" PRIMARY KEY (\"bucketpool_pk\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
   $Schema["CONSTRAINT"]["foldercontents_pkey"] = "ALTER TABLE \"foldercontents\" ADD CONSTRAINT \"foldercontents_pkey\" PRIMARY KEY (\"foldercontents_pk\");";
@@ -1265,11 +1274,13 @@
   $Schema["CONSTRAINT"]["agent_lic_status_pfile_fk_fkey"] = "ALTER TABLE \"agent_lic_status\" ADD CONSTRAINT \"agent_lic_status_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["attrib_attrib_key_fk_fkey"] = "ALTER TABLE \"attrib\" ADD CONSTRAINT \"attrib_attrib_key_fk_fkey\" FOREIGN KEY (\"attrib_key_fk\") REFERENCES \"key\" (\"key_pk\");";
   $Schema["CONSTRAINT"]["attrib_pfile_fk_fkey"] = "ALTER TABLE \"attrib\" ADD CONSTRAINT \"attrib_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
-  $Schema["CONSTRAINT"]["bcon_bucket_agent_fk"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bcon_bucket_agent_fk\" FOREIGN KEY (\"bucket_agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
-  $Schema["CONSTRAINT"]["bcon_bucket_fk"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bcon_bucket_fk\" FOREIGN KEY (\"bucket_fk\") REFERENCES \"bucket\" (\"bucket_pk\");";
-  $Schema["CONSTRAINT"]["bcon_uploadtree_fk"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bcon_uploadtree_fk\" FOREIGN KEY (\"uploadtree_fk\") REFERENCES \"uploadtree\" (\"uploadtree_pk\");";
-  $Schema["CONSTRAINT"]["bucket_fk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_fk\" FOREIGN KEY (\"bucket_fk\") REFERENCES \"bucket\" (\"bucket_pk\");";
-  $Schema["CONSTRAINT"]["bucketpool_fk"] = "ALTER TABLE \"bucket\" ADD CONSTRAINT \"bucketpool_fk\" FOREIGN KEY (\"bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\");";
+  $Schema["CONSTRAINT"]["bf_bucket_agent_fk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bf_bucket_agent_fk\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
+  $Schema["CONSTRAINT"]["bucket_container_agent_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
+  $Schema["CONSTRAINT"]["bucket_container_bucket_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_bucket_fk_fkey\" FOREIGN KEY (\"bucket_fk\") REFERENCES \"bucket_def\" (\"bucket_pk\");";
+  $Schema["CONSTRAINT"]["bucket_container_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
+  $Schema["CONSTRAINT"]["bucket_container_uploadtree_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_uploadtree_fk_fkey\" FOREIGN KEY (\"uploadtree_fk\") REFERENCES \"uploadtree\" (\"uploadtree_pk\");";
+  $Schema["CONSTRAINT"]["bucket_fk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_fk\" FOREIGN KEY (\"bucket_fk\") REFERENCES \"bucket_def\" (\"bucket_pk\");";
+  $Schema["CONSTRAINT"]["bucketpool_fk"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucketpool_fk\" FOREIGN KEY (\"bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\");";
   $Schema["CONSTRAINT"]["jdep_depends_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_depends_jq_fk\" FOREIGN KEY (\"jdep_jq_depends_fk\") REFERENCES \"jobqueue\" (\"jq_pk\");";
   $Schema["CONSTRAINT"]["jdep_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_jq_fk\" FOREIGN KEY (\"jdep_jq_fk\") REFERENCES \"jobqueue\" (\"jq_pk\");";
   $Schema["CONSTRAINT"]["job_job_folder_fk_fkey"] = "ALTER TABLE \"job\" ADD CONSTRAINT \"job_job_folder_fk_fkey\" FOREIGN KEY (\"job_folder_fk\") REFERENCES \"folder\" (\"folder_pk\");";
@@ -1287,6 +1298,7 @@
   $Schema["CONSTRAINT"]["ltagent"] = "ALTER TABLE \"license_test\" ADD CONSTRAINT \"ltagent\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
   $Schema["CONSTRAINT"]["ltpfile"] = "ALTER TABLE \"license_test\" ADD CONSTRAINT \"ltpfile\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["mimetype_fk"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"mimetype_fk\" FOREIGN KEY (\"pfile_mimetypefk\") REFERENCES \"mimetype\" (\"mimetype_pk\");";
+  $Schema["CONSTRAINT"]["nomosagentpk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"nomosagentpk\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
   $Schema["CONSTRAINT"]["pfile_fk"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"pfile_fk\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_fkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["pkg_deb_req_pkg_fk_fkey"] = "ALTER TABLE \"pkg_deb_req\" ADD CONSTRAINT \"pkg_deb_req_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_deb\" (\"pkg_pk\");";
@@ -1307,7 +1319,7 @@
   $Schema["INDEX"]["attrib"]["attrib_key_fk_idx"] = "CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk);";
   $Schema["INDEX"]["attrib"]["attrib_pfile_fk_idx"] = "CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk);";
 
-  $Schema["INDEX"]["bucket_file"]["bf_unique"] = "CREATE UNIQUE INDEX bf_unique ON bucket_file USING btree (bucket_fk, pfile_fk, bucket_agent_fk);";
+  $Schema["INDEX"]["bucket_file"]["bf_unique"] = "CREATE UNIQUE INDEX bf_unique ON bucket_file USING btree (bucket_fk, pfile_fk, agent_fk);";
 
   $Schema["INDEX"]["license_file"]["fl_rf_fk"] = "CREATE INDEX fl_rf_fk ON license_file USING btree (rf_fk);";
   $Schema["INDEX"]["license_file"]["lf_pfile_fk"] = "CREATE INDEX lf_pfile_fk ON license_file USING btree (pfile_fk);";
