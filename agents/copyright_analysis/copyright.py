@@ -74,10 +74,11 @@ def main():
             help="Creates a connection to the database and quits.")
     optparser.add_option("-v", "--verbose", action="store_true",
             help="")
+    optparser.add_option("--version", action="store_true",
+            help="Print the version ids for the model and source.")
 
     (options, args) = optparser.parse_args()
     
-    print "Source hash: %s" % hex(abs(hash(open(sys.argv[0]).read())))
     if options.init:
         db = None
         try:
@@ -108,12 +109,15 @@ def main():
 
     try:
         model = pickle.load(open(options.model))
-        print 'Model hash: %s' % (model['id'])
     except:
         print >> sys.stderr, 'You must specify a training file to create a model.\n\n'
         optparser.print_usage()
         sys.exit(1)
 
+    if options.version:
+        print "Source hash: %s" % hex(abs(hash(open(sys.argv[0]).read())))
+        print 'Model hash: %s' % (model['id'])
+    
     if options.analyze_from_file:
         files = [line.rstrip() for line in open(options.analyze_from_file).readlines()]
         for file in files:
@@ -220,7 +224,8 @@ def table_check(db):
             return setup_database()
 
         print >> sys.stderr, 'ERROR: Could not select table copyright. Database said: "%s"' % error
-    return -1
+        return -1
+    return 0
 
 def drop_database():
     db = None
@@ -235,11 +240,6 @@ def drop_database():
         error = db.errmsg()
         if error != 'table "copyright" does not exist':
             print >> sys.stderr, "ERROR: Could not drop copyright. Database said: '%s'" % error
-    result = db.access2("DROP TYPE copyright_type;")
-    if result != 0:
-        error = db.errmsg()
-        if error != 'type "copyright_type" does not exist':
-            print >> sys.stderr, "ERROR: Could not drop copyright_type. Database said: '%s'" % error
     result = db.access2("DROP SEQUENCE copyright_ct_pk_seq CASCADE;")
     if result != 0:
         error = db.errmsg()
@@ -280,30 +280,14 @@ def setup_database(drop=False):
             return -1
 
     exists = False
-    result = db.access2("CREATE TYPE copyright_type AS ENUM ('statement', 'email', 'url');")
-    if result != 0:
-        error = db.errmsg()
-        if error != 'type "copyright_type" already exists':
-            print >> sys.stderr, "ERROR: Could not create copyright_type. Database said: '%s'" % error
-            return -1
-        else:
-            exists = True
-
-    if not exists:
-        result = db.access2("ALTER TYPE copyright_type OWNER TO fossy;")
-        if result != 0:
-            error = db.errmsg()
-            print >> sys.stderr, "ERROR: Could not alter copyright_type. Database said: '%s'" % error
-            return -1
-
-    exists = False
     result = db.access2("CREATE TABLE copyright ( "
         "ct_pk bigint DEFAULT nextval('copyright_ct_pk_seq'::regclass) NOT NULL, "
         "agent_fk bigint NOT NULL, "
         "pfile_fk bigint NOT NULL, "
         "content text, "
         "hash text, "
-        "type copyright_type NOT NULL, "
+        "type text CHECK (type in ('statement', 'email', 'url')), "
+        # "type copyright_type NOT NULL, "
         "copy_startbyte integer, "
         "copy_endbyte integer);")
     if result != 0:
