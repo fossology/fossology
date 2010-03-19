@@ -68,9 +68,11 @@ if((strlen($Filename)) == 0)
 
 // get db params and open connection to db.
 
-//echo "connecting to db randodb\n";
-$dbOptions = 'dbname=randodb user=rando password=rando';
+echo "connecting to db fossology-gold\n";
+$dbOptions = 'host=sirius.ostt dbname=fossology-gold user=fossy password=fossy';
 $PGCONN = dbConnect($dbOptions);
+
+echo "schemaEXDB: calling ExportSchema with filename:$Filename\n";
 
 $res = ExportSchema($Filename);
 
@@ -86,6 +88,7 @@ $res = ExportSchema($Filename);
 function ExportSchema($Filename = NULL) {
 	
 	global $Name;
+	global $PGCONN;
 	
 	if (empty($Filename)) {
 		$Filename = Filename;
@@ -100,7 +103,9 @@ function ExportSchema($Filename = NULL) {
 	fwrite($Fout, "/* Do not manually edit this file */\n\n");
 	fwrite($Fout, "  global \$GlobalReady;\n");
 	fwrite($Fout, "  if (!isset(\$GlobalReady)) { exit; }\n\n");
-	fwrite($Fout, '  $Schema=array();' . "\n");
+	fwrite($Fout, "  global \$DATADIR;\n\n");
+	fwrite($Fout, "  print \"datadir is:\$DATADIR\\n\";\n\n");
+	fwrite($Fout, '  $Schema=array();' . "\n\n");
 	foreach($Schema as $K1 => $V1) {
 		$K1 = str_replace('"', '\"', $K1);
 		$A1 = '  $Schema["' . $K1 . "\"]";
@@ -142,5 +147,6 @@ function ExportSchema($Filename = NULL) {
 	fwrite($Fout, "?>\n");
 	fclose($Fout);
 	print "Data written to $Filename\n";
+	return;
 } // ExportSchema()
 ?>

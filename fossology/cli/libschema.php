@@ -581,11 +581,13 @@ function dbConnect($Options="")
 	$path="$SYSCONFDIR/$PROJECT/Db.conf";
 	if (empty($Options))
 	{
-		$PGCONN = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
+		//$PGCONN = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
+		$PGCONN = pg_connect(str_replace(";", " ", file_get_contents($path)));
 	}
 	else
 	{
-		$PGCONN = pg_pconnect(str_replace(";", " ", $Options));
+		//$PGCONN = pg_pconnect(str_replace(";", " ", $Options));
+		$PGCONN = pg_connect(str_replace(";", " ", $Options));
 	}
 	if (!isset($PGCONN)) die ("connection to db failed\n");
 	return($PGCONN);
@@ -949,7 +951,6 @@ function initBsamFiles($Debug = 1)
 	global $AGENTDIR;
 	global $PROJECTSTATEDIR;
 	global $PROJECTUSER;
-
 
 	if ($Debug) {
 		print "Going to $DATADIR/agents/licenses\n";
