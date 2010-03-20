@@ -73,7 +73,6 @@ typedef struct cacheroot cacheroot_t;
 int   checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb);
 char *getFieldValue(char *inStr, char *field, int fieldMax, char *value, int valueMax, char separator) ;
 void  parseLicenseList() ;
-void  parseSchedInput(char *s) ;
 void  Usage(char *Name) ;
 void  Bail(int exitval) ;
 int   optionIsSet(int val) ;
@@ -105,6 +104,7 @@ long  lrcache_lookup(cacheroot_t *pcroot, char *rf_shortname);
 
  @return 0 on OK, -1 on failure.
   On failure, result will be freed.
+  NOTE this should be moved to std library.
  */
 FUNCTION int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb) 
 {
@@ -122,6 +122,41 @@ FUNCTION int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineN
   PQclear(result);
   return (-1);
 } /* checkPQresult */
+
+
+/****************************************************
+ checkPQcommand
+
+  check the result status of a postgres commands (not select)
+  If an error occured, write the error to stdout
+
+  @param PGresult *result
+  @param char *sql the sql query
+  @param char * FcnName the function name of the caller
+  @param int LineNumb the line number of the caller
+
+  @return 0 on OK, -1 on failure.
+  On failure, result will be freed.
+
+  NOTE: this function should be moved to a std library
+****************************************************/
+FUNCTION int checkPQcommand(PGresult *result, char *sql, char *FcnName, int LineNumb)
+{
+  if (!result)
+  {
+    printf("Error: %s:%d - checkPQcommand called with invalid parameter.\n",
+            FcnName, LineNumb);
+    return 0;
+  }
+
+  /* If no error, return */
+  if (PQresultStatus(result) == PGRES_COMMAND_OK) return 0;
+
+  printf("ERROR: %s:%d, %s\nOn: %s\n",
+          FcnName, LineNumb, PQresultErrorMessage(result), sql);
+  PQclear(result);
+  return (-1);
+} /* checkPQcommand */
 
 
 /**
@@ -586,62 +621,6 @@ FUNCTION void parseLicenseList() {
     return;
 } /* parseLicenseList */
 
-/**
- parseSchedInput
- \brief Convert input pairs from the scheduler into globals.
-
- @param char *s a string that should contain foo = bar type substrings
-
- sets cur.pFileFk and cur.pFile in the curScan structure
-
- return void
-
- \callgraph
- */
-FUNCTION void parseSchedInput(char *s) {
-    char field[256];
-    char value[1024];
-    int gotOther = 0;
-    char *origS;
-
-#ifdef	PROC_TRACE
-    traceFunc("== parseSchedInput(%s)\n", s);
-#endif	/* PROC_TRACE */
-
-    cur.pFileFk = -1;
-    memset(cur.pFile, '\0', myBUFSIZ);
-    if (!s) {
-        return;
-    }
-    origS = s;
-
-    while (s && (s[0] != '\0')) {
-        s = getFieldValue(s, field, 256, value, 1024, '=');
-        if (value[0] != '\0') {
-            if (!strcasecmp(field, "pfile_pk")) {
-                cur.pFileFk = atol(value);
-            }
-            else if (!strcasecmp(field, "pfilename")) {
-                strncpy(cur.pFile, value, sizeof(cur.pFile));
-            }
-            else {
-                printf("   LOG: got other:%s\n", value); /* DEBUG */
-                gotOther = 1;
-            }
-        }
-    }
-    /* printf("   LOG: nomos got:\npfilePk:%ld\npFile:%s\n",
-     cur.pFileFk , cur.pFile);  DEBUG */
-
-    if (gotOther || (cur.pFileFk < 0) || (cur.pFile[0] == '\0')) {
-        printf("   FATAL: Data is in an unknown format.\n");
-        printf("   LOG: Unknown data: '%s'\n", origS);
-        printf("   LOG: Nomos agent is exiting\n");
-        fflush(stdout);
-        DBclose(gl.DB);
-        exit(-1);
-    }
-} /* parseSchedInput */
 
 FUNCTION void Usage(char *Name) {
     printf("Usage: %s [options] [file [file [...]]\n", Name);
@@ -913,6 +892,9 @@ int main(int argc, char **argv) {
     int i;
     int c;
     int file_count = 0;
+    int upload_pk = 0;
+    int numrows;
+    int ars_pk = 0;
 
     extern int AlarmSecs;
     extern long HBItemsProcessed;
@@ -921,6 +903,10 @@ int main(int argc, char **argv) {
     char *agent_desc = "Nomos License Detection Agency";
     char parm[myBUFSIZ];
     char **files_to_be_scanned; /**< The list of files to scan */
+    char sqlbuf[1024];
+    PGresult *result;
+    PGresult *ars_result;
+    PGresult *cmd_result;
 
     cacheroot_t cacheroot;
 
@@ -1062,37 +1048,92 @@ int main(int argc, char **argv) {
 
         printf("OK\n");
         fflush(stdout);
-        while (ReadLine(stdin, parm, myBUFSIZ) >= 0) {
- //           printf("NOMOSDB: nomos read %s\n", parm);
-            fflush(stdout);
-            if (parm[0] != '\0') {
-                /*
-                 Get the file arg and go ahead and process it
-                 */
-                parseSchedInput(parm);
-                repFile = RepMkPath("files", cur.pFile);
-                if (!repFile) {
-                    printf("FATAL: pfile %ld Nomos unable to open file %s\n",
-                            cur.pFileFk, cur.pFile);
-                    fflush(stdout);
-                    DBclose(gl.DB);
-                    exit(-1);
-                }
-                processFile(repFile);
-                recordScanToDB(&cacheroot, &cur);
-                freeAndClearScan(&cur);
-
-                Heartbeat(++HBItemsProcessed);
-
-                printf("OK\n"); /* tell scheduler ready for more data */
-                fflush(stdout);
+        /* read upload_pk from scheduler */
+        while (ReadLine(stdin, parm, myBUFSIZ) >= 0) 
+        {
+          if (parm[0] != '\0') 
+          {
+            upload_pk = atoi(parm);
+            snprintf(sqlbuf, sizeof(sqlbuf), 
+                   "SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS left outer join license_file on (PF=pfile_fk and agent_fk='%d') inner join pfile on (PF=pfile_pk) WHERE fl_pk IS null",
+                   upload_pk, gl.agentPk);
+            result = PQexec(gl.pgConn, sqlbuf);
+            if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+            numrows = PQntuples(result);
+            if (numrows == 0) 
+            {
+              printf("Requested nomos analysis of upload %d - No records to processes.\n",
+                    upload_pk);
+              continue;
             }
+
+            /* Record analysis start in nomos_ars, the nomos audit trail. */
+            if (upload_pk)
+            {
+              snprintf(sqlbuf, sizeof(sqlbuf),
+                      "insert into nomos_ars (agent_fk, upload_fk, ars_success) values(%d,%d,'%s');",
+                      gl.agentPk, upload_pk, "false");
+              ars_result = PQexec(gl.pgConn, sqlbuf);
+              if (checkPQcommand(ars_result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+
+              /* retrieve the ars_pk of the newly inserted record */
+              sprintf(sqlbuf, "select ars_pk from nomos_ars \
+                              where agent_fk='%d' and upload_fk='%d' \
+                              and ars_success='%s' and ars_endtime is null \
+                              order by ars_starttime desc limit 1",
+                              gl.agentPk, upload_pk, "false");
+              ars_result = PQexec(gl.pgConn, sqlbuf);
+              if (checkPQresult(ars_result, sqlbuf, __FILE__, __LINE__)) return -1;
+              if (PQntuples(ars_result) == 0)
+              {
+                printf("FATAL: (%s.%d) Missing bucket_ars record.\n%s\n",__FILE__,__LINE__,sqlbuf);
+                return -1;
+              }
+              ars_pk = atol(PQgetvalue(ars_result, 0, 0));
+              PQclear(ars_result);
+            }
+
+            cmd_result = PQexec(gl.pgConn, "begin");
+            if (checkPQcommand(cmd_result, "begin", __FILE__, __LINE__)) return -1;
+
+            /* process all files in this upload */
+            for (i=0; i<numrows; i++)
+            {
+              strcpy(cur.pFile, PQgetvalue(result, i, 1));
+              cur.pFileFk = atoi(PQgetvalue(result, i, 0));
+          
+              repFile = RepMkPath("files", cur.pFile);
+              if (!repFile) 
+              {
+                printf("FATAL: pfile %ld Nomos unable to open file %s\n", cur.pFileFk, cur.pFile);
+                fflush(stdout);
+                DBclose(gl.DB);
+                exit(-1);
+              }
+              processFile(repFile);
+              recordScanToDB(&cacheroot, &cur);
+              freeAndClearScan(&cur);
+
+              Heartbeat(++HBItemsProcessed);
+            }
+            PQclear(result);
+            cmd_result = PQexec(gl.pgConn, "commit");
+            if (checkPQcommand(cmd_result, "commit", __FILE__, __LINE__)) return -1;
+
+            /* Record analysis success in nomos_ars. */
+            if (ars_pk)
+            {
+              snprintf(sqlbuf, sizeof(sqlbuf),
+                          "update nomos_ars set ars_endtime=now(), ars_success=true where ars_pk='%d'",
+                       ars_pk);
+              result = PQexec(gl.pgConn, sqlbuf);
+              if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+            }
+
+            printf("OK\n"); /* tell scheduler ready for more data */
+            fflush(stdout);
+          }
         }
-
-        /*
-         On EOF we fall through to the Bail() call at the end.
-         */
-
     }
     else {
         /*

@@ -920,6 +920,7 @@
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons attribution =FEW= licen[cs]e"
 #
+# _LT_CCA_SA is for v 2.5
 %ENTRY%	_LT_CCA_SA
 %KEY%	"distribut"
 %STR%	"if you alter transform or build upon this work you may distribute the resulting work only under the same or similar licen[cs]e"
@@ -927,6 +928,18 @@
 %ENTRY%	_LT_CCA_SAref
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons attribution[ -]share[ -]alike =FEW= licen[cs]e"
+# CC v 3.0 share alike wording
+%ENTRY%	_LT_CCA_SA_30
+%KEY%	"Adaptation"
+%STR%	"You may not offer or impose any terms on the Adaptation that restrict"
+# CC v 3.0 non commercial wording
+%ENTRY%	_LT_CCA_NC_30
+%KEY%	"commercial"
+%STR%	"in any manner that is primarily intended for or directed toward commercial advantage or private monetary"
+# CC v 3.0 no derivatives wording
+%ENTRY%	_LT_CCA_ND_30
+%KEY%	"derogatory"
+%STR%	"You must not distort, mutilate, modify or take other derogatory"
 #####
 # DELETED: ... you a world-?wide royalty-free non-?exclusive perpetual
 # for the duration of the applicable copyright licen[cs]e to exercise
