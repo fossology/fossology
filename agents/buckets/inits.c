@@ -573,48 +573,37 @@ FUNCTION int *getLicsInStr(PGconn *pgConn, char *nameStr,
 
 
 /****************************************************
- licDataAvailable
+ LatestNomosAgent
 
- Get the latest nomos agent_pk, and verify that there is
- data from it for this uploadtree.
+ Get the latest nomos agent_pk that has data for this
+ this uploadtree.
 
  @param PGconn *pgConn  Database connection object
- @param int    *uploadtree_pk  
+ @param int    *upload_pk  
 
- @return nomos_agent_pk, or 0 if there is no license data from
-         the latest version of the nomos agent.
+ @return nomos_agent_pk of the latest version of the nomos agent
+         that has data for this upload.
+         Or 0 if there is no license data available
  NOTE: This function writes error to stdout
 ****************************************************/
-FUNCTION int licDataAvailable(PGconn *pgConn, int uploadtree_pk)
+FUNCTION int LatestNomosAgent(PGconn *pgConn, int upload_pk)
 {
-  char *fcnName = "licDataAvailable";
-  char sql[256];
+  char *fcnName = "LatestNomosAgent";
+  char sql[512];
   PGresult *result;
   int  nomos_agent_pk = 0;
 
   /*** Find the latest enabled nomos agent_pk ***/
+                         
   snprintf(sql, sizeof(sql),
-           "select agent_pk from agent where agent_name='nomos' order by agent_ts desc limit 1");
+          "select agent_fk from nomos_ars, agent \
+              WHERE agent_pk=agent_fk and ars_success=true and upload_fk='%d' \
+                    and agent_enabled=true order by agent_ts desc limit 1",
+          upload_pk);
   result = PQexec(pgConn, sql);
   if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
-  if (PQntuples(result) == 0)
-  {
-    /* agent isn't in agent table */
-    printf("FATAL: %s.%s.%d agent nomos doesn't exist in agent table.\n",
-           __FILE__, fcnName, __LINE__);
-    PQclear(result);
-    return(0);
-  }
+  if (PQntuples(result) == 0) return 0;
   nomos_agent_pk = atoi(PQgetvalue(result,0,0));
-  PQclear(result);
-
-  /*** Make sure there is available license data from this nomos agent ***/
-  snprintf(sql, sizeof(sql),
-           "select fl_pk from license_file where agent_fk=%d limit 1",
-           nomos_agent_pk);
-  result = PQexec(pgConn, sql);
-  if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
-  if (PQntuples(result) == 0) nomos_agent_pk = 0;
   PQclear(result);
   return nomos_agent_pk;
 }
