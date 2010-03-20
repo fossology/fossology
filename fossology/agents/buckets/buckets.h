@@ -116,7 +116,7 @@ int **getMatchEvery  (PGconn *pgConn, int bucketpool_pk, char *filename, cachero
 regex_file_t *getRegexFile  (PGconn *pgConn, int bucketpool_pk, char *filename, cacheroot_t *pcroot);
 int getRegexFiletype (char *token, char *filepath);
 int getBucketpool_pk (PGconn *pgConn, char * bucketpool_name);
-int licDataAvailable (PGconn *pgConn, int uploadtree_pk);
+int LatestNomosAgent(PGconn *pgConn, int upload_pk);
 int *getLicsInStr    (PGconn *pgConn, char *nameStr, cacheroot_t *pcroot);
 int childParent      (PGconn *pgConn, int uploadtree_pk);
 

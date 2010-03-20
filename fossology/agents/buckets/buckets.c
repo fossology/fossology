@@ -783,15 +783,21 @@ int main(int argc, char **argv)
   int cmdopt;
   int verbose = 0;
   int writeDB = 0;
+  int ReadFromStdin = 1;
   int head_uploadtree_pk = 0;
   void *DB;   // DB object from agent
   PGconn *pgConn;
   PGresult *result;
-  char sqlbuf[128];
+  char sqlbuf[512];
+  char inbuf[64];
+  char *inbufp;
+  char *Delims = ",= \t\n\r";
+  char *token, *saveptr;
   int agent_pk = 0;
   int nomos_agent_pk = 0;
   int bucketpool_pk = 0;
   int upload_pk = 0;
+  int ars_pk = 0;
   char *fileName;  // head_uploadtree_pk ufile_name
   char *bucketpool_name;
   int pfile_pk = 0;
@@ -810,25 +816,28 @@ int main(int argc, char **argv)
     exit(-1);
   }
   pgConn = DBgetconn(DB);
+  writeDB = 1;  /* default is to write to the db */
 
   /* command line options */
   while ((cmdopt = getopt(argc, argv, "din:p:t:u:v")) != -1) 
   {
     switch (cmdopt) 
     {
-      case 'd': /* write results to db instead of stdout
+      case 'd': /* Debug.  Do not write results to db.
                    Note: license_ref may get written to even if writeDB=0
-                   Note: ALWAYS use -d unless you are debugging and know
+                   Note: Never use -d unless you are debugging and know
                          what you are doing.  Several functions
                          depend on db updates (like determining bucket
                          of container).
                  */
-            writeDB = 1;
+            writeDB = 0;
+            verbose++;
             break;
       case 'i': /* "Initialize" */
             DBclose(DB); /* DB was opened above, now close it and exit */
             exit(0);
       case 'n': /* bucketpool_name  */
+            ReadFromStdin = 0;
             bucketpool_name = optarg;
             /* find the highest rev active bucketpool_pk */
             if (!bucketpool_pk)
@@ -839,6 +848,7 @@ int main(int argc, char **argv)
             }
             break;
       case 'p': /* bucketpool_pk */
+            ReadFromStdin = 0;
             bucketpool_pk = atoi(optarg);
             /* validate bucketpool_pk */
             sprintf(sqlbuf, "select bucketpool_pk from bucketpool where bucketpool_pk=%d and active='Y'", bucketpool_pk);
@@ -847,6 +857,8 @@ int main(int argc, char **argv)
               printf("%d is not an active bucketpool_pk.\n", atoi(optarg));
             break;
       case 't': /* uploadtree_pk */
+            ReadFromStdin = 0;
+            if (upload_pk) break;
             head_uploadtree_pk = atoi(optarg);
             /* validate bucketpool_pk */
             sprintf(sqlbuf, "select uploadtree_pk from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
@@ -855,6 +867,7 @@ int main(int argc, char **argv)
               printf("%d is not an active uploadtree_pk.\n", atoi(optarg));
             break;
       case 'u': /* upload_pk */
+            ReadFromStdin = 0;
             if (!head_uploadtree_pk)
             {
               upload_pk = atoi(optarg);
@@ -883,13 +896,13 @@ int main(int argc, char **argv)
   debug = verbose;
 
   /*** validate command line ***/
-  if (!bucketpool_pk)
+  if (!bucketpool_pk && !ReadFromStdin)
   {
     printf("You must specify an active bucketpool.\n");
     Usage(argv[0]);
     exit(-1);
   }
-  if (!head_uploadtree_pk)
+  if (!head_uploadtree_pk && !ReadFromStdin)
   {
     printf("You must specify a valid uploadtree_pk or upload_pk.\n");
     Usage(argv[0]);
@@ -900,33 +913,6 @@ int main(int argc, char **argv)
    * Note, if GetAgentKey fails, this process will exit.
    */
   agent_pk = GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agentDesc);
-
-  /*** Get the pfile for head_uploadtree_pk so we can
-     check if its already been processed ***/
-  sprintf(sqlbuf, "select pfile_fk, ufile_name from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
-  result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(result, sqlbuf, agentDesc, __LINE__)) return -1;
-  if (PQntuples(result) == 0) 
-  {
-    printf("FATAL: %s.%s missing root uploadtree_pk %d\n", 
-           __FILE__, agentDesc, head_uploadtree_pk);
-    return -1;
-  }
-  pfile_pk = atol(PQgetvalue(result, 0, 0));
-  fileName = PQgetvalue(result, 0, 1);
-  PQclear(result);
-
-  /* Has it already been processed?  If so, we are done */
-  if (processed(pgConn, agent_pk, pfile_pk, head_uploadtree_pk, bucketpool_pk)) return 0;
-
-  /*** Make sure there is  license data available from the latest nomos agent ***/
-  nomos_agent_pk = licDataAvailable(pgConn, head_uploadtree_pk);
-  if (nomos_agent_pk == 0)
-  {
-    printf("WARNING: Bucket agent called on treeitem (%d), but the latest nomos agent hasn't created any license data for this tree.\n",
-          head_uploadtree_pk);
-    return -1;
-  }
 
   /*** Initialize the license_ref table cache ***/
   /* Build the license ref cache to hold 2**11 (2048) licenses.
@@ -940,46 +926,162 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-
+  /* set the heartbeat alarm signal */
   if (writeDB)
   {
     signal(SIGALRM, ShowHeartbeat);
     alarm(AlarmSecs);
-    printf("OK\n");
-    fflush(stdout);
   }
+
+  /* main processing loop */
+  while(1)
+  {
+    if (ReadFromStdin) 
+    {
+      printf("OK\n");
+      fflush(stdout);
+
+      /* Read the bucketpool_pk and upload_pk from stdin.
+       * Format looks like 'bppk=123, upk=987'
+       */
+      inbufp = fgets(inbuf, sizeof(inbuf), stdin);
+      if (!inbufp) break;
+
+      token = strtok_r(inbufp, Delims, &saveptr);
+      while (token && (!upload_pk || !bucketpool_pk))
+      {
+        if (strcmp(token, "bppk") == 0)
+          bucketpool_pk = atoi(strtok_r(NULL, Delims, &saveptr));
+        else
+        if (strcmp(token, "upk") == 0)
+          upload_pk = atoi(strtok_r(NULL, Delims, &saveptr));
+        token = strtok_r(NULL, Delims, &saveptr);
+      }
+
+      /* From the upload_pk, get the head of the uploadtree, pfile_pk and fileName  */
+      sprintf(sqlbuf, "select uploadtree_pk, pfile_fk, ufile_name from uploadtree \
+             where upload_fk='%d' and parent is null limit 1", upload_pk);
+      result = PQexec(pgConn, sqlbuf);
+      if (checkPQresult(result, sqlbuf, agentDesc, __LINE__)) return -1;
+      if (PQntuples(result) == 0) 
+      {
+        printf("ERROR: %s.%s missing upload_pk %d\n", 
+               __FILE__, agentDesc, upload_pk);
+        return -1;
+      }
+      head_uploadtree_pk = atol(PQgetvalue(result, 0, 0));
+      pfile_pk = atol(PQgetvalue(result, 0, 1));
+      fileName = PQgetvalue(result, 0, 2);
+      PQclear(result);
+    } /* end ReadFromStdin */
+    else
+    {
+      /* not reading from stdin 
+       * Get the pfile, and fileName for head_uploadtree_pk
+       */
+      sprintf(sqlbuf, "select pfile_fk, ufile_name from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
+      result = PQexec(pgConn, sqlbuf);
+      if (checkPQresult(result, sqlbuf, agentDesc, __LINE__)) return -1;
+      if (PQntuples(result) == 0) 
+      {
+        printf("FATAL: %s.%s missing root uploadtree_pk %d\n", 
+               __FILE__, agentDesc, head_uploadtree_pk);
+        return -1;
+      }
+      pfile_pk = atol(PQgetvalue(result, 0, 0));
+      fileName = PQgetvalue(result, 0, 1);
+      PQclear(result);
+    }
+
+    /* at this point we know:
+     * bucketpool_pk, bucket agent_pk, upload_pk, pfile_pk, head_uploadtree_pk
+     * (the uploadtree_pk of the head tree to scan)
+     */
+
+    /* Has the uploadtree already been processed?  If so, we are done.
+       Don't even bother to create a bucket_ars entry.
+       THIS ISN'T RIGHT SINCE IT MAY BE FOR A DIFFERENT nomos agent_pk
+     */
+    if (processed(pgConn, agent_pk, pfile_pk, head_uploadtree_pk, bucketpool_pk)) return 0;
+
+    /* Find the most recent nomos data for this upload.  That's what we want to use
+         to process the buckets.
+     */
+    nomos_agent_pk = LatestNomosAgent(pgConn, upload_pk);
+    if (nomos_agent_pk == 0)
+    {
+      printf("WARNING: Bucket agent called on treeitem (%d), but the latest nomos agent hasn't created any license data for this tree.\n",
+            head_uploadtree_pk);
+      return -1;
+    }
 
   // Heartbeat(++HBItemsProcessed);
-  // printf("OK\n"); /* tell scheduler ready for more data */
-  // fflush(stdout);
 
-  /* Initialize the Bucket Definition List bucketDefArray  */
-  bucketDefArray = initBuckets(pgConn, bucketpool_pk, &cacheroot);
-  if (bucketDefArray == 0)
-  {
-    printf("FATAL: %s.%d Bucket definition for pool %d could not be initialized.\n",
-           __FILE__, __LINE__, bucketpool_pk);
-    return -1;
-  }
-  bucketDefArray->nomos_agent_pk = nomos_agent_pk;
-  bucketDefArray->bucket_agent_pk = agent_pk;
+    /*** Initialize the Bucket Definition List bucketDefArray  ***/
+    bucketDefArray = initBuckets(pgConn, bucketpool_pk, &cacheroot);
+    if (bucketDefArray == 0)
+    {
+      printf("FATAL: %s.%d Bucket definition for pool %d could not be initialized.\n",
+             __FILE__, __LINE__, bucketpool_pk);
+      return -1;
+    }
+    bucketDefArray->nomos_agent_pk = nomos_agent_pk;
+    bucketDefArray->bucket_agent_pk = agent_pk;
+    /*** END initializing bucketDefArray  ***/
 
-   /* process the tree for buckets 
-      Do this as a single transaction, therefore this agent must be 
-      run as a single thread.  This will prevent the scheduler from
-      consuming excess time (this is a fast agent), and allow this
-      process to update bucket_ars.
-    */
-   result = PQexec(pgConn, "begin");
-   if (checkPQcommand(result, "begin", __FILE__, __LINE__)) return -1;
+    /*** Record analysis start in bucket_ars, the bucket audit trail. ***/
+    snprintf(sqlbuf, sizeof(sqlbuf), 
+                "insert into bucket_ars (agent_fk, upload_fk, ars_success, nomosagent_fk) values(%d,%d,'%s',%d)",
+                 agent_pk, upload_pk, "false", nomos_agent_pk);
+    result = PQexec(pgConn, sqlbuf);
+    if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
 
-  walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0, fileName);
-  bucketList = getContainerBuckets(pgConn, bucketDefArray, head_uploadtree_pk);
-  writeBuckets(pgConn, pfile_pk, head_uploadtree_pk, bucketList, agent_pk, 
-               writeDB, bucketDefArray->nomos_agent_pk);
+    /* retrieve the ars_pk of the newly inserted record */
+    sprintf(sqlbuf, "select ars_pk from bucket_ars where agent_fk='%d' and upload_fk='%d' and ars_success='%s' and nomosagent_fk='%d' \
+                  and ars_endtime is null \
+            order by ars_starttime desc limit 1",
+            agent_pk, upload_pk, "false", nomos_agent_pk);
+    result = PQexec(pgConn, sqlbuf);
+    if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) return -1;
+    if (PQntuples(result) == 0)
+    {
+      printf("FATAL: (%s.%d) Missing bucket_ars record.\n%s\n",__FILE__,__LINE__,sqlbuf);
+      return -1;
+    }
+    ars_pk = atol(PQgetvalue(result, 0, 0));
+    PQclear(result);
+    /*** END bucket_ars insert  ***/
 
-   result = PQexec(pgConn, "commit");
-   if (checkPQcommand(result, "commit", __FILE__, __LINE__)) return -1;
+    if (debug) printf("%s sql: %s\n",__FILE__, sqlbuf);
+  
+    /* process the tree for buckets 
+       Do this as a single transaction, therefore this agent must be 
+       run as a single thread.  This will prevent the scheduler from
+       consuming excess time (this is a fast agent), and allow this
+       process to update bucket_ars.
+     */
+    result = PQexec(pgConn, "begin");
+    if (checkPQcommand(result, "begin", __FILE__, __LINE__)) return -1;
+
+    walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0, fileName);
+    bucketList = getContainerBuckets(pgConn, bucketDefArray, head_uploadtree_pk);
+    writeBuckets(pgConn, pfile_pk, head_uploadtree_pk, bucketList, agent_pk, 
+                 writeDB, bucketDefArray->nomos_agent_pk);
+
+     result = PQexec(pgConn, "commit");
+     if (checkPQcommand(result, "commit", __FILE__, __LINE__)) return -1;
+
+    /* Record analysis end in bucket_ars, the bucket audit trail. */
+    if (ars_pk)
+    {
+      snprintf(sqlbuf, sizeof(sqlbuf), 
+                "update bucket_ars set ars_endtime=now(), ars_success=true where ars_pk='%d'",
+                ars_pk);
+      result = PQexec(pgConn, sqlbuf);
+      if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+      if (debug) printf("%s sqlbuf: %s\n",__FILE__, sqlbuf);
+    }
+  }  /* end of main processing loop */
 
   PQfinish(pgConn);
   return (0);

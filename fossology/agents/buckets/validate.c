@@ -82,7 +82,12 @@ FUNCTION int intAinB(int intA, int *arrayB)
 /****************************************************
  validate_pk
 
- Verify a primary key exists and is active
+ Verify a primary key exists.
+ This works by running the sql (must be select) and
+ returning the first column of the first row.
+ The sql should make this the primary key.
+ This could be used to simply return the first column 
+ of the first result for any query.
 
  @param PGconn *pgConn  Database connection object
  @param char *sql   sql must select a single column, value in first row is returned.
@@ -107,17 +112,18 @@ FUNCTION int validate_pk(PGconn *pgConn, char *sql)
 
 FUNCTION void Usage(char *Name) 
 {
-  printf("Usage: %s [options] [uploadtree_pk]\n", Name);
-  printf("  -d   :: Write results to database instead of stdout.\n");
+  printf("Usage: %s [debug options]\n", Name);
+  printf("  Debug options are:\n");
+  printf("  -d   :: Debug. Results NOT written to database.\n");
   printf("  -i   :: Initialize the database, then exit.\n");
   printf("  -n   :: bucketpool_pk of bucketpool to use.\n");
   printf("  -p   :: bucketpool name of bucketpool to use.\n");
-  printf("  -t   :: uploadtree_pk, root of tree to scan.\n");
-  printf("  -u   :: upload_pk, to scan entire upload.\n");
-  printf("  -v   :: verbose (-vv = more verbose)\n"); 
-  printf("  uploadtree_pk :: Find buckets in this tree\n");
+  printf("  -t   :: uploadtree_pk, root of tree to scan. Will turn on -d!\n");
+  printf("  -u   :: upload_pk to scan.\n");
+  printf("  -v   :: verbose (turns on debugging output)\n"); 
   printf("  NOTE: -n and -p are mutually exclusive.  If both are specified\n");
   printf("         -n is used.  One of these is required.\n");
   printf("  NOTE: -t and -u are mutually exclusive.  If both are specified\n");
-  printf("         -t is used.  One of these is required.\n");
+  printf("         -u is used.  One of these is required.\n");
+  printf("  NOTE: If none of -nptu are specified, the bucketpool_pk and upload_pk are read from stdin, one comma delimited pair per line.  For example, 'bppk=123, upk=987' where 123 is the bucketpool_pk and 987 is the upload_pk.  This is the normal execution from the scheduler.\n");
 } /* Usage() */
