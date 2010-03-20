@@ -277,97 +277,106 @@ function GetAgentKey($agentName, $agentDesc)
 
 } // GetAgentKey
 
-
 /**
- * GetAgentList
+ * AgentARSList
  * \brief
- *  GetAgentList() returns an array that has info on each the version of an
- *  agent ($agentName), and if that version was used to analyze $upload_pk.
- *  Disabled agents will not show up in the result.
+ *  The purpose of this function is to return an array of 
+ *  _ars records for an agent so that the latest agent_pk(s)
+ *  can be determined.
  *
- * @param string $agentName the name of the agent e.g. nomos
- * @param int    $upload_pk
- * @param string $tablename - name of table to check for data.  Must have column "agent_fk"
- * @param boolean $dataonly - if true (default), only return the latest agent and agent revs 
- *                            that have data for this upload_pk
- *                            if false, return all the agent_revs
+ *  This is for _ars tables only, for example, nomos_ars and bucket_ars.
+ *  The _ars tables have a standard format with optional added agent_fk's.
+ *  This function does not process those optional agent_fk's, leaving that
+ *  task to the caller.
  *
- * @return 0 on error
- *         Success returns an array of assoc array with the following elements:
- *         agent_pk, agent_rev, agent_desc, agent_ts, data
- *         The definitions for the agent_ elements are the same as in the agent table.
- *         "data" is 0 if the upload has no data from this agent_pk
- *                   1 if the upload has data from this agent_pk
- *         Agents recs are ordered from the most recent to the least.
+ * @param string  $TableName - name of the ars table (e.g. nomos_ars)
+ * @param int     $upload_pk
+ * @param int     $limit - limit number of rows returned.  0=No limit
+ *
+ * @return assoc array of _ars records.
+ *         or FALSE on error, or no rows
  */
-
-function GetAgentList($agentName, $upload_pk, $tablename, $dataonly=true)
+function AgentARSList($TableName, $upload_pk, $limit)
 {
-	global $PG_CONN;
-    
-    $agentList = array();
-    $colstr = "agent_pk, agent_name, agent_rev, agent_desc, agent_ts";
-    $colarray = explode(',', $colstr);
+  global $PG_CONN;
 
-	/* get the agent recs */
-	$sql = "SELECT $colstr FROM agent WHERE agent_name ='$agentName' and agent_enabled=true order by agent_ts desc";
-	$result = pg_query($PG_CONN, $sql);
-	DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $LimitClause = "";
+  if ($limit > 0) $LimitClause = " limit $limit";
+  
+  $sql = "SELECT * FROM $TableName, agent 
+           WHERE agent_pk=agent_fk and ars_success=true and upload_fk='$upload_pk' and agent_enabled=true 
+           order by agent_ts desc $LimitClause";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $resultArray =  pg_fetch_all($result);
+  pg_free_result($result);
+  return $resultArray;
+}
 
-    $first = true;  // first rec is always returned, regardless of $dataonly
-	while ($row = pg_fetch_assoc($result)) 
-    {
-      // see if this agent has any data for this upload_pk
-	  $sql = "SELECT agent_fk FROM $tablename, uploadtree WHERE agent_fk ='$row[agent_pk]' and upload_fk='$upload_pk' and $tablename.pfile_fk=uploadtree.pfile_fk limit 1";
-	  $result2 = pg_query($PG_CONN, $sql);
-	  DBCheckResult($result2, $sql, __FILE__, __LINE__);
-      
-      if ( $first || ($dataonly == false) || ($dataonly && (pg_num_rows($result2) > 0)))
-      {
-        $row['data'] = pg_num_rows($result2);
-        $agentList[] = $row;
-      }
-
-      pg_free_result($result2);
-      $first = false;
-    }
-    pg_free_result($result);
-
-	return $agentList;
-} // GetAgentList
 
 /**
  * AgentSelect
  * \brief
- *  Return html for Agent select list
+ *  The purpose of this function is to return a pulldown select list for users
+ *  to be able to select the dataset results they want to see.
  *
- * @param string $AgentName the name of the agent e.g. nomos
- * @param int    $upload_pk
- * @param string $tablename - name of table to check for data.  Must have column "agent_fk"
- * @param boolean $dataonly - if true (default), only return the latest agent and agent revs 
- *                            that have data for this upload_pk
- *                            if false, return all the agent_revs
- * @param string $SLName - select list element name
- * @param string *SelectedKey - selected key (optional), if absent the latest agent with 
- *                              results is selected.
+ *  This is for _ars tables only, for example, nomos_ars and bucket_ars.
+ *  The _ars tables have a standard format with optional agent_fk's named
+ *  agent_fk2, agent_fk3, ...
+ *
+ * @param string  $TableName - name of the ars table (e.g. nomos_ars)
+ * @param int     $upload_pk
+ * @param boolean $DataOnly  - If false, return the latest agent AND agent revs 
+ *                             that have data for this agent.  Note the latest agent may have
+ *                             no entries in $TableName.
+ *                             If true (default), return only the agent_revs with ars data.
+ * @param string  $SLName    - select list element name
+ * @param string  $SLID      - select list element id
+ * @param string  *SelectedKey - selected key (optional)
+ *                              If absent and $DataOnly is true
+ *                              then the latest agent with results is selected.
+ *                              If absent and $DataOnly is false 
+ *                              then the latest agent is selected.
  *
  * @return agent select list
  *      or 0 on error
  */
-function AgentSelect($AgentName, $upload_pk, $tablename, $dataonly=true, $SLName, $SelectedKey="")
+function AgentSelect($TableName, $upload_pk, $DataOnly=true, 
+                           $SLName, $SLID, $SelectedKey="")
 {
-  $AgentList = GetAgentList($AgentName, $upload_pk, $tablename);
+echo "DO NOT USE: PRELIMINARY AND INCOMPLETE<br>";
+/*
+  / get the agent recs /
+  $sql = "SELECT * FROM $TableName, agent 
+           WHERE upload_fk='$upload_pk' and agent_enabled=true order by agent_ts desc";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+  / Create an assoc array to build the select list from.
+   * "{agent_pk} [,{agent_pk} ...] => {agent name} ( {agentrevision} ), ... [ NO DATA]
+   * For example:
+   *   123 => nomos(rev 1)
+   *   111,123 => bucket(rev 5), nomos(rev 7)
+   *   112,179 => bucket(latest rev), nomos(latest rev) NO DATA
+or one could just use the ars_pk instead of the pk list, but that is another
+indirection.
+   /
+  while ($row = pg_fetch_assoc($result)) 
+  {
+  }
+  $AgentList = GetAgentDataList($AgentName, $upload_pk, $tablename);
   $SelArray = array();
 
   if ($SelectedKey == "") $SelectedKey = $AgentList[0]['agent_pk'];
 
-  /* create key/val array for pulldown */
+  / create key/val array for pulldown /
   foreach($AgentList as $AgentRec)
   {
-    $DataInd = ($AgentRec['data']) ? "" : ", NO DATA AVAILABLE";
+    $DataInd = ($AgentRec['data']) ? "" : ", NO DATA";
     $SelArray[$AgentRec['agent_pk']] = "$AgentRec[agent_name] rev: $AgentRec[agent_rev]$DataInd";
   }
   return "Results from:" . Array2SingleSelect($SelArray, $SLName, $SelectedKey, false, false);
+*/
 }
 
 /**
@@ -579,4 +588,38 @@ function userAgents()
 	}
 	return($agentsChecked);
 }
+
+/**
+ * SelectBucketpool
+ * \brief Return a select list for bucketpool's
+ *
+ * @param string $selected, selected bucketpool_pk
+ *
+ * @return string select list
+ * Note: list uses static element id="default_bucketpool_fk"
+ *       the element name is the same as the id.
+ */
+function SelectBucketPool($selected)
+{
+  global $PG_CONN;
+
+  $id = "default_bucketpool_fk";
+  $name = $id;
+  $select = "<select name='$name' id='$id'>";
+
+  /* get the bucketpool recs */
+  $sql = "select * from bucketpool where active='Y'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+  while ($row = pg_fetch_assoc($result)) 
+  {
+    $select .= "<option value='$row[bucketpool_pk]'";
+    if ($row['bucketpool_pk'] == $selected) $select .= " SELECTED ";
+    $select .= ">$row[bucketpool_name]\n";
+  }
+  $select .= "</select>";
+  return $select;
+}
+
 ?>

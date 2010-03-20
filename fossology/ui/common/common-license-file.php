@@ -30,7 +30,7 @@
  *   $uploadtree_pk  (used only if $pfile_pk is empty)
  * Returns:
  *   sql result for rf_shortname, rf_fk
- *   FATAl if neither pfile_pk or uploadtree_pk were given
+ *   FATAL if neither pfile_pk or uploadtree_pk were given
  */
 function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk)
 {
@@ -41,8 +41,8 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk)
   // if $pfile_pk, then return the licenses for that one file
   if ($pfile_pk)
   {
-    $sql = "SELECT rf_shortname, rf_fk
-              from license_ref,license_file,
+    $sql = "SELECT distinct(rf_shortname) as rf_shortname, rf_fk
+              from license_ref,license_file
               where pfile_fk='$pfile_pk' and agent_fk=$agent_pk and rf_fk=rf_pk
               order by rf_shortname desc";
     $result = pg_query($PG_CONN, $sql);
@@ -61,7 +61,7 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk)
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
-    /*  Get the counts for each license under this UploadtreePk*/
+    /*  Get the licenses under this $uploadtree_pk*/
     $sql = "SELECT distinct(rf_shortname) as rf_shortname, rf_fk
               from license_ref,license_file,
                   (SELECT distinct(pfile_fk) as PF from uploadtree 
@@ -81,14 +81,17 @@ function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk)
 {
   $LicStr = "";
   $LicenseResult = GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk);
+  $first = true;
   while ($row = pg_fetch_assoc($LicenseResult))
   {
-    $LicStr .= $row['rf_shortname']. ", ";
+    if ($first)
+      $first = false;
+    else 
+      $LicStr .= " ,";
+    $LicStr .= $row["rf_shortname"];
   }
   pg_free_result($LicenseResult);
   
-  // remove trailing ", "
-  $LicStr[strlen($LicStr)-2] = ' ';
   return $LicStr;
 }
 
