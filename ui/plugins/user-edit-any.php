@@ -55,6 +55,7 @@ class user_edit_any extends FO_Plugin {
 		$agentList = userAgents();
 		$Block = GetParm("block", PARM_INTEGER);
 		$Blank = GetParm("blank", PARM_INTEGER);
+		$default_bucketpool_fk = GetParm("default_bucketpool_fk", PARM_INTEGER);
 		if (!empty($Email_notify)) {
 		}
 		/* Make sure username looks valid */
@@ -152,6 +153,9 @@ class user_edit_any extends FO_Plugin {
 			$Val = str_replace("'", "''", $agentList);
 			$DB->Action("UPDATE users SET user_agent_list = '$Val' WHERE user_pk = '$UserId';");
 		}
+		if ($default_bucketpool_fk != $R['default_bucketpool_fk']) {
+			$DB->Action("UPDATE users SET default_bucketpool_fk = '$default_bucketpool_fk' WHERE user_pk = '$UserId';");
+		}
 
 		$Results = $DB->Action($SQL);
 		return (NULL);
@@ -189,7 +193,7 @@ class user_edit_any extends FO_Plugin {
 				/* Get the list of users */
 				$SQL = "SELECT user_pk,user_name,user_desc,user_pass,
                                 root_folder_fk,user_perm,user_email,email_notify,
-                                user_agent_list FROM users WHERE 
+                                user_agent_list,default_bucketpool_fk FROM users WHERE 
                                 user_pk != '" . @$_SESSION['UserId'] . "' ORDER BY user_name;";
 				$Results = $DB->Action($SQL);
 				/* Create JavaScript for updating users */
@@ -202,6 +206,7 @@ class user_edit_any extends FO_Plugin {
 				$V.= "var Userperm = new Array();\n";
 				$V.= "var Userblock = new Array();\n";
 				$V.= "var Userfolder = new Array();\n";
+				$V.= "var default_bucketpool_fk = new Array();\n";
 				for ($i = 0;!empty($Results[$i]['user_pk']);$i++) {
 					$R = & $Results[$i];
 					$Id = $R['user_pk'];
@@ -214,6 +219,7 @@ class user_edit_any extends FO_Plugin {
 					$V.= "Userenote[" . $Id . '] = "' . $R['email_notify'] . "\";\n";
 					$V.= "Useragents[" . $Id . '] = "' . $R['user_agent_list'] . "\";\n";
 					$V.= "Userfolder[" . $Id . '] = "' . $R['root_folder_fk'] . "\";\n";
+					$V.= "default_bucketpool_fk[" . $Id . '] = "' . $R['default_bucketpool_fk'] . "\";\n";
 					$V.= "Userperm[" . $Id . '] = "' . $R['user_perm'] . "\";\n";
 					if (substr($R['user_pass'], 0, 1) == ' ') {
 						$Block = 1;
@@ -289,6 +295,7 @@ class user_edit_any extends FO_Plugin {
                   document.userEditAny.description.value = Userdesc[id];
                   document.userEditAny.permission.value = Userperm[id];
                   document.userEditAny.folder.value = Userfolder[id];
+                  document.userEditAny.default_bucketpool_fk.value = default_bucketpool_fk[id];
                   if (Userblock[id] == 1) { document.userEditAny.block.checked=true; }
                   else { document.userEditAny.block.checked=false; }
                   if (Userenote[id] == \"\") { document.userEditAny.enote.checked=false; }
@@ -383,6 +390,12 @@ class user_edit_any extends FO_Plugin {
 				$V.= AgentCheckBoxMake(-1, "agent_unpack");
 				$V .= "</td>\n";
 				$V .= "</tr>\n";
+				$Val = GetParm('default_bucketpool_fk', PARM_INTEGER);
+				$V.= "$Style<th>Default bucket pool</th>\n";
+				$V.= "<td>";
+                $V.= SelectBucketPool($Val);
+                $V.= "</td>\n";
+				$V.= "</tr>\n";
 				$V.= "</table><P />";
 				$V.= "<input type='submit' value='Edit!'>\n";
 				$V.= "</form>\n";

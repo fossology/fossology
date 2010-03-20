@@ -50,6 +50,7 @@ class user_add extends FO_Plugin {
     $Email_notify = GetParm('enote', PARM_TEXT);
     $Email = str_replace("'", "''", GetParm('email', PARM_TEXT));
     $agentList = userAgents();
+    $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
     
     /* Make sure username looks valid */
     if (empty($User)) {
@@ -84,9 +85,9 @@ class user_add extends FO_Plugin {
     /* Add the user */
     $SQL = "INSERT INTO users
       (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
-       email_notify,user_agent_list,root_folder_fk)
+       email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk)
 	     VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
-	             '$Email_notify','$agentList',$Folder);";
+	             '$Email_notify','$agentList',$Folder, $default_bucketpool_fk);";
     $Results = $DB->Action($SQL);
     /* Make sure it was added */
     $SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
@@ -170,6 +171,10 @@ class user_add extends FO_Plugin {
               " selections can be changed on the upload screens.\n</th><td> ";
         $V.= AgentCheckBoxMake(-1, "agent_unpack");
         $V .= "</td>\n";
+        $V.= "$Style<th>10.</th><th>Default bucketpool.</th>";
+        $V.= "<td>";
+        $V.= SelectBucketPool($default_bucketpool_fk);
+        $V.= "</td>";
         $V .= "</tr>\n";
         $V.= "</table border=0><P />";
         $V.= "<input type='submit' value='Add!'>\n";

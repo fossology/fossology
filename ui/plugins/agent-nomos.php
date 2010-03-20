@@ -126,20 +126,10 @@ class agent_fonomos extends FO_Plugin {
        this requires knowing the agents fk.
      */
     $agent_pk = GetAgentKey("nomos", "nomos license agent");
-    $jqargs = "SELECT pfile_pk,
-              pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size  AS pfilename
-              FROM (SELECT distinct(pfile_fk) AS PF
-              FROM uploadtree WHERE upload_fk=$uploadpk and (ufile_mode&x'3C000000'::int)=0) as SS
-              left outer join license_file on (PF=pfile_fk and agent_fk=$agent_pk)
-              inner join pfile on (pf=pfile_pk)
-              WHERE fl_pk IS null LIMIT 5000;";
 
-    /*
-      Hand of the SQL  to the scheduler
-     */
-
-  /* Add job: job "Fo-Nomos License Analysis" has jobqueue item "nomos" */
-    $jobqueuepk = JobQueueAdd($jobpk, "nomos", $jqargs, "yes", "pfilename", $Dep);
+    /* Add job: job "Fo-Nomos License Analysis" has jobqueue item "nomos" */
+    $jqargs = $uploadpk;
+    $jobqueuepk = JobQueueAdd($jobpk, "nomos", $jqargs, "no", "", $Dep);
     if (empty($jobqueuepk)) {
       return ("Failed to insert agent nomos into job queue");
     }

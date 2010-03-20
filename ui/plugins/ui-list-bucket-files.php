@@ -133,7 +133,7 @@ class list_bucket_files extends FO_Plugin
 
     // Get all the uploadtree_pk's with this bucket (for this agent and bucketpool)
     // in this subtree.  Some of these might be containers, some not.
-    $sql = "select uploadtree.*, bucket_file.nomosagent_pk as nomosagent_pk
+    $sql = "select uploadtree.*, bucket_file.nomosagent_fk as nomosagent_fk
                from uploadtree, bucket_file, bucket_def
                where upload_fk=$upload_pk and uploadtree.lft between $lft and $rgt
                  and uploadtree.pfile_fk=bucket_file.pfile_fk
@@ -178,41 +178,24 @@ class list_bucket_files extends FO_Plugin
     $Header = "";
 
     $V .= "<table>";
+    $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Licenses found</th></tr>";
     while ($row = pg_fetch_assoc($fileresult))
     {
-      $V .= "<tr><td colspan=3>";
+      $V .= "<tr><td>";
       $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, 
                        $ShowMicro, ++$RowNum, $Header);
       $V .= "</td>";
-      $nomosagent_pk = $row['nomosagent_pk'];
+      $nomosagent_pk = $row['nomosagent_fk'];
       $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
 
-      // find all the licenses in this subtree (bucket uploadtree_pk)
-      $sql = "SELECT distinct(rf_shortname) as licname
-              from license_ref,license_file,
-                  (SELECT distinct(pfile_fk) as PF from uploadtree
-                     where upload_fk=$upload_pk
-                       and uploadtree.lft BETWEEN $row[lft] and $row[rgt]) as SS
-              where PF=license_file.pfile_fk and agent_fk=$nomosagent_pk and rf_fk=rf_pk
-              group by rf_shortname order by rf_shortname";
-      $licsresult = pg_query($PG_CONN, $sql);
-      DBCheckResult($licsresult, $sql, __FILE__, __LINE__);
+      // get all the licenses in this subtree (bucket uploadtree_pk)
+      $pfile_pk = $row['pfile_fk'];
+      $licstring = GetFileLicenses_string($nomosagent_pk, $row[pfile_fk], $row[uploadtree_pk]);
 
       // show the entire license list as a single string with links to the files
       // in this container with that license.
-      $V .= "<td>";
-      $first = true;
-      while ($licsrow = pg_fetch_assoc($licsresult))
-      {
-        if ($first)
-          $first = false;
-        else 
-          $V .= " ,";
-        $V .= $licsrow["licname"];
-      }
-      $V .= "</td></tr>";
+      $V .= "<td>$licstring</td></tr>";
       $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
-      pg_free_result($licsresult);
     }
     $V .= "</table>";
 
