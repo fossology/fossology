@@ -149,7 +149,26 @@ class ui_buckets extends FO_Plugin
         Because buckets roll up, the counts will be high (a bucket will be counted
         for the container and everything under the container).
      */
-$bucketpool_pk=1; // TEMPORARY until a "switch buckets" pulldown is implemented
+    $bucketpool_pk=1; // !!! VERY TEMPORARY until a "switch buckets" pulldown is implemented
+    /* find latest bucket and nomos agent that has data */
+    $AgentRec = AgentARSList("bucket_ars", $upload_pk, 0);
+    if ($AgentRec === false)
+    {
+      echo "No data available";
+      return;
+    }
+    /* loop through $AgentRec to verify that the nomosagent_pk is enabled */
+    $nomosagent_pk = 0;
+    foreach ($AgentRec as $AgentRow)
+    {
+      $sql = "select agent_pk from agent where agent_pk=$AgentRow[nomosagent_fk] 
+                    and agent_enabled=true";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result) > 0) $nomosagent_pk = $AgentRow['nomosagent_fk'];
+    }
+
+
     $sql = "SELECT distinct(bucket_fk) as bucket_pk, 
                    count(bucket_fk) as bucketcount
               from bucket_file, bucket_def,
@@ -159,6 +178,7 @@ $bucketpool_pk=1; // TEMPORARY until a "switch buckets" pulldown is implemented
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$Agent_pk 
                     and bucket_fk=bucket_pk and bucketpool_fk=$bucketpool_pk
+                    and bucket_file.nomosagent_fk=$nomosagent_pk
               group by bucket_fk 
               order by bucketcount desc";
     $result = pg_query($PG_CONN, $sql);
@@ -177,9 +197,11 @@ $bucketpool_pk=1; // TEMPORARY until a "switch buckets" pulldown is implemented
     /* Get agent list */
     $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
 
+/* FUTURE advanced interface for selecting agents
     $AgentSelect = AgentSelect($Agent_name, $upload_pk, "bucket_file", true, "agent_pk", $Agent_pk);
     $VLic .= $AgentSelect;
     $VLic .= "<input type='submit' value='Go'>";
+*/
 
     /* Write bucket histogram to $VLic  */
     $bucketcount = 0;

@@ -139,11 +139,13 @@ class ui_nomos_license extends FO_Plugin
     pg_free_result($result);
 
     $Agent_name = "nomos";
-    $Agent_desc = "nomos license agent";
-    if (array_key_exists("agent_pk", $_POST))
-      $Agent_pk = $_POST["agent_pk"];
-    else
-      $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
+    $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
+    if ($AgentRec === false)
+    {
+      echo "No data available";
+      return;
+    }
+    $Agent_pk = $AgentRec[0]['agent_fk'];
 
     /*  Get the counts for each license under this UploadtreePk*/
     $sql = "SELECT distinct(rf_shortname) as licname, 
@@ -161,9 +163,12 @@ class ui_nomos_license extends FO_Plugin
     /* Get agent list */
     $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
 
+/*
+FUTURE advanced interface allowing user to select dataset (agent version)
     $AgentSelect = AgentSelect($Agent_name, $upload_pk, "license_file", true, "agent_pk", $Agent_pk);
     $VLic .= $AgentSelect;
     $VLic .= "<input type='submit' value='Go'>";
+*/
 
     /* Write license histogram to $VLic  */
     $LicCount = 0;

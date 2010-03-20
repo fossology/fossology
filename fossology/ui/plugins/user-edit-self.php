@@ -93,6 +93,7 @@ class user_edit_self extends FO_Plugin {
 		$Email = GetParm('email', PARM_TEXT);
 		$Email_notify = GetParm('enote', PARM_TEXT);
 		$agentList = userAgents();
+        $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
 
 		/* Make sure username looks valid */
 		if (empty($_SESSION['UserId'])) {
@@ -165,6 +166,12 @@ class user_edit_self extends FO_Plugin {
 			$SQL.= " user_agent_list = '$agentList'";
 			$GotUpdate = 1;
 		}
+
+        if ($default_bucketpool_fk != $R['default_bucketpool_fk']) {
+			$SQL.= " default_bucketpool_fk = '$default_bucketpool_fk'";
+			$GotUpdate = 1;
+        }
+
 		if (!empty($Pass1) && ($Pass0 != $Pass1) && ($Pass1 == $Pass2)) {
 			$Seed = rand() . rand();
 			$Hash = sha1($Seed . $Pass1);
@@ -261,6 +268,11 @@ class user_edit_self extends FO_Plugin {
 					$V.= AgentCheckBoxMake(-1, "agent_unpack");
 				}
 				$V .= "</td>\n";
+                $V.= "$Style<th>7.</th><th>Default bucketpool.</th>";
+                $V.= "<td>";
+				$Val = htmlentities($R['default_bucketpool_fk'], ENT_QUOTES);
+                $V.= SelectBucketPool($Val);
+                $V.= "</td>";
 				$V .= "</tr>\n";
 				$V.= "</table><P />";
 				$V.= "<input type='submit' value='Edit!'>\n";
