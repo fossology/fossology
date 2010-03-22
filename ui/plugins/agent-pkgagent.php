@@ -39,6 +39,10 @@ class agent_pkgagent extends FO_Plugin
   function RegisterMenus()
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); } // don't run
+    global $DB;
+    $SQL = "SELECT agent_enabled FROM agent WHERE agent_name ='pkgagent' order by agent_ts LIMIT 1;";
+    $Results = $DB->Action($SQL);
+    if ($Results[0]['agent_enabled']== f){return(0);}
     menu_insert("Agents::" . $this->Title,0,$this->Name);
     }
 

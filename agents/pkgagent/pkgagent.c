@@ -128,6 +128,13 @@ int Verbose = 0;
  field='value' pairs, save the items.
  Returns: pointer to start of next field, or
  NULL at \0.
+
+	@param char *Sin
+	@param char *Field
+	@param int FieldMax
+	@param char *Value
+	@param int ValueMax
+	@param char Separator
 **********************************************/
 char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
                          char *Value, int ValueMax, char Separator)
@@ -190,9 +197,9 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
  *
  * Expect 3 field from the scheduler, 'pfile_pk' 'pfilename' and 'mimetype'
  * Parameters:
- * 		s   string send from scheduler
- * 		pi  rpmpkginfo global pointer
- * 		dpi debpkginfo global pointer
+ * 	@param char *s   string send from scheduler
+ * 	@param struct rpmpkginfo *pi  rpmpkginfo global pointer
+ * 	@param struct debpkginfo *dpi debpkginfo global pointer
  */
 void    ParseSchedInput (char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi)
 {
@@ -263,8 +270,8 @@ void    ParseSchedInput (char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi)
  * get RPM package info from rpm file header use rpm library
  *
  * Parameters:
- * 		header rpm header
- * 		*pi    rpmpkginfo global pointer
+ * 	@param Header header rpm header
+ * 	@param struct *pi    rpmpkginfo global pointer
  */
 void ReadHeaderInfo(Header header, struct rpmpkginfo *pi) 
 {
@@ -385,8 +392,8 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
  * 
  * Get RPM package info.
  * Parameters:
- * 		pkg  path of repo pfile
- * 		*pi  rpmpkginfo global pointer
+ * 	@param char *pkg                path of repo pfile
+ * 	@param struct rpmpkginfo *pi    rpmpkginfo global pointer
  * Returns:
  * 		True for success
  */
@@ -444,8 +451,10 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
 
 /**
  * RecordMetadata(struct rpmpkginfo *pi)
- *
  * Store rpm package info into database
+ *	
+ * 	@param struct rpmpkginfo *pi
+ *
  */
 void	RecordMetadataRPM	(struct rpmpkginfo *pi)
 {
@@ -467,7 +476,7 @@ void	RecordMetadataRPM	(struct rpmpkginfo *pi)
   if (DBdatasize(DB) <=0)
   {
     memset(SQL,0,sizeof(SQL));
-    DBaccess(DB,"BEGIN;");  
+    DBaccess(DB,"BEGIN;"); 
     snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm (pkg_name,pkg_alias,pkg_arch,version,rpm_filename,license,pkg_group,packager,release,build_date,vendor,url,source_rpm,summary,description,pfile_fk) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%ld);",pi->pkgName,pi->pkgAlias,pi->pkgArch,pi->version,pi->rpmFilename,pi->license,pi->group,pi->packager,pi->release,pi->buildDate,pi->vendor,pi->url,pi->sourceRPM,pi->summary,pi->description,pi->pFileFk);
     rc = DBaccess(DB,SQL);
     if (rc < 0)
@@ -479,7 +488,7 @@ void	RecordMetadataRPM	(struct rpmpkginfo *pi)
       DBclose(DB);
       exit(-1);
     }
-    
+      
     DBaccess(DB,"SELECT currval('pkg_rpm_pkg_pk_seq'::regclass);");
     pkg_pk = atoi(DBgetvalue(DB,0,0));
 
@@ -804,6 +813,53 @@ void	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
   fclose(fp);
 }/*  GetMetadataDebSource(char *repFile, struct debpkginfo *pi) */
 
+/* **************************************************
+ *  IsExe(): Check if the executable exists.
+ *  (Like the command-line "which" but without returning
+ *  the path.)
+ *  This should only be used on relative path executables.
+ *  Returns: 1 if exists, 0 if does not exist.
+ * ***************************************************/
+int     IsExe   (char *Exe, int Quiet)
+{
+  char *Path;
+  int i,j;
+  char TestCmd[FILENAME_MAX];
+
+  Path = getenv("PATH");
+  if (!Path) return(0); /*  nope! */
+
+  memset(TestCmd,'\0',sizeof(TestCmd));
+  j=0;
+  for(i=0; (j<FILENAME_MAX-1) && (Path[i] != '\0'); i++)
+    {
+    if (Path[i]==':')
+        {
+        if ((j>0) && (TestCmd[j-1] != '/')) strcat(TestCmd,"/");
+        strcat(TestCmd,Exe);
+        if (IsFile(TestCmd,1))  return(1); /*  found it! */
+        /*  missed */
+        memset(TestCmd,'\0',sizeof(TestCmd));
+        j=0;
+        }
+    else
+        {
+        TestCmd[j]=Path[i];
+        j++;
+        }
+    }
+
+  /*  check last path element */
+  if (j>0)
+    {
+    if (TestCmd[j-1] != '/') strcat(TestCmd,"/");
+    strcat(TestCmd,Exe);
+    if (IsFile(TestCmd,1))      return(1); /*  found it! */
+    }
+  if (!Quiet) fprintf(stderr,"  %s :: not found in $PATH\n",Exe);
+  return(0); /*  not in path */
+} /*  IsExe() */
+
 /***********************************************
  Usage():
  Command line options allow you to write the agent so it works 
@@ -828,9 +884,9 @@ int	main	(int argc, char *argv[])
   char Parm[MAXCMD];
   int c;
   char *agent_desc = "Pulls metadata out of RPM or DEBIAN packages";
-  int i;
   glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+  int DISABLED = 0;
 
   DB = DBopen();
   if (!DB)
@@ -847,6 +903,22 @@ int	main	(int argc, char *argv[])
     switch(c)
 	{
 	case 'i':
+                /*  Check dpkg-source tools if installed, if not update agent table
+                 *  Set agent_enabled = false */
+                if (!IsExe("dpkg-source",1)){
+        	  char sql[256];
+        	  int rc = 0;
+        	  printf("WARNING: Package agent diabled, because <dpkg-source> could not be found on the system.\n");
+        	  fflush(stdout);
+
+        	  sprintf(sql, "UPDATE agent set agent_enabled=false WHERE agent_name ='%s';", basename(argv[0]));
+     	   	  rc = DBaccess(DB, sql);
+         	  if (rc < 0){
+                    printf("ERROR: Agent_enabled unable to write to the database. %s\n", sql);
+                    DBclose(DB);
+                    exit(-1);
+        	  }
+   		}
                 DBclose(DB);  /* DB was opened above, now close it and exit */
                 exit(0);
         case 'v':
@@ -859,6 +931,13 @@ int	main	(int argc, char *argv[])
 	}
   }
 
+  /* Check dpkg-source tools not installed, pkgagent will not run */
+  if (!IsExe("dpkg-source",1)){
+	DISABLED = 1;
+	printf("WARNING: Package agent diabled, no information could be determined about the package, because <dpkg-source> could not be found on the system. To generate this information ensure that it is available to on the standard search path and reschedule this agent.\n");
+        fflush(stdout);
+
+  }
   /* If no args, run from scheduler! */
   if (argc == 1)
   {
@@ -889,19 +968,23 @@ int	main	(int argc, char *argv[])
           GetMetadata(repFile,glb_rpmpi);
           RecordMetadataRPM(glb_rpmpi);
         } else if (PKG_DEB) {
-          GetMetadataDebBinary(glb_debpi);
-          RecordMetadataDEB(glb_debpi);
+	  if (!DISABLED){
+            GetMetadataDebBinary(glb_debpi);
+            RecordMetadataDEB(glb_debpi);
+	  }
 	} else if (PKG_DEB_SRC) {
-	  repFile = RepMkPath("files", glb_debpi->pFile);
-	  if (!repFile) {
-	    printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
+	  if (!DISABLED){
+	    repFile = RepMkPath("files", glb_debpi->pFile);
+	    if (!repFile) {
+	      printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
                             glb_debpi->pFileFk, glb_debpi->pFile);
-            fflush(stdout);
-            DBclose(DB);
-            exit(-1);
-          }
-	  GetMetadataDebSource(repFile,glb_debpi);
-	  RecordMetadataDEB(glb_debpi);
+              fflush(stdout);
+              DBclose(DB);
+              exit(-1);
+            }
+	    GetMetadataDebSource(repFile,glb_debpi);
+	    RecordMetadataDEB(glb_debpi);
+	  }
         } else {
 	  /* Deal with the other package*/
 	}
@@ -913,10 +996,10 @@ int	main	(int argc, char *argv[])
   else
   {
     /* printf("DEBUG: running in cli mode, processing file(s)\n"); */
-    for (i = 1; i < argc; i++)
+    for (; optind < argc; optind++)
     {
        PKG_RPM=1;
-       GetMetadata(argv[i],glb_rpmpi);
+       GetMetadata(argv[optind],glb_rpmpi);
        //RecordMetadataRPM(glb_rpmpi);
     }
   }
