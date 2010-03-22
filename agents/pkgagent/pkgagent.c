@@ -903,12 +903,12 @@ int	main	(int argc, char *argv[])
     switch(c)
 	{
 	case 'i':
-                /*  Check dpkg-source tools if installed, if not update agent table
+                /*  Check if dpkg-source tools is installed, if not update agent table
                  *  Set agent_enabled = false */
                 if (!IsExe("dpkg-source",1)){
         	  char sql[256];
         	  int rc = 0;
-        	  printf("WARNING: Package agent diabled, because <dpkg-source> could not be found on the system.\n");
+        	  printf("WARNING: Package agent disabled, because <dpkg-source> could not be found on the system.\n");
         	  fflush(stdout);
 
         	  sprintf(sql, "UPDATE agent set agent_enabled=false WHERE agent_name ='%s';", basename(argv[0]));
@@ -931,10 +931,10 @@ int	main	(int argc, char *argv[])
 	}
   }
 
-  /* Check dpkg-source tools not installed, pkgagent will not run */
+  /* Check if dpkg-source tools is not installed, pkgagent will not run */
   if (!IsExe("dpkg-source",1)){
 	DISABLED = 1;
-	printf("WARNING: Package agent diabled, no information could be determined about the package, because <dpkg-source> could not be found on the system. To generate this information ensure that it is available to on the standard search path and reschedule this agent.\n");
+	printf("WARNING: Package agent disabled, no information could be determined about the package, because <dpkg-source> could not be found on the system. To generate this information ensure that it is available to on the standard search path and reschedule this agent.\n");
         fflush(stdout);
 
   }
