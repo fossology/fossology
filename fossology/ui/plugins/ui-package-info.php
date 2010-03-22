@@ -38,6 +38,11 @@ class ui_package_info extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
+    global $DB;
+    $SQL = "SELECT agent_enabled FROM agent WHERE agent_name ='pkgagent' order by agent_ts LIMIT 1;";
+    $Results = $DB->Action($SQL);
+    if ($Results[0]['agent_enabled']== f){return(0);}
+
     $Parm = Traceback_parm_keep(array("upload","item","format"));
     $URI = $this->Name . $Parm;
     if (GetParm("mod",PARM_STRING) == $this->Name)
