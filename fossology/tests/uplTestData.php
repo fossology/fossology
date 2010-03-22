@@ -65,6 +65,9 @@ class uploadTestDataTest extends fossologyTestCase
     print "Creating Testing folder\n";
     $page = $this->mybrowser->get($URL);
     $this->createFolder(null, 'Testing', null);
+    
+    print "Creating Copyright folder\n";
+    $this->createFolder(null, 'Copyright', null);
   }
 
   function testuploadTestDataTest() {
@@ -83,13 +86,27 @@ class uploadTestDataTest extends fossologyTestCase
                      'http://www.gnu.org/licenses/gpl-3.0.txt',
                      'http://www.gnu.org/licenses/agpl-3.0.txt',
                      'http://osrb-1.fc.hp.com/~fosstester/fossDirsOnly.tar.bz2');
+    
+    $copyrightList = array ('TestData/archives/3files.tar.bz2');
 
-    /* upload the archives using the upload from file menu */
+    /* upload the archives using the upload from file menu
+     * 
+     * 1 = copyright agent
+     * 3 = metadata agent
+     * 4 = nomos agent
+     * 5 = package agent
+     */
+    
 
     print "Starting file uploads\n";
     foreach($uploadList as $upload) {
       $description = "File $upload uploaded by Upload Test Data Test";
       $this->uploadFile('Testing', $upload, $description, null, '1,3,4');
+    }
+    print "Starting copyright uploads\n";
+    foreach($copyrightList as $upload) {
+      $description = "File $upload uploaded by Upload Test Data Test";
+      $this->uploadFile('Copyright', $upload, $description, null, '1,3,4');
     }
     /* Upload the urls using upload from url.  Check if the user specificed a
      * web proxy for the environment.  If so, set the attribute. */
