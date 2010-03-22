@@ -6,7 +6,11 @@
   if (!isset($GlobalReady)) { exit; }
 
   global $DATADIR;
+
+  print "datadir is:$DATADIR\n";
+
   $Schema=array();
+
   $Schema["TABLE"]["agent"]["agent_pk"]["DESC"] = "COMMENT ON COLUMN \"agent\".\"agent_pk\" IS 'Primary key';";
   $Schema["TABLE"]["agent"]["agent_pk"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_pk\" int4;";
   $Schema["TABLE"]["agent"]["agent_pk"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_pk\" SET NOT NULL, ALTER COLUMN \"agent_pk\" SET DEFAULT nextval('agent_agent_pk_seq'::regclass);";
@@ -1160,6 +1164,10 @@
   $Schema["TABLE"]["users"]["user_agent_list"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_agent_list\" text;";
   $Schema["TABLE"]["users"]["user_agent_list"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_agent_list\" DROP NOT NULL;";
 
+  $Schema["TABLE"]["users"]["default_bucketpool_fk"]["DESC"] = "";
+  $Schema["TABLE"]["users"]["default_bucketpool_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"default_bucketpool_fk\" int4;";
+  $Schema["TABLE"]["users"]["default_bucketpool_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"default_bucketpool_fk\" DROP NOT NULL;";
+
 
 
   $Schema["VIEW"]["keyagent"] = "CREATE VIEW \"keyagent\" AS SELECT key.key_pk, key.key_name, key.key_desc, key.key_parent_fk, key.key_agent_fk, agent.agent_pk, agent.agent_name, agent.agent_rev, agent.agent_desc FROM key, agent WHERE (agent.agent_pk = key.key_agent_fk);";
@@ -1305,6 +1313,7 @@
   $Schema["CONSTRAINT"]["pkg_rpm_pfile_fk_fkey"] = "ALTER TABLE \"pkg_rpm\" ADD CONSTRAINT \"pkg_rpm_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["pkg_rpm_req_pkg_fk_fkey"] = "ALTER TABLE \"pkg_rpm_req\" ADD CONSTRAINT \"pkg_rpm_req_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_rpm\" (\"pkg_pk\");";
   $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\");";
+  $Schema["CONSTRAINT"]["users_default_bucketpool_pk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_default_bucketpool_pk_fkey\" FOREIGN KEY (\"default_bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\");";
 
   $Schema["INDEX"]["agent_lic_meta"]["lic_fk_btree"] = "CREATE INDEX lic_fk_btree ON agent_lic_meta USING btree (lic_fk);";
   $Schema["INDEX"]["agent_lic_meta"]["pfile_fk_idx"] = "CREATE INDEX pfile_fk_idx ON agent_lic_meta USING btree (pfile_fk);";
