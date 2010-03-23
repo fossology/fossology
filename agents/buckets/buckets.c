@@ -898,13 +898,13 @@ int main(int argc, char **argv)
   /*** validate command line ***/
   if (!bucketpool_pk && !ReadFromStdin)
   {
-    printf("You must specify an active bucketpool.\n");
+    printf("FATAL: You must specify an active bucketpool.\n");
     Usage(argv[0]);
     exit(-1);
   }
   if (!head_uploadtree_pk && !ReadFromStdin)
   {
-    printf("You must specify a valid uploadtree_pk or upload_pk.\n");
+    printf("FATAL: You must specify a valid uploadtree_pk or upload_pk.\n");
     Usage(argv[0]);
     exit(-1);
   }
@@ -944,7 +944,8 @@ int main(int argc, char **argv)
       /* Read the bucketpool_pk and upload_pk from stdin.
        * Format looks like 'bppk=123, upk=987'
        */
-      inbufp = fgets(inbuf, sizeof(inbuf), stdin);
+      if (ReadLine(stdin, inbuf, sizeof(inbuf)) < 0) break;
+      inbufp = inbuf;
       if (!inbufp) break;
 
       token = strtok_r(inbufp, Delims, &saveptr);
@@ -1001,8 +1002,8 @@ int main(int argc, char **argv)
     /* Has the uploadtree already been processed?  If so, we are done.
        Don't even bother to create a bucket_ars entry.
        THIS ISN'T RIGHT SINCE IT MAY BE FOR A DIFFERENT nomos agent_pk
-     */
-    if (processed(pgConn, agent_pk, pfile_pk, head_uploadtree_pk, bucketpool_pk)) return 0;
+     */ 
+    if (processed(pgConn, agent_pk, pfile_pk, head_uploadtree_pk, bucketpool_pk)) break;
 
     /* Find the most recent nomos data for this upload.  That's what we want to use
          to process the buckets.
