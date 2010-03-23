@@ -199,7 +199,7 @@ FUNCTION int *getMatchOnly(PGconn *pgConn, int bucketpool_pk,
   fin = fopen(filepath, "r");
   if (!fin)
   {
-    printf("FATAL: %s.%s.%d Failure to initialize bucket %s (pool=%d).\nError: %s\n",
+    printf("FATAL: %s.%s.%d Failure to open bucket file %s (pool=%d).\nError: %s\n",
            __FILE__, fcnName, __LINE__, filepath, bucketpool_pk, strerror(errno));
     return 0;
   }
