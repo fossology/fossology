@@ -42,7 +42,7 @@ class agent_pkgagent extends FO_Plugin
     global $DB;
     $SQL = "SELECT agent_enabled FROM agent WHERE agent_name ='pkgagent' order by agent_ts LIMIT 1;";
     $Results = $DB->Action($SQL);
-    if ($Results[0]['agent_enabled']== 'f'){return(0);}
+    if (isset($Results[0]) && ($Results[0]['agent_enabled']== 'f')){return(0);}
     menu_insert("Agents::" . $this->Title,0,$this->Name);
     }
 
