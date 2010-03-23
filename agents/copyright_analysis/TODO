@@ -1,0 +1,47 @@
+In copyright.py v 2903:
+
+line 87: 
+            print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
+1) "Something is broken." is pretty redundant. 
+2) I'm pretty sure the actual postgres error message is more specific than "Could not connect to database".  Why don't you just print that out instead of your own message?  The libpq functions to get the error code and error message string are PQresStatus() and PQresultErrorMessage().  I notice that you write the error message string in some cases but not others.
+
+
+line 100:
+        print >> sys.stderr, 'You must specify a model file for all phases of the algorithm.
+1) What do you mean "for all phases of the algorithm"?  There is only one switch -m (--model) for specifying the model.   So to reduce ambiguity (i.e. is there a different model file for each phase"), why not just say "You mush specify a model file.".
+
+lines 122-129:
+    if options.analyze_from_file:
+        files = [line.rstrip() for line in open(options.analyze_from_file).readlines()]
+        for file in files:
+            results = library.label_file(file,model)
+            print "%s :: " % (file)
+            if len(results) == 0:
+                print "No copyrights"
+            for i in range(len(results)):
+                print "\t[%d:%d]" % (results[i][0], results[i][1])
+1) each of those print's are going to come out in the log file as "ERROR: ...".   Did you mean for these to be printed with --verbose only?  They are also going to be printed on separate lines in the scheduler log, is that what you wanted?
+
+You get the idea.  Here is a summary of tips.
+1) Please don't print debug to the log unless it is requested with the verbose option.
+2) There are 5 options you should be using when printing to the log:
+   - "FATAL" Technical and detailed errors.
+   - "ERROR" Human readable errors.
+   - "WARNING" Human readable warning.
+   - "LOG" Machine readable warning.
+   - "DEBUG" Debugging message.
+3) Make sure your messages mean something to the intended reader.
+4) Make your messages as explicit as reasonable.  For example, line 158:
+            print >> sys.stderr, 'ERROR: Something is broken. Could not open Repo.'
+    would be improved by including the path you are trying to open.  This extra info will tell the reader if their config path file is correct.
+     Another example is the dbconnect error I mentioned above.
+     Another example is  line 189:
+                        print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
+     printing the status code is fine, but the error message (PQresultErrorMessage()) is better.  Who wants to go look up the message from the code when you can just print the message?
+5) Starting on line 201 you have a couple of "except:" where you print a traceback.  It would be easier to understand the log if you print out why you are doing the traceback before you print it.  Or is it there and I'm just not seeing it?
+6) When you want to know if a table exists, don't (potentially) count every record like on line 220:
+    if db.access2('SELECT count(ct_pk) FROM copyright;') != 1:
+Quicker would be "select ct_pk from copyright limit 1".
+7) Semicolons aren't needed at the end of your sql stmt unless you are stringing a bunch of statements together.  the semicolon is a statement separator so it isn't needed if you are only sending a single stmt to the postmaster.
+8) This statement in 6) brings up a question about db.access2().   Does access2() distinguish between an invalid query (like a syntax error) and no records returned?  It's important to give an error if the command fails.  Is db.access2() is a wrapper around the same function in libfossdb.c?  If so, then the stmt in 6) is an error because DBaccess2 in libfossdb returns a PGresult * or a null pointer on serious errors.
+
