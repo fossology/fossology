@@ -315,6 +315,10 @@ class ui_browse extends FO_Plugin {
         $V.= $Status['active'] . " active; ";
       }
       $V.= $Status['failed'] . " failed.";
+
+/* bobg: bsam license analysis is depricated */
+if (isset($__OBSOLETE__))
+{
       /* Check for re-do license analysis */
       if (!empty($ReAnalyze)) {
         /* Check if the analysis already exists and is not running */
@@ -334,6 +338,7 @@ class ui_browse extends FO_Plugin {
           $V.= "'>Reschedule</a> license analysis";
         }
       }
+}
       /* End of the record */
       $V.= "<tr><td colspan=2>&nbsp;</td></tr>\n";
     }
