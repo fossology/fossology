@@ -1062,7 +1062,7 @@ int main(int argc, char **argv) {
             numrows = PQntuples(result);
             if (numrows == 0) 
             {
-              printf("Requested nomos analysis of upload %d - No records to processes.\n",
+              printf("LOG: Ignoring requested nomos analysis of upload %d - Records already processed.\n",
                     upload_pk);
               continue;
             }
