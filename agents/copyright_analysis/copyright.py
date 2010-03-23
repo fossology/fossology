@@ -83,8 +83,8 @@ def main():
         db = None
         try:
             db = libfosspython.FossDB()
-        except:
-            print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
+        except Exception, inst:
+            print >> sys.stderr, 'ERROR: %s, in %s' % inst
             return 1
 
         tr = table_check(db)
@@ -146,8 +146,8 @@ def agent(model):
         db = None
         try:
             db = libfosspython.FossDB()
-        except:
-            print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
+        except Exception, inst:
+            print >> sys.stderr, 'ERROR: %s, in %s' % inst[:]
             return 1
 
         tr = table_check(db)
@@ -174,13 +174,13 @@ def agent(model):
                 text = open(path).read()
                 if len(offsets) == 0:
                     result = db.access2("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
-                        "VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement');" % (agent_pk, pfile))
+                        "VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement')" % (agent_pk, pfile))
                     if result != 0:
                         print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
                 else:
                     for i in range(len(offsets)):
                         result = db.access2("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
-                            "VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s');" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]]), hex(abs(hash(re.escape(text[offsets[i][0]:offsets[i][1]])))), offsets[i][2]))
+                            "VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s')" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]]), hex(abs(hash(re.escape(text[offsets[i][0]:offsets[i][1]])))), offsets[i][2]))
                         if result != 0:
                             print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
                 count += 1
@@ -199,16 +199,16 @@ def agent(model):
             try:
                 line = sys.stdin.readline()
             except:
-                line = "quit"
                 exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
-                p = repr(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
-                sys.stderr.write("ERROR:\n%s\n" % p)
+                p = '\t'.join(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
+                sys.stderr.write("ERROR: An error occurred in the main agent loop.\n\tThe current command is: '%s'.\n\tPlease consult the provided traceback.\n\t%s\n" % (line,p))
                 sys.stderr.flush()
+                line = "quit"
 
     except:
         exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
-        p = repr(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
-        sys.stderr.write("ERROR:\n%s\n" % p)
+        p = '\t'.join(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
+        sys.stderr.write("ERROR: An error occurred in the main agent loop. Please consult the provided traceback.\n\t%s\n" % p)
         sys.stderr.flush()
         return 1
 
@@ -217,7 +217,7 @@ def agent(model):
     return 0
 
 def table_check(db):
-    if db.access2('SELECT count(ct_pk) FROM copyright;') != 1:
+    if db.access2('SELECT ct_pk FROM copyright LIMIT 1') != 1:
         error = db.errmsg()
         if error == 'relation "copyright" does not exist':
             print >> sys.stderr, 'WARNING: Could not find copyright table. Will try to setup automatically. If you continue to have trouble try using %s --setup-database' % sys.argv[0]
@@ -231,16 +231,16 @@ def drop_database():
     db = None
     try:
         db = libfosspython.FossDB()
-    except:
-        print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
+    except Exception, inst:
+        print >> sys.stderr, 'ERROR: %s, in %s' % inst
         sys.exit(1)
 
-    result = db.access2("DROP TABLE copyright CASCADE;")
+    result = db.access2("DROP TABLE copyright CASCADE")
     if result != 0:
         error = db.errmsg()
         if error != 'table "copyright" does not exist':
             print >> sys.stderr, "ERROR: Could not drop copyright. Database said: '%s'" % error
-    result = db.access2("DROP SEQUENCE copyright_ct_pk_seq CASCADE;")
+    result = db.access2("DROP SEQUENCE copyright_ct_pk_seq CASCADE")
     if result != 0:
         error = db.errmsg()
         if error != 'sequence "copyright_ct_pk_seq" does not exist':
@@ -252,8 +252,8 @@ def setup_database(drop=False):
     db = None
     try:
         db = libfosspython.FossDB()
-    except:
-        print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
+    except Exception, inst:
+        print >> sys.stderr, 'ERROR: %s, in %s' % inst
         sys.exit(1)
 
     if drop:
@@ -263,7 +263,7 @@ def setup_database(drop=False):
     exists = False
     result = db.access2("CREATE SEQUENCE copyright_ct_pk_seq "
         "START WITH 1 INCREMENT BY 1 NO MAXVALUE NO MINVALUE "
-        "CACHE 1;")
+        "CACHE 1")
     if result != 0:
         error = db.errmsg()
         if error != 'relation "copyright_ct_pk_seq" already exists':
@@ -273,7 +273,7 @@ def setup_database(drop=False):
             exists = True
     
     if not exists:
-        result = db.access2("ALTER TABLE public.copyright_ct_pk_seq OWNER TO fossy;")
+        result = db.access2("ALTER TABLE public.copyright_ct_pk_seq OWNER TO fossy")
         if result != 0:
             error = db.errmsg()
             print >> sys.stderr, "ERROR: Could not alter copyright_ct_pk_seq. Database said: '%s'" % error
@@ -289,7 +289,7 @@ def setup_database(drop=False):
         "type text CHECK (type in ('statement', 'email', 'url')), "
         # "type copyright_type NOT NULL, "
         "copy_startbyte integer, "
-        "copy_endbyte integer);")
+        "copy_endbyte integer)")
     if result != 0:
         error = db.errmsg()
         if error != 'relation "copyright" already exists':
@@ -299,28 +299,28 @@ def setup_database(drop=False):
             exists = True
 
     if not exists:
-        result = db.access2("ALTER TABLE public.copyright OWNER TO fossy;")
+        result = db.access2("ALTER TABLE public.copyright OWNER TO fossy")
         if result != 0:
             error = db.errmsg()
             print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
             return -1
 
         result = db.access2("ALTER TABLE ONLY copyright ADD CONSTRAINT "
-                "copyright_pkey PRIMARY KEY (ct_pk);")
+                "copyright_pkey PRIMARY KEY (ct_pk)")
         if result != 0:
             error = db.errmsg()
             print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
             return -1
         
         result = db.access2("ALTER TABLE ONLY copyright ADD CONSTRAINT "
-                "pfile_fk FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk);")
+                "pfile_fk FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk)")
         if result != 0:
             error = db.errmsg()
             print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
             return -1
         
         result = db.access2("ALTER TABLE ONLY copyright ADD CONSTRAINT "
-                "agent_fk FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk);")
+                "agent_fk FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk)")
         if result != 0:
             error = db.errmsg()
             print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
