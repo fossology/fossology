@@ -19,12 +19,30 @@ import re
 import math
 
 def findall(RE, text):
+    """
+    findall(Regex, text) -> list(['str_1',start_byte_1, end_byte_1], ...)
+
+    Uses the re.finditer method to locate all instances of the search 
+    string and return the string and its start and end bytes.
+
+    Regex is a compiled regular expression using the re.compile() method.
+    text is the body of text to search through.
+    """
     found = []
     for iter in RE.finditer(text):
         found.append([iter.group(), iter.start(), iter.end()])
     return found
 
 def findall_erase(RE, text):
+    """
+    findall_erase(Regex, text) -> string
+
+    Uses the re.finditer method to locate all instances of the search
+    string and replaces them with spaces. The modified text is returned.
+
+    Regex is a compiled regular expression using the re.complile() method.
+    text is the body of text to search through.
+    """
     new_text = list(text)
     found = []
     for iter in RE.finditer(text):
@@ -33,6 +51,7 @@ def findall_erase(RE, text):
         new_text[l[1]:l[2]] = [' ' for i in range(l[2]-l[1])]
     return (found, ''.join(new_text))
 
+# standard Regular Expressions used to tokenize files.
 months = ['JAN','FEB','MAR','MAY','APR','JUL','JUN','AUG','OCT','SEP','NOV','DEC','January', 'February', 'March', 'April', 'June', 'July', 'August', 'September', 'SEPT', 'October', 'November', 'December',]
 RE_ANDOR = re.compile('and\/or',re.I)
 RE_COMMENT = re.compile('\s([\*\/\#\%\!\@]+)')
@@ -50,6 +69,25 @@ RE_TOKEN = re.compile('([A-Za-z0-9]+)')
 RE_ANYTHING = re.compile('.', re.DOTALL)
 
 def parsetext(text):
+    """
+    parsetext(text) -> dict()
+
+    Tokenizes a body of text and returns a dictionary containing
+    a set of features located within the text.
+
+    'start':    the byte offset of '<s>' tags found in the text.
+    'end':      the byte offset of '</s>' tags found in the text.
+    'email':    the byte offset and text of emails found in the text.
+    'date':     the byte offset and text of date like strings found.
+    'time':     the byte offset and text of time like strings found.
+    'year':     the byte offset and text of year like strings found.
+    'float':    the byte offset and text of floating point numbers found.
+    'copyright':the byte offset and text of copyright strings and symbols.
+                includes 'opyright', '(c)', and the copyright characters.
+    'tokens':   the byte offset and text of white space split tokens.
+                this also includes the characters located between 
+                alphanumeric characters.
+    """
     stuff = {}
     
     text = RE_ANDOR.sub('and or',text)
@@ -67,6 +105,10 @@ def parsetext(text):
     (stuff['copyright'], text) = findall_erase(RE_COPYRIGHT, text)
     (stuff['tokens'], text) = findall_erase(RE_TOKEN, text)
 
+
+    # we replace the original information extracted from the text with place
+    # holders so we can learn a generic trend in the structure of the
+    # documents.
     stuff['tokens'].extend([['XXXstartXXX', stuff['start'][i][1], stuff['start'][i][2]] for i in range(len(stuff['start']))])
     stuff['tokens'].extend([['XXXendXXX', stuff['end'][i][1], stuff['end'][i][2]] for i in range(len(stuff['end']))])
     stuff['tokens'].extend([['XXXemailXXX', stuff['email'][i][1], stuff['email'][i][2]] for i in range(len(stuff['email']))])
@@ -83,6 +125,20 @@ def parsetext(text):
     return stuff
 
 def replace_placeholders(tokens,stuff):
+    """
+    replace_placeholders(tokens, parse_dictionary) -> list()
+
+    Given a set of tokens and a parse_dictionary replace all the
+    place holders in the list of tokens with their respective
+    counter parts in the parse_dictionary.
+
+    The parse_dictionary is the dictionary returned by the 
+    parsetext function.
+
+    the list of tokens is a list of lists containing the token
+    as a string and the start and end bytes of the token as structured
+    as the tokens element in the parse_dictionary.
+    """
     t = tokens[:]
     n = len(t)
     for needle in ['XXXcopyrightXXX', 'XXXfloatXXX', 'XXXyearXXX', 'XXXtimeXXX',
@@ -95,6 +151,12 @@ def replace_placeholders(tokens,stuff):
     return t
 
 def token_sort(x,y):
+    """
+    token_sort(x,y) -> int
+
+    A sort help function. Takes two lists, ['string', int, int], and returns
+    {-1: if x < y, 1: if x > 1, 0: if x == y}.
+    """
     if (x[1] < y[1]):
         return -1
     if (x[1] > y[1]):
@@ -102,6 +164,22 @@ def token_sort(x,y):
     return 0
 
 def tokens_to_BIO(tokens):
+    """
+    tokens_to_BIO(tokens) -> (tokens, labels)
+
+    Takes a token list and returns the BIO labels based on the position
+    of the start and end tags.
+
+    This is used to convert the training data which is labeled using '<s></s>'
+    tags into a NLP standard labeling.
+
+    The returned tokens does not include start and end place holders.
+    The labels list contained the BIO tag for that token.
+
+    B - begining
+    I - inside
+    O - outside
+    """
     n = len(tokens)
     t = []
     l = []
