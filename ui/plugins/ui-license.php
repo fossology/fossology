@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class ui_license extends FO_Plugin
   {
   var $Name       = "license";
-  var $Title      = "License Browser";
+  var $Title      = "bSAM License Browser (deprecated)";
   var $Version    = "1.0";
   // var $MenuList= "Jobs::License";
   var $Dependency = array("db","browse","view-license");
