@@ -47,13 +47,13 @@ class list_lic_files extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
 
     // micro-menu
-	$agent_pk = GetParm("agent",PARM_INTEGER);
+	$nomosagent_pk = GetParm("napk",PARM_INTEGER);
 	$uploadtree_pk = GetParm("item",PARM_INTEGER);
 	$rf_shortname = GetParm("lic",PARM_RAW);
 	$Page = GetParm("page",PARM_INTEGER);
 	$Excl = GetParm("excl",PARM_RAW);
 
-    $URL = $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&lic=$rf_shortname&page=-1";
+    $URL = $this->Name . "&napk=$nomosagent_pk&item=$uploadtree_pk&lic=$rf_shortname&page=-1";
     if (!empty($Excl)) $URL .= "&excl=$Excl";
     menu_insert($this->Name."::Show All",0, $URL, "Show All Files");
 
@@ -77,7 +77,7 @@ class list_lic_files extends FO_Plugin
     $Max = 50;
 
     /*  Input parameters */
-	$agent_pk = GetParm("agent",PARM_INTEGER);
+	$nomosagent_pk = GetParm("napk",PARM_INTEGER);
 	$uploadtree_pk = GetParm("item",PARM_INTEGER);
 	$rf_shortname = GetParm("lic",PARM_RAW);
 	$Excl = GetParm("excl",PARM_RAW);
@@ -107,12 +107,12 @@ class list_lic_files extends FO_Plugin
 	$Offset = ($Page < 0) ? 0 : $Page*$Max;
     $order = "";
     $PkgsOnly = false;
-    $Count = CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly);
+    $Count = CountFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly);
     $V.= "<br>$Count files found with this license ";
     if ($Count < (1.25 * $Max)) $Max = $Count;
     $limit = ($Page < 0) ? "ALL":$Max;
     $order = " order by ufile_name asc";
-    $filesresult = GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
+    $filesresult = GetFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk,
                                 $PkgsOnly, $Offset, $limit, $order);
     $NumFiles = pg_num_rows($filesresult);
 //    $V .= "($NumFiles shown)";
@@ -131,13 +131,13 @@ class list_lic_files extends FO_Plugin
 
 	/* Offset is +1 to start numbering from 1 instead of zero */
     $RowNum = $Offset;
-    $LinkLast = "view-license&agent=$agent_pk";
+    $LinkLast = "view-license&napk=$nomosagent_pk";
     $ShowBox = 1;
     $ShowMicro=NULL;
 
     // base url
     $ushortname = rawurlencode($rf_shortname);
-    $URL = "?mod=" . $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&lic=$ushortname&page=-1";
+    $URL = "?mod=" . $this->Name . "&napk=$nomosagent_pk&item=$uploadtree_pk&lic=$ushortname&page=-1";
 
     while ($row = pg_fetch_assoc($filesresult))
     {

@@ -211,7 +211,8 @@ class ui_view extends FO_Plugin
 	  $V .= "<th align='left'>Item</th>";
 	  $V .= "</tr>\n";
 	  }
-    $V .= "<tr bgcolor='" . $this->HighlightColors[$H['Color']] . "'>\n";
+    if (key_exists('Color', $this->HighlightColors))
+      $V .= "<tr bgcolor='" . $this->HighlightColors[$H['Color']] . "'>\n";
 	$V .= "<td align='right'>" . $H['Match'] . "</td>\n";
 
 	$V .= "<td>";
@@ -603,8 +604,9 @@ class ui_view extends FO_Plugin
     $Folder = GetParm("folder",PARM_INTEGER);
     $Show = GetParm("show",PARM_STRING);
     $Item = GetParm("item",PARM_INTEGER);
+    $nomosagent_pk = GetParm("napk",PARM_INTEGER);
     $Page = GetParm("page",PARM_INTEGER);
-    $agent_pk = GetParm("agent",PARM_INTEGER);
+    $bucketagent_pk = GetParm("bapk",PARM_INTEGER);
     if (!$Fin && (empty($Item) || empty($Upload))) { return; }
     if (empty($Page)) { $Page=0; };
 
@@ -716,18 +718,26 @@ class ui_view extends FO_Plugin
 
     $HighlightMenu .= "</center>";  // some fcn left a dangling center
 
-    /* only display nomos results if we know the agent_pk 
+    /* only display nomos results if we know the nomosagent_pk 
        Otherwise, we don't know what results to display.  */
-    if (!empty($agent_pk))
+    if (!empty($nomosagent_pk))
     {
       $HighlightMenu .= "<b>The Nomos license detector found the following: </b>";
       $pfile_pk = 0;  // unknown, only have uploadtree_pk aka $Item
-      $NomosLics = GetFileLicenses_string($agent_pk, $pfile_pk, $Item);
+      $NomosLics = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $Item);
       $HighlightMenu .= $NomosLics;
-
-      $HighlightMenu .= "<p><b>The bSAM license detector found the following: </b>";
-      $HighlightMenu .= "<br>Note: Only bSAM results are highlighted.";
     }
+    if (!empty($bucketagent_pk))
+    {
+      $BuckArray = GetFileBuckets_array($nomosagent_pk, $bucketagent_pk, $pfile_pk, $Item);
+      $HighlightMenu .= "<br>" . $BuckArray[0] . ": ";
+      array_shift($BuckArray);
+      $HighlightMenu .= implode(", ", $BuckArray);
+    }
+      
+
+    $HighlightMenu .= "<p><b>The bSAM license detector found the following: </b>";
+    $HighlightMenu .= "<br>Note: Only bSAM results are highlighted.";
 
     if ($Format == 'hex')
 	{

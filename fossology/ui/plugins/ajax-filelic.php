@@ -20,14 +20,14 @@
  This plugin finds all the uploadtree_pk's in the first directory
  level under a parent, that contain a given license.
 
- GET args: agent, lic, item, (optional debug)
+ GET args: napk, lic, item, (optional debug)
 
  item   is the parent uploadtree_pk
- agent  is the agent_pk whos results you are looking for
+ napk   is the nomosagent_pk whos results you are looking for
  lic    is the shortname of the license
 
  ajax usage:
-   http://...?mod=ajax_filelic&agent=123&item=123456&lic=FSF
+   http://...?mod=ajax_filelic&napk=123&item=123456&lic=FSF
  
  Returns the rf_shortname, and comma delimited string of uploadtree_pks: "FSF,123,456"
  *************************************************/
@@ -69,12 +69,12 @@ class ajax_filelic extends FO_Plugin
       case "XML":
 	    break;
       case "HTML":
-	    $agent_pk = GetParm("agent",PARM_INTEGER);
+	    $nomosagent_pk = GetParm("napk",PARM_INTEGER);
     	$rf_shortname = GetParm("lic",PARM_RAW);
     	$uploadtree_pk = GetParm("item",PARM_INTEGER);
     	$debug = array_key_exists("debug", $_GET) ? true : false;
 
-        $Files = Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk);
+        $Files = Level1WithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk);
         $V = "";
         if (count($Files) == 0)
           $V .= "";  // no matches found

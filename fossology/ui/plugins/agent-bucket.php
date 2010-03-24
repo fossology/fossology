@@ -77,11 +77,18 @@ class agent_bucket extends FO_Plugin {
   $Depends is for specifying other dependencies.
   $Depends can be a jq_pk, or an array of jq_pks, or NULL.
 
-  This agent will queue a nomos agent if there are no
+  AgentAdd will queue a nomos agent if there are no
   license_file results for this upload.  If there are 
   results, then the agent will run on the most current.
   Note that the most current may not represent the latest
   nomos agent.
+
+  The pkgagent is also queued.  At this time there is no 
+  reliable way to see if the pkgagent has been run on an upload.
+
+  Note that if the pkg and nomos agents are already in the queue
+  for this upload, they will not be requeued.
+
   Returns NULL on success, string on failure.
   *********************************************/
   function AgentAdd($uploadpk, $Depends = NULL, $Priority = 0) 
@@ -125,6 +132,23 @@ class agent_bucket extends FO_Plugin {
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
     if (pg_num_rows($result) < 1) return ("Unable to find dependent job: unpack");
+    $NomosDep[] = $row['jq_pk'];
+    pg_free_result($result);
+
+    /* queue pkgagent.  If it's been previously run on this upload, it will 
+       run again but not insert duplicate pkgagent records.  */
+    $pkgagent = & $Plugins[plugin_find_id("agent_pkgagent") ];
+    $rc = $pkgagent->AgentAdd($uploadpk);
+    if (!empty($rc)) return $rc;
+
+    /* To make the bucket agent dependent on pkgagent, we need it's jq_pk */
+    $sql = "SELECT jq_pk FROM jobqueue INNER JOIN job ON
+            job.job_upload_fk = $uploadpk AND job.job_pk = jobqueue.jq_job_fk
+            WHERE jobqueue.jq_type = 'pkgagent';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    if (pg_num_rows($result) < 1) return ("Unable to find dependent job: pkgagent");
     $NomosDep[] = $row['jq_pk'];
     pg_free_result($result);
 

@@ -141,9 +141,9 @@ class ui_buckets extends FO_Plugin
     $Agent_name = "buckets";
     $Agent_desc = "Bucket agent (categorizes files)";
     if (array_key_exists("agent_pk", $_POST))
-      $Agent_pk = $_POST["agent_pk"];
+      $bucketagent_pk = $_POST["agent_pk"];
     else
-      $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
+      $bucketagent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
     /*  Get the counts for each bucket under this UploadtreePk, skip artifacts 
         Because buckets roll up, the counts will be high (a bucket will be counted
@@ -176,7 +176,7 @@ class ui_buckets extends FO_Plugin
                      where upload_fk=$upload_pk 
                        and ((ufile_mode & (1<<29))=0)
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
-              where PF=pfile_fk and agent_fk=$Agent_pk 
+              where PF=pfile_fk and agent_fk=$bucketagent_pk 
                     and bucket_fk=bucket_pk and bucketpool_fk=$bucketpool_pk
                     and bucket_file.nomosagent_fk=$nomosagent_pk
               group by bucket_fk 
@@ -198,7 +198,7 @@ class ui_buckets extends FO_Plugin
     $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
 
 /* FUTURE advanced interface for selecting agents
-    $AgentSelect = AgentSelect($Agent_name, $upload_pk, "bucket_file", true, "agent_pk", $Agent_pk);
+    $AgentSelect = AgentSelect($Agent_name, $upload_pk, "bucket_file", true, "agent_pk", $bucketagent_pk);
     $VLic .= $AgentSelect;
     $VLic .= "<input type='submit' value='Go'>";
 */
@@ -226,11 +226,11 @@ class ui_buckets extends FO_Plugin
       /*  Show  */
       $VLic .= "<td align='center'><a href='";
       $VLic .= Traceback_uri();
-      $VLic .= "?mod=list_bucket_files&agent=$Agent_pk&item=$Uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk" . "'>Show</a></td>";
+      $VLic .= "?mod=list_bucket_files&bapk=$bucketagent_pk&item=$Uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk" . "'>Show</a></td>";
 
       /*  Bucket name  */
       $VLic .= "<td align='left'>";
-      $VLic .= "<a id='$bucket_pk' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filebucket&agent=$Agent_pk&item=$Uploadtree_pk&bucket_pk=$bucket_pk\")'";
+      $VLic .= "<a id='$bucket_pk' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filebucket&bapk=$bucketagent_pk&item=$Uploadtree_pk&bucket_pk=$bucket_pk\")'";
       $VLic .= ">$bucket_name </a>";
       $VLic .= "</td>";
       $VLic .= "</tr>\n";
@@ -267,7 +267,7 @@ class ui_buckets extends FO_Plugin
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
       {
         $LinkUri = Traceback_uri();
-        $LinkUri .= "?mod=view-license&agent=$Agent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
+        $LinkUri .= "?mod=view-license&bapk=$bucketagent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
       }
       else
       {

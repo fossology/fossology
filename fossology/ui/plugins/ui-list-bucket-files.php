@@ -28,7 +28,8 @@ if (!isset($GlobalReady)) { exit; }
  This plugin is used to:
    List files for a given bucket in a given uploadtree.
  The following are passed in:
-   agent  agent_pk
+   bapk   bucketagent_pk
+   napk   nomosagent_pk
    item   uploadtree_pk
    bpk    bucket_pk
    bp     bucketpool_pk
@@ -51,13 +52,14 @@ class list_bucket_files extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
 
     // micro-menu
-	$agent_pk = GetParm("agent",PARM_INTEGER);
+	$bucketagent_pk = GetParm("bapk",PARM_INTEGER);
 	$uploadtree_pk = GetParm("item",PARM_INTEGER);
 	$bucket_pk = GetParm("bpk",PARM_INTEGER);
 	$bucketpool_pk = GetParm("bp",PARM_INTEGER);
+	$nomosagent_pk = GetParm("napk",PARM_INTEGER);
 	$Page = GetParm("page",PARM_INTEGER);
 
-    $URL = $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&page=-1";
+    $URL = $this->Name . "&bapk=$bucketagent_pk&item=$uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk&page=-1";
     menu_insert($this->Name."::Show All",0, $URL, "Show All Files");
 
   } // RegisterMenus()
@@ -77,10 +79,11 @@ class list_bucket_files extends FO_Plugin
     if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
 
     /*  Input parameters */
-	$agent_pk = GetParm("agent",PARM_INTEGER);
+	$bucketagent_pk = GetParm("bapk",PARM_INTEGER);
 	$uploadtree_pk = GetParm("item",PARM_INTEGER);
 	$bucket_pk = GetParm("bpk",PARM_INTEGER);
 	$bucketpool_pk = GetParm("bp",PARM_INTEGER);
+	$nomosagent_pk = GetParm("napk",PARM_INTEGER);
 	if (empty($uploadtree_pk) || empty($bucket_pk) || empty($bucketpool_pk)) 
     {
       echo $this->Name . " is missing required parameters.";
@@ -137,7 +140,7 @@ class list_bucket_files extends FO_Plugin
                from uploadtree, bucket_file, bucket_def
                where upload_fk=$upload_pk and uploadtree.lft between $lft and $rgt
                  and uploadtree.pfile_fk=bucket_file.pfile_fk
-                 and agent_fk=$agent_pk
+                 and agent_fk=$bucketagent_pk
                  and bucket_fk=$bucket_pk
                  and bucketpool_fk=$bucketpool_pk
                  and bucket_pk=bucket_fk";
@@ -163,12 +166,12 @@ class list_bucket_files extends FO_Plugin
 
 	/* Offset is +1 to start numbering from 1 instead of zero */
     $RowNum = $Offset;
-    $LinkLast = "list_bucket_files&agent=$agent_pk";
+    $LinkLast = "list_bucket_files&bapk=$bucketagent_pk";
     $ShowBox = 1;
     $ShowMicro=NULL;
 
     // base url
-    $URL = "?mod=" . $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&page=-1";
+    $URL = "?mod=" . $this->Name . "&bapk=$bucketagent_pk&item=$uploadtree_pk&page=-1";
 
     // for each uploadtree rec ($fileresult), find all the licenses in it and it's children
     $ShowBox = 1;
@@ -181,7 +184,7 @@ class list_bucket_files extends FO_Plugin
     while ($row = pg_fetch_assoc($fileresult))
     {
       $nomosagent_pk = $row['nomosagent_fk'];
-      $LinkLast = "view-license&agent=$nomosagent_pk";
+      $LinkLast = "view-license&bapk=$bucketagent_pk&napk=$nomosagent_pk";
       $V .= "<tr><td>";
       $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, 
                        $ShowMicro, ++$RowNum, $Header);
@@ -190,7 +193,7 @@ class list_bucket_files extends FO_Plugin
 
       // get all the licenses in this subtree (bucket uploadtree_pk)
       $pfile_pk = $row['pfile_fk'];
-      $licstring = GetFileLicenses_string($nomosagent_pk, $row[pfile_fk], $row[uploadtree_pk]);
+      $licstring = GetFileLicenses_string($nomosagent_pk, $row['pfile_fk'], $row['uploadtree_pk']);
 
       // show the entire license list as a single string with links to the files
       // in this container with that license.
