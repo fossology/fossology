@@ -124,6 +124,25 @@ int PKG_DEB_SRC = 0; /**< Non-zero when it's DEBINE source package */
 int Verbose = 0;
 
 /**********************************************
+ *  Escaping special characters(single quote)
+ *  so that they cannot cause any harm
+ *
+ * ********************************************/
+char*	EscapeString	(const char *sourceString)
+{
+	int len;
+	char *escString;
+	int error;
+	
+	len = strlen(sourceString);
+	escString = (char*)calloc(sizeof(char*),len);
+	PQescapeStringConn(DB, escString, sourceString, len, &error);
+	if (error)
+		printf("WARNING: Error escape string %s\n", sourceString);
+	return escString;
+}
+
+/**********************************************
  GetFieldValue(): Given a string that contains
  field='value' pairs, save the items.
  Returns: pointer to start of next field, or
@@ -342,10 +361,10 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
 	strncpy(pi->sourceRPM,msgstr,sizeof(pi->sourceRPM));
 	break;
       case RPMTAG_SUMMARY:
-	strncpy(pi->summary,msgstr,sizeof(pi->summary));
+	strncpy(pi->summary,EscapeString(msgstr),sizeof(pi->summary));
 	break;
       case RPMTAG_DESCRIPTION:
-	strncpy(pi->description,msgstr,sizeof(pi->description));
+	strncpy(pi->description,EscapeString(msgstr),sizeof(pi->description));
 	break;
       default:
 	break;
@@ -476,7 +495,7 @@ void	RecordMetadataRPM	(struct rpmpkginfo *pi)
   if (DBdatasize(DB) <=0)
   {
     memset(SQL,0,sizeof(SQL));
-    DBaccess(DB,"BEGIN;"); 
+    DBaccess(DB,"BEGIN;");
     snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm (pkg_name,pkg_alias,pkg_arch,version,rpm_filename,license,pkg_group,packager,release,build_date,vendor,url,source_rpm,summary,description,pfile_fk) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%ld);",pi->pkgName,pi->pkgAlias,pi->pkgArch,pi->version,pi->rpmFilename,pi->license,pi->group,pi->packager,pi->release,pi->buildDate,pi->vendor,pi->url,pi->sourceRPM,pi->summary,pi->description,pi->pFileFk);
     rc = DBaccess(DB,SQL);
     if (rc < 0)
@@ -814,51 +833,21 @@ void	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
 }/*  GetMetadataDebSource(char *repFile, struct debpkginfo *pi) */
 
 /* **************************************************
- *  IsExe(): Check if the executable exists.
- *  (Like the command-line "which" but without returning
- *  the path.)
- *  This should only be used on relative path executables.
+ *  IsExe(): Check if the Cmd excutable.
+ *
  *  Returns: 1 if exists, 0 if does not exist.
  * ***************************************************/
-int     IsExe   (char *Exe, int Quiet)
+int	IsExe	(char *Cmd)
 {
-  char *Path;
-  int i,j;
   char TestCmd[FILENAME_MAX];
+  int rc;
 
-  Path = getenv("PATH");
-  if (!Path) return(0); /*  nope! */
-
-  memset(TestCmd,'\0',sizeof(TestCmd));
-  j=0;
-  for(i=0; (j<FILENAME_MAX-1) && (Path[i] != '\0'); i++)
-    {
-    if (Path[i]==':')
-        {
-        if ((j>0) && (TestCmd[j-1] != '/')) strcat(TestCmd,"/");
-        strcat(TestCmd,Exe);
-        if (IsFile(TestCmd,1))  return(1); /*  found it! */
-        /*  missed */
-        memset(TestCmd,'\0',sizeof(TestCmd));
-        j=0;
-        }
-    else
-        {
-        TestCmd[j]=Path[i];
-        j++;
-        }
-    }
-
-  /*  check last path element */
-  if (j>0)
-    {
-    if (TestCmd[j-1] != '/') strcat(TestCmd,"/");
-    strcat(TestCmd,Exe);
-    if (IsFile(TestCmd,1))      return(1); /*  found it! */
-    }
-  if (!Quiet) fprintf(stderr,"  %s :: not found in $PATH\n",Exe);
-  return(0); /*  not in path */
-} /*  IsExe() */
+  memset (TestCmd, '\0', sizeof(TestCmd));
+  strcat (TestCmd, Cmd);
+  rc = system(TestCmd);
+  if ( rc == 0 ) return(1);
+  return(0);  
+}/* IsExe() */
 
 /***********************************************
  Usage():
@@ -888,6 +877,9 @@ int	main	(int argc, char *argv[])
   glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
   int DISABLED = 0;
 
+  char sql[256];
+  int rc;
+
   DB = DBopen();
   if (!DB)
   {
@@ -905,12 +897,11 @@ int	main	(int argc, char *argv[])
 	case 'i':
                 /*  Check if dpkg-source tools is installed, if not update agent table
                  *  Set agent_enabled = false */
-                if (!IsExe("dpkg-source",1)){
-        	  char sql[256];
-        	  int rc = 0;
+                if (!IsExe("dpkg-source --version >/dev/null 2>&1")){
         	  printf("WARNING: Package agent disabled, because <dpkg-source> could not be found on the system.\n");
         	  fflush(stdout);
 
+		  memset(sql, 0, sizeof(sql));
         	  sprintf(sql, "UPDATE agent set agent_enabled=false WHERE agent_name ='%s';", basename(argv[0]));
      	   	  rc = DBaccess(DB, sql);
          	  if (rc < 0){
@@ -932,11 +923,38 @@ int	main	(int argc, char *argv[])
   }
 
   /* Check if dpkg-source tools is not installed, pkgagent will not run */
-  if (!IsExe("dpkg-source",1)){
+  if (!IsExe("dpkg-source --version >/dev/null 2>&1")){
 	DISABLED = 1;
-	printf("WARNING: Package agent disabled, no information could be determined about the package, because <dpkg-source> could not be found on the system. To generate this information ensure that it is available to on the standard search path and reschedule this agent.\n");
+	printf("WARNING: Package agent diabled because <dpkg-source> is not be found in the system search path. See {INSTALL} for package agent dependencies.\n");
         fflush(stdout);
 
+  } else {
+	int a, maxa;
+	void *DBTemp;
+	DBTemp = DBopen();
+
+	memset(sql, 0, sizeof(sql));
+	sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='pkgagent' AND agent_enabled='FALSE';");
+	rc = DBaccess(DB, sql);
+	if (rc < 0){
+		printf("ERROR: %s\n", sql);
+		DBclose(DB);
+		exit(-1);
+	}
+	maxa = DBdatasize(DB);
+	if (maxa > 0){
+		for (a=0;a<maxa;a++){
+			memset(sql, 0, sizeof(sql));
+			sprintf(sql, "UPDATE agent SET agent_enabled=true WHERE agent_pk=%d;",atoi(DBgetvalue(DB,a,0)));
+			rc = DBaccess(DBTemp, sql);
+			if (rc < 0){
+		                printf("ERROR: %s\n", sql);
+                		DBclose(DBTemp);
+                		exit(-1);
+        		}
+		}	
+	}
+	DBclose(DBTemp);
   }
   /* If no args, run from scheduler! */
   if (argc == 1)
