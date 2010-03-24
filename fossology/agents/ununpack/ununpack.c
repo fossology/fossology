@@ -1224,7 +1224,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   if (CI->PI.uploadtree_pk > 0) /* This is a child */
     {
     /* Prepare to insert child */
-    snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,'%s',%s);",
+    snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,E'%s',%s);",
 	CI->PI.uploadtree_pk, CI->pfile_pk, CI->ufile_mode,
 	UfileName, Upload_Pk);
     rc=MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
