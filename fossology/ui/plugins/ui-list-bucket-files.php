@@ -171,7 +171,6 @@ class list_bucket_files extends FO_Plugin
     $URL = "?mod=" . $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&page=-1";
 
     // for each uploadtree rec ($fileresult), find all the licenses in it and it's children
-    $LinkLast = "view-license&agent=$agent_pk";
     $ShowBox = 1;
     $ShowMicro=NULL;
     $RowNum = $Offset;
@@ -181,11 +180,12 @@ class list_bucket_files extends FO_Plugin
     $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Licenses found</th></tr>";
     while ($row = pg_fetch_assoc($fileresult))
     {
+      $nomosagent_pk = $row['nomosagent_fk'];
+      $LinkLast = "view-license&agent=$nomosagent_pk";
       $V .= "<tr><td>";
       $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, 
                        $ShowMicro, ++$RowNum, $Header);
       $V .= "</td>";
-      $nomosagent_pk = $row['nomosagent_fk'];
       $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
 
       // get all the licenses in this subtree (bucket uploadtree_pk)
