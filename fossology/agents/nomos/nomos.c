@@ -1064,6 +1064,8 @@ int main(int argc, char **argv) {
             {
               printf("LOG: Ignoring requested nomos analysis of upload %d - Records already processed.\n",
                     upload_pk);
+              printf("OK\n");
+              fflush(stdout);
               continue;
             }
 
@@ -1129,7 +1131,6 @@ int main(int argc, char **argv) {
               result = PQexec(gl.pgConn, sqlbuf);
               if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
             }
-
             printf("OK\n"); /* tell scheduler ready for more data */
             fflush(stdout);
           }
