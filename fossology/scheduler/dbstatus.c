@@ -496,21 +496,13 @@ void	DBSaveJobStatus	(int Thread, int MSQid)
   Now = time(NULL);
   if (Thread >= 0)
 	{
-	if (!CM[Thread].IsDB) return;
-	JobPk = CM[Thread].DBJobKey;
-	if (CM[Thread].Status == ST_RUNNING)
-	  {
-	  ProcessCount = 0;
-	  CM[Thread].StatusLastDuration = Now - CM[Thread].StatusTime;
-	  CM[Thread].StatusTime = Now;
-	  }
-	else
-	  {
-	  ProcessCount = CM[Thread].ItemsProcessed;
-	  /* Don't reset values since this is only called when the job ends. */
-	  }
-	ProcessTime = CM[Thread].StatusLastDuration;
-	ElapseTime = ProcessTime;
+  	if (!CM[Thread].IsDB) return;
+    JobPk = CM[Thread].DBJobKey;
+    CM[Thread].StatusLastDuration = Now - CM[Thread].StatusTime;
+    CM[Thread].StatusTime = Now;
+    ProcessCount = CM[Thread].ItemsProcessed;
+  	ProcessTime = CM[Thread].StatusLastDuration;
+    ElapseTime = ProcessTime;
 	}
   else if (MSQid >= 0)
 	{
@@ -554,20 +546,6 @@ void	DBSaveJobStatus	(int Thread, int MSQid)
   if (JobPk != -1)	/* ignore non-jobs */
     {
     char SQL[MAXCMD];
-#if 0
-    if (Thread!=-1)
-	{
-	printf("To update[%d,%d]: jq_pk=%d  count=%ld  elapse=%d  processtime=%d\n",
-		Thread,MSQid,JobPk,
-		ProcessCount,(int)ElapseTime,(int)ProcessTime);
-	}
-    else
-	{
-	printf("To update[%d,%d] [%d/%d]: jq_pk=%d  count=%ld  elapse=%d  processtime=%d\n",
-		Thread,MSQid,MSQ[MSQid].ItemsDone,MSQ[MSQid].MaxItems,JobPk,
-		ProcessCount,(int)ElapseTime,(int)ProcessTime);
-	}
-#endif
     memset(SQL,'\0',MAXCMD);
     snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_itemsprocessed=jq_itemsprocessed+%ld, jq_elapsedtime=jq_elapsedtime+%d, jq_processedtime=jq_processedtime+%d WHERE jq_pk=%d;",
 	ProcessCount,(int)ElapseTime,(int)ProcessTime,JobPk);
