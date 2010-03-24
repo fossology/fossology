@@ -480,6 +480,7 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
 void	DBSaveJobStatus	(int Thread, int MSQid)
 {
   int JobPk=-1;
+  int RealItemsProcessed;
   long ProcessCount=0;	/* add to jq_itemsprocessed */
   time_t ElapseTime=0;	/* add to jq_elapsedtime */
   time_t ProcessTime=0;	/* add to jq_processtime */
@@ -493,6 +494,9 @@ void	DBSaveJobStatus	(int Thread, int MSQid)
   sigaddset(&Mask,SIGINT);
   sigprocmask(SIG_BLOCK,&Mask,&OldMask);
 
+  /* if false, ProcessCount is increment; if true ProcessCount is 
+     real Items processed */
+  RealItemsProcessed = 0;  
   Now = time(NULL);
   if (Thread >= 0)
 	{
@@ -501,6 +505,7 @@ void	DBSaveJobStatus	(int Thread, int MSQid)
     CM[Thread].StatusLastDuration = Now - CM[Thread].StatusTime;
     CM[Thread].StatusTime = Now;
     ProcessCount = CM[Thread].ItemsProcessed;
+    RealItemsProcessed = 1;  
   	ProcessTime = CM[Thread].StatusLastDuration;
     ElapseTime = ProcessTime;
 	}
@@ -547,8 +552,16 @@ void	DBSaveJobStatus	(int Thread, int MSQid)
     {
     char SQL[MAXCMD];
     memset(SQL,'\0',MAXCMD);
-    snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_itemsprocessed=jq_itemsprocessed+%ld, jq_elapsedtime=jq_elapsedtime+%d, jq_processedtime=jq_processedtime+%d WHERE jq_pk=%d;",
-	ProcessCount,(int)ElapseTime,(int)ProcessTime,JobPk);
+    if (RealItemsProcessed)
+    {
+      snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_itemsprocessed=%ld, jq_elapsedtime=jq_elapsedtime+%d, jq_processedtime=jq_processedtime+%d WHERE jq_pk=%d;",
+	            ProcessCount,(int)ElapseTime,(int)ProcessTime,JobPk);
+    }
+    else
+    {
+      snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_itemsprocessed=jq_itemsprocessed+%ld, jq_elapsedtime=jq_elapsedtime+%d, jq_processedtime=jq_processedtime+%d WHERE jq_pk=%d;",
+	            ProcessCount,(int)ElapseTime,(int)ProcessTime,JobPk);
+    }
     if (DBLockAccess(DB,SQL) < 0)
 	{
 	LogPrint("FATAL: Scheduler failed to update job status in DB.\n");
