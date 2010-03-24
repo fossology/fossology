@@ -190,12 +190,12 @@ FUTURE advanced interface allowing user to select dataset (agent version)
       /*  Show  */
       $VLic .= "<td align='center'><a href='";
       $VLic .= Traceback_uri();
-      $VLic .= "?mod=list_lic_files&agent=$Agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']) . "'>Show</a></td>";
+      $VLic .= "?mod=list_lic_files&napk=$Agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']) . "'>Show</a></td>";
 
       /*  License name  */
       $VLic .= "<td align='left'>";
       $rf_shortname = rawurlencode($row['rf_shortname']);
-      $VLic .= "<a id='$rf_shortname' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filelic&agent=$Agent_pk&item=$Uploadtree_pk&lic=$rf_shortname\")'";
+      $VLic .= "<a id='$rf_shortname' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filelic&napk=$Agent_pk&item=$Uploadtree_pk&lic=$rf_shortname\")'";
       $VLic .= ">$row[licname] </a>";
       $VLic .= "</td>";
       $VLic .= "</tr>\n";
@@ -232,7 +232,7 @@ FUTURE advanced interface allowing user to select dataset (agent version)
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
       {
         $LinkUri = Traceback_uri();
-        $LinkUri .= "?mod=view-license&agent=$Agent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
+        $LinkUri .= "?mod=view-license&napk=$Agent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
       }
       else
       {

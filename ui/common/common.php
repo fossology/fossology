@@ -41,6 +41,7 @@ require_once("common-agents.php");
 require_once("common-active.php");
 require_once("common-cache.php");
 require_once("common-ui.php");
+require_once("common-buckets.php");
 
 /* Only include the command-line interface functions if it is required. */
 global $UI_CLI;

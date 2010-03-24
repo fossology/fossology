@@ -589,37 +589,4 @@ function userAgents()
 	return($agentsChecked);
 }
 
-/**
- * SelectBucketpool
- * \brief Return a select list for bucketpool's
- *
- * @param string $selected, selected bucketpool_pk
- *
- * @return string select list
- * Note: list uses static element id="default_bucketpool_fk"
- *       the element name is the same as the id.
- */
-function SelectBucketPool($selected)
-{
-  global $PG_CONN;
-
-  $id = "default_bucketpool_fk";
-  $name = $id;
-  $select = "<select name='$name' id='$id'>";
-
-  /* get the bucketpool recs */
-  $sql = "select * from bucketpool where active='Y'";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-  while ($row = pg_fetch_assoc($result)) 
-  {
-    $select .= "<option value='$row[bucketpool_pk]'";
-    if ($row['bucketpool_pk'] == $selected) $select .= " SELECTED ";
-    $select .= ">$row[bucketpool_name]\n";
-  }
-  $select .= "</select>";
-  return $select;
-}
-
 ?>
