@@ -77,7 +77,7 @@ FUNCTION void Heartbeat (long NewItemsProcessed)
  * **************************************************/
 FUNCTION void ShowHeartbeat   (int Sig)
 {
-
+  long int delta;
 #ifdef NEWSCHEDULER
   /* IF we are tracking hearbeat values AND it has not changed,
      THEN don't display a heartbeat message.
@@ -93,11 +93,14 @@ FUNCTION void ShowHeartbeat   (int Sig)
 #else
    if (HBItemsProcessed > 0)
    {
-     printf("ItemsProcessed %ld\n", HBItemsProcessed);
+     delta = HBItemsProcessed;
      HBItemsProcessed = 0;  /* 1.1 scheduler must be given incremental updates */
+     printf("ItemsProcessed %ld\n", delta);
+//printf("DEBUG: Sent to scheduler - ItemsProcessed %ld\n", delta);
    }
+   else
+     printf("Heartbeat\n");
 
-   printf("Heartbeat\n");
    fflush(stdout);
 #endif
 
