@@ -36,12 +36,15 @@ class domParseLicenseTbl
 {
 	public $page;
 	public $hList = array();
+	public $noRows = FALSE;
+	private $tableId;
 
-	function __construct($page)
+	function __construct($page,$tblId)
 	{
 		if (empty ($page)) { return; }
 		$this->page = $page;
-		$this->parseLicenseTbl();
+		if (strlen($tblId) == 0) { return; }
+		$this->tableId = $tblId;
 	}
 	/**
 	 * parseLicenseTbl
@@ -49,11 +52,15 @@ class domParseLicenseTbl
 	 * names and Show links.
 	 *
 	 * @returns an array of associative arrays  with keys of:
-	 * licCount, showLink, licName. the values will be the license count
-	 * the url of the Show link and the license name.
+	 * count, showLink, textOrLink. the values will be the license count
+	 * the url of the Show link and whatever is in the next column.  This
+	 * can be text or a link or ?
+	 * 
+	 * Sets property noRows.
+	 * 
 	 * An empty array if no license histogram on that page,
-	 *
-	 *
+	 * 
+	 * @todo renumber final array so consumers can user array[0]
 	 */
 	function parseLicenseTbl()
 	{
@@ -66,9 +73,10 @@ class domParseLicenseTbl
 		@$dom->loadHTML($this->page);
 		/*** discard white space ***/
 		$dom->preserveWhiteSpace = false;
-		$table = $dom->getElementById('lichistogram');
-		if($table === NULL) {
-			print "DPLTDB: table is NULL!\n";
+		//$table = $dom->getElementById('lichistogram');
+		$table = $dom->getElementById($this->tableId);
+		if(empty($table)) {
+			//print "DPLTDB: table is empty, can't find table!\n";
 			return($hList(array()));
 		}
 
@@ -78,7 +86,7 @@ class domParseLicenseTbl
 			foreach($tblChildNode->childNodes as $childNode){
 				if($childNode->nodeName == 'td'){
 					if(is_numeric($childNode->nodeValue)) {
-						$histogram['licCount'] = trim($childNode->nodeValue);
+						$histogram['count'] = trim($childNode->nodeValue);
 					}
 					if ($childNode->nodeValue == 'Show') {
 						$anchorList = $childNode->getElementsByTagName('a');
@@ -87,7 +95,7 @@ class domParseLicenseTbl
 						}
 					}
 					if(is_string($childNode->nodeValue)) {
-						$histogram['licName'] = trim($childNode->nodeValue);
+						$histogram['textOrLink'] = trim($childNode->nodeValue);
 					}
 				}
 			} // foreach($tblChildNode
@@ -96,7 +104,9 @@ class domParseLicenseTbl
 		} // foreach
 		// remove empty 1st entry
 		unset($this->hList[0]);
-		//print "hList is:\n";print_r($this->hList) . "\n";
+	  if(empty($this->hList)) {
+	  	$this->noRows = TRUE;
+	  }
 	} // parseLicenseTbl
 }
 ?>
