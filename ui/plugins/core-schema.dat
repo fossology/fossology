@@ -214,6 +214,35 @@
   $Schema["TABLE"]["agent_wc"]["wc_lines"]["ALTER"] = "ALTER TABLE \"agent_wc\" ALTER COLUMN \"wc_lines\" DROP NOT NULL;";
 
 
+  $Schema["TABLE"]["ars_master"]["ars_pk"]["DESC"] = "";
+  $Schema["TABLE"]["ars_master"]["ars_pk"]["ADD"] = "ALTER TABLE \"ars_master\" ADD COLUMN \"ars_pk\" int4;";
+  $Schema["TABLE"]["ars_master"]["ars_pk"]["ALTER"] = "ALTER TABLE \"ars_master\" ALTER COLUMN \"ars_pk\" SET NOT NULL, ALTER COLUMN \"ars_pk\" SET DEFAULT nextval('nomos_ars_ars_pk_seq'::regclass);";
+
+  $Schema["TABLE"]["ars_master"]["agent_fk"]["DESC"] = "COMMENT ON COLUMN \"ars_master\".\"agent_fk\" IS 'nomos agent pk';";
+  $Schema["TABLE"]["ars_master"]["agent_fk"]["ADD"] = "ALTER TABLE \"ars_master\" ADD COLUMN \"agent_fk\" int4;";
+  $Schema["TABLE"]["ars_master"]["agent_fk"]["ALTER"] = "ALTER TABLE \"ars_master\" ALTER COLUMN \"agent_fk\" SET NOT NULL;";
+
+  $Schema["TABLE"]["ars_master"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ars_master"]["upload_fk"]["ADD"] = "ALTER TABLE \"ars_master\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["ars_master"]["upload_fk"]["ALTER"] = "ALTER TABLE \"ars_master\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+
+  $Schema["TABLE"]["ars_master"]["ars_success"]["DESC"] = "COMMENT ON COLUMN \"ars_master\".\"ars_success\" IS 'true if the scan completed successfully.  false if the scan in not complete or completed with errors';";
+  $Schema["TABLE"]["ars_master"]["ars_success"]["ADD"] = "ALTER TABLE \"ars_master\" ADD COLUMN \"ars_success\" bool;";
+  $Schema["TABLE"]["ars_master"]["ars_success"]["ALTER"] = "ALTER TABLE \"ars_master\" ALTER COLUMN \"ars_success\" SET NOT NULL, ALTER COLUMN \"ars_success\" SET DEFAULT false;";
+
+  $Schema["TABLE"]["ars_master"]["ars_status"]["DESC"] = "COMMENT ON COLUMN \"ars_master\".\"ars_status\" IS 'scan completion message (error msg, or \"success\")';";
+  $Schema["TABLE"]["ars_master"]["ars_status"]["ADD"] = "ALTER TABLE \"ars_master\" ADD COLUMN \"ars_status\" text;";
+  $Schema["TABLE"]["ars_master"]["ars_status"]["ALTER"] = "ALTER TABLE \"ars_master\" ALTER COLUMN \"ars_status\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["ars_master"]["ars_starttime"]["DESC"] = "COMMENT ON COLUMN \"ars_master\".\"ars_starttime\" IS 'time scan started';";
+  $Schema["TABLE"]["ars_master"]["ars_starttime"]["ADD"] = "ALTER TABLE \"ars_master\" ADD COLUMN \"ars_starttime\" timestamptz;";
+  $Schema["TABLE"]["ars_master"]["ars_starttime"]["ALTER"] = "ALTER TABLE \"ars_master\" ALTER COLUMN \"ars_starttime\" SET NOT NULL, ALTER COLUMN \"ars_starttime\" SET DEFAULT now();";
+
+  $Schema["TABLE"]["ars_master"]["ars_endtime"]["DESC"] = "COMMENT ON COLUMN \"ars_master\".\"ars_endtime\" IS 'time scan completed';";
+  $Schema["TABLE"]["ars_master"]["ars_endtime"]["ADD"] = "ALTER TABLE \"ars_master\" ADD COLUMN \"ars_endtime\" timestamptz;";
+  $Schema["TABLE"]["ars_master"]["ars_endtime"]["ALTER"] = "ALTER TABLE \"ars_master\" ALTER COLUMN \"ars_endtime\" DROP NOT NULL;";
+
+
   $Schema["TABLE"]["attachments"]["attachment_pk"]["DESC"] = "";
   $Schema["TABLE"]["attachments"]["attachment_pk"]["ADD"] = "ALTER TABLE \"attachments\" ADD COLUMN \"attachment_pk\" int4;";
   $Schema["TABLE"]["attachments"]["attachment_pk"]["ALTER"] = "ALTER TABLE \"attachments\" ALTER COLUMN \"attachment_pk\" SET NOT NULL, ALTER COLUMN \"attachment_pk\" SET DEFAULT nextval('attachments_attachment_pk_seq'::regclass);";
@@ -250,6 +279,39 @@
   $Schema["TABLE"]["attrib"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN \"attrib\".\"pfile_fk\" IS 'key of pfile record that attribute refers to';";
   $Schema["TABLE"]["attrib"]["pfile_fk"]["ADD"] = "ALTER TABLE \"attrib\" ADD COLUMN \"pfile_fk\" int4;";
   $Schema["TABLE"]["attrib"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"attrib\" ALTER COLUMN \"pfile_fk\" SET NOT NULL;";
+
+
+  $Schema["TABLE"]["bucket_ars"]["ars_pk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_ars"]["ars_pk"]["ADD"] = "ALTER TABLE \"bucket_ars\" ADD COLUMN \"ars_pk\" int4;";
+  $Schema["TABLE"]["bucket_ars"]["ars_pk"]["ALTER"] = "ALTER TABLE \"bucket_ars\" ALTER COLUMN \"ars_pk\" SET NOT NULL, ALTER COLUMN \"ars_pk\" SET DEFAULT nextval('nomos_ars_ars_pk_seq'::regclass);";
+
+  $Schema["TABLE"]["bucket_ars"]["agent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_ars"]["agent_fk"]["ADD"] = "ALTER TABLE \"bucket_ars\" ADD COLUMN \"agent_fk\" int4;";
+  $Schema["TABLE"]["bucket_ars"]["agent_fk"]["ALTER"] = "ALTER TABLE \"bucket_ars\" ALTER COLUMN \"agent_fk\" SET NOT NULL;";
+
+  $Schema["TABLE"]["bucket_ars"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_ars"]["upload_fk"]["ADD"] = "ALTER TABLE \"bucket_ars\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["bucket_ars"]["upload_fk"]["ALTER"] = "ALTER TABLE \"bucket_ars\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+
+  $Schema["TABLE"]["bucket_ars"]["ars_success"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_ars"]["ars_success"]["ADD"] = "ALTER TABLE \"bucket_ars\" ADD COLUMN \"ars_success\" bool;";
+  $Schema["TABLE"]["bucket_ars"]["ars_success"]["ALTER"] = "ALTER TABLE \"bucket_ars\" ALTER COLUMN \"ars_success\" SET NOT NULL, ALTER COLUMN \"ars_success\" SET DEFAULT false;";
+
+  $Schema["TABLE"]["bucket_ars"]["ars_status"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_ars"]["ars_status"]["ADD"] = "ALTER TABLE \"bucket_ars\" ADD COLUMN \"ars_status\" text;";
+  $Schema["TABLE"]["bucket_ars"]["ars_status"]["ALTER"] = "ALTER TABLE \"bucket_ars\" ALTER COLUMN \"ars_status\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["bucket_ars"]["ars_starttime"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_ars"]["ars_starttime"]["ADD"] = "ALTER TABLE \"bucket_ars\" ADD COLUMN \"ars_starttime\" timestamptz;";
+  $Schema["TABLE"]["bucket_ars"]["ars_starttime"]["ALTER"] = "ALTER TABLE \"bucket_ars\" ALTER COLUMN \"ars_starttime\" SET NOT NULL, ALTER COLUMN \"ars_starttime\" SET DEFAULT now();";
+
+  $Schema["TABLE"]["bucket_ars"]["ars_endtime"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_ars"]["ars_endtime"]["ADD"] = "ALTER TABLE \"bucket_ars\" ADD COLUMN \"ars_endtime\" timestamptz;";
+  $Schema["TABLE"]["bucket_ars"]["ars_endtime"]["ALTER"] = "ALTER TABLE \"bucket_ars\" ALTER COLUMN \"ars_endtime\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["bucket_ars"]["nomosagent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_ars"]["nomosagent_fk"]["ADD"] = "ALTER TABLE \"bucket_ars\" ADD COLUMN \"nomosagent_fk\" int4;";
+  $Schema["TABLE"]["bucket_ars"]["nomosagent_fk"]["ALTER"] = "ALTER TABLE \"bucket_ars\" ALTER COLUMN \"nomosagent_fk\" DROP NOT NULL;";
 
 
   $Schema["TABLE"]["bucket_container"]["bucket_fk"]["DESC"] = "";
@@ -790,6 +852,35 @@
   $Schema["TABLE"]["mimetype"]["mimetype_name"]["ALTER"] = "ALTER TABLE \"mimetype\" ALTER COLUMN \"mimetype_name\" SET NOT NULL;";
 
 
+  $Schema["TABLE"]["nomos_ars"]["ars_pk"]["DESC"] = "";
+  $Schema["TABLE"]["nomos_ars"]["ars_pk"]["ADD"] = "ALTER TABLE \"nomos_ars\" ADD COLUMN \"ars_pk\" int4;";
+  $Schema["TABLE"]["nomos_ars"]["ars_pk"]["ALTER"] = "ALTER TABLE \"nomos_ars\" ALTER COLUMN \"ars_pk\" SET NOT NULL, ALTER COLUMN \"ars_pk\" SET DEFAULT nextval('nomos_ars_ars_pk_seq'::regclass);";
+
+  $Schema["TABLE"]["nomos_ars"]["agent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["nomos_ars"]["agent_fk"]["ADD"] = "ALTER TABLE \"nomos_ars\" ADD COLUMN \"agent_fk\" int4;";
+  $Schema["TABLE"]["nomos_ars"]["agent_fk"]["ALTER"] = "ALTER TABLE \"nomos_ars\" ALTER COLUMN \"agent_fk\" SET NOT NULL;";
+
+  $Schema["TABLE"]["nomos_ars"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["nomos_ars"]["upload_fk"]["ADD"] = "ALTER TABLE \"nomos_ars\" ADD COLUMN \"upload_fk\" int4;";
+  $Schema["TABLE"]["nomos_ars"]["upload_fk"]["ALTER"] = "ALTER TABLE \"nomos_ars\" ALTER COLUMN \"upload_fk\" SET NOT NULL;";
+
+  $Schema["TABLE"]["nomos_ars"]["ars_success"]["DESC"] = "";
+  $Schema["TABLE"]["nomos_ars"]["ars_success"]["ADD"] = "ALTER TABLE \"nomos_ars\" ADD COLUMN \"ars_success\" bool;";
+  $Schema["TABLE"]["nomos_ars"]["ars_success"]["ALTER"] = "ALTER TABLE \"nomos_ars\" ALTER COLUMN \"ars_success\" SET NOT NULL, ALTER COLUMN \"ars_success\" SET DEFAULT false;";
+
+  $Schema["TABLE"]["nomos_ars"]["ars_status"]["DESC"] = "";
+  $Schema["TABLE"]["nomos_ars"]["ars_status"]["ADD"] = "ALTER TABLE \"nomos_ars\" ADD COLUMN \"ars_status\" text;";
+  $Schema["TABLE"]["nomos_ars"]["ars_status"]["ALTER"] = "ALTER TABLE \"nomos_ars\" ALTER COLUMN \"ars_status\" DROP NOT NULL;";
+
+  $Schema["TABLE"]["nomos_ars"]["ars_starttime"]["DESC"] = "";
+  $Schema["TABLE"]["nomos_ars"]["ars_starttime"]["ADD"] = "ALTER TABLE \"nomos_ars\" ADD COLUMN \"ars_starttime\" timestamptz;";
+  $Schema["TABLE"]["nomos_ars"]["ars_starttime"]["ALTER"] = "ALTER TABLE \"nomos_ars\" ALTER COLUMN \"ars_starttime\" SET NOT NULL, ALTER COLUMN \"ars_starttime\" SET DEFAULT now();";
+
+  $Schema["TABLE"]["nomos_ars"]["ars_endtime"]["DESC"] = "";
+  $Schema["TABLE"]["nomos_ars"]["ars_endtime"]["ADD"] = "ALTER TABLE \"nomos_ars\" ADD COLUMN \"ars_endtime\" timestamptz;";
+  $Schema["TABLE"]["nomos_ars"]["ars_endtime"]["ALTER"] = "ALTER TABLE \"nomos_ars\" ALTER COLUMN \"ars_endtime\" DROP NOT NULL;";
+
+
   $Schema["TABLE"]["pfile"]["pfile_pk"]["DESC"] = "";
   $Schema["TABLE"]["pfile"]["pfile_pk"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_pk\" int4;";
   $Schema["TABLE"]["pfile"]["pfile_pk"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_pk\" SET NOT NULL, ALTER COLUMN \"pfile_pk\" SET DEFAULT nextval('pfile_pfile_pk_seq'::regclass);";
@@ -1214,6 +1305,7 @@
   $Schema["SEQUENCE"]["pkg_rpm_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_req_req_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_deb_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_pkg_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_deb_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_req_req_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["nomos_ars_ars_pk_seq"] = "CREATE SEQUENCE \"nomos_ars_ars_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["bucket_container_bf_pk_seq"] = "CREATE SEQUENCE \"bucket_container_bf_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["bucket_file_bf_pk_seq"] = "CREATE SEQUENCE \"bucket_file_bf_pk_seq\" START 1;";
 
@@ -1223,6 +1315,7 @@
   $Schema["CONSTRAINT"]["agent_runstatus_pkey"] = "ALTER TABLE \"agent_runstatus\" ADD CONSTRAINT \"agent_runstatus_pkey\" PRIMARY KEY (\"ars_pk\");";
   $Schema["CONSTRAINT"]["attachments_pkey"] = "ALTER TABLE \"attachments\" ADD CONSTRAINT \"attachments_pkey\" PRIMARY KEY (\"attachment_pk\");";
   $Schema["CONSTRAINT"]["attrib_pkey"] = "ALTER TABLE \"attrib\" ADD CONSTRAINT \"attrib_pkey\" PRIMARY KEY (\"attrib_pk\");";
+  $Schema["CONSTRAINT"]["bucket_ars_pkey"] = "ALTER TABLE \"bucket_ars\" ADD CONSTRAINT \"bucket_ars_pkey\" PRIMARY KEY (\"ars_pk\");";
   $Schema["CONSTRAINT"]["bucket_container_pkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_pkey\" PRIMARY KEY (\"bf_pk\");";
   $Schema["CONSTRAINT"]["bucket_file_pkey"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_pkey\" PRIMARY KEY (\"bf_pk\");";
   $Schema["CONSTRAINT"]["bucket_pkey"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucket_pkey\" PRIMARY KEY (\"bucket_pk\");";
@@ -1243,6 +1336,8 @@
   $Schema["CONSTRAINT"]["licterm_pkey"] = "ALTER TABLE \"licterm\" ADD CONSTRAINT \"licterm_pkey\" PRIMARY KEY (\"licterm_pk\");";
   $Schema["CONSTRAINT"]["licterm_words_pkey"] = "ALTER TABLE \"licterm_words\" ADD CONSTRAINT \"licterm_words_pkey\" PRIMARY KEY (\"licterm_words_pk\");";
   $Schema["CONSTRAINT"]["mimetype_pk"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"mimetype_pk\" PRIMARY KEY (\"mimetype_pk\");";
+  $Schema["CONSTRAINT"]["nomos_ars_pkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"nomos_ars_pkey\" PRIMARY KEY (\"ars_pk\");";
+  $Schema["CONSTRAINT"]["nomos_ars_pkey1"] = "ALTER TABLE \"nomos_ars\" ADD CONSTRAINT \"nomos_ars_pkey1\" PRIMARY KEY (\"ars_pk\");";
   $Schema["CONSTRAINT"]["pfile_pkey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_pkey\" PRIMARY KEY (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["pkg_deb_pkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pkey\" PRIMARY KEY (\"pkg_pk\");";
   $Schema["CONSTRAINT"]["pkg_deb_req_pkey"] = "ALTER TABLE \"pkg_deb_req\" ADD CONSTRAINT \"pkg_deb_req_pkey\" PRIMARY KEY (\"req_pk\");";
@@ -1283,6 +1378,9 @@
   $Schema["CONSTRAINT"]["attrib_attrib_key_fk_fkey"] = "ALTER TABLE \"attrib\" ADD CONSTRAINT \"attrib_attrib_key_fk_fkey\" FOREIGN KEY (\"attrib_key_fk\") REFERENCES \"key\" (\"key_pk\");";
   $Schema["CONSTRAINT"]["attrib_pfile_fk_fkey"] = "ALTER TABLE \"attrib\" ADD CONSTRAINT \"attrib_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["bf_bucket_agent_fk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bf_bucket_agent_fk\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
+  $Schema["CONSTRAINT"]["bucket_ars_agent_fk_fkey"] = "ALTER TABLE \"bucket_ars\" ADD CONSTRAINT \"bucket_ars_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
+  $Schema["CONSTRAINT"]["bucket_ars_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_ars\" ADD CONSTRAINT \"bucket_ars_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
+  $Schema["CONSTRAINT"]["bucket_ars_upload_fk_fkey"] = "ALTER TABLE \"bucket_ars\" ADD CONSTRAINT \"bucket_ars_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\");";
   $Schema["CONSTRAINT"]["bucket_container_agent_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
   $Schema["CONSTRAINT"]["bucket_container_bucket_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_bucket_fk_fkey\" FOREIGN KEY (\"bucket_fk\") REFERENCES \"bucket_def\" (\"bucket_pk\");";
   $Schema["CONSTRAINT"]["bucket_container_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
@@ -1306,6 +1404,10 @@
   $Schema["CONSTRAINT"]["ltagent"] = "ALTER TABLE \"license_test\" ADD CONSTRAINT \"ltagent\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
   $Schema["CONSTRAINT"]["ltpfile"] = "ALTER TABLE \"license_test\" ADD CONSTRAINT \"ltpfile\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["mimetype_fk"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"mimetype_fk\" FOREIGN KEY (\"pfile_mimetypefk\") REFERENCES \"mimetype\" (\"mimetype_pk\");";
+  $Schema["CONSTRAINT"]["nomos_ars_agent_fk_fkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"nomos_ars_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
+  $Schema["CONSTRAINT"]["nomos_ars_agent_fk_fkey1"] = "ALTER TABLE \"nomos_ars\" ADD CONSTRAINT \"nomos_ars_agent_fk_fkey1\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
+  $Schema["CONSTRAINT"]["nomos_ars_upload_fk_fkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"nomos_ars_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\");";
+  $Schema["CONSTRAINT"]["nomos_ars_upload_fk_fkey1"] = "ALTER TABLE \"nomos_ars\" ADD CONSTRAINT \"nomos_ars_upload_fk_fkey1\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\");";
   $Schema["CONSTRAINT"]["nomosagentpk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"nomosagentpk\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
   $Schema["CONSTRAINT"]["pfile_fk"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"pfile_fk\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_fkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
