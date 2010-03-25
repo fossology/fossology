@@ -169,7 +169,7 @@ class verifyFossolyTest extends fossologyTestCase
 		// create list of Show urls
 		$urls = array();
 		foreach ($licHistogram->hList as $license) {
-			$urls[$license['licName']] = makeUrl($this->host, $license['showLink']);
+			$urls[$license['textOrLink']] = makeUrl($this->host, $license['showLink']);
 		}
 		if(empty($urls)) {
 			$this->fail("FATAL! no urls to process, there should be many for"
