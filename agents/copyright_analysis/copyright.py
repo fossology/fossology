@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -u
 
 ## 
 ## Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
@@ -70,6 +70,8 @@ def main():
             help="Drops the tables before creating them for copyright analysis agent.")
     optparser.add_option("--agent", action="store_true",
             help="Starts up in agent mode. Files will be read from stdin.")
+    optparser.add_option("--runonpfiles", action="store_true",
+            help="Expect the scheduler to provide the pfiles on stdin. Only available in agent mode.")
     optparser.add_option("-i", "--init", action="store_true",
             help="Creates a connection to the database and quits.")
     optparser.add_option("-v", "--verbose", action="store_true",
@@ -121,27 +123,29 @@ def main():
     if options.analyze_from_file:
         files = [line.rstrip() for line in open(options.analyze_from_file).readlines()]
         for file in files:
+            text = open(file).read()
             results = library.label_file(file,model)
             print "%s :: " % (file)
             if len(results) == 0:
                 print "No copyrights"
             for i in range(len(results)):
-                print "\t[%d:%d]" % (results[i][0], results[i][1])
+                print "\t[%d:%d:%s] %r" % (results[i][0], results[i][1], results[i][2], text[results[i][0]:results[i][1]])
 
     if options.analyze_from_command_line:
         files = args
         for file in files:
+            text = open(file).read()
             results = library.label_file(file,model)
             print "%s :: " % (file)
             if len(results) == 0:
                 print "No copyrights"
             for i in range(len(results)):
-                print "\t[%d:%d]" % (results[i][0], results[i][1])
+                print "\t[%d:%d:%s] %r" % (results[i][0], results[i][1], results[i][2], text[results[i][0]:results[i][1]])
 
     if options.agent:
-         return(agent(model))   
+         return(agent(model,options.runonpfiles))   
 
-def agent(model):
+def agent(model,runonpfiles=False):
     try:
         db = None
         try:
@@ -160,64 +164,106 @@ def agent(model):
 
         agent_pk = db.getAgentKey('copyright', '1.0 source_hash(%s) model_hash(%s)' % (hex(hash(open(sys.argv[0]).read())), hex(hash(str(model)))), 'copyright agent')
         
-        count = 0
+        if runonpfiles:
+            # if the scheduler is going to hand us files.
+            count = 0
+            line = 'start'
+            while line:
+                line = line.strip()
+                re_str = "pfile_pk=\"([0-9]+)\" pfilename=\"([0-9a-fA-F]+\.[0-9a-fA-F]+\.[0-9]+)\""
+                if re.match(re_str, line):
+                    (pfile, file) = re.findall(re_str, line)[0]
+                    pfile = int(pfile)
+                    if analyze(pfile_pk, file, agent_pk, model, db) != 0:
+                        print >> sys.stderr, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, row['pfile_pk'], row['pfilename'])
+                    else:
+                        count += 1
+                        print "ItemsProcessed %ld" % 1
+                        print "OK"
+                elif re.match("quit", line):
+                    print "BYE."
+                    break
+                elif re.match("start", line):
+                    print "OK"
+                    count = 0
 
-        line = 'start'
-        while line:
-            line = line.strip()
-            re_str = "pfile_pk=\"([0-9]+)\" pfilename=\"([0-9a-fA-F]+\.[0-9a-fA-F]+\.[0-9]+)\""
-            if re.match(re_str, line):
-                (pfile, file) = re.findall(re_str, line)[0]
-                pfile = int(pfile)
-                path = libfosspython.repMkPath('files', file)
-                offsets = library.label_file(path,model)
-                text = open(path).read()
-                if len(offsets) == 0:
-                    result = db.access2("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
-                        "VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement')" % (agent_pk, pfile))
-                    if result != 0:
-                        print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
-                else:
-                    for i in range(len(offsets)):
-                        result = db.access2("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
-                            "VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s')" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]]), hex(abs(hash(re.escape(text[offsets[i][0]:offsets[i][1]])))), offsets[i][2]))
-                        if result != 0:
-                            print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
-                count += 1
-                sys.stdout.write("OK\n")
-                sys.stdout.flush()
-                sys.stdout.write("ItemsProcessed %ld\n" % 1)
-                sys.stdout.flush()
-            elif re.match("quit", line):
-                print "BYE."
-                break
-            elif re.match("start", line):
-                sys.stdout.write("OK\n")
-                sys.stdout.flush()
+                try:
+                    line = sys.stdin.readline()
+                except:
+                    exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+                    p = '\t'.join(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
+                    print >> sys.std.err, "ERROR: An error occurred in the main agent loop.\n\tThe current command is: '%s'.\n\tPlease consult the provided traceback.\n\t%s\n" % (line,p)
+                    line = "quit"
+
+        else:
+            while True:
+                print "OK"
+                # get the upload_pk from stdin.
+                upload_pk = -1
+                try:
+                    line = sys.stdin.readline().rstrip()
+                    if len(line) > 0:
+                        upload_pk = int(line)
+                except ValueError:
+                    print >> sys.stderr, 'ERROR: Provided upload_pk is not a number: %r' % line
+                    return -1
+
+                sql = '''SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS left outer join copyright on (PF=pfile_fk and agent_fk='%d') inner join pfile on (PF=pfile_pk) WHERE ct_pk IS null''' % (upload_pk, agent_pk)
+                
+                if db.access(sql) != 1:
+                    error = db.errmsg()
+                    print >> sys.stderr, 'ERROR: Could not select job queue for copyright analysis. Database said: "%s"' % error
+                    return -1
+
+                rows = db.getrows()
+
                 count = 0
-
-            try:
-                line = sys.stdin.readline()
-            except:
-                exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
-                p = '\t'.join(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
-                sys.stderr.write("ERROR: An error occurred in the main agent loop.\n\tThe current command is: '%s'.\n\tPlease consult the provided traceback.\n\t%s\n" % (line,p))
-                sys.stderr.flush()
-                line = "quit"
+                for row in rows:
+                    if analyze(row['pfile_pk'], row['pfilename'], agent_pk, model, db) != 0:
+                        print >> sys.stderr, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, row['pfile_pk'], row['pfilename'])
+                    else:
+                        print "ItemsProcessed %ld" % 1
+                        count += 1
 
     except:
         exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
         p = '\t'.join(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
-        sys.stderr.write("ERROR: An error occurred in the main agent loop. Please consult the provided traceback.\n\t%s\n" % p)
-        sys.stderr.flush()
+        print >> sys.stderr, "ERROR: An error occurred in the main agent loop. Please consult the provided traceback.\n\t%s\n" % p
         return 1
 
     libfosspython.repClose()
     
     return 0
 
+def analyze(pfile_pk, filename, agent_pk, model, db):
+    pfile = -1
+    try:
+        pfile = int(pfile_pk)
+    except ValueError:
+        print >> sys.stderr, 'ERROR: Provided pfile_pk is not a number: %r' % line
+        return -1
+
+    path = libfosspython.repMkPath('files', filename)
+    offsets = library.label_file(path,model)
+    text = open(path).read()
+    if len(offsets) == 0:
+        result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
+            "VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement')" % (agent_pk, pfile))
+        if result != 0:
+            print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
+            return -1
+    else:
+        for i in range(len(offsets)):
+            result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
+                "VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s')" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]]), hex(abs(hash(re.escape(text[offsets[i][0]:offsets[i][1]])))), offsets[i][2]))
+            if result != 0:
+                print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
+                return -1
+
+    return 0
+
 def table_check(db):
-    if db.access2('SELECT ct_pk FROM copyright LIMIT 1') != 1:
+    if db.access('SELECT ct_pk FROM copyright LIMIT 1') != 1:
         error = db.errmsg()
         if error == 'relation "copyright" does not exist':
             print >> sys.stderr, 'WARNING: Could not find copyright table. Will try to setup automatically. If you continue to have trouble try using %s --setup-database' % sys.argv[0]
@@ -235,12 +281,12 @@ def drop_database():
         print >> sys.stderr, 'ERROR: %s, in %s' % inst
         sys.exit(1)
 
-    result = db.access2("DROP TABLE copyright CASCADE")
+    result = db.access("DROP TABLE copyright CASCADE")
     if result != 0:
         error = db.errmsg()
         if error != 'table "copyright" does not exist':
             print >> sys.stderr, "ERROR: Could not drop copyright. Database said: '%s'" % error
-    result = db.access2("DROP SEQUENCE copyright_ct_pk_seq CASCADE")
+    result = db.access("DROP SEQUENCE copyright_ct_pk_seq CASCADE")
     if result != 0:
         error = db.errmsg()
         if error != 'sequence "copyright_ct_pk_seq" does not exist':
@@ -261,7 +307,7 @@ def setup_database(drop=False):
 
     #
     exists = False
-    result = db.access2("CREATE SEQUENCE copyright_ct_pk_seq "
+    result = db.access("CREATE SEQUENCE copyright_ct_pk_seq "
         "START WITH 1 INCREMENT BY 1 NO MAXVALUE NO MINVALUE "
         "CACHE 1")
     if result != 0:
@@ -273,14 +319,14 @@ def setup_database(drop=False):
             exists = True
     
     if not exists:
-        result = db.access2("ALTER TABLE public.copyright_ct_pk_seq OWNER TO fossy")
+        result = db.access("ALTER TABLE public.copyright_ct_pk_seq OWNER TO fossy")
         if result != 0:
             error = db.errmsg()
             print >> sys.stderr, "ERROR: Could not alter copyright_ct_pk_seq. Database said: '%s'" % error
             return -1
 
     exists = False
-    result = db.access2("CREATE TABLE copyright ( "
+    result = db.access("CREATE TABLE copyright ( "
         "ct_pk bigint DEFAULT nextval('copyright_ct_pk_seq'::regclass) NOT NULL, "
         "agent_fk bigint NOT NULL, "
         "pfile_fk bigint NOT NULL, "
@@ -299,27 +345,27 @@ def setup_database(drop=False):
             exists = True
 
     if not exists:
-        result = db.access2("ALTER TABLE public.copyright OWNER TO fossy")
+        result = db.access("ALTER TABLE public.copyright OWNER TO fossy")
         if result != 0:
             error = db.errmsg()
             print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
             return -1
 
-        result = db.access2("ALTER TABLE ONLY copyright ADD CONSTRAINT "
+        result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
                 "copyright_pkey PRIMARY KEY (ct_pk)")
         if result != 0:
             error = db.errmsg()
             print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
             return -1
         
-        result = db.access2("ALTER TABLE ONLY copyright ADD CONSTRAINT "
+        result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
                 "pfile_fk FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk)")
         if result != 0:
             error = db.errmsg()
             print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
             return -1
         
-        result = db.access2("ALTER TABLE ONLY copyright ADD CONSTRAINT "
+        result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
                 "agent_fk FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk)")
         if result != 0:
             error = db.errmsg()

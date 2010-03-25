@@ -33,7 +33,7 @@ class agent_copyright_once extends FO_Plugin {
     public $Version = "1.0";
     public $Dependency = array(
         "view",
-        "view-license"
+        "copyrightview"
     );
     public $NoHTML = 0;
     /** For anyone to access, without login, use: **/
@@ -57,15 +57,24 @@ class agent_copyright_once extends FO_Plugin {
         $Fin = popen($Sys, "r");
         //print "<pre>";
         //print $Sys."\n";
+        $colors = Array();
+        $colors['statement'] = 0;
+        $colors['email'] = 1;
+        $colors['url'] = 2;
+        $stuff = Array();
+        $stuff['statement'] = Array();
+        $stuff['email'] = Array();
+        $stuff['url'] = Array();
         while (!feof($Fin)) {
             $Line = fgets($Fin);
             if (strlen($Line) > 0) {
                 //print $Line;
                 $match = array();
-                preg_match_all("/\[(?P<start>\d+)\:(?P<end>\d+)\]/", $Line, $match);
+                preg_match_all("/\t\[(?P<start>\d+)\:(?P<end>\d+)\:(?P<type>[A-Za-z]+)\] \'(?P<content>.+)\'/", $Line, $match);
                 //print_r($match);
                 if (!empty($match['start'])) {
-                    $View->AddHighlight($match['start'][0], $match['end'][0], 0);
+                    $stuff[$match['type'][0]][] = $match['content'][0];
+                    $View->AddHighlight($match['start'][0], $match['end'][0], $colors[$match['type'][0]], '', $match['content'][0],-1);
                 }
             }
         }
@@ -84,6 +93,45 @@ class agent_copyright_once extends FO_Plugin {
             }
         }
         else {
+            print "<table width=100%>\n";
+            print "<tr><td>Copyright Statments:</td></tr>\n";
+            print "<tr><td><hr></td></tr>\n";
+            if (count($stuff['statement']) > 0) {
+                foreach ($stuff['statement'] as $i) {
+                    print "<tr><td>$i</td></tr>\n";
+                }
+                print "<tr><td><hr></td></tr>\n";
+            }
+            print "<tr><td>Total: ".count($stuff['statement'])."</td></tr>\n";
+            print "</table>\n";
+            
+            print "<br><br>\n";
+            
+            print "<table width=100%>\n";
+            print "<tr><td>Emails:</td></tr>\n";
+            print "<tr><td><hr></td></tr>\n";
+            if (count($stuff['email']) > 0) {
+                foreach ($stuff['email'] as $i) {
+                    print "<tr><td>$i</td></tr>\n";
+                }
+                print "<tr><td><hr></td></tr>\n";
+            }
+            print "<tr><td>Total: ".count($stuff['email'])."</td></tr>\n";
+            print "</table>\n";
+            
+            print "<br><br>\n";
+            
+            print "<table width=100%>\n";
+            print "<tr><td>URLs:</td></tr>\n";
+            print "<tr><td><hr></td></tr>\n";
+            if (count($stuff['url']) > 0) {
+                foreach ($stuff['url'] as $i) {
+                    print "<tr><td>$i</td></tr>\n";
+                }
+                print "<tr><td><hr></td></tr>\n";
+            }
+            print "<tr><td>Total: ".count($stuff['url'])."</td></tr>\n";
+            print "</table>\n";
         }
         /* Clean up */
         return ($V);
@@ -220,8 +268,8 @@ class agent_copyright_once extends FO_Plugin {
             $V.= "<li>Select the file to upload:<br />\n";
             $V.= "<input name='licfile' size='60' type='file' /><br />\n";
             $V.= "<b>NOTE</b>: Files larger than 100K will be discarded and not analyzed.<P />\n";
-            $V.= "<li><input type='checkbox' name='highlight' value='1'>Check if you want to see the highlighted licenses.\n";
-            $V.= "Unchecked returns a simple list that summarizes the identified license types.";
+            $V.= "<li><input type='checkbox' name='highlight' value='1'>Check if you want to see the highlighted text.\n";
+            $V.= "Unchecked returns a simple list that summarizes the identified types.";
             $V.= "<P />\n";
             $V.= "</ol>\n";
             $V.= "<input type='hidden' name='showheader' value='1'>";
