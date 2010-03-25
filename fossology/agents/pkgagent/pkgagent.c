@@ -877,6 +877,8 @@ int	main	(int argc, char *argv[])
   char sql[256];
   int rc;
 
+  extern long HBItemsProcessed;
+
   DB = DBopen();
   if (!DB)
   {
@@ -1003,6 +1005,9 @@ int	main	(int argc, char *argv[])
         } else {
 	  /* Deal with the other package*/
 	}
+
+	Heartbeat(++HBItemsProcessed);
+
         printf("OK\n");
         fflush(stdout);
       }
