@@ -119,20 +119,13 @@ class agent_copyright extends FO_Plugin {
        this requires knowing the agents fk.
      */
     $agent_pk = GetAgentKey("copyright", "copyright agent");
-    $jqargs = "SELECT pfile_pk,
-              pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size  AS pfilename
-              FROM (SELECT distinct(pfile_fk) AS PF
-              FROM uploadtree WHERE upload_fk=$uploadpk and (ufile_mode&x'3C000000'::int)=0) as SS
-              left outer join copyright on (PF=pfile_fk and agent_fk=$agent_pk)
-              inner join pfile on (pf=pfile_pk)
-              WHERE ct_pk IS null LIMIT 5000;";
-
+    $jqargs = $uploadpk;
     /*
       Hand of the SQL  to the scheduler
      */
 
-  /* Add job: job "Fo-Nomos License Analysis" has jobqueue item "nomos" */
-    $jobqueuepk = JobQueueAdd($jobpk, "copyright", $jqargs, "yes", "pfilename", $Dep);
+  /* Add job: job "Copyright Analysis" has jobqueue item "copyright" */
+    $jobqueuepk = JobQueueAdd($jobpk, "copyright", $jqargs, "no", "", $Dep);
     if (empty($jobqueuepk)) {
       return ("Failed to insert agent copyright into job queue.");
     }
