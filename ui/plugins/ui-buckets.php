@@ -154,8 +154,8 @@ class ui_buckets extends FO_Plugin
     $AgentRec = AgentARSList("bucket_ars", $upload_pk, 0);
     if ($AgentRec === false)
     {
-      echo "No data available";
-      return;
+      $VLic .=  "<b>No data available</b><br>";
+      return $VLic;
     }
     /* loop through $AgentRec to verify that the nomosagent_pk is enabled */
     $nomosagent_pk = 0;
