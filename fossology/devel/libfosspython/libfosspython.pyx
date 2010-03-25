@@ -120,29 +120,29 @@ cdef class FossDB:
         """
         return GetAgentKey(self.DB, agent_name, 0, svn_rev, agent_desc)
 
+    # def access(self, sql):
+    #     """
+    #     FossDB.access(sql) -> int (error id)
+
+    #     Write to the DB and read results.
+    #     Returns:
+    #       1 = ok, got results (e.g., SELECT)
+    #       0 = ok, no results (e.g., INSERT)
+    #       -1 = constraint error
+    #       -2 = other error
+    #       -3 = timeout
+    #     NOTE: For a huge DB request, this could take a while
+    #     and could consume all memory.
+    #     Callers should take care to not call unbounded SQL selects.
+    #     (Say "select limit 1000" or something.)
+
+    #      * where `sql' is a string.
+    #     """
+    #     return DBaccess(self.DB, sql)
+
     def access(self, sql):
         """
         FossDB.access(sql) -> int (error id)
-
-        Write to the DB and read results.
-        Returns:
-          1 = ok, got results (e.g., SELECT)
-          0 = ok, no results (e.g., INSERT)
-          -1 = constraint error
-          -2 = other error
-          -3 = timeout
-        NOTE: For a huge DB request, this could take a while
-        and could consume all memory.
-        Callers should take care to not call unbounded SQL selects.
-        (Say "select limit 1000" or something.)
-
-         * where `sql' is a string.
-        """
-        return DBaccess(self.DB, sql)
-
-    def access2(self, sql):
-        """
-        FossDB.access2(sql) -> int (error id)
 
         Write to the DB and read results.
         Stripped down version of DBaccess without all the
@@ -173,6 +173,28 @@ cdef class FossDB:
 
         return -1
 
+    def getrows(self):
+        """
+        FossDB.getrows() -> list(dict(), ...)
+
+        Returns a list of dictionaries containing the results as a key value pairs.
+
+        Returns and empty list if no results returned.
+        """
+
+        rows = []
+
+        n = self.datasize()
+        d = self.colsize()
+
+        for i in xrange(n):
+            rowdict = {}
+            for j in xrange(d):
+                rowdict[self.getcolname(j)] = self.getvalue(i,j)
+            rows.append(rowdict)
+
+        return rows
+
     def errmsg(self):
         """
         FossDB.errmsg() -> string (error message)
@@ -185,7 +207,7 @@ cdef class FossDB:
         """
         FossDB.status() -> string (status message)
 
-        Return the last result status or empty string if db not open or no result available
+        Return the last result status or empty string if db not open or no result available.
         """
         return DBstatus(self.DB)
 
