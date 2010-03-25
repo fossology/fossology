@@ -140,7 +140,7 @@ class list_lic_files extends FO_Plugin
     $URL = "?mod=" . $this->Name . "&napk=$nomosagent_pk&item=$uploadtree_pk&lic=$ushortname&page=-1";
 
     $V .= "<table>";
-    $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Licenses found</th></tr>";
+    $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Nomos Licenses found</th></tr>";
     while ($row = pg_fetch_assoc($filesresult))
     {
       // Allow user to exclude files with this extension
