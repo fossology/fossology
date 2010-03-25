@@ -128,18 +128,15 @@ int Verbose = 0;
  *  so that they cannot cause any harm
  *
  * ********************************************/
-char*	EscapeString	(const char *sourceString)
+void	EscapeString	(const char *sourceString, char *escString)
 {
 	int len;
-	char *escString;
 	int error;
 	
 	len = strlen(sourceString);
-	escString = (char*)calloc(sizeof(char*),len);
 	PQescapeStringConn(DB, escString, sourceString, len, &error);
 	if (error)
-		printf("WARNING: Error escape string %s\n", sourceString);
-	return escString;
+		printf("WARNING: %s line %d: Error escaping string with multibype character set?\n",__FILE__, __LINE__ );
 }
 
 /**********************************************
@@ -346,7 +343,6 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
         strncpy(pi->release,msgstr,sizeof(pi->release));
         break;
       case RPMTAG_BUILDTIME:	
-	tp = malloc(sizeof(long));
 	t = atol(msgstr);
 	tp = &t;
 	strncpy(pi->buildDate,asctime(gmtime((time_t*)tp)),sizeof(pi->buildDate));
@@ -361,10 +357,12 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
 	strncpy(pi->sourceRPM,msgstr,sizeof(pi->sourceRPM));
 	break;
       case RPMTAG_SUMMARY:
-	strncpy(pi->summary,EscapeString(msgstr),sizeof(pi->summary));
+	//strncpy(pi->summary,EscapeString(msgstr),sizeof(pi->summary));
+	EscapeString(msgstr, pi->summary);
 	break;
       case RPMTAG_DESCRIPTION:
-	strncpy(pi->description,EscapeString(msgstr),sizeof(pi->description));
+	//strncpy(pi->description,EscapeString(msgstr),sizeof(pi->description));
+	EscapeString(msgstr, pi->description);
 	break;
       default:
 	break;
@@ -376,7 +374,6 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
   header_status = headerGetEntry(header,tag[14],&type,&pointer,&data_size);
   if (header_status) {
     if (type == RPM_STRING_ARRAY_TYPE) {
-      pi->requires = calloc(data_size, sizeof(char *));
       pi->requires = (char **) pointer;
       pi->req_size = data_size;
     } 
