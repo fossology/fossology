@@ -139,6 +139,8 @@ class list_lic_files extends FO_Plugin
     $ushortname = rawurlencode($rf_shortname);
     $URL = "?mod=" . $this->Name . "&napk=$nomosagent_pk&item=$uploadtree_pk&lic=$ushortname&page=-1";
 
+    $V .= "<table>";
+    $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Licenses found</th></tr>";
     while ($row = pg_fetch_assoc($filesresult))
     {
       // Allow user to exclude files with this extension
@@ -155,8 +157,24 @@ class list_lic_files extends FO_Plugin
         $ExclArray = explode(":", $Excl);
         if (in_array($FileExt, $ExclArray)) $ok = false;
       }
-      if ($ok) $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, ++$RowNum, $Header);
+      if ($ok) 
+      {
+        $V .= "<tr><td>";
+        $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, ++$RowNum, $Header);
+        $V .= "</td>";
+        $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
+
+        $pfile_pk = $row['pfile_fk'];
+        $licstring = GetFileLicenses_string($nomosagent_pk, $row['pfile_fk'], $row['uploadtree_pk
+']);
+
+        // show the entire license list as a single string with links to the files
+        // in this container with that license.
+        $V .= "<td>$licstring</td></tr>";
+        $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
+      }
     }
+    $V .= "</table>";
 
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
