@@ -197,7 +197,6 @@ static int lDiags = 0;  /* set this to non-zero for printing diagnostics */
 #define mCR_IPTC()      (INFILE(_CR_IPTC1) || INFILE(_CR_IPTC2))
 
 
-
 static int fileHasPatt(int licTextIdx, char *filetext, int size,
 		       int isML, int isPS, int qType)
 {
@@ -215,9 +214,6 @@ static int fileHasPatt(int licTextIdx, char *filetext, int size,
      * raw text of the file; non-negative value means look in the doctored
      * text buffers...
      */
-#ifdef	DEBUG
-	printf("?? %d ??\n", x);
-#endif	/* DEBUG */
     if ((qType >= 0) && (qType & FL_SHOWMATCH)) {
 	qType &= ~FL_SHOWMATCH;
 	show = FL_SHOWMATCH;
@@ -257,7 +253,6 @@ static int fileHasPatt(int licTextIdx, char *filetext, int size,
     }
     return(findPhrase(licTextIdx, PARSE_ARGS, qType));
 }
-
 
 
 static int dbgIdxGrep(int licTextIdx, char *buf, int show)
@@ -7360,7 +7355,7 @@ int checkUnclassified(char *filetext, int size, int score, char *ftype,
 
 #ifdef  PROC_TRACE
 	traceFunc("== checkUnclassified(%p, %d, %d %s, %d, %d, %d)\n", filetext,
-	       size, score ftype, isML, isPS, nw);
+	       size, score, ftype, isML, isPS, nw);
 #endif  /* PROC_TRACE */
 
     /*
