@@ -104,16 +104,35 @@ class ui_view_info extends FO_Plugin
       $V .= "<tr><td align='center'>Pfile ID</td><td align='right'>" . $R['pfile_fk'] . "</td></tr>\n";
       $V .= "</table>\n";
       }
+    return($V);
+  } // ShowView()
+
+  /***********************************************************
+   Show Sightings, List the directory locations where this pfile is found
+   ***********************************************************/
+  function ShowSightings()
+  {
+    global $DB;
+    $V = "";
+    $Folder = GetParm("folder",PARM_INTEGER);
+    $Upload = GetParm("upload",PARM_INTEGER);
+    $Item = GetParm("item",PARM_INTEGER);
+    if (empty($Upload) || empty($Item)) { return; }
+
+    $Page = GetParm("page",PARM_INTEGER);
+    if (empty($Page)) { $Page=0; }
+    $Max = 50;
+    $Offset = $Page * $Max;
 
     /**********************************
      List the directory locations where this pfile is found
      **********************************/
     $V .= "<H2>Sightings</H2>\n";
     $SQL = "SELECT * FROM pfile,uploadtree
-	WHERE pfile_pk=pfile_fk
-	AND pfile_pk IN
-	(SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $Item)
-	LIMIT $Max OFFSET $Offset";
+        WHERE pfile_pk=pfile_fk
+        AND pfile_pk IN
+        (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $Item)
+        LIMIT $Max OFFSET $Offset";
     $Results = $DB->Action($SQL);
     $Count = count($Results);
     if (($Page > 0) || ($Count >= $Max))
@@ -122,24 +141,373 @@ class ui_view_info extends FO_Plugin
       }
     else { $VM = ""; }
     if ($Count > 0)
-	{
-	$V .= "This exact file appears in the following locations:\n";
-	$V .= $VM;
-	$Offset++;
-	$V .= Dir2FileList($Results,"browse","view",$Offset);
-	$V .= $VM;
-	}
+        {
+        $V .= "This exact file appears in the following locations:\n";
+        $V .= $VM;
+        $Offset++;
+        $V .= Dir2FileList($Results,"browse","view",$Offset);
+        $V .= $VM;
+        }
     else if ($Page > 0)
-	{
-	$V .= "End of listing.\n";
-	}
+        {
+        $V .= "End of listing.\n";
+        }
     else
-	{
-	$V .= "This file does not appear in any other known location.\n";
-	}
-
+        {
+        $V .= "This file does not appear in any other known location.\n";
+        }
     return($V);
-  } // ShowView()
+  }//ShowSightings()
+	
+  /***********************************************************
+   ShowMetaView(): Display the meta data associated with the file.
+   ***********************************************************/
+  function ShowMetaView()
+  {
+    global $DB;
+    $V = "";
+    $Upload = GetParm("upload",PARM_INTEGER);
+    $Folder = GetParm("folder",PARM_INTEGER);
+    $Item = GetParm("item",PARM_INTEGER);
+    if (empty($Item) || empty($Upload))
+        { return; }
+
+    /**********************************
+     Display meta data
+     **********************************/
+
+    $SQL = "SELECT *
+        FROM uploadtree
+        INNER JOIN pfile ON uploadtree_pk = $Item
+        AND pfile_fk = pfile_pk
+        INNER JOIN mimetype ON pfile_mimetypefk = mimetype_pk;";
+    $Results = $DB->Action($SQL);
+    $Count=1;
+
+    $V .= "<H2>Meta Data</H2>\n";
+    $V .= "<table border='1'>\n";
+    $V .= "<tr><th width='5%'>Item</th><th width='20%'>Meta Data</th><th>Value</th></tr>\n";
+    foreach($Results as $R)
+    for($i=0; !empty($Results[$i]['mimetype_pk']); $i++)
+        {
+        $R = &$Results[$i];
+        $V .= "<tr><td align='right'>$Count</td><td>Unpacked file type";
+        $V .= "</td><td>" . htmlentities($R['mimetype_name']) . "</td></tr>\n";
+        $Count++;
+        }
+/*  Don't display attrib table value
+
+    $SQL = "SELECT DISTINCT key_name,attrib_value FROM attrib
+        INNER JOIN key ON key_pk = attrib_key_fk
+        AND key_parent_fk IN
+        (SELECT key_pk FROM key WHERE key_parent_fk=0 AND
+          (key_name = 'pkgmeta' OR key_name = 'specagent') )
+        INNER JOIN uploadtree ON uploadtree_pk = $Item
+        AND uploadtree.pfile_fk = attrib.pfile_fk
+        AND key_name != 'Processed' ORDER BY key_name;";
+    $Results = $DB->Action($SQL);
+
+    for($i=0; !empty($Results[$i]['key_name']); $i++)
+        {
+        $R = &$Results[$i];
+        $V .= "<tr><td align='right'>$Count</td><td>" . htmlentities($R['key_name']);
+        $Val = htmlentities($R['attrib_value']);
+        $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
+        $V .= "</td><td>$Val</td></tr>\n";
+        $Count++;
+        }
+*/
+    $V .= "</table>\n";
+    $Count--;
+    $V .= "<P />Total meta data records: " . number_format($Count,0,"",",") . "<br />\n";
+    return($V);
+  } // ShowMetaView()
+
+  /*********************************************************** 
+   ShowPackageInfo(): Display the package info associated with
+   the rpm/debian package.
+   ***********************************************************/
+  function ShowPackageInfo($ShowMenu=0,$ShowHeader=0)
+  {
+    global $DB;
+    $V = "";
+    $Upload = GetParm("upload",PARM_INTEGER);
+    $Item = GetParm("item",PARM_INTEGER);
+    $Require = "";
+    $MIMETYPE = "";
+    $Count = 0;	
+
+    if (empty($Item) || empty($Upload))
+        { return; }
+
+    /**********************************
+     Display micro header
+     **********************************/
+    if ($ShowHeader)
+      {
+      $V .= Dir2Browse("browse",$Item,NULL,1,"View");
+      } // if ShowHeader
+
+    /**********************************
+     Check if pkgagent disabled
+    ***********************************/		
+    $SQL = "SELECT agent_enabled FROM agent WHERE agent_name ='pkgagent' order by agent_ts LIMIT 1;";
+    $Results = $DB->Action($SQL);
+    if (isset($Results[0]) && ($Results[0]['agent_enabled']== 'f')){return;}
+
+    /**********************************
+     Display package info
+     **********************************/
+    $V .= "<H2>Package Info</H2>\n";
+
+    $SQL = "SELECT mimetype_name
+        FROM uploadtree
+        INNER JOIN pfile ON uploadtree_pk = $Item
+        AND pfile_fk = pfile_pk
+        INNER JOIN mimetype ON pfile_mimetypefk = mimetype_pk;";
+    $Results = $DB->Action($SQL);
+    foreach($Results as $R)
+       {
+       if (!empty($R['mimetype_name']))
+          {
+          $MIMETYPE = $R['mimetype_name'];
+          }
+       }
+    /** RPM Package Info **/
+    if ($MIMETYPE == "application/x-rpm")
+       {
+       $SQL = "SELECT *
+                FROM pkg_rpm
+                INNER JOIN uploadtree ON uploadtree_pk = $Item
+                AND uploadtree.pfile_fk = pkg_rpm.pfile_fk;";
+       $Results = $DB->Action($SQL);
+       foreach($Results as $R)
+          {
+          if((!empty($R['source_rpm']))and(trim($R['source_rpm']) != "(none)"))
+              {
+              $V .= "RPM Binary Package";
+              }
+          else
+              {
+              $V .= "RPM Source Package";
+              }
+          }
+       $Count=1;
+
+       $V .= "<table border='1'>\n";
+       $V .= "<tr><th width='5%'>Item</th><th width='20%'>Type</th><th>Value</th></tr>\n";
+
+       for($i=0; !empty($Results[$i]['pkg_pk']); $i++)
+          {
+          $R = &$Results[$i];
+          $Require = $R['pkg_pk'];
+
+          $V .= "<tr><td align='right'>$Count</td><td>Package";
+          $V .= "</td><td>" . htmlentities($R['pkg_name']) . "</td></tr>\n";
+          $Count++;
+
+          $V .= "<tr><td align='right'>$Count</td><td>Alias";
+          $V .= "</td><td>" . htmlentities($R['pkg_alias']) . "</td></tr>\n";
+          $Count++;
+          $V .= "<tr><td align='right'>$Count</td><td>Architecture";
+          $V .= "</td><td>" . htmlentities($R['pkg_arch']) . "</td></tr>\n";
+          $Count++;
+          $V .= "<tr><td align='right'>$Count</td><td>Version";
+          $V .= "</td><td>" . htmlentities($R['version']) . "</td></tr>\n";
+          $Count++;
+	  	
+          $V .= "<tr><td align='right'>$Count</td><td>License";
+          $V .= "</td><td>" . htmlentities($R['license']) . "</td></tr>\n";
+          $Count++;
+          $V .= "<tr><td align='right'>$Count</td><td>Group";
+          $V .= "</td><td>" . htmlentities($R['pkg_group']) . "</td></tr>\n";
+          $Count++;
+          $V .= "<tr><td align='right'>$Count</td><td>Packager";
+          $V .= "</td><td>" . htmlentities($R['packager']) . "</td></tr>\n";
+          $Count++;
+          $V .= "<tr><td align='right'>$Count</td><td>Release";
+          $V .= "</td><td>" . htmlentities($R['release']) . "</td></tr>\n";
+          $Count++;
+          $V .= "<tr><td align='right'>$Count</td><td>BuildDate";
+          $V .= "</td><td>" . htmlentities($R['build_date']) . "</td></tr>\n";
+          $Count++;
+          $V .= "<tr><td align='right'>$Count</td><td>Vendor";
+          $V .= "</td><td>" . htmlentities($R['vendor']) . "</td></tr>\n";
+          $Count++;
+          $V .= "<tr><td align='right'>$Count</td><td>URL";
+          $V .= "</td><td>" . htmlentities($R['url']) . "</td></tr>\n";
+          $Count++;
+          $V .= "<tr><td align='right'>$Count</td><td>Summary";
+          $V .= "</td><td>" . htmlentities($R['summary']) . "</td></tr>\n";
+          $Count++;
+          $V .= "<tr><td align='right'>$Count</td><td>Description";
+          $V .= "</td><td>" . htmlentities($R['description']) . "</td></tr>\n";
+          $Count++;
+          $V .= "<tr><td align='right'>$Count</td><td>Source";
+          $V .= "</td><td>" . htmlentities($R['source_rpm']) . "</td></tr>\n";
+          $Count++;
+          }
+
+       $SQL = "SELECT * FROM pkg_rpm_req WHERE pkg_fk = $Require;";
+       $Results = $DB->Action($SQL);
+
+       for($i=0; !empty($Results[$i]['req_pk']); $i++)
+            {
+            $R = &$Results[$i];
+            $V .= "<tr><td align='right'>$Count</td><td>Requires";
+            $Val = htmlentities($R['req_value']);
+            $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
+            $V .= "</td><td>$Val</td></tr>\n";
+            $Count++;
+            }
+
+       $V .= "</table>\n";
+       $Count--;
+
+       }
+    else if ($MIMETYPE == "application/x-debian-package")
+       {
+       $V .= "Debian Binary Package\n";
+
+       $SQL = "SELECT *
+                FROM pkg_deb
+                INNER JOIN uploadtree ON uploadtree_pk = $Item
+                AND uploadtree.pfile_fk = pkg_deb.pfile_fk;";
+       $Results = $DB->Action($SQL);
+       $Count=1;
+
+       $V .= "<table border='1'>\n";
+       $V .= "<tr><th width='5%'>Item</th><th width='20%'>Type</th><th>Value</th></tr>\n";
+       
+       for($i=0; !empty($Results[$i]['pkg_pk']); $i++)
+            {
+            $R = &$Results[$i];
+            $Require = $R['pkg_pk'];
+
+            $V .= "<tr><td align='right'>$Count</td><td>Package";
+            $V .= "</td><td>" . htmlentities($R['pkg_name']) . "</td></tr>\n";
+            $Count++;
+
+            $V .= "<tr><td align='right'>$Count</td><td>Architecture";
+            $V .= "</td><td>" . htmlentities($R['pkg_arch']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Version";
+            $V .= "</td><td>" . htmlentities($R['version']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Section";
+            $V .= "</td><td>" . htmlentities($R['section']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Priority";
+            $V .= "</td><td>" . htmlentities($R['priority']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Installed Size";
+            $V .= "</td><td>" . htmlentities($R['installed_size']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Maintainer";
+            $V .= "</td><td>" . htmlentities($R['maintainer']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Homepage";
+            $V .= "</td><td>" . htmlentities($R['homepage']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Source";
+            $V .= "</td><td>" . htmlentities($R['source']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Summary";
+            $V .= "</td><td>" . htmlentities($R['summary']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Description";
+            $V .= "</td><td>" . htmlentities($R['description']) . "</td></tr>\n";
+            $Count++;
+
+            }
+
+       $SQL = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
+       $Results = $DB->Action($SQL);
+
+       for($i=0; !empty($Results[$i]['req_pk']); $i++)
+            {
+            $R = &$Results[$i];
+            $V .= "<tr><td align='right'>$Count</td><td>Depends";
+            $Val = htmlentities($R['req_value']);
+            $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
+            $V .= "</td><td>$Val</td></tr>\n";
+            $Count++;
+            }
+
+       $V .= "</table>\n";
+       $Count--;
+       }
+
+    else if ($MIMETYPE == "application/x-debian-source")
+       {
+       $V .= "Debian Source Package\n";
+
+       $SQL = "SELECT *
+                FROM pkg_deb
+                INNER JOIN uploadtree ON uploadtree_pk = $Item
+                AND uploadtree.pfile_fk = pkg_deb.pfile_fk;";
+       $Results = $DB->Action($SQL);
+       $Count=1;
+
+       $V .= "<table border='1'>\n";
+       $V .= "<tr><th width='5%'>Item</th><th width='20%'>Type</th><th>Value</th></tr>\n";
+
+       for($i=0; !empty($Results[$i]['pkg_pk']); $i++)
+            {
+            $R = &$Results[$i];
+            $Require = $R['pkg_pk'];
+
+            $V .= "<tr><td align='right'>$Count</td><td>Format";
+            $V .= "</td><td>" . htmlentities($R['format']) . "</td></tr>\n";
+            $Count++;
+
+            $V .= "<tr><td align='right'>$Count</td><td>Source";
+            $V .= "</td><td>" . htmlentities($R['source']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Binary";
+            $V .= "</td><td>" . htmlentities($R['pkg_name']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Architecture";
+            $V .= "</td><td>" . htmlentities($R['pkg_arch']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Version";
+            $V .= "</td><td>" . htmlentities($R['version']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Maintainer";
+            $V .= "</td><td>" . htmlentities($R['maintainer']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Uploaders";
+            $V .= "</td><td>" . htmlentities($R['uploaders']) . "</td></tr>\n";
+            $Count++;
+            $V .= "<tr><td align='right'>$Count</td><td>Standards-Version";
+            $V .= "</td><td>" . htmlentities($R['standards_version']) . "</td></tr>\n";
+            $Count++;
+            }
+
+       $SQL = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
+       $Results = $DB->Action($SQL);
+
+       for($i=0; !empty($Results[$i]['req_pk']); $i++)
+            {
+            $R = &$Results[$i];
+            $V .= "<tr><td align='right'>$Count</td><td>Build-Depends";
+            $Val = htmlentities($R['req_value']);
+            $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
+            $V .= "</td><td>$Val</td></tr>\n";
+            $Count++;
+            }
+
+       $V .= "</table>\n";
+       $Count--;
+       }
+
+    else
+       {
+       $V .= "NOT RPM/DEBIAN Package.";
+       }
+    $V .= "<P />Total package info records: " . number_format($Count,0,"",",") . "<br />\n";
+    return($V);
+  } // ShowPackageInfo()
 
   /***********************************************************
    Output(): This function is called when user output is
@@ -160,7 +528,10 @@ class ui_view_info extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= $this->ShowView(1,1);
+	$V .= $this->ShowPackageinfo(1,1);
+	$V .= $this->ShowSightings();
+	$V .= $this->ShowView(0,0);
+	$V .= $this->ShowMetaView();
 	break;
       case "Text":
 	break;
