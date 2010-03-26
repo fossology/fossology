@@ -131,7 +131,7 @@ class copyright_hist extends FO_Plugin
     $VCopyright .= "<table border=1 width='100%' id='copyright'>\n";
     $VCopyright .= "<tr><th width='10%'>Count</th>";
     $VCopyright .= "<th width='10%'>Files</th>";
-    $VCopyright .= "<th>Copyright</th></tr>\n";
+    $VCopyright .= "<th>Copyright Statements</th></tr>\n";
 
     $EmailCount = 0;
     $UniqueEmailCount = 0;
@@ -313,11 +313,11 @@ class copyright_hist extends FO_Plugin
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
-    $V .= "<tr><td>Copyrights</td><td></td></tr>\n";
+    $V .= "<tr><td><a name=\"statements\"></a>Jump to: <a href=\"#emails\">Emails</a> | <a href=\"#urls\">URLs</a></td><td></td></tr>\n";
     $V .= "<tr><td valign='top' width='50%'>$VCopyright</td><td valign='top'>$VF</td></tr>\n";
-    $V .= "<tr><td>Emails</td><td></td></tr>\n";
+    $V .= "<tr><td><a name=\"emails\"></a>Jump to: <a href=\"#statements\">Copyright Statements</a> | <a href=\"#urls\">URLs</a></td><td></td></tr>\n";
     $V .= "<tr><td valign='top' width='50%'>$VEmail</td><td valign='top'></td></tr>\n";
-    $V .= "<tr><td>URLs</td><td></td></tr>\n";
+    $V .= "<tr><td><a name=\"urls\"></a>Jump To: <a href=\"#statements\">Copyright Statements</a> | <a href=\"#emails\">Emails</a></td><td></td></tr>\n";
     $V .= "<tr><td valign='top' width='50%'>$VUrl</td><td valign='top'></td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
