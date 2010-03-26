@@ -18,6 +18,7 @@
 ##
 
 import sys
+import time
 import re
 import traceback
 import cPickle as pickle
@@ -86,7 +87,7 @@ def main():
         try:
             db = libfosspython.FossDB()
         except Exception, inst:
-            print >> sys.stderr, 'ERROR: %s, in %s' % inst
+            print >> sys.stdout, 'ERROR: %s, in %s' % inst
             return 1
 
         tr = table_check(db)
@@ -99,7 +100,7 @@ def main():
         return(setup_database(options.drop))
 
     if not options.model:
-        print >> sys.stderr, 'You must specify a model file for all phases of the algorithm.\n\n'
+        print >> sys.stdout, 'You must specify a model file for all phases of the algorithm.\n\n'
         optparser.print_usage()
         sys.exit(1)
 
@@ -112,7 +113,7 @@ def main():
     try:
         model = pickle.load(open(options.model))
     except:
-        print >> sys.stderr, 'You must specify a training file to create a model.\n\n'
+        print >> sys.stdout, 'You must specify a training file to create a model.\n\n'
         optparser.print_usage()
         sys.exit(1)
 
@@ -151,7 +152,7 @@ def agent(model,runonpfiles=False):
         try:
             db = libfosspython.FossDB()
         except Exception, inst:
-            print >> sys.stderr, 'ERROR: %s, in %s' % inst[:]
+            print >> sys.stdout, 'ERROR: %s, in %s' % inst[:]
             return 1
 
         tr = table_check(db)
@@ -159,7 +160,7 @@ def agent(model,runonpfiles=False):
             return tr
 
         if libfosspython.repOpen() != 1:
-            print >> sys.stderr, 'ERROR: Something is broken. Could not open Repo.'
+            print >> sys.stdout, 'ERROR: Something is broken. Could not open Repo.'
             return 1
 
         agent_pk = db.getAgentKey('copyright', '1.0 source_hash(%s) model_hash(%s)' % (hex(hash(open(sys.argv[0]).read())), hex(hash(str(model)))), 'copyright agent')
@@ -175,7 +176,7 @@ def agent(model,runonpfiles=False):
                     (pfile, file) = re.findall(re_str, line)[0]
                     pfile = int(pfile)
                     if analyze(pfile_pk, file, agent_pk, model, db) != 0:
-                        print >> sys.stderr, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, row['pfile_pk'], row['pfilename'])
+                        print >> sys.stdout, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, row['pfile_pk'], row['pfilename'])
                     else:
                         count += 1
                         print "ItemsProcessed %ld" % 1
@@ -196,6 +197,13 @@ def agent(model,runonpfiles=False):
                     line = "quit"
 
         else:
+            # we cant print a message everytime we complete a job or the
+            # scheduler cant unlock stdout in time. So lets wait a number of
+            # items before we print a message.
+            # 50 is a good number on my 1.8GHZ Core 2 Duo Linux VM.
+
+            waititems = 50
+
             while True:
                 print "OK"
                 # get the upload_pk from stdin.
@@ -205,14 +213,14 @@ def agent(model,runonpfiles=False):
                     if len(line) > 0:
                         upload_pk = int(line)
                 except ValueError:
-                    print >> sys.stderr, 'ERROR: Provided upload_pk is not a number: %r' % line
+                    print >> sys.stdout, 'ERROR: Provided upload_pk is not a number: %r' % line
                     return -1
 
                 sql = '''SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS left outer join copyright on (PF=pfile_fk and agent_fk='%d') inner join pfile on (PF=pfile_pk) WHERE ct_pk IS null''' % (upload_pk, agent_pk)
                 
                 if db.access(sql) != 1:
                     error = db.errmsg()
-                    print >> sys.stderr, 'ERROR: Could not select job queue for copyright analysis. Database said: "%s"' % error
+                    print >> sys.stdout, 'ERROR: Could not select job queue for copyright analysis. Database said: "%s"' % error
                     return -1
 
                 rows = db.getrows()
@@ -220,15 +228,23 @@ def agent(model,runonpfiles=False):
                 count = 0
                 for row in rows:
                     if analyze(row['pfile_pk'], row['pfilename'], agent_pk, model, db) != 0:
-                        print >> sys.stderr, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, row['pfile_pk'], row['pfilename'])
+                        print >> sys.stdout, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, row['pfile_pk'], row['pfilename'])
                     else:
-                        print "ItemsProcessed %ld" % 1
                         count += 1
+                        if count%waititems == 0:
+                            print "ItemsProcessed %ld" % waititems
+                
+                if count%waititems != 0:
+                    # wait just a second so we dont print too soon.
+                    time.sleep(1)
+                    print "ItemsProcessed %ld" % (count%waititems)
 
+                # gives the scheduler a break
+                time.sleep(1)
     except:
         exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
         p = '\t'.join(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
-        print >> sys.stderr, "ERROR: An error occurred in the main agent loop. Please consult the provided traceback.\n\t%s\n" % p
+        print >> sys.stdout, "ERROR: An error occurred in the main agent loop. Please consult the provided traceback.\n\t%s\n" % p
         return 1
 
     libfosspython.repClose()
@@ -240,7 +256,7 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
     try:
         pfile = int(pfile_pk)
     except ValueError:
-        print >> sys.stderr, 'ERROR: Provided pfile_pk is not a number: %r' % line
+        print >> sys.stdout, 'ERROR: Provided pfile_pk is not a number: %r' % line
         return -1
 
     path = libfosspython.repMkPath('files', filename)
@@ -250,14 +266,14 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
         result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
             "VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement')" % (agent_pk, pfile))
         if result != 0:
-            print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
+            print >> sys.stdout, "ERROR: DB Access error,\n%s" % db.status()
             return -1
     else:
         for i in range(len(offsets)):
             result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
                 "VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s')" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]]), hex(abs(hash(re.escape(text[offsets[i][0]:offsets[i][1]])))), offsets[i][2]))
             if result != 0:
-                print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
+                print >> sys.stdout, "ERROR: DB Access error,\n%s" % db.status()
                 return -1
 
     return 0
@@ -266,10 +282,10 @@ def table_check(db):
     if db.access('SELECT ct_pk FROM copyright LIMIT 1') != 1:
         error = db.errmsg()
         if error == 'relation "copyright" does not exist':
-            print >> sys.stderr, 'WARNING: Could not find copyright table. Will try to setup automatically. If you continue to have trouble try using %s --setup-database' % sys.argv[0]
+            print >> sys.stdout, 'WARNING: Could not find copyright table. Will try to setup automatically. If you continue to have trouble try using %s --setup-database' % sys.argv[0]
             return setup_database()
 
-        print >> sys.stderr, 'ERROR: Could not select table copyright. Database said: "%s"' % error
+        print >> sys.stdout, 'ERROR: Could not select table copyright. Database said: "%s"' % error
         return -1
     return 0
 
@@ -278,19 +294,19 @@ def drop_database():
     try:
         db = libfosspython.FossDB()
     except Exception, inst:
-        print >> sys.stderr, 'ERROR: %s, in %s' % inst
+        print >> sys.stdout, 'ERROR: %s, in %s' % inst
         sys.exit(1)
 
     result = db.access("DROP TABLE copyright CASCADE")
     if result != 0:
         error = db.errmsg()
         if error != 'table "copyright" does not exist':
-            print >> sys.stderr, "ERROR: Could not drop copyright. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not drop copyright. Database said: '%s'" % error
     result = db.access("DROP SEQUENCE copyright_ct_pk_seq CASCADE")
     if result != 0:
         error = db.errmsg()
         if error != 'sequence "copyright_ct_pk_seq" does not exist':
-            print >> sys.stderr, "ERROR: Could not drop copyright_ct_pk_seq. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not drop copyright_ct_pk_seq. Database said: '%s'" % error
     
     return 0
 
@@ -299,7 +315,7 @@ def setup_database(drop=False):
     try:
         db = libfosspython.FossDB()
     except Exception, inst:
-        print >> sys.stderr, 'ERROR: %s, in %s' % inst
+        print >> sys.stdout, 'ERROR: %s, in %s' % inst
         sys.exit(1)
 
     if drop:
@@ -313,7 +329,7 @@ def setup_database(drop=False):
     if result != 0:
         error = db.errmsg()
         if error != 'relation "copyright_ct_pk_seq" already exists':
-            print >> sys.stderr, "ERROR: Could not create copyright_ct_pk_seq. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not create copyright_ct_pk_seq. Database said: '%s'" % error
             return -1
         else:
             exists = True
@@ -322,7 +338,7 @@ def setup_database(drop=False):
         result = db.access("ALTER TABLE public.copyright_ct_pk_seq OWNER TO fossy")
         if result != 0:
             error = db.errmsg()
-            print >> sys.stderr, "ERROR: Could not alter copyright_ct_pk_seq. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not alter copyright_ct_pk_seq. Database said: '%s'" % error
             return -1
 
     exists = False
@@ -339,7 +355,7 @@ def setup_database(drop=False):
     if result != 0:
         error = db.errmsg()
         if error != 'relation "copyright" already exists':
-            print >> sys.stderr, "ERROR: Could not create table copyright. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not create table copyright. Database said: '%s'" % error
             return -1
         else:
             exists = True
@@ -348,28 +364,28 @@ def setup_database(drop=False):
         result = db.access("ALTER TABLE public.copyright OWNER TO fossy")
         if result != 0:
             error = db.errmsg()
-            print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'" % error
             return -1
 
         result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
                 "copyright_pkey PRIMARY KEY (ct_pk)")
         if result != 0:
             error = db.errmsg()
-            print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'" % error
             return -1
         
         result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
                 "pfile_fk FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk)")
         if result != 0:
             error = db.errmsg()
-            print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'" % error
             return -1
         
         result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
                 "agent_fk FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk)")
         if result != 0:
             error = db.errmsg()
-            print >> sys.stderr, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'" % error
             return -1
 
 if __name__ == '__main__':
