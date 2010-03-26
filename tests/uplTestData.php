@@ -78,7 +78,7 @@ class uploadTestDataTest extends fossologyTestCase
     print "starting testUploadTestData\n";
     $rootFolder = 1;
     $upload = NULL;
-    $uploadList = array('TestData/archives/fossI16L518.tar.bz2',
+    $uploadList = array('TestData/archives/fossI16L335U29.tar.bz2',
                         'TestData/archives/foss23D1F1L.tar.bz2',
                         'TestData/licenses/gplv2.1',
                         'TestData/licenses/Affero-v1.0');
