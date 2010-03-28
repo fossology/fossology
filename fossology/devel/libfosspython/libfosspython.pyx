@@ -13,43 +13,86 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-import signal
+from threading import Thread
+import time
 import re
 
+class Heartbeat(Thread):
+    """
+    This thread class will create a new thread that maintains a count of the 
+    current number of items processed for your agent. After a defined amount of
+    time the thread will report the number of items processed. If no items have
+    been processed with in the defined period of time a heartbeat message will 
+    be displayed.
+
+    The items processed count can be incremented using the ``increment" method.
+
+    To start the heartbeat use the ``start" method.
+
+    Create a new heartbeat thread by using the following command:
+        hb = Heartbeat(30.0) # for a heartbeat every 30 seconds.
+    """
+    def __init__(self,waittime):
+        Thread.__init__(self)
+        
+        # The number of items processed so far.
+        self.count = 0
+        # The number of items processed at the last heartbeat.
+        self.last = 0
+        # The amount of time to wait before printing a heartbeat message.
+        self.waittime = waittime
+        # Holds the status of the thread.
+        self.status = 'stopped'
+
+    def run(self):
+        """
+        DO NOT  call this from outside the thread. It will not return.
+        """
+
+        self.status = 'running'
+
+        while self.status == 'running':
+            self.heartbeat()
+            time.sleep(self.waittime)
+
+    def increment(self,amount=1):
+        """
+        Heartbeat.increment(amount) -> None
+
+        Increments the counter by ``amount". If amount is left out then the 
+        counter is incremented by 1.
+        """
+
+        self.count += amount
+
+    def heartbeat(self):
+        if self.count-self.last <= 0:
+            print "Heartbeat"
+        else:
+            print "ItemsProcessed %ld" % (self.count-self.last)
+            self.last = self.count
+    
+    def restart(self):
+        """
+        Heartbeat.restart(amount)
+
+        Restarts the counter at 0.
+        """
+        
+        self.count = 0
+        self.last = 0
+
+    def stop(self):
+        """
+        Heartbeat.stop()
+
+        Stops the heartbeat theard.
+        """
+
+        self.status = 'stop'
+
 cdef extern from "../libfossagent/libfossagent.h":
-    void InitHeartbeat()
-    void ShowHeartbeat(int Sig)
-    void Heartbeat(long NewItemsProcessed)
     int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn_rev, char *agent_desc)
-
-def initHeartbeat():
-    """
-    initHeartbeat()
-
-    Send heartbeat on next alarm.
-    Setup signal handlers.
-    """
-    InitHeartbeat()
-    signal.signal(signal.SIGALRM,showHeartbeat)
-    signal.alarm(10)
-    
-def showHeartbeat(sig,frame):
-    """
-    showHeartbeat(sig,frame)
-
-    Given an alarm signal, display a heartbeat.
-    """
-    ShowHeartbeat(sig)
-
-def updateHeartbeat(newItemsProcessed):
-    """
-    updateHeartbeat(newItemsProcessed)
-
-    Update heartbeat counter and items processed.
-    
-     * where `newItemsProcessed' is an integer.
-    """
-    Heartbeat(newItemsProcessed)
 
 cdef extern from "libpq-fe.h":
     ctypedef struct PGconn
@@ -89,10 +132,19 @@ cdef class FossDB:
     cdef void * DB
 
     def __new__(self):
+        """
+        FossDB() -> FossDB
+
+        Returns a new FossDB object.
+
+        Raises an exception if there is a problem opening the database.
+            Exception(Error, Function)
+        """
+
         self.DB = DBopen()
         if not self.isconnected():
             self.DB = NULL
-            raise Exception('Unable to connect to the database! :(', 'self.DB = DBopen()')
+            raise Exception('Unable to connect to the database! :(', 'libfosspython.pyx, __new__: self.DB = DBopen()')
 
     def __init__(self):
         pass
