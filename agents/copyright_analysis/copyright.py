@@ -152,22 +152,25 @@ def agent(model,runonpfiles=False):
         try:
             db = libfosspython.FossDB()
         except Exception, inst:
-            print >> sys.stdout, 'ERROR: %s, in %s' % inst[:]
-            return 1
+            raise Exception('%s, in %s' % inst[:])
 
         tr = table_check(db)
         if tr != 0:
             return tr
 
+        # try to open the repo.
         if libfosspython.repOpen() != 1:
-            print >> sys.stdout, 'ERROR: Something is broken. Could not open Repo.'
-            return 1
+            raise Exception('Something is broken.\n\tCould not open Repo.\n\tTried to open "%s".' % (libfosspython.repGetRepPath()))
 
+        # get out agent id from the database
         agent_pk = db.getAgentKey('copyright', '1.0 source_hash(%s) model_hash(%s)' % (hex(hash(open(sys.argv[0]).read())), hex(hash(str(model)))), 'copyright agent')
+
+        # create a heartbeat thread so the scheduler doesn't kill the agent.
+        hb = libfosspython.Heartbeat(30.0) # print a heartbeat every 30 seconds
+        hb.start()
         
         if runonpfiles:
             # if the scheduler is going to hand us files.
-            count = 0
             line = 'start'
             while line:
                 line = line.strip()
@@ -178,15 +181,13 @@ def agent(model,runonpfiles=False):
                     if analyze(pfile_pk, file, agent_pk, model, db) != 0:
                         print >> sys.stdout, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, row['pfile_pk'], row['pfilename'])
                     else:
-                        count += 1
-                        print "ItemsProcessed %ld" % 1
-                        print "OK"
+                        hb.increment()
                 elif re.match("quit", line):
                     print "BYE."
                     break
                 elif re.match("start", line):
                     print "OK"
-                    count = 0
+                    hb.restart()
 
                 try:
                     line = sys.stdin.readline()
@@ -197,15 +198,9 @@ def agent(model,runonpfiles=False):
                     line = "quit"
 
         else:
-            # we cant print a message everytime we complete a job or the
-            # scheduler cant unlock stdout in time. So lets wait a number of
-            # items before we print a message.
-            # 50 is a good number on my 1.8GHZ Core 2 Duo Linux VM.
-
-            waititems = 50
-
             while True:
                 print "OK"
+                hb.restart()
                 # get the upload_pk from stdin.
                 upload_pk = -1
                 try:
@@ -214,39 +209,37 @@ def agent(model,runonpfiles=False):
                         upload_pk = int(line)
                 except ValueError:
                     print >> sys.stdout, 'ERROR: Provided upload_pk is not a number: %r' % line
-                    return -1
+                    continue
 
-                sql = '''SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS left outer join copyright on (PF=pfile_fk and agent_fk='%d') inner join pfile on (PF=pfile_pk) WHERE ct_pk IS null''' % (upload_pk, agent_pk)
+                sql = '''SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size 
+                    AS pfilename FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE 
+                    upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS left outer join 
+                    copyright on (PF=pfile_fk and agent_fk='%d') inner join pfile on 
+                    (PF=pfile_pk) WHERE ct_pk IS null''' % (upload_pk, agent_pk)
                 
                 if db.access(sql) != 1:
                     error = db.errmsg()
-                    print >> sys.stdout, 'ERROR: Could not select job queue for copyright analysis. Database said: "%s"' % error
-                    return -1
+                    raise Exception('Could not select job queue for copyright analysis. Database said: "%s"' % error)
 
                 rows = db.getrows()
 
-                count = 0
                 for row in rows:
                     if analyze(row['pfile_pk'], row['pfilename'], agent_pk, model, db) != 0:
                         print >> sys.stdout, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, row['pfile_pk'], row['pfilename'])
                     else:
-                        count += 1
-                        if count%waititems == 0:
-                            print "ItemsProcessed %ld" % waititems
-                
-                if count%waititems != 0:
-                    # wait just a second so we dont print too soon.
-                    time.sleep(1)
-                    print "ItemsProcessed %ld" % (count%waititems)
+                        hb.increment()
 
-                # gives the scheduler a break
-                time.sleep(1)
+                hb.heartbeat()
+    
     except:
         exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
         p = '\t'.join(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
-        print >> sys.stdout, "ERROR: An error occurred in the main agent loop. Please consult the provided traceback.\n\t%s\n" % p
+        print >> sys.stdout, "FATAL: An error occurred in the main agent loop. Please consult the provided traceback.\n\t%s\n" % p
+        hb.stop()
+        libfosspython.repClose()
         return 1
 
+    hb.stop()
     libfosspython.repClose()
     
     return 0
