@@ -71,7 +71,7 @@ global $LF;
 $SiteTests = '../ui/tests/SiteTests';
 $BasicTests = '../ui/tests/BasicTests';
 $UserTests = '../ui/tests/Users';
-$EmailTests = '../ui/tests/EmailNotifcation';
+$EmailTests = '../ui/tests/EmailNotification';
 $VerifyTests = '../ui/tests/VerifyTests';
 
 /*
@@ -196,6 +196,8 @@ if (array_key_exists("a", $options)) {
   if (chdir($SiteTests) === FALSE) {
     LogandPrint($LF, "ALL Tests ERROR: can't cd to $SiteTests\n");
   }
+  //print "testFOSS: path is:$_ENV[PATH]\n";
+  
   $SiteLast = exec("./runSiteTests.php >> $logFile 2>&1", $dummy, $Srtn);
   LogAndPrint($LF, "\n");
   if (chdir('../BasicTests') === FALSE) {
@@ -203,13 +205,15 @@ if (array_key_exists("a", $options)) {
   }
   $BasicLast = exec("./runBasicTests.php >> $logFile 2>&1", $dummy, $Brtn);
   LogAndPrint($LF, "\n");
+  
   /*
    * run user tests, create UI users then run Email Notification tests
    */
   if (chdir('../Users') === FALSE) {
     LogAndPrint($LF, "ALL Tests ERROR: can't cd to $UserTests\n");
   }
-  $UsersLast = exec("fo-runTests -l \"`ls`\" -n 'User Tests' >> $logFile 2>&1", $dummy, $Urtn);
+  $uCmnd = "/usr/local/bin/fo-runTests -l \"`ls`\" -n 'User Tests' >> $logFile 2>&1";
+  $UsersLast = exec($uCmnd, $dummy, $Urtn);
   LogAndPrint($LF, "\n");
 
   if (chdir($Home) === FALSE) {
@@ -254,9 +258,12 @@ if (array_key_exists("a", $options)) {
     }
     $resultsHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
     $reportHome = "$resultsHome" . "$logFileName";
-    print "testFOSSology: reportHOME is:$reportHome\n";
+    
+    $TO = "mark.donohoe@hp.com mary.laser@hp.com ";
+    //$TO = "mark.donohoe@hp.com mary.laser@hp.com " . 
+    //      "bob.gobeille@hp.com dong.ma@hp.com";
     $last = exec("./textReport.php -f $reportHome | 
-    mailx -s \"test results\" mark.donohoe@hp.com", $tossme, $rptGen);
+    mailx -s \"test results\" $TO ",$tossme, $rptGen);
   }
   exit(0);
 }
