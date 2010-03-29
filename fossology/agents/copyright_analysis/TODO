@@ -1,28 +1,3 @@
-In copyright.py v 2903:
-
-line 87: 
-            print >> sys.stderr, 'ERROR: Something is broken. Could not connect to database.'
-1) "Something is broken." is pretty redundant. 
-2) I'm pretty sure the actual postgres error message is more specific than "Could not connect to database".  Why don't you just print that out instead of your own message?  The libpq functions to get the error code and error message string are PQresStatus() and PQresultErrorMessage().  I notice that you write the error message string in some cases but not others.
-
-
 line 100:
         print >> sys.stderr, 'You must specify a model file for all phases of the algorithm.
 1) What do you mean "for all phases of the algorithm"?  There is only one switch -m (--model) for specifying the model.   So to reduce ambiguity (i.e. is there a different model file for each phase"), why not just say "You mush specify a model file.".
-
-You get the idea.  Here is a summary of tips.
-1) Please don't print debug to the log unless it is requested with the verbose option.
-2) There are 5 options you should be using when printing to the log:
-   - "FATAL" Technical and detailed errors.
-   - "ERROR" Human readable errors.
-   - "WARNING" Human readable warning.
-   - "LOG" Machine readable warning.
-   - "DEBUG" Debugging message.
-3) Make sure your messages mean something to the intended reader.
-4) Make your messages as explicit as reasonable.  For example, line 158:
-            print >> sys.stderr, 'ERROR: Something is broken. Could not open Repo.'
-    would be improved by including the path you are trying to open.  This extra info will tell the reader if their config path file is correct.
-     Another example is the dbconnect error I mentioned above.
-     Another example is  line 189:
-                        print >> sys.stderr, "ERROR: DB Access error,\n%s" % db.status()
-     printing the status code is fine, but the error message (PQresultErrorMessage()) is better.  Who wants to go look up the message from the code when you can just print the message?
