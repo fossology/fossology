@@ -164,7 +164,7 @@ class verifyFossolyTest extends fossologyTestCase
         "verifyFossl16L335 FAILED! Unique Licenses does not equal 29\n");
 
 		// get the license names and 'Show' links
-		$licHistogram = new domParseLicenseTbl($page);
+		$licHistogram = new domParseLicenseTbl($page, 'lichistgram');
 		// create list of Show urls
 		$urls = array();
 		foreach ($licHistogram->hList as $license) {
