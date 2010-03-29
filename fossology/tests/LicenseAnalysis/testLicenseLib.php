@@ -390,18 +390,28 @@ function _runAnalysis($licenseList,$cmd){
 	global $directory;
 
 	$last = "";
-	$all = array();
+	$all       = array();
 	$Fossology = array();
+	$output    = array();
 
+	//print "_runAnalysis: licenseList is:\n";print_r($licenseList) . "\n";
+	//print "_runAnalysis: direcotry is:$direcotry\n";
 	if(is_array($licenseList)) {
 		foreach($licenseList as $path => $licenseFileList) {
 			//print "_runAnalysis: Path is:$path\n";
 			$testFile = $directory ."/" . $path;
-			//print "_runAnalysis: running $cmd $testFile 2>&1\n";
+      //print "_runAnalysis: running $cmd $testFile 2>&1\n";
 			$last = exec("$cmd $testFile 2>&1", $output, $rtn);
 			//print "_runAnalysis: last is:$last\n";
-			//print "_runAnalysis: nomos output:\n";print_r($result) . "\n";
-			/* check for this string... FATAL: Cannot copy */
+			//print "_runAnalysis: nomos output:\n";print_r($output) . "\n";
+			/* check for this string... FATAL: Cannot copy in last*/
+			$found = 0;
+			$found = strpos($last, 'FATAL: Cannot copy');
+			if ($found > 0) {
+				$Fossology[$path] = array($last);
+				$last = "";
+				continue;
+			}
 
 			/* isolate the answer, the results come out as a sentance */
 			$tokens = explode(' ',$last);
@@ -416,7 +426,7 @@ function _runAnalysis($licenseList,$cmd){
 			$all = explode(",",$list);
 			$Fossology[$path] = $all;
 			$all = array();
-			$last = "";
+      $last = "";
 		}
 		return($Fossology);
 	}
