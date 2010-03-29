@@ -17,9 +17,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 /**
- * fo-nomosLicenseTest
+ * nomosLicenseTest
  *
- * run fo-nomos license analysis for eddy test files
+ * run nomos license analysis for eddy test files
  *
  * Usage: [-h] {-f filepath | -d directorypath}
  *
@@ -29,6 +29,8 @@
 
 require_once('../commonTestFuncs.php');
 require_once('testLicenseLib.php');
+
+global $directory;
 
 $masterPath = NULL;
 
@@ -45,12 +47,22 @@ if (array_key_exists("h",$options)) {
 }
 if (array_key_exists("f",$options)) {
 	$file = $options['f'];
+  if(!is_file($file)){
+    print "FATAL! $file is not a file\n";
+    exit(1);
+  }
+  if(!is_readable($file)){
+    print "FATAL! $file does not exist or is not readable\n";
+    exit(1);
+  }
 }
 if (array_key_exists("d",$options)) {
 	$dir = $options['d'];
+	if(!is_dir($dir)) {
+		print "FATAL! $dir is not a directory\n";
+    exit(1);
+	}
 	$directory = rtrim($dir, '/');
-
-	global $directory;
 }
 if (array_key_exists("m",$options)) {
 	$mPath = $options['m'];
