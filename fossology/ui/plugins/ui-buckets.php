@@ -149,7 +149,19 @@ class ui_buckets extends FO_Plugin
         Because buckets roll up, the counts will be high (a bucket will be counted
         for the container and everything under the container).
      */
-    $bucketpool_pk=1; // !!! VERY TEMPORARY until a "switch buckets" pulldown is implemented
+   /* get the default_bucketpool_fk from the users record */
+    $sql = "select default_bucketpool_fk from users where user_pk='$_SESSION[UserId]' limit 1";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $bucketpool_pk = $row['default_bucketpool_fk'];
+    pg_free_result($result);
+    if (!$bucketpool_pk) 
+    {
+      $VLic .= "User does not have a default bucketpool.  Pool 1 will be used.<br>";
+      $bucketpool_pk = 1;
+    }
+
     /* find latest bucket and nomos agent that has data */
     $AgentRec = AgentARSList("bucket_ars", $upload_pk, 0);
     if ($AgentRec === false)
