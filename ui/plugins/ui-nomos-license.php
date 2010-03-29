@@ -174,7 +174,7 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     $LicCount = 0;
     $UniqueLicCount = 0;
     $NoLicFound = 0;
-    $VLic .= "<table border=1 width='100%'>\n";
+    $VLic .= "<table border=1 width='100%' id='lichistogram'>\n";
     $VLic .= "<tr><th width='10%'>Count</th>";
     $VLic .= "<th width='10%'>Files</th>";
     $VLic .= "<th>License</th></tr>\n";
@@ -220,7 +220,7 @@ FUTURE advanced interface allowing user to select dataset (agent version)
       if (Iscontainer($C['ufile_mode'])) { $ChildDirCount++; }
     }
 
-    $VF .= "<table border=0>";
+    $VF .= "<table border=0 id='dirlist'>";
     foreach($Children as $C)
     {
       if (empty($C)) { continue; }
