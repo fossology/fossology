@@ -1037,7 +1037,8 @@ int main(int argc, char **argv) {
     if (magic_load(gl.mcookie, NULL_STR)) {
         Fatal("magic_load() fails!");
     }
-    if (file_count == 0) {
+    if (file_count == 0) 
+    {
         char *repFile;
 
         /* We're being run from the scheduler */
@@ -1051,89 +1052,95 @@ int main(int argc, char **argv) {
         /* read upload_pk from scheduler */
         while (ReadLine(stdin, parm, myBUFSIZ) >= 0) 
         {
-          if (parm[0] != '\0') 
+          upload_pk = atoi(parm);
+          if (upload_pk == 0) continue; 
+
+          /* Is this a duplicate request (same upload_pk, sameagent_fk)?
+             If so, there is no point in repeating it.
+           */
+          snprintf(sqlbuf, sizeof(sqlbuf), 
+                 "select ars_pk from nomos_ars,agent \
+                  where agent_pk=agent_fk and ars_success=true \
+                    and upload_fk='%d' and agent_fk='%d'",
+                   upload_pk, gl.agentPk);
+          result = PQexec(gl.pgConn, sqlbuf);
+          if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+          if (PQntuples(result) != 0) 
           {
-            upload_pk = atoi(parm);
-            snprintf(sqlbuf, sizeof(sqlbuf), 
+            printf("LOG: Ignoring requested nomos analysis of upload %d - Results are already in database.\n",
+                  upload_pk);
+            printf("OK\n");
+            fflush(stdout);
+            continue;
+          }
+          PQclear(result);
+
+          /* Record analysis start in nomos_ars, the nomos audit trail. */
+          snprintf(sqlbuf, sizeof(sqlbuf),
+                  "insert into nomos_ars (agent_fk, upload_fk, ars_success) values(%d,%d,'%s');",
+                    gl.agentPk, upload_pk, "false");
+          ars_result = PQexec(gl.pgConn, sqlbuf);
+          if (checkPQcommand(ars_result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+
+          /* retrieve the ars_pk of the newly inserted record */
+          sprintf(sqlbuf, "select ars_pk from nomos_ars \
+                            where agent_fk='%d' and upload_fk='%d' \
+                            and ars_success='%s' and ars_endtime is null \
+                            order by ars_starttime desc limit 1",
+                            gl.agentPk, upload_pk, "false");
+          ars_result = PQexec(gl.pgConn, sqlbuf);
+          if (checkPQresult(ars_result, sqlbuf, __FILE__, __LINE__)) return -1;
+          if (PQntuples(ars_result) == 0)
+          {
+            printf("FATAL: (%s.%d) Missing nomos_ars record.\n%s\n",__FILE__,__LINE__,sqlbuf);
+            return -1;
+          }
+          ars_pk = atol(PQgetvalue(ars_result, 0, 0));
+          PQclear(ars_result);
+
+          /* retrieve the records to process */
+          snprintf(sqlbuf, sizeof(sqlbuf),
                    "SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS left outer join license_file on (PF=pfile_fk and agent_fk='%d') inner join pfile on (PF=pfile_pk) WHERE fl_pk IS null",
                    upload_pk, gl.agentPk);
-            result = PQexec(gl.pgConn, sqlbuf);
-            if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) exit(-1);
-            numrows = PQntuples(result);
-            if (numrows == 0) 
+          result = PQexec(gl.pgConn, sqlbuf);
+          if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+          numrows = PQntuples(result);
+
+          cmd_result = PQexec(gl.pgConn, "begin");
+          if (checkPQcommand(cmd_result, "begin", __FILE__, __LINE__)) return -1;
+
+          /* process all files in this upload */
+          for (i=0; i<numrows; i++)
+          {
+            strcpy(cur.pFile, PQgetvalue(result, i, 1));
+            cur.pFileFk = atoi(PQgetvalue(result, i, 0));
+        
+            repFile = RepMkPath("files", cur.pFile);
+            if (!repFile) 
             {
-              printf("LOG: Ignoring requested nomos analysis of upload %d - Records already processed.\n",
-                    upload_pk);
-              printf("OK\n");
+              printf("FATAL: pfile %ld Nomos unable to open file %s\n", cur.pFileFk, cur.pFile);
               fflush(stdout);
-              continue;
+              DBclose(gl.DB);
+              exit(-1);
             }
+            processFile(repFile);
+            recordScanToDB(&cacheroot, &cur);
+            freeAndClearScan(&cur);
 
-            /* Record analysis start in nomos_ars, the nomos audit trail. */
-            if (upload_pk)
-            {
-              snprintf(sqlbuf, sizeof(sqlbuf),
-                      "insert into nomos_ars (agent_fk, upload_fk, ars_success) values(%d,%d,'%s');",
-                      gl.agentPk, upload_pk, "false");
-              ars_result = PQexec(gl.pgConn, sqlbuf);
-              if (checkPQcommand(ars_result, sqlbuf, __FILE__ ,__LINE__)) return -1;
-
-              /* retrieve the ars_pk of the newly inserted record */
-              sprintf(sqlbuf, "select ars_pk from nomos_ars \
-                              where agent_fk='%d' and upload_fk='%d' \
-                              and ars_success='%s' and ars_endtime is null \
-                              order by ars_starttime desc limit 1",
-                              gl.agentPk, upload_pk, "false");
-              ars_result = PQexec(gl.pgConn, sqlbuf);
-              if (checkPQresult(ars_result, sqlbuf, __FILE__, __LINE__)) return -1;
-              if (PQntuples(ars_result) == 0)
-              {
-                printf("FATAL: (%s.%d) Missing bucket_ars record.\n%s\n",__FILE__,__LINE__,sqlbuf);
-                return -1;
-              }
-              ars_pk = atol(PQgetvalue(ars_result, 0, 0));
-              PQclear(ars_result);
-            }
-
-            cmd_result = PQexec(gl.pgConn, "begin");
-            if (checkPQcommand(cmd_result, "begin", __FILE__, __LINE__)) return -1;
-
-            /* process all files in this upload */
-            for (i=0; i<numrows; i++)
-            {
-              strcpy(cur.pFile, PQgetvalue(result, i, 1));
-              cur.pFileFk = atoi(PQgetvalue(result, i, 0));
-          
-              repFile = RepMkPath("files", cur.pFile);
-              if (!repFile) 
-              {
-                printf("FATAL: pfile %ld Nomos unable to open file %s\n", cur.pFileFk, cur.pFile);
-                fflush(stdout);
-                DBclose(gl.DB);
-                exit(-1);
-              }
-              processFile(repFile);
-              recordScanToDB(&cacheroot, &cur);
-              freeAndClearScan(&cur);
-
-              Heartbeat(++HBItemsProcessed);
-            }
-            PQclear(result);
-            cmd_result = PQexec(gl.pgConn, "commit");
-            if (checkPQcommand(cmd_result, "commit", __FILE__, __LINE__)) return -1;
-
-            /* Record analysis success in nomos_ars. */
-            if (ars_pk)
-            {
-              snprintf(sqlbuf, sizeof(sqlbuf),
-                          "update nomos_ars set ars_endtime=now(), ars_success=true where ars_pk='%d'",
-                       ars_pk);
-              result = PQexec(gl.pgConn, sqlbuf);
-              if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
-            }
-            printf("OK\n"); /* tell scheduler ready for more data */
-            fflush(stdout);
+            Heartbeat(++HBItemsProcessed);
           }
+          PQclear(result);
+          cmd_result = PQexec(gl.pgConn, "commit");
+          if (checkPQcommand(cmd_result, "commit", __FILE__, __LINE__)) return -1;
+
+          /* Record analysis success in nomos_ars. */
+          snprintf(sqlbuf, sizeof(sqlbuf),
+                  "update nomos_ars set ars_endtime=now(), ars_success=true where ars_pk='%d'",
+                   ars_pk);
+          result = PQexec(gl.pgConn, sqlbuf);
+          if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+          printf("OK\n"); /* tell scheduler ready for more data */
+          fflush(stdout);
         }
     }
     else {
