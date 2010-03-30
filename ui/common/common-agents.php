@@ -292,19 +292,25 @@ function GetAgentKey($agentName, $agentDesc)
  * @param string  $TableName - name of the ars table (e.g. nomos_ars)
  * @param int     $upload_pk
  * @param int     $limit - limit number of rows returned.  0=No limit
+ * @param int     $agent_fk - ARS table agent_fk, optional
  *
  * @return assoc array of _ars records.
  *         or FALSE on error, or no rows
  */
-function AgentARSList($TableName, $upload_pk, $limit)
+function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0)
 {
   global $PG_CONN;
 
   $LimitClause = "";
   if ($limit > 0) $LimitClause = " limit $limit";
+  if ($agent_fk)
+    $agentCond = " and agent_fk='$agent_fk' ";
+  else
+    $agentCond = "";
   
   $sql = "SELECT * FROM $TableName, agent 
            WHERE agent_pk=agent_fk and ars_success=true and upload_fk='$upload_pk' and agent_enabled=true 
+                 $agentCond
            order by agent_ts desc $LimitClause";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
