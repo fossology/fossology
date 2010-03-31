@@ -72,22 +72,22 @@ class agent_pkgagent extends FO_Plugin
   function AgentAdd ($uploadpk,$Depends=NULL,$Priority=0)
   {
     global $DB;
-    /* Get dependency: "pkgagent" require "mimetype" and "nomos". */
+    /* Get dependency: "pkgagent" don't require "mimetype" and "nomos", require "unpack". */
     $SQL = "SELECT jq_pk FROM jobqueue
 	    INNER JOIN job ON job.job_upload_fk = '$uploadpk'
 	    AND job.job_pk = jobqueue.jq_job_fk
-	    WHERE jobqueue.jq_type = 'mimetype';";
+	    WHERE jobqueue.jq_type = 'adj2nest';";
     $Results = $DB->Action($SQL);
     $Dep = $Results[0]['jq_pk'];
     if (empty($Dep))
 	{
 	global $Plugins;
-	$Unpack = &$Plugins[plugin_find_id("agent_mimetype")];
+	$Unpack = &$Plugins[plugin_find_id("agent_unpack")];
 	$rc = $Unpack->AgentAdd($uploadpk);
 	if (!empty($rc)) { return($rc); }
 	$Results = $DB->Action($SQL);
 	$Dep = $Results[0]['jq_pk'];
-	if (empty($Dep)) { return("Unable to find dependent job: mimetype"); }
+	if (empty($Dep)) { return("Unable to find dependent job: unpack"); }
 	}
     $Dep = array($Dep);
     if (is_array($Depends)) { $Dep = array_merge($Dep,$Depends); }
