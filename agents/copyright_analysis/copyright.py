@@ -18,6 +18,7 @@
 ##
 
 import sys
+import os
 import time
 import re
 import traceback
@@ -30,6 +31,12 @@ try:
 except:
     pass
 
+# set sys.stdout and sys.stderr to blocking. Otherwise we get a resource
+# temporarily unavailable error :-(
+
+import fcntl
+fcntl.fcntl(sys.stdout.fileno(),fcntl.F_SETFL, fcntl.fcntl(sys.stdout.fileno(), fcntl.F_GETFL) & ~os.O_NONBLOCK)
+fcntl.fcntl(sys.stderr.fileno(),fcntl.F_SETFL, fcntl.fcntl(sys.stderr.fileno(), fcntl.F_GETFL) & ~os.O_NONBLOCK)
 
 def main():
     #         ------------------------------------------------------------
@@ -183,11 +190,14 @@ def agent(model,runonpfiles=False):
                     else:
                         hb.increment()
                 elif re.match("quit", line):
+                    hb.heartbeat()
                     print "BYE."
                     break
                 elif re.match("start", line):
                     print "OK"
                     hb.restart()
+                else:
+                    print >> sys.stdout, 'ERROR: Unknown command:\n\t"%s".' % line
 
                 try:
                     line = sys.stdin.readline()
@@ -205,6 +215,9 @@ def agent(model,runonpfiles=False):
                 upload_pk = -1
                 try:
                     line = sys.stdin.readline().rstrip()
+                    if not line:
+                        print "BYE."
+                        break
                     if len(line) > 0:
                         upload_pk = int(line)
                 except ValueError:
@@ -237,6 +250,9 @@ def agent(model,runonpfiles=False):
         print >> sys.stdout, "FATAL: An error occurred in the main agent loop. Please consult the provided traceback.\n\t%s\n" % p
         hb.stop()
         libfosspython.repClose()
+    finally:
+        # if we really get here and there was another exception we cant print
+        # the correct error so just return.
         return 1
 
     hb.stop()
