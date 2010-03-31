@@ -35,8 +35,8 @@ copyright-build: copyright.py $(PYTHONLIB)
 copyright: copyright.py $(PYTHONLIB)
 	cat copyright.py > copyright
 	echo -n "    sys.path.append('" >> copyright
-	echo -n $(DESTDIR)$(LIBDIR) >> copyright
-	echo    "/python_fossology/')" >> copyright
+	echo -n $(DESTDIR)$(LIBEXECDIR) >> copyright
+	echo    "/lib/')" >> copyright
 	echo    "    import libfosspython" >> copyright
 	echo    "    import copyright_library as library" >> copyright
 	echo    "    main()" >> copyright
@@ -47,15 +47,13 @@ model.dat: copyright-build copyright_library.py data.txt
 	
 install: all
 	$(INSTALL_PROGRAM) copyright $(DESTDIR)$(AGENTDIR)/copyright
-	mkdir -p $(DESTDIR)$(LIBDIR)/python_fossology/
-	$(INSTALL_PROGRAM) copyright_library.py $(DESTDIR)$(LIBDIR)/python_fossology/copyright_library.py
+	$(INSTALL_PROGRAM) copyright_library.py $(DESTDIR)$(AGENTDIR)/copyright_library.py
 	$(INSTALL_PROGRAM) model.dat $(DATADIR)/model.dat
 	make -C ui-plugin install
 
 uninstall: 
 	rm -rf $(DESTDIR)$(AGENTDIR)/copyright
-	rm -rf $(DESTDIR)$(LIBDIR)/python_fossology/copyright_library.py
-	rmdir $(DESTDIR)$(LIBDIR)/python_fossology/
+	rm -rf $(DESTDIR)$(AGENTDIR)/copyright_library.py
 	rm -rf $(DATADIR)/model.dat
 	make -C ui-plugin uninstall
 
