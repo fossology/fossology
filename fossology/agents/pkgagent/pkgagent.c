@@ -782,7 +782,7 @@ void	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
     if (!strcasecmp(field, "Source")) {
        strncpy(pi->source, value, sizeof(pi->source));
     }
-    if (!strcasecmp(field, "Binary")) {
+    if (!strcasecmp(field, "Source")) {
        strncpy(pi->pkgName, value, sizeof(pi->pkgName));
     }
     if (!strcasecmp(field, "Architecture")) {
