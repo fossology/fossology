@@ -116,7 +116,7 @@ if(!chdir($testPath))
  * script is not running a fossy... need to think about this...
  *
  */
-$TestLast = exec('./testFOSSology.php -a', $results, $rtn);
+$TestLast = exec('./testFOSSology.php -a -e', $results, $rtn);
 print "after running tests the output is\n";
 print_r($results) . "\n";
 
