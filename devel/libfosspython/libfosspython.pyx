@@ -14,6 +14,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 from threading import Thread
+from threading import Event
 import time
 import re
 
@@ -62,18 +63,18 @@ class Heartbeat(Thread):
         # The amount of time to wait before printing a heartbeat message.
         self.waittime = waittime
         # Holds the status of the thread.
-        self.status = 'stopped'
+        self.done = Event()
 
     def run(self):
         """
         DO NOT  call this from outside the thread. It will not return.
         """
 
-        self.status = 'running'
-
-        while self.status == 'running':
-            self.heartbeat()
-            time.sleep(self.waittime)
+        while not self.done.isSet():
+            self.done.wait(self.waittime)
+            # check the event condition before we print the heartbeat
+            if not self.done.isSet():
+                self.heartbeat()
 
     def increment(self,amount=1):
         """
@@ -106,10 +107,11 @@ class Heartbeat(Thread):
         """
         Heartbeat.stop()
 
-        Stops the heartbeat theard.
+        Stops the heartbeat thread.
         """
 
-        self.status = 'stop'
+        self.heartbeat()
+        self.done.set()
 
 cdef extern from "../libfossagent/libfossagent.h":
     int	GetAgentKey	(void *DB, char * agent_name, long Upload_pk, char *svn_rev, char *agent_desc)
