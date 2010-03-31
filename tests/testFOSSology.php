@@ -86,25 +86,25 @@ $myname = $argv[0];
 $Home = getcwd();
 $pid = getmypid();
 
-$options = getopt('abhl:sv');
+$options = getopt('abehl:sv');
 if (empty($options)) {
-  print "$usage\n";
-  exit(0);
+	print "$usage\n";
+	exit(0);
 }
 if (array_key_exists('h', $options)) {
-  print "$usage\n";
-  exit(0);
+	print "$usage\n";
+	exit(0);
 }
 if (array_key_exists('l', $options)) {
-  $logFile = $options['l'];
-  $logFileName = basename($logFile);
+	$logFile = $options['l'];
+	$logFileName = basename($logFile);
 }
 else {
-  // Default Log file, use full path to it
-  $cwd = getcwd();
-  $logFile = $cwd . $defaultLog;
-  //$logFileName = $defaultLog;
-  $logFileName = basename($logFile);
+	// Default Log file, use full path to it
+	$cwd = getcwd();
+	$logFile = $cwd . $defaultLog;
+	//$logFileName = $defaultLog;
+	$logFileName = basename($logFile);
 }
 /**
  * _runSetupVerify()
@@ -113,279 +113,281 @@ else {
  */
 function _runTestEnvSetup() {
 
-  global $date;
-  global $myname;
-  global $Home;
-  global $logFile;
-  global $LF;
+	global $date;
+	global $myname;
+	global $Home;
+	global $logFile;
+	global $LF;
 
-  $errors = 0;
-  if (chdir($Home) === FALSE) {
-    LogAndPrint($LF, "_runTestEnvSetup ERROR: can't cd to $Home\n");
-  }
-  LogAndPrint($LF, "\n");
-  $UpLast = exec("./uploadTestData.php >> $logFile 2>&1", $dummy, $SUrtn);
-  LogAndPrint($LF, "\n");
-  $AALast = exec("./fo-runTests.php AgentAddData.php -n 'Agent Add Uploads'>> $logFile 2>&1", $dummy, $AArtn);
-  LogAndPrint($LF, "\n");
-  // need to check the return on the setup and report accordingly.
-  if ($SUrtn != 0) {
-    LogAndPrint($LF, "ERROR when running uploadTestData.php\n");
-    foreach($dummy as $ErrorLine) {
-      print "$ErrorLine\n";
-    }
-    $errors++;
-  }
-  if ($AArtn != 0) {
-    LogAndPrint($LF, "ERROR when running AgentAddData.php\n");
-    foreach($dummy as $ErrorLine) {
-      print "$ErrorLine\n";
-    }
-    $errors++;
-  }
-  if ($errors != 0) {
-    print "Warning! There were errors in the test setup, one or more test may fail as a result\n";
-  }
+	$errors = 0;
+	if (chdir($Home) === FALSE) {
+		LogAndPrint($LF, "_runTestEnvSetup ERROR: can't cd to $Home\n");
+	}
+	LogAndPrint($LF, "\n");
+	$UpLast = exec("./uploadTestData.php >> $logFile 2>&1", $dummy, $SUrtn);
+	LogAndPrint($LF, "\n");
+	$AALast = exec("./fo-runTests.php AgentAddData.php -n 'Agent Add Uploads'>> $logFile 2>&1", $dummy, $AArtn);
+	LogAndPrint($LF, "\n");
+	// need to check the return on the setup and report accordingly.
+	if ($SUrtn != 0) {
+		LogAndPrint($LF, "ERROR when running uploadTestData.php\n");
+		foreach($dummy as $ErrorLine) {
+			print "$ErrorLine\n";
+		}
+		$errors++;
+	}
+	if ($AArtn != 0) {
+		LogAndPrint($LF, "ERROR when running AgentAddData.php\n");
+		foreach($dummy as $ErrorLine) {
+			print "$ErrorLine\n";
+		}
+		$errors++;
+	}
+	if ($errors != 0) {
+		print "Warning! There were errors in the test setup, one or more test may fail as a result\n";
+	}
 } //_runTestEnvSetup
 
 function getSvnVer() {
-  return (`svnversion`);
+	return (`svnversion`);
 }
 
 function LogAndPrint($FileHandle, $message) {
-  if (empty($message)) {
-    return (FALSE);
-  }
-  if (empty($FileHandle)) {
-    return (FALSE);
-  }
-  if (-1 == fwrite($FileHandle, $message)) {
-    print $message; // if we don't do this nothing will print
-    return (FALSE);
-  }
-  print $message;
-  return (TRUE);
+	if (empty($message)) {
+		return (FALSE);
+	}
+	if (empty($FileHandle)) {
+		return (FALSE);
+	}
+	if (-1 == fwrite($FileHandle, $message)) {
+		print $message; // if we don't do this nothing will print
+		return (FALSE);
+	}
+	print $message;
+	return (TRUE);
 }
 
 $Svn = getSvnVer();
 
 /************* ALL Tests **********************************************/
 if (array_key_exists("a", $options)) {
-  $LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
-  print "Using log file:$logFile\n";
-  if (chdir($Home) === FALSE) {
-    LogAndPrint($LF, "All Tests ERROR: can't cd to $Home\n");
-  }
-  LogAndPrint($LF, "Running All Tests on: $date at $time using subversion version: $Svn\n");
+	$LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
+	print "Using log file:$logFile\n";
+	if (chdir($Home) === FALSE) {
+		LogAndPrint($LF, "All Tests ERROR: can't cd to $Home\n");
+	}
+	LogAndPrint($LF, "Running All Tests on: $date at $time using subversion version: $Svn\n");
 
-  /*
-   * Create the test users first or nothing will work should this be somewhere else like
-   * in install?
-   */
-  $cmd = "./fo-runTests.php createUIUsers.php -n 'Create UI Users Test' >> $logFile 2>&1";
-  $UIusers = exec($cmd, $dummy, $UsrRtn);
-  if ($UsrRtn != 0) {
-    LogAndPrint($LF, "ERROR when running createUIUsers.php: return code:$UsrRtn\n");
-    LogAndPrint($LF, "last line returned is:$UIusers\n");
-    foreach($dummy as $ErrorLine) {
-      LogAndPrint($LF,"$ErrorLine\n");
-    }
-    LogAndPrint($LF, "The Email Notification tests mail fail as a result\n");
-  }
+	/*
+	 * Create the test users first or nothing will work should this be somewhere else like
+	 * in install?
+	 */
+	$cmd = "./fo-runTests.php createUIUsers.php -n 'Create UI Users Test' >> $logFile 2>&1";
+	$UIusers = exec($cmd, $dummy, $UsrRtn);
+	if ($UsrRtn != 0) {
+		LogAndPrint($LF, "ERROR when running createUIUsers.php: return code:$UsrRtn\n");
+		LogAndPrint($LF, "last line returned is:$UIusers\n");
+		foreach($dummy as $ErrorLine) {
+			LogAndPrint($LF,"$ErrorLine\n");
+		}
+		LogAndPrint($LF, "The Email Notification tests mail fail as a result\n");
+	}
 
-  if (chdir($SiteTests) === FALSE) {
-    LogandPrint($LF, "ALL Tests ERROR: can't cd to $SiteTests\n");
-  }
-  //print "testFOSS: path is:$_ENV[PATH]\n";
-  
-  $SiteLast = exec("./runSiteTests.php >> $logFile 2>&1", $dummy, $Srtn);
-  LogAndPrint($LF, "\n");
-  if (chdir('../BasicTests') === FALSE) {
-    LogAndPrint($LF, "ALL Tests ERROR: can't cd to $BasicTests\n");
-  }
-  $BasicLast = exec("./runBasicTests.php >> $logFile 2>&1", $dummy, $Brtn);
-  LogAndPrint($LF, "\n");
-  
-  /*
-   * run user tests, create UI users then run Email Notification tests
-   */
-  if (chdir('../Users') === FALSE) {
-    LogAndPrint($LF, "ALL Tests ERROR: can't cd to $UserTests\n");
-  }
-  $uCmnd = "/usr/local/bin/fo-runTests -l \"`ls`\" -n 'User Tests' >> $logFile 2>&1";
-  $UsersLast = exec($uCmnd, $dummy, $Urtn);
-  LogAndPrint($LF, "\n");
+	if (chdir($SiteTests) === FALSE) {
+		LogandPrint($LF, "ALL Tests ERROR: can't cd to $SiteTests\n");
+	}
+	//print "testFOSS: path is:$_ENV[PATH]\n";
 
-  if (chdir($Home) === FALSE) {
-    $cUInoHome = "All Tests ERROR: can't cd to $Home\n";
-    LogAndPrint($LF, $cUInoHome);
-  }
+	$SiteLast = exec("./runSiteTests.php >> $logFile 2>&1", $dummy, $Srtn);
+	LogAndPrint($LF, "\n");
+	if (chdir('../BasicTests') === FALSE) {
+		LogAndPrint($LF, "ALL Tests ERROR: can't cd to $BasicTests\n");
+	}
+	$BasicLast = exec("./runBasicTests.php >> $logFile 2>&1", $dummy, $Brtn);
+	LogAndPrint($LF, "\n");
 
-  if (chdir($EmailTests) === FALSE) {
-    LogAndPrint($LF, "ALL Tests ERROR: can't cd to $EmailTests\n");
-  }
-  $EmailLast = exec("fo-runTests -l \"`ls`\" -n 'Email Tests' >> $logFile 2>&1", $dummy, $ENrtn);
-  LogAndPrint($LF, "\n");
-  /*
-   * The verify tests require that uploads be done first.
-   */
-  _runTestEnvSetup();
-  fclose($LF);
-  // wait for uploads to finish
-  if (chdir($Home) === FALSE) {
-    $UInoHome = "All Tests ERROR: can't cd to $Home\n";
-    LogAndPrint($LF, $UInoHome);
-  }
-  print "Waiting for jobs to finish...\n";
-  $last = exec('./wait4jobs.php', $tossme, $jobsDone);
-  foreach($tossme as $line){
-    print "$line\n";
-  }
-  print "testFOSSology: jobsDone is:$jobsDone\n";
-  if ($jobsDone != 0) {
-    print "ERROR! jobs are not finished after two hours, not running" .
+	/*
+	 * run user tests, create UI users then run Email Notification tests
+	 */
+	if (chdir('../Users') === FALSE) {
+		LogAndPrint($LF, "ALL Tests ERROR: can't cd to $UserTests\n");
+	}
+	$uCmnd = "/usr/local/bin/fo-runTests -l \"`ls`\" -n 'User Tests' >> $logFile 2>&1";
+	$UsersLast = exec($uCmnd, $dummy, $Urtn);
+	LogAndPrint($LF, "\n");
+
+	if (chdir($Home) === FALSE) {
+		$cUInoHome = "All Tests ERROR: can't cd to $Home\n";
+		LogAndPrint($LF, $cUInoHome);
+	}
+
+	if (chdir($EmailTests) === FALSE) {
+		LogAndPrint($LF, "ALL Tests ERROR: can't cd to $EmailTests\n");
+	}
+	$EmailLast = exec("fo-runTests -l \"`ls`\" -n 'Email Tests' >> $logFile 2>&1", $dummy, $ENrtn);
+	LogAndPrint($LF, "\n");
+	/*
+	 * The verify tests require that uploads be done first.
+	 */
+	_runTestEnvSetup();
+	fclose($LF);
+	// wait for uploads to finish
+	if (chdir($Home) === FALSE) {
+		$UInoHome = "All Tests ERROR: can't cd to $Home\n";
+		LogAndPrint($LF, $UInoHome);
+	}
+	print "Waiting for jobs to finish...\n";
+	$last = exec('./wait4jobs.php', $tossme, $jobsDone);
+	foreach($tossme as $line){
+		print "$line\n";
+	}
+	print "testFOSSology: jobsDone is:$jobsDone\n";
+	if ($jobsDone != 0) {
+		print "ERROR! jobs are not finished after two hours, not running" .
     "verify tests, please investigate and run verify tests by hand\n";
-    print "Monitor the job Q and when the setup jobs are done, run:\n";
-    print "$myname -v -l $logFile\n";
-    exit(1);
-  }
-  if ($jobsDone == 0) {
-    verifyUploads($logFile);
-    if (!is_null($rtn = saveResults())) {
-      print "ERROR! could not save the test results, please save by hand\n";
-      print "saveResults returned the following error:\n$rtn\n";
-      exit(1);
-    }
-    $resultsHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
-    $reportHome = "$resultsHome" . "$logFileName";
-    
-    $TO = "mark.donohoe@hp.com mary.laser@hp.com ";
-    //$TO = "mark.donohoe@hp.com mary.laser@hp.com " . 
-    //      "bob.gobeille@hp.com dong.ma@hp.com";
-    $last = exec("./textReport.php -f $reportHome | 
+		print "Monitor the job Q and when the setup jobs are done, run:\n";
+		print "$myname -v -l $logFile\n";
+		exit(1);
+	}
+	if ($jobsDone == 0) {
+		verifyUploads($logFile);
+		if (!is_null($rtn = saveResults())) {
+			print "ERROR! could not save the test results, please save by hand\n";
+			print "saveResults returned the following error:\n$rtn\n";
+			exit(1);
+		}
+		$resultsHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
+		$reportHome = "$resultsHome" . "$logFileName";
+
+		if(array_key_exists('e', $options) {
+			$TO = "mark.donohoe@hp.com mary.laser@hp.com ";
+			//$TO = "mark.donohoe@hp.com mary.laser@hp.com " .
+			//      "bob.gobeille@hp.com dong.ma@hp.com";
+			$last = exec("./textReport.php -f $reportHome |
     mailx -s \"test results\" $TO ",$tossme, $rptGen);
-  }
-  exit(0);
+		}
+	}
+	exit(0);
 }
 /**************** Basic Tests (includes Site) *************************/
 if (array_key_exists("b", $options)) {
-  $LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
-  print "Using log file:$logFile\n";
-  if (chdir($Home) === FALSE) {
-    $BnoHome = "Basic Tests ERROR: can't cd to $Home\n";
-    LogAndPrint($LF, $BnoHome);
-  }
-  $startB = "Running Basic/SiteTests on: $date at $time\n";
-  LogAndPrint($LF, $startB);
-  if (chdir($SiteTests) === FALSE) {
-    $noBS = "Basic/Site Tests ERROR: can't cd to $SiteTests\n";
-    LogAndPrint($LF, $noBS);
-  }
-  print "\n";
-  $SiteLast = exec("./runSiteTests.php >> $logFile 2>&1", $dummy, $Srtn);
-  if (chdir('../BasicTests') === FALSE) {
-    $noBT = "Basic Tests ERROR: can't cd to $BasicTests\n";
-    LogAndPrint($LF, $noBT);
-  }
-  print "\n";
-  $BasicLast = exec("./runBasicTests.php >> $logFile 2>&1", $dummy, $Srtn);
-  fclose($LF);
-  exit(0);
+	$LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
+	print "Using log file:$logFile\n";
+	if (chdir($Home) === FALSE) {
+		$BnoHome = "Basic Tests ERROR: can't cd to $Home\n";
+		LogAndPrint($LF, $BnoHome);
+	}
+	$startB = "Running Basic/SiteTests on: $date at $time\n";
+	LogAndPrint($LF, $startB);
+	if (chdir($SiteTests) === FALSE) {
+		$noBS = "Basic/Site Tests ERROR: can't cd to $SiteTests\n";
+		LogAndPrint($LF, $noBS);
+	}
+	print "\n";
+	$SiteLast = exec("./runSiteTests.php >> $logFile 2>&1", $dummy, $Srtn);
+	if (chdir('../BasicTests') === FALSE) {
+		$noBT = "Basic Tests ERROR: can't cd to $BasicTests\n";
+		LogAndPrint($LF, $noBT);
+	}
+	print "\n";
+	$BasicLast = exec("./runBasicTests.php >> $logFile 2>&1", $dummy, $Srtn);
+	fclose($LF);
+	exit(0);
 }
 /***************** SiteTest Only **************************************/
 if (array_key_exists("s", $options)) {
-  $LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
-  print "Using log file:$logFile\n";
-  $Sstart = "Running SiteTests on: $date at $time\n";
-  LogAndPrint($LF, $Sstart);
-  if (chdir($SiteTests) === FALSE) {
-    $noST = "Site Tests ERROR: can't cd to $SiteTests\n";
-    LogAndPrint($LF, $noST);
-  }
-  $SiteLast = exec("./runSiteTests.php >> $logFile 2>&1", $dummy, $Srtn);
-  fclose($LF);
-  exit(0);
+	$LF = fopen($logFile, 'w') or die("can't open $logFile $phperrormsg\n");
+	print "Using log file:$logFile\n";
+	$Sstart = "Running SiteTests on: $date at $time\n";
+	LogAndPrint($LF, $Sstart);
+	if (chdir($SiteTests) === FALSE) {
+		$noST = "Site Tests ERROR: can't cd to $SiteTests\n";
+		LogAndPrint($LF, $noST);
+	}
+	$SiteLast = exec("./runSiteTests.php >> $logFile 2>&1", $dummy, $Srtn);
+	fclose($LF);
+	exit(0);
 }
 /******************** Verify ******************************************/
 if (array_key_exists("v", $options)) {
-  if (array_key_exists("l", $options)) {
-    $logFile = $options['l'];
-    /*
-     * check if it starts with a slash, if not assume it's relative and make
-     * a complete path of it.  If you don't the results end up in the verifyTests
-     * directory.
-     */
-    $position = strpos($logFile,'/');
-    if($position === FALSE) {
-      $logFile = getcwd() . "/$logFile";
-    }
-    $logFileName = basename($logFile);
-  } else {
-    print "Error, must supply a path to a log file with -v option\n";
-    print $usage;
-    exit(1);
-  }
-  print "calling verifyUploads with:$logFile\n";
-  if (!verifyUploads($logFile)) {
-    print "ERROR! verify upload tests had errors, please investigate\n";
-    exit(1);
-  }
-  if (!is_null($rtn = saveResults())) {
-    print "ERROR! could not save the test results, please save by hand\n";
-    exit(1);
-  }
-  exit(0);
+	if (array_key_exists("l", $options)) {
+		$logFile = $options['l'];
+		/*
+		 * check if it starts with a slash, if not assume it's relative and make
+		 * a complete path of it.  If you don't the results end up in the verifyTests
+		 * directory.
+		 */
+		$position = strpos($logFile,'/');
+		if($position === FALSE) {
+			$logFile = getcwd() . "/$logFile";
+		}
+		$logFileName = basename($logFile);
+	} else {
+		print "Error, must supply a path to a log file with -v option\n";
+		print $usage;
+		exit(1);
+	}
+	print "calling verifyUploads with:$logFile\n";
+	if (!verifyUploads($logFile)) {
+		print "ERROR! verify upload tests had errors, please investigate\n";
+		exit(1);
+	}
+	if (!is_null($rtn = saveResults())) {
+		print "ERROR! could not save the test results, please save by hand\n";
+		exit(1);
+	}
+	exit(0);
 }
 function saveResults() {
 
-  global $Home;
-  global $logFileName;
-  global $LF;
-  global $logFile;
+	global $Home;
+	global $logFileName;
+	global $LF;
+	global $logFile;
 
-  $resultsHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
-  if (chdir($Home) === FALSE) {
-    $nohome = "Save Data ERROR: can't cd to $Home\n";
-    LogAndPrint($LF, $nohome);
-    return ($nohome);
-  }
-  //print "saveResults: logFileName is:$logFileName\n";
-  //print "saveResults: resultsHome is:$resultsHome\n";
-  $reportHome = "$resultsHome" . "$logFileName";
-  if (!rename($logFile, $reportHome)) {
-    $E = "Error, could not move\n$logFile\nto\n$reportHome\n";
-    $E.= "Please move it by hand so the reports will be current\n";
-    return ($E);
-  }
-  return (NULL);
+	$resultsHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
+	if (chdir($Home) === FALSE) {
+		$nohome = "Save Data ERROR: can't cd to $Home\n";
+		LogAndPrint($LF, $nohome);
+		return ($nohome);
+	}
+	//print "saveResults: logFileName is:$logFileName\n";
+	//print "saveResults: resultsHome is:$resultsHome\n";
+	$reportHome = "$resultsHome" . "$logFileName";
+	if (!rename($logFile, $reportHome)) {
+		$E = "Error, could not move\n$logFile\nto\n$reportHome\n";
+		$E.= "Please move it by hand so the reports will be current\n";
+		return ($E);
+	}
+	return (NULL);
 }
 function verifyUploads($logfile) {
-  global $Home;
-  global $VerifyTests;
-  global $date;
-  global $time;
-  if (empty($logfile)) {
-    return (FALSE);
-  }
-  $VLF = fopen($logfile, 'a') or die("Can't open $logfile, $phperrormsg");
-  $Vstart = "\nRunning Verify Tests on: $date at $time\n";
-  LogAndPrint($VLF, $Vstart);
-  if (chdir($Home) === FALSE) {
-    $noVhome = "Verify Tests ERROR: can't cd to $Home\n";
-    LogAndPrint($VLF, $noVhome);
-  }
-  if (chdir($VerifyTests) === FALSE) {
-    $noVT = "Verify Tests ERROR: can't cd to $VerifyTests\n";
-    LogAndPrint($VLF, $noVT);
-  }
-  fclose($VLF);
-  $VerifyLast = exec("./runVerifyTests.php >> $logfile 2>&1", $dummy, $Vrtn);
-  if($Vrtn == 0) {
-    return(TRUE);
-  }
-  else {
-    return(FALSE);
-  }
+	global $Home;
+	global $VerifyTests;
+	global $date;
+	global $time;
+	if (empty($logfile)) {
+		return (FALSE);
+	}
+	$VLF = fopen($logfile, 'a') or die("Can't open $logfile, $phperrormsg");
+	$Vstart = "\nRunning Verify Tests on: $date at $time\n";
+	LogAndPrint($VLF, $Vstart);
+	if (chdir($Home) === FALSE) {
+		$noVhome = "Verify Tests ERROR: can't cd to $Home\n";
+		LogAndPrint($VLF, $noVhome);
+	}
+	if (chdir($VerifyTests) === FALSE) {
+		$noVT = "Verify Tests ERROR: can't cd to $VerifyTests\n";
+		LogAndPrint($VLF, $noVT);
+	}
+	fclose($VLF);
+	$VerifyLast = exec("./runVerifyTests.php >> $logfile 2>&1", $dummy, $Vrtn);
+	if($Vrtn == 0) {
+		return(TRUE);
+	}
+	else {
+		return(FALSE);
+	}
 }
 
 /*

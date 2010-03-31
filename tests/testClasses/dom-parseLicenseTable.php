@@ -73,7 +73,6 @@ class domParseLicenseTbl
 		@$dom->loadHTML($this->page);
 		/*** discard white space ***/
 		$dom->preserveWhiteSpace = false;
-		//$table = $dom->getElementById('lichistogram');
 		$table = $dom->getElementById($this->tableId);
 		if(empty($table)) {
 			//print "DPLTDB: table is empty, can't find table!\n";
