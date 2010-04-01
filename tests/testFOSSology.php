@@ -259,7 +259,7 @@ if (array_key_exists("a", $options)) {
 		$resultsHome = "/home/fosstester/public_html/TestResults/Data/Latest/";
 		$reportHome = "$resultsHome" . "$logFileName";
 
-		if(array_key_exists('e', $options) {
+		if(array_key_exists('e', $options)) {
 			$TO = "mark.donohoe@hp.com mary.laser@hp.com ";
 			//$TO = "mark.donohoe@hp.com mary.laser@hp.com " .
 			//      "bob.gobeille@hp.com dong.ma@hp.com";
