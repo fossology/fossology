@@ -75,6 +75,9 @@ class parseBrowseMenu
    *
    * @returns array of v|m|d keys and links or empty array if none found
    * on that page.
+   * 
+   * @todo clear up what the array looks like I think it's an array of
+   * arrays with keys.
    */
   function parseBrowseFileMinis()
   {
@@ -126,7 +129,10 @@ class parseBrowseMenu
    * combine two arrays into a single associative array.  One of the
    * arrays is already associative and had duplicate keys.
    *
-   * ($array, $matches)
+   * @param array, $array
+   * @param scalar, $matches
+   * 
+   * @todo what does the return array look like! Docuement it!
    */
   function _createMiniArray($array, $matches)
   {
