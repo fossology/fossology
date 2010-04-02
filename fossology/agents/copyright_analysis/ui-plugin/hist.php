@@ -118,11 +118,13 @@ class copyright_hist extends FO_Plugin
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
     /* Get agent list */
+/* selecting the agent is a future feature
     $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
 
     $AgentSelect = AgentSelect($Agent_name, $upload_pk, "copyright", true, "agent_pk", $Agent_pk);
     $VLic .= $AgentSelect;
     $VLic .= "<input type='submit' value='Go'>";
+*/
 
     /* Write license histogram to $VLic  */
     $CopyrightCount = 0;
