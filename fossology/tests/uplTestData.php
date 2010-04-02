@@ -91,22 +91,24 @@ class uploadTestDataTest extends fossologyTestCase
 
     /* upload the archives using the upload from file menu
      * 
-     * 1 = copyright agent
-     * 3 = metadata agent
-     * 4 = nomos agent
-     * 5 = package agent
+     * 1 = bucket agent
+     * 2 = copyright agent
+     * 3 = mime agent 
+     * 4 = metadata agent
+     * 5 = nomos agent
+     * 6 = package agent
      */
     
 
     print "Starting file uploads\n";
     foreach($uploadList as $upload) {
       $description = "File $upload uploaded by Upload Test Data Test";
-      $this->uploadFile('Testing', $upload, $description, null, '1,3,4');
+      $this->uploadFile('Testing', $upload, $description, null, '1,2,3,5');
     }
     print "Starting copyright uploads\n";
     foreach($copyrightList as $upload) {
       $description = "File $upload uploaded by Upload Test Data Test";
-      $this->uploadFile('Copyright', $upload, $description, null, '1,3,4');
+      $this->uploadFile('Copyright', $upload, $description, null, '2,3,5');
     }
     /* Upload the urls using upload from url.  Check if the user specificed a
      * web proxy for the environment.  If so, set the attribute. */
@@ -117,7 +119,7 @@ class uploadTestDataTest extends fossologyTestCase
     print "Starting Url uploads\n";
     foreach($urlList as $url)
     {
-      $this->uploadUrl($rootFolder, $url, null, null, '1,3,4');
+      $this->uploadUrl($rootFolder, $url, null, null, '1,2,3,5,6');
     }
   }
 }
