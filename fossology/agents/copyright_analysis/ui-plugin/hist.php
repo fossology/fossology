@@ -128,7 +128,7 @@ class copyright_hist extends FO_Plugin
     $CopyrightCount = 0;
     $UniqueCopyrightCount = 0;
     $NoCopyrightFound = 0;
-    $VCopyright .= "<table border=1 width='100%' id='copyright'>\n";
+    $VCopyright = "<table border=1 width='100%' id='copyright'>\n";
     $VCopyright .= "<tr><th width='10%'>Count</th>";
     $VCopyright .= "<th width='10%'>Files</th>";
     $VCopyright .= "<th>Copyright Statements</th></tr>\n";
@@ -136,7 +136,7 @@ class copyright_hist extends FO_Plugin
     $EmailCount = 0;
     $UniqueEmailCount = 0;
     $NoEmailFound = 0;
-    $VEmail .= "<table border=1 width='100%'id='copyrightemail'>\n";
+    $VEmail = "<table border=1 width='100%'id='copyrightemail'>\n";
     $VEmail .= "<tr><th width='10%'>Count</th>";
     $VEmail .= "<th width='10%'>Files</th>";
     $VEmail .= "<th>Email</th></tr>\n";
@@ -144,7 +144,7 @@ class copyright_hist extends FO_Plugin
     $UrlCount = 0;
     $UniqueUrlCount = 0;
     $NoUrlFound = 0;
-    $VUrl .= "<table border=1 width='100%' id='copyrighturl'>\n";
+    $VUrl = "<table border=1 width='100%' id='copyrighturl'>\n";
     $VUrl .= "<tr><th width='10%'>Count</th>";
     $VUrl .= "<th width='10%'>Files</th>";
     $VUrl .= "<th>URL</th></tr>\n";
@@ -164,7 +164,7 @@ class copyright_hist extends FO_Plugin
             $VCopyright .= Traceback_uri();
             $VCopyright .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
             $VCopyright .= "<td align='left'>";
-            $VCopyright .= $row[content];
+            $VCopyright .= $row['content'];
             $VCopyright .= "</td>";
             $VCopyright .= "</tr>\n";
         } else if ($row['type'] == 'email') {
@@ -175,7 +175,7 @@ class copyright_hist extends FO_Plugin
             $VEmail .= Traceback_uri();
             $VEmail .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
             $VEmail .= "<td align='left'>";
-            $VEmail .= $row[content];
+            $VEmail .= $row['content'];
             $VEmail .= "</td>";
             $VEmail .= "</tr>\n";
         } else if ($row['type'] == 'url') {
@@ -186,7 +186,7 @@ class copyright_hist extends FO_Plugin
             $VUrl .= Traceback_uri();
             $VUrl .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
             $VUrl .= "<td align='left'>";
-            $VUrl .= $row[content];
+            $VUrl .= $row['content'];
             $VUrl .= "</td>";
             $VUrl .= "</tr>\n";
         }
