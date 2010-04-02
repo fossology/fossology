@@ -29,7 +29,7 @@
  * \brief run the python test that determines if the naive Bayes
  * classifier can correctly classify data that it has already seen.
  *
- * @version "$Id: $"
+ * @version "$Id$"
  */
 
 require_once('../fossologyTestCase.php');
