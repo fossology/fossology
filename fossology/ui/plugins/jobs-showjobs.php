@@ -174,7 +174,8 @@ class jobs_showjobs extends FO_Plugin
 		  }
 		break;
 	default:
-		$V .= htmlentities($Row[$F]);
+        if (array_key_exists($F, $Row))
+  		  $V .= htmlentities($Row[$F]);
 		break;
 	}
       $V .= "</td></tr>\n";
@@ -273,11 +274,14 @@ class jobs_showjobs extends FO_Plugin
     /* Get Jobs that are NOT associated with uploads (e.g., folder delete). */
     /*****************************************************************/
     $Count = 1; /* count number of jobs */
+    /* turn off E_NOTICE kludge so this stops reporting undefined index */
+    $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
     for($i=1; !empty($Results[$i]['upload_pk']); $i++)
       {
       if ($Results[$i]['upload_pk'] != $Results[$i+1]['upload_pk'])
 	$Count++;
       }
+    error_reporting($errlev); /* return to previous error reporting level */
 
     if (($UploadPk < 0) && (!is_array($Results) || ($Count < 10)))
 	{
@@ -324,6 +328,10 @@ class jobs_showjobs extends FO_Plugin
     $Upload="-1";
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     $UriFull = $Uri . Traceback_parm_keep(array("show","history","upload"));
+
+    /* turn off E_NOTICE kludge so this stops reporting undefined index */
+    $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
+
     for($i=0; !empty($Results[$i]['job_name']); $i++)
       {
       $Row = &$Results[$i];
@@ -419,6 +427,7 @@ class jobs_showjobs extends FO_Plugin
       if (!empty($Row['jdep_jq_depends_fk']))
 	{
 	$Dep = " / <a href='$Uri&show=job&job=" . $Row['jdep_jq_depends_fk'] . "'>" . $Row['jdep_jq_depends_fk'] . "</a>";
+
 	for( ; $Results[$i+1]['jq_pk'] == $Row['jq_pk']; $i++)
 	  {
 	  $Dep .= ", <a href='$Uri&show=job&job=" . $Results[$i+1]['jdep_jq_depends_fk'] . "'>" . $Results[$i+1]['jdep_jq_depends_fk'] . "</a>";
@@ -489,6 +498,7 @@ class jobs_showjobs extends FO_Plugin
       $V .= "  <td width='20%' bgcolor='$Color'>$endtime</td>\n";
       $V .= "</tr>\n";
       }
+    error_reporting($errlev); /* return to previous error reporting level */
     $V .= "</table>\n";
     $V .= "<P />$VM<P />";
     return($V);
