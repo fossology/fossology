@@ -73,6 +73,7 @@ $BasicTests = '../ui/tests/BasicTests';
 $UserTests = '../ui/tests/Users';
 $EmailTests = '../ui/tests/EmailNotification';
 $CopyRight = 'copyright';
+$pkgAgent  = 'pkgagent';
 $VerifyTests = '../ui/tests/VerifyTests';
 
 /*
@@ -228,6 +229,17 @@ if (array_key_exists("a", $options)) {
 	$EmailLast = exec("fo-runTests -l \"`ls`\" -n 'Email Tests' >> $logFile 2>&1", $dummy, $ENrtn);
 	LogAndPrint($LF, "\n");
 
+	if (chdir($Home) === FALSE) {
+		$cUInoHome = "All Tests ERROR: can't cd to $Home\n";
+		LogAndPrint($LF, $cUInoHome);
+	}
+
+	if (chdir($pkgAgent) === FALSE) {
+		LogAndPrint($LF, "ALL Tests ERROR: can't cd to $pkgAgent\n");
+	}
+	$PkgLast = exec("fo-runTests -l \"`ls cli*\" -n 'Package Agent Tests'" .
+										" >> $logFile 2>&1", $dummy, $Pkgrtn);
+	LogAndPrint($LF, "\n");
 
 	/*
 	 * The verify tests require that uploads be done first.
