@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -245,6 +245,17 @@ if (array_key_exists("a", $options)) {
 	}
 	$PkgLast = exec("fo-runTests -l \"`ls cli*\" -n 'Package Agent Tests'" .
 										" >> $logFile 2>&1", $dummy, $Pkgrtn);
+	LogAndPrint($LF, "\n");
+
+	// copyright classification test does not depend on uploads, run now.
+	if (chdir($Home) === FALSE) {
+		$cUInoHome = "All Tests ERROR: can't cd to $Home\n";
+		LogAndPrint($LF, $cUInoHome);
+	}
+	if (chdir($CopyRight) === FALSE) {
+		LogAndPrint($LF, "ALL Tests ERROR: can't cd to $CopyRight\n");
+	}
+	$CopyLast = exec("fo-runTests -l \"classifierTest.php\" -n 'Classifier Tests' >> $logFile 2>&1", $dummy, $CRrtn);
 	LogAndPrint($LF, "\n");
 
 	/*
