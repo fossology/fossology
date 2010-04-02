@@ -86,7 +86,6 @@ class user_edit_self extends FO_Plugin {
 		$Pass1 = GetParm('pass1', PARM_TEXT);
 		$Pass2 = GetParm('pass2', PARM_TEXT);
 		$Seed = rand() . rand();
-		$Hash = sha1($Seed . $Pass);
 		$Desc = GetParm('description', PARM_TEXT);
 		$Perm = GetParm('permission', PARM_INTEGER);
 		$Folder = GetParm('folder', PARM_INTEGER);
