@@ -76,7 +76,7 @@ class domParseLicenseTbl
 		$table = $dom->getElementById($this->tableId);
 		if(empty($table)) {
 			//print "DPLTDB: table is empty, can't find table!\n";
-			return($hList(array()));
+			return($this->hList=array());
 		}
 
 		foreach ($table->childNodes as $tblChildNode)
