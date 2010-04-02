@@ -63,7 +63,7 @@ class verify3filesCopyright extends fossologyTestCase
 		$page = $this->mybrowser->clickLink('Browse');
 		$this->assertTrue($this->myassertText($page, '/Browse/'),
      "verify3files FAILED! Could not find Browse menu\n");
-		$page = $this->mybrowser->clickLink('copyright');
+		$page = $this->mybrowser->clickLink('Copyright');
 		$this->assertTrue($this->myassertText($page, '/Copyright/'),
      "verify3files FAILED! Could not find copyright folder\n");
 		$result = $this->myassertText($page, "/$name/");
@@ -80,7 +80,7 @@ class verify3filesCopyright extends fossologyTestCase
 		$page = $this->mybrowser->clickLink('Browse');
 		$this->assertTrue($this->myassertText($page, '/Browse/'),
              "verify3files FAILED! Could not find Browse menu\n");
-		$page = $this->mybrowser->clickLink('copyright');
+		$page = $this->mybrowser->clickLink('Copyright');
 		//print "************ Page after upload link *************\n$page\n";
 		$this->assertTrue($this->myassertText($page, "/Browse/"),
        "verify3files FAILED! Browse Title not found\n");

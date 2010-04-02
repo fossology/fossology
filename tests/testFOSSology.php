@@ -72,6 +72,7 @@ $SiteTests = '../ui/tests/SiteTests';
 $BasicTests = '../ui/tests/BasicTests';
 $UserTests = '../ui/tests/Users';
 $EmailTests = '../ui/tests/EmailNotification';
+$CopyRight = 'copyright';
 $VerifyTests = '../ui/tests/VerifyTests';
 
 /*
@@ -226,6 +227,8 @@ if (array_key_exists("a", $options)) {
 	}
 	$EmailLast = exec("fo-runTests -l \"`ls`\" -n 'Email Tests' >> $logFile 2>&1", $dummy, $ENrtn);
 	LogAndPrint($LF, "\n");
+
+
 	/*
 	 * The verify tests require that uploads be done first.
 	 */
@@ -250,6 +253,16 @@ if (array_key_exists("a", $options)) {
 		exit(1);
 	}
 	if ($jobsDone == 0) {
+		if (chdir($Home) === FALSE) {
+			$cUInoHome = "All Tests ERROR: can't cd to $Home\n";
+			LogAndPrint($LF, $cUInoHome);
+		}
+		if (chdir($CopyRight) === FALSE) {
+			LogAndPrint($LF, "ALL Tests ERROR: can't cd to $CopyRight\n");
+		}
+		$CopyLast = exec("fo-runTests -l \"`ls verify*`\" -n 'CopyRight Tests' >> $logFile 2>&1", $dummy, $CRrtn);
+		LogAndPrint($LF, "\n");
+
 		verifyUploads($logFile);
 		if (!is_null($rtn = saveResults())) {
 			print "ERROR! could not save the test results, please save by hand\n";
