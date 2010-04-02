@@ -250,10 +250,10 @@ def agent(model,runonpfiles=False):
         print >> sys.stdout, "FATAL: An error occurred in the main agent loop. Please consult the provided traceback.\n\t%s\n" % p
         hb.stop()
         libfosspython.repClose()
-    finally:
+      #finally:
         # if we really get here and there was another exception we cant print
         # the correct error so just return.
-        return 1
+        #return 1
 
     hb.stop()
     libfosspython.repClose()
