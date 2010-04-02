@@ -38,6 +38,7 @@ class ui_view_info extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
+    menu_insert("Browse-Pfile::Info",5,$this->Name,"View file information");	
     // For the Browse menu, permit switching between detail and summary.
     $Parm = Traceback_parm_keep(array("upload","item","format"));
     $URI = $this->Name . $Parm;
@@ -48,8 +49,8 @@ class ui_view_info extends FO_Plugin
 	}
     else
 	{
-	menu_insert("View::Info",1,$URI,"View summary information about this file");
-	menu_insert("View-Meta::Info",1,$URI,"View summary information about this file");
+	menu_insert("View::Info",1,$URI,"View all information about this file");
+	menu_insert("View-Meta::Info",1,$URI,"View all information about this file");
 	}
     } // RegisterMenus()
 
@@ -195,13 +196,17 @@ class ui_view_info extends FO_Plugin
         $V .= "</td><td>" . htmlentities($R['mimetype_name']) . "</td></tr>\n";
         $Count++;
         }
-/*  Don't display attrib table value
+    $V .= "</table>\n";
+    /*  Display meta-data get from  pkgmetagetta agent */
 
+    $V .= "<H4>Meta Data From PkgMetaGetta Agent</H4>\n";
+    $V .= "<table border='1'>\n";
+    $V .= "<tr><th width='5%'>Item</th><th width='20%'>Meta Data</th><th>Value</th></tr>\n";
     $SQL = "SELECT DISTINCT key_name,attrib_value FROM attrib
         INNER JOIN key ON key_pk = attrib_key_fk
         AND key_parent_fk IN
         (SELECT key_pk FROM key WHERE key_parent_fk=0 AND
-          (key_name = 'pkgmeta' OR key_name = 'specagent') )
+          (key_name = 'pkgmeta') )
         INNER JOIN uploadtree ON uploadtree_pk = $Item
         AND uploadtree.pfile_fk = attrib.pfile_fk
         AND key_name != 'Processed' ORDER BY key_name;";
@@ -216,7 +221,7 @@ class ui_view_info extends FO_Plugin
         $V .= "</td><td>$Val</td></tr>\n";
         $Count++;
         }
-*/
+
     $V .= "</table>\n";
     $Count--;
     $V .= "<P />Total meta data records: " . number_format($Count,0,"",",") . "<br />\n";
