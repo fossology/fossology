@@ -180,6 +180,12 @@ if (array_key_exists("a", $options)) {
 	}
 	LogAndPrint($LF, "Running All Tests on: $date at $time using subversion version: $Svn\n");
 
+	$Cleanup = "This program does not remove the testing folders in case" .
+						 " there was a failure and it needs to be looked at.  Run " .
+						 "the script/test runTestCleanup.php to clean things up.\n";
+
+	print wordwrap($Cleanup);
+
 	/*
 	 * Create the test users first or nothing will work should this be somewhere else like
 	 * in install?
@@ -414,10 +420,4 @@ function verifyUploads($logfile) {
 		return(FALSE);
 	}
 }
-
-/*
- * this program does not remove the testing folders in case there
- * was a failure and it needs to be looked at.  Run the script/test
- * runTestCleanup.php to clean things up.
- */
 ?>
