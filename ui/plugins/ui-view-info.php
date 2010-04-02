@@ -49,8 +49,8 @@ class ui_view_info extends FO_Plugin
 	}
     else
 	{
-	menu_insert("View::Info",1,$URI,"View all information about this file");
-	menu_insert("View-Meta::Info",1,$URI,"View all information about this file");
+	menu_insert("View::Info",1,$URI,"View information about this file");
+	menu_insert("View-Meta::Info",1,$URI,"View information about this file");
 	}
     } // RegisterMenus()
 
