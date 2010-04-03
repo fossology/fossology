@@ -30,6 +30,7 @@
  */
 require_once ('../fossologyTestCase.php');
 require_once ('../TestEnvironment.php');
+require_once('../testClasses/parseBrowseMenu.php');
 
 global $URL;
 
@@ -38,7 +39,7 @@ global $URL;
 class UIPkgagentTest extends fossologyTestCase
 {
   public $mybrowser;          // must have
-  public $webProxy;
+  public $host;
 
   function setUp()
   {
@@ -49,6 +50,7 @@ class UIPkgagentTest extends fossologyTestCase
     $name = 'fossRpmsDebs.tar.bz2';
     $safeName = escapeDots($name);
 
+    $this->host = getHost($URL);
     $this->Login();
   }
   /**
@@ -84,10 +86,12 @@ class UIPkgagentTest extends fossologyTestCase
 
     print "Waiting for jobs to finish...\n";
     $last = exec('../wait4jobs.php', $tossme, $jobsDone);
+    /*
     foreach($tossme as $line){
       print "$line\n";
     }
     print "testVerifyPkgagentTestData; jobsDone is:$jobsDone\n";
+    */
     if ($jobsDone != 0) {
       print "ERROR! jobs are not finished after two hours, not running" .
       "verify tests, please investigate and run verify tests by hand\n";
@@ -129,7 +133,76 @@ class UIPkgagentTest extends fossologyTestCase
       $this->assertTrue($this->myassertText($page, "/fossology-debsrc/"),
         "verifyPkgagent FAILED! did not find 'fossology-debsrc' directory \n");
 
-      //print "************ Page after select fossRpmsDebs/ link  *************\n$page\n";
+      /* Select fossology-debsrc/ link to check debian source pacakge */
+      $pagedebsrc = $this->mybrowser->clickLink('fossology-debsrc/');
+
+      $this->assertTrue($this->myassertText($pagedebsrc, "/3 items/"),
+        "verifyPkgagent FAILED! '3 items' not found\n");
+      $this->assertTrue($this->myassertText($pagedebsrc, "/fossology_1.1.1~20100119.diff.gz/"),
+        "verifyPkgagent FAILED! did not find 'fossology_1.1.1~20100119.diff.gz' \n");
+      $this->assertTrue($this->myassertText($pagedebsrc, "/fossology_1.1.1~20100119.dsc/"),
+        "verifyPkgagent FAILED! did not find 'fossology_1.1.1~20100119.dsc' \n");
+      $this->assertTrue($this->myassertText($pagedebsrc, "/fossology_1.1.1~20100119.orig.tar.gz/"),
+        "verifyPkgagent FAILED! did not find 'fossology_1.1.1~20100119.orig.tar.gz' \n");
+
+      preg_match_all("/.*?\[<a href='(.*?)'.*?>(Info.*?)</", $pagedebsrc, $match, PREG_OFFSET_CAPTURE);
+      //print_r($match);
+      $url = makeUrl($this->host, $match[1][1][0]);
+      if($url === NULL) { $this->fail("verifyPkgagent Failed, host is not set"); }
+      $pagedebsrc = $this->mybrowser->get($url);
+      //print "$pagedebsrc\n";  
+	  $this->assertTrue($this->myassertText($pagedebsrc, '/records: 15/'),
+        "verifyPkgagent FAILED! Package info records: 15 not found\n");
+      $this->assertTrue($this->myassertText($pagedebsrc, '/Debian Source Package/'),
+        "verifyPkgagent FAILED! Debian Source Package not found\n");
+      $this->assertTrue($this->myassertText($pagedebsrc, '/Matt Taggart &lt;taggart@debian.org&gt;/'),
+        "verifyPkgagent FAILED! Matt Taggart <taggart@debian.org>  not found\n");
+	  $this->assertTrue($this->myassertText($pagedebsrc, '/debhelper \(&gt;\= 5\)/'),
+        "verifyPkgagent FAILED! debhelper (>= 5) not found\n");
+
+      /* Select each package's [Info] link to View package info*/
+      $menu = new parseBrowseMenu($page);
+      $list = $menu->parseBrowseFileMinis();
+      //print_r($list);
+      $url = makeUrl($this->host, $list[0]['Info']);
+      if($url === NULL) { $this->fail("verifyPkgagent Failed, host is not set"); }
+      //print "$url\n";
+      $page = $this->mybrowser->get($url);
+      $this->assertTrue($this->myassertText($page, '/records: 51/'),
+        "verifyPkgagent FAILED! Package Info records: 51 not found\n");
+      $this->assertTrue($this->myassertText($page, '/RPM Binary Package/'),
+        "verifyPkgagent FAILED! RPM Binary Package not found\n");
+      $this->assertTrue($this->myassertText($page, '/Sun Jul 19 10:54:54 2009/'),
+        "verifyPkgagent FAILED! Sun Jul 19 10:54:54 2009 not found\n");
+      $this->assertTrue($this->myassertText($page, '/fossology-1.1.0-1.el4.src.rpm/'),
+        "verifyPkgagent FAILED! fossology-1.1.0-1.el4.src.rpm not found\n");
+      
+      $url = makeUrl($this->host, $list[1]['Info']);
+      if($url === NULL) { $this->fail("verifyPkgagent Failed, host is not set"); }
+      //print "$url\n";
+      $page = $this->mybrowser->get($url);
+      $this->assertTrue($this->myassertText($page, '/records: 24/'),
+        "verifyPkgagent FAILED! Package Info records: 24 not found\n");
+      $this->assertTrue($this->myassertText($page, '/RPM Source Package/'),
+        "verifyPkgagent FAILED! RPM Source Package not found\n");
+      $this->assertTrue($this->myassertText($page, '/x86_64/'),
+        "verifyPkgagent FAILED! x86_64 not found\n");
+      $this->assertTrue($this->myassertText($page, '/perl-Text-Template/'),
+        "verifyPkgagent FAILED! perl-Text-Template not found\n");
+
+      $url = makeUrl($this->host, $list[2]['Info']);
+      if($url === NULL) { $this->fail("verifyPkgagent Failed, host is not set"); }
+      //print "$url\n";
+      $page = $this->mybrowser->get($url);
+      $this->assertTrue($this->myassertText($page, '/records: 12/'),
+        "verifyPkgagent FAILED! Package Info records: 12 not found\n");
+      $this->assertTrue($this->myassertText($page, '/Debian Binary Package/'),
+        "verifyPkgagent FAILED! Debian Binary Package not found\n");
+      $this->assertTrue($this->myassertText($page, '/utils/'),
+        "verifyPkgagent FAILED! utils not found\n");
+      $this->assertTrue($this->myassertText($page, '/36/'),
+        "verifyPkgagent FAILED! 36 not found\n");
+  
     } 
   }	
 }  
