@@ -271,6 +271,34 @@ void	DeleteUpload	(long UploadId)
   /*** Everything above is slow, everything below is fast ***/
   /***********************************************/
 
+  /* Delete upload from nomos_ars */
+  memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("# Deleting nomos_ars\n"); }
+  snprintf(SQL,sizeof(SQL),"DELETE FROM nomos_ars WHERE upload_fk = %ld;",UploadId);
+  MyDBaccess(DB,SQL);
+
+  /* Delete upload reference from bucket_ars */
+  memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("# Deleting bucket_ars\n"); }
+  snprintf(SQL,sizeof(SQL),"DELETE FROM bucket_ars WHERE upload_fk = %ld;",UploadId);
+  MyDBaccess(DB,SQL);
+  /* Delete uploadtree reference from bucket_container  */
+  memset(SQL,'\0',sizeof(SQL));
+  if (Verbose) { printf("# Deleting bucket_container\n"); }
+  snprintf(SQL,sizeof(SQL),"DELETE FROM bucket_container USING uploadtree WHERE uploadtree_fk = uploadtree_pk AND upload_fk = %ld;",UploadId);
+  MyDBaccess(DB,SQL);
+  /* Delete pfile reference from bucket_file */
+  if (Verbose) { printf("# Deleting bucket_file\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM bucket_file USING %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
+  MyDBaccess(DB,SQL);
+
+  /* Delete pfile reference from copyright table */
+  if (Verbose) { printf("# Deleting copyright\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM copyright USING %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
+  MyDBaccess(DB,SQL);
+
   /***********************************************/
   /* Blow away jobs */
   /*****
