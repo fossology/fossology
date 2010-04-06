@@ -26,7 +26,7 @@ if (!isset($GlobalReady)) {
 }
 class agent_copyright_once extends FO_Plugin {
     public $Name = "agent_copyright_once";
-    public $Title = "One-Shot Copyright/Email/Url Analysis";
+    public $Title = "One-Shot Copyright/Email/URL Analysis";
     // Note: menuList is not needed for this plugin, it inserts into the menu
     // in the code below.
     //public $MenuList = "Upload::One-Shot Bsam";
@@ -187,7 +187,7 @@ class agent_copyright_once extends FO_Plugin {
         if (!empty($_SESSION['User'])) {
             // Debugging changes to license analysis NOTE: this comment doesn't make sense.
             if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
-                menu_insert("Main::Upload::One-Shot Copyright/Email/Url", $this->MenuOrder, $this->Name, $this->MenuTarget);
+                menu_insert("Main::Upload::One-Shot Copyright/Email/URL", $this->MenuOrder, $this->Name, $this->MenuTarget);
             }
             // Debugging changes to license analysis
             if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG) {
@@ -196,9 +196,9 @@ class agent_copyright_once extends FO_Plugin {
                     "item"
                 ));
                 menu_insert("View::[BREAK]", 100);
-                menu_insert("View::One-Shot Copyright/Email/Url", 101, $URI, "Copyright/Email/Url One-shot, real-time analysis");
+                menu_insert("View::One-Shot Copyright/Email/URL", 101, $URI, "Copyright/Email/URL One-shot, real-time analysis");
                 menu_insert("View-Meta::[BREAK]", 100);
-                menu_insert("View-Meta::One-Shot Copyright/Email/Url", 101, $URI, "Copyright/Email/Url One-shot, real-time analysis");
+                menu_insert("View-Meta::One-Shot Copyright/Email/URL", 101, $URI, "Copyright/Email/URL One-shot, real-time analysis");
             }
         }
     } // RegisterMenus()

@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class copyright_hist extends FO_Plugin
 {
   var $Name       = "copyrighthist";
-  var $Title      = "Copyright/Email/Url Browser";
+  var $Title      = "Copyright/Email/URL Browser";
   var $Version    = "1.0";
   var $Dependency = array("db","browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -58,13 +58,13 @@ class copyright_hist extends FO_Plugin
     {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-       menu_insert("Browse::Copyright/Email/Url",1);
+       menu_insert("Browse::Copyright/Email/URL",1);
        menu_insert("Browse::[BREAK]",100);
        //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
       }
       else
       {
-       menu_insert("Browse::Copyright/Email/Url",10,$URI,"View copyright/email/url histogram");
+       menu_insert("Browse::Copyright/Email/URL",10,$URI,"View copyright/email/url histogram");
       }
     }
   } // RegisterMenus()

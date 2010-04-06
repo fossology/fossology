@@ -35,7 +35,7 @@ require($WEBDIR.'/plugins/copyright/library.php');
 class copyright_list extends FO_Plugin
 {
   var $Name       = "copyrightlist";
-  var $Title      = "List Files for Copyright/Email/Url";
+  var $Title      = "List Files for Copyright/Email/URL";
   var $Version    = "1.0";
   var $Dependency = array("db","copyrighthist");
   var $DBaccess   = PLUGIN_DB_READ;
