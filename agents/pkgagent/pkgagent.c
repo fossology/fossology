@@ -34,6 +34,7 @@
 #include <libgen.h>
 #include <time.h>
 
+#include <sys/wait.h>
 
 #include "libfossrepo.h"
 #include "libfossdb.h"
@@ -834,16 +835,60 @@ void	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
  *
  *  Returns: 1 if exists, 0 if does not exist.
  * ***************************************************/
-int	IsExe	(char *Cmd)
+int	IsExe	(char *Exe)
 {
+/*
   char TestCmd[FILENAME_MAX];
   int rc;
 
   memset (TestCmd, '\0', sizeof(TestCmd));
   strcat (TestCmd, Cmd);
   rc = system(TestCmd);
+  if (WIFSIGNALED(rc))
+  {
+    printf("ERROR: Process killed by signal (%d): %s\n",WTERMSIG(rc),TestCmd);
+    return(0);
+  }
+  if (WIFEXITED(rc)) {rc = WEXITSTATUS(rc);printf ("RC1---%d\n",rc);}
+  else {printf ("RC2---%d\n",rc);}
+
   if ( rc == 0 ) return(1);
-  return(0);  
+  else return(0);
+*/
+  char *Path;
+  int i,j;
+  char TestCmd[FILENAME_MAX];
+
+  Path = getenv("PATH");
+  if (!Path) return(0);
+
+  memset(TestCmd,'\0',sizeof(TestCmd));
+  j=0;
+  for(i=0; (j<FILENAME_MAX-1) && (Path[i] != '\0'); i++)
+    {
+    if (Path[i]==':')
+        {
+        if ((j>0) && (TestCmd[j-1] != '/')) strcat(TestCmd,"/");
+        strcat(TestCmd,Exe);
+        if (IsFile(TestCmd,1))  return(1); /*   found it! */
+        /*   missed */
+        memset(TestCmd,'\0',sizeof(TestCmd));
+        j=0;
+        }
+    else
+        {
+        TestCmd[j]=Path[i];
+        j++;
+        }
+    }
+  /*   check last path element */
+  if (j>0)
+    {
+    if (TestCmd[j-1] != '/') strcat(TestCmd,"/");
+    strcat(TestCmd,Exe);
+    if (IsFile(TestCmd,1))      return(1); /*   found it! */
+    }
+  return(0); /*   not in path */
 }/* IsExe() */
 
 /***********************************************
@@ -896,7 +941,7 @@ int	main	(int argc, char *argv[])
 	case 'i':
                 /*  Check if dpkg-source tools is installed, if not update agent table
                  *  Set agent_enabled = false */
-                if (!IsExe("dpkg-source --version >/dev/null 2>&1")){
+                if (!IsExe("dpkg-source")){
         	  printf("WARNING: Package agent disabled, because <dpkg-source> could not be found on the system.\n");
         	  fflush(stdout);
 
@@ -922,7 +967,7 @@ int	main	(int argc, char *argv[])
   }
 
   /* Check if dpkg-source tools is not installed, pkgagent will not run */
-  if (!IsExe("dpkg-source --version >/dev/null 2>&1")){
+  if (!IsExe("dpkg-source")){
 	DISABLED = 1;
 	printf("WARNING: Package agent diabled because <dpkg-source> is not be found in the system search path. See {INSTALL} for package agent dependencies.\n");
         fflush(stdout);
