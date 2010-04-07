@@ -152,10 +152,10 @@ class agent_license_once_compare extends FO_Plugin
       if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG)	// Debugging changes to license analysis
 	{
 	$URI = $this->Name . Traceback_parm_keep(array("format","item"));
-	menu_insert("View::[BREAK]",100);
-	menu_insert("View::Recompare",101,$URI,"One-shot, real-time license recomparison");
-	menu_insert("View-Meta::[BREAK]",100);
-	menu_insert("View-Meta::Recompare",101,$URI,"One-shot, real-time license recomparison");
+	//menu_insert("View::[BREAK]",100);
+	menu_insert("View::Recompare",-22,$URI,"One-shot, real-time license recomparison");
+	//menu_insert("View-Meta::[BREAK]",100);
+	menu_insert("View-Meta::Recompare",-22,$URI,"One-shot, real-time license recomparison");
 	}
       }
   } // RegisterMenus()

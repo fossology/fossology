@@ -44,7 +44,7 @@ class licterm_manage extends FO_Plugin
   var $Version    = "1.0";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_ANALYZE;
-  var $MenuList   = "Organize::License::Manage Terms";
+  var $MenuList   = "Obsolete::License::Manage Terms";
   var $LoginFlag  = 0;
 
   /***********************************************************

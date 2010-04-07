@@ -42,7 +42,7 @@ class licgroup_manage extends FO_Plugin
   var $Name       = "license_groups_manage";
   var $Title      = "Manage License Groups";
   var $Version    = "1.0";
-  var $MenuList   = "Organize::License::Manage Groups";
+  var $MenuList   = "Obsolete::License::Manage Groups";
   var $Dependency = array("db","licgroup","view-license");
   var $DBaccess   = PLUGIN_DB_ANALYZE;
   var $LoginFlag  = 1; /* must be logged in to use this */

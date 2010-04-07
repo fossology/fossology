@@ -45,15 +45,16 @@ class ui_view_license extends FO_Plugin
     $Upload = GetParm("upload",PARM_INTEGER);
     if (!empty($Item) && !empty($Upload))
       {
+      menu_insert("View::[BREAK]",-19);
       if (GetParm("mod",PARM_STRING) == $this->Name)
 	{
-	menu_insert("View::bsam License",1);
-	menu_insert("View-Meta::bsam License",1);
+	menu_insert("View::bsam License",-21);
+	menu_insert("View-Meta::bsam License",-21);
 	}
       else
 	{
-	menu_insert("View::bsam License",1,$URI,"View license histogram");
-	menu_insert("View-Meta::bsam License",1,$URI,"View license histogram");
+	menu_insert("View::bsam License",-21,$URI,"View license histogram");
+	menu_insert("View-Meta::bsam License",-21,$URI,"View license histogram");
 	}
       }
     $Lic = GetParm("lic",PARM_INTEGER);

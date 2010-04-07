@@ -42,7 +42,7 @@ class licterm_default extends FO_Plugin
   var $Name       = "license_terms_default";
   var $Title      = "Reset Default License Terms";
   var $Version    = "1.0";
-  var $MenuList   = "Organize::License::Default Terms";
+  var $MenuList   = "Obsolete::License::Default Terms";
   var $Dependency = array("db","licterm_manage");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
   var $LoginFlag  = 1; /* must be logged in to use this */

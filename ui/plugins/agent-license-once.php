@@ -229,7 +229,7 @@ class agent_license_once extends FO_Plugin {
     if (!empty($_SESSION['User'])) {
       // Debugging changes to license analysis NOTE: this comment doesn't make sense.
       if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
-        menu_insert("Main::Upload::One-Shot Bsam", $this->MenuOrder, $this->Name, $this->MenuTarget);
+        menu_insert("Main::Obsolete::One-Shot Bsam", $this->MenuOrder, $this->Name, $this->MenuTarget);
       }
       // Debugging changes to license analysis
       if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG) {
@@ -237,10 +237,10 @@ class agent_license_once extends FO_Plugin {
           "format",
           "item"
         ));
-        menu_insert("View::[BREAK]", 100);
-        menu_insert("View::bsam One-Shot", 101, $URI, "bsam One-shot, real-time license analysis");
-        menu_insert("View-Meta::[BREAK]", 100);
-        menu_insert("View-Meta::bsam One-Shot", 101, $URI, "bsam One-shot, real-time license analysis");
+        //menu_insert("View::[BREAK]", 100);
+        menu_insert("View::bsam One-Shot", -21, $URI, "bsam One-shot, real-time license analysis");
+        //menu_insert("View-Meta::[BREAK]", 100);
+        menu_insert("View-Meta::bsam One-Shot", -21, $URI, "bsam One-shot, real-time license analysis");
       }
     }
   } // RegisterMenus()
