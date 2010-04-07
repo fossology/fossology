@@ -33,7 +33,7 @@ class agent_remove_licenseMeta extends FO_Plugin
 {
   public $Name       = "agent_reset_license";
   public $Title      = "Remove License Analysis";
-  public $MenuList   = "Organize::Uploads::Remove License Analysis";
+  public $MenuList   = "Obsolete::Remove License Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db", "agent_license");
   public $DBaccess   =  PLUGIN_DB_ANALYZE;

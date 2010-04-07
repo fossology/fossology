@@ -181,10 +181,10 @@ class agent_license_reanalyze extends FO_Plugin
     if (!empty($_SESSION['User']) && (GetParm("mod",PARM_STRING) == 'view-license'))
     {
       $URI = $this->Name . Traceback_parm(0);
-      menu_insert("View::[BREAK]",200);
-      menu_insert("View::Reanalyze",201,$URI,"Reanalyze license and store results");
-      menu_insert("View-Meta::[BREAK]",200);
-      menu_insert("View-Meta::Reanalyze",201,$URI,"Reanalyze license and store results");
+      //menu_insert("View::[BREAK]",200);
+      menu_insert("View::Reanalyze",-20,$URI,"Reanalyze license and store results");
+      //menu_insert("View-Meta::[BREAK]",200);
+      menu_insert("View-Meta::Reanalyze",-20,$URI,"Reanalyze license and store results");
     }
   } // RegisterMenus()
 

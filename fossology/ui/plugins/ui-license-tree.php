@@ -149,12 +149,12 @@ class ui_license_tree extends FO_Plugin {
     $Upload = GetParm("upload", PARM_INTEGER);
     if (!empty($Item) && !empty($Upload)) {
       if (GetParm("mod", PARM_STRING) == $this->Name) {
-        menu_insert("Browse::License Tree", 1);
-        menu_insert("Browse::[BREAK]", 100);
-        menu_insert("Browse::CSV", 101, $URI . "&output=csv");
+        menu_insert("Browse::License Tree", -4);
+        //menu_insert("Browse::[BREAK]", -4);
+        menu_insert("Browse::CSV", -2, $URI . "&output=csv");
       }
       else {
-        menu_insert("Browse::License Tree", 1, $URI, "View license tree");
+        menu_insert("Browse::License Tree",-4 , $URI, "View license tree");
       }
     }
   } // RegisterMenus()

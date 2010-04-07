@@ -85,7 +85,7 @@ class ui_browse extends FO_Plugin {
       "upload",
       "item"
     ));
-    menu_insert("Browse::[BREAK]", -1, "$URI&show=simple", "Basic directory listing");
+    menu_insert("Browse::[BREAK]", -8, "$URI&show=simple", "Basic directory listing");
     $Show = GetParm("show", PARM_STRING);
     switch ($Show) {
       default:

@@ -42,7 +42,7 @@ class licgroup_default extends FO_Plugin
   var $Name       = "license_groups_default";
   var $Title      = "Create Default License Groups";
   var $Version    = "1.0";
-  var $MenuList   = "Organize::License::Default Groups";
+  var $MenuList   = "Obsolete::License::Default Groups";
   var $Dependency = array("db","license_groups_manage");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
   var $LoginFlag  = 1; /* must be logged in to use this */

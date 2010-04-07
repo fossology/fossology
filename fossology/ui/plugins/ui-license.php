@@ -77,13 +77,14 @@ class ui_license extends FO_Plugin
       {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-       menu_insert("Browse::bsam License",1);
-       menu_insert("Browse::[BREAK]",100);
-       menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
+       menu_insert("Browse::bsam License",-3);
+       menu_insert("Browse::[BREAK]",-1);
+       menu_insert("Browse::Clear",-2,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
       }
       else
       {
-       menu_insert("Browse::bsam License",1,$URI,"View bsam license histogram");
+       menu_insert("Browse::[BREAK]",-1);
+       menu_insert("Browse::bsam License",-3,$URI,"View bsam license histogram");
       }
     }
   } // RegisterMenus()
