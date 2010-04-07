@@ -20,40 +20,24 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 DEPS=$(TOP)/Makefile.deps
 
-all: model.dat copyright
+COPYRIGHTPATH=$(DESTDIR)$(AGENTDIR)/copyright
 
-copyright-build: copyright.py $(PYTHONLIB)
-	cat copyright.py > copyright-build
-	echo -n "    sys.path.append('" >> copyright-build
-	echo -n $(PYTHONLIBPATH) >> copyright-build
-	echo    "')" >> copyright-build
-	echo    "    import libfosspython" >> copyright-build
-	echo    "    import copyright_library as library" >> copyright-build
-	echo    "    main()" >> copyright-build
-	chmod a+x copyright-build
+all: model.dat vars.py
 
-copyright: copyright.py $(PYTHONLIB)
-	cat copyright.py > copyright
-	echo -n "    sys.path.append('" >> copyright
-	echo -n $(DESTDIR)$(LIBEXECDIR) >> copyright
-	echo    "/lib/')" >> copyright
-	echo    "    import libfosspython" >> copyright
-	echo    "    import copyright_library as library" >> copyright
-	echo    "    main()" >> copyright
-	chmod a+x copyright
-
-model.dat: copyright-build copyright_library.py data.txt
-	./copyright-build --model model.dat --training data.txt
+model.dat: run.py copyright.py copyright_library.py data.txt
+	./run.py --model model.dat --training data.txt
 	
 install: all
-	$(INSTALL_PROGRAM) copyright $(DESTDIR)$(AGENTDIR)/copyright
-	$(INSTALL_PROGRAM) copyright_library.py $(DESTDIR)$(AGENTDIR)/copyright_library.py
+	mkdir -p $(COPYRIGHTPATH)
+	$(INSTALL_PROGRAM) run.py $(COPYRIGHTPATH)/run.py
+	$(INSTALL_PROGRAM) vars.py $(COPYRIGHTPATH)/vars.py
+	$(INSTALL_PROGRAM) copyright.py $(COPYRIGHTPATH)/copyright.py
+	$(INSTALL_PROGRAM) copyright_library.py $(COPYRIGHTPATH)/copyright_library.py
 	$(INSTALL_PROGRAM) model.dat $(DATADIR)/model.dat
 	make -C ui-plugin install
 
 uninstall: 
-	rm -rf $(DESTDIR)$(AGENTDIR)/copyright
-	rm -rf $(DESTDIR)$(AGENTDIR)/copyright_library.py
+	rm -rf $(COPYRIGHTPATH)
 	rm -rf $(DATADIR)/model.dat
 	make -C ui-plugin uninstall
 
@@ -61,8 +45,27 @@ test: all
 	@echo "*** No tests available for agents/copyright_analysis ***"
 
 clean:
-	rm -f copyright copyright-build model.dat training_files
+	rm -f model.dat training_files vars.py *.pyc
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean test vars.py
+
+vars.py:
+	@rm -f $@
+	@echo -n "DATADIR = '''" >> $@
+	@echo -n $(DATADIR) >> $@
+	@echo    "'''" >> $@
+	@echo -n "AGENTDIR = '''" >> $@
+	@echo -n $(AGENTDIR) >> $@
+	@echo    "'''" >> $@
+	@echo -n "PYTHONLIBPATH = '''" >> $@
+	@echo -n $(PYTHONLIBPATH) >> $@
+	@echo    "'''" >> $@
+	@echo -n "COPYRIGHTPATH = '''" >> $@
+	@echo -n $(COPYRIGHTPATH) >> $@
+	@echo    "'''" >> $@
+	@echo -n "PYTHONLIBEXECDIR = '''" >> $@
+	@echo -n $(PYTHONLIBEXECDIR) >> $@
+	@echo    "'''" >> $@
+

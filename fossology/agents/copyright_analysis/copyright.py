@@ -31,12 +31,9 @@ try:
 except:
     pass
 
-# set sys.stdout and sys.stderr to blocking. Otherwise we get a resource
-# temporarily unavailable error :-(
+import copyright_library as library
+import libfosspython
 
-import fcntl
-fcntl.fcntl(sys.stdout.fileno(),fcntl.F_SETFL, fcntl.fcntl(sys.stdout.fileno(), fcntl.F_GETFL) & ~os.O_NONBLOCK)
-fcntl.fcntl(sys.stderr.fileno(),fcntl.F_SETFL, fcntl.fcntl(sys.stderr.fileno(), fcntl.F_GETFL) & ~os.O_NONBLOCK)
 
 def main():
     #         ------------------------------------------------------------
@@ -398,3 +395,4 @@ def setup_database(drop=False):
             return -1
 
 if __name__ == '__main__':
+    sys.exit(main())
