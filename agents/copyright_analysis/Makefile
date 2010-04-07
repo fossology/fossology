@@ -24,7 +24,7 @@ COPYRIGHTPATH=$(DESTDIR)$(AGENTDIR)/copyright
 
 all: model.dat vars.py
 
-model.dat: run.py copyright.py copyright_library.py data.txt
+model.dat: run.py vars.py copyright.py copyright_library.py data.txt
 	./run.py --model model.dat --training data.txt
 	
 install: all
