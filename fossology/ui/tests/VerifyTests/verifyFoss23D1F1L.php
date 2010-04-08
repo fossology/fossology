@@ -128,7 +128,8 @@ class verify23D1F1L extends fossologyTestCase
         "verify23D1F1L FAILED! Total Licenses does not equal 1\n");
 
 		// get the 'Show' links and License color links
-		$licHisto = new domParseLicenseTbl($page);
+		$licHisto = new domParseLicenseTbl($page, 'lichistogram');
+		$licHisto->parseLicenseTbl();
 		if(empty($licHisto->hList)) {
 			$this->fail("FATAL! table with id=lichistogram was not found on
 									the page, nothing to process, stopping test\n");
