@@ -63,8 +63,8 @@ class browseUPloadedTest extends fossologyTestCase
                       "BrowseUploadedTest FAILED did not find string simpletest_1.0.1.tar.gz\n");
     $this->assertTrue($this->myassertText($page, "/>View</"),
                       "BrowseUploadedTest FAILED! Do not see  >View< link\n");
-    $this->assertTrue($this->myassertText($page, "/>Meta</"),
-                      "BrowseUploadedTest FAILED!FAIL!Do not see  >Meta< not found\n");
+    $this->assertTrue($this->myassertText($page, "/>Info</"),
+                      "BrowseUploadedTest FAILED!FAIL!Do not see  >Info< not found\n");
     $this->assertTrue($this->myassertText($page, "/>Download</"),
                       "BrowseUploadedTest FAILED!FAIL! Do not see >Download< not found\n");
 
@@ -79,8 +79,8 @@ class browseUPloadedTest extends fossologyTestCase
      */
     $this->assertFalse($this->myassertText($page, "/>View</"),
                       "BrowseUploadedTest FAILED! Do not see >View< link\n");
-    $this->assertFalse($this->myassertText($page, "/>Meta</"),
-                      "BrowseUploadedTest FAILED! Do not see >Meta< link\n");
+    $this->assertFalse($this->myassertText($page, "/>Info</"),
+                      "BrowseUploadedTest FAILED! Do not see >Info< link\n");
     $this->assertFalse($this->myassertText($page, "/>Download</"),
                       "BrowseUploadedTest FAILED! Do not see >Download< link\n");
 
@@ -93,8 +93,8 @@ class browseUPloadedTest extends fossologyTestCase
                       "BrowseUploadedTest FAILED! did not find simpletest_1.0.1.tar.gz\n");
     $this->assertTrue($this->myassertText($page, "/>View</"),
                       "BrowseUploadedTest FAILED! Do not see >View< link\n");
-    $this->assertTrue($this->myassertText($page, "/>Meta</"),
-                      "BrowseUploadedTest FAILED! Do not see >Meta< link\n");
+    $this->assertTrue($this->myassertText($page, "/>Info</"),
+                      "BrowseUploadedTest FAILED! Do not see >Info< link\n");
     $this->assertTrue($this->myassertText($page, "/>Download</"),
                       "BrowseUploadedTest FAILED! Do not see >Download< link\n");
 
