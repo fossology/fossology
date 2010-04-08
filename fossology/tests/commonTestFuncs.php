@@ -176,6 +176,7 @@ function lastDir($dirpath) {
  * @return the http string or NULL on error
  */
 function makeUrl($host, $query) {
+	
 	if (empty ($host)) {
 		return (NULL);
 	}
