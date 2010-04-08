@@ -89,8 +89,8 @@ class verify23D1F1L extends fossologyTestCase
        "verify23D1F1L FAILED! did not find $name\n");
 		$this->assertTrue($this->myassertText($page, "/>View</"),
        "verifyfoss23D1F1L FAILED! >View< not found\n");
-		$this->assertTrue($this->myassertText($page, "/>Meta</"),
-       "verifyFoss23D1F1L FAILED! >Meta< not found\n");
+		$this->assertTrue($this->myassertText($page, "/>Info</"),
+       "verifyFoss23D1F1L FAILED! >Info< not found\n");
 		$this->assertTrue($this->myassertText($page, "/>Download</"),
        "verifyFoss23D1F1L FAILED! >Download< not found\n");
 

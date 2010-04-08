@@ -121,8 +121,8 @@ class verifyFossolyTest extends fossologyTestCase
        "verifyFossl16L335 FAILED! did not find $name\n");
 		$this->assertTrue($this->myassertText($page, "/>View</"),
        "verifyFossl16L335 FAILED! >View< not found\n");
-		$this->assertTrue($this->myassertText($page, "/>Meta</"),
-       "verifyFossl16L335 FAILED! >Meta< not found\n");
+		$this->assertTrue($this->myassertText($page, "/>Info</"),
+       "verifyFossl16L335 FAILED! >Info< not found\n");
 		$this->assertTrue($this->myassertText($page, "/>Download</"),
        "verifyFossl16L335 FAILED! >Download< not found\n");
 
@@ -142,8 +142,8 @@ class verifyFossolyTest extends fossologyTestCase
                       "FAIL! did not find mkcheck.sh\n");
 		$this->assertTrue($this->myassertText($page, "/>View</"),
                       "FAIL! >View< not found\n");
-		$this->assertTrue($this->myassertText($page, "/>Meta</"),
-                      "FAIL! >Meta< not found\n");
+		$this->assertTrue($this->myassertText($page, "/>Info</"),
+                      "FAIL! >Info< not found\n");
 		$this->assertTrue($this->myassertText($page, "/>Download</"),
                       "FAIL! >Download< not found\n");
 

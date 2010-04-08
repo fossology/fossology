@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,7 +19,7 @@
 /**
  * Verify special fossology test archive loaded correctly
  *
- * @version "$Id$"
+ * @version "$Id: verifyFossDirsOnly.php 2019 2009-04-25 03:05:10Z rrando $"
  *
  * Created on Aug 25, 2008
  */
@@ -87,8 +87,8 @@ class verifyDirsOnly extends fossologyTestCase
        "verifyFossDirsOnly FAILED! did not find $name\n");
     $this->assertTrue($this->myassertText($page, "/>View</"),
        "verifyFossDirsOnly FAILED! >View< not found\n");
-    $this->assertTrue($this->myassertText($page, "/>Info</"),
-       "verifyFossDirsOnly FAILED! >Info< not found\n");
+    $this->assertTrue($this->myassertText($page, "/>Meta</"),
+       "verifyFossDirsOnly FAILED! >Meta< not found\n");
     $this->assertTrue($this->myassertText($page, "/>Download</"),
        "verifyFossDirsOnly FAILED! >Download< not found\n");
 
@@ -115,18 +115,19 @@ class verifyDirsOnly extends fossologyTestCase
     $browse = new parseBrowseMenu($page);
     $mini = new parseMiniMenu($page);
     $miniMenu = $mini->parseMiniMenu();
-    $url = makeUrl($this->host, $miniMenu['Nomos License']);
+    $url = makeUrl($this->host, $miniMenu['License']);
     if($url === NULL) { $this->fail("verifyFossDirsOnly Failed, host is not set"); }
 
     $page = $this->mybrowser->get($url);
     //print "page after get of $url is:\n$page\n";
-    $this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
-          "verifyFossDirsOnly FAILED! Nomos License Browser Title not found\n");
+    $this->assertTrue($this->myassertText($page, '/License Browser/'),
+          "verifyFossDirsOnly FAILED! License Browser Title not found\n");
     $this->assertTrue($this->myassertText($page, '/Total licenses: 0/'),
         "verifyFossDirsOnly FAILED! Total Licenses does not equal 0\n");
 
     $dList = new parseLicenseTblDirs($page);
     $dirList = $dList->parseLicenseTblDirs();
+    //print "dirList is:\n"; print_r($dirList) . "\n";
     /*
      * the directiory agents has 13 subdirectories all other directories
      * are empty. we are going to loop through them, but for now just
@@ -135,14 +136,14 @@ class verifyDirsOnly extends fossologyTestCase
     $url = makeUrl($this->host, $dirList['scheduler/']);
     $page = $this->mybrowser->get($url);
     //print "page after scheduler is:\n$page\n";
-    $folders = new parseFolderPath($page, $url);
-    $dirCnt = $folders->countFiles();
+    $fList = new parseFolderPath($page, $url);
+    $dirCnt = $fList->countFiles();
     // should only get one folder path)
     $this->assertEqual((int)$dirCnt, 1,
     "verifyFossDirsOnly FAILED! did not get 1 folder path back, got $dirCnt instead\n");
     // every entry but the last must have a non-null value (we assume parse
     // routine worked)
-    $fpaths = $folders->parseFolderPath();
+    $fpaths = $fList->parseFolderPath();
     $this->assertTrue($this->check4Links($fpaths),
       "verifyFossDirsOnly FAILED! something wrong with folder path\n" .
       "See this url:\n$url\n");
