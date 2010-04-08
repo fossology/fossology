@@ -243,7 +243,7 @@ if (array_key_exists("a", $options)) {
 	if (chdir($pkgAgent) === FALSE) {
 		LogAndPrint($LF, "ALL Tests ERROR: can't cd to $pkgAgent\n");
 	}
-	$PkgLast = exec("fo-runTests -l \"`ls cli*\" -n 'Package Agent Tests'" .
+	$PkgLast = exec("fo-runTests -l \"`ls cli*`\" -n 'Package Agent Tests'" .
 										" >> $logFile 2>&1", $dummy, $Pkgrtn);
 	LogAndPrint($LF, "\n");
 
@@ -262,7 +262,7 @@ if (array_key_exists("a", $options)) {
 	 * The verify tests require that uploads be done first.
 	 */
 	_runTestEnvSetup();
-	fclose($LF);
+
 	// wait for uploads to finish
 	if (chdir($Home) === FALSE) {
 		$UInoHome = "All Tests ERROR: can't cd to $Home\n";
@@ -292,6 +292,7 @@ if (array_key_exists("a", $options)) {
 		$CopyLast = exec("fo-runTests -l \"`ls verify*`\" -n 'CopyRight Tests' >> $logFile 2>&1", $dummy, $CRrtn);
 		LogAndPrint($LF, "\n");
 
+	  fclose($LF);
 		verifyUploads($logFile);
 		if (!is_null($rtn = saveResults())) {
 			print "ERROR! could not save the test results, please save by hand\n";
