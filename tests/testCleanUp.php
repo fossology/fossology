@@ -47,7 +47,8 @@ class cleanupTestData extends fossologyTestCase {
                         'Testing',
                         'Agent-Test',
                         'SrvUploads',
-                        'Enote');
+                        'Enote',
+    										'Copyright');
 
     print "Removing Testing folders\n";
     $page = $this->mybrowser->get($URL);
