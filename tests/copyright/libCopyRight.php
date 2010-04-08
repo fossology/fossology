@@ -84,7 +84,7 @@ function checkStandard($list, $standard, $testName)
 			if($stdCount != $uiData['count'])
 			{
 				$results[] = "$testName FAILED! Should be $stdCount files " .
-    	 		"got:$uiData[count]\n";
+    	 		"got:$uiData[count] for row with text:\n$cleanText\n";
 			}
 		}
 		else

@@ -88,8 +88,8 @@ class verify3filesCopyright extends fossologyTestCase
        "verify3files FAILED! did not find $name\n");
 		$this->assertTrue($this->myassertText($page, "/>View</"),
        "verify3files FAILED! >View< not found\n");
-		$this->assertTrue($this->myassertText($page, "/>Meta</"),
-       "verify3files FAILED! >Meta< not found\n");
+		$this->assertTrue($this->myassertText($page, "/>Info</"),
+       "verify3files FAILED! >Info< not found\n");
 		$this->assertTrue($this->myassertText($page, "/>Download</"),
        "verify3files FAILED! >Download< not found\n");
 
@@ -102,22 +102,26 @@ class verify3filesCopyright extends fossologyTestCase
       "verify3files FAILED! '1 item' not found\n");
 
 
-		/* Select the License link to View License Historgram */
+		/* Select the Copyright/Email/URL link  */
 		$browse = new parseBrowseMenu($page);
 		$mini = new parseMiniMenu($page);
 		$miniMenu = $mini->parseMiniMenu();
-		$url = makeUrl($this->host, $miniMenu['Copyright/Email/Url']);
+		$url = makeUrl($this->host, $miniMenu['Copyright/Email/URL']);
 		if($url === NULL) { 
-			$this->fail("verify3files Failed, host is not set or url cannot be made"); 
+			$this->fail("FATAL! verify3files Failed, host is not set or url " .
+									"cannot be made, Stopping this test"); 
+			exit(1);
 		}
 
 		$page = $this->mybrowser->get($url);
 		//print "page after get of $url is:\n$page\n";
-		$this->assertTrue($this->myassertText($page, '/Copyright\/Email\/Url Browser/'),
-          "verify3files FAILED! Copyright/Email/Url Browser Title not found\n");
+		$this->assertTrue($this->myassertText($page, '/Copyright\/Email\/URL Browser/'),
+          "verify3files FAILED! Copyright/Email/URL Browser Title not found\n");
 		$this->assertTrue($this->myassertText($page, '/Total Copyrights: 3/'),
         "verify3files FAILED! Total copyrights does not equal 3\n");
-
+		$this->assertTrue($this->myassertText($page, '/Unique Copyrights: 3/'),
+        "verify3files FAILED! Unique Copyrights does not equal 3\n");
+		
 		// get the count, show links and text or link
 		$copyR = new domParseLicenseTbl($page, 'copyright');
 		$copyR->parseLicenseTbl();
