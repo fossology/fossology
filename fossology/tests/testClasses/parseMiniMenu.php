@@ -58,7 +58,8 @@ class parseMiniMenu
      * doesn't have a link associated with it.
      */
     $matches = preg_match_all("/<a href='((.*?).*?)'.*?>(.*?)</", $menuList[1], $parsed, PREG_PATTERN_ORDER);
-    //print "parsed is:"; print_r($parsed) . "\n";
+    //print "PMINIDB: parsed is:"; print_r($parsed) . "\n";
+    //print "PMINIDB: matches is:$matches\n";
     /*
      * if we have a match, the create return array, else return empty
      * array.
@@ -71,7 +72,7 @@ class parseMiniMenu
       {
         $menus[$parsed[3][$i]] = $parsed[1][$i];
       }
-      //print "menus after construct:\n"; print_r($menus) . "\n";
+      //print "PMINIDB: menus after construct:\n"; print_r($menus) . "\n";
       return ($menus);
     } else
     {
