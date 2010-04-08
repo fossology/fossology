@@ -18,6 +18,12 @@
 ##
 
 import sys
+import traceback
+
+# set stderr to point at stdout so the scheduler catches errors.
+# we can remove this when the scheduler is fixed.
+sys.stderr = sys.stdout
+
 import os
 import re
 import vars
