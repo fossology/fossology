@@ -152,6 +152,10 @@ def main():
 
 def agent(model,runonpfiles=False):
     try:
+        # create a heartbeat thread so the scheduler doesn't kill the agent.
+        hb = libfosspython.Heartbeat(30.0) # print a heartbeat every 30 seconds
+        hb.start()
+        
         db = None
         try:
             db = libfosspython.FossDB()
@@ -169,9 +173,6 @@ def agent(model,runonpfiles=False):
         # get out agent id from the database
         agent_pk = db.getAgentKey('copyright', '1.0 source_hash(%s) model_hash(%s)' % (hex(hash(open(sys.argv[0]).read())), hex(hash(str(model)))), 'copyright agent')
 
-        # create a heartbeat thread so the scheduler doesn't kill the agent.
-        hb = libfosspython.Heartbeat(30.0) # print a heartbeat every 30 seconds
-        hb.start()
         
         if runonpfiles:
             # if the scheduler is going to hand us files.
@@ -246,6 +247,7 @@ def agent(model,runonpfiles=False):
         p = '\t'.join(traceback.format_exception(exceptionType, exceptionValue, exceptionTraceback))
         print >> sys.stdout, "FATAL: An error occurred in the main agent loop. Please consult the provided traceback.\n\t%s\n" % p
         hb.stop()
+        hb.join()
         libfosspython.repClose()
       #finally:
         # if we really get here and there was another exception we cant print
@@ -253,6 +255,7 @@ def agent(model,runonpfiles=False):
         #return 1
 
     hb.stop()
+    hb.join()
     libfosspython.repClose()
     
     return 0
