@@ -279,7 +279,7 @@ class verifySimpletest extends fossologyTestCase
 		'www.lastcraft.com/stuff/somewhere.php' => 1,
 		);
 
-		print "starting VerifySimpletest test\n";
+		print "\nstarting VerifySimpletest test\n";
 		$page = $this->mybrowser->clickLink('Browse');
 		$this->assertTrue($this->myassertText($page, '/Browse/'),
              "verifySimpleTest FAILED! Could not find Browse menu\n");
@@ -289,8 +289,8 @@ class verifySimpletest extends fossologyTestCase
        "verifySimpleTest FAILED! did not find $name\n");
 		$this->assertTrue($this->myassertText($page, "/>View</"),
        "verifySimpletest FAILED! >View< not found\n");
-		$this->assertTrue($this->myassertText($page, "/>Meta</"),
-       "verifySimpletest FAILED! >Meta< not found\n");
+		$this->assertTrue($this->myassertText($page, "/>Info</"),
+       "verifySimpletest FAILED! >Info< not found\n");
 		$this->assertTrue($this->myassertText($page, "/>Download</"),
        "verifySimpletest FAILED! >Download< not found\n");
 
@@ -306,7 +306,7 @@ class verifySimpletest extends fossologyTestCase
 		$browse = new parseBrowseMenu($page);
 		$mini = new parseMiniMenu($page);
 		$miniMenu = $mini->parseMiniMenu();
-		$url = makeUrl($this->host, $miniMenu['Copyright/Email/Url']);
+		$url = makeUrl($this->host, $miniMenu['Copyright/Email/URL']);
 		if($url === NULL) { $this->fail("verifySimpletest Failed, host is not set"); }
 
 		$page = $this->mybrowser->get($url);
@@ -325,8 +325,8 @@ class verifySimpletest extends fossologyTestCase
 									"the page, There should be one\n");
 		}
 		else {
-			$this->assertTrue($this->myassertText($page, '/Copyright\/Email\/Url Browser/'),
-          "verifySimpleTest FAILED! Copyright/Email/Url Browser Title not found\n");
+			$this->assertTrue($this->myassertText($page, '/Copyright\/Email\/URL Browser/'),
+          "verifySimpleTest FAILED! Copyright/Email/URL Browser Title not found\n");
 			$this->assertTrue($this->myassertText($page, '/Total Copyrights: 1/'),
         "verifySimpleTest FAILED! Total copyrights does not equal 1\n");
 
