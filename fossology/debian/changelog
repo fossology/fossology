@@ -16,6 +16,8 @@ fossology (1.1.0-2) unstable; urgency=low
   * fix typo in init script Provides (will be in next upstream)
       (Closes: #541854 )
   * Build against PostgreSQL 8.4. (Closes: #559582 )
+  * patch from upstream SVN 2848 to build libs with -fPIC
+  * patch from upstream SVN 2484 to make selftest not check agent timestamps
   * UNRELEASED
 
  -- Matt Taggart <taggart@debian.org>  Fri, 07 Aug 2009 15:21:37 -0700
