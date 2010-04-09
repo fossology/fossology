@@ -227,12 +227,13 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   int  **ppmatch_array;
   int  *pfile_rfpks;
   int   rv;
+  int   envnum;
   pbucketdef_t bucketDefArray;
   regex_file_t *regex_row;
   char *argv[2];
-  char *envp[5];
+  char *envp[6];
   char  envbuf[256];
-  char *pkgvers=0, *vendor=0;
+  char *pkgvers=0, *vendor=0, *pkgname=0;
   pid_t pid;
 
   if (debug) printf("debug: %s  pfile: %d\n", fcnName, pfile_pk);
@@ -286,6 +287,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
       if (checkPQresult(resultpkg, sql, fcnName, __LINE__)) return 0;
       numLics = PQntuples(resultpkg);
       if (numLics < 1) continue;
+      pkgname = PQgetvalue(result, 0, 0);
       pkgvers = PQgetvalue(result, 0, 1);
       vendor = PQgetvalue(result, 0, 2);
     }
@@ -356,6 +358,8 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
          * Exec'd file returns 0 on true (file is in bucket)
          * environment: FILENAME, LICENSES, PKGVERS, VENDOR
          * FILENAME: name of file being checked
+         * PKGNAME:  simple package name (e.g. "cup", "mozilla-mail", ...) 
+                     of file being checked.  Only applies to packages.
          * LICENSES: pipe seperated list of licenses for this file.
          * PKGVERS: Package version from pkg header
          * VENDOR: Vendor from pkg header
@@ -370,11 +374,20 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
 			else 
       if (pid == 0)  /* in child */
       {
+        /* use TMPDIR for working directory
+         */
+        if ((rv = chdir("/tmp")))
+        {
+          printf("FATAL: exec bucket couldn't cd to /tmp\n");
+          exit(1);
+        }
+
 				/* set up environment variables */
+        envnum = 0;
         argv[0] = strdup(bucketDefArray->dataFilename);
         argv[1] = 0;
         sprintf(envbuf, "FILENAME=%s", fileName);
-        envp[0] = strdup(envbuf);
+        envp[envnum++] = strdup(envbuf);
         /* create pipe seperated list of licenses */
         strcpy(envbuf, "LICENSES=");
         for (licNumb=0; licNumb < numLics; licNumb++) 
@@ -382,12 +395,14 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
           if (envbuf[9]) strcat(envbuf, "|");
           strcat(envbuf, PQgetvalue(result, licNumb, 0));
         }
-        envp[1] = strdup(envbuf);
+        envp[envnum++] = strdup(envbuf);
         sprintf(envbuf, "PKGVERS=%s", pkgvers);
-        envp[2] = strdup(envbuf); 
+        envp[envnum++] = strdup(envbuf); 
         sprintf(envbuf, "VENDOR=%s", vendor);
-        envp[3] =strdup(envbuf); 
-        envp[4] = 0;
+        envp[envnum++] =strdup(envbuf); 
+        sprintf(envbuf, "PKGNAME=%s", pkgname);
+        envp[envnum++] =strdup(envbuf); 
+        envp[envnum++] = 0;
         execve(filepath, argv, envp);
         printf("FATAL: buckets execve (%s) failed, %s\n", filepath, strerror(errno));
         exit(1);
@@ -968,7 +983,7 @@ int main(int argc, char **argv)
       {
         printf("ERROR: %s.%s missing upload_pk %d\n", 
                __FILE__, agentDesc, upload_pk);
-        return -1;
+        continue;
       }
       head_uploadtree_pk = atol(PQgetvalue(result, 0, 0));
       pfile_pk = atol(PQgetvalue(result, 0, 1));
@@ -987,7 +1002,7 @@ int main(int argc, char **argv)
       {
         printf("FATAL: %s.%s missing root uploadtree_pk %d\n", 
                __FILE__, agentDesc, head_uploadtree_pk);
-        return -1;
+        continue;
       }
       pfile_pk = atol(PQgetvalue(result, 0, 0));
       fileName = PQgetvalue(result, 0, 1);
@@ -1003,7 +1018,12 @@ int main(int argc, char **argv)
        Don't even bother to create a bucket_ars entry.
        THIS ISN'T RIGHT SINCE IT MAY BE FOR A DIFFERENT nomos agent_pk
      */ 
-    if (processed(pgConn, agent_pk, pfile_pk, head_uploadtree_pk, bucketpool_pk)) break;
+    if (processed(pgConn, agent_pk, pfile_pk, head_uploadtree_pk, bucketpool_pk)) 
+    {
+      printf("LOG: Duplicate request for bucket agent to process uploadtree_pk: %d, bucketpool_pk: %d, bucket agent_pk: %d, pfile_pk: %d ignored.\n",
+             head_uploadtree_pk, bucketpool_pk, agent_pk, pfile_pk);
+      continue;
+    }
 
     /* Find the most recent nomos data for this upload.  That's what we want to use
          to process the buckets.
@@ -1013,7 +1033,7 @@ int main(int argc, char **argv)
     {
       printf("WARNING: Bucket agent called on treeitem (%d), but the latest nomos agent hasn't created any license data for this tree.\n",
             head_uploadtree_pk);
-      return -1;
+      continue;
     }
 
   // Heartbeat(++HBItemsProcessed);
@@ -1024,7 +1044,7 @@ int main(int argc, char **argv)
     {
       printf("FATAL: %s.%d Bucket definition for pool %d could not be initialized.\n",
              __FILE__, __LINE__, bucketpool_pk);
-      return -1;
+      continue;
     }
     bucketDefArray->nomos_agent_pk = nomos_agent_pk;
     bucketDefArray->bucket_agent_pk = agent_pk;
@@ -1032,16 +1052,16 @@ int main(int argc, char **argv)
 
     /*** Record analysis start in bucket_ars, the bucket audit trail. ***/
     snprintf(sqlbuf, sizeof(sqlbuf), 
-                "insert into bucket_ars (agent_fk, upload_fk, ars_success, nomosagent_fk) values(%d,%d,'%s',%d)",
-                 agent_pk, upload_pk, "false", nomos_agent_pk);
+                "insert into bucket_ars (agent_fk, upload_fk, ars_success, nomosagent_fk, bucketpool_fk) values(%d,%d,'%s',%d,%d)",
+                 agent_pk, upload_pk, "false", nomos_agent_pk, bucketpool_pk);
     result = PQexec(pgConn, sqlbuf);
     if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
 
     /* retrieve the ars_pk of the newly inserted record */
     sprintf(sqlbuf, "select ars_pk from bucket_ars where agent_fk='%d' and upload_fk='%d' and ars_success='%s' and nomosagent_fk='%d' \
-                  and ars_endtime is null \
+                  and bucketpool_fk='%d' and ars_endtime is null \
             order by ars_starttime desc limit 1",
-            agent_pk, upload_pk, "false", nomos_agent_pk);
+            agent_pk, upload_pk, "false", nomos_agent_pk, bucketpool_pk);
     result = PQexec(pgConn, sqlbuf);
     if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) return -1;
     if (PQntuples(result) == 0)
