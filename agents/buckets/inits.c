@@ -111,7 +111,7 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
     bucketDefList[rowNum].bucketpool_pk = bucketpool_pk;
 
     rv = regcomp(&bucketDefList[rowNum].compRegex, PQgetvalue(result, rowNum, 2), 
-                 REG_NOSUB | REG_ICASE);
+                 REG_NOSUB | REG_ICASE | REG_EXTENDED);
     if (rv != 0)
     {
       printf("ERROR: %s.%s.%d Invalid regular expression for bucketpool_pk: %d, bucket: %s\n",
