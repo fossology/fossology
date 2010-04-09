@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 /*
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,7 +24,8 @@
  * Usage: [-h] {-f filepath | -d directorypath}
  *
  * created: Jun 1, 2009
- * @version "$Id:  $"
+ * 
+ * @version "$Id$"
  */
 
 require_once('../commonTestFuncs.php');
