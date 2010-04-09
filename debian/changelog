@@ -11,8 +11,6 @@ fossology (1.1.0-2) unstable; urgency=low
   * fix description to actually be a proper sentence (Closes: #539716 )
   * change fossology-db to better explain that it will create the db
     (Closes: #540252 )
-  * switch agent packages to depend on poppler-utils since xpdf-utils
-      might not ship with squeeze. (Closes: #550653 )
   * fix typo in init script Provides (will be in next upstream)
       (Closes: #541854 )
   * Build against PostgreSQL 8.4. (Closes: #559582 )
