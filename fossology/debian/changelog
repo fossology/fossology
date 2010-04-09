@@ -1,17 +1,13 @@
-fossology (1.1.1~2799-1) unstable; urgency=low
-
-  * Non-maintainer upload.
-
- -- Build User <build@cranky.manage>  Wed, 10 Feb 2010 17:20:44 -0800
-
-fossology (1.1.1~2723-1) unstable; urgency=low
+fossology (1.1.1~SVNBUILD-1) unstable; urgency=low
 
   * Unofficial SVN build.
 
- -- Matt Taggart <taggart@debian.org>  Fri, 07 Aug 2009 15:42:28 -0700
+ -- Matt Taggart <taggart@debian.org>  Fri, 09 Apr 2010 00:05:35 -0700
 
 fossology (1.1.0-2) unstable; urgency=low
 
+  * Acknowledge NMU
+   - Replace depends on xpdf-utils with poppler-utils (Closes: #550653 )
   * fix description to actually be a proper sentence (Closes: #539716 )
   * change fossology-db to better explain that it will create the db
     (Closes: #540252 )
@@ -20,8 +16,16 @@ fossology (1.1.0-2) unstable; urgency=low
   * fix typo in init script Provides (will be in next upstream)
       (Closes: #541854 )
   * Build against PostgreSQL 8.4. (Closes: #559582 )
+  * UNRELEASED
 
  -- Matt Taggart <taggart@debian.org>  Fri, 07 Aug 2009 15:21:37 -0700
+
+fossology (1.1.0-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Replace depends on xpdf-utils with poppler-utils (Closes: #550653)
+
+ -- Alexander Reichle-Schmehl <tolimar@debian.org>  Fri, 22 Jan 2010 23:31:16 +0100
 
 fossology (1.1.0-1) unstable; urgency=low
 
