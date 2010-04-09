@@ -3,12 +3,12 @@ Section: utils
 Priority: extra
 Maintainer: Matt Taggart <taggart@debian.org>
 Build-Depends: debhelper (>= 5), postgresql-server-dev-8.4 | postgresql-server-dev-8.3, libmagic-dev, libxml2-dev, libextractor-dev, libtext-template-perl, librpm-dev, subversion
-Standards-Version: 3.8.0
+Standards-Version: 3.8.4
 Homepage: http://fossology.org
 
 Package: fossology
 Architecture: all
-Depends: fossology-web-single
+Depends: fossology-web-single, ${misc:Depends}
 Description: open and modular architecture for analyzing software
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -36,7 +36,7 @@ Description: architecture for analyzing software, common files
 
 Package: fossology-web
 Architecture: all
-Depends: fossology-agents, apache2, libapache2-mod-php5
+Depends: fossology-agents, apache2, libapache2-mod-php5, ${misc:Depends}
 Conflicts: fossology-web-single
 Description: architecture for analyzing software, web interface
  The FOSSology project is a web based framework that allows you to
@@ -49,7 +49,7 @@ Description: architecture for analyzing software, web interface
 
 Package: fossology-web-single
 Architecture: all
-Depends: fossology-scheduler-single, apache2, libapache2-mod-php5
+Depends: fossology-scheduler-single, apache2, libapache2-mod-php5, ${misc:Depends}
 Conflicts: fossology-web
 Description: architecture for analyzing software, web interface  (single machine case)
  The FOSSology project is a web based framework that allows you to
