@@ -2,7 +2,7 @@ Source: fossology
 Section: utils
 Priority: extra
 Maintainer: Matt Taggart <taggart@debian.org>
-Build-Depends: debhelper (>= 5), postgresql-server-dev-8.3 | postgresql-server-dev-8.1, libmagic-dev, libxml2-dev, libextractor-dev, libtext-template-perl, librpm-dev, subversion
+Build-Depends: debhelper (>= 5), postgresql-server-dev-8.4 | postgresql-server-dev-8.3, libmagic-dev, libxml2-dev, libextractor-dev, libtext-template-perl, librpm-dev, subversion
 Standards-Version: 3.8.0
 Homepage: http://fossology.org
 
@@ -90,7 +90,7 @@ Description: architecture for analyzing software, scheduler (single machine case
 
 Package: fossology-db
 Architecture: all
-Depends: postgresql-8.3 | postgresql-8.1, ${shlibs:Depends}, ${misc:Depends}
+Depends: postgresql-8.4 | postgresql-8.3, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, database
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -136,7 +136,7 @@ Description: architecture for analyzing software, agents (single machine case)
 
 Package: fossology-dev
 Architecture: any
-Depends: postgresql-server-dev-8.3 | postgresql-server-dev-8.1, ${shlibs:Depends}, ${misc:Depends}
+Depends: postgresql-server-dev-8.4 | postgresql-server-dev-8.3, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, development files
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
