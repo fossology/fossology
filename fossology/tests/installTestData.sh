@@ -19,7 +19,8 @@
 #
 # install test data into the fosstester account for use in testing
 #
-# NOTE: assumes being executed from the sources!
+# NOTE: assumes being executed from the sources and that the fosstester
+#       account already exists!
 #
 # best if run as fosstester, root will work ok too.
 #
@@ -60,6 +61,9 @@ else
 	let $error_cnt += 1
 fi
 
+#
+# copy selected archives to other places for other tests
+#
 mkdir -p ~fosstester/public_html
 if [ "$?" -ne 0 ]
 then
@@ -71,6 +75,21 @@ cp ~fosstester/archives/fossDirsOnly.tar.bz2 ~fosstester/public_html
 if [ "$?" -ne 0 ]
 then
 	echo "ERROR!, could not copy fossDirsOnly.tar.bz2 to fosstester/public_html"
+	let $error_cnt += 1
+fi
+
+mkdir -p ~fosstester/eddy
+if [ "$?" -ne 0 ]
+then
+	echo "ERROR!, could not create ~fosstester/eddy"
+	let $error_cnt += 1
+fi
+
+cd ~fosstester/eddy
+tar -xf ~fosstester/archives/eddyData.tar.bz2 
+if [ "$?" -ne 0 ]
+then
+	echo "ERROR!, tar returned an error unpacking ~fosstester/archives/eddyData.tar.bz2"
 	let $error_cnt += 1
 fi
 #

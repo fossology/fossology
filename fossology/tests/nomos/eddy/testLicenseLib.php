@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -22,7 +22,8 @@
  * common routines for use by license regression tests
  *
  * created: May 29, 2009
- * @version "$Id:  $"
+ * 
+ * @version "$Id$"
  */
 
 require_once('../commonTestFuncs.php');
@@ -445,7 +446,7 @@ function _runAnalysis($licenseList,$cmd){
  * results.
  *
  * @param string $file optional file name of results file, if no file is passed in
- * the default filename of 'OSRB-nomos-license-matches' is used.
+ * the default filename of 'GnomosResults' is used.
  *
  * @return array $Master the results or FALSE on error
  *
@@ -469,7 +470,7 @@ function loadMasterResults($file=NULL){
 		$masterFile = $file;
 	}
 	else { // default file
-		$masterFile = 'OSRB-nomos-license-matches';
+		$masterFile = 'GnomosResults';
 	}
 
 	try {
@@ -485,7 +486,7 @@ function loadMasterResults($file=NULL){
 	while(($line = fgets($FD, 1024)) !== FALSE) {
 		list($file,$standard) = explode(':',$line);
 		$standard = trim($standard);
-		$list = filterNomosResults($standard);     // name filter
+		$list = filterNomosResults($standard);     // license name filter
 		$Standard = explode(',',$list);
 		$Master[$file] = $Standard;
 	}
