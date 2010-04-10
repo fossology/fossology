@@ -84,7 +84,7 @@ class ui_view_info extends FO_Plugin
      **********************************/
     if ($Page == 0)
       {
-      $V .= "<H2>Information</H2>\n";
+      $V .= "<H2>Repository Locator</H2>\n";
       $SQL = "SELECT * FROM uploadtree
 	INNER JOIN pfile ON uploadtree_pk = $Item
 	AND pfile_fk = pfile_pk
