@@ -66,7 +66,7 @@ struct bucketdef_struct
   int    **match_every;     /* list of arrays of rf_pk's if type=1 */
   regex_file_t *regex_row;  /* array of regex_file_structs if type=5 */
   char     stopon;          /* Y to stop procecessing if this bucket matches */
-  char     applies_to;      /* 1=every file, 2=packages only  */
+  char     applies_to;      /* 'f'=every file, 'p'=packages only  */
   int      nomos_agent_pk;  /* nomos agent_pk whose results this bucket analsis is using */
   int      bucket_agent_pk; /* bucket agent_pk */
   int      bucketpool_pk;
@@ -92,14 +92,26 @@ typedef struct bucketpool_struct bucketpool_t, *pbucketpool_t;
 
 /* buckets.c */
 int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, 
-             int uploadtree_pk, int writeDB, int skipProcessedCheck, char *fileName);
+             int uploadtree_pk, int writeDB, int skipProcessedCheck, 
+             int hasPrules);
+
+int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
+                      int  uploadtree_pk, int writeDB, int pfile_pk, int ufile_mode,
+                      char *ufile_name, int hasPrules);
+
 int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, 
-                int uploadtree_pk, int agent_pk, int writeDB, char *fileName);
-int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, char *fileName);
+                int uploadtree_pk, int agent_pk, int writeDB, char *fileName, int hasPrules);
+
+int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, 
+                    char *fileName, int uploadtree_pk, int hasPrules);
+
 int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int uploadtree_pk);
+
 int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
                  int *bucketList, int agent_pk, int writeDB, int nomosagent_pk);
+
 int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk, int bucketpool_pk);
+
 int matchAnyLic(PGresult *result, int numLics, regex_t *compRegex);
 
 
