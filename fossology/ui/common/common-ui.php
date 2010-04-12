@@ -113,7 +113,9 @@ function DBCheckResult($result, $sql="", $filenm, $lineno)
   {
     echo "<hr>File: $filenm, Line number: $lineno<br>";
     echo pg_last_error($PG_CONN);
-    echo "<br> $sql <hr>";
+    echo "<br> $sql";
+    debugbacktrace();
+    echo "<hr>";
     exit(1);
   }
 }
