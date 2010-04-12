@@ -26,23 +26,30 @@ if (!isset($GlobalReady)) { exit; }
 
 /************************************************************
  GetMimeTypeItem(): Given an uploadtree_pk, return a string that describes
- the mime type.
+ the mime type.  Note this only looks in the pfile rec.  For some mimetypes
+ unpack initializes the pfile mimetype.  Others require the mimetype agent.
  (This is in common-repo since mimetypes apply to repo contents.)
  ************************************************************/
 function GetMimeType($Item)
 {
-  global $Plugins;
-  global $DB;
-  if (empty($DB)) { return; }
+  global $PG_CONN;
 
-  $Sql = "SELECT *
+  $Sql = "SELECT mimetype_name
 	FROM uploadtree
 	INNER JOIN pfile ON pfile_pk = pfile_fk
 	INNER JOIN mimetype ON pfile.pfile_mimetypefk = mimetype.mimetype_pk
 	WHERE uploadtree_pk = $Item LIMIT 1;";
-  $Results = $DB->Action($Sql);
-  $Meta = $Results[0]['mimetype_name'];
-  if (empty($Meta)) { $Meta = 'application/octet-stream'; }
+  $result = pg_query($PG_CONN, $Sql);
+  DBCheckResult($result, $Sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) > 0)
+  {
+    $row = pg_fetch_assoc($result);
+    $Meta = $row['mimetype_name'];
+  }
+  else
+    $Meta = 'application/octet-stream'; 
+
+  pg_free_result($result);
   return($Meta);
 } /* GetMimeType() */
 
