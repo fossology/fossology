@@ -173,26 +173,32 @@ function DirGetList($Upload,$UploadtreePk)
   /* Get the basic directory contents */
   global $DirGetList_Prepared;
   if (!$DirGetList_Prepared) 
-    {   
+  {   
     $DirGetList_Prepared=1;
     $DB->Prepare("DirGetList_1",'SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent IS NULL ORDER BY ufile_name ASC;');
     $DB->Prepare("DirGetList_2",'SELECT * FROM uploadtree LEFT JOIN pfile ON pfile.pfile_pk = uploadtree.pfile_fk WHERE upload_fk = $1 AND uploadtree.parent = $2 ORDER BY ufile_name ASC;');
 
-    }
-  if (empty($UploadtreePk)) { $Results=$DB->Execute("DirGetList_1",array($Upload)); }
-  else { $Results=$DB->Execute("DirGetList_2",array($Upload,$UploadtreePk)); }
+  }
+  if (empty($UploadtreePk)) 
+  { 
+    $Results=$DB->Execute("DirGetList_1",array($Upload)); 
+  }
+  else 
+  { 
+    $Results=$DB->Execute("DirGetList_2",array($Upload,$UploadtreePk)); 
+  }
   usort($Results,'_DirCmp');
 
   /* Replace all artifact directories */
   foreach($Results as $Key => $Val)
-    {
+  {
     /* if artifact and directory */
     $R = &$Results[$Key];
     if (Isartifact($R['ufile_mode']) && Iscontainer($R['ufile_mode']))
     {
-    $R['uploadtree_pk'] = DirGetNonArtifact($R['uploadtree_pk']);
+      $R['uploadtree_pk'] = DirGetNonArtifact($R['uploadtree_pk']);
     }
-    }
+  }
   return($Results);
 } // DirGetList()
 
