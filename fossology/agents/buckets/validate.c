@@ -116,13 +116,13 @@ FUNCTION void Usage(char *Name)
   printf("  Debug options are:\n");
   printf("  -d   :: Debug. Results NOT written to database.\n");
   printf("  -i   :: Initialize the database, then exit.\n");
-  printf("  -n   :: bucketpool_pk of bucketpool to use.\n");
-  printf("  -p   :: bucketpool name of bucketpool to use.\n");
+  printf("  -n   :: bucketpool name of bucketpool to use.\n");
+  printf("  -p   :: bucketpool_pk of bucketpool to use.\n");
   printf("  -t   :: uploadtree_pk, root of tree to scan. Will turn on -d!\n");
   printf("  -u   :: upload_pk to scan.\n");
   printf("  -v   :: verbose (turns on debugging output)\n"); 
   printf("  NOTE: -n and -p are mutually exclusive.  If both are specified\n");
-  printf("         -n is used.  One of these is required.\n");
+  printf("         -p is used.  One of these is required.\n");
   printf("  NOTE: -t and -u are mutually exclusive.  If both are specified\n");
   printf("         -u is used.  One of these is required.\n");
   printf("  NOTE: If none of -nptu are specified, the bucketpool_pk and upload_pk are read from stdin, one comma delimited pair per line.  For example, 'bppk=123, upk=987' where 123 is the bucketpool_pk and 987 is the upload_pk.  This is the normal execution from the scheduler.\n");
