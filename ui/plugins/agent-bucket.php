@@ -98,8 +98,8 @@ class agent_bucket extends FO_Plugin {
     $Dep = array();
     $NomosDep = array();
 
-    /* Does the user have a default bucketpool_pk?
-       If not, then fail because we don't know which to use.
+    /* Is the user authenticated?  If not, then fail 
+     * because we won't know which bucketpool to use.
      */
     if (!array_key_exists('UserId', $_SESSION))
       return("Session is unauthenticated, bucket agent cannot run without knowing who the user is.");
