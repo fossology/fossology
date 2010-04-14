@@ -640,11 +640,6 @@ class ui_view extends FO_Plugin
 	}
 
     /**********************************
-     Show optional text message.
-     **********************************/
-    if (!empty($ShowText)) { $V .= $ShowText; }
-
-    /**********************************
       Display micro header
      **********************************/
     if ($ShowHeader)
@@ -718,27 +713,6 @@ class ui_view extends FO_Plugin
 
     $HighlightMenu .= "</center>";  // some fcn left a dangling center
 
-    /* only display nomos results if we know the nomosagent_pk 
-       Otherwise, we don't know what results to display.  */
-    if (!empty($nomosagent_pk))
-    {
-      $HighlightMenu .= "<b>The Nomos license detector found the following: </b>";
-      $pfile_pk = 0;  // unknown, only have uploadtree_pk aka $Item
-      $NomosLics = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $Item);
-      $HighlightMenu .= $NomosLics;
-    }
-    if (!empty($bucketagent_pk))
-    {
-      $BuckArray = GetFileBuckets_array($nomosagent_pk, $bucketagent_pk, $pfile_pk, $Item);
-      $HighlightMenu .= "<br>" . $BuckArray[0] . ": ";
-      array_shift($BuckArray);
-      $HighlightMenu .= implode(", ", $BuckArray);
-    }
-      
-
-    $HighlightMenu .= "<p><b>The bSAM license detector found the following: </b>";
-    $HighlightMenu .= "<br>Note: Only bSAM results are highlighted.";
-
     if ($Format == 'hex')
 	{
 	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_HEX);
@@ -766,6 +740,7 @@ class ui_view extends FO_Plugin
 	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
 	$PageSize = VIEW_BLOCK_TEXT * $Page;
 	if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
+    if (!empty($ShowText)) { echo $ShowText, "<hr>"; }
 	$this->ShowText($Fin,$PageSize,1,VIEW_BLOCK_TEXT);
 	if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
 	}
