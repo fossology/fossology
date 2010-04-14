@@ -187,7 +187,7 @@ class ui_view_license extends FO_Plugin
 
     if (empty($Item)) { return; }
     $ModBack = GetParm("modback",PARM_STRING);
-    if (empty($ModBack)) { $ModBack='license'; }
+    if (empty($ModBack) && (!empty($nomos_out)))  $ModBack = "nomoslicense";
 
     /* Load bSAM licenses for this file */
     $Results = LicenseGetForFile($Item);
@@ -202,6 +202,7 @@ class ui_view_license extends FO_Plugin
          user a misleading "No licenses found".
        */
       // $View->AddHighlight(-1,-1,'white',NULL,"No licenses found");
+        if (empty($ModBack)) $ModBack = "browse";
       }
     else
       {
@@ -219,6 +220,7 @@ class ui_view_license extends FO_Plugin
 		}
 	$this->ConvertLicPathToHighlighting($R,$R['licterm_name'],$RefURL);
 	}
+        if (empty($ModBack)) $ModBack = "license";
       }
 
     $View->ShowView(NULL,$ModBack, 1, 1, $nomos_out);
