@@ -203,6 +203,7 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     }
     $VLic .= "</table>\n";
     $VLic .= "<p>\n";
+    $VLic .= "Hint: Click on license name to highlight were license is found in the file listing.<br>\n";
     $VLic .= "Unique licenses: $UniqueLicCount<br>\n";
     $NetLic = $LicCount - $NoLicFound;
     $VLic .= "Total licenses: $NetLic";
