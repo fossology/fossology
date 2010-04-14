@@ -170,7 +170,7 @@ class ui_view_license extends FO_Plugin
     if (!empty($nomosagent_pk))
     { 
       $pfile_pk = 0;  // unknown, only have uploadtree_pk aka $Item
-      $nomos_license_string .= GetFileLicenses_string($nomosagent_pk, $pfile_pk, $Item);
+      $nomos_license_string = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $Item);
       if (!empty($nomos_license_string)) 
       {
         $nomos_out = "The <b>Nomos</b> license detector found: <b>";
