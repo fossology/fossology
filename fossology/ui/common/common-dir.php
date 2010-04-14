@@ -452,9 +452,11 @@ function GetNonArtifactChildren($uploadtree_pk)
     {
       if (Iscontainer($child['ufile_mode']))
       {
+        unset($children[$key]);
         $children = array_merge($children, GetNonArtifactChildren($child['uploadtree_pk']));
       }
-      unset($children[$key]);
+      else
+        unset($children[$key]);
     }
   }
   usort($children, '_DirCmp');
