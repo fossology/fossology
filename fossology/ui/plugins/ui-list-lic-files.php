@@ -165,8 +165,7 @@ class list_lic_files extends FO_Plugin
         $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
 
         $pfile_pk = $row['pfile_fk'];
-        $licstring = GetFileLicenses_string($nomosagent_pk, $row['pfile_fk'], $row['uploadtree_pk
-']);
+        $licstring = GetFileLicenses_string($nomosagent_pk, $row['pfile_fk'], $row['uploadtree_pk']);
 
         // show the entire license list as a single string with links to the files
         // in this container with that license.
