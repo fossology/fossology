@@ -20,12 +20,16 @@
  This plugin finds all the uploadtree_pk's in the first directory
  level under a parent, that contains a given bucket.
 
- GET args: agent_pk, parent_uploadtree_pk, bucket_pk
+ GET args: 
+   bapk        bucket agent pk 
+   item        parent uploadtree_pk
+   bucket_pk   bucket_pk
 
  ajax usage:
-   http://...?mod=ajax_filelic&agent=1234&item=23456&bucket_pk=27
+   http://...?mod=ajax_filebucket&bapk=1234&item=23456&bucket_pk=27
  
- Returns a comma delimited string of bucket_pk followed by uploadtree_pks: "999,123,456"
+ Returns a comma delimited string of bucket_pk followed by uploadtree_pks: 
+  "12,999,123,456"
  *************************************************/
 
 /*************************************************
@@ -64,22 +68,34 @@ class ajax_filebucket extends FO_Plugin
     $bucket_pk = GetParm("bucket_pk",PARM_RAW);
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
 
-    // Find all the uploadtree_pk's that contain this bucket, in this subtree
-    // Only need to look one level down since buckets cascade up
-    $sql = "select uploadtree_pk from uploadtree,bucket_container 
-             where parent='$uploadtree_pk' and uploadtree_pk=uploadtree_fk 
-                   and bucket_fk='$bucket_pk' and agent_fk='$agent_pk'
-            union
-            select uploadtree_pk from uploadtree,bucket_file 
-             where parent='$uploadtree_pk' and uploadtree.pfile_fk=bucket_file.pfile_fk
-                   and bucket_fk='$bucket_pk' and agent_fk='$agent_pk'";
+    /* Get all the non-artifact children */
+    $children = GetNonArtifactChildren($uploadtree_pk);
 
-    $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) == 0) return "";
-
+    /* Loop through children and create a list of those that contain $bucket_pk */
     $outstr = $bucket_pk;
-    while ($row = pg_fetch_assoc($result)) $outstr .= ",$row[uploadtree_pk]";
+    foreach ($children as $child)
+    {
+      $sql = "select uploadtree_pk from uploadtree,bucket_container 
+               where uploadtree_pk='$child[uploadtree_pk]'
+                     and uploadtree_pk=uploadtree_fk 
+                     and bucket_fk='$bucket_pk' and agent_fk='$agent_pk'
+              union
+              select uploadtree_pk from uploadtree,bucket_file 
+               where uploadtree_pk='$child[uploadtree_pk]'
+                     and uploadtree.pfile_fk=bucket_file.pfile_fk
+                     and bucket_fk='$bucket_pk' and agent_fk='$agent_pk'
+               limit 1";
+//echo $sql, "<br>";
+
+      $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result) > 0) 
+      {
+        $row = pg_fetch_assoc($result);
+        $outstr .= ",$row[uploadtree_pk]";
+      }
+      pg_free_result($result);
+    }
 
     if (!$this->OutputToStdout) { return($outstr); }
     print("$outstr");
