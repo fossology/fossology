@@ -416,4 +416,49 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
   return($V);
 } // Dir2FileList()
 
+
+/* Function: GetNonArtifactChildren
+ *
+ * Find the non artifact children of an uploadtree pk.
+ * If any children are artifacts, resolve them until you get
+ * to a non-artifact.
+ *
+ * This function replaces DirGetList()
+ *
+ * @param int  $uploadtree_pk
+ *
+ * @return 0 on error or no children, list of child uploadtree recs + pfile_size  on success.
+ * Child list is sorted by ufile_name.
+ */
+function GetNonArtifactChildren($uploadtree_pk)
+{
+  global $PG_CONN;
+
+  /* Find all the children */
+  $sql = "select uploadtree.*, pfile_size from uploadtree 
+          left outer join pfile on (pfile_pk=pfile_fk)
+          where parent=$uploadtree_pk";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $children = pg_fetch_all($result);
+  pg_free_result($result);
+
+  /* Loop through each child and replace any artifacts with their 
+     non artifact child.  Or skip them if they are not containers.
+   */
+  foreach($children as $key => $child)
+  {
+    if (Isartifact($child['ufile_mode']))
+    {
+      if (Iscontainer($child['ufile_mode']))
+      {
+        $children = array_merge($children, GetNonArtifactChildren($child['uploadtree_pk']));
+      }
+      unset($children[$key]);
+    }
+  }
+  usort($children, '_DirCmp');
+  return $children;
+}
+
 ?>

@@ -60,7 +60,7 @@ class ajax_filebucket extends FO_Plugin
     // make sure there is a db connection since I've pierced the core-db abstraction
     if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
 
-	$agent_pk = GetParm("agent",PARM_INTEGER);
+	$agent_pk = GetParm("bapk",PARM_INTEGER);
     $bucket_pk = GetParm("bucket_pk",PARM_RAW);
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
 

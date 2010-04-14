@@ -112,50 +112,39 @@ class ui_browse extends FO_Plugin {
   ShowItem(): Given a upload_pk, list every item in it.
   If it is an individual file, then list the file contents.
   ***********************************************************/
-  function ShowItem($Upload, $Item, $Show, $Folder) {
-    global $Plugins;
-    global $DB;
+  function ShowItem($Upload, $Item, $Show, $Folder) 
+  {
+    global $PG_CONN;
+
     $V = "";
     /* Use plugin "view" and "download" if they exist. */
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&folder=$Folder";
     $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
-    /* Grab the directory */
-    $Results = DirGetList($Upload, $Item);
+
+    /* Get the (non artifact) children  */
+    $Results = GetNonArtifactChildren($Item);
     $ShowSomething = 0;
     $V.= "<table class='text' style='border-collapse: collapse' border=0 padding=0>\n";
-    foreach($Results as $Row) {
-      if (empty($Row['uploadtree_pk'])) {
-        continue;
-      }
+    foreach($Results as $Row) 
+    {
+      if (empty($Row['uploadtree_pk'])) continue;
       $ShowSomething = 1;
       $Link = NULL;
       $Name = $Row['ufile_name'];
       $V.= "<tr>";
-      /* Check for children */
-      $Children = DirGetList($Upload, $Row['uploadtree_pk']);
+
+      /* Check for children so we know if the file should by hyperlinked */
+      $sql = "select uploadtree_pk from uploadtree 
+                where parent=$Row[uploadtree_pk] limit 1";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $HasChildren = pg_num_rows($result);
+      pg_free_result($result);
+
       $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
-      /* Scan for meta data */
-      $HasRealChildren = 0;
-      $CountChildren = 0;
-      foreach($Children as $C) {
-        if (empty($C['ufile_name'])) {
-          continue;
-        }
-        $CountChildren++;
-        if (!Isartifact($C['ufile_mode'])) {
-          $HasRealChildren = 1;
-        }
-      } /* foreach Children */
-      /* Set the traversal link */
-      if ($CountChildren > 0) // if is directory
-      {
-        if ($HasRealChildren) {
-          $Link = $Uri . "&show=$Show&upload=$Upload&item=" . $Row['uploadtree_pk'];
-        }
-        else {
-          $Link = $Uri . "&show=$Show&upload=$Upload&item=" . DirGetNonArtifact($Row['uploadtree_pk']);
-        }
-      }
+      if ($HasChildren) 
+        $Link = $Uri . "&show=$Show&upload=$Upload&item=" . $Row['uploadtree_pk'];
+
       /* Show details children */
       if ($Show == 'detail') {
         $V.= "<td class='mono'>" . DirMode2String($Row['ufile_mode']) . "</td>";
@@ -261,13 +250,15 @@ class ui_browse extends FO_Plugin {
         $Name = $Row['upload_filename'];
       }
       $uploadOrigin = $Row['upload_origin'];
-      //if(!strlen($uploadOrigin)) {
-      //  $uploadOrigin = $Name;
-      //}
-      //	  $Sql2 = "SELECT count(*) AS count FROM uploadtree WHERE upload_fk = '$UploadPk';";
-      //          $SResults = $DB->Action($Sql2);
-      //	  $ItemCount = number_format($SResults[0]['count'], 0, "", ",");
+
+      /* If UploadtreePk is not an artifact, then use it as the root.
+         Else get the first non artifact under it.
+       */
+      if (Isartifact($Row['ufile_mode'])) 
       $UploadtreePk = DirGetNonArtifact($Row['uploadtree_pk']);
+      else
+      $UploadtreePk = $Row['uploadtree_pk'];
+
       $V.= "<tr><td>";
       if (IsContainer($Row['ufile_mode'])) {
         $V.= "<a href='$Uri&upload=$UploadPk&folder=$Folder&item=$UploadtreePk&show=$Show'>";
