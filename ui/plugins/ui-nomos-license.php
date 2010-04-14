@@ -211,7 +211,7 @@ FUTURE advanced interface allowing user to select dataset (agent version)
 
     /*******    File Listing     ************/
     /* Get ALL the items under this Uploadtree_pk */
-    $Children = DirGetList($upload_pk,$Uploadtree_pk);
+    $Children = GetNonArtifactChildren($Uploadtree_pk);
     $ChildCount=0;
     $ChildLicCount=0;
     $ChildDirCount=0; /* total number of directory or containers */
