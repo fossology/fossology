@@ -194,8 +194,9 @@ class ui_buckets extends FO_Plugin
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-    /* get array of bucket_pk, bucket_name since I don't see how to put this in the
-       above query. */
+    /* Create bucketDefArray as individual query this is MUCH faster
+       than incorporating it with a join in the previous query.
+     */
     $sql = "select * from bucket_def where bucketpool_fk=$bucketpool_pk";
     $result_name = pg_query($PG_CONN, $sql);
     DBCheckResult($result_name, $sql, __FILE__, __LINE__);
