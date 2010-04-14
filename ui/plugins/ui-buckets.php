@@ -180,19 +180,17 @@ class ui_buckets extends FO_Plugin
       if (pg_num_rows($result) > 0) $nomosagent_pk = $AgentRow['nomosagent_fk'];
     }
 
-
     $sql = "SELECT distinct(bucket_fk) as bucket_pk, 
                    count(bucket_fk) as bucketcount
-              from bucket_file, bucket_def,
+              from bucket_file, 
                   (SELECT distinct(pfile_fk) as PF from uploadtree 
                      where upload_fk=$upload_pk 
                        and ((ufile_mode & (1<<28))=0)
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$bucketagent_pk 
-                    and bucket_fk=bucket_pk and bucketpool_fk=$bucketpool_pk
                     and bucket_file.nomosagent_fk=$nomosagent_pk
               group by bucket_fk 
-              order by bucketcount desc";
+              order by bucketcount desc"; 
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
@@ -322,7 +320,6 @@ class ui_buckets extends FO_Plugin
       if ($bucketcount)
       {
         $VF .= "[" . number_format($bucketcount,0,"",",") . "&nbsp;";
-        //$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
         $VF .= "bucket" . ($bucketcount == 1 ? "" : "s");
         $VF .= "</a>";
         $VF .= "]";
@@ -334,7 +331,6 @@ class ui_buckets extends FO_Plugin
       $ChildCount++;
     }
     $VF .= "</table>\n";
-    // print "ChildCount=$ChildCount  Childbucketcount=$Childbucketcount\n";
 
     /***************************************
      Problem: $ChildCount can be zero!
