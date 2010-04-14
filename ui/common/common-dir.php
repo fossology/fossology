@@ -307,7 +307,7 @@ function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
 	  {
 	    $Uri = Traceback_uri() . "?mod=$LinkLast";
 	  }
-	$V .= "<a href='$Uri&upload=" . $P['upload_fk'] . $Opt . "&item=" . DirGetNonArtifact($UploadtreePk) . "'>";
+	$V .= "<a href='$Uri&upload=" . $P['upload_fk'] . $Opt . "&item=" . $UploadtreePk . "'>";
 	}
 
       if (Isdir($P['ufile_mode']))
