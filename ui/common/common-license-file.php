@@ -195,8 +195,13 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
 
 
 /*
- * Return which uploadtree_pk's in the top level of $uploadtree_pk
- * have license $rf_shortname.
+ * Given an uploadtree_pk, find all the non-artifact, immediate children
+ * (uploadtree_pk's) that have license $rf_shortname.
+ * By "immediate" I mean the earliest direct non-artifact.
+ * For example:
+ *    A > B, C  (A has children B and C)
+ *    If C is an artifact, descend that tree till you find the first non-artifact
+ *    and consider that non-artifact an immediate child.
  *
  * Inputs:
  *   $agent_pk
@@ -212,15 +217,13 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
   global $PG_CONN;
   $pkarray = array();
 
-  $sql = "select uploadtree_pk, ufile_name from uploadtree where parent=$uploadtree_pk";
-  $TopUTpks = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
-  DBCheckResult($TopUTpks, $sql, __FILE__, __LINE__);
+  $Children = GetNonArtifactChildren($uploadtree_pk);
   
   /* Loop throught each top level uploadtree_pk */
   $offset = 0;
   $limit = 1;
   $order = "";
-  while ($row = pg_fetch_assoc($TopUTpks))
+  foreach($Children as $row)
   {
 //$uTime2 = microtime(true);
     $result = GetFilesWithLicense($agent_pk, $rf_shortname, $row['uploadtree_pk'], 
@@ -228,9 +231,10 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
 //$Time = microtime(true) - $uTime2;
 //printf( "GetFilesWithLicense($row[ufile_name]) time: %.2f seconds<br>", $Time);
 
-    if (pg_num_rows($result) > 0) $pkarray[$row['uploadtree_pk']] = $row['ufile_name'];
-    pg_free_result($result);
+    if (pg_num_rows($result) > 0) 
+      $pkarray[$row['uploadtree_pk']] = $row['ufile_name'];
   }
+  pg_free_result($result);
   return $pkarray;
 }
 
