@@ -98,7 +98,7 @@ class ui_view_license extends FO_Plugin
    Solution: Save license to a temp file.
    NOTE: If the uploadtree_pk is provided, then highlighting is enabled.
    ***********************************************************/
-  function ViewLicense($Item, $LicPk, $TokPfileStart)
+  function ViewLicense($Item, $LicPk, $TokPfileStart, $nomos_out)
     {
     global $DB;
     global $Plugins;
@@ -141,6 +141,7 @@ class ui_view_license extends FO_Plugin
       }
     $Text .= "<hr>\n";
     $Text .= "</div>";
+    $Text .= $nomos_out;
     $View->ShowView($Ftmp,"view",0,0,$Text);
     } // ViewLicense()
 
@@ -161,23 +162,43 @@ class ui_view_license extends FO_Plugin
     $LicId = GetParm("lic",PARM_INTEGER);
     $LicIdSet = GetParm("licset",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
+    $nomosagent_pk = GetParm("napk",PARM_INTEGER);
+
+    /* only display nomos results if we know the nomosagent_pk 
+       Otherwise, we don't know what results to display.  */
+    if (!empty($nomosagent_pk))
+    { 
+      $pfile_pk = 0;  // unknown, only have uploadtree_pk aka $Item
+      $nomos_out = "The <b>Nomos</b> license detector found: <b>";
+      $nomos_out .= GetFileLicenses_string($nomosagent_pk, $pfile_pk, $Item);
+      $nomos_out .= "</b>";
+    }
+    else
+      $nomos_out = "";
+
     if (!empty($LicId))
 	{
-	$this->ViewLicense($Item,$LicId,$LicIdSet);
+	$this->ViewLicense($Item,$LicId,$LicIdSet, $nomos_out);
 	return;
 	}
+
     if (empty($Item)) { return; }
     $ModBack = GetParm("modback",PARM_STRING);
     if (empty($ModBack)) { $ModBack='license'; }
 
-    /* Load licenses for this file */
+    /* Load bSAM licenses for this file */
     $Results = LicenseGetForFile($Item);
 
-    /* Process all licenses */
+    /* Show bSAM licenses  */
     if (count($Results) <= 0)
       {
-      $View = &$Plugins[plugin_find_id("view")];
-      $View->AddHighlight(-1,-1,'white',NULL,"No licenses found");
+      /*
+         Since LicenseGetForFile() doesn't distinguish between files that
+         bSAM ran on and found no licenses, and files that bSAM was never
+         run on (both cases return no $Results rows), don't tell the
+         user a misleading "No licenses found".
+       */
+      // $View->AddHighlight(-1,-1,'white',NULL,"No licenses found");
       }
     else
       {
@@ -197,7 +218,7 @@ class ui_view_license extends FO_Plugin
 	}
       }
 
-    $View->ShowView(NULL,$ModBack);
+    $View->ShowView(NULL,$ModBack, 1, 1, $nomos_out);
     return;
     } // Output()
 
