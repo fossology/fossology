@@ -804,6 +804,7 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray
 FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
                           int *bucketList, int agent_pk, int writeDB, int nomosagent_pk)
 {
+  extern long HBItemsProcessed;
   char     *fcnName = "writeBuckets";
   char      sql[256];
   PGresult *result;
@@ -818,6 +819,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
     {
       if (writeDB)
       {
+        Heartbeat(++HBItemsProcessed);
         if (pfile_pk)
         {
           snprintf(sql, sizeof(sql), 
@@ -940,7 +942,6 @@ int main(int argc, char **argv)
   cacheroot_t  cacheroot;
 
   extern int AlarmSecs;
-//  extern long HBItemsProcessed;
 
   /* Connect to the database */
   DB = DBopen();
@@ -1160,7 +1161,6 @@ int main(int argc, char **argv)
       continue;
     }
 
-  // Heartbeat(++HBItemsProcessed);
 
     /*** Initialize the Bucket Definition List bucketDefArray  ***/
     bucketDefArray = initBuckets(pgConn, bucketpool_pk, &cacheroot);
