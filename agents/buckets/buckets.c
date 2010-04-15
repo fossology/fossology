@@ -799,7 +799,7 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray
                           that match this pfile
  @param int agent_pk  
 
- @return 0=success, errors are FATAL and will exit process.
+ @return 0=success, -1 failure
 ****************************************************/
 FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
                           int *bucketList, int agent_pk, int writeDB, int nomosagent_pk)
@@ -826,12 +826,15 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
                  "insert into bucket_file (bucket_fk, pfile_fk, agent_fk, nomosagent_fk) \
                   values(%d,%d,%d,%d)", *bucketList, pfile_pk, agent_pk, nomosagent_pk);
           result = PQexec(pgConn, sql);
-          if (PQresultStatus(result) != PGRES_COMMAND_OK) 
+          if ((PQresultStatus(result) != PGRES_COMMAND_OK) && 
+              (PQresultStatus(result) != 23505))    // ignore duplicate insert error
           {
             printf("ERROR: %s.%s.%d:  Failed to add bucket to bucket_file. %s:%s\n: %s\n",
                     __FILE__,fcnName, __LINE__, PQresultErrorField(result, PG_DIAG_SQLSTATE),
                     PQresultErrorMessage(result), sql);
             PQclear(result);
+            rv = -1;
+            break;
           }
           if (debug) printf("%s sql: %s\n",fcnName, sql);
         }
@@ -841,12 +844,15 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
                  "insert into bucket_container (bucket_fk, uploadtree_fk, agent_fk, nomosagent_fk) \
                   values(%d,%d,%d,%d)", *bucketList, uploadtree_pk, agent_pk, nomosagent_pk);
           result = PQexec(pgConn, sql);
-          if (PQresultStatus(result) != PGRES_COMMAND_OK) 
+          if ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
+              (PQresultStatus(result) != 23505))    // ignore duplicate insert error
           {
             printf("ERROR: %s.%s.%d:  Failed to add bucket to bucket_container. %s:%s\n: %s\n",
                     __FILE__,fcnName, __LINE__, PQresultErrorField(result, PG_DIAG_SQLSTATE),
                     PQresultErrorMessage(result), sql);
             PQclear(result);
+            rv = -1;
+            break;
           }
           if (debug) printf("%s sql: %s\n",fcnName, sql);
         }
