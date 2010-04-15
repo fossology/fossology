@@ -62,7 +62,7 @@ struct rpmpkginfo {
   char rpmFilename[128];
   char license[255];
   char group[64];
-  char packager[128];
+  char packager[1024];
   char release[32];
   char buildDate[64];
   char vendor[64];
@@ -78,24 +78,24 @@ struct rpmpkginfo {
 struct rpmpkginfo *glb_rpmpi;
 
 struct debpkginfo {
-  char pkgName[96];
-  char source[96];
-  char version[64];
-  char section[32];
-  char priority[16];
-  char pkgArch[32];
+  char pkgName[MAXCMD];
+  char source[MAXCMD];
+  char version[MAXCMD];
+  char section[MAXCMD];
+  char priority[MAXCMD];
+  char pkgArch[MAXCMD];
   int installedSize;
-  char maintainer[128];
-  char homepage[128];
-  char summary[128];
+  char maintainer[MAXCMD];
+  char homepage[MAXCMD];
+  char summary[MAXCMD];
   char description[MAXCMD];
   long pFileFk;
   char pFile[MAXCMD];
   char **depends;
   int dep_size;
-  char uploaders[128];
-  char format[16];
-  char standardsVersion[32];
+  char uploaders[MAXCMD];
+  char format[MAXCMD];
+  char standardsVersion[MAXCMD];
 };
 struct debpkginfo *glb_debpi;
 
@@ -320,7 +320,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
       if (Verbose) { printf("%s:%s",tagName(tag[i]),msgstr);}
       switch (tag[i]) {
       case RPMTAG_NAME:
-        strncpy(pi->pkgName,msgstr,sizeof(pi->pkgName));
+	      EscapeString(msgstr, pi->pkgName);
         break;
       case RPMTAG_EPOCH:
         strncpy(pi->pkgAlias,msgstr,sizeof(pi->pkgAlias));
@@ -338,7 +338,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
         strncpy(pi->group,msgstr,sizeof(pi->group));
         break;
       case RPMTAG_PACKAGER:
-        strncpy(pi->packager,msgstr,sizeof(pi->packager));
+	      EscapeString(msgstr, pi->packager);
         break;
       case RPMTAG_RELEASE:
         strncpy(pi->release,msgstr,sizeof(pi->release));
@@ -358,12 +358,10 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
 	strncpy(pi->sourceRPM,msgstr,sizeof(pi->sourceRPM));
 	break;
       case RPMTAG_SUMMARY:
-	//strncpy(pi->summary,EscapeString(msgstr),sizeof(pi->summary));
-	EscapeString(msgstr, pi->summary);
+        EscapeString(msgstr, pi->summary);
 	break;
       case RPMTAG_DESCRIPTION:
-	//strncpy(pi->description,EscapeString(msgstr),sizeof(pi->description));
-	EscapeString(msgstr, pi->description);
+        EscapeString(msgstr, pi->description);
 	break;
       default:
 	break;
@@ -629,37 +627,37 @@ void	GetMetadataDebBinary	(struct debpkginfo *pi)
   {
     s = ParseDebFile(line,field,value);
     if (!strcasecmp(field, "Description")) {
-       strncpy(pi->summary, value, sizeof(pi->summary));
+	     EscapeString(value, pi->summary);
        strcpy(temp, "");
     }
     if ((s[0] != '\0') && (temp!=NULL))
       strcat(temp,s);
     if (!strcasecmp(field, "Package")) {
-       strncpy(pi->pkgName, value, sizeof(pi->pkgName));
+	     EscapeString(value, pi->pkgName);
     }
     if (!strcasecmp(field, "Version")) {
-       strncpy(pi->version, value, sizeof(pi->version));
+	     EscapeString(value, pi->version);
     }
     if (!strcasecmp(field, "Architecture")) {
-       strncpy(pi->pkgArch,  value, sizeof(pi->pkgArch));
+	     EscapeString(value, pi->pkgArch);
     }
     if (!strcasecmp(field, "Maintainer")) {
-       strncpy(pi->maintainer, value, sizeof(pi->maintainer));
+	     EscapeString(value, pi->maintainer);
     }
     if (!strcasecmp(field, "Installed-Size")) {
        pi->installedSize=atol(value);
     }
     if (!strcasecmp(field, "Section")) {
-       strncpy(pi->section, value, sizeof(pi->section));
+	     EscapeString(value, pi->section);
     }
     if (!strcasecmp(field, "Priority")) {
-       strncpy(pi->priority, value, sizeof(pi->priority));
+	     EscapeString(value, pi->priority);
     }
     if (!strcasecmp(field, "Homepage")) {
-       strncpy(pi->homepage, value, sizeof(pi->homepage));
+	     EscapeString(value, pi->homepage);
     }
     if (!strcasecmp(field, "Source")) {
-       strncpy(pi->source, value, sizeof(pi->source));
+	     EscapeString(value, pi->source);
     }
     if (!strcasecmp(field, "Depends")) {
        char *depends = NULL;
@@ -778,26 +776,26 @@ void	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
     s = ParseDebFile(line,field,value);
 
     if (!strcasecmp(field, "Format")) {
-       strncpy(pi->format, value, sizeof(pi->format));
+	     EscapeString(value, pi->format);
     }
     if (!strcasecmp(field, "Source")) {
-       strncpy(pi->source, value, sizeof(pi->source));
+	     EscapeString(value, pi->source);
     }
     if (!strcasecmp(field, "Source")) {
-       strncpy(pi->pkgName, value, sizeof(pi->pkgName));
+	     EscapeString(value, pi->pkgName);
     }
     if (!strcasecmp(field, "Architecture")) {
-       strncpy(pi->pkgArch,  value, sizeof(pi->pkgArch));
+	     EscapeString(value, pi->pkgArch);
     }
     if (!strcasecmp(field, "Version")) {
        if (strlen(pi->version) == 0)
          strncpy(pi->version, value, sizeof(pi->version));
     }
     if (!strcasecmp(field, "Maintainer")) {
-       strncpy(pi->maintainer, value, sizeof(pi->maintainer));
+	     EscapeString(value, pi->maintainer);
     }
     if (!strcasecmp(field, "Uploaders")) {
-       strncpy(pi->uploaders, value, sizeof(pi->uploaders));
+	     EscapeString(value, pi->uploaders);
     }
     if (!strcasecmp(field, "Standards-Version")) {
        strncpy(pi->standardsVersion, value, sizeof(pi->standardsVersion));
