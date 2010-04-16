@@ -27,6 +27,10 @@
 
 int debug = 0;
 
+/* global mimetype_pk's for Debian source and binary packages */
+int DEB_SOURCE;
+int DEB_BINARY;
+
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif /* SVN_REV */
@@ -294,7 +298,9 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   char  filepath[256];
   char  sql[256];
   PGresult *result;
+  PGresult *resultmime;
   PGresult *resultpkg = 0;
+  int   mimetype;
   int   numLics, licNumb;
   int   numBucketDefs = 0;
   int   match = 0;   // bucket match
@@ -309,9 +315,10 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   pbucketdef_t bucketDefArray;
   regex_file_t *regex_row;
   char *argv[2];
-  char *envp[9];
+  char *envp[10];
   char  envbuf[256];
   char *pkgvers=0, *vendor=0, *pkgname=0, *srcpkgname=0;
+  char  pkgtype=0;
   pid_t pid;
 
   if (debug) printf("debug: %s  pfile: %d\n", fcnName, pfile_pk);
@@ -457,14 +464,15 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
          * When a file is exec'd it can expect the following
          * environment variables:
          * FILENAME: name of file being checked
-         * PKGNAME:  simple package name (e.g. "cup", "mozilla-mail", ...) 
-                     of file being checked.  Only applies to packages.
-         * SRCPKGNAME:  Source package name 
          * LICENSES: pipe seperated list of licenses for this file.
          * PKGVERS: Package version from pkg header
          * VENDOR: Vendor from pkg header
+         * PKGNAME:  simple package name (e.g. "cup", "mozilla-mail", ...) 
+                     of file being checked.  Only applies to packages.
+         * SRCPKGNAME:  Source package name 
          * UPLOADTREE_PK: uploadtree_pk
          * PFILE_PK: pfile_pk
+         * PKGTYPE: 's' if source, 'b' if binary package, '' if not a package
          */
         /* put together complete file path to file */
         snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
@@ -510,8 +518,38 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
         envp[envnum++] =strdup(envbuf); 
         sprintf(envbuf, "PFILE_PK=%d", pfile_pk);
         envp[envnum++] =strdup(envbuf); 
-        PQclear(resultpkg);
 
+        /* Only figure out PKGTYPE if there is a PKGNAME 
+           For Debian packages, check mimetype:
+             application/x-debian-package --  binary
+             application/x-debian-source  --  source
+           For RPM's, 
+             if srcpkgname is not null, 
+             then this is a binary package
+             else this is a source package
+         */
+        pkgtype = 0;
+        if (pkgname)
+        {
+          if (srcpkgname && (strstr(srcpkgname,"none")==0)) pkgtype='b';
+          else
+          {
+            snprintf(sql, sizeof(sql), 
+                     "select pfile_mimetypefk from pfile where pfile_pk=%d",
+                     pfile_pk);
+            resultmime = PQexec(pgConn, sql);
+            if (checkPQresult(resultmime, sql, fcnName, __LINE__)) return 0;
+            mimetype = *(PQgetvalue(resultmime, 0, 0));
+            PQclear(resultmime);
+            if (mimetype == DEB_SOURCE) pkgtype = 's';
+            else if (mimetype == DEB_BINARY) pkgtype = 'b';
+            else pkgtype = 's';
+          }
+        }
+        sprintf(envbuf, "PKGTYPE=%c", pkgtype);
+        envp[envnum++] =strdup(envbuf); 
+
+        PQclear(resultpkg);
         envp[envnum++] = 0;
         execve(filepath, argv, envp);
         printf("FATAL: buckets execve (%s) failed, %s\n", filepath, strerror(errno));
@@ -1189,6 +1227,30 @@ int main(int argc, char **argv)
       }
 
     /*** END initializing bucketDefArray  ***/
+
+    /*** Initialize DEB_SOURCE and DEB_BINARY  ***/
+    sprintf(sqlbuf, "select mimetype_pk from mimetype where mimetype_name='application/x-debian-package'");
+    result = PQexec(pgConn, sqlbuf);
+    if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) return -1;
+    if (PQntuples(result) == 0)
+    {
+      printf("FATAL: (%s.%d) Missing application/x-debian-package mimetype.\n",__FILE__,__LINE__);
+      return -1;
+    }
+    DEB_BINARY = atoi(PQgetvalue(result, 0, 0));
+    PQclear(result);
+
+    sprintf(sqlbuf, "select mimetype_pk from mimetype where mimetype_name='application/x-debian-source'");
+    result = PQexec(pgConn, sqlbuf);
+    if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) return -1;
+    if (PQntuples(result) == 0)
+    {
+      printf("FATAL: (%s.%d) Missing application/x-debian-source mimetype.\n",__FILE__,__LINE__);
+      return -1;
+    }
+    DEB_SOURCE = atoi(PQgetvalue(result, 0, 0));
+    PQclear(result);
+    /*** END Initialize DEB_SOURCE and DEB_BINARY  ***/
 
     /*** Record analysis start in bucket_ars, the bucket audit trail. ***/
     snprintf(sqlbuf, sizeof(sqlbuf), 
