@@ -828,67 +828,6 @@ void	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
   fclose(fp);
 }/*  GetMetadataDebSource(char *repFile, struct debpkginfo *pi) */
 
-/* **************************************************
- *  IsExe(): Check if the Cmd excutable.
- *
- *  Returns: 1 if exists, 0 if does not exist.
- * ***************************************************/
-int	IsExe	(char *Exe)
-{
-/*
-  char TestCmd[FILENAME_MAX];
-  int rc;
-
-  memset (TestCmd, '\0', sizeof(TestCmd));
-  strcat (TestCmd, Cmd);
-  rc = system(TestCmd);
-  if (WIFSIGNALED(rc))
-  {
-    printf("ERROR: Process killed by signal (%d): %s\n",WTERMSIG(rc),TestCmd);
-    return(0);
-  }
-  if (WIFEXITED(rc)) {rc = WEXITSTATUS(rc);printf ("RC1---%d\n",rc);}
-  else {printf ("RC2---%d\n",rc);}
-
-  if ( rc == 0 ) return(1);
-  else return(0);
-*/
-  char *Path;
-  int i,j;
-  char TestCmd[FILENAME_MAX];
-
-  Path = getenv("PATH");
-  if (!Path) return(0);
-
-  memset(TestCmd,'\0',sizeof(TestCmd));
-  j=0;
-  for(i=0; (j<FILENAME_MAX-1) && (Path[i] != '\0'); i++)
-    {
-    if (Path[i]==':')
-        {
-        if ((j>0) && (TestCmd[j-1] != '/')) strcat(TestCmd,"/");
-        strcat(TestCmd,Exe);
-        if (IsFile(TestCmd,1))  return(1); /*   found it! */
-        /*   missed */
-        memset(TestCmd,'\0',sizeof(TestCmd));
-        j=0;
-        }
-    else
-        {
-        TestCmd[j]=Path[i];
-        j++;
-        }
-    }
-  /*   check last path element */
-  if (j>0)
-    {
-    if (TestCmd[j-1] != '/') strcat(TestCmd,"/");
-    strcat(TestCmd,Exe);
-    if (IsFile(TestCmd,1))      return(1); /*   found it! */
-    }
-  return(0); /*   not in path */
-}/* IsExe() */
-
 /***********************************************
  Usage():
  Command line options allow you to write the agent so it works 
@@ -915,10 +854,6 @@ int	main	(int argc, char *argv[])
   char *agent_desc = "Pulls metadata out of RPM or DEBIAN packages";
   glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
-  int DISABLED = 0;
-
-  char sql[256];
-  int rc;
 
   extern long HBItemsProcessed;
 
@@ -937,21 +872,6 @@ int	main	(int argc, char *argv[])
     switch(c)
 	{
 	case 'i':
-                /*  Check if dpkg-source tools is installed, if not update agent table
-                 *  Set agent_enabled = false */
-                if (!IsExe("dpkg-source")){
-        	  printf("WARNING: Package agent disabled, because <dpkg-source> could not be found on the system.\n");
-        	  fflush(stdout);
-
-		  memset(sql, 0, sizeof(sql));
-        	  sprintf(sql, "UPDATE agent set agent_enabled=false WHERE agent_name ='%s';", basename(argv[0]));
-     	   	  rc = DBaccess(DB, sql);
-         	  if (rc < 0){
-                    printf("ERROR: Agent_enabled unable to write to the database. %s\n", sql);
-                    DBclose(DB);
-                    exit(-1);
-        	  }
-   		}
                 DBclose(DB);  /* DB was opened above, now close it and exit */
                 exit(0);
         case 'v':
@@ -964,40 +884,6 @@ int	main	(int argc, char *argv[])
 	}
   }
 
-  /* Check if dpkg-source tools is not installed, pkgagent will not run */
-  if (!IsExe("dpkg-source")){
-	DISABLED = 1;
-	printf("WARNING: Package agent diabled because <dpkg-source> is not be found in the system search path. See {INSTALL} for package agent dependencies.\n");
-        fflush(stdout);
-
-  } else {
-	int a, maxa;
-	void *DBTemp;
-	DBTemp = DBopen();
-
-	memset(sql, 0, sizeof(sql));
-	sprintf(sql, "SELECT agent_pk FROM agent WHERE agent_name ='pkgagent' AND agent_enabled='FALSE';");
-	rc = DBaccess(DB, sql);
-	if (rc < 0){
-		printf("ERROR: %s\n", sql);
-		DBclose(DB);
-		exit(-1);
-	}
-	maxa = DBdatasize(DB);
-	if (maxa > 0){
-		for (a=0;a<maxa;a++){
-			memset(sql, 0, sizeof(sql));
-			sprintf(sql, "UPDATE agent SET agent_enabled=true WHERE agent_pk=%d;",atoi(DBgetvalue(DB,a,0)));
-			rc = DBaccess(DBTemp, sql);
-			if (rc < 0){
-		                printf("ERROR: %s\n", sql);
-                		DBclose(DBTemp);
-                		exit(-1);
-        		}
-		}	
-	}
-	DBclose(DBTemp);
-  }
   /* If no args, run from scheduler! */
   if (argc == 1)
   {
@@ -1028,23 +914,19 @@ int	main	(int argc, char *argv[])
           GetMetadata(repFile,glb_rpmpi);
           RecordMetadataRPM(glb_rpmpi);
         } else if (PKG_DEB) {
-	  if (!DISABLED){
-            GetMetadataDebBinary(glb_debpi);
-            RecordMetadataDEB(glb_debpi);
-	  }
+          GetMetadataDebBinary(glb_debpi);
+          RecordMetadataDEB(glb_debpi);
 	} else if (PKG_DEB_SRC) {
-	  if (!DISABLED){
-	    repFile = RepMkPath("files", glb_debpi->pFile);
-	    if (!repFile) {
-	      printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
+	  repFile = RepMkPath("files", glb_debpi->pFile);
+	  if (!repFile) {
+	    printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
                             glb_debpi->pFileFk, glb_debpi->pFile);
-              fflush(stdout);
-              DBclose(DB);
-              exit(-1);
-            }
-	    GetMetadataDebSource(repFile,glb_debpi);
-	    RecordMetadataDEB(glb_debpi);
-	  }
+            fflush(stdout);
+            DBclose(DB);
+            exit(-1);
+          }
+	  GetMetadataDebSource(repFile,glb_debpi);
+	  RecordMetadataDEB(glb_debpi);
         } else {
 	  /* Deal with the other package*/
 	}
