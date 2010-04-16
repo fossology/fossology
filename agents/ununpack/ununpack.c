@@ -2083,6 +2083,8 @@ int	main	(int argc, char *argv[])
 			}
 		GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
 		DBclose(DB);
+		if (!IsExe("dpkg-source",Quiet))
+			printf("WARNING: dpkg-source is not available on this system.  This means that debian source packages will NOT be unpacked.\n");
 		return(0);
 		break; /* never reached */
 	case 'Q':
