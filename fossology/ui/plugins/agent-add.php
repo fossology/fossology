@@ -44,8 +44,9 @@ class agent_add extends FO_Plugin
     /* Make sure the uploadpk is valid */
     global $Plugins;
     global $DB;
-    $Results = $DB->Action("SELECT upload_pk FROM upload WHERE upload_pk = '$upload_pk';");
-    if ($Results[0]['upload_pk'] != $upload_pk)
+    if (!$uploadpk) return "agent-add.php AgentsAdd(): No upload_pk specified";
+    $Results = $DB->Action("SELECT upload_pk FROM upload WHERE upload_pk = '$uploadpk';");
+    if ($Results[0]['upload_pk'] != $uploadpk)
     {
       return("Upload not found.");
     }
@@ -60,7 +61,11 @@ class agent_add extends FO_Plugin
       $Found = -1;
       for($ac=0; ($Found < 0) && !empty($agent_list[$ac]->URI); $ac++)
       {
-        if (!strcmp($agent_list[$ac]->URI,$agentlist[$al])) { $Found = $al; }
+        if (!strcmp($agent_list[$ac]->URI,$agentlist[$al])) 
+        { 
+          $Found = $al; 
+          break;
+        }
       }
       if ($Found >= 0)
       {
@@ -101,7 +106,11 @@ class agent_add extends FO_Plugin
         $Folder = GetParm('folder',PARM_INTEGER);
         if (empty($Folder)) { $Folder = FolderGetTop(); }
         $uploadpk = GetParm('upload',PARM_INTEGER);
-        $agents = $_POST['agents'];
+        if (array_key_exists('agents', $_REQUEST))
+          $agents = $_POST['agents'];
+        else
+          $agents = '';
+  
         if (!empty($uploadpk) && !empty($agents) && is_array($agents))
         {
           $rc = $this->AgentsAdd($uploadpk,$agents);
