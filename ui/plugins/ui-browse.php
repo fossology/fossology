@@ -343,6 +343,8 @@ if (isset($__OBSOLETE__))
   Output(): This function returns the scheduler status.
   ***********************************************************/
   function Output() {
+    global $PG_CONN;
+
     if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     }
@@ -419,6 +421,24 @@ if (isset($__OBSOLETE__))
         /* Get the folder description */
         /******************************/
         if (!empty($Upload)) {
+          if (empty($Item))
+          {
+            $sql = "select uploadtree_pk from uploadtree 
+                where parent is NULL and upload_fk=$Upload ";
+            $result = pg_query($PG_CONN, $sql);
+            DBCheckResult($result, $sql, __FILE__, __LINE__);
+            if ( pg_num_rows($result))
+            {
+              $row = pg_fetch_assoc($result);
+              $Item = $row['uploadtree_pk'];
+            }
+            else
+            {
+              $V.= "<hr><h2>Missing upload tree parent for upload $Upload</h2><hr>";
+              break;
+            }
+            pg_free_result($result);
+          }
           $V.= $this->ShowItem($Upload, $Item, $Show, $Folder);
         }
         else if (!empty($Folder)) {
