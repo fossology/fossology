@@ -112,7 +112,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
     fprintf(Fout,"\n");
     }
 
-  /** nomos license inspection Agency */
+  /* nomos license Agent */
     memset(Cmd,'\0',sizeof(Cmd));
     snprintf(Cmd,sizeof(Cmd)-1,"%s/nomos",AGENTDIR);
     for(i=0; i<NumCPU1; i++)
@@ -122,7 +122,17 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
       fprintf(Fout,"\n");
       }
 
-  /** copyright inspection Agency */
+  /* bucket Agent */
+    memset(Cmd,'\0',sizeof(Cmd));
+    snprintf(Cmd,sizeof(Cmd)-1,"%s/buckets",AGENTDIR);
+    for(i=0; i<NumCPU1; i++)
+      {
+      fprintf(Fout,"agent=buckets %s| ",CmdHost);
+      fprintf(Fout,Rcmd,Cmd);
+      fprintf(Fout,"\n");
+      }
+
+  /** copyright/email/url inspection Agent */
     memset(Cmd,'\0',sizeof(Cmd));
     snprintf(Cmd,sizeof(Cmd)-1,"%s/copyright/run.py --model %s/model.dat --agent",AGENTDIR,DATADIR);
     for(i=0; i<NumCPU1; i++)
