@@ -333,16 +333,20 @@ class core_auth extends FO_Plugin {
             }
             $V.= "<form method='post'>\n";
             $V.= "<table border=0>";
-            $V.= "<tr><td>Username:</td><td><input type='text' size=20 name='username'></td></tr>\n";
+            $V.= "<tr><td>Username:</td><td><input type='text' size=20 name='username' id='unamein'></td></tr>\n";
             $V.= "<tr><td>Password:</td><td><input type='password' size=20 name='password'></td></tr>\n";
             $V.= "</table>";
             $V.= "<P/>";
+            $V.= "<script type=\"text/javascript\">document.getElementById(\"unamein\").focus();</script>";
+/* Commenting out the Validate IP option since it's probably overkill for this app, 
+   and it confuses people.
             $V.= "<input type='checkbox' name='checkip' value='1'>Validate IP.\n";
             $Referer = @$_SERVER['HTTP_REFERER'];
             if (!empty($Referer)) {
               $V.= "<input type='hidden' name='redirect' value='$Referer'>";
             }
             $V.= "This option deters session hijacking by linking your session to your IP address (" . @$_SESSION['ip'] . "). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.<P />\n";
+*/
             $V.= "<input type='submit' value='Login'>\n";
             $V.= "</form>\n";
           }
