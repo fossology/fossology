@@ -47,7 +47,7 @@
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif /* SVN_REV */
 
-#define MAXCMD  2048
+#define MAXCMD 4096 
 
 #define NO      0
 #define YES     1
@@ -684,7 +684,7 @@ void	GetMetadataDebBinary	(struct debpkginfo *pi)
     }
   }
   if (temp!=NULL)
-    strncpy(pi->description, temp, sizeof(pi->description));
+    EscapeString(temp, pi->description);
 
   fclose(fp);
 }/* GetMetadataDebBinary(struct debpkginfo *pi) */
