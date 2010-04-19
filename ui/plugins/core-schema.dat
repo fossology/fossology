@@ -37,7 +37,7 @@
 
   $Schema["TABLE"]["agent"]["agent_enabled"]["DESC"] = "COMMENT ON COLUMN \"agent\".\"agent_enabled\" IS 'true to enable, false to disable';";
   $Schema["TABLE"]["agent"]["agent_enabled"]["ADD"] = "ALTER TABLE \"agent\" ADD COLUMN \"agent_enabled\" bool;";
-  $Schema["TABLE"]["agent"]["agent_enabled"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_enabled\" SET NOT NULL, ALTER COLUMN \"agent_enabled\" SET DEFAULT true;";
+  $Schema["TABLE"]["agent"]["agent_enabled"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_enabled\" DROP NOT NULL, ALTER COLUMN \"agent_enabled\" SET DEFAULT true;";
 
 
   $Schema["TABLE"]["agent_lic_meta"]["pfile_fk"]["DESC"] = "";
@@ -313,6 +313,10 @@
   $Schema["TABLE"]["bucket_ars"]["nomosagent_fk"]["ADD"] = "ALTER TABLE \"bucket_ars\" ADD COLUMN \"nomosagent_fk\" int4;";
   $Schema["TABLE"]["bucket_ars"]["nomosagent_fk"]["ALTER"] = "ALTER TABLE \"bucket_ars\" ALTER COLUMN \"nomosagent_fk\" DROP NOT NULL;";
 
+  $Schema["TABLE"]["bucket_ars"]["bucketpool_fk"]["DESC"] = "";
+  $Schema["TABLE"]["bucket_ars"]["bucketpool_fk"]["ADD"] = "ALTER TABLE \"bucket_ars\" ADD COLUMN \"bucketpool_fk\" int4;";
+  $Schema["TABLE"]["bucket_ars"]["bucketpool_fk"]["ALTER"] = "ALTER TABLE \"bucket_ars\" ALTER COLUMN \"bucketpool_fk\" DROP NOT NULL;";
+
 
   $Schema["TABLE"]["bucket_container"]["bucket_fk"]["DESC"] = "";
   $Schema["TABLE"]["bucket_container"]["bucket_fk"]["ADD"] = "ALTER TABLE \"bucket_container\" ADD COLUMN \"bucket_fk\" int4;";
@@ -359,7 +363,7 @@
   $Schema["TABLE"]["bucket_def"]["bucketpool_fk"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucketpool_fk\" int4;";
   $Schema["TABLE"]["bucket_def"]["bucketpool_fk"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucketpool_fk\" SET NOT NULL;";
 
-  $Schema["TABLE"]["bucket_def"]["bucket_type"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"bucket_type\" IS '1=MATCH_EVERY (aka STR-FILE), 2=MATCH_ONLY (aka COMP-FILE), 3=REGEX, 4=exec, 99=Not in any other bucket';";
+  $Schema["TABLE"]["bucket_def"]["bucket_type"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"bucket_type\" IS '1=MATCH_EVERY (aka STR-FILE) licenses in file line all match licenses in test file, 2=MATCH_ONLY (aka COMP-FILE) test file licenses are all contained in this file, 3=REGEX, 4=EXEC, 5=REGEX-FILE, 99=Not in any other bucket';";
   $Schema["TABLE"]["bucket_def"]["bucket_type"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucket_type\" int4;";
   $Schema["TABLE"]["bucket_def"]["bucket_type"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucket_type\" SET NOT NULL;";
 
@@ -367,13 +371,17 @@
   $Schema["TABLE"]["bucket_def"]["bucket_regex"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucket_regex\" text;";
   $Schema["TABLE"]["bucket_def"]["bucket_regex"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucket_regex\" DROP NOT NULL;";
 
-  $Schema["TABLE"]["bucket_def"]["bucket_filename"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"bucket_filename\" IS 'if type != 3, this is the name of the file in $DATADIR/{bucketpool name}';";
+  $Schema["TABLE"]["bucket_def"]["bucket_filename"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"bucket_filename\" IS 'if type =1, 2, 4,5: this is the name of the file in $DATADIR/{bucketpool name}';";
   $Schema["TABLE"]["bucket_def"]["bucket_filename"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"bucket_filename\" text;";
   $Schema["TABLE"]["bucket_def"]["bucket_filename"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"bucket_filename\" DROP NOT NULL;";
 
   $Schema["TABLE"]["bucket_def"]["stopon"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"stopon\" IS 'if ''N'' continue evaluating buckets even if this one matches.  If ''Y'' stop bucket processing loop if this matches';";
   $Schema["TABLE"]["bucket_def"]["stopon"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"stopon\" char(1);";
   $Schema["TABLE"]["bucket_def"]["stopon"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"stopon\" SET NOT NULL, ALTER COLUMN \"stopon\" SET DEFAULT 'N'::char;";
+
+  $Schema["TABLE"]["bucket_def"]["applies_to"]["DESC"] = "COMMENT ON COLUMN \"bucket_def\".\"applies_to\" IS 'Bucket only applies to: ''1''=every file, ''2''=package';";
+  $Schema["TABLE"]["bucket_def"]["applies_to"]["ADD"] = "ALTER TABLE \"bucket_def\" ADD COLUMN \"applies_to\" char(1);";
+  $Schema["TABLE"]["bucket_def"]["applies_to"]["ALTER"] = "ALTER TABLE \"bucket_def\" ALTER COLUMN \"applies_to\" SET NOT NULL, ALTER COLUMN \"applies_to\" SET DEFAULT 1;";
 
 
   $Schema["TABLE"]["bucket_file"]["bf_pk"]["DESC"] = "";
@@ -905,29 +913,25 @@
   $Schema["TABLE"]["pfile"]["pfile_liccount"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"pfile_liccount\" int4;";
   $Schema["TABLE"]["pfile"]["pfile_liccount"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"pfile_liccount\" DROP NOT NULL;";
 
-  $Schema["TABLE"]["pfile"]["server_fk"]["DESC"] = "";
-  $Schema["TABLE"]["pfile"]["server_fk"]["ADD"] = "ALTER TABLE \"pfile\" ADD COLUMN \"server_fk\" int4;";
-  $Schema["TABLE"]["pfile"]["server_fk"]["ALTER"] = "ALTER TABLE \"pfile\" ALTER COLUMN \"server_fk\" SET NOT NULL, ALTER COLUMN \"server_fk\" SET DEFAULT 1;";
-
 
   $Schema["TABLE"]["pkg_deb"]["pkg_name"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"pkg_name\" IS 'the name of the package';";
-  $Schema["TABLE"]["pkg_deb"]["pkg_name"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"pkg_name\" varchar(96);";
+  $Schema["TABLE"]["pkg_deb"]["pkg_name"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"pkg_name\" text;";
   $Schema["TABLE"]["pkg_deb"]["pkg_name"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"pkg_name\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["pkg_arch"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"pkg_arch\" IS 'debian machine architecture';";
-  $Schema["TABLE"]["pkg_deb"]["pkg_arch"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"pkg_arch\" varchar(32);";
+  $Schema["TABLE"]["pkg_deb"]["pkg_arch"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"pkg_arch\" text;";
   $Schema["TABLE"]["pkg_deb"]["pkg_arch"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"pkg_arch\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["version"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"version\" IS 'the version number of a package';";
-  $Schema["TABLE"]["pkg_deb"]["version"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"version\" varchar(64);";
+  $Schema["TABLE"]["pkg_deb"]["version"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"version\" text;";
   $Schema["TABLE"]["pkg_deb"]["version"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"version\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["section"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"section\" IS 'this field specifies an application area into which the package has been classified';";
-  $Schema["TABLE"]["pkg_deb"]["section"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"section\" varchar(32);";
+  $Schema["TABLE"]["pkg_deb"]["section"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"section\" text;";
   $Schema["TABLE"]["pkg_deb"]["section"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"section\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["priority"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"priority\" IS 'this field represents how important that it is that the user have the package installed';";
-  $Schema["TABLE"]["pkg_deb"]["priority"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"priority\" varchar(16);";
+  $Schema["TABLE"]["pkg_deb"]["priority"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"priority\" text;";
   $Schema["TABLE"]["pkg_deb"]["priority"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"priority\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["installed_size"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"installed_size\" IS 'an estimate of the total amount of disk space required to install the named package';";
@@ -935,15 +939,15 @@
   $Schema["TABLE"]["pkg_deb"]["installed_size"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"installed_size\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["maintainer"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"maintainer\" IS 'the package maintainer''s name and email address';";
-  $Schema["TABLE"]["pkg_deb"]["maintainer"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"maintainer\" varchar(128);";
+  $Schema["TABLE"]["pkg_deb"]["maintainer"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"maintainer\" text;";
   $Schema["TABLE"]["pkg_deb"]["maintainer"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"maintainer\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["homepage"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"homepage\" IS 'the URL of the web site for this package';";
-  $Schema["TABLE"]["pkg_deb"]["homepage"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"homepage\" varchar(128);";
+  $Schema["TABLE"]["pkg_deb"]["homepage"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"homepage\" text;";
   $Schema["TABLE"]["pkg_deb"]["homepage"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"homepage\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["source"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"source\" IS 'this field identifies the source package name.';";
-  $Schema["TABLE"]["pkg_deb"]["source"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"source\" varchar(96);";
+  $Schema["TABLE"]["pkg_deb"]["source"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"source\" text;";
   $Schema["TABLE"]["pkg_deb"]["source"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"source\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["description"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"description\" IS 'a description of the binary package';";
@@ -959,19 +963,19 @@
   $Schema["TABLE"]["pkg_deb"]["pkg_pk"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"pkg_pk\" SET NOT NULL, ALTER COLUMN \"pkg_pk\" SET DEFAULT nextval('pkg_deb_pkg_pk_seq'::regclass);";
 
   $Schema["TABLE"]["pkg_deb"]["summary"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"summary\" IS 'short description';";
-  $Schema["TABLE"]["pkg_deb"]["summary"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"summary\" varchar(128);";
+  $Schema["TABLE"]["pkg_deb"]["summary"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"summary\" text;";
   $Schema["TABLE"]["pkg_deb"]["summary"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"summary\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["format"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"format\" IS 'specifies a format revision for the file';";
-  $Schema["TABLE"]["pkg_deb"]["format"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"format\" varchar(16);";
+  $Schema["TABLE"]["pkg_deb"]["format"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"format\" text;";
   $Schema["TABLE"]["pkg_deb"]["format"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"format\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["uploaders"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"uploaders\" IS 'names and email addresses of co-maintainers of the package';";
-  $Schema["TABLE"]["pkg_deb"]["uploaders"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"uploaders\" varchar(128);";
+  $Schema["TABLE"]["pkg_deb"]["uploaders"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"uploaders\" text;";
   $Schema["TABLE"]["pkg_deb"]["uploaders"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"uploaders\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb"]["standards_version"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb\".\"standards_version\" IS 'the most recent version of the standards';";
-  $Schema["TABLE"]["pkg_deb"]["standards_version"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"standards_version\" varchar(32);";
+  $Schema["TABLE"]["pkg_deb"]["standards_version"]["ADD"] = "ALTER TABLE \"pkg_deb\" ADD COLUMN \"standards_version\" text;";
   $Schema["TABLE"]["pkg_deb"]["standards_version"]["ALTER"] = "ALTER TABLE \"pkg_deb\" ALTER COLUMN \"standards_version\" DROP NOT NULL;";
 
 
@@ -989,55 +993,55 @@
 
 
   $Schema["TABLE"]["pkg_rpm"]["pkg_name"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"pkg_name\" IS 'the name of the package';";
-  $Schema["TABLE"]["pkg_rpm"]["pkg_name"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"pkg_name\" varchar(128);";
+  $Schema["TABLE"]["pkg_rpm"]["pkg_name"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"pkg_name\" text;";
   $Schema["TABLE"]["pkg_rpm"]["pkg_name"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"pkg_name\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["pkg_alias"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"pkg_alias\" IS 'the alias of the package';";
-  $Schema["TABLE"]["pkg_rpm"]["pkg_alias"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"pkg_alias\" varchar(128);";
+  $Schema["TABLE"]["pkg_rpm"]["pkg_alias"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"pkg_alias\" text;";
   $Schema["TABLE"]["pkg_rpm"]["pkg_alias"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"pkg_alias\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["pkg_arch"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"pkg_arch\" IS 'a shorthand name describing the type of computer hardware the packaged software is meant to run on';";
-  $Schema["TABLE"]["pkg_rpm"]["pkg_arch"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"pkg_arch\" varchar(32);";
+  $Schema["TABLE"]["pkg_rpm"]["pkg_arch"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"pkg_arch\" text;";
   $Schema["TABLE"]["pkg_rpm"]["pkg_arch"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"pkg_arch\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["version"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"version\" IS 'the version number of the software, as specified by the software''s original creator';";
-  $Schema["TABLE"]["pkg_rpm"]["version"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"version\" varchar(32);";
+  $Schema["TABLE"]["pkg_rpm"]["version"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"version\" text;";
   $Schema["TABLE"]["pkg_rpm"]["version"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"version\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["rpm_filename"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"rpm_filename\" IS 'filename of rpm';";
-  $Schema["TABLE"]["pkg_rpm"]["rpm_filename"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"rpm_filename\" varchar(128);";
+  $Schema["TABLE"]["pkg_rpm"]["rpm_filename"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"rpm_filename\" text;";
   $Schema["TABLE"]["pkg_rpm"]["rpm_filename"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"rpm_filename\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["license"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"license\" IS 'license type can be GPL, Freeware, Commercial, or other common type';";
-  $Schema["TABLE"]["pkg_rpm"]["license"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"license\" varchar(255);";
+  $Schema["TABLE"]["pkg_rpm"]["license"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"license\" text;";
   $Schema["TABLE"]["pkg_rpm"]["license"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"license\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["pkg_group"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"pkg_group\" IS 'categorize the software';";
-  $Schema["TABLE"]["pkg_rpm"]["pkg_group"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"pkg_group\" varchar(64);";
+  $Schema["TABLE"]["pkg_rpm"]["pkg_group"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"pkg_group\" text;";
   $Schema["TABLE"]["pkg_rpm"]["pkg_group"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"pkg_group\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["packager"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"packager\" IS 'the name and contact information for the individual responsible for building the package';";
-  $Schema["TABLE"]["pkg_rpm"]["packager"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"packager\" varchar(128);";
+  $Schema["TABLE"]["pkg_rpm"]["packager"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"packager\" text;";
   $Schema["TABLE"]["pkg_rpm"]["packager"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"packager\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["release"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"release\" IS 'the number of times a package consisting of this software has been packaged';";
-  $Schema["TABLE"]["pkg_rpm"]["release"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"release\" varchar(32);";
+  $Schema["TABLE"]["pkg_rpm"]["release"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"release\" text;";
   $Schema["TABLE"]["pkg_rpm"]["release"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"release\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["build_date"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"build_date\" IS 'the time the package was created';";
-  $Schema["TABLE"]["pkg_rpm"]["build_date"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"build_date\" varchar(64);";
+  $Schema["TABLE"]["pkg_rpm"]["build_date"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"build_date\" text;";
   $Schema["TABLE"]["pkg_rpm"]["build_date"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"build_date\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["vendor"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"vendor\" IS 'the organization responsible for building this package';";
-  $Schema["TABLE"]["pkg_rpm"]["vendor"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"vendor\" varchar(64);";
+  $Schema["TABLE"]["pkg_rpm"]["vendor"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"vendor\" text;";
   $Schema["TABLE"]["pkg_rpm"]["vendor"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"vendor\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["url"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"url\" IS 'url resource';";
-  $Schema["TABLE"]["pkg_rpm"]["url"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"url\" varchar(128);";
+  $Schema["TABLE"]["pkg_rpm"]["url"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"url\" text;";
   $Schema["TABLE"]["pkg_rpm"]["url"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"url\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["source_rpm"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"source_rpm\" IS 'the package file containing the source code and other files used to create the binary package file. the package is source rpm, this field will be NULL';";
-  $Schema["TABLE"]["pkg_rpm"]["source_rpm"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"source_rpm\" varchar(128);";
+  $Schema["TABLE"]["pkg_rpm"]["source_rpm"]["ADD"] = "ALTER TABLE \"pkg_rpm\" ADD COLUMN \"source_rpm\" text;";
   $Schema["TABLE"]["pkg_rpm"]["source_rpm"]["ALTER"] = "ALTER TABLE \"pkg_rpm\" ALTER COLUMN \"source_rpm\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm"]["summary"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm\".\"summary\" IS 'a concise description of the packaged software';";
@@ -1169,10 +1173,6 @@
   $Schema["TABLE"]["upload"]["pfile_fk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"pfile_fk\" int4;";
   $Schema["TABLE"]["upload"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL;";
 
-  $Schema["TABLE"]["upload"]["server_fk"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"server_fk\" IS 'for 1.2';";
-  $Schema["TABLE"]["upload"]["server_fk"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"server_fk\" int4;";
-  $Schema["TABLE"]["upload"]["server_fk"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"server_fk\" SET NOT NULL, ALTER COLUMN \"server_fk\" SET DEFAULT 1;";
-
   $Schema["TABLE"]["upload"]["upload_origin"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"upload_origin\" IS 'original filename or directory name or URL, depending on upload_mode';";
   $Schema["TABLE"]["upload"]["upload_origin"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"upload_origin\" text;";
   $Schema["TABLE"]["upload"]["upload_origin"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"upload_origin\" DROP NOT NULL;";
@@ -1209,10 +1209,6 @@
   $Schema["TABLE"]["uploadtree"]["ufile_name"]["DESC"] = "COMMENT ON COLUMN \"uploadtree\".\"ufile_name\" IS 'file name';";
   $Schema["TABLE"]["uploadtree"]["ufile_name"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"ufile_name\" text;";
   $Schema["TABLE"]["uploadtree"]["ufile_name"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"ufile_name\" DROP NOT NULL;";
-
-  $Schema["TABLE"]["uploadtree"]["server_fk"]["DESC"] = "";
-  $Schema["TABLE"]["uploadtree"]["server_fk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"server_fk\" int4;";
-  $Schema["TABLE"]["uploadtree"]["server_fk"]["ALTER"] = "ALTER TABLE \"uploadtree\" ALTER COLUMN \"server_fk\" SET NOT NULL, ALTER COLUMN \"server_fk\" SET DEFAULT 1;";
 
 
   $Schema["TABLE"]["users"]["user_pk"]["DESC"] = "";
@@ -1299,15 +1295,15 @@
   $Schema["SEQUENCE"]["report_cache_user_report_cache_user_pk_seq"] = "CREATE SEQUENCE \"report_cache_user_report_cache_user_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["sqlagentproc_sap_pk_seq"] = "CREATE SEQUENCE \"sqlagentproc_sap_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["users_user_pk_seq"] = "CREATE SEQUENCE \"users_user_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["pkg_rpm_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_pkg_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["bucketpool_bucketpool_pk_seq"] = "CREATE SEQUENCE \"bucketpool_bucketpool_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["bucket_bucket_pk_seq"] = "CREATE SEQUENCE \"bucket_bucket_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_rpm_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_req_req_pk_seq\" START 1;";
-  $Schema["SEQUENCE"]["pkg_deb_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_pkg_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["pkg_deb_req_req_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_req_req_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["nomos_ars_ars_pk_seq"] = "CREATE SEQUENCE \"nomos_ars_ars_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["bucket_container_bf_pk_seq"] = "CREATE SEQUENCE \"bucket_container_bf_pk_seq\" START 1;";
   $Schema["SEQUENCE"]["bucket_file_bf_pk_seq"] = "CREATE SEQUENCE \"bucket_file_bf_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["bucket_bucket_pk_seq"] = "CREATE SEQUENCE \"bucket_bucket_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["pkg_rpm_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_rpm_pkg_pk_seq\" START 1;";
+  $Schema["SEQUENCE"]["pkg_deb_pkg_pk_seq"] = "CREATE SEQUENCE \"pkg_deb_pkg_pk_seq\" START 1;";
 
   $Schema["CONSTRAINT"]["FileLicense_pkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"FileLicense_pkey\" PRIMARY KEY (\"fl_pk\");";
   $Schema["CONSTRAINT"]["agent_lic_meta_pkey"] = "ALTER TABLE \"agent_lic_meta\" ADD CONSTRAINT \"agent_lic_meta_pkey\" PRIMARY KEY (\"agent_lic_meta_pk\");";
@@ -1357,8 +1353,10 @@
   $Schema["CONSTRAINT"]["agent_unique_name_rev"] = "ALTER TABLE \"agent\" ADD CONSTRAINT \"agent_unique_name_rev\" UNIQUE (\"agent_name\",\"agent_rev\");";
   $Schema["CONSTRAINT"]["agent_wc_pfile_fk_key"] = "ALTER TABLE \"agent_wc\" ADD CONSTRAINT \"agent_wc_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
   $Schema["CONSTRAINT"]["ars_unique"] = "ALTER TABLE \"agent_runstatus\" ADD CONSTRAINT \"ars_unique\" UNIQUE (\"agent_fk\",\"upload_fk\");";
+  $Schema["CONSTRAINT"]["bucket_file_bucket_fk_key"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_bucket_fk_key\" UNIQUE (\"bucket_fk\",\"pfile_fk\",\"agent_fk\",\"nomosagent_fk\");";
   $Schema["CONSTRAINT"]["bucketpool_bucketpool_name_key"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_bucketpool_name_key\" UNIQUE (\"bucketpool_name\");";
   $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"dirmodemask\" UNIQUE (\"mimetype_name\");";
+  $Schema["CONSTRAINT"]["license_file_rf_fk_key"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_rf_fk_key\" UNIQUE (\"rf_fk\",\"agent_fk\",\"pfile_fk\");";
   $Schema["CONSTRAINT"]["licgroup_licgroup_name_key"] = "ALTER TABLE \"licgroup\" ADD CONSTRAINT \"licgroup_licgroup_name_key\" UNIQUE (\"licgroup_name\");";
   $Schema["CONSTRAINT"]["licterm_licterm_name_key"] = "ALTER TABLE \"licterm\" ADD CONSTRAINT \"licterm_licterm_name_key\" UNIQUE (\"licterm_name\");";
   $Schema["CONSTRAINT"]["licterm_words_licterm_words_text_key"] = "ALTER TABLE \"licterm_words\" ADD CONSTRAINT \"licterm_words_licterm_words_text_key\" UNIQUE (\"licterm_words_text\");";
@@ -1369,7 +1367,6 @@
   $Schema["CONSTRAINT"]["only_one_licterm_maplic"] = "ALTER TABLE \"licterm_maplic\" ADD CONSTRAINT \"only_one_licterm_maplic\" UNIQUE (\"licterm_fk\",\"lic_fk\");";
   $Schema["CONSTRAINT"]["only_one_licterm_name"] = "ALTER TABLE \"licterm_name\" ADD CONSTRAINT \"only_one_licterm_name\" UNIQUE (\"licterm_fk\",\"agent_lic_meta_fk\");";
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_key"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
-  $Schema["CONSTRAINT"]["pkg_rpm_pfile_fk_key"] = "ALTER TABLE \"pkg_rpm\" ADD CONSTRAINT \"pkg_rpm_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
   $Schema["CONSTRAINT"]["report_cache_report_cache_key_key"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_report_cache_key_key\" UNIQUE (\"report_cache_key\");";
   $Schema["CONSTRAINT"]["rf_md5unique"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_md5unique\" UNIQUE (\"rf_md5\");";
   $Schema["CONSTRAINT"]["user_user_name_key"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_user_name_key\" UNIQUE (\"user_name\");";
@@ -1382,10 +1379,8 @@
   $Schema["CONSTRAINT"]["bucket_ars_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_ars\" ADD CONSTRAINT \"bucket_ars_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
   $Schema["CONSTRAINT"]["bucket_ars_upload_fk_fkey"] = "ALTER TABLE \"bucket_ars\" ADD CONSTRAINT \"bucket_ars_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\");";
   $Schema["CONSTRAINT"]["bucket_container_agent_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
-  $Schema["CONSTRAINT"]["bucket_container_bucket_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_bucket_fk_fkey\" FOREIGN KEY (\"bucket_fk\") REFERENCES \"bucket_def\" (\"bucket_pk\");";
   $Schema["CONSTRAINT"]["bucket_container_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
   $Schema["CONSTRAINT"]["bucket_container_uploadtree_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_uploadtree_fk_fkey\" FOREIGN KEY (\"uploadtree_fk\") REFERENCES \"uploadtree\" (\"uploadtree_pk\");";
-  $Schema["CONSTRAINT"]["bucket_fk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_fk\" FOREIGN KEY (\"bucket_fk\") REFERENCES \"bucket_def\" (\"bucket_pk\");";
   $Schema["CONSTRAINT"]["bucketpool_fk"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucketpool_fk\" FOREIGN KEY (\"bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\");";
   $Schema["CONSTRAINT"]["jdep_depends_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_depends_jq_fk\" FOREIGN KEY (\"jdep_jq_depends_fk\") REFERENCES \"jobqueue\" (\"jq_pk\");";
   $Schema["CONSTRAINT"]["jdep_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_jq_fk\" FOREIGN KEY (\"jdep_jq_fk\") REFERENCES \"jobqueue\" (\"jq_pk\");";
@@ -1411,9 +1406,7 @@
   $Schema["CONSTRAINT"]["nomosagentpk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"nomosagentpk\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\");";
   $Schema["CONSTRAINT"]["pfile_fk"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"pfile_fk\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_fkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
-  $Schema["CONSTRAINT"]["pkg_deb_req_pkg_fk_fkey"] = "ALTER TABLE \"pkg_deb_req\" ADD CONSTRAINT \"pkg_deb_req_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_deb\" (\"pkg_pk\");";
   $Schema["CONSTRAINT"]["pkg_rpm_pfile_fk_fkey"] = "ALTER TABLE \"pkg_rpm\" ADD CONSTRAINT \"pkg_rpm_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\");";
-  $Schema["CONSTRAINT"]["pkg_rpm_req_pkg_fk_fkey"] = "ALTER TABLE \"pkg_rpm_req\" ADD CONSTRAINT \"pkg_rpm_req_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_rpm\" (\"pkg_pk\");";
   $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\");";
   $Schema["CONSTRAINT"]["users_default_bucketpool_pk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_default_bucketpool_pk_fkey\" FOREIGN KEY (\"default_bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\");";
 
@@ -1429,8 +1422,6 @@
 
   $Schema["INDEX"]["attrib"]["attrib_key_fk_idx"] = "CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk);";
   $Schema["INDEX"]["attrib"]["attrib_pfile_fk_idx"] = "CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk);";
-
-  $Schema["INDEX"]["bucket_file"]["bf_unique"] = "CREATE UNIQUE INDEX bf_unique ON bucket_file USING btree (bucket_fk, pfile_fk, agent_fk);";
 
   $Schema["INDEX"]["license_file"]["fl_rf_fk"] = "CREATE INDEX fl_rf_fk ON license_file USING btree (rf_fk);";
   $Schema["INDEX"]["license_file"]["lf_pfile_fk"] = "CREATE INDEX lf_pfile_fk ON license_file USING btree (pfile_fk);";
