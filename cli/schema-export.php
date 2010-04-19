@@ -28,12 +28,11 @@
 global $GlobalReady;
 $GlobalReady = 1;
 
-
 //require_once (dirname(__FILE__)) . '/../share/fossology/php/pathinclude.php';
 require_once '/usr/local/share/fossology/php/pathinclude.php';
+
 global $LIBEXECDIR;
-//require_once "$LIBEXECDIR/libschema.php";
-require_once "./libschema.php";
+require_once "$LIBEXECDIR/libschema.php";
 
 global $PGCONN;
 global $Name;
