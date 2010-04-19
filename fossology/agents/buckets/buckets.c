@@ -379,6 +379,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
       vendor = PQgetvalue(resultpkg, 0, 2);
       srcpkgname = PQgetvalue(resultpkg, 0, 3);
     }
+    PQclear(resultpkg);
   }
 
   /* loop through all the bucket defs in this pool */
@@ -390,11 +391,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
     */
     if (bucketDefArray->applies_to == 'p')
     {
-      if (!isPkg)
-      {
-        PQclear(resultpkg);
-        continue;
-      }
+      if (!isPkg) continue;
     }
 
     switch (bucketDefArray->bucket_type)
@@ -549,7 +546,6 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
         sprintf(envbuf, "PKGTYPE=%c", pkgtype);
         envp[envnum++] =strdup(envbuf); 
 
-        PQclear(resultpkg);
         envp[envnum++] = 0;
         execve(filepath, argv, envp);
         printf("FATAL: buckets execve (%s) failed, %s\n", filepath, strerror(errno));
@@ -1176,6 +1172,7 @@ int main(int argc, char **argv)
       pfile_pk = atol(PQgetvalue(topresult, 0, 0));
       ufile_name = PQgetvalue(topresult, 0, 1);
       ufile_mode = atoi(PQgetvalue(topresult, 0, 2));
+      PQclear(topresult);
     }
 
     /* at this point we know:
@@ -1293,7 +1290,6 @@ int main(int argc, char **argv)
       /* process top level container */
       processFile(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 
                   pfile_pk, ufile_mode, ufile_name, hasPrules);
-      PQclear(topresult);
       result = PQexec(pgConn, "commit");
     }
     else
@@ -1318,6 +1314,7 @@ int main(int argc, char **argv)
     }
   }  /* end of main processing loop */
 
+  free(cacheroot.nodes);
   PQfinish(pgConn);
   return (0);
 }
