@@ -153,6 +153,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
                 child_pfile_pk, ufile_mode, child_ufile_name, hasPrules);
   } // end of child processing
 
+  PQclear(result);
   PQclear(origresult);
   return rv;
 } /* walkTree */
@@ -272,6 +273,8 @@ FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray,
   }
   else
     rv = -1;
+
+  free(bucketList);
   return rv;
 }
 
@@ -316,9 +319,9 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
   pbucketdef_t bucketDefArray;
   regex_file_t *regex_row;
   char *argv[2];
-  char *envp[10];
+  char *envp[11];
   char  envbuf[256];
-  char *pkgvers=0, *vendor=0, *pkgname=0, *srcpkgname=0;
+  char pkgvers[256], vendor[256], pkgname[256], srcpkgname[256];
   char  pkgtype=0;
   pid_t pid;
 
@@ -375,11 +378,12 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
     /* is the file a package?  If not, continue on to the next bucket def. */
     if (isPkg)
     {
-      pkgname = PQgetvalue(resultpkg, 0, 0);
-      pkgvers = PQgetvalue(resultpkg, 0, 1);
-      vendor = PQgetvalue(resultpkg, 0, 2);
-      srcpkgname = PQgetvalue(resultpkg, 0, 3);
+      strcpy(pkgname, PQgetvalue(resultpkg, 0, 0));
+      strcpy(pkgvers, PQgetvalue(resultpkg, 0, 1));
+      strcpy(vendor, PQgetvalue(resultpkg, 0, 2));
+      strcpy(srcpkgname, PQgetvalue(resultpkg, 0, 3));
     }
+    PQclear(resultpkg);
   }
 
   /* loop through all the bucket defs in this pool */
@@ -526,9 +530,9 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
              else this is a source package
          */
         pkgtype = 0;
-        if (pkgname)
+        if (pkgname[0])
         {
-          if (srcpkgname && (strstr(srcpkgname,"none")==0)) pkgtype='b';
+          if (strstr(srcpkgname,"none")==0) pkgtype='b';
           else
           {
             snprintf(sql, sizeof(sql), 
@@ -579,7 +583,12 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
           match++;
 				}
         else
+        {
+          free(pfile_rfpks);
+          free(bucket_pk_list_start);
+          PQclear(result);
           return 0;
+        }
 			}
       break;
 
@@ -670,9 +679,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
     if (match && bucketDefArray->stopon == 'Y') break;
   }
 
-  if (resultpkg) PQclear(resultpkg);
   free(pfile_rfpks);
-
   PQclear(result);
   return bucket_pk_list_start;
 }
@@ -893,6 +900,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
           }
           if (debug) printf("%s sql: %s\n",fcnName, sql);
         }
+        PQclear(result);
       }
       else
         printf(" %d", *bucketList);
@@ -1186,7 +1194,6 @@ int main(int argc, char **argv)
 
     /* Has the uploadtree already been processed?  If so, we are done.
        Don't even bother to create a bucket_ars entry.
-       THIS ISN'T RIGHT SINCE IT MAY BE FOR A DIFFERENT nomos agent_pk
      */ 
     if (processed(pgConn, agent_pk, pfile_pk, head_uploadtree_pk, bucketpool_pk)) 
     {
@@ -1259,6 +1266,7 @@ int main(int argc, char **argv)
                  agent_pk, upload_pk, "false", nomos_agent_pk, bucketpool_pk);
     result = PQexec(pgConn, sqlbuf);
     if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+    PQclear(result);
 
     /* retrieve the ars_pk of the newly inserted record */
     sprintf(sqlbuf, "select ars_pk from bucket_ars where agent_fk='%d' and upload_fk='%d' and ars_success='%s' and nomosagent_fk='%d' \
@@ -1286,6 +1294,7 @@ int main(int argc, char **argv)
      */
     result = PQexec(pgConn, "begin");
     if (checkPQcommand(result, "begin", __FILE__, __LINE__)) return -1;
+    PQclear(result);
 
     rv = walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0, 
              hasPrules);
@@ -1301,6 +1310,7 @@ int main(int argc, char **argv)
 
     result = PQexec(pgConn, sqlbuf);
     if (checkPQcommand(result, sqlbuf, __FILE__, __LINE__)) return -1;
+    PQclear(result);
 
     /* Record analysis end in bucket_ars, the bucket audit trail. */
     if (ars_pk)
@@ -1316,11 +1326,12 @@ int main(int argc, char **argv)
 
       result = PQexec(pgConn, sqlbuf);
       if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+      PQclear(result);
       if (debug) printf("%s sqlbuf: %s\n",__FILE__, sqlbuf);
     }
   }  /* end of main processing loop */
 
-  free(cacheroot.nodes);
-  PQfinish(pgConn);
+  lrcache_free(&cacheroot);
+  DBclose(DB);
   return (0);
 }
