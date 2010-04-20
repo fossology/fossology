@@ -988,7 +988,7 @@
   $Schema["TABLE"]["pkg_deb_req"]["pkg_fk"]["ALTER"] = "ALTER TABLE \"pkg_deb_req\" ALTER COLUMN \"pkg_fk\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_deb_req"]["req_value"]["DESC"] = "COMMENT ON COLUMN \"pkg_deb_req\".\"req_value\" IS 'pkg debian require';";
-  $Schema["TABLE"]["pkg_deb_req"]["req_value"]["ADD"] = "ALTER TABLE \"pkg_deb_req\" ADD COLUMN \"req_value\" varchar(128);";
+  $Schema["TABLE"]["pkg_deb_req"]["req_value"]["ADD"] = "ALTER TABLE \"pkg_deb_req\" ADD COLUMN \"req_value\" text;";
   $Schema["TABLE"]["pkg_deb_req"]["req_value"]["ALTER"] = "ALTER TABLE \"pkg_deb_req\" ALTER COLUMN \"req_value\" DROP NOT NULL;";
 
 
@@ -1066,7 +1066,7 @@
   $Schema["TABLE"]["pkg_rpm_req"]["pkg_fk"]["ALTER"] = "ALTER TABLE \"pkg_rpm_req\" ALTER COLUMN \"pkg_fk\" SET NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm_req"]["req_value"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm_req\".\"req_value\" IS 'pkg rpm require';";
-  $Schema["TABLE"]["pkg_rpm_req"]["req_value"]["ADD"] = "ALTER TABLE \"pkg_rpm_req\" ADD COLUMN \"req_value\" varchar(128);";
+  $Schema["TABLE"]["pkg_rpm_req"]["req_value"]["ADD"] = "ALTER TABLE \"pkg_rpm_req\" ADD COLUMN \"req_value\" text;";
   $Schema["TABLE"]["pkg_rpm_req"]["req_value"]["ALTER"] = "ALTER TABLE \"pkg_rpm_req\" ALTER COLUMN \"req_value\" DROP NOT NULL;";
 
   $Schema["TABLE"]["pkg_rpm_req"]["req_pk"]["DESC"] = "COMMENT ON COLUMN \"pkg_rpm_req\".\"req_pk\" IS 'pkg rpm require primary key';";
