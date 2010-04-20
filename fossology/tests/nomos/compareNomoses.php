@@ -22,15 +22,44 @@
  * compare licenses per file btween gnomos and nomos
  */
 
-$gnFile =  './LicensesPerFile-TestDistro-4-7-2010';
-//$gnFile =  './noCached';
+$Usage = "compareNomoses [-h] [-g gnomosResults] [-n fnomosResults]\n" .
+"If no parameters given then the following files will be used:\n" .
+"./LicensesPerFile-TestDistro-4-7-2010 for gnomos results and \n" .
+"./Nomos-licPerFile for FOSSology results\n";
 
-$GF = fopen($gnFile, 'r');
+$options = getopt('hg:n:');
+if (empty($options)) {
+	$gnFile =  './LicensesPerFile-TestDistro-4-7-2010';
+	$nFile = './Nomos-licPerFile';
+}
+if (array_key_exists('h', $options)) {
+	print "$Usage\n";
+	exit(0);
+}
+if (array_key_exists('g', $options)) {
+	$gnFile = $options['g'];
+}
+else
+{
+	$gnFile =  './LicensesPerFile-TestDistro-4-7-2010';
+}
+if (array_key_exists('n', $options)) {
+	$nFile = $options['n'];
+}
+else
+{
+	$nFile = './Nomos-licPerFile';
+}
+
+//$gnFile =  './LicensesPerFile-TestDistro-4-7-2010';
+
+$GF = fopen($gnFile, 'r') or die("Can't open $gnFile\n");
 /*
  * Can't just use the path or the filename as they are not unique.  Will
- * need to use the complete path!
+ * need to use much of the complete paths, some hand editing of results
+ * files are needed for both versions.
  *
- * Read the two files into two arrays and sort the keys
+ * Read the two fixed up files into two arrays and sort the keys
  */
 while (! feof($GF))
 {
@@ -43,11 +72,7 @@ while (! feof($GF))
 }
 //print "gnomos is:\n";print_r($gnomos) . "\n";
 
-
-$nFile = './nr3';
-//$nFile = './Nomos-licPerFile';
-
-$NF = fopen($nFile, 'r');
+$NF = fopen($nFile, 'r') or die("Can't open $nFile\n");
 
 while (! feof($NF))
 {
@@ -80,23 +105,30 @@ if(!ksort($nomos))
  }
  */
 
-/*
- $diffs = array_diff_assoc($nomos, $gnomos);
- //print "the Src only diffs are:\n";print_r($diffs) . "\n";
- if(!empty($diffs))
- {
- foreach($diffs as $path => $licenses)
- {
- print "$path: $licenses\n";
- }
- }
- */
-print "could not find the following in fnomos output:\n";
-foreach($gnomos as $path => $licenses)
+$diffs = array_diff_assoc($nomos, $gnomos);
+//print "the diffs are:\n";print_r($diffs) . "\n";
+if(!empty($diffs))
 {
-	if(!array_key_exists($path,$nomos))
+	$DF = fopen('nomos-diffs', 'w') or die("Can't open nomos-diffs " .
+ 							"File: " . __FILE__ . " on line: " . __LINE__ . "\n"); 							
+	foreach($diffs as $path => $licenses)
 	{
-		print "$path: $licenses\n";
+		fwrite($DF,"$path: $licenses\n");
 	}
 }
+
+fclose($DF);
+
+//print "could not find the following in fnomos output:\n";
+$NF = fopen('nomos-NotFound', 'w') or die("Can't open nomos-NotFound " .
+ 							"File: " . __FILE__ . " on line: " . __LINE__ . "\n"); 
+foreach($gnomos as $path => $licenses)
+{
+	//print "CDB: looking for:\n$path\n";
+	if(!array_key_exists($path,$nomos))
+	{
+		fwrite($NF,"$path: $licenses\n");
+	}
+}
+fclose($NF);
 ?>
