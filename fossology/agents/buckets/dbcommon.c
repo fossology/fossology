@@ -45,7 +45,7 @@ FUNCTION int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineN
    {
      printf("Error: %s:%d - checkPQresult called with invalid parameter.\n",
              FcnName, LineNumb);
-     return 0;
+     return -1;
    }
 
    /* If no error, return */
@@ -78,9 +78,9 @@ FUNCTION int checkPQcommand(PGresult *result, char *sql, char *FcnName, int Line
 {
    if (!result)
    {
-     printf("Error: %s:%d - checkPQcommand called with invalid parameter.\n",
+     printf("Error: %s:%d - checkPQcommand called with invalid PGresult object.\n",
              FcnName, LineNumb);
-     return 0;
+     return -1;
    }
 
    /* If no error, return */
