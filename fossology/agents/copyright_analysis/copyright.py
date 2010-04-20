@@ -304,23 +304,23 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
         return -1
 
     path = libfosspython.repMkPath('files', filename)
-    offsets = library.label_file(path,model)
     if (not os.path.exists(path)):
         print >> sys.stdout, 'ERROR: File not found. path=%s' % (path)
         return -1
+    offsets = library.label_file(path,model)
     text = open(path).read()
     if len(offsets) == 0:
         result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
             "VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement')" % (agent_pk, pfile))
         if result != 0:
-            print >> sys.stdout, "ERROR: DB Access error,\n%s" % db.status()
+            print >> sys.stdout, "ERROR: DB Access error, returned %d.\nERROR: DB STATUS: %s\nERROR: DB ERRMSG: %s" % (result, db.status(), db.errmsg())
             return -1
     else:
         for i in range(len(offsets)):
             result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
                 "VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s')" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]]), hex(abs(hash(re.escape(text[offsets[i][0]:offsets[i][1]])))), offsets[i][2]))
             if result != 0:
-                print >> sys.stdout, "ERROR: DB Access error,\n%s" % db.status()
+                print >> sys.stdout, "ERROR: DB Access error, returned %d.\nERROR: DB STATUS: %s\nERROR: DB ERRMSG: %s" % (result, db.status(), db.errmsg())
                 return -1
 
     return 0
