@@ -24,6 +24,7 @@ import re
 import traceback
 import cPickle as pickle
 from optparse import OptionParser
+import textwrap
 
 try:
     import psyco
@@ -36,29 +37,63 @@ import libfosspython
 
 
 def main():
-    #         ------------------------------------------------------------
-    usage  = "%prog is used to automatically locate copyright statements. \n"
-    usage += " There are three (3) possible functioning modes that %prog \n"
-    usage += " can enter:\n\n"
-    usage += "    MODEL CREATION    :: Create a model of copyright statements \n"
-    usage += "                         using training data.\n"
-    usage += "    COMMAND LINE TEST :: Test a file from the command line.\n"
-    usage += "    AGENT TEST        :: Waits for commands from stdin.\n\n"
-    usage += "  +----------------+\n"
-    usage += "  | MODEL CREATION |\n"
-    usage += "  +----------------+\n"
-    usage += "  To analyze any files a model is REQUIRED. To create a model a set of labeled file must used; a basic set is provided in the data directory. First create a file listing the paths of the training files. Making sure that each training file is on its own line in the file. Next run the following command:\n"
-    usage += "    %prog --model model.dat --training training_files\n"
-    usage += "  This will create a model file called 'model.dat' from the training file provided in 'training_files'.\n"
-    usage += "  +-------------------+\n"
-    usage += "  | COMMAND LINE TEST |\n"
-    usage += "  +-------------------+\n"
-    usage += "  To analyze a file from the command line you must first create a model, see MODEL CREATION.\n"
-    usage += "  There are two options for passing the file to be analyzed to %prog. The first uses a text file that lists the paths of the files with one path per line. The second option is to pass the files over the command line. For the first option use the following command:\n"
-    usage += "    %prog --model model.dat --analyze-from-file test_files\n"
+    usage  = """
+%prog is used to automatically locate copyright statements, email addresses and URLs.
 
-    
-    usage += "  \n"
+There are three (3) possible functions that can be performed:
+ * MODEL CREATION    :: Create a model of copyright statements
+                        using training data.
+ * COMMAND LINE TEST :: Test a file from the command line.
+ * AGENT TEST        :: Waits for commands from stdin.
+
++----------------+
+| MODEL CREATION |
++----------------+
+Due to the complex nature of copyright statements a simple regular expression will not suffice to locate the majority of copyright statements. We use a naive Bayes bi-gram model to locate copyright statements based on each bi-grams probability of being found in a copyright statement. This allows copyright unseen copyright statements to be classified correctly. This also allows use to simply maintain a set of training data instead of a complex set of regular expressions. This brings us to the need for the model creation phase. This phase creates the naive Bayes bi-gram model that will be used to locate copyright statements. Lets take a moment to look at the training data, because the format is a little strange.
+
+1) Training data.
+    The training data is stored in a text file where each line contains a single training example. Each training example is stored as follows.
+    '''Each training example is wrapped with three quotes and the training example is escaped using the python repr() function.'''
+2) Creating the model.
+    To create a model the following command should be used.
+        > %prog --model model --training examples
+    Where `model' is the name of the model file being created, and `examples' is the file containing the training examples.
+
+ ** Remember that a model file is required to locate copyright statements. 
+
++-------------------+
+| COMMAND LINE TEST |
++-------------------+
+To analyze a file from the command line you must first create a model, see MODEL CREATION.
+
+To analyze files as parameters to %prog use the following command:
+        > %prog --model model --analyze-from-command-line file1 ... fileN
+    Where `model' is the saved model file and `file*' are the files to analyze.
+
+A file containing the file paths to the file to be analyzed may be used instead of passing them over the command line. This requires that each line of the paths file contain the path to a single file to be analyzed. Use the following command to analyze a paths file.
+        > %prog --model model --analyze-from-file paths_file
+    Where `model' is the saved model file and `paths_file' is the file containing the paths to the files to be analyzed.
+
++------------+
+| AGENT TEST |
++------------+
+%prog has a special option to allow for scheduling with the Fossology
+scheduler. When in default agent %prog will wait for a job id from the scheduler on stdin (see --runonpfiles to change the default behavior).
+
+Use the --agent switch to place %prog into Fossology agent mode. There are four (4) options.
+
+  --setup-database      Creates the tables for copyright analysis that the
+                        fossology database needs.
+  --drop                Drops the tables before creating them for copyright
+                        analysis agent when used with --setup-database.
+  --runonpfiles         Expect the scheduler to provide the pfiles on stdin.
+                        Only available in agent mode.
+  -i, --init            Creates a connection to the database and quits.
+
+    """
+
+    # Make sure our usage statement will fit in an 80 character wide terminal.
+    usage = '\n'.join([textwrap.fill(line,79,subsequent_indent=re.findall('^\s*',line)[0]) for line in usage.splitlines()])
   
     optparser = OptionParser(usage)
     optparser.add_option("-m", "--model", type="string",
@@ -72,7 +107,7 @@ def main():
     optparser.add_option("--setup-database", action="store_true",
             help="Creates the tables for copyright analysis that the fossology database needs.")
     optparser.add_option("--drop", action="store_true",
-            help="Drops the tables before creating them for copyright analysis agent.")
+            help="Drops the tables before creating them for copyright analysis agent when used with --setup-database.")
     optparser.add_option("--agent", action="store_true",
             help="Starts up in agent mode. Files will be read from stdin.")
     optparser.add_option("--runonpfiles", action="store_true",
