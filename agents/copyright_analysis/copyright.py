@@ -305,6 +305,9 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
 
     path = libfosspython.repMkPath('files', filename)
     offsets = library.label_file(path,model)
+    if (not os.path.exists(path)):
+        print >> sys.stdout, 'ERROR: File not found. path=%s' % (path)
+        return -1
     text = open(path).read()
     if len(offsets) == 0:
         result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
