@@ -267,7 +267,7 @@ def agent(model,runonpfiles=False):
                 
                 if db.access(sql) != 1:
                     error = db.errmsg()
-                    raise Exception('Could not select job queue for copyright analysis. Database said: "%s"' % error)
+                    raise Exception('Could not select job queue for copyright analysis. Database said: "%s".\n\tsql=%s' % (error, sql))
 
                 rows = db.getrows()
 
@@ -312,29 +312,34 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
     offsets = library.label_file(path,model)
     text = open(path).read()
     if len(offsets) == 0:
-        result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
-            "VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement')" % (agent_pk, pfile))
+        sql = """INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type)
+                 VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement')""" % (agent_pk, pfile)
+        result = db.access(sql)
         if result != 0:
-            print >> sys.stdout, "ERROR: DB Access error, returned %d.\nERROR: DB STATUS: %s\nERROR: DB ERRMSG: %s" % (result, db.status(), db.errmsg())
+            print >> sys.stdout, "ERROR: DB Access error, returned %d.\nERROR: DB STATUS: %s\nERROR: DB ERRMSG: %s\nERROR: sql=%s" % (result, db.status(), db.errmsg(), sql)
             return -1
     else:
         for i in range(len(offsets)):
-            result = db.access("INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) "
-                "VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s')" % (agent_pk, pfile, offsets[i][0], offsets[i][1], re.escape(text[offsets[i][0]:offsets[i][1]]), hex(abs(hash(re.escape(text[offsets[i][0]:offsets[i][1]])))), offsets[i][2]))
+            sql = """INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type)
+                     VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s')""" % (agent_pk, pfile, offsets[i][0], offsets[i][1],
+                        re.escape(text[offsets[i][0]:offsets[i][1]]), hex(abs(hash(re.escape(text[offsets[i][0]:offsets[i][1]])))),
+                        offsets[i][2])
+            result = db.access(sql)
             if result != 0:
-                print >> sys.stdout, "ERROR: DB Access error, returned %d.\nERROR: DB STATUS: %s\nERROR: DB ERRMSG: %s" % (result, db.status(), db.errmsg())
+                print >> sys.stdout, "ERROR: DB Access error, returned %d.\nERROR: DB STATUS: %s\nERROR: DB ERRMSG: %s\nERROR: sql=%s" % (result, db.status(), db.errmsg(), sql)
                 return -1
 
     return 0
 
 def table_check(db):
-    if db.access('SELECT ct_pk FROM copyright LIMIT 1') != 1:
+    sql = 'SELECT ct_pk FROM copyright LIMIT 1'
+    if db.access(sql) != 1:
         error = db.errmsg()
         if error == 'relation "copyright" does not exist':
             print >> sys.stdout, 'WARNING: Could not find copyright table. Will try to setup automatically. If you continue to have trouble try using %s --setup-database' % sys.argv[0]
             return setup_database()
 
-        print >> sys.stdout, 'ERROR: Could not select table copyright. Database said: "%s"' % error
+        print >> sys.stdout, 'ERROR: Could not select table copyright. Database said: "%s"\nERROR: sql=%s' % (error, sql)
         return -1
     return 0
 
@@ -344,18 +349,20 @@ def drop_database():
         db = libfosspython.FossDB()
     except Exception, inst:
         print >> sys.stdout, 'ERROR: %s, in %s' % inst
-        sys.exit(1)
+        sys.exit(-1)
 
-    result = db.access("DROP TABLE copyright CASCADE")
+    sql = "DROP TABLE copyright CASCADE"
+    result = db.access(sql)
     if result != 0:
         error = db.errmsg()
         if error != 'table "copyright" does not exist':
-            print >> sys.stdout, "ERROR: Could not drop copyright. Database said: '%s'" % error
-    result = db.access("DROP SEQUENCE copyright_ct_pk_seq CASCADE")
+            print >> sys.stdout, "ERROR: Could not drop copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
+    sql = "DROP SEQUENCE copyright_ct_pk_seq CASCADE"
+    result = db.access(sql)
     if result != 0:
         error = db.errmsg()
         if error != 'sequence "copyright_ct_pk_seq" does not exist':
-            print >> sys.stdout, "ERROR: Could not drop copyright_ct_pk_seq. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not drop copyright_ct_pk_seq. Database said: '%s'\nERROR: sql=%s" % (error, sql)
     
     return 0
 
@@ -372,69 +379,73 @@ def setup_database(drop=False):
 
     #
     exists = False
-    result = db.access("CREATE SEQUENCE copyright_ct_pk_seq "
-        "START WITH 1 INCREMENT BY 1 NO MAXVALUE NO MINVALUE "
-        "CACHE 1")
+    
+    sql = """CREATE SEQUENCE copyright_ct_pk_seq
+             START WITH 1 INCREMENT BY 1 NO MAXVALUE NO MINVALUE
+             CACHE 1"""
+    result = db.access(sql)
     if result != 0:
         error = db.errmsg()
         if error != 'relation "copyright_ct_pk_seq" already exists':
-            print >> sys.stdout, "ERROR: Could not create copyright_ct_pk_seq. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not create copyright_ct_pk_seq. Database said: '%s'\nERROR: sql=%s" % (error, sql)
             return -1
         else:
             exists = True
     
     if not exists:
-        result = db.access("ALTER TABLE public.copyright_ct_pk_seq OWNER TO fossy")
+        sql = "ALTER TABLE public.copyright_ct_pk_seq OWNER TO fossy"
+        result = db.access(sql)
         if result != 0:
             error = db.errmsg()
-            print >> sys.stdout, "ERROR: Could not alter copyright_ct_pk_seq. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not alter copyright_ct_pk_seq. Database said: '%s'\nERROR: sql=%s" % (error, sql)
             return -1
 
     exists = False
-    result = db.access("CREATE TABLE copyright ( "
-        "ct_pk bigint DEFAULT nextval('copyright_ct_pk_seq'::regclass) NOT NULL, "
-        "agent_fk bigint NOT NULL, "
-        "pfile_fk bigint NOT NULL, "
-        "content text, "
-        "hash text, "
-        "type text CHECK (type in ('statement', 'email', 'url')), "
-        # "type copyright_type NOT NULL, "
-        "copy_startbyte integer, "
-        "copy_endbyte integer)")
+    sql = """CREATE TABLE copyright (
+             ct_pk bigint DEFAULT nextval('copyright_ct_pk_seq'::regclass) NOT NULL,
+             agent_fk bigint NOT NULL,
+             pfile_fk bigint NOT NULL,
+             content text,
+             hash text,
+             type text CHECK (type in ('statement', 'email', 'url')),
+             copy_startbyte integer,
+             copy_endbyte integer)"""
+    result = db.access(sql)
     if result != 0:
         error = db.errmsg()
         if error != 'relation "copyright" already exists':
-            print >> sys.stdout, "ERROR: Could not create table copyright. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not create table copyright. Database said: '%s'\nERROR: sql=%s" % error
             return -1
         else:
             exists = True
 
     if not exists:
-        result = db.access("ALTER TABLE public.copyright OWNER TO fossy")
+        sql = "ALTER TABLE public.copyright OWNER TO fossy"
+        result = db.access(sql)
         if result != 0:
             error = db.errmsg()
-            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
             return -1
 
-        result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
-                "copyright_pkey PRIMARY KEY (ct_pk)")
+        sql = "ALTER TABLE ONLY copyright ADD CONSTRAINT copyright_pkey PRIMARY KEY (ct_pk)"
+        result = db.access(sql)
         if result != 0:
             error = db.errmsg()
-            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
             return -1
         
-        result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
-                "pfile_fk FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk)")
+        sql = "ALTER TABLE ONLY copyright ADD CONSTRAINT pfile_fk FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk)" 
+        result = db.access(sql)
         if result != 0:
             error = db.errmsg()
-            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
             return -1
         
-        result = db.access("ALTER TABLE ONLY copyright ADD CONSTRAINT "
-                "agent_fk FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk)")
+        sql = "ALTER TABLE ONLY copyright ADD CONSTRAINT agent_fk FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk)"
+        result = db.access(sql)
         if result != 0:
             error = db.errmsg()
-            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'" % error
+            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
             return -1
 
 if __name__ == '__main__':
