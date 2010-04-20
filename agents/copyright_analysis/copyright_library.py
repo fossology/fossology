@@ -146,7 +146,7 @@ def replace_placeholders(tokens,stuff):
         count = 0
         for i in range(n):
             if t[i][0] == needle:
-                t[i][0] = stuff[needle.replace('X','')][count]
+                t[i][0] = stuff[needle.replace('X','')][count][0]
                 count += 1
     return t
 

@@ -320,9 +320,15 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
             return -1
     else:
         for i in range(len(offsets)):
+            str = text[offsets[i][0]:offsets[i][1]]
+            if type(str) == type(u''): # we have a unicode object
+                str = str.decode('ascii', 'ignore')
+            pd = library.parsetext(str)
+            tokens = library.replace_placeholders(pd['tokens'][:],pd)
+            str = re.escape(' '.join([token[0] for token in tokens]))
             sql = """INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type)
                      VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s')""" % (agent_pk, pfile, offsets[i][0], offsets[i][1],
-                        re.escape(text[offsets[i][0]:offsets[i][1]]), hex(abs(hash(re.escape(text[offsets[i][0]:offsets[i][1]])))),
+                        str, hex(abs(hash(str))),
                         offsets[i][2])
             result = db.access(sql)
             if result != 0:
