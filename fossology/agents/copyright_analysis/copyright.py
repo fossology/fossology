@@ -187,15 +187,12 @@ Use the --agent switch to place %prog into Fossology agent mode. There are four 
 
 def agent(model,runonpfiles=False):
     try:
-        # create a heartbeat thread so the scheduler doesn't kill the agent.
-        hb = libfosspython.Heartbeat(30.0) # print a heartbeat every 30 seconds
-        hb.start()
-        
         db = None
         try:
             db = libfosspython.FossDB()
         except Exception, inst:
-            raise Exception('%s, in %s' % inst[:])
+            print >> sys.stderr, 'FATAL: %s, in %s' % (inst[:])
+            return -1
 
         tr = table_check(db)
         if tr != 0:
@@ -203,8 +200,13 @@ def agent(model,runonpfiles=False):
 
         # try to open the repo.
         if libfosspython.repOpen() != 1:
-            raise Exception('Something is broken.\n\tCould not open Repo.\n\tTried to open "%s".' % (libfosspython.repGetRepPath()))
+            print >> sys.stderr, 'Something is broken.\n\tCould not open Repo.\n\tTried to open "%s".' % (libfosspython.repGetRepPath())
+            return -1
 
+        # create a heartbeat thread so the scheduler doesn't kill the agent.
+        hb = libfosspython.Heartbeat(30.0) # print a heartbeat every 30 seconds
+        hb.start()
+        
         # get out agent id from the database
         agent_pk = db.getAgentKey('copyright', '1.0 source_hash(%s) model_hash(%s)' % (hex(hash(open(sys.argv[0]).read())), hex(hash(str(model)))), 'copyright agent')
 
