@@ -1,36 +1,22 @@
-copyright_analysis agent
-by adamrbates
+FOSSology Makefile - agents/copyright_analysis
 
-prototype.py: 
-    takes a list of training files, i.e. `find data/*.label > trainingdata`,
-    and a file to be analyzed.
+Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
 
-    The copyright holders are output on a lines with the following format:
-        ... token_{-2} token_{-1} * copyright holder
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
-    Example:
-        $ find data/ > trainingdata
-        $ ./prototype.py trainingdata /usr/share/doc/apache2/copyright
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    TODO:
-        * Convert into C.
-
-statement.py: 
-    takes a list of training files, i.e. `find data/*.label > trainingdata`,
-    and a file to be analyzed.
-
-    The copyright statements are output on a lines with the following format:
-        [start:end] copyright statement
-
-    Example:
-        $ find data/ > trainingdata
-        $ ./statement.py trainingdata /usr/share/doc/apache2/copyright
-
-    TODO:
-        * Convert into C.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 copyright.py:
-    This is the full blown copyright statement agent. Use ./copyright.py --help for more information.
+    This is the copyright statement/email/URL agent. Use ./copyright.py --help for more information.
 
 copyright_library.py:
     Holds all the important functions that the copyright scripts depend on.
