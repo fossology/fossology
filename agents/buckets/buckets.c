@@ -228,6 +228,7 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_
     bucketList = getContainerBuckets(pgConn, bucketDefArray, uploadtree_pk);
     rv = writeBuckets(pgConn, pfile_pk, uploadtree_pk, bucketList, 
                       agent_pk, writeDB, bucketDefArray->nomos_agent_pk);
+    if (bucketList) free(bucketList);
   }
 
   return rv;
@@ -379,7 +380,6 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
       vendor = PQgetvalue(resultpkg, 0, 2);
       srcpkgname = PQgetvalue(resultpkg, 0, 3);
     }
-    PQclear(resultpkg);
   }
 
   /* loop through all the bucket defs in this pool */
@@ -670,6 +670,9 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
     if (match && bucketDefArray->stopon == 'Y') break;
   }
 
+  if (resultpkg) PQclear(resultpkg);
+  free(pfile_rfpks);
+
   PQclear(result);
   return bucket_pk_list_start;
 }
@@ -817,6 +820,7 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray
     if (match && bucketDefArray->stopon == 'Y') break;
     bucketDefArray++;
   }
+  free(children_bucket_pk_list);
   return bucket_pk_list_start;
 }
 
@@ -857,14 +861,13 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
         if (pfile_pk)
         {
           snprintf(sql, sizeof(sql), 
-                 "insert into bucket_file (bucket_fk, pfile_fk, agent_fk, nomosagent_fk) \
-                  values(%d,%d,%d,%d)", *bucketList, pfile_pk, agent_pk, nomosagent_pk);
+                 "insert into bucket_file (bucket_fk, pfile_fk, agent_fk, nomosagent_fk) values(%d,%d,%d,%d)", *bucketList, pfile_pk, agent_pk, nomosagent_pk);
           result = PQexec(pgConn, sql);
-          if ((PQresultStatus(result) != PGRES_COMMAND_OK) && 
-              (PQresultStatus(result) != 23505))    // ignore duplicate insert error
+          if (PQresultStatus(result) != PGRES_COMMAND_OK)
           {
-            printf("ERROR: %s.%s.%d:  Failed to add bucket to bucket_file. %s:%s\n: %s\n",
-                    __FILE__,fcnName, __LINE__, PQresultErrorField(result, PG_DIAG_SQLSTATE),
+              // ignore duplicate insert error
+            printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file. %s\n: %s\n",
+                    __FILE__,fcnName, __LINE__, 
                     PQresultErrorMessage(result), sql);
             PQclear(result);
             rv = -1;
@@ -878,11 +881,11 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
                  "insert into bucket_container (bucket_fk, uploadtree_fk, agent_fk, nomosagent_fk) \
                   values(%d,%d,%d,%d)", *bucketList, uploadtree_pk, agent_pk, nomosagent_pk);
           result = PQexec(pgConn, sql);
-          if ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
-              (PQresultStatus(result) != 23505))    // ignore duplicate insert error
+          if (PQresultStatus(result) != PGRES_COMMAND_OK)
           {
-            printf("ERROR: %s.%s.%d:  Failed to add bucket to bucket_container. %s:%s\n: %s\n",
-                    __FILE__,fcnName, __LINE__, PQresultErrorField(result, PG_DIAG_SQLSTATE),
+             // ignore duplicate insert error
+            printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file. %s\n: %s\n",
+                    __FILE__,fcnName, __LINE__, 
                     PQresultErrorMessage(result), sql);
             PQclear(result);
             rv = -1;
@@ -1141,15 +1144,16 @@ int main(int argc, char **argv)
       if (checkPQresult(topresult, sqlbuf, agentDesc, __LINE__)) return -1;
       if (PQntuples(topresult) == 0) 
       {
-        printf("ERROR: %s.%s missing upload_pk %d\n", 
-               __FILE__, agentDesc, upload_pk);
+        printf("ERROR: %s.%s missing upload_pk %d.\nsql: %s", 
+               __FILE__, agentDesc, upload_pk, sqlbuf);
         PQclear(topresult);
         continue;
       }
       head_uploadtree_pk = atol(PQgetvalue(topresult, 0, 0));
       pfile_pk = atol(PQgetvalue(topresult, 0, 1));
       ufile_name = PQgetvalue(topresult, 0, 2);
-      ufile_mode = atoi(PQgetvalue(topresult, 0, 2));
+      ufile_mode = atoi(PQgetvalue(topresult, 0, 3));
+      PQclear(topresult);
     } /* end ReadFromStdin */
     else
     {
@@ -1290,11 +1294,13 @@ int main(int argc, char **argv)
       /* process top level container */
       processFile(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 
                   pfile_pk, ufile_mode, ufile_name, hasPrules);
-      result = PQexec(pgConn, "commit");
+      strcpy(sqlbuf, "commit");
     }
     else
-     result = PQexec(pgConn, "rollback");
-     if (checkPQcommand(result, "commit", __FILE__, __LINE__)) return -1;
+      strcpy(sqlbuf, "rollback");
+
+    result = PQexec(pgConn, sqlbuf);
+    if (checkPQcommand(result, sqlbuf, __FILE__, __LINE__)) return -1;
 
     /* Record analysis end in bucket_ars, the bucket audit trail. */
     if (ars_pk)
