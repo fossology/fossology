@@ -725,7 +725,10 @@ FUNCTION int updateLicenseFile(long rfPk) {
 
     result = PQexec(gl.pgConn, query);
 
-    if (PQresultStatus(result) != PGRES_COMMAND_OK) {
+    if ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
+        (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5)))
+    {
+        // ignoring duplicate constraint failure (23505)
         printf("ERROR: %s:%s:%d  %s  On: %s", 
           __FILE__, "updateLicenseFile()", __LINE__, PQresultErrorMessage(result), query);
         PQclear(result);
