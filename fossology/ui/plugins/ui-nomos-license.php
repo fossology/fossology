@@ -142,7 +142,7 @@ class ui_nomos_license extends FO_Plugin
     $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
     if ($AgentRec === false)
     {
-      echo "<h3>No data available</h3>";
+      echo "<h3>No data available.  Use Jobs > Agents to schedule a license scan.</h3>";
       return;
     }
     $Agent_pk = $AgentRec[0]['agent_fk'];
@@ -203,7 +203,7 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     }
     $VLic .= "</table>\n";
     $VLic .= "<p>\n";
-    $VLic .= "Hint: Click on license name to highlight were license is found in the file listing.<br>\n";
+    $VLic .= "Hint: Click on the license name to highlight where the license is found in the file listing.<br>\n";
     $VLic .= "Unique licenses: $UniqueLicCount<br>\n";
     $NetLic = $LicCount - $NoLicFound;
     $VLic .= "Total licenses: $NetLic";
