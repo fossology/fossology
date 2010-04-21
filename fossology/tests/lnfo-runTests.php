@@ -37,11 +37,14 @@ if($euid != 0) {
 $OK = array();
 print "installing fo-runTests into /usr/local/bin\n";
 $wd = getcwd();
-$rmCmd = "rm /usr/local/bin/fo-runTests";
+$rmCmd = "rm /usr/local/bin/fo-runTests 2>&1";
 $last = exec($rmCmd, $tossme, $rtn);
 if($rtn != 0) {
-	print "Error, could not remove /usr/local/bin/fo-runTests, remove by hand\n";
-	exit(1);
+	$OK = preg_grep('/No such file/', $tossme);
+  if(empty($OK)) {
+  	print "Error, could not remove /usr/local/bin/fo-runTests, remove by hand\n";
+  	exit(1);
+  }
 }
 $cmd = "ln -s $wd/fo-runTests.php /usr/local/bin/fo-runTests 2>&1";
 $last = exec($cmd, $tossme, $rtn);
