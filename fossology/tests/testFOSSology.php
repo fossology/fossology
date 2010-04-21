@@ -292,7 +292,7 @@ if (array_key_exists("a", $options)) {
 		$CopyLast = exec("fo-runTests -l \"`ls verify*`\" -n 'CopyRight Tests' >> $logFile 2>&1", $dummy, $CRrtn);
 		LogAndPrint($LF, "\n");
 
-	  fclose($LF);
+		fclose($LF);
 		verifyUploads($logFile);
 		if (!is_null($rtn = saveResults())) {
 			print "ERROR! could not save the test results, please save by hand\n";
@@ -308,6 +308,11 @@ if (array_key_exists("a", $options)) {
 			//      "bob.gobeille@hp.com dong.ma@hp.com";
 			$last = exec("./textReport.php -f $reportHome |
     mailx -s \"test results\" $TO ",$tossme, $rptGen);
+		}
+		$last = system("./textReport.php -f $reportHome", $rtn);
+		if($last === FALSE) {
+			print "Error! Counld not generate text summary report\n";
+			exit(1);
 		}
 	}
 	exit(0);

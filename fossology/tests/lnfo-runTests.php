@@ -29,22 +29,25 @@
 /* Check for Super User */
 $euid = posix_getuid();
 if($euid != 0) {
-  print "Error, this script must be run as root\n";
-  exit(1);
+	print "Error, this script must be run as root\n";
+	exit(1);
 }
 
 /* Create sym link to fo-runTests */
 $OK = array();
 print "installing fo-runTests into /usr/local/bin\n";
 $wd = getcwd();
+$rmCmd = "rm /usr/local/bin/fo-runTests";
+$last = exec($rmCmd, $tossme, $rtn);
+if($rtn != 0) {
+	print "Error, could not remove /usr/local/bin/fo-runTests, remove by hand\n";
+	exit(1);
+}
 $cmd = "ln -s $wd/fo-runTests.php /usr/local/bin/fo-runTests 2>&1";
 $last = exec($cmd, $tossme, $rtn);
 if($rtn != 0) {
-  $OK = preg_grep('/File exists/', $tossme);
-  if(empty($OK)) {
-    print "Error, could not create sym link in /usr/local/bin for fo-runTests\n";
-    exit(1);
-  }
+	print "Error, could not create sym link in /usr/local/bin for fo-runTests\n";
+	exit(1);
 }
 exit(0);
 ?>
