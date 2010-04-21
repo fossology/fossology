@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class copyright_hist extends FO_Plugin
 {
   var $Name       = "copyrighthist";
-  var $Title      = "Copyright/Email/URL Browser";
+  var $Title      = "Copyright/Email/Url Browser";
   var $Version    = "1.0";
   var $Dependency = array("db","browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -58,13 +58,13 @@ class copyright_hist extends FO_Plugin
     {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-       menu_insert("Browse::Copyright/Email/URL",1);
+       menu_insert("Browse::Copyright/Email/Url",1);
        menu_insert("Browse::[BREAK]",100);
        //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
       }
       else
       {
-       menu_insert("Browse::Copyright/Email/URL",10,$URI,"View copyright/email/url histogram");
+       menu_insert("Browse::Copyright/Email/Url",10,$URI,"View copyright/email/url histogram");
       }
     }
   } // RegisterMenus()
@@ -105,7 +105,7 @@ class copyright_hist extends FO_Plugin
     else
       $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
-    /*  Get the counts for each license under this UploadtreePk*/
+    /*  Get the counts under this UploadtreePk*/
     $sql = "SELECT DISTINCT ON (count(content),content, hash, type) content, hash, type, count(content) as copyright_count
               from copyright,
                   (SELECT distinct(pfile_fk) as PF from uploadtree 
@@ -217,7 +217,8 @@ class copyright_hist extends FO_Plugin
 
     /*******    File Listing     ************/
     /* Get ALL the items under this Uploadtree_pk */
-    $Children = DirGetList($upload_pk,$Uploadtree_pk);
+    //$Children = DirGetList($upload_pk,$Uploadtree_pk);
+    $Children = GetNonArtifactChildren($Uploadtree_pk);
     $ChildCount=0;
     $ChildLicCount=0;
     $ChildDirCount=0; /* total number of directory or containers */
