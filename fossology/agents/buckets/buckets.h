@@ -110,8 +110,6 @@ int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int upload
 int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
                  int *bucketList, int agent_pk, int writeDB, int nomosagent_pk);
 
-int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk, int bucketpool_pk);
-
 int matchAnyLic(PGresult *result, int numLics, regex_t *compRegex);
 
 
@@ -120,6 +118,8 @@ int arrayAinB        (int *arrayA, int *arrayB);
 int intAinB          (int intA, int *arrayB);
 int validate_pk      (PGconn *pgConn, char *sql);
 void Usage           (char *Name);
+int processed        (PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk, int bucketpool_pk);
+int UploadProcessed  (PGconn *pgConn, int bucketagent_pk, int nomosagent_pk, int pfile_pk, int uploadtree_pk, int upload_pk, int bucketpool_pk);
 
 /* inits.c */
 pbucketdef_t initBuckets   (PGconn *pgConn, int bucketpool_pk, cacheroot_t *pcroot);

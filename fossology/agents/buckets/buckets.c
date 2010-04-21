@@ -870,9 +870,10 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
           snprintf(sql, sizeof(sql), 
                  "insert into bucket_file (bucket_fk, pfile_fk, agent_fk, nomosagent_fk) values(%d,%d,%d,%d)", *bucketList, pfile_pk, agent_pk, nomosagent_pk);
           result = PQexec(pgConn, sql);
-          if (PQresultStatus(result) != PGRES_COMMAND_OK)
+          if ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
+              (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5)))
           {
-              // ignore duplicate insert error
+            // ignore duplicate constraint failure (23505)
             printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file. %s\n: %s\n",
                     __FILE__,fcnName, __LINE__, 
                     PQresultErrorMessage(result), sql);
@@ -888,9 +889,10 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
                  "insert into bucket_container (bucket_fk, uploadtree_fk, agent_fk, nomosagent_fk) \
                   values(%d,%d,%d,%d)", *bucketList, uploadtree_pk, agent_pk, nomosagent_pk);
           result = PQexec(pgConn, sql);
-          if (PQresultStatus(result) != PGRES_COMMAND_OK)
+          if ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
+              (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5)))
           {
-             // ignore duplicate insert error
+            // ignore duplicate constraint failure (23505)
             printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file. %s\n: %s\n",
                     __FILE__,fcnName, __LINE__, 
                     PQresultErrorMessage(result), sql);
@@ -910,50 +912,6 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
 
   if (!writeDB) printf("\n");
   return rv;
-}
-
-
-/****************************************************
- processed
-
- Has this pfile or uploadtree_pk already been bucket processed?
- This only works if the bucket has been recorded in table 
- bucket_file, or bucket_container.
-
- @param PGconn *pgConn  postgresql connection
- @param int *agent_pk   agent ID
- @param int pfile_pk  
- @param int uploadtree_pk  
- @param int bucketpool_pk  
-
- @return 1=yes, 0=no
-****************************************************/
-FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk,
-                       int bucketpool_pk)
-{
-  char *fcnName = "processed";
-  int numRecs=0;
-  char sqlbuf[512];
-  PGresult *result;
-
-  /* Skip file if it has already been processed for buckets. 
-     See if this pfile or uploadtree_pk has any buckets. */
-  sprintf(sqlbuf,
-    "select bf_pk from bucket_file, bucket_def \
-      where pfile_fk=%d and agent_fk=%d and bucketpool_fk=%d \
-            and bucket_fk=bucket_pk \
-     union \
-     select bf_pk from bucket_container, bucket_def \
-      where uploadtree_fk=%d and agent_fk=%d and bucketpool_fk=%d \
-            and bucket_fk=bucket_pk limit 1",
-    pfile_pk, agent_pk, bucketpool_pk, uploadtree_pk, agent_pk, bucketpool_pk);
-  result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return -1;
-  numRecs = PQntuples(result);
-  PQclear(result);
-
-  if (debug) printf("%s: returning %d, for pfile_pk %d, uploadtree_pk %d\n",fcnName,numRecs,pfile_pk, uploadtree_pk);
-  return numRecs;
 }
 
 
@@ -1187,21 +1145,6 @@ int main(int argc, char **argv)
       PQclear(topresult);
     }
 
-    /* at this point we know:
-     * bucketpool_pk, bucket agent_pk, upload_pk, pfile_pk, head_uploadtree_pk
-     * (the uploadtree_pk of the head tree to scan)
-     */
-
-    /* Has the uploadtree already been processed?  If so, we are done.
-       Don't even bother to create a bucket_ars entry.
-     */ 
-    if (processed(pgConn, agent_pk, pfile_pk, head_uploadtree_pk, bucketpool_pk)) 
-    {
-      printf("LOG: Duplicate request for bucket agent to process uploadtree_pk: %d, bucketpool_pk: %d, bucket agent_pk: %d, pfile_pk: %d ignored.\n",
-             head_uploadtree_pk, bucketpool_pk, agent_pk, pfile_pk);
-      continue;
-    }
-
     /* Find the most recent nomos data for this upload.  That's what we want to use
          to process the buckets.
      */
@@ -1211,6 +1154,26 @@ int main(int argc, char **argv)
       printf("WARNING: Bucket agent called on treeitem (%d), but the latest nomos agent hasn't created any license data for this tree.\n",
             head_uploadtree_pk);
       continue;
+    }
+
+    /* at this point we know:
+     * bucketpool_pk, bucket agent_pk, nomos agent_pk, upload_pk, 
+     * pfile_pk, and head_uploadtree_pk (the uploadtree_pk of the head tree to scan)
+     */
+
+    /* Has the upload already been processed?  If so, we are done.
+       Don't even bother to create a bucket_ars entry.
+     */ 
+    switch (UploadProcessed(pgConn, agent_pk, nomos_agent_pk, pfile_pk, head_uploadtree_pk, upload_pk, bucketpool_pk)) 
+    {
+      case 1:  /* upload has already been processed */
+        printf("LOG: Duplicate request for bucket agent to process upload_pk: %d, uploadtree_pk: %d, bucketpool_pk: %d, bucket agent_pk: %d, pfile_pk: %d ignored.\n",
+             upload_pk, head_uploadtree_pk, bucketpool_pk, agent_pk, pfile_pk);
+        continue;
+      case -1: /* SQL error, UploadProcessed() wrote error message */
+        continue; 
+      case 0:  /* upload has not been processed */
+        break;
     }
 
 
