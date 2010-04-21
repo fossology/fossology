@@ -21,6 +21,7 @@
  */
 
 #include "buckets.h"
+extern int debug;
 
 /****************************************************
  arrayAinB
@@ -127,3 +128,92 @@ FUNCTION void Usage(char *Name)
   printf("         -u is used.  One of these is required.\n");
   printf("  NOTE: If none of -nptu are specified, the bucketpool_pk and upload_pk are read from stdin, one comma delimited pair per line.  For example, 'bppk=123, upk=987' where 123 is the bucketpool_pk and 987 is the upload_pk.  This is the normal execution from the scheduler.\n");
 } /* Usage() */
+
+
+/****************************************************
+ processed
+
+ Has this pfile or uploadtree_pk already been bucket processed?
+ This only works if the bucket has been recorded in table 
+ bucket_file, or bucket_container.
+
+ @param PGconn *pgConn  postgresql connection
+ @param int *agent_pk   agent ID
+ @param int pfile_pk  
+ @param int uploadtree_pk  
+ @param int bucketpool_pk  
+
+ @return 1=yes, 0=no
+****************************************************/
+FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtree_pk,
+                       int bucketpool_pk)
+{
+  char *fcnName = "processed";
+  int numRecs=0;
+  char sqlbuf[512];
+  PGresult *result;
+
+  /* Skip file if it has already been processed for buckets. 
+     See if this pfile or uploadtree_pk has any buckets. */
+  sprintf(sqlbuf,
+    "select bf_pk from bucket_file, bucket_def \
+      where pfile_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+            and bucket_fk=bucket_pk \
+     union \
+     select bf_pk from bucket_container, bucket_def \
+      where uploadtree_fk=%d and agent_fk=%d and bucketpool_fk=%d \
+            and bucket_fk=bucket_pk limit 1",
+    pfile_pk, agent_pk, bucketpool_pk, uploadtree_pk, agent_pk, bucketpool_pk);
+  result = PQexec(pgConn, sqlbuf);
+  if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return -1;
+  numRecs = PQntuples(result);
+  PQclear(result);
+
+  if (debug) printf("%s: returning %d, for pfile_pk %d, uploadtree_pk %d\n",fcnName,numRecs,pfile_pk, uploadtree_pk);
+  return numRecs;
+}
+
+
+/****************************************************
+ UploadProcessed
+
+ Has this upload already been bucket processed?
+ This function checkes buckets_ars to see if the upload has
+ been processed.  
+ 
+ @param PGconn *pgConn  postgresql connection
+ @param int bucketagent_pk   bucket agent ID
+ @param int nomosagent_pk    nomos agent ID
+ @param int pfile_pk  
+ @param int uploadtree_pk  
+ @param int bucketpool_pk  
+
+ @return 1=yes upload has been processed, 
+         0=upload has not been processed
+ 
+ Note: This could also cross check with the bucket_file
+ and bucket_container recs but doesn't at this time.  
+ This is the reason for the unused function args.
+****************************************************/
+FUNCTION int UploadProcessed(PGconn *pgConn, int bucketagent_pk, int nomosagent_pk, 
+                             int pfile_pk, int uploadtree_pk,
+                             int upload_pk, int bucketpool_pk)
+{
+  char *fcnName = "UploadProcessed";
+  int numRecs=0;
+  char sqlbuf[512];
+  PGresult *result;
+
+  /* Check bucket_ars to see if there has been a successful run */
+  sprintf(sqlbuf,
+    "select ars_pk from bucket_ars \
+      where agent_fk=%d and nomosagent_fk=%d and upload_fk=%d and bucketpool_fk=%d \
+            and ars_success=true limit 1",
+     bucketagent_pk, nomosagent_pk,  upload_pk, bucketpool_pk);
+  result = PQexec(pgConn, sqlbuf);
+  if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return -1;
+  numRecs = PQntuples(result);
+  PQclear(result);
+
+  return numRecs;
+}
