@@ -153,7 +153,7 @@ function DirGetNonArtifact($UploadtreePk)
  ************************************************************/
 function _DirCmp($a,$b)
 {
-  return(strcmp($a['ufile_name'],$b['ufile_name']));
+  return(strcasecmp($a['ufile_name'],$b['ufile_name']));
 } // _DirCmp()
 
 /************************************************************
@@ -433,6 +433,8 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
 function GetNonArtifactChildren($uploadtree_pk)
 {
   global $PG_CONN;
+  
+$foundChildren = array();
 
   /* Find all the children */
   $sql = "select uploadtree.*, pfile_size from uploadtree 
@@ -453,14 +455,16 @@ function GetNonArtifactChildren($uploadtree_pk)
       if (Iscontainer($child['ufile_mode']))
       {
         unset($children[$key]);
-        $children = array_merge($children, GetNonArtifactChildren($child['uploadtree_pk']));
+        $foundChildren = array_merge($foundChildren, GetNonArtifactChildren($child['uploadtree_pk']));
       }
       else
         unset($children[$key]);
     }
+    else
+      $foundChildren[$key] = $child;
   }
-  usort($children, '_DirCmp');
-  return $children;
+  uasort($foundChildren, '_DirCmp');
+  return $foundChildren;
 }
 
 ?>
