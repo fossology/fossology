@@ -142,7 +142,7 @@ class ui_nomos_license extends FO_Plugin
     $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
     if ($AgentRec === false)
     {
-      echo "No data available";
+      echo "<h3>No data available</h3>";
       return;
     }
     $Agent_pk = $AgentRec[0]['agent_fk'];
