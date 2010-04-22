@@ -1,3 +1,10 @@
+fossology (1.1.1~20100421) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * 
+
+ -- Build User <build@cranky.manage>  Wed, 21 Apr 2010 20:45:40 -0700
+
 fossology (1.1.1~SVNBUILD-1) unstable; urgency=low
 
   * Unofficial SVN build.
