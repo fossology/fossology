@@ -87,8 +87,8 @@ class verifySimpletest extends fossologyTestCase
        "verifySimpleTest FAILED! did not find $name\n");
 		$this->assertTrue($this->myassertText($page, "/>View</"),
        "verifySimpletest FAILED! >View< not found\n");
-		$this->assertTrue($this->myassertText($page, "/>Meta</"),
-       "verifySimpletest FAILED! >Meta< not found\n");
+		$this->assertTrue($this->myassertText($page, "/>Info</"),
+       "verifySimpletest FAILED! >Info< not found\n");
 		$this->assertTrue($this->myassertText($page, "/>Download</"),
        "verifySimpletest FAILED! >Download< not found\n");
 
@@ -100,11 +100,11 @@ class verifySimpletest extends fossologyTestCase
 		$this->assertTrue($this->myassertText($page, "/1 item/"),
       "verifySimpletest FAILED! '1 item' not found\n");
 
-		/* Select the License link to View License Historgram */
+		/* Select the link to get copyright info */
 		$browse = new parseBrowseMenu($page);
 		$mini = new parseMiniMenu($page);
 		$miniMenu = $mini->parseMiniMenu();
-		$url = makeUrl($this->host, $miniMenu['Copyright/Email/Url']);
+		$url = makeUrl($this->host, $miniMenu['Copyright/Email/URL']);
 		if($url === NULL) { $this->fail("verifySimpletest Failed, host is not set"); }
 
 		$page = $this->mybrowser->get($url);
@@ -122,13 +122,16 @@ class verifySimpletest extends fossologyTestCase
 									"the page, There should be one\n");
 		}
 		else {
+			$total = 0;
 			print "\$urlStd = array(\n";
 			foreach($ct->hList as $list) 
 			{
 				$cs = cleanString($list['textOrLink']);
-				print "'$cs' => $list[count],\n";
+				print "\t\t'$cs' => $list[count],\n";
+				$total += (int)$list['count'];
 			}
 			print ");\n";
+			print "Total URLs: $total\n";
 		}
 	}
 }
