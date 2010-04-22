@@ -57,16 +57,110 @@ class ui_license_list extends FO_Plugin {
     $Upload = GetParm("upload", PARM_INTEGER);
     if (!empty($Item) && !empty($Upload)) {
       if (GetParm("mod", PARM_STRING) == $this->Name) {
-        menu_insert("Browse::License List", 1);
+        menu_insert("Browse::Nomos License List", 1);
 //        menu_insert("Browse::[BREAK]", 100);
-//        menu_insert("Browse::CSV", 101, $URI . "&output=csv");
+        menu_insert("Browse::Nomos License List Download", 1, $URI . "&output=dltext");
       }
       else {
         menu_insert("Browse::Nomos License List", 1, $URI, "Nomos license listing");
+        menu_insert("Browse::Nomos License List Download", 1, $URI . "&output=dltext");
       }
     }
   } // RegisterMenus()
 
+
+  /***********************************************************
+  OutputOpen(): This function is called when user output is
+  requested.  This function is responsible for assigning headers.
+  If $Type is "HTML" then generate an HTTP header.
+  If $Type is "XML" then begin an XML header.
+  If $Type is "Text" then generate a text header as needed.
+  The $ToStdout flag is "1" if output should go to stdout, and
+  0 if it should be returned as a string.  (Strings may be parsed
+  and used by other plugins.)
+  ***********************************************************/
+  function OutputOpen($Type, $ToStdout) {
+    global $Plugins;
+    if ($this->State != PLUGIN_STATE_READY) {
+      return (0);
+    }
+    if (GetParm("output", PARM_STRING) == 'dltext') {
+      $Type = 'dltext';
+    }
+    $this->OutputType = $Type;
+    $this->OutputToStdout = $ToStdout;
+    $Item = GetParm("item", PARM_INTEGER);
+    if (empty($Item)) {
+      return;
+    }
+    switch ($this->OutputType) {
+      case "dltext":
+        $this->NoHeader = 1;
+        $Path = Dir2Path($Item);
+        $Name = $Path[count($Path) - 1]['ufile_name'] . ".txt";
+        header("Content-Type: text");
+        header('Content-Disposition: attachment; filename="' . $Name . '"');
+        $V = "";
+      break;
+      case "XML":
+        $V = "<xml>\n";
+      break;
+      case "HTML":
+        header('Content-type: text/html');
+        if ($this->NoHTML) {
+          return;
+        }
+        $V = "";
+        if (($this->NoMenu == 0) && ($this->Name != "menus")) {
+          $Menu = & $Plugins[plugin_find_id("menus") ];
+          $Menu->OutputSet($Type, $ToStdout);
+        }
+        else {
+          $Menu = NULL;
+        }
+        /* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
+        $V.= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
+        // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
+        // $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
+        // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "xhtml1-strict.dtd">' . "\n";
+        $V.= "<html>\n";
+        $V.= "<head>\n";
+        if ($this->NoHeader == 0) {
+          /** Known bug: DOCTYPE "should" be in the HEADER
+           and the HEAD tags should come first.
+           Also, IE will ignore <style>...</style> tags that are NOT
+           in a <head>...</head> block.
+           *
+           */
+          if (!empty($this->Title)) {
+            $V.= "<title>" . htmlentities($this->Title) . "</title>\n";
+          }
+          $V.= "<link rel='stylesheet' href='fossology.css'>\n";
+          print $V;
+          $V = "";
+          if (!empty($Menu)) {
+            print $Menu->OutputCSS();
+          }
+          $V.= "</head>\n";
+          $V.= "<body class='text'>\n";
+          print $V;
+          $V = "";
+          if (!empty($Menu)) {
+            $Menu->Output($this->Title);
+          }
+        }
+      break;
+      case "Text":
+      break;
+      default:
+      break;
+    }
+    if (!$this->OutputToStdout) {
+      return ($V);
+    }
+    print $V;
+    return;
+  } // OutputOpen()
 
   /***********************************************************
   Output(): This function returns the scheduler status.
