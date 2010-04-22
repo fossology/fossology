@@ -79,6 +79,7 @@ function checkStandard($list, $standard, $testName)
 
 	foreach($list as $uiData) {
 		$cleanText = cleanString($uiData['textOrLink']);
+		print "ckSTDB: cleanText is:$cleanText\n";
 		if (array_key_exists($cleanText, $standard)) {
 			$stdCount = $standard[$cleanText];
 			if($stdCount != $uiData['count'])
@@ -89,7 +90,7 @@ function checkStandard($list, $standard, $testName)
 		}
 		else
 		{
-			$results[] = "$testName FAILED! $cleanText did not meet any Standard\n";
+			$results[] = "$testName FAILED! $cleanText did not meet the test Standard\n";
 		}
 	}
 	//print "ckStdDB: results are:\n";print_r($results) . "\n";

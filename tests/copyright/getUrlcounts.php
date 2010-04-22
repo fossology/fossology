@@ -122,7 +122,7 @@ class verifySimpletest extends fossologyTestCase
 			{
 				$cs = cleanString($list['textOrLink']);
 				$findCmd = "find /usr/local/simpletest -type f -print | " .
-				"xargs grep -F $cs";
+				"xargs grep  \"'$cs'\"";
 				$countCmd = $findCmd . ' | wc -l';
 				
 				$flast = exec("$findCmd", $foutput, $frtn);
