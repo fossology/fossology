@@ -901,6 +901,8 @@ int	main	(int argc, char *argv[])
 
       if (Parm[0] != '\0') 
       {
+	memset(glb_rpmpi,0,sizeof(struct rpmpkginfo));
+	memset(glb_debpi,0,sizeof(struct debpkginfo));
 	ParseSchedInput(Parm,glb_rpmpi,glb_debpi);
         if (PKG_RPM) {
           repFile = RepMkPath("files", glb_rpmpi->pFile);
