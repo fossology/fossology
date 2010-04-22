@@ -20,7 +20,7 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 DEPS=$(TOP)/Makefile.deps
 
-COPYRIGHTPATH=$(DESTDIR)$(AGENTDIR)/copyright
+COPYRIGHTPATH=$(AGENTDIR)/copyright
 
 all: model.dat vars.py
 
@@ -29,25 +29,25 @@ model.dat: run.py vars.py copyright.py copyright_library.py data.txt
 	
 install: all
 	if \
-		test -d $(COPYRIGHTPATH); \
+		test -d $(DESTDIR)$(COPYRIGHTPATH); \
 	then \
-		$(INSTALL_PROGRAM) run.py $(COPYRIGHTPATH)/run.py; \
-		$(INSTALL_PROGRAM) vars.py $(COPYRIGHTPATH)/vars.py; \
-		$(INSTALL_PROGRAM) copyright.py $(COPYRIGHTPATH)/copyright.py; \
-		$(INSTALL_PROGRAM) copyright_library.py $(COPYRIGHTPATH)/copyright_library.py; \
+		$(INSTALL_PROGRAM) run.py $(DESTDIR)$(COPYRIGHTPATH)/run.py; \
+		$(INSTALL_PROGRAM) vars.py $(DESTDIR)$(COPYRIGHTPATH)/vars.py; \
+		$(INSTALL_PROGRAM) copyright.py $(DESTDIR)$(COPYRIGHTPATH)/copyright.py; \
+		$(INSTALL_PROGRAM) copyright_library.py $(DESTDIR)$(COPYRIGHTPATH)/copyright_library.py; \
 		$(INSTALL_PROGRAM) model.dat $(DESTDIR)$(DATADIR)/model.dat; \
 	else \
-		mkdir -p $(COPYRIGHTPATH); \
-		$(INSTALL_PROGRAM) run.py $(COPYRIGHTPATH)/run.py; \
-		$(INSTALL_PROGRAM) vars.py $(COPYRIGHTPATH)/vars.py; \
-		$(INSTALL_PROGRAM) copyright.py $(COPYRIGHTPATH)/copyright.py; \
-		$(INSTALL_PROGRAM) copyright_library.py $(COPYRIGHTPATH)/copyright_library.py; \
+		mkdir -p $(DESTDIR)$(COPYRIGHTPATH); \
+		$(INSTALL_PROGRAM) run.py $(DESTDIR)$(COPYRIGHTPATH)/run.py; \
+		$(INSTALL_PROGRAM) vars.py $(DESTDIR)$(COPYRIGHTPATH)/vars.py; \
+		$(INSTALL_PROGRAM) copyright.py $(DESTDIR)$(COPYRIGHTPATH)/copyright.py; \
+		$(INSTALL_PROGRAM) copyright_library.py $(DESTDIR)$(COPYRIGHTPATH)/copyright_library.py; \
 		$(INSTALL_PROGRAM) model.dat $(DESTDIR)$(DATADIR)/model.dat; \
 	fi
 	make -C ui-plugin install
 
 uninstall: 
-	rm -rf $(COPYRIGHTPATH)
+	rm -rf $(DESTDIR)$(COPYRIGHTPATH)
 	rm -rf $(DESTDIR)$(DATADIR)/model.dat
 	make -C ui-plugin uninstall
 
