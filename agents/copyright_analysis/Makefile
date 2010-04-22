@@ -35,20 +35,20 @@ install: all
 		$(INSTALL_PROGRAM) vars.py $(COPYRIGHTPATH)/vars.py; \
 		$(INSTALL_PROGRAM) copyright.py $(COPYRIGHTPATH)/copyright.py; \
 		$(INSTALL_PROGRAM) copyright_library.py $(COPYRIGHTPATH)/copyright_library.py; \
-		$(INSTALL_PROGRAM) model.dat $(DATADIR)/model.dat; \
+		$(INSTALL_PROGRAM) model.dat $(DESTDIR)$(DATADIR)/model.dat; \
 	else \
 		mkdir -p $(COPYRIGHTPATH); \
 		$(INSTALL_PROGRAM) run.py $(COPYRIGHTPATH)/run.py; \
 		$(INSTALL_PROGRAM) vars.py $(COPYRIGHTPATH)/vars.py; \
 		$(INSTALL_PROGRAM) copyright.py $(COPYRIGHTPATH)/copyright.py; \
 		$(INSTALL_PROGRAM) copyright_library.py $(COPYRIGHTPATH)/copyright_library.py; \
-		$(INSTALL_PROGRAM) model.dat $(DATADIR)/model.dat; \
+		$(INSTALL_PROGRAM) model.dat $(DESTDIR)$(DATADIR)/model.dat; \
 	fi
 	make -C ui-plugin install
 
 uninstall: 
 	rm -rf $(COPYRIGHTPATH)
-	rm -rf $(DATADIR)/model.dat
+	rm -rf $(DESTDIR)$(DATADIR)/model.dat
 	make -C ui-plugin uninstall
 
 test: all
