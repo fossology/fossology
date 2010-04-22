@@ -16,7 +16,14 @@ install:
 	$(INSTALL_PROGRAM) oneshot.php $(DESTDIR)$(WEBDIR)/plugins/copyright/oneshot.php
 	
 uninstall:
-	rmdir $(DESTDIR)$(WEBDIR)/plugins/
+	rm -f $(DESTDIR)$(WEBDIR)/plugins/copyright.php
 	rm -rf $(DESTDIR)$(WEBDIR)/plugins/copyright/
+	@if [ -d $(DESTDIR)$(WEBDIR)/plugins ]; then \
+   	   if [ "`ls -A $(DESTDIR)$(WEBDIR)/plugins`" ]; then \
+	      echo "WARNING: $(DESTDIR)$(WEBDIR)/plugins not empty, not removing";\
+           else \
+              rmdir $(DESTDIR)$(WEBDIR)/plugins; \
+           fi; \
+        fi
     
 .PHONY: install uninstall
