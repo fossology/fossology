@@ -28,22 +28,14 @@ model.dat: run.py vars.py copyright.py copyright_library.py data.txt
 	./run.py --model model.dat --training data.txt
 	
 install: all
-	if \
-		test -d $(DESTDIR)$(COPYRIGHTPATH); \
-	then \
-		$(INSTALL_PROGRAM) run.py $(DESTDIR)$(COPYRIGHTPATH)/run.py; \
-		$(INSTALL_PROGRAM) vars.py $(DESTDIR)$(COPYRIGHTPATH)/vars.py; \
-		$(INSTALL_PROGRAM) copyright.py $(DESTDIR)$(COPYRIGHTPATH)/copyright.py; \
-		$(INSTALL_PROGRAM) copyright_library.py $(DESTDIR)$(COPYRIGHTPATH)/copyright_library.py; \
-		$(INSTALL_PROGRAM) model.dat $(DESTDIR)$(DATADIR)/model.dat; \
-	else \
-		mkdir -p $(DESTDIR)$(COPYRIGHTPATH); \
-		$(INSTALL_PROGRAM) run.py $(DESTDIR)$(COPYRIGHTPATH)/run.py; \
-		$(INSTALL_PROGRAM) vars.py $(DESTDIR)$(COPYRIGHTPATH)/vars.py; \
-		$(INSTALL_PROGRAM) copyright.py $(DESTDIR)$(COPYRIGHTPATH)/copyright.py; \
-		$(INSTALL_PROGRAM) copyright_library.py $(DESTDIR)$(COPYRIGHTPATH)/copyright_library.py; \
-		$(INSTALL_PROGRAM) model.dat $(DESTDIR)$(DATADIR)/model.dat; \
+	if [ ! -d "$(DESTDIR)$(COPYRIGHTPATH)" ] ; then \
+		mkdir -p "$(DESTDIR)$(COPYRIGHTPATH)"; \
 	fi
+	$(INSTALL_PROGRAM) run.py $(DESTDIR)$(COPYRIGHTPATH)/run.py
+	$(INSTALL_PROGRAM) vars.py $(DESTDIR)$(COPYRIGHTPATH)/vars.py
+	$(INSTALL_PROGRAM) copyright.py $(DESTDIR)$(COPYRIGHTPATH)/copyright.py
+	$(INSTALL_PROGRAM) copyright_library.py $(DESTDIR)$(COPYRIGHTPATH)/copyright_library.py
+	$(INSTALL_PROGRAM) model.dat $(DESTDIR)$(DATADIR)/model.dat
 	make -C ui-plugin install
 
 uninstall: 
