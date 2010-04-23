@@ -278,7 +278,7 @@ class ui_buckets extends FO_Plugin
       if (!empty($C['pfile_fk']) && !empty($ModLicView))
       {
         $LinkUri = Traceback_uri();
-        $LinkUri .= "?mod=view-license&bapk=$bucketagent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
+        $LinkUri .= "?mod=view-license&napk=$nomosagent_pk&bapk=$bucketagent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
       }
       else
       {
