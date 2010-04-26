@@ -430,9 +430,7 @@ FUTURE advanced interface allowing user to select dataset (agent version)
       default:
       }
 
-      /*  Cache Report */
       $Cached = false;
-      ReportCachePut($CacheKey, $V);
     }
     else
       $Cached = true;
@@ -442,7 +440,15 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     $Time = microtime(true) - $uTime;  // convert usecs to secs
     printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
 
-    if ($Cached) echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
+    if ($Cached) 
+    {
+      echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
+    }
+    else
+    {
+      /*  Cache Report if this took longer than 1/2 second*/
+      if ($Time > 0.5) ReportCachePut($CacheKey, $V);
+    }
     return;
   }
 
