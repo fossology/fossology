@@ -432,7 +432,6 @@ class ui_buckets extends FO_Plugin
     }
 
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
-/********  disable cache to see if this is fast enough without it *****
     $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder")) . "&show=$Show";
     if ($this->UpdCache != 0)
     {
@@ -441,7 +440,6 @@ class ui_buckets extends FO_Plugin
     }
     else
       $V = ReportCacheGet($CacheKey);
-***********************************************/
 
     if (empty($V) )  // no cache exists
     {
@@ -470,11 +468,7 @@ class ui_buckets extends FO_Plugin
       default:
       }
 
-      /*  Cache Report */
-/********  disable cache to see if this is fast enough without it *****
       $Cached = false;
-      ReportCachePut($CacheKey, $V);
-**************************************************/
     }
     else
       $Cached = true;
@@ -484,9 +478,14 @@ class ui_buckets extends FO_Plugin
     $Time = microtime(true) - $uTime;  // convert usecs to secs
     printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
 
-/********  disable cache to see if this is fast enough without it *****
-    if ($Cached) echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
-**************************************************/
+    if ($Cached) 
+      echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
+    else
+    {
+      /*  Cache Report if this took longer than 1/2 second*/
+      if ($Time > 0.5) ReportCachePut($CacheKey, $V);
+    }
+
     return;
   }
 
