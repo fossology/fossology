@@ -191,7 +191,7 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     $VLic .= "<table border=1 width='100%' id='lichistogram'>\n";
     $VLic .= "<tr><th width='10%'>Count</th>";
     $VLic .= "<th width='10%'>Files</th>";
-    $VLic .= "<th>License</th></tr>\n";
+    $VLic .= "<th align=left>License Name</th></tr>\n";
 
     while ($row = pg_fetch_assoc($result))
     {
