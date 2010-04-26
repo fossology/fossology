@@ -47,7 +47,7 @@
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif /* SVN_REV */
 
-#define MAXCMD 4096 
+#define MAXCMD 5000
 
 #define NO      0
 #define YES     1
