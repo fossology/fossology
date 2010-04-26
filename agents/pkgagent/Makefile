@@ -12,7 +12,7 @@ CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 
 all: $(EXE)
 $(EXE): %: %.c $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	if [[ `rpm --version|awk '{print $$3}'` < "4.5" ]] ; then \
+	if [ `rpm --version|awk '{print $$3}'` \< "4.5" ] ; then \
 	$(CC) $< $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
 	else \
 	$(CC) $< $(CFLAGS_LOCAL_RPM) -o $@; \
