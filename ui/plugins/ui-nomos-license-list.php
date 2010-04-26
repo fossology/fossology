@@ -173,8 +173,12 @@ class ui_license_list extends FO_Plugin {
     if ($this->State != PLUGIN_STATE_READY)  return (0);
     $V = "";
     $uploadtree_pk = GetParm("item", PARM_INTEGER);
-    $upload_pk = GetParm("upload", PARM_INTEGER);
     if (empty($uploadtree_pk)) return;
+    $upload_pk = GetParm("upload", PARM_INTEGER);
+    if (GetParm("output", PARM_STRING) == 'dltext')
+      $dltext = true;
+    else
+      $dltext = false;
 
     /* get last nomos agent_pk that has data for this upload */
     $Agent_name = "nomos";
@@ -214,7 +218,11 @@ class ui_license_list extends FO_Plugin {
         if (!empty($filepath)) $filepath .= "/";
         $filepath .= $uploadtreeRow['ufile_name'];
       }
-      $V .= $filepath . ": ". GetFileLicenses_string($agent_pk, 0, $row['uploadtree_pk']) . "<br>";
+      $V .= $filepath . ": ". GetFileLicenses_string($agent_pk, 0, $row['uploadtree_pk']) ;
+      if ($dltext)
+        $V .= "\n";
+      else 
+        $V .= "<br>";
     } 
     pg_free_result($outerresult);
     
