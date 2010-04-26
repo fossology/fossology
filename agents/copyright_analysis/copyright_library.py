@@ -55,13 +55,13 @@ def findall_erase(RE, text):
 months = ['JAN','FEB','MAR','MAY','APR','JUL','JUN','AUG','OCT','SEP','NOV','DEC','January', 'February', 'March', 'April', 'June', 'July', 'August', 'September', 'SEPT', 'October', 'November', 'December',]
 RE_ANDOR = re.compile('and\/or',re.I)
 RE_COMMENT = re.compile('\s([\*\/\#\%\!\@]+)')
-RE_EMAIL = re.compile('([A-Za-z0-9\-_\.\+]+@[A-Za-z0-9\-_\.\+]+\.[A-Za-z]+)')
-RE_URL   = re.compile('(((https?)://[-\w]+(\.\w[-\w]*)+|([-a-z0-9]+\.)+(com|edu|biz|gov|int|info|mil|net|org|me|mobi|us|ca|mx|ag|bz|gs|ms|tc|vg|eu|de|it|fr|nl|am|at|be|asia|cc|in|nu|tv|tw|jp|[a-z][a-z]\.[a-z][a-z])\b)(:\d+)?(/[A-Za-z0-9\/#&\?\.\+\-\_]*)?)', re.I)
+RE_EMAIL = re.compile('([A-Za-z0-9\-_\.\+]{1,100}@[A-Za-z0-9\-_\.\+]{1,100}\.[A-Za-z]{1,4})')
+RE_URL   = re.compile('(((https?)://[\-\w]{1,100}(\.\w[-\w]{0,100}){1,100}|([\-a-z0-9]+\.){1,100}(com|edu|biz|gov|int|info|mil|net|org|me|mobi|us|ca|mx|ag|bz|gs|ms|tc|vg|eu|de|it|fr|nl|am|at|be|asia|cc|in|nu|tv|tw|jp|[a-z][a-z]\.[a-z][a-z])\b)(:\d+)?(/[A-Za-z0-9\/#&\?\.\+\-\_]{0,100})?)', re.I)
 RE_PATH  = re.compile('([^\s\*]{0,100}[\\\/][^\s\*]{1,100}|[^\s\*]{1,100}[\\\/][^\s\*]{0,100})')
 RE_YEAR  = re.compile('[^0-9](19[0-9][0-9]|20[0-9][0-9])[^0-9]')
 RE_DATE = re.compile('(((\d+)[\ ]*(%s)[,\ ]*(\d+))|((%s)[\ ]*(\d+)[\ ,]*(\d+))|((\d+)(\ *[-\/\.]\ *)(\d+)(\ *[-\/\.]\ *)(\d+)))' % ('|'.join(months),'|'.join(months)), re.I)
 RE_TIME = re.compile('(\d\d\ *:\ *\d\d\ *:\ *\d\d(\ *\+\d\d\d\d)?)')
-RE_FLOAT = re.compile('(\d+\.\d+)')
+RE_FLOAT = re.compile('(\d+(\.\d+)?)')
 RE_COPYRIGHT = re.compile('(\([c]\)|c?opyright|\&copy\;)',re.I)
 RE_START = re.compile('(<s>)')
 RE_END = re.compile('(<\/s>)')
@@ -90,20 +90,33 @@ def parsetext(text):
     """
     stuff = {}
     
+    print 0
+
     text = RE_ANDOR.sub('and or',text)
     (temp, text) = findall_erase(RE_COMMENT, text)
 
+    print 1
     (stuff['start'], text) = findall_erase(RE_START, text)
+    print 2
     (stuff['end'], text) = findall_erase(RE_END, text)
+    print 3
     (stuff['email'], text) = findall_erase(RE_EMAIL, text)
+    print 4
     (stuff['url'], text) = findall_erase(RE_URL, text)
     # (stuff['path'], text) = findall_erase(RE_PATH, text)
-    (stuff['date'], text) = findall_erase(RE_DATE, text)
-    (stuff['time'], text) = findall_erase(RE_TIME, text)
+    print 5
+    #(stuff['date'], text) = findall_erase(RE_DATE, text)
+    print 6
+    #(stuff['time'], text) = findall_erase(RE_TIME, text)
+    print 7
     (stuff['year'], text) = findall_erase(RE_YEAR, text)
+    print 8
     (stuff['float'], text) = findall_erase(RE_FLOAT, text)
+    print 9
     (stuff['copyright'], text) = findall_erase(RE_COPYRIGHT, text)
+    print 10
     (stuff['tokens'], text) = findall_erase(RE_TOKEN, text)
+    print 11
 
 
     # we replace the original information extracted from the text with place
@@ -114,8 +127,8 @@ def parsetext(text):
     stuff['tokens'].extend([['XXXemailXXX', stuff['email'][i][1], stuff['email'][i][2]] for i in range(len(stuff['email']))])
     stuff['tokens'].extend([['XXXurlXXX', stuff['url'][i][1], stuff['url'][i][2]] for i in range(len(stuff['url']))])
     # stuff['tokens'].extend([['XXXpathXXX', stuff['path'][i][1], stuff['path'][i][2]] for i in range(len(stuff['path']))])
-    stuff['tokens'].extend([['XXXdateXXX', stuff['date'][i][1], stuff['date'][i][2]] for i in range(len(stuff['date']))])
-    stuff['tokens'].extend([['XXXtimeXXX', stuff['time'][i][1], stuff['time'][i][2]] for i in range(len(stuff['time']))])
+    # stuff['tokens'].extend([['XXXdateXXX', stuff['date'][i][1], stuff['date'][i][2]] for i in range(len(stuff['date']))])
+    # stuff['tokens'].extend([['XXXtimeXXX', stuff['time'][i][1], stuff['time'][i][2]] for i in range(len(stuff['time']))])
     stuff['tokens'].extend([['XXXyearXXX', stuff['year'][i][1], stuff['year'][i][2]] for i in range(len(stuff['year']))])
     stuff['tokens'].extend([['XXXfloatXXX', stuff['float'][i][1], stuff['float'][i][2]] for i in range(len(stuff['float']))])
     stuff['tokens'].extend([['XXXcopyrightXXX', stuff['copyright'][i][1], stuff['copyright'][i][2]] for i in range(len(stuff['copyright']))])
@@ -318,7 +331,7 @@ def create_model(training_data):
 
 def label_file(file, model):
     PFC = model['P(F|C)']
-    text = open(file).read()
+    text = open(file).read(64000)
 
     # parse the file and get the tokens
     parsed_text = parsetext(text)
