@@ -53,10 +53,10 @@ $UserCacheStat = 0;  // default, don't know
     global $DB;
     global $UserCacheStat;
 
-    /* Purge old entries ~ 1/100 of the times this fcn is called */
-    if ( rand(1,100) == 1)
+    /* Purge old entries ~ 1/500 of the times this fcn is called */
+    if ( rand(1,500) == 1)
     {
-      ReportCachePurgeByDate(" now() - interval '10 days'");
+      ReportCachePurgeByDate(" now() - interval '30 days'");
     }
 
     /* Check if user has cache turned off by default it is on for everyone.
