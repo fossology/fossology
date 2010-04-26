@@ -1127,7 +1127,12 @@ int main(int argc, char **argv) {
               exit(-1);
             }
             processFile(repFile);
-            recordScanToDB(&cacheroot, &cur);
+            if (recordScanToDB(&cacheroot, &cur))
+            {
+              printf("FATAL: nomos terminating on upload %d due to previous errors.",
+                     upload_pk);
+              exit(-99);
+            }
             freeAndClearScan(&cur);
 
             Heartbeat(++HBItemsProcessed);
