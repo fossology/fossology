@@ -156,7 +156,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
  *   $CheckOnly       if true, sets LIMIT 1 to check if uploadtree_pk has 
  *                    any of the given license.  Default is false.
  * Returns:
- *   number of files with this shortname.
+ *   number of ufiles with this shortname.
  */
 function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk, 
                              $PkgsOnly=false, $CheckOnly=false)
