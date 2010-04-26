@@ -107,6 +107,8 @@ class list_lic_files extends FO_Plugin
 	$Offset = ($Page < 0) ? 0 : $Page*$Max;
     $order = "";
     $PkgsOnly = false;
+
+    // Count is uploadtree recs, not pfiles
     $Count = CountFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly);
     $V.= "<br>$Count files found with this license ";
     if ($Count < (1.25 * $Max)) $Max = $Count;
@@ -160,12 +162,14 @@ class list_lic_files extends FO_Plugin
       if ($ok) 
       {
         $V .= "<tr><td>";
-        $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, ++$RowNum, $Header);
+        /* Tack on pfile to url - information only */
+        $pfile_pk = $row['pfile_fk'];
+        $LinkLastpfile = $LinkLast . "&pfile=$pfile_pk";
+        $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLastpfile, $ShowBox, $ShowMicro, ++$RowNum, $Header);
         $V .= "</td>";
         $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
 
-        $pfile_pk = $row['pfile_fk'];
-        $licstring = GetFileLicenses_string($nomosagent_pk, $row['pfile_fk'], $row['uploadtree_pk']);
+        $licstring = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $row['uploadtree_pk']);
 
         // show the entire license list as a single string with links to the files
         // in this container with that license.
