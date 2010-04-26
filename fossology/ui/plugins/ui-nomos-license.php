@@ -34,6 +34,7 @@ class ui_nomos_license extends FO_Plugin
   var $DBaccess   = PLUGIN_DB_READ;
   var $LoginFlag  = 0;
   var $UpdCache   = 0;
+  var $HighlightColor = '#4bfe78';
 
   /***********************************************************
    Install(): Create and configure database tables
@@ -138,6 +139,19 @@ class ui_nomos_license extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
+    /* Find total number of files for this $Uploadtree_pk  
+     * Exclude artifacts and directories.
+     */
+    $sql = "SELECT count(*) as count FROM uploadtree 
+              WHERE upload_fk = $upload_pk 
+                    and uploadtree.lft BETWEEN $lft and $rgt
+                    and ((ufile_mode & (1<<28))=0) and pfile_fk!=0";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $FileCount = $row["count"];
+    pg_free_result($result);
+
     $Agent_name = "nomos";
     $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
     if ($AgentRec === false)
@@ -203,10 +217,16 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     }
     $VLic .= "</table>\n";
     $VLic .= "<p>\n";
-    $VLic .= "Hint: Click on the license name to highlight where the license is found in the file listing.<br>\n";
-    $VLic .= "Unique licenses: $UniqueLicCount<br>\n";
+    $VLic .= "Hint: Click on the license name to ";
+    $VLic .= "<span style='background-color:$this->HighlightColor'>highlight </span>";
+    $VLic .= "where the license is found in the file listing.<br>\n";
+    $VLic .= "<table border=0>";
+    $VLic .= "<tr><td align=right>$UniqueLicCount</td><td>Unique licenses</td></tr>";
     $NetLic = $LicCount - $NoLicFound;
-    $VLic .= "Total licenses: $NetLic";
+    $VLic .= "<tr><td align=right>$NetLic</td><td>Licenses found</td></tr>";
+    $VLic .= "<tr><td align=right>$NoLicFound</td><td>Files with no licenses</td></tr>";
+    $VLic .= "<tr><td align=right>$FileCount</td><td>Files</td></tr>";
+    $VLic .= "</table>";
     pg_free_result($result);
 
 
@@ -317,7 +337,7 @@ FUTURE advanced interface allowing user to select dataset (agent version)
       <script type=\"text/javascript\" charset=\"utf-8\">
         var Lastutpks='';   /* save last list of uploadtree_pk's */
         var LastLic='';   /* save last License (short) name */
-        var color = '#4bfe78';
+        var color = '$this->HighlightColor';
         function FileColor_Reply()
         {
           if ((FileColor.readyState==4) && (FileColor.status==200))
@@ -345,19 +365,6 @@ FUTURE advanced interface allowing user to select dataset (agent version)
           }
           return;
         }
-/* bobg fooling with wait icon 
-    var myGlobalHandlers = {
-        onCreate: function(){
-            Element.show('ajax_waiting');
-        },
-
-        onComplete: function() {
-            if(Ajax.activeRequestCount == 0){
-                Element.hide('ajax_waiting');
-            }
-        }
-    };
-*/
       </script>
     ";
     $V .= $script;
