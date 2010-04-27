@@ -18,6 +18,94 @@
 import re
 import math
 
+tokenizer_pattern = r"""(?ixs) # VERBOSE | IGNORE | DOTALL
+(?P<token>
+    (?P<email>[A-Za-z0-9\-_\.\+]{1,100}@[A-Za-z0-9\-_\.\+]{1,100}\.[A-Za-z]{1,4})
+    |
+    (?P<url>
+        (?:https?\S+)
+        |
+        (?:[a-z\.\_\-]+\.(?:
+            com|edu|biz|gov|int|info|mil|net|org|me
+            |mobi|us|ca|mx|ag|bz|gs|ms|tc|vg|eu|de
+            |it|fr|nl|am|at|be|asia|cc|in|nu|tv|tw
+            |jp|[a-z][a-z]\.[a-z][a-z]
+        )\b)(?:\:\d+)?(?:\/\S+)?
+    )
+    |
+    (?P<path>
+        [\/\\][a-z0-9\_\-\+\~\.]+(?:[\/\\a-z0-9\_\-\+\~\.]*)
+    )
+    |
+    (?P<number>\$?\d+(?:\.\d+)?\%?)
+    |
+    (?P<abbreviation>[A-Z]\.)+
+    |
+    (?P<copyright>
+        (?:c?opyright)
+        |
+        (?:\(c\))
+        |
+        (?:\&copy\;)
+        |
+        (?:\xc2\xa9)
+    )
+    |
+    (?P<word>[a-z0-9\-\_]+)
+    |
+    (?P<symbol>[\.\,\?\\\|\/\:\"\'\;\(\)])
+)
+"""
+
+RE_TOKENIZER = re.compile(tokenizer_pattern)
+
+def test():
+    text = """
+        some random text with a number 3.145, a path /usr/bin/python, an email someone@someplace.com, a url http://stuff.com/blah/, Walter H. Mann, and a copyright &copy; /xc2/xa9 (c).
+    """
+
+    correct = [('some', '', '', '', '', '', '', 'some', ''),
+            ('random', '', '', '', '', '', '', 'random', ''),
+            ('text', '', '', '', '', '', '', 'text', ''),
+            ('with', '', '', '', '', '', '', 'with', ''),
+            ('a', '', '', '', '', '', '', 'a', ''),
+            ('number', '', '', '', '', '', '', 'number', ''),
+            ('3.145', '', '', '', '3.145', '', '', '', ''),
+            (',', '', '', '', '', '', '', '', ','),
+            ('a', '', '', '', '', '', '', 'a', ''),
+            ('path', '', '', '', '', '', '', 'path', ''),
+            ('/usr/bin/python', '', '', '/usr/bin/python', '', '', '', '', ''),
+            (',', '', '', '', '', '', '', '', ','),
+            ('an', '', '', '', '', '', '', 'an', ''),
+            ('email', '', '', '', '', '', '', 'email', ''),
+            ('someone@someplace.com', 'someone@someplace.com', '', '', '', '', '', '', ''),
+            (',', '', '', '', '', '', '', '', ','),
+            ('a', '', '', '', '', '', '', 'a', ''),
+            ('url', '', '', '', '', '', '', 'url', ''),
+            ('http://stuff.com/blah/,', '', 'http://stuff.com/blah/,', '', '', '', '', '', ''),
+            ('Walter', '', '', '', '', '', '', 'Walter', ''),
+            ('H.', '', '', '', '', 'H.', '', '', ''),
+            ('Mann', '', '', '', '', '', '', 'Mann', ''),
+            (',', '', '', '', '', '', '', '', ','),
+            ('and', '', '', '', '', '', '', 'and', ''),
+            ('a', '', '', '', '', '', '', 'a', ''),
+            ('copyright', '', '', '', '', '', 'copyright', '', ''),
+            ('&copy;', '', '', '', '', '', '&copy;', '', ''),
+            ('/xc2/xa9', '', '', '/xc2/xa9', '', '', '', '', ''),
+            ('(c)', '', '', '', '', '', '(c)', '', ''),
+            ('.', '', '', '', '', '', '', '', '.')]
+
+    result = RE_TOKENIZER.findall(text)
+
+    if correct == result:
+        print "Correct!"
+        return True
+    else:
+        print "Test Failed! Something regressed."
+        return False
+
+    return False
+
 def findall(RE, text):
     """
     findall(Regex, text) -> list(['str_1',start_byte_1, end_byte_1], ...)
@@ -90,34 +178,20 @@ def parsetext(text):
     """
     stuff = {}
     
-    print 0
-
     text = RE_ANDOR.sub('and or',text)
     (temp, text) = findall_erase(RE_COMMENT, text)
 
-    print 1
     (stuff['start'], text) = findall_erase(RE_START, text)
-    print 2
     (stuff['end'], text) = findall_erase(RE_END, text)
-    print 3
     (stuff['email'], text) = findall_erase(RE_EMAIL, text)
-    print 4
     (stuff['url'], text) = findall_erase(RE_URL, text)
     # (stuff['path'], text) = findall_erase(RE_PATH, text)
-    print 5
     #(stuff['date'], text) = findall_erase(RE_DATE, text)
-    print 6
     #(stuff['time'], text) = findall_erase(RE_TIME, text)
-    print 7
     (stuff['year'], text) = findall_erase(RE_YEAR, text)
-    print 8
     (stuff['float'], text) = findall_erase(RE_FLOAT, text)
-    print 9
     (stuff['copyright'], text) = findall_erase(RE_COPYRIGHT, text)
-    print 10
     (stuff['tokens'], text) = findall_erase(RE_TOKEN, text)
-    print 11
-
 
     # we replace the original information extracted from the text with place
     # holders so we can learn a generic trend in the structure of the
