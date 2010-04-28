@@ -135,6 +135,8 @@ void	EscapeString	(const char *sourceString, char *escString)
 	int error;
 	
 	len = strlen(sourceString);
+	if ( len > MAXCMD/2 )
+		len = MAXCMD/2 ;
 	PQescapeStringConn(DB, escString, sourceString, len, &error);
 	if (error)
 		printf("WARNING: %s line %d: Error escaping string with multibype character set?\n",__FILE__, __LINE__ );
@@ -361,7 +363,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
         EscapeString(msgstr, pi->summary);
 	break;
       case RPMTAG_DESCRIPTION:
-        EscapeString(msgstr, pi->description);
+	EscapeString(msgstr, pi->description);
 	break;
       default:
 	break;
