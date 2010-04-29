@@ -386,6 +386,9 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
     PQclear(resultpkg);
   }
 
+#ifdef BOBG
+printf("bobg: fileName: %s\n", fileName);
+#endif
   /* loop through all the bucket defs in this pool */
   for (defnum=0; defnum<numBucketDefs; bucketDefArray++)
   {
@@ -398,6 +401,9 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
       if (!isPkg) continue;
     }
 
+#ifdef BOBG
+printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
+#endif
     switch (bucketDefArray->bucket_type)
     {
       /***  1  MATCH_EVERY  ***/
@@ -582,13 +588,6 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
           bucket_pk_list++;
           match++;
 				}
-        else
-        {
-          free(pfile_rfpks);
-          free(bucket_pk_list_start);
-          PQclear(result);
-          return 0;
-        }
 			}
       break;
 
@@ -676,9 +675,18 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, int
                 bucketDefArray->bucket_type);
         exit(-1);
     }
+#ifdef BOBG
+if (match)
+printf("bobg found MATCH\n");
+else
+printf("bobg found NO Match\n");
+#endif
     if (match && bucketDefArray->stopon == 'Y') break;
   }
 
+#ifdef BOBG
+  printf("bobg exit GetLeafBuckets()\n");
+#endif
   free(pfile_rfpks);
   PQclear(result);
   return bucket_pk_list_start;
@@ -856,7 +864,7 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
   int rv = 0;
   if (debug) printf("debug: %s pfile: %d, uploadtree_pk: %d\n", fcnName, pfile_pk, uploadtree_pk);
 
-  if (!writeDB) printf("write buckets for pfile=%d, uploadtree_pk=%d: ", pfile_pk, uploadtree_pk);
+  if (!writeDB) printf("NOTE: writeDB is FALSE, write buckets for pfile=%d, uploadtree_pk=%d: ", pfile_pk, uploadtree_pk);
 
   if (bucketList)
   {
@@ -1261,9 +1269,9 @@ int main(int argc, char **argv)
 
     rv = walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0, 
              hasPrules);
-    if (!rv)
+    /* if no errors and top level is a container, process the container */
+    if ((!rv) && ((ufile_mode & 1<<29) != 0))
     {
-      /* process top level container */
       processFile(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 
                   pfile_pk, ufile_mode, ufile_name, hasPrules);
       strcpy(sqlbuf, "commit");
