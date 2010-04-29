@@ -42,6 +42,7 @@
 #include "rpmlib.h"
 #include "rpmts.h"
 #include "rpmlog.h"
+#include "rpmmacro.h"
 
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
@@ -55,19 +56,19 @@ char BuildVersion[]="Build version: " SVN_REV ".\n";
 #define FALSE NO
 
 struct rpmpkginfo {
-  char pkgName[128];
-  char pkgAlias[128];
-  char pkgArch[32];
-  char version[32];
-  char rpmFilename[128];
-  char license[255];
-  char group[64];
+  char pkgName[256];
+  char pkgAlias[256];
+  char pkgArch[64];
+  char version[64];
+  char rpmFilename[256];
+  char license[512];
+  char group[128];
   char packager[1024];
-  char release[32];
-  char buildDate[64];
-  char vendor[64];
-  char url[128];
-  char sourceRPM[128];
+  char release[64];
+  char buildDate[128];
+  char vendor[128];
+  char url[256];
+  char sourceRPM[256];
   char summary[MAXCMD];
   char description[MAXCMD];
   long pFileFk;
@@ -129,14 +130,15 @@ int Verbose = 0;
  *  so that they cannot cause any harm
  *
  * ********************************************/
-void	EscapeString	(const char *sourceString, char *escString)
+void	EscapeString	(const char *sourceString, char *escString, int esclen)
 {
 	int len;
 	int error;
 	
-	len = strlen(sourceString);
-	if ( len > MAXCMD/2 )
-		len = MAXCMD/2 ;
+	len = strlen(sourceString);	
+	if ( len > esclen/2 )
+		len = esclen/2 - 1;
+	//printf("TEST:esclen---%d,sourcelen---%d\n",esclen,len);
 	PQescapeStringConn(DB, escString, sourceString, len, &error);
 	if (error)
 		printf("WARNING: %s line %d: Error escaping string with multibype character set?\n",__FILE__, __LINE__ );
@@ -312,7 +314,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
 #endif /* After RPM4.4 version*/
 
   for (i = 0; i < 14; i++) {
-    fmt[0] = '\0';
+    memset(fmt, 0, sizeof(fmt));
     strcat( fmt, "%{");
     strcat( fmt, tagName(tag[i]));
     strcat( fmt, "}\n");
@@ -322,28 +324,28 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
       if (Verbose) { printf("%s:%s",tagName(tag[i]),msgstr);}
       switch (tag[i]) {
       case RPMTAG_NAME:
-	      EscapeString(msgstr, pi->pkgName);
+	      EscapeString(msgstr, pi->pkgName, sizeof(pi->pkgName));
         break;
       case RPMTAG_EPOCH:
-        strncpy(pi->pkgAlias,msgstr,sizeof(pi->pkgAlias));
+        EscapeString(msgstr, pi->pkgAlias, sizeof(pi->pkgAlias));
         break;
       case RPMTAG_ARCH:
-        strncpy(pi->pkgArch,msgstr,sizeof(pi->pkgArch));
+        EscapeString(msgstr, pi->pkgArch, sizeof(pi->pkgArch));
         break;
       case RPMTAG_VERSION:
-        strncpy(pi->version,msgstr,sizeof(pi->version));
+        EscapeString(msgstr, pi->version, sizeof(pi->version));
         break;
       case RPMTAG_LICENSE:
-        strncpy(pi->license,msgstr,sizeof(pi->license));
+        EscapeString(msgstr, pi->license, sizeof(pi->license));
         break;
       case RPMTAG_GROUP:
-        strncpy(pi->group,msgstr,sizeof(pi->group));
+        EscapeString(msgstr, pi->group, sizeof(pi->group));
         break;
       case RPMTAG_PACKAGER:
-	      EscapeString(msgstr, pi->packager);
+	      EscapeString(msgstr, pi->packager, sizeof(pi->packager));
         break;
       case RPMTAG_RELEASE:
-        strncpy(pi->release,msgstr,sizeof(pi->release));
+        EscapeString(msgstr, pi->release, sizeof(pi->release));
         break;
       case RPMTAG_BUILDTIME:	
 	t = atol(msgstr);
@@ -351,24 +353,25 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
 	strncpy(pi->buildDate,asctime(gmtime((time_t*)tp)),sizeof(pi->buildDate));
 	break;
       case RPMTAG_VENDOR:
-	strncpy(pi->vendor,msgstr,sizeof(pi->vendor));
+	EscapeString(msgstr, pi->vendor, sizeof(pi->vendor));
 	break;
       case RPMTAG_URL:
-	strncpy(pi->url,msgstr,sizeof(pi->url));
+	EscapeString(msgstr, pi->url, sizeof(pi->url));
 	break;
       case RPMTAG_SOURCERPM:
-	strncpy(pi->sourceRPM,msgstr,sizeof(pi->sourceRPM));
+	EscapeString(msgstr, pi->sourceRPM,sizeof(pi->sourceRPM));
 	break;
       case RPMTAG_SUMMARY:
-        EscapeString(msgstr, pi->summary);
+        EscapeString(msgstr, pi->summary, sizeof(pi->summary));
 	break;
       case RPMTAG_DESCRIPTION:
-	EscapeString(msgstr, pi->description);
+	EscapeString(msgstr, pi->description, sizeof(pi->description));
 	break;
       default:
 	break;
       }
     }
+    free((void *)msgstr); 
   }      
   if (Verbose) { printf("Name:%s\n",pi->buildDate);}
 #ifdef _RPM_4_4
@@ -461,7 +464,8 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
         return FALSE;
     }
     ReadHeaderInfo(header, pi);
-    header = headerFree(header);
+    rpmFreeMacros(NULL);
+    header = headerFree(header);	
   }
   return TRUE;
 } /* GetMetadata(char *pkg, struct rpmpkginfo *pi) */
@@ -578,8 +582,8 @@ char * ParseDebFile(char *Sin, char *Field, char *Value)
  */
 void	GetMetadataDebBinary	(struct debpkginfo *pi)
 {
-  char *repfile =NULL;
-  char *filename = NULL;
+  char *repfile;
+  char *filename;
   char SQL[MAXCMD];
   int rc;
   
@@ -629,37 +633,37 @@ void	GetMetadataDebBinary	(struct debpkginfo *pi)
   {
     s = ParseDebFile(line,field,value);
     if (!strcasecmp(field, "Description")) {
-	     EscapeString(value, pi->summary);
+	     EscapeString(value, pi->summary, sizeof(pi->summary));
        strcpy(temp, "");
     }
     if ((s[0] != '\0') && (temp!=NULL))
       strcat(temp,s);
     if (!strcasecmp(field, "Package")) {
-	     EscapeString(value, pi->pkgName);
+	     EscapeString(value, pi->pkgName, sizeof(pi->pkgName));
     }
     if (!strcasecmp(field, "Version")) {
-	     EscapeString(value, pi->version);
+	     EscapeString(value, pi->version, sizeof(pi->version));
     }
     if (!strcasecmp(field, "Architecture")) {
-	     EscapeString(value, pi->pkgArch);
+	     EscapeString(value, pi->pkgArch, sizeof(pi->pkgArch));
     }
     if (!strcasecmp(field, "Maintainer")) {
-	     EscapeString(value, pi->maintainer);
+	     EscapeString(value, pi->maintainer, sizeof(pi->maintainer));
     }
     if (!strcasecmp(field, "Installed-Size")) {
        pi->installedSize=atol(value);
     }
     if (!strcasecmp(field, "Section")) {
-	     EscapeString(value, pi->section);
+	     EscapeString(value, pi->section, sizeof(pi->section));
     }
     if (!strcasecmp(field, "Priority")) {
-	     EscapeString(value, pi->priority);
+	     EscapeString(value, pi->priority, sizeof(pi->priority));
     }
     if (!strcasecmp(field, "Homepage")) {
-	     EscapeString(value, pi->homepage);
+	     EscapeString(value, pi->homepage, sizeof(pi->homepage));
     }
     if (!strcasecmp(field, "Source")) {
-	     EscapeString(value, pi->source);
+	     EscapeString(value, pi->source, sizeof(pi->source));
     }
     if (!strcasecmp(field, "Depends")) {
        char *depends = NULL;
@@ -686,7 +690,7 @@ void	GetMetadataDebBinary	(struct debpkginfo *pi)
     }
   }
   if (temp!=NULL)
-    EscapeString(temp, pi->description);
+    EscapeString(temp, pi->description, sizeof(pi->description));
 
   fclose(fp);
 }/* GetMetadataDebBinary(struct debpkginfo *pi) */
@@ -778,29 +782,29 @@ void	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
     s = ParseDebFile(line,field,value);
 
     if (!strcasecmp(field, "Format")) {
-	     EscapeString(value, pi->format);
+	     EscapeString(value, pi->format, sizeof(pi->format));
     }
     if (!strcasecmp(field, "Source")) {
-	     EscapeString(value, pi->source);
+	     EscapeString(value, pi->source, sizeof(pi->source));
     }
     if (!strcasecmp(field, "Source")) {
-	     EscapeString(value, pi->pkgName);
+	     EscapeString(value, pi->pkgName, sizeof(pi->pkgName));
     }
     if (!strcasecmp(field, "Architecture")) {
-	     EscapeString(value, pi->pkgArch);
+	     EscapeString(value, pi->pkgArch, sizeof(pi->pkgArch));
     }
     if (!strcasecmp(field, "Version")) {
        if (strlen(pi->version) == 0)
-         strncpy(pi->version, value, sizeof(pi->version));
+         EscapeString(value, pi->version, sizeof(pi->version));
     }
     if (!strcasecmp(field, "Maintainer")) {
-	     EscapeString(value, pi->maintainer);
+	     EscapeString(value, pi->maintainer, sizeof(pi->maintainer));
     }
     if (!strcasecmp(field, "Uploaders")) {
-	     EscapeString(value, pi->uploaders);
+	     EscapeString(value, pi->uploaders, sizeof(pi->uploaders));
     }
     if (!strcasecmp(field, "Standards-Version")) {
-       strncpy(pi->standardsVersion, value, sizeof(pi->standardsVersion));
+       EscapeString(value, pi->standardsVersion, sizeof(pi->standardsVersion));
     }
     if (!strcasecmp(field, "Build-Depends")) {
        char *depends = NULL;
@@ -949,7 +953,6 @@ int	main	(int argc, char *argv[])
     {
        PKG_RPM=1;
        GetMetadata(argv[optind],glb_rpmpi);
-       //RecordMetadataRPM(glb_rpmpi);
     }
   }
 
