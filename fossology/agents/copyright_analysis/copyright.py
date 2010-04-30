@@ -35,6 +35,8 @@ except:
 import copyright_library as library
 import libfosspython
 
+# only read 2M of a file
+READMAX = 200000
 
 def main():
     usage  = """
@@ -163,8 +165,8 @@ Use the --agent switch to place %prog into Fossology agent mode. There are four 
     if options.analyze_from_file:
         files = [line.rstrip() for line in open(options.analyze_from_file).readlines()]
         for file in files:
-            text = open(file).read()
-            results = library.label_file(file,model)
+            text = open(file).read(READMAX)
+            results = library.label_file(file,model,READMAX)
             print "%s :: " % (file)
             if len(results) == 0:
                 print "No copyrights"
@@ -174,8 +176,8 @@ Use the --agent switch to place %prog into Fossology agent mode. There are four 
     if options.analyze_from_command_line:
         files = args
         for file in files:
-            text = open(file).read()
-            results = library.label_file(file,model)
+            text = open(file).read(READMAX)
+            results = library.label_file(file,model,READMAX)
             print "%s :: " % (file)
             if len(results) == 0:
                 print "No copyrights"
@@ -309,8 +311,8 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
     if (not os.path.exists(path)):
         print >> sys.stdout, 'ERROR: File not found. path=%s' % (path)
         return -1
-    offsets = library.label_file(path,model)
-    text = open(path).read()
+    offsets = library.label_file(path,model,READMAX)
+    text = open(path).read(READMAX)
     if len(offsets) == 0:
         sql = """INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type)
                  VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement')""" % (agent_pk, pfile)

@@ -53,9 +53,9 @@ tokenizer_pattern = r"""(?ixs) # VERBOSE | IGNORE | DOTALL
     (?P<abbreviation>[A-Z]\.)+
     |
     (?P<copyright>(?:
-        (?:c?opyright)
-        |
-        (?:\(c\))
+        (?:\bc?opyright\b)
+        #|
+        #(?:\(c\))
         |
         (?:\&copy\;)
         |
@@ -72,6 +72,8 @@ tokenizer_pattern = r"""(?ixs) # VERBOSE | IGNORE | DOTALL
 RE_TOKENIZER = re.compile(tokenizer_pattern)
 RE_ANDOR = re.compile('and\/or',re.I)
 RE_COMMENT = re.compile(r'(^(?:(?P<a>\s*)(?P<b>(?:\*|\/\*|\*\/|#!|#|%|\/\/|;)+))|(?:(?P<c>(?:\*|\/\*|\*\/|#|\/\/)+)(?P<d>\s*))$)', re.I | re.M)
+
+FEATURES = ['current_word', 'previous_label', 'current_bigram', ]
 
 def test():
     text = """
@@ -213,6 +215,77 @@ def tokens_to_BIO(tokens):
 
     return (t,l)
 
+def get_features(tokens,labels,features):
+    """
+    Returns a set of features.
+
+    Features is a list of features key words.
+        'current_word'
+        'previous_word'
+        'next_word'
+        'current_bigram'
+        'previous_bigram'
+        'next_bigram'
+        'previous_label'
+    """
+
+    ALLOWED_FEATURES = ['current_word', 
+        'previous_word',
+        'next_word',
+        'current_bigram',
+        'previous_bigram',
+        'next_bigram',
+        'previous_label',]
+    # check the features
+    for f in features:
+        if f not in ALLOWED_FEATURES:
+            raise Exception('Feature %s is not in the allowed set of features.' % f)
+
+    n = len(tokens)
+
+    feat_list = []
+    for i in xrange(n):
+        feat = {}
+        for f in features:
+            if f=='current_word':
+                feat[f] = tokens[i]
+            if f=='previous_word':
+                if i>0:
+                    feat[f] = tokens[i-1]
+                else:
+                    feat[f] = '__START__'
+            if f=='next_word':
+                if i<n-1:
+                    feat[f] = tokens[i+1]
+                else:
+                    feat[f] = '__END__'
+            if f=='current_bigram':
+                bi = ['__START__', tokens[i]]
+                if i>0:
+                    bi[0] = tokens[i-1]
+                feat[f] = ' '.join(bi)
+            if f=='previous_bigram':
+                bi = ['__START__', '__START__']
+                if i>1:
+                    bi[1] = tokens[i-1]
+                    bi[0] = tokens[i-2]
+                if i>0:
+                    bi[1] = tokens[i-1]
+                feat[f] = ' '.join(bi)
+            if f=='next_bigram':
+                bi = [tokens[i], '__END__']
+                if i<n-1:
+                    bi[1] = tokens[i+1]
+                feat[f] = ' '.join(bi)
+            if f=='previous_label':
+                if i>0:
+                    feat[f] = labels[i-1]
+                else:
+                    feat[f] = 'O'
+        feat_list.append(feat)
+    return feat_list
+    
+
 def train_nb(data, priors=None):
     n = len(data)
 
@@ -220,38 +293,26 @@ def train_nb(data, priors=None):
         priors = {'B':{}, 'I':{}, 'O':{}}
 
     classes = ['B', 'I', 'O',]
-    features = ['current_word', 'previous_label', 'previous_word', 'next_word']
     PFC = {} # P(F_{i}|C) accessed as PFC[C][F][i] for simplicity.
     # initialize our model
     for c in classes:
         PFC[c] = {'class':priors[c].get('class',math.log(1.0/3.0)), 'min':{}}
-        for f in features:
+        for f in FEATURES:
             PFC[c]['min'][f] = priors[c].get(f, -1e-10)
             PFC[c][f] = {}
 
     for i in xrange(n):
         (tokens, labels) = data[i]
+        feats = get_features(tokens, labels, FEATURES)
         nn = len(tokens)
         for j in xrange(nn):
             c = labels[j]
-            w = tokens[j]
-            PFC[c]['current_word'][w] = PFC[c]['current_word'].get(w, 0.0) + 1.0
-            c_1 = ''
-            if j != 0:
-                c_1 = labels[j-1]
-            PFC[c]['previous_label'][c_1] = PFC[c]['previous_label'].get(c_1, 0.0) + 1.0
-            w_1 = ''
-            if j != 0:
-                w_1 = tokens[j-1]
-            PFC[c]['previous_word'][w_1] = PFC[c]['previous_word'].get(w_1, 0.0) + 1.0
-            w_1 = ''
-            if j != nn-1:
-                w_1 = tokens[j+1]
-            PFC[c]['next_word'][w_1] = PFC[c]['next_word'].get(w_1, 0.0) + 1.0
+            for f in FEATURES:
+                PFC[c][f][feats[j][f]] = PFC[c][f].get(feats[j][f], 0.0) + 1.0
 
     # normalize everything
     for c in classes:
-        for f in features:
+        for f in FEATURES:
             s = sum(PFC[c][f].values())
             for (k,v) in PFC[c][f].iteritems():
                 PFC[c][f][k] = math.log(v/s)
@@ -261,54 +322,44 @@ def train_nb(data, priors=None):
 def tuned_model(iob, priors=None, debug=False):
     n = len(iob)
     classes = ['B', 'I', 'O']
-    features = ['class', 'current_word', 'previous_label', 'previous_word', 'next_word']
-    mins = ['current_word', 'previous_label', 'previous_word', 'next_word']
+    mins = FEATURES[:]
+    mins.append('class')
     if not priors:
         priors = {}
         for c in classes:
             priors[c] = {}
-            for f in features:
+            for f in FEATURES:
                 priors[c][f] = math.log(1e-20)
             priors[c]['class'] = math.log(1.0/3.0)
 
-    for j in range(20):
+    for j in range(10):
         for i in range(n):
             tiob = iob[:]
             tiob.pop(i)
             PFC = train_nb(tiob, priors)
             L, P = label_nb(PFC, iob[i][0], True)
+            feats = get_features(iob[i][0],iob[i][1],FEATURES)
             d = len(L)
             cp = {}
             for c in classes:
                 cp[c] = {}
-                for f in features:
+                for f in FEATURES:
                     cp[c][f] = []
+                cp[c]['class'] = []
             for j in range(d):
                 a = L[j]
                 b = iob[i][1][j]
                 if a != b:
                     dif = math.exp(P[j][a]) - math.exp(P[j][b])
                     cp[b]['class'].append(dif)
-                    if j>0:
-                        t = iob[i][0][j-1]
-                        if not PFC[b]['previous_word'].get(t,False):
-                            cp[b]['previous_word'].append(1e-22)
-                        if not PFC[a]['previous_word'].get(t,False):
-                            cp[a]['previous_word'].append(-1e-22)
-                    if j>d-1:
-                        t = iob[i][0][j+1]
-                        if not PFC[b]['next_word'].get(t,False):
-                            cp[b]['next_word'].append(1e-22)
-                        if not PFC[a]['next_word'].get(t,False):
-                            cp[a]['next_word'].append(-1e-22)
-                    t = iob[i][0][j]
-                    if not PFC[b]['current_word'].get(t,False):
-                        cp[b]['current_word'].append(1e-22)
-                    if not PFC[a]['current_word'].get(t,False):
-                        cp[a]['current_word'].append(-1e-22)
+                    for m in FEATURES:
+                        if not PFC[b][m].get(feats[j][m],False):
+                            cp[b][m].append(1e-22)
+                        if not PFC[a][m].get(feats[j][m],False):
+                            cp[a][m].append(-1e-22)
 
             for c in classes:
-                for f in features:
+                for f in mins:
                     if len(cp[c][f]) > 0:
                         priors[c][f] = math.exp(priors[c][f]) + sum(cp[c][f])/float(len(cp[c][f]))
                     else:
@@ -318,7 +369,7 @@ def tuned_model(iob, priors=None, debug=False):
             for c in classes:
                 priors[c]['class'] = priors[c]['class']/s
             for c in classes:
-                for f in features:
+                for f in mins:
                     if priors[c][f]>1.0:
                         print "%s %s > 1.0" % (c,f)
                         priors[c][f] = 1.0
@@ -326,6 +377,8 @@ def tuned_model(iob, priors=None, debug=False):
                         print "%s %s < 0.0" % (c,f)
                         priors[c][f] = 1e-25
                     priors[c][f] = math.log(priors[c][f])
+
+    priors['B']['current_word'] = -6000000000000.0 # ~log(0)
 
     PFC = train_nb(iob, priors)
     
@@ -336,26 +389,17 @@ def label_nb(PFC, tokens, debug=False):
     P = []
 
     classes = PFC.keys()
-    features = ['current_word', 'previous_label', 'previous_word', 'next_word']
+    labels = ['O' for i in range(len(tokens))]
+    feats = get_features(tokens,labels,FEATURES)
 
     for t in xrange(len(tokens)):
-        fv = {}
-        fv['current_word'] = tokens[t]
-        fv['previous_label'] = ''
-        if t > 0:
-            fv['previous_label'] = L[-1]
-        fv['previous_word'] = ''
-        if t > 0:
-            fv['previous_word'] = tokens[t-1]
-        fv['next_word'] = ''
-        if t < len(tokens)-1:
-            fv['next_word'] = tokens[t+1]
-
+        if t>0 and 'previous_label' in FEATURES:
+            feats[t]['previous_label'] = L[-1]
         p = dict([(c,0.0) for c in classes])
         for c in classes:
             p[c] += PFC[c]['class']
-            for f in features:
-                p[c] += PFC[c][f].get(fv[f],PFC[c]['min'][f])
+            for f in FEATURES:
+                p[c] += PFC[c][f].get(feats[t][f],PFC[c]['min'][f])
     
         i = 'O'
         if t == 0:
@@ -396,9 +440,9 @@ def create_model(training_data, debug=False):
 
     return model
 
-def label_file(file, model):
+def label_file(file, model, READMAX=64000):
     PFC = model['P(F|C)']
-    text = open(file).read()
+    text = open(file).read(READMAX)
 
     # parse the file and get the tokens
     parsed_text = parsetext(text)
