@@ -18,30 +18,41 @@
 import re
 import math
 
+months = ['JAN','FEB','MAR','MAY','APR','JUL','JUN','AUG','OCT','SEP','NOV','DEC','January', 'February', 'March', 'April', 'June', 'July', 'August', 'September', 'SEPT', 'October', 'November', 'December',]
 tokenizer_pattern = r"""(?ixs) # VERBOSE | IGNORE | DOTALL
 (?P<token>
-    (?P<email>[A-Za-z0-9\-_\.\+]{1,100}@[A-Za-z0-9\-_\.\+]{1,100}\.[A-Za-z]{1,4})
+    (?P<start>\<s\>)
+    |
+    (?P<end>\<\/s\>)
+    |
+    (?P<date>(?:(?:\d+)[\ ]*(?:%s)[,\ ]*(?:\d+))|(?:(?:%s)[\ ]*(?:\d+)[\ ,]*(?:\d+))|(?:(?:\d+)(?:\ *[-\/\.]\ *)(?:\d+)(?:\ *[-\/\.]\ *)(?:\d+)))
+    |
+    (?P<time>(?:\d\d\ *:\ *\d\d\ *:\ *\d\d(?:\ *\+\d\d\d\d)?))
+    |
+    (?P<email>[\<\(]?[A-Za-z0-9\-_\.\+]{1,100}@[A-Za-z0-9\-_\.\+]{1,100}\.[A-Za-z]{1,4})[\>\)]?
     |
     (?P<url>
-        (?:https?\S+)
+        (?:(:?ht|f)tps?\:\/\/\S+[^\.\,\s]) # starts with  http:// https:// ftp:// ftps:// plus anything that isnt a white space character
         |
         (?:[a-z\.\_\-]+\.(?:
             com|edu|biz|gov|int|info|mil|net|org|me
             |mobi|us|ca|mx|ag|bz|gs|ms|tc|vg|eu|de
             |it|fr|nl|am|at|be|asia|cc|in|nu|tv|tw
             |jp|[a-z][a-z]\.[a-z][a-z]
-        )\b)(?:\:\d+)?(?:\/\S+)?
+        )) # some.thing.(com or edu or ...)
+        (?:\:\d+)? # port number
+        (?:\/\S*[^\.\,\s]?)? # path do the page, must not end with a '.'
     )
     |
     (?P<path>
-        [\/\\][a-z0-9\_\-\+\~\.]+(?:[\/\\a-z0-9\_\-\+\~\.]*)
+        [\/\\][a-z0-9\_\-\+\~\.]+(?:[\/\\a-z0-9\_\-\+\~\.]*)[^\.\,\s]
     )
     |
-    (?P<number>\$?\d+(?:\.\d+)?\%?)
+    (?P<number>\$?\d+(?:\.\d+)?\%%?)
     |
     (?P<abbreviation>[A-Z]\.)+
     |
-    (?P<copyright>
+    (?P<copyright>(?:
         (?:c?opyright)
         |
         (?:\(c\))
@@ -49,206 +60,122 @@ tokenizer_pattern = r"""(?ixs) # VERBOSE | IGNORE | DOTALL
         (?:\&copy\;)
         |
         (?:\xc2\xa9)
-    )
+    ))
     |
     (?P<word>[a-z0-9\-\_]+)
-    |
-    (?P<symbol>[\.\,\?\\\|\/\:\"\'\;\(\)])
+    # | (?P<symbol>[\.\,\?\\\|\/\:\"\'\;\(\)])
+    # | (?P<symbol>.) # catch all
+    # | (?P<fullstop>\.) # grab '.'s if they don't match anything else.
 )
-"""
+""" % ('|'.join(months),'|'.join(months))
 
 RE_TOKENIZER = re.compile(tokenizer_pattern)
+RE_ANDOR = re.compile('and\/or',re.I)
+RE_COMMENT = re.compile(r'(^(?:(?P<a>\s*)(?P<b>(?:\*|\/\*|\*\/|#!|#|%|\/\/|;)+))|(?:(?P<c>(?:\*|\/\*|\*\/|#|\/\/)+)(?P<d>\s*))$)', re.I | re.M)
 
 def test():
     text = """
-        some random text with a number 3.145, a path /usr/bin/python, an email someone@someplace.com, a url http://stuff.com/blah/, Walter H. Mann, and a copyright &copy; /xc2/xa9 (c).
+        some random text with a number 3.145, a path /usr/bin/python, an email <someone@someplace.com>, a url http://stuff.com/blah/, Walter H. Mann, and a copyright &copy; /xc2/xa9 (c), May 22 1985 12:34:56.
     """
 
-    correct = [('some', '', '', '', '', '', '', 'some', ''),
-            ('random', '', '', '', '', '', '', 'random', ''),
-            ('text', '', '', '', '', '', '', 'text', ''),
-            ('with', '', '', '', '', '', '', 'with', ''),
-            ('a', '', '', '', '', '', '', 'a', ''),
-            ('number', '', '', '', '', '', '', 'number', ''),
-            ('3.145', '', '', '', '3.145', '', '', '', ''),
-            (',', '', '', '', '', '', '', '', ','),
-            ('a', '', '', '', '', '', '', 'a', ''),
-            ('path', '', '', '', '', '', '', 'path', ''),
-            ('/usr/bin/python', '', '', '/usr/bin/python', '', '', '', '', ''),
-            (',', '', '', '', '', '', '', '', ','),
-            ('an', '', '', '', '', '', '', 'an', ''),
-            ('email', '', '', '', '', '', '', 'email', ''),
-            ('someone@someplace.com', 'someone@someplace.com', '', '', '', '', '', '', ''),
-            (',', '', '', '', '', '', '', '', ','),
-            ('a', '', '', '', '', '', '', 'a', ''),
-            ('url', '', '', '', '', '', '', 'url', ''),
-            ('http://stuff.com/blah/,', '', 'http://stuff.com/blah/,', '', '', '', '', '', ''),
-            ('Walter', '', '', '', '', '', '', 'Walter', ''),
-            ('H.', '', '', '', '', 'H.', '', '', ''),
-            ('Mann', '', '', '', '', '', '', 'Mann', ''),
-            (',', '', '', '', '', '', '', '', ','),
-            ('and', '', '', '', '', '', '', 'and', ''),
-            ('a', '', '', '', '', '', '', 'a', ''),
-            ('copyright', '', '', '', '', '', 'copyright', '', ''),
-            ('&copy;', '', '', '', '', '', '&copy;', '', ''),
-            ('/xc2/xa9', '', '', '/xc2/xa9', '', '', '', '', ''),
-            ('(c)', '', '', '', '', '', '(c)', '', ''),
-            ('.', '', '', '', '', '', '', '', '.')]
+    correct = [
+            'some', 'random', 'text', 'with', 'a', 'number', '3.145', 'a',
+            'path', '/usr/bin/python', 'an', 'email', '<someone@someplace.com>',
+            'a', 'url', 'http://stuff.com/blah/', 'Walter', 'H.', 'Mann',
+            'and', 'a', 'copyright', '&copy;', '/xc2/xa9', '(c)',
+            'May 22 1985', '12:34:56',
+        ]
 
-    result = RE_TOKENIZER.findall(text)
+    result = findall(RE_TOKENIZER, text, True)
 
     if correct == result:
         print "Correct!"
         return True
     else:
         print "Test Failed! Something regressed."
+        m = max([len(result), len(correct)])
+        for i in range(m):
+            if i >= len(correct):
+                print "EXTRA[%d]: %s" % (i, str(result[i]))
+            elif i >= len(result):
+                print "MISSING[%d]: %s" % (i, str(correct[i]))
+            elif result[i] != correct[i]:
+                print "MISSMATCH[%d]:\n\t%s\n\t%s" % (i, str(correct[i]), str(result[i]))
+
+        print result
         return False
 
     return False
 
-def findall(RE, text):
+def remove_comments(text):
+    from cStringIO import StringIO
+    io_text = StringIO()
+    io_text.write(text)
+    for iter in RE_COMMENT.finditer(text):
+        gd = iter.groupdict()
+        start = iter.start()
+        if gd['b']:
+            io_text.seek(start+len(gd['a']))
+            for i in range(len(gd['b'])):
+                io_text.write(' ')
+        else:
+            io_text.seek(start+len(gd['c']))
+            for i in range(len(gd['d'])):
+                io_text.write(' ')
+    result = io_text.getvalue()
+    io_text.close()
+    return result
+
+def findall(RE, text, tokens_only=False):
     """
-    findall(Regex, text) -> list(['str_1',start_byte_1, end_byte_1], ...)
+    findall(Regex, text, offsets) -> list(['str_1', token_type, start_byte_1, end_byte_1], ...)
 
     Uses the re.finditer method to locate all instances of the search 
     string and return the string and its start and end bytes.
 
     Regex is a compiled regular expression using the re.compile() method.
     text is the body of text to search through.
+    tokens_only is a boolean which tells findall to only return a list of string tokens.
     """
     found = []
     for iter in RE.finditer(text):
-        found.append([iter.group(), iter.start(), iter.end()])
+        gd = iter.groupdict()
+        token_type = [k for k,v in gd.iteritems() if v!=None and k!='token']
+        if len(token_type) > 1:
+            raise Exception("Token matched more than one search parameter.\n\t%s" % token_type)
+        if len(token_type) == 0:
+            raise Exception("Token did not a token type in the regular expression. Please check your group names.\n\tGROUP DICTIONARY::%s" % gd)
+        if not tokens_only:
+            found.append([iter.group(), token_type[0], iter.start(), iter.end()])
+        else:
+            found.append(iter.group())
     return found
 
-def findall_erase(RE, text):
+def parsetext(text, tokens_only=False):
     """
-    findall_erase(Regex, text) -> string
-
-    Uses the re.finditer method to locate all instances of the search
-    string and replaces them with spaces. The modified text is returned.
-
-    Regex is a compiled regular expression using the re.complile() method.
-    text is the body of text to search through.
-    """
-    new_text = list(text)
-    found = []
-    for iter in RE.finditer(text):
-        l = [iter.group(), iter.start(), iter.end()]
-        found.append(l)
-        new_text[l[1]:l[2]] = [' ' for i in range(l[2]-l[1])]
-    return (found, ''.join(new_text))
-
-# standard Regular Expressions used to tokenize files.
-months = ['JAN','FEB','MAR','MAY','APR','JUL','JUN','AUG','OCT','SEP','NOV','DEC','January', 'February', 'March', 'April', 'June', 'July', 'August', 'September', 'SEPT', 'October', 'November', 'December',]
-RE_ANDOR = re.compile('and\/or',re.I)
-RE_COMMENT = re.compile('\s([\*\/\#\%\!\@]+)')
-RE_EMAIL = re.compile('([A-Za-z0-9\-_\.\+]{1,100}@[A-Za-z0-9\-_\.\+]{1,100}\.[A-Za-z]{1,4})')
-RE_URL   = re.compile('(((https?)://[\-\w]{1,100}(\.\w[-\w]{0,100}){1,100}|([\-a-z0-9]+\.){1,100}(com|edu|biz|gov|int|info|mil|net|org|me|mobi|us|ca|mx|ag|bz|gs|ms|tc|vg|eu|de|it|fr|nl|am|at|be|asia|cc|in|nu|tv|tw|jp|[a-z][a-z]\.[a-z][a-z])\b)(:\d+)?(/[A-Za-z0-9\/#&\?\.\+\-\_]{0,100})?)', re.I)
-RE_PATH  = re.compile('([^\s\*]{0,100}[\\\/][^\s\*]{1,100}|[^\s\*]{1,100}[\\\/][^\s\*]{0,100})')
-RE_YEAR  = re.compile('[^0-9](19[0-9][0-9]|20[0-9][0-9])[^0-9]')
-RE_DATE = re.compile('(((\d+)[\ ]*(%s)[,\ ]*(\d+))|((%s)[\ ]*(\d+)[\ ,]*(\d+))|((\d+)(\ *[-\/\.]\ *)(\d+)(\ *[-\/\.]\ *)(\d+)))' % ('|'.join(months),'|'.join(months)), re.I)
-RE_TIME = re.compile('(\d\d\ *:\ *\d\d\ *:\ *\d\d(\ *\+\d\d\d\d)?)')
-RE_FLOAT = re.compile('(\d+(\.\d+)?)')
-RE_COPYRIGHT = re.compile('(\([c]\)|c?opyright|\&copy\;)',re.I)
-RE_START = re.compile('(<s>)')
-RE_END = re.compile('(<\/s>)')
-RE_TOKEN = re.compile('([A-Za-z0-9]+)')
-RE_ANYTHING = re.compile('.', re.DOTALL)
-
-def parsetext(text):
-    """
-    parsetext(text) -> dict()
+    parsetext(text) -> []
 
     Tokenizes a body of text and returns a dictionary containing
     a set of features located within the text.
 
-    'start':    the byte offset of '<s>' tags found in the text.
-    'end':      the byte offset of '</s>' tags found in the text.
-    'email':    the byte offset and text of emails found in the text.
-    'date':     the byte offset and text of date like strings found.
-    'time':     the byte offset and text of time like strings found.
-    'year':     the byte offset and text of year like strings found.
-    'float':    the byte offset and text of floating point numbers found.
-    'copyright':the byte offset and text of copyright strings and symbols.
-                includes 'opyright', '(c)', and the copyright characters.
-    'tokens':   the byte offset and text of white space split tokens.
-                this also includes the characters located between 
-                alphanumeric characters.
     """
     stuff = {}
     
     text = RE_ANDOR.sub('and or',text)
-    (temp, text) = findall_erase(RE_COMMENT, text)
+    test = remove_comments(text)
 
-    (stuff['start'], text) = findall_erase(RE_START, text)
-    (stuff['end'], text) = findall_erase(RE_END, text)
-    (stuff['email'], text) = findall_erase(RE_EMAIL, text)
-    (stuff['url'], text) = findall_erase(RE_URL, text)
-    # (stuff['path'], text) = findall_erase(RE_PATH, text)
-    #(stuff['date'], text) = findall_erase(RE_DATE, text)
-    #(stuff['time'], text) = findall_erase(RE_TIME, text)
-    (stuff['year'], text) = findall_erase(RE_YEAR, text)
-    (stuff['float'], text) = findall_erase(RE_FLOAT, text)
-    (stuff['copyright'], text) = findall_erase(RE_COPYRIGHT, text)
-    (stuff['tokens'], text) = findall_erase(RE_TOKEN, text)
+    tokens = findall(RE_TOKENIZER, text)
 
-    # we replace the original information extracted from the text with place
-    # holders so we can learn a generic trend in the structure of the
-    # documents.
-    stuff['tokens'].extend([['XXXstartXXX', stuff['start'][i][1], stuff['start'][i][2]] for i in range(len(stuff['start']))])
-    stuff['tokens'].extend([['XXXendXXX', stuff['end'][i][1], stuff['end'][i][2]] for i in range(len(stuff['end']))])
-    stuff['tokens'].extend([['XXXemailXXX', stuff['email'][i][1], stuff['email'][i][2]] for i in range(len(stuff['email']))])
-    stuff['tokens'].extend([['XXXurlXXX', stuff['url'][i][1], stuff['url'][i][2]] for i in range(len(stuff['url']))])
-    # stuff['tokens'].extend([['XXXpathXXX', stuff['path'][i][1], stuff['path'][i][2]] for i in range(len(stuff['path']))])
-    # stuff['tokens'].extend([['XXXdateXXX', stuff['date'][i][1], stuff['date'][i][2]] for i in range(len(stuff['date']))])
-    # stuff['tokens'].extend([['XXXtimeXXX', stuff['time'][i][1], stuff['time'][i][2]] for i in range(len(stuff['time']))])
-    stuff['tokens'].extend([['XXXyearXXX', stuff['year'][i][1], stuff['year'][i][2]] for i in range(len(stuff['year']))])
-    stuff['tokens'].extend([['XXXfloatXXX', stuff['float'][i][1], stuff['float'][i][2]] for i in range(len(stuff['float']))])
-    stuff['tokens'].extend([['XXXcopyrightXXX', stuff['copyright'][i][1], stuff['copyright'][i][2]] for i in range(len(stuff['copyright']))])
+    for i in xrange(len(tokens)):
+        word = tokens[i][0]
+        if tokens[i][1] != 'word':
+            word = 'XXX%sXXX' % tokens[i][1]
+        tokens[i].insert(0,word)
 
-    stuff['tokens'].sort(token_sort)
+    if tokens_only:
+        tokens = [token[0] for token in tokens]
 
-    return stuff
-
-def replace_placeholders(tokens,stuff):
-    """
-    replace_placeholders(tokens, parse_dictionary) -> list()
-
-    Given a set of tokens and a parse_dictionary replace all the
-    place holders in the list of tokens with their respective
-    counter parts in the parse_dictionary.
-
-    The parse_dictionary is the dictionary returned by the 
-    parsetext function.
-
-    the list of tokens is a list of lists containing the token
-    as a string and the start and end bytes of the token as structured
-    as the tokens element in the parse_dictionary.
-    """
-    t = tokens[:]
-    n = len(t)
-    for needle in ['XXXcopyrightXXX', 'XXXfloatXXX', 'XXXyearXXX', 'XXXtimeXXX',
-            'XXXdateXXX', 'XXXpathXXX', 'XXXurlXXX', 'XXXemailXXX',]:
-        count = 0
-        for i in range(n):
-            if t[i][0] == needle:
-                t[i][0] = stuff[needle.replace('X','')][count][0]
-                count += 1
-    return t
-
-def token_sort(x,y):
-    """
-    token_sort(x,y) -> int
-
-    A sort help function. Takes two lists, ['string', int, int], and returns
-    {-1: if x < y, 1: if x > 1, 0: if x == y}.
-    """
-    if (x[1] < y[1]):
-        return -1
-    if (x[1] > y[1]):
-        return 1
-    return 0
+    return tokens
 
 def tokens_to_BIO(tokens):
     """
@@ -286,16 +213,20 @@ def tokens_to_BIO(tokens):
 
     return (t,l)
 
-def train_nb(data):
+def train_nb(data, priors=None):
     n = len(data)
+
+    if not priors:
+        priors = {'B':{}, 'I':{}, 'O':{}}
 
     classes = ['B', 'I', 'O',]
     features = ['current_word', 'previous_label', 'previous_word', 'next_word']
     PFC = {} # P(F_{i}|C) accessed as PFC[C][F][i] for simplicity.
     # initialize our model
     for c in classes:
-        PFC[c] = {'class':0.0}
+        PFC[c] = {'class':priors[c].get('class',math.log(1.0/3.0)), 'min':{}}
         for f in features:
+            PFC[c]['min'][f] = priors[c].get(f, -1e-10)
             PFC[c][f] = {}
 
     for i in xrange(n):
@@ -304,7 +235,6 @@ def train_nb(data):
         for j in xrange(nn):
             c = labels[j]
             w = tokens[j]
-            PFC[c]['class'] += 1.0
             PFC[c]['current_word'][w] = PFC[c]['current_word'].get(w, 0.0) + 1.0
             c_1 = ''
             if j != 0:
@@ -326,12 +256,79 @@ def train_nb(data):
             for (k,v) in PFC[c][f].iteritems():
                 PFC[c][f][k] = math.log(v/s)
 
-    s = 0.0
-    for c in classes:
-        s += PFC[c]['class']
-    for c in classes:
-        PFC[c]['class'] = math.log(PFC[c]['class']/s)
+    return PFC
 
+def tuned_model(iob, priors=None, debug=False):
+    n = len(iob)
+    classes = ['B', 'I', 'O']
+    features = ['class', 'current_word', 'previous_label', 'previous_word', 'next_word']
+    mins = ['current_word', 'previous_label', 'previous_word', 'next_word']
+    if not priors:
+        priors = {}
+        for c in classes:
+            priors[c] = {}
+            for f in features:
+                priors[c][f] = math.log(1e-20)
+            priors[c]['class'] = math.log(1.0/3.0)
+
+    for j in range(20):
+        for i in range(n):
+            tiob = iob[:]
+            tiob.pop(i)
+            PFC = train_nb(tiob, priors)
+            L, P = label_nb(PFC, iob[i][0], True)
+            d = len(L)
+            cp = {}
+            for c in classes:
+                cp[c] = {}
+                for f in features:
+                    cp[c][f] = []
+            for j in range(d):
+                a = L[j]
+                b = iob[i][1][j]
+                if a != b:
+                    dif = math.exp(P[j][a]) - math.exp(P[j][b])
+                    cp[b]['class'].append(dif)
+                    if j>0:
+                        t = iob[i][0][j-1]
+                        if not PFC[b]['previous_word'].get(t,False):
+                            cp[b]['previous_word'].append(1e-22)
+                        if not PFC[a]['previous_word'].get(t,False):
+                            cp[a]['previous_word'].append(-1e-22)
+                    if j>d-1:
+                        t = iob[i][0][j+1]
+                        if not PFC[b]['next_word'].get(t,False):
+                            cp[b]['next_word'].append(1e-22)
+                        if not PFC[a]['next_word'].get(t,False):
+                            cp[a]['next_word'].append(-1e-22)
+                    t = iob[i][0][j]
+                    if not PFC[b]['current_word'].get(t,False):
+                        cp[b]['current_word'].append(1e-22)
+                    if not PFC[a]['current_word'].get(t,False):
+                        cp[a]['current_word'].append(-1e-22)
+
+            for c in classes:
+                for f in features:
+                    if len(cp[c][f]) > 0:
+                        priors[c][f] = math.exp(priors[c][f]) + sum(cp[c][f])/float(len(cp[c][f]))
+                    else:
+                        priors[c][f] = math.exp(priors[c][f])
+
+            s = sum([priors[c]['class'] for c in classes])
+            for c in classes:
+                priors[c]['class'] = priors[c]['class']/s
+            for c in classes:
+                for f in features:
+                    if priors[c][f]>1.0:
+                        print "%s %s > 1.0" % (c,f)
+                        priors[c][f] = 1.0
+                    elif priors[c][f]<1e-25:
+                        print "%s %s < 0.0" % (c,f)
+                        priors[c][f] = 1e-25
+                    priors[c][f] = math.log(priors[c][f])
+
+    PFC = train_nb(iob, priors)
+    
     return PFC
 
 def label_nb(PFC, tokens, debug=False):
@@ -340,10 +337,6 @@ def label_nb(PFC, tokens, debug=False):
 
     classes = PFC.keys()
     features = ['current_word', 'previous_label', 'previous_word', 'next_word']
-    minimums = {}
-    minimums['B'] = {'current_word':math.log(1e-23), 'previous_label':math.log(1e-23), 'previous_word':math.log(1e-23), 'next_word':math.log(1e-23)}
-    minimums['I'] = {'current_word':math.log(1e-10), 'previous_label':math.log(1e-23), 'previous_word':math.log(1e-10), 'next_word':math.log(1e-10)}
-    minimums['O'] = {'current_word':math.log(1e-10), 'previous_label':math.log(1e-10), 'previous_word':math.log(1e-10), 'next_word':math.log(1e-10)}
 
     for t in xrange(len(tokens)):
         fv = {}
@@ -362,7 +355,7 @@ def label_nb(PFC, tokens, debug=False):
         for c in classes:
             p[c] += PFC[c]['class']
             for f in features:
-                p[c] += PFC[c][f].get(fv[f],minimums[c][f])
+                p[c] += PFC[c][f].get(fv[f],PFC[c]['min'][f])
     
         i = 'O'
         if t == 0:
@@ -389,15 +382,15 @@ def label_nb(PFC, tokens, debug=False):
         return L,P
     return L
 
-def create_model(training_data):
+def create_model(training_data, debug=False):
     n = len(training_data)
     # need to convert the string data into BIO labels and tokens.
     parsed_data = [parsetext(text) for text in training_data]
-    tokens = [[parsed_data[i]['tokens'][j][0] for j in xrange(len(parsed_data[i]['tokens']))] for i in xrange(n)]
+    tokens = [[parsed_data[i][j][0] for j in xrange(len(parsed_data[i]))] for i in xrange(n)]
     bio_data = [tokens_to_BIO(tokens[i]) for i in xrange(n)]
 
     # create the naive Bayes model
-    PFC = train_nb(bio_data)
+    PFC = tuned_model(bio_data)
 
     model = {'id':hex(abs(hash(str(PFC)))), 'P(F|C)':PFC}
 
@@ -405,11 +398,11 @@ def create_model(training_data):
 
 def label_file(file, model):
     PFC = model['P(F|C)']
-    text = open(file).read(64000)
+    text = open(file).read()
 
     # parse the file and get the tokens
     parsed_text = parsetext(text)
-    tokens = [parsed_text['tokens'][j][0] for j in xrange(len(parsed_text['tokens']))]
+    tokens = [parsed_text[j][0] for j in xrange(len(parsed_text))]
 
     offsets = []
     
@@ -418,22 +411,20 @@ def label_file(file, model):
     L = label_nb(PFC, tokens)
     for l in xrange(len(L)):
         if L[l] == 'B':
-            starts.append(parsed_text['tokens'][l][1])
+            starts.append(parsed_text[l][3])
         if l>0 and L[l-1] == 'B' and L[l] == 'O':
             starts.pop()
         elif l>0 and L[l-1] != 'O' and L[l] == 'O':
-            ends.append(parsed_text['tokens'][l-1][2])
+            ends.append(parsed_text[l-1][4])
         elif l>0 and L[l-1] == 'I' and L[l] == 'B':
-            ends.append(parsed_text['tokens'][l-1][2])
+            ends.append(parsed_text[l-1][4])
     if len(starts)>len(ends):
-        ends.append(parsed_text['tokens'][-1][2])
+        ends.append(parsed_text[-1][4])
 
     for i in xrange(len(starts)):
         offsets.append((starts[i], ends[i], 'statement'))
 
-    for item in parsed_text['email']:
-        offsets.append((item[1], item[2], 'email'))
-    for item in parsed_text['url']:
-        offsets.append((item[1], item[2], 'url'))
+    offsets.extend([(item[3], item[4], 'email') for item in parsed_text if item[2] == 'email'])
+    offsets.extend([(item[3], item[4], 'url') for item in parsed_text if item[2] == 'url'])
 
     return offsets

@@ -190,7 +190,7 @@ def crossvalidation(data_file, folds=10):
     random.shuffle(training_data)
 
     parsed_data = [library.parsetext(text) for text in training_data]
-    tokens = [[parsed_data[i]['tokens'][j][0] for j in xrange(len(parsed_data[i]['tokens']))] for i in xrange(N)]
+    tokens = [[parsed_data[i][j][0] for j in xrange(len(parsed_data[i]))] for i in xrange(N)]
     bio_data = [library.tokens_to_BIO(tokens[i]) for i in xrange(N)]
 
     fold_index = []
@@ -212,7 +212,7 @@ def crossvalidation(data_file, folds=10):
         testing_data = [bio_data[d] for d in testing]
         training_data = [bio_data[d] for d in training]
 
-        PFC = library.train_nb(training_data)
+        PFC = library.tuned_model(training_data)
 
         passed = 0
         for test in testing_data:
