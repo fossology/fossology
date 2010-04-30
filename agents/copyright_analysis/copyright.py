@@ -126,7 +126,7 @@ Use the --agent switch to place %prog into Fossology agent mode. There are four 
         try:
             db = libfosspython.FossDB()
         except Exception, inst:
-            print >> sys.stdout, 'ERROR: %s, in %s' % inst
+            print >> sys.stdout, 'ERROR: %s, in %s' % (inst[0], inst[1])
             return 1
 
         tr = table_check(db)
@@ -191,7 +191,7 @@ def agent(model,runonpfiles=False):
         try:
             db = libfosspython.FossDB()
         except Exception, inst:
-            print >> sys.stderr, 'FATAL: %s, in %s' % (inst[:])
+            print >> sys.stderr, 'FATAL: %s, in %s' % (inst[0], inst[1])
             return -1
 
         tr = table_check(db)
@@ -354,7 +354,7 @@ def drop_database():
     try:
         db = libfosspython.FossDB()
     except Exception, inst:
-        print >> sys.stdout, 'ERROR: %s, in %s' % inst
+        print >> sys.stdout, 'ERROR: %s, in %s' % (inst[0], inst[1])
         sys.exit(-1)
 
     sql = "DROP TABLE copyright CASCADE"
@@ -377,7 +377,7 @@ def setup_database(drop=False):
     try:
         db = libfosspython.FossDB()
     except Exception, inst:
-        print >> sys.stdout, 'ERROR: %s, in %s' % inst
+        print >> sys.stdout, 'ERROR: %s, in %s' % (inst[0], inst[1])
         sys.exit(1)
 
     if drop:
@@ -408,7 +408,7 @@ def setup_database(drop=False):
 
     exists = False
     sql = """CREATE TABLE copyright (
-             ct_pk bigint DEFAULT nextval('copyright_ct_pk_seq'::regclass) NOT NULL,
+             ct_pk bigint PRIMARY KEY DEFAULT nextval('copyright_ct_pk_seq'::regclass),
              agent_fk bigint NOT NULL,
              pfile_fk bigint NOT NULL,
              content text,
@@ -426,14 +426,21 @@ def setup_database(drop=False):
             exists = True
 
     if not exists:
-        sql = "ALTER TABLE public.copyright OWNER TO fossy"
+        sql = "CREATE INDEX copyright_pfile_fk_index ON copyright USING BTREE (pfile_fk)"
         result = db.access(sql)
         if result != 0:
             error = db.errmsg()
-            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
+            print >> sys.stdout, "ERROR: Could not create index for pfile_fk. Database said: '%s'\nERROR: sql=%s" % (error, sql)
             return -1
 
-        sql = "ALTER TABLE ONLY copyright ADD CONSTRAINT copyright_pkey PRIMARY KEY (ct_pk)"
+        sql = "CREATE INDEX copyright_agent_fk_index ON copyright USING BTREE (agent_fk)"
+        result = db.access(sql)
+        if result != 0:
+            error = db.errmsg()
+            print >> sys.stdout, "ERROR: Could not create index for agent_fk. Database said: '%s'\nERROR: sql=%s" % (error, sql)
+            return -1
+
+        sql = "ALTER TABLE public.copyright OWNER TO fossy"
         result = db.access(sql)
         if result != 0:
             error = db.errmsg()
@@ -453,6 +460,8 @@ def setup_database(drop=False):
             error = db.errmsg()
             print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
             return -1
+
+    return 0
 
 if __name__ == '__main__':
     sys.exit(main())
