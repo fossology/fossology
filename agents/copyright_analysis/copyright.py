@@ -324,8 +324,7 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
             if type(str) == type(u''): # we have a unicode object
                 str = str.decode('ascii', 'ignore')
             pd = library.parsetext(str)
-            tokens = library.replace_placeholders(pd['tokens'][:],pd)
-            str = re.escape(' '.join([token[0] for token in tokens]))
+            str = re.escape(' '.join([token[1] for token in pd]))
             sql = """INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type)
                      VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s')""" % (agent_pk, pfile, offsets[i][0], offsets[i][1],
                         str, hex(abs(hash(str))),
