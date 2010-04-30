@@ -729,8 +729,10 @@ FUNCTION int updateLicenseFile(long rfPk) {
         (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5)))
     {
         // ignoring duplicate constraint failure (23505)
-        printf("ERROR: %s:%s:%d  %s  On: %s", 
-          __FILE__, "updateLicenseFile()", __LINE__, PQresultErrorMessage(result), query);
+        printf("ERROR: %s:%s:%d  Error:%s %s  On: %s", 
+          __FILE__, "updateLicenseFile()", __LINE__, 
+          PQresultErrorField(result, PG_DIAG_SQLSTATE),
+          PQresultErrorMessage(result), query);
         PQclear(result);
         return (FALSE);
     }
