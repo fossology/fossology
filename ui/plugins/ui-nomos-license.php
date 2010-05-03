@@ -389,6 +389,10 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
+    if ($_GET['updcache'])
+      $this->UpdCache = $_GET['updcache'];
+    else
+      $this->UpdCache = 0;
 
     switch(GetParm("show",PARM_STRING))
     {
