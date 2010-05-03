@@ -73,7 +73,7 @@ RE_TOKENIZER = re.compile(tokenizer_pattern)
 RE_ANDOR = re.compile('and\/or',re.I)
 RE_COMMENT = re.compile(r'(^(?:(?P<a>\s*)(?P<b>(?:\*|\/\*|\*\/|#!|#|%|\/\/|;)+))|(?:(?P<c>(?:\*|\/\*|\*\/|#|\/\/)+)(?P<d>\s*))$)', re.I | re.M)
 
-FEATURES = ['current_word', 'previous_label', 'current_bigram', ]
+FEATURES = ['current_word', 'previous_word', 'next_word', 'previous_label', 'current_bigram', 'previous_bigram', 'next_bigram']
 
 def test():
     text = """
@@ -296,9 +296,9 @@ def train_nb(data, priors=None):
     PFC = {} # P(F_{i}|C) accessed as PFC[C][F][i] for simplicity.
     # initialize our model
     for c in classes:
-        PFC[c] = {'class':priors[c].get('class',math.log(1.0/3.0)), 'min':{}}
+        PFC[c] = {'class':priors[c].get('class',math.log(1.0/3.0)), 'unknown':{}}
         for f in FEATURES:
-            PFC[c]['min'][f] = priors[c].get(f, -1e-10)
+            PFC[c]['unknown'][f] = priors[c].get(f, math.log(1e-20))
             PFC[c][f] = {}
 
     for i in xrange(n):
@@ -314,16 +314,17 @@ def train_nb(data, priors=None):
     for c in classes:
         for f in FEATURES:
             s = sum(PFC[c][f].values())
-            for (k,v) in PFC[c][f].iteritems():
+            keys = PFC[c][f].keys()
+            for k in keys:
+                v = PFC[c][f][k]
                 PFC[c][f][k] = math.log(v/s)
-
+        
     return PFC
 
 def tuned_model(iob, priors=None, debug=False):
     n = len(iob)
+    fn = float(n)
     classes = ['B', 'I', 'O']
-    mins = FEATURES[:]
-    mins.append('class')
     if not priors:
         priors = {}
         for c in classes:
@@ -332,7 +333,14 @@ def tuned_model(iob, priors=None, debug=False):
                 priors[c][f] = math.log(1e-20)
             priors[c]['class'] = math.log(1.0/3.0)
 
-    for j in range(10):
+    # a single iteration should locate the correct priors for the classes.
+    correct = 0.0
+    correct_last = -1.0
+    priors_last = priors.copy()
+    while (correct>correct_last):
+        correct_last = correct
+        priors_last = priors.copy()
+        matrix = {'B':{'B':0.0, 'I':0.0, 'O':0.0}, 'I':{'B':0.0, 'I':0.0, 'O':0.0}, 'O':{'B':0.0, 'I':0.0, 'O':0.0}}
         for i in range(n):
             tiob = iob[:]
             tiob.pop(i)
@@ -340,45 +348,46 @@ def tuned_model(iob, priors=None, debug=False):
             L, P = label_nb(PFC, iob[i][0], True)
             feats = get_features(iob[i][0],iob[i][1],FEATURES)
             d = len(L)
-            cp = {}
+            fd = float(d)
+            fp = {'B':{}, 'I':{}, 'O':{}}
+            cp = {'B':[], 'I':[], 'O':[]}
             for c in classes:
-                cp[c] = {}
                 for f in FEATURES:
-                    cp[c][f] = []
-                cp[c]['class'] = []
+                    fp[c][f] = []
             for j in range(d):
                 a = L[j]
                 b = iob[i][1][j]
+                matrix[b][a] += 1.0
+
                 if a != b:
-                    dif = math.exp(P[j][a]) - math.exp(P[j][b])
-                    cp[b]['class'].append(dif)
-                    for m in FEATURES:
-                        if not PFC[b][m].get(feats[j][m],False):
-                            cp[b][m].append(1e-22)
-                        if not PFC[a][m].get(feats[j][m],False):
-                            cp[a][m].append(-1e-22)
+                    cp[a].append(-1.0/(fn+fd))
+                    cp[b].append(1.0/(fn+fd))
 
             for c in classes:
-                for f in mins:
-                    if len(cp[c][f]) > 0:
-                        priors[c][f] = math.exp(priors[c][f]) + sum(cp[c][f])/float(len(cp[c][f]))
-                    else:
-                        priors[c][f] = math.exp(priors[c][f])
-
-            s = sum([priors[c]['class'] for c in classes])
+                if len(cp[c]) > 0:
+                    cp[c] = sum(cp[c])/float(len(cp[c]))
+                else:
+                    cp[c] = 0.0
+            s = 0.0
             for c in classes:
-                priors[c]['class'] = priors[c]['class']/s
+                priors[c]['class'] = math.exp(priors[c]['class']) + cp[c]
+                if priors[c]['class'] < 0.0:
+                    priors[c]['class'] = 1e-100
+                if priors[c]['class'] > 1.0:
+                    priors[c]['class'] = 1.0
+                s += priors[c]['class']
             for c in classes:
-                for f in mins:
-                    if priors[c][f]>1.0:
-                        print "%s %s > 1.0" % (c,f)
-                        priors[c][f] = 1.0
-                    elif priors[c][f]<1e-25:
-                        print "%s %s < 0.0" % (c,f)
-                        priors[c][f] = 1e-25
-                    priors[c][f] = math.log(priors[c][f])
+                if priors[c]['class'] <= 1e-100:
+                    priors[c]['class'] = -230.0
+                else:
+                    priors[c]['class'] = math.log(priors[c]['class']/s)
 
-    priors['B']['current_word'] = -6000000000000.0 # ~log(0)
+        total = sum([sum([matrix[c1][c2] for c2 in classes]) for c1 in classes])
+        correct = sum([matrix[c][c] for c in classes])/total
+        #print correct
+
+    if correct_last>correct:
+        priors = priors_last.copy()
 
     PFC = train_nb(iob, priors)
     
@@ -395,29 +404,31 @@ def label_nb(PFC, tokens, debug=False):
     for t in xrange(len(tokens)):
         if t>0 and 'previous_label' in FEATURES:
             feats[t]['previous_label'] = L[-1]
-        p = dict([(c,0.0) for c in classes])
+        p = dict()
         for c in classes:
-            p[c] += PFC[c]['class']
+            if t == 0 and c == 'I':
+                continue
+            if t > 0 and L[-1] == 'B' and c == 'B':
+                continue
+            if t > 0 and L[-1] == 'O' and c == 'I':
+                continue
+
+            s = []
+            s.append(PFC[c]['class'])
             for f in FEATURES:
-                p[c] += PFC[c][f].get(feats[t][f],PFC[c]['min'][f])
+                s.append(PFC[c][f].get(feats[t][f],PFC[c]['unknown'][f]))
+            # check for a zero probability. -200~log(0.0)
+            if min(s) < -200.0:
+                continue
+            p[c] = sum(s)
     
         i = 'O'
-        if t == 0:
-            if p['B'] > p['O']:
-                i = 'B'
-        elif L[-1] == 'O':
-            if p['B'] > p['O']:
-                i = 'B'
-        elif L[-1] == 'B':
-            if p['B'] > max([p['O'], p['I']]):
-                i = 'B'
-            elif p['I'] > p['O']:
-                i = 'I'
-        elif L[-1] == 'I':
-            if p['I'] > max([p['O'], p['B']]):
-                i = 'I'
-            elif p['B'] > p['O']:
-                i = 'B'
+        if len(p) > 0:
+            m = -1000.0
+            for k,v in p.iteritems():
+                if v > m:
+                    i = k
+                    m = v
 
         P.append(p)
         L.append(i)

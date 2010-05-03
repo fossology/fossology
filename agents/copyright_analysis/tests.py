@@ -198,14 +198,11 @@ def crossvalidation(data_file, folds=10):
         fold_index.append(range(i*n,min([n+n*i,N])))
 
     accuracy = 0.0
-    B_count = 0
-    B_correct = 0
-    I_count = 0
-    I_correct = 0
-    O_count = 0
-    O_correct = 0
+    classes = ['B', 'I', 'O']
+    matrix = {'B':{'B':0.0, 'I':0.0, 'O':0.0}, 'I':{'B':0.0, 'I':0.0, 'O':0.0}, 'O':{'B':0.0, 'I':0.0, 'O':0.0}}
 
     for i in range(folds):
+        print "Fold %d." % i
         testing = fold_index[i]
         training = list(set(testing).symmetric_difference(set(range(N))))
 
@@ -225,27 +222,30 @@ def crossvalidation(data_file, folds=10):
                 passed += 1
 
             for l in range(len(labels)):
-                if labels[l] == 'B':
-                    B_count += 1
-                    if out[l] == 'B':
-                        B_correct += 1
-                elif labels[l] == 'I':
-                    I_count += 1
-                    if out[l] == 'I':
-                        I_correct += 1
-                elif labels[l] == 'O':
-                    O_count += 1
-                    if out[l] == 'O':
-                        O_correct += 1
-        
+                matrix[labels[l]][out[l]] += 1.0
+
         accuracy += passed/float(len(testing))
 
     raw_accuracy = accuracy/float(folds)
-    B_accuracy = float(B_correct)/float(B_count)
-    I_accuracy = float(I_correct)/float(I_count)
-    O_accuracy = float(O_correct)/float(O_count)
 
-    return {'raw accuracy':raw_accuracy, 'B accuracy':B_accuracy, 'I accuracy':I_accuracy, 'O accuracy':O_accuracy,}
+    total = sum([sum([matrix[c1][c2] for c2 in classes]) for c1 in classes])
+    for c1 in classes:
+        s = sum([matrix[c1][c2] for c2 in classes])
+        for c2 in matrix[c1]:
+            matrix[c1][c2] = matrix[c1][c2]/s
+
+    print "Raw Accuracy: %1.2f" % raw_accuracy
+    print "------------------------"
+    print "   |   B  |   I  |   O  "
+    print "------------------------"
+    print " B | %1.2f | %1.2f | %1.2f " % (matrix['B']['B'], matrix['B']['I'], matrix['B']['O'])
+    print "------------------------"
+    print " I | %1.2f | %1.2f | %1.2f " % (matrix['I']['B'], matrix['I']['I'], matrix['I']['O'])
+    print "------------------------"
+    print " O | %1.2f | %1.2f | %1.2f " % (matrix['O']['B'], matrix['O']['I'], matrix['O']['O'])
+    print "------------------------"
+
+    return {'raw accuracy':raw_accuracy, 'matrix':matrix}
 
 def main():
     """
