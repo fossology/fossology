@@ -2192,7 +2192,7 @@ int	main	(int argc, char *argv[])
 	MaxThread=1;
 	}
   //Begin add by vincent
-  if (!ReunpackSwitch)
+  if (!ReunpackSwitch && UseRepository)
 	{
 	memset(SQL,'\0',MAXSQL);
   	snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s limit 1;",Upload_Pk);
