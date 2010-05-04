@@ -211,13 +211,6 @@ void	DeleteUpload	(long UploadId)
    ***********************************************/
 
   /***********************************************/
-  /* Blow away uploadtree */
-  memset(SQL,'\0',sizeof(SQL));
-  if (Verbose) { printf("# Deleting uploadtree\n"); }
-  snprintf(SQL,sizeof(SQL),"DELETE FROM uploadtree WHERE upload_fk = %ld;",UploadId);
-  MyDBaccess(DB,SQL);
-
-  /***********************************************/
   /* delete pfile references from all the pfile dependent tables */
   if (Verbose) { printf("# Deleting from licterm_name\n"); }
   memset(SQL,'\0',sizeof(SQL));
