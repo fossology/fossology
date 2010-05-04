@@ -1262,10 +1262,10 @@ int main(int argc, char **argv)
        run as a single thread.  This will prevent the scheduler from
        consuming excess time (this is a fast agent), and allow this
        process to update bucket_ars.
-     */
     result = PQexec(pgConn, "begin");
     if (checkPQcommand(result, "begin", __FILE__, __LINE__)) return -1;
     PQclear(result);
+     */
 
     rv = walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0, 
              hasPrules);
@@ -1274,14 +1274,14 @@ int main(int argc, char **argv)
     {
       processFile(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 
                   pfile_pk, ufile_mode, ufile_name, hasPrules);
-      strcpy(sqlbuf, "commit");
+//      strcpy(sqlbuf, "commit");
     }
-    else
-      strcpy(sqlbuf, "rollback");
+//    else
+//      strcpy(sqlbuf, "rollback");
 
-    result = PQexec(pgConn, sqlbuf);
-    if (checkPQcommand(result, sqlbuf, __FILE__, __LINE__)) return -1;
-    PQclear(result);
+//    result = PQexec(pgConn, sqlbuf);
+//    if (checkPQcommand(result, sqlbuf, __FILE__, __LINE__)) return -1;
+//    PQclear(result);
 
     /* Record analysis end in bucket_ars, the bucket audit trail. */
     if (ars_pk)
