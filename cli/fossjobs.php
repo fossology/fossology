@@ -186,6 +186,8 @@ if (!empty($upload_pk_list)) {
     if (empty($upload_pk)) {
       continue;
     }
+    // don't exit on AgentAdd failure, or all the agents requested will
+    // not get scheduled.
     for ($ac = 0;$ac < $agent_count;$ac++) {
       $agentname = $agent_list[$ac]->URI;
       if (!empty($agentname)) {
@@ -194,7 +196,6 @@ if (!empty($upload_pk_list)) {
         if (!empty($results)) {
           echo "ERROR: Scheduling failed for Agent $agentname\n";
           echo "ERROR message: $results\n";
-          exit(1);
         } else if ($Verbose) {
           print "Scheduled: $upload_pk -> $agentname\n";
         }
