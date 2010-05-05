@@ -287,6 +287,28 @@ def get_features(tokens,labels,features):
     
 
 def train_nb(data, priors=None):
+    """
+    Creates a naive Bayes model given a list of token, IOB tuple data.
+
+    A priors dictionary can be used to tweak the prior probability of
+    the individual classes and the unknown probability if individual
+    features.
+
+    Data formate:
+        data = [
+                [(token1_1, label1_1), ..., (tokenn_1, labeln_1)],
+                .
+                .
+                .
+                [(token1_N, label1_N), ..., (tokenn_N, labeln_N)]
+               ]
+    Priors formate:
+        priors = {
+            'B':{'class':0.33, 'current_word':1e-10, ...},
+            'I':{...},
+            'O':{...}
+            }
+    """
     n = len(data)
 
     if not priors:
@@ -322,6 +344,35 @@ def train_nb(data, priors=None):
     return PFC
 
 def tuned_model(iob, priors=None, debug=False):
+    """
+    This function uses a leave one out technique to determine the optimal
+    prior probabilities of the three IOB classes. This is a better solution
+    then trying to tune these parameters by hand.
+
+    The general idea is to create a model using all the training data
+    but one example. The example that is left out is then used to determine
+    which priors are incorrect. Once a prior has been determined to be
+    incorrect it is moved in the correct direction by a small amount.
+    After a number of iterations through the data the priors will stabilize
+    and the error rate will stop deceasing. This is when the algorithm stops.
+
+    IOB formate:
+        iob = [
+                [(token1_1, label1_1), ..., (tokenn_1, labeln_1)],
+                .
+                .
+                .
+                [(token1_N, label1_N), ..., (tokenn_N, labeln_N)]
+               ]
+    Priors formate:
+        priors = {
+            'B':{'class':0.33, 'current_word':1e-10, ...},
+            'I':{...},
+            'O':{...}
+            }
+
+    Returns a tuned model.
+    """
     n = len(iob)
     fn = float(n)
     classes = ['B', 'I', 'O']
@@ -333,7 +384,8 @@ def tuned_model(iob, priors=None, debug=False):
                 priors[c][f] = math.log(1e-20)
             priors[c]['class'] = math.log(1.0/3.0)
 
-    # a single iteration should locate the correct priors for the classes.
+    # a single iteration should locate the correct priors for the classes,
+    # but we should continue until the error rate stabilizes.
     correct = 0.0
     correct_last = -1.0
     priors_last = priors.copy()
@@ -394,6 +446,15 @@ def tuned_model(iob, priors=None, debug=False):
     return PFC
 
 def label_nb(PFC, tokens, debug=False):
+    """
+    Given a naive Bayes model and a list of tokens this function will
+    return a list of predicted labels.
+
+    If debug is True then a tuple containing the labels and the class
+    probabilities is returned. This is helpful when trying to determine
+    what feature is causing a mis-classification.
+    """
+
     L = []
     P = []
 
@@ -438,6 +499,19 @@ def label_nb(PFC, tokens, debug=False):
     return L
 
 def create_model(training_data, debug=False):
+    """
+    This function dose all the work of creating a naive Bayes model.
+
+    Pass a list of labeled texts and the function returns a trained
+    and tuned NB model.
+
+    Labeled text should be wrapped in <s></s> tags. This means if
+    you want to train a model to find proper names then each proper
+    name in the text will be wrapped in <s> tags.
+
+    The model formate contains an ID which contains a hash of the 
+    actual NB model. The P(F|C) element contains the NB model.
+    """
     n = len(training_data)
     # need to convert the string data into BIO labels and tokens.
     parsed_data = [parsetext(text) for text in training_data]
@@ -452,6 +526,24 @@ def create_model(training_data, debug=False):
     return model
 
 def label_file(file, model, READMAX=64000):
+    """
+    A wrapper function for extracting copyright statements.
+
+    `file' is a filepath to the file to label.
+    `model' is a model returned by create model.
+    `READMAX' sets a limit on the amount of data to read from the file.
+        If READMAX is set to a negative number then label_file will read
+        until EOF.
+
+    Returns a set of offsets in to the file with corresponding label.
+
+    Offsets formate:
+        offsets = [
+                (start_byte, end_byte, type)
+            ]
+        type can include the following ('statement', 'email', 'url')
+    """
+
     PFC = model['P(F|C)']
     text = open(file).read(READMAX)
 
