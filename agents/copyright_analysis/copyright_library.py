@@ -73,9 +73,16 @@ RE_TOKENIZER = re.compile(tokenizer_pattern)
 RE_ANDOR = re.compile('and\/or',re.I)
 RE_COMMENT = re.compile(r'(^(?:(?P<a>\s*)(?P<b>(?:\*|\/\*|\*\/|#!|#|%|\/\/|;)+))|(?:(?P<c>(?:\*|\/\*|\*\/|#|\/\/)+)(?P<d>\s*))$)', re.I | re.M)
 
+
+# The current set of features used in the naive Bayes model.
 FEATURES = ['current_word', 'previous_word', 'next_word', 'previous_label', 'current_bigram', 'previous_bigram', 'next_bigram']
 
 def test():
+    """
+    Tests to make sure the tokenizor is working correctly.
+
+    Returns True if everything worked correctly, and False if it didn't.
+    """
     text = """
         some random text with a number 3.145, a path /usr/bin/python, an email <someone@someplace.com>, a url http://stuff.com/blah/, Walter H. Mann, and a copyright &copy; /xc2/xa9 (c), May 22 1985 12:34:56.
     """
@@ -110,6 +117,12 @@ def test():
     return False
 
 def remove_comments(text):
+    """
+    Removes standard C/C++, Python, Perl, Bash, etc. comment characters.
+
+    Returns a new string with comment characters replaced by spaces.
+    """
+
     from cStringIO import StringIO
     io_text = StringIO()
     io_text.write(text)
@@ -186,6 +199,19 @@ def tokens_to_BIO(tokens):
     Takes a token list and returns the BIO labels based on the position
     of the start and end tags.
 
+    Function expects phrases to be wrapped by XXXstartXXX XXXendXXX tokens.
+    For example:
+        tokens = ['some', 'proper', 'names', 'include', 'XXXstartXXX', 'Adam',
+                    'Bates', 'XXXendXXX', 'and', 'XXXstartXXX', 'Bob',
+                    'Gobeille', 'XXXendXXX', '.'
+                ]
+        will be converted into the following IOB tags.
+        tokens = ['some', 'proper', 'names', 'include', 'Adam',
+                    'Bates', 'and', 'Bob', 'Gobeille', '.'
+                ]
+        labels = ['O', 'O', 'O', 'O', 'B', 'I', 'O', 'B', 'I', 'O']
+                    
+
     This is used to convert the training data which is labeled using '<s></s>'
     tags into a NLP standard labeling.
 
@@ -195,6 +221,10 @@ def tokens_to_BIO(tokens):
     B - begining
     I - inside
     O - outside
+
+    More info about IOB/BIO tagging can be found on page 453 of 
+    ``Speech and Language Processing" 2nd edition by Daniel Jurafsky and James H. Martin
+    Google book link: http://books.google.com/books?id=fZmj5UNK8AQC
     """
     n = len(tokens)
     t = []
