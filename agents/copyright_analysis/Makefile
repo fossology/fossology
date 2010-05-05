@@ -51,7 +51,7 @@ clean:
 
 include $(DEPS)
 
-.PHONY: all install uninstall clean test vars.py
+.PHONY: all install uninstall clean test
 
 vars.py:
 	@rm -f $@
