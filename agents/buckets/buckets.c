@@ -1088,6 +1088,8 @@ int main(int argc, char **argv)
   /* main processing loop */
   while(++readnum)
   {
+    upload_pk = 0;
+    bucketpool_pk = 0;
     if (ReadFromStdin) 
     {
       printf("OK\n");
@@ -1104,10 +1106,14 @@ int main(int argc, char **argv)
       while (token && (!upload_pk || !bucketpool_pk))
       {
         if (strcmp(token, "bppk") == 0)
+        {
           bucketpool_pk = atoi(strtok_r(NULL, Delims, &saveptr));
+        }
         else
         if (strcmp(token, "upk") == 0)
+        {
           upload_pk = atoi(strtok_r(NULL, Delims, &saveptr));
+        }
         token = strtok_r(NULL, Delims, &saveptr);
       }
 
@@ -1175,8 +1181,8 @@ int main(int argc, char **argv)
     switch (UploadProcessed(pgConn, agent_pk, nomos_agent_pk, pfile_pk, head_uploadtree_pk, upload_pk, bucketpool_pk)) 
     {
       case 1:  /* upload has already been processed */
-        printf("LOG: Duplicate request for bucket agent to process upload_pk: %d, uploadtree_pk: %d, bucketpool_pk: %d, bucket agent_pk: %d, pfile_pk: %d ignored.\n",
-             upload_pk, head_uploadtree_pk, bucketpool_pk, agent_pk, pfile_pk);
+        printf("LOG: Duplicate request for bucket agent to process upload_pk: %d, uploadtree_pk: %d, bucketpool_pk: %d, bucket agent_pk: %d, nomos agent_pk: %d, pfile_pk: %d ignored.\n",
+             upload_pk, head_uploadtree_pk, bucketpool_pk, agent_pk, nomos_agent_pk, pfile_pk);
         continue;
       case -1: /* SQL error, UploadProcessed() wrote error message */
         continue; 
