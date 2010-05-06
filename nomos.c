@@ -806,7 +806,7 @@ FUNCTION void processFile(char *fileToScan) {
         perror("mkdtemp");
         Fatal("%s: cannot make temp directory %s", gl.progName);
     }
-    chmod(cur.targetDir, 0777);
+    chmod(cur.targetDir, 0775);
     if (mySystem("cp '%s' %s", fileToScan, cur.targetDir)) {
         Fatal("Cannot copy %s to temp-directory", fileToScan);
     }
