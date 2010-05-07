@@ -180,6 +180,7 @@ class ui_buckets extends FO_Plugin
       if (pg_num_rows($result) > 0) $nomosagent_pk = $AgentRow['nomosagent_fk'];
     }
 
+/*  select all the buckets for entire tree 
     $sql = "SELECT distinct(bucket_fk) as bucket_pk, 
                    count(bucket_fk) as bucketcount
               from bucket_file, 
@@ -191,11 +192,48 @@ class ui_buckets extends FO_Plugin
                     and bucket_file.nomosagent_fk=$nomosagent_pk
               group by bucket_fk 
               order by bucketcount desc"; 
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+*/
+
+    /* find the children  and sum their buckets */
+    $Children = GetNonArtifactChildren($Uploadtree_pk);
+    $combinedHisto = array();
+    // ignore notice from adding to nonexistant rows, php will just create them
+    $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
+    foreach($Children as $Child)
+    {
+      $sql = "SELECT bucket_fk from bucket_file,uploadtree 
+                     where uploadtree_pk=$Child[uploadtree_pk]
+                       and bucket_file.pfile_fk=uploadtree.pfile_fk 
+                       and agent_fk=$bucketagent_pk 
+                       and bucket_file.nomosagent_fk=$nomosagent_pk";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+      /* accumulate bucket counts
+       * array[bucket_pk] = count
+       */
+      while ($bucket = pg_fetch_assoc($result)) $combinedHisto[$bucket['bucket_fk']]++;
+      pg_free_result($result);
+
+      /* Now get the bucket_container recs.  */
+      $sql = "SELECT bucket_fk from bucket_container
+                     where uploadtree_fk=$Child[uploadtree_pk]
+                       and agent_fk=$bucketagent_pk 
+                       and nomosagent_fk=$nomosagent_pk";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+      /* accumulate bucket counts
+       * array[bucket_pk] = count
+       */
+      while ($bucket = pg_fetch_assoc($result)) $combinedHisto[$bucket['bucket_fk']]++;
+      pg_free_result($result);
+
+    }
+    error_reporting($errlev); 
 
     /* Create bucketDefArray as individual query this is MUCH faster
-       than incorporating it with a join in the previous query.
+       than incorporating it with a join in the previous queries.
      */
     $sql = "select * from bucket_def where bucketpool_fk=$bucketpool_pk";
     $result_name = pg_query($PG_CONN, $sql);
@@ -204,6 +242,9 @@ class ui_buckets extends FO_Plugin
     while ($name_row = pg_fetch_assoc($result_name)) 
       $bucketDefArray[$name_row['bucket_pk']] = $name_row;
     pg_free_result($result_name);
+
+    /* sort $combinedHisto by the count */
+    arsort($combinedHisto);
 
     /* Get agent list */
     $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
@@ -223,16 +264,14 @@ class ui_buckets extends FO_Plugin
     $VLic .= "<th width='10%'>Files</th>";
     $VLic .= "<th>Bucket</th></tr>\n";
 
-    while ($row = pg_fetch_assoc($result))
+    foreach($combinedHisto as $bucket_pk => $bucketcount)
     {
       $Uniquebucketcount++;
-      $bucketcount += $row['bucketcount'];
-      $bucket_pk = $row['bucket_pk'];
       $bucket_name = $bucketDefArray[$bucket_pk]['bucket_name'];
       $bucket_color = $bucketDefArray[$bucket_pk]['bucket_color'];
 
       /*  Count  */
-      $VLic .= "<tr><td align='right' style='background-color:$bucket_color'>$row[bucketcount]</td>";
+      $VLic .= "<tr><td align='right' style='background-color:$bucket_color'>$bucketcount</td>";
 
       /*  Show  */
       $VLic .= "<td align='center'><a href='";
@@ -250,9 +289,6 @@ class ui_buckets extends FO_Plugin
     $VLic .= "</table>\n";
     $VLic .= "<p>\n";
     $VLic .= "Unique buckets: $Uniquebucketcount<br>\n";
-    $NetLic = $bucketcount - $NoLicFound;
-    $VLic .= "Total: $NetLic";
-    pg_free_result($result);
 
 
     /*******    File Listing     ************/
@@ -420,7 +456,8 @@ class ui_buckets extends FO_Plugin
     $Folder = GetParm("folder",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
-    if ($_GET['updcache'])
+    $updcache = GetParm("updcache",PARM_INTEGER);
+    if ($updcache)
     {
       $this->UpdCache = $_GET['updcache'];
     }
