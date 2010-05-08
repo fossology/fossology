@@ -38,6 +38,10 @@
 #include "liccache.h"
 #define FUNCTION
 
+#define IsContainer(mode)  ((mode & 1<<29) != 0)
+#define IsArtifact(mode)   ((mode & 1<<28) != 0)
+
+
 /* REGEX-FILE bucket type
    The ftypes tell you what data to apply the regex to.
  */
@@ -89,23 +93,47 @@ struct bucketpool_struct
 };
 typedef struct bucketpool_struct bucketpool_t, *pbucketpool_t;
 
+/* uploadtree record values */
+struct uploadtree_struct 
+{
+  int      uploadtree_pk;
+  char    *ufile_name;
+  int      upload_fk;
+  int      ufile_mode;
+  int      pfile_fk;
+  int      lft;
+  int      rgt;
+};
+typedef struct uploadtree_struct uploadtree_t, *puploadtree_t;
+
+/* package record values */
+struct package_struct 
+{
+  char pkgname[256];
+  char pkgvers[256];
+  char vendor[256];
+  char srcpkgname[256];
+};
+typedef struct package_struct package_t, *ppackage_t;
 
 /* buckets.c */
 int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, 
              int uploadtree_pk, int writeDB, int skipProcessedCheck, 
              int hasPrules);
 
-int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
-                      int  uploadtree_pk, int writeDB, int pfile_pk, int ufile_mode,
-                      char *ufile_name, int hasPrules);
+int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray, 
+                      puploadtree_t puploadtree, int agent_pk, int writeDB, int hasPrules);
 
-int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, 
-                int uploadtree_pk, int agent_pk, int writeDB, char *fileName, int hasPrules);
+int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, 
+                puploadtree_t puploadtree, ppackage_t ppackage,
+                int agent_pk, int writeDB, int hasPrules);
 
-int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int pfile_pk, 
-                    char *fileName, int uploadtree_pk, int hasPrules);
+int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, 
+                    puploadtree_t puploadtree, ppackage_t ppackage,
+                    int hasPrules);
 
 int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int uploadtree_pk);
+int childInBucket(PGconn *pgConn, pbucketdef_t in_bucketDef, puploadtree_t puploadtree);
 
 int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
                  int *bucketList, int agent_pk, int writeDB, int nomosagent_pk);
