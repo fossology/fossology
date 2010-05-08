@@ -22,7 +22,7 @@
  */
 
 #include "buckets.h"
-
+extern int debug;
 
 /****************************************************
  getBucketPool
@@ -145,20 +145,21 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
   PQclear(result);
   if (numErrors) return 0;
 
-#ifdef DEBUG
-  for (rowNum=0; rowNum<numRows; rowNum++)
+  if (debug)
   {
-    printf("\nbucket_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_pk);
-    printf("bucket_name[%d] = %s\n", rowNum, bucketDefList[rowNum].bucket_name);
-    printf("bucket_type[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_type);
-    printf("dataFilename[%d] = %s\n", rowNum, bucketDefList[rowNum].dataFilename);
-    printf("stopon[%d] = %c\n", rowNum, bucketDefList[rowNum].stopon);
-    printf("applies_to[%d] = %c\n", rowNum, bucketDefList[rowNum].applies_to);
-    printf("nomos_agent_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].nomos_agent_pk);
-    printf("bucket_agent_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_agent_pk);
-    printf("regex[%d] = %s\n", rowNum, bucketDefList[rowNum].regex);
+    for (rowNum=0; rowNum<numRows; rowNum++)
+    {
+      printf("\nbucket_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_pk);
+      printf("bucket_name[%d] = %s\n", rowNum, bucketDefList[rowNum].bucket_name);
+      printf("bucket_type[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_type);
+      printf("dataFilename[%d] = %s\n", rowNum, bucketDefList[rowNum].dataFilename);
+      printf("stopon[%d] = %c\n", rowNum, bucketDefList[rowNum].stopon);
+      printf("applies_to[%d] = %c\n", rowNum, bucketDefList[rowNum].applies_to);
+      printf("nomos_agent_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].nomos_agent_pk);
+      printf("bucket_agent_pk[%d] = %d\n", rowNum, bucketDefList[rowNum].bucket_agent_pk);
+      printf("regex[%d] = %s\n", rowNum, bucketDefList[rowNum].regex);
+    }
   }
-#endif
 
   return bucketDefList;
 }
