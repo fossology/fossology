@@ -53,9 +53,9 @@ tokenizer_pattern = r"""(?ixs) # VERBOSE | IGNORE | DOTALL
     (?P<abbreviation>[A-Z]\.)+
     |
     (?P<copyright>(?:
+        (?:\(c\))
+        |
         (?:\bc?opyright\b)
-        #|
-        #(?:\(c\))
         |
         (?:\&copy\;)
         |
@@ -445,13 +445,31 @@ def tuned_model(iob, priors=None, debug=False):
                     cp[a].append(-1.0/(fn+fd))
                     cp[b].append(1.0/(fn+fd))
 
+                    for f in FEATURES:
+                        if feats[j][f] not in PFC[a][f]:
+                            fp[a][f].append(math.exp(priors[a][f])*-0.01)
+                        if feats[j][f] not in PFC[b][f]:
+                            fp[b][f].append(math.exp(priors[b][f])*0.01)
+
             for c in classes:
+                for f in FEATURES:
+                    if len(fp[c][f]) > 0:
+                        fp[c][f] = sum(fp[c][f])/float(len(fp[c][f]))
+                    else:
+                        fp[c][f] = 0.0
                 if len(cp[c]) > 0:
                     cp[c] = sum(cp[c])/float(len(cp[c]))
                 else:
                     cp[c] = 0.0
+
             s = 0.0
             for c in classes:
+                for f in FEATURES:
+                    priors[c][f] = math.exp(priors[c][f]) + fp[c][f]
+                    if priors[c][f] < 0.0:
+                        priors[c][f] = 1e-100
+                    if priors[c][f] > 1.0:
+                        priors[c][f] = 1.0
                 priors[c]['class'] = math.exp(priors[c]['class']) + cp[c]
                 if priors[c]['class'] < 0.0:
                     priors[c]['class'] = 1e-100
@@ -459,6 +477,11 @@ def tuned_model(iob, priors=None, debug=False):
                     priors[c]['class'] = 1.0
                 s += priors[c]['class']
             for c in classes:
+                for f in FEATURES:
+                    if priors[c][f]<= 1e-100:
+                        priors[c][f] = -230.0
+                    else:
+                        priors[c][f] = math.log(priors[c][f])
                 if priors[c]['class'] <= 1e-100:
                     priors[c]['class'] = -230.0
                 else:
