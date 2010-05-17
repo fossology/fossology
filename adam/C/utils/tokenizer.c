@@ -13,10 +13,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*********************************************************************/
+ *********************************************************************/
 
+/*#define REMOVE_SPACES*/
+
+/* other libraries */
+#include <cvector.h>
+
+/* local includes */
 #include "tokenizer.h"
-#include <default_list.h>
 #include "re.h"
 #include "token.h"
 #include "token_feature.h"
@@ -26,109 +31,132 @@ char start_nonword_re[] = "^[^A-Za-z0-9]+";
 char general_token_re[] = "[A-Za-z0-9]+|[^A-Za-z0-9]+";
 char word_token_re[] = "[A-Za-z0-9][A-Za-z0-9]+";
 
-void remove_bad_tokens(feature_type_list) {
+void remove_bad_tokens(cvector* feature_type_list) {
 #ifdef REMOVE_SPACES
-    int i;
-    for (i = 0; i < default_list_length(feature_type_list); i++) {
-        token_feature *tf = default_list_get(feature_type_list,i);
-        if (tf->char_vector[0] == tf->length) {
-            default_list_remove(feature_type_list,i);
-            i--;
-        }
+  cvector_iterator iter;
+  for(iter = cvector_begin(feature_type_list); iter != cvector_end(feature_type_list); iter++) {
+    token_feature *tf = (token_feature*)*iter;
+    if(tf->char_vector[0] == tf->length) {
+      iter = cvector_remove(feature_type_list, iter) - 1;
     }
+  }
 #endif
 }
 
-void create_sentence_list(char* buffer, default_list list) {
-    int i,j;
-    cre *re;
+void create_sentence_list(char* buffer, cvector* list) {
+  int i,j;
+  cre *re;
 
-    i = re_compile(sent_re,RE_DOTALL,&re);
+  /* strip out the sentence tags   */
+  /* i.e. <sentence>***</sentence> */
+  /* place these sentence in list  */
+  i = re_compile(sent_re, RE_DOTALL, &re);
+  if (i != 0) { re_print_error(i); }
+  i = re_find_all(re, buffer, list, &token_create_from_string);
+  if (i != 0) { re_print_error(i); }
+  re_free(re);
 
-    if (i!=0) { re_print_error(i); }
+  /* that which will loop over the sentences */
+  /* this is used to get rid of non words    */
+  i = re_compile(start_nonword_re, RE_DOTALL, &re);
+  if ( i!=0 ) { re_print_error(i); }
 
-    i = re_find_all(re,buffer,list,&token_create_from_string);
+  /* remove the non words from the beginning of each sentence */
+  for (i = 1; i < list->size; i++) {
+    /* grab a token and create a new token list */
+    token* t = cvector_at(list, i);
+    cvector l;
+    cvector_init(&l, token_cvector_registry());
 
-    re_free(re);
+    /* find all instances of the regular expression and store them in l */
+    j = re_find_all(re, t->string, &l, &token_create_from_string);
 
-    if (i!=0) { re_print_error(i); }
+    /* check the error code to be sure that somthing valid was returned */
+    if (j != 0) {
+      re_print_error(j);
+    } else if (l.size > 0) {
+      /* grab the next sentence */
+      token *t_1 = cvector_at(list, i-1);
+      /* grab the first thing that matched in the current sentence */
+      token *t_2 = cvector_at(&l, 0);
 
-    i = re_compile(start_nonword_re,RE_DOTALL,&re);
-    
-    if (i!=0) { re_print_error(i); }
+      /* concatenate both strings onto each other */
+      /* TODO I don't like this, lets see if I can get rid of this later */
+      char *new_string = (char*)calloc((strlen(t_1->string)+strlen(t_2->string)+1), sizeof(char));
+      strcat(new_string,t_1->string);
+      strcat(new_string,t_2->string);
+      new_string[strlen(t_1->string)+strlen(t_2->string)] = '\0';
+      free(t_1->string);
+      t_1->string = new_string;
 
-    for (i = 1; i < default_list_length(list); i++) {
-        token *t = default_list_get(list,i);
-        default_list l = default_list_create(default_list_type_token());
-        if (t != NULL) {
-            j = re_find_all(re,t->string,l,&token_create_from_string);
-            if (j!=0) {
-                re_print_error(j);
-            } else if (default_list_length(l)>0) {
-                token *t_1 = default_list_get(list,i-1);
-                token *t_2 = default_list_get(l,0);
-
-                // get the previous token and append the begging of this token
-                // to the end of it.
-                char *new_string = (char*)malloc(sizeof(char)*(strlen(t_1->string)+strlen(t_2->string)+1));
-                new_string[0] = '\0';
-                strcat(new_string,t_1->string);
-                strcat(new_string,t_2->string);
-                new_string[strlen(t_1->string)+strlen(t_2->string)] = '\0';
-                free(t_1->string);
-                t_1->string = new_string;
-
-                new_string = (char*)malloc(sizeof(char)*(strlen(t->string)-strlen(t_2->string)+1));
-                strcpy(new_string,t->string+strlen(t_2->string));
-                new_string[strlen(t->string)-strlen(t_2->string)] = '\0';
-                free(t->string);
-                t->string = new_string;
-
-                default_list_destroy(l);
-            }
-        }
+      /* remove what wasn't a word from the beginning of the string */
+      new_string = (char*)calloc(strlen(t->string)-strlen(t_2->string)+1, sizeof(char));
+      strcpy(new_string,t->string+strlen(t_2->string));
+      new_string[strlen(t->string)-strlen(t_2->string)] = '\0';
+      free(t->string);
+      t->string = new_string;
     }
-    re_free(re);
+
+    /* clean up the list that was used */
+    cvector_destroy(&l);
+  }
+
+  /* clean up the regular expresion */
+  re_free(re);
 }
 
-void create_features_from_sentences(default_list list, default_list feature_type_list,default_list label_list) {
-    int i,j;
-    cre *re;
-    
-    char *E = "E";
-    char *I = "I";
+void create_features_from_sentences(cvector* list, cvector* feature_type_list, cvector* label_list) {
+  /* locals */
+  cvector_iterator iter;
+  int j;
+  cre *re;
 
-    i = re_compile(general_token_re,RE_DOTALL,&re);
-    if (i!=0) { re_print_error(i); }
-    for (i = 0; i < default_list_length(list); i++) {
-        token *t = default_list_get(list,i);
-        if (t != NULL) {
-            j = re_find_all(re,t->string,feature_type_list,&token_feature_create_from_string);
-            if (j!=0) { re_print_error(j); break; }
-            remove_bad_tokens(feature_type_list);
-            while (default_list_length(label_list)<default_list_length(feature_type_list)) {
-                if (default_list_length(label_list)+1==default_list_length(feature_type_list)) {
-                    default_list_append(label_list,E);
-                } else {
-                    default_list_append(label_list,I);
-                }
-            }
-        }
-    }
-    
-    re_free(re);
-}
+  char *E = "E";
+  char *I = "I";
 
-void create_features_from_buffer(char *buffer, default_list feature_type_list) {
-    int i,j;
-    cre *re;
+  /* spilts a sentence into individual words */
+  j = re_compile(general_token_re,RE_DOTALL,&re);
+  if (j!=0) { re_print_error(j); }
 
-    i = re_compile(general_token_re,RE_DOTALL,&re);
-    if (i!=0) { re_print_error(i); }
-    i = re_find_all(re,buffer,feature_type_list,&token_feature_create_from_string);
-    if (i!=0) { re_print_error(j); }
+  /* loop over everyone in the list passed in */
+  for (iter = cvector_begin(list); iter != cvector_end(list); iter++) {
+    /* grab the current token */
+    token *t = (token*)(*iter);
 
+    /* split the sentence into individual words */
+    j = re_find_all(re, t->string, feature_type_list, &token_feature_create_from_string);
+    if (j!=0) { re_print_error(j); break; }
+
+    /* removes any unnecessary tokens from a list of features */
     remove_bad_tokens(feature_type_list);
 
-    re_free(re);
+    /* this is used to tell if the current feature is thought */
+    /* to be the end of a sentence or internal to a sentence  */
+    while (label_list->size < feature_type_list->size) {
+      if (label_list->size + 1 == feature_type_list->size) {
+        cvector_push_back(label_list, E);
+      } else {
+        cvector_push_back(label_list, I);
+      }
+    }
+  }
+
+  re_free(re);
+}
+
+
+void create_features_from_buffer(char *buffer, cvector* feature_type_list) {
+  int i,j;
+  cre *re;
+
+  /* compile regex and use to create token appending this to the list */
+  i = re_compile(general_token_re,RE_DOTALL,&re);
+  if (i!=0) { re_print_error(i); }
+  i = re_find_all(re, buffer, feature_type_list, &token_feature_create_from_string);
+  if (i!=0) { re_print_error(j); }
+
+  /* removes any unnecessary tokens from a list of features */
+  remove_bad_tokens(feature_type_list);
+
+  re_free(re);
 }

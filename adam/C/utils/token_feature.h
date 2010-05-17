@@ -1,6 +1,6 @@
 /*
    Functions for a token feature list
-*/
+ */
 #ifndef __TOKEN_FEATURE_H__
 #define __TOKEN_FEATURE_H__
 
@@ -8,44 +8,61 @@
 extern "C" {
 #endif
 
+/* std library */
 #include <stdio.h>
 #include <stdlib.h>
-#include <default_list.h>
+
+/* local includes */
+#include "cvector.h"
 
 typedef int c_bool;
 #define FALSE 0
 #define TRUE (1)
-// #define FT_CHAR_MAP " \n.!?"
-// #define FT_CHAR_MAP_LEN 5
-//#define FT_CHAR_MAP " \n.:;,/\\|~`!@#$%^&*-_=+?()[]{}<>"
-//#define FT_CHAR_MAP_LEN 32
 #define FT_CHAR_MAP " \n.:;,!?"
 #define FT_CHAR_MAP_LEN 8
 
-// Our simple datatype
+/*!
+ * Our token feature datatype
+ *
+ * TODO fill this in
+ */
 typedef struct token_feature {
-    char *string;
-    char *stemmed;
-    int start;
-    int end;
-    int length;
-    c_bool word;
-    c_bool capped;
-    c_bool upper;
-    c_bool number;
-    c_bool incnum;
-    int char_vector[FT_CHAR_MAP_LEN];
+  char *string;
+  char *stemmed;
+  int start;
+  int end;
+  int length;
+  c_bool word;
+  c_bool capped;
+  c_bool upper;
+  c_bool number;
+  c_bool incnum;
+  int char_vector[FT_CHAR_MAP_LEN];
 } token_feature;
 
-int default_list_type_token_feature(void);
-int default_list_type_token_feature_init(void);
-void* default_list_type_function_token_feature_create(void *v);
-void* default_list_type_function_token_feature_copy(void *v);
-void default_list_type_function_token_feature_destroy(void *v);
-void default_list_type_function_token_feature_print(void *v, FILE *f);
-int default_list_type_function_token_feature_dump(void *v, FILE *f);
-void* default_list_type_function_token_feature_load(FILE *f);
-token_feature* token_feature_create_from_string(char *string, int start, int end);
+/*!
+ * \brief creates a vector function registry for a cvector of token_features
+ *
+ * this function will allocate memory, but the result should
+ * be passed directly to the constructor of a cvector which
+ * will own the registry
+ *
+ * \return the new function registry
+ */
+function_registry* token_feature_cvector_registry();
+
+/*!
+ * \brief takes a string and creates a token_feature from it
+ *
+ * this function will create the token_feature struct that belongs to a certain
+ * string. This will allocate memory for the string in the token and will
+ * set the start, end and length
+ *
+ * \param string: the string that will be stored in this token_feature
+ * \param start: the start location of the string in the source file
+ * \param end: the location of the end of the string in the source file
+ */
+void* token_feature_create_from_string(char *string, int start, int end);
 
 #if defined(__cplusplus)
 }

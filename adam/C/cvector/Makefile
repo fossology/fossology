@@ -16,24 +16,18 @@
 ######################################################################
 
 CC=gcc
-CFLAGS=-g -O2 -Wall
+CFLAGS=-g -O2 -Wall -I.
 
-files=\
-	default_list.c \
-	default_list_basic.c
+files= cvector.c
 
-all: default_list.a test
+all: cvector.a
 
 files_o := $(patsubst %.c,%.o,$(files))
 
-default_list.o: default_list.c default_list.h
-default_list_basic.o: default_list_basic.c default_list_basic.h
+cvector.o: cvector.c cvector.h
 
-default_list.a: $(files_o)
+cvector.a: $(files_o)
 	$(AR) -cru $@ $^
-
-test: test.o default_list.a
-	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:
 	rm -f test *.o *.a

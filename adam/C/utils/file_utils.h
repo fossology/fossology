@@ -26,9 +26,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern "C" {
 #endif
 
+/*!
+ * Opens and reads the file specified into the char array given. It is
+ * important to note that this function will reset the pointer that the
+ * charr array was previously pointing to. Therefore, if this pointer owned
+ * any memory prior to calling this function, that memory will be lost
+ *
+ * \param filename: the name of the file that should be read from
+ * \param buffer: a pointer to the char array that the contents of the file
+ *                  will be stored in
+ */
 void openfile(char *filename, char **buffer);
+
+/*!
+ * Opens and reads the file specified into the char array given. This
+ * function works exactly like openfile, however it is possible to provide
+ * a maximum size that it will not read beyond.
+ *
+ * \param filename: the name of the file that should be read from
+ * \param buffer: a pointer to the char array to store the file into
+ * \param max: the maximum number of bytes that should be read from the file
+ */
 void readtomax(char *filename, char **buffer, size_t max);
-int readline(FILE *pFile, char **line);
 
 #if defined(__cplusplus)
 }

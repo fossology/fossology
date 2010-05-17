@@ -6,12 +6,12 @@ Dependencies:
 
 TODO:
     * Currently the access time of the list is very poor. Even on a small file it takes seconds to create a full similarity matrix. Removing the sglib 
-hould fix this.
+		should fix this.
     * Bring in the scoring functions from the python code.
     * Enable leaders. For testing we have left this out.
 
 Applications:
-First you want to bruild the sentence model.  Then label_sentences can create more training data for the sentence model. database can then be used to create a text frequency representation of the reference licenses.
+First you want to build the sentence model.  Then label_sentences can create more training data for the sentence model. database can then be used to create a text frequency representation of the reference licenses.
 
 train_sent_model:
 	This application takes a set of files as input. Each file should have its sentences wrapped with <SENTENCE>...</SENTENCE> tags. The application outputs a model file called SentenceModel.dat. This model file can be used to label sentence breaks in unlabeled files.

@@ -18,6 +18,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef __SENTENCE_TYPE__H_
 #define __SENTENCE_TYPE__H_
 
+/* local includes */
+#include <cvector.h>
+
+/* other library includes */
 #include <sparsevect.h>
 
 #if defined(__cplusplus)
@@ -36,17 +40,44 @@ typedef struct sentence {
     sv_vector vector;
 } sentence;
 
-int default_list_type_sentence(void);
-int default_list_type_sentence_init(void);
-void* default_list_type_function_sentence_create(void *v);
-void* default_list_type_function_sentence_copy(void *v);
-void default_list_type_function_sentence_destroy(void *v);
-void default_list_type_function_sentence_print(void *v, FILE *f);
-int default_list_type_function_sentence_dump(void *v, FILE *f);
-void* default_list_type_function_sentence_load(FILE *f);
 
-// This function is used to create the datatype.
+/*!
+ * \brief creates a vector function registry for a cvector of tokens
+ *
+ * this function will allocate memory, but the result should
+ * be passed directly to the constructor of a cvector which
+ * will own the registry
+ *
+ * \return the new function registry
+ */
+function_registry* sentence_cvector_registry();
+
+/*!
+ * \brief takes a string and creates a sentence from it
+ *
+ * this function will create the sentence struct that belongs to a certain
+ * string. This will allocate any necessary memory and create the different
+ * aspects of the sentence.
+ *
+ * \param string: the string that will be stored in this sentece
+ * \param start: the start location of the string in the source file
+ * \param end: the location of the end of the string in the source file
+ * \param position: the position in the file of this sentence
+ * \param filename: the name of the file that this sentence came from
+ * \param licensename: the name of the license that this sentence belongs to
+ * \param id: TODO figure this out
+ * \param sv_vector vector: TODO figure this out
+ */
 sentence* sentence_create(char *string, int start, int end, int position, char *filename, char *licensename, int id, sv_vector vector);
+
+/*!
+ * \brief public destructor for the sentence datatype
+ *
+ * this function will free the memory allocated by the sentence_create function.
+ *
+ * \param sent: the sentence that should be destructed
+ */
+sentence* sentence_destroy(sentence* sent);
 
 #if defined(__cplusplus)
 }
