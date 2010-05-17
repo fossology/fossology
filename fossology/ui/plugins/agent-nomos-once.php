@@ -40,12 +40,12 @@ class agent_nomos_once extends FO_Plugin {
   //public $Dependency = array();
   public $NoHTML = 0;  // always print text output for now
   /** For anyone to access, without login, use: **/
-  // public $DBaccess   = PLUGIN_DB_NONE;
-  // public $LoginFlag  = 0;
+  public $DBaccess   = PLUGIN_DB_NONE;
+  public $LoginFlag  = 0;
 
   /** To require login access, use: **/
-  public $DBaccess = PLUGIN_DB_ANALYZE;
-  public $LoginFlag = 1;
+//  public $DBaccess = PLUGIN_DB_ANALYZE;
+//  public $LoginFlag = 1;
 
   /**
    * AnalyzFile(): Analyze one uploaded file.
@@ -63,8 +63,7 @@ class agent_nomos_once extends FO_Plugin {
 
     $licenseResult = "";
     /* move the temp file */
-    $TempFile = $_FILES['licfile']['tmp_name'];
-    $licenseResult = exec("$AGENTDIR/nomos $TempFile",$out,$rtn);
+    $licenseResult = exec("$AGENTDIR/nomos $FilePath",$out,$rtn);
     $licenses = explode(' ',$out[0]);
     $last = end($licenses);
     return ($last);
@@ -107,18 +106,14 @@ class agent_nomos_once extends FO_Plugin {
         $_FILES['licfile']['tmp_name'] = $Ftmp;
         $_FILES['licfile']['size'] = filesize($Ftmp);
         $_FILES['licfile']['unlink_flag'] = 1;
+        $this->NoHTML = 1;
       }
       else {
         unlink($Ftmp);
       }
       fclose($Fin);
     }
-    //print "<pre>The filename (licfile) is:\n";
-    //print_r($_FILES['licfile']) . "\n</pre>";
-    if ($ThisMod && file_exists(@$_FILES['licfile']['tmp_name'])) {
-      $this->NoHTML = 0;
-      /* default header is plain text */
-    }
+
     /* Only register with the menu system if the user is logged in. */
     if (!empty($_SESSION['User'])) {
       if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
@@ -147,6 +142,20 @@ class agent_nomos_once extends FO_Plugin {
     global $DB;
     global $DATADIR;
     global $PROJECTSTATEDIR;
+
+    $tmp_name = $_FILES['licfile']['tmp_name'];
+
+    /* For REST API:
+       wget -O - --post-file=myfile.c http://myserv.com/?mod=agent_nomos_once
+     */
+    if ($this->NoHTML && file_exists($tmp_name))
+    {
+       echo $this->AnalyzeFile($tmp_name);
+       echo "\n";
+       unlink($tmp_name);
+       return;
+    }
+
     $V = "";
     switch ($this->OutputType) {
       case "XML":
@@ -174,26 +183,23 @@ class agent_nomos_once extends FO_Plugin {
         $V.= "<input type='submit' value='Analyze!'>\n";
         $V.= "</form>\n";
 
-        /*
-         You can also specify the file by uploadtree_pk as 'item',
-         note: rando can't find this in the form, so how did this ever work?
-         */
-        $Item = GetParm('item', PARM_INTEGER); // may be null
-        //print "<pre>The filename (licfile) is:{$_FILES['licfile']}\n</pre>";
-        if (file_exists(@$_FILES['licfile']['tmp_name'])) {
+
+        if (file_exists($tmp_name)) {
           $keep = "<strong>A one shot license analysis shows the following license(s)" .
             " in file </strong><em>{$_FILES['licfile']['name']}:</em> ";
-          $keep .= "<strong>" . $this->AnalyzeFile($_FILES['licfile']['tmp_name']) . "</strong><br>";
+          $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
           print displayMessage(NULL,$keep);
           $_FILES['licfile'] = NULL;
           print $V;
 
           if (!empty($_FILES['licfile']['unlink_flag'])) {
-            unlink($_FILES['licfile']['tmp_name']);
+            unlink($tmp_name);
           }
           return;
         }
-        else if (!empty($Item) && !empty($DB)) {
+
+        $Item = GetParm('item', PARM_INTEGER); // may be null
+        if (!empty($Item) && !empty($DB)) {
           /* Get the pfile info */
           $Results = $DB->Action("SELECT * FROM pfile
 		        INNER JOIN uploadtree ON uploadtree_pk = $Item
@@ -203,16 +209,15 @@ class agent_nomos_once extends FO_Plugin {
             $Highlight = 1; /* processing a pfile? Always highlight. */
             $Repo = $Results[0]['pfile_sha1'] . "." . $Results[0]['pfile_md5'] . "." . $Results[0]['pfile_size'];
             $Repo = trim(shell_exec("$LIBEXECDIR/reppath files '$Repo'"));
-            $_FILES['licfile']['tmp_name'] = $Repo;
-            $_FILES['licfile']['size'] = $Results[0]['pfile_size'];
+            $tmp_name = $Repo;
             $keep = "<strong>A one shot license analysis shows the following license(s)" .
             " in file </strong><em>{$_FILES['licfile']['name']}:</em> ";
-            $keep .= "<strong>" . $this->AnalyzeFile($_FILES['licfile']['tmp_name']) . "</strong><br>";
+            $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
             print displayMessage(NULL, $keep);
             print $V;
             /* Do not unlink the or it will delete the repo file! */
             if (!empty($_FILES['licfile']['unlink_flag'])) {
-              unlink($_FILES['licfile']['tmp_name']);
+              unlink($tmp_name);
             }
             return;
           }
