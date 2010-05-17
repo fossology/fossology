@@ -16,9 +16,9 @@
 ######################################################################
 
 CC=gcc
-CFLAGS=-g -I../default_list -lpcre -lstemmer -O3 -I../../sparsevect/
+CFLAGS=-g -I../cvector -lpcre -lstemmer -O3 -I../../sparsevect/ -I.
 CPP=g++
-CPPFLAGS=-g -I../default_list -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../../sparsevect/
+CPPFLAGS=-g -I../cvector -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../../sparsevect/
 
 all: file_utils.o maxent_utils.o re.o repr.o sentence.o token.o token_feature.o tokenizer.o
 

@@ -18,18 +18,24 @@
   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
+/* std library includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <default_list.h>
+#include <string.h>
+
+/* other library includes */
+#include <maxent/maxentmodel.hpp>
+
+/* h file includes */
 #include "token.h"
 #include "token_feature.h"
 #include "tokenizer.h"
 #include "re.h"
 #include "file_utils.h"
-#include <maxent/maxentmodel.hpp>
 #include "maxent_utils.h"
 #include "config.h"
+#include "cvector.h"
 
 void print_usage(char *name) {
     fprintf(stderr, "Usage: %s [options]\n",name);
@@ -57,6 +63,7 @@ int main(int argc, char *argv[]) {
                     fprintf(stderr, "File provided to -f parameter does not exists.\n");
                     exit(1);
                 }
+                fclose(file);
 
                 break;
             case 'o':
@@ -92,30 +99,32 @@ int main(int argc, char *argv[]) {
     // training data.
     MaxentModel m;
     m.begin_add_event();
-    char *filename = NULL;
-    while (readline(pFile,&filename)!=EOF) {
-        default_list sentence_list = default_list_create(default_list_type_token());
-        default_list feature_type_list = default_list_create(default_list_type_token_feature());
-        default_list label_list = default_list_create(default_list_type_string());
+    char filename[FILENAME_MAX];
+    while (fgets(filename, FILENAME_MAX, pFile) != NULL) {
+    	filename[strlen(filename) - 1] = filename[strlen(filename) - 1] == '\n' ? '\0' : filename[strlen(filename) - 1];
+    	cvector sentence_list, feature_type_list, label_list;
+    	cvector_init(&sentence_list, token_cvector_registry());
+    	cvector_init(&feature_type_list, token_feature_cvector_registry());
+    	cvector_init(&label_list, string_cvector_registry());
         buffer = NULL;
         printf("Starting on %s...\n", filename);
         
         openfile(filename,&buffer);
-        create_sentence_list(buffer,sentence_list);
-        create_features_from_sentences(sentence_list,feature_type_list, label_list);
+        create_sentence_list(buffer,&sentence_list);
+        create_features_from_sentences(&sentence_list, &feature_type_list, &label_list);
         // This function adds the training data to the model.
-        create_model(m, feature_type_list, label_list, left_window, right_window);
+        create_model(m, &feature_type_list, &label_list, left_window, right_window);
         free(buffer);
-        free(filename);
-        default_list_destroy(sentence_list);
-        default_list_destroy(feature_type_list);
-        default_list_destroy(label_list);
+        cvector_destroy(&sentence_list);
+        cvector_destroy(&feature_type_list);
+        cvector_destroy(&label_list);
     }
     m.end_add_event();
 
     printf("Training MaxEnt model...\n");
     m.train(2000, "lbfgs");
     m.save(model_file);
+    fclose(pFile);
 
     return(0);
 }

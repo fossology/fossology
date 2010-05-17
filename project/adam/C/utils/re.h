@@ -22,12 +22,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern "C" {
 #endif
 
+/* std library */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <default_list.h>
+
+/* other libraries */
 #include <pcre.h>
+
+/* local includes */
+#include "cvector.h"
 
 typedef pcre cre;
 #define RE_DOTALL PCRE_DOTALL
@@ -36,7 +41,7 @@ typedef pcre cre;
 void re_print_error(int id);
 int re_compile(char *pattern, int options, cre **re);
 void re_free(cre *re);
-int re_find_all(cre *re, char* subject, default_list list, void*(*helpFunc)(char*, int, int));
+int re_find_all(cre *re, char* subject, cvector* list, void*(*helpFunc)(char*, int, int));
 
 #if defined(__cplusplus)
 }

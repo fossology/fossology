@@ -1,39 +1,39 @@
-######################################################################
-# Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
-# 
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-######################################################################
+#############################################################################
+# Copyright (C) 2009 Hewlett-Packard Development Company, L.P.				#
+# 																			#
+# This program is free software; you can redistribute it and/or				#
+# modify it under the terms of the GNU General Public License				#
+# version 2 as published by the Free Software Foundation.					#
+# 																			#
+# This program is distributed in the hope that it will be useful,			#
+# but WITHOUT ANY WARRANTY; without even the implied warranty of			#
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the				#
+# GNU General Public License for more details.								#
+# 																			#
+# You should have received a copy of the GNU General Public License along	#
+# with this program; if not, write to the Free Software Foundation, Inc.,	#
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.				#
+#############################################################################
 
 CC=gcc
-CFLAGS=-g -Iutils -Idefault_list -lpcre -lstemmer -O3 -I../sparsevect/
+CFLAGS=-g -Iutils -Icvector -lpcre -lstemmer -O3 -I../sparsevect/
 CPP=g++
-CPPFLAGS=-g -Iutils -Idefault_list -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../sparsevect/
-utils=\
-      utils/re.c \
-      utils/token.c \
-      utils/token_feature.c \
-      utils/tokenizer.c \
-      utils/file_utils.c \
-      utils/repr.c
+CPPFLAGS=-g -Iutils -Icvector -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../sparsevect/ \
+			-L/home/norton/Downloads/maxent-20061005/src/opt/ -I/home/norton/Downloads/maxent-20061005/src/
+utils= utils/re.c \
+       utils/token.c \
+       utils/token_feature.c \
+       utils/tokenizer.c \
+       utils/file_utils.c \
+       utils/repr.c \
 
 utils_o := $(patsubst %.cpp,%.o,$(utils))
 utils_o := $(patsubst %.c,%.o,$(utils_o))
 
 all: train_sent_model label_sentences database test f1
 
-default_list/default_list.a:
-	make -C default_list default_list.a
+cvector/cvector.a: cvector/cvector.c cvector/cvector.h
+	make -C cvector cvector.a
 
 #utils/utils.a: $(utils_o) ../sparsevect/sparsevect.o
 #	$(AR) -cru $@ $^
@@ -47,16 +47,16 @@ gld: gld.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a ../
 gld.o: gld.c
 	$(CC) -o $@ -c $^ $(CFLAGS) -I../../../fossology/devel/libfossagent/ -I../../../fossology/devel/libfossdb/ -I../../../fossology/devel/libfossrepo/ -DSVN_REV $(SVN_REV) -I`pg_config --includedir`
 
-f1: f1.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a utils/sentence.o utils/maxent_utils.o
+f1: f1.o $(utils_o) cvector/cvector.a ../sparsevect/sparsevect.o utils/sentence.o utils/maxent_utils.o
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-train_sent_model: train_sent_model.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a utils/maxent_utils.o utils/sentence.o
+train_sent_model: train_sent_model.o $(utils_o) cvector/cvector.a ../sparsevect/sparsevect.o utils/maxent_utils.o utils/sentence.o
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-label_sentences: label_sentences.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a utils/maxent_utils.o utils/sentence.o
+label_sentences: label_sentences.o $(utils_o) cvector/cvector.a ../sparsevect/sparsevect.o utils/maxent_utils.o utils/sentence.o
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
-database: database.o $(utils_o) ../sparsevect/sparsevect.o default_list/default_list.a utils/sentence.o utils/maxent_utils.o
+database: database.o $(utils_o) cvector/cvector.a ../sparsevect/sparsevect.o utils/sentence.o utils/maxent_utils.o
 	$(CPP) -o $@ $^ $(CPPFLAGS)
 
 ../sparsevect/sparsevect.o:
@@ -76,7 +76,7 @@ database.dat: database maxent.dat training.txt
 
 clean:
 	rm -f test_app f1 database train_sent_model label_sentences *.o utils/*.o utils/*.a
-	make -C default_list clean
+	make -C cvector clean
 
 phony: all clean ../sparsevect/sparsevect.o
 

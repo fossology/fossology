@@ -15,12 +15,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 
+/* std library includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <default_list.h>
+
+/* other library includes */
+#include <cvector.h>
+
+/* h file includes */
 #include "re.h"
+#include "token.h"
 
 int __RE__ERROR_OFFSET__ = 0;
 const char *__RE_ERROR__ = NULL;
@@ -54,7 +60,7 @@ void re_free(cre *re) {
     pcre_free(re);
 }
 
-int re_find_all(cre *re, char* subject, default_list list,void* (*helpFunc)(char*, int, int)) {
+int re_find_all(cre *re, char* subject, cvector* list,void* (*helpFunc)(char*, int, int)) {
     unsigned char *name_table;
     int namecount;
     int name_entry_size;
@@ -65,7 +71,8 @@ int re_find_all(cre *re, char* subject, default_list list,void* (*helpFunc)(char
     subject_length = (int)strlen(subject);
 
     ovector[1] = 0;
-    
+    ovector[0] = !ovector[1];
+
     for (;;)
     {
         int options = 0;                 /* Normally no options */
@@ -124,7 +131,8 @@ int re_find_all(cre *re, char* subject, default_list list,void* (*helpFunc)(char
         if (temp==NULL) {
             return 3;
         }
-        default_list_append(list, temp);
+        cvector_push_back(list, NULL);
+        *(cvector_end(list)-1) = temp;
 
     }      /* End of loop to find second and subsequent matches */
 

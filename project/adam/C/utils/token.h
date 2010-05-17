@@ -22,7 +22,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern "C" {
 #endif
 
-// Our simple datatype
+/* local includes */
+#include <cvector.h>
+
+/*!
+ * \brief the token data type
+ *
+ * the struct that hold the string, where it is in the license that
+ * it belongs to and the length of the string
+ */
 typedef struct token {
     char *string;
     int start;
@@ -30,15 +38,29 @@ typedef struct token {
     int length;
 } token;
 
-int default_list_type_token(void);
-int default_list_type_token_init(void);
-void* default_list_type_function_token_create(void *v);
-void* default_list_type_function_token_copy(void *v);
-void default_list_type_function_token_destroy(void *v);
-void default_list_type_function_token_print(void *v, FILE *f);
-int default_list_type_function_token_dump(void *v, FILE *f);
-void* default_list_type_function_token_load(FILE *f);
-token* token_create_from_string(char *string, int start, int end);
+/*!
+ * \brief creates a vector function registry for a cvector of tokens
+ *
+ * this function will allocate memory, but the result should
+ * be passed directly to the constructor of a cvector which
+ * will own the registry
+ *
+ * \return the new function registry
+ */
+function_registry* token_cvector_registry();
+
+/*!
+ * \brief takes a string and creates a token from it
+ *
+ * this function will create the token struct that belongs to a certain
+ * string. This will allocate memory for the string in the token and will
+ * set the start, end and length
+ *
+ * \param string: the string that will be stored in this token
+ * \param start: the start location of the string in the source file
+ * \param end: the location of the end of the string in the source file
+ */
+void* token_create_from_string(char *string, int start, int end);
 
 #if defined(__cplusplus)
 }
