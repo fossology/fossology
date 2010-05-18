@@ -354,9 +354,10 @@ class ui_buckets extends FO_Plugin
       if ($HasHref) { $VF .= "</a>"; }
 
       /* print licenses */
-// link to files with the given license
       $VF .= "<br>";
+      $VF .= "<span style='position:relative;left:1em'>";
       $VF .= GetFileLicenses_string($nomosagent_pk, $pfile_pk, $uploadtree_pk);
+      $VF .= "</span>";
       $VF .= "</td><td>";
 
       if ($bucketcount)

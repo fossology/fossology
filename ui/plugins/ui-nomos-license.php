@@ -294,7 +294,9 @@ FUTURE advanced interface allowing user to select dataset (agent version)
 
       /* show licenses under file name */
       $VF .= "<br>";
+      $VF .= "<span style='position:relative;left:1em'>";
       $VF .= GetFileLicenses_string($Agent_pk, $pfile_pk, $uploadtree_pk);
+      $VF .= "</span>";
       $VF .= "</td><td>";
 
       if ($LicCount)
