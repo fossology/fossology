@@ -356,7 +356,8 @@ class ui_buckets extends FO_Plugin
       /* print licenses */
       $VF .= "<br>";
       $VF .= "<span style='position:relative;left:1em'>";
-      $VF .= GetFileLicenses_string($nomosagent_pk, $pfile_pk, $uploadtree_pk);
+//      $VF .= GetFileLicenses_string($nomosagent_pk, $pfile_pk, $uploadtree_pk);
+      $VF .= GetFileLicenses_string($nomosagent_pk, $C['pfile_fk'], $C['uploadtree_pk']);
       $VF .= "</span>";
       $VF .= "</td><td>";
 
