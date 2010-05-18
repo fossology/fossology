@@ -291,6 +291,10 @@ FUTURE advanced interface allowing user to select dataset (agent version)
       if ($IsDir) { $VF .= "/"; };
       if ($HasBold) { $VF .= "</b>"; }
       if ($HasHref) { $VF .= "</a>"; }
+
+      /* show licenses under file name */
+      $VF .= "<br>";
+      $VF .= GetFileLicenses_string($Agent_pk, $pfile_pk, $uploadtree_pk);
       $VF .= "</td><td>";
 
       if ($LicCount)
