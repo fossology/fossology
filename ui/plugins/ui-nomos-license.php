@@ -235,86 +235,82 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     $Children = GetNonArtifactChildren($Uploadtree_pk);
     $ChildCount=0;
     $ChildLicCount=0;
-    $ChildDirCount=0; /* total number of directory or containers */
-    foreach($Children as $C)
+
+    if (!empty($Children))
     {
-      if (Iscontainer($C['ufile_mode'])) { $ChildDirCount++; }
+      $VF .= "<table border=0 id='dirlist'>";
+      foreach($Children as $C)
+      {
+        if (empty($C)) { continue; }
+
+        $IsDir = Isdir($C['ufile_mode']);
+        $IsContainer = Iscontainer($C['ufile_mode']);
+
+        /* Determine the hyperlink for non-containers to view-license  */
+        if (!empty($C['pfile_fk']) && !empty($ModLicView))
+        {
+          $LinkUri = Traceback_uri();
+          $LinkUri .= "?mod=view-license&napk=$Agent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
+        }
+        else
+        {
+          $LinkUri = NULL;
+        }
+
+        /* Determine link for containers */
+        if (Iscontainer($C['ufile_mode']))
+        {
+          $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
+          $LicUri = "$Uri&item=" . $uploadtree_pk;
+        }
+        else
+        {
+          $LicUri = NULL;
+        }
+  
+        /* Populate the output ($VF) - file list */
+        /* id of each element is its uploadtree_pk */
+        $LicCount=0;
+
+        $VF .= "<tr><td id='$C[uploadtree_pk]' align='left'>";
+        $HasHref=0;
+        $HasBold=0;
+        if ($IsContainer)
+        {
+          $VF .= "<a href='$LicUri'>"; $HasHref=1;
+          $VF .= "<b>"; $HasBold=1;
+        }
+        else if (!empty($LinkUri)) //  && ($LicCount > 0))
+        {
+          $VF .= "<a href='$LinkUri'>"; $HasHref=1;
+        }
+        $VF .= $C['ufile_name'];
+        if ($IsDir) { $VF .= "/"; };
+        if ($HasBold) { $VF .= "</b>"; }
+        if ($HasHref) { $VF .= "</a>"; }
+  
+        /* show licenses under file name */
+        $VF .= "<br>";
+        $VF .= "<span style='position:relative;left:1em'>";
+        $VF .= GetFileLicenses_string($Agent_pk, $C['pfile_fk'], $C['uploadtree_pk']);
+        $VF .= "</span>";
+        $VF .= "</td><td>";
+  
+        if ($LicCount)
+        {
+          $VF .= "[" . number_format($LicCount,0,"",",") . "&nbsp;";
+          $VF .= "license" . ($LicCount == 1 ? "" : "s");
+          $VF .= "</a>";
+          $VF .= "]";
+          $ChildLicCount += $LicCount;
+        }
+        $VF .= "</td>";
+        $VF .= "</tr>\n";
+  
+        $ChildCount++;
+      }
+      $VF .= "</table>\n";
     }
-
-    $VF .= "<table border=0 id='dirlist'>";
-    foreach($Children as $C)
-    {
-      if (empty($C)) { continue; }
-
-      $IsDir = Isdir($C['ufile_mode']);
-      $IsContainer = Iscontainer($C['ufile_mode']);
-
-      /* Determine the hyperlink for non-containers to view-license  */
-      if (!empty($C['pfile_fk']) && !empty($ModLicView))
-      {
-        $LinkUri = Traceback_uri();
-        $LinkUri .= "?mod=view-license&napk=$Agent_pk&upload=$upload_pk&item=$C[uploadtree_pk]";
-      }
-      else
-      {
-        $LinkUri = NULL;
-      }
-
-      /* Determine link for containers */
-      if (Iscontainer($C['ufile_mode']))
-      {
-        $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
-        $LicUri = "$Uri&item=" . $uploadtree_pk;
-      }
-      else
-      {
-        $LicUri = NULL;
-      }
-
-      /* Populate the output ($VF) - file list */
-      /* id of each element is its uploadtree_pk */
-      $LicCount=0;
-
-      $VF .= "<tr><td id='$C[uploadtree_pk]' align='left'>";
-      $HasHref=0;
-      $HasBold=0;
-      if ($IsContainer)
-      {
-        $VF .= "<a href='$LicUri'>"; $HasHref=1;
-        $VF .= "<b>"; $HasBold=1;
-      }
-      else if (!empty($LinkUri)) //  && ($LicCount > 0))
-      {
-        $VF .= "<a href='$LinkUri'>"; $HasHref=1;
-      }
-      $VF .= $C['ufile_name'];
-      if ($IsDir) { $VF .= "/"; };
-      if ($HasBold) { $VF .= "</b>"; }
-      if ($HasHref) { $VF .= "</a>"; }
-
-      /* show licenses under file name */
-      $VF .= "<br>";
-      $VF .= "<span style='position:relative;left:1em'>";
-      $VF .= GetFileLicenses_string($Agent_pk, $C['pfile_fk'], $C['uploadtree_pk']);
-      $VF .= "</span>";
-      $VF .= "</td><td>";
-
-      if ($LicCount)
-      {
-        $VF .= "[" . number_format($LicCount,0,"",",") . "&nbsp;";
-        //$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
-        $VF .= "license" . ($LicCount == 1 ? "" : "s");
-        $VF .= "</a>";
-        $VF .= "]";
-        $ChildLicCount += $LicCount;
-      }
-      $VF .= "</td>";
-      $VF .= "</tr>\n";
-
-      $ChildCount++;
-    }
-    $VF .= "</table>\n";
-    // print "ChildCount=$ChildCount  ChildLicCount=$ChildLicCount\n";
 
     /***************************************
      Problem: $ChildCount can be zero!
