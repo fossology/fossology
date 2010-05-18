@@ -442,6 +442,11 @@ $foundChildren = array();
           where parent=$uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) == 0)
+  {
+    pg_free_result($result);
+    return 0;
+  }
   $children = pg_fetch_all($result);
   pg_free_result($result);
 
