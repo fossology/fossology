@@ -1,92 +1,115 @@
-'''from http://mx4j.sourceforge.net.\n\nUpstream Authors:\n\tSimone Bordet <biorn_steedom@users.sourceforge.net>\n\tCarlos Quiroz <tibu@users.sourceforge.net>\n\nCopyright:\n/* ====================================================================\n * The MX4J License, Version 1.0\n *\n * <s>Copyright (c) 2001 MX4J.  All rights reserved.</s>\n *\n * Redistribution and use in source'''
-'''are met:\n *\n * 1. Redistributions of source code must retain the above copyright\n *    notice, this list of conditions and the following disclaimer.\n *\n * 2. Redistributions in binary form must reproduce the above copyright\n *    notice, this list of conditions and the following disclaimer in\n *    the'''
-'''Tue, 16 Jan 2007 19:37:21 +0100\n\nIt was downloaded from http://goodies.xfce.org/releases/xfce4-timer-plugin/\n\n<s>Copyright Holder: \n\xc2\xa9 2005-2008 Kemal Ilgar Eroglu <kieroglu@math.washington.edu></s>\n\nLicense:\n\nYou are free'''
-'''can always be found at:\n\tftp://ftp.debian.org/dists/unstable/main/source/\n\nThis software is developed at: \n        http://alioth.debian.org/projects/menu\n\n<s>Copyright (C) 1996-2003  Joost Witteveen,</s> \nModifications:\n<s>Copyright (C) 2002-2005  Bill Allombert and Morten Brix Pedersen.</s>\n\n  This program '''
-''' Marcelo E. Magallon <mmagallo@debian.org> on\nFri, 19 Aug 2005 21:11:18 -0600.\n\n<s>Copyright Holder: Adam Jackson <ajax at nwnk dot net></s>\n\nLicense:\n\n <s>Copyright 2005 Adam Jackson.</s>\n\n Permission is hereby granted, free of charge, to '''
-''' is furnished to do so,\n subject to the following conditions:\n\n The above copyright notice and this permission notice (including the\n next paragraph) shall'''
-''' THE\n SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n------------------------------------------------------------------------\n\n <s>Copyright 1999 Precision Insight, Inc., Cedar Park, Texas.</s>\n <s>Copyright 2000 VA Linux Systems, Inc., Sunnyvale, California.\n All Rights Reserved.</s>\n\n '''
-''' is furnished to do so, subject to\n the following conditions:\n\n The above copyright notice and this permission notice (including the\n next paragraph) shall'''
-'''This package was downloaded from\nhttp://xorg.freedesktop.org/releases/individual/app/\n\n<s>Copyright 1986, 1998  The Open Group</s>\n\nPermission to use, copy, modify, '''
-''' purpose is hereby granted without fee, provided that\nthe above copyright notice appear in all copies and that both that\ncopyright notice and this permission notice appear in supporting\ndocumentation.\n\nThe above copyright notice and this permission notice shall be included in\nall copies'''
-''' +0200.\n\nThis library can be fetched from http://www.xfce4.org/\n\nFiles: glade/*\n<s>Copyright: \xc2\xa9      2007  Brian Tarricone <bjt23@cornell.edu></s>\n<s>Copyright: \xc2\xa9      2001 Ximian, Inc.</s>\nLicense: GPL-2\n\nFiles: libxfce4kbd-private/*\n<s>Copyright: \xc2\xa9      2008 Jannis Pohlmann <jannis@xfce.org></s>\nLicense: LGPL-2+\n\nFiles: libxfcegui4/xinerama.{c,h}\n<s>Copyright: \xc2\xa9      2004 Olivier Fourdan <fourdan@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-widget-helpers.{c,h}\n<s>Copyright: \xc2\xa9      2005 Brian Tarricone <bjt23@cornell.edu></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_togglebutton.{c,h}\n<s>Copyright: \xc2\xa9      2004 Olivier Fourdan <fourdan@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-title-dialog.{c,h}\n<s>Copyright: \xc2\xa9      2006 Benedikt Meurer <benny@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_systemtray.{c,h}\n<s>Copyright: \xc2\xa9 2003-2004 Benedikt Meurer <benny@xfce.org></s>\n<s>Copyright: \xc2\xa9 2003-2004 Olivier Fourdan <fourdan@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-startup-notification.c\n<s>Copyright: \xc2\xa9 2004-2005 The Xfce Development Team</s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_scaled_image.{c,h}\n<s>Copyright: \xc2\xa9      2004 Jasper Huijsmans (jasper@xfce.org)</s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_movehandler.{c,h}\n<s>Copyright: \xc2\xa9      2002 Olivier Fourdan <fourdan@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_menubutton.c\n<s>Copyright: \xc2\xa9 2002-2004 Jasper Huijsmans <jasper@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_menubutton.h\n<s>Copyright: \xc2\xa9      2002 Olivier Fourdan <fourdan@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-internals.{c,h}\n<s>Copyright: \xc2\xa9      2004 Benedikt Meurer <benny@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-icontheme.{c,h}\n<s>Copyright: \xc2\xa9      2004 Brian Tarricone <bjt23@cornell.edu></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_iconbutton.c\n<s>Copyright: \xc2\xa9 2002-2004 Jasper Huijsmans <jasper@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_iconbutton.h\n<s>Copyright: \xc2\xa9 2002 Olivier Fourdan <fourdan@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-heading{c,h}\n<s>Copyright: \xc2\xa9      2006 Benedikt Meurer <benny@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-gtk-extensions.{c,h}\n<s>Copyright: \xc2\xa9      2004 Benedikt Meurer <benny@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-gdk-extensions.{c,h}\n<s>Copyright: \xc2\xa9 2004-2006 Benedikt Meurer <benny@xfce.org></s>\n<s>Copyright: \xc2\xa9      2003 Mark McLoughlin <mark@skynet.ie></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_framebox.{c,h}\n<s>Copyright: \xc2\xa9      2002 Olivier Fourdan <fourdan@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-filechooser.{c,h}\n<s>Copyright: \xc2\xa9      2004 Brian Tarricone <bjt23@cornell.edu></s>\nFiles: libxfcegui4/xfce-exec.c\n<s>Copyright: \xc2\xa9 2004-2006 The Xfce Development Team</s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-exec.h\n<s>Copyright: \xc2\xa9      2004 Jasper Huijsmans <jasper@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_decortoggle.{c,h}\n<s>Copyright: \xc2\xa9      2002 Olivier Fourdan <fourdan@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_decorbutton.{c,h}\n<s>Copyright: \xc2\xa9      2002 Olivier Fourdan <fourdan@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-colorbutton.c\n<s>Copyright: \xc2\xa9      2004 Brian Tarricone <bjt23@cornell.edu></s>\n<s>Copyright: \xc2\xa9 1998,1999 Red Hat, Inc.</s>\nFiles: libxfcegui4/xfce_clock.c\n<s>Copyright: \xc2\xa9      1999 Olivier Fourdan <fourdan@xfce.org></s>\n<s>Copyright: \xc2\xa9      2002 Jasper Huijsmans <j.b.huijsmans@hetnet.nl></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce-appmenuitem.{c,h}\n<s>Copyright: \xc2\xa9 2004-2007 Brian Tarricone <bjt23@cornell.edu></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/xfce_aboutdialog{c,h}\n<s>Copyright: \xc2\xa9 2002-2006 Benedikt Meurer <benny@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/session-client.c\n<s>Copyright: \xc2\xa9      1999 Olivier Fourdan <fourdan@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/preview_filesel.c\n<s>Copyright: \xc2\xa9      2001 Ximian, Inc.</s>\nLicense: LGPL-2+\nFiles: libxfcegui4/*netk-*{c,h}\n<s>Copyright: \xc2\xa9      2001 Havoc Pennington</s>\nLicense: LGPL-2+\nFiles: libxfcegui4/netk-application.c\n<s>Copyright: \xc2\xa9      2001 Havoc Pennington</s>\n<s>Copyright: \xc2\xa9      2003 Red Hat, Inc.</s>\nLicense: LGPL-2+\nFiles: libxfcegui4/netk-class-group.{c,h}\n<s>Copyright: \xc2\xa9      2003 Ximian, Inc.</s>\nLicense: LGPL-2+\nFiles: libxfcegui4/netk-pager.c\n<s>Copyright: \xc2\xa9      2001 Havoc Pennington</s>\n<s>Copyright: \xc2\xa9      2003 Red Hat, Inc.</s>\n<s>Copyright: \xc2\xa9      2003 Ximian, Inc<s>.\nC</s>opyright: \xc2\xa9      2003 Kim Woelders</s>\nLicense: LGPL-2+\nFiles: libxfcegui4/netk-tasklist.c\n<s>Copyright: \xc2\xa9      2001 Havoc Pennington</s>\n<s>Copyright: \xc2\xa9      2003 Red Hat, Inc.</s>\n<s>Copyright: \xc2\xa9      2003 Kim Woelders</s>\nLicense: LGPL-2+\nFiles: libxfcegui4/netk-trayicon.{c,h}\n<s>Copyright: \xc2\xa9      2003 Benedikt Meurer <benedikt.meurer@unix-ag.uni-siegen.de></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/netk-window.c\n<s>Copyright: \xc2\xa9      2001 Havoc Pennington</s>\n<s>Copyright: \xc2\xa9      2003 Red Hat, Inc.</s>\n<s>Copyright: \xc2\xa9      2003 Kim Woelders</s>\nLicense: LGPL-2+\nFiles: libxfcegui4/libxfcegui4.h\n<s>Copyright: \xc2\xa9 2002-2006 The Xfce development team.</s>\nLicense: LGPL-2+\nFiles: libxfcegui4/icons.c\n<s>Copyright: \xc2\xa9 2002-2004 The Xfce development team.</s>\n<s>Copyright: \xc2\xa9 2004-2006 Brian Tarricone <bjt23@cornell.edu></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/dialogs.c\n<s>Copyright: \xc2\xa9 2003,2005 Jasper Huijsmans <jasper@xfce.org></s>\n<s>Copyright: \xc2\xa9      2003 Benedikt Meurer <benny@xfce.org></s>\nLicense: LGPL-2+\nFiles: libxfcegui4/dialogs.h\n<s>Copyright: \xc2\xa9      2003 Jasper Huijsmans <jasper@xfce.org></s>\nLicense: LGPL-2+\n\nOn Debian systems, the '''
-''' Franklin Street, \n   Fifth Floor, Boston, MA 02110-1301, USA.\n\nFiles: egg/egg-secure-entry.c\n<s>Copyright: \xc2\xa9 1995-1997 Peter Mattis, Spencer Kimball and Josh MacDonald</s>\nLicense: LGPL-2'''
-''' Street, \n   Fifth Floor, Boston, MA 02110-1301, USA.\n\nFiles: egg/egg-dbus.*\n       egg/egg-unix-credential.*\n<s>Copyright: \xc2\xa9 2002, 2003 CodeFactory AB\n           \xc2\xa9 2005 Red Hat, Inc.</s>\nLicense: GPL-2+\n\nFiles: daemon/ui/gkr-ask-request.*\n       daemon/ui/gkr-ask-tool-widgets.*\n       daemon/ui/gkr-ask-tool.*\n       pkcs11/ssh-agent/*\n<s>Copyright: \xc2\xa9 2003 Red Hat, Inc\n           \xc2\xa9 2007 Stefan Walter</s>\nLicense: GPL-2+\n   Gnome'''
-'''daemon/pkcs11/*\n       egg/egg-hex.*\n       egg/egg-libgcrypt.*\n       egg/egg-symkey.*\n       gcr/*\n       pkcs11/gck/*\n       pkcs11/plex-layer/*\n       pkcs11/roots-store/*\n       pkcs11/ssh-store/*\n       pkcs11/user-store/*\n<s>Copyright: \xc2\xa9 2008 Stefan Walter</s>\nLicense: LGPL-2.1+ (/usr/share/common-licenses/LGPL-2.1)\n   This program is free '''
-''' Franklin Street, \n   Fifth Floor, Boston, MA 02110-1301, USA.\n\nFiles: pkcs11/pkcs11.h\n<s>Copyright: \xc2\xa9 2006, 2007 g10 Code GmbH\n           \xc2\xa9 2006 Andreas Jellinghaus</s>\nLicense:\n   This'''
-''' warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR\n   PURPOSE.\n\nFiles: pkcs11/pkcs11n.h\n<s>Copyright: \xc2\xa9 1994-2000 Netscape Communications Corporation</s>\nLicense: MPL-1.1 | GPL-2+ | LGPL-2.1+ (/usr/share/common-licenses/LGPL-2.1)\n   The'''
-'''\n   Netscape Communications Corporation.\n   Portions created by the Initial Developer are <s>Copyright (C) 1994-2000\n   the Initial Developer. All Rights Reserved.</s>\n\n   Contributor(s):\n     Dr Stephen'''
-'''one of the MPL, the GPL or the LGPL.\n\nFiles: daemon/*\n<s>Copyright: \xc2\xa9 2003 Red Hat, Inc\n           \xc2\xa9 2007 Stefan Walter</s>\nLicense: GPL2+ (/usr/share/common-licenses/GPL-2'''
-'''<s>Authors:\tDan Dennedy <dan@dennedy.org>\n\t\t\tAndreas Micklei <andreas.micklei@ivistar.de>\n\t\t\tJason Howard <jason@spectsoft.com>\n\nCopyright</s>:\n\nThe library itself, and the executable mkrfc2734 are covered by '''
-''' 1998 12:50:05 -0500.\n\nIt was downloaded from http://www.imagemagick.org/www/download.html\n\nnote: GPL copyright files should be located at /usr/share/common-licenses\n\nCopyright:\n\nThis file is part of the ImageMagick software distributed by the '''
-''' and conditions for use, reproduction, and distribution of ImageMagick follow:\n\n<s>Copyright 1999-2004 ImageMagick Studio LLC</s>, a non-profit organization dedicated to making software'''
-''' Sections 1 through 9 of this document.\n  \n"Licensor" shall mean the copyright owner or entity authorized by the copyright owner that is granting the License.\n  \n"Legal Entity" shall mean '''
-''' Object form, made available under the License, as indicated by a copyright notice that is included in or attached to the work (an example '''
-''' intentionally submitted to Licensor for inclusion in the Work by the copyright owner or by an individual or Legal Entity authorized to submit on behalf of the copyright owner. For the purposes of this definition, "submitted" means any '''
-'''communication that is conspicuously marked or otherwise designated in writing by the copyright owner as "Not a Contribution."\n  \n"Contributor" shall mean Licensor and any'''
-''' by Licensor and subsequently incorporated within the Work.\n\n2. Grant of Copyright License. Subject to the terms and conditions of this License, each'''
-'''hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license to reproduce, prepare Derivative Works of, publicly display, publicly perform'''
-''' Source form of any Derivative Works that You distribute, all copyright, patent, trademark, and attribution notices from the Source form of '''
-''' construed as modifying the License.\n\nYou may add Your own copyright statement to Your modifications and may provide additional or different license'''
-'''while at duPont.  The algorithm is distributed under the following license:\n\n<s>Copyright 1999 E. I. du Pont de Nemours and Company</s>\n\nPermission is hereby '''
-''' is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies'''
-''' improvements\n\nThe source code is distributed under the following license:\n\n<s>Copyright (C) 2002 GraphicsMagick Group</s>, an organization dedicated to making software imaging '''
-''' is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies'''
-''' magick/nt_base.c.  The source code is distributed under the following license:\n\n<s>Copyright (C) 2000-2002, Ghostgum Software Pty Ltd.  All rights reserved.</s>\n\nPermission '''
-''' at all, unless he or she says so in writing.\n\nThe above copyright notice and this permission notice shall be included in all copies'''
-''' OpenSSH.  The source code is distributed under the following license:\n\n<s>Copyright (c) 2000 Markus Friedl.  All rights reserved.</s>\n\nRedistribution and use '''
-'''are met:\n\n   1. Redistributions of source code must retain the above copyright\n      notice, this list of conditions and the following disclaimer.\n   2. Redistributions in binary form must reproduce the above copyright\n      notice, this list of conditions and the following disclaimer in the'''
-'''optional C++ wrapper, Magick++.  Magick++ is distributed under the following license:\n\n<s>Copyright 1999 - 2003 Bob Friesenhahn</s>\n\nPermission is hereby granted, free of charge'''
-''' Magick++ is furnished to do so, subject to the following conditions:\n\nThis copyright notice shall be included in all copies or substantial portions of Magick++. The copyright to Magick++ is retained by its author and shall not be subsumed or replaced by any other copyright.\n\nThe software is provided "as is", without warranty of any kind, express'''
-''' the following license:\n\nFIG : Facility for Interactive Generation of figures <s>Copyright (c) 1985-1988 by Supoj Sutanthavibul</s> Parts <s>Copyright (c) 1989-2000 by Brian V. Smith Parts</s> <s>Copyright (c) 1991 by Paul King</s>\n\nAny party obtaining a copy of these'''
-''' party to do so, with the only requirement being that this copyright notice remain intact.\n\n----\n\nImageMagick makes use of third-party "delegate" libraries to support certain optional features. These libraries bear their own copyrights and licenses, which may be more or less restrictive than the'''
-''' these libraries is provided in a "licenses" directory.\n\n----\n\nPerlMagick/t/ttf/input.ttf and PerlMagick/demo/Generic.ttf:\n\n        <s>Copyright (C) 2004-2007 Thatcher Ulrich <tu@tulrich.com></s>\n\n        I have placed these fonts in '''
-'''\n\n\nIt was downloaded from http://liboil.freedesktop.org/download.\n\n<s>Upstream Author: David Schleef <ds@schleef.org></s>\n\nCopyright:\n\n\nThe majority of the source code and the collective work is subject\nto the following license:\n  \n  <s>Copyright 2002,2003,2004,2005 David A. Schleef <ds@schleef.org>\n  All rights reserved.</s>\n  \n  Redistribution and '''
-'''are met:\n  1. Redistributions of source code must retain the above copyright\n     notice, this list of conditions and the following disclaimer.\n  2. Redistributions in binary form must reproduce the above copyright\n     notice, this list of conditions and the following disclaimer in the'''
-''' code in the liboil/motovec directory is subject to the\nfollowing license:\n\n  <s>Copyright Motorola, Inc. 2003\n  ALL RIGHTS RESERVED</s>\n\n  You are hereby granted a copyright license to use, modify, and \n  distribute the SOFTWARE so long as '''
-'''implementing the Mersenne Twister algorithm is\nsubject to the following license:\n\n   <s>Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,\n   All rights RESERVED</s>'''
-'''are met:\n\n     1. Redistributions of source code must retain the above copyright\n        notice, this list of conditions and the following disclaimer.\n\n     2. Redistributions in binary form must reproduce the above copyright\n        notice, this list of conditions and the following disclaimer in the'''
-'''without specific prior written \n        permission.\n\n   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, '''
-''' FOR\n   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR\n   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL'''
-'''Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=31\nName: rpm\nContact: rpm-list@lists.rpm.org\nSource: http://rpm.org\n\n<s>Copyright: 1995 - 2009, Erik Troan, Marc Ewing</s>\nLicense: GPL-2+\n On Debian '''
-'''Sierralta\n                  Ewald Snel\n                  Leon van Stuivenberg\n                  Roberto Togni\n                  Lionel Ulmer\n\n<s>Copyright (c) 2000-2004 Fabrice Bellard et al.</s>\n\nThe following files are licensed '''
-'''Wed, 29 Oct 2003 15:47:14 +1100.\n\nIt was downloaded from: http://goodies.xfce.org/releases/xfce4-notes-plugin/\n\n<s>Copyrights:\n  \xc2\xa9 2006-2009 Mike Massonnet <mmassonnet@gmail.com></s>\npanel-plugin/panel-plugin.c:\n  <s>\xc2\xa9 2003 Jakob Henriksson <b0kaj+dev@lysator.liu.se></s>\n'''
-'''Mon, 27 Oct 2008 07:32:27 +0100\n\nIt was downloaded from\nhttp://goodies.xfce.org/projects/applications/xfce4-power-manager\n\n<s>Copyright Holders: \n\n\xc2\xa9 2008-2009 Ali <aliov@xfce.org></s>\n\nsrc/xfpm-button-xf86.c:\n  <s>\xc2\xa9 2008-2009 Ali <aliov@xfce.org></s> with some'''
-'''downloaded from http://httpd.apache.org/download.cgi\n\n<s>Upstream Authors: The Apache Software Foundation - http://apr.apache.org/</s>\n\nCopyright:\n\nLicensed to the Apache Software Foundation (ASF) under one or more'''
-'''The Apache Portable Runtime includes a number of subcomponents with\nseparate copyright notices and license terms. Your use of the source\ncode '''
-''' of the following licenses. \n\nFrom strings/apr_fnmatch.c, include/apr_fnmatch.h, misc/unix/getopt.c,\nfile_io/unix/mktemp.c, strings/apr_strings.c:\n\n/* \n * <s>Copyright (c) 1987, 1993, 1994\n *      The Regents of the University of California.</s>  '''
-'''are met:\n * 1. Redistributions of source code must retain the above copyright\n *    notice, this list of conditions and the following disclaimer.\n * 2. Redistributions in binary form must reproduce the above copyright\n *    notice, this list of conditions and the following disclaimer in the'''
-''' IF ADVISED OF THE POSSIBILITY OF\n * SUCH DAMAGE.\n\nFrom network_io/unix/inet_ntop.c, network_io/unix/inet_pton.c:\n\n/* <s>Copyright (c) 1996 by Internet Software Consortium.</s>\n *\n * Permission to use, copy, modify, '''
-'''with or without fee is hereby granted, provided that the above\n * copyright notice and this permission notice appear in all copies.\n *\n * THE '''
-''' OF THIS\n * SOFTWARE.\n\nFrom dso/aix/dso.c:\n\n *  Based on libdl (dlfcn.c/dlfcn.h) which is\n *  <s>Copyright (c) 1992,1993,1995,1996,1997,1988\n *  Jens-Uwe Mager, Helios Software GmbH, Hannover, Germany.</s>\n *\n *  Not '''
-''' removed or altered from any source distribution.\n\n\nFrom test/CuTest.c, test/CuTest.h:\n\n * <s>Copyright (c) 2002-2006 Asim Jalis</s>\n * \n * This library is released under the zlib/libpng'''
-''' fixes\n    Fredrik Vraalsen <vraalsen@cs.uiuc.edu> - general hackage and stuff\n\nmpeg2dec is <s>Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca></s>\n            <s>Copyright (C) 2000-2003 Michel Lespinasse <walken@zoy.org></s>\n            <s>Copyright (C) 2000-2003 Silicon Integrated System Corp.</s>\n            <s>Copyright (C) 2000-2003 Ryan C. Gordon <icculus@lokigames.com></s>\n            <s>Copyright (C) 2000-2003 Dominik Schnitzer <aeneas@linuxvideo.org></s>\n            <s>Copyright (C) 2003      Regis Duchesne <hpreg@zoy.org></s>\n            <s>Copyright (C) 2003      David S. Miller <davem@redhat.com></s>\n            <s>Copyright (C) 2003      Peter Gubanov <peter@elecard.net.ru></s>\n\n    This program is free software; you'''
-'''>\n  Merlin Hughes <merlin@merlin.org>\n  Mark M. Hoffman <mhoffman@lightlink.com>\n  Jean Delvare <khali@linux-fr.org>\n\nCopyright:\n  <s>Copyright 1998, 1999 Adrian Baugh <adrian.baugh@keble.ox.ac.uk></s>\n  <s>Copyright 1998-2003 Frodo Looijaard <frodol@dds.nl></s>\n  <s>Copyright 1999-2002 Merlin Hughes <merlin@merlin.org></s>\n  <s>Copyright 2001,2005 Mark D. Studebaker <mdsxyz123@yahoo.com></s>\n  <s>Copyright 2001 Philip Edelbrock</s>\n  <s>Copyright 2003-2007 Jean Delvare <khali@linux-fr.org></s>\n  <s>Copyright 2003 Marius Reiner <marius.reiner@hdev.de></s>\n  <s>Copyright 2005, 2006 Mark M. Hoffman <mhoffman@lightlink.com></s>\n\nLicense:\n  This program is free'''
-'''Apr 2008 03:07:18 +0930.\n\nUpstream source was cloned from http://git.xiph.org/celt.git\n\n    <s>Copyright 2005-2007 Christopher Montgomery, Jean-Marc Valin,\n\t\t\tTimothy Terriberry, CSIRO, and other</s>'''
-'''\n    are met:\n\n    - Redistributions of source code must retain the above copyright\n    notice, this list of conditions and the following disclaimer.\n\n    - Redistributions in binary form must reproduce the above copyright\n    notice, this list of conditions and the following disclaimer in the'''
-''' Youngdale and many\nothers.\n\nNames of relevant binary program(s) and copyright info have been adapted to\navoid the violation of the GPL'''
-'''offered by Joerg Schilling) and the\nobligations created by German laws.\n\nCopyright:\n\n* cdda2wav \n  <s>Copyright 1998-2003 Heiko Eissfeldt</s>\n  parts    <s>(C) Peter Widow</s>\n  parts    <s>(C) Thomas Niederreiter</s>'''
-''' Security, Inc.\n  License: GPLv2\n \n* mkisofs\n  Written by Eric Youngdale (1993).\n  <s>Copyright 1993 Yggdrasil Computing, Incorporated</s>\n  <s>Copyright (c) 1999,2000-2004 J. Schilling</s>\n  APPLE_HYB James Pearson j.pearson@ge.ucl.ac.uk 22/2/2000\n  License: GPLv2'''
-'''\n\n* libcdparanoia\n  (C) by Monty (xiphmont@mit.edu)\n  Modifications to make the code portable <s>Copyright (c) 2002 J. Schilling</s>\n  License: GPLv2\n\n* readcd\n  <s>Copyright (c) 1987, 1995-2003 J. Schilling</s>\n  License: GPLv2\n\n* zisofs-tools:\n  <s>Copyright 2001 H. Peter Anvin - All Rights Reserved</s>\n  *   This program is free'''
-'''Funded under Grant\n     P41-RR02188 by the National Institutes of Health. \n\n     Portions <s>copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 by\n     Boutell.Com, Inc.</s> \n\n     Portions relating to GD2 format <s>copyright 1999, 2000, 2001, 2002\n     Philip Warner.</s>\n     \n     Portions relating to PNG <s>copyright 1999, 2000, 2001, 2002 Greg\n     Roelofs.</s> \n\n     Portions relating to gdttf.c <s>copyright 1999, 2000, 2001, 2002 John  \n     Ellson (ellson@lucent.com).</s>\n   \n     Portions relating to gdft.c <s>copyright 2001, 2002 John Ellson  \n     (ellson@lucent.com).  \n\n     Portions copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007\n\t\t Pierre-Alain Joye (pierre@libgd.org).</s>  \n\n     Portions relating to JPEG and to color quantization <s>copyright 2000,\n     2001, 2002, Doug Becker</s> and '''
-''' the\n     file README-JPEG.TXT for more information.\n\n     Portions relating to WBMP <s>copyright 2000, 2001, 2002 Maurice\n     Szmurlo and Johan Van den Brande</s>'''
-''' be given in user-accessible documentation.\n\n     This software is provided "AS IS." The copyright holders disclaim  \n     all warranties, either express or implied, including but '''
-'''%KEY%  "( |\(c\)|copyright|\<c\>[^+:]|&copy)"'''
-'''%STR%  "debian[^/]*/[^/]*copyright"\n#\n%ENTRY%  _FN_LICENSEPATT\n%KEY%  =NULL=\n%STR%\n%"(licen[cs]e|copy(right|rite|left)|cpy(right|left)|cpyrt|legal|eula|agreement)"'''
-'''fonts in this package are copyright =SOME= ... without'''
-'''a non-exclusive worldwide royalty-free copyright licen[cs]e to'''
-'''(or another written agreement between Licensor and You) is expressly prohibited by U.S. copyright law, the equivalent laws of other countries, and by international treaty.'''
-'''rights of fair use or other equivalent, as provided by copyright law.\n\nYou may make, run and propagate covered'''
-'''No covered work shall be deemed part of an effective technological measure under any applicable law fulfilling obligations under article 11 of the WIPO copyright treaty adopted on 20 December 1996, or similar laws prohibiting or restricting circumvention of such measures.'''
-'''However, if you cease all violation of this License, then your license from a particular copyright holder is reinstated (a) provisionally, unless and until the copyright holder explicitly and finally terminates your license, and (b) permanently, if the copyright holder fails to notify you of the violation by some reasonable means prior to 60 days after the cessation.'''
-'''Moreover, your license from a particular copyright holder is reinstated permanently if the copyright holder notifies you of the violation by some reasonable means, this is the first time you have received notice of violation of this License (for any work) from that copyright holder, and you cure the violation prior to 30 days after your receipt of the notice.'''
-'''These actions infringe copyright if you do not accept this License.'''
-'''Later license versions may give you additional or different permissions. However, no additional obligations are imposed on any author or copyright holder as a result of your choosing to follow a later version.'''
-'''IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.'''
-'''1.1 "Copyright Holder" means the original author(s) of the Document or other owner(s) of the copyright in the Document.'''
-'''(a) All copyright and license notices in the original Document must be preserved'''
-'''$Term["Free with copyright clause"]["Desc"]=""; $Term["Free with copyright clause"]["License"][0]="Free/FreeWithCopyright/Free with copyright clause variant 1"; $Term["Free with copyright clause"]["License"][1]="Free/FreeWithCopyright/Free with copyright clause variant 10"; $Term["Free with copyright clause"]["License"][2]="Free/FreeWithCopyright/Free with copyright clause variant 11"; $Term["Free with copyright clause"]["License"][3]="Free/FreeWithCopyright/Free with copyright clause variant 3"; $Term["Free with copyright clause"]["License"][4]="Free/FreeWithCopyright/Free with copyright clause variant 4"; $Term["Free with copyright clause"]["License"][5]="Free/FreeWithCopyright/Free with copyright clause variant 5"; $Term["Free with copyright clause"]["License"][6]="Free/FreeWithCopyright/Free with copyright clause variant 8"; $Term["Free with copyright clause"]["License"][7]="Free/FreeWithCopyright/Free with copyright clause variant 9"; $Term["Free with copyright clause"]["License"][8]="GPL/v2/Free with copyright clause"; /* Canonical name: 80 */ $Term["Free with files clause"]["Desc"]="";'''
-'''We protect your rights with two steps: (1) copyright the software, and (2) offer you this license which gives you legal permission to copy, distribute and/or modify the software.'''
-'''WholeFile =~ s@\xA9@Copyright@g; # copyright symbol\n$WholeFile'''
-'''The Unix configuration script "configure" was produced with GNU Autoconf. It is <s>copyright by the Free Software Foundation</s> but is freely distributable. The same holds for its supporting scripts (config.guess, config.sub, ltconfig, ltmain.sh). Another support script, install-sh, is <s>copyright by M.I.T.</s> but is also freely distributable.'''
-'''Pine, Pico, and Pilot software and its included text are <s>Copyright 1989-2007 by\nthe University of Washington.</s>\n\nUse of Pine/Pico/Pilot: You may compile'''
-'''Microsoft reserves all rights not expressly granted to you.\n\n2. COPYRIGHT. All rights, title, and copyrights in and to the SOFTWARE PRODUCT'''
+training/_usr_share_doc_adduser_copyright
+training/_usr_share_doc_apache2-mpm-prefork_copyright
+training/_usr_share_doc_apache2-suexec_copyright
+training/_usr_share_doc_apache2-utils_copyright
+training/_usr_share_doc_apache2.2-common_copyright
+training/_usr_share_doc_apache2_copyright
+training/_usr_share_doc_apg_copyright
+training/_usr_share_doc_apt-utils_copyright
+training/_usr_share_doc_apt_copyright
+training/_usr_share_doc_aptitude_copyright
+training/_usr_share_doc_base-files_copyright
+training/_usr_share_doc_base-passwd_copyright
+training/_usr_share_doc_bash_copyright
+training/_usr_share_doc_bind9-host_copyright
+training/_usr_share_doc_bind9_copyright
+training/_usr_share_doc_bind9utils_copyright
+training/_usr_share_doc_binutils_copyright
+training/_usr_share_doc_bip_copyright
+training/_usr_share_doc_bsd-mailx_copyright
+training/_usr_share_doc_bsdmainutils_copyright
+training/_usr_share_doc_bsdutils_copyright
+training/_usr_share_doc_build-essential_copyright
+training/_usr_share_doc_bzip2_copyright
+training/_usr_share_doc_bzr_copyright
+training/_usr_share_doc_ca-certificates_copyright
+training/_usr_share_doc_cdbs_copyright
+training/_usr_share_doc_cdebootstrap_copyright
+training/_usr_share_doc_coreutils_copyright
+training/_usr_share_doc_courier-authdaemon_copyright
+training/_usr_share_doc_courier-authlib-userdb_copyright
+training/_usr_share_doc_courier-authlib_copyright
+training/_usr_share_doc_courier-base_copyright
+training/_usr_share_doc_courier-imap-ssl_copyright
+training/_usr_share_doc_courier-imap_copyright
+training/_usr_share_doc_courier-ssl_copyright
+training/_usr_share_doc_cpio_copyright
+training/_usr_share_doc_cpp-4.1_copyright
+training/_usr_share_doc_cpp-4.3_copyright
+training/_usr_share_doc_cpp_copyright
+training/_usr_share_doc_cron_copyright
+training/_usr_share_doc_curl_copyright
+training/_usr_share_doc_dash_copyright
+training/_usr_share_doc_db4.6-util_copyright
+training/_usr_share_doc_dbconfig-common_copyright
+training/_usr_share_doc_debconf-i18n_copyright
+training/_usr_share_doc_debconf_copyright
+training/_usr_share_doc_debhelper_copyright
+training/_usr_share_doc_debian-archive-keyring_copyright
+training/_usr_share_doc_debian-backports-keyring_copyright
+training/_usr_share_doc_debianutils_copyright
+training/_usr_share_doc_defoma_copyright
+training/_usr_share_doc_devscripts_copyright
+training/_usr_share_doc_dhcp3-client_copyright
+training/_usr_share_doc_dhcp3-common_copyright
+training/_usr_share_doc_diff_copyright
+training/_usr_share_doc_diffstat_copyright
+training/_usr_share_doc_djvulibre-desktop_copyright
+training/_usr_share_doc_dmidecode_copyright
+training/_usr_share_doc_dnsutils_copyright
+training/_usr_share_doc_docbook-xsl_copyright
+training/_usr_share_doc_dpatch_copyright
+training/_usr_share_doc_dpkg-dev_copyright
+training/_usr_share_doc_dpkg_copyright
+training/_usr_share_doc_drupal5_copyright
+training/_usr_share_doc_dselect_copyright
+training/_usr_share_doc_dvipng_copyright
+training/_usr_share_doc_e2fslibs_copyright
+training/_usr_share_doc_e2fsprogs_copyright
+training/_usr_share_doc_ed_copyright
+training/_usr_share_doc_elinks-data_copyright
+training/_usr_share_doc_elinks_copyright
+training/_usr_share_doc_expect_copyright
+training/_usr_share_doc_fakeroot_copyright
+training/_usr_share_doc_fetchmail_copyright
+training/_usr_share_doc_fgetty_copyright
+training/_usr_share_doc_file_copyright
+training/_usr_share_doc_findutils_copyright
+training/_usr_share_doc_fontconfig-config_copyright
+training/_usr_share_doc_fontconfig_copyright
+training/_usr_share_doc_g++-4.1_copyright
+training/_usr_share_doc_g++-4.3_copyright
+training/_usr_share_doc_g++_copyright
+training/_usr_share_doc_gallery2_copyright
+training/_usr_share_doc_gawk_copyright
+training/_usr_share_doc_gcc-4.1-base_copyright
+training/_usr_share_doc_gcc-4.1_copyright
+training/_usr_share_doc_gcc-4.3-base_copyright
+training/_usr_share_doc_gcc-4.3_copyright
+training/_usr_share_doc_gcc_copyright
+training/_usr_share_doc_gettext-base_copyright
+training/_usr_share_doc_gettext_copyright
+training/_usr_share_doc_ghostscript-x_copyright
+training/_usr_share_doc_ghostscript_copyright
+training/_usr_share_doc_git-core_copyright
+training/_usr_share_doc_git-daemon-run_copyright
+training/_usr_share_doc_gitweb_copyright
+training/_usr_share_doc_gnupg_copyright
+training/_usr_share_doc_gpgv_copyright
+training/_usr_share_doc_grep_copyright
+training/_usr_share_doc_groff-base_copyright
+training/_usr_share_doc_gs-common_copyright
+training/_usr_share_doc_gs-gpl_copyright
+training/_usr_share_doc_gsfonts_copyright
+training/_usr_share_doc_gzip_copyright
+training/_usr_share_doc_hostname_copyright
+training/_usr_share_doc_html2text_copyright
+training/_usr_share_doc_ifupdown_copyright
+training/_usr_share_doc_imagemagick_copyright
+training/_usr_share_doc_info_copyright
+training/_usr_share_doc_initscripts_copyright
+training/_usr_share_doc_intltool-debian_copyright
+training/_usr_share_doc_iproute_copyright
+training/_usr_share_doc_iptables_copyright
+training/_usr_share_doc_iputils-ping_copyright
+training/_usr_share_doc_ipython_copyright

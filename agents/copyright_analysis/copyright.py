@@ -147,7 +147,8 @@ Use the --agent switch to place %prog into Fossology agent mode. There are four 
 
     model = {}
     if options.training:
-        training_data = [eval(line) for line in open(options.training).readlines()]
+        files = [line.rstrip() for line in open(options.training).readlines()]
+        training_data = [open(file).read() for file in files if os.path.exists(file)]
         model = library.create_model(training_data)
         pickle.dump(model, open(options.model,'w'))
 

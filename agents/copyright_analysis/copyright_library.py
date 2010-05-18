@@ -32,7 +32,7 @@ tokenizer_pattern = r"""(?ixs) # VERBOSE | IGNORE | DOTALL
     (?P<email>[\<\(]?[A-Za-z0-9\-_\.\+]{1,100}@[A-Za-z0-9\-_\.\+]{1,100}\.[A-Za-z]{1,4})[\>\)]?
     |
     (?P<url>
-        (?:(:?ht|f)tps?\:\/\/\S+[^\.\,\s]) # starts with  http:// https:// ftp:// ftps:// plus anything that isnt a white space character
+        (?:(:?ht|f)tps?\:\/\/[^\s\<]+[^\<\.\,\s]) # starts with  http:// https:// ftp:// ftps:// plus anything that isnt a white space character
         |
         (?:[a-z\.\_\-]+\.(?:
             com|edu|biz|gov|int|info|mil|net|org|me
@@ -41,7 +41,7 @@ tokenizer_pattern = r"""(?ixs) # VERBOSE | IGNORE | DOTALL
             |jp|[a-z][a-z]\.[a-z][a-z]
         )) # some.thing.(com or edu or ...)
         (?:\:\d+)? # port number
-        (?:\/\S*[^\.\,\s]?)? # path do the page, must not end with a '.'
+        (?:\/[^\s\<]*[^\<\.\,\s]?)? # path do the page, must not end with a '.'
     )
     |
     (?P<path>
@@ -61,11 +61,14 @@ tokenizer_pattern = r"""(?ixs) # VERBOSE | IGNORE | DOTALL
         |
         (?:\xc2\xa9)
     ))
-    |
-    (?P<word>[a-z0-9\-\_]+)
-    # | (?P<symbol>[\.\,\?\\\|\/\:\"\'\;\(\)])
-    # | (?P<symbol>.) # catch all
-    # | (?P<fullstop>\.) # grab '.'s if they don't match anything else.
+    | (?P<word>[a-z0-9][a-z0-9\-\_\']*)
+    | (?P<doublebreak>\s*\n\s*\n\s*)
+    | (?P<colon>\:)
+    | (?P<comma>\,)
+    | (?P<quote>\")
+    | (?P<paren>\(|\))
+    | (?P<symbol>[\\\|\/\'\;])
+    | (?P<fullstop>\.) # grab '.'s if they don't match anything else.
 )
 """ % ('|'.join(months),'|'.join(months))
 
@@ -75,7 +78,17 @@ RE_COMMENT = re.compile(r'(^(?:(?P<a>\s*)(?P<b>(?:\*|\/\*|\*\/|#!|#|%|\/\/|;)+))
 
 
 # The current set of features used in the naive Bayes model.
-FEATURES = ['current_word', 'previous_word', 'next_word', 'previous_label', 'current_bigram', 'previous_bigram', 'next_bigram']
+FEATURES = [
+        'current_word', 
+        'previous_word',
+        #'next_word',
+        'current_bigram',
+        'previous_bigram',
+        #'next_bigram',
+        #'next_next_bigram',
+        #'previous_label',
+        'key_word',
+        ]
 
 def test():
     """
@@ -245,7 +258,7 @@ def tokens_to_BIO(tokens):
 
     return (t,l)
 
-def get_features(tokens,labels,features):
+def get_features(tokens,labels,features = []):
     """
     Returns a set of features.
 
@@ -259,13 +272,21 @@ def get_features(tokens,labels,features):
         'previous_label'
     """
 
-    ALLOWED_FEATURES = ['current_word', 
+    ALLOWED_FEATURES = [
+        'current_word', 
         'previous_word',
-        'next_word',
+        #'next_word',
         'current_bigram',
         'previous_bigram',
-        'next_bigram',
-        'previous_label',]
+        #'next_bigram',
+        #'next_next_bigram',
+        #'previous_label',
+        'key_word',
+        ]
+
+    if type(features) != type([]) or len(features) == 0:
+        features = ALLOWED_FEATURES[:]
+
     # check the features
     for f in features:
         if f not in ALLOWED_FEATURES:
@@ -279,22 +300,22 @@ def get_features(tokens,labels,features):
         for f in features:
             if f=='current_word':
                 feat[f] = tokens[i]
-            if f=='previous_word':
+            elif f=='previous_word':
                 if i>0:
                     feat[f] = tokens[i-1]
                 else:
                     feat[f] = '__START__'
-            if f=='next_word':
+            elif f=='next_word':
                 if i<n-1:
                     feat[f] = tokens[i+1]
                 else:
                     feat[f] = '__END__'
-            if f=='current_bigram':
+            elif f=='current_bigram':
                 bi = ['__START__', tokens[i]]
                 if i>0:
                     bi[0] = tokens[i-1]
                 feat[f] = ' '.join(bi)
-            if f=='previous_bigram':
+            elif f=='previous_bigram':
                 bi = ['__START__', '__START__']
                 if i>1:
                     bi[1] = tokens[i-1]
@@ -302,19 +323,44 @@ def get_features(tokens,labels,features):
                 if i>0:
                     bi[1] = tokens[i-1]
                 feat[f] = ' '.join(bi)
-            if f=='next_bigram':
-                bi = [tokens[i], '__END__']
+            elif f=='next_bigram':
+                bi = [tokens[i].lower(), '__END__']
                 if i<n-1:
+                    bi[1] = tokens[i+1].lower()
+                feat[f] = ' '.join(bi)
+            elif f=='next_next_bigram':
+                bi = [tokens[i],'__END__', '__END__']
+                if i<n-2:
+                    bi[1] = tokens[i+1]
+                    bi[2] = tokens[i+2]
+                elif i<n-1:
                     bi[1] = tokens[i+1]
                 feat[f] = ' '.join(bi)
-            if f=='previous_label':
+            elif f=='previous_label':
                 if i>0:
                     feat[f] = labels[i-1]
                 else:
                     feat[f] = 'O'
+            elif f=='key_word':
+                if tokens[i] in ['AUTHORS',
+                        'Author',
+                        'Authored',
+                        'Authors',
+                        'Written',
+                        'XXXabbreviationXXX',
+                        'XXXcopyrightXXX',
+                        'author',
+                        'contributed',
+                        'copyrighted',
+                        'put',
+                        'written']:
+                    feat[f] = True
+                else:
+                    feat[f] = False
+            elif f=='pos':
+                feat[f] = pos[i]
         feat_list.append(feat)
     return feat_list
-    
 
 def train_nb(data, priors=None):
     """
@@ -373,7 +419,7 @@ def train_nb(data, priors=None):
         
     return PFC
 
-def tuned_model(iob, priors=None, debug=False):
+def tuned_model(iob, priors=None, feature_priors=False, debug=False):
     """
     This function uses a leave one out technique to determine the optimal
     prior probabilities of the three IOB classes. This is a better solution
@@ -385,6 +431,9 @@ def tuned_model(iob, priors=None, debug=False):
     incorrect it is moved in the correct direction by a small amount.
     After a number of iterations through the data the priors will stabilize
     and the error rate will stop deceasing. This is when the algorithm stops.
+
+    If ``feature_priors'' is set to True then the algorithm will try to locate
+    the optimal prior probabilities for unknown features.
 
     IOB formate:
         iob = [
@@ -433,9 +482,12 @@ def tuned_model(iob, priors=None, debug=False):
             fd = float(d)
             fp = {'B':{}, 'I':{}, 'O':{}}
             cp = {'B':[], 'I':[], 'O':[]}
-            for c in classes:
-                for f in FEATURES:
-                    fp[c][f] = []
+
+            if feature_priors:
+                for c in classes:
+                    for f in FEATURES:
+                        fp[c][f] = []
+                
             for j in range(d):
                 a = L[j]
                 b = iob[i][1][j]
@@ -445,18 +497,20 @@ def tuned_model(iob, priors=None, debug=False):
                     cp[a].append(-1.0/(fn+fd))
                     cp[b].append(1.0/(fn+fd))
 
-                    for f in FEATURES:
-                        if feats[j][f] not in PFC[a][f]:
-                            fp[a][f].append(math.exp(priors[a][f])*-0.01)
-                        if feats[j][f] not in PFC[b][f]:
-                            fp[b][f].append(math.exp(priors[b][f])*0.01)
+                    if feature_priors:
+                        for f in FEATURES:
+                            if feats[j][f] not in PFC[a][f]:
+                                fp[a][f].append(math.exp(priors[a][f])*-0.01)
+                            if feats[j][f] not in PFC[b][f]:
+                                fp[b][f].append(math.exp(priors[b][f])*0.01)
 
             for c in classes:
-                for f in FEATURES:
-                    if len(fp[c][f]) > 0:
-                        fp[c][f] = sum(fp[c][f])/float(len(fp[c][f]))
-                    else:
-                        fp[c][f] = 0.0
+                if feature_priors:
+                    for f in FEATURES:
+                        if len(fp[c][f]) > 0:
+                            fp[c][f] = sum(fp[c][f])/float(len(fp[c][f]))
+                        else:
+                            fp[c][f] = 0.0
                 if len(cp[c]) > 0:
                     cp[c] = sum(cp[c])/float(len(cp[c]))
                 else:
@@ -464,12 +518,13 @@ def tuned_model(iob, priors=None, debug=False):
 
             s = 0.0
             for c in classes:
-                for f in FEATURES:
-                    priors[c][f] = math.exp(priors[c][f]) + fp[c][f]
-                    if priors[c][f] < 0.0:
-                        priors[c][f] = 1e-100
-                    if priors[c][f] > 1.0:
-                        priors[c][f] = 1.0
+                if feature_priors:
+                    for f in FEATURES:
+                        priors[c][f] = math.exp(priors[c][f]) + fp[c][f]
+                        if priors[c][f] < 0.0:
+                            priors[c][f] = 1e-100
+                        if priors[c][f] > 1.0:
+                            priors[c][f] = 1.0
                 priors[c]['class'] = math.exp(priors[c]['class']) + cp[c]
                 if priors[c]['class'] < 0.0:
                     priors[c]['class'] = 1e-100
@@ -477,11 +532,12 @@ def tuned_model(iob, priors=None, debug=False):
                     priors[c]['class'] = 1.0
                 s += priors[c]['class']
             for c in classes:
-                for f in FEATURES:
-                    if priors[c][f]<= 1e-100:
-                        priors[c][f] = -230.0
-                    else:
-                        priors[c][f] = math.log(priors[c][f])
+                if feature_priors:
+                    for f in FEATURES:
+                        if priors[c][f]<= 1e-100:
+                            priors[c][f] = -230.0
+                        else:
+                            priors[c][f] = math.log(priors[c][f])
                 if priors[c]['class'] <= 1e-100:
                     priors[c]['class'] = -230.0
                 else:
@@ -489,7 +545,7 @@ def tuned_model(iob, priors=None, debug=False):
 
         total = sum([sum([matrix[c1][c2] for c2 in classes]) for c1 in classes])
         correct = sum([matrix[c][c] for c in classes])/total
-        #print correct
+        print correct
 
     if correct_last>correct:
         priors = priors_last.copy()
