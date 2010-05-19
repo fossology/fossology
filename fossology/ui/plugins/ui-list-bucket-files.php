@@ -139,6 +139,7 @@ class list_bucket_files extends FO_Plugin
     $sql = "select uploadtree.*, bucket_file.nomosagent_fk as nomosagent_fk
                from uploadtree, bucket_file, bucket_def
                where upload_fk=$upload_pk and uploadtree.lft between $lft and $rgt
+                 and ((ufile_mode & (1<<28)) = 0)
                  and uploadtree.pfile_fk=bucket_file.pfile_fk
                  and agent_fk=$bucketagent_pk
                  and bucket_fk=$bucket_pk
