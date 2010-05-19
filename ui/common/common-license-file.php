@@ -156,7 +156,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
  *   $CheckOnly       if true, sets LIMIT 1 to check if uploadtree_pk has 
  *                    any of the given license.  Default is false.
  * Returns:
- *   number of ufiles with this shortname.
+ *   Array "count"=>{total number of pfiles}, "unique"=>{number of unique pfiles}
  */
 function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk, 
                              $PkgsOnly=false, $CheckOnly=false)
@@ -177,20 +177,19 @@ function CountFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   $shortname = pg_escape_string($rf_shortname);
   $chkonly = ($CheckOnly) ? " LIMIT 1" : "";
 
-  $sql = "select count(*)
+  $sql = "select count(pfile_fk) as count, count(distinct pfile_fk) as unique
           from license_ref,license_file,
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
                  where upload_fk=$upload_pk
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
           where PF=pfile_fk and agent_fk=$agent_pk and rf_fk=rf_pk
                 and rf_shortname='$shortname' $chkonly";
-
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   
-  $LicCount = pg_fetch_result($result, 0, 0);
+  $RetArray = pg_fetch_assoc($result);
   pg_free_result($result);
-  return $LicCount;
+  return $RetArray;
 }
 
 
