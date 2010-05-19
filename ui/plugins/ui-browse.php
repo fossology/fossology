@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
-Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -85,21 +85,6 @@ class ui_browse extends FO_Plugin {
       "upload",
       "item"
     ));
-    menu_insert("Browse::[BREAK]", -8, "$URI&show=simple", "Basic directory listing");
-    $Show = GetParm("show", PARM_STRING);
-    switch ($Show) {
-      default:
-      case "detail":
-        menu_insert("Browse::Simple", -10, "$URI&show=simple", "Basic directory listing");
-        menu_insert("Browse::Detail", -10);
-        $URI.= "&show=detail";
-      break;
-      case "simple":
-        menu_insert("Browse::Simple", -10);
-        menu_insert("Browse::Detail", -10, "$URI&show=detail", "Detailed directory listing");
-        $URI.= "&show=simple";
-      break;
-    }
     if (GetParm("mod", PARM_STRING) == $this->Name) {
       menu_insert("Browse::Browse", 1);
     }
@@ -358,15 +343,9 @@ if (isset($__OBSOLETE__))
     $Uri = Traceback_uri() . "?mod=" . $this->Name;
     global $Plugins;
     global $DB;
-    switch (GetParm("show", PARM_STRING)) {
-      default:
-      case 'detail':
-        $Show = 'detail';
-      break;
-      case 'simple':
-        $Show = 'simple';
-      break;
-    }
+  
+    $Show = 'detail';						// always use detail
+
     /* Check for re-analysis */
     $ReAnalyze = & $Plugins[plugin_find_id("agent_reset_license") ]; /* may be null */
     $Analyze = & $Plugins[plugin_find_id("agent_license") ]; /* may be null */
