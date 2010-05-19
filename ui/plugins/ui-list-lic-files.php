@@ -98,26 +98,23 @@ class list_lic_files extends FO_Plugin
       // micro menus
       $V .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
-	/* Get License Name */
-	$V .= "The following files contain the license '<b>";
-	$V .= $rf_shortname;
-	$V .= "</b>'.\n";
-
 	/* Load licenses */
 	$Offset = ($Page < 0) ? 0 : $Page*$Max;
     $order = "";
     $PkgsOnly = false;
 
     // Count is uploadtree recs, not pfiles
-    $Count = CountFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly);
-    $V.= "<br>$Count files found with this license ";
-    if ($Count < (1.25 * $Max)) $Max = $Count;
+    $CountArray = CountFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly);
+    $Count = $CountArray['count'];
+    $Unique = $CountArray['unique'];
+
+    $V.= "$Count files found ($Unique unique) with license <b>$rf_shortname</b>";
+    if ($Count < $Max) $Max = $Count;
     $limit = ($Page < 0) ? "ALL":$Max;
     $order = " order by ufile_name asc";
     $filesresult = GetFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk,
                                 $PkgsOnly, $Offset, $limit, $order);
     $NumFiles = pg_num_rows($filesresult);
-//    $V .= "($NumFiles shown)";
     if (!empty($Excl)) $V .= "<br>Display excludes files with these extensions: $Excl";
 
 	/* Get the page menu */
