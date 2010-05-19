@@ -165,7 +165,7 @@ class copyright_hist extends FO_Plugin
             $VCopyright .= Traceback_uri();
             $VCopyright .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
             $VCopyright .= "<td align='left'>";
-            $VCopyright .= $row['content'];
+            $VCopyright .= htmlentities($row['content']);
             $VCopyright .= "</td>";
             $VCopyright .= "</tr>\n";
         } else if ($row['type'] == 'email') {
@@ -176,7 +176,7 @@ class copyright_hist extends FO_Plugin
             $VEmail .= Traceback_uri();
             $VEmail .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
             $VEmail .= "<td align='left'>";
-            $VEmail .= $row['content'];
+            $VEmail .= htmlentities($row['content']);
             $VEmail .= "</td>";
             $VEmail .= "</tr>\n";
         } else if ($row['type'] == 'url') {
@@ -187,7 +187,7 @@ class copyright_hist extends FO_Plugin
             $VUrl .= Traceback_uri();
             $VUrl .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
             $VUrl .= "<td align='left'>";
-            $VUrl .= $row['content'];
+            $VUrl .= htmlentities($row['content']);
             $VUrl .= "</td>";
             $VUrl .= "</tr>\n";
         }
