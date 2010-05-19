@@ -132,6 +132,11 @@ class ui_buckets extends FO_Plugin
               WHERE uploadtree_pk = $Uploadtree_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) < 1)
+    {
+      pg_free_result($result);
+      return "<h2>Invalid URL, nonexistant item $Uploadtree_pk</h2>";
+    }
     $row = pg_fetch_assoc($result);
     $lft = $row["lft"];
     $rgt = $row["rgt"];
