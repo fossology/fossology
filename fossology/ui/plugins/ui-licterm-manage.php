@@ -552,7 +552,10 @@ function moveOptions(theSelFrom, theSelTo)
       $SQL = "SELECT * FROM licterm WHERE licterm_name = '$TermName';";
       }
     $Results = $DB->Action($SQL);
+    /* turn off E_NOTICE so this stops reporting undefined offset */
+    $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
     $TermKey = $Results[0]['licterm_pk'];
+    error_reporting($errlev); /* return to previous error reporting level */	
 
     /* Do the insert (or update) */
     if (empty($TermKey))

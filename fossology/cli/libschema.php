@@ -57,6 +57,10 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 	//print "SUPDB: Current Schema returned by GetSchema:\n"; print_r($Curr) . "\n";
 	/* The gameplan: Make $Curr look like $Schema. */
 	// print "<pre>"; print_r($Schema); print "</pre>";
+
+	/* turn off E_NOTICE so this stops reporting undefined index */
+	$errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
+
 	/************************************/
 	/* Add sequences */
 	/************************************/
@@ -386,6 +390,8 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 			}
 		}
 	} /* Add constraints */
+
+	error_reporting($errlev); /* return to previous error reporting level */
 
 	/************************************/
 	/* CREATE FUNCTIONS */
