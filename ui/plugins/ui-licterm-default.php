@@ -205,8 +205,13 @@ class licterm_default extends FO_Plugin
 	  }
 	}
       else { $LicList = NULL; }
+
+      /* turn off E_NOTICE so this stops reporting undefined index */
+      $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
       /* Get the list of terms */
       $TermList = $Val['Term'];
+      error_reporting($errlev); /* return to previous error reporting level */
+
       /* Create! */
       /** Delete terms and license mappings, but not the canonical names **/
       $LT->LicTermInsert('',$Key,$Val['Desc'],$TermList,$LicList,0);
