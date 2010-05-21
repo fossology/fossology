@@ -83,7 +83,7 @@ class copyright_hist extends FO_Plugin
     global $Plugins;
     global $DB;
 
-    $ModLicView = &$Plugins[plugin_find_id("view-copyright")];
+    $ModLicView = &$Plugins[plugin_find_id("copyrightview")];
 
     /*******  Get license names and counts  ******/
     /* Find lft and rgt bounds for this $Uploadtree_pk  */
