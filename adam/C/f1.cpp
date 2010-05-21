@@ -39,6 +39,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* global defines */
 #define NAME_SIZE 256
 
+const double threshold = 0.54;
+
 void load_database(FILE* file, cvector* database_list) {
   /* local variables */
   int i, j, type_size, num_licenses, num_sentences;
@@ -100,9 +102,16 @@ void load_database(FILE* file, cvector* database_list) {
   }
 }
 
+void print(char* license, int index, int start, int end) {
+  int i;
+
+  printf("%s\n", license);
+  //  printf("\t%d [%05d, %05d]\n", index, start, end);
+}
+
 void classify_file(char *filename, cvector* database_list, MaxentModel m) {
   char *buffer;
-  cvector feature_type_list, label_list, file_list, * sentence_list;
+  cvector feature_type_list, label_list, file_list, * sentence_list, * compare_list;
   char *t = NULL;
   token_feature *ft = NULL;
   sentence *st = NULL;
@@ -124,160 +133,68 @@ void classify_file(char *filename, cvector* database_list, MaxentModel m) {
   cvector_destroy(&feature_type_list);
   cvector_destroy(&label_list);
 
-  double score      [file_list.size];
-  int score_index   [file_list.size];
-  int vector              [database_list->size][file_list.size];
-  double match_percent    [database_list->size][file_list.size];
-  int match_index         [database_list->size][file_list.size];
+  double best_score = 0.0;
+  int best_index = 0;
 
   for (i = 0; i < database_list->size; i++) {
+    /* grab a license to compare to */
+    compare_list = (cvector*)cvector_at(database_list, i);
+
     /* locals to the loop */
-    sentence_list = (cvector*)cvector_at(database_list, i);
-    double matrix[file_list.size + 1][sentence_list->size + 1];
-    double cosine[file_list.size    ][sentence_list->size    ];
-    double m = 0;
+    double values[compare_list->size][file_list.size];
+    int binary_values[compare_list->size][file_list.size];
 
-    /* zero the matrix and cosine */
-    memset(matrix, 0, sizeof(matrix));
-    memset(cosine, 0, sizeof(cosine));
+    /* zero the matricies */
+    memset(values, 0, sizeof(values));
+    memset(binary_values, 0 , sizeof(binary_values));
 
-    for (j = 0; j < sentence_list->size; j++) {
-      a = (sentence *)cvector_at(sentence_list, j);
-      /* TODO this threshold stuff needs to be updated */
-      double thresh = 1.0 - 2.0 / ((double)sv_nonzeros(a->vector));
-      if (thresh < 0.75) {
-        thresh = 0.75;
-      }
-      thresh = 0.5;
-      for (k = 0; k < file_list.size; k++) {
+    int best = 0;
+    int best_j = 0;
+    int best_k = 0;
+
+    /* populate the values and binary matrix with the values */
+    for(j = 0; j < compare_list->size; j++) {
+      a = (sentence*)cvector_at(compare_list, j);
+      for(k = 0; k < file_list.size; k++) {
         b = (sentence *)cvector_at(&file_list, k);
-        cosine[k][j] = sv_inner(a->vector,b->vector);
-        if (cosine[k][j] > thresh) {
-          matrix[k+1][j+1] = matrix[k][j] + 1;
-        } else {
-          if (matrix[k][j+1] > matrix[k+1][j]) {
-            matrix[k+1][j+1] = matrix[k][j+1];
+        /* take the dot product of the sentences to find the similarity */
+        values[j][k] = sv_inner(a->vector, b->vector);
+
+        /* if the sentence is above the threshold record it */
+        if(values[j][k] > threshold) {
+          if(j == 0 || k == 0) {
+            binary_values[j][k] == 1;
           } else {
-            matrix[k+1][j+1] = matrix[k+1][j];
+            binary_values[j][k] = binary_values[j-1][k-1] + 1;
           }
         }
-      }
-    }
 
-    for (k = 0; k < file_list.size; k++) {
-      vector[i][k] = 0;
-      for (j = 0; j < sentence_list->size; j++) {
-        if (matrix[k+1][j+1] > vector[i][k]) {
-          vector[i][k] = matrix[k+1][j+1];
-          match_percent[i][k] = cosine[k][j];
-          match_index[i][k] = j;
+        if(binary_values[j][k] > best) {
+          best = binary_values[j][k];
+          best_j = j;
+          best_k = k;
         }
       }
     }
 
-    for (k = 0; k < file_list.size; k++) {
-      if (vector[i][k] == m) {
-        vector[i][k] = 0;
-        match_percent[i][k] = 0.0;
-      } else if (k > 0 && vector[i][k-1] == 0) {
-        m = vector[i][k];
-        vector[i][k] = 1;
-      } else {
-        m = vector[i][k];
-        if (k > 0) {
-          vector[i][k] = vector[i][k-1] + 1;
-          match_percent[i][k] += match_percent[i][k-1];
-        }
-      }
+    double score = 0.0;
+    for(j = 0; j < binary_values[best_j][best_k]; j++) {
+      score += values[best_j - j][best_k - j];
     }
-
-    for (k = file_list.size - 2; k > -1; k--) {
-      if (vector[i][k] != 0 && vector[i][k+1] > vector[i][k]) {
-        vector[i][k] = vector[i][k+1];
-        match_percent[i][k] = match_percent[i][k+1];
-      }
-    }
-
-    for (k = 0; k < file_list.size; k++) {
-      if (vector[i][k] == 1) {
-        vector[i][k] = 0;
-        match_percent[i][k] = 0.0;
-      }
+    score /= binary_values[best_j][best_k];
+    if(score > best_score) {
+      best_score = score;
+      best_index = i;
     }
   }
 
-  for (i = 0; i < file_list.size; i++) {
-    score[i] = 0;
-    for (j = 0; j < database_list->size; j++) {
-      if (match_percent[j][i] > score[i]) {
-        score[i] = match_percent[j][i];
-        score_index[i] = j;
-      }
-    }
-  }
-
-  for (i = 1; i < file_list.size - 1; i++) {
-    if (i == 1) {
-      if (score[0] < score[1]) {
-        score[0] = 0;
-      }
-    }
-    if (i == file_list.size - 2) {
-      if (score[i+1] < score[i]) {
-        score[i+1] = 0;
-      }
-    }
-    if (score[i-1] == 0 && score[i] < score[i+1]) {
-      score[i] = 0;
-    } else if (score[i+1] == 0 && score[i] < score[i-1]) {
-      score[i] = 0;
-    }
-  }
-
-  for (i = 0; i < file_list.size; i++) {
-    if (score[i] == 0) {
-      score_index[i] = 0;
-    }
-  }
-
-  int prev_index = -1;
-  int start_byte = 0;
-  int end_byte = 0;
-  for (i = 0; i < file_list.size; i++) {
-    printf("score_index[i]: %d\n",score_index[i]);
-    if (score_index[i] != 0) {
-      st = (sentence *)cvector_at(&file_list,i);
-      if (prev_index == -1) {
-        start_byte = st->start;
-        end_byte = st->end;
-      } else if (prev_index != score_index[i]) {
-        printf("one: ");
-        printf("\t%d [%05d, %05d]\n", prev_index, start_byte, end_byte);
-        start_byte = st->start;
-        end_byte = st->end;
-      } else if (prev_index == score_index[i]) {
-        end_byte = st->end;
-      }
-      prev_index = score_index[i];
-    } else {
-      if (prev_index > -1) {
-        printf("two: ");
-        printf("\t%d [%05d, %05d]\n", prev_index, start_byte, end_byte);
-      }
-      prev_index = -1;
-      start_byte = 0;
-      end_byte = 0;
-    }
-  }
-  if (prev_index != -1) {
-    printf("three: ");
-    printf("\t%d [%05d, %05d]\n", prev_index, start_byte, end_byte);
-  }
+  printf("File: \"%s\" -> \"%s\"\n", filename, ((sentence*)cvector_at((cvector*)cvector_at(database_list, best_index), 0))->licensename);
 }
 
 int main(int argc, char **argv) {
   FILE *file;
   cvector database_list;
+  char **curr;
 
   MaxentModel m;
   m.load("maxent.dat");
@@ -291,7 +208,10 @@ int main(int argc, char **argv) {
   /* create and load the database from a file */
   cvector_init(&database_list, cvector_cvector_registry());
   load_database(file, &database_list);
-  classify_file(argv[1],&database_list,m);
+
+  for(curr = argv+1; curr-argv < argc; curr++) {
+    classify_file(*curr,&database_list,m);
+  }
 
   fclose(file);
   cvector_destroy(&database_list);

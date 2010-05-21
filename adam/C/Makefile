@@ -1,25 +1,25 @@
 #############################################################################
-# Copyright (C) 2009 Hewlett-Packard Development Company, L.P.				#
-# 																			#
-# This program is free software; you can redistribute it and/or				#
-# modify it under the terms of the GNU General Public License				#
-# version 2 as published by the Free Software Foundation.					#
-# 																			#
-# This program is distributed in the hope that it will be useful,			#
-# but WITHOUT ANY WARRANTY; without even the implied warranty of			#
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the				#
-# GNU General Public License for more details.								#
-# 																			#
-# You should have received a copy of the GNU General Public License along	#
-# with this program; if not, write to the Free Software Foundation, Inc.,	#
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.				#
+# Copyright (C) 2009 Hewlett-Packard Development Company, L.P.              #
+#                                                                           #
+# This program is free software; you can redistribute it and/or             #
+# modify it under the terms of the GNU General Public License               #
+# version 2 as published by the Free Software Foundation.                   #
+#                                                                           #
+# This program is distributed in the hope that it will be useful,           #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of            #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             #
+# GNU General Public License for more details.                              #
+#                                                                           #
+# You should have received a copy of the GNU General Public License along   #
+# with this program; if not, write to the Free Software Foundation, Inc.,   #
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.             #
 #############################################################################
 
 CC=gcc
 CFLAGS=-g -Iutils -Icvector -lpcre -lstemmer -O3 -I../sparsevect/
 CPP=g++
-CPPFLAGS=-g -Iutils -Icvector -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../sparsevect/ \
-			-L/home/norton/Downloads/maxent-20061005/src/opt/ -I/home/norton/Downloads/maxent-20061005/src/
+CPPFLAGS=-g -Iutils -Icvector -lpcre -lstemmer -lmaxent -O3 -Wno-deprecated -I../sparsevect/
+			
 utils= utils/re.c \
        utils/token.c \
        utils/token_feature.c \
@@ -66,7 +66,7 @@ maxent.txt:
 	find ../Training/Sentences/*.sent > maxent.txt
 
 training.txt:
-	find ../Licenses/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > training.txt
+	find ../../../fossology/agents/license_files/ -type f -not \( -regex ".*meta$$" \)  -not \( -wholename "*.svn*" \) > training.txt
 
 maxent.dat: train_sent_model maxent.txt
 	./train_sent_model -f maxent.txt -o maxent.dat
