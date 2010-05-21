@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define SENTENCE_THRESHOLD 0.4
 
-unsigned long create_context(cvector* feature_type_list, int left_window, int right_window, cvector_iterator iter, me_context_type& context) {
+unsigned long create_context(cvector* feature_type_list, int left_window, int right_window, cvector_iterator iter, MaxentModel::context_type& context) {
   int j, k;
   string hash_string;
   context.clear();
@@ -116,8 +116,8 @@ unsigned long create_context(cvector* feature_type_list, int left_window, int ri
 void create_model(MaxentModel& m, cvector* feature_type_list, cvector* label_list, int left_window, int right_window) {
   cvector_iterator features, labels;
   int i, j, k;
-  me_context_type context;
-  me_outcome_type outcome;
+  MaxentModel::context_type context;
+  MaxentModel::outcome_type outcome;
 
   sv_vector vect_E = sv_new(ULONG_MAX);
   sv_vector vect_I = sv_new(ULONG_MAX);
@@ -176,7 +176,7 @@ void label_sentences(MaxentModel& m, cvector* feature_type_list, cvector* label_
   cvector_iterator iter;
   char E[2] = "E";
   char I[2] = "I";
-  me_context_type context;
+  MaxentModel::context_type context;
 
   for(iter = cvector_begin(feature_type_list); iter != cvector_end(feature_type_list); iter++) {
     token_feature *tf = (token_feature *)*iter;

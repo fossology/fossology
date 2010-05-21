@@ -21,8 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* std library */
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
-#include <vector>
 #include <ctype.h>
 
 /* local includes */
@@ -34,17 +32,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* other libraries */
 #include <maxent/maxentmodel.hpp>
+using maxent::MaxentModel;
 #include <sparsevect.h>
 #include <cvector.h>
 
-using namespace maxent;
-using namespace std;
-
-
-typedef MaxentModel::context_type me_context_type;
-typedef MaxentModel::outcome_type me_outcome_type;
-
 /*!
+ * \brief creates a context that the maxent model will train on
+ *
+ * clears the context that is passed to it and fills the context with
  *
  *
  * \param feature_type_list:
@@ -53,7 +48,7 @@ typedef MaxentModel::outcome_type me_outcome_type;
  * \param iter:
  * \param context:
  */
-unsigned long create_context(cvector* feature_type_list, int l_window, int r_window, cvector_iterator iter, me_context_type& context);
+unsigned long create_context(cvector* feature_type_list, int l_window, int r_window, cvector_iterator iter, MaxentModel::context_type& context);
 
 /*!
  *

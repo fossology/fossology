@@ -46,8 +46,25 @@ void print_usage(char *name) {
   fprintf(stderr, "   -o path ::  Save sentence model at the specified path.\n");
 }
 
+void get_name(char* metadata, char* name) {
+  FILE* file;
+
+  file = fopen(metadata, "rb");
+  if(file == NULL) {
+    name[0] = '\0';
+    return;
+  }
+
+  if(fgets(name, FILENAME_MAX, file) == NULL) { name[0] = '\0'; return; }
+  if(fgets(name, FILENAME_MAX, file) == NULL) { name[0] = '\0'; return; }
+  if(fgets(name, FILENAME_MAX, file) == NULL) { name[0] = '\0'; return; }
+
+  strcpy(name, name + 11);
+  name[strlen(name)-1] = '\0';
+}
+
 int main(int argc, char **argv) {
-  char filename[FILENAME_MAX], to_tokenize[FILENAME_MAX], * licensename, * prev;
+  char filename[FILENAME_MAX], licensename[FILENAME_MAX], metafile[FILENAME_MAX], dummy[FILENAME_MAX];
   char *buffer;
   int i,j;
   cvector feature_type_list, label_list, sentence_list, database_list;
@@ -111,8 +128,7 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  i = 0;
-  while (fgets(filename, FILENAME_MAX, pFile) != NULL) {
+  for (i = 0; fgets(filename, FILENAME_MAX, pFile) != NULL; i++) {
     if(filename[strlen(filename) - 1] == '\n') {
       filename[strlen(filename) - 1] = '\0';
     }
@@ -125,10 +141,9 @@ int main(int argc, char **argv) {
     create_features_from_buffer(buffer,&feature_type_list);
     label_sentences(m,&feature_type_list,&label_list,left_window,right_window);
 
-    licensename = strtok(strcpy(to_tokenize, filename), "/");
-    while((prev = strtok(NULL, "/")) != NULL) {
-      licensename = prev;
-    }
+    strcpy(metafile, filename);
+    strcat(metafile, ".meta");
+    get_name(metafile, licensename);
 
     create_sentences(m, &sentence_list, buffer, &feature_type_list, &label_list, filename, licensename, i);
     cvector_push_back(&database_list, &sentence_list);
@@ -139,7 +154,6 @@ int main(int argc, char **argv) {
     cvector_destroy(&sentence_list);
 
     printf("done.\n");
-    i++;
   }
 
   FILE *file;
