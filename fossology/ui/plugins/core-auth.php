@@ -210,7 +210,7 @@ class core_auth extends FO_Plugin {
   CheckUser(): See if a username/password is valid.
   Returns string on match, or null on no-match.
   ******************************************/
-  function CheckUser($User, $Pass) {
+  function CheckUser($User, $Pass, $Referer) {
     global $DB;
     $V = "";
     if (empty($User)) {
@@ -276,7 +276,7 @@ class core_auth extends FO_Plugin {
       $Uri = $Redirect;
     }
     /* Redirect window */
-    $V.= "window.open('$Uri','_top');\n";
+    $V.= "window.open('$Referer','_top');\n";
     $V.= "</script>\n";
     return ($V);
   } // CheckUser()
@@ -296,8 +296,10 @@ class core_auth extends FO_Plugin {
         if (empty($_SESSION['User'])) {
           $User = GetParm("username", PARM_TEXT);
           $Pass = GetParm("password", PARM_TEXT);
+          $Referer = GetParm("HTTP_REFERER", PARM_TEXT);
+          if (empty($Referer)) $Referer = $_SERVER['HTTP_REFERER'];
           if (!empty($User)) {
-            $VP = $this->CheckUser($User, $Pass);
+            $VP = $this->CheckUser($User, $Pass, $Referer);
           } else {
             $VP = "";
           }
@@ -332,6 +334,7 @@ class core_auth extends FO_Plugin {
               $V.= "This login uses $Protocol, so passwords are tranmitted in plain text.  This is not a secure connection.<P />\n";
             }
             $V.= "<form method='post'>\n";
+            $V.= "<input type='hidden' name='HTTP_REFERER' value='$Referer'>";
             $V.= "<table border=0>";
             $V.= "<tr><td>Username:</td><td><input type='text' size=20 name='username' id='unamein'></td></tr>\n";
             $V.= "<tr><td>Password:</td><td><input type='password' size=20 name='password'></td></tr>\n";
