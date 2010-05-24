@@ -235,7 +235,14 @@ class ui_view extends FO_Plugin
 		}
 	$V .= "</td>\n";
 
-	$V .= "<td>" . $H['Name'] . "</td>\n";
+    /* strip out characters we don't want to see */
+    $S = strip_tags($H['Name']);
+    $S = str_replace(chr(0xc2),"",$S);  // comes from utf-8 copyright symbol
+	$S = str_replace("&Acirc;","",$S);  // comes from utf-8 copyright symbol
+	$S = str_replace("\r","",$S);
+	$S = str_replace("\n","",$S);
+	$S = str_replace("\t","&nbsp;&nbsp;",$S);
+	$V .= "<td>" . $S . "</td>\n";
 	$V .= "</tr>\n";
 	}
       }
