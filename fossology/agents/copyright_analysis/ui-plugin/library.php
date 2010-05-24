@@ -22,81 +22,11 @@
  ************************************************************/
 
 /*
- * Return all the copyrights for a single file or uploadtree
+ * Return files with a given copyright.
  * Inputs:
  *   $agent_pk
- *   $pfile_pk       (if empty, $uploadtree_pk must be given)
- *   $uploadtree_pk  (used only if $pfile_pk is empty)
- * Returns:
- *   sql result for content, rf_fk
- *   FATAl if neither pfile_pk or uploadtree_pk were given
- */
-function GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk)
-{
-  global $PG_CONN;
-
-  if (empty($agent_pk)) Fatal("Missing parameter: agent_pk", __FILE__, __LINE__);
-
-  // if $pfile_pk, then return the licenses for that one file
-  if ($pfile_pk)
-  {
-    $sql = "SELECT *
-              from copyright
-              where pfile_fk='$pfile_pk' and agent_fk=$agent_pk
-              order by content desc";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-  }
-  else if ($uploadtree_pk)
-  {
-    /* Find lft and rgt bounds for this $uploadtree_pk  */
-    $sql = "SELECT lft, rgt, upload_fk FROM uploadtree 
-                   WHERE uploadtree_pk = $uploadtree_pk";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $lft = $row["lft"];
-    $rgt = $row["rgt"];
-    $upload_pk = $row["upload_fk"];
-    pg_free_result($result);
-
-    /*  Get the counts for each license under this UploadtreePk*/
-    $sql = "SELECT DISTINCT ON (count(content),content, hash, type, pfile_fk) content, hash, type, pfile_fk count(content) as copyright_count
-              from copyright,
-                  (SELECT distinct(pfile_fk) as PF from uploadtree 
-                     where upload_fk=$upload_pk 
-                       and uploadtree.lft BETWEEN $lft and $rgt) as SS
-              where PF=pfile_fk and agent_fk=$Agent_pk 
-              group by content, hash, type, pfile_fk 
-              order by copyright_count desc";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-  }
-  else Fatal("Missing function inputs", __FILE__, __LINE__);
-  return $result;
-}
-
-// Same as GetFileCopyrights() but returns license list as a single string
-function GetFileCopyrights_string($agent_pk, $pfile_pk, $uploadtree_pk)
-{
-  $LicStr = "";
-  $LicenseResult = GetFileCopyrights($agent_pk, $pfile_pk, $uploadtree_pk);
-  while ($row = pg_fetch_assoc($LicenseResult))
-  {
-    $LicStr .= $row['content']. ", ";
-  }
-  pg_free_result($LicenseResult);
-  
-  // remove trailing ", "
-  //$LicStr[strlen($LicStr)-2] = ' ';
-  return $LicStr;
-}
-
-/*
- * Return files with a given license (shortname).
- * Inputs:
- *   $agent_pk
- *   $rf_shortname
+ *   $hash            content hash
+ *   $type            content type (statement, url, email)
  *   $uploadtree_pk   sets scope of request
  *   $PkgsOnly        if true, only list packages, default is false (all files are listed)
  *                    $PkgsOnly is not yet implemented.
@@ -125,15 +55,14 @@ function GetFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
   $upload_pk = $row["upload_fk"];
   pg_free_result($result);
 
-  $econtent = pg_escape_string($content);
-
-  $sql = "select uploadtree_pk, pfile_fk, ufile_name
+  $sql = "select distinct uploadtree_pk, pfile_fk, ufile_name
           from copyright,
               (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
                  where upload_fk=$upload_pk
                    and uploadtree.lft BETWEEN $lft and $rgt) as SS
           where PF=pfile_fk and agent_fk=$agent_pk
                 and hash='$hash' and type='$type'
+          group by uploadtree_pk, pfile_fk, ufile_name 
           $order limit $limit offset $offset";
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -143,17 +72,18 @@ function GetFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
 }
 
 /*
- * Count files with a given license (shortname).
+ * Count files (pfiles) with a given copyright string.
  * Inputs:
  *   $agent_pk
- *   $rf_shortname
+ *   $hash            content hash
+ *   $type            content type (statement, url, email)
  *   $uploadtree_pk   sets scope of request
  *   $PkgsOnly        if true, only list packages, default is false (all files are listed)
  *                    $PkgsOnly is not yet implemented.  Default is false.
  *   $CheckOnly       if true, sets LIMIT 1 to check if uploadtree_pk has 
- *                    any of the given license.  Default is false.
+ *                    any of the given copyrights.  Default is false.
  * Returns:
- *   number of files with this shortname.
+ *   Number of unique pfiles with $hash
  */
 function CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk, 
                              $PkgsOnly=false, $CheckOnly=false)
@@ -171,61 +101,22 @@ function CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
   $upload_pk = $row["upload_fk"];
   pg_free_result($result);
 
-  $econtent = pg_escape_string($content);
   $chkonly = ($CheckOnly) ? " LIMIT 1" : "";
 
-  $sql = "SELECT count(DISTINCT pfile_fk) from copyright,
-            (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from uploadtree 
+  $sql = "SELECT count(DISTINCT pfile_fk) as unique from copyright,
+            (SELECT pfile_fk as PF from uploadtree 
                 where upload_fk=$upload_pk and uploadtree.lft BETWEEN $lft and $rgt) as SS
-            where PF=pfile_fk and agent_fk=$agent_pk and hash='$hash' and type='$type' $chkonly";
+            where PF=pfile_fk and agent_fk=$agent_pk and hash='$hash' and type='$type' 
+            $chkonly";
 
   $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   
-  $LicCount = pg_fetch_result($result, 0, 0);
+  $row = pg_fetch_assoc($result);
+  $FileCount = $row['unique'];
   pg_free_result($result);
-  return $LicCount;
+  return $FileCount;
 }
 
-
-/*
- * Return which uploadtree_pk's in the top level of $uploadtree_pk
- * have license $rf_shortname.
- *
- * Inputs:
- *   $agent_pk
- *   $rf_shortname
- *   $uploadtree_pk   sets scope of request
- *   $PkgsOnly        if true, only list packages, default is false (all files are listed)
- *                    $PkgsOnly is not yet implemented.
- * Returns:
- *   Array of uploadtree_pk ==> ufile_name
- */
-function Level1WithCopyright($agent_pk, $hash, $type, $uploadtree_pk, $PkgsOnly=false)
-{
-  global $PG_CONN;
-  $pkarray = array();
-
-  $sql = "select uploadtree_pk, ufile_name from uploadtree where parent=$uploadtree_pk";
-  $TopUTpks = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
-  DBCheckResult($TopUTpks, $sql, __FILE__, __LINE__);
-  
-  /* Loop throught each top level uploadtree_pk */
-  $offset = 0;
-  $limit = 1;
-  $order = "";
-  while ($row = pg_fetch_assoc($TopUTpks))
-  {
-//$uTime2 = microtime(true);
-    $result = GetFilesWithCopyright($agent_pk, $hash, $type, $row['uploadtree_pk'], 
-                             $PkgsOnly, $offset, $limit, $order);
-//$Time = microtime(true) - $uTime2;
-//printf( "GetFilesWithLicense($row[ufile_name]) time: %.2f seconds<br>", $Time);
-
-    if (pg_num_rows($result) > 0) $pkarray[$row['uploadtree_pk']] = $row['ufile_name'];
-    pg_free_result($result);
-  }
-  return $pkarray;
-}
 
 ?>
