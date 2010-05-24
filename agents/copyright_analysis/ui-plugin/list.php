@@ -118,9 +118,9 @@ class copyright_list extends FO_Plugin
     $order = " order by ufile_name asc";
     $filesresult = GetFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
                                 $PkgsOnly, $Offset, $Max, $order);
-    $NumFiles = pg_num_rows($filesresult);
+    $Count = pg_num_rows($filesresult);
 
-    $V.= "$NumFiles files found ($Unique unique) with ";
+    $V.= "$Count files found ($Unique unique) with ";
     switch ($type) {
         case "statement":
             $V .= "copyright";
