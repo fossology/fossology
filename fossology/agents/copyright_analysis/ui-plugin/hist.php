@@ -165,7 +165,17 @@ class copyright_hist extends FO_Plugin
             $VCopyright .= Traceback_uri();
             $VCopyright .= "?mod=copyrightlist&agent=$Agent_pk&item=$Uploadtree_pk&hash=" . $row['hash'] . "&type=" . $row['type'] . "'>Show</a></td>";
             $VCopyright .= "<td align='left'>";
-            $VCopyright .= htmlentities($row['content']);
+
+            /* strip out characters we don't want to see 
+               This is a hack until the agent stops writing these chars to the db.
+             */
+            $S = strip_tags($row['content']);
+            $S = str_replace(chr(0xc2),"",$S);  // comes from utf-8 copyright symbol
+            $S = str_replace("&Acirc;","",$S);  // comes from utf-8 copyright symbol
+            $S = str_replace("\r","",$S);
+            $S = str_replace("\n","",$S);
+            $VCopyright .= str_replace("\t","&nbsp;&nbsp;",$S);
+
             $VCopyright .= "</td>";
             $VCopyright .= "</tr>\n";
         } else if ($row['type'] == 'email') {
