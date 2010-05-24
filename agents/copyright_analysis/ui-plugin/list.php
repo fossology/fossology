@@ -101,43 +101,39 @@ class copyright_list extends FO_Plugin
       // micro menus
       $V .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
-    $sql = "SELECT DISTINCT ON (count(content),content, hash, type, pfile_fk) content, hash, type, count(content) as copyright_count
-              from copyright WHERE hash='$hash' AND type='$type' AND agent_fk='$agent_pk' 
-              group by content, hash, type, pfile_fk 
-              order by copyright_count desc";
+    $sql = "SELECT content from copyright WHERE hash='$hash' AND type='$type' limit 1";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if ($row = pg_fetch_assoc($result)) {
-        $copyright_name = $row['content'];
+        $content = strip_tags($row['content']);
     } else {
-        $copyright_name = "";
+        $content = "";
     }
-
-    /* Get License Name */
-    switch ($type) {
-        case "statement":
-            $V .= "The following files contain the copyright '<b>";
-        case "email":
-            $V .= "The following files contain the email '<b>";
-        case "url":
-            $V .= "The following files contain the url '<b>";
-    }
-	$V .= $copyright_name;
-	$V .= "</b>'.\n";
 
 	/* Load licenses */
 	$Offset = ($Page < 0) ? 0 : $Page*$Max;
     $order = "";
     $PkgsOnly = false;
-    $Count = CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk, $PkgsOnly);
-    $V.= "<br>$Count files found ";
-    if ($Count < (1.25 * $Max)) $Max = $Count;
-    $limit = ($Page < 0) ? "ALL":$Max;
+    $Unique = CountFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk, $PkgsOnly);
     $order = " order by ufile_name asc";
     $filesresult = GetFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
-                                $PkgsOnly, $Offset, $limit, $order);
+                                $PkgsOnly, $Offset, $Max, $order);
     $NumFiles = pg_num_rows($filesresult);
-//    $V .= "($NumFiles shown)";
+
+    $V.= "$NumFiles files found ($Unique unique) with ";
+    switch ($type) {
+        case "statement":
+            $V .= "copyright";
+            break;
+        case "email":
+            $V .= "email";
+            break;
+        case "url":
+            $V .= "url";
+            break;
+    }
+    $V .= ": <b>$content</b>";
+
     if (!empty($Excl)) $V .= "<br>Display excludes files with these extensions: $Excl";
 
 	/* Get the page menu */
