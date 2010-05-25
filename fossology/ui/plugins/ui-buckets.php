@@ -254,7 +254,7 @@ class ui_buckets extends FO_Plugin
     /* Get agent list */
     $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
 
-/* FUTURE advanced interface for selecting agents
+/* FUTURE advanced interface for selecting agents, don't display unless there are >1 choice
     $AgentSelect = AgentSelect($Agent_name, $upload_pk, "bucket_file", true, "agent_pk", $bucketagent_pk);
     $VLic .= $AgentSelect;
     $VLic .= "<input type='submit' value='Go'>";
@@ -301,16 +301,20 @@ class ui_buckets extends FO_Plugin
     $Children = GetNonArtifactChildren($Uploadtree_pk);
     $ChildCount=0;
     $Childbucketcount=0;
-    $ChildDirCount=0; /* total number of directory or containers */
-    foreach($Children as $C)
-    {
-      if (Iscontainer($C['ufile_mode'])) { $ChildDirCount++; }
-    }
+    $NumSrcPackages = 0;
+    $NumBinPackages = 0;
+    $NumBinNoSrcPackages = 0;
+
+    /* get mimetypes for packages */
+    $MimetypeArray = GetPkgMimetypes(); 
 
     $VF .= "<table border=0>";
     foreach($Children as $C)
     {
       if (empty($C)) { continue; }
+
+      /* update package counts */
+      IncrSrcBinCounts($C, $MimetypeArray, $NumSrcPackages, $NumBinPackages, $NumBinNoSrcPackages);
 
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
@@ -439,6 +443,13 @@ class ui_buckets extends FO_Plugin
       </script>
     ";
     $V .= $script;
+
+    /* Display source, binary, and binary missing source package counts */
+    $VLic .= "<ul>";
+    $VLic .= "<li> $NumSrcPackages source packages";
+    $VLic .= "<li> $NumBinPackages binary packages";
+    $VLic .= "<li> $NumBinNoSrcPackages binary packages with no source package";
+    $VLic .= "</ul>";
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
