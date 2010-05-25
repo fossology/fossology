@@ -88,6 +88,7 @@ if [ $BUILDTIME ]; then
             etch|dapper) apt-get install postgresql-server-dev-8.1;;
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
             sid) apt-get install postgresql-server-dev-8.3;;
+            lucid) apt-get install postgresql-server-dev-8.4;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO release"; exit 1;;
          esac
          ;;
@@ -141,6 +142,9 @@ if [ $RUNTIME ]; then
                apt-get install libextractor-plugins;;
             sid)
                [ $AGENT ] || apt-get install postgresql-8.3
+               apt-get install libextractor-plugins;;
+            lucid)
+               [ $AGENT ] || apt-get install postgresql-8.4
                apt-get install libextractor-plugins;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO release"; exit 1;;
          esac
