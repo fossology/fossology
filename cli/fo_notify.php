@@ -20,8 +20,8 @@
 /**
  *  fo-notify
  *
- * \brief Report the status of a fossology job.  
- * 
+ * \brief Report the status of a fossology job.
+ *
  * Either email analysis results to the
  * user or report the job status on the command line.
  *
@@ -61,10 +61,10 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
  */
 
 function printMsg($Message) {
-  if (empty($Message)) {
-    return;
-  }
-  print wordwrap($Message,72) . "\n";
+	if (empty($Message)) {
+		return;
+	}
+	print wordwrap($Message,72) . "\n";
 }
 
 /* Load command-line options */
@@ -77,47 +77,47 @@ $JobStatus = "";
 /* Process some of the parameters */
 $options = getopt("he:n:j:u:");
 if (empty($options)) {
-  print $Usage;
-  exit(1);
+	print $Usage;
+	exit(1);
 }
 
 if (array_key_exists("h",$options)) {
-  print $Usage;
-  exit(0);
+	print $Usage;
+	exit(0);
 }
 
 /* no -e implies interactive, just print to stdout */
 $Interactive = FALSE;
 /* Default TO: is the users email */
 if (array_key_exists("e",$options)) {
-  $ToEmail = trim($options['e']);
-  if (empty($ToEmail)) {
-    print $Usage;
-    exit(1);
-  }
+	$ToEmail = trim($options['e']);
+	if (empty($ToEmail)) {
+		print $Usage;
+		exit(1);
+	}
 }
 else {
-  $Interactive = TRUE;
+	$Interactive = TRUE;
 }
 
 /* Optional Salutation */
 if (array_key_exists("n",$options)) {
-  $UserName = $options['n'];
-  if (empty($UserName)) {
-    print $Usage;
-    exit(1);
-  }
+	$UserName = $options['n'];
+	if (empty($UserName)) {
+		print $Usage;
+		exit(1);
+	}
 }
 
 if (array_key_exists("u",$options)) {
-  $upload_id = $options['u'];
-  if (empty($upload_id)) {
-    print $Usage;
-    exit(1);
-  }
+	$upload_id = $options['u'];
+	if (empty($upload_id)) {
+		print $Usage;
+		exit(1);
+	}
 }
 if (empty($UserName)){
-  $UserName = $ToEmail;
+	$UserName = $ToEmail;
 }
 /* gather the data from the db:
  * - User name
@@ -125,18 +125,18 @@ if (empty($UserName)){
  * - job status
  */
 if(empty($UserName)) {
-  /* no User name passed in, get the user name for this upload */
-  $Sql = "select job_submitter, user_pk, user_name from job, users " .
+	/* no User name passed in, get the user name for this upload */
+	$Sql = "select job_submitter, user_pk, user_name from job, users " .
            "where job_upload_fk = $upload_id and user_pk = job_submitter limit 1;";
-  $Results = $DB->Action($Sql);
-  if (!empty($Results[0]['user_name'])) {
-    $UserName = $Results[0]['user_name'];
-  }
+	$Results = $DB->Action($Sql);
+	if (!empty($Results[0]['user_name'])) {
+		$UserName = $Results[0]['user_name'];
+	}
 }
 /********** Set Message Preamble ******************************************/
 /* if still no UserName, then use email address as the name */
 if (empty($UserName)){
-  $UserName = $ToEmail;
+	$UserName = $ToEmail;
 }
 $Preamble = "Dear $UserName,\n" .
             "Do not reply to this message.  " .
@@ -144,60 +144,47 @@ $Preamble = "Dear $UserName,\n" .
 
 /* Optional Job Name */
 if (array_key_exists("j",$options)) {
-  $JobName = $option['j'];
+	$JobName = $option['j'];
 }
 /* No job name supplied, go get it*/
 if(empty($JobName)) {
-  /* Get Upload Filename, use that as the 'job' name which is what the jobs display
-   * screen does. */
-  $Sql = "SELECT upload_filename FROM upload WHERE upload_pk = $upload_id;";
-  $Results = $DB->Action($Sql);
-  $Row = $Results[0];
-  if (!empty($Results[0]['upload_filename'])) {
-    $JobName = $Row['upload_filename'];
-  }
-  else {
-    print "ERROR: $upload_id is not a valid upload Id. See fossjobs(1)\n";
-    exit(1);
-  }
+	/* Get Upload Filename, use that as the 'job' name which is what the jobs display
+	 * screen does. */
+	$Sql = "SELECT upload_filename FROM upload WHERE upload_pk = $upload_id;";
+	$Results = $DB->Action($Sql);
+	$Row = $Results[0];
+	if (!empty($Results[0]['upload_filename'])) {
+		$JobName = $Row['upload_filename'];
+	}
+	else {
+		print "ERROR: $upload_id is not a valid upload Id. See fossjobs(1)\n";
+		exit(1);
+	}
 }
 /********************** get job status **************************************/
 $summary = JobListSummary($upload_id);
 //print "  DEBUG: summary for upload $upload_id is:\n"; print_r($summary) . "\n";
 
 /* Construct the URL for the message */
-/*
- * check both locations for Db.conf, check package 1st, then upstream
- * if local host, need to get hostname.
- */
-global $SYSCONFDIR;
 
-if(file_exists("$SYSCONFDIR/Db.conf")) {
-  $contents = file_get_contents("$SYSCONFDIR/Db.conf");
-}
-// get rid of new lines
-$c = str_replace("\n",'',$contents);
-$hostLine = explode(';',$c);
-list($hostWord,$host) = split('=',$hostLine[1]);
-if($host == 'localhost') {
-  $hostname = exec('hostname --fqdn', $toss);
-}
+$hostname = exec('hostname --fqdn', $toss);
+
 //print "hostname is:$hostname\n";
 $JobHistoryUrl = "http://$hostname/repo/?mod=showjobs&history=1&upload=$upload_id";
 
 /* Job aborted */
 if ($summary['total'] == 0 &&
-    $summary['completed'] == 0 &&
-    $summary['active'] == 0 &&
-    $summary['failed'] == 0 ) {
-  $JobStatus = "was killed";
-  $MessagePart = "No results, your job $JobName $JobStatus";
-  $Message = $Preamble . $MessagePart;
-  if ($Interactive) {
-    $MessagePart .= " For more details, see: $JobHistoryUrl\n";
-    printMsg($MessagePart);
-    exit(0);
-  }
+		$summary['completed'] == 0 &&
+		$summary['active'] == 0 &&
+		$summary['failed'] == 0 ) {
+	$JobStatus = "was killed";
+	$MessagePart = "No results, your job $JobName $JobStatus";
+	$Message = $Preamble . $MessagePart;
+	if ($Interactive) {
+		$MessagePart .= " For more details, see: $JobHistoryUrl\n";
+		printMsg($MessagePart);
+		exit(0);
+	}
 }
 
 /*
@@ -209,74 +196,74 @@ if ($summary['total'] == 0 &&
 $Done = FALSE;
 /* running as cli */
 if ($summary['total'] == $summary['completed']) {
-  if ($summary['failed'] == 0) {
-    $Done = TRUE;
-  }
+	if ($summary['failed'] == 0) {
+		$Done = TRUE;
+	}
 }
 /* As agent */
 elseif ($summary['total'] == $summary['completed']+1) {
-  if ($summary['failed'] == 0) {
-    $Done = TRUE;
-  }
+	if ($summary['failed'] == 0) {
+		$Done = TRUE;
+	}
 }
 
 if ($Done) {
-  $JobStatus = "completed with no errors";
-  $MessagePart = "Your requested FOSSology results are ready. " .
+	$JobStatus = "completed with no errors";
+	$MessagePart = "Your requested FOSSology results are ready. " .
                  "Your job $JobName has $JobStatus.";
-  $Message = $Preamble . $MessagePart;
-  if ($Interactive) {
-    $MessagePart .= " For more details, see: $JobHistoryUrl\n";
-    printMsg($MessagePart);
-  }
+	$Message = $Preamble . $MessagePart;
+	if ($Interactive) {
+		$MessagePart .= " For more details, see: $JobHistoryUrl\n";
+		printMsg($MessagePart);
+	}
 }
 /*
  * Job Failed: the order of checks is important, you can still have pending jobs
  * when a job fails, so check for failed first before pending or active.
  */
 elseif ($summary['failed'] > 0) {
-  $JobStatus = "Failed";
-  $MessagePart = "Your requested FOSSology results are  not ready. " .
+	$JobStatus = "Failed";
+	$MessagePart = "Your requested FOSSology results are  not ready. " .
                  "Your job $JobName $JobStatus.";
-  $Message = $Preamble . $MessagePart;
-  if ($Interactive) {
-    $MessagePart .= "For more details, see: $JobHistoryUrl\n";
-    printMsg($MessagePart);
-  }
+	$Message = $Preamble . $MessagePart;
+	if ($Interactive) {
+		$MessagePart .= "For more details, see: $JobHistoryUrl\n";
+		printMsg($MessagePart);
+	}
 }
 /* Job is still active */
 elseif ($summary['pending'] > 0 || $summary['active'] > 0) {
-  $JobStatus = "is still active.";
-  $MessagePart = "Your requested FOSSology results are  not ready. " .
+	$JobStatus = "is still active.";
+	$MessagePart = "Your requested FOSSology results are  not ready. " .
                  "Your job $JobName $JobStatus";
-  $Message = $Preamble . $MessagePart;
-  if ($Interactive) {
-    $MessagePart .= "For more details, see: $JobHistoryUrl\n";
-    printMsg($MessagePart);
-  }
+	$Message = $Preamble . $MessagePart;
+	if ($Interactive) {
+		$MessagePart .= "For more details, see: $JobHistoryUrl\n";
+		printMsg($MessagePart);
+	}
 }
 
 /* called as agent, or -e passed in, send mail. */
 if (!$Interactive) {
-  /* use php mail to queue it up */
-  //print "  NOT: sending email to:$ToEmail with message:\n$Message\n";
-  $Sender = "The FOSSology Application";
-  $From = "root@localhost";
-  $Recipient = $ToEmail;
-  $Mail_body = wordwrap($Message,75);
-  $JobHistoryUrl = "\n\nFor more details, see:\n<a href='$JobHistoryUrl'>upload #$upload_id</a>\n";
-  $Mail_body .= $JobHistoryUrl;
-  $Subject = "FOSSology Results: $JobName $JobStatus";
-  $Header = "From: " . $Sender . " <" . $From . ">\r\n";
-  if($rtn = mail($Recipient, $Subject, $Mail_body, $Header)){
-    print "Mail has been queued by fo-notify\n";
-    exit(0);
-  }
-  else {
-    print "   WARNING Mail was NOT queued by fo-notify\n";
-    print "   WARNING sendmail(1) must be installed and configured for this feature to work\n";
-    exit(0);
-  }
+	/* use php mail to queue it up */
+	//print "  NOT: sending email to:$ToEmail with message:\n$Message\n";
+	$Sender = "The FOSSology Application";
+	$From = "root@localhost";
+	$Recipient = $ToEmail;
+	$Mail_body = wordwrap($Message,75);
+	$JobHistoryUrl = "\n\nFor more details, see:\n$JobHistoryUrl\n";
+	$Mail_body .= $JobHistoryUrl;
+	$Subject = "FOSSology Results: $JobName $JobStatus";
+	$Header = "From: " . $Sender . " <" . $From . ">\r\n";
+	if($rtn = mail($Recipient, $Subject, $Mail_body, $Header)){
+		print "Mail has been queued by fo-notify\n";
+		exit(0);
+	}
+	else {
+		print "   WARNING Mail was NOT queued by fo-notify\n";
+		print "   WARNING sendmail(1) must be installed and configured for this feature to work\n";
+		exit(0);
+	}
 }
 exit(0);
 ?>
