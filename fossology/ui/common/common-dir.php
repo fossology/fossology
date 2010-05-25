@@ -427,7 +427,7 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
  *
  * @param int  $uploadtree_pk
  *
- * @return 0 on error or no children, list of child uploadtree recs + pfile_size  on success.
+ * @return 0 on error or no children, list of child uploadtree recs + pfile_size + pfile_mimetypefk on success.
  * Child list is sorted by ufile_name.
  */
 function GetNonArtifactChildren($uploadtree_pk)
@@ -437,7 +437,7 @@ function GetNonArtifactChildren($uploadtree_pk)
 $foundChildren = array();
 
   /* Find all the children */
-  $sql = "select uploadtree.*, pfile_size from uploadtree 
+  $sql = "select uploadtree.*, pfile_size, pfile_mimetypefk from uploadtree 
           left outer join pfile on (pfile_pk=pfile_fk)
           where parent=$uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
