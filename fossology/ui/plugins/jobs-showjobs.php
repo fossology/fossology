@@ -224,7 +224,7 @@ class jobs_showjobs extends FO_Plugin
   function Show	($History,$UploadPk=-1,$Detail=0)
     {
     global $Plugins;
-    global $DB;
+    global $DB, $PG_CONN;
     $V = '';
 
     if ($History == 1) { $Where = ""; }
@@ -369,7 +369,20 @@ class jobs_showjobs extends FO_Plugin
 	$Style = "style='background:#202020; color:white;}'";
 	$Style1 = "style='font:normal 8pt verdana, arial, helvetica; background:#202020; color:white;'";
 	$V .= "<tr><th colspan=3 $Style>";
-	$V .= "<a title='Click to browse this upload' $Style href='" . Traceback_uri() . "?mod=browse&upload=" . $Row['upload_pk'] . "'>";
+
+    /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
+    $sql = "select uploadtree_pk from uploadtree 
+                where parent is NULL and upload_fk=$Upload ";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if ( pg_num_rows($result))
+    {
+      $row = pg_fetch_assoc($result);
+      $Item = $row['uploadtree_pk'];
+    }
+    pg_free_result($result);
+
+	$V .= "<a title='Click to browse this upload' $Style href='" . Traceback_uri() . "?mod=browse&upload=" . $Row['upload_pk'] . "&item=" . $Item . "'>";
 	$V .= $JobName;
 	$V .= "</a>";
 	$V .= "</th>";
