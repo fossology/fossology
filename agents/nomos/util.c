@@ -145,7 +145,7 @@ int isINODE(char *ipath, int typ)
 	}
 	perror(ipath);
 	mySystem("ls -l '%s'", ipath);
-	Bail(1);
+	Bail(10);
     }
     if (typ == 0) {
 	return(1);
@@ -372,7 +372,7 @@ void changeDir(char *pathname)
     }
     if (getcwd(cur.cwd, sizeof(cur.cwd)) == NULL_STR) {
 	perror("getcwd(changeDir)");
-	Bail(1);
+	Bail(11);
     }
     cur.cwdLen = (int) strlen(cur.cwd);
 #ifdef	CHDIR_DEBUG
@@ -1109,9 +1109,9 @@ char *mmapFile(char *pathname)	/* read-only for now */
     }
 
     if (i == MM_CACHESIZE) {
-	fprintf(stderr, "mmap-cache too small [%d]!\n", MM_CACHESIZE);
+	printf("mmap-cache too small [%d]!\n", MM_CACHESIZE);
 	mmapOpenListing();
-	Bail(1);
+	Bail(12);
     }
 
     if ((mmp->fd = open(pathname, O_RDONLY)) < 0) {
@@ -1129,13 +1129,13 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	Fatal("%s: open failure!", pathname);
     }
     if (fstat(mmp->fd, &cur.stbuf) < 0) {
-	fprintf(stderr, "fstat failure!\n");
+	printf("fstat failure!\n");
 	perror(pathname);
-	Bail(1);
+	Bail(13);
     }
     if (S_ISDIR(cur.stbuf.st_mode)) {
-	fprintf(stderr, "mmapFile(%s): is a directory\n", pathname);
-	Bail(1);
+	printf("mmapFile(%s): is a directory\n", pathname);
+	Bail(14);
     }
     (void) strcpy(mmp->label, pathname);
     if (cur.stbuf.st_size) {
@@ -1149,7 +1149,7 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	while (rem > 0) {
 	    if ((n = (int) read(mmp->fd, cp, (size_t) rem)) < 0) {
 		perror("read");
-		Bail(1);
+		Bail(15);
 	    }
 	    rem -= n;
 	    cp += n;
@@ -1219,7 +1219,7 @@ void munmapFile(void *ptr)
 #endif
 	    if (close(mmp->fd) < 0) {
 		perror("close");
-		Bail(1);
+		Bail(16);
 	    }
 #ifdef	PARANOID
 	    mmp->buf = (void *) NULL;
@@ -1703,7 +1703,7 @@ void Assert(int fatalFlag, const char *fmt, ...)
     (void) strcat(utilbuf, "\n");
     Msg("%s", utilbuf);
     if (fatalFlag) {
-	Bail(1);
+	Bail(17);
     }
     return;
 }
@@ -1740,7 +1740,7 @@ void Fatal(const char *fmt, ...) {
     (void) strcat(utilbuf, "\n");
     Msg("%s", utilbuf);
     freeAndClearScan(&cur);
-    Bail(1);
+    Bail(18);
 }
 
 void traceFunc(char *fmtStr, ...)
