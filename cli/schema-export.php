@@ -28,11 +28,12 @@
 global $GlobalReady;
 $GlobalReady = 1;
 
-//require_once (dirname(__FILE__)) . '/../share/fossology/php/pathinclude.php';
-require_once '/usr/local/share/fossology/php/pathinclude.php';
+require_once (dirname(__FILE__)) . '/../share/fossology/php/pathinclude.php';
+//require_once '/usr/local/share/fossology/php/pathinclude.php';
 
 global $LIBEXECDIR;
 require_once "$LIBEXECDIR/libschema.php";
+//require_once "libschema.php";
 
 global $PGCONN;
 global $Name;
@@ -103,7 +104,7 @@ function ExportSchema($Filename = NULL) {
 	fwrite($Fout, "  global \$GlobalReady;\n");
 	fwrite($Fout, "  if (!isset(\$GlobalReady)) { exit; }\n\n");
 	fwrite($Fout, "  global \$DATADIR;\n\n");
-	fwrite($Fout, "  print \"datadir is:\$DATADIR\\n\";\n\n");
+	//fwrite($Fout, "  print \"datadir is:\$DATADIR\\n\";\n\n");
 	fwrite($Fout, '  $Schema=array();' . "\n\n");
 	foreach($Schema as $K1 => $V1) {
 		$K1 = str_replace('"', '\"', $K1);

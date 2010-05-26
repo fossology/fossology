@@ -30,6 +30,7 @@
 function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 {
 	global $PGCONN;
+	
 	print "Applying database schema\n";
 	flush();
 	/**************************************/
@@ -54,7 +55,10 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 	pg_query($PGCONN, "SET statement_timeout = 0;"); /* turn off DB timeouts */
 	pg_query($PGCONN, "BEGIN;");
 	$Curr = GetSchema();
-	//print "SUPDB: Current Schema returned by GetSchema:\n"; print_r($Curr) . "\n";
+	//print "DBG: ApplySchema: Current Schema returned by GetSchema:\n"; print_r($Curr) . "\n";
+	//print "DBG: ApplySchema: Schema to compare with:\n"; print_r($Schema) . "\n";
+  //print "DBG: ApplySchema: ******* START *******\n";
+	
 	/* The gameplan: Make $Curr look like $Schema. */
 	// print "<pre>"; print_r($Schema); print "</pre>";
 
@@ -94,9 +98,12 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 			}
 		}
 		foreach($Columns as $Column => $Val) {
+			//print "DBG: foreach Colunm => Val\n";
+			//print "DBG: VAL is:\n"; print_r($Val) . "\n";
 			if ($Curr['TABLE'][$Table][$Column]['ADD'] != $Val['ADD']) {
 				$Rename = "";
 				if (ColExist($Table, $Column)) {
+					//print "DBG: column exists, renaming\n";
 					/* The column exists, but it looks different!
 					 Solution: Delete the column! */
 					$Rename = $Column . "_old";
@@ -105,6 +112,7 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 						print "$SQL\n";
 					}
 					else {
+						//print "DBG: column DOES NOT Exist, SQL is:\n$SQL\n";
 						$result = pg_query($PGCONN, $SQL);
 						checkresult($result, $SQL, __LINE__);
 					}
@@ -113,9 +121,23 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 					print $Val['ADD'] . "\n";
 				}
 				else {
+					// Add the new column, then set the default value with update
 					$SQL = $Val['ADD'];
+					//print "DBG: ['ADD'] == val[add] Adding column, SQL is:\n$SQL\n";
 					$result = pg_query($PGCONN, $SQL);
 					checkresult($result, $SQL, __LINE__);
+					
+						//print "DBG: ADD: updating $Table:$Column\n";
+						$SQL = $Val['UPDATE'];
+						//print "DBG: In ADD: UPDATE SQL is:\n$SQL\n";
+					
+					if(!empty($Val['UPDATE']))
+					{
+						//print "DBG: ADD: updating $Table:$Column\n";
+						$SQL = $Val['UPDATE'];
+						$result = pg_query($PGCONN, $SQL);
+						checkresult($result, $SQL, __LINE__);
+					}
 				}
 				if (!empty($Rename)) {
 					/* copy over the old data */
@@ -124,6 +146,7 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 						print "$SQL\n";
 					}
 					else {
+						//print "DBG: copying old data back to: $Table:$Column\n";
 						$result = pg_query($PGCONN, $SQL);
 						checkresult($result, $SQL, __LINE__);
 					}
@@ -132,19 +155,35 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 						print "$SQL\n";
 					}
 					else {
+						//print "DBG: Droping column, SQL is:\n$SQL\n";
 						$result = pg_query($PGCONN, $SQL);
 						checkresult($result, $SQL, __LINE__);
 					}
 				}
 			}
 			if ($Curr['TABLE'][$Table][$Column]['ALTER'] != $Val['ALTER']) {
+				//print "DBG: != VAL['ALTER'], VAL is:\n"; print_r($Val) . "\n";
 				if ($Debug) {
 					print $Val['ALTER'] . "\n";
 				}
 				else {
+					//print "DBG: In != Val['ALTER'] altering $Table:$Column\n";
 					$SQL = $Val['ALTER'];
+					//print "DBG: In != Val['ALTER'] SQL is:\n$SQL\n";
 					$result = pg_query($PGCONN, $SQL);
 					checkresult($result, $SQL, __LINE__);
+					
+					$SQL = $Val['UPDATE'];
+					//print "DBG: In != Val['ALTER'] UPDATE SQL is:\n$SQL\n";
+					
+					if(!empty($Val['UPDATE']))
+					{
+						//print "DBG: In != Val['ALTER':updating $Table:$Column\n";
+						$SQL = $Val['UPDATE'];
+						//print "DBG: In != Val['ALTER'] UPDATE SQL is:\n$SQL\n";
+						$result = pg_query($PGCONN, $SQL);
+						checkresult($result, $SQL, __LINE__);
+					}
 				}
 			}
 			if ($Curr['TABLE'][$Table][$Column]['DESC'] != $Val['DESC']) {
@@ -587,12 +626,10 @@ function dbConnect($Options="")
 	$path="$SYSCONFDIR/$PROJECT/Db.conf";
 	if (empty($Options))
 	{
-		//$PGCONN = pg_pconnect(str_replace(";", " ", file_get_contents($path)));
 		$PGCONN = pg_connect(str_replace(";", " ", file_get_contents($path)));
 	}
 	else
 	{
-		//$PGCONN = pg_pconnect(str_replace(";", " ", $Options));
 		$PGCONN = pg_connect(str_replace(";", " ", $Options));
 	}
 	if (!isset($PGCONN)) die ("connection to db failed\n");
@@ -606,8 +643,9 @@ function dbConnect($Options="")
 function GetSchema()
 {
 	global $PGCONN;
+	
 	$Schema = array();
-
+	
 	/***************************/
 	/* Get the tables */
 	/***************************/
@@ -660,6 +698,9 @@ function GetSchema()
 		$Schema['TABLE'][$Table][$Column]['ADD'] = "ALTER TABLE \"$Table\" ADD COLUMN \"$Column\" $Type;";
 		$Schema['TABLE'][$Table][$Column]['ALTER'] = "ALTER TABLE \"$Table\"";
 		$Alter = "ALTER COLUMN \"$Column\"";
+		// create the index UPDATE to get rid of php notice
+		$Schema['TABLE'][$Table][$Column]['UPDATE'] = "";
+		
 		// $Schema['TABLE'][$Table][$Column]['ALTER'] .= " $Alter TYPE $Type";
 		if ($R['notnull'] == 't') {
 			$Schema['TABLE'][$Table][$Column]['ALTER'].= " $Alter SET NOT NULL";
@@ -671,6 +712,7 @@ function GetSchema()
 			// $R['default'] = preg_replace("/::.*/","",$R['default']);
 			$R['default'] = preg_replace("/::bpchar/", "::char", $R['default']);
 			$Schema['TABLE'][$Table][$Column]['ALTER'].= ", $Alter SET DEFAULT " . $R['default'];
+			$Schema['TABLE'][$Table][$Column]['UPDATE'] .= "UPDATE $Table SET $Column=" . $R['default'];
 		}
 		$Schema['TABLE'][$Table][$Column]['ALTER'].= ";";
 	}
@@ -913,9 +955,13 @@ function GetSchema()
  *
  */
 function initAgents($Debug = 1) {
+	
+	global $AGENTDIR;
+	global $PGCONN;
+	
 	print "  Initializing agents.\n";
 	flush();
-	global $AGENTDIR;
+	
 	if (!is_dir($AGENTDIR)) {
 		die("FATAL: Directory '$AGENTDIR' does not exist.\n");
 	}
