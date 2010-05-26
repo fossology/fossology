@@ -99,6 +99,7 @@ if (!file_exists($Filename))
   }
   
 $PGCONN = dbConnect(NULL);
+$Debug=0;
 $FailFlag = ApplySchema($Filename,$Debug,$Verbose);
 
 /* Remove the "Need to initialize" flag */
