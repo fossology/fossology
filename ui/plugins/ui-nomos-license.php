@@ -271,7 +271,6 @@ FUTURE advanced interface allowing user to select dataset (agent version)
   
         /* Populate the output ($VF) - file list */
         /* id of each element is its uploadtree_pk */
-        $LicCount=0;
 
         $VF .= "<tr><td id='$C[uploadtree_pk]' align='left'>";
         $HasHref=0;
@@ -281,7 +280,7 @@ FUTURE advanced interface allowing user to select dataset (agent version)
           $VF .= "<a href='$LicUri'>"; $HasHref=1;
           $VF .= "<b>"; $HasBold=1;
         }
-        else if (!empty($LinkUri)) //  && ($LicCount > 0))
+        else if (!empty($LinkUri)) 
         {
           $VF .= "<a href='$LinkUri'>"; $HasHref=1;
         }
@@ -295,16 +294,11 @@ FUTURE advanced interface allowing user to select dataset (agent version)
         $VF .= "<span style='position:relative;left:1em'>";
         $VF .= GetFileLicenses_string($Agent_pk, $C['pfile_fk'], $C['uploadtree_pk']);
         $VF .= "</span>";
-        $VF .= "</td><td>";
-  
-        if ($LicCount)
-        {
-          $VF .= "[" . number_format($LicCount,0,"",",") . "&nbsp;";
-          $VF .= "license" . ($LicCount == 1 ? "" : "s");
-          $VF .= "</a>";
-          $VF .= "]";
-          $ChildLicCount += $LicCount;
-        }
+        $VF .= "</td><td valign='top'>";
+
+        /* display file links if this is really a file */
+        if (!empty($C['pfile_fk']))
+          $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $Agent_pk);
         $VF .= "</td>";
         $VF .= "</tr>\n";
   
