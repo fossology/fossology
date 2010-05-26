@@ -648,7 +648,7 @@ FUNCTION void Bail(int exitval) {
 #endif	/* MEMORY_TRACING && MEM_ACCT */
 
     if (!cur.cliMode) {
-        printf("   LOG: Nomos agent is exiting\n");
+        printf("   LOG: Nomos agent is exiting, exit %d\n", exitval);
         fflush(stdout);
     }
 
@@ -1166,7 +1166,7 @@ int main(int argc, char **argv) {
         }
     }
     lrcache_free(&cacheroot);  // for valgrind
-    Bail(0);
+    Bail(100);
 
     /* this will never execute but prevents a compiler warning about reaching 
      the end of a non-void function */
