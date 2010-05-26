@@ -125,6 +125,29 @@ int PKG_DEB = 0; /**< Non-zero when it's DEBINE package */
 int PKG_DEB_SRC = 0; /**< Non-zero when it's DEBINE source package */
 int Verbose = 0;
 
+
+/* ***********************************************
+ *  Trimming whitespace
+ * ***********************************************/
+char *trim(char *str)
+{
+  char *end;
+
+  // Trim leading space
+  while(isspace(*str)) str++;
+
+  if(*str == 0)  // All spaces
+  return str;
+
+  // Trim trailing space
+  end = str + strlen(str) - 1;
+  while(end > str && isspace(*end)) end--;
+
+  // Write new null terminator
+  *(end+1) = 0;
+  return str;
+}
+
 /**********************************************
  *  Escaping special characters(single quote)
  *  so that they cannot cause any harm
@@ -498,7 +521,7 @@ void	RecordMetadataRPM	(struct rpmpkginfo *pi)
   {
     memset(SQL,0,sizeof(SQL));
     DBaccess(DB,"BEGIN;");
-    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm (pkg_name,pkg_alias,pkg_arch,version,rpm_filename,license,pkg_group,packager,release,build_date,vendor,url,source_rpm,summary,description,pfile_fk) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%ld);",pi->pkgName,pi->pkgAlias,pi->pkgArch,pi->version,pi->rpmFilename,pi->license,pi->group,pi->packager,pi->release,pi->buildDate,pi->vendor,pi->url,pi->sourceRPM,pi->summary,pi->description,pi->pFileFk);
+    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm (pkg_name,pkg_alias,pkg_arch,version,rpm_filename,license,pkg_group,packager,release,build_date,vendor,url,source_rpm,summary,description,pfile_fk) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%ld);",trim(pi->pkgName),trim(pi->pkgAlias),trim(pi->pkgArch),trim(pi->version),trim(pi->rpmFilename),trim(pi->license),trim(pi->group),trim(pi->packager),trim(pi->release),pi->buildDate,trim(pi->vendor),trim(pi->url),trim(pi->sourceRPM),trim(pi->summary),trim(pi->description),pi->pFileFk);
     rc = DBaccess(DB,SQL);
     if (rc < 0)
     {
@@ -518,7 +541,7 @@ void	RecordMetadataRPM	(struct rpmpkginfo *pi)
     for (i=0;i<pi->req_size;i++)
     {
       memset(SQL,0,sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm_req (pkg_fk,req_value) values (%d,'%s');",pkg_pk,pi->requires[i]);
+      snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm_req (pkg_fk,req_value) values (%d,'%s');",pkg_pk,trim(pi->requires[i]));
       rc = DBaccess(DB,SQL);
       if (rc < 0)
       {
@@ -721,7 +744,7 @@ void    RecordMetadataDEB       (struct debpkginfo *pi)
   {
     memset(SQL,0,sizeof(SQL));
     DBaccess(DB,"BEGIN;");
-    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,summary,description,format,uploaders,standards_version,pfile_fk) values ('%s','%s','%s','%s',%d,'%s','%s','%s','%s','%s','%s','%s','%s','%s',%ld);",pi->pkgName,pi->pkgArch,pi->version,pi->maintainer,pi->installedSize,pi->section,pi->priority,pi->homepage,pi->source,pi->summary,pi->description,pi->format,pi->uploaders,pi->standardsVersion,pi->pFileFk);
+    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,summary,description,format,uploaders,standards_version,pfile_fk) values ('%s','%s','%s','%s',%d,'%s','%s','%s','%s','%s','%s','%s','%s','%s',%ld);",trim(pi->pkgName),trim(pi->pkgArch),trim(pi->version),trim(pi->maintainer),pi->installedSize,trim(pi->section),trim(pi->priority),trim(pi->homepage),trim(pi->source),trim(pi->summary),trim(pi->description),trim(pi->format),trim(pi->uploaders),trim(pi->standardsVersion),pi->pFileFk);
     rc = DBaccess(DB,SQL);
     if (rc < 0)
     {
@@ -741,7 +764,7 @@ void    RecordMetadataDEB       (struct debpkginfo *pi)
     for (i=0;i<pi->dep_size;i++)
     {
       memset(SQL,0,sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb_req (pkg_fk,req_value) values (%d,'%s');",pkg_pk,pi->depends[i]);
+      snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb_req (pkg_fk,req_value) values (%d,'%s');",pkg_pk,trim(pi->depends[i]));
       if (Verbose) { printf("DEPENDS:%s\n",pi->depends[i]);}
       rc = DBaccess(DB,SQL);
       if (rc < 0)
