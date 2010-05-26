@@ -343,8 +343,6 @@ class ui_buckets extends FO_Plugin
 
       /* Populate the output ($VF) - file list */
       /* id of each element is its uploadtree_pk */
-      $bucketcount=0;
-
       $VF .= "<tr><td id='$C[uploadtree_pk]' align='left'>";
       $HasHref=0;
       $HasBold=0;
@@ -353,7 +351,7 @@ class ui_buckets extends FO_Plugin
         $VF .= "<a href='$LicUri'>"; $HasHref=1;
         $VF .= "<b>"; $HasBold=1;
       }
-      else if (!empty($LinkUri)) //  && ($bucketcount > 0))
+      else if (!empty($LinkUri)) 
       {
         $VF .= "<a href='$LinkUri'>"; $HasHref=1;
       }
@@ -362,22 +360,16 @@ class ui_buckets extends FO_Plugin
       if ($HasBold) { $VF .= "</b>"; }
       if ($HasHref) { $VF .= "</a>"; }
 
-      /* print licenses */
+      /* print buckets */
       $VF .= "<br>";
       $VF .= "<span style='position:relative;left:1em'>";
-//      $VF .= GetFileLicenses_string($nomosagent_pk, $pfile_pk, $uploadtree_pk);
       $VF .= GetFileLicenses_string($nomosagent_pk, $C['pfile_fk'], $C['uploadtree_pk']);
       $VF .= "</span>";
-      $VF .= "</td><td>";
+      $VF .= "</td><td valign='top'>";
 
-      if ($bucketcount)
-      {
-        $VF .= "[" . number_format($bucketcount,0,"",",") . "&nbsp;";
-        $VF .= "bucket" . ($bucketcount == 1 ? "" : "s");
-        $VF .= "</a>";
-        $VF .= "]";
-        $Childbucketcount += $bucketcount;
-      }
+      /* display file links if this is really a file */
+      if (!empty($C['pfile_fk']))
+        $VF .= FileListLinks($C['upload_fk'], $C['uploadtree_pk'], $nomosagent_pk);
       $VF .= "</td>";
       $VF .= "</tr>\n";
 
@@ -466,7 +458,8 @@ class ui_buckets extends FO_Plugin
   function Output()
   {
     /* Validate that we are in an active session. */
-    if (!array_key_exists('UserId', $_SESSION))
+    if ((!array_key_exists('UserId', $_SESSION))
+         or (empty($_SESSION['UserId'])))
     {
       echo "<h2>Sorry your session timed out.</h2>";
       echo "<b>Please log in again.</b>";

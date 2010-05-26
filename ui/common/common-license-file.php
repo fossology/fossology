@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2010 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -235,6 +235,26 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
   }
   pg_free_result($result);
   return $pkarray;
+}
+ 
+
+/*
+ * Return [View][Info][Download] links
+ * Inputs:
+ *   $upload_fk
+ *   $uploadtree_pk
+ *   $napk    nomos agent pk
+ * Returns:
+ *   String containing the links above.
+ */
+function FileListLinks($upload_fk, $uploadtree_pk, $napk)
+{
+  $out = "";
+  $out .= "[<a href='" . Traceback_uri() . "?mod=view-license&upload=$upload_fk&item=$uploadtree_pk&napk=$napk' >View</a>]";
+  $out .= "[<a href='" . Traceback_uri() . "?mod=view_info&upload=$upload_fk&item=$uploadtree_pk&show=detail' >Info</a>]";
+  $out .= "[<a href='" . Traceback_uri() . "?mod=download&upload=$upload_fk&item=$uploadtree_pk' >Download</a>]";
+
+  return $out;
 }
 
 ?>
