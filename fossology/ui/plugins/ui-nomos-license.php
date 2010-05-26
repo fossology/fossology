@@ -145,7 +145,8 @@ class ui_nomos_license extends FO_Plugin
     $sql = "SELECT count(*) as count FROM uploadtree 
               WHERE upload_fk = $upload_pk 
                     and uploadtree.lft BETWEEN $lft and $rgt
-                    and ((ufile_mode & (1<<28))=0) and pfile_fk!=0";
+                    and ((ufile_mode & (1<<28))=0) 
+                    and ((ufile_mode & (1<<29))=0) and pfile_fk!=0";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
