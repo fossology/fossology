@@ -154,7 +154,12 @@ class ui_view_license extends FO_Plugin
    ***********************************************************/
   function Output()
     {
+    global $DB, $PG_CONN;
+
     if ($this->State != PLUGIN_STATE_READY) { return; }
+
+    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+
     $V="";
     global $Plugins;
     global $DB;
