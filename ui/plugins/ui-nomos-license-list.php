@@ -168,7 +168,8 @@ class ui_license_list extends FO_Plugin {
 
   function Output() 
   {
-    global $PG_CONN;
+    global $PG_CONN, $DB;
+    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
 
     if ($this->State != PLUGIN_STATE_READY)  return (0);
     $V = "";
