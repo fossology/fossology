@@ -761,14 +761,32 @@ int	FindCmd	(char *Filename)
 
   /* Set .dsc file magic as application/x-debian-source */
   char *pExt;
+  FILE *fp;
+  char line[500];
+  int j;
+  char c;
   pExt = strrchr(Filename, '.');
   if ( pExt != NULL)
   {
     if (strcmp(pExt, ".dsc")==0)
     {
-      memset(Static,0,sizeof(Static));
-      strcpy(Static,"application/x-debian-source");
-      Type=Static;
+      //check .dsc file contect to verify if is debian source file
+      if ((fp = fopen(Filename, "r")) == NULL){
+        printf("DEBUG: Unable to open .dsc file %s\n",Filename);
+	return(-1);
+      }
+      j=0;	
+      while ((c = fgetc(fp)) != EOF && j < 500 ){
+	line[j]=c;
+	j++; 
+      }
+      if (strstr(line, "-----BEGIN PGP SIGNED MESSAGE-----") && strstr(line,"Source:"))
+      {
+        if (Verbose > 0) {printf("First bytes of .dsc file %s\n",line);}
+        memset(Static,0,sizeof(Static));
+        strcpy(Static,"application/x-debian-source");
+        Type=Static;
+      }
     }	
   }
 
