@@ -780,7 +780,8 @@ int	FindCmd	(char *Filename)
 	line[j]=c;
 	j++; 
       }
-      if (strstr(line, "-----BEGIN PGP SIGNED MESSAGE-----") && strstr(line,"Source:"))
+      if ((strstr(line, "-----BEGIN PGP SIGNED MESSAGE-----") && strstr(line,"Source:")) || 
+	  (strstr(line, "Format:") && strstr(line, "Source:") && strstr(line, "Version:")))
       {
         if (Verbose > 0) {printf("First bytes of .dsc file %s\n",line);}
         memset(Static,0,sizeof(Static));
