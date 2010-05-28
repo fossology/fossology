@@ -327,7 +327,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray,
   char *fcnName = "getLeafBuckets";
   int  *bucket_pk_list = 0;
   int  *bucket_pk_list_start;
-  char  filepath[256];
+  char  filepath[512];
   char  sql[1024];
   PGresult *result;
   PGresult *resultmime;
@@ -346,7 +346,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray,
   regex_file_t *regex_row;
   char *argv[2];
   char *envp[11];
-  char  envbuf[256];
+  char  envbuf[4096];
   char  pkgtype=0;
   pid_t pid;
 
