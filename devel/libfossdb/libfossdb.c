@@ -200,6 +200,7 @@ void *	DBmove	(void *VDB)
    -1 = constraint error
    -2 = other error
    -3 = timeout
+   2 = ok, ignore duplicate constraint failure (23505)
  NOTE: For a huge DB request, this could take a while
  and could consume all memory.
  Callers should take care to not call unbounded SQL selects.
@@ -264,6 +265,10 @@ int	DBaccess	(void *VDB, char *SQL)
 	   Class 57: Operator Intervention
 		57014   QUERY CANCELED  (comes from a timeout)
 	 */
+	if (!strncmp("23505",PQresultErrorField(DB->Res,PG_DIAG_SQLSTATE),5))
+	  {
+	    return(2);	
+	  } 
 	if (!strncmp("23",PQresultErrorField(DB->Res,PG_DIAG_SQLSTATE),2) ||
 	    !strncmp("25",PQresultErrorField(DB->Res,PG_DIAG_SQLSTATE),2))
 	  {
