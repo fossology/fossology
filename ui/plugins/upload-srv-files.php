@@ -124,8 +124,11 @@ class upload_srv_files extends FO_Plugin {
       else {
         $Email = $_SESSION['UserEmail'];
       }
-      /* Put -e <addr> in the front as the upload is last part of jq_args */
-      $jq_args = " -e $Email " . "$jq_args";
+      /* 
+       * Put -w webServer -e <addr> in the front as the upload is last
+       * part of jq_args. 
+       */
+      $jq_args = " -W {$_SERVER['SERVER_NAME']} -e $Email " . "$jq_args";
     }
     // put the job in the jobqueue
     $jq_type = 'fosscp_agent';

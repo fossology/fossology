@@ -81,7 +81,7 @@ class upload_url extends FO_Plugin {
     AgentCheckBoxDo($uploadpk);
 
     if (CheckEnotification()) {
-      $sched = scheduleEmailNotification($uploadpk);
+      $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME']);
       if ($sched !== NULL) {
         return($sched);
       }

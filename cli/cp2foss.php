@@ -37,6 +37,7 @@ error_reporting(E_NOTICE & E_STRICT);
 global $Enotification;
 global $Email;
 global $ME;
+global $webServer;
 
 $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
   Options:
@@ -198,6 +199,7 @@ function ProcEnote($UploadPk) {
   global $Email;
   global $DB;
   global $ME;
+  global $webServer;
 
   /* get the user name from the previous upload */
   $previous = $UploadPk-1;
@@ -229,11 +231,11 @@ function ProcEnote($UploadPk) {
      * ensures the email address is correct, the UserName is used for the
      * salutation.
      */
-    $sched = scheduleEmailNotification($UploadPk,$UserEmail,$UserName);
+    $sched = scheduleEmailNotification($UploadPk,$webServer,$UserEmail,$UserName);
   }
   else {
     /* run as cli, use the email passed in and $ME */
-    $sched = scheduleEmailNotification($UploadPk,$Email,$ME);
+    $sched = scheduleEmailNotification($UploadPk,$webServer,$Email,$ME);
     print "  Scheduling email notification for $Email\n";
   }
   if ($sched !== NULL) {
@@ -439,6 +441,11 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
 
           break;
         case '-R': /* obsolete: recurse directories */
+        case '-W': /* webserver */
+        	$i++;
+        	$webServer = $argv[$i];
+        	//print "DBG: setting webServer to $webServer\n";
+        	break;
         case '-w': /* obsolete: URL switch to use wget */
           break;
         case '-d': /* specify upload description */
@@ -456,8 +463,6 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
             exit(1);
           }
           $Enotification = TRUE;
-          if($Enotification) {
-          }
           break;
         case '-n': /* specify upload name */
           $i++;
