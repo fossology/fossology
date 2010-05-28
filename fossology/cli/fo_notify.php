@@ -51,6 +51,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
     -j string      = optional, Name of the job to include in the email
     -n string      = optional, user name to address email to, this is not the email address.
     -u <upload_id> = Upload ID. (required)
+    -w web-server  = required, string, fqdn of the webserver
 
     If no -e option is supplied, status is printed to standard out.
   ";
@@ -75,7 +76,7 @@ $JobName   = "";
 $JobStatus = "";
 
 /* Process some of the parameters */
-$options = getopt("he:n:j:u:");
+$options = getopt("he:n:j:u:w:");
 if (empty($options)) {
 	print $Usage;
 	exit(1);
@@ -144,7 +145,7 @@ $Preamble = "Dear $UserName,\n" .
 
 /* Optional Job Name */
 if (array_key_exists("j",$options)) {
-	$JobName = $option['j'];
+	$JobName = $options['j'];
 }
 /* No job name supplied, go get it*/
 if(empty($JobName)) {
@@ -165,11 +166,24 @@ if(empty($JobName)) {
 $summary = JobListSummary($upload_id);
 //print "  DEBUG: summary for upload $upload_id is:\n"; print_r($summary) . "\n";
 
-/* Construct the URL for the message */
+/* Construct the URL for the message, must have hostname*/
+if(array_key_exists("w",$options))
+{
+	$hostname = $options['w'];
+	//print "DBG: hostname is:$hostname\n";
+	if(empty($hostname))
+	{
+		print "Error, no hostname supplied\n";
+		exit(1);
+	}	
+}
+else
+{
+	print "Error, no hostname supplied\n";
+	exit(1);
+}
+//$hostname = exec('hostname --fqdn', $toss);
 
-$hostname = exec('hostname --fqdn', $toss);
-
-//print "hostname is:$hostname\n";
 $JobHistoryUrl = "http://$hostname/repo/?mod=showjobs&history=1&upload=$upload_id";
 
 /* Job aborted */

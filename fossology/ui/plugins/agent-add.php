@@ -81,7 +81,8 @@ class agent_add extends FO_Plugin
     }
     if (CheckEnotification()) {
       /* Create list for dependency checking by enotification */
-      $sched = scheduleEmailNotification($uploadpk,NULL,NULL,NULL,$Alist,TRUE);
+      $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
+      				 NULL,NULL,NULL,$Alist,TRUE);
       if ($sched !== NULL) {
         return($sched);
       }

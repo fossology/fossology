@@ -61,6 +61,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgent=NULL) {
 
 	$AgentList = menu_find("Agents",$Depth);
 	$V = "";
+	
 	if (!empty($AgentList)) {
 		// get user agent preferences
 		$userName = $_SESSION['User'];
@@ -144,6 +145,30 @@ function AgentCheckBoxDo($upload_pk)
 	}
 	return($V);
 } // AgentCheckBoxDo()
+
+/**
+ * bucketPools
+ * \brief make a checkbox list of bucket pools.  Only 1 box can be selected
+ *
+ * @return string $html html formatted checkboxes
+ */
+function bucketPools()
+{
+	
+	/*
+	 * need a way to determine a bucket agent from other agents.....
+	 */
+	 global $DB;
+	 
+	 $html = "";
+	 $SQL = "SELECT bucketpool_pk, bucketpool_name FROM bucketpool" .
+	        " ORDER BY bucketpool_pk;";
+	 $pools = $DB->Action($SQL);
+	 DBCheckResult($pools, $SQL, __FILE__, __LINE__);
+	 
+	 
+	 return(TRUE);
+}
 
 /**
  * CheckEnotification
@@ -479,7 +504,7 @@ function MostRows($Jobs) {
  * @return NULL on success, string on failure.
  */
 
-function scheduleEmailNotification($upload_pk,$Email=NULL,$UserName=NULL,
+function scheduleEmailNotification($upload_pk,$webServer,$Email=NULL,$UserName=NULL,
 $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
 
 	global $DB;
@@ -502,10 +527,17 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
 	else {
 		$Depends = FindDependent($upload_pk);
 	}
-
+	// should we die if webServer is empty?  For now just make a stab at it.
+	if(empty($webServer))
+	{
+	  $webServer = $_SERVER['SERVER_NAME'];	
+	}
+	
 	/* set up input for fo-notify */
 	$Nparams = '';
 	$To = NULL;
+	
+	$Nparams .= "-w $webServer ";
 	/* If email is passed in, favor that over the session */
 	if(!empty($Email)) {
 		$To = " -e $Email";
