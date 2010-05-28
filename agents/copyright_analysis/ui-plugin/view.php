@@ -79,7 +79,7 @@ class copyright_view extends FO_Plugin
         $Upload = GetParm("upload", PARM_INTEGER);
 
         $ModBack = GetParm("modback",PARM_STRING);
-        if (empty($ModBack)) { $ModBack='copyright'; }
+        if (empty($ModBack)) { $ModBack='copyrighthist'; }
 
         $pfile = 0;
 
