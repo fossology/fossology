@@ -532,27 +532,32 @@ void	RecordMetadataRPM	(struct rpmpkginfo *pi)
       DBclose(DB);
       exit(-1);
     }
-      
-    DBaccess(DB,"SELECT currval('pkg_rpm_pkg_pk_seq'::regclass);");
-    pkg_pk = atoi(DBgetvalue(DB,0,0));
-
-    if (Verbose) { printf("pkg_pk:%d\n",pkg_pk);}
-    int i;
-    for (i=0;i<pi->req_size;i++)
+    if (rc != 2)  
     {
-      memset(SQL,0,sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm_req (pkg_fk,req_value) values (%d,'%s');",pkg_pk,trim(pi->requires[i]));
-      rc = DBaccess(DB,SQL);
-      if (rc < 0)
+      DBaccess(DB,"SELECT currval('pkg_rpm_pkg_pk_seq'::regclass);");
+      pkg_pk = atoi(DBgetvalue(DB,0,0));
+
+      if (Verbose) { printf("pkg_pk:%d\n",pkg_pk);}
+      int i;
+      for (i=0;i<pi->req_size;i++)
       {
-        DBaccess(DB,"ROLLBACK;");
-        printf("LOG pkg %d ERROR: %s\n",pkg_pk,SQL);
-        fflush(stdout);
-        DBclose(DB);
-        exit(-1);
+        memset(SQL,0,sizeof(SQL));
+        snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm_req (pkg_fk,req_value) values (%d,'%s');",pkg_pk,trim(pi->requires[i]));
+        rc = DBaccess(DB,SQL);
+        if (rc < 0)
+        {
+          DBaccess(DB,"ROLLBACK;");
+          printf("LOG pkg %d ERROR: %s\n",pkg_pk,SQL);
+          fflush(stdout);
+          DBclose(DB);
+          exit(-1);
+        }
       }
+      DBaccess(DB,"COMMIT;");
+    } else {
+      //ignore duplicate constraint failure, rollback transaction
+      DBaccess(DB,"ROLLBACK;"); 
     }
-    DBaccess(DB,"COMMIT;");
   }
 } /* RecordMetadata(struct rpmpkginfo *pi) */
 
@@ -755,28 +760,33 @@ void    RecordMetadataDEB       (struct debpkginfo *pi)
       DBclose(DB);
       exit(-1);
     }
-
-    DBaccess(DB,"SELECT currval('pkg_deb_pkg_pk_seq'::regclass);");
-    pkg_pk = atoi(DBgetvalue(DB,0,0));
-
-    if (Verbose) { printf("pkg_pk:%d\n",pkg_pk);}
-    int i;
-    for (i=0;i<pi->dep_size;i++)
+    if (rc != 2)
     {
-      memset(SQL,0,sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb_req (pkg_fk,req_value) values (%d,'%s');",pkg_pk,trim(pi->depends[i]));
-      if (Verbose) { printf("DEPENDS:%s\n",pi->depends[i]);}
-      rc = DBaccess(DB,SQL);
-      if (rc < 0)
+      DBaccess(DB,"SELECT currval('pkg_deb_pkg_pk_seq'::regclass);");
+      pkg_pk = atoi(DBgetvalue(DB,0,0));
+
+      if (Verbose) { printf("pkg_pk:%d\n",pkg_pk);}
+      int i;
+      for (i=0;i<pi->dep_size;i++)
       {
-        DBaccess(DB,"ROLLBACK;");
-        printf("LOG pkg %d ERROR: %s\n",pkg_pk,SQL);
-        fflush(stdout);
-        DBclose(DB);
-        exit(-1);
+        memset(SQL,0,sizeof(SQL));
+        snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb_req (pkg_fk,req_value) values (%d,'%s');",pkg_pk,trim(pi->depends[i]));
+        if (Verbose) { printf("DEPENDS:%s\n",pi->depends[i]);}
+        rc = DBaccess(DB,SQL);
+        if (rc < 0)
+        {
+          DBaccess(DB,"ROLLBACK;");
+          printf("LOG pkg %d ERROR: %s\n",pkg_pk,SQL);
+          fflush(stdout);
+          DBclose(DB);
+          exit(-1);
+        }
       }
+      DBaccess(DB,"COMMIT;");
+    } else {
+      //ignore duplicate constraint failure, rollback transaction
+      DBaccess(DB,"ROLLBACK;");
     }
-    DBaccess(DB,"COMMIT;");
   }
 }/* RecordMetadataDEB(struct debpkginfo *pi) */
 
