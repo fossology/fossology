@@ -319,7 +319,7 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
                  VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement')""" % (agent_pk, pfile)
         result = db.access(sql)
         if result != 0:
-            print >> sys.stdout, "ERROR: DB Access error, returned %d.\nERROR: DB STATUS: %s\nERROR: DB ERRMSG: %s\nERROR: sql=%s" % (result, db.status(), db.errmsg(), sql)
+            print >> sys.stdout, "ERROR: DB Access error, returned %d.\nERROR: DB STATUS: %s\nERROR: DB ERRMSG: %s\nERROR: sql=%sERROR: filename=%s" % (result, db.status(), db.errmsg(), sql, filename)
             return -1
     else:
         for i in range(len(offsets)):
@@ -333,7 +333,7 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
                         offsets[i][2])
             result = db.access(sql)
             if result != 0:
-                print >> sys.stdout, "ERROR: DB Access error, returned %d.\nERROR: DB STATUS: %s\nERROR: DB ERRMSG: %s\nERROR: sql=%s" % (result, db.status(), db.errmsg(), sql)
+                print >> sys.stdout, "ERROR: DB Access error, returned %d.\nERROR: DB STATUS: %s\nERROR: DB ERRMSG: %s\nERROR: sql=%s\nERROR: filename=%s" % (result, db.status(), db.errmsg(), sql, filename)
                 return -1
 
     return 0
