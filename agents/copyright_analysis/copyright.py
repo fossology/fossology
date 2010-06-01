@@ -186,7 +186,7 @@ Use the --agent switch to place %prog into Fossology agent mode. There are four 
                 print "\t[%d:%d:%s] %r" % (results[i][0], results[i][1], results[i][2], text[results[i][0]:results[i][1]])
 
     if options.agent:
-         return(agent(model,options.runonpfiles))   
+        return(agent(model,options.runonpfiles))   
 
 def agent(model,runonpfiles=False):
     try:
@@ -324,8 +324,7 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
     else:
         for i in range(len(offsets)):
             str = text[offsets[i][0]:offsets[i][1]]
-            if type(str) == type(u''): # we have a unicode object
-                str = str.decode('ascii', 'ignore')
+            str = str.decode('ascii', 'ignore')     # make sure that it is using ascii encoding
             pd = library.parsetext(str)
             str = re.escape(' '.join([token[1] for token in pd]))
             sql = """INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type)
