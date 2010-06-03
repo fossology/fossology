@@ -47,13 +47,13 @@ if (!isset($GlobalReady)) { exit; }
 /**
  AgentCheckBoxMake
  \brief Generate a checkbox list of available agents.
- 
- Only agents that are not already scheduled are added. If 
- $upload_pk == -1, then list all.  User agent preferences will be 
+
+ Only agents that are not already scheduled are added. If
+ $upload_pk == -1, then list all.  User agent preferences will be
  checked as long as the agent is not already scheduled.
- 
+
  @return string containing HTML-formatted checkbox list
-*/
+ */
 function AgentCheckBoxMake($upload_pk,$SkipAgent=NULL) {
 
 	global $Plugins;
@@ -61,19 +61,19 @@ function AgentCheckBoxMake($upload_pk,$SkipAgent=NULL) {
 
 	$AgentList = menu_find("Agents",$Depth);
 	$V = "";
-	
+
 	if (!empty($AgentList)) {
 		// get user agent preferences
 		$userName = $_SESSION['User'];
 		$SQL = "SELECT user_name, user_agent_list FROM users WHERE
 				    user_name='$userName';";
 		$uList = $DB->Action($SQL);
-		
+
 		// Ulist should never be empty, if it is, something really wrong,
 		// like the user_agent_list column is missing.
 		if(empty($uList))
 		{
-			return("<h3 style='color:red'>Fatal! Query Failed getting 
+			return("<h3 style='color:red'>Fatal! Query Failed getting
 			        user_agent_list for user $UserName</h3>");
 		}
 		$list = explode(',',$uList[0]['user_agent_list']);
@@ -154,20 +154,20 @@ function AgentCheckBoxDo($upload_pk)
  */
 function bucketPools()
 {
-	
+
 	/*
 	 * need a way to determine a bucket agent from other agents.....
 	 */
-	 global $DB;
-	 
-	 $html = "";
-	 $SQL = "SELECT bucketpool_pk, bucketpool_name FROM bucketpool" .
+	global $DB;
+
+	$html = "";
+	$SQL = "SELECT bucketpool_pk, bucketpool_name FROM bucketpool" .
 	        " ORDER BY bucketpool_pk;";
-	 $pools = $DB->Action($SQL);
-	 DBCheckResult($pools, $SQL, __FILE__, __LINE__);
-	 
-	 
-	 return(TRUE);
+	$pools = $DB->Action($SQL);
+	DBCheckResult($pools, $SQL, __FILE__, __LINE__);
+
+
+	return(TRUE);
 }
 
 /**
@@ -190,7 +190,7 @@ function CheckEnotification() {
 /**
  * FindDependent
  *
- * find the job in the job and jobqueue table to be dependent on
+ * find the jobs in the job and jobqueue table to be dependent on
  *
  * @param int $UploadPk the upload PK
  * @param array $list an optional array of jobs to use instead of all jobs
@@ -199,69 +199,54 @@ function CheckEnotification() {
  */
 function FindDependent($UploadPk, $list=NULL) {
 	/*
-	 * Dependencies.  Jobs are layed out in dependency order NOT execution order.
-	 * This makes scheduling the email notification much harder.
-	 * If the license agent is part of the jobs, then that will finish last due to
-	 * the time it takes adj2nest to run/complete.  So be dependent on license if
-	 * it's there.
+	 * Find the jobs that fo_notify should depend on. fo_notify is
+	 * dependent on the following agents:
+	 *   copyright
+	 *   nomos
+	 *   package
+	 *   bucket
 	 *
-	 * If there is no license agent, use the highest jq_pk for the highest job
-	 * number as your dependency.
-	 *
-	 * * is the above still true given sublists?
+	 *   Determine if the above agents are scheduled and create a list of
+	 *   jq_pk for each agent.
 	 *
 	 */
 	global $DB;
 
+	$Depends = array();
 	/* get job list for this upload */
+
+	// get the list of jobs for this upload
 	$Sql = "SELECT job_upload_fk, job_pk, job_name FROM job WHERE " .
   "job_upload_fk = $UploadPk order by job_pk desc;";
 	$Jobs = $DB->Action($Sql);
-	$Agent2Job =
-	array('agent_license'  => 'license','agent_mimetype' => 'Default Meta Agents',
-  'agent_pkgmetagetta' => 'Meta Analysis','agent_specagent' => 'Default Meta Agents');
 
-	if(!empty($list)) {
-		/* process this list instead of what's in the db.*/
-		/* find the job_pk of each job added */
-		foreach($list as $NewJob) {
-			foreach($Agent2Job as $agent => $JobName) {
-				if($NewJob == $agent) {
-					$Sql = "SELECT job_upload_fk, job_pk, job_name FROM job WHERE " .
-           "job_upload_fk = $UploadPk AND job_name = '$JobName' order by job_pk desc;";
-					// get the job_pk for this job
-					$job_pks = $DB->Action($Sql);
-					$JobPks[] = $job_pks[0]['job_pk'];
-				}
-			}
+	$jobList = array();
+	foreach($Jobs as $Row) {
+		if($Row['job_name'] == 'Copyright Analysis') {
+			$jobList[] = $Row['job_pk'];
 		}
-		//print "FD: list of job_pk's is:\n<br>"; print_r($JobPks) . "/n<br>";
-		$foo = array(MostRows($JobPks));
-		//print "FD: job_pk with MostRows is:\n<br>"; print_r($foo) . "/n<br>";
-		return(array(MostRows($JobPks)));
-	}
-	else {
-		/*
-		 * If there is a license job, use that job_pk to get the jobqueue item to be
-		 * dependent on.
-		 */
-		$LicenseJob = FALSE;
-		foreach($Jobs as $Row) {
-			foreach($Row as $col => $JobType) {
-				if($JobType == 'license') {
-					$job_pk = $Row['job_pk'];
-					$LicenseJob = TRUE;
-				}
-			}
+		elseif($Row['job_name'] == 'Bucket Analysis')
+		{
+			$jobList[] = $Row['job_pk'];
 		}
-
-		/* No license job, just use the last job*/
-		if(!$LicenseJob) {
-			$job_pk = $Jobs[0]['job_pk'];
+		elseif($Row['job_name'] == 'Package Agents')
+		{
+			$jobList[] = $Row['job_pk'];
+		}
+		elseif($Row['job_name'] == 'Nomos License Analysis')
+		{
+			$jobList[] = $Row['job_pk'];
 		}
 	}
-	/* Find the highest jq_pk for the job */
-	$Depends[] = Largestjq_pk($job_pk);
+
+	// get the jq_pk's for each job, retrun the list of jq_pk's
+	foreach($jobList as $job)
+	{
+		$Sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE jq_job_fk = $job " .
+					 " order by jq_pk desc;";
+		$Q = $DB->Action($Sql);
+		$Depends[] = $Q[0]['jq_pk'];
+	}
 	return($Depends);
 } // FindDependent
 
@@ -305,7 +290,7 @@ function GetAgentKey($agentName, $agentDesc)
 /**
  * AgentARSList
  * \brief
- *  The purpose of this function is to return an array of 
+ *  The purpose of this function is to return an array of
  *  _ars records for an agent so that the latest agent_pk(s)
  *  can be determined.
  *
@@ -324,24 +309,24 @@ function GetAgentKey($agentName, $agentDesc)
  */
 function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0)
 {
-  global $PG_CONN;
+	global $PG_CONN;
 
-  $LimitClause = "";
-  if ($limit > 0) $LimitClause = " limit $limit";
-  if ($agent_fk)
-    $agentCond = " and agent_fk='$agent_fk' ";
-  else
-    $agentCond = "";
-  
-  $sql = "SELECT * FROM $TableName, agent 
+	$LimitClause = "";
+	if ($limit > 0) $LimitClause = " limit $limit";
+	if ($agent_fk)
+	$agentCond = " and agent_fk='$agent_fk' ";
+	else
+	$agentCond = "";
+
+	$sql = "SELECT * FROM $TableName, agent
            WHERE agent_pk=agent_fk and ars_success=true and upload_fk='$upload_pk' and agent_enabled=true 
-                 $agentCond
+           $agentCond
            order by agent_ts desc $LimitClause";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $resultArray =  pg_fetch_all($result);
-  pg_free_result($result);
-  return $resultArray;
+           $result = pg_query($PG_CONN, $sql);
+           DBCheckResult($result, $sql, __FILE__, __LINE__);
+           $resultArray =  pg_fetch_all($result);
+           pg_free_result($result);
+           return $resultArray;
 }
 
 
@@ -357,7 +342,7 @@ function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0)
  *
  * @param string  $TableName - name of the ars table (e.g. nomos_ars)
  * @param int     $upload_pk
- * @param boolean $DataOnly  - If false, return the latest agent AND agent revs 
+ * @param boolean $DataOnly  - If false, return the latest agent AND agent revs
  *                             that have data for this agent.  Note the latest agent may have
  *                             no entries in $TableName.
  *                             If true (default), return only the agent_revs with ars data.
@@ -366,48 +351,48 @@ function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0)
  * @param string  *SelectedKey - selected key (optional)
  *                              If absent and $DataOnly is true
  *                              then the latest agent with results is selected.
- *                              If absent and $DataOnly is false 
+ *                              If absent and $DataOnly is false
  *                              then the latest agent is selected.
  *
  * @return agent select list
  *      or 0 on error
  */
-function AgentSelect($TableName, $upload_pk, $DataOnly=true, 
-                           $SLName, $SLID, $SelectedKey="")
+function AgentSelect($TableName, $upload_pk, $DataOnly=true,
+$SLName, $SLID, $SelectedKey="")
 {
-echo "DO NOT USE: PRELIMINARY AND INCOMPLETE<br>";
-/*
-  / get the agent recs /
-  $sql = "SELECT * FROM $TableName, agent 
-           WHERE upload_fk='$upload_pk' and agent_enabled=true order by agent_ts desc";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
+	echo "DO NOT USE: PRELIMINARY AND INCOMPLETE<br>";
+	/*
+	 / get the agent recs /
+	 $sql = "SELECT * FROM $TableName, agent
+	 WHERE upload_fk='$upload_pk' and agent_enabled=true order by agent_ts desc";
+	 $result = pg_query($PG_CONN, $sql);
+	 DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-  / Create an assoc array to build the select list from.
-   * "{agent_pk} [,{agent_pk} ...] => {agent name} ( {agentrevision} ), ... [ NO DATA]
-   * For example:
-   *   123 => nomos(rev 1)
-   *   111,123 => bucket(rev 5), nomos(rev 7)
-   *   112,179 => bucket(latest rev), nomos(latest rev) NO DATA
-or one could just use the ars_pk instead of the pk list, but that is another
-indirection.
-   /
-  while ($row = pg_fetch_assoc($result)) 
-  {
-  }
-  $AgentList = GetAgentDataList($AgentName, $upload_pk, $tablename);
-  $SelArray = array();
+	 / Create an assoc array to build the select list from.
+	 * "{agent_pk} [,{agent_pk} ...] => {agent name} ( {agentrevision} ), ... [ NO DATA]
+	 * For example:
+	 *   123 => nomos(rev 1)
+	 *   111,123 => bucket(rev 5), nomos(rev 7)
+	 *   112,179 => bucket(latest rev), nomos(latest rev) NO DATA
+	 or one could just use the ars_pk instead of the pk list, but that is another
+	 indirection.
+	 /
+	 while ($row = pg_fetch_assoc($result))
+	 {
+	 }
+	 $AgentList = GetAgentDataList($AgentName, $upload_pk, $tablename);
+	 $SelArray = array();
 
-  if ($SelectedKey == "") $SelectedKey = $AgentList[0]['agent_pk'];
+	 if ($SelectedKey == "") $SelectedKey = $AgentList[0]['agent_pk'];
 
-  / create key/val array for pulldown /
-  foreach($AgentList as $AgentRec)
-  {
-    $DataInd = ($AgentRec['data']) ? "" : ", NO DATA";
-    $SelArray[$AgentRec['agent_pk']] = "$AgentRec[agent_name] rev: $AgentRec[agent_rev]$DataInd";
-  }
-  return "Results from:" . Array2SingleSelect($SelArray, $SLName, $SelectedKey, false, false);
-*/
+	 / create key/val array for pulldown /
+	 foreach($AgentList as $AgentRec)
+	 {
+	 $DataInd = ($AgentRec['data']) ? "" : ", NO DATA";
+	 $SelArray[$AgentRec['agent_pk']] = "$AgentRec[agent_name] rev: $AgentRec[agent_rev]$DataInd";
+	 }
+	 return "Results from:" . Array2SingleSelect($SelArray, $SLName, $SelectedKey, false, false);
+	 */
 }
 
 /**
@@ -521,22 +506,24 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
 	 * A valid $list means we got called by agent_add, use this list of jobs to
 	 * determine dependencies
 	 */
+	$Depends = array();
 	if(!empty($list)) {
 		$Depends = FindDependent($upload_pk, $list);
 	}
 	else {
 		$Depends = FindDependent($upload_pk);
 	}
+
 	// should we die if webServer is empty?  For now just make a stab at it.
 	if(empty($webServer))
 	{
-	  $webServer = $_SERVER['SERVER_NAME'];	
+		$webServer = $_SERVER['SERVER_NAME'];
 	}
-	
+
 	/* set up input for fo-notify */
 	$Nparams = '';
 	$To = NULL;
-	
+
 	$Nparams .= "-w $webServer ";
 	/* If email is passed in, favor that over the session */
 	if(!empty($Email)) {
@@ -575,13 +562,18 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
 
 	/* Prepare the job: job fo-notify has jobqueue item fo-notify */
 	if ($Reschedule) {
-		$jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,$Depends,TRUE);
+		$jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,
+		$Depends,TRUE);
 		if (empty($jobqueuepk)) {
-			return("Failed to insert task 'fonotify' into job queue");
+			return("Failed to insert task 'fo_notify' into job queue (reschedule)");
 		}
 	}
 	else {
-		$jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,$Depends,FALSE);
+		$jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,
+		$Depends,FALSE);
+		if (empty($jobqueuepk)) {
+			return("Failed to insert task 'fo_notify' into job queue");
+		}
 	}
 	return(NULL);
 }
