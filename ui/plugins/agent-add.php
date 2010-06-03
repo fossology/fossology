@@ -71,7 +71,7 @@ class agent_add extends FO_Plugin
       {
         //print "Adding to " . $agentlist[$Found] . "<br>\n";
         $P = &$Plugins[plugin_find_id($agentlist[$Found])];
-        $P->AgentAdd($uploadpk);
+        $rc .= $P->AgentAdd($uploadpk);
         $Alist[] = $agentlist[$Found];
       }
       else
