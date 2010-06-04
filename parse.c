@@ -94,7 +94,7 @@ extern void preloadResults(char *filetext, char *ltsr);
 */
 int findPhrase(int, char *,int, int, int, int);
 int famOPENLDAP(char *, int ,int, int);
-int checkUnclassified(char *, int, int, char *, int, int, int);
+int checkUnclassified(char *, int, int, int, int, int);
 int checkPublicDomain(char *, int, int, int, int, int);
 static int dbgIdxGrep(int, char *, int);
 #ifdef  LTSR_DEBUG
@@ -282,7 +282,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		    int isML, int isPS)
 {
     static int first = 1;
-    char *ftype = scp->ftype;
     char *cp;
     int i;
     int j;
@@ -295,8 +294,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 #endif  /* PRECHECK */
 
 #if     defined(PROC_TRACE) || defined(DOCTOR_DEBUG)
-    traceFunc("== parseLicenses(%p, %d, [%d, 0x%x], %d, %d, \"%s\")\n",
-	      filetext, size, score, kwbm, isML, isPS, ftype);
+    traceFunc("== parseLicenses(%p, %d, [%d, 0x%x], %d, %d)\n",
+	      filetext, size, score, kwbm, isML, isPS );
 #endif  /* PROC_TRACE || DOCTOR_DEBUG */
 
     if (size == 0) {
@@ -4993,8 +4992,8 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      */
     if (maxInterest != IL_HIGH && !lmem[_fDOC]) {
 	pd = checkPublicDomain(filetext, size, score, kwbm, isML, isPS);
-	if (!pd && !HASREGEX(_UTIL_MSGCAT, ftype) &&
-	    checkUnclassified(filetext, size, scp->score, ftype, isML,
+	if (!pd &&
+	    checkUnclassified(filetext, size, scp->score, isML,
 			      isPS, nw)) {
 	    strcpy(name, LS_UNCL);
 	    if (isPS) {
@@ -7341,7 +7340,7 @@ int famOPENLDAP(char *filetext, int size, int isML, int isPS)
  * calling the corner-case license-check function.
  */
 
-int checkUnclassified(char *filetext, int size, int score, char *ftype,
+int checkUnclassified(char *filetext, int size, int score, 
    int isML, int isPS, int nw)
 {
     char *buf;
@@ -7354,8 +7353,8 @@ int checkUnclassified(char *filetext, int size, int score, char *ftype,
     int i = 0;
 
 #ifdef  PROC_TRACE
-	traceFunc("== checkUnclassified(%p, %d, %d %s, %d, %d, %d)\n", filetext,
-	       size, score, ftype, isML, isPS, nw);
+	traceFunc("== checkUnclassified(%p, %d, %d, %d, %d, %d)\n", filetext,
+	       size, score, isML, isPS, nw);
 #endif  /* PROC_TRACE */
 
     /*

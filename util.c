@@ -356,31 +356,6 @@ char *findEol(char *s)
 }
 
 
-void changeDir(char *pathname)
-{
-    /*
-     * we die here if the chdir() fails.
-     */
-
-#if	defined(PROC_TRACE) || defined(UNPACK_DEBUG) || defined(CHDIR_DEBUG)
-	traceFunc("== changeDir(%s)\n", pathname);
-#endif	/* PROC_TRACE || UNPACK_DEBUG || CHDIR_DEBUG */
-
-    if (chdir(pathname) < 0) {
-	perror(pathname);
-	Fatal("changeDir: chdir(\"%s\") fails", pathname);
-    }
-    if (getcwd(cur.cwd, sizeof(cur.cwd)) == NULL_STR) {
-	perror("getcwd(changeDir)");
-	Bail(11);
-    }
-    cur.cwdLen = (int) strlen(cur.cwd);
-#ifdef	CHDIR_DEBUG
-    printf("DEBUG: now in \"%s\"\n", cur.cwd);
-#endif	/* CHDIR_DEBUG */
-    return;
-}
-
 void renameInode(char *oldpath, char *newpath)
 {
     int err = 0;
@@ -410,28 +385,6 @@ void renameInode(char *oldpath, char *newpath)
 #ifdef	DEBUG
     (void) mySystem("ls -ldi %s", newpath);
 #endif	/* DEBUG */
-    return;
-}
-
-
-void unlinkFile(char *pathname)
-{
-    /*
-     * we die here if the unlink() fails.
-     */
-
-#if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-	traceFunc("== unlinkFile(%s)\n", pathname);
-#endif	/* PROC_TRACE || UNPACK_DEBUG */
-
-    if (unlink(pathname) < 0) {
-	(void) chmod(pathname, 0777);
-	if (unlink(pathname) < 0) {
-	    perror(pathname);
-	    (void) mySystem("ls -ldi '%s'", pathname);
-	    Fatal("unlink(\"%s\") fails", pathname);
-	}
-    }
     return;
 }
 
@@ -1077,7 +1030,6 @@ void printRegexMatch(int n, int cached)
 char *mmapFile(char *pathname)	/* read-only for now */
 {
     struct mm_cache *mmp;
-    static int first = 1;
     int i;
     int n;
     int rem;
@@ -1087,21 +1039,6 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	traceFunc("== mmapFile(%s)\n", pathname);
 #endif	/* PROC_TRACE */
 
-    /* 
-     * Static storage is _supposed_ to be initialized @ 0.  Do we need this?
-     */
-    if (first) {
-#if	(DEBUG > 3)
-	printf("MMapFile: first call\n");
-#endif	/* DEBUG > 3 */
-	for (mmp = mmap_data, i = 0; i < MM_CACHESIZE; i++) {
-	    if (mmp->inUse) {
-		printf("Uninitialized entry %d\n", i);
-		mmp->inUse = 0;
-	    }
-	}
-	first = 0;
-    }
     for (mmp = mmap_data, i = 0; i < MM_CACHESIZE; i++, mmp++) {
         if (mmp->inUse == 0) {
             break;
@@ -1128,6 +1065,7 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	(void) mySystem("ls -l %s", pathname);
 	Fatal("%s: open failure!", pathname);
     }
+
     if (fstat(mmp->fd, &cur.stbuf) < 0) {
 	printf("fstat failure!\n");
 	perror(pathname);
@@ -1144,6 +1082,12 @@ char *mmapFile(char *pathname)	/* read-only for now */
 #ifdef	DEBUG
 	printf("+MM: %d @ %p\n", mmp->size, mmp->mmPtr);
 #endif	/* DEBUG */
+
+  /* Limit scan to first MAX_SCANBYTES
+   * We have never found a license more than 64k into a file.
+   */
+  if (mmp->size > MAX_SCANBYTES) mmp->size = MAX_SCANBYTES;
+
 	rem = mmp->size-1;
 	cp = mmp->mmPtr;
 	while (rem > 0) {
@@ -1237,31 +1181,6 @@ void munmapFile(void *ptr)
 }
 
 
-int fileLineCount(char *pathname)
-{
-    char *filep;
-    int i;
-    /*
-     * We need the file size to know when we're at the end-of-file.
-     *****
-     * When we call mmapFile(), we automatically get a stat(2) structure
-     * populated for the file we're opening, so we can get the file size
-     * from there.  Maybe that's kludgy, and maybe it's 'efficient design'. 
-     */
-
-#ifdef	PROC_TRACE
-	traceFunc("== fileLineCount(%s)\n", pathname);
-#endif	/* PROC_TRACE */
-
-    if ((filep = mmapFile(pathname)) == NULL_STR) {
-	return(0);
-    }
-    i = bufferLineCount(filep, cur.stbuf.st_size);
-    munmapFile(filep);
-    return(i);
-}
-
-
 int bufferLineCount(char *p, int len)
 {
     char *cp; 
@@ -1288,44 +1207,6 @@ int bufferLineCount(char *p, int len)
 }
 
 
-/*
- * like strcmp(), but operate on contents of files
- */
-int fileCompare(char *f1, char *f2)
-{
-    int size1;
-    int size2;
-    int ret;
-    char *base1;
-    char *base2;
-
-#ifdef	PROC_TRACE
-	traceFunc("== fileCompare(%s, %s)\n", f1, f2);
-#endif	/* PROC_TRACE */
-
-    base1 = mmapFile(f1);
-    size1 = (int) cur.stbuf.st_size;
-    base2 = mmapFile(f2);
-    size2 = (int) cur.stbuf.st_size;
-    if (size1 == 0 && size2 == 0) {
-	ret = 0;
-    } else if (size1 < size2) {
-	ret = -1;
-    } else if (size1 > size2) {
-	ret = 1;
-    } else {
-	ret = strcmp(base1, base2);
-    }
-    if (base1) {
-	munmapFile(base1);
-    }
-    if (base2) {
-	munmapFile(base2);
-    }
-    return(ret);
-}
-
-
 void appendFile(char *pathname, char *str)
 {
     FILE *fp;
@@ -1337,36 +1218,6 @@ void appendFile(char *pathname, char *str)
     fp = fopenFile(pathname, "a+");
     fprintf(fp, "%s\n", str);
     (void) fclose(fp);
-    return;
-}
-
-/*
-  Dump the contents of a file -- this utility MAY go away later!
-*/
-void dumpFile(FILE *fp, char *pathname, int logFlag)
-{
-    char *filep;
-
-#ifdef	PROC_TRACE
-	traceFunc("== dumpFile(%p, %s, %d)\n", fp, pathname, logFlag);
-#endif	/* PROC_TRACE */
-
-    if (!isFILE(pathname)) {
-#ifdef	DEBUG
-	printf("%s: NO SUCH FILE\n", pathname);
-#endif	/* DEBUG */
-	perror(pathname);
-	return;
-    }
-    if (cur.stbuf.st_size == 0) {
-	printf("%s: EMPTY\n", pathname);
-	return;
-    }
-    if ((filep = mmapFile(pathname)) == NULL_STR) {
-	return;
-    }
-    fprintf(fp, "%s", filep);
-    munmapFile(filep);
     return;
 }
 
@@ -1444,71 +1295,8 @@ int nftwFileFilter(char *pathname, struct stat *st, int onlySingleLink)
 	ret = 1;
     }
 #endif /* notdef */
-    if (ret && *pathname != '/') {
-	unlinkFile(pathname);
-    }
     return(ret);
 }
-
-
-
-void makePath(char *dirpath)	/* e.g., the command "mkdir -p" */
-{
-    char *cp = dirpath;
-
-#if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-	traceFunc("== makePath(%s)\n", dirpath);
-#endif	/* PROC_TRACE || UNPACK_DEBUG */
-
-    if (isDIR(dirpath)) {
-	Warn("makePath: \"%s\" exists\n", cp);
-	return;
-    }
-
-    while ((cp = strchr(cp, '/')) != NULL_STR) {
-	*cp = NULL_CHAR;
-	makeDir(dirpath);
-	*cp = '/';
-	cp++;
-    }
-    makeDir(dirpath);
-    return;
-}
-
-
-void makeDir(char *dirpath)
-{
-#if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-	traceFunc("== makeDir(%s)\n", dirpath);
-#endif	/* PROC_TRACE || UNPACK_DEBUG */
-
-    if (isDIR(dirpath)) {
-#if	(DEBUG > 1)
-	printf("makeDir: \"%s\" exists\n", dirpath);
-#endif	/* DEBUG > 1 */
-	return;
-    }
-    if (mkdir(dirpath, 0755) < 0) {
-	perror(dirpath);
-	Fatal("Failure in makeDir");
-    }
-    return;
-}
-
-
-void removeDir(char *dir)
-{
-
-#if	defined(PROC_TRACE) || defined(UNPACK_DEBUG)
-	traceFunc("== removeDir(%s)\n", dir);
-#endif	/* PROC_TRACE || UNPACK_DEBUG */
-
-    if (mySystem("rm -rf %s", dir)) {
-	Fatal("Cannot clean %s", dir);
-    }
-    return;
-}
-
 
 int mySystem(const char *fmt, ...)
 {
@@ -1538,11 +1326,6 @@ int mySystem(const char *fmt, ...)
 	ret = WSTOPSIG(ret);
 	Error("system(%s) stopped, signal %d", cmdBuf, ret);
     }
-#if	0
-    if (ret && isFILE(UNPACK_STDERR) && (int) cur.stbuf.st_size > 0) {
-	dumpFile(stderr, UNPACK_STDERR, YES);
-    }
-#endif
     return(ret);
 }
 
