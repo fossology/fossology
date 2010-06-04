@@ -84,6 +84,7 @@ class list_bucket_files extends FO_Plugin
 	$bucket_pk = GetParm("bpk",PARM_INTEGER);
 	$bucketpool_pk = GetParm("bp",PARM_INTEGER);
 	$nomosagent_pk = GetParm("napk",PARM_INTEGER);
+	$BinNoSrc = GetParm("bns",PARM_INTEGER);  // 1 if requesting binary with no src
 	if (empty($uploadtree_pk) || empty($bucket_pk) || empty($bucketpool_pk)) 
     {
       echo $this->Name . " is missing required parameters.";
@@ -134,6 +135,15 @@ class list_bucket_files extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
+    /* If $BinNoSrc, then only list binary packages in this subtree
+     * that do not have Source packages.
+     * Else list files in the asked for bucket.
+     */
+    if ($BinNoSrc)
+    {
+    }
+    else
+    {
     // Get all the uploadtree_pk's with this bucket (for this agent and bucketpool)
     // in this subtree.  Some of these might be containers, some not.
     $sql = "select uploadtree.*, bucket_file.nomosagent_fk as nomosagent_fk
@@ -144,11 +154,13 @@ class list_bucket_files extends FO_Plugin
                  and agent_fk=$bucketagent_pk
                  and bucket_fk=$bucket_pk
                  and bucketpool_fk=$bucketpool_pk
-                 and bucket_pk=bucket_fk";
+                 and bucket_pk=bucket_fk ";
     $fileresult = pg_query($PG_CONN, $sql);
     DBCheckResult($fileresult, $sql, __FILE__, __LINE__);
     $Count = pg_num_rows($fileresult);
     $V.= "<br>$Count files found in this bucket ";
+    }
+
     if ($Count < (1.25 * $Max)) $Max = $Count;
     if ($Max < 1) $Max = 1;  // prevent div by zero in corner case of no files
     $limit = ($Page < 0) ? "ALL":$Max;
@@ -182,7 +194,7 @@ class list_bucket_files extends FO_Plugin
 
     $V .= "<table>";
     $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Licenses found</th></tr>";
-    while ($row = pg_fetch_assoc($fileresult))
+    while ($row = pg_fetch_assoc($fileresult, $RowNum))
     {
       $nomosagent_pk = $row['nomosagent_fk'];
       $LinkLast = "view-license&bapk=$bucketagent_pk&napk=$nomosagent_pk";
