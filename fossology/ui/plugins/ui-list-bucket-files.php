@@ -177,12 +177,6 @@ class list_bucket_files extends FO_Plugin
 	  $VM = "";
 	}
 
-	/* Offset is +1 to start numbering from 1 instead of zero */
-    $RowNum = $Offset;
-    $LinkLast = "list_bucket_files&bapk=$bucketagent_pk";
-    $ShowBox = 1;
-    $ShowMicro=NULL;
-
     // base url
     $URL = "?mod=" . $this->Name . "&bapk=$bucketagent_pk&item=$uploadtree_pk&page=-1";
 
@@ -191,6 +185,7 @@ class list_bucket_files extends FO_Plugin
     $ShowMicro=NULL;
     $RowNum = $Offset;
     $Header = "";
+    $LinkLast = "list_bucket_files&bapk=$bucketagent_pk";
 
     $V .= "<table>";
     $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Licenses found</th></tr>";
@@ -212,6 +207,7 @@ class list_bucket_files extends FO_Plugin
       // in this container with that license.
       $V .= "<td>$licstring</td></tr>";
       $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
+      if ($Count == $RowNum) break;
     }
     $V .= "</table>";
 
