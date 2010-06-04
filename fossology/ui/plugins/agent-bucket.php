@@ -174,7 +174,14 @@ class agent_bucket extends FO_Plugin {
     $jqargs = "bppk=$bucketpool_pk, upk=$uploadpk";
     $jobqueuepk = JobQueueAdd($jobpk, "buckets", $jqargs, "no", "", $NomosDep);
     if (empty($jobqueuepk)) return ("Failed to insert agent nomos into job queue");
-
+    
+    if (CheckEnotification()) {
+      $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
+      				 NULL,NULL,array($jobqueuepk));
+      if ($sched !== NULL) {
+        return($sched);
+      }
+    }
     return (NULL);
   } // AgentAdd()
 

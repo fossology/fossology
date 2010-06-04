@@ -483,17 +483,16 @@ function MostRows($Jobs) {
  * @param int $upload_pk the upload_pk of the upload
  * @param string $Email, an optional email address to pass on to fo-notify.
  * @param string $UserName, an optional User name to pass on to fo-notify.
- * @param string $JobName, an optional Job Name to pass on to fo-notify.
- * @param array $list optional list of jobs (supplied by agent add).
+ * @param array, $Depends array of jq_pk's that fo_notify will be dependent on
+ * can be empty (no dependencies).
  *
  * @return NULL on success, string on failure.
  */
 
-function scheduleEmailNotification($upload_pk,$webServer,$Email=NULL,$UserName=NULL,
-$JobName=NULL,$list=NULL,$Reschedule=FALSE) {
+function scheduleEmailNotification($upload_pk,$webServer,$Email=NULL,
+$UserName=NULL,$Depends) {
 
 	global $DB;
-	$Depends = array();
 
 	if (empty($DB)) {
 		return;
@@ -501,17 +500,6 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
 
 	if (empty($upload_pk)) {
 		return ('Invalid parameter (upload_pk)');
-	}
-	/*
-	 * A valid $list means we got called by agent_add, use this list of jobs to
-	 * determine dependencies
-	 */
-	$Depends = array();
-	if(!empty($list)) {
-		$Depends = FindDependent($upload_pk, $list);
-	}
-	else {
-		$Depends = FindDependent($upload_pk);
 	}
 
 	// should we die if webServer is empty?  For now just make a stab at it.
@@ -550,9 +538,6 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
 	if (!empty($UserName)) {
 		$Nparams .= " -n $UserName";
 	}
-	if (!empty($JobName)) {
-		$Nparams .= " -j $JobName";
-	}
 
 	/* Prepare the job: job "fo-notify" */
 	$jobpk = JobAddJob($upload_pk,"fo_notify",-1);
@@ -561,20 +546,12 @@ $JobName=NULL,$list=NULL,$Reschedule=FALSE) {
 	}
 
 	/* Prepare the job: job fo-notify has jobqueue item fo-notify */
-	if ($Reschedule) {
-		$jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,
-		$Depends,TRUE);
-		if (empty($jobqueuepk)) {
-			return("Failed to insert task 'fo_notify' into job queue (reschedule)");
-		}
+	$jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,
+	$Depends,TRUE);
+	if (empty($jobqueuepk)) {
+		return("Failed to insert task 'fo_notify' into job queue");
 	}
-	else {
-		$jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,
-		$Depends,FALSE);
-		if (empty($jobqueuepk)) {
-			return("Failed to insert task 'fo_notify' into job queue");
-		}
-	}
+
 	return(NULL);
 }
 

@@ -71,7 +71,6 @@ function printMsg($Message) {
 /* Load command-line options */
 global $DB;
 
-
 $JobName   = "";
 $JobStatus = "";
 
@@ -164,7 +163,7 @@ if(empty($JobName)) {
 }
 /********************** get job status **************************************/
 $summary = JobListSummary($upload_id);
-//print "  DEBUG: summary for upload $upload_id is:\n"; print_r($summary) . "\n";
+//print "foNotifyDB: summary for upload $upload_id is:\n"; print_r($summary) . "\n";
 
 /* Construct the URL for the message, must have hostname*/
 if(array_key_exists("w",$options))
@@ -182,7 +181,6 @@ else
 	print "Error, no hostname supplied\n";
 	exit(1);
 }
-//$hostname = exec('hostname --fqdn', $toss);
 
 $JobHistoryUrl = "http://$hostname/repo/?mod=showjobs&history=1&upload=$upload_id";
 
@@ -246,6 +244,7 @@ elseif ($summary['failed'] > 0) {
 	}
 }
 /* Job is still active */
+
 elseif ($summary['pending'] > 0 || $summary['active'] > 0) {
 	$JobStatus = "is still active.";
 	$MessagePart = "Your requested FOSSology results are  not ready. " .

@@ -153,6 +153,15 @@ class agent_pkgagent extends FO_Plugin
     /* Add job: job "Package Agents" has jobqueue item "pkgagent" */
     $jobqueuepk = JobQueueAdd($jobpk,"pkgagent",$jqargs,"yes","pfile_pk",$Dep);
     if (empty($jobqueuepk)) { return("Failed to insert pkgagent into job queue"); }
+    
+    if (CheckEnotification()) {
+      $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
+      				 NULL,NULL,array($jobqueuepk));
+      if ($sched !== NULL) {
+        return($sched);
+      }
+    }
+    
     return(NULL);
   } // AgentAdd()
 
