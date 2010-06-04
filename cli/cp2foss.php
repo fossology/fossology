@@ -224,6 +224,10 @@ function ProcEnote($UploadPk) {
   $UserPk = $Users[0]['job_user_fk'];
   $UserId = $Users[0]['upload_userid'];
 
+  // need to find the jq_pk's of bucket, copyright, nomos and package 
+  // agents to use as dependencies.
+  
+  $Depends = FindDependent($UploadPk);
   /* are we being run as fossy?, either as agent or from command line */
   if($UserId === NULL && $ME == 'fossy') {
     /*
@@ -231,11 +235,11 @@ function ProcEnote($UploadPk) {
      * ensures the email address is correct, the UserName is used for the
      * salutation.
      */
-    $sched = scheduleEmailNotification($UploadPk,$webServer,$UserEmail,$UserName);
+    $sched = scheduleEmailNotification($UploadPk,$webServer,$UserEmail,$UserName,$Depends);
   }
   else {
     /* run as cli, use the email passed in and $ME */
-    $sched = scheduleEmailNotification($UploadPk,$webServer,$Email,$ME);
+    $sched = scheduleEmailNotification($UploadPk,$webServer,$Email,$ME,$Depends);
     print "  Scheduling email notification for $Email\n";
   }
   if ($sched !== NULL) {

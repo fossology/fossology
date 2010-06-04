@@ -72,19 +72,10 @@ class agent_add extends FO_Plugin
         //print "Adding to " . $agentlist[$Found] . "<br>\n";
         $P = &$Plugins[plugin_find_id($agentlist[$Found])];
         $rc .= $P->AgentAdd($uploadpk);
-        $Alist[] = $agentlist[$Found];
       }
       else
       {
         $rc .= "Agent '" . htmlentities($agentlist[$al]) . "' not found.\n";
-      }
-    }
-    if (CheckEnotification()) {
-      /* Create list for dependency checking by enotification */
-      $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
-      				 NULL,NULL,NULL,$Alist,TRUE);
-      if ($sched !== NULL) {
-        return($sched);
       }
     }
     return($rc);

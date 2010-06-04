@@ -92,13 +92,6 @@ class upload_file extends FO_Plugin {
     $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
     AgentCheckBoxDo($uploadpk);
 
-    if (CheckEnotification()) {
-      $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME']);
-      if ($sched !== NULL) {
-        print displayMessage($sched);
-        return($sched);
-      }
-    }
     if($wgetRtn == 0) {
       $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
       $Msg = "The file $Name has been uploaded. It is ";

@@ -80,12 +80,6 @@ class upload_url extends FO_Plugin {
     $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
     AgentCheckBoxDo($uploadpk);
 
-    if (CheckEnotification()) {
-      $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME']);
-      if ($sched !== NULL) {
-        return($sched);
-      }
-    }
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
     $msg = "The upload $Name has been scheduled. It is ";
     $keep =  "<a href='$Url'>upload #" . $uploadpk . "</a>.\n";

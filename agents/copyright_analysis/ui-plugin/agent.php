@@ -129,6 +129,14 @@ class agent_copyright extends FO_Plugin {
     if (empty($jobqueuepk)) {
       return ("Failed to insert agent copyright into job queue.");
     }
+    
+    if (CheckEnotification()) {
+      $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
+      				 NULL,NULL,array($jobqueuepk));
+      if ($sched !== NULL) {
+        return($sched);
+      }
+    }
     return (NULL);
   } // AgentAdd()
 
