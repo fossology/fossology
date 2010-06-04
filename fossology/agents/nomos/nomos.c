@@ -637,10 +637,6 @@ FUNCTION void Bail(int exitval) {
     traceFunc("== Bail(%d)\n", exitval);
 #endif	/* PROC_TRACE */
 
-    (void) chdir(gl.initwd);
-    if (gl.mcookie != (magic_t) NULL) {
-        magic_close(gl.mcookie);
-    }
 #if defined(MEMORY_TRACING) && defined(MEM_ACCT)
     if (exitval) {
         memCacheDump("Mem-cache @ Bail() time:");
@@ -747,18 +743,6 @@ FUNCTION int updateLicenseFile(long rfPk) {
  * \callgraph
  */
 FUNCTION void freeAndClearScan(struct curScan *thisScan) {
-
-    /*
-     Remove scratch dir and contents
-     */
-    (void) mySystem("rm -rf %s", thisScan->targetDir);
-
-    /*
-     Change back to original working directory
-     */
-    /* DBug: printf("freeAndClearScan: changing back to gl.initwd\n"); */
-    changeDir(gl.initwd);
-
     /*
      Clear lists
      */
@@ -783,6 +767,7 @@ FUNCTION void freeAndClearScan(struct curScan *thisScan) {
  */
 FUNCTION void processFile(char *fileToScan) {
 
+  char *pathcopy;
 #ifdef	PROC_TRACE
     traceFunc("== processFile(%s)\n", fileToScan);
 #endif	/* PROC_TRACE */
@@ -801,35 +786,17 @@ FUNCTION void processFile(char *fileToScan) {
      reporting results.
      */
     strcpy(cur.filePath, fileToScan);
-    strcpy(cur.targetDir, TEMPDIR_TEMPLATE);
-    if (!mkdtemp(cur.targetDir)) {
-        perror("mkdtemp");
-        Fatal("%s: cannot make temp directory %s", gl.progName);
-    }
-    chmod(cur.targetDir, 0775);
-    if (mySystem("cp '%s' %s", fileToScan, cur.targetDir)) {
-        Fatal("Cannot copy %s to temp-directory", fileToScan);
-    }
-    strcpy(cur.targetFile, cur.targetDir);
-    strcat(cur.targetFile, "/");
-    strcat(cur.targetFile, basename(fileToScan));
+    pathcopy = strdup(fileToScan);
+    strcpy(cur.targetDir, dirname(pathcopy));
+    free(pathcopy);
+    strcpy(cur.targetFile, fileToScan);
     cur.targetLen = strlen(cur.targetDir);
 
     if (!isFILE(fileToScan)) {
-        Fatal("\"%s\" is not a plain file", *fileToScan);
+      Fatal("\"%s\" is not a plain file", fileToScan);
     }
 
-    /*
-     CDB - How much of this is still necessary?
-
-     chdir to target, call getcwd() to get real pathname; then, chdir back
-
-     We've saved the specified directory in 'gl.targetDir'; now, normalize
-     the pathname (in case we were passed a symlink to another dir).
-     */
-    changeDir(cur.targetDir); /* see if we can chdir to the target */
     getFileLists(cur.targetDir);
-    changeDir(gl.initwd);
     listInit(&cur.fLicFoundMap, 0, "file-license-found map");
     listInit(&cur.parseList, 0, "license-components list");
     listInit(&cur.lList, 0, "license-list");
@@ -1007,7 +974,6 @@ int main(int argc, char **argv) {
             /* turn on the debug log and set debug flag, useful for debugging
              * with the scheduler
              */
-            mdDebug = 1;
             argc--;
             ++argv;
             break;
@@ -1032,16 +998,6 @@ int main(int argc, char **argv) {
     licenseInit();
     gl.flags = 0;
 
-    /*
-     CDB - Would eventually like to get rid of the file magic stuff
-     in the agent and let other parts of FOSSology handle it.
-     */
-    if ((gl.mcookie = magic_open(MAGIC_NONE)) == (magic_t) NULL) {
-        Fatal("magic_open() fails!");
-    }
-    if (magic_load(gl.mcookie, NULL_STR)) {
-        Fatal("magic_load() fails!");
-    }
     if (file_count == 0) 
     {
         char *repFile;

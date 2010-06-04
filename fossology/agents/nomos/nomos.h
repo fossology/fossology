@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006,2009 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006,2009,2010 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -34,6 +34,7 @@
 #include <getopt.h>
 #include <time.h>
 #include <magic.h>
+#include <libgen.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -62,6 +63,12 @@
 #define	myBUFSIZ	2048
 #define	MAX_RENAME	1000
 
+/* MAX_SCANBYTES is the maximum number of bytes that will be scanned
+ * in a file.  Historically, we have never found a license more than
+ * 64k into a file.  
+ */
+#define MAX_SCANBYTES 1024*1024
+
 /*
  * Program options and flags
  *
@@ -69,18 +76,6 @@
  */
 #define	OPTS_DEBUG		0x1
 #define	OPTS_TRACE_SWITCH	0x2
-
-/*
- * debug variable, used by everyone, put it here.
- *
- * 0 = off
- * !0 = on
- */
-
-/*
- * Mark's variables (for now)
- */
-int mdDebug;
 
 char debugStr[myBUFSIZ];
 char dbErrString[myBUFSIZ];
@@ -359,7 +354,6 @@ struct scanResults {
     int flag;
     int dataOffset;
     char fullpath[myBUFSIZ];
-    char ftype[256];
     char linkname[16];
     char *licenses;
     char *relpath;
