@@ -42,7 +42,6 @@
 #define	HASHES		"#####################"
 #define	DEBCPYRIGHT	"debian/copyright"
 
-static void prettyPrint(FILE *, char *, int);
 static void makeLicenseSummary(list_t *, int, char *, int);
 static void noLicenseFound();
 #ifdef notdef
@@ -634,11 +633,6 @@ void licenseScan(list_t *licenseList) {
             cur.stbuf.st_size -= scp->dataOffset;
         }
         scp->size = cur.stbuf.st_size; /* Where did this get set ? CDB */
-        (void) strcpy(scp->ftype, magic_buffer(gl.mcookie, textp,
-                (size_t) scp->size));
-#ifdef	DEBUG
-        printf("Magic: %s\n", scp->ftype);
-#endif	/* DEBUG */
         /*
          * Disinterest #3 (discriminate-by-file-content):
          * Files not of a known-good type (as reported by file(1)/magic(3)) should
@@ -651,7 +645,6 @@ void licenseScan(list_t *licenseList) {
          * FIX-ME: we don't currently use _UTIL_FILTER, which is set up to
          * exclude some files by filename.
          */
-        if (idxGrep(_UTIL_MAGIC, scp->ftype, REG_ICASE | REG_EXTENDED)) {
             for (scp->kwbm = c = 0; c < NKEYWORDS; c++) {
                 if (idxGrep(c + _KW_first, textp, REG_EXTENDED | REG_ICASE)) {
                     scp->kwbm |= (1 << c);
@@ -661,10 +654,6 @@ void licenseScan(list_t *licenseList) {
 #endif	/* DEBUG > 5 */
                 }
             }
-        }
-        else {
-            scp->score = 0;
-        }
         munmapFile(textp);
 #if	(DEBUG > 5)
         printf("%s = %d\n", (char *)(scp->fullpath+scp->nameOffset),
@@ -803,15 +792,12 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     int base;
     int size;
     int highScore = scores->score;
-    int fCnt;
     int isML = 0;
     int isPS = 0;
     int offset;
     int idx;
     char *fileName;
     char *textp;
-    FILE *linkFp;
-    FILE *scoreFp;
     item_t *p;
 
 #ifdef	PROC_TRACE
@@ -835,8 +821,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
      * registers instead of accessing everything through the scanres
      * array?  We've got to be doing some serious address calculations.
      */
-    scoreFp = fopenFile(FILE_SCORES, "w");
-    fCnt = 0;
     i = 1;
 
     for (idx = 0; i <= nCand; idx++) {
@@ -846,14 +830,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
         if (scores[idx].flag == 0) {
             continue;
         }
-        if (scores[idx].flag > 1) {
-            fCnt++;
-        }
-        fprintf(scoreFp, "%7d %s\n", scores[idx].score, scores[idx].relpath);
         (void) sprintf(scores[idx].linkname, "Link%03d.txt", i++);
-        linkFp = fopenFile(scores[idx].linkname, "w+");
-        fprintf(linkFp, "[%s]\n%s %s\n", LABEL_ATTR, LABEL_PATH,
-                scores[idx].relpath);
 #if	DEBUG > 5
         printf("name: %s\n[%s]\n", scores[idx].relpath, scores[idx].fullpath);
 #endif	/* DEBUG > 5 */
@@ -883,17 +860,14 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
          important side-effect of setting nLines and nWords in the
          global structure "cur".
          */
-        fprintf(linkFp, "Type: %s\n%s %s, %d bytes\n", scores[idx].ftype,
-                LABEL_CNTS, wordCount(textp), scores[idx].size);
+        wordCount(textp);
         /*
          * Report which package (if any) this file came from
          */
-        fprintf(linkFp, "Package: %s\n", STR_NOTPKG);
 
         /*
          * construct the list of keywords that matched in licenseScan()
          */
-        fprintf(linkFp, "Score: %d\n", scores[idx].score);
         (void) strcpy(miscbuf, "Matches: ");
         offset = 9; /* e.g., strlen("Matches: ") */
         for (base = c = 0; c < NKEYWORDS; c++) {
@@ -910,7 +884,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
          * of 1 could be either 0 or 1, so scores[idx].kwbm tells the real story...
          */
         if (optionIsSet(OPTS_DEBUG)) {
-            printf("File type: %s\n", scores[idx].ftype);
             printf("File score: %d (0x%06x)\n",
                     (scores[idx].kwbm ? scores[idx].score : scores[idx].kwbm),
                     scores[idx].kwbm);
@@ -918,11 +891,9 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
                 printf("%s\n", miscbuf);
             }
         }
-        prettyPrint(linkFp, miscbuf, 3);
         /*
          * Print the license claim (e.g., what's listed in the package)
          */
-        fprintf(linkFp, "License Claim: %s\n", STR_NOTPKG);
         /*
          * determine licenses in the file, and record 'em; wrap up by including
          * the file contents
@@ -939,8 +910,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     || defined(BATCH_DEBUG) || defined(PARSE_STOPWATCH) || defined(MEMSTATS) \
     || defined(MEM_DEBUG) || defined(UNKNOWN_CHECK_DEBUG)
         printf("*** PROCESS File: %s\n", scores[idx].relpath);
-        printf("... %d bytes, score %d, %s\n", scores[idx].size, scores[idx].score,
-                scores[idx].ftype);
+        printf("... %d bytes, score %d\n", scores[idx].size, scores[idx].score);
 #endif /* DEBUG || DOCTOR_DEBUG || LTSR_DEBUG || BATCH_DEBUG || PARSE_STOPWATCH || MEMSTATS || MEM_DEBUG || defined(UNKNOWN_CHECK_DEBUG)*/
         isML = idxGrep(_UTIL_MARKUP, textp, REG_ICASE | REG_EXTENDED);
 #ifdef	DOCTOR_DEBUG
@@ -960,19 +930,11 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
          * "utf-8 unicode" are searched independently, parsing definitely finds
          * quantifiable licenses. WHY?
          */
-        if (idxGrep(_FTYP_POSTSCR, scores[idx].ftype, REG_ICASE) || idxGrep(
-                _FTYP_UTF8, scores[idx].ftype, REG_ICASE) || idxGrep(_FTYP_RTF,
-                scores[idx].ftype, REG_ICASE)) {
-            isPS = 1;
-        }
 #ifdef	DOCTOR_DEBUG
         printf("idxGrep(PS) returns %d\n", isPS);
         if (isPS) {
             int n;
             printf("isPostScript@%d: [", cur.regm.rm_so);
-            for (n = cur.regm.rm_so; n <= cur.regm.rm_eo; n++) {
-                printf("%c", *(scores[idx].ftype + n));
-            }
             printf("]\n");
         }
 #endif	/* DOCTOR_DEBUG */
@@ -1000,22 +962,11 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
             p->num = scores[idx].score;
         }
 #endif	/* FLAG_NO_COPYRIGHT */
-        fprintf(linkFp, "License(s) Found: %s\n", scores[idx].licenses);
         if (cur.licPara != NULL_STR) {
-            if (gl.flags & FL_FRAGMENT) {
-                fprintf(linkFp, "[- Pattern(fragment) text -]\n\"%s\"\n",
-                        cur.licPara);
-            }
-            else {
-                fprintf(linkFp, "[- Possible license text/snippet -]\n%s\n",
-                        cur.licPara);
-            }
             memFree(cur.licPara, MTAG_TEXTPARA); /* be free! */
             cur.licPara = NULL_STR; /* remember */
         }
-        fprintf(linkFp, "[%s]\n%s", LABEL_TEXT, textp);
         munmapFile(textp);
-        (void) fclose(linkFp);
 
         /*
          * Remember this license in this file...
@@ -1037,11 +988,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 #endif /* fix_later */
     }
 
-#ifdef	MEMSTATS
-    memStats("saveLicenseData: out of loop");
-#endif	/* MEMSTATS */
-
-    (void) fclose(scoreFp);
     listSort(&cur.lList, SORT_BY_COUNT_DSC);
 
 #ifdef	QA_CHECKS
@@ -1083,51 +1029,6 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
     return;
 } /* saveLicenseData */
 
-/*
- * pretty-print the keywords into possibly _several_ formatted lines
- * e.g., 'fmt -t'
- */
-#define	_PP_LINESIZE	72	/* formatting limit */
-
-static void prettyPrint(FILE *fp, char *s, int indentLen) {
-    static char pbuf[myBUFSIZ * 2];
-    char *cp1 = pbuf;
-    char *cp2;
-    int len;
-
-    if ((len = strlen(s)) > sizeof(pbuf)) {
-        Warn("buffer contents \"%s\"", s);
-        Fatal("Pretty-print data too long (%d)!", len);
-    }
-    strcpy(pbuf, s);
-    if (indentLen > 10) {
-        indentLen = 10;
-    }
-    else if (indentLen < 0) {
-        indentLen = 0;
-    }
-
-    while (isspace(*cp1)) { /* skip leading white-space */
-        cp1++;
-    }
-
-    while (strlen(cp1) > _PP_LINESIZE) {
-        cp2 = (char *) (cp1 + _PP_LINESIZE - 1);
-        while ((*cp2 != ' ') && (cp2 > cp1)) {
-            cp2--;
-        }
-        *cp2 = NULL_CHAR; /* end line */
-        fprintf(fp, "%s\n", cp1); /* dump line */
-        *cp2 = ' '; /* reset it */
-        cp1 = cp2 + 1; /* indented line */
-        if (indentLen) {
-            cp1 -= indentLen;
-            strncpy(cp1, "          ", indentLen);
-        }
-    }
-    fprintf(fp, "%s\n", cp1);
-    return;
-}
 
 /*
  * Construct a 'computed license'.  Wherever possible, leave off the

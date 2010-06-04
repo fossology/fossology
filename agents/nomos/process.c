@@ -125,8 +125,6 @@ void processRawSource()
 	traceFunc("== processRawSource()\n");
 #endif	/* PROC_TRACE */
 
-    changeDir(cur.targetDir);
-
 #ifdef	PACKAGE_DEBUG
     listDump(&cur.regfList, NO);
 #endif	/* PACKAGE_DEBUG */
