@@ -288,8 +288,8 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 				continue;
 			}
 			/* Only delete indexes that are different */
-			print "DBG: RMINDEX: sql of schema is:{$Schema['INDEX'][$Table][$Name]}\n";
-			print "DBG: RMINDEX: sql of Current is:$SQL\n";
+			//print "DBG: RMINDEX: sql of schema is:{$Schema['INDEX'][$Table][$Name]}\n";
+			//print "DBG: RMINDEX: sql of Current is:$SQL\n";
 			if ($Schema['INDEX'][$Table][$Name] == $SQL) {
 				continue;
 			}
@@ -321,8 +321,8 @@ function ApplySchema($Filename = NULL, $Debug, $Verbose = 1)
 			if (empty($Name)) {
 				continue;
 			}
-			print "DBG: ADDINDEX: sql of schema is:$SQL}\n";
-			print "DBG: ADDINDEX: sql of Currnt is:{$Curr['INDEX'][$Table][$Name]}\n";
+			//print "DBG: ADDINDEX: sql of schema is:$SQL}\n";
+			//print "DBG: ADDINDEX: sql of Currnt is:{$Curr['INDEX'][$Table][$Name]}\n";
 			if ($Curr['INDEX'][$Table][$Name] == $SQL) {
 				continue;
 			}
