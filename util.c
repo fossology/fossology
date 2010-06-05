@@ -1091,10 +1091,13 @@ char *mmapFile(char *pathname)	/* read-only for now */
 	rem = mmp->size-1;
 	cp = mmp->mmPtr;
 	while (rem > 0) {
-	    if ((n = (int) read(mmp->fd, cp, (size_t) rem)) < 0) {
-		perror("read");
-		Bail(15);
-	    }
+    if ((n = (int) read(mmp->fd, cp, (size_t) rem)) < 0) {
+      /* log error and move on.  This way error will be logged
+       * but job will continue
+       */
+      printf("WARNING nomos read error: %s, file: %s, read size: %d, pfile_pk: %ld\n", strerror(errno), pathname, rem, cur.pFileFk);
+      break;
+    }
 	    rem -= n;
 	    cp += n;
 	}
