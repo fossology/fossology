@@ -55,7 +55,7 @@ function SelectBucketPool($selected)
   {
     $select .= "<option value='$row[bucketpool_pk]'";
     if ($row['bucketpool_pk'] == $selected) $select .= " SELECTED ";
-    $select .= ">$row[bucketpool_name]\n";
+    $select .= ">$row[bucketpool_name], v $row[version]\n";
   }
   $select .= "</select>";
   return $select;
