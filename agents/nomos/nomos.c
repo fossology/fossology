@@ -878,7 +878,6 @@ int main(int argc, char **argv) {
     char sqlbuf[1024];
     PGresult *result;
     PGresult *ars_result;
-    PGresult *cmd_result;
 
     cacheroot_t cacheroot;
 
@@ -1067,9 +1066,6 @@ int main(int argc, char **argv) {
           if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) exit(-1);
           numrows = PQntuples(result);
 
-          cmd_result = PQexec(gl.pgConn, "begin");
-          if (checkPQcommand(cmd_result, "begin", __FILE__, __LINE__)) return -1;
-
           /* process all files in this upload */
           for (i=0; i<numrows; i++)
           {
@@ -1096,8 +1092,6 @@ int main(int argc, char **argv) {
             Heartbeat(++HBItemsProcessed);
           }
           PQclear(result);
-          cmd_result = PQexec(gl.pgConn, "commit");
-          if (checkPQcommand(cmd_result, "commit", __FILE__, __LINE__)) return -1;
 
           /* Record analysis success in nomos_ars. */
           snprintf(sqlbuf, sizeof(sqlbuf),
