@@ -12,7 +12,7 @@ Source:         PBREPO/PBSRC
 #PBPATCHSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 Requires:       postgresql >= 8.1.11 php >= 5.1.6 php-pear >= 5.16 php-pgsql >= 5.1.6 libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip p7zip httpd which PBDEP
-BuildRequires:  postgresql-devel >= 8.1.11 libxml2 gcc make perl rpm-devel PBBUILDDEP
+BuildRequires:  postgresql-devel >= 8.1.11 libxml2 gcc make perl rpm-devel Pyrex python python-devel PBBUILDDEP
 Summary:        FOSSology is a licenses exploration tool
 Summary(fr):    FOSSology est un outil d'exploration de licenses
 
@@ -87,6 +87,18 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_libdir}/*.a
 
 %post
+# If upgrade from 1.1, rename 1.1 Scheduler.conf file
+if [ $1 -eq  2 ]; then
+	if [ -f "%{_sysconfdir}/PBPROJ/Scheduler.conf" -o -L "%{_sysconfdir}/PBPROJ/Scheduler.conf" ]; then
+		echo "NOTE: found old Scheduler.conf, saving to Scheduler.conf.fo_1.1;"
+		echo "  Create new default Scheduler.conf;"
+		echo "  Please check that is it correct for your enviroment or"
+		echo "  Create a different one with mkschedconf."
+		cp %{_sysconfdir}/PBPROJ/Scheduler.conf %{_sysconfdir}/PBPROJ/Scheduler.conf.fo_1.1
+		rm -f %{_sysconfdir}/PBPROJ/Scheduler.conf
+	fi
+fi
+
 # Check postgresql is running
 LANGUAGE=C /etc/init.d/postgresql status 2>&1 | grep -q stop
 if [ $? -eq 0 ]; then
@@ -139,7 +151,6 @@ chkconfig --add httpd
 #touch %{_var}/log/PBPROJ
 # Handle logfile owner correctly
 #chown fossy:fossy %{_var}/log/PBPROJ
-
 # Test that things are installed correctly
 /usr/lib/PBPROJ/fossology-scheduler -t
 if [ $? -ne 0 ]; then
