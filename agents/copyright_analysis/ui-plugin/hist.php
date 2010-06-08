@@ -104,6 +104,9 @@ class copyright_hist extends FO_Plugin
     else
       $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
+    /* set maximum number of rows to display */
+    $max_rows = 2000;
+
     /*  Get the counts under this UploadtreePk*/
     $sql = "SELECT DISTINCT ON (count(content),content, hash, type) content, hash, type, count(content) as copyright_count
               from copyright,
@@ -112,7 +115,7 @@ class copyright_hist extends FO_Plugin
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$Agent_pk 
               group by content, hash, type 
-              order by copyright_count desc";
+              order by copyright_count desc limit $max_rows";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
@@ -129,7 +132,18 @@ class copyright_hist extends FO_Plugin
     $CopyrightCount = 0;
     $UniqueCopyrightCount = 0;
     $NoCopyrightFound = 0;
-    $VCopyright = "<table border=1 width='100%' id='copyright'>\n";
+    $VCopyright = "";
+
+    /* In the unlikely event that there are exactly $max_rows in the result, this
+     * warning will be displayed even though all the rows are going to be displayed.
+     * Otherwise, the warning is correct.
+     */
+    if (pg_num_rows($result) == $max_rows)
+    {
+      $VCopyright .= "<h2>Too many rows to display.  Only first $max_rows shown.</h2>";
+    }
+    
+    $VCopyright .= "<table border=1 width='100%' id='copyright'>\n";
     $VCopyright .= "<tr><th width='10%'>Count</th>";
     $VCopyright .= "<th width='10%'>Files</th>";
     $VCopyright .= "<th>Copyright Statements</th></tr>\n";
