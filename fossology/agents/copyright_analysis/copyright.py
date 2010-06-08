@@ -271,10 +271,11 @@ def agent(model,runonpfiles=False):
                 if db.access(sql) != 1:
                     error = db.errmsg()
                     raise Exception('Could not select job queue for copyright analysis. Database said: "%s".\n\tsql=%s' % (error, sql))
+                
+                n = db.datasize()
 
-                rows = db.getrows()
-
-                for row in rows:
+                for i in xrange(n):
+                    row = db.nextrow(i)
                     if analyze(row['pfile_pk'], row['pfilename'], agent_pk, model, db) != 0:
                         print >> sys.stdout, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, row['pfile_pk'], row['pfilename'])
                     else:
