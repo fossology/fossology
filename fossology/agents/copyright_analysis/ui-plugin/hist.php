@@ -174,7 +174,6 @@ class copyright_hist extends FO_Plugin
     $VUrl .= "<th width='10%'>Files</th>";
     $VUrl .= "<th>URL</th></tr>\n";
 
-    /* sort results by copyright notation, then alpha */
     $rows = pg_fetch_all($result);
     uasort($rows, 'hist_rowcmp');
 
