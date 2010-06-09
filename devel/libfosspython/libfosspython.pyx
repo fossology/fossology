@@ -283,7 +283,7 @@ cdef class FossDB:
         
         Returns a dictionary containing the resutls of a key value pair
         """
-        dict = []
+        dict = {}
         
         d = self.colsize()
         
