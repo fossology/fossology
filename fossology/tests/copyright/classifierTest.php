@@ -71,12 +71,12 @@ class classifier extends fossologyTestCase
 		$pat = '/^Test[0-9]+\spassed\s([0-9]+).*?([0-9]+)/';
 		
 		// check results for test1
-		$matches = preg_match_all($pat, $results[2], $found);
+		$matches = preg_match_all($pat, $results[4], $found);
 		//print "matches found are:\n";print_r($found) . "\n";
-		if($results[1][0] != $results[2][0])
+		if($results[0] != $results[1])
 		{
 			$this->fail("tests.py had test failures\n" .
-									"test1 passes $results[1][0] differs from total:$results[2][0]\n");
+									"test1 passes $results[0] differs from total:$results[1]\n");
 		}
 		else
 		{
@@ -84,12 +84,12 @@ class classifier extends fossologyTestCase
 		}
 
 		// check results for test2
-		$matches = preg_match_all($pat, $results[6], $found);
+		$matches = preg_match_all($pat, $results[10], $found);
 		//print "matches found are:\n";print_r($found) . "\n";
-		if($results[1][0] != $results[2][0])
+		if($results[6] != $results[7])
 		{
 			$this->fail("tests.py had test failures\n" .
-									"test2 passes $results[1][0] differs from total:$results[2][0]\n");
+									"test2 passes $results[6] differs from total:$results[7]\n");
 		}
 		else
 		{
