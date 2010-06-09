@@ -372,7 +372,7 @@ class jobs_showjobs extends FO_Plugin
 
     /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
     $sql = "select uploadtree_pk from uploadtree 
-                where parent is NULL and upload_fk=$Upload ";
+                where parent is NULL and upload_fk='$Upload' ";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if ( pg_num_rows($result))
