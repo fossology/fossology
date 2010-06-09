@@ -24,6 +24,15 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+
+/***********************************************************
+ Sort query histogram results 
+ ***********************************************************/
+function hist_rowcmp($rowa, $rowb)
+{
+  return (strnatcasecmp(ltrim($rowa['content'], "<(."), ltrim($rowb['content'], "<(.")));
+}
+
 class copyright_hist extends FO_Plugin
 {
   var $Name       = "copyrighthist";
@@ -67,6 +76,7 @@ class copyright_hist extends FO_Plugin
       }
     }
   } // RegisterMenus()
+
 
   /***********************************************************
    ShowUploadHist(): Given an $Uploadtree_pk, display:
@@ -115,7 +125,7 @@ class copyright_hist extends FO_Plugin
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$Agent_pk 
               group by content, hash, type 
-              order by copyright_count desc limit $max_rows";
+              limit $max_rows";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
@@ -164,7 +174,11 @@ class copyright_hist extends FO_Plugin
     $VUrl .= "<th width='10%'>Files</th>";
     $VUrl .= "<th>URL</th></tr>\n";
 
-    while ($row = pg_fetch_assoc($result))
+    /* sort results by copyright notation, then alpha */
+    $rows = pg_fetch_all($result);
+    uasort($rows, 'hist_rowcmp');
+
+    foreach($rows as $row)
     {
 
         if ($row['content'] == '') {
@@ -349,6 +363,7 @@ class copyright_hist extends FO_Plugin
 
     return($V);
   } // ShowUploadHist()
+
 
   /***********************************************************
    Output(): This function returns the scheduler status.
