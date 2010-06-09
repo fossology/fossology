@@ -276,6 +276,21 @@ cdef class FossDB:
             rows.append(rowdict)
 
         return rows
+    
+    def nextrow(self, i):
+        """
+        FossDB.nextrow() -> (dict(), ...)
+        
+        Returns a dictionary containing the resutls of a key value pair
+        """
+        dict = []
+        
+        d = self.colsize()
+        
+        for j in xrange(d) :
+            dict[self.getcolname(j)] = self.getvalue(i,j)
+        
+        return dict
 
     def errmsg(self):
         """
