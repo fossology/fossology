@@ -24,7 +24,7 @@
   *
  * @param URL obtained from the test enviroment globals
  *
- * @version "$Id:  $"
+ * @version "$Id$"
  *
  * Created on June 10, 2010
  */
