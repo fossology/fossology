@@ -8,7 +8,7 @@
 filter PBREPO = $pb->{'repo'}
 
 # PBSRC is replaced by the source package location after the repo
-filter PBSRC = src/%{name}-%{version}.tar.gz
+filter PBSRC = http://sourceforge.net/projects/fossology/files/fossology/%{name}-%{version}.tar.gz
 # Used if virtual name != real name (perl, ...)
 #filter PBSRC = src/%{srcname}-%{version}.tar.gz
 
@@ -46,7 +46,7 @@ filter PBPROJ = $pb->{'proj'}
 filter PBPACKAGER = $pb->{'packager'}
 
 # PBDESC contains the description of the package
-filter PBDESC = "FOSSology is a licenses exploration tool"
+filter PBDESC = An open and modular architecture for analyzing software. Currently specializing on license detection.
 
 # PBURL contains the URL of the Web site of the project
 filter PBURL = http://www.fossology.org

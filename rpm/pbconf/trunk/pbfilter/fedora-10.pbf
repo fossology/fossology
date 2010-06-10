@@ -19,8 +19,9 @@ filter PBDEP = libextractor libextractor-plugins cabextract genisoimage upx sleu
 filter PBBUILDDEP = libextractor-devel file-libs file-devel perl-Text-Template
 
 # PBSUF is replaced by the package suffix ($pbsuf'} in code)
-filter PBSUF = %{dist}
+filter PBSUF = $pb->{'suf'}
 
 # PBOBS is replaced by the Obsolete line
 #filter PBOBS =
 
+filter PBPHPINI = /etc/php.ini
