@@ -128,11 +128,19 @@ function _runTestEnvSetup() {
 	LogAndPrint($LF, "\n");
 	$UpLast = exec("./uploadTestData.php >> $logFile 2>&1", $dummy, $SUrtn);
 	LogAndPrint($LF, "\n");
-	$AALast = exec("./fo-runTests.php AgentAddData.php -n 'Agent Add Uploads'>> $logFile 2>&1", $dummy, $AArtn);
+	$UpLast = exec("./fo-runTests.php  -l uploadCopyrightData.php >> $logFile 2>&1", $dummy, $Copyrtn);
+	$AALast = exec("./fo-runTests.php -l AgentAddData.php -n 'Agent Add Uploads'>> $logFile 2>&1", $dummy, $AArtn);
 	LogAndPrint($LF, "\n");
 	// need to check the return on the setup and report accordingly.
 	if ($SUrtn != 0) {
 		LogAndPrint($LF, "ERROR when running uploadTestData.php\n");
+		foreach($dummy as $ErrorLine) {
+			print "$ErrorLine\n";
+		}
+		$errors++;
+	}
+	if ($Copyrtn != 0) {
+		LogAndPrint($LF, "ERROR when running uploadCopyrightData.php\n");
 		foreach($dummy as $ErrorLine) {
 			print "$ErrorLine\n";
 		}
