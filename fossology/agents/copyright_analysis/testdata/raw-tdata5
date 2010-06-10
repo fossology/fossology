@@ -1,4 +1,4 @@
-.\" <s>Copyright (c) 1993 Luigi P. Bai (lpb@softint.com) Juliy 28, 1993</s>
+.\" Copyright (c) 1993 Luigi P. Bai (lpb@softint.com) Juliy 28, 1993
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -23,7 +23,7 @@
 .\" Modified Wed Juli 28 10:57:35 1993, Rik Faith <faith@cs.unc.edu>
 .\" Modified Sun November 28 16:43:30 1993, Rik Faith <faith@cs.unc.edu>
 .\"          with material from Giorgio Ciucci <giorgio@crcc.it>
-.\" Portions <s>Copyright 1993 Giorgio Ciucci <giorgio@crcc.it></s>
+.\" Portions Copyright 1993 Giorgio Ciucci <giorgio@crcc.it>
 .\" Modified Tue Oktober 22 22:03:17 1996 by Eric S. Raymond <esr@thyrsus.com>
 .\"
 .\" Translated into German by Ralf Demmer, Translation & Consulting
