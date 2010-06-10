@@ -66,8 +66,6 @@ struct cacheroot
 };
 typedef struct cacheroot cacheroot_t;
 
-#define	_MAXFILESIZE	/* was 512000000-> 800000000 */	1600000000
-#define TEMPDIR_TEMPLATE "/tmp/nomos.agent.XXXXXX"
 #define FUNCTION
 
 int   checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb);
