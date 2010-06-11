@@ -645,7 +645,7 @@ function JobListSummary($upload_pk) {
     } else {
       $State|= 0x04;
     }
-    if(count($Results) > 1) {
+    if(count($Results) >= 1) {
       $i++;
     }
     if (array_key_exists($i, $Results) && array_key_exists('job_pk',$Results[$i]))
