@@ -273,11 +273,15 @@ def agent(model,runonpfiles=False):
                     raise Exception('Could not select job queue for copyright analysis. Database said: "%s".\n\tsql=%s' % (error, sql))
                 
                 n = db.datasize()
+                jobs = []
 
                 for i in xrange(n):
                     row = db.nextrow(i)
-                    if analyze(row['pfile_pk'], row['pfilename'], agent_pk, model, db) != 0:
-                        print >> sys.stdout, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, row['pfile_pk'], row['pfilename'])
+                    jobs.append(row)
+
+                for i in xrange(n):
+                    if analyze(jobs[i]['pfile_pk'], jobs[i]['pfilename'], agent_pk, model, db) != 0:
+                        print >> sys.stdout, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, jobs[i]['pfile_pk'], jobs[i]['pfilename'])
                     else:
                         hb.increment()
 
