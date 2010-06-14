@@ -185,7 +185,12 @@ class ui_buckets extends FO_Plugin
       if (pg_num_rows($result) > 0) $nomosagent_pk = $AgentRow['nomosagent_fk'];
     }
 
-/*  select all the buckets for entire tree 
+    /* Create bucketDefArray as individual query this is MUCH faster
+       than incorporating it with a join in the following queries.
+     */
+    $bucketDefArray = initBucketDefArray($bucketpool_pk);
+
+    /*select all the buckets for entire tree */
     $sql = "SELECT distinct(bucket_fk) as bucket_pk, 
                    count(bucket_fk) as bucketcount
               from bucket_file, 
@@ -197,59 +202,10 @@ class ui_buckets extends FO_Plugin
                     and bucket_file.nomosagent_fk=$nomosagent_pk
               group by bucket_fk 
               order by bucketcount desc"; 
-*/
-
-    /* find the children  and sum their buckets */
-    $Children = GetNonArtifactChildren($Uploadtree_pk);
-    $combinedHisto = array();
-    // ignore notice from adding to nonexistant rows, php will just create them
-    $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
-    foreach($Children as $Child)
-    {
-      $sql = "SELECT bucket_fk from bucket_file,uploadtree 
-                     where uploadtree_pk=$Child[uploadtree_pk]
-                       and bucket_file.pfile_fk=uploadtree.pfile_fk 
-                       and agent_fk=$bucketagent_pk 
-                       and bucket_file.nomosagent_fk=$nomosagent_pk";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-      /* accumulate bucket counts
-       * array[bucket_pk] = count
-       */
-      while ($bucket = pg_fetch_assoc($result)) $combinedHisto[$bucket['bucket_fk']]++;
+      $historows = pg_fetch_all($result);
       pg_free_result($result);
-
-      /* Now get the bucket_container recs.  */
-      $sql = "SELECT bucket_fk from bucket_container
-                     where uploadtree_fk=$Child[uploadtree_pk]
-                       and agent_fk=$bucketagent_pk 
-                       and nomosagent_fk=$nomosagent_pk";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-      /* accumulate bucket counts
-       * array[bucket_pk] = count
-       */
-      while ($bucket = pg_fetch_assoc($result)) $combinedHisto[$bucket['bucket_fk']]++;
-      pg_free_result($result);
-
-    }
-    error_reporting($errlev); 
-
-    /* Create bucketDefArray as individual query this is MUCH faster
-       than incorporating it with a join in the previous queries.
-     */
-    $sql = "select * from bucket_def where bucketpool_fk=$bucketpool_pk";
-    $result_name = pg_query($PG_CONN, $sql);
-    DBCheckResult($result_name, $sql, __FILE__, __LINE__);
-    $bucketDefArray = array();
-    while ($name_row = pg_fetch_assoc($result_name)) 
-      $bucketDefArray[$name_row['bucket_pk']] = $name_row;
-    pg_free_result($result_name);
-
-    /* sort $combinedHisto by the count */
-    arsort($combinedHisto);
 
     /* Get agent list */
     $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
@@ -269,9 +225,11 @@ class ui_buckets extends FO_Plugin
     $VLic .= "<th width='10%'>Files</th>";
     $VLic .= "<th>Bucket</th></tr>\n";
 
-    foreach($combinedHisto as $bucket_pk => $bucketcount)
+    foreach($historows as $bucketrow)
     {
       $Uniquebucketcount++;
+      $bucket_pk = $bucketrow['bucket_pk'];
+      $bucketcount = $bucketrow['bucketcount'];
       $bucket_name = $bucketDefArray[$bucket_pk]['bucket_name'];
       $bucket_color = $bucketDefArray[$bucket_pk]['bucket_color'];
 
@@ -361,9 +319,12 @@ class ui_buckets extends FO_Plugin
       if ($HasHref) { $VF .= "</a>"; }
 
       /* print buckets */
+      $BuckArray = GetFileBuckets($nomosagent_pk, $bucketagent_pk, $C['uploadtree_pk']);
       $VF .= "<br>";
       $VF .= "<span style='position:relative;left:1em'>";
-      $VF .= GetFileLicenses_string($nomosagent_pk, $C['pfile_fk'], $C['uploadtree_pk']);
+      /* get color coded string of bucket names */
+      $VF .= GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $C['uploadtree_pk'],
+                 $BuckArray, $bucketDefArray, ",", True);
       $VF .= "</span>";
       $VF .= "</td><td valign='top'>";
 
