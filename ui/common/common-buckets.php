@@ -62,64 +62,122 @@ function SelectBucketPool($selected)
 }
 
 /*
- * Return all the buckets for a single file or uploadtree
+ * Return all the unique bucket_pk's for a given uploadtree_pk and
  * for a given nomos and bucket agent.
  * Inputs:
  *   $nomosagent_pk
  *   $bucketagent_pk
- *   $pfile_pk       (if empty, $uploadtree_pk must be given)
- *   $uploadtree_pk  (used only if $pfile_pk is empty)
+ *   $uploadtree_pk  
  * Returns:
- *   sql result for the result bucket_file records plus bucket_name
- *   FATAL if neither pfile_pk or uploadtree_pk were given
+ *   array of unique bucket_pk's, may be empty if no buckets.
+ *   FATAL if any input is missing
  */
-function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $pfile_pk, $uploadtree_pk)
+function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk)
+{
+  global $PG_CONN;
+  $BuckArray = array();
+
+  if (empty($nomosagent_pk)|| empty($bucketagent_pk) || empty($uploadtree_pk)) 
+     Fatal("Missing parameter: nomosagent_pk $nomosagent_pk, bucketagent_pk: $bucketagent_pk, uploadtree_pk: $uploadtree_pk<br>", __FILE__, __LINE__);
+
+  /* Find lft and rgt bounds for this $uploadtree_pk  */
+  $sql = "SELECT lft,rgt,upload_fk FROM uploadtree 
+            WHERE uploadtree_pk = $uploadtree_pk";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) < 1)
+  {
+    pg_free_result($result);
+    return $BuckArray;
+  }
+  $row = pg_fetch_assoc($result);
+  $lft = $row["lft"];
+  $rgt = $row["rgt"];
+  $upload_pk = $row["upload_fk"];
+  pg_free_result($result);
+
+  /*select all the buckets for this tree */
+  $sql = "SELECT distinct(bucket_fk) as bucket_pk
+            from bucket_file, 
+                (SELECT distinct(pfile_fk) as PF from uploadtree 
+                   where upload_fk=$upload_pk 
+                     and ((ufile_mode & (1<<28))=0)
+                     and uploadtree.lft BETWEEN $lft and $rgt) as SS
+            where PF=pfile_fk and agent_fk=$bucketagent_pk 
+                  and bucket_file.nomosagent_fk=$nomosagent_pk";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  while ($row = pg_fetch_assoc($result)) $BuckArray[] = $row['bucket_pk'];
+  pg_free_result($result);
+
+  return $BuckArray;
+}
+
+
+/* Returns string of $delimiter delimited bucket names for the given inputs.
+ * Args are same as GetFileBuckets().
+ * $BuckArray is bucket_pk array, see GetFileBuckets().
+ * $bucketDefArray is array of bucket_def records indexed by bucket_pk
+ *        see initBucketDefArray().
+ * $delimiter is delimiter string to use to seperate bucket names.
+ * $color if True, the string is returned as html with bucket names
+          color coded.
+ */
+function GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, 
+                               $BuckArray, $bucketDefArray, $delimiter, $color)
+{
+  $outstr = "";
+
+  $BuckArray = GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk);
+  if (empty($BuckArray)) return "";
+
+  /* convert array of bucket_pk's to array of bucket names */
+  $BuckNames = array();
+  foreach ($BuckArray as $bucket_pk) 
+  {
+    $BuckNames[$bucket_pk] = $bucketDefArray[$bucket_pk]['bucket_name'];
+  }
+
+  /* sort $BuckArray */
+  natcasesort($BuckNames);
+
+  $first = true;
+  foreach ($BuckNames as $bucket_name)
+  {
+    if ($first)
+      $first = false;
+    else
+      $outstr .= $delimiter . " ";
+
+    if ($color)
+    {
+      $bucket_pk = array_search($bucket_name, $BuckNames);
+      $bucket_color = $bucketDefArray[$bucket_pk]['bucket_color'];
+      $outstr .= "<span style='background-color:$bucket_color'>";
+      $outstr .= $bucket_name;
+      $outstr .= "</span>";
+    }
+    else
+      $outstr .= $bucket_name;
+  }
+  
+  return $outstr;
+}
+
+
+/* Initializes array of bucket_def records.
+ */
+function initBucketDefArray($bucketpool_pk)
 {
   global $PG_CONN;
 
-  if (empty($nomosagent_pk)|| empty($bucketagent_pk)) 
-     Fatal("Missing parameter: nomosagent_pk $nomosagent_pk, bucketagent_pk: $bucketagent_pk<br>", __FILE__, __LINE__);
-
-  // if no $pfile_pk, then get it for the given $uploadtree_pk
-  if (!$pfile_pk)
-  {
-    $sql = "select pfile_fk from uploadtree where uploadtree_pk='$uploadtree_pk'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) == 0) return 0;
-    $row = pg_fetch_assoc($result);
-    $pfile_pk = $row['pfile_fk'];
-    pg_free_result($result);
-  }
-
-    $sql = "SELECT *, bucket_name, bucketpool_name from bucket_file, bucket_def, bucketpool
-              where pfile_fk='$pfile_pk' and nomosagent_fk='$nomosagent_pk' 
-                    and agent_fk='$bucketagent_pk' and bucket_fk=bucket_pk
-                    and bucketpool_pk=bucketpool_fk
-              order by bucket_reportorder asc";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-  return $result;
-}
-
-// Returns array 'bucketpool name', 'bucket name 1', 'bucket name 2', etc
-// Args are same as GetFileBuckets()
-function GetFileBuckets_array($nomosagent_pk, $bucketagent_pk, $pfile_pk, $uploadtree_pk)
-{
-  $BuckArray = array();
-  $BucketResult = GetFileBuckets($nomosagent_pk, $bucketagent_pk, $pfile_pk, $uploadtree_pk);
-  $first = true;
-  while ($row = pg_fetch_assoc($BucketResult))
-  {
-    if ($first)
-    {
-      $BuckArray[] = $row['bucketpool_name'];
-      $first = false;
-    }
-    $BuckArray[] = $row['bucket_name'];
-  }
-  pg_free_result($BucketResult);
-  
-  return $BuckArray;
+  $sql = "select * from bucket_def where bucketpool_fk=$bucketpool_pk";
+  $result_name = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_name, $sql, __FILE__, __LINE__);
+  $bucketDefArray = array();
+  while ($name_row = pg_fetch_assoc($result_name))
+    $bucketDefArray[$name_row['bucket_pk']] = $name_row;
+  pg_free_result($result_name);
+  return $bucketDefArray;
 }
 ?>
