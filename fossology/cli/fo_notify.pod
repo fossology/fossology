@@ -10,13 +10,13 @@ fo_notify - Display upload job status.  Optionally send email.
 
 =head1 SYNOPSIS
 
-fo_notify [-e email-address] [-h] [-j <job-name>] [-n user-name]  -u <upload-id> 
+fo_notify [-e email-address] [-h] [-j <job-name>] [-n user-name]  -u <upload-id>  -w <fqdn-web-server>
 
 =head1 DESCRIPTION
 
 B<fo_notify> is a dual purpose command. The main purpose of
 B<fo_notify> is to act as the email notification agent when email notificiation is
-turned on for a user account in the Graphical User Interface. The status is 
+turned on for a user account in the Graphical User Interface. The status of the job is 
 sent in email and is reported as aborted, failed, still active or done based on the job queue 
 data-base entries for that upload.  The command can also be run as a cli to
 report the status of the upload or send email about it's status.  
@@ -61,19 +61,25 @@ the message to say Dear Mr. Natural,.....
 
 The upload id to report on.  Use B<fossjobs> to find the upload id or the UI.
 
+=item B<-w fqdn-web-server>
+
+The fully qualified domain name (fqdn) of the webserver.  This is required 
+for formatting of the email message and running in CLI mode.  For example,
+someserver.mydomain.com, or aserver.net.
+
 =back
 
 =head2 Examples
 
 Display the job status for upload 99.
 
-fo_notify -u 99
+fo_notify -u 99 -w 'myserver.company.com'
 
 would report the status of upload 99.
 
-send email instead
+Send email instead of reporting on the command line.
 
-fo_notify -e me@somebody.com -u 99
+fo_notify -e me@somebody.com -u 99 -w 'somebody.com'
 
 Would queue email to me@somebody.com with the results for upload 99.
 
