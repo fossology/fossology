@@ -169,10 +169,10 @@ class dashboard extends FO_Plugin
 	$V .= "<H2>Database Metrics</H2>\n";
 	$V .= "<table border=1>\n";
 	$V .= "<tr><th>Metric</th><th>Total</th></tr>\n";
-	$Results = $DB->Action("SELECT SUM(relpages) AS val FROM pg_class INNER JOIN pg_stat_all_tables ON pg_stat_all_tables.relname = pg_class.relname WHERE schemaname='public';");
+    $Results = $DB->Action("SELECT pg_size_pretty(pg_database_size('fossology')) as val");
 	$V .= "<tr><td>FOSSology database size</td>";
-	$Size = $Results[0]['val'] * 8*1024; /* 8K per page */
-	$V .= "<td align='right'>" . Bytes2Human($Size) . " (" . number_format($Size,0,"",",") . ")</td></tr>\n";;
+	$Size = $Results[0]['val']; 
+	$V .= "<td align='right'>  $Size </td></tr>\n";;
 
 	$Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity';");
 	if (!empty($Results[0]['val']))
