@@ -154,7 +154,8 @@ class user_edit_any extends FO_Plugin {
 			$DB->Action("UPDATE users SET user_agent_list = '$Val' WHERE user_pk = '$UserId';");
 		}
 		if ($default_bucketpool_fk != $R['default_bucketpool_fk']) {
-			$DB->Action("UPDATE users SET default_bucketpool_fk = '$default_bucketpool_fk' WHERE user_pk = '$UserId';");
+            if ($default_bucketpool_fk == 0) $default_bucketpool_fk='NULL';
+			$DB->Action("UPDATE users SET default_bucketpool_fk = $default_bucketpool_fk WHERE user_pk = '$UserId'");
 		}
 
 		$Results = $DB->Action($SQL);
@@ -184,7 +185,7 @@ class user_edit_any extends FO_Plugin {
 						$qResults = $DB->Action($SQL);
 						$userName = $qResults[0]['user_name'];
 						// display status
-						$V.= displayMessage("User $userName edited.");
+						$V.= displayMessage("User $userName updated.");
 					}
 					else {
 						$V.= displayMessage($rc);
@@ -397,7 +398,7 @@ class user_edit_any extends FO_Plugin {
                 $V.= "</td>\n";
 				$V.= "</tr>\n";
 				$V.= "</table><P />";
-				$V.= "<input type='submit' value='Edit!'>\n";
+				$V.= "<input type='submit' value='Update Account'>\n";
 				$V.= "</form>\n";
 				break;
 		case "Text":
