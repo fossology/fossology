@@ -390,15 +390,18 @@ class ui_view extends FO_Plugin
     $ReadCount = strlen($S);
     while(($ReadCount > 0) && ($Length > 0))
       {
-      /* Massage the data and print it */
-      $S = preg_replace('/[^[:print:][:space:]]+/'," ",$S);
-      $S = htmlentities($S);
       if ($Flowed)
 	{
 	$S = str_replace("\r","",$S);
 	$S = str_replace("\n","<br>\n",$S);
 	$S = str_replace("\t","&nbsp;&nbsp;",$S);
 	}
+    else
+    {
+      /* Massage the data and print it */
+      $S = preg_replace('/[^[:print:][:space:]]+/'," ",$S);
+      $S = htmlentities($S);
+    }
 
       if (($this->FindHighlight($Start)) & 0x01)
 	{
