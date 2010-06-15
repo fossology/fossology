@@ -107,7 +107,7 @@ class copyright_view extends FO_Plugin
             $View->SortHighlightMenu();
         }
         
-        $View->ShowView(NULL,$ModBack);
+        $View->ShowView(NULL,$ModBack, 1,1,NULL,True);
         return;
     } // Output()
 
