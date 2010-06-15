@@ -613,7 +613,7 @@ class ui_view extends FO_Plugin
    This function is intended to be called from other plugins.
    ***********************************************************/
   function ShowView($Fin=NULL, $BackMod="browse",
-		    $ShowMenu=1, $ShowHeader=1, $ShowText=NULL, $ViewOnly)
+		    $ShowMenu=1, $ShowHeader=1, $ShowText=NULL, $ViewOnly=False)
     {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
