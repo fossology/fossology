@@ -193,7 +193,7 @@ class ui_view extends FO_Plugin
   /***********************************************************
    GetHighlightMenu(): If there is a highlight menu, create it.
    ***********************************************************/
-  function GetHighlightMenu($PageBlockSize)
+  function GetHighlightMenu($PageBlockSize, $ViewOnly=False)
     {
     if (empty($this->Highlight)) { return; }
     $First=1;
@@ -206,14 +206,20 @@ class ui_view extends FO_Plugin
 	if ($First)
 	  {
 	  $First = 0;
-	  $V .= "<tr><th>Match</th>";
-	  $V .= "<th></th><th></th>";
-	  $V .= "<th align='left'>Item</th>";
-	  $V .= "</tr>\n";
+      if (!$ViewOnly) 
+      {
+	    $V .= "<tr>";
+        $V .= "<th>Match</th>";
+	    $V .= "<th></th>";
+	    $V .= "<th></th>";
+        if (!$ViewOnly) $V .= "<th align='left'>Item</th>";
+	    $V .= "</tr>\n";
+      }
 	  }
     if (key_exists('Color', $this->HighlightColors))
       $V .= "<tr bgcolor='" . $this->HighlightColors[$H['Color']] . "'>\n";
-	$V .= "<td align='right'>" . $H['Match'] . "</td>\n";
+
+    if (!$ViewOnly) $V .= "<td align='right'>" . $H['Match'] . "</td>\n";
 
 	$V .= "<td>";
 	if ($PageBlockSize > 0)
@@ -227,13 +233,15 @@ class ui_view extends FO_Plugin
 	  }
 	$V .= "</td>\n";
 
-	$V .= "<td>";
-	if (!empty($H['RefURL']))
-		{
-		// $V .= "<a href='" . $H['RefURL'] . "' target='_blank'>ref</a>";
-		$V .= "<a href='javascript:;' onClick=\"javascript:window.open('" . $H['RefURL'] . "','License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">ref</a>";
-		}
-	$V .= "</td>\n";
+    if (!$ViewOnly)
+    {
+      $V .= "<td>";
+      if (!empty($H['RefURL']))
+      {
+        $V .= "<a href='javascript:;' onClick=\"javascript:window.open('" . $H['RefURL'] . "','License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">ref</a>";
+      }
+      $V .= "</td>\n";
+    }
 
     /* strip out characters we don't want to see */
     $S = strip_tags($H['Name']);
@@ -605,7 +613,7 @@ class ui_view extends FO_Plugin
    This function is intended to be called from other plugins.
    ***********************************************************/
   function ShowView($Fin=NULL, $BackMod="browse",
-		    $ShowMenu=1, $ShowHeader=1, $ShowText=NULL)
+		    $ShowMenu=1, $ShowHeader=1, $ShowText=NULL, $ViewOnly)
     {
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
@@ -725,7 +733,7 @@ class ui_view extends FO_Plugin
 
     if ($Format == 'hex')
 	{
-	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_HEX);
+	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_HEX, $ViewOnly);
 	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
 	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_HEX,$Uri);
 	$PageSize = VIEW_BLOCK_HEX * $Page;
@@ -735,7 +743,7 @@ class ui_view extends FO_Plugin
 	}
     else if ($Format == 'text')
 	{
-	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
+	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT, $ViewOnly);
 	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
 	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
 	$PageSize = VIEW_BLOCK_TEXT * $Page;
@@ -745,7 +753,7 @@ class ui_view extends FO_Plugin
 	}
     else if ($Format == 'flow')
 	{
-	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT);
+	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT, $ViewOnly);
 	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
 	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
 	$PageSize = VIEW_BLOCK_TEXT * $Page;
