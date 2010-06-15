@@ -167,7 +167,8 @@ class user_edit_self extends FO_Plugin {
 		}
 
         if ($default_bucketpool_fk != $R['default_bucketpool_fk']) {
-			$SQL.= " default_bucketpool_fk = '$default_bucketpool_fk'";
+            if ($default_bucketpool_fk == 0) $default_bucketpool_fk='NULL';
+			$SQL.= " default_bucketpool_fk = $default_bucketpool_fk";
 			$GotUpdate = 1;
         }
 
@@ -274,7 +275,7 @@ class user_edit_self extends FO_Plugin {
                 $V.= "</td>";
 				$V .= "</tr>\n";
 				$V.= "</table><P />";
-				$V.= "<input type='submit' value='Edit!'>\n";
+				$V.= "<input type='submit' value='Update Account'>\n";
 				$V.= "</form>\n";
 				break;
 			case "Text":
