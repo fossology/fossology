@@ -69,7 +69,13 @@ class jobs_runningjobs extends FO_Plugin
 	/** Do the SQL **/
 	global $DB;
 	$Results = $DB->Action("SELECT * FROM scheduler_status WHERE record_update > now()-interval '600' ORDER BY $OrderBy $OrderDir;");
-	if (!is_array($Results)) { return; }
+	if (!is_array($Results) || count($Results) == 0) 
+    { 
+      echo "<h3>The FOSSology job scheduler does not appear to be running.</h3>";
+      echo "If this is unexpected, look in the log file (typically /var/log/fossology/fossology.log) for errors. ";
+      echo " Otherwise, you may want to restart the scheduler (typically sudo /etc/init.d/fossology start)";
+      return; 
+    }
 
 	/* Put the results in a table */
     $Headings = "";
