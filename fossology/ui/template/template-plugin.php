@@ -338,6 +338,7 @@ class FO_Plugin
         $V .= "<html>\n";
         $V .= "<head>\n";
         $V .= "<meta name='description' content='The study of Open Source'>\n";
+        $V .= "<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>\n";
         if ($this->NoHeader == 0)
         {
           /** Known bug: DOCTYPE "should" be in the HEADER
