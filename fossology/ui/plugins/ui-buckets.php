@@ -163,8 +163,9 @@ class ui_buckets extends FO_Plugin
     pg_free_result($result);
     if (!$bucketpool_pk) 
     {
-      $VLic .= "User does not have a default bucketpool.  Pool 1 will be used.<br>";
-      $bucketpool_pk = 1;
+      echo "<h3>You do not specified a default bucketpool.  <br>";
+      echo "Edit your user settings (Admin > Users > Account Settings) to select a default bucketpool.</h3>";
+      exit(1);
     }
 
     /* find latest bucket and nomos agent that has data */
