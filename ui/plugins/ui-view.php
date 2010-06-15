@@ -401,8 +401,10 @@ class ui_view extends FO_Plugin
       if ($Flowed)
 	{
 	$S = str_replace("\r","",$S);
-	$S = str_replace("\n","<br>\n",$S);
 	$S = str_replace("\t","&nbsp;&nbsp;",$S);
+	$S = str_replace("<","&lt;",$S);
+	$S = str_replace(">","&gt;",$S);
+	$S = str_replace("\n","<br>\n",$S);
 	}
     else
     {
