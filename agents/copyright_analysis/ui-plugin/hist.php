@@ -129,6 +129,12 @@ class copyright_hist extends FO_Plugin
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
+    if (pg_num_rows($result) == 0)
+    {
+      echo "<h2>No results to display.</h2>";
+      exit();
+    }
+
     /* Get agent list */
 /* selecting the agent is a future feature
     $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
@@ -175,6 +181,7 @@ class copyright_hist extends FO_Plugin
     $VUrl .= "<th>URL</th></tr>\n";
 
     $rows = pg_fetch_all($result);
+
     uasort($rows, 'hist_rowcmp');
 
     foreach($rows as $row)
