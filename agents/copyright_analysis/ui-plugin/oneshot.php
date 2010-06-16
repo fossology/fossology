@@ -50,13 +50,13 @@ class agent_copyright_once extends FO_Plugin {
         global $Plugins;
         global $AGENTDIR;
         global $DATADIR;
+        $ModBack = GetParm("modback",PARM_STRING);
+
         $V = "";
         $View = & $Plugins[plugin_find_id("view") ];
         $TempFile = $_FILES['licfile']['tmp_name'];
-        $Sys = $AGENTDIR."/copyright --model ".$DATADIR."/model.dat --analyze-from-command-line $TempFile";
+        $Sys = $AGENTDIR."/copyright/run.py --model ".$DATADIR."/model.dat --analyze-from-command-line $TempFile";
         $Fin = popen($Sys, "r");
-        //print "<pre>";
-        //print $Sys."\n";
         $colors = Array();
         $colors['statement'] = 0;
         $colors['email'] = 1;
@@ -78,17 +78,13 @@ class agent_copyright_once extends FO_Plugin {
                 }
             }
         }
-        //print "</pre>";
         pclose($Fin);
         if ($Highlight) {
             $Fin = fopen($TempFile, "r");
             if ($Fin) {
                 $View->SortHighlightMenu();
-                print "<center>";
-                print $View->GetHighlightMenu(-1);
-                print "</center>";
-                print "<hr />\n";
-                $View->ShowText($Fin, 0, 1, -1);
+                $View->ShowView($Fin,$ModBack, 1,1,NULL,True);
+
                 fclose($Fin);
             }
         }
