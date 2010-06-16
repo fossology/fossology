@@ -31,7 +31,7 @@ class jobs_runningjobs extends FO_Plugin
   var $Version    = "1.0";
   var $MenuList   = "Admin::Scheduler::Status";
   var $Dependency = array("db");
-  var $DBaccess   = PLUGIN_DB_READ;
+  var $DBaccess   = PLUGIN_DB_DOWNLOAD;
 
   /***********************************************************
    Output(): This function returns the scheduler status.

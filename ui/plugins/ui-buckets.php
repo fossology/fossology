@@ -419,7 +419,7 @@ class ui_buckets extends FO_Plugin
    ***********************************************************/
   function Output()
   {
-    /* Validate that we are in an active session. */
+    /* Validate that we are in an active session. 
     if ((!array_key_exists('UserId', $_SESSION))
          or (empty($_SESSION['UserId'])))
     {
@@ -427,6 +427,7 @@ class ui_buckets extends FO_Plugin
       echo "<b>Please log in again.</b>";
       return;
     }
+*/
 
     $uTime = microtime(true);
     if ($this->State != PLUGIN_STATE_READY) { return(0); }

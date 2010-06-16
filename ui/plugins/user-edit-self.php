@@ -30,7 +30,7 @@ class user_edit_self extends FO_Plugin {
 	var $MenuList = "Admin::Users::Account Settings";
 	var $Version = "1.0";
 	var $Dependency = array("db");
-	var $DBaccess = PLUGIN_DB_NONE;
+	var $DBaccess = PLUGIN_DB_DOWNLOAD;
 	/***********************************************************
 	 PostInitialize(): This function is called before the plugin
 	 is used and after all plugins have been initialized.

@@ -177,6 +177,13 @@ class core_auth extends FO_Plugin {
             $Level = PLUGIN_DB_NONE;
           } else {
             $Level = $Results[0]['user_perm'];
+            $R = $Results[0];
+            $_SESSION['User'] = $R['user_name'];
+            $_SESSION['UserId'] = $R['user_pk'];
+            $_SESSION['Folder'] = $R['root_folder_fk'];
+            $_SESSION['UserLevel'] = $R['user_perm'];
+            $_SESSION['UserEmail'] = $R['user_email'];
+            $_SESSION['UserEnote'] = $R['email_notify'];
           }
         }
       }
@@ -186,7 +193,14 @@ class core_auth extends FO_Plugin {
       if (empty($Results)) {
         $Level = PLUGIN_DB_NONE;
       } else {
-        $Level = $Results[0]['user_perm'];
+        $R = $Results[0];
+        $Level = $R['user_perm'];
+        $_SESSION['User'] = $R['user_name'];
+        $_SESSION['UserId'] = $R['user_pk'];
+        $_SESSION['Folder'] = $R['root_folder_fk'];
+        $_SESSION['UserLevel'] = $R['user_perm'];
+        $_SESSION['UserEmail'] = $R['user_email'];
+        $_SESSION['UserEnote'] = $R['email_notify'];
       }
     }
 
