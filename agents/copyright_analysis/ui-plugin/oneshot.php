@@ -46,7 +46,7 @@ class agent_copyright_once extends FO_Plugin {
   /*********************************************
   AnalyzeOne(): Analyze one uploaded file.
   *********************************************/
-    function AnalyzeOne($Highlight, $LicCache) {
+    function AnalyzeOne($Highlight) {
         global $Plugins;
         global $AGENTDIR;
         global $DATADIR;
@@ -83,7 +83,9 @@ class agent_copyright_once extends FO_Plugin {
             $Fin = fopen($TempFile, "r");
             if ($Fin) {
                 $View->SortHighlightMenu();
+echo "Fin1: $Fin<br>";
                 $View->ShowView($Fin,$ModBack, 1,1,NULL,True);
+echo "Fin2: $Fin<br>";
 
                 fclose($Fin);
             }
@@ -221,7 +223,7 @@ class agent_copyright_once extends FO_Plugin {
             if (file_exists(@$_FILES['licfile']['tmp_name'])) {
                 if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
                     /* Size is not too big.  */
-                    print $this->AnalyzeOne($Highlight, $LicCache) . "\n";
+                    print $this->AnalyzeOne($Highlight) . "\n";
                 }
                 if (!empty($_FILES['licfile']['unlink_flag'])) {
                     unlink($_FILES['licfile']['tmp_name']);
@@ -242,7 +244,7 @@ class agent_copyright_once extends FO_Plugin {
                     $_FILES['licfile']['size'] = $Results[0]['pfile_size'];
                     if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10) {
                         /* Size is not too big.  */
-                        print $this->AnalyzeOne($Highlight, $LicCache) . "\n";
+                        print $this->AnalyzeOne($Highlight) . "\n";
                     }
                     /* Do not unlink the or it will delete the repo file! */
                     if (!empty($_FILES['licfile']['unlink_flag'])) {
