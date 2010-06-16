@@ -51,6 +51,7 @@ function SelectBucketPool($selected)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
+  $select .= "<option value=''";
   while ($row = pg_fetch_assoc($result)) 
   {
     $select .= "<option value='$row[bucketpool_pk]'";
