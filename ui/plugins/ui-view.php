@@ -681,9 +681,11 @@ class ui_view extends FO_Plugin
      ***********************************/
     print $V;
     $V = "";
+    $openedFin = False;
     if (empty($Fin))
       {
       $Fin = @fopen( RepPathItem($Item) ,"rb");
+      if ($Fin) $openedFin = true;
       if (empty($Fin))
 	{
 	  /* Added by vincent implement when view files which not in repository, ask user if want to reunpack*/
@@ -764,7 +766,7 @@ class ui_view extends FO_Plugin
 	$this->ShowText($Fin,$PageSize,1,VIEW_BLOCK_TEXT);
 	if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
 	}
-    fclose($Fin);
+    if ($openedFin) fclose($Fin);
     return;
     } // ShowView()
 
