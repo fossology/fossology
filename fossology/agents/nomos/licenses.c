@@ -625,7 +625,7 @@ void licenseScan(list_t *licenseList) {
          */
         if ((textp = mmapFile(cp)) == NULL_STR) {
             /* perror(cp); */
-            printf("Zero length file: %s\n", cp);
+            /*printf("Zero length file: %s\n", cp); */
             continue;
         }
         if (scp->dataOffset == iMadeThis(textp)) {
