@@ -620,6 +620,7 @@ function JobListSummary($upload_pk) {
   $Status = array();
   $Status['total'] = 0;
   $Status['completed'] = 0;
+  $Status['pending'] = 0;
   $Status['active'] = 0;
   $Status['failed'] = 0;
   $SQL = "SELECT job_pk,jq_starttime,jq_endtime,jq_end_bits FROM jobqueue
