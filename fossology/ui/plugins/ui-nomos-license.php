@@ -54,10 +54,13 @@ class ui_nomos_license extends FO_Plugin
   {
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
+
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     if (!empty($Item) && !empty($Upload))
     {
+      $nomosAgentpk = LatestNomosAgentpk($Upload);
+      $nomosURI = "view-license&napk=$nomosAgentpk" . Traceback_parm_keep(array("show","format","page","upload","item"));
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
        menu_insert("Browse::Nomos License",1);
@@ -67,6 +70,7 @@ class ui_nomos_license extends FO_Plugin
       else
       {
        menu_insert("Browse::Nomos License",10,$URI,"View nomos license histogram");
+       menu_insert("View::Nomos License",10,$nomosURI,"nomos license");
       }
     }
   } // RegisterMenus()
@@ -153,14 +157,12 @@ class ui_nomos_license extends FO_Plugin
     $FileCount = $row["count"];
     pg_free_result($result);
 
-    $Agent_name = "nomos";
-    $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
-    if ($AgentRec === false)
+    $Agent_pk = LatestNomosAgentpk($upload_pk);
+    if ($Agent_pk == 0)
     {
       echo "<h3>No data available.  Use Jobs > Agents to schedule a license scan.</h3>";
       return;
     }
-    $Agent_pk = $AgentRec[0]['agent_fk'];
 
     /*  Get the counts for each license under this UploadtreePk*/
     $sql = "SELECT distinct(rf_shortname) as licname, 
