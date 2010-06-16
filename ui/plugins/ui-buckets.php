@@ -265,6 +265,14 @@ class ui_buckets extends FO_Plugin
     /*******    File Listing     ************/
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($Uploadtree_pk);
+
+    if (!is_array($Children))
+    {
+      $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$Uploadtree_pk'");
+      if (empty($Results) || (IsDir($Results[0]['ufile_mode']))) { return; }
+      $ModLicView = &$Plugins[plugin_find_id("view-license")];
+      return($ModLicView->Output() );
+    }
     $ChildCount=0;
     $Childbucketcount=0;
     $NumSrcPackages = 0;
@@ -345,24 +353,6 @@ class ui_buckets extends FO_Plugin
       $ChildCount++;
     }
     $VF .= "</table>\n";
-
-    /***************************************
-     Problem: $ChildCount can be zero!
-     This happens if you have a container that does not
-     unpack to a directory.  For example:
-     file.gz extracts to archive.txt that contains a bucket.
-     Same problem seen with .pdf and .Z files.
-     Solution: if $ChildCount == 0, then just view the bucket!
-
-     $ChildCount can also be zero if the directory is empty.
-     ***************************************/
-    if ($ChildCount == 0)
-    {
-      $Results = $DB->Action("SELECT * FROM uploadtree WHERE uploadtree_pk = '$Item';");
-      if (IsDir($Results[0]['ufile_mode'])) { return; }
-      $ModLicView = &$Plugins[plugin_find_id("view-license")];
-      return($ModLicView->Output() );
-    }
 
     $V .= ActiveHTTPscript("FileColor");
 
