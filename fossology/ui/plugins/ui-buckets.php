@@ -163,8 +163,15 @@ class ui_buckets extends FO_Plugin
     pg_free_result($result);
     if (!$bucketpool_pk) 
     {
-      echo "<h3>You do not specified a default bucketpool.  <br>";
-      echo "Edit your user settings (Admin > Users > Account Settings) to select a default bucketpool.</h3>";
+      if ($_SESSION['UserLevel'] < PLUGIN_DB_DOWNLOAD)
+      {
+        echo "<h3>Your FOSSology system administrator has not enabled read only users to use use the bucket view</h3>";
+      }
+      else
+      {
+        echo "<h3>You do not have a bucketpool in your account settings.  <br>";
+        echo "Edit your user settings (Admin > Users > Account Settings) to select a default bucketpool.</h3>";
+      }
       exit(1);
     }
 
@@ -419,16 +426,6 @@ class ui_buckets extends FO_Plugin
    ***********************************************************/
   function Output()
   {
-    /* Validate that we are in an active session. 
-    if ((!array_key_exists('UserId', $_SESSION))
-         or (empty($_SESSION['UserId'])))
-    {
-      echo "<h2>Sorry your session timed out.</h2>";
-      echo "<b>Please log in again.</b>";
-      return;
-    }
-*/
-
     $uTime = microtime(true);
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $V="";
