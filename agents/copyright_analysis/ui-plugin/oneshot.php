@@ -189,6 +189,7 @@ class agent_copyright_once extends FO_Plugin {
             if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DEBUG) {
                 $URI = $this->Name . Traceback_parm_keep(array(
                     "format",
+                    "upload",
                     "item"
                 ));
                 menu_insert("View::[BREAK]", 100);
