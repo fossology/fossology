@@ -179,7 +179,7 @@ class ui_buckets extends FO_Plugin
     $AgentRec = AgentARSList("bucket_ars", $upload_pk, 0);
     if ($AgentRec === false)
     {
-      $VLic .=  "<b>No data available</b><br>";
+      $VLic .= "<h3>No data available.  Use Jobs > Agents to schedule a license scan.</h3>";
       return $VLic;
     }
     /* loop through $AgentRec to verify that the nomosagent_pk is enabled */
