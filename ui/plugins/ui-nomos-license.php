@@ -160,8 +160,8 @@ class ui_nomos_license extends FO_Plugin
     $Agent_pk = LatestNomosAgentpk($upload_pk);
     if ($Agent_pk == 0)
     {
-      echo "<h3>No data available.  Use Jobs > Agents to schedule a license scan.</h3>";
-      return;
+      $VLic = "<b>No data available.  Use Jobs > Agents to schedule a license scan.</b><p>";
+      return $VLic;
     }
 
     /*  Get the counts for each license under this UploadtreePk*/
