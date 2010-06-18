@@ -623,7 +623,6 @@ FUNCTION void parseLicenseList() {
 FUNCTION void Usage(char *Name) {
     printf("Usage: %s [options] [file [file [...]]\n", Name);
     printf("  -i   :: initialize the database, then exit.\n");
-    printf("  -d   :: turn on debugging to a logfile (NomosDebugLog)\n");
     /*    printf("  -v   :: verbose (-vv = more verbose)\n"); */
     printf(
             "  file :: if files are listed, print the licenses detected within them.\n");
@@ -772,17 +771,8 @@ FUNCTION void processFile(char *fileToScan) {
 
     /* printf("   LOG: nomos scanning file %s.\n", fileToScan);  DEBUG */
 
-    /*
-     Initialize. This stuff should probably be broken into a separate
-     function, but for now, I'm leaving it all here.
-     */
     (void) strcpy(cur.cwd, gl.initwd);
 
-    /*
-     Create temporary directory for scratch space
-     and copy target file to that directory.  Save the original filepath for
-     reporting results.
-     */
     strcpy(cur.filePath, fileToScan);
     pathcopy = strdup(fileToScan);
     strcpy(cur.targetDir, dirname(pathcopy));
@@ -952,10 +942,7 @@ int main(int argc, char **argv) {
      Deal with command line options
      */
 
-    /* MD: if you keep -d, then this code needs fixing as it doesn't leave argc
-     * in the correct state (number of args).
-     */
-    while ((c = getopt(argc, argv, "id")) != -1) {
+    while ((c = getopt(argc, argv, "i")) != -1) {
 
         /* printf("start of while; argc is:%d\n", argc); */
         /* for(i=0; i<argc; i++){
@@ -967,13 +954,6 @@ int main(int argc, char **argv) {
             /* "Initialize" */
             DBclose(gl.DB); /* DB was opened above, now close it and exit */
             exit(0);
-        case 'd':
-            /* turn on the debug log and set debug flag, useful for debugging
-             * with the scheduler
-             */
-            argc--;
-            ++argv;
-            break;
         default:
             Usage(argv[0]);
             DBclose(gl.DB);
@@ -1078,6 +1058,10 @@ int main(int argc, char **argv) {
               DBclose(gl.DB);
               exit(-1);
             }
+
+            /* make sure this is a regular file, ignore if not */
+            if (0 == isFILE(cur.pFile)) continue;
+
             processFile(repFile);
             if (recordScanToDB(&cacheroot, &cur))
             {
