@@ -83,10 +83,7 @@ class agent_copyright_once extends FO_Plugin {
             $Fin = fopen($TempFile, "r");
             if ($Fin) {
                 $View->SortHighlightMenu();
-echo "Fin1: $Fin<br>";
                 $View->ShowView($Fin,$ModBack, 1,1,NULL,True);
-echo "Fin2: $Fin<br>";
-
                 fclose($Fin);
             }
         }
