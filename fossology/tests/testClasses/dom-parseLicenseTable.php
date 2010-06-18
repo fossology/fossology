@@ -29,7 +29,7 @@
  * @todo add in link fixups and adjust consumers
  * @todo change the name to parsetable and adjust all consumers
  *
- * @version "$Id:  $"
+ * @version "$Id$"
  * Created on Aug 21, 2008
  */
 
@@ -38,6 +38,7 @@ class domParseLicenseTbl
 	public $page;
 	public $hList = array();
 	public $noRows = FALSE;
+	public $emptyTable = FALSE;
 	private $tableId;
 	private $title;
 
@@ -77,7 +78,8 @@ class domParseLicenseTbl
 		$dom->preserveWhiteSpace = false;
 		$table = $dom->getElementById($this->tableId);
 		if(empty($table)) {
-			//print "DPLTDB: table is empty, can't find table!\n";
+			$this->emptyTable = TRUE;
+			//print "DPLTDB: table is empty, can't find table! with table id of:$this->tableId\n";
 			return($this->hList=array());
 		}
 
