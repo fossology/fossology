@@ -31,6 +31,7 @@ require_once('../../../tests/testClasses/parseBrowseMenu.php');
 require_once('../../../tests/testClasses/parseMiniMenu.php');
 require_once('../../../tests/testClasses/parseFolderPath.php');
 require_once('../../../tests/testClasses/parseLicenseTbl.php');
+require_once('../../../tests/testClasses/dom-parseLicenseTable.php');
 require_once('../../../tests/testClasses/parseLicenseTblDirs.php');
 
 global $URL;
@@ -77,6 +78,13 @@ class verifyDirsOnly extends fossologyTestCase
     global $URL;
     global $name;
     global $safeName;
+    
+    $licenseSummary = array(
+    												'Unique licenses' 			 => 0,
+    												'Licenses found'   			 => 0,
+    												'Files with no licenses' => 0,
+    												'Files'									 => 0
+    												);
 
     print "starting verifyFossDirsOnly test\n";
     $page = $this->mybrowser->clickLink('Browse');
@@ -122,9 +130,17 @@ class verifyDirsOnly extends fossologyTestCase
     //print "page after get of $url is:\n$page\n";
     $this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
           "verifyFossDirsOnly FAILED! Nomos License Browser Title not found\n");
-    $this->assertTrue($this->myassertText($page, '/Total licenses: 0/'),
-        "verifyFossDirsOnly FAILED! Total Licenses does not equal 0\n");
-
+    
+    $licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
+		$licSummary->parseLicenseTbl();
+		
+  	foreach ($licSummary->hList as $summary) {
+  		$key = $summary['textOrLink'];
+  		$this->assertEqual($licenseSummary[$key], $summary['count'],
+  		"verifyFossDirsOnly FAILED! $key does not equal $licenseSummary[$key]\n");
+			//print "summary is:\n";print_r($summary) . "\n";
+		}
+		
     $dList = new parseLicenseTblDirs($page);
     $dirList = $dList->parseLicenseTblDirs();
     /*
