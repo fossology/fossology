@@ -76,6 +76,13 @@ class verify23D1F1L extends fossologyTestCase
 		global $URL;
 		global $name;
 		global $safeName;
+		
+		$licenseSummary = array(
+    												'Unique licenses' 			 => 1,
+    												'Licenses found'   			 => 1,
+    												'Files with no licenses' => 0,
+    												'Files'									 => 1
+		);
 
 		print "starting VerifyFoss23D1F1L test\n";
 		$page = $this->mybrowser->clickLink('Browse');
@@ -124,8 +131,18 @@ class verify23D1F1L extends fossologyTestCase
 		//print "page after get of $url is:\n$page\n";
 		$this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
           "verify23D1F1L FAILED! License Browser Title not found\n");
-		$this->assertTrue($this->myassertText($page, '/Total licenses: 1/'),
-        "verify23D1F1L FAILED! Total Licenses does not equal 1\n");
+		
+		// verify license summaries
+	  $licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
+		$licSummary->parseLicenseTbl();
+		
+  	foreach ($licSummary->hList as $summary) {
+  		$key = $summary['textOrLink'];
+  		$this->assertEqual($licenseSummary[$key], $summary['count'],
+  		"verifyFossDirsOnly FAILED! $key does not equal $licenseSummary[$key],
+  		got $summary[count]\n");
+			//print "summary is:\n";print_r($summary) . "\n";
+		}
 
 		// get the 'Show' links and License color links
 		$licHisto = new domParseLicenseTbl($page, 'lichistogram');

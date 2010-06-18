@@ -78,7 +78,7 @@ class verifyFossolyTest extends fossologyTestCase
 		$licenseCounts = array(
 											'GPL_v2'     					=> 225,
     									'(C)HP-Dev' 					=> 41,
-    									'No License Found' 	=> 28,
+    									'No License Found' 	  => 29,
     									'GPL' 								=> 24,
     									'LGPL_v2.1'						=> 17,
     									'Apache_v2.0' 				=> 2,
@@ -96,7 +96,6 @@ class verifyFossolyTest extends fossologyTestCase
                       'LGPL_v2.1+' 					=> 1,
                       'LGPL_v3+' 						=> 1,
                       'Misc-Copyright' 			=> 1,
-    									'NoLicenseFound' 			=> 1,
         						  'NPL' 								=> 1,
                       'OSL_v3.0' 						=> 1,
                       'PHP-possibility' 		=> 1,
@@ -108,6 +107,12 @@ class verifyFossolyTest extends fossologyTestCase
 
 		);
 
+		$licenseSummary = array(
+    												'Unique licenses' 			 => 28,
+    												'Licenses found'   			 => 334,
+    												'Files with no licenses' => 29,
+    												'Files'									 => 345
+		);
 		print "starting VerifyFossl16L335 test\n";
 		$page = $this->mybrowser->clickLink('Browse');
 		$this->assertTrue($this->myassertText($page, '/Browse/'),
@@ -158,14 +163,30 @@ class verifyFossolyTest extends fossologyTestCase
 		//print "page after get of $url is:\n$page\n";
 		$this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
           "verifyFossl16L335 FAILED! Nomos License Browser Title not found\n");
-		$this->assertTrue($this->myassertText($page, '/Total licenses: 335/'),
-        "verifyFossl16L335 FAILED! Total Licenses does not equal 335\n");
-		$this->assertTrue($this->myassertText($page, '/Unique licenses: 29/'),
-        "verifyFossl16L335 FAILED! Unique Licenses does not equal 29\n");
+
+		// check that license summarys are correct
+		$licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
+		$licSummary->parseLicenseTbl();
+
+		foreach ($licSummary->hList as $summary) {
+			$key = $summary['textOrLink'];
+			$this->assertEqual($licenseSummary[$key], $summary['count'],
+  		"verifyFossDirsOnly FAILED! $key does not equal $licenseSummary[$key],
+  		got $summary[count]\n");
+			//print "summary is:\n";print_r($summary) . "\n";
+		}
 
 		// get the license names and 'Show' links
-		$licHistogram = new domParseLicenseTbl($page, 'lichistogram');
+		$licHistogram = new domParseLicenseTbl($page, 'lichistogram',1);
 		$licHistogram->parseLicenseTbl();
+
+		if($licHistogram->noRows === TRUE)
+		{
+			$this->fail("FATAL! no table rows to process, there should be many for"
+			. " this test, Stopping the test");
+			return;
+		}
+
 		// create list of Show urls
 		$urls = array();
 		foreach ($licHistogram->hList as $license) {
@@ -181,8 +202,8 @@ class verifyFossolyTest extends fossologyTestCase
 			$page = $this->mybrowser->get($showUrl);
 			print "Checking the number of files based on $lic\n";
 			if($licenseCounts[$lic] > 50) {
-				$this->assertTrue($this->myassertText($page, '/225 files found with this license/'),
-        "verifyFossl16L335 FAILED! Licenses found for $lic does not equal 225\n");
+				$this->assertTrue($this->myassertText($page, '/225 files found \(225 unique\) with license/'),
+        "verifyFossl16L335 FAILED! Phrase for $lic not found on page\n");
 				continue;
 			}
 			$licFileList = new parseFolderPath($page, $URL);
