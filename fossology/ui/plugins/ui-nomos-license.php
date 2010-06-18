@@ -223,7 +223,7 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     $VLic .= "Hint: Click on the license name to ";
     $VLic .= "<span style='background-color:$this->HighlightColor'>highlight </span>";
     $VLic .= "where the license is found in the file listing.<br>\n";
-    $VLic .= "<table border=0>";
+    $VLic .= "<table border=0 id='licsummary'>";
     $VLic .= "<tr><td align=right>$UniqueLicCount</td><td>Unique licenses</td></tr>";
     $NetLic = $LicCount - $NoLicFound;
     $VLic .= "<tr><td align=right>$NetLic</td><td>Licenses found</td></tr>";

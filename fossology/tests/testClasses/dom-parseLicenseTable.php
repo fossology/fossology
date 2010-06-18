@@ -27,8 +27,9 @@
  * nothing on the page to browse.
  *
  * @todo add in link fixups and adjust consumers
+ * @todo change the name to parsetable and adjust all consumers
  *
- * @version "$Id: parseLicenseTbl.php 2865 2010-03-10 19:06:25Z rrando $"
+ * @version "$Id:  $"
  * Created on Aug 21, 2008
  */
 
@@ -38,13 +39,15 @@ class domParseLicenseTbl
 	public $hList = array();
 	public $noRows = FALSE;
 	private $tableId;
+	private $title;
 
-	function __construct($page,$tblId)
+	function __construct($page,$tblId,$title=1)
 	{
 		if (empty ($page)) { return; }
 		$this->page = $page;
 		if (strlen($tblId) == 0) { return; }
 		$this->tableId = $tblId;
+		$this->title = $title;
 	}
 	/**
 	 * parseLicenseTbl
@@ -55,12 +58,11 @@ class domParseLicenseTbl
 	 * count, showLink, textOrLink. the values will be the license count
 	 * the url of the Show link and whatever is in the next column.  This
 	 * can be text or a link or ?
-	 * 
+	 *
 	 * Sets property noRows.
-	 * 
+	 *
 	 * An empty array if no license histogram on that page,
-	 * 
-	 * @todo renumber final array so consumers can user array[0]
+	 *
 	 */
 	function parseLicenseTbl()
 	{
@@ -101,11 +103,16 @@ class domParseLicenseTbl
 			$this->hList[] = $histogram;
 			$histogram = array();
 		} // foreach
-		// remove empty 1st entry
-		unset($this->hList[0]);
-	  if(empty($this->hList)) {
-	  	$this->noRows = TRUE;
-	  }
+		// for tables with titles, the first row is empty as no childNodes match
+		// what we are looking for, remove the first row.
+		if($this->title)
+		{
+			// remove empty 1st entry
+			unset($this->hList[0]);
+		}
+		if(empty($this->hList)) {
+			$this->noRows = TRUE;
+		}
 	} // parseLicenseTbl
 }
 ?>
