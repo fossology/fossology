@@ -137,7 +137,8 @@ class verifyDirsOnly extends fossologyTestCase
   	foreach ($licSummary->hList as $summary) {
   		$key = $summary['textOrLink'];
   		$this->assertEqual($licenseSummary[$key], $summary['count'],
-  		"verifyFossDirsOnly FAILED! $key does not equal $licenseSummary[$key]\n");
+  		"verifyFossDirsOnly FAILED! $key does not equal $licenseSummary[$key],
+  		got $summary[count]\n");
 			//print "summary is:\n";print_r($summary) . "\n";
 		}
 		
