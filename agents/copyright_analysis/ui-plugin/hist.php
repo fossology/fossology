@@ -357,6 +357,7 @@ class copyright_hist extends FO_Plugin
     }
 
     /* Combine VF and VLic */
+    $V .= "We realize there may be many false positives in this report.  They will be addressed in the next release.<p>";
     $V .= "<table border=0 width='100%'>\n";
     $V .= "<tr><td><a name=\"statements\"></a>Jump to: <a href=\"#emails\">Emails</a> | <a href=\"#urls\">URLs</a></td><td></td></tr>\n";
     $V .= "<tr><td valign='top' width='50%'>$VCopyright</td><td valign='top'>$VF</td></tr>\n";
