@@ -1290,7 +1290,7 @@ int main(int argc, char **argv)
     {
       printf("FATAL: %s.%d Bucket definition for pool %d could not be initialized.\n",
              __FILE__, __LINE__, bucketpool_pk);
-      continue;
+      exit(-2);
     }
     bucketDefArray->nomos_agent_pk = nomos_agent_pk;
     bucketDefArray->bucket_agent_pk = agent_pk;
