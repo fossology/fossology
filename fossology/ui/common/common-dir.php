@@ -460,7 +460,9 @@ $foundChildren = array();
       if (Iscontainer($child['ufile_mode']))
       {
         unset($children[$key]);
-        $foundChildren = array_merge($foundChildren, GetNonArtifactChildren($child['uploadtree_pk']));
+        $NonAChildren = GetNonArtifactChildren($child['uploadtree_pk']);
+        if ($NonAChildren)
+          $foundChildren = array_merge($foundChildren, $NonAChildren);
       }
       else
         unset($children[$key]);
