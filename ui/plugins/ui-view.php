@@ -637,25 +637,31 @@ class ui_view extends FO_Plugin
 	case 'flow':	$Format='flow'; break;
 	default:
 	  /* Determine default show based on mime type */
-	  $Meta = GetMimeType($Item);
-	  list($Type,$Junk) = split("/",$Meta,2);
-	  if ($Type == 'text') { $Format = 'flow'; }
-	  else switch($Meta)
-	  	{
-		case "application/octet-string":
-		case "application/x-awk":
-		case "application/x-csh":
-		case "application/x-javascript":
-		case "application/x-perl":
-		case "application/x-shellscript":
-		case "application/x-rpm-spec":
-		case "application/xml":
-		case "message/rfc822":
-			$Format='flow';
-			break;
-		default:
-			$Format = 'flow';
+      if (empty($Item))
+        $Format = 'text';
+      else
+      {
+        $Meta = GetMimeType($Item);
+        list($Type,$Junk) = split("/",$Meta,2);
+        if ($Type == 'text') 
+        { $Format = 'flow'; }
+        else switch($Meta)
+        {
+          case "application/octet-string":
+          case "application/x-awk":
+          case "application/x-csh":
+          case "application/x-javascript":
+          case "application/x-perl":
+          case "application/x-shellscript":
+          case "application/x-rpm-spec":
+          case "application/xml":
+          case "message/rfc822":
+            $Format='flow';
+          break;
+          default:
+            $Format = 'flow';
 		}
+      }
 	  break;
 	}
 
