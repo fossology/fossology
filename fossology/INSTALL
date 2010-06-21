@@ -349,7 +349,8 @@ Debian and the one used for the http://repo.fossology.org database:
  effective_cache_size = 25000
  log_min_duration_statement = -1	# -1 is disabled, 0 logs all statements
  log_line_prefix = '%t %h %c'		# prepend a time stamp to all log entries
-
+ standard_conforming_strings = on
+ 
 2.1.5 Configuring PHP
 ---------------------
 Some php config variables may need to be adjusted for FOSSology. We don't
