@@ -93,8 +93,8 @@ class agent_pkgagent extends FO_Plugin
     if (is_array($Depends)) { $Dep = array_merge($Dep,$Depends); }
     else if (!empty($Depends)) { $Dep[1] = $Depends; }
 
-    /* Prepare the job: job "Package Agents" */
-    $jobpk = JobAddJob($uploadpk,"Package Agents",$Priority=0);
+    /* Prepare the job: job "Package Agent" */
+    $jobpk = JobAddJob($uploadpk,"Package Scan",$Priority=0);
     if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
 
     /* "pkgagent" needs to know what? */
@@ -150,7 +150,7 @@ class agent_pkgagent extends FO_Plugin
         AND pfile_pk NOT IN (SELECT pkg_deb.pfile_fk FROM pkg_deb)
 	LIMIT 5000;";
 
-    /* Add job: job "Package Agents" has jobqueue item "pkgagent" */
+    /* Add job: job "Package Scan" has jobqueue item "pkgagent" */
     $jobqueuepk = JobQueueAdd($jobpk,"pkgagent",$jqargs,"yes","pfile_pk",$Dep);
     if (empty($jobqueuepk)) { return("Failed to insert pkgagent into job queue"); }
     
@@ -202,7 +202,7 @@ class agent_pkgagent extends FO_Plugin
 		  SELECT upload_pk FROM upload
 		  INNER JOIN job ON job.job_upload_fk = upload.upload_pk
 		  INNER JOIN jobqueue ON jobqueue.jq_job_fk = job.job_pk
-		    AND job.job_name = 'Package Agents'
+		    AND job.job_name = 'Package Scan'
 		    AND jobqueue.jq_type = 'pkgagent'
 		    ORDER BY upload_pk
 		)
