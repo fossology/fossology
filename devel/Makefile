@@ -7,11 +7,16 @@ DIRS = libfossdb libfossrepo libfossagent libfosspython
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
-# run 'make $(operation)-$(subdir)'. Yet another convenience, a target of
-# '$(subdir)' is equivalent to 'build-$(subdir)'
+# run 'make $(operation)-$(subdir)'.
 BUILDDIRS = $(DIRS:%=build-%)
 INSTALLDIRS = $(DIRS:%=install-%)
+INSTALLEXEDIRS = $(DIRS:%=installexe-%)
+INSTALLLIBDIRS = $(DIRS:%=installlib-%)
+INSTALLDEVDIRS = $(DIRS:%=installdev-%)
 UNINSTALLDIRS = $(DIRS:%=uninstall-%)
+UNINSTALLEXEDIRS = $(DIRS:%=uninstallexe-%)
+UNINSTALLLIBDIRS = $(DIRS:%=uninstalllib-%)
+UNINSTALLDEVDIRS = $(DIRS:%=uninstalldev-%)
 CLEANDIRS = $(DIRS:%=clean-%)
 TESTDIRS = $(DIRS:%=test-%)
 
@@ -28,19 +33,19 @@ $(INSTALLDIRS):
 install-runtime: install-exe install-libs
 
 # just install the executables
-install-exe: all $(INSTALLDIRS)
-$(INSTALLDIRS):
-	$(MAKE) -C $(@:install-%=%) install-exe
+install-exe: all $(INSTALLEXEDIRS)
+$(INSTALLEXEDIRS):
+	$(MAKE) -C $(@:installexe-%=%) install-exe
 
 # just install the libs
-install-lib: all $(INSTALLDIRS)
-$(INSTALLDIRS):
-	$(MAKE) -C $(@:install-%=%) install-lib
+install-lib: all $(INSTALLLIBDIRS)
+$(INSTALLLIBDIRS):
+	$(MAKE) -C $(@:installlib-%=%) install-lib
 
 # just install the development stuff
-install-dev: all $(INSTALLDIRS)
-$(INSTALLDIRS):
-	$(MAKE) -C $(@:install-%=%) install-dev
+install-dev: all $(INSTALLDEVDIRS)
+$(INSTALLDEVDIRS):
+	$(MAKE) -C $(@:installdev-%=%) install-dev
 
 
 uninstall: $(UNINSTALLDIRS)
@@ -49,17 +54,17 @@ $(UNINSTALLDIRS):
 
 uninstall-runtime: uninstall-exe uninstall-libs
 
-uninstall-exe: $(UNINSTALLDIRS)
-$(UNINSTALLDIRS):
-	$(MAKE) -C $(@:uninstall-%=%) uninstall-exe
+uninstall-exe: $(UNINSTALLEXEDIRS)
+$(UNINSTALLEXEDIRS):
+	$(MAKE) -C $(@:uninstallexe-%=%) uninstall-exe
 
-uninstall-lib: $(UNINSTALLDIRS)
-$(UNINSTALLDIRS):
-	$(MAKE) -C $(@:uninstall-%=%) uninstall-lib
+uninstall-lib: $(UNINSTALLLIBDIRS)
+$(UNINSTALLLIBDIRS):
+	$(MAKE) -C $(@:uninstalllib-%=%) uninstall-lib
 
-uninstall-dev: $(UNINSTALLDIRS)
-$(UNINSTALLDIRS):
-	$(MAKE) -C $(@:uninstall-%=%) uninstall-dev
+uninstall-dev: $(UNINSTALLDEVDIRS)
+$(UNINSTALLDEVDIRS):
+	$(MAKE) -C $(@:uninstalldev-%=%) uninstall-dev
 
 # test depends on everything being built first
 test: all $(TESTDIRS)
@@ -72,7 +77,14 @@ $(CLEANDIRS):
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)
+.PHONY: subdirs $(INSTALLDIRS)
+.PHONY: subdirs $(INSTALLEXEDIRS)
+.PHONY: subdirs $(INSTALLLIBDIRS)
+.PHONY: subdirs $(INSTALLDEVDIRS)
 .PHONY: subdirs $(UNINSTALLDIRS)
+.PHONY: subdirs $(UNINSTALLEXEDIRS)
+.PHONY: subdirs $(UNINSTALLLIBDIRS)
+.PHONY: subdirs $(UNINSTALLDEVDIRS)
 .PHONY: subdirs $(TESTDIRS)
 .PHONY: subdirs $(CLEANDIRS)
 .PHONY: all clean test
