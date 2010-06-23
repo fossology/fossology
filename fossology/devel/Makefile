@@ -26,7 +26,6 @@ $(INSTALLDIRS):
 	$(MAKE) -C $(@:install-%=%) install
 
 install-runtime: install-exe install-libs
-install-dev: install-dev
 
 # just install the executables
 install-exe: all $(INSTALLDIRS)
@@ -43,9 +42,12 @@ install-dev: all $(INSTALLDIRS)
 $(INSTALLDIRS):
 	$(MAKE) -C $(@:install-%=%) install-dev
 
+
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
 	$(MAKE) -C $(@:uninstall-%=%) uninstall
+
+uninstall-runtime: uninstall-exe uninstall-libs
 
 uninstall-exe: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
@@ -54,6 +56,10 @@ $(UNINSTALLDIRS):
 uninstall-lib: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
 	$(MAKE) -C $(@:uninstall-%=%) uninstall-lib
+
+uninstall-dev: $(UNINSTALLDIRS)
+$(UNINSTALLDIRS):
+	$(MAKE) -C $(@:uninstall-%=%) uninstall-dev
 
 # test depends on everything being built first
 test: all $(TESTDIRS)
@@ -69,4 +75,6 @@ $(CLEANDIRS):
 .PHONY: subdirs $(UNINSTALLDIRS)
 .PHONY: subdirs $(TESTDIRS)
 .PHONY: subdirs $(CLEANDIRS)
-.PHONY: all install uninstall clean test
+.PHONY: all clean test
+.PHONY: install install-exe install-lib install-dev install-runtime
+.PHONY: uninstall uninstall-exe uninstall-lib uninstall-dev uninstall-runtime
