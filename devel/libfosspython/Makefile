@@ -16,8 +16,8 @@ $(LIB): $(DB) $(REPO) $(AGENTLIB) libfosspython.pyx
 install: install-dev install-lib install-exe
 
 install-lib: $(LIB)
-	mkdir -p $(PYTHONLIBEXECDIR)
-	$(INSTALL_DATA) libfosspython.so $(PYTHONLIBEXECDIR)/libfosspython.so
+	mkdir -p $(DESTDIR)$(PYTHONLIBEXECDIR)
+	$(INSTALL_DATA) libfosspython.so $(DESTDIR)$(PYTHONLIBEXECDIR)/libfosspython.so
 
 # libfosspython doesn't provide development specific resources
 install-dev:
@@ -30,9 +30,9 @@ install-exe:
 uninstall: uninstall-dev uninstall-exe uninstall-lib
 
 uninstall-lib:
-	rm -f $(PYTHONLIBEXECDIR)/libfosspython.so
+	rm -f $(DESTDIR)$(PYTHONLIBEXECDIR)/libfosspython.so
 	if [ -d "$(DESTDIR)$(PYTHONLIBEXECDIR)" ]; then \
-	   rmdir $(PYTHONLIBEXECDIR);\
+	   rmdir $(DESTDIR)$(PYTHONLIBEXECDIR);\
         fi
 
 
