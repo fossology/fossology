@@ -25,6 +25,9 @@ install: all $(INSTALLDIRS)
 $(INSTALLDIRS):
 	$(MAKE) -C $(@:install-%=%) install
 
+install-runtime: install-exe install-libs
+install-dev: install-dev
+
 # just install the executables
 install-exe: all $(INSTALLDIRS)
 $(INSTALLDIRS):
@@ -34,6 +37,11 @@ $(INSTALLDIRS):
 install-lib: all $(INSTALLDIRS)
 $(INSTALLDIRS):
 	$(MAKE) -C $(@:install-%=%) install-lib
+
+# just install the development stuff
+install-dev: all $(INSTALLDIRS)
+$(INSTALLDIRS):
+	$(MAKE) -C $(@:install-%=%) install-dev
 
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
