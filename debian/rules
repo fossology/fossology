@@ -73,7 +73,7 @@ install-arch:
            install-common install-ui install-cli
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
-           -C devel install-exe
+           -C devel install-runtime
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-scheduler
@@ -95,7 +95,7 @@ install-arch:
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-dev \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
-           -C devel install-lib
+           -C devel install-dev
 
 	dh_install -s
 # Must not depend on anything. This is to be called by
