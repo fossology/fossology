@@ -126,15 +126,18 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
     bucketDefList[rowNum].dataFilename = strdup(PQgetvalue(result, rowNum, 3));
 
     /* verify that external file dataFilename exists */
-    snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s",
-      DATADIR, bucketpool_pk, bucketDefList[rowNum].dataFilename);
-    if (stat(filepath, &statbuf) == -1)
+    if (strlen(bucketDefList[rowNum].dataFilename) > 0)
     {
-      hostname[0] = 0;
-      gethostname(hostname, sizeof(hostname));
-      printf("ERROR: %s.%s.%d File: %s is missing on host: %s.  bucketpool_pk: %d, bucket: %s\n",
-             __FILE__, fcnName, __LINE__, filepath, hostname, bucketpool_pk, PQgetvalue(result, rowNum, 5));
-      numErrors++;
+      snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s",
+        DATADIR, bucketpool_pk, bucketDefList[rowNum].dataFilename);
+      if (stat(filepath, &statbuf) == -1)
+      {
+        hostname[0] = 0;
+        gethostname(hostname, sizeof(hostname));
+        printf("ERROR: %s.%s.%d File: %s is missing on host: %s.  bucketpool_pk: %d, bucket: %s\n",
+               __FILE__, fcnName, __LINE__, filepath, hostname, bucketpool_pk, PQgetvalue(result, rowNum, 5));
+        numErrors++;
+      }
     }
 
     /* MATCH_EVERY */
