@@ -148,9 +148,14 @@ Use the --agent switch to place %prog into Fossology agent mode. There are four 
     model = {}
     if options.training:
         files = [line.rstrip() for line in open(options.training).readlines()]
+        if os.path.exists('training.dat'):
+            hash = pickle.load(open('training.dat','r'))
+            if hash == files:
+                return 0
         training_data = [open(file).read() for file in files if os.path.exists(file)]
         model = library.create_model(training_data)
         pickle.dump(model, open(options.model,'w'))
+        pickle.dump(files, open('training.dat', 'w'))
 
     try:
         model = pickle.load(open(options.model))
@@ -167,7 +172,7 @@ Use the --agent switch to place %prog into Fossology agent mode. There are four 
         files = [line.rstrip() for line in open(options.analyze_from_file).readlines()]
         for file in files:
             text = open(file).read(READMAX)
-            results = library.label_file(file,model,READMAX)
+            results = library.label_file(text,model,READMAX)
             print "%s :: " % (file)
             if len(results) == 0:
                 print "No copyrights"
@@ -178,7 +183,7 @@ Use the --agent switch to place %prog into Fossology agent mode. There are four 
         files = args
         for file in files:
             text = open(file).read(READMAX)
-            results = library.label_file(file,model,READMAX)
+            results = library.label_file(text,model,READMAX)
             print "%s :: " % (file)
             if len(results) == 0:
                 print "No copyrights"
@@ -272,15 +277,10 @@ def agent(model,runonpfiles=False):
                     error = db.errmsg()
                     raise Exception('Could not select job queue for copyright analysis. Database said: "%s".\n\tsql=%s' % (error, sql))
                 
-                n = db.datasize()
-                jobs = []
+                rows = db.getrows()
 
-                for i in xrange(n):
-                    row = db.nextrow(i)
-                    jobs.append(row)
-
-                for i in xrange(n):
-                    if analyze(jobs[i]['pfile_pk'], jobs[i]['pfilename'], agent_pk, model, db) != 0:
+                for row in rows:
+                    if analyze(row['pfile_pk'], row['pfilename'], agent_pk, model, db) != 0:
                         print >> sys.stdout, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, jobs[i]['pfile_pk'], jobs[i]['pfilename'])
                     else:
                         hb.increment()
@@ -317,8 +317,8 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
     if (not os.path.exists(path)):
         print >> sys.stdout, 'ERROR: File not found. path=%s' % (path)
         return -1
-    offsets = library.label_file(path,model,READMAX)
     text = open(path).read(READMAX)
+    offsets = library.label_file(text,model,READMAX)
     if len(offsets) == 0:
         sql = """INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type)
                  VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement')""" % (agent_pk, pfile)
@@ -431,41 +431,41 @@ def setup_database(drop=False):
         else:
             exists = True
 
-    if not exists:
-        sql = "CREATE INDEX copyright_pfile_fk_index ON copyright USING BTREE (pfile_fk)"
-        result = db.access(sql)
-        if result != 0:
-            error = db.errmsg()
-            print >> sys.stdout, "ERROR: Could not create index for pfile_fk. Database said: '%s'\nERROR: sql=%s" % (error, sql)
-            return -1
+    sql = "CREATE INDEX copyright_pfile_fk_index ON copyright USING BTREE (pfile_fk)"
+    result = db.access(sql)
+    if result != 0 and result != -1:
+        error = db.errmsg()
+        print >> sys.stdout, "ERROR: Could not create index for pfile_fk. Database said: '%s'\nERROR: sql=%s" % (error, sql)
+        return -1
 
-        sql = "CREATE INDEX copyright_agent_fk_index ON copyright USING BTREE (agent_fk)"
-        result = db.access(sql)
-        if result != 0:
-            error = db.errmsg()
-            print >> sys.stdout, "ERROR: Could not create index for agent_fk. Database said: '%s'\nERROR: sql=%s" % (error, sql)
-            return -1
+    sql = "CREATE INDEX copyright_agent_fk_index ON copyright USING BTREE (agent_fk)"
+    result = db.access(sql)
+    if result != 0 and result != -1:
+        error = db.errmsg()
+        print >> sys.stdout, "ERROR: Could not create index for agent_fk. Database said: '%s'\nERROR: sql=%s" % (error, sql)
+        return -1
 
-        sql = "ALTER TABLE public.copyright OWNER TO fossy"
-        result = db.access(sql)
-        if result != 0:
-            error = db.errmsg()
-            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
-            return -1
-        
-        sql = "ALTER TABLE ONLY copyright ADD CONSTRAINT pfile_fk FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk)" 
-        result = db.access(sql)
-        if result != 0:
-            error = db.errmsg()
-            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
-            return -1
-        
-        sql = "ALTER TABLE ONLY copyright ADD CONSTRAINT agent_fk FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk)"
-        result = db.access(sql)
-        if result != 0:
-            error = db.errmsg()
-            print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
-            return -1
+    sql = "ALTER TABLE public.copyright OWNER TO fossy"
+    result = db.access(sql)
+    if result != 0 and result != -1:
+        error = db.errmsg()
+        print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
+        return -1
+
+    sql = "ALTER TABLE ONLY copyright ADD CONSTRAINT pfile_fk FOREIGN KEY (pfile_fk) REFERENCES pfile(pfile_pk)"
+    result = db.access(sql)
+    if result != 0 and result != -1:
+        error = db.errmsg()
+        print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
+        return -1
+
+    sql = "ALTER TABLE ONLY copyright ADD CONSTRAINT agent_fk FOREIGN KEY (agent_fk) REFERENCES agent(agent_pk)"
+    result = db.access(sql)
+    if result != 0 and result != -1:
+        error = db.errmsg()
+        print >> sys.stdout, "ERROR: Could not alter copyright. Database said: '%s'\nERROR: sql=%s" % (error, sql)
+        return -1
+
 
     return 0
 
