@@ -13,22 +13,27 @@ all: $(LIB) $(VARS)
 $(LIB): $(DB) $(REPO) $(AGENTLIB) libfosspython.pyx
 	python setup.py build_ext --inplace
 
-install: install-lib
+install: install-dev install-lib install-exe
 
 install-lib: $(LIB)
 	mkdir -p $(PYTHONLIBEXECDIR)
 	$(INSTALL_DATA) libfosspython.so $(PYTHONLIBEXECDIR)/libfosspython.so
 
+# libfosspython doesn't provide development specific resources
+install-dev:
+
+# libfosspython doesn't provide any executables
 install-exe:
 
 # uninstall only cleans up the files, not the directories that might have
 # been created
-uninstall: uninstall-lib
+uninstall: uninstall-dev uninstall-exe uninstall-lib
 
 uninstall-lib:
 	rm -f $(PYTHONLIBEXECDIR)/libfosspython.so
 	rmdir $(PYTHONLIBEXECDIR)
 
+uninstall-dev:
 uninstall-exe:
 
 test: all
@@ -39,7 +44,8 @@ clean:
 	rm -rf build
 
 .PHONY: all clean test
-.PHONY: install install-lib install-exe uninstall uninstall-lib uninstall-exe
+.PHONY: install install-dev install-lib install-exe
+.PHONY: uninstall uninstall-dev uninstall-lib uninstall-exe
 
 include $(DEPS)
 

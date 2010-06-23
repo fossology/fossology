@@ -17,25 +17,30 @@ $(LIB): %.a: %.c %.h $(VARS)
 $(EXE): %: %.c $(LIB) $(VARS)
 	$(CC) $< -lpq $(CFLAGS_DB) -I`pg_config --includedir` -o $@
 
-install: install-lib install-exe
+install: install-dev install-lib install-exe
 
-install-lib: $(LIB)
+install-dev: $(LIB)
 	$(INSTALL_DATA) libfossdb.a $(DESTDIR)$(LIBDIR)/libfossdb.a
 	$(INSTALL_DATA) libfossdb.h $(DESTDIR)$(INCLUDEDIR)/libfossdb.h
 
 install-exe: $(EXE)
 	$(INSTALL_PROGRAM) dbcheck $(DESTDIR)$(LIBEXECDIR)/dbcheck
 
+# If we ever do shared libs, they will go here
+install-lib:
+
 # uninstall only cleans up the files, not the directories that might have
 # been created
-uninstall: uninstall-lib uninstall-exe
+uninstall: uninstall-dev uninstall-lib uninstall-exe
 
-uninstall-lib:
+uninstall-dev:
 	rm -f $(DESTDIR)$(LIBDIR)/libfossdb.a
 	rm -f $(DESTDIR)$(INCLUDEDIR)/libfossdb.h
 
 uninstall-exe:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbcheck
+
+uninstall-lib:
 
 test: all
 	@echo "*** No tests available for libfossdb ***"
@@ -44,4 +49,5 @@ clean:
 	rm -f $(LIB) $(EXE) *.o core
 
 .PHONY: all clean test
-.PHONY: install install-lib install-exe uninstall uninstall-lib uninstall-exe
+.PHONY: install install-dev install-lib install-exe
+.PHONY: uninstall uninstall-dev uninstall-lib uninstall-exe
