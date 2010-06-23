@@ -31,7 +31,10 @@ uninstall: uninstall-dev uninstall-exe uninstall-lib
 
 uninstall-lib:
 	rm -f $(PYTHONLIBEXECDIR)/libfosspython.so
-	rmdir $(PYTHONLIBEXECDIR)
+	if [ -d "$(DESTDIR)$(PYTHONLIBEXECDIR)" ]; then \
+	   rmdir $(PYTHONLIBEXECDIR);\
+        fi
+
 
 uninstall-dev:
 uninstall-exe:

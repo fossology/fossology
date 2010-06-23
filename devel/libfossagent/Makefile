@@ -28,7 +28,7 @@ install-exe:
 
 # uninstall only cleans up the files, not the directories that might have
 # been created
-uninstall: uninstall-lib 
+uninstall: uninstall-lib uninstall-exe uninstall-dev
 
 uninstall-dev:
 	rm -f $(DESTDIR)$(LIBDIR)/libfossagent.a
