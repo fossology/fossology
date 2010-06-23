@@ -228,38 +228,41 @@ class ui_buckets extends FO_Plugin
     $bucketcount = 0;
     $Uniquebucketcount = 0;
     $NoLicFound = 0;
-    $VLic .= "<table border=1 width='100%'>\n";
-    $VLic .= "<tr><th width='10%'>Count</th>";
-    $VLic .= "<th width='10%'>Files</th>";
-    $VLic .= "<th>Bucket</th></tr>\n";
-
-    foreach($historows as $bucketrow)
+    if (is_array($historows))
     {
-      $Uniquebucketcount++;
-      $bucket_pk = $bucketrow['bucket_pk'];
-      $bucketcount = $bucketrow['bucketcount'];
-      $bucket_name = $bucketDefArray[$bucket_pk]['bucket_name'];
-      $bucket_color = $bucketDefArray[$bucket_pk]['bucket_color'];
+      $VLic .= "<table border=1 width='100%'>\n";
+      $VLic .= "<tr><th width='10%'>Count</th>";
+      $VLic .= "<th width='10%'>Files</th>";
+      $VLic .= "<th>Bucket</th></tr>\n";
+  
+      foreach($historows as $bucketrow)
+      {
+        $Uniquebucketcount++;
+        $bucket_pk = $bucketrow['bucket_pk'];
+        $bucketcount = $bucketrow['bucketcount'];
+        $bucket_name = $bucketDefArray[$bucket_pk]['bucket_name'];
+        $bucket_color = $bucketDefArray[$bucket_pk]['bucket_color'];
+  
+        /*  Count  */
+        $VLic .= "<tr><td align='right' style='background-color:$bucket_color'>$bucketcount</td>";
 
-      /*  Count  */
-      $VLic .= "<tr><td align='right' style='background-color:$bucket_color'>$bucketcount</td>";
+        /*  Show  */
+        $VLic .= "<td align='center'><a href='";
+        $VLic .= Traceback_uri();
+        $VLic .= "?mod=list_bucket_files&bapk=$bucketagent_pk&item=$Uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk" . "'>Show</a></td>";
 
-      /*  Show  */
-      $VLic .= "<td align='center'><a href='";
-      $VLic .= Traceback_uri();
-      $VLic .= "?mod=list_bucket_files&bapk=$bucketagent_pk&item=$Uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk" . "'>Show</a></td>";
-
-      /*  Bucket name  */
-      $VLic .= "<td align='left'>";
-      $VLic .= "<a id='$bucket_pk' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filebucket&bapk=$bucketagent_pk&item=$Uploadtree_pk&bucket_pk=$bucket_pk\")'";
-      $VLic .= ">$bucket_name </a>";
-      $VLic .= "</td>";
-      $VLic .= "</tr>\n";
+        /*  Bucket name  */
+        $VLic .= "<td align='left'>";
+        $VLic .= "<a id='$bucket_pk' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filebucket&bapk=$bucketagent_pk&item=$Uploadtree_pk&bucket_pk=$bucket_pk\")'";
+        $VLic .= ">$bucket_name </a>";
+        $VLic .= "</td>";
+        $VLic .= "</tr>\n";
 //      if ($row['bucket_name'] == "No Buckets Found") $NoLicFound =  $row['bucketcount'];
+      }
+      $VLic .= "</table>\n";
+      $VLic .= "<p>\n";
+      $VLic .= "Unique buckets: $Uniquebucketcount<br>\n";
     }
-    $VLic .= "</table>\n";
-    $VLic .= "<p>\n";
-    $VLic .= "Unique buckets: $Uniquebucketcount<br>\n";
 
 
     /*******    File Listing     ************/
