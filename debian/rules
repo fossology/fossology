@@ -73,10 +73,7 @@ install-arch:
            install-common install-ui install-cli
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
-           -C devel/libfossrepo install-exe
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
-           -C devel/libfossdb install-exe
+           -C devel install-exe
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scheduler \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var install-scheduler
@@ -98,11 +95,7 @@ install-arch:
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-dev \
            PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
-           -C devel/libfossrepo install-lib
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-dev \
-           PREFIX=/usr SYSCONFDIR=/etc LOCALSTATEDIR=/var \
-           -C devel/libfossdb install-lib
-
+           -C devel install-lib
 
 	dh_install -s
 # Must not depend on anything. This is to be called by
