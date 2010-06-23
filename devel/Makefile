@@ -30,7 +30,7 @@ install: all $(INSTALLDIRS)
 $(INSTALLDIRS):
 	$(MAKE) -C $(@:install-%=%) install
 
-install-runtime: install-exe install-libs
+install-runtime: install-exe install-lib
 
 # just install the executables
 install-exe: all $(INSTALLEXEDIRS)
@@ -52,7 +52,7 @@ uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
 	$(MAKE) -C $(@:uninstall-%=%) uninstall
 
-uninstall-runtime: uninstall-exe uninstall-libs
+uninstall-runtime: uninstall-exe uninstall-lib
 
 uninstall-exe: $(UNINSTALLEXEDIRS)
 $(UNINSTALLEXEDIRS):

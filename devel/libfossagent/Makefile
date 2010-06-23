@@ -21,7 +21,7 @@ install-dev: $(LIB)
 	$(INSTALL_DATA) libfossagent.h $(DESTDIR)$(INCLUDEDIR)/libfossagent.h
 
 # If we ever do shared libs, they will go here
-install-libs:
+install-lib:
 
 # libfossagent doesn't provide any executables
 install-exe:

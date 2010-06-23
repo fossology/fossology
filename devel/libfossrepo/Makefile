@@ -29,7 +29,7 @@ install-exe: $(EXE)
 	done
 
 # If we ever do shared libs, they will go here
-install-libs:
+install-lib:
 
 # uninstall only cleans up the files, not the directories that might have
 # been created
