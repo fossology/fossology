@@ -25,9 +25,27 @@ install: all $(INSTALLDIRS)
 $(INSTALLDIRS):
 	$(MAKE) -C $(@:install-%=%) install
 
+# just install the executables
+install-exe: all $(INSTALLDIRS)
+$(INSTALLDIRS):
+	$(MAKE) -C $(@:install-%=%) install-exe
+
+# just install the libs
+install-lib: all $(INSTALLDIRS)
+$(INSTALLDIRS):
+	$(MAKE) -C $(@:install-%=%) install-lib
+
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
 	$(MAKE) -C $(@:uninstall-%=%) uninstall
+
+uninstall-exe: $(UNINSTALLDIRS)
+$(UNINSTALLDIRS):
+	$(MAKE) -C $(@:uninstall-%=%) uninstall-exe
+
+uninstall-lib: $(UNINSTALLDIRS)
+$(UNINSTALLDIRS):
+	$(MAKE) -C $(@:uninstall-%=%) uninstall-lib
 
 # test depends on everything being built first
 test: all $(TESTDIRS)
