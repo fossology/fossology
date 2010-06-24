@@ -1060,7 +1060,7 @@ int main(int argc, char **argv) {
             }
 
             /* make sure this is a regular file, ignore if not */
-            if (0 == isFILE(cur.pFile)) continue;
+            if (0 == isFILE(repFile)) continue;
 
             processFile(repFile);
             if (recordScanToDB(&cacheroot, &cur))
