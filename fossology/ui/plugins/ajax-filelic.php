@@ -44,11 +44,12 @@ if (!isset($GlobalReady)) { exit; }
 class ajax_filelic extends FO_Plugin
 {
   var $Name       = "ajax_filelic";
-  var $Title      = "List Uploads as Options";
+  var $Title      = "ajax find items by license";
   var $Version    = "1.0";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;
   var $NoHTML     = 1; /* This plugin needs no HTML content help */
+  var $LoginFlag = 0;
 
   /***********************************************************
    Output(): Display the loaded menu and plugins.
