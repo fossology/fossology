@@ -49,6 +49,7 @@ class ajax_filebucket extends FO_Plugin
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;
   var $NoHTML     = 1; /* This plugin needs no HTML content help */
+  var $LoginFlag = 0;
 
   /***********************************************************
    Output(): Display the loaded menu and plugins.
