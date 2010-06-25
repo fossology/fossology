@@ -40,7 +40,39 @@ class ui_buckets extends FO_Plugin
   function Install()
   {
     global $DB;
+    global $PG_CONN;
+
     if (empty($DB)) { return(1); } /* No DB */
+
+    /* If there are no bucket pools defined, create a demo */
+    /* Check if there is already a bucket pool */
+    $sql = "SELECT count(*)  FROM bucketpool";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) > 0) return;
+
+    /* none exist so create the demo */
+    $DemoPoolName = "GPL Demo bucket pool";
+    $sql = "INSERT INTO bucketpool (bucketpool_name, version, active, description) VALUES ('$DemoPoolName', 1, 'Y', 'Demonstration of a very simple GPL/non-gpl bucket pool')";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    /* get the bucketpool_pk of the newly inserted record */
+    $sql = "select bucketpool_pk from bucketpool 
+              where bucketpool_name='$DemoPoolName' limit 1";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $bucketpool_pk = $row['bucketpool_pk'];
+    pg_free_result($result);
+
+    /* Insert the bucket_def records */
+    $sql = "INSERT INTO bucketpool (bucketpool_name, version, active, description) VALUES ('$DemoPoolName', 1, 'Y', 'Demonstration of a very simple GPL/non-gpl bucket pool')";
+    $Columns = "bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, stopon, applies_to";
+    $sql = "INSERT INTO bucket_def ($Columns) VALUES ('GPL Licenses (Demo)', 'orange', 50, 50, $bucketpool_pk, 3, '(affero|gpl)', 'N', 'f');
+            INSERT INTO bucket_def ($Columns) VALUES ('non-gpl (Demo)', 'yellow', 50, 1000, $bucketpool_pk, 99, NULL, 'N', 'f')";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
 
     return(0);
   } // Install()
