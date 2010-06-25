@@ -186,10 +186,10 @@ $JobHistoryUrl = "http://$hostname/repo/?mod=showjobs&history=1&upload=$upload_i
 
 // get the item to create the browse/license report link
 $licenseLinkError = NULL;
-$SQL = "SELECT uploadtree_pk FROM uploadtree WHERE parent is NULL and upload_fk=$upload_id";
+$Sql = "SELECT uploadtree_pk FROM uploadtree WHERE parent is NULL and upload_fk=$upload_id";
 
-$result = pg_query($PG_CONN, $SQL);
-DBCheckResult($result, $sql, __FILE__, __LINE__);
+$result = pg_query($PG_CONN, $Sql);
+DBCheckResult($result, $Sql, __FILE__, __LINE__);
 if ( pg_num_rows($result))
 {
 	$row = pg_fetch_assoc($result);
@@ -207,31 +207,11 @@ pg_free_result($result);
  * different depending on a single file or multiple files. See the
  * comment below.
  */
-/* Find lft and rgt bounds for this $Uploadtree_pk  */
-$sql = "SELECT lft,rgt,upload_fk FROM uploadtree
-              WHERE uploadtree_pk = $item";
-$result = pg_query($PG_CONN, $sql);
-DBCheckResult($result, $sql, __FILE__, __LINE__);
-$row = pg_fetch_assoc($result);
-$lft = $row["lft"];
-$rgt = $row["rgt"];
-$upload_pk = $row["upload_fk"];
-pg_free_result($result);
 
-/* Find total number of files for this $Uploadtree_pk
- * Exclude artifacts and directories.  This code only cares about the
- * count.
- */
-$sql = "SELECT count(*) as count FROM uploadtree
-              WHERE upload_fk = $upload_pk 
-                    and uploadtree.lft BETWEEN $lft and $rgt
-                    and ((ufile_mode & (1<<28))=0) 
-                    and ((ufile_mode & (1<<29))=0) and pfile_fk!=0";
-$result = pg_query($PG_CONN, $sql);
-DBCheckResult($result, $sql, __FILE__, __LINE__);
-$row = pg_fetch_assoc($result);
-$fileCount = $row["count"];
-pg_free_result($result);
+$Sql = "select uploadtree_pk from uploadtree where upload_fk=$upload_id limit 2;";
+$result = pg_query($PG_CONN, $Sql);
+DBCheckResult($result, $Sql, __FILE__, __LINE__);
+$fileCount = pg_num_rows($result);
 
 /*
  * if no agent_pk, no license analysis
@@ -245,7 +225,7 @@ pg_free_result($result);
  * the uploadPK, this will get the folder_pk of the job.
  */
 
-$Agent_pk = LatestNomosAgentpk($upload_pk);
+$Agent_pk = LatestNomosAgentpk($upload_id);
 if($Agent_pk == 0)
 {
 	// No license analysis.  Single file, create view url, otherwise browse url
@@ -257,16 +237,9 @@ if($Agent_pk == 0)
 	}
 	if($fileCount > 1)
 	{
-		// get the folder_fk/pk
-		$SQL = "select parent_fk, child_id from foldercontents where child_id=$upload_pk;";
-		$result = pg_query($PG_CONN, $SQL);
-		DBCheckResult($result, $sql, __FILE__, __LINE__);
-		$row = pg_fetch_assoc($result);
-		$folder_fk = $row['parent_fk'];
-		pg_free_result($result);
 		// no license analysis scheduled, create a browse menu link to the upload
 		$licenseReportUrl = "http://$hostname/repo/?mod=browse" .
-												"&upload=$upload_id&show=detail&item=$item&folder=$folder_fk";
+												"&upload=$upload_id&show=detail&item=$item";
 	}
 	$licenseReport = "\n\nNo License analysis was scheduled, browse the upload at:" .
 										"\n$licenseReportUrl\n";
@@ -281,7 +254,7 @@ else
 		{
 			// create view-license link
 			$licenseReportUrl = "http://$hostname/repo/?mod=view-license&napk=$Agent_pk" .
-													"&show=detail&upload=$upload_pk&item=$item";
+													"&show=detail&upload=$upload_id&item=$item";
 		}
 		if($fileCount > 1)
 		{
@@ -347,6 +320,9 @@ if ($Done) {
 /*
  * Job Failed: the order of checks is important, you can still have pending jobs
  * when a job fails, so check for failed first before pending or active.
+ * 
+ * @todo wait till after the new scheduler is done... but it would be 
+ * nice to report on a failed job what other subjobs are pending.
  */
 elseif ($summary['failed'] > 0) {
 	$JobStatus = "Failed";
