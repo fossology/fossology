@@ -76,12 +76,7 @@ class ajax_filebucket extends FO_Plugin
     $outstr = $bucket_pk;
     foreach ($children as $child)
     {
-      $sql = "select uploadtree_pk from uploadtree,bucket_container 
-               where uploadtree_pk='$child[uploadtree_pk]'
-                     and uploadtree_pk=uploadtree_fk 
-                     and bucket_fk='$bucket_pk' and agent_fk='$agent_pk'
-              union
-              select uploadtree_pk from uploadtree,bucket_file 
+      $sql = "select uploadtree_pk from uploadtree,bucket_file 
                where uploadtree_pk='$child[uploadtree_pk]'
                      and uploadtree.pfile_fk=bucket_file.pfile_fk
                      and bucket_fk='$bucket_pk' and agent_fk='$agent_pk'
