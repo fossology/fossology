@@ -113,15 +113,19 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
     bucketDefList[rowNum].bucket_type = atoi(PQgetvalue(result, rowNum, 1));
     bucketDefList[rowNum].bucketpool_pk = bucketpool_pk;
 
-    rv = regcomp(&bucketDefList[rowNum].compRegex, PQgetvalue(result, rowNum, 2), 
-                 REG_NOSUB | REG_ICASE | REG_EXTENDED);
-    if (rv != 0)
+    /* compile regex if type 3 (REGEX) */
+    if (bucketDefList[rowNum].bucket_type == 3)
     {
-      printf("ERROR: %s.%s.%d Invalid regular expression for bucketpool_pk: %d, bucket: %s\n",
-             __FILE__, fcnName, __LINE__, bucketpool_pk, PQgetvalue(result, rowNum, 5));
-      numErrors++;
+      rv = regcomp(&bucketDefList[rowNum].compRegex, PQgetvalue(result, rowNum, 2), 
+                   REG_NOSUB | REG_ICASE | REG_EXTENDED);
+      if (rv != 0)
+      {
+        printf("ERROR: %s.%s.%d Invalid regular expression for bucketpool_pk: %d, bucket: %s\n",
+               __FILE__, fcnName, __LINE__, bucketpool_pk, PQgetvalue(result, rowNum, 5));
+        numErrors++;
+      }
+      bucketDefList[rowNum].regex = strdup(PQgetvalue(result, rowNum, 2));
     }
-    bucketDefList[rowNum].regex = strdup(PQgetvalue(result, rowNum, 2));
 
     bucketDefList[rowNum].dataFilename = strdup(PQgetvalue(result, rowNum, 3));
 

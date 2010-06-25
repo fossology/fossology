@@ -1297,7 +1297,7 @@ int main(int argc, char **argv)
 
     /* loop through rules (bucket defs) to see if there are any package only rules */
     hasPrules = 0;
-    for (tmpbucketDefArray = bucketDefArray; tmpbucketDefArray; tmpbucketDefArray++)
+    for (tmpbucketDefArray = bucketDefArray; tmpbucketDefArray->bucket_pk; tmpbucketDefArray++)
       if (tmpbucketDefArray->applies_to == 'p')
       {
         hasPrules = 1;
