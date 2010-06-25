@@ -634,7 +634,7 @@ def create_model(training_data, debug=False):
 
     return model
 
-def label_file(file, model, READMAX=64000):
+def label_file(text, model):
     """
     A wrapper function for extracting copyright statements.
 
@@ -654,7 +654,6 @@ def label_file(file, model, READMAX=64000):
     """
 
     PFC = model['P(F|C)']
-    text = open(file).read(READMAX)
 
     # parse the file and get the tokens
     parsed_text = parsetext(text)
