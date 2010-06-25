@@ -169,6 +169,56 @@ function GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $uploadtree_pk,
 }
 
 
+/*
+ * Return true if a bucket_pk is found in a tree 
+ * for a given nomos and bucket agent.
+ * Inputs:
+ *   $bucket_pk
+ *   $uploadtree_pk  
+ * Returns:
+ *   True if bucket_pk is found in the tree
+ *   False if not
+ */
+function BucketInTree($bucket_pk, $uploadtree_pk)
+{
+  global $PG_CONN;
+  $BuckArray = array();
+
+  if (empty($bucket_pk) || empty($uploadtree_pk)) 
+     Fatal("Missing parameter: bucket_pk: $bucket_pk, uploadtree_pk: $uploadtree_pk<br>", __FILE__, __LINE__);
+
+  /* Find lft and rgt bounds for this $uploadtree_pk  */
+  $sql = "SELECT lft,rgt FROM uploadtree WHERE uploadtree_pk = $uploadtree_pk";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) < 1)
+  {
+    pg_free_result($result);
+    return False;
+  }
+  $row = pg_fetch_assoc($result);
+  $lft = $row["lft"];
+  $rgt = $row["rgt"];
+  pg_free_result($result);
+
+  /* search for bucket in tree */
+  $sql = "SELECT bucket_fk from bucket_file, 
+            (SELECT distinct(pfile_fk) as PF from uploadtree 
+               where uploadtree.lft BETWEEN $lft and $rgt) as SS
+          where PF=pfile_fk and bucket_fk='$bucket_pk' limit 1";
+
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) == 0)
+    $rv = False;
+  else
+    $rv = True;
+  pg_free_result($result);
+
+  return $rv;
+}
+
+
 /* Initializes array of bucket_def records.
  */
 function initBucketDefArray($bucketpool_pk)

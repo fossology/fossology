@@ -21,12 +21,11 @@
  level under a parent, that contains a given bucket.
 
  GET args: 
-   bapk        bucket agent pk 
    item        parent uploadtree_pk
    bucket_pk   bucket_pk
 
  ajax usage:
-   http://...?mod=ajax_filebucket&bapk=1234&item=23456&bucket_pk=27
+   http://...?mod=ajax_filebucket&item=23456&bucket_pk=27
  
  Returns a comma delimited string of bucket_pk followed by uploadtree_pks: 
   "12,999,123,456"
@@ -65,7 +64,6 @@ class ajax_filebucket extends FO_Plugin
     // make sure there is a db connection since I've pierced the core-db abstraction
     if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
 
-	$agent_pk = GetParm("bapk",PARM_INTEGER);
     $bucket_pk = GetParm("bucket_pk",PARM_RAW);
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
 
@@ -76,21 +74,8 @@ class ajax_filebucket extends FO_Plugin
     $outstr = $bucket_pk;
     foreach ($children as $child)
     {
-      $sql = "select uploadtree_pk from uploadtree,bucket_file 
-               where uploadtree_pk='$child[uploadtree_pk]'
-                     and uploadtree.pfile_fk=bucket_file.pfile_fk
-                     and bucket_fk='$bucket_pk' and agent_fk='$agent_pk'
-               limit 1";
-//echo $sql, "<br>";
-
-      $result = pg_query($PG_CONN, $sql);  // Top uploadtree_pk's
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      if (pg_num_rows($result) > 0) 
-      {
-        $row = pg_fetch_assoc($result);
-        $outstr .= ",$row[uploadtree_pk]";
-      }
-      pg_free_result($result);
+      if (BucketInTree($bucket_pk, $child['uploadtree_pk']))
+        $outstr .= ",$child[uploadtree_pk]";
     }
 
     if (!$this->OutputToStdout) { return($outstr); }
