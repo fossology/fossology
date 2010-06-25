@@ -176,7 +176,7 @@ class ui_buckets extends FO_Plugin
     }
 
     /* find latest bucket and nomos agent that has data */
-    $AgentRec = AgentARSList("bucket_ars", $upload_pk, 0);
+    $AgentRec = AgentARSList("bucket_ars", $upload_pk, 0, 0, "and bucketpool_fk=$bucketpool_pk");
     if ($AgentRec === false)
     {
       $VLic .= "<h3>No data available.  Use Jobs > Agents to schedule a bucket scan.</h3>";

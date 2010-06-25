@@ -295,19 +295,20 @@ function GetAgentKey($agentName, $agentDesc)
  *  can be determined.
  *
  *  This is for _ars tables only, for example, nomos_ars and bucket_ars.
- *  The _ars tables have a standard format with optional added agent_fk's.
- *  This function does not process those optional agent_fk's, leaving that
- *  task to the caller.
+ *  The _ars tables have a standard format but the specific agent ars table
+ *  may have additional fields.
  *
  * @param string  $TableName - name of the ars table (e.g. nomos_ars)
  * @param int     $upload_pk
  * @param int     $limit - limit number of rows returned.  0=No limit
  * @param int     $agent_fk - ARS table agent_fk, optional
+ * @param string  $ExtraWhere - Optional, added to where clause.
+ *                   eg: "and bucketpool_fk=2"
  *
  * @return assoc array of _ars records.
  *         or FALSE on error, or no rows
  */
-function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0)
+function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0, $ExtraWhere="")
 {
 	global $PG_CONN;
 
@@ -320,7 +321,7 @@ function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0)
 
 	$sql = "SELECT * FROM $TableName, agent
            WHERE agent_pk=agent_fk and ars_success=true and upload_fk='$upload_pk' and agent_enabled=true 
-           $agentCond
+           $agentCond $ExtraWhere 
            order by agent_ts desc $LimitClause";
            $result = pg_query($PG_CONN, $sql);
            DBCheckResult($result, $sql, __FILE__, __LINE__);
