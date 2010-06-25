@@ -172,7 +172,7 @@ Use the --agent switch to place %prog into Fossology agent mode. There are four 
         files = [line.rstrip() for line in open(options.analyze_from_file).readlines()]
         for file in files:
             text = open(file).read(READMAX)
-            results = library.label_file(text,model,READMAX)
+            results = library.label_file(text,model)
             print "%s :: " % (file)
             if len(results) == 0:
                 print "No copyrights"
@@ -183,7 +183,7 @@ Use the --agent switch to place %prog into Fossology agent mode. There are four 
         files = args
         for file in files:
             text = open(file).read(READMAX)
-            results = library.label_file(text,model,READMAX)
+            results = library.label_file(text,model)
             print "%s :: " % (file)
             if len(results) == 0:
                 print "No copyrights"
@@ -318,7 +318,7 @@ def analyze(pfile_pk, filename, agent_pk, model, db):
         print >> sys.stdout, 'ERROR: File not found. path=%s' % (path)
         return -1
     text = open(path).read(READMAX)
-    offsets = library.label_file(text,model,READMAX)
+    offsets = library.label_file(text,model)
     if len(offsets) == 0:
         sql = """INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type)
                  VALUES (%d, %d, NULL, NULL, NULL, NULL, 'statement')""" % (agent_pk, pfile)
