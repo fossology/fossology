@@ -518,9 +518,9 @@
   $Schema["TABLE"]["bucketpool"]["active"]["ALTER"] = "ALTER TABLE \"bucketpool\" ALTER COLUMN \"active\" SET NOT NULL, ALTER COLUMN \"active\" SET DEFAULT 'Y'::char;";
   $Schema["TABLE"]["bucketpool"]["active"]["UPDATE"] = "UPDATE bucketpool SET active='Y'::char";
 
-  $Schema["TABLE"]["bucketpool"]["description"]["DESC"] = "COMMENT ON COLUMN \"bucketpool\".\"bucketpool_name\" IS 'Optional bucketpool description';";
-  $Schema["TABLE"]["bucketpool"]["description"]["ADD"] = "ALTER TABLE \"bucketpool\" ADD COLUMN \"bucketpool_name\" text;";
-  $Schema["TABLE"]["bucketpool"]["description"]["ALTER"] = "ALTER TABLE \"bucketpool\" ALTER COLUMN \"bucketpool_name\" DROP NOT NULL;";
+  $Schema["TABLE"]["bucketpool"]["description"]["DESC"] = "COMMENT ON COLUMN \"bucketpool\".\"description\" IS 'Optional bucketpool description';";
+  $Schema["TABLE"]["bucketpool"]["description"]["ADD"] = "ALTER TABLE \"bucketpool\" ADD COLUMN \"description\" text;";
+  $Schema["TABLE"]["bucketpool"]["description"]["ALTER"] = "ALTER TABLE \"bucketpool\" ALTER COLUMN \"description\" DROP NOT NULL;";
   $Schema["TABLE"]["bucketpool"]["description"]["UPDATE"] = "";
 
 
