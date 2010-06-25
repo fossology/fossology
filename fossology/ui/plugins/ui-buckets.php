@@ -257,6 +257,12 @@ class ui_buckets extends FO_Plugin
     $VLic .= $AgentSelect;
     $VLic .= "<input type='submit' value='Go'>";
 */
+    $sql = "select bucketpool_name from bucketpool where bucketpool_pk=$bucketpool_pk";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $bucketpool_name = $row['bucketpool_name'];
+    pg_free_result($result);
 
     /* Write bucket histogram to $VLic  */
     $bucketcount = 0;
@@ -264,10 +270,11 @@ class ui_buckets extends FO_Plugin
     $NoLicFound = 0;
     if (is_array($historows))
     {
+      $VLic .= "Bucket Pool: $bucketpool_name<br>";
       $VLic .= "<table border=1 width='100%'>\n";
       $VLic .= "<tr><th width='10%'>Count</th>";
       $VLic .= "<th width='10%'>Files</th>";
-      $VLic .= "<th>Bucket</th></tr>\n";
+      $VLic .= "<th align='left'>Bucket</th></tr>\n";
   
       foreach($historows as $bucketrow)
       {
