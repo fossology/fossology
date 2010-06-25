@@ -292,7 +292,7 @@ class ui_browse extends FO_Plugin {
       }
       $V.= $Status['failed'] . " failed.";
 
-/* bobg: bsam license analysis is depricated */
+/* bobg: bsam license analysis is deprecated */
 if (isset($__OBSOLETE__))
 {
       /* Check for re-do license analysis */
