@@ -174,7 +174,7 @@ if(array_key_exists("w",$options))
 	{
 		print "Error, no hostname supplied\n";
 		exit(1);
-	}	
+	}
 }
 else
 {
@@ -184,16 +184,131 @@ else
 
 $JobHistoryUrl = "http://$hostname/repo/?mod=showjobs&history=1&upload=$upload_id";
 
+// get the item to create the browse/license report link
+$licenseLinkError = NULL;
+$SQL = "SELECT uploadtree_pk FROM uploadtree WHERE parent is NULL and upload_fk=$upload_id";
+
+$result = pg_query($PG_CONN, $SQL);
+DBCheckResult($result, $sql, __FILE__, __LINE__);
+if ( pg_num_rows($result))
+{
+	$row = pg_fetch_assoc($result);
+	$item = $row['uploadtree_pk'];
+}
+else
+{
+	$licenseLinkError = "Could not get license report link due to missing" .
+											"upload tree parent for upload $upload_id\n";
+}
+pg_free_result($result);
+
+/*
+ * need to determine how many files there are.  As the url's are 
+ * different depending on a single file or multiple files. See the
+ * comment below.
+ */
+/* Find lft and rgt bounds for this $Uploadtree_pk  */
+$sql = "SELECT lft,rgt,upload_fk FROM uploadtree
+              WHERE uploadtree_pk = $item";
+$result = pg_query($PG_CONN, $sql);
+DBCheckResult($result, $sql, __FILE__, __LINE__);
+$row = pg_fetch_assoc($result);
+$lft = $row["lft"];
+$rgt = $row["rgt"];
+$upload_pk = $row["upload_fk"];
+pg_free_result($result);
+
+/* Find total number of files for this $Uploadtree_pk
+ * Exclude artifacts and directories.  This code only cares about the
+ * count.
+ */
+$sql = "SELECT count(*) as count FROM uploadtree
+              WHERE upload_fk = $upload_pk 
+                    and uploadtree.lft BETWEEN $lft and $rgt
+                    and ((ufile_mode & (1<<28))=0) 
+                    and ((ufile_mode & (1<<29))=0) and pfile_fk!=0";
+$result = pg_query($PG_CONN, $sql);
+DBCheckResult($result, $sql, __FILE__, __LINE__);
+$row = pg_fetch_assoc($result);
+$fileCount = $row["count"];
+pg_free_result($result);
+
+/*
+ * if no agent_pk, no license analysis
+ *    mod = view menu if filecount = 1
+ *    mod = browse menu if filecount > 1 (need folder for browse menu)
+ *
+ * if agent and filecount = 1 mod = view-license
+ * if agent and filecount > 1 mod = nomoslicense
+ *
+ * select parent_fk, child_id from foldercontents where child_id=13; child_id is
+ * the uploadPK, this will get the folder_pk of the job.
+ */
+
+$Agent_pk = LatestNomosAgentpk($upload_pk);
+if($Agent_pk == 0)
+{
+	// No license analysis.  Single file, create view url, otherwise browse url
+	if($fileCount == 1)
+	{
+		// view url
+		$licenseReportUrl = "http://$hostname/repo/?mod=view" .
+												"&upload=$upload_id&show=detail&item=$item";
+	}
+	if($fileCount > 1)
+	{
+		// get the folder_fk/pk
+		$SQL = "select parent_fk, child_id from foldercontents where child_id=$upload_pk;";
+		$result = pg_query($PG_CONN, $SQL);
+		DBCheckResult($result, $sql, __FILE__, __LINE__);
+		$row = pg_fetch_assoc($result);
+		$folder_fk = $row['parent_fk'];
+		pg_free_result($result);
+		// no license analysis scheduled, create a browse menu link to the upload
+		$licenseReportUrl = "http://$hostname/repo/?mod=browse" .
+												"&upload=$upload_id&show=detail&item=$item&folder=$folder_fk";
+	}
+	$licenseReport = "\n\nNo License analysis was scheduled, browse the upload at:" .
+										"\n$licenseReportUrl\n";
+}
+// license analysis scheduled, create the license report link
+else
+{
+	// no parent for upload if licenseLinkError is not null.
+	if(is_null($licenseLinkError))
+	{
+		if($fileCount == 1)
+		{
+			// create view-license link
+			$licenseReportUrl = "http://$hostname/repo/?mod=view-license&napk=$Agent_pk" .
+													"&show=detail&upload=$upload_pk&item=$item";
+		}
+		if($fileCount > 1)
+		{
+			// create nomoslicense link
+			$licenseReportUrl = "http://$hostname/repo/?mod=nomoslicense" .
+													"&upload=$upload_id&show=detail&item=$item";
+		}
+	}
+	else
+	{
+		$licenseReportUrl = $licenseLinkError;
+	}
+	$licenseReport = "\n\nLicense analysis was scheduled, the report can be found at " .
+										"\n$licenseReportUrl\n";
+}
+// get the item to create the browse license report link
+
 /* Job aborted */
 if ($summary['total'] == 0 &&
-		$summary['completed'] == 0 &&
-		$summary['active'] == 0 &&
-		$summary['failed'] == 0 ) {
+$summary['completed'] == 0 &&
+$summary['active'] == 0 &&
+$summary['failed'] == 0 ) {
 	$JobStatus = "was killed";
 	$MessagePart = "No results, your job $JobName $JobStatus";
 	$Message = $Preamble . $MessagePart;
 	if ($Interactive) {
-		$MessagePart .= " For more details, see: $JobHistoryUrl\n";
+		$MessagePart .= " For job details, see: $JobHistoryUrl\n";
 		printMsg($MessagePart);
 		exit(0);
 	}
@@ -225,7 +340,7 @@ if ($Done) {
                  "Your job $JobName has $JobStatus.";
 	$Message = $Preamble . $MessagePart;
 	if ($Interactive) {
-		$MessagePart .= " For more details, see: $JobHistoryUrl\n";
+		$MessagePart .= " For job details, see: $JobHistoryUrl\n";
 		printMsg($MessagePart);
 	}
 }
@@ -239,7 +354,7 @@ elseif ($summary['failed'] > 0) {
                  "Your job $JobName $JobStatus.";
 	$Message = $Preamble . $MessagePart;
 	if ($Interactive) {
-		$MessagePart .= "For more details, see: $JobHistoryUrl\n";
+		$MessagePart .= "For job details, see: $JobHistoryUrl\n";
 		printMsg($MessagePart);
 	}
 }
@@ -264,8 +379,8 @@ if (!$Interactive) {
 	$From = "root@localhost";
 	$Recipient = $ToEmail;
 	$Mail_body = wordwrap($Message,75);
-	$JobHistoryUrl = "\n\nFor more details, see:\n$JobHistoryUrl\n";
-	$Mail_body .= $JobHistoryUrl;
+	$JobHistoryUrl = "\n\nFor job details, see:\n$JobHistoryUrl\n";
+	$Mail_body .= $licenseReport . $JobHistoryUrl;
 	$Subject = "FOSSology Results: $JobName $JobStatus";
 	$Header = "From: " . $Sender . " <" . $From . ">\r\n";
 	if($rtn = mail($Recipient, $Subject, $Mail_body, $Header)){
