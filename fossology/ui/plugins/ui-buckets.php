@@ -198,16 +198,18 @@ class ui_buckets extends FO_Plugin
      */
     $bucketDefArray = initBucketDefArray($bucketpool_pk);
 
-    /*select all the buckets for entire tree */
+    /*select all the buckets for entire tree for this bucketpool */
     $sql = "SELECT distinct(bucket_fk) as bucket_pk, 
                    count(bucket_fk) as bucketcount
-              from bucket_file, 
+              from bucket_file, bucket_def,
                   (SELECT distinct(pfile_fk) as PF from uploadtree 
                      where upload_fk=$upload_pk 
                        and ((ufile_mode & (1<<28))=0)
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$bucketagent_pk 
                     and bucket_file.nomosagent_fk=$nomosagent_pk
+                    and bucket_pk=bucket_fk
+                    and bucketpool_fk=$bucketpool_pk
               group by bucket_fk 
               order by bucketcount desc"; 
       $result = pg_query($PG_CONN, $sql);
@@ -338,12 +340,11 @@ class ui_buckets extends FO_Plugin
       if ($HasHref) { $VF .= "</a>"; }
 
       /* print buckets */
-      $BuckArray = GetFileBuckets($nomosagent_pk, $bucketagent_pk, $C['uploadtree_pk']);
       $VF .= "<br>";
       $VF .= "<span style='position:relative;left:1em'>";
       /* get color coded string of bucket names */
       $VF .= GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $C['uploadtree_pk'],
-                 $BuckArray, $bucketDefArray, ",", True);
+                 $bucketDefArray, ",", True);
       $VF .= "</span>";
       $VF .= "</td><td valign='top'>";
 

@@ -73,7 +73,7 @@ function SelectBucketPool($selected)
  *   array of unique bucket_pk's, may be empty if no buckets.
  *   FATAL if any input is missing
  */
-function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk)
+function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucketpool_pk)
 {
   global $PG_CONN;
   $BuckArray = array();
@@ -99,13 +99,16 @@ function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk)
 
   /*select all the buckets for this tree */
   $sql = "SELECT distinct(bucket_fk) as bucket_pk
-            from bucket_file, 
+            from bucket_file, bucket_def,
                 (SELECT distinct(pfile_fk) as PF from uploadtree 
                    where upload_fk=$upload_pk 
                      and ((ufile_mode & (1<<28))=0)
                      and uploadtree.lft BETWEEN $lft and $rgt) as SS
             where PF=pfile_fk and agent_fk=$bucketagent_pk 
-                  and bucket_file.nomosagent_fk=$nomosagent_pk";
+                  and bucket_file.nomosagent_fk=$nomosagent_pk
+                    and bucket_pk=bucket_fk
+                    and bucketpool_fk=$bucketpool_pk";
+
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   while ($row = pg_fetch_assoc($result)) $BuckArray[] = $row['bucket_pk'];
@@ -117,7 +120,6 @@ function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk)
 
 /* Returns string of $delimiter delimited bucket names for the given inputs.
  * Args are same as GetFileBuckets().
- * $BuckArray is bucket_pk array, see GetFileBuckets().
  * $bucketDefArray is array of bucket_def records indexed by bucket_pk
  *        see initBucketDefArray().
  * $delimiter is delimiter string to use to seperate bucket names.
@@ -125,11 +127,12 @@ function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk)
           color coded.
  */
 function GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, 
-                               $BuckArray, $bucketDefArray, $delimiter, $color)
+                               $bucketDefArray, $delimiter, $color)
 {
   $outstr = "";
-
-  $BuckArray = GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk);
+  $defrec = current($bucketDefArray);
+  $bucketpool_pk = $defrec['bucketpool_fk'];
+  $BuckArray = GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucketpool_pk);
   if (empty($BuckArray)) return "";
 
   /* convert array of bucket_pk's to array of bucket names */
