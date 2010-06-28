@@ -115,7 +115,7 @@ class copyright_hist extends FO_Plugin
       $Agent_pk = GetAgentKey($Agent_name, $Agent_desc);
 
     /* set maximum number of rows to display */
-    $max_rows = 2000;
+    $max_rows = 4000;
 
     /*  Get the counts under this UploadtreePk*/
     $sql = "SELECT DISTINCT ON (count(content),content, hash, type) content, hash, type, count(content) as copyright_count
