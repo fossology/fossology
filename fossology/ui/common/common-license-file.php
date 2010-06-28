@@ -44,7 +44,7 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk)
     $sql = "SELECT distinct(rf_shortname) as rf_shortname, rf_fk
               from license_ref,license_file
               where pfile_fk='$pfile_pk' and agent_fk=$agent_pk and rf_fk=rf_pk
-              order by rf_shortname desc";
+              order by rf_shortname asc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
   }
@@ -68,7 +68,7 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk)
                      where upload_fk=$upload_pk 
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$agent_pk and rf_fk=rf_pk
-              order by rf_shortname desc";
+              order by rf_shortname asc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
   }
