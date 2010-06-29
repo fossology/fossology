@@ -44,8 +44,19 @@ class ui_buckets extends FO_Plugin
 
     if (empty($DB)) { return(1); } /* No DB */
 
-    /* If there are no bucket pools defined, create a demo */
-    /* Check if there is already a bucket pool */
+    /* If there are no bucket pools defined, 
+     * then create a simple demo.
+     * Note: that the bucketpool and two simple bucket definitions
+     * are created but no user default bucket pools are set.
+     * We don't want to automatically set this to be the 
+     * default bucket pool because this may not be appropiate for 
+     * the installation.  The user or system administrator will 
+     * have to set the default bucket pool in their account settings.
+     */
+
+    /* Check if there is already a bucket pool, if there is 
+     * then return because there is nothing to do.
+     */
     $sql = "SELECT count(*)  FROM bucketpool";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
