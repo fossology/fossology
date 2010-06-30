@@ -243,7 +243,7 @@ class ui_buckets extends FO_Plugin
 
     /*select all the buckets for entire tree for this bucketpool */
     $sql = "SELECT distinct(bucket_fk) as bucket_pk, 
-                   count(bucket_fk) as bucketcount
+                   count(bucket_fk) as bucketcount, bucket_reportorder
               from bucket_file, bucket_def,
                   (SELECT distinct(pfile_fk) as PF from uploadtree 
                      where upload_fk=$upload_pk 
@@ -253,8 +253,8 @@ class ui_buckets extends FO_Plugin
                     and bucket_file.nomosagent_fk=$nomosagent_pk
                     and bucket_pk=bucket_fk
                     and bucketpool_fk=$bucketpool_pk
-              group by bucket_fk 
-              order by bucketcount desc"; 
+              group by bucket_fk,bucket_reportorder
+              order by bucket_reportorder asc"; 
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $historows = pg_fetch_all($result);
