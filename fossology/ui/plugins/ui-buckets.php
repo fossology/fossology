@@ -57,7 +57,7 @@ class ui_buckets extends FO_Plugin
     /* Check if there is already a bucket pool, if there is 
      * then return because there is nothing to do.
      */
-    $sql = "SELECT count(*)  FROM bucketpool";
+    $sql = "SELECT bucketpool_pk  FROM bucketpool limit 1";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 0) return;
