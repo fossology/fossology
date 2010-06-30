@@ -95,7 +95,7 @@ class list_bucket_files extends FO_Plugin
 
     $V="";
     $Time = time();
-    $Max = 50;
+    $Max = 200;
 
     // Create cache of bucket_pk => bucket_name 
     // Since we are going to do a lot of lookups
@@ -144,6 +144,7 @@ class list_bucket_files extends FO_Plugin
     }
     else
     {
+    $limit = ($Page < 0) ? "ALL":$Max;
     // Get all the uploadtree_pk's with this bucket (for this agent and bucketpool)
     // in this subtree.  Some of these might be containers, some not.
     $sql = "select uploadtree.*, bucket_file.nomosagent_fk as nomosagent_fk
@@ -154,16 +155,14 @@ class list_bucket_files extends FO_Plugin
                  and agent_fk=$bucketagent_pk
                  and bucket_fk=$bucket_pk
                  and bucketpool_fk=$bucketpool_pk
-                 and bucket_pk=bucket_fk ";
+                 and bucket_pk=bucket_fk offset $Offset limit $Offset+$limit";
     $fileresult = pg_query($PG_CONN, $sql);
     DBCheckResult($fileresult, $sql, __FILE__, __LINE__);
     $Count = pg_num_rows($fileresult);
-    $V.= "<br>$Count files found in this bucket ";
     }
 
     if ($Count < (1.25 * $Max)) $Max = $Count;
     if ($Max < 1) $Max = 1;  // prevent div by zero in corner case of no files
-    $limit = ($Page < 0) ? "ALL":$Max;
     $order = " order by ufile_name asc";
 
 	/* Get the page menu */
