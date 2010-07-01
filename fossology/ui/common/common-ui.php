@@ -173,4 +173,17 @@ function GetFileExt($fname)
   return $extension;
 }
 
+
+/*
+ * Return an array value, or "" if the array key does not exist
+ */
+function GetArrayVal($Key, $Arr)
+{
+  if (!is_array($Arr)) return "";
+  if (array_key_exists($Key, $Arr))
+    return ($Arr[$Key]);
+  else
+    return "";
+}
+
 ?>
