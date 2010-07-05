@@ -1,9 +1,9 @@
-fossology (1.1.1~20100623) unstable; urgency=low
+fossology (1.2.0~rc2) unstable; urgency=low
 
   * Non-maintainer upload.
   * 
 
- -- Build User <build@cranky.manage>  Wed, 23 Jun 2010 15:09:07 -0700
+ -- Build User <build@cranky.manage>  Mon, 05 Jul 2010 11:54:52 -0700
 
 fossology (1.1.1~SVNBUILD-1) unstable; urgency=low
 
