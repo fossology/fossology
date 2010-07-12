@@ -106,10 +106,12 @@ void _radix_copy(radix_tree* tree_ptr, radix_tree reference) {
  */
 int _radix_match(radix_tree tree, char* dst, char* src) {
   if(strlen(src) == 0) {
+    dst[strlen(dst) + 1] = '\0';
     dst[strlen(dst)] = tree->character;
     return 0;
   }
 
+  dst[strlen(dst) + 1] = '\0';
   dst[strlen(dst)] = tree->character;
   if(tree->children[*src - OFFSET] != NULL &&
       tree->children[*src - OFFSET]->character == *src) {
@@ -132,8 +134,8 @@ int _radix_match(radix_tree tree, char* dst, char* src) {
  */
 void _radix_recprint(radix_tree tree, FILE* ostr, char* string) {
   int i;
+  string[strlen(string) + 1] = 0;
   string[strlen(string)] = tree->character;
-  string[strlen(string)] = 0;
 
   if(tree->terminal) {
     fprintf(ostr,"%s\n",string);
@@ -142,6 +144,35 @@ void _radix_recprint(radix_tree tree, FILE* ostr, char* string) {
   for(i = 0; i < NODE_SIZE; i++) {
     if(tree->children[i]) {
       _radix_recprint(tree->children[i], ostr, string);
+    }
+  }
+
+  string[strlen(string) - 1] = 0;
+}
+
+/**
+ * @brief private recursive helper fruntion for the radix_copy_to function
+ *
+ * recursive function that does the majority of the work for radix_copy_to.
+ * This is employed since the tree is recursively defined and the string being
+ * appended to the cvector must be tracked as the depth is increased.
+ *
+ * @param tree the tree to grab strings from
+ * @param vec the cvector to append them to
+ * @param string the current string for this depth of the tree
+ */
+void _radix_append(radix_tree tree, cvector vec, char* string) {
+  int i;
+  string[strlen(string) + 1] = 0;
+  string[strlen(string)] = tree->character;
+
+  if(tree->terminal) {
+    cvector_push_back(vec, string);
+  }
+
+  for(i = 0; i < NODE_SIZE; i++) {
+    if(tree->children[i]) {
+      _radix_append(tree->children[i], vec, string);
     }
   }
 
@@ -279,29 +310,6 @@ int radix_contains(radix_tree tree, char* string) {
 }
 
 /*!
- * @brief tests if a certain word in its entirtiy has been inserted into a tree
- *
- * Exactly like contains, but if the string passed in is much longer than the
- * entry in the dictionary, this will still return true where radix_contains
- * would return false
- *
- * @param tree the tree to be searched in
- * @param string the string to search for
- * @return true if the string in the tree, false otherwise
- */
-int radix_contains_il(radix_tree tree, char* string) {
-  if(tree == NULL) {
-    return 1;
-  }
-
-  if(strlen(string) == 0) {
-    return tree->terminal;
-  }
-
-  return radix_contains_il(tree->children[*string - OFFSET], string + 1);
-}
-
-/*!
  * @brief attempts to match part of a string to the radix tree
  *
  * finds the longest match starting at the root of a radix tree to the provided
@@ -315,8 +323,61 @@ int radix_contains_il(radix_tree tree, char* string) {
  * @return the length of the string found
  */
 int radix_match(radix_tree tree, char* dst, char* src) {
-  memset(dst, '\0', sizeof(dst));
+  *dst = '\0';
   return _radix_match(tree, dst, src);
+}
+
+/*!
+ * @brief attempts to match any place in the given string
+ *
+ * will match any place in the given string to something within the radix tree,
+ * essentially this will try to find the longest string above the threshold that
+ * matches something within the tree. One important note is that the longest
+ * string that a dictionary can contain that uses this method is 256 characters.
+ *
+ * @param tree the tree to search within
+ * @param dst the string to place results in
+ * @param src the source of the string
+ * @param threshold the minimum number of characters to match
+ * @return the size of the output string
+ */
+int radix_match_within(radix_tree tree, char* dst, char* src, int threshold) {
+  char* curr, temp[256];
+
+  // clear the input string so that it can be used in this function
+  memset(dst, '\0', sizeof(dst));
+  memset(temp, '\0', sizeof(temp));
+
+  // search a single character at a time in the input string
+  for(curr = src; *curr; curr++) {
+    radix_match(tree, temp, curr);
+    if(radix_contains(tree, temp) && strlen(temp) > strlen(dst)) {
+      strcpy(dst, temp);
+    }
+  }
+
+  return strlen(dst);
+}
+
+/*!
+ * @brief appends the string within the radix tree to a cvector
+ *
+ * this will copy the strings that a radix tree contains into a cvector. The
+ * cvector should be initialized because this function will not do that. This
+ * will also count the number of string within the radix tree as it creates the
+ * cvector.
+ *
+ * @param tree the tree to get the strings from
+ * @param dst the cvector to append them to
+ * @return the number of string appended to the cvector
+ */
+int radix_copy_to(radix_tree tree, cvector dst) {
+  char str[256];
+  memset(str, '\0', sizeof(str));
+  cvector_clear(dst);
+  _radix_append(tree, dst, str);
+
+  return cvector_size(dst);
 }
 
 

@@ -31,6 +31,22 @@ extern "C" {
 /* ************************************************************************** */
 
 /*!
+* @brief the function pointers for memory management
+*
+* struct that contains the function pointers to allow the data type to be
+* correctly copied. For every type of data that would be held in vec list, there
+* should be one of these. Despite having access to this struct, the only times
+* when a user should create one of these is if they are writing a new data type
+* for the cvector.
+*/
+struct _function_registry {
+  const char* name;
+  void* (*copy)(void*);
+  void (*destroy)(void*);
+  void (*print)(void*, FILE*);
+};
+
+/*!
  * @brief the cvector datatype
  *
  * Code to create a new cvector:
@@ -94,6 +110,7 @@ void* cvector_at(cvector vec, int index);
 cvector_iterator cvector_begin(cvector vec);
 cvector_iterator cvector_end(cvector vec);
 int cvector_size(cvector vec);
+int cvector_capacity(cvector vec);
 
 /* ************************************************************************** */
 /* **** Print Functions ***************************************************** */

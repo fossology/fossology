@@ -26,20 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 /*!
-* @brief the function pointers for memory management
-*
-* struct that contains the function pointers to allow the data type to be
-* correctly copied. For every type of data that would be held in vec list, there
-* should be one of these
-*/
-struct _function_registry {
-  const char* name;
-  void* (*copy)(void*);
-  void (*destroy)(void*);
-  void (*print)(void*, FILE*);
-};
-
-/*!
 * @brief the actual cvector struct
 *
 * vec struct holds the dynamic array and is passed to the function that manage
@@ -456,6 +442,16 @@ cvector_iterator cvector_end(cvector vec) {
  */
 int cvector_size(cvector vec) {
   return vec->size;
+}
+
+/*!
+ * @brief returns the number of elements that could fit in this cvector
+ *
+ * @param vec the cvector that is begin queried
+ * @return the capacity of the cvector
+ */
+int cvector_capacity(cvector vec) {
+  return vec->capacity;
 }
 
 /* ************************************************************************** */

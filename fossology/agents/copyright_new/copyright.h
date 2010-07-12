@@ -18,6 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef COPYRIGHT_H_INCLUDE
 #define COPYRIGHT_H_INCLUDE
 
+#include <cvector.h>
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -36,6 +38,22 @@ extern "C" {
 typedef struct _copyright_internal* copyright;
 
 /**
+ * A copyright that the copyright object has identified in a file
+ *
+ * This contains:
+ *   1. the text of the copyright
+ *   2. the string in the diction that matched this entry
+ *   3. the string in the names that matched this entry
+ *   4. the start byte in the file of the copyright text
+ *   5. the end byte in the file of the copyright text
+ *
+ * The user of this class should not need to worry about memory management for
+ * this struct. All the memory should be correctly managed by the copyright
+ * struct and will get cleaned up when analyze or copyright_destroy is called.
+ */
+typedef struct _entry_internal* copy_entry;
+
+/**
  * An iterator to iterate across the copyright matches within a copyright
  *
  * Since a copyright will store all the matches that it found after a call to
@@ -44,7 +62,7 @@ typedef struct _copyright_internal* copyright;
  * Dereferencing this will return a string that can be accessed like any other
  * c-string.
  */
-typedef char** copyright_iterator;
+typedef copy_entry* copyright_iterator;
 
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
@@ -59,7 +77,7 @@ void copyright_destroy(copyright copy);
 /* ************************************************************************** */
 
 void copyright_clear(copyright copy);
-void copyright_analyze_file(copyright copy, const char* file_name);
+void copyright_analyze(copyright copy, FILE* file_name);
 void copyright_add_name(copyright copy, const char* name);
 void copyright_add_entry(copyright copy, const char* entry);
 
@@ -72,6 +90,17 @@ copyright_iterator copyright_end(copyright copy);
 char* copyright_at(copyright copy, int index);
 char* copyright_get(copyright copy, int index);
 int copyright_size(copyright copy);
+void copyright_dictionary(copyright copy, cvector dict);
+void copyright_names(copyright copy, cvector name);
+
+/* ************************************************************************** */
+/* **** Entry Accessor Functions ******************************************** */
+/* ************************************************************************** */
+char* copy_entry_text(copy_entry entry);
+char* copy_entry_name(copy_entry entry);
+char* copy_entry_dict(copy_entry entry);
+unsigned int copy_entry_start(copy_entry entry);
+unsigned int copy_entry_end(copy_entry entry);
 
 #if defined(__cplusplus)
 }

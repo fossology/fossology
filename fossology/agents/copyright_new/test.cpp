@@ -43,11 +43,16 @@ using std::for_each;
 
 /* distance to read into a file */
 #define READMAX 1024*1024
+/* the threashold over which something matches and isn't a negative */
+#define THRESHOLD 10
+
+/* list of words that are searched for by the copyright */
+cvector copy_dict;
 
 string longest_common(const string& lhs, const string& rhs) {
   int result[lhs.length()][rhs.length()];
-  string ret;
-  int z = 0;
+  ostringstream ostr;
+  int beg = 0, ths = 0, max = 0;
 
   memset(result, 0, sizeof(result));
 
@@ -60,31 +65,41 @@ string longest_common(const string& lhs, const string& rhs) {
           result[i][j] = result[i - 1][j - 1] + 1;
         }
 
-        if(result[i][j] > z) {
-          z = result[i][j];
-          ret = "";
-        }
-
-        if(result[i][j] == z) {
-          ret = lhs.substr(i - z+1, i - 1);
-          cout << result[i][j] << " " << i << " " << j << " " << ret << " " << lhs.substr(i - z+1) << endl;
+        if(result[i][j] > max) {
+          max = result[i][j];
+          ths = i - result[i][j] + 1;
+          // the currect substring is still the logest found, continue to append
+          // to it instead of creating a new one
+          if(beg == ths) {
+            ostr << lhs[i];
+          }
+          // a new longest common substring has been found, clear the stream and
+          // start on a new string
+          else {
+            beg = ths;
+            ostr.clear();
+            ostr << lhs.substr(beg, (i + 1) - beg);
+          }
         }
       }
     }
   }
 
-  for(unsigned int i = 0; i < lhs.length(); i++) {
-    for(unsigned int j = 0; j < rhs.length(); j++) {
-      cout << result[i][j] << "  ";
-    }
-    cout << endl;
-  }
-  cout << "GER: \"" << rhs << "\"" << endl;
-  cout << "OTH: \"" << lhs << "\"" << endl;
-  cout << "RET: \"" << ret << "\"\t" << ret.length() << endl;
-  sleep(3);
+  return ostr.str();
+}
 
-  return ret;
+template<typename T>
+T min(const T& rhs, const T& lhs) {
+  return (rhs < lhs) ? rhs : lhs;
+}
+
+void remove_copyrights(string& str) {
+  /*for(cvector_iterator iter = cvector_begin(copy_dict); iter != cvector_end(copy_dict); iter++) {
+    unsigned int pos = 0;
+    while((pos = str.find((char*)*iter, pos)) != string::npos) {
+      str.erase(str.begin() + pos, str.begin() + pos + strlen((char*)*iter));
+    }
+  }*/
 }
 
 int main(int argc, char** argv) {
@@ -99,11 +114,17 @@ int main(int argc, char** argv) {
   memset(buffer, '\0', sizeof(buffer));
   correct = falsep = falsen = 0;
 
+  /* get the list of matching strings */
+  cvector_init(&copy_dict, string_cvector_registry());
+  copyright_dictionary(copy, copy_dict);
+
   /* create the file to output false negatives to */
-  ofstream fout("False_Negatives");
+  ofstream n_out("False_Negatives");
+  ofstream p_out("False_Positives");
   ofstream mout("Matches");
 
   for(int i = 0; i < 140; i++) {
+    FILE* istr;
     ostringstream curr_file;
     curr_file << "testdata/testdata" << i << "_raw";
 
@@ -140,42 +161,70 @@ int main(int argc, char** argv) {
       contents = contents.substr(last + 4);
     }
 
-    copyright_analyze_file(copy, curr_file.str().substr(0,curr_file.str().length() - 4).c_str());
+    for(vector<string>::iterator iter = compare.begin(); iter != compare.end(); iter++) {
+      remove_copyrights(*iter);
+    }
+
+    string curr_filename = curr_file.str().substr(0,curr_file.str().length() - 4).c_str();
+    istr = fopen(curr_filename.c_str(), "r");
+    assert(istr);
+
+    copyright_analyze(copy, istr);
     matches = 0;
 
-    for(copy_iter = copyright_begin(copy); copy_iter != copyright_end(copy) && compare.size() > 0; copy_iter++) {
-      vector<string>::iterator best = compare.begin();
-      string best_score = "";
+    mout << "================================================================================\n";
+    mout << curr_filename << "\n" << endl;
+    for(copy_iter = copyright_begin(copy); copy_iter != copyright_end(copy); copy_iter++) {
+      mout << copy_entry_dict(*copy_iter) << "\t" << copy_entry_name(*copy_iter) << endl;
+      mout << copy_entry_text(*copy_iter) << endl;
+    }
 
-      for(vector<string>::iterator iter = compare.begin(); iter != compare.end(); iter++) {
-        string curr_score = longest_common((char*)*copy_iter, *iter);
+    for(copy_iter = copyright_begin(copy); copy_iter != copyright_end(copy); copy_iter++) {
+      if(compare.size() != 0) {
+        vector<string>::iterator best = compare.begin();
+        string best_score = "";
+        string curr_iter = (char*)*copy_iter;
 
-        if(curr_score.length() > best_score.length()) {
-          best_score = curr_score;
-          best = iter;
+        remove_copyrights(curr_iter);
+
+        for(vector<string>::iterator iter = compare.begin(); iter != compare.end(); iter++) {
+          string curr_score = longest_common(curr_iter, *iter);
+
+          if(curr_score.length() > best_score.length()) {
+            best_score = curr_score;
+            best = iter;
+          }
         }
+
+        if(best_score.length() > THRESHOLD) {
+          compare.erase(best);
+          matches++;
+        } else {
+          p_out << "================================================================================\n";
+          p_out << copy_entry_dict(*copy_iter) << "\t" << copy_entry_name(*copy_iter) << endl;
+          p_out << copy_entry_text(*copy_iter) << endl;
+          falsep++;
+        }
+      } else {
+        p_out << copy_entry_dict(*copy_iter) << "\t" << copy_entry_name(*copy_iter) << endl;
+        p_out << copy_entry_text(*copy_iter) << endl;
+        falsep++;
       }
 
-      mout << "================================================================================\n";
-      mout << "LOOK:  " << (char*)*copy_iter << "\n" << endl;
-      mout << "FOUND: " << best_score << endl;
-      compare.erase(best);
-      matches++;
     }
 
     cout << "==========  " << curr_file.str() << "  ==========\n";
     cout << "Correct:         " << matches << "\n";
-    cout << "False Positive:  " << copyright_size(copy) - matches << "\n";
+    cout << "False Positive:  " << copyright_size(copy) << "\n";
     cout << "False Negatives: " << compare.size() << "\n" << endl;
 
     for(vector<string>::iterator iter = compare.begin(); iter != compare.end(); iter++) {
-      fout << "================================================================================\n";
-      fout << *iter << endl;
+      n_out << "===== " << curr_filename << " ====================================================\n";
+      n_out << *iter << endl;
+      falsen++;
     }
 
     correct += matches;
-    falsep  += copyright_size(copy) - matches;
-    falsen  += compare.size();
 
     compare.clear();
     curr.close();
@@ -187,6 +236,8 @@ int main(int argc, char** argv) {
   cout << "False Negatives: " << falsen << endl;
 
   copyright_destroy(copy);
-  fout.close();
+  cvector_destroy(copy_dict);
+  n_out.close();
+  p_out.close();
   mout.close();
 }

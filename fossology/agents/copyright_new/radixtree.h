@@ -20,6 +20,7 @@
 #define RADIXTREE_H_INCLUDE
 
 #include <stdio.h>
+#include <cvector.h>
 
 #if defined(__cplusplus)
 extern "C" {
@@ -58,8 +59,9 @@ void radix_insert_all(radix_tree tree, char** first, char** last);
 /* ************************************************************************** */
 
 int radix_contains(radix_tree tree, char* string);
-int radix_contains_il(radix_tree tree, char* string);
 int radix_match(radix_tree tree, char* dst, char* src);
+int radix_match_within(radix_tree tree, char* dst, char* src, int threshold);
+int radix_copy_to(radix_tree tree, cvector dst);
 void radix_print(radix_tree tree, FILE* ostr);
 
 #if defined(__cplusplus)
