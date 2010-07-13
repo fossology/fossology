@@ -1,6 +1,0 @@
-The following is most of the code for the distro comparison tool talked about on 
-http://fossology.org/task:integrate_distrodb_distro_package_reports
-
-Not all the code is here because some internal HP stuff (irrelevant to fossology) was 
-removed.  It was mostly standard web metadata, webpage links, formatting, etc.
-

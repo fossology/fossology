@@ -1,5 +1,0 @@
-1. place the retriveuserdata directory in SM's plugins directory
-2. read the comments in setup.php and ldap.php about the options
-3. edit the plugin's config.php 
-4. start SM's configuration tool and activate the plugin
-5. does the plugin work?
