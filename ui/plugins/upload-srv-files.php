@@ -136,7 +136,7 @@ class upload_srv_files extends FO_Plugin {
     if (empty($jobqueue_pk)) {
       return ("Failed to place fosscp_agent in job queue");
     }
-    $Url = Traceback_uri() . "?mod=jobstat&upload=$uploadpk";
+    $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
     $msg = "The upload for $SourceFiles has been scheduled. ";
     $keep = "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
     print displayMessage($msg,$keep);
