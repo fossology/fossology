@@ -21,7 +21,7 @@ HDRS=nomos.h $(OBJS:.o=.h) _autodefs.h
 # http://www.suse.de/~aj/linux_lfs.html
 DEF=-D_FILE_OFFSET_BITS=64 -D__USE_LARGEFILE64
 
-CFLAGS_LOCAL= $(DEF) $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
+CFLAGS_LOCAL= $(DEF) $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
 CFLAGS_LOCALO= $(DEF) $(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
 
 all: encode nomos
