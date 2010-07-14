@@ -114,6 +114,11 @@ if [ `id -u` != "0" ] ; then
    exit 1
 fi
 
+# add /usr/sbin to path
+PATH=$PATH:/usr/sbin
+#echo "path is:$PATH"
+export PATH
+
 # add groups
 
 add_group fosstester
