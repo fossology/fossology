@@ -211,7 +211,8 @@ PHP5:
  something like:
   runtime: apt-get install libmagic1 libxml2 libextractor1c2a \
 	libextractor-plugins librpm4.4
-  build: apt-get install libmagic-dev libxml2-dev libextractor-dev librpm-dev
+  build: apt-get install libmagic-dev libxml2-dev libextractor-dev \
+        rpm librpm-dev
  On Fedora:
   runtime: yum install file-libs libxml2 libextractor libextractor-plugins-base
   build: file-libs libxml2 libextractor-devel rpm-devel
