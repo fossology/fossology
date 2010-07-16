@@ -336,27 +336,23 @@ int radix_match(radix_tree tree, char* dst, char* src) {
  * string that a dictionary can contain that uses this method is 256 characters.
  *
  * @param tree the tree to search within
- * @param dst the string to place results in
+ * @param dst this cvector will be populated with the matches
  * @param src the source of the string
  * @param threshold the minimum number of characters to match
- * @return the size of the output string
  */
-int radix_match_within(radix_tree tree, char* dst, char* src, int threshold) {
+void radix_match_within(radix_tree tree, cvector dst, char* src) {
   char* curr, temp[256];
 
-  // clear the input string so that it can be used in this function
-  memset(dst, '\0', sizeof(dst));
+  // clear the buffer that matches will be place in
   memset(temp, '\0', sizeof(temp));
 
   // search a single character at a time in the input string
   for(curr = src; *curr; curr++) {
     radix_match(tree, temp, curr);
-    if(radix_contains(tree, temp) && strlen(temp) > strlen(dst)) {
-      strcpy(dst, temp);
+    if(radix_contains(tree, temp)) {
+      cvector_push_back(dst, &curr);
     }
   }
-
-  return strlen(dst);
 }
 
 /*!

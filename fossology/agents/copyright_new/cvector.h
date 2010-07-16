@@ -126,6 +126,7 @@ function_registry* cvector_registry_copy(cvector vec);
 function_registry* int_cvector_registry();
 function_registry* char_cvector_registry();
 function_registry* double_cvector_registry();
+function_registry* pointer_cvector_registry();
 function_registry* string_cvector_registry();
 function_registry* cvector_cvector_registry();
 

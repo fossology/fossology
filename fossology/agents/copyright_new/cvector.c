@@ -329,7 +329,7 @@ cvector_iterator cvector_remove(cvector vec, cvector_iterator iter) {
   }
   *iter = NULL;
 
-  return old_pos;
+  return old_pos - 1;
 }
 
 /*!
@@ -573,6 +573,32 @@ void  _double_print(void* to_print, FILE* pfile) {
   fprintf(pfile, "%f", *((double*)to_print));
 }
 
+/* ********** pointer memory management functions ********** */
+/**
+ * @brief allocated memory for a pointer and store the pointer
+ * @param to_copy
+ */
+void* _pointer_copy(void** to_copy) {
+  void** v = (void**)calloc(1, sizeof(void*));
+  *v = *(int**)to_copy;
+  return v;
+}
+
+/*!
+ * @brief deallocate the memory for to_delete
+ * @param to_delete
+ */
+void  _pointer_destroy(void* to_delete) { free(to_delete); }
+
+/*!
+ * @brief print the element to a file
+ * @param to_print
+ * @param pfile
+ */
+void  _pointer_print(void** to_print, FILE* pfile) {
+  fprintf(pfile, "0x%X", (unsigned int)*to_print);
+}
+
 /* ********** string memory management functions ********** */
 /**
  * @brief allocated memory for an int and store the int
@@ -721,6 +747,29 @@ function_registry* double_cvector_registry() {
   ret->copy = &_double_copy;
   ret->destroy = &_double_destroy;
   ret->print = &_double_print;
+
+  return ret;
+}
+
+/*!
+ * @brief creates a function registry for a cvector of pointers
+ *
+ * This function should be called as one of the parameters for the init function
+ * of the cvector i.e.
+ *
+ * @code cvector example;
+ * @code cvector_init(&example, int_cvector_registry());
+ *
+ * @return the new function registry
+ */
+function_registry* pointer_cvector_registry() {
+  function_registry* ret =
+      (function_registry*)calloc(1, sizeof(function_registry));
+
+  ret->name = "pointer";
+  ret->copy = (void* (*)(void*))&_pointer_copy;
+  ret->destroy = &_pointer_destroy;
+  ret->print = (void (*)(void*, FILE*))&_pointer_print;
 
   return ret;
 }

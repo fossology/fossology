@@ -47,7 +47,7 @@ cvector.o:   cvector.c   cvector.h
 copyright.a: $(OBJS) $(SOURCE) $(HEADER)
 	$(AR) -cru $@ $^
 
-test: copyright.a test.cpp copyright.dic names.dic
+test: copyright.a test.cpp
 	$(CPP) test.cpp $(CFLAGS) -o $@ copyright.a
 
 clean:

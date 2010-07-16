@@ -68,8 +68,8 @@ string longest_common(const string& lhs, const string& rhs) {
         if(result[i][j] > max) {
           max = result[i][j];
           ths = i - result[i][j] + 1;
-          // the currect substring is still the logest found, continue to append
-          // to it instead of creating a new one
+          // the current substring is still the longest found, continue to
+          // append to it instead of creating a new one
           if(beg == ths) {
             ostr << lhs[i];
           }
@@ -106,13 +106,13 @@ int main(int argc, char** argv) {
   copyright copy;
   vector<string> compare;
   char buffer[READMAX];
-  unsigned int first, last, matches, correct, falsep, falsen;
+  unsigned int first, last, matches, correct, falsep, falsen, total;
   copyright_iterator copy_iter;
 
   /* initalize the copyright analyzer */
   copyright_init(&copy);
   memset(buffer, '\0', sizeof(buffer));
-  correct = falsep = falsen = 0;
+  correct = falsep = falsen = total = 0;
 
   /* get the list of matching strings */
   cvector_init(&copy_dict, string_cvector_registry());
@@ -122,6 +122,7 @@ int main(int argc, char** argv) {
   ofstream n_out("False_Negatives");
   ofstream p_out("False_Positives");
   ofstream mout("Matches");
+  ofstream found("Found");
 
   for(int i = 0; i < 140; i++) {
     FILE* istr;
@@ -131,6 +132,7 @@ int main(int argc, char** argv) {
     ifstream curr(curr_file.str().c_str());
     assert(!curr.fail());
 
+    memset(buffer, '\0', sizeof(buffer));
     curr.read(buffer, READMAX);
     buffer[READMAX - 1] = '\0';
 
@@ -196,21 +198,23 @@ int main(int argc, char** argv) {
           }
         }
 
-        if(best_score.length() > THRESHOLD) {
+        if(strcmp(copy_entry_dict(*copy_iter),"by") || best_score.length() > THRESHOLD) {
+          found << "==========  " << curr_file.str() << "  ==========\n";
+          found << copy_entry_text(*copy_iter) << endl;
           compare.erase(best);
           matches++;
         } else {
-          p_out << "================================================================================\n";
-          p_out << copy_entry_dict(*copy_iter) << "\t" << copy_entry_name(*copy_iter) << endl;
-          p_out << copy_entry_text(*copy_iter) << endl;
+          p_out << "==========  " << curr_file.str() << "  ==========\n";
+          p_out << "DICT: " << copy_entry_dict(*copy_iter) << "\tNAME: " << copy_entry_name(*copy_iter) << endl;
+          p_out << "TEXT:[" << copy_entry_text(*copy_iter) << "]" << endl;
           falsep++;
         }
       } else {
-        p_out << copy_entry_dict(*copy_iter) << "\t" << copy_entry_name(*copy_iter) << endl;
-        p_out << copy_entry_text(*copy_iter) << endl;
+        p_out << "==========  " << curr_file.str() << "  ==========\n";
+        p_out << "DICT: " << copy_entry_dict(*copy_iter) << "\tNAME: " << copy_entry_name(*copy_iter) << endl;
+        p_out << "TEXT:[" << copy_entry_text(*copy_iter) << "]" << endl;
         falsep++;
       }
-
     }
 
     cout << "==========  " << curr_file.str() << "  ==========\n";
@@ -225,6 +229,7 @@ int main(int argc, char** argv) {
     }
 
     correct += matches;
+    total += copyright_size(copy);
 
     compare.clear();
     curr.close();
@@ -233,7 +238,8 @@ int main(int argc, char** argv) {
   cout << "==========  Totals  ==========\n";
   cout << "Correct:         " << correct << "\n";
   cout << "False Positive:  " << falsep << "\n";
-  cout << "False Negatives: " << falsen << endl;
+  cout << "False Negatives: " << falsen << "\n";
+  cout << "Total Found:     " << total << endl;
 
   copyright_destroy(copy);
   cvector_destroy(copy_dict);
