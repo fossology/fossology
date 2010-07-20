@@ -32,9 +32,9 @@ install: all
 		mkdir -p "$(DESTDIR)$(COPYRIGHTPATH)"; \
 	fi
 	$(INSTALL_PROGRAM) run.py $(DESTDIR)$(COPYRIGHTPATH)/run.py
-	$(INSTALL_PROGRAM) vars.py $(DESTDIR)$(COPYRIGHTPATH)/vars.py
 	$(INSTALL_PROGRAM) copyright.py $(DESTDIR)$(COPYRIGHTPATH)/copyright.py
-	$(INSTALL_PROGRAM) copyright_library.py $(DESTDIR)$(COPYRIGHTPATH)/copyright_library.py
+	$(INSTALL_DATA) vars.py $(DESTDIR)$(COPYRIGHTPATH)/vars.py
+	$(INSTALL_DATA) copyright_library.py $(DESTDIR)$(COPYRIGHTPATH)/copyright_library.py
 	$(INSTALL_DATA) model.dat $(DESTDIR)$(DATADIR)/model.dat
 	make -C ui-plugin install
 
