@@ -7,13 +7,13 @@ include $(VARS)
 install:
 	mkdir -p $(DESTDIR)$(WEBDIR)/plugins/
 	mkdir -p $(DESTDIR)$(WEBDIR)/plugins/copyright/
-	$(INSTALL_PROGRAM) copyright.php $(DESTDIR)$(WEBDIR)/plugins/copyright.php
-	$(INSTALL_PROGRAM) library.php $(DESTDIR)$(WEBDIR)/plugins/copyright/library.php
-	$(INSTALL_PROGRAM) hist.php $(DESTDIR)$(WEBDIR)/plugins/copyright/hist.php
-	$(INSTALL_PROGRAM) list.php $(DESTDIR)$(WEBDIR)/plugins/copyright/list.php
-	$(INSTALL_PROGRAM) view.php $(DESTDIR)$(WEBDIR)/plugins/copyright/view.php
-	$(INSTALL_PROGRAM) agent.php $(DESTDIR)$(WEBDIR)/plugins/copyright/agent.php
-	$(INSTALL_PROGRAM) oneshot.php $(DESTDIR)$(WEBDIR)/plugins/copyright/oneshot.php
+	$(INSTALL_DATA) copyright.php $(DESTDIR)$(WEBDIR)/plugins/copyright.php
+	$(INSTALL_DATA) library.php $(DESTDIR)$(WEBDIR)/plugins/copyright/library.php
+	$(INSTALL_DATA) hist.php $(DESTDIR)$(WEBDIR)/plugins/copyright/hist.php
+	$(INSTALL_DATA) list.php $(DESTDIR)$(WEBDIR)/plugins/copyright/list.php
+	$(INSTALL_DATA) view.php $(DESTDIR)$(WEBDIR)/plugins/copyright/view.php
+	$(INSTALL_DATA) agent.php $(DESTDIR)$(WEBDIR)/plugins/copyright/agent.php
+	$(INSTALL_DATA) oneshot.php $(DESTDIR)$(WEBDIR)/plugins/copyright/oneshot.php
 	
 uninstall:
 	rm -f $(DESTDIR)$(WEBDIR)/plugins/copyright.php
