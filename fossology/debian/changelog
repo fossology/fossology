@@ -1,15 +1,20 @@
-fossology (1.1.1~20100623) unstable; urgency=low
-
-  * Non-maintainer upload.
-  * 
-
- -- Build User <build@cranky.manage>  Wed, 23 Jun 2010 15:09:07 -0700
-
-fossology (1.1.1~SVNBUILD-1) unstable; urgency=low
+fossology (1.2.1~SVNBUILD-1) unstable; urgency=low
 
   * Unofficial SVN build.
 
- -- Matt Taggart <taggart@debian.org>  Fri, 09 Apr 2010 00:05:35 -0700
+ -- Matt Taggart <taggart@debian.org>  Tue, 20 Jul 2010 16:53:38 -0700
+
+fossology (1.2.0-1) unstable; urgency=low
+
+  * New upstream release
+  * Added build-dep on python-pyrex, python, and python-dev, and
+     fossology-common depends on python due to libfosspython.
+  * Add python Depends to agent packages.
+  * Update standards version.
+  * Make references to licenses in copyright more specific.
+  * Add upstream SVN#3338 fix for ununpack p7zip.
+
+ -- Matt Taggart <taggart@debian.org>  Tue, 20 Jul 2010 16:20:31 -0700
 
 fossology (1.1.0-2) unstable; urgency=low
 
@@ -24,7 +29,7 @@ fossology (1.1.0-2) unstable; urgency=low
   * patch from upstream SVN 2848 to build libs with -fPIC
   * patch from upstream SVN 2484 to make selftest not check agent timestamps
   * fix some lintian warnings and update to Policy 3.8.4
-  * UNRELEASED
+  * patch from upstream SVN 2585 and 2605 to fix fo_notify
 
  -- Matt Taggart <taggart@debian.org>  Fri, 09 Apr 2010 00:29:34 -0700
 
