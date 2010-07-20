@@ -814,7 +814,7 @@ int	FindCmd	(char *Filename)
        }
        else  // cpio failed so try 7zr (possibly from p7zip)
        {
-         rc = RunCommand("7zr","x -y",Filename,">/dev/null 2>&1",NULL,NULL);
+         rc = RunCommand("7zr","l -y",Filename,">/dev/null 2>&1",NULL,NULL);
          if (rc==0)
          {
            memset(Static,0,sizeof(Static));
