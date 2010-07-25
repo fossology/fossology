@@ -83,6 +83,7 @@ case "$1" in
     $WATCHDOG -k
 	$DAEMON -k
 	$DAEMON $SCHEDULEROPT
+	echo "$NAME."
     $WATCHDOG
 	;;
   *)
