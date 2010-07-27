@@ -61,21 +61,12 @@ void _cvector_resize(cvector vec) {
   vec->capacity = vec->capacity*2;
 
   /* allocate the new array to hold the data */
-  void** newdata = (void**)calloc(vec->capacity, sizeof(void*));
-
-  /* copy all of the old data over from the old array */
-  for(i = 0; i < vec->size; i++) {
-    newdata[i] = vec->data[i];
-  }
+  vec->data = (void**)realloc(vec->data, vec->capacity * sizeof(void*));
 
   /* fill the rest of the array with NULL */
   for(i = vec->size; i < vec->capacity; i++) {
-    newdata[i] = NULL;
+    vec->data[i] = NULL;
   }
-
-  /* delete the old data and set the pointer to the new data */
-  free(vec->data);
-  vec->data = newdata;
 }
 
 /* ************************************************************************** */
@@ -112,7 +103,7 @@ void cvector_copy(cvector* dst, cvector src) {
   cvector_iterator iter = NULL;
 
   /* initialize the new cvector */
-  cvector_init(dst, cvector_registry_copy(src));
+  cvector_init(dst, function_registry_copy(src->memory));
 
   /* loop over the old cvector and copy everything over */
   for(iter = cvector_begin(src); iter != cvector_end(src); iter++) {
@@ -670,14 +661,14 @@ void  _cvector_print(void* to_print, FILE* pfile) {
  *
  * @return the new function registry
  */
-function_registry* cvector_registry_copy(cvector vec) {
+function_registry* function_registry_copy(function_registry* vec) {
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
-  ret->name = vec->memory->name;
-  ret->copy = vec->memory->copy;
-  ret->destroy = vec->memory->destroy;
-  ret->print = vec->memory->print;
+  ret->name = vec->name;
+  ret->copy = vec->copy;
+  ret->destroy = vec->destroy;
+  ret->print = vec->print;
 
   return ret;
 }
@@ -693,7 +684,7 @@ function_registry* cvector_registry_copy(cvector vec) {
  *
  * @return the new function registry
  */
-function_registry* int_cvector_registry() {
+function_registry* int_function_registry() {
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
@@ -716,7 +707,7 @@ function_registry* int_cvector_registry() {
  *
  * @return the new function registry
  */
-function_registry* char_cvector_registry() {
+function_registry* char_function_registry() {
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
@@ -739,7 +730,7 @@ function_registry* char_cvector_registry() {
  *
  * @return the new function registry
  */
-function_registry* double_cvector_registry() {
+function_registry* double_function_registry() {
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
@@ -762,7 +753,7 @@ function_registry* double_cvector_registry() {
  *
  * @return the new function registry
  */
-function_registry* pointer_cvector_registry() {
+function_registry* pointer_function_registry() {
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
@@ -785,7 +776,7 @@ function_registry* pointer_cvector_registry() {
  *
  * @return the new function registry
  */
-function_registry* string_cvector_registry() {
+function_registry* string_function_registry() {
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
@@ -808,7 +799,7 @@ function_registry* string_cvector_registry() {
  *
  * @return the new function registry
  */
-function_registry* cvector_cvector_registry() {
+function_registry* cvector_function_registry() {
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 

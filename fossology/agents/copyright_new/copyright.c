@@ -172,7 +172,7 @@ void _contains_name(copyright copy, copy_entry entry, char* buf) {
   cvector matches;
   cvector_iterator iter;
 
-  cvector_init(&matches, pointer_cvector_registry());
+  cvector_init(&matches, pointer_function_registry());
 
   radix_match_within(copy->name, matches, entry->entry);
 
@@ -183,7 +183,6 @@ void _contains_name(copyright copy, copy_entry entry, char* buf) {
         (*(curr - 1) > '9' && *(curr - 1) < 'A') ||
         (*(curr - 1) > 'Z' && *(curr - 1) < 'a') ||
         *(curr - 1) > 'z') {
-      printf("%s\n",curr);
       radix_match(copy->name, buf, curr);
       if(*(curr + strlen(buf)) < '0' ||
               (*(curr + strlen(buf)) > '9' && *(curr + strlen(buf)) < 'A') ||
@@ -428,7 +427,6 @@ void copyright_analyze(copyright copy, FILE* istr) {
 
   _strip_empty_entries(copy);
   free(entry);
-  fclose(istr);
 }
 
 /**

@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
   for(int j = 0; j < 10; j++) {
     printf("== NUMBER = %d ==\n",j);
     cvector to_test;
-    cvector_init(&to_test, string_cvector_registry());
+    cvector_init(&to_test, string_function_registry());
 
     for(int i = 0; i < j; i++) {
       cvector_push_back(to_test, strs[i]);

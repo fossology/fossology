@@ -21,22 +21,29 @@ INCL = -I.
 # C compiler options
 CC = gcc
 CFLAGS = -g -O3 -Wall $(INCL)
+EXEC = copyright
 
 CPP = g++
 
 SOURCE = cvector.c \
 		 radixtree.c \
 		 copyright.c \
+		 pair.c \
 
 HEADER = cvector.h \
 		 radixtree.h \
 		 copyright.h \
+		 pair.h \
 
 OBJS   = cvector.o \
 		 radixtree.o \
 		 copyright.o \
+		 pair.o \
 		 
-all: test
+all: $(EXEC)
+
+$(EXEC): $(OBJS) copyright.a main.c
+	$(CC) main.c $(CFLAGS) -o $(EXEC) copyright.a
 
 copyright.o: copyright.c $(HEADER)
 
@@ -47,11 +54,10 @@ cvector.o:   cvector.c   cvector.h
 copyright.a: $(OBJS) $(SOURCE) $(HEADER)
 	$(AR) -cru $@ $^
 
-test: copyright.a test.cpp
-	$(CPP) test.cpp $(CFLAGS) -o $@ copyright.a
-
 clean:
-	rm -f *.o *.a test
+	rm -f *.o *.a
+	rm -f $(EXEC)
+	rm -f False_Positives False_Negatives Matches Found
 
 phony: all clean
 	
