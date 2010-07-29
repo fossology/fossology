@@ -25,15 +25,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /** internal structure for the pair. */
 struct _pair_internal
 {
-  void* first;                  /// <- the first element in the pair
-  void* second;                 /// <- the second element in the pair
-  function_registry* first_mem; /// <- memory management for first data type
-  function_registry* second_mem;/// <- memory management for second data type
+  void* first;                   ///< the first element in the pair
+  void* second;                  ///< the second element in the pair
+  function_registry* first_mem;  ///< memory management for first data type
+  function_registry* second_mem; ///< memory management for second data type
 };
 
 /**
+ * @brief function to allocate and copy a new pair
  *
- * @param to_copy
+ * This is used by containers such at the cvector to create a new pair. This
+ * function will be placed in a function registry so that other files can
+ * access it.
+ *
+ * @param to_copy the pair that will be copied
  */
 void* _pair_copy(void* to_copy)
 {
@@ -48,8 +53,13 @@ void* _pair_copy(void* to_copy)
 }
 
 /**
+ * @brief function to deallocate memory for a pair
  *
- * @param to_destroy
+ * This is used by containers such the cvector to destroy an old pair. This
+ * function will be placed in a function registry so other files can access
+ * it.
+ *
+ * @param to_destroy the pair to be deallocated
  */
 void  _pair_destroy(void* to_destroy)
 {

@@ -31,8 +31,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAXBUF 1024*1024
 /** the max length of a line in a file */
 #define LINE_LENGTH 256
-/** the threshold over which a match must get to be a name */
-#define NAME_THRESHOLD 5
+/** the list of letter that will be removed when matching to a radix tree */
+char token[34] = {' ','!','"','#','$','%','&','`','*','+','\'','-','.','/',':','\n',',',
+                  '\t',';','<','=','>','?','@','[','\\',']','^','_','{','|','}','~',0};
 
 /* ************************************************************************** */
 /* **** Private Members ***************************************************** */
@@ -48,9 +49,9 @@ struct _copyright_internal {
   cvector entries;
 };
 
-struct _entry_internal {
+struct _copy_entry_internal {
   /// the code that was identified as a copyright
-  char entry[1024];
+  char text[1024];
   /// the name that matched the entry identified as a copyright
   char name_match[256];
   /// the dictionary match that originally identified the entry
@@ -159,41 +160,38 @@ void _strip_empty_entries(copyright copy) {
 }
 
 /**
-* @brief checks to see if an possible entry contains a name
+* @brief checks to see if a string contains a word in a dictionary
 *
-* Uses the name dictionary from a copyright instance to check if a possible
-* entry contains a name that is in the dictionary. This will check for spaces
-* before and after the name during the check to make sure it isn't a
-* substring of a normal word.
+* This will tokenize the whitespace and special characters out of a sentence
+* to search for a word that is contained within a dictionary.
 *
-* @return 0 if it does not contain a name, 1 otherwise
+* @param tree the diction to search within
+* @param string the string to search within
+* @param buf a string to place the find within
+* @return the index the string was found at, otherwise the length of the string
 */
-void _contains_name(copyright copy, copy_entry entry, char* buf) {
-  cvector matches;
-  cvector_iterator iter;
+int _contains(radix_tree tree, char* string, char* buf) {
+  /* locals */
+  char string_copy[strlen(string) + 1];
+  char* curr;
 
-  cvector_init(&matches, pointer_function_registry());
+  /* set up the necessary memory */
+  memset(string_copy, '\0', sizeof(string_copy));
+  strcpy(string_copy, string);
+  curr = strtok(string_copy, token);
+  buf[0] = '\0';
 
-  radix_match_within(copy->name, matches, entry->entry);
-
-  for(iter = cvector_begin(matches); iter != cvector_end(matches); iter++) {
-    char* curr = *(char**)*iter;
-
-    if(*(curr - 1) < '0' ||
-        (*(curr - 1) > '9' && *(curr - 1) < 'A') ||
-        (*(curr - 1) > 'Z' && *(curr - 1) < 'a') ||
-        *(curr - 1) > 'z') {
-      radix_match(copy->name, buf, curr);
-      if(*(curr + strlen(buf)) < '0' ||
-              (*(curr + strlen(buf)) > '9' && *(curr + strlen(buf)) < 'A') ||
-              (*(curr + strlen(buf)) > 'Z' && *(curr + strlen(buf)) < 'a') ||
-              *(curr + strlen(buf)) > 'z') {
-        break;
-      }
+  /* loop until we find a match in the dictionary */
+  while(curr != NULL) {
+    if(radix_contains(tree, curr)) {
+      strcpy(buf, curr);
+      return curr - string_copy;
     }
+    curr = strtok(NULL, token);
   }
 
-  cvector_destroy(matches);
+  /* a match was not found */
+  return strlen(string);
 }
 
 /**
@@ -224,9 +222,9 @@ void _load_dictionary(radix_tree dict, char* filename) {
 */
 void* _entry_copy(void* to_copy) {
   copy_entry cpy = (copy_entry)to_copy;
-  copy_entry new = (copy_entry)calloc(1,sizeof(struct _entry_internal));
+  copy_entry new = (copy_entry)calloc(1,sizeof(struct _copy_entry_internal));
 
-  strcpy(new->entry, cpy->entry);
+  strcpy(new->text, cpy->text);
   strcpy(new->dict_match, cpy->dict_match);
   strcpy(new->name_match, cpy->name_match);
   new->start_byte = cpy->start_byte;
@@ -255,7 +253,7 @@ void  _entry_print(void* to_print, FILE* ostr) {
   fprintf(ostr, "%s\t%s ==>\n%s\n%d -> %d\n",
       prt->dict_match,
       prt->name_match,
-      prt->entry,
+      prt->text,
       prt->start_byte,
       prt->end_byte);
 }
@@ -289,7 +287,7 @@ function_registry* _entry_cvector_registry() {
 * @param entry the entry to initialize
 */
 void _entry_init(copy_entry entry) {
-  memset(entry->entry, '\0', sizeof(entry->entry));
+  memset(entry->text, '\0', sizeof(entry->text));
   memset(entry->dict_match, '\0', sizeof(entry->dict_match));
   memset(entry->name_match, '\0', sizeof(entry->name_match));
   entry->start_byte = 0;
@@ -375,7 +373,7 @@ void copyright_analyze(copyright copy, FILE* istr) {
   int i, bufidx, bufsize;
   int beg = 0, end = 0;
   char temp[1024];
-  copy_entry entry = (copy_entry)calloc(1, sizeof(struct _entry_internal));
+  copy_entry entry = (copy_entry)calloc(1, sizeof(struct _copy_entry_internal));
 
   assert(copy);
   assert(istr);
@@ -402,23 +400,23 @@ void copyright_analyze(copyright copy, FILE* istr) {
   /* look through the whole file for something in the dictionary */
   for(bufidx = 0; bufidx < bufsize; bufidx = end+1) {
     _entry_init(entry);
-    bufidx = _find_index(copy, temp, buf, bufidx, entry);
+    bufidx += _contains(copy->dict, &buf[bufidx], temp);
     if(bufidx < bufsize) {
+      /* copy the dictionary entry into the copyright entry */
+      strcpy(entry->dict_match, temp);
+
       /* grab the begging and end of the match */
       beg = _find_beginning(buf, bufidx);
       end = _find_end(buf, bufidx, bufsize);
 
       /* copy the match into a new entry */
-      memcpy(entry->entry, &buf[beg+1], end-beg);
-      entry->entry[end-beg]=0;
+      memcpy(entry->text, &buf[beg+1], end-beg);
+      entry->text[end-beg]=0;
       entry->start_byte = beg;
       entry->end_byte = end;
 
-      memset(temp, '\0', sizeof(temp));
-      _contains_name(copy, entry, temp);
-
       /* push the string onto the list and increment bufidx */
-      if(strlen(temp)) {
+      if(_contains(copy->name, entry->text, temp)) {
         strcpy(entry->name_match, temp);
         cvector_push_back(copy->entries, entry);
       }
@@ -551,7 +549,7 @@ void copyright_names(copyright copy, cvector name) {
 * @param entry the entry to get the text from
 */
 char* copy_entry_text(copy_entry entry) {
-  return entry->entry;
+  return entry->text;
 }
 
 /**

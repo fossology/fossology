@@ -14,16 +14,13 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ######################################################################
+TOP = ../..
+VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
+include $(VARS)
 
-# directory specific information
-INCL = -I.
-
-# C compiler options
-CC = gcc
-CFLAGS = -g -O3 -Wall $(INCL)
-EXEC = copyright
-
-CPP = g++
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq
+EXE = copyright
 
 SOURCE = cvector.c \
 		 radixtree.c \
@@ -37,27 +34,28 @@ HEADER = cvector.h \
 
 OBJS   = cvector.o \
 		 radixtree.o \
-		 copyright.o \
 		 pair.o \
 		 
-all: $(EXEC)
+all: $(EXE)
 
-$(EXEC): $(OBJS) copyright.a main.c
-	$(CC) main.c $(CFLAGS) -o $(EXEC) copyright.a
+$(EXE): copyright.o main.c
+	$(CC) $(OBJS) copyright.o main.c $(CFLAGS_LOCAL) -o $@
 
-copyright.o: copyright.c $(HEADER)
+copyright.o: $(OBJS) $(HEADER) $(DB) $(VARS) copyright.c
+	$(CC) $(DIRS) -c $(CFLAGS_LOCAL) copyright.c
 
-radixtree.o: radixtree.c radixtree.h
+$(OBJS): %.o: %.c $(HEADER) $(DB) $(VARS)
+	$(CC) -c $(CFLAGS_LOCAL) $<
 
-cvector.o:   cvector.c   cvector.h
+install: all
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
-copyright.a: $(OBJS) $(SOURCE) $(HEADER)
-	$(AR) -cru $@ $^
+uninstall:
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 clean:
-	rm -f *.o *.a
-	rm -f $(EXEC)
+	rm -f *.o $(EXEC)
 	rm -f False_Positives False_Negatives Matches Found
 
-phony: all clean
+.PHONY: all install uninstall clean test
 	

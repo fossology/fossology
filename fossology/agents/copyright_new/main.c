@@ -22,6 +22,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include <ctype.h>
 
+/* other library includes */
+#include <libfossagent.h>
+#include <libfossdb.h>
+
 /* local includes */
 #include <copyright.h>
 #include <cvector.h>
@@ -34,6 +38,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define THRESHOLD 10
 /** the number of files that are in the testing directory */
 #define TESTFILE_NUMBER 140
+/** the file that all things written to stdin should be written to */
+#define STDOUT stdout;
+/** the file that all things written to stderr should be writtent to */
+#define STDERR stderr;
 
 /** the file to print information to */
 FILE* cout;
@@ -54,6 +62,11 @@ char* test_dir = "testdata/testdata";
  * @param argv
  */
 void copyright_usage(char* arg) {
+
+
+
+
+
 
 
 
@@ -190,7 +203,7 @@ void run_test_files(copyright copy) {
 
       tmp = *last;
       *last = 0;
-      cvector_push_back(compare, first + 4);
+      cvector_push_back(compare, first + 3);
       *last = tmp;
       loc = last + 4;
     }
@@ -231,6 +244,7 @@ void run_test_files(copyright copy) {
         }
       }
 
+      /* log the entry as found if it matched something in compare */
       if(cvector_size(compare) != 0 &&
           (strcmp(copy_entry_dict(*iter), "by") || strlen(score) > THRESHOLD)) {
         cvector_remove(compare, best);
@@ -242,6 +256,7 @@ void run_test_files(copyright copy) {
       }
     }
 
+    /* log all the false negatives */
     for(curr = cvector_begin(compare); curr != cvector_end(compare); curr++) {
       fprintf(n_out, "====%s================================\n", file_name);
       fprintf(n_out, "%s\n", (char*)*curr);
@@ -249,17 +264,18 @@ void run_test_files(copyright copy) {
 
     fprintf(cout, "====%s================================\n", file_name);
     fprintf(cout, "Correct:         %d\n", matches);
-    fprintf(cout, "False Positives: %d\n", copyright_size(copy));
+    fprintf(cout, "False Positives: %d\n", copyright_size(copy) - matches);
     fprintf(cout, "False Negatives: %d\n", cvector_size(compare));
 
+    /* clean up for the next file */
     correct += matches;
-    falsep += copyright_size(copy);
+    falsep += copyright_size(copy) - matches;
     falsen += cvector_size(compare);
-
     cvector_clear(compare);
   }
 
   fprintf(cout, "==== Totals ================================\n");
+  fprintf(cout, "Total Found:     %d\n", correct + falsep);
   fprintf(cout, "Correct:         %d\n", correct);
   fprintf(cout, "False Positives: %d\n", falsep);
   fprintf(cout, "False Negatives: %d\n", falsen);
@@ -298,8 +314,8 @@ int main(int argc, char** argv)
   FILE* mout = NULL;
 
   /* set the output stream */
-  cout = stdout;
-  cerr = stderr;
+  cout = STDOUT;
+  cerr = STDERR;
 
   /* construct any complex structs */
   cvector_init(&file_list, pair_function_registry());
@@ -355,16 +371,12 @@ int main(int argc, char** argv)
   /* loop over all of the files that have been loaded into the cvector for */
   /* processing. if the pfile_pk (second element in pair) is positive this */
   /* will also enter the results into the database                         */
-  for(iter = cvector_begin(file_list); iter != cvector_end(file_list); iter++)
-  {
+  for(iter = cvector_begin(file_list); iter != cvector_end(file_list); iter++) {
     pair curr = (pair)*iter;
-
-    printf("%s\n",(char*)pair_first(curr));
 
     /* attempt to open the file */
     istr = fopen((char*)pair_first(curr), "rb");
-    if(!istr)
-    {
+    if(!istr) {
       fprintf(cerr, "FATAL: pfile %d Copyright Agent unable to open file %s\n",
           (unsigned int)pair_second(curr), (char*)pair_first(curr));
       fflush(cerr);
@@ -375,12 +387,10 @@ int main(int argc, char** argv)
     copyright_analyze(copy, istr);
 
     /* loop across the found copyrights */
-    for(finds = copyright_begin(copy); finds != copyright_end(copy); finds++)
-    {
+    for(finds = copyright_begin(copy); finds != copyright_end(copy); finds++) {
       copy_entry entry = (copy_entry)*finds;
 
-      if(verbose)
-      {
+      if(verbose) {
         fprintf(mout, "=== %s ==============================================\n",
             (char*)pair_first(curr));
         fprintf(mout, "DICT: %s\nNAME: %s\nTEXT[%s]\n",
@@ -392,7 +402,7 @@ int main(int argc, char** argv)
 
 
     /* we are finished with this file, close it */
-    //fclose(istr);
+    fclose(istr);
   }
 
   if(verbose) {

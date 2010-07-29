@@ -51,7 +51,7 @@ typedef struct _copyright_internal* copyright;
  * this struct. All the memory should be correctly managed by the copyright
  * struct and will get cleaned up when analyze or copyright_destroy is called.
  */
-typedef struct _entry_internal* copy_entry;
+typedef struct _copy_entry_internal* copy_entry;
 
 /**
  * An iterator to iterate across the copyright matches within a copyright
