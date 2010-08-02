@@ -188,7 +188,7 @@ function BucketInTree($bucket_pk, $uploadtree_pk)
      Fatal("Missing parameter: bucket_pk: $bucket_pk, uploadtree_pk: $uploadtree_pk<br>", __FILE__, __LINE__);
 
   /* Find lft and rgt bounds for this $uploadtree_pk  */
-  $sql = "SELECT lft,rgt FROM uploadtree WHERE uploadtree_pk = $uploadtree_pk";
+  $sql = "SELECT lft,rgt, upload_fk FROM uploadtree WHERE uploadtree_pk = $uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   if (pg_num_rows($result) < 1)
@@ -199,12 +199,13 @@ function BucketInTree($bucket_pk, $uploadtree_pk)
   $row = pg_fetch_assoc($result);
   $lft = $row["lft"];
   $rgt = $row["rgt"];
+  $upload_fk = $row["upload_fk"];
   pg_free_result($result);
 
   /* search for bucket in tree */
   $sql = "SELECT bucket_fk from bucket_file, 
             (SELECT distinct(pfile_fk) as PF from uploadtree 
-               where uploadtree.lft BETWEEN $lft and $rgt) as SS
+               where uploadtree.lft BETWEEN $lft and $rgt and upload_fk='$upload_fk') as SS
           where PF=pfile_fk and bucket_fk='$bucket_pk' limit 1";
 
   $result = pg_query($PG_CONN, $sql);
