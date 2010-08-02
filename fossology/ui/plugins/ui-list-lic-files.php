@@ -115,7 +115,7 @@ class list_lic_files extends FO_Plugin
     $filesresult = GetFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk,
                                 $PkgsOnly, $Offset, $limit, $order);
     $NumFiles = pg_num_rows($filesresult);
-    if (!empty($Excl)) $V .= "<br>Display excludes files with these extensions: $Excl";
+    if (!empty($Excl)) $V .= "<br>Display <b>excludes</b> files with these extensions: $Excl";
 
 	/* Get the page menu */
 	if (($Count >= $Max) && ($Page >= 0))
@@ -136,7 +136,7 @@ class list_lic_files extends FO_Plugin
 
     // base url
     $ushortname = rawurlencode($rf_shortname);
-    $URL = "?mod=" . $this->Name . "&napk=$nomosagent_pk&item=$uploadtree_pk&lic=$ushortname&page=-1";
+    $baseURL = "?mod=" . $this->Name . "&napk=$nomosagent_pk&item=$uploadtree_pk&lic=$ushortname&page=-1";
 
     $V .= "<table>";
     $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Nomos Licenses found</th></tr>";
@@ -145,9 +145,9 @@ class list_lic_files extends FO_Plugin
       // Allow user to exclude files with this extension
       $FileExt = GetFileExt($row['ufile_name']);
       if (!empty($Excl)) 
-        $URL .= "&excl=$Excl:$FileExt";
+        $URL = $baseURL . "&excl=$Excl:$FileExt";
       else
-        $URL .= "&excl=$FileExt";
+        $URL = $baseURL . "&excl=$FileExt";
       $Header = "<a href=$URL>Exclude this file type.</a>";
 
       $ok = true;
