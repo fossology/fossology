@@ -203,7 +203,7 @@ class list_bucket_files extends FO_Plugin
 
       /* Allow user to exclude files with this exact license list */
       if (!empty($Excl))
-        $URL = $baseURL ."&excl=$Excl:$URLlicstring";
+        $URL = $baseURL ."&excl=".urlencode($Excl).":".$URLlicstring;
       else
         $URL = $baseURL ."&excl=$URLlicstring";
       $Header = "<a href=$URL>Exclude files with license: $licstring.</a>";
@@ -215,19 +215,19 @@ class list_bucket_files extends FO_Plugin
       }
       if ($ok)
       {
-      $nomosagent_pk = $row['nomosagent_fk'];
-      $LinkLast = "view-license&bapk=$bucketagent_pk&napk=$nomosagent_pk";
-      $V .= "<tr><td>";
-      $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, 
-                       $ShowMicro, ++$ItemNumb, $Header);
-      $V .= "</td>";
-      $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
+        $nomosagent_pk = $row['nomosagent_fk'];
+        $LinkLast = "view-license&bapk=$bucketagent_pk&napk=$nomosagent_pk";
+        $V .= "<tr><td>";
+        $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, 
+                         $ShowMicro, $ItemNumb++, $Header);
+        $V .= "</td>";
+        $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
 
-      // show the entire license list as a single string with links to the files
-      // in this container with that license.
-      $V .= "<td>$licstring</td></tr>";
-      $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
-      if ($Count == $RowNum) break;
+        // show the entire license list as a single string with links to the files
+        // in this container with that license.
+        $V .= "<td>$licstring</td></tr>";
+        $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
+        if ($Count == $RowNum) break;
       }
       $RowNum++;
       if ($Count == $RowNum) break;
