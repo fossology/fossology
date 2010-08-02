@@ -85,6 +85,8 @@ class list_bucket_files extends FO_Plugin
 	$bucketpool_pk = GetParm("bp",PARM_INTEGER);
 	$nomosagent_pk = GetParm("napk",PARM_INTEGER);
 	$BinNoSrc = GetParm("bns",PARM_INTEGER);  // 1 if requesting binary with no src
+    $Excl = GetParm("excl",PARM_RAW);
+
 	if (empty($uploadtree_pk) || empty($bucket_pk) || empty($bucketpool_pk)) 
     {
       echo $this->Name . " is missing required parameters.";
@@ -119,6 +121,7 @@ class list_bucket_files extends FO_Plugin
 	$V .= "The following files are in bucket: '<b>";
 	$V .= $bucketNameCache[$bucket_pk];
 	$V .= "</b>'.\n";
+    if (!empty($Excl)) $V .= "<br>Display <b>excludes</b> files with these licenses: $Excl";
 
 	$Offset = ($Page < 0) ? 0 : $Page*$Max;
     $order = "";
@@ -144,7 +147,7 @@ class list_bucket_files extends FO_Plugin
     }
     else
     {
-    $limit = ($Page < 0) ? "ALL":$Max;
+    $limit = ($Page < 0) ? "":" limit $Offset+$Max";
     // Get all the uploadtree_pk's with this bucket (for this agent and bucketpool)
     // in this subtree.  Some of these might be containers, some not.
     $sql = "select uploadtree.*, bucket_file.nomosagent_fk as nomosagent_fk
@@ -155,7 +158,7 @@ class list_bucket_files extends FO_Plugin
                  and agent_fk=$bucketagent_pk
                  and bucket_fk=$bucket_pk
                  and bucketpool_fk=$bucketpool_pk
-                 and bucket_pk=bucket_fk offset $Offset limit $Offset+$limit";
+                 and bucket_pk=bucket_fk offset $Offset $limit";
     $fileresult = pg_query($PG_CONN, $sql);
     DBCheckResult($fileresult, $sql, __FILE__, __LINE__);
     $Count = pg_num_rows($fileresult);
@@ -177,7 +180,7 @@ class list_bucket_files extends FO_Plugin
 	}
 
     // base url
-    $URL = "?mod=" . $this->Name . "&bapk=$bucketagent_pk&item=$uploadtree_pk&page=-1";
+    $baseURL = "?mod=" . $this->Name . "&bapk=$bucketagent_pk&item=$uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk&page=-1";
 
     // for each uploadtree rec ($fileresult), find all the licenses in it and it's children
     $ShowBox = 1;
@@ -186,30 +189,50 @@ class list_bucket_files extends FO_Plugin
     $Header = "";
     $LinkLast = "list_bucket_files&bapk=$bucketagent_pk";
 
+    /* file display loop/table */
     $V .= "<table>";
     $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Licenses found</th></tr>";
+    $ExclArray = explode(":", $Excl);
+    $ItemNumb = 1;
     while ($row = pg_fetch_assoc($fileresult, $RowNum))
     {
+      // get all the licenses in this subtree (bucket uploadtree_pk)
+      $pfile_pk = $row['pfile_fk'];
+      $licstring = GetFileLicenses_string($nomosagent_pk, $row['pfile_fk'], $row['uploadtree_pk']);
+      $URLlicstring = urlencode($licstring);
+
+      /* Allow user to exclude files with this exact license list */
+      if (!empty($Excl))
+        $URL = $baseURL ."&excl=$Excl:$URLlicstring";
+      else
+        $URL = $baseURL ."&excl=$URLlicstring";
+      $Header = "<a href=$URL>Exclude files with license: $licstring.</a>";
+
+      $ok = true;
+      if ($Excl)
+      {
+        if (in_array($licstring, $ExclArray)) $ok = false;
+      }
+      if ($ok)
+      {
       $nomosagent_pk = $row['nomosagent_fk'];
       $LinkLast = "view-license&bapk=$bucketagent_pk&napk=$nomosagent_pk";
       $V .= "<tr><td>";
       $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, 
-                       $ShowMicro, ++$RowNum, $Header);
+                       $ShowMicro, ++$ItemNumb, $Header);
       $V .= "</td>";
       $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
-
-      // get all the licenses in this subtree (bucket uploadtree_pk)
-      $pfile_pk = $row['pfile_fk'];
-      $licstring = GetFileLicenses_string($nomosagent_pk, $row['pfile_fk'], $row['uploadtree_pk']);
 
       // show the entire license list as a single string with links to the files
       // in this container with that license.
       $V .= "<td>$licstring</td></tr>";
       $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
       if ($Count == $RowNum) break;
+      }
+      $RowNum++;
+      if ($Count == $RowNum) break;
     }
     $V .= "</table>";
-
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
