@@ -25,33 +25,37 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* other library includes */
 #include <libfossagent.h>
 #include <libfossdb.h>
+#include <libpq-fe.h>
 
 /* local includes */
 #include <copyright.h>
 #include <cvector.h>
 #include <copyright.h>
 #include <pair.h>
+#include <sql_statements.h>
 
-/** the farthest into a file to look for copyright information */
-#define READMAX 1024*1024
-/** this has been tuned to provide the most accurate test */
-#define THRESHOLD 10
-/** the number of files that are in the testing directory */
-#define TESTFILE_NUMBER 140
-/** the file that all things written to stdin should be written to */
-#define STDOUT stdout;
-/** the file that all things written to stderr should be writtent to */
-#define STDERR stderr;
+#define READMAX 1024*1024            ///< farthest into a file to look for copyrights
+#define THRESHOLD 10                 ///< tuned threshold for testing purposes
+#define TESTFILE_NUMBER 140          ///< the number of files pairs used in tests
+#define STDOUT stdout;               ///< the file to write std information to
+#define STDERR stderr;               ///< the file to write error information to
+#define STDIN stdin;                 ///< the file that will be read from as an agent
+#define AGENT_NAME "copyright"       ///< the name of the agent, used to get agent key
+#define AGENT_DESC "copyright agent" ///< what program this is
 
 /** the file to print information to */
 FILE* cout;
 /** the file to print errors to */
 FILE* cerr;
+/** the file to read from */
+FILE* cin;
+/** output filestream for debugging purposes */
+FILE* mout;
 
-/** whether the copyright agent should print to relevant log files */
-int verbose = 0;
+int verbose = 0;                ///< turn on or off dumping to debug files
+int db_connected = 0;           ///< indicates if the database is connected
 
-/** the location of the label and raw testing data */
+/** the location of the labeled and raw testing data */
 char* test_dir = "testdata/testdata";
 
 /**
@@ -62,17 +66,7 @@ char* test_dir = "testdata/testdata";
  * @param argv
  */
 void copyright_usage(char* arg) {
-
-
-
-
-
-
-
-
-
-
-
+  // TODO
 }
 
 /**
@@ -288,9 +282,145 @@ void run_test_files(copyright copy) {
 }
 
 /**
+ * @brief perform the analysis of a given list of files
+ *
+ * loops over the file_list given and performs the analysis of all the files,
+ * when finished simply check if the results should be entered into the
+ * database, this is indicated by the second element of the pair not being NULL
+ *
+ * @param copy the copyright instance to use to perform the analysis
+ * @param file_list the list of files to analyze
+ */
+void perform_analysis(PGconn* pgConn, copyright copy, cvector file_list, long agent_pk) {
+  /* locals */
+  char sql[1024];
+  cvector_iterator iter;
+  copyright_iterator finds;
+  FILE* istr;
+  PGresult* pgResult;
+
+  /* initialize memory */
+  memset(sql, 0, sizeof(sql));
+  iter = NULL;
+  finds = NULL;
+  istr = NULL;
+
+  /* loop over all of the files that have been loaded into the cvector for */
+  /* processing. if the pfile_pk (second element in pair) is positive this */
+  /* will also enter the results into the database                         */
+  for(iter = cvector_begin(file_list); iter != cvector_end(file_list); iter++) {
+    pair curr = (pair)*iter;
+
+    /* attempt to open the file */
+    istr = fopen((char*)pair_first(curr), "rb");
+    if(!istr) {
+      fprintf(cerr, "FATAL: pfile %d Copyright Agent unable to open file %s\n",
+          (unsigned int)pair_second(curr), (char*)pair_first(curr));
+      fflush(cerr);
+      exit(-1);
+    }
+
+    /* perform the actual analysis */
+    copyright_analyze(copy, istr);
+
+    /* if running command line, print file name */
+    if(*(int*)pair_second(curr) < 0) {
+      fprintf(cout, "%s\n", (char*)pair_first(curr));
+    }
+
+    /* loop across the found copyrights */
+    if(copyright_size(copy) > 0) {
+      for(finds = copyright_begin(copy); finds != copyright_end(copy); finds++) {
+        copy_entry entry = (copy_entry)*finds;
+
+        if(verbose) {
+          fprintf(mout, "=== %s ==============================================\n",
+              (char*)pair_first(curr));
+          fprintf(mout, "DICT: %s\nNAME: %s\nTEXT[%s]\n",
+              copy_entry_dict(entry),
+              copy_entry_name(entry),
+              copy_entry_text(entry));
+        }
+
+        if(*(int*)pair_second(curr) >= 0) {
+          // TODO there are several things in this sql that seem unnecessary now
+          sprintf(sql, copyrights_found, agent_pk, *(int*)pair_second(curr),
+              copy_entry_start(entry), copy_entry_end(entry),
+              copy_entry_text(entry), "statement");
+          pgResult = PQexec(pgConn, sql);
+
+          if (PQresultStatus(pgResult) != PGRES_TUPLES_OK) {
+            fprintf(cerr, "ERROR: %s:%d, %s\nOn: %s\n",
+                  AGENT_DESC, __LINE__, PQresultErrorMessage(pgResult), sql);
+            PQclear(pgResult);
+            exit(-1);
+          }
+        } else {
+          fprintf(cout, "\t[%d:%d] %s",
+              copy_entry_start(entry), copy_entry_end(entry),
+              copy_entry_text(entry));
+          if(copy_entry_text(entry)[strlen(copy_entry_text(entry)) - 1] != '\n') {
+            fprintf(cout, "\n");
+          }
+        }
+      }
+    } else if(*(int*)pair_second(curr) >= 0) {
+      sprintf(sql, no_copyrights_found, agent_pk, *(int*)pair_second(curr));
+      pgResult = PQexec(pgConn, sql);
+
+      if (PQresultStatus(pgResult) != PGRES_TUPLES_OK) {
+        fprintf(cerr, "ERROR: %s:%d, %s\nOn: %s\n",
+               AGENT_DESC, __LINE__, PQresultErrorMessage(pgResult), sql);
+        PQclear(pgResult);
+        exit(-1);
+      }
+    }
+
+    /* we are finished with this file, close it */
+    fclose(istr);
+  }
+}
+
+/**
  * @brief main function for the copyright agent
  *
- * TODO detailed usage documentation
+ * The copyright agent is used to automatically locate copyright statements
+ * found in code.
+ *
+ * There are 3 ways to use the copyright agent:
+ *   1. Command Line Analysis :: test a file from the command line
+ *   2. Agent Based Analysis :: waits for commands from stdin
+ *   3. Accuracy Test :: tests the accuracy of the copyright agent
+ *
+ * +-----------------------+
+ * | Command Line Analysis |
+ * +-----------------------+
+ *
+ * To analyze a file from the command line:
+ *   ./copyright -c <filename 1> -c <filename 2> ... -c <filename N>
+ *
+ * +----------------------+
+ * | Agent Based Analysis |
+ * +----------------------+
+ *
+ * To run the copyright agent as an agent simply run with no command line args
+ *   ./copyright
+ *
+ * In either Agent Based Analysis or Command Line Analysis, the copyright agent
+ * can be run with a -d to turn on the debugging information. This will create
+ * a file named "Matches" with all the copyright match information conatined
+ * within.
+ *
+ * +---------------+
+ * | Accuracy Test |
+ * +---------------+
+ *
+ * Running the accuracy test for the copyright agent will trump all other
+ * command line arguments, and will only run the accuracy test as result. To
+ * test the accuracy of the copyright agent run with a -t:
+ *   ./copyright -t
+ *
+ *
  *
  * @param argc
  * @param argv
@@ -299,32 +429,36 @@ void run_test_files(copyright copy) {
 int main(int argc, char** argv)
 {
   /* primitives */
-  char input[FILENAME_MAX];
-  int c, i = -1;
+  char input[FILENAME_MAX];     // input buffer
+  char sql[512];                // buffer for database access
+  int c;                        // holds return from getop()
+  int i = -1;                   // TODO find a way to rid of this variable
+  long upload_pk = 0;           // used for database access
+  long agent_pk = 0;            // used for database access
+
+  /* Database structs */
+  void* DataBase = NULL;        // the connection to the database
+  PGconn* pgConn = NULL;        // cursor for the database
+  PGresult* pgResult = NULL;    // result of a database access
 
   /* copyright structs */
-  cvector_iterator iter;
-  copyright_iterator finds;
-  cvector file_list;
-  copyright copy;
-  pair curr;
+  cvector file_list;            // the list of files to be analyzed
+  copyright copy;               // the workhdorse of the copyrigth agent
+  pair curr;                    // pair to push into the file list
 
-  /* other locals */
-  FILE* istr = NULL;
-  FILE* mout = NULL;
-
-  /* set the output stream */
+  /* set the output streams */
   cout = STDOUT;
   cerr = STDERR;
+  cin = STDIN;
 
-  /* construct any complex structs */
+  /* initialize complex data strcutres */
   cvector_init(&file_list, pair_function_registry());
   copyright_init(&copy);
 
   /* parse the command line options */
-  while((c = getopt(argc, argv, "gc:t")) != -1) {
+  while((c = getopt(argc, argv, "dc:t")) != -1) {
     switch(c) {
-      case 'g':
+      case 'd':
         verbose = 1;
         break;
       case 'c':
@@ -347,66 +481,60 @@ int main(int argc, char** argv)
     }
   }
 
-  /* the agent is being run from the scheduler */
-  if(cvector_size(file_list) == 0)
-  {
-    while(fgets(input, FILENAME_MAX, stdin) != NULL)
-    {
-      // TODO implement agents stuff
+  /* if there are no files in the file list then the agent is begin run from */
+  /* the scheduler, open the database and grab the files to be analyzed      */
+  if(cvector_size(file_list) == 0) {
+    DataBase = DBopen();
+    if(!DataBase) {
+      fprintf(cerr, "FATAL: Copyright agent unable to connect to database.\n");
+      exit(-1);
     }
+
+    /* book keeping */
+    pgConn = DBgetconn(DataBase);
+    pair_init(&curr, string_function_registry(), int_function_registry());
+    db_connected = 1;
+    agent_pk = GetAgentKey(DataBase, AGENT_NAME, 0, "", AGENT_DESC);
+
+    while(fgets(input, FILENAME_MAX, cin) != NULL) {
+      upload_pk = atol(input);
+
+      sprintf(sql, fetch_pfile, upload_pk, agent_pk);
+      pgResult = PQexec(pgConn, sql);
+      i = PQntuples(pgResult);
+
+      for(c = 0; c < i; c++) {
+        pair_set_first(curr, PQgetvalue(pgResult, c, PQfnumber(pgResult, "pfilename")));
+        pair_set_second(curr, PQgetvalue(pgResult, c, PQfnumber(pgResult, "pfile_pk")));
+        cvector_push_back(file_list, curr);
+      }
+
+      perform_analysis(pgConn, copy, file_list, agent_pk);
+      cvector_clear(file_list);
+    }
+
+    pair_destroy(curr);
   }
 
   /* if the verbose flag has been set, we need to open the relevant files */
-  if(verbose)
-  {
+  if(verbose) {
     mout = fopen("Matches", "w");
-    if(!mout)
-    {
+    if(!mout) {
       fprintf(cerr, "FATAL: could not open Matches for logging\n");
       fflush(cerr);
       exit(-1);
     }
   }
 
-  /* loop over all of the files that have been loaded into the cvector for */
-  /* processing. if the pfile_pk (second element in pair) is positive this */
-  /* will also enter the results into the database                         */
-  for(iter = cvector_begin(file_list); iter != cvector_end(file_list); iter++) {
-    pair curr = (pair)*iter;
-
-    /* attempt to open the file */
-    istr = fopen((char*)pair_first(curr), "rb");
-    if(!istr) {
-      fprintf(cerr, "FATAL: pfile %d Copyright Agent unable to open file %s\n",
-          (unsigned int)pair_second(curr), (char*)pair_first(curr));
-      fflush(cerr);
-      exit(-1);
-    }
-
-    /* perform the actual analysis */
-    copyright_analyze(copy, istr);
-
-    /* loop across the found copyrights */
-    for(finds = copyright_begin(copy); finds != copyright_end(copy); finds++) {
-      copy_entry entry = (copy_entry)*finds;
-
-      if(verbose) {
-        fprintf(mout, "=== %s ==============================================\n",
-            (char*)pair_first(curr));
-        fprintf(mout, "DICT: %s\nNAME: %s\nTEXT[%s]\n",
-            copy_entry_dict(entry),
-            copy_entry_name(entry),
-            copy_entry_text(entry));
-      }
-    }
-
-
-    /* we are finished with this file, close it */
-    fclose(istr);
-  }
+  perform_analysis(pgConn, copy, file_list, agent_pk);
 
   if(verbose) {
     fclose(mout);
+  }
+
+  if(db_connected) {
+    pair_destroy(curr);
+    DBclose(DataBase);
   }
 
   cvector_destroy(file_list);

@@ -36,7 +36,7 @@ char token[34] = {' ','!','"','#','$','%','&','`','*','+','\'','-','.','/',':','
                   '\t',';','<','=','>','?','@','[','\\',']','^','_','{','|','}','~',0};
 
 /* ************************************************************************** */
-/* **** Private Members ***************************************************** */
+/* **** Limited File Scope ************************************************** */
 /* ************************************************************************** */
 
 /** the internal structure for a copyright */
@@ -220,7 +220,7 @@ void _load_dictionary(radix_tree dict, char* filename) {
 *
 * @param to_copy
 */
-void* _entry_copy(void* to_copy) {
+void* _copy_entry_copy(void* to_copy) {
   copy_entry cpy = (copy_entry)to_copy;
   copy_entry new = (copy_entry)calloc(1,sizeof(struct _copy_entry_internal));
 
@@ -238,7 +238,7 @@ void* _entry_copy(void* to_copy) {
 *
 * @param to_destroy
 */
-void  _entry_destroy(void* to_destroy) {
+void  _copy_entry_destroy(void* to_destroy) {
   free(to_destroy);
 }
 
@@ -248,7 +248,7 @@ void  _entry_destroy(void* to_destroy) {
 * @param to_print
 * @param ostr
 */
-void  _entry_print(void* to_print, FILE* ostr) {
+void  _copy_entry_print(void* to_print, FILE* ostr) {
   copy_entry prt = (copy_entry)to_print;
   fprintf(ostr, "%s\t%s ==>\n%s\n%d -> %d\n",
       prt->dict_match,
@@ -271,9 +271,9 @@ function_registry* _entry_cvector_registry() {
       (function_registry*)calloc(1, sizeof(function_registry));
 
   ret->name = "cvector";
-  ret->copy = &_entry_copy;
-  ret->destroy = &_entry_destroy;
-  ret->print = &_entry_print;
+  ret->copy = &_copy_entry_copy;
+  ret->destroy = &_copy_entry_destroy;
+  ret->print = &_copy_entry_print;
 
   return ret;
 }

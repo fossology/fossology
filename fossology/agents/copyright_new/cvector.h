@@ -22,10 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdlib.h>
 #include <stdio.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
@@ -129,9 +125,5 @@ function_registry* double_function_registry();
 function_registry* pointer_function_registry();
 function_registry* string_function_registry();
 function_registry* cvector_function_registry();
-
-#if defined(__cplusplus)
-}
-#endif
 
 #endif /* CVECTOR_H_INCLUDE */

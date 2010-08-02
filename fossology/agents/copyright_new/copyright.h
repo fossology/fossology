@@ -20,10 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <cvector.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
@@ -101,9 +97,5 @@ char* copy_entry_name(copy_entry entry);
 char* copy_entry_dict(copy_entry entry);
 unsigned int copy_entry_start(copy_entry entry);
 unsigned int copy_entry_end(copy_entry entry);
-
-#if defined(__cplusplus)
-}
-#endif
 
 #endif /* COPYRIGHT_H_INCLUDE */

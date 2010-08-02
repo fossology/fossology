@@ -67,6 +67,7 @@ void  _pair_destroy(void* to_destroy)
   ((pair)to_destroy)->second_mem->destroy(((pair)to_destroy)->second);
   free(((pair)to_destroy)->first_mem);
   free(((pair)to_destroy)->second_mem);
+  free(to_destroy);
 }
 
 /**

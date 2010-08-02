@@ -22,10 +22,6 @@
 #include <stdio.h>
 #include <cvector.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
@@ -63,10 +59,6 @@ int radix_match(radix_tree tree, char* dst, char* src);
 void radix_match_within(radix_tree tree, cvector dst, char* src);
 int radix_copy_to(radix_tree tree, cvector dst);
 void radix_print(radix_tree tree, FILE* ostr);
-
-#if defined(__cplusplus)
-}
-#endif
 
 #endif /* RADIXTREE_H_INCLUDE */
 
