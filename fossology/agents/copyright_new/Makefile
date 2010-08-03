@@ -54,7 +54,7 @@ uninstall:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 clean:
-	rm -f *.o $(EXEC)
+	rm -f *.o $(EXE)
 	rm -f False_Positives False_Negatives Matches Found
 
 .PHONY: all install uninstall clean test
