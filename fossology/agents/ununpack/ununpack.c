@@ -780,6 +780,7 @@ int	FindCmd	(char *Filename)
 	line[j]=c;
 	j++; 
       }
+      fclose(fp);
       if ((strstr(line, "-----BEGIN PGP SIGNED MESSAGE-----") && strstr(line,"Source:")) || 
 	  (strstr(line, "Format:") && strstr(line, "Source:") && strstr(line, "Version:")))
       {
