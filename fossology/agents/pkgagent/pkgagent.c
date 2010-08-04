@@ -570,8 +570,8 @@ char * ParseDebFile(char *Sin, char *Field, char *Value)
 {
   int s,f,v;
 
-  memset(Field,0,256);
-  memset(Value,0,1024);
+  memset(Field,0,MAXCMD);
+  memset(Value,0,MAXCMD);
 
   f=0; v=0;
   if(!isspace(Sin[0]))
@@ -614,8 +614,8 @@ int	GetMetadataDebBinary	(struct debpkginfo *pi)
   int rc;
   
   FILE *fp;
-  char field[256];
-  char value[1024];
+  char field[MAXCMD];
+  char value[MAXCMD];
   char line[MAXCMD];
   char *s = NULL;
   char temp[MAXCMD];
@@ -654,7 +654,7 @@ int	GetMetadataDebBinary	(struct debpkginfo *pi)
     return FALSE;
   }
 
-  while (fgets(line,2048,fp)!=NULL)
+  while (fgets(line,MAXCMD,fp)!=NULL)
   {
     s = ParseDebFile(line,field,value);
     if (!strcasecmp(field, "Description")) {
@@ -692,7 +692,7 @@ int	GetMetadataDebBinary	(struct debpkginfo *pi)
     }
     if (!strcasecmp(field, "Depends")) {
        char *depends = NULL;
-       char tempvalue[1024];
+       char tempvalue[MAXCMD];
        int size,i;
        size = 0;
 
@@ -794,8 +794,8 @@ int    RecordMetadataDEB       (struct debpkginfo *pi)
 int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
 { 
   FILE *fp;
-  char field[256];
-  char value[1024];
+  char field[MAXCMD];
+  char value[MAXCMD];
   char line[MAXCMD];
   char *s = NULL;
 
@@ -806,7 +806,7 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
     return FALSE;
   }
 
-  while (fgets(line,2048,fp)!=NULL)
+  while (fgets(line,MAXCMD,fp)!=NULL)
   {
     s = ParseDebFile(line,field,value);
 
@@ -837,7 +837,7 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
     }
     if (!strcasecmp(field, "Build-Depends")) {
        char *depends = NULL;
-       char tempvalue[1024];
+       char tempvalue[MAXCMD];
        int size,i;
        size = 0;
 
