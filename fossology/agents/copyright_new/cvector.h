@@ -49,7 +49,7 @@ struct _function_registry {
  *   cvector vec;
  *   radix_init(&vec);
  */
-typedef struct _cvector_internal* cvector;
+typedef struct cvector_internal* cvector;
 
 /*!
  * @brief the cvector function registry

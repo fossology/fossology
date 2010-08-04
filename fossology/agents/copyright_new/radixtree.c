@@ -24,33 +24,26 @@
 /* local includes */
 #include <radixtree.h>
 
-/// the number of children that a node can have
-#define NODE_SIZE 128
-/// the base offset that indexing into the child array is done using
-#define OFFSET '\0'
+#define NODE_SIZE 128 ///< the number of children that a node can have
+#define OFFSET '\0'   ///< the base offset that indexing into the child array is done using
 
 /* ************************************************************************** */
-/* *** Private Members ****************************************************** */
+/* *** Local Functions ****************************************************** */
 /* ************************************************************************** */
 
 /*!
  * @brief private typename to remove overuse of the struct keyword
  */
-typedef struct _tree_internal node;
+typedef struct tree_internal node;
 
 /*!
  * @brief internal structure of the radix tree
- *
- * the internal structure of the radix tree, essentially all these members are
- * private to anything outside of this file
  */
-struct _tree_internal {
-  /// the character represented by this node
-  char character;
-  /// true if a word terminates at this node, false otherwise
-  int terminal;
-  /// the list of children of this node
-  node* children[NODE_SIZE];
+struct tree_internal
+{
+  char character;               ///< the character represented by this node
+  int terminal;                 ///< true if a word terminates at this node, false otherwise
+  node* children[NODE_SIZE];    ///< the list of children of this node
 };
 
 /*!
@@ -62,35 +55,12 @@ struct _tree_internal {
  * @param tree the tree to be initialized
  * @param value the value that this node should have
  */
-void _radix_initialize(radix_tree* tree_ptr, char value) {
+void radix_init_local(radix_tree* tree_ptr, char value)
+{
   (*tree_ptr) = (node*)calloc(1, sizeof(node));
   (*tree_ptr)->character = value;
   (*tree_ptr)->terminal = 0;
   memset((*tree_ptr)->children, 0, sizeof((*tree_ptr)->children));
-}
-
-/*!
- * @brief private copy constructor for a radix tree
- *
- * private deep copy constructor for a radix tree. the tree pointed to by
- * tree_ptr will be identical to the tree pointed to by reference.
- *
- * @param tree_ptr the tree to copy into
- * @param reference the tree to copy from
- */
-void _radix_copy(radix_tree* tree_ptr, radix_tree reference) {
-  int i;
-
-  (*tree_ptr) = (node*)calloc(1, sizeof(node));
-  (*tree_ptr)->character = reference->character;
-  (*tree_ptr)->terminal = reference->terminal;
-  memset((*tree_ptr)->children, 0, sizeof((*tree_ptr)->children));
-
-  for(i = 0; i < NODE_SIZE; i++) {
-    if(reference->children[i]) {
-      _radix_copy(&(*tree_ptr)->children[i], reference->children[i]);
-    }
-  }
 }
 
 /*!
@@ -104,8 +74,10 @@ void _radix_copy(radix_tree* tree_ptr, radix_tree reference) {
  * @param src the string to search for
  * @return the length of the string found
  */
-int _radix_match(radix_tree tree, char* dst, char* src) {
-  if(strlen(src) == 0) {
+int radix_match_local(radix_tree tree, char* dst, char* src)
+{
+  if(strlen(src) == 0)
+  {
     dst[strlen(dst) + 1] = '\0';
     dst[strlen(dst)] = tree->character;
     return 0;
@@ -114,8 +86,9 @@ int _radix_match(radix_tree tree, char* dst, char* src) {
   dst[strlen(dst) + 1] = '\0';
   dst[strlen(dst)] = tree->character;
   if(tree->children[*src - OFFSET] != NULL &&
-      tree->children[*src - OFFSET]->character == *src) {
-    return 1 + _radix_match(tree->children[*src - OFFSET], dst, src+1);
+      tree->children[*src - OFFSET]->character == *src)
+  {
+    return 1 + radix_match_local(tree->children[*src - OFFSET], dst, src+1);
   }
 
   return 0;
@@ -132,18 +105,22 @@ int _radix_match(radix_tree tree, char* dst, char* src) {
  * @param ostr
  * @param string
  */
-void _radix_recprint(radix_tree tree, FILE* ostr, char* string) {
+void radix_recprint(radix_tree tree, FILE* ostr, char* string)
+{
   int i;
   string[strlen(string) + 1] = 0;
   string[strlen(string)] = tree->character;
 
-  if(tree->terminal) {
+  if(tree->terminal)
+  {
     fprintf(ostr,"%s\n",string);
   }
 
-  for(i = 0; i < NODE_SIZE; i++) {
-    if(tree->children[i]) {
-      _radix_recprint(tree->children[i], ostr, string);
+  for(i = 0; i < NODE_SIZE; i++)
+  {
+    if(tree->children[i])
+    {
+      radix_recprint(tree->children[i], ostr, string);
     }
   }
 
@@ -161,18 +138,22 @@ void _radix_recprint(radix_tree tree, FILE* ostr, char* string) {
  * @param vec the cvector to append them to
  * @param string the current string for this depth of the tree
  */
-void _radix_append(radix_tree tree, cvector vec, char* string) {
+void radix_append(radix_tree tree, cvector vec, char* string)
+{
   int i;
   string[strlen(string) + 1] = 0;
   string[strlen(string)] = tree->character;
 
-  if(tree->terminal) {
+  if(tree->terminal)
+  {
     cvector_push_back(vec, string);
   }
 
-  for(i = 0; i < NODE_SIZE; i++) {
-    if(tree->children[i]) {
-      _radix_append(tree->children[i], vec, string);
+  for(i = 0; i < NODE_SIZE; i++)
+  {
+    if(tree->children[i])
+    {
+      radix_append(tree->children[i], vec, string);
     }
   }
 
@@ -191,18 +172,9 @@ void _radix_append(radix_tree tree, cvector vec, char* string) {
  * @param tree a reference to the tree that is being initialized
  * @param value the value that this tree contains
  */
-void radix_init(radix_tree* tree_ptr) {
-  _radix_initialize(tree_ptr, '\0');
-}
-
-/*!
- * @brief copy constructor for the radix tree
- *
- * @param tree the tree to copy into
- * @param reference the tree to copy from
- */
-void radix_copy(radix_tree* tree, radix_tree reference) {
-  _radix_copy(tree, reference);
+void radix_init(radix_tree* tree_ptr)
+{
+  radix_init_local(tree_ptr, '\0');
 }
 
 /*!
@@ -212,11 +184,14 @@ void radix_copy(radix_tree* tree, radix_tree reference) {
  *
  * @param tree the tree to be destructed
  */
-void radix_destroy(radix_tree tree) {
+void radix_destroy(radix_tree tree)
+{
   int i;
 
-  for(i = 0; i < NODE_SIZE; i++) {
-    if(tree->children[i] != NULL) {
+  for(i = 0; i < NODE_SIZE; i++)
+ {
+    if(tree->children[i] != NULL)
+    {
       radix_destroy(tree->children[i]);
     }
   }
@@ -237,16 +212,19 @@ void radix_destroy(radix_tree tree) {
  * @param tree the tree that the string is to be inserted into
  * @param string the string that will be in the tree
  */
-void radix_insert(radix_tree tree, const char* string) {
+void radix_insert(radix_tree tree, const char* string)
+{
   /* base case for recursive insert function */
-  if(strlen(string) == 0) {
+  if(strlen(string) == 0)
+  {
     tree->terminal = 1;
     return;
   }
 
   /* if the subtree does not yet exist, create it */
-  if(tree->children[*string - OFFSET] == NULL) {
-    _radix_initialize(&tree->children[*string - OFFSET], *string);
+  if(tree->children[*string - OFFSET] == NULL)
+  {
+    radix_init_local(&tree->children[*string - OFFSET], *string);
   }
 
   /* recursively add the next character in the string */
@@ -268,15 +246,18 @@ void radix_insert(radix_tree tree, const char* string) {
  * @param start the start of the array
  * @param finsih one past the end of the array
  */
-void radix_insert_all(radix_tree tree, char** first, char** last) {
+void radix_insert_all(radix_tree tree, char** first, char** last)
+{
   /* make sure that first is less than last */
-  if(first > last) {
+  if(first > last)
+  {
     fprintf(stderr, "ERROR: first must be less than last");
     exit(-1);
   }
 
   /* insert all of the elements into the tree */
-  for(;first != last; first++) {
+  for(;first != last; first++)
+  {
     radix_insert(tree, *first);
   }
 }
@@ -297,12 +278,15 @@ void radix_insert_all(radix_tree tree, char** first, char** last) {
  * @param string the string to search for
  * @return true if the string in the tree, false otherwise
  */
-int radix_contains(radix_tree tree, char* string) {
-  if(strlen(string) == 0) {
+int radix_contains(radix_tree tree, char* string)
+{
+  if(strlen(string) == 0)
+  {
     return tree->terminal;
   }
 
-  if(tree->children[*string - OFFSET] != NULL) {
+  if(tree->children[*string - OFFSET] != NULL)
+  {
     return radix_contains(tree->children[*string - OFFSET], string+1);
   }
 
@@ -322,9 +306,10 @@ int radix_contains(radix_tree tree, char* string) {
  * @param src the string to search for a match
  * @return the length of the string found
  */
-int radix_match(radix_tree tree, char* dst, char* src) {
+int radix_match(radix_tree tree, char* dst, char* src)
+{
   *dst = '\0';
-  return _radix_match(tree, dst, src);
+  return radix_match_local(tree, dst, src);
 }
 
 /*!
@@ -340,16 +325,19 @@ int radix_match(radix_tree tree, char* dst, char* src) {
  * @param src the source of the string
  * @param threshold the minimum number of characters to match
  */
-void radix_match_within(radix_tree tree, cvector dst, char* src) {
+void radix_match_within(radix_tree tree, cvector dst, char* src)
+{
   char* curr, temp[256];
 
   // clear the buffer that matches will be place in
   memset(temp, '\0', sizeof(temp));
 
   // search a single character at a time in the input string
-  for(curr = src; *curr; curr++) {
+  for(curr = src; *curr; curr++)
+  {
     radix_match(tree, temp, curr);
-    if(radix_contains(tree, temp)) {
+    if(radix_contains(tree, temp))
+    {
       cvector_push_back(dst, &curr);
     }
   }
@@ -367,11 +355,12 @@ void radix_match_within(radix_tree tree, cvector dst, char* src) {
  * @param dst the cvector to append them to
  * @return the number of string appended to the cvector
  */
-int radix_copy_to(radix_tree tree, cvector dst) {
+int radix_copy_to(radix_tree tree, cvector dst)
+{
   char str[256];
   memset(str, '\0', sizeof(str));
   cvector_clear(dst);
-  _radix_append(tree, dst, str);
+  radix_append(tree, dst, str);
 
   return cvector_size(dst);
 }
@@ -386,8 +375,9 @@ int radix_copy_to(radix_tree tree, cvector dst) {
  * @param tree the tree to print to the output stream
  * @param ostr the output stream that will be printed to
  */
-void radix_print(radix_tree tree, FILE* ostr) {
+void radix_print(radix_tree tree, FILE* ostr)
+{
   char str[256];
   memset(str, 0, sizeof(str));
-  _radix_recprint(tree, ostr, str);
+  radix_recprint(tree, ostr, str);
 }

@@ -32,15 +32,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 * the memory of the array, also holds the size of the cvector and the possible
 * capacity of the cvecotr.
 */
-struct _cvector_internal {
-  /// the number of element in the cvector
-  int size;
-  /// the number of elements that data can store
-  int capacity;
-  /// the array that controls access to the data
-  void** data;
-  /// the momory management functions employed by cvector
-  function_registry* memory;
+struct cvector_internal
+{
+  int size;                   ///< the number of element in the cvector
+  int capacity;               ///< the number of elements that data can store
+  void** data;                ///< the array that controls access to the data
+  function_registry* memory;  ///< the momory management functions employed by cvector
 };
 
 /**
@@ -53,7 +50,8 @@ struct _cvector_internal {
 *
 * @param vec the vector to alter the size of
 */
-void _cvector_resize(cvector vec) {
+void cvector_resize(cvector vec)
+{
   /* local variables */
   int i;
 
@@ -64,7 +62,8 @@ void _cvector_resize(cvector vec) {
   vec->data = (void**)realloc(vec->data, vec->capacity * sizeof(void*));
 
   /* fill the rest of the array with NULL */
-  for(i = vec->size; i < vec->capacity; i++) {
+  for(i = vec->size; i < vec->capacity; i++)
+  {
     vec->data[i] = NULL;
   }
 }
@@ -80,8 +79,9 @@ void _cvector_resize(cvector vec) {
  * @param memory_manager: the function registry that will
  *                  holds the functions for memory cleanup
  */
-void cvector_init(cvector* vec, function_registry* memory_manager) {
-  (*vec) = (cvector)calloc(1, sizeof(struct _cvector_internal));
+void cvector_init(cvector* vec, function_registry* memory_manager)
+{
+  (*vec) = (cvector)calloc(1, sizeof(struct cvector_internal));
   (*vec)->data = (void**)calloc(1, sizeof(void*));
   (*vec)->size = 0;
   (*vec)->capacity = 1;
@@ -98,7 +98,8 @@ void cvector_init(cvector* vec, function_registry* memory_manager) {
  *
  * @param vec: a pointer to the cvector to be copied
  */
-void cvector_copy(cvector* dst, cvector src) {
+void cvector_copy(cvector* dst, cvector src)
+{
   /* locals */
   cvector_iterator iter = NULL;
 
@@ -106,7 +107,8 @@ void cvector_copy(cvector* dst, cvector src) {
   cvector_init(dst, function_registry_copy(src->memory));
 
   /* loop over the old cvector and copy everything over */
-  for(iter = cvector_begin(src); iter != cvector_end(src); iter++) {
+  for(iter = cvector_begin(src); iter != cvector_end(src); iter++)
+  {
     cvector_push_back(*dst, *iter);
   }
 }
@@ -116,11 +118,13 @@ void cvector_copy(cvector* dst, cvector src) {
  *
  * @param vec: a pointer to the cvector
  */
-void cvector_destroy(cvector vec) {
+void cvector_destroy(cvector vec)
+{
   cvector_iterator iter;
 
   /* loop through  every datum and call the delete on it */
-  for(iter = cvector_begin(vec); iter != cvector_end(vec); iter++) {
+  for(iter = cvector_begin(vec); iter != cvector_end(vec); iter++)
+  {
     vec->memory->destroy(*iter);
   }
 
@@ -153,18 +157,23 @@ void cvector_destroy(cvector vec) {
  * @param datum: the pointer to the datum to be pushed
  *                  into the vecotr
  */
-void cvector_push_back(cvector vec, void* datum) {
+void cvector_push_back(cvector vec, void* datum)
+{
   /* test if the cvector needs resizing */
-  if(vec->size == vec->capacity) {
-    _cvector_resize(vec);
+  if(vec->size == vec->capacity)
+  {
+    cvector_resize(vec);
   }
 
   /* there is enough room for a new element,  */
   /* increase the size and store the element  */
   /* using the copy function                  */
-  if(datum != NULL) {
+  if(datum != NULL)
+  {
     vec->data[vec->size++] = vec->memory->copy(datum);
-  } else {
+  }
+  else
+  {
     vec->data[vec->size++] = NULL;
   }
 }
@@ -180,28 +189,32 @@ void cvector_push_back(cvector vec, void* datum) {
  * @param datum the element to insert
  */
 cvector_iterator cvector_insert(cvector vec,
-    cvector_iterator iter, void* datum) {
+    cvector_iterator iter, void* datum)
+{
   /* variable to store the return value */
   cvector_iterator ret;
 
   /* since vec function does bounds checking, do so */
-  if(iter < cvector_begin(vec) || iter > cvector_end(vec)) {
+  if(iter < cvector_begin(vec) || iter > cvector_end(vec))
+  {
     fprintf(stderr, "cvector.c: ERROR: array index access out of bounds.\n");
     fprintf(stderr, "cvector.c: ERROR: iterator is outside of array.\n");
     exit(-1);
   }
 
   /* test if the cvector needs to be bigger */
-  if(vec->size == vec->capacity) {
+  if(vec->size == vec->capacity)
+  {
     int offset = iter - cvector_begin(vec);
-    _cvector_resize(vec);
+    cvector_resize(vec);
     iter = cvector_begin(vec) + offset;
   }
 
   /* do the actual insert function */
   vec->size++;
   ret = iter;
-  while(iter != cvector_end(vec)) {
+  while(iter != cvector_end(vec))
+  {
     void* temp = *iter;
     *iter = vec->memory->copy(datum);
     datum = temp;
@@ -225,12 +238,14 @@ cvector_iterator cvector_insert(cvector vec,
  * @param last the end of the block of elements to add
  */
 void cvector_insert_all(cvector vec,
-    cvector_iterator pos, cvector_iterator first, cvector_iterator last) {
+    cvector_iterator pos, cvector_iterator first, cvector_iterator last)
+{
   /* local iterators */
   cvector_iterator iter;
 
   /* make sure that the provided iterators are in the correct order */
-  if(first < cvector_begin(vec) || last >= cvector_end(vec) || first > last) {
+  if(first < cvector_begin(vec) || last >= cvector_end(vec) || first > last)
+  {
     fprintf(stderr, "cvector.c: ERROR: array index access out of bounds.\n");
     fprintf(stderr, "cvector.c: ERROR: invalid iterator in intsert_all.\n");
     exit(-1);
@@ -238,8 +253,6 @@ void cvector_insert_all(cvector vec,
 
   /* move all elements after pos down */
   iter = pos + (last - first);
-
-
 }
 
 /* ************************************************************************** */
@@ -255,17 +268,20 @@ void cvector_insert_all(cvector vec,
  *
  * @param vec the cvector to clear
  */
-void cvector_clear(cvector vec) {
+void cvector_clear(cvector vec)
+{
   /* iterator for deletion */
   cvector_iterator iter;
 
   /* delete everything currently in the cvector */
-  for(iter = cvector_begin(vec); iter != cvector_end(vec); iter++) {
+  for(iter = cvector_begin(vec); iter != cvector_end(vec); iter++)
+  {
     vec->memory->destroy(*iter);
     *iter = NULL;
   }
 
-  for(iter = cvector_end(vec); iter != vec->data + vec->capacity; iter++) {
+  for(iter = cvector_end(vec); iter != vec->data + vec->capacity; iter++)
+  {
     *iter = NULL;
   }
 
@@ -281,9 +297,11 @@ void cvector_clear(cvector vec) {
  *
  * @param vec the cvector to remove the element from
  */
-void cvector_pop_back(cvector vec) {
-  if(vec->size > 0) {
-    cvector_remove(vec, cvector_end(vec) - 1);
+void cvector_pop_back(cvector vec)
+{
+  if(vec->size > 0)
+  {
+    vec->size--;
   }
 }
 
@@ -298,12 +316,14 @@ void cvector_pop_back(cvector vec) {
  * @param iter the position that should be removed
  * @return an iterator to the new position
  */
-cvector_iterator cvector_remove(cvector vec, cvector_iterator iter) {
+cvector_iterator cvector_remove(cvector vec, cvector_iterator iter)
+{
   /* save the input iterator so that it can be returned */
   cvector_iterator old_pos = iter;
 
   /* since vec function does bounds checking, do so */
-  if(iter < cvector_begin(vec) || iter >= cvector_end(vec)) {
+  if(iter < cvector_begin(vec) || iter >= cvector_end(vec))
+  {
     fprintf(stderr, "cvector.c: ERROR: array index access out of bounds.\n");
     fprintf(stderr, "cvector.c: ERROR: invalid iterator in remove.\n");
     exit(-1);
@@ -314,7 +334,8 @@ cvector_iterator cvector_remove(cvector vec, cvector_iterator iter) {
 
   /* do the actual remove function */
   vec->size--;
-  while(iter != cvector_end(vec)) {
+  while(iter != cvector_end(vec))
+  {
     *iter = *(iter+1);
     iter++;
   }
@@ -336,26 +357,30 @@ cvector_iterator cvector_remove(cvector vec, cvector_iterator iter) {
  * @return an iterator to the element that is not at the position of start
  */
 cvector_iterator cvector_remove_all(cvector vec,
-    cvector_iterator start, cvector_iterator end) {
+    cvector_iterator start, cvector_iterator end)
+{
   /* tmp variable for iterator storage */
   cvector_iterator curr;
 
   /* bounds check the incomming iterators */
-  if(start < cvector_begin(vec) || end >= cvector_end(vec) || start > end) {
+  if(start < cvector_begin(vec) || end >= cvector_end(vec) || start > end)
+  {
     fprintf(stderr, "cvector.c: ERROR: array index access out of bounds.\n");
     fprintf(stderr, "cvector.c: ERROR: invlaid iterator in remove_all.\n");
     exit(-1);
   }
 
   /* destruct all the elements in [start, end) */
-  for(curr = start; curr != end; curr++) {
+  for(curr = start; curr != end; curr++)
+  {
     vec->memory->destroy(*curr);
   }
 
   /* move all following elements up by (end - start) */
   curr = start;
   vec->size -= (end - start);
-  while(start != cvector_end(vec)) {
+  while(start != cvector_end(vec))
+  {
     *start = *end;
     start++;
     end++;
@@ -382,7 +407,8 @@ cvector_iterator cvector_remove_all(cvector vec,
  * @param index: the index in the cvector that should
  *                  be returned.
  */
-void* cvector_get(cvector vec, int index) {
+void* cvector_get(cvector vec, int index)
+{
   return vec->data[index];
 }
 
@@ -397,7 +423,8 @@ void* cvector_get(cvector vec, int index) {
  * @param index: the index in the cvector that should
  *                  be returned.
  */
-void* cvector_at(cvector vec, int index) {
+void* cvector_at(cvector vec, int index)
+{
   /* since vec function does bounds checking, do so */
   if(index < 0 || index >= vec->size) {
     fprintf(stderr, "cvector.c: ERROR: array index access out of bounds.\n");
@@ -412,7 +439,8 @@ void* cvector_at(cvector vec, int index) {
  *
  * @param vec: a pointer to the cvector
  */
-cvector_iterator cvector_begin(cvector vec) {
+cvector_iterator cvector_begin(cvector vec)
+{
   return vec->data;
 }
 
@@ -421,7 +449,8 @@ cvector_iterator cvector_begin(cvector vec) {
  *
  * @param vec: a pointer to the cvector
  */
-cvector_iterator cvector_end(cvector vec) {
+cvector_iterator cvector_end(cvector vec)
+{
   return vec->data + vec->size;
 }
 
@@ -431,7 +460,8 @@ cvector_iterator cvector_end(cvector vec) {
  * @param vec the relevant cvector
  * @return the size of vec
  */
-int cvector_size(cvector vec) {
+int cvector_size(cvector vec)
+{
   return vec->size;
 }
 
@@ -441,7 +471,8 @@ int cvector_size(cvector vec) {
  * @param vec the cvector that is begin queried
  * @return the capacity of the cvector
  */
-int cvector_capacity(cvector vec) {
+int cvector_capacity(cvector vec)
+{
   return vec->capacity;
 }
 
@@ -462,7 +493,8 @@ int cvector_capacity(cvector vec) {
  * @param pfile: the FILE pointer that will be printed to
  *
  */
-void cvector_print(cvector vec, FILE* pfile) {
+void cvector_print(cvector vec, FILE* pfile)
+{
   /* local variables */
   int length = strlen(vec->memory->name);
   cvector_iterator iter;
@@ -473,7 +505,8 @@ void cvector_print(cvector vec, FILE* pfile) {
   fwrite(&vec->size, sizeof(int), 1, pfile);
 
   /* loop through the data and print every element */
-  for(iter = cvector_begin(vec); iter != cvector_end(vec); iter++) {
+  for(iter = cvector_begin(vec); iter != cvector_end(vec); iter++)
+  {
     vec->memory->print(*iter, pfile);
   }
 }
@@ -487,7 +520,8 @@ void cvector_print(cvector vec, FILE* pfile) {
  * @brief allocated memory for an int and store the int
  * @param to_copy
  */
-void* _int_copy(void* to_copy) {
+void* int_copy(void* to_copy)
+{
   int* i = (int*)calloc(1, sizeof(int));
   *i = *(int*)to_copy;
   return i;
@@ -497,7 +531,8 @@ void* _int_copy(void* to_copy) {
  * @brief deallocate the memory for to_delete
  * @param to_delete
  */
-void  _int_destroy(void* to_delete) {
+void  int_destroy(void* to_delete)
+{
   free(to_delete);
 }
 
@@ -506,7 +541,8 @@ void  _int_destroy(void* to_delete) {
  * @param to_print
  * @param pfile
  */
-void  _int_print(void* to_print, FILE* pfile) {
+void  int_print(void* to_print, FILE* pfile)
+{
   fprintf(pfile, "%d\t", *((int*)to_print));
 }
 
@@ -515,7 +551,8 @@ void  _int_print(void* to_print, FILE* pfile) {
  * @brief allocated memory for a char and store the char
  * @param to_copy
  */
-void* _char_copy(void* to_copy) {
+void* char_copy(void* to_copy)
+{
   char* c = (char*)calloc(1, sizeof(char));
   *c = *(char*)to_copy;
   return c;
@@ -525,7 +562,8 @@ void* _char_copy(void* to_copy) {
  * @brief deallocate the memory for to_delete
  * @param to_delete
  */
-void  _char_destroy(void* to_delete) {
+void  char_destroy(void* to_delete)
+{
   free(to_delete);
 }
 
@@ -534,7 +572,8 @@ void  _char_destroy(void* to_delete) {
  * @param to_print
  * @param pfile
  */
-void  _char_print(void* to_print, FILE* pfile) {
+void  char_print(void* to_print, FILE* pfile)
+{
   fprintf(pfile, "%c", *((char*)to_print));
 }
 
@@ -543,7 +582,8 @@ void  _char_print(void* to_print, FILE* pfile) {
  * @brief allocated memory for a double and store the double
  * @param to_copy
  */
-void* _double_copy(void* to_copy) {
+void* double_copy(void* to_copy)
+{
   double* d = (double*)calloc(1, sizeof(double));
   *d = *(double*)to_copy;
   return d;
@@ -553,14 +593,18 @@ void* _double_copy(void* to_copy) {
  * @brief deallocate the memory for to_delete
  * @param to_delete
  */
-void  _double_destroy(void* to_delete) { free(to_delete); }
+void  double_destroy(void* to_delete)
+{
+  free(to_delete);
+}
 
 /*!
  * @brief print the element to a file
  * @param to_print
  * @param pfile
  */
-void  _double_print(void* to_print, FILE* pfile) {
+void  double_print(void* to_print, FILE* pfile)
+{
   fprintf(pfile, "%f", *((double*)to_print));
 }
 
@@ -569,7 +613,8 @@ void  _double_print(void* to_print, FILE* pfile) {
  * @brief allocated memory for a pointer and store the pointer
  * @param to_copy
  */
-void* _pointer_copy(void** to_copy) {
+void* pointer_copy(void** to_copy)
+{
   void** v = (void**)calloc(1, sizeof(void*));
   *v = *(int**)to_copy;
   return v;
@@ -579,14 +624,18 @@ void* _pointer_copy(void** to_copy) {
  * @brief deallocate the memory for to_delete
  * @param to_delete
  */
-void  _pointer_destroy(void* to_delete) { free(to_delete); }
+void  pointer_destroy(void* to_delete)
+{
+  free(to_delete);
+}
 
 /*!
  * @brief print the element to a file
  * @param to_print
  * @param pfile
  */
-void  _pointer_print(void** to_print, FILE* pfile) {
+void  pointer_print(void** to_print, FILE* pfile)
+{
   fprintf(pfile, "0x%X", (unsigned int)*to_print);
 }
 
@@ -595,7 +644,8 @@ void  _pointer_print(void** to_print, FILE* pfile) {
  * @brief allocated memory for an int and store the int
  * @param to_copy
  */
-void* _string_copy(void* to_copy) {
+void* string_copy(void* to_copy)
+{
   char* s = (char*)calloc(strlen((char*)to_copy) + 1, sizeof(char));
   strcpy(s, (char*)to_copy);
   s[strlen(s)] = '\0';
@@ -606,7 +656,8 @@ void* _string_copy(void* to_copy) {
  * @brief deallocate the memory for to_delete
  * @param to_delete
  */
-void  _string_destroy(void* to_delete) {
+void  string_destroy(void* to_delete)
+{
   free(to_delete);
 }
 
@@ -615,7 +666,8 @@ void  _string_destroy(void* to_delete) {
  * @param to_print
  * @param pfile
  */
-void  _string_print(void* to_print, FILE* pfile) {
+void  string_print(void* to_print, FILE* pfile)
+{
   fprintf(pfile, "%s", (char*)to_print);
 }
 
@@ -624,7 +676,8 @@ void  _string_print(void* to_print, FILE* pfile) {
  * @brief allocated memory for an int and store the int
  * @param to_copy
  */
-void* _cvector_copy(void* to_copy) {
+void* cvector_copy_reg(void* to_copy)
+{
   cvector v;
   cvector_copy(&v, (cvector)to_copy);
   return v;
@@ -634,7 +687,8 @@ void* _cvector_copy(void* to_copy) {
  * @brief deallocate the memory for to_delete
  * @param to_delete
  */
-void  _cvector_destroy(void* to_delete) {
+void  cvector_destroy_reg(void* to_delete)
+{
   cvector_destroy((cvector)to_delete);
   free(to_delete);
 }
@@ -644,7 +698,8 @@ void  _cvector_destroy(void* to_delete) {
  * @param to_print
  * @param pfile
  */
-void  _cvector_print(void* to_print, FILE* pfile) {
+void  cvector_print_reg(void* to_print, FILE* pfile)
+{
   cvector_print((cvector)to_print, pfile);
 }
 
@@ -661,7 +716,8 @@ void  _cvector_print(void* to_print, FILE* pfile) {
  *
  * @return the new function registry
  */
-function_registry* function_registry_copy(function_registry* vec) {
+function_registry* function_registry_copy(function_registry* vec)
+{
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
@@ -684,14 +740,15 @@ function_registry* function_registry_copy(function_registry* vec) {
  *
  * @return the new function registry
  */
-function_registry* int_function_registry() {
+function_registry* int_function_registry()
+{
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
   ret->name = "integer";
-  ret->copy = &_int_copy;
-  ret->destroy = &_int_destroy;
-  ret->print = &_int_print;
+  ret->copy = &int_copy;
+  ret->destroy = &int_destroy;
+  ret->print = &int_print;
 
   return ret;
 }
@@ -707,14 +764,15 @@ function_registry* int_function_registry() {
  *
  * @return the new function registry
  */
-function_registry* char_function_registry() {
+function_registry* char_function_registry()
+{
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
   ret->name = "character";
-  ret->copy = &_char_copy;
-  ret->destroy = &_char_destroy;
-  ret->print = &_char_print;
+  ret->copy = &char_copy;
+  ret->destroy = &char_destroy;
+  ret->print = &char_print;
 
   return ret;
 }
@@ -730,14 +788,15 @@ function_registry* char_function_registry() {
  *
  * @return the new function registry
  */
-function_registry* double_function_registry() {
+function_registry* double_function_registry()
+{
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
   ret->name = "float";
-  ret->copy = &_double_copy;
-  ret->destroy = &_double_destroy;
-  ret->print = &_double_print;
+  ret->copy = &double_copy;
+  ret->destroy = &double_destroy;
+  ret->print = &double_print;
 
   return ret;
 }
@@ -753,14 +812,15 @@ function_registry* double_function_registry() {
  *
  * @return the new function registry
  */
-function_registry* pointer_function_registry() {
+function_registry* pointer_function_registry()
+{
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
   ret->name = "pointer";
-  ret->copy = (void* (*)(void*))&_pointer_copy;
-  ret->destroy = &_pointer_destroy;
-  ret->print = (void (*)(void*, FILE*))&_pointer_print;
+  ret->copy = (void* (*)(void*))&pointer_copy;
+  ret->destroy = &pointer_destroy;
+  ret->print = (void (*)(void*, FILE*))&pointer_print;
 
   return ret;
 }
@@ -776,14 +836,15 @@ function_registry* pointer_function_registry() {
  *
  * @return the new function registry
  */
-function_registry* string_function_registry() {
+function_registry* string_function_registry()
+{
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
   ret->name = "string";
-  ret->copy = &_string_copy;
-  ret->destroy = &_string_destroy;
-  ret->print = &_string_print;
+  ret->copy = &string_copy;
+  ret->destroy = &string_destroy;
+  ret->print = &string_print;
 
   return ret;
 }
@@ -799,14 +860,15 @@ function_registry* string_function_registry() {
  *
  * @return the new function registry
  */
-function_registry* cvector_function_registry() {
+function_registry* cvector_function_registry()
+{
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
   ret->name = "cvector";
-  ret->copy = &_cvector_copy;
-  ret->destroy = &_cvector_destroy;
-  ret->print = &_cvector_print;
+  ret->copy = &cvector_copy_reg;
+  ret->destroy = &cvector_destroy_reg;
+  ret->print = &cvector_print_reg;
 
   return ret;
 }

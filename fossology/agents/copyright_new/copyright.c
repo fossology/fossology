@@ -36,72 +36,38 @@ char token[34] = {' ','!','"','#','$','%','&','`','*','+','\'','-','.','/',':','
                   '\t',';','<','=','>','?','@','[','\\',']','^','_','{','|','}','~',0};
 
 /* ************************************************************************** */
-/* **** Limited File Scope ************************************************** */
+/* **** Local Function ****************************************************** */
 /* ************************************************************************** */
 
 /** the internal structure for a copyright */
-struct _copyright_internal {
-  /// the dictionary to search within
-  radix_tree dict;
-  /// the list of names to match
-  radix_tree name;
-  /// the set of copyright found in a particular file
-  cvector entries;
+struct copyright_internal
+{
+  radix_tree dict;  ///< the dictionary to search within
+  radix_tree name;  ///< the list of names to match
+  cvector entries;  ///< the set of copyright found in a particular file
 };
 
-struct _copy_entry_internal {
-  /// the code that was identified as a copyright
-  char text[1024];
-  /// the name that matched the entry identified as a copyright
-  char name_match[256];
-  /// the dictionary match that originally identified the entry
-  char dict_match[256];
-  /// the location in the file that this copyright starts
-  unsigned int start_byte;
-  /// the location in the file that this copyright ends
-  unsigned int end_byte;
+struct copy_entry_internal
+{
+  char text[1024];          ///< the code that was identified as a copyright
+  char name_match[256];     ///< the name that matched the entry identified as a copyright
+  char dict_match[256];     ///< the dictionary match that originally identified the entry
+  unsigned int start_byte;  ///< the location in the file that this copyright starts
+  unsigned int end_byte;    ///< the location in the file that this copyright ends
 };
-
-/*!
- * @brief attempts to find any word in the given dictionary in a string
- *
- * Trys to match any word in the given dictionary with a location in the string.
- * If found this will return the location of the word that was found. This
- * function will start looking at bufidx and stop if it reaches the end of the
- * string.
- *
- * @param dict the set of words to look for
- * @param buf the string to look in
- * @param bufidx the location to start looking at
- * @return the index of the word that was found
- */
-int _find_index(copyright copy, char* dest, char *buf, int bufidx,
-    copy_entry entry) {
-  memset(dest, '\0', sizeof(dest));
-
-  for(; buf[bufidx]; bufidx++) {
-    radix_match(copy->dict, dest, &buf[bufidx]);
-    if(radix_contains(copy->dict, dest)) {
-      strcpy(entry->dict_match, dest);
-      break;
-    }
-  }
-
-  return bufidx;
-}
 
 /**
-* @brief looks for the beginning of a line in the provided string
-*
-* will look at most 50 characters back for the beginning of a line based off of
-* the provided index. If within 50 characters it does not find the beginning of
-* the line, this will return the index 50 characters before the given index.
-*
-* @param ptext the string to search within
-* @param idx the index to base the search from
-* @return the index that is the beginning of the line.
-*/
-int _find_beginning(char *ptext, int idx)
+ * @brief looks for the beginning of a line in the provided string
+ *
+ * will look at most 50 characters back for the beginning of a line based off of
+ * the provided index. If within 50 characters it does not find the beginning of
+ * the line, this will return the index 50 characters before the given index.
+ *
+ * @param ptext the string to search within
+ * @param idx the index to base the search from
+ * @return the index that is the beginning of the line.
+ */
+int find_beginning(char *ptext, int idx)
 {
   int maxback = 50;
   int minidx = idx - maxback;
@@ -115,18 +81,18 @@ int _find_beginning(char *ptext, int idx)
 
 
 /**
-* @brief looks for the end of a line in ptext
-*
-* Looks at most 200 characters after the given index in the string. If the end
-* of the sentence or line is not within 200 characters, this will return the
-* given index plus 200 characters.
-*
-* @param ptext the string to search through
-* @param idx the index to search from
-* @param bufsize the largest valid index in the string
-* @return the location of the end of the current line or sentence
-*/
-int _find_end(char *ptext, int idx, int bufsize)
+ * @brief looks for the end of a line in ptext
+ *
+ * Looks at most 200 characters after the given index in the string. If the end
+ * of the sentence or line is not within 200 characters, this will return the
+ * given index plus 200 characters.
+ *
+ * @param ptext the string to search through
+ * @param idx the index to search from
+ * @param bufsize the largest valid index in the string
+ * @return the location of the end of the current line or sentence
+ */
+int find_end(char *ptext, int idx, int bufsize)
 {
   int maxchars = 200;
   int last = idx + maxchars;
@@ -139,20 +105,23 @@ int _find_end(char *ptext, int idx, int bufsize)
 }
 
 /**
-* @brief strips false entries out of a copyright instance
-*
-* entries that do not contain any dictionary or name information should be
-* deleted since they are false entries. This private function will get run
-* after analyze has been run.
-*
-* @param copy the copyright instance to check for false entries
-*/
-void _strip_empty_entries(copyright copy) {
+ * @brief strips false entries out of a copyright instance
+ *
+ * entries that do not contain any dictionary or name information should be
+ * deleted since they are false entries. This private function will get run
+ * after analyze has been run.
+ *
+ * @param copy the copyright instance to check for false entries
+ */
+void strip_empty_entries(copyright copy)
+{
   copyright_iterator iter;
 
-  for(iter = copyright_begin(copy); iter != copyright_end(copy); iter++) {
+  for(iter = copyright_begin(copy); iter != copyright_end(copy); iter++)
+  {
     if(*iter == NULL || strlen(copy_entry_dict(*iter)) == 0 ||
-        strlen(copy_entry_name(*iter)) == 0) {
+        strlen(copy_entry_name(*iter)) == 0)
+    {
       iter = (copyright_iterator)cvector_remove(copy->entries,
           (cvector_iterator)iter);
     }
@@ -160,17 +129,18 @@ void _strip_empty_entries(copyright copy) {
 }
 
 /**
-* @brief checks to see if a string contains a word in a dictionary
-*
-* This will tokenize the whitespace and special characters out of a sentence
-* to search for a word that is contained within a dictionary.
-*
-* @param tree the diction to search within
-* @param string the string to search within
-* @param buf a string to place the find within
-* @return the index the string was found at, otherwise the length of the string
-*/
-int _contains(radix_tree tree, char* string, char* buf) {
+ * @brief checks to see if a string contains a word in a dictionary
+ *
+ * This will tokenize the whitespace and special characters out of a sentence
+ * to search for a word that is contained within a dictionary.
+ *
+ * @param tree the diction to search within
+ * @param string the string to search within
+ * @param buf a string to place the find within
+ * @return the index the string was found at, otherwise the length of the string
+ */
+int contains_copyright(radix_tree tree, char* string, char* buf)
+{
   /* locals */
   char string_copy[strlen(string) + 1];
   char* curr;
@@ -182,8 +152,10 @@ int _contains(radix_tree tree, char* string, char* buf) {
   buf[0] = '\0';
 
   /* loop until we find a match in the dictionary */
-  while(curr != NULL) {
-    if(radix_contains(tree, curr)) {
+  while(curr != NULL)
+  {
+    if(radix_contains(tree, curr))
+    {
       strcpy(buf, curr);
       return curr - string_copy;
     }
@@ -195,19 +167,21 @@ int _contains(radix_tree tree, char* string, char* buf) {
 }
 
 /**
-* @brief Loads a file that is a list of words into a dictionary
-*
-* @param dict the diction to add the strings to
-* @param filename the file to grab the string from
-*/
-void _load_dictionary(radix_tree dict, char* filename) {
+ * @brief Loads a file that is a list of words into a dictionary
+ *
+ * @param dict the diction to add the strings to
+ * @param filename the file to grab the string from
+ */
+void load_dictionary(radix_tree dict, char* filename)
+{
   FILE* pfile;
   char str[256];
 
   pfile = fopen(filename, "r");
   assert(pfile);
 
-  while(fgets(str, LINE_LENGTH, pfile) != NULL) {
+  while(fgets(str, LINE_LENGTH, pfile) != NULL)
+  {
     str[strlen(str) - 1] = '\0';
     radix_insert(dict, str);
   }
@@ -216,13 +190,17 @@ void _load_dictionary(radix_tree dict, char* filename) {
 }
 
 /**
-* TODO doc
-*
-* @param to_copy
-*/
-void* _copy_entry_copy(void* to_copy) {
+ * @brief copy the data from the passed void* into a copyright entry
+ *
+ * This is a deep copy, any data that is pointed at will also be copied instead
+ * of simply pointed at as well
+ *
+ * @param to_copy the memory to copy
+ */
+void* copy_entry_copy(void* to_copy)
+{
   copy_entry cpy = (copy_entry)to_copy;
-  copy_entry new = (copy_entry)calloc(1,sizeof(struct _copy_entry_internal));
+  copy_entry new = (copy_entry)calloc(1,sizeof(struct copy_entry_internal));
 
   strcpy(new->text, cpy->text);
   strcpy(new->dict_match, cpy->dict_match);
@@ -234,21 +212,26 @@ void* _copy_entry_copy(void* to_copy) {
 }
 
 /**
-* TODO doc
-*
-* @param to_destroy
-*/
-void  _copy_entry_destroy(void* to_destroy) {
+ * @brief will delete the memory associated with to_destroy
+ *
+ * This is a deep destructor, all memory associated with and pointed at by
+ * to_destroy will be deallocated
+ *
+ * @param to_destroy the memory to destroy
+ */
+void  copy_entry_destroy(void* to_destroy)
+{
   free(to_destroy);
 }
 
 /**
-* TODO doc
-*
-* @param to_print
-* @param ostr
-*/
-void  _copy_entry_print(void* to_print, FILE* ostr) {
+ * @brief print the data contained in the entry to the file provided
+ *
+ * @param to_print the copy_entry that should be printed
+ * @param ostr the file pointer to print to
+ */
+void  copy_entry_print(void* to_print, FILE* ostr)
+{
   copy_entry prt = (copy_entry)to_print;
   fprintf(ostr, "%s\t%s ==>\n%s\n%d -> %d\n",
       prt->dict_match,
@@ -259,34 +242,36 @@ void  _copy_entry_print(void* to_print, FILE* ostr) {
 }
 
 /*!
-* @brief creates a function registry for a copyright entry
-*
-* This function is private to the copyright class since the copyright object is
-* responsible for managing all memory relating to these.
-*
-* @return the new function registry
-*/
-function_registry* _entry_cvector_registry() {
+ * @brief creates a function registry for a copyright entry
+ *
+ * This function is private to the copyright class since the copyright object is
+ * responsible for managing all memory relating to these.
+ *
+ * @return the new function registry
+ */
+function_registry* copy_entry_cvector_registry()
+{
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
 
   ret->name = "cvector";
-  ret->copy = &_copy_entry_copy;
-  ret->destroy = &_copy_entry_destroy;
-  ret->print = &_copy_entry_print;
+  ret->copy = &copy_entry_copy;
+  ret->destroy = &copy_entry_destroy;
+  ret->print = &copy_entry_print;
 
   return ret;
 }
 
 /**
-* @brief Initialize the data in this entry
-*
-* clean up the strings and numbers in an entry so that we don't get any
-* accidental overlap between the entries.
-*
-* @param entry the entry to initialize
-*/
-void _entry_init(copy_entry entry) {
+ * @brief Initialize the data in this entry
+ *
+ * clean up the strings and numbers in an entry so that we don't get any
+ * accidental overlap between the entries.
+ *
+ * @param entry the entry to initialize
+ */
+void copy_entry_init(copy_entry entry)
+{
   memset(entry->text, '\0', sizeof(entry->text));
   memset(entry->dict_match, '\0', sizeof(entry->dict_match));
   memset(entry->name_match, '\0', sizeof(entry->name_match));
@@ -299,41 +284,30 @@ void _entry_init(copy_entry entry) {
 /* ************************************************************************** */
 
 /**
-* the constructor for a copyright object
-*
-* @param copy the copyright object to initialize
-*/
-void copyright_init(copyright* copy) {
+ * the constructor for a copyright object
+ *
+ * @param copy the copyright object to initialize
+ */
+void copyright_init(copyright* copy)
+{
   /* call constructor for all sub objects */
-  (*copy) = (copyright)calloc(1,sizeof(struct _copyright_internal));
+  (*copy) = (copyright)calloc(1,sizeof(struct copyright_internal));
   radix_init(&((*copy)->dict));
   radix_init(&((*copy)->name));
-  cvector_init(&((*copy)->entries), _entry_cvector_registry());
+  cvector_init(&((*copy)->entries), copy_entry_cvector_registry());
 
   /* load the dictionaries */
-  _load_dictionary((*copy)->dict, "copyright.dic");
-  _load_dictionary((*copy)->name, "names.dic");
+  load_dictionary((*copy)->dict, "copyright.dic");
+  load_dictionary((*copy)->name, "names.dic");
 }
 
 /**
-* The copy constructor for the copyright object
-*
-* @param copy the copyright instance to copy into
-* @param reference the instance to copy from
-*/
-void copyright_copy(copyright* copy, copyright reference) {
-  (*copy) = (copyright)calloc(1, sizeof(struct _copyright_internal));
-  radix_copy(&((*copy)->dict), reference->dict);
-  radix_copy(&((*copy)->name), reference->name);
-  cvector_copy(&((*copy)->entries), reference->entries);
-}
-
-/**
-* the destructor for a copyright object
-*
-* @param copy
-*/
-void copyright_destroy(copyright copy) {
+ * the destructor for a copyright object
+ *
+ * @param copy
+ */
+void copyright_destroy(copyright copy)
+{
   radix_destroy(copy->dict);
   radix_destroy(copy->name);
   cvector_destroy(copy->entries);
@@ -345,35 +319,37 @@ void copyright_destroy(copyright copy) {
 /* ************************************************************************** */
 
 /**
-* @brief clear all copyright specific information
-*
-* clears the set of matches found by any previous calls to analyze and clears
-* the file_name that will be opened if analyze is called
-*
-* @param copy the copyright object to clear
-*/
-void copyright_clear(copyright copy) {
+ * @brief clear all copyright specific information
+ *
+ * clears the set of matches found by any previous calls to analyze and clears
+ * the file_name that will be opened if analyze is called
+ *
+ * @param copy the copyright object to clear
+ */
+void copyright_clear(copyright copy)
+{
   cvector_clear(copy->entries);
 }
 
 /**
-* @brief analyze a file for the copyright information
-*
-* This will open and analyze the file provided. It is important to note that
-* this function will clear any information that was previously stored in copy.
-* All information that is needed should be extracted from copy after a call to
-* analyze before calling analyze again.
-*
-* @param copy the copyright instance that will be analyzed
-* @param file_name the name of the file to be openned and analyzed
-*/
-void copyright_analyze(copyright copy, FILE* istr) {
+ * @brief analyze a file for the copyright information
+ *
+ * This will open and analyze the file provided. It is important to note that
+ * this function will clear any information that was previously stored in copy.
+ * All information that is needed should be extracted from copy after a call to
+ * analyze before calling analyze again.
+ *
+ * @param copy the copyright instance that will be analyzed
+ * @param file_name the name of the file to be openned and analyzed
+ */
+void copyright_analyze(copyright copy, FILE* istr)
+{
   /* local variables */
   char buf[MAXBUF];
   int i, bufidx, bufsize;
   int beg = 0, end = 0;
   char temp[1024];
-  copy_entry entry = (copy_entry)calloc(1, sizeof(struct _copy_entry_internal));
+  copy_entry entry = (copy_entry)calloc(1, sizeof(struct copy_entry_internal));
 
   assert(copy);
   assert(istr);
@@ -390,24 +366,26 @@ void copyright_analyze(copyright copy, FILE* istr) {
   buf[bufsize-1] = 0;
 
   /* convert file to lower case and validate any characters */
-  for (i=0; i<bufsize; i++) {
+  for (i=0; i<bufsize; i++)
+  {
     buf[i] = tolower(buf[i]);
-    if(buf[i] < 0) {
+    if(buf[i] < 0)
       buf[i] = 127;
-    }
   }
 
   /* look through the whole file for something in the dictionary */
-  for(bufidx = 0; bufidx < bufsize; bufidx = end+1) {
-    _entry_init(entry);
-    bufidx += _contains(copy->dict, &buf[bufidx], temp);
-    if(bufidx < bufsize) {
+  for(bufidx = 0; bufidx < bufsize; bufidx = end+1)
+  {
+    copy_entry_init(entry);
+    bufidx += contains_copyright(copy->dict, &buf[bufidx], temp);
+    if(bufidx < bufsize)
+    {
       /* copy the dictionary entry into the copyright entry */
       strcpy(entry->dict_match, temp);
 
       /* grab the begging and end of the match */
-      beg = _find_beginning(buf, bufidx);
-      end = _find_end(buf, bufidx, bufsize);
+      beg = find_beginning(buf, bufidx);
+      end = find_end(buf, bufidx, bufsize);
 
       /* copy the match into a new entry */
       memcpy(entry->text, &buf[beg+1], end-beg);
@@ -416,34 +394,37 @@ void copyright_analyze(copyright copy, FILE* istr) {
       entry->end_byte = end;
 
       /* push the string onto the list and increment bufidx */
-      if(_contains(copy->name, entry->text, temp)) {
+      if(contains_copyright(copy->name, entry->text, temp))
+      {
         strcpy(entry->name_match, temp);
         cvector_push_back(copy->entries, entry);
       }
     }
   }
 
-  _strip_empty_entries(copy);
+  strip_empty_entries(copy);
   free(entry);
 }
 
 /**
-* @brief adds a new name to the diction of names
-*
-* @param copy the copyright instance to add to
-* @param name the name to add to the copyright instance
-*/
-void copyright_add_name(copyright copy, const char* name) {
+ * @brief adds a new name to the diction of names
+ *
+ * @param copy the copyright instance to add to
+ * @param name the name to add to the copyright instance
+ */
+void copyright_add_name(copyright copy, const char* name)
+{
   radix_insert(copy->name, name);
 }
 
 /**
-* @brief adds a new entry to the search dictionary
-*
-* @param copy the copyright instance to add to
-* @param entry the string entry to add to the copyright instance
-*/
-void copyright_add_entry(copyright copy, const char* entry) {
+ * @brief adds a new entry to the search dictionary
+ *
+ * @param copy the copyright instance to add to
+ * @param entry the string entry to add to the copyright instance
+ */
+void copyright_add_entry(copyright copy, const char* entry)
+{
   radix_insert(copy->dict, entry);
 }
 
@@ -452,90 +433,97 @@ void copyright_add_entry(copyright copy, const char* entry) {
 /* ************************************************************************** */
 
 /**
-* @brief gets an iterator to the beginning of the set of matches
-*
-* gets an iterator to the beginning of the set of matches that this copyright
-* has found.
-*
-* @param copy the copyright to get the beginning of
-* @return an iterator to the beginning of the copyright's matches
-*/
-copyright_iterator copyright_begin(copyright copy) {
+ * @brief gets an iterator to the beginning of the set of matches
+ *
+ * gets an iterator to the beginning of the set of matches that this copyright
+ * has found.
+ *
+ * @param copy the copyright to get the beginning of
+ * @return an iterator to the beginning of the copyright's matches
+ */
+copyright_iterator copyright_begin(copyright copy)
+{
   return (copyright_iterator)cvector_begin(copy->entries);
 }
 
 /**
-* @brief gets an iterator just past the end of the set of matches
-*
-* gets an iterator just pas the end of the set of matches that this copyright
-* has found.
-*
-* @param copy the copyright to get the beginning of
-* @return an iterator just past the end of the copyright's matches
-*/
-copyright_iterator copyright_end(copyright copy) {
+ * @brief gets an iterator just past the end of the set of matches
+ *
+ *  gets an iterator just pas the end of the set of matches that this copyright
+ * has found.
+ *
+ * @param copy the copyright to get the beginning of
+ * @return an iterator just past the end of the copyright's matches
+ */
+copyright_iterator copyright_end(copyright copy)
+{
   return (copyright_iterator)cvector_end(copy->entries);
 }
 
 /**
-* @brief bounds checked access function, gets the match at index
-*
-* @param copy the copyright object to grab from
-* @param index the index to grab
-* @return the match at index
-*/
-char* copyright_at(copyright copy, int index) {
+ * @brief bounds checked access function, gets the match at index
+ *
+ * @param copy the copyright object to grab from
+ * @param index the index to grab
+ * @return the match at index
+ */
+char* copyright_at(copyright copy, int index)
+{
   return (char*)cvector_at(copy->entries, index);
 }
 
 /**
-* @brief simple access function, gets the match at index
-*
-* @param copy the copyright object to grab from
-* @param index the index to grab
-* @return the match at index
-*/
-char* copyright_get(copyright copy, int index) {
+ * @brief simple access function, gets the match at index
+ *
+ * @param copy the copyright object to grab from
+ * @param index the index to grab
+ * @return the match at index
+ */
+char* copyright_get(copyright copy, int index)
+{
   return (char*)cvector_get(copy->entries, index);
 }
 
 /**
-* @brief gets the number of copyrights
-*
-* retrieves the number of copyrights that were found in the previous call to
-* copyright analyze(). If a call to copyright_analyze() has not been made this
-* will return 0.
-*
-* @param copy the relevant copyright instance
-* @return the number of copyrights
-*/
-int copyright_size(copyright copy) {
+ * @brief gets the number of copyrights
+ *
+ * retrieves the number of copyrights that were found in the previous call to
+ * copyright analyze(). If a call to copyright_analyze() has not been made this
+ * will return 0.
+ *
+ * @param copy the relevant copyright instance
+ * @return the number of copyrights
+ */
+int copyright_size(copyright copy)
+{
   return cvector_size(copy->entries);
 }
 
 /**
-* @brief gets a cvector containing the elements in the matching dictionary
-*
-* returns a cvector that contains all of the string contained within the
-* dictionary that is used to match copyrights.
-*
-* @param copy the copygith to get the dictionary from
-* @param dict the cvector that will contain the dictionary
-*/
-void copyright_dictionary(copyright copy, cvector dict) {
+ * @brief gets a cvector containing the elements in the matching dictionary
+ *
+ * returns a cvector that contains all of the string contained within the
+ * dictionary that is used to match copyrights.
+ *
+ * @param copy the copygith to get the dictionary from
+ * @param dict the cvector that will contain the dictionary
+ */
+void copyright_dictionary(copyright copy, cvector dict)
+{
   radix_copy_to(copy->dict, dict);
 }
 
 /**
-* @brief gets a cvector containing the elements in the name dictionary
-*
-* returns a cvector that contains all of the string contained within the
-* dictionary that is used to match names in copyrights.
-*
-* @param copy the copygith to get the dictionary from
-* @param name the cvector that will contain the dictionary
-*/
-void copyright_names(copyright copy, cvector name) {
+ * @brief gets a cvector containing the elements in the name dictionary
+ *
+ * returns a cvector that contains all of the string contained within the
+ * dictionary that is used to match names in copyrights.
+ *
+ * @param copy the copygith to get the dictionary from
+ * @param name the cvector that will contain the dictionary
+ */
+void copyright_names(copyright copy, cvector name)
+{
   radix_copy_to(copy->name, name);
 }
 
@@ -544,46 +532,51 @@ void copyright_names(copyright copy, cvector name) {
 /* ************************************************************************** */
 
 /**
-* @brief gets the text of the copyright entry
-*
-* @param entry the entry to get the text from
-*/
-char* copy_entry_text(copy_entry entry) {
+ * @brief gets the text of the copyright entry
+ *
+ * @param entry the entry to get the text from
+ */
+char* copy_entry_text(copy_entry entry)
+{
   return entry->text;
 }
 
 /**
-* @brief gets the name that is associated with this copyright entry
-*
-* @param entry the entry to get the name from
-*/
-char* copy_entry_name(copy_entry entry) {
+ * @brief gets the name that is associated with this copyright entry
+ *
+ * @param entry the entry to get the name from
+ */
+char* copy_entry_name(copy_entry entry)
+{
   return entry->name_match;
 }
 
 /**
-* @brief gets the dictionary entry that matches this entry
-*
-* @param the entry to get the dictionary entry from
-*/
-char* copy_entry_dict(copy_entry entry) {
+ * @brief gets the dictionary entry that matches this entry
+ *
+ * @param the entry to get the dictionary entry from
+ */
+char* copy_entry_dict(copy_entry entry)
+{
   return entry->dict_match;
 }
 
 /**
-* @brief gets the number of the start byte for the text of the entry
-*
-* @param the entry to get the start byte from
-*/
-unsigned int copy_entry_start(copy_entry entry) {
+ * @brief gets the number of the start byte for the text of the entry
+ *
+ * @param the entry to get the start byte from
+ */
+unsigned int copy_entry_start(copy_entry entry)
+{
   return entry->start_byte;
 }
 
 /**
-* @brief gets the number of the end byte for the text of the entry
-*
-* @param the entry to get the end byte from
-*/
-unsigned int copy_entry_end(copy_entry entry) {
+ * @brief gets the number of the end byte for the text of the entry
+ *
+ * @param the entry to get the end byte from
+ */
+unsigned int copy_entry_end(copy_entry entry)
+{
   return entry->end_byte;
 }

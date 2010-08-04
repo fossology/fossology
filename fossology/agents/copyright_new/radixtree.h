@@ -33,7 +33,7 @@
  *   radix_tree t;
  *   radix_init(&t);
  */
-typedef struct _tree_internal* radix_tree;
+typedef struct tree_internal* radix_tree;
 
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */

@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  *   copyright copy;
  *   copyright_init(copy)
  */
-typedef struct _copyright_internal* copyright;
+typedef struct copyright_internal* copyright;
 
 /**
  * A copyright that the copyright object has identified in a file
@@ -47,7 +47,7 @@ typedef struct _copyright_internal* copyright;
  * this struct. All the memory should be correctly managed by the copyright
  * struct and will get cleaned up when analyze or copyright_destroy is called.
  */
-typedef struct _copy_entry_internal* copy_entry;
+typedef struct copy_entry_internal* copy_entry;
 
 /**
  * An iterator to iterate across the copyright matches within a copyright
@@ -65,7 +65,6 @@ typedef copy_entry* copyright_iterator;
 /* ************************************************************************** */
 
 void copyright_init(copyright* copy);
-void copyright_copy(copyright* copy, copyright reference);
 void copyright_destroy(copyright copy);
 
 /* ************************************************************************** */
@@ -90,7 +89,7 @@ void copyright_dictionary(copyright copy, cvector dict);
 void copyright_names(copyright copy, cvector name);
 
 /* ************************************************************************** */
-/* **** Entry Accessor Functions ******************************************** */
+/* **** Copy Entry Accessor Functions *************************************** */
 /* ************************************************************************** */
 char* copy_entry_text(copy_entry entry);
 char* copy_entry_name(copy_entry entry);

@@ -1,4 +1,4 @@
-/***************************************************************
+/* **************************************************************
 Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
@@ -14,7 +14,7 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-***************************************************************/
+************************************************************** */
 
 /* std library includes */
 #include <unistd.h>
@@ -42,27 +42,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define AGENT_NAME "copyright"       ///< the name of the agent, used to get agent key
 #define AGENT_DESC "copyright agent" ///< what program this is
 
-/** the file to print information to */
-FILE* cout;
-/** the file to print errors to */
-FILE* cerr;
-/** the file to read from */
-FILE* cin;
-
-int verbose = 0;                ///< turn on or off dumping to debug files
-int db_connected = 0;           ///< indicates if the database is connected
-
-/** the location of the labeled and raw testing data */
-char* test_dir = "testdata/testdata";
+FILE* cout;                           ///< the file to print information to
+FILE* cerr;                           ///< the file to print errors to
+FILE* cin;                            ///< the file to read from
+int verbose = 0;                      ///< turn on or off dumping to debug files
+int db_connected = 0;                 ///< indicates if the database is connected
+char* test_dir = "testdata/testdata"; ///< the location of the labeled and raw testing data
 
 /**
  * @brief prints the usage statement for the copyright agent
  *
- *
- *
- * @param argv
+ * @param argv the command line namme of the function
  */
-void copyright_usage(char* arg) {
+void copyright_usage(char* arg)
+{
   fprintf(cout, "Usage: %s [options]\n", arg);
   fprintf(cout, "  Options are:\n");
   fprintf(cout, "  -d  :: Turns verbose on, matches printed to Matches file.\n");
@@ -84,31 +77,35 @@ void copyright_usage(char* arg) {
  * @param rhs a string to search within
  * @return the length of the longest common substring
  */
-int longest_common(char* dst, char* lhs, char* rhs) {
+int longest_common(char* dst, char* lhs, char* rhs)
+{
   int result[strlen(lhs)][strlen(rhs)], i, j;
   int beg = 0, ths = 0, max = 0;
 
   memset(result, 0, sizeof(result));
   dst[0] = '\0';
 
-  for(i = 0; i < strlen(lhs); i++) {
-    for(j = 0; j < strlen(rhs); j++) {
-      if(lhs[i] == rhs[j]) {
-        if(i == 0 || j == 0) {
-          result[i][j] = 1;
-        } else {
-          result[i][j] = result[i - 1][j - 1] + 1;
-        }
+  for(i = 0; i < strlen(lhs); i++)
+  {
+    for(j = 0; j < strlen(rhs); j++)
+    {
+      if(lhs[i] == rhs[j])
+      {
+        if(i == 0 || j == 0) result[i][j] = 1;
+        else                 result[i][j] = result[i - 1][j - 1] + 1;
 
-        if(result[i][j] > max) {
+        if(result[i][j] > max)
+        {
           max = result[i][j];
           ths = i - result[i][j] + 1;
           // the current substring is still hte longest found
-          if(beg == ths) {
+          if(beg == ths)
+          {
             strncat(dst, lhs + i, 1);
           }
           // a new longest common substring has been found
-          else {
+          else
+          {
             beg = ths;
             strncpy(dst, lhs + beg, (i + 1) - beg);
           }
@@ -130,7 +127,8 @@ int longest_common(char* dst, char* lhs, char* rhs) {
  * containing all matches that the copyright agent found, all the things that it
  * didn't find, and all of the false positives.
  */
-void run_test_files(copyright copy) {
+void run_test_files(copyright copy)
+{
   /* locals */
   cvector compare;
   copyright_iterator iter;
@@ -151,7 +149,8 @@ void run_test_files(copyright copy) {
   p_out = fopen("False_Positives", "w");
 
   /* big problem if any of the log files didn't open correctly */
-  if(!m_out || !n_out || !p_out) {
+  if(!m_out || !n_out || !p_out)
+  {
     fprintf(cerr, "ERROR: did not successfully open one of the log files\n");
     fprintf(cerr, "ERROR: the files that needed to be opened were:\n");
     fprintf(cerr, "ERROR: Matches, False_Positives, False_Negatives\n");
@@ -159,12 +158,14 @@ void run_test_files(copyright copy) {
   }
 
   /* loop over every file in the test directory */
-  for(i = 0; i < TESTFILE_NUMBER; i++) {
+  for(i = 0; i < TESTFILE_NUMBER; i++)
+  {
     sprintf(file_name, "%s%d_raw", test_dir, i);
 
     /* attempt to open the labeled test file */
     istr = fopen(file_name, "r");
-    if(!istr) {
+    if(!istr)
+    {
       fprintf(cerr, "ERROR: Must run testing from correct directory. The\n");
       fprintf(cerr, "ERROR: correct directory is installation dependent but\n");
       fprintf(cerr, "ERROR: the working directory should include the folder:\n");
@@ -178,22 +179,26 @@ void run_test_files(copyright copy) {
     matches = 0;
 
     /* set everything in the buffer to lower case */
-    for(first = buffer; *first; first++) {
+    for(first = buffer; *first; first++)
+    {
       *first = tolower(*first);
     }
 
     /* loop through and find all <s>...</s> tags */
     loc = buffer;
-    while((first = strstr(loc, "<s>")) != NULL) {
+    while((first = strstr(loc, "<s>")) != NULL)
+    {
       last = strstr(loc, "</s>");
 
-      if(last == NULL) {
+      if(last == NULL)
+      {
         fprintf(cerr, "ERROR: unmatched \"<s>\"\n");
         fprintf(cerr, "ERROR: in file: \"%s\"\n", file_name);
         exit(-1);
       }
 
-      if(last <= first) {
+      if(last <= first)
+      {
         fprintf(cerr, "ERROR: unmatched \"</s>\"\n");
         fprintf(cerr, "ERROR: in file: \"%s\"\n", file_name);
         exit(-1);
@@ -210,7 +215,8 @@ void run_test_files(copyright copy) {
     fclose(istr);
     file_name[strlen(file_name) - 4] = '\0';
     istr = fopen(file_name, "r");
-    if(!istr) {
+    if(!istr)
+    {
       fprintf(cerr, "ERROR: Unmatched file in the test directory");
       fprintf(cerr, "ERROR: File with no match: \"%s\"_raw\n", file_name);
       fprintf(cerr, "ERROR: File that caused error: \"%s\"\n", file_name);
@@ -221,7 +227,8 @@ void run_test_files(copyright copy) {
     fclose(istr);
 
     /* loop over every match that the copyright object found */
-    for(iter = copyright_begin(copy); iter != copyright_end(copy); iter++) {
+    for(iter = copyright_begin(copy); iter != copyright_end(copy); iter++)
+    {
       cvector_iterator best = cvector_begin(compare);
       char score[2048];
       char dst[2048];
@@ -235,8 +242,10 @@ void run_test_files(copyright copy) {
       fprintf(m_out, "TEXT[%s]\n",copy_entry_text(*iter));
 
       /* loop over the vector looking for matches */
-      for(curr = cvector_begin(compare); curr != cvector_end(compare); curr++) {
-        if(longest_common(dst, copy_entry_text(*iter), (char*)*curr) > strlen(score)) {
+      for(curr = cvector_begin(compare); curr != cvector_end(compare); curr++)
+      {
+        if(longest_common(dst, copy_entry_text(*iter), (char*)*curr) > strlen(score))
+        {
           strcpy(score, dst);
           best = curr;
         }
@@ -244,10 +253,13 @@ void run_test_files(copyright copy) {
 
       /* log the entry as found if it matched something in compare */
       if(cvector_size(compare) != 0 &&
-          (strcmp(copy_entry_dict(*iter), "by") || strlen(score) > THRESHOLD)) {
+          (strcmp(copy_entry_dict(*iter), "by") || strlen(score) > THRESHOLD))
+      {
         cvector_remove(compare, best);
         matches++;
-      } else {
+      }
+      else
+      {
         fprintf(p_out, "====%s================================\n", file_name);
         fprintf(p_out, "DICT: %s\tNAME: %s\n",copy_entry_dict(*iter), copy_entry_name(*iter));
         fprintf(p_out, "TEXT[%s]\n",copy_entry_text(*iter));
@@ -255,7 +267,8 @@ void run_test_files(copyright copy) {
     }
 
     /* log all the false negatives */
-    for(curr = cvector_begin(compare); curr != cvector_end(compare); curr++) {
+    for(curr = cvector_begin(compare); curr != cvector_end(compare); curr++)
+    {
       fprintf(n_out, "====%s================================\n", file_name);
       fprintf(n_out, "%s\n", (char*)*curr);
     }
@@ -295,7 +308,8 @@ void run_test_files(copyright copy) {
  * @param copy the copyright instance to use to perform the analysis
  * @param file_list the list of files to analyze
  */
-void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk) {
+void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
+{
   /* locals */
   char sql[1024];
   extern int HBItemsProcessed;
@@ -311,9 +325,11 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk) 
   input_fp = NULL;
 
   /* if the verbose flag has been set, we need to open the relevant files */
-  if(verbose) {
+  if(verbose)
+  {
     mout = fopen("Matches", "w");
-    if(!mout) {
+    if(!mout)
+    {
       fprintf(cerr, "FATAL: could not open Matches for logging\n");
       fflush(cerr);
       exit(-1);
@@ -322,7 +338,8 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk) 
 
   /* attempt to open the file */
   input_fp = fopen((char*)pair_first(curr), "rb");
-  if(!input_fp) {
+  if(!input_fp)
+  {
     fprintf(cerr, "FATAL: pfile %d Copyright Agent unable to open file %s\n",
         (unsigned int)pair_second(curr), (char*)pair_first(curr));
     fflush(cerr);
@@ -333,16 +350,20 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk) 
   copyright_analyze(copy, input_fp);
 
   /* if running command line, print file name */
-  if(*(int*)pair_second(curr) < 0) {
+  if(*(int*)pair_second(curr) < 0)
+  {
     fprintf(cout, "%s\n", (char*)pair_first(curr));
   }
 
   /* loop across the found copyrights */
-  if(copyright_size(copy) > 0) {
-    for(finds = copyright_begin(copy); finds != copyright_end(copy); finds++) {
+  if(copyright_size(copy) > 0)
+  {
+    for(finds = copyright_begin(copy); finds != copyright_end(copy); finds++)
+    {
       copy_entry entry = (copy_entry)*finds;
 
-      if(verbose) {
+      if(verbose)
+      {
         fprintf(mout, "=== %s ==============================================\n",
             (char*)pair_first(curr));
         fprintf(mout, "DICT: %s\nNAME: %s\nTEXT[%s]\n",
@@ -351,33 +372,41 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk) 
             copy_entry_text(entry));
       }
 
-      if(*(int*)pair_second(curr) >= 0) {
+      if(*(int*)pair_second(curr) >= 0)
+      {
         // TODO there are several things in this sql that seem unnecessary now
         sprintf(sql, insert_copyright, agent_pk, *(int*)pair_second(curr),
             copy_entry_start(entry), copy_entry_end(entry),
             copy_entry_text(entry), "statement");
         pgResult = PQexec(pgConn, sql);
 
-        if (PQresultStatus(pgResult) != PGRES_TUPLES_OK) {
+        if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
+        {
           fprintf(cerr, "ERROR: %s:%d, %s\nOn: %s\n",
               AGENT_DESC, __LINE__, PQresultErrorMessage(pgResult), sql);
           PQclear(pgResult);
           exit(-1);
         }
-      } else {
+      }
+      else
+      {
         fprintf(cout, "\t[%d:%d] %s",
             copy_entry_start(entry), copy_entry_end(entry),
             copy_entry_text(entry));
-        if(copy_entry_text(entry)[strlen(copy_entry_text(entry)) - 1] != '\n') {
+        if(copy_entry_text(entry)[strlen(copy_entry_text(entry)) - 1] != '\n')
+        {
           fprintf(cout, "\n");
         }
       }
     }
-  } else if(*(int*)pair_second(curr) >= 0) {
+  }
+  else if(*(int*)pair_second(curr) >= 0)
+  {
     sprintf(sql, insert_no_copyright, agent_pk, *(int*)pair_second(curr));
     pgResult = PQexec(pgConn, sql);
 
-    if (PQresultStatus(pgResult) != PGRES_TUPLES_OK) {
+    if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
+    {
       fprintf(cerr, "ERROR: %s:%d, %s\nOn: %s\n",
           AGENT_DESC, __LINE__, PQresultErrorMessage(pgResult), sql);
       PQclear(pgResult);
@@ -386,9 +415,11 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk) 
   }
 
   /* we are finished with this file, close it and incriment heart beat */
-  if(verbose) {
+  if(verbose)
+  {
     fclose(mout);
   }
+
   fclose(input_fp);
   Heartbeat(++HBItemsProcessed);
 }
@@ -403,7 +434,8 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk) 
  * @param pgConn the connection to the database
  * @return 1 if the table exists at the end of the function, 0 otherwise
  */
-int check_copyright_table(PGconn* pgConn) {
+int check_copyright_table(PGconn* pgConn)
+{
   PGresult* pgResult = PQexec(pgConn, check_database_table);
 
 
@@ -502,8 +534,10 @@ int main(int argc, char** argv)
   copyright_init(&copy);
 
   /* parse the command line options */
-  while((c = getopt(argc, argv, "dc:ti")) != -1) {
-    switch(c) {
+  while((c = getopt(argc, argv, "dc:ti")) != -1)
+  {
+    switch(c)
+    {
       case 'd': /* debugging */
         verbose = 1;
         break;
@@ -529,22 +563,24 @@ int main(int argc, char** argv)
         }
         DBclose(DataBase);
         return 0;
-      default:
+      default: /* error, print usage */
         copyright_usage(argv[0]);
-        break;
+        return -1;
     }
   }
 
   /* if there are no files in the file list then the agent is begin run from */
   /* the scheduler, open the database and grab the files to be analyzed      */
-  if(num_files == 0) {
+  if(num_files == 0)
+  {
     /* create the heartbeat */
     signal(SIGALRM, ShowHeartbeat);
     alarm(AlarmSecs);
 
     /* open the database */
     DataBase = DBopen();
-    if(!DataBase) {
+    if(!DataBase)
+    {
       fprintf(cerr, "FATAL: Copyright agent unable to connect to database.\n");
       exit(-1);
     }
@@ -555,14 +591,16 @@ int main(int argc, char** argv)
     db_connected = 1;
     agent_pk = GetAgentKey(DataBase, AGENT_NAME, 0, "", AGENT_DESC);
 
-    while(fgets(input, FILENAME_MAX, cin) != NULL) {
+    while(fgets(input, FILENAME_MAX, cin) != NULL)
+    {
       upload_pk = atol(input);
 
       sprintf(sql, fetch_pfile, upload_pk, agent_pk);
       pgResult = PQexec(pgConn, sql);
       num_files = PQntuples(pgResult);
 
-      for(i = 0; i < num_files; i++) {
+      for(i = 0; i < num_files; i++)
+      {
         pair_set_first(curr, PQgetvalue(pgResult, i, PQfnumber(pgResult, "pfilename")));
         pair_set_second(curr, PQgetvalue(pgResult, i, PQfnumber(pgResult, "pfile_pk")));
         perform_analysis(pgConn, copy, curr, agent_pk);
@@ -574,7 +612,8 @@ int main(int argc, char** argv)
     pair_destroy(curr);
   }
 
-  if(db_connected) {
+  if(db_connected)
+  {
     DBclose(DataBase);
   }
 
