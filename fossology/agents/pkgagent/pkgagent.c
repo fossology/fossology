@@ -691,27 +691,28 @@ int	GetMetadataDebBinary	(struct debpkginfo *pi)
 	     EscapeString(value, pi->source, sizeof(pi->source));
     }
     if (!strcasecmp(field, "Depends")) {
-       char *depends = NULL;
-       char tempvalue[MAXCMD];
-       int size,i;
-       size = 0;
-
-       strncpy(tempvalue, value, sizeof(tempvalue));
-       depends = strtok(value, ",");
-       while (depends && (depends[0] != '\0')) {
-         depends = strtok(NULL, ",");
-         size++;
-       }
-       if (Verbose) { printf("SIZE:%d\n", size);}
-       
-       pi->depends = calloc(size, sizeof(char *));
-       pi->depends[0] = calloc(256, sizeof(char));
-       strcpy(pi->depends[0],strtok(tempvalue,","));
-       for (i=1;i<size;i++){
-         pi->depends[i] = calloc(256, sizeof(char));
-         strcpy(pi->depends[i],strtok(NULL, ","));
-       }
-       pi->dep_size = size;
+      char *depends = NULL;
+      char tempvalue[MAXCMD];
+      int size,i;
+      size = 0;
+      if (value[0] != '\0'){
+        strncpy(tempvalue, value, sizeof(tempvalue));
+        depends = strtok(value, ",");
+        while (depends && (depends[0] != '\0')) {
+          depends = strtok(NULL, ",");
+          size++;
+        }
+        if (Verbose) { printf("SIZE:%d\n", size);}
+        
+        pi->depends = calloc(size, sizeof(char *));
+        pi->depends[0] = calloc(256, sizeof(char));
+        strcpy(pi->depends[0],strtok(tempvalue,","));
+        for (i=1;i<size;i++){
+          pi->depends[i] = calloc(256, sizeof(char));
+          strcpy(pi->depends[i],strtok(NULL, ","));
+        }
+        pi->dep_size = size;
+      }
     }
   }
   if (temp!=NULL)
@@ -840,7 +841,7 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
        char tempvalue[MAXCMD];
        int size,i;
        size = 0;
-
+       if (value[0] != '\0'){
        strncpy(tempvalue, value, sizeof(tempvalue));
        depends = strtok(value, ",");
        while (depends && (depends[0] != '\0')) {
@@ -857,6 +858,7 @@ int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
          strcpy(pi->depends[i],strtok(NULL, ","));
        }
        pi->dep_size = size;
+       }
     }
   }
 
@@ -891,7 +893,7 @@ int	main	(int argc, char *argv[])
   glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
 
-  extern long HBItemsProcessed;
+  //extern long HBItemsProcessed;
 
   DB = DBopen();
   if (!DB)
@@ -972,7 +974,7 @@ int	main	(int argc, char *argv[])
 	  /* Deal with the other package*/
 	}
 
-	Heartbeat(++HBItemsProcessed);
+	//Heartbeat(++HBItemsProcessed);
 
         printf("OK\n");
         fflush(stdout);
