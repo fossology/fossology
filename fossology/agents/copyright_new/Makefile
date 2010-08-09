@@ -19,7 +19,7 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpcre
 EXE = copyright
 
 SOURCE = cvector.c \

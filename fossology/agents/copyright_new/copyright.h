@@ -25,6 +25,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 /**
+ * an enum that allows the copyright object to identify what the type of the
+ * statement that was found is.
+ */
+enum copy_entry_type {
+  copyright_s = 0,//!< copyright_s
+  email_s = 1,    //!< email_s
+  url_s = 2,      //!< url_s
+};
+
+/**
  * The copyright datatype
  *
  * to create:
@@ -73,6 +83,7 @@ void copyright_destroy(copyright copy);
 
 void copyright_clear(copyright copy);
 void copyright_analyze(copyright copy, FILE* file_name);
+void copyright_email_url(copyright copy, char* file);
 void copyright_add_name(copyright copy, const char* name);
 void copyright_add_entry(copyright copy, const char* entry);
 
@@ -96,5 +107,6 @@ char* copy_entry_name(copy_entry entry);
 char* copy_entry_dict(copy_entry entry);
 unsigned int copy_entry_start(copy_entry entry);
 unsigned int copy_entry_end(copy_entry entry);
+int copy_entry_contains(copy_entry src, copy_entry dst);
 
 #endif /* COPYRIGHT_H_INCLUDE */

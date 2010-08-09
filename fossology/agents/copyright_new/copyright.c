@@ -23,14 +23,31 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <assert.h>
 #include <ctype.h>
 
+/* other library includes */
+#include <pcre.h>
+
 /* local includes */
 #include <radixtree.h>
 #include <copyright.h>
+#include <cvector.h>
 
-/** max bytes to scan */
-#define MAXBUF 1024*1024
-/** the max length of a line in a file */
-#define LINE_LENGTH 256
+#define MAXBUF 1024*1024  ///< max bytes to scan
+#define LINE_LENGTH 256   ///< the max length of a line in a file
+
+/** regular expression to find email statements in natural language */
+char* email_regex = "[\\<\\(]?[A-Za-z0-9\\-_\\.\\+]{1,100}@[A-Za-z0-9\\-_\\.\\+]{1,100}\\.[A-Za-z]{1,4}[\\>\\)]?(?C1)";
+/** regular expression to find url statements in natural language */
+char* url_regex =
+       "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s]) | \
+        (?:[a-z\\.\\_\\-]+\\.(?: \
+            com|edu|biz|gov|int|info|mil|net|org|me \
+            |mobi|us|ca|mx|ag|bz|gs|ms|tc|vg|eu|de \
+            |it|fr|nl|am|at|be|asia|cc|in|nu|tv|tw \
+            |jp|[a-z][a-z]\\.[a-z][a-z] \
+        )) # some.thing.(com or edu or ...) \
+        (?:\\:\\d+)? # port number \
+        (?:\\/[^\\s\\<]*[^\\<\\.\\,\\s]?)? \
+        (?C2)";
 /** the list of letter that will be removed when matching to a radix tree */
 char token[34] = {' ','!','"','#','$','%','&','`','*','+','\'','-','.','/',':','\n',',',
                   '\t',';','<','=','>','?','@','[','\\',']','^','_','{','|','}','~',0};
@@ -42,18 +59,23 @@ char token[34] = {' ','!','"','#','$','%','&','`','*','+','\'','-','.','/',':','
 /** the internal structure for a copyright */
 struct copyright_internal
 {
-  radix_tree dict;  ///< the dictionary to search within
-  radix_tree name;  ///< the list of names to match
-  cvector entries;  ///< the set of copyright found in a particular file
+  radix_tree dict;        ///< the dictionary to search within
+  radix_tree name;        ///< the list of names to match
+  cvector entries;        ///< the set of copyright found in a particular file
+  pcre* email_re;         ///< regex for finding emails
+  pcre* url_re;           ///< the regex for finding emails
+  const char* reg_error;  ///< for regular expression error messages
+  int reg_error_offset;   ///< for regex error offsets
 };
 
 struct copy_entry_internal
 {
-  char text[1024];          ///< the code that was identified as a copyright
-  char name_match[256];     ///< the name that matched the entry identified as a copyright
-  char dict_match[256];     ///< the dictionary match that originally identified the entry
-  unsigned int start_byte;  ///< the location in the file that this copyright starts
-  unsigned int end_byte;    ///< the location in the file that this copyright ends
+  char text[1024];            ///< the code that was identified as a copyright
+  char name_match[256];       ///< the name that matched the entry identified as a copyright
+  char dict_match[256];       ///< the dictionary match that originally identified the entry
+  unsigned int start_byte;    ///< the location in the file that this copyright starts
+  unsigned int end_byte;      ///< the location in the file that this copyright ends
+  enum copy_entry_type type;  ///< the type of entry that was found
 };
 
 /**
@@ -279,6 +301,66 @@ void copy_entry_init(copy_entry entry)
   entry->end_byte = 0;
 }
 
+/**
+ * TODO
+ *
+ * @param info
+ * @return
+ */
+int copyright_callout(pcre_callout_block* info)
+{
+  /* locals */
+  char temp[1024];
+  memset(temp, 0, sizeof(temp));
+  copy_entry new_entry = (copy_entry)calloc(1, sizeof(struct copy_entry_internal));
+  copy_entry prev;
+  cvector data = (cvector)info->callout_data;
+
+  /* initialize memory */
+  copy_entry_init(new_entry);
+
+  /* copy information into the entry */
+  strncpy(new_entry->text,
+      &(info->subject[info->start_match]),
+      info->current_position - info->start_match);
+  new_entry->start_byte = info->start_match;
+  new_entry->end_byte = info->current_position;
+
+  /* copy the type that was found into the entry */
+  switch(info->callout_number)
+  {
+    case(1) :
+      strcpy(new_entry->name_match, "email");
+      strcpy(new_entry->dict_match, "email");
+      break;
+    case(2) :
+      strcpy(new_entry->name_match, "url");
+      strcpy(new_entry->dict_match, "url");
+      break;
+  }
+
+  /* only log the new entry if it wasn't already located by the regex */
+  prev = cvector_get(data, cvector_size(data) - 1);
+  if(cvector_size(data) != 0 &&
+      (!strcmp(prev->dict_match, "email") || !strcmp(prev->dict_match, "url")))
+  {
+    if(!(prev->start_byte <= new_entry->start_byte && prev->end_byte >= new_entry->end_byte))
+    {
+      cvector_push_back(data, new_entry);
+    }
+  }
+  else
+  {
+    cvector_push_back(data, new_entry);
+  }
+
+  /* free up memory */
+  free(new_entry);
+
+  /* force the pcre_exec function to continue searching */
+  return 1;
+}
+
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
@@ -299,6 +381,25 @@ void copyright_init(copyright* copy)
   /* load the dictionaries */
   load_dictionary((*copy)->dict, "copyright.dic");
   load_dictionary((*copy)->name, "names.dic");
+
+  (*copy)->reg_error_offset = 0;
+
+  /* compile the regular expressions */
+  (*copy)->email_re = pcre_compile(
+      email_regex,
+      PCRE_CASELESS,
+      &(*copy)->reg_error,
+      &(*copy)->reg_error_offset,
+      NULL);
+  (*copy)->url_re   = pcre_compile(
+      url_regex,
+      PCRE_CASELESS,
+      &(*copy)->reg_error,
+      &(*copy)->reg_error_offset,
+      NULL);
+
+  /* set the callout function */
+  pcre_callout = copyright_callout;
 }
 
 /**
@@ -311,6 +412,8 @@ void copyright_destroy(copyright copy)
   radix_destroy(copy->dict);
   radix_destroy(copy->name);
   cvector_destroy(copy->entries);
+  pcre_free(copy->email_re);
+  pcre_free(copy->url_re);
   free(copy);
 }
 
@@ -401,10 +504,48 @@ void copyright_analyze(copyright copy, FILE* istr)
       }
     }
   }
+  copyright_email_url(copy, buf);
 
   strip_empty_entries(copy);
   free(entry);
 }
+
+/**
+ * TODO
+ *
+ * @param copy
+ * @param file
+ */
+void copyright_email_url(copyright copy, char* file)
+{
+  int ovector[768];
+  memset(ovector, 0, sizeof(ovector));
+
+  pcre_extra pass;
+
+  pass.flags = PCRE_EXTRA_CALLOUT_DATA;
+  pass.callout_data = copy->entries;
+
+  pcre_exec(
+      copy->email_re,                /* the compiled regular expression       */
+      &pass,                         /* the pattern wasn't studied            */
+      file,                          /* the string to be analyzed             */
+      strlen(file),                  /* the size of the input string          */
+      ovector[1],                    /* start with 0 offset into the string   */
+      0,                             /* default options                       */
+      ovector,                       /* vector to contain the return          */
+      sizeof(ovector)/sizeof(int));  /* the size of the return vector         */
+  pcre_exec(
+      copy->url_re,                  /* the compiled regular expression       */
+      &pass,                         /* the pattern wasn't studied            */
+      file,                          /* the string to be analyzed             */
+      strlen(file),                  /* the size of the input string          */
+      ovector[1],                    /* start with 0 offset into the string   */
+      0,                             /* default options                       */
+      ovector,                       /* vector to contain the return          */
+      sizeof(ovector)/sizeof(int));  /* the size of the return vector         */
+}
+
 
 /**
  * @brief adds a new name to the diction of names
