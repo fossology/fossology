@@ -200,7 +200,7 @@ function Updatefm($rf_pk)
   $ob .= "<FORM name='Updatefm' action='?mod=" . $this->Name."' method='POST'>";
   $ob .= "<input type=hidden name=rf_pk value='$rf_pk'>";
   $ob .= "<input type=hidden name=req_marydone value='$_GET[req_marydone]'>";
-  $ob .= "<input type=hidoen name=req_shortname value='$_GET[req_shortname]'>";
+  $ob .= "<input type=hidden name=req_shortname value='$_GET[req_shortname]'>";
   $ob .= "<table>";
 
   if ($rf_pk)  // true if this is an update
