@@ -37,17 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /** regular expression to find email statements in natural language */
 char* email_regex = "[\\<\\(]?[A-Za-z0-9\\-_\\.\\+]{1,100}@[A-Za-z0-9\\-_\\.\\+]{1,100}\\.[A-Za-z]{1,4}[\\>\\)]?(?C1)";
 /** regular expression to find url statements in natural language */
-char* url_regex =
-       "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s]) | \
-        (?:[a-z\\.\\_\\-]+\\.(?: \
-            com|edu|biz|gov|int|info|mil|net|org|me \
-            |mobi|us|ca|mx|ag|bz|gs|ms|tc|vg|eu|de \
-            |it|fr|nl|am|at|be|asia|cc|in|nu|tv|tw \
-            |jp|[a-z][a-z]\\.[a-z][a-z] \
-        )) # some.thing.(com or edu or ...) \
-        (?:\\:\\d+)? # port number \
-        (?:\\/[^\\s\\<]*[^\\<\\.\\,\\s]?)? \
-        (?C2)";
+char* url_regex = "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s])(?C2)";
 /** the list of letter that will be removed when matching to a radix tree */
 char token[34] = {' ','!','"','#','$','%','&','`','*','+','\'','-','.','/',':','\n',',',
                   '\t',';','<','=','>','?','@','[','\\',']','^','_','{','|','}','~',0};
@@ -342,7 +332,8 @@ int copyright_callout(pcre_callout_block* info)
   /* only log the new entry if it wasn't already located by the regex */
   prev = cvector_get(data, cvector_size(data) - 1);
   if(cvector_size(data) != 0 &&
-      (!strcmp(prev->dict_match, "email") || !strcmp(prev->dict_match, "url")))
+      ((!strcmp(prev->dict_match, "email") && !strcmp(new_entry->dict_match, "email"))
+          ||  (!strcmp(prev->dict_match, "url") && !strcmp(new_entry->dict_match, "url"))))
   {
     if(!(prev->start_byte <= new_entry->start_byte && prev->end_byte >= new_entry->end_byte))
     {
@@ -518,7 +509,7 @@ void copyright_analyze(copyright copy, FILE* istr)
  */
 void copyright_email_url(copyright copy, char* file)
 {
-  int ovector[768];
+  int ovector[30];
   memset(ovector, 0, sizeof(ovector));
 
   pcre_extra pass;
@@ -531,7 +522,7 @@ void copyright_email_url(copyright copy, char* file)
       &pass,                         /* the pattern wasn't studied            */
       file,                          /* the string to be analyzed             */
       strlen(file),                  /* the size of the input string          */
-      ovector[1],                    /* start with 0 offset into the string   */
+      0,                             /* start with 0 offset into the string   */
       0,                             /* default options                       */
       ovector,                       /* vector to contain the return          */
       sizeof(ovector)/sizeof(int));  /* the size of the return vector         */
@@ -540,7 +531,7 @@ void copyright_email_url(copyright copy, char* file)
       &pass,                         /* the pattern wasn't studied            */
       file,                          /* the string to be analyzed             */
       strlen(file),                  /* the size of the input string          */
-      ovector[1],                    /* start with 0 offset into the string   */
+      0,                             /* start with 0 offset into the string   */
       0,                             /* default options                       */
       ovector,                       /* vector to contain the return          */
       sizeof(ovector)/sizeof(int));  /* the size of the return vector         */
