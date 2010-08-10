@@ -821,9 +821,19 @@ int	FindCmd	(char *Filename)
            memset(Static,0,sizeof(Static));
            strcpy(Static,"application/x-7z-compressed");
            Type=Static;
-         }
-         else // .deb and .udeb as application/x-debian-package
+         } // add by larry, start
+         else  // 7zr failed so try 7z (possibly from 7zip)
          {
+           rc = RunCommand("7z","l -y",Filename,">/dev/null 2>&1",NULL,NULL);
+           if (rc==0)
+           {
+             memset(Static,0,sizeof(Static));
+             strcpy(Static,"application/x-7z-w-compressed");
+             Type=Static;
+           }
+	 // add by larry, end
+           else // .deb and .udeb as application/x-debian-package
+           {
   	     if ( pExt != NULL)
              {
     		if ((strcmp(pExt, ".deb")==0) || (strcmp(pExt, ".udeb")==0))
@@ -838,6 +848,7 @@ int	FindCmd	(char *Filename)
            	// only here to validate other octet file types
            	if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
 	     }
+           }
          }
        }
     }
