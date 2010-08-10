@@ -4,6 +4,7 @@ TOP=../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
+TESTDIRS=tests
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -I/usr/include/rpm -lpq -lrpm $(ALL_CFLAGS)
 EXE=pkgagent
@@ -25,10 +26,14 @@ uninstall:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 test: all
-	@echo "*** No tests available for agents/$(EXE) ***"
+	$(MAKE) -C $(TESTDIRS) test
 
+coverage: test
+	$(MAKE) -C $(TESTDIRS) coverage
+	
 clean:
-	rm -f $(EXE) *.o core
+	rm -f $(EXE) *.o core; \
+	$(MAKE) -C $(TESTDIRS) clean
 
 include $(DEPS)
 
