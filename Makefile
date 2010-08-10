@@ -49,6 +49,9 @@ test: all $(TESTDIRS)
 $(TESTDIRS):
 	$(MAKE) -C $(@:test-%=%) test
 
+coverage: test
+	$(MAKE) -C $(@:test-%=%) coverage
+
 clean: $(CLEANDIRS)
 	rm -f variable.list fo-postinstall
 
@@ -69,3 +72,4 @@ dist:
 .PHONY: $(TESTDIRS) $(CLEANDIRS)
 .PHONY: all install uninstall clean test utils
 .PHONY: dist dist-testing tar tar-release
+
