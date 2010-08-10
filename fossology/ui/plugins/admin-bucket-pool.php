@@ -111,11 +111,14 @@ class admin_bucket_pool extends FO_Plugin
   /************************************************
    * Output()
    * User chooses a bucketpool to duplicate from a select list.
-   * The new bucketpool is identical to the one to duplicate.
+   * The new bucketpool and bucket_def records will be identical 
+   * to the originals except for the primary keys and bucketpool version
+   * (which will be bumped).
+   * The user can optionally also set their default bucketpool to the 
+   * new one.  This is the default.
+   *
    * The user must then manually modify the bucketpool and/or bucketdef
-   * records to create a new bucketpool.
-   * This only dups the pool/defs.  Use a different ui to update the
-   * users default bucketpool.
+   * records to create their new (modified) bucketpool.
    ************************************************/
   function Output()
   {
