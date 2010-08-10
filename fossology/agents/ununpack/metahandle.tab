@@ -207,6 +207,17 @@ Magic: "application/x-7z-compressed"
   ModeMaskReg: 0177000
   END
 
+Magic: "application/x-7z-w-compressed"
+  Cmd: "7z"
+  CmdPre: "x -y"
+  CmdPost: ">/dev/null 2>&1"
+  MetaCmd: ""
+  Type: CMD_ARC
+  Status: 1
+  ModeMaskDir: 0177000
+  ModeMaskReg: 0177000
+  END
+
 ###############################################################
 # RPM files -- special case of CMD_ARC.
 ###############################################################
