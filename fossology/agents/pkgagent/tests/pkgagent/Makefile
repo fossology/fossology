@@ -24,10 +24,10 @@ libpkgagent.so: ../../pkgagent.c $(DB) $(REPO) $(AGENTLIB) $(VARS)
 $(TEST_OBJ): %.o: %.c
 	$(CC) -c -g $<
 
-test: $(EXE)
+test: all $(EXE)
 	./$(EXE)
 
-coverage: 
+coverage: test
 	lcov --directory  .   --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
