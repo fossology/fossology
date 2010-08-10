@@ -25,7 +25,7 @@ install: all
 uninstall:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
 
-test: all
+test: all 
 	$(MAKE) -C $(TESTDIRS) test
 
 coverage: test
