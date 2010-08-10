@@ -35,6 +35,9 @@ test: all $(TESTDIRS)
 $(TESTDIRS):
 	$(MAKE) -C $(@:test-%=%) test
 
+coverage: test
+	$(MAKE) -C $(@:test-%=%) coverage
+
 clean: $(CLEANDIRS)
 $(CLEANDIRS):
 	$(MAKE) -C $(@:clean-%=%) clean
