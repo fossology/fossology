@@ -71,7 +71,7 @@ class admin_bucket_pool extends FO_Plugin
 
     /* Insert the new bucketpool record 
      */
-    $sql = "insert into bucketpool (bucketpool_name, version, active, description) values ('$row[bucketpool_name]', '$newversion', '$row[active]', '$row[description]')";
+    $sql = "insert into bucketpool (bucketpool_name, version, active, description) select bucketpool_name, '$newversion', active, description from bucketpool where bucketpool_pk=$bucketpool_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
@@ -83,19 +83,11 @@ class admin_bucket_pool extends FO_Plugin
     pg_free_result($result);
     $newbucketpool_pk = $row['bucketpool_pk'];
 
-    /* select and duplicate all the bucketdef records */
-    $sql = "select * from bucket_def where bucketpool_fk='$bucketpool_pk'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    while ($row = pg_fetch_assoc($result))
-    {
-      if (empty($row['bucket_regex'])) $row['bucket_regex'] = "NULL";
-      if (empty($row['bucket_filename'])) $row['bucket_filename'] = "NULL";
-      $sql = "insert into bucket_def (bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to) values ('$row[bucket_name]', '$row[bucket_color]', '$row[bucket_reportorder]', '$row[bucket_evalorder]', '$newbucketpool_pk', '$row[bucket_type]', '$row[bucket_regex]', '$row[bucket_filename]', '$row[stopon]', '$row[applies_to]')";
-      $insertresult = pg_query($PG_CONN, $sql);
-      DBCheckResult($insertresult, $sql, __FILE__, __LINE__);
-    }
-    pg_free_result($result);
+    /* duplicate all the bucketdef records for the new bucketpool_pk */
+    $sql = "insert into bucket_def (bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, bucketpool_fk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to) 
+select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbucketpool_pk, bucket_type, bucket_regex, bucket_filename, stopon, applies_to from bucket_def where bucketpool_fk=$bucketpool_pk";
+    $insertresult = pg_query($PG_CONN, $sql);
+    DBCheckResult($insertresult, $sql, __FILE__, __LINE__);
 
     /* Update default bucket pool in user table for this user only */
     if ($UpdateDefault == 'on')
