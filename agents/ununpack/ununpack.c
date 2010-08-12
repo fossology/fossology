@@ -91,6 +91,16 @@ int TotalDirectories=0;
 int TotalContainers=0;
 int TotalArtifacts=0;
 
+// add by larry, start
+void deleteTmpFiles()
+{
+  if (NewDir != ".")
+  {
+    RemoveDir(NewDir);
+  }
+}
+// add by larry, end
+
 /*********************************************************
  MyDBaccess(): MyDBaccess with debugging wrapper.
  *********************************************************/
@@ -830,8 +840,7 @@ int	FindCmd	(char *Filename)
              memset(Static,0,sizeof(Static));
              strcpy(Static,"application/x-7z-w-compressed");
              Type=Static;
-           }
-	 // add by larry, end
+           } // add by larry, end
            else // .deb and .udeb as application/x-debian-package
            {
   	     if ( pExt != NULL)
@@ -1872,6 +1881,11 @@ int	Traverse	(char *Filename, char *Basename,
 	  SafeExit(19);
 	  }
 	Queue[Index].ChildPid = Pid;
+
+	// add by larry, start
+	Queue[Index].PI.uploadtree_pk = CI.uploadtree_pk;
+	// add by larry, end
+
 	Thread++;
 	/* Parent: Continue testing files */
 	if (Thread >= MaxThread)
@@ -1892,7 +1906,9 @@ int	Traverse	(char *Filename, char *Basename,
 	    CI.PI.uploadtree_pk = Queue[Index].PI.uploadtree_pk;
 	    CI.HasChild = Queue[Index].ChildHasChild;
 	    CI.Stat = Queue[Index].ChildStat;
+	    #if 0
 	    Queue[Index].PI.uploadtree_pk = CI.uploadtree_pk;
+	    #endif
 	    if (Recurse > 0)
 	      Traverse(Queue[Index].ChildRecurse,NULL,"Called by dir/wait",NULL,Recurse-1,&Queue[Index].PI);
 	    else if (Recurse < 0)
@@ -1921,7 +1937,7 @@ int	Traverse	(char *Filename, char *Basename,
     }
 
 TraverseEnd:
-  if (UnlinkAll)
+  if (UnlinkAll && MaxThread <=1)
     {
 #if 0
     printf("===\n");
@@ -2432,6 +2448,14 @@ int	main	(int argc, char *argv[])
 	{
 	fclose(ListOutFile);
 	}
+
+  // add by larry, start
+  if (UnlinkAll && MaxThread > 1)
+  {
+    deleteTmpFiles();
+  }
+  // add by larry, end
+
   return(0);
 } /* main() */
 
