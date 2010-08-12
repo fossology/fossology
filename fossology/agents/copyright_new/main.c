@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* other library includes */
 #include <libfossagent.h>
 #include <libfossdb.h>
+#include <libfossrepo.h>
 #include <libpq-fe.h>
 #include <unistd.h>
 #include <signal.h>
@@ -258,6 +259,10 @@ void run_test_files(copyright copy)
         cvector_remove(compare, best);
         matches++;
       }
+      else if(!strcmp(copy_entry_dict(*iter), "email") || !strcmp(copy_entry_dict(*iter), "url"))
+      {
+        matches++;
+      }
       else
       {
         fprintf(p_out, "====%s================================\n", file_name);
@@ -311,7 +316,7 @@ void run_test_files(copyright copy)
 void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
 {
   /* locals */
-  char sql[1024];
+  char sql[1024], filename[FILENAME_MAX], * tmp = NULL;
   extern int HBItemsProcessed;
   cvector_iterator iter;
   copyright_iterator finds;
@@ -320,6 +325,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
 
   /* initialize memory */
   memset(sql, 0, sizeof(sql));
+  memset(filename, 0, sizeof(filename));
   iter = NULL;
   finds = NULL;
   input_fp = NULL;
@@ -336,8 +342,13 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
     }
   }
 
+  /* get the path to the file */
+  strcpy(filename, (tmp = RepMkPath("file", (char*)pair_first(curr))));
+  free(tmp);
+
+
   /* attempt to open the file */
-  input_fp = fopen((char*)pair_first(curr), "rb");
+  input_fp = fopen(filename, "rb");
   if(!input_fp)
   {
     fprintf(cerr, "FATAL: pfile %d Copyright Agent unable to open file %s\n",
@@ -591,6 +602,8 @@ int main(int argc, char** argv)
     db_connected = 1;
     agent_pk = GetAgentKey(DataBase, AGENT_NAME, 0, "", AGENT_DESC);
 
+    /* enter the main agent loop */
+    fprintf(cout, "OK");
     while(fgets(input, FILENAME_MAX, cin) != NULL)
     {
       upload_pk = atol(input);
@@ -607,8 +620,10 @@ int main(int argc, char** argv)
       }
 
       PQclear(pgResult);
+      fprintf(cout, "OK");
     }
 
+    fprintf(cout, "BYE");
     pair_destroy(curr);
   }
 
@@ -621,9 +636,4 @@ int main(int argc, char** argv)
 
   return 0;
 }
-
-
-
-
-
 

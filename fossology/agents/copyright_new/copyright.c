@@ -184,13 +184,16 @@ int contains_copyright(radix_tree tree, char* string, char* buf)
  * @param dict the diction to add the strings to
  * @param filename the file to grab the string from
  */
-void load_dictionary(radix_tree dict, char* filename)
+int load_dictionary(radix_tree dict, char* filename)
 {
   FILE* pfile;
   char str[256];
 
   pfile = fopen(filename, "r");
-  assert(pfile);
+  if(!pfile)
+  {
+    return 0;
+  }
 
   while(fgets(str, LINE_LENGTH, pfile) != NULL)
   {
@@ -199,6 +202,7 @@ void load_dictionary(radix_tree dict, char* filename)
   }
 
   fclose(pfile);
+  return 1;
 }
 
 /**
@@ -261,7 +265,7 @@ void  copy_entry_print(void* to_print, FILE* ostr)
  *
  * @return the new function registry
  */
-function_registry* copy_entry_cvector_registry()
+function_registry* copy_entry_function_registry()
 {
   function_registry* ret =
       (function_registry*)calloc(1, sizeof(function_registry));
@@ -361,17 +365,20 @@ int copyright_callout(pcre_callout_block* info)
  *
  * @param copy the copyright object to initialize
  */
-void copyright_init(copyright* copy)
+int copyright_init(copyright* copy)
 {
   /* call constructor for all sub objects */
   (*copy) = (copyright)calloc(1,sizeof(struct copyright_internal));
   radix_init(&((*copy)->dict));
   radix_init(&((*copy)->name));
-  cvector_init(&((*copy)->entries), copy_entry_cvector_registry());
+  cvector_init(&((*copy)->entries), copy_entry_function_registry());
 
   /* load the dictionaries */
-  load_dictionary((*copy)->dict, "copyright.dic");
-  load_dictionary((*copy)->name, "names.dic");
+  if(!load_dictionary((*copy)->dict, "copyright.dic") ||
+     !load_dictionary((*copy)->name, "names.dic"))
+  {
+    return 0;
+  }
 
   (*copy)->reg_error_offset = 0;
 
@@ -391,6 +398,7 @@ void copyright_init(copyright* copy)
 
   /* set the callout function */
   pcre_callout = copyright_callout;
+  return 1;
 }
 
 /**

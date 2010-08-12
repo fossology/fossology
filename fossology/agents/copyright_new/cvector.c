@@ -37,7 +37,7 @@ struct cvector_internal
   int size;                   ///< the number of element in the cvector
   int capacity;               ///< the number of elements that data can store
   void** data;                ///< the array that controls access to the data
-  function_registry* memory;  ///< the momory management functions employed by cvector
+  function_registry* memory;  ///< the memory management functions employed by cvector
 };
 
 /**

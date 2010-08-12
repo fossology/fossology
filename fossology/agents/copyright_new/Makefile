@@ -19,7 +19,7 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpcre
+CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpcre
 EXE = copyright
 
 SOURCE = cvector.c \
@@ -41,10 +41,10 @@ all: $(EXE)
 $(EXE): copyright.o main.c
 	$(CC) $(OBJS) copyright.o main.c $(CFLAGS_LOCAL) -o $@
 
-copyright.o: $(OBJS) $(HEADER) $(DB) $(VARS) copyright.c
+copyright.o: $(OBJS) $(HEADER) $(DB) $(REPO) $(VARS) copyright.c
 	$(CC) $(DIRS) -c $(CFLAGS_LOCAL) copyright.c
 
-$(OBJS): %.o: %.c $(HEADER) $(DB) $(VARS)
+$(OBJS): %.o: %.c $(HEADER) $(DB) $(REPO) $(VARS)
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
 install: all

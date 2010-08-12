@@ -29,9 +29,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * statement that was found is.
  */
 enum copy_entry_type {
-  copyright_s = 0,//!< copyright_s
-  email_s = 1,    //!< email_s
-  url_s = 2,      //!< url_s
+  copyright_s = 0,  ///< copyright_s
+  email_s = 1,      ///< email_s
+  url_s = 2,        ///< url_s
 };
 
 /**
@@ -74,7 +74,7 @@ typedef copy_entry* copyright_iterator;
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
-void copyright_init(copyright* copy);
+int  copyright_init(copyright* copy);
 void copyright_destroy(copyright copy);
 
 /* ************************************************************************** */
