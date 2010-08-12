@@ -497,9 +497,6 @@ return;
       case "XML":
         break;
       case "HTML":
-      /* javascript to change form id action by adding bars+pk and submit the form */
-
-
         $V .= "<font class='text'>\n";
 
         /************************/
