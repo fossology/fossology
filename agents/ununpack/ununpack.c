@@ -92,11 +92,11 @@ int TotalContainers=0;
 int TotalArtifacts=0;
 
 // add by larry, start
-void deleteTmpFiles()
+void deleteTmpFiles(char *dir)
 {
-  if (NewDir != ".")
-  {
-    RemoveDir(NewDir);
+  if (strcmp(dir, "."))
+  { 
+    RemoveDir(dir);
   }
 }
 // add by larry, end
@@ -2452,7 +2452,7 @@ int	main	(int argc, char *argv[])
   // add by larry, start
   if (UnlinkAll && MaxThread > 1)
   {
-    deleteTmpFiles();
+    deleteTmpFiles(NewDir);
   }
   // add by larry, end
 
