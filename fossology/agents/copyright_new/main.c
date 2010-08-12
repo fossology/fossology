@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossrepo.h>
 #include <libpq-fe.h>
 #include <unistd.h>
+#include <errno.h>
 #include <signal.h>
 
 /* local includes */
@@ -316,7 +317,7 @@ void run_test_files(copyright copy)
 void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
 {
   /* locals */
-  char sql[1024], filename[FILENAME_MAX], * tmp = NULL;
+  char sql[1024], * tmp = NULL;
   extern int HBItemsProcessed;
   cvector_iterator iter;
   copyright_iterator finds;
@@ -325,7 +326,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
 
   /* initialize memory */
   memset(sql, 0, sizeof(sql));
-  memset(filename, 0, sizeof(filename));
   iter = NULL;
   finds = NULL;
   input_fp = NULL;
@@ -343,19 +343,18 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
   }
 
   /* get the path to the file */
-  strcpy(filename, (tmp = RepMkPath("file", (char*)pair_first(curr))));
-  free(tmp);
-
+  tmp = RepMkPath("file", (char*)pair_first(curr));
 
   /* attempt to open the file */
-  input_fp = fopen(filename, "rb");
+  input_fp = fopen(tmp, "rb");
   if(!input_fp)
   {
-    fprintf(cerr, "FATAL: pfile %d Copyright Agent unable to open file %s\n",
-        (unsigned int)pair_second(curr), (char*)pair_first(curr));
+    fprintf(cerr, "FATAL: %s.%d Failure to open file %s", __FILE__, __LINE__, tmp);
+    fprintf(cerr, "ERROR: %s\n", strerror(errno));
     fflush(cerr);
     exit(-1);
   }
+  free(tmp);
 
   /* perform the actual analysis */
   copyright_analyze(copy, input_fp);
