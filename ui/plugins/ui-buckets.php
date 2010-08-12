@@ -186,55 +186,25 @@ class ui_buckets extends FO_Plugin
     $upload_pk = $row["upload_fk"];
     pg_free_result($result);
 
-    $Agent_name = "buckets";
-    $Agent_desc = "Bucket agent (categorizes files)";
-    if (array_key_exists("agent_pk", $_POST))
-      $bucketagent_pk = $_POST["agent_pk"];
-    else
-      $bucketagent_pk = GetAgentKey($Agent_name, $Agent_desc);
-
-    /*  Get the counts for each bucket under this UploadtreePk, skip artifacts 
-        Because buckets roll up, the counts will be high (a bucket will be counted
-        for the container and everything under the container).
-     */
-   /* get the default_bucketpool_fk from the users record */
-    $sql = "select default_bucketpool_fk from users where user_pk='$_SESSION[UserId]' limit 1";
+    /* Get the ars_pk of the scan to display, also the select list  */
+    $ars_pk = GetArrayVal("ars", $_GET);
+    $BucketSelect = SelectBucketDataset($upload_pk, $ars_pk, "selectbdata", 
+                                        "onchange=\"addArsGo('newds','selectbdata');\"");
+    if ($ars_pk == 0) 
+    {
+      /* No bucket data for this upload */
+      return $BucketSelect;
+    }
+    
+    /* Get scan keys */
+    $sql = "select agent_fk, nomosagent_fk, bucketpool_fk from bucket_ars where ars_pk=$ars_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
-    $bucketpool_pk = $row['default_bucketpool_fk'];
+    $bucketagent_pk = $row["agent_fk"];
+    $nomosagent_pk = $row["nomosagent_fk"];
+    $bucketpool_pk = $row["bucketpool_fk"];
     pg_free_result($result);
-    if (!$bucketpool_pk) 
-    {
-      if ($_SESSION['UserLevel'] < PLUGIN_DB_DOWNLOAD)
-      {
-        echo "<h3>Your FOSSology system administrator has not enabled read only users to use use the bucket view</h3>";
-      }
-      else
-      {
-        echo "<h3>You do not have a bucketpool in your account settings.  <br>";
-        echo "Edit your user settings (Admin > Users > Account Settings) to select a default bucketpool.</h3>";
-      }
-      exit(1);
-    }
-
-    /* find latest bucket and nomos agent that has data */
-    $AgentRec = AgentARSList("bucket_ars", $upload_pk, 0, 0, "and bucketpool_fk=$bucketpool_pk");
-    if ($AgentRec === false)
-    {
-      $VLic .= "<h3>No data available.  Use Jobs > Agents to schedule a bucket scan.</h3>";
-      return $VLic;
-    }
-    /* loop through $AgentRec to verify that the nomosagent_pk is enabled */
-    $nomosagent_pk = 0;
-    foreach ($AgentRec as $AgentRow)
-    {
-      $sql = "select agent_pk from agent where agent_pk=$AgentRow[nomosagent_fk] 
-                    and agent_enabled=true";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      if (pg_num_rows($result) > 0) $nomosagent_pk = $AgentRow['nomosagent_fk'];
-    }
 
     /* Create bucketDefArray as individual query this is MUCH faster
        than incorporating it with a join in the following queries.
@@ -260,14 +230,28 @@ class ui_buckets extends FO_Plugin
       $historows = pg_fetch_all($result);
       pg_free_result($result);
 
-    /* Get agent list */
-    $VLic .= "<form action='" . Traceback_uri()."?" . $_SERVER["QUERY_STRING"] . "' method='POST'>\n";
+    /* Show dataset list */
+    if (!empty($BucketSelect))
+    {
+      $action = Traceback_uri() . "?mod=bucketbrowser&upload=$upload_pk&item=$Uploadtree_pk";
 
-/* FUTURE advanced interface for selecting agents, don't display unless there are >1 choice
-    $AgentSelect = AgentSelect($Agent_name, $upload_pk, "bucket_file", true, "agent_pk", $bucketagent_pk);
-    $VLic .= $AgentSelect;
-    $VLic .= "<input type='submit' value='Go'>";
-*/
+      $VLic .= "<script type='text/javascript'>
+function addArsGo(formid, selectid ) 
+{
+var selectobj = document.getElementById(selectid);
+var ars_pk = selectobj.options[selectobj.selectedIndex].value;
+document.getElementById(formid).action='$action'+'&ars='+ars_pk;
+document.getElementById(formid).submit();
+return;
+}
+</script>";
+
+      /* form to select new dataset (ars_pk) */
+      $VLic .= "<form action='$action' id='newds' method='POST'>\n";
+      $VLic .= $BucketSelect;
+      $VLic .= "</form>";
+    }
+
     $sql = "select bucketpool_name from bucketpool where bucketpool_pk=$bucketpool_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -513,6 +497,9 @@ class ui_buckets extends FO_Plugin
       case "XML":
         break;
       case "HTML":
+      /* javascript to change form id action by adding bars+pk and submit the form */
+
+
         $V .= "<font class='text'>\n";
 
         /************************/
@@ -541,7 +528,7 @@ class ui_buckets extends FO_Plugin
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
-    printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
+    printf( "<p><small>Elapsed time: %.2f seconds</small>", $Time);
 
     if ($Cached) 
       echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";

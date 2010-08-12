@@ -29,8 +29,94 @@ if (!isset($GlobalReady)) { exit; }
  ************************************************************/
 
 /**
+ * SelectBucketDataset
+ * \brief Return a select list showing all the successful bucket
+ *        runs on a particular $upload_pk.
+ *        This list can be included in UI's to let the user select
+ *        which data they wish to view.
+ *        The most recent results are the default selection.
+ *
+ * @param string $upload_pk
+ * @param string &$ars_pk    return ars_pk of the selected element, may be zero
+ *                           if there are no data.  This is also used to pass in
+ *                           the selected ars_pk.
+ * @param string $id         HTML element id
+ * @param string $extra      Extra info for the select element, e.g. "onclick=..."
+ *
+ * @return select string, select value is $ars_pk
+ *         If there are no rows to select, $ars_pk is returned 0
+ *         and a simple string $NoData is returned;
+ *         If there are only 1 row, an empty string is returned, and $ars_pk is
+ *         set to that row.
+ */
+function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $extra="")
+{
+  global $PG_CONN;
+
+  $NoData = "No data available.  Use Jobs > Agents to schedule a bucket scan.";
+  $name = $id;
+  $select = "<select name='$name' id='$id' $extra>";
+
+  /* get the bucketpool recs */
+  $sql = "select ars_pk, bucketpool_pk, bucketpool_name, version from bucketpool, bucket_ars where active='Y' and bucketpool_fk=bucketpool_pk and ars_success=True and upload_fk='$upload_pk' order by ars_starttime desc";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $NumRows = pg_num_rows($result);
+  if ($NumRows == 0) return $NoData;
+  $rows = pg_fetch_all($result);
+  pg_free_result($result);
+  if ($NumRows == 1) 
+  {
+    $ars_pk = $rows[0]['ars_pk'];
+    return "";  /* only one row */
+  }
+
+  /* Find the users default_bucketpool_fk */
+  $sql = "select default_bucketpool_fk from users where user_pk='$_SESSION[UserId]'";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_assoc($result);
+  $DefaultBucketpool_pk = $row['default_bucketpool_fk'];
+  pg_free_result($result);
+
+  /* Find the default selected row if ars_pk wasn't passed in */
+  if (empty($ars_pk))
+  {
+    foreach ($rows as $row)
+    {
+      if ($row['bucketpool_pk'] == $DefaultBucketpool_pk)
+      {
+        $ars_pk = $row['ars_pk'];
+        break;
+      }
+    }
+    reset($rows);
+  }
+
+  $select .= "<option value=''";
+  foreach ($rows as $row)
+  {
+    $select .= "<option value='$row[ars_pk]'";
+
+    if (empty($ars_pk))
+    {
+      $select .= " SELECTED ";
+      $ars_pk = $row["ars_pk"];
+    }
+    else if ($ars_pk == $row['ars_pk'])
+    {
+      $select .= " SELECTED ";
+    }
+
+    $select .= ">$row[bucketpool_name], v $row[version]\n";
+  }
+  $select .= "</select>";
+  return $select;
+}
+
+/**
  * SelectBucketpool
- * \brief Return a select list for bucketpool's
+ * \brief Return a select list containing all the active bucketpool's.
  *
  * @param string $selected, selected bucketpool_pk
  *
