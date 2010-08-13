@@ -342,8 +342,15 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
     }
   }
 
-  /* get the path to the file */
-  tmp = RepMkPath("files", (char*)pair_first(curr));
+  /* find the correct path to the file */
+  if(*(int*)pair_second(curr) >= 0)
+  {
+    tmp = RepMkPath("files", (char*)pair_first(curr));
+  }
+  else
+  {
+    tmp = (char*)pair_first(curr);
+  }
 
   /* attempt to open the file */
   input_fp = fopen(tmp, "rb");
@@ -354,7 +361,12 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
     fflush(cerr);
     exit(-1);
   }
-  free(tmp);
+
+  /* only free temp if running as an agent */
+  if(*(int*)pair_second(curr) >= 0)
+  {
+    free(tmp);
+  }
 
   /* perform the actual analysis */
   copyright_analyze(copy, input_fp);
@@ -384,9 +396,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
 
       if(*(int*)pair_second(curr) >= 0)
       {
-	fprintf(cerr, "%s <- TEXT\n", copy_entry_text(entry));
-
-        // TODO there are several things in this sql that seem unnecessary now
         memset(sql, '\0', sizeof(sql));
         snprintf(sql, sizeof(sql), insert_copyright, agent_pk, *(int*)pair_second(curr),
             copy_entry_start(entry), copy_entry_end(entry),

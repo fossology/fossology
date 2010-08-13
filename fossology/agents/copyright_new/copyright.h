@@ -25,16 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 /**
- * an enum that allows the copyright object to identify what the type of the
- * statement that was found is.
- */
-enum copy_entry_type {
-  copyright_s = 0,  ///< copyright_s
-  email_s = 1,      ///< email_s
-  url_s = 2,        ///< url_s
-};
-
-/**
  * The copyright datatype
  *
  * to create:

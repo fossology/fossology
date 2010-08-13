@@ -65,7 +65,7 @@ struct copy_entry_internal
   char dict_match[256];       ///< the dictionary match that originally identified the entry
   unsigned int start_byte;    ///< the location in the file that this copyright starts
   unsigned int end_byte;      ///< the location in the file that this copyright ends
-  enum copy_entry_type type;  ///< the type of entry that was found
+  char* type;
 };
 
 /**
@@ -223,6 +223,7 @@ void* copy_entry_copy(void* to_copy)
   strcpy(new->name_match, cpy->name_match);
   new->start_byte = cpy->start_byte;
   new->end_byte = cpy->end_byte;
+  new->type = NULL;
 
   return new;
 }
@@ -293,6 +294,7 @@ void copy_entry_init(copy_entry entry)
   memset(entry->name_match, '\0', sizeof(entry->name_match));
   entry->start_byte = 0;
   entry->end_byte = 0;
+  entry->type = NULL;
 }
 
 /**
@@ -326,10 +328,12 @@ int copyright_callout(pcre_callout_block* info)
     case(1) :
       strcpy(new_entry->name_match, "email");
       strcpy(new_entry->dict_match, "email");
+      new_entry->type = "email";
       break;
     case(2) :
       strcpy(new_entry->name_match, "url");
       strcpy(new_entry->dict_match, "url");
+      new_entry->type = "email";
       break;
   }
 
@@ -494,6 +498,7 @@ void copyright_analyze(copyright copy, FILE* istr)
       entry->text[end-beg]=0;
       entry->start_byte = beg;
       entry->end_byte = end;
+      entry->type = "statement";
 
       /* push the string onto the list and increment bufidx */
       if(contains_copyright(copy->name, entry->text, temp))
