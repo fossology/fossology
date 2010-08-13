@@ -111,7 +111,7 @@ int find_end(char *ptext, int idx, int bufsize)
 
   for (; (idx < bufsize) && (idx < last); idx++)
   {
-    if (ptext[idx] == '\n') return idx;
+    if (ptext[idx] == '\n') return idx - 1;
   }
   return idx;
 }

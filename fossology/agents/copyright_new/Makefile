@@ -35,6 +35,9 @@ HEADER = cvector.h \
 OBJS   = cvector.o \
 		 radixtree.o \
 		 pair.o \
+
+DOCS   = copyright.dic \
+		 names.dic \
 		 
 all: $(EXE)
 
@@ -49,6 +52,7 @@ $(OBJS): %.o: %.c $(HEADER) $(DB) $(REPO) $(VARS)
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	$(INSTALL_PROGRAM) $(DOCS) $(DESTDIR)$(AGENTDIR)/$(EXE)
 
 uninstall:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)

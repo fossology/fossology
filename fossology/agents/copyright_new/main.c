@@ -343,13 +343,13 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
   }
 
   /* get the path to the file */
-  tmp = RepMkPath("file", (char*)pair_first(curr));
+  tmp = RepMkPath("files", (char*)pair_first(curr));
 
   /* attempt to open the file */
   input_fp = fopen(tmp, "rb");
   if(!input_fp)
   {
-    fprintf(cerr, "FATAL: %s.%d Failure to open file %s", __FILE__, __LINE__, tmp);
+    fprintf(cerr, "FATAL: %s.%d Failure to open file %s\n", __FILE__, __LINE__, tmp);
     fprintf(cerr, "ERROR: %s\n", strerror(errno));
     fflush(cerr);
     exit(-1);
@@ -384,16 +384,19 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
 
       if(*(int*)pair_second(curr) >= 0)
       {
+	fprintf(cerr, "%s <- TEXT\n", copy_entry_text(entry));
+
         // TODO there are several things in this sql that seem unnecessary now
-        sprintf(sql, insert_copyright, agent_pk, *(int*)pair_second(curr),
+        memset(sql, '\0', sizeof(sql));
+        snprintf(sql, sizeof(sql), insert_copyright, agent_pk, *(int*)pair_second(curr),
             copy_entry_start(entry), copy_entry_end(entry),
-            copy_entry_text(entry), "statement");
+            copy_entry_text(entry), "", "statement");
         pgResult = PQexec(pgConn, sql);
 
-        if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
+        if (PQresultStatus(pgResult) != PGRES_COMMAND_OK)
         {
-          fprintf(cerr, "ERROR: %s:%d, %s\nOn: %s\n",
-              AGENT_DESC, __LINE__, PQresultErrorMessage(pgResult), sql);
+          fprintf(cerr, "ERROR: %s.%d: %s\nOn: %s\n",
+              __FILE__, __LINE__, PQresultErrorMessage(pgResult), sql);
           PQclear(pgResult);
           exit(-1);
         }
@@ -412,10 +415,10 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
   }
   else if(*(int*)pair_second(curr) >= 0)
   {
-    sprintf(sql, insert_no_copyright, agent_pk, *(int*)pair_second(curr));
+    snprintf(sql, sizeof(sql), insert_no_copyright, agent_pk, *(int*)pair_second(curr));
     pgResult = PQexec(pgConn, sql);
 
-    if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
+    if (PQresultStatus(pgResult) != PGRES_COMMAND_OK)
     {
       fprintf(cerr, "ERROR: %s:%d, %s\nOn: %s\n",
           AGENT_DESC, __LINE__, PQresultErrorMessage(pgResult), sql);
@@ -537,7 +540,7 @@ int main(int argc, char** argv)
 
   /* set the output streams */
   cout = stdout;
-  cerr = stderr;
+  cerr = stdout;
   cin = stdin;
 
   /* initialize complex data strcutres */
@@ -613,8 +616,9 @@ int main(int argc, char** argv)
 
       for(i = 0; i < num_files; i++)
       {
+        c = atoi(PQgetvalue(pgResult, i, PQfnumber(pgResult, "pfile_pk")));
         pair_set_first(curr, PQgetvalue(pgResult, i, PQfnumber(pgResult, "pfilename")));
-        pair_set_second(curr, PQgetvalue(pgResult, i, PQfnumber(pgResult, "pfile_pk")));
+        pair_set_second(curr, &c);
         perform_analysis(pgConn, copy, curr, agent_pk);
       }
 
