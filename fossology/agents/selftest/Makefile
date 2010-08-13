@@ -24,6 +24,9 @@ uninstall:
 test: all
 	@echo "*** No tests available for agents/$(EXE) ***"
 
+coverage: test
+	@echo "NOTICE: no coverage available for selftest"
+
 clean:
 	rm -f $(EXE) *.o core
 

@@ -75,6 +75,9 @@ uninstall:
 test: all
 	@echo "*** No tests available for agent/$(EXE) ***"
 
+coverage: test
+	@echo "NOTICE: no coverage available for nomos"
+
 clean:
 	rm -f encode nomos  *.o core \
            _autodata.c _autodefs.c _autodefs.h _precheck.c \

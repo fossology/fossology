@@ -51,6 +51,9 @@ uninstall: $(VARS)
 test: all
 	@echo "*** No tests available for agents/$(EXE) ***"
 
+coverage: test
+	@echo "NOTICE: no coverage available for ununpack"
+
 clean:
 	rm -f $(EXE) *.o core metahandle.h metahandle.c
 
