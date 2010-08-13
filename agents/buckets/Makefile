@@ -39,6 +39,9 @@ uninstall:
 test: all
 	@echo "*** No tests available for agents/$(EXE) ***"
 
+coverage: test
+	@echo "NOTICE: no coverage available for buckets"
+
 clean:
 	rm -f $(EXE) *.o core
 

@@ -47,4 +47,7 @@ clean:
 test: all
 	@echo "NOTICE: no tests available for db"
 
+coverage: test
+	@echo "NOTICE: no coverage available for db"
+
 .PHONY: all install uninstall clean test

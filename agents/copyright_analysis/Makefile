@@ -46,6 +46,9 @@ uninstall:
 test: all
 	@echo "*** No tests available for agents/copyright_analysis ***"
 
+coverage: test
+	@echo "NOTICE: no coverage available for copyright_analysis"
+
 clean:
 	rm -f model.dat training_files vars.py *.pyc
 

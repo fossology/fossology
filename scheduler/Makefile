@@ -104,6 +104,9 @@ clean:
 test: all
 	@echo "NOTICE: no tests available for scheduler"
 
+coverage: test
+	@echo "NOTICE: no coverage available for scheduler"
+
 include $(DEPS)
 
 .PHONY: all install uninstall clean test

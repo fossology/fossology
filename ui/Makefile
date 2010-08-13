@@ -61,6 +61,9 @@ uninstall:
 test: all
 	@echo "*** Tests are still run by hand for ui/ ***"
 
+coverage: test
+	@echo "NOTICE: no coverage available for ui"
+
 clean:
 	rm -f *.o core $(iPATHFILE)
 

@@ -49,6 +49,9 @@ uninstall:
 test: all
 	@echo "*** Tests are still run by hand for cli/ ***"
 
+coverage: test
+	@echo "NOTICE: no coverage available for cli"
+
 clean:
 	# pod2html leaves temporary files: see debian bug #378328
 	rm -f *.o core $(MAN1FILES) $(HTMLFILES) $(TEXTFILES) pod*.tmp

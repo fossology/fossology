@@ -16,6 +16,7 @@ INSTALLDIRS = $(DIRS:%=install-%)
 UNINSTALLDIRS = $(DIRS:%=uninstall-%)
 CLEANDIRS = $(DIRS:%=clean-%)
 TESTDIRS = $(DIRS:%=test-%)
+COVDIRS = $(DIRS:%=cov-%)
 
 ## Targets
 # build
@@ -49,8 +50,10 @@ test: all $(TESTDIRS)
 $(TESTDIRS):
 	$(MAKE) -C $(@:test-%=%) test
 
-coverage: test
-	$(MAKE) -C $(@:test-%=%) coverage
+
+coverage: test $(COVDIRS)
+$(COVDIRS):
+	$(MAKE) -C $(@:cov-%=%) coverage
 
 clean: $(CLEANDIRS)
 	rm -f variable.list fo-postinstall
