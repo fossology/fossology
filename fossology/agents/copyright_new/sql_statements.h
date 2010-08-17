@@ -61,7 +61,7 @@ INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content
  */
 char* insert_copyright = "\
 INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) \
-  VALUES (%d, %d, %d, %d, '%s', '%s', '%s')";
+  VALUES (%d, %d, %d, %d, E'%s', E'%s', '%s')";
 
 /**
  * This will check to see if the copyright table exists.

@@ -169,6 +169,7 @@ int contains_copyright(radix_tree tree, char* string, char* buf)
     if(radix_contains(tree, curr))
     {
       strcpy(buf, curr);
+      printf("%s\n",buf);
       return curr - string_copy;
     }
     curr = strtok(NULL, token);
@@ -333,7 +334,7 @@ int copyright_callout(pcre_callout_block* info)
     case(2) :
       strcpy(new_entry->name_match, "url");
       strcpy(new_entry->dict_match, "url");
-      new_entry->type = "email";
+      new_entry->type = "url";
       break;
   }
 
@@ -378,8 +379,8 @@ int copyright_init(copyright* copy)
   cvector_init(&((*copy)->entries), copy_entry_function_registry());
 
   /* load the dictionaries */
-  if(!load_dictionary((*copy)->dict, "copyright.dic") ||
-     !load_dictionary((*copy)->name, "names.dic"))
+  if(!load_dictionary((*copy)->dict, "/usr/local/lib/fossology/agents/copyright/copyright.dic") ||
+     !load_dictionary((*copy)->name, "/usr/local/lib/fossology/agents/copyright/names.dic"))
   {
     return 0;
   }
@@ -704,6 +705,17 @@ char* copy_entry_name(copy_entry entry)
 char* copy_entry_dict(copy_entry entry)
 {
   return entry->dict_match;
+}
+
+/**
+ * @brief gets the type of entry this is, i.e. how it was found
+ *
+ * @param entry the entry to ge the type for
+ * @return the string type of the entry
+ */
+char* copy_entry_type(copy_entry entry)
+{
+  return entry->type;
 }
 
 /**

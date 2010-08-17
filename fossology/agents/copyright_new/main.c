@@ -352,6 +352,8 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
     tmp = (char*)pair_first(curr);
   }
 
+  fprintf(cout, "%s\n", RepMkPath("files", (char*)pair_first(curr)));
+
   /* attempt to open the file */
   input_fp = fopen(tmp, "rb");
   if(!input_fp)
@@ -399,7 +401,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
         memset(sql, '\0', sizeof(sql));
         snprintf(sql, sizeof(sql), insert_copyright, agent_pk, *(int*)pair_second(curr),
             copy_entry_start(entry), copy_entry_end(entry),
-            copy_entry_text(entry), "", "statement");
+            copy_entry_text(entry), "", copy_entry_type(entry));
         pgResult = PQexec(pgConn, sql);
 
         if (PQresultStatus(pgResult) != PGRES_COMMAND_OK)
