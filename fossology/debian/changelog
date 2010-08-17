@@ -1,8 +1,23 @@
 fossology (1.2.1~SVNBUILD-1) unstable; urgency=low
 
-  * Unofficial SVN build.
+  * unofficial build version
 
- -- Matt Taggart <taggart@debian.org>  Tue, 20 Jul 2010 16:53:38 -0700
+ -- Matt Taggart <taggart@debian.org>  Fri, 06 Aug 2010 16:53:49 -0700
+
+fossology (1.2.0-2) unstable; urgency=low
+
+  * added upstream fixes to 1.2.0 that will go in 1.2.1
+    - fix pkgagent bug, svn#3363
+    - free temp name string on fopen error condition, svn#3362
+    - fix too many open files bug, svn#3361
+    - add error checking to fopen, svn#3359
+    - fix pkgagent dsc parsing, svn#3358
+    - fix copyright wrong variable name, svn#3355
+    - bucket agent fixes, svn#3351-3353
+    - fix missing copyright database, svn#3348
+    - init script restart output, svn#3346
+
+ -- Matt Taggart <taggart@debian.org>  Fri, 06 Aug 2010 15:12:18 -0700
 
 fossology (1.2.0-1) unstable; urgency=low
 
