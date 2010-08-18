@@ -16,9 +16,9 @@ $(EXE): libpkgagent.so $(TEST_OBJ)
 
 libpkgagent.so: ../../pkgagent.c $(DB) $(REPO) $(AGENTLIB) $(VARS)
 	if [ `rpm --version|awk '{print $$3}'` \< "4.5" ] ; then \
-	$(CC) -shared -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
+	$(CC) -shared -fPIC -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
 	else \
-	$(CC) -shared -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM) -o $@; \
+	$(CC) -shared -fPIC -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM) -o $@; \
 	fi
 
 $(TEST_OBJ): %.o: %.c
