@@ -489,7 +489,19 @@ int check_copyright_table(PGconn* pgConn)
 
 
   PQclear(pgResult);
-  return 0;
+  return 1;
+}
+
+/**
+ *
+ *
+ *
+ */
+int setup_database() {
+  
+  
+  
+  return 1;
 }
 
 /* ************************************************************************** */
