@@ -38,6 +38,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 char* email_regex = "[\\<\\(]?[A-Za-z0-9\\-_\\.\\+]{1,100}@[A-Za-z0-9\\-_\\.\\+]{1,100}\\.[A-Za-z]{1,4}[\\>\\)]?(?C1)";
 /** regular expression to find url statements in natural language */
 char* url_regex = "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s])(?C2)";
+/** the directory that the copyright.dic file will be in */
+char* copy_dir = "copyright.dic";
+//char* copy_dir = "/usr/local/lib/fossology/agents/copyright/copyright.dic";
+/** the directory that the name.dic file will be in */
+char* name_dir = "names.dic";
+//char* name_dir = "/usr/local/lib/fossology/agents/copyright/names.dic";
 /** the list of letter that will be removed when matching to a radix tree */
 char token[34] = {' ','!','"','#','$','%','&','`','*','+','\'','-','.','/',':','\n',',',
                   '\t',';','<','=','>','?','@','[','\\',']','^','_','{','|','}','~',0};
@@ -381,8 +387,8 @@ int copyright_init(copyright* copy)
   cvector_init(&((*copy)->entries), copy_entry_function_registry());
 
   /* load the dictionaries */
-  if(!load_dictionary((*copy)->dict, "/usr/local/lib/fossology/agents/copyright/copyright.dic") ||
-     !load_dictionary((*copy)->name, "/usr/local/lib/fossology/agents/copyright/names.dic"))
+  if(!load_dictionary((*copy)->dict, copy_dir) ||
+     !load_dictionary((*copy)->name, name_dir))
   {
     return 0;
   }
@@ -713,7 +719,7 @@ char* copy_entry_dict(copy_entry entry)
 /**
  * @brief gets the type of entry this is, i.e. how it was found
  *
- * @param entry the entry to ge the type for
+ * @param entry the entry to get the type for
  * @return the string type of the entry
  */
 char* copy_entry_type(copy_entry entry)

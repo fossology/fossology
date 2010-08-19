@@ -341,16 +341,17 @@ void run_test_files(copyright copy)
 void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
 {
   /* locals */
-  char sql[1024], * tmp = NULL;
-  extern int HBItemsProcessed;
-  cvector_iterator iter;
-  copyright_iterator finds;
-  FILE* input_fp, * mout = NULL;
-  PGresult* pgResult;
+  char sql[1024];               // buffer to hold the sql commands
+  char * tmp;                   // holds the name of the file to open
+  extern int HBItemsProcessed;  // the number of items processed by this agent
+  copyright_iterator finds;     // an iterator to access the copyrights
+  FILE* input_fp;               // the file that will be analyzed
+  FILE * mout = NULL;           // the file that matches will be logged in
+  PGresult* pgResult;           // the result of database quiers
 
   /* initialize memory */
   memset(sql, 0, sizeof(sql));
-  iter = NULL;
+  tmp = NULL;
   finds = NULL;
   input_fp = NULL;
 
@@ -406,7 +407,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
   {
     for(finds = copyright_begin(copy); finds != copyright_end(copy); finds++)
     {
-      copy_entry entry = (copy_entry)*finds;
+      copy_entry entry = *finds;
 
       if(verbose)
       {
@@ -454,10 +455,10 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
     snprintf(sql, sizeof(sql), insert_no_copyright, agent_pk, *(int*)pair_second(curr));
     pgResult = PQexec(pgConn, sql);
 
-    if (PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+    if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
     {
       fprintf(cerr, "ERROR: %s:%d, %s\nOn: %s\n",
-          AGENT_DESC, __LINE__, PQresultErrorMessage(pgResult), sql);
+          __FILE__, __LINE__, PQresultErrorMessage(pgResult), sql);
       PQclear(pgResult);
       exit(-1);
     }
@@ -474,6 +475,21 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
 }
 
 /**
+ * @brief Sets up the tables for the copyright agent within the database
+ *
+ * this will create the copyright table and everything that is related to the
+ * copyright table.
+ *
+ * @param the connection to the database
+ */
+int setup_database(PGconn* pgConn) {
+
+
+
+  return 1;
+}
+
+/**
  * @brief check to make sure the copyright has been created
  *
  * will attempt to access the copyright table, if the response from the database
@@ -485,23 +501,38 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
  */
 int check_copyright_table(PGconn* pgConn)
 {
-  PGresult* pgResult = PQexec(pgConn, check_database_table);
+  /* local variables */
+  PGresult* pgResult; // the result of the database access
+  int ret;            // the value returned by this function
+  char* str;          // the string error message if the database access fails
+  char buffer[256];   // a buffer used for string manipulation
 
+  /* initialize memory and do the sql access */
+  ret = 1;
+  str = NULL;
+  memset(buffer, '\0', sizeof(buffer));
+  pgResult = PQexec(pgConn, check_database_table);
 
+  /* check if the database already exists */
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    str = PQresultErrorMessage(pgResult);
+    if(longest_common(buffer, str, "does not exist") == 14)
+    {
+      fprintf(cerr, "WARNING: %s.%d: Could not find copyright table.", __FILE__, __LINE__);
+      ret = setup_database(pgConn);
+    }
+    else
+    {
+      fprintf(cerr, "ERROR: %s:%d, %s\nOn: %s\n", __FILE__, __LINE__, PQresultErrorMessage(pgResult), check_database_table);
+      ret = 0;
+    }
+    free(str);
+  }
+
+  /* clean up memory and return */
   PQclear(pgResult);
-  return 1;
-}
-
-/**
- *
- *
- *
- */
-int setup_database() {
-  
-  
-  
-  return 1;
+  return ret;
 }
 
 /* ************************************************************************** */
@@ -678,6 +709,12 @@ int main(int argc, char** argv)
     db_connected = 1;
     agent_pk = GetAgentKey(DataBase, AGENT_NAME, 0, "", AGENT_DESC);
     memset(input, '\0', sizeof(input));
+
+    /* make sure that we are connected to the database */
+    if(!check_copyright_table(pgConn))
+    {
+      exit(-1);
+    }
 
     /* enter the main agent loop */
     fprintf(cout, "OK\n");

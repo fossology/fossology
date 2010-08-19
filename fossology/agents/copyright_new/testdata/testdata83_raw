@@ -21,11 +21,11 @@ this file consists of savelog's distribution terms.)
 		     SMAIL GENERAL PUBLIC LICENSE
 		       (Clarified 11 Feb 1988)
 
- <s>Copyright (C)  1988 Landon Curt Noll & Ronald</s> <s>S. Karr</s>
- <s>Copyright (C)  1992 Ronald</s> <s>S. Karr
- Copyleft</s> (GNU) 1988 Landon Curt Noll & Ronald <s>S. Karr
+ <s>Copyright (C)  1988 Landon Curt Noll & Ronald S. Karr</s>
+ <s>Copyright (C)  1992 Ronald S. Karr </s>
+ Copyleft<s> (GNU) 1988 Landon Curt Noll & Ronald S. Karr</s>
 
- </s>Everyone is permitted to copy and distribute verbatim copies
+ Everyone is permitted to copy and distribute verbatim copies
  of this license, but changing it is not allowed.  You can also
  use this wording to make the terms for other programs.
 
@@ -62,8 +62,8 @@ SMAIL.
 
   1. You may copy and distribute verbatim copies of SMAIL source code
 as you receive it, in any medium, provided that you conspicuously and
-appropriately publish on each copy a valid <s>copyright</s> notice "<s>Copyright
-(C) 1988 Landon Curt Noll & Ronald</s> <s>S. Karr"</s> (or with whatever year is
+appropriately publish on each copy a valid <s>copyright notice "Copyright
+(C) 1988 Landon Curt Noll & Ronald S. Karr"</s> (or with whatever year is
 appropriate); keep intact the notices on all files that refer to this
 License Agreement and to the absence of any warranty; and give any
 other recipients of the SMAIL program a copy of this License
@@ -126,7 +126,7 @@ their licenses terminated so long as such parties remain in full compliance.
 
   5. If you wish to incorporate parts of SMAIL into other free
 programs whose distribution conditions are different, write to Landon
-Curt Noll & Ronald <s>S. Karr via</s> the Free Software Foundation at 51
+Curt Noll & Ronald S. Karr via the Free Software Foundation at 51
 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.  We have not yet
 worked out a simple rule that can be stated here, but we will often
 permit this.  We will be guided by the two goals of preserving the
@@ -153,7 +153,7 @@ YOU.  SHOULD SMAIL PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
 NECESSARY SERVICING, REPAIR OR CORRECTION.
 
   IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW WILL LANDON CURT NOLL &
-RONALD <s>S. KARR</s> AND/OR ANY OTHER PARTY WHO MAY MODIFY AND REDISTRIBUTE
+RONALD S. KARR AND/OR ANY OTHER PARTY WHO MAY MODIFY AND REDISTRIBUTE
 SMAIL AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
 LOST PROFITS, LOST MONIES, OR OTHER SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE

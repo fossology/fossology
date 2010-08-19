@@ -71,5 +71,15 @@ SELECT ct_pk \
   FROM copyright \
   LIMIT 1";
 
+/**
+ * This will create the copyright sequence in the database
+ */
+char* create_database_squence = "\
+CREATE SEQUENCE copyright_ct_pk_seq \
+  START WITH 1 \
+  INCREMENT BY 1 \
+  NO MAXVALUE \
+  NO MINVALUE \
+  CACHE 1";
 
 #endif /* SQL_STATEMENTS_H_INCLUDE */
