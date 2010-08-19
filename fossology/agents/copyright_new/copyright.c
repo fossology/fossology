@@ -131,6 +131,7 @@ void strip_empty_entries(copyright copy)
 
   for(iter = copyright_begin(copy); iter != copyright_end(copy); iter++)
   {
+    /* remove if the copyright entry is emtpy */
     if(*iter == NULL || strlen(copy_entry_dict(*iter)) == 0 ||
         strlen(copy_entry_name(*iter)) == 0)
     {
@@ -169,7 +170,6 @@ int contains_copyright(radix_tree tree, char* string, char* buf)
     if(radix_contains(tree, curr))
     {
       strcpy(buf, curr);
-      printf("%s\n",buf);
       return curr - string_copy;
     }
     curr = strtok(NULL, token);
@@ -222,9 +222,9 @@ void* copy_entry_copy(void* to_copy)
   strcpy(new->text, cpy->text);
   strcpy(new->dict_match, cpy->dict_match);
   strcpy(new->name_match, cpy->name_match);
+  new->type = cpy->type;
   new->start_byte = cpy->start_byte;
   new->end_byte = cpy->end_byte;
-  new->type = NULL;
 
   return new;
 }
@@ -336,6 +336,8 @@ int copyright_callout(pcre_callout_block* info)
       strcpy(new_entry->dict_match, "url");
       new_entry->type = "url";
       break;
+    default :
+      return 1;
   }
 
   /* only log the new entry if it wasn't already located by the regex */
@@ -403,6 +405,7 @@ int copyright_init(copyright* copy)
 
   /* set the callout function */
   pcre_callout = copyright_callout;
+
   return 1;
 }
 
@@ -456,10 +459,10 @@ void copyright_analyze(copyright copy, FILE* istr)
   int i, bufidx, bufsize;
   int beg = 0, end = 0;
   char temp[1024];
-  copy_entry entry = (copy_entry)calloc(1, sizeof(struct copy_entry_internal));
+  copy_entry entry;
 
-  assert(copy);
-  assert(istr);
+  /* get memory for the copyright entry */
+  entry = (copy_entry)calloc(1, sizeof(struct copy_entry_internal));
 
   /* open the relevant file */
   fseek(istr, 0, SEEK_SET);
@@ -509,8 +512,8 @@ void copyright_analyze(copyright copy, FILE* istr)
       }
     }
   }
-  copyright_email_url(copy, buf);
 
+  copyright_email_url(copy, buf);
   strip_empty_entries(copy);
   free(entry);
 }

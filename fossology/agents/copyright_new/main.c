@@ -51,22 +51,9 @@ int verbose = 0;                      ///< turn on or off dumping to debug files
 int db_connected = 0;                 ///< indicates if the database is connected
 char* test_dir = "testdata/testdata"; ///< the location of the labeled and raw testing data
 
-/**
- * @brief prints the usage statement for the copyright agent
- *
- * @param argv the command line namme of the function
- */
-void copyright_usage(char* arg)
-{
-  fprintf(cout, "Usage: %s [options]\n", arg);
-  fprintf(cout, "  Options are:\n");
-  fprintf(cout, "  -d  :: Turns verbose on, matches printed to Matches file.\n");
-  fprintf(cout, "  -i  :: Initialize the database, the exit.\n");
-  fprintf(cout, "  -c  :: Run command line, does not write to database.\n");
-  fprintf(cout, "  -t  :: Run the accuracy tests, nothing written to database.\n");
-  fprintf(cout, "NOTE: -i, -c, and -t cause the agent to perform the request\n");
-  fprintf(cout, "       and then exit without waiting for scheduler input\n");
-}
+/* ************************************************************************** */
+/* **** Utility Functions *************************************************** */
+/* ************************************************************************** */
 
 /**
  * @brief find the longest common substring between two strings
@@ -118,6 +105,39 @@ int longest_common(char* dst, char* lhs, char* rhs)
 
   return strlen(dst);
 }
+
+/**
+ * @brief replaces all of the ' in a string with ''
+ *
+ * this fixes the problem of an sql string ending when it sees the second '
+ * since there will be two escentially espacing both
+ *
+ * @param str the string to replace all of the 's in
+ */
+void replace_apostrophes(char* str) {
+  /* locals */
+  char tmp[1024];
+  char* ptr_t, * ptr_s;
+  
+  memset(tmp, '\0', sizeof(tmp));
+  ptr_t = tmp;
+  ptr_s = str;
+  
+  while(*ptr_s)
+  {
+    *(ptr_t++) = *(ptr_s++);
+    if(*ptr_s == '\'')
+      *(ptr_t++) = '\'';
+    if(*ptr_s == '\\')
+      *(ptr_t++) = '\\';
+  }
+  
+  strcpy(str, tmp);
+}
+
+/* ************************************************************************** */
+/* **** Accuracy Tests ****************************************************** */
+/* ************************************************************************** */
 
 /**
  * @brief runs the labeled test files to determine accuracy
@@ -304,6 +324,10 @@ void run_test_files(copyright copy)
   cvector_destroy(compare);
 }
 
+/* ************************************************************************** */
+/* **** Database Access ***************************************************** */
+/* ************************************************************************** */
+
 /**
  * @brief perform the analysis of a given list of files
  *
@@ -352,8 +376,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
     tmp = (char*)pair_first(curr);
   }
 
-  fprintf(cout, "%s\n", RepMkPath("files", (char*)pair_first(curr)));
-
   /* attempt to open the file */
   input_fp = fopen(tmp, "rb");
   if(!input_fp)
@@ -398,6 +420,10 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
 
       if(*(int*)pair_second(curr) >= 0)
       {
+        /* ensure legal sql */
+        replace_apostrophes(copy_entry_text(entry));
+
+        /* place the copyright in the table */
         memset(sql, '\0', sizeof(sql));
         snprintf(sql, sizeof(sql), insert_copyright, agent_pk, *(int*)pair_second(curr),
             copy_entry_start(entry), copy_entry_end(entry),
@@ -409,7 +435,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
           fprintf(cerr, "ERROR: %s.%d: %s\nOn: %s\n",
               __FILE__, __LINE__, PQresultErrorMessage(pgResult), sql);
           PQclear(pgResult);
-          exit(-1);
         }
       }
       else
@@ -465,6 +490,27 @@ int check_copyright_table(PGconn* pgConn)
 
   PQclear(pgResult);
   return 0;
+}
+
+/* ************************************************************************** */
+/* **** Main Functions ****************************************************** */
+/* ************************************************************************** */
+
+/**
+ * @brief prints the usage statement for the copyright agent
+ *
+ * @param argv the command line namme of the function
+ */
+void copyright_usage(char* arg)
+{
+  fprintf(cout, "Usage: %s [options]\n", arg);
+  fprintf(cout, "  Options are:\n");
+  fprintf(cout, "  -d  :: Turns verbose on, matches printed to Matches file.\n");
+  fprintf(cout, "  -i  :: Initialize the database, the exit.\n");
+  fprintf(cout, "  -c  :: Run command line, does not write to database.\n");
+  fprintf(cout, "  -t  :: Run the accuracy tests, nothing written to database.\n");
+  fprintf(cout, "NOTE: -i, -c, and -t cause the agent to perform the request\n");
+  fprintf(cout, "       and then exit without waiting for scheduler input\n");
 }
 
 /**
@@ -555,7 +601,12 @@ int main(int argc, char** argv)
   cin = stdin;
 
   /* initialize complex data strcutres */
-  copyright_init(&copy);
+  if(!copyright_init(&copy)) {
+    fprintf(cerr, "FATAL: %s.%d: copyright initialization failed\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR: %s\n", strerror(errno));
+    fflush(cerr);
+    return -1;
+  }
 
   /* parse the command line options */
   while((c = getopt(argc, argv, "dc:ti")) != -1)
@@ -605,7 +656,7 @@ int main(int argc, char** argv)
     DataBase = DBopen();
     if(!DataBase)
     {
-      fprintf(cerr, "FATAL: Copyright agent unable to connect to database.\n");
+      fprintf(cerr, "FATAL: %s.%d: Copyright agent unable to connect to database.\n", __FILE__, __LINE__);
       exit(-1);
     }
 
@@ -614,9 +665,10 @@ int main(int argc, char** argv)
     pair_init(&curr, string_function_registry(), int_function_registry());
     db_connected = 1;
     agent_pk = GetAgentKey(DataBase, AGENT_NAME, 0, "", AGENT_DESC);
+    memset(input, '\0', sizeof(input));
 
     /* enter the main agent loop */
-    fprintf(cout, "OK");
+    fprintf(cout, "OK\n");
     while(fgets(input, FILENAME_MAX, cin) != NULL)
     {
       upload_pk = atol(input);
@@ -634,7 +686,7 @@ int main(int argc, char** argv)
       }
 
       PQclear(pgResult);
-      fprintf(cout, "OK");
+      fprintf(cout, "OK\n");
     }
 
     fprintf(cout, "BYE");

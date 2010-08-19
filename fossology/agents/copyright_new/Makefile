@@ -31,6 +31,7 @@ HEADER = cvector.h \
 		 radixtree.h \
 		 copyright.h \
 		 pair.h \
+     sql_statements.h
 
 OBJS   = cvector.o \
 		 radixtree.o \
