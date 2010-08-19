@@ -177,6 +177,7 @@ void cvector_push_back(cvector vec, void* datum)
     vec->data[vec->size++] = NULL;
   }
 }
+
 /*!
  * @brief insert an element into the vector at iter
  *
@@ -223,7 +224,6 @@ cvector_iterator cvector_insert(cvector vec,
 
   return ret;
 }
-
 
 /*!
  * @brief insert a set of element from one containner into another
