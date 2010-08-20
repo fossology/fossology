@@ -25,7 +25,7 @@ uninstall:
 test: all
 	@echo "*** No tests available for agents/$(EXE) ***"
 
-coverage: test
+coverage:
 	@echo "NOTICE: no coverage available for wget_agent"
 
 clean:

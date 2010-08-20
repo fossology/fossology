@@ -104,7 +104,7 @@ clean:
 test: all
 	@echo "NOTICE: no tests available for scheduler"
 
-coverage: test
+coverage:
 	@echo "NOTICE: no coverage available for scheduler"
 
 include $(DEPS)

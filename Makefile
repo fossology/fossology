@@ -51,7 +51,7 @@ $(TESTDIRS):
 	$(MAKE) -C $(@:test-%=%) test
 
 
-coverage: test $(COVDIRS)
+coverage: $(COVDIRS)
 $(COVDIRS):
 	$(MAKE) -C $(@:cov-%=%) coverage
 

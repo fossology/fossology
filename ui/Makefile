@@ -61,7 +61,7 @@ uninstall:
 test: all
 	@echo "*** Tests are still run by hand for ui/ ***"
 
-coverage: test
+coverage:
 	@echo "NOTICE: no coverage available for ui"
 
 clean:
