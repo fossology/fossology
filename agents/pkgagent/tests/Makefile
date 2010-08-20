@@ -9,7 +9,7 @@ all: $(TEST_FILES)
 test: $(TEST_FIlES)
 	$(MAKE) -C $(TEST_FILES) test
 
-coverage: test
+coverage:
 	$(MAKE) -C $(TEST_FILES) coverage 
 
 clean:

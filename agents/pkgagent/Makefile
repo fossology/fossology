@@ -37,12 +37,13 @@ test: all
 
 coverage: libpkgagent_cov.so
 	$(MAKE) -C $(TESTDIRS) coverage
+
 libpkgagent_cov.so: pkgagent.c $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
-        if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
-        $(CC) -shared -fPIC -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM) -o $@; \
-        else \
-        $(CC) -shared -fPIC -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
-        fi
+	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
+	$(CC) -shared -fPIC -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM) -o $@; \
+	else \
+	$(CC) -shared -fPIC -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
+fi
 
 clean:
 	rm -f $(EXE) *.o *.so core *.gc*; \
