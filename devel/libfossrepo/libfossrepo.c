@@ -622,6 +622,13 @@ FILE *	RepFwriteTmp	(char *Type, char *Filename, char *Ext)
   setegid(RepGroup);
 #endif
   F = fopen(Fname,"wb");
+  if (!F)
+  {
+    fprintf(stderr, "ERROR: %s, in %s:%d, failed to open [%s]\n",
+            strerror(errno), __FILE__,__LINE__, Fname);
+    free(Fname);
+    return(NULL);
+  }
   chmod(Fname,S_ISGID|S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP); /* when umask fails */
 #if GROUP
   setegid(Gid);
