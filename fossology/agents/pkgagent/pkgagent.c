@@ -500,7 +500,7 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
  * 	@param struct rpmpkginfo *pi
  *
  */
-void	RecordMetadataRPM	(struct rpmpkginfo *pi)
+int	RecordMetadataRPM	(struct rpmpkginfo *pi)
 {
   char SQL[MAXCMD];
   int rc;
@@ -514,8 +514,7 @@ void	RecordMetadataRPM	(struct rpmpkginfo *pi)
     printf("ERROR pfile %s Unable to access database.\n",pi->pFile);
     printf("LOG pfile %s ERROR: %s\n",pi->pFile,SQL);
     fflush(stdout);
-    DBclose(DB);
-    exit(-1);
+    return FALSE;
   }
   if (DBdatasize(DB) <=0)
   {
@@ -529,8 +528,7 @@ void	RecordMetadataRPM	(struct rpmpkginfo *pi)
       printf("ERROR pfile %s Unable to access database.\n",pi->pFile);
       printf("LOG pfile %s ERROR: %s\n",pi->pFile,SQL);
       fflush(stdout);
-      DBclose(DB);
-      exit(-1);
+      return FALSE;
     }
     if (rc != 2)  
     {
@@ -549,8 +547,7 @@ void	RecordMetadataRPM	(struct rpmpkginfo *pi)
           DBaccess(DB,"ROLLBACK;");
           printf("LOG pkg %d ERROR: %s\n",pkg_pk,SQL);
           fflush(stdout);
-          DBclose(DB);
-          exit(-1);
+          return FALSE;
         }
       }
       DBaccess(DB,"COMMIT;");
@@ -559,6 +556,7 @@ void	RecordMetadataRPM	(struct rpmpkginfo *pi)
       DBaccess(DB,"ROLLBACK;"); 
     }
   }
+  return TRUE;	
 } /* RecordMetadata(struct rpmpkginfo *pi) */
 
 
@@ -608,7 +606,7 @@ char * ParseDebFile(char *Sin, char *Field, char *Value)
  *
  * get debian binary package info
  */
-void	GetMetadataDebBinary	(struct debpkginfo *pi)
+int	GetMetadataDebBinary	(struct debpkginfo *pi)
 {
   char *repfile;
   char *filename;
@@ -630,31 +628,30 @@ void	GetMetadataDebBinary	(struct debpkginfo *pi)
   {
     printf("LOG ERROR: %s\n",SQL);
     fflush(stdout);
-    DBclose(DB);
-    exit(-1);
+    return FALSE;
   }
-  filename = DBgetvalue(DB,0,0);
-  if (filename)
+  if (DBdatasize(DB) > 0)
   {
+    filename = DBgetvalue(DB,0,0);	
     repfile = RepMkPath("files", filename);
     if (!repfile) {
       printf("FATAL: PkgAgent unable to open file %s\n",filename);
       fflush(stdout);
-      DBclose(DB);
-      exit(-1);
+      return FALSE;
     }
   } else {
-    printf("FATAL: Unable to find debian/control file!\n");
-    fflush(stdout);
-    DBclose(DB);
-    exit(-1);
+    printf("LOG: Unable to find debian/control file! This file had wrong mimetype, ignore it!\n");
+    memset(SQL,0,sizeof(SQL));
+    snprintf(SQL,sizeof(SQL),"UPDATE pfile SET pfile_mimetypefk = NULL WHERE pfile_pk = %ld;", pi->pFileFk);
+    DBaccess(DB,SQL);
+    return FALSE;
   }
 
   /* Parse the debian/control file to get every Field and Value */
   if ((fp = fopen(repfile, "r")) == NULL){
     printf("FATAL: Unable to open debian/control file %s\n",repfile);
     fflush(stdout);
-    exit(-1);
+    return FALSE;
   }
 
   while (fgets(line,2048,fp)!=NULL)
@@ -721,6 +718,7 @@ void	GetMetadataDebBinary	(struct debpkginfo *pi)
     EscapeString(temp, pi->description, sizeof(pi->description));
 
   fclose(fp);
+  return TRUE;
 }/* GetMetadataDebBinary(struct debpkginfo *pi) */
 
 /**
@@ -728,7 +726,7 @@ void	GetMetadataDebBinary	(struct debpkginfo *pi)
  * 
  * Store debian package info into database
  */
-void    RecordMetadataDEB       (struct debpkginfo *pi)
+int    RecordMetadataDEB       (struct debpkginfo *pi)
 {
   char SQL[MAXCMD];
   int rc;
@@ -742,8 +740,7 @@ void    RecordMetadataDEB       (struct debpkginfo *pi)
     printf("ERROR pfile %s Unable to access database.\n",pi->pFile);
     printf("LOG pfile %s ERROR: %s\n",pi->pFile,SQL);
     fflush(stdout);
-    DBclose(DB);
-    exit(-1);
+    return FALSE;
   }
   if (DBdatasize(DB) <=0)
   {
@@ -757,8 +754,7 @@ void    RecordMetadataDEB       (struct debpkginfo *pi)
       printf("ERROR pfile %s Unable to access database.\n",pi->pFile);
       printf("LOG pfile %s ERROR: %s\n",pi->pFile,SQL);
       fflush(stdout);
-      DBclose(DB);
-      exit(-1);
+      return FALSE;
     }
     if (rc != 2)
     {
@@ -778,8 +774,7 @@ void    RecordMetadataDEB       (struct debpkginfo *pi)
           DBaccess(DB,"ROLLBACK;");
           printf("LOG pkg %d ERROR: %s\n",pkg_pk,SQL);
           fflush(stdout);
-          DBclose(DB);
-          exit(-1);
+          return FALSE;
         }
       }
       DBaccess(DB,"COMMIT;");
@@ -788,6 +783,7 @@ void    RecordMetadataDEB       (struct debpkginfo *pi)
       DBaccess(DB,"ROLLBACK;");
     }
   }
+  return TRUE;
 }/* RecordMetadataDEB(struct debpkginfo *pi) */
 
 /**
@@ -795,7 +791,7 @@ void    RecordMetadataDEB       (struct debpkginfo *pi)
  *
  * get debian source package info from .dsc file
  **/
-void	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
+int	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
 { 
   FILE *fp;
   char field[256];
@@ -807,7 +803,7 @@ void	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
   if ((fp = fopen(repFile, "r")) == NULL){
     printf("FATAL: Unable to open .dsc file %s\n",repFile);
     fflush(stdout);
-    exit(-1);
+    return FALSE;
   }
 
   while (fgets(line,2048,fp)!=NULL)
@@ -865,6 +861,7 @@ void	GetMetadataDebSource	(char *repFile, struct debpkginfo *pi)
   }
 
   fclose(fp);
+  return TRUE;
 }/*  GetMetadataDebSource(char *repFile, struct debpkginfo *pi) */
 
 /***********************************************
@@ -952,11 +949,13 @@ int	main	(int argc, char *argv[])
             DBclose(DB);
             exit(-1);
 	  }
-          GetMetadata(repFile,glb_rpmpi);
-          RecordMetadataRPM(glb_rpmpi);
+          if (GetMetadata(repFile,glb_rpmpi)){
+            RecordMetadataRPM(glb_rpmpi);
+	  }
         } else if (PKG_DEB) {
-          GetMetadataDebBinary(glb_debpi);
-          RecordMetadataDEB(glb_debpi);
+	  if (GetMetadataDebBinary(glb_debpi)){
+            RecordMetadataDEB(glb_debpi);
+	  }	
 	} else if (PKG_DEB_SRC) {
 	  repFile = RepMkPath("files", glb_debpi->pFile);
 	  if (!repFile) {
@@ -966,8 +965,9 @@ int	main	(int argc, char *argv[])
             DBclose(DB);
             exit(-1);
           }
-	  GetMetadataDebSource(repFile,glb_debpi);
-	  RecordMetadataDEB(glb_debpi);
+	  if (GetMetadataDebSource(repFile,glb_debpi)){
+	    RecordMetadataDEB(glb_debpi);
+	  }
         } else {
 	  /* Deal with the other package*/
 	}
