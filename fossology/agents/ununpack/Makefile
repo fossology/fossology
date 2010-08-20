@@ -22,7 +22,7 @@ departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
 
 ununpack: $(UUSRC) $(UUHDR) $(VARS) $(DB) $(REPO)
-	$(CC) $(UUSRC) $(CFLAGS_LOCAL) -o $@
+	$(CC) $(UUSRC) $(CFLAGS_LOCAL) -o $@ -g
 
 metahandle.h: metahandle.tab metahandle.pl
 	if [ ! -x metahandle.pl ] ; then chmod u+x metahandle.pl; fi
@@ -51,7 +51,7 @@ uninstall: $(VARS)
 test: all
 	@echo "*** No tests available for agents/$(EXE) ***"
 
-coverage: test
+coverage:
 	@echo "NOTICE: no coverage available for ununpack"
 
 clean:

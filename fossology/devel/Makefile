@@ -71,7 +71,7 @@ test: all $(TESTDIRS)
 $(TESTDIRS):
 	$(MAKE) -C $(@:test-%=%) test
 
-coverage: test
+coverage:
 	@echo "NOTICE: no coverage available for devel"
 
 clean: $(CLEANDIRS)

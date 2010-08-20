@@ -70,7 +70,7 @@ clean:
 test: all
 	@echo "NOTICE: no tests available for common"
 
-coverage: test
+coverage:
         @echo "NOTICE: no coverage available for common""
 
 .PHONY: all install uninstall clean test

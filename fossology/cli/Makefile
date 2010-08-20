@@ -49,7 +49,7 @@ uninstall:
 test: all
 	@echo "*** Tests are still run by hand for cli/ ***"
 
-coverage: test
+coverage:
 	@echo "NOTICE: no coverage available for cli"
 
 clean:
