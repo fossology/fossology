@@ -347,7 +347,7 @@ def table_check(db):
     sql = 'SELECT ct_pk FROM copyright LIMIT 1'
     if db.access(sql) != 1:
         error = db.errmsg()
-        if error == 'relation "copyright" does not exist':
+        if error.find('does not exist') != -1:
             print >> sys.stdout, 'WARNING: Could not find copyright table. Will try to setup automatically. If you continue to have trouble try using %s --setup-database' % sys.argv[0]
             return setup_database()
 
