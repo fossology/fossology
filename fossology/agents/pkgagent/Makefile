@@ -15,7 +15,7 @@ CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 
 all: $(EXE)
 $(EXE): main.c libpkgagent.so $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
-	$(CC) main.c $(PYTHONLIBEXECDIR)/libpkgagent.so $(CFLAGS_LOCAL) -o $@
+	$(CC) main.c $(LIBDIR)/libpkgagent.so $(CFLAGS_LOCAL) -o $@
 
 libpkgagent.so: pkgagent.c $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
@@ -25,16 +25,12 @@ libpkgagent.so: pkgagent.c $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
 	fi
 
 install: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
-	mkdir -p $(DESTDIR)$(PYTHONLIBEXECDIR)
-        $(INSTALL_PROGRAM) libpkgagent.so $(DESTDIR)$(PYTHONLIBEXECDIR)/libpkgagent.so
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)	
+        $(INSTALL_PROGRAM) libpkgagent.so $(DESTDIR)$(LIBDIR)/libpkgagent.so
 
 uninstall:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
-	rm -f $(DESTDIR)$(PYTHONLIBEXECDIR)/libpkgagent.so
-        if [ -d "$(DESTDIR)$(PYTHONLIBEXECDIR)" ]; then \
-           rmdir $(DESTDIR)$(PYTHONLIBEXECDIR);\
-        fi
+	rm -f $(DESTDIR)$(LIBDIR)/libpkgagent.so
 
 test: all 
 	$(MAKE) -C $(TESTDIRS) test
