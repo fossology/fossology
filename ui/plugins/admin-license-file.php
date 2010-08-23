@@ -69,9 +69,9 @@ function Inputfm()
   $Selected =  ($_REQUEST['req_marydone'] == 'all') ? " SELECTED ": "";
   $V.= "<option value='all' $Selected> All </option>";
   $Selected =  ($_REQUEST['req_marydone'] == 'done') ? " SELECTED ": "";
-  $V.= "<option value='done' $Selected> Mary is done </option>";
+  $V.= "<option value='done' $Selected> Checked </option>";
   $Selected =  ($_REQUEST['req_marydone'] == 'notdone') ? " SELECTED ": "";
-  $V.= "<option value='notdone' $Selected> Mary is not done </option>";
+  $V.= "<option value='notdone' $Selected> Not Checked </option>";
   $V.= "</SELECT>";
   $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
@@ -142,7 +142,7 @@ function LicenseList($namestr, $filter)
   $ob .= "<table rules='rows' cellpadding='3'>";
   $ob .= "<tr>";
   $ob .= "<th>Edit</th>";
-  $ob .= "<th>Mary<br>Done</th>";
+  $ob .= "<th>Checked</th>";
   $ob .= "<th>Shortname</th>";
   $ob .= "<th>Fullname</th>";
   $ob .= "<th>Text</th>";
@@ -236,7 +236,7 @@ function Updatefm($rf_pk)
     $ob .= "<tr>";
     $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "marydone", $marydone);
-    $ob .= "<td align=right>Mary Done</td>";
+    $ob .= "<td align=right>Checked</td>";
     $ob .= "<td align=left>$select</td>";
     $ob .= "</tr>";
 
