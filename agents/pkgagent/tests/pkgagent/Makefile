@@ -11,15 +11,8 @@ CFLAGS_LOCAL_RPM_4_4=$(CFLAGS_LOCAL) -D_RPM_4_4
 CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 TEST_OBJ=testRun.o testGetFieldValue.o testGetMetadata.o 
 all: $(EXE)
-$(EXE): libpkgagent.so $(TEST_OBJ)
-	$(CC) -o $@ $(TEST_OBJ) -I/usr/local/include -L/usr/local/lib -lcunit ./libpkgagent.so
-
-libpkgagent.so: ../../pkgagent.c $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	if [ `rpm --version|awk '{print $$3}'` \< "4.5" ] ; then \
-	$(CC) -shared -fPIC -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
-	else \
-	$(CC) -shared -fPIC -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM) -o $@; \
-	fi
+$(EXE): $(TEST_OBJ) libpkgagent.so
+	$(CC) -o $@ $(TEST_OBJ) -I/usr/local/include -L/usr/local/lib -lcunit ../../libpkgagent.so
 
 $(TEST_OBJ): %.o: %.c
 	$(CC) -c -g $<
@@ -27,9 +20,17 @@ $(TEST_OBJ): %.o: %.c
 test: all $(EXE)
 	./$(EXE)
 
-coverage: test
-	lcov --directory  .   --capture --output-file cov.txt; \
+coverage: $(TEST_OBJ) libpkgagent_cov.so
+	$(CC) -o $(EXE) $(TEST_OBJ) -I/usr/local/include -L/usr/local/lib -lcunit ../../libpkgagent_cov.so; \
+	./$(EXE); \
+	lcov --directory  ../../   --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
+
+libpkgagent_cov.so:
+	$(MAKE) -C ../../ $@
+
+libpkgagent.so:
+	$(MAKE) -C ../../ $@
 
 clean:
 	rm -fr $(EXE) *.o core *.so *.g* *.xml *.txt results
