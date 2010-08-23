@@ -276,7 +276,7 @@ function Updatefm($rf_pk)
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $dettype = ($row['rf_detector_type'] == '1') ? "Reference License" : "Nomos";
+    $dettype = ($row['rf_detector_type'] == '2') ? "Nomos" : "Reference License";
     $select = Array2SingleSelect(array("1"=>"Reference License", "2"=>"Nomos"), "rf_detector_type", $dettype);
     $ob .= "<td align=right>Detector Type</td>";
     $ob .= "<td align=left>$select</td>";
