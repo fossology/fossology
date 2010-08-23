@@ -482,9 +482,117 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
  *
  * @param the connection to the database
  */
-int setup_database(PGconn* pgConn) {
+int setup_database(PGconn* pgConn)
+{
+  /* locals */
+  int exists = 0;     // whether any piece of the table already exists
+  PGresult* pgResult; // the result from a database access
 
+  /* initialize memory */
+  pgResult = NULL;
 
+  /* start by creating the copyright sequence */
+  pgResult = PQexec(pgConn, create_database_squence);
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    if(strcmp(PQresultErrorMessage(pgResult), "relation \"copyright_ct_pk_seq\" already exists"))
+    {
+      fprintf(cerr, "ERROR: %s.%d: Could not create copyright_ct_pk_seq.\n", __FILE__, __LINE__);
+      fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+      exit(-1);
+    }
+    else
+    {
+      exists = 1;
+    }
+  }
+  PQclear(pgResult);
+
+  /* if necessary change the owner of the copyright table */
+  if(!exists)
+  {
+    pgResult = PQexec(pgConn, alter_database_table);
+    if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+    {
+      fprintf(cerr, "ERROR: %s.%d: Could not alter copyrght_ct_pk_seq.\n", __FILE__, __LINE__);
+      fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+      exit(-1);
+    }
+  }
+  PQclear(pgResult);
+
+  /* create the copyright database table */
+  pgResult = PQexec(pgConn, create_database_table);
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    if(strcmp(PQresultErrorMessage(pgResult), "relation \"copyright_ct_pk_seq\" already exists"))
+    {
+      fprintf(cerr, "ERROR: %s.%d: Could not create table copyright.\n", __FILE__, __LINE__);
+      fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+      exit(-1);
+    }
+  }
+  PQclear(pgResult);
+
+  /* create the pfile foreign key index */
+  pgResult = PQexec(pgConn, create_pfile_foreign_index);
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    fprintf(cerr, "ERROR: %s.%d: Could not create copyright pfile_fk.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+    return -1;
+  }
+  PQclear(pgResult);
+
+  /* create the agent foreign key index */
+  pgResult = PQexec(pgConn, create_agent_foreign_index);
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    fprintf(cerr, "ERROR: %s.%d: Could not create copyright agent_fk.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+    return -1;
+  }
+  PQclear(pgResult);
+
+  /* alter the owner of the copyright table */
+  pgResult = PQexec(pgConn, alter_copyright_owner);
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    fprintf(cerr, "ERROR: %s.%d: Could not change the onwer of the copyright table.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+    return -1;
+  }
+  PQclear(pgResult);
+
+  /* alter the owner of the copyright table */
+  pgResult = PQexec(pgConn, alter_copyright_owner);
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    fprintf(cerr, "ERROR: %s.%d: Could not change the onwer of the copyright table.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+    return -1;
+  }
+  PQclear(pgResult);
+
+  /* alter pfile_fk ??? TODO */
+  pgResult = PQexec(pgConn, alter_table_pfile);
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    fprintf(cerr, "ERROR: %s.%d: Could not alter pfile_fk in copyright table.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+    return -1;
+  }
+  PQclear(pgResult);
+
+  /* alter agent_fk ??? TODO */
+  pgResult = PQexec(pgConn, alter_table_agent);
+  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  {
+    fprintf(cerr, "ERROR: %s.%d: Could not alter agent_fk in copyright table.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+    return -1;
+  }
+  PQclear(pgResult);
 
   return 1;
 }
@@ -514,7 +622,7 @@ int check_copyright_table(PGconn* pgConn)
   pgResult = PQexec(pgConn, check_database_table);
 
   /* check if the database already exists */
-  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
+  if(PQresultStatus(pgResult) != PGRES_TUPLES_OK)
   {
     str = PQresultErrorMessage(pgResult);
     if(longest_common(buffer, str, "does not exist") == 14)
