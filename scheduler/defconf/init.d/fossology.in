@@ -44,7 +44,6 @@ case "$1" in
   start)
 	echo -n "Starting $DESC: "
 	$DAEMON $SCHEDULEROPT
-	echo "$NAME."
     $WATCHDOG
 	;;
   stop)
@@ -83,6 +82,7 @@ case "$1" in
     $WATCHDOG -k
 	$DAEMON -k
 	$DAEMON $SCHEDULEROPT
+	echo "$NAME."
     $WATCHDOG
 	;;
   *)
