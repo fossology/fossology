@@ -281,7 +281,7 @@ def agent(model,runonpfiles=False):
 
                 for row in rows:
                     if analyze(row['pfile_pk'], row['pfilename'], agent_pk, model, db) != 0:
-                        print >> sys.stdout, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, jobs[i]['pfile_pk'], jobs[i]['pfilename'])
+                      print >> sys.stdout, 'ERROR: Could not process file.\n\tupload_pk = %s, pfile_pk = %s, pfilename = %s' % (upload_pk, row['pfile_pk'], row['pfilename'])
                     else:
                         hb.increment()
 
