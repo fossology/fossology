@@ -117,7 +117,7 @@ function SelectAll()
   }
 //-->
 </script>';
-  $V .= "\n";
+  $V .= _("\n");
 
     /*** BEGIN: code from mredkj.com ***/
     $V .= '
@@ -180,7 +180,7 @@ function moveOptions(theSelFrom, theSelTo)
 //-->
 </script>';
     /*** END: code from mredkj.com ***/
-    $V .= "\n";
+    $V .= _("\n");
     return($V);
     } // LicGroupJavascript()
 
@@ -194,7 +194,9 @@ function moveOptions(theSelFrom, theSelTo)
     global $DB;
     /* Get list of groups */
     $V = "";
-    if ($PermitNew) { $V .= "<option value='-1'>[New Group]</option>\n"; }
+$text = _("[New Group]");
+$text1 = _("\n");
+    if ($PermitNew) { $V .= "<option value='-1'>$text</option>$text1"; }
     if (empty($Group))
       {
       foreach($this->LicGroupPlugin->GrpInGroup as $G => $g)
@@ -210,9 +212,9 @@ function moveOptions(theSelFrom, theSelTo)
     $GrpInGroup = &$this->LicGroupPlugin->GrpInGroup[$Group];
     if ($GrpInGroup['id'] == 'phrase') { return($V); }
 
-    $V .= "<option ";
+    $V .= _("<option ");
     if ($SelectKey == $GrpInGroup['id']) { $V .= "selected "; }
-    $V .= "value='" . $GrpInGroup['id'] . "'>";
+    $V .= _("value='" . $GrpInGroup['id'] . "'>");
     for($i=0; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
     $V .= htmlentities($GrpInGroup['name']);
     $V .= "</option>\n";
@@ -399,32 +401,40 @@ function moveOptions(theSelFrom, theSelTo)
 
     /* List groups fields */
     $V .= "<tr>\n";
-    $V .= "<td width='20%'>Select management action</td>";
+$text = _("Select management action");
+    $V .= "<td width='20%'>$text</td>";
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&groupkey=";
     $V .= "<td><select name='groupkey' onChange='window.open(\"$Uri\"+this.value,\"_top\");'>\n";
     $V .= $this->LicGroupCurrList($GroupKey,1);
     $V .= "</select>\n";
     /* Permit delete */
-    $V .= "<input type='checkbox' value='1' name='delete' onclick='ToggleForm(this.checked);'><b>Check to delete this license group!</b></td>\n";
+$text = _("Check to delete this license group!");
+    $V .= "<input type='checkbox' value='1' name='delete' onclick='ToggleForm(this.checked);'><b>$text</b></td>\n";
     $V .= "</td>";
 
     /* Text fields */
     $V .= "</tr><tr>\n";
-    $V .= "<td width='20%'>Group name</td><td><input type='text' name='name' size='60' value='" . htmlentities($GroupName,ENT_QUOTES) . "'></td>\n";
+$text = _("Group name");
+$text1 = _("");
+    $V .= "<td width='20%'>$text</td><td>$text1<input type='text' name='name' size='60' value='";
     $V .= "</tr><tr>\n";
-    $V .= "<td>Group description</td><td><input type='text' name='desc' size='60' value='" . htmlentities($GroupDesc,ENT_QUOTES) . "'></td>\n";
+$text = _("Group description");
+$text1 = _("");
+    $V .= "<td>$text</td><td>$text1<input type='text' name='desc' size='60' value='";
 
     $V .= "</tr><tr>\n";
-    $V .= "<td>Group color</td><td>";
+$text = _("Group color");
+$text1 = _("");
+    $V .= "<td>$text</td><td>$text1";
     $V .= "<select name='color' style='background-color:$GroupColor' onSelect='this.style.background=this.value;' onChange='this.style.background=this.value;'>\n";
     foreach($ColorParts as $C1)
     foreach($ColorParts as $C2)
     foreach($ColorParts as $C3)
       {
       $Color = "#" . $C1 . $C2 . $C3;
-      $V .= "<option value='$Color' style='background-color:$Color'";
+      $V .= _("<option value='$Color' style='background-color:$Color'");
       if (!strcasecmp($Color,$GroupColor)) { $V .= " selected"; }
-      $V .= ">";
+      $V .= _(">");
       // $V .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
       $V .= $Color;
       $V .= "</option>";
@@ -433,15 +443,19 @@ function moveOptions(theSelFrom, theSelTo)
 
     /* Get the list of licenses */
     $V .= "</tr><tr>\n";
-    $V .= "<td>Select licenses to include in the group</td><td>";
+$text = _("Select licenses to include in the group");
+$text1 = _("");
+    $V .= "<td>$text</td><td>$text1";
     $V .= "<table width='100%'>";
-    $V .= "<tr><td align='center' width='45%'>Available licenses</td><td width='10%'></td><td width='45%' align='center'>Licenses in this Group</td></tr>";
+$text = _("Available licenses");
+$text1 = _("");
+    $V .= "<tr><td align='center' width='45%'>$text</td><td width='10%'>$text1</td><td width='45%' align='center'>Licenses in this Group</td></tr>";
     $V .= "<tr>";
     $V .= "<tr><td>";
     $V .= "<select onFocus='UnselectForm(\"liclist\");' multiple='multiple' id='licavailable' name='licavailable' size='10'>";
     foreach($LicAvailable as $Name => $Key)
       {
-      $V .= "<option value='$Key'";
+      $V .= _("<option value='$Key'");
       $V .= ">" . htmlentities($Name) . "</option>\n";
       }
     $V .= "</select>";
@@ -469,13 +483,17 @@ function moveOptions(theSelFrom, theSelTo)
     $Uri .= "&licset=";
     $Uri .= "' + document.getElementById('liclist').value";
     $Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes'); }";
-    $V .= "<a href='#' onClick=\"$Uri\">View</a><hr/>\n";
+$text = _("View");
+    $V .= "<a href='#' onClick=\"$Uri\">$text</a><hr/>\n";
 
     /*** Add --> ***/
-    $V .= "<a href='#' onClick='moveOptions(document.formy.licavailable,document.formy.liclist);'>Add&rarr;</a><P/>\n";
+$text = _("Add&rarr;");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.licavailable,document.formy.liclist);'>$text</a><P/>\n";
 
     /*** <-- Remove ***/
-    $V .= "<a href='#' onClick='moveOptions(document.formy.liclist,document.formy.licavailable);'>&larr;Remove</a>\n";
+$text = _("&larr;Remove");
+$text1 = _("\n");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.liclist,document.formy.licavailable);'>$text</a>$text1";
     $V .= "</center>\n";
 
     /* List the license groups */
@@ -492,9 +510,13 @@ function moveOptions(theSelFrom, theSelTo)
 
     /* Groups can contain groups */
     $V .= "</tr><tr>\n";
-    $V .= "<td>Select subgroups to include in this group</td><td>";
+$text = _("Select subgroups to include in this group");
+$text1 = _("");
+    $V .= "<td>$text</td><td>$text1";
     $V .= "<table width='100%'>";
-    $V .= "<tr><td align='center' width='45%'>Available subgroups</td><td width='10%'></td><td width='45%' align='center'>Subgroups in this Group</td></tr>";
+$text = _("Available subgroups");
+$text1 = _("");
+    $V .= "<tr><td align='center' width='45%'>$text</td><td width='10%'>$text1</td><td width='45%' align='center'>Subgroups in this Group</td></tr>";
     $V .= "<tr>";
     $V .= "<tr><td>";
     $V .= "<select multiple='multiple' id='grpavailable' name='grpavailable' size='10'>";
@@ -522,10 +544,13 @@ function moveOptions(theSelFrom, theSelTo)
 
     /*** Add --> ***/
     $V .= "</td><td>";
-    $V .= "<a href='#' onClick='moveOptions(document.formy.grpavailable,document.formy.grplist);'>Add&rarr;</a><P/>\n";
+$text = _("Add&rarr;");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.grpavailable,document.formy.grplist);'>$text</a><P/>\n";
 
     /*** <-- Remove ***/
-    $V .= "<a href='#' onClick='moveOptions(document.formy.grplist,document.formy.grpavailable);'>&larr;Remove</a>\n";
+$text = _("&larr;Remove");
+$text1 = _("\n");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.grplist,document.formy.grpavailable);'>$text</a>$text1";
     $V .= "</center>\n";
 
     /* List the license subgroups */

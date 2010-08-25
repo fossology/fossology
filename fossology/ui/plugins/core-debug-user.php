@@ -48,9 +48,13 @@ class debug_user extends FO_Plugin
       case "HTML":
 	$Results = $DB->Action("SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';");
 	$R = &$Results[0];
-	$V .= "<H2>User Information</H2>\n";
+$text = _("User Information");
+$text1 = _("\n");
+	$V .= "<H2>$text</H2>$text1";
 	$V .= "<table border=1>\n";
-	$V .= "<tr><th>Field</th><th>Value</th></tr>\n";
+$text = _("Field");
+$text1 = _("Value");
+	$V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
 	foreach($R as $Key => $Val)
 	  {
 	  if (empty($Key)) { continue; }

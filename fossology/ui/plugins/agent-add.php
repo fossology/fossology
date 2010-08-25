@@ -123,38 +123,38 @@ class agent_add extends FO_Plugin
         $V .= ActiveHTTPscript("Uploads");
         $V .= "<script language='javascript'>\n";
         $V .= "function Uploads_Reply()\n";
-        $V .= "  {\n";
+        $V .= _("  {\n");
         $V .= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
-        $V .= "    {\n";
+        $V .= _("    {\n");
         /* Remove all options */
-        $V .= "    document.formy.upload.innerHTML = Uploads.responseText;\n";
+        $V .= _("    document.formy.upload.innerHTML = Uploads.responseText;\n");
         $V .= "    document.getElementById('agents').innerHTML = '';\n";
         /* Add new options */
-        $V .= "    }\n";
-        $V .= "  }\n";
+        $V .= _("    }\n");
+        $V .= _("  }\n");
         $V .= "</script>\n";
 
         $V .= ActiveHTTPscript("Agents");
         $V .= "<script language='javascript'>\n";
         $V .= "function Agents_Reply()\n";
-        $V .= "  {\n";
+        $V .= _("  {\n");
         $V .= "  if ((Agents.readyState==4) && (Agents.status==200))\n";
-        $V .= "    {\n";
+        $V .= _("    {\n");
         /* Remove all options */
         $V .= "    document.getElementById('agents').innerHTML = Agents.responseText;\n";
         /* Add new options */
-        $V .= "    }\n";
-        $V .= "  }\n";
+        $V .= _("    }\n");
+        $V .= _("  }\n");
         $V .= "</script>\n";
 
         /*************************************************************/
         /* Display the form */
         $V .= "<form name='formy' method='post'>\n"; // no url = this url
-        $V .= "Select an uploaded file for additional analysis.\n";
+        $V .= _("Select an uploaded file for additional analysis.\n");
 
         $V .= "<ol>\n";
         $V .= "<li>Select the folder containing the upload you wish to analyze:<br>\n";
-        $V .= "<select name='folder'\n";
+        $V .= _("<select name='folder'\n");
         $V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=$Folder' ";
         $V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
         $V .= FolderListOption(-1,0,1,$Folder);

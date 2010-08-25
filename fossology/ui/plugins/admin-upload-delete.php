@@ -93,33 +93,42 @@ class admin_upload_delete extends FO_Plugin {
         $V.= ActiveHTTPscript("Uploads");
         $V.= "<script language='javascript'>\n";
         $V.= "function Uploads_Reply()\n";
-        $V.= "  {\n";
+        $V.= _("  {\n");
         $V.= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
-        $V.= "    {\n";
+        $V.= _("    {\n");
         /* Remove all options */
-        $V.= "    document.formy.upload.innerHTML = Uploads.responseText;\n";
+        $V.= _("    document.formy.upload.innerHTML = Uploads.responseText;\n");
         /* Add new options */
-        $V.= "    }\n";
-        $V.= "  }\n";
+        $V.= _("    }\n");
+        $V.= _("  }\n");
         $V.= "</script>\n";
         /* Build HTML form */
         $V.= "<form name='formy' method='post'>\n"; // no url = this url
-        $V.= "Select the uploaded file to <em>delete</em>.\n";
+$text = _("delete");
+$text1 = _(".\n");
+        $V.= "Select the uploaded file to <em>$text</em>$text1";
         $V.= "<ul>\n";
-        $V.= "<li>This will <em>delete</em> the upload file!\n";
-        $V.= "<li>Be very careful with your selection since you can delete a lot of work!\n";
-        $V.= "<li>All analysis only associated with the deleted upload file will also be deleted.\n";
-        $V.= "<li>THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.\n";
+$text = _("delete");
+$text1 = _(" the upload file!\n");
+        $V.= "<li>This will <em>$text</em>$text1";
+$text = _("Be very careful with your selection since you can delete a lot of work!\n");
+        $V.= "<li>$text";
+$text = _("All analysis only associated with the deleted upload file will also be deleted.\n");
+        $V.= "<li>$text";
+$text = _("THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.\n");
+        $V.= "<li>$text";
         $V.= "</ul>\n";
         $V.= "<P>Select the uploaded file to delete:<P>\n";
         $V.= "<ol>\n";
-        $V.= "<li>Select the folder containing the file to delete: ";
-        $V.= "<select name='folder' ";
+$text = _("Select the folder containing the file to delete: ");
+        $V.= "<li>$text";
+        $V.= _("<select name='folder' ");
         $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
         $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
-        $V.= "<li>Select the uploaded project to delete:";
+$text = _("Select the uploaded project to delete:");
+        $V.= "<li>$text";
         $V.= "<BR><select name='upload' size='10'>\n";
         $List = FolderListUploads(-1);
         foreach($List as $L) {

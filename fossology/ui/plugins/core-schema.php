@@ -57,13 +57,25 @@ class core_schema extends FO_Plugin {
     /**************************************/
     $Current = GetSchema();
     print "<ul>\n";
-    print "<li><a href='#Table'>Tables</a>\n";
-    print "<li><a href='#Sequence'>Sequences</a>\n";
-    print "<li><a href='#View'>Views</a>\n";
-    print "<li><a href='#Index'>Indexes</a>\n";
-    print "<li><a href='#Constraint'>Constraints</a>\n";
+$text = _("Tables");
+$text1 = _("\n");
+    print "<li><a href='#Table'>$text</a>$text1";
+$text = _("Sequences");
+$text1 = _("\n");
+    print "<li><a href='#Sequence'>$text</a>$text1";
+$text = _("Views");
+$text1 = _("\n");
+    print "<li><a href='#View'>$text</a>$text1";
+$text = _("Indexes");
+$text1 = _("\n");
+    print "<li><a href='#Index'>$text</a>$text1";
+$text = _("Constraints");
+$text1 = _("\n");
+    print "<li><a href='#Constraint'>$text</a>$text1";
     if (count($Schema['FUNCTION']) > 0) {
-      print "<li><a href='#Function'>Functions</a>\n";
+$text = _("Functions");
+$text1 = _("\n");
+      print "<li><a href='#Function'>$text</a>$text1";
     }
     print "</ul>\n";
     print "<ul>\n";
@@ -81,7 +93,8 @@ class core_schema extends FO_Plugin {
           continue;
         }
         if ($LastTableName != $TableName) {
-          print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>Alter SQL\n";
+$text = _("Alter SQL\n");
+          print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>$text";
           $LastTableName = $TableName;
         }
         if (empty($ColName)) {
@@ -104,7 +117,8 @@ class core_schema extends FO_Plugin {
           continue;
         }
         if ($LastTableName != $TableName) {
-          print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>Alter SQL\n";
+$text = _("Alter SQL\n");
+          print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>$text";
           $LastTableName = $TableName;
         }
         if (empty($ColName)) {
@@ -121,7 +135,8 @@ class core_schema extends FO_Plugin {
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Sequence'></a><table width='100%' border='1'>\n";
-    print "<th>Sequence<th>Definition\n";
+$text = _("Definition\n");
+    print "<th>Sequence<th>$text";
     if (!empty($Schema['SEQUENCE'])) foreach($Schema['SEQUENCE'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
@@ -129,7 +144,8 @@ class core_schema extends FO_Plugin {
       if ($Description == $Current['SEQUENCE'][$Name]) {
         continue;
       }
-      print "<tr bgcolor='$Blue'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+$text = _("" . htmlentities($Name) . ");
+      print "<tr bgcolor='$Blue'><td>$text"<td>" . htmlentities($Description) . "\n";
     }
     if (!empty($Current['SEQUENCE'])) foreach($Current['SEQUENCE'] as $Name => $Description) {
       if (empty($Name)) {
@@ -138,12 +154,14 @@ class core_schema extends FO_Plugin {
       if ($Description == $Schema['SEQUENCE'][$Name]) {
         continue;
       }
-      print "<tr bgcolor='$Red'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+$text = _("" . htmlentities($Name) . ");
+      print "<tr bgcolor='$Red'><td>$text"<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
     print "<P/>\n";
     print "<a name='View'></a><table width='100%' border='1'>\n";
-    print "<th>View<th>Definition\n";
+$text = _("Definition\n");
+    print "<th>View<th>$text";
     if (!empty($Schema['VIEW'])) foreach($Schema['VIEW'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
@@ -151,7 +169,8 @@ class core_schema extends FO_Plugin {
       if ($Description == $Current['VIEW'][$Name]) {
         continue;
       }
-      print "<tr bgcolor='$Blue'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+$text = _("" . htmlentities($Name) . ");
+      print "<tr bgcolor='$Blue'><td>$text"<td>" . htmlentities($Description) . "\n";
     }
     if (!empty($Current['VIEW'])) foreach($Current['VIEW'] as $Name => $Description) {
       if (empty($Name)) {
@@ -160,12 +179,14 @@ class core_schema extends FO_Plugin {
       if ($Description == $Schema['VIEW'][$Name]) {
         continue;
       }
-      print "<tr bgcolor='$Red'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+$text = _("" . htmlentities($Name) . ");
+      print "<tr bgcolor='$Red'><td>$text"<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Index'></a><table width='100%' border='1'>\n";
-    print "<th>Table<th>Index<th>Definition\n";
+$text = _("Definition\n");
+    print "<th>Table<th>Index<th>$text";
     if (!empty($Schema['INDEX'])) foreach($Schema['INDEX'] as $Table => $Indexes) {
       if (empty($Table)) {
         continue;
@@ -195,7 +216,8 @@ class core_schema extends FO_Plugin {
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Constraint'></a><table width='100%' border='1'>\n";
-    print "<th>Constraint<th>Definition\n";
+$text = _("Definition\n");
+    print "<th>Constraint<th>$text";
     if (!empty($Schema['CONSTRAINT'])) foreach($Schema['CONSTRAINT'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
@@ -203,7 +225,8 @@ class core_schema extends FO_Plugin {
       if ($Description == $Current['CONSTRAINT'][$Name]) {
         continue;
       }
-      print "<tr bgcolor='$Blue'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+$text = _("" . htmlentities($Name) . ");
+      print "<tr bgcolor='$Blue'><td>$text"<td>" . htmlentities($Description) . "\n";
     }
     if (!empty($Current['CONSTRAINT'])) foreach($Current['CONSTRAINT'] as $Name => $Description) {
       if (empty($Name)) {
@@ -212,7 +235,8 @@ class core_schema extends FO_Plugin {
       if ($Description == $Schema['CONSTRAINT'][$Name]) {
         continue;
       }
-      print "<tr bgcolor='$Red'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+$text = _("" . htmlentities($Name) . ");
+      print "<tr bgcolor='$Red'><td>$text"<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
   } // CompareSchema()
@@ -222,13 +246,25 @@ class core_schema extends FO_Plugin {
   function ViewSchema() {
     $Schema = GetSchema();
     print "<ul>\n";
-    print "<li><a href='#Table'>Tables</a>\n";
-    print "<li><a href='#Sequence'>Sequences</a>\n";
-    print "<li><a href='#View'>Views</a>\n";
-    print "<li><a href='#Index'>Indexes</a>\n";
-    print "<li><a href='#Constraint'>Constraints</a>\n";
+$text = _("Tables");
+$text1 = _("\n");
+    print "<li><a href='#Table'>$text</a>$text1";
+$text = _("Sequences");
+$text1 = _("\n");
+    print "<li><a href='#Sequence'>$text</a>$text1";
+$text = _("Views");
+$text1 = _("\n");
+    print "<li><a href='#View'>$text</a>$text1";
+$text = _("Indexes");
+$text1 = _("\n");
+    print "<li><a href='#Index'>$text</a>$text1";
+$text = _("Constraints");
+$text1 = _("\n");
+    print "<li><a href='#Constraint'>$text</a>$text1";
     if (count($Schema['FUNCTION']) > 0) {
-      print "<li><a href='#Function'>Functions</a>\n";
+$text = _("Functions");
+$text1 = _("\n");
+      print "<li><a href='#Function'>$text</a>$text1";
     }
     print "</ul>\n";
     print "<a name='Table'></a><table width='100%' border='1'>\n";
@@ -239,7 +275,8 @@ class core_schema extends FO_Plugin {
       }
       foreach($Columns as $ColName => $Val) {
         if ($LastTableName != $TableName) {
-          print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>Alter SQL\n";
+$text = _("Alter SQL\n");
+          print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>$text";
           $LastTableName = $TableName;
         }
         if (empty($ColName)) {
@@ -256,27 +293,32 @@ class core_schema extends FO_Plugin {
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Sequence'></a><table width='100%' border='1'>\n";
-    print "<th>Sequence<th>Definition\n";
+$text = _("Definition\n");
+    print "<th>Sequence<th>$text";
     if (!empty($Schema['SEQUENCE'])) foreach($Schema['SEQUENCE'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
       }
-      print "<tr><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+$text = _("" . htmlentities($Name) . ");
+      print "<tr><td>$text"<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
     print "<P/>\n";
     print "<a name='View'></a><table width='100%' border='1'>\n";
-    print "<th>View<th>Definition\n";
+$text = _("Definition\n");
+    print "<th>View<th>$text";
     if (!empty($Schema['VIEW'])) foreach($Schema['VIEW'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
       }
-      print "<tr><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+$text = _("" . htmlentities($Name) . ");
+      print "<tr><td>$text"<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Index'></a><table width='100%' border='1'>\n";
-    print "<th>Table<th>Index<th>Definition\n";
+$text = _("Definition\n");
+    print "<th>Table<th>Index<th>$text";
     if (!empty($Schema['INDEX'])) foreach($Schema['INDEX'] as $Table => $Indexes) {
       if (empty($Table)) {
         continue;
@@ -290,18 +332,21 @@ class core_schema extends FO_Plugin {
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Constraint'></a><table width='100%' border='1'>\n";
-    print "<th>Constraint<th>Definition\n";
+$text = _("Definition\n");
+    print "<th>Constraint<th>$text";
     if (!empty($Schema['CONSTRAINT'])) foreach($Schema['CONSTRAINT'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
       }
-      print "<tr><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
+$text = _("" . htmlentities($Name) . ");
+      print "<tr><td>$text"<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
     if (count($Schema['FUNCTION']) > 0) {
       print "<P/>\n";
       print "<a name='Function'></a><table width='100%' border='1'>\n";
-      print "<th>Function<th>Definition\n";
+$text = _("Definition\n");
+      print "<th>Function<th>$text";
       if (!empty($Schema['FUNCTION'])) foreach($Schema['FUNCTION'] as $Name => $Description) {
         if (empty($Name)) {
           continue;
@@ -690,15 +735,19 @@ class core_schema extends FO_Plugin {
           $V.= "<hr>\n";
         }
         $V.= "<form method='post'>\n";
-        $V.= "Viewing, exporting, and applying the schema is only used by installation and debugging.\n";
-        $V.= "Otherwise, you should not need to use this functionality.\n";
-        $V.= "<P/><b>Using this functionality willy-nilly may <u><i>TOTALLY SCREW UP</i></u> your FOSSology database.</b>\n";
+        $V.= _("Viewing, exporting, and applying the schema is only used by installation and debugging.\n");
+        $V.= _("Otherwise, you should not need to use this functionality.\n");
+$text = _("TOTALLY SCREW UP");
+$text1 = _(" your FOSSology database.");
+        $V.= "<P/><b>Using this functionality willy-nilly may <u><i>$text</i></u>$text1</b>\n";
         $V.= "<P/>\n";
         $V.= "<table width='100%' border='1'>\n";
         $V.= "<tr><td width='2%'><input type='checkbox' value='1' name='View'><td>Check to view the current schema. The output generation is harmless, but extremely technical.<br>\n";
         $V.= "<tr><td><input type='checkbox' value='1' name='Compare'><td>Highlight the differences between the default schema (blue) and current schema (red).<br>\n";
-        $V.= "<tr><td><input type='checkbox' value='1' name='Export'><td>Check to export the current schema. This will overwrite your default schema configuration file. Don't do this unless you know <i>exactly</i> what you are doing. The default configuration file is the only one that is supported. This will overwrite your default file.<br>\n";
-        $V.= "<tr><td><input type='checkbox' value='1' name='Apply'><td>Check to apply the last exported schema. This will overwrite and atempt to migrate your database schema according to the default configuration file. Non-standard columns, tables, constraints, and views can and will be destroyed.\n";
+$text = _("exactly");
+        $V.= "<tr><td><input type='checkbox' value='1' name='Export'><td>Check to export the current schema. This will overwrite your default schema configuration file. Don't do this unless you know <i>$text</i> what you are doing. The default configuration file is the only one that is supported. This will overwrite your default file.<br>\n";
+$text = _("Check to apply the last exported schema. This will overwrite and atempt to migrate your database schema according to the default configuration file. Non-standard columns, tables, constraints, and views can and will be destroyed.\n");
+        $V.= "<tr><td><input type='checkbox' value='1' name='Apply'><td>$text";
         $V.= "</table>\n";
         $V.= "<P/>\n";
         $V.= "<input type='submit' value='Go!'>";

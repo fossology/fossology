@@ -86,7 +86,9 @@ class upload_move extends FO_Plugin {
       case "XML":
       break;
       case "HTML":
-        $V.= "<H2>Move upload to different folder.</H1>\n";
+$text = _("Move upload to different folder.");
+$text1 = _("\n");
+        $V.= "<H2>$text</H1>$text1";
         /* If this is a POST, then process the request. */
         $OldFolderId = GetParm('oldfolderid', PARM_INTEGER);
         $UploadId = GetParm('uploadid', PARM_INTEGER);
@@ -115,27 +117,29 @@ class upload_move extends FO_Plugin {
         $V.= ActiveHTTPscript("Uploads");
         $V.= "<script language='javascript'>\n";
         $V.= "function Uploads_Reply()\n";
-        $V.= "  {\n";
+        $V.= _("  {\n");
         $V.= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
-        $V.= "    {\n";
+        $V.= _("    {\n");
         /* Remove all options */
-        $V.= "    document.formy.uploadid.innerHTML = Uploads.responseText;\n";
+        $V.= _("    document.formy.uploadid.innerHTML = Uploads.responseText;\n");
         /* Add new options */
-        $V.= "    }\n";
-        $V.= "  }\n";
+        $V.= _("    }\n");
+        $V.= _("  }\n");
         $V.= "</script>\n";
         /* Build the  HTML form */
         $V.= "<form name='formy' method='post'>\n"; // no url = this url
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-        $V.= "<li>Select the folder containing the upload you wish to move:  \n";
-        $V.= "<select name='oldfolderid'\n";
+$text = _("Select the folder containing the upload you wish to move:  \n");
+        $V.= "<li>$text";
+        $V.= _("<select name='oldfolderid'\n");
         $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
         $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
-        $V.= "<li>Select the upload you wish to move:  \n";
+$text = _("Select the upload you wish to move:  \n");
+        $V.= "<li>$text";
         $V.= "<select name='uploadid'>\n";
         $List = FolderListUploads(-1);
         foreach($List as $L) {
@@ -150,7 +154,8 @@ class upload_move extends FO_Plugin {
           $V.= "</option>\n";
         }
         $V.= "</select><P />\n";
-        $V.= "<li>Select the destination folder:  \n";
+$text = _("Select the destination folder:  \n");
+        $V.= "<li>$text";
         $V.= "<select name='targetfolderid'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";

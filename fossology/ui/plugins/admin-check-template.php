@@ -52,7 +52,9 @@ class admin_check_template extends FO_Plugin
     $Name = "";
     $Section = "";
     $Bad=0;
-    if ($Verbose) { print "<H3>Checking for duplicate errors within the license templates</H3>\n"; }
+$text = _("Checking for duplicate errors within the license templates");
+$text1 = _("\n");
+    if ($Verbose) { print "<H3>$text</H3>$text1"; }
     while(!feof($Fin))
       {
       $Type = ord(fgetc($Fin))*256 + ord(fgetc($Fin));
@@ -67,14 +69,17 @@ class admin_check_template extends FO_Plugin
       /* 0x0110 == Unique checksum */
       if (!empty($Hash[$Data]))
 	{
-	if ($Verbose) { print "Duplicate: $Name ($Section) <i>is</i> " .  $Hash[$Data] . "<br>\n"; }
+$text = _("Duplicate:");
+$text1 = _("is");
+	if ($Verbose) { print "$text $Name ($Section) <i>$text1</i> " .  $Hash[$Data] . "<br>\n"; }
 	$Bad++;
 	}
       if ($Type == 0x0110) { $Hash[$Data]="$Name ($Section)"; }
       }
 
     fclose($Fin);
-    if ($Verbose) { print "<br>Total duplicate templates that need cleaning up: $Bad</b><br>\n"; }
+$text = _("Total duplicate templates that need cleaning up:");
+    if ($Verbose) { print "<br>$text $Bad</b><br>\n"; }
     return($Hash);
     } // ReadBsamUnique()
 
@@ -89,7 +94,9 @@ class admin_check_template extends FO_Plugin
     global $DB;
     $SQL = "SELECT lic_pk,lic_id,lic_unique,lic_name,lic_section FROM agent_lic_raw ORDER BY lic_name;";
     $Results = $DB->Action($SQL);
-    if ($Verbose) { print "<H3>Checking for obsolete license templates</H3>\n"; }
+$text = _("Checking for obsolete license templates");
+$text1 = _("\n");
+    if ($Verbose) { print "<H3>$text</H3>$text1"; }
     $BadList = array();
     if ($Verbose) { print "<ol>\n"; }
     for($i=0; !empty($Results[$i]['lic_pk']); $i++)
@@ -99,7 +106,8 @@ class admin_check_template extends FO_Plugin
 	{
 	if ($Verbose)
 	  {
-	  print "<li>Obsolete: " . $Results[$i]['lic_pk'] . ": ";
+$text = _("Obsolete: ");
+	  print "<li>" . $text . $Results[$i]['lic_pk'] . ": ";
 	  print $Results[$i]['lic_name'] . " (" . $Results[$i]['lic_section'] . ")<br>\n";
 	  }
 	$BadList[] = $Results[$i]['lic_pk'];
@@ -125,10 +133,12 @@ class admin_check_template extends FO_Plugin
 
     if ($Verbose)
       {
-      print "<b>Total obsolete template records that need cleaning up: " . count($BadList) . "</b><br>\n";
+$text = _("Total obsolete template records that need cleaning up: ");
+      print "<b>" . $text . count($BadList) . "</b><br>\n";
       if ($OldCount != $NewCount)
         {
-	print "<font color='red'>Reinstall licenses before doing the cleanup.</font><br>\n";
+$text = _("Reinstall licenses before doing the cleanup.");
+	print "<font color='red'>$text</font><br>\n";
 	}
       }
     return($BadList);
@@ -215,8 +225,11 @@ class admin_check_template extends FO_Plugin
         {
           if ($VerboseInit)
           { 
-            print "<H3>Checking for Uploads to Re-analyze</H3>\n";
-            print "The impacted uploads:<br>\n";
+$text = _("Checking for Uploads to Re-analyze");
+$text1 = _("\n");
+            print "<H3>$text</H3>$text1";
+$text = _("The impacted uploads:");
+            print "$text<br>\n";
             print "<ul>\n";
             $VerboseInit = 0;
           }
@@ -335,15 +348,21 @@ class admin_check_template extends FO_Plugin
 	$PfileList = $this->FindPfiles($BadUniq);
 	$UploadList = $this->FindUploads($BadUniq,1);
 	$V .= "<hr>\n";
-	$V .= "<H3>Clean-Up</H3>\n";
-	$V .= "<b>Total obsolete templates to remove: " . count($BadUniq) . "</b><br>\n";
-	$V .= "<b>Total pfiles to re-analyze: " . count($PfileList) . "</b><br>\n";
-	$V .= "<b>Total uploads to re-analyze: " . count($UploadList) . "</b><P>\n";
-	$V .= "Cleaning up obsolete analysis requires removing the old analysis and rescheduling the projects for license analysis.\n";
-	$V .= "Only the files linked to the obsolete templates need to be analyzed.\n";
-	$V .= "This will not re-analyze every file in the uploaded package.\n";
+$text = _("Clean-Up");
+$text1 = _("\n");
+	$V .= "<H3>$text</H3>$text1";
+$text = _("Total obsolete templates to remove: ");
+	$V .= "<b>$text" . count($BadUniq) . "</b><br>\n";
+$text = _("Total pfiles to re-analyze: ");
+	$V .= "<b>$text" . count($PfileList) . "</b><br>\n";
+$text = _("Total uploads to re-analyze: ");
+	$V .= "<b>$text" . count($UploadList) . "</b><P>\n";
+	$V .= _("Cleaning up obsolete analysis requires removing the old analysis and rescheduling the projects for license analysis.\n");
+	$V .= _("Only the files linked to the obsolete templates need to be analyzed.\n");
+	$V .= _("This will not re-analyze every file in the uploaded package.\n");
 	$V .= "<form method='POST'>";
-	$V .= "<P><input type='checkbox' name='cleanup' value='1'> Check to cleanup and re-analyze.\n";
+$text = _(" Check to cleanup and re-analyze.\n");
+	$V .= "<P><input type='checkbox' name='cleanup' value='1'>$text";
 	$V .= "<P><input type='submit' value='Clean!'>\n";
 	$V .= "</form>";
 	break;

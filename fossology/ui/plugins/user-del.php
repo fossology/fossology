@@ -98,12 +98,13 @@ class user_del extends FO_Plugin
 	$Results = $DB->Action("SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' AND user_pk != '1' ORDER BY user_name;");
 	if (empty($Results[0]['user_name']))
 	  {
-	  $V .= "No users to delete.";
+	  $V .= _("No users to delete.");
 	  }
 	else
 	  {
 	  /* Build HTML form */
-	  $V .= "Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>permanently</font> removed. (There is no 'undo' to this delete.)<P />\n";
+$text = _("permanently");
+	  $V .= "Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>$text</font> removed. (There is no 'undo' to this delete.)<P />\n";
 	  $V .= "<form name='formy' method='POST'>\n"; // no url = this url
 	  $V .= "To delete a user, enter the following information:<P />\n";
 	  $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";

@@ -320,7 +320,8 @@ class core_auth extends FO_Plugin {
           } else {
             /* Check for init and first-time use */
             if (plugin_find_id("init") >= 0) {
-              $V.= "<b>The system requires initialization. Please login and use the Initialize option under the Admin menu.</b>";
+$text = _("The system requires initialization. Please login and use the Initialize option under the Admin menu.");
+              $V.= "<b>$text</b>";
               $V.= "<P />\n";
               /* Check for a default user */
               global $DB;
@@ -336,7 +337,7 @@ class core_auth extends FO_Plugin {
               }
               $R = & $Results[0];
               if (!empty($R['user_name'])) {
-                $V.= "If you need an account, use '" . $R['user_name'] . "' with no password.\n";
+                $V.= _("If you need an account, use '" . $R['user_name'] . "' with no password.\n");
                 $V.= "<P />\n";
               }
             }
@@ -348,14 +349,19 @@ class core_auth extends FO_Plugin {
             $V.= "<form method='post'>\n";
             $V.= "<input type='hidden' name='HTTP_REFERER' value='$Referer'>";
             $V.= "<table border=0>";
-            $V.= "<tr><td>Username:</td><td><input type='text' size=20 name='username' id='unamein'></td></tr>\n";
-            $V.= "<tr><td>Password:</td><td><input type='password' size=20 name='password'></td></tr>\n";
+$text = _("Username:");
+$text1 = _("");
+            $V.= "<tr><td>$text</td><td>$text1<input type='text' size=20 name='username' id='unamein'></td></tr>\n";
+$text = _("Password:");
+$text1 = _("");
+            $V.= "<tr><td>$text</td><td>$text1<input type='password' size=20 name='password'></td></tr>\n";
             $V.= "</table>";
             $V.= "<P/>";
             $V.= "<script type=\"text/javascript\">document.getElementById(\"unamein\").focus();</script>";
 /* Commenting out the Validate IP option since it's probably overkill for this app, 
    and it confuses people.
-            $V.= "<input type='checkbox' name='checkip' value='1'>Validate IP.\n";
+$text = _("Validate IP.\n");
+            $V.= "<input type='checkbox' name='checkip' value='1'>$text";
             $Referer = @$_SERVER['HTTP_REFERER'];
             if (!empty($Referer)) {
               $V.= "<input type='hidden' name='redirect' value='$Referer'>";

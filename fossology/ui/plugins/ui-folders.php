@@ -55,9 +55,14 @@ class ui_folders extends FO_Plugin
 	$V .= "<center><a href='http://fossology.org' target='_top'><img alt='FOSSology' title='FOSSology' src='${Uri}images/fossology-logo.gif' align=absmiddle border=0></a></center><br>\n";
 	$V .= FolderListScript();
 	$V .= "<small><center>";
-	$V .= "<a href='javascript:Expand();'>Expand</a> |";
-	$V .= "<a href='javascript:Collapse();'>Collapse</a> |";
-	$V .= "<a href='" . Traceback() . "'>Refresh</a>";
+$text = _("Expand");
+$text1 = _(" |");
+	$V .= "<a href='javascript:Expand();'>$text</a>$text1";
+$text = _("Collapse");
+$text1 = _(" |");
+	$V .= "<a href='javascript:Collapse();'>$text</a>$text1";
+$text = _("Refresh");
+	$V .= "<a href='" . Traceback() . "'>$text</a>";
 	$V .= "</center></small>";
 	$V .= "<P>\n";
 

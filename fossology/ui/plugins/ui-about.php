@@ -44,9 +44,15 @@ class ui_about extends FO_Plugin
     switch($this->OutputType)
       {
       case "XML":
-	$V .= "<project>$this->_Project</project>\n";
-	$V .= "<copyright>$this->_Copyright</copyright>\n";
-	$V .= "<text>$this->_Text</text>\n";
+$text = _("_Project");
+$text1 = _("\n");
+	$V .= "<project>$this->$text</project>$text1";
+$text = _("_Copyright");
+$text1 = _("\n");
+	$V .= "<copyright>$this->$text</copyright>$text1";
+$text = _("_Text");
+$text1 = _("\n");
+	$V .= "<text>$this->$text</text>$text1";
 	break;
       case "HTML":
 	global $VERSION;
@@ -57,9 +63,9 @@ class ui_about extends FO_Plugin
 	$V .= str_replace("\n","\n<P>\n",$this->_Text);
 	break;
       case "Text":
-	$V .= "$this->_Project\n";
-	$V .= "$this->_Copyright\n";
-	$V .= str_replace("\n","\n\n",$this->_Text) . "\n";
+	$V .= _("$this->_Project\n");
+	$V .= _("$this->_Copyright\n");
+	$V .= str_replace(_("\n","\n\n",$this->_Text) . "\n");
 	break;
       default:
 	break;

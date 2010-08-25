@@ -120,8 +120,11 @@ class list_bucket_files extends FO_Plugin
 	/* Get all the files under this uploadtree_pk with this bucket */
 	$V .= "The following files are in bucket: '<b>";
 	$V .= $bucketNameCache[$bucket_pk];
-	$V .= "</b>'.\n";
-    if (!empty($Excl)) $V .= "<br>Display <b>excludes</b> files with these licenses: $Excl";
+$text = _("'.\n");
+	$V .= "</b>$text";
+$text = _("excludes");
+$text1 = _(" files with these licenses: $Excl");
+    if (!empty($Excl)) $V .= "<br>Display <b>$text</b>$text1";
 
 	$Offset = ($Page < 0) ? 0 : $Page*$Max;
     $order = "";
@@ -171,7 +174,8 @@ class list_bucket_files extends FO_Plugin
 	/* Get the page menu */
 	if (($Count >= $Max) && ($Page >= 0))
 	{
-	  $VM = "<P />\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
+$text = _("\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . ");
+	  $VM = "<P />$text"<P />\n";
 	  $V .= $VM;
 	}
 	else
@@ -191,7 +195,9 @@ class list_bucket_files extends FO_Plugin
 
     /* file display loop/table */
     $V .= "<table>";
-    $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Licenses found</th></tr>";
+$text = _("File");
+$text1 = _("&nbsp");
+    $V .= "<tr><th>$text</th><th>$text1";
     $ExclArray = explode(":", $Excl);
     $ItemNumb = 1;
     while ($row = pg_fetch_assoc($fileresult, $RowNum))
@@ -206,7 +212,8 @@ class list_bucket_files extends FO_Plugin
         $URL = $baseURL ."&excl=".urlencode($Excl).":".$URLlicstring;
       else
         $URL = $baseURL ."&excl=$URLlicstring";
-      $Header = "<a href=$URL>Exclude files with license: $licstring.</a>";
+$text = _("Exclude files with license: $licstring.");
+      $Header = "<a href=$URL>$text</a>";
 
       $ok = true;
       if ($Excl)
@@ -221,11 +228,14 @@ class list_bucket_files extends FO_Plugin
         $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, 
                          $ShowMicro, $ItemNumb++, $Header);
         $V .= "</td>";
-        $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
+$text = _("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+        $V .= "<td>$text</td>";  // spaces to seperate licenses
 
         // show the entire license list as a single string with links to the files
         // in this container with that license.
-        $V .= "<td>$licstring</td></tr>";
+$text = _("$licstring");
+$text1 = _("");
+        $V .= "<td>$text</td></tr>$text1";
         $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
         if ($Count == $RowNum) break;
       }
@@ -236,7 +246,9 @@ class list_bucket_files extends FO_Plugin
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-	$V .= "<small>Elaspsed time: $Time seconds</small>\n";
+$text = _("Elaspsed time: $Time seconds");
+$text1 = _("\n");
+	$V .= "<small>$text</small>$text1";
 	break;
       case "Text":
 	break;

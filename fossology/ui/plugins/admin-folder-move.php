@@ -73,7 +73,8 @@ class folder_move extends FO_Plugin {
     $FContents = $DB->Action($Sql);
     $Row = $FContents[0];
     $fc_pk = $Row['foldercontents_pk'];
-    //echo ("<pre>\$Sql = UPDATE foldercontents SET parent_fk = '$NewParentId' WHERE child_id = '$FolderId ' AND foldercontents_pk = '$fc_pk' AND foldercontents_mode = '1'\n</pre>");
+$text = _("\$Sql = UPDATE foldercontents SET parent_fk = '$NewParentId' WHERE child_id = '$FolderId ' AND foldercontents_pk = '$fc_pk' AND foldercontents_mode = '1'\n");
+    //echo ("<pre>$text</pre>");
     $Sql = "UPDATE foldercontents SET parent_fk = '$NewParentId' WHERE child_id = '$FolderId ' AND foldercontents_pk = '$fc_pk' AND foldercontents_mode = '1'";
     $Results = $DB->Action($Sql);
     return (1);
@@ -113,11 +114,13 @@ class folder_move extends FO_Plugin {
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-        $V.= "<li>Select the source folder to move:  \n";
+$text = _("Select the source folder to move:  \n");
+        $V.= "<li>$text";
         $V.= "<select name='oldfolderid'>\n";
         $V.= FolderListOption(-1, 0, 0);
         $V.= "</select><P />\n";
-        $V.= "<li>Select the destination folder:  \n";
+$text = _("Select the destination folder:  \n");
+        $V.= "<li>$text";
         $V.= "<select name='targetfolderid'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";

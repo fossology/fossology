@@ -116,7 +116,9 @@ class jobs_showjobs extends FO_Plugin
     $V .= "<table border=1 padding=0><tr>\n";
     foreach($this->Colors as $Key => $Val)
       {
-      $V .= "  <td bgcolor='$Val'>$Key</td>\n";
+$text = _("$Key");
+$text1 = _("\n");
+      $V .= "  <td bgcolor='$Val'>$text</td>$text1";
       }
     $V .= "</tr></table>\n";
     return($V);
@@ -146,10 +148,14 @@ class jobs_showjobs extends FO_Plugin
     $Row = $Results[0];
     if (empty($Row['jq_pk'])) { return; }
     $V .= "<table class='text' border=1 name='jobtable1'>\n";
-    $V .= "<tr><th>Field</th><th>Value</th></tr>\n";
+$text = _("Field");
+$text1 = _("Value");
+    $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
     foreach($Fields as $F)
       {
-      $V .= "  <tr><th align='left'>$F</th><td>";
+$text = _("$F");
+$text1 = _("");
+      $V .= "  <tr><th align='left'>$text</th><td>$text1";
       switch($F)
 	{
 	case 'jq_pk':
@@ -186,13 +192,16 @@ class jobs_showjobs extends FO_Plugin
     $Results = $DB->Action($Sql);
     if (count($Results) > 0)
       {
-      $V .= "  <tr><th align='left'>depends on</th><td>";
+$text = _("depends on");
+$text1 = _("");
+      $V .= "  <tr><th align='left'>$text</th><td>$text1";
       $First=1;
       foreach($Results as $R)
 	{
 	if ($First) { $First=0; }
 	else { $V .= ", "; }
-	$V .= "<a href='$Uri" . $R['jdep_jq_depends_fk'] . "'>" . $R['jdep_jq_depends_fk'] . "</a>";
+$text = _("" . $R['jdep_jq_depends_fk'] . "");
+	$V .= "<a href='$Uri" . $R['jdep_jq_depends_fk'] . "'>$text</a>";
 	}
       $V .= "</td></tr>\n";
       }
@@ -202,13 +211,16 @@ class jobs_showjobs extends FO_Plugin
     $Results = $DB->Action($Sql);
     if (count($Results) > 0)
       {
-      $V .= "  <tr><th align='left'>required by</th><td>";
+$text = _("required by");
+$text1 = _("");
+      $V .= "  <tr><th align='left'>$text</th><td>$text1";
       $First=1;
       foreach($Results as $R)
 	{
 	if ($First) { $First=0; }
 	else { $V .= ", "; }
-	$V .= "<a href='$Uri" . $R['jdep_jq_fk'] . "'>" . $R['jdep_jq_fk'] . "</a>";
+$text = _("" . $R['jdep_jq_fk'] . "");
+	$V .= "<a href='$Uri" . $R['jdep_jq_fk'] . "'>$text</a>";
 	}
       $V .= "</td></tr>\n";
       }
@@ -393,11 +405,13 @@ class jobs_showjobs extends FO_Plugin
 	  {
 	  if ($Detail)
 	    {
-	    $V .= "<th $Style1><a $Style1 title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=detail&history=1&upload=$Upload'>History</a>";
+$text = _("History");
+	    $V .= "<th $Style1><a $Style1 title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=detail&history=1&upload=$Upload'>$text</a>";
 	    }
 	  else
 	    {
-	    $V .= "<th $Style1><a $Style1 title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=summary&history=1&upload=$Upload'>History</a>";
+$text = _("History");
+	    $V .= "<th $Style1><a $Style1 title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=summary&history=1&upload=$Upload'>$text</a>";
 	    }
 	  }
 	else
@@ -410,22 +424,27 @@ class jobs_showjobs extends FO_Plugin
       if ($Job != $Row['jq_job_fk'])
 	{
 	$Job = $Row['jq_job_fk'];
-	$V .= "<tr><th width='20%'>Job/Dependency</th>\n";
-	$V .= "<th width='60%' colspan=2>Job Name: " . $Row['job_name'] . "</th>";
+$text = _("Job/Dependency");
+$text1 = _("\n");
+	$V .= "<tr><th width='20%'>$text</th>$text1";
+$text = _("Job Name: " . $Row['job_name'] . "");
+	$V .= "<th width='60%' colspan=2>$text</th>";
 	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
 	  {
 	  $Style = "style='font:normal 8pt verdana, arial, helvetica;'";
 	  $JobId = $Row['job_pk'];
 	  $V .= "<th $Style>";
-	  $V .= "<a href='$UriFull&action=reset&jobid=$JobId' title='Reset this specific job'>Reset</a>";
-	  $V .= " | ";
-	  $V .= "<a href='$UriFull&action=delete&jobid=$JobId' title='Delete this specific job'>Delete</a>";
-	  $V .= " | ";
+$text = _("Reset");
+	  $V .= "<a href='$UriFull&action=reset&jobid=$JobId' title='Reset this specific job'>$text</a>";
+	  $V .= _(" | ");
+$text = _("Delete");
+	  $V .= "<a href='$UriFull&action=delete&jobid=$JobId' title='Delete this specific job'>$text</a>";
+	  $V .= _(" | ");
 	  $Priority = $Row['job_priority'];
-	  $V .= "Priority: ";
+	  $V .= _("Priority: ");
 	  $V .= "<a title='Decrease priority' href='$UriFull&action=priority&priority=" . ($Priority-1);
 	  $V .= "&jobid=$JobId'>&laquo;</a>";
-	  $V .= " $Priority ";
+	  $V .= _(" $Priority ");
 	  $V .= "<a title='Increase priority' href='$UriFull&action=priority&priority=" . ($Priority+1);
 	  $V .= "&jobid=$JobId'>&raquo;</a>";
 	  $V .= "</th>";
@@ -439,14 +458,17 @@ class jobs_showjobs extends FO_Plugin
 
       /** Job ID and dependencies **/
       $V .= "  <td bgcolor='$Color' width='20%'>";
-      $V .= "<a href='$Uri&show=job&job=" . $Row['jq_pk'] . "'>" . $Row['jq_pk'] . "</a>";
+$text = _("" . $Row['jq_pk'] . "");
+      $V .= "<a href='$Uri&show=job&job=" . $Row['jq_pk'] . "'>$text</a>";
       if (!empty($Row['jdep_jq_depends_fk']))
 	{
-	$Dep = " / <a href='$Uri&show=job&job=" . $Row['jdep_jq_depends_fk'] . "'>" . $Row['jdep_jq_depends_fk'] . "</a>";
+$text = _("" . $Row['jdep_jq_depends_fk'] . "");
+	$Dep = " / <a href='$Uri&show=job&job=" . $Row['jdep_jq_depends_fk'] . "'>$text</a>";
 
 	for( ; $Results[$i+1]['jq_pk'] == $Row['jq_pk']; $i++)
 	  {
-	  $Dep .= ", <a href='$Uri&show=job&job=" . $Results[$i+1]['jdep_jq_depends_fk'] . "'>" . $Results[$i+1]['jdep_jq_depends_fk'] . "</a>";
+$text = _("" . $Results[$i+1]['jdep_jq_depends_fk'] . "");
+	  $Dep .= ", <a href='$Uri&show=job&job=" . $Results[$i+1]['jdep_jq_depends_fk'] . "'>$text</a>";
 	  }
 	$V .= $Dep;
 	}
@@ -455,11 +477,15 @@ class jobs_showjobs extends FO_Plugin
       /** Job name and details **/
       if (!$Detail) /* Show summary */
 	{
-	$V .= "  <td bgcolor='$Color' colspan='2'>" . $Row['jq_type'] . "</td>\n";
+$text = _("" . $Row['jq_type'] . "");
+$text1 = _("\n");
+	$V .= "  <td bgcolor='$Color' colspan='2'>$text</td>$text1";
 	}
       else /* Show details */
 	{
-	$V .= "  <td bgcolor='$Color' width='20%'>" . $Row['jq_type'] . "</td>\n";
+$text = _("" . $Row['jq_type'] . "");
+$text1 = _("\n");
+	$V .= "  <td bgcolor='$Color' width='20%'>$text</td>$text1";
 	if (($Color == $this->Colors['Queued']) && ($Row['jq_itemsprocessed'] == 0))
 	  {
 	  $V .= "  <td bgcolor='$Color'></td>\n";
@@ -511,7 +537,9 @@ class jobs_showjobs extends FO_Plugin
 	  }
 	} /* if show details */
       $endtime = substr($Row['jq_endtime'],0,16);
-      $V .= "  <td width='20%' bgcolor='$Color'>$endtime</td>\n";
+$text = _("$endtime");
+$text1 = _("\n");
+      $V .= "  <td width='20%' bgcolor='$Color'>$text</td>$text1";
       $V .= "</tr>\n";
       }
     error_reporting($errlev); /* return to previous error reporting level */

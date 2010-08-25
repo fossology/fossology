@@ -137,7 +137,8 @@ class ui_browse extends FO_Plugin {
           $V.= "<td align='right'>&nbsp;&nbsp;" . number_format($Row['pfile_size'], 0, "", ",") . "&nbsp;&nbsp;</td>";
         }
         else {
-          $V.= "<td>&nbsp;</td>";
+$text = _("&nbsp;");
+          $V.= "<td>$text</td>";
         }
       }
       /* Display item */
@@ -150,7 +151,7 @@ class ui_browse extends FO_Plugin {
       }
       $V.= $Name;
       if (Isdir($Row['ufile_mode'])) {
-        $V.= "/";
+        $V.= _("/");
       }
       if (!empty($Link)) {
         $V.= "</a>";
@@ -160,21 +161,25 @@ class ui_browse extends FO_Plugin {
       }
       $V.= "</td>\n";
       if (!Isdir($Row['ufile_mode'])) {
-        $V.= menu_to_1list($MenuPfile, $Parm, "<td>", "</td>\n");
+$text = _("", "");
+$text1 = _("\n");
+        $V.= menu_to_1list($MenuPfile, $Parm, "<td>$text</td>$text1");
       }
       $V.= "</td>";
     } /* foreach($Results as $Row) */
     $V.= "</table>\n";
     if (!$ShowSomething) {
-      $V.= "<b>No files</b>\n";
+$text = _("No files");
+$text1 = _("\n");
+      $V.= "<b>$text</b>$text1";
     }
     else {
       $V.= "<hr>\n";
       if (count($Results) == 1) {
-        $V.= "1 item\n";
+        $V.= _("1 item\n");
       }
       else {
-        $V.= count($Results) . " items\n";
+        $V.= count($Results) . _(" items\n");
       }
     }
     return ($V);
@@ -204,23 +209,34 @@ class ui_browse extends FO_Plugin {
     $V.= "<table border=1 width='100%'>";
     $V.= "<tr><td valign='top' width='20%'>\n";
     $V.= FolderListScript();
-    $V.= "<center><H3>Folder Navigation</H3></center>\n";
+$text = _("Folder Navigation");
+    $V.= "<center><H3>$text</H3></center>\n";
     $V.= "<center><small>";
     if ($Folder != FolderGetTop()) {
-      $V.= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>Top</a> |";
+$text = _("Top");
+$text1 = _(" |");
+      $V.= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>$text</a>$text1";
     }
-    $V.= "<a href='javascript:Expand();'>Expand</a> |";
-    $V.= "<a href='javascript:Collapse();'>Collapse</a> |";
-    $V.= "<a href='" . Traceback() . "'>Refresh</a>";
+$text = _("Expand");
+$text1 = _(" |");
+    $V.= "<a href='javascript:Expand();'>$text</a>$text1";
+$text = _("Collapse");
+$text1 = _(" |");
+    $V.= "<a href='javascript:Collapse();'>$text</a>$text1";
+$text = _("Refresh");
+    $V.= "<a href='" . Traceback() . "'>$text</a>";
     $V.= "</small></center>";
     $V.= "<P>\n";
     $V.= "<form>\n";
     $V.= FolderListDiv($Folder, 0, $Folder, 1);
     $V.= "</form>\n";
     $V.= "</td><td valign='top'>\n";
-    $V.= "<center><H3>Uploads</H3></center>\n";
+$text = _("Uploads");
+    $V.= "<center><H3>$text</H3></center>\n";
     $V.= "<table class='text' border=0 width='100%' cellpadding=0>\n";
-    $V.= "<th>Upload Name and Description</th><th>Upload Date</th></tr>\n";
+$text = _("Upload Name and Description");
+$text1 = _("Upload Date");
+    $V.= "<th>$text</th><th>$text1</th></tr>\n";
     foreach($Results as $Row) {
       if (empty($Row['upload_pk'])) {
         continue;
@@ -228,7 +244,8 @@ class ui_browse extends FO_Plugin {
       $Desc = htmlentities($Row['upload_desc']);
       $UploadPk = $Row['upload_pk'];
       if (empty($Desc)) {
-        $Desc = "<i>No description</i>";
+$text = _("No description");
+        $Desc = "<i>$text</i>";
       }
       $Name = $Row['ufile_name'];
       if (empty($Name)) {
@@ -247,20 +264,25 @@ class ui_browse extends FO_Plugin {
       $V.= "<tr><td>";
       if (IsContainer($Row['ufile_mode'])) {
         $V.= "<a href='$Uri&upload=$UploadPk&folder=$Folder&item=$UploadtreePk&show=$Show'>";
-        $V.= "<b>" . $Name . "</b>";
+$text = _("" . $Name . "");
+        $V.= "<b>$text</b>";
         $V.= "</a>";
       }
       else {
-        $V.= "<b>" . $Name . "</b>";
+$text = _("" . $Name . "");
+        $V.= "<b>$text</b>";
       }
       if ($Row['upload_mode'] & 1 << 2) {
-        $V.= "<br>Added by URL: " . htmlentities($uploadOrigin);
+$text = _("Added by URL: ");
+        $V.= "<br>$text" . htmlentities($uploadOrigin);
       }
       if ($Row['upload_mode'] & 1 << 3) {
-        $V.= "<br>Added by file upload: " . htmlentities($uploadOrigin);
+$text = _("Added by file upload: ");
+        $V.= "<br>$text" . htmlentities($uploadOrigin);
       }
       if ($Row['upload_mode'] & 1 << 4) {
-        $V.= "<br>Added from filesystem: " . htmlentities($uploadOrigin);
+$text = _("Added from filesystem: ");
+        $V.= "<br>$text" . htmlentities($uploadOrigin);
       }
       $V.= "<br>";
       $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
@@ -268,29 +290,33 @@ class ui_browse extends FO_Plugin {
       $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
       $V.= menu_to_1list($MenuPfile, $Parm, " ", " ");
       $V.= "<br>" . $Desc;
-      //          $V .= "<br>Contains $ItemCount ";
+$text = _("Contains $ItemCount ");
+      //          $V .= "<br>$text";
       //	  if ($ItemCount != "1") { $V .= "items."; }
       //	  else { $V .= "item."; }
       $V.= "</td>\n";
       $V.= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td></tr>\n";
       /* Check job status */
       $Status = JobListSummary($UploadPk);
-      $V.= "<td>Scheduled ";
+$text = _("Scheduled ");
+      $V.= "<td>$text";
       if (plugin_find_id('showjobs') >= 0) {
-        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>jobs</a>: ";
+$text = _("jobs");
+$text1 = _(": ");
+        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>$text</a>$text1";
       }
       else {
-        $V.= "jobs: ";
+        $V.= _("jobs: ");
       }
-      $V.= $Status['total'] . " total; ";
-      $V.= $Status['completed'] . " completed; ";
+      $V.= $Status['total'] . _(" total; ");
+      $V.= $Status['completed'] . _(" completed; ");
       if (!empty($Status['pending'])) {
-        $V.= $Status['pending'] . " pending; ";
+        $V.= $Status['pending'] . _(" pending; ");
       }
       if (!empty($Status['pending'])) {
-        $V.= $Status['active'] . " active; ";
+        $V.= $Status['active'] . _(" active; ");
       }
-      $V.= $Status['failed'] . " failed.";
+      $V.= $Status['failed'] . _(" failed.");
 
 /* bobg: bsam license analysis is deprecated */
 if (isset($__OBSOLETE__))
@@ -304,19 +330,22 @@ if (isset($__OBSOLETE__))
           "folder"
         ));
         if ($Status == 0) {
-          $V.= "<a href='";
-          $V.= $Uri . "&analyze=$UploadPk";
-          $V.= "'>Schedule</a> license analysis";
+          $V.= _("<a href='");
+          $V.= $Uri . _("&analyze=$UploadPk");
+$text = _(" license analysis");
+          $V.= "'>Schedule</a>$text";
         }
         else if ($Status == 2) {
-          $V.= "<a href='";
-          $V.= $Uri . "&reanalyze=$UploadPk";
-          $V.= "'>Reschedule</a> license analysis";
+          $V.= _("<a href='");
+          $V.= $Uri . _("&reanalyze=$UploadPk");
+$text = _(" license analysis");
+          $V.= "'>Reschedule</a>$text";
         }
       }
 }
       /* End of the record */
-      $V.= "<tr><td colspan=2>&nbsp;</td></tr>\n";
+$text = _("&nbsp;");
+      $V.= "<tr><td colspan=2>$text</td></tr>\n";
     }
     $V.= "</table>\n";
     $V.= "</td></tr>\n";
@@ -387,11 +416,11 @@ if (isset($__OBSOLETE__))
             }
           }
           $V.= "<font class='text'>\n";
-          $V.= Dir2Browse($this->Name, $Item, NULL, 1, "Browse") . "\n";
+          $V.= Dir2Browse($this->Name, $Item, NULL, 1, _("Browse") . "\n");
         }
         else if (!empty($Upload)) {
           $V.= "<font class='text'>\n";
-          $V.= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse") . "\n";
+          $V.= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, _("Browse") . "\n");
         }
         else {
           $V.= "<font class='text'>\n";
@@ -413,7 +442,9 @@ if (isset($__OBSOLETE__))
             }
             else
             {
-              $V.= "<hr><h2>Missing upload tree parent for upload $Upload</h2><hr>";
+$text = _("Missing upload tree parent for upload $Upload");
+$text1 = _("");
+              $V.= "<hr><h2>$text</h2><hr>$text1";
               break;
             }
             pg_free_result($result);

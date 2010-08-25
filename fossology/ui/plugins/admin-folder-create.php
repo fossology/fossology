@@ -136,16 +136,19 @@ class folder_create extends FO_Plugin
           }
         }
         /* Display the form */
-        $V .= "$R\n";
+        $V .= _("$R\n");
         $V .= "<form method='POST'>\n"; // no url = this url
         $V .= "<ol>\n";
-        $V .= "<li>Select the parent folder:  \n";
+$text = _("Select the parent folder:  \n");
+        $V .= "<li>$text";
         $V .= "<select name='parentid'>\n";
         $V .= FolderListOption(-1, 0);
         $V .= "</select><P />\n";
-        $V .= "<li>Enter the new folder name:  \n";
+$text = _("Enter the new folder name:  \n");
+        $V .= "<li>$text";
         $V .= "<INPUT type='text' name='newname' size=40 />\n<br>";
-        $V .= "<br><li>Enter a meaningful description:  \n";
+$text = _("Enter a meaningful description:  \n");
+        $V .= "<br><li>$text";
         $V .= "<INPUT type='text' name='description' size=80 />\n";
         $V .= "</ol>\n";
         $V .= "<input type='submit' value='Create!'>\n";

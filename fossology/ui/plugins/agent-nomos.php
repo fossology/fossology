@@ -201,7 +201,9 @@ class agent_fonomos extends FO_Plugin {
             else {
               $Name = $Row['upload_desc'] . " (" . $Row['upload_filename'] . ")";
             }
-            $Page.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
+$text = _("$Name");
+$text1 = _("\n");
+            $Page.= "<option value='" . $Row['upload_pk'] . "'>$text</option>$text1";
           }
           $Page.= "</select><P />\n";
           $Page.= "<input type='submit' value='Analyze!'>\n";

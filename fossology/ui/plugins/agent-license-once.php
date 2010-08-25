@@ -69,9 +69,11 @@ class agent_license_once extends FO_Plugin {
     $Match = "0%";
     while (!feof($Fin)) {
       $Line = fgets($Fin);
-      // print "<pre>$Line</pre>";
+$text = _("$Line");
+      // print "<pre>$text</pre>";
       if (strlen($Line) > 0) {
-        // print "<pre>$Line</pre>";
+$text = _("$Line");
+        // print "<pre>$text</pre>";
         if (substr($Line, 0, 4) == "A = ") {
           $Bsam = array(); /* clear the structure */
           $Bsam['Aname'] = trim(substr($Line, 4));
@@ -298,21 +300,28 @@ class agent_license_once extends FO_Plugin {
           }
         }
         /* Display instructions */
-        $V.= "This analyzer allows you to upload a single file for license analysis.\n";
-        $V.= "The limitations:\n";
+        $V.= _("This analyzer allows you to upload a single file for license analysis.\n");
+        $V.= _("The limitations:\n");
         $V.= "<ul>\n";
-        $V.= "<li>The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n";
-        $V.= "<li>Files that contain files are <b>not</b> unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n";
-        $V.= "<li>Results are <b>not</b> stored. As soon as you get your results, your uploaded file is removed from the system.\n";
+$text = _("The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n");
+        $V.= "<li>$text";
+$text = _("not");
+$text1 = _(" unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n");
+        $V.= "<li>Files that contain files are <b>$text</b>$text1";
+$text = _("not");
+$text1 = _(" stored. As soon as you get your results, your uploaded file is removed from the system.\n");
+        $V.= "<li>Results are <b>$text</b>$text1";
         $V.= "</ul>\n";
         /* Display the form */
         $V.= "<form enctype='multipart/form-data' method='post'>\n";
         $V.= "<ol>\n";
         $V.= "<li>Select the file to upload:<br />\n";
         $V.= "<input name='licfile' size='60' type='file' /><br />\n";
-        $V.= "<b>NOTE</b>: Files larger than 100K will be discarded and not analyzed.<P />\n";
-        $V.= "<li><input type='checkbox' name='highlight' value='1'>Check if you want to see the highlighted licenses.\n";
-        $V.= "Unchecked returns a simple list that summarizes the identified license types.";
+$text = _("NOTE");
+        $V.= "<b>$text</b>: Files larger than 100K will be discarded and not analyzed.<P />\n";
+$text = _("Check if you want to see the highlighted licenses.\n");
+        $V.= "<li><input type='checkbox' name='highlight' value='1'>$text";
+        $V.= _("Unchecked returns a simple list that summarizes the identified license types.");
         $V.= "<P />\n";
         $V.= "</ol>\n";
         $V.= "<input type='hidden' name='showheader' value='1'>";

@@ -56,7 +56,11 @@ class dashboard extends FO_Plugin
     /* Display results */
     $V = "";
     $V .= "<table border=1>\n";
-    $V .= "<tr><th>Filesystem</th><th colspan=2>Used</th><th colspan=2>Capacity</th><th>Percent Full</th></tr>\n";
+$text = _("Filesystem");
+$text1 = _("Used");
+$text2 = _("Capacity");
+$text3 = _("Percent Full");
+    $V .= "<tr><th>$text</th><th colspan=2>$text1</th><th colspan=2>$text2</th><th>$text3</th></tr>\n";
     foreach($Lines as $L)
     {
       if (empty($L)) { continue; }
@@ -69,7 +73,7 @@ class dashboard extends FO_Plugin
       $Capacity = $List[1] * 1024;
       $CapacityH = Bytes2Human($Capacity);
 
-      $V .= "<td align='right' style='border-right:none'>$UsedH</td>";
+      $V .= "<td align='right' style='border-right:none'>$UsedH"</td>";
       $V .= "<td align='right' style='border-left:none'>(" . number_format($Used,0,"",",") . ")</td>";
       $V .= "<td align='right' style='border-right:none'>$CapacityH</td>";
       $V .= "<td align='right' style='border-left:none'>(" . number_format($Capacity,0,"",",") . ")</td>";
@@ -100,43 +104,59 @@ class dashboard extends FO_Plugin
 
 	/**************************************************/
 	$V .= "<td valign='top'>\n";
-	$V .= "<H2>Job Queue</H2>\n";
+$text = _("Job Queue");
+$text1 = _("\n");
+	$V .= "<H2>$text</H2>$text1";
 	$V .= "<table border=1>\n";
-	$V .= "<tr><th>Queue Information</th><th>Total</th></tr>\n";
+$text = _("Queue Information");
+$text1 = _("Total");
+	$V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
 	// Dynamically set hyperlinks based on showjobs plugin existence.
 	$uri_showjobs = Traceback_uri() . "?mod=showjobs";
 	$showjobs_exists = &$Plugins[plugin_find_id("showjobs")]; /* may be null */
 
 	$Results = $DB->Action("SELECT COUNT(DISTINCT jq_job_fk) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
 	if ($showjobs_exists) {
-	  $V .= "<tr><td><a href='$uri_showjobs'>Pending Analysis Jobs</a></td>";
+$text = _("Pending Analysis Jobs");
+$text1 = _("");
+	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td>$text1";
 	}
 	else {
-	  $V .= "<tr><td>Pending Analysis Jobs</td>";
+$text = _("Pending Analysis Jobs");
+	  $V .= "<tr><td>$text</td>";
 	}
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
 	if ($showjobs_exists) {
-	  $V .= "<tr><td><a href='$uri_showjobs'>Tasks in the Job Queue</a></td>";
+$text = _("Tasks in the Job Queue");
+$text1 = _("");
+	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td>$text1";
 	}
 	else {
-	  $V .= "<tr><td>Tasks in the Job Queue</td>";
+$text = _("Tasks in the Job Queue");
+	  $V .= "<tr><td>$text</td>";
 	}
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
 	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL AND jq_starttime IS NOT NULL;");
 	if ($showjobs_exists) {
-	  $V .= "<tr><td><a href='$uri_showjobs'>Running Tasks</a></td>";
+$text = _("Running Tasks");
+$text1 = _("");
+	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td>$text1";
 	}
 	else {
-	  $V .= "<tr><td>Running Tasks</td>";
+$text = _("Running Tasks");
+	  $V .= "<tr><td>$text</td>";
 	}
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
 	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NOT NULL AND jq_end_bits=2;");
 	if ($showjobs_exists) {
-	  $V .= "<tr><td><a href='$uri_showjobs'>Failed Tasks</a></td>";
+$text = _("Failed Tasks");
+$text1 = _("");
+	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td>$text1";
 	}
 	else {
-	  $V .= "<tr><td>Failed Tasks</td>";
+$text = _("Failed Tasks");
+	  $V .= "<tr><td>$text</td>";
 	}
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";
 	$V .= "</table>\n";
@@ -144,48 +164,66 @@ class dashboard extends FO_Plugin
 
 	/**************************************************/
 	$V .= "<td valign='top'>\n";
-	$V .= "<H2>Database Contents</H2>\n";
+$text = _("Database Contents");
+$text1 = _("\n");
+	$V .= "<H2>$text</H2>$text1";
 	$V .= "<table border=1>\n";
-	$V .= "<tr><th>Metric</th><th>Total</th></tr>\n";
+$text = _("Metric");
+$text1 = _("Total");
+	$V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
 	$Results = $DB->Action("SELECT count(*) AS val FROM upload;");
-	$V .= "<tr><td>Unique Uploads</td>";
+$text = _("Unique Uploads");
+	$V .= "<tr><td>$text</td>";
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$Results = $DB->Action("SELECT count(*) AS val FROM pfile;");
-	$V .= "<tr><td>Unique Extracted Files</td>";
+$text = _("Unique Extracted Files");
+	$V .= "<tr><td>$text</td>";
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$Results = $DB->Action("SELECT count(*) AS val FROM uploadtree;");
-	$V .= "<tr><td>Extracted Names</td>";
+$text = _("Extracted Names");
+	$V .= "<tr><td>$text</td>";
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$Results = $DB->Action("SELECT count(*) AS val FROM agent_lic_raw;");
-	$V .= "<tr><td>Known License Templates</td>";
+$text = _("Known License Templates");
+	$V .= "<tr><td>$text</td>";
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$Results = $DB->Action("SELECT count(*) AS val FROM agent_lic_meta;");
-	$V .= "<tr><td>Identified Licenses</td>";
+$text = _("Identified Licenses");
+	$V .= "<tr><td>$text</td>";
 	$V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	$V .= "</table>\n";
 
 	/**************************************************/
 	$V .= "<td valign='top'>\n";
-	$V .= "<H2>Database Metrics</H2>\n";
+$text = _("Database Metrics");
+$text1 = _("\n");
+	$V .= "<H2>$text</H2>$text1";
 	$V .= "<table border=1>\n";
-	$V .= "<tr><th>Metric</th><th>Total</th></tr>\n";
+$text = _("Metric");
+$text1 = _("Total");
+	$V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
     $Results = $DB->Action("SELECT pg_size_pretty(pg_database_size('fossology')) as val");
-	$V .= "<tr><td>FOSSology database size</td>";
+$text = _("FOSSology database size");
+	$V .= "<tr><td>$text</td>";
 	$Size = $Results[0]['val']; 
 	$V .= "<td align='right'>  $Size </td></tr>\n";;
 
 	$Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity';");
 	if (!empty($Results[0]['val']))
 	  {
-	  $V .= "<tr><td>Active database connections</td>";
+$text = _("Active database connections");
+	  $V .= "<tr><td>$text</td>";
 	  $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	  $Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology';");
-	  $V .= "<tr><td>Active FOSSology queries</td>";
+$text = _("Active FOSSology queries");
+	  $V .= "<tr><td>$text</td>";
 	  $V .= "<td align='right'>" . number_format($Results[0]['val'],0,"",",") . "</td></tr>\n";;
 	  $Results = $DB->Action("SELECT datname,now()-query_start AS val FROM pg_stat_activity WHERE current_query != '<IDLE>' AND datname = 'fossology' ORDER BY val;");
 	  for($i=0; !empty($Results['datname']); $i++)
 	    {
-	    $V .= "<tr><td>Duration query #" . $i . " has been active</td>";
+$text = _("Duration query #");
+$text1 = _(" has been active");
+	    $V .= "<tr><td>$text . $i . $text1</td>";
 	    $V .= "<td align='right'>" . $Results[$i]['val'] . "</td></tr>\n";
 	    }
 	  }
@@ -195,7 +233,9 @@ class dashboard extends FO_Plugin
 	$V .= "</table>\n";
 
 	/**************************************************/
-	$V .= "<H2>Repository Disk Space</H2>\n";
+$text = _("Repository Disk Space");
+$text1 = _("\n");
+	$V .= "<H2>$text</H2>$text1";
 	$V .= $this->DiskFree();
 
 	break;

@@ -69,7 +69,8 @@ class admin_db_vacuum extends FO_Plugin
 	$Tables = $DB->Action($SQL);
 	if (!empty($Action))
 	  {
-	  print "<b>Cleaning: Vacuum and Analyze</b><br>\n";
+$text = _("Cleaning: Vacuum and Analyze");
+	  print "<b>$text</b><br>\n";
 	  flush();
 	  for($i=0; !empty($Tables[$i]['table']); $i++)
 		{
@@ -81,17 +82,19 @@ class admin_db_vacuum extends FO_Plugin
 	  }
 
 	/***************************************/
-	$V .= "Database performance can be improved by optimizing table memory allocation.";
-	$V .= " The database supports 'vacuum' to free deleted rows";
-	$V .= " and 'analyze' to precompute row counts.\n";
-	$V .= " These two functions are called by most agents on an as-needed basis.";
-	$V .= " However, you can start them yourself as needed.";
-	$V .= " Keep in mind:\n";
-	$V .= " Running them too often can negatively impact database performance since the database will spend more time cleaning than doing real work.";
+	$V .= _("Database performance can be improved by optimizing table memory allocation.");
+	$V .= _(" The database supports 'vacuum' to free deleted rows");
+	$V .= _(" and 'analyze' to precompute row counts.\n");
+	$V .= _(" These two functions are called by most agents on an as-needed basis.");
+	$V .= _(" However, you can start them yourself as needed.");
+	$V .= _(" Keep in mind:\n");
+	$V .= _(" Running them too often can negatively impact database performance since the database will spend more time cleaning than doing real work.");
 
 	$V .= "<form method='POST'>";
-	$V .= "<P><input type='checkbox' name='vacuum' value='1'> Vacuum\n";
-	$V .= "<br><input type='checkbox' name='analyze' value='1'> Analyze\n";
+$text = _(" Vacuum\n");
+	$V .= "<P><input type='checkbox' name='vacuum' value='1'>$text";
+$text = _(" Analyze\n");
+	$V .= "<br><input type='checkbox' name='analyze' value='1'>$text";
 	$V .= "<P><input type='submit' value='Clean!'>\n";
 	$V .= "</form>";
 	break;

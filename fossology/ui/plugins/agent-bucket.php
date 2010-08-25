@@ -214,7 +214,8 @@ class agent_bucket extends FO_Plugin {
         }
           /* Display the form */
           $Page.= "<form method='post'>\n"; // no url = this url
-          $Page.= "<H1>NOTE: this code was borrowed from nomos.  It needs to be updated for buckets.  If you see this message please tell bobg.</H1>";
+$text = _("NOTE: this code was borrowed from nomos.  It needs to be updated for buckets.  If you see this message please tell bobg.");
+          $Page.= "<H1>$text</H1>";
           $Page.= "Select an uploaded file for bucket analysis.\n";
           $Page.= "<p />\nAnalyze: <select name='upload'>\n";
           foreach($Results as $Row) {
@@ -227,7 +228,9 @@ class agent_bucket extends FO_Plugin {
             else {
               $Name = $Row['upload_desc'] . " (" . $Row['upload_filename'] . ")";
             }
-            $Page.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
+$text = _("$Name");
+$text1 = _("\n");
+            $Page.= "<option value='" . $Row['upload_pk'] . "'>$text</option>$text1";
           }
           $Page.= "</select><P />\n";
           $Page.= "<input type='submit' value='Analyze!'>\n";

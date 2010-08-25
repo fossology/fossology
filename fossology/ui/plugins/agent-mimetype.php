@@ -156,14 +156,14 @@ class agent_mimetype extends FO_Plugin {
 		ORDER BY upload_desc,upload_filename;";
         $Results = $DB->Action($SQL);
         if (empty($Results[0]['upload_pk'])) {
-          $V.= "All uploaded files are already analyzed, or scheduled to be analyzed.";
+          $V.= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
         }
         else {
           /* Display the form */
           $V.= "MIME-type analysis identifies files based on their MIME type.<P />\n";
           $V.= "<form method='post'>\n"; // no url = this url
-          $V.= "Select an uploaded file for MIME-type analysis.\n";
-          $V.= "Only uploads that are not already scheduled can be scheduled.\n";
+          $V.= _("Select an uploaded file for MIME-type analysis.\n");
+          $V.= _("Only uploads that are not already scheduled can be scheduled.\n");
           $V.= "<p />\nAnalyze: <select name='upload'>\n";
           foreach($Results as $Row) {
             if (empty($Row['upload_pk'])) {
@@ -175,7 +175,9 @@ class agent_mimetype extends FO_Plugin {
             else {
               $Name = $Row['upload_desc'] . " (" . $Row['upload_filename'] . ")";
             }
-            $V.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
+$text = _("$Name");
+$text1 = _("\n");
+            $V.= "<option value='" . $Row['upload_pk'] . "'>$text</option>$text1";
           }
           $V.= "</select><P />\n";
           $V.= "<input type='submit' value='Analyze!'>\n";

@@ -82,7 +82,9 @@ class upload_url extends FO_Plugin {
 
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
     $msg = "The upload $Name has been scheduled. It is ";
-    $keep =  "<a href='$Url'>upload #" . $uploadpk . "</a>.\n";
+$text = _("upload #" . $uploadpk . "");
+$text1 = _(".\n");
+    $keep =  "<a href='$Url'>$text</a>$text1";
     print displayMessage($msg,$keep);
     return (NULL);
   } // Upload()
@@ -120,24 +122,27 @@ class upload_url extends FO_Plugin {
           $GetURL = 'http://';
         }
         /* Display instructions */
-        $V.= "This option permits uploading a file from a remote web or FTP server to FOSSology.\n";
-        $V.= "The file to upload must be accessible via a URL and must not require human interaction ";
-        $V.= "such as login credentials.\n";
+        $V.= _("This option permits uploading a file from a remote web or FTP server to FOSSology.\n");
+        $V.= _("The file to upload must be accessible via a URL and must not require human interaction ");
+        $V.= _("such as login credentials.\n");
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-        $V.= "<li>Select the folder for storing the uploaded file:\n";
+$text = _("Select the folder for storing the uploaded file:\n");
+        $V.= "<li>$text";
         $V.= "<select name='folder'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
         $V.= "<li>Enter the URL to the file:<br />\n";
         $V.= "<INPUT type='text' name='geturl' size=60 value='" . htmlentities($GetURL) . "'/><br />\n";
-        $V.= "<b>NOTE</b>: If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file. The URL can begin with HTTP://, HTTPS://, or FTP://.<P />\n";
+$text = _("NOTE");
+        $V.= "<b>$text</b>: If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file. The URL can begin with HTTP://, HTTPS://, or FTP://.<P />\n";
         $V.= "<li>(Optional) Enter a description of this file:<br />\n";
         $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
         $V.= "<li>(Optional) Enter a viewable name for this file:<br />\n";
         $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
-        $V.= "<b>NOTE</b>: If no name is provided, then the uploaded file name will be used.<P />\n";
+$text = _("NOTE");
+        $V.= "<b>$text</b>: If no name is provided, then the uploaded file name will be used.<P />\n";
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
           $V.= "<li>Select optional analysis<br />\n";
           $V.= AgentCheckBoxMake(-1, "agent_unpack");

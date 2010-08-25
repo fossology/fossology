@@ -137,14 +137,15 @@ class agent_unpack extends FO_Plugin
 	$Results = $DB->Action($SQL);
 	if (empty($Results[0]['upload_pk']))
 	  {
-	  $V .= "All uploaded files are already unpacked, or scheduled to be unpacked.";
+	  $V .= _("All uploaded files are already unpacked, or scheduled to be unpacked.");
 	  }
 	else
 	  {
 	  /* Display the form */
 	  $V .= "<form method='post'>\n"; // no url = this url
 	  $V .= "<ol>\n";
-	  $V .= "<li>Select an uploaded file to unpack.\n";
+$text = _("Select an uploaded file to unpack.\n");
+	  $V .= "<li>$text";
 	  $V .= "Only uploads that are not already unpacked (and not already scheduled) can be scheduled.\n";
 	  $V .= "<p />\nUnpack: <select name='upload'>\n";
 	  foreach($Results as $Row)
@@ -152,7 +153,9 @@ class agent_unpack extends FO_Plugin
 	    if (empty($Row['upload_pk'])) { continue; }
 	    if (empty($Row['upload_desc'])) { $Name = $Row['upload_filename']; }
 	    else { $Name = $Row['upload_desc'] . " (" . $Row['upload_filename'] . ")"; }
-	    $V .= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
+$text = _("$Name");
+$text1 = _("\n");
+	    $V .= "<option value='" . $Row['upload_pk'] . "'>$text</option>$text1";
 	    }
 	  $V .= "</select><P />\n";
 	  $V .= "<li>Select optional analysis<br />\n";

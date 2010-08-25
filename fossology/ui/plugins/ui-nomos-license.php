@@ -65,7 +65,8 @@ class ui_nomos_license extends FO_Plugin
       {
        menu_insert("Browse::Nomos License",1);
        //menu_insert("Browse::[BREAK]",100);
-       //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
+$text = _("Clear");
+       //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>$text</a>");
       }
       else
       {
@@ -160,7 +161,9 @@ class ui_nomos_license extends FO_Plugin
     $Agent_pk = LatestNomosAgentpk($upload_pk);
     if ($Agent_pk == 0)
     {
-      $VLic = "<b>No data available.  Use Jobs > Agents to schedule a license scan.</b><p>";
+$text = _(" Agents to schedule a license scan.");
+$text1 = _("");
+      $VLic = "<b>No data available.  Use Jobs >$text</b><p>$text1";
       return $VLic;
     }
 
@@ -192,9 +195,12 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     $UniqueLicCount = 0;
     $NoLicFound = 0;
     $VLic .= "<table border=1 width='100%' id='lichistogram'>\n";
-    $VLic .= "<tr><th width='10%'>Count</th>";
-    $VLic .= "<th width='10%'>Files</th>";
-    $VLic .= "<th align=left>License Name</th></tr>\n";
+$text = _("Count");
+    $VLic .= "<tr><th width='10%'>$text</th>";
+$text = _("Files");
+    $VLic .= "<th width='10%'>$text</th>";
+$text = _("License Name");
+    $VLic .= "<th align=left>$text</th></tr>\n";
 
     while ($row = pg_fetch_assoc($result))
     {
@@ -202,10 +208,11 @@ FUTURE advanced interface allowing user to select dataset (agent version)
       $LicCount += $row['liccount'];
 
       /*  Count  */
-      $VLic .= "<tr><td align='right'>$row[liccount]</td>";
+$text = _("$row[liccount]");
+      $VLic .= "<tr><td align='right'>$text</td>";
 
       /*  Show  */
-      $VLic .= "<td align='center'><a href='";
+      $VLic .= _("<td align='center'><a href='");
       $VLic .= Traceback_uri();
       $VLic .= "?mod=list_lic_files&napk=$Agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']) . "'>Show</a></td>";
 
@@ -220,15 +227,24 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     }
     $VLic .= "</table>\n";
     $VLic .= "<p>\n";
-    $VLic .= "Hint: Click on the license name to ";
-    $VLic .= "<span style='background-color:$this->HighlightColor'>highlight </span>";
+    $VLic .= _("Hint: Click on the license name to ");
+$text = _("highlight ");
+    $VLic .= "<span style='background-color:$this->HighlightColor'>$text</span>";
     $VLic .= "where the license is found in the file listing.<br>\n";
     $VLic .= "<table border=0 id='licsummary'>";
-    $VLic .= "<tr><td align=right>$UniqueLicCount</td><td>Unique licenses</td></tr>";
+$text = _("$UniqueLicCount");
+$text1 = _("Unique licenses");
+    $VLic .= "<tr><td align=right>$text</td><td>$text1</td></tr>";
     $NetLic = $LicCount - $NoLicFound;
-    $VLic .= "<tr><td align=right>$NetLic</td><td>Licenses found</td></tr>";
-    $VLic .= "<tr><td align=right>$NoLicFound</td><td>Files with no licenses</td></tr>";
-    $VLic .= "<tr><td align=right>$FileCount</td><td>Files</td></tr>";
+$text = _("$NetLic");
+$text1 = _("Licenses found");
+    $VLic .= "<tr><td align=right>$text</td><td>$text1</td></tr>";
+$text = _("$NoLicFound");
+$text1 = _("Files with no licenses");
+    $VLic .= "<tr><td align=right>$text</td><td>$text1</td></tr>";
+$text = _("$FileCount");
+$text1 = _("Files");
+    $VLic .= "<tr><td align=right>$text</td><td>$text1</td></tr>";
     $VLic .= "</table>";
     pg_free_result($result);
 
@@ -370,7 +386,9 @@ FUTURE advanced interface allowing user to select dataset (agent version)
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VLic</td><td valign='top'>$VF</td></tr>\n";
+$text = _("$VLic");
+$text1 = _("$VF");
+    $V .= "<tr><td valign='top' width='50%'>$text</td><td valign='top'>$text1</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
 
@@ -434,7 +452,8 @@ FUTURE advanced interface allowing user to select dataset (agent version)
           $V .= $this->ShowUploadHist($Item,$Uri);
         }
         $V .= "</font>\n";
-/*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>Loading...</div>"; */
+$text = _("Loading...");
+/*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>$text</div>"; */
         break;
       case "Text":
         break;
@@ -449,11 +468,14 @@ FUTURE advanced interface allowing user to select dataset (agent version)
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
-    printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
+$text = _("Elapsed time: %.2f seconds");
+    printf( "<small>$text</small>", $Time);
 
     if ($Cached) 
     {
-      echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
+$text = _("cached");
+$text1 = _("   <a href=\");
+      echo " <i>$text</i>$text1"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
     }
     else
     {

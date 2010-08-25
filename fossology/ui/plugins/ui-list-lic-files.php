@@ -108,19 +108,23 @@ class list_lic_files extends FO_Plugin
     $Count = $CountArray['count'];
     $Unique = $CountArray['unique'];
 
-    $V.= "$Count files found ($Unique unique) with license <b>$rf_shortname</b>";
+$text = _("$rf_shortname");
+    $V.= "$Count files found ($Unique unique) with license <b>$text</b>";
     if ($Count < $Max) $Max = $Count;
     $limit = ($Page < 0) ? "ALL":$Max;
     $order = " order by ufile_name asc";
     $filesresult = GetFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk,
                                 $PkgsOnly, $Offset, $limit, $order);
     $NumFiles = pg_num_rows($filesresult);
-    if (!empty($Excl)) $V .= "<br>Display <b>excludes</b> files with these extensions: $Excl";
+$text = _("excludes");
+$text1 = _(" files with these extensions: $Excl");
+    if (!empty($Excl)) $V .= "<br>Display <b>$text</b>$text1";
 
 	/* Get the page menu */
 	if (($Count >= $Max) && ($Page >= 0))
 	{
-	  $VM = "<P />\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
+$text = _("\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . ");
+	  $VM = "<P />$text"<P />\n";
 	  $V .= $VM;
 	}
 	else
@@ -139,7 +143,9 @@ class list_lic_files extends FO_Plugin
     $baseURL = "?mod=" . $this->Name . "&napk=$nomosagent_pk&item=$uploadtree_pk&lic=$ushortname&page=-1";
 
     $V .= "<table>";
-    $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Nomos Licenses found</th></tr>";
+$text = _("File");
+$text1 = _("&nbsp");
+    $V .= "<tr><th>$text</th><th>$text1";
     while ($row = pg_fetch_assoc($filesresult))
     {
       // Allow user to exclude files with this extension
@@ -148,7 +154,8 @@ class list_lic_files extends FO_Plugin
         $URL = $baseURL . "&excl=$Excl:$FileExt";
       else
         $URL = $baseURL . "&excl=$FileExt";
-      $Header = "<a href=$URL>Exclude this file type.</a>";
+$text = _("Exclude this file type.");
+      $Header = "<a href=$URL>$text</a>";
 
       $ok = true;
       if ($Excl)
@@ -164,13 +171,16 @@ class list_lic_files extends FO_Plugin
         $LinkLastpfile = $LinkLast . "&pfile=$pfile_pk";
         $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLastpfile, $ShowBox, $ShowMicro, ++$RowNum, $Header);
         $V .= "</td>";
-        $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
+$text = _("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+        $V .= "<td>$text</td>";  // spaces to seperate licenses
 
         $licstring = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $row['uploadtree_pk']);
 
         // show the entire license list as a single string with links to the files
         // in this container with that license.
-        $V .= "<td>$licstring</td></tr>";
+$text = _("$licstring");
+$text1 = _("");
+        $V .= "<td>$text</td></tr>$text1";
         $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
       }
     }
@@ -179,7 +189,9 @@ class list_lic_files extends FO_Plugin
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-	$V .= "<small>Elaspsed time: $Time seconds</small>\n";
+$text = _("Elaspsed time: $Time seconds");
+$text1 = _("\n");
+	$V .= "<small>$text</small>$text1";
 	break;
       case "Text":
 	break;

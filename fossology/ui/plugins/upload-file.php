@@ -66,12 +66,14 @@ class upload_file extends FO_Plugin {
       return ("Failed to insert upload record");
     }
     /* move the temp file */
-    //echo "<pre>uploadfile: renaming uploaded file\n</pre>";
+$text = _("uploadfile: renaming uploaded file\n");
+    //echo "<pre>$text</pre>";
     if (!move_uploaded_file($TempFile, "$TempFile-uploaded")) {
       return ("Could not save uploaded file");
     }
     $UploadedFile = "$TempFile" . "-uploaded";
-    //echo "<pre>uploadfile: \$UploadedFile is:$UploadedFile\n</pre>";
+$text = _("uploadfile: \$UploadedFile is:$UploadedFile\n");
+    //echo "<pre>$text</pre>";
     if (!chmod($UploadedFile, 0660)) {
       return ("ERROR! could not update permissions on downloaded file");
     }
@@ -95,7 +97,9 @@ class upload_file extends FO_Plugin {
     if($wgetRtn == 0) {
       $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
       $Msg = "The file $Name has been uploaded. It is ";
-      $keep = '<a href=' . $Url . '>upload #' . $uploadpk . "</a>.\n";
+$text = _("upload #' . $uploadpk . "");
+$text1 = _(".\n");
+      $keep = '<a href=' . $Url . '>$text</a>$text1";
       print displayMessage($Msg,$keep);
       return (NULL);
     }
@@ -139,29 +143,33 @@ class upload_file extends FO_Plugin {
           $GetURL = 'http://';
         }
         /* Display instructions */
-        $V.= "This option permits uploading a file from your computer to FOSSology.\n";
-        $V.= "The file to upload should be located on your computer.\n";
-        $V.= "Many browsers, including Microsoft's Internet Explorer, have trouble uploading ";
+        $V.= _("This option permits uploading a file from your computer to FOSSology.\n");
+        $V.= _("The file to upload should be located on your computer.\n");
+        $V.= _("Many browsers, including Microsoft's Internet Explorer, have trouble uploading ");
         $V.= "file larger than 650 Megabytes (a standard-size CD-ROM image).\n";
-        $V.= "If your file is larger than 650 Megabytes, then choose one of the other upload options.";
+        $V.= _("If your file is larger than 650 Megabytes, then choose one of the other upload options.");
 
         /* Display the form */
         $V.= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-        $V.= "<li>Select the folder for storing the uploaded file:\n";
+$text = _("Select the folder for storing the uploaded file:\n");
+        $V.= "<li>$text";
         $V.= "<select name='folder'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
         $V.= "<li>Select the file to upload:<br />\n";
         $V.= "<input name='getfile' size='60' type='file' /><br />\n";
-        $V.= "<b>NOTE</b>: If the file is larger than 650 Megs (one CD-ROM)," .
+$text = _("NOTE");
+$text1 = _(": If the file is larger than 650 Megs (one CD-ROM),");
+        $V.= "<b>$text</b>$text1" .
              "then this method will not work with some browsers (e.g., Internet Explorer)." .
              " Only attach files smaller than 650 Megs.<P />\n";
         $V.= "<li>(Optional) Enter a description of this file:<br />\n";
         $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
         $V.= "<li>(Optional) Enter a viewable name for this file:<br />\n";
         $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
-        $V.= "<b>NOTE</b>: If no name is provided, then the uploaded file name will be used.<P />\n";
+$text = _("NOTE");
+        $V.= "<b>$text</b>: If no name is provided, then the uploaded file name will be used.<P />\n";
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
           $V.= "<li>Select optional analysis<br />\n";
           $V.= AgentCheckBoxMake(-1, "agent_unpack");

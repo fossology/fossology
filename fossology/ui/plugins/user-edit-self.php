@@ -215,7 +215,8 @@ class user_edit_self extends FO_Plugin {
 				}
 				/* Build HTML form */
 				$V.= "<form name='formy' method='POST'>\n"; // no url = this url
-				$V.= "You <font color='red'>must</font> provide your current password in order to make any changes.<br />\n";
+$text = _("must");
+				$V.= "You <font color='red'>$text</font> provide your current password in order to make any changes.<br />\n";
 				$V.= "Enter your password: <input type='password' name='pass0' size=20>\n";
 				$V.= "<hr>\n";
 				$Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';");
@@ -224,18 +225,26 @@ class user_edit_self extends FO_Plugin {
 				$Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 				$V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
 				$Val = htmlentities($R['user_name'], ENT_QUOTES);
-				$V.= "$Style<th width='5%'>1.</th><th width='25%'>Change your username. This will be checked to ensure that it is unique among all users.</th>";
+$text = _("1.");
+$text1 = _("Change your username. This will be checked to ensure that it is unique among all users.");
+				$V.= "$Style<th width='5%'>$text</th><th width='25%'>$text1</th>";
 				$V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities($R['user_desc'], ENT_QUOTES);
-				$V.= "$Style<th>2.</th><th>Change your description (name, contact, or other information).  This may be blank.</th>\n";
+$text = _("2.");
+$text1 = _("Change your description (name, contact, or other information).  This may be blank.");
+				$V.= "$Style<th>$text</th><th>$text1</th>\n";
 				$V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities($R['user_email'], ENT_QUOTES);
-				$V.= "$Style<th>3.</th><th>Change your email address. This may be blank.</th>\n";
+$text = _("3.");
+$text1 = _("Change your email address. This may be blank.");
+				$V.= "$Style<th>$text</th><th>$text1</th>\n";
 				$V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>4.</th><th>Change your password.<br>Re-enter your password.</th><td>";
+$text = _("4.");
+$text1 = _("Change your password.");
+				$V.= "$Style<th>$text</th><th>$text1<br>Re-enter your password.</th><td>";
 				$V.= "<input type='password' name='pass1' size=20><br />\n";
 				$V.= "<input type='password' name='pass2' size=20></td>\n";
 				$V.= "</tr>\n";
@@ -244,10 +253,14 @@ class user_edit_self extends FO_Plugin {
 				} else {
 					$Checked = "checked='checked'";
 				}
-				$V.= "$Style<th>5.</th><th>E-mail Notification</th><td><input type=checkbox " . "name='enote' value='y' $Checked>" . "Check to enable email notification of completed analysis.</td>\n";
+$text = _("5.");
+$text1 = _("E-mail Notification");
+				$V.= "$Style<th>$text</th><th>$text1</th><td><input type=checkbox ";
 				$V.= "</tr>\n";
 				$V.= "</tr>\n";
-				$V .= "$Style<th>6.</th><th>Default Agents: Select the ".
+$text = _("6.");
+$text1 = _("Default Agents: Select the ");
+				$V .= "$Style<th>$text</th><th>$text1";
               "agent(s) to automatically run when uploading data. These" .
               " selections can be changed on the upload screens.\n</th><td>\n";
         /*
@@ -262,13 +275,17 @@ class user_edit_self extends FO_Plugin {
 				$uri = $AgentItem->URI;
 				}
 				if($uri == "agent_unpack" && count($AgentList) == 1 ) {
-					$V .= "<h3>You do not have permission to change your default agents</h3>\n";
+$text = _("You do not have permission to change your default agents");
+$text1 = _("\n");
+					$V .= "<h3>$text</h3>$text1";
 				}
 				else {
 					$V.= AgentCheckBoxMake(-1, "agent_unpack");
 				}
 				$V .= "</td>\n";
-                $V.= "$Style<th>7.</th><th>Default bucketpool.</th>";
+$text = _("7.");
+$text1 = _("Default bucketpool.");
+                $V.= "$Style<th>$text</th><th>$text1</th>";
                 $V.= "<td>";
 				$Val = htmlentities($R['default_bucketpool_fk'], ENT_QUOTES);
                 $V.= SelectBucketPool($Val);

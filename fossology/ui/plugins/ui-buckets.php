@@ -104,7 +104,8 @@ class ui_buckets extends FO_Plugin
       {
        menu_insert("Browse::Bucket Browser",1);
        //menu_insert("Browse::[BREAK]",100);
-       //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
+$text = _("Clear");
+       //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>$text</a>");
       }
       else
       {
@@ -178,7 +179,8 @@ class ui_buckets extends FO_Plugin
     if (pg_num_rows($result) < 1)
     {
       pg_free_result($result);
-      return "<h2>Invalid URL, nonexistant item $Uploadtree_pk</h2>";
+$text = _("Invalid URL, nonexistant item $Uploadtree_pk");
+      return "<h2>$text</h2>";
     }
     $row = pg_fetch_assoc($result);
     $lft = $row["lft"];
@@ -267,9 +269,12 @@ return;
     {
       $VLic .= "Bucket Pool: $bucketpool_name<br>";
       $VLic .= "<table border=1 width='100%'>\n";
-      $VLic .= "<tr><th width='10%'>Count</th>";
-      $VLic .= "<th width='10%'>Files</th>";
-      $VLic .= "<th align='left'>Bucket</th></tr>\n";
+$text = _("Count");
+      $VLic .= "<tr><th width='10%'>$text</th>";
+$text = _("Files");
+      $VLic .= "<th width='10%'>$text</th>";
+$text = _("Bucket");
+      $VLic .= "<th align='left'>$text</th></tr>\n";
   
       foreach($historows as $bucketrow)
       {
@@ -280,10 +285,11 @@ return;
         $bucket_color = $bucketDefArray[$bucket_pk]['bucket_color'];
   
         /*  Count  */
-        $VLic .= "<tr><td align='right' style='background-color:$bucket_color'>$bucketcount</td>";
+$text = _("$bucketcount");
+        $VLic .= "<tr><td align='right' style='background-color:$bucket_color'>$text</td>";
 
         /*  Show  */
-        $VLic .= "<td align='center'><a href='";
+        $VLic .= _("<td align='center'><a href='");
         $VLic .= Traceback_uri();
         $VLic .= "?mod=list_bucket_files&bapk=$bucketagent_pk&item=$Uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk" . "'>Show</a></td>";
 
@@ -435,14 +441,19 @@ return;
 
     /* Display source, binary, and binary missing source package counts */
     $VLic .= "<ul>";
-    $VLic .= "<li> $NumSrcPackages source packages";
-    $VLic .= "<li> $NumBinPackages binary packages";
-    $VLic .= "<li> $NumBinNoSrcPackages binary packages with no source package";
+$text = _(" $NumSrcPackages source packages");
+    $VLic .= "<li>$text";
+$text = _(" $NumBinPackages binary packages");
+    $VLic .= "<li>$text";
+$text = _(" $NumBinNoSrcPackages binary packages with no source package");
+    $VLic .= "<li>$text";
     $VLic .= "</ul>";
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VLic</td><td valign='top'>$VF</td></tr>\n";
+$text = _("$VLic");
+$text1 = _("$VF");
+    $V .= "<tr><td valign='top' width='50%'>$text</td><td valign='top'>$text1</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
 
@@ -510,7 +521,8 @@ return;
           $V .= $this->ShowUploadHist($Item,$Uri);
         }
         $V .= "</font>\n";
-/*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>Loading...</div>"; */
+$text = _("Loading...");
+/*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>$text</div>"; */
         break;
       case "Text":
         break;
@@ -525,10 +537,13 @@ return;
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
-    printf( "<p><small>Elapsed time: %.2f seconds</small>", $Time);
+$text = _("Elapsed time: %.2f seconds");
+    printf( "<p><small>$text</small>", $Time);
 
     if ($Cached) 
-      echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
+$text = _("cached");
+$text1 = _("   <a href=\");
+      echo " <i>$text</i>$text1"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
     else
     {
       /*  Cache Report if this took longer than 1/2 second*/

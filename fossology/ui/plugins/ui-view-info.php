@@ -84,7 +84,9 @@ class ui_view_info extends FO_Plugin
      **********************************/
     if ($Page == 0)
       {
-      $V .= "<H2>Repository Locator</H2>\n";
+$text = _("Repository Locator");
+$text1 = _("\n");
+      $V .= "<H2>$text</H2>$text1";
       $SQL = "SELECT * FROM uploadtree
 	INNER JOIN pfile ON uploadtree_pk = $Item
 	AND pfile_fk = pfile_pk
@@ -92,17 +94,29 @@ class ui_view_info extends FO_Plugin
       $Results = $DB->Action($SQL);
       $R = &$Results[0];
       $V .= "<table border=1>\n";
-      $V .= "<tr><th>Attribute</th><th>Value</th></tr>\n";
+$text = _("Attribute");
+$text1 = _("Value");
+      $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
       $Bytes = $R['pfile_size'];
       $BytesH = Bytes2Human($Bytes);
       $Bytes = number_format($Bytes, 0, "", ",");
       if ($BytesH == $Bytes) { $BytesH = ""; }
       else { $BytesH = '(' . $BytesH . ')'; }
-      $V .= "<tr><td align='center'>File Size</td><td align='right'>$Bytes $BytesH</td></tr>\n";
-      $V .= "<tr><td align='center'>SHA1 Checksum</td><td align='right'>" . $R['pfile_sha1'] . "</td></tr>\n";
-      $V .= "<tr><td align='center'>MD5 Checksum</td><td align='right'>" . $R['pfile_md5'] . "</td></tr>\n";
-      $V .= "<tr><td align='center'>Repository ID</td><td align='right'>" . $R['pfile_sha1'] . "." . $R['pfile_md5'] . "." . $R['pfile_size'] . "</td></tr>\n";
-      $V .= "<tr><td align='center'>Pfile ID</td><td align='right'>" . $R['pfile_fk'] . "</td></tr>\n";
+$text = _("File Size");
+$text1 = _("$Bytes $BytesH");
+      $V .= "<tr><td align='center'>$text</td><td align='right'>$text1</td></tr>\n";
+$text = _("SHA1 Checksum");
+$text1 = _("");
+      $V .= "<tr><td align='center'>$text</td><td align='right'>$text1";
+$text = _("MD5 Checksum");
+$text1 = _("");
+      $V .= "<tr><td align='center'>$text</td><td align='right'>$text1";
+$text = _("Repository ID");
+$text1 = _("");
+      $V .= "<tr><td align='center'>$text</td><td align='right'>$text1";
+$text = _("Pfile ID");
+$text1 = _("");
+      $V .= "<tr><td align='center'>$text</td><td align='right'>$text1";
       $V .= "</table>\n";
       }
     return($V);
@@ -128,7 +142,9 @@ class ui_view_info extends FO_Plugin
     /**********************************
      List the directory locations where this pfile is found
      **********************************/
-    $V .= "<H2>Sightings</H2>\n";
+$text = _("Sightings");
+$text1 = _("\n");
+    $V .= "<H2>$text</H2>$text1";
     $SQL = "SELECT * FROM pfile,uploadtree
         WHERE pfile_pk=pfile_fk
         AND pfile_pk IN
@@ -143,7 +159,7 @@ class ui_view_info extends FO_Plugin
     else { $VM = ""; }
     if ($Count > 0)
         {
-        $V .= "This exact file appears in the following locations:\n";
+        $V .= _("This exact file appears in the following locations:\n");
         $V .= $VM;
         $Offset++;
         $V .= Dir2FileList($Results,"browse","view",$Offset);
@@ -151,11 +167,11 @@ class ui_view_info extends FO_Plugin
         }
     else if ($Page > 0)
         {
-        $V .= "End of listing.\n";
+        $V .= _("End of listing.\n");
         }
     else
         {
-        $V .= "This file does not appear in any other known location.\n";
+        $V .= _("This file does not appear in any other known location.\n");
         }
     return($V);
   }//ShowSightings()
@@ -185,23 +201,33 @@ class ui_view_info extends FO_Plugin
     $Results = $DB->Action($SQL);
     $Count=1;
 
-    $V .= "<H2>Meta Data</H2>\n";
+$text = _("Meta Data");
+$text1 = _("\n");
+    $V .= "<H2>$text</H2>$text1";
     $V .= "<table border='1'>\n";
-    $V .= "<tr><th width='5%'>Item</th><th width='20%'>Meta Data</th><th>Value</th></tr>\n";
+$text = _("Item");
+$text1 = _("Meta Data");
+    $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>Value</th></tr>\n";
     foreach($Results as $R)
     for($i=0; !empty($Results[$i]['mimetype_pk']); $i++)
         {
         $R = &$Results[$i];
-        $V .= "<tr><td align='right'>$Count</td><td>Unpacked file type";
+$text = _("$Count");
+$text1 = _("Unpacked file type");
+        $V .= "<tr><td align='right'>$text</td><td>$text1";
         $V .= "</td><td>" . htmlentities($R['mimetype_name']) . "</td></tr>\n";
         $Count++;
         }
     $V .= "</table>\n";
     /*  Display meta-data get from  pkgmetagetta agent */
 
-    $V .= "<H4>Meta Data From PkgMetaGetta Agent</H4>\n";
+$text = _("Meta Data From PkgMetaGetta Agent");
+$text1 = _("\n");
+    $V .= "<H4>$text</H4>$text1";
     $V .= "<table border='1'>\n";
-    $V .= "<tr><th width='5%'>Item</th><th width='20%'>Meta Data</th><th>Value</th></tr>\n";
+$text = _("Item");
+$text1 = _("Meta Data");
+    $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>Value</th></tr>\n";
     $SQL = "SELECT DISTINCT key_name,attrib_value FROM attrib
         INNER JOIN key ON key_pk = attrib_key_fk
         AND key_parent_fk IN
@@ -215,16 +241,21 @@ class ui_view_info extends FO_Plugin
     for($i=0; !empty($Results[$i]['key_name']); $i++)
         {
         $R = &$Results[$i];
-        $V .= "<tr><td align='right'>$Count</td><td>" . htmlentities($R['key_name']);
+$text = _("$Count");
+$text1 = _("");
+        $V .= "<tr><td align='right'>$text</td><td>$text1";
         $Val = htmlentities($R['attrib_value']);
-        $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
-        $V .= "</td><td>$Val</td></tr>\n";
+$text = _("\$1");
+        $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>$text</a>",$Val);
+$text = _("$Val");
+        $V .= "</td><td>$text</td></tr>\n";
         $Count++;
         }
 
     $V .= "</table>\n";
     $Count--;
-    $V .= "<P />Total meta data records: " . number_format($Count,0,"",",") . "<br />\n";
+$text = _("Total meta data records: " . number_format($Count,0,"",",") . ");
+    $V .= "<P />$text"<br />\n";
     return($V);
   } // ShowMetaView()
 
@@ -263,7 +294,9 @@ class ui_view_info extends FO_Plugin
     /**********************************
      Display package info
      **********************************/
-    $V .= "<H2>Package Info</H2>\n";
+$text = _("Package Info");
+$text1 = _("\n");
+    $V .= "<H2>$text</H2>$text1";
 
     $SQL = "SELECT mimetype_name
         FROM uploadtree
@@ -290,65 +323,95 @@ class ui_view_info extends FO_Plugin
           {
           if((!empty($R['source_rpm']))and(trim($R['source_rpm']) != "(none)"))
               {
-              $V .= "RPM Binary Package";
+              $V .= _("RPM Binary Package");
               }
           else
               {
-              $V .= "RPM Source Package";
+              $V .= _("RPM Source Package");
               }
           }
        $Count=1;
 
        $V .= "<table border='1'>\n";
-       $V .= "<tr><th width='5%'>Item</th><th width='20%'>Type</th><th>Value</th></tr>\n";
+$text = _("Item");
+$text1 = _("Type");
+       $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>Value</th></tr>\n";
 
        for($i=0; !empty($Results[$i]['pkg_pk']); $i++)
           {
           $R = &$Results[$i];
           $Require = $R['pkg_pk'];
 
-          $V .= "<tr><td align='right'>$Count</td><td>Package";
+$text = _("$Count");
+$text1 = _("Package");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['pkg_name']) . "</td></tr>\n";
           $Count++;
 
-          $V .= "<tr><td align='right'>$Count</td><td>Alias";
+$text = _("$Count");
+$text1 = _("Alias");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['pkg_alias']) . "</td></tr>\n";
           $Count++;
-          $V .= "<tr><td align='right'>$Count</td><td>Architecture";
+$text = _("$Count");
+$text1 = _("Architecture");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['pkg_arch']) . "</td></tr>\n";
           $Count++;
-          $V .= "<tr><td align='right'>$Count</td><td>Version";
+$text = _("$Count");
+$text1 = _("Version");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['version']) . "</td></tr>\n";
           $Count++;
 	  	
-          $V .= "<tr><td align='right'>$Count</td><td>License";
+$text = _("$Count");
+$text1 = _("License");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['license']) . "</td></tr>\n";
           $Count++;
-          $V .= "<tr><td align='right'>$Count</td><td>Group";
+$text = _("$Count");
+$text1 = _("Group");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['pkg_group']) . "</td></tr>\n";
           $Count++;
-          $V .= "<tr><td align='right'>$Count</td><td>Packager";
+$text = _("$Count");
+$text1 = _("Packager");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['packager']) . "</td></tr>\n";
           $Count++;
-          $V .= "<tr><td align='right'>$Count</td><td>Release";
+$text = _("$Count");
+$text1 = _("Release");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['release']) . "</td></tr>\n";
           $Count++;
-          $V .= "<tr><td align='right'>$Count</td><td>BuildDate";
+$text = _("$Count");
+$text1 = _("BuildDate");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['build_date']) . "</td></tr>\n";
           $Count++;
-          $V .= "<tr><td align='right'>$Count</td><td>Vendor";
+$text = _("$Count");
+$text1 = _("Vendor");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['vendor']) . "</td></tr>\n";
           $Count++;
-          $V .= "<tr><td align='right'>$Count</td><td>URL";
+$text = _("$Count");
+$text1 = _("URL");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['url']) . "</td></tr>\n";
           $Count++;
-          $V .= "<tr><td align='right'>$Count</td><td>Summary";
+$text = _("$Count");
+$text1 = _("Summary");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['summary']) . "</td></tr>\n";
           $Count++;
-          $V .= "<tr><td align='right'>$Count</td><td>Description";
+$text = _("$Count");
+$text1 = _("Description");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['description']) . "</td></tr>\n";
           $Count++;
-          $V .= "<tr><td align='right'>$Count</td><td>Source";
+$text = _("$Count");
+$text1 = _("Source");
+          $V .= "<tr><td align='right'>$text</td><td>$text1";
           $V .= "</td><td>" . htmlentities($R['source_rpm']) . "</td></tr>\n";
           $Count++;
           }
@@ -359,10 +422,14 @@ class ui_view_info extends FO_Plugin
        for($i=0; !empty($Results[$i]['req_pk']); $i++)
             {
             $R = &$Results[$i];
-            $V .= "<tr><td align='right'>$Count</td><td>Requires";
+$text = _("$Count");
+$text1 = _("Requires");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $Val = htmlentities($R['req_value']);
-            $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
-            $V .= "</td><td>$Val</td></tr>\n";
+$text = _("\$1");
+            $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>$text</a>",$Val);
+$text = _("$Val");
+            $V .= "</td><td>$text</td></tr>\n";
             $Count++;
             }
 
@@ -372,7 +439,7 @@ class ui_view_info extends FO_Plugin
        }
     else if ($MIMETYPE == "application/x-debian-package")
        {
-       $V .= "Debian Binary Package\n";
+       $V .= _("Debian Binary Package\n");
 
        $SQL = "SELECT *
                 FROM pkg_deb
@@ -382,45 +449,69 @@ class ui_view_info extends FO_Plugin
        $Count=1;
 
        $V .= "<table border='1'>\n";
-       $V .= "<tr><th width='5%'>Item</th><th width='20%'>Type</th><th>Value</th></tr>\n";
+$text = _("Item");
+$text1 = _("Type");
+       $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>Value</th></tr>\n";
        
        for($i=0; !empty($Results[$i]['pkg_pk']); $i++)
             {
             $R = &$Results[$i];
             $Require = $R['pkg_pk'];
 
-            $V .= "<tr><td align='right'>$Count</td><td>Package";
+$text = _("$Count");
+$text1 = _("Package");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['pkg_name']) . "</td></tr>\n";
             $Count++;
 
-            $V .= "<tr><td align='right'>$Count</td><td>Architecture";
+$text = _("$Count");
+$text1 = _("Architecture");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['pkg_arch']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Version";
+$text = _("$Count");
+$text1 = _("Version");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['version']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Section";
+$text = _("$Count");
+$text1 = _("Section");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['section']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Priority";
+$text = _("$Count");
+$text1 = _("Priority");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['priority']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Installed Size";
+$text = _("$Count");
+$text1 = _("Installed Size");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['installed_size']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Maintainer";
+$text = _("$Count");
+$text1 = _("Maintainer");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['maintainer']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Homepage";
+$text = _("$Count");
+$text1 = _("Homepage");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['homepage']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Source";
+$text = _("$Count");
+$text1 = _("Source");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['source']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Summary";
+$text = _("$Count");
+$text1 = _("Summary");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['summary']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Description";
+$text = _("$Count");
+$text1 = _("Description");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['description']) . "</td></tr>\n";
             $Count++;
 
@@ -432,10 +523,14 @@ class ui_view_info extends FO_Plugin
        for($i=0; !empty($Results[$i]['req_pk']); $i++)
             {
             $R = &$Results[$i];
-            $V .= "<tr><td align='right'>$Count</td><td>Depends";
+$text = _("$Count");
+$text1 = _("Depends");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $Val = htmlentities($R['req_value']);
-            $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
-            $V .= "</td><td>$Val</td></tr>\n";
+$text = _("\$1");
+            $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>$text</a>",$Val);
+$text = _("$Val");
+            $V .= "</td><td>$text</td></tr>\n";
             $Count++;
             }
 
@@ -445,7 +540,7 @@ class ui_view_info extends FO_Plugin
 
     else if ($MIMETYPE == "application/x-debian-source")
        {
-       $V .= "Debian Source Package\n";
+       $V .= _("Debian Source Package\n");
 
        $SQL = "SELECT *
                 FROM pkg_deb
@@ -455,36 +550,54 @@ class ui_view_info extends FO_Plugin
        $Count=1;
 
        $V .= "<table border='1'>\n";
-       $V .= "<tr><th width='5%'>Item</th><th width='20%'>Type</th><th>Value</th></tr>\n";
+$text = _("Item");
+$text1 = _("Type");
+       $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>Value</th></tr>\n";
 
        for($i=0; !empty($Results[$i]['pkg_pk']); $i++)
             {
             $R = &$Results[$i];
             $Require = $R['pkg_pk'];
 
-            $V .= "<tr><td align='right'>$Count</td><td>Format";
+$text = _("$Count");
+$text1 = _("Format");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['format']) . "</td></tr>\n";
             $Count++;
 
-            $V .= "<tr><td align='right'>$Count</td><td>Source";
+$text = _("$Count");
+$text1 = _("Source");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['source']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Binary";
+$text = _("$Count");
+$text1 = _("Binary");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['pkg_name']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Architecture";
+$text = _("$Count");
+$text1 = _("Architecture");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['pkg_arch']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Version";
+$text = _("$Count");
+$text1 = _("Version");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['version']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Maintainer";
+$text = _("$Count");
+$text1 = _("Maintainer");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['maintainer']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Uploaders";
+$text = _("$Count");
+$text1 = _("Uploaders");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['uploaders']) . "</td></tr>\n";
             $Count++;
-            $V .= "<tr><td align='right'>$Count</td><td>Standards-Version";
+$text = _("$Count");
+$text1 = _("Standards-Version");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $V .= "</td><td>" . htmlentities($R['standards_version']) . "</td></tr>\n";
             $Count++;
             }
@@ -495,10 +608,14 @@ class ui_view_info extends FO_Plugin
        for($i=0; !empty($Results[$i]['req_pk']); $i++)
             {
             $R = &$Results[$i];
-            $V .= "<tr><td align='right'>$Count</td><td>Build-Depends";
+$text = _("$Count");
+$text1 = _("Build-Depends");
+            $V .= "<tr><td align='right'>$text</td><td>$text1";
             $Val = htmlentities($R['req_value']);
-            $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
-            $V .= "</td><td>$Val</td></tr>\n";
+$text = _("\$1");
+            $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>$text</a>",$Val);
+$text = _("$Val");
+            $V .= "</td><td>$text</td></tr>\n";
             $Count++;
             }
 
@@ -508,9 +625,10 @@ class ui_view_info extends FO_Plugin
 
     else
        {
-       $V .= "NOT RPM/DEBIAN Package.";
+       $V .= _("NOT RPM/DEBIAN Package.");
        }
-    $V .= "<P />Total package info records: " . number_format($Count,0,"",",") . "<br />\n";
+$text = _("Total package info records: " . number_format($Count,0,"",",") . ");
+    $V .= "<P />$text"<br />\n";
     return($V);
   } // ShowPackageInfo()
 

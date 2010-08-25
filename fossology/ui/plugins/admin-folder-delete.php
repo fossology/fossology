@@ -110,18 +110,28 @@ class admin_folder_delete extends FO_Plugin {
               $R.= displayMessage("Deletion of " . $Folder['folder_name'] . " failed: $rc");
             }
           }
-          $V.= "$R\n";
+          $V.= _("$R\n");
           $V.= "<form method='post'>\n"; // no url = this url
-          $V.= "Select the folder to <em>delete</em>.\n";
+$text = _("delete");
+$text1 = _(".\n");
+          $V.= "Select the folder to <em>$text</em>$text1";
           $V.= "<ul>\n";
-          $V.= "<li>This will <em>delete</em> the folder, all subfolders, and all uploaded files stored within the folder!\n";
-          $V.= "<li>Be very careful with your selection since you can delete a lot of work!\n";
-          $V.= "<li>All analysis only associated with the deleted uploads will also be deleted.\n";
-          $V.= "<li>THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.\n";
+$text = _("delete");
+$text1 = _(" the folder, all subfolders, and all uploaded files stored within the folder!\n");
+          $V.= "<li>This will <em>$text</em>$text1";
+$text = _("Be very careful with your selection since you can delete a lot of work!\n");
+          $V.= "<li>$text";
+$text = _("All analysis only associated with the deleted uploads will also be deleted.\n");
+          $V.= "<li>$text";
+$text = _("THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.\n");
+          $V.= "<li>$text";
           $V.= "</ul>\n";
-          $V.= "<P>Select the folder to delete:  \n";
+$text = _("Select the folder to delete:  \n");
+          $V.= "<P>$text";
           $V.= "<select name='folder'>\n";
-          $V.= "<option value=''>[select folder]</option>\n";
+$text = _("[select folder]");
+$text1 = _("\n");
+          $V.= "<option value=''>$text</option>$text1";
           $V.= FolderListOption(-1, 0);
           $V.= "</select><P />\n";
           $V.= "<input type='submit' value='Delete!'>\n";

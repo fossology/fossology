@@ -134,10 +134,13 @@ class ui_view_license extends FO_Plugin
     /* Save the path */
     $this->ConvertLicPathToHighlighting($Lic,NULL);
     $Text = "<div class='text'>";
-    $Text .= "<H1>License: " . $Results[0]['lic_name'] . "</H1>\n";
+$text = _("License: " . $Results[0]['lic_name'] . "");
+$text1 = _("\n");
+    $Text .= "<H1>$text</H1>$text1";
     if (!empty($Results[0]['lic_url']) && (strtolower($Results[0]['lic_url']) != 'none'))
       {
-      $Text .= "Reference URL: <a href=\"" . $Results[0]['lic_url'] . "\" target=_blank> " . $Results[0]['lic_url'] . "</a>";
+$text = _(" " . $Results[0]['lic_url'] . "");
+      $Text .= "Reference URL: <a href=\"" . $Results[0]['lic_url'] . "\" target=_blank>$text</a>";
       }
     $Text .= "<hr>\n";
     $Text .= "</div>";
@@ -178,7 +181,9 @@ class ui_view_license extends FO_Plugin
       $nomos_license_string = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $Item);
       if (!empty($nomos_license_string)) 
       {
-        $nomos_out = "The <b>Nomos</b> license detector found: <b>";
+$text = _("Nomos");
+$text1 = _("");
+        $nomos_out = "The <b>$text</b><b>$text1";
         $nomos_out .= $nomos_license_string;
         $nomos_out .= "</b>";
       }

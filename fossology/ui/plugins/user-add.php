@@ -45,7 +45,8 @@ class user_add extends FO_Plugin {
 		if (!$PG_CONN) {
 			$dbok = $DB->db_init();
 			if (!$dbok)
-			echo "<pre>NO DB connection!\n</pre>";
+$text = _("NO DB connection!\n");
+			echo "<pre>$text</pre>";
 		}
 
 		/* Get the parameters */
@@ -123,7 +124,8 @@ class user_add extends FO_Plugin {
       (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
        email_notify,user_agent_list,root_folder_fk, default_bucketpool_fk) 
 	      $VALUES";
-		//print "<pre>SQL is:\n$SQL\n</pre>";
+$text = _("SQL is:\n$SQL\n");
+		//print "<pre>$text</pre>";
 		
 		$Results = pg_query($PG_CONN, $SQL);
 		DBCheckResult($Results, $sql, __FILE__, __LINE__);
@@ -165,18 +167,26 @@ class user_add extends FO_Plugin {
 				$Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 				$V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='75%'>";
 				$Val = htmlentities(GetParm('username', PARM_TEXT), ENT_QUOTES);
-				$V.= "$Style<th width='5%'>1.</th><th width='25%'>Enter the username.</th>";
+$text = _("1.");
+$text1 = _("Enter the username.");
+				$V.= "$Style<th width='5%'>$text</th><th width='25%'>$text1</th>";
 				$V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities(GetParm('description', PARM_TEXT), ENT_QUOTES);
-				$V.= "$Style<th>2.</th><th>Enter a description for the user (name, contact, or other information).  This may be blank.</th>\n";
+$text = _("2.");
+$text1 = _("Enter a description for the user (name, contact, or other information).  This may be blank.");
+				$V.= "$Style<th>$text</th><th>$text1</th>\n";
 				$V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities(GetParm('email', PARM_TEXT), ENT_QUOTES);
-				$V .= "$Style<th>3.</th><th>Enter an email address for the user, see step 8. This field may be left blank.</th>\n";
+$text = _("3.");
+$text1 = _("Enter an email address for the user, see step 8. This field may be left blank.");
+				$V .= "$Style<th>$text</th><th>$text1</th>\n";
 				$V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>4.</th><th>Select the user's access level.</th>";
+$text = _("4.");
+$text1 = _("Select the user's access level.");
+				$V.= "$Style<th>$text</th><th>$text1</th>";
 				$V.= "<td><select name='permission'>\n";
 				$V.= "<option value='" . PLUGIN_DB_NONE . "'>None (very basic, no database access)</option>\n";
 				$V.= "<option selected value='" . PLUGIN_DB_READ . "'>Read-only (read, but no writes or downloads)</option>\n";
@@ -189,27 +199,40 @@ class user_add extends FO_Plugin {
 				$V.= "<option value='" . PLUGIN_DB_USERADMIN . "'>Full Administrator (all access including adding and deleting users)</option>\n";
 				$V.= "</select></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>5.</th><th>Select the user's top-level folder. Access is restricted to this folder.";
+$text = _("5.");
+$text1 = _("Select the user's top-level folder. Access is restricted to this folder.");
+				$V.= "$Style<th>$text</th><th>$text1";
 				$V.= " (NOTE: This is only partially implemented right now. Current users can escape the top of tree limitation.)";
 				$V.= "</th>";
 				$V.= "<td><select name='folder'>";
 				$V.= FolderListOption(-1, 0);
 				$V.= "</select></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>6.</th><th>Enter the user's password.  It may be blank.</th><td><input type='password' name='pass1' size=20></td>\n";
+$text = _("6.");
+$text1 = _("Enter the user's password.  It may be blank.");
+				$V.= "$Style<th>$text</th><th>$text1</th><td><input type='password' name='pass1' size=20></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>7.</th><th>Re-enter the user's password.</th><td><input type='password' name='pass2' size=20></td>\n";
+$text = _("7.");
+$text1 = _("Re-enter the user's password.");
+				$V.= "$Style<th>$text</th><th>$text1</th><td><input type='password' name='pass2' size=20></td>\n";
 				$V.= "</tr>\n";
-				$V .= "$Style<th>8.</th><th>E-mail Notification</th><td><input type='checkbox'" .
+$text = _("8.");
+$text1 = _("E-mail Notification");
+				$V .= "$Style<th>$text</th><th>$text1</th><td><input type='checkbox'";
                 "name='enote' value='y' checked='checked'>" .
                 "Check to enable email notification of completed analysis.</td>\n";
 				$V.= "</tr>\n";
-				$V .= "$Style<th>9.</th><th>Default Agents: Select the ".
+$text = _("9.");
+$text1 = _("Default Agents: Select the ");
+				$V .= "$Style<th>$text</th><th>$text1";
               "agent(s) to automatically run when uploading data. These" .
-              " selections can be changed on the upload screens.\n</th><td> ";
+$text = _(" ");
+              " selections can be changed on the upload screens.\n</th><td>$text";
 				$V.= AgentCheckBoxMake(-1, "agent_unpack");
 				$V .= "</td>\n";
-				$V.= "$Style<th>10.</th><th>Default bucketpool.</th>";
+$text = _("10.");
+$text1 = _("Default bucketpool.");
+				$V.= "$Style<th>$text</th><th>$text1</th>";
 				$V.= "<td>";
 				$V.= SelectBucketPool($default_bucketpool_fk);
 				$V.= "</td>";

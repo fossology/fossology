@@ -58,32 +58,36 @@ function Inputfm()
 {
   $V = "";
 
-  $V.= "<FORM name='Inputfm' action='?mod=" . $this->Name."' method='POST'>";
+$text = _("Name.");
+  $V.= "<FORM name='Inputfm' action='?mod=" . $this->$text"' method='POST'>";
   $V.= "What license family do you wish to view:<br>";
 
   // qualify by marydone, short name and long name
   // all are optional
   $V.= "<p>";
-  $V.= "Filter: ";
+  $V.= _("Filter: ");
   $V.= "<SELECT name='req_marydone'>\n";
   $Selected =  ($_REQUEST['req_marydone'] == 'all') ? " SELECTED ": "";
-  $V.= "<option value='all' $Selected> All </option>";
+$text = _(" All ");
+  $V.= "<option value='all' $Selected>$text</option>";
   $Selected =  ($_REQUEST['req_marydone'] == 'done') ? " SELECTED ": "";
-  $V.= "<option value='done' $Selected> Checked </option>";
+$text = _(" Checked ");
+  $V.= "<option value='done' $Selected>$text</option>";
   $Selected =  ($_REQUEST['req_marydone'] == 'notdone') ? " SELECTED ": "";
-  $V.= "<option value='notdone' $Selected> Not Checked </option>";
+$text = _(" Not Checked ");
+  $V.= "<option value='notdone' $Selected>$text</option>";
   $V.= "</SELECT>";
-  $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+  $V.= _("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
 
   // by short name -ajax-> fullname
-  $V.= "License family name: ";
+  $V.= _("License family name: ");
   //$Shortnamearray = DB2KeyValArray("license_ref", "rf_pk", "rf_shortname");
   $Shortnamearray = $this->FamilyNames();
   $Shortnamearray = array("All"=>"All") + $Shortnamearray;
   $Selected = $_REQUEST['req_shortname'];
   $Pulldown = Array2SingleSelect($Shortnamearray, "req_shortname", $Selected);
   $V.= $Pulldown;
-  $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+  $V.= _("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
   $V.= "<INPUT type='submit' value='Find'>\n";
   $V .= "</FORM>\n";
   $V.= "<hr>";
@@ -141,12 +145,18 @@ function LicenseList($namestr, $filter)
   //$ob .= "<table style='border: thin dotted gray'>";
   $ob .= "<table rules='rows' cellpadding='3'>";
   $ob .= "<tr>";
-  $ob .= "<th>Edit</th>";
-  $ob .= "<th>Checked</th>";
-  $ob .= "<th>Shortname</th>";
-  $ob .= "<th>Fullname</th>";
-  $ob .= "<th>Text</th>";
-  $ob .= "<th>URL</th>";
+$text = _("Edit");
+  $ob .= "<th>$text</th>";
+$text = _("Checked");
+  $ob .= "<th>$text</th>";
+$text = _("Shortname");
+  $ob .= "<th>$text</th>";
+$text = _("Fullname");
+  $ob .= "<th>$text</th>";
+$text = _("Text");
+  $ob .= "<th>$text</th>";
+$text = _("URL");
+  $ob .= "<th>$text</th>";
   $ob .= "</tr>";
   $lineno = 0;
   while ($row = pg_fetch_assoc($result))
@@ -168,15 +178,22 @@ function LicenseList($namestr, $filter)
     $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
 /* to allow editing in line
     $select = Array2SingleSelect(array("Yes", "No"), "marydone", $marydone);
-    $ob .= "<td align=center>$select</td>";
+$text = _("$select");
+    $ob .= "<td align=center>$text</td>";
 */
-    $ob .= "<td align=center>$marydone</td>";
+$text = _("$marydone");
+    $ob .= "<td align=center>$text</td>";
 
-    $ob .= "<td>$row[rf_shortname]</td>";
-    $ob .= "<td>$row[rf_fullname]</td>";
+$text = _("$row[rf_shortname]");
+    $ob .= "<td>$text</td>";
+$text = _("$row[rf_fullname]");
+    $ob .= "<td>$text</td>";
     $vetext = htmlspecialchars($row[rf_text]);
-    $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$vetext</textarea></td>";
-    $ob .= "<td>$row[rf_url]</td>";
+$text = _("$vetext");
+$text1 = _("");
+    $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$text</textarea></td>$text1";
+$text = _("$row[rf_url]");
+    $ob .= "<td>$text</td>";
     $ob .= "</tr>";
   }
   $ob .= "</table>";
@@ -197,7 +214,8 @@ function Updatefm($rf_pk)
   global $PG_CONN;
 
   $ob = "";     // output buffer
-  $ob .= "<FORM name='Updatefm' action='?mod=" . $this->Name."' method='POST'>";
+$text = _("Name.");
+  $ob .= "<FORM name='Updatefm' action='?mod=" . $this->$text"' method='POST'>";
   $ob .= "<input type=hidden name=rf_pk value='$rf_pk'>";
   $ob .= "<input type=hidden name=req_marydone value='$_GET[req_marydone]'>";
   $ob .= "<input type=hidden name=req_shortname value='$_GET[req_shortname]'>";
@@ -229,26 +247,32 @@ function Updatefm($rf_pk)
     $ob .= "<tr>";
     $active = ($row['rf_active'] == 't') ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_active", $active);
-    $ob .= "<td align=right>Active</td>";
-    $ob .= "<td align=left>$select</td>";
+$text = _("Active");
+    $ob .= "<td align=right>$text</td>";
+$text = _("$select");
+    $ob .= "<td align=left>$text</td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
     $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "marydone", $marydone);
-    $ob .= "<td align=right>Checked</td>";
-    $ob .= "<td align=left>$select</td>";
+$text = _("Checked");
+    $ob .= "<td align=right>$text</td>";
+$text = _("$select");
+    $ob .= "<td align=left>$text</td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
 //    $ob .= "<td align=right>Short name<br>(read only)</td>";
 //    $ob .= "<td><input readonly='readonly' type='text' name='rf_shortname' value='$row[rf_shortname]' size=80></td>";
-    $ob .= "<td align=right>Short name</td>";
+$text = _("Short name");
+    $ob .= "<td align=right>$text</td>";
     $ob .= "<td><input type='text' name='rf_shortname' value='$row[rf_shortname]' size=80></td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $ob .= "<td align=right>Full name</td>";
+$text = _("Full name");
+    $ob .= "<td align=right>$text</td>";
     $ob .= "<td><input type='text' name='rf_fullname' value='$row[rf_fullname]' size=80></td>";
     $ob .= "</tr>";
 
@@ -261,36 +285,48 @@ function Updatefm($rf_pk)
     }
     else
     {
-      $rotext = "<br>(read only)";
+$text = _("(read only)");
+      $rotext = "<br>$text";
       $rooption = "readonly='readonly'";
     }
-    $ob .= "<td align=right>License Text $rotext</td>";
-    $ob .= "<td><textarea name='rf_text' rows=10 cols=80 $rooption>".$row[rf_text]. "</textarea></td>";
+$text = _("License Text $rotext");
+    $ob .= "<td align=right>$text</td>";
+$text = _("".$row[rf_text]. "");
+$text1 = _("");
+    $ob .= "<td><textarea name='rf_text' rows=10 cols=80 $rooption>$text</textarea></td>$text1";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
     $tupable = ($row['rf_text_updatable'] == 't') ? "Yes" : "No";
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_text_updatable", $tupable);
-    $ob .= "<td align=right>Text Updatable</td>";
-    $ob .= "<td align=left>$select</td>";
+$text = _("Text Updatable");
+    $ob .= "<td align=right>$text</td>";
+$text = _("$select");
+    $ob .= "<td align=left>$text</td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
     $dettype = ($row['rf_detector_type'] == '2') ? "Nomos" : "Reference License";
     $select = Array2SingleSelect(array("1"=>"Reference License", "2"=>"Nomos"), "rf_detector_type", $dettype);
-    $ob .= "<td align=right>Detector Type</td>";
-    $ob .= "<td align=left>$select</td>";
+$text = _("Detector Type");
+    $ob .= "<td align=right>$text</td>";
+$text = _("$select");
+    $ob .= "<td align=left>$text</td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $ob .= "<td align=right>URL";
+$text = _("URL");
+    $ob .= "<td align=right>$text";
     $ob .= "<a href='$row[rf_url]'><image border=0 src=images/right-point-bullet.gif></a></td>";
     $ob .= "<td><input type='text' name='rf_url' value='$row[rf_url]' size=80></td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
-    $ob .= "<td align=right>Public Notes</td>";
-    $ob .= "<td><textarea name='rf_notes' rows=5 cols=80>" .$row[rf_notes]. "</textarea></td>";
+$text = _("Public Notes");
+    $ob .= "<td align=right>$text</td>";
+$text = _("" .$row[rf_notes]. "");
+$text1 = _("");
+    $ob .= "<td><textarea name='rf_notes' rows=5 cols=80>$text</textarea></td>$text1";
     $ob .= "</tr>";
   
   $ob .= "</table>";

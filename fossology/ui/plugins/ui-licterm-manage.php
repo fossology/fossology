@@ -196,7 +196,7 @@ function moveOptions(theSelFrom, theSelTo)
 //-->
 </script>';
     /*** END: code from mredkj.com ***/
-    $V .= "\n";
+    $V .= _("\n");
     return($V);
     } // LicTermJavascript()
 
@@ -206,17 +206,19 @@ function moveOptions(theSelFrom, theSelTo)
   function LicTermCurrList	($TermKey=NULL)
     {
     global $DB;
-    $V = "<option value='-1'>[New Term]</option>\n";
+$text = _("[New Term]");
+$text1 = _("\n");
+    $V = "<option value='-1'>$text</option>$text1";
     $SQL = "SELECT * FROM licterm ORDER BY licterm_name;";
     $Results = $DB->Action($SQL);
     for($i=0; !empty($Results[$i]['licterm_pk']); $i++)
       {
-      $V .= "<option value='" . $Results[$i]['licterm_pk'] . "'";
+      $V .= _("<option value='" . $Results[$i]['licterm_pk'] . "'");
       if ($Results[$i]['licterm_pk'] == $TermKey)
         {
-	$V .= " selected";
+	$V .= _(" selected");
 	}
-      $V .= ">";
+      $V .= _(">");
       $V .= htmlentities($Results[$i]['licterm_name']);
       $V .= "</option>\n";
       }
@@ -243,7 +245,9 @@ function moveOptions(theSelFrom, theSelTo)
       $Text = preg_replace("[^[a-zA-Z0-9%]"," ",$Text);
       $Text = preg_replace("/licenc/","licens",$Text);
       $Text = trim(preg_replace(" +"," ",$Text));
-      $V .= "<option value='$Text'>$Text</option>\n";
+$text = _("$Text");
+$text1 = _("\n");
+      $V .= "<option value='$Text'>$text</option>$text1";
       }
     return($V);
     } // LicTermCurrWords()
@@ -270,17 +274,23 @@ function moveOptions(theSelFrom, theSelTo)
       }
 
     $V = "";
-    $V .= "Keyword terms and phrases are used during license analysis to better identify license names.\n";
-    $V .= "Terms consist of two parts: a canonical name for the class of terms, and a list of words or phrases that are members of the class.\n";
-    $V .= "For example, the phrases 'GNU General Public License version 2' and 'GPL version 2' may both be parts of the 'GPLv2' class.\n";
+    $V .= _("Keyword terms and phrases are used during license analysis to better identify license names.\n");
+    $V .= _("Terms consist of two parts: a canonical name for the class of terms, and a list of words or phrases that are members of the class.\n");
+    $V .= _("For example, the phrases 'GNU General Public License version 2' and 'GPL version 2' may both be parts of the 'GPLv2' class.\n");
     $V .= "<P />\n";
-    $V .= "<b>Note #1</b>: Changes to this list will impact all new license analysis.\n";
-    $V .= "However, all completed license analysis will be unchanged.\n";
-    $V .= "You may wish to clear the license analysis for an upload and reschedule the analysis in order to apply changes.\n";
+$text = _("Note #1");
+$text1 = _(": Changes to this list will impact all new license analysis.\n");
+    $V .= "<b>$text</b>$text1";
+    $V .= _("However, all completed license analysis will be unchanged.\n");
+    $V .= _("You may wish to clear the license analysis for an upload and reschedule the analysis in order to apply changes.\n");
     $V .= "<P />\n";
-    $V .= "<b>Note #2</b>: There is one special case for spelling.\n";
-    $V .= "Many licenses spell the word 'licen<b>c</b>e' instead of 'licen<b>s</b>e.\n";
-    $V .= "If the term contains either spelling of 'license', 'licensing', 'licensed', etc., then it will be converted to 's' but will match both spellings.\n";
+$text = _("Note #2");
+$text1 = _(": There is one special case for spelling.\n");
+    $V .= "<b>$text</b>$text1";
+$text = _("c");
+$text1 = _("s");
+    $V .= "Many licenses spell the word 'licen<b>$text</b><b>$text1</b>e.\n";
+    $V .= _("If the term contains either spelling of 'license', 'licensing', 'licensed', etc., then it will be converted to 's' but will match both spellings.\n");
     $V .= "<P />\n";
 
     $V .= "<form name='formy' method='post' onSubmit='return SelectAll();'>\n";
@@ -289,33 +299,42 @@ function moveOptions(theSelFrom, theSelTo)
     /***********************************************************/
     /* List groups fields */
     $V .= "<tr>\n";
-    $V .= "<td width='20%'>Select canonical group to edit</td>";
+$text = _("Select canonical group to edit");
+    $V .= "<td width='20%'>$text</td>";
     $Uri = Traceback_uri() . "?mod=" . $this->Name . "&termkey=";
     $V .= "<td><select name='termkey' onChange='window.open(\"$Uri\"+this.value,\"_top\");'>\n";
     $V .= $this->LicTermCurrList($TermKey);
     $V .= "</select>\n";
     $V .= "<br>\n";
     /* Permit delete */
-    $V .= "<input type='checkbox' value='1' name='delete' onclick='ToggleForm(this.checked);'><b>Check to delete this canonical group!</b></td>\n";
+$text = _("Check to delete this canonical group!");
+    $V .= "<input type='checkbox' value='1' name='delete' onclick='ToggleForm(this.checked);'><b>$text</b></td>\n";
     $V .= "</td>";
     $V .= "</tr>\n";
 
     /***********************************************************/
     /* Text fields */
     $V .= "<tr>\n";
-    $V .= "<td width='20%'>Canonical name</td><td><input type='text' name='name' size='60' value='" . htmlentities($TermName,ENT_QUOTES) . "'></td>\n";
+$text = _("Canonical name");
+$text1 = _("");
+    $V .= "<td width='20%'>$text</td><td>$text1<input type='text' name='name' size='60' value='";
     $V .= "</tr><tr>\n";
-    $V .= "<td>Description</td><td><input type='text' name='desc' size='60' value='" . htmlentities($TermDesc,ENT_QUOTES) . "'></td>\n";
+$text = _("Description");
+$text1 = _("");
+    $V .= "<td>$text</td><td>$text1<input type='text' name='desc' size='60' value='";
     $V .= "</tr>\n";
 
     /***********************************************************/
     /* Add a new term */
     $V .= "<tr>\n";
-    $V .= "<td width='20%'>Keywords, terms, and phrases specific to this group.</td>";
+$text = _("Keywords, terms, and phrases specific to this group.");
+    $V .= "<td width='20%'>$text</td>";
 
     $V .= "<td>";
     $V .= "<table width='100%'>";
-    $V .= "<td align='center' width='45%'>Terms associated with this canonical group</td><td width='10%'></td><td width='45%' align='center'>Known terms</td></tr>";
+$text = _("Terms associated with this canonical group");
+$text1 = _("");
+    $V .= "<td align='center' width='45%'>$text</td><td width='10%'>$text1</td><td width='45%' align='center'>Known terms</td></tr>";
 
     /* List these license terms */
     if (!empty($TermKey))
@@ -343,7 +362,9 @@ function moveOptions(theSelFrom, theSelTo)
       $Text = trim(preg_replace("/  */"," ",$Text));
       if (empty($TL[$Text]))
 	{
-	$V .= "<option value='$Text'>$Text</option>\n";
+$text = _("$Text");
+$text1 = _("\n");
+	$V .= "<option value='$Text'>$text</option>$text1";
 	$TL[$Text] = 1;
 	}
       }
@@ -353,8 +374,11 @@ function moveOptions(theSelFrom, theSelTo)
     /* center list of options */
     $V .= "<td>";
     $V .= "<center>\n";
-    $V .= "<a href='#' onClick='moveOptions(document.formy.termavailable,document.formy.termlist);'>&larr;Add</a><P/>\n";
-    $V .= "<a href='#' onClick='moveOptions(document.formy.termlist,document.formy.termavailable);'>Remove&rarr;</a>\n";
+$text = _("&larr;Add");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.termavailable,document.formy.termlist);'>$text</a><P/>\n";
+$text = _("Remove&rarr;");
+$text1 = _("\n");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.termlist,document.formy.termavailable);'>$text</a>$text1";
     $V .= "</center></td>\n";
 
     $V .= "<td>";
@@ -368,7 +392,9 @@ function moveOptions(theSelFrom, theSelTo)
       $Text = preg_replace("/licenc/","licens",$Text);
       if (empty($TL[$Text]))
 	{
-	$V .= "<option value='$Text'>$Text</option>\n";
+$text = _("$Text");
+$text1 = _("\n");
+	$V .= "<option value='$Text'>$text</option>$text1";
 	$TL[$Text] = 1;
 	}
       }
@@ -378,27 +404,31 @@ function moveOptions(theSelFrom, theSelTo)
 
     /* Permit new words */
     $V .= "<tr>";
-    $V .= "<td>Add a new keyword, term, or phrase to this canonical group.\n";
+$text = _("Add a new keyword, term, or phrase to this canonical group.\n");
+    $V .= "<td>$text";
     $V .= "</td>";
     $V .= "<td>";
     $V .= "<input type='text' id='newtext' size='60'>";
     $V .= "<input type='button' id='addtext' onClick='AddText(this)' value='Add!'>";
     $V .= "<br>\n";
-    $V .= "Only letters, numbers, and spaces are permitted. Text will be normalized to lowercase letters with no more than one space between words.\n";
+    $V .= _("Only letters, numbers, and spaces are permitted. Text will be normalized to lowercase letters with no more than one space between words.\n");
     $V .= "</td>";
 
     /***********************************************************/
     /* Permit associating licenses with canonical names */
     $V .= "<tr>\n";
-    $V .= "<td width='20%'>Associate licenses with this canonical group.\n";
+$text = _("Associate licenses with this canonical group.\n");
+    $V .= "<td width='20%'>$text";
     $V .= "<P />\n";
-    $V .= "Licenses that are associated will be referred by the canonical name.\n";
-    $V .= "Unassociated licenses are referred by their license name.";
+    $V .= _("Licenses that are associated will be referred by the canonical name.\n");
+    $V .= _("Unassociated licenses are referred by their license name.");
     $V .= "</td>";
 
     $V .= "<td>";
     $V .= "<table width='100%'>";
-    $V .= "<td align='center' width='45%'>Licenses associated with this canonical group</td><td width='10%'></td><td width='45%' align='center'>Unassociated Licenses</td></tr>";
+$text = _("Licenses associated with this canonical group");
+$text1 = _("");
+    $V .= "<td align='center' width='45%'>$text</td><td width='10%'>$text1</td><td width='45%' align='center'>Unassociated Licenses</td></tr>";
 
     /* List these license terms */
     if (!empty($TermKey))
@@ -420,7 +450,9 @@ function moveOptions(theSelFrom, theSelTo)
       {
       $Text = trim($LicList[$i]['text']);
       $Id = trim($LicList[$i]['id']);
-      $V .= "<option value='$Id'>$Text</option>\n";
+$text = _("$Text");
+$text1 = _("\n");
+      $V .= "<option value='$Id'>$text</option>$text1";
       }
     $V .= "</select>";
     $V .= "</td>\n";
@@ -447,9 +479,13 @@ function moveOptions(theSelFrom, theSelTo)
     $Uri .= "&licset=";
     $Uri .= "' + document.getElementById('liclist').value";
     $Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes'); }";
-    $V .= "<a href='#' onClick=\"$Uri\">View</a><hr/>\n";
-    $V .= "<a href='#' onClick='moveOptions(document.formy.licavailable,document.formy.liclist);'>&larr;Add</a><P/>\n";
-    $V .= "<a href='#' onClick='moveOptions(document.formy.liclist,document.formy.licavailable);'>Remove&rarr;</a>\n";
+$text = _("View");
+    $V .= "<a href='#' onClick=\"$Uri\">$text</a><hr/>\n";
+$text = _("&larr;Add");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.licavailable,document.formy.liclist);'>$text</a><P/>\n";
+$text = _("Remove&rarr;");
+$text1 = _("\n");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.liclist,document.formy.licavailable);'>$text</a>$text1";
     $V .= "</center></td>\n";
 
     $V .= "<td>";
@@ -458,7 +494,9 @@ function moveOptions(theSelFrom, theSelTo)
       {
       $Text = trim($LicAvailable[$i]['text']);
       $Id = trim($LicAvailable[$i]['id']);
-      $V .= "<option value='$Id'>$Text</option>\n";
+$text = _("$Text");
+$text1 = _("\n");
+      $V .= "<option value='$Id'>$text</option>$text1";
       }
     $V .= "</select>";
     $V .= "</td></table>\n";
@@ -467,9 +505,11 @@ function moveOptions(theSelFrom, theSelTo)
     /***********************************************************/
     /* Delete a keyword */
     $V .= "<tr>";
-    $V .= "<td>Delete a keyword from <i>all</i> canonical groups.\n";
+$text = _("all");
+$text1 = _(" canonical groups.\n");
+    $V .= "<td>Delete a keyword from <i>$text</i>$text1";
     $V .= "</td><td>";
-    $V .= "Use this to remove typographical errors or completely unnecessary keywords or phrases.\n";
+    $V .= _("Use this to remove typographical errors or completely unnecessary keywords or phrases.\n");
     $V .= "<br>";
     $V .= "<select name='deleteword'>\n";
     $V .= "<option value=''></option>\n";
@@ -480,7 +520,9 @@ function moveOptions(theSelFrom, theSelTo)
       $Text = preg_replace("/[^a-z0-9%]/"," ",$Text);
       $Text = preg_replace("/licenc/","licens",$Text);
       $Text = trim(preg_replace("/ +/"," ",$Text));
-      $V .= "<option value='$Text'>Delete: $Text</option>\n";
+$text = _("Delete: $Text");
+$text1 = _("\n");
+      $V .= "<option value='$Text'>$text</option>$text1";
       }
     $V .= "</select>\n";
     $V .= "</td>";

@@ -216,20 +216,24 @@ class ui_reunpack extends FO_Plugin
     $Fin_gold = @fopen( RepPath($Pfile_fk,"gold") ,"rb");
     if (empty($Fin_gold))
     {
-        $V = "<p/>The File's Gold file are not available in the repository.\n";
+$text = _("The File's Gold file are not available in the repository.\n");
+        $V = "<p/>$text";
         return $V;
     }
       
     $V = "<p/>";
-    $V.= "This file is unpacked from <font color='blue'>[".$Ufile_name."]</font>\n";
+$text = _("[".$Ufile_name."]");
+$text1 = _("\n");
+    $V.= "This file is unpacked from <font color='blue'>$text</font>$text1";
 
       	  /* Display the form */
 	  $V .= "<form method='post'>\n"; // no url = this url
 
-	  $V .= "<p />\nReunpack: " . $Ufile_name . "<input name='uploadunpack' type='hidden' value='$Upload_pk'/>\n";
-	  $V .= "<input type='submit' value='Reunpack!' ";
+$text = _("\nReunpack: " . $Ufile_name . ");
+	  $V .= "<p />$text"<input name='uploadunpack' type='hidden' value='$Upload_pk'/>\n";
+	  $V .= _("<input type='submit' value='Reunpack!' ");
 	  if ($Reunpack) {$V .= "disabled";}
-	  $V .= " >\n";
+	  $V .= _(" >\n");
 	  $V .= "</form>\n";
 	  
       return $V;

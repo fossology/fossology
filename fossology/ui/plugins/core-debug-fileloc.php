@@ -71,9 +71,13 @@ class core_debug_fileloc extends FO_Plugin
       case "XML":
         break;
       case "HTML":
-	    $V .= "<table cellpadding=3><tr><th align=left> Variable</th><th>&nbsp;</th><th align=left >Value</th></tr>";
+$text = _(" Variable");
+$text1 = _("&nbsp");
+	    $V .= "<table cellpadding=3><tr><th align=left>$text</th><th>$text1";
         foreach ($varray as $var)
-          $V .= "<tr><td>$var</td><td>&nbsp;</td><td>". $$var ."</td></tr>";
+$text = _("$var");
+$text1 = _("&nbsp");
+          $V .= "<tr><td>$text</td><td>$text1";
      
         $V .= "</table>";
         break;

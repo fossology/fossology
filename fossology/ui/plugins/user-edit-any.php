@@ -212,23 +212,23 @@ class user_edit_any extends FO_Plugin {
 					$R = & $Results[$i];
 					$Id = $R['user_pk'];
 					$Val = str_replace('"', "\\\"", $R['user_name']);
-					$V.= "Username[" . $Id . '] = "' . $Val . "\";\n";
+					$V.= _("Username[" . $Id . '] = "' . $Val . "\");
 					$Val = str_replace('"', "\\\"", $R['user_desc']);
-					$V.= "Userdesc[" . $Id . '] = "' . $Val . "\";\n";
+					$V.= _("Userdesc[" . $Id . '] = "' . $Val . "\");
 					$Val = str_replace('"', "\\\"", $R['user_email']);
-					$V.= "Useremail[" . $Id . '] = "' . $Val . "\";\n";
-					$V.= "Userenote[" . $Id . '] = "' . $R['email_notify'] . "\";\n";
-					$V.= "Useragents[" . $Id . '] = "' . $R['user_agent_list'] . "\";\n";
-					$V.= "Userfolder[" . $Id . '] = "' . $R['root_folder_fk'] . "\";\n";
-					$V.= "default_bucketpool_fk[" . $Id . '] = "' . $R['default_bucketpool_fk'] . "\";\n";
-					$V.= "Userperm[" . $Id . '] = "' . $R['user_perm'] . "\";\n";
+					$V.= _("Useremail[" . $Id . '] = "' . $Val . "\");
+					$V.= _("Userenote[" . $Id . '] = "' . $R['email_notify'] . "\");
+					$V.= _("Useragents[" . $Id . '] = "' . $R['user_agent_list'] . "\");
+					$V.= _("Userfolder[" . $Id . '] = "' . $R['root_folder_fk'] . "\");
+					$V.= _("default_bucketpool_fk[" . $Id . '] = "' . $R['default_bucketpool_fk'] . "\");
+					$V.= _("Userperm[" . $Id . '] = "' . $R['user_perm'] . "\");
 					if (substr($R['user_pass'], 0, 1) == ' ') {
 						$Block = 1;
 					}
 					else {
 						$Block = 0;
 					}
-					$V.= "Userblock[" . $Id . "] = '$Block';\n";
+					$V.= _("Userblock[" . $Id . "] = '$Block';\n");
 				}
 
 				$V.= "
@@ -322,16 +322,23 @@ class user_edit_any extends FO_Plugin {
 				}
 				$Uri = Traceback_uri();
 				$V.= "<P />\n";
-				$V.= "To edit <strong>another</strong> user on this system, alter
-              any of the following information.<P />\n";
+$text = _("another");
+$text1 = _(" user on this system, alter
+");
+				$V.= "To edit <strong>$text</strong>$text1              any of the following information.<P />\n";
 
-				$V.= "To edit <strong>your</strong> account settings, use
-         <a href='${Uri}?mod=user_edit_self'>Account Settings.</a><P />\n";
+$text = _("your");
+$text1 = _(" account settings, use
+");
+				$V.= "To edit <strong>$text</strong>$text1$text = _("Account Settings.");
+         <a href='${Uri}?mod=user_edit_self'>$text</a><P />\n";
 
-				$V.= "Select the user to edit: ";
+				$V.= _("Select the user to edit: ");
 				$V.= "<select name='userid' onClick='SetInfo(this.value);' onchange='SetInfo(this.value);'>\n";
 
-				//$V .= "<option selected value='0'>--select user--</option>\n";
+$text = _("--select user--");
+$text1 = _("\n");
+				//$V .= "<option selected value='0'>$text</option>$text1";
 				for ($i = 0;!empty($Results[$i]['user_pk']);$i++) {
 					$Selected = "";
 					if ($UserId == $Results[$i]['user_pk']) {
@@ -345,7 +352,8 @@ class user_edit_any extends FO_Plugin {
 				$Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 				$V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
 				$Val = htmlentities(GetParm('username', PARM_TEXT), ENT_QUOTES);
-				$V.= "$Style<th width='25%'>Change the username.</th>";
+$text = _("Change the username.");
+				$V.= "$Style<th width='25%'>$text</th>";
 				$V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities(GetParm('description', PARM_TEXT), ENT_QUOTES);
@@ -353,10 +361,13 @@ class user_edit_any extends FO_Plugin {
 				$V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities(GetParm('email', PARM_TEXT), ENT_QUOTES);
-				$V.= "$Style<th>Change the user's email address. This may be blank.</th>\n";
+$text = _("Change the user's email address. This may be blank.");
+$text1 = _("\n");
+				$V.= "$Style<th>$text</th>$text1";
 				$V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>Select the user's access level.</th>";
+$text = _("Select the user's access level.");
+				$V.= "$Style<th>$text</th>";
 				$V.= "<td><select name='permission'>\n";
 				$V.= "<option value='" . PLUGIN_DB_NONE . "'>None (very basic, no database access)</option>\n";
 				$V.= "<option selected value='" . PLUGIN_DB_READ . "'>Read-only (read, but no writes or downloads)</option>\n";
@@ -369,30 +380,44 @@ class user_edit_any extends FO_Plugin {
 				$V.= "<option value='" . PLUGIN_DB_USERADMIN . "'>Full Administrator (all access including adding and deleting users)</option>\n";
 				$V.= "</select></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>Select the user's top-level folder. Access is restricted to this folder.";
+$text = _("Select the user's top-level folder. Access is restricted to this folder.");
+				$V.= "$Style<th>$text";
 				$V.= " (NOTE: This is only partially implemented right now. Current users can escape the top of tree limitation.)";
 				$V.= "</th>";
 				$V.= "<td><select name='folder'>";
 				$V.= FolderListOption(-1, 0);
 				$V.= "</select></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>Block the user's account. This will prevent logins.</th><td><input type='checkbox' name='block' value='1'></td>\n";
-				$V.= "$Style<th>Blank the user's account. This will will set the password to a blank password.</th><td><input type='checkbox' name='blank' value='1'></td>\n";
-				$V.= "$Style<th>Change the user's password.</th><td><input type='password' name='pass1' size=20></td>\n";
+$text = _("Block the user's account. This will prevent logins.");
+$text1 = _("");
+				$V.= "$Style<th>$text</th><td>$text1<input type='checkbox' name='block' value='1'></td>\n";
+$text = _("Blank the user's account. This will will set the password to a blank password.");
+$text1 = _("");
+				$V.= "$Style<th>$text</th><td>$text1<input type='checkbox' name='blank' value='1'></td>\n";
+$text = _("Change the user's password.");
+$text1 = _("");
+				$V.= "$Style<th>$text</th><td>$text1<input type='password' name='pass1' size=20></td>\n";
 				$V.= "</tr>\n";
-				$V.= "<tr><th>Re-enter the user's password.</th><td><input type='password' name='pass2' size=20></td>\n";
+$text = _("Re-enter the user's password.");
+$text1 = _("");
+				$V.= "<tr><th>$text</th><td>$text1<input type='password' name='pass2' size=20></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>E-mail Notification</th><td><input type=checkbox name='enote'" . "checked=document.formy.enote.checked>" . "Check to enable email notification of completed analysis.</td>\n";
+$text = _("E-mail Notification");
+$text1 = _("");
+				$V.= "$Style<th>$text</th><td>$text1<input type=checkbox name='enote'";
 				$V.= "</tr>\n";
 				$V.= "</tr>\n";
 				$V .= "$Style<th>Default Agents: Select the ".
               "agent(s) to automatically run when uploading data. These" .
-              " selections can be changed on the upload screens.\n</th><td> ";
+$text = _(" ");
+              " selections can be changed on the upload screens.\n</th><td>$text";
 				$V.= AgentCheckBoxMake(-1, "agent_unpack");
 				$V .= "</td>\n";
 				$V .= "</tr>\n";
 				$Val = GetParm('default_bucketpool_fk', PARM_INTEGER);
-				$V.= "$Style<th>Default bucket pool</th>\n";
+$text = _("Default bucket pool");
+$text1 = _("\n");
+				$V.= "$Style<th>$text</th>$text1";
 				$V.= "<td>";
                 $V.= SelectBucketPool($Val);
                 $V.= "</td>\n";

@@ -109,7 +109,7 @@ class core_init extends FO_Plugin
 	  $Schema = &$Plugins[plugin_find_any_id("schema")];
 	  if (empty($Schema))
 	    {
-	    $V .= "Failed to find schema plugin.\n";
+	    $V .= _("Failed to find schema plugin.\n");
 	    $FailFlag = 1;
 	    }
 	  else
@@ -126,8 +126,9 @@ class core_init extends FO_Plugin
 	    if (!$State)
 		{
 		$V .= "<font color='red'>";
-		$V .= "Failed to remove $Filename\n";
-		$V .= "<br />Remove this file to complete the initialization.\n";
+		$V .= _("Failed to remove $Filename\n");
+$text = _("Remove this file to complete the initialization.\n");
+		$V .= "<br />$text";
 		$V .= "</font>\n";
 		$FailedFlag = 1;
 		}
@@ -135,7 +136,7 @@ class core_init extends FO_Plugin
 	  else
 	    {
 	    $V .= "<font color='red'>";
-	    $V .= "Initialization complete with errors.";
+	    $V .= _("Initialization complete with errors.");
 	    $V .= "</font>\n";
 	    }
 	  }

@@ -114,7 +114,7 @@ class search_repo extends FO_Plugin
 	{
 	return($this->GetUploadtreeFromRepo($String,$Page));
 	}
-    $V = "Search string is not a valid format.";
+    $V = _("Search string is not a valid format.");
     return($V);
     } // Search()
 

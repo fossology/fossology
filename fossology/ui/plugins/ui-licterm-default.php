@@ -82,7 +82,9 @@ class licterm_default extends FO_Plugin
     {
     global $DB;
     $Names = $DB->Action("SELECT * FROM licterm ORDER BY licterm_name;");
-    print "<H3>Export Data</H3>\n";
+$text = _("Export Data");
+$text1 = _("\n");
+    print "<H3>$text</H3>$text1";
 
     global $WEBDIR;
     $Filename = "plugins/ui-licterm-default.dat";
@@ -181,7 +183,8 @@ class licterm_default extends FO_Plugin
     print "<ol>\n";
     foreach($Term as $Key => $Val)
       {
-      print "<li>Creating default canonical name: " . htmlentities($Key) . "\n";
+$text = _("Creating default canonical name: " . htmlentities($Key) . "\n");
+      print "<li>$text";
 
       /* Get the list of licenses */
       $SQL = "SELECT DISTINCT lic_id FROM agent_lic_raw WHERE lic_pk=lic_id AND (";
@@ -262,27 +265,33 @@ class licterm_default extends FO_Plugin
 	  }
 
 	$V .= "<form method='post'>\n";
-	$V .= "License terms associate common license names with canonical license names.\n";
-	$V .= "For example, the terms 'GPL' and 'Gnu Public License' are both commonly used to describe the Free Software Foundation's GNU General Public License. These terms are all commonly referred to be the canonical name 'GPL'.\n";
+	$V .= _("License terms associate common license names with canonical license names.\n");
+	$V .= _("For example, the terms 'GPL' and 'Gnu Public License' are both commonly used to describe the Free Software Foundation's GNU General Public License. These terms are all commonly referred to be the canonical name 'GPL'.\n");
 	$V .= "<P />\n";
-    $V .= "You shouldn't need to do this unless you have modified the default terms and want to reset them back to the way they were when you installed this software.  ";
-	$V .= "This will reset the default license terms, canonical names, and associations between terms, license templates, and canonical names.";
+    $V .= _("You shouldn't need to do this unless you have modified the default terms and want to reset them back to the way they were when you installed this software.  ");
+	$V .= _("This will reset the default license terms, canonical names, and associations between terms, license templates, and canonical names.");
 	$V .= "<ul>\n";
-	$V .= "<li>The default license settings are <b>NOT</b> a recommendation or legal interpretation.\n";
-	$V .= "In particular, related terms, templates, and canonical names may have very different legal meanings.\n";
-	$V .= "<li>Resetting the default terms will not impact any new terms you have created or their associations.\n";
+$text = _("NOT");
+$text1 = _(" a recommendation or legal interpretation.\n");
+	$V .= "<li>The default license settings are <b>$text</b>$text1";
+	$V .= _("In particular, related terms, templates, and canonical names may have very different legal meanings.\n");
+$text = _("Resetting the default terms will not impact any new terms you have created or their associations.\n");
+	$V .= "<li>$text";
 	$V .= "</ul>\n";
-	$V .= "You can modify, edit, or delete the default groups with the ";
+	$V .= _("You can modify, edit, or delete the default groups with the ");
 	$P = &$Plugins[plugin_find_id("licterm_manage")];
-	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->Title . "</a>";
-	$V .= " menu option.\n";
-	$V .= "You can also use the ";
-	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->Title . "</a>";
+$text = _("Title . "");
+	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->$text</a>";
+	$V .= _(" menu option.\n");
+	$V .= _("You can also use the ");
+$text = _("Title . "");
+	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->$text</a>";
 	$V .= " to create new terms, canonical names, and associations.<P/>\n";
 
 	$V .= "<P/>\n";
 	// $V .= "<input type='checkbox' value='1' name='Export'>Check to export term-related information.<br>\n";
-	$V .= "<input type='checkbox' value='1' name='Default'>Check to revert back to the original default terms, canonical names, and license template associations.\n";
+$text = _("Check to revert back to the original default terms, canonical names, and license template associations.\n");
+	$V .= "<input type='checkbox' value='1' name='Default'>$text";
 	$V .= "<P/>\n";
 	$V .= "<input type='submit' value='RESET!'>";
 	$V .= "</form>\n";

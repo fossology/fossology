@@ -114,14 +114,17 @@ class folder_properties extends FO_Plugin {
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-        $V.= "<li>Select the folder to edit:  \n";
+$text = _("Select the folder to edit:  \n");
+        $V.= "<li>$text";
         $Uri = Traceback_uri() . "?mod=" . $this->Name . "&selectfolderid=";
         $V.= "<select name='oldfolderid' onChange='window.location.href=\"$Uri\" + this.value'>\n";
         $V.= FolderListOption(-1, 0, 1, $FolderSelectId);
         $V.= "</select><P />\n";
-        $V.= "<li>Change folder name:  \n";
+$text = _("Change folder name:  \n");
+        $V.= "<li>$text";
         $V.= "<INPUT type='text' name='newname' size=40 value=\"" . htmlentities($Folder['folder_name'], ENT_COMPAT) . "\" />\n";
-        $V.= "<P /><li>Change folder description:  \n";
+$text = _("Change folder description:  \n");
+        $V.= "<P /><li>$text";
         $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['folder_desc'], ENT_COMPAT) . "\" />\n";
         $V.= "</ol>\n";
         $V.= "<input type='submit' value='Edit!'>\n";

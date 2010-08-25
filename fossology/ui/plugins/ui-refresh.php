@@ -38,7 +38,7 @@ class ui_refresh extends FO_Plugin
     $Mod = GetParm("mod",PARM_STRING);
     $Opt = Traceback_parm(0);
     $Opt = preg_replace("/&/","--",$Opt);
-    $V = "mod=" . $this->Name . "&remod=$Mod" . "&reopt=$Opt";
+    $V = _("mod=" . $this->Name . "&remod=$Mod" . "&reopt=$Opt");
     return($V);
     } // GetRefresh()
 

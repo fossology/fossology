@@ -94,7 +94,8 @@ class ajax_filelic extends FO_Plugin
     if ($debug) 
     {
       $Time = microtime(true) - $uTime;  // convert usecs to secs
-      printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
+$text = _("Elapsed time: %.2f seconds");
+      printf( "<small>$text</small>", $Time);
     }
 */
 

@@ -45,17 +45,20 @@ class ui_welcome extends FO_Plugin
       case "HTML":
 	if (plugin_find_id("browse") >= 0)
 	  {
-	  $Browse = "<a href='" . Traceback_uri() . "?mod=browse'>Browse</a>";
+$text = _("Browse");
+	  $Browse = "<a href='" . Traceback_uri() . "?mod=browse'>$text</a>";
 	  }
 	else { $Browse = "Browse"; }
 	if (plugin_find_id("search_file") >= 0)
 	  {
-	  $Search = "<a href='" . Traceback_uri() . "?mod=search_file'>Search</a>";
+$text = _("Search");
+	  $Search = "<a href='" . Traceback_uri() . "?mod=search_file'>$text</a>";
 	  }
 	else { $Search = "Search"; }
 	if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
 	  {
-	  $Login = "<a href='" . Traceback_uri() . "?mod=auth'>Login</a>";
+$text = _("Login");
+	  $Login = "<a href='" . Traceback_uri() . "?mod=auth'>$text</a>";
 	  }
 	else { $Login = "Login"; }
 
@@ -70,9 +73,14 @@ class ui_welcome extends FO_Plugin
           <br>
           <img src='images/right-point-bullet.gif'>Identify licenses in software<br>
           <img src='images/right-point-bullet.gif'>Allow browsing uploaded file hierarchies<br>
-          <img src='images/right-point-bullet.gif'>Extract MIME type and meta data information</font></p>
-        <p>&nbsp;</p>
-      </blockquote></td>
+$text = _("Extract MIME type and meta data information");
+$text1 = _("
+");
+          <img src='images/right-point-bullet.gif'>$text</font></p>$text1";
+$text = _("&nbsp;");
+$text1 = _("
+");
+        <p>$text</p>$text1      </blockquote></td>
     <td><img src='images/white.png'></td>
   </tr>
 </table>
@@ -81,7 +89,10 @@ class ui_welcome extends FO_Plugin
   <tr> 
     <td><img src='images/logo2.png' align='right'></td>
     <td valign='top'>
-      <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'>FOSSology's Graphical User Interface</font></h3>
+$text = _("FOSSology's Graphical User Interface");
+$text1 = _("
+");
+      <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'>$text</font></h3>$text1";
       <blockquote> 
         <p> <font face='Arial, Helvetica, sans-serif'>This website is an interface 
           into the FOSSology project. With it, you can:<br>
@@ -90,7 +101,10 @@ class ui_welcome extends FO_Plugin
           to analyze.<br>
           <img src='images/right-point-bullet.gif'>Unpack and store the data within the files for analysis. <br>
           <img src='images/right-point-bullet.gif'>Invoke specialized agents to scan and analyze the files.  <br>
-          <img src='images/right-point-bullet.gif'>Store and display the analyzed results. </font><br>
+$text = _("Store and display the analyzed results. ");
+$text1 = _("
+");
+          <img src='images/right-point-bullet.gif'>$text</font><br>$text1";
         </p>
       </blockquote></td>
   </tr>
@@ -106,11 +120,20 @@ class ui_welcome extends FO_Plugin
           to log in before they can be accessed. The following functions are available 
           without logging in:<br>
           <br>
-          <strong><em>$Browse: </em></strong>If you don't know where to start, 
+$text = _("$Browse: ");
+$text1 = _("If you don't know where to start, 
+");
+          <strong><em>$text</em></strong>$text1";
           try browsing the currently uploaded projects. <br>
-          <strong><em>$Search:</em></strong> Look through the uploaded projects 
+$text = _("$Search:");
+$text1 = _(" Look through the uploaded projects 
+");
+          <strong><em>$text</em></strong>$text1";
           for specific files. <br>
-          <strong><em>$Login:</em></strong> If you log in, you can access additional 
+$text = _("$Login:");
+$text1 = _(" If you log in, you can access additional 
+");
+          <strong><em>$text</em></strong>$text1";
           capabilities. Depending on your account's access rights,<br>
           you may be able to upload files, schedule analysis tasks, or even add 
           new users.</font></p>
@@ -126,20 +149,38 @@ class ui_welcome extends FO_Plugin
         <p><font face='Arial, Helvetica, sans-serif'>Some parts of FOSSology helpful 
           to know about are:<br>
           <br>
-          <em><strong>Software Repository</strong></em> - Stores files downloaded 
+$text = _("Software Repository");
+$text1 = _(" - Stores files downloaded 
+");
+          <em><strong>$text</strong></em>$text1";
           for analysis.<br>
-          <em><strong>Database</strong></em> - Stores user accounts, file information, 
+$text = _("Database");
+$text1 = _(" - Stores user accounts, file information, 
+");
+          <em><strong>$text</strong></em>$text1";
           and analysis results.<br>
-          <em><strong>Agents</strong></em> - Perform analysis of files and data 
+$text = _("Agents");
+$text1 = _(" - Perform analysis of files and data 
+");
+          <em><strong>$text</strong></em>$text1";
           found in the Software Repository and Database.<br>
-          <em><strong>Scheduler</strong></em> - Runs the agents, making efficient 
+$text = _("Scheduler");
+$text1 = _(" - Runs the agents, making efficient 
+");
+          <em><strong>$text</strong></em>$text1";
           use of available resources.<br>
-          <em><strong>Web GUI</strong></em> &shy; - Provides user access to FOSSology.<br>
-          <em><strong>Command line utilities</strong></em> &shy; - Provides scripting access to FOSSology.</font>
+$text = _("Web GUI");
+$text1 = _(" &shy");
+          <em><strong>$text</strong></em>$text1";
+$text = _("Command line utilities");
+$text1 = _(" &shy");
+          <em><strong>$text</strong></em>$text1";
         </p>
       </blockquote></td>
-    <td><img src='images/fossology-flow4.png'> </td>
-  </tr>
+$text = _(" ");
+$text1 = _("
+");
+    <td><img src='images/fossology-flow4.png'>$text</td>$text1  </tr>
 </table>
 
 <table width='100%' border='0'>
@@ -154,13 +195,19 @@ class ui_welcome extends FO_Plugin
             </font></p>
           <blockquote>
 		  
-		  <!--  <font face='Arial, Helvetica, sans-serif'><em><strong>Help tab</strong></em> 
+$text = _("Help tab");
+$text1 = _(" 
+");
+		  <!--  <font face='Arial, Helvetica, sans-serif'><em><strong>$text</strong></em>$text1";
               - Select this website's Help tab for software-related help and tips.
               </font><br>-->
             
 			  <font face='Arial, Helvetica, sans-serif'><em><strong><a href='http://fossology.org/'>FOSSology 
               web site</a></strong></em> - Where you can find more information and get help on FOSSology.<br>
-              <em><strong><a href='https://fossbazaar.org/'>FOSSbazaar web site</a></strong></em></font> 
+$text = _("FOSSbazaar web site");
+$text1 = _("");
+              <em><strong><a href='https://fossbazaar.org/'>$text</a></strong>$text1</em></font> 
+";
               <font face='Arial, Helvetica, sans-serif'> - A community website 
               with information on Open Source Governance.</font>
           </blockquote>

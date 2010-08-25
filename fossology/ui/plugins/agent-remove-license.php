@@ -132,34 +132,42 @@ class agent_remove_licenseMeta extends FO_Plugin
         $V .= ActiveHTTPscript("ResetLicense");
         $V .= "<script language='javascript'>\n";
         $V .= "function ResetLicense_Reply()\n";
-        $V .= "  {\n";
+        $V .= _("  {\n");
         $V .= "  if ((ResetLicense.readyState==4) && (ResetLicense.status==200))\n";
-        $V .= "    {\n";
+        $V .= _("    {\n");
         /* Remove all options */
-        $V .= "    document.formR.upload.innerHTML = ResetLicense.responseText;\n";
+        $V .= _("    document.formR.upload.innerHTML = ResetLicense.responseText;\n");
         /* Add new options */
-        $V .= "    }\n";
-        $V .= "  }\n";
+        $V .= _("    }\n");
+        $V .= _("  }\n");
         $V .= "</script>\n";
 
         /* Build HTML form */
         $V .= "<form name='formR' method='post'>\n"; // no url = this url
-        $V .= "<em>Remove</em> the license meta data from the selected upload.\n";
+$text = _("Remove");
+$text1 = _(" the license meta data from the selected upload.\n");
+        $V .= "<em>$text</em>$text1";
         $V .= "<ul>\n";
-        $V .= "<li>This will <em>remove</em> the license meta data associated with the selected upload file!\n";
-        $V .= "<li>Be very careful with your selection since you can delete a lot of work!\n";
-        $V .= "<li>THERE IS NO UNREMOVE. The license meta data can be recreated by re-running the license analysis\n";
+$text = _("remove");
+$text1 = _(" the license meta data associated with the selected upload file!\n");
+        $V .= "<li>This will <em>$text</em>$text1";
+$text = _("Be very careful with your selection since you can delete a lot of work!\n");
+        $V .= "<li>$text";
+$text = _("THERE IS NO UNREMOVE. The license meta data can be recreated by re-running the license analysis\n");
+        $V .= "<li>$text";
         $V .= "</ul>\n";
         $V .= "<P>Select the uploaded file to remove license data:<P>\n";
         $V .= "<ol>\n";
-        $V .= "<li>Select the folder containing the upload file to use: ";
-        $V .= "<select name='folder' ";
+$text = _("Select the folder containing the upload file to use: ");
+        $V .= "<li>$text";
+        $V .= _("<select name='folder' ");
         $V .= "onLoad='ResetLicense_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
         $V .= "onChange='ResetLicense_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + document.formR.folder.value)'>\n";
         $V .= FolderListOption(-1,0);
         $V .= "</select><P />\n";
 
-        $V .= "<li>Select the uploaded project to use:";
+$text = _("Select the uploaded project to use:");
+        $V .= "<li>$text";
         $V .= "<BR><select name='upload' size='10'>\n";
         $List = FolderListUploads(-1);
         foreach($List as $L)

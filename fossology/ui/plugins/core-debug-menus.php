@@ -101,21 +101,31 @@ class core_debug_menus extends FO_Plugin
 	$FullMenuDebug = GetParm("fullmenu",PARM_INTEGER);
 	if ($FullMenuDebug == 2)
 		{
-		print "<b>Full debug ENABLED!</b> Now view any page.<P>\n";
+$text = _("Full debug ENABLED!");
+		print "<b>$text</b> Now view any page.<P>\n";
 		}
 	if ($FullMenuDebug == 1)
 		{
-		print "<b>Full debug disabled!</b> Now view any page.<P>\n";
+$text = _("Full debug disabled!");
+		print "<b>$text</b> Now view any page.<P>\n";
 		}
 	print "This developer tool lists all items in the menu structure.\n";
 	print "Since some menu inserts are conditional, not everything may appear here (the conditions may not lead to the insertion).\n";
-	print "Fully-debugged menus show the full menu path and order number <i>in the menu</i>.\n";
+$text = _("in the menu");
+$text1 = _(".\n");
+	print "Fully-debugged menus show the full menu path and order number <i>$text</i>$text1";
 	print "<ul>\n";
-	print "<li>The full debugging is restricted to <b>your</b> login session. (Nobody else will see it.)\n";
-	print "<li>Full debugging shows the full menu path for each menu\n";
+$text = _("your");
+$text1 = _(" login session. (Nobody else will see it.)\n");
+	print "<li>The full debugging is restricted to <b>$text</b>$text1";
+$text = _("Full debugging shows the full menu path for each menu\n");
+	print "<li>$text";
 	print "and the order is included in parenthesis.\n";
-	print "However, menus that use HTML instead of text will <i>not</i> show the full path.\n";
-	print "<li>To disable full debugging, return here and unselect the option.\n";
+$text = _("not");
+$text1 = _(" show the full path.\n");
+	print "However, menus that use HTML instead of text will <i>$text</i>$text1";
+$text = _("To disable full debugging, return here and unselect the option.\n");
+	print "<li>$text";
 	print "</ul>\n";
 	print "<br>\n";
 	print "<form method='post'>\n";

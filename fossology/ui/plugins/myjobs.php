@@ -73,15 +73,29 @@ class myJobs extends FO_Plugin {
 		    "<caption align='top'>Click Job Name:Id to see the job details<br>". 
 		    "Page updates every $this->Interval seconds</caption>\n" .
         "   <tr>\n" .
-        "     <th colspan=6 align='center'>Running Jobs</th>\n" .
+$text = _("Running Jobs");
+$text1 = _("\n");
+        "     <th colspan=6 align='center'>$text</th>$text1" .
         "   </tr>\n" .
         "   <tr>\n" .
-        "     <th align='center'>Job Name:Id</th>\n" .
-        "     <th align='center'>Total<br>Tasks</th>\n" .
-        "     <th align='center'>Completed<br>Tasks</th>\n" .
-        "     <th align='center'>Active<br>Tasks</th>\n" .
-        "     <th align='center'>Pending<br>Tasks</th>\n" .
-        "     <th align='center'>Failed<br>Tasks</th>\n" .
+$text = _("Job Name:Id");
+$text1 = _("\n");
+        "     <th align='center'>$text</th>$text1" .
+$text = _("Tasks");
+$text1 = _("\n");
+        "     <th align='center'>Total<br>$text</th>$text1" .
+$text = _("Tasks");
+$text1 = _("\n");
+        "     <th align='center'>Completed<br>$text</th>$text1" .
+$text = _("Tasks");
+$text1 = _("\n");
+        "     <th align='center'>Active<br>$text</th>$text1" .
+$text = _("Tasks");
+$text1 = _("\n");
+        "     <th align='center'>Pending<br>$text</th>$text1" .
+$text = _("Tasks");
+$text1 = _("\n");
+        "     <th align='center'>Failed<br>$text</th>$text1" .
         "   </tr>\n";
 
 		$Tbl = $this->MakeJobTblRow();
@@ -115,7 +129,9 @@ class myJobs extends FO_Plugin {
 		global $CompletedJobs;
 
 		if(empty($DB)) {
-			print "<h3 color='red'>Fatal internal ERROR! Cannot connect to the DataBase</h3>\n";
+$text = _("Fatal internal ERROR! Cannot connect to the DataBase");
+$text1 = _("\n");
+			print "<h3 color='red'>$text</h3>$text1";
 			return(FALSE);
 		}
 		
@@ -152,10 +168,14 @@ class myJobs extends FO_Plugin {
 			foreach($JobPhase as $phase => $color) {
 				/* Only cells with something going on get a color */
 				if($status[$phase] == 0){
-					$T .= "     <td align='center'>$status[$phase]</td>\n";
+$text = _("$status[$phase]");
+$text1 = _("\n");
+					$T .= "     <td align='center'>$text</td>$text1";
 				}
 				else {
-					$T .= "     <td align='center' $color>$status[$phase]</td>\n";
+$text = _("$status[$phase]");
+$text1 = _("\n");
+					$T .= "     <td align='center' $color>$text</td>$text1";
 				}
 			}
 			$T .= "   </tr>\n";      // close the row and table

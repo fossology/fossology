@@ -217,13 +217,20 @@ class agent_license_once_compare extends FO_Plugin
 	/* Display instructions */
 	$V .= "This analyzer allows you to compare a single file to a set of licenses selectable by you without having the results saved in the database.\n<br>";
 	$V .= "Typical uses include comparing one license to other licenses to see their similarity, and to compare a file to a license to see how this particular license matches.\n<br>";
-	$V .= "The analysis is done in real-time.\n";
-	$V .= "<P>Limitations:\n";
+	$V .= _("The analysis is done in real-time.\n");
+$text = _("Limitations:\n");
+	$V .= "<P>$text";
 	$V .= "<ul>\n";
-	$V .= "<li>The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n";
-	$V .= "<li>The analysis is done in real-time. Selecting many licenses to compare against can take a long time.\n";
-	$V .= "<li>Files that contain files are <b>not</b> unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n";
-	$V .= "<li>Results are <b>not</b> stored. As soon as you get your results, your analysis is removed from the system.\n";
+$text = _("The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n");
+	$V .= "<li>$text";
+$text = _("The analysis is done in real-time. Selecting many licenses to compare against can take a long time.\n");
+	$V .= "<li>$text";
+$text = _("not");
+$text1 = _(" unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n");
+	$V .= "<li>Files that contain files are <b>$text</b>$text1";
+$text = _("not");
+$text1 = _(" stored. As soon as you get your results, your analysis is removed from the system.\n");
+	$V .= "<li>Results are <b>$text</b>$text1";
 	$V .= "</ul>\n";
 
 	$V .= "<form enctype='multipart/form-data' method='post'>\n";
@@ -233,7 +240,8 @@ class agent_license_once_compare extends FO_Plugin
 	  {
 	  $V .= "<li>Select the file to upload:<br />\n";
 	  $V .= "<input name='licfile' size='60' type='file' /><br />\n";
-	  $V .= "<b>NOTE</b>: Files larger than 100K will be discarded and not analyzed.<P />\n";
+$text = _("NOTE");
+	  $V .= "<b>$text</b>: Files larger than 100K will be discarded and not analyzed.<P />\n";
 	  $V .= "<input type='hidden' name='item' value='$Item'>";
 	  }
 	else
@@ -248,7 +256,9 @@ class agent_license_once_compare extends FO_Plugin
 	$Lics = $DB->Action("SELECT DISTINCT lic_name,lic_id FROM agent_lic_raw ORDER BY lic_name;");
 	for($i=0; !empty($Lics[$i]['lic_name']); $i++)
 	  {
-	  $V .= "<option value='" . $Lics[$i]['lic_id'] . "'>" . $Lics[$i]['lic_name'] . "</option>\n";
+$text = _("" . $Lics[$i]['lic_name'] . "");
+$text1 = _("\n");
+	  $V .= "<option value='" . $Lics[$i]['lic_id'] . "'>$text</option>$text1";
 	  }
 	$V .= "</select>\n";
 	$Uri = "if (document.getElementById('liclist').value) { window.open('";
@@ -261,7 +271,9 @@ class agent_license_once_compare extends FO_Plugin
 	$Uri .= "' + document.getElementById('liclist').value";
 	$Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes'); }";
 	$V .= "</td><td>";
-	$V .= "<a href='#' onClick=\"$Uri\">View</a>\n";
+$text = _("View");
+$text1 = _("\n");
+	$V .= "<a href='#' onClick=\"$Uri\">$text</a>$text1";
 	$V .= "</td></tr></table>";
 
 	$V .= "</ol>\n";

@@ -79,7 +79,8 @@ class ui_license extends FO_Plugin
       {
        menu_insert("Browse::bsam License",-3);
        menu_insert("Browse::[BREAK]",-1);
-       menu_insert("Browse::Clear",-2,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
+$text = _("Clear");
+       menu_insert("Browse::Clear",-2,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>$text</a>");
       }
       else
       {
@@ -273,7 +274,7 @@ class ui_license extends FO_Plugin
   //$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
   $VF .= "license" . ($LicCount == 1 ? "" : "s");
   $VF .= "</a>";
-  $VF .= "]";
+  $VF .= _("]");
   $ChildLicCount += $LicCount;
   }
       $VF .= "</td>";
@@ -306,9 +307,13 @@ class ui_license extends FO_Plugin
     /* List the licenses */
     $VH .= "<table border=1 width='100%'>\n";
     $SFbL = plugin_find_id("search_file_by_license");
-    $VH .= "<tr><th width='10%'>Count</th>";
-    if ($SFbL >= 0) { $VH .= "<th width='10%'>Files</th>"; }
-    $VH .= "<th>License</th>\n";
+$text = _("Count");
+    $VH .= "<tr><th width='10%'>$text</th>";
+$text = _("Files");
+    if ($SFbL >= 0) { $VH .= "<th width='10%'>$text</th>"; }
+$text = _("License");
+$text1 = _("\n");
+    $VH .= "<th>$text</th>$text1";
 
     /* krsort + arsort = consistent sorting order */
     arsort($Lics);
@@ -334,11 +339,12 @@ class ui_license extends FO_Plugin
       if ($Key != ' Total ')
   {
   $GID = $MapLic2GID[$Key];
-  $VH .= "<tr><td align='right'>$Val</td>";
+$text = _("$Val");
+  $VH .= "<tr><td align='right'>$text</td>";
   $Total += $Val;
   if ($SFbL >= 0)
     {
-    $VH .= "<td align='center'><a href='";
+    $VH .= _("<td align='center'><a href='");
     $VH .= Traceback_uri();
     $VH .= "?mod=search_file_by_license&item=$Item&lic=" . urlencode($Key) . "'>Show</a></td>";
     }
@@ -353,50 +359,52 @@ class ui_license extends FO_Plugin
       }
     $VH .= "</table>\n";
     $VH .= "<br>\n";
-    $VH .= "Total licenses: $Total\n";
+    $VH .= _("Total licenses: $Total\n");
 
     /****************************************/
     /* Licenses use Javascript to highlight */
     $VJ = ""; // return values for the javascript
     $VJ .= "<script language='javascript'>\n";
-    $VJ .= "<!--\n";
-    $VJ .= "var LastSelf='';\n";
-    $VJ .= "var LastPrefix='';\n";
-    $VJ .= "var LastListing='';\n";
+    $VJ .= _("<!--\n");
+    $VJ .= _("var LastSelf='';\n");
+    $VJ .= _("var LastPrefix='';\n");
+    $VJ .= _("var LastListing='';\n");
     $VJ .= "function LicColor(Self,Prefix,Listing,color)\n";
-    $VJ .= "{\n";
+    $VJ .= _("{\n");
     $VJ .= "if (LastSelf!='')\n";
     $VJ .= "  { document.getElementById(LastSelf).style.backgroundColor='white'; }\n";
-    $VJ .= "LastSelf = Self;\n";
+    $VJ .= _("LastSelf = Self;\n");
     $VJ .= "if (LastPrefix!='')\n";
-    $VJ .= "  {\n";
+    $VJ .= _("  {\n");
     $VJ .= "  List = LastListing.split(' ');\n";
     $VJ .= "  for(var i in List)\n";
-    $VJ .= "    {\n";
+    $VJ .= _("    {\n");
     $VJ .= "    document.getElementById(LastPrefix + List[i]).style.backgroundColor='white';\n";
-    $VJ .= "    }\n";
-    $VJ .= "  }\n";
-    $VJ .= "LastPrefix = Prefix;\n";
-    $VJ .= "LastListing = Listing;\n";
+    $VJ .= _("    }\n");
+    $VJ .= _("  }\n");
+    $VJ .= _("LastPrefix = Prefix;\n");
+    $VJ .= _("LastListing = Listing;\n");
     $VJ .= "if (Self!='')\n";
-    $VJ .= "  {\n";
+    $VJ .= _("  {\n");
     $VJ .= "  document.getElementById(Self).style.backgroundColor=color;\n";
-    $VJ .= "  }\n";
+    $VJ .= _("  }\n");
     $VJ .= "if (Listing!='')\n";
-    $VJ .= "  {\n";
+    $VJ .= _("  {\n");
     $VJ .= "  List = Listing.split(' ');\n";
     $VJ .= "  for(var i in List)\n";
-    $VJ .= "    {\n";
+    $VJ .= _("    {\n");
     $VJ .= "    document.getElementById(Prefix + List[i]).style.backgroundColor=color;\n";
-    $VJ .= "    }\n";
-    $VJ .= "  }\n";
-    $VJ .= "}\n";
-    $VJ .= "// -->\n";
+    $VJ .= _("    }\n");
+    $VJ .= _("  }\n");
+    $VJ .= _("}\n");
+    $VJ .= _("// -->\n");
     $VJ .= "</script>\n";
 
     /* Combine VF and VH */
     $V .= "<table border=0 width='100%'>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VH</td><td valign='top'>$VF</td></tr>\n";
+$text = _("$VH");
+$text1 = _("$VF");
+    $V .= "<tr><td valign='top' width='50%'>$text</td><td valign='top'>$text1</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
     $V .= $VJ;
@@ -480,8 +488,11 @@ class ui_license extends FO_Plugin
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
-    printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
-    if ($Cached) echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
+$text = _("Elapsed time: %.2f seconds");
+    printf( "<small>$text</small>", $Time);
+$text = _("cached");
+$text1 = _("   <a href=\");
+    if ($Cached) echo " <i>$text</i>$text1"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
     return;
   }
 

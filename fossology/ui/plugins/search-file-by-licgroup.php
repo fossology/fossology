@@ -92,11 +92,13 @@ class search_file_by_licgroup extends FO_Plugin
 	  $Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_pk = '$LicGrpPk' LIMIT 1;");
 	  $LicName = htmlentities($Results[0]['licgroup_name']);
 	  if (empty($LicName)) { return; }
-	  $V .= "The following files include licenses in the license group '<b>$LicName</b>'.\n";
+$text = _("$LicName");
+$text1 = _("'.\n");
+	  $V .= "The following files include licenses in the license group '<b>$text</b>$text1";
 	  }
 	else
 	  {
-	  $V .= "The following files are not included in any license groups.\n";
+	  $V .= _("The following files are not included in any license groups.\n");
 	  }
 
 	/* Find the key associated with the group id */
@@ -173,7 +175,7 @@ if (0)
 {
 /* TBD: Fix this so it works with license groups. */
 	$V .= "<form method='get' action='" . Traceback_uri() . "'>";
-	$V .= "Refine search by specific license: ";
+	$V .= _("Refine search by specific license: ");
 	$V .= "<input type='hidden' name='mod' value='search_file_by_license'>";
 	$V .= "<input type='hidden' name='item' value='$UploadTreePk'>";
 	$V .= "<select name='lic'>";
@@ -210,23 +212,29 @@ if (0)
 	  $L = &$Lics[$i];
 	  $Pos = $Offset + $i + 1;
 	  $V .= "<table border=1 width='100%' style='background:lightyellow'>";
-	  $V .= "<tr><td align='center' width='5%'><font size='+2'>$Pos:</font></td>";
+$text = _("$Pos:");
+$text1 = _("");
+	  $V .= "<tr><td align='center' width='5%'><font size='+2'>$text</font></td>$text1";
 	  $V .= "<td>";
-	  if (!empty($L['phrase_text'])) { $V .= "<b>Phrase:</b> " . htmlentities($L['phrase_text']) . "\n"; }
+$text = _("Phrase:");
+$text1 = _(" ");
+	  if (!empty($L['phrase_text'])) { $V .= "<b>$text</b>$text1" . htmlentities($L['phrase_text']) . "\n"; }
 	  if (Isdir($L['ufile_mode']))
 	    {
-	    $V .= Dir2Browse("licgroup",$L['uploadtree_pk'],"license") . "\n";
+	    $V .= Dir2Browse(_("licgroup",$L['uploadtree_pk'],"license") . "\n");
 	    }
 	  else
 	    {
-	    $V .= Dir2Browse("licgroup",$L['uploadtree_pk'],"view-license") . "\n";
+	    $V .= Dir2Browse(_("licgroup",$L['uploadtree_pk'],"view-license") . "\n");
 	    }
 	  $V .= "</td></tr></table>\n";
 	  }
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-	$V .= "<small>Elaspsed time: $Time seconds</small>\n";
+$text = _("Elaspsed time: $Time seconds");
+$text1 = _("\n");
+	$V .= "<small>$text</small>$text1";
         break;
       case "Text":
         break;

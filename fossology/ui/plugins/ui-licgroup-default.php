@@ -67,7 +67,8 @@ class licgroup_default extends FO_Plugin
     {
     global $DB;
     $V = "";
-    $V .= "<input type='checkbox' value='Group-" . $this->DefaultName . "'>" . $this->DefaultName . "<br>\n";
+$text = _("DefaultName . ");
+    $V .= "<input type='checkbox' value='Group-" . $this->$text"'>" . $this->DefaultName . "<br>\n";
     $LastPathName = $this->DefaultName;
     $Lics = $DB->Action("SELECT lic_name FROM agent_lic_raw WHERE lic_pk=lic_id ORDER BY lic_name;");
     for($i=0; !empty($Lics[$i]['lic_name']); $i++)
@@ -84,7 +85,7 @@ class licgroup_default extends FO_Plugin
         {
 	if ($Path[$j] != $Path[$j-1]) { $V .= "&nbsp;&zwnj;"; }
 	}
-      $V .= "&mdash;";
+      $V .= _("&mdash;");
       $Group = htmlentities(preg_replace("@^.*/@","",$PathName),ENT_QUOTES);
       $V .= "<input type='checkbox' value='Group-$Group'>$Group<br>\n";
       $LastPathName = $PathName;
@@ -565,29 +566,42 @@ class licgroup_default extends FO_Plugin
 	  }
 
 	$V .= "<form method='post'>\n";
-	$V .= "License groups provide organization for licenses.\n";
-	$V .= "By selecting the 'Create' button, you will initialize the license groups.\n";
-	$V .= "This initialization will create many default license groups.";
+	$V .= _("License groups provide organization for licenses.\n");
+	$V .= _("By selecting the 'Create' button, you will initialize the license groups.\n");
+	$V .= _("This initialization will create many default license groups.");
 	$V .= "<ul>\n";
-	$V .= "<li>The default license groups are <b>NOT</b> a recommendation or legal interpretation.\n";
-	$V .= "In particular, related licenses may have very different legal meanings.\n";
-	$V .= "<li>If you create these default groups twice, then any modification you made to the default groups <b>will be lost</b>.\n";
-	$V .= "<li>Creating default groups will not impact any new groups you created.\n";
+$text = _("NOT");
+$text1 = _(" a recommendation or legal interpretation.\n");
+	$V .= "<li>The default license groups are <b>$text</b>$text1";
+	$V .= _("In particular, related licenses may have very different legal meanings.\n");
+$text = _("will be lost");
+$text1 = _(".\n");
+	$V .= "<li>If you create these default groups twice, then any modification you made to the default groups <b>$text</b>$text1";
+$text = _("Creating default groups will not impact any new groups you created.\n");
+	$V .= "<li>$text";
 	$V .= "</ul>\n";
-	$V .= "After the default groups are created, you can modify, edit, or delete the default groups with the ";
+	$V .= _("After the default groups are created, you can modify, edit, or delete the default groups with the ");
 	$P = &$Plugins[plugin_find_id("license_groups_manage")];
-	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->Title . "</a>";
-	$V .= " menu option.\n";
-	$V .= "You can also use the ";
-	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->Title . "</a>";
+$text = _("Title . "");
+	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->$text</a>";
+	$V .= _(" menu option.\n");
+	$V .= _("You can also use the ");
+$text = _("Title . "");
+	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->$text</a>";
 	$V .= " to create new groups.<P/>\n";
 
-	$V .= "Select the default groups to create:\n";
+	$V .= _("Select the default groups to create:\n");
 	$V .= "<P/>\n";
-	$V .= "<input type='checkbox' value='1' name='Default-Tree'><b>" . $this->DefaultName . "</b>.\n";
+$text = _("DefaultName . "");
+$text1 = _(".\n");
+	$V .= "<input type='checkbox' value='1' name='Default-Tree'><b>" . $this->$text</b>$text1";
 	$V .= "These are default license groups based on a heirarchy of similar license text.<br>\n";
-	$V .= "<input type='checkbox' value='1' name='Default-FSF'><b>FSF</b>. See <a href='http://www.fsf.org/licensing/licenses/index_html'>FSF Licensing</a> for the list of GPL-compatible, incompatible, and free licenses.<br>\n";
-	$V .= "<input type='checkbox' value='1' name='Default-Fedora'><b>Fedora</b>. See <a href='http://fedoraproject.org/wiki/Licensing'>Fedora Licensing</a> for the list of good, bad, and unknown licenses.<br>\n";
+$text = _("FSF");
+$text1 = _("FSF Licensing");
+	$V .= "<input type='checkbox' value='1' name='Default-FSF'><b>$text</b><a href='http://www.fsf.org/licensing/licenses/index_html'>$text1</a> for the list of GPL-compatible, incompatible, and free licenses.<br>\n";
+$text = _("Fedora");
+$text1 = _("Fedora Licensing");
+	$V .= "<input type='checkbox' value='1' name='Default-Fedora'><b>$text</b><a href='http://fedoraproject.org/wiki/Licensing'>$text1</a> for the list of good, bad, and unknown licenses.<br>\n";
 	$V .= "<P/>\n";
 	$V .= "<input type='submit' value='Create!'>";
 	$V .= "</form>\n";

@@ -45,12 +45,14 @@ class core_debug extends FO_Plugin
       case "XML":
         break;
       case "HTML":
-	$V .= "<H2>Plugin Summary</H2>";
+$text = _("Plugin Summary");
+	$V .= "<H2>$text</H2>";
 	foreach ($Plugins as $key => $val)
 	  {
 	  $V .=  "$key : $val->Name (state=$val->State)<br>\n";
 	  }
-	$V .= "<H2>Plugin State Details</H2>";
+$text = _("Plugin State Details");
+	$V .= "<H2>$text</H2>";
 	$V .= "<pre>";
 	$V .= print_r($Plugins,1);
 	$V .= "</pre>";

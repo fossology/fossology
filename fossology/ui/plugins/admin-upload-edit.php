@@ -125,25 +125,27 @@ class upload_properties extends FO_Plugin {
           $V.= ActiveHTTPscript("Uploads");
           $V.= "<script language='javascript'>\n";
           $V.= "function Uploads_Reply()\n";
-          $V.= "  {\n";
+          $V.= _("  {\n");
           $V.= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
-          $V.= "    {\n";
+          $V.= _("    {\n");
           /* Remove all options */
-          $V.= "    document.formy.uploadid.innerHTML = Uploads.responseText;\n";
+          $V.= _("    document.formy.uploadid.innerHTML = Uploads.responseText;\n");
           /* Add new options */
-          $V.= "    }\n";
-          $V.= "  }\n";
+          $V.= _("    }\n");
+          $V.= _("  }\n");
           $V.= "</script>\n";
           /* Build the HTML form */
           $V.= "<form name='formy' method='post'>\n"; // no url = this url
           $V.= "<ol>\n";
-          $V.= "<li>Select the folder that contains the upload:  \n";
-          $V.= "<select name='oldfolderid'\n";
+$text = _("Select the folder that contains the upload:  \n");
+          $V.= "<li>$text";
+          $V.= _("<select name='oldfolderid'\n");
           $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
           $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
           $V.= FolderListOption(-1, 0);
           $V.= "</select><P />\n";
-          $V.= "<li>Select the upload you wish to edit:  \n";
+$text = _("Select the upload you wish to edit:  \n");
+          $V.= "<li>$text";
           $V.= "<select name='uploadid'>\n";
           $List = FolderListUploads(-1);
           foreach($List as $L) {
@@ -158,11 +160,14 @@ class upload_properties extends FO_Plugin {
             $V.= "</option>\n";
           }
           $V.= "</select><P />\n";
-          $V.= "<li>Change upload name:  \n";
+$text = _("Change upload name:  \n");
+          $V.= "<li>$text";
           $V.= "<INPUT type='text' name='newname' size=40 value=\"" . htmlentities($Folder['upload_filename'], ENT_COMPAT) . "\" />\n";
-          $V.= "<P /><li>Change upload description:  \n";
+$text = _("Change upload description:  \n");
+          $V.= "<P /><li>$text";
           $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['upload_desc'], ENT_COMPAT) . "\" />\n";
-          //$V .= "<P /><li>Change Upload Source Location:  \n";
+$text = _("Change Upload Source Location:  \n");
+          //$V .= "<P /><li>$text";
           //$V .= "<INPUT type='text' name='newsrc' size=60 value=\"" . htmlentities($Folder['folder_src'],ENT_COMPAT) . "\" />\n";
           $V.= "</ol>\n";
           $V.= "<input type='submit' value='Edit!'>\n";
