@@ -61,6 +61,7 @@ uninstall:
 clean:
 	rm -f *.o $(EXE)
 	rm -f False_Positives False_Negatives Matches Found
+	$(MAKE) -C test/ clean
 
 .PHONY: all install uninstall clean test
 	

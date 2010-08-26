@@ -302,6 +302,8 @@ void cvector_pop_back(cvector vec)
   if(vec->size > 0)
   {
     vec->size--;
+    vec->memory->destroy(vec->data[vec->size]);
+    vec->data[vec->size] = NULL;
   }
 }
 
@@ -648,7 +650,6 @@ void* string_copy(void* to_copy)
 {
   char* s = (char*)calloc(strlen((char*)to_copy) + 1, sizeof(char));
   strcpy(s, (char*)to_copy);
-  s[strlen(s)] = '\0';
   return s;
 }
 
