@@ -310,7 +310,8 @@ function GetAgentKey($agentName, $agentDesc)
  */
 function AgentARSList($TableName, $upload_pk, $limit, $agent_fk=0, $ExtraWhere="")
 {
-	global $PG_CONN;
+	global $DB, $PG_CONN;
+    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
 
 	$LimitClause = "";
 	if ($limit > 0) $LimitClause = " limit $limit";
