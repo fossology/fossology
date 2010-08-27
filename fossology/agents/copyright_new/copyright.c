@@ -85,7 +85,7 @@ struct copy_entry_internal
  * @param idx the index to base the search from
  * @return the index that is the beginning of the line.
  */
-int find_beginning(char *ptext, int idx)
+int find_beginning(char* ptext, int idx)
 {
   int maxback = 50;
   int minidx = idx - maxback;
@@ -110,7 +110,7 @@ int find_beginning(char *ptext, int idx)
  * @param bufsize the largest valid index in the string
  * @return the location of the end of the current line or sentence
  */
-int find_end(char *ptext, int idx, int bufsize)
+int find_end(char* ptext, int idx, int bufsize)
 {
   int maxchars = 200;
   int last = idx + maxchars;

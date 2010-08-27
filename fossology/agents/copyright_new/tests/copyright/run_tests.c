@@ -27,7 +27,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** test case sets ****************************************************** */
 /* ************************************************************************** */
 
+extern CU_TestInfo function_registry_testcases[];
 extern CU_TestInfo cvector_testcases[];
+extern CU_TestInfo copyright_local_testcases[];
+extern CU_TestInfo copyright_testcases[];
+extern CU_TestInfo radix_testcases[];
 
 /* ************************************************************************** */
 /* **** create test suite *************************************************** */
@@ -35,7 +39,11 @@ extern CU_TestInfo cvector_testcases[];
 
 CU_SuiteInfo suites[] =
 {
+    {"Testing function registry:", NULL, NULL, function_registry_testcases},
     {"Testing cvector:", NULL, NULL, cvector_testcases},
+    {"Testing radix tree:", NULL, NULL,  radix_testcases},
+    {"Testing copyright locals:", NULL, NULL, copyright_local_testcases},
+    {"Testing copyright:", NULL, NULL, copyright_testcases},
     CU_SUITE_INFO_NULL
 };
 
@@ -75,6 +83,8 @@ int main(int argc, char** argv)
 
     CU_cleanup_registry();
   }
+
+  return 0;
 }
 
 

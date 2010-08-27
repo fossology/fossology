@@ -24,9 +24,6 @@
 /* local includes */
 #include <radixtree.h>
 
-#define NODE_SIZE 128 ///< the number of children that a node can have
-#define OFFSET '\0'   ///< the base offset that indexing into the child array is done using
-
 /* ************************************************************************** */
 /* *** Local Functions ****************************************************** */
 /* ************************************************************************** */
@@ -238,7 +235,7 @@ void radix_insert(radix_tree tree, const char* string)
  * last. These should be the pointer to the start of the array and the pointer
  * just past the end of the array.
  *
- * If you wanted to insert an array of string called Dictionary:
+ * If you wanted to insert an array of strings called Dict:
  *      char* Dict[] = {"one", "two", ... , "n"};
  *      radix_insert_all(tree, Dict, Dict + sizeof(Dict)/sizeof(char*));
  *

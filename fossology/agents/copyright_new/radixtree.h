@@ -22,6 +22,9 @@
 #include <stdio.h>
 #include <cvector.h>
 
+#define NODE_SIZE 128 ///< the number of children that a node can have
+#define OFFSET '\0'   ///< the base offset that indexing into the child array is done using
+
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
@@ -40,7 +43,6 @@ typedef struct tree_internal* radix_tree;
 /* ************************************************************************** */
 
 void radix_init(radix_tree* tree);
-void radix_copy(radix_tree* tree, radix_tree reference);
 void radix_destroy(radix_tree tree);
 
 /* ************************************************************************** */

@@ -19,27 +19,28 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I../../
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I../../ -lpcre -lcunit
 EXE = test_copyright
 
-SOURCES = test_cvector.c \
-
 OBJECTS = test_cvector.o \
+          test_copyright.o \
+          test_radixtree.o \
 
-TO_TEST = 
+TO_TEST = ../../cvector.o \
+          ../../copyright.o \
+          ../../radixtree.o \
 
 all: $(EXE)
-$(EXE): $(OBJECTS) cvector.o
-	$(CC) run_tests.c -o $@ $(OBJECTS) ../../cvector.o -lcunit
+$(EXE): $(OBJECTS) $(TO_TEST) run_tests.c
+	$(CC) run_tests.c -o $@ $(OBJECTS) $(TO_TEST) $(CFLAGS_LOCAL)
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c -g -I../../ $<
+	$(CC) -c $(CFLAGS_LOCAL) $<
 
-test: all $(EXE)
-	./$(EXE)
+test: all
 
-cvector.o:
-	$(MAKE) -C ../../ $@
+$(TO_TEST): ../../%: $(%)
+	$(MAKE) -C ../../ $(%)
 
 clean:
 	rm -f $(EXE) *.o *.g *.xml *.txt results

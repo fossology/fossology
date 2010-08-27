@@ -30,10 +30,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 struct cvector_internal
 {
-  int size;                   ///< the number of element in the cvector
-  int capacity;               ///< the number of elements that data can store
-  void** data;                ///< the array that controls access to the data
-  function_registry* memory;  ///< the memory management functions employed by cvector
+  int size;                   // the number of element in the cvector
+  int capacity;               // the number of elements that data can store
+  void** data;                // the array that controls access to the data
+  function_registry* memory;  // the memory management functions employed by cvector
 };
 
 void cvector_resize(cvector vec);
@@ -281,7 +281,7 @@ void test_cvector_remove()
   int tester = 1;
 
   /* start the test */
-  printf("Test cvector_clear:");
+  printf("Test cvector_remove:");
 
   /* run the functions */
   cvector_init(&vec, int_function_registry());
@@ -296,25 +296,218 @@ void test_cvector_remove()
   printf("\n");
 }
 
+void test_cvector_get()
+{
+  cvector vec;
+  int tester = 1;
+
+  /* start the test */
+  printf("Test cvector_get:");
+
+  /* run the functions */
+  cvector_init(&vec, int_function_registry());
+  cvector_push_back(vec, &tester);
+
+  /* test the results */;
+  CU_ASSERT_EQUAL(*(int*)cvector_get(vec, 0), tester);
+
+  cvector_destroy(vec);
+  printf("\n");
+}
+
+void test_cvector_at()
+{
+  cvector vec;
+  int tester = 1;
+
+  /* start the test */
+  printf("Test cvector_at:");
+
+  /* run the functions */
+  cvector_init(&vec, int_function_registry());
+  cvector_push_back(vec, &tester);
+
+  /* test the results */;
+  CU_ASSERT_EQUAL(*(int*)cvector_at(vec, 0), tester);
+
+  cvector_destroy(vec);
+  printf("\n");
+}
+
+void test_cvector_begin()
+{
+  cvector vec;
+  int tester = 1;
+
+  /* start the test */
+  printf("Test cvector_begin:");
+
+  /* run the functions */
+  cvector_init(&vec, int_function_registry());
+  cvector_push_back(vec, &tester);
+
+  /* test the results */;
+  CU_ASSERT_EQUAL(cvector_begin(vec), vec->data);
+
+  cvector_destroy(vec);
+  printf("\n");
+}
+
+void test_cvector_end()
+{
+  cvector vec;
+  int tester = 1;
+
+  /* start the test */
+  printf("Test cvector_end:");
+
+  /* run the functions */
+  cvector_init(&vec, int_function_registry());
+  cvector_push_back(vec, &tester);
+
+  /* test the results */;
+  CU_ASSERT_EQUAL(cvector_end(vec), vec->data+vec->size);
+
+  cvector_destroy(vec);
+  printf("\n");
+}
+
+void test_cvector_size()
+{
+  cvector vec;
+  int tester = 1;
+
+  /* start the test */
+  printf("Test cvector_size:");
+
+  /* run the functions */
+  cvector_init(&vec, int_function_registry());
+
+  /* test the results */;
+  CU_ASSERT_EQUAL(cvector_size(vec), 0);
+  cvector_push_back(vec, &tester);
+  CU_ASSERT_EQUAL(cvector_size(vec), 1);
+  cvector_push_back(vec, &tester);
+  CU_ASSERT_EQUAL(cvector_size(vec), 2);
+
+  cvector_destroy(vec);
+  printf("\n");
+}
+
+void test_cvector_capacity()
+{
+  cvector vec;
+  int tester = 1;
+
+  /* start the test */
+  printf("Test cvector_capacity:");
+
+  /* run the functions */
+  cvector_init(&vec, int_function_registry());
+
+  /* test the results */;
+  CU_ASSERT_EQUAL(cvector_capacity(vec), 1);
+  cvector_push_back(vec, &tester);
+  CU_ASSERT_EQUAL(cvector_capacity(vec), 1);
+  cvector_push_back(vec, &tester);
+  CU_ASSERT_EQUAL(cvector_capacity(vec), 2);
+  cvector_push_back(vec, &tester);
+  CU_ASSERT_EQUAL(cvector_capacity(vec), 4);
+
+  cvector_destroy(vec);
+  printf("\n");
+}
+
+/* ************************************************************************** */
+/* **** test cvector error checkes ****************************************** */
+/* **** TODO figure out how to test exit() ********************************** */
+/* ************************************************************************** */
+
+void test_cvector_at_error()
+{
+  cvector vec;
+  int tester = 1;
+
+  /* start the test */
+  printf("Test cvector_at_error: NOT IMPLEMENTED");
+
+  /* run the functions */
+  cvector_init(&vec, int_function_registry());
+  cvector_push_back(vec, &tester);
+
+  /* test the results */;
+
+  cvector_destroy(vec);
+  printf("\n");
+}
+
+void test_cvector_insert_error()
+{
+  cvector vec;
+  int tester = 1;
+
+  /* start the test */
+  printf("Test cvector_insert_error: NOT IMPLEMENTED");
+
+  /* run the functions */
+  cvector_init(&vec, int_function_registry());
+  cvector_push_back(vec, &tester);
+
+  /* test the results */;
+
+
+  cvector_destroy(vec);
+  printf("\n");
+}
+
+void test_cvector_remove_error()
+{
+  cvector vec;
+  int tester = 1;
+
+  /* start the test */
+  printf("Test cvector_remove_error: NOT IMPLEMENTED");
+
+  /* run the functions */
+  cvector_init(&vec, int_function_registry());
+  cvector_push_back(vec, &tester);
+
+  /* test the results */;
+
+  cvector_destroy(vec);
+  printf("\n");
+}
+
 /* ************************************************************************** */
 /* **** cunit test info ***************************************************** */
 /* ************************************************************************** */
 
-CU_TestInfo cvector_testcases[] =
+CU_TestInfo function_registry_testcases[] =
 {
     {"Testing int_function_registry:", test_int_function_registry},
     {"Testing char_function_registry:", test_char_function_registry},
     {"Testing double_function_registry:", test_double_function_registry},
     {"Testing pointer_function_registry:", test_pointer_function_registry},
     {"Testing string_function_registry:", test_string_function_registry},
+    CU_TEST_INFO_NULL
+};
+
+CU_TestInfo cvector_testcases[] =
+{
     {"Testing cvector_init:", test_cvector_init},
     {"Testing cvector_push_back:", test_cvector_push_back},
     {"Testing cvector_insert:", test_cvector_insert},
     {"Testing cvector_clear:", test_cvector_clear},
     {"Testing cvector_pop_back:", test_cvector_pop_back},
     {"Testing cvector_remove:", test_cvector_remove},
+    {"Testing cvector_get:", test_cvector_get},
+    {"Testing cvector_at:", test_cvector_at},
+    {"Testing cvector_begin:", test_cvector_begin},
+    {"Testing cvector_end:", test_cvector_end},
+    {"Testing cvector_size:", test_cvector_size},
+    {"Testing cvector_capacity:", test_cvector_capacity},
+    {"Testing cvector_at_error:", test_cvector_at_error},
+    {"Testing cvector_insert_error:", test_cvector_insert_error},
+    {"Testing cvector_remove_error:", test_cvector_remove_error},
     CU_TEST_INFO_NULL
 };
-
-
-

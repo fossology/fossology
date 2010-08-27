@@ -28,10 +28,10 @@ SOURCE = cvector.c \
 		 pair.c \
 
 HEADER = cvector.h \
-		 radixtree.h \
-		 copyright.h \
-		 pair.h \
-     sql_statements.h
+         radixtree.h \
+         copyright.h \
+         pair.h \
+         sql_statements.h
 
 OBJS   = cvector.o \
 		 radixtree.o \
@@ -61,7 +61,7 @@ uninstall:
 clean:
 	rm -f *.o $(EXE)
 	rm -f False_Positives False_Negatives Matches Found
-	$(MAKE) -C test/ clean
+	$(MAKE) -C tests/ clean
 
 .PHONY: all install uninstall clean test
 	
