@@ -43,7 +43,8 @@ class admin_check_template extends FO_Plugin
     $Fin = @fopen("$PROJECTSTATEDIR/agents/License.bsam","rb");
     if (!$Fin)
       {
-      print "Failed to read License.bsam<br>\n";
+$text=_("Failed to read License.bsam");
+      print "$text<br>\n";
       return;
       }
 
@@ -53,8 +54,7 @@ class admin_check_template extends FO_Plugin
     $Section = "";
     $Bad=0;
 $text = _("Checking for duplicate errors within the license templates");
-$text1 = _("\n");
-    if ($Verbose) { print "<H3>$text</H3>$text1"; }
+    if ($Verbose) { print "<H3>$text</H3>\n"; }
     while(!feof($Fin))
       {
       $Type = ord(fgetc($Fin))*256 + ord(fgetc($Fin));
@@ -95,8 +95,7 @@ $text = _("Total duplicate templates that need cleaning up:");
     $SQL = "SELECT lic_pk,lic_id,lic_unique,lic_name,lic_section FROM agent_lic_raw ORDER BY lic_name;";
     $Results = $DB->Action($SQL);
 $text = _("Checking for obsolete license templates");
-$text1 = _("\n");
-    if ($Verbose) { print "<H3>$text</H3>$text1"; }
+    if ($Verbose) { print "<H3>$text</H3>\n"; }
     $BadList = array();
     if ($Verbose) { print "<ol>\n"; }
     for($i=0; !empty($Results[$i]['lic_pk']); $i++)
@@ -226,8 +225,7 @@ $text = _("Reinstall licenses before doing the cleanup.");
           if ($VerboseInit)
           { 
 $text = _("Checking for Uploads to Re-analyze");
-$text1 = _("\n");
-            print "<H3>$text</H3>$text1";
+            print "<H3>$text</H3>\n";
 $text = _("The impacted uploads:");
             print "$text<br>\n";
             print "<ul>\n";
@@ -257,7 +255,9 @@ $text = _("The impacted uploads:");
     $DB->Action("BEGIN;");
 
     /* Delete the metadata for the licenses, in batches */
-    print "Resetting license analysis for " . count($PfileList) . " files.<br>\n";
+$text=_("Resetting license analysis for ");
+$text1=_(" files.");
+    print "$text" . count($PfileList) . "$text1<br>\n";
     $SQL="";
     for($i=0; !empty($PfileList[$i]); $i++)
       {
@@ -279,7 +279,9 @@ $text = _("The impacted uploads:");
 	}
 
     /* Delete the licenses */
-    print "Removing " . count($OldTemplates) . " obsolete license templates.<br>\n";
+$text=_("Removing ");
+$text1=_(" obsolete license templates.");
+    print "$text" . count($OldTemplates) . "$text1<br>\n";
     $SQL="";
     $SQL2="";
     for($i=0; !empty($OldTemplates[$i]); $i++)
@@ -306,7 +308,9 @@ $text = _("The impacted uploads:");
     $DB->Action("COMMIT;");
 
     /* Reset the jobs */
-    print "Resetting " . count($UploadList) . " license analysis jobs.<br>\n";
+$text=_("Resetting ");
+$text1=_(" license analysis jobs.");
+    print "$text" . count($UploadList) . "$text1<br>\n";
     $Analyze = &$Plugins[plugin_find_id("agent_license")];
     for($i=0; !empty($UploadList[$i]); $i++)
       {
@@ -349,8 +353,7 @@ $text = _("The impacted uploads:");
 	$UploadList = $this->FindUploads($BadUniq,1);
 	$V .= "<hr>\n";
 $text = _("Clean-Up");
-$text1 = _("\n");
-	$V .= "<H3>$text</H3>$text1";
+	$V .= "<H3>$text</H3>\n";
 $text = _("Total obsolete templates to remove: ");
 	$V .= "<b>$text" . count($BadUniq) . "</b><br>\n";
 $text = _("Total pfiles to re-analyze: ");

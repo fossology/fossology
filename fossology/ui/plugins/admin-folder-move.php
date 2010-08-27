@@ -73,8 +73,7 @@ class folder_move extends FO_Plugin {
     $FContents = $DB->Action($Sql);
     $Row = $FContents[0];
     $fc_pk = $Row['foldercontents_pk'];
-$text = _("\$Sql = UPDATE foldercontents SET parent_fk = '$NewParentId' WHERE child_id = '$FolderId ' AND foldercontents_pk = '$fc_pk' AND foldercontents_mode = '1'\n");
-    //echo ("<pre>$text</pre>");
+    //echo ("<pre>\$Sql = UPDATE foldercontents SET parent_fk = '$NewParentId' WHERE child_id = '$FolderId ' AND foldercontents_pk = '$fc_pk' AND foldercontents_mode = '1'\n</pre>");
     $Sql = "UPDATE foldercontents SET parent_fk = '$NewParentId' WHERE child_id = '$FolderId ' AND foldercontents_pk = '$fc_pk' AND foldercontents_mode = '1'";
     $Results = $DB->Action($Sql);
     return (1);
@@ -104,11 +103,14 @@ $text = _("\$Sql = UPDATE foldercontents SET parent_fk = '$NewParentId' WHERE ch
             $NRow = $NewFolder[0];
             $OldFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$OldFolderId';");
             $ORow = $OldFolder[0];
-            $success = "Moved folder " . $ORow['folder_name'] . " to folder " . $NRow['folder_name'];
+$text=_("Moved folder ");
+$text1=_(" to folder ");
+            $success = $text . $ORow['folder_name'] . $text1 . $NRow['folder_name'];
             $V.= displayMessage($success);
           }
           else {
-            $V.= displayMessage("Could not move folder!: $rc");
+$text=_("Could not move folder!: ");
+            $V.= displayMessage($text.$rc);
           }
         }
         /* Display the form */

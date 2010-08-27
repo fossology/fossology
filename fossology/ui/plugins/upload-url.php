@@ -81,10 +81,10 @@ class upload_url extends FO_Plugin {
     AgentCheckBoxDo($uploadpk);
 
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
-    $msg = "The upload $Name has been scheduled. It is ";
-$text = _("upload #" . $uploadpk . "");
-$text1 = _(".\n");
-    $keep =  "<a href='$Url'>$text</a>$text1";
+$text = _("The upload");
+$text1 = _("has been scheduled. It is");
+    $msg = "$text $Name $text1 ";
+    $keep =  "<a href='$Url'>upload #" . $uploadpk . "</a>.\n";
     print displayMessage($msg,$keep);
     return (NULL);
   } // Upload()
@@ -114,7 +114,8 @@ $text1 = _(".\n");
             $Name = NULL;
           }
           else {
-            $V.= displayMessage("Upload failed for $GetUrl: $rc");
+$text = _("Upload failed for");
+            $V.= displayMessage("$text $GetUrl: $rc");
           }
         }
         /* Set default values */
@@ -128,23 +129,29 @@ $text1 = _(".\n");
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-$text = _("Select the folder for storing the uploaded file:\n");
-        $V.= "<li>$text";
+$text = _("Select the folder for storing the uploaded file:");
+        $V.= "<li>$text\n";
         $V.= "<select name='folder'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
-        $V.= "<li>Enter the URL to the file:<br />\n";
+$text = _("Enter the URL to the file:");
+        $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='geturl' size=60 value='" . htmlentities($GetURL) . "'/><br />\n";
 $text = _("NOTE");
-        $V.= "<b>$text</b>: If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file. The URL can begin with HTTP://, HTTPS://, or FTP://.<P />\n";
-        $V.= "<li>(Optional) Enter a description of this file:<br />\n";
+$text1 = _(": If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file. The URL can begin with HTTP://, HTTPS://, or FTP://.");
+        $V.= "<b>$text</b>$text1<P />\n";
+$text = _("(Optional) Enter a description of this file:");
+        $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
-        $V.= "<li>(Optional) Enter a viewable name for this file:<br />\n";
+$text = _("(Optional) Enter a viewable name for this file:");
+        $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
 $text = _("NOTE");
-        $V.= "<b>$text</b>: If no name is provided, then the uploaded file name will be used.<P />\n";
+$text1 = _(": If no name is provided, then the uploaded file name will be used.");
+        $V.= "<b>$text</b>$text1<P />\n";
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
-          $V.= "<li>Select optional analysis<br />\n";
+$text = _("Select optional analysis");
+          $V.= "<li>$text<br />\n";
           $V.= AgentCheckBoxMake(-1, "agent_unpack");
         }
         $V.= "</ol>\n";

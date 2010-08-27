@@ -46,15 +46,17 @@ class licgroup_debug extends FO_Plugin
    ***********************************************************/
   function DrawGroupTree	($Group)
     {
-$text = _("Group: ");
-    print "<li>$text";
+$text = _("Group");
+    print "<li>$text: ";
     if (!empty($this->LicGroupPlugin->GrpInGroup[$Group]['head']))
       {
-      print "[HEAD] ";
+$text = _("HEAD");
+      print "[$text] ";
       }
     if (!empty($this->LicGroupPlugin->GrpInGroup[$Group]['tail']))
       {
-      print "[TAIL] ";
+$text = ("TAIL");
+      print "[$text] ";
       }
     print htmlentities($this->GrpName[$Group]) . "\n";
     if (!empty($this->LicGroupPlugin->GrpInGroup[$Group]))
@@ -66,19 +68,19 @@ $text = _("Group: ");
 	  {
 	  if ($g == 1)
 	    {
-$text = _("Inherited Group: ");
-	    print "<li>$text" . htmlentities($this->GrpName[$G]) . "\n";
+$text = _("Inherited Group");
+	    print "<li>$text: " . htmlentities($this->GrpName[$G]) . "\n";
 	    }
 	  if ($g == 0)
 	    {
 $text = _("Loop");
-$text1 = _(" to Group: ");
-	    print "<li><b>$text</b>$text1" . htmlentities($this->GrpName[$G]) . "\n";
+$text1 = _("to Group");
+	    print "<li><b>$text</b> $text1: " . htmlentities($this->GrpName[$G]) . "\n";
 	    }
 	  else /* direct */
 	    {
-$text = _("Group: ");
-	    print "<li>$text" . htmlentities($this->GrpName[$G]) . "\n";
+$text = _("Group");
+	    print "<li>$text: " . htmlentities($this->GrpName[$G]) . "\n";
 	    $this->DrawGroupTree($G);
 	    }
 	  }
@@ -86,13 +88,13 @@ $text = _("Group: ");
 	  {
 	  if ($g == 2)
 	    {
-$text = _("License: ");
-	    print "<li>$text";
+$text = _("License");
+	    print "<li>$text: ";
 	    }
 	  if ($g == 1)
 	    {
-$text = _("Inherited License: ");
-	    print "<li>$text";
+$text = _("Inherited License");
+	    print "<li>$text: ";
 	    }
 	  print htmlentities($this->LicName[$G]) . "\n";
 	  }
@@ -141,9 +143,12 @@ $text = _("Inherited License: ");
       case "XML":
 	break;
       case "HTML":
-	print "The current license group tree.\n";
-	print "Inherited groups are expanded and licenses are listed.\n";
-	print "Loops in group inheritance are identified.\n";
+$text = _("The current license group tree.");
+	print "$text\n";
+$text = _("Inherited groups are expanded and licenses are listed.");
+	print "$text\n";
+$text = _("Loops in group inheritance are identified.");
+	print "$text\n";
 	print "<P/>\n";
 	foreach($this->GrpName as $G => $g)
 	  {

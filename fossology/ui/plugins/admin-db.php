@@ -39,7 +39,8 @@ class admin_db_cleanup extends FO_Plugin
   function FixDB	($CheckType)
     {
     global $DB;
-    print "Deleting " . $CheckType['label'] . "...";
+$text=_("Deleting ");
+    print $text . $CheckType['label'] . "...";
     $DB->Debug=1;
     print "<pre>";
     $DB->Action("DELETE " . $CheckType['sql']);
@@ -47,7 +48,9 @@ class admin_db_cleanup extends FO_Plugin
     $DB->Debug=0;
     if ($DB->GetAffectedRows() > 0)
       {
-      print "Deleted " . $DB->GetAffectedRows() . " from ";
+$text=_("Deleted ");
+$text1=_(" from ");
+      print $text . $DB->GetAffectedRows() . $text1;
       print $CheckType['label'] . ".<br>\n";
       }
     } // FixDB()
@@ -129,15 +132,13 @@ if (0)
 	  if (GetParm($Checks[$i]['tag'],PARM_INTEGER) == 1)
 	    {
 $text = _("Fixing Records");
-$text1 = _("\n");
-	    if ($Args==0) { print "<H1>$text</H1>$text1"; }
+	    if ($Args==0) { print "<H1>$text</H1>\n"; }
 	    $this->FixDB($Checks[$i]);
 	    $Args++;
 	    }
 	  }
 $text = _("Fix Records");
-$text1 = _("\n");
-	if ($Args > 0) { $V .= "<H1>$text</H1>$text1"; }
+	if ($Args > 0) { $V .= "<H1>$text</H1>\n"; }
 
 	/***************************************/
 	$V .= _("On occasion, the database can become inconsistent.");
@@ -220,8 +221,7 @@ $text = _("Details");
 	      if ($j > 0) { $V .= "<br>\n"; }
 	      $V .= ($j+1) . ": " . htmlentities($Results[$j]['list']);
 	      }
-$text = _("\n...");
-	    if ($j < $Count) { $V .= "<br>$text"; }
+	    if ($j < $Count) { $V .= "<br>\n..."; }
 	    $V .= "</div>\n";
 	    }
 	  $V .= "</td>";
@@ -231,7 +231,7 @@ $text = _("\n...");
 	$V .= "</table>\n";
 	$V .= "<P />";
 	if ($FixCount > 0) { $V .= "<input type='submit' value='Fix!'>"; }
-	else { $V .= "No database inconsistencies found.\n"; }
+	else { $V .= _("No database inconsistencies found.\n"); }
 	$V .= "</form>";
 	break;
       case "Text":

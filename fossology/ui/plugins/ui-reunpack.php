@@ -56,11 +56,13 @@ class ui_reunpack extends FO_Plugin
 	       if (empty($rc))
 	       {
 	       /* Need to refresh the screen */
-	         $V .= displayMessage('Unpack added to job queue');
+$text = _("Unpack added to job queue");
+	         $V .= displayMessage($text);
 	       }
 	       else
 	       {
-	         $V .= displayMessage("Unpack of Upload failed: $rc");
+$text = _("Unpack of Upload failed");
+	         $V .= displayMessage("$text: $rc");
 	       }
 	     }
 
@@ -216,24 +218,23 @@ class ui_reunpack extends FO_Plugin
     $Fin_gold = @fopen( RepPath($Pfile_fk,"gold") ,"rb");
     if (empty($Fin_gold))
     {
-$text = _("The File's Gold file are not available in the repository.\n");
-        $V = "<p/>$text";
+$text = _("The File's Gold file are not available in the repository.");
+        $V = "<p/>$text\n";
         return $V;
     }
       
     $V = "<p/>";
-$text = _("[".$Ufile_name."]");
-$text1 = _("\n");
-    $V.= "This file is unpacked from <font color='blue'>$text</font>$text1";
+$text = _("This file is unpacked from");
+    $V.= "$text <font color='blue'>[".$Ufile_name."]</font>\n";
 
       	  /* Display the form */
 	  $V .= "<form method='post'>\n"; // no url = this url
 
-$text = _("\nReunpack: " . $Ufile_name . ");
-	  $V .= "<p />$text"<input name='uploadunpack' type='hidden' value='$Upload_pk'/>\n";
-	  $V .= _("<input type='submit' value='Reunpack!' ");
+$text = _("Reunpack");
+	  $V .= "<p />\n$text: " . $Ufile_name . "<input name='uploadunpack' type='hidden' value='$Upload_pk'/>\n";
+	  $V .= "<input type='submit' value='Reunpack!' ";
 	  if ($Reunpack) {$V .= "disabled";}
-	  $V .= _(" >\n");
+	  $V .= " >\n";
 	  $V .= "</form>\n";
 	  
       return $V;

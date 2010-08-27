@@ -55,8 +55,7 @@ class licgroup extends FO_Plugin
       if (GetParm("mod",PARM_TEXT) == $this->Name)
 	{
 	menu_insert("Browse::License Groups",-5);	
-$text = _("Clear");
-	menu_insert("Browse::Clear",-2,NULL,NULL,NULL,"<a title='Clear highlighting' href='javascript:LicColor(\"\",\"\",\"\",\"\");'>$text</a>");
+	menu_insert("Browse::Clear",-2,NULL,NULL,NULL,"<a title='Clear highlighting' href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
 	}
       else
 	{
@@ -259,7 +258,8 @@ $text = _("Clear");
       {
       print "<pre>";
       // print "LicGroups:\n"; print_r($this->LicInGroup);
-      print "GrpGroups:\n"; print_r($this->GrpInGroup);
+$text = _("GrpGroups");
+      print "$text:\n"; print_r($this->GrpInGroup);
       print "</pre>";
       print "<hr>";
       }
@@ -302,28 +302,27 @@ $text = _("Clear");
       {
       if ($this->SFbL >= 0)
 	{
-	$V .= _("<td width='10%' align='center'><a href='");
+	$V .= "<td width='10%' align='center'><a href='";
 	$V .= Traceback_uri();
 	$V .= "?mod=search_file_by_license&item=$Item&lic=Phrase'>Show</a></td>";
 	}
       }
     else if ($this->SFbLG >= 0)
       {
-$text = _("GrpInGroup[$Group]['color'] . ");
-      $V .= "<td width='10%' align='center' bgcolor='" . $this->$text"'>";
-      $V .= _("<a ");
+      $V .= "<td width='10%' align='center' bgcolor='" . $this->GrpInGroup[$Group]['color'] . "'>";
+      $V .= "<a ";
       if ($this->GrpInGroup[$Group]['color'] == '#ff0000')
         {
-	$V .= _("onMouseOver='this.style.color=\"#ffffff\");
+	$V .= "onMouseOver='this.style.color=\"#ffffff\";' onMouseOut='this.style.color=\"#0000ff\";' ";
 	}
       if ($this->GrpInGroup[$Group]['color'] == '#0000ff')
         {
-	$V .= _("style='color:#ffffff' ");
-	$V .= _("onMouseOut='this.style.color=\"#ffffff\");
+	$V .= "style='color:#ffffff' ";
+	$V .= "onMouseOut='this.style.color=\"#ffffff\";' onMouseOver='this.style.color=\"#ff0000\";' ";
 	}
-      $V .= _("href='");
+      $V .= "href='";
       $V .= Traceback_uri();
-      $V .= _("?mod=search_file_by_licgroup&item=$Item&licgroup=" . $this->GrpInGroup[$Group]['id'] . "'>");
+      $V .= "?mod=search_file_by_licgroup&item=$Item&licgroup=" . $this->GrpInGroup[$Group]['id'] . "'>";
       $V .= "<font style='text-shadow: black 0px 0px 5px;'>";
       $V .= _("Show");
       $V .= "</a>";
@@ -345,34 +344,30 @@ $text = _("GrpInGroup[$Group]['color'] . ");
 	}
     if (($Count > 0) && empty($this->GrpInGroup[$Group]['tail']))
       {
-$text = _("+");
-      $V .= "<a href='javascript:ShowHide(\"DivGrp-" . $this->ShowHistRow . "\")'>$text</a>";
+      $V .= "<a href='javascript:ShowHide(\"DivGrp-" . $this->ShowHistRow . "\")'>+</a>";
       }
     else
       {
-$text = _("+");
-      $V .= "<font color='white'>$text</font>";
+      $V .= "<font color='white'>+</font>";
       }
 
     /* Show the license name */
-$text = _("ShowHistRow . " $Group");
-    $V .= "</td><td id='LicGroup r" . $this->$text";
+    $V .= "</td><td id='LicGroup r" . $this->ShowHistRow . " $Group";
     foreach($this->GrpInGroup[$Group] as $G => $g)
 	{
 	if (($g > 1) && (substr($G,0,1) == 'g'))
 	  {
-	  $V .= _(" $G");
+	  $V .= " $G";
 	  }
 	}
-    $V .= _(" ' style='border-left:none;'>");
+    $V .= " ' style='border-left:none;'>";
     if ($Depth > 0)
       {
       $V .= "<font color='#999999'>";
       for($i=0; $i < $Depth; $i++) { $V .= "&#8230;"; }
       $V .= "</font>";
       }
-$text = _("ShowHistRow . "','LicItem','$Group','yellow')\"");
-    $V .= "<a href=\"javascript:LicColor('LicGroup','r" . $this->$text";
+    $V .= "<a href=\"javascript:LicColor('LicGroup','r" . $this->ShowHistRow . "','LicItem','$Group','yellow')\"";
     $V .= " title='" . htmlentities($this->GrpInGroup[$Group]['desc'],ENT_QUOTES) . "'>";
     $V .= htmlentities($this->GrpInGroup[$Group]['name']);
     $V .= "</a>";
@@ -381,8 +376,7 @@ $text = _("ShowHistRow . "','LicItem','$Group','yellow')\"");
     $this->ShowHistRow++;
     if (empty($this->GrpInGroup[$Group]['tail']))
       {
-$text = _("ShowHistRow-1) . ");
-      $V .= "<div id='DivGrp-" . ($this->$text"' style='display:none;'>";
+      $V .= "<div id='DivGrp-" . ($this->ShowHistRow-1) . "' style='display:none;'>";
       foreach($this->GrpInGroup[$Group] as $G => $g)
 	{
 	/* only process direct relations */
@@ -514,9 +508,9 @@ $text = _("ShowHistRow-1) . ");
 
       /* Populate the output ($VF) */
       $VF .= '<tr>';
-      $VF .= _("<td id='LicItem i$ChildCount");
+      $VF .= "<td id='LicItem i$ChildCount";
       foreach($GrpList as $G => $g) { $VF .= " $G"; }
-      $VF .= _(" ' align='left'>");
+      $VF .= " ' align='left'>";
       if ($LicCount > 0)
 	{
 	$HasHref=0;
@@ -535,11 +529,10 @@ $text = _("ShowHistRow-1) . ");
 	if ($IsDir) { $VF .= "/"; };
 	if ($IsContainer) { $VF .= "<b>"; };
 	if ($HasHref) { $VF .= "</a>"; }
-$text = _("[" . number_format($LicCount,0,"",",") . "&nbsp;");
-	$VF .= "</td><td>$text";
-	$VF .= _("<a href=\"javascript:LicColor('LicItem','i$ChildCount','LicGroup','");
+	$VF .= "</td><td>[" . number_format($LicCount,0,"",",") . "&nbsp;";
+	$VF .= "<a href=\"javascript:LicColor('LicItem','i$ChildCount','LicGroup','";
 	foreach($GrpList as $G => $g) { $VF .= " $G"; }
-	$VF .= _("','lightgreen');\">");
+	$VF .= "','lightgreen');\">";
 	$VF .= "license" . ($LicCount == 1 ? "" : "s");
 	$VF .= "</a>";
 	$VF .= "]</td>";
@@ -568,8 +561,7 @@ $text = _("Count");
 $text = _("Files");
     if ($this->SFbLG >= 0) { $VH .= "<th width='10%'>$text</th>"; }
 $text = _("License Groups");
-$text1 = _("");
-    $VH .= "<th colspan='2'>$text</th></tr>$text1";
+    $VH .= "<th colspan='2'>$text</th></tr>";
     $VH .= "</table>";
     foreach($this->GrpInGroup as $G => $g)
       {
@@ -587,14 +579,12 @@ $text1 = _("");
       $VH .= "</td>";
       $VH .= "<td width='10%' align='center'>";
       $VH .= "<a href='" . Traceback_uri();
-      $VH .= _("?mod=search_file_by_licgroup&item=$Item&licgroup=-1'>");
+      $VH .= "?mod=search_file_by_licgroup&item=$Item&licgroup=-1'>";
       $VH .= "<font style='text-shadow: black 0px 0px 5px;'>";
       $VH .= _("Show");
       $VH .= "</a>";
       $VH .= "</td>";
-$text = _("+");
-$text1 = _("");
-      $VH .= "<td width='1%' style='border-right:none;'><font color='white'>$text</font></td>$text1";
+      $VH .= "<td width='1%' style='border-right:none;'><font color='white'>+</font></td>";
       $VH .= "<td id='LicGroup Gnone ' style='border-left:none;'>";
       $VH .= "<a href=\"javascript:LicColor('LicGroup','Gnone','LicItem','Gnone','yellow')\">";
       $VH .= _("License not part of any group");
@@ -606,98 +596,96 @@ $text1 = _("");
     /* Licenses use Javascript to highlight */
     $VJ = ""; // return values for the javascript
     $VJ .= "<script language='javascript'>\n";
-    $VJ .= _("<!--\n");
+    $VJ .= "<!--\n";
     $VJ .= "function LicColor(Self,SelfList,Group,GroupList,color)\n";
-    $VJ .= _("{\n");
+    $VJ .= "{\n";
     $VJ .= "var UpdateList = new Array();\n";
 
     /* Clear all */
-    $VJ .= _("  {\n");
+    $VJ .= "  {\n";
     $VJ .= "  var Contains = '//td[contains(@id,\"LicItem\") or contains(@id,\"LicGroup\")]';\n";
     $VJ .= "  var tds = document.evaluate(Contains,document,null,XPathResult.ANY_TYPE,null);\n";
     $VJ .= "  var Td = tds.iterateNext();\n";
     $VJ .= "  while(Td)\n";
-    $VJ .= _("    {\n");
+    $VJ .= "    {\n";
     $VJ .= "    UpdateList[UpdateList.length] = Td.getAttribute('id');\n";
     $VJ .= "    Td = tds.iterateNext();\n";
-    $VJ .= _("    }\n");
-    $VJ .= _("  }\n");
+    $VJ .= "    }\n";
+    $VJ .= "  }\n";
 
     /* Clear everything in the update list */
     /* The select and update must be done in separate loops, because setting
        anything will invalidate the tds array. */
     $VJ .= "for(var i in UpdateList)\n";
-    $VJ .= _("  {\n");
+    $VJ .= "  {\n";
     $VJ .= "  document.getElementById(UpdateList[i]).style.backgroundColor='white';\n";
-    $VJ .= _("  }\n");
+    $VJ .= "  }\n";
     $VJ .= "UpdateList = new Array();\n";
 
     /* Color self */
     $VJ .= "if (Self!='')\n";
-    $VJ .= _("  {\n");
+    $VJ .= "  {\n";
     $VJ .= "  SelfList.replace(/^\s+|\s+\$/g,'');\n";
     $VJ .= "  var List = SelfList.split(' ');\n";
     $VJ .= "  var Contains = '//td[contains(@id,\"' + Self + '\")]';\n";
     $VJ .= "  var tds = document.evaluate(Contains,document,null,XPathResult.ANY_TYPE,null);\n";
     $VJ .= "  var Td = tds.iterateNext();\n";
     $VJ .= "  while(Td)\n";
-    $VJ .= _("    {\n");
+    $VJ .= "    {\n";
     $VJ .= "    for(var i in List)\n";
-    $VJ .= _("      {\n");
+    $VJ .= "      {\n";
     $VJ .= "      var Attr = Td.getAttribute('id');\n";
     $VJ .= "      if (Attr.match(' ' + List[i] + ' '))\n";
-    $VJ .= _("        {\n");
-    $VJ .= _("        UpdateList[UpdateList.length] = Attr;\n");
-    $VJ .= _("        }\n");
-    $VJ .= _("      }\n");
+    $VJ .= "        {\n";
+    $VJ .= "        UpdateList[UpdateList.length] = Attr;\n";
+    $VJ .= "        }\n";
+    $VJ .= "      }\n";
     $VJ .= "    Td = tds.iterateNext();\n";
-    $VJ .= _("    }\n");
-    $VJ .= _("  }\n");
+    $VJ .= "    }\n";
+    $VJ .= "  }\n";
 
     /* Color group */
     $VJ .= "if (Group!='')\n";
-    $VJ .= _("  {\n");
+    $VJ .= "  {\n";
     $VJ .= "  GroupList.replace(/^\s+|\s+\$/g,'');\n";
     $VJ .= "  var List = GroupList.split(' ');\n";
     $VJ .= "  var Contains = '//td[contains(@id,\"' + Group + '\")]';\n";
     $VJ .= "  var tds = document.evaluate(Contains,document,null,XPathResult.ANY_TYPE,null);\n";
     $VJ .= "  var Td = tds.iterateNext();\n";
     $VJ .= "  while(Td)\n";
-    $VJ .= _("    {\n");
+    $VJ .= "    {\n";
     $VJ .= "    for(var i in List)\n";
-    $VJ .= _("      {\n");
+    $VJ .= "      {\n";
     $VJ .= "      var Attr = Td.getAttribute('id');\n";
     $VJ .= "      if (Attr.match(' ' + List[i] + ' '))\n";
-    $VJ .= _("        {\n");
-    $VJ .= _("        UpdateList[UpdateList.length] = Attr;\n");
-    $VJ .= _("        }\n");
-    $VJ .= _("      }\n");
+    $VJ .= "        {\n";
+    $VJ .= "        UpdateList[UpdateList.length] = Attr;\n";
+    $VJ .= "        }\n";
+    $VJ .= "      }\n";
     $VJ .= "    Td = tds.iterateNext();\n";
-    $VJ .= _("    }\n");
-    $VJ .= _("  }\n");
+    $VJ .= "    }\n";
+    $VJ .= "  }\n";
 
     /* Clear everything in the update list */
     $VJ .= "for(var i in UpdateList)\n";
-    $VJ .= _("  {\n");
+    $VJ .= "  {\n";
     $VJ .= "  document.getElementById(UpdateList[i]).style.backgroundColor=color;\n";
-    $VJ .= _("  }\n");
+    $VJ .= "  }\n";
 
     /* End of Javascript function: LicColor */
-    $VJ .= _("}\n");
-    $VJ .= _("// -->\n");
+    $VJ .= "}\n";
+    $VJ .= "// -->\n";
     $VJ .= "</script>\n";
 
     /* Combine VF and VH */
     $V .= "<table border=0 width='100%'>\n";
-$text = _("$VH");
-$text1 = _("$VF");
-    $V .= "<tr><td valign='top' width='50%'>$text</td><td valign='top'>$text1</td></tr>\n";
+    $V .= "<tr><td valign='top' width='50%'>$VH</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
     $Time = time() - $Time;
-$text = _("Elaspsed time: $Time seconds");
-$text1 = _("\n");
-    $V .= "<small>$text</small>$text1";
+$text = _("Elaspsed time");
+$text1 = _("seconds");
+    $V .= "<small>$text: $Time $text1</small>\n";
     $V .= $VJ;
     return($V);
     } // ShowUploadHist()
@@ -741,8 +729,7 @@ $text1 = _("\n");
       case "HTML":
 	$V .= "<font class='text'>\n";
 $text = _("WARNING: Licence groups only work for the bsam license scanner and do not use the results from licterm.  This functionality has been superceded in v 1.2 by 'buckets' based on the nomos license scanner.");
-$text1 = _("");
-	$V .= "<center><b><font color='red'>$text</font></b>$text1</center><P>\n";
+	$V .= "<center><b><font color='red'>$text</font></b></center><P>\n";
 
 	/************************/
 	/* Show the folder path */

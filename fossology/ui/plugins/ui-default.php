@@ -42,40 +42,40 @@ class ui_default extends FO_Plugin
 	break;
       case "HTML":
 $text = _("FOSSology");
-$text1 = _(" is a framework for software analysis tools. The current tools identify\n");
-	$V .= "<b>$text</b>$text1";
+$text1 = _("is a framework for software analysis tools. The current tools identify");
+	$V .= "<b>$text</b> $text1\n";
 	$V .= _("licenses in software, allow browsing of uploaded file hierarchies, and extract\n");
 	$V .= _("MIME type and meta data information.\n");
 
 	$V .= _("This website is an interface into the FOSSology project. With it, you can:\n");
 	$V .= "<ul>\n";
-$text = _("Browse uploaded files and content.\n");
-	$V .= "<li>$text";
-$text = _("View file contents and meta data.\n");
-	$V .= "<li>$text";
-$text = _("Display analysis results.\n");
-	$V .= "<li>$text";
+$text = _("Browse uploaded files and content.");
+	$V .= "<li>$text\n";
+$text = _("View file contents and meta data.");
+	$V .= "<li>$text\n";
+$text = _("Display analysis results.");
+	$V .= "<li>$text\n";
 	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DOWNLOAD)
 	  {
-$text = _("Download files.\n");
-	  $V .= "<li>$text";
+$text = _("Download files.");
+	  $V .= "<li>$text\n";
 	  }
 	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_UPLOAD)
 	  {
-$text = _("Upload files to analyze.\n");
-	  $V .= "<li>$text";
-$text = _("Unpack and store the data within the files for analysis.\n");
-	  $V .= "<li>$text";
+$text = _("Upload files to analyze.");
+	  $V .= "<li>$text\n";
+$text = _("Unpack and store the data within the files for analysis.");
+	  $V .= "<li>$text\n";
 	  }
 	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
 	  {
-$text = _("Invoke specialized agents to scan and analyze the files.\n");
-	  $V .= "<li>$text";
+$text = _("Invoke specialized agents to scan and analyze the files.");
+	  $V .= "<li>$text\n";
 	  }
 	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_USERADMIN)
 	  {
-$text = _("Create and manage user accounts.\n");
-	  $V .= "<li>$text";
+$text = _("Create and manage user accounts.");
+	  $V .= "<li>$text\n";
 	  }
 	$V .= "</ul>\n";
 	$V .= "<P />\n";
@@ -89,16 +89,16 @@ $text = _("Where to Begin...");
 	  $V .= "<li><b>";
 $text = _("Browse");
 	  $V .= "<a href='" . Traceback_Uri() . "?mod=browse'>$text</a>";
-$text = _(": If you don't know where to start, try browsing the currently uploaded projects.\n");
-	  $V .= "</b>$text";
+$text = _(": If you don't know where to start, try browsing the currently uploaded projects.");
+	  $V .= "</b>$text\n";
 	  }
 	if (plugin_find_id("search_file") >= 0)
 	  {
 	  $V .= "<li><b>";
 $text = _("Search");
 	  $V .= "<a href='" . Traceback_Uri() . "?mod=search_file'>$text</a>";
-$text = _(": Look through the uploaded projects for specific files.\n");
-	  $V .= "</b>$text";
+$text = _(": Look through the uploaded projects for specific files.");
+	  $V .= "</b>$text\n";
 	  }
 	if (empty($_SESSION['UserId']))
 	  {
@@ -112,8 +112,8 @@ $text = _("Login");
 	    {
 	    $V .= _("Login");
 	    }
-$text = _(": Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or even add new users.\n");
-	  $V .= "</b>$text";
+$text = _(": Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or even add new users.");
+	  $V .= "</b>$text\n";
 	  }
 	$V .= "</ul>\n";
 

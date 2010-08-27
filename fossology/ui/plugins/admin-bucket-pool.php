@@ -157,8 +157,7 @@ ENDINTRO;
     echo SelectBucketPool($Val);
 
     echo "<p>";
-$text = _(" Update my default bucketpool.");
-    echo "<input type='checkbox' name='updatedefault' checked>$text";
+    echo "<input type='checkbox' name='updatedefault' checked> Update my default bucketpool.";
     echo "<p>";
     echo "<input type='submit' value='Submit'>";
 	echo "</form>";

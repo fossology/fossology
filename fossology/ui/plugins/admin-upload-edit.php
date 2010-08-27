@@ -113,10 +113,12 @@ class upload_properties extends FO_Plugin {
           $NewDesc = GetParm('newdesc', PARM_TEXT);
           $rc = $this->EditUploadProperties($FolderSelectId, $uploadId, $NewName, $NewDesc);
           if ($rc == 1) {
-            $V.= displayMessage('Upload Properties changed');
+$text = _("Upload Properties changed");
+            $V.= displayMessage($text);
           }
-          $V.= "<p>The upload properties that can be changed are the upload name and
-                 description.  First select the folder that the upload is stored in.  " . "Then select the upload to edit. Then enter the new values. If no " . "value is entered, then the corresponding field will not be changed.</p>";
+$text =_("The upload properties that can be changed are the upload name and
+                 description.  First select the folder that the upload is stored in.  " . "Then select the upload to edit. Then enter the new values. If no " . "value is entered, then the corresponding field will not be changed.");
+          $V.= "<p>$text</p>";
           /* Get the folder info */
           $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$FolderSelectId';");
           $Folder = & $Results[0];
@@ -125,21 +127,21 @@ class upload_properties extends FO_Plugin {
           $V.= ActiveHTTPscript("Uploads");
           $V.= "<script language='javascript'>\n";
           $V.= "function Uploads_Reply()\n";
-          $V.= _("  {\n");
+          $V.= "  {\n";
           $V.= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
-          $V.= _("    {\n");
+          $V.= "    {\n";
           /* Remove all options */
-          $V.= _("    document.formy.uploadid.innerHTML = Uploads.responseText;\n");
+          $V.= "    document.formy.uploadid.innerHTML = Uploads.responseText;\n";
           /* Add new options */
-          $V.= _("    }\n");
-          $V.= _("  }\n");
+          $V.= "    }\n";
+          $V.= "  }\n";
           $V.= "</script>\n";
           /* Build the HTML form */
           $V.= "<form name='formy' method='post'>\n"; // no url = this url
           $V.= "<ol>\n";
 $text = _("Select the folder that contains the upload:  \n");
           $V.= "<li>$text";
-          $V.= _("<select name='oldfolderid'\n");
+          $V.= "<select name='oldfolderid'\n";
           $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
           $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
           $V.= FolderListOption(-1, 0);
@@ -166,8 +168,7 @@ $text = _("Change upload name:  \n");
 $text = _("Change upload description:  \n");
           $V.= "<P /><li>$text";
           $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['upload_desc'], ENT_COMPAT) . "\" />\n";
-$text = _("Change Upload Source Location:  \n");
-          //$V .= "<P /><li>$text";
+          //$V .= "<P /><li>Change Upload Source Location:  \n";
           //$V .= "<INPUT type='text' name='newsrc' size=60 value=\"" . htmlentities($Folder['folder_src'],ENT_COMPAT) . "\" />\n";
           $V.= "</ol>\n";
           $V.= "<input type='submit' value='Edit!'>\n";

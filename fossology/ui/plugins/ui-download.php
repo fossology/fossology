@@ -90,14 +90,10 @@ class ui_download extends FO_Plugin
             else { $Menu = NULL; }
 
             /* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
-$text = _("' . "\n");
-            $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">$text";
-$text = _("' . "\n");
-            // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">$text";
-$text = _("' . "\n");
-            // $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">$text";
-$text = _("' . "\n");
-            // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "xhtml1-strict.dtd">$text";
+            $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
+            // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
+            // $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
+            // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "xhtml1-strict.dtd">' . "\n";
 
             $V .= "<html>\n";
             $V .= "<head>\n";
@@ -106,16 +102,10 @@ $text = _("' . "\n");
               {
               /** Known bug: DOCTYPE "should" be in the HEADER
               and the HEAD tags should come first.
-$text = _("...");
-$text1 = _(" tags that are NOT
-");
-              Also, IE will ignore <style>$text</style>$text1$text = _("...");
-$text1 = _(" block.
-");
-              in a <head>$text</head>$text1              **/
-$text = _("Title) . "");
-$text1 = _("\n");
-              if (!empty($this->Title)) { $V .= "<title>" . htmlentities($this->$text</title>$text1"; }
+              Also, IE will ignore <style>...</style> tags that are NOT
+              in a <head>...</head>block.
+           **/
+              if (!empty($this->Title)) { $V .= "<title>" . htmlentities($this->Title) . "</title>\n"; }
               $V .= "<link rel='stylesheet' href='fossology.css'>\n";
               print $V; $V="";
               if (!empty($Menu)) { print $Menu->OutputCSS(); }

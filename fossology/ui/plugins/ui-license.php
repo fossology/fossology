@@ -274,7 +274,7 @@ $text = _("Clear");
   //$VF .= "<a href=\"javascript:LicColor('Lic-$ChildCount','LicGroup-','" . trim($LicItem2GID[$ChildCount]) . "','lightgreen');\">";
   $VF .= "license" . ($LicCount == 1 ? "" : "s");
   $VF .= "</a>";
-  $VF .= _("]");
+  $VF .= "]";
   $ChildLicCount += $LicCount;
   }
       $VF .= "</td>";
@@ -312,8 +312,7 @@ $text = _("Count");
 $text = _("Files");
     if ($SFbL >= 0) { $VH .= "<th width='10%'>$text</th>"; }
 $text = _("License");
-$text1 = _("\n");
-    $VH .= "<th>$text</th>$text1";
+    $VH .= "<th>$text</th>\n";
 
     /* krsort + arsort = consistent sorting order */
     arsort($Lics);
@@ -339,14 +338,14 @@ $text1 = _("\n");
       if ($Key != ' Total ')
   {
   $GID = $MapLic2GID[$Key];
-$text = _("$Val");
-  $VH .= "<tr><td align='right'>$text</td>";
+  $VH .= "<tr><td align='right'>$Val</td>";
   $Total += $Val;
   if ($SFbL >= 0)
     {
-    $VH .= _("<td align='center'><a href='");
+    $VH .= "<td align='center'><a href='";
     $VH .= Traceback_uri();
-    $VH .= "?mod=search_file_by_license&item=$Item&lic=" . urlencode($Key) . "'>Show</a></td>";
+$text = _("Show");
+    $VH .= "?mod=search_file_by_license&item=$Item&lic=" . urlencode($Key) . "'>$text</a></td>";
     }
   $VH .= "<td id='LicGroup-$GID'>";
   $Uri = Traceback_uri() . "?mod=license_listing&item=$Item&lic=$GID";
@@ -359,52 +358,51 @@ $text = _("$Val");
       }
     $VH .= "</table>\n";
     $VH .= "<br>\n";
-    $VH .= _("Total licenses: $Total\n");
+$text = _("Total licenses");
+    $VH .= "$text: $Total\n";
 
     /****************************************/
     /* Licenses use Javascript to highlight */
     $VJ = ""; // return values for the javascript
     $VJ .= "<script language='javascript'>\n";
-    $VJ .= _("<!--\n");
-    $VJ .= _("var LastSelf='';\n");
-    $VJ .= _("var LastPrefix='';\n");
-    $VJ .= _("var LastListing='';\n");
+    $VJ .= "<!--\n";
+    $VJ .= "var LastSelf='';\n";
+    $VJ .= "var LastPrefix='';\n";
+    $VJ .= "var LastListing='';\n";
     $VJ .= "function LicColor(Self,Prefix,Listing,color)\n";
-    $VJ .= _("{\n");
+    $VJ .= "{\n";
     $VJ .= "if (LastSelf!='')\n";
     $VJ .= "  { document.getElementById(LastSelf).style.backgroundColor='white'; }\n";
-    $VJ .= _("LastSelf = Self;\n");
+    $VJ .= "LastSelf = Self;\n";
     $VJ .= "if (LastPrefix!='')\n";
-    $VJ .= _("  {\n");
+    $VJ .= "  {\n";
     $VJ .= "  List = LastListing.split(' ');\n";
     $VJ .= "  for(var i in List)\n";
-    $VJ .= _("    {\n");
+    $VJ .= "    {\n";
     $VJ .= "    document.getElementById(LastPrefix + List[i]).style.backgroundColor='white';\n";
-    $VJ .= _("    }\n");
-    $VJ .= _("  }\n");
-    $VJ .= _("LastPrefix = Prefix;\n");
-    $VJ .= _("LastListing = Listing;\n");
+    $VJ .= "    }\n";
+    $VJ .= "  }\n";
+    $VJ .= "LastPrefix = Prefix;\n";
+    $VJ .= "LastListing = Listing;\n";
     $VJ .= "if (Self!='')\n";
-    $VJ .= _("  {\n");
+    $VJ .= "  {\n";
     $VJ .= "  document.getElementById(Self).style.backgroundColor=color;\n";
-    $VJ .= _("  }\n");
+    $VJ .= "  }\n";
     $VJ .= "if (Listing!='')\n";
-    $VJ .= _("  {\n");
+    $VJ .= "  {\n";
     $VJ .= "  List = Listing.split(' ');\n";
     $VJ .= "  for(var i in List)\n";
-    $VJ .= _("    {\n");
+    $VJ .= "    {\n";
     $VJ .= "    document.getElementById(Prefix + List[i]).style.backgroundColor=color;\n";
-    $VJ .= _("    }\n");
-    $VJ .= _("  }\n");
-    $VJ .= _("}\n");
-    $VJ .= _("// -->\n");
+    $VJ .= "    }\n";
+    $VJ .= "  }\n";
+    $VJ .= "}\n";
+    $VJ .= "// -->\n";
     $VJ .= "</script>\n";
 
     /* Combine VF and VH */
     $V .= "<table border=0 width='100%'>\n";
-$text = _("$VH");
-$text1 = _("$VF");
-    $V .= "<tr><td valign='top' width='50%'>$text</td><td valign='top'>$text1</td></tr>\n";
+    $V .= "<tr><td valign='top' width='50%'>$VH</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
     $V .= $VJ;
@@ -491,8 +489,8 @@ $text1 = _("$VF");
 $text = _("Elapsed time: %.2f seconds");
     printf( "<small>$text</small>", $Time);
 $text = _("cached");
-$text1 = _("   <a href=\");
-    if ($Cached) echo " <i>$text</i>$text1"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
+$text1 = _("Update");
+    if ($Cached) echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     return;
   }
 

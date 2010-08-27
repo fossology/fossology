@@ -64,8 +64,7 @@ class ajax_upload_agents extends FO_Plugin
 	  $P = &$Plugins[plugin_find_id($agent_list[$ac]->URI)];
 	  if ($P->AgentCheck($UploadPk) == 0)
 	    {
-$text = _("URI . ");
-	    $V .= "<option value='" . $agent_list[$ac]->$text"'>";
+	    $V .= "<option value='" . $agent_list[$ac]->URI . "'>";
 	    $V .= htmlentities($agent_list[$ac]->Name);
 	    $V .= "</option>\n";
 	    }

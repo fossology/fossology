@@ -119,31 +119,21 @@ class ui_license_list extends FO_Plugin {
           $Menu = NULL;
         }
         /* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
-$text = _("' . "\n");
-        $V.= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">$text";
-$text = _("' . "\n");
-        // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">$text";
-$text = _("' . "\n");
-        // $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">$text";
-$text = _("' . "\n");
-        // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "xhtml1-strict.dtd">$text";
+        $V.= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
+        // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' . "\n";
+        // $V .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Loose//EN" "http://www.w3.org/TR/html4/loose.dtd">' . "\n";
+        // $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "xhtml1-strict.dtd">' . "\n";
         $V.= "<html>\n";
         $V.= "<head>\n";
         if ($this->NoHeader == 0) {
           /** Known bug: DOCTYPE "should" be in the HEADER
            and the HEAD tags should come first.
-$text = _("...");
-$text1 = _(" tags that are NOT
-");
-           Also, IE will ignore <style>$text</style>$text1$text = _("...");
-$text1 = _(" block.
-");
-           in a <head>$text</head>$text1           *
+           Also, IE will ignore <style>...</style> tags that are NOT
+           in a <head>...</head> block.
+           *
            */
           if (!empty($this->Title)) {
-$text = _("Title) . "");
-$text1 = _("\n");
-            $V.= "<title>" . htmlentities($this->$text</title>$text1";
+            $V.= "<title>" . htmlentities($this->Title) . "</title>\n";
           }
           $V.= "<link rel='stylesheet' href='fossology.css'>\n";
           print $V;
@@ -179,7 +169,7 @@ $text1 = _("\n");
   function Output() 
   {
     global $PG_CONN, $DB;
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo _("NO DB connection"); }
 
     if ($this->State != PLUGIN_STATE_READY)  return (0);
     $V = "";
@@ -197,7 +187,7 @@ $text1 = _("\n");
     $agent_pk = $AgentRec[0]["agent_fk"];
     if ($AgentRec === false)
     {
-      echo "No data available";
+      echo _("No data available");
       return;
     }
 
@@ -231,7 +221,7 @@ $text1 = _("\n");
       }
       $V .= $filepath . ": ". GetFileLicenses_string($agent_pk, 0, $row['uploadtree_pk']) ;
       if ($dltext)
-        $V .= _("\n");
+        $V .= "\n";
       else 
         $V .= "<br>";
     } 

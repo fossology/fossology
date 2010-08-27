@@ -73,8 +73,8 @@ class jobs_runningjobs extends FO_Plugin
     { 
 $text = _("The FOSSology job scheduler does not appear to be running.");
       echo "<h3>$text</h3>";
-      echo "If this is unexpected, look in the log file (typically /var/log/fossology/fossology.log) for errors. ";
-      echo " Otherwise, you may want to restart the scheduler (typically sudo /etc/init.d/fossology start)";
+      echo _("If this is unexpected, look in the log file (typically /var/log/fossology/fossology.log) for errors. ");
+      echo _(" Otherwise, you may want to restart the scheduler (typically sudo /etc/init.d/fossology start)");
       return; 
     }
 
@@ -126,9 +126,7 @@ $text = _("Parameters");
 
 	  $V .= "  <tr bgcolor='" . $BGColor[$Val['agent_status']] . "'>\n";
 	  $V .= "    <td>" .  ereg_replace("^(....-..-.. ..:..:..).*","\\1",$Val['record_update']) . "</td>\n";
-$text = _("" . $Val['agent_status'] . "");
-$text1 = _("\n");
-	  $V .= "    <td align=center>$text</td>$text1";
+	  $V .= "    <td align=center>" . $Val['agent_status'] . "</td>\n";
 	  if ($Val['agent_number'] == -1)
 	    {
 	    $VV = $Val['agent_attrib'];

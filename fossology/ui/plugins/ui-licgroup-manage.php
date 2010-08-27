@@ -117,7 +117,7 @@ function SelectAll()
   }
 //-->
 </script>';
-  $V .= _("\n");
+  $V .= "\n";
 
     /*** BEGIN: code from mredkj.com ***/
     $V .= '
@@ -180,7 +180,7 @@ function moveOptions(theSelFrom, theSelTo)
 //-->
 </script>';
     /*** END: code from mredkj.com ***/
-    $V .= _("\n");
+    $V .= "\n";
     return($V);
     } // LicGroupJavascript()
 
@@ -194,9 +194,8 @@ function moveOptions(theSelFrom, theSelTo)
     global $DB;
     /* Get list of groups */
     $V = "";
-$text = _("[New Group]");
-$text1 = _("\n");
-    if ($PermitNew) { $V .= "<option value='-1'>$text</option>$text1"; }
+$text = _("New Group");
+    if ($PermitNew) { $V .= "<option value='-1'>[$text]</option>\n"; }
     if (empty($Group))
       {
       foreach($this->LicGroupPlugin->GrpInGroup as $G => $g)
@@ -212,7 +211,7 @@ $text1 = _("\n");
     $GrpInGroup = &$this->LicGroupPlugin->GrpInGroup[$Group];
     if ($GrpInGroup['id'] == 'phrase') { return($V); }
 
-    $V .= _("<option ");
+    $V .= "<option ";
     if ($SelectKey == $GrpInGroup['id']) { $V .= "selected "; }
     $V .= _("value='" . $GrpInGroup['id'] . "'>");
     for($i=0; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
@@ -415,26 +414,23 @@ $text = _("Check to delete this license group!");
     /* Text fields */
     $V .= "</tr><tr>\n";
 $text = _("Group name");
-$text1 = _("");
-    $V .= "<td width='20%'>$text</td><td>$text1<input type='text' name='name' size='60' value='";
+    $V .= "<td width='20%'>$text</td><td><input type='text' name='name' size='60' value='";
     $V .= "</tr><tr>\n";
 $text = _("Group description");
-$text1 = _("");
-    $V .= "<td>$text</td><td>$text1<input type='text' name='desc' size='60' value='";
+    $V .= "<td>$text</td><td><input type='text' name='desc' size='60' value='";
 
     $V .= "</tr><tr>\n";
 $text = _("Group color");
-$text1 = _("");
-    $V .= "<td>$text</td><td>$text1";
+    $V .= "<td>$text</td><td>";
     $V .= "<select name='color' style='background-color:$GroupColor' onSelect='this.style.background=this.value;' onChange='this.style.background=this.value;'>\n";
     foreach($ColorParts as $C1)
     foreach($ColorParts as $C2)
     foreach($ColorParts as $C3)
       {
       $Color = "#" . $C1 . $C2 . $C3;
-      $V .= _("<option value='$Color' style='background-color:$Color'");
+      $V .= "<option value='$Color' style='background-color:$Color'";
       if (!strcasecmp($Color,$GroupColor)) { $V .= " selected"; }
-      $V .= _(">");
+      $V .= ">";
       // $V .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
       $V .= $Color;
       $V .= "</option>";
@@ -444,18 +440,17 @@ $text1 = _("");
     /* Get the list of licenses */
     $V .= "</tr><tr>\n";
 $text = _("Select licenses to include in the group");
-$text1 = _("");
-    $V .= "<td>$text</td><td>$text1";
+    $V .= "<td>$text</td><td>";
     $V .= "<table width='100%'>";
 $text = _("Available licenses");
-$text1 = _("");
-    $V .= "<tr><td align='center' width='45%'>$text</td><td width='10%'>$text1</td><td width='45%' align='center'>Licenses in this Group</td></tr>";
+$text1 = _("Licenses in this Group");
+    $V .= "<tr><td align='center' width='45%'>$text</td><td width='10%'></td><td width='45%' align='center'>$text1</td></tr>";
     $V .= "<tr>";
     $V .= "<tr><td>";
     $V .= "<select onFocus='UnselectForm(\"liclist\");' multiple='multiple' id='licavailable' name='licavailable' size='10'>";
     foreach($LicAvailable as $Name => $Key)
       {
-      $V .= _("<option value='$Key'");
+      $V .= "<option value='$Key'";
       $V .= ">" . htmlentities($Name) . "</option>\n";
       }
     $V .= "</select>";
@@ -487,13 +482,12 @@ $text = _("View");
     $V .= "<a href='#' onClick=\"$Uri\">$text</a><hr/>\n";
 
     /*** Add --> ***/
-$text = _("Add&rarr;");
-    $V .= "<a href='#' onClick='moveOptions(document.formy.licavailable,document.formy.liclist);'>$text</a><P/>\n";
+$text = _("Add");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.licavailable,document.formy.liclist);'>$text&rarr;</a><P/>\n";
 
     /*** <-- Remove ***/
-$text = _("&larr;Remove");
-$text1 = _("\n");
-    $V .= "<a href='#' onClick='moveOptions(document.formy.liclist,document.formy.licavailable);'>$text</a>$text1";
+$text = _("Remove");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.liclist,document.formy.licavailable);'>&larr;$text</a>\n";
     $V .= "</center>\n";
 
     /* List the license groups */
@@ -511,12 +505,11 @@ $text1 = _("\n");
     /* Groups can contain groups */
     $V .= "</tr><tr>\n";
 $text = _("Select subgroups to include in this group");
-$text1 = _("");
-    $V .= "<td>$text</td><td>$text1";
+    $V .= "<td>$text</td><td>";
     $V .= "<table width='100%'>";
 $text = _("Available subgroups");
-$text1 = _("");
-    $V .= "<tr><td align='center' width='45%'>$text</td><td width='10%'>$text1</td><td width='45%' align='center'>Subgroups in this Group</td></tr>";
+$text1 = _("Subgroups in this Group");
+    $V .= "<tr><td align='center' width='45%'>$text</td><td width='10%'></td><td width='45%' align='center'>$text1</td></tr>";
     $V .= "<tr>";
     $V .= "<tr><td>";
     $V .= "<select multiple='multiple' id='grpavailable' name='grpavailable' size='10'>";
@@ -544,13 +537,12 @@ $text1 = _("");
 
     /*** Add --> ***/
     $V .= "</td><td>";
-$text = _("Add&rarr;");
-    $V .= "<a href='#' onClick='moveOptions(document.formy.grpavailable,document.formy.grplist);'>$text</a><P/>\n";
+$text = _("Add");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.grpavailable,document.formy.grplist);'>$text&rarr;</a><P/>\n";
 
     /*** <-- Remove ***/
-$text = _("&larr;Remove");
-$text1 = _("\n");
-    $V .= "<a href='#' onClick='moveOptions(document.formy.grplist,document.formy.grpavailable);'>$text</a>$text1";
+$text = _("Remove");
+    $V .= "<a href='#' onClick='moveOptions(document.formy.grplist,document.formy.grpavailable);'>&larr;$text</a>\n";
     $V .= "</center>\n";
 
     /* List the license subgroups */
@@ -609,11 +601,13 @@ $text1 = _("\n");
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= displayMessage('License group information updated.');
+$text = _("License group information updated.");
+	    $V .= displayMessage($text);
 	    }
 	  else
 	    {
-	    $V .= displayMessage("Could not update License group information, error code is:$rc");
+$text = _("Could not update License group information, error code is");
+	    $V .= displayMessage("$text:$rc");
 	    }
 	  /* Reload the group list since it changed. */
 	  $this->LicGroupPlugin->MakeGroupTables();

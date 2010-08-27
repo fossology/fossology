@@ -69,14 +69,16 @@ class agent_license_once_compare extends FO_Plugin
       }
     if (empty($SQL))
 	{
-	print "No comparison licenses found.";
+$text = _("No comparison licenses found.");
+	print $text;
 	return(1);
 	}
     $SQL = "SELECT DISTINCT lic_name FROM agent_lic_raw WHERE $SQL;";
     $Lics = $DB->Action($SQL);
     if (empty($Lics))
 	{
-	print "No comparison licenses found.";
+$text = _("No comparison licenses found.");
+	print $text;
 	return(1);
 	}
     chdir("$DATADIR/agents/licenses/");
@@ -215,8 +217,8 @@ class agent_license_once_compare extends FO_Plugin
 	  }
 
 	/* Display instructions */
-	$V .= "This analyzer allows you to compare a single file to a set of licenses selectable by you without having the results saved in the database.\n<br>";
-	$V .= "Typical uses include comparing one license to other licenses to see their similarity, and to compare a file to a license to see how this particular license matches.\n<br>";
+	$V .= _("This analyzer allows you to compare a single file to a set of licenses selectable by you without having the results saved in the database.\n<br>");
+	$V .= _("Typical uses include comparing one license to other licenses to see their similarity, and to compare a file to a license to see how this particular license matches.\n<br>");
 	$V .= _("The analysis is done in real-time.\n");
 $text = _("Limitations:\n");
 	$V .= "<P>$text";
@@ -225,12 +227,14 @@ $text = _("The analysis is done in real-time. Large files may take a while. This
 	$V .= "<li>$text";
 $text = _("The analysis is done in real-time. Selecting many licenses to compare against can take a long time.\n");
 	$V .= "<li>$text";
-$text = _("not");
-$text1 = _(" unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n");
-	$V .= "<li>Files that contain files are <b>$text</b>$text1";
+$text = _("Files that contain files are");
+$text1 = _("not");
+$text2 = _(" unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n");
+	$V .= "<li>$text <b>$text1</b>$text2";
+$text = _("Results are");
 $text = _("not");
 $text1 = _(" stored. As soon as you get your results, your analysis is removed from the system.\n");
-	$V .= "<li>Results are <b>$text</b>$text1";
+	$V .= "<li>$text <b>$text1</b>$text2";
 	$V .= "</ul>\n";
 
 	$V .= "<form enctype='multipart/form-data' method='post'>\n";
@@ -238,27 +242,26 @@ $text1 = _(" stored. As soon as you get your results, your analysis is removed f
 	/* Display the form */
 	if (empty($Item))
 	  {
-	  $V .= "<li>Select the file to upload:<br />\n";
+	  $V .= _("<li>Select the file to upload:<br />\n");
 	  $V .= "<input name='licfile' size='60' type='file' /><br />\n";
 $text = _("NOTE");
-	  $V .= "<b>$text</b>: Files larger than 100K will be discarded and not analyzed.<P />\n";
+$text1 = _(": Files larger than 100K will be discarded and not analyzed.");
+	  $V .= "<b>$text</b>$text1<P />\n";
 	  $V .= "<input type='hidden' name='item' value='$Item'>";
 	  }
 	else
 	  {
-	  $V .= "<li>This is the selected file to re-analyze:<br />\n";
+	  $V .= _("<li>This is the selected file to re-analyze:<br />\n");
 	  $V .= Dir2Browse("license",$Item) . "<P />\n";
 	  }
 
-	$V .= "<li>Select one or more licenses to compare against:<br>\n";
+	$V .= _("<li>Select one or more licenses to compare against:<br>\n");
 	$V .= "<table border=0><tr>";
 	$V .= "<td><select size='10' multiple='multiple' id='liclist' name='liclist[]'>\n";
 	$Lics = $DB->Action("SELECT DISTINCT lic_name,lic_id FROM agent_lic_raw ORDER BY lic_name;");
 	for($i=0; !empty($Lics[$i]['lic_name']); $i++)
 	  {
-$text = _("" . $Lics[$i]['lic_name'] . "");
-$text1 = _("\n");
-	  $V .= "<option value='" . $Lics[$i]['lic_id'] . "'>$text</option>$text1";
+	  $V .= "<option value='" . $Lics[$i]['lic_id'] . "'>" . $Lics[$i]['lic_name'] . "</option>\n";
 	  }
 	$V .= "</select>\n";
 	$Uri = "if (document.getElementById('liclist').value) { window.open('";
@@ -272,8 +275,7 @@ $text1 = _("\n");
 	$Uri .= ",'License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes'); }";
 	$V .= "</td><td>";
 $text = _("View");
-$text1 = _("\n");
-	$V .= "<a href='#' onClick=\"$Uri\">$text</a>$text1";
+	$V .= "<a href='#' onClick=\"$Uri\">$text</a>\n";
 	$V .= "</td></tr></table>";
 
 	$V .= "</ol>\n";

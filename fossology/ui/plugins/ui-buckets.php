@@ -179,8 +179,8 @@ $text = _("Clear");
     if (pg_num_rows($result) < 1)
     {
       pg_free_result($result);
-$text = _("Invalid URL, nonexistant item $Uploadtree_pk");
-      return "<h2>$text</h2>";
+$text = _("Invalid URL, nonexistant item");
+      return "<h2>$text $Uploadtree_pk</h2>";
     }
     $row = pg_fetch_assoc($result);
     $lft = $row["lft"];
@@ -267,7 +267,8 @@ return;
     $NoLicFound = 0;
     if (is_array($historows))
     {
-      $VLic .= "Bucket Pool: $bucketpool_name<br>";
+$text = _("Bucket Pool");
+      $VLic .= "$text: $bucketpool_name<br>";
       $VLic .= "<table border=1 width='100%'>\n";
 $text = _("Count");
       $VLic .= "<tr><th width='10%'>$text</th>";
@@ -285,13 +286,13 @@ $text = _("Bucket");
         $bucket_color = $bucketDefArray[$bucket_pk]['bucket_color'];
   
         /*  Count  */
-$text = _("$bucketcount");
-        $VLic .= "<tr><td align='right' style='background-color:$bucket_color'>$text</td>";
+        $VLic .= "<tr><td align='right' style='background-color:$bucket_color'>$bucketcount</td>";
 
         /*  Show  */
-        $VLic .= _("<td align='center'><a href='");
+        $VLic .= "<td align='center'><a href='";
         $VLic .= Traceback_uri();
-        $VLic .= "?mod=list_bucket_files&bapk=$bucketagent_pk&item=$Uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk" . "'>Show</a></td>";
+$text = _("Show");
+        $VLic .= "?mod=list_bucket_files&bapk=$bucketagent_pk&item=$Uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk" . "'>$text</a></td>";
 
         /*  Bucket name  */
         $VLic .= "<td align='left'>";
@@ -303,7 +304,8 @@ $text = _("$bucketcount");
       }
       $VLic .= "</table>\n";
       $VLic .= "<p>\n";
-      $VLic .= "Unique buckets: $Uniquebucketcount<br>\n";
+$text = _("Unique buckets");
+      $VLic .= "$text: $Uniquebucketcount<br>\n";
     }
 
 
@@ -441,19 +443,17 @@ $text = _("$bucketcount");
 
     /* Display source, binary, and binary missing source package counts */
     $VLic .= "<ul>";
-$text = _(" $NumSrcPackages source packages");
-    $VLic .= "<li>$text";
-$text = _(" $NumBinPackages binary packages");
-    $VLic .= "<li>$text";
-$text = _(" $NumBinNoSrcPackages binary packages with no source package");
-    $VLic .= "<li>$text";
+$text = _("source packages");
+    $VLic .= "<li> $NumSrcPackages $text";
+$text = _("binary packages");
+    $VLic .= "<li> $NumBinPackages $text";
+$text = _("binary packages with no source package");
+    $VLic .= "<li> $NumBinNoSrcPackages $text";
     $VLic .= "</ul>";
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
-$text = _("$VLic");
-$text1 = _("$VF");
-    $V .= "<tr><td valign='top' width='50%'>$text</td><td valign='top'>$text1</td></tr>\n";
+    $V .= "<tr><td valign='top' width='50%'>$VLic</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
 
@@ -540,11 +540,11 @@ $text = _("Loading...");
 $text = _("Elapsed time: %.2f seconds");
     printf( "<p><small>$text</small>", $Time);
 
-    if ($Cached) 
+    if ($Cached){ 
 $text = _("cached");
-$text1 = _("   <a href=\");
-      echo " <i>$text</i>$text1"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
-    else
+$text1 = _("Update");
+      echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+    }else
     {
       /*  Cache Report if this took longer than 1/2 second*/
       if ($Time > 0.5) ReportCachePut($CacheKey, $V);

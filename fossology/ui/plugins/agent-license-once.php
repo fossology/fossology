@@ -69,11 +69,9 @@ class agent_license_once extends FO_Plugin {
     $Match = "0%";
     while (!feof($Fin)) {
       $Line = fgets($Fin);
-$text = _("$Line");
-      // print "<pre>$text</pre>";
+      // print "<pre>$Line</pre>";
       if (strlen($Line) > 0) {
-$text = _("$Line");
-        // print "<pre>$text</pre>";
+        // print "<pre>$Line</pre>";
         if (substr($Line, 0, 4) == "A = ") {
           $Bsam = array(); /* clear the structure */
           $Bsam['Aname'] = trim(substr($Line, 4));
@@ -305,20 +303,23 @@ $text = _("$Line");
         $V.= "<ul>\n";
 $text = _("The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n");
         $V.= "<li>$text";
-$text = _("not");
-$text1 = _(" unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n");
-        $V.= "<li>Files that contain files are <b>$text</b>$text1";
-$text = _("not");
-$text1 = _(" stored. As soon as you get your results, your uploaded file is removed from the system.\n");
-        $V.= "<li>Results are <b>$text</b>$text1";
+$text = _("Files that contain files are");
+$text1 = _("not");
+$text2 = _("unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n");
+        $V.= "<li>$text <b>$text1</b> $text2";
+$text = _("Results are");
+$text1 = _("not");
+$text2 = _("stored. As soon as you get your results, your uploaded file is removed from the system.\n");
+        $V.= "<li>$text <b>$text1</b> $text2";
         $V.= "</ul>\n";
         /* Display the form */
         $V.= "<form enctype='multipart/form-data' method='post'>\n";
         $V.= "<ol>\n";
-        $V.= "<li>Select the file to upload:<br />\n";
+        $V.= _("<li>Select the file to upload:<br />\n");
         $V.= "<input name='licfile' size='60' type='file' /><br />\n";
 $text = _("NOTE");
-        $V.= "<b>$text</b>: Files larger than 100K will be discarded and not analyzed.<P />\n";
+$text1 = _(": Files larger than 100K will be discarded and not analyzed.");
+        $V.= "<b>$text</b>$text1<P />\n";
 $text = _("Check if you want to see the highlighted licenses.\n");
         $V.= "<li><input type='checkbox' name='highlight' value='1'>$text";
         $V.= _("Unchecked returns a simple list that summarizes the identified license types.");

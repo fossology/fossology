@@ -68,34 +68,30 @@ class myJobs extends FO_Plugin {
 	public function displayJob($uploadId=NULL) {
 		
 		// Create the style and heading
-		
+$text = _("Click Job Name:Id to see the job details");	
+$text1 = _("Page updates every");
+$text2 = _("seconds");
+$text3 = _("Running Jobs");
+$text4 = _("Job Name:Id");
+$text5 = _("Total");
+$text6 = _("Tasks");
+$text7 = _("Completed");
+$text8 = _("Active");
+$text9 = _("Pending");
+$text10 = _("Failed");
 		$Heading = "<table border=2 align='center' cellspacing=1 cellpadding=5>\n" .
-		    "<caption align='top'>Click Job Name:Id to see the job details<br>". 
-		    "Page updates every $this->Interval seconds</caption>\n" .
+		    "<caption align='top'>$text<br>". 
+		    "$text1 $this->Interval $text2</caption>\n" .
         "   <tr>\n" .
-$text = _("Running Jobs");
-$text1 = _("\n");
-        "     <th colspan=6 align='center'>$text</th>$text1" .
+        "     <th colspan=6 align='center'>$text3</th>\n" .
         "   </tr>\n" .
         "   <tr>\n" .
-$text = _("Job Name:Id");
-$text1 = _("\n");
-        "     <th align='center'>$text</th>$text1" .
-$text = _("Tasks");
-$text1 = _("\n");
-        "     <th align='center'>Total<br>$text</th>$text1" .
-$text = _("Tasks");
-$text1 = _("\n");
-        "     <th align='center'>Completed<br>$text</th>$text1" .
-$text = _("Tasks");
-$text1 = _("\n");
-        "     <th align='center'>Active<br>$text</th>$text1" .
-$text = _("Tasks");
-$text1 = _("\n");
-        "     <th align='center'>Pending<br>$text</th>$text1" .
-$text = _("Tasks");
-$text1 = _("\n");
-        "     <th align='center'>Failed<br>$text</th>$text1" .
+        "     <th align='center'>$text4</th>\n" .
+        "     <th align='center'>$text5<br>$text6</th>\n" .
+        "     <th align='center'>$text7<br>$text6</th>\n" .
+        "     <th align='center'>$text8<br>$text6</th>\n" .
+        "     <th align='center'>$text9<br>$text6</th>\n" .
+        "     <th align='center'>$text10<br>$text6</th>\n" .
         "   </tr>\n";
 
 		$Tbl = $this->MakeJobTblRow();
@@ -130,8 +126,7 @@ $text1 = _("\n");
 
 		if(empty($DB)) {
 $text = _("Fatal internal ERROR! Cannot connect to the DataBase");
-$text1 = _("\n");
-			print "<h3 color='red'>$text</h3>$text1";
+			print "<h3 color='red'>$text</h3>\n";
 			return(FALSE);
 		}
 		
@@ -168,14 +163,10 @@ $text1 = _("\n");
 			foreach($JobPhase as $phase => $color) {
 				/* Only cells with something going on get a color */
 				if($status[$phase] == 0){
-$text = _("$status[$phase]");
-$text1 = _("\n");
-					$T .= "     <td align='center'>$text</td>$text1";
+					$T .= "     <td align='center'>$status[$phase]</td>\n";
 				}
 				else {
-$text = _("$status[$phase]");
-$text1 = _("\n");
-					$T .= "     <td align='center' $color>$text</td>$text1";
+					$T .= "     <td align='center' $color>$status[$phase]</td>\n";
 				}
 			}
 			$T .= "   </tr>\n";      // close the row and table

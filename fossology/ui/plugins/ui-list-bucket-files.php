@@ -89,7 +89,8 @@ class list_bucket_files extends FO_Plugin
 
 	if (empty($uploadtree_pk) || empty($bucket_pk) || empty($bucketpool_pk)) 
     {
-      echo $this->Name . " is missing required parameters.";
+$text = _("is missing required parameters.");
+      echo $this->Name . " $text";
       return;
     }
 	$Page = GetParm("page",PARM_INTEGER);
@@ -118,13 +119,13 @@ class list_bucket_files extends FO_Plugin
       $V .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
 	/* Get all the files under this uploadtree_pk with this bucket */
-	$V .= "The following files are in bucket: '<b>";
+	$V .= _("The following files are in bucket: '<b>");
 	$V .= $bucketNameCache[$bucket_pk];
-$text = _("'.\n");
-	$V .= "</b>$text";
-$text = _("excludes");
-$text1 = _(" files with these licenses: $Excl");
-    if (!empty($Excl)) $V .= "<br>Display <b>$text</b>$text1";
+	$V .= "</b>'.\n";
+$text = _("Display");
+$text1 = _("excludes");
+$text2 = _("files with these licenses");
+    if (!empty($Excl)) $V .= "<br>$text <b>$text1</b>$text2: $Excl";
 
 	$Offset = ($Page < 0) ? 0 : $Page*$Max;
     $order = "";
@@ -174,8 +175,7 @@ $text1 = _(" files with these licenses: $Excl");
 	/* Get the page menu */
 	if (($Count >= $Max) && ($Page >= 0))
 	{
-$text = _("\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . ");
-	  $VM = "<P />$text"<P />\n";
+	  $VM = "<P />\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
 	  $V .= $VM;
 	}
 	else
@@ -196,8 +196,7 @@ $text = _("\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . ");
     /* file display loop/table */
     $V .= "<table>";
 $text = _("File");
-$text1 = _("&nbsp");
-    $V .= "<tr><th>$text</th><th>$text1";
+    $V .= "<tr><th>$text</th><th>&nbsp";
     $ExclArray = explode(":", $Excl);
     $ItemNumb = 1;
     while ($row = pg_fetch_assoc($fileresult, $RowNum))
@@ -212,8 +211,8 @@ $text1 = _("&nbsp");
         $URL = $baseURL ."&excl=".urlencode($Excl).":".$URLlicstring;
       else
         $URL = $baseURL ."&excl=$URLlicstring";
-$text = _("Exclude files with license: $licstring.");
-      $Header = "<a href=$URL>$text</a>";
+$text = _("Exclude files with license");
+      $Header = "<a href=$URL>$text: $licstring.</a>";
 
       $ok = true;
       if ($Excl)
@@ -228,14 +227,11 @@ $text = _("Exclude files with license: $licstring.");
         $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLast, $ShowBox, 
                          $ShowMicro, $ItemNumb++, $Header);
         $V .= "</td>";
-$text = _("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-        $V .= "<td>$text</td>";  // spaces to seperate licenses
+        $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
 
         // show the entire license list as a single string with links to the files
         // in this container with that license.
-$text = _("$licstring");
-$text1 = _("");
-        $V .= "<td>$text</td></tr>$text1";
+        $V .= "<td>$licstring</td></tr>";
         $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
         if ($Count == $RowNum) break;
       }
@@ -246,9 +242,9 @@ $text1 = _("");
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-$text = _("Elaspsed time: $Time seconds");
-$text1 = _("\n");
-	$V .= "<small>$text</small>$text1";
+$text = _("Elaspsed time");
+$text1 = _("seconds");
+	$V .= "<small>$text: $Time $text1</small>\n";
 	break;
       case "Text":
 	break;

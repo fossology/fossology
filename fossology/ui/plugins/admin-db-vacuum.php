@@ -39,9 +39,11 @@ class admin_db_vacuum extends FO_Plugin
   function FixDB	($CheckType)
     {
     global $DB;
-    print "Deleting " . $CheckType['label'] . "...";
-    $DB->Action("DELETE " . $CheckType['sql']);
-    print $DB->GetAffectedRows . "cleaned.<br>";
+$text=_("Deleting ");
+    print $text . $CheckType['label'] . "...";
+    $DB->Action("DELETE ". $CheckType['sql']);
+$text=_("cleaned.");
+    print $DB->GetAffectedRows . "$text<br>";
     } // FixDB()
 
   /************************************************

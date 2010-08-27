@@ -58,9 +58,8 @@ function Inputfm()
 {
   $V = "";
 
-$text = _("Name.");
-  $V.= "<FORM name='Inputfm' action='?mod=" . $this->$text"' method='POST'>";
-  $V.= "What license family do you wish to view:<br>";
+  $V.= "<FORM name='Inputfm' action='?mod=" . $this->Name . "' method='POST'>";
+  $V.= _("What license family do you wish to view:<br>");
 
   // qualify by marydone, short name and long name
   // all are optional
@@ -87,7 +86,7 @@ $text = _(" Not Checked ");
   $Selected = $_REQUEST['req_shortname'];
   $Pulldown = Array2SingleSelect($Shortnamearray, "req_shortname", $Selected);
   $V.= $Pulldown;
-  $V.= _("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+  $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
   $V.= "<INPUT type='submit' value='Find'>\n";
   $V .= "</FORM>\n";
   $V.= "<hr>";
@@ -184,16 +183,11 @@ $text = _("$select");
 $text = _("$marydone");
     $ob .= "<td align=center>$text</td>";
 
-$text = _("$row[rf_shortname]");
-    $ob .= "<td>$text</td>";
-$text = _("$row[rf_fullname]");
-    $ob .= "<td>$text</td>";
+    $ob .= "<td>$row[rf_shortname]</td>";
+    $ob .= "<td>$row[rf_fullname]</td>";
     $vetext = htmlspecialchars($row[rf_text]);
-$text = _("$vetext");
-$text1 = _("");
-    $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$text</textarea></td>$text1";
-$text = _("$row[rf_url]");
-    $ob .= "<td>$text</td>";
+    $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$vetext</textarea></td> ";
+    $ob .= "<td>$row[rf_url]</td>";
     $ob .= "</tr>";
   }
   $ob .= "</table>";
@@ -214,8 +208,7 @@ function Updatefm($rf_pk)
   global $PG_CONN;
 
   $ob = "";     // output buffer
-$text = _("Name.");
-  $ob .= "<FORM name='Updatefm' action='?mod=" . $this->$text"' method='POST'>";
+  $ob .= "<FORM name='Updatefm' action='?mod=" . $this->Name . "' method='POST'>";
   $ob .= "<input type=hidden name=rf_pk value='$rf_pk'>";
   $ob .= "<input type=hidden name=req_marydone value='$_GET[req_marydone]'>";
   $ob .= "<input type=hidden name=req_shortname value='$_GET[req_shortname]'>";
@@ -249,8 +242,7 @@ $text = _("Name.");
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_active", $active);
 $text = _("Active");
     $ob .= "<td align=right>$text</td>";
-$text = _("$select");
-    $ob .= "<td align=left>$text</td>";
+    $ob .= "<td align=left>$select</td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
@@ -258,8 +250,7 @@ $text = _("$select");
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "marydone", $marydone);
 $text = _("Checked");
     $ob .= "<td align=right>$text</td>";
-$text = _("$select");
-    $ob .= "<td align=left>$text</td>";
+    $ob .= "<td align=left>$select</td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
@@ -289,11 +280,9 @@ $text = _("(read only)");
       $rotext = "<br>$text";
       $rooption = "readonly='readonly'";
     }
-$text = _("License Text $rotext");
-    $ob .= "<td align=right>$text</td>";
-$text = _("".$row[rf_text]. "");
-$text1 = _("");
-    $ob .= "<td><textarea name='rf_text' rows=10 cols=80 $rooption>$text</textarea></td>$text1";
+$text = _("License Text");
+    $ob .= "<td align=right>$text $rotext</td>";
+    $ob .= "<td><textarea name='rf_text' rows=10 cols=80 $rooption>".$row[rf_text]. "</textarea></td> ";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
@@ -301,8 +290,7 @@ $text1 = _("");
     $select = Array2SingleSelect(array("true"=>"Yes", "false"=>"No"), "rf_text_updatable", $tupable);
 $text = _("Text Updatable");
     $ob .= "<td align=right>$text</td>";
-$text = _("$select");
-    $ob .= "<td align=left>$text</td>";
+    $ob .= "<td align=left>$select</td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
@@ -310,8 +298,7 @@ $text = _("$select");
     $select = Array2SingleSelect(array("1"=>"Reference License", "2"=>"Nomos"), "rf_detector_type", $dettype);
 $text = _("Detector Type");
     $ob .= "<td align=right>$text</td>";
-$text = _("$select");
-    $ob .= "<td align=left>$text</td>";
+    $ob .= "<td align=left>$select</td>";
     $ob .= "</tr>";
 
     $ob .= "<tr>";
@@ -324,9 +311,7 @@ $text = _("URL");
     $ob .= "<tr>";
 $text = _("Public Notes");
     $ob .= "<td align=right>$text</td>";
-$text = _("" .$row[rf_notes]. "");
-$text1 = _("");
-    $ob .= "<td><textarea name='rf_notes' rows=5 cols=80>$text</textarea></td>$text1";
+    $ob .= "<td><textarea name='rf_notes' rows=5 cols=80>" .$row[rf_notes]. "</textarea></td> ";
     $ob .= "</tr>";
   
   $ob .= "</table>";

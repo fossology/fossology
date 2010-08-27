@@ -137,8 +137,7 @@ class ui_browse extends FO_Plugin {
           $V.= "<td align='right'>&nbsp;&nbsp;" . number_format($Row['pfile_size'], 0, "", ",") . "&nbsp;&nbsp;</td>";
         }
         else {
-$text = _("&nbsp;");
-          $V.= "<td>$text</td>";
+          $V.= "<td>&nbsp;</td>";
         }
       }
       /* Display item */
@@ -151,7 +150,7 @@ $text = _("&nbsp;");
       }
       $V.= $Name;
       if (Isdir($Row['ufile_mode'])) {
-        $V.= _("/");
+        $V.= "/";
       }
       if (!empty($Link)) {
         $V.= "</a>";
@@ -161,25 +160,24 @@ $text = _("&nbsp;");
       }
       $V.= "</td>\n";
       if (!Isdir($Row['ufile_mode'])) {
-$text = _("", "");
-$text1 = _("\n");
-        $V.= menu_to_1list($MenuPfile, $Parm, "<td>$text</td>$text1");
+        $V.= menu_to_1list($MenuPfile, $Parm, "<td>", "</td>\n");
       }
       $V.= "</td>";
     } /* foreach($Results as $Row) */
     $V.= "</table>\n";
     if (!$ShowSomething) {
 $text = _("No files");
-$text1 = _("\n");
-      $V.= "<b>$text</b>$text1";
+      $V.= "<b>$text</b>\n";
     }
     else {
       $V.= "<hr>\n";
       if (count($Results) == 1) {
-        $V.= _("1 item\n");
+$text = _("1 item");
+        $V.= "$text\n";
       }
       else {
-        $V.= count($Results) . _(" items\n");
+$text = _("items");
+        $V.= count($Results) . " $text\n";
       }
     }
     return ($V);
@@ -214,15 +212,12 @@ $text = _("Folder Navigation");
     $V.= "<center><small>";
     if ($Folder != FolderGetTop()) {
 $text = _("Top");
-$text1 = _(" |");
-      $V.= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>$text</a>$text1";
+      $V.= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>$text</a> |";
     }
 $text = _("Expand");
-$text1 = _(" |");
-    $V.= "<a href='javascript:Expand();'>$text</a>$text1";
+    $V.= "<a href='javascript:Expand();'>$text</a> |";
 $text = _("Collapse");
-$text1 = _(" |");
-    $V.= "<a href='javascript:Collapse();'>$text</a>$text1";
+    $V.= "<a href='javascript:Collapse();'>$text</a> |";
 $text = _("Refresh");
     $V.= "<a href='" . Traceback() . "'>$text</a>";
     $V.= "</small></center>";
@@ -264,13 +259,11 @@ $text = _("No description");
       $V.= "<tr><td>";
       if (IsContainer($Row['ufile_mode'])) {
         $V.= "<a href='$Uri&upload=$UploadPk&folder=$Folder&item=$UploadtreePk&show=$Show'>";
-$text = _("" . $Name . "");
-        $V.= "<b>$text</b>";
+        $V.= "<b>" . $Name . "</b>";
         $V.= "</a>";
       }
       else {
-$text = _("" . $Name . "");
-        $V.= "<b>$text</b>";
+        $V.= "<b>" . $Name . "</b>";
       }
       if ($Row['upload_mode'] & 1 << 2) {
 $text = _("Added by URL: ");
@@ -290,8 +283,7 @@ $text = _("Added from filesystem: ");
       $Parm = "upload=$Upload&show=$Show&item=" . $Row['uploadtree_pk'];
       $V.= menu_to_1list($MenuPfile, $Parm, " ", " ");
       $V.= "<br>" . $Desc;
-$text = _("Contains $ItemCount ");
-      //          $V .= "<br>$text";
+      //          $V .= "<br>Contains $ItemCount ";
       //	  if ($ItemCount != "1") { $V .= "items."; }
       //	  else { $V .= "item."; }
       $V.= "</td>\n";
@@ -302,8 +294,7 @@ $text = _("Scheduled ");
       $V.= "<td>$text";
       if (plugin_find_id('showjobs') >= 0) {
 $text = _("jobs");
-$text1 = _(": ");
-        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>$text</a>$text1";
+        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>$text</a>: ";
       }
       else {
         $V.= _("jobs: ");
@@ -330,22 +321,23 @@ if (isset($__OBSOLETE__))
           "folder"
         ));
         if ($Status == 0) {
-          $V.= _("<a href='");
-          $V.= $Uri . _("&analyze=$UploadPk");
-$text = _(" license analysis");
-          $V.= "'>Schedule</a>$text";
+          $V.= "<a href='";
+          $V.= $Uri . "&analyze=$UploadPk";
+$text = _("license analysis");
+$text1 = _("Schedule");
+          $V.= "'>$text1</a> $text";
         }
         else if ($Status == 2) {
-          $V.= _("<a href='");
-          $V.= $Uri . _("&reanalyze=$UploadPk");
-$text = _(" license analysis");
-          $V.= "'>Reschedule</a>$text";
+          $V.= "<a href='";
+          $V.= $Uri . "&reanalyze=$UploadPk";
+$text = _("license analysis");
+$text1 = _("Reschedule");
+          $V.= "'>$text1</a>$text";
         }
       }
 }
       /* End of the record */
-$text = _("&nbsp;");
-      $V.= "<tr><td colspan=2>$text</td></tr>\n";
+      $V.= "<tr><td colspan=2>&nbsp;</td></tr>\n";
     }
     $V.= "</table>\n";
     $V.= "</td></tr>\n";
@@ -382,20 +374,24 @@ $text = _("&nbsp;");
     if (!empty($ReAnalyze) && !empty($UploadPk)) {
       $rc = $ReAnalyze->RemoveLicenseMeta($UploadPk, NULL, 1);
       if (empty($rc)) {
-        $V.= displayMessage('License data re-analysis added to job queue');
+$text = _("License data re-analysis added to job queue");
+        $V.= displayMessage($text);
       }
       else {
-        $V.= displayMessage("Scheduling of re-analysis failed, return code: $rc");
+$text = _("Scheduling of re-analysis failed, return code");
+        $V.= displayMessage("$text: $rc");
       }
     }
     $UploadPk = GetParm("analyze", PARM_INTEGER);
     if (!empty($Analyze) && !empty($UploadPk)) {
       $rc = $Analyze->AgentAdd($UploadPk);
       if (empty($rc)) {
-        $V.= displayMessage('License data analysis added to job queue');
+$text = _("License data analysis added to job queue");
+        $V.= displayMessage($text);
       }
       else {
-        $V.= displayMessage("Scheduling of re-analysis failed, return code: $rc");
+$text = _("Scheduling of re-analysis failed, return code");
+        $V.= displayMessage("$text: $rc");
       }
     }
     switch ($this->OutputType) {
@@ -416,11 +412,11 @@ $text = _("&nbsp;");
             }
           }
           $V.= "<font class='text'>\n";
-          $V.= Dir2Browse($this->Name, $Item, NULL, 1, _("Browse") . "\n");
+          $V.= Dir2Browse($this->Name, $Item, NULL, 1, "Browse" . "\n");
         }
         else if (!empty($Upload)) {
           $V.= "<font class='text'>\n";
-          $V.= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, _("Browse") . "\n");
+          $V.= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse" . "\n");
         }
         else {
           $V.= "<font class='text'>\n";
@@ -442,9 +438,8 @@ $text = _("&nbsp;");
             }
             else
             {
-$text = _("Missing upload tree parent for upload $Upload");
-$text1 = _("");
-              $V.= "<hr><h2>$text</h2><hr>$text1";
+$text = _("Missing upload tree parent for upload");
+              $V.= "<hr><h2>$text $Upload</h2><hr>";
               break;
             }
             pg_free_result($result);

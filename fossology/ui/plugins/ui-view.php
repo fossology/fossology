@@ -219,12 +219,9 @@ $text = _("Item");
       }
 	  }
     if (key_exists('Color', $this->HighlightColors))
-$text = _("HighlightColors[$H['Color']] . ");
-      $V .= "<tr bgcolor='" . $this->$text"'>\n";
+      $V .= "<tr bgcolor='" . $this->HighlightColors[$H['Color']] . "'>\n";
 
-$text = _("" . $H['Match'] . "");
-$text1 = _("\n");
-    if (!$ViewOnly) $V .= "<td align='right'>$text</td>$text1";
+    if (!$ViewOnly) $V .= "<td align='right'>" . $H['Match'] . "</td>\n";
 
 	$V .= "<td>";
 	if ($PageBlockSize > 0)
@@ -258,9 +255,7 @@ $text = _("ref");
 	$S = str_replace("\r","",$S);
 	$S = str_replace("\n","",$S);
 	$S = str_replace("\t","&nbsp;&nbsp;",$S);
-$text = _("" . $S . "");
-$text1 = _("\n");
-	$V .= "<td>$text</td>$text1";
+	$V .= "<td>" . $S . "</td>\n";
 	$V .= "</tr>\n";
 	}
       }
@@ -290,12 +285,10 @@ $text1 = _("\n");
 
     if ($CurrPage > 0)
 	{
-$text = _("[First]");
-$text1 = _(" ");
-	$V .= "<a href='$Uri&page=0'>$text</a>$text1";
-$text = _("[Prev]");
-$text1 = _(" ");
-	$V .= "<a href='$Uri&page=" . ($CurrPage-1) . "'>$text</a>$text1";
+$text = _("First");
+	$V .= "<a href='$Uri&page=0'>[$text]</a> ";
+$text = _("Prev");
+	$V .= "<a href='$Uri&page=" . ($CurrPage-1) . "'>[$text]</a> ";
 	$Pages++;
 	}
     for($i = $CurrPage-5; $i <= $CurrPage+5; $i ++)
@@ -311,10 +304,10 @@ $text1 = _(" ");
       }
     if ($CurrPage < $MaxPage)
 	{
-$text = _("[Next]");
-	$V .= "<a href='$Uri&page=" . ($CurrPage+1) . "'>$text</a>";
-$text = _("[Last]");
-	$V .= "<a href='$Uri&page=" . (intval(($MaxSize-1)/$PageSize)) . "'>$text</a>";
+$text = _("Next");
+	$V .= "<a href='$Uri&page=" . ($CurrPage+1) . "'>[$text]</a>";
+$text = _("Last");
+	$V .= "<a href='$Uri&page=" . (intval(($MaxSize-1)/$PageSize)) . "'>[$text]</a>";
 	$Pages++;
 	}
     $V .= "</font>";
@@ -407,8 +400,7 @@ $text = _("[Last]");
     if (($this->FindHighlight($Start) & 0x03) == 0x02)
 	{
 	$H = $this->Highlight[0];
-$text = _("HighlightColors[$H['Color']] . ");
-	print "<font style='background:" . $this->$text";'>";
+	print "<font style='background:" . $this->HighlightColors[$H['Color']] . ";'>";
 	$InColor=1;
 	}
     $S = $this->ReadHighlight($Fin,$Start,$Length);
@@ -434,13 +426,11 @@ $text = _("HighlightColors[$H['Color']] . ");
 	{
 	if ($InColor) { print "</font>"; }
 	$H = $this->Highlight[0]['Color'];
-$text = _("HighlightColors[$H] . ");
-	print "<font style='background:" . $this->$text";'>";
+	print "<font style='background:" . $this->HighlightColors[$H] . ";'>";
 	$InColor=1;
 	if (!empty($this->Highlight[0]['Name']))
 	  {
-$text = _("Highlight[0]['Index'] . ");
-	  print "<a name='" . $this->$text"'></a>" . $S;
+	  print "<a name='" . $this->Highlight[0]['Index'] . "'></a>" . $S;
 	  }
 	else
 	  {
@@ -497,10 +487,8 @@ $text = _("Highlight[0]['Index'] . ");
     if ($this->FindHighlight($Start) & 0x02)
 	{
 	$H = $this->Highlight[0]['Color'];
-$text = _("HighlightColors[$H] . ");
-	$Text .= "<font style='background:" . $this->$text";'>";
-$text = _("HighlightColors[$H] . ");
-	$Hex .= "<font style='background:" . $this->$text";'>";
+	$Text .= "<font style='background:" . $this->HighlightColors[$H] . ";'>";
+	$Hex .= "<font style='background:" . $this->HighlightColors[$H] . ";'>";
 	$InColor=1;
 	}
 
@@ -512,8 +500,7 @@ $text = _("HighlightColors[$H] . ");
       /* If read nothing, then pad and exit */
       if (strlen($S) == 0)
 	{
-$text = _(""; $Text .= "");
-	if ($InColor) { $Hex .= "</font>$text</font>"; }
+	if ($InColor) { $Hex .= "</font>"; $Text .= "</font>"; }
 	/* Pad out and return */
 	for($i=$ReadCount; $i < 16; $i++)
 	  {
@@ -527,18 +514,14 @@ $text = _(""; $Text .= "");
 	/* Add color */
 	if ($this->FindHighlight($Start) & 0x01)
 	  {
-$text = _(""; $Text .= "");
-	  if ($InColor) { $Hex .= "</font>$text</font>"; }
+	  if ($InColor) { $Hex .= "</font>"; $Text .= "</font>"; }
 	  $H = $this->Highlight[0]['Color'];
-$text = _("HighlightColors[$H] . ");
-	  $Hex .= "<font style='background:" . $this->$text";'>";
-$text = _("HighlightColors[$H] . ");
-	  $Text .= "<font style='background:" . $this->$text";'>";
+	  $Hex .= "<font style='background:" . $this->HighlightColors[$H] . ";'>";
+	  $Text .= "<font style='background:" . $this->HighlightColors[$H] . ";'>";
 	  $InColor=1;
 	  if (!empty($this->Highlight[0]['Name']))
 	    {
-$text = _("Highlight[0]['Index'] . ");
-	    $Hex .= "<a name='" . $this->$text"'>";
+	    $Hex .= "<a name='" . $this->Highlight[0]['Index'] . "'>";
 	    }
 	  }
 
@@ -621,8 +604,7 @@ $text = _("Highlight[0]['Index'] . ");
 	{
 	/* show file location */
 	$B = base_convert($Tell,10,16);
-$text = _("0x");
-	print "<font class='mono'>$text";
+	print "<font class='mono'>0x";
 	for($i=strlen($B); $i<8; $i++) { print("0"); }
 	print "$B&nbsp;";
         print "</font>";
@@ -730,8 +712,7 @@ $text = _("0x");
 
 	   $P = &$Plugins[plugin_find_id("ui_reunpack")];
 	   $state = $P->CheckStatus($uploadpk, "unpack", "unpack");
-$text = _("$state");
-	   //print "<p>$text</p>";
+	   //print "<p>$state</p>";
 	   if ( $state == 0 || $state == 2)
 	   {
   	   if (!empty($uploadunpack))
@@ -740,26 +721,29 @@ $text = _("$state");
     	   if (empty($rc))
   	       {
   	         /* Need to refresh the screen */
-  	         $V .= displayMessage('Unpack added to job queue');
+$text = _("Unpack added to job queue");
+  	         $V .= displayMessage($text);
   	         $flag = 1;
-$text = _("jobqueue");
-$text1 = _("");
-  	                print "<p> <font color=red>Reunpack job is running: you can see it in <a href='" . Traceback_uri() . "?mod=showjobs'>$text</a></font>$text1</p>";
+$text = _("Reunpack job is running: you can see it in");
+$text1 = _("jobqueue");
+  	                print "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
   	       }
   	       else
   	       {
-  	         $V .= displayMessage("Unpack of Upload failed: $rc");
+$text = _("Unpack of Upload failed");
+  	         $V .= displayMessage("$text: $rc");
 	         }
   	       print $V;
 	     }
 	   }     
 	   else {
 	     $flag = 1;
-$text = _("jobqueue");
-$text1 = _("");
-       print "<p> <font color=red>Reunpack job is running: you can see it in <a href='" . Traceback_uri() . "?mod=showjobs'>$text</a></font>$text1</p>";
+$text = _("Reunpack job is running: you can see it in");
+$text1 = _("jobqueue");
+       print "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
      }
-	   print "File contents are not available in the repository.\n";
+$text = _("File contents are not available in the repository.");
+	   print "$text\n";
 	   $P = &$Plugins[plugin_find_id("ui_reunpack")];
      print $P->ShowReunpackView($Item,$flag);
 	   return;
@@ -776,42 +760,33 @@ $text1 = _("");
     if ($Format == 'hex')
 	{
 	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_HEX, $ViewOnly);
-$text = _("$HighlightMenu");
-	if (!empty($HighlightMenu)) { print "<center>$text</center><hr>\n"; }
+	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
 	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_HEX,$Uri);
 	$PageSize = VIEW_BLOCK_HEX * $Page;
-$text = _("$PageMenu");
-	if (!empty($PageMenu)) { print "<center>$text</center><br>\n"; }
+	if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
 	$this->ShowHex($Fin,$PageSize,VIEW_BLOCK_HEX);
-$text = _("$PageMenu");
-	if (!empty($PageMenu)) { print "<P /><center>$text</center><br>\n"; }
+	if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
 	}
     else if ($Format == 'text')
 	{
 	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT, $ViewOnly);
-$text = _("$HighlightMenu");
-	if (!empty($HighlightMenu)) { print "<center>$text</center><hr>\n"; }
+	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
 	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
 	$PageSize = VIEW_BLOCK_TEXT * $Page;
-$text = _("$PageMenu");
-	if (!empty($PageMenu)) { print "<center>$text</center><br>\n"; }
+	if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
 	$this->ShowText($Fin,$PageSize,0,VIEW_BLOCK_TEXT);
-$text = _("$PageMenu");
-	if (!empty($PageMenu)) { print "<P /><center>$text</center><br>\n"; }
+	if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
 	}
     else if ($Format == 'flow')
 	{
 	$HighlightMenu .= $this->GetHighlightMenu(VIEW_BLOCK_TEXT, $ViewOnly);
-$text = _("$HighlightMenu");
-	if (!empty($HighlightMenu)) { print "<center>$text</center><hr>\n"; }
+	if (!empty($HighlightMenu)) { print "<center>$HighlightMenu</center><hr>\n"; }
 	$PageMenu = $this->GetFileJumpMenu($Fin,$Page,VIEW_BLOCK_TEXT,$Uri);
 	$PageSize = VIEW_BLOCK_TEXT * $Page;
-$text = _("$PageMenu");
-	if (!empty($PageMenu)) { print "<center>$text</center><br>\n"; }
+	if (!empty($PageMenu)) { print "<center>$PageMenu</center><br>\n"; }
     if (!empty($ShowText)) { echo $ShowText, "<hr>"; }
 	$this->ShowText($Fin,$PageSize,1,VIEW_BLOCK_TEXT);
-$text = _("$PageMenu");
-	if (!empty($PageMenu)) { print "<P /><center>$text</center><br>\n"; }
+	if (!empty($PageMenu)) { print "<P /><center>$PageMenu</center><br>\n"; }
 	}
     if ($openedFin) fclose($Fin);
     return;

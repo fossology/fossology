@@ -115,12 +115,15 @@ class search_file extends FO_Plugin
 	$V .= _("You can use '%' as a wild-card.\n");
 	$V .= "<form action='$Uri' method='POST'>\n";
 	$V .= "<ul>\n";
-	$V .= "<li>Enter the filename to find:<P>";
+$text = _("Enter the filename to find:");
+	$V .= "<li>$text<P>";
 	$V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
-	$V .= "<li>By default only containers (rpms, tars, isos, etc) are shown.<P>";
-	$V .= _("<INPUT type='checkbox' name='allfiles' value='1'");
+$text = _("By default only containers (rpms, tars, isos, etc) are shown.");
+	$V .= "<li>$text<P>";
+$text = _("Show All Files");
+	$V .= "<INPUT type='checkbox' name='allfiles' value='1'";
 	if ($allfiles == '1') { $V .= " checked"; }
-	$V .= _("> Show All Files\n");
+	$V .= "> $text\n";
 	$V .= "</ul>\n";
 	$V .= "<input type='submit' value='Search!'>\n";
 	$V .= "</form>\n";
@@ -130,7 +133,8 @@ class search_file extends FO_Plugin
 	  if (empty($Page)) { $Page = 0; }
 	  if (empty($allfiles)) { $ContainerOnly = 1; }
 	  $V .= "<hr>\n";
-	  $V .= "<H2>Files matching " . htmlentities($Filename) . "</H2>\n";
+$text = _("Files matching");
+	  $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
 	  $V .= $this->GetUploadtreeFromName($Filename,$Page, $ContainerOnly);
 	  }
         break;

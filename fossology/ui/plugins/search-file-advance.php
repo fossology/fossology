@@ -107,7 +107,8 @@ class search_file_advance extends FO_Plugin
       $SQL = preg_replace('/\*/','COUNT(*) AS count',$SQL,1);
       $SQL = preg_replace('/ ORDER BY .*;/',';',$SQL);
       $Count = $DB->Action($SQL);
-      $V .= "Total matched: " . number_format($Count[0]['count'],0,"",",") . "<br>\n";
+$text = _("Total matched:");
+      $V .= "$text " . number_format($Count[0]['count'],0,"",",") . "<br>\n";
       }
 
     $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
@@ -156,8 +157,7 @@ class search_file_advance extends FO_Plugin
 	$Page = GetParm("page",PARM_INTEGER);
 
 	$V .= _("You can use '%' as a wild-card.\n");
-$text = _("Name . ");
-	$V .= "<form action='" . Traceback_uri() . "?mod=" . $this->$text"' method='POST'>\n";
+	$V .= "<form action='" . Traceback_uri() . "?mod=" . $this->Name . "' method='POST'>\n";
 	$V .= "<ul>\n";
 $text = _("Enter the filename to find: ");
 	$V .= "<li>$text";
@@ -169,27 +169,22 @@ $text = _("Mimetype ");
 	if ($MimetypeNot == 0)
 	  {
 $text = _("IS");
-$text1 = _("\n");
-	  $V .= "<option value='0' selected>$text</option>$text1";
+	  $V .= "<option value='0' selected>$text</option>\n";
 $text = _("IS NOT");
-$text1 = _("\n");
-	  $V .= "<option value='1'>$text</option>$text1";
+	  $V .= "<option value='1'>$text</option>\n";
 	  }
 	else
 	  {
 $text = _("IS");
-$text1 = _("\n");
-	  $V .= "<option value='0'>$text</option>$text1";
+	  $V .= "<option value='0'>$text</option>\n";
 $text = _("IS NOT");
-$text1 = _("\n");
-	  $V .= "<option value='1' selected>$text</option>$text1";
+	  $V .= "<option value='1' selected>$text</option>\n";
 	  }
 	$V .= "</select>\n";
 	$V .= "<select name='mimetype'>\n";
 	$Results = $DB->Action("SELECT * FROM mimetype ORDER BY mimetype_name;");
 $text = _("Select mimetype...");
-$text1 = _("\n");
-	$V .= "<option value='-1'>$text</option>$text1";
+	$V .= "<option value='-1'>$text</option>\n";
 	for($i=0; !empty($Results[$i]['mimetype_pk']); $i++)
 	  {
 	  if ($Results[$i]['mimetype_pk'] == $Mimetype)
@@ -205,11 +200,13 @@ $text1 = _("\n");
 	  }
 	$V .= "</select>\n";
 	$Value=$SizeMin; if ($Value < 0) { $Value=''; }
-$text = _(" bytes\n");
-	$V .= "<li>File size is &gt; <input name='sizemin' size=10 value='$Value'>$text";
+$text = _("File size is");
+$text1 = _(" bytes\n");
+	$V .= "<li>$text &gt; <input name='sizemin' size=10 value='$Value'>$text1";
 	$Value=$SizeMax; if ($Value < 0) { $Value=''; }
-$text = _(" bytes\n");
-	$V .= "<li>File size is &lt; <input name='sizemax' size=10 value='$Value'>$text";
+$text = _("File size is");
+$text1 = _(" bytes\n");
+	$V .= "<li>$text &lt; <input name='sizemax' size=10 value='$Value'>$text1";
 
 	$V .= "</ul>\n";
 	$V .= "<input type='submit' value='Search!'>\n";
@@ -219,7 +216,8 @@ $text = _(" bytes\n");
 	  {
 	  if (empty($Page)) { $Page = 0; }
 	  $V .= "<hr>\n";
-	  $V .= "<H2>Files matching " . htmlentities($Filename) . "</H2>\n";
+$text = _("Files matching");
+	  $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
 	  $V .= $this->GetUploadtreeFromName($Filename,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax);
 	  }
         break;

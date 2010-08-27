@@ -109,11 +109,13 @@ class agent_add extends FO_Plugin
           if (empty($rc))
           {
             /* Need to refresh the screen */
-            $V .= displayMessage('Agent Analysis added to job queue');
+$text = _("Agent Analysis added to job queue");
+            $V .= displayMessage($text);
           }
           else
           {
-            $V .= displayMessage("Scheduling of Agent(s) failed: $rc");
+$text = _("Scheduling of Agent(s) failed: ");
+            $V .= displayMessage($text.$rc);
           }
         }
 
@@ -123,28 +125,28 @@ class agent_add extends FO_Plugin
         $V .= ActiveHTTPscript("Uploads");
         $V .= "<script language='javascript'>\n";
         $V .= "function Uploads_Reply()\n";
-        $V .= _("  {\n");
+        $V .= "  {\n";
         $V .= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
-        $V .= _("    {\n");
+        $V .= "    {\n";
         /* Remove all options */
-        $V .= _("    document.formy.upload.innerHTML = Uploads.responseText;\n");
+        $V .= "    document.formy.upload.innerHTML = Uploads.responseText;\n";
         $V .= "    document.getElementById('agents').innerHTML = '';\n";
         /* Add new options */
-        $V .= _("    }\n");
-        $V .= _("  }\n");
+        $V .= "    }\n";
+        $V .= "  }\n";
         $V .= "</script>\n";
 
         $V .= ActiveHTTPscript("Agents");
         $V .= "<script language='javascript'>\n";
         $V .= "function Agents_Reply()\n";
-        $V .= _("  {\n");
+        $V .= "  {\n";
         $V .= "  if ((Agents.readyState==4) && (Agents.status==200))\n";
-        $V .= _("    {\n");
+        $V .= "    {\n";
         /* Remove all options */
         $V .= "    document.getElementById('agents').innerHTML = Agents.responseText;\n";
         /* Add new options */
-        $V .= _("    }\n");
-        $V .= _("  }\n");
+        $V .= "    }\n";
+        $V .= "  }\n";
         $V .= "</script>\n";
 
         /*************************************************************/
@@ -153,14 +155,16 @@ class agent_add extends FO_Plugin
         $V .= _("Select an uploaded file for additional analysis.\n");
 
         $V .= "<ol>\n";
-        $V .= "<li>Select the folder containing the upload you wish to analyze:<br>\n";
+$text = _("Select the folder containing the upload you wish to analyze:");
+        $V .= "<li>$text<br>\n";
         $V .= _("<select name='folder'\n");
         $V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=$Folder' ";
         $V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
         $V .= FolderListOption(-1,0,1,$Folder);
         $V .= "</select><P />\n";
 
-        $V .= "<li>Select the upload to analyze:<br>";
+$text = _("Select the upload to analyze:");
+        $V .= "<li>$text<br>";
         $V .= "<select size='10' name='upload' onChange='Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=\" + this.value)'>\n";
         $List = FolderListUploads($Folder);
         foreach($List as $L)
@@ -174,7 +178,8 @@ class agent_add extends FO_Plugin
           $V .= "</option>\n";
         }
         $V .= "</select><P />\n";
-        $V .= "<li>Select additional analysis.<br>\n";
+$text = _("Select additional analysis.");
+        $V .= "<li>$text<br>\n";
         $V .= "<select multiple size='10' id='agents' name='agents[]'></select>\n";
         $V .= "</ol>\n";
         $V .= "<input type='submit' value='Analyze!'>\n";

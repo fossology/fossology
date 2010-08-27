@@ -113,11 +113,13 @@ class agent_remove_licenseMeta extends FO_Plugin
             // Need to refresh the screen
 	    if ($Restart)
 	      {
-              $V .= displayMessage('License data re-analysis added to job queue');
+$text = _("License data re-analysis added to job queue");
+              $V .= displayMessage($text);
 	      }
 	    else
 	      {
-              $V .= displayMessage('License data removal added to job queue');
+$text = _("License data removal added to job queue");
+              $V .= displayMessage($text);
 	      }
           }
           else
@@ -132,31 +134,33 @@ class agent_remove_licenseMeta extends FO_Plugin
         $V .= ActiveHTTPscript("ResetLicense");
         $V .= "<script language='javascript'>\n";
         $V .= "function ResetLicense_Reply()\n";
-        $V .= _("  {\n");
+        $V .= "  {\n";
         $V .= "  if ((ResetLicense.readyState==4) && (ResetLicense.status==200))\n";
-        $V .= _("    {\n");
+        $V .= "    {\n";
         /* Remove all options */
-        $V .= _("    document.formR.upload.innerHTML = ResetLicense.responseText;\n");
+        $V .= "    document.formR.upload.innerHTML = ResetLicense.responseText;\n";
         /* Add new options */
-        $V .= _("    }\n");
-        $V .= _("  }\n");
+        $V .= "    }\n";
+        $V .= "  }\n";
         $V .= "</script>\n";
 
         /* Build HTML form */
         $V .= "<form name='formR' method='post'>\n"; // no url = this url
 $text = _("Remove");
-$text1 = _(" the license meta data from the selected upload.\n");
-        $V .= "<em>$text</em>$text1";
+$text1 = _("the license meta data from the selected upload.\n");
+        $V .= "<em>$text</em> $text1";
         $V .= "<ul>\n";
-$text = _("remove");
-$text1 = _(" the license meta data associated with the selected upload file!\n");
-        $V .= "<li>This will <em>$text</em>$text1";
+$text = _("This will");
+$text1 = _("remove");
+$text2 = _("the license meta data associated with the selected upload file!\n");
+        $V .= "<li>$text <em>$text1</em> $text2";
 $text = _("Be very careful with your selection since you can delete a lot of work!\n");
         $V .= "<li>$text";
 $text = _("THERE IS NO UNREMOVE. The license meta data can be recreated by re-running the license analysis\n");
         $V .= "<li>$text";
         $V .= "</ul>\n";
-        $V .= "<P>Select the uploaded file to remove license data:<P>\n";
+$text = _("Select the uploaded file to remove license data:");
+        $V .= "<P>$text<P>\n";
         $V .= "<ol>\n";
 $text = _("Select the folder containing the upload file to use: ");
         $V .= "<li>$text";
@@ -185,9 +189,11 @@ $text = _("Select the uploaded project to use:");
           $V .= "</option>\n";
         }
         $V .= "</select><P />\n";
-        $V .= "<li>After the license data is removed you can reschedule the License Analysis by checking the box below<br />";
+$text = _("After the license data is removed you can reschedule the License Analysis by checking the box below");
+        $V .= "<li>$text<br />";
         $V .= "<input type='checkbox' name='ReDoLic' value='Y' />";
-        $V .= "Reschedule License Analysis?<br /><br />\n";
+$text = _("Reschedule License Analysis?");
+        $V .= "$text<br /><br />\n";
         $V .= "</ol>\n";
         $V .= "<input type='submit' value='Commit!'>\n";
         $V .= "</form>\n";

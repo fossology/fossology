@@ -134,13 +134,10 @@ class ui_view_license extends FO_Plugin
     /* Save the path */
     $this->ConvertLicPathToHighlighting($Lic,NULL);
     $Text = "<div class='text'>";
-$text = _("License: " . $Results[0]['lic_name'] . "");
-$text1 = _("\n");
-    $Text .= "<H1>$text</H1>$text1";
+    $Text .= "<H1>License: " . $Results[0]['lic_name'] . "</H1>\n";
     if (!empty($Results[0]['lic_url']) && (strtolower($Results[0]['lic_url']) != 'none'))
       {
-$text = _(" " . $Results[0]['lic_url'] . "");
-      $Text .= "Reference URL: <a href=\"" . $Results[0]['lic_url'] . "\" target=_blank>$text</a>";
+      $Text .= "Reference URL: <a href=\"" . $Results[0]['lic_url'] . "\" target=_blank> " . $Results[0]['lic_url'] . "</a>";
       }
     $Text .= "<hr>\n";
     $Text .= "</div>";
@@ -161,7 +158,7 @@ $text = _(" " . $Results[0]['lic_url'] . "");
 
     if ($this->State != PLUGIN_STATE_READY) { return; }
 
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo _("NO DB connection"); }
 
     $V="";
     global $Plugins;
@@ -181,9 +178,9 @@ $text = _(" " . $Results[0]['lic_url'] . "");
       $nomos_license_string = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $Item);
       if (!empty($nomos_license_string)) 
       {
-$text = _("Nomos");
-$text1 = _("");
-        $nomos_out = "The <b>$text</b><b>$text1";
+$text1 = _("Nomos");
+$text = _("The");
+        $nomos_out = "$text <b>$text1</b><b>";
         $nomos_out .= $nomos_license_string;
         $nomos_out .= "</b>";
       }

@@ -92,9 +92,8 @@ class search_file_by_licgroup extends FO_Plugin
 	  $Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_pk = '$LicGrpPk' LIMIT 1;");
 	  $LicName = htmlentities($Results[0]['licgroup_name']);
 	  if (empty($LicName)) { return; }
-$text = _("$LicName");
-$text1 = _("'.\n");
-	  $V .= "The following files include licenses in the license group '<b>$text</b>$text1";
+$text = _("The following files include licenses in the license group");
+	  $V .= "$text '<b>$LicName</b>'.\n";
 	  }
 	else
 	  {
@@ -212,29 +211,26 @@ if (0)
 	  $L = &$Lics[$i];
 	  $Pos = $Offset + $i + 1;
 	  $V .= "<table border=1 width='100%' style='background:lightyellow'>";
-$text = _("$Pos:");
-$text1 = _("");
-	  $V .= "<tr><td align='center' width='5%'><font size='+2'>$text</font></td>$text1";
+	  $V .= "<tr><td align='center' width='5%'><font size='+2'>$Pos:</font></td>";
 	  $V .= "<td>";
 $text = _("Phrase:");
-$text1 = _(" ");
-	  if (!empty($L['phrase_text'])) { $V .= "<b>$text</b>$text1" . htmlentities($L['phrase_text']) . "\n"; }
+	  if (!empty($L['phrase_text'])) { $V .= "<b>$text</b> " . htmlentities($L['phrase_text']) . "\n"; }
 	  if (Isdir($L['ufile_mode']))
 	    {
-	    $V .= Dir2Browse(_("licgroup",$L['uploadtree_pk'],"license") . "\n");
+	    $V .= Dir2Browse("licgroup",$L['uploadtree_pk'],"license") . "\n";
 	    }
 	  else
 	    {
-	    $V .= Dir2Browse(_("licgroup",$L['uploadtree_pk'],"view-license") . "\n");
+	    $V .= Dir2Browse("licgroup",$L['uploadtree_pk'],"view-license") . "\n";
 	    }
 	  $V .= "</td></tr></table>\n";
 	  }
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-$text = _("Elaspsed time: $Time seconds");
-$text1 = _("\n");
-	$V .= "<small>$text</small>$text1";
+$text = _("Elaspsed time:");
+$text1 = _("seconds");
+	$V .= "<small>$text $Time $text1</small>\n";
         break;
       case "Text":
         break;

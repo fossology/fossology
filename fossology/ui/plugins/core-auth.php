@@ -56,7 +56,8 @@ class core_auth extends FO_Plugin {
       $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
 	VALUES ('Default User','Default User when nobody is logged in','Seed','Pass',$Level,NULL,1);";
       $DB->Action($SQL);
-      print "*** Created default user: 'Default User'.\n";
+$text = _("*** Created default user: 'Default User'.");
+      print "$text\n";
     }
     /* There must always be at least one user with user-admin access.
     If he does not exist, make it user "fossy".
@@ -73,13 +74,15 @@ class core_auth extends FO_Plugin {
         $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass," .
                "user_perm,user_email,email_notify,root_folder_fk)
 		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,'fossy','y',1);";
-        print "*** Created default administrator: 'fossy' with password 'fossy'.\n";
+$text = _("*** Created default administrator: 'fossy' with password 'fossy'.");
+        print "$text\n";
       }
       else {
         /* User "fossy" exists!  Update it. */
         $SQL = "UPDATE users SET user_perm = $Perm, email_notify = 'y'," .
                " user_email= 'fossy' WHERE user_name = 'fossy';";
-        print "*** Existing user 'fossy' promoted to default administrator.\n";
+$text = _("*** Existing user 'fossy' promoted to default administrator.");
+        print "$text\n";
       }
       $DB->Action($SQL);
       $Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Perm;");
@@ -350,11 +353,9 @@ $text = _("The system requires initialization. Please login and use the Initiali
             $V.= "<input type='hidden' name='HTTP_REFERER' value='$Referer'>";
             $V.= "<table border=0>";
 $text = _("Username:");
-$text1 = _("");
-            $V.= "<tr><td>$text</td><td>$text1<input type='text' size=20 name='username' id='unamein'></td></tr>\n";
+            $V.= "<tr><td>$text</td><td><input type='text' size=20 name='username' id='unamein'></td></tr>\n";
 $text = _("Password:");
-$text1 = _("");
-            $V.= "<tr><td>$text</td><td>$text1<input type='password' size=20 name='password'></td></tr>\n";
+            $V.= "<tr><td>$text</td><td><input type='password' size=20 name='password'></td></tr>\n";
             $V.= "</table>";
             $V.= "<P/>";
             $V.= "<script type=\"text/javascript\">document.getElementById(\"unamein\").focus();</script>";
@@ -366,7 +367,9 @@ $text = _("Validate IP.\n");
             if (!empty($Referer)) {
               $V.= "<input type='hidden' name='redirect' value='$Referer'>";
             }
-            $V.= "This option deters session hijacking by linking your session to your IP address (" . @$_SESSION['ip'] . "). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.<P />\n";
+$text = _("This option deters session hijacking by linking your session to your IP address (");
+$text1 = _("). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.");
+            $V.= "$text" . @$_SESSION['ip'] . "$text1<P />\n";
 */
             $V.= "<input type='submit' value='Login'>\n";
             $V.= "</form>\n";

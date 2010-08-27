@@ -102,12 +102,13 @@ class folder_properties extends FO_Plugin {
           $rc = $this->Edit($FolderId, $NewName, $NewDesc);
           if ($rc == 1) {
             /* Need to refresh the screen */
-            $V.= displayMessage('Folder Properties changed');
+$text=_("Folder Properties changed");
+            $V.= displayMessage($text);
           }
         }
-        $V.= "<p>The folder properties that can be changed are the folder name and
+        $V.= _("<p>The folder properties that can be changed are the folder name and
 			 description.  First select the folder to edit. Then enter the new values.
-			 If no value is entered, then the corresponding field will not be changed.</p>";
+			 If no value is entered, then the corresponding field will not be changed.</p>");
         /* Get the folder info */
         $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$FolderSelectId';");
         $Folder = & $Results[0];

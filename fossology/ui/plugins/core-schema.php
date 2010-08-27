@@ -58,29 +58,25 @@ class core_schema extends FO_Plugin {
     $Current = GetSchema();
     print "<ul>\n";
 $text = _("Tables");
-$text1 = _("\n");
-    print "<li><a href='#Table'>$text</a>$text1";
+    print "<li><a href='#Table'>$text</a>\n";
 $text = _("Sequences");
-$text1 = _("\n");
-    print "<li><a href='#Sequence'>$text</a>$text1";
+    print "<li><a href='#Sequence'>$text</a>\n";
 $text = _("Views");
-$text1 = _("\n");
-    print "<li><a href='#View'>$text</a>$text1";
+    print "<li><a href='#View'>$text</a>\n";
 $text = _("Indexes");
-$text1 = _("\n");
-    print "<li><a href='#Index'>$text</a>$text1";
+    print "<li><a href='#Index'>$text</a>\n";
 $text = _("Constraints");
-$text1 = _("\n");
-    print "<li><a href='#Constraint'>$text</a>$text1";
+    print "<li><a href='#Constraint'>$text</a>\n";
     if (count($Schema['FUNCTION']) > 0) {
 $text = _("Functions");
-$text1 = _("\n");
-      print "<li><a href='#Function'>$text</a>$text1";
+      print "<li><a href='#Function'>$text</a>\n";
     }
     print "</ul>\n";
     print "<ul>\n";
-    print "<li><font color='$Red'>This color indicates the current schema (items that should be removed).</font>\n";
-    print "<li><font color='$Blue'>This color indicates the default schema (items that should be applied).</font>\n";
+$text = _("This color indicates the current schema (items that should be removed).");
+    print "<li><font color='$Red'>$text</font>\n";
+$text = _("This color indicates the default schema (items that should be applied).");
+    print "<li><font color='$Blue'>$text</font>\n";
     print "</ul>\n";
     print "<a name='Table'></a><table width='100%' border='1'>\n";
     $LastTableName = "";
@@ -93,8 +89,12 @@ $text1 = _("\n");
           continue;
         }
         if ($LastTableName != $TableName) {
-$text = _("Alter SQL\n");
-          print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>$text";
+$text = _("Table");
+$text1 = _("Column");
+$text2 = _("Description");
+$text3 = _("Add SQL");
+$text4 = _("Alter SQL\n");
+          print "<tr><th><a name='Table-$TableName'></a>$text<th>$text1<th>$text2<th>$text3<th>$text4";
           $LastTableName = $TableName;
         }
         if (empty($ColName)) {
@@ -117,8 +117,12 @@ $text = _("Alter SQL\n");
           continue;
         }
         if ($LastTableName != $TableName) {
-$text = _("Alter SQL\n");
-          print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>$text";
+$text = _("Table");
+$text1 = _("Column");
+$text2 = _("Description");
+$text3 = _("Add SQL");
+$text4 = _("Alter SQL\n");
+          print "<tr><th><a name='Table-$TableName'></a>$text<th>$text1<th>$text2<th>$text3<th>$text4";
           $LastTableName = $TableName;
         }
         if (empty($ColName)) {
@@ -135,8 +139,9 @@ $text = _("Alter SQL\n");
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Sequence'></a><table width='100%' border='1'>\n";
-$text = _("Definition\n");
-    print "<th>Sequence<th>$text";
+$text = _("Sequence");
+$text1 = _("Definition\n");
+    print "<th>$text<th>$text1";
     if (!empty($Schema['SEQUENCE'])) foreach($Schema['SEQUENCE'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
@@ -144,8 +149,7 @@ $text = _("Definition\n");
       if ($Description == $Current['SEQUENCE'][$Name]) {
         continue;
       }
-$text = _("" . htmlentities($Name) . ");
-      print "<tr bgcolor='$Blue'><td>$text"<td>" . htmlentities($Description) . "\n";
+      print "<tr bgcolor='$Blue'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
     }
     if (!empty($Current['SEQUENCE'])) foreach($Current['SEQUENCE'] as $Name => $Description) {
       if (empty($Name)) {
@@ -154,14 +158,14 @@ $text = _("" . htmlentities($Name) . ");
       if ($Description == $Schema['SEQUENCE'][$Name]) {
         continue;
       }
-$text = _("" . htmlentities($Name) . ");
-      print "<tr bgcolor='$Red'><td>$text"<td>" . htmlentities($Description) . "\n";
+      print "<tr bgcolor='$Red'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
     print "<P/>\n";
     print "<a name='View'></a><table width='100%' border='1'>\n";
-$text = _("Definition\n");
-    print "<th>View<th>$text";
+$text = _("View");
+$text1 = _("Definition\n");
+    print "<th>$text<th>$text1";
     if (!empty($Schema['VIEW'])) foreach($Schema['VIEW'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
@@ -169,8 +173,7 @@ $text = _("Definition\n");
       if ($Description == $Current['VIEW'][$Name]) {
         continue;
       }
-$text = _("" . htmlentities($Name) . ");
-      print "<tr bgcolor='$Blue'><td>$text"<td>" . htmlentities($Description) . "\n";
+      print "<tr bgcolor='$Blue'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
     }
     if (!empty($Current['VIEW'])) foreach($Current['VIEW'] as $Name => $Description) {
       if (empty($Name)) {
@@ -179,14 +182,15 @@ $text = _("" . htmlentities($Name) . ");
       if ($Description == $Schema['VIEW'][$Name]) {
         continue;
       }
-$text = _("" . htmlentities($Name) . ");
-      print "<tr bgcolor='$Red'><td>$text"<td>" . htmlentities($Description) . "\n";
+      print "<tr bgcolor='$Red'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Index'></a><table width='100%' border='1'>\n";
-$text = _("Definition\n");
-    print "<th>Table<th>Index<th>$text";
+$text = _("Table");
+$text1 = _("Index");
+$text2 = _("Definition\n");
+    print "<th>$text<th>$text1<th>$text2";
     if (!empty($Schema['INDEX'])) foreach($Schema['INDEX'] as $Table => $Indexes) {
       if (empty($Table)) {
         continue;
@@ -216,8 +220,9 @@ $text = _("Definition\n");
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Constraint'></a><table width='100%' border='1'>\n";
-$text = _("Definition\n");
-    print "<th>Constraint<th>$text";
+$text = _("Constraint");
+$text1 = _("Definition\n");
+    print "<th>$text<th>$text1";
     if (!empty($Schema['CONSTRAINT'])) foreach($Schema['CONSTRAINT'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
@@ -225,8 +230,7 @@ $text = _("Definition\n");
       if ($Description == $Current['CONSTRAINT'][$Name]) {
         continue;
       }
-$text = _("" . htmlentities($Name) . ");
-      print "<tr bgcolor='$Blue'><td>$text"<td>" . htmlentities($Description) . "\n";
+      print "<tr bgcolor='$Blue'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
     }
     if (!empty($Current['CONSTRAINT'])) foreach($Current['CONSTRAINT'] as $Name => $Description) {
       if (empty($Name)) {
@@ -235,8 +239,7 @@ $text = _("" . htmlentities($Name) . ");
       if ($Description == $Schema['CONSTRAINT'][$Name]) {
         continue;
       }
-$text = _("" . htmlentities($Name) . ");
-      print "<tr bgcolor='$Red'><td>$text"<td>" . htmlentities($Description) . "\n";
+      print "<tr bgcolor='$Red'><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
   } // CompareSchema()
@@ -247,24 +250,18 @@ $text = _("" . htmlentities($Name) . ");
     $Schema = GetSchema();
     print "<ul>\n";
 $text = _("Tables");
-$text1 = _("\n");
-    print "<li><a href='#Table'>$text</a>$text1";
+    print "<li><a href='#Table'>$text</a>\n";
 $text = _("Sequences");
-$text1 = _("\n");
-    print "<li><a href='#Sequence'>$text</a>$text1";
+    print "<li><a href='#Sequence'>$text</a>\n";
 $text = _("Views");
-$text1 = _("\n");
-    print "<li><a href='#View'>$text</a>$text1";
+    print "<li><a href='#View'>$text</a>\n";
 $text = _("Indexes");
-$text1 = _("\n");
-    print "<li><a href='#Index'>$text</a>$text1";
+    print "<li><a href='#Index'>$text</a>\n";
 $text = _("Constraints");
-$text1 = _("\n");
-    print "<li><a href='#Constraint'>$text</a>$text1";
+    print "<li><a href='#Constraint'>$text</a>\n";
     if (count($Schema['FUNCTION']) > 0) {
 $text = _("Functions");
-$text1 = _("\n");
-      print "<li><a href='#Function'>$text</a>$text1";
+      print "<li><a href='#Function'>$text</a>\n";
     }
     print "</ul>\n";
     print "<a name='Table'></a><table width='100%' border='1'>\n";
@@ -275,8 +272,12 @@ $text1 = _("\n");
       }
       foreach($Columns as $ColName => $Val) {
         if ($LastTableName != $TableName) {
-$text = _("Alter SQL\n");
-          print "<tr><th><a name='Table-$TableName'></a>Table<th>Column<th>Description<th>Add SQL<th>$text";
+$text = _("Table");
+$text1 = _("Column");
+$text2 = _("Description");
+$text3 = _("Add SQL");
+$text4 = _("Alter SQL\n");
+          print "<tr><th><a name='Table-$TableName'></a>$text<th>$text1<th>$text2<th>$text3<th>$text4";
           $LastTableName = $TableName;
         }
         if (empty($ColName)) {
@@ -293,32 +294,34 @@ $text = _("Alter SQL\n");
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Sequence'></a><table width='100%' border='1'>\n";
-$text = _("Definition\n");
-    print "<th>Sequence<th>$text";
+$text = _("Sequence");
+$text1 = _("Definition\n");
+    print "<th>$text<th>$text1";
     if (!empty($Schema['SEQUENCE'])) foreach($Schema['SEQUENCE'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
       }
-$text = _("" . htmlentities($Name) . ");
-      print "<tr><td>$text"<td>" . htmlentities($Description) . "\n";
+      print "<tr><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
     print "<P/>\n";
     print "<a name='View'></a><table width='100%' border='1'>\n";
-$text = _("Definition\n");
-    print "<th>View<th>$text";
+$text = _("View");
+$text1 = _("Definition\n");
+    print "<th>$text<th>$text1";
     if (!empty($Schema['VIEW'])) foreach($Schema['VIEW'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
       }
-$text = _("" . htmlentities($Name) . ");
-      print "<tr><td>$text"<td>" . htmlentities($Description) . "\n";
+      print "<tr><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Index'></a><table width='100%' border='1'>\n";
-$text = _("Definition\n");
-    print "<th>Table<th>Index<th>$text";
+$text = _("Table");
+$text1 = _("Index");
+$text2 = _("Definition\n");
+    print "<th>$text<th>$text1<th>$text2";
     if (!empty($Schema['INDEX'])) foreach($Schema['INDEX'] as $Table => $Indexes) {
       if (empty($Table)) {
         continue;
@@ -332,21 +335,22 @@ $text = _("Definition\n");
     print "</table>\n";
     print "<P/>\n";
     print "<a name='Constraint'></a><table width='100%' border='1'>\n";
-$text = _("Definition\n");
-    print "<th>Constraint<th>$text";
+$text = _("Constraint");
+$text1 = _("Definition\n");
+    print "<th>$text<th>$text1";
     if (!empty($Schema['CONSTRAINT'])) foreach($Schema['CONSTRAINT'] as $Name => $Description) {
       if (empty($Name)) {
         continue;
       }
-$text = _("" . htmlentities($Name) . ");
-      print "<tr><td>$text"<td>" . htmlentities($Description) . "\n";
+      print "<tr><td>" . htmlentities($Name) . "<td>" . htmlentities($Description) . "\n";
     }
     print "</table>\n";
     if (count($Schema['FUNCTION']) > 0) {
       print "<P/>\n";
       print "<a name='Function'></a><table width='100%' border='1'>\n";
-$text = _("Definition\n");
-      print "<th>Function<th>$text";
+$text = _("Function");
+$text1 = _("Definition\n");
+      print "<th>$text<th>$text1";
       if (!empty($Schema['FUNCTION'])) foreach($Schema['FUNCTION'] as $Name => $Description) {
         if (empty($Name)) {
           continue;
@@ -737,15 +741,20 @@ $text = _("Definition\n");
         $V.= "<form method='post'>\n";
         $V.= _("Viewing, exporting, and applying the schema is only used by installation and debugging.\n");
         $V.= _("Otherwise, you should not need to use this functionality.\n");
-$text = _("TOTALLY SCREW UP");
-$text1 = _(" your FOSSology database.");
-        $V.= "<P/><b>Using this functionality willy-nilly may <u><i>$text</i></u>$text1</b>\n";
+$text = _("Using this functionality willy-nilly may");
+$text1 = _("TOTALLY SCREW UP");
+$text2 = _("your FOSSology database.");
+        $V.= "<P/><b>$text <u><i>$text1</i></u>$text2</b>\n";
         $V.= "<P/>\n";
         $V.= "<table width='100%' border='1'>\n";
-        $V.= "<tr><td width='2%'><input type='checkbox' value='1' name='View'><td>Check to view the current schema. The output generation is harmless, but extremely technical.<br>\n";
-        $V.= "<tr><td><input type='checkbox' value='1' name='Compare'><td>Highlight the differences between the default schema (blue) and current schema (red).<br>\n";
-$text = _("exactly");
-        $V.= "<tr><td><input type='checkbox' value='1' name='Export'><td>Check to export the current schema. This will overwrite your default schema configuration file. Don't do this unless you know <i>$text</i> what you are doing. The default configuration file is the only one that is supported. This will overwrite your default file.<br>\n";
+$text = _("Check to view the current schema. The output generation is harmless, but extremely technical.");
+        $V.= "<tr><td width='2%'><input type='checkbox' value='1' name='View'><td>$text<br>\n";
+$text = _("Highlight the differences between the default schema (blue) and current schema (red).");
+        $V.= "<tr><td><input type='checkbox' value='1' name='Compare'><td>$text<br>\n";
+$text = _("Check to export the current schema. This will overwrite your default schema configuration file. Don't do this unless you know");
+$text1 = _("exactly");
+$text2 = _("what you are doing. The default configuration file is the only one that is supported. This will overwrite your default file.");
+        $V.= "<tr><td><input type='checkbox' value='1' name='Export'><td>$text <i>$text1</i> $text2<br>\n";
 $text = _("Check to apply the last exported schema. This will overwrite and atempt to migrate your database schema according to the default configuration file. Non-standard columns, tables, constraints, and views can and will be destroyed.\n");
         $V.= "<tr><td><input type='checkbox' value='1' name='Apply'><td>$text";
         $V.= "</table>\n";

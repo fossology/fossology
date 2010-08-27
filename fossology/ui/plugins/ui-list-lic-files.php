@@ -84,7 +84,8 @@ class list_lic_files extends FO_Plugin
 	$rf_shortname = rawurldecode($rf_shortname);
 	if (empty($uploadtree_pk) || empty($rf_shortname)) 
     {
-      echo $this->Name . " is missing required parameters.";
+$text = _("is missing required parameters.");
+      echo $this->Name . " $text";
       return;
     }
 	$Page = GetParm("page",PARM_INTEGER);
@@ -108,23 +109,25 @@ class list_lic_files extends FO_Plugin
     $Count = $CountArray['count'];
     $Unique = $CountArray['unique'];
 
-$text = _("$rf_shortname");
-    $V.= "$Count files found ($Unique unique) with license <b>$text</b>";
+$text = _("files found");
+$text1 =_("unique");
+$text2 = _("with license");
+    $V.= "$Count $text ($Unique $text1) $text2 <b>$rf_shortname</b>";
     if ($Count < $Max) $Max = $Count;
     $limit = ($Page < 0) ? "ALL":$Max;
     $order = " order by ufile_name asc";
     $filesresult = GetFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk,
                                 $PkgsOnly, $Offset, $limit, $order);
     $NumFiles = pg_num_rows($filesresult);
-$text = _("excludes");
-$text1 = _(" files with these extensions: $Excl");
-    if (!empty($Excl)) $V .= "<br>Display <b>$text</b>$text1";
+$text = _("Display");
+$text1 = _("excludes");
+$text2 = _("files with these extensions");
+    if (!empty($Excl)) $V .= "<br>$text <b>$text1</b>$text1: $Excl";
 
 	/* Get the page menu */
 	if (($Count >= $Max) && ($Page >= 0))
 	{
-$text = _("\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . ");
-	  $VM = "<P />$text"<P />\n";
+	  $VM = "<P />\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
 	  $V .= $VM;
 	}
 	else
@@ -144,8 +147,7 @@ $text = _("\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . ");
 
     $V .= "<table>";
 $text = _("File");
-$text1 = _("&nbsp");
-    $V .= "<tr><th>$text</th><th>$text1";
+    $V .= "<tr><th>$text</th><th>&nbsp";
     while ($row = pg_fetch_assoc($filesresult))
     {
       // Allow user to exclude files with this extension
@@ -171,16 +173,13 @@ $text = _("Exclude this file type.");
         $LinkLastpfile = $LinkLast . "&pfile=$pfile_pk";
         $V .= Dir2Browse("browse", $row['uploadtree_pk'], $LinkLastpfile, $ShowBox, $ShowMicro, ++$RowNum, $Header);
         $V .= "</td>";
-$text = _("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
-        $V .= "<td>$text</td>";  // spaces to seperate licenses
+        $V .= "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>";  // spaces to seperate licenses
 
         $licstring = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $row['uploadtree_pk']);
 
         // show the entire license list as a single string with links to the files
         // in this container with that license.
-$text = _("$licstring");
-$text1 = _("");
-        $V .= "<td>$text</td></tr>$text1";
+        $V .= "<td>$licstring</td></tr>";
         $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
       }
     }
@@ -189,9 +188,9 @@ $text1 = _("");
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-$text = _("Elaspsed time: $Time seconds");
-$text1 = _("\n");
-	$V .= "<small>$text</small>$text1";
+$text = _("Elaspsed time");
+$text1 = _("seconds");
+	$V .= "<small>$text: $Time $text1</small>\n";
 	break;
       case "Text":
 	break;

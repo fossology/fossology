@@ -164,10 +164,12 @@ class agent_fonomos extends FO_Plugin {
           $rc = $this->AgentAdd($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $Page.= displayMessage('fo_nomos analysis added to the job queue');
+$text = _("fo_nomos analysis added to the job queue");
+            $Page.= displayMessage($text);
           }
           else {
-            $Page.= displayMessage("Scheduling of fo_nomos failed: $rc");
+$text = _("Scheduling of fo_nomos failed:");
+            $Page.= displayMessage($text.$rc);
           }
         }
         /* Get list of projects that are not scheduled for uploads */
@@ -183,14 +185,15 @@ class agent_fonomos extends FO_Plugin {
                 ORDER BY upload_desc,upload_filename;";
         $Results = $DB->Action($SQL);
         if (empty($Results[0]['upload_pk'])) {
-          $Page.= "All uploaded files are already analyzed, or scheduled to be analyzed.";
+          $Page.= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
         }
         else {
           /* Display the form */
           $Page.= "<form method='post'>\n"; // no url = this url
-          $Page.= "Select an uploaded file for license analysis.\n";
-          $Page.= "Only uploads that are not already scheduled can be scheduled.\n";
-          $Page.= "<p />\nAnalyze: <select name='upload'>\n";
+          $Page.= _("Select an uploaded file for license analysis.\n");
+          $Page.= _("Only uploads that are not already scheduled can be scheduled.\n");
+$text = _("Analyze:");
+          $Page.= "<p />\n$text <select name='upload'>\n";
           foreach($Results as $Row) {
             if (empty($Row['upload_pk'])) {
               continue;
@@ -201,9 +204,7 @@ class agent_fonomos extends FO_Plugin {
             else {
               $Name = $Row['upload_desc'] . " (" . $Row['upload_filename'] . ")";
             }
-$text = _("$Name");
-$text1 = _("\n");
-            $Page.= "<option value='" . $Row['upload_pk'] . "'>$text</option>$text1";
+            $Page.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
           $Page.= "</select><P />\n";
           $Page.= "<input type='submit' value='Analyze!'>\n";

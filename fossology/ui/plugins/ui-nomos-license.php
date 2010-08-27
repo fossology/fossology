@@ -65,8 +65,7 @@ class ui_nomos_license extends FO_Plugin
       {
        menu_insert("Browse::Nomos License",1);
        //menu_insert("Browse::[BREAK]",100);
-$text = _("Clear");
-       //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>$text</a>");
+       //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
       }
       else
       {
@@ -161,9 +160,8 @@ $text = _("Clear");
     $Agent_pk = LatestNomosAgentpk($upload_pk);
     if ($Agent_pk == 0)
     {
-$text = _(" Agents to schedule a license scan.");
-$text1 = _("");
-      $VLic = "<b>No data available.  Use Jobs >$text</b><p>$text1";
+$text = _("No data available.  Use Jobs > Agents to schedule a license scan.");
+      $VLic = "<b>$text</b><p>";
       return $VLic;
     }
 
@@ -208,13 +206,13 @@ $text = _("License Name");
       $LicCount += $row['liccount'];
 
       /*  Count  */
-$text = _("$row[liccount]");
-      $VLic .= "<tr><td align='right'>$text</td>";
+      $VLic .= "<tr><td align='right'>$row[liccount]</td>";
 
       /*  Show  */
-      $VLic .= _("<td align='center'><a href='");
+      $VLic .= "<td align='center'><a href='";
       $VLic .= Traceback_uri();
-      $VLic .= "?mod=list_lic_files&napk=$Agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']) . "'>Show</a></td>";
+$text = _("Show");
+      $VLic .= "?mod=list_lic_files&napk=$Agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']) . "'>$text</a></td>";
 
       /*  License name  */
       $VLic .= "<td align='left'>";
@@ -228,23 +226,19 @@ $text = _("$row[liccount]");
     $VLic .= "</table>\n";
     $VLic .= "<p>\n";
     $VLic .= _("Hint: Click on the license name to ");
-$text = _("highlight ");
-    $VLic .= "<span style='background-color:$this->HighlightColor'>$text</span>";
-    $VLic .= "where the license is found in the file listing.<br>\n";
+$text = _("highlight");
+    $VLic .= "<span style='background-color:$this->HighlightColor'>$text </span>";
+    $VLic .= _("where the license is found in the file listing.<br>\n");
     $VLic .= "<table border=0 id='licsummary'>";
-$text = _("$UniqueLicCount");
-$text1 = _("Unique licenses");
-    $VLic .= "<tr><td align=right>$text</td><td>$text1</td></tr>";
+$text = _("Unique licenses");
+    $VLic .= "<tr><td align=right>$UniqueLicCount</td><td>$text</td></tr>";
     $NetLic = $LicCount - $NoLicFound;
-$text = _("$NetLic");
-$text1 = _("Licenses found");
-    $VLic .= "<tr><td align=right>$text</td><td>$text1</td></tr>";
-$text = _("$NoLicFound");
-$text1 = _("Files with no licenses");
-    $VLic .= "<tr><td align=right>$text</td><td>$text1</td></tr>";
-$text = _("$FileCount");
-$text1 = _("Files");
-    $VLic .= "<tr><td align=right>$text</td><td>$text1</td></tr>";
+$text = _("Licenses found");
+    $VLic .= "<tr><td align=right>$NetLic</td><td>$text</td></tr>";
+$text = _("Files with no licenses");
+    $VLic .= "<tr><td align=right>$NoLicFound</td><td>$text</td></tr>";
+$text = _("Files");
+    $VLic .= "<tr><td align=right>$FileCount</td><td>$text</td></tr>";
     $VLic .= "</table>";
     pg_free_result($result);
 
@@ -386,9 +380,7 @@ $text1 = _("Files");
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
-$text = _("$VLic");
-$text1 = _("$VF");
-    $V .= "<tr><td valign='top' width='50%'>$text</td><td valign='top'>$text1</td></tr>\n";
+    $V .= "<tr><td valign='top' width='50%'>$VLic</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
 
@@ -474,8 +466,8 @@ $text = _("Elapsed time: %.2f seconds");
     if ($Cached) 
     {
 $text = _("cached");
-$text1 = _("   <a href=\");
-      echo " <i>$text</i>$text1"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
+$text1 = _("Update");
+      echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     }
     else
     {

@@ -56,11 +56,9 @@ class ui_folders extends FO_Plugin
 	$V .= FolderListScript();
 	$V .= "<small><center>";
 $text = _("Expand");
-$text1 = _(" |");
-	$V .= "<a href='javascript:Expand();'>$text</a>$text1";
+	$V .= "<a href='javascript:Expand();'>$text</a> |";
 $text = _("Collapse");
-$text1 = _(" |");
-	$V .= "<a href='javascript:Collapse();'>$text</a>$text1";
+	$V .= "<a href='javascript:Collapse();'>$text</a> |";
 $text = _("Refresh");
 	$V .= "<a href='" . Traceback() . "'>$text</a>";
 	$V .= "</center></small>";

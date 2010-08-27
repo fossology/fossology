@@ -87,8 +87,7 @@ class upload_move extends FO_Plugin {
       break;
       case "HTML":
 $text = _("Move upload to different folder.");
-$text1 = _("\n");
-        $V.= "<H2>$text</H1>$text1";
+        $V.= "<H2>$text</H1>\n";
         /* If this is a POST, then process the request. */
         $OldFolderId = GetParm('oldfolderid', PARM_INTEGER);
         $UploadId = GetParm('uploadid', PARM_INTEGER);
@@ -108,7 +107,10 @@ $text1 = _("\n");
             $base = basename($Uploads[0]['ufile_name']);
             $OldFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$OldFolderId';");
             $ORow = $OldFolder[0];
-            $success = "Moved $base from folder $ORow[folder_name] to folder $NRow[folder_name]";
+$text = _("Moved");
+$text1 = _("from folder");
+$text2 = _("to folder");
+            $success = "$text $base $text1 $ORow[folder_name] $text2 $NRow[folder_name]";
             $V.= displayMessage($success);
           }
         }
@@ -117,14 +119,14 @@ $text1 = _("\n");
         $V.= ActiveHTTPscript("Uploads");
         $V.= "<script language='javascript'>\n";
         $V.= "function Uploads_Reply()\n";
-        $V.= _("  {\n");
+        $V.= "  {\n";
         $V.= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
-        $V.= _("    {\n");
+        $V.= "    {\n";
         /* Remove all options */
-        $V.= _("    document.formy.uploadid.innerHTML = Uploads.responseText;\n");
+        $V.= "    document.formy.uploadid.innerHTML = Uploads.responseText;\n";
         /* Add new options */
-        $V.= _("    }\n");
-        $V.= _("  }\n");
+        $V.= "    }\n";
+        $V.= "  }\n";
         $V.= "</script>\n";
         /* Build the  HTML form */
         $V.= "<form name='formy' method='post'>\n"; // no url = this url
@@ -133,7 +135,7 @@ $text1 = _("\n");
         $V.= "<ol>\n";
 $text = _("Select the folder containing the upload you wish to move:  \n");
         $V.= "<li>$text";
-        $V.= _("<select name='oldfolderid'\n");
+        $V.= "<select name='oldfolderid'\n";
         $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
         $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
         $V.= FolderListOption(-1, 0);

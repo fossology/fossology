@@ -110,11 +110,13 @@ class agent_unpack extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= displayMessage('Unpack added to job queue');
+$text = _("Unpack added to job queue");
+	    $V .= displayMessage($text);
 	    }
 	  else
 	    {
-	    $V .= displayMessage("Unpack of Upload failed: $rc");
+$text = _("Unpack of Upload failed:");
+	    $V .= displayMessage($text.$rc);
 	    }
 	  }
 
@@ -146,19 +148,19 @@ class agent_unpack extends FO_Plugin
 	  $V .= "<ol>\n";
 $text = _("Select an uploaded file to unpack.\n");
 	  $V .= "<li>$text";
-	  $V .= "Only uploads that are not already unpacked (and not already scheduled) can be scheduled.\n";
-	  $V .= "<p />\nUnpack: <select name='upload'>\n";
+	  $V .= _("Only uploads that are not already unpacked (and not already scheduled) can be scheduled.\n");
+$text = _("Unpack:");
+	  $V .= "<p />\n$text <select name='upload'>\n";
 	  foreach($Results as $Row)
 	    {
 	    if (empty($Row['upload_pk'])) { continue; }
 	    if (empty($Row['upload_desc'])) { $Name = $Row['upload_filename']; }
 	    else { $Name = $Row['upload_desc'] . " (" . $Row['upload_filename'] . ")"; }
-$text = _("$Name");
-$text1 = _("\n");
-	    $V .= "<option value='" . $Row['upload_pk'] . "'>$text</option>$text1";
+	    $V .= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
 	    }
 	  $V .= "</select><P />\n";
-	  $V .= "<li>Select optional analysis<br />\n";
+$text = _("Select optional analysis");
+	  $V .= "<li>$text<br />\n";
 	  $V .= AgentCheckboxMake(-1,$this->Name);
 	  $V .= "</ol>\n";
 	  $V .= "<input type='submit' value='Unpack!'>\n";

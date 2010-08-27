@@ -73,7 +73,7 @@ $text3 = _("Percent Full");
       $Capacity = $List[1] * 1024;
       $CapacityH = Bytes2Human($Capacity);
 
-      $V .= "<td align='right' style='border-right:none'>$UsedH"</td>";
+      $V .= "<td align='right' style='border-right:none'>$UsedH</td>";
       $V .= "<td align='right' style='border-left:none'>(" . number_format($Used,0,"",",") . ")</td>";
       $V .= "<td align='right' style='border-right:none'>$CapacityH</td>";
       $V .= "<td align='right' style='border-left:none'>(" . number_format($Capacity,0,"",",") . ")</td>";
@@ -105,8 +105,7 @@ $text3 = _("Percent Full");
 	/**************************************************/
 	$V .= "<td valign='top'>\n";
 $text = _("Job Queue");
-$text1 = _("\n");
-	$V .= "<H2>$text</H2>$text1";
+	$V .= "<H2>$text</H2>\n";
 	$V .= "<table border=1>\n";
 $text = _("Queue Information");
 $text1 = _("Total");
@@ -118,8 +117,7 @@ $text1 = _("Total");
 	$Results = $DB->Action("SELECT COUNT(DISTINCT jq_job_fk) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
 	if ($showjobs_exists) {
 $text = _("Pending Analysis Jobs");
-$text1 = _("");
-	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td>$text1";
+	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
 	}
 	else {
 $text = _("Pending Analysis Jobs");
@@ -129,8 +127,7 @@ $text = _("Pending Analysis Jobs");
 	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL OR jq_end_bits = 2;");
 	if ($showjobs_exists) {
 $text = _("Tasks in the Job Queue");
-$text1 = _("");
-	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td>$text1";
+	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
 	}
 	else {
 $text = _("Tasks in the Job Queue");
@@ -140,8 +137,7 @@ $text = _("Tasks in the Job Queue");
 	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NULL AND jq_starttime IS NOT NULL;");
 	if ($showjobs_exists) {
 $text = _("Running Tasks");
-$text1 = _("");
-	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td>$text1";
+	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
 	}
 	else {
 $text = _("Running Tasks");
@@ -151,8 +147,7 @@ $text = _("Running Tasks");
 	$Results = $DB->Action("SELECT COUNT(*) AS val FROM jobqueue WHERE jq_endtime IS NOT NULL AND jq_end_bits=2;");
 	if ($showjobs_exists) {
 $text = _("Failed Tasks");
-$text1 = _("");
-	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td>$text1";
+	  $V .= "<tr><td><a href='$uri_showjobs'>$text</a></td> ";
 	}
 	else {
 $text = _("Failed Tasks");
@@ -165,8 +160,7 @@ $text = _("Failed Tasks");
 	/**************************************************/
 	$V .= "<td valign='top'>\n";
 $text = _("Database Contents");
-$text1 = _("\n");
-	$V .= "<H2>$text</H2>$text1";
+	$V .= "<H2>$text</H2>\n";
 	$V .= "<table border=1>\n";
 $text = _("Metric");
 $text1 = _("Total");
@@ -196,8 +190,7 @@ $text = _("Identified Licenses");
 	/**************************************************/
 	$V .= "<td valign='top'>\n";
 $text = _("Database Metrics");
-$text1 = _("\n");
-	$V .= "<H2>$text</H2>$text1";
+	$V .= "<H2>$text</H2>\n";
 	$V .= "<table border=1>\n";
 $text = _("Metric");
 $text1 = _("Total");
@@ -234,8 +227,7 @@ $text1 = _(" has been active");
 
 	/**************************************************/
 $text = _("Repository Disk Space");
-$text1 = _("\n");
-	$V .= "<H2>$text</H2>$text1";
+	$V .= "<H2>$text</H2>\n";
 	$V .= $this->DiskFree();
 
 	break;

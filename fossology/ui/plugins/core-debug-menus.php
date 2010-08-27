@@ -102,28 +102,35 @@ class core_debug_menus extends FO_Plugin
 	if ($FullMenuDebug == 2)
 		{
 $text = _("Full debug ENABLED!");
-		print "<b>$text</b> Now view any page.<P>\n";
+$text1 = _("Now view any page.");
+		print "<b>$text</b> $text1<P>\n";
 		}
 	if ($FullMenuDebug == 1)
 		{
 $text = _("Full debug disabled!");
-		print "<b>$text</b> Now view any page.<P>\n";
+$text1 = _("Now view any page.");
+		print "<b>$text</b> $text1<P>\n";
 		}
-	print "This developer tool lists all items in the menu structure.\n";
-	print "Since some menu inserts are conditional, not everything may appear here (the conditions may not lead to the insertion).\n";
-$text = _("in the menu");
-$text1 = _(".\n");
-	print "Fully-debugged menus show the full menu path and order number <i>$text</i>$text1";
+$text = _("This developer tool lists all items in the menu structure.");
+	print "$text\n";
+$text = _("Since some menu inserts are conditional, not everything may appear here (the conditions may not lead to the insertion).");
+	print "$text\n";
+$text = _("Fully-debugged menus show the full menu path and order number");
+$text1 = _("in the menu");
+	print "$text <i>$text1</i>.\n";
 	print "<ul>\n";
-$text = _("your");
-$text1 = _(" login session. (Nobody else will see it.)\n");
-	print "<li>The full debugging is restricted to <b>$text</b>$text1";
+$text = _("The full debugging is restricted to");
+$text1 = _("your");
+$text2 = _(" login session. (Nobody else will see it.)\n");
+	print "<li>$text <b>$text1</b>$text2";
 $text = _("Full debugging shows the full menu path for each menu\n");
 	print "<li>$text";
-	print "and the order is included in parenthesis.\n";
-$text = _("not");
-$text1 = _(" show the full path.\n");
-	print "However, menus that use HTML instead of text will <i>$text</i>$text1";
+$text = _("and the order is included in parenthesis.");
+	print "$text\n";
+$text = _("However, menus that use HTML instead of text will");
+$text1 = _("not");
+$text2 = _("show the full path.\n");
+	print "$text <i>$text1</i>$text2";
 $text = _("To disable full debugging, return here and unselect the option.\n");
 	print "<li>$text";
 	print "</ul>\n";

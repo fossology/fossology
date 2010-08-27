@@ -104,34 +104,38 @@ class admin_folder_delete extends FO_Plugin {
               $Folderprop = $DB->Action("SELECT * FROM folder where folder_pk = '$folder';");
               $Folder = $Folderprop[0];
               /* Need to refresh the screen */
-              $R.= displayMessage("Deletion of folder " . $Folder['folder_name'] . " added to job queue");
+$text = _("Deletion of folder ");
+$text1 = _(" added to job queue");
+              $R.= displayMessage($text . $Folder['folder_name'] . $text1);
             }
             else {
-              $R.= displayMessage("Deletion of " . $Folder['folder_name'] . " failed: $rc");
+$text = _("Deletion of ");
+$text1 = _(" failed: ");
+              $R.= displayMessage($text . $Folder['folder_name'] . $text1 . $rc);
             }
           }
-          $V.= _("$R\n");
+          $V.= "$R\n";
           $V.= "<form method='post'>\n"; // no url = this url
-$text = _("delete");
-$text1 = _(".\n");
-          $V.= "Select the folder to <em>$text</em>$text1";
+$text  =  _("Select the folder to ");
+$text1 = _("delete");
+          $V.= "$text<em>$text1</em>.\n";
           $V.= "<ul>\n";
-$text = _("delete");
-$text1 = _(" the folder, all subfolders, and all uploaded files stored within the folder!\n");
-          $V.= "<li>This will <em>$text</em>$text1";
-$text = _("Be very careful with your selection since you can delete a lot of work!\n");
-          $V.= "<li>$text";
-$text = _("All analysis only associated with the deleted uploads will also be deleted.\n");
-          $V.= "<li>$text";
-$text = _("THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.\n");
-          $V.= "<li>$text";
+$text = _("This will ");
+$text1 = _("delete");
+$text2 = _(" the folder, all subfolders, and all uploaded files stored within the folder!");
+          $V.= "<li>$text<em>$text1</em>$text2\n";
+$text = _("Be very careful with your selection since you can delete a lot of work!");
+          $V.= "<li>$text\n";
+$text = _("All analysis only associated with the deleted uploads will also be deleted.");
+          $V.= "<li>$text\n";
+$text = _("THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.");
+          $V.= "<li>$text\n";
           $V.= "</ul>\n";
-$text = _("Select the folder to delete:  \n");
-          $V.= "<P>$text";
+$text = _("Select the folder to delete:  ");
+          $V.= "<P>$text\n";
           $V.= "<select name='folder'>\n";
-$text = _("[select folder]");
-$text1 = _("\n");
-          $V.= "<option value=''>$text</option>$text1";
+$text = _("select folder");
+          $V.= "<option value=''>[$text]</option>\n";
           $V.= FolderListOption(-1, 0);
           $V.= "</select><P />\n";
           $V.= "<input type='submit' value='Delete!'>\n";

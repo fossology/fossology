@@ -86,7 +86,8 @@ class user_del extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= displayMessage('User deleted.');
+$text = _("User deleted.");
+	    $V .= displayMessage($text);
 	    }
 	  else
 	    {
@@ -103,14 +104,13 @@ class user_del extends FO_Plugin
 	else
 	  {
 	  /* Build HTML form */
-$text = _("permanently");
-	  $V .= "Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>$text</font> removed. (There is no 'undo' to this delete.)<P />\n";
+	  $V .= _("Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>permanently</font> removed. (There is no 'undo' to this delete.)<P />\n");
 	  $V .= "<form name='formy' method='POST'>\n"; // no url = this url
-	  $V .= "To delete a user, enter the following information:<P />\n";
+	  $V .= _("To delete a user, enter the following information:<P />\n");
 	  $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 	  $Val = htmlentities(GetParm('userid',PARM_TEXT),ENT_QUOTES);
 	  $V .= "<ol>\n";
-	  $V .= "<li>Select the user to delete.<br />";
+	  $V .= _("<li>Select the user to delete.<br />");
 	  $V .= "<select name='userid'>\n";
 	  for($i=0; !empty($Results[$i]['user_name']); $i++)
 	    {
@@ -120,7 +120,8 @@ $text = _("permanently");
 	    }
 	  $V .= "</select>\n";
 
-	  $V .= "<P /><li>Confirm user deletion: <input type='checkbox' name='confirm' value='1'>";
+$text = _("Confirm user deletion");
+	  $V .= "<P /><li>$text: <input type='checkbox' name='confirm' value='1'>";
 	  $V .= "</ol>\n";
 
 	  $V .= "<input type='submit' value='Delete!'>\n";

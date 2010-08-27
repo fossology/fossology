@@ -129,10 +129,14 @@ class folder_create extends FO_Plugin
           $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
           if ($rc == 1) {
             /* Need to refresh the screen */
-            $R .= displayMessage("Folder $NewFolder Created");
+$text=_("Folder ");
+$text1=_(" Created");
+            $R .= displayMessage($text.$NewFolder.$text1);
           }
           else if($rc == 4) {
-            $R .= displayMessage("Folder $NewFolder Exists");
+$text=_("Folder ");
+$text1=_(" Exists");
+            $R .= displayMessage($text.$NewFolder.$text1);
           }
         }
         /* Display the form */

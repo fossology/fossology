@@ -49,8 +49,7 @@ class debug_user extends FO_Plugin
 	$Results = $DB->Action("SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';");
 	$R = &$Results[0];
 $text = _("User Information");
-$text1 = _("\n");
-	$V .= "<H2>$text</H2>$text1";
+	$V .= "<H2>$text</H2>\n";
 	$V .= "<table border=1>\n";
 $text = _("Field");
 $text1 = _("Value");

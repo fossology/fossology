@@ -208,43 +208,41 @@ class user_edit_self extends FO_Plugin {
 					$rc = $this->Edit();
 					if (empty($rc)) {
 						/* Need to refresh the screen */
-						$V.= displayMessage('User information updated.');
+$text = _("User information updated.");
+						$V.= displayMessage($text);
 					} else {
 						$V.= displayMessage($rc);
 					}
 				}
 				/* Build HTML form */
 				$V.= "<form name='formy' method='POST'>\n"; // no url = this url
-$text = _("must");
-				$V.= "You <font color='red'>$text</font> provide your current password in order to make any changes.<br />\n";
-				$V.= "Enter your password: <input type='password' name='pass0' size=20>\n";
+				$V.= _("You <font color='red'>must</font> provide your current password in order to make any changes.<br />\n");
+$text = _("Enter your password");
+				$V.= "$text: <input type='password' name='pass0' size=20>\n";
 				$V.= "<hr>\n";
 				$Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';");
 				$R = $Results[0];
-				$V.= "To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n";
+				$V.= _("To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n");
 				$Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 				$V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
 				$Val = htmlentities($R['user_name'], ENT_QUOTES);
-$text = _("1.");
-$text1 = _("Change your username. This will be checked to ensure that it is unique among all users.");
-				$V.= "$Style<th width='5%'>$text</th><th width='25%'>$text1</th>";
+$text = _("Change your username. This will be checked to ensure that it is unique among all users.");
+				$V.= "$Style<th width='5%'>1.</th><th width='25%'>$text</th>";
 				$V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities($R['user_desc'], ENT_QUOTES);
-$text = _("2.");
-$text1 = _("Change your description (name, contact, or other information).  This may be blank.");
-				$V.= "$Style<th>$text</th><th>$text1</th>\n";
+$text = _("Change your description (name, contact, or other information).  This may be blank.");
+				$V.= "$Style<th>2.</th><th>$text</th>\n";
 				$V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities($R['user_email'], ENT_QUOTES);
-$text = _("3.");
-$text1 = _("Change your email address. This may be blank.");
-				$V.= "$Style<th>$text</th><th>$text1</th>\n";
+$text = _("Change your email address. This may be blank.");
+				$V.= "$Style<th>3.</th><th>$text</th>\n";
 				$V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
-$text = _("4.");
-$text1 = _("Change your password.");
-				$V.= "$Style<th>$text</th><th>$text1<br>Re-enter your password.</th><td>";
+$text = _("Change your password.");
+$text1 = _("Re-enter your password.");
+				$V.= "$Style<th>4.</th><th>$text<br>$text1</th><td>";
 				$V.= "<input type='password' name='pass1' size=20><br />\n";
 				$V.= "<input type='password' name='pass2' size=20></td>\n";
 				$V.= "</tr>\n";
@@ -253,16 +251,12 @@ $text1 = _("Change your password.");
 				} else {
 					$Checked = "checked='checked'";
 				}
-$text = _("5.");
-$text1 = _("E-mail Notification");
-				$V.= "$Style<th>$text</th><th>$text1</th><td><input type=checkbox ";
+$text = _("E-mail Notification");
+				$V.= "$Style<th>5.</th><th>$text</th><td><input type=checkbox ";
 				$V.= "</tr>\n";
 				$V.= "</tr>\n";
-$text = _("6.");
-$text1 = _("Default Agents: Select the ");
-				$V .= "$Style<th>$text</th><th>$text1";
-              "agent(s) to automatically run when uploading data. These" .
-              " selections can be changed on the upload screens.\n</th><td>\n";
+$text = _("Default Agents: Select the agent(s) to automatically run when uploading data. These selections can be changed on the upload screens.");
+				$V .= "$Style<th>6.</th><th>$text\n</th><td>\n";
         /*
          * added this code so the form makes sense.  You can have an admin define default agents
          * but if you don't have Analyze or better permissions, then those agents are not available to
@@ -276,16 +270,14 @@ $text1 = _("Default Agents: Select the ");
 				}
 				if($uri == "agent_unpack" && count($AgentList) == 1 ) {
 $text = _("You do not have permission to change your default agents");
-$text1 = _("\n");
-					$V .= "<h3>$text</h3>$text1";
+					$V .= "<h3>$text</h3>\n";
 				}
 				else {
 					$V.= AgentCheckBoxMake(-1, "agent_unpack");
 				}
 				$V .= "</td>\n";
-$text = _("7.");
-$text1 = _("Default bucketpool.");
-                $V.= "$Style<th>$text</th><th>$text1</th>";
+$text = _("Default bucketpool.");
+                $V.= "$Style<th>7.</th><th>$text</th>";
                 $V.= "<td>";
 				$Val = htmlentities($R['default_bucketpool_fk'], ENT_QUOTES);
                 $V.= SelectBucketPool($Val);

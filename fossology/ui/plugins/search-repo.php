@@ -137,9 +137,9 @@ class search_repo extends FO_Plugin
 	$Page = GetParm("page",PARM_INTEGER);
 	if (empty($Page)) { $Page = 0; }
 
-	$V .= "Given a file key (pfile_pk) or repository identifier (sha1.md5.length), return the list of files.\n";
+	$V .= _("Given a file key (pfile_pk) or repository identifier (sha1.md5.length), return the list of files.\n");
 	$V .= "<P /><form method='post'>\n";
-	$V .= "Enter the pfile key or repository identifier:<P />";
+	$V .= _("Enter the pfile key or repository identifier:<P />");
 	$V .= "<INPUT type='text' name='search' size='60' value='" . htmlentities($SearchArg) . "'><P>\n";
 	$V .= "<input type='submit' value='Find!'>\n";
 	$V .= "</form>\n";
@@ -147,7 +147,8 @@ class search_repo extends FO_Plugin
 	if (!empty($SearchArg))
 	  {
 	  $V .= "<hr>\n";
-	  $V .= "<H2>Files associated with " . htmlentities($SearchArg) . "</H2>\n";
+$text = _("Files associated with");
+	  $V .= "<H2>$text " . htmlentities($SearchArg) . "</H2>\n";
 	  $V .= $this->Search($SearchArg,$Page);
 	  }
 

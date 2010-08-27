@@ -65,14 +65,14 @@ class jobs_showjobs_upload extends FO_Plugin
 	$V .= ActiveHTTPscript("Uploads");
 	$V .= "<script language='javascript'>\n";
 	$V .= "function Uploads_Reply()\n";
-	$V .= _("  {\n");
+	$V .= "  {\n";
 	$V .= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
-	$V .= _("    {\n");
+	$V .= "    {\n";
 	/* Remove all options */
-	$V .= _("    document.formy.upload.innerHTML = Uploads.responseText;\n");
+	$V .= "    document.formy.upload.innerHTML = Uploads.responseText;\n";
 	/* Add new options */
-	$V .= _("    }\n");
-	$V .= _("  }\n");
+	$V .= "    }\n";
+	$V .= "  }\n";
 	$V .= "</script>\n";
 
 	/* Build HTML form */
@@ -81,11 +81,12 @@ class jobs_showjobs_upload extends FO_Plugin
 	$V .= "<input type='hidden' name='mod' value='showjobs'>";
 	$V .= "<input type='hidden' name='show' value='summary'>";
 	$V .= "<input type='hidden' name='history' value='1'>\n";
-	$V .= "<P>View the scheduled jobs associated with an uploaded file.<P>\n";
+$text = _("View the scheduled jobs associated with an uploaded file.");
+	$V .= "<P>$text<P>\n";
 	$V .= "<ol>\n";
 $text = _("Select the folder containing the file to view: ");
 	$V .= "<li>$text";
-	$V .= _("<select name='folder' ");
+	$V .= "<select name='folder' ";
 	$V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
 	$V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + document.formy.folder.value)'>\n";
 	$V .= FolderListOption(-1,0);

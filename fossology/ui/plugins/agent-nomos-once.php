@@ -165,22 +165,21 @@ class agent_nomos_once extends FO_Plugin {
         $V.= _("This analyzer allows you to upload a single file for license analysis.\n");
         $V.= _("The limitations:\n");
         $V.= "<ul>\n";
-        $V.= "<li>The analysis is done in real-time. Large files may take a while." .
-             " This method is not recommended for files larger than a few hundred kilobytes.\n";
-$text = _("not");
-$text1 = _(" unpacked. If you upload");
-        $V.= "<li>Files that contain files are <b>$text</b>$text1" .
-             " a 'zip' or 'deb' file, then the binary file will be scanned for " .
-             "licenses and nothing will likely be found.\n";
-$text = _("not");
-$text1 = _(" stored. As soon as you get your results, ");
-        $V.= "<li>Results are <b>$text</b>$text1" .
-             "your uploaded file is removed from the system.\n";
+        $V.= _("<li>The analysis is done in real-time. Large files may take a while." .
+             " This method is not recommended for files larger than a few hundred kilobytes.\n");
+$text = _("Files that contain files are");
+$text1 = _("not");
+$text2 = _("unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.");
+        $V.= "<li>$text <b>$text1</b> $text2\n";
+$text = _("Results are");
+$text1 = _("not");
+$text2 = _("stored. As soon as you get your results, your uploaded file is removed from the system. ");
+        $V.= "<li>$text <b>$text1</b> $text2\n";
         $V.= "</ul>\n";
         /* Display the form */
         $V.= "<form enctype='multipart/form-data' method='post'>\n";
         $V.= "<ul>\n";
-        $V.= "<li>Select the file to upload:<br />\n";
+        $V.= _("<li>Select the file to upload:<br />\n");
         $V.= "<input name='licfile' size='60' type='file' /><br />\n";
         $V.= "</ul>\n";
         $V.= "<input type='hidden' name='showheader' value='1'>";
@@ -189,10 +188,8 @@ $text1 = _(" stored. As soon as you get your results, ");
 
 
         if (file_exists($tmp_name)) {
-          $keep = "<strong>A one shot license analysis shows the following license(s)" .
-$text = _("{$_FILES['licfile']['name']}:");
-$text1 = _(" ");
-            " in file </strong><em>$text</em>$text1";
+$text = _("A one shot license analysis shows the following license(s) in file");
+          $keep = "<strong>$text </strong><em>{$_FILES['licfile']['name']}:</em> ";
           $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
           print displayMessage(NULL,$keep);
           $_FILES['licfile'] = NULL;
@@ -216,10 +213,8 @@ $text1 = _(" ");
             $Repo = $Results[0]['pfile_sha1'] . "." . $Results[0]['pfile_md5'] . "." . $Results[0]['pfile_size'];
             $Repo = trim(shell_exec("$LIBEXECDIR/reppath files '$Repo'"));
             $tmp_name = $Repo;
-            $keep = "<strong>A one shot license analysis shows the following license(s)" .
-$text = _("{$_FILES['licfile']['name']}:");
-$text1 = _(" ");
-            " in file </strong><em>$text</em>$text1";
+$text = _("A one shot license analysis shows the following license(s) in file");
+            $keep = "<strong>$text </strong><em>{$_FILES['licfile']['name']}:</em> ";
             $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
             print displayMessage(NULL, $keep);
             print $V;

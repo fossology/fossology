@@ -82,10 +82,12 @@ class admin_upload_delete extends FO_Plugin {
           $rc = $this->Delete($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $V.= displayMessage('Deletion added to job queue');
+$text=_("Deletion added to job queue");
+            $V.= displayMessage($text);
           }
           else {
-            $V.= DisplayMessage("Deletion Scheduling failed: $rc");
+$text=_("Deletion Scheduling failed: ");
+            $V.= DisplayMessage($text.$rc);
           }
         }
         /* Create the AJAX (Active HTTP) javascript for doing the reply
@@ -93,24 +95,25 @@ class admin_upload_delete extends FO_Plugin {
         $V.= ActiveHTTPscript("Uploads");
         $V.= "<script language='javascript'>\n";
         $V.= "function Uploads_Reply()\n";
-        $V.= _("  {\n");
+        $V.= "  {\n";
         $V.= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
-        $V.= _("    {\n");
+        $V.= "    {\n";
         /* Remove all options */
-        $V.= _("    document.formy.upload.innerHTML = Uploads.responseText;\n");
+        $V.= "    document.formy.upload.innerHTML = Uploads.responseText;\n";
         /* Add new options */
-        $V.= _("    }\n");
-        $V.= _("  }\n");
+        $V.= "    }\n";
+        $V.= "  }\n";
         $V.= "</script>\n";
         /* Build HTML form */
         $V.= "<form name='formy' method='post'>\n"; // no url = this url
-$text = _("delete");
-$text1 = _(".\n");
-        $V.= "Select the uploaded file to <em>$text</em>$text1";
+$text = _("Select the uploaded file to");
+$text1 = _("delete");
+        $V.= "$text <em>$text1</em>\n";
         $V.= "<ul>\n";
-$text = _("delete");
-$text1 = _(" the upload file!\n");
-        $V.= "<li>This will <em>$text</em>$text1";
+$text = _("This will");
+$text1 = _("delete");
+$text2 = _("the upload file!\n");
+        $V.= "<li>$text <em>$text1</em> $text2";
 $text = _("Be very careful with your selection since you can delete a lot of work!\n");
         $V.= "<li>$text";
 $text = _("All analysis only associated with the deleted upload file will also be deleted.\n");
@@ -118,11 +121,12 @@ $text = _("All analysis only associated with the deleted upload file will also b
 $text = _("THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.\n");
         $V.= "<li>$text";
         $V.= "</ul>\n";
-        $V.= "<P>Select the uploaded file to delete:<P>\n";
+$text = _("Select the uploaded file to delete:");
+        $V.= "<P>$text<P>\n";
         $V.= "<ol>\n";
 $text = _("Select the folder containing the file to delete: ");
         $V.= "<li>$text";
-        $V.= _("<select name='folder' ");
+        $V.= "<select name='folder' ";
         $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
         $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
         $V.= FolderListOption(-1, 0);

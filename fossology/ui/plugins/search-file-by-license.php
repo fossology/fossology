@@ -70,10 +70,10 @@ class search_file_by_license extends FO_Plugin
 	$Offset = $Page * $Max;
 
 	/* Get License Name */
-	$V .= "The following files contain the license '<b>";
+$text = _("The following files contain the license");
+	$V .= "$text '<b>";
 	$V .= htmlentities($WantLic);
-$text = _("'.\n");
-	$V .= "</b>$text";
+	$V .= "</b>'.\n";
 
 	/* Load licenses */
 	$Lics = array();
@@ -86,8 +86,7 @@ $text = _("'.\n");
 	/* Get the page menu */
 	if (($Count >= $Max) || ($Page > 0))
 	{
-$text = _("\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . ");
-	  $VM = "<P />$text"<P />\n";
+	  $VM = "<P />\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . "<P />\n";
 	  $V .= $VM;
 	}
 	else
@@ -101,9 +100,9 @@ $text = _("\n" . MenuEndlessPage($Page,intval((($Count+$Offset)/$Max))) . ");
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-$text = _("Elaspsed time: $Time seconds");
-$text1 = _("\n");
-	$V .= "<small>$text</small>$text1";
+$text = _("Elaspsed time:");
+$text1 = _("seconds");
+	$V .= "<small>$text $Time $text1</small>\n";
 	break;
       case "Text":
 	break;

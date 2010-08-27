@@ -206,18 +206,21 @@ class agent_bucket extends FO_Plugin {
           $rc = $this->AgentAdd($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $Page.= displayMessage('Bucket analysis added to the job queue');
+$text = _("Bucket analysis added to the job queue");
+            $Page.= displayMessage($text);
           }
           else {
-            $Page.= displayMessage("Scheduling Bucket agent failed: $rc");
+$text = _("Scheduling Bucket agent failed: ");
+            $Page.= displayMessage($text.$rc);
           }
         }
           /* Display the form */
           $Page.= "<form method='post'>\n"; // no url = this url
 $text = _("NOTE: this code was borrowed from nomos.  It needs to be updated for buckets.  If you see this message please tell bobg.");
           $Page.= "<H1>$text</H1>";
-          $Page.= "Select an uploaded file for bucket analysis.\n";
-          $Page.= "<p />\nAnalyze: <select name='upload'>\n";
+          $Page.= _("Select an uploaded file for bucket analysis.\n");
+$text = _("Analyze:");
+          $Page.= "<p />\n$text <select name='upload'>\n";
           foreach($Results as $Row) {
             if (empty($Row['upload_pk'])) {
               continue;
@@ -228,9 +231,7 @@ $text = _("NOTE: this code was borrowed from nomos.  It needs to be updated for 
             else {
               $Name = $Row['upload_desc'] . " (" . $Row['upload_filename'] . ")";
             }
-$text = _("$Name");
-$text1 = _("\n");
-            $Page.= "<option value='" . $Row['upload_pk'] . "'>$text</option>$text1";
+            $Page.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
           $Page.= "</select><P />\n";
           $Page.= "<input type='submit' value='Analyze!'>\n";
