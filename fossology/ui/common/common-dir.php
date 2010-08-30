@@ -267,7 +267,8 @@ function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
   if (!empty($Text)) { $V .= "$Text<br>\n"; }
 
   /* Get the FOLDER list for the upload */
-  $V .= "<b>Folder</b>: ";
+$text = _("Folder");
+  $V .= "<b>$text</b>: ";
   $List = FolderGetFromUpload($Path[0]['upload_fk']);
   $Uri2 = Traceback_uri() . "?mod=browse" . Traceback_parm_keep(array("show"));
   for($i=0; $i < count($List); $i++)
@@ -388,7 +389,8 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
     $Phrase='';
     if ($ShowPhrase && !empty($R['phrase_text']))
       {
-      $Phrase = "<b>Phrase:</b> " . htmlentities($R['phrase_text']);
+$text = _("Phrase");
+      $Phrase = "<b>$text:</b> " . htmlentities($R['phrase_text']);
       }
 
     if ((IsDir($R['ufile_mode'])) || (Iscontainer($R['ufile_mode'])))

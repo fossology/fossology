@@ -126,7 +126,8 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
     {
       $msg = "";
       $newbucketpool_pk = $this->CloneBucketpool($bucketpool_pk, $UpdateDefault, $msg);
-      echo "Your new bucketpool_pk is $newbucketpool_pk<hr>";
+$text = _("Your new bucketpool_pk is");
+      echo "$text $newbucketpool_pk<hr>";
     }
 
 print <<<ENDINTRO
@@ -153,11 +154,13 @@ ENDINTRO;
 
 	echo "<form method='POST'>";
     $Val = "";
-    echo "Choose the bucketpool to duplicate ";
+$text = _("Choose the bucketpool to duplicate");
+    echo "$text ";
     echo SelectBucketPool($Val);
 
     echo "<p>";
-    echo "<input type='checkbox' name='updatedefault' checked> Update my default bucketpool.";
+$text = _("Update my default bucketpool");
+    echo "<input type='checkbox' name='updatedefault' checked> $text.";
     echo "<p>";
     echo "<input type='submit' value='Submit'>";
 	echo "</form>";

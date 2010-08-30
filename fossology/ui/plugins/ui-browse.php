@@ -412,11 +412,11 @@ $text = _("Scheduling of re-analysis failed, return code");
             }
           }
           $V.= "<font class='text'>\n";
-          $V.= Dir2Browse($this->Name, $Item, NULL, 1, "Browse" . "\n");
+          $V.= Dir2Browse($this->Name, $Item, NULL, 1, "Browse") . "\n";
         }
         else if (!empty($Upload)) {
           $V.= "<font class='text'>\n";
-          $V.= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse" . "\n");
+          $V.= Dir2BrowseUpload($this->Name, $Upload, NULL, 1, "Browse") . "\n";
         }
         else {
           $V.= "<font class='text'>\n";
