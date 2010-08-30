@@ -34,7 +34,7 @@ if (!isset($GlobalReady)) {
 class agent_bucket extends FO_Plugin {
 
   public $Name = "agent_bucket";
-  public $Title = "Schedule Bucket Analysis";
+  public $Title = "Bucket Analysis";
   // public $MenuList   = "Jobs::Agents::Bucket Analysis";
   public $Version = "1.0";
   public $Dependency = array("db");

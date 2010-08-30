@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class agent_specagent extends FO_Plugin
 {
   public $Name       = "agent_specagent";
-  public $Title      = "Schedule Spec File Analysis (deprecated)";
+  public $Title      = "Spec File Analysis (deprecated. Replaced by Package analysis.)";
   // public $MenuList   = "Jobs::Agents::Spec File Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
