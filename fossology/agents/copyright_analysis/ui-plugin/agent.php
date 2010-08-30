@@ -28,7 +28,7 @@ if (!isset($GlobalReady)) {
 class agent_copyright extends FO_Plugin {
 
   public $Name = "agent_copyright";
-  public $Title = "Schedule Copyright/Email/URL Analysis";
+  public $Title = "Copyright/Email/URL Analysis";
   public $Version = "1.0";
   public $Dependency = array("db");
   public $DBaccess = PLUGIN_DB_ANALYZE;
