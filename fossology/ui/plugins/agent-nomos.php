@@ -34,7 +34,7 @@ if (!isset($GlobalReady)) {
 class agent_fonomos extends FO_Plugin {
 
   public $Name = "agent_nomos";
-  public $Title = "Schedule Nomos License Analysis";
+  public $Title = "Nomos License Analysis";
   // public $MenuList   = "Jobs::Agents::Nomos License Analysis";
   public $Version = "1.0";
   public $Dependency = array("db");

@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class agent_pkgagent extends FO_Plugin
 {
   public $Name       = "agent_pkgagent";
-  public $Title      = "Schedule Package Analysis";
+  public $Title      = "Package Analysis (Parse package headers)";
   //public $MenuList   = "Jobs::Agents::Package Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");

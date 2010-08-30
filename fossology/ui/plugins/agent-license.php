@@ -26,7 +26,7 @@ if (!isset($GlobalReady)) {
 }
 class agent_license extends FO_Plugin {
   public $Name = "agent_license";
-  public $Title = "Schedule bSAM License Analysis (deprecated)";
+  public $Title = "bSAM License Analysis (deprecated)";
   // public $MenuList   = "Jobs::Agents::License Analysis";
   public $Version = "1.1";
   public $Dependency = array(
