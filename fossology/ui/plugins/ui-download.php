@@ -38,7 +38,8 @@ class ui_download extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    menu_insert("Browse-Pfile::Download",0,$this->Name,"Download this file");
+$text = _("Download this file");
+    menu_insert("Browse-Pfile::Download",0,$this->Name,$text);
     } // RegisterMenus()
 
   /***********************************************************

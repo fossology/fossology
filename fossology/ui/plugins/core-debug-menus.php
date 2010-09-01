@@ -139,12 +139,14 @@ $text = _("To disable full debugging, return here and unselect the option.\n");
 	if (@$_SESSION['fullmenudebug'] == 1)
 	  {
 	  print "<input type='hidden' name='fullmenu' value='1'>";
-	  print "<input type='submit' value='Disable Full Debug!'>";
+$text = _("Disable Full Debug");
+	  print "<input type='submit' value='$text!'>";
 	  }
 	else
 	  {
 	  print "<input type='hidden' name='fullmenu' value='2'>";
-	  print "<input type='submit' value='Enable Full Debug!'>";
+$text = _("Enable Full Debug");
+	  print "<input type='submit' value='$text!'>";
 	  }
 	print "</form>\n";
 	print "<hr>";

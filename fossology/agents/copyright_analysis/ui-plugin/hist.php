@@ -72,7 +72,8 @@ class copyright_hist extends FO_Plugin
       }
       else
       {
-       menu_insert("Browse::Copyright/Email/URL",10,$URI,"View copyright/email/url histogram");
+$text = _("View copyright/email/url histogram");
+       menu_insert("Browse::Copyright/Email/URL",10,$URI,$text);
       }
     }
   } // RegisterMenus()
@@ -131,7 +132,7 @@ class copyright_hist extends FO_Plugin
 
     if (pg_num_rows($result) == 0)
     {
-      echo "<h2>No results to display.</h2>";
+      echo _("<h2>No results to display.</h2>");
       exit();
     }
 
@@ -141,7 +142,8 @@ class copyright_hist extends FO_Plugin
 
     $AgentSelect = AgentSelect($Agent_name, $upload_pk, "copyright", true, "agent_pk", $Agent_pk);
     $VLic .= $AgentSelect;
-    $VLic .= "<input type='submit' value='Go'>";
+$text = _("Go");
+    $VLic .= "<input type='submit' value='$text'>";
 */
 
     /* Write license histogram to $VLic  */
@@ -156,29 +158,36 @@ class copyright_hist extends FO_Plugin
      */
     if (pg_num_rows($result) == $max_rows)
     {
-      $VCopyright .= "<h2>Too many rows to display.  Only first $max_rows shown.</h2>";
+$text = _("Too many rows to display.  Only first");
+$text1 = _("shown");
+      $VCopyright .= "<h2>$text $max_rows $text1.</h2>";
     }
     
     $VCopyright .= "<table border=1 width='100%' id='copyright'>\n";
-    $VCopyright .= "<tr><th width='10%'>Count</th>";
-    $VCopyright .= "<th width='10%'>Files</th>";
-    $VCopyright .= "<th>Copyright Statements</th></tr>\n";
+$text = _("Count");
+$text1 = _("Files");
+$text2 = _("Copyright Statements");
+$text3 = _("Email");
+$text4 = _("URL");
+    $VCopyright .= "<tr><th width='10%'>$text</th>";
+    $VCopyright .= "<th width='10%'>$text1</th>";
+    $VCopyright .= "<th>$text2</th></tr>\n";
 
     $EmailCount = 0;
     $UniqueEmailCount = 0;
     $NoEmailFound = 0;
     $VEmail = "<table border=1 width='100%'id='copyrightemail'>\n";
-    $VEmail .= "<tr><th width='10%'>Count</th>";
-    $VEmail .= "<th width='10%'>Files</th>";
-    $VEmail .= "<th>Email</th></tr>\n";
+    $VEmail .= "<tr><th width='10%'>$text</th>";
+    $VEmail .= "<th width='10%'>$text1</th>";
+    $VEmail .= "<th>$text3</th></tr>\n";
 
     $UrlCount = 0;
     $UniqueUrlCount = 0;
     $NoUrlFound = 0;
     $VUrl = "<table border=1 width='100%' id='copyrighturl'>\n";
-    $VUrl .= "<tr><th width='10%'>Count</th>";
-    $VUrl .= "<th width='10%'>Files</th>";
-    $VUrl .= "<th>URL</th></tr>\n";
+    $VUrl .= "<tr><th width='10%'>$text</th>";
+    $VUrl .= "<th width='10%'>$text1</th>";
+    $VUrl .= "<th>$text4</th></tr>\n";
 
     $rows = pg_fetch_all($result);
 
@@ -239,21 +248,27 @@ class copyright_hist extends FO_Plugin
 
     $VCopyright .= "</table>\n";
     $VCopyright .= "<p>\n";
-    $VCopyright .= "Unique Copyrights: $UniqueCopyrightCount<br>\n";
+$text = _("Unique Copyrights");
+$text1 = _("Total Copyrights");
+    $VCopyright .= "$text: $UniqueCopyrightCount<br>\n";
     $NetCopyright = $CopyrightCount;
-    $VCopyright .= "Total Copyrights: $NetCopyright";
+    $VCopyright .= "$text1: $NetCopyright";
 
     $VEmail .= "</table>\n";
     $VEmail .= "<p>\n";
-    $VEmail .= "Unique Emails: $UniqueEmailCount<br>\n";
+$text = _("Unique Emails");
+$text1 = _("Total Emails");
+    $VEmail .= "$text: $UniqueEmailCount<br>\n";
     $NetEmail = $EmailCount;
-    $VEmail .= "Total Emails: $NetEmail";
+    $VEmail .= "$text1: $NetEmail";
 
     $VUrl .= "</table>\n";
     $VUrl .= "<p>\n";
-    $VUrl .= "Unique URLs: $UniqueUrlCount<br>\n";
+$text = _("Unique URLs");
+$text1 = _("Total URLs");
+    $VUrl .= "$text: $UniqueUrlCount<br>\n";
     $NetUrl = $UrlCount;
-    $VUrl .= "Total URLs: $NetUrl";
+    $VUrl .= "$text1: $NetUrl";
 
     pg_free_result($result);
 
@@ -357,13 +372,17 @@ class copyright_hist extends FO_Plugin
     }
 
     /* Combine VF and VLic */
-    $V .= "We realize there may be many false positives in this report.  They will be addressed in the next release.<p>";
+    $V .= _("We realize there may be many false positives in this report.  They will be addressed in the next release.<p>");
+$text = _("Jump to");
+$text1 = _("Emails");
+$text2 = _("Copyright Statements");
+$text3 = _("URLs");
     $V .= "<table border=0 width='100%'>\n";
-    $V .= "<tr><td><a name=\"statements\"></a>Jump to: <a href=\"#emails\">Emails</a> | <a href=\"#urls\">URLs</a></td><td></td></tr>\n";
+    $V .= "<tr><td><a name=\"statements\"></a>$text: <a href=\"#emails\">$text1</a> | <a href=\"#urls\">$text3</a></td><td></td></tr>\n";
     $V .= "<tr><td valign='top' width='50%'>$VCopyright</td><td valign='top'>$VF</td></tr>\n";
-    $V .= "<tr><td><a name=\"emails\"></a>Jump to: <a href=\"#statements\">Copyright Statements</a> | <a href=\"#urls\">URLs</a></td><td></td></tr>\n";
+    $V .= "<tr><td><a name=\"emails\"></a>Jump to: <a href=\"#statements\">$text2</a> | <a href=\"#urls\">$text3</a></td><td></td></tr>\n";
     $V .= "<tr><td valign='top' width='50%'>$VEmail</td><td valign='top'></td></tr>\n";
-    $V .= "<tr><td><a name=\"urls\"></a>Jump To: <a href=\"#statements\">Copyright Statements</a> | <a href=\"#emails\">Emails</a></td><td></td></tr>\n";
+    $V .= "<tr><td><a name=\"urls\"></a>Jump To: <a href=\"#statements\">$text2</a> | <a href=\"#emails\">$text1</a></td><td></td></tr>\n";
     $V .= "<tr><td valign='top' width='50%'>$VUrl</td><td valign='top'></td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
@@ -445,10 +464,13 @@ class copyright_hist extends FO_Plugin
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
-    printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
+$text = _("Elapsed time: %.2f seconds");
+    printf( "<small>$text</small>", $Time);
 
 /********  disable cache to see if this is fast enough without it *****
-    if ($Cached) echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
+$text = _("cached");
+$text1 = _("Update");
+    if ($Cached) echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
 **************************************************/
     return;
   }

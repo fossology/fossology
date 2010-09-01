@@ -38,7 +38,8 @@ class ui_view_info extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    menu_insert("Browse-Pfile::Info",5,$this->Name,"View file information");	
+$text = _("View file information");
+    menu_insert("Browse-Pfile::Info",5,$this->Name,$text);	
     // For the Browse menu, permit switching between detail and summary.
     $Parm = Traceback_parm_keep(array("upload","item","format"));
     $URI = $this->Name . $Parm;
@@ -49,8 +50,9 @@ class ui_view_info extends FO_Plugin
 	}
     else
 	{
-	menu_insert("View::Info",1,$URI,"View information about this file");
-	menu_insert("View-Meta::Info",1,$URI,"View information about this file");
+$text = _("View information about this file");
+	menu_insert("View::Info",1,$URI,$text);
+	menu_insert("View-Meta::Info",1,$URI,$text);
 	}
     } // RegisterMenus()
 

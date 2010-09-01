@@ -58,7 +58,8 @@ class copyright_list extends FO_Plugin
 
     $URL = $this->Name . "&agent=$agent_pk&item=$uploadtree_pk&hash=$hash&type=$type&page=-1";
     if (!empty($Excl)) $URL .= "&excl=$Excl";
-    menu_insert($this->Name."::Show All",0, $URL, "Show All Files");
+$text = _("Show All Files");
+    menu_insert($this->Name."::Show All",0, $URL, $text);
 
   } // RegisterMenus()
       
@@ -73,7 +74,7 @@ class copyright_list extends FO_Plugin
     global $DB, $PG_CONN;
 
     // make sure there is a db connection since I've pierced the core-db abstraction
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo _("NO DB connection"); }
 
     $V="";
     $Time = time();
@@ -87,7 +88,8 @@ class copyright_list extends FO_Plugin
 	$Excl = GetParm("excl",PARM_RAW);
 	if (empty($uploadtree_pk) || empty($hash) || empty($type)) 
     {
-      echo $this->Name . " is missing required parameters.";
+$text = _("is missing required parameters");
+      echo $this->Name . " $text.";
       return;
     }
 	$Page = GetParm("page",PARM_INTEGER);
@@ -119,22 +121,28 @@ class copyright_list extends FO_Plugin
     $filesresult = GetFilesWithCopyright($agent_pk, $hash, $type, $uploadtree_pk,
                                 $PkgsOnly, $Offset, $Max, $order);
     $Count = pg_num_rows($filesresult);
-
-    $V.= "$Count files found ($Unique unique) with ";
+$text = _("files found");
+$text1 = _("unique");
+$text2 = _("with");
+$text3 = _("copyright");
+$text4 = _("email");
+$text5 = _("url");
+    $V.= "$Count $text ($Unique $text1) $text2 ";
     switch ($type) {
         case "statement":
-            $V .= "copyright";
+            $V .= "$text3";
             break;
         case "email":
-            $V .= "email";
+            $V .= "$text4";
             break;
         case "url":
-            $V .= "url";
+            $V .= "$text5";
             break;
     }
     $V .= ": <b>$content</b>";
 
-    if (!empty($Excl)) $V .= "<br>Display excludes files with these extensions: $Excl";
+$text = _("Display excludes files with these extensions");
+    if (!empty($Excl)) $V .= "<br>$text: $Excl";
 
 	/* Get the page menu */
 	if (($Count >= $Max) && ($Page >= 0))
@@ -165,7 +173,8 @@ class copyright_list extends FO_Plugin
         $URL .= "&excl=$Excl:$FileExt";
       else
         $URL .= "&excl=$FileExt";
-      $Header = "<a href=$URL>Exclude this file type.</a>";
+$text = _("Exclude this file type");
+      $Header = "<a href=$URL>$text.</a>";
 
       $ok = true;
       if ($Excl)
@@ -179,7 +188,9 @@ class copyright_list extends FO_Plugin
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-	$V .= "<small>Elaspsed time: $Time seconds</small>\n";
+$text = _("Elaspsed time");
+$text1 = _("seconds");
+	$V .= "<small>$text: $Time $text1</small>\n";
 	break;
       case "Text":
 	break;

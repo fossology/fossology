@@ -129,18 +129,18 @@ class folder_create extends FO_Plugin
           $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
           if ($rc == 1) {
             /* Need to refresh the screen */
-$text=_("Folder ");
-$text1=_(" Created");
-            $R .= displayMessage($text.$NewFolder.$text1);
+$text = _("Folder");
+$text1 = _("Created");
+            $R .= displayMessage($text .$NewFolder. $text1);
           }
           else if($rc == 4) {
-$text=_("Folder ");
-$text1=_(" Exists");
-            $R .= displayMessage($text.$NewFolder.$text1);
+$text = _("Folder");
+$text1 = _("Exists");
+            $R .= displayMessage($text .$NewFolder. $text1);
           }
         }
         /* Display the form */
-        $V .= _("$R\n");
+        $V .= "$R\n";
         $V .= "<form method='POST'>\n"; // no url = this url
         $V .= "<ol>\n";
 $text = _("Select the parent folder:  \n");
@@ -155,7 +155,8 @@ $text = _("Enter a meaningful description:  \n");
         $V .= "<br><li>$text";
         $V .= "<INPUT type='text' name='description' size=80 />\n";
         $V .= "</ol>\n";
-        $V .= "<input type='submit' value='Create!'>\n";
+$text = _("Create");
+        $V .= "<input type='submit' value='$text!'>\n";
         $V .= "</form>\n";
         break;
       case "Text" :

@@ -128,7 +128,8 @@ $text = _("Change folder description:  \n");
         $V.= "<P /><li>$text";
         $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['folder_desc'], ENT_COMPAT) . "\" />\n";
         $V.= "</ol>\n";
-        $V.= "<input type='submit' value='Edit!'>\n";
+$text = _("Edit");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
       break;
       case "Text":

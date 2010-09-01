@@ -238,9 +238,11 @@ class agent_license_once extends FO_Plugin {
           "item"
         ));
         //menu_insert("View::[BREAK]", 100);
-        menu_insert("View::bsam One-Shot", -21, $URI, "bsam One-shot, real-time license analysis");
+$text = _("bsam One-shot, real-time license analysis");
+        menu_insert("View::bsam One-Shot", -21, $URI, $text);
         //menu_insert("View-Meta::[BREAK]", 100);
-        menu_insert("View-Meta::bsam One-Shot", -21, $URI, "bsam One-shot, real-time license analysis");
+$text = _("bsam One-shot, real-time license analysis");
+        menu_insert("View-Meta::bsam One-Shot", -21, $URI, $text);
       }
     }
   } // RegisterMenus()
@@ -326,7 +328,8 @@ $text = _("Check if you want to see the highlighted licenses.\n");
         $V.= "<P />\n";
         $V.= "</ol>\n";
         $V.= "<input type='hidden' name='showheader' value='1'>";
-        $V.= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
         break;
       case "Text":

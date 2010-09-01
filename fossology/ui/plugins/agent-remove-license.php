@@ -71,19 +71,23 @@ class agent_remove_licenseMeta extends FO_Plugin
 
     /* Prepare the job: job "Delete" */
     $jobpk = JobAddJob($upload_pk,"license-delete");
-    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to create job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { 
+$text = _("Failed to create job record");
+	return($text); }
 
     /* Add job: job "Delete" has jobqueue item "delagent" */
     $jqargs = "DELETE LICENSE $upload_pk";
     $jobqueue_pk = JobQueueAdd($jobpk,"delagent",$jqargs,"no",NULL,NULL);
     if (empty($jobqueue_pk)) {
-      return("Failed to place delete in job queue");
+$text = _("Failed to place delete in job queue");
+      return($text);
     }
     if (!empty($restart)){
       // schedule the agent using the plugin found at the start of the routine.
       $agent_added = $agent_license_plugin->AgentAdd($upload_pk, $jobqueue_pk);
       if(!empty($agent_added)){
-        return ('Could not reschedule License Analysis');
+$text = _("Could not reschedule License Analysis");
+        return ($text);
       }
     }
     return(NULL);
@@ -195,7 +199,8 @@ $text = _("After the license data is removed you can reschedule the License Anal
 $text = _("Reschedule License Analysis?");
         $V .= "$text<br /><br />\n";
         $V .= "</ol>\n";
-        $V .= "<input type='submit' value='Commit!'>\n";
+$text = _("Commit");
+        $V .= "<input type='submit' value='$text!'>\n";
         $V .= "</form>\n";
         break;
       case "Text":

@@ -60,7 +60,8 @@ class list_bucket_files extends FO_Plugin
 	$Page = GetParm("page",PARM_INTEGER);
 
     $URL = $this->Name . "&bapk=$bucketagent_pk&item=$uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk&page=-1";
-    menu_insert($this->Name."::Show All",0, $URL, "Show All Files");
+$text = _("Show All Files");
+    menu_insert($this->Name."::Show All",0, $URL, $text);
 
   } // RegisterMenus()
       

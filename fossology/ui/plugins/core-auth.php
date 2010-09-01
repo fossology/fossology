@@ -371,7 +371,8 @@ $text = _("This option deters session hijacking by linking your session to your 
 $text1 = _("). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.");
             $V.= "$text" . @$_SESSION['ip'] . "$text1<P />\n";
 */
-            $V.= "<input type='submit' value='Login'>\n";
+$text = _("Login");
+            $V.= "<input type='submit' value='$text'>\n";
             $V.= "</form>\n";
           }
         } else

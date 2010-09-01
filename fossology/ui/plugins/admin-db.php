@@ -39,7 +39,7 @@ class admin_db_cleanup extends FO_Plugin
   function FixDB	($CheckType)
     {
     global $DB;
-$text=_("Deleting ");
+$text = _("Deleting");
     print $text . $CheckType['label'] . "...";
     $DB->Debug=1;
     print "<pre>";
@@ -48,9 +48,9 @@ $text=_("Deleting ");
     $DB->Debug=0;
     if ($DB->GetAffectedRows() > 0)
       {
-$text=_("Deleted ");
-$text1=_(" from ");
-      print $text . $DB->GetAffectedRows() . $text1;
+$text = _("Deleted");
+$text1 = _("from");
+      print $text . $DB->GetAffectedRows() . $text1 ;
       print $CheckType['label'] . ".<br>\n";
       }
     } // FixDB()
@@ -180,10 +180,10 @@ $text = _("The delete system removes records in series, so a partial delete (or 
 	$V .= "<li>$text";
 	$V .= "</ul>\n";
 $text = _("There");
-$text1 = _("currently ");
+$text1 = _("currently");
 $text2 = _("running");
-$text3 = _(" in the job queue that may make records appear inconsistent.\n");
-	$V .= "$text $Verb <b>$text1$Count $String $text2</b>$text3";
+$text3 = _("in the job queue that may make records appear inconsistent.\n");
+	$V .= "$text $Verb <b>$text1 $Count $String $text2</b> $text3";
 	$V .= _("Fixing inconsistencies while any jobs are running could lead to job failures and further inconsistencies.\n");
 $text = _("NOTE: Some of these inconsistencies may not be resolvable from here due to table constraints.\n");
 	$V.= "<P>$text";
@@ -230,7 +230,8 @@ $text = _("Details");
 
 	$V .= "</table>\n";
 	$V .= "<P />";
-	if ($FixCount > 0) { $V .= "<input type='submit' value='Fix!'>"; }
+$text = _("Fix");
+	if ($FixCount > 0) { $V .= "<input type='submit' value='$text!'>"; }
 	else { $V .= _("No database inconsistencies found.\n"); }
 	$V .= "</form>";
 	break;

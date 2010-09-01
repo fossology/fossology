@@ -69,8 +69,10 @@ class ui_nomos_license extends FO_Plugin
       }
       else
       {
-       menu_insert("Browse::Nomos License",10,$URI,"View nomos license histogram");
-       menu_insert("View::Nomos License",10,$nomosURI,"nomos license");
+$text = _("View nomos license histogram");
+       menu_insert("Browse::Nomos License",10,$URI,$text);
+$text = _("nomos license");
+       menu_insert("View::Nomos License",10,$nomosURI,$text);
       }
     }
   } // RegisterMenus()

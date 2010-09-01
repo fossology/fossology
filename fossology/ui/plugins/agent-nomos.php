@@ -34,7 +34,7 @@ if (!isset($GlobalReady)) {
 class agent_fonomos extends FO_Plugin {
 
   public $Name = "agent_nomos";
-  public $Title = "Schedule Nomos License Analysis";
+  public $Title = "Nomos License Analysis";
   // public $MenuList   = "Jobs::Agents::Nomos License Analysis";
   public $Version = "1.0";
   public $Dependency = array("db");
@@ -103,7 +103,8 @@ class agent_fonomos extends FO_Plugin {
       $Results = $DB->Action($SQL);
       $Dep = $Results[0]['jq_pk'];
       if (empty($Dep)) {
-        return ("Unable to find dependent job: unpack");
+$text = _("Unable to find dependent job: unpack");
+        return ($text);
       }
     }
 
@@ -118,7 +119,8 @@ class agent_fonomos extends FO_Plugin {
     /* Prepare the job: job "nomos" */
     $jobpk = JobAddJob($uploadpk, "Nomos License Analysis", $Priority);
     if (empty($jobpk) || ($jobpk < 0)) {
-      return ("Failed to insert job record for nomos");
+$text = _("Failed to insert job record for nomos");
+      return ($text);
     }
 
     /*
@@ -131,7 +133,8 @@ class agent_fonomos extends FO_Plugin {
     $jqargs = $uploadpk;
     $jobqueuepk = JobQueueAdd($jobpk, "nomos", $jqargs, "no", "", $Dep);
     if (empty($jobqueuepk)) {
-      return ("Failed to insert agent nomos into job queue");
+$text = _("Failed to insert agent nomos into job queue");
+      return ($text);
     }
     if (CheckEnotification()) {
       $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
@@ -207,7 +210,8 @@ $text = _("Analyze:");
             $Page.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
           $Page.= "</select><P />\n";
-          $Page.= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+          $Page.= "<input type='submit' value='$text!'>\n";
           $Page.= "</form>\n";
         }
       break;

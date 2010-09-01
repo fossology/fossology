@@ -49,7 +49,8 @@ class upload_file extends FO_Plugin {
   function Upload($Folder, $TempFile, $Desc, $Name) {
     /* See if the URL looks valid */
     if (empty($Folder)) {
-      return ("Invalid folder");
+$text = _("Invalid folder");
+      return ($text);
     }
     if (empty($Name)) {
       $Name = basename(@$_FILES['getfile']['name']);
@@ -63,17 +64,20 @@ class upload_file extends FO_Plugin {
     $Mode = (1 << 3); // code for "it came from web upload"
     $uploadpk = JobAddUpload($ShortName, $originName, $Desc, $Mode, $Folder);
     if (empty($uploadpk)) {
-      return ("Failed to insert upload record");
+$text = _("Failed to insert upload record");
+      return ($text);
     }
     /* move the temp file */
     //echo "<pre>uploadfile: renaming uploaded file\n</pre>";
     if (!move_uploaded_file($TempFile, "$TempFile-uploaded")) {
-      return ("Could not save uploaded file");
+$text = _("Could not save uploaded file");
+      return ($text);
     }
     $UploadedFile = "$TempFile" . "-uploaded";
     //echo "<pre>uploadfile: \$UploadedFile is:$UploadedFile\n</pre>";
     if (!chmod($UploadedFile, 0660)) {
-      return ("ERROR! could not update permissions on downloaded file");
+$text = _("ERROR! could not update permissions on downloaded file");
+      return ($text);
     }
 
     /* Run wget_agent locally to import the file. */
@@ -179,7 +183,8 @@ $text = _("Select optional analysis");
         $V.= "</ol>\n";
 $text = _("It may take time to transmit the file from your computer to this server. Please be patient.");
         $V.= "$text<br>\n";
-        $V.= "<input type='submit' value='Upload!'>\n";
+$text = _("Upload");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
         break;
       case "Text":

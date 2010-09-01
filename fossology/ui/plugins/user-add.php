@@ -83,22 +83,26 @@ $text = _("NO DB connection!");
 
 		/* Make sure username looks valid */
 		if (empty($User)) {
-			return ("Username must be specified. Not added.");
+$text = _("Username must be specified. Not added.");
+			return ($text);
 		}
 		/* Make sure password matches */
 		if ($Pass != $Pass2) {
-			return ("Passwords did not match. Not added.");
+$text = _("Passwords did not match. Not added.");
+			return ($text);
 		}
 		/* Make sure email looks valid */
 		$Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
 		if ($Check != $Email) {
-			return ("Invalid email address.  Not added.");
+$text = _("Invalid email address.  Not added.");
+			return ($text);
 		}
 		/* See if the user already exists (better not!) */
 		$SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
 		$Results = $DB->Action($SQL);
 		if (!empty($Results[0]['user_name'])) {
-			return ("User already exists.  Not added.");
+$text = _("User already exists.  Not added.");
+			return ($text);
 		}
 
 		/* check email notification, if empty (box not checked), or if no email
@@ -132,7 +136,8 @@ $text = _("NO DB connection!");
 		$SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
 		$Results = $DB->Action($SQL);
 		if (empty($Results[0]['user_name'])) {
-			return ("Failed to insert user.");
+$text = _("Failed to insert user.");
+			return ($text);
 		}
 		return (NULL);
 	} // Add()
@@ -236,7 +241,8 @@ $text = _("Default bucketpool.");
 				$V.= "</td>";
 				$V .= "</tr>\n";
 				$V.= "</table border=0><P />";
-				$V.= "<input type='submit' value='Add!'>\n";
+$text = _("Add");
+				$V.= "<input type='submit' value='$text!'>\n";
 				$V.= "</form>\n";
 				break;
 			case "Text":

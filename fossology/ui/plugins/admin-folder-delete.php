@@ -63,20 +63,23 @@ class admin_folder_delete extends FO_Plugin {
     function Delete($folderpk, $Depends = NULL) {
       /* Can't remove top folder */
       if ($folderpk == FolderGetTop()) {
-        return ("Can Not Delete Root Folder");
+$text = _("Can Not Delete Root Folder");
+        return ($text);
       }
       /* Get the folder's name */
       $FolderName = FolderGetName($folderpk);
       /* Prepare the job: job "Delete" */
       $jobpk = JobAddJob(NULL, "Delete Folder: $FolderName");
       if (empty($jobpk) || ($jobpk < 0)) {
-        return ("Failed to create job record");
+$text = _("Failed to create job record");
+        return ($text);
       }
       /* Add job: job "Delete" has jobqueue item "delagent" */
       $jqargs = "DELETE FOLDER $folderpk";
       $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, "no", NULL, NULL);
       if (empty($jobqueuepk)) {
-        return ("Failed to place delete in job queue");
+$text = _("Failed to place delete in job queue");
+        return ($text);
       }
       return (NULL);
     } // Delete()
@@ -116,14 +119,14 @@ $text1 = _(" failed: ");
           }
           $V.= "$R\n";
           $V.= "<form method='post'>\n"; // no url = this url
-$text  =  _("Select the folder to ");
+$text  =  _("Select the folder to");
 $text1 = _("delete");
-          $V.= "$text<em>$text1</em>.\n";
+          $V.= "$text <em>$text1</em>.\n";
           $V.= "<ul>\n";
-$text = _("This will ");
+$text = _("This will");
 $text1 = _("delete");
-$text2 = _(" the folder, all subfolders, and all uploaded files stored within the folder!");
-          $V.= "<li>$text<em>$text1</em>$text2\n";
+$text2 = _("the folder, all subfolders, and all uploaded files stored within the folder!");
+          $V.= "<li>$text <em>$text1</em> $text2\n";
 $text = _("Be very careful with your selection since you can delete a lot of work!");
           $V.= "<li>$text\n";
 $text = _("All analysis only associated with the deleted uploads will also be deleted.");
@@ -138,7 +141,8 @@ $text = _("select folder");
           $V.= "<option value=''>[$text]</option>\n";
           $V.= FolderListOption(-1, 0);
           $V.= "</select><P />\n";
-          $V.= "<input type='submit' value='Delete!'>\n";
+$text = _("Delete");
+          $V.= "<input type='submit' value='$text!'>\n";
           $V.= "</form>\n";
           break;
         case "Text":

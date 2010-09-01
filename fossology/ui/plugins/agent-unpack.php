@@ -69,7 +69,9 @@ class agent_unpack extends FO_Plugin
   {
     /* Prepare the job: job "unpack" */
     $jobpk = JobAddJob($uploadpk,"unpack",$Priority);
-    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { 
+$text = _("Failed to insert job record");
+	return($text); }
     if (!empty($Depends) && !is_array($Depends)) { $Depends = array($Depends); }
 
     /* job "unpack" has jobqueue item "unpack" */
@@ -79,12 +81,16 @@ class agent_unpack extends FO_Plugin
 	    INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk
 	    WHERE upload.upload_pk = '$uploadpk';";
     $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"no","pfile",$Depends);
-    if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
+    if (empty($jobqueuepk)) { 
+$text = _("Failed to insert item into job queue");
+	return($text); }
 
     /* job "unpack" has jobqueue item "adj2nest" */
     $jqargs = "$uploadpk";
     $jobqueuepk = JobQueueAdd($jobpk,"adj2nest",$jqargs,"no","",array($jobqueuepk));
-    if (empty($jobqueuepk)) { return("Failed to insert adj2nest into job queue"); }
+    if (empty($jobqueuepk)) { 
+$text = _("Failed to insert adj2nest into job queue");
+	return($text); }
 
     return(NULL);
   } // AgentAdd()
@@ -163,7 +169,8 @@ $text = _("Select optional analysis");
 	  $V .= "<li>$text<br />\n";
 	  $V .= AgentCheckboxMake(-1,$this->Name);
 	  $V .= "</ol>\n";
-	  $V .= "<input type='submit' value='Unpack!'>\n";
+$text = _("Unpack");
+	  $V .= "<input type='submit' value='$text!'>\n";
 	  $V .= "</form>\n";
 	  }
 	break;

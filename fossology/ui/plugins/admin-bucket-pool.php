@@ -130,27 +130,37 @@ $text = _("Your new bucketpool_pk is");
       echo "$text $newbucketpool_pk<hr>";
     }
 
-print <<<ENDINTRO
-<p>
-The purpose of this is to facilitate editing an existing bucketpool.  Make sure you
-understand <a href='http://fossology.org/buckets'>Creating Bucket Pools</a> before continuing.
- It will explain why you should create a new bucketpool rather than edit an old one that
-has already recorded results.
-<p>
-Steps to modify a bucketpool:
-<ol>
-<li> Create a baseline with your current bucketpool.  In other words, run a bucket scan on something.  If you do this before creating a new modified bucketpool, you can compare the old results with the new to verify it is working as you expect.
-<li> Duplicate the bucketpool (this will increment the bucketpool version and its bucketdef records).  You should also check "Update my default bucketpool" since new bucket jobs only use your default bucketpool.
-<li> Manually edit the new bucketpool record, if desired.
-<li> Manually insert/update/delete the new bucketdef records.
-<li> Delete your old bucket job from the job queue (from Show Jobs).  You must delete the old completed bucket job from the queue rather than reset it because a reset will use the previous bucketpool (the one you originally queued).
-<li> Queue up the new bucket job in Jobs > Agents.
-<li> Use Buckets > Compare to compare the new and old runs.  Verify the results.
-<li> If you still need to edit the buckets, use Buckets > Remove Bucket Results to remove the previous runs results and repeat starting with editing the bucketpool or def records.
-<li> When the bucket results are what you want, then you can reset all the users of the old bucketpool to the new one with Buckets > New Bucketpool.
-</ol>
-<hr>
-ENDINTRO;
+echo "<p>";
+echo _("The purpose of this is to facilitate editing an existing bucketpool.  Make sure you
+understand");
+echo " <a href='http://fossology.org/buckets'>";
+echo _("Creating Bucket Pools");
+echo "</a> ";
+echo _("before continuing.");
+echo _(" It will explain why you should create a new bucketpool rather than edit an old one that has already recorded results.");
+echo "<p>";
+echo _("Steps to modify a bucketpool:");
+echo "<ol>";
+echo "<li>";
+echo _("Create a baseline with your current bucketpool.  In other words, run a bucket scan on something.  If you do this before creating a new modified bucketpool, you can compare the old results with the new to verify it is working as you expect.");
+echo "<li>";
+echo _("Duplicate the bucketpool (this will increment the bucketpool version and its bucketdef records).  You should also check 'Update my default bucketpool' since new bucket jobs only use your default bucketpool.");
+echo "<li>";
+echo _("Manually edit the new bucketpool record, if desired.");
+echo "<li>";
+echo _("Manually insert/update/delete the new bucketdef records.");
+echo "<li>";
+echo _("Delete your old bucket job from the job queue (from Show Jobs).  You must delete the old completed bucket job from the queue rather than reset it because a reset will use the previous bucketpool (the one you originally queued).");
+echo "<li>";
+echo _("Queue up the new bucket job in Jobs > Agents.");
+echo "<li>";
+echo _("Use Buckets > Compare to compare the new and old runs.  Verify the results.");
+echo "<li>";
+echo _("If you still need to edit the buckets, use Buckets > Remove Bucket Results to remove the previous runs results and repeat starting with editing the bucketpool or def records.");
+echo "<li>";
+echo _("When the bucket results are what you want, then you can reset all the users of the old bucketpool to the new one with Buckets > New Bucketpool.");
+echo "</ol>";
+echo "<hr>";
 
 	echo "<form method='POST'>";
     $Val = "";
@@ -162,7 +172,8 @@ $text = _("Choose the bucketpool to duplicate");
 $text = _("Update my default bucketpool");
     echo "<input type='checkbox' name='updatedefault' checked> $text.";
     echo "<p>";
-    echo "<input type='submit' value='Submit'>";
+$text = _("Submit");
+    echo "<input type='submit' value='$text'>";
 	echo "</form>";
 
     return;

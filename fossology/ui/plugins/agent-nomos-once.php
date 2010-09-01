@@ -126,9 +126,11 @@ class agent_nomos_once extends FO_Plugin {
           "item"
           ));
           menu_insert("View::[BREAK]", 100);
-          menu_insert("View::Nomos One-Shot", 101, $URI, "Nomos One-shot, real-time license analysis");
+$text = _("Nomos One-shot, real-time license analysis");
+          menu_insert("View::Nomos One-Shot", 101, $URI, $text);
           menu_insert("View-Meta::[BREAK]", 100);
-          menu_insert("View-Meta::Nomos One-Shot", 101, $URI, "Nomos One-shot, real-time license analysis");
+$text = _("Nomos One-shot, real-time license analysis");
+          menu_insert("View-Meta::Nomos One-Shot", 101, $URI, $text);
       }
     }
   } // RegisterMenus()
@@ -183,7 +185,8 @@ $text2 = _("stored. As soon as you get your results, your uploaded file is remov
         $V.= "<input name='licfile' size='60' type='file' /><br />\n";
         $V.= "</ul>\n";
         $V.= "<input type='hidden' name='showheader' value='1'>";
-        $V.= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
 
 

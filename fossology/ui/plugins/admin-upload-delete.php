@@ -53,13 +53,15 @@ class admin_upload_delete extends FO_Plugin {
     /* Prepare the job: job "Delete" */
     $jobpk = JobAddJob($uploadpk, "Delete");
     if (empty($jobpk) || ($jobpk < 0)) {
-      return ("Failed to create job record");
+$text = _("Failed to create job record");
+      return ($text);
     }
     /* Add job: job "Delete" has jobqueue item "delagent" */
     $jqargs = "DELETE UPLOAD $uploadpk";
     $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, "no", NULL, NULL);
     if (empty($jobqueuepk)) {
-      return ("Failed to place delete in job queue");
+$text = _("Failed to place delete in job queue");
+      return ($text);
     }
     return (NULL);
   } // Delete()
@@ -112,8 +114,8 @@ $text1 = _("delete");
         $V.= "<ul>\n";
 $text = _("This will");
 $text1 = _("delete");
-$text2 = _("the upload file!\n");
-        $V.= "<li>$text <em>$text1</em> $text2";
+$text2 = _("the upload file!");
+        $V.= "<li>$text <em>$text1</em> $text2\n";
 $text = _("Be very careful with your selection since you can delete a lot of work!\n");
         $V.= "<li>$text";
 $text = _("All analysis only associated with the deleted upload file will also be deleted.\n");
@@ -148,7 +150,8 @@ $text = _("Select the uploaded project to delete:");
         }
         $V.= "</select><P />\n";
         $V.= "</ol>\n";
-        $V.= "<input type='submit' value='Delete!'>\n";
+$text = _("Delete");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
       break;
       case "Text":

@@ -613,7 +613,8 @@ $text1 = _("Fedora Licensing");
 $text2 = _("for the list of good, bad, and unknown licenses.");
 	$V .= "<input type='checkbox' value='1' name='Default-Fedora'><b>$text</b><a href='http://fedoraproject.org/wiki/Licensing'>$text1</a> $text2<br>\n";
 	$V .= "<P/>\n";
-	$V .= "<input type='submit' value='Create!'>";
+$text = _("Create");
+	$V .= "<input type='submit' value='$text!'>";
 	$V .= "</form>\n";
 	break;
       case "Text":

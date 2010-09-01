@@ -61,7 +61,8 @@ class jobs_showjobs extends FO_Plugin
     if (!empty($UploadPk))
 	{
 	$NewURI = preg_replace('/&upload=[^&]*/','',$URI);
-	menu_insert("JobDetails::All",-11,"$NewURI","Show all jobs (not just this one)");
+$text = _("Show all jobs (not just this one)");
+	menu_insert("JobDetails::All",-11,"$NewURI",$text);
 	$UploadPk = "&upload=$UploadPk";
 	}
 
@@ -70,17 +71,21 @@ class jobs_showjobs extends FO_Plugin
     switch($Show)
       {
       case "detail":
-	menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History$UploadPk","Show a summary of jobs");
+$text = _("Show a summary of jobs");
+	menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History$UploadPk",$text);
 	menu_insert("JobDetails::Detail",-3);
 	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk");
 	break;
       case "summary":
+$text = _("Show detailed information about each job");
 	menu_insert("JobDetails::Summary",-2);
-	menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History$UploadPk","Show detailed information about each job");
-	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk","Show all jobs (active and completed)");
+	menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History$UploadPk",$text);
+$text = _("Show all jobs (active and completed)");
+	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk",$text);
 	break;
       case "job":
-	menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History$UploadPk","Show the job queue");
+$text = _("Show the job queue");
+	menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History$UploadPk",$text);
 	$Job = GetParm("job",PARM_INTEGER);
 	if (!empty($Job)) { $Job = "&job=$Job"; }
 	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk$Job");
@@ -95,13 +100,15 @@ class jobs_showjobs extends FO_Plugin
       switch($History)
 	{
 	case "0":
-	  menu_insert("JobDetails::History",-12,"$URI&show=$Show&history=1","Show all jobs (active and completed)");
+$text = _("Show all jobs (active and completed)");
+	  menu_insert("JobDetails::History",-12,"$URI&show=$Show&history=1",$text);
 	  menu_insert("JobDetails::Active",-12);
 	  break;
 	case "1":
 	default:
 	  menu_insert("JobDetails::History",-12);
-	  menu_insert("JobDetails::Active",-12,"$URI&show=$Show&history=0","Show only active jobs");
+$text = _("Show only active jobs");
+	  menu_insert("JobDetails::Active",-12,"$URI&show=$Show&history=0",$text);
 	  break;
 	}
       }

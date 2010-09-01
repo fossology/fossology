@@ -185,7 +185,8 @@ if (0)
 	  $V .= "</option>";
 	  }
 	$V .= "</select>";
-	$V .= "<input type='submit' value='Search!'>";
+$text = _("Search");
+	$V .= "<input type='submit' value='$text!'>";
 	$V .= "</form>\n";
 }
 

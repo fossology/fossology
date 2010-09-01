@@ -191,9 +191,11 @@ $text = _("FAIL! Scheduling of email failed:");
     {
       $URI = $this->Name . Traceback_parm(0);
       //menu_insert("View::[BREAK]",200);
-      menu_insert("View::Reanalyze",-20,$URI,"Reanalyze license and store results");
+$text = _("Reanalyze license and store results");
+      menu_insert("View::Reanalyze",-20,$URI,$text);
       //menu_insert("View-Meta::[BREAK]",200);
-      menu_insert("View-Meta::Reanalyze",-20,$URI,"Reanalyze license and store results");
+$text = _("Reanalyze license and store results");
+      menu_insert("View-Meta::Reanalyze",-20,$URI,$text);
     }
   } // RegisterMenus()
 

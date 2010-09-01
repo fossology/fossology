@@ -96,24 +96,28 @@ class user_edit_self extends FO_Plugin {
 
 		/* Make sure username looks valid */
 		if (empty($_SESSION['UserId'])) {
-			return ("You must be logged in.");
+$text = _("You must be logged in.");
+			return ($text);
 		}
 		/* Make sure password matches */
 		if (!empty($Pass1) || !empty($Pass2)) {
 			if ($Pass1 != $Pass2) {
-				return ("New passwords did not match. No change.");
+$text = _("New passwords did not match. No change.");
+				return ($text);
 			}
 		}
 		/* Make sure email looks valid */
 		$Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
 		if ($Check != $Email) {
-			return ("Invalid email address.  Not added.");
+$text = _("Invalid email address.  Not added.");
+			return ($text);
 		}
 		/* See if the user already exists (better not!) */
 		$SQL = "SELECT * FROM users WHERE user_name = '$User' AND user_pk != '$UserId' LIMIT 1;";
 		$Results = $DB->Action($SQL);
 		if (!empty($Results[0]['user_name'])) {
-			return ("User already exists.  Not added.");
+$text = _("User already exists.  Not added.");
+			return ($text);
 		}
 		/* Load current user */
 		$SQL = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
@@ -122,7 +126,8 @@ class user_edit_self extends FO_Plugin {
 		/* Make sure old password matched */
 		$Hash = sha1($R['user_seed'] . $Pass0);
 		if ($Hash != $R['user_pass']) {
-			return ("Authentication password did not match. No change.");
+$text = _("Authentication password did not match. No change.");
+			return ($text);
 		}
 		/* Update the user */
 		$GotUpdate = 0;
@@ -284,7 +289,8 @@ $text = _("Default bucketpool.");
                 $V.= "</td>";
 				$V .= "</tr>\n";
 				$V.= "</table><P />";
-				$V.= "<input type='submit' value='Update Account'>\n";
+$text = _("Update Account");
+				$V.= "<input type='submit' value='$text'>\n";
 				$V.= "</form>\n";
 				break;
 			case "Text":

@@ -109,7 +109,8 @@ $text = _("Clear");
       }
       else
       {
-       menu_insert("Browse::Bucket Browser",10,$URI,"Browse by buckets (categories)");
+$text = _("Browse by buckets (categories)");
+       menu_insert("Browse::Bucket Browser",10,$URI,$text);
       }
     }
   } // RegisterMenus()

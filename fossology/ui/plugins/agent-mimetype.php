@@ -26,7 +26,7 @@ if (!isset($GlobalReady)) {
 }
 class agent_mimetype extends FO_Plugin {
   public $Name = "agent_mimetype";
-  public $Title = "Schedule MIME-type Analysis";
+  public $Title = "MIME-type Analysis (Determine mimetype of every file.  Not needed for licenses or buckets)";
   // public $MenuList   = "Jobs::Agents::MIME-type Analysis";
   public $Version = "1.0";
   public $Dependency = array(
@@ -86,7 +86,8 @@ class agent_mimetype extends FO_Plugin {
       $Results = $DB->Action($SQL);
       $Dep = $Results[0]['jq_pk'];
       if (empty($Dep)) {
-        return ("Unable to find dependent job: unpack");
+$text = _("Unable to find dependent job: unpack");
+        return ($text);
       }
     }
     $Dep = array(
@@ -101,7 +102,8 @@ class agent_mimetype extends FO_Plugin {
     /* Prepare the job: job "Default Meta Agents" */
     $jobpk = JobAddJob($uploadpk, "Default Meta Agents", $Priority);
     if (empty($jobpk) || ($jobpk < 0)) {
-      return ("Failed to insert job record");
+$text = _("Failed to insert job record");
+      return ($text);
     }
     /* Add job: job "Default Meta Agents" has jobqueue item "mimetype" */
     $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,
@@ -112,7 +114,8 @@ class agent_mimetype extends FO_Plugin {
 	LIMIT 5000;";
     $jobqueuepk = JobQueueAdd($jobpk, "mimetype", $jqargs, "yes", "a", $Dep);
     if (empty($jobqueuepk)) {
-      return ("Failed to insert mimetype into job queue");
+$text = _("Failed to insert mimetype into job queue");
+      return ($text);
     }
     return (NULL);
   } // AgentAdd()
@@ -181,7 +184,8 @@ $text = _("Analyze:");
             $V.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
           $V.= "</select><P />\n";
-          $V.= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+          $V.= "<input type='submit' value='$text!'>\n";
           $V.= "</form>\n";
         }
       break;

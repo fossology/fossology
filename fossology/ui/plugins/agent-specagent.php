@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class agent_specagent extends FO_Plugin
 {
   public $Name       = "agent_specagent";
-  public $Title      = "Schedule Spec File Analysis (deprecated)";
+  public $Title      = "Spec File Analysis (deprecated. Replaced by Package analysis.)";
   // public $MenuList   = "Jobs::Agents::Spec File Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
@@ -211,7 +211,8 @@ $text = _("Analyze:");
 	    $V .= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
 	    }
 	  $V .= "</select><P />\n";
-	  $V .= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+	  $V .= "<input type='submit' value='$text!'>\n";
 	  $V .= "</form>\n";
 	  }
 	break;

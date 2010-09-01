@@ -27,7 +27,7 @@ if (!isset($GlobalReady)) { exit; }
 class agent_pkgmetagetta extends FO_Plugin
 {
   public $Name       = "agent_pkgmetagetta";
-  public $Title      = "Schedule Metadata Analysis (not needed for license analysis)";
+  public $Title      = "Metadata Analysis (Slow.  Not needed for license analysis)";
   // public $MenuList   = "Jobs::Agents::Metadata Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
@@ -207,7 +207,8 @@ $text = _("Analyze:");
 	    $V .= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
 	    }
 	  $V .= "</select><P />\n";
-	  $V .= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+	  $V .= "<input type='submit' value='$text!'>\n";
 	  $V .= "</form>\n";
 	  }
 	break;

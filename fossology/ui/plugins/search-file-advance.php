@@ -124,7 +124,8 @@ $text = _("Total matched:");
   function RegisterMenus()
     {
     $URI = $this->Name;
-    menu_insert("Search::Advanced",0,$URI,"Additional search options");
+$text = _("Additional search options");
+    menu_insert("Search::Advanced",0,$URI,$text);
     } // RegisterMenus()
 
   /***********************************************************
@@ -209,7 +210,8 @@ $text1 = _(" bytes\n");
 	$V .= "<li>$text &lt; <input name='sizemax' size=10 value='$Value'>$text1";
 
 	$V .= "</ul>\n";
-	$V .= "<input type='submit' value='Search!'>\n";
+$text = _("Search");
+	$V .= "<input type='submit' value='$text!'>\n";
 	$V .= "</form>\n";
 
 	if (!empty($Filename))

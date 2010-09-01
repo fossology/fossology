@@ -84,8 +84,9 @@ $text = _("Clear");
       }
       else
       {
+$text = _("View bsam license histogram");
        menu_insert("Browse::[BREAK]",-1);
-       menu_insert("Browse::bsam License",-3,$URI,"View bsam license histogram");
+       menu_insert("Browse::bsam License",-3,$URI,$text);
       }
     }
   } // RegisterMenus()

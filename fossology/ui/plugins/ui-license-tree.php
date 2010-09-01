@@ -154,7 +154,8 @@ class ui_license_tree extends FO_Plugin {
         menu_insert("Browse::CSV", -2, $URI . "&output=csv");
       }
       else {
-        menu_insert("Browse::License Tree",-4 , $URI, "View license tree");
+$text = _("View license tree");
+        menu_insert("Browse::License Tree",-4 , $URI, $text);
       }
     }
   } // RegisterMenus()

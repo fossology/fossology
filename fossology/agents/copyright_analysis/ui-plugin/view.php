@@ -52,8 +52,9 @@ class copyright_view extends FO_Plugin
             }
             else
             {
-                menu_insert("View::View Copyright/Email/Url",1,$URI,"View Copyright/Email/Url info");
-                menu_insert("View-Meta::View Copyright/Email/Url",1,$URI,"View Copyright/Email/Url info");
+$text = _("View Copyright/Email/Url info");
+                menu_insert("View::View Copyright/Email/Url",1,$URI,$text);
+                menu_insert("View-Meta::View Copyright/Email/Url",1,$URI,$text);
             }
         }
         $Lic = GetParm("lic",PARM_INTEGER);
@@ -88,7 +89,8 @@ class copyright_view extends FO_Plugin
         if ($result && !empty($result[0]['pfile_fk'])) {
             $pfile = $result[0]['pfile_fk'];
         } else {
-            print "Could not locate the corresponding pfile.";
+$text = _("Could not locate the corresponding pfile.");
+            print $text;
         }
 
         $sql = "SELECT * FROM copyright WHERE copy_startbyte IS NOT NULL

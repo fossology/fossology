@@ -155,9 +155,11 @@ $text = _("No comparison licenses found.");
 	{
 	$URI = $this->Name . Traceback_parm_keep(array("format","item"));
 	//menu_insert("View::[BREAK]",100);
-	menu_insert("View::Recompare",-22,$URI,"One-shot, real-time license recomparison");
+$text = _("One-shot, real-time license recomparison");
+	menu_insert("View::Recompare",-22,$URI,$text);
 	//menu_insert("View-Meta::[BREAK]",100);
-	menu_insert("View-Meta::Recompare",-22,$URI,"One-shot, real-time license recomparison");
+$text = _("One-shot, real-time license recomparison");
+	menu_insert("View-Meta::Recompare",-22,$URI,$text);
 	}
       }
   } // RegisterMenus()
@@ -280,6 +282,7 @@ $text = _("View");
 
 	$V .= "</ol>\n";
 	$V .= "<input type='hidden' name='showheader' value='1'>";
+$text = _("Analyze");
 	$V .= "<input type='submit' value='Analyze!'>\n";
 	$V .= "</form>\n";
 	break;

@@ -232,7 +232,7 @@ $text = _("This file is unpacked from");
 
 $text = _("Reunpack");
 	  $V .= "<p />\n$text: " . $Ufile_name . "<input name='uploadunpack' type='hidden' value='$Upload_pk'/>\n";
-	  $V .= "<input type='submit' value='Reunpack!' ";
+	  $V .= "<input type='submit' value='$text!' ";
 	  if ($Reunpack) {$V .= "disabled";}
 	  $V .= " >\n";
 	  $V .= "</form>\n";

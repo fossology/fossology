@@ -40,7 +40,8 @@ class user_edit_any extends FO_Plugin {
 		/* Get the parameters */
 		$UserId = GetParm('userid', PARM_INTEGER);
 		if (empty($UserId)) {
-			return ("No user selected. No change.");
+$text = _("No user selected. No change.");
+			return ($text);
 		}
 		$User = GetParm('username', PARM_TEXT);
 		$Pass1 = GetParm('pass1', PARM_TEXT);
@@ -60,23 +61,27 @@ class user_edit_any extends FO_Plugin {
 		}
 		/* Make sure username looks valid */
 		if (empty($User)) {
-			return ("Username must be specified. No change.");
+$text = _("Username must be specified. No change.");
+			return ($text);
 		}
 		/* Make sure password matches */
 		if ($Pass1 != $Pass2) {
-			return ("Passwords did not match. No change.");
+$text = _("Passwords did not match. No change.");
+			return ($text);
 		}
 		/* Make sure email looks valid */
 		$Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
 		if ($Check != $Email) {
-			return ("Invalid email address.  Not edited.");
+$text = _("Invalid email address.  Not edited.");
+			return ($text);
 		}
 		/* Get existing user info for updating */
 		$SQL = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
 		$Results = $DB->Action($SQL);
 		$R = $Results[0];
 		if (empty($R['user_pk'])) {
-			return ("User does not exist.  No change.");
+$text = _("User does not exist.  No change.");
+			return ($text);
 		}
 		/* Edit the user */
 		if (strcmp($User, $R['user_name'])) {
@@ -85,7 +90,8 @@ class user_edit_any extends FO_Plugin {
 			$SQL = "SELECT * FROM users WHERE user_name = '$Val' LIMIT 1;";
 			$Results = $DB->Action($SQL);
 			if (!empty($Results[0]['user_name'])) {
-				return ("User already exists.  Not edited.");
+$text = _("User already exists.  Not edited.");
+				return ($text);
 			}
 			$DB->Action("UPDATE users SET user_name = '$Val' WHERE user_pk = '$UserId';");
 		}
@@ -424,7 +430,8 @@ $text = _("Default bucket pool");
                 $V.= "</td>\n";
 				$V.= "</tr>\n";
 				$V.= "</table><P />";
-				$V.= "<input type='submit' value='Update Account'>\n";
+$text = _("Update Account");
+				$V.= "<input type='submit' value='$text'>\n";
 				$V.= "</form>\n";
 				break;
 		case "Text":

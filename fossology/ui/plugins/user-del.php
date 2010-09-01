@@ -46,7 +46,8 @@ class user_del extends FO_Plugin
     $Results = $DB->Action($SQL);
     if (empty($Results[0]['user_name']))
 	{
-	return("User does not exist.");
+$text = _("User does not exist.");
+	return($text);
 	}
 
     /* Delete the user */
@@ -57,7 +58,8 @@ class user_del extends FO_Plugin
     $Results = $DB->Action($SQL);
     if (!empty($Results[0]['user_name']))
 	{
-	return("Failed to delete user.");
+$text = _("Failed to delete user.");
+	return($text);
 	}
 
     return(NULL);
@@ -124,7 +126,8 @@ $text = _("Confirm user deletion");
 	  $V .= "<P /><li>$text: <input type='checkbox' name='confirm' value='1'>";
 	  $V .= "</ol>\n";
 
-	  $V .= "<input type='submit' value='Delete!'>\n";
+$text = _("Delete");
+	  $V .= "<input type='submit' value='$text!'>\n";
 	  $V .= "</form>\n";
 	  }
 	break;

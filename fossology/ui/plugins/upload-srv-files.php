@@ -114,7 +114,8 @@ class upload_srv_files extends FO_Plugin {
     $uploadpk = JobAddUpload($ShortName, $SourceFiles, $Desc, $Mode, $FolderPk);
     $jobq = JobAddJob($uploadpk, 'fosscp_agent', 0);
     if (empty($jobq) || ($jobpk < 0)) {
-      return ("Failed to create job record");
+$text = _("Failed to create job record");
+      return ($text);
     }
     /* Check for email notification and adjust jq_args as needed */
     if (CheckEnotification()) {
@@ -134,7 +135,8 @@ class upload_srv_files extends FO_Plugin {
     $jq_type = 'fosscp_agent';
     $jobqueue_pk = JobQueueAdd($jobq, $jq_type, $jq_args, "no", NULL, NULL, 0);
     if (empty($jobqueue_pk)) {
-      return ("Failed to place fosscp_agent in job queue");
+$text = _("Failed to place fosscp_agent in job queue");
+      return ($text);
     }
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
     $msg = "The upload for $SourceFiles has been scheduled. ";
@@ -225,7 +227,8 @@ $text = _("Select optional analysis");
           $V.= AgentCheckBoxMake(-1, "agent_unpack");
         }
         $V.= "</ol>\n";
-        $V.= "<input type='submit' value='Upload!'>\n";
+$text = _("Upload");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
         break;
       case "Text":

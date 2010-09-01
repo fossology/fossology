@@ -162,7 +162,8 @@ $text = _("Select the destination folder:  \n");
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
         $V.= "</ol>\n";
-        $V.= "<input type='submit' value='Move!'>\n";
+$text = ("Move");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
       break;
       case "Text":

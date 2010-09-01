@@ -171,7 +171,8 @@ $text = _("Change upload description:  \n");
           //$V .= "<P /><li>Change Upload Source Location:  \n";
           //$V .= "<INPUT type='text' name='newsrc' size=60 value=\"" . htmlentities($Folder['folder_src'],ENT_COMPAT) . "\" />\n";
           $V.= "</ol>\n";
-          $V.= "<input type='submit' value='Edit!'>\n";
+$text = _("Edit");
+          $V.= "<input type='submit' value='$text!'>\n";
           $V.= "</form>\n";
           break;
         case "Text":

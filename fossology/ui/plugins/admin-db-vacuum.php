@@ -39,7 +39,7 @@ class admin_db_vacuum extends FO_Plugin
   function FixDB	($CheckType)
     {
     global $DB;
-$text=_("Deleting ");
+$text = _("Deleting");
     print $text . $CheckType['label'] . "...";
     $DB->Action("DELETE ". $CheckType['sql']);
 $text=_("cleaned.");
@@ -97,7 +97,8 @@ $text = _(" Vacuum\n");
 	$V .= "<P><input type='checkbox' name='vacuum' value='1'>$text";
 $text = _(" Analyze\n");
 	$V .= "<br><input type='checkbox' name='analyze' value='1'>$text";
-	$V .= "<P><input type='submit' value='Clean!'>\n";
+$text = _("Clean");
+	$V .= "<P><input type='submit' value='$text!'>\n";
 	$V .= "</form>";
 	break;
       case "Text":

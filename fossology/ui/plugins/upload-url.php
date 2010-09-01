@@ -40,16 +40,20 @@ class upload_url extends FO_Plugin {
   function Upload($Folder, $GetURL, $Desc, $Name) {
     /* See if the URL looks valid */
     if (empty($Folder)) {
-      return ("Invalid folder");
+$text = _("Invalid folder");
+      return ($text);
     }
     if (empty($GetURL)) {
-      return ("Invalid URL");
+$text = _("Invalid URL");
+      return ($text);
     }
     if (preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $GetURL) != 1) {
-      return ("Invalid URL: " . htmlentities($GetURL));
+$text = _("Invalid URL");
+      return ("$text: " . htmlentities($GetURL));
     }
     if (preg_match("@[[:space:]]@", $GetURL) != 0) {
-      return ("Invalid URL (no spaces permitted): " . htmlentities($GetURL));
+$text = _("Invalid URL (no spaces permitted)");
+      return ("$text: " . htmlentities($GetURL));
     }
     if (empty($Name)) {
       $Name = basename($GetURL);
@@ -62,18 +66,21 @@ class upload_url extends FO_Plugin {
     $Mode = (1 << 2); // code for "it came from wget"
     $uploadpk = JobAddUpload($ShortName, $GetURL, $Desc, $Mode, $Folder);
     if (empty($uploadpk)) {
-      return ("Failed to insert upload record");
+$text = _("Failed to insert upload record");
+      return ($text);
     }
     /* Prepare the job: job "wget" */
     $jobpk = JobAddJob($uploadpk, "wget");
     if (empty($jobpk) || ($jobpk < 0)) {
-      return ("Failed to insert job record");
+$text = _("Failed to insert job record");
+      return ($text);
     }
     /* Prepare the job: job "wget" has jobqueue item "wget" */
     /** 2nd parameter is obsolete **/
     $jobqueuepk = JobQueueAdd($jobpk, "wget", "$uploadpk - $GetURL", "no", NULL, NULL);
     if (empty($jobqueuepk)) {
-      return ("Failed to insert task 'wget' into job queue");
+$text = _("Failed to insert task 'wget' into job queue");
+      return ($text);
     }
     global $Plugins;
     $Unpack = & $Plugins[plugin_find_id("agent_unpack") ];
@@ -155,7 +162,8 @@ $text = _("Select optional analysis");
           $V.= AgentCheckBoxMake(-1, "agent_unpack");
         }
         $V.= "</ol>\n";
-        $V.= "<input type='submit' value='Upload!'>\n";
+$text = _("Upload");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
         break;
       case "Text":

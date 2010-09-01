@@ -55,7 +55,8 @@ class list_lic_files extends FO_Plugin
 
     $URL = $this->Name . "&napk=$nomosagent_pk&item=$uploadtree_pk&lic=$rf_shortname&page=-1";
     if (!empty($Excl)) $URL .= "&excl=$Excl";
-    menu_insert($this->Name."::Show All",0, $URL, "Show All Files");
+$text = _("Show All Files");
+    menu_insert($this->Name."::Show All",0, $URL, $text);
 
   } // RegisterMenus()
       

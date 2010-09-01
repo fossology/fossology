@@ -62,7 +62,8 @@ class ui_license_list extends FO_Plugin {
         menu_insert("Browse::Nomos License List Download", 1, $URI . "&output=dltext");
       }
       else {
-        menu_insert("Browse::Nomos License List", 1, $URI, "Nomos license listing");
+$text = _("Nomos license listing");
+        menu_insert("Browse::Nomos License List", 1, $URI, $text);
         menu_insert("Browse::Nomos License List Download", 1, $URI . "&output=dltext");
       }
     }

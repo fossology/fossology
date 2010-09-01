@@ -38,7 +38,8 @@ class search_repo extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    menu_insert("Search::Repository",0,$this->Name,"Search based on repository keys");
+$text = _("Search based on repository keys");
+    menu_insert("Search::Repository",0,$this->Name,$text);
     } // RegisterMenus()
 
   /***********************************************************
@@ -141,7 +142,8 @@ class search_repo extends FO_Plugin
 	$V .= "<P /><form method='post'>\n";
 	$V .= _("Enter the pfile key or repository identifier:<P />");
 	$V .= "<INPUT type='text' name='search' size='60' value='" . htmlentities($SearchArg) . "'><P>\n";
-	$V .= "<input type='submit' value='Find!'>\n";
+$text = _("Find");
+	$V .= "<input type='submit' value='$text!'>\n";
 	$V .= "</form>\n";
 
 	if (!empty($SearchArg))

@@ -43,9 +43,11 @@ function RegisterMenus()
 
   // micro-menu
   $URL = $this->Name."&add=y";
-  menu_insert($this->Name."::Add License",0, $URL, "Add new license");
+$text = _("Add new license");
+  menu_insert($this->Name."::Add License",0, $URL, $text);
   $URL = $this->Name;
-  menu_insert($this->Name."::Select License",0, $URL, "Select license family");
+$text = _("Select license family");
+  menu_insert($this->Name."::Select License",0, $URL, $text);
 }
 
 
@@ -67,16 +69,16 @@ function Inputfm()
   $V.= _("Filter: ");
   $V.= "<SELECT name='req_marydone'>\n";
   $Selected =  ($_REQUEST['req_marydone'] == 'all') ? " SELECTED ": "";
-$text = _(" All ");
-  $V.= "<option value='all' $Selected>$text</option>";
+$text = _("All");
+  $V.= "<option value='all' $Selected> $text </option>";
   $Selected =  ($_REQUEST['req_marydone'] == 'done') ? " SELECTED ": "";
-$text = _(" Checked ");
-  $V.= "<option value='done' $Selected>$text</option>";
+$text = _("Checked");
+  $V.= "<option value='done' $Selected> $text </option>";
   $Selected =  ($_REQUEST['req_marydone'] == 'notdone') ? " SELECTED ": "";
-$text = _(" Not Checked ");
-  $V.= "<option value='notdone' $Selected>$text</option>";
+$text = _("Not Checked");
+  $V.= "<option value='notdone' $Selected> $text </option>";
   $V.= "</SELECT>";
-  $V.= _("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+  $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
   // by short name -ajax-> fullname
   $V.= _("License family name: ");
@@ -87,7 +89,8 @@ $text = _(" Not Checked ");
   $Pulldown = Array2SingleSelect($Shortnamearray, "req_shortname", $Selected);
   $V.= $Pulldown;
   $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-  $V.= "<INPUT type='submit' value='Find'>\n";
+$text = _("Find");
+  $V.= "<INPUT type='submit' value='$text'>\n";
   $V .= "</FORM>\n";
   $V.= "<hr>";
 
@@ -134,7 +137,10 @@ function LicenseList($namestr, $filter)
   // print simple message if we have no results
   if (pg_num_rows($result) == 0)
   {
-    $ob .= "<br>No licenses matching the filter ($filter) and name pattern ($namestr) were found.<br>";
+$text = _("No licenses matching the filter");
+$text1 = _("and name pattern");
+$text2 = _("were found");
+    $ob .= "<br>$text ($filter) $text1 ($namestr) $text2.<br>";
     return $ob;
   }
 
@@ -224,7 +230,9 @@ function Updatefm($rf_pk)
     if (pg_num_rows($result) ==0)
     {
       $ob .= "</table>";
-      $ob .= "<br>No licenses matching this key ($rf_pk) was found.<br>";
+$text = _("No licenses matching this key");
+$text1 = _("was found");
+      $ob .= "<br>$text ($rf_pk) $text1.<br>";
       return $ob;
     }
     $ob .= "<input type=hidden name=updateit value=true>";
@@ -315,10 +323,13 @@ $text = _("Public Notes");
     $ob .= "</tr>";
   
   $ob .= "</table>";
-  if ($rf_pk)
-    $ob .= "<INPUT type='submit' value='Update'>\n";
-  else
-    $ob .= "<INPUT type='submit' value='Add License'>\n";
+  if ($rf_pk){
+$text = _("Update");
+    $ob .= "<INPUT type='submit' value='$text'>\n";
+  }else{
+$text = _("Add License");
+    $ob .= "<INPUT type='submit' value='$text'>\n";
+  }
   $ob .= "</FORM>\n";
   return $ob;
 }

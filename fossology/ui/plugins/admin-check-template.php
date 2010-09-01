@@ -255,9 +255,9 @@ $text = _("The impacted uploads:");
     $DB->Action("BEGIN;");
 
     /* Delete the metadata for the licenses, in batches */
-$text=_("Resetting license analysis for ");
-$text1=_(" files.");
-    print "$text" . count($PfileList) . "$text1<br>\n";
+$text = _("Resetting license analysis for");
+$text1 = _("files.");
+    print "$text " . count($PfileList) . " $text1<br>\n";
     $SQL="";
     for($i=0; !empty($PfileList[$i]); $i++)
       {
@@ -279,9 +279,9 @@ $text1=_(" files.");
 	}
 
     /* Delete the licenses */
-$text=_("Removing ");
-$text1=_(" obsolete license templates.");
-    print "$text" . count($OldTemplates) . "$text1<br>\n";
+$text = _("Removing");
+$text1 = _("obsolete license templates.");
+    print "$text " . count($OldTemplates) . " $text1<br>\n";
     $SQL="";
     $SQL2="";
     for($i=0; !empty($OldTemplates[$i]); $i++)
@@ -308,9 +308,9 @@ $text1=_(" obsolete license templates.");
     $DB->Action("COMMIT;");
 
     /* Reset the jobs */
-$text=_("Resetting ");
-$text1=_(" license analysis jobs.");
-    print "$text" . count($UploadList) . "$text1<br>\n";
+$text = _("Resetting");
+$text1 = _("license analysis jobs.");
+    print "$text " . count($UploadList) . " $text1<br>\n";
     $Analyze = &$Plugins[plugin_find_id("agent_license")];
     for($i=0; !empty($UploadList[$i]); $i++)
       {
@@ -366,7 +366,8 @@ $text = _("Total uploads to re-analyze: ");
 	$V .= "<form method='POST'>";
 $text = _(" Check to cleanup and re-analyze.\n");
 	$V .= "<P><input type='checkbox' name='cleanup' value='1'>$text";
-	$V .= "<P><input type='submit' value='Clean!'>\n";
+$text = _("Clean");
+	$V .= "<P><input type='submit' value='$text!'>\n";
 	$V .= "</form>";
 	break;
       case "Text":

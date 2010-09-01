@@ -48,7 +48,8 @@ class agent_add extends FO_Plugin
     $Results = $DB->Action("SELECT upload_pk FROM upload WHERE upload_pk = '$uploadpk';");
     if ($Results[0]['upload_pk'] != $uploadpk)
     {
-      return("Upload not found.");
+$text = _("Upload not found.");
+      return($text);
     }
 
     /* Validate the agent list and add agents as needed. */
@@ -157,7 +158,7 @@ $text = _("Scheduling of Agent(s) failed: ");
         $V .= "<ol>\n";
 $text = _("Select the folder containing the upload you wish to analyze:");
         $V .= "<li>$text<br>\n";
-        $V .= _("<select name='folder'\n");
+        $V .= "<select name='folder'\n";
         $V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=$Folder' ";
         $V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
         $V .= FolderListOption(-1,0,1,$Folder);
@@ -182,7 +183,8 @@ $text = _("Select additional analysis.");
         $V .= "<li>$text<br>\n";
         $V .= "<select multiple size='10' id='agents' name='agents[]'></select>\n";
         $V .= "</ol>\n";
-        $V .= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+        $V .= "<input type='submit' value='$text!'>\n";
         $V .= "</form>\n";
         break;
       case "Text":

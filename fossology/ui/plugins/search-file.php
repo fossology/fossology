@@ -88,7 +88,8 @@ class search_file extends FO_Plugin
   function RegisterMenus()
     {
     $URI = $this->Name;
-    menu_insert("Search::Filename",0,$URI,"Search based on filename");
+$text = _("Search based on filename");
+    menu_insert("Search::Filename",0,$URI,$text);
     } // RegisterMenus()
 
   /***********************************************************
@@ -125,7 +126,8 @@ $text = _("Show All Files");
 	if ($allfiles == '1') { $V .= " checked"; }
 	$V .= "> $text\n";
 	$V .= "</ul>\n";
-	$V .= "<input type='submit' value='Search!'>\n";
+$text = _("Search");
+	$V .= "<input type='submit' value='$text!'>\n";
 	$V .= "</form>\n";
 
 	if (!empty($Filename))
