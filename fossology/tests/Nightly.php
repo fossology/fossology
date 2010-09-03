@@ -36,6 +36,24 @@
  */
 
 require_once('TestRun.php');
+require_once('mailTo.php');
+
+global $mailTo;
+
+/**
+ * reportError
+ * \brief report the test setup error in a mail message using the gloabl
+ * mailTo variable.
+ */
+function reportError($error)
+{
+	$hdr = "There were errors in the nightly test setup." .
+	       "The tests were not run due to one or more errors.\n\n";
+
+	$msg = $hdr . $error . "\n";
+	
+  $last = exec("mailx -s \"test Setup Failed\" $mailTo < $msg ",$tossme, $rptGen);
+}
 
 // Using the standard source path /home/fosstester/fossology
 $tonight = new TestRun();
@@ -46,7 +64,9 @@ $path = '/home/fosstester/fossology/agents/copyright_analysis/model.dat';
 $last = exec("rm $path", $output, $rtn);
 if($rtn != 0)
 {
-	print "Error, could not remove $path, sources will not update, exiting\n";
+	$error = "Error, could not remove $path, sources will not update, exiting\n";
+	print $error;
+	
 	exit(1);
 }
 print "Updating sources with svn update\n";

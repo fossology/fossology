@@ -49,6 +49,7 @@
 
 require_once ('TestEnvironment.php');
 require_once ('testClasses/check4jobs.php');
+require_once ('mailTo.php');
 
 $usage = NULL;
 $usage.= "Usage: $argv[0] [-l path] {[-a] | [-b] | [-h] | [-s] | [-v -l]}\n";
@@ -67,6 +68,7 @@ $usage.= "-a: Run all FOSSology Test Suites\n" .
 global $logFile;
 global $logFileName;
 global $LF;
+global $mailTo;
 
 $SiteTests = '../ui/tests/SiteTests';
 $BasicTests = '../ui/tests/BasicTests';
@@ -311,11 +313,8 @@ if (array_key_exists("a", $options)) {
 		$reportHome = "$resultsHome" . "$logFileName";
 
 		if(array_key_exists('e', $options)) {
-			$TO = "mark.donohoe@hp.com mary.laser@hp.com ";
-			//$TO = "mark.donohoe@hp.com mary.laser@hp.com " .
-			//      "bob.gobeille@hp.com dong.ma@hp.com";
 			$last = exec("./textReport.php -f $reportHome |
-    mailx -s \"test results\" $TO ",$tossme, $rptGen);
+    mailx -s \"test results\" $mailTo ",$tossme, $rptGen);
 		}
 		$last = system("./textReport.php -f $reportHome", $rtn);
 		if($last === FALSE) {
