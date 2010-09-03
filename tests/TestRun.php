@@ -59,6 +59,36 @@ class TestRun {
     }
     return;
   }
+  /**
+   * checkFop
+   * \brief checks the output file from a fo-postinstall for the strings
+   * FATAL, error and Error. Assumes fop.out file is in the cwd.
+   * 
+   * @return Boolean. True if any of the strings are found, false if not found.
+   *
+   */
+  protected function checkFop()
+  {
+  	$fMatches = array();
+  	$eMatches = array();
+  	$fatalPat = '/FATAL/';
+  	$errPat = '/error/i';
+  	
+  	$fMatches = preg_grep($fatalPat, file('fop.out'));
+  	$eMatches = preg_grep($errPat, file('fop.out'));
+  	if(empty($fMatches) && empty($eMatches))
+  	{
+  		print "DEBUG: returning false, matched arrays are:\n";
+  		print_r($fMatches) . "\n";
+  		print_r($eMatches) . "\n";
+  		return(FALSE);
+  	}
+  	else
+  	{
+  		return(TRUE);
+  	}
+  }
+  
   public function checkOutTot() {
 
     $Tot = 'svn co https://fossology.svn.sourceforge.net/svnroot/fossology/trunk/fossology';
@@ -110,11 +140,16 @@ class TestRun {
     return ($parts[5]);
   }
   public function foPostinstall() {
+  	
     if (!chdir($this->srcPath)) {
       print "Error can't cd to $this->srcPath\n";
     }
     $foLast = exec('sudo /usr/local/lib/fossology/fo-postinstall > fop.out 2>&1', $results, $rtn);
-    if ($rtn == 0) {
+    
+// remove this check as fo-postinstall reports true (0) when there are errors    
+//        if ($rtn == 0) {
+    if (checkFop() === FALSE)
+    {
       return (TRUE);
     }
     else {
