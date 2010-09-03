@@ -131,12 +131,12 @@ class folder_create extends FO_Plugin
             /* Need to refresh the screen */
 $text = _("Folder");
 $text1 = _("Created");
-            $R .= displayMessage($text .$NewFolder. $text1);
+            $R .= displayMessage("$text $NewFolder $text1");
           }
           else if($rc == 4) {
 $text = _("Folder");
 $text1 = _("Exists");
-            $R .= displayMessage($text .$NewFolder. $text1);
+            $R .= displayMessage("$text $NewFolder $text1");
           }
         }
         /* Display the form */
