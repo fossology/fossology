@@ -101,6 +101,7 @@ class agent_nomos_once extends FO_Plugin {
         $Line = fgets($Fin);
         fwrite($Fout, $Line);
       }
+      fclose($Fin);
       fclose($Fout);
       if (filesize($Ftmp) > 0) {
         $_FILES['licfile']['tmp_name'] = $Ftmp;
@@ -110,8 +111,9 @@ class agent_nomos_once extends FO_Plugin {
       }
       else {
         unlink($Ftmp);
+        echo "FATAL: Missing POST file\n";
+        exit(1);
       }
-      fclose($Fin);
     }
 
     /* Only register with the menu system if the user is logged in. */
