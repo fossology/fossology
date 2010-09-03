@@ -41,6 +41,15 @@ require_once('TestRun.php');
 $tonight = new TestRun();
 
 // Step 1 update sources
+print "removing model.dat file so sources will update";
+$path = '/home/fosstester/fossology/agents/copyright_analysis/model.dat'
+$cmd = "rm $path";
+$last = exec("rm $path", $output, $rtn);
+if($rtn != 0)
+{
+	print "Error, could not remove $path, sources will not update, exiting\n";
+	exit(1);
+}
 print "Updating sources with svn update\n";
 if($tonight->svnUpdate() !== TRUE)
 {
