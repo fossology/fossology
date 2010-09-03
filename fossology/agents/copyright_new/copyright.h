@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef COPYRIGHT_H_INCLUDE
 #define COPYRIGHT_H_INCLUDE
 
-#include <cvector.h>
+#include <stdio.h>
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
@@ -86,8 +86,6 @@ copyright_iterator copyright_end(copyright copy);
 char* copyright_at(copyright copy, int index);
 char* copyright_get(copyright copy, int index);
 int copyright_size(copyright copy);
-void copyright_dictionary(copyright copy, cvector dict);
-void copyright_names(copyright copy, cvector name);
 
 /* ************************************************************************** */
 /* **** Copy Entry Accessor Functions *************************************** */

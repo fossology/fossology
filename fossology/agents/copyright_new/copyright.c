@@ -27,8 +27,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <pcre.h>
 
 /* local includes */
-#include <radixtree.h>
 #include <copyright.h>
+#include <radixtree.h>
 #include <cvector.h>
 
 #define MAXBUF 1024*1024  ///< max bytes to scan
@@ -38,12 +38,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 char* email_regex = "[\\<\\(]?[A-Za-z0-9\\-_\\.\\+]{1,100}@[A-Za-z0-9\\-_\\.\\+]{1,100}\\.[A-Za-z]{1,4}[\\>\\)]?(?C1)";
 /** regular expression to find url statements in natural language */
 char* url_regex = "(?:(:?ht|f)tps?\\:\\/\\/[^\\s\\<]+[^\\<\\.\\,\\s])(?C2)";
-/** the directory that the copyright.dic file will be in */
-char* copy_dir = "copyright.dic";
-//char* copy_dir = "/usr/local/lib/fossology/agents/copyright/copyright.dic";
-/** the directory that the name.dic file will be in */
-char* name_dir = "names.dic";
-//char* name_dir = "/usr/local/lib/fossology/agents/copyright/names.dic";
 /** the list of letter that will be removed when matching to a radix tree */
 char token[34] = {' ','!','"','#','$','%','&','`','*','+','\'','-','.','/',':','\n',',',
                   '\t',';','<','=','>','?','@','[','\\',']','^','_','{','|','}','~',0};
@@ -380,11 +374,21 @@ int copyright_callout(pcre_callout_block* info)
  */
 int copyright_init(copyright* copy)
 {
+  /* local variables */
+  char copy_dir[FILENAME_MAX];  // the location of the copyright data
+  char name_dir[FILENAME_MAX];  // the location of the dictionary data
+
   /* call constructor for all sub objects */
   (*copy) = (copyright)calloc(1,sizeof(struct copyright_internal));
   radix_init(&((*copy)->dict));
   radix_init(&((*copy)->name));
   cvector_init(&((*copy)->entries), copy_entry_function_registry());
+
+  /* setup the copy_dir and name_dir variables */
+  memset(copy_dir, '\0', sizeof(copy_dir));
+  memset(name_dir, '\0', sizeof(name_dir));
+  sprintf(copy_dir, "%s/copyright.dic", DATADIR);
+  sprintf(name_dir, "%s/names.dic", DATADIR);
 
   /* load the dictionaries */
   if(!load_dictionary((*copy)->dict, copy_dir) ||
@@ -652,34 +656,6 @@ char* copyright_get(copyright copy, int index)
 int copyright_size(copyright copy)
 {
   return cvector_size(copy->entries);
-}
-
-/**
- * @brief gets a cvector containing the elements in the matching dictionary
- *
- * returns a cvector that contains all of the string contained within the
- * dictionary that is used to match copyrights.
- *
- * @param copy the copygith to get the dictionary from
- * @param dict the cvector that will contain the dictionary
- */
-void copyright_dictionary(copyright copy, cvector dict)
-{
-  radix_copy_to(copy->dict, dict);
-}
-
-/**
- * @brief gets a cvector containing the elements in the name dictionary
- *
- * returns a cvector that contains all of the string contained within the
- * dictionary that is used to match names in copyrights.
- *
- * @param copy the copygith to get the dictionary from
- * @param name the cvector that will contain the dictionary
- */
-void copyright_names(copyright copy, cvector name)
-{
-  radix_copy_to(copy->name, name);
 }
 
 /* ************************************************************************** */

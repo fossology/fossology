@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* includes for files that will be tested */
 #include <copyright.h>
 #include <radixtree.h>
+#include <cvector.h>
 
 /* library includes */
 #include <stdio.h>
@@ -67,7 +68,7 @@ void test_copyright_init()
   printf("Test copyright_init: ");
 
   /* start the tests */
-  copyright_init(&copy);
+  CU_ASSERT_TRUE(copyright_init(&copy));
 
 
 
@@ -86,5 +87,6 @@ CU_TestInfo copyright_local_testcases[] =
 
 CU_TestInfo copyright_testcases[] =
 {
+    {"Testing copyright_init:", test_copyright_init},
     CU_TEST_INFO_NULL
 };

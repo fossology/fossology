@@ -20,7 +20,6 @@
 #define RADIXTREE_H_INCLUDE
 
 #include <stdio.h>
-#include <cvector.h>
 
 #define NODE_SIZE 128 ///< the number of children that a node can have
 #define OFFSET '\0'   ///< the base offset that indexing into the child array is done using
@@ -58,8 +57,6 @@ void radix_insert_all(radix_tree tree, char** first, char** last);
 
 int radix_contains(radix_tree tree, char* string);
 int radix_match(radix_tree tree, char* dst, char* src);
-void radix_match_within(radix_tree tree, cvector dst, char* src);
-int radix_copy_to(radix_tree tree, cvector dst);
 void radix_print(radix_tree tree, FILE* ostr);
 
 #endif /* RADIXTREE_H_INCLUDE */

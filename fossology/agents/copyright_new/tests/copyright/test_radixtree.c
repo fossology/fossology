@@ -205,31 +205,6 @@ void test_radix_match()
   printf("\n");
 }
 
-void test_radix_copy_to()
-{
-  radix_tree tree;
-  cvector vec;
-
-  /* start the test */
-  printf("Test radix_contains: ");
-
-  /* run the functions */
-  radix_init(&tree);
-  cvector_init(&vec, string_function_registry());
-  radix_insert(tree, "hello");
-  radix_insert(tree, "world");
-  radix_insert(tree, "!");
-
-  /* do the asserts */
-  CU_ASSERT_EQUAL(radix_copy_to(tree, vec), 3);
-  CU_ASSERT_TRUE(!strcmp(cvector_get(vec, 0), "!"));
-  CU_ASSERT_TRUE(!strcmp(cvector_get(vec, 1), "hello"));
-  CU_ASSERT_TRUE(!strcmp(cvector_get(vec, 2), "world"));
-
-  radix_destroy(tree);
-  printf("\n");
-}
-
 /* ************************************************************************** */
 /* **** cunit test info ***************************************************** */
 /* ************************************************************************** */
@@ -243,6 +218,5 @@ CU_TestInfo radix_testcases[] =
     {"Testing radix_contains:", test_radix_contains},
     {"Testing radix_match_local:", test_radix_match_local},
     {"Testing radix_match:", test_radix_match},
-    {"Testing radix_copy_to:", test_radix_copy_to},
     CU_TEST_INFO_NULL
 };

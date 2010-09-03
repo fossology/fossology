@@ -26,21 +26,33 @@ OBJECTS = test_cvector.o \
           test_copyright.o \
           test_radixtree.o \
 
-TO_TEST = ../../cvector.o \
-          ../../copyright.o \
-          ../../radixtree.o \
+TO_TEST = ../../copyright.c  ../../copyright.h \
+          ../../cvector.c    ../../cvector.h \
+          ../../radixtree.c  ../../radixtree.h \
+          ../../pair.c       ../../pair.h \
 
 all: $(EXE)
-$(EXE): $(OBJECTS) $(TO_TEST) run_tests.c
-	$(CC) run_tests.c -o $@ $(OBJECTS) $(TO_TEST) $(CFLAGS_LOCAL)
+
+test: $(EXE)
+	./$(EXE)
+
+coverage: $(OBJECTS) libcopyright_cov.so run_tests.c
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) ../../libcopyright_cov.so $(CFLAGS_LOCAL)
+	./$(EXE)
+	lcov --directory  ../../   --capture --output-file cov.txt; \
+	genhtml  -o  results cov.txt
+
+$(EXE): $(OBJECTS) libcopyright.so run_tests.c
+	$(CC) run_tests.c -o $@ $(OBJECTS) ../../libcopyright.so $(CFLAGS_LOCAL)
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
-test: all
+libcopyright.so: $(TO_TEST)
+	$(MAKE) -C ../../ $@
 
-$(TO_TEST): ../../%: $(%)
-	$(MAKE) -C ../../ $(%)
+libcopyright_cov.so: $(TO_TEST)
+	$(MAKE) -C ../../ $@
 
 clean:
 	rm -f $(EXE) *.o *.g *.xml *.txt results

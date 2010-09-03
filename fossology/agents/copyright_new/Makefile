@@ -20,48 +20,79 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpcre
+DEF = -DDATADIR='"$(DATADIR)"'
+
 EXE = copyright
+TESTDIR = tests
 
-SOURCE = cvector.c \
-		 radixtree.c \
-		 copyright.c \
-		 pair.c \
+OBJECTS = copyright.o \
+          cvector.o \
+		  radixtree.o \
+		  pair.o \
 
-HEADER = cvector.h \
-         radixtree.h \
-         copyright.h \
-         pair.h \
-         sql_statements.h
-
-OBJS   = cvector.o \
-		 radixtree.o \
-		 pair.o \
-
-DOCS   = copyright.dic \
-		 names.dic \
-		 
+##########################
+# executable build rules #
+##########################		 
 all: $(EXE)
 
-$(EXE): copyright.o main.c
-	$(CC) $(OBJS) copyright.o main.c $(CFLAGS_LOCAL) -o $@
+test: $(OBJECTS)
+	$(MAKE) -C $(TESTDIR) test
 
-copyright.o: $(OBJS) $(HEADER) $(DB) $(REPO) $(VARS) copyright.c
-	$(CC) $(DIRS) -c $(CFLAGS_LOCAL) copyright.c
+coverage: libcopyright_cov.so
+	$(MAKE) -C $(TESTDIR) coverage
 
-$(OBJS): %.o: %.c $(HEADER) $(DB) $(REPO) $(VARS)
+$(EXE): main.c libcopyright.so $(DB) $(REPO) $(AGENTLIB) $(VARS)
+	$(CC) main.c libcopyright.so $(CFLAGS_LOCAL) -o $@
+
+##############################
+# shared library build rules #
+##############################
+
+libcopyright.so: $(OBJECTS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
+	$(CC) -shared -fPIC $(CFLAGS_LOCAL) $(OBJECTS) -o $@
+
+libcopyright_cov.so: $(OBJECTS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
+	$(CC) -shared -fPIC $(CFLAGS_LOCAL) $(OBJECTS) -o $@
+
+######################
+# object build rules #
+######################
+copyright.o: %.o: %.c %.h cvector.h radixtree.h
+	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+
+cvector.o: %.o: %.c %.h cvector.h
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
+radixtree.o: %.o: %.c %.h
+	$(CC) -c $(CFLAGS_LOCAL) $<
+
+pair.o: %.o: %.c %.h cvector.h
+	$(CC) -c $(CFLAGS_LOCAL) $<
+
+#######################
+# install build rules #
+#######################
 install: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
-	$(INSTALL_PROGRAM) $(DOCS) $(DESTDIR)$(AGENTDIR)/$(EXE)
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)/
+	$(INSTALL_PROGRAM) copyright.dic $(DATADIR)/
+	$(INSTALL_PROGRAM) names.dic $(DATADIR)/
+	$(INSTALL_PROGRAM) libcopyright.so $(DESTDIR)$(LIBDIR)/
 
 uninstall:
-	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
+	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)/$(EXE)
+	rm -f $(DATADIR)/copyright.dic
+	rm -f $(DATADIR)/names.dic
+	rm -f $(DESTDIR)$(LIBDIR)/libcopyright.so
 
+#####################
+# other build rules #
+#####################
 clean:
-	rm -f *.o $(EXE)
+	rm -f *.o *.so $(EXE)
 	rm -f False_Positives False_Negatives Matches Found
 	$(MAKE) -C tests/ clean
+
+include $(DEPS)
 
 .PHONY: all install uninstall clean test
 	
