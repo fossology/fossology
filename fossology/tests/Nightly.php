@@ -42,8 +42,7 @@ $tonight = new TestRun();
 
 // Step 1 update sources
 print "removing model.dat file so sources will update";
-$path = '/home/fosstester/fossology/agents/copyright_analysis/model.dat'
-$cmd = "rm $path";
+$path = '/home/fosstester/fossology/agents/copyright_analysis/model.dat';
 $last = exec("rm $path", $output, $rtn);
 if($rtn != 0)
 {
