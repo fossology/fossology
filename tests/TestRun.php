@@ -72,6 +72,7 @@ class TestRun {
       //print_r($output) . "\n";
       if ($rtn != 0) {
         print "ERROR! Could not check out FOSSology sources at\n$Tot\n";
+        print "Error was: $output\n";
         return (FALSE);
       }
     }
