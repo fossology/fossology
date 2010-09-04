@@ -148,7 +148,7 @@ class TestRun {
     
 // remove this check as fo-postinstall reports true (0) when there are errors    
 //        if ($rtn == 0) {
-    if (checkFop() === FALSE)
+    if ($this->checkFop() === FALSE)
     {
       return (TRUE);
     }
