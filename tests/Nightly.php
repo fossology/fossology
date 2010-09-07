@@ -25,9 +25,9 @@
  * @return
  *
  * \todo add parameters, e.g. -c for checkout?  -d for run fo-postinstall
- * but these parameters should have a + or - ?  as they are switches for 
+ * but these parameters should have a + or - ?  as they are switches for
  * indicating don't do this.... as all actions are on be default.
- * 
+ *
  * \todo save the fossology log file and start with a fresh one each night.
  *
  * @version "$Id$"
@@ -47,33 +47,41 @@ global $mailTo;
  */
 function reportError($error)
 {
+	global $mailTo;
+	
 	$hdr = "There were errors in the nightly test setup." .
 	       "The tests were not run due to one or more errors.\n\n";
 
 	$msg = $hdr . $error . "\n";
-	
-  $last = exec("mailx -s \"test Setup Failed\" $mailTo < $msg ",$tossme, $rptGen);
+
+	$last = exec("mailx -s \"test Setup Failed\" $mailTo < $msg ",$tossme, $rptGen);
 }
 
 // Using the standard source path /home/fosstester/fossology
 $tonight = new TestRun();
 
 // Step 1 update sources
-print "removing model.dat file so sources will update";
+print "removing model.dat file so sources will update\n";
 $path = '/home/fosstester/fossology/agents/copyright_analysis/model.dat';
-$last = exec("rm $path", $output, $rtn);
-if($rtn != 0)
+$last = exec("rm $path 2>&1", $output, $rtn);
+// if the file doesn't exist, that'
+if((preg_match('/No such file or directory/',$last, $matches)) != 1)
 {
-	$error = "Error, could not remove $path, sources will not update, exiting\n";
-	print $error;
-	
-	exit(1);
+	if($rtn != 0)
+	{
+		$error = "Error, could not remove $path, sources will not update, exiting\n";
+		print $error;
+		reportError($error);
+		exit(1);
+	}
 }
 print "Updating sources with svn update\n";
 if($tonight->svnUpdate() !== TRUE)
 {
-  print "Error, could not svn Update the sources, aborting test\n";
-  exit(1);
+	$error = "Error, could not svn Update the sources, aborting test\n";
+	print $error;
+	reportError($error);
+	exit(1);
 }
 
 /*
@@ -83,60 +91,74 @@ if($tonight->svnUpdate() !== TRUE)
 print "Making sources\n";
 if($tonight->makeSrcs() !== TRUE)
 {
-  print "There were Errors in the make of the sources examine make.out\n";
-  exit(1);
+	$error = "There were Errors in the make of the sources examine make.out\n";
+	print $error;
+  reportError($error);
+	exit(1);
 }
 //try to stop the scheduler before the make install step.
 print "Stopping Scheduler before install\n";
 if($tonight->stopScheduler() !== TRUE)
 {
-  print "Could not stop fossology-scheduler, maybe it wasn't running?\n";
+	$error = "Could not stop fossology-scheduler, maybe it wasn't running?\n";
+  print $error;
+  reportError($error);
 }
 
 // Step 4 install fossology
 print "Installing fossology\n";
 if($tonight->makeInstall() !== TRUE)
 {
-  print "There were Errors in the Installation examine make-install.out\n";
-  exit(1);
+	$error = "There were Errors in the Installation examine make-install.out\n";
+	print $error;
+  reportError($error);
+	exit(1);
 }
 
 // Step 5 run the post install process
 /*
- for most updates you don't have to remake the db and license cache.  Need to 
+ for most updates you don't have to remake the db and license cache.  Need to
  add a -d for turning it off.
  */
 
 print "Running fo-postinstall\n";
 if($tonight->foPostinstall() !== TRUE)
 {
-  print "There were errors in the postinstall process check fop.out\n";
-  exit(1);
+	$error = "There were errors in the postinstall process check fop.out\n";
+	print $error;
+  reportError($error);
+	exit(1);
 }
 
 // Step 6 run the scheduler test to make sure everything is clean
 print "Starting Scheduler Test\n";
 if($tonight->schedulerTest() !== TRUE)
 {
-  print "Error! in scheduler test examine ST.out\n";
-  exit(1);
+	$error = "Error! in scheduler test examine ST.out\n";
+	print $error;
+  reportError($error);
+	exit(1);
 }
 
 print "Starting Scheduler\n";
 if($tonight->startScheduler() !== TRUE)
 {
-  print "Error! Could not start fossology-scheduler\n";
-  exit(1);
+	$error = "Error! Could not start fossology-scheduler\n";
+	print $error;
+  reportError($error);
+	exit(1);
 }
 
 print "Running tests\n";
 $testPath = "$tonight->srcPath" . "/tests";
 print "testpath is:$testPath\n";
 if(!chdir($testPath))
-     {
-       print "Error can't cd to $testPath\n";
-       exit(1);
-     }
+{
+	$error = "Error can't cd to $testPath\n";
+	print $error;
+  reportError($error);
+	exit(1);
+}
 
 
 /*
@@ -149,8 +171,8 @@ print "after running tests the output is\n";
 print_r($results) . "\n";
 
 /*
-   In either case, need to isolate the results file name so we can feed it to
-   the results summary program(s).
+ In either case, need to isolate the results file name so we can feed it to
+ the results summary program(s).
  */
 
 /*
@@ -164,19 +186,19 @@ print_r($results) . "\n";
 
 /*
  * At this point should have results, generate the results summary and email it.
- * 
+ *
  * 10-29-2009: the results are generated in testFOSSology.php and mailed there
  * for now.... it should be done here.
  */
 
 
 /*
-print "Stoping Scheduler\n";
-if($tonight->stopScheduler() !== TRUE)
-{
-  print "Error! Could not stop fossology-scheduler\n";
-  exit(1);
-}
-*/
+ print "Stoping Scheduler\n";
+ if($tonight->stopScheduler() !== TRUE)
+ {
+ print "Error! Could not stop fossology-scheduler\n";
+ exit(1);
+ }
+ */
 
 ?>
