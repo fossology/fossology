@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_copyright_view", _("View Copyright/Email/Url Analysis"));
+
 class copyright_view extends FO_Plugin
 {
     var $Name       = "copyrightview";
-    var $Title      = "View Copyright/Email/Url Analysis";
+    var $Title      = TITLE_copyright_view;
     var $Version    = "1.0";
     var $Dependency = array("db","browse","view");
     var $DBaccess   = PLUGIN_DB_READ;

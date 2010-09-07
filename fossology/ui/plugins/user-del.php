@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_user_del", _("Delete A User"));
+
 class user_del extends FO_Plugin
 {
   var $Name       = "user_del";
-  var $Title      = "Delete A User";
+  var $Title      = TITLE_user_del;
   var $MenuList   = "Admin::Users::Delete";
   var $Version    = "1.0";
   var $Dependency = array("db");

@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_jobs_showjobs", _("Show Job Queue"));
+
 class jobs_showjobs extends FO_Plugin
   {
   var $Name       = "showjobs";
-  var $Title      = "Show Job Queue";
+  var $Title      = TITLE_jobs_showjobs;
   var $Version    = "1.0";
   var $MenuList   = "Jobs::Queue::Summary";
   var $MenuOrder  = 5;

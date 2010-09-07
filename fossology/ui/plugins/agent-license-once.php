@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_license_once", _("Bsam One-Shot License Analysis"));
+
 class agent_license_once extends FO_Plugin {
   public $Name = "agent_license_once";
-  public $Title = "Bsam One-Shot License Analysis";
+  public $Title = TITLE_agent_license_once;
   // Note: menuList is not needed for this plugin, it inserts into the menu
   // in the code below.
   //public $MenuList = "Upload::One-Shot Bsam";

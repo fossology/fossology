@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_jobs_showjobs_upload", _("View Jobs By Upload"));
+
 class jobs_showjobs_upload extends FO_Plugin
 {
   var $Name       = "jobs_showjobs_upload";
-  var $Title      = "View Jobs By Upload";
+  var $Title      = TITLE_jobs_showjobs_upload;
   var $MenuList   = "Jobs::Queue::By Upload";
   var $Version    = "1.0";
   var $Dependency = array("db","showjobs");

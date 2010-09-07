@@ -25,9 +25,11 @@ if (!isset($GlobalReady)) {
 	exit;
 }
 
+define("TITLE_user_add", _("Add A User"));
+
 class user_add extends FO_Plugin {
 	var $Name = "user_add";
-	var $Title = "Add A User";
+	var $Title = TITLE_user_add;
 	var $MenuList = "Admin::Users::Add";
 	var $Version = "1.0";
 	var $Dependency = array("db");

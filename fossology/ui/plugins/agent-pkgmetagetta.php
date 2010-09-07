@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_pkgmetagetta", _("Metadata Analysis (Slow.  Not needed for license analysis)"));
+
 class agent_pkgmetagetta extends FO_Plugin
 {
   public $Name       = "agent_pkgmetagetta";
-  public $Title      = "Metadata Analysis (Slow.  Not needed for license analysis)";
+  public $Title      = TITLE_agent_pkgmetagetta;
   // public $MenuList   = "Jobs::Agents::Metadata Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");

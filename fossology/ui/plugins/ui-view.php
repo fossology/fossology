@@ -27,11 +27,12 @@ if (!isset($GlobalReady)) { exit; }
 define("VIEW_BLOCK_HEX",8192);
 define("VIEW_BLOCK_TEXT",20*VIEW_BLOCK_HEX);
 define("MAXHIGHLIGHTCOLOR",8);
+define("TITLE_ui_view", _("View File"));
 
 class ui_view extends FO_Plugin
   {
   var $Name       = "view";
-  var $Title      = "View File";
+  var $Title      = TITLE_ui_view;
   var $Version    = "1.0";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;

@@ -34,9 +34,12 @@ if (!isset($GlobalReady)) {
  * @version "$Id$"
  *
  */
+
+define("TITLE_admin_folder_delete", _("Delete Folder"));
+
 class admin_folder_delete extends FO_Plugin {
   public $Name = "admin_folder_delete";
-  public $Title = "Delete Folder";
+  public $Title = TITLE_admin_folder_delete;
   public $MenuList = "Organize::Folders::Delete Folder";
   public $Version = "1.0";
   public $Dependency = array(

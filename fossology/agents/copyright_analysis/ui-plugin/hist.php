@@ -24,6 +24,7 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_copyright_hist", _("Copyright/Email/URL Browser"));
 
 /***********************************************************
  Sort query histogram results 
@@ -36,7 +37,7 @@ function hist_rowcmp($rowa, $rowb)
 class copyright_hist extends FO_Plugin
 {
   var $Name       = "copyrighthist";
-  var $Title      = "Copyright/Email/URL Browser";
+  var $Title      = TITLE_copyright_hist;
   var $Version    = "1.0";
   var $Dependency = array("db","browse","view");
   var $DBaccess   = PLUGIN_DB_READ;

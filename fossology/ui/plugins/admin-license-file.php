@@ -24,12 +24,13 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_admin_license_file", _("License Administration"));
 
 class admin_license_file extends FO_Plugin
 {
   var $Name       = "Admin_License";
   var $Version    = "1.0";
-  var $Title      = "License Administration";
+  var $Title      = TITLE_admin_license_file;
   var $MenuList   = "Admin::License Admin";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_WRITE;

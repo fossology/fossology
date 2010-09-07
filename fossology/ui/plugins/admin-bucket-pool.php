@@ -24,11 +24,13 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_admin_bucket_pool", _("Duplicate Bucketpool"));
+
 class admin_bucket_pool extends FO_Plugin
 {
   var $Name       = "admin_bucket_pool";
   var $Version    = "1.0";
-  var $Title      = "Duplicate Bucketpool";
+  var $Title      = TITLE_admin_bucket_pool;
   var $MenuList   = "Admin::Buckets::Duplicate Bucketpool";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;

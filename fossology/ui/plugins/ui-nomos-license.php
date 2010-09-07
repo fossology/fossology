@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_nomos_license", _("Nomos License Browser"));
+
 class ui_nomos_license extends FO_Plugin
 {
   var $Name       = "nomoslicense";
-  var $Title      = "Nomos License Browser";
+  var $Title      = TITLE_ui_nomos_license;
   var $Version    = "1.0";
   // var $MenuList= "Jobs::License";
   var $Dependency = array("db","browse","view");

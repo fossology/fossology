@@ -31,10 +31,13 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_upload_file", _("Upload a New File"));
+
 class upload_file extends FO_Plugin {
 	
   public $Name = "upload_file";
-  public $Title = "Upload a New File";
+  public $Title = TITLE_upload_file;
   public $Version = "1.0";
   public $MenuList = "Upload::From File";
   public $Dependency = array("db", "agent_unpack", "showjobs");

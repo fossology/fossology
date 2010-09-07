@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_license", _("bSAM License Browser (deprecated)"));
+
 class ui_license extends FO_Plugin
   {
   var $Name       = "license";
-  var $Title      = "bSAM License Browser (deprecated)";
+  var $Title      = TITLE_ui_license;
   var $Version    = "1.0";
   // var $MenuList= "Jobs::License";
   var $Dependency = array("db","browse","view-license");

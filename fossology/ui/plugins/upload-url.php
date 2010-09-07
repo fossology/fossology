@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_upload_url", _("Upload from URL"));
+
 class upload_url extends FO_Plugin {
   public $Name = "upload_url";
-  public $Title = "Upload from URL";
+  public $Title = TITLE_upload_url;
   public $Version = "1.0";
   public $MenuList = "Upload::From URL";
   public $Dependency = array("db", "agent_unpack");

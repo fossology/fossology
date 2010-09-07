@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_default", _("Welcome to FOSSology"));
+
 class ui_default extends FO_Plugin
   {
   var $Name       = "Default";
-  var $Title      = "Welcome to FOSSology";
+  var $Title      = TITLE_ui_default;
   var $Version    = "2.0";
   var $MenuList   = "";
   var $LoginFlag  = 0;

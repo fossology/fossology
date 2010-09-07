@@ -31,10 +31,13 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_bucket", _("Bucket Analysis"));
+
 class agent_bucket extends FO_Plugin {
 
   public $Name = "agent_bucket";
-  public $Title = "Bucket Analysis";
+  public $Title = TITLE_agent_bucket;
   // public $MenuList   = "Jobs::Agents::Bucket Analysis";
   public $Version = "1.0";
   public $Dependency = array("db");

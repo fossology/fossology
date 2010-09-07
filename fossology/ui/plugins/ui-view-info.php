@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_view_info", _("View File Information"));
+
 class ui_view_info extends FO_Plugin
   {
   var $Name       = "view_info";
-  var $Title      = "View File Information";
+  var $Title      = TITLE_ui_view_info;
   var $Version    = "1.0";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;

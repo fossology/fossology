@@ -25,9 +25,11 @@ if (!isset($GlobalReady)) {
   exit;
 }
 
+define("TITLE_ui_license_list", _("Nomos License List"));
+
 class ui_license_list extends FO_Plugin {
   var $Name = "license-list";
-  var $Title = "Nomos License List";
+  var $Title = TITLE_ui_license_list;
   var $Version = "1.0";
   var $Dependency = array(
     "db",

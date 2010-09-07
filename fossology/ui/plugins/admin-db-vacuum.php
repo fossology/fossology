@@ -24,11 +24,13 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_admin_db_vacuum", _("Database Vacuum and Analyze"));
+
 class admin_db_vacuum extends FO_Plugin
   {
   var $Name       = "admin_db_vacuum";
   var $Version    = "1.0";
-  var $Title      = "Database Vacuum and Analyze";
+  var $Title      = TITLE_admin_db_vacuum;
   var $MenuList   = "Admin::Database::Vacuum and Analyze";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;

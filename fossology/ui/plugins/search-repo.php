@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_search_repo", _("Search the Repository"));
+
 class search_repo extends FO_Plugin
   {
   var $Name       = "search_repo";
-  var $Title      = "Search the Repository";
+  var $Title      = TITLE_search_repo;
   var $Version    = "1.0";
   // var $MenuList   = "Help::Debug::Debug Repository";
   var $Dependency = array("db","view","browse");

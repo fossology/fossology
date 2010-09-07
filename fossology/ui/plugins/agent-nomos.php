@@ -31,10 +31,13 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_fonomos", _("Nomos License Analysis"));
+
 class agent_fonomos extends FO_Plugin {
 
   public $Name = "agent_nomos";
-  public $Title = "Nomos License Analysis";
+  public $Title = TITLE_agent_fonomos;
   // public $MenuList   = "Jobs::Agents::Nomos License Analysis";
   public $Version = "1.0";
   public $Dependency = array("db");

@@ -24,10 +24,12 @@
 global $GlobalReady;
 if(!isset($GlobalReady)){exit;}
 
+define("TITLE_ui_reunpack", _("Schedule an Reunpack"));
+
 class ui_reunpack extends FO_Plugin
 {
   public $Name       = "ui_reunpack";
-  public $Title      = "Schedule an Reunpack";
+  public $Title      = TITLE_ui_reunpack;
   //public $MenuList   = "Jobs::Agents::Reunpack";
   public $Version    = "1.2";
   public $Dependency = array("db");

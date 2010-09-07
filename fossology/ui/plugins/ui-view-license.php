@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_view_license", _("View License"));
+
 class ui_view_license extends FO_Plugin
   {
   var $Name       = "view-license";
-  var $Title      = "View License";
+  var $Title      = TITLE_ui_view_license;
   var $Version    = "1.0";
   var $Dependency = array("db","view");
   var $DBaccess   = PLUGIN_DB_READ;

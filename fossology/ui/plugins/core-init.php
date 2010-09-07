@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_core_init", _("Initialize"));
+
 class core_init extends FO_Plugin
   {
   var $Name       = "init";
-  var $Title      = "Initialize";
+  var $Title      = TITLE_core_init;
   var $Version    = "1.0";
   var $MenuList   = "Admin::Initialize";
   var $Dependency = array("db","auth","refresh","menus","Default");

@@ -32,10 +32,12 @@ if (!isset($GlobalReady)) { exit; }
  data to the UI.
  *************************************************/
 
+define("TITLE_search_file_by_licgroup", _("List Files based on License Group"));
+
 class search_file_by_licgroup extends FO_Plugin
   {
   var $Name       = "search_file_by_licgroup";
-  var $Title      = "List Files based on License Group";
+  var $Title      = TITLE_search_file_by_licgroup;
   var $Version    = "1.0";
   var $Dependency = array("db","browse","licgroup","search_file_by_license");
   var $DBaccess   = PLUGIN_DB_READ;

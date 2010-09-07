@@ -32,10 +32,12 @@ if (!isset ($GlobalReady))
   exit;
 }
 
+define("TITLE_folder_create", _("Create a new Fossology folder"));
+
 class folder_create extends FO_Plugin
 {
   var $Name = "folder_create";
-  var $Title = "Create a new Fossology folder";
+  var $Title = TITLE_folder_create;
   var $Version = "1.0";
   var $MenuList = "Organize::Folders::Create";
   var $Dependency = array (

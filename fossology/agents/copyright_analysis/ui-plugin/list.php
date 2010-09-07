@@ -32,10 +32,12 @@ require($WEBDIR.'/plugins/copyright/library.php');
    uploadtree.
  *************************************************/
 
+define("TITLE_copyright_list", _("List Files for Copyright/Email/URL"));
+
 class copyright_list extends FO_Plugin
 {
   var $Name       = "copyrightlist";
-  var $Title      = "List Files for Copyright/Email/URL";
+  var $Title      = TITLE_copyright_list;
   var $Version    = "1.0";
   var $Dependency = array("db","copyrighthist");
   var $DBaccess   = PLUGIN_DB_READ;

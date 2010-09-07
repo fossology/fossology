@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_search_file_advance", _("Advanced Search for File"));
+
 class search_file_advance extends FO_Plugin
   {
   var $Name       = "search_file_advance";
-  var $Title      = "Advanced Search for File";
+  var $Title      = TITLE_search_file_advance;
   var $Version    = "1.0";
   var $MenuList   = "";
   var $Dependency = array("db","view","browse");

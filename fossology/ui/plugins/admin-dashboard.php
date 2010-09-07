@@ -24,11 +24,13 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_dashboard", _("Dashboard"));
+
 class dashboard extends FO_Plugin
 {
   var $Name       = "dashboard";
   var $Version    = "1.0";
-  var $Title      = "Dashboard";
+  var $Title      = TITLE_dashboard;
   var $MenuList   = "Admin::Dashboard";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_DOWNLOAD;

@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_pkgagent", _("Package Analysis (Parse package headers)"));
+
 class agent_pkgagent extends FO_Plugin
 {
   public $Name       = "agent_pkgagent";
-  public $Title      = "Package Analysis (Parse package headers)";
+  public $Title      = TITLE_agent_pkgagent;
   //public $MenuList   = "Jobs::Agents::Package Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");

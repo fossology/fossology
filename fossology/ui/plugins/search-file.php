@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_search_file", _("Search for File"));
+
 class search_file extends FO_Plugin
   {
   var $Name       = "search_file";
-  var $Title      = "Search for File";
+  var $Title      = TITLE_search_file;
   var $Version    = "1.0";
   var $MenuList   = "Search";
   var $Dependency = array("db","view","browse");

@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_core_debug", _("Debug Plugins"));
+
 class core_debug extends FO_Plugin
   {
   var $Name       = "debug";
-  var $Title      = "Debug Plugins";
+  var $Title      = TITLE_core_debug;
   var $Version    = "1.0";
   var $MenuList   = "Help::Debug::Debug Plugins";
   var $DBaccess   = PLUGIN_DB_DEBUG;

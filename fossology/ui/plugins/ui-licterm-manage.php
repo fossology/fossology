@@ -34,13 +34,15 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_licterm_manage", _("Manage License Terms"));
+
 /************************************************
  Plugin for License Terms
  *************************************************/
 class licterm_manage extends FO_Plugin
   {
   var $Name       = "licterm_manage";
-  var $Title      = "Manage License Terms";
+  var $Title      = TITLE_licterm_manage;
   var $Version    = "1.0";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_ANALYZE;

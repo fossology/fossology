@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_mimetype", _("MIME-type Analysis (Determine mimetype of every file.  Not needed for licenses or buckets)"));
+
 class agent_mimetype extends FO_Plugin {
   public $Name = "agent_mimetype";
-  public $Title = "MIME-type Analysis (Determine mimetype of every file.  Not needed for licenses or buckets)";
+  public $Title = TITLE_agent_mimetype;
   // public $MenuList   = "Jobs::Agents::MIME-type Analysis";
   public $Version = "1.0";
   public $Dependency = array(

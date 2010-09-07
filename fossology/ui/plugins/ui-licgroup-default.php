@@ -34,13 +34,15 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_licgroup_default", _("Create Default License Groups"));
+
 /************************************************
  Plugin for creating License Groups
  *************************************************/
 class licgroup_default extends FO_Plugin
   {
   var $Name       = "license_groups_default";
-  var $Title      = "Create Default License Groups";
+  var $Title      = TITLE_licgroup_default;
   var $Version    = "1.0";
   var $MenuList   = "Obsolete::License::Default Groups";
   var $Dependency = array("db","license_groups_manage");

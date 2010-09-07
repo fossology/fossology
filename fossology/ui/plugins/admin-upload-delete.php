@@ -27,9 +27,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_admin_upload_delete", _("Delete Uploaded File"));
+
 class admin_upload_delete extends FO_Plugin {
   var $Name = "admin_upload_delete";
-  var $Title = "Delete Uploaded File";
+  var $Title = TITLE_admin_upload_delete;
   var $MenuList = "Organize::Uploads::Delete Uploaded File";
   var $Version = "1.0";
   var $Dependency = array(

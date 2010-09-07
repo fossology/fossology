@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_license_reanalyze", _("Reanalyze License and Store Results"));
+
 class agent_license_reanalyze extends FO_Plugin
 {
   public $Name       = "agent_license_reanalyze";
-  public $Title      = "Reanalyze License and Store Results";
+  public $Title      = TITLE_agent_license_reanalyze;
   public $Version    = "1.0";
   public $Dependency = array("db","view","view-license");
   public $NoHTML     = 0;

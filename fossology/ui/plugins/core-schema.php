@@ -29,9 +29,11 @@ if (!isset($GlobalReady)) {
 global $LIBEXECDIR;
 require_once "$LIBEXECDIR/libschema.php";
 
+define("TITLE_core_schema", _("Database Schema"));
+
 class core_schema extends FO_Plugin {
   var $Name = "schema";
-  var $Title = "Database Schema";
+  var $Title = TITLE_core_schema;
   var $Version = "1.0";
   var $Dependency = array(
     "db"

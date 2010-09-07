@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
     exit;
 }
+
+define("TITLE_agent_copyright_once", _("One-Shot Copyright/Email/URL Analysis"));
+
 class agent_copyright_once extends FO_Plugin {
     public $Name = "agent_copyright_once";
-    public $Title = "One-Shot Copyright/Email/URL Analysis";
+    public $Title = TITLE_agent_copyright_once;
     // Note: menuList is not needed for this plugin, it inserts into the menu
     // in the code below.
     //public $MenuList = "Upload::One-Shot Bsam";

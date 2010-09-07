@@ -34,13 +34,15 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_licterm_default", _("Reset Default License Terms"));
+
 /************************************************
  Plugin for creating License Groups
  *************************************************/
 class licterm_default extends FO_Plugin
   {
   var $Name       = "license_terms_default";
-  var $Title      = "Reset Default License Terms";
+  var $Title      = TITLE_licterm_default;
   var $Version    = "1.0";
   var $MenuList   = "Obsolete::License::Default Terms";
   var $Dependency = array("db","licterm_manage");

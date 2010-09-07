@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_license_once_compare", _("One-Shot License Comparison"));
+
 class agent_license_once_compare extends FO_Plugin
 {
   public $Name       = "agent_license_once_compare";
-  public $Title      = "One-Shot License Comparison";
+  public $Title      = TITLE_agent_license_once_compare;
   public $Version    = "1.0";
   public $Dependency = array("db","view","view-license","agent_license_once");
   public $NoHTML     = 0;

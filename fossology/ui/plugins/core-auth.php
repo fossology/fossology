@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_core_auth", _("Login"));
+
 class core_auth extends FO_Plugin {
   var $Name = "auth";
-  var $Title = "Login";
+  var $Title = TITLE_core_auth;
   var $Version = "1.0";
   var $PluginLevel = 1000; /* make this run first! */
   var $Dependency = array("db");

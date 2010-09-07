@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_download", _("Download File"));
+
 class ui_download extends FO_Plugin
   {
   var $Name       = "download";
-  var $Title      = "Download File";
+  var $Title      = TITLE_ui_download;
   var $Version    = "1.0";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_DOWNLOAD;

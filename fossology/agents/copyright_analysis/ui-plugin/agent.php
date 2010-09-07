@@ -25,10 +25,13 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_copyright", _("Copyright/Email/URL Analysis"));
+
 class agent_copyright extends FO_Plugin {
 
   public $Name = "agent_copyright";
-  public $Title = "Copyright/Email/URL Analysis";
+  public $Title = TITLE_agent_copyright;
   public $Version = "1.0";
   public $Dependency = array("db");
   public $DBaccess = PLUGIN_DB_ANALYZE;

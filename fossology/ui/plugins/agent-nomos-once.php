@@ -31,10 +31,13 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_nomos_once", _("One-Shot License Analysis"));
+
 class agent_nomos_once extends FO_Plugin {
 
   public $Name = "agent_nomos_once";
-  public $Title = "One-Shot License Analysis";
+  public $Title = TITLE_agent_nomos_once;
   public $Version = "1.0";
   /* note: no menulist needed, it's insterted in the code below */
   //public $Dependency = array();
@@ -101,6 +104,7 @@ class agent_nomos_once extends FO_Plugin {
         $Line = fgets($Fin);
         fwrite($Fout, $Line);
       }
+      fclose($Fin);
       fclose($Fout);
       if (filesize($Ftmp) > 0) {
         $_FILES['licfile']['tmp_name'] = $Ftmp;
@@ -110,8 +114,9 @@ class agent_nomos_once extends FO_Plugin {
       }
       else {
         unlink($Ftmp);
+        echo "FATAL: Missing POST file\n";
+        exit(1);
       }
-      fclose($Fin);
     }
 
     /* Only register with the menu system if the user is logged in. */

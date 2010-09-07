@@ -27,9 +27,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_folder_move", _("Move Folder"));
+
 class folder_move extends FO_Plugin {
   var $Name = "folder_move";
-  var $Title = "Move Folder";
+  var $Title = TITLE_folder_move;
   var $Version = "1.0";
   var $MenuList = "Organize::Folders::Move";
   var $Dependency = array(

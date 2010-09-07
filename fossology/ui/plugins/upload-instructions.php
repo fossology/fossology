@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_upload_instructions", _("Upload Instructions"));
+
 class upload_instructions extends FO_Plugin
 {
   public $Name       = "upload_instructions";
-  public $Title      = "Upload Instructions";
+  public $Title      = TITLE_upload_instructions;
   public $Version    = "1.0";
   public $MenuList   = "Upload::Instructions";
   public $MenuOrder  = 10;

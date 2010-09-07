@@ -24,13 +24,15 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_licgroup_debug", _("License Groups Debug"));
+
 /************************************************
  Plugin for License Groups
  *************************************************/
 class licgroup_debug extends FO_Plugin
   {
   var $Name       = "license_groups_debug";
-  var $Title      = "License Groups Debug";
+  var $Title      = TITLE_licgroup_debug;
   var $Version    = "1.0";
   var $MenuList   = "Obsolete::Debug::Debug License Groups";
   var $Dependency = array("db","licgroup");

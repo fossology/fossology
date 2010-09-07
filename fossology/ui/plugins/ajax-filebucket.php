@@ -39,11 +39,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ajax_filebucket", _("List Uploads as Options"));
 
 class ajax_filebucket extends FO_Plugin
 {
   var $Name       = "ajax_filebucket";
-  var $Title      = "List Uploads as Options";
+  var $Title      = TITLE_ajax_filebucket;
   var $Version    = "1.0";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;

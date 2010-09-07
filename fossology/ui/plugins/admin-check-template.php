@@ -24,11 +24,13 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_admin_check_template", _("License Template Check"));
+
 class admin_check_template extends FO_Plugin
   {
   var $Name       = "admin_check_template";
   var $Version    = "1.0";
-  var $Title      = "License Template Check";
+  var $Title      = TITLE_admin_check_template;
   var $MenuList   = "Admin::Database::Check Templates";
   var $Dependency = array("db","agent_license");
   var $DBaccess   = PLUGIN_DB_USERADMIN;

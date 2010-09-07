@@ -29,10 +29,12 @@ global $GlobalReady;
 
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_remove_licenseMeta", _("Remove License Analysis"));
+
 class agent_remove_licenseMeta extends FO_Plugin
 {
   public $Name       = "agent_reset_license";
-  public $Title      = "Remove License Analysis";
+  public $Title      = TITLE_agent_remove_licenseMeta;
   public $MenuList   = "Obsolete::Remove License Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db", "agent_license");

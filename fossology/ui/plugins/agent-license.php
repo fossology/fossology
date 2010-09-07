@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_license", _("bSAM License Analysis (deprecated)"));
+
 class agent_license extends FO_Plugin {
   public $Name = "agent_license";
-  public $Title = "bSAM License Analysis (deprecated)";
+  public $Title = TITLE_agent_license;
   // public $MenuList   = "Jobs::Agents::License Analysis";
   public $Version = "1.1";
   public $Dependency = array(

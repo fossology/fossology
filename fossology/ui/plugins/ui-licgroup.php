@@ -24,13 +24,15 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_licgroup", _("License Groups"));
+
 /************************************************
  Plugin for License Groups
  *************************************************/
 class licgroup extends FO_Plugin
   {
   var $Name       = "licgroup";
-  var $Title      = "License Groups";
+  var $Title      = TITLE_licgroup;
   var $Version    = "1.0";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;

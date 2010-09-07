@@ -47,9 +47,12 @@ global $DB;
  *
  * @version "Id: $"
  */
+
+define("TITLE_myJobs", _("My Jobs Status"));
+
 class myJobs extends FO_Plugin {
 	public $Name       = "myjobs";
-	public $Title      = "My Jobs Status";
+	public $Title      = TITLE_myJobs;
 	public $MenuList   = "Jobs::MyJobs";
 	public $MenuOrder  = 0;    // Don't appear in a menu (internal plugin) BUG!
 	public $MenuTarget = 0;

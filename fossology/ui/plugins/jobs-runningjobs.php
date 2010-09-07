@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_jobs_runningjobs", _("Show Agent Status"));
+
 class jobs_runningjobs extends FO_Plugin
   {
   var $Name       = "runningjobs";
-  var $Title      = "Show Agent Status";
+  var $Title      = TITLE_jobs_runningjobs;
   var $Version    = "1.0";
   var $MenuList   = "Admin::Scheduler::Status";
   var $Dependency = array("db");

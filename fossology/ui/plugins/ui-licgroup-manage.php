@@ -34,13 +34,15 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_licgroup_manage", _("Manage License Groups"));
+
 /************************************************
  Plugin for creating License Groups
  *************************************************/
 class licgroup_manage extends FO_Plugin
   {
   var $Name       = "license_groups_manage";
-  var $Title      = "Manage License Groups";
+  var $Title      = TITLE_licgroup_manage;
   var $Version    = "1.0";
   var $MenuList   = "Obsolete::License::Manage Groups";
   var $Dependency = array("db","licgroup","view-license");

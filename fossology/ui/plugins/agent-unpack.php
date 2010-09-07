@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_unpack", _("Schedule an Unpack"));
+
 class agent_unpack extends FO_Plugin
 {
   public $Name       = "agent_unpack";
-  public $Title      = "Schedule an Unpack";
+  public $Title      = TITLE_agent_unpack;
   // public $MenuList   = "Jobs::Agents::Unpack";
   public $Version    = "1.0";
   public $Dependency = array("db");

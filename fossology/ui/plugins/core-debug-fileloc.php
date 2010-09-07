@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_core_debug_fileloc", _("Global Variables"));
+
 class core_debug_fileloc extends FO_Plugin
 {
   var $Name       = "debug-fileloc";
-  var $Title      = "Global Variables";
+  var $Title      = TITLE_core_debug_fileloc;
   var $Version    = "1.0";
   var $MenuList   = "Help::Debug::Global Variables";
   var $DBaccess   = PLUGIN_DB_DEBUG;

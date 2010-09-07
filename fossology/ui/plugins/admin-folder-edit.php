@@ -27,9 +27,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_folder_properties", _("Edit Folder Properties"));
+
 class folder_properties extends FO_Plugin {
   var $Name = "folder_properties";
-  var $Title = "Edit Folder Properties";
+  var $Title = TITLE_folder_properties;
   var $Version = "1.0";
   var $MenuList = "Organize::Folders::Edit Properties";
   var $Dependency = array(

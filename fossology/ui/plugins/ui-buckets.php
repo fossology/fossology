@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_buckets", _("Bucket Browser"));
+
 class ui_buckets extends FO_Plugin
 {
   var $Name       = "bucketbrowser";
-  var $Title      = "Bucket Browser";
+  var $Title      = TITLE_ui_buckets;
   var $Version    = "1.0";
   var $Dependency = array("db","browse","view");
   var $DBaccess   = PLUGIN_DB_READ;

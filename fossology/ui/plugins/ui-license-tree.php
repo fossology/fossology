@@ -25,9 +25,11 @@ if (!isset($GlobalReady)) {
   exit;
 }
 
+define("TITLE_ui_license_tree", _("License Tree View"));
+
 class ui_license_tree extends FO_Plugin {
   var $Name = "license-tree";
-  var $Title = "License Tree View";
+  var $Title = TITLE_ui_license_tree;
   var $Version = "1.0";
   var $Dependency = array(
     "db",

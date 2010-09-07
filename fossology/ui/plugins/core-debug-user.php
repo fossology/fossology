@@ -24,11 +24,13 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_debug_user", _("Debug User"));
+
 class debug_user extends FO_Plugin
   {
   var $Name       = "debug_user";
   var $Version    = "1.0";
-  var $Title      = "Debug User";
+  var $Title      = TITLE_debug_user;
   var $MenuList   = "Help::Debug::Debug User";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_DEBUG;

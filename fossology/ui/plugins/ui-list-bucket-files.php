@@ -35,10 +35,12 @@ if (!isset($GlobalReady)) { exit; }
    bp     bucketpool_pk
  *************************************************/
 
+define("TITLE_list_bucket_files", _("List Files for Bucket"));
+
 class list_bucket_files extends FO_Plugin
 {
   var $Name       = "list_bucket_files";
-  var $Title      = "List Files for Bucket";
+  var $Title      = TITLE_list_bucket_files;
   var $Version    = "1.0";
   var $Dependency = array("db","nomoslicense");
   var $DBaccess   = PLUGIN_DB_READ;

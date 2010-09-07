@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_folders", _("Show Folders"));
+
 class ui_folders extends FO_Plugin
   {
   var $Name       = "folders";
-  var $Title      = "Show Folders";
+  var $Title      = TITLE_ui_folders;
   var $Version    = "1.0";
   // var $MenuList   = "Jobs::Folders (refresh)";
   var $MenuTarget = "treenav";

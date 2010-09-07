@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
 	exit;
 }
+
+define("TITLE_user_edit_self", _("Edit Your Account Settings"));
+
 class user_edit_self extends FO_Plugin {
 	var $Name = "user_edit_self";
-	var $Title = "Edit Your Account Settings";
+	var $Title = TITLE_user_edit_self;
 	var $MenuList = "Admin::Users::Account Settings";
 	var $Version = "1.0";
 	var $Dependency = array("db");

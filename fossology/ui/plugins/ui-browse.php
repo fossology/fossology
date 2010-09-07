@@ -28,9 +28,11 @@ if (!isset($GlobalReady)) {
 global $WEBDIR;
 require_once("$WEBDIR/common/common.php");
 
+define("TITLE_ui_browse", _("Browse"));
+
 class ui_browse extends FO_Plugin {
   var $Name = "browse";
-  var $Title = "Browse";
+  var $Title = TITLE_ui_browse;
   var $Version = "1.0";
   var $MenuList = "Browse";
   var $Dependency = array(

@@ -24,11 +24,13 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_admin_db_cleanup", _("Database Check"));
+
 class admin_db_cleanup extends FO_Plugin
   {
   var $Name       = "admin_db_cleanup";
   var $Version    = "1.0";
-  var $Title      = "Database Check";
+  var $Title      = TITLE_admin_db_cleanup;
   var $MenuList   = "Admin::Database::Check";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;

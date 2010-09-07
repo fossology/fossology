@@ -30,9 +30,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_upload_properties", _("Edit Upload Properties"));
+
 class upload_properties extends FO_Plugin {
   var $Name = "upload_properties";
-  public $Title = "Edit Upload Properties";
+  public $Title = TITLE_upload_properties;
   var $Version = "1.0";
   var $MenuList = "Organize::Uploads::Edit Properties";
   var $Dependency = array(

@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_upload_srv_files", _("Upload from Server"));
+
 class upload_srv_files extends FO_Plugin {
   public $Name = "upload_srv_files";
-  public $Title = "Upload from Server";
+  public $Title = TITLE_upload_srv_files;
   public $Version = "1.0";
   public $MenuList = "Upload::From Server";
   public $Dependency = array("db", "agent_unpack");

@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
 	exit;
 }
+
+define("TITLE_user_edit_any", _("Edit A User"));
+
 class user_edit_any extends FO_Plugin {
 	var $Name = "user_edit_any";
-	var $Title = "Edit A User";
+	var $Title = TITLE_user_edit_any;
 	var $MenuList = "Admin::Users::Edit Users";
 	var $Version = "1.0";
 	var $Dependency = array("db");

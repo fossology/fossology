@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_add", _("Schedule an Analysis"));
+
 class agent_add extends FO_Plugin
 {
   public $Name       = "agent_add";
-  public $Title      = "Schedule an Analysis";
+  public $Title      = TITLE_agent_add;
   public $MenuList   = "Jobs::Agents";
   public $Version    = "1.1";
   public $Dependency = array("db");

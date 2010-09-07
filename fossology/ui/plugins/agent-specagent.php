@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_specagent", _("Spec File Analysis (deprecated. Replaced by Package analysis.)"));
+
 class agent_specagent extends FO_Plugin
 {
   public $Name       = "agent_specagent";
-  public $Title      = "Spec File Analysis (deprecated. Replaced by Package analysis.)";
+  public $Title      = TITLE_agent_specagent;
   // public $MenuList   = "Jobs::Agents::Spec File Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
