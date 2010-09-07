@@ -531,6 +531,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 	    INTERESTING(lDebug ? "PHP(v2.0.2#2)" : "PHP_v2.0.2");
 	    lmem[_mPHP] = 1;
 	}
+  else if (INFILE(_TITLE_ZEND_V20)) {
+      INTERESTING("Zend_v2.0");
+  }
 	else if (!lmem[_fOPENLDAP] && !TRYGROUP(famOPENLDAP)) {
 	    if (INFILE(_CR_BSDCAL)) {
 		INTERESTING(lDebug ? "BSD(1)" : "BSD");
@@ -4853,6 +4856,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      */
     if (INFILE(_LT_ACAA_RIGHTS) && INFILE(_LT_PUBLIC)) {
 	INTERESTING("ACAA");
+    }
+    /* Zend Engine License
+     */
+    if (INFILE(_LT_ZEND_1) || INFILE(_URL_ZEND)) {
+       INTERESTING("Zend_v2.0");
     }
     /*
      * The Stallman paper "Why Software Should Be Free" is a red-herring.
