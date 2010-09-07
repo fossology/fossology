@@ -4392,6 +4392,11 @@ e /* (INFILE(j)) */
 %KEY%	"distribut"
 %STR%	"decompile reverse engineer disassemble modify rent lease loan distribute or create derivative works"
 #
+# Zend license information
+%ENTRY% _LT_ZEND_1
+%KEY%   "zend"
+%STR% "source file is subject to version 2\.?00 of the Zend license"
+#
 %ENTRY%	_LT_ZEUS
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"may be used and/?o?r? copied freely provid(ed|ing) this copyright notice is not removed"
@@ -6670,6 +6675,11 @@ k
 %KEY%	"licen[cs]"
 %STR%	"the xnet inc licen[cs]e"
 #
+# Zend license
+%ENTRY%   _TITLE_ZEND_V20
+%KEY% "zend"
+%STR% "Zend Engine License (v|version )2\.?00"
+#
 %ENTRY%	_TITLE_ZONEALARM_EULA
 %KEY%	"\<(end[ -]user|eula)\>"
 %STR%	"zonealarm end[ -]user licen[cs]e agreement"
@@ -7814,6 +7824,11 @@ k
 %ENTRY%	_URL_W3C_IP
 %KEY%	"legal"
 %STR%	"w?w?w?\.?w3c?\.?org/consortium/legal"
+#
+# Zend license
+%ENTRY%   _URL_ZEND
+%KEY% "licen[cs]"
+%STR% "w?w?w?\.?zend\.?com/license/2_00\.?txt"
 #
 %ENTRY%	_URL_ZLIB
 %KEY%	"licen[cs]"
