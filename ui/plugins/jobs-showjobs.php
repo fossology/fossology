@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_jobs_showjobs", _("Show Job Queue"));
+
 class jobs_showjobs extends FO_Plugin
   {
   var $Name       = "showjobs";
-  var $Title      = "Show Job Queue";
+  var $Title      = TITLE_jobs_showjobs;
   var $Version    = "1.0";
   var $MenuList   = "Jobs::Queue::Summary";
   var $MenuOrder  = 5;
@@ -61,7 +63,8 @@ class jobs_showjobs extends FO_Plugin
     if (!empty($UploadPk))
 	{
 	$NewURI = preg_replace('/&upload=[^&]*/','',$URI);
-	menu_insert("JobDetails::All",-11,"$NewURI","Show all jobs (not just this one)");
+$text = _("Show all jobs (not just this one)");
+	menu_insert("JobDetails::All",-11,"$NewURI",$text);
 	$UploadPk = "&upload=$UploadPk";
 	}
 
@@ -70,17 +73,21 @@ class jobs_showjobs extends FO_Plugin
     switch($Show)
       {
       case "detail":
-	menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History$UploadPk","Show a summary of jobs");
+$text = _("Show a summary of jobs");
+	menu_insert("JobDetails::Summary",-2,"$URI&show=summary&history=$History$UploadPk",$text);
 	menu_insert("JobDetails::Detail",-3);
 	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk");
 	break;
       case "summary":
+$text = _("Show detailed information about each job");
 	menu_insert("JobDetails::Summary",-2);
-	menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History$UploadPk","Show detailed information about each job");
-	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk","Show all jobs (active and completed)");
+	menu_insert("JobDetails::Detail",-3,"$URI&show=detail&history=$History$UploadPk",$text);
+$text = _("Show all jobs (active and completed)");
+	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk",$text);
 	break;
       case "job":
-	menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History$UploadPk","Show the job queue");
+$text = _("Show the job queue");
+	menu_insert("JobDetails::Jobs",-2,"$URI&show=summary&history=$History$UploadPk",$text);
 	$Job = GetParm("job",PARM_INTEGER);
 	if (!empty($Job)) { $Job = "&job=$Job"; }
 	menu_insert("JobDetails::Refresh",-21,"$URI&show=$Show&history=$History$UploadPk$Job");
@@ -95,13 +102,15 @@ class jobs_showjobs extends FO_Plugin
       switch($History)
 	{
 	case "0":
-	  menu_insert("JobDetails::History",-12,"$URI&show=$Show&history=1","Show all jobs (active and completed)");
+$text = _("Show all jobs (active and completed)");
+	  menu_insert("JobDetails::History",-12,"$URI&show=$Show&history=1",$text);
 	  menu_insert("JobDetails::Active",-12);
 	  break;
 	case "1":
 	default:
 	  menu_insert("JobDetails::History",-12);
-	  menu_insert("JobDetails::Active",-12,"$URI&show=$Show&history=0","Show only active jobs");
+$text = _("Show only active jobs");
+	  menu_insert("JobDetails::Active",-12,"$URI&show=$Show&history=0",$text);
 	  break;
 	}
       }
@@ -146,7 +155,9 @@ class jobs_showjobs extends FO_Plugin
     $Row = $Results[0];
     if (empty($Row['jq_pk'])) { return; }
     $V .= "<table class='text' border=1 name='jobtable1'>\n";
-    $V .= "<tr><th>Field</th><th>Value</th></tr>\n";
+$text = _("Field");
+$text1 = _("Value");
+    $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
     foreach($Fields as $F)
       {
       $V .= "  <tr><th align='left'>$F</th><td>";
@@ -186,7 +197,8 @@ class jobs_showjobs extends FO_Plugin
     $Results = $DB->Action($Sql);
     if (count($Results) > 0)
       {
-      $V .= "  <tr><th align='left'>depends on</th><td>";
+$text = _("depends on");
+      $V .= "  <tr><th align='left'>$text</th><td>";
       $First=1;
       foreach($Results as $R)
 	{
@@ -202,7 +214,8 @@ class jobs_showjobs extends FO_Plugin
     $Results = $DB->Action($Sql);
     if (count($Results) > 0)
       {
-      $V .= "  <tr><th align='left'>required by</th><td>";
+$text = _("required by");
+      $V .= "  <tr><th align='left'>$text</th><td>";
       $First=1;
       foreach($Results as $R)
 	{
@@ -393,11 +406,13 @@ class jobs_showjobs extends FO_Plugin
 	  {
 	  if ($Detail)
 	    {
-	    $V .= "<th $Style1><a $Style1 title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=detail&history=1&upload=$Upload'>History</a>";
+$text = _("History");
+	    $V .= "<th $Style1><a $Style1 title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=detail&history=1&upload=$Upload'>$text</a>";
 	    }
 	  else
 	    {
-	    $V .= "<th $Style1><a $Style1 title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=summary&history=1&upload=$Upload'>History</a>";
+$text = _("History");
+	    $V .= "<th $Style1><a $Style1 title='Display all jobs associated with this upload' href='" . Traceback_uri() . "?mod=" . $this->Name . "&show=summary&history=1&upload=$Upload'>$text</a>";
 	    }
 	  }
 	else
@@ -410,19 +425,22 @@ class jobs_showjobs extends FO_Plugin
       if ($Job != $Row['jq_job_fk'])
 	{
 	$Job = $Row['jq_job_fk'];
-	$V .= "<tr><th width='20%'>Job/Dependency</th>\n";
+$text = _("Job/Dependency");
+	$V .= "<tr><th width='20%'>$text</th>\n";
 	$V .= "<th width='60%' colspan=2>Job Name: " . $Row['job_name'] . "</th>";
 	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
 	  {
 	  $Style = "style='font:normal 8pt verdana, arial, helvetica;'";
 	  $JobId = $Row['job_pk'];
 	  $V .= "<th $Style>";
-	  $V .= "<a href='$UriFull&action=reset&jobid=$JobId' title='Reset this specific job'>Reset</a>";
+$text = _("Reset");
+	  $V .= "<a href='$UriFull&action=reset&jobid=$JobId' title='Reset this specific job'>$text</a>";
 	  $V .= " | ";
-	  $V .= "<a href='$UriFull&action=delete&jobid=$JobId' title='Delete this specific job'>Delete</a>";
+$text = _("Delete");
+	  $V .= "<a href='$UriFull&action=delete&jobid=$JobId' title='Delete this specific job'>$text</a>";
 	  $V .= " | ";
 	  $Priority = $Row['job_priority'];
-	  $V .= "Priority: ";
+	  $V .= _("Priority: ");
 	  $V .= "<a title='Decrease priority' href='$UriFull&action=priority&priority=" . ($Priority-1);
 	  $V .= "&jobid=$JobId'>&laquo;</a>";
 	  $V .= " $Priority ";
@@ -486,12 +504,15 @@ class jobs_showjobs extends FO_Plugin
 	    if (intval($Res[1]['sum']) > 0)
 	      {
 	      $Percent = intval($Res[0]['sum']*10000.0 / $Res[1]['sum'])/100.0;
-	      $V .= $Percent . "% completed<br />\n";
+$text = _("completed");
+	      $V .= $Percent . "% $text<br />\n";
 	      }
 	    }
 
-	  $V .= "Elapsed scheduled:<br />\n";
-	  $V .= "Elapsed running:</td>\n";
+$text = _("Elapsed scheduled:");
+	  $V .= "$text<br />\n";
+$text = _("Elapsed running:");
+	  $V .= "$text</td>\n";
 
 	  $V .= "    <td bgcolor='$Color'align='right'><br />";
 	  $t = floor($Row['jq_elapsedtime'] / (60*60*24));

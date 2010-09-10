@@ -53,7 +53,7 @@ function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $e
 {
   global $PG_CONN;
 
-  $NoData = "No data available.  Use Jobs > Agents to schedule a bucket scan.";
+  $NoData = _("No data available.  Use Jobs > Agents to schedule a bucket scan.");
   $name = $id;
   $select = "<select name='$name' id='$id' $extra>";
 

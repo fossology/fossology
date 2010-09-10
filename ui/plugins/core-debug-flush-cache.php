@@ -24,11 +24,13 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_debug_flush_cache", _("Flush Cache"));
+
 class debug_flush_cache extends FO_Plugin
   {
   var $Name       = "debug_flush_cache";
   var $Version    = "1.0";
-  var $Title      = "Flush Cache";
+  var $Title      = TITLE_debug_flush_cache;
   var $MenuList   = "Help::Debug::Flush Cache";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_DEBUG;
@@ -47,7 +49,7 @@ class debug_flush_cache extends FO_Plugin
 	break;
       case "HTML":
 	ReportCachePurgeAll();
-	$V .= "All cached pages have been removed.\n";
+	$V .= _("All cached pages have been removed.\n");
 	break;
       case "Text":
 	break;

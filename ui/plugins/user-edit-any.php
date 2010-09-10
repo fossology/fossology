@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
 	exit;
 }
+
+define("TITLE_user_edit_any", _("Edit A User"));
+
 class user_edit_any extends FO_Plugin {
 	var $Name = "user_edit_any";
-	var $Title = "Edit A User";
+	var $Title = TITLE_user_edit_any;
 	var $MenuList = "Admin::Users::Edit Users";
 	var $Version = "1.0";
 	var $Dependency = array("db");
@@ -40,7 +43,8 @@ class user_edit_any extends FO_Plugin {
 		/* Get the parameters */
 		$UserId = GetParm('userid', PARM_INTEGER);
 		if (empty($UserId)) {
-			return ("No user selected. No change.");
+$text = _("No user selected. No change.");
+			return ($text);
 		}
 		$User = GetParm('username', PARM_TEXT);
 		$Pass1 = GetParm('pass1', PARM_TEXT);
@@ -60,23 +64,27 @@ class user_edit_any extends FO_Plugin {
 		}
 		/* Make sure username looks valid */
 		if (empty($User)) {
-			return ("Username must be specified. No change.");
+$text = _("Username must be specified. No change.");
+			return ($text);
 		}
 		/* Make sure password matches */
 		if ($Pass1 != $Pass2) {
-			return ("Passwords did not match. No change.");
+$text = _("Passwords did not match. No change.");
+			return ($text);
 		}
 		/* Make sure email looks valid */
 		$Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
 		if ($Check != $Email) {
-			return ("Invalid email address.  Not edited.");
+$text = _("Invalid email address.  Not edited.");
+			return ($text);
 		}
 		/* Get existing user info for updating */
 		$SQL = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
 		$Results = $DB->Action($SQL);
 		$R = $Results[0];
 		if (empty($R['user_pk'])) {
-			return ("User does not exist.  No change.");
+$text = _("User does not exist.  No change.");
+			return ($text);
 		}
 		/* Edit the user */
 		if (strcmp($User, $R['user_name'])) {
@@ -85,7 +93,8 @@ class user_edit_any extends FO_Plugin {
 			$SQL = "SELECT * FROM users WHERE user_name = '$Val' LIMIT 1;";
 			$Results = $DB->Action($SQL);
 			if (!empty($Results[0]['user_name'])) {
-				return ("User already exists.  Not edited.");
+$text = _("User already exists.  Not edited.");
+				return ($text);
 			}
 			$DB->Action("UPDATE users SET user_name = '$Val' WHERE user_pk = '$UserId';");
 		}
@@ -322,13 +331,19 @@ class user_edit_any extends FO_Plugin {
 				}
 				$Uri = Traceback_uri();
 				$V.= "<P />\n";
-				$V.= "To edit <strong>another</strong> user on this system, alter
-              any of the following information.<P />\n";
+$text = _("To edit");
+$text1 = _("another");
+$text2 = _(" user on this system, alter any of the following information.");
+				$V.= "$text <strong>$text1</strong>$text2<P />\n";
 
-				$V.= "To edit <strong>your</strong> account settings, use
-         <a href='${Uri}?mod=user_edit_self'>Account Settings.</a><P />\n";
+$text = _("To edit");
+$text1 = _("your");
+$text2 = _(" account settings, use");
+$text3 = _("Account Settings.");
+				$V.= "$text <strong>$text1</strong>$text2
+         <a href='${Uri}?mod=user_edit_self'>$text4</a><P />\n";
 
-				$V.= "Select the user to edit: ";
+				$V.= _("Select the user to edit: ");
 				$V.= "<select name='userid' onClick='SetInfo(this.value);' onchange='SetInfo(this.value);'>\n";
 
 				//$V .= "<option selected value='0'>--select user--</option>\n";
@@ -345,60 +360,81 @@ class user_edit_any extends FO_Plugin {
 				$Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 				$V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
 				$Val = htmlentities(GetParm('username', PARM_TEXT), ENT_QUOTES);
-				$V.= "$Style<th width='25%'>Change the username.</th>";
+$text = _("Change the username.");
+				$V.= "$Style<th width='25%'>$text</th>";
 				$V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities(GetParm('description', PARM_TEXT), ENT_QUOTES);
-				$V.= "$Style<th>Change the user's description (name, contact, or other information).  This may be blank.</th>\n";
+$text = _("Change the user's description (name, contact, or other information).  This may be blank.");
+				$V.= "$Style<th>$text</th>\n";
 				$V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities(GetParm('email', PARM_TEXT), ENT_QUOTES);
-				$V.= "$Style<th>Change the user's email address. This may be blank.</th>\n";
+$text = _("Change the user's email address. This may be blank.");
+				$V.= "$Style<th>$text</th>\n";
 				$V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>Select the user's access level.</th>";
+$text = _("Select the user's access level.");
+				$V.= "$Style<th>$text</th>";
 				$V.= "<td><select name='permission'>\n";
-				$V.= "<option value='" . PLUGIN_DB_NONE . "'>None (very basic, no database access)</option>\n";
-				$V.= "<option selected value='" . PLUGIN_DB_READ . "'>Read-only (read, but no writes or downloads)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_DOWNLOAD . "'>Download (Read-only, but can download files)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_WRITE . "'>Read-Write (read, download, or edit information)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_UPLOAD . "'>Upload (read-write, and permits uploading files)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_ANALYZE . "'>Analyze (... and permits scheduling analysis tasks)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_DELETE . "'>Delete (... and permits deleting uploaded files and analysis)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_DEBUG . "'>Debug (... and allows access to debugging functions)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_USERADMIN . "'>Full Administrator (all access including adding and deleting users)</option>\n";
+$text1 = _("None (very basic, no database access)");
+$text2 = _("Read-only (read, but no writes or downloads)");
+$text3 = _("Download (Read-only, but can download files)");
+$text4 = _("Read-Write (read, download, or edit information)");
+$text5 = _("Upload (read-write, and permits uploading files)");
+$text6 = _("Analyze (... and permits scheduling analysis tasks)");
+$text7 = _("Delete (... and permits deleting uploaded files and analysis)");
+$text8 = _("Debug (... and allows access to debugging functions)");
+$text9 = _("Full Administrator (all access including adding and deleting users)");
+
+				$V.= "<option value='" . PLUGIN_DB_NONE . "'>$text1</option>\n";
+				$V.= "<option selected value='" . PLUGIN_DB_READ . "'>$text2</option>\n";
+				$V.= "<option value='" . PLUGIN_DB_DOWNLOAD . "'>$text3</option>\n";
+				$V.= "<option value='" . PLUGIN_DB_WRITE . "'>$text4</option>\n";
+				$V.= "<option value='" . PLUGIN_DB_UPLOAD . "'>$text5</option>\n";
+				$V.= "<option value='" . PLUGIN_DB_ANALYZE . "'>$text6</option>\n";
+				$V.= "<option value='" . PLUGIN_DB_DELETE . "'>$text7</option>\n";
+				$V.= "<option value='" . PLUGIN_DB_DEBUG . "'>$text8</option>\n";
+				$V.= "<option value='" . PLUGIN_DB_USERADMIN . "'>$text9</option>\n";
 				$V.= "</select></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>Select the user's top-level folder. Access is restricted to this folder.";
-				$V.= " (NOTE: This is only partially implemented right now. Current users can escape the top of tree limitation.)";
+$text = _("Select the user's top-level folder. Access is restricted to this folder.");
+				$V.= "$Style<th>$text";
+				$V.= _(" (NOTE: This is only partially implemented right now. Current users can escape the top of tree limitation.)");
 				$V.= "</th>";
 				$V.= "<td><select name='folder'>";
 				$V.= FolderListOption(-1, 0);
 				$V.= "</select></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>Block the user's account. This will prevent logins.</th><td><input type='checkbox' name='block' value='1'></td>\n";
-				$V.= "$Style<th>Blank the user's account. This will will set the password to a blank password.</th><td><input type='checkbox' name='blank' value='1'></td>\n";
-				$V.= "$Style<th>Change the user's password.</th><td><input type='password' name='pass1' size=20></td>\n";
+$text = _("Block the user's account. This will prevent logins.");
+				$V.= "$Style<th>$text</th><td><input type='checkbox' name='block' value='1'></td>\n";
+$text = _("Blank the user's account. This will will set the password to a blank password.");
+				$V.= "$Style<th>$text</th><td><input type='checkbox' name='blank' value='1'></td>\n";
+$text = _("Change the user's password.");
+				$V.= "$Style<th>$text</th><td><input type='password' name='pass1' size=20></td>\n";
 				$V.= "</tr>\n";
-				$V.= "<tr><th>Re-enter the user's password.</th><td><input type='password' name='pass2' size=20></td>\n";
+$text = _("Re-enter the user's password.");
+				$V.= "<tr><th>$text</th><td><input type='password' name='pass2' size=20></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>E-mail Notification</th><td><input type=checkbox name='enote'" . "checked=document.formy.enote.checked>" . "Check to enable email notification of completed analysis.</td>\n";
+$text = _("E-mail Notification");
+				$V.= "$Style<th>$text</th><td><input type=checkbox name='enote'";
 				$V.= "</tr>\n";
 				$V.= "</tr>\n";
-				$V .= "$Style<th>Default Agents: Select the ".
-              "agent(s) to automatically run when uploading data. These" .
-              " selections can be changed on the upload screens.\n</th><td> ";
+$text = _("Default Agents: Select the agent(s) to automatically run when uploading data. These selections can be changed on the upload screens.");
+				$V .= "$Style<th>$text\n</th><td> ";
 				$V.= AgentCheckBoxMake(-1, "agent_unpack");
 				$V .= "</td>\n";
 				$V .= "</tr>\n";
 				$Val = GetParm('default_bucketpool_fk', PARM_INTEGER);
-				$V.= "$Style<th>Default bucket pool</th>\n";
+$text = _("Default bucket pool");
+				$V.= "$Style<th>$text</th>\n";
 				$V.= "<td>";
                 $V.= SelectBucketPool($Val);
                 $V.= "</td>\n";
 				$V.= "</tr>\n";
 				$V.= "</table><P />";
-				$V.= "<input type='submit' value='Update Account'>\n";
+$text = _("Update Account");
+				$V.= "<input type='submit' value='$text'>\n";
 				$V.= "</form>\n";
 				break;
 		case "Text":

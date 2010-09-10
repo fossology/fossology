@@ -25,10 +25,13 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_copyright", _("Copyright/Email/URL Analysis"));
+
 class agent_copyright extends FO_Plugin {
 
   public $Name = "agent_copyright";
-  public $Title = "Copyright/Email/URL Analysis";
+  public $Title = TITLE_agent_copyright;
   public $Version = "1.0";
   public $Dependency = array("db");
   public $DBaccess = PLUGIN_DB_ANALYZE;
@@ -96,7 +99,8 @@ class agent_copyright extends FO_Plugin {
       $Results = $DB->Action($SQL);
       $Dep = $Results[0]['jq_pk'];
       if (empty($Dep)) {
-        return ("Unable to find dependent job: unpack");
+$text = _("Unable to find dependent job: unpack");
+        return ($text);
       }
     }
 
@@ -111,7 +115,8 @@ class agent_copyright extends FO_Plugin {
     /* Prepare the job: job "nomos" */
     $jobpk = JobAddJob($uploadpk, "Copyright Analysis", $Priority);
     if (empty($jobpk) || ($jobpk < 0)) {
-      return ("Failed to insert job record for copyright agent.");
+$text = _("Failed to insert job record for copyright agent.");
+      return ($text);
     }
 
     /*
@@ -127,7 +132,8 @@ class agent_copyright extends FO_Plugin {
   /* Add job: job "Copyright Analysis" has jobqueue item "copyright" */
     $jobqueuepk = JobQueueAdd($jobpk, "copyright", $jqargs, "no", "", $Dep);
     if (empty($jobqueuepk)) {
-      return ("Failed to insert agent copyright into job queue.");
+$text = _("Failed to insert agent copyright into job queue.");
+      return ($text);
     }
     
     if (CheckEnotification()) {
@@ -161,10 +167,12 @@ class agent_copyright extends FO_Plugin {
           $rc = $this->AgentAdd($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $Page.= displayMessage('copyright/email/url analysis added to the job queue');
+$text = _("copyright/email/url analysis added to the job queue");
+            $Page.= displayMessage($text);
           }
           else {
-            $Page.= displayMessage("Scheduling of copyright/email/url analysis failed: $rc");
+$text = _("Scheduling of copyright/email/url analysis failed");
+            $Page.= displayMessage("$text: $rc");
           }
         }
         /* Get list of projects that are not scheduled for uploads */
@@ -180,14 +188,15 @@ class agent_copyright extends FO_Plugin {
                 ORDER BY upload_desc,upload_filename;";
         $Results = $DB->Action($SQL);
         if (empty($Results[0]['upload_pk'])) {
-          $Page.= "All uploaded files are already analyzed, or scheduled to be analyzed.";
+          $Page.= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
         }
         else {
           /* Display the form */
           $Page.= "<form method='post'>\n"; // no url = this url
-          $Page.= "Select an uploaded file for copyright analysis.\n";
-          $Page.= "Only uploads that are not already scheduled can be scheduled.\n";
-          $Page.= "<p />\nAnalyze: <select name='upload'>\n";
+          $Page.= _("Select an uploaded file for copyright analysis.\n");
+          $Page.= _("Only uploads that are not already scheduled can be scheduled.\n");
+$text = _("Analyze");
+          $Page.= "<p />\n$text: <select name='upload'>\n";
           foreach($Results as $Row) {
             if (empty($Row['upload_pk'])) {
               continue;
@@ -201,7 +210,8 @@ class agent_copyright extends FO_Plugin {
             $Page.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
           $Page.= "</select><P />\n";
-          $Page.= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+          $Page.= "<input type='submit' value='$text!'>\n";
           $Page.= "</form>\n";
         }
       break;

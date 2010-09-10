@@ -24,13 +24,15 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_licgroup_debug", _("License Groups Debug"));
+
 /************************************************
  Plugin for License Groups
  *************************************************/
 class licgroup_debug extends FO_Plugin
   {
   var $Name       = "license_groups_debug";
-  var $Title      = "License Groups Debug";
+  var $Title      = TITLE_licgroup_debug;
   var $Version    = "1.0";
   var $MenuList   = "Obsolete::Debug::Debug License Groups";
   var $Dependency = array("db","licgroup");
@@ -46,14 +48,17 @@ class licgroup_debug extends FO_Plugin
    ***********************************************************/
   function DrawGroupTree	($Group)
     {
-    print "<li>Group: ";
+$text = _("Group");
+    print "<li>$text: ";
     if (!empty($this->LicGroupPlugin->GrpInGroup[$Group]['head']))
       {
-      print "[HEAD] ";
+$text = _("HEAD");
+      print "[$text] ";
       }
     if (!empty($this->LicGroupPlugin->GrpInGroup[$Group]['tail']))
       {
-      print "[TAIL] ";
+$text = ("TAIL");
+      print "[$text] ";
       }
     print htmlentities($this->GrpName[$Group]) . "\n";
     if (!empty($this->LicGroupPlugin->GrpInGroup[$Group]))
@@ -65,15 +70,19 @@ class licgroup_debug extends FO_Plugin
 	  {
 	  if ($g == 1)
 	    {
-	    print "<li>Inherited Group: " . htmlentities($this->GrpName[$G]) . "\n";
+$text = _("Inherited Group");
+	    print "<li>$text: " . htmlentities($this->GrpName[$G]) . "\n";
 	    }
 	  if ($g == 0)
 	    {
-	    print "<li><b>Loop</b> to Group: " . htmlentities($this->GrpName[$G]) . "\n";
+$text = _("Loop");
+$text1 = _("to Group");
+	    print "<li><b>$text</b> $text1: " . htmlentities($this->GrpName[$G]) . "\n";
 	    }
 	  else /* direct */
 	    {
-	    print "<li>Group: " . htmlentities($this->GrpName[$G]) . "\n";
+$text = _("Group");
+	    print "<li>$text: " . htmlentities($this->GrpName[$G]) . "\n";
 	    $this->DrawGroupTree($G);
 	    }
 	  }
@@ -81,11 +90,13 @@ class licgroup_debug extends FO_Plugin
 	  {
 	  if ($g == 2)
 	    {
-	    print "<li>License: ";
+$text = _("License");
+	    print "<li>$text: ";
 	    }
 	  if ($g == 1)
 	    {
-	    print "<li>Inherited License: ";
+$text = _("Inherited License");
+	    print "<li>$text: ";
 	    }
 	  print htmlentities($this->LicName[$G]) . "\n";
 	  }
@@ -134,9 +145,12 @@ class licgroup_debug extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
-	print "The current license group tree.\n";
-	print "Inherited groups are expanded and licenses are listed.\n";
-	print "Loops in group inheritance are identified.\n";
+$text = _("The current license group tree.");
+	print "$text\n";
+$text = _("Inherited groups are expanded and licenses are listed.");
+	print "$text\n";
+$text = _("Loops in group inheritance are identified.");
+	print "$text\n";
 	print "<P/>\n";
 	foreach($this->GrpName as $G => $g)
 	  {

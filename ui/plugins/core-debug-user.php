@@ -24,11 +24,13 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_debug_user", _("Debug User"));
+
 class debug_user extends FO_Plugin
   {
   var $Name       = "debug_user";
   var $Version    = "1.0";
-  var $Title      = "Debug User";
+  var $Title      = TITLE_debug_user;
   var $MenuList   = "Help::Debug::Debug User";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_DEBUG;
@@ -48,9 +50,12 @@ class debug_user extends FO_Plugin
       case "HTML":
 	$Results = $DB->Action("SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';");
 	$R = &$Results[0];
-	$V .= "<H2>User Information</H2>\n";
+$text = _("User Information");
+	$V .= "<H2>$text</H2>\n";
 	$V .= "<table border=1>\n";
-	$V .= "<tr><th>Field</th><th>Value</th></tr>\n";
+$text = _("Field");
+$text1 = _("Value");
+	$V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
 	foreach($R as $Key => $Val)
 	  {
 	  if (empty($Key)) { continue; }

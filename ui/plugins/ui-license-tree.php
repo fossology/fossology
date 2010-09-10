@@ -25,9 +25,11 @@ if (!isset($GlobalReady)) {
   exit;
 }
 
+define("TITLE_ui_license_tree", _("License Tree View"));
+
 class ui_license_tree extends FO_Plugin {
   var $Name = "license-tree";
-  var $Title = "License Tree View";
+  var $Title = TITLE_ui_license_tree;
   var $Version = "1.0";
   var $Dependency = array(
     "db",
@@ -154,7 +156,8 @@ class ui_license_tree extends FO_Plugin {
         menu_insert("Browse::CSV", -2, $URI . "&output=csv");
       }
       else {
-        menu_insert("Browse::License Tree",-4 , $URI, "View license tree");
+$text = _("View license tree");
+        menu_insert("Browse::License Tree",-4 , $URI, $text);
       }
     }
   } // RegisterMenus()
@@ -412,7 +415,8 @@ class ui_license_tree extends FO_Plugin {
     }
     switch ($this->OutputType) {
       case "CSV":
-        print "License Count|License Summary|Path\n";
+$text = _("License Count|License Summary|Path");
+        print "$text\n";
         $this->ShowLicenseTree($Upload, $Item, $Uri);
       break;
       case "XML":

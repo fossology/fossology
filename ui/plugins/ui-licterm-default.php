@@ -34,13 +34,15 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_licterm_default", _("Reset Default License Terms"));
+
 /************************************************
  Plugin for creating License Groups
  *************************************************/
 class licterm_default extends FO_Plugin
   {
   var $Name       = "license_terms_default";
-  var $Title      = "Reset Default License Terms";
+  var $Title      = TITLE_licterm_default;
   var $Version    = "1.0";
   var $MenuList   = "Obsolete::License::Default Terms";
   var $Dependency = array("db","licterm_manage");
@@ -82,7 +84,8 @@ class licterm_default extends FO_Plugin
     {
     global $DB;
     $Names = $DB->Action("SELECT * FROM licterm ORDER BY licterm_name;");
-    print "<H3>Export Data</H3>\n";
+$text = _("Export Data");
+    print "<H3>$text</H3>\n";
 
     global $WEBDIR;
     $Filename = "plugins/ui-licterm-default.dat";
@@ -153,7 +156,8 @@ class licterm_default extends FO_Plugin
       }
     fwrite($Fout,"?>\n");
     fclose($Fout);
-    print "Data written to $Filename\n";
+$text = _("Data written to");
+    print "$text $Filename\n";
     print "<hr>\n";
     } // ExportTerms()
 
@@ -181,7 +185,8 @@ class licterm_default extends FO_Plugin
     print "<ol>\n";
     foreach($Term as $Key => $Val)
       {
-      print "<li>Creating default canonical name: " . htmlentities($Key) . "\n";
+$text = _("Creating default canonical name");
+      print "<li>$text: " . htmlentities($Key) . "\n";
 
       /* Get the list of licenses */
       $SQL = "SELECT DISTINCT lic_id FROM agent_lic_raw WHERE lic_pk=lic_id AND (";
@@ -262,27 +267,32 @@ class licterm_default extends FO_Plugin
 	  }
 
 	$V .= "<form method='post'>\n";
-	$V .= "License terms associate common license names with canonical license names.\n";
-	$V .= "For example, the terms 'GPL' and 'Gnu Public License' are both commonly used to describe the Free Software Foundation's GNU General Public License. These terms are all commonly referred to be the canonical name 'GPL'.\n";
+	$V .= _("License terms associate common license names with canonical license names.\n");
+	$V .= _("For example, the terms 'GPL' and 'Gnu Public License' are both commonly used to describe the Free Software Foundation's GNU General Public License. These terms are all commonly referred to be the canonical name 'GPL'.\n");
 	$V .= "<P />\n";
-    $V .= "You shouldn't need to do this unless you have modified the default terms and want to reset them back to the way they were when you installed this software.  ";
-	$V .= "This will reset the default license terms, canonical names, and associations between terms, license templates, and canonical names.";
+    $V .= _("You shouldn't need to do this unless you have modified the default terms and want to reset them back to the way they were when you installed this software.  ");
+	$V .= _("This will reset the default license terms, canonical names, and associations between terms, license templates, and canonical names.");
 	$V .= "<ul>\n";
-	$V .= "<li>The default license settings are <b>NOT</b> a recommendation or legal interpretation.\n";
-	$V .= "In particular, related terms, templates, and canonical names may have very different legal meanings.\n";
-	$V .= "<li>Resetting the default terms will not impact any new terms you have created or their associations.\n";
+$text = _("The default license settings are");
+$text1 = _("NOT");
+$text2 = _("a recommendation or legal interpretation.");
+	$V .= "<li>$text <b>$text1</b> $text2\n";
+	$V .= _("In particular, related terms, templates, and canonical names may have very different legal meanings.\n");
+$text = _("Resetting the default terms will not impact any new terms you have created or their associations.");
+	$V .= "<li>$text\n";
 	$V .= "</ul>\n";
-	$V .= "You can modify, edit, or delete the default groups with the ";
+	$V .= _("You can modify, edit, or delete the default groups with the ");
 	$P = &$Plugins[plugin_find_id("licterm_manage")];
 	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->Title . "</a>";
-	$V .= " menu option.\n";
-	$V .= "You can also use the ";
+	$V .= _(" menu option.\n");
+	$V .= _("You can also use the ");
 	$V .= "<a href='" . Traceback_uri() . "?mod=" . $P->Name . "'>" . $P->Title . "</a>";
 	$V .= " to create new terms, canonical names, and associations.<P/>\n";
 
 	$V .= "<P/>\n";
 	// $V .= "<input type='checkbox' value='1' name='Export'>Check to export term-related information.<br>\n";
-	$V .= "<input type='checkbox' value='1' name='Default'>Check to revert back to the original default terms, canonical names, and license template associations.\n";
+$text = _("Check to revert back to the original default terms, canonical names, and license template associations.");
+	$V .= "<input type='checkbox' value='1' name='Default'>$text\n";
 	$V .= "<P/>\n";
 	$V .= "<input type='submit' value='RESET!'>";
 	$V .= "</form>\n";

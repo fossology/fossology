@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_jobs_showjobs_upload", _("View Jobs By Upload"));
+
 class jobs_showjobs_upload extends FO_Plugin
 {
   var $Name       = "jobs_showjobs_upload";
-  var $Title      = "View Jobs By Upload";
+  var $Title      = TITLE_jobs_showjobs_upload;
   var $MenuList   = "Jobs::Queue::By Upload";
   var $Version    = "1.0";
   var $Dependency = array("db","showjobs");
@@ -81,16 +83,19 @@ class jobs_showjobs_upload extends FO_Plugin
 	$V .= "<input type='hidden' name='mod' value='showjobs'>";
 	$V .= "<input type='hidden' name='show' value='summary'>";
 	$V .= "<input type='hidden' name='history' value='1'>\n";
-	$V .= "<P>View the scheduled jobs associated with an uploaded file.<P>\n";
+$text = _("View the scheduled jobs associated with an uploaded file.");
+	$V .= "<P>$text<P>\n";
 	$V .= "<ol>\n";
-	$V .= "<li>Select the folder containing the file to view: ";
+$text = _("Select the folder containing the file to view: ");
+	$V .= "<li>$text";
 	$V .= "<select name='folder' ";
 	$V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
 	$V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + document.formy.folder.value)'>\n";
 	$V .= FolderListOption(-1,0);
 	$V .= "</select><P />\n";
 
-	$V .= "<li>Select the uploaded project to view:";
+$text = _("Select the uploaded project to view:");
+	$V .= "<li>$text";
 	$V .= "<BR><select name='upload' size='10'>\n";
 	$List = FolderListUploads(-1);
 	foreach($List as $L)

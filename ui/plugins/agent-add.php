@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_add", _("Schedule an Analysis"));
+
 class agent_add extends FO_Plugin
 {
   public $Name       = "agent_add";
-  public $Title      = "Schedule an Analysis";
+  public $Title      = TITLE_agent_add;
   public $MenuList   = "Jobs::Agents";
   public $Version    = "1.1";
   public $Dependency = array("db");
@@ -48,7 +50,8 @@ class agent_add extends FO_Plugin
     $Results = $DB->Action("SELECT upload_pk FROM upload WHERE upload_pk = '$uploadpk';");
     if ($Results[0]['upload_pk'] != $uploadpk)
     {
-      return("Upload not found.");
+$text = _("Upload not found.");
+      return($text);
     }
 
     /* Validate the agent list and add agents as needed. */
@@ -109,11 +112,13 @@ class agent_add extends FO_Plugin
           if (empty($rc))
           {
             /* Need to refresh the screen */
-            $V .= displayMessage('Agent Analysis added to job queue');
+$text = _("Agent Analysis added to job queue");
+            $V .= displayMessage($text);
           }
           else
           {
-            $V .= displayMessage("Scheduling of Agent(s) failed: $rc");
+$text = _("Scheduling of Agent(s) failed: ");
+            $V .= displayMessage($text.$rc);
           }
         }
 
@@ -150,17 +155,19 @@ class agent_add extends FO_Plugin
         /*************************************************************/
         /* Display the form */
         $V .= "<form name='formy' method='post'>\n"; // no url = this url
-        $V .= "Select an uploaded file for additional analysis.\n";
+        $V .= _("Select an uploaded file for additional analysis.\n");
 
         $V .= "<ol>\n";
-        $V .= "<li>Select the folder containing the upload you wish to analyze:<br>\n";
+$text = _("Select the folder containing the upload you wish to analyze:");
+        $V .= "<li>$text<br>\n";
         $V .= "<select name='folder'\n";
         $V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=$Folder' ";
         $V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
         $V .= FolderListOption(-1,0,1,$Folder);
         $V .= "</select><P />\n";
 
-        $V .= "<li>Select the upload to analyze:<br>";
+$text = _("Select the upload to analyze:");
+        $V .= "<li>$text<br>";
         $V .= "<select size='10' name='upload' onChange='Agents_Get(\"" . Traceback_uri() . "?mod=upload_agent_options&upload=\" + this.value)'>\n";
         $List = FolderListUploads($Folder);
         foreach($List as $L)
@@ -174,10 +181,12 @@ class agent_add extends FO_Plugin
           $V .= "</option>\n";
         }
         $V .= "</select><P />\n";
-        $V .= "<li>Select additional analysis.<br>\n";
+$text = _("Select additional analysis.");
+        $V .= "<li>$text<br>\n";
         $V .= "<select multiple size='10' id='agents' name='agents[]'></select>\n";
         $V .= "</ol>\n";
-        $V .= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+        $V .= "<input type='submit' value='$text!'>\n";
         $V .= "</form>\n";
         break;
       case "Text":

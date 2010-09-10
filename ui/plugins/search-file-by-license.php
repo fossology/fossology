@@ -32,10 +32,12 @@ if (!isset($GlobalReady)) { exit; }
  data to the UI.
  *************************************************/
 
+define("TITLE_search_file_by_license", _("List Files based on License"));
+
 class search_file_by_license extends FO_Plugin
   {
   var $Name       = "search_file_by_license";
-  var $Title      = "List Files based on License";
+  var $Title      = TITLE_search_file_by_license;
   var $Version    = "1.0";
   var $Dependency = array("db","license");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -70,7 +72,8 @@ class search_file_by_license extends FO_Plugin
 	$Offset = $Page * $Max;
 
 	/* Get License Name */
-	$V .= "The following files contain the license '<b>";
+$text = _("The following files contain the license");
+	$V .= "$text '<b>";
 	$V .= htmlentities($WantLic);
 	$V .= "</b>'.\n";
 
@@ -99,7 +102,9 @@ class search_file_by_license extends FO_Plugin
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-	$V .= "<small>Elaspsed time: $Time seconds</small>\n";
+$text = _("Elaspsed time:");
+$text1 = _("seconds");
+	$V .= "<small>$text $Time $text1</small>\n";
 	break;
       case "Text":
 	break;

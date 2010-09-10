@@ -31,10 +31,13 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_fonomos", _("Nomos License Analysis"));
+
 class agent_fonomos extends FO_Plugin {
 
   public $Name = "agent_nomos";
-  public $Title = "Nomos License Analysis";
+  public $Title = TITLE_agent_fonomos;
   // public $MenuList   = "Jobs::Agents::Nomos License Analysis";
   public $Version = "1.0";
   public $Dependency = array("db");
@@ -103,7 +106,8 @@ class agent_fonomos extends FO_Plugin {
       $Results = $DB->Action($SQL);
       $Dep = $Results[0]['jq_pk'];
       if (empty($Dep)) {
-        return ("Unable to find dependent job: unpack");
+$text = _("Unable to find dependent job: unpack");
+        return ($text);
       }
     }
 
@@ -118,7 +122,8 @@ class agent_fonomos extends FO_Plugin {
     /* Prepare the job: job "nomos" */
     $jobpk = JobAddJob($uploadpk, "Nomos License Analysis", $Priority);
     if (empty($jobpk) || ($jobpk < 0)) {
-      return ("Failed to insert job record for nomos");
+$text = _("Failed to insert job record for nomos");
+      return ($text);
     }
 
     /*
@@ -131,7 +136,8 @@ class agent_fonomos extends FO_Plugin {
     $jqargs = $uploadpk;
     $jobqueuepk = JobQueueAdd($jobpk, "nomos", $jqargs, "no", "", $Dep);
     if (empty($jobqueuepk)) {
-      return ("Failed to insert agent nomos into job queue");
+$text = _("Failed to insert agent nomos into job queue");
+      return ($text);
     }
     if (CheckEnotification()) {
       $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
@@ -164,10 +170,12 @@ class agent_fonomos extends FO_Plugin {
           $rc = $this->AgentAdd($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $Page.= displayMessage('fo_nomos analysis added to the job queue');
+$text = _("fo_nomos analysis added to the job queue");
+            $Page.= displayMessage($text);
           }
           else {
-            $Page.= displayMessage("Scheduling of fo_nomos failed: $rc");
+$text = _("Scheduling of fo_nomos failed:");
+            $Page.= displayMessage($text.$rc);
           }
         }
         /* Get list of projects that are not scheduled for uploads */
@@ -183,14 +191,15 @@ class agent_fonomos extends FO_Plugin {
                 ORDER BY upload_desc,upload_filename;";
         $Results = $DB->Action($SQL);
         if (empty($Results[0]['upload_pk'])) {
-          $Page.= "All uploaded files are already analyzed, or scheduled to be analyzed.";
+          $Page.= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
         }
         else {
           /* Display the form */
           $Page.= "<form method='post'>\n"; // no url = this url
-          $Page.= "Select an uploaded file for license analysis.\n";
-          $Page.= "Only uploads that are not already scheduled can be scheduled.\n";
-          $Page.= "<p />\nAnalyze: <select name='upload'>\n";
+          $Page.= _("Select an uploaded file for license analysis.\n");
+          $Page.= _("Only uploads that are not already scheduled can be scheduled.\n");
+$text = _("Analyze:");
+          $Page.= "<p />\n$text <select name='upload'>\n";
           foreach($Results as $Row) {
             if (empty($Row['upload_pk'])) {
               continue;
@@ -204,7 +213,8 @@ class agent_fonomos extends FO_Plugin {
             $Page.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
           $Page.= "</select><P />\n";
-          $Page.= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+          $Page.= "<input type='submit' value='$text!'>\n";
           $Page.= "</form>\n";
         }
       break;

@@ -29,10 +29,12 @@ global $GlobalReady;
 
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_remove_licenseMeta", _("Remove License Analysis"));
+
 class agent_remove_licenseMeta extends FO_Plugin
 {
   public $Name       = "agent_reset_license";
-  public $Title      = "Remove License Analysis";
+  public $Title      = TITLE_agent_remove_licenseMeta;
   public $MenuList   = "Obsolete::Remove License Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db", "agent_license");
@@ -71,19 +73,23 @@ class agent_remove_licenseMeta extends FO_Plugin
 
     /* Prepare the job: job "Delete" */
     $jobpk = JobAddJob($upload_pk,"license-delete");
-    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to create job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { 
+$text = _("Failed to create job record");
+	return($text); }
 
     /* Add job: job "Delete" has jobqueue item "delagent" */
     $jqargs = "DELETE LICENSE $upload_pk";
     $jobqueue_pk = JobQueueAdd($jobpk,"delagent",$jqargs,"no",NULL,NULL);
     if (empty($jobqueue_pk)) {
-      return("Failed to place delete in job queue");
+$text = _("Failed to place delete in job queue");
+      return($text);
     }
     if (!empty($restart)){
       // schedule the agent using the plugin found at the start of the routine.
       $agent_added = $agent_license_plugin->AgentAdd($upload_pk, $jobqueue_pk);
       if(!empty($agent_added)){
-        return ('Could not reschedule License Analysis');
+$text = _("Could not reschedule License Analysis");
+        return ($text);
       }
     }
     return(NULL);
@@ -113,11 +119,13 @@ class agent_remove_licenseMeta extends FO_Plugin
             // Need to refresh the screen
 	    if ($Restart)
 	      {
-              $V .= displayMessage('License data re-analysis added to job queue');
+$text = _("License data re-analysis added to job queue");
+              $V .= displayMessage($text);
 	      }
 	    else
 	      {
-              $V .= displayMessage('License data removal added to job queue');
+$text = _("License data removal added to job queue");
+              $V .= displayMessage($text);
 	      }
           }
           else
@@ -144,22 +152,32 @@ class agent_remove_licenseMeta extends FO_Plugin
 
         /* Build HTML form */
         $V .= "<form name='formR' method='post'>\n"; // no url = this url
-        $V .= "<em>Remove</em> the license meta data from the selected upload.\n";
+$text = _("Remove");
+$text1 = _("the license meta data from the selected upload.\n");
+        $V .= "<em>$text</em> $text1";
         $V .= "<ul>\n";
-        $V .= "<li>This will <em>remove</em> the license meta data associated with the selected upload file!\n";
-        $V .= "<li>Be very careful with your selection since you can delete a lot of work!\n";
-        $V .= "<li>THERE IS NO UNREMOVE. The license meta data can be recreated by re-running the license analysis\n";
+$text = _("This will");
+$text1 = _("remove");
+$text2 = _("the license meta data associated with the selected upload file!\n");
+        $V .= "<li>$text <em>$text1</em> $text2";
+$text = _("Be very careful with your selection since you can delete a lot of work!\n");
+        $V .= "<li>$text";
+$text = _("THERE IS NO UNREMOVE. The license meta data can be recreated by re-running the license analysis\n");
+        $V .= "<li>$text";
         $V .= "</ul>\n";
-        $V .= "<P>Select the uploaded file to remove license data:<P>\n";
+$text = _("Select the uploaded file to remove license data:");
+        $V .= "<P>$text<P>\n";
         $V .= "<ol>\n";
-        $V .= "<li>Select the folder containing the upload file to use: ";
-        $V .= "<select name='folder' ";
+$text = _("Select the folder containing the upload file to use: ");
+        $V .= "<li>$text";
+        $V .= _("<select name='folder' ");
         $V .= "onLoad='ResetLicense_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
         $V .= "onChange='ResetLicense_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + document.formR.folder.value)'>\n";
         $V .= FolderListOption(-1,0);
         $V .= "</select><P />\n";
 
-        $V .= "<li>Select the uploaded project to use:";
+$text = _("Select the uploaded project to use:");
+        $V .= "<li>$text";
         $V .= "<BR><select name='upload' size='10'>\n";
         $List = FolderListUploads(-1);
         foreach($List as $L)
@@ -177,11 +195,14 @@ class agent_remove_licenseMeta extends FO_Plugin
           $V .= "</option>\n";
         }
         $V .= "</select><P />\n";
-        $V .= "<li>After the license data is removed you can reschedule the License Analysis by checking the box below<br />";
+$text = _("After the license data is removed you can reschedule the License Analysis by checking the box below");
+        $V .= "<li>$text<br />";
         $V .= "<input type='checkbox' name='ReDoLic' value='Y' />";
-        $V .= "Reschedule License Analysis?<br /><br />\n";
+$text = _("Reschedule License Analysis?");
+        $V .= "$text<br /><br />\n";
         $V .= "</ol>\n";
-        $V .= "<input type='submit' value='Commit!'>\n";
+$text = _("Commit");
+        $V .= "<input type='submit' value='$text!'>\n";
         $V .= "</form>\n";
         break;
       case "Text":

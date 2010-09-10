@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_core_debug_menus", _("Debug Menus"));
+
 class core_debug_menus extends FO_Plugin
   {
   var $Name       = "debug-menus";
-  var $Title      = "Debug Menus";
+  var $Title      = TITLE_core_debug_menus;
   var $Version    = "1.0";
   var $MenuList   = "Help::Debug::Debug Menus";
   var $DBaccess   = PLUGIN_DB_DEBUG;
@@ -101,33 +103,52 @@ class core_debug_menus extends FO_Plugin
 	$FullMenuDebug = GetParm("fullmenu",PARM_INTEGER);
 	if ($FullMenuDebug == 2)
 		{
-		print "<b>Full debug ENABLED!</b> Now view any page.<P>\n";
+$text = _("Full debug ENABLED!");
+$text1 = _("Now view any page.");
+		print "<b>$text</b> $text1<P>\n";
 		}
 	if ($FullMenuDebug == 1)
 		{
-		print "<b>Full debug disabled!</b> Now view any page.<P>\n";
+$text = _("Full debug disabled!");
+$text1 = _("Now view any page.");
+		print "<b>$text</b> $text1<P>\n";
 		}
-	print "This developer tool lists all items in the menu structure.\n";
-	print "Since some menu inserts are conditional, not everything may appear here (the conditions may not lead to the insertion).\n";
-	print "Fully-debugged menus show the full menu path and order number <i>in the menu</i>.\n";
+$text = _("This developer tool lists all items in the menu structure.");
+	print "$text\n";
+$text = _("Since some menu inserts are conditional, not everything may appear here (the conditions may not lead to the insertion).");
+	print "$text\n";
+$text = _("Fully-debugged menus show the full menu path and order number");
+$text1 = _("in the menu");
+	print "$text <i>$text1</i>.\n";
 	print "<ul>\n";
-	print "<li>The full debugging is restricted to <b>your</b> login session. (Nobody else will see it.)\n";
-	print "<li>Full debugging shows the full menu path for each menu\n";
-	print "and the order is included in parenthesis.\n";
-	print "However, menus that use HTML instead of text will <i>not</i> show the full path.\n";
-	print "<li>To disable full debugging, return here and unselect the option.\n";
+$text = _("The full debugging is restricted to");
+$text1 = _("your");
+$text2 = _(" login session. (Nobody else will see it.)\n");
+	print "<li>$text <b>$text1</b>$text2";
+$text = _("Full debugging shows the full menu path for each menu\n");
+	print "<li>$text";
+$text = _("and the order is included in parenthesis.");
+	print "$text\n";
+$text = _("However, menus that use HTML instead of text will");
+$text1 = _("not");
+$text2 = _("show the full path.\n");
+	print "$text <i>$text1</i>$text2";
+$text = _("To disable full debugging, return here and unselect the option.\n");
+	print "<li>$text";
 	print "</ul>\n";
 	print "<br>\n";
 	print "<form method='post'>\n";
 	if (@$_SESSION['fullmenudebug'] == 1)
 	  {
 	  print "<input type='hidden' name='fullmenu' value='1'>";
-	  print "<input type='submit' value='Disable Full Debug!'>";
+$text = _("Disable Full Debug");
+	  print "<input type='submit' value='$text!'>";
 	  }
 	else
 	  {
 	  print "<input type='hidden' name='fullmenu' value='2'>";
-	  print "<input type='submit' value='Enable Full Debug!'>";
+$text = _("Enable Full Debug");
+	  print "<input type='submit' value='$text!'>";
 	  }
 	print "</form>\n";
 	print "<hr>";

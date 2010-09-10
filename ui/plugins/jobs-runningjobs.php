@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_jobs_runningjobs", _("Show Agent Status"));
+
 class jobs_runningjobs extends FO_Plugin
   {
   var $Name       = "runningjobs";
-  var $Title      = "Show Agent Status";
+  var $Title      = TITLE_jobs_runningjobs;
   var $Version    = "1.0";
   var $MenuList   = "Admin::Scheduler::Status";
   var $Dependency = array("db");
@@ -71,9 +73,10 @@ class jobs_runningjobs extends FO_Plugin
 	$Results = $DB->Action("SELECT * FROM scheduler_status WHERE record_update > now()-interval '600' ORDER BY $OrderBy $OrderDir;");
 	if (!is_array($Results) || count($Results) == 0) 
     { 
-      echo "<h3>The FOSSology job scheduler does not appear to be running.</h3>";
-      echo "If this is unexpected, look in the log file (typically /var/log/fossology/fossology.log) for errors. ";
-      echo " Otherwise, you may want to restart the scheduler (typically sudo /etc/init.d/fossology start)";
+$text = _("The FOSSology job scheduler does not appear to be running.");
+      echo "<h3>$text</h3>";
+      echo _("If this is unexpected, look in the log file (typically /var/log/fossology/fossology.log) for errors. ");
+      echo _(" Otherwise, you may want to restart the scheduler (typically sudo /etc/init.d/fossology start)");
       return; 
     }
 
@@ -85,19 +88,24 @@ class jobs_runningjobs extends FO_Plugin
 	$Uri=Traceback_uri() . '?mod=' . $this->Name;
 	$Ord = 'agent_status_date';
 	if (!strcmp($OrderBy,$Ord)) { $Rev = (!strcmp($OrderDir,"ASC") ? 'desc' : 'asc'); } else { $Rev='desc'; }
-	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Update time</a></th>\n";
+$text = _("Update time");
+	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>$text</a></th>\n";
 	$Ord = 'agent_status';
 	if (!strcmp($OrderBy,$Ord)) { $Rev = (!strcmp($OrderDir,"ASC") ? 'desc' : 'asc'); } else { $Rev='desc'; }
-	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Status</a></th>\n";
+$text = _("Status");
+	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>$text</a></th>\n";
 	$Ord = 'agent_fk';
 	if (!strcmp($OrderBy,$Ord)) { $Rev = (!strcmp($OrderDir,"ASC") ? 'desc' : 'asc'); } else { $Rev='desc'; }
-	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Agent Name</a></th>\n";
+$text = _("Agent Name");
+	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>$text</a></th>\n";
 	$Ord = 'agent_host';
 	if (!strcmp($OrderBy,$Ord)) { $Rev = (!strcmp($OrderDir,"ASC") ? 'desc' : 'asc'); } else { $Rev='desc'; }
-	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Host</a></th>\n";
+$text = _("Host");
+	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>$text</a></th>\n";
 	$Ord = 'agent_param';
 	if (!strcmp($OrderBy,$Ord)) { $Rev = (!strcmp($OrderDir,"ASC") ? 'desc' : 'asc'); } else { $Rev='desc'; }
-	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>Parameters</a></th>\n";
+$text = _("Parameters");
+	$Headings .= "    <th><a href='$Uri&order=$Ord&rev=$Rev'>$text</a></th>\n";
 	$Headings .= "  </tr>\n";
 
 	$BGColor=array(

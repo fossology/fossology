@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_copyright_view", _("View Copyright/Email/Url Analysis"));
+
 class copyright_view extends FO_Plugin
 {
     var $Name       = "copyrightview";
-    var $Title      = "View Copyright/Email/Url Analysis";
+    var $Title      = TITLE_copyright_view;
     var $Version    = "1.0";
     var $Dependency = array("db","browse","view");
     var $DBaccess   = PLUGIN_DB_READ;
@@ -52,8 +54,9 @@ class copyright_view extends FO_Plugin
             }
             else
             {
-                menu_insert("View::View Copyright/Email/Url",1,$URI,"View Copyright/Email/Url info");
-                menu_insert("View-Meta::View Copyright/Email/Url",1,$URI,"View Copyright/Email/Url info");
+$text = _("View Copyright/Email/Url info");
+                menu_insert("View::View Copyright/Email/Url",1,$URI,$text);
+                menu_insert("View-Meta::View Copyright/Email/Url",1,$URI,$text);
             }
         }
         $Lic = GetParm("lic",PARM_INTEGER);
@@ -88,7 +91,8 @@ class copyright_view extends FO_Plugin
         if ($result && !empty($result[0]['pfile_fk'])) {
             $pfile = $result[0]['pfile_fk'];
         } else {
-            print "Could not locate the corresponding pfile.";
+$text = _("Could not locate the corresponding pfile.");
+            print $text;
         }
 
         $sql = "SELECT * FROM copyright WHERE copy_startbyte IS NOT NULL

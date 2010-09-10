@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_upload_srv_files", _("Upload from Server"));
+
 class upload_srv_files extends FO_Plugin {
   public $Name = "upload_srv_files";
-  public $Title = "Upload from Server";
+  public $Title = TITLE_upload_srv_files;
   public $Version = "1.0";
   public $MenuList = "Upload::From Server";
   public $Dependency = array("db", "agent_unpack");
@@ -114,7 +117,8 @@ class upload_srv_files extends FO_Plugin {
     $uploadpk = JobAddUpload($ShortName, $SourceFiles, $Desc, $Mode, $FolderPk);
     $jobq = JobAddJob($uploadpk, 'fosscp_agent', 0);
     if (empty($jobq) || ($jobpk < 0)) {
-      return ("Failed to create job record");
+$text = _("Failed to create job record");
+      return ($text);
     }
     /* Check for email notification and adjust jq_args as needed */
     if (CheckEnotification()) {
@@ -134,7 +138,8 @@ class upload_srv_files extends FO_Plugin {
     $jq_type = 'fosscp_agent';
     $jobqueue_pk = JobQueueAdd($jobq, $jq_type, $jq_args, "no", NULL, NULL, 0);
     if (empty($jobqueue_pk)) {
-      return ("Failed to place fosscp_agent in job queue");
+$text = _("Failed to place fosscp_agent in job queue");
+      return ($text);
     }
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
     $msg = "The upload for $SourceFiles has been scheduled. ";
@@ -173,27 +178,33 @@ class upload_srv_files extends FO_Plugin {
             $Name        = NULL;
           }
           else {
-            $V.= displayMessage("Upload failed for $SourceFiles: $rc");
+$text = _("Upload failed for");
+            $V.= displayMessage("$text $SourceFiles: $rc");
           }
         }
         /* Display instructions */
-        $V.= "This option permits uploading a file, set of files, or a directory from the web server to FOSSology.\n";
-        $V.= "This option is designed for developers who have large source code directories that they wish to analyze (and the directories are already mounted on the web server's system).\n";
-        $V.= "This option only uploads files located on the FOSSology web server.\n";
-        $V.= "If your file is located elsewhere, then use one of the other upload options.\n";
+        $V.= _("This option permits uploading a file, set of files, or a directory from the web server to FOSSology.\n");
+        $V.= _("This option is designed for developers who have large source code directories that they wish to analyze (and the directories are already mounted on the web server's system).\n");
+        $V.= _("This option only uploads files located on the FOSSology web server.\n");
+        $V.= _("If your file is located elsewhere, then use one of the other upload options.\n");
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-        $V.= "<li>Select the folder for storing the upload:\n";
+$text = _("Select the folder for storing the upload:");
+        $V.= "<li>$text\n";
         $V.= "<select name='folder'>\n";
         //$V .= FolderListOption($FolderPk,0);
         $V.= FolderListOption(-1, 0);
         $V.= "</select>\n";
-        $V.= "<p><li>Select the directory or file(s) on the server to upload:<br />\n";
+$text = _("Select the directory or file(s) on the server to upload:");
+        $V.= "<p><li>$text<br />\n";
         $V.= "<input type='text' name='sourcefiles' size='60' value='" . htmlentities($SourceFiles, ENT_QUOTES) . "'/><br />\n";
-        $V.= "<strong>NOTE</strong>: Contents under a directory will be recursively included.\n";
-        $V.= "If you specify a regular expression for the filename, then multiple filenames will be selected.\n";
-        $V.= "<p><li>Files can be placed in alphabetized sub-folders for organization.\n";
+$text = _("NOTE");
+$text1 = _(": Contents under a directory will be recursively included.");
+        $V.= "<strong>$text</strong>$text1\n";
+        $V.= _("If you specify a regular expression for the filename, then multiple filenames will be selected.\n");
+$text = _("Files can be placed in alphabetized sub-folders for organization.");
+        $V.= "<p><li>$text\n";
         $V.= "<br /><input type='radio' name='groupnames' value='0'";
         if ($GroupNames != '1') {
           $V.= " checked";
@@ -204,17 +215,23 @@ class upload_srv_files extends FO_Plugin {
           $V.= " checked";
         }
         $V.= " />Enable alphabetized sub-folders";
-        $V.= "<p><li>(Optional) Enter a description for this Upload:<br />\n";
+$text = _("(Optional) Enter a description for this Upload:");
+        $V.= "<p><li>$text<br />\n";
         $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc, ENT_QUOTES) . "'/>\n";
-        $V.= "<p><li>(Optional) Enter a viewable name for this Upload:<br />\n";
+$text = _("(Optional) Enter a viewable name for this Upload:");
+        $V.= "<p><li>$text<br />\n";
         $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name, ENT_QUOTES) . "' /><br />\n";
-        $V.= "<b>NOTE</b>: If no name is provided, then the uploaded file name will be used.<P />\n";
+$text = _("NOTE");
+$text1 = _(": If no name is provided, then the uploaded file name will be used.");
+        $V.= "<b>$text</b>$text1<P />\n";
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
-          $V.= "<li>Select optional analysis<br />\n";
+$text = _("Select optional analysis");
+          $V.= "<li>$text<br />\n";
           $V.= AgentCheckBoxMake(-1, "agent_unpack");
         }
         $V.= "</ol>\n";
-        $V.= "<input type='submit' value='Upload!'>\n";
+$text = _("Upload");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
         break;
       case "Text":

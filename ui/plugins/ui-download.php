@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_download", _("Download File"));
+
 class ui_download extends FO_Plugin
   {
   var $Name       = "download";
-  var $Title      = "Download File";
+  var $Title      = TITLE_ui_download;
   var $Version    = "1.0";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_DOWNLOAD;
@@ -38,7 +40,8 @@ class ui_download extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    menu_insert("Browse-Pfile::Download",0,$this->Name,"Download this file");
+$text = _("Download this file");
+    menu_insert("Browse-Pfile::Download",0,$this->Name,$text);
     } // RegisterMenus()
 
   /***********************************************************
@@ -103,8 +106,8 @@ class ui_download extends FO_Plugin
               /** Known bug: DOCTYPE "should" be in the HEADER
               and the HEAD tags should come first.
               Also, IE will ignore <style>...</style> tags that are NOT
-              in a <head>...</head> block.
-              **/
+              in a <head>...</head>block.
+           **/
               if (!empty($this->Title)) { $V .= "<title>" . htmlentities($this->Title) . "</title>\n"; }
               $V .= "<link rel='stylesheet' href='fossology.css'>\n";
               print $V; $V="";

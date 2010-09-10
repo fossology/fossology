@@ -27,9 +27,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_folder_move", _("Move Folder"));
+
 class folder_move extends FO_Plugin {
   var $Name = "folder_move";
-  var $Title = "Move Folder";
+  var $Title = TITLE_folder_move;
   var $Version = "1.0";
   var $MenuList = "Organize::Folders::Move";
   var $Dependency = array(
@@ -103,26 +106,32 @@ class folder_move extends FO_Plugin {
             $NRow = $NewFolder[0];
             $OldFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$OldFolderId';");
             $ORow = $OldFolder[0];
-            $success = "Moved folder " . $ORow['folder_name'] . " to folder " . $NRow['folder_name'];
+$text=_("Moved folder ");
+$text1=_(" to folder ");
+            $success = $text . $ORow['folder_name'] . $text1 . $NRow['folder_name'];
             $V.= displayMessage($success);
           }
           else {
-            $V.= displayMessage("Could not move folder!: $rc");
+$text=_("Could not move folder!: ");
+            $V.= displayMessage($text.$rc);
           }
         }
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-        $V.= "<li>Select the source folder to move:  \n";
+$text = _("Select the source folder to move:  \n");
+        $V.= "<li>$text";
         $V.= "<select name='oldfolderid'>\n";
         $V.= FolderListOption(-1, 0, 0);
         $V.= "</select><P />\n";
-        $V.= "<li>Select the destination folder:  \n";
+$text = _("Select the destination folder:  \n");
+        $V.= "<li>$text";
         $V.= "<select name='targetfolderid'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
         $V.= "</ol>\n";
-        $V.= "<input type='submit' value='Move!'>\n";
+$text = _("Move");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
       break;
       case "Text":

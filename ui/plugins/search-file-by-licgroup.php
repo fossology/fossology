@@ -32,10 +32,12 @@ if (!isset($GlobalReady)) { exit; }
  data to the UI.
  *************************************************/
 
+define("TITLE_search_file_by_licgroup", _("List Files based on License Group"));
+
 class search_file_by_licgroup extends FO_Plugin
   {
   var $Name       = "search_file_by_licgroup";
-  var $Title      = "List Files based on License Group";
+  var $Title      = TITLE_search_file_by_licgroup;
   var $Version    = "1.0";
   var $Dependency = array("db","browse","licgroup","search_file_by_license");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -92,11 +94,12 @@ class search_file_by_licgroup extends FO_Plugin
 	  $Results = $DB->Action("SELECT * FROM licgroup WHERE licgroup_pk = '$LicGrpPk' LIMIT 1;");
 	  $LicName = htmlentities($Results[0]['licgroup_name']);
 	  if (empty($LicName)) { return; }
-	  $V .= "The following files include licenses in the license group '<b>$LicName</b>'.\n";
+$text = _("The following files include licenses in the license group");
+	  $V .= "$text '<b>$LicName</b>'.\n";
 	  }
 	else
 	  {
-	  $V .= "The following files are not included in any license groups.\n";
+	  $V .= _("The following files are not included in any license groups.\n");
 	  }
 
 	/* Find the key associated with the group id */
@@ -173,7 +176,7 @@ if (0)
 {
 /* TBD: Fix this so it works with license groups. */
 	$V .= "<form method='get' action='" . Traceback_uri() . "'>";
-	$V .= "Refine search by specific license: ";
+	$V .= _("Refine search by specific license: ");
 	$V .= "<input type='hidden' name='mod' value='search_file_by_license'>";
 	$V .= "<input type='hidden' name='item' value='$UploadTreePk'>";
 	$V .= "<select name='lic'>";
@@ -184,7 +187,8 @@ if (0)
 	  $V .= "</option>";
 	  }
 	$V .= "</select>";
-	$V .= "<input type='submit' value='Search!'>";
+$text = _("Search");
+	$V .= "<input type='submit' value='$text!'>";
 	$V .= "</form>\n";
 }
 
@@ -212,7 +216,8 @@ if (0)
 	  $V .= "<table border=1 width='100%' style='background:lightyellow'>";
 	  $V .= "<tr><td align='center' width='5%'><font size='+2'>$Pos:</font></td>";
 	  $V .= "<td>";
-	  if (!empty($L['phrase_text'])) { $V .= "<b>Phrase:</b> " . htmlentities($L['phrase_text']) . "\n"; }
+$text = _("Phrase:");
+	  if (!empty($L['phrase_text'])) { $V .= "<b>$text</b> " . htmlentities($L['phrase_text']) . "\n"; }
 	  if (Isdir($L['ufile_mode']))
 	    {
 	    $V .= Dir2Browse("licgroup",$L['uploadtree_pk'],"license") . "\n";
@@ -226,7 +231,9 @@ if (0)
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-	$V .= "<small>Elaspsed time: $Time seconds</small>\n";
+$text = _("Elaspsed time:");
+$text1 = _("seconds");
+	$V .= "<small>$text $Time $text1</small>\n";
         break;
       case "Text":
         break;

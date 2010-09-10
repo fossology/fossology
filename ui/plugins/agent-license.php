@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_license", _("bSAM License Analysis (deprecated)"));
+
 class agent_license extends FO_Plugin {
   public $Name = "agent_license";
-  public $Title = "bSAM License Analysis (deprecated)";
+  public $Title = TITLE_agent_license;
   // public $MenuList   = "Jobs::Agents::License Analysis";
   public $Version = "1.1";
   public $Dependency = array(
@@ -87,7 +90,8 @@ class agent_license extends FO_Plugin {
       $Results = $DB->Action($SQL);
       $Dep = $Results[0]['jq_pk'];
       if (empty($Dep)) {
-        return ("Unable to find dependent job: unpack");
+$text = _("Unable to find dependent job: unpack");
+        return ($text);
       }
     }
     $Dep = array(
@@ -102,7 +106,8 @@ class agent_license extends FO_Plugin {
     /* Prepare the job: job "license" */
     $jobpk = JobAddJob($uploadpk, "license", $Priority);
     if (empty($jobpk) || ($jobpk < 0)) {
-      return ("Failed to insert job record");
+$text = _("Failed to insert job record");
+      return ($text);
     }
     /*****
     Performance notes:
@@ -160,7 +165,8 @@ class agent_license extends FO_Plugin {
     $jqargs = str_replace("\n", " ", $jqargs);
     $jobqueuepk = JobQueueAdd($jobpk, "sqlagent", $jqargs, "no", "", $Dep);
     if (empty($jobqueuepk)) {
-      return ("Failed to insert first sqlagent into job queue");
+$text = _("Failed to insert first sqlagent into job queue");
+      return ($text);
     }
     /* job "license" has jobqueue item "filter_license" */
     /** $jqargs = pfiles NOT processed and NOT with tokens in repository **/
@@ -175,7 +181,8 @@ class agent_license extends FO_Plugin {
       $jobqueuepk
     ));
     if (empty($jobqueuepk)) {
-      return ("Failed to insert filter_license into job queue");
+$text = _("Failed to insert filter_license into job queue");
+      return ($text);
     }
     /* job "license" has jobqueue item "license" */
     /** jqargs = all pfiles NOT processed and WITH tokens in repository **/
@@ -190,7 +197,8 @@ class agent_license extends FO_Plugin {
       $jobqueuepk
     ));
     if (empty($jobqueuepk)) {
-      return ("Failed to insert license into job queue");
+$text = _("Failed to insert license into job queue");
+      return ($text);
     }
     /* job "license" has jobqueue item "licinspect" */
     /** jqargs = all pfiles NOT processed and WITH tokens in repository **/
@@ -204,7 +212,8 @@ class agent_license extends FO_Plugin {
       $jobqueuepk
     ));
     if (empty($jobqueuepk)) {
-      return ("Failed to insert licinspect into job queue");
+$text = _("Failed to insert licinspect into job queue");
+      return ($text);
     }
     /* job "license" has jobqueue item "filter_clean" */
     /** jqargs = all pfiles with tokens in the repository **/
@@ -220,7 +229,8 @@ class agent_license extends FO_Plugin {
       $jobqueuepk
     ));
     if (empty($jobqueuepk)) {
-      return ("Failed to insert filter_clean into job queue");
+$text = _("Failed to insert filter_clean into job queue");
+      return ($text);
     }
     /* job "license" has jobqueue item "sqlagent" */
     /** This updates the license counts **/
@@ -231,7 +241,8 @@ class agent_license extends FO_Plugin {
       $jobqueuepk
     ));
     if (empty($jobqueuepk2)) {
-      return ("Failed to insert count-update sqlagent into job queue");
+$text = _("Failed to insert count-update sqlagent into job queue");
+      return ($text);
     }
     /* job "license" has jobqueue item "sqlagent" */
     /** This removes the temp table and flushes the cache **/
@@ -240,7 +251,8 @@ class agent_license extends FO_Plugin {
       $jobqueuepk
     ));
     if (empty($jobqueuepk)) {
-      return ("Failed to insert final sqlagent into job queue");
+$text = _("Failed to insert final sqlagent into job queue");
+      return ($text);
     }
     return (NULL);
   } // AgentAdd()
@@ -264,10 +276,12 @@ class agent_license extends FO_Plugin {
           $rc = $this->AgentAdd($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $V.= displayMessage('Analysis added to job queue');
+$text = _("Analysis added to job queue");
+            $V.= displayMessage($text);
           }
           else {
-            $V.= displayMessage("Scheduling of Analysis failed: $rc");
+$text = _("Scheduling of Analysis failed: ");
+            $V.= displayMessage($text.$rc);
           }
         }
         /* Get list of projects that are not scheduled for uploads */
@@ -285,14 +299,15 @@ class agent_license extends FO_Plugin {
 		ORDER BY upload_desc,upload_filename;";
         $Results = $DB->Action($SQL);
         if (empty($Results[0]['upload_pk'])) {
-          $V.= "All uploaded files are already analyzed, or scheduled to be analyzed.";
+          $V.= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
         }
         else {
           /* Display the form */
           $V.= "<form method='post'>\n"; // no url = this url
-          $V.= "Select an uploaded file for license analysis.\n";
-          $V.= "Only uploads that are not already scheduled can be scheduled.\n";
-          $V.= "<p />\nAnalyze: <select name='upload'>\n";
+          $V.= _("Select an uploaded file for license analysis.\n");
+          $V.= _("Only uploads that are not already scheduled can be scheduled.\n");
+$text = _("Analyze:");
+          $V.= "<p />\n$text <select name='upload'>\n";
           foreach($Results as $Row) {
             if (empty($Row['upload_pk'])) {
               continue;
@@ -306,7 +321,8 @@ class agent_license extends FO_Plugin {
             $V.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
           $V.= "</select><P />\n";
-          $V.= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+          $V.= "<input type='submit' value='$text!'>\n";
           $V.= "</form>\n";
         }
       break;

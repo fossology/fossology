@@ -30,10 +30,12 @@ if (!isset($GlobalReady)) { exit; }
    uploadtree.
  *************************************************/
 
+define("TITLE_list_lic_files", _("List Files for License"));
+
 class list_lic_files extends FO_Plugin
 {
   var $Name       = "list_lic_files";
-  var $Title      = "List Files for License";
+  var $Title      = TITLE_list_lic_files;
   var $Version    = "1.0";
   var $Dependency = array("db","nomoslicense");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -55,7 +57,8 @@ class list_lic_files extends FO_Plugin
 
     $URL = $this->Name . "&napk=$nomosagent_pk&item=$uploadtree_pk&lic=$rf_shortname&page=-1";
     if (!empty($Excl)) $URL .= "&excl=$Excl";
-    menu_insert($this->Name."::Show All",0, $URL, "Show All Files");
+$text = _("Show All Files");
+    menu_insert($this->Name."::Show All",0, $URL, $text);
 
   } // RegisterMenus()
       
@@ -84,7 +87,8 @@ class list_lic_files extends FO_Plugin
 	$rf_shortname = rawurldecode($rf_shortname);
 	if (empty($uploadtree_pk) || empty($rf_shortname)) 
     {
-      echo $this->Name . " is missing required parameters.";
+$text = _("is missing required parameters.");
+      echo $this->Name . " $text";
       return;
     }
 	$Page = GetParm("page",PARM_INTEGER);
@@ -108,14 +112,20 @@ class list_lic_files extends FO_Plugin
     $Count = $CountArray['count'];
     $Unique = $CountArray['unique'];
 
-    $V.= "$Count files found ($Unique unique) with license <b>$rf_shortname</b>";
+$text = _("files found");
+$text1 =_("unique");
+$text2 = _("with license");
+    $V.= "$Count $text ($Unique $text1) $text2 <b>$rf_shortname</b>";
     if ($Count < $Max) $Max = $Count;
     $limit = ($Page < 0) ? "ALL":$Max;
     $order = " order by ufile_name asc";
     $filesresult = GetFilesWithLicense($nomosagent_pk, $rf_shortname, $uploadtree_pk,
                                 $PkgsOnly, $Offset, $limit, $order);
     $NumFiles = pg_num_rows($filesresult);
-    if (!empty($Excl)) $V .= "<br>Display <b>excludes</b> files with these extensions: $Excl";
+$text = _("Display");
+$text1 = _("excludes");
+$text2 = _("files with these extensions");
+    if (!empty($Excl)) $V .= "<br>$text <b>$text1</b>$text1: $Excl";
 
 	/* Get the page menu */
 	if (($Count >= $Max) && ($Page >= 0))
@@ -139,7 +149,8 @@ class list_lic_files extends FO_Plugin
     $baseURL = "?mod=" . $this->Name . "&napk=$nomosagent_pk&item=$uploadtree_pk&lic=$ushortname&page=-1";
 
     $V .= "<table>";
-    $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Nomos Licenses found</th></tr>";
+$text = _("File");
+    $V .= "<tr><th>$text</th><th>&nbsp";
     while ($row = pg_fetch_assoc($filesresult))
     {
       // Allow user to exclude files with this extension
@@ -148,7 +159,8 @@ class list_lic_files extends FO_Plugin
         $URL = $baseURL . "&excl=$Excl:$FileExt";
       else
         $URL = $baseURL . "&excl=$FileExt";
-      $Header = "<a href=$URL>Exclude this file type.</a>";
+$text = _("Exclude this file type.");
+      $Header = "<a href=$URL>$text</a>";
 
       $ok = true;
       if ($Excl)
@@ -179,7 +191,9 @@ class list_lic_files extends FO_Plugin
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-	$V .= "<small>Elaspsed time: $Time seconds</small>\n";
+$text = _("Elaspsed time");
+$text1 = _("seconds");
+	$V .= "<small>$text: $Time $text1</small>\n";
 	break;
       case "Text":
 	break;

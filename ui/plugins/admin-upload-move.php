@@ -86,7 +86,8 @@ class upload_move extends FO_Plugin {
       case "XML":
       break;
       case "HTML":
-        $V.= "<H2>Move upload to different folder.</H1>\n";
+$text = _("Move upload to different folder.");
+        $V.= "<H2>$text</H1>\n";
         /* If this is a POST, then process the request. */
         $OldFolderId = GetParm('oldfolderid', PARM_INTEGER);
         $UploadId = GetParm('uploadid', PARM_INTEGER);
@@ -106,7 +107,10 @@ class upload_move extends FO_Plugin {
             $base = basename($Uploads[0]['ufile_name']);
             $OldFolder = $DB->Action("SELECT * FROM folder where folder_pk = '$OldFolderId';");
             $ORow = $OldFolder[0];
-            $success = "Moved $base from folder $ORow[folder_name] to folder $NRow[folder_name]";
+$text = _("Moved");
+$text1 = _("from folder");
+$text2 = _("to folder");
+            $success = "$text $base $text1 $ORow[folder_name] $text2 $NRow[folder_name]";
             $V.= displayMessage($success);
           }
         }
@@ -129,13 +133,15 @@ class upload_move extends FO_Plugin {
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-        $V.= "<li>Select the folder containing the upload you wish to move:  \n";
+$text = _("Select the folder containing the upload you wish to move:  \n");
+        $V.= "<li>$text";
         $V.= "<select name='oldfolderid'\n";
         $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
         $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
-        $V.= "<li>Select the upload you wish to move:  \n";
+$text = _("Select the upload you wish to move:  \n");
+        $V.= "<li>$text";
         $V.= "<select name='uploadid'>\n";
         $List = FolderListUploads(-1);
         foreach($List as $L) {
@@ -150,12 +156,14 @@ class upload_move extends FO_Plugin {
           $V.= "</option>\n";
         }
         $V.= "</select><P />\n";
-        $V.= "<li>Select the destination folder:  \n";
+$text = _("Select the destination folder:  \n");
+        $V.= "<li>$text";
         $V.= "<select name='targetfolderid'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
         $V.= "</ol>\n";
-        $V.= "<input type='submit' value='Move!'>\n";
+$text = ("Move");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
       break;
       case "Text":

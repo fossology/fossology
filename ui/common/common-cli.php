@@ -82,7 +82,8 @@ function cli_logger($handle, $message, $mode='a')
   if ($wrote == -1)
   {
     fclose($FR);
-    return("ERROR: could not write message to $handle\n");
+$text = _("ERROR: could not write message to");
+    return("$text $handle\n");
   }
   fclose($FR);
   return(Null);

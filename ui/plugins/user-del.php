@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_user_del", _("Delete A User"));
+
 class user_del extends FO_Plugin
 {
   var $Name       = "user_del";
-  var $Title      = "Delete A User";
+  var $Title      = TITLE_user_del;
   var $MenuList   = "Admin::Users::Delete";
   var $Version    = "1.0";
   var $Dependency = array("db");
@@ -46,7 +48,8 @@ class user_del extends FO_Plugin
     $Results = $DB->Action($SQL);
     if (empty($Results[0]['user_name']))
 	{
-	return("User does not exist.");
+$text = _("User does not exist.");
+	return($text);
 	}
 
     /* Delete the user */
@@ -57,7 +60,8 @@ class user_del extends FO_Plugin
     $Results = $DB->Action($SQL);
     if (!empty($Results[0]['user_name']))
 	{
-	return("Failed to delete user.");
+$text = _("Failed to delete user.");
+	return($text);
 	}
 
     return(NULL);
@@ -86,7 +90,8 @@ class user_del extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= displayMessage('User deleted.');
+$text = _("User deleted.");
+	    $V .= displayMessage($text);
 	    }
 	  else
 	    {
@@ -98,18 +103,18 @@ class user_del extends FO_Plugin
 	$Results = $DB->Action("SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '" . @$_SESSION['UserId'] . "' AND user_pk != '1' ORDER BY user_name;");
 	if (empty($Results[0]['user_name']))
 	  {
-	  $V .= "No users to delete.";
+	  $V .= _("No users to delete.");
 	  }
 	else
 	  {
 	  /* Build HTML form */
-	  $V .= "Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>permanently</font> removed. (There is no 'undo' to this delete.)<P />\n";
+	  $V .= _("Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>permanently</font> removed. (There is no 'undo' to this delete.)<P />\n");
 	  $V .= "<form name='formy' method='POST'>\n"; // no url = this url
-	  $V .= "To delete a user, enter the following information:<P />\n";
+	  $V .= _("To delete a user, enter the following information:<P />\n");
 	  $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 	  $Val = htmlentities(GetParm('userid',PARM_TEXT),ENT_QUOTES);
 	  $V .= "<ol>\n";
-	  $V .= "<li>Select the user to delete.<br />";
+	  $V .= _("<li>Select the user to delete.<br />");
 	  $V .= "<select name='userid'>\n";
 	  for($i=0; !empty($Results[$i]['user_name']); $i++)
 	    {
@@ -119,10 +124,12 @@ class user_del extends FO_Plugin
 	    }
 	  $V .= "</select>\n";
 
-	  $V .= "<P /><li>Confirm user deletion: <input type='checkbox' name='confirm' value='1'>";
+$text = _("Confirm user deletion");
+	  $V .= "<P /><li>$text: <input type='checkbox' name='confirm' value='1'>";
 	  $V .= "</ol>\n";
 
-	  $V .= "<input type='submit' value='Delete!'>\n";
+$text = _("Delete");
+	  $V .= "<input type='submit' value='$text!'>\n";
 	  $V .= "</form>\n";
 	  }
 	break;

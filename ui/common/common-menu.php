@@ -55,8 +55,10 @@ function MenuPage($Page, $TotalPage, $Uri = '') {
   $Uri = preg_replace("/&page=[^&]*/", "", $Uri);
   /* Create first page */
   if ($Page > 0) {
-    $V.= "<a href='$Uri&page=0'>[First]</a> ";
-    $V.= "<a href='$Uri&page=" . ($Page - 1) . "'>[Prev]</a> ";
+$text = _("First");
+$text1 = _("Prev");
+    $V.= "<a href='$Uri&page=0'>[$text]</a> ";
+    $V.= "<a href='$Uri&page=" . ($Page - 1) . "'>[$text1]</a> ";
     if ($Page > 9) {
       $V.= " ... ";
     }
@@ -77,8 +79,10 @@ function MenuPage($Page, $TotalPage, $Uri = '') {
     if ($Page < $TotalPage - 9) {
       $V.= " ...";
     }
-    $V.= " <a href='$Uri&page=" . ($Page + 1) . "'>[Next]</a>";
-    $V.= " <a href='$Uri&page=" . ($TotalPage) . "'>[Last]</a>";
+$text = _("Next");
+$text1 = _("Last");
+    $V.= " <a href='$Uri&page=" . ($Page + 1) . "'>[$text]</a>";
+    $V.= " <a href='$Uri&page=" . ($TotalPage) . "'>[$text1]</a>";
   }
   $V.= "</center></font>";
   return ($V);
@@ -96,8 +100,10 @@ function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
   $Uri = preg_replace("/&page=[^&]*/", "", $Uri);
   /* Create first page */
   if ($Page > 0) {
-    $V.= "<a href='$Uri&page=0'>[First]</a> ";
-    $V.= "<a href='$Uri&page=" . ($Page - 1) . "'>[Prev]</a> ";
+$text = _("First");
+$text1 = _("Prev");
+    $V.= "<a href='$Uri&page=0'>[$text]</a> ";
+    $V.= "<a href='$Uri&page=" . ($Page - 1) . "'>[$text1]</a> ";
     if ($Page > 9) {
       $V.= " ... ";
     }
@@ -112,9 +118,10 @@ function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
   $V.= "<b>" . ($Page + 1) . "</b>";
   /* Create next page */
   if ($Next) {
+$text = _("Next");
     $i = $Page + 1;
     $V.= " <a href='$Uri&page=$i'>" . ($i + 1) . "</a>";
-    $V.= " ... <a href='$Uri&page=$i'>[Next]</a>";
+    $V.= " ... <a href='$Uri&page=$i'>[$text]</a>";
   }
   $V.= "</center></font>";
   return ($V);
@@ -271,15 +278,17 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
     global $Plugins;
     $Refresh = & $Plugins[plugin_find_id("refresh") ];
     if (!empty($Refresh)) {
+$text = _("Traceback");
       $URL = Traceback_dir() . "?" . $Refresh->GetRefresh();
-      $Std.= "<a href='$URL' target='_top'>Traceback</a>";
+      $Std.= "<a href='$URL' target='_top'>$text</a>";
     }
   }
   if ($ShowRefresh) {
     if (!empty($Std)) {
       $Std.= " | ";
     }
-    $Std.= "<a href='" . Traceback() . "'>Refresh</a>";
+$text = _("Refresh");
+    $Std.= "<a href='" . Traceback() . "'>$text</a>";
   }
   $First = 1;
   if (!empty($Menu)) {
