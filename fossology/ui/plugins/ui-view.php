@@ -27,11 +27,12 @@ if (!isset($GlobalReady)) { exit; }
 define("VIEW_BLOCK_HEX",8192);
 define("VIEW_BLOCK_TEXT",20*VIEW_BLOCK_HEX);
 define("MAXHIGHLIGHTCOLOR",8);
+define("TITLE_ui_view", _("View File"));
 
 class ui_view extends FO_Plugin
   {
   var $Name       = "view";
-  var $Title      = "View File";
+  var $Title      = TITLE_ui_view;
   var $Version    = "1.0";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -45,7 +46,8 @@ class ui_view extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    menu_insert("Browse-Pfile::View",10,$this->Name,"View file contents");
+$text = _("View file contents");
+    menu_insert("Browse-Pfile::View",10,$this->Name,$text);
     // For the Browse menu, permit switching between detail and summary.
     $Format = GetParm("format",PARM_STRING);
     $Page = GetParm("page",PARM_INTEGER);
@@ -77,24 +79,33 @@ class ui_view extends FO_Plugin
     switch($Format)
       {
       case "hex":
+$text = _("View as unformatted text");
         menu_insert("View::Hex",-10);
-        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText","View as unformatted text");
-        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText","View as formatted text");
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText",$text);
+$text = _("View as formatted text");
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText",$text);
         break;
       case "text":
-        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex","View as a hex dump");
+$text = _("View as a hex dump");
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex",$text);
         menu_insert("View::Text",-11);
-        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText","View as formatted text");
+$text = _("View as formatted text");
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText",$text);
         break;
       case "flow":
-        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex","View as a hex dump");
-        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText","View as unformatted text");
+$text = _("View as a hex dump");
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex",$text);
+$text = _("View as unformatted text");
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText",$text);
         menu_insert("View::Formatted",-12);
         break;
       default:
-        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex","View as a hex dump");
-        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText","View as unformatted text");
-        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText","View as formatted text");
+$text = _("View as a hex dump");
+        menu_insert("View::Hex",-10,"$URI&format=hex&page=$PageHex",$text);
+$text = _("View as unformatted text");
+        menu_insert("View::Text",-11,"$URI&format=text&page=$PageText",$text);
+$text = _("View as formatted text");
+        menu_insert("View::Formatted",-12,"$URI&format=flow&page=$PageText",$text);
         break;
       }
 
@@ -106,8 +117,9 @@ class ui_view extends FO_Plugin
 	}
     else
 	{
-	menu_insert("View::View",2,$this->Name . $URI,"View file contents");
-	menu_insert("View-Meta::View",2,$this->Name . $URI,"View file contents");
+$text = _("View file contents");
+	menu_insert("View::View",2,$this->Name . $URI,$text);
+	menu_insert("View-Meta::View",2,$this->Name . $URI,$text);
 	}
     } // RegisterMenus()
 
@@ -209,10 +221,12 @@ class ui_view extends FO_Plugin
       if (!$ViewOnly) 
       {
 	    $V .= "<tr>";
-        $V .= "<th>Match</th>";
+$text = _("Match");
+        $V .= "<th>$text</th>";
 	    $V .= "<th></th>";
 	    $V .= "<th></th>";
-        if (!$ViewOnly) $V .= "<th align='left'>Item</th>";
+$text = _("Item");
+        if (!$ViewOnly) $V .= "<th align='left'>$text</th>";
 	    $V .= "</tr>\n";
       }
 	  }
@@ -225,11 +239,13 @@ class ui_view extends FO_Plugin
 	if ($PageBlockSize > 0)
 	  {
 	  $Page = intval($H['Start'] / $PageBlockSize);
-	  $V .= "<a href='$Uri&page=$Page#" . $H['Index'] . "'>view</a>";
+$text = _("view");
+	  $V .= "<a href='$Uri&page=$Page#" . $H['Index'] . "'>$text</a>";
 	  }
 	else
 	  {
-	  $V .= "<a href='#" . $H['Index'] . "'>view</a>";
+$text = _("view");
+	  $V .= "<a href='#" . $H['Index'] . "'>$text</a>";
 	  }
 	$V .= "</td>\n";
 
@@ -238,7 +254,8 @@ class ui_view extends FO_Plugin
       $V .= "<td>";
       if (!empty($H['RefURL']))
       {
-        $V .= "<a href='javascript:;' onClick=\"javascript:window.open('" . $H['RefURL'] . "','License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">ref</a>";
+$text = _("ref");
+        $V .= "<a href='javascript:;' onClick=\"javascript:window.open('" . $H['RefURL'] . "','License','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$text</a>";
       }
       $V .= "</td>\n";
     }
@@ -280,8 +297,10 @@ class ui_view extends FO_Plugin
 
     if ($CurrPage > 0)
 	{
-	$V .= "<a href='$Uri&page=0'>[First]</a> ";
-	$V .= "<a href='$Uri&page=" . ($CurrPage-1) . "'>[Prev]</a> ";
+$text = _("First");
+	$V .= "<a href='$Uri&page=0'>[$text]</a> ";
+$text = _("Prev");
+	$V .= "<a href='$Uri&page=" . ($CurrPage-1) . "'>[$text]</a> ";
 	$Pages++;
 	}
     for($i = $CurrPage-5; $i <= $CurrPage+5; $i ++)
@@ -297,8 +316,10 @@ class ui_view extends FO_Plugin
       }
     if ($CurrPage < $MaxPage)
 	{
-	$V .= "<a href='$Uri&page=" . ($CurrPage+1) . "'>[Next]</a>";
-	$V .= "<a href='$Uri&page=" . (intval(($MaxSize-1)/$PageSize)) . "'>[Last]</a>";
+$text = _("Next");
+	$V .= "<a href='$Uri&page=" . ($CurrPage+1) . "'>[$text]</a>";
+$text = _("Last");
+	$V .= "<a href='$Uri&page=" . (intval(($MaxSize-1)/$PageSize)) . "'>[$text]</a>";
 	$Pages++;
 	}
     $V .= "</font>";
@@ -712,22 +733,29 @@ class ui_view extends FO_Plugin
     	   if (empty($rc))
   	       {
   	         /* Need to refresh the screen */
-  	         $V .= displayMessage('Unpack added to job queue');
+$text = _("Unpack added to job queue");
+  	         $V .= displayMessage($text);
   	         $flag = 1;
-  	                print "<p> <font color=red>Reunpack job is running: you can see it in <a href='" . Traceback_uri() . "?mod=showjobs'>jobqueue</a> </font></p>";
+$text = _("Reunpack job is running: you can see it in");
+$text1 = _("jobqueue");
+  	                print "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
   	       }
   	       else
   	       {
-  	         $V .= displayMessage("Unpack of Upload failed: $rc");
+$text = _("Unpack of Upload failed");
+  	         $V .= displayMessage("$text: $rc");
 	         }
   	       print $V;
 	     }
 	   }     
 	   else {
 	     $flag = 1;
-       print "<p> <font color=red>Reunpack job is running: you can see it in <a href='" . Traceback_uri() . "?mod=showjobs'>jobqueue</a> </font></p>";
+$text = _("Reunpack job is running: you can see it in");
+$text1 = _("jobqueue");
+       print "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
      }
-	   print "File contents are not available in the repository.\n";
+$text = _("File contents are not available in the repository.");
+	   print "$text\n";
 	   $P = &$Plugins[plugin_find_id("ui_reunpack")];
      print $P->ShowReunpackView($Item,$flag);
 	   return;

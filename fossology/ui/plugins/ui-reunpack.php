@@ -24,10 +24,12 @@
 global $GlobalReady;
 if(!isset($GlobalReady)){exit;}
 
+define("TITLE_ui_reunpack", _("Schedule an Reunpack"));
+
 class ui_reunpack extends FO_Plugin
 {
   public $Name       = "ui_reunpack";
-  public $Title      = "Schedule an Reunpack";
+  public $Title      = TITLE_ui_reunpack;
   //public $MenuList   = "Jobs::Agents::Reunpack";
   public $Version    = "1.2";
   public $Dependency = array("db");
@@ -56,11 +58,13 @@ class ui_reunpack extends FO_Plugin
 	       if (empty($rc))
 	       {
 	       /* Need to refresh the screen */
-	         $V .= displayMessage('Unpack added to job queue');
+$text = _("Unpack added to job queue");
+	         $V .= displayMessage($text);
 	       }
 	       else
 	       {
-	         $V .= displayMessage("Unpack of Upload failed: $rc");
+$text = _("Unpack of Upload failed");
+	         $V .= displayMessage("$text: $rc");
 	       }
 	     }
 
@@ -216,18 +220,21 @@ class ui_reunpack extends FO_Plugin
     $Fin_gold = @fopen( RepPath($Pfile_fk,"gold") ,"rb");
     if (empty($Fin_gold))
     {
-        $V = "<p/>The File's Gold file are not available in the repository.\n";
+$text = _("The File's Gold file are not available in the repository.");
+        $V = "<p/>$text\n";
         return $V;
     }
       
     $V = "<p/>";
-    $V.= "This file is unpacked from <font color='blue'>[".$Ufile_name."]</font>\n";
+$text = _("This file is unpacked from");
+    $V.= "$text <font color='blue'>[".$Ufile_name."]</font>\n";
 
       	  /* Display the form */
 	  $V .= "<form method='post'>\n"; // no url = this url
 
-	  $V .= "<p />\nReunpack: " . $Ufile_name . "<input name='uploadunpack' type='hidden' value='$Upload_pk'/>\n";
-	  $V .= "<input type='submit' value='Reunpack!' ";
+$text = _("Reunpack");
+	  $V .= "<p />\n$text: " . $Ufile_name . "<input name='uploadunpack' type='hidden' value='$Upload_pk'/>\n";
+	  $V .= "<input type='submit' value='$text!' ";
 	  if ($Reunpack) {$V .= "disabled";}
 	  $V .= " >\n";
 	  $V .= "</form>\n";

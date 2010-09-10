@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_pkgmetagetta", _("Metadata Analysis (Slow.  Not needed for license analysis)"));
+
 class agent_pkgmetagetta extends FO_Plugin
 {
   public $Name       = "agent_pkgmetagetta";
-  public $Title      = "Metadata Analysis (Slow.  Not needed for license analysis)";
+  public $Title      = TITLE_agent_pkgmetagetta;
   // public $MenuList   = "Jobs::Agents::Metadata Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
@@ -162,11 +164,13 @@ class agent_pkgmetagetta extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= displayMessage('Analysis added to job queue');
+$text = _("Analysis added to job queue");
+	    $V .= displayMessage($text);
 	    }
 	  else
 	    {
-	    $V .= displayMessage("Scheduling of Analysis failed: $rc");
+$text = _("Scheduling of Analysis failed: ");
+	    $V .= displayMessage($text.$rc);
 	    }
 	  }
 
@@ -186,16 +190,17 @@ class agent_pkgmetagetta extends FO_Plugin
 	$Results = $DB->Action($SQL);
 	if (empty($Results[0]['upload_pk']))
 	  {
-	  $V .= "All uploaded files are already analyzed, or scheduled to be analyzed.";
+	  $V .= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
 	  }
 	else
 	  {
 	  /* Display the form */
-	  $V .= "Metadata analysis extracts meta data from RPM and DEB files.<P />\n";
+	  $V .= _("Metadata analysis extracts meta data from RPM and DEB files.<P />\n");
 	  $V .= "<form method='post'>\n"; // no url = this url
-	  $V .= "Select an uploaded file for analysis.\n";
-	  $V .= "Only uploads that are not already scheduled can be scheduled.\n";
-	  $V .= "<p />\nAnalyze: <select name='upload'>\n";
+	  $V .= _("Select an uploaded file for analysis.\n");
+	  $V .= _("Only uploads that are not already scheduled can be scheduled.\n");
+$text = _("Analyze:");
+	  $V .= "<p />\n$text <select name='upload'>\n";
 	  foreach($Results as $Row)
 	    {
 	    if (empty($Row['upload_pk'])) { continue; }
@@ -204,7 +209,8 @@ class agent_pkgmetagetta extends FO_Plugin
 	    $V .= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
 	    }
 	  $V .= "</select><P />\n";
-	  $V .= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+	  $V .= "<input type='submit' value='$text!'>\n";
 	  $V .= "</form>\n";
 	  }
 	break;

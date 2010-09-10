@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_license", _("bSAM License Browser (deprecated)"));
+
 class ui_license extends FO_Plugin
   {
   var $Name       = "license";
-  var $Title      = "bSAM License Browser (deprecated)";
+  var $Title      = TITLE_ui_license;
   var $Version    = "1.0";
   // var $MenuList= "Jobs::License";
   var $Dependency = array("db","browse","view-license");
@@ -79,12 +81,14 @@ class ui_license extends FO_Plugin
       {
        menu_insert("Browse::bsam License",-3);
        menu_insert("Browse::[BREAK]",-1);
-       menu_insert("Browse::Clear",-2,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
+$text = _("Clear");
+       menu_insert("Browse::Clear",-2,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>$text</a>");
       }
       else
       {
+$text = _("View bsam license histogram");
        menu_insert("Browse::[BREAK]",-1);
-       menu_insert("Browse::bsam License",-3,$URI,"View bsam license histogram");
+       menu_insert("Browse::bsam License",-3,$URI,$text);
       }
     }
   } // RegisterMenus()
@@ -306,9 +310,12 @@ class ui_license extends FO_Plugin
     /* List the licenses */
     $VH .= "<table border=1 width='100%'>\n";
     $SFbL = plugin_find_id("search_file_by_license");
-    $VH .= "<tr><th width='10%'>Count</th>";
-    if ($SFbL >= 0) { $VH .= "<th width='10%'>Files</th>"; }
-    $VH .= "<th>License</th>\n";
+$text = _("Count");
+    $VH .= "<tr><th width='10%'>$text</th>";
+$text = _("Files");
+    if ($SFbL >= 0) { $VH .= "<th width='10%'>$text</th>"; }
+$text = _("License");
+    $VH .= "<th>$text</th>\n";
 
     /* krsort + arsort = consistent sorting order */
     arsort($Lics);
@@ -340,7 +347,8 @@ class ui_license extends FO_Plugin
     {
     $VH .= "<td align='center'><a href='";
     $VH .= Traceback_uri();
-    $VH .= "?mod=search_file_by_license&item=$Item&lic=" . urlencode($Key) . "'>Show</a></td>";
+$text = _("Show");
+    $VH .= "?mod=search_file_by_license&item=$Item&lic=" . urlencode($Key) . "'>$text</a></td>";
     }
   $VH .= "<td id='LicGroup-$GID'>";
   $Uri = Traceback_uri() . "?mod=license_listing&item=$Item&lic=$GID";
@@ -353,7 +361,8 @@ class ui_license extends FO_Plugin
       }
     $VH .= "</table>\n";
     $VH .= "<br>\n";
-    $VH .= "Total licenses: $Total\n";
+$text = _("Total licenses");
+    $VH .= "$text: $Total\n";
 
     /****************************************/
     /* Licenses use Javascript to highlight */
@@ -480,8 +489,11 @@ class ui_license extends FO_Plugin
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
-    printf( "<small>Elapsed time: %.2f seconds</small>", $Time);
-    if ($Cached) echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
+$text = _("Elapsed time: %.2f seconds");
+    printf( "<small>$text</small>", $Time);
+$text = _("cached");
+$text1 = _("Update");
+    if ($Cached) echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     return;
   }
 

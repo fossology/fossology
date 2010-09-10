@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_search_repo", _("Search the Repository"));
+
 class search_repo extends FO_Plugin
   {
   var $Name       = "search_repo";
-  var $Title      = "Search the Repository";
+  var $Title      = TITLE_search_repo;
   var $Version    = "1.0";
   // var $MenuList   = "Help::Debug::Debug Repository";
   var $Dependency = array("db","view","browse");
@@ -38,7 +40,8 @@ class search_repo extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
-    menu_insert("Search::Repository",0,$this->Name,"Search based on repository keys");
+$text = _("Search based on repository keys");
+    menu_insert("Search::Repository",0,$this->Name,$text);
     } // RegisterMenus()
 
   /***********************************************************
@@ -114,7 +117,7 @@ class search_repo extends FO_Plugin
 	{
 	return($this->GetUploadtreeFromRepo($String,$Page));
 	}
-    $V = "Search string is not a valid format.";
+    $V = _("Search string is not a valid format.");
     return($V);
     } // Search()
 
@@ -137,17 +140,19 @@ class search_repo extends FO_Plugin
 	$Page = GetParm("page",PARM_INTEGER);
 	if (empty($Page)) { $Page = 0; }
 
-	$V .= "Given a file key (pfile_pk) or repository identifier (sha1.md5.length), return the list of files.\n";
+	$V .= _("Given a file key (pfile_pk) or repository identifier (sha1.md5.length), return the list of files.\n");
 	$V .= "<P /><form method='post'>\n";
-	$V .= "Enter the pfile key or repository identifier:<P />";
+	$V .= _("Enter the pfile key or repository identifier:<P />");
 	$V .= "<INPUT type='text' name='search' size='60' value='" . htmlentities($SearchArg) . "'><P>\n";
-	$V .= "<input type='submit' value='Find!'>\n";
+$text = _("Find");
+	$V .= "<input type='submit' value='$text!'>\n";
 	$V .= "</form>\n";
 
 	if (!empty($SearchArg))
 	  {
 	  $V .= "<hr>\n";
-	  $V .= "<H2>Files associated with " . htmlentities($SearchArg) . "</H2>\n";
+$text = _("Files associated with");
+	  $V .= "<H2>$text " . htmlentities($SearchArg) . "</H2>\n";
 	  $V .= $this->Search($SearchArg,$Page);
 	  }
 

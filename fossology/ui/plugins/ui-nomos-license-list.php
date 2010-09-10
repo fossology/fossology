@@ -25,9 +25,11 @@ if (!isset($GlobalReady)) {
   exit;
 }
 
+define("TITLE_ui_license_list", _("Nomos License List"));
+
 class ui_license_list extends FO_Plugin {
   var $Name = "license-list";
-  var $Title = "Nomos License List";
+  var $Title = TITLE_ui_license_list;
   var $Version = "1.0";
   var $Dependency = array(
     "db",
@@ -62,7 +64,8 @@ class ui_license_list extends FO_Plugin {
         menu_insert("Browse::Nomos License List Download", 1, $URI . "&output=dltext");
       }
       else {
-        menu_insert("Browse::Nomos License List", 1, $URI, "Nomos license listing");
+$text = _("Nomos license listing");
+        menu_insert("Browse::Nomos License List", 1, $URI, $text);
         menu_insert("Browse::Nomos License List Download", 1, $URI . "&output=dltext");
       }
     }
@@ -169,7 +172,7 @@ class ui_license_list extends FO_Plugin {
   function Output() 
   {
     global $PG_CONN, $DB;
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo _("NO DB connection"); }
 
     if ($this->State != PLUGIN_STATE_READY)  return (0);
     $V = "";
@@ -187,7 +190,7 @@ class ui_license_list extends FO_Plugin {
     $agent_pk = $AgentRec[0]["agent_fk"];
     if ($AgentRec === false)
     {
-      echo "No data available";
+      echo _("No data available");
       return;
     }
 

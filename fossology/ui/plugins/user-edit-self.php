@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
 	exit;
 }
+
+define("TITLE_user_edit_self", _("Edit Your Account Settings"));
+
 class user_edit_self extends FO_Plugin {
 	var $Name = "user_edit_self";
-	var $Title = "Edit Your Account Settings";
+	var $Title = TITLE_user_edit_self;
 	var $MenuList = "Admin::Users::Account Settings";
 	var $Version = "1.0";
 	var $Dependency = array("db");
@@ -96,24 +99,28 @@ class user_edit_self extends FO_Plugin {
 
 		/* Make sure username looks valid */
 		if (empty($_SESSION['UserId'])) {
-			return ("You must be logged in.");
+$text = _("You must be logged in.");
+			return ($text);
 		}
 		/* Make sure password matches */
 		if (!empty($Pass1) || !empty($Pass2)) {
 			if ($Pass1 != $Pass2) {
-				return ("New passwords did not match. No change.");
+$text = _("New passwords did not match. No change.");
+				return ($text);
 			}
 		}
 		/* Make sure email looks valid */
 		$Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
 		if ($Check != $Email) {
-			return ("Invalid email address.  Not added.");
+$text = _("Invalid email address.  Not added.");
+			return ($text);
 		}
 		/* See if the user already exists (better not!) */
 		$SQL = "SELECT * FROM users WHERE user_name = '$User' AND user_pk != '$UserId' LIMIT 1;";
 		$Results = $DB->Action($SQL);
 		if (!empty($Results[0]['user_name'])) {
-			return ("User already exists.  Not added.");
+$text = _("User already exists.  Not added.");
+			return ($text);
 		}
 		/* Load current user */
 		$SQL = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
@@ -122,7 +129,8 @@ class user_edit_self extends FO_Plugin {
 		/* Make sure old password matched */
 		$Hash = sha1($R['user_seed'] . $Pass0);
 		if ($Hash != $R['user_pass']) {
-			return ("Authentication password did not match. No change.");
+$text = _("Authentication password did not match. No change.");
+			return ($text);
 		}
 		/* Update the user */
 		$GotUpdate = 0;
@@ -208,34 +216,41 @@ class user_edit_self extends FO_Plugin {
 					$rc = $this->Edit();
 					if (empty($rc)) {
 						/* Need to refresh the screen */
-						$V.= displayMessage('User information updated.');
+$text = _("User information updated.");
+						$V.= displayMessage($text);
 					} else {
 						$V.= displayMessage($rc);
 					}
 				}
 				/* Build HTML form */
 				$V.= "<form name='formy' method='POST'>\n"; // no url = this url
-				$V.= "You <font color='red'>must</font> provide your current password in order to make any changes.<br />\n";
-				$V.= "Enter your password: <input type='password' name='pass0' size=20>\n";
+				$V.= _("You <font color='red'>must</font> provide your current password in order to make any changes.<br />\n");
+$text = _("Enter your password");
+				$V.= "$text: <input type='password' name='pass0' size=20>\n";
 				$V.= "<hr>\n";
 				$Results = $DB->Action("SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';");
 				$R = $Results[0];
-				$V.= "To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n";
+				$V.= _("To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n");
 				$Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 				$V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='100%'>";
 				$Val = htmlentities($R['user_name'], ENT_QUOTES);
-				$V.= "$Style<th width='5%'>1.</th><th width='25%'>Change your username. This will be checked to ensure that it is unique among all users.</th>";
+$text = _("Change your username. This will be checked to ensure that it is unique among all users.");
+				$V.= "$Style<th width='5%'>1.</th><th width='25%'>$text</th>";
 				$V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities($R['user_desc'], ENT_QUOTES);
-				$V.= "$Style<th>2.</th><th>Change your description (name, contact, or other information).  This may be blank.</th>\n";
+$text = _("Change your description (name, contact, or other information).  This may be blank.");
+				$V.= "$Style<th>2.</th><th>$text</th>\n";
 				$V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities($R['user_email'], ENT_QUOTES);
-				$V.= "$Style<th>3.</th><th>Change your email address. This may be blank.</th>\n";
+$text = _("Change your email address. This may be blank.");
+				$V.= "$Style<th>3.</th><th>$text</th>\n";
 				$V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>4.</th><th>Change your password.<br>Re-enter your password.</th><td>";
+$text = _("Change your password.");
+$text1 = _("Re-enter your password.");
+				$V.= "$Style<th>4.</th><th>$text<br>$text1</th><td>";
 				$V.= "<input type='password' name='pass1' size=20><br />\n";
 				$V.= "<input type='password' name='pass2' size=20></td>\n";
 				$V.= "</tr>\n";
@@ -244,12 +259,12 @@ class user_edit_self extends FO_Plugin {
 				} else {
 					$Checked = "checked='checked'";
 				}
-				$V.= "$Style<th>5.</th><th>E-mail Notification</th><td><input type=checkbox " . "name='enote' value='y' $Checked>" . "Check to enable email notification of completed analysis.</td>\n";
+$text = _("E-mail Notification");
+				$V.= "$Style<th>5.</th><th>$text</th><td><input type=checkbox ";
 				$V.= "</tr>\n";
 				$V.= "</tr>\n";
-				$V .= "$Style<th>6.</th><th>Default Agents: Select the ".
-              "agent(s) to automatically run when uploading data. These" .
-              " selections can be changed on the upload screens.\n</th><td>\n";
+$text = _("Default Agents: Select the agent(s) to automatically run when uploading data. These selections can be changed on the upload screens.");
+				$V .= "$Style<th>6.</th><th>$text\n</th><td>\n";
         /*
          * added this code so the form makes sense.  You can have an admin define default agents
          * but if you don't have Analyze or better permissions, then those agents are not available to
@@ -262,20 +277,23 @@ class user_edit_self extends FO_Plugin {
 				$uri = $AgentItem->URI;
 				}
 				if($uri == "agent_unpack" && count($AgentList) == 1 ) {
-					$V .= "<h3>You do not have permission to change your default agents</h3>\n";
+$text = _("You do not have permission to change your default agents");
+					$V .= "<h3>$text</h3>\n";
 				}
 				else {
 					$V.= AgentCheckBoxMake(-1, "agent_unpack");
 				}
 				$V .= "</td>\n";
-                $V.= "$Style<th>7.</th><th>Default bucketpool.</th>";
+$text = _("Default bucketpool.");
+                $V.= "$Style<th>7.</th><th>$text</th>";
                 $V.= "<td>";
 				$Val = htmlentities($R['default_bucketpool_fk'], ENT_QUOTES);
                 $V.= SelectBucketPool($Val);
                 $V.= "</td>";
 				$V .= "</tr>\n";
 				$V.= "</table><P />";
-				$V.= "<input type='submit' value='Update Account'>\n";
+$text = _("Update Account");
+				$V.= "<input type='submit' value='$text'>\n";
 				$V.= "</form>\n";
 				break;
 			case "Text":

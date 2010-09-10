@@ -24,11 +24,13 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_admin_db_cleanup", _("Database Check"));
+
 class admin_db_cleanup extends FO_Plugin
   {
   var $Name       = "admin_db_cleanup";
   var $Version    = "1.0";
-  var $Title      = "Database Check";
+  var $Title      = TITLE_admin_db_cleanup;
   var $MenuList   = "Admin::Database::Check";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
@@ -39,7 +41,8 @@ class admin_db_cleanup extends FO_Plugin
   function FixDB	($CheckType)
     {
     global $DB;
-    print "Deleting " . $CheckType['label'] . "...";
+$text = _("Deleting");
+    print $text . $CheckType['label'] . "...";
     $DB->Debug=1;
     print "<pre>";
     $DB->Action("DELETE " . $CheckType['sql']);
@@ -47,7 +50,9 @@ class admin_db_cleanup extends FO_Plugin
     $DB->Debug=0;
     if ($DB->GetAffectedRows() > 0)
       {
-      print "Deleted " . $DB->GetAffectedRows() . " from ";
+$text = _("Deleted");
+$text1 = _("from");
+      print $text . $DB->GetAffectedRows() . $text1 ;
       print $CheckType['label'] . ".<br>\n";
       }
     } // FixDB()
@@ -128,18 +133,20 @@ if (0)
 	  {
 	  if (GetParm($Checks[$i]['tag'],PARM_INTEGER) == 1)
 	    {
-	    if ($Args==0) { print "<H1>Fixing Records</H1>\n"; }
+$text = _("Fixing Records");
+	    if ($Args==0) { print "<H1>$text</H1>\n"; }
 	    $this->FixDB($Checks[$i]);
 	    $Args++;
 	    }
 	  }
-	if ($Args > 0) { $V .= "<H1>Fix Records</H1>\n"; }
+$text = _("Fix Records");
+	if ($Args > 0) { $V .= "<H1>$text</H1>\n"; }
 
 	/***************************************/
-	$V .= "On occasion, the database can become inconsistent.";
-	$V .= " For example, there may be pfile records without uploadtree entries";
-	$V .= " or uploadtree entries that are not linked by any upload records.";
-	$V .= " Inconsistencies usually arise due to failed unpacking, partial deletions, and testing.\n";
+	$V .= _("On occasion, the database can become inconsistent.");
+	$V .= _(" For example, there may be pfile records without uploadtree entries");
+	$V .= _(" or uploadtree entries that are not linked by any upload records.");
+	$V .= _(" Inconsistencies usually arise due to failed unpacking, partial deletions, and testing.\n");
 
 	$V .= "<script language='javascript'>\n";
 	$V .= "<!--\n";
@@ -164,21 +171,33 @@ if (0)
 	$Count = $Results[0]['count'];
 	if ($Count == 1) { $Verb = "is"; $String = "task"; }
 	else { $Verb = "are"; $String = "tasks"; }
-	$V .= "<P>Temporary inconsistencies may exist when a file is uploaded, being unpacked, or being deleted.\n";
+$text = _("Temporary inconsistencies may exist when a file is uploaded, being unpacked, or being deleted.\n");
+	$V .= "<P>$text";
 	$V .= "<ul>";
-	$V .= "<li>An uploaded file -- before being unpacked -- can appear inconsistent.\n";
-	$V .= "<li>The unpack system creates pfiles first, then links them together when it completes.\n";
-	$V .= "<li>The delete system removes records in series, so a partial delete (or delete in progress) can show inconsistencies.\n";
+$text = _("An uploaded file -- before being unpacked -- can appear inconsistent.\n");
+	$V .= "<li>$text";
+$text = _("The unpack system creates pfiles first, then links them together when it completes.\n");
+	$V .= "<li>$text";
+$text = _("The delete system removes records in series, so a partial delete (or delete in progress) can show inconsistencies.\n");
+	$V .= "<li>$text";
 	$V .= "</ul>\n";
-	$V .= "There $Verb <b>currently $Count $String running</b> in the job queue that may make records appear inconsistent.\n";
-	$V .= "Fixing inconsistencies while any jobs are running could lead to job failures and further inconsistencies.\n";
-	$V.= "<P>NOTE: Some of these inconsistencies may not be resolvable from here due to table constraints.\n";
+$text = _("There");
+$text1 = _("currently");
+$text2 = _("running");
+$text3 = _("in the job queue that may make records appear inconsistent.\n");
+	$V .= "$text $Verb <b>$text1 $Count $String $text2</b> $text3";
+	$V .= _("Fixing inconsistencies while any jobs are running could lead to job failures and further inconsistencies.\n");
+$text = _("NOTE: Some of these inconsistencies may not be resolvable from here due to table constraints.\n");
+	$V.= "<P>$text";
 
 	/****************************************************/
-	$V .= "<P>The following inconsistencies have been identified:\n";
+$text = _("The following inconsistencies have been identified:\n");
+	$V .= "<P>$text";
 	$V .= "<form method='POST'>";
 	$V .= "<table border=1 width='100%'>\n";
-	$V .= "<tr><th width='5%'>Fix</th><th width='80%'>Type of Inconsistency</th><th>Count</th></tr>\n";
+$text = _("Fix");
+$text1 = _("Type of Inconsistency");
+	$V .= "<tr><th width='5%'>$text</th><th width='80%'>$text1</th><th>Count</th></tr>\n";
 
 	$FixCount=0;
 	for($i=0; !empty($Checks[$i]['tag']); $i++)
@@ -195,7 +214,8 @@ if (0)
 	  $V .= "<td valign='top'>" . $Checks[$i]['label'];
 	  if (!empty($Checks[$i]['list']) && ($Count > 0))
 	    {
-	    $V .= " (<a href=\"javascript:ShowHideDBDetails('Details_$i')\">Details</a>)<br>\n";
+$text = _("Details");
+	    $V .= " (<a href=\"javascript:ShowHideDBDetails('Details_$i')\">$text</a>)<br>\n";
 	    $V .= "<div id='Details_$i' style='display:none;'>";
 	    $Results = $DB->Action($Checks[$i]['list']);
 	    for($j=0; !empty($Results[$j]['list']); $j++)
@@ -212,8 +232,9 @@ if (0)
 
 	$V .= "</table>\n";
 	$V .= "<P />";
-	if ($FixCount > 0) { $V .= "<input type='submit' value='Fix!'>"; }
-	else { $V .= "No database inconsistencies found.\n"; }
+$text = _("Fix");
+	if ($FixCount > 0) { $V .= "<input type='submit' value='$text!'>"; }
+	else { $V .= _("No database inconsistencies found.\n"); }
 	$V .= "</form>";
 	break;
       case "Text":

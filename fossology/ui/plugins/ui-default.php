@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_default", _("Welcome to FOSSology"));
+
 class ui_default extends FO_Plugin
   {
   var $Name       = "Default";
-  var $Title      = "Welcome to FOSSology";
+  var $Title      = TITLE_ui_default;
   var $Version    = "2.0";
   var $MenuList   = "";
   var $LoginFlag  = 0;
@@ -41,62 +43,79 @@ class ui_default extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
-	$V .= "<b>FOSSology</b> is a framework for software analysis tools. The current tools identify\n";
-	$V .= "licenses in software, allow browsing of uploaded file hierarchies, and extract\n";
-	$V .= "MIME type and meta data information.\n";
+$text = _("FOSSology");
+$text1 = _("is a framework for software analysis tools. The current tools identify");
+	$V .= "<b>$text</b> $text1\n";
+	$V .= _("licenses in software, allow browsing of uploaded file hierarchies, and extract\n");
+	$V .= _("MIME type and meta data information.\n");
 
-	$V .= "This website is an interface into the FOSSology project. With it, you can:\n";
+	$V .= _("This website is an interface into the FOSSology project. With it, you can:\n");
 	$V .= "<ul>\n";
-	$V .= "<li>Browse uploaded files and content.\n";
-	$V .= "<li>View file contents and meta data.\n";
-	$V .= "<li>Display analysis results.\n";
+$text = _("Browse uploaded files and content.");
+	$V .= "<li>$text\n";
+$text = _("View file contents and meta data.");
+	$V .= "<li>$text\n";
+$text = _("Display analysis results.");
+	$V .= "<li>$text\n";
 	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_DOWNLOAD)
 	  {
-	  $V .= "<li>Download files.\n";
+$text = _("Download files.");
+	  $V .= "<li>$text\n";
 	  }
 	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_UPLOAD)
 	  {
-	  $V .= "<li>Upload files to analyze.\n";
-	  $V .= "<li>Unpack and store the data within the files for analysis.\n";
+$text = _("Upload files to analyze.");
+	  $V .= "<li>$text\n";
+$text = _("Unpack and store the data within the files for analysis.");
+	  $V .= "<li>$text\n";
 	  }
 	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE)
 	  {
-	  $V .= "<li>Invoke specialized agents to scan and analyze the files.\n";
+$text = _("Invoke specialized agents to scan and analyze the files.");
+	  $V .= "<li>$text\n";
 	  }
 	if (@$_SESSION['UserLevel'] >= PLUGIN_DB_USERADMIN)
 	  {
-	  $V .= "<li>Create and manage user accounts.\n";
+$text = _("Create and manage user accounts.");
+	  $V .= "<li>$text\n";
 	  }
 	$V .= "</ul>\n";
 	$V .= "<P />\n";
 
-	$V .= "<b>Where to Begin...</b><br />\n";
-	$V .= "The menu at the top contains all the primary capabilities of FOSSology.\n";
+$text = _("Where to Begin...");
+	$V .= "<b>$text</b><br />\n";
+	$V .= _("The menu at the top contains all the primary capabilities of FOSSology.\n");
 	$V .= "<ul>\n";
 	if (plugin_find_id("browse") >= 0)
 	  {
 	  $V .= "<li><b>";
-	  $V .= "<a href='" . Traceback_Uri() . "?mod=browse'>Browse</a>";
-	  $V .= "</b>: If you don't know where to start, try browsing the currently uploaded projects.\n";
+$text = _("Browse");
+	  $V .= "<a href='" . Traceback_Uri() . "?mod=browse'>$text</a>";
+$text = _(": If you don't know where to start, try browsing the currently uploaded projects.");
+	  $V .= "</b>$text\n";
 	  }
 	if (plugin_find_id("search_file") >= 0)
 	  {
 	  $V .= "<li><b>";
-	  $V .= "<a href='" . Traceback_Uri() . "?mod=search_file'>Search</a>";
-	  $V .= "</b>: Look through the uploaded projects for specific files.\n";
+$text = _("Search");
+	  $V .= "<a href='" . Traceback_Uri() . "?mod=search_file'>$text</a>";
+$text = _(": Look through the uploaded projects for specific files.");
+	  $V .= "</b>$text\n";
 	  }
 	if (empty($_SESSION['UserId']))
 	  {
 	  $V .= "<li><b>";
 	  if (plugin_find_id("auth") >= 0)
 	    {
-	    $V .= "<a href='" . Traceback_Uri() . "?mod=auth'>Login</a>";
+$text = _("Login");
+	    $V .= "<a href='" . Traceback_Uri() . "?mod=auth'>$text</a>";
 	    }
 	  else
 	    {
-	    $V .= "Login";
+	    $V .= _("Login");
 	    }
-	  $V .= "</b>: Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or even add new users.\n";
+$text = _(": Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or even add new users.");
+	  $V .= "</b>$text\n";
 	  }
 	$V .= "</ul>\n";
 

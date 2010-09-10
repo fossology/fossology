@@ -24,11 +24,13 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_admin_db_vacuum", _("Database Vacuum and Analyze"));
+
 class admin_db_vacuum extends FO_Plugin
   {
   var $Name       = "admin_db_vacuum";
   var $Version    = "1.0";
-  var $Title      = "Database Vacuum and Analyze";
+  var $Title      = TITLE_admin_db_vacuum;
   var $MenuList   = "Admin::Database::Vacuum and Analyze";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_USERADMIN;
@@ -39,9 +41,11 @@ class admin_db_vacuum extends FO_Plugin
   function FixDB	($CheckType)
     {
     global $DB;
-    print "Deleting " . $CheckType['label'] . "...";
-    $DB->Action("DELETE " . $CheckType['sql']);
-    print $DB->GetAffectedRows . "cleaned.<br>";
+$text = _("Deleting");
+    print $text . $CheckType['label'] . "...";
+    $DB->Action("DELETE ". $CheckType['sql']);
+$text=_("cleaned.");
+    print $DB->GetAffectedRows . "$text<br>";
     } // FixDB()
 
   /************************************************
@@ -69,7 +73,8 @@ class admin_db_vacuum extends FO_Plugin
 	$Tables = $DB->Action($SQL);
 	if (!empty($Action))
 	  {
-	  print "<b>Cleaning: Vacuum and Analyze</b><br>\n";
+$text = _("Cleaning: Vacuum and Analyze");
+	  print "<b>$text</b><br>\n";
 	  flush();
 	  for($i=0; !empty($Tables[$i]['table']); $i++)
 		{
@@ -81,18 +86,21 @@ class admin_db_vacuum extends FO_Plugin
 	  }
 
 	/***************************************/
-	$V .= "Database performance can be improved by optimizing table memory allocation.";
-	$V .= " The database supports 'vacuum' to free deleted rows";
-	$V .= " and 'analyze' to precompute row counts.\n";
-	$V .= " These two functions are called by most agents on an as-needed basis.";
-	$V .= " However, you can start them yourself as needed.";
-	$V .= " Keep in mind:\n";
-	$V .= " Running them too often can negatively impact database performance since the database will spend more time cleaning than doing real work.";
+	$V .= _("Database performance can be improved by optimizing table memory allocation.");
+	$V .= _(" The database supports 'vacuum' to free deleted rows");
+	$V .= _(" and 'analyze' to precompute row counts.\n");
+	$V .= _(" These two functions are called by most agents on an as-needed basis.");
+	$V .= _(" However, you can start them yourself as needed.");
+	$V .= _(" Keep in mind:\n");
+	$V .= _(" Running them too often can negatively impact database performance since the database will spend more time cleaning than doing real work.");
 
 	$V .= "<form method='POST'>";
-	$V .= "<P><input type='checkbox' name='vacuum' value='1'> Vacuum\n";
-	$V .= "<br><input type='checkbox' name='analyze' value='1'> Analyze\n";
-	$V .= "<P><input type='submit' value='Clean!'>\n";
+$text = _(" Vacuum\n");
+	$V .= "<P><input type='checkbox' name='vacuum' value='1'>$text";
+$text = _(" Analyze\n");
+	$V .= "<br><input type='checkbox' name='analyze' value='1'>$text";
+$text = _("Clean");
+	$V .= "<P><input type='submit' value='$text!'>\n";
 	$V .= "</form>";
 	break;
       case "Text":

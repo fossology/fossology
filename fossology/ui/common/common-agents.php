@@ -73,8 +73,8 @@ function AgentCheckBoxMake($upload_pk,$SkipAgent=NULL) {
 		// like the user_agent_list column is missing.
 		if(empty($uList))
 		{
-			return("<h3 style='color:red'>Fatal! Query Failed getting
-			        user_agent_list for user $UserName</h3>");
+$text = _("Fatal! Query Failed getting user_agent_list for user");
+			return("<h3 style='color:red'>$text $UserName</h3>");
 		}
 		$list = explode(',',$uList[0]['user_agent_list']);
 
@@ -501,7 +501,8 @@ $UserName=NULL,$Depends) {
 	}
 
 	if (empty($upload_pk)) {
-		return ('Invalid parameter (upload_pk)');
+$text = _("Invalid parameter (upload_pk)");
+		return ($text);
 	}
 
 	// should we die if webServer is empty?  For now just make a stab at it.
@@ -524,9 +525,8 @@ $UserName=NULL,$Depends) {
 		//print "  SEN: Setting To to Email in session To:$To\n";
 	}
 	if(empty($To)) {
-		return('FATAL: Email Notification: no email address supplied, cannot send mail,' .
-             ' common-agents::scheduleEmailNotification' .
-             ' Your job should be scheduled, you will not get email notifying you it is done');
+$text = _("FATAL: Email Notification: no email address supplied, cannot send mail, common-agents::scheduleEmailNotification Your job should be scheduled, you will not get email notifying you it is done");
+		return($text);
 	}
 	$Nparams .= "$To";
 	/* Upload Pk */
@@ -544,14 +544,16 @@ $UserName=NULL,$Depends) {
 	/* Prepare the job: job "fo-notify" */
 	$jobpk = JobAddJob($upload_pk,"fo_notify",-1);
 	if (empty($jobpk) || ($jobpk < 0)) {
-		return("Failed to insert job record, job fo_notify not created");
+$text = _("Failed to insert job record, job fo_notify not created");
+		return($text);
 	}
 
 	/* Prepare the job: job fo-notify has jobqueue item fo-notify */
 	$jobqueuepk = JobQueueAdd($jobpk,"fo_notify","$Nparams","no",NULL,
 	$Depends,TRUE);
 	if (empty($jobqueuepk)) {
-		return("Failed to insert task 'fo_notify' into job queue");
+$text = _("Failed to insert task 'fo_notify' into job queue");
+		return($text);
 	}
 
 	return(NULL);

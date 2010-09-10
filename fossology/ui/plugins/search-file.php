@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_search_file", _("Search for File"));
+
 class search_file extends FO_Plugin
   {
   var $Name       = "search_file";
-  var $Title      = "Search for File";
+  var $Title      = TITLE_search_file;
   var $Version    = "1.0";
   var $MenuList   = "Search";
   var $Dependency = array("db","view","browse");
@@ -71,7 +73,7 @@ class search_file extends FO_Plugin
 
     if ($Count == 0)
 	{
-	$V .= "No results.\n";
+	$V .= _("No results.\n");
 	return($V);
 	}
 
@@ -88,7 +90,8 @@ class search_file extends FO_Plugin
   function RegisterMenus()
     {
     $URI = $this->Name;
-    menu_insert("Search::Filename",0,$URI,"Search based on filename");
+$text = _("Search based on filename");
+    menu_insert("Search::Filename",0,$URI,$text);
     } // RegisterMenus()
 
   /***********************************************************
@@ -112,17 +115,21 @@ class search_file extends FO_Plugin
 	$Uri = preg_replace("/&filename=[^&]*/","",Traceback());
 	$Uri = preg_replace("/&page=[^&]*/","",$Uri);
 
-	$V .= "You can use '%' as a wild-card.\n";
+	$V .= _("You can use '%' as a wild-card.\n");
 	$V .= "<form action='$Uri' method='POST'>\n";
 	$V .= "<ul>\n";
-	$V .= "<li>Enter the filename to find:<P>";
+$text = _("Enter the filename to find:");
+	$V .= "<li>$text<P>";
 	$V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
-	$V .= "<li>By default only containers (rpms, tars, isos, etc) are shown.<P>";
+$text = _("By default only containers (rpms, tars, isos, etc) are shown.");
+	$V .= "<li>$text<P>";
+$text = _("Show All Files");
 	$V .= "<INPUT type='checkbox' name='allfiles' value='1'";
 	if ($allfiles == '1') { $V .= " checked"; }
-	$V .= "> Show All Files\n";
+	$V .= "> $text\n";
 	$V .= "</ul>\n";
-	$V .= "<input type='submit' value='Search!'>\n";
+$text = _("Search");
+	$V .= "<input type='submit' value='$text!'>\n";
 	$V .= "</form>\n";
 
 	if (!empty($Filename))
@@ -130,7 +137,8 @@ class search_file extends FO_Plugin
 	  if (empty($Page)) { $Page = 0; }
 	  if (empty($allfiles)) { $ContainerOnly = 1; }
 	  $V .= "<hr>\n";
-	  $V .= "<H2>Files matching " . htmlentities($Filename) . "</H2>\n";
+$text = _("Files matching");
+	  $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
 	  $V .= $this->GetUploadtreeFromName($Filename,$Page, $ContainerOnly);
 	  }
         break;

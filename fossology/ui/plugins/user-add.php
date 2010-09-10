@@ -25,9 +25,11 @@ if (!isset($GlobalReady)) {
 	exit;
 }
 
+define("TITLE_user_add", _("Add A User"));
+
 class user_add extends FO_Plugin {
 	var $Name = "user_add";
-	var $Title = "Add A User";
+	var $Title = TITLE_user_add;
 	var $MenuList = "Admin::Users::Add";
 	var $Version = "1.0";
 	var $Dependency = array("db");
@@ -45,7 +47,8 @@ class user_add extends FO_Plugin {
 		if (!$PG_CONN) {
 			$dbok = $DB->db_init();
 			if (!$dbok)
-			echo "<pre>NO DB connection!\n</pre>";
+$text = _("NO DB connection!");
+			echo "<pre>$text\n</pre>";
 		}
 
 		/* Get the parameters */
@@ -82,22 +85,26 @@ class user_add extends FO_Plugin {
 
 		/* Make sure username looks valid */
 		if (empty($User)) {
-			return ("Username must be specified. Not added.");
+$text = _("Username must be specified. Not added.");
+			return ($text);
 		}
 		/* Make sure password matches */
 		if ($Pass != $Pass2) {
-			return ("Passwords did not match. Not added.");
+$text = _("Passwords did not match. Not added.");
+			return ($text);
 		}
 		/* Make sure email looks valid */
 		$Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
 		if ($Check != $Email) {
-			return ("Invalid email address.  Not added.");
+$text = _("Invalid email address.  Not added.");
+			return ($text);
 		}
 		/* See if the user already exists (better not!) */
 		$SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
 		$Results = $DB->Action($SQL);
 		if (!empty($Results[0]['user_name'])) {
-			return ("User already exists.  Not added.");
+$text = _("User already exists.  Not added.");
+			return ($text);
 		}
 
 		/* check email notification, if empty (box not checked), or if no email
@@ -131,7 +138,8 @@ class user_add extends FO_Plugin {
 		$SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
 		$Results = $DB->Action($SQL);
 		if (empty($Results[0]['user_name'])) {
-			return ("Failed to insert user.");
+$text = _("Failed to insert user.");
+			return ($text);
 		}
 		return (NULL);
 	} // Add()
@@ -154,68 +162,89 @@ class user_add extends FO_Plugin {
 					$rc = $this->Add();
 					if (empty($rc)) {
 						/* Need to refresh the screen */
-						$V.= displayMessage("User $User added.");
+$text = _("User");
+$text1 = _("added");
+						$V.= displayMessage("$text $User $text1.");
 					} else {
 						$V.= displayMessage($rc);
 					}
 				}
 				/* Build HTML form */
 				$V.= "<form name='formy' method='POST'>\n"; // no url = this url
-				$V.= "To create a new user, enter the following information:<P />\n";
+				$V.= _("To create a new user, enter the following information:<P />\n");
 				$Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
 				$V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='75%'>";
 				$Val = htmlentities(GetParm('username', PARM_TEXT), ENT_QUOTES);
-				$V.= "$Style<th width='5%'>1.</th><th width='25%'>Enter the username.</th>";
+$text = _("Enter the username.");
+				$V.= "$Style<th width='5%'>1.</th><th width='25%'>$text</th>";
 				$V.= "<td><input type='text' value='$Val' name='username' size=20></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities(GetParm('description', PARM_TEXT), ENT_QUOTES);
-				$V.= "$Style<th>2.</th><th>Enter a description for the user (name, contact, or other information).  This may be blank.</th>\n";
+$text = _("Enter a description for the user (name, contact, or other information).  This may be blank.");
+				$V.= "$Style<th>2.</th><th>$text</th>\n";
 				$V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
 				$Val = htmlentities(GetParm('email', PARM_TEXT), ENT_QUOTES);
-				$V .= "$Style<th>3.</th><th>Enter an email address for the user, see step 8. This field may be left blank.</th>\n";
+$text = _("Enter an email address for the user, see step 8. This field may be left blank.");
+				$V .= "$Style<th>3.</th><th>$text</th>\n";
 				$V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>4.</th><th>Select the user's access level.</th>";
+$text = _("Select the user's access level.");
+				$V.= "$Style<th>4.</th><th>$text</th>";
 				$V.= "<td><select name='permission'>\n";
-				$V.= "<option value='" . PLUGIN_DB_NONE . "'>None (very basic, no database access)</option>\n";
-				$V.= "<option selected value='" . PLUGIN_DB_READ . "'>Read-only (read, but no writes or downloads)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_DOWNLOAD . "'>Download (Read-only, but can download files)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_WRITE . "'>Read-Write (read, download, or edit information)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_UPLOAD . "'>Upload (read-write, and permits uploading files)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_ANALYZE . "'>Analyze (... and permits scheduling analysis tasks)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_DELETE . "'>Delete (... and permits deleting uploaded files and analysis)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_DEBUG . "'>Debug (... and allows access to debugging functions)</option>\n";
-				$V.= "<option value='" . PLUGIN_DB_USERADMIN . "'>Full Administrator (all access including adding and deleting users)</option>\n";
+$text = _("None (very basic, no database access)");
+				$V.= "<option value='" . PLUGIN_DB_NONE . "'>$text</option>\n";
+$text = _("Read-only (read, but no writes or downloads)");
+				$V.= "<option selected value='" . PLUGIN_DB_READ . "'>$text</option>\n";
+$text = _("Download (Read-only, but can download files)");
+				$V.= "<option value='" . PLUGIN_DB_DOWNLOAD . "'>$text</option>\n";
+$text = _("Read-Write (read, download, or edit information)");
+				$V.= "<option value='" . PLUGIN_DB_WRITE . "'>$text</option>\n";
+$text = _("Upload (read-write, and permits uploading files)");
+				$V.= "<option value='" . PLUGIN_DB_UPLOAD . "'>$text</option>\n";
+$text = _("Analyze (... and permits scheduling analysis tasks)");
+				$V.= "<option value='" . PLUGIN_DB_ANALYZE . "'>$text</option>\n";
+$text = _("Delete (... and permits deleting uploaded files and analysis)");
+				$V.= "<option value='" . PLUGIN_DB_DELETE . "'>$text</option>\n";
+$text = _("Debug (... and allows access to debugging functions)");
+				$V.= "<option value='" . PLUGIN_DB_DEBUG . "'>$text</option>\n";
+$text = _("Full Administrator (all access including adding and deleting users)");
+				$V.= "<option value='" . PLUGIN_DB_USERADMIN . "'>$text</option>\n";
 				$V.= "</select></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>5.</th><th>Select the user's top-level folder. Access is restricted to this folder.";
-				$V.= " (NOTE: This is only partially implemented right now. Current users can escape the top of tree limitation.)";
+$text = _("Select the user's top-level folder. Access is restricted to this folder.");
+				$V.= "$Style<th>5.</th><th>$text";
+				$V.= _(" (NOTE: This is only partially implemented right now. Current users can escape the top of tree limitation.)");
 				$V.= "</th>";
 				$V.= "<td><select name='folder'>";
 				$V.= FolderListOption(-1, 0);
 				$V.= "</select></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>6.</th><th>Enter the user's password.  It may be blank.</th><td><input type='password' name='pass1' size=20></td>\n";
+$text = _("Enter the user's password.  It may be blank.");
+				$V.= "$Style<th>6.</th><th>$text</th><td><input type='password' name='pass1' size=20></td>\n";
 				$V.= "</tr>\n";
-				$V.= "$Style<th>7.</th><th>Re-enter the user's password.</th><td><input type='password' name='pass2' size=20></td>\n";
+$text = _("Re-enter the user's password.");
+				$V.= "$Style<th>7.</th><th>$text</th><td><input type='password' name='pass2' size=20></td>\n";
 				$V.= "</tr>\n";
-				$V .= "$Style<th>8.</th><th>E-mail Notification</th><td><input type='checkbox'" .
+$text = _("E-mail Notification");
+$text1 = _("Check to enable email notification of completed analysis.");
+				$V .= "$Style<th>8.</th><th>$text</th><td><input type='checkbox'" .
                 "name='enote' value='y' checked='checked'>" .
-                "Check to enable email notification of completed analysis.</td>\n";
+                "$text1</td>\n";
 				$V.= "</tr>\n";
-				$V .= "$Style<th>9.</th><th>Default Agents: Select the ".
-              "agent(s) to automatically run when uploading data. These" .
-              " selections can be changed on the upload screens.\n</th><td> ";
+$text = _("Default Agents: Select the agent(s) to automatically run when uploading data. These selections can be changed on the upload screens.");
+				$V .= "$Style<th>9.</th><th>$text\n</th><td> ";
 				$V.= AgentCheckBoxMake(-1, "agent_unpack");
 				$V .= "</td>\n";
-				$V.= "$Style<th>10.</th><th>Default bucketpool.</th>";
+$text = _("Default bucketpool.");
+				$V.= "$Style<th>10.</th><th>$text</th>";
 				$V.= "<td>";
 				$V.= SelectBucketPool($default_bucketpool_fk);
 				$V.= "</td>";
 				$V .= "</tr>\n";
 				$V.= "</table border=0><P />";
-				$V.= "<input type='submit' value='Add!'>\n";
+$text = _("Add");
+				$V.= "<input type='submit' value='$text!'>\n";
 				$V.= "</form>\n";
 				break;
 			case "Text":

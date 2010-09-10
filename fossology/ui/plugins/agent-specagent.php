@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_specagent", _("Spec File Analysis (deprecated. Replaced by Package analysis.)"));
+
 class agent_specagent extends FO_Plugin
 {
   public $Name       = "agent_specagent";
-  public $Title      = "Spec File Analysis (deprecated. Replaced by Package analysis.)";
+  public $Title      = TITLE_agent_specagent;
   // public $MenuList   = "Jobs::Agents::Spec File Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
@@ -165,11 +167,13 @@ class agent_specagent extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= displayMessage('Analysis added to job queue');
+$text = _("Analysis added to job queue");
+	    $V .= displayMessage($text);
 	    }
 	  else
 	    {
-	    $V .= displayMessage("Scheduling of Analysis failed: $rc");
+$text = _("Scheduling of Analysis failed: ");
+	    $V .= displayMessage($text.$rc);
 	    }
 	  }
 
@@ -189,16 +193,18 @@ class agent_specagent extends FO_Plugin
 	$Results = $DB->Action($SQL);
 	if (empty($Results[0]['upload_pk']))
 	  {
-	  $V .= "All uploaded files are already analyzed, or scheduled to be analyzed.";
+	  $V .= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
 	  }
 	else
 	  {
 	  /* Display the form */
-	  $V .= "Spec file analysis extracts meta data from RPM '.spec' files.<P />\n";
+$text = _("Spec file analysis extracts meta data from RPM '.spec' files.");
+	  $V .= "$text<P />\n";
 	  $V .= "<form method='post'>\n"; // no url = this url
-	  $V .= "Select an uploaded file for analysis.\n";
-	  $V .= "Only uploads that are not already scheduled can be scheduled.\n";
-	  $V .= "<p />\nAnalyze: <select name='upload'>\n";
+	  $V .= _("Select an uploaded file for analysis.\n");
+	  $V .= _("Only uploads that are not already scheduled can be scheduled.\n");
+$text = _("Analyze:");
+	  $V .= "<p />\n$text <select name='upload'>\n";
 	  foreach($Results as $Row)
 	    {
 	    if (empty($Row['upload_pk'])) { continue; }
@@ -207,7 +213,8 @@ class agent_specagent extends FO_Plugin
 	    $V .= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
 	    }
 	  $V .= "</select><P />\n";
-	  $V .= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+	  $V .= "<input type='submit' value='$text!'>\n";
 	  $V .= "</form>\n";
 	  }
 	break;

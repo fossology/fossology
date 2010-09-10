@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_search_file_advance", _("Advanced Search for File"));
+
 class search_file_advance extends FO_Plugin
   {
   var $Name       = "search_file_advance";
-  var $Title      = "Advanced Search for File";
+  var $Title      = TITLE_search_file_advance;
   var $Version    = "1.0";
   var $MenuList   = "";
   var $Dependency = array("db","view","browse");
@@ -98,7 +100,7 @@ class search_file_advance extends FO_Plugin
 
     if ($Count == 0)
 	{
-	$V .= "No results.\n";
+	$V .= _("No results.\n");
 	return($V);
 	}
 
@@ -107,7 +109,8 @@ class search_file_advance extends FO_Plugin
       $SQL = preg_replace('/\*/','COUNT(*) AS count',$SQL,1);
       $SQL = preg_replace('/ ORDER BY .*;/',';',$SQL);
       $Count = $DB->Action($SQL);
-      $V .= "Total matched: " . number_format($Count[0]['count'],0,"",",") . "<br>\n";
+$text = _("Total matched:");
+      $V .= "$text " . number_format($Count[0]['count'],0,"",",") . "<br>\n";
       }
 
     $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
@@ -123,7 +126,8 @@ class search_file_advance extends FO_Plugin
   function RegisterMenus()
     {
     $URI = $this->Name;
-    menu_insert("Search::Advanced",0,$URI,"Additional search options");
+$text = _("Additional search options");
+    menu_insert("Search::Advanced",0,$URI,$text);
     } // RegisterMenus()
 
   /***********************************************************
@@ -155,28 +159,35 @@ class search_file_advance extends FO_Plugin
 	$Mimetype = GetParm("mimetype",PARM_INTEGER);
 	$Page = GetParm("page",PARM_INTEGER);
 
-	$V .= "You can use '%' as a wild-card.\n";
+	$V .= _("You can use '%' as a wild-card.\n");
 	$V .= "<form action='" . Traceback_uri() . "?mod=" . $this->Name . "' method='POST'>\n";
 	$V .= "<ul>\n";
-	$V .= "<li>Enter the filename to find: ";
+$text = _("Enter the filename to find: ");
+	$V .= "<li>$text";
 	$V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
 
-	$V .= "<li>Mimetype ";
+$text = _("Mimetype ");
+	$V .= "<li>$text";
 	$V .= "<select name='notmimetype'>\n";
 	if ($MimetypeNot == 0)
 	  {
-	  $V .= "<option value='0' selected>IS</option>\n";
-	  $V .= "<option value='1'>IS NOT</option>\n";
+$text = _("IS");
+	  $V .= "<option value='0' selected>$text</option>\n";
+$text = _("IS NOT");
+	  $V .= "<option value='1'>$text</option>\n";
 	  }
 	else
 	  {
-	  $V .= "<option value='0'>IS</option>\n";
-	  $V .= "<option value='1' selected>IS NOT</option>\n";
+$text = _("IS");
+	  $V .= "<option value='0'>$text</option>\n";
+$text = _("IS NOT");
+	  $V .= "<option value='1' selected>$text</option>\n";
 	  }
 	$V .= "</select>\n";
 	$V .= "<select name='mimetype'>\n";
 	$Results = $DB->Action("SELECT * FROM mimetype ORDER BY mimetype_name;");
-	$V .= "<option value='-1'>Select mimetype...</option>\n";
+$text = _("Select mimetype...");
+	$V .= "<option value='-1'>$text</option>\n";
 	for($i=0; !empty($Results[$i]['mimetype_pk']); $i++)
 	  {
 	  if ($Results[$i]['mimetype_pk'] == $Mimetype)
@@ -192,19 +203,25 @@ class search_file_advance extends FO_Plugin
 	  }
 	$V .= "</select>\n";
 	$Value=$SizeMin; if ($Value < 0) { $Value=''; }
-	$V .= "<li>File size is &gt; <input name='sizemin' size=10 value='$Value'> bytes\n";
+$text = _("File size is");
+$text1 = _(" bytes\n");
+	$V .= "<li>$text &gt; <input name='sizemin' size=10 value='$Value'>$text1";
 	$Value=$SizeMax; if ($Value < 0) { $Value=''; }
-	$V .= "<li>File size is &lt; <input name='sizemax' size=10 value='$Value'> bytes\n";
+$text = _("File size is");
+$text1 = _(" bytes\n");
+	$V .= "<li>$text &lt; <input name='sizemax' size=10 value='$Value'>$text1";
 
 	$V .= "</ul>\n";
-	$V .= "<input type='submit' value='Search!'>\n";
+$text = _("Search");
+	$V .= "<input type='submit' value='$text!'>\n";
 	$V .= "</form>\n";
 
 	if (!empty($Filename))
 	  {
 	  if (empty($Page)) { $Page = 0; }
 	  $V .= "<hr>\n";
-	  $V .= "<H2>Files matching " . htmlentities($Filename) . "</H2>\n";
+$text = _("Files matching");
+	  $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
 	  $V .= $this->GetUploadtreeFromName($Filename,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax);
 	  }
         break;

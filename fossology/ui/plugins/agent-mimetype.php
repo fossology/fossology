@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_mimetype", _("MIME-type Analysis (Determine mimetype of every file.  Not needed for licenses or buckets)"));
+
 class agent_mimetype extends FO_Plugin {
   public $Name = "agent_mimetype";
-  public $Title = "MIME-type Analysis (Determine mimetype of every file.  Not needed for licenses or buckets)";
+  public $Title = TITLE_agent_mimetype;
   // public $MenuList   = "Jobs::Agents::MIME-type Analysis";
   public $Version = "1.0";
   public $Dependency = array(
@@ -86,7 +89,8 @@ class agent_mimetype extends FO_Plugin {
       $Results = $DB->Action($SQL);
       $Dep = $Results[0]['jq_pk'];
       if (empty($Dep)) {
-        return ("Unable to find dependent job: unpack");
+$text = _("Unable to find dependent job: unpack");
+        return ($text);
       }
     }
     $Dep = array(
@@ -101,7 +105,8 @@ class agent_mimetype extends FO_Plugin {
     /* Prepare the job: job "Default Meta Agents" */
     $jobpk = JobAddJob($uploadpk, "Default Meta Agents", $Priority);
     if (empty($jobpk) || ($jobpk < 0)) {
-      return ("Failed to insert job record");
+$text = _("Failed to insert job record");
+      return ($text);
     }
     /* Add job: job "Default Meta Agents" has jobqueue item "mimetype" */
     $jqargs = "SELECT DISTINCT(pfile_pk) as Akey,
@@ -112,7 +117,8 @@ class agent_mimetype extends FO_Plugin {
 	LIMIT 5000;";
     $jobqueuepk = JobQueueAdd($jobpk, "mimetype", $jqargs, "yes", "a", $Dep);
     if (empty($jobqueuepk)) {
-      return ("Failed to insert mimetype into job queue");
+$text = _("Failed to insert mimetype into job queue");
+      return ($text);
     }
     return (NULL);
   } // AgentAdd()
@@ -135,10 +141,12 @@ class agent_mimetype extends FO_Plugin {
           $rc = $this->AgentAdd($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $V.= displayMessage('Analysis added to job queue');
+$text = _("Analysis added to job queue");
+            $V.= displayMessage($text);
           }
           else {
-            $V.= displayMessage("Scheduling of Analysis failed: $rc");
+$text = _("Scheduling of Analysis failed: ");
+            $V.= displayMessage($text.$rc);
           }
         }
         /* Get list of projects that are not scheduled for uploads */
@@ -156,15 +164,16 @@ class agent_mimetype extends FO_Plugin {
 		ORDER BY upload_desc,upload_filename;";
         $Results = $DB->Action($SQL);
         if (empty($Results[0]['upload_pk'])) {
-          $V.= "All uploaded files are already analyzed, or scheduled to be analyzed.";
+          $V.= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
         }
         else {
           /* Display the form */
-          $V.= "MIME-type analysis identifies files based on their MIME type.<P />\n";
+          $V.= _("MIME-type analysis identifies files based on their MIME type.<P />\n");
           $V.= "<form method='post'>\n"; // no url = this url
-          $V.= "Select an uploaded file for MIME-type analysis.\n";
-          $V.= "Only uploads that are not already scheduled can be scheduled.\n";
-          $V.= "<p />\nAnalyze: <select name='upload'>\n";
+          $V.= _("Select an uploaded file for MIME-type analysis.\n");
+          $V.= _("Only uploads that are not already scheduled can be scheduled.\n");
+$text = _("Analyze:");
+          $V.= "<p />\n$text <select name='upload'>\n";
           foreach($Results as $Row) {
             if (empty($Row['upload_pk'])) {
               continue;
@@ -178,7 +187,8 @@ class agent_mimetype extends FO_Plugin {
             $V.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
           $V.= "</select><P />\n";
-          $V.= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+          $V.= "<input type='submit' value='$text!'>\n";
           $V.= "</form>\n";
         }
       break;

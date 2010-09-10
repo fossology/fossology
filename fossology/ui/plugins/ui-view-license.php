@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_view_license", _("View License"));
+
 class ui_view_license extends FO_Plugin
   {
   var $Name       = "view-license";
-  var $Title      = "View License";
+  var $Title      = TITLE_ui_view_license;
   var $Version    = "1.0";
   var $Dependency = array("db","view");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -158,7 +160,7 @@ class ui_view_license extends FO_Plugin
 
     if ($this->State != PLUGIN_STATE_READY) { return; }
 
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo _("NO DB connection"); }
 
     $V="";
     global $Plugins;
@@ -178,7 +180,9 @@ class ui_view_license extends FO_Plugin
       $nomos_license_string = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $Item);
       if (!empty($nomos_license_string)) 
       {
-        $nomos_out = "The <b>Nomos</b> license detector found: <b>";
+$text1 = _("Nomos");
+$text = _("The");
+        $nomos_out = "$text <b>$text1</b><b>";
         $nomos_out .= $nomos_license_string;
         $nomos_out .= "</b>";
       }

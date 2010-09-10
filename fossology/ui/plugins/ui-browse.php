@@ -28,9 +28,11 @@ if (!isset($GlobalReady)) {
 global $WEBDIR;
 require_once("$WEBDIR/common/common.php");
 
+define("TITLE_ui_browse", _("Browse"));
+
 class ui_browse extends FO_Plugin {
   var $Name = "browse";
-  var $Title = "Browse";
+  var $Title = TITLE_ui_browse;
   var $Version = "1.0";
   var $MenuList = "Browse";
   var $Dependency = array(
@@ -166,15 +168,18 @@ class ui_browse extends FO_Plugin {
     } /* foreach($Results as $Row) */
     $V.= "</table>\n";
     if (!$ShowSomething) {
-      $V.= "<b>No files</b>\n";
+$text = _("No files");
+      $V.= "<b>$text</b>\n";
     }
     else {
       $V.= "<hr>\n";
       if (count($Results) == 1) {
-        $V.= "1 item\n";
+$text = _("1 item");
+        $V.= "$text\n";
       }
       else {
-        $V.= count($Results) . " items\n";
+$text = _("items");
+        $V.= count($Results) . " $text\n";
       }
     }
     return ($V);
@@ -204,23 +209,31 @@ class ui_browse extends FO_Plugin {
     $V.= "<table border=1 width='100%'>";
     $V.= "<tr><td valign='top' width='20%'>\n";
     $V.= FolderListScript();
-    $V.= "<center><H3>Folder Navigation</H3></center>\n";
+$text = _("Folder Navigation");
+    $V.= "<center><H3>$text</H3></center>\n";
     $V.= "<center><small>";
     if ($Folder != FolderGetTop()) {
-      $V.= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>Top</a> |";
+$text = _("Top");
+      $V.= "<a href='" . Traceback_uri() . "?mod=" . $this->Name . "'>$text</a> |";
     }
-    $V.= "<a href='javascript:Expand();'>Expand</a> |";
-    $V.= "<a href='javascript:Collapse();'>Collapse</a> |";
-    $V.= "<a href='" . Traceback() . "'>Refresh</a>";
+$text = _("Expand");
+    $V.= "<a href='javascript:Expand();'>$text</a> |";
+$text = _("Collapse");
+    $V.= "<a href='javascript:Collapse();'>$text</a> |";
+$text = _("Refresh");
+    $V.= "<a href='" . Traceback() . "'>$text</a>";
     $V.= "</small></center>";
     $V.= "<P>\n";
     $V.= "<form>\n";
     $V.= FolderListDiv($Folder, 0, $Folder, 1);
     $V.= "</form>\n";
     $V.= "</td><td valign='top'>\n";
-    $V.= "<center><H3>Uploads</H3></center>\n";
+$text = _("Uploads");
+    $V.= "<center><H3>$text</H3></center>\n";
     $V.= "<table class='text' border=0 width='100%' cellpadding=0>\n";
-    $V.= "<th>Upload Name and Description</th><th>Upload Date</th></tr>\n";
+$text = _("Upload Name and Description");
+$text1 = _("Upload Date");
+    $V.= "<th>$text</th><th>$text1</th></tr>\n";
     foreach($Results as $Row) {
       if (empty($Row['upload_pk'])) {
         continue;
@@ -228,7 +241,8 @@ class ui_browse extends FO_Plugin {
       $Desc = htmlentities($Row['upload_desc']);
       $UploadPk = $Row['upload_pk'];
       if (empty($Desc)) {
-        $Desc = "<i>No description</i>";
+$text = _("No description");
+        $Desc = "<i>$text</i>";
       }
       $Name = $Row['ufile_name'];
       if (empty($Name)) {
@@ -254,13 +268,16 @@ class ui_browse extends FO_Plugin {
         $V.= "<b>" . $Name . "</b>";
       }
       if ($Row['upload_mode'] & 1 << 2) {
-        $V.= "<br>Added by URL: " . htmlentities($uploadOrigin);
+$text = _("Added by URL: ");
+        $V.= "<br>$text" . htmlentities($uploadOrigin);
       }
       if ($Row['upload_mode'] & 1 << 3) {
-        $V.= "<br>Added by file upload: " . htmlentities($uploadOrigin);
+$text = _("Added by file upload: ");
+        $V.= "<br>$text" . htmlentities($uploadOrigin);
       }
       if ($Row['upload_mode'] & 1 << 4) {
-        $V.= "<br>Added from filesystem: " . htmlentities($uploadOrigin);
+$text = _("Added from filesystem: ");
+        $V.= "<br>$text" . htmlentities($uploadOrigin);
       }
       $V.= "<br>";
       $MenuPfile = menu_find("Browse-Pfile", $MenuDepth);
@@ -275,22 +292,24 @@ class ui_browse extends FO_Plugin {
       $V.= "<td align='right'>" . substr($Row['upload_ts'], 0, 19) . "</td></tr>\n";
       /* Check job status */
       $Status = JobListSummary($UploadPk);
-      $V.= "<td>Scheduled ";
+$text = _("Scheduled ");
+      $V.= "<td>$text";
       if (plugin_find_id('showjobs') >= 0) {
-        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>jobs</a>: ";
+$text = _("jobs");
+        $V.= "<a href='" . Traceback_uri() . "?mod=showjobs&show=summary&history=1&upload=$UploadPk'>$text</a>: ";
       }
       else {
-        $V.= "jobs: ";
+        $V.= _("jobs: ");
       }
-      $V.= $Status['total'] . " total; ";
-      $V.= $Status['completed'] . " completed; ";
+      $V.= $Status['total'] . _(" total; ");
+      $V.= $Status['completed'] . _(" completed; ");
       if (!empty($Status['pending'])) {
-        $V.= $Status['pending'] . " pending; ";
+        $V.= $Status['pending'] . _(" pending; ");
       }
       if (!empty($Status['pending'])) {
-        $V.= $Status['active'] . " active; ";
+        $V.= $Status['active'] . _(" active; ");
       }
-      $V.= $Status['failed'] . " failed.";
+      $V.= $Status['failed'] . _(" failed.");
 
 /* bobg: bsam license analysis is deprecated */
 if (isset($__OBSOLETE__))
@@ -306,12 +325,16 @@ if (isset($__OBSOLETE__))
         if ($Status == 0) {
           $V.= "<a href='";
           $V.= $Uri . "&analyze=$UploadPk";
-          $V.= "'>Schedule</a> license analysis";
+$text = _("license analysis");
+$text1 = _("Schedule");
+          $V.= "'>$text1</a> $text";
         }
         else if ($Status == 2) {
           $V.= "<a href='";
           $V.= $Uri . "&reanalyze=$UploadPk";
-          $V.= "'>Reschedule</a> license analysis";
+$text = _("license analysis");
+$text1 = _("Reschedule");
+          $V.= "'>$text1</a>$text";
         }
       }
 }
@@ -353,20 +376,24 @@ if (isset($__OBSOLETE__))
     if (!empty($ReAnalyze) && !empty($UploadPk)) {
       $rc = $ReAnalyze->RemoveLicenseMeta($UploadPk, NULL, 1);
       if (empty($rc)) {
-        $V.= displayMessage('License data re-analysis added to job queue');
+$text = _("License data re-analysis added to job queue");
+        $V.= displayMessage($text);
       }
       else {
-        $V.= displayMessage("Scheduling of re-analysis failed, return code: $rc");
+$text = _("Scheduling of re-analysis failed, return code");
+        $V.= displayMessage("$text: $rc");
       }
     }
     $UploadPk = GetParm("analyze", PARM_INTEGER);
     if (!empty($Analyze) && !empty($UploadPk)) {
       $rc = $Analyze->AgentAdd($UploadPk);
       if (empty($rc)) {
-        $V.= displayMessage('License data analysis added to job queue');
+$text = _("License data analysis added to job queue");
+        $V.= displayMessage($text);
       }
       else {
-        $V.= displayMessage("Scheduling of re-analysis failed, return code: $rc");
+$text = _("Scheduling of re-analysis failed, return code");
+        $V.= displayMessage("$text: $rc");
       }
     }
     switch ($this->OutputType) {
@@ -413,7 +440,8 @@ if (isset($__OBSOLETE__))
             }
             else
             {
-              $V.= "<hr><h2>Missing upload tree parent for upload $Upload</h2><hr>";
+$text = _("Missing upload tree parent for upload");
+              $V.= "<hr><h2>$text $Upload</h2><hr>";
               break;
             }
             pg_free_result($result);

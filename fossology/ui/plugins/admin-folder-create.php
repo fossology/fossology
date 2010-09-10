@@ -32,10 +32,12 @@ if (!isset ($GlobalReady))
   exit;
 }
 
+define("TITLE_folder_create", _("Create a new Fossology folder"));
+
 class folder_create extends FO_Plugin
 {
   var $Name = "folder_create";
-  var $Title = "Create a new Fossology folder";
+  var $Title = TITLE_folder_create;
   var $Version = "1.0";
   var $MenuList = "Organize::Folders::Create";
   var $Dependency = array (
@@ -129,26 +131,34 @@ class folder_create extends FO_Plugin
           $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
           if ($rc == 1) {
             /* Need to refresh the screen */
-            $R .= displayMessage("Folder $NewFolder Created");
+$text = _("Folder");
+$text1 = _("Created");
+            $R .= displayMessage("$text $NewFolder $text1");
           }
           else if($rc == 4) {
-            $R .= displayMessage("Folder $NewFolder Exists");
+$text = _("Folder");
+$text1 = _("Exists");
+            $R .= displayMessage("$text $NewFolder $text1");
           }
         }
         /* Display the form */
         $V .= "$R\n";
         $V .= "<form method='POST'>\n"; // no url = this url
         $V .= "<ol>\n";
-        $V .= "<li>Select the parent folder:  \n";
+$text = _("Select the parent folder:  \n");
+        $V .= "<li>$text";
         $V .= "<select name='parentid'>\n";
         $V .= FolderListOption(-1, 0);
         $V .= "</select><P />\n";
-        $V .= "<li>Enter the new folder name:  \n";
+$text = _("Enter the new folder name:  \n");
+        $V .= "<li>$text";
         $V .= "<INPUT type='text' name='newname' size=40 />\n<br>";
-        $V .= "<br><li>Enter a meaningful description:  \n";
+$text = _("Enter a meaningful description:  \n");
+        $V .= "<br><li>$text";
         $V .= "<INPUT type='text' name='description' size=80 />\n";
         $V .= "</ol>\n";
-        $V .= "<input type='submit' value='Create!'>\n";
+$text = _("Create");
+        $V .= "<input type='submit' value='$text!'>\n";
         $V .= "</form>\n";
         break;
       case "Text" :

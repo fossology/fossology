@@ -31,10 +31,13 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_agent_bucket", _("Bucket Analysis"));
+
 class agent_bucket extends FO_Plugin {
 
   public $Name = "agent_bucket";
-  public $Title = "Bucket Analysis";
+  public $Title = TITLE_agent_bucket;
   // public $MenuList   = "Jobs::Agents::Bucket Analysis";
   public $Version = "1.0";
   public $Dependency = array("db");
@@ -100,8 +103,10 @@ class agent_bucket extends FO_Plugin {
     /* Is the user authenticated?  If not, then fail 
      * because we won't know which bucketpool to use.
      */
-    if (!array_key_exists('UserId', $_SESSION))
-      return("Session is unauthenticated, bucket agent cannot run without knowing who the user is.");
+    if (!array_key_exists('UserId', $_SESSION)){
+$text = _("Session is unauthenticated, bucket agent cannot run without knowing who the user is.");
+      return($text);
+    }
 
     if (is_array($Depends)) 
       $Dep = array_merge($Dep, $Depends);
@@ -119,7 +124,10 @@ class agent_bucket extends FO_Plugin {
               job.job_upload_fk = $uploadpk AND job.job_pk = jobqueue.jq_job_fk
               WHERE jobqueue.jq_type = 'adj2nest';";
       $Results = $DB->Action($SQL);
-      if (!isset($Results[0])) return ("Unable to find dependent job: unpack");
+      if (!isset($Results[0])){
+$text = _("Unable to find dependent job: unpack");
+	 return ($text);
+      }
       $Dep[] = $Results[0]['jq_pk'];
     }
 
@@ -136,7 +144,10 @@ class agent_bucket extends FO_Plugin {
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
-    if (pg_num_rows($result) < 1) return ("Unable to find dependent job: unpack");
+    if (pg_num_rows($result) < 1){
+$text = _("Unable to find dependent job: unpack"); 
+	return ($text);
+    }
     $NomosDep[] = $row['jq_pk'];
     pg_free_result($result);
 
@@ -153,13 +164,19 @@ class agent_bucket extends FO_Plugin {
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
-    if (pg_num_rows($result) < 1) return ("Unable to find dependent job: pkgagent");
+    if (pg_num_rows($result) < 1){
+$text = _("Unable to find dependent job: pkgagent");
+	 return ($text);
+    }
     $NomosDep[] = $row['jq_pk'];
     pg_free_result($result);
 
     /* create the bucket job  */
     $jobpk = JobAddJob($uploadpk, "Bucket Analysis", $Priority);
-    if (empty($jobpk) || ($jobpk < 0)) return ("Failed to queue bucket agent.");
+    if (empty($jobpk) || ($jobpk < 0)){
+$text = _("Failed to queue bucket agent.");
+	 return ($text);
+    }
 
     /* get the default_bucketpool_fk from the users record */
     $sql = "select default_bucketpool_fk from users where user_pk='$_SESSION[UserId]' limit 1";
@@ -169,11 +186,16 @@ class agent_bucket extends FO_Plugin {
     $bucketpool_pk = $row['default_bucketpool_fk'];
     pg_free_result($result);
 
-    if (!$bucketpool_pk) return ("User does not have a default bucketpool.  Bucket agent cannot be scheduled without this.");
-
+    if (!$bucketpool_pk){
+$text = _("User does not have a default bucketpool.  Bucket agent cannot be scheduled without this."); 
+	return ($text);
+    }
     $jqargs = "bppk=$bucketpool_pk, upk=$uploadpk";
     $jobqueuepk = JobQueueAdd($jobpk, "buckets", $jqargs, "no", "", $NomosDep);
-    if (empty($jobqueuepk)) return ("Failed to insert agent nomos into job queue");
+    if (empty($jobqueuepk)){ 
+$text = _("Failed to insert agent nomos into job queue");
+	return ($text);
+    }
     
     if (CheckEnotification()) {
       $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
@@ -206,17 +228,21 @@ class agent_bucket extends FO_Plugin {
           $rc = $this->AgentAdd($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $Page.= displayMessage('Bucket analysis added to the job queue');
+$text = _("Bucket analysis added to the job queue");
+            $Page.= displayMessage($text);
           }
           else {
-            $Page.= displayMessage("Scheduling Bucket agent failed: $rc");
+$text = _("Scheduling Bucket agent failed: ");
+            $Page.= displayMessage($text.$rc);
           }
         }
           /* Display the form */
           $Page.= "<form method='post'>\n"; // no url = this url
-          $Page.= "<H1>NOTE: this code was borrowed from nomos.  It needs to be updated for buckets.  If you see this message please tell bobg.</H1>";
-          $Page.= "Select an uploaded file for bucket analysis.\n";
-          $Page.= "<p />\nAnalyze: <select name='upload'>\n";
+$text = _("NOTE: this code was borrowed from nomos.  It needs to be updated for buckets.  If you see this message please tell bobg.");
+          $Page.= "<H1>$text</H1>";
+          $Page.= _("Select an uploaded file for bucket analysis.\n");
+$text = _("Analyze:");
+          $Page.= "<p />\n$text <select name='upload'>\n";
           foreach($Results as $Row) {
             if (empty($Row['upload_pk'])) {
               continue;
@@ -230,7 +256,8 @@ class agent_bucket extends FO_Plugin {
             $Page.= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
           }
           $Page.= "</select><P />\n";
-          $Page.= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+          $Page.= "<input type='submit' value='$text!'>\n";
           $Page.= "</form>\n";
       break;
       case "Text":

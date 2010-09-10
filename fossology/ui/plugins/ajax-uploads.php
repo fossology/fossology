@@ -32,10 +32,12 @@ if (!isset($GlobalReady)) { exit; }
  data to the UI.
  *************************************************/
 
+define("TITLE_core_uploads", _("List Uploads as Options"));
+
 class core_uploads extends FO_Plugin
   {
   var $Name       = "upload_options";
-  var $Title      = "List Uploads as Options";
+  var $Title      = TITLE_core_uploads;
   var $Version    = "1.0";
   var $Dependency = array("db");
   var $DBaccess   = PLUGIN_DB_READ;

@@ -47,9 +47,12 @@ global $DB;
  *
  * @version "Id: $"
  */
+
+define("TITLE_myJobs", _("My Jobs Status"));
+
 class myJobs extends FO_Plugin {
 	public $Name       = "myjobs";
-	public $Title      = "My Jobs Status";
+	public $Title      = TITLE_myJobs;
 	public $MenuList   = "Jobs::MyJobs";
 	public $MenuOrder  = 0;    // Don't appear in a menu (internal plugin) BUG!
 	public $MenuTarget = 0;
@@ -68,20 +71,30 @@ class myJobs extends FO_Plugin {
 	public function displayJob($uploadId=NULL) {
 		
 		// Create the style and heading
-		
+$text = _("Click Job Name:Id to see the job details");	
+$text1 = _("Page updates every");
+$text2 = _("seconds");
+$text3 = _("Running Jobs");
+$text4 = _("Job Name:Id");
+$text5 = _("Total");
+$text6 = _("Tasks");
+$text7 = _("Completed");
+$text8 = _("Active");
+$text9 = _("Pending");
+$text10 = _("Failed");
 		$Heading = "<table border=2 align='center' cellspacing=1 cellpadding=5>\n" .
-		    "<caption align='top'>Click Job Name:Id to see the job details<br>". 
-		    "Page updates every $this->Interval seconds</caption>\n" .
+		    "<caption align='top'>$text<br>". 
+		    "$text1 $this->Interval $text2</caption>\n" .
         "   <tr>\n" .
-        "     <th colspan=6 align='center'>Running Jobs</th>\n" .
+        "     <th colspan=6 align='center'>$text3</th>\n" .
         "   </tr>\n" .
         "   <tr>\n" .
-        "     <th align='center'>Job Name:Id</th>\n" .
-        "     <th align='center'>Total<br>Tasks</th>\n" .
-        "     <th align='center'>Completed<br>Tasks</th>\n" .
-        "     <th align='center'>Active<br>Tasks</th>\n" .
-        "     <th align='center'>Pending<br>Tasks</th>\n" .
-        "     <th align='center'>Failed<br>Tasks</th>\n" .
+        "     <th align='center'>$text4</th>\n" .
+        "     <th align='center'>$text5<br>$text6</th>\n" .
+        "     <th align='center'>$text7<br>$text6</th>\n" .
+        "     <th align='center'>$text8<br>$text6</th>\n" .
+        "     <th align='center'>$text9<br>$text6</th>\n" .
+        "     <th align='center'>$text10<br>$text6</th>\n" .
         "   </tr>\n";
 
 		$Tbl = $this->MakeJobTblRow();
@@ -115,7 +128,8 @@ class myJobs extends FO_Plugin {
 		global $CompletedJobs;
 
 		if(empty($DB)) {
-			print "<h3 color='red'>Fatal internal ERROR! Cannot connect to the DataBase</h3>\n";
+$text = _("Fatal internal ERROR! Cannot connect to the DataBase");
+			print "<h3 color='red'>$text</h3>\n";
 			return(FALSE);
 		}
 		

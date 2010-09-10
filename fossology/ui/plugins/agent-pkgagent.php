@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_pkgagent", _("Package Analysis (Parse package headers)"));
+
 class agent_pkgagent extends FO_Plugin
 {
   public $Name       = "agent_pkgagent";
-  public $Title      = "Package Analysis (Parse package headers)";
+  public $Title      = TITLE_agent_pkgagent;
   //public $MenuList   = "Jobs::Agents::Package Analysis";
   public $Version    = "1.0";
   public $Dependency = array("db");
@@ -87,7 +89,9 @@ class agent_pkgagent extends FO_Plugin
 	if (!empty($rc)) { return($rc); }
 	$Results = $DB->Action($SQL);
 	$Dep = $Results[0]['jq_pk'];
-	if (empty($Dep)) { return("Unable to find dependent job: unpack"); }
+	if (empty($Dep)) { 
+$text = _("Unable to find dependent job: unpack");
+	   return($text); }
 	}
     $Dep = array($Dep);
     if (is_array($Depends)) { $Dep = array_merge($Dep,$Depends); }
@@ -95,7 +99,9 @@ class agent_pkgagent extends FO_Plugin
 
     /* Prepare the job: job "Package Agent" */
     $jobpk = JobAddJob($uploadpk,"Package Scan",$Priority=0);
-    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { 
+$text = _("Failed to insert job record");
+	return($text); }
 
     /* "pkgagent" needs to know what? */
     
@@ -111,7 +117,9 @@ class agent_pkgagent extends FO_Plugin
       $Results = $DB->Action($SQL);
       $mimetypepk = $Results[0]['mimetype_pk'];
       }
-    if (empty($mimetypepk)) { return("pkgagent rpm mimetype not installed."); }
+    if (empty($mimetypepk)) { 
+$text = _("pkgagent rpm mimetype not installed.");
+	return($text); }
 
     $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;";
     $Results = $DB->Action($SQL);
@@ -124,7 +132,9 @@ class agent_pkgagent extends FO_Plugin
       $Results = $DB->Action($SQL);
       $debmimetypepk = $Results[0]['mimetype_pk'];
       }
-    if (empty($debmimetypepk)) { return("pkgagent deb mimetype not installed."); }
+    if (empty($debmimetypepk)) { 
+$text = _("pkgagent deb mimetype not installed.");
+	return($text); }
 
     $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;";
     $Results = $DB->Action($SQL);
@@ -137,7 +147,9 @@ class agent_pkgagent extends FO_Plugin
       $Results = $DB->Action($SQL);
       $debsrcmimetypepk = $Results[0]['mimetype_pk'];
       }
-    if (empty($debsrcmimetypepk)) { return("pkgagent deb source mimetype not installed."); }
+    if (empty($debsrcmimetypepk)) { 
+$text = _("pkgagent deb source mimetype not installed.");
+	return($text); }
 
     /** jqargs wants EVERY RPM and DEBIAN pfile in this upload **/
     $jqargs = "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name AS mimetype
@@ -152,7 +164,9 @@ class agent_pkgagent extends FO_Plugin
 
     /* Add job: job "Package Scan" has jobqueue item "pkgagent" */
     $jobqueuepk = JobQueueAdd($jobpk,"pkgagent",$jqargs,"yes","pfile_pk",$Dep);
-    if (empty($jobqueuepk)) { return("Failed to insert pkgagent into job queue"); }
+    if (empty($jobqueuepk)) { 
+$text = _("Failed to insert pkgagent into job queue");
+	return($text); }
     
     if (CheckEnotification()) {
       $sched = scheduleEmailNotification($uploadpk,$_SERVER['SERVER_NAME'],
@@ -186,11 +200,13 @@ class agent_pkgagent extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= displayMessage('Analysis added to job queue');
+$text = _("Analysis added to job queue");
+	    $V .= displayMessage($text);
 	    }
 	  else
 	    {
-	    $V .= displayMessage("Scheduling of Analysis failed: $rc");
+$text = _("Scheduling of Analysis failed:");
+	    $V .= displayMessage($text.$rc);
 	    }
 	  }
 
@@ -210,16 +226,17 @@ class agent_pkgagent extends FO_Plugin
 	$Results = $DB->Action($SQL);
 	if (empty($Results[0]['upload_pk']))
 	  {
-	  $V .= "All uploaded files are already analyzed, or scheduled to be analyzed.";
+	  $V .= _("All uploaded files are already analyzed, or scheduled to be analyzed.");
 	  }
 	else
 	  {
 	  /* Display the form */
 	  $V .= "Package analysis extract meta data from RPM files.<P />\n";
 	  $V .= "<form method='post'>\n"; // no url = this url
-	  $V .= "Select an uploaded file for analysis.\n";
-	  $V .= "Only uploads that are not already scheduled can be scheduled.\n";
-	  $V .= "<p />\nAnalyze: <select name='upload'>\n";
+	  $V .= _("Select an uploaded file for analysis.\n");
+	  $V .= _("Only uploads that are not already scheduled can be scheduled.\n");
+$text = _("Analyze:");
+	  $V .= "<p />\n$text <select name='upload'>\n";
 	  foreach($Results as $Row)
 	    {
 	    if (empty($Row['upload_pk'])) { continue; }
@@ -228,7 +245,8 @@ class agent_pkgagent extends FO_Plugin
 	    $V .= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
 	    }
 	  $V .= "</select><P />\n";
-	  $V .= "<input type='submit' value='Analyze!'>\n";
+$text = _("Analyze");
+	  $V .= "<input type='submit' value='$text!'>\n";
 	  $V .= "</form>\n";
 	  }
 	break;

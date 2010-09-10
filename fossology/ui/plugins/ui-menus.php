@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_menu", _("Menus"));
+
 class ui_menu extends FO_Plugin
   {
   var $Name       = "menus";
-  var $Title      = "Menus";
+  var $Title      = TITLE_ui_menu;
   var $Version    = "1.0";
   var $MenuTarget = "treenav";
   var $LoginFlag  = 0;
@@ -266,7 +268,7 @@ class ui_menu extends FO_Plugin
     {
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $V="";
-    if (empty($Title)) { $Title = "Welcome to FOSSology"; }
+    if (empty($Title)) { $Title = _("Welcome to FOSSology"); }
     switch($this->OutputType)
       {
       case "XML":
@@ -293,11 +295,13 @@ class ui_menu extends FO_Plugin
 	  /* Width matches logo image */
 	  if (empty($_SESSION['User']))
 		{
-		$V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>login</b></a></small>";
+$text = _("login");
+		$V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>$text</b></a></small>";
 		}
 	  else
 		{
-		$V .= "<small>User:</small> " . @$_SESSION['User'] . "<br>";
+$text = _("User");
+		$V .= "<small>$text:</small> " . @$_SESSION['User'] . "<br>";
 		$V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
 		}
 	  }

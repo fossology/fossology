@@ -24,13 +24,15 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_licgroup", _("License Groups"));
+
 /************************************************
  Plugin for License Groups
  *************************************************/
 class licgroup extends FO_Plugin
   {
   var $Name       = "licgroup";
-  var $Title      = "License Groups";
+  var $Title      = TITLE_licgroup;
   var $Version    = "1.0";
   var $Dependency = array("db","browse");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -258,7 +260,8 @@ class licgroup extends FO_Plugin
       {
       print "<pre>";
       // print "LicGroups:\n"; print_r($this->LicInGroup);
-      print "GrpGroups:\n"; print_r($this->GrpInGroup);
+$text = _("GrpGroups");
+      print "$text:\n"; print_r($this->GrpInGroup);
       print "</pre>";
       print "<hr>";
       }
@@ -323,7 +326,7 @@ class licgroup extends FO_Plugin
       $V .= Traceback_uri();
       $V .= "?mod=search_file_by_licgroup&item=$Item&licgroup=" . $this->GrpInGroup[$Group]['id'] . "'>";
       $V .= "<font style='text-shadow: black 0px 0px 5px;'>";
-      $V .= "Show";
+      $V .= _("Show");
       $V .= "</a>";
       $V .= "</td>";
       }
@@ -555,9 +558,12 @@ class licgroup extends FO_Plugin
     $this->GroupColorMerge(); /* muddy the colors! */
     $VH .= FolderListScript();
     $VH .= "<table border='1' width='100%'>";
-    $VH .= "<tr><th width='15%'>Count</th>";
-    if ($this->SFbLG >= 0) { $VH .= "<th width='10%'>Files</th>"; }
-    $VH .= "<th colspan='2'>License Groups</th></tr>";
+$text = _("Count");
+    $VH .= "<tr><th width='15%'>$text</th>";
+$text = _("Files");
+    if ($this->SFbLG >= 0) { $VH .= "<th width='10%'>$text</th>"; }
+$text = _("License Groups");
+    $VH .= "<th colspan='2'>$text</th></tr>";
     $VH .= "</table>";
     foreach($this->GrpInGroup as $G => $g)
       {
@@ -577,13 +583,13 @@ class licgroup extends FO_Plugin
       $VH .= "<a href='" . Traceback_uri();
       $VH .= "?mod=search_file_by_licgroup&item=$Item&licgroup=-1'>";
       $VH .= "<font style='text-shadow: black 0px 0px 5px;'>";
-      $VH .= "Show";
+      $VH .= _("Show");
       $VH .= "</a>";
       $VH .= "</td>";
       $VH .= "<td width='1%' style='border-right:none;'><font color='white'>+</font></td>";
       $VH .= "<td id='LicGroup Gnone ' style='border-left:none;'>";
       $VH .= "<a href=\"javascript:LicColor('LicGroup','Gnone','LicItem','Gnone','yellow')\">";
-      $VH .= "License not part of any group";
+      $VH .= _("License not part of any group");
       $VH .= "</a>";
       $VH .= "</td></tr></table>\n";
       }
@@ -679,7 +685,9 @@ class licgroup extends FO_Plugin
     $V .= "</table>\n";
     $V .= "<hr />\n";
     $Time = time() - $Time;
-    $V .= "<small>Elaspsed time: $Time seconds</small>\n";
+$text = _("Elaspsed time");
+$text1 = _("seconds");
+    $V .= "<small>$text: $Time $text1</small>\n";
     $V .= $VJ;
     return($V);
     } // ShowUploadHist()
@@ -722,7 +730,8 @@ class licgroup extends FO_Plugin
 	break;
       case "HTML":
 	$V .= "<font class='text'>\n";
-	$V .= "<center><b><font color='red'>WARNING: Licence groups only work for the bsam license scanner and do not use the results from licterm.  This functionality has been superceded in v 1.2 by 'buckets' based on the nomos license scanner.</font></b></center><P>\n";
+$text = _("WARNING: Licence groups only work for the bsam license scanner and do not use the results from licterm.  This functionality has been superceded in v 1.2 by 'buckets' based on the nomos license scanner.");
+	$V .= "<center><b><font color='red'>$text</font></b></center><P>\n";
 
 	/************************/
 	/* Show the folder path */

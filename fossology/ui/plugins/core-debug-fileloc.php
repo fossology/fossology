@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_core_debug_fileloc", _("Global Variables"));
+
 class core_debug_fileloc extends FO_Plugin
 {
   var $Name       = "debug-fileloc";
-  var $Title      = "Global Variables";
+  var $Title      = TITLE_core_debug_fileloc;
   var $Version    = "1.0";
   var $MenuList   = "Help::Debug::Global Variables";
   var $DBaccess   = PLUGIN_DB_DEBUG;
@@ -71,7 +73,8 @@ class core_debug_fileloc extends FO_Plugin
       case "XML":
         break;
       case "HTML":
-	    $V .= "<table cellpadding=3><tr><th align=left> Variable</th><th>&nbsp;</th><th align=left >Value</th></tr>";
+$text = _(" Variable");
+	    $V .= "<table cellpadding=3><tr><th align=left>$text</th><th>&nbsp";
         foreach ($varray as $var)
           $V .= "<tr><td>$var</td><td>&nbsp;</td><td>". $$var ."</td></tr>";
      

@@ -27,9 +27,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_folder_properties", _("Edit Folder Properties"));
+
 class folder_properties extends FO_Plugin {
   var $Name = "folder_properties";
-  var $Title = "Edit Folder Properties";
+  var $Title = TITLE_folder_properties;
   var $Version = "1.0";
   var $MenuList = "Organize::Folders::Edit Properties";
   var $Dependency = array(
@@ -102,29 +105,34 @@ class folder_properties extends FO_Plugin {
           $rc = $this->Edit($FolderId, $NewName, $NewDesc);
           if ($rc == 1) {
             /* Need to refresh the screen */
-            $V.= displayMessage('Folder Properties changed');
+$text=_("Folder Properties changed");
+            $V.= displayMessage($text);
           }
         }
-        $V.= "<p>The folder properties that can be changed are the folder name and
+        $V.= _("<p>The folder properties that can be changed are the folder name and
 			 description.  First select the folder to edit. Then enter the new values.
-			 If no value is entered, then the corresponding field will not be changed.</p>";
+			 If no value is entered, then the corresponding field will not be changed.</p>");
         /* Get the folder info */
         $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$FolderSelectId';");
         $Folder = & $Results[0];
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-        $V.= "<li>Select the folder to edit:  \n";
+$text = _("Select the folder to edit:  \n");
+        $V.= "<li>$text";
         $Uri = Traceback_uri() . "?mod=" . $this->Name . "&selectfolderid=";
         $V.= "<select name='oldfolderid' onChange='window.location.href=\"$Uri\" + this.value'>\n";
         $V.= FolderListOption(-1, 0, 1, $FolderSelectId);
         $V.= "</select><P />\n";
-        $V.= "<li>Change folder name:  \n";
+$text = _("Change folder name:  \n");
+        $V.= "<li>$text";
         $V.= "<INPUT type='text' name='newname' size=40 value=\"" . htmlentities($Folder['folder_name'], ENT_COMPAT) . "\" />\n";
-        $V.= "<P /><li>Change folder description:  \n";
+$text = _("Change folder description:  \n");
+        $V.= "<P /><li>$text";
         $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['folder_desc'], ENT_COMPAT) . "\" />\n";
         $V.= "</ol>\n";
-        $V.= "<input type='submit' value='Edit!'>\n";
+$text = _("Edit");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
       break;
       case "Text":

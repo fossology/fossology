@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_ui_buckets", _("Bucket Browser"));
+
 class ui_buckets extends FO_Plugin
 {
   var $Name       = "bucketbrowser";
-  var $Title      = "Bucket Browser";
+  var $Title      = TITLE_ui_buckets;
   var $Version    = "1.0";
   var $Dependency = array("db","browse","view");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -104,11 +106,13 @@ class ui_buckets extends FO_Plugin
       {
        menu_insert("Browse::Bucket Browser",1);
        //menu_insert("Browse::[BREAK]",100);
-       //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>Clear</a>");
+$text = _("Clear");
+       //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>$text</a>");
       }
       else
       {
-       menu_insert("Browse::Bucket Browser",10,$URI,"Browse by buckets (categories)");
+$text = _("Browse by buckets (categories)");
+       menu_insert("Browse::Bucket Browser",10,$URI,$text);
       }
     }
   } // RegisterMenus()
@@ -178,7 +182,8 @@ class ui_buckets extends FO_Plugin
     if (pg_num_rows($result) < 1)
     {
       pg_free_result($result);
-      return "<h2>Invalid URL, nonexistant item $Uploadtree_pk</h2>";
+$text = _("Invalid URL, nonexistant item");
+      return "<h2>$text $Uploadtree_pk</h2>";
     }
     $row = pg_fetch_assoc($result);
     $lft = $row["lft"];
@@ -265,11 +270,15 @@ return;
     $NoLicFound = 0;
     if (is_array($historows))
     {
-      $VLic .= "Bucket Pool: $bucketpool_name<br>";
+$text = _("Bucket Pool");
+      $VLic .= "$text: $bucketpool_name<br>";
       $VLic .= "<table border=1 width='100%'>\n";
-      $VLic .= "<tr><th width='10%'>Count</th>";
-      $VLic .= "<th width='10%'>Files</th>";
-      $VLic .= "<th align='left'>Bucket</th></tr>\n";
+$text = _("Count");
+      $VLic .= "<tr><th width='10%'>$text</th>";
+$text = _("Files");
+      $VLic .= "<th width='10%'>$text</th>";
+$text = _("Bucket");
+      $VLic .= "<th align='left'>$text</th></tr>\n";
   
       foreach($historows as $bucketrow)
       {
@@ -285,7 +294,8 @@ return;
         /*  Show  */
         $VLic .= "<td align='center'><a href='";
         $VLic .= Traceback_uri();
-        $VLic .= "?mod=list_bucket_files&bapk=$bucketagent_pk&item=$Uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk" . "'>Show</a></td>";
+$text = _("Show");
+        $VLic .= "?mod=list_bucket_files&bapk=$bucketagent_pk&item=$Uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk" . "'>$text</a></td>";
 
         /*  Bucket name  */
         $VLic .= "<td align='left'>";
@@ -297,7 +307,8 @@ return;
       }
       $VLic .= "</table>\n";
       $VLic .= "<p>\n";
-      $VLic .= "Unique buckets: $Uniquebucketcount<br>\n";
+$text = _("Unique buckets");
+      $VLic .= "$text: $Uniquebucketcount<br>\n";
     }
 
 
@@ -435,9 +446,12 @@ return;
 
     /* Display source, binary, and binary missing source package counts */
     $VLic .= "<ul>";
-    $VLic .= "<li> $NumSrcPackages source packages";
-    $VLic .= "<li> $NumBinPackages binary packages";
-    $VLic .= "<li> $NumBinNoSrcPackages binary packages with no source package";
+$text = _("source packages");
+    $VLic .= "<li> $NumSrcPackages $text";
+$text = _("binary packages");
+    $VLic .= "<li> $NumBinPackages $text";
+$text = _("binary packages with no source package");
+    $VLic .= "<li> $NumBinNoSrcPackages $text";
     $VLic .= "</ul>";
 
     /* Combine VF and VLic */
@@ -510,7 +524,8 @@ return;
           $V .= $this->ShowUploadHist($Item,$Uri);
         }
         $V .= "</font>\n";
-/*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>Loading...</div>"; */
+$text = _("Loading...");
+/*$V .= "<div id='ajax_waiting'><img src='images/ajax-loader.gif'>$text</div>"; */
         break;
       case "Text":
         break;
@@ -525,11 +540,14 @@ return;
     if (!$this->OutputToStdout) { return($V); }
     print "$V";
     $Time = microtime(true) - $uTime;  // convert usecs to secs
-    printf( "<p><small>Elapsed time: %.2f seconds</small>", $Time);
+$text = _("Elapsed time: %.2f seconds");
+    printf( "<p><small>$text</small>", $Time);
 
-    if ($Cached) 
-      echo " <i>cached</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> Update </a>";
-    else
+    if ($Cached){ 
+$text = _("cached");
+$text1 = _("Update");
+      echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+    }else
     {
       /*  Cache Report if this took longer than 1/2 second*/
       if ($Time > 0.5) ReportCachePut($CacheKey, $V);

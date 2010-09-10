@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_license_reanalyze", _("Reanalyze License and Store Results"));
+
 class agent_license_reanalyze extends FO_Plugin
 {
   public $Name       = "agent_license_reanalyze";
-  public $Title      = "Reanalyze License and Store Results";
+  public $Title      = TITLE_agent_license_reanalyze;
   public $Version    = "1.0";
   public $Dependency = array("db","view","view-license");
   public $NoHTML     = 0;
@@ -58,7 +60,8 @@ class agent_license_reanalyze extends FO_Plugin
     $UploadPk = $Results[0]['upload_fk'];
 
     /* Remove old database information */
-    print "Removing previous license information.\n"; flush();
+$text = _("Removing previous license information.");
+    print "$text\n"; flush();
     $DB->Action("BEGIN;");
     $DB->Action("DELETE FROM licterm_name WHERE pfile_fk = '$Akey';");
     $DB->Action("UPDATE pfile SET pfile_liccount = NULL WHERE pfile_pk = '$Akey';");
@@ -70,7 +73,8 @@ class agent_license_reanalyze extends FO_Plugin
     $Results = $DB->Action("SELECT * FROM uploadtree WHERE parent = '$UploadtreePk';");
     if (Iscontainer($Results[0]['ufile_mode']))
     {
-      print "Container not processed.\n";
+$text = _("Container not processed.");
+      print "$text\n";
     }
     else
     {
@@ -79,18 +83,21 @@ class agent_license_reanalyze extends FO_Plugin
       $CmdEnd = "2>&1 > /dev/null";
 
       $Cmd = "$CmdOk | $AGENTDIR/Filter_License $CmdEnd";
-      print "Creating license cache\n"; flush();
+$text = _("Creating license cache");
+      print "$text\n"; flush();
       system($Cmd);
 
       $Results = $DB->Action("SELECT * FROM agent_lic_status WHERE pfile_fk = '$Akey' AND inrepository = TRUE AND processed = FALSE;");
       if (!empty($Results[0]['pfile_fk']))
       {
         $Cmd = "$CmdOk | $AGENTDIR/bsam-engine -L 20 -A 0 -B 60 -G 15 -M 10 -E -T license -O n -- - $PROJECTSTATEDIR/agents/License.bsam $CmdEnd";
-        print "Finding licenses based on templates\n"; flush();
+$text = _("Finding licenses based on templates");
+        print "$text\n"; flush();
         system($Cmd);
 
         $Cmd = "$CmdOk | $AGENTDIR/licinspect $CmdEnd";
-        print "Finding license names based on terms and keywords\n"; flush();
+$text = _("Finding license names based on terms and keywords");
+        print "$text\n"; flush();
         system($Cmd);
 
         /* Update license count */
@@ -105,11 +112,13 @@ class agent_license_reanalyze extends FO_Plugin
       }
       else
       {
-        print "No licenses found.\n";
+$text = _("No licenses found.");
+        print "$text\n";
       }
 
       $Cmd = "$CmdOk | $AGENTDIR/filter_clean -s $CmdEnd";
-      print "Cleaning up\n"; flush();
+$text = _("Cleaning up");
+      print "$text\n"; flush();
       system($Cmd);
     }
 
@@ -117,10 +126,12 @@ class agent_license_reanalyze extends FO_Plugin
 
     /* check for email notification and schedule if needed */
     if (CheckEnotification()) {
-      print "Scheduling email\n";
+$text = _("Scheduling email");
+      print "$text\n";
       $last = exec("notify -u $UploadPk -e markd",$dummy,$rtn);
       if ($rtn != 0) {
-        print "FAIL! Scheduling of email failed:\n$last\n";
+$text = _("FAIL! Scheduling of email failed:");
+        print "$text\n$last\n";
         return;
       }
     }
@@ -182,9 +193,11 @@ class agent_license_reanalyze extends FO_Plugin
     {
       $URI = $this->Name . Traceback_parm(0);
       //menu_insert("View::[BREAK]",200);
-      menu_insert("View::Reanalyze",-20,$URI,"Reanalyze license and store results");
+$text = _("Reanalyze license and store results");
+      menu_insert("View::Reanalyze",-20,$URI,$text);
       //menu_insert("View-Meta::[BREAK]",200);
-      menu_insert("View-Meta::Reanalyze",-20,$URI,"Reanalyze license and store results");
+$text = _("Reanalyze license and store results");
+      menu_insert("View-Meta::Reanalyze",-20,$URI,$text);
     }
   } // RegisterMenus()
 
@@ -216,7 +229,8 @@ class agent_license_reanalyze extends FO_Plugin
         print "function Refresh() { window.open('$Uri','_top'); }\n";
         print "window.setTimeout('Refresh()',2000);\n";
         print "</script>";
-        print "Refreshing in 2 seconds...";
+$text = _("Refreshing in 2 seconds...");
+        print "$text";
         break;
       case "Text":
         break;

@@ -30,9 +30,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_upload_properties", _("Edit Upload Properties"));
+
 class upload_properties extends FO_Plugin {
   var $Name = "upload_properties";
-  public $Title = "Edit Upload Properties";
+  public $Title = TITLE_upload_properties;
   var $Version = "1.0";
   var $MenuList = "Organize::Uploads::Edit Properties";
   var $Dependency = array(
@@ -113,10 +116,12 @@ class upload_properties extends FO_Plugin {
           $NewDesc = GetParm('newdesc', PARM_TEXT);
           $rc = $this->EditUploadProperties($FolderSelectId, $uploadId, $NewName, $NewDesc);
           if ($rc == 1) {
-            $V.= displayMessage('Upload Properties changed');
+$text = _("Upload Properties changed");
+            $V.= displayMessage($text);
           }
-          $V.= "<p>The upload properties that can be changed are the upload name and
-                 description.  First select the folder that the upload is stored in.  " . "Then select the upload to edit. Then enter the new values. If no " . "value is entered, then the corresponding field will not be changed.</p>";
+$text =_("The upload properties that can be changed are the upload name and
+                 description.  First select the folder that the upload is stored in.  " . "Then select the upload to edit. Then enter the new values. If no " . "value is entered, then the corresponding field will not be changed.");
+          $V.= "<p>$text</p>";
           /* Get the folder info */
           $Results = $DB->Action("SELECT * FROM folder WHERE folder_pk = '$FolderSelectId';");
           $Folder = & $Results[0];
@@ -137,13 +142,15 @@ class upload_properties extends FO_Plugin {
           /* Build the HTML form */
           $V.= "<form name='formy' method='post'>\n"; // no url = this url
           $V.= "<ol>\n";
-          $V.= "<li>Select the folder that contains the upload:  \n";
+$text = _("Select the folder that contains the upload:  \n");
+          $V.= "<li>$text";
           $V.= "<select name='oldfolderid'\n";
           $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
           $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
           $V.= FolderListOption(-1, 0);
           $V.= "</select><P />\n";
-          $V.= "<li>Select the upload you wish to edit:  \n";
+$text = _("Select the upload you wish to edit:  \n");
+          $V.= "<li>$text";
           $V.= "<select name='uploadid'>\n";
           $List = FolderListUploads(-1);
           foreach($List as $L) {
@@ -158,14 +165,17 @@ class upload_properties extends FO_Plugin {
             $V.= "</option>\n";
           }
           $V.= "</select><P />\n";
-          $V.= "<li>Change upload name:  \n";
+$text = _("Change upload name:  \n");
+          $V.= "<li>$text";
           $V.= "<INPUT type='text' name='newname' size=40 value=\"" . htmlentities($Folder['upload_filename'], ENT_COMPAT) . "\" />\n";
-          $V.= "<P /><li>Change upload description:  \n";
+$text = _("Change upload description:  \n");
+          $V.= "<P /><li>$text";
           $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['upload_desc'], ENT_COMPAT) . "\" />\n";
           //$V .= "<P /><li>Change Upload Source Location:  \n";
           //$V .= "<INPUT type='text' name='newsrc' size=60 value=\"" . htmlentities($Folder['folder_src'],ENT_COMPAT) . "\" />\n";
           $V.= "</ol>\n";
-          $V.= "<input type='submit' value='Edit!'>\n";
+$text = _("Edit");
+          $V.= "<input type='submit' value='$text!'>\n";
           $V.= "</form>\n";
           break;
         case "Text":

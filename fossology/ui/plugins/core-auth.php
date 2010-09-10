@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_core_auth", _("Login"));
+
 class core_auth extends FO_Plugin {
   var $Name = "auth";
-  var $Title = "Login";
+  var $Title = TITLE_core_auth;
   var $Version = "1.0";
   var $PluginLevel = 1000; /* make this run first! */
   var $Dependency = array("db");
@@ -56,7 +59,8 @@ class core_auth extends FO_Plugin {
       $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass,user_perm,user_email,root_folder_fk)
 	VALUES ('Default User','Default User when nobody is logged in','Seed','Pass',$Level,NULL,1);";
       $DB->Action($SQL);
-      print "*** Created default user: 'Default User'.\n";
+$text = _("*** Created default user: 'Default User'.");
+      print "$text\n";
     }
     /* There must always be at least one user with user-admin access.
     If he does not exist, make it user "fossy".
@@ -73,13 +77,15 @@ class core_auth extends FO_Plugin {
         $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass," .
                "user_perm,user_email,email_notify,root_folder_fk)
 		  VALUES ('fossy','Default Administrator','$Seed','$Hash',$Perm,'fossy','y',1);";
-        print "*** Created default administrator: 'fossy' with password 'fossy'.\n";
+$text = _("*** Created default administrator: 'fossy' with password 'fossy'.");
+        print "$text\n";
       }
       else {
         /* User "fossy" exists!  Update it. */
         $SQL = "UPDATE users SET user_perm = $Perm, email_notify = 'y'," .
                " user_email= 'fossy' WHERE user_name = 'fossy';";
-        print "*** Existing user 'fossy' promoted to default administrator.\n";
+$text = _("*** Existing user 'fossy' promoted to default administrator.");
+        print "$text\n";
       }
       $DB->Action($SQL);
       $Results = $DB->Action("SELECT * FROM users WHERE user_perm = $Perm;");
@@ -320,7 +326,8 @@ class core_auth extends FO_Plugin {
           } else {
             /* Check for init and first-time use */
             if (plugin_find_id("init") >= 0) {
-              $V.= "<b>The system requires initialization. Please login and use the Initialize option under the Admin menu.</b>";
+$text = _("The system requires initialization. Please login and use the Initialize option under the Admin menu.");
+              $V.= "<b>$text</b>";
               $V.= "<P />\n";
               /* Check for a default user */
               global $DB;
@@ -336,7 +343,7 @@ class core_auth extends FO_Plugin {
               }
               $R = & $Results[0];
               if (!empty($R['user_name'])) {
-                $V.= "If you need an account, use '" . $R['user_name'] . "' with no password.\n";
+                $V.= _("If you need an account, use '" . $R['user_name'] . "' with no password.\n");
                 $V.= "<P />\n";
               }
             }
@@ -348,21 +355,27 @@ class core_auth extends FO_Plugin {
             $V.= "<form method='post'>\n";
             $V.= "<input type='hidden' name='HTTP_REFERER' value='$Referer'>";
             $V.= "<table border=0>";
-            $V.= "<tr><td>Username:</td><td><input type='text' size=20 name='username' id='unamein'></td></tr>\n";
-            $V.= "<tr><td>Password:</td><td><input type='password' size=20 name='password'></td></tr>\n";
+$text = _("Username:");
+            $V.= "<tr><td>$text</td><td><input type='text' size=20 name='username' id='unamein'></td></tr>\n";
+$text = _("Password:");
+            $V.= "<tr><td>$text</td><td><input type='password' size=20 name='password'></td></tr>\n";
             $V.= "</table>";
             $V.= "<P/>";
             $V.= "<script type=\"text/javascript\">document.getElementById(\"unamein\").focus();</script>";
 /* Commenting out the Validate IP option since it's probably overkill for this app, 
    and it confuses people.
-            $V.= "<input type='checkbox' name='checkip' value='1'>Validate IP.\n";
+$text = _("Validate IP.\n");
+            $V.= "<input type='checkbox' name='checkip' value='1'>$text";
             $Referer = @$_SERVER['HTTP_REFERER'];
             if (!empty($Referer)) {
               $V.= "<input type='hidden' name='redirect' value='$Referer'>";
             }
-            $V.= "This option deters session hijacking by linking your session to your IP address (" . @$_SESSION['ip'] . "). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.<P />\n";
+$text = _("This option deters session hijacking by linking your session to your IP address (");
+$text1 = _("). While this option is more secure, it is not ideal for people using proxy networks, where IP addresses regularly change. If you find that are you constantly being logged out, then do not use this option.");
+            $V.= "$text" . @$_SESSION['ip'] . "$text1<P />\n";
 */
-            $V.= "<input type='submit' value='Login'>\n";
+$text = _("Login");
+            $V.= "<input type='submit' value='$text'>\n";
             $V.= "</form>\n";
           }
         } else

@@ -27,9 +27,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_admin_upload_delete", _("Delete Uploaded File"));
+
 class admin_upload_delete extends FO_Plugin {
   var $Name = "admin_upload_delete";
-  var $Title = "Delete Uploaded File";
+  var $Title = TITLE_admin_upload_delete;
   var $MenuList = "Organize::Uploads::Delete Uploaded File";
   var $Version = "1.0";
   var $Dependency = array(
@@ -53,13 +56,15 @@ class admin_upload_delete extends FO_Plugin {
     /* Prepare the job: job "Delete" */
     $jobpk = JobAddJob($uploadpk, "Delete");
     if (empty($jobpk) || ($jobpk < 0)) {
-      return ("Failed to create job record");
+$text = _("Failed to create job record");
+      return ($text);
     }
     /* Add job: job "Delete" has jobqueue item "delagent" */
     $jqargs = "DELETE UPLOAD $uploadpk";
     $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, "no", NULL, NULL);
     if (empty($jobqueuepk)) {
-      return ("Failed to place delete in job queue");
+$text = _("Failed to place delete in job queue");
+      return ($text);
     }
     return (NULL);
   } // Delete()
@@ -82,10 +87,12 @@ class admin_upload_delete extends FO_Plugin {
           $rc = $this->Delete($uploadpk);
           if (empty($rc)) {
             /* Need to refresh the screen */
-            $V.= displayMessage('Deletion added to job queue');
+$text=_("Deletion added to job queue");
+            $V.= displayMessage($text);
           }
           else {
-            $V.= DisplayMessage("Deletion Scheduling failed: $rc");
+$text=_("Deletion Scheduling failed: ");
+            $V.= DisplayMessage($text.$rc);
           }
         }
         /* Create the AJAX (Active HTTP) javascript for doing the reply
@@ -104,22 +111,33 @@ class admin_upload_delete extends FO_Plugin {
         $V.= "</script>\n";
         /* Build HTML form */
         $V.= "<form name='formy' method='post'>\n"; // no url = this url
-        $V.= "Select the uploaded file to <em>delete</em>.\n";
+$text = _("Select the uploaded file to");
+$text1 = _("delete");
+        $V.= "$text <em>$text1</em>\n";
         $V.= "<ul>\n";
-        $V.= "<li>This will <em>delete</em> the upload file!\n";
-        $V.= "<li>Be very careful with your selection since you can delete a lot of work!\n";
-        $V.= "<li>All analysis only associated with the deleted upload file will also be deleted.\n";
-        $V.= "<li>THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.\n";
+$text = _("This will");
+$text1 = _("delete");
+$text2 = _("the upload file!");
+        $V.= "<li>$text <em>$text1</em> $text2\n";
+$text = _("Be very careful with your selection since you can delete a lot of work!\n");
+        $V.= "<li>$text";
+$text = _("All analysis only associated with the deleted upload file will also be deleted.\n");
+        $V.= "<li>$text";
+$text = _("THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.\n");
+        $V.= "<li>$text";
         $V.= "</ul>\n";
-        $V.= "<P>Select the uploaded file to delete:<P>\n";
+$text = _("Select the uploaded file to delete:");
+        $V.= "<P>$text<P>\n";
         $V.= "<ol>\n";
-        $V.= "<li>Select the folder containing the file to delete: ";
+$text = _("Select the folder containing the file to delete: ");
+        $V.= "<li>$text";
         $V.= "<select name='folder' ";
         $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
         $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
-        $V.= "<li>Select the uploaded project to delete:";
+$text = _("Select the uploaded project to delete:");
+        $V.= "<li>$text";
         $V.= "<BR><select name='upload' size='10'>\n";
         $List = FolderListUploads(-1);
         foreach($List as $L) {
@@ -135,7 +153,8 @@ class admin_upload_delete extends FO_Plugin {
         }
         $V.= "</select><P />\n";
         $V.= "</ol>\n";
-        $V.= "<input type='submit' value='Delete!'>\n";
+$text = _("Delete");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
       break;
       case "Text":

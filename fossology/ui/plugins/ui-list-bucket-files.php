@@ -35,10 +35,12 @@ if (!isset($GlobalReady)) { exit; }
    bp     bucketpool_pk
  *************************************************/
 
+define("TITLE_list_bucket_files", _("List Files for Bucket"));
+
 class list_bucket_files extends FO_Plugin
 {
   var $Name       = "list_bucket_files";
-  var $Title      = "List Files for Bucket";
+  var $Title      = TITLE_list_bucket_files;
   var $Version    = "1.0";
   var $Dependency = array("db","nomoslicense");
   var $DBaccess   = PLUGIN_DB_READ;
@@ -60,7 +62,8 @@ class list_bucket_files extends FO_Plugin
 	$Page = GetParm("page",PARM_INTEGER);
 
     $URL = $this->Name . "&bapk=$bucketagent_pk&item=$uploadtree_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk&page=-1";
-    menu_insert($this->Name."::Show All",0, $URL, "Show All Files");
+$text = _("Show All Files");
+    menu_insert($this->Name."::Show All",0, $URL, $text);
 
   } // RegisterMenus()
       
@@ -89,7 +92,8 @@ class list_bucket_files extends FO_Plugin
 
 	if (empty($uploadtree_pk) || empty($bucket_pk) || empty($bucketpool_pk)) 
     {
-      echo $this->Name . " is missing required parameters.";
+$text = _("is missing required parameters.");
+      echo $this->Name . " $text";
       return;
     }
 	$Page = GetParm("page",PARM_INTEGER);
@@ -118,10 +122,13 @@ class list_bucket_files extends FO_Plugin
       $V .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
 	/* Get all the files under this uploadtree_pk with this bucket */
-	$V .= "The following files are in bucket: '<b>";
+	$V .= _("The following files are in bucket: '<b>");
 	$V .= $bucketNameCache[$bucket_pk];
 	$V .= "</b>'.\n";
-    if (!empty($Excl)) $V .= "<br>Display <b>excludes</b> files with these licenses: $Excl";
+$text = _("Display");
+$text1 = _("excludes");
+$text2 = _("files with these licenses");
+    if (!empty($Excl)) $V .= "<br>$text <b>$text1</b>$text2: $Excl";
 
 	$Offset = ($Page < 0) ? 0 : $Page*$Max;
     $order = "";
@@ -191,7 +198,8 @@ class list_bucket_files extends FO_Plugin
 
     /* file display loop/table */
     $V .= "<table>";
-    $V .= "<tr><th>File</th><th>&nbsp;</th><th align=left>Licenses found</th></tr>";
+$text = _("File");
+    $V .= "<tr><th>$text</th><th>&nbsp";
     $ExclArray = explode(":", $Excl);
     $ItemNumb = 1;
     while ($row = pg_fetch_assoc($fileresult, $RowNum))
@@ -206,7 +214,8 @@ class list_bucket_files extends FO_Plugin
         $URL = $baseURL ."&excl=".urlencode($Excl).":".$URLlicstring;
       else
         $URL = $baseURL ."&excl=$URLlicstring";
-      $Header = "<a href=$URL>Exclude files with license: $licstring.</a>";
+$text = _("Exclude files with license");
+      $Header = "<a href=$URL>$text: $licstring.</a>";
 
       $ok = true;
       if ($Excl)
@@ -236,7 +245,9 @@ class list_bucket_files extends FO_Plugin
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-	$V .= "<small>Elaspsed time: $Time seconds</small>\n";
+$text = _("Elaspsed time");
+$text1 = _("seconds");
+	$V .= "<small>$text: $Time $text1</small>\n";
 	break;
       case "Text":
 	break;

@@ -24,10 +24,12 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+define("TITLE_agent_unpack", _("Schedule an Unpack"));
+
 class agent_unpack extends FO_Plugin
 {
   public $Name       = "agent_unpack";
-  public $Title      = "Schedule an Unpack";
+  public $Title      = TITLE_agent_unpack;
   // public $MenuList   = "Jobs::Agents::Unpack";
   public $Version    = "1.0";
   public $Dependency = array("db");
@@ -69,7 +71,9 @@ class agent_unpack extends FO_Plugin
   {
     /* Prepare the job: job "unpack" */
     $jobpk = JobAddJob($uploadpk,"unpack",$Priority);
-    if (empty($jobpk) || ($jobpk < 0)) { return("Failed to insert job record"); }
+    if (empty($jobpk) || ($jobpk < 0)) { 
+$text = _("Failed to insert job record");
+	return($text); }
     if (!empty($Depends) && !is_array($Depends)) { $Depends = array($Depends); }
 
     /* job "unpack" has jobqueue item "unpack" */
@@ -79,12 +83,16 @@ class agent_unpack extends FO_Plugin
 	    INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk
 	    WHERE upload.upload_pk = '$uploadpk';";
     $jobqueuepk = JobQueueAdd($jobpk,"unpack",$jqargs,"no","pfile",$Depends);
-    if (empty($jobqueuepk)) { return("Failed to insert item into job queue"); }
+    if (empty($jobqueuepk)) { 
+$text = _("Failed to insert item into job queue");
+	return($text); }
 
     /* job "unpack" has jobqueue item "adj2nest" */
     $jqargs = "$uploadpk";
     $jobqueuepk = JobQueueAdd($jobpk,"adj2nest",$jqargs,"no","",array($jobqueuepk));
-    if (empty($jobqueuepk)) { return("Failed to insert adj2nest into job queue"); }
+    if (empty($jobqueuepk)) { 
+$text = _("Failed to insert adj2nest into job queue");
+	return($text); }
 
     return(NULL);
   } // AgentAdd()
@@ -110,11 +118,13 @@ class agent_unpack extends FO_Plugin
 	  if (empty($rc))
 	    {
 	    /* Need to refresh the screen */
-	    $V .= displayMessage('Unpack added to job queue');
+$text = _("Unpack added to job queue");
+	    $V .= displayMessage($text);
 	    }
 	  else
 	    {
-	    $V .= displayMessage("Unpack of Upload failed: $rc");
+$text = _("Unpack of Upload failed:");
+	    $V .= displayMessage($text.$rc);
 	    }
 	  }
 
@@ -137,16 +147,18 @@ class agent_unpack extends FO_Plugin
 	$Results = $DB->Action($SQL);
 	if (empty($Results[0]['upload_pk']))
 	  {
-	  $V .= "All uploaded files are already unpacked, or scheduled to be unpacked.";
+	  $V .= _("All uploaded files are already unpacked, or scheduled to be unpacked.");
 	  }
 	else
 	  {
 	  /* Display the form */
 	  $V .= "<form method='post'>\n"; // no url = this url
 	  $V .= "<ol>\n";
-	  $V .= "<li>Select an uploaded file to unpack.\n";
-	  $V .= "Only uploads that are not already unpacked (and not already scheduled) can be scheduled.\n";
-	  $V .= "<p />\nUnpack: <select name='upload'>\n";
+$text = _("Select an uploaded file to unpack.\n");
+	  $V .= "<li>$text";
+	  $V .= _("Only uploads that are not already unpacked (and not already scheduled) can be scheduled.\n");
+$text = _("Unpack:");
+	  $V .= "<p />\n$text <select name='upload'>\n";
 	  foreach($Results as $Row)
 	    {
 	    if (empty($Row['upload_pk'])) { continue; }
@@ -155,10 +167,12 @@ class agent_unpack extends FO_Plugin
 	    $V .= "<option value='" . $Row['upload_pk'] . "'>$Name</option>\n";
 	    }
 	  $V .= "</select><P />\n";
-	  $V .= "<li>Select optional analysis<br />\n";
+$text = _("Select optional analysis");
+	  $V .= "<li>$text<br />\n";
 	  $V .= AgentCheckboxMake(-1,$this->Name);
 	  $V .= "</ol>\n";
-	  $V .= "<input type='submit' value='Unpack!'>\n";
+$text = _("Unpack");
+	  $V .= "<input type='submit' value='$text!'>\n";
 	  $V .= "</form>\n";
 	  }
 	break;

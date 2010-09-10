@@ -24,9 +24,12 @@ global $GlobalReady;
 if (!isset($GlobalReady)) {
   exit;
 }
+
+define("TITLE_upload_url", _("Upload from URL"));
+
 class upload_url extends FO_Plugin {
   public $Name = "upload_url";
-  public $Title = "Upload from URL";
+  public $Title = TITLE_upload_url;
   public $Version = "1.0";
   public $MenuList = "Upload::From URL";
   public $Dependency = array("db", "agent_unpack");
@@ -40,16 +43,20 @@ class upload_url extends FO_Plugin {
   function Upload($Folder, $GetURL, $Desc, $Name) {
     /* See if the URL looks valid */
     if (empty($Folder)) {
-      return ("Invalid folder");
+$text = _("Invalid folder");
+      return ($text);
     }
     if (empty($GetURL)) {
-      return ("Invalid URL");
+$text = _("Invalid URL");
+      return ($text);
     }
     if (preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $GetURL) != 1) {
-      return ("Invalid URL: " . htmlentities($GetURL));
+$text = _("Invalid URL");
+      return ("$text: " . htmlentities($GetURL));
     }
     if (preg_match("@[[:space:]]@", $GetURL) != 0) {
-      return ("Invalid URL (no spaces permitted): " . htmlentities($GetURL));
+$text = _("Invalid URL (no spaces permitted)");
+      return ("$text: " . htmlentities($GetURL));
     }
     if (empty($Name)) {
       $Name = basename($GetURL);
@@ -62,18 +69,21 @@ class upload_url extends FO_Plugin {
     $Mode = (1 << 2); // code for "it came from wget"
     $uploadpk = JobAddUpload($ShortName, $GetURL, $Desc, $Mode, $Folder);
     if (empty($uploadpk)) {
-      return ("Failed to insert upload record");
+$text = _("Failed to insert upload record");
+      return ($text);
     }
     /* Prepare the job: job "wget" */
     $jobpk = JobAddJob($uploadpk, "wget");
     if (empty($jobpk) || ($jobpk < 0)) {
-      return ("Failed to insert job record");
+$text = _("Failed to insert job record");
+      return ($text);
     }
     /* Prepare the job: job "wget" has jobqueue item "wget" */
     /** 2nd parameter is obsolete **/
     $jobqueuepk = JobQueueAdd($jobpk, "wget", "$uploadpk - $GetURL", "no", NULL, NULL);
     if (empty($jobqueuepk)) {
-      return ("Failed to insert task 'wget' into job queue");
+$text = _("Failed to insert task 'wget' into job queue");
+      return ($text);
     }
     global $Plugins;
     $Unpack = & $Plugins[plugin_find_id("agent_unpack") ];
@@ -81,7 +91,9 @@ class upload_url extends FO_Plugin {
     AgentCheckBoxDo($uploadpk);
 
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
-    $msg = "The upload $Name has been scheduled. It is ";
+$text = _("The upload");
+$text1 = _("has been scheduled. It is");
+    $msg = "$text $Name $text1 ";
     $keep =  "<a href='$Url'>upload #" . $uploadpk . "</a>.\n";
     print displayMessage($msg,$keep);
     return (NULL);
@@ -112,7 +124,8 @@ class upload_url extends FO_Plugin {
             $Name = NULL;
           }
           else {
-            $V.= displayMessage("Upload failed for $GetUrl: $rc");
+$text = _("Upload failed for");
+            $V.= displayMessage("$text $GetUrl: $rc");
           }
         }
         /* Set default values */
@@ -120,30 +133,40 @@ class upload_url extends FO_Plugin {
           $GetURL = 'http://';
         }
         /* Display instructions */
-        $V.= "This option permits uploading a file from a remote web or FTP server to FOSSology.\n";
-        $V.= "The file to upload must be accessible via a URL and must not require human interaction ";
-        $V.= "such as login credentials.\n";
+        $V.= _("This option permits uploading a file from a remote web or FTP server to FOSSology.\n");
+        $V.= _("The file to upload must be accessible via a URL and must not require human interaction ");
+        $V.= _("such as login credentials.\n");
         /* Display the form */
         $V.= "<form method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
-        $V.= "<li>Select the folder for storing the uploaded file:\n";
+$text = _("Select the folder for storing the uploaded file:");
+        $V.= "<li>$text\n";
         $V.= "<select name='folder'>\n";
         $V.= FolderListOption(-1, 0);
         $V.= "</select><P />\n";
-        $V.= "<li>Enter the URL to the file:<br />\n";
+$text = _("Enter the URL to the file:");
+        $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='geturl' size=60 value='" . htmlentities($GetURL) . "'/><br />\n";
-        $V.= "<b>NOTE</b>: If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file. The URL can begin with HTTP://, HTTPS://, or FTP://.<P />\n";
-        $V.= "<li>(Optional) Enter a description of this file:<br />\n";
+$text = _("NOTE");
+$text1 = _(": If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file. The URL can begin with HTTP://, HTTPS://, or FTP://.");
+        $V.= "<b>$text</b>$text1<P />\n";
+$text = _("(Optional) Enter a description of this file:");
+        $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='description' size=60 value='" . htmlentities($Desc) . "'/><P />\n";
-        $V.= "<li>(Optional) Enter a viewable name for this file:<br />\n";
+$text = _("(Optional) Enter a viewable name for this file:");
+        $V.= "<li>$text<br />\n";
         $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
-        $V.= "<b>NOTE</b>: If no name is provided, then the uploaded file name will be used.<P />\n";
+$text = _("NOTE");
+$text1 = _(": If no name is provided, then the uploaded file name will be used.");
+        $V.= "<b>$text</b>$text1<P />\n";
         if (@$_SESSION['UserLevel'] >= PLUGIN_DB_ANALYZE) {
-          $V.= "<li>Select optional analysis<br />\n";
+$text = _("Select optional analysis");
+          $V.= "<li>$text<br />\n";
           $V.= AgentCheckBoxMake(-1, "agent_unpack");
         }
         $V.= "</ol>\n";
-        $V.= "<input type='submit' value='Upload!'>\n";
+$text = _("Upload");
+        $V.= "<input type='submit' value='$text!'>\n";
         $V.= "</form>\n";
         break;
       case "Text":
