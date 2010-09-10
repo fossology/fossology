@@ -73,16 +73,18 @@ pair.o: %.o: %.c %.h cvector.h
 # install build rules #
 #######################
 install: all
-	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)/
+	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/
 	$(INSTALL_PROGRAM) copyright.dic $(DATADIR)/
 	$(INSTALL_PROGRAM) names.dic $(DATADIR)/
 	$(INSTALL_PROGRAM) libcopyright.so $(DESTDIR)$(LIBDIR)/
+	make -C ui-plugin install
 
 uninstall:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)/$(EXE)
 	rm -f $(DATADIR)/copyright.dic
 	rm -f $(DATADIR)/names.dic
 	rm -f $(DESTDIR)$(LIBDIR)/libcopyright.so
+	make -C ui-plugin uninstall
 
 #####################
 # other build rules #
