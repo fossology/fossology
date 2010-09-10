@@ -134,7 +134,8 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
 
   /** copyright/email/url inspection Agent */
     memset(Cmd,'\0',sizeof(Cmd));
-    snprintf(Cmd,sizeof(Cmd)-1,"%s/copyright/run.py --model %s/model.dat --agent",AGENTDIR,DATADIR);
+    snprintf(Cmd, sizeof(Cmd)-1, "%s/copyright", AGENTDIR);
+    //snprintf(Cmd,sizeof(Cmd)-1,"%s/copyright/run.py --model %s/model.dat --agent",AGENTDIR,DATADIR);
     for(i=0; i<NumCPU1; i++)
       {
       fprintf(Fout,"agent=copyright %s| ",CmdHost);
