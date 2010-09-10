@@ -200,11 +200,14 @@ void test_cvector_push_back()
   /* run the functions */
   cvector_init(&vec, int_function_registry());
   cvector_push_back(vec, &tester);
+  cvector_push_back(vec, NULL);
 
   /* test the results */
   CU_ASSERT_EQUAL(*(int*)vec->data[0], tester);
   tester = 2;
   CU_ASSERT_NOT_EQUAL(*(int*)vec->data[0], tester);
+  CU_ASSERT_EQUAL(vec->size, 2);
+  CU_ASSERT_EQUAL(vec->data[1], NULL);
 
   cvector_destroy(vec);
   printf("\n");

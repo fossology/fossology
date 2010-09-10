@@ -84,7 +84,7 @@ int find_beginning(char* ptext, int idx)
   int maxback = 50;
   int minidx = idx - maxback;
 
-  while (idx-- && (idx > minidx))
+  while (--idx && (idx > minidx))
   {
     if (ptext[idx] == '\n') return idx;
   }
@@ -207,6 +207,24 @@ int load_dictionary(radix_tree dict, char* filename)
 }
 
 /**
+ * @brief Initialize the data in this entry
+ *
+ * clean up the strings and numbers in an entry so that we don't get any
+ * accidental overlap between the entries.
+ *
+ * @param entry the entry to initialize
+ */
+void copy_entry_init(copy_entry entry)
+{
+  memset(entry->text, '\0', sizeof(entry->text));
+  memset(entry->dict_match, '\0', sizeof(entry->dict_match));
+  memset(entry->name_match, '\0', sizeof(entry->name_match));
+  entry->start_byte = 0;
+  entry->end_byte = 0;
+  entry->type = NULL;
+}
+
+/**
  * @brief copy the data from the passed void* into a copyright entry
  *
  * This is a deep copy, any data that is pointed at will also be copied instead
@@ -278,24 +296,6 @@ function_registry* copy_entry_function_registry()
   ret->print = &copy_entry_print;
 
   return ret;
-}
-
-/**
- * @brief Initialize the data in this entry
- *
- * clean up the strings and numbers in an entry so that we don't get any
- * accidental overlap between the entries.
- *
- * @param entry the entry to initialize
- */
-void copy_entry_init(copy_entry entry)
-{
-  memset(entry->text, '\0', sizeof(entry->text));
-  memset(entry->dict_match, '\0', sizeof(entry->dict_match));
-  memset(entry->name_match, '\0', sizeof(entry->name_match));
-  entry->start_byte = 0;
-  entry->end_byte = 0;
-  entry->type = NULL;
 }
 
 /**

@@ -25,10 +25,15 @@ DEF = -DDATADIR='"$(DATADIR)"'
 EXE = copyright
 TESTDIR = tests
 
-OBJECTS = copyright.o \
-          cvector.o \
-		  radixtree.o \
-		  pair.o \
+OBJECTS  = copyright.o \
+           cvector.o \
+		   radixtree.o \
+		   pair.o \
+
+COVERAGE = copyright.o_cov \
+           cvector.o_cov \
+           radixtree.o_cov \
+           pair.o_cov \
 
 ##########################
 # executable build rules #
@@ -38,25 +43,16 @@ all: $(EXE)
 test: $(OBJECTS)
 	$(MAKE) -C $(TESTDIR) test
 
-coverage: libcopyright_cov.so
+coverage: $(COVERAGE)
 	$(MAKE) -C $(TESTDIR) coverage
 
-$(EXE): main.c libcopyright.so $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) main.c libcopyright.so $(CFLAGS_LOCAL) -o $@
-
-##############################
-# shared library build rules #
-##############################
-
-libcopyright.so: $(OBJECTS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) -shared -fPIC $(CFLAGS_LOCAL) $(OBJECTS) -o $@
-
-libcopyright_cov.so: $(OBJECTS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) -shared -fPIC $(CFLAGS_LOCAL) $(OBJECTS) -o $@
+$(EXE): main.c $(OBJECTS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
+	$(CC) main.c $(OBJECTS) $(CFLAGS_LOCAL) -o $@
 
 ######################
 # object build rules #
 ######################
+
 copyright.o: %.o: %.c %.h cvector.h radixtree.h
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
@@ -69,6 +65,22 @@ radixtree.o: %.o: %.c %.h
 pair.o: %.o: %.c %.h cvector.h
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
+########################
+# coverage build rules #
+########################
+
+copyright.o_cov: %.o_cov: %.c %.h cvector.h radixtree.h
+	$(CC) -c $(CFLAGS_LOCAL) -fprofile-arcs -ftest-coverage $(DEF) $<
+
+cvector.o_cov: %.o_cov: %.c %.h cvector.h
+	$(CC) -c $(CFLAGS_LOCAL) -fprofile-arcs -ftest-coverage $<
+
+radixtree.o_cov: %.o_cov: %.c %.h
+	$(CC) -c $(CFLAGS_LOCAL) -fprofile-arcs -ftest-coverage $<
+
+pair.o_cov: %.o_cov: %.c %.h cvector.h
+	$(CC) -c $(CFLAGS_LOCAL) -fprofile-arcs -ftest-coverage $<
+
 #######################
 # install build rules #
 #######################
@@ -76,21 +88,19 @@ install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/
 	$(INSTALL_PROGRAM) copyright.dic $(DATADIR)/
 	$(INSTALL_PROGRAM) names.dic $(DATADIR)/
-	$(INSTALL_PROGRAM) libcopyright.so $(DESTDIR)$(LIBDIR)/
 	make -C ui-plugin install
 
 uninstall:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)/$(EXE)
 	rm -f $(DATADIR)/copyright.dic
 	rm -f $(DATADIR)/names.dic
-	rm -f $(DESTDIR)$(LIBDIR)/libcopyright.so
 	make -C ui-plugin uninstall
 
 #####################
 # other build rules #
 #####################
 clean:
-	rm -f *.o *.so $(EXE)
+	rm -f *.o *.gcno *.gcda $(EXE)
 	rm -f False_Positives False_Negatives Matches Found
 	$(MAKE) -C tests/ clean
 
