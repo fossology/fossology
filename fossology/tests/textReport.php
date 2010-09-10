@@ -159,9 +159,6 @@ foreach($results as $suite => $result) {
 	}
 }
 
-print "suites run were:\n";
-print_r($suitesRun) . "\n";
-
 // print the summary and any failures and exceptions
 
 print "Test Results for FOSSology UI Test suite\n";
