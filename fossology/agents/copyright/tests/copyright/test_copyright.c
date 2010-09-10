@@ -52,12 +52,111 @@ struct copy_entry_internal
   char* type;
 };
 
+void  copy_entry_init(copy_entry entry);
 int find_beginning(char* ptext, int idx);
 int find_end(char* ptext, int idex, int bufsize);
-void strip_emtry_entries(copyright copy);
+void strip_emty_entries(copyright copy);
+int contains_copyright(radix_tree tree, char* string, char* buf);
+int load_dictionary(radix_tree dict, char* filename);
+void* copy_entry_copy(void* to_copy);
+void  copy_entry_destroy();
+void  copy_entry_print(void* to_print, FILE* ostr);
+function_registry* copy_entry_function_registry();
+int copyright_callout(pcre_callout_block* info);
 
 /* ************************************************************************** */
 /* **** local function tests ************************************************ */
+/* ************************************************************************** */
+
+void test_copy_entry_init()
+{
+  /* set up the test params */
+  struct copy_entry_internal entry;
+
+  /* start the test */
+  printf("Test copy_entry_init: ");
+  copy_entry_init(&entry);
+
+  /* check the results */
+  CU_ASSERT_EQUAL(entry.text[0], '\0');
+  CU_ASSERT_EQUAL(entry.name_match[0], '\0');
+  CU_ASSERT_EQUAL(entry.dict_match[0], '\0');
+  CU_ASSERT_EQUAL(entry.start_byte, 0);
+  CU_ASSERT_EQUAL(entry.end_byte, 0);
+  CU_ASSERT_EQUAL(entry.type, NULL);
+
+  printf("\n");
+}
+
+void test_find_beginning()
+{
+  /* set up the test params */
+  char* text = "hello this is a test, hello this is a test, hello this is a test,\nhello this is a test, hello this is a test";
+
+  /* start the test */
+  printf("Test find_beginning: ");
+
+  /* run some tests, these numbers index to specific locations in the above */
+  /* string, i.e. they are magic numbers, only change them if you know the  */
+  /* correct indices in the above string                                    */
+  CU_ASSERT_EQUAL(find_beginning(text, 10), 0);
+  CU_ASSERT_EQUAL(find_beginning(text, 60), 10);
+  CU_ASSERT_EQUAL(find_beginning(text, 70), 65);
+
+  printf("\n");
+}
+
+void test_find_end()
+{
+  /* set up the test params */
+  char* text = "hello this is a test, hello this is a test, hello this is a test,\nhello this is a test, hello this is a test";
+
+  /* start the test */
+  printf("Test find_end: ");
+
+  /* run some tests, these numbers index to specific locations in the above */
+  /* string, i.e. they are magic numbers, only change them if you know the  */
+  /* correct indices in the above string                                    */
+  CU_ASSERT_EQUAL(find_end(text, 0, strlen(text)), 64);
+  CU_ASSERT_EQUAL(find_end(text, 70, strlen(text)), 108);
+
+  printf("\n");
+}
+
+void test_strip_empty_entries()
+{
+  copyright copy;
+
+  /* start the test */
+  printf("Test strip_empty_entries: NOT IMPLEMENTED");
+  copyright_init(&copy);
+
+  // TODO implement
+
+  printf("\n");
+}
+
+void test_load_dictionary()
+{
+  radix_tree tree;
+
+  /* start the test */
+  printf("Test load_dictionary: ");
+  radix_init(&tree);
+
+  /* do the asserts */
+  CU_ASSERT_TRUE(load_dictionary(tree, "../../copyright.dic"));
+  CU_ASSERT_TRUE(radix_contains(tree, "copyright"));
+  CU_ASSERT_TRUE(radix_contains(tree, "(c)"));
+  CU_ASSERT_TRUE(radix_contains(tree, "author"));
+  CU_ASSERT_FALSE(load_dictionary(tree, "bad filename"));
+
+  radix_destroy(tree);
+  printf("\n");
+}
+
+/* ************************************************************************** */
+/* **** standard function tests ********************************************* */
 /* ************************************************************************** */
 
 void test_copyright_init()
@@ -65,12 +164,10 @@ void test_copyright_init()
   copyright copy;
 
   /* start the test */
-  printf("Test copyright_init: ");
+  printf("Test copyright_init: NOT IMPLEMENTED");
 
   /* start the tests */
   CU_ASSERT_TRUE(copyright_init(&copy));
-
-
 
   copyright_destroy(copy);
   printf("\n");
@@ -80,13 +177,13 @@ void test_copyright_init()
 /* **** cunit test info ***************************************************** */
 /* ************************************************************************** */
 
-CU_TestInfo copyright_local_testcases[] =
-{
-    CU_TEST_INFO_NULL
-};
-
 CU_TestInfo copyright_testcases[] =
 {
+    {"Testing copy_entry_init:", test_copy_entry_init},
+    {"Testing find_beginning:", test_find_beginning},
+    {"Testing find_end:", test_find_end},
+    {"Testing load_dictionary:", test_load_dictionary},
     {"Testing copyright_init:", test_copyright_init},
+    {"Testing strip_emtpy_entries:", test_strip_empty_entries},
     CU_TEST_INFO_NULL
 };

@@ -42,7 +42,6 @@ CU_SuiteInfo suites[] =
     {"Testing function registry:", NULL, NULL, function_registry_testcases},
     {"Testing cvector:", NULL, NULL, cvector_testcases},
     {"Testing radix tree:", NULL, NULL,  radix_testcases},
-    {"Testing copyright locals:", NULL, NULL, copyright_local_testcases},
     {"Testing copyright:", NULL, NULL, copyright_testcases},
     CU_SUITE_INFO_NULL
 };
