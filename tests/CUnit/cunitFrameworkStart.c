@@ -290,12 +290,24 @@ static int ExtractCunitRunSummary(const char FileName[1024])
   return 0;
 }
 
-static int GetTestResult(char *ProductList)
+int Preparing(char *ProductList)
 {
   char Dir[LINE];
   getcwd(Dir, LINE);
   char TwoDimensionalArray[LINE][LINE];
   printf("CurrentDir is: %s\n", Dir);
+  chdir("../../");
+  system("make clean");
+  system("make test");
+  chdir("./tests/CUnit");
+  return 0;
+}
+
+static int GetTestResult(char *ProductList)
+{
+  char TwoDimensionalArray[LINE][LINE];
+  Preparing(ProductList);
+  
   char *CollectResultCommand = "find ../../ -path ./tests -prune -o -name \"*Results.xml\" -exec ls {} \\;";
   CommandExecute(CollectResultCommand);
   Array2DimensionalArray(CommandResult, "\n", TwoDimensionalArray);
