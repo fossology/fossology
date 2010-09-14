@@ -74,8 +74,6 @@ void copyright_destroy(copyright copy);
 void copyright_clear(copyright copy);
 void copyright_analyze(copyright copy, FILE* file_name);
 void copyright_email_url(copyright copy, char* file);
-void copyright_add_name(copyright copy, const char* name);
-void copyright_add_entry(copyright copy, const char* entry);
 
 /* ************************************************************************** */
 /* **** Accessor Functions ************************************************** */
@@ -83,8 +81,8 @@ void copyright_add_entry(copyright copy, const char* entry);
 
 copyright_iterator copyright_begin(copyright copy);
 copyright_iterator copyright_end(copyright copy);
-char* copyright_at(copyright copy, int index);
-char* copyright_get(copyright copy, int index);
+copy_entry copyright_at(copyright copy, int index);
+copy_entry copyright_get(copyright copy, int index);
 int copyright_size(copyright copy);
 
 /* ************************************************************************** */
@@ -96,6 +94,5 @@ char* copy_entry_dict(copy_entry entry);
 char* copy_entry_type(copy_entry entry);
 unsigned int copy_entry_start(copy_entry entry);
 unsigned int copy_entry_end(copy_entry entry);
-int copy_entry_contains(copy_entry src, copy_entry dst);
 
 #endif /* COPYRIGHT_H_INCLUDE */

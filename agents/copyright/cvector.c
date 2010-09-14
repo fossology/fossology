@@ -214,45 +214,16 @@ cvector_iterator cvector_insert(cvector vec,
   /* do the actual insert function */
   vec->size++;
   ret = iter;
+  datum = vec->memory->copy(datum);
   while(iter != cvector_end(vec))
   {
     void* temp = *iter;
-    *iter = vec->memory->copy(datum);
+    *iter = datum;
     datum = temp;
     iter++;
   }
 
   return ret;
-}
-
-/*!
- * @brief insert a set of element from one containner into another
- *
- * insert element [first, last) from whatever container they belong to into
- * this cvector at position pos. All elements before pos will remain unchagned,
- * and all elements after pos will be move down (last - first) indexes.
- *
- * @param vec the vector that will be inserted into
- * @param pos the position in the vector to insert into
- * @param first the start of the block of elements to add
- * @param last the end of the block of elements to add
- */
-void cvector_insert_all(cvector vec,
-    cvector_iterator pos, cvector_iterator first, cvector_iterator last)
-{
-  /* local iterators */
-  cvector_iterator iter;
-
-  /* make sure that the provided iterators are in the correct order */
-  if(first < cvector_begin(vec) || last >= cvector_end(vec) || first > last)
-  {
-    fprintf(stderr, "cvector.c: ERROR: array index access out of bounds.\n");
-    fprintf(stderr, "cvector.c: ERROR: invalid iterator in intsert_all.\n");
-    exit(-1);
-  }
-
-  /* move all elements after pos down */
-  iter = pos + (last - first);
 }
 
 /* ************************************************************************** */
@@ -344,54 +315,6 @@ cvector_iterator cvector_remove(cvector vec, cvector_iterator iter)
   *iter = NULL;
 
   return old_pos - 1;
-}
-
-/*!
- * @brief removes a set of elements from the cvector
- *
- * removes all elements of the cvector that occur in the set [start, end). All
- * elements that occur before start will remain where they are, and all elements
- * that occur after end will move up (end - start) locations.
- *
- * @param vec the cvector to remove the elements from
- * @param start the location to start removing elements from
- * @param end the location to stop removing elements
- * @return an iterator to the element that is not at the position of start
- */
-cvector_iterator cvector_remove_all(cvector vec,
-    cvector_iterator start, cvector_iterator end)
-{
-  /* tmp variable for iterator storage */
-  cvector_iterator curr;
-
-  /* bounds check the incomming iterators */
-  if(start < cvector_begin(vec) || end >= cvector_end(vec) || start > end)
-  {
-    fprintf(stderr, "cvector.c: ERROR: array index access out of bounds.\n");
-    fprintf(stderr, "cvector.c: ERROR: invlaid iterator in remove_all.\n");
-    exit(-1);
-  }
-
-  /* destruct all the elements in [start, end) */
-  for(curr = start; curr != end; curr++)
-  {
-    vec->memory->destroy(*curr);
-  }
-
-  /* move all following elements up by (end - start) */
-  curr = start;
-  vec->size -= (end - start);
-  while(start != cvector_end(vec))
-  {
-    *start = *end;
-    start++;
-    end++;
-  }
-
-  /* make the final element in the vector NULL */
-  *start = NULL;
-
-  return curr;
 }
 
 /* ************************************************************************** */

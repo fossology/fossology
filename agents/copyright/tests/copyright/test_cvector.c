@@ -224,6 +224,8 @@ void test_cvector_insert()
   /* run the functions */
   cvector_init(&vec, int_function_registry());
   cvector_insert(vec, vec->data, &tester);
+  cvector_insert(vec, vec->data, &tester);
+  cvector_insert(vec, vec->data, &tester);
 
   /* test the results */
   CU_ASSERT_EQUAL(*(int*)vec->data[0], tester);

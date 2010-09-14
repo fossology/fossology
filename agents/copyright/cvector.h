@@ -84,8 +84,6 @@ void cvector_destroy(cvector vec);
 
 void cvector_push_back(cvector vec, void* datum);
 cvector_iterator cvector_insert(cvector vec, cvector_iterator iter, void* datum);
-void cvector_insert_all(cvector vec,
-    cvector_iterator pos, cvector_iterator first, cvector_iterator last);
 
 /* ************************************************************************** */
 /* **** Removal Functions *************************************************** */
@@ -94,8 +92,6 @@ void cvector_insert_all(cvector vec,
 void cvector_clear(cvector vec);
 void cvector_pop_back(cvector vec);
 cvector_iterator cvector_remove(cvector vec, cvector_iterator iter);
-cvector_iterator cvector_remove_all(cvector vec,
-    cvector_iterator start, cvector_iterator end);
 
 /* ************************************************************************** */
 /* **** Access Functions **************************************************** */
