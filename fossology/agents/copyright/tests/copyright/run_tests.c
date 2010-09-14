@@ -29,7 +29,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern CU_TestInfo function_registry_testcases[];
 extern CU_TestInfo cvector_testcases[];
-extern CU_TestInfo copyright_local_testcases[];
 extern CU_TestInfo copyright_testcases[];
 extern CU_TestInfo radix_testcases[];
 

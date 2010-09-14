@@ -84,7 +84,7 @@ int find_beginning(char* ptext, int idx)
   int maxback = 50;
   int minidx = idx - maxback;
 
-  while (--idx && (idx > minidx))
+  while (idx-- && (idx > minidx))
   {
     if (ptext[idx] == '\n') return idx;
   }
@@ -337,11 +337,12 @@ int copyright_callout(pcre_callout_block* info)
       new_entry->type = "url";
       break;
     default :
+      free(new_entry);
       return 1;
   }
 
   /* only log the new entry if it wasn't already located by the regex */
-  prev = cvector_get(data, cvector_size(data) - 1);
+  prev = *(cvector_end(data) - 1);
   if(cvector_size(data) != 0 &&
       ((!strcmp(prev->dict_match, "email") && !strcmp(new_entry->dict_match, "email"))
           ||  (!strcmp(prev->dict_match, "url") && !strcmp(new_entry->dict_match, "url"))))
@@ -564,29 +565,6 @@ void copyright_email_url(copyright copy, char* file)
       sizeof(ovector)/sizeof(int));  /* the size of the return vector         */
 }
 
-
-/**
- * @brief adds a new name to the diction of names
- *
- * @param copy the copyright instance to add to
- * @param name the name to add to the copyright instance
- */
-void copyright_add_name(copyright copy, const char* name)
-{
-  radix_insert(copy->name, name);
-}
-
-/**
- * @brief adds a new entry to the search dictionary
- *
- * @param copy the copyright instance to add to
- * @param entry the string entry to add to the copyright instance
- */
-void copyright_add_entry(copyright copy, const char* entry)
-{
-  radix_insert(copy->dict, entry);
-}
-
 /* ************************************************************************** */
 /* **** Accessor Functions ************************************************** */
 /* ************************************************************************** */
@@ -626,9 +604,9 @@ copyright_iterator copyright_end(copyright copy)
  * @param index the index to grab
  * @return the match at index
  */
-char* copyright_at(copyright copy, int index)
+copy_entry copyright_at(copyright copy, int index)
 {
-  return (char*)cvector_at(copy->entries, index);
+  return (copy_entry)cvector_at(copy->entries, index);
 }
 
 /**
@@ -638,9 +616,9 @@ char* copyright_at(copyright copy, int index)
  * @param index the index to grab
  * @return the match at index
  */
-char* copyright_get(copyright copy, int index)
+copy_entry copyright_get(copyright copy, int index)
 {
-  return (char*)cvector_get(copy->entries, index);
+  return (copy_entry)cvector_get(copy->entries, index);
 }
 
 /**
