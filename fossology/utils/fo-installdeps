@@ -83,7 +83,7 @@ if [ $BUILDTIME ]; then
          apt-get install \
             libmagic-dev libxml2-dev libextractor-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev \
-            python python-dev python-pyrex
+            python python-dev python-pyrex libpcre3-dev
          case "$CODENAME" in
             etch|dapper) apt-get install postgresql-server-dev-8.1;;
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
@@ -131,7 +131,7 @@ if [ $RUNTIME ]; then
             php5 php5-pgsql php-pear \
             libmagic1 libxml2 libextractor1c2a \
             binutils bzip2 cabextract cpio sleuthkit mkisofs xpdf-utils \
-               rpm tar upx-ucl unrar unzip p7zip
+               rpm tar upx-ucl unrar unzip p7zip libpcre3
          case "$CODENAME" in
             dapper) [ $AGENT ] || apt-get install postgresql-8.1;;
             etch)
