@@ -5,7 +5,6 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 TESTDIRS=tests
-
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -I/usr/include/rpm -lpq -lrpm $(ALL_CFLAGS)
 
 EXE=pkgagent
@@ -14,35 +13,33 @@ CFLAGS_LOCAL_RPM_4_4=$(CFLAGS_LOCAL) -D_RPM_4_4
 CFLAGS_LOCAL_RPM=$(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 
 all: $(EXE)
-$(EXE): main.c libpkgagent.so $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
-	$(CC) main.c libpkgagent.so $(CFLAGS_LOCAL) -o $@
+$(EXE): main.c pkgagent.o $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
+	$(CC) main.c pkgagent.o  $(CFLAGS_LOCAL) -o $@
 
-libpkgagent.so: pkgagent.c $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
+pkgagent.o: pkgagent.c pkgagent.h
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
-	$(CC) -shared -fPIC $< $(CFLAGS_LOCAL_RPM) -o $@; \
+	$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
 	else \
-	$(CC) -shared -fPIC $< $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
+	$(CC) -c $< $(CFLAGS_LOCAL_RPM_4_4); \
 	fi
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)	
-	$(INSTALL_PROGRAM) libpkgagent.so $(DESTDIR)$(LIBDIR)/libpkgagent.so
 
 uninstall:
 	rm -f $(DESTDIR)$(AGENTDIR)/$(EXE)
-	rm -f $(DESTDIR)$(LIBDIR)/libpkgagent.so
 
 test: all 
 	$(MAKE) -C $(TESTDIRS) test
 
-coverage: libpkgagent_cov.so
+coverage: pkgagent_cov.o
 	$(MAKE) -C $(TESTDIRS) coverage
 
-libpkgagent_cov.so: pkgagent.c $(DB) $(REPO) $(AGENTLIB) $(VARS) $(HDRS)
+pkgagent_cov.o: pkgagent.c pkgagent.h
 	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null ; then \
-	$(CC) -shared -fPIC -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM) -o $@; \
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM) -o $@; \
 	else \
-	$(CC) -shared -fPIC -fprofile-arcs -ftest-coverage $< $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
 fi
 
 clean:
