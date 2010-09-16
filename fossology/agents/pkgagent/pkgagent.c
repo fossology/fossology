@@ -28,6 +28,12 @@
  */
 #include "pkgagent.h"
 
+void *DB=NULL;
+int PKG_RPM = 0; /* *< Non-zero when it's RPM package */
+int PKG_DEB = 0; /* *< Non-zero when it's DEBINE package */
+int PKG_DEB_SRC = 0; /* *< Non-zero when it's DEBINE source package */
+int Verbose = 0;
+
 #ifdef SVN_REV
 char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif /* SVN_REV */
