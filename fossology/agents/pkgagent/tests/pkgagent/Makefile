@@ -34,5 +34,5 @@ pkgagent.o:
 	$(MAKE) -C ../../ $@
 
 clean:
-	rm -fr $(EXE) *.o core *.so *.g* *.xml *.txt results
+	rm -fr $(EXE) *.o core *.xml *.txt results
 

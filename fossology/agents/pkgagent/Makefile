@@ -43,7 +43,7 @@ pkgagent_cov.o: pkgagent.c pkgagent.h
 fi
 
 clean:
-	rm -f $(EXE) *.o *.so core *.gc*; \
+	rm -f $(EXE) *.o core *.gc*; \
 	$(MAKE) -C $(TESTDIRS) clean
 
 include $(DEPS)
