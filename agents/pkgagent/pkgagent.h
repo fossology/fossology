@@ -88,11 +88,11 @@ struct debpkginfo
   char standardsVersion[MAXCMD];
 };
 
-void *DB=NULL;
-int PKG_RPM = 0; /* *< Non-zero when it's RPM package */
-int PKG_DEB = 0; /* *< Non-zero when it's DEBINE package */
-int PKG_DEB_SRC = 0; /* *< Non-zero when it's DEBINE source package */
-int Verbose = 0;
+extern void *DB;
+extern int PKG_RPM; /* *< Non-zero when it's RPM package */
+extern int PKG_DEB; /* *< Non-zero when it's DEBINE package */
+extern int PKG_DEB_SRC; /* *< Non-zero when it's DEBINE source package */
+extern int Verbose;
 
 void ParseSchedInput(char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi);
 

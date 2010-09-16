@@ -29,7 +29,6 @@
 #include "pkgagent.h"
 
 #ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
 #endif /* SVN_REV */
 
 /***********************************************/
