@@ -128,7 +128,7 @@ $text = _("is missing required parameters.");
 $text = _("Display");
 $text1 = _("excludes");
 $text2 = _("files with these licenses");
-    if (!empty($Excl)) $V .= "<br>$text <b>$text1</b>$text2: $Excl";
+    if (!empty($Excl)) $V .= "<br>$text <b>$text1</b> $text2: $Excl";
 
 	$Offset = ($Page < 0) ? 0 : $Page*$Max;
     $order = "";

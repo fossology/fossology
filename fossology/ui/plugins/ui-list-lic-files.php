@@ -125,7 +125,7 @@ $text2 = _("with license");
 $text = _("Display");
 $text1 = _("excludes");
 $text2 = _("files with these extensions");
-    if (!empty($Excl)) $V .= "<br>$text <b>$text1</b>$text1: $Excl";
+    if (!empty($Excl)) $V .= "<br>$text <b>$text1</b> $text1: $Excl";
 
 	/* Get the page menu */
 	if (($Count >= $Max) && ($Page >= 0))
