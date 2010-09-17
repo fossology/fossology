@@ -26,27 +26,28 @@ OBJECTS = test_cvector.o \
           test_copyright.o \
           test_radixtree.o \
 
-TO_TEST = ../../copyright.o \
-          ../../cvector.o \
-          ../../radixtree.o \
-          ../../pair.o \
-
 all: $(EXE)
 
 test: $(EXE)
 	./$(EXE)
 
-coverage: $(OBJECTS) $(TO_TEST) run_tests.c
-	$(CC) run_tests.c -o $(EXE) $(OBJECTS) $(TO_TEST) $(CFLAGS_LOCAL) -fprofile-arcs -ftest-coverage
+coverage: $(OBJECTS) libcopyright_cov.a run_tests.c
+	$(CC) run_tests.c -o $(EXE) $(OBJECTS) ../../libcopyright_cov.a $(CFLAGS_LOCAL) $(FLAG_COV)
 	./$(EXE)
 	lcov --directory  ../../   --capture --output-file cov.txt; \
 	genhtml  -o  results cov.txt
 
-$(EXE): $(OBJECTS) $(TO_TEST) run_tests.c
-	$(CC) run_tests.c -o $@ $(OBJECTS) $(TO_TEST) $(CFLAGS_LOCAL)
+$(EXE): $(OBJECTS) libcopyright.a run_tests.c
+	$(CC) run_tests.c -o $@ $(OBJECTS) ../../libcopyright.a $(CFLAGS_LOCAL)
 
 $(OBJECTS): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
+
+libcopyright.a:
+	$(MAKE) -C ../../ $@
+
+libcopyright_cov.a:
+	$(MAKE) -C ../../ $@
 
 clean:
 	rm -rf $(EXE) *.o *.g *.xml *.txt *.gcda *.gcno results
