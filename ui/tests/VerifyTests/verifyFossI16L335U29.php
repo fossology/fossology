@@ -27,7 +27,6 @@
 require_once('../../../tests/fossologyTestCase.php');
 require_once('../../../tests/commonTestFuncs.php');
 require_once('../../../tests/TestEnvironment.php');
-require_once('../../../tests/testClasses/parseBrowseMenu.php');
 require_once('../../../tests/testClasses/parseMiniMenu.php');
 require_once('../../../tests/testClasses/parseFolderPath.php');
 //require_once('../../../tests/testClasses/parseLicenseTbl.php');
@@ -153,7 +152,6 @@ class verifyFossolyTest extends fossologyTestCase
                       "FAIL! >Download< not found\n");
 
 		/* Select the License link to View License Historgram */
-		$browse = new parseBrowseMenu($page);
 		$mini = new parseMiniMenu($page);
 		$miniMenu = $mini->parseMiniMenu();
 		$url = makeUrl($this->host, $miniMenu['Nomos License']);
