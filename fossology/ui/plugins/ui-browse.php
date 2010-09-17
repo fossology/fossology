@@ -230,7 +230,7 @@ $text = _("Refresh");
     $V.= "</td><td valign='top'>\n";
 $text = _("Uploads");
     $V.= "<center><H3>$text</H3></center>\n";
-    $V.= "<table class='text' border=0 width='100%' cellpadding=0>\n";
+    $V.= "<table class='text' id='browsetbl' border=0 width='100%' cellpadding=0>\n";
 $text = _("Upload Name and Description");
 $text1 = _("Upload Date");
     $V.= "<th>$text</th><th>$text1</th></tr>\n";
