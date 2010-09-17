@@ -30,14 +30,15 @@ OBJECTS  = copyright.o \
 		   radixtree.o \
 		   pair.o \
 
-COVERAGE = copyright.o_cov \
-           cvector.o_cov \
-           radixtree.o_cov \
-           pair.o_cov \
+COVERAGE = copyright_cov.o \
+           cvector_cov.o \
+           radixtree_cov.o \
+           pair_cov.o \
 
 ##########################
 # executable build rules #
-##########################		 
+##########################
+		 
 all: $(EXE)
 
 test: $(OBJECTS)
@@ -46,8 +47,18 @@ test: $(OBJECTS)
 coverage: $(COVERAGE)
 	$(MAKE) -C $(TESTDIR) coverage
 
-$(EXE): main.c $(OBJECTS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) main.c $(OBJECTS) $(CFLAGS_LOCAL) -o $@
+$(EXE): main.c libcopyright.a $(DB) $(REPO) $(AGENTLIB) $(VARS)
+	$(CC) main.c libcopyright.a $(CFLAGS_LOCAL) -o $@
+	
+#######################
+# library buidl rules #
+#######################
+
+libcopyright.a: $(OBJECTS)
+	ar cvr $@ $(OBJECTS)
+	
+libcopyright_cov.a: $(COVERAGE)
+	ar cvr $@ $(COVERAGE)
 
 ######################
 # object build rules #
@@ -69,21 +80,22 @@ pair.o: %.o: %.c %.h cvector.h
 # coverage build rules #
 ########################
 
-copyright.o_cov: %.o_cov: %.c %.h cvector.h radixtree.h
-	$(CC) -c $(CFLAGS_LOCAL) -fprofile-arcs -ftest-coverage $(DEF) $<
+copyright_cov.o: copyright.c copyright.h cvector.h radixtree.h
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) $(DEF) -o $@
 
-cvector.o_cov: %.o_cov: %.c %.h cvector.h
-	$(CC) -c $(CFLAGS_LOCAL) -fprofile-arcs -ftest-coverage $<
+cvector_cov.o: cvector.c cvector.h
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
-radixtree.o_cov: %.o_cov: %.c %.h
-	$(CC) -c $(CFLAGS_LOCAL) -fprofile-arcs -ftest-coverage $<
+radixtree_cov.o: radixtree.c radixtree.h
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
-pair.o_cov: %.o_cov: %.c %.h cvector.h
-	$(CC) -c $(CFLAGS_LOCAL) -fprofile-arcs -ftest-coverage $<
+pair_cov.o:  pair.c pair.h cvector.h
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
 #######################
 # install build rules #
 #######################
+
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/
 	$(INSTALL_PROGRAM) copyright.dic $(DATADIR)/
@@ -99,8 +111,9 @@ uninstall:
 #####################
 # other build rules #
 #####################
+
 clean:
-	rm -f *.o *.gcno *.gcda $(EXE)
+	rm -f *.o *.gcno *.gcda *.a $(EXE)
 	rm -f False_Positives False_Negatives Matches Found
 	$(MAKE) -C tests/ clean
 
