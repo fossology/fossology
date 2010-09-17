@@ -63,14 +63,17 @@ class zendTest extends fossologyTestCase
 
 		$name = 'zend-license';
 		$page = $this->mybrowser->clickLink('Browse');
-		$this->assertTrue($this->myassertText($page, "/$name/"),
-       "ckzend FAILED! did not find $name\n");
 		$this->assertTrue($this->myassertText($page, "/>View</"),
        "ckzend FAILED! >View< not found\n");
 		$this->assertTrue($this->myassertText($page, "/>Info</"),
        "ckzend FAILED! >Info< not found\n");
 		$this->assertTrue($this->myassertText($page, "/>Download</"),
        "ckzend FAILED! >Download< not found\n");
+		$page = $this->mybrowser->clickLink('Testing');
+    $this->assertTrue($this->myassertText($page, '/Testing/'),
+     "ckzend FAILED! Could not find Testing folder\n");
+    $this->assertTrue($this->myassertText($page, "/$name/"),
+       "ckzend FAILED! did not find $name\n");
 
 		/* Select archive */
 		$browse = new parseBrowseMenu($page, 'browsetbl', 1);
