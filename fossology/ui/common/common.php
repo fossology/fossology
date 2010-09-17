@@ -43,6 +43,7 @@ require_once("common-cache.php");
 require_once("common-ui.php");
 require_once("common-buckets.php");
 require_once("common-pkg.php");
+require_once("common-tags.php");
 
 /* Only include the command-line interface functions if it is required. */
 global $UI_CLI;
