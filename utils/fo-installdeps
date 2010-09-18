@@ -79,7 +79,7 @@ fi
 if [ $BUILDTIME ]; then
    echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
-      Debian|Ubuntu)
+      Debian|Ubuntu|LinuxMint)
          apt-get install \
             libmagic-dev libxml2-dev libextractor-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev \
@@ -88,7 +88,7 @@ if [ $BUILDTIME ]; then
             etch|dapper) apt-get install postgresql-server-dev-8.1;;
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
             sid) apt-get install postgresql-server-dev-8.4;;
-            lucid) apt-get install postgresql-server-dev-8.4;;
+            lucid|isadora) apt-get install postgresql-server-dev-8.4;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO release"; exit 1;;
          esac
          ;;
@@ -124,7 +124,7 @@ fi
 if [ $RUNTIME ]; then
    echo "*** Installing $DISTRO runtime dependencies ***";
    case "$DISTRO" in
-      Debian|Ubuntu)
+      Debian|Ubuntu|LinuxMint)
          [ $AGENT ] || apt-get install apache2 libapache2-mod-php5
          apt-get install \
             mail-transport-agent \
@@ -143,7 +143,7 @@ if [ $RUNTIME ]; then
             sid)
                [ $AGENT ] || apt-get install postgresql-8.4
                apt-get install libextractor-plugins;;
-            lucid)
+            lucid|isadora)
                [ $AGENT ] || apt-get install postgresql-8.4
                apt-get install libextractor-plugins;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO release"; exit 1;;
