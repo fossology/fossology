@@ -32,6 +32,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* are a very expensive object to create                                      */
 copyright copy;
 
+/* external function to test if a particular test failed */
+extern void (*test_failure)(void);
+
 /* ************************************************************************** */
 /* **** copyright local declarations **************************************** */
 /* ************************************************************************** */
@@ -88,6 +91,7 @@ void test_find_beginning()
   CU_ASSERT_EQUAL(find_beginning(text, 60), 10);
   CU_ASSERT_EQUAL(find_beginning(text, 70), 65);
 
+  test_failure();
   printf("\n");
 }
 
@@ -105,6 +109,7 @@ void test_find_end()
   CU_ASSERT_EQUAL(find_end(text, 0, strlen(text)), 64);
   CU_ASSERT_EQUAL(find_end(text, 70, strlen(text)), 108);
 
+  test_failure();
   printf("\n");
 }
 
@@ -129,6 +134,7 @@ void test_strip_empty_entries()
   CU_ASSERT_EQUAL(cvector_size(copy->entries), 1);
 
   cvector_clear(copy->entries);
+  test_failure();
   printf("\n");
 }
 
@@ -147,6 +153,7 @@ void test_contains_copyright()
       contains_copyright(copy->dict, "This does not contain one", buffer), 25);
   CU_ASSERT_EQUAL(strlen(buffer), 0);
 
+  test_failure();
   printf("\n");
 }
 
@@ -167,6 +174,7 @@ void test_load_dictionary()
   CU_ASSERT_FALSE(load_dictionary(tree, "bad filename"));
 
   radix_destroy(tree);
+  test_failure();
   printf("\n");
 }
 
@@ -187,6 +195,7 @@ void test_copy_entry_init()
   CU_ASSERT_EQUAL(entry.end_byte, 0);
   CU_ASSERT_EQUAL(entry.type, NULL);
 
+  test_failure();
   printf("\n");
 }
 
@@ -218,6 +227,7 @@ void test_copy_entry_copy()
   CU_ASSERT_TRUE(!strcmp(cpy->dict_match, "copyright"));
 
   free(cpy);
+  test_failure();
   printf("\n");
 }
 
@@ -250,14 +260,15 @@ void test_copyright_callout()
 
   /* do the asserts */
   CU_ASSERT_EQUAL(cvector_size(copy->entries), 3);
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_at(copy->entries, 0))->name_match, "email"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_at(copy->entries, 0))->dict_match, "email"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_at(copy->entries, 2))->name_match, "url"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_at(copy->entries, 2))->dict_match, "url"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_at(copy->entries, 0))->text, "This is ju"));
-  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_at(copy->entries, 2))->text, "his is jus"));
+  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->name_match, "email"));
+  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->dict_match, "email"));
+  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->name_match, "url"));
+  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->dict_match, "url"));
+  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 0))->text, "This is ju"));
+  CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 2))->text, "his is jus"));
 
   cvector_clear(copy->entries);
+  test_failure();
   printf("\n");
 }
 
@@ -284,6 +295,7 @@ void test_copyright_destroy()
   /* start the tests */
   copyright_destroy(copy);
 
+  test_failure();
   printf("\n");
 }
 
@@ -306,6 +318,7 @@ void test_copyright_clear()
   copyright_clear(copy);
   CU_ASSERT_EQUAL(cvector_size(copy->entries), 0);
 
+  test_failure();
   printf("\n");
 }
 
@@ -334,6 +347,7 @@ void test_copyright_analyze()
   CU_ASSERT_TRUE(!strcmp(((copy_entry)cvector_get(copy->entries, 4))->text,
       "http://www.not.a.url/index.html"));
 
+  test_failure();
   printf("\n");
 }
 
@@ -345,10 +359,11 @@ void test_copyright_email_url()
   /* run the tests */
   copyright_email_url(copy, "test.email@url.com http://www.testurl.com not_a_url");
   CU_ASSERT_EQUAL(cvector_size(copy->entries), 2);
-  CU_ASSERT_TRUE(!strcmp(cvector_at(copy->entries, 0), "test.email@url.com"));
-  CU_ASSERT_TRUE(!strcmp(cvector_at(copy->entries, 1), "http://www.testurl.com"));
+  CU_ASSERT_TRUE(!strcmp(cvector_get(copy->entries, 0), "test.email@url.com"));
+  CU_ASSERT_TRUE(!strcmp(cvector_get(copy->entries, 1), "http://www.testurl.com"));
 
   cvector_clear(copy->entries);
+  test_failure();
   printf("\n");
 }
 
@@ -360,6 +375,7 @@ void test_copyright_begin()
   /* make sure that the correct location is returned */
   CU_ASSERT_EQUAL((cvector_iterator)copyright_begin(copy), cvector_begin(copy->entries));
 
+  test_failure();
   printf("\n");
 }
 
@@ -371,6 +387,7 @@ void test_copyright_end()
   /* make sure that the correct location is returned */
   CU_ASSERT_EQUAL((cvector_iterator)copyright_end(copy), cvector_end(copy->entries));
 
+  test_failure();
   printf("\n");
 }
 
@@ -390,6 +407,7 @@ void test_copyright_at()
   CU_ASSERT_TRUE(!strcmp(copyright_at(copy, 0)->text, "words"));
 
   cvector_clear(copy->entries);
+  test_failure();
   printf("\n");
 }
 
@@ -409,6 +427,7 @@ void test_copyright_get()
   CU_ASSERT_TRUE(!strcmp(copyright_get(copy, 0)->text, "words"));
 
   cvector_clear(copy->entries);
+  test_failure();
   printf("\n");
 }
 
@@ -427,6 +446,7 @@ void test_copyright_size()
   CU_ASSERT_EQUAL(copyright_size(copy), 1);
 
   cvector_clear(copy->entries);
+  test_failure();
   printf("\n");
 }
 
@@ -441,6 +461,7 @@ void test_copy_entry_text()
   strcpy(entry.text, "This is simple text");
   CU_ASSERT_TRUE(!strcmp(copy_entry_text(&entry), "This is simple text"));
 
+  test_failure();
   printf("\n");
 }
 
@@ -455,6 +476,7 @@ void test_copy_entry_name()
   strcpy(entry.name_match, "Alex");
   CU_ASSERT_TRUE(!strcmp(copy_entry_name(&entry), "Alex"));
 
+  test_failure();
   printf("\n");
 }
 
@@ -469,6 +491,7 @@ void test_copy_entry_dict()
   strcpy(entry.dict_match, "copyright");
   CU_ASSERT_TRUE(!strcmp(copy_entry_dict(&entry), "copyright"));
 
+  test_failure();
   printf("\n");
 }
 
@@ -483,6 +506,7 @@ void test_copy_entry_type()
   entry.type = "statement";
   CU_ASSERT_TRUE(!strcmp(copy_entry_type(&entry), "statement"));
 
+  test_failure();
   printf("\n");
 }
 
@@ -497,6 +521,7 @@ void test_copy_entry_start()
   entry.start_byte = 100;
   CU_ASSERT_EQUAL(copy_entry_start(&entry), 100);
 
+  test_failure();
   printf("\n");
 }
 
@@ -511,6 +536,7 @@ void test_copy_entry_end()
   entry.end_byte = 100;
   CU_ASSERT_EQUAL(copy_entry_end(&entry), 100);
 
+  test_failure();
   printf("\n");
 }
 

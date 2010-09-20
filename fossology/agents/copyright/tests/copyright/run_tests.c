@@ -46,6 +46,23 @@ CU_SuiteInfo suites[] =
 };
 
 /* ************************************************************************** */
+/* **** test failure function *********************************************** */
+/* ************************************************************************** */
+
+void test_failure_function()
+{
+  static int num_failed = 0;
+  if(CU_get_number_of_tests_failed() != num_failed)
+  {
+    printf("FAILED");
+    num_failed++;
+  }
+}
+
+/* external function to test if a particular test failed */
+void (*test_failure)(void) = test_failure_function;
+
+/* ************************************************************************** */
 /* **** main test functions ************************************************* */
 /* ************************************************************************** */
 

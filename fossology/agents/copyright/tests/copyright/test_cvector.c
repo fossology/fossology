@@ -24,6 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* cunit includes */
 #include <CUnit/CUnit.h>
 
+/* external function to test if a particular test failed */
+extern void (*test_failure)(void);
+
 /* ************************************************************************** */
 /* **** cvector locals ****************************************************** */
 /* ************************************************************************** */
@@ -64,6 +67,7 @@ void test_int_function_registry()
   free(fr);
 
   /* finish the test */
+  test_failure();
   printf("\n");
 }
 
@@ -89,6 +93,7 @@ void test_char_function_registry()
   free(fr);
 
   /* finish the test */
+  test_failure();
   printf("\n");
 }
 
@@ -111,6 +116,7 @@ void test_double_function_registry()
 
   /* free memory */
   fr->destroy(cpy);
+  test_failure();
   free(fr);
 
   /* finish the test */
@@ -139,6 +145,7 @@ void test_pointer_function_registry()
   free(fr);
 
   /* finish the test */
+  test_failure();
   printf("\n");
 }
 
@@ -164,6 +171,7 @@ void test_string_function_registry()
   free(fr);
 
   /* finish the test */
+  test_failure();
   printf("\n");
 }
 
@@ -186,6 +194,7 @@ void test_cvector_init()
   CU_ASSERT_NOT_EQUAL(vec->data, NULL);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -210,6 +219,7 @@ void test_cvector_push_back()
   CU_ASSERT_EQUAL(vec->data[1], NULL);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -233,6 +243,7 @@ void test_cvector_insert()
   CU_ASSERT_NOT_EQUAL(*(int*)vec->data[0], tester);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -256,6 +267,7 @@ void test_cvector_clear()
   CU_ASSERT_EQUAL(vec->data[0], NULL);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -277,6 +289,7 @@ void test_cvector_pop_back()
   CU_ASSERT_EQUAL(vec->data[0], NULL);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -298,6 +311,7 @@ void test_cvector_remove()
   CU_ASSERT_EQUAL(vec->data[0], NULL);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -317,6 +331,7 @@ void test_cvector_get()
   CU_ASSERT_EQUAL(*(int*)cvector_get(vec, 0), tester);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -336,6 +351,7 @@ void test_cvector_at()
   CU_ASSERT_EQUAL(*(int*)cvector_at(vec, 0), tester);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -355,6 +371,7 @@ void test_cvector_begin()
   CU_ASSERT_EQUAL(cvector_begin(vec), vec->data);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -374,6 +391,7 @@ void test_cvector_end()
   CU_ASSERT_EQUAL(cvector_end(vec), vec->data+vec->size);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -396,6 +414,7 @@ void test_cvector_size()
   CU_ASSERT_EQUAL(cvector_size(vec), 2);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -420,6 +439,7 @@ void test_cvector_capacity()
   CU_ASSERT_EQUAL(cvector_capacity(vec), 4);
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -443,6 +463,7 @@ void test_cvector_at_error()
   /* test the results */;
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -462,6 +483,7 @@ void test_cvector_insert_error()
 
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 
@@ -480,6 +502,7 @@ void test_cvector_remove_error()
   /* test the results */;
 
   cvector_destroy(vec);
+  test_failure();
   printf("\n");
 }
 

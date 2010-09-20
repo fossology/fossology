@@ -26,6 +26,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* cunit includes */
 #include <CUnit/CUnit.h>
 
+/* external function to test if a particular test failed */
+extern void (*test_failure)(void);
+
 /* ************************************************************************** */
 /* **** radix local declarations ******************************************** */
 /* ************************************************************************** */
@@ -63,6 +66,7 @@ void test_radix_init_local()
   CU_ASSERT_EQUAL(tree->children[10], NULL);
 
   radix_destroy(tree);
+  test_failure();
   printf("\n");
 }
 
@@ -82,6 +86,7 @@ void test_radix_init()
   CU_ASSERT_EQUAL(tree->children[10], NULL);
 
   radix_destroy(tree);
+  test_failure();
   printf("\n");
 }
 
@@ -105,6 +110,7 @@ void test_radix_insert()
   CU_ASSERT_EQUAL(tree->children['h']->children['k'], NULL);
 
   radix_destroy(tree);
+  test_failure();
   printf("\n");
 }
 
@@ -129,6 +135,7 @@ void test_radix_insert_all()
   CU_ASSERT_EQUAL(tree->children['!']->character, '!');
 
   radix_destroy(tree);
+  test_failure();
   printf("\n");
 }
 
@@ -151,6 +158,7 @@ void test_radix_contains()
   CU_ASSERT_FALSE(radix_contains(tree, "worl"));
 
   radix_destroy(tree);
+  test_failure();
   printf("\n");
 }
 
@@ -175,6 +183,7 @@ void test_radix_match_local()
   CU_ASSERT_TRUE(!strcmp(buf, "hello hellohel"));
 
   radix_destroy(tree);
+  test_failure();
   printf("\n");
 }
 
@@ -202,6 +211,7 @@ void test_radix_match()
   CU_ASSERT_TRUE(!strcmp(buf, "hel"));
 
   radix_destroy(tree);
+  test_failure();
   printf("\n");
 }
 
