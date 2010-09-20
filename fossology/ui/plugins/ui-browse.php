@@ -219,7 +219,7 @@ class ui_browse extends FO_Plugin {
     $V.= "</form>\n";
     $V.= "</td><td valign='top'>\n";
     $V.= "<center><H3>Uploads</H3></center>\n";
-    $V.= "<table class='text' border=0 width='100%' cellpadding=0>\n";
+    $V.= "<table class='text' id='browsetbl' border=0 width='100%' cellpadding=0>\n";
     $V.= "<th>Upload Name and Description</th><th>Upload Date</th></tr>\n";
     foreach($Results as $Row) {
       if (empty($Row['upload_pk'])) {
