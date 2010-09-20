@@ -303,7 +303,6 @@ if (array_key_exists("a", $options)) {
 		// Nomos functional test (only 1 for now)
 		$zendLast = exec("fo-runTests -l ckzend.php -n 'Zend License Test' >> $logFile 2>&1", $dummy, $zlRtn);
 		LogAndPrint($LF, "\n");
-		fclose($LF);
 		
 		// Copyright tests
 		if (chdir($CopyRight) === FALSE) {
