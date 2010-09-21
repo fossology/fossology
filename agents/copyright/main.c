@@ -26,7 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossagent.h>
 #include <libfossdb.h>
 #include <libfossrepo.h>
-#include <libpq-fe.h>
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
@@ -338,7 +337,7 @@ void run_test_files(copyright copy)
  * @param copy the copyright instance to use to perform the analysis
  * @param file_list the list of files to analyze
  */
-void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
+void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk, FILE* mout)
 {
   /* locals */
   char sql[1024];               // buffer to hold the sql commands
@@ -346,7 +345,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
   extern int HBItemsProcessed;  // the number of items processed by this agent
   copyright_iterator finds;     // an iterator to access the copyrights
   FILE* input_fp;               // the file that will be analyzed
-  FILE * mout = NULL;           // the file that matches will be logged in
   PGresult* pgResult;           // the result of database quiers
 
   /* initialize memory */
@@ -354,18 +352,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
   tmp = NULL;
   finds = NULL;
   input_fp = NULL;
-
-  /* if the verbose flag has been set, we need to open the relevant files */
-  if(verbose)
-  {
-    mout = fopen("Matches", "w");
-    if(!mout)
-    {
-      fprintf(cerr, "FATAL: could not open Matches for logging\n");
-      fflush(cerr);
-      exit(-1);
-    }
-  }
 
   /* find the correct path to the file */
   if(*(int*)pair_second(curr) >= 0)
@@ -464,12 +450,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
     }
   }
 
-  /* we are finished with this file, close it and incriment heart beat */
-  if(verbose)
-  {
-    fclose(mout);
-  }
-
   fclose(input_fp);
   Heartbeat(++HBItemsProcessed);
 }
@@ -485,41 +465,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk)
 int setup_database(PGconn* pgConn)
 {
   /* locals */
-  int exists = 0;     // whether any piece of the table already exists
-  PGresult* pgResult; // the result from a database access
-
-  /* initialize memory */
-  pgResult = NULL;
-
-  /* start by creating the copyright sequence */
-  pgResult = PQexec(pgConn, create_database_squence);
-  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
-  {
-    if(strcmp(PQresultErrorMessage(pgResult), "relation \"copyright_ct_pk_seq\" already exists"))
-    {
-      fprintf(cerr, "ERROR: %s.%d: Could not create copyright_ct_pk_seq.\n", __FILE__, __LINE__);
-      fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
-      exit(-1);
-    }
-    else
-    {
-      exists = 1;
-    }
-  }
-  PQclear(pgResult);
-
-  /* if necessary change the owner of the copyright table */
-  if(!exists)
-  {
-    pgResult = PQexec(pgConn, alter_database_table);
-    if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
-    {
-      fprintf(cerr, "ERROR: %s.%d: Could not alter copyrght_ct_pk_seq.\n", __FILE__, __LINE__);
-      fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
-      exit(-1);
-    }
-  }
-  PQclear(pgResult);
+  PGresult* pgResult = NULL;  // the result from a database access
 
   /* create the copyright database table */
   pgResult = PQexec(pgConn, create_database_table);
@@ -746,6 +692,10 @@ int main(int argc, char** argv)
   copyright copy;               // the work horse of the copyright agent
   pair curr;                    // pair to push into the file list
 
+  /* verbose data */
+  char mdir[FILENAME_MAX];
+  FILE* mout = NULL;
+
   /* set the output streams */
   cout = stdout;
   cerr = stdout;
@@ -766,13 +716,21 @@ int main(int argc, char** argv)
     {
       case 'd': /* debugging */
         verbose = 1;
+        sprintf(mdir, "%s/Matches", DATADIR);
+        mout = fopen(mdir, "w");
+        if(!mout)
+        {
+          fprintf(cerr, "FATAL: could not open Matches for logging\n");
+          fflush(cerr);
+          exit(-1);
+        }
         break;
       case 'c': /* run from command line */
         pair_init(&curr, string_function_registry(), int_function_registry());
 
         pair_set_first(curr, optarg);
         pair_set_second(curr, &i);
-        perform_analysis(pgConn, copy, curr, agent_pk);
+        perform_analysis(pgConn, copy, curr, agent_pk, mout);
         num_files++;
 
         pair_destroy(curr);
@@ -839,7 +797,7 @@ int main(int argc, char** argv)
         c = atoi(PQgetvalue(pgResult, i, PQfnumber(pgResult, "pfile_pk")));
         pair_set_first(curr, PQgetvalue(pgResult, i, PQfnumber(pgResult, "pfilename")));
         pair_set_second(curr, &c);
-        perform_analysis(pgConn, copy, curr, agent_pk);
+        perform_analysis(pgConn, copy, curr, agent_pk, mout);
       }
 
       PQclear(pgResult);
@@ -853,6 +811,11 @@ int main(int argc, char** argv)
   if(db_connected)
   {
     DBclose(DataBase);
+  }
+
+  if(verbose)
+  {
+    fclose(mout);
   }
 
   copyright_destroy(copy);
