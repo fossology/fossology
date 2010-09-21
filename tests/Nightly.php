@@ -67,7 +67,6 @@ function reportError($error)
 // Using the standard source path /home/fosstester/fossology
 $tonight = new TestRun();
 
-/*
 // Step 1 update sources
 print "removing model.dat file so sources will update\n";
 $path = '/home/fosstester/fossology/agents/copyright_analysis/model.dat';
@@ -92,7 +91,7 @@ if($tonight->svnUpdate() !== TRUE)
 	exit(1);
 }
 
- //TODO: remove all log files as sudo
+//TODO: remove all log files as sudo
 
 // Step 2 make clean and make sources
 print "Making sources\n";
@@ -112,7 +111,6 @@ if($tonight->stopScheduler() !== TRUE)
   reportError($error);
 }
 
-*/
 // Step 4 install fossology
 print "Installing fossology\n";
 if($tonight->makeInstall() !== TRUE)
