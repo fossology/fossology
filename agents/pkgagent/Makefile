@@ -1,5 +1,6 @@
 # FOSSology Makefile - agents/pkgagent
 # Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+LANG=C
 TOP=../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
