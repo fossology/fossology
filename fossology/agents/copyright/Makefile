@@ -48,7 +48,7 @@ coverage: $(COVERAGE)
 	$(MAKE) -C $(TESTDIR) coverage
 
 $(EXE): main.c libcopyright.a $(DB) $(REPO) $(AGENTLIB) $(VARS)
-	$(CC) main.c libcopyright.a $(CFLAGS_LOCAL) -o $@
+	$(CC) main.c libcopyright.a $(DEF) $(CFLAGS_LOCAL) -o $@
 	
 #######################
 # library buidl rules #
