@@ -49,6 +49,7 @@
 
 require_once ('TestEnvironment.php');
 require_once ('testClasses/check4jobs.php');
+require_once ('mailTo.php');
 
 $usage = NULL;
 $usage.= "Usage: $argv[0] [-l path] {[-a] | [-b] | [-h] | [-s] | [-v -l]}\n";
@@ -67,6 +68,7 @@ $usage.= "-a: Run all FOSSology Test Suites\n" .
 global $logFile;
 global $logFileName;
 global $LF;
+global $mailTo;
 
 $SiteTests = '../ui/tests/SiteTests';
 $BasicTests = '../ui/tests/BasicTests';
@@ -129,7 +131,7 @@ function _runTestEnvSetup() {
 	LogAndPrint($LF, "\n");
 	$UpLast = exec("./uploadTestData.php >> $logFile 2>&1", $dummy, $SUrtn);
 	LogAndPrint($LF, "\n");
-	$UpLast = exec("./fo-runTests.php  -l uploadCopyrightData.php >> $logFile 2>&1", $dummy, $Copyrtn);
+	$UpLast = exec("./fo-runTests.php  -l uploadCopyrightData.php -n 'Upload copyright data'>> $logFile 2>&1", $dummy, $Copyrtn);
 	$AALast = exec("./fo-runTests.php -l AgentAddData.php -n 'Agent Add Uploads'>> $logFile 2>&1", $dummy, $AArtn);
 	LogAndPrint($LF, "\n");
 	// need to check the return on the setup and report accordingly.
@@ -301,7 +303,6 @@ if (array_key_exists("a", $options)) {
 		// Nomos functional test (only 1 for now)
 		$zendLast = exec("fo-runTests -l ckzend.php -n 'Zend License Test' >> $logFile 2>&1", $dummy, $zlRtn);
 		LogAndPrint($LF, "\n");
-		fclose($LF);
 		
 		// Copyright tests
 		if (chdir($CopyRight) === FALSE) {
@@ -321,11 +322,8 @@ if (array_key_exists("a", $options)) {
 		$reportHome = "$resultsHome" . "$logFileName";
 
 		if(array_key_exists('e', $options)) {
-			$TO = "mark.donohoe@hp.com mary.laser@hp.com ";
-			//$TO = "mark.donohoe@hp.com mary.laser@hp.com " .
-			//      "bob.gobeille@hp.com dong.ma@hp.com";
 			$last = exec("./textReport.php -f $reportHome |
-    mailx -s \"test results\" $TO ",$tossme, $rptGen);
+    mailx -s \"test results\" $mailTo ",$tossme, $rptGen);
 		}
 		$last = system("./textReport.php -f $reportHome", $rtn);
 		if($last === FALSE) {
