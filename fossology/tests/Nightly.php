@@ -54,12 +54,20 @@ function reportError($error)
 
 	$msg = $hdr . $error . "\n";
 
-	$last = exec("mailx -s \"test Setup Failed\" $mailTo < $msg ",$tossme, $rptGen);
-}
+	// mailx will not take a string as the message body... save to a tmp
+	// file and give it that.
+	
+	$tmpFile = tempnam('.', 'testError');
+	$F = fopen($tmpFile, 'w') or die("Can not open tmp file $tmpFile\n");
+	fwrite($F, $msg);
+	fclose($F);
+	$last = exec("mailx -s 'test Setup Failed' mark.donohoe@hp.com < $tmpFile ",$tossme, $rptGen);
+	}
 
 // Using the standard source path /home/fosstester/fossology
 $tonight = new TestRun();
 
+/*
 // Step 1 update sources
 print "removing model.dat file so sources will update\n";
 $path = '/home/fosstester/fossology/agents/copyright_analysis/model.dat';
@@ -84,9 +92,8 @@ if($tonight->svnUpdate() !== TRUE)
 	exit(1);
 }
 
-/*
- * TODO: remove all log files as sudo
- */
+ //TODO: remove all log files as sudo
+
 // Step 2 make clean and make sources
 print "Making sources\n";
 if($tonight->makeSrcs() !== TRUE)
@@ -105,6 +112,7 @@ if($tonight->stopScheduler() !== TRUE)
   reportError($error);
 }
 
+*/
 // Step 4 install fossology
 print "Installing fossology\n";
 if($tonight->makeInstall() !== TRUE)
@@ -122,10 +130,15 @@ if($tonight->makeInstall() !== TRUE)
  */
 
 print "Running fo-postinstall\n";
-if($tonight->foPostinstall() !== TRUE)
+$iRes = $tonight->foPostinstall();
+print "install results are:$iRes\n";
+
+if($iRes !== TRUE)
 {
+	
 	$error = "There were errors in the postinstall process check fop.out\n";
 	print $error;
+	print "calling reportError\n";
   reportError($error);
 	exit(1);
 }
