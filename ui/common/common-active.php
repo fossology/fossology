@@ -59,10 +59,10 @@ function PopupAlert	($Message) {
 function displayMessage($Message,$keep=NULL) {
 
   $HTML = NULL;
-  $HTML .= "\n<div id='dmessage' style='text-indent:75px'>\n";
-  $HTML .= "<button name='eraseme' value='close' onclick='rmMsg()'" .
-           " style='position:absolute;left:10px'>Close</button>\n";
-  $HTML .= "<p>" . htmlentities($Message,ENT_QUOTES) . "\n";
+  $HTML .= "\n<div id='dmessage'>";
+  $text = _("Close");
+  $HTML .= "<button name='eraseme' value='close' onclick='rmMsg()'> $text</button>\n";
+  $HTML .= htmlentities($Message,ENT_QUOTES) . "\n";
   $HTML .= $keep . "\n</p>";
   $HTML .= "  <hr>\n";
   $HTML .= "</div>\n";
