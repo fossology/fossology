@@ -66,11 +66,11 @@ class uploadCopyRdata extends fossologyTestCase
     $upload = NULL;
     
     $copyrightList = array ('TestData/archives/3files.tar.bz2',
-    												'../agents/copyright_analysis/testdata/tdata1',
-    												'../agents/copyright_analysis/testdata/tdata2',
-    												'../agents/copyright_analysis/testdata/tdata3',
-    												'../agents/copyright_analysis/testdata/tdata4',
-    												'../agents/copyright_analysis/testdata/tdata5'
+    												'copyright/testdata/tdata1',
+    												'copyright/testdata/tdata2',
+    												'copyright/testdata/tdata3',
+    												'.copyright/testdata/tdata4',
+    												'copyright/testdata/tdata5'
     												);
 
     /* upload the archives using the upload from file menu
@@ -86,7 +86,7 @@ class uploadCopyRdata extends fossologyTestCase
     print "Starting copyright uploads\n";
     foreach($copyrightList as $upload) {
       $description = "File $upload uploaded by Upload Test Data Test";
-      $this->uploadFile('Copyright', $upload, $description, null, '2,3,5');
+      $this->uploadFile('Copyright', $upload, $description, null, '2,5');
     }
   }
 }
