@@ -373,7 +373,6 @@ $text1 = _("Total URLs");
     }
 
     /* Combine VF and VLic */
-    $V .= _("We realize there may be many false positives in this report.  They will be addressed in the next release.<p>");
 $text = _("Jump to");
 $text1 = _("Emails");
 $text2 = _("Copyright Statements");
