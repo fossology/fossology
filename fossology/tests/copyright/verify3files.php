@@ -99,11 +99,10 @@ class verify3filesCopyright extends fossologyTestCase
 		$this->assertTrue($this->myassertText($page, "/Affero-v1\.0/"),
       "verify3files FAILED! '3files/' not found\n");
 		$this->assertTrue($this->myassertText($page, "/3 items/"),
-      "verify3files FAILED! '1 item' not found\n");
+      "verify3files FAILED! '3 items' not found\n");
 
 
 		/* Select the Copyright/Email/URL link  */
-		$browse = new parseBrowseMenu($page);
 		$mini = new parseMiniMenu($page);
 		$miniMenu = $mini->parseMiniMenu();
 		$url = makeUrl($this->host, $miniMenu['Copyright/Email/URL']);
@@ -117,10 +116,10 @@ class verify3filesCopyright extends fossologyTestCase
 		//print "page after get of $url is:\n$page\n";
 		$this->assertTrue($this->myassertText($page, '/Copyright\/Email\/URL Browser/'),
           "verify3files FAILED! Copyright/Email/URL Browser Title not found\n");
-		$this->assertTrue($this->myassertText($page, '/Total Copyrights: 3/'),
-        "verify3files FAILED! Total copyrights does not equal 3\n");
-		$this->assertTrue($this->myassertText($page, '/Unique Copyrights: 3/'),
-        "verify3files FAILED! Unique Copyrights does not equal 3\n");
+		$this->assertTrue($this->myassertText($page, '/Total Copyrights: 6/'),
+        "verify3files FAILED! Total copyrights does not equal 6\n");
+		$this->assertTrue($this->myassertText($page, '/Unique Copyrights: 6/'),
+        "verify3files FAILED! Unique Copyrights does not equal 6\n");
 		
 		// get the count, show links and text or link
 		$copyR = new domParseLicenseTbl($page, 'copyright');

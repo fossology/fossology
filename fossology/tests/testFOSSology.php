@@ -263,11 +263,6 @@ if (array_key_exists("a", $options)) {
 		$cUInoHome = "All Tests ERROR: can't cd to $Home\n";
 		LogAndPrint($LF, $cUInoHome);
 	}
-	if (chdir($CopyRight) === FALSE) {
-		LogAndPrint($LF, "ALL Tests ERROR: can't cd to $CopyRight\n");
-	}
-	$CopyLast = exec("fo-runTests -l \"classifierTest.php\" -n 'Classifier Tests' >> $logFile 2>&1", $dummy, $CRrtn);
-	LogAndPrint($LF, "\n");
 
 	/*
 	 * The verify tests require that uploads be done first.
