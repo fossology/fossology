@@ -93,10 +93,12 @@ class agent_nomos_once extends FO_Plugin {
       $ThisMod = 0;
     }
     /*
-     Check for a wget post (wget cannot post to a variable name).  Sets the
-     unlink_flag if there is a temp file.
+     * This if stmt is true only for wget.
+     * For wget, populate the $_FILES array, just like the UI post would do.
+     * Sets the unlink_flag if there is a temp file.
      */
-    if ($ThisMod && empty($_POST['licfile'])) {
+    if ($ThisMod && empty($_POST['showheader']) && ($_SERVER['REQUEST_METHOD'] == "POST"))
+    {
       $Fin = fopen("php://input", "r");
       $Ftmp = tempnam(NULL, "fosslic-alo-");
       $Fout = fopen($Ftmp, "w");
@@ -106,16 +108,27 @@ class agent_nomos_once extends FO_Plugin {
       }
       fclose($Fin);
       fclose($Fout);
-      if (filesize($Ftmp) > 0) {
+
+      /* Populate _FILES from wget so the processing logic only has to look in one
+       * place wether the data came from wget or the UI
+       */
+      if (filesize($Ftmp) > 0) 
+      {
         $_FILES['licfile']['tmp_name'] = $Ftmp;
         $_FILES['licfile']['size'] = filesize($Ftmp);
         $_FILES['licfile']['unlink_flag'] = 1;
         $this->NoHTML = 1;
       }
-      else {
+      else 
+      {
         unlink($Ftmp);
-        echo "FATAL: Missing POST file\n";
-        exit(1);
+        /* If there is no input data, then something is wrong.  
+         * For example the php POST limit is too low and prevented
+         * the data from coming through.  Or there was an apache redirect,
+         * which removes the POST data.
+         */
+        $text = _("FATAL: your file did not get passed throught.  Make sure this page wasn't a result of a web server redirect, or that it didn't exceed your php POST limit.");
+        echo $text;
       }
     }
 
@@ -150,10 +163,13 @@ $text = _("Nomos One-shot, real-time license analysis");
     global $DATADIR;
     global $PROJECTSTATEDIR;
 
+    /* Ignore php Notice is array keys don't exist */
+    $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
     $tmp_name = $_FILES['licfile']['tmp_name'];
+    error_reporting($errlev);
 
     /* For REST API:
-       wget -O - --post-file=myfile.c http://myserv.com/?mod=agent_nomos_once
+       wget -qO - --post-file=myfile.c http://myserv.com/?mod=agent_nomos_once
      */
     if ($this->NoHTML && file_exists($tmp_name))
     {
