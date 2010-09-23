@@ -69,7 +69,7 @@ class uploadCopyRdata extends fossologyTestCase
     												'copyright/testdata/tdata1',
     												'copyright/testdata/tdata2',
     												'copyright/testdata/tdata3',
-    												'.copyright/testdata/tdata4',
+    												'copyright/testdata/tdata4',
     												'copyright/testdata/tdata5'
     												);
 
