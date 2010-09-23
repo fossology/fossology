@@ -158,7 +158,7 @@ class fossologyTest extends WebTestCase
   *@return int $FolderId, NULL on error
   *
   */
-  public function getFolderId($folderName, $page, $selectName=NULL) {
+  public function getFolderId($folderName, $page, $selectName) {
     if(empty($folderName)) {
       return(NULL);
     }
@@ -365,8 +365,8 @@ class fossologyTest extends WebTestCase
    * @param string $page the page to search
    * @param string $selectName the name of the select
    * @param string $optionText the text of the option statement
-   * @return mixed $select either array (if first two args present) or int if
-   * all three arguments present. NULL on error.
+   * @return mixed $select either array (if first two args present) or 
+   * int if all three arguments present. NULL on error.
    *
    * Format of the array returned:
    *
@@ -402,7 +402,7 @@ class fossologyTest extends WebTestCase
         $cleanText = trim($htmlGone);
         if(!empty($optionText)) {
           $noDotOptText = escapeDots($optionText);
-          $match = preg_match("/^$noDotOptText/", $cleanText, $matches);
+          $match = preg_match("/^$noDotOptText$/", $cleanText, $matches);
           if($match) {
             /* Use the matched optionText instead of the whole string */
             //print "Adding matches[0] to select array\n";
@@ -419,7 +419,7 @@ class fossologyTest extends WebTestCase
           $foo = $selectList->item($i)->getAttribute('onload');
         }
       }
-    }
+    } //for
 
     /*
      * if there were no selects found, then we were passed something that
@@ -428,7 +428,8 @@ class fossologyTest extends WebTestCase
     if (empty($Selects)) {
       return(NULL);
     }
-    /* Return either an int, or an array */
+    //print "FTPSS: selects array is:\n";print_r($Selects) . "\n";
+    /* Return either an int or an array */
     if (!is_null($optionText)) {
       if(array_key_exists($optionText,$Selects[$selectName])){
         return($Selects[$selectName][$optionText]);   // int
