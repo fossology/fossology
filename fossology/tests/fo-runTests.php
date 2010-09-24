@@ -52,7 +52,8 @@ require_once SIMPLE_TEST . 'reporter.php';
 require_once SIMPLE_TEST . 'web_tester.php';
 
 require_once ('TestEnvironment.php');
-require_once(TESTROOT . '/testClasses/timer.php');
+$tr = TESTROOT;
+require_once($tr . '/testClasses/timer.php');
 
 
 $Usage =  "Usage: $argv[0] options...
