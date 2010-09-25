@@ -1,0 +1,223 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Stefan Schroeder <stefan_fkp@sf.net>, 2010.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: FOSSOLOGY 1.3pre\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-09-25 15:56+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Stefan Schroeder <e-mail see project page>\n"
+"Language-Team: visit fossology.org/i18n\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: index.php:51
+msgid "Module unavailable or your login session timed out."
+msgstr ""
+
+#: index.php:53
+msgid "Click"
+msgstr ""
+
+#: index.php:54
+msgid "here"
+msgstr ""
+
+#: index.php:55
+msgid "to continue."
+msgstr ""
+
+#: plugins/ui-welcome.php:27
+msgid "Getting Started with FOSSology"
+msgstr "Einführung in FOSSology"
+
+#: plugins/ui-welcome.php:50 plugins/ui-welcome.php:53
+msgid "Browse"
+msgstr ""
+
+#: plugins/ui-welcome.php:56 plugins/ui-welcome.php:59
+msgid "Search"
+msgstr "Suche"
+
+#: plugins/ui-welcome.php:62 plugins/ui-welcome.php:65
+msgid "Login"
+msgstr ""
+
+#: plugins/ui-welcome.php:66
+msgid "The FOSSology Toolset"
+msgstr ""
+
+#: plugins/ui-welcome.php:67
+msgid ""
+"FOSSology is a framework for software analysis tools. The current FOSSology "
+"tools can:"
+msgstr ""
+
+#: plugins/ui-welcome.php:68
+msgid "Identify licenses in software"
+msgstr ""
+
+#: plugins/ui-welcome.php:69
+msgid "Allow browsing uploaded file hierarchies"
+msgstr ""
+
+#: plugins/ui-welcome.php:70
+msgid "Extract MIME type and meta data information"
+msgstr ""
+
+#: plugins/ui-welcome.php:71
+msgid "FOSSology's Graphical User Interface"
+msgstr ""
+
+#: plugins/ui-welcome.php:72
+msgid ""
+"This website is an interface into the FOSSology project. With it, you can:"
+msgstr ""
+
+#: plugins/ui-welcome.php:73
+msgid "Upload files to analyze."
+msgstr ""
+
+#: plugins/ui-welcome.php:74
+msgid "Unpack and store the data within the files for analysis. "
+msgstr ""
+
+#: plugins/ui-welcome.php:75
+msgid "Invoke specialized agents to scan and analyze the files.  "
+msgstr ""
+
+#: plugins/ui-welcome.php:76
+msgid "Store and display the analyzed results. "
+msgstr ""
+
+#: plugins/ui-welcome.php:77
+msgid "How to Begin"
+msgstr ""
+
+#: plugins/ui-welcome.php:78
+msgid ""
+"The menu at the top contains all the primary capabilities of FOSSology. Most "
+"functions require you to log in before they can be accessed. The following "
+"functions are available without logging in:"
+msgstr ""
+
+#: plugins/ui-welcome.php:79
+msgid ""
+"If you don't know where to start, try browsing the currently uploaded "
+"projects. "
+msgstr ""
+
+#: plugins/ui-welcome.php:80
+msgid "Look through the uploaded projects for specific files. "
+msgstr ""
+
+#: plugins/ui-welcome.php:81
+msgid ""
+"If you log in, you can access additional capabilities. Depending on your "
+"account's access rights,"
+msgstr ""
+
+#: plugins/ui-welcome.php:82
+msgid ""
+"you may be able to upload files, schedule analysis tasks, or even add new "
+"users."
+msgstr ""
+
+#: plugins/ui-welcome.php:83
+msgid "Inside FOSSology"
+msgstr ""
+
+#: plugins/ui-welcome.php:84
+msgid "Some parts of FOSSology helpful to know about are:"
+msgstr ""
+
+#: plugins/ui-welcome.php:85
+msgid "Software Repository"
+msgstr ""
+
+#: plugins/ui-welcome.php:86
+msgid "- Stores files downloaded for analysis."
+msgstr ""
+
+#: plugins/ui-welcome.php:87
+msgid "Database"
+msgstr ""
+
+#: plugins/ui-welcome.php:88
+msgid "- Stores user accounts, file information, and analysis results."
+msgstr ""
+
+#: plugins/ui-welcome.php:89
+msgid "Agents"
+msgstr ""
+
+#: plugins/ui-welcome.php:90
+msgid ""
+"- Perform analysis of files and data found in the Software Repository and "
+"Database."
+msgstr ""
+
+#: plugins/ui-welcome.php:91
+msgid "Scheduler"
+msgstr ""
+
+#: plugins/ui-welcome.php:92
+msgid "- Runs the agents, making efficient  use of available resources."
+msgstr ""
+
+#: plugins/ui-welcome.php:93
+msgid "Web GUI"
+msgstr ""
+
+#: plugins/ui-welcome.php:94
+msgid "- Provides user access to FOSSology."
+msgstr ""
+
+#: plugins/ui-welcome.php:95
+msgid "Command line utilities"
+msgstr ""
+
+#: plugins/ui-welcome.php:96
+msgid "- Provides scripting access to FOSSology."
+msgstr ""
+
+#: plugins/ui-welcome.php:97
+msgid "Need Some Help?"
+msgstr ""
+
+#: plugins/ui-welcome.php:98
+msgid "Now that you've been introduced to Fossology, try exploring it!"
+msgstr ""
+
+#: plugins/ui-welcome.php:99
+msgid "The following resources will provide additional help and information:"
+msgstr ""
+
+#: plugins/ui-welcome.php:100
+msgid "Help tab"
+msgstr ""
+
+#: plugins/ui-welcome.php:101
+msgid "- Select this website's Help tab for software-related help and tips."
+msgstr ""
+
+#: plugins/ui-welcome.php:102
+msgid "FOSSology web site"
+msgstr ""
+
+#: plugins/ui-welcome.php:103
+msgid "- Where you can find more information and get help on FOSSology."
+msgstr ""
+
+#: plugins/ui-welcome.php:104
+msgid "FOSSbazaar web site"
+msgstr ""
+
+#: plugins/ui-welcome.php:105
+msgid "- A community website with information on Open Source Governance."
+msgstr ""
