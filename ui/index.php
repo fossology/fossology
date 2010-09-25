@@ -25,6 +25,7 @@
  ***************************************************************/
 $GlobalReady=1;
 
+//require("i18n.php"); DISABLED until i18n infrastructure is set-up.
 require_once(dirname(__FILE__) . '/../php/pathinclude.php');
 require_once("common/common.php");
 
