@@ -25,6 +25,8 @@
  * without a web browser.
  * 
  * To run a single PHPUnit test, type phpunit <test-file>
+ * 
+ * @version "$Id$"
  *
  */
 

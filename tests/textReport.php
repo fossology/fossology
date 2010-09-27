@@ -26,7 +26,7 @@
  *
  * @param string $resultsFile -f <file>
  *
- * @version "$Id: $"
+ * @version "$Id$"
  *
  * Created on Aug. 25, 1009
  */
