@@ -118,6 +118,7 @@ function printByType($typeName, $typeList) {
 		foreach ($flist as $fline) {
 			print "   $fline\n";
 		}
+		print "\n";
 	}
 } // printByType
 
