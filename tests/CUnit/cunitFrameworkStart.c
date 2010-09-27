@@ -41,7 +41,13 @@
 static char CommandResult[1024];
 static int Count = 0;
 
-int Trim(char *Sentence)
+/**
+ * @brief utility function, trim the string
+ *
+ * @param source string & destination string
+ * @return success & error code, 0: ok, other: error
+ */
+static int Trim(char *Sentence)
 {
   if (NULL == Sentence || "" == Sentence)
   {
@@ -57,7 +63,15 @@ int Trim(char *Sentence)
   return 0;
 }
 
-int CommandExecute(char *Command)
+/**
+ * @brief utility function, run commands
+ *
+ * @param commands
+
+ * CommandResult is the execute result
+ * @return success & error code, 0: ok, other: error
+ */
+static int CommandExecute(char *Command)
 {
   FILE *stream;  
   char buf[1024]; 
@@ -70,7 +84,16 @@ int CommandExecute(char *Command)
   return 0;
 }
 
-int Array2DimensionalArray(char *Array, char *Token, char TwoDimensionalArray[][1024])
+/**
+ * @brief parse the results(one array) from running commands to TwoDimensionalArray
+ *
+ * @param Array: source array
+ * @param Token: token
+ * @param TwoDimensionalArray: split result
+
+ * @return success & error code, 0: ok, other: error
+ */
+static int Array2DimensionalArray(char *Array, char *Token, char TwoDimensionalArray[][1024])
 {
   Count = 0;
   char temp[1024];
@@ -127,6 +150,14 @@ static int GetIndividualResultDir(char Path[], int Length)
   return 0;
 }
 
+/**
+ * @brief extract cunit result listing from individual xx.xml
+ *
+ * @param FileName
+
+ * ResultListing stores all cunit result listing 
+ * @return success & error code, 0: ok, other: error
+ */
 static int ExtractCunitResultListing(const char FileName[1024])
 {
   FILE *TestFile = NULL;
@@ -181,12 +212,21 @@ static int ExtractCunitResultListing(const char FileName[1024])
   pclose(TestFile);
   return 0;
 }
+
 const char *TOTAL = "TOTAL";
 const char *RUN = "RUN";
 const char *SUCCEEDED = "SUCCEEDED";
 const char *FAILED = "FAILED";
 int Flag = 0;
 
+/**
+ * @brief walk one xx.xml, calculate the number of SuitesTotal, SuitesRun, SuitesSucceeded, SuitesFailed, TestCasesTotal, 
+ * TestCasesTotal, long TestCasesRun, TestCasesSucceeded, TestCasesFailed, AssertionsTotal, AssertionsRun, AssertionsSucceeded, AssertionsFailed
+ * @param one node
+
+ * ResultListing stores all cunit result listing
+ * @return success & error code, 0: ok, other: error
+ */
 static void WalkTree(xmlNode *a_node)
 {
   xmlNode *cur_node = NULL;
@@ -263,6 +303,14 @@ static void WalkTree(xmlNode *a_node)
   }
 }
 
+/**
+ * @brief extract cunit run summary from individual xx.xml
+ *
+ * @param FileName
+
+ * ResultListing stores all cunit result listing
+ * @return success & error code, 0: ok, other: error
+ */
 static int ExtractCunitRunSummary(const char FileName[1024])
 {
   xmlDoc *doc = NULL;
@@ -290,7 +338,14 @@ static int ExtractCunitRunSummary(const char FileName[1024])
   return 0;
 }
 
-int Preparing(char *ProductList)
+/**
+ * @brief prepare for unit testing, change the dir, execute make test or make coverage
+ *
+ * @param ProductList
+
+ * @return success & error code, 0: ok, other: error
+ */
+static int Preparing(char *ProductList)
 {
   char Dir[LINE];
   getcwd(Dir, LINE);
@@ -298,17 +353,25 @@ int Preparing(char *ProductList)
   printf("CurrentDir is: %s\n", Dir);
   chdir("../../");
   system("make clean");
-  system("make test");
+  system("make coverage");
   chdir("./tests/CUnit");
+  rmdir("results");
   return 0;
 }
 
+/**
+ * @brief get test result, invoke ExtractCunitResultListing & ExtractCunitRunSummary for each xx.xml
+ *
+ * @param ProductList
+
+ * @return success & error code, 0: ok, other: error
+ */
 static int GetTestResult(char *ProductList)
 {
   char TwoDimensionalArray[LINE][LINE];
   Preparing(ProductList);
   
-  char *CollectResultCommand = "find ../../ -path ./tests -prune -o -name \"*Results.xml\" -exec ls {} \\;";
+  char *CollectResultCommand = "find ../../ -path ../../tests -prune -o -name \"*Results.xml\" -exec ls {} \\;";
   CommandExecute(CollectResultCommand);
   Array2DimensionalArray(CommandResult, "\n", TwoDimensionalArray);
   int i = 0;
@@ -322,6 +385,14 @@ static int GetTestResult(char *ProductList)
 }
 
 static FILE*  f_pTestResultFile = NULL; /**< FILE pointer the test results file. */
+
+/**
+ * @brief generate the test result 
+ *
+ * @param test result file name
+
+ * @return success & error code, 0: ok, other: error
+ */
 static int Print2File(char *TestResultFilename)
 {
   FILE*  f_pTestResultFile = NULL; /**< FILE pointer the test results file. */
@@ -339,10 +410,6 @@ static int Print2File(char *TestResultFilename)
             "<CUNIT_TEST_RUN_REPORT> \n"
             "  <CUNIT_HEADER/> \n");
   
-  /* cunit result listing */
-  fprintf(f_pTestResultFile,"  <CUNIT_RESULT_LISTING> \n");
-  fprintf(f_pTestResultFile, ResultListing);
-  fprintf(f_pTestResultFile,"  </CUNIT_RESULT_LISTING> \n");
   /* cunit run summary */
   fprintf(f_pTestResultFile,
           "  <CUNIT_RUN_SUMMARY> \n"
@@ -387,6 +454,11 @@ static int Print2File(char *TestResultFilename)
           AssertionsFailed
           );
 
+  /* cunit result listing */
+  fprintf(f_pTestResultFile,"  <CUNIT_RESULT_LISTING> \n");
+  fprintf(f_pTestResultFile, ResultListing);
+  fprintf(f_pTestResultFile,"  </CUNIT_RESULT_LISTING> \n");
+
   /* footer */
   char* szTime;
   time_t tTime = 0;
@@ -399,12 +471,37 @@ static int Print2File(char *TestResultFilename)
 
   return 0;
 }
+
+/**
+ * @brief get coverage  result
+ *
+ * @return success & error code, 0: ok, other: error
+ */
+static int GetCoverageResult()
+{
+  char *CollectResultCommand = "find ../../ -path ../../tests/CUnit/results -prune -o -name \"results\" -exec cp -r {} ../../tests/CUnit \\;";
+  CommandExecute(CollectResultCommand);
+  CollectResultCommand = "rm -rf ./results/tests  ./results/index.html";
+  CommandExecute(CollectResultCommand);
+  return 0;
+}
+
+/**
+ * @brief start cuit test 
+ *
+ * @param RunMode: run mode, one of four interfaces
+ * @param ProductList: soure dir
+ * @param NeedCoverage: if need coverage, default yes
+ * @param ResultDestination: result destination, default ./fossology/test/CUnit
+ * @return success & error code, 0: ok, other: error
+ */
 int CunitTestFramework(char RunMode, char *ProductList, int NeedCoverage, char *ResultDestination)
 {
   printf("the parameters: RunMode is:%c,  TestList is: %s,  NeedCoverage is:%d,  ResultDestination is:%s\n",
   RunMode, ProductList, NeedCoverage, ResultDestination);
   ResultListing = (char*)malloc(LINE*LINE*sizeof(char));
   GetTestResult(ProductList);
+  GetCoverageResult();
   Print2File(ResultDestination);
   free(ResultListing);
   return 0;

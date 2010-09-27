@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
   char RunMode = 'a';
   char *ProductList = "";
   int NeedCoverage = 0;
-  char *ResultDestination = "./Fosslogy_C_Test-Result.xml";
+  char *ResultDestination = "./Fosslogy_C_Test-Results.xml";
   CunitTestFramework(RunMode, ProductList, NeedCoverage, ResultDestination);
   return 0;
 }
