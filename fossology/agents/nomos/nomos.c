@@ -622,6 +622,7 @@ FUNCTION void parseLicenseList() {
 
 FUNCTION void Usage(char *Name) {
     printf("Usage: %s [options] [file [file [...]]\n", Name);
+    printf("  -h   :: help (print this message), then exit.\n");
     printf("  -i   :: initialize the database, then exit.\n");
     /*    printf("  -v   :: verbose (-vv = more verbose)\n"); */
     printf(
@@ -942,7 +943,7 @@ int main(int argc, char **argv) {
      Deal with command line options
      */
 
-    while ((c = getopt(argc, argv, "i")) != -1) {
+    while ((c = getopt(argc, argv, "hi")) != -1) {
 
         /* printf("start of while; argc is:%d\n", argc); */
         /* for(i=0; i<argc; i++){
@@ -954,6 +955,7 @@ int main(int argc, char **argv) {
             /* "Initialize" */
             DBclose(gl.DB); /* DB was opened above, now close it and exit */
             exit(0);
+        case 'h':
         default:
             Usage(argv[0]);
             DBclose(gl.DB);
