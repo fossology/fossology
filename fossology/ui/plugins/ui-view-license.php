@@ -180,9 +180,8 @@ class ui_view_license extends FO_Plugin
       $nomos_license_string = GetFileLicenses_string($nomosagent_pk, $pfile_pk, $Item);
       if (!empty($nomos_license_string)) 
       {
-$text1 = _("Nomos");
-$text = _("The");
-        $nomos_out = "$text <b>$text1</b><b>";
+$text = _("The Nomos license scanner found:");
+        $nomos_out = "$text <b>";
         $nomos_out .= $nomos_license_string;
         $nomos_out .= "</b>";
       }
