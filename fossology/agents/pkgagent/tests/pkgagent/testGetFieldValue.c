@@ -11,10 +11,10 @@ void test_GetFieldValue_normal()
     char Value[1024];
     int ValueMax = 1024;
     char Separator = '=';
-    char *predictValue = "Result is:name=larry, very good";
+    char *predictValue = "name=larry, very good";
     char *Result = GetFieldValue(Sin, Field, FieldMax, Value, ValueMax, Separator);
     printf("test_GetFieldValue_normal Result is:%s, field is: %s, value is:%s\n", Result, Field, Value); 
-    CU_ASSERT_EQUAL(Result, predictValue);
+    CU_ASSERT_TRUE(!strcmp(Result, predictValue));
 }
 
 void test_GetFieldValue_sin_is_null()
@@ -25,7 +25,7 @@ void test_GetFieldValue_sin_is_null()
     char Value[1024];
     int ValueMax = 1024;
     char Separator = '=';
-    char *predictValue = "";
+    char *predictValue = NULL;
     char *Result = GetFieldValue(Sin, Field, FieldMax, Value, ValueMax, Separator);
     printf("test_GetFieldValue_sin_is_null Result is:%s, field is: %s, value is:%s\n", Result, Field, Value);
     CU_ASSERT_EQUAL(Result, predictValue);
