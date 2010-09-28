@@ -1,8 +1,9 @@
-fossology (1.2.1~SVNBUILD-1.2) unstable; urgency=low
+fossology (1.2.1~3507-1.2) unstable; urgency=low
 
   * unofficial build version
+  * 
 
- -- Build User <build@cranky.manage>  Tue, 21 Sep 2010 14:02:25 -0700
+ -- Build User <build@cranky.manage>  Tue, 28 Sep 2010 10:09:24 -0700
 
 fossology (1.2.1~SVNBUILD-1) unstable; urgency=low
 
