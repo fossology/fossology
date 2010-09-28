@@ -7,8 +7,8 @@ include $(VARS)
 # also set in Makefile.conf, but we override with a shorter version
 iPATHFILE=pathinclude.php
 
-DIRS=images plugins common template
-FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat)$$" |grep -v $(iPATHFILE)`
+DIRS=images plugins common template locale
+FILES=`find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$" |grep -v $(iPATHFILE)`
 
 all:
 
