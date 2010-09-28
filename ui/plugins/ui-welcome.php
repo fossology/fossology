@@ -171,7 +171,7 @@ $text58 = _("- A community website with information on Open Source Governance.")
 
 <table width='100%' border='0'>
   <tr> 
-    <td valign='top'> <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'><img src='images/white.png' align='left'>$5</font></h3>
+    <td valign='top'> <h3><font  color='#CC0000' face='Verdana, Arial, Helvetica, sans-serif'><img src='images/white.png' align='left'>$text5</font></h3>
       <blockquote> 
         <blockquote> 
           <p><font face='Arial, Helvetica, sans-serif'>$text51<br>
