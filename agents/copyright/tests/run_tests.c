@@ -54,7 +54,7 @@ void test_failure_function()
   static int num_failed = 0;
   if(CU_get_number_of_tests_failed() != num_failed)
   {
-    printf("FAILED");
+    printf(" FAILED");
     num_failed++;
   }
 }

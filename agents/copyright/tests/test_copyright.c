@@ -284,6 +284,7 @@ void test_copyright_init()
   /* start the tests */
   CU_ASSERT_TRUE(copyright_init(&copy));
 
+  test_failure();
   printf("\n");
 }
 
