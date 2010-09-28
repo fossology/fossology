@@ -231,10 +231,10 @@ function Dir2Path($UploadtreePk)
   $ShowMicro - show micro menu
   $Enumerate - if >= zero number the folder/file path (the stuff in the yellow bar)
     starting with the value $Enumerate 
-  $Text - additional text to preceed the folder path
+  $PreText - additional text to preceed the folder path
  ************************************************************/
 function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
-		     $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $Text='')
+		     $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='')
 {
   global $Plugins;
   global $DB;
@@ -264,7 +264,7 @@ function Dir2Browse ($Mod, $UploadtreePk, $LinkLast=NULL,
   $V .= "<font class='text'>\n";
 
   /* Add in additional text */
-  if (!empty($Text)) { $V .= "$Text<br>\n"; }
+  if (!empty($PreText)) { $V .= "$PreText<br>\n"; }
 
   /* Get the FOLDER list for the upload */
 $text = _("Folder");
