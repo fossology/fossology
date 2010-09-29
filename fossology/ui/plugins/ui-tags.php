@@ -61,6 +61,7 @@ class ui_tag extends FO_Plugin
     $tag_file = GetParm('tag_file', PARM_TEXT);
     $tag_package = GetParm('tag_package', PARM_TEXT);
     $tag_container = GetParm('tag_container', PARM_TEXT);
+    $tag_desc = GetParm('tag_desc', PARM_TEXT);
 
     /* Debug
     print "<pre>";
@@ -86,6 +87,9 @@ class ui_tag extends FO_Plugin
       $text = _("Need to select one option(file/pacakge/container) to create tag.");
       return ($text);
     }
+    
+    pg_exec("BEGIN;");
+
     /* See if the tag already exists */
     $sql = "SELECT * FROM tag WHERE tag = '$tag_name' AND tag_ns_fk = '$tag_ns_pk';";
     $result = pg_query($PG_CONN, $sql);
@@ -94,7 +98,9 @@ class ui_tag extends FO_Plugin
     {
       pg_free_result($result);
 
-      $sql = "INSERT INTO tag (tag,tag_ns_fk,tag_desc) VALUES ('$tag_name', $tag_ns_pk, '$tag_notes');";
+      $Val = str_replace("'", "''", $tag_name);
+      $Val1 = str_replace("'", "''", $tag_desc);
+      $sql = "INSERT INTO tag (tag,tag_ns_fk,tag_desc) VALUES ('$Val', $tag_ns_pk, '$Val1');";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
@@ -173,12 +179,14 @@ class ui_tag extends FO_Plugin
       {
         pg_free_result($result);
         /* Add record to tag_file table */
-        $sql = "INSERT INTO tag_file (tag_fk,pfile_fk,tag_file_date,tag_file_text) VALUES ($tag_pk, $pfile, now(), '$tag_notes');";
+        $Val = str_replace("'", "''", $tag_notes);
+        $sql = "INSERT INTO tag_file (tag_fk,pfile_fk,tag_file_date,tag_file_text) VALUES ($tag_pk, $pfile, now(), '$Val');";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         pg_free_result($result);
       }
     }
+    pg_exec("COMMIT;");
     return (NULL);
   }
   
@@ -203,6 +211,7 @@ class ui_tag extends FO_Plugin
     $tag_file = GetParm('tag_file', PARM_TEXT);
     $tag_package = GetParm('tag_package', PARM_TEXT);
     $tag_container = GetParm('tag_container', PARM_TEXT);
+    $tag_desc = GetParm('tag_desc', PARM_TEXT);
 
     /* Debug
     print "<pre>";
@@ -222,17 +231,22 @@ class ui_tag extends FO_Plugin
       return ($text);
     }
 
+    pg_exec("BEGIN;");
     /* Update the tag table */
-    $sql = "UPDATE tag SET tag = '$tag_name', tag_ns_fk = $tag_ns_pk, tag_desc = '$tag_notes' WHERE tag_pk = $tag_pk;";
+    $Val = str_replace("'", "''", $tag_name);
+    $Val1 = str_replace("'", "''", $tag_desc);
+    $sql = "UPDATE tag SET tag = '$Val', tag_ns_fk = $tag_ns_pk, tag_desc = '$Val1' WHERE tag_pk = $tag_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
 
-    $sql = "UPDATE tag_file SET tag_file_date = now(), tag_file_text = '$tag_notes' WHERE tag_file_pk = $tag_file_pk;";
+    $Val = str_replace("'", "''", $tag_notes);
+    $sql = "UPDATE tag_file SET tag_file_date = now(), tag_file_text = '$Val' WHERE tag_file_pk = $tag_file_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
 
+    pg_exec("COMMIT;");
     return (NULL);
   }
 
@@ -243,6 +257,34 @@ class ui_tag extends FO_Plugin
   {
     global $PG_CONN;
 
+    $tag_file_pk = GetParm('tag_file_pk', PARM_INTEGER);
+
+    $sql = "SELECT tag_fk FROM tag_file WHERE tag_file_pk=$tag_file_pk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) < 1)
+    {
+      pg_free_result($result);
+      $text = _("Can't find this tag, Tag Not deleted.");
+      return ($text);
+    }
+    $row = pg_fetch_assoc($result);
+    $tag_pk = $row['tag_fk'];
+    pg_free_result($result);
+
+    pg_exec("BEGIN;");
+    $sql = "DELETE FROM tag_file WHERE tag_file_pk = $tag_file_pk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    $sql = "DELETE FROM tag WHERE tag_pk = $tag_pk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+    pg_exec("COMMIT;");
+
+    return (NULL);
   }
   /***********************************************************
    ShowExistTags($Uploadtree_pk): Show all tags about
@@ -252,8 +294,8 @@ class ui_tag extends FO_Plugin
   {
     global $PG_CONN;
     $VE = "";
-    $VE = _("<h3>Exist Tags:</h3>\n");
-    $sql = "SELECT tag_pk, tag, tag_ns_pk, tag_ns_name, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_ns, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag.tag_ns_fk = tag_ns.tag_ns_pk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Uploadtree_pk;";
+    $VE = _("<h3>Current Tags:</h3>\n");
+    $sql = "SELECT tag_pk, tag, tag_desc, tag_ns_pk, tag_ns_name, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_ns, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag.tag_ns_fk = tag_ns.tag_ns_pk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Uploadtree_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) > 0)
@@ -261,11 +303,12 @@ class ui_tag extends FO_Plugin
       $VE .= "<table border=1>\n";
       $text = _("Tag Namespace");
       $text1 = _("Tag");
-      $text2 = _("Tag Date");
-      $VE .= "<tr><th>$text</th><th>$text1</th><th>$text2</th><th></th></tr>\n";
+      $text2 = _("Tag Description");
+      $text3 = _("Tag Date");
+      $VE .= "<tr><th>$text</th><th>$text1</th><th>$text2</th><th>$text3</th><th></th></tr>\n";
       while ($row = pg_fetch_assoc($result))
       {
-        $VE .= "<tr><td align='center'>" . $row['tag_ns_name'] . "</td><td align='center'>" . $row['tag'] . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td><td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Edit</a></td></tr>\n";
+        $VE .= "<tr><td align='center'>" . $row['tag_ns_name'] . "</td><td align='center'>" . $row['tag'] . "</td><td align='center'>" . $row['tag_desc'] . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td><td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Edit</a>|<a href='" . Traceback_uri() . "?mod=tag&action=delete&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Delete</a></td></tr>\n";
       }
       $VE .= "</table><p>\n";
     }
@@ -369,7 +412,7 @@ class ui_tag extends FO_Plugin
     $ufile_mode = $row["ufile_mode"];
     pg_free_result($result);
 
-    $VC.= "<form name='form' method='POST'>\n";
+    $VC.= "<form name='form' method='POST' action='" . Traceback_uri() ."?mod=tag&upload=$Upload&item=$Item'>\n";
     /* Get TagName Space Name */
     $tag_ns = DB2KeyValArray("tag_ns", "tag_ns_pk", "tag_ns_name","");
 
@@ -386,19 +429,25 @@ class ui_tag extends FO_Plugin
     $VC .= "$text: <input type='text' id='tag_name' name='tag_name' autocomplete='off' onclick='Tags_Get(\"". Traceback_uri() . "?mod=tag_get&uploadtree_pk=$Item\")'/> ";
 
     /****** Permission comments: if user don't have add or high permission, can't see this check box ******/
-    $VC .= "<input type='checkbox' name='tag_add' value='1'/>";
-    $VC .= _("Check to confirm this is a new tag.");
+    //$VC .= "<input type='checkbox' name='tag_add' value='1'/>";
+    //$VC .= _("Check to confirm this is a new tag.");
     $VC .= "</p>";
+    $text = _("Tag description:");
+    $VC .= "<p>$text <input type='text' name='tag_desc'/></p>";
     $VC .= _("<p>Notes:</p>");
     $VC .= "<p><textarea rows='10' cols='80' name='tag_notes'></textarea></p>";
     if (Iscontainer($ufile_mode))
     {
+      /* Recursively tagging UI part comment out */
+      /*
       $text = _("Tag this files only.");
       $VC .= "<p><input type='checkbox' name='tag_file' value='1' checked/>$text</p>";
       $text = _("Tag all packages (source and binary) in this container tree.");
       $VC .= "<p><input type='checkbox' name='tag_package' value='1'/> $text</p>";
-      //$text = _("Tag every file in this container tree.");
-      //$VC .= "<p><input type='checkbox' name='tag_container' value='1'/> $text</p>";
+      $text = _("Tag every file in this container tree.");
+      $VC .= "<p><input type='checkbox' name='tag_container' value='1'/> $text</p>";
+      */
+      $VC .= "<p><input type='hidden' name='tag_file' value='1'/></p>"; 
     } else {
       $VC .= "<p><input type='hidden' name='tag_file' value='1'/></p>";
     }
@@ -434,7 +483,7 @@ class ui_tag extends FO_Plugin
     pg_free_result($result);
 
     /* Get all information about $tag_file_pk */
-    $sql = "SELECT tag_pk, tag_file_text, tag, tag_ns_pk, tag_ns_name FROM tag_file, tag, tag_ns WHERE tag_file_pk=$tag_file_pk AND tag_file.tag_fk = tag.tag_pk AND tag.tag_ns_fk = tag_ns.tag_ns_pk;";
+    $sql = "SELECT tag_pk, tag_file_text, tag, tag_ns_pk, tag_ns_name, tag_desc FROM tag_file, tag, tag_ns WHERE tag_file_pk=$tag_file_pk AND tag_file.tag_fk = tag.tag_pk AND tag.tag_ns_fk = tag_ns.tag_ns_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
@@ -442,6 +491,7 @@ class ui_tag extends FO_Plugin
     $tag = $row['tag'];
     $tag_notes = $row['tag_file_text'];
     $tag_ns_pk = $row['tag_ns_pk'];
+    $tag_desc = $row['tag_desc'];
     pg_free_result($result); 
 
     $VEd.= "<form name='form' method='POST' action='" . Traceback_uri() ."?mod=tag&upload=$Upload&item=$Item'>\n";
@@ -453,18 +503,22 @@ class ui_tag extends FO_Plugin
     $VEd .= "<p>$text:$select</p>";
     $VEd .= "<p>";
     $text = _("Tag");
-    $VEd .= "$text: <input type='text' id='tag_name' name='tag_name' autocomplete='off' onclick='Tags_Get(\"". Traceback_uri() . "?mod=tag_get&uploadtree_pk=$Item\")' value='$tag'/> ";
-
+    $VEd .= "$text: <input type='text' id='tag_name' name='tag_name' autocomplete='off' onclick='Tags_Get(\"". Traceback_uri() . "?mod=tag_get&uploadtree_pk=$Item\")' value=\"$tag\"/> ";
+    $text = _("Tag description:");
+    $VEd .= "<p>$text <input type='text' name='tag_desc' value=\"$tag_desc\"/></p>";
     $VEd .= _("<p>Notes:</p>");
     $VEd .= "<p><textarea rows='10' cols='80' name='tag_notes'>$tag_notes</textarea></p>";
     if (Iscontainer($ufile_mode))
     {
+      /* 
       $text = _("Tag this files only.");
       $VEd .= "<p><input type='checkbox' name='tag_file' value='1' checked/>$text</p>";
       $text = _("Tag all packages (source and binary) in this container tree.");
       $VEd .= "<p><input type='checkbox' name='tag_package' value='1'/> $text</p>";
-      //$text = _("Tag every file in this container tree.");
-      //$VEd .= "<p><input type='checkbox' name='tag_container' value='1'/> $text</p>";
+      $text = _("Tag every file in this container tree.");
+      $VEd .= "<p><input type='checkbox' name='tag_container' value='1'/> $text</p>";
+      */
+      $VEd .= "<p><input type='hidden' name='tag_file' value='1'/></p>";
     } else {
       $VEd .= "<p><input type='hidden' name='tag_file' value='1'/></p>";
     }
@@ -563,8 +617,9 @@ class ui_tag extends FO_Plugin
     } else {
       /* Show create tag page */
       $V .= $this->ShowCreateTagPage($Upload,$Item);
-      /* Show delete tag page */
+      /* Show delete tag page removing
       $V .= $this->ShowDeleteTagPage($Upload,$Item);
+      */
     }
     return($V);
   }
@@ -590,20 +645,13 @@ class ui_tag extends FO_Plugin
       case "HTML":
         if ($action == 'add')
         {
-          $Add = GetParm('tag_add', PARM_TEXT);
-          if (!empty($Add))
+          $rc = $this->CreateTag();
+          if (!empty($rc))
           {
-            $rc = $this->CreateTag();
-            if (!empty($rc))
-            {
-              $text = _("Create Tag Failed");
-              $V .= displayMessage("$text: $rc");
-            } else {
-              $text = _("Create Tag Successful!");
-              $V .= displayMessage($text);
-            }
+            $text = _("Create Tag Failed");
+            $V .= displayMessage("$text: $rc");
           } else {
-            $text = _("Create Tag Unsuccessful! You need check confirm checkbox!");
+            $text = _("Create Tag Successful!");
             $V .= displayMessage($text);
           }
         }
