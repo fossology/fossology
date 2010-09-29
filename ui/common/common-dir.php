@@ -216,8 +216,7 @@ function Dir2Path($UploadtreePk)
 
   if (empty($DB)) { return; }
 
-  $Rows = $DB->Action("SELECT * from (SELECT * from uploadtree2path($UploadtreePk)) AS path 
-           ORDER BY lft ASC");
+  $Rows = $DB->Action("SELECT * from uploadtree2path($UploadtreePk) ORDER BY lft ASC");
 
   return($Rows);
 } // Dir2Path()
