@@ -37,9 +37,59 @@ class search_file_advance extends FO_Plugin
   var $LoginFlag  = 0;
 
   /***********************************************************
+   GetUploadtreeFromTag(): Given a tag, return all uploadtree.
+   ***********************************************************/
+  function GetUploadtreeFromTag($tag,$Page)
+  {
+    global $DB;
+    $Max = 50;
+    $SQL = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file INNER JOIN tag ON tag_pk = tag_fk AND tag LIKE '$tag') T ON uploadtree.pfile_fk = T.pfile_fk";
+    $Offset = $Page * $Max;
+    $SQL .= " ORDER BY ufile_name LIMIT $Max OFFSET $Offset;";
+    $Results = $DB->Action($SQL);
+
+    $V = "";
+    $Count = count($Results);
+    //$V .= "<pre>" . htmlentities($SQL) . "</pre>\n";
+
+    if (($Page > 0) || ($Count >= $Max))
+      {
+      $Uri = Traceback_uri() . "?mod=" . $this->Name;
+      $Uri .= "&tag=" . urlencode($tag);
+      $VM = MenuEndlessPage($Page, ($Count >= $Max),$Uri) . "<P />\n";
+      $V .= $VM;
+      }
+    else
+      {
+      $VM = "";
+      }
+
+    if ($Count == 0)
+        {
+        $V .= _("No results.\n");
+        return($V);
+        }
+
+    if ($Page==0)
+      {
+      $SQL = preg_replace('/\*/','COUNT(*) AS count',$SQL,1);
+      $SQL = preg_replace('/ ORDER BY .*;/',';',$SQL);
+      $Count = $DB->Action($SQL);
+$text = _("Total matched:");
+      $V .= "$text " . number_format($Count[0]['count'],0,"",",") . "<br>\n";
+      }
+
+    $V .= Dir2FileList($Results,"browse","view",$Page*$Max + 1);
+
+    /* put page menu at the bottom, too */
+    if (!empty($VM)) { $V .= "<P />\n" . $VM; }
+    return($V);
+  }
+
+  /***********************************************************
    GetUploadtreeFromName(): Given a filename, return all uploadtree.
    ***********************************************************/
-  function GetUploadtreeFromName($Filename,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax)
+  function GetUploadtreeFromName($Filename,$tag,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax)
     {
     global $DB;
     $Max = 50;
@@ -76,16 +126,26 @@ class search_file_advance extends FO_Plugin
 	}
     $Offset = $Page * $Max;
     $SQL .= " ORDER BY pfile_fk,ufile_name LIMIT $Max OFFSET $Offset;";
+
+    if (!empty($tag))
+    {
+      $TagSQL = "SELECT U.* FROM (";
+      $TagSQL .= substr($SQL,0,-1);
+      $TagSQL .= ") U INNER JOIN (SELECT * FROM tag_file INNER JOIN tag ON tag_pk = tag_fk AND tag LIKE '$tag') T ON U.pfile_fk = T.pfile_fk";
+      $SQL = $TagSQL;
+    }
+
     $Results = $DB->Action($SQL);
 
     $V = "";
     $Count = count($Results);
-    // $V .= "<pre>" . htmlentities($SQL) . "</pre>\n";
+    //$V .= "<pre>" . htmlentities($SQL) . "</pre>\n";
 
     if (($Page > 0) || ($Count >= $Max))
       {
       $Uri = Traceback_uri() . "?mod=" . $this->Name;
       $Uri .= "&filename=" . urlencode($Filename);
+      $Uri .= "&tag=" . urlencode($tag);
       $Uri .= "&sizemin=$SizeMin";
       $Uri .= "&sizemax=$SizeMax";
       $Uri .= "&notmimetype=$MimetypeNot";
@@ -147,6 +207,7 @@ $text = _("Additional search options");
 	$V .= menu_to_1html(menu_find("Search",$MenuDepth),1);
 
 	$Filename = GetParm("filename",PARM_STRING);
+        $tag = GetParm("tag",PARM_STRING);
 	$SizeMin = GetParm("sizemin",PARM_TEXT) . 'x';
 	if ($SizeMin != 'x') { $SizeMin=intval($SizeMin); }
 	else { $SizeMin = -1; }
@@ -165,6 +226,9 @@ $text = _("Additional search options");
 $text = _("Enter the filename to find: ");
 	$V .= "<li>$text";
 	$V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
+
+        $text = _("Tag to find");
+        $V .= "<li>$text:  <input name='tag' size='30' value='" . htmlentities($tag) . "'>\n";
 
 $text = _("Mimetype ");
 	$V .= "<li>$text";
@@ -222,8 +286,17 @@ $text = _("Search");
 	  $V .= "<hr>\n";
 $text = _("Files matching");
 	  $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
-	  $V .= $this->GetUploadtreeFromName($Filename,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax);
-	  }
+	  $V .= $this->GetUploadtreeFromName($Filename,$tag,$Page,$MimetypeNot,$Mimetype,$SizeMin,$SizeMax);
+	  } else {
+            if (!empty($tag))
+            {
+              if (empty($Page)) { $Page = 0; }
+              $V .= "<hr>\n";
+              $text = _("Files matching");
+              $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
+              $V .= $this->GetUploadtreeFromTag($tag,$Page);
+            }
+          }
         break;
       case "Text":
         break;
