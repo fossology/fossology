@@ -97,7 +97,7 @@ class zendTest extends fossologyTestCase
 		$matched = preg_match("/<hr>\nThe(.*?)<div class='text'>--/", $page, $matches);
 		//print "DBCKZ: we found:\n";print_r($matches) . "\n";
 		$found = $matches[1];
-		$stringToMatch = 'The <b>Nomos<\/b> license detector found: <b>Zend_v2\.0<\/b>';
+		$stringToMatch = 'The Nomos license scanner found: <b>Zend_v2\.0';
 		$this->assertTrue($this->myassertText($page,"/$stringToMatch/"),
           "ckzend FAILED! Nomos license string does not match\n" .
 		      "Expected: $stringToMatch\n" . 
