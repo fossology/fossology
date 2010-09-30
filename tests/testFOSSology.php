@@ -112,8 +112,9 @@ else {
 	$logFileName = basename($logFile);
 }
 /**
- * _runSetupVerify()
- *
+ * _runTestEnvSetup()
+ * \brief upload the files needed to accomplished the functional tests
+ * for the agents, nomos, copyright, and pkgagent.
  *
  */
 function _runTestEnvSetup() {
@@ -258,12 +259,6 @@ if (array_key_exists("a", $options)) {
 										" >> $logFile 2>&1", $dummy, $Pkgrtn);
 	LogAndPrint($LF, "\n");
 
-	// copyright classification test does not depend on uploads, run now.
-	if (chdir($Home) === FALSE) {
-		$cUInoHome = "All Tests ERROR: can't cd to $Home\n";
-		LogAndPrint($LF, $cUInoHome);
-	}
-
 	/*
 	 * The verify tests require that uploads be done first.
 	 */
@@ -298,7 +293,11 @@ if (array_key_exists("a", $options)) {
 		// Nomos functional test (only 1 for now)
 		$zendLast = exec("fo-runTests -l ckzend.php -n 'Zend License Test' >> $logFile 2>&1", $dummy, $zlRtn);
 		LogAndPrint($LF, "\n");
-		
+
+		if (chdir($Home) === FALSE) {
+			$cUInoHome = "All Tests ERROR: can't cd to $Home\n";
+			LogAndPrint($LF, $cUInoHome);
+		}
 		// Copyright tests
 		if (chdir($CopyRight) === FALSE) {
 			LogAndPrint($LF, "ALL Tests ERROR: can't cd to $CopyRight\n");
