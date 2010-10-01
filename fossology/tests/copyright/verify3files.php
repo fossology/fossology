@@ -76,6 +76,16 @@ class verify3filesCopyright extends fossologyTestCase
 		global $name;
 		global $safeName;
 
+		$copyStd = array(
+    'Copyright (C) 1991 , 1999 Free Software Foundation , Inc .' => 1,
+    'Copyright (c) 2002 2004 Sam Leffler , Errno' => 1,
+    'Copyright (C) year name of author' => 1,
+    'COPYRIGHT ,' => 1,
+    'Copyright 2002' => 1,
+    'copyrighted by Affero' => 1,
+		);
+
+
 		print "starting Verify3filesCopyright test\n";
 		$page = $this->mybrowser->clickLink('Browse');
 		$this->assertTrue($this->myassertText($page, '/Browse/'),
@@ -106,7 +116,7 @@ class verify3filesCopyright extends fossologyTestCase
 		$mini = new parseMiniMenu($page);
 		$miniMenu = $mini->parseMiniMenu();
 		$url = makeUrl($this->host, $miniMenu['Copyright/Email/URL']);
-		if($url === NULL) { 
+		if($url === NULL) {
 			$this->fail("FATAL! verify3files Failed, host is not set or url " .
 									"cannot be made, Stopping this test"); 
 			exit(1);
@@ -120,7 +130,7 @@ class verify3filesCopyright extends fossologyTestCase
         "verify3files FAILED! Total copyrights does not equal 6\n");
 		$this->assertTrue($this->myassertText($page, '/Unique Copyrights: 6/'),
         "verify3files FAILED! Unique Copyrights does not equal 6\n");
-		
+
 		// get the count, show links and text or link
 		$copyR = new domParseLicenseTbl($page, 'copyright');
 		$copyR->parseLicenseTbl();
@@ -129,6 +139,38 @@ class verify3filesCopyright extends fossologyTestCase
 									"the page, nothing to process, stopping test\n");
 			exit(1);
 		}
+
+		// Verify text and counts are correct
+
+		foreach($copyStd as $stdKey => $count)
+		{
+			$tk = trim($stdKey);
+			if(in_array($stdKey, $copyR->hList))
+			{
+				print "Found $tk in copyfound\n";
+			}
+			$found = NULL;
+			foreach ($copyR->hList as $copyFound)
+			{
+				//print "copyFound is:\n";print_r($copyFound) . "\n";
+				$key = $copyFound['textOrLink'];
+				if(in_array($stdKey, $copyFound))
+				{
+					$this->pass("Pass: found $key\n");
+					$found = 1;
+					// found one, check the count
+					$foundCount= $copyFound['count'];
+					$this->assertEqual($count, $foundCount,
+        "verify3files FAILED! the counts are not equal\n
+         Expected:$count\nGot:$foundCount\n");
+				}
+			} // foreach $copyR->
+			if(!$found)
+			{
+				$this->fail("verify3files FAILED! the Standard\n$stdKey\nwas not" .
+        " found in the table\nExpected: $stdKey\nGot: $key\n");
+			}
+		} // foreach $copyStd
 
 		$email = new domParseLicenseTbl($page, 'copyrightemail');
 		$email->parseLicenseTbl();
