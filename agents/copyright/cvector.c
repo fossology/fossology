@@ -200,7 +200,7 @@ cvector_iterator cvector_insert(cvector vec,
   {
     fprintf(stderr, "cvector.c: ERROR: array index access out of bounds.\n");
     fprintf(stderr, "cvector.c: ERROR: iterator is outside of array.\n");
-    exit(-1);
+    return NULL;
   }
 
   /* test if the cvector needs to be bigger */
@@ -299,7 +299,7 @@ cvector_iterator cvector_remove(cvector vec, cvector_iterator iter)
   {
     fprintf(stderr, "cvector.c: ERROR: array index access out of bounds.\n");
     fprintf(stderr, "cvector.c: ERROR: invalid iterator in remove.\n");
-    exit(-1);
+    return NULL;
   }
 
   /* delete the element */
@@ -354,7 +354,7 @@ void* cvector_at(cvector vec, int index)
   if(index < 0 || index >= vec->size) {
     fprintf(stderr, "cvector.c: ERROR: array index access out of bounds.\n");
     fprintf(stderr, "cvector.c: ERROR: index %d is outside of bounds.", index);
-    exit(-1);
+    return NULL;
   }
   return vec->data[index];
 }

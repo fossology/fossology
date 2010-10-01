@@ -129,7 +129,7 @@ void strip_empty_entries(copyright copy)
 {
   copyright_iterator iter;
 
-  for(iter = copyright_begin(copy); iter != copyright_end(copy); iter++)
+  for(iter = copyright_begin(copy); iter != copyright_end(copy) && iter != NULL; iter++)
   {
     /* remove if the copyright entry is emtpy */
     if(*iter == NULL || strlen(copy_entry_dict(*iter)) == 0 ||
@@ -309,56 +309,52 @@ int copyright_callout(pcre_callout_block* info)
   /* locals */
   char temp[1024];
   memset(temp, 0, sizeof(temp));
-  copy_entry new_entry = (copy_entry)calloc(1, sizeof(struct copy_entry_internal));
+  struct copy_entry_internal new_entry;
   copy_entry prev;
   cvector data = (cvector)info->callout_data;
 
   /* initialize memory */
-  copy_entry_init(new_entry);
+  copy_entry_init(&new_entry);
 
   /* copy information into the entry */
-  strncpy(new_entry->text,
+  strncpy(new_entry.text,
       &(info->subject[info->start_match]),
       info->current_position - info->start_match);
-  new_entry->start_byte = info->start_match;
-  new_entry->end_byte = info->current_position;
+  new_entry.start_byte = info->start_match;
+  new_entry.end_byte = info->current_position;
 
   /* copy the type that was found into the entry */
   switch(info->callout_number)
   {
     case(1) :
-      strcpy(new_entry->name_match, "email");
-      strcpy(new_entry->dict_match, "email");
-      new_entry->type = "email";
+      strcpy(new_entry.name_match, "email");
+      strcpy(new_entry.dict_match, "email");
+      new_entry.type = "email";
       break;
     case(2) :
-      strcpy(new_entry->name_match, "url");
-      strcpy(new_entry->dict_match, "url");
-      new_entry->type = "url";
+      strcpy(new_entry.name_match, "url");
+      strcpy(new_entry.dict_match, "url");
+      new_entry.type = "url";
       break;
     default :
-      free(new_entry);
       return 1;
   }
 
   /* only log the new entry if it wasn't already located by the regex */
   prev = *(cvector_end(data) - 1);
   if(cvector_size(data) != 0 &&
-      ((!strcmp(prev->dict_match, "email") && !strcmp(new_entry->dict_match, "email"))
-          ||  (!strcmp(prev->dict_match, "url") && !strcmp(new_entry->dict_match, "url"))))
+      ((!strcmp(prev->dict_match, "email") && !strcmp(new_entry.dict_match, "email"))
+          ||  (!strcmp(prev->dict_match, "url") && !strcmp(new_entry.dict_match, "url"))))
   {
-    if(!(prev->start_byte <= new_entry->start_byte && prev->end_byte >= new_entry->end_byte))
+    if(!(prev->start_byte <= new_entry.start_byte && prev->end_byte >= new_entry.end_byte))
     {
-      cvector_push_back(data, new_entry);
+      cvector_push_back(data, &new_entry);
     }
   }
   else
   {
-    cvector_push_back(data, new_entry);
+    cvector_push_back(data, &new_entry);
   }
-
-  /* free up memory */
-  free(new_entry);
 
   /* force the pcre_exec function to continue searching */
   return 1;
