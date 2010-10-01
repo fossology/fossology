@@ -11,7 +11,7 @@ EXE=departition checksum ununpack
 CHKHDR= checksum.h md5.h sha1.h
 CHKSRC=$(CHKHDR:%.h=%.c)
 UUHDR= ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h metahandle.h $(CHKHDR)
-UUSRC=$(UUHDR:%.h=%.c) main.c
+UUSRC=$(UUHDR:%.h=%.c)
 
 all: $(EXE)
 
@@ -22,7 +22,7 @@ departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
 
 ununpack: $(UUSRC) $(UUHDR) $(VARS) $(DB) $(REPO)
-	$(CC) $(UUSRC) $(CFLAGS_LOCAL) -o $@
+	$(CC) $(UUSRC) $(CFLAGS_LOCAL) -o $@ -g
 
 metahandle.h: metahandle.tab metahandle.pl
 	if [ ! -x metahandle.pl ] ; then chmod u+x metahandle.pl; fi
