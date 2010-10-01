@@ -487,7 +487,7 @@ void copyright_analyze(copyright copy, FILE* istr)
   {
     buf[i] = tolower(buf[i]);
     if(buf[i] < 0)
-      buf[i] = 127;
+      buf[i] = 32;
   }
 
   /* look through the whole file for something in the dictionary */
