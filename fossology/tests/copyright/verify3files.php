@@ -76,11 +76,17 @@ class verify3filesCopyright extends fossologyTestCase
 		global $name;
 		global $safeName;
 
+		// Note the entry: COPYRIGHT ,
+		// should really be:
+		// * $Id$
+		//
+		// Likewise: copyrighted by Affero should be:
+		// copyrighted by 278 Affero, Inc.
 		$copyStd = array(
-    'Copyright (C) 1991 , 1999 Free Software Foundation , Inc .' => 1,
-    'Copyright (c) 2002 2004 Sam Leffler , Errno' => 1,
-    'Copyright (C) year name of author' => 1,
-    'COPYRIGHT ,' => 1,
+    'Copyright (C) 1991, 1999 Free Software Foundation, Inc.' => 1,
+    'Copyright (c) 2002-2004 Sam Leffler, Errno Consulting, Atheros' => 1,
+    'Copyright (C) <year>  <name of author>' => 1,
+    'COPYRIGHT,' => 1,
     'Copyright 2002' => 1,
     'copyrighted by Affero' => 1,
 		);
@@ -141,7 +147,7 @@ class verify3filesCopyright extends fossologyTestCase
 		}
 
 		// Verify text and counts are correct
-
+		$notFound = array();
 		foreach($copyStd as $stdKey => $count)
 		{
 			$tk = trim($stdKey);
@@ -156,6 +162,7 @@ class verify3filesCopyright extends fossologyTestCase
 				$key = $copyFound['textOrLink'];
 				if(in_array($stdKey, $copyFound))
 				{
+					print("Pass: found $stdKey in copyFound\n");
 					$this->pass("Pass: found $key\n");
 					$found = 1;
 					// found one, check the count
@@ -163,15 +170,41 @@ class verify3filesCopyright extends fossologyTestCase
 					$this->assertEqual($count, $foundCount,
         "verify3files FAILED! the counts are not equal\n
          Expected:$count\nGot:$foundCount\n");
+				 continue;
+				}
+				else
+				{
+					//print "DB: did not find $stdKey in copyFound\n";
+					//print "DB: adding $key to notFound\n";
+					$notFound[] = $key;
 				}
 			} // foreach $copyR->
-			if(!$found)
-			{
-				$this->fail("verify3files FAILED! the Standard\n$stdKey\nwas not" .
-        " found in the table\nExpected: $stdKey\nGot: $key\n");
-			}
+			//if(!empty($notFound))
+			//{
+			//$this->fail("verify3files FAILED! the following items did not" .
+			//" match any standard, are any false positives?:\n");
+			//print "DB: notFound is:\n";
+			//foreach($notFound as $falsePos)
+			//{
+			//print "$falsePos\n---------------------\n";
+				//}
+				//}
 		} // foreach $copyStd
-
+		
+		// this is a hack for now... should be a better way to filter 
+		// Try in_array before insert?
+		$uniqueNF = array();
+		$uniqueNF = array_unique($notFound);
+		if(!empty($uniqueNF))
+		{
+			$this->fail("verify3files FAILED! the following items did not" .
+			" match any standard, are any false positives?:\n");
+			print "\n";
+			foreach($uniqueNF as $falsePos)
+			{
+				print "$falsePos\n---------------------\n";
+			}
+		}
 		$email = new domParseLicenseTbl($page, 'copyrightemail');
 		$email->parseLicenseTbl();
 		// empty table?, verify counts are zero
