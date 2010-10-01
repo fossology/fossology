@@ -516,7 +516,8 @@ void copyright_analyze(copyright copy, FILE* istr)
       entry->type = "statement";
 
       /* push the string onto the list and increment bufidx */
-      if(contains_copyright(copy->name, entry->text, temp))
+      contains_copyright(copy->name, entry->text, temp);
+      if(strlen(temp))
       {
         strcpy(entry->name_match, temp);
         cvector_push_back(copy->entries, entry);
