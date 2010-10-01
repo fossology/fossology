@@ -61,7 +61,7 @@ function reportError($error)
 	$F = fopen($tmpFile, 'w') or die("Can not open tmp file $tmpFile\n");
 	fwrite($F, $msg);
 	fclose($F);
-	$last = exec("mailx -s 'test Setup Failed' mark.donohoe@hp.com < $tmpFile ",$tossme, $rptGen);
+	$last = exec("mailx -s 'test Setup Failed' $mailTo < $tmpFile ",$tossme, $rptGen);
 	}
 
 // Using the standard source path /home/fosstester/fossology
