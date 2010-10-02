@@ -1,540 +1,563 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: FO\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-28 20:49+0100\n"
-"PO-Revision-Date: \n"
-"Last-Translator: Stefan Schroeder <stefan_fkp at sourceforge>\n"
-"Language-Team: None <stefan_fkp sf>\n"
+"POT-Creation-Date: 2010-10-01 20:53+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Stefan Schroeder\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: German\n"
-"X-Poedit-Country: GERMANY\n"
-"X-Poedit-SourceCharset: utf-8\n"
-"X-Poedit-Basepath: /home/fobbie/fossology/trunk/fossology/ui\n"
-"X-Poedit-SearchPath-0: .\n"
 
 #: index.php:51
 msgid "Module unavailable or your login session timed out."
-msgstr ""
+msgstr "Das ge&auml;hlte Modul existiert nicht oder die Session ist abgelaufen."
 
 #: index.php:53
-msgid "Click"
-msgstr ""
+msgid "Click here to continue."
+msgstr "Klicken Sie hier um fortzufahren."
 
-#: index.php:54
-msgid "here"
-msgstr ""
-
-#: index.php:55
-msgid "to continue."
-msgstr ""
-
-#: common/common-license-file.php:252
+#: common/common-license-file.php:252 plugins/ui-licgroup-manage.php:483
+#: plugins/ui-licterm-manage.php:470
+#: plugins/agent-license-once-compare.php:281 plugins/core-schema.php:168
+#: plugins/core-schema.php:311
 msgid "View"
-msgstr ""
+msgstr "Ansicht"
 
 #: common/common-license-file.php:253
 msgid "Info"
-msgstr ""
+msgstr "Info"
 
 #: common/common-license-file.php:254
 msgid "Download"
-msgstr ""
+msgstr "Download"
 
 #: common/common-agents.php:76
 msgid "Fatal! Query Failed getting user_agent_list for user"
-msgstr ""
+msgstr "Fehler! Abfrage fehlgeschlagen"
 
 #: common/common-agents.php:504
 msgid "Invalid parameter (upload_pk)"
-msgstr ""
+msgstr "Unzulässiger Parameter (upload_pk)"
 
 #: common/common-agents.php:528
-msgid "FATAL: Email Notification: no email address supplied, cannot send mail, common-agents::scheduleEmailNotification Your job should be scheduled, you will not get email notifying you it is done"
-msgstr ""
+msgid ""
+"FATAL: Email Notification: no email address supplied, cannot send mail, "
+"common-agents::scheduleEmailNotification Your job should be scheduled, you "
+"will not get email notifying you it is done"
+msgstr "Fehler: Die E-Mail-Nachricht konnte nicht zugestellt werden. "
+"Es wurde keine E-Mail-Adresse hinterlegt. "
+"common-agents::scheduleEmailNotification: Bei Abschluss der Aufgabe werden "
+"Sie keine E-Mail erhalten k&ouml;nnen."
 
 #: common/common-agents.php:547
 msgid "Failed to insert job record, job fo_notify not created"
-msgstr ""
+msgstr "Fehler: Datensatz konnte nicht erstellt werden. "
+"Die Aufgabe fo_notify konnte nicht gestartet werden. "
 
 #: common/common-agents.php:555
 msgid "Failed to insert task 'fo_notify' into job queue"
-msgstr ""
+msgstr "Fehler: Die Aufgabe fo_notify konnte nicht zur Aufgabenliste "
+"hinzugef&uuml;gt werden."
 
-#: common/common-menu.php:58
-#: common/common-menu.php:103
+#: common/common-menu.php:58 common/common-menu.php:103
+#: plugins/ui-view.php:300
 msgid "First"
-msgstr ""
+msgstr "Erster"
 
-#: common/common-menu.php:59
-#: common/common-menu.php:104
+#: common/common-menu.php:59 common/common-menu.php:104
+#: plugins/ui-view.php:302
 msgid "Prev"
-msgstr ""
+msgstr "Vorheriger"
 
-#: common/common-menu.php:82
-#: common/common-menu.php:121
+#: common/common-menu.php:82 common/common-menu.php:121
+#: plugins/ui-view.php:319
 msgid "Next"
-msgstr ""
+msgstr "N&auml;chster"
 
-#: common/common-menu.php:83
+#: common/common-menu.php:83 plugins/ui-view.php:321
 msgid "Last"
-msgstr ""
+msgstr "Letzter"
 
 #: common/common-menu.php:281
 msgid "Traceback"
-msgstr ""
+msgstr "R&uuml;ckverfolgung"
 
-#: common/common-menu.php:290
+#: common/common-menu.php:290 plugins/ui-browse.php:223
+#: plugins/ui-folders.php:64
 msgid "Refresh"
-msgstr ""
+msgstr "Neu laden"
 
 #: common/common-cli.php:85
 msgid "ERROR: could not write message to"
-msgstr ""
+msgstr "Fehler: Nachricht konnte nicht geschrieben werden:"
 
-#: common/common-dir.php:270
+#: common/common-dir.php:269 plugins/admin-folder-create.php:134
+#: plugins/admin-folder-create.php:139
 msgid "Folder"
-msgstr ""
+msgstr "Ordner"
 
-#: common/common-dir.php:392
+#: common/common-dir.php:391
 msgid "Phrase"
-msgstr ""
+msgstr "Phrase"
 
 #: common/common-active.php:63
 msgid "Close"
-msgstr ""
+msgstr "Schlie&szlig;en"
 
 #: common/common-buckets.php:56
 msgid "No data available.  Use Jobs > Agents to schedule a bucket scan."
-msgstr ""
+msgstr "Keine Daten vorhanden. Benutzen Sie Aufgaben > Agenten um einen "
+"Scan anzusto&szlig;en."
 
 #: plugins/ajax-filelic.php:43
 msgid "ajax find items by license"
-msgstr ""
+msgstr "Ajax: Suche nach Lizenzen"
 
 #: plugins/ui-license.php:27
 msgid "bSAM License Browser (deprecated)"
-msgstr ""
+msgstr "bSAM Lizenz-Browser (veraltet)"
 
-#: plugins/ui-license.php:84
+#: plugins/ui-license.php:84 plugins/ui-buckets.php:109
 msgid "Clear"
-msgstr ""
+msgstr "L&ouml;schen"
 
 #: plugins/ui-license.php:89
 msgid "View bsam license histogram"
-msgstr ""
+msgstr "bSAM-Lizenz-Histogramm-Ansicht"
 
-#: plugins/ui-license.php:313
+#: plugins/ui-license.php:313 plugins/ui-buckets.php:276
+#: plugins/ui-licgroup.php:561 plugins/ui-nomos-license.php:200
 msgid "Count"
-msgstr ""
+msgstr "Anzahl"
 
-#: plugins/ui-license.php:315
+#: plugins/ui-license.php:315 plugins/ui-buckets.php:278
+#: plugins/ui-licgroup.php:563 plugins/ui-nomos-license.php:202
+#: plugins/ui-nomos-license.php:244
 msgid "Files"
-msgstr ""
+msgstr "Dateien"
 
-#: plugins/ui-license.php:317
+#: plugins/ui-license.php:317 plugins/ui-view-info.php:354
+#: plugins/ui-licgroup-debug.php:93
 msgid "License"
-msgstr ""
+msgstr "Lizenz"
 
-#: plugins/ui-license.php:350
+#: plugins/ui-license.php:350 plugins/ui-buckets.php:297
+#: plugins/ui-licgroup.php:329 plugins/ui-licgroup.php:586
+#: plugins/ui-nomos-license.php:218
 msgid "Show"
-msgstr ""
+msgstr "Ansicht"
 
 #: plugins/ui-license.php:364
 msgid "Total licenses"
-msgstr ""
+msgstr "Lizenzen Gesamt"
 
-#: plugins/ui-license.php:492
+#: plugins/ui-license.php:492 plugins/ui-buckets.php:543
+#: plugins/search.php:409 plugins/ui-nomos-license.php:467
 #, php-format
 msgid "Elapsed time: %.2f seconds"
-msgstr ""
+msgstr "Dauer: %.2f Sekunden"
 
-#: plugins/ui-license.php:494
+#: plugins/ui-license.php:494 plugins/ui-buckets.php:547
+#: plugins/ui-nomos-license.php:472
 msgid "cached"
-msgstr ""
+msgstr "zwischengespeichert"
 
-#: plugins/ui-license.php:495
-#: plugins/admin-license-file.php:328
+#: plugins/ui-license.php:495 plugins/admin-license-file.php:328
+#: plugins/ui-buckets.php:548 plugins/ui-nomos-license.php:473
 msgid "Update"
-msgstr ""
+msgstr "Aktualisieren"
 
 #: plugins/jobs-runningjobs.php:27
 msgid "Show Agent Status"
-msgstr ""
+msgstr "Ansicht Agenten-Status"
 
 #: plugins/jobs-runningjobs.php:76
 msgid "The FOSSology job scheduler does not appear to be running."
-msgstr ""
+msgstr "Offenbar l&auml;uft der FOSSology-Scheduler nicht."
 
 #: plugins/jobs-runningjobs.php:78
-msgid "If this is unexpected, look in the log file (typically /var/log/fossology/fossology.log) for errors. "
-msgstr ""
+msgid ""
+"If this is unexpected, look in the log file (typically /var/log/fossology/"
+"fossology.log) for errors. "
+msgstr "Falls dies unerwartet geschieht, dann pr&uuml;fen Sie die"
+"Logfiles auf Fehlermeldungen. (&Uuml;blicherweise in /var/log/fossology)"
 
 #: plugins/jobs-runningjobs.php:79
-msgid " Otherwise, you may want to restart the scheduler (typically sudo /etc/init.d/fossology start)"
-msgstr ""
+msgid ""
+" Otherwise, you may want to restart the scheduler (typically sudo /etc/init."
+"d/fossology start)"
+msgstr "Ansonsten starten Sie den Scheduler neu (&Uuml;blicherweise "
+"durch sudo /etc/init.d/fossology start)"
 
 #: plugins/jobs-runningjobs.php:91
 msgid "Update time"
-msgstr ""
+msgstr "Zeit aktualisieren"
 
 #: plugins/jobs-runningjobs.php:95
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #: plugins/jobs-runningjobs.php:99
 msgid "Agent Name"
-msgstr ""
+msgstr "Name des Agenten"
 
 #: plugins/jobs-runningjobs.php:103
 msgid "Host"
-msgstr ""
+msgstr "Rechner"
 
 #: plugins/jobs-runningjobs.php:107
 msgid "Parameters"
-msgstr ""
+msgstr "Parameter"
 
 #: plugins/admin-license-file.php:27
 msgid "License Administration"
-msgstr ""
+msgstr "Lizenzverwaltung"
 
 #: plugins/admin-license-file.php:47
 msgid "Add new license"
-msgstr ""
+msgstr "Lizenz hinzuf&uuml;gen"
 
 #: plugins/admin-license-file.php:50
 msgid "Select license family"
-msgstr ""
+msgstr "Auswahl der Lizenz-Familie"
 
 #: plugins/admin-license-file.php:65
 msgid "What license family do you wish to view:<br>"
-msgstr ""
+msgstr "Welche Lizenz-Familie m&ouml;chten Sie betrachten:<br>"
 
 #: plugins/admin-license-file.php:70
 msgid "Filter: "
-msgstr ""
+msgstr "Filter:"
 
 #: plugins/admin-license-file.php:73
 msgid "All"
-msgstr ""
+msgstr "Alle"
 
-#: plugins/admin-license-file.php:76
-#: plugins/admin-license-file.php:156
+#: plugins/admin-license-file.php:76 plugins/admin-license-file.php:156
 #: plugins/admin-license-file.php:260
 msgid "Checked"
-msgstr ""
+msgstr "Ausgew&auml;hlt"
 
 #: plugins/admin-license-file.php:79
 msgid "Not Checked"
-msgstr ""
+msgstr "Nicht angew&auml;hlt"
 
 #: plugins/admin-license-file.php:85
 msgid "License family name: "
-msgstr ""
+msgstr "Name der Lizenz-Familie"
 
-#: plugins/admin-license-file.php:93
+#: plugins/admin-license-file.php:93 plugins/search-repo.php:147
 msgid "Find"
-msgstr ""
+msgstr "Suchen"
 
 #: plugins/admin-license-file.php:141
 msgid "No licenses matching the filter"
-msgstr ""
+msgstr "F&uuml;r den Filter"
 
 #: plugins/admin-license-file.php:142
 msgid "and name pattern"
-msgstr ""
+msgstr "und das Namensmuster"
 
 #: plugins/admin-license-file.php:143
 msgid "were found"
-msgstr ""
+msgstr "wurden keine Lizenzen gefunden."
 
-#: plugins/admin-license-file.php:154
+#: plugins/admin-license-file.php:154 plugins/ui-tags.php:525
+#: plugins/admin-upload-edit.php:177 plugins/admin-folder-edit.php:134
 msgid "Edit"
-msgstr ""
+msgstr "Bearbeiten"
 
 #: plugins/admin-license-file.php:158
 msgid "Shortname"
-msgstr ""
+msgstr "Kurzname"
 
 #: plugins/admin-license-file.php:160
 msgid "Fullname"
-msgstr ""
+msgstr "Vollst&auml;ndiger Name"
 
 #: plugins/admin-license-file.php:162
 msgid "Text"
-msgstr ""
+msgstr "Text"
 
-#: plugins/admin-license-file.php:164
-#: plugins/admin-license-file.php:314
+#: plugins/admin-license-file.php:164 plugins/admin-license-file.php:314
+#: plugins/ui-view-info.php:378
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: plugins/admin-license-file.php:234
 msgid "No licenses matching this key"
-msgstr ""
+msgstr "Zu diesem Schl&uuml;ssel passen keine Lizenzen:"
 
 #: plugins/admin-license-file.php:235
 msgid "was found"
-msgstr ""
+msgstr "."
 
-#: plugins/admin-license-file.php:252
+#: plugins/admin-license-file.php:252 plugins/myjobs.php:82
 msgid "Active"
-msgstr ""
+msgstr "Aktiv"
 
 #: plugins/admin-license-file.php:268
 msgid "Short name"
-msgstr ""
+msgstr "Kurzname"
 
 #: plugins/admin-license-file.php:274
 msgid "Full name"
-msgstr ""
+msgstr "Vollst&auml;ndiger Name"
 
 #: plugins/admin-license-file.php:288
 msgid "(read only)"
-msgstr ""
+msgstr "(nur lesbar)"
 
 #: plugins/admin-license-file.php:292
 msgid "License Text"
-msgstr ""
+msgstr "Lizenztext"
 
 #: plugins/admin-license-file.php:300
 msgid "Text Updatable"
-msgstr ""
+msgstr "Text kann aktualisiert werden"
 
 #: plugins/admin-license-file.php:308
 msgid "Detector Type"
-msgstr ""
+msgstr "Detektor-Typ"
 
 #: plugins/admin-license-file.php:321
 msgid "Public Notes"
-msgstr ""
+msgstr "Öffentliche Notizen"
 
 #: plugins/admin-license-file.php:331
 msgid "Add License"
-msgstr ""
+msgstr "Lizenz hinzuf&uuml;gen"
 
 #: plugins/admin-dashboard.php:27
 msgid "Dashboard"
-msgstr ""
+msgstr "Armaturenbrett"
 
 #: plugins/admin-dashboard.php:61
 msgid "Filesystem"
-msgstr ""
+msgstr "Dateisystem"
 
 #: plugins/admin-dashboard.php:62
 msgid "Used"
-msgstr ""
+msgstr "Genutzt"
 
 #: plugins/admin-dashboard.php:63
 msgid "Capacity"
-msgstr ""
+msgstr "Kapazit&auml;t"
 
 #: plugins/admin-dashboard.php:64
 msgid "Percent Full"
-msgstr ""
+msgstr "Prozent gef&uuml;llt"
 
 #: plugins/admin-dashboard.php:109
 msgid "Job Queue"
-msgstr ""
+msgstr "Job Warteschlange"
 
 #: plugins/admin-dashboard.php:112
 msgid "Queue Information"
-msgstr ""
+msgstr "Warteschlangen-Information"
 
-#: plugins/admin-dashboard.php:113
-#: plugins/admin-dashboard.php:168
-#: plugins/admin-dashboard.php:198
+#: plugins/admin-dashboard.php:113 plugins/admin-dashboard.php:168
+#: plugins/admin-dashboard.php:198 plugins/myjobs.php:79
 msgid "Total"
-msgstr ""
+msgstr "Summe"
 
-#: plugins/admin-dashboard.php:121
-#: plugins/admin-dashboard.php:125
+#: plugins/admin-dashboard.php:121 plugins/admin-dashboard.php:125
 msgid "Pending Analysis Jobs"
-msgstr ""
+msgstr "Anstehende Analysen"
 
-#: plugins/admin-dashboard.php:131
-#: plugins/admin-dashboard.php:135
+#: plugins/admin-dashboard.php:131 plugins/admin-dashboard.php:135
 msgid "Tasks in the Job Queue"
-msgstr ""
+msgstr "Aufgaben in der Warteschlange"
 
-#: plugins/admin-dashboard.php:141
-#: plugins/admin-dashboard.php:145
+#: plugins/admin-dashboard.php:141 plugins/admin-dashboard.php:145
 msgid "Running Tasks"
-msgstr ""
+msgstr "Laufende Aufgaben"
 
-#: plugins/admin-dashboard.php:151
-#: plugins/admin-dashboard.php:155
+#: plugins/admin-dashboard.php:151 plugins/admin-dashboard.php:155
 msgid "Failed Tasks"
-msgstr ""
+msgstr "Fehlgeschlagene Aufgaben"
 
 #: plugins/admin-dashboard.php:164
 msgid "Database Contents"
-msgstr ""
+msgstr "Inhalt der Datenbank"
 
-#: plugins/admin-dashboard.php:167
-#: plugins/admin-dashboard.php:197
+#: plugins/admin-dashboard.php:167 plugins/admin-dashboard.php:197
 msgid "Metric"
-msgstr ""
+msgstr "Metrik"
 
 #: plugins/admin-dashboard.php:171
 msgid "Unique Uploads"
-msgstr ""
+msgstr "Hochgeladenes (ohne Duplikate)"
 
 #: plugins/admin-dashboard.php:175
 msgid "Unique Extracted Files"
-msgstr ""
+msgstr "Extrahierte Dateien (ohne Duplikate)"
 
 #: plugins/admin-dashboard.php:179
 msgid "Extracted Names"
-msgstr ""
+msgstr "Extrahierte Namen"
 
 #: plugins/admin-dashboard.php:183
 msgid "Known License Templates"
-msgstr ""
+msgstr "Bekannte Lizenz-Vorlagen"
 
 #: plugins/admin-dashboard.php:187
 msgid "Identified Licenses"
-msgstr ""
+msgstr "Identifizierte Lizenzen"
 
 #: plugins/admin-dashboard.php:194
 msgid "Database Metrics"
-msgstr ""
+msgstr "Datenbank-Metrik"
 
 #: plugins/admin-dashboard.php:201
 msgid "FOSSology database size"
-msgstr ""
+msgstr "Gr&ouml;&szlig;e der FOSSology-Datenbank"
 
 #: plugins/admin-dashboard.php:209
 msgid "Active database connections"
-msgstr ""
+msgstr "Aktive Verbindungen zur Datenbank"
 
 #: plugins/admin-dashboard.php:213
 msgid "Active FOSSology queries"
-msgstr ""
+msgstr "Aktive FOSSology Abfragen"
 
 #: plugins/admin-dashboard.php:219
 msgid "Duration query #"
-msgstr ""
+msgstr "Dauer w&auml;hrend der die Abfrage #"
 
 #: plugins/admin-dashboard.php:220
 msgid " has been active"
-msgstr ""
+msgstr " aktiv war."
 
 #: plugins/admin-dashboard.php:231
 msgid "Repository Disk Space"
-msgstr ""
+msgstr "Plattenplatz der Datenbank"
 
 #: plugins/user-add.php:28
 msgid "Add A User"
-msgstr ""
+msgstr "Benutzer hinzufügen"
 
 #: plugins/user-add.php:50
 msgid "NO DB connection!"
-msgstr ""
+msgstr "Keine Verbindung zu Datenbank!"
 
 #: plugins/user-add.php:88
 msgid "Username must be specified. Not added."
-msgstr ""
+msgstr "Der Benutzername ist eine Pflichteingabe!"
 
 #: plugins/user-add.php:93
 msgid "Passwords did not match. Not added."
-msgstr ""
+msgstr "Die Passw&ouml;rter stimmen nicht &uuml;berein."
 
-#: plugins/user-add.php:99
+#: plugins/user-add.php:99 plugins/user-edit-self.php:115
 msgid "Invalid email address.  Not added."
-msgstr ""
+msgstr "Die E-Mail-Adresse ist ung&uuml;ltig."
 
-#: plugins/user-add.php:106
+#: plugins/user-add.php:106 plugins/user-edit-self.php:122
 msgid "User already exists.  Not added."
-msgstr ""
+msgstr "Der Benutzer existiert bereits."
 
 #: plugins/user-add.php:141
 msgid "Failed to insert user."
-msgstr ""
+msgstr "Benutzer konnte nicht hinzugef&uuml;gt werden."
 
-#: plugins/user-add.php:165
+#: plugins/user-add.php:165 plugins/ui-menus.php:303
 msgid "User"
-msgstr ""
+msgstr "Benutzer"
 
 #: plugins/user-add.php:166
 msgid "added"
-msgstr ""
+msgstr "hinzugef&uuml;gt."
 
 #: plugins/user-add.php:174
 msgid "To create a new user, enter the following information:<P />\n"
-msgstr ""
+msgstr "Um einen neuen Benutzer anzulegen, stellen Sie die folgenden Daten bereit:\n"
 
 #: plugins/user-add.php:178
 msgid "Enter the username."
-msgstr ""
+msgstr "Benutzername:"
 
 #: plugins/user-add.php:183
-msgid "Enter a description for the user (name, contact, or other information).  This may be blank."
-msgstr ""
+msgid ""
+"Enter a description for the user (name, contact, or other information).  "
+"This may be blank."
+msgstr "Beschreibung des Benutzers (Name, Kontaktdaten oder &auml;hnliches)"
 
 #: plugins/user-add.php:188
-msgid "Enter an email address for the user, see step 8. This field may be left blank."
-msgstr ""
+msgid ""
+"Enter an email address for the user, see step 8. This field may be left "
+"blank."
+msgstr "E-Mail-Adresse des Benutzers, siehe Schritt 8. Dieses Feld ist optional."
 
-#: plugins/user-add.php:192
+#: plugins/user-add.php:192 plugins/user-edit-any.php:377
 msgid "Select the user's access level."
-msgstr ""
+msgstr "W&aumlhlen Sie die Zugriffsrolle des Benutzers."
 
-#: plugins/user-add.php:195
+#: plugins/user-add.php:195 plugins/user-edit-any.php:380
 msgid "None (very basic, no database access)"
-msgstr ""
+msgstr "Keine Rechte (kein Datenbakzugriff)"
 
-#: plugins/user-add.php:197
+#: plugins/user-add.php:197 plugins/user-edit-any.php:381
 msgid "Read-only (read, but no writes or downloads)"
-msgstr ""
+msgstr "Nur-lesend (kein Schreibzugriff, keine Downloads)"
 
-#: plugins/user-add.php:199
+#: plugins/user-add.php:199 plugins/user-edit-any.php:382
 msgid "Download (Read-only, but can download files)"
-msgstr ""
+msgstr "Download (lesen und herunterladen)"
 
-#: plugins/user-add.php:201
+#: plugins/user-add.php:201 plugins/user-edit-any.php:383
 msgid "Read-Write (read, download, or edit information)"
-msgstr ""
+msgstr "Lesen-Schreiben (lesen, herunterladen und editieren)"
 
-#: plugins/user-add.php:203
+#: plugins/user-add.php:203 plugins/user-edit-any.php:384
 msgid "Upload (read-write, and permits uploading files)"
-msgstr ""
+msgstr "Hochladen (lesen, schreiben, hochladen und editieren)"
 
-#: plugins/user-add.php:205
+#: plugins/user-add.php:205 plugins/user-edit-any.php:385
 msgid "Analyze (... and permits scheduling analysis tasks)"
-msgstr ""
+msgstr "Analyse (... und darf Zeiten planen)"
 
-#: plugins/user-add.php:207
+#: plugins/user-add.php:207 plugins/user-edit-any.php:386
 msgid "Delete (... and permits deleting uploaded files and analysis)"
-msgstr ""
+msgstr "L&ouml;schen (... von Dateien und Analysen)"
 
-#: plugins/user-add.php:209
+#: plugins/user-add.php:209 plugins/user-edit-any.php:387
 msgid "Debug (... and allows access to debugging functions)"
-msgstr ""
+msgstr "Debug (... Zugriff auf Funktionen zur Fehlersuche)"
 
-#: plugins/user-add.php:211
+#: plugins/user-add.php:211 plugins/user-edit-any.php:388
 msgid "Full Administrator (all access including adding and deleting users)"
+msgstr "Administrator (voller Zugriff)"
+
+#: plugins/user-add.php:215 plugins/user-edit-any.php:401
+msgid ""
+"Select the user's top-level folder. Access is restricted to this folder."
 msgstr ""
 
-#: plugins/user-add.php:215
-msgid "Select the user's top-level folder. Access is restricted to this folder."
-msgstr ""
-
-#: plugins/user-add.php:217
-msgid " (NOTE: This is only partially implemented right now. Current users can escape the top of tree limitation.)"
+#: plugins/user-add.php:217 plugins/user-edit-any.php:403
+msgid ""
+" (NOTE: This is only partially implemented right now. Current users can "
+"escape the top of tree limitation.)"
 msgstr ""
 
 #: plugins/user-add.php:223
 msgid "Enter the user's password.  It may be blank."
 msgstr ""
 
-#: plugins/user-add.php:226
+#: plugins/user-add.php:226 plugins/user-edit-any.php:416
 msgid "Re-enter the user's password."
 msgstr ""
 
-#: plugins/user-add.php:229
+#: plugins/user-add.php:229 plugins/user-edit-self.php:262
+#: plugins/user-edit-any.php:419
 msgid "E-mail Notification"
 msgstr ""
 
@@ -542,17 +565,20 @@ msgstr ""
 msgid "Check to enable email notification of completed analysis."
 msgstr ""
 
-#: plugins/user-add.php:235
-msgid "Default Agents: Select the agent(s) to automatically run when uploading data. These selections can be changed on the upload screens."
+#: plugins/user-add.php:235 plugins/user-edit-self.php:266
+#: plugins/user-edit-any.php:423
+msgid ""
+"Default Agents: Select the agent(s) to automatically run when uploading "
+"data. These selections can be changed on the upload screens."
 msgstr ""
 
-#: plugins/user-add.php:239
+#: plugins/user-add.php:239 plugins/user-edit-self.php:287
 msgid "Default bucketpool."
 msgstr ""
 
-#: plugins/user-add.php:246
-#: plugins/ui-licgroup-manage.php:487
-#: plugins/ui-licgroup-manage.php:542
+#: plugins/user-add.php:246 plugins/ui-licgroup-manage.php:487
+#: plugins/ui-licgroup-manage.php:542 plugins/ui-licterm-manage.php:370
+#: plugins/ui-licterm-manage.php:472
 msgid "Add"
 msgstr ""
 
@@ -560,11 +586,12 @@ msgstr ""
 msgid "List Files for Bucket"
 msgstr ""
 
-#: plugins/ui-list-bucket-files.php:65
+#: plugins/ui-list-bucket-files.php:65 plugins/search-file.php:126
+#: plugins/ui-list-lic-files.php:60
 msgid "Show All Files"
 msgstr ""
 
-#: plugins/ui-list-bucket-files.php:95
+#: plugins/ui-list-bucket-files.php:95 plugins/ui-list-lic-files.php:90
 msgid "is missing required parameters."
 msgstr ""
 
@@ -572,11 +599,11 @@ msgstr ""
 msgid "The following files are in bucket: '<b>"
 msgstr ""
 
-#: plugins/ui-list-bucket-files.php:128
+#: plugins/ui-list-bucket-files.php:128 plugins/ui-list-lic-files.php:125
 msgid "Display"
 msgstr ""
 
-#: plugins/ui-list-bucket-files.php:129
+#: plugins/ui-list-bucket-files.php:129 plugins/ui-list-lic-files.php:126
 msgid "excludes"
 msgstr ""
 
@@ -584,7 +611,7 @@ msgstr ""
 msgid "files with these licenses"
 msgstr ""
 
-#: plugins/ui-list-bucket-files.php:201
+#: plugins/ui-list-bucket-files.php:201 plugins/ui-list-lic-files.php:152
 msgid "File"
 msgstr ""
 
@@ -592,11 +619,14 @@ msgstr ""
 msgid "Exclude files with license"
 msgstr ""
 
-#: plugins/ui-list-bucket-files.php:248
+#: plugins/ui-list-bucket-files.php:248 plugins/ui-licgroup.php:688
+#: plugins/ui-list-lic-files.php:194
 msgid "Elaspsed time"
 msgstr ""
 
-#: plugins/ui-list-bucket-files.php:249
+#: plugins/ui-list-bucket-files.php:249 plugins/ui-licgroup.php:689
+#: plugins/myjobs.php:76 plugins/search-file-by-license.php:106
+#: plugins/search-file-by-licgroup.php:235 plugins/ui-list-lic-files.php:195
 msgid "seconds"
 msgstr ""
 
@@ -604,65 +634,75 @@ msgstr ""
 msgid "Advanced Search for File"
 msgstr ""
 
-#: plugins/search-file-advance.php:103
+#: plugins/search-file-advance.php:69 plugins/search-file-advance.php:163
+#: plugins/search-file.php:76 plugins/search.php:96 plugins/search.php:220
 msgid "No results.\n"
 msgstr ""
 
-#: plugins/search-file-advance.php:112
+#: plugins/search-file-advance.php:78 plugins/search-file-advance.php:172
+#: plugins/search.php:105 plugins/search.php:229
 msgid "Total matched:"
 msgstr ""
 
-#: plugins/search-file-advance.php:129
+#: plugins/search-file-advance.php:189
 msgid "Additional search options"
 msgstr ""
 
-#: plugins/search-file-advance.php:162
+#: plugins/search-file-advance.php:223 plugins/search-file.php:118
+#: plugins/search.php:326
 msgid "You can use '%' as a wild-card.\n"
 msgstr ""
 
-#: plugins/search-file-advance.php:165
+#: plugins/search-file-advance.php:226 plugins/search.php:323
 msgid "Enter the filename to find: "
 msgstr ""
 
-#: plugins/search-file-advance.php:169
+#: plugins/search-file-advance.php:230 plugins/search.php:328
+msgid "Tag to find"
+msgstr ""
+
+#: plugins/search-file-advance.php:233 plugins/search.php:331
 msgid "Mimetype "
 msgstr ""
 
-#: plugins/search-file-advance.php:174
-#: plugins/search-file-advance.php:181
+#: plugins/search-file-advance.php:238 plugins/search-file-advance.php:245
+#: plugins/search.php:336 plugins/search.php:343
 msgid "IS"
 msgstr ""
 
-#: plugins/search-file-advance.php:176
-#: plugins/search-file-advance.php:183
+#: plugins/search-file-advance.php:240 plugins/search-file-advance.php:247
+#: plugins/search.php:338 plugins/search.php:345
 msgid "IS NOT"
 msgstr ""
 
-#: plugins/search-file-advance.php:189
+#: plugins/search-file-advance.php:253 plugins/search.php:351
 msgid "Select mimetype..."
 msgstr ""
 
-#: plugins/search-file-advance.php:206
-#: plugins/search-file-advance.php:210
+#: plugins/search-file-advance.php:270 plugins/search-file-advance.php:274
+#: plugins/search.php:368 plugins/search.php:372
 msgid "File size is"
 msgstr ""
 
-#: plugins/search-file-advance.php:207
-#: plugins/search-file-advance.php:211
+#: plugins/search-file-advance.php:271 plugins/search-file-advance.php:275
+#: plugins/search.php:369 plugins/search.php:373
 msgid " bytes\n"
 msgstr ""
 
-#: plugins/search-file-advance.php:215
+#: plugins/search-file-advance.php:279 plugins/search-file.php:131
+#: plugins/search-file-by-licgroup.php:190 plugins/ui-welcome.php:56
+#: plugins/ui-welcome.php:59 plugins/search.php:27 plugins/search.php:260
+#: plugins/search.php:379 plugins/ui-default.php:100
 msgid "Search"
 msgstr ""
 
-#: plugins/search-file-advance.php:223
+#: plugins/search-file-advance.php:287 plugins/search-file-advance.php:295
+#: plugins/search-file.php:140 plugins/search.php:387 plugins/search.php:395
 msgid "Files matching"
 msgstr ""
 
-#: plugins/ui-tags.php:27
-#: plugins/ui-tags.php:271
-#: plugins/ui-tags.php:277
+#: plugins/ui-tags.php:27 plugins/ui-tags.php:305 plugins/ui-tags.php:428
+#: plugins/ui-tags.php:505
 msgid "Tag"
 msgstr ""
 
@@ -670,56 +710,115 @@ msgstr ""
 msgid "Tag files or containers"
 msgstr ""
 
-#: plugins/ui-tags.php:80
+#: plugins/ui-tags.php:81
 msgid "TagName must be specified. Tag Not created."
 msgstr ""
 
-#: plugins/ui-tags.php:86
+#: plugins/ui-tags.php:87
 msgid "Need to select one option(file/pacakge/container) to create tag."
 msgstr ""
 
-#: plugins/ui-tags.php:102
+#: plugins/ui-tags.php:108
 msgid "TagName already exists. Tag Not created."
 msgstr ""
 
-#: plugins/ui-tags.php:112
+#: plugins/ui-tags.php:118
 msgid "Failed to create tag."
 msgstr ""
 
-#: plugins/ui-tags.php:274
+#: plugins/ui-tags.php:230
+msgid "TagName must be specified. Tag Not Updated."
+msgstr ""
+
+#: plugins/ui-tags.php:268
+msgid "Can't find this tag, Tag Not deleted."
+msgstr ""
+
+#: plugins/ui-tags.php:297
+msgid "<h3>Current Tags:</h3>\n"
+msgstr ""
+
+#: plugins/ui-tags.php:304
+msgid "Tag Namespace"
+msgstr ""
+
+#: plugins/ui-tags.php:306
+msgid "Tag Description"
+msgstr ""
+
+#: plugins/ui-tags.php:307
+msgid "Tag Date"
+msgstr ""
+
+#: plugins/ui-tags.php:403
+msgid "<h3>Create Tag:</h3>\n"
+msgstr ""
+
+#: plugins/ui-tags.php:425 plugins/ui-tags.php:502
 msgid "Namespace"
 msgstr ""
 
-#: plugins/ui-tags.php:282
-msgid "Check to confirm this is a new tag."
+#: plugins/ui-tags.php:435 plugins/ui-tags.php:507
+msgid "Tag description:"
 msgstr ""
 
-#: plugins/ui-tags.php:284
+#: plugins/ui-tags.php:437 plugins/ui-tags.php:509
 msgid "<p>Notes:</p>"
 msgstr ""
 
-#: plugins/ui-tags.php:286
-msgid "Tag this files."
+#: plugins/ui-tags.php:454 plugins/ui-licgroup-default.php:618
+#: plugins/admin-folder-create.php:160
+msgid "Create"
 msgstr ""
 
-#: plugins/ui-tags.php:290
-msgid "Tag all packages (source and binary) in this container tree."
+#: plugins/ui-tags.php:469
+msgid "Create New Tag"
 msgstr ""
 
-#: plugins/ui-tags.php:292
-msgid "Tag every file in this container tree."
+#: plugins/ui-tags.php:472
+msgid "<h3>Edit Tag:</h3>\n"
 msgstr ""
 
-#: plugins/ui-tags.php:295
-msgid "Submit"
+#: plugins/ui-tags.php:542
+msgid "<h3>Delete Tag:</h3>\n"
 msgstr ""
 
-#: plugins/ui-tags.php:326
+#: plugins/ui-tags.php:568
+msgid "Delete Tag only for this file."
+msgstr ""
+
+#: plugins/ui-tags.php:570
+msgid "Delete Tag for all packages (source and binary) in this container tree."
+msgstr ""
+
+#: plugins/ui-tags.php:577 plugins/jobs-showjobs.php:439
+#: plugins/admin-folder-delete.php:147 plugins/user-del.php:131
+#: plugins/admin-upload-delete.php:156
+msgid "Delete"
+msgstr ""
+
+#: plugins/ui-tags.php:651
 msgid "Create Tag Failed"
 msgstr ""
 
-#: plugins/ui-tags.php:329
+#: plugins/ui-tags.php:654
 msgid "Create Tag Successful!"
+msgstr ""
+
+#: plugins/ui-tags.php:663
+msgid "Edit Tag Failed"
+msgstr ""
+
+#: plugins/ui-tags.php:666
+msgid "Edit Tag Successful!"
+msgstr ""
+
+#: plugins/ui-tags.php:675
+msgid "Delete Tag Failed"
+msgstr ""
+
+#: plugins/ui-tags.php:678
+msgid "Delete Tag Successful!"
 msgstr ""
 
 #: plugins/ui-licgroup-manage.php:37
@@ -766,8 +865,9 @@ msgstr ""
 msgid "Licenses in this Group"
 msgstr ""
 
-#: plugins/ui-licgroup-manage.php:491
-#: plugins/ui-licgroup-manage.php:546
+#: plugins/ui-licgroup-manage.php:491 plugins/ui-licgroup-manage.php:546
+#: plugins/ui-licterm-manage.php:372 plugins/ui-licterm-manage.php:474
+#: plugins/agent-remove-license.php:155
 msgid "Remove"
 msgstr ""
 
@@ -796,7 +896,8 @@ msgid "Upload Instructions"
 msgstr ""
 
 #: plugins/upload-instructions.php:53
-msgid "FOSSology has many options for importing and uploading files for analysis.\n"
+msgid ""
+"FOSSology has many options for importing and uploading files for analysis.\n"
 msgstr ""
 
 #: plugins/upload-instructions.php:54
@@ -811,8 +912,7 @@ msgstr ""
 msgid "On your browser system"
 msgstr ""
 
-#: plugins/upload-instructions.php:59
-#: plugins/upload-instructions.php:69
+#: plugins/upload-instructions.php:59 plugins/upload-instructions.php:69
 #: plugins/upload-instructions.php:78
 msgid "Use the"
 msgstr ""
@@ -826,7 +926,9 @@ msgid "option to select and upload the file."
 msgstr ""
 
 #: plugins/upload-instructions.php:63
-msgid "While this can be very convenient (particularly if the file is not readily accessible online),\n"
+msgid ""
+"While this can be very convenient (particularly if the file is not readily "
+"accessible online),\n"
 msgstr ""
 
 #: plugins/upload-instructions.php:64
@@ -841,7 +943,7 @@ msgstr ""
 msgid "On a remote server"
 msgstr ""
 
-#: plugins/upload-instructions.php:70
+#: plugins/upload-instructions.php:70 plugins/upload-url.php:28
 msgid "Upload from URL"
 msgstr ""
 
@@ -850,18 +952,22 @@ msgid "option to specify a remote server."
 msgstr ""
 
 #: plugins/upload-instructions.php:73
-msgid "This is the most flexible option, but the URL must denote a publicly accessible HTTP, HTTPS, or FTP location.\n"
+msgid ""
+"This is the most flexible option, but the URL must denote a publicly "
+"accessible HTTP, HTTPS, or FTP location.\n"
 msgstr ""
 
 #: plugins/upload-instructions.php:74
-msgid "URLs that require authentication or human interactions cannot be downloaded through this automated system.\n"
+msgid ""
+"URLs that require authentication or human interactions cannot be downloaded "
+"through this automated system.\n"
 msgstr ""
 
 #: plugins/upload-instructions.php:76
 msgid "On the FOSSology web server"
 msgstr ""
 
-#: plugins/upload-instructions.php:79
+#: plugins/upload-instructions.php:79 plugins/upload-srv-files.php:28
 msgid "Upload from Server"
 msgstr ""
 
@@ -870,7 +976,9 @@ msgid "option to specify a file or path on the server."
 msgstr ""
 
 #: plugins/upload-instructions.php:82
-msgid "This option is intended for developers who have mounted directories containing source trees.\n"
+msgid ""
+"This option is intended for developers who have mounted directories "
+"containing source trees.\n"
 msgstr ""
 
 #: plugins/upload-instructions.php:83
@@ -878,11 +986,15 @@ msgid "The directory must be accessible via the web server's user.\n"
 msgstr ""
 
 #: plugins/upload-instructions.php:85
-msgid "If your system is configured to use multiple agent servers, the data area must be\n"
+msgid ""
+"If your system is configured to use multiple agent servers, the data area "
+"must be\n"
 msgstr ""
 
 #: plugins/upload-instructions.php:86
-msgid "mounted and accessible to the FOSSology user (fossy) on every agent system.  See\n"
+msgid ""
+"mounted and accessible to the FOSSology user (fossy) on every agent system.  "
+"See\n"
 msgstr ""
 
 #: plugins/upload-instructions.php:87
@@ -922,7 +1034,8 @@ msgid "Failed to find schema plugin.\n"
 msgstr ""
 
 #: plugins/core-init.php:125
-msgid "Initialization complete.  Click 'Home' in the top menu to proceed.<br />"
+msgid ""
+"Initialization complete.  Click 'Home' in the top menu to proceed.<br />"
 msgstr ""
 
 #: plugins/core-init.php:132
@@ -945,7 +1058,9 @@ msgstr ""
 msgid "Schedule an Unpack"
 msgstr ""
 
-#: plugins/agent-unpack.php:75
+#: plugins/agent-unpack.php:75 plugins/agent-license.php:109
+#: plugins/agent-pkgagent.php:103 plugins/upload-url.php:78
+#: plugins/agent-mimetype.php:108
 msgid "Failed to insert job record"
 msgstr ""
 
@@ -957,7 +1072,8 @@ msgstr ""
 msgid "Failed to insert adj2nest into job queue"
 msgstr ""
 
-#: plugins/agent-unpack.php:121
+#: plugins/agent-unpack.php:121 plugins/ui-reunpack.php:61
+#: plugins/ui-view.php:736
 msgid "Unpack added to job queue"
 msgstr ""
 
@@ -974,14 +1090,17 @@ msgid "Select an uploaded file to unpack.\n"
 msgstr ""
 
 #: plugins/agent-unpack.php:159
-msgid "Only uploads that are not already unpacked (and not already scheduled) can be scheduled.\n"
+msgid ""
+"Only uploads that are not already unpacked (and not already scheduled) can "
+"be scheduled.\n"
 msgstr ""
 
 #: plugins/agent-unpack.php:160
 msgid "Unpack:"
 msgstr ""
 
-#: plugins/agent-unpack.php:170
+#: plugins/agent-unpack.php:170 plugins/upload-file.php:182
+#: plugins/upload-url.php:163 plugins/upload-srv-files.php:228
 msgid "Select optional analysis"
 msgstr ""
 
@@ -1005,8 +1124,7 @@ msgstr ""
 msgid "Show detailed information about each job"
 msgstr ""
 
-#: plugins/jobs-showjobs.php:85
-#: plugins/jobs-showjobs.php:105
+#: plugins/jobs-showjobs.php:85 plugins/jobs-showjobs.php:105
 msgid "Show all jobs (active and completed)"
 msgstr ""
 
@@ -1018,17 +1136,14 @@ msgstr ""
 msgid "Show only active jobs"
 msgstr ""
 
-#: plugins/jobs-showjobs.php:158
+#: plugins/jobs-showjobs.php:158 plugins/core-debug-user.php:56
 msgid "Field"
 msgstr ""
 
-#: plugins/jobs-showjobs.php:159
-#: plugins/ui-view-info.php:101
-#: plugins/ui-view-info.php:206
-#: plugins/ui-view-info.php:224
-#: plugins/ui-view-info.php:328
-#: plugins/ui-view-info.php:428
-#: plugins/ui-view-info.php:516
+#: plugins/jobs-showjobs.php:159 plugins/ui-view-info.php:101
+#: plugins/ui-view-info.php:206 plugins/ui-view-info.php:224
+#: plugins/ui-view-info.php:328 plugins/ui-view-info.php:428
+#: plugins/ui-view-info.php:516 plugins/core-debug-user.php:57
 msgid "Value"
 msgstr ""
 
@@ -1040,8 +1155,7 @@ msgstr ""
 msgid "required by"
 msgstr ""
 
-#: plugins/jobs-showjobs.php:409
-#: plugins/jobs-showjobs.php:414
+#: plugins/jobs-showjobs.php:409 plugins/jobs-showjobs.php:414
 msgid "History"
 msgstr ""
 
@@ -1051,10 +1165,6 @@ msgstr ""
 
 #: plugins/jobs-showjobs.php:436
 msgid "Reset"
-msgstr ""
-
-#: plugins/jobs-showjobs.php:439
-msgid "Delete"
 msgstr ""
 
 #: plugins/jobs-showjobs.php:443
@@ -1093,7 +1203,7 @@ msgstr ""
 msgid "Select the source folder to move:  \n"
 msgstr ""
 
-#: plugins/admin-folder-move.php:127
+#: plugins/admin-folder-move.php:127 plugins/admin-upload-move.php:159
 msgid "Select the destination folder:  \n"
 msgstr ""
 
@@ -1105,7 +1215,7 @@ msgstr ""
 msgid "View License"
 msgstr ""
 
-#: plugins/ui-view-license.php:163
+#: plugins/ui-view-license.php:163 plugins/ui-nomos-license-list.php:175
 msgid "NO DB connection"
 msgstr ""
 
@@ -1169,17 +1279,14 @@ msgstr ""
 msgid "This file does not appear in any other known location.\n"
 msgstr ""
 
-#: plugins/ui-view-info.php:201
-#: plugins/ui-view-info.php:205
+#: plugins/ui-view-info.php:201 plugins/ui-view-info.php:205
 #: plugins/ui-view-info.php:223
 msgid "Meta Data"
 msgstr ""
 
-#: plugins/ui-view-info.php:204
-#: plugins/ui-view-info.php:222
-#: plugins/ui-view-info.php:326
-#: plugins/ui-view-info.php:426
-#: plugins/ui-view-info.php:514
+#: plugins/ui-view-info.php:204 plugins/ui-view-info.php:222
+#: plugins/ui-view-info.php:326 plugins/ui-view-info.php:426
+#: plugins/ui-view-info.php:514 plugins/ui-view.php:228
 msgid "Item"
 msgstr ""
 
@@ -1203,14 +1310,12 @@ msgstr ""
 msgid "RPM Source Package"
 msgstr ""
 
-#: plugins/ui-view-info.php:327
-#: plugins/ui-view-info.php:427
+#: plugins/ui-view-info.php:327 plugins/ui-view-info.php:427
 #: plugins/ui-view-info.php:515
 msgid "Type"
 msgstr ""
 
-#: plugins/ui-view-info.php:336
-#: plugins/ui-view-info.php:436
+#: plugins/ui-view-info.php:336 plugins/ui-view-info.php:436
 msgid "Package"
 msgstr ""
 
@@ -1218,19 +1323,18 @@ msgstr ""
 msgid "Alias"
 msgstr ""
 
-#: plugins/ui-view-info.php:345
-#: plugins/ui-view-info.php:441
+#: plugins/ui-view-info.php:345 plugins/ui-view-info.php:441
 #: plugins/ui-view-info.php:537
 msgid "Architecture"
 msgstr ""
 
-#: plugins/ui-view-info.php:349
-#: plugins/ui-view-info.php:445
+#: plugins/ui-view-info.php:349 plugins/ui-view-info.php:445
 #: plugins/ui-view-info.php:541
 msgid "Version"
 msgstr ""
 
-#: plugins/ui-view-info.php:358
+#: plugins/ui-view-info.php:358 plugins/ui-licgroup-debug.php:51
+#: plugins/ui-licgroup-debug.php:84
 msgid "Group"
 msgstr ""
 
@@ -1250,19 +1354,17 @@ msgstr ""
 msgid "Vendor"
 msgstr ""
 
-#: plugins/ui-view-info.php:382
-#: plugins/ui-view-info.php:473
+#: plugins/ui-view-info.php:382 plugins/ui-view-info.php:473
 msgid "Summary"
 msgstr ""
 
-#: plugins/ui-view-info.php:386
-#: plugins/ui-view-info.php:477
-#: plugins/ui-licterm-manage.php:318
+#: plugins/ui-view-info.php:386 plugins/ui-view-info.php:477
+#: plugins/ui-licterm-manage.php:318 plugins/core-schema.php:96
+#: plugins/core-schema.php:124 plugins/core-schema.php:279
 msgid "Description"
 msgstr ""
 
-#: plugins/ui-view-info.php:390
-#: plugins/ui-view-info.php:469
+#: plugins/ui-view-info.php:390 plugins/ui-view-info.php:469
 #: plugins/ui-view-info.php:529
 msgid "Source"
 msgstr ""
@@ -1287,8 +1389,7 @@ msgstr ""
 msgid "Installed Size"
 msgstr ""
 
-#: plugins/ui-view-info.php:461
-#: plugins/ui-view-info.php:545
+#: plugins/ui-view-info.php:461 plugins/ui-view-info.php:545
 msgid "Maintainer"
 msgstr ""
 
@@ -1341,15 +1442,21 @@ msgid "New Term"
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:276
-msgid "Keyword terms and phrases are used during license analysis to better identify license names.\n"
+msgid ""
+"Keyword terms and phrases are used during license analysis to better "
+"identify license names.\n"
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:277
-msgid "Terms consist of two parts: a canonical name for the class of terms, and a list of words or phrases that are members of the class.\n"
+msgid ""
+"Terms consist of two parts: a canonical name for the class of terms, and a "
+"list of words or phrases that are members of the class.\n"
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:278
-msgid "For example, the phrases 'GNU General Public License version 2' and 'GPL version 2' may both be parts of the 'GPLv2' class.\n"
+msgid ""
+"For example, the phrases 'GNU General Public License version 2' and 'GPL "
+"version 2' may both be parts of the 'GPLv2' class.\n"
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:280
@@ -1365,7 +1472,9 @@ msgid "However, all completed license analysis will be unchanged.\n"
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:284
-msgid "You may wish to clear the license analysis for an upload and reschedule the analysis in order to apply changes.\n"
+msgid ""
+"You may wish to clear the license analysis for an upload and reschedule the "
+"analysis in order to apply changes.\n"
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:286
@@ -1381,7 +1490,9 @@ msgid "Many licenses spell the word 'licen<b>c</b><b>s</b>e.\n"
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:290
-msgid "If the term contains either spelling of 'license', 'licensing', 'licensed', etc., then it will be converted to 's' but will match both spellings.\n"
+msgid ""
+"If the term contains either spelling of 'license', 'licensing', 'licensed', "
+"etc., then it will be converted to 's' but will match both spellings.\n"
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:299
@@ -1413,7 +1524,9 @@ msgid "Add a new keyword, term, or phrase to this canonical group."
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:404
-msgid "Only letters, numbers, and spaces are permitted. Text will be normalized to lowercase letters with no more than one space between words.\n"
+msgid ""
+"Only letters, numbers, and spaces are permitted. Text will be normalized to "
+"lowercase letters with no more than one space between words.\n"
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:410
@@ -1449,7 +1562,9 @@ msgid "canonical groups."
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:498
-msgid "Use this to remove typographical errors or completely unnecessary keywords or phrases.\n"
+msgid ""
+"Use this to remove typographical errors or completely unnecessary keywords "
+"or phrases.\n"
 msgstr ""
 
 #: plugins/ui-licterm-manage.php:711
@@ -1464,9 +1579,9 @@ msgstr ""
 msgid "Menus"
 msgstr ""
 
-#: plugins/ui-menus.php:271
+#: plugins/ui-menus.php:271 plugins/ui-default.php:27
 msgid "Welcome to FOSSology"
-msgstr "Willkommen bei FOSSology"
+msgstr ""
 
 #: plugins/ui-menus.php:298
 msgid "login"
@@ -1493,7 +1608,9 @@ msgid "Search string is not a valid format."
 msgstr ""
 
 #: plugins/search-repo.php:143
-msgid "Given a file key (pfile_pk) or repository identifier (sha1.md5.length), return the list of files.\n"
+msgid ""
+"Given a file key (pfile_pk) or repository identifier (sha1.md5.length), "
+"return the list of files.\n"
 msgstr ""
 
 #: plugins/search-repo.php:145
@@ -1563,7 +1680,8 @@ msgstr ""
 
 #: plugins/admin-bucket-pool.php:136
 msgid ""
-"The purpose of this is to facilitate editing an existing bucketpool.  Make sure you\n"
+"The purpose of this is to facilitate editing an existing bucketpool.  Make "
+"sure you\n"
 "understand"
 msgstr ""
 
@@ -1576,7 +1694,9 @@ msgid "before continuing."
 msgstr ""
 
 #: plugins/admin-bucket-pool.php:142
-msgid " It will explain why you should create a new bucketpool rather than edit an old one that has already recorded results."
+msgid ""
+" It will explain why you should create a new bucketpool rather than edit an "
+"old one that has already recorded results."
 msgstr ""
 
 #: plugins/admin-bucket-pool.php:144
@@ -1584,11 +1704,18 @@ msgid "Steps to modify a bucketpool:"
 msgstr ""
 
 #: plugins/admin-bucket-pool.php:147
-msgid "Create a baseline with your current bucketpool.  In other words, run a bucket scan on something.  If you do this before creating a new modified bucketpool, you can compare the old results with the new to verify it is working as you expect."
+msgid ""
+"Create a baseline with your current bucketpool.  In other words, run a "
+"bucket scan on something.  If you do this before creating a new modified "
+"bucketpool, you can compare the old results with the new to verify it is "
+"working as you expect."
 msgstr ""
 
 #: plugins/admin-bucket-pool.php:149
-msgid "Duplicate the bucketpool (this will increment the bucketpool version and its bucketdef records).  You should also check 'Update my default bucketpool' since new bucket jobs only use your default bucketpool."
+msgid ""
+"Duplicate the bucketpool (this will increment the bucketpool version and its "
+"bucketdef records).  You should also check 'Update my default bucketpool' "
+"since new bucket jobs only use your default bucketpool."
 msgstr ""
 
 #: plugins/admin-bucket-pool.php:151
@@ -1600,7 +1727,11 @@ msgid "Manually insert/update/delete the new bucketdef records."
 msgstr ""
 
 #: plugins/admin-bucket-pool.php:155
-msgid "Delete your old bucket job from the job queue (from Show Jobs).  You must delete the old completed bucket job from the queue rather than reset it because a reset will use the previous bucketpool (the one you originally queued)."
+msgid ""
+"Delete your old bucket job from the job queue (from Show Jobs).  You must "
+"delete the old completed bucket job from the queue rather than reset it "
+"because a reset will use the previous bucketpool (the one you originally "
+"queued)."
 msgstr ""
 
 #: plugins/admin-bucket-pool.php:157
@@ -1608,15 +1739,21 @@ msgid "Queue up the new bucket job in Jobs > Agents."
 msgstr ""
 
 #: plugins/admin-bucket-pool.php:159
-msgid "Use Buckets > Compare to compare the new and old runs.  Verify the results."
+msgid ""
+"Use Buckets > Compare to compare the new and old runs.  Verify the results."
 msgstr ""
 
 #: plugins/admin-bucket-pool.php:161
-msgid "If you still need to edit the buckets, use Buckets > Remove Bucket Results to remove the previous runs results and repeat starting with editing the bucketpool or def records."
+msgid ""
+"If you still need to edit the buckets, use Buckets > Remove Bucket Results "
+"to remove the previous runs results and repeat starting with editing the "
+"bucketpool or def records."
 msgstr ""
 
 #: plugins/admin-bucket-pool.php:163
-msgid "When the bucket results are what you want, then you can reset all the users of the old bucketpool to the new one with Buckets > New Bucketpool."
+msgid ""
+"When the bucket results are what you want, then you can reset all the users "
+"of the old bucketpool to the new one with Buckets > New Bucketpool."
 msgstr ""
 
 #: plugins/admin-bucket-pool.php:169
@@ -1625,6 +1762,10 @@ msgstr ""
 
 #: plugins/admin-bucket-pool.php:174
 msgid "Update my default bucketpool"
+msgstr ""
+
+#: plugins/admin-bucket-pool.php:177
+msgid "Submit"
 msgstr ""
 
 #: plugins/admin-check-template.php:27
@@ -1716,7 +1857,9 @@ msgid "Total uploads to re-analyze: "
 msgstr ""
 
 #: plugins/admin-check-template.php:365
-msgid "Cleaning up obsolete analysis requires removing the old analysis and rescheduling the projects for license analysis.\n"
+msgid ""
+"Cleaning up obsolete analysis requires removing the old analysis and "
+"rescheduling the projects for license analysis.\n"
 msgstr ""
 
 #: plugins/admin-check-template.php:366
@@ -1731,7 +1874,7 @@ msgstr ""
 msgid " Check to cleanup and re-analyze.\n"
 msgstr ""
 
-#: plugins/admin-check-template.php:371
+#: plugins/admin-check-template.php:371 plugins/admin-db-vacuum.php:102
 msgid "Clean"
 msgstr ""
 
@@ -1755,18 +1898,20 @@ msgstr ""
 msgid "Metadata Analysis (Slow.  Not needed for license analysis)"
 msgstr ""
 
-#: plugins/agent-pkgmetagetta.php:167
-#: plugins/agent-license.php:279
+#: plugins/agent-pkgmetagetta.php:167 plugins/agent-license.php:279
+#: plugins/agent-pkgagent.php:203 plugins/agent-specagent.php:170
+#: plugins/agent-mimetype.php:144
 msgid "Analysis added to job queue"
 msgstr ""
 
-#: plugins/agent-pkgmetagetta.php:172
-#: plugins/agent-license.php:283
+#: plugins/agent-pkgmetagetta.php:172 plugins/agent-license.php:283
+#: plugins/agent-specagent.php:175 plugins/agent-mimetype.php:148
 msgid "Scheduling of Analysis failed: "
 msgstr ""
 
-#: plugins/agent-pkgmetagetta.php:193
-#: plugins/agent-license.php:302
+#: plugins/agent-pkgmetagetta.php:193 plugins/agent-license.php:302
+#: plugins/agent-pkgagent.php:229 plugins/agent-specagent.php:196
+#: plugins/agent-mimetype.php:167 plugins/agent-nomos.php:194
 msgid "All uploaded files are already analyzed, or scheduled to be analyzed."
 msgstr ""
 
@@ -1774,24 +1919,30 @@ msgstr ""
 msgid "Metadata analysis extracts meta data from RPM and DEB files.<P />\n"
 msgstr ""
 
-#: plugins/agent-pkgmetagetta.php:200
+#: plugins/agent-pkgmetagetta.php:200 plugins/agent-pkgagent.php:236
+#: plugins/agent-specagent.php:204
 msgid "Select an uploaded file for analysis.\n"
 msgstr ""
 
-#: plugins/agent-pkgmetagetta.php:201
-#: plugins/agent-license.php:308
+#: plugins/agent-pkgmetagetta.php:201 plugins/agent-license.php:308
+#: plugins/agent-pkgagent.php:237 plugins/agent-specagent.php:205
+#: plugins/agent-mimetype.php:174 plugins/agent-nomos.php:200
 msgid "Only uploads that are not already scheduled can be scheduled.\n"
 msgstr ""
 
-#: plugins/agent-pkgmetagetta.php:202
-#: plugins/agent-license.php:309
+#: plugins/agent-pkgmetagetta.php:202 plugins/agent-license.php:309
+#: plugins/agent-bucket.php:244 plugins/agent-pkgagent.php:238
+#: plugins/agent-specagent.php:206 plugins/agent-mimetype.php:175
+#: plugins/agent-nomos.php:201
 msgid "Analyze:"
 msgstr ""
 
-#: plugins/agent-pkgmetagetta.php:212
-#: plugins/agent-license.php:324
+#: plugins/agent-pkgmetagetta.php:212 plugins/agent-license.php:324
 #: plugins/agent-license-once.php:334
-#: plugins/agent-license-once-compare.php:287
+#: plugins/agent-license-once-compare.php:287 plugins/agent-nomos-once.php:209
+#: plugins/agent-bucket.php:259 plugins/agent-pkgagent.php:248
+#: plugins/agent-add.php:188 plugins/agent-specagent.php:216
+#: plugins/agent-mimetype.php:190 plugins/agent-nomos.php:216
 msgid "Analyze"
 msgstr ""
 
@@ -1839,11 +1990,13 @@ msgstr ""
 msgid "Can Not Delete Root Folder"
 msgstr ""
 
-#: plugins/admin-folder-delete.php:77
+#: plugins/admin-folder-delete.php:77 plugins/agent-remove-license.php:77
+#: plugins/admin-upload-delete.php:59 plugins/upload-srv-files.php:120
 msgid "Failed to create job record"
 msgstr ""
 
-#: plugins/admin-folder-delete.php:84
+#: plugins/admin-folder-delete.php:84 plugins/agent-remove-license.php:84
+#: plugins/admin-upload-delete.php:66
 msgid "Failed to place delete in job queue"
 msgstr ""
 
@@ -1867,17 +2020,19 @@ msgstr ""
 msgid "Select the folder to"
 msgstr ""
 
-#: plugins/admin-folder-delete.php:126
-#: plugins/admin-folder-delete.php:130
+#: plugins/admin-folder-delete.php:126 plugins/admin-folder-delete.php:130
+#: plugins/admin-upload-delete.php:115 plugins/admin-upload-delete.php:119
 msgid "delete"
 msgstr ""
 
-#: plugins/admin-folder-delete.php:129
+#: plugins/admin-folder-delete.php:129 plugins/agent-remove-license.php:159
+#: plugins/admin-upload-delete.php:118
 msgid "This will"
 msgstr ""
 
 #: plugins/admin-folder-delete.php:131
-msgid "the folder, all subfolders, and all uploaded files stored within the folder!"
+msgid ""
+"the folder, all subfolders, and all uploaded files stored within the folder!"
 msgstr ""
 
 #: plugins/admin-folder-delete.php:133
@@ -1885,11 +2040,14 @@ msgid "Be very careful with your selection since you can delete a lot of work!"
 msgstr ""
 
 #: plugins/admin-folder-delete.php:135
-msgid "All analysis only associated with the deleted uploads will also be deleted."
+msgid ""
+"All analysis only associated with the deleted uploads will also be deleted."
 msgstr ""
 
 #: plugins/admin-folder-delete.php:137
-msgid "THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository."
+msgid ""
+"THERE IS NO UNDELETE. When you select something to delete, it will be "
+"removed from the database and file repository."
 msgstr ""
 
 #: plugins/admin-folder-delete.php:140
@@ -1904,7 +2062,9 @@ msgstr ""
 msgid "bSAM License Analysis (deprecated)"
 msgstr ""
 
-#: plugins/agent-license.php:93
+#: plugins/agent-license.php:93 plugins/agent-bucket.php:128
+#: plugins/agent-bucket.php:148 plugins/agent-pkgagent.php:93
+#: plugins/agent-mimetype.php:92 plugins/agent-nomos.php:109
 msgid "Unable to find dependent job: unpack"
 msgstr ""
 
@@ -1936,7 +2096,7 @@ msgstr ""
 msgid "Failed to insert final sqlagent into job queue"
 msgstr ""
 
-#: plugins/agent-license.php:307
+#: plugins/agent-license.php:307 plugins/agent-nomos.php:199
 msgid "Select an uploaded file for license analysis.\n"
 msgstr ""
 
@@ -1948,7 +2108,7 @@ msgstr ""
 msgid "Browse by buckets (categories)"
 msgstr ""
 
-#: plugins/ui-buckets.php:185
+#: plugins/ui-buckets.php:185 plugins/search.php:55 plugins/search.php:132
 msgid "Invalid URL, nonexistant item"
 msgstr ""
 
@@ -1976,7 +2136,7 @@ msgstr ""
 msgid "binary packages with no source package"
 msgstr ""
 
-#: plugins/ui-buckets.php:527
+#: plugins/ui-buckets.php:527 plugins/ui-nomos-license.php:451
 msgid "Loading..."
 msgstr ""
 
@@ -1991,7 +2151,9 @@ msgstr ""
 #: plugins/admin-upload-edit.php:122
 msgid ""
 "The upload properties that can be changed are the upload name and\n"
-"                 description.  First select the folder that the upload is stored in.  Then select the upload to edit. Then enter the new values. If no value is entered, then the corresponding field will not be changed."
+"                 description.  First select the folder that the upload is "
+"stored in.  Then select the upload to edit. Then enter the new values. If no "
+"value is entered, then the corresponding field will not be changed."
 msgstr ""
 
 #: plugins/admin-upload-edit.php:145
@@ -2018,8 +2180,7 @@ msgstr ""
 msgid "All cached pages have been removed.\n"
 msgstr ""
 
-#: plugins/ui-licgroup.php:27
-#: plugins/ui-licgroup.php:565
+#: plugins/ui-licgroup.php:27 plugins/ui-licgroup.php:565
 msgid "License Groups"
 msgstr ""
 
@@ -2032,63 +2193,75 @@ msgid "License not part of any group"
 msgstr ""
 
 #: plugins/ui-licgroup.php:733
-msgid "WARNING: Licence groups only work for the bsam license scanner and do not use the results from licterm.  This functionality has been superceded in v 1.2 by 'buckets' based on the nomos license scanner."
+msgid ""
+"WARNING: Licence groups only work for the bsam license scanner and do not "
+"use the results from licterm.  This functionality has been superceded in v "
+"1.2 by 'buckets' based on the nomos license scanner."
 msgstr ""
 
 #: plugins/agent-license-once.php:28
 msgid "Bsam One-Shot License Analysis"
 msgstr ""
 
-#: plugins/agent-license-once.php:244
-#: plugins/agent-license-once.php:247
+#: plugins/agent-license-once.php:244 plugins/agent-license-once.php:247
 msgid "bsam One-shot, real-time license analysis"
 msgstr ""
 
-#: plugins/agent-license-once.php:306
-msgid "This analyzer allows you to upload a single file for license analysis.\n"
+#: plugins/agent-license-once.php:306 plugins/agent-nomos-once.php:188
+msgid ""
+"This analyzer allows you to upload a single file for license analysis.\n"
 msgstr ""
 
-#: plugins/agent-license-once.php:307
+#: plugins/agent-license-once.php:307 plugins/agent-nomos-once.php:189
 msgid "The limitations:\n"
 msgstr ""
 
 #: plugins/agent-license-once.php:309
 #: plugins/agent-license-once-compare.php:230
-msgid "The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n"
+msgid ""
+"The analysis is done in real-time. Large files may take a while. This method "
+"is not recommended for files larger than a few hundred kilobytes.\n"
 msgstr ""
 
 #: plugins/agent-license-once.php:311
-#: plugins/agent-license-once-compare.php:234
+#: plugins/agent-license-once-compare.php:234 plugins/agent-nomos-once.php:193
 msgid "Files that contain files are"
 msgstr ""
 
-#: plugins/agent-license-once.php:312
-#: plugins/agent-license-once.php:316
+#: plugins/agent-license-once.php:312 plugins/agent-license-once.php:316
 #: plugins/agent-license-once-compare.php:235
-#: plugins/agent-license-once-compare.php:239
+#: plugins/agent-license-once-compare.php:239 plugins/core-debug-menus.php:133
+#: plugins/agent-nomos-once.php:194 plugins/agent-nomos-once.php:198
 msgid "not"
 msgstr ""
 
 #: plugins/agent-license-once.php:313
-msgid "unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n"
+msgid ""
+"unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be "
+"scanned for licenses and nothing will likely be found.\n"
 msgstr ""
 
 #: plugins/agent-license-once.php:315
-#: plugins/agent-license-once-compare.php:238
+#: plugins/agent-license-once-compare.php:238 plugins/agent-nomos-once.php:197
 msgid "Results are"
 msgstr ""
 
 #: plugins/agent-license-once.php:317
-msgid "stored. As soon as you get your results, your uploaded file is removed from the system.\n"
+msgid ""
+"stored. As soon as you get your results, your uploaded file is removed from "
+"the system.\n"
 msgstr ""
 
 #: plugins/agent-license-once.php:323
-#: plugins/agent-license-once-compare.php:249
+#: plugins/agent-license-once-compare.php:249 plugins/agent-nomos-once.php:205
 msgid "<li>Select the file to upload:<br />\n"
 msgstr ""
 
 #: plugins/agent-license-once.php:325
-#: plugins/agent-license-once-compare.php:251
+#: plugins/agent-license-once-compare.php:251 plugins/upload-file.php:169
+#: plugins/upload-file.php:178 plugins/upload-url.php:150
+#: plugins/upload-url.php:159 plugins/upload-srv-files.php:202
+#: plugins/upload-srv-files.php:224
 msgid "NOTE"
 msgstr ""
 
@@ -2102,7 +2275,8 @@ msgid "Check if you want to see the highlighted licenses.\n"
 msgstr ""
 
 #: plugins/agent-license-once.php:330
-msgid "Unchecked returns a simple list that summarizes the identified license types."
+msgid ""
+"Unchecked returns a simple list that summarizes the identified license types."
 msgstr ""
 
 #: plugins/ui-licgroup-default.php:37
@@ -2117,7 +2291,7 @@ msgstr ""
 msgid "Default FSF groups created."
 msgstr ""
 
-#: plugins/ui-licgroup-default.php:514
+#: plugins/ui-licgroup-default.php:514 plugins/admin-folder-create.php:135
 msgid "Created"
 msgstr ""
 
@@ -2154,7 +2328,8 @@ msgid "License groups provide organization for licenses.\n"
 msgstr ""
 
 #: plugins/ui-licgroup-default.php:581
-msgid "By selecting the 'Create' button, you will initialize the license groups.\n"
+msgid ""
+"By selecting the 'Create' button, you will initialize the license groups.\n"
 msgstr ""
 
 #: plugins/ui-licgroup-default.php:582
@@ -2165,20 +2340,23 @@ msgstr ""
 msgid "The default license groups are"
 msgstr ""
 
-#: plugins/ui-licgroup-default.php:585
+#: plugins/ui-licgroup-default.php:585 plugins/ui-licterm-default.php:277
 msgid "NOT"
 msgstr ""
 
-#: plugins/ui-licgroup-default.php:586
+#: plugins/ui-licgroup-default.php:586 plugins/ui-licterm-default.php:278
 msgid "a recommendation or legal interpretation."
 msgstr ""
 
 #: plugins/ui-licgroup-default.php:588
-msgid "In particular, related licenses may have very different legal meanings.\n"
+msgid ""
+"In particular, related licenses may have very different legal meanings.\n"
 msgstr ""
 
 #: plugins/ui-licgroup-default.php:589
-msgid "If you create these default groups twice, then any modification you made to the default groups"
+msgid ""
+"If you create these default groups twice, then any modification you made to "
+"the default groups"
 msgstr ""
 
 #: plugins/ui-licgroup-default.php:590
@@ -2190,14 +2368,16 @@ msgid "Creating default groups will not impact any new groups you created."
 msgstr ""
 
 #: plugins/ui-licgroup-default.php:595
-msgid "After the default groups are created, you can modify, edit, or delete the default groups with the "
+msgid ""
+"After the default groups are created, you can modify, edit, or delete the "
+"default groups with the "
 msgstr ""
 
-#: plugins/ui-licgroup-default.php:598
+#: plugins/ui-licgroup-default.php:598 plugins/ui-licterm-default.php:287
 msgid " menu option.\n"
 msgstr ""
 
-#: plugins/ui-licgroup-default.php:599
+#: plugins/ui-licgroup-default.php:599 plugins/ui-licterm-default.php:288
 msgid "You can also use the "
 msgstr ""
 
@@ -2210,7 +2390,9 @@ msgid "Select the default groups to create:\n"
 msgstr ""
 
 #: plugins/ui-licgroup-default.php:607
-msgid "These are default license groups based on a heirarchy of similar license text."
+msgid ""
+"These are default license groups based on a heirarchy of similar license "
+"text."
 msgstr ""
 
 #: plugins/ui-licgroup-default.php:609
@@ -2237,10 +2419,6 @@ msgstr ""
 msgid "for the list of good, bad, and unknown licenses."
 msgstr ""
 
-#: plugins/ui-licgroup-default.php:618
-msgid "Create"
-msgstr ""
-
 #: plugins/agent-license-once-compare.php:27
 msgid "One-Shot License Comparison"
 msgstr ""
@@ -2257,13 +2435,16 @@ msgstr ""
 
 #: plugins/agent-license-once-compare.php:224
 msgid ""
-"This analyzer allows you to compare a single file to a set of licenses selectable by you without having the results saved in the database.\n"
+"This analyzer allows you to compare a single file to a set of licenses "
+"selectable by you without having the results saved in the database.\n"
 "<br>"
 msgstr ""
 
 #: plugins/agent-license-once-compare.php:225
 msgid ""
-"Typical uses include comparing one license to other licenses to see their similarity, and to compare a file to a license to see how this particular license matches.\n"
+"Typical uses include comparing one license to other licenses to see their "
+"similarity, and to compare a file to a license to see how this particular "
+"license matches.\n"
 "<br>"
 msgstr ""
 
@@ -2276,15 +2457,21 @@ msgid "Limitations:\n"
 msgstr ""
 
 #: plugins/agent-license-once-compare.php:232
-msgid "The analysis is done in real-time. Selecting many licenses to compare against can take a long time.\n"
+msgid ""
+"The analysis is done in real-time. Selecting many licenses to compare "
+"against can take a long time.\n"
 msgstr ""
 
 #: plugins/agent-license-once-compare.php:236
-msgid " unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found.\n"
+msgid ""
+" unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be "
+"scanned for licenses and nothing will likely be found.\n"
 msgstr ""
 
 #: plugins/agent-license-once-compare.php:240
-msgid " stored. As soon as you get your results, your analysis is removed from the system.\n"
+msgid ""
+" stored. As soon as you get your results, your analysis is removed from the "
+"system.\n"
 msgstr ""
 
 #: plugins/agent-license-once-compare.php:258
@@ -2371,8 +2558,7 @@ msgstr ""
 msgid "Full debug ENABLED!"
 msgstr ""
 
-#: plugins/core-debug-menus.php:107
-#: plugins/core-debug-menus.php:113
+#: plugins/core-debug-menus.php:107 plugins/core-debug-menus.php:113
 msgid "Now view any page."
 msgstr ""
 
@@ -2385,7 +2571,9 @@ msgid "This developer tool lists all items in the menu structure."
 msgstr ""
 
 #: plugins/core-debug-menus.php:118
-msgid "Since some menu inserts are conditional, not everything may appear here (the conditions may not lead to the insertion)."
+msgid ""
+"Since some menu inserts are conditional, not everything may appear here (the "
+"conditions may not lead to the insertion)."
 msgstr ""
 
 #: plugins/core-debug-menus.php:120
@@ -2400,7 +2588,7 @@ msgstr ""
 msgid "The full debugging is restricted to"
 msgstr ""
 
-#: plugins/core-debug-menus.php:125
+#: plugins/core-debug-menus.php:125 plugins/user-edit-any.php:340
 msgid "your"
 msgstr ""
 
@@ -2441,28 +2629,35 @@ msgid "One-Shot License Analysis"
 msgstr ""
 
 #: plugins/agent-nomos-once.php:130
-msgid "FATAL: your file did not get passed throught.  Make sure this page wasn't a result of a web server redirect, or that it didn't exceed your php POST limit."
+msgid ""
+"FATAL: your file did not get passed throught.  Make sure this page wasn't a "
+"result of a web server redirect, or that it didn't exceed your php POST "
+"limit."
 msgstr ""
 
-#: plugins/agent-nomos-once.php:147
-#: plugins/agent-nomos-once.php:150
+#: plugins/agent-nomos-once.php:147 plugins/agent-nomos-once.php:150
 msgid "Nomos One-shot, real-time license analysis"
 msgstr ""
 
 #: plugins/agent-nomos-once.php:191
-msgid "<li>The analysis is done in real-time. Large files may take a while. This method is not recommended for files larger than a few hundred kilobytes.\n"
+msgid ""
+"<li>The analysis is done in real-time. Large files may take a while. This "
+"method is not recommended for files larger than a few hundred kilobytes.\n"
 msgstr ""
 
 #: plugins/agent-nomos-once.php:195
-msgid "unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be scanned for licenses and nothing will likely be found."
+msgid ""
+"unpacked. If you upload a 'zip' or 'deb' file, then the binary file will be "
+"scanned for licenses and nothing will likely be found."
 msgstr ""
 
 #: plugins/agent-nomos-once.php:199
-msgid "stored. As soon as you get your results, your uploaded file is removed from the system. "
+msgid ""
+"stored. As soon as you get your results, your uploaded file is removed from "
+"the system. "
 msgstr ""
 
-#: plugins/agent-nomos-once.php:215
-#: plugins/agent-nomos-once.php:240
+#: plugins/agent-nomos-once.php:215 plugins/agent-nomos-once.php:240
 msgid "A one shot license analysis shows the following license(s) in file"
 msgstr ""
 
@@ -2487,7 +2682,11 @@ msgid "No users to delete."
 msgstr ""
 
 #: plugins/user-del.php:111
-msgid "Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>permanently</font> removed. (There is no 'undo' to this delete.)<P />\n"
+msgid ""
+"Deleting a user removes the user entry from the FOSSology system. The user's "
+"name, account information, and password will be <font "
+"color='red'>permanently</font> removed. (There is no 'undo' to this delete.)"
+"<P />\n"
 msgstr ""
 
 #: plugins/user-del.php:113
@@ -2502,7 +2701,8 @@ msgstr ""
 msgid "Confirm user deletion"
 msgstr ""
 
-#: plugins/ui-browse.php:31
+#: plugins/ui-browse.php:31 plugins/ui-welcome.php:50
+#: plugins/ui-welcome.php:53 plugins/ui-default.php:92
 msgid "Browse"
 msgstr ""
 
@@ -2526,13 +2726,11 @@ msgstr ""
 msgid "Top"
 msgstr ""
 
-#: plugins/ui-browse.php:219
-#: plugins/ui-folders.php:60
+#: plugins/ui-browse.php:219 plugins/ui-folders.php:60
 msgid "Expand"
 msgstr ""
 
-#: plugins/ui-browse.php:221
-#: plugins/ui-folders.php:62
+#: plugins/ui-browse.php:221 plugins/ui-folders.php:62
 msgid "Collapse"
 msgstr ""
 
@@ -2596,8 +2794,7 @@ msgstr ""
 msgid " failed."
 msgstr ""
 
-#: plugins/ui-browse.php:328
-#: plugins/ui-browse.php:335
+#: plugins/ui-browse.php:328 plugins/ui-browse.php:335
 msgid "license analysis"
 msgstr ""
 
@@ -2609,13 +2806,11 @@ msgstr ""
 msgid "Reschedule"
 msgstr ""
 
-#: plugins/ui-browse.php:379
-#: plugins/agent-remove-license.php:122
+#: plugins/ui-browse.php:379 plugins/agent-remove-license.php:122
 msgid "License data re-analysis added to job queue"
 msgstr ""
 
-#: plugins/ui-browse.php:383
-#: plugins/ui-browse.php:395
+#: plugins/ui-browse.php:383 plugins/ui-browse.php:395
 msgid "Scheduling of re-analysis failed, return code"
 msgstr ""
 
@@ -2648,7 +2843,9 @@ msgid "User information updated."
 msgstr ""
 
 #: plugins/user-edit-self.php:227
-msgid "You <font color='red'>must</font> provide your current password in order to make any changes.<br />\n"
+msgid ""
+"You <font color='red'>must</font> provide your current password in order to "
+"make any changes.<br />\n"
 msgstr ""
 
 #: plugins/user-edit-self.php:228
@@ -2656,15 +2853,21 @@ msgid "Enter your password"
 msgstr ""
 
 #: plugins/user-edit-self.php:233
-msgid "To change user information, edit the following fields. You do not need to edit every field. Only fields with edits will be changed.<P />\n"
+msgid ""
+"To change user information, edit the following fields. You do not need to "
+"edit every field. Only fields with edits will be changed.<P />\n"
 msgstr ""
 
 #: plugins/user-edit-self.php:237
-msgid "Change your username. This will be checked to ensure that it is unique among all users."
+msgid ""
+"Change your username. This will be checked to ensure that it is unique among "
+"all users."
 msgstr ""
 
 #: plugins/user-edit-self.php:242
-msgid "Change your description (name, contact, or other information).  This may be blank."
+msgid ""
+"Change your description (name, contact, or other information).  This may be "
+"blank."
 msgstr ""
 
 #: plugins/user-edit-self.php:247
@@ -2683,7 +2886,7 @@ msgstr ""
 msgid "You do not have permission to change your default agents"
 msgstr ""
 
-#: plugins/user-edit-self.php:295
+#: plugins/user-edit-self.php:295 plugins/user-edit-any.php:436
 msgid "Update Account"
 msgstr ""
 
@@ -2691,7 +2894,7 @@ msgstr ""
 msgid "Database Check"
 msgstr ""
 
-#: plugins/admin-db.php:44
+#: plugins/admin-db.php:44 plugins/admin-db-vacuum.php:44
 msgid "Deleting"
 msgstr ""
 
@@ -2724,11 +2927,15 @@ msgid " or uploadtree entries that are not linked by any upload records."
 msgstr ""
 
 #: plugins/admin-db.php:149
-msgid " Inconsistencies usually arise due to failed unpacking, partial deletions, and testing.\n"
+msgid ""
+" Inconsistencies usually arise due to failed unpacking, partial deletions, "
+"and testing.\n"
 msgstr ""
 
 #: plugins/admin-db.php:174
-msgid "Temporary inconsistencies may exist when a file is uploaded, being unpacked, or being deleted.\n"
+msgid ""
+"Temporary inconsistencies may exist when a file is uploaded, being unpacked, "
+"or being deleted.\n"
 msgstr ""
 
 #: plugins/admin-db.php:177
@@ -2736,11 +2943,15 @@ msgid "An uploaded file -- before being unpacked -- can appear inconsistent.\n"
 msgstr ""
 
 #: plugins/admin-db.php:179
-msgid "The unpack system creates pfiles first, then links them together when it completes.\n"
+msgid ""
+"The unpack system creates pfiles first, then links them together when it "
+"completes.\n"
 msgstr ""
 
 #: plugins/admin-db.php:181
-msgid "The delete system removes records in series, so a partial delete (or delete in progress) can show inconsistencies.\n"
+msgid ""
+"The delete system removes records in series, so a partial delete (or delete "
+"in progress) can show inconsistencies.\n"
 msgstr ""
 
 #: plugins/admin-db.php:184
@@ -2760,19 +2971,22 @@ msgid "in the job queue that may make records appear inconsistent.\n"
 msgstr ""
 
 #: plugins/admin-db.php:189
-msgid "Fixing inconsistencies while any jobs are running could lead to job failures and further inconsistencies.\n"
+msgid ""
+"Fixing inconsistencies while any jobs are running could lead to job failures "
+"and further inconsistencies.\n"
 msgstr ""
 
 #: plugins/admin-db.php:190
-msgid "NOTE: Some of these inconsistencies may not be resolvable from here due to table constraints.\n"
+msgid ""
+"NOTE: Some of these inconsistencies may not be resolvable from here due to "
+"table constraints.\n"
 msgstr ""
 
 #: plugins/admin-db.php:194
 msgid "The following inconsistencies have been identified:\n"
 msgstr ""
 
-#: plugins/admin-db.php:198
-#: plugins/admin-db.php:235
+#: plugins/admin-db.php:198 plugins/admin-db.php:235
 msgid "Fix"
 msgstr ""
 
@@ -2792,7 +3006,7 @@ msgstr ""
 msgid "About FOSSology"
 msgstr ""
 
-#: plugins/ui-about.php:28
+#: plugins/ui-about.php:28 plugins/ui-default.php:46
 msgid "FOSSology"
 msgstr ""
 
@@ -2802,9 +3016,16 @@ msgstr ""
 
 #: plugins/ui-about.php:30
 msgid ""
-"This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation.\n"
-"This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\n"
-"You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA."
+"This program is free software; you can redistribute it and/or modify it "
+"under the terms of the GNU General Public License version 2 as published by "
+"the Free Software Foundation.\n"
+"This program is distributed in the hope that it will be useful, but WITHOUT "
+"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
+"FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for "
+"more details.\n"
+"You should have received a copy of the GNU General Public License along with "
+"this program; if not, write to the Free Software Foundation, Inc., 51 "
+"Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA."
 msgstr ""
 
 #: plugins/ui-about.php:59
@@ -2839,12 +3060,15 @@ msgstr ""
 msgid "the license meta data associated with the selected upload file!\n"
 msgstr ""
 
-#: plugins/agent-remove-license.php:163
-msgid "Be very careful with your selection since you can delete a lot of work!\n"
+#: plugins/agent-remove-license.php:163 plugins/admin-upload-delete.php:122
+msgid ""
+"Be very careful with your selection since you can delete a lot of work!\n"
 msgstr ""
 
 #: plugins/agent-remove-license.php:165
-msgid "THERE IS NO UNREMOVE. The license meta data can be recreated by re-running the license analysis\n"
+msgid ""
+"THERE IS NO UNREMOVE. The license meta data can be recreated by re-running "
+"the license analysis\n"
 msgstr ""
 
 #: plugins/agent-remove-license.php:168
@@ -2864,7 +3088,9 @@ msgid "Select the uploaded project to use:"
 msgstr ""
 
 #: plugins/agent-remove-license.php:198
-msgid "After the license data is removed you can reschedule the License Analysis by checking the box below"
+msgid ""
+"After the license data is removed you can reschedule the License Analysis by "
+"checking the box below"
 msgstr ""
 
 #: plugins/agent-remove-license.php:201
@@ -2888,7 +3114,9 @@ msgid "Bucket Analysis"
 msgstr ""
 
 #: plugins/agent-bucket.php:107
-msgid "Session is unauthenticated, bucket agent cannot run without knowing who the user is."
+msgid ""
+"Session is unauthenticated, bucket agent cannot run without knowing who the "
+"user is."
 msgstr ""
 
 #: plugins/agent-bucket.php:168
@@ -2900,10 +3128,12 @@ msgid "Failed to queue bucket agent."
 msgstr ""
 
 #: plugins/agent-bucket.php:190
-msgid "User does not have a default bucketpool.  Bucket agent cannot be scheduled without this."
+msgid ""
+"User does not have a default bucketpool.  Bucket agent cannot be scheduled "
+"without this."
 msgstr ""
 
-#: plugins/agent-bucket.php:196
+#: plugins/agent-bucket.php:196 plugins/agent-nomos.php:139
 msgid "Failed to insert agent nomos into job queue"
 msgstr ""
 
@@ -2916,7 +3146,9 @@ msgid "Scheduling Bucket agent failed: "
 msgstr ""
 
 #: plugins/agent-bucket.php:241
-msgid "NOTE: this code was borrowed from nomos.  It needs to be updated for buckets.  If you see this message please tell bobg."
+msgid ""
+"NOTE: this code was borrowed from nomos.  It needs to be updated for "
+"buckets.  If you see this message please tell bobg."
 msgstr ""
 
 #: plugins/agent-bucket.php:243
@@ -2927,11 +3159,11 @@ msgstr ""
 msgid "Upload a New File"
 msgstr ""
 
-#: plugins/upload-file.php:55
+#: plugins/upload-file.php:55 plugins/upload-url.php:46
 msgid "Invalid folder"
 msgstr ""
 
-#: plugins/upload-file.php:70
+#: plugins/upload-file.php:70 plugins/upload-url.php:72
 msgid "Failed to insert upload record"
 msgstr ""
 
@@ -2964,7 +3196,9 @@ msgid "The file to upload should be located on your computer.\n"
 msgstr ""
 
 #: plugins/upload-file.php:154
-msgid "Many browsers, including Microsoft's Internet Explorer, have trouble uploading "
+msgid ""
+"Many browsers, including Microsoft's Internet Explorer, have trouble "
+"uploading "
 msgstr ""
 
 #: plugins/upload-file.php:155
@@ -2972,10 +3206,12 @@ msgid "file larger than 650 Megabytes (a standard-size CD-ROM image).\n"
 msgstr ""
 
 #: plugins/upload-file.php:156
-msgid "If your file is larger than 650 Megabytes, then choose one of the other upload options."
+msgid ""
+"If your file is larger than 650 Megabytes, then choose one of the other "
+"upload options."
 msgstr ""
 
-#: plugins/upload-file.php:161
+#: plugins/upload-file.php:161 plugins/upload-url.php:142
 msgid "Select the folder for storing the uploaded file:"
 msgstr ""
 
@@ -2984,26 +3220,33 @@ msgid "Select the file to upload:"
 msgstr ""
 
 #: plugins/upload-file.php:170
-msgid ": If the file is larger than 650 Megs (one CD-ROM), then this method will not work with some browsers (e.g., Internet Explorer). Only attach files smaller than 650 Megs."
+msgid ""
+": If the file is larger than 650 Megs (one CD-ROM), then this method will "
+"not work with some browsers (e.g., Internet Explorer). Only attach files "
+"smaller than 650 Megs."
 msgstr ""
 
-#: plugins/upload-file.php:172
+#: plugins/upload-file.php:172 plugins/upload-url.php:153
 msgid "(Optional) Enter a description of this file:"
 msgstr ""
 
-#: plugins/upload-file.php:175
+#: plugins/upload-file.php:175 plugins/upload-url.php:156
 msgid "(Optional) Enter a viewable name for this file:"
 msgstr ""
 
-#: plugins/upload-file.php:179
+#: plugins/upload-file.php:179 plugins/upload-url.php:160
+#: plugins/upload-srv-files.php:225
 msgid ": If no name is provided, then the uploaded file name will be used."
 msgstr ""
 
 #: plugins/upload-file.php:187
-msgid "It may take time to transmit the file from your computer to this server. Please be patient."
+msgid ""
+"It may take time to transmit the file from your computer to this server. "
+"Please be patient."
 msgstr ""
 
-#: plugins/upload-file.php:189
+#: plugins/upload-file.php:189 plugins/upload-url.php:168
+#: plugins/upload-srv-files.php:233
 msgid "Upload"
 msgstr ""
 
@@ -3051,7 +3294,7 @@ msgstr ""
 msgid "Schedule an Reunpack"
 msgstr ""
 
-#: plugins/ui-reunpack.php:66
+#: plugins/ui-reunpack.php:66 plugins/ui-view.php:745
 msgid "Unpack of Upload failed"
 msgstr ""
 
@@ -3067,13 +3310,11 @@ msgstr ""
 msgid "Reunpack"
 msgstr ""
 
-#: plugins/ajax-uploads.php:35
-#: plugins/ajax-filebucket.php:42
+#: plugins/ajax-uploads.php:35 plugins/ajax-filebucket.php:42
 msgid "List Uploads as Options"
 msgstr ""
 
-#: plugins/upload-url.php:50
-#: plugins/upload-url.php:54
+#: plugins/upload-url.php:50 plugins/upload-url.php:54
 msgid "Invalid URL"
 msgstr ""
 
@@ -3093,17 +3334,20 @@ msgstr ""
 msgid "has been scheduled. It is"
 msgstr ""
 
-#: plugins/upload-url.php:127
-#: plugins/upload-srv-files.php:181
+#: plugins/upload-url.php:127 plugins/upload-srv-files.php:181
 msgid "Upload failed for"
 msgstr ""
 
 #: plugins/upload-url.php:136
-msgid "This option permits uploading a file from a remote web or FTP server to FOSSology.\n"
+msgid ""
+"This option permits uploading a file from a remote web or FTP server to "
+"FOSSology.\n"
 msgstr ""
 
 #: plugins/upload-url.php:137
-msgid "The file to upload must be accessible via a URL and must not require human interaction "
+msgid ""
+"The file to upload must be accessible via a URL and must not require human "
+"interaction "
 msgstr ""
 
 #: plugins/upload-url.php:138
@@ -3115,13 +3359,15 @@ msgid "Enter the URL to the file:"
 msgstr ""
 
 #: plugins/upload-url.php:151
-msgid ": If the URL requires authentication or navigation to access, then the upload will fail. Only provide a URL that goes directly to the file. The URL can begin with HTTP://, HTTPS://, or FTP://."
+msgid ""
+": If the URL requires authentication or navigation to access, then the "
+"upload will fail. Only provide a URL that goes directly to the file. The URL "
+"can begin with HTTP://, HTTPS://, or FTP://."
 msgstr ""
 
-#: plugins/core-auth.php:28
-#: plugins/core-auth.php:377
-#: plugins/ui-welcome.php:62
-#: plugins/ui-welcome.php:65
+#: plugins/core-auth.php:28 plugins/core-auth.php:377
+#: plugins/ui-welcome.php:62 plugins/ui-welcome.php:65
+#: plugins/ui-default.php:110 plugins/ui-default.php:115
 msgid "Login"
 msgstr ""
 
@@ -3138,7 +3384,9 @@ msgid "*** Existing user 'fossy' promoted to default administrator."
 msgstr ""
 
 #: plugins/core-auth.php:329
-msgid "The system requires initialization. Please login and use the Initialize option under the Admin menu."
+msgid ""
+"The system requires initialization. Please login and use the Initialize "
+"option under the Admin menu."
 msgstr ""
 
 #: plugins/core-auth.php:346
@@ -3174,11 +3422,15 @@ msgid "the upload file!"
 msgstr ""
 
 #: plugins/admin-upload-delete.php:124
-msgid "All analysis only associated with the deleted upload file will also be deleted.\n"
+msgid ""
+"All analysis only associated with the deleted upload file will also be "
+"deleted.\n"
 msgstr ""
 
 #: plugins/admin-upload-delete.php:126
-msgid "THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository.\n"
+msgid ""
+"THERE IS NO UNDELETE. When you select something to delete, it will be "
+"removed from the database and file repository.\n"
 msgstr ""
 
 #: plugins/admin-upload-delete.php:129
@@ -3294,8 +3546,7 @@ msgstr ""
 msgid "User already exists.  Not edited."
 msgstr ""
 
-#: plugins/user-edit-any.php:334
-#: plugins/user-edit-any.php:339
+#: plugins/user-edit-any.php:334 plugins/user-edit-any.php:339
 msgid "To edit"
 msgstr ""
 
@@ -3324,7 +3575,9 @@ msgid "Change the username."
 msgstr ""
 
 #: plugins/user-edit-any.php:368
-msgid "Change the user's description (name, contact, or other information).  This may be blank."
+msgid ""
+"Change the user's description (name, contact, or other information).  This "
+"may be blank."
 msgstr ""
 
 #: plugins/user-edit-any.php:373
@@ -3336,7 +3589,9 @@ msgid "Block the user's account. This will prevent logins."
 msgstr ""
 
 #: plugins/user-edit-any.php:411
-msgid "Blank the user's account. This will will set the password to a blank password."
+msgid ""
+"Blank the user's account. This will will set the password to a blank "
+"password."
 msgstr ""
 
 #: plugins/user-edit-any.php:413
@@ -3358,8 +3613,10 @@ msgstr ""
 #: plugins/admin-folder-edit.php:112
 msgid ""
 "<p>The folder properties that can be changed are the folder name and\n"
-"\t\t\t description.  First select the folder to edit. Then enter the new values.\n"
-"\t\t\t If no value is entered, then the corresponding field will not be changed.</p>"
+"\t\t\t description.  First select the folder to edit. Then enter the new "
+"values.\n"
+"\t\t\t If no value is entered, then the corresponding field will not be "
+"changed.</p>"
 msgstr ""
 
 #: plugins/admin-folder-edit.php:121
@@ -3427,30 +3684,33 @@ msgid "The FOSSology Toolset"
 msgstr ""
 
 #: plugins/ui-welcome.php:67
-msgid "FOSSology is a framework for software analysis tools. The current FOSSology tools can:"
-msgstr "FOSSology dient zur Analyse von Software-Lizenzen. Mit den FOSSology-Werkzeugen k&ouml;nen Sie:"
+msgid ""
+"FOSSology is a framework for software analysis tools. The current FOSSology "
+"tools can:"
+msgstr ""
 
 #: plugins/ui-welcome.php:68
 msgid "Identify licenses in software"
-msgstr "Lizenzen in Software identifizieren."
+msgstr ""
 
 #: plugins/ui-welcome.php:69
 msgid "Allow browsing uploaded file hierarchies"
-msgstr "In hochgeladenen Dateien st&ouml;bern."
+msgstr ""
 
 #: plugins/ui-welcome.php:70
 msgid "Extract MIME type and meta data information"
-msgstr "Auf den MIME-Typen und andere Meta-Daten zugreifen."
+msgstr ""
 
 #: plugins/ui-welcome.php:71
 msgid "FOSSology's Graphical User Interface"
-msgstr "Die graphische Benutzeroberfl&auml;che von FOSSology"
-
-#: plugins/ui-welcome.php:72
-msgid "This website is an interface into the FOSSology project. With it, you can:"
 msgstr ""
 
-#: plugins/ui-welcome.php:73
+#: plugins/ui-welcome.php:72
+msgid ""
+"This website is an interface into the FOSSology project. With it, you can:"
+msgstr ""
+
+#: plugins/ui-welcome.php:73 plugins/ui-default.php:67
 msgid "Upload files to analyze."
 msgstr ""
 
@@ -3471,11 +3731,16 @@ msgid "How to Begin"
 msgstr ""
 
 #: plugins/ui-welcome.php:78
-msgid "The menu at the top contains all the primary capabilities of FOSSology. Most functions require you to log in before they can be accessed. The following functions are available without logging in:"
-msgstr "&Uuml;ber das Men&uuml; k&ouml;nnen Sie auf die wichtigsten FOSSology-Funktionen zugreifen. Die meisten Funktionen erfordern den vorherigen Login. Diese Funktionen k&ouml;nen Sie ohne Login benutzen:" 
+msgid ""
+"The menu at the top contains all the primary capabilities of FOSSology. Most "
+"functions require you to log in before they can be accessed. The following "
+"functions are available without logging in:"
+msgstr ""
 
 #: plugins/ui-welcome.php:79
-msgid "If you don't know where to start, try browsing the currently uploaded projects. "
+msgid ""
+"If you don't know where to start, try browsing the currently uploaded "
+"projects. "
 msgstr ""
 
 #: plugins/ui-welcome.php:80
@@ -3483,11 +3748,15 @@ msgid "Look through the uploaded projects for specific files. "
 msgstr ""
 
 #: plugins/ui-welcome.php:81
-msgid "If you log in, you can access additional capabilities. Depending on your account's access rights,"
+msgid ""
+"If you log in, you can access additional capabilities. Depending on your "
+"account's access rights,"
 msgstr ""
 
 #: plugins/ui-welcome.php:82
-msgid "you may be able to upload files, schedule analysis tasks, or even add new users."
+msgid ""
+"you may be able to upload files, schedule analysis tasks, or even add new "
+"users."
 msgstr ""
 
 #: plugins/ui-welcome.php:83
@@ -3519,7 +3788,9 @@ msgid "Agents"
 msgstr ""
 
 #: plugins/ui-welcome.php:90
-msgid "- Perform analysis of files and data found in the Software Repository and Database."
+msgid ""
+"- Perform analysis of files and data found in the Software Repository and "
+"Database."
 msgstr ""
 
 #: plugins/ui-welcome.php:91
@@ -3587,11 +3858,16 @@ msgid "Failed to place fosscp_agent in job queue"
 msgstr ""
 
 #: plugins/upload-srv-files.php:186
-msgid "This option permits uploading a file, set of files, or a directory from the web server to FOSSology.\n"
+msgid ""
+"This option permits uploading a file, set of files, or a directory from the "
+"web server to FOSSology.\n"
 msgstr ""
 
 #: plugins/upload-srv-files.php:187
-msgid "This option is designed for developers who have large source code directories that they wish to analyze (and the directories are already mounted on the web server's system).\n"
+msgid ""
+"This option is designed for developers who have large source code "
+"directories that they wish to analyze (and the directories are already "
+"mounted on the web server's system).\n"
 msgstr ""
 
 #: plugins/upload-srv-files.php:188
@@ -3599,7 +3875,9 @@ msgid "This option only uploads files located on the FOSSology web server.\n"
 msgstr ""
 
 #: plugins/upload-srv-files.php:189
-msgid "If your file is located elsewhere, then use one of the other upload options.\n"
+msgid ""
+"If your file is located elsewhere, then use one of the other upload "
+"options.\n"
 msgstr ""
 
 #: plugins/upload-srv-files.php:193
@@ -3615,7 +3893,9 @@ msgid ": Contents under a directory will be recursively included."
 msgstr ""
 
 #: plugins/upload-srv-files.php:205
-msgid "If you specify a regular expression for the filename, then multiple filenames will be selected.\n"
+msgid ""
+"If you specify a regular expression for the filename, then multiple "
+"filenames will be selected.\n"
 msgstr ""
 
 #: plugins/upload-srv-files.php:206
@@ -3631,7 +3911,9 @@ msgid "(Optional) Enter a viewable name for this Upload:"
 msgstr ""
 
 #: plugins/agent-mimetype.php:28
-msgid "MIME-type Analysis (Determine mimetype of every file.  Not needed for licenses or buckets)"
+msgid ""
+"MIME-type Analysis (Determine mimetype of every file.  Not needed for "
+"licenses or buckets)"
 msgstr ""
 
 #: plugins/agent-mimetype.php:120
@@ -3666,26 +3948,19 @@ msgstr ""
 msgid "View File"
 msgstr ""
 
-#: plugins/ui-view.php:49
-#: plugins/ui-view.php:120
+#: plugins/ui-view.php:49 plugins/ui-view.php:120
 msgid "View file contents"
 msgstr ""
 
-#: plugins/ui-view.php:82
-#: plugins/ui-view.php:98
-#: plugins/ui-view.php:105
+#: plugins/ui-view.php:82 plugins/ui-view.php:98 plugins/ui-view.php:105
 msgid "View as unformatted text"
 msgstr ""
 
-#: plugins/ui-view.php:85
-#: plugins/ui-view.php:92
-#: plugins/ui-view.php:107
+#: plugins/ui-view.php:85 plugins/ui-view.php:92 plugins/ui-view.php:107
 msgid "View as formatted text"
 msgstr ""
 
-#: plugins/ui-view.php:89
-#: plugins/ui-view.php:96
-#: plugins/ui-view.php:103
+#: plugins/ui-view.php:89 plugins/ui-view.php:96 plugins/ui-view.php:103
 msgid "View as a hex dump"
 msgstr ""
 
@@ -3693,8 +3968,7 @@ msgstr ""
 msgid "Match"
 msgstr ""
 
-#: plugins/ui-view.php:242
-#: plugins/ui-view.php:247
+#: plugins/ui-view.php:242 plugins/ui-view.php:247
 msgid "view"
 msgstr ""
 
@@ -3702,13 +3976,11 @@ msgstr ""
 msgid "ref"
 msgstr ""
 
-#: plugins/ui-view.php:739
-#: plugins/ui-view.php:753
+#: plugins/ui-view.php:739 plugins/ui-view.php:753
 msgid "Reunpack job is running: you can see it in"
 msgstr ""
 
-#: plugins/ui-view.php:740
-#: plugins/ui-view.php:754
+#: plugins/ui-view.php:740 plugins/ui-view.php:754
 msgid "jobqueue"
 msgstr ""
 
@@ -3726,6 +3998,18 @@ msgstr ""
 
 #: plugins/core-debug-plugins.php:56
 msgid "Plugin State Details"
+msgstr ""
+
+#: plugins/search.php:305
+msgid "Search for"
+msgstr ""
+
+#: plugins/search.php:306
+msgid "Containers only(rpms,tars,isos,etc)."
+msgstr ""
+
+#: plugins/search.php:307
+msgid "All Files"
 msgstr ""
 
 #: plugins/ui-nomos-license.php:27
@@ -3801,19 +4085,28 @@ msgid "Creating default canonical name"
 msgstr ""
 
 #: plugins/ui-licterm-default.php:270
-msgid "License terms associate common license names with canonical license names.\n"
+msgid ""
+"License terms associate common license names with canonical license names.\n"
 msgstr ""
 
 #: plugins/ui-licterm-default.php:271
-msgid "For example, the terms 'GPL' and 'Gnu Public License' are both commonly used to describe the Free Software Foundation's GNU General Public License. These terms are all commonly referred to be the canonical name 'GPL'.\n"
+msgid ""
+"For example, the terms 'GPL' and 'Gnu Public License' are both commonly used "
+"to describe the Free Software Foundation's GNU General Public License. These "
+"terms are all commonly referred to be the canonical name 'GPL'.\n"
 msgstr ""
 
 #: plugins/ui-licterm-default.php:273
-msgid "You shouldn't need to do this unless you have modified the default terms and want to reset them back to the way they were when you installed this software.  "
+msgid ""
+"You shouldn't need to do this unless you have modified the default terms and "
+"want to reset them back to the way they were when you installed this "
+"software.  "
 msgstr ""
 
 #: plugins/ui-licterm-default.php:274
-msgid "This will reset the default license terms, canonical names, and associations between terms, license templates, and canonical names."
+msgid ""
+"This will reset the default license terms, canonical names, and associations "
+"between terms, license templates, and canonical names."
 msgstr ""
 
 #: plugins/ui-licterm-default.php:276
@@ -3821,11 +4114,15 @@ msgid "The default license settings are"
 msgstr ""
 
 #: plugins/ui-licterm-default.php:280
-msgid "In particular, related terms, templates, and canonical names may have very different legal meanings.\n"
+msgid ""
+"In particular, related terms, templates, and canonical names may have very "
+"different legal meanings.\n"
 msgstr ""
 
 #: plugins/ui-licterm-default.php:281
-msgid "Resetting the default terms will not impact any new terms you have created or their associations."
+msgid ""
+"Resetting the default terms will not impact any new terms you have created "
+"or their associations."
 msgstr ""
 
 #: plugins/ui-licterm-default.php:284
@@ -3833,7 +4130,9 @@ msgid "You can modify, edit, or delete the default groups with the "
 msgstr ""
 
 #: plugins/ui-licterm-default.php:294
-msgid "Check to revert back to the original default terms, canonical names, and license template associations."
+msgid ""
+"Check to revert back to the original default terms, canonical names, and "
+"license template associations."
 msgstr ""
 
 #: plugins/agent-nomos.php:35
@@ -3857,7 +4156,9 @@ msgid "is a framework for software analysis tools. The current tools identify"
 msgstr ""
 
 #: plugins/ui-default.php:49
-msgid "licenses in software, allow browsing of uploaded file hierarchies, and extract\n"
+msgid ""
+"licenses in software, allow browsing of uploaded file hierarchies, and "
+"extract\n"
 msgstr ""
 
 #: plugins/ui-default.php:50
@@ -3865,20 +4166,21 @@ msgid "MIME type and meta data information.\n"
 msgstr ""
 
 #: plugins/ui-default.php:52
-msgid "This website is an interface into the FOSSology project. With it, you can:\n"
+msgid ""
+"This website is an interface into the FOSSology project. With it, you can:\n"
 msgstr ""
 
 #: plugins/ui-default.php:54
 msgid "Browse uploaded files and content."
-msgstr "In hochgeladenen Dateien st&ouml;bern."
+msgstr ""
 
 #: plugins/ui-default.php:56
 msgid "View file contents and meta data."
-msgstr "Die Dateien und ihre Meta-Daten anschauen."
+msgstr ""
 
 #: plugins/ui-default.php:58
 msgid "Display analysis results."
-msgstr "Analyse-Ergebnisse anzeigen."
+msgstr ""
 
 #: plugins/ui-default.php:62
 msgid "Download files."
@@ -3898,14 +4200,17 @@ msgstr ""
 
 #: plugins/ui-default.php:85
 msgid "Where to Begin..."
-msgstr "Wie Sie beginnen..."
+msgstr ""
 
 #: plugins/ui-default.php:87
-msgid "The menu at the top contains all the primary capabilities of FOSSology.\n"
-msgstr "&Uuml;ber das Men&uuml; k&ouml;nnen Sie auf die wichtigsten FOSSology-Funktionen zugreifen.\n" 
+msgid ""
+"The menu at the top contains all the primary capabilities of FOSSology.\n"
+msgstr ""
 
 #: plugins/ui-default.php:94
-msgid ": If you don't know where to start, try browsing the currently uploaded projects."
+msgid ""
+": If you don't know where to start, try browsing the currently uploaded "
+"projects."
 msgstr ""
 
 #: plugins/ui-default.php:102
@@ -3913,7 +4218,9 @@ msgid ": Look through the uploaded projects for specific files."
 msgstr ""
 
 #: plugins/ui-default.php:117
-msgid ": Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or even add new users."
+msgid ""
+": Depending on your account's access rights, you may be able to upload "
+"files, schedule analysis tasks, or even add new users."
 msgstr ""
 
 #: plugins/ajax-tags.php:35
@@ -3933,7 +4240,8 @@ msgid "Cleaning: Vacuum and Analyze"
 msgstr ""
 
 #: plugins/admin-db-vacuum.php:89
-msgid "Database performance can be improved by optimizing table memory allocation."
+msgid ""
+"Database performance can be improved by optimizing table memory allocation."
 msgstr ""
 
 #: plugins/admin-db-vacuum.php:90
@@ -3957,7 +4265,9 @@ msgid " Keep in mind:\n"
 msgstr ""
 
 #: plugins/admin-db-vacuum.php:95
-msgid " Running them too often can negatively impact database performance since the database will spend more time cleaning than doing real work."
+msgid ""
+" Running them too often can negatively impact database performance since the "
+"database will spend more time cleaning than doing real work."
 msgstr ""
 
 #: plugins/admin-db-vacuum.php:98
@@ -3972,33 +4282,27 @@ msgstr ""
 msgid "Database Schema"
 msgstr ""
 
-#: plugins/core-schema.php:62
-#: plugins/core-schema.php:254
+#: plugins/core-schema.php:62 plugins/core-schema.php:254
 msgid "Tables"
 msgstr ""
 
-#: plugins/core-schema.php:64
-#: plugins/core-schema.php:256
+#: plugins/core-schema.php:64 plugins/core-schema.php:256
 msgid "Sequences"
 msgstr ""
 
-#: plugins/core-schema.php:66
-#: plugins/core-schema.php:258
+#: plugins/core-schema.php:66 plugins/core-schema.php:258
 msgid "Views"
 msgstr ""
 
-#: plugins/core-schema.php:68
-#: plugins/core-schema.php:260
+#: plugins/core-schema.php:68 plugins/core-schema.php:260
 msgid "Indexes"
 msgstr ""
 
-#: plugins/core-schema.php:70
-#: plugins/core-schema.php:262
+#: plugins/core-schema.php:70 plugins/core-schema.php:262
 msgid "Constraints"
 msgstr ""
 
-#: plugins/core-schema.php:73
-#: plugins/core-schema.php:265
+#: plugins/core-schema.php:73 plugins/core-schema.php:265
 msgid "Functions"
 msgstr ""
 
@@ -4010,56 +4314,44 @@ msgstr ""
 msgid "This color indicates the default schema (items that should be applied)."
 msgstr ""
 
-#: plugins/core-schema.php:94
-#: plugins/core-schema.php:122
-#: plugins/core-schema.php:192
-#: plugins/core-schema.php:277
+#: plugins/core-schema.php:94 plugins/core-schema.php:122
+#: plugins/core-schema.php:192 plugins/core-schema.php:277
 #: plugins/core-schema.php:323
 msgid "Table"
 msgstr ""
 
-#: plugins/core-schema.php:95
-#: plugins/core-schema.php:123
+#: plugins/core-schema.php:95 plugins/core-schema.php:123
 #: plugins/core-schema.php:278
 msgid "Column"
 msgstr ""
 
-#: plugins/core-schema.php:97
-#: plugins/core-schema.php:125
+#: plugins/core-schema.php:97 plugins/core-schema.php:125
 #: plugins/core-schema.php:280
 msgid "Add SQL"
 msgstr ""
 
-#: plugins/core-schema.php:98
-#: plugins/core-schema.php:126
+#: plugins/core-schema.php:98 plugins/core-schema.php:126
 #: plugins/core-schema.php:281
 msgid "Alter SQL\n"
 msgstr ""
 
-#: plugins/core-schema.php:144
-#: plugins/core-schema.php:299
+#: plugins/core-schema.php:144 plugins/core-schema.php:299
 msgid "Sequence"
 msgstr ""
 
-#: plugins/core-schema.php:145
-#: plugins/core-schema.php:169
-#: plugins/core-schema.php:194
-#: plugins/core-schema.php:226
-#: plugins/core-schema.php:300
-#: plugins/core-schema.php:312
-#: plugins/core-schema.php:325
-#: plugins/core-schema.php:341
+#: plugins/core-schema.php:145 plugins/core-schema.php:169
+#: plugins/core-schema.php:194 plugins/core-schema.php:226
+#: plugins/core-schema.php:300 plugins/core-schema.php:312
+#: plugins/core-schema.php:325 plugins/core-schema.php:341
 #: plugins/core-schema.php:354
 msgid "Definition\n"
 msgstr ""
 
-#: plugins/core-schema.php:193
-#: plugins/core-schema.php:324
+#: plugins/core-schema.php:193 plugins/core-schema.php:324
 msgid "Index"
 msgstr ""
 
-#: plugins/core-schema.php:225
-#: plugins/core-schema.php:340
+#: plugins/core-schema.php:225 plugins/core-schema.php:340
 msgid "Constraint"
 msgstr ""
 
@@ -4068,7 +4360,9 @@ msgid "Function"
 msgstr ""
 
 #: plugins/core-schema.php:744
-msgid "Viewing, exporting, and applying the schema is only used by installation and debugging.\n"
+msgid ""
+"Viewing, exporting, and applying the schema is only used by installation and "
+"debugging.\n"
 msgstr ""
 
 #: plugins/core-schema.php:745
@@ -4088,15 +4382,21 @@ msgid "your FOSSology database."
 msgstr ""
 
 #: plugins/core-schema.php:752
-msgid "Check to view the current schema. The output generation is harmless, but extremely technical."
+msgid ""
+"Check to view the current schema. The output generation is harmless, but "
+"extremely technical."
 msgstr ""
 
 #: plugins/core-schema.php:754
-msgid "Highlight the differences between the default schema (blue) and current schema (red)."
+msgid ""
+"Highlight the differences between the default schema (blue) and current "
+"schema (red)."
 msgstr ""
 
 #: plugins/core-schema.php:756
-msgid "Check to export the current schema. This will overwrite your default schema configuration file. Don't do this unless you know"
+msgid ""
+"Check to export the current schema. This will overwrite your default schema "
+"configuration file. Don't do this unless you know"
 msgstr ""
 
 #: plugins/core-schema.php:757
@@ -4104,10 +4404,15 @@ msgid "exactly"
 msgstr ""
 
 #: plugins/core-schema.php:758
-msgid "what you are doing. The default configuration file is the only one that is supported. This will overwrite your default file."
+msgid ""
+"what you are doing. The default configuration file is the only one that is "
+"supported. This will overwrite your default file."
 msgstr ""
 
 #: plugins/core-schema.php:760
-msgid "Check to apply the last exported schema. This will overwrite and atempt to migrate your database schema according to the default configuration file. Non-standard columns, tables, constraints, and views can and will be destroyed.\n"
+msgid ""
+"Check to apply the last exported schema. This will overwrite and atempt to "
+"migrate your database schema according to the default configuration file. "
+"Non-standard columns, tables, constraints, and views can and will be "
+"destroyed.\n"
 msgstr ""
-
