@@ -215,7 +215,7 @@ $text = _("New Group");
 
     $V .= "<option ";
     if ($SelectKey == $GrpInGroup['id']) { $V .= "selected "; }
-    $V .= _("value='" . $GrpInGroup['id'] . "'>");
+    $V .= "value='" . $GrpInGroup['id'] . "'>";
     for($i=0; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
     $V .= htmlentities($GrpInGroup['name']);
     $V .= "</option>\n";
