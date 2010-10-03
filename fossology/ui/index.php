@@ -48,12 +48,10 @@ if ($PluginId >= 0)
 else
   {
   $Uri = Traceback_uri() . "?mod=auth";
-$text = _("Module unavailable or your login session timed out.");
+  $text = _("Module unavailable or your login session timed out.");
   print "$text <P />";
-$text = _("Click");
-$text1 = _("here");
-$text2 = _("to continue.");
-  print "$text <a href='$Uri'>$text1</a> $text2";
+  $text01= _("Click here to continue.");
+  print "<a href='$Uri'>" . $text01 . "</a>";
   print "<script language='JavaScript'>\n";
   print "function Redirect()\n";
   print "{\n";
