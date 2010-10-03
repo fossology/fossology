@@ -546,74 +546,77 @@ msgstr ""
 msgid ""
 " (NOTE: This is only partially implemented right now. Current users can "
 "escape the top of tree limitation.)"
-msgstr ""
+msgstr "(Hinweis: Diese Funktion ist nur teilweise implementiert."
+"Momentan angemeldete Nutzer k&ouml;nnen die Begrenzung umgehen."
 
 #: plugins/user-add.php:223
 msgid "Enter the user's password.  It may be blank."
-msgstr ""
+msgstr "Benutzerkennwort (Darf leer bleiben.)"
 
 #: plugins/user-add.php:226 plugins/user-edit-any.php:416
 msgid "Re-enter the user's password."
-msgstr ""
+msgstr "Wiederholung des Benutzerkennwortes"
 
 #: plugins/user-add.php:229 plugins/user-edit-self.php:262
 #: plugins/user-edit-any.php:419
 msgid "E-mail Notification"
-msgstr ""
+msgstr "E-Mail-Benachrichtigung"
 
 #: plugins/user-add.php:230
 msgid "Check to enable email notification of completed analysis."
-msgstr ""
+msgstr "E-Mail-Bericht der vollst&auml;ndigen Analyse?"
 
 #: plugins/user-add.php:235 plugins/user-edit-self.php:266
 #: plugins/user-edit-any.php:423
 msgid ""
 "Default Agents: Select the agent(s) to automatically run when uploading "
 "data. These selections can be changed on the upload screens."
-msgstr ""
+msgstr "Standard-Agenten: W&auml;hlen Sie die Agenten, die nach dem"
+"Hochladen automatisch gestartet werden. Kann im Hochladen-Dialog"
+"modifiziert werden."
 
 #: plugins/user-add.php:239 plugins/user-edit-self.php:287
 msgid "Default bucketpool."
-msgstr ""
+msgstr "Standard-Kategorien"
 
 #: plugins/user-add.php:246 plugins/ui-licgroup-manage.php:487
 #: plugins/ui-licgroup-manage.php:542 plugins/ui-licterm-manage.php:370
 #: plugins/ui-licterm-manage.php:472
 msgid "Add"
-msgstr ""
+msgstr "Hinzuf&uuml;gen"
 
 #: plugins/ui-list-bucket-files.php:38
 msgid "List Files for Bucket"
-msgstr ""
+msgstr "Dateiliste f&uuml;r Kategorie"
 
 #: plugins/ui-list-bucket-files.php:65 plugins/search-file.php:126
 #: plugins/ui-list-lic-files.php:60
 msgid "Show All Files"
-msgstr ""
+msgstr "Zeige alle Dateien"
 
 #: plugins/ui-list-bucket-files.php:95 plugins/ui-list-lic-files.php:90
 msgid "is missing required parameters."
-msgstr ""
+msgstr "fehlen notwendige Parameter."
 
 #: plugins/ui-list-bucket-files.php:125
 msgid "The following files are in bucket: '<b>"
-msgstr ""
+msgstr "Diese Dateien geh&ouml;ren zur Kategorie: '<b>"
 
 #: plugins/ui-list-bucket-files.php:128 plugins/ui-list-lic-files.php:125
 msgid "Display"
-msgstr ""
+msgstr "In der Anzeige"
 
 #: plugins/ui-list-bucket-files.php:129 plugins/ui-list-lic-files.php:126
 msgid "excludes"
-msgstr ""
+msgstr "fehlen"
 
 #: plugins/ui-list-bucket-files.php:130
 msgid "files with these licenses"
-msgstr ""
+msgstr "die Dateien mit diesen Lizenzen"
 
 #: plugins/ui-list-bucket-files.php:201 plugins/ui-list-lic-files.php:152
 msgid "File"
-msgstr ""
+msgstr "Datei"
 
 #: plugins/ui-list-bucket-files.php:217
 msgid "Exclude files with license"
@@ -621,90 +624,90 @@ msgstr ""
 
 #: plugins/ui-list-bucket-files.php:248 plugins/ui-licgroup.php:688
 #: plugins/ui-list-lic-files.php:194
-msgid "Elaspsed time"
-msgstr ""
+msgid "Elapsed time"
+msgstr "Vergangene Zeit"
 
 #: plugins/ui-list-bucket-files.php:249 plugins/ui-licgroup.php:689
 #: plugins/myjobs.php:76 plugins/search-file-by-license.php:106
 #: plugins/search-file-by-licgroup.php:235 plugins/ui-list-lic-files.php:195
 msgid "seconds"
-msgstr ""
+msgstr "Sekunden"
 
 #: plugins/search-file-advance.php:27
 msgid "Advanced Search for File"
-msgstr ""
+msgstr "Dateisuche"
 
 #: plugins/search-file-advance.php:69 plugins/search-file-advance.php:163
 #: plugins/search-file.php:76 plugins/search.php:96 plugins/search.php:220
 msgid "No results.\n"
-msgstr ""
+msgstr "Keine Ergebnisse.\ņ"
 
 #: plugins/search-file-advance.php:78 plugins/search-file-advance.php:172
 #: plugins/search.php:105 plugins/search.php:229
 msgid "Total matched:"
-msgstr ""
+msgstr "Anzahl Treffer:"
 
 #: plugins/search-file-advance.php:189
 msgid "Additional search options"
-msgstr ""
+msgstr "Zus&auml;tzliche Suchoptionen"
 
 #: plugins/search-file-advance.php:223 plugins/search-file.php:118
 #: plugins/search.php:326
 msgid "You can use '%' as a wild-card.\n"
-msgstr ""
+msgstr "Das Zeichen '%' kann als Wildcard genutzt werden.\n"
 
 #: plugins/search-file-advance.php:226 plugins/search.php:323
 msgid "Enter the filename to find: "
-msgstr ""
+msgstr "Zu suchender Dateiname: "
 
 #: plugins/search-file-advance.php:230 plugins/search.php:328
 msgid "Tag to find"
-msgstr ""
+msgstr "Zu suchendes Schl&uuml;sselwort"
 
 #: plugins/search-file-advance.php:233 plugins/search.php:331
 msgid "Mimetype "
-msgstr ""
+msgstr "Dateityp (MIME)"
 
 #: plugins/search-file-advance.php:238 plugins/search-file-advance.php:245
 #: plugins/search.php:336 plugins/search.php:343
 msgid "IS"
-msgstr ""
+msgstr "IST"
 
 #: plugins/search-file-advance.php:240 plugins/search-file-advance.php:247
 #: plugins/search.php:338 plugins/search.php:345
 msgid "IS NOT"
-msgstr ""
+msgstr "IST NICHT"
 
 #: plugins/search-file-advance.php:253 plugins/search.php:351
 msgid "Select mimetype..."
-msgstr ""
+msgstr "Auswahl des Typs (MIME)"
 
 #: plugins/search-file-advance.php:270 plugins/search-file-advance.php:274
 #: plugins/search.php:368 plugins/search.php:372
 msgid "File size is"
-msgstr ""
+msgstr "Dateigr&ouml;&szlig;e ist"
 
 #: plugins/search-file-advance.php:271 plugins/search-file-advance.php:275
 #: plugins/search.php:369 plugins/search.php:373
 msgid " bytes\n"
-msgstr ""
+msgstr " Byte.\n"
 
 #: plugins/search-file-advance.php:279 plugins/search-file.php:131
 #: plugins/search-file-by-licgroup.php:190 plugins/ui-welcome.php:56
 #: plugins/ui-welcome.php:59 plugins/search.php:27 plugins/search.php:260
 #: plugins/search.php:379 plugins/ui-default.php:100
 msgid "Search"
-msgstr ""
+msgstr "Suche"
 
 #: plugins/search-file-advance.php:287 plugins/search-file-advance.php:295
 #: plugins/search-file.php:140 plugins/search.php:387 plugins/search.php:395
 msgid "Files matching"
-msgstr ""
+msgstr "Passende Dateien"
 
 #: plugins/ui-tags.php:27 plugins/ui-tags.php:305 plugins/ui-tags.php:428
 #: plugins/ui-tags.php:505
 msgid "Tag"
-msgstr ""
+msgstr "Schl&uuml;sselwort"
 
 #: plugins/ui-tags.php:41
 msgid "Tag files or containers"
@@ -712,68 +715,68 @@ msgstr ""
 
 #: plugins/ui-tags.php:81
 msgid "TagName must be specified. Tag Not created."
-msgstr ""
+msgstr "Der Name des Schl&uumlsselwortes muss angegben werden. Schl&uuml;sselwort wurde nicht angelegt."
 
 #: plugins/ui-tags.php:87
-msgid "Need to select one option(file/pacakge/container) to create tag."
-msgstr ""
+msgid "Need to select one option (file/package/container) to create tag."
+msgstr "Eine der Optionen (File/Package/Container) muss gewählt werden."
 
 #: plugins/ui-tags.php:108
 msgid "TagName already exists. Tag Not created."
-msgstr ""
+msgstr "Der Schlüsselname existiert bereits. Nicht angelegt."
 
 #: plugins/ui-tags.php:118
 msgid "Failed to create tag."
-msgstr ""
+msgstr "Schlüsselwort konnte nicht angelegt werden."
 
 #: plugins/ui-tags.php:230
 msgid "TagName must be specified. Tag Not Updated."
-msgstr ""
+msgstr "Schlüsselname muss angegeben werden. Schlüsselwort nicht aktualisiert."
 
 #: plugins/ui-tags.php:268
 msgid "Can't find this tag, Tag Not deleted."
-msgstr ""
+msgstr "Schlüsselwort nicht gefunden, daher nicht gelöscht."
 
 #: plugins/ui-tags.php:297
 msgid "<h3>Current Tags:</h3>\n"
-msgstr ""
+msgstr "<h3>Aktuelles Schlüsselwort:</h3>\n"
 
 #: plugins/ui-tags.php:304
 msgid "Tag Namespace"
-msgstr ""
+msgstr "Schlüssel-Namensraum "
 
 #: plugins/ui-tags.php:306
 msgid "Tag Description"
-msgstr ""
+msgstr "Schlüsselwort-Beschreibung"
 
 #: plugins/ui-tags.php:307
 msgid "Tag Date"
-msgstr ""
+msgstr "Schlüsselwort-Datum"
 
 #: plugins/ui-tags.php:403
 msgid "<h3>Create Tag:</h3>\n"
-msgstr ""
+msgstr "<h3>Schlüsselwort anlegen:</h3>"
 
 #: plugins/ui-tags.php:425 plugins/ui-tags.php:502
 msgid "Namespace"
-msgstr ""
+msgstr "Namensraum"
 
 #: plugins/ui-tags.php:435 plugins/ui-tags.php:507
 msgid "Tag description:"
-msgstr ""
+msgstr "Schlüsselwort-Beschreibung:"
 
 #: plugins/ui-tags.php:437 plugins/ui-tags.php:509
 msgid "<p>Notes:</p>"
-msgstr ""
+msgstr "<p>Hinweise:</p>"
 
 #: plugins/ui-tags.php:454 plugins/ui-licgroup-default.php:618
 #: plugins/admin-folder-create.php:160
 msgid "Create"
-msgstr ""
+msgstr "Anlegen"
 
 #: plugins/ui-tags.php:469
 msgid "Create New Tag"
-msgstr ""
+msgstr "Neues Schlüsselwort anlegen"
 
 #: plugins/ui-tags.php:472
 msgid "<h3>Edit Tag:</h3>\n"

@@ -191,7 +191,7 @@ $text = _("Exclude this file type.");
 	if (!empty($VM)) { $V .= $VM . "\n"; }
 	$V .= "<hr>\n";
 	$Time = time() - $Time;
-$text = _("Elaspsed time");
+$text = _("Elapsed time");
 $text1 = _("seconds");
 	$V .= "<small>$text: $Time $text1</small>\n";
 	break;

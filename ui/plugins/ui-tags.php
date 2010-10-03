@@ -84,7 +84,7 @@ class ui_tag extends FO_Plugin
     /* Need select tag file/package/container */
     if (empty($tag_file) && empty($tag_package) && empty($tag_container))
     {
-      $text = _("Need to select one option(file/pacakge/container) to create tag.");
+      $text = _("Need to select one option (file/package/container) to create tag.");
       return ($text);
     }
     
