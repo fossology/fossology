@@ -45,7 +45,7 @@ msgstr "Fehler! Abfrage fehlgeschlagen"
 
 #: common/common-agents.php:504
 msgid "Invalid parameter (upload_pk)"
-msgstr "Unzulässiger Parameter (upload_pk)"
+msgstr "Unzuläauml;ssiger Parameter (upload_pk)"
 
 #: common/common-agents.php:528
 msgid ""
@@ -330,7 +330,7 @@ msgstr "Detektor-Typ"
 
 #: plugins/admin-license-file.php:321
 msgid "Public Notes"
-msgstr "Öffentliche Notizen"
+msgstr "ÖOuml;ffentliche Notizen"
 
 #: plugins/admin-license-file.php:331
 msgid "Add License"
@@ -443,7 +443,7 @@ msgstr "Plattenplatz der Datenbank"
 
 #: plugins/user-add.php:28
 msgid "Add A User"
-msgstr "Benutzer hinzufügen"
+msgstr "Benutzer hinzufüuuml;gen"
 
 #: plugins/user-add.php:50
 msgid "NO DB connection!"
@@ -620,7 +620,7 @@ msgstr "Datei"
 
 #: plugins/ui-list-bucket-files.php:217
 msgid "Exclude files with license"
-msgstr ""
+msgstr "Dateien mit dieser Lizenz auslassen:"
 
 #: plugins/ui-list-bucket-files.php:248 plugins/ui-licgroup.php:688
 #: plugins/ui-list-lic-files.php:194
@@ -719,43 +719,43 @@ msgstr "Der Name des Schl&uumlsselwortes muss angegben werden. Schl&uuml;sselwor
 
 #: plugins/ui-tags.php:87
 msgid "Need to select one option (file/package/container) to create tag."
-msgstr "Eine der Optionen (File/Package/Container) muss gewählt werden."
+msgstr "Eine der Optionen (File/Package/Container) muss gewäauml;hlt werden."
 
 #: plugins/ui-tags.php:108
 msgid "TagName already exists. Tag Not created."
-msgstr "Der Schlüsselname existiert bereits. Nicht angelegt."
+msgstr "Der Schlüuuml;sselname existiert bereits. Nicht angelegt."
 
 #: plugins/ui-tags.php:118
 msgid "Failed to create tag."
-msgstr "Schlüsselwort konnte nicht angelegt werden."
+msgstr "Schlüuuml;sselwort konnte nicht angelegt werden."
 
 #: plugins/ui-tags.php:230
 msgid "TagName must be specified. Tag Not Updated."
-msgstr "Schlüsselname muss angegeben werden. Schlüsselwort nicht aktualisiert."
+msgstr "Schlüuuml;sselname muss angegeben werden. Schlüuuml;sselwort nicht aktualisiert."
 
 #: plugins/ui-tags.php:268
 msgid "Can't find this tag, Tag Not deleted."
-msgstr "Schlüsselwort nicht gefunden, daher nicht gelöscht."
+msgstr "Schlüuuml;sselwort nicht gefunden, daher nicht gelöouml;scht."
 
 #: plugins/ui-tags.php:297
 msgid "<h3>Current Tags:</h3>\n"
-msgstr "<h3>Aktuelles Schlüsselwort:</h3>\n"
+msgstr "<h3>Aktuelles Schlüuuml;sselwort:</h3>\n"
 
 #: plugins/ui-tags.php:304
 msgid "Tag Namespace"
-msgstr "Schlüssel-Namensraum "
+msgstr "Schlüuuml;ssel-Namensraum "
 
 #: plugins/ui-tags.php:306
 msgid "Tag Description"
-msgstr "Schlüsselwort-Beschreibung"
+msgstr "Schlüuuml;sselwort-Beschreibung"
 
 #: plugins/ui-tags.php:307
 msgid "Tag Date"
-msgstr "Schlüsselwort-Datum"
+msgstr "Schlüuuml;sselwort-Datum"
 
 #: plugins/ui-tags.php:403
 msgid "<h3>Create Tag:</h3>\n"
-msgstr "<h3>Schlüsselwort anlegen:</h3>"
+msgstr "<h3>Schlüuuml;sselwort anlegen:</h3>"
 
 #: plugins/ui-tags.php:425 plugins/ui-tags.php:502
 msgid "Namespace"
@@ -763,7 +763,7 @@ msgstr "Namensraum"
 
 #: plugins/ui-tags.php:435 plugins/ui-tags.php:507
 msgid "Tag description:"
-msgstr "Schlüsselwort-Beschreibung:"
+msgstr "Schlüuuml;sselwort-Beschreibung:"
 
 #: plugins/ui-tags.php:437 plugins/ui-tags.php:509
 msgid "<p>Notes:</p>"
@@ -776,144 +776,140 @@ msgstr "Anlegen"
 
 #: plugins/ui-tags.php:469
 msgid "Create New Tag"
-msgstr "Neues Schlüsselwort anlegen"
+msgstr "Neues Schlüuuml;sselwort anlegen"
 
 #: plugins/ui-tags.php:472
 msgid "<h3>Edit Tag:</h3>\n"
-msgstr ""
+msgstr "<h3>Schlüuuml;sselword äauml;ndern:</h3>"
 
 #: plugins/ui-tags.php:542
 msgid "<h3>Delete Tag:</h3>\n"
-msgstr ""
+msgstr "<h3>Schlüuuml;sselwort löouml;schen</h3>"
 
 #: plugins/ui-tags.php:568
 msgid "Delete Tag only for this file."
-msgstr ""
+msgstr "Schlüuuml;sselwort nur füuuml;r diese Datei entfernen."
 
 #: plugins/ui-tags.php:570
 msgid "Delete Tag for all packages (source and binary) in this container tree."
-msgstr ""
+msgstr "Schlüuuml;sselwort füuuml;r alle Pakete (Quellen und Binäauml;rpakete) in diesem Container-Baum entfernen."
 
 #: plugins/ui-tags.php:577 plugins/jobs-showjobs.php:439
 #: plugins/admin-folder-delete.php:147 plugins/user-del.php:131
 #: plugins/admin-upload-delete.php:156
 msgid "Delete"
-msgstr ""
+msgstr "Löouml;schen"
 
 #: plugins/ui-tags.php:651
 msgid "Create Tag Failed"
-msgstr ""
+msgstr "Erzeugung des neuen Schlüuuml;sselwortes fehlgeschlagen"
 
 #: plugins/ui-tags.php:654
 msgid "Create Tag Successful!"
-msgstr ""
+msgstr "Neues Schlüuuml;sselwort erfolgreich angelegt!"
 
 #: plugins/ui-tags.php:663
 msgid "Edit Tag Failed"
-msgstr ""
+msgstr "ÄAuml;nderung des Schlüuuml;sselwortes fehlgeschlagen"
 
 #: plugins/ui-tags.php:666
 msgid "Edit Tag Successful!"
-msgstr ""
+msgstr "Schlüuuml;sselwort erfolgreich geäauml;ndert"
 
 #: plugins/ui-tags.php:675
 msgid "Delete Tag Failed"
-msgstr ""
+msgstr "Löouml;schen des Schlüuuml;sselwortes ist fehlgeschlagen"
 
 #: plugins/ui-tags.php:678
 msgid "Delete Tag Successful!"
-msgstr ""
+msgstr "Löouml;schen des Schlüuuml;sselwortes erfolgreich!"
 
 #: plugins/ui-licgroup-manage.php:37
 msgid "Manage License Groups"
-msgstr ""
+msgstr "Lizenzgruppen verwalten"
 
 #: plugins/ui-licgroup-manage.php:199
 msgid "New Group"
-msgstr ""
-
-#: plugins/ui-licgroup-manage.php:218
-msgid "value='"
-msgstr ""
+msgstr "Neue Gruppe"
 
 #: plugins/ui-licgroup-manage.php:405
 msgid "Select management action"
-msgstr ""
+msgstr "Verwaltungsaktion"
 
 #: plugins/ui-licgroup-manage.php:412
 msgid "Check to delete this license group!"
-msgstr ""
+msgstr "Auswäauml;hlen um Lizenzgruppe zu löouml;schen"
 
 #: plugins/ui-licgroup-manage.php:418
 msgid "Group name"
-msgstr ""
+msgstr "Gruppenname"
 
 #: plugins/ui-licgroup-manage.php:421
 msgid "Group description"
-msgstr ""
+msgstr "Gruppenbeschreibung"
 
 #: plugins/ui-licgroup-manage.php:425
 msgid "Group color"
-msgstr ""
+msgstr "Gruppenfarbe"
 
 #: plugins/ui-licgroup-manage.php:444
 msgid "Select licenses to include in the group"
-msgstr ""
+msgstr "Lizenzen, die zu dieser Gruppen gehöouml;ren sollen"
 
 #: plugins/ui-licgroup-manage.php:447
 msgid "Available licenses"
-msgstr ""
+msgstr "Bekannte Lizenzen"
 
 #: plugins/ui-licgroup-manage.php:448
 msgid "Licenses in this Group"
-msgstr ""
+msgstr "Lizenzen in dieser Gruppe"
 
 #: plugins/ui-licgroup-manage.php:491 plugins/ui-licgroup-manage.php:546
 #: plugins/ui-licterm-manage.php:372 plugins/ui-licterm-manage.php:474
 #: plugins/agent-remove-license.php:155
 msgid "Remove"
-msgstr ""
+msgstr "Entfernen"
 
 #: plugins/ui-licgroup-manage.php:509
 msgid "Select subgroups to include in this group"
-msgstr ""
+msgstr "In dieser Gruppe einzufüuuml;gende Untergruppen"
 
 #: plugins/ui-licgroup-manage.php:512
 msgid "Available subgroups"
-msgstr ""
+msgstr "Bekannte Untergruppen"
 
 #: plugins/ui-licgroup-manage.php:513
 msgid "Subgroups in this Group"
-msgstr ""
+msgstr "Untergruppen in dieser Gruppe"
 
 #: plugins/ui-licgroup-manage.php:606
 msgid "License group information updated."
-msgstr ""
+msgstr "Lizenzgruppe aktualisiert."
 
 #: plugins/ui-licgroup-manage.php:611
 msgid "Could not update License group information, error code is"
-msgstr ""
+msgstr "Lizenzgruppe wurde nicht aktualisiert. Fehlercode: "
 
 #: plugins/upload-instructions.php:27
 msgid "Upload Instructions"
-msgstr ""
+msgstr "Anleitung zum Hochladen"
 
 #: plugins/upload-instructions.php:53
 msgid ""
 "FOSSology has many options for importing and uploading files for analysis.\n"
-msgstr ""
+msgstr "FOSSology bietet viele Möouml;glichkeiten, um Dateien zur Analyse zu importieren.\n"
 
 #: plugins/upload-instructions.php:54
 msgid "The options vary based on <i>where</i> the data to upload is located.\n"
-msgstr ""
+msgstr "Die Möouml;glichkeiten häauml;ngen davon ab, <em>woher</em> die Daten hochgeladen werden.\n";
 
 #: plugins/upload-instructions.php:55
 msgid "The data may be located:\n"
-msgstr ""
+msgstr "Die Daten köouml;nnen aus verschiedene Quellen stammen:"
 
 #: plugins/upload-instructions.php:57
 msgid "On your browser system"
-msgstr ""
+msgstr "Vom System auf dem der Browser läauml;uft"
 
 #: plugins/upload-instructions.php:59 plugins/upload-instructions.php:69
 #: plugins/upload-instructions.php:78
@@ -1769,7 +1765,7 @@ msgstr ""
 
 #: plugins/admin-bucket-pool.php:177
 msgid "Submit"
-msgstr ""
+msgstr "Absenden"
 
 #: plugins/admin-check-template.php:27
 msgid "License Template Check"
@@ -1867,50 +1863,52 @@ msgstr ""
 
 #: plugins/admin-check-template.php:366
 msgid "Only the files linked to the obsolete templates need to be analyzed.\n"
-msgstr ""
+msgstr "Nur die mit den veralteten Vorlagen verknüuuml;pften Dateien müuuml;ssen"
+"analysiert werden.\n";
 
 #: plugins/admin-check-template.php:367
 msgid "This will not re-analyze every file in the uploaded package.\n"
-msgstr ""
+msgstr "Dies wird nicht zu einer neuen Analyse jeder Datein in dem"
+"hochgeladenen Paket füuuml;hren.\n"
 
 #: plugins/admin-check-template.php:369
 msgid " Check to cleanup and re-analyze.\n"
-msgstr ""
+msgstr "Aufräauml;umen und neu analysieren?\n"
 
 #: plugins/admin-check-template.php:371 plugins/admin-db-vacuum.php:102
 msgid "Clean"
-msgstr ""
+msgstr "Aufräauml;umen"
 
 #: plugins/search-file.php:27
 msgid "Search for File"
-msgstr ""
+msgstr "Nach Datei suchen"
 
 #: plugins/search-file.php:93
 msgid "Search based on filename"
-msgstr ""
+msgstr "Suche nach Dateiname"
 
 #: plugins/search-file.php:121
 msgid "Enter the filename to find:"
-msgstr ""
+msgstr "Zu suchender Dateiname"
 
 #: plugins/search-file.php:124
 msgid "By default only containers (rpms, tars, isos, etc) are shown."
-msgstr ""
+msgstr "Standardmäauml;ßszlig;ig werden nur Container (RPM, TAR, ISO, etc.) anzgezeigt."
 
 #: plugins/agent-pkgmetagetta.php:27
 msgid "Metadata Analysis (Slow.  Not needed for license analysis)"
-msgstr ""
+msgstr "Analyse der Metadaten (Langsam. Füuuml;r Lizenzanalyse nicht notwendig.)"
 
 #: plugins/agent-pkgmetagetta.php:167 plugins/agent-license.php:279
 #: plugins/agent-pkgagent.php:203 plugins/agent-specagent.php:170
 #: plugins/agent-mimetype.php:144
 msgid "Analysis added to job queue"
-msgstr ""
+msgstr "Analyse zur Aufgabenliste hinzugefüuuml;gt."
 
 #: plugins/agent-pkgmetagetta.php:172 plugins/agent-license.php:283
 #: plugins/agent-specagent.php:175 plugins/agent-mimetype.php:148
 msgid "Scheduling of Analysis failed: "
-msgstr ""
+msgstr "Einplanung der Analyse ist fehlgeschlagen: "
 
 #: plugins/agent-pkgmetagetta.php:193 plugins/agent-license.php:302
 #: plugins/agent-pkgagent.php:229 plugins/agent-specagent.php:196
