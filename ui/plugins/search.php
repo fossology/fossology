@@ -193,7 +193,7 @@ $text = _("Total matched:");
 
     $V = "";
     $Count = count($Results);
-    \\$V .= "<pre>" . htmlentities($SQL) . "</pre>\n";
+    //$V .= "<pre>" . htmlentities($SQL) . "</pre>\n";
 
     if (($Page > 0) || ($Count >= $Max))
       {
