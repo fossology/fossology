@@ -52,6 +52,8 @@ if((int)$argc < 4)
   exit(1);
 }
 
+$proxy = '';
+
 list($me, $url, $user, $password, $proxy) = $argv;
 //print "Params: U:$url USR:$user PW:password PROX:$proxy\n";
 if(empty($url)) { exit(1); }
@@ -63,6 +65,9 @@ if('http://' != substr($url,0,7))
 
 $FD = fopen('./TestEnvironment.php', 'w') or die("Can't open ./TestEnvironment $php_errormsg\n");
 $startphp = "<?php\n";
+$testGlobals = "global \$USER;\n" .
+               "global \$PASSWORD;\n" . 
+               "global \$URL;\n";
 $fullUrl = "\$URL='$url';\n";
 $usr = "\$USER='$user';\n";
 $passwd = "\$PASSWORD='$password';\n";
@@ -73,11 +78,11 @@ $define ="define('TESTROOT',\"$tests\");\n";
 if(!(empty($proxy)))
 {
   $useproxy = "\$PROXY='$proxy';\n";
-  fwrite($FD, "$startphp$fullUrl$usr$passwd$useproxy$define$endphp");
+  fwrite($FD, "$startphp$testGlobals$fullUrl$usr$passwd$useproxy$define$endphp");
 }
 else
 {
-  fwrite($FD, "$startphp$fullUrl$usr$passwd$define$endphp");
+  fwrite($FD, "$startphp$testGlobals$fullUrl$usr$passwd$define$endphp");
 }
 fclose($FD);
 print "./TestEnvironment.php created sucessfully\n";
