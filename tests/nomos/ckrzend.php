@@ -26,33 +26,32 @@
 
 require_once '/usr/share/php/PHPUnit/Extensions/SeleniumTestCase.php';
 require_once ('../TestEnvironment.php');
-require_once ('../commonTestFuncs.php');
+//require_once ('../commonTestFuncs.php');
 
-global $URL;
 
 class WebTest extends PHPUnit_Extensions_SeleniumTestCase
 {
 	protected $host;
 
+	public static $browsers = array(
+	array(
+    'name' => "Firefox on randotest",
+    'browser' => '*firefox /usr/local/firefox/firefox-bin',
+    'host' => 'randotest.ostt',
+    'port' => 4444,
+    'timeout' => 50000
+	)
+	);
+
 	protected function setUp()
 	{
-		global $URL;
-		print "URL is:$URL\n";
-		$this->setBrowser('*firefox /usr/local/firefox/firefox-bin');
-		//$this->host = getHost($URL);
-		//$this->host = 'http://randotest.ostt/repo/';
-		$this->host = 'http://www.google.com/';
-		print "host is:$this->host\n";
-		$this->setBrowserUrl($this->host);
+		$this->setBrowserUrl('http://randotest.ostt/repo/');
 	}
 
 	public function testTitle()
 	{
-		global $URL;
-		print "TT: URL is:$URL\n";
-			
-		$this->open($this->host);
-		$this->assertTitle('Google');
+		$this->open('http://randotest.ostt/repo/');
+		$this->assertTitle('Welcome to FOSSology');
 	}
 }
 ?>
