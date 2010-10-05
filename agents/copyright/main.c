@@ -668,7 +668,7 @@ void copyright_usage(char* arg)
  *   -d                 :: turn on debugging information
  *
  *   example:
- *     $ ./copyright -c
+ *     $ ./copyright -c myfiletoscan
  *
  * +----------------------+
  * | Agent Based Analysis |
