@@ -6,12 +6,12 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: FOSSology 1.3pre\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-10-01 20:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Stefan Schroeder\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language-Team: None\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -913,266 +913,279 @@ msgstr "Vom System auf dem der Browser l&auml;uft"
 
 #: plugins/upload-instructions.php:59 plugins/upload-instructions.php:69
 #: plugins/upload-instructions.php:78
-msgid "Use the"
+msgid "Benutzen Sie "
 msgstr ""
 
 #: plugins/upload-instructions.php:60
 msgid "Upload File"
-msgstr ""
+msgstr "Datei hochladen"
 
 #: plugins/upload-instructions.php:61
 msgid "option to select and upload the file."
-msgstr ""
+msgstr " um Dateien zum Hochladen auszuwählen."
 
 #: plugins/upload-instructions.php:63
 msgid ""
 "While this can be very convenient (particularly if the file is not readily "
 "accessible online),\n"
 msgstr ""
+"Obwohl es einfach ist eine Datei mittels des Web-Browsers hochzuladen"
+"(insbesondere wenn die Datei nicht online verfügbar ist),\n"
 
 #: plugins/upload-instructions.php:64
 msgid "uploading via your web browser can be slow for large files,\n"
-msgstr ""
+msgstr "kann diese Methode bei großen Dateien sehr langsam sein."
 
 #: plugins/upload-instructions.php:65
 msgid "and files larger than 650 Megabytes may not be uploadable.\n"
-msgstr ""
+msgstr "Bei Dateien, die größer als 650 Megabyte sind, kann das "
+"Hochladen ebenfalls zu Problemen führen."
 
 #: plugins/upload-instructions.php:67
 msgid "On a remote server"
-msgstr ""
+msgstr "Nutzen Sie "
 
 #: plugins/upload-instructions.php:70 plugins/upload-url.php:28
 msgid "Upload from URL"
-msgstr ""
+msgstr "Hochladen von URL"
 
 #: plugins/upload-instructions.php:71
 msgid "option to specify a remote server."
-msgstr ""
+msgstr "um von einem entfernten Server hochzuladen."
 
 #: plugins/upload-instructions.php:73
 msgid ""
 "This is the most flexible option, but the URL must denote a publicly "
 "accessible HTTP, HTTPS, or FTP location.\n"
 msgstr ""
+"Diese Methode ist die flexibelste, doch die URL muss öffentlich erreichbar"
+" sein (mittels HTTP, HTTPS oder FTP)."
 
 #: plugins/upload-instructions.php:74
 msgid ""
 "URLs that require authentication or human interactions cannot be downloaded "
 "through this automated system.\n"
-msgstr ""
+msgstr "URLs, die eine Authentifizierung erfordern können nicht geladen werden."
 
 #: plugins/upload-instructions.php:76
 msgid "On the FOSSology web server"
-msgstr ""
+msgstr "Auf dem FOSSology-Webserver können Sie  "
 
 #: plugins/upload-instructions.php:79 plugins/upload-srv-files.php:28
 msgid "Upload from Server"
-msgstr ""
+msgstr "Upload vom Server"
 
 #: plugins/upload-instructions.php:80
 msgid "option to specify a file or path on the server."
-msgstr ""
+msgstr "wählen, indem Sie den Pfadnamen auf dem Server angeben."
 
 #: plugins/upload-instructions.php:82
 msgid ""
 "This option is intended for developers who have mounted directories "
 "containing source trees.\n"
 msgstr ""
+"Diese Option ermöglicht Entwicklern, die Zugriff auf den Server"
+"besitzen, von dort Quellen hochzuladen.\n"
 
 #: plugins/upload-instructions.php:83
 msgid "The directory must be accessible via the web server's user.\n"
-msgstr ""
+msgstr "Der angemeldete Beutzer muss über Zugriff auf das Verzeichnis verfügen."
 
 #: plugins/upload-instructions.php:85
 msgid ""
 "If your system is configured to use multiple agent servers, the data area "
 "must be\n"
 msgstr ""
+"Wenn das System verschiedene Server nutzt, dann muss der Datenbereich "
 
 #: plugins/upload-instructions.php:86
 msgid ""
 "mounted and accessible to the FOSSology user (fossy) on every agent system.  "
 "See\n"
-msgstr ""
+msgstr "vom FOSSology-Benutzer (fossy) auf jedem Agenten-System aus erreichbar sein.\n"
 
 #: plugins/upload-instructions.php:87
 msgid "the section"
-msgstr ""
+msgstr "Weiteres unter"
 
 #: plugins/upload-instructions.php:88
 msgid "Configuring the Scheduler"
-msgstr ""
+msgstr "Konfiguration des Zeitmanagements"
 
 #: plugins/upload-instructions.php:89
 msgid "Scheduler documentation"
-msgstr ""
+msgstr "Dokumentation des Zeitmanagements"
 
 #: plugins/upload-instructions.php:95
 msgid "Select the type of upload based on where the data is located:\n"
-msgstr ""
+msgstr "Entscheiden Sie aufgrund des Quellortes der Daten:\ņ"
 
 #: plugins/upload-instructions.php:111
 msgid "Your computer"
-msgstr ""
+msgstr "Ihr Computer"
 
 #: plugins/upload-instructions.php:116
 msgid "FOSSology web server"
-msgstr ""
+msgstr "FOSSology Web-Server"
 
 #: plugins/upload-instructions.php:157
 msgid "Remote web or FTP server"
-msgstr ""
+msgstr "Fernzugriff über Web- oder FTP-Server"
 
 #: plugins/core-init.php:27
 msgid "Initialize"
-msgstr ""
+msgstr "Initialisieren"
 
 #: plugins/core-init.php:114
 msgid "Failed to find schema plugin.\n"
-msgstr ""
+msgstr "Schema-Plugins nicht gefunden."
 
 #: plugins/core-init.php:125
 msgid ""
 "Initialization complete.  Click 'Home' in the top menu to proceed.<br />"
 msgstr ""
+"Initialisierung abgeschlossen. Klicken Sie auf 'Startseite' im Hauptmenü"
+"um fortzufahren.<br />"
 
 #: plugins/core-init.php:132
 msgid "Remove this file to complete the initialization.\n"
 msgstr ""
+"Entfernen Sie diese Datei, um die Initialisierung abzuschließen.\n"
 
 #: plugins/core-init.php:141
 msgid "Initialization complete with errors."
-msgstr ""
+msgstr "Initialisierung mit Fehlern abgeschlossen."
 
 #: plugins/ui-download.php:27
 msgid "Download File"
-msgstr ""
+msgstr "Datei laden"
 
 #: plugins/ui-download.php:43
 msgid "Download this file"
-msgstr ""
+msgstr "Diese Datei laden"
 
 #: plugins/agent-unpack.php:27
 msgid "Schedule an Unpack"
-msgstr ""
+msgstr "Auspacken eines Pakets anmelden"
 
 #: plugins/agent-unpack.php:75 plugins/agent-license.php:109
 #: plugins/agent-pkgagent.php:103 plugins/upload-url.php:78
 #: plugins/agent-mimetype.php:108
 msgid "Failed to insert job record"
-msgstr ""
+msgstr "Datensatz konnte nicht angelegt werden"
 
 #: plugins/agent-unpack.php:87
 msgid "Failed to insert item into job queue"
-msgstr ""
+msgstr "Aufgabe konnt nicht in die Aufgabenliste übernommen werden"
 
 #: plugins/agent-unpack.php:94
 msgid "Failed to insert adj2nest into job queue"
-msgstr ""
+msgstr "'adj2nest' konnte nicht in die Aufgabenliste übernommen werden"
 
 #: plugins/agent-unpack.php:121 plugins/ui-reunpack.php:61
 #: plugins/ui-view.php:736
 msgid "Unpack added to job queue"
-msgstr ""
+msgstr "Das Entpacken ist in die Aufgabenliste übernommen worden."
 
 #: plugins/agent-unpack.php:126
 msgid "Unpack of Upload failed:"
-msgstr ""
+msgstr "Das Entpacken der hochgeladenen Datei ist fehlgeschlagen:"
 
 #: plugins/agent-unpack.php:150
 msgid "All uploaded files are already unpacked, or scheduled to be unpacked."
-msgstr ""
+msgstr "Alle hochgeladenen Dateien wurden bereits entpackt oder "
+"sind zum Entpacken vorgemerkt."
 
 #: plugins/agent-unpack.php:157
 msgid "Select an uploaded file to unpack.\n"
-msgstr ""
+msgstr "Wählen Sie eine hochgeladene Datei zum Auspacken.\n"
 
 #: plugins/agent-unpack.php:159
 msgid ""
 "Only uploads that are not already unpacked (and not already scheduled) can "
 "be scheduled.\n"
 msgstr ""
+"Nur noch nicht entpackte Pakete können eingeplant werden.\n"
 
 #: plugins/agent-unpack.php:160
 msgid "Unpack:"
-msgstr ""
+msgstr "Entpacken:"
 
 #: plugins/agent-unpack.php:170 plugins/upload-file.php:182
 #: plugins/upload-url.php:163 plugins/upload-srv-files.php:228
 msgid "Select optional analysis"
-msgstr ""
+msgstr "Wählen Sie "
 
 #: plugins/agent-unpack.php:174
 msgid "Unpack"
-msgstr ""
+msgstr "Entpacken"
 
 #: plugins/jobs-showjobs.php:27
 msgid "Show Job Queue"
-msgstr ""
+msgstr "Zeige Warteschlange"
 
 #: plugins/jobs-showjobs.php:66
 msgid "Show all jobs (not just this one)"
-msgstr ""
+msgstr "Alle Aufgaben anzeigen"
 
 #: plugins/jobs-showjobs.php:76
 msgid "Show a summary of jobs"
-msgstr ""
+msgstr "Zeige Zusammenfassungen aller Aufgaben"
 
 #: plugins/jobs-showjobs.php:82
 msgid "Show detailed information about each job"
-msgstr ""
+msgstr "Zeige detaillierte Informationen zu jeder Aufgabe"
 
 #: plugins/jobs-showjobs.php:85 plugins/jobs-showjobs.php:105
 msgid "Show all jobs (active and completed)"
-msgstr ""
+msgstr "Anzeige aller Aufgaben (aktive und abgeschlossene)"
 
 #: plugins/jobs-showjobs.php:89
 msgid "Show the job queue"
-msgstr ""
+msgstr "Zeige Warteschlange"
 
 #: plugins/jobs-showjobs.php:112
 msgid "Show only active jobs"
-msgstr ""
+msgstr "Zeige nur aktive Aufgaben"
 
 #: plugins/jobs-showjobs.php:158 plugins/core-debug-user.php:56
 msgid "Field"
-msgstr ""
+msgstr "Feld"
 
 #: plugins/jobs-showjobs.php:159 plugins/ui-view-info.php:101
 #: plugins/ui-view-info.php:206 plugins/ui-view-info.php:224
 #: plugins/ui-view-info.php:328 plugins/ui-view-info.php:428
 #: plugins/ui-view-info.php:516 plugins/core-debug-user.php:57
 msgid "Value"
-msgstr ""
+msgstr "Wert"
 
 #: plugins/jobs-showjobs.php:200
 msgid "depends on"
-msgstr ""
+msgstr "hängt ab von"
 
 #: plugins/jobs-showjobs.php:217
 msgid "required by"
-msgstr ""
+msgstr "gefordert von"
 
 #: plugins/jobs-showjobs.php:409 plugins/jobs-showjobs.php:414
 msgid "History"
-msgstr ""
+msgstr "Geschichte"
 
 #: plugins/jobs-showjobs.php:428
 msgid "Job/Dependency"
-msgstr ""
+msgstr "Aufgabe/Abhängigkeit"
 
 #: plugins/jobs-showjobs.php:436
 msgid "Reset"
-msgstr ""
+msgstr "Zurücksetzen"
 
 #: plugins/jobs-showjobs.php:443
 msgid "Priority: "
-msgstr ""
+msgstr "Priorität:"
 
 #: plugins/jobs-showjobs.php:507
 msgid "completed"
-msgstr ""
+msgstr "abgeschlossen"
 
 #: plugins/jobs-showjobs.php:512
 msgid "Elapsed scheduled:"
@@ -1184,104 +1197,105 @@ msgstr ""
 
 #: plugins/admin-folder-move.php:31
 msgid "Move Folder"
-msgstr ""
+msgstr "Ordner verschieben"
 
 #: plugins/admin-folder-move.php:109
-msgid "Moved folder "
+msgid "Ordner verschoben von "
 msgstr ""
 
 #: plugins/admin-folder-move.php:110
-msgid " to folder "
+msgid " nach "
 msgstr ""
 
 #: plugins/admin-folder-move.php:115
 msgid "Could not move folder!: "
-msgstr ""
+msgstr "Ordner konnte nicht verschoben werden!:"
 
 #: plugins/admin-folder-move.php:122
 msgid "Select the source folder to move:  \n"
-msgstr ""
+msgstr "Wählen Sie den zu verschiebenden Ordner:  \n"
 
 #: plugins/admin-folder-move.php:127 plugins/admin-upload-move.php:159
 msgid "Select the destination folder:  \n"
-msgstr ""
+msgstr "Wählen Sie den Zielordner:  \n"
 
 #: plugins/admin-folder-move.php:133
 msgid "Move"
-msgstr ""
+msgstr "Verschieben"
 
 #: plugins/ui-view-license.php:27
 msgid "View License"
-msgstr ""
+msgstr "Lizenz anschauen"
 
 #: plugins/ui-view-license.php:163 plugins/ui-nomos-license-list.php:175
 msgid "NO DB connection"
-msgstr ""
+msgstr "Keine Verbindung zur Datenbank"
 
 #: plugins/ui-view-license.php:183
 msgid "The Nomos license scanner found:"
-msgstr ""
+msgstr "Ergebnisse der Suche durch den Nomos-Lizenz-Scanner:"
 
 #: plugins/ui-view-info.php:27
 msgid "View File Information"
-msgstr ""
+msgstr "Dateiinformation ansehen"
 
 #: plugins/ui-view-info.php:43
 msgid "View file information"
-msgstr ""
+msgstr "Dateiinformation ansehen"
 
 #: plugins/ui-view-info.php:55
 msgid "View information about this file"
-msgstr ""
+msgstr "Dateiinformation ansehen"
 
 #: plugins/ui-view-info.php:91
 msgid "Repository Locator"
-msgstr ""
+msgstr "Ort des Repositoriums"
 
 #: plugins/ui-view-info.php:100
 msgid "Attribute"
-msgstr ""
+msgstr "Attribut"
 
 #: plugins/ui-view-info.php:108
 msgid "File Size"
-msgstr ""
+msgstr "Dateigröße"
 
 #: plugins/ui-view-info.php:110
 msgid "SHA1 Checksum"
-msgstr ""
+msgstr "SHA1-Prüfsumme"
 
 #: plugins/ui-view-info.php:112
 msgid "MD5 Checksum"
-msgstr ""
+msgstr "MD5-Prüfsumme"
 
 #: plugins/ui-view-info.php:114
 msgid "Repository ID"
-msgstr ""
+msgstr "ID des Repositoriums"
 
 #: plugins/ui-view-info.php:116
+# PFile FIXME XXX
 msgid "Pfile ID"
-msgstr ""
+msgstr "ID der Datei"
 
 #: plugins/ui-view-info.php:143
 msgid "Sightings"
-msgstr ""
+msgstr "Beobachtungen"
 
 #: plugins/ui-view-info.php:159
 msgid "This exact file appears in the following locations:\n"
-msgstr ""
+msgstr "Diese Datei kommt an folgenden Stellen vor:\n"
 
 #: plugins/ui-view-info.php:167
 msgid "End of listing.\n"
-msgstr ""
+msgstr "Ende der Auflistung.\n"
 
 #: plugins/ui-view-info.php:171
 msgid "This file does not appear in any other known location.\n"
-msgstr ""
+msgstr "Diese Datei kommt an keiner weiteren Stelle vor.\n"
 
 #: plugins/ui-view-info.php:201 plugins/ui-view-info.php:205
 #: plugins/ui-view-info.php:223
 msgid "Meta Data"
-msgstr ""
+msgstr "Metadaten"
 
 #: plugins/ui-view-info.php:204 plugins/ui-view-info.php:222
 #: plugins/ui-view-info.php:326 plugins/ui-view-info.php:426
