@@ -169,6 +169,7 @@ static int lDiags = 0;  /* set this to non-zero for printing diagnostics */
 #define TRYGROUP(x)     x(PARSE_ARGS)
 #define LOWINTEREST(x)  addRef(x, IL_LOW)
 #define MEDINTEREST(x)  addRef(x, IL_MED)
+//#define INTERESTING(x)  printf("INTERESTING: %s, %d, %s\n", __FILE__, __LINE__, x);addRef(x, IL_HIGH)
 #define INTERESTING(x)  addRef(x, IL_HIGH)
 #define ASLVERS()       aslVersion(PARSE_ARGS)
 #define CCVERS()        ccVersion(PARSE_ARGS)
@@ -1233,6 +1234,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		INTERESTING(lDebug ? "GPL(ref14)" : cp);
 		lmem[_mGPL] = 1;
 	    }
+      /* Commented out on 10/6/2010 by bobg because this causes a false "GPL"
+         when is sees "including the GNU Public Licence" out of context.
+         ref15 is VERY broad.
 	    else if (!lmem[_mLIBRE] && GPL_INFILE(_LT_GPLref15) &&
 		     !INFILE(_PHR_NOT_UNDER_GPL) &&
 		     !INFILE(_PHR_REFERS_TO_GPL) &&
@@ -1241,17 +1245,20 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
 		INTERESTING(lDebug ? "GPL(ref15)" : cp);
 		lmem[_mGPL] = 1;
 	    }
+      */
 	    else if (INFILE(_LT_GPLref16)) {
 		cp = GPLVERS();
 		INTERESTING(lDebug ? "GPL(ref16)" : cp);
 		lmem[_mGPL] = 1;
 	    }
+      /*  commented out on 10/6/2010 by bobg because this causes false positives (LGPL v2.1 to be identified as also being GPL_v2.1+)
 	    else if (INFILE(_LT_GPLref17) &&
 		     !INFILE(_PHR_REFERS_TO_GPL)) {
 		cp = GPLVERS();
 		INTERESTING(lDebug ? "GPL(ref17)" : cp);
 		lmem[_mGPL] = 1;
 	    }
+      */
 	    else if (INFILE(_LT_GPLref18)) {
 		if (INFILE(_LT_EXCEPT_1)) {
 		    INTERESTING(lDebug ? "GPL-except-4" : "GPL-exception");
