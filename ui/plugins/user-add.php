@@ -118,7 +118,7 @@ $text = _("User already exists.  Not added.");
 		}
 
 		/* Add the user */
-		if($defult_bucketpool_fk === NULL) {
+		if($default_bucketpool_fk === NULL) {
 			$VALUES = " VALUES ('$User','$Desc','$Seed','$Hash',$Perm,'$Email',
 	             '$Email_notify','$agentList',$Folder, NULL);";
 		}
@@ -133,7 +133,7 @@ $text = _("User already exists.  Not added.");
 		//print "<pre>SQL is:\n$SQL\n</pre>";
 		
 		$Results = pg_query($PG_CONN, $SQL);
-		DBCheckResult($Results, $sql, __FILE__, __LINE__);
+		DBCheckResult($Results, $SQL, __FILE__, __LINE__);
 		/* Make sure it was added */
 		$SQL = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
 		$Results = $DB->Action($SQL);
