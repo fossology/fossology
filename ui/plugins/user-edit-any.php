@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -341,7 +341,7 @@ $text1 = _("your");
 $text2 = _(" account settings, use");
 $text3 = _("Account Settings.");
 				$V.= "$text <strong>$text1</strong>$text2
-         <a href='${Uri}?mod=user_edit_self'>$text4</a><P />\n";
+         <a href='${Uri}?mod=user_edit_self'>$text3</a><P />\n";
 
 				$V.= _("Select the user to edit: ");
 				$V.= "<select name='userid' onClick='SetInfo(this.value);' onchange='SetInfo(this.value);'>\n";
