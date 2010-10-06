@@ -125,7 +125,7 @@ $text1 = _("has been scheduled. It is");
           }
           else {
 $text = _("Upload failed for");
-            $V.= displayMessage("$text $GetUrl: $rc");
+            $V.= displayMessage("$text $GetURL: $rc");
           }
         }
         /* Set default values */
