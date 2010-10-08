@@ -105,35 +105,6 @@ int longest_common(char* dst, char* lhs, char* rhs)
   return strlen(dst);
 }
 
-/**
- * @brief replaces all of the ' in a string with ''
- *
- * this fixes the problem of an sql string ending when it sees the second '
- * since there will be two escentially espacing both
- *
- * @param str the string to replace all of the 's in
- */
-void replace_apostrophes(char* str) {
-  /* locals */
-  char tmp[1024];
-  char* ptr_t, * ptr_s;
-  
-  memset(tmp, '\0', sizeof(tmp));
-  ptr_t = tmp;
-  ptr_s = str;
-  
-  while(*ptr_s)
-  {
-    *(ptr_t++) = *(ptr_s++);
-    if(*ptr_s == '\'')
-      *(ptr_t++) = '\'';
-    if(*ptr_s == '\\')
-      *(ptr_t++) = '\\';
-  }
-  
-  strcpy(str, tmp);
-}
-
 /* ************************************************************************** */
 /* **** Accuracy Tests ****************************************************** */
 /* ************************************************************************** */
@@ -334,14 +305,19 @@ void run_test_files(copyright copy)
  * when finished simply check if the results should be entered into the
  * database, this is indicated by the second element of the pair not being NULL
  *
+ * @param pgConn the connection to the database
  * @param copy the copyright instance to use to perform the analysis
- * @param file_list the list of files to analyze
+ * @param current_file the file and the pfile_pk that is currently being analyzed
+ * @param agent_pk the primary key for this agent, use to enter info into the database
+ * @param mout a logging file to used for debugging
  */
-void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk, FILE* mout)
+void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long agent_pk, FILE* mout)
 {
   /* locals */
   char sql[1024];               // buffer to hold the sql commands
+  char buf[1024];               // buffer to hold string that have been escaped for sql
   char * tmp;                   // holds the name of the file to open
+  int error;                    // used to store errors returned by PQ functions
   extern int HBItemsProcessed;  // the number of items processed by this agent
   copyright_iterator finds;     // an iterator to access the copyrights
   FILE* input_fp;               // the file that will be analyzed
@@ -354,13 +330,13 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk, 
   input_fp = NULL;
 
   /* find the correct path to the file */
-  if(*(int*)pair_second(curr) >= 0)
+  if(*(int*)pair_second(current_file) >= 0)
   {
-    tmp = RepMkPath("files", (char*)pair_first(curr));
+    tmp = RepMkPath("files", (char*)pair_first(current_file));
   }
   else
   {
-    tmp = (char*)pair_first(curr);
+    tmp = (char*)pair_first(current_file);
   }
 
   /* attempt to open the file */
@@ -374,7 +350,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk, 
   }
 
   /* only free temp if running as an agent */
-  if(*(int*)pair_second(curr) >= 0)
+  if(*(int*)pair_second(current_file) >= 0)
   {
     free(tmp);
   }
@@ -383,9 +359,9 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk, 
   copyright_analyze(copy, input_fp);
 
   /* if running command line, print file name */
-  if(*(int*)pair_second(curr) < 0)
+  if(*(int*)pair_second(current_file) < 0)
   {
-    fprintf(cout, "%s\n", (char*)pair_first(curr));
+    fprintf(cout, "%s\n", (char*)pair_first(current_file));
   }
 
   /* loop across the found copyrights */
@@ -398,21 +374,21 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk, 
       if(verbose)
       {
         fprintf(mout, "=== %s ==============================================\n",
-            (char*)pair_first(curr));
+            (char*)pair_first(current_file));
         fprintf(mout, "DICT: %s\nNAME: %s\nTEXT[%s]\n",
             copy_entry_dict(entry),
             copy_entry_name(entry),
             copy_entry_text(entry));
       }
 
-      if(*(int*)pair_second(curr) >= 0)
+      if(*(int*)pair_second(current_file) >= 0)
       {
         /* ensure legal sql */
-        replace_apostrophes(copy_entry_text(entry));
+        PQescapeStringConn(pgConn, buf, copy_entry_text(entry), strlen(copy_entry_text(entry)), &error);
 
         /* place the copyright in the table */
         memset(sql, '\0', sizeof(sql));
-        snprintf(sql, sizeof(sql), insert_copyright, agent_pk, *(int*)pair_second(curr),
+        snprintf(sql, sizeof(sql), insert_copyright, agent_pk, *(int*)pair_second(current_file),
             copy_entry_start(entry), copy_entry_end(entry),
             copy_entry_text(entry), "", copy_entry_type(entry));
         pgResult = PQexec(pgConn, sql);
@@ -436,9 +412,9 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair curr, long agent_pk, 
       }
     }
   }
-  else if(*(int*)pair_second(curr) >= 0)
+  else if(*(int*)pair_second(current_file) >= 0)
   {
-    snprintf(sql, sizeof(sql), insert_no_copyright, agent_pk, *(int*)pair_second(curr));
+    snprintf(sql, sizeof(sql), insert_no_copyright, agent_pk, *(int*)pair_second(current_file));
     pgResult = PQexec(pgConn, sql);
 
     if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
@@ -676,7 +652,7 @@ void copyright_usage(char* arg)
  *
  * To run the copyright agent as an agent simply run with no command line args
  *   -i                 :: initialize a connection to the database
- *   -d                 :: turn on debuggin information
+ *   -d                 :: turn on debugging information
  *
  *   example:
  *     $ upload_pk | ./copyright
@@ -696,19 +672,19 @@ void copyright_usage(char* arg)
  * 1. Matches: contains all of the matches found by the copyright agent, information
  *             includes what file the match was found in, the dictionary element
  *             that it matched, the name that it matched and the text that was found
- * 2. False_Positives: contains all of the flase positives found by the agent,
+ * 2. False_Positives: contains all of the false positives found by the agent,
  *             information in the file includes the file the false positive was
  *             in, the dictionary match, the name match, and the text
  * 3. Flase_Negatives: contains all of the false negatives found by the agent,
  *             information in the file includes the file the false negative was
  *             in, and the text of the false negative
  *
- * NOTE: -d will procudes the exact same style of Matches file that the accuracy
+ * NOTE: -d will produces the exact same style of Matches file that the accuracy
  *       testing does. Currently this is the only thing that -d will produce
  *
- * @param argc the number of command line arugments
+ * @param argc the number of command line arguments
  * @param argv the command line arguments
- * @return 0 of a succefull program execution
+ * @return 0 on a successful program execution
  */
 int main(int argc, char** argv)
 {
