@@ -316,7 +316,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   /* locals */
   char sql[1024];               // buffer to hold the sql commands
   char buf[1024];               // buffer to hold string that have been escaped for sql
-  char * tmp;                   // holds the name of the file to open
+  char* file_name;                    // holds the name of the file to open
   int error;                    // used to store errors returned by PQ functions
   extern int HBItemsProcessed;  // the number of items processed by this agent
   copyright_iterator finds;     // an iterator to access the copyrights
@@ -325,25 +325,25 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
 
   /* initialize memory */
   memset(sql, 0, sizeof(sql));
-  tmp = NULL;
+  file_name = NULL;
   finds = NULL;
   input_fp = NULL;
 
   /* find the correct path to the file */
   if(*(int*)pair_second(current_file) >= 0)
   {
-    tmp = RepMkPath("files", (char*)pair_first(current_file));
+    file_name = RepMkPath("files", (char*)pair_first(current_file));
   }
   else
   {
-    tmp = (char*)pair_first(current_file);
+    file_name = (char*)pair_first(current_file);
   }
 
   /* attempt to open the file */
-  input_fp = fopen(tmp, "rb");
+  input_fp = fopen(file_name, "rb");
   if(!input_fp)
   {
-    fprintf(cerr, "FATAL: %s.%d Failure to open file %s\n", __FILE__, __LINE__, tmp);
+    fprintf(cerr, "FATAL: %s.%d Failure to open file %s\n", __FILE__, __LINE__, file_name);
     fprintf(cerr, "ERROR: %s\n", strerror(errno));
     fflush(cerr);
     exit(-1);
@@ -352,7 +352,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   /* only free temp if running as an agent */
   if(*(int*)pair_second(current_file) >= 0)
   {
-    free(tmp);
+    free(file_name);
   }
 
   /* perform the actual analysis */
