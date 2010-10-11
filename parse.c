@@ -169,8 +169,8 @@ static int lDiags = 0;  /* set this to non-zero for printing diagnostics */
 #define TRYGROUP(x)     x(PARSE_ARGS)
 #define LOWINTEREST(x)  addRef(x, IL_LOW)
 #define MEDINTEREST(x)  addRef(x, IL_MED)
-//#define INTERESTING(x)  printf("INTERESTING: %s, %d, %s\n", __FILE__, __LINE__, x);addRef(x, IL_HIGH)
-#define INTERESTING(x)  addRef(x, IL_HIGH)
+#define INTERESTING(x)  printf("INTERESTING: %s, %d, %s\n", __FILE__, __LINE__, x);addRef(x, IL_HIGH)
+//#define INTERESTING(x)  addRef(x, IL_HIGH)
 #define ASLVERS()       aslVersion(PARSE_ARGS)
 #define CCVERS()        ccVersion(PARSE_ARGS)
 #define CCSAVERS()      ccsaVersion(PARSE_ARGS)
@@ -2239,6 +2239,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      */
     if (INFILE(_LT_OPENSSLref1) || INFILE(_LT_OPENSSLref2)) {
 	INTERESTING(lDebug ? "OpenSSL(ref)" : "OpenSSL");
+    }
+    /*
+     * Dual OpenSSL SSLeay
+     */
+    if (INFILE(_LT_COMBINED_OPENSSL_SSLEAY)) {
+	INTERESTING("Combined OpenSSL+SSLeay");
     }
     /*
      * Ruby

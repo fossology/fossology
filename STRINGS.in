@@ -3343,6 +3343,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_OPENSSLref2
 %KEY%	"distribut"
 %STR%	"rights for r?e?-?distribution and/?o?r? usage in source and binary forms are granted according to the openSSL licen[cs]e"
+#
+%ENTRY%	_LT_COMBINED_OPENSSL_SSLEAY
+%KEY%	"SSLeay"
+%STR%	"OpenSSL License and =SOME= SSLeay license"
 #####
 # DELETED: this =SOME= is open source =SOME= ...
 #####
