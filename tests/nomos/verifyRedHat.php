@@ -168,7 +168,7 @@ class rhelTest extends fossologyTestCase
        "verifyRedHat FAILED! >Info< not found\n");
 		$this->assertTrue($this->myassertText($page, "/>Download</"),
        "verifyRedHat FAILED! >Download< not found\n");
-    //$page = $this->mybrowser->clickLink('Testing');
+    $page = $this->mybrowser->clickLink('Testing');
 		$this->assertTrue($this->myassertText($page, "/$name/"),
        "verifyRedHat FAILED! did not find $name\n");
 
