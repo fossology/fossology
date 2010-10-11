@@ -23,6 +23,7 @@
 #define UNUNPACK_H
 
 #include <stdlib.h>
+#include <libgen.h>
 
 /* specify support for files > 2G */
 #define __USE_LARGEFILE64
@@ -34,6 +35,9 @@
 #include <signal.h>
 #include <ctype.h>
 #include <errno.h>
+#include "libfossrepo.h"
+#include "libfossdb.h"
+#include "libfossagent.h"
 
 /* for open/close/stat */
 #include <sys/types.h>
@@ -73,6 +77,72 @@ extern int ForceContinue;
 extern int PruneFiles;
 extern FILE *ListOutFile;
 extern char *Pfile;
+
+/* add by larry for removing main function */
+/* ParentInfo relates to the command being executed.
+   It is common information needed by Traverse() and stored in CommandInfo
+   and Queue structures. */
+struct ParentInfo
+  {
+  int Cmd;      /* index into command table used to run this */
+  time_t StartTime;     /* time when command started */
+  time_t EndTime;       /* time when command ended */
+  int ChildRecurseArtifact; /* child is an artifact -- don't log to XML */
+  long uploadtree_pk;   /* if DB is enabled, this is the parent */
+  };
+typedef struct ParentInfo ParentInfo;
+
+struct unpackqueue
+  {
+  int ChildPid; /* set to 0 if this record is not in use */
+  char ChildRecurse[FILENAME_MAX+1]; /* file (or directory) to recurse on */
+  int ChildStatus;      /* return code from child */
+  int ChildCorrupt;     /* return status from child */
+  int ChildEnd; /* flag: 0=recurse, 1=don't recurse */
+  int ChildHasChild;    /* is the child likely to have children? */
+  stat_t ChildStat;
+  ParentInfo PI;
+  };
+typedef struct unpackqueue unpackqueue;
+#define MAXSQL  4096
+
+extern magic_t MagicCookie;
+extern int ForceDuplicate;   /* when using db, should it process duplicates? */
+extern int DebugHeartbeat; /* Enable heartbeat and print the time for each */
+extern int UseRepository;
+extern int MaxThread; /* value between 1 and MAXCHILD */
+extern void *DB;  /* the DB repository */
+extern void *DBTREE;      /* second DB repository for uploadtree */
+extern char *Pfile_Pk; /* PK for *Pfile */
+extern char *Upload_Pk; /* PK for upload table */
+extern char REP_FILES[16];
+extern int UnlinkAll;
+extern char Version[];
+extern int ReunpackSwitch;
+extern char SQL[];
+extern int Thread;
+extern unpackqueue Queue[];
+
+/*** Global Stats (for summaries) ***/
+extern long TotalItems;      /* number of records inserted */
+extern int TotalFiles;
+extern int TotalCompressedFiles;
+extern int TotalDirectories;
+extern int TotalContainers;
+extern int TotalArtifacts;
+
+void    AlarmDisplay    (int Sig);
+int ParentWait();
+int     Traverse        (char *Filename, char *Basename,
+                         char *Label, char *NewDir,
+                         int Recurse, ParentInfo *PI);
+void    TraverseStart   (char *Filename, char *Label, char *NewDir,
+                         int Recurse);
+void    InitCmd ();
+void    Usage   (char *Name);
+void    CheckCommands   (int Show);
+void deleteTmpFiles(char *dir);
+int     MyDBaccess      (void *VDB, char *SQL);
 
 enum cmdtype
   {
