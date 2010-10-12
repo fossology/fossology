@@ -2244,7 +2244,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * Dual OpenSSL SSLeay
      */
     if (INFILE(_LT_COMBINED_OPENSSL_SSLEAY)) {
-	INTERESTING("Combined OpenSSL+SSLeay");
+	INTERESTING("Combined_OpenSSL+SSLeay");
     }
     /*
      * Ruby
