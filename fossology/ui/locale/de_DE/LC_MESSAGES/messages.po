@@ -1301,158 +1301,158 @@ msgstr "Metadaten"
 #: plugins/ui-view-info.php:326 plugins/ui-view-info.php:426
 #: plugins/ui-view-info.php:514 plugins/ui-view.php:228
 msgid "Item"
-msgstr ""
+msgstr "Paket"
 
 #: plugins/ui-view-info.php:219
 msgid "Meta Data From PkgMetaGetta Agent"
-msgstr ""
+msgstr "Metadaten des Agenten PkgMetaGetta"
 
 #: plugins/ui-view-info.php:248
 msgid "Total meta data records"
-msgstr ""
+msgstr "Gesamtzahl der Metadatensätze"
 
 #: plugins/ui-view-info.php:288
 msgid "Package Info"
-msgstr ""
+msgstr "Paket-Info"
 
 #: plugins/ui-view-info.php:316
 msgid "RPM Binary Package"
-msgstr ""
+msgstr "RPM-Binärpaket"
 
 #: plugins/ui-view-info.php:320
 msgid "RPM Source Package"
-msgstr ""
+msgstr "RPM-Quell-Paket"
 
 #: plugins/ui-view-info.php:327 plugins/ui-view-info.php:427
 #: plugins/ui-view-info.php:515
 msgid "Type"
-msgstr ""
+msgstr "Typ"
 
 #: plugins/ui-view-info.php:336 plugins/ui-view-info.php:436
 msgid "Package"
-msgstr ""
+msgstr "Paket"
 
 #: plugins/ui-view-info.php:341
 msgid "Alias"
-msgstr ""
+msgstr "Aliasname"
 
 #: plugins/ui-view-info.php:345 plugins/ui-view-info.php:441
 #: plugins/ui-view-info.php:537
 msgid "Architecture"
-msgstr ""
+msgstr "Architektur"
 
 #: plugins/ui-view-info.php:349 plugins/ui-view-info.php:445
 #: plugins/ui-view-info.php:541
 msgid "Version"
-msgstr ""
+msgstr "Version"
 
 #: plugins/ui-view-info.php:358 plugins/ui-licgroup-debug.php:51
 #: plugins/ui-licgroup-debug.php:84
 msgid "Group"
-msgstr ""
+msgstr "Gruppe"
 
 #: plugins/ui-view-info.php:362
 msgid "Packager"
-msgstr ""
+msgstr "Paketierer"
 
 #: plugins/ui-view-info.php:366
 msgid "Release"
-msgstr ""
+msgstr "Release"
 
 #: plugins/ui-view-info.php:370
 msgid "BuildDate"
-msgstr ""
+msgstr "Erstellungsdatum"
 
 #: plugins/ui-view-info.php:374
 msgid "Vendor"
-msgstr ""
+msgstr "Händler"
 
 #: plugins/ui-view-info.php:382 plugins/ui-view-info.php:473
 msgid "Summary"
-msgstr ""
+msgstr "Zusammenfassung"
 
 #: plugins/ui-view-info.php:386 plugins/ui-view-info.php:477
 #: plugins/ui-licterm-manage.php:318 plugins/core-schema.php:96
 #: plugins/core-schema.php:124 plugins/core-schema.php:279
 msgid "Description"
-msgstr ""
+msgstr "Beschreibung"
 
 #: plugins/ui-view-info.php:390 plugins/ui-view-info.php:469
 #: plugins/ui-view-info.php:529
 msgid "Source"
-msgstr ""
+msgstr "Quelle"
 
 #: plugins/ui-view-info.php:402
 msgid "Requires"
-msgstr ""
+msgstr "Erforderlich"
 
 #: plugins/ui-view-info.php:416
 msgid "Debian Binary Package\n"
-msgstr ""
+msgstr "Debian Binärpaket"
 
 #: plugins/ui-view-info.php:449
 msgid "Section"
-msgstr ""
+msgstr "Abschnitt"
 
 #: plugins/ui-view-info.php:453
 msgid "Priority"
-msgstr ""
+msgstr "Priorität"
 
 #: plugins/ui-view-info.php:457
 msgid "Installed Size"
-msgstr ""
+msgstr "Größe der Installation"
 
 #: plugins/ui-view-info.php:461 plugins/ui-view-info.php:545
 msgid "Maintainer"
-msgstr ""
+msgstr "Betreuer"
 
 #: plugins/ui-view-info.php:465
 msgid "Homepage"
-msgstr ""
+msgstr "Homepage"
 
 #: plugins/ui-view-info.php:490
 msgid "Depends"
-msgstr ""
+msgstr "Hängt ab von"
 
 #: plugins/ui-view-info.php:504
 msgid "Debian Source Package\n"
-msgstr ""
+msgstr "Debian Quellpaket"
 
 #: plugins/ui-view-info.php:524
 msgid "Format"
-msgstr ""
+msgstr "Format"
 
 #: plugins/ui-view-info.php:533
 msgid "Binary"
-msgstr ""
+msgstr "Binär"
 
 #: plugins/ui-view-info.php:549
 msgid "Uploaders"
-msgstr ""
+msgstr "Hochgeladen durch"
 
 #: plugins/ui-view-info.php:553
 msgid "Standards-Version"
-msgstr ""
+msgstr "Standard-Version"
 
 #: plugins/ui-view-info.php:565
 msgid "Build-Depends"
-msgstr ""
+msgstr "Build-Abhängigkeiten"
 
 #: plugins/ui-view-info.php:579
 msgid "NOT RPM/DEBIAN Package."
-msgstr ""
+msgstr "Kein RPM/Debian-Paket"
 
 #: plugins/ui-view-info.php:581
 msgid "Total package info records"
-msgstr ""
+msgstr "Gesamt Infodatensätze des Pakets"
 
 #: plugins/ui-licterm-manage.php:37
 msgid "Manage License Terms"
-msgstr ""
+msgstr "Lizenzbedingungen verwalten"
 
 #: plugins/ui-licterm-manage.php:211
 msgid "New Term"
-msgstr ""
+msgstr "Neuer Begriff"
 
 #: plugins/ui-licterm-manage.php:276
 msgid ""
