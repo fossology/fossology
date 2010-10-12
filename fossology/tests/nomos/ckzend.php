@@ -96,12 +96,15 @@ class zendTest extends fossologyTestCase
 		// Get the displayed result
 		$matched = preg_match("/<hr>\nThe(.*?)<div class='text'>--/", $page, $matches);
 		//print "DBCKZ: we found:\n";print_r($matches) . "\n";
-		$found = $matches[1];
-		$stringToMatch = 'The Nomos license scanner found: <b>Zend_v2\.0';
-		$this->assertTrue($this->myassertText($page,"/$stringToMatch/"),
+		$foundRaw = $matches[1];
+		$stripped = strip_tags($foundRaw);
+		$found = escapeDots($stripped);
+		
+		$stringToMatch = 'Nomos license detector found: Zend_v2\.0';
+		$this->assertTrue($found,"/$stringToMatch/",
           "ckzend FAILED! Nomos license string does not match\n" .
 		      "Expected: $stringToMatch\n" . 
-		      "Got: $found\n");
+		      "     Got: $found\n");
 		$this->assertTrue($this->myassertText($page, '/View License/'),
           "ckzend FAILED! View License Title not found\n");
 		// Check One-shot Analysis

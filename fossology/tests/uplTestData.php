@@ -73,7 +73,8 @@ class uploadTestDataTest extends fossologyTestCase
                         'TestData/archives/foss23D1F1L.tar.bz2',
                         'TestData/licenses/gplv2.1',
                         'TestData/licenses/Affero-v1.0',
-                        'nomos/testdata/zend-license');
+                        'nomos/testdata/zend-license',
+                        'nomos/testdata/RedHat.tar.gz');
         
     $urlList = array('http://downloads.sourceforge.net/simpletest/simpletest_1.0.1.tar.gz',
                      'http://www.gnu.org/licenses/gpl-3.0.txt',
