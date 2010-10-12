@@ -16,44 +16,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 ************************************************************** */
 
-#ifndef LIBFOSSSCHEDULER_H_INCLUDE
-#define LIBFOSSSCHEDULER_H_INCLUDE
-
 /* local includes */
-
-/* library includes */
-#include <stdio.h>
+#include <agent.h>
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
 
-/**
- * The status that a job has.
- *
- * RUNNING: all agents will continue to work normally
- * KILLED:  all agent associated with the job will die
- * PAUSED:  all agents will stop and wait for instructions
- */
-enum job_status {
-  RUNNING, ///< RUNNING
-  KILLED,  ///< KILLED
-  PAUSED   ///< PAUSED
+/** internal structure for the agent. */
+struct agent_internal {
+  pthread_t thread;         ///< the thread that communicates with this agent
+  int parent_to_child[2];   ///< pipe connected to child's stdin
+  int child_to_parent[2];   ///< pipe connected to child's stdout
+
 };
 
-/* ************************************************************************** */
-/* **** Agent api *********************************************************** */
-/* ************************************************************************** */
-
-void scheduler_connect();
-void scheduler_disconnect();
-FILE* scheduler_next();
-
-/* ************************************************************************** */
-/* **** Accessor Functions ************************************************** */
-/* ************************************************************************** */
-
-int scheduler_pfile_pk();
-int scheduler_agent_pk();
-
-#endif /* LIBFOSSSCHEDULER_H_INCLUDE */
