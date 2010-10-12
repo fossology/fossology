@@ -175,9 +175,11 @@ function LogAndPrint($FileHandle, $message) {
 	}
 	if (-1 == fwrite($FileHandle, $message)) {
 		print $message; // if we don't do this nothing will print
+		flush();
 		return (FALSE);
 	}
 	print $message;
+	flush();
 	return (TRUE);
 }
 
@@ -290,9 +292,27 @@ if (array_key_exists("a", $options)) {
 		if (chdir($nomos) === FALSE) {
 			LogAndPrint($LF, "ALL Tests ERROR: can't cd to $nomos\n");
 		}
-		// Nomos functional test (only 1 for now)
-		$zendLast = exec("fo-runTests -l ckzend.php -n 'Zend License Test' >> $logFile 2>&1", $dummy, $zlRtn);
-		LogAndPrint($LF, "\n");
+		// Nomos functional tests
+		$nomosTests = array('ckzend.php', 'verifyRedHat.php');
+		foreach($nomosTests as $test)
+		{
+			$last = exec("fo-runTests -l $test -n 'Nomos Tests' >> $logFile 2>&1", $dummy, $rtn);
+			LogAndPrint($LF, "\n");
+		}
+		
+		LogAndPrint($LF, "Starting cli1Test\n" );
+		$last = exec('phpunit ./cli1Test.php', $punitOut, $puRtn);
+		if($puRtn != 0)
+		{
+			LogAndPrint($LF, "cli1Test Failed\n");
+			LogAndPrint($LF, $punitOut);
+			LogAndPrint($LF, "\n");
+		}
+		else
+		{
+			LogAndPrint($LF, "cli1Test Passed\n");
+			LogAndPrint($LF, "$last\n");
+		}
 
 		if (chdir($Home) === FALSE) {
 			$cUInoHome = "All Tests ERROR: can't cd to $Home\n";
