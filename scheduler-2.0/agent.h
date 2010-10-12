@@ -16,44 +16,40 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 ************************************************************** */
 
-#ifndef LIBFOSSSCHEDULER_H_INCLUDE
-#define LIBFOSSSCHEDULER_H_INCLUDE
-
-/* local includes */
-
-/* library includes */
-#include <stdio.h>
+#ifndef AGENT_H_INCLUDE
+#define AGENT_H_INCLUDE
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
 
 /**
- * The status that a job has.
+ * Class to hold all of the information associated with an agent.
  *
- * RUNNING: all agents will continue to work normally
- * KILLED:  all agent associated with the job will die
- * PAUSED:  all agents will stop and wait for instructions
+ * To create:
+ *   agent a;
+ *   agent_init(&a);
  */
-enum job_status {
-  RUNNING, ///< RUNNING
-  KILLED,  ///< KILLED
-  PAUSED   ///< PAUSED
-};
+typedef struct agent_internal* agent;
+
+/**
+ *
+ *
+ */
+typedef int agent_pk;
 
 /* ************************************************************************** */
-/* **** Agent api *********************************************************** */
+/* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
-void scheduler_connect();
-void scheduler_disconnect();
-FILE* scheduler_next();
+agent_init(agent* a);
+agent_destroy(agent a);
 
 /* ************************************************************************** */
 /* **** Accessor Functions ************************************************** */
 /* ************************************************************************** */
 
-int scheduler_pfile_pk();
-int scheduler_agent_pk();
+// TODO host agent_host(agent a);
+// TODO
 
-#endif /* LIBFOSSSCHEDULER_H_INCLUDE */
+#endif /* AGENT_H_INCLUDE */
