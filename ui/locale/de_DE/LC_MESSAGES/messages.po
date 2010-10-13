@@ -640,7 +640,7 @@ msgstr "Dateisuche"
 #: plugins/search-file-advance.php:69 plugins/search-file-advance.php:163
 #: plugins/search-file.php:76 plugins/search.php:96 plugins/search.php:220
 msgid "No results.\n"
-msgstr "Keine Ergebnisse.\ņ"
+msgstr "Keine Ergebnisse.\n"
 
 #: plugins/search-file-advance.php:78 plugins/search-file-advance.php:172
 #: plugins/search.php:105 plugins/search.php:229
@@ -755,7 +755,7 @@ msgstr "Schl&uuml;sselwort-Datum"
 
 #: plugins/ui-tags.php:403
 msgid "<h3>Create Tag:</h3>\n"
-msgstr "<h3>Schl&uuml;sselwort anlegen:</h3>"
+msgstr "<h3>Schl&uuml;sselwort anlegen:</h3>\n"
 
 #: plugins/ui-tags.php:425 plugins/ui-tags.php:502
 msgid "Namespace"
@@ -780,11 +780,11 @@ msgstr "Neues Schl&uuml;sselwort anlegen"
 
 #: plugins/ui-tags.php:472
 msgid "<h3>Edit Tag:</h3>\n"
-msgstr "<h3>Schl&uuml;sselword &auml;ndern:</h3>"
+msgstr "<h3>Schl&uuml;sselword &auml;ndern:</h3>\n"
 
 #: plugins/ui-tags.php:542
 msgid "<h3>Delete Tag:</h3>\n"
-msgstr "<h3>Schl&uuml;sselwort l&ouml;schen</h3>"
+msgstr "<h3>Schl&uuml;sselwort l&ouml;schen</h3>\n"
 
 #: plugins/ui-tags.php:568
 msgid "Delete Tag only for this file."
@@ -901,11 +901,11 @@ msgstr "FOSSology bietet viele M&ouml;glichkeiten, um Dateien zur Analyse zu imp
 
 #: plugins/upload-instructions.php:54
 msgid "The options vary based on <i>where</i> the data to upload is located.\n"
-msgstr "Die M&ouml;glichkeiten h&auml;ngen davon ab, <em>woher</em> die Daten hochgeladen werden.\n";
+msgstr "Die M&ouml;glichkeiten h&auml;ngen davon ab, <em>woher</em> die Daten hochgeladen werden.\n"
 
 #: plugins/upload-instructions.php:55
 msgid "The data may be located:\n"
-msgstr "Die Daten k&ouml;nnen aus verschiedene Quellen stammen:"
+msgstr "Die Daten k&ouml;nnen aus verschiedene Quellen stammen:\n"
 
 #: plugins/upload-instructions.php:57
 msgid "On your browser system"
@@ -934,12 +934,12 @@ msgstr ""
 
 #: plugins/upload-instructions.php:64
 msgid "uploading via your web browser can be slow for large files,\n"
-msgstr "kann diese Methode bei großen Dateien sehr langsam sein."
+msgstr "kann diese Methode bei großen Dateien sehr langsam sein.\n"
 
 #: plugins/upload-instructions.php:65
 msgid "and files larger than 650 Megabytes may not be uploadable.\n"
 msgstr "Bei Dateien, die größer als 650 Megabyte sind, kann das "
-"Hochladen ebenfalls zu Problemen führen."
+"Hochladen ebenfalls zu Problemen führen.\n"
 
 #: plugins/upload-instructions.php:67
 msgid "On a remote server"
@@ -959,13 +959,13 @@ msgid ""
 "accessible HTTP, HTTPS, or FTP location.\n"
 msgstr ""
 "Diese Methode ist die flexibelste, doch die URL muss öffentlich erreichbar"
-" sein (mittels HTTP, HTTPS oder FTP)."
+" sein (mittels HTTP, HTTPS oder FTP).\n"
 
 #: plugins/upload-instructions.php:74
 msgid ""
 "URLs that require authentication or human interactions cannot be downloaded "
 "through this automated system.\n"
-msgstr "URLs, die eine Authentifizierung erfordern können nicht geladen werden."
+msgstr "URLs, die eine Authentifizierung erfordern können nicht geladen werden.\n"
 
 #: plugins/upload-instructions.php:76
 msgid "On the FOSSology web server"
@@ -989,14 +989,14 @@ msgstr ""
 
 #: plugins/upload-instructions.php:83
 msgid "The directory must be accessible via the web server's user.\n"
-msgstr "Der angemeldete Beutzer muss über Zugriff auf das Verzeichnis verfügen."
+msgstr "Der angemeldete Beutzer muss über Zugriff auf das Verzeichnis verfügen.\n"
 
 #: plugins/upload-instructions.php:85
 msgid ""
 "If your system is configured to use multiple agent servers, the data area "
 "must be\n"
 msgstr ""
-"Wenn das System verschiedene Server nutzt, dann muss der Datenbereich "
+"Wenn das System verschiedene Server nutzt, dann muss der Datenbereich \n"
 
 #: plugins/upload-instructions.php:86
 msgid ""
@@ -1018,7 +1018,7 @@ msgstr "Dokumentation des Zeitmanagements"
 
 #: plugins/upload-instructions.php:95
 msgid "Select the type of upload based on where the data is located:\n"
-msgstr "Entscheiden Sie aufgrund des Quellortes der Daten:\ņ"
+msgstr "Entscheiden Sie aufgrund des Quellortes der Daten:\n"
 
 #: plugins/upload-instructions.php:111
 msgid "Your computer"
@@ -1038,7 +1038,7 @@ msgstr "Initialisieren"
 
 #: plugins/core-init.php:114
 msgid "Failed to find schema plugin.\n"
-msgstr "Schema-Plugins nicht gefunden."
+msgstr "Schema-Plugins nicht gefunden.\n"
 
 #: plugins/core-init.php:125
 msgid ""
@@ -1388,7 +1388,7 @@ msgstr "Erforderlich"
 
 #: plugins/ui-view-info.php:416
 msgid "Debian Binary Package\n"
-msgstr "Debian Binärpaket"
+msgstr "Debian Binärpaket\n"
 
 #: plugins/ui-view-info.php:449
 msgid "Section"
@@ -1416,7 +1416,7 @@ msgstr "Hängt ab von"
 
 #: plugins/ui-view-info.php:504
 msgid "Debian Source Package\n"
-msgstr "Debian Quellpaket"
+msgstr "Debian Quellpaket\n"
 
 #: plugins/ui-view-info.php:524
 msgid "Format"
@@ -1474,8 +1474,8 @@ msgid ""
 "For example, the phrases 'GNU General Public License version 2' and 'GPL "
 "version 2' may both be parts of the 'GPLv2' class.\n"
 msgstr ""
-"Beispielsweise gehören die Phrasen 'GNU General Public License 2' und
-auch 'GPL version 2' zur Klasse 'GPLv2'.\n"
+"Beispielsweise gehören die Phrasen 'GNU General Public License 2' und"
+"auch 'GPL version 2' zur Klasse 'GPLv2'.\n"
 
 #: plugins/ui-licterm-manage.php:280
 msgid "Note #1"
@@ -1545,7 +1545,7 @@ msgstr "Bekannte Begriffe"
 #: plugins/ui-licterm-manage.php:397
 msgid "Add a new keyword, term, or phrase to this canonical group."
 msgstr "Ein neues Schlüsselwort, Begriff und Ausdruck zu dieser"
-"allgemeinen Gruppe hinzufügen."5
+"allgemeinen Gruppe hinzufügen."
 
 #: plugins/ui-licterm-manage.php:404
 msgid ""
@@ -1891,7 +1891,7 @@ msgstr ""
 #: plugins/admin-check-template.php:366
 msgid "Only the files linked to the obsolete templates need to be analyzed.\n"
 msgstr "Nur die mit den veralteten Vorlagen verkn&uuml;pften Dateien m&uuml;ssen"
-"analysiert werden.\n";
+"analysiert werden.\n"
 
 #: plugins/admin-check-template.php:367
 msgid "This will not re-analyze every file in the uploaded package.\n"
@@ -4364,7 +4364,7 @@ msgstr "SQL hinzufügen"
 #: plugins/core-schema.php:98 plugins/core-schema.php:126
 #: plugins/core-schema.php:281
 msgid "Alter SQL\n"
-msgstr "SQL ändern"
+msgstr "SQL ändern\n"
 
 #: plugins/core-schema.php:144 plugins/core-schema.php:299
 msgid "Sequence"
