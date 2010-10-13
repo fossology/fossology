@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Stefan Schroeder 2010-10-01 
 #
 #, fuzzy
 msgid ""
@@ -1458,93 +1458,106 @@ msgstr "Neuer Begriff"
 msgid ""
 "Keyword terms and phrases are used during license analysis to better "
 "identify license names.\n"
-msgstr ""
+msgstr "Während der Lizenzanalyse werden Schlüsselwörter und"
+"Phrasen verwendet, um die Lizenz genauer zu bestimmen.\n"
 
 #: plugins/ui-licterm-manage.php:277
 msgid ""
 "Terms consist of two parts: a canonical name for the class of terms, and a "
 "list of words or phrases that are members of the class.\n"
 msgstr ""
+"Ausdrücke bestehen aus zwei Teilen: Einem allgemeinen Namen für die"
+"Klasse von Ausdrücken und einer Wortliste, die zu dieser Klasse gehören.\n"
 
 #: plugins/ui-licterm-manage.php:278
 msgid ""
 "For example, the phrases 'GNU General Public License version 2' and 'GPL "
 "version 2' may both be parts of the 'GPLv2' class.\n"
 msgstr ""
+"Beispielsweise gehören die Phrasen 'GNU General Public License 2' und
+auch 'GPL version 2' zur Klasse 'GPLv2'.\n"
 
 #: plugins/ui-licterm-manage.php:280
 msgid "Note #1"
-msgstr ""
+msgstr "Hinweis #1"
 
 #: plugins/ui-licterm-manage.php:281
 msgid ": Changes to this list will impact all new license analysis.\n"
-msgstr ""
+msgstr ": Änderungen an dieser Liste beeinflussen alle weiteren Lizenzanalysen.\n"
 
 #: plugins/ui-licterm-manage.php:283
 msgid "However, all completed license analysis will be unchanged.\n"
-msgstr ""
+msgstr "Bereits abgeschlossene Analysen bleiben unverändert.\n"
 
 #: plugins/ui-licterm-manage.php:284
 msgid ""
 "You may wish to clear the license analysis for an upload and reschedule the "
 "analysis in order to apply changes.\n"
 msgstr ""
+"Es kann wünschenswert sein, die Lizenzanalyse zu löschen und neu"
+"hochzuladen, so dass die geänderten Listen angewendet werden.\n"
 
 #: plugins/ui-licterm-manage.php:286
 msgid "Note #2"
-msgstr ""
+msgstr "Hinweis #2"
 
 #: plugins/ui-licterm-manage.php:287
 msgid ": There is one special case for spelling.\n"
-msgstr ""
+msgstr ": Es gibt eine Spezialklasse für Rechtschreibung.\n"
 
 #: plugins/ui-licterm-manage.php:289
 msgid "Many licenses spell the word 'licen<b>c</b><b>s</b>e.\n"
-msgstr ""
+msgstr "Viele Lizenzen benutzen die Schreibung 'licen<b>cs</b>e.\n"
 
 #: plugins/ui-licterm-manage.php:290
 msgid ""
 "If the term contains either spelling of 'license', 'licensing', 'licensed', "
 "etc., then it will be converted to 's' but will match both spellings.\n"
 msgstr ""
+"Sowohl die amerikanische, als auch die britische Schreibung des Wortes "
+"'Lizenz' werden erkannt (und im Hintergrund in die amerikanische konvertiert).\n"
 
 #: plugins/ui-licterm-manage.php:299
 msgid "Select canonical group to edit"
-msgstr ""
+msgstr "Wählen Sie die allgemeine Gruppe zum Editieren"
 
 #: plugins/ui-licterm-manage.php:307
 msgid "Check to delete this canonical group!"
-msgstr ""
+msgstr "Auswählen, im die allgemeine Gruppe zu löschen!"
 
 #: plugins/ui-licterm-manage.php:315
 msgid "Canonical name"
-msgstr ""
+msgstr "Allgemeiner Name"
 
 #: plugins/ui-licterm-manage.php:325
 msgid "Keywords, terms, and phrases specific to this group."
-msgstr ""
+msgstr "Schlüsselwörter, Ausdrücke und Phrasen, die für diese Gruppe"
+"spezifisch sind."
 
 #: plugins/ui-licterm-manage.php:330
 msgid "Terms associated with this canonical group"
-msgstr ""
+msgstr "Mit dieser allgemeinen Gruppe verknüpften Begriffe"
 
 #: plugins/ui-licterm-manage.php:331
 msgid "Known terms"
-msgstr ""
+msgstr "Bekannte Begriffe"
 
 #: plugins/ui-licterm-manage.php:397
 msgid "Add a new keyword, term, or phrase to this canonical group."
-msgstr ""
+msgstr "Ein neues Schlüsselwort, Begriff und Ausdruck zu dieser"
+"allgemeinen Gruppe hinzufügen."5
 
 #: plugins/ui-licterm-manage.php:404
 msgid ""
 "Only letters, numbers, and spaces are permitted. Text will be normalized to "
 "lowercase letters with no more than one space between words.\n"
 msgstr ""
+"Nur Buchstaben, Ziffern und Leerzeichen sind erlaubt. Text wird in "
+"Kleinbuchstaben umgewandelt, mehrfache Leerzeichen werden reduziert.\n"
 
 #: plugins/ui-licterm-manage.php:410
 msgid "Associate licenses with this canonical group."
-msgstr ""
+msgstr "Mit dieser allgemeinen Gruppe Lizenzen verknüpfen."
 
 #: plugins/ui-licterm-manage.php:413
 msgid "Licenses that are associated will be referred by the canonical name.\n"
@@ -3834,49 +3847,52 @@ msgstr ""
 
 #: plugins/ui-welcome.php:97
 msgid "Need Some Help?"
-msgstr ""
+msgstr "Brauchen Sie Hilfe?"
 
 #: plugins/ui-welcome.php:98
 msgid "Now that you've been introduced to Fossology, try exploring it!"
-msgstr ""
+msgstr "Sie haben sich nun mit FOSSology bekannt gemacht, brechen Sie"
+"nun auf, es selbst zu entdecken!"
 
 #: plugins/ui-welcome.php:99
 msgid "The following resources will provide additional help and information:"
-msgstr ""
+msgstr "Die folgenden Ressourcen können Ihnen dabei helfen:"
 
 #: plugins/ui-welcome.php:100
 msgid "Help tab"
-msgstr ""
+msgstr "Hilfe"
 
 #: plugins/ui-welcome.php:101
 msgid "- Select this website's Help tab for software-related help and tips."
-msgstr ""
+msgstr "- Wählen Sie den Hilfe-Reiter, um weitere Hilfen und Hinweise"
+"zu erhalten."
 
 #: plugins/ui-welcome.php:102
 msgid "FOSSology web site"
-msgstr ""
+msgstr "FOSSology-Website"
 
 #: plugins/ui-welcome.php:103
 msgid "- Where you can find more information and get help on FOSSology."
-msgstr ""
+msgstr "- Hier erhalten Sie weitere Informationen und Hilfe zu FOSSology."
 
 #: plugins/ui-welcome.php:104
 msgid "FOSSbazaar web site"
-msgstr ""
+msgstr "FOSSbazaar-Website"
 
 #: plugins/ui-welcome.php:105
 msgid "- A community website with information on Open Source Governance."
-msgstr ""
+msgstr "- eine Internet-Gemeinschaft die sich für Open Source einsetzt."
 
 #: plugins/upload-srv-files.php:141
 msgid "Failed to place fosscp_agent in job queue"
-msgstr ""
+msgstr "Der Agent 'fosscp_agent' konnte nicht in die Aufgabenliste eingefügt werden"
 
 #: plugins/upload-srv-files.php:186
 msgid ""
 "This option permits uploading a file, set of files, or a directory from the "
 "web server to FOSSology.\n"
 msgstr ""
+"Hier können Sie Dateien oder Verzeichnisse zum Hochladen vom FOSSology-Webserver auswählen.\n"
 
 #: plugins/upload-srv-files.php:187
 msgid ""
@@ -4333,26 +4349,26 @@ msgstr ""
 #: plugins/core-schema.php:192 plugins/core-schema.php:277
 #: plugins/core-schema.php:323
 msgid "Table"
-msgstr ""
+msgstr "Tabelle"
 
 #: plugins/core-schema.php:95 plugins/core-schema.php:123
 #: plugins/core-schema.php:278
 msgid "Column"
-msgstr ""
+msgstr "Spalte"
 
 #: plugins/core-schema.php:97 plugins/core-schema.php:125
 #: plugins/core-schema.php:280
 msgid "Add SQL"
-msgstr ""
+msgstr "SQL hinzufügen"
 
 #: plugins/core-schema.php:98 plugins/core-schema.php:126
 #: plugins/core-schema.php:281
 msgid "Alter SQL\n"
-msgstr ""
+msgstr "SQL ändern"
 
 #: plugins/core-schema.php:144 plugins/core-schema.php:299
 msgid "Sequence"
-msgstr ""
+msgstr "Sequenz"
 
 #: plugins/core-schema.php:145 plugins/core-schema.php:169
 #: plugins/core-schema.php:194 plugins/core-schema.php:226
