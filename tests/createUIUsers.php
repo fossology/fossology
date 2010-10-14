@@ -63,7 +63,7 @@ class createUIUsers extends fossologyTestCase {
         continue;
       }
       if(!empty($added)) {
-        $this->fail("User $user was not added to the fossology database\n");
+        $this->fail("User $user was not added to the fossology database\n$added\n");
       }
     }
   }

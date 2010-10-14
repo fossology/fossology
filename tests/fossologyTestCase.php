@@ -89,6 +89,10 @@ class fossologyTestCase extends fossologyTest
     else if($this->myassertText($page, "/User already exists\.  Not added/")) {
       return('User already exists.  Not added');
     }
+    else if($this->myassertText($page, "/ERROR/"))
+    {
+    	return("addUser FAILED! ERROR when adding users, please investigate");
+    }
     return(NULL);
   } // addUser
 
