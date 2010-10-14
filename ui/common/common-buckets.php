@@ -137,12 +137,12 @@ function SelectBucketPool($selected)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-  $select .= "<option value=''";
+  //$select .= "<option value=''";
   while ($row = pg_fetch_assoc($result)) 
   {
     $select .= "<option value='$row[bucketpool_pk]'";
     if ($row['bucketpool_pk'] == $selected) $select .= " SELECTED ";
-    $select .= ">$row[bucketpool_name], v $row[version]\n";
+    $select .= ">$row[bucketpool_name], v $row[version]</option>\n";
   }
   $select .= "</select>";
   return $select;
