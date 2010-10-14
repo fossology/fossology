@@ -147,9 +147,9 @@ class rhelTest extends fossologyTestCase
     'TeX-exception' => 1,
     'U-Wash(Free-Fork)' => 1,
     'X11' => 1,
-    'zlib/libpng' => 1,
+    'zlib/libpng' => 1
 		);
-		
+
 		$licenseSummary = array(
       'Unique licenses'        => 88,
       'Licenses found'         => 5528,
@@ -169,7 +169,7 @@ class rhelTest extends fossologyTestCase
        "verifyRedHat FAILED! >Info< not found\n");
 		$this->assertTrue($this->myassertText($page, "/>Download</"),
        "verifyRedHat FAILED! >Download< not found\n");
-    $page = $this->mybrowser->clickLink('Testing');
+		$page = $this->mybrowser->clickLink('Testing');
 		$this->assertTrue($this->myassertText($page, "/$safeName/"),
        "verifyRedHat FAILED! did not find $safeName\n");
 
@@ -177,7 +177,7 @@ class rhelTest extends fossologyTestCase
 		//print "CKZDB: page before call parseBMenu:\n$page\n";
 
 
-		$page = $this->mybrowser->clickLink('RedHat.tar.gz');
+		$page = $this->mybrowser->clickLink($name);
 		$this->assertTrue($this->myassertText($page, "/1 item/"),
        "verifyRedHat FAILED! 1 item not found\n");
 		$page = $this->mybrowser->clickLink('RedHat/');
@@ -188,52 +188,62 @@ class rhelTest extends fossologyTestCase
 		//print "miniMenu is:\n";print_r($miniMenu) . "\n";
 		$url = makeUrl($this->host, $miniMenu['Nomos License']);
 		if($url === NULL) { $this->fail("verifyRedHat Failed, host/url is not set"); }
-		
+
 		$page = $this->mybrowser->get($url);
-    //print "page after get of $url is:\n$page\n";
-    $this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
+		//print "page after get of $url is:\n$page\n";
+		$this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
           "verifyRedHat FAILED! Nomos License Browser Title not found\n");
 
-	    // check that license summarys are correct
-    $licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
-    $licSummary->parseLicenseTbl();
+		// check that license summarys are correct
+		$licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
+		$licSummary->parseLicenseTbl();
 
-    foreach ($licSummary->hList as $summary)
-    {
-    	//print "summary is:\n";print_r($summary) . "\n";
-      $key = $summary['textOrLink'];
-      $this->assertEqual($licenseSummary[$key], $summary['count'],
+		foreach ($licSummary->hList as $summary)
+		{
+			//print "summary is:\n";print_r($summary) . "\n";
+			$key = $summary['textOrLink'];
+			$this->assertEqual($licenseSummary[$key], $summary['count'],
       "verifyRedHat FAILED! $key does not equal $licenseSummary[$key],
-      got $summary[count]\n");
-      //print "summary is:\n";print_r($summary) . "\n";
-    }
+      Expected: {$licenseSummary[$key]},
+           Got: $summary[count]\n");
+			//print "summary is:\n";print_r($summary) . "\n";
+		}
 
-    // get the license names and 'Show' links
-    $licHistogram = new domParseLicenseTbl($page, 'lichistogram',1);
-    $licHistogram->parseLicenseTbl();
+		// get the license names and 'Show' links
+		$licHistogram = new domParseLicenseTbl($page, 'lichistogram',1);
+		$licHistogram->parseLicenseTbl();
 
-    if($licHistogram->noRows === TRUE)
-    {
-      $this->fail("FATAL! no table rows to process, there should be many for"
-      . " this test, Stopping the test");
-      return;
-    }
-    
-    // verify every row against the standard by comparing the counts.
-    /*
-     * @todo check the show links, but to do that, need to gather another
-     * standard array to match agains?  or just use the count from the
-     * baseline?
-     */
-    foreach($licHistogram->hList as $licFound)
-    {
-      $key = $licFound['textOrLink'];
-      $this->assertEqual($licBaseLine[$key], $licFound['count'],
-      "verifyRedHat FAILED! the baseline count {$licBaseLine[$key]} does" .
-      "not equal $licFound[$key],\n" .
-      "Expected: $licBaseLine[$key],\n" .
-      "Got: $LicFound[count]\n");
-    }
+		if($licHistogram->noRows === TRUE)
+		{
+			$this->fail("FATAL! no table rows to process, there should be many for"
+			. " this test, Stopping the test");
+			return;
+		}
+
+		// verify every row against the standard by comparing the counts.
+		/*
+		* @todo check the show links, but to do that, need to gather another
+		* standard array to match agains?  or just use the count from the
+		* baseline?
+		*/
+
+		foreach($licHistogram->hList as $licFound)
+		{
+			$key = $licFound['textOrLink'];
+			if(array_key_exists($key,$licBaseLine))
+			{
+				$this->assertEqual($licBaseLine[$key], $licFound['count'],
+          "verifyRedHat FAILED! the baseline count {$licBaseLine[$key]} does" .
+          " not equal {$licFound['count']} for license $key,\n" .
+          "Expected: {$licBaseLine[$key]},\n" .
+          "     Got: {$licFound['count']}\n");
+			}
+			else
+			{
+			  $this->fail("verifyRedHat FAILED! A License was found that is " .
+			   "not in the standard:\n$key\n");
+			}
+		}
 	}
 }
 ?>
