@@ -72,10 +72,11 @@ class fossologyTestCase extends fossologyTest
       return("No User Name, cannot add user");
     }
 
-    //$page = $this->mybrowser->get($URL);
-    //$page = $this->mybrowser->clickLink('Add');
-    //$this->assertTrue($this->myassertText($page, '/Add A User/'),
-    //  "Did NOT find Title, 'Add A User'");
+    $page = $this->mybrowser->get($URL);
+    $page = $this->mybrowser->clickLink('Add');
+    $this->assertTrue($this->myassertText($page, '/Add A User/'),
+          "Did NOT find Title, 'Add A User'");
+    
     $this->setUserFields($UserName,$Description, $Email, $Access, $Folder,
     NULL,NULL, $Password, $EmailNotify);
 
