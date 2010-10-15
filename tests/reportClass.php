@@ -169,7 +169,6 @@ class TestReport {
 	 */
 	public function parseResultsFile($file) {
 
-		print "in parseResultsFile\n";
 		$results = array ();
 		if (empty ($file)) {
 			return FALSE;
