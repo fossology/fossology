@@ -220,6 +220,9 @@ FILE* scheduler_next() {
     number_read = files_in_job - file_number < BLOCK_SIZE ? files_in_job - file_number : BLOCK_SIZE;
     fseek(job_info, file_offset, SEEK_SET);
 
+    /* inform the scheduler of the files that will be analyzed */
+    fprintf(stdout, "UPDATE: %d %d", file_number, file_number + file_offset);
+
     for(i = 0; i < number_read; i++) {
       bytes = fread(&current_file_pk[i], sizeof(int), 1, job_info);
       bytes = fread(&status, sizeof(status), 1, job_info);
@@ -232,9 +235,6 @@ FILE* scheduler_next() {
     fseek(job_info, agent_byte_offset, SEEK_SET);
     bytes = fwrite(&file_number, sizeof(file_number), 1, job_info);
     bytes = fwrite(&file_offset, sizeof(file_offset), 1, job_info);
-
-    /* inform the scheduler of the set of files this agent is working on */
-    // TODO
 
     /* call the heartbeat() */
     // TODO
