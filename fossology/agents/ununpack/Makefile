@@ -5,13 +5,17 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS) -I./
 EXE=departition checksum ununpack
 
 CHKHDR= checksum.h md5.h sha1.h
 CHKSRC=$(CHKHDR:%.h=%.c)
 UUHDR= ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h metahandle.h $(CHKHDR)
-UUSRC=$(UUHDR:%.h=%.c) main.c
+UUSRC=$(UUHDR:%.h=%.c)
+
+TESTDIR=tests
+OBJECTS=$(UUHDR:%.h=%.o)
+COVERAGE=$(OBJECTS:%.o=%_cov.o)
 
 all: $(EXE)
 
@@ -21,8 +25,8 @@ checksum: $(CHKHDR) $(CHKSRC) $(VARS)
 departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
 
-ununpack: $(UUSRC) $(UUHDR) $(VARS) $(DB) $(REPO)
-	$(CC) $(UUSRC) $(CFLAGS_LOCAL) -o $@
+ununpack: main.c libununpack.a $(VARS) $(DB) $(REPO) 
+	$(CC) main.c libununpack.a $(CFLAGS_LOCAL) -o $@
 
 metahandle.h: metahandle.tab metahandle.pl
 	if [ ! -x metahandle.pl ] ; then chmod u+x metahandle.pl; fi
@@ -48,14 +52,29 @@ uninstall: $(VARS)
 	rm -f $(DESTDIR)$(LIBEXECDIR)/checksum
 	rm -f $(DESTDIR)$(AGENTDIR)/ununpack
 
-test: all
-	@echo "*** No tests available for agents/$(EXE) ***"
+$(OBJECTS): %.o: %.c metahandle.h
+	$(CC) -c $< $(CFLAGS_LOCAL) 
 
-coverage:
-	@echo "NOTICE: no coverage available for ununpack"
+
+$(COVERAGE): %_cov.o: %.c metahandle.h
+	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
+
+libununpack.a: $(OBJECTS)
+	ar cvr $@ $(OBJECTS)
+
+libununpack_cov.a: $(COVERAGE)
+	ar cvr $@ $(COVERAGE)
+
+
+test: libununpack.a
+	$(MAKE) -C $(TESTDIR) test
+
+coverage: libununpack_cov.a
+	$(MAKE) -C $(TESTDIR) coverage
 
 clean:
-	rm -f $(EXE) *.o core metahandle.h metahandle.c
+	rm -f $(EXE) *.o core metahandle.h metahandle.c *.a *.gc*; \
+	$(MAKE) -C $(TESTDIR) clean
 
 include $(DEPS)
 
