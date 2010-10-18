@@ -166,7 +166,7 @@ void test_load_dictionary()
   radix_init(&tree);
 
   /* do the asserts */
-  CU_ASSERT_TRUE(load_dictionary(tree, "../../copyright.dic"));
+  CU_ASSERT_TRUE(load_dictionary(tree, "../copyright.dic"));
   CU_ASSERT_TRUE(radix_contains(tree, "copyright"));
   CU_ASSERT_TRUE(radix_contains(tree, "(c)"));
   CU_ASSERT_TRUE(radix_contains(tree, "author"));
