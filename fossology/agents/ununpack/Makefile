@@ -5,7 +5,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS) -I./
+CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS)
 EXE=departition checksum ununpack
 
 CHKHDR= checksum.h md5.h sha1.h
@@ -25,7 +25,7 @@ checksum: $(CHKHDR) $(CHKSRC) $(VARS)
 departition: %: %.c $(VARS)
 	$(CC) $< $(ALL_CFLAGS) -o $@
 
-ununpack: main.c libununpack.a $(VARS) $(DB) $(REPO) 
+ununpack: main.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB)
 	$(CC) main.c libununpack.a $(CFLAGS_LOCAL) -o $@
 
 metahandle.h: metahandle.tab metahandle.pl
