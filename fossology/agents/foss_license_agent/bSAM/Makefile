@@ -11,7 +11,7 @@ UTILS=SeeSam bsamlist
 
 all: $(EXE) $(UTILS)
 
-$(EXE): %: %.c $(DB) $(REPO) $(VARS)
+$(EXE): %: %.c $(DB) $(REPO) $(AGENTLIB) $(VARS)
 	$(CC) $< $(CFLAGS_LOCAL) -o $@
 
 $(UTILS): %: %.c $(VARS)
