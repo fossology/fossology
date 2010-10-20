@@ -1746,7 +1746,7 @@ msgstr ""
 
 #: plugins/admin-bucket-pool.php:151
 msgid "Manually edit the new bucketpool record, if desired."
-msgstr ""
+msgstr "Editieren Sie falls nötig die neuen Kategorien."
 
 #: plugins/admin-bucket-pool.php:153
 msgid "Manually insert/update/delete the new bucketdef records."
@@ -1762,12 +1762,14 @@ msgstr ""
 
 #: plugins/admin-bucket-pool.php:157
 msgid "Queue up the new bucket job in Jobs > Agents."
-msgstr ""
+msgstr "Reihen Sie die neue Aufgabe ein mit Aufgaben > Agenten."
 
 #: plugins/admin-bucket-pool.php:159
 msgid ""
 "Use Buckets > Compare to compare the new and old runs.  Verify the results."
 msgstr ""
+"Nutzen Sie Ablagen > Vergleichen, um die alten und die neuen Läufe "
+"miteinander zu vergleichen. Bestätigen Sie so die Ergebnisse."
 
 #: plugins/admin-bucket-pool.php:161
 msgid ""
@@ -1775,20 +1777,27 @@ msgid ""
 "to remove the previous runs results and repeat starting with editing the "
 "bucketpool or def records."
 msgstr ""
+"Wenn Sie die die Ablagen noch ändern wollen, dann wählen Sie "
+"Ablagen > Entferne Ablagen-Ergebnisse, um die alten Ergebnisse "
+"zu entfernen und passen Sie dann die Ablagen oder Def-Records an."
+
 
 #: plugins/admin-bucket-pool.php:163
 msgid ""
 "When the bucket results are what you want, then you can reset all the users "
 "of the old bucketpool to the new one with Buckets > New Bucketpool."
 msgstr ""
+"Wenn Sie mit den Ergebnissen dieser Sammlung zufrieden sind, dann "
+"können Sie die alte Ablagensammlung aller Nutzer mit "
+"Ablagen > Neue Ablagensammlung zurücksetzen."
 
 #: plugins/admin-bucket-pool.php:169
 msgid "Choose the bucketpool to duplicate"
-msgstr ""
+msgstr "Wählen Sie die Ablagensammlung, die kopiert werden soll"
 
 #: plugins/admin-bucket-pool.php:174
 msgid "Update my default bucketpool"
-msgstr ""
+msgstr "Standard-Ablagensammlung aktualisieren"
 
 #: plugins/admin-bucket-pool.php:177
 msgid "Submit"
