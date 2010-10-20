@@ -28,7 +28,8 @@
  * Created on Oct 18, 2010
  */
 
-require_once('../TestEnvironment.php');
+//require_once('../TestEnvironment.php');
+require_once('TestEnvironment.php');
 
 global $TR;
 global $testList;
@@ -36,8 +37,6 @@ global $testList;
 $TR = TESTROOT;
 $publish = '/home/fosstester/public_html/unitTests';
 $testList = array('copyright');
-
-print "testroot is:$TR\n";
 
 function cd2TestRoot()
 {
@@ -77,7 +76,7 @@ function copyResults($publish)
 		$baseName = pathinfo($file,PATHINFO_BASENAME);
 		if(!copy($file, $publish . "/" . $baseName))
 		{
-			echo "Error! could not copy $file to $publish . "/" . $baseName\n";
+			echo "Error! could not copy $file to $publish/$baseName\n";
 		}
 	}
 
@@ -86,7 +85,7 @@ function copyResults($publish)
 		$baseName = pathinfo($file,PATHINFO_BASENAME);
 		if(!copy($file, $publish . "/" . $baseName))
 		{
-			echo "Error! could not copy $file to $publish . "/" . $baseName\n";
+			echo "Error! could not copy $file to $publish/$baseName\n";
 		}
 	}
 	// Copy the raw results
