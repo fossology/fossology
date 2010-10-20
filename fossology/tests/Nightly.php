@@ -20,7 +20,8 @@
 /**
  * Nightly test runs of Top of Trunk
  *
- * @param
+ * @param -h
+ * @param [ -p <path>] the path to the fossology sources
  *
  * @return
  *
@@ -40,6 +41,23 @@ require_once('mailTo.php');
 
 global $mailTo;
 
+$usage = "$argv[0] [-h] [-p <path>]\n" .
+         "h: help, this message\n" .
+         "p path: the path to the fossology sources to test\n";
+
+$path = NULL;
+
+$options = getopt('hp:');
+if(array_key_exists('h', $options))
+{
+	echo $usage;
+	exit(0);
+}
+if(array_key_exists('p', $options))
+{
+	$path = $options['p'];
+}
+
 /**
  * reportError
  * \brief report the test setup error in a mail message using the gloabl
@@ -48,7 +66,7 @@ global $mailTo;
 function reportError($error)
 {
 	global $mailTo;
-	
+
 	$hdr = "There were errors in the nightly test setup." .
 	       "The tests were not run due to one or more errors.\n\n";
 
@@ -56,27 +74,37 @@ function reportError($error)
 
 	// mailx will not take a string as the message body... save to a tmp
 	// file and give it that.
-	
+
 	$tmpFile = tempnam('.', 'testError');
 	$F = fopen($tmpFile, 'w') or die("Can not open tmp file $tmpFile\n");
 	fwrite($F, $msg);
 	fclose($F);
 	$last = exec("mailx -s 'test Setup Failed' $mailTo < $tmpFile ",$tossme, $rptGen);
-	}
+}
 
 // Using the standard source path /home/fosstester/fossology
-$tonight = new TestRun();
+
+if(array_key_exists('WORKSPACE', $_ENV))
+{
+	$apath = $_ENV['WORKSPACE'];
+	print "workspaces:\napath:$apath\n";
+}
+
+$tonight = new TestRun($path);
 
 // Step 1 update sources
+
 print "removing model.dat file so sources will update\n";
-$path = '/home/fosstester/fossology/agents/copyright_analysis/model.dat';
-$last = exec("rm $path 2>&1", $output, $rtn);
-// if the file doesn't exist, that'
+$modelPath = '/home/fosstester/fossology/agents/copyright_analysis/model.dat';
+//$last = exec("rm $modelPath 2>&1", $output, $rtn);
+$last = exec("rm -f $modelPath ", $output, $rtn);
+
+// if the file doesn't exist, that's OK
 if((preg_match('/No such file or directory/',$last, $matches)) != 1)
 {
 	if($rtn != 0)
 	{
-		$error = "Error, could not remove $path, sources will not update, exiting\n";
+		$error = "Error, could not remove $modelPath, sources will not update, exiting\n";
 		print $error;
 		reportError($error);
 		exit(1);
@@ -99,7 +127,7 @@ if($tonight->makeSrcs() !== TRUE)
 {
 	$error = "There were Errors in the make of the sources examine make.out\n";
 	print $error;
-  reportError($error);
+	reportError($error);
 	exit(1);
 }
 //try to stop the scheduler before the make install step.
@@ -107,8 +135,8 @@ print "Stopping Scheduler before install\n";
 if($tonight->stopScheduler() !== TRUE)
 {
 	$error = "Could not stop fossology-scheduler, maybe it wasn't running?\n";
-  print $error;
-  reportError($error);
+	print $error;
+	reportError($error);
 }
 
 // Step 4 install fossology
@@ -117,7 +145,7 @@ if($tonight->makeInstall() !== TRUE)
 {
 	$error = "There were Errors in the Installation examine make-install.out\n";
 	print $error;
-  reportError($error);
+	reportError($error);
 	exit(1);
 }
 
@@ -133,11 +161,11 @@ print "install results are:$iRes\n";
 
 if($iRes !== TRUE)
 {
-	
+
 	$error = "There were errors in the postinstall process check fop.out\n";
 	print $error;
 	print "calling reportError\n";
-  reportError($error);
+	reportError($error);
 	exit(1);
 }
 
@@ -147,7 +175,7 @@ if($tonight->schedulerTest() !== TRUE)
 {
 	$error = "Error! in scheduler test examine ST.out\n";
 	print $error;
-  reportError($error);
+	reportError($error);
 	exit(1);
 }
 
@@ -156,7 +184,7 @@ if($tonight->startScheduler() !== TRUE)
 {
 	$error = "Error! Could not start fossology-scheduler\n";
 	print $error;
-  reportError($error);
+	reportError($error);
 	exit(1);
 }
 
@@ -167,32 +195,29 @@ if(!chdir($testPath))
 {
 	$error = "Error can't cd to $testPath\n";
 	print $error;
-  reportError($error);
+	reportError($error);
 	exit(1);
 }
 
+print "Running Unit tests\n";
 
+$unitLast = exec('CUnit/runUnitTests.php > CUnit/log-UnitTests 2>&1',
+$results, $exitVal);
+if($exitVal != 0)
+{
+	print "FAILURES! There were errors in the Unit tests, examine" .
+	      "fossology/tests/Cunit/log-UnitTests\n";
+}
+
+print "Running Functional tests\n";
 /*
- * This fails if run by fosstester as Db.conf if not world readable and the
+ * This fails if run by fosstester as Db.conf is not world readable and the
  * script is not running a fossy... need to think about this...
  *
  */
 $TestLast = exec('./testFOSSology.php -a -e', $results, $rtn);
 print "after running tests the output is\n";
 print_r($results) . "\n";
-
-/*
- In either case, need to isolate the results file name so we can feed it to
- the results summary program(s).
- */
-
-/*
- * ok, works for running -a, now need to figure out how to tell if all
- * my jobs are done? then run the verifier part...
- *
- * need to grep for message about jobs not done and isolate the run line and
- * use it.
- */
 
 
 /*
