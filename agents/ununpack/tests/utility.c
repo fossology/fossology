@@ -19,13 +19,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/stat.h> 
 #include "utility.h"
 
+/**
+ * @brief juge if the file or directory is existed not
+ * @param path_name, the file or directory name including path
+ * @return existed or not, 0: not existed, 1: existed
+ */
 int file_dir_existed(char *path_name)
 {
   struct stat sts;
   int existed = 1; // 0: not existed, 1: existed, default existed
   if ((stat (path_name, &sts)) == -1)
   {
-    printf ("The file or dir %s doesn't exist...\n", path_name);
+    //printf ("The file or dir %s doesn't exist...\n", path_name);
     existed = 0;
   }
   return existed;
