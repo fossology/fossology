@@ -38,8 +38,14 @@ class ui_tag extends FO_Plugin
   function RegisterMenus()
     {
 /****** Permission comments: if user don't have read or high permission, can't see tag menu. ******/
-    $text = _("Tag files or containers");
-    menu_insert("Browse-Pfile::Tag",0,$this->Name,$text);
+    $perm = GetTaggingPerms($_SESSION['UserId'],NULL);
+    //print ($perm);
+    if ($perm > 0){
+      $text = _("Tag files or containers");
+      menu_insert("Browse-Pfile::Tag",0,$this->Name,$text);
+    } else {
+      return(0);
+    }
     } // RegisterMenus()
 
   /***********************************************************
@@ -308,7 +314,13 @@ class ui_tag extends FO_Plugin
       $VE .= "<tr><th>$text</th><th>$text1</th><th>$text2</th><th>$text3</th><th></th></tr>\n";
       while ($row = pg_fetch_assoc($result))
       {
-        $VE .= "<tr><td align='center'>" . $row['tag_ns_name'] . "</td><td align='center'>" . $row['tag'] . "</td><td align='center'>" . $row['tag_desc'] . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td><td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Edit</a>|<a href='" . Traceback_uri() . "?mod=tag&action=delete&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Delete</a></td></tr>\n";
+        $VE .= "<tr><td align='center'>" . $row['tag_ns_name'] . "</td><td align='center'>" . $row['tag'] . "</td><td align='center'>" . $row['tag_desc'] . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td>";
+        $perm = GetTaggingPerms($_SESSION['UserId'],$row['tag_ns_pk']);
+        if ($perm > 1){
+          $VE .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Edit</a>|<a href='" . Traceback_uri() . "?mod=tag&action=delete&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Delete</a></td></tr>\n";
+        }else{ 
+          $VE .= "<td align='center'></td></tr>\n";
+        }
       }
       $VE .= "</table><p>\n";
     }
@@ -616,7 +628,10 @@ class ui_tag extends FO_Plugin
       $V .= $this->ShowEditTagPage($Upload,$Item);
     } else {
       /* Show create tag page */
-      $V .= $this->ShowCreateTagPage($Upload,$Item);
+      $perm = GetTaggingPerms($_SESSION['UserId'],NULL);
+      if ($perm > 1) {      
+        $V .= $this->ShowCreateTagPage($Upload,$Item);
+      }
       /* Show delete tag page removing
       $V .= $this->ShowDeleteTagPage($Upload,$Item);
       */

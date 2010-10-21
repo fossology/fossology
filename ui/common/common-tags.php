@@ -49,3 +49,51 @@ function GetAllTags($Item)
     }
   return($List);
   } // GetAllTags()
+
+/* GetTaggingPerms($user_pk, $tag_ns_pk): Returns integer of:
+   0  None
+   1  Read Only
+   2  Read/Write
+   3  Admin
+ ***********************************************************/
+function GetTaggingPerms($user_pk, $tag_ns_pk)
+{
+  global $DB,$PG_CONN;
+  $perm = 0;
+
+  if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+  
+  if(empty($user_pk)){
+    return (0);
+  }
+  $sql = "SELECT * FROM group_user_member WHERE user_fk=$user_pk;";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) > 0)
+  {
+    while ($row = pg_fetch_assoc($result))
+    {
+      $group_pk = $row['group_fk'];
+      $sql = "SELECT * FROM tag_ns_group WHERE group_fk=$group_pk;";
+      $result1 = pg_query($PG_CONN, $sql);
+      DBCheckResult($result1, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result1) > 0){
+        while ($row1 = pg_fetch_assoc($result1)){
+          if ($row1['tag_ns_fk'] == $tag_ns_pk){
+            pg_free_result($result1);
+            return ($row1['tag_ns_perm']);
+          }else{
+            $temp = $row1['tag_ns_perm'];
+            if ($temp > $perm) {$perm = $temp;}
+          }
+        }
+      }
+      pg_free_result($result1);
+    }
+    pg_free_result($result);
+    return ($perm);
+  }else{
+    pg_free_result($result);
+    return (0);
+  }
+}
