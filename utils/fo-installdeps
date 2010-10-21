@@ -128,7 +128,7 @@ if [ $RUNTIME ]; then
          [ $AGENT ] || apt-get install apache2 libapache2-mod-php5
          apt-get install \
             mail-transport-agent \
-            php5 php5-pgsql php-pear \
+            php5 php5-pgsql php-pear php5-cli \
             libmagic1 libxml2 libextractor1c2a \
             binutils bzip2 cabextract cpio sleuthkit mkisofs xpdf-utils \
                rpm tar upx-ucl unrar unzip p7zip libpcre3 \
