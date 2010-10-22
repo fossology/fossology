@@ -60,7 +60,7 @@ class rhelTest extends fossologyTestCase
 		global $URL;
 
 		$licBaseLine = array(
-    'No License Found' => 4734,
+    'No License Found' => 4150,
     '(C)Apache' => 909,
     'Apache_v2.0' => 858,
     'ATT' => 812,
@@ -71,47 +71,48 @@ class rhelTest extends fossologyTestCase
     'FSF' => 176,
     'BSD-style' => 154,
     'LGPL' => 123,
-    'GPL' => 95,
     '(C)RedHat' => 82,
     'GPL_v3+' => 76,
     'Apache-possibility' => 62,
+    'See-doc(OTHER)' => 37,
     'Debian-SPI-style' => 34,
     'GNU-Manpages' => 34,
     'LGPL_v2.1+' => 29,
     'MPL_v1.1' => 29,
     'IETF' => 28,
-    'See-doc(OTHER)' => 28,
     'UnclassifiedLicense' => 28,
+    'No-warranty' => 25,
     'GPL-exception' => 24,
     'BSD' => 20,
     'Apache' => 17,
+    'GPL' => 14,
+    '(C)GPL' => 13,
+    'Possible-copyright' => 13,
+    '(C)FSF' => 12,
     'GPL_v2' => 12,
-    'Possible-copyright' => 12,
     'Indemnity' => 11,
     'LikelyNot' => 10,
+    'GPL-possibility' => 9,
     'Public-domain-claim' => 9,
-    'Authorship-inference' => 8,
     '(C)Stanford' => 8,
-    'GPL-possibility' => 8,
+    'Authorship-inference' => 7,
     'Non-commercial!' => 7,
     'RSA-Security' => 7,
     'ATT-possibility' => 6,
     'LGPL_v2+' => 6,
     'OSL_v1.0' => 6,
-    'CPL_v1.0' => 5,
     'GFDL_v1.1+' => 5,
     'GPL_v3' => 5,
     'Intel' => 5,
     'LGPL_v3+' => 4,
-    'No-warranty' => 4,
     'Public-domain-ref' => 4,
     'APSL_v1.1' => 3,
     'IOS' => 3,
     'MIT-style' => 3,
+    'NOT-public-domain' => 3,
     'Apache_v1.1' => 2,
-    '(C)FSF' => 2,
-    '(C)GPL' => 2,
     'CMU-possibility' => 2,
+    'CPL_v1.0' => 2,
     '(C)Sun' => 2,
     'GFDL_v1.1' => 2,
     'GFDL_v1.2+' => 2,
@@ -129,17 +130,16 @@ class rhelTest extends fossologyTestCase
     '(C)MIT' => 1,
     '(C)RedHat-Cygnus' => 1,
     'Dyade' => 1,
-    'GPL_v2.1+' => 1,
     'HP-possibility' => 1,
     'ISC' => 1,
     'LGPL-possibility' => 1,
     'MacroMedia-RPSL' => 1,
     'Microsoft-possibility' => 1,
-    'NOT-public-domain' => 1,
     'NPL_v1.1' => 1,
     'Patent-ref' => 1,
     'RedHat-EULA' => 1,
     'RedHat(Non-commercial)' => 1,
+    'Same-license-as' => 1,
     'Sun' => 1,
     'Sun-BCLA' => 1,
     'Sun-possibility' => 1,
@@ -152,9 +152,9 @@ class rhelTest extends fossologyTestCase
 
 		$licenseSummary = array(
       'Unique licenses'        => 88,
-      'Licenses found'         => 5528,
-      'Files with no licenses' => 4734,
-      'Files'                  => 12532
+      'Licenses found'         => 5498,
+      'Files with no licenses' => 4150,
+      'Files'                  => 11907
 		);
 
 
@@ -230,6 +230,8 @@ class rhelTest extends fossologyTestCase
 		foreach($licHistogram->hList as $licFound)
 		{
 			$key = $licFound['textOrLink'];
+			//print "VDB: key is:$key\n";
+			//print "licFound is:\n";print_r($licFound) . "\n";
 			if(array_key_exists($key,$licBaseLine))
 			{
 				$this->assertEqual($licBaseLine[$key], $licFound['count'],
