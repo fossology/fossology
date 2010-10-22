@@ -51,7 +51,7 @@ class upload_move extends FO_Plugin {
     if ($OldParentId == $NewParentId) {
       return (0);
     } // already there
-    if ($OldParentId == FolderGetTop()) {
+    if ($NewParentId == FolderGetTop()) {
       return (0);
     } // cannot move folder root
     /* New folder must exist? */
