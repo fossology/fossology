@@ -17,26 +17,47 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* cunit includes */
 #include <CUnit/CUnit.h>
+#include "ununpack.h"
+#include "utility.h"
 
-extern void	TraverseStart	(char *Filename, char *Label, char *NewDir, int Recurse);
+void	TraverseStart	(char *Filename, char *Label, char *NewDir, int Recurse);
 
-/* global variables. This is used to avoid needing to initialize a   */
+static char *Label = "";
 
+/**
+ * @brief initialize
+ */
+int  TraverseStartInit()
+{
+  MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
+  if (MagicCookie == NULL)
+  {
+    fprintf(stderr,"FATAL: Failed to initialize magic cookie\n");
+    return -1;
+  }
 
-/* ************************************************************************** */
-/* **** local declarations **************************************** */
-/* ************************************************************************** */
+  magic_load(MagicCookie,NULL);
+  return 0;
+}
 
+/**
+ * @brief clean env and others
+ */
+int TraverseStartClean()
+{
+  magic_close(MagicCookie);
+  return 0;
+}
 
 void testTraverseStartNormal()
 {
-  #if 0
-  char *Filename = "../testdata4unpack.7z";
-  char *Label = "call by main";
-  char *NewDir = "../test-result";
-  #endif
-  int Recurse = -1;
-  TraverseStart("", "", "", Recurse);
+  Filename = "../test-data/testdata4unpack/threezip.zip";
+  deleteTmpFiles("../test-result/");
+  existed = file_dir_existed("../test-result/threezip.zip.dir/twozip.zip.dir/Desktop.zip.dir/record.txt");
+  CU_ASSERT_EQUAL(existed, 0); // ../test-result/ is not existing
+  TraverseStart(Filename, Label, NewDir, Recurse);
+  existed = file_dir_existed("../test-result/threezip.zip.dir/twozip.zip.dir/Desktop.zip.dir/record.txt");
+  CU_ASSERT_EQUAL(existed, 1); // ../test-result/ is existing
 }
 
 CU_TestInfo TraverseStart_testcases[] =

@@ -7,14 +7,24 @@
 extern CU_TestInfo TraverseStart_testcases[]; 
 extern CU_TestInfo FindCmd_testcases[];
 extern CU_TestInfo UnunpackEntry_testcases[];
-
+extern CU_TestInfo Traverse_testcases[]; 
+/* FindCmd */
 extern int FindCmdInit();
 extern int FindCmdClean();
 
+/* TraverseStart */
+extern int TraverseStartInit();
+extern int TraverseStartClean();
+
+/* Traverse */
+extern int TraverseInit();
+extern int TraverseClean();
+
 CU_SuiteInfo suites[] = {
-        {"Testing the function TraverseStart:", NULL, NULL, TraverseStart_testcases},
+        {"Testing the function TraverseStart:", TraverseStartInit, TraverseStartClean, TraverseStart_testcases},
         {"Testing the function FindCmd:", FindCmdInit, FindCmdClean, FindCmd_testcases},
         {"Testing the function UnunpackEntry:", NULL, NULL, UnunpackEntry_testcases},
+        {"Testing the function Traverse:", TraverseInit, TraverseClean, Traverse_testcases},
         CU_SUITE_INFO_NULL
 };
 

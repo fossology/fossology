@@ -17,9 +17,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* cunit includes */
 #include <CUnit/CUnit.h>
 #include "ununpack.h"
+#include "utility.h"
 
-extern int	FindCmd	(char *Filename);
-extern magic_t MagicCookie;
+int	FindCmd	(char *Filename);
 
 /**
  * @brief initialize
@@ -65,7 +65,13 @@ void testFindCmdNormal()
  */
 void testFindCmd4DscFile()
 {
-  
+  char *Filename = "../test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
+  int result = 0;
+  result = FindCmd(Filename);
+  CU_ASSERT_EQUAL(result, 26);
+  #ifdef DEBUG
+  printf("result is :%d\n", result);
+  #endif  
 }
 
 /**
@@ -271,9 +277,26 @@ void testFindCmd4Bz2File()
   #endif
 }
 
+/**
+ * @brief find ext2 fs
+ */
+void testFindCmd4Ext2File()
+{
+  char *Filename = "../test-data/testdata4unpack/ext2test-image";
+  int result = 0;
+  result = FindCmd(Filename);
+  CU_ASSERT_EQUAL(result, 23);
+
+  #ifdef DEBUG
+  printf("result is :%d\n", result);
+  #endif
+}
+
+
 CU_TestInfo FindCmd_testcases[] =
 {
     {"Testing FindCmd normal:", testFindCmdNormal},
+    {"Testing FindCmd dsc file:", testFindCmd4DscFile},
     {"Testing FindCmd cab file:", testFindCmd4CabFile},
     {"Testing FindCmd msi file:", testFindCmd4MsiFile},
     {"Testing FindCmd rpm file:", testFindCmd4RpmFile},
@@ -287,5 +310,6 @@ CU_TestInfo FindCmd_testcases[] =
     {"Testing FindCmd Z file:", testFindCmd4ZFile},
     {"Testing FindCmd exe file:", testFindCmd4ExeFile},
     {"Testing FindCmd bz2 file:", testFindCmd4Bz2File},
+    {"Testing FindCmd ext2 file system:", testFindCmd4Ext2File},
     CU_TEST_INFO_NULL
 };

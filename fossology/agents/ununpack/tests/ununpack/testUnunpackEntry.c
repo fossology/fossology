@@ -21,10 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "utility.h"
 
 /* used funtions */
-extern int     UnunpackEntry(int argc, char *argv[]);
-extern void deleteTmpFiles(char *dir);
-
-int existed = 0; // default not existed
+int     UnunpackEntry(int argc, char *argv[]);
 
 /* test functions */
 void testUnunpackEntryNormal()
