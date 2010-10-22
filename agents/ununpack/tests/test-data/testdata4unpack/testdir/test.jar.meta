@@ -1,0 +1,98 @@
+Archive:  ./tests/test-data/testdata4unpack/testdir/test.jar   1061   3
+
+End-of-central-directory record:
+-------------------------------
+
+  Actual offset of end-of-central-dir record:        1039 (0000040Fh)
+  Expected offset of end-of-central-dir record:      1039 (0000040Fh)
+  (based on the length of the central directory and its expected offset)
+
+  This zipfile constitutes the sole disk of a single-part archive; its
+  central directory contains 3 entries.  The central directory is 175
+  (000000AFh) bytes long, and its (expected) offset in bytes from the
+  beginning of the zipfile is 864 (00000360h).
+
+  There is no zipfile comment.
+
+Central directory entry #1:
+---------------------------
+
+  META-INF/
+
+  offset of local header from start of archive:     0 (00000000h) bytes
+  file system or operating system of origin:        MS-DOS, OS/2 or NT FAT
+  version of encoding software:                     1.0
+  minimum file system compatibility required:       MS-DOS, OS/2 or NT FAT
+  minimum software version required to extract:     1.0
+  compression method:                               none (stored)
+  file security status:                             not encrypted
+  extended local header:                            no
+  file last modified on (DOS date/time):            2005 Aug 2 11:32:38
+  32-bit CRC value (hex):                           00000000
+  compressed size:                                  0 bytes
+  uncompressed size:                                0 bytes
+  length of filename:                               9 characters
+  length of extra field:                            0 bytes
+  length of file comment:                           0 characters
+  disk number on which file begins:                 disk 1
+  apparent file type:                               binary
+  non-MSDOS external file attributes:               000000 hex
+  MS-DOS file attributes (00 hex):                  none
+
+  There is no file comment.
+
+Central directory entry #2:
+---------------------------
+
+  META-INF/MANIFEST.MF
+
+  offset of local header from start of archive:     39 (00000027h) bytes
+  file system or operating system of origin:        MS-DOS, OS/2 or NT FAT
+  version of encoding software:                     1.0
+  minimum file system compatibility required:       MS-DOS, OS/2 or NT FAT
+  minimum software version required to extract:     1.0
+  compression method:                               none (stored)
+  file security status:                             not encrypted
+  extended local header:                            no
+  file last modified on (DOS date/time):            2005 Aug 2 11:32:38
+  32-bit CRC value (hex):                           616d2db8
+  compressed size:                                  44 bytes
+  uncompressed size:                                44 bytes
+  length of filename:                               20 characters
+  length of extra field:                            0 bytes
+  length of file comment:                           0 characters
+  disk number on which file begins:                 disk 1
+  apparent file type:                               binary
+  non-MSDOS external file attributes:               000000 hex
+  MS-DOS file attributes (00 hex):                  none
+
+  There is no file comment.
+
+Central directory entry #3:
+---------------------------
+
+  ununpack
+
+  offset of local header from start of archive:     133 (00000085h) bytes
+  file system or operating system of origin:        MS-DOS, OS/2 or NT FAT
+  version of encoding software:                     1.0
+  minimum file system compatibility required:       MS-DOS, OS/2 or NT FAT
+  minimum software version required to extract:     1.0
+  compression method:                               deflated
+  compression sub-type (deflation):                 normal
+  file security status:                             not encrypted
+  extended local header:                            no
+  file last modified on (DOS date/time):            2005 Aug 2 11:32:22
+  32-bit CRC value (hex):                           09e41f5a
+  compressed size:                                  677 bytes
+  uncompressed size:                                1312 bytes
+  length of filename:                               8 characters
+  length of extra field:                            0 bytes
+  length of file comment:                           0 characters
+  disk number on which file begins:                 disk 1
+  apparent file type:                               binary
+  non-MSDOS external file attributes:               000000 hex
+  MS-DOS file attributes (00 hex):                  none
+
+  There is no file comment.
+
