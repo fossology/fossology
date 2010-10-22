@@ -541,6 +541,8 @@ msgstr "Administrator (voller Zugriff)"
 msgid ""
 "Select the user's top-level folder. Access is restricted to this folder."
 msgstr ""
+"W&auml;hlen Sie den h&ouml;chsten Ordner des Benutzers. Der Zugang beschränkt "
+"sich auf diesen Ordner."
 
 #: plugins/user-add.php:217 plugins/user-edit-any.php:403
 msgid ""
@@ -810,7 +812,7 @@ msgstr "Neues Schl&uuml;sselwort erfolgreich angelegt!"
 
 #: plugins/ui-tags.php:663
 msgid "Edit Tag Failed"
-msgstr "ÄAuml;nderung des Schl&uuml;sselwortes fehlgeschlagen"
+msgstr "&Auml;nderung des Schl&uuml;sselwortes fehlgeschlagen"
 
 #: plugins/ui-tags.php:666
 msgid "Edit Tag Successful!"
@@ -922,7 +924,7 @@ msgstr "Datei hochladen"
 
 #: plugins/upload-instructions.php:61
 msgid "option to select and upload the file."
-msgstr " um Dateien zum Hochladen auszuwählen."
+msgstr " um Dateien zum Hochladen auszuw&auml;hlen."
 
 #: plugins/upload-instructions.php:63
 msgid ""
@@ -930,7 +932,7 @@ msgid ""
 "accessible online),\n"
 msgstr ""
 "Obwohl es einfach ist eine Datei mittels des Web-Browsers hochzuladen"
-"(insbesondere wenn die Datei nicht online verfügbar ist),\n"
+"(insbesondere wenn die Datei nicht online verf&uuml;gbar ist),\n"
 
 #: plugins/upload-instructions.php:64
 msgid "uploading via your web browser can be slow for large files,\n"
@@ -938,8 +940,8 @@ msgstr "kann diese Methode bei großen Dateien sehr langsam sein.\n"
 
 #: plugins/upload-instructions.php:65
 msgid "and files larger than 650 Megabytes may not be uploadable.\n"
-msgstr "Bei Dateien, die größer als 650 Megabyte sind, kann das "
-"Hochladen ebenfalls zu Problemen führen.\n"
+msgstr "Bei Dateien, die gr&ouml;ßer als 650 Megabyte sind, kann das "
+"Hochladen ebenfalls zu Problemen f&uuml;hren.\n"
 
 #: plugins/upload-instructions.php:67
 msgid "On a remote server"
@@ -958,18 +960,18 @@ msgid ""
 "This is the most flexible option, but the URL must denote a publicly "
 "accessible HTTP, HTTPS, or FTP location.\n"
 msgstr ""
-"Diese Methode ist die flexibelste, doch die URL muss öffentlich erreichbar"
+"Diese Methode ist die flexibelste, doch die URL muss &ouml;ffentlich erreichbar"
 " sein (mittels HTTP, HTTPS oder FTP).\n"
 
 #: plugins/upload-instructions.php:74
 msgid ""
 "URLs that require authentication or human interactions cannot be downloaded "
 "through this automated system.\n"
-msgstr "URLs, die eine Authentifizierung erfordern können nicht geladen werden.\n"
+msgstr "URLs, die eine Authentifizierung erfordern k&ouml;nnen nicht geladen werden.\n"
 
 #: plugins/upload-instructions.php:76
 msgid "On the FOSSology web server"
-msgstr "Auf dem FOSSology-Webserver können Sie  "
+msgstr "Auf dem FOSSology-Webserver k&ouml;nnen Sie  "
 
 #: plugins/upload-instructions.php:79 plugins/upload-srv-files.php:28
 msgid "Upload from Server"
@@ -977,19 +979,19 @@ msgstr "Upload vom Server"
 
 #: plugins/upload-instructions.php:80
 msgid "option to specify a file or path on the server."
-msgstr "wählen, indem Sie den Pfadnamen auf dem Server angeben."
+msgstr "w&auml;hlen, indem Sie den Pfadnamen auf dem Server angeben."
 
 #: plugins/upload-instructions.php:82
 msgid ""
 "This option is intended for developers who have mounted directories "
 "containing source trees.\n"
 msgstr ""
-"Diese Option ermöglicht Entwicklern, die Zugriff auf den Server"
+"Diese Option erm&ouml;glicht Entwicklern, die Zugriff auf den Server"
 "besitzen, von dort Quellen hochzuladen.\n"
 
 #: plugins/upload-instructions.php:83
 msgid "The directory must be accessible via the web server's user.\n"
-msgstr "Der angemeldete Beutzer muss über Zugriff auf das Verzeichnis verfügen.\n"
+msgstr "Der angemeldete Beutzer muss &uuml;ber Zugriff auf das Verzeichnis verfügen.\n"
 
 #: plugins/upload-instructions.php:85
 msgid ""
@@ -1030,7 +1032,7 @@ msgstr "FOSSology Web-Server"
 
 #: plugins/upload-instructions.php:157
 msgid "Remote web or FTP server"
-msgstr "Fernzugriff über Web- oder FTP-Server"
+msgstr "Fernzugriff &uuml;ber Web- oder FTP-Server"
 
 #: plugins/core-init.php:27
 msgid "Initialize"
@@ -1044,7 +1046,7 @@ msgstr "Schema-Plugins nicht gefunden.\n"
 msgid ""
 "Initialization complete.  Click 'Home' in the top menu to proceed.<br />"
 msgstr ""
-"Initialisierung abgeschlossen. Klicken Sie auf 'Startseite' im Hauptmenü"
+"Initialisierung abgeschlossen. Klicken Sie auf 'Startseite' im Hauptmen&uuml;"
 "um fortzufahren.<br />"
 
 #: plugins/core-init.php:132
@@ -1076,16 +1078,16 @@ msgstr "Datensatz konnte nicht angelegt werden"
 
 #: plugins/agent-unpack.php:87
 msgid "Failed to insert item into job queue"
-msgstr "Aufgabe konnt nicht in die Aufgabenliste übernommen werden"
+msgstr "Aufgabe konnt nicht in die Aufgabenliste &uuml;bernommen werden"
 
 #: plugins/agent-unpack.php:94
 msgid "Failed to insert adj2nest into job queue"
-msgstr "'adj2nest' konnte nicht in die Aufgabenliste übernommen werden"
+msgstr "'adj2nest' konnte nicht in die Aufgabenliste &uuml;bernommen werden"
 
 #: plugins/agent-unpack.php:121 plugins/ui-reunpack.php:61
 #: plugins/ui-view.php:736
 msgid "Unpack added to job queue"
-msgstr "Das Entpacken ist in die Aufgabenliste übernommen worden."
+msgstr "Das Entpacken ist in die Aufgabenliste &uuml;bernommen worden."
 
 #: plugins/agent-unpack.php:126
 msgid "Unpack of Upload failed:"
@@ -1098,14 +1100,14 @@ msgstr "Alle hochgeladenen Dateien wurden bereits entpackt oder "
 
 #: plugins/agent-unpack.php:157
 msgid "Select an uploaded file to unpack.\n"
-msgstr "Wählen Sie eine hochgeladene Datei zum Auspacken.\n"
+msgstr "W&auml;hlen Sie eine hochgeladene Datei zum Auspacken.\n"
 
 #: plugins/agent-unpack.php:159
 msgid ""
 "Only uploads that are not already unpacked (and not already scheduled) can "
 "be scheduled.\n"
 msgstr ""
-"Nur noch nicht entpackte Pakete können eingeplant werden.\n"
+"Nur noch nicht entpackte Pakete k&ouml;nnen eingeplant werden.\n"
 
 #: plugins/agent-unpack.php:160
 msgid "Unpack:"
@@ -1114,7 +1116,7 @@ msgstr "Entpacken:"
 #: plugins/agent-unpack.php:170 plugins/upload-file.php:182
 #: plugins/upload-url.php:163 plugins/upload-srv-files.php:228
 msgid "Select optional analysis"
-msgstr "Wählen Sie "
+msgstr "W&auml;hlen Sie "
 
 #: plugins/agent-unpack.php:174
 msgid "Unpack"
@@ -1161,7 +1163,7 @@ msgstr "Wert"
 
 #: plugins/jobs-showjobs.php:200
 msgid "depends on"
-msgstr "hängt ab von"
+msgstr "h&auml;ngt ab von"
 
 #: plugins/jobs-showjobs.php:217
 msgid "required by"
@@ -1173,15 +1175,15 @@ msgstr "Geschichte"
 
 #: plugins/jobs-showjobs.php:428
 msgid "Job/Dependency"
-msgstr "Aufgabe/Abhängigkeit"
+msgstr "Aufgabe/Abh&auml;ngigkeit"
 
 #: plugins/jobs-showjobs.php:436
 msgid "Reset"
-msgstr "Zurücksetzen"
+msgstr "Zur&uuml;cksetzen"
 
 #: plugins/jobs-showjobs.php:443
 msgid "Priority: "
-msgstr "Priorität:"
+msgstr "Priorit&auml;t:"
 
 #: plugins/jobs-showjobs.php:507
 msgid "completed"
@@ -1213,11 +1215,11 @@ msgstr "Ordner konnte nicht verschoben werden!:"
 
 #: plugins/admin-folder-move.php:122
 msgid "Select the source folder to move:  \n"
-msgstr "Wählen Sie den zu verschiebenden Ordner:  \n"
+msgstr "W&auml;hlen Sie den zu verschiebenden Ordner:  \n"
 
 #: plugins/admin-folder-move.php:127 plugins/admin-upload-move.php:159
 msgid "Select the destination folder:  \n"
-msgstr "Wählen Sie den Zielordner:  \n"
+msgstr "W&auml;hlen Sie den Zielordner:  \n"
 
 #: plugins/admin-folder-move.php:133
 msgid "Move"
@@ -1257,15 +1259,15 @@ msgstr "Attribut"
 
 #: plugins/ui-view-info.php:108
 msgid "File Size"
-msgstr "Dateigröße"
+msgstr "Dateigr&ouml;ße"
 
 #: plugins/ui-view-info.php:110
 msgid "SHA1 Checksum"
-msgstr "SHA1-Prüfsumme"
+msgstr "SHA1-Pr&uuml;fsumme"
 
 #: plugins/ui-view-info.php:112
 msgid "MD5 Checksum"
-msgstr "MD5-Prüfsumme"
+msgstr "MD5-Pr&uuml;fsumme"
 
 #: plugins/ui-view-info.php:114
 msgid "Repository ID"
@@ -1309,7 +1311,7 @@ msgstr "Metadaten des Agenten PkgMetaGetta"
 
 #: plugins/ui-view-info.php:248
 msgid "Total meta data records"
-msgstr "Gesamtzahl der Metadatensätze"
+msgstr "Gesamtzahl der Metadatens&auml;tze"
 
 #: plugins/ui-view-info.php:288
 msgid "Package Info"
@@ -1317,7 +1319,7 @@ msgstr "Paket-Info"
 
 #: plugins/ui-view-info.php:316
 msgid "RPM Binary Package"
-msgstr "RPM-Binärpaket"
+msgstr "RPM-Bin&auml;rpaket"
 
 #: plugins/ui-view-info.php:320
 msgid "RPM Source Package"
@@ -1365,7 +1367,7 @@ msgstr "Erstellungsdatum"
 
 #: plugins/ui-view-info.php:374
 msgid "Vendor"
-msgstr "Händler"
+msgstr "H&auml;ndler"
 
 #: plugins/ui-view-info.php:382 plugins/ui-view-info.php:473
 msgid "Summary"
@@ -1388,7 +1390,7 @@ msgstr "Erforderlich"
 
 #: plugins/ui-view-info.php:416
 msgid "Debian Binary Package\n"
-msgstr "Debian Binärpaket\n"
+msgstr "Debian Bin&auml;rpaket\n"
 
 #: plugins/ui-view-info.php:449
 msgid "Section"
@@ -1396,11 +1398,11 @@ msgstr "Abschnitt"
 
 #: plugins/ui-view-info.php:453
 msgid "Priority"
-msgstr "Priorität"
+msgstr "Priorit&auml;t"
 
 #: plugins/ui-view-info.php:457
 msgid "Installed Size"
-msgstr "Größe der Installation"
+msgstr "Gr&ouml;ße der Installation"
 
 #: plugins/ui-view-info.php:461 plugins/ui-view-info.php:545
 msgid "Maintainer"
@@ -1412,7 +1414,7 @@ msgstr "Homepage"
 
 #: plugins/ui-view-info.php:490
 msgid "Depends"
-msgstr "Hängt ab von"
+msgstr "H&auml;ngt ab von"
 
 #: plugins/ui-view-info.php:504
 msgid "Debian Source Package\n"
@@ -1424,7 +1426,7 @@ msgstr "Format"
 
 #: plugins/ui-view-info.php:533
 msgid "Binary"
-msgstr "Binär"
+msgstr "Bin&auml;r"
 
 #: plugins/ui-view-info.php:549
 msgid "Uploaders"
@@ -1436,7 +1438,7 @@ msgstr "Standard-Version"
 
 #: plugins/ui-view-info.php:565
 msgid "Build-Depends"
-msgstr "Build-Abhängigkeiten"
+msgstr "Build-Abh&auml;ngigkeiten"
 
 #: plugins/ui-view-info.php:579
 msgid "NOT RPM/DEBIAN Package."
@@ -1444,7 +1446,7 @@ msgstr "Kein RPM/Debian-Paket"
 
 #: plugins/ui-view-info.php:581
 msgid "Total package info records"
-msgstr "Gesamt Infodatensätze des Pakets"
+msgstr "Gesamt Infodatens&auml;tze des Pakets"
 
 #: plugins/ui-licterm-manage.php:37
 msgid "Manage License Terms"
@@ -1458,7 +1460,7 @@ msgstr "Neuer Begriff"
 msgid ""
 "Keyword terms and phrases are used during license analysis to better "
 "identify license names.\n"
-msgstr "Während der Lizenzanalyse werden Schlüsselwörter und"
+msgstr "W&auml;hrend der Lizenzanalyse werden Schl&uuml;sselw&ouml;rter und"
 "Phrasen verwendet, um die Lizenz genauer zu bestimmen.\n"
 
 #: plugins/ui-licterm-manage.php:277
@@ -1466,15 +1468,15 @@ msgid ""
 "Terms consist of two parts: a canonical name for the class of terms, and a "
 "list of words or phrases that are members of the class.\n"
 msgstr ""
-"Ausdrücke bestehen aus zwei Teilen: Einem allgemeinen Namen für die"
-"Klasse von Ausdrücken und einer Wortliste, die zu dieser Klasse gehören.\n"
+"Ausdr&uuml;cke bestehen aus zwei Teilen: Einem allgemeinen Namen für die"
+"Klasse von Ausdr&uuml;cken und einer Wortliste, die zu dieser Klasse geh&ouml;ren.\n"
 
 #: plugins/ui-licterm-manage.php:278
 msgid ""
 "For example, the phrases 'GNU General Public License version 2' and 'GPL "
 "version 2' may both be parts of the 'GPLv2' class.\n"
 msgstr ""
-"Beispielsweise gehören die Phrasen 'GNU General Public License 2' und"
+"Beispielsweise geh&ouml;ren die Phrasen 'GNU General Public License 2' und"
 "auch 'GPL version 2' zur Klasse 'GPLv2'.\n"
 
 #: plugins/ui-licterm-manage.php:280
@@ -1483,19 +1485,19 @@ msgstr "Hinweis #1"
 
 #: plugins/ui-licterm-manage.php:281
 msgid ": Changes to this list will impact all new license analysis.\n"
-msgstr ": Änderungen an dieser Liste beeinflussen alle weiteren Lizenzanalysen.\n"
+msgstr ": &Auml;nderungen an dieser Liste beeinflussen alle weiteren Lizenzanalysen.\n"
 
 #: plugins/ui-licterm-manage.php:283
 msgid "However, all completed license analysis will be unchanged.\n"
-msgstr "Bereits abgeschlossene Analysen bleiben unverändert.\n"
+msgstr "Bereits abgeschlossene Analysen bleiben unver&auml;ndert.\n"
 
 #: plugins/ui-licterm-manage.php:284
 msgid ""
 "You may wish to clear the license analysis for an upload and reschedule the "
 "analysis in order to apply changes.\n"
 msgstr ""
-"Es kann wünschenswert sein, die Lizenzanalyse zu löschen und neu"
-"hochzuladen, so dass die geänderten Listen angewendet werden.\n"
+"Es kann w&uuml;nschenswert sein, die Lizenzanalyse zu l&ouml;schen und neu"
+"hochzuladen, so dass die ge&auml;nderten Listen angewendet werden.\n"
 
 #: plugins/ui-licterm-manage.php:286
 msgid "Note #2"
@@ -1503,7 +1505,7 @@ msgstr "Hinweis #2"
 
 #: plugins/ui-licterm-manage.php:287
 msgid ": There is one special case for spelling.\n"
-msgstr ": Es gibt eine Spezialklasse für Rechtschreibung.\n"
+msgstr ": Es gibt eine Spezialklasse f&uuml;r Rechtschreibung.\n"
 
 #: plugins/ui-licterm-manage.php:289
 msgid "Many licenses spell the word 'licen<b>c</b><b>s</b>e.\n"
@@ -1519,11 +1521,11 @@ msgstr ""
 
 #: plugins/ui-licterm-manage.php:299
 msgid "Select canonical group to edit"
-msgstr "Wählen Sie die allgemeine Gruppe zum Editieren"
+msgstr "W&auml;hlen Sie die allgemeine Gruppe zum Editieren"
 
 #: plugins/ui-licterm-manage.php:307
 msgid "Check to delete this canonical group!"
-msgstr "Auswählen, im die allgemeine Gruppe zu löschen!"
+msgstr "Ausw&auml;hlen, im die allgemeine Gruppe zu l&ouml;schen!"
 
 #: plugins/ui-licterm-manage.php:315
 msgid "Canonical name"
@@ -1531,12 +1533,12 @@ msgstr "Allgemeiner Name"
 
 #: plugins/ui-licterm-manage.php:325
 msgid "Keywords, terms, and phrases specific to this group."
-msgstr "Schlüsselwörter, Ausdrücke und Phrasen, die für diese Gruppe"
+msgstr "Schl&uuml;sselw&ouml;rter, Ausdrücke und Phrasen, die für diese Gruppe"
 "spezifisch sind."
 
 #: plugins/ui-licterm-manage.php:330
 msgid "Terms associated with this canonical group"
-msgstr "Mit dieser allgemeinen Gruppe verknüpften Begriffe"
+msgstr "Mit dieser allgemeinen Gruppe verkn&uuml;pften Begriffe"
 
 #: plugins/ui-licterm-manage.php:331
 msgid "Known terms"
@@ -1544,8 +1546,8 @@ msgstr "Bekannte Begriffe"
 
 #: plugins/ui-licterm-manage.php:397
 msgid "Add a new keyword, term, or phrase to this canonical group."
-msgstr "Ein neues Schlüsselwort, Begriff und Ausdruck zu dieser"
-"allgemeinen Gruppe hinzufügen."
+msgstr "Ein neues Schl&uuml;sselwort, Begriff und Ausdruck zu dieser"
+"allgemeinen Gruppe hinzuf&uuml;gen."
 
 #: plugins/ui-licterm-manage.php:404
 msgid ""
@@ -1557,91 +1559,95 @@ msgstr ""
 
 #: plugins/ui-licterm-manage.php:410
 msgid "Associate licenses with this canonical group."
-msgstr "Mit dieser allgemeinen Gruppe Lizenzen verknüpfen."
+msgstr "Mit dieser allgemeinen Gruppe Lizenzen verkn&uuml;pfen."
 
 #: plugins/ui-licterm-manage.php:413
 msgid "Licenses that are associated will be referred by the canonical name.\n"
-msgstr ""
+msgstr "Lizenzen einer Gruppe werden durch den Gruppennamen bezeichnet.\n"
 
 #: plugins/ui-licterm-manage.php:414
 msgid "Unassociated licenses are referred by their license name."
-msgstr ""
+msgstr "Nicht verkn&uuml;pfte Lizenzen werden durch den Lizenznamen bezeichnet."
 
 #: plugins/ui-licterm-manage.php:419
 msgid "Licenses associated with this canonical group"
-msgstr ""
+msgstr "Lizenzen, die zu dieser Gruppe geh&ouml;ren"
 
 #: plugins/ui-licterm-manage.php:420
 msgid "Unassociated Licenses"
-msgstr ""
+msgstr "Nicht verkn&uuml;pfte Lizenzen"
 
 #: plugins/ui-licterm-manage.php:493
 msgid "Delete a keyword from"
-msgstr ""
+msgstr "Schl&uuml;sselwort aus"
 
 #: plugins/ui-licterm-manage.php:494
 msgid "all"
-msgstr ""
+msgstr "allen"
 
 #: plugins/ui-licterm-manage.php:495
 msgid "canonical groups."
-msgstr ""
+msgstr "Gruppen entfernen."
 
 #: plugins/ui-licterm-manage.php:498
 msgid ""
 "Use this to remove typographical errors or completely unnecessary keywords "
 "or phrases.\n"
 msgstr ""
+"Zu benutzen, um Schreibfehler oder falsche Schl&uuml;sselw&ouml;rter oder "
+"Phrasen zu entfernen.\n"
 
 #: plugins/ui-licterm-manage.php:711
 msgid "License term information updated."
-msgstr ""
+msgstr "Lizenztexte aktualisiert."
 
 #: plugins/ui-licterm-manage.php:716
 msgid "Could not add License term information, error code is"
-msgstr ""
+msgstr "Lizenztext-Informationen konnten nicht hinzugef&uuml;gt werden Fehlercode:"
 
 #: plugins/ui-menus.php:27
 msgid "Menus"
-msgstr ""
+msgstr "Men&uuml;s"
 
 #: plugins/ui-menus.php:271 plugins/ui-default.php:27
 msgid "Welcome to FOSSology"
-msgstr ""
+msgstr "Willkommen zu FOSSology"
 
 #: plugins/ui-menus.php:298
 msgid "login"
-msgstr ""
+msgstr "Login"
 
 #: plugins/core-debug-fileloc.php:27
 msgid "Global Variables"
-msgstr ""
+msgstr "Globale Variablen"
 
 #: plugins/core-debug-fileloc.php:76
 msgid " Variable"
-msgstr ""
+msgstr "Variable"
 
 #: plugins/search-repo.php:27
 msgid "Search the Repository"
-msgstr ""
+msgstr "Das Repositorium durchsuchen"
 
 #: plugins/search-repo.php:43
 msgid "Search based on repository keys"
-msgstr ""
+msgstr "Suche mit Repositorium-Schl&uuml;sselw&ouml;rtern"
 
 #: plugins/search-repo.php:120
 msgid "Search string is not a valid format."
-msgstr ""
+msgstr "Der Suchbegriff hat ein ung&uuml;ltiges Format."
 
 #: plugins/search-repo.php:143
 msgid ""
 "Given a file key (pfile_pk) or repository identifier (sha1.md5.length), "
 "return the list of files.\n"
 msgstr ""
+"Es kann nach Datei-Schl&uuml;sseln (pfile_pk) oder Repositoriums-IDs "
+"(sha1.md5.length) gesucht werden. Ergebnis ist eine Dateiliste.\n"
 
 #: plugins/search-repo.php:145
 msgid "Enter the pfile key or repository identifier:<P />"
-msgstr ""
+msgstr "Datei-Schl&uuml;ssel oder Repositorium-ID:<P />"
 
 #: plugins/search-repo.php:154
 msgid "Files associated with"
@@ -1746,7 +1752,7 @@ msgstr ""
 
 #: plugins/admin-bucket-pool.php:151
 msgid "Manually edit the new bucketpool record, if desired."
-msgstr "Editieren Sie falls nötig die neuen Kategorien."
+msgstr "Editieren Sie falls n&ouml;tig die neuen Kategorien."
 
 #: plugins/admin-bucket-pool.php:153
 msgid "Manually insert/update/delete the new bucketdef records."
@@ -1768,8 +1774,8 @@ msgstr "Reihen Sie die neue Aufgabe ein mit Aufgaben > Agenten."
 msgid ""
 "Use Buckets > Compare to compare the new and old runs.  Verify the results."
 msgstr ""
-"Nutzen Sie Ablagen > Vergleichen, um die alten und die neuen Läufe "
-"miteinander zu vergleichen. Bestätigen Sie so die Ergebnisse."
+"Nutzen Sie Ablagen > Vergleichen, um die alten und die neuen L&auml;ufe "
+"miteinander zu vergleichen. Best&auml;tigen Sie so die Ergebnisse."
 
 #: plugins/admin-bucket-pool.php:161
 msgid ""
@@ -1777,7 +1783,7 @@ msgid ""
 "to remove the previous runs results and repeat starting with editing the "
 "bucketpool or def records."
 msgstr ""
-"Wenn Sie die die Ablagen noch ändern wollen, dann wählen Sie "
+"Wenn Sie die die Ablagen noch &auml;ndern wollen, dann wählen Sie "
 "Ablagen > Entferne Ablagen-Ergebnisse, um die alten Ergebnisse "
 "zu entfernen und passen Sie dann die Ablagen oder Def-Records an."
 
@@ -1788,12 +1794,12 @@ msgid ""
 "of the old bucketpool to the new one with Buckets > New Bucketpool."
 msgstr ""
 "Wenn Sie mit den Ergebnissen dieser Sammlung zufrieden sind, dann "
-"können Sie die alte Ablagensammlung aller Nutzer mit "
-"Ablagen > Neue Ablagensammlung zurücksetzen."
+"k&ouml;nnen Sie die alte Ablagensammlung aller Nutzer mit "
+"Ablagen > Neue Ablagensammlung zur&uuml;cksetzen."
 
 #: plugins/admin-bucket-pool.php:169
 msgid "Choose the bucketpool to duplicate"
-msgstr "Wählen Sie die Ablagensammlung, die kopiert werden soll"
+msgstr "W&auml;hlen Sie die Ablagensammlung, die kopiert werden soll"
 
 #: plugins/admin-bucket-pool.php:174
 msgid "Update my default bucketpool"
@@ -3865,7 +3871,7 @@ msgstr "Sie haben sich nun mit FOSSology bekannt gemacht, brechen Sie"
 
 #: plugins/ui-welcome.php:99
 msgid "The following resources will provide additional help and information:"
-msgstr "Die folgenden Ressourcen können Ihnen dabei helfen:"
+msgstr "Die folgenden Ressourcen k&ouml;nnen Ihnen dabei helfen:"
 
 #: plugins/ui-welcome.php:100
 msgid "Help tab"
@@ -3873,7 +3879,7 @@ msgstr "Hilfe"
 
 #: plugins/ui-welcome.php:101
 msgid "- Select this website's Help tab for software-related help and tips."
-msgstr "- Wählen Sie den Hilfe-Reiter, um weitere Hilfen und Hinweise"
+msgstr "- W&auml;hlen Sie den Hilfe-Reiter, um weitere Hilfen und Hinweise"
 "zu erhalten."
 
 #: plugins/ui-welcome.php:102
@@ -3890,18 +3896,18 @@ msgstr "FOSSbazaar-Website"
 
 #: plugins/ui-welcome.php:105
 msgid "- A community website with information on Open Source Governance."
-msgstr "- eine Internet-Gemeinschaft die sich für Open Source einsetzt."
+msgstr "- eine Internet-Gemeinschaft die sich f&uuml;r Open Source einsetzt."
 
 #: plugins/upload-srv-files.php:141
 msgid "Failed to place fosscp_agent in job queue"
-msgstr "Der Agent 'fosscp_agent' konnte nicht in die Aufgabenliste eingefügt werden"
+msgstr "Der Agent 'fosscp_agent' konnte nicht in die Aufgabenliste eingef&uuml;gt werden"
 
 #: plugins/upload-srv-files.php:186
 msgid ""
 "This option permits uploading a file, set of files, or a directory from the "
 "web server to FOSSology.\n"
 msgstr ""
-"Hier können Sie Dateien oder Verzeichnisse zum Hochladen vom FOSSology-Webserver auswählen.\n"
+"Hier k&ouml;nnen Sie Dateien oder Verzeichnisse zum Hochladen vom FOSSology-Webserver ausw&auml;hlen.\n"
 
 #: plugins/upload-srv-files.php:187
 msgid ""
@@ -4368,12 +4374,12 @@ msgstr "Spalte"
 #: plugins/core-schema.php:97 plugins/core-schema.php:125
 #: plugins/core-schema.php:280
 msgid "Add SQL"
-msgstr "SQL hinzufügen"
+msgstr "SQL hinzuf&uuml;gen"
 
 #: plugins/core-schema.php:98 plugins/core-schema.php:126
 #: plugins/core-schema.php:281
 msgid "Alter SQL\n"
-msgstr "SQL ändern\n"
+msgstr "SQL &auml;ndern\n"
 
 #: plugins/core-schema.php:144 plugins/core-schema.php:299
 msgid "Sequence"
