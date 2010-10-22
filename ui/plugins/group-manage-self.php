@@ -57,15 +57,17 @@ class group_manage_self extends FO_Plugin {
         return(0);
       }
     }
-   
-    $sql = "SELECT * FROM group_user_member WHERE user_fk = $UserId and group_perm=1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1){
+  
+    if (!empty($UserId)){ 
+      $sql = "SELECT * FROM group_user_member WHERE user_fk = $UserId and group_perm=1;";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      if (pg_num_rows($result) < 1){
+        pg_free_result($result);
+        return(0);
+      }
       pg_free_result($result);
-      return(0);
     }
-    pg_free_result($result);
 
     $this->State = PLUGIN_STATE_READY;
     // Add this plugin to the menu
