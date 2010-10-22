@@ -69,7 +69,7 @@ if((strlen($Filename)) == 0)
 // get db params and open connection to db.
 
 echo "connecting to db fossology-gold\n";
-$dbOptions = 'host=sirius.ostt dbname=fossology-gold user=fossy password=fossy';
+$dbOptions = 'host=fossology.org dbname=fossology-gold user=fossy password=fossy';
 $PGCONN = dbConnect($dbOptions);
 
 echo "schemaEXDB: calling ExportSchema with filename:$Filename\n";
