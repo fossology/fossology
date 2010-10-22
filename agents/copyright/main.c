@@ -731,7 +731,7 @@ int main(int argc, char** argv)
       case 'd': /* debugging */
         verbose = 1;
         sprintf(mdir, "%s/Matches", DATADIR);
-        mout = fopen(mdir, "w");
+        mout = fopen("Matches", "w");
         if(!mout)
         {
           fprintf(cerr, "FATAL: could not open Matches for logging\n");
