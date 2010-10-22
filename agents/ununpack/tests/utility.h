@@ -14,4 +14,14 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+#include <magic.h>
+
 int file_dir_existed(char *path_name);
+
+void deleteTmpFiles(char *dir);
+extern magic_t MagicCookie;
+extern char *Filename;
+extern char *NewDir;
+extern int Recurse;
+extern int existed;
+

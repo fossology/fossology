@@ -19,6 +19,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/stat.h> 
 #include "utility.h"
 
+/* global variables. */
+char *Filename = "";
+char *NewDir = "../test-result";
+int Recurse = -1;
+int existed = 0; // default not existed
+magic_t MagicCookie;
+
 /**
  * @brief juge if the file or directory is existed not
  * @param path_name, the file or directory name including path
