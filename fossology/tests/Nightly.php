@@ -60,17 +60,46 @@ if(array_key_exists('p', $options))
 
 /**
  * reportError
- * \brief report the test setup error in a mail message using the gloabl
+ * \brief report the test setup error in a mail message using the global
  * mailTo variable.
+ *
+ * @param string $error the error string to mail
+ * @param string $file either the file path of a file or a string.  If
+ * the parameter is a file path to a valid file, then the file will be
+ * read and it's contents reported in the mail message.
  */
-function reportError($error)
+function reportError($error, $file=NULL)
 {
 	global $mailTo;
+
+	if(is_file($file))
+	{
+		if(is_readable($file))
+		{
+			$longMsg = file_get_contnets($file);
+		}
+		else
+		{
+			$longMsg = "$file was not readable\n";
+		}
+	}
+	else if(strlen($file) != 0)
+	{
+		if(is_string($file))
+		{
+			$longMsg = $file;
+		}
+		else
+		{
+			$longMsg = "Could not append a non-string to the message, " .
+			           "reportError was passed an invalid 2nd parameter\n";
+		}
+	}
 
 	$hdr = "There were errors in the nightly test setup." .
 	       "The tests were not run due to one or more errors.\n\n";
 
-	$msg = $hdr . $error . "\n";
+	$msg = $hdr . $error . "\n" . $longMsg . "\n";
 
 	// mailx will not take a string as the message body... save to a tmp
 	// file and give it that.
@@ -106,7 +135,7 @@ if((preg_match('/No such file or directory/',$last, $matches)) != 1)
 	{
 		$error = "Error, could not remove $modelPath, sources will not update, exiting\n";
 		print $error;
-		reportError($error);
+		reportError($error,NULL);
 		exit(1);
 	}
 }
@@ -115,7 +144,7 @@ if($tonight->svnUpdate() !== TRUE)
 {
 	$error = "Error, could not svn Update the sources, aborting test\n";
 	print $error;
-	reportError($error);
+	reportError($error,NULL);
 	exit(1);
 }
 
@@ -127,7 +156,7 @@ if($tonight->makeSrcs() !== TRUE)
 {
 	$error = "There were Errors in the make of the sources examine make.out\n";
 	print $error;
-	reportError($error);
+	reportError($error,'make.out');
 	exit(1);
 }
 //try to stop the scheduler before the make install step.
@@ -136,7 +165,7 @@ if($tonight->stopScheduler() !== TRUE)
 {
 	$error = "Could not stop fossology-scheduler, maybe it wasn't running?\n";
 	print $error;
-	reportError($error);
+	reportError($error, NULL);
 }
 
 // Step 4 install fossology
@@ -145,7 +174,7 @@ if($tonight->makeInstall() !== TRUE)
 {
 	$error = "There were Errors in the Installation examine make-install.out\n";
 	print $error;
-	reportError($error);
+	reportError($error, 'mi.out');
 	exit(1);
 }
 
@@ -165,7 +194,7 @@ if($iRes !== TRUE)
 	$error = "There were errors in the postinstall process check fop.out\n";
 	print $error;
 	print "calling reportError\n";
-	reportError($error);
+	reportError($error, 'fop.out');
 	exit(1);
 }
 
@@ -175,7 +204,7 @@ if($tonight->schedulerTest() !== TRUE)
 {
 	$error = "Error! in scheduler test examine ST.out\n";
 	print $error;
-	reportError($error);
+	reportError($error, 'ST.out');
 	exit(1);
 }
 
@@ -184,7 +213,7 @@ if($tonight->startScheduler() !== TRUE)
 {
 	$error = "Error! Could not start fossology-scheduler\n";
 	print $error;
-	reportError($error);
+	reportError($error, NULL);
 	exit(1);
 }
 
