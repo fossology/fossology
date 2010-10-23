@@ -1651,64 +1651,64 @@ msgstr "Datei-Schl&uuml;ssel oder Repositorium-ID:<P />"
 
 #: plugins/search-repo.php:154
 msgid "Files associated with"
-msgstr ""
+msgstr "Verknüpfte Dateien"
 
 #: plugins/agent-license-reanalyze.php:27
 msgid "Reanalyze License and Store Results"
-msgstr ""
+msgstr "Lizenz erneut analysieren und Ergebnisse speichern"
 
 #: plugins/agent-license-reanalyze.php:63
 msgid "Removing previous license information."
-msgstr ""
+msgstr "Vorherige Lizenz-Daten entfernen"
 
 #: plugins/agent-license-reanalyze.php:76
 msgid "Container not processed."
-msgstr ""
+msgstr "Container nicht bearbeitet."
 
 #: plugins/agent-license-reanalyze.php:86
 msgid "Creating license cache"
-msgstr ""
+msgstr "Lizenz-Cache erzeugt"
 
 #: plugins/agent-license-reanalyze.php:94
 msgid "Finding licenses based on templates"
-msgstr ""
+msgstr "Suche Lizenzen anhand von Schablonen"
 
 #: plugins/agent-license-reanalyze.php:99
 msgid "Finding license names based on terms and keywords"
-msgstr ""
+msgstr "Suche Lizenznamen basieren auf Begriffen und Schlüsselworten"
 
 #: plugins/agent-license-reanalyze.php:115
 msgid "No licenses found."
-msgstr ""
+msgstr "Keine Lizenzen gefunden."
 
 #: plugins/agent-license-reanalyze.php:120
 msgid "Cleaning up"
-msgstr ""
+msgstr "Aufräumen"
 
 #: plugins/agent-license-reanalyze.php:129
 msgid "Scheduling email"
-msgstr ""
+msgstr "E-Mail vorgemerkt"
 
 #: plugins/agent-license-reanalyze.php:133
 msgid "FAIL! Scheduling of email failed:"
-msgstr ""
+msgstr "FEHLER: E-Mail kann nicht zum Versand vorgemerkt werden:"
 
 #: plugins/agent-license-reanalyze.php:196
 #: plugins/agent-license-reanalyze.php:199
 msgid "Reanalyze license and store results"
-msgstr ""
+msgstr "Erneute Analyse von Lizenzen Speicherung der Ergebnisse"
 
 #: plugins/agent-license-reanalyze.php:232
 msgid "Refreshing in 2 seconds..."
-msgstr ""
+msgstr "Wird in 2 Sekunden erneut geladen..."
 
 #: plugins/admin-bucket-pool.php:27
 msgid "Duplicate Bucketpool"
-msgstr ""
+msgstr "Ablagensammlung duplizieren"
 
 #: plugins/admin-bucket-pool.php:131
 msgid "Your new bucketpool_pk is"
-msgstr ""
+msgstr "Der neue bucketpool_pk ist" 
 
 #: plugins/admin-bucket-pool.php:136
 msgid ""
