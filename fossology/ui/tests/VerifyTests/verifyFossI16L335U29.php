@@ -169,7 +169,7 @@ class verifyFossolyTest extends fossologyTestCase
 		foreach ($licSummary->hList as $summary) {
 			$key = $summary['textOrLink'];
 			$this->assertEqual($licenseSummary[$key], $summary['count'],
-  		"verifyFossDirsOnly FAILED! $key does not equal $licenseSummary[$key],
+  		"verifyFossl16L335 FAILED! $key does not equal $licenseSummary[$key],
   		got $summary[count]\n");
 			//print "summary is:\n";print_r($summary) . "\n";
 		}
@@ -185,30 +185,31 @@ class verifyFossolyTest extends fossologyTestCase
 			return;
 		}
 
-		// create list of Show urls
-		$urls = array();
-		foreach ($licHistogram->hList as $license) {
-			$urls[$license['textOrLink']] = makeUrl($this->host, $license['showLink']);
-		}
-		if(empty($urls)) {
-			$this->fail("FATAL! no urls to process, there should be many for"
-			. " this test, Stopping the test");
-			return;
-		}
-		// verify every row against the standard
-		foreach($urls as $lic => $showUrl){
-			$page = $this->mybrowser->get($showUrl);
-			print "Checking the number of files based on $lic\n";
-			if($licenseCounts[$lic] > 50) {
-				$this->assertTrue($this->myassertText($page, '/225 files found \(225 unique\) with license/'),
-        "verifyFossl16L335 FAILED! Phrase for $lic not found on page\n");
-				continue;
+		// verify every row against the standard by comparing the counts.
+		/*
+		* @todo check the show links, but to do that, need to gather another
+		* standard array to match against  or just use the count from the
+		* baseline?
+		*/
+
+		foreach($licHistogram->hList as $licFound)
+		{
+			$key = $licFound['textOrLink'];
+			//print "VDB: key is:$key\n";
+			//print "licFound is:\n";print_r($licFound) . "\n";
+			if(array_key_exists($key,$licenseCounts))
+			{
+				$this->assertEqual($licenseCounts[$key], $licFound['count'],
+          "verifyFossl16L335 FAILED! the baseline count {$licenseCounts[$key]} does" .
+          " not equal {$licFound['count']} for license $key,\n" .
+          "Expected: {$licenseCounts[$key]},\n" .
+          "     Got: {$licFound['count']}\n");
 			}
-			$licFileList = new parseFolderPath($page, $URL);
-			$fileCount = $licFileList->countFiles();
-			$this->assertEqual($fileCount, $licenseCounts[$lic],
-    	"verifyFossl16L335 FAILED! Should be $licenseCounts[$lic] files
-    	 based on $lic got:$fileCount\n");
+			else
+			{
+				$this->fail("verifyFossl16L335 A License was found that is " .
+         "not in the standard:\n$key\n");
+			}
 		}
 	}
 }
