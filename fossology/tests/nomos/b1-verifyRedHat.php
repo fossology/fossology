@@ -163,19 +163,12 @@ class rhelTest extends fossologyTestCase
 		$name = 'RedHat.tar.gz';
 		$safeName = escapeDots($name);
 		$page = $this->mybrowser->clickLink('Browse');
-		$this->assertTrue($this->myassertText($page, "/>View</"),
-       "verifyRedHat FAILED! >View< not found\n");
-		$this->assertTrue($this->myassertText($page, "/>Info</"),
-       "verifyRedHat FAILED! >Info< not found\n");
-		$this->assertTrue($this->myassertText($page, "/>Download</"),
-       "verifyRedHat FAILED! >Download< not found\n");
 		$page = $this->mybrowser->clickLink('Testing');
 		$this->assertTrue($this->myassertText($page, "/$safeName/"),
        "verifyRedHat FAILED! did not find $safeName\n");
 
 		/* Select archive */
 		//print "CKZDB: page before call parseBMenu:\n$page\n";
-
 
 		$page = $this->mybrowser->clickLink($name);
 		$this->assertTrue($this->myassertText($page, "/1 item/"),

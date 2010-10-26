@@ -38,7 +38,7 @@ require_once('../commonTestFuncs.php');
 /* Globals for test use, most tests need $URL, only login needs the others */
 global $URL;
 
-class rhelTest extends fossologyTestCase
+class rhelbl2Test extends fossologyTestCase
 {
 	public $mybrowser;          // must have
 	protected $host;
@@ -163,12 +163,6 @@ class rhelTest extends fossologyTestCase
 		$name = 'RedHat.tar.gz';
 		$safeName = escapeDots($name);
 		$page = $this->mybrowser->clickLink('Browse');
-		$this->assertTrue($this->myassertText($page, "/>View</"),
-       "verifyRedHat FAILED! >View< not found\n");
-		$this->assertTrue($this->myassertText($page, "/>Info</"),
-       "verifyRedHat FAILED! >Info< not found\n");
-		$this->assertTrue($this->myassertText($page, "/>Download</"),
-       "verifyRedHat FAILED! >Download< not found\n");
 		$page = $this->mybrowser->clickLink('Testing');
 		$this->assertTrue($this->myassertText($page, "/$safeName/"),
        "verifyRedHat FAILED! did not find $safeName\n");
