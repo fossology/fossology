@@ -1,19 +1,27 @@
 # FOSSology Makefile - test for agents/ununpack
 # Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
 
-TEST_FILES=ununpack
+DIRS=ununpack ununpack-ar ununpack-iso ununpack-disk
+BUILDDIRS = $(DIRS:%=build-%)
+CLEANDIRS = $(DIRS:%=clean-%)
+TESTDIRS = $(DIRS:%=test-%)
+COVDIRS = $(DIRS:%=cov-%)
 
-all: $(TEST_FILES)
-	$(MAKE) -C $(TEST_FILES) all
+all: $(BUILDDIRS)
+$(BUILDDIRS):
+	$(MAKE) -C $(@:build-%=%) all
 
-test: $(TEST_FIlES)
-	$(MAKE) -C $(TEST_FILES) test
+test: $(TESTDIRS)
+$(TESTDIRS):
+	$(MAKE) -C $(@:test-%=%) test
 
-coverage:
-	$(MAKE) -C $(TEST_FILES) coverage 
+coverage: $(COVDIRS)
+$(COVDIRS):
+	$(MAKE) -C $(@:cov-%=%) coverage 
 
-clean:
-	$(MAKE) -C $(TEST_FILES) clean
+clean: $(CLEANDIRS)
+$(CLEANDIRS):
+	$(MAKE) -C $(@:clean-%=%) clean
 
-utility.o: utility.c 
-	$(CC) -c utility.c
+utility.o: utility.c
+	$(CC) -c utility.c -I../
