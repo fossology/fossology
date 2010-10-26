@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 *********************************************************************/
 /* cunit includes */
 #include <CUnit/CUnit.h>
-#include "ununpack.h"
 #include "utility.h"
+#include "metahandle.h"
 
 int	FindCmd	(char *Filename);
 
