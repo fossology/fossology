@@ -17,7 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* cunit includes */
 #include <CUnit/CUnit.h>
-#include "ununpack.h"
 #include "utility.h"
 
 struct ParentInfo
