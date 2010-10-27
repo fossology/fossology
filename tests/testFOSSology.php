@@ -302,17 +302,17 @@ if (array_key_exists("a", $options)) {
 
 		LogAndPrint($LF, "Starting cli1Test\n" );
 		$last = exec('phpunit ./cli1Test.php', $punitOut, $puRtn);
-		if($puRtn != 0)
-		{
-			LogAndPrint($LF, "cli1Test Failed\n");
-			LogAndPrint($LF, $punitOut);
-			LogAndPrint($LF, "\n");
-		}
-		else
-		{
-			LogAndPrint($LF, "cli1Test Passed\n");
-			LogAndPrint($LF, "$last\n");
-		}
+    if($puRtn != 0)
+    {
+      LogAndPrint($LF, "cli1Test Failed\n");
+      LogAndPrint($LF, $punitOut);
+      LogAndPrint($LF, "\n");
+    }
+    else
+    {
+      LogAndPrint($LF, "cli1Test Passed\n");
+      LogAndPrint($LF, "$last\n");
+    }
 
 		if (chdir($Home) === FALSE) {
 			$cUInoHome = "All Tests ERROR: can't cd to $Home\n";
@@ -324,6 +324,20 @@ if (array_key_exists("a", $options)) {
 		}
 		$CopyLast = exec("fo-runTests -l \"`ls verify*`\" -n 'CopyRight Tests' >> $logFile 2>&1", $dummy, $CRrtn);
 		LogAndPrint($LF, "\n");
+
+    // phpunit tests
+    $last = exec('phpunit cliParamsTest.php', $punitOut, $puRtn);
+    if($puRtn != 0)
+    {
+      LogAndPrint($LF, "cli1Test Failed\n");
+      LogAndPrint($LF, $punitOut);
+      LogAndPrint($LF, "\n");
+    }
+    else
+    {
+      LogAndPrint($LF, "cli1Test Passed\n");
+      LogAndPrint($LF, "$last\n");
+    }
 
 		fclose($LF);
 		verifyUploads($logFile);
