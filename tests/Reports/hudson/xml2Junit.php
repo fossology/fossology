@@ -27,8 +27,6 @@
  * Created on Oct 14, 2010
  */
 
-// hack for now, put parameters in later
-
 /*
  * xml2Junit (x2j?)
  *
@@ -97,13 +95,19 @@ $xmlDoc->load($xmlFile);
 
 $proc = new XSLTProcessor();
 $proc->importStylesheet($xslDoc);
+$transformed = $proc->transformToXML($xmlDoc);
+
 if($outputFile)
 {
   // open file and write output
+  $OF = fopen($outputFile, 'w') or
+    die("Fatal cannot open output file $outputFile\n");
+  $wrote = fwrite($OF, $transformed);
+  fclose($OF);
 }
 else
 {
   // no output file, echo to stdout
-  echo $proc->transformToXML($xmlDoc);
+  echo "$transformed\n";
 }
 ?>
