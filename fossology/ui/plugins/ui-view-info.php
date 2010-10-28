@@ -41,7 +41,7 @@ class ui_view_info extends FO_Plugin
   function RegisterMenus()
     {
 $text = _("View file information");
-    menu_insert("Browse-Pfile::Info",5,$this->Name,$text);	
+    menu_insert("Browse-Pfile::Info",5,$this->Name,$text);
     // For the Browse menu, permit switching between detail and summary.
     $Parm = Traceback_parm_keep(array("upload","item","format"));
     $URI = $this->Name . $Parm;
@@ -172,7 +172,7 @@ $text = _("Sightings");
         }
     return($V);
   }//ShowSightings()
-	
+
   /***********************************************************
    ShowMetaView(): Display the meta data associated with the file.
    ***********************************************************/
@@ -250,7 +250,7 @@ $text = _("Total meta data records");
     return($V);
   } // ShowMetaView()
 
-  /*********************************************************** 
+  /***********************************************************
    ShowPackageInfo(): Display the package info associated with
    the rpm/debian package.
    ***********************************************************/
@@ -262,7 +262,7 @@ $text = _("Total meta data records");
     $Item = GetParm("item",PARM_INTEGER);
     $Require = "";
     $MIMETYPE = "";
-    $Count = 0;	
+    $Count = 0;
 
     if (empty($Item) || empty($Upload))
         { return; }
@@ -277,7 +277,7 @@ $text = _("Total meta data records");
 
     /**********************************
      Check if pkgagent disabled
-    ***********************************/		
+    ***********************************/
     $SQL = "SELECT agent_enabled FROM agent WHERE agent_name ='pkgagent' order by agent_ts LIMIT 1;";
     $Results = $DB->Action($SQL);
     if (isset($Results[0]) && ($Results[0]['agent_enabled']== 'f')){return;}
@@ -322,7 +322,7 @@ $text = _("Package Info");
           }
        $Count=1;
 
-       $V .= "<table border='1'>\n";
+       $V .= "<table border='1' name='pkginfo'>\n";
 $text = _("Item");
 $text1 = _("Type");
 $text2 = _("Value");
@@ -350,8 +350,8 @@ $text = _("Version");
           $V .= "<tr><td align='right'>$Count</td><td>$text";
           $V .= "</td><td>" . htmlentities($R['version']) . "</td></tr>\n";
           $Count++;
-	  
-$text = _("License");	
+
+$text = _("License");
           $V .= "<tr><td align='right'>$Count</td><td>$text";
           $V .= "</td><td>" . htmlentities($R['license']) . "</td></tr>\n";
           $Count++;
@@ -427,7 +427,7 @@ $text = _("Item");
 $text1 = _("Type");
 $text2 = _("Value");
        $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
-       
+
        for($i=0; !empty($Results[$i]['pkg_pk']); $i++)
             {
             $R = &$Results[$i];
