@@ -113,11 +113,13 @@ class upload_srv_files extends FO_Plugin {
       $ShortName = $Name;
     }
     // Create an upload record.
+    $jobq = NULL;
     $Mode = (1 << 3); // code for "it came from web upload"
     $uploadpk = JobAddUpload($ShortName, $SourceFiles, $Desc, $Mode, $FolderPk);
     $jobq = JobAddJob($uploadpk, 'fosscp_agent', 0);
-    if (empty($jobq) || ($jobpk < 0)) {
-$text = _("Failed to create job record");
+    if (empty($jobq))
+    {
+      $text = _("Failed to create job record");
       return ($text);
     }
     /* Check for email notification and adjust jq_args as needed */
@@ -128,9 +130,9 @@ $text = _("Failed to create job record");
       else {
         $Email = $_SESSION['UserEmail'];
       }
-      /* 
+      /*
        * Put -w webServer -e <addr> in the front as the upload is last
-       * part of jq_args. 
+       * part of jq_args.
        */
       $jq_args = " -W {$_SERVER['SERVER_NAME']} -e $Email " . "$jq_args";
     }
