@@ -112,8 +112,9 @@ if [ $BUILDTIME ]; then
          # 4=Nahant* 5=Tikanga*
          yum install \
             postgresql-devel \
-            file libxml2 rpm-devel \
-            perl-Text-Template subversion
+            gcc make file libxml2 rpm-devel \
+            perl-Text-Template subversion \
+            Pyrex libextractor-devel
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
