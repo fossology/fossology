@@ -1,5 +1,6 @@
 <?php
 
+
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -78,11 +79,14 @@ class folder_create extends FO_Plugin
 
     // folder name exists under the parent?
     $Sql = "SELECT * FROM folderlist WHERE name = '$NewFolder' AND
-        			parent = '$ParentId' AND foldercontents_mode = '1';";
+            			parent = '$ParentId' AND foldercontents_mode = '1';";
     $Results = $DB->Action($Sql);
-    if ($Results[0]['name'] == $NewFolder)
+    if (!empty ($Results))
     {
-      return (4);
+      if ($Results[0]['name'] == $NewFolder)
+      {
+        return (4);
+      }
     }
 
     /* Create the folder
@@ -124,40 +128,43 @@ class folder_create extends FO_Plugin
         $ParentId = GetParm('parentid', PARM_INTEGER);
         $NewFolder = GetParm('newname', PARM_TEXT);
         $Desc = GetParm('description', PARM_TEXT);
-        if (!empty ($ParentId) && !empty ($NewFolder)) {
+        if (!empty ($ParentId) && !empty ($NewFolder))
+        {
 
           $rc = $this->Create($ParentId, $NewFolder, $Desc);
 
           $Uri = Traceback_uri() . "?mod=refresh&remod=" . $this->Name;
-          if ($rc == 1) {
+          if ($rc == 1)
+          {
             /* Need to refresh the screen */
-$text = _("Folder");
-$text1 = _("Created");
+            $text = _("Folder");
+            $text1 = _("Created");
             $R .= displayMessage("$text $NewFolder $text1");
-          }
-          else if($rc == 4) {
-$text = _("Folder");
-$text1 = _("Exists");
-            $R .= displayMessage("$text $NewFolder $text1");
-          }
+          } else
+            if ($rc == 4)
+            {
+              $text = _("Folder");
+              $text1 = _("Exists");
+              $R .= displayMessage("$text $NewFolder $text1");
+            }
         }
         /* Display the form */
         $V .= "$R\n";
         $V .= "<form method='POST'>\n"; // no url = this url
         $V .= "<ol>\n";
-$text = _("Select the parent folder:  \n");
+        $text = _("Select the parent folder:  \n");
         $V .= "<li>$text";
         $V .= "<select name='parentid'>\n";
         $V .= FolderListOption(-1, 0);
         $V .= "</select><P />\n";
-$text = _("Enter the new folder name:  \n");
+        $text = _("Enter the new folder name:  \n");
         $V .= "<li>$text";
         $V .= "<INPUT type='text' name='newname' size=40 />\n<br>";
-$text = _("Enter a meaningful description:  \n");
+        $text = _("Enter a meaningful description:  \n");
         $V .= "<br><li>$text";
         $V .= "<INPUT type='text' name='description' size=80 />\n";
         $V .= "</ol>\n";
-$text = _("Create");
+        $text = _("Create");
         $V .= "<input type='submit' value='$text!'>\n";
         $V .= "</form>\n";
         break;
