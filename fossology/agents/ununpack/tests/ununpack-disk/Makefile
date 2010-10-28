@@ -8,7 +8,7 @@ include $(VARS)
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS) -I../../ -I../ -lcunit
 EXE=test_ununpack_disk
 
-TEST_OBJ=testRun.o testExtractDisk.o
+TEST_OBJ=testRun.o testExtractDisk.o testFatDiskName.o
 
 all: $(EXE)
 
