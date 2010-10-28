@@ -78,6 +78,15 @@ void testExtractDisk4Ext2FstypeUnknow()
  */
 void testExtractDisk4Fat()
 {
+  deleteTmpFiles("../test-result/");
+  existed = file_dir_existed("../test-result/");
+  CU_ASSERT_EQUAL(existed, 0); // not existing
+  Filename = "../test-data/testdata4unpack/fattest-image";
+  MkDirs("../test-result/fattest-image.dir");
+  Result = ExtractDisk(Filename, "fat", "../test-result/fattest-image.dir");
+  existed = file_dir_existed("../test-result/fattest-image.dir/.imagefile.iso");
+  CU_ASSERT_EQUAL(Result, 0);
+  CU_ASSERT_EQUAL(existed, 1);
 }
 
 /**
@@ -85,6 +94,15 @@ void testExtractDisk4Fat()
  */
 void testExtractDisk4Ntfs()
 {
+  deleteTmpFiles("../test-result/");
+  existed = file_dir_existed("../test-result/");
+  CU_ASSERT_EQUAL(existed, 0); // not existing
+  Filename = "../test-data/testdata4unpack/ntfstest-image";
+  MkDirs("../test-result/ntfstest-image.dir");
+  Result = ExtractDisk(Filename, "ntfs", "../test-result/ntfstest-image.dir");
+  existed = file_dir_existed("../test-result/ntfstest-image.dir/.imagefile.iso");
+  CU_ASSERT_EQUAL(Result, 0);
+  CU_ASSERT_EQUAL(existed, 1);
 }
 
 CU_TestInfo ExtractDisk_testcases[] =
@@ -92,7 +110,7 @@ CU_TestInfo ExtractDisk_testcases[] =
     {"Testing function ExtractDisk for ext2 image:", testExtractDisk4Ext2},
     {"Testing function ExtractDisk for ext3 image:", testExtractDisk4Ext3},
     {"Testing function ExtractDisk for ext2 image, fs type is unknowed:", testExtractDisk4Ext2FstypeUnknow},
-//    {"Testing function ExtractDisk for fat image:", testExtractDisk4Fat},
-//    {"Testing function ExtractDisk for nfts image:", testExtractDisk4Ntfs},
+    {"Testing function ExtractDisk for fat image:", testExtractDisk4Fat},
+    {"Testing function ExtractDisk for nfts image:", testExtractDisk4Ntfs},
     CU_TEST_INFO_NULL
 };
