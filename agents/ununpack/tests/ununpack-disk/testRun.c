@@ -7,9 +7,12 @@
 extern CU_TestInfo ExtractDisk_testcases[]; 
 extern CU_TestInfo FatDiskName_testcases[];
 
+extern int FatDiskNameInit();
+extern int FatDiskNameClean();
+
 CU_SuiteInfo suites[] = {
         {"Testing the function ExtractDisk:", NULL, NULL, ExtractDisk_testcases},
-        {"Testing the function FatDiskName:",  NULL, NULL, FatDiskName_testcases},
+        {"Testing the function FatDiskName:", FatDiskNameInit, FatDiskNameClean, FatDiskName_testcases},
         CU_SUITE_INFO_NULL
 };
 

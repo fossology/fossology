@@ -26,11 +26,28 @@ static char *Name = NULL;
 void FatDiskName(char *name);
 
 /**
+ * @brief initialize
+ */
+int  FatDiskNameInit()
+{
+  Name = (char *)malloc(100);
+  return 0;
+}
+
+/**
+ * @brief clean env and others
+ */
+int FatDiskNameClean()
+{
+  free(Name);
+  return 0;
+}
+
+/**
  * @brief Convert to lowercase.
  */
 void testFatDiskName1()
 {
-  Name = (char *)malloc(100);
   strcpy(Name, "Fossology\0");
   FatDiskName(Name);
   CU_ASSERT_EQUAL(strcmp(Name, "fossology"), 0); 
