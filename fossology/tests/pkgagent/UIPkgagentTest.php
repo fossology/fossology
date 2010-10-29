@@ -49,7 +49,6 @@ class UIPkgagentTest extends fossologyTestCase
 
     $name = 'fossRpmsDebs.tar.bz2';
     $safeName = escapeDots($name);
-
     $this->host = getHost($URL);
     $this->Login();
   }
@@ -58,7 +57,7 @@ class UIPkgagentTest extends fossologyTestCase
    */
 /*  function testCreatePkgFolder()
   {
-    global $URL;	
+    global $URL;
     print "Creating Pkgagent folder\n";
     $this->createFolder(null, 'Pkgagent', null);
   }
@@ -70,7 +69,7 @@ class UIPkgagentTest extends fossologyTestCase
     $rootFolder = 1;
     $upload = NULL;
     $pkgagentList = array ('TestData/fossRpmsDebs.tar.bz2');
-    
+
     print "Starting pkgagent upload\n";
     foreach($pkgagentList as $upload) {
       $description = "File $upload uploaded by Upload Pkgagent TestData";
@@ -82,7 +81,7 @@ class UIPkgagentTest extends fossologyTestCase
   {
     global $URL;
     global $name;
-    global $safename;
+    global $safeName;
 
     print "Waiting for jobs to finish...\n";
     $last = exec('../wait4jobs.php', $tossme, $jobsDone);
@@ -102,7 +101,7 @@ class UIPkgagentTest extends fossologyTestCase
       $page = $this->mybrowser->clickLink('Browse');
       $this->assertTrue($this->myassertText($page, '/Browse/'),
              "verifyPkgagent FAILED! Could not find Browse menu\n");
-      
+
       $page = $this->mybrowser->clickLink('Pkgagent');
       $this->assertTrue($this->myassertText($page, "/Browse/"),
         "verifyPkgagent FAILED! Browse Title not found\n");
@@ -150,7 +149,7 @@ class UIPkgagentTest extends fossologyTestCase
       $url = makeUrl($this->host, $match[1][1][0]);
       if($url === NULL) { $this->fail("verifyPkgagent Failed, host is not set"); }
       $pagedebsrc = $this->mybrowser->get($url);
-      //print "$pagedebsrc\n";  
+      //print "$pagedebsrc\n";
 	  $this->assertTrue($this->myassertText($pagedebsrc, '/records: 15/'),
         "verifyPkgagent FAILED! Package info records: 15 not found\n");
       $this->assertTrue($this->myassertText($pagedebsrc, '/Debian Source Package/'),
@@ -161,7 +160,7 @@ class UIPkgagentTest extends fossologyTestCase
         "verifyPkgagent FAILED! debhelper (>= 5) not found\n");
 
       /* Select each package's [Info] link to View package info*/
-      $menu = new parseBrowseMenu($page);
+      $menu = new parseBrowseMenu($page, 'pkginfo', 1);
       $list = $menu->parseBrowseFileMinis();
       //print_r($list);
       $url = makeUrl($this->host, $list[0]['Info']);
@@ -176,7 +175,7 @@ class UIPkgagentTest extends fossologyTestCase
         "verifyPkgagent FAILED! Sun Jul 19 10:54:54 2009 not found\n");
       $this->assertTrue($this->myassertText($page, '/fossology-1.1.0-1.el4.src.rpm/'),
         "verifyPkgagent FAILED! fossology-1.1.0-1.el4.src.rpm not found\n");
-      
+
       $url = makeUrl($this->host, $list[1]['Info']);
       if($url === NULL) { $this->fail("verifyPkgagent Failed, host is not set"); }
       //print "$url\n";
@@ -202,8 +201,7 @@ class UIPkgagentTest extends fossologyTestCase
         "verifyPkgagent FAILED! utils not found\n");
       $this->assertTrue($this->myassertText($page, '/36/'),
         "verifyPkgagent FAILED! 36 not found\n");
-  
-    } 
-  }	
-}  
+    }
+  }
+}
 ?>
