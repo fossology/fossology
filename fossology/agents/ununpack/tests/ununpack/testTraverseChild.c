@@ -65,10 +65,10 @@ typedef struct unpackqueue unpackqueue;
 #define MAXCHILD        4096
 extern unpackqueue Queue[MAXCHILD+1];    /* manage children */
 
+int     ParentWait      ();
 void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir);
 void InitCmd();
 static int Index = 0;
-static int Result = 0;
 static stat_t Stat;
 
 /**
@@ -134,7 +134,7 @@ void testTraverseChild4DebianSourceFile()
   existed = file_dir_existed("../test-result/");
 
   Filename = "../test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
-  MkDirs("../test-result/fcitx_3.6.2-1.dsc.dir/");
+  //  MkDirs("../test-result/fcitx_3.6.2-1.dsc.dir/");
   lstat64(Filename, &Stat);
   ContainerInfo CITemp;
   memset(&CITemp,0,sizeof(ContainerInfo));
@@ -162,10 +162,8 @@ void testTraverseChild4DebianSourceFile()
   } else
   {
     ParentWait();
-    existed = file_dir_existed("../test-result/");
+    existed = file_dir_existed("../test-result/fcitx_3.6.2-1.dsc.dir/debian/README.Debian");
     CU_ASSERT_EQUAL(existed, 1); // existing
-    existed = file_dir_existed("../test-result/");
-    CU_ASSERT_EQUAL(existed, 0); // not existing
   }
 }
 
@@ -184,8 +182,8 @@ void testTraverseChild4PartitionFile()
   memset(&CITemp,0,sizeof(ContainerInfo));
   strcpy(CITemp.Source, Filename);
   strcpy(CITemp.Partdir, NewDir);
-  strcpy(CITemp.Partname, "imagefile.iso");
-  strcpy(CITemp.PartnameNew, "imagefile.iso.dir");
+  strcpy(CITemp.Partname, "initrd.img-2.6.26-2-686");
+  strcpy(CITemp.PartnameNew, "initrd.img-2.6.26-2-686.dir");
   ParentInfo PITemp = {25, 1287725739, 1287725739, 0};
   lstat64(Filename, &Stat);
   CITemp.Stat = Stat;
@@ -198,10 +196,8 @@ void testTraverseChild4PartitionFile()
   } else
   {
     ParentWait();
-    existed = file_dir_existed("../test-result/");
+    existed = file_dir_existed("../test-result/initrd.img-2.6.26-2-686.dir/Partition_0000");
     CU_ASSERT_EQUAL(existed, 1); // existing
-    existed = file_dir_existed("../test-result/");
-    CU_ASSERT_EQUAL(existed, 0); // not existing
   }
 }
 
