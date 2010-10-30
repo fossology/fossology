@@ -77,6 +77,7 @@ static stat_t Stat;
 int  TraverseChildInit()
 {
   InitCmd();
+  return 0;
 }
 
 /**
