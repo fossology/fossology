@@ -84,7 +84,7 @@ void testExtractDisk4Fat()
   Filename = "../test-data/testdata4unpack/fattest-image";
   MkDirs("../test-result/fattest-image.dir");
   Result = ExtractDisk(Filename, "fat", "../test-result/fattest-image.dir");
-  existed = file_dir_existed("../test-result/fattest-image.dir/.imagefile.iso");
+  existed = file_dir_existed("../test-result/fattest-image.dir/ununpack.c");
   CU_ASSERT_EQUAL(Result, 0);
   CU_ASSERT_EQUAL(existed, 1);
 }
@@ -100,7 +100,7 @@ void testExtractDisk4Ntfs()
   Filename = "../test-data/testdata4unpack/ntfstest-image";
   MkDirs("../test-result/ntfstest-image.dir");
   Result = ExtractDisk(Filename, "ntfs", "../test-result/ntfstest-image.dir");
-  existed = file_dir_existed("../test-result/ntfstest-image.dir/.imagefile.iso");
+  existed = file_dir_existed("../test-result/ntfstest-image.dir/ununpack.c");
   CU_ASSERT_EQUAL(Result, 0);
   CU_ASSERT_EQUAL(existed, 1);
 }
