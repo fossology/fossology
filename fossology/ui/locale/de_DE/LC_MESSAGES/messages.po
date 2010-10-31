@@ -1811,23 +1811,23 @@ msgstr "Absenden"
 
 #: plugins/admin-check-template.php:27
 msgid "License Template Check"
-msgstr ""
+msgstr "Prüfung Lizenz-Vorlagen"
 
 #: plugins/admin-check-template.php:48
 msgid "Failed to read License.bsam"
-msgstr ""
+msgstr "Konnte License.bsam nicht lesen"
 
 #: plugins/admin-check-template.php:58
 msgid "Checking for duplicate errors within the license templates"
-msgstr ""
+msgstr "Prüfung auf Duplikat-Fehler innerhalb der Lizenzvorlagen"
 
 #: plugins/admin-check-template.php:74
 msgid "Duplicate:"
-msgstr ""
+msgstr "Duplikat "
 
 #: plugins/admin-check-template.php:75
 msgid "is"
-msgstr ""
+msgstr "ist"
 
 #: plugins/admin-check-template.php:83
 msgid "Total duplicate templates that need cleaning up:"
