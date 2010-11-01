@@ -80,8 +80,8 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
   /* reasonable input validation  */
   if ((!pgConn) || (!bucketpool_pk)) 
   {
-    printf("ERROR: %s.%s.%d Invalid input pgConn: %d, bucketpool_pk: %d.\n",
-            __FILE__, fcnName, __LINE__, (int)pgConn, bucketpool_pk);
+    printf("ERROR: %s.%s.%d Invalid input pgConn: %lx, bucketpool_pk: %d.\n",
+            __FILE__, fcnName, __LINE__, (unsigned long)pgConn, bucketpool_pk);
     return 0;
   }
 
