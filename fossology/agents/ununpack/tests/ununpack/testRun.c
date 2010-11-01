@@ -10,6 +10,8 @@ extern CU_TestInfo UnunpackEntry_testcases[];
 extern CU_TestInfo Traverse_testcases[]; 
 extern CU_TestInfo RunCommand_testcases[];
 extern CU_TestInfo TraverseChild_testcases[];
+extern CU_TestInfo CopyFile_testcases[];
+extern CU_TestInfo Prune_testcases[];
 
 /* FindCmd */
 extern int FindCmdInit();
@@ -26,6 +28,14 @@ extern int TraverseClean();
 /* TraverseChildInit */
 extern int TraverseChildInit();
 
+/* CopyFile */
+extern int CopyFileInit();
+extern int CopyFileClean();
+
+/* Prune */
+extern int PruneInit();
+extern int PruneClean();
+
 CU_SuiteInfo suites[] = {
         {"Testing the function TraverseStart:", TraverseStartInit, TraverseStartClean, TraverseStart_testcases},
         {"Testing the function FindCmd:", FindCmdInit, FindCmdClean, FindCmd_testcases},
@@ -33,6 +43,8 @@ CU_SuiteInfo suites[] = {
         {"Testing the function Traverse:", TraverseInit, TraverseClean, Traverse_testcases},
         {"Testing the function RunCommand:", NULL, NULL, RunCommand_testcases},
         {"Testing the function TraverseChild:", TraverseChildInit, NULL, TraverseChild_testcases},
+        {"Testing the function CopyFile:", CopyFileInit, CopyFileClean, CopyFile_testcases},
+        {"Testing the function Prune:", PruneInit, PruneClean, Prune_testcases},
         CU_SUITE_INFO_NULL
 };
 
