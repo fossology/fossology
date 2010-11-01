@@ -24,6 +24,7 @@ int     UnunpackEntry(int argc, char *argv[]);
 
 /* test functions */
 
+#if 0
 /**
  * @brief when unpack end, do not delete all the unpacked files
  * quiet (generate no output).
@@ -38,9 +39,10 @@ void testUnunpackEntryNormal()
   existed = file_dir_existed("../test-result/");
   CU_ASSERT_EQUAL(existed, 0); // ../test-result/ is not existing
   UnunpackEntry(argc, argv);
-  existed = file_dir_existed("../test-result/");
+  existed = file_dir_existed("../test-result/testdata4unpack.7z.dir/testdata4unpack/libfossagent.a.dir/libfossagent.o");
   CU_ASSERT_EQUAL(existed, 1); // ../test-result/ is existing
 }
+#endif
 
 /**
  * @brief when unpack end, delete all the unpacked files
@@ -49,7 +51,7 @@ void testUnunpackEntryNormalDeleteResult()
 {
   int argc = 5;
 
-  char *argv[] = {"../../ununpack", "-qCRx", "../test-data/testdata4unpack.7z", "-d", "../test-result/"};
+  char *argv[] = {"../../ununpack", "-qCRLx", "../test-data/testdata4unpack.7z", "-d", "../test-result/"};
   deleteTmpFiles("../test-result/");
   existed = file_dir_existed("../test-result/");
   CU_ASSERT_EQUAL(existed, 0); // ../test-result/ is not existing
@@ -85,10 +87,10 @@ void testUnunpackEntryNormalMultyProcess1()
  * the package is xx.tar/xxx.rpm type
  * multy process
  */
-void testUnunpackEntryNormalMultyProcess2()
+void testUnunpackEntryNormalMultyProcess()
 {
-  int argc = 7;
-  char *argv[] = {"../../ununpack", "-qCR", "-m", "5", "../test-data/testdata4unpack/rpm.tar", "-d", "../test-result/"}; 
+  int argc = 5;
+  char *argv[] = {"../../ununpack", "-qCR", "../test-data/testdata4unpack/rpm.tar", "-d", "../test-result/"}; 
   deleteTmpFiles("../test-result/");
   existed = file_dir_existed("../test-result/");
   CU_ASSERT_EQUAL(existed, 0); // ../test-result/ is not existing
@@ -124,13 +126,38 @@ void testUnunpackEntryOptionInvalid()
   }
 }
 
+/**
+ * @brief the option Q, Using database queue system.
+ */
+void testUnunpackEntryUsingDB()
+{
+  int argc = 5;
+  char *argv[] = {"../../ununpack", "-qCRQi",
+         "../test-data/testdata4unpack/rpm.tar", "-d", "../test-result/"}; // option H is invalid
+  deleteTmpFiles("../test-result/");
+
+  int Pid = fork();
+  if (Pid == 0)
+  {
+    UnunpackEntry(argc, argv);
+  } else
+  {
+    int status;
+    waitpid(Pid, &status, 0);
+    int code = WEXITSTATUS(status);
+    existed = file_dir_existed("../test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
+    CU_ASSERT_EQUAL(existed, 0); // not existing
+    CU_ASSERT_EQUAL(code, 23); 
+  }
+}
+
 CU_TestInfo UnunpackEntry_testcases[] =
 {
-    {"Testing testUnunpackEntryNormal:", testUnunpackEntryNormal},
-    {"Testing the function UnunpackEntry, delete unpack result:", testUnunpackEntryNormalDeleteResult},
-    {"Testing the function UnunpackEntry, multy process 2:", testUnunpackEntryNormalMultyProcess2},
     {"Testing the function UnunpackEntry, option is invalid:", testUnunpackEntryOptionInvalid},
-//    {"Testing the function UnunpackEntry, multy process 1:", testUnunpackEntryNormalMultyProcess1},
+    {"Testing the function UnunpackEntry, using database:", testUnunpackEntryUsingDB},
+    {"Testing the function UnunpackEntry, multy process :", testUnunpackEntryNormalMultyProcess},
+//    {"Testing testUnunpackEntryNormal:", testUnunpackEntryNormal},
+    {"Testing the function UnunpackEntry, delete unpack result:", testUnunpackEntryNormalDeleteResult},
     CU_TEST_INFO_NULL
 };
 
