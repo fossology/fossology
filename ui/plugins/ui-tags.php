@@ -38,13 +38,15 @@ class ui_tag extends FO_Plugin
   function RegisterMenus()
     {
 /****** Permission comments: if user don't have read or high permission, can't see tag menu. ******/
-    $perm = GetTaggingPerms($_SESSION['UserId'],NULL);
-    //print ($perm);
-    if ($perm > 0){
-      $text = _("Tag files or containers");
-      menu_insert("Browse-Pfile::Tag",0,$this->Name,$text);
-    } else {
-      return(0);
+    if (!empty($_SESSION['UserId'])) {
+      $perm = GetTaggingPerms($_SESSION['UserId'],NULL);
+      //print ($perm);
+      if ($perm > 0){
+        $text = _("Tag files or containers");
+        menu_insert("Browse-Pfile::Tag",0,$this->Name,$text);
+      } else {
+        return(0);
+      }
     }
     } // RegisterMenus()
 

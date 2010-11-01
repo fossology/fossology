@@ -38,7 +38,7 @@ class group_manage_self extends FO_Plugin {
   function PostInitialize()
   {
     global $DB, $PG_CONN;
-    $UserId = $_SESSION['UserId'];
+    //$UserId = $_SESSION['UserId'];
     global $Plugins;
 
     if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
@@ -58,7 +58,8 @@ class group_manage_self extends FO_Plugin {
       }
     }
   
-    if (!empty($UserId)){ 
+    if (!empty($_SESSION['UserId'])){
+      $UserId = $_SESSION['UserId']; 
       $sql = "SELECT * FROM group_user_member WHERE user_fk = $UserId and group_perm=1;";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
