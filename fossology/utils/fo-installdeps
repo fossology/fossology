@@ -99,7 +99,7 @@ if [ $BUILDTIME ]; then
             perl-Text-Template subversion \
             postgresql-devel file-devel \
             libxml2 libextractor-devel rpm-devel Pyrex \
-            python python-devel
+            python python-devel pcre-devel
          ;;
       Mandriva)
          # 2008.1 tested
@@ -114,7 +114,7 @@ if [ $BUILDTIME ]; then
             postgresql-devel \
             gcc make file libxml2 rpm-devel \
             perl-Text-Template subversion \
-            Pyrex libextractor-devel
+            Pyrex libextractor-devel pcre-devel
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
@@ -168,7 +168,7 @@ if [ $RUNTIME ]; then
             smtpdaemon \
             file-libs libxml2 libextractor libextractor-plugins \
             binutils bzip2 cabextract cpio genisoimage p7zip \
-               poppler-utils rpm tar upx unzip gzip
+               poppler-utils rpm tar upx unzip gzip pcre
 
          # enable, possible init, and start postgresql
          /sbin/chkconfig postgresql on
@@ -202,7 +202,7 @@ if [ $RUNTIME ]; then
             php php-pear php-pgsql \
             smtpdaemon \
             file libxml2 \
-            binutils bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip
+            binutils bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip pcre
          echo "NOTE: libextractor, cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources.";;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
