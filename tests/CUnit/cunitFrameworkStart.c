@@ -487,6 +487,17 @@ static int GetCoverageResult()
 }
 
 /**
+ * @brief copy /usr/local/share/CUnit/CUnit-Run.dtd CUnit-Run.xsl to ./ 
+ * in order to open test-Results.xml, requirng the two files
+ */
+static int CopyFiles()
+{
+  char *Commands = " /bin/cp /usr/local/share/CUnit/CUnit-Run* ./";
+  CommandExecute(Commands);
+  return 0;
+}
+
+/**
  * @brief start cuit test 
  *
  * @param RunMode: run mode, one of four interfaces
@@ -503,6 +514,7 @@ int CunitTestFramework(char RunMode, char *ProductList, int NeedCoverage, char *
   GetTestResult(ProductList);
   GetCoverageResult();
   Print2File(ResultDestination);
+  CopyFiles();
   free(ResultListing);
   return 0;
 }
