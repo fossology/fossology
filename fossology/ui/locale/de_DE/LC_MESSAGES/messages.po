@@ -1831,71 +1831,71 @@ msgstr "ist"
 
 #: plugins/admin-check-template.php:83
 msgid "Total duplicate templates that need cleaning up:"
-msgstr ""
+msgstr "Anzahl mehrfach vorkommender Vorlagen, die aufgeräumt werden müssen:"
 
 #: plugins/admin-check-template.php:99
 msgid "Checking for obsolete license templates"
-msgstr ""
+msgstr "Prüfe auf veraltete Lizenz Vorlagen"
 
 #: plugins/admin-check-template.php:110
 msgid "Obsolete: "
-msgstr ""
+msgstr "Veraltet: "
 
 #: plugins/admin-check-template.php:137
 msgid "Total obsolete template records that need cleaning up: "
-msgstr ""
+msgstr "Anzahl veralteter Vorlagen, die aufgeräumt werden müssen: "
 
 #: plugins/admin-check-template.php:141
 msgid "Reinstall licenses before doing the cleanup."
-msgstr ""
+msgstr "Vor dem Aufräumen müssen die Lizenzen neuinstalliert werden"
 
 #: plugins/admin-check-template.php:229
 msgid "Checking for Uploads to Re-analyze"
-msgstr ""
+msgstr "Prüfe auf hochgeladene Objekte, zur erneuten Analyse"
 
 #: plugins/admin-check-template.php:231
 msgid "The impacted uploads:"
-msgstr ""
+msgstr "Betroffene hochgeladene Objekte:"
 
 #: plugins/admin-check-template.php:260
 msgid "Resetting license analysis for"
-msgstr ""
+msgstr "Setze Lizenzanalyse für"
 
 #: plugins/admin-check-template.php:261
 msgid "files."
-msgstr ""
+msgstr "Dateien zurück."
 
 #: plugins/admin-check-template.php:284
 msgid "Removing"
-msgstr ""
+msgstr "Entferne "
 
 #: plugins/admin-check-template.php:285
 msgid "obsolete license templates."
-msgstr ""
+msgstr "überflüssige Lizenzvorlagen."
 
 #: plugins/admin-check-template.php:313
 msgid "Resetting"
-msgstr ""
+msgstr "Setze "
 
 #: plugins/admin-check-template.php:314
 msgid "license analysis jobs."
-msgstr ""
+msgstr "Analyse-Aufträge zurück"
 
 #: plugins/admin-check-template.php:357
 msgid "Clean-Up"
-msgstr ""
+msgstr "Aufräumen"
 
 #: plugins/admin-check-template.php:359
 msgid "Total obsolete templates to remove: "
-msgstr ""
+msgstr "Anzahl zu löschender veralteter Vorlagen: "
 
 #: plugins/admin-check-template.php:361
 msgid "Total pfiles to re-analyze: "
-msgstr ""
+msgstr "Anzahl von pfiles zur erneuten Analyse: "
 
 #: plugins/admin-check-template.php:363
 msgid "Total uploads to re-analyze: "
-msgstr ""
+msgstr "Anzahl von hochgeladenen Objekte zur erneuten Analyse"
 
 #: plugins/admin-check-template.php:365
 msgid ""
@@ -2113,83 +2113,84 @@ msgstr ""
 
 #: plugins/agent-license.php:168
 msgid "Failed to insert first sqlagent into job queue"
-msgstr ""
+msgstr "Erster sqlagent konnte nicht in die Aufgabenliste übernommen werden"
 
 #: plugins/agent-license.php:184
 msgid "Failed to insert filter_license into job queue"
-msgstr ""
+msgstr "filter_license konnte nicht in die Aufgabenliste übernommen werden"
 
 #: plugins/agent-license.php:200
 msgid "Failed to insert license into job queue"
-msgstr ""
+msgstr "license konnte nicht in die Aufgabenliste übernommen werden"
 
 #: plugins/agent-license.php:215
 msgid "Failed to insert licinspect into job queue"
-msgstr ""
+msgstr "licinspect konnte nicht in die Aufgabenliste übernommen werden"
 
 #: plugins/agent-license.php:232
 msgid "Failed to insert filter_clean into job queue"
-msgstr ""
+msgstr "filter_clean konnte nicht in die Aufgabenliste übernommen werden"
 
 #: plugins/agent-license.php:244
 msgid "Failed to insert count-update sqlagent into job queue"
-msgstr ""
+msgstr "Die Aufgabe count-update sqlagent konnte nicht in die "
+"Aufgabenliste übernommen werden"
 
 #: plugins/agent-license.php:254
 msgid "Failed to insert final sqlagent into job queue"
-msgstr ""
+msgstr "sqlagent konnte nicht in die Aufgabenliste übernommen werden"
 
 #: plugins/agent-license.php:307 plugins/agent-nomos.php:199
 msgid "Select an uploaded file for license analysis.\n"
-msgstr ""
+msgstr "Wählen Sie eine hochgeladene Datei zur Lizenzanalyse"
 
 #: plugins/ui-buckets.php:27
 msgid "Bucket Browser"
-msgstr ""
+msgstr "Kategorie-Suche"
 
 #: plugins/ui-buckets.php:114
 msgid "Browse by buckets (categories)"
-msgstr ""
+msgstr "Suche in Kategorien"
 
 #: plugins/ui-buckets.php:185 plugins/search.php:55 plugins/search.php:132
 msgid "Invalid URL, nonexistant item"
-msgstr ""
+msgstr "Ungültige URL, Datei existiert nicht"
 
 #: plugins/ui-buckets.php:273
 msgid "Bucket Pool"
-msgstr ""
+msgstr "Kategorien-Sammlung"
 
 #: plugins/ui-buckets.php:280
 msgid "Bucket"
-msgstr ""
+msgstr "Kategorie"
 
 #: plugins/ui-buckets.php:310
 msgid "Unique buckets"
-msgstr ""
+msgstr "Einzelne Kategorien"
 
 #: plugins/ui-buckets.php:449
 msgid "source packages"
-msgstr ""
+msgstr "Quelltextpakete"
 
 #: plugins/ui-buckets.php:451
 msgid "binary packages"
-msgstr ""
+msgstr "Binärpakete"
 
 #: plugins/ui-buckets.php:453
 msgid "binary packages with no source package"
-msgstr ""
+msgstr "Binärpakete ohne Quellen"
 
 #: plugins/ui-buckets.php:527 plugins/ui-nomos-license.php:451
 msgid "Loading..."
-msgstr ""
+msgstr "Lade..."
 
 #: plugins/admin-upload-edit.php:34
 msgid "Edit Upload Properties"
-msgstr ""
+msgstr "Editiere Eigenschaften des hocheladenen Objekts"
 
 #: plugins/admin-upload-edit.php:119
 msgid "Upload Properties changed"
-msgstr ""
+msgstr "Eigenschaften des hochgeladenen Objekts geändert"
 
 #: plugins/admin-upload-edit.php:122
 msgid ""
@@ -2198,26 +2199,30 @@ msgid ""
 "stored in.  Then select the upload to edit. Then enter the new values. If no "
 "value is entered, then the corresponding field will not be changed."
 msgstr ""
+"Die folgenden Eigenschaften des hochgeladenen Objekts können geändert werden:\n"
+"Der Name und die Beschreibung. Wählen Sie zuerst den Ordner, in dem das"
+"hochgeladene Objekt abgelegt ist. Dann wählen Sie das Objekt. Dann "
+"geben Sie die neuen Werte ein. Leere Felder lassen den Wert unverändert."
 
 #: plugins/admin-upload-edit.php:145
 msgid "Select the folder that contains the upload:  \n"
-msgstr ""
+msgstr "Wählen Sie den Ordner, der das hochgeladene Objekt beinhaltet: \n"
 
 #: plugins/admin-upload-edit.php:152
 msgid "Select the upload you wish to edit:  \n"
-msgstr ""
+msgstr "Wählen Sie das hochgeladene Objekt, das Sie editieren wollen"
 
 #: plugins/admin-upload-edit.php:168
 msgid "Change upload name:  \n"
-msgstr ""
+msgstr "Ändere Namen des Objekts"
 
 #: plugins/admin-upload-edit.php:171
 msgid "Change upload description:  \n"
-msgstr ""
+msgstr "Ändere Beschreibung des Objekts"
 
 #: plugins/core-debug-flush-cache.php:27
 msgid "Flush Cache"
-msgstr ""
+msgstr "Cache leeren"
 
 #: plugins/core-debug-flush-cache.php:52
 msgid "All cached pages have been removed.\n"
