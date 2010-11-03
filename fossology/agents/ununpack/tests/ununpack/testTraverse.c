@@ -80,7 +80,7 @@ void testTraverseNormal4Package()
   #endif
   existed = file_dir_existed("../test-result/threezip.zip.dir/Desktop.zip.dir/record.txt");
   CU_ASSERT_EQUAL(existed, 1); // is existing
-  CU_ASSERT_EQUAL(Result, 0); // Filename is not one containter
+  CU_ASSERT_EQUAL(Result, 1); // Filename is one containter
 }
 
 /**
@@ -99,7 +99,7 @@ void testTraverseNormal4Package2()
   #endif
   existed = file_dir_existed("../test-result/libfossagent.a.dir/libfossagent.o");
   CU_ASSERT_EQUAL(existed, 1); //  is existing
-  CU_ASSERT_EQUAL(Result, 0); // Filename is not one containter
+  CU_ASSERT_EQUAL(Result, 1); // Filename is one containter
 }
 
 /**
@@ -110,6 +110,9 @@ void testTraverseNormal4Dir()
   Filename = "../test-data/testdata4unpack/testdir";
   Basename = "";
   deleteTmpFiles(NewDir);
+  MkDirs("../test-result/test-data/testdata4unpack/testdir");
+  char *cmdline = "/bin/cp -r ../test-data/testdata4unpack/testdir/* ../test-result/test-data/testdata4unpack/testdir";
+  system(cmdline); // cp ../test-data/testdata4unpack/testdir to ../test-result/
   ParentInfo PITest = {0, 1287725739, 1287725739, 0, 0};
   PI = &PITest;
   Label = "Called by dir/wait";
@@ -117,9 +120,9 @@ void testTraverseNormal4Dir()
   #ifdef DEBUG
   printf("in testTraverseNormal4Dir result is :%d\n", Result);
   #endif
-  existed = file_dir_existed("../test-result/");
+  existed = file_dir_existed("../test-result/test-data/testdata4unpack/testdir/test.jar.dir/ununpack");
   CU_ASSERT_EQUAL(existed, 1); // is existing
-  CU_ASSERT_EQUAL(Result, 1); // Filename is not one containter
+  CU_ASSERT_EQUAL(Result, 1); // Filename is one containter
 }
 
 /**

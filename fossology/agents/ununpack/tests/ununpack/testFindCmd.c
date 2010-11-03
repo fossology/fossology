@@ -278,6 +278,21 @@ void testFindCmd4Bz2File()
 }
 
 /**
+ * @brief find ext3 fs
+ */
+void testFindCmd4Ext3File()
+{
+  char *Filename = "../test-data/testdata4unpack/ext3test-image";
+  int result = 0;
+  result = FindCmd(Filename);
+  CU_ASSERT_EQUAL(result, 24);
+
+  #ifdef DEBUG
+  printf("ext3 result is :%d\n", result);
+  #endif
+}
+
+/**
  * @brief find ext2 fs
  */
 void testFindCmd4Ext2File()
@@ -288,10 +303,54 @@ void testFindCmd4Ext2File()
   CU_ASSERT_EQUAL(result, 23);
 
   #ifdef DEBUG
-  printf("result is :%d\n", result);
+  printf("ext2 result is :%d\n", result);
   #endif
 }
 
+/**
+ * @brief find fat fs
+ */
+void testFindCmd4FatFile()
+{
+  char *Filename = "../test-data/testdata4unpack/fattest-image";
+  int result = 0;
+  result = FindCmd(Filename);
+  CU_ASSERT_EQUAL(result, 21);
+
+  #ifdef DEBUG
+  printf("fat result is :%d\n", result);
+  #endif
+}
+
+/**
+ * @brief find ntfs fs
+ */
+void testFindCmd4NtfsFile()
+{
+  char *Filename = "../test-data/testdata4unpack/ntfstest-image";
+  int result = 0;
+  result = FindCmd(Filename);
+  CU_ASSERT_EQUAL(result, 22);
+
+  #ifdef DEBUG
+  printf("ntfs result is :%d\n", result);
+  #endif
+}
+
+/**
+ * @brief find partition
+ */
+void testFindCmd4PartitionFile()
+{
+  char *Filename = "../test-data/testdata4unpack/initrd.img-2.6.26-2-686";
+  int result = 0;
+  result = FindCmd(Filename);
+  CU_ASSERT_EQUAL(result, 25);
+
+  #ifdef DEBUG
+  printf("partition result is :%d\n", result);
+  #endif
+}
 
 CU_TestInfo FindCmd_testcases[] =
 {
@@ -311,5 +370,9 @@ CU_TestInfo FindCmd_testcases[] =
     {"Testing FindCmd exe file:", testFindCmd4ExeFile},
     {"Testing FindCmd bz2 file:", testFindCmd4Bz2File},
     {"Testing FindCmd ext2 file system:", testFindCmd4Ext2File},
+    {"Testing FindCmd ext3 file system:", testFindCmd4Ext3File},
+    {"Testing FindCmd fat file system:", testFindCmd4FatFile},
+    {"Testing FindCmd ntfs file system:", testFindCmd4NtfsFile},
+    {"Testing FindCmd partition:", testFindCmd4PartitionFile},
     CU_TEST_INFO_NULL
 };
