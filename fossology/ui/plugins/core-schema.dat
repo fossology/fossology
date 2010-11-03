@@ -1872,7 +1872,7 @@
   $Schema["CONSTRAINT"]["agent_wc_pfile_fk_key"] = "ALTER TABLE \"agent_wc\" ADD CONSTRAINT \"agent_wc_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
   $Schema["CONSTRAINT"]["ars_unique"] = "ALTER TABLE \"agent_runstatus\" ADD CONSTRAINT \"ars_unique\" UNIQUE (\"agent_fk\",\"upload_fk\");";
   $Schema["CONSTRAINT"]["bucket_file_bucket_fk_key"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_bucket_fk_key\" UNIQUE (\"bucket_fk\",\"pfile_fk\",\"agent_fk\",\"nomosagent_fk\");";
-  $Schema["CONSTRAINT"]["bucketpool_bucketpool_name_key"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_bucketpool_name_key\" UNIQUE (\"bucketpool_name\");";
+  $Schema["CONSTRAINT"]["bucketpool_bucketpool_name_key1"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_bucketpool_name_key1\" UNIQUE (\"bucketpool_name\",\"version\");";
   $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"dirmodemask\" UNIQUE (\"mimetype_name\");";
   $Schema["CONSTRAINT"]["group_group_name_key"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_group_name_key\" UNIQUE (\"group_name\");";
   $Schema["CONSTRAINT"]["license_file_rf_fk_key"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_rf_fk_key\" UNIQUE (\"rf_fk\",\"agent_fk\",\"pfile_fk\");";
