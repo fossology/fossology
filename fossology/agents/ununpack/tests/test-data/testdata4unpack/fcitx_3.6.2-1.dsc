@@ -1,13 +1,30 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
 Format: 1.0
-Source: cris-dist
-Binary: cris-dist
-Architecture: i386
-Version: 1.64-1
-Maintainer: Cristian Ionescu-Idbohrn <cii@axis.com>
-Build-Depends: make (>= 3.79.1), texinfo (>= 4.1), perl | perl5 | perl5-base
+Source: fcitx
+Binary: fcitx
+Architecture: any
+Version: 1:3.6.2-1
+Maintainer: Yu Guanghui <ygh@debian.org>
+Uploaders: LI Daobing <lidaobing@debian.org>
+Homepage: http://code.google.com/p/fcitx/
+Standards-Version: 3.8.3
+Build-Depends: debhelper (>= 7), libx11-dev, libxft-dev, x11proto-core-dev, libxpm-dev, automake, autoconf, libxtst-dev
 Checksums-Sha1: 
- b0c3ce27d29af709d525675e1de7406263fc2e2c 9256 cris-dist_1.64-1.tar.gz
+ c2c0fd502fd577fe4785c6ab730ece6c5a7fed68 6306315 fcitx_3.6.2.orig.tar.gz
+ b41c17c9a461e740c8749c16de5577aceb324141 9154 fcitx_3.6.2-1.diff.gz
 Checksums-Sha256: 
- d9a89697a2eca5f09a72c109c9513f4a9d305171461ae0dc397cb8b5bb47d9d8 9256 cris-dist_1.64-1.tar.gz
+ 734329b1dd48528a6ac63e586606e690c6d92f77c4270bbfca0b85c7091c1826 6306315 fcitx_3.6.2.orig.tar.gz
+ d1a42b28f31e6f83701823df6f0253c106ae8c054e6e9e099eeee9f89078c11b 9154 fcitx_3.6.2-1.diff.gz
 Files: 
- 8985878c3fbe6389cb05706f882a2369 9256 cris-dist_1.64-1.tar.gz
+ b2eb3b086a0a597dedcde07264085cb6 6306315 fcitx_3.6.2.orig.tar.gz
+ 6925c9799bf4ee4c21216447268cf001 9154 fcitx_3.6.2-1.diff.gz
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEARECAAYFAkrPJFYACgkQ5TUK4GCH0vinkQCdEBXA7ZXfpFdADM7kmUZenYg7
+INcAmwf//KqLszWlAIr2iBrO0Eyuuj5P
+=5ZRt
+-----END PGP SIGNATURE-----

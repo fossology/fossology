@@ -178,6 +178,7 @@ void testTraverseChild4PartitionFile()
 
   Filename = "../test-data/testdata4unpack/initrd.img-2.6.26-2-686";
   MkDirs("../test-result/initrd.img-2.6.26-2-686.dir/");
+  strcpy(Queue[0].ChildRecurse, "../test-result/initrd.img-2.6.26-2-686.dir/");
   lstat64(Filename, &Stat);
   ContainerInfo CITemp;
   memset(&CITemp,0,sizeof(ContainerInfo));
