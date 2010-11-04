@@ -214,8 +214,8 @@ $text2 = _("Value");
         $Count++;
         }
     $V .= "</table>\n";
-    /*  Display meta-data get from  pkgmetagetta agent */
-
+    /*  Display meta-data get from  pkgmetagetta agent disabled by vincent*/
+/*
 $text = _("Meta Data From PkgMetaGetta Agent");
     $V .= "<H4>$text</H4>\n";
     $V .= "<table border='1'>\n";
@@ -244,6 +244,7 @@ $text2 = _("Value");
         }
 
     $V .= "</table>\n";
+*/
     $Count--;
 $text = _("Total meta data records");
     $V .= "<P />$text: " . number_format($Count,0,"",",") . "<br />\n";

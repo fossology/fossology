@@ -40,6 +40,7 @@ class agent_pkgmetagetta extends FO_Plugin
    ***********************************************************/
   function RegisterMenus()
     {
+    return(0);
     if ($this->State != PLUGIN_STATE_READY) { return(0); } // don't run
     menu_insert("Agents::" . $this->Title,0,$this->Name);
     }
