@@ -198,7 +198,8 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
   fprintf(Fout,Rcmd,Cmd);
   fprintf(Fout,"\n");
 
-  /** pkgmetagetta **/
+  /** pkgmetagetta disabled by vincent**/
+  /*
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,"%s/pkgmetagetta",AGENTDIR);
   for(i=0; i<NumCPU; i++)
@@ -207,7 +208,7 @@ int	PrintConfig	(FILE *Fout, int NumCPU, char *UseHost, char *RemoteCmd)
     fprintf(Fout,Rcmd,Cmd);
     fprintf(Fout,"\n");
     }
-  
+  */
   /** pkgagent **/
   memset(Cmd,'\0',sizeof(Cmd));
   snprintf(Cmd,sizeof(Cmd)-1,"%s/pkgagent",AGENTDIR);
