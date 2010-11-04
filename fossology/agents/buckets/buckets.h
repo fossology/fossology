@@ -118,15 +118,15 @@ typedef struct package_struct package_t, *ppackage_t;
 
 /* buckets.c */
 int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, 
-             int uploadtree_pk, int writeDB, int skipProcessedCheck, 
+             int uploadtree_pk, int skipProcessedCheck, 
              int hasPrules);
 
 int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray, 
-                      puploadtree_t puploadtree, int agent_pk, int writeDB, int hasPrules);
+                      puploadtree_t puploadtree, int agent_pk, int hasPrules);
 
 int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, 
                 puploadtree_t puploadtree, ppackage_t ppackage,
-                int agent_pk, int writeDB, int hasPrules);
+                int agent_pk, int hasPrules);
 
 int *getLeafBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, 
                     puploadtree_t puploadtree, ppackage_t ppackage,
@@ -136,7 +136,7 @@ int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray, int upload
 int childInBucket(PGconn *pgConn, pbucketdef_t in_bucketDef, puploadtree_t puploadtree);
 
 int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
-                 int *bucketList, int agent_pk, int writeDB, int nomosagent_pk);
+                 int *bucketList, int agent_pk, int nomosagent_pk);
 
 int matchAnyLic(PGresult *result, int numLics, regex_t *compRegex);
 

@@ -24,115 +24,116 @@ extern int debug;
  getContainerBuckets
 
  given a container uploadtree_pk and bucketdef, determine what buckets 
- the container is in (based on the buckets of its children).
+ the container is in.
+ A container is in all the buckets of its children (recursive).
  
- This function is also called for artifacts to simplify the
+ This function is also called for no-pfile artifacts to simplify the
  recursion in walkTree().
-
- Unlike licenses, where we can report a license hierarchy at runtime
- from a single select, buckets need to be evaluated in order.  Because
- of this extra processing, this agent computes and stores
- buckets for containers (this function).
 
  @param PGconn      *pgConn  postgresql connection
  @param pbucketdef_t bucketDefArray  
  @param int          uploadtree_pk
 
- @return array of bucket_pk's for this uploadtree_pk
+ @return zero terminated array of bucket_pk's for this uploadtree_pk (may contain 
+         no elements).  This must be free'd by the caller.
 
- Note: You can't just pass in a list of child buckets from walkTree()
-       since, due to pfile reuse, walkTree() may not have processed
-       parts of the tree.
+ Note: It's tempting to just have walkTree() remember all the child buckets.
+       but, due to pfile reuse, some of the tree might have been
+       processed before walkTree() was called.
 ****************************************************/
-FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray,
+FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray,
                                   int uploadtree_pk)
 {
   char *fcnName = "getContainerBuckets";
   char  sql[1024];
   int  *bucket_pk_list = 0;
-  int  *bucket_pk_list_start = 0;
   int   numBucketDefs = 0;
-  int  *children_bucket_pk_list = 0;
-  int   childParent_pk;  /* uploadtree_pk */
   int   numLics;
+  int   upload_pk, lft, rgt;
   int   bucketNumb;
-  int   match;
   PGresult *result;
-  pbucketdef_t bucketDefArray;
+  pbucketdef_t pbucketDefArray;
 
   if (debug) printf("%s: for uploadtree_pk %d\n",fcnName,uploadtree_pk);
 
-  /* Find the parent of this uploadtree_pk's children.  */
-//  childParent_pk = childParent(pgConn, uploadtree_pk);
-//printf("childParent_pk %d\n", childParent_pk);
-  childParent_pk = uploadtree_pk;
+  /*** Create the return array ***/
+  /* count how many elements are in in_bucketDefArray.
+     This won't be needed after implementing pbucketpool_t 
+   */
+  for (pbucketDefArray = bucketDefArray; pbucketDefArray->bucket_pk; pbucketDefArray++)
+    numBucketDefs++;
 
-  /* Get all the bucket_fk's from the immediate children  
-     That is, what buckets are the children in */
-  snprintf(sql, sizeof(sql), 
-           "select distinct(bucket_fk) from uploadtree,bucket_container, bucket_def \
-             where parent='%d' and bucket_container.uploadtree_fk=uploadtree_pk \
-                   and bucket_fk=bucket_pk and agent_fk='%d' and bucketpool_fk='%d'\
-            union\
-            select distinct(bucket_fk) from uploadtree, bucket_file, bucket_def \
-             where parent='%d' and bucket_file.pfile_fk=uploadtree.pfile_fk \
-                   and bucket_fk=bucket_pk and agent_fk='%d' and bucketpool_fk='%d'",
-           childParent_pk, in_bucketDefArray->bucket_agent_pk, 
-           in_bucketDefArray->bucketpool_pk,
-           childParent_pk, in_bucketDefArray->bucket_agent_pk, 
-           in_bucketDefArray->bucketpool_pk);
+  /* Create a null terminated int array, to hold the bucket_pk list  */
+  bucket_pk_list = calloc(numBucketDefs+1, sizeof(int));
+  if (bucket_pk_list == 0)
+  {
+    printf("FATAL: %s(%d) out of memory allocating int array of %d ints\n", 
+           fcnName, __LINE__, numBucketDefs+1);
+    return 0;
+  }
+  /*** END: Create the return array ***/
+
+  /*** Find lft and rgt bounds for uploadtree_pk  ***/
+  snprintf(sql, sizeof(sql),
+    "SELECT lft,rgt,upload_fk FROM uploadtree WHERE uploadtree_pk ='%d'",
+    uploadtree_pk);
   result = PQexec(pgConn, sql);
   if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
   numLics = PQntuples(result);
-
-  /*** save the bucket list in a null terminated easy access int array ***/
-  children_bucket_pk_list = calloc(numLics+1, sizeof(int));
-  if (children_bucket_pk_list == 0)
+  if (numLics == 0) 
   {
-    printf("FATAL: out of memory allocating int array of %d ints\n", numLics+1);
-    return 0;
+    if (debug) printf("%s(%d): uploadtree_pk %d %s returned no recs.\n",__FILE__, __LINE__,uploadtree_pk, sql);
+    PQclear(result);
+    return bucket_pk_list;
   }
+  lft = atoi(PQgetvalue(result, 0, 0));
+  rgt = atoi(PQgetvalue(result, 0, 1));
+  upload_pk = atoi(PQgetvalue(result, 0, 2));
+  PQclear(result);
+  /*** END: Find lft and rgt bounds for uploadtree_pk  ***/
+
+
+  /*** Select all the unique buckets in this tree ***/
+  snprintf(sql, sizeof(sql),
+    "SELECT distinct(bucket_fk) as bucket_pk\
+     from bucket_file, bucket_def,\
+          (SELECT distinct(pfile_fk) as PF from uploadtree \
+             where upload_fk=%d\
+               and ((ufile_mode & (1<<28))=0)\
+               and uploadtree.lft BETWEEN %d and %d) as SS\
+     where PF=pfile_fk and agent_fk=%d\
+       and bucket_file.nomosagent_fk=%d\
+       and bucket_pk=bucket_fk\
+       and bucketpool_fk=%d",
+         upload_pk, lft, rgt, bucketDefArray->bucket_agent_pk,
+         bucketDefArray->nomos_agent_pk, bucketDefArray->bucketpool_pk);
+  if (debug) printf("%s(%d): Find buckets in container for uploadtree_pk %d\n%s\n",__FILE__, __LINE__,uploadtree_pk, sql);
+  result = PQexec(pgConn, sql);
+  if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
+  numLics = PQntuples(result);
+  if (numLics == 0) 
+  {
+    PQclear(result);
+    return bucket_pk_list;
+  }
+  /*** END: Select all the unique buckets in this tree ***/
+
+  /*** Populate the return array with the bucket_pk's  ***/
   for (bucketNumb=0; bucketNumb < numLics; bucketNumb++)
   {
-    children_bucket_pk_list[bucketNumb] = atoi(PQgetvalue(result, bucketNumb, 0));
+    bucket_pk_list[bucketNumb] = atoi(PQgetvalue(result, bucketNumb, 0));
   }
   PQclear(result);
 
-  /*** count how many elements are in in_bucketDefArray   ***/
-  /* move this out when implement pbucketpool_t */
-  for (bucketDefArray = in_bucketDefArray; bucketDefArray->bucket_pk; bucketDefArray++)
-    numBucketDefs++;
-
-  /* allocate return array to hold max number of bucket_pk's + 1 for null terminator */
-  bucket_pk_list_start = calloc(numBucketDefs+1, sizeof(int));
-  if (bucket_pk_list_start == 0)
+  if (debug)
   {
-    printf("FATAL: out of memory allocating int array of %d ints\n", numBucketDefs+1);
-    return 0;
-  }
-  bucket_pk_list = bucket_pk_list_start;
-
-  if (debug) printf("debug found %d buckets under parent %d, childParent %d\n",numLics, uploadtree_pk, childParent_pk);
-
-  /* loop through each bucket definition */
-  bucketDefArray = in_bucketDefArray;
-  match = 0;
-  while (bucketDefArray->bucket_pk != 0)
-  {
-    /* if children_bucket_pk_list contains this bucket_pk 
-       then this is a match */
-    if (intAinB(bucketDefArray->bucket_pk, children_bucket_pk_list))
+    printf("getContainerBuckets returning: ");
+    for (bucketNumb=0; bucketNumb < numLics; bucketNumb++)
     {
-      if (debug) printf(">>>   found bucket_pk: %d\n", bucketDefArray->bucket_pk);
-      *bucket_pk_list = bucketDefArray->bucket_pk;
-      bucket_pk_list++;
-      match++;
-      break;
+      printf("%d  " ,bucket_pk_list[bucketNumb]);
     }
-
-    if (match && bucketDefArray->stopon == 'Y') break;
-    bucketDefArray++;
+    printf("\n");
   }
-  free(children_bucket_pk_list);
-  return bucket_pk_list_start;
+
+  return bucket_pk_list;
 }

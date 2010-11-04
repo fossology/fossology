@@ -20,7 +20,13 @@
  \brief Bucket agent
 
  The bucket agent uses user rules (see bucket table) to classify
- files into user categories
+ files into user categories (buckets).
+
+ Containers are in all the buckets of their contents.
+
+ Packages, like all other container, are in the buckets of their children.
+ In addition, packages can have their own rules that will place them in
+ additional buckets.
  */
 
 //#define BOBG
@@ -43,7 +49,6 @@ int main(int argc, char **argv)
   char *agentDesc = "Bucket agent";
   int cmdopt;
   int verbose = 0;
-  int writeDB = 0;
   int ReadFromStdin = 1;
   int head_uploadtree_pk = 0;
   void *DB;   // DB object from agent
@@ -79,23 +84,12 @@ int main(int argc, char **argv)
     exit(-1);
   }
   pgConn = DBgetconn(DB);
-  writeDB = 1;  /* default is to write to the db */
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "din:p:t:u:v")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "in:p:t:u:v")) != -1) 
   {
     switch (cmdopt) 
     {
-      case 'd': /* Debug.  Do not write results to db.
-                   Note: license_ref may get written to even if writeDB=0
-                   Note: Never use -d unless you are debugging and know
-                         what you are doing.  Several functions
-                         depend on db updates (like determining bucket
-                         of container).
-                 */
-            writeDB = 0;
-            verbose++;
-            break;
       case 'i': /* "Initialize" */
             DBclose(DB); /* DB was opened above, now close it and exit */
             exit(0);
@@ -147,7 +141,6 @@ int main(int argc, char **argv)
             }
             break;
       case 'v': /* verbose output for debugging  */
-            /* FOR NOW this also means debug but does write to db */
             verbose++;
             break;
       default:
@@ -190,7 +183,9 @@ int main(int argc, char **argv)
   }
 
   /* set the heartbeat alarm signal */
-  if (writeDB)
+  /* But leave it off is verbose is on because it causes too much output
+     and obscures the debugging information */
+  if (verbose == 0)
   {
     signal(SIGALRM, ShowHeartbeat);
     alarm(AlarmSecs);
@@ -359,9 +354,13 @@ int main(int argc, char **argv)
     snprintf(sqlbuf, sizeof(sqlbuf), 
                 "insert into bucket_ars (agent_fk, upload_fk, ars_success, nomosagent_fk, bucketpool_fk) values(%d,%d,'%s',%d,%d)",
                  agent_pk, uploadtree.upload_fk, "false", nomos_agent_pk, bucketpool_pk);
+    if (debug)
+      printf("%s(%d): %s\n", __FILE__, __LINE__, sqlbuf);
+    
     result = PQexec(pgConn, sqlbuf);
     if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
     PQclear(result);
+
 
     /* retrieve the ars_pk of the newly inserted record */
     sprintf(sqlbuf, "select ars_pk from bucket_ars where agent_fk='%d' and upload_fk='%d' and ars_success='%s' and nomosagent_fk='%d' \
@@ -387,12 +386,12 @@ int main(int argc, char **argv)
        consuming excess time (this is a fast agent), and allow this
        process to update bucket_ars.
      */
-    rv = walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, writeDB, 0, 
+    rv = walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, 0, 
              hasPrules);
     /* if no errors and top level is a container, process the container */
     if ((!rv) && (IsContainer(uploadtree.ufile_mode)))
     {
-      rv = processFile(pgConn, bucketDefArray, &uploadtree, agent_pk, writeDB, hasPrules);
+      rv = processFile(pgConn, bucketDefArray, &uploadtree, agent_pk, hasPrules);
     }
 
     /* Record analysis end in bucket_ars, the bucket audit trail. */
@@ -407,14 +406,18 @@ int main(int argc, char **argv)
                 "update bucket_ars set ars_endtime=now(), ars_success=true where ars_pk='%d'",
                 ars_pk);
 
+      if (debug)  
+        printf("%s(%d): %s\n", __FILE__, __LINE__, sqlbuf);
+      
       result = PQexec(pgConn, sqlbuf);
       if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
       PQclear(result);
-      if (debug) printf("%s sqlbuf: %s\n",__FILE__, sqlbuf);
     }
   }  /* end of main processing loop */
 
   lrcache_free(&cacheroot);
+  free(bucketDefArray);
+
   DBclose(DB);
   return (0);
 }
