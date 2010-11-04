@@ -309,12 +309,7 @@ FUNCTION long add2license_ref(PGconn *pgConn, char *licenseName)
             "insert into license_ref(rf_shortname, rf_text, rf_detector_type) values('%s', '%s', 2)",
             escLicName, specialLicenseText);
     result = PQexec(pgConn, insert);
-    if (PQresultStatus(result) != PGRES_COMMAND_OK) {
-        printf("ERROR: %s(%d):  Failed to add a new license. %s/n: %s/n",
-            __FILE__,__LINE__, PQresultErrorMessage(result), insert);
-        PQclear(result);
-        return (0);
-    }
+    if (checkPQcommand(result, insert, __FILE__, __LINE__)) return 0;
     PQclear(result);
 
     /* retrieve the new rf_pk */

@@ -40,8 +40,6 @@ FUNCTION int childInBucket(PGconn *pgConn, pbucketdef_t bucketDef, puploadtree_t
   int   lft, rgt, upload_pk, rv;
   PGresult *result;
 
-  if (debug) printf("%s: for uploadtree_pk %d\n",fcnName,puploadtree->uploadtree_pk);
-
   lft = puploadtree->lft;
   rgt = puploadtree->rgt;
   upload_pk = puploadtree->upload_fk;
@@ -58,6 +56,7 @@ FUNCTION int childInBucket(PGconn *pgConn, pbucketdef_t bucketDef, puploadtree_t
             where upload_fk=%d and uploadtree.lft BETWEEN %d and %d limit 1",
            bucketDef->bucket_pk, bucketDef->bucket_agent_pk, 
            bucketDef->nomos_agent_pk, upload_pk, lft, rgt);
+//  if (debug) printf("===%s:%d:\n%s\n===\n", __FILE__, __LINE__, sql);
   result = PQexec(pgConn, sql);
   if (checkPQresult(result, sql, fcnName, __LINE__)) return -1;
   rv = PQntuples(result);
@@ -73,6 +72,7 @@ FUNCTION int childInBucket(PGconn *pgConn, pbucketdef_t bucketDef, puploadtree_t
             where upload_fk=%d and uploadtree.lft BETWEEN %d and %d limit 1",
            bucketDef->bucket_pk, bucketDef->bucket_agent_pk, 
            bucketDef->nomos_agent_pk, upload_pk, lft, rgt);
+//  if (debug) printf("===%s:%d:\n%s\n===\n", __FILE__, __LINE__, sql);
   result = PQexec(pgConn, sql);
   if (checkPQresult(result, sql, fcnName, __LINE__)) return -1;
   rv = PQntuples(result);

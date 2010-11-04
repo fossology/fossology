@@ -32,14 +32,13 @@ extern int DEB_BINARY;
  @param puploadtree_t puploadtree    uploadtree record
  @param ppackage_t    ppackage       package record
  @param int          agent_pk
- @param int          writeDB         True writes to DB, False writes results to stdout
  @param int          hasPrules       
 
  @return 0=success, else error
 ****************************************************/
 FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, 
                          puploadtree_t puploadtree, ppackage_t ppackage,
-                         int agent_pk, int writeDB, int hasPrules)
+                         int agent_pk, int hasPrules)
 {
   int rv = 0;
   int *bucketList;
@@ -55,7 +54,7 @@ FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray,
     }
     rv = writeBuckets(pgConn, puploadtree->pfile_fk, puploadtree->uploadtree_pk, 
                       bucketList, agent_pk, 
-                      writeDB, bucketDefArray->nomos_agent_pk);
+                      bucketDefArray->nomos_agent_pk);
   }
   else
     rv = -1;
@@ -68,7 +67,7 @@ FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray,
 /****************************************************
  getLeafBuckets
 
- given a pfile and bucketdef, determine what buckets the pfile is in
+ Determine what buckets the pfile is in
 
  @param PGconn *pgConn  postgresql connection
  @param pbucketdef_t bucketDefArray

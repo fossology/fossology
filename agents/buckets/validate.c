@@ -115,13 +115,12 @@ FUNCTION void Usage(char *Name)
 {
   printf("Usage: %s [debug options]\n", Name);
   printf("  Debug options are:\n");
-  printf("  -d   :: Debug. Results NOT written to database.\n");
   printf("  -i   :: Initialize the database, then exit.\n");
   printf("  -n   :: bucketpool name of bucketpool to use.\n");
   printf("  -p   :: bucketpool_pk of bucketpool to use.\n");
   printf("  -t   :: uploadtree_pk, root of tree to scan. Will turn on -d!\n");
   printf("  -u   :: upload_pk to scan.\n");
-  printf("  -v   :: verbose (turns on debugging output)\n"); 
+  printf("  -v   :: verbose (turns on copious debugging output)\n"); 
   printf("  NOTE: -n and -p are mutually exclusive.  If both are specified\n");
   printf("         -p is used.  One of these is required.\n");
   printf("  NOTE: -t and -u are mutually exclusive.  If both are specified\n");
@@ -165,7 +164,7 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtre
             and bucket_fk=bucket_pk limit 1",
     pfile_pk, agent_pk, bucketpool_pk, uploadtree_pk, agent_pk, bucketpool_pk);
   result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return -1;
+  if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) return -1;
   numRecs = PQntuples(result);
   PQclear(result);
 

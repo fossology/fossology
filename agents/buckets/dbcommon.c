@@ -41,12 +41,7 @@
 ****************************************************/
 FUNCTION int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb)
 {
-   if (!result)
-   {
-     printf("Error: %s:%d - checkPQresult called with invalid parameter.\n",
-             FcnName, LineNumb);
-     return -1;
-   }
+   if (!result) return -1;
 
    /* If no error, return */
    if (PQresultStatus(result) == PGRES_TUPLES_OK) return 0;

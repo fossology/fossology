@@ -28,7 +28,6 @@ extern int debug;
  @param pbucketdef_t    bucketDefArray  Bucket Definitions
  @param int  agent_pk   The agent_pk
  @param int  uploadtree_pk
- @param int  writeDB    true to write results to db, false writes to stdout
  @param int  skipProcessedCheck true if it is ok to skip the initial 
                         processed() call.  The call is unnecessary during 
                         recursion and it's an DB query, so best to avoid
@@ -40,7 +39,7 @@ extern int debug;
  Errors are written to stdout.
 ****************************************************/
 FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, 
-                      int  uploadtree_pk, int writeDB, int skipProcessedCheck,
+                      int  uploadtree_pk, int skipProcessedCheck,
                       int hasPrules)
 {
   char *fcnName = "walkTree";
@@ -53,6 +52,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   uploadtree_t childuploadtree;
 
   if (debug) printf("---- START walkTree, uploadtree_pk=%d ----\n",uploadtree_pk);
+
   /* get uploadtree rec for uploadtree_pk */
   sprintf(sqlbuf, "select pfile_fk, lft, rgt, ufile_mode, ufile_name, upload_fk from uploadtree where uploadtree_pk=%d", uploadtree_pk);
   origresult = PQexec(pgConn, sqlbuf);
@@ -70,22 +70,26 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   uploadtree.ufile_name = strdup(PQgetvalue(origresult, 0, 4));
   uploadtree.upload_fk = atol(PQgetvalue(origresult, 0, 5));
 
-  /* Skip file if it has already been processed for buckets. */
+  /* Skip file if it has already been processed for buckets. 
+     This can happen due to file reuse.
+   */
   if (!skipProcessedCheck)
     if (processed(pgConn, agent_pk, uploadtree.pfile_fk, uploadtree.uploadtree_pk, bucketpool_pk)) return 0;
 
-  /* If this is a leaf node, and not an artifact process it 
+  /* If this is a leaf node, process it
      (i.e. determine what bucket it belongs in).
-     This should only be executed in the case where the unpacked upload
-     is a single file.
+     This will only be executed in the case where the unpacked upload
+     is itself a single file.
    */
   if (uploadtree.rgt == (uploadtree.lft+1))
   {
-    return  processFile(pgConn, bucketDefArray, &uploadtree, agent_pk, writeDB, hasPrules);
+    return  processFile(pgConn, bucketDefArray, &uploadtree, agent_pk, hasPrules);
   }
 
-  /* Since uploadtree_pk isn't a leaf, find its children and process (if child is leaf) 
-     or recurse */
+  /* Since uploadtree_pk isn't a leaf, find its immediate children and 
+     process (if child is leaf) or recurse on container.
+     Packages need both processing (check bucket_def rules) and recursion.
+   */
   sprintf(sqlbuf, "select uploadtree_pk,pfile_fk, lft, rgt, ufile_mode, ufile_name from uploadtree where parent=%d", 
           uploadtree_pk);
   result = PQexec(pgConn, sqlbuf);
@@ -117,19 +121,23 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
     {
       if (childuploadtree.pfile_fk > 0)
         processFile(pgConn, bucketDefArray, &childuploadtree,
-                    agent_pk, writeDB, hasPrules);
+                    agent_pk, hasPrules);
       continue;
     }
 
     /* not a leaf so recurse */
-    rv = walkTree(pgConn, bucketDefArray, agent_pk, childuploadtree.uploadtree_pk, writeDB, 
+    rv = walkTree(pgConn, bucketDefArray, agent_pk, childuploadtree.uploadtree_pk, 
                   1, hasPrules);
     if (rv) return rv;
 
     /* done processing children, now processes (find buckets) for the container */
-    processFile(pgConn, bucketDefArray, &childuploadtree, agent_pk, writeDB, 
+    processFile(pgConn, bucketDefArray, &childuploadtree, agent_pk, 
                 hasPrules);
   } // end of child processing
+  
+  /* free all the ufile_names in childuploadtree */
+  for (childIdx = 0; childIdx < numChildren; childIdx++)
+    free(childuploadtree.ufile_name);
 
   PQclear(result);
   PQclear(origresult);
@@ -141,19 +149,19 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
  processFile
 
  Process a file.  The file might be a single file, a container,
- an artifact, a package, ...
+ an artifact, a package, ..., in other words, an uploadtree record.
  Need to process container artifacts as a regular directory so that buckets cascade
  up without interruption.
  There is one small caveat.  If the container is a package AND
  the bucketDefArray has rules that apply to packages (applies_to='p')
- THEN process the package as a leaf since the bucket pool has its own 
- rules for packages.
+ THEN process the package as both a leaf since the bucket pool has its own 
+ rules for packages, and as a container (the pkg is in each of its childrens
+ buckets).
  
  @param PGconn pgConn   The database connection object.
  @param pbucketdef_t    bucketDefArray  Bucket Definitions
  @param pupuploadtree_t Uploadtree record
  @param int  agent_pk   The agent_pk
- @param int  writeDB    true to write results to db, false writes to stdout
  @param int  hasPrules  1=bucketDefArray contains at least one rule that only 
                         apply to packages.  0=No package rules.
 
@@ -161,8 +169,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
  Errors are written to stdout.
 ****************************************************/
 FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray, 
-                      puploadtree_t puploadtree, int agent_pk, 
-                      int writeDB, int hasPrules)
+                      puploadtree_t puploadtree, int agent_pk, int hasPrules)
 {
   int  *bucketList;  // null terminated list of bucket_pk's
   int  rv = 0;
@@ -184,7 +191,7 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
   package.srcpkgname[0] = 0;
 
   /* If is a container and hasPrules and pfile_pk != 0, 
-     then get the package record if it is a package
+     then get the package record (if it is a package).
    */
   if ((puploadtree->pfile_fk && (IsContainer(puploadtree->ufile_mode))) && hasPrules)
   {
@@ -202,7 +209,10 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
     if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
     isPkg = PQntuples(result);
 
-    /* is the file a package?  If not, continue on to the next bucket def. */
+    /* is the file a package?  
+       Then replace any terminal newline with a null in the package name.
+       If not, continue on to the next bucket def. 
+     */
     if (isPkg)
     {
       strncpy(package.pkgname, PQgetvalue(result, 0, 0), sizeof(package.pkgname));
@@ -224,23 +234,29 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
     PQclear(result);
   }
 
-   /* getContainerBuckets handles:
-      1) items with no pfile (both artifact and non-artifact)
+  if (debug) printf("\nFile name: %s\n", puploadtree->ufile_name);
+
+   /* getContainerBuckets() handles:
+      1) items with no pfile
       2) artifacts (both with pfile and without)
-      3) containers except packages
+      3) all containers
    */
   if ((puploadtree->pfile_fk == 0) || (IsArtifact(puploadtree->ufile_mode))
-      || (IsContainer(puploadtree->ufile_mode) && !isPkg))
+      || (IsContainer(puploadtree->ufile_mode)))
   {
     bucketList = getContainerBuckets(pgConn, bucketDefArray, puploadtree->uploadtree_pk);
     rv = writeBuckets(pgConn, puploadtree->pfile_fk, puploadtree->uploadtree_pk, bucketList, 
-                      agent_pk, writeDB, bucketDefArray->nomos_agent_pk);
+                      agent_pk, bucketDefArray->nomos_agent_pk);
     if (bucketList) free(bucketList);
+
+    /* process packages because they are treated as leafs and as containers */
+    rv = processLeaf(pgConn, bucketDefArray, puploadtree, &package,
+                     agent_pk, hasPrules);
   }
   else /* processLeaf handles everything else.  */
   {
     rv = processLeaf(pgConn, bucketDefArray, puploadtree, &package,
-                     agent_pk, writeDB, hasPrules);
+                     agent_pk, hasPrules);
   }
 
   return rv;

@@ -34,69 +34,66 @@ extern int debug;
  @return 0=success, -1 failure
 ****************************************************/
 FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk, 
-                          int *bucketList, int agent_pk, int writeDB, int nomosagent_pk)
+                          int *bucketList, int agent_pk, int nomosagent_pk)
 {
   extern long HBItemsProcessed;
   char     *fcnName = "writeBuckets";
   char      sql[1024];
-  PGresult *result;
+  PGresult *result = 0;
   int rv = 0;
-  if (debug) printf("debug: %s pfile: %d, uploadtree_pk: %d\n", fcnName, pfile_pk, uploadtree_pk);
+  if (debug) printf("debug: %s:%s() pfile: %d, uploadtree_pk: %d\n", __FILE__, fcnName, pfile_pk, uploadtree_pk);
 
-  if (!writeDB) printf("NOTE: writeDB is FALSE, write buckets for pfile=%d, uploadtree_pk=%d: ", pfile_pk, uploadtree_pk);
 
   if (bucketList)
   {
     while(*bucketList)
     {
-      if (writeDB)
+      Heartbeat(++HBItemsProcessed);
+      if (pfile_pk)
       {
-        Heartbeat(++HBItemsProcessed);
-        if (pfile_pk)
+        snprintf(sql, sizeof(sql), 
+               "insert into bucket_file (bucket_fk, pfile_fk, agent_fk, nomosagent_fk) values(%d,%d,%d,%d)", *bucketList, pfile_pk, agent_pk, nomosagent_pk);
+        if (debug) 
+          printf("%s(%d): %s\n", __FILE__, __LINE__, sql);
+        result = PQexec(pgConn, sql);
+        if ((result==0) || ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
+            (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5))))
         {
-          snprintf(sql, sizeof(sql), 
-                 "insert into bucket_file (bucket_fk, pfile_fk, agent_fk, nomosagent_fk) values(%d,%d,%d,%d)", *bucketList, pfile_pk, agent_pk, nomosagent_pk);
-          result = PQexec(pgConn, sql);
-          if ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
-              (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5)))
-          {
-            // ignore duplicate constraint failure (23505)
-            printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file. %s\n: %s\n",
-                    __FILE__,fcnName, __LINE__, 
-                    PQresultErrorMessage(result), sql);
-            PQclear(result);
-            rv = -1;
-            break;
-          }
-          if (debug) printf("%s sql: %s\n",fcnName, sql);
+          // ignore duplicate constraint failure (23505)
+          printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file. %s\n: %s\n",
+                  __FILE__,fcnName, __LINE__, 
+                  PQresultErrorMessage(result), sql);
+          PQclear(result);
+          rv = -1;
+          break;
         }
-        else
-        {
-          snprintf(sql, sizeof(sql), 
-                 "insert into bucket_container (bucket_fk, uploadtree_fk, agent_fk, nomosagent_fk) \
-                  values(%d,%d,%d,%d)", *bucketList, uploadtree_pk, agent_pk, nomosagent_pk);
-          result = PQexec(pgConn, sql);
-          if ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
-              (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5)))
-          {
-            // ignore duplicate constraint failure (23505)
-            printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file. %s\n: %s\n",
-                    __FILE__,fcnName, __LINE__, 
-                    PQresultErrorMessage(result), sql);
-            PQclear(result);
-            rv = -1;
-            break;
-          }
-          if (debug) printf("%s sql: %s\n",fcnName, sql);
-        }
-        PQclear(result);
       }
       else
-        printf(" %d", *bucketList);
+      {
+        snprintf(sql, sizeof(sql), 
+               "insert into bucket_container (bucket_fk, uploadtree_fk, agent_fk, nomosagent_fk) \
+                values(%d,%d,%d,%d)", *bucketList, uploadtree_pk, agent_pk, nomosagent_pk);
+        if (debug)
+          printf("%s(%d): %s\n", __FILE__, __LINE__, sql);
+
+        result = PQexec(pgConn, sql);
+        if ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
+            (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5)))
+        {
+          // ignore duplicate constraint failure (23505)
+          printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file. %s\n: %s\n",
+                  __FILE__,fcnName, __LINE__, 
+                  PQresultErrorMessage(result), sql);
+          PQclear(result);
+          rv = -1;
+          break;
+        }
+      }
+      if (result) PQclear(result);
       bucketList++;
     }
   }
 
-  if (!writeDB) printf("\n");
+  if (debug) printf("%s:%s() returning rv=%d\n", __FILE__, fcnName, rv);
   return rv;
 }
