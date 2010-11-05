@@ -104,10 +104,32 @@ class admin_tag_ns extends FO_Plugin
 
     $tag_ns_pk = GetParm('tag_ns_pk', PARM_INTEGER);
 
+    $sql = "SELECT * FROM tag_ns_group WHERE tag_ns_fk = $tag_ns_pk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) > 0)
+    {
+      pg_free_result($result);
+      $text = _("As there are group permissions related to this tag namespace, if you want to delete this tag namespace you should first delete permissions about this tag namespace! ");
+      return ($text);  
+    }
+
+    pg_exec("BEGIN;");
+    $sql = "DELETE FROM tag_file USING tag WHERE tag_pk = tag_fk AND tag_ns_fk = $tag_ns_pk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    $sql = "DELETE FROM tag WHERE tag_ns_fk = $tag_ns_pk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
     $sql = "DELETE FROM tag_ns WHERE tag_ns_pk = $tag_ns_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
+    pg_exec("COMMIT;");
 
     return (NULL);
   }

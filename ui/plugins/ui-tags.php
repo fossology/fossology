@@ -435,7 +435,7 @@ class ui_tag extends FO_Plugin
     $VC .= "<p><font color='blue'>$text: $ufile_name</font></p>";
     */
 
-    $select = Array2SingleSelect($tag_ns, "tag_ns_pk", "");
+    $select = Array2SingleSelectTag($tag_ns, "tag_ns_pk", "");
     $text = _("Namespace");
     $VC .= "<p>$text:$select</p>";
     $VC .= "<p>";

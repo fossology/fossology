@@ -44,11 +44,29 @@ class group_manage extends FO_Plugin {
     global $PG_CONN;
     
     $group_pk = GetParm('group_pk', PARM_INTEGER);
-    
+  
+    $sql = "SELECT * FROM tag_ns_group WHERE group_fk = $group_pk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) > 0)
+    {
+      pg_free_result($result);
+      $text = _("Group Delete Failed:As there are group permissions related to this group, if you want to delete this group you should first delete permissions about this group! ");
+      return ($text);
+    }
+ 
+    pg_exec("BEGIN;");
+    $sql = "DELETE FROM group_user_member WHERE group_fk = $group_pk;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+ 
     $sql = "DELETE FROM groups WHERE group_pk = $group_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
+    pg_exec("COMMIT;");
+
     return (NULL);
   }
  
