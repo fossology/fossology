@@ -86,7 +86,17 @@ void	EscapeString	(const char *sourceString, char *escString, int esclen)
 {
 	int len;
 	int error;
-	
+
+  /*  remove any backslashes from the string as they don't escape properly
+   *  for example, "don\'t" in the input will cause an insert error
+   */
+  char *cp = (char *)sourceString;
+  while(*cp) 
+  {
+    if (*cp == '\\') *cp = ' ';
+    cp++;
+  }
+
 	len = strlen(sourceString);	
 	if ( len > esclen/2 )
 		len = esclen/2 - 1;
@@ -412,7 +422,7 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
     case RPMRC_NOTFOUND:
     case RPMRC_FAIL:
     default:
-        rpmlog(RPMLOG_ERR, "%s cannot be read\n", pkg);
+        rpmlog(RPMLOG_ERR, "%s cannot be read or is not an RPM.\n", pkg);
         return FALSE;
     }
     ReadHeaderInfo(header, pi);
@@ -449,7 +459,7 @@ int	RecordMetadataRPM	(struct rpmpkginfo *pi)
   {
     memset(SQL,0,sizeof(SQL));
     DBaccess(DB,"BEGIN;");
-    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm (pkg_name,pkg_alias,pkg_arch,version,rpm_filename,license,pkg_group,packager,release,build_date,vendor,url,source_rpm,summary,description,pfile_fk) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%ld);",trim(pi->pkgName),trim(pi->pkgAlias),trim(pi->pkgArch),trim(pi->version),trim(pi->rpmFilename),trim(pi->license),trim(pi->group),trim(pi->packager),trim(pi->release),pi->buildDate,trim(pi->vendor),trim(pi->url),trim(pi->sourceRPM),trim(pi->summary),trim(pi->description),pi->pFileFk);
+    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm (pkg_name,pkg_alias,pkg_arch,version,rpm_filename,license,pkg_group,packager,release,build_date,vendor,url,source_rpm,summary,description,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",trim(pi->pkgName),trim(pi->pkgAlias),trim(pi->pkgArch),trim(pi->version),trim(pi->rpmFilename),trim(pi->license),trim(pi->group),trim(pi->packager),trim(pi->release),pi->buildDate,trim(pi->vendor),trim(pi->url),trim(pi->sourceRPM),trim(pi->summary),trim(pi->description),pi->pFileFk);
     rc = DBaccess(DB,SQL);
     if (rc < 0)
     {
@@ -469,7 +479,7 @@ int	RecordMetadataRPM	(struct rpmpkginfo *pi)
       for (i=0;i<pi->req_size;i++)
       {
         memset(SQL,0,sizeof(SQL));
-        snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm_req (pkg_fk,req_value) values (%d,'%s');",pkg_pk,trim(pi->requires[i]));
+        snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm_req (pkg_fk,req_value) values (%d,E'%s');",pkg_pk,trim(pi->requires[i]));
         rc = DBaccess(DB,SQL);
         if (rc < 0)
         {
@@ -676,7 +686,7 @@ int    RecordMetadataDEB       (struct debpkginfo *pi)
   {
     memset(SQL,0,sizeof(SQL));
     DBaccess(DB,"BEGIN;");
-    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,summary,description,format,uploaders,standards_version,pfile_fk) values ('%s','%s','%s','%s',%d,'%s','%s','%s','%s','%s','%s','%s','%s','%s',%ld);",trim(pi->pkgName),trim(pi->pkgArch),trim(pi->version),trim(pi->maintainer),pi->installedSize,trim(pi->section),trim(pi->priority),trim(pi->homepage),trim(pi->source),trim(pi->summary),trim(pi->description),trim(pi->format),trim(pi->uploaders),trim(pi->standardsVersion),pi->pFileFk);
+    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,summary,description,format,uploaders,standards_version,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',%d,E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",trim(pi->pkgName),trim(pi->pkgArch),trim(pi->version),trim(pi->maintainer),pi->installedSize,trim(pi->section),trim(pi->priority),trim(pi->homepage),trim(pi->source),trim(pi->summary),trim(pi->description),trim(pi->format),trim(pi->uploaders),trim(pi->standardsVersion),pi->pFileFk);
     rc = DBaccess(DB,SQL);
     if (rc < 0)
     {
@@ -696,7 +706,7 @@ int    RecordMetadataDEB       (struct debpkginfo *pi)
       for (i=0;i<pi->dep_size;i++)
       {
         memset(SQL,0,sizeof(SQL));
-        snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb_req (pkg_fk,req_value) values (%d,'%s');",pkg_pk,trim(pi->depends[i]));
+        snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb_req (pkg_fk,req_value) values (%d,E'%s');",pkg_pk,trim(pi->depends[i]));
         if (Verbose) { printf("DEPENDS:%s\n",pi->depends[i]);}
         rc = DBaccess(DB,SQL);
         if (rc < 0)
