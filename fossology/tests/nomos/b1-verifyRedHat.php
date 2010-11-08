@@ -64,14 +64,14 @@ class rhelTest extends fossologyTestCase
     '(C)Apache' => 909,
     'Apache_v2.0' => 858,
     'ATT' => 812,
-    'Misc-Copyright' => 787,
+    'Misc-Copyright' => 788,
     '(C)U-Washington' => 385,
     'GPL_v2+' => 289,
     'CMU' => 247,
     'FSF' => 176,
     'BSD-style' => 154,
     'LGPL' => 123,
-    'GPL' => 95,
+    'GPL' => 14,
     '(C)RedHat' => 82,
     'GPL_v3+' => 76,
     'Apache-possibility' => 62,
@@ -80,19 +80,19 @@ class rhelTest extends fossologyTestCase
     'LGPL_v2.1+' => 29,
     'MPL_v1.1' => 29,
     'IETF' => 28,
-    'See-doc(OTHER)' => 28,
+    'See-doc(OTHER)' => 37,
     'UnclassifiedLicense' => 28,
     'GPL-exception' => 24,
     'BSD' => 20,
     'Apache' => 17,
     'GPL_v2' => 12,
-    'Possible-copyright' => 12,
+    'Possible-copyright' => 13,
     'Indemnity' => 11,
     'LikelyNot' => 10,
     'Public-domain-claim' => 9,
     'Authorship-inference' => 8,
     '(C)Stanford' => 8,
-    'GPL-possibility' => 8,
+    'GPL-possibility' => 9,
     'Non-commercial!' => 7,
     'RSA-Security' => 7,
     'ATT-possibility' => 6,
@@ -103,13 +103,13 @@ class rhelTest extends fossologyTestCase
     'GPL_v3' => 5,
     'Intel' => 5,
     'LGPL_v3+' => 4,
-    'No-warranty' => 4,
+    'No-warranty' => 25,
     'Public-domain-ref' => 4,
     'APSL_v1.1' => 3,
     'IOS' => 3,
     'MIT-style' => 3,
     'Apache_v1.1' => 2,
-    '(C)FSF' => 2,
+    '(C)FSF' => 12,
     '(C)GPL' => 2,
     'CMU-possibility' => 2,
     '(C)Sun' => 2,
@@ -135,11 +135,12 @@ class rhelTest extends fossologyTestCase
     'LGPL-possibility' => 1,
     'MacroMedia-RPSL' => 1,
     'Microsoft-possibility' => 1,
-    'NOT-public-domain' => 1,
+    'NOT-public-domain' => 3,
     'NPL_v1.1' => 1,
     'Patent-ref' => 1,
     'RedHat-EULA' => 1,
     'RedHat(Non-commercial)' => 1,
+    'Same-license-as' => 1,
     'Sun' => 1,
     'Sun-BCLA' => 1,
     'Sun-possibility' => 1,
@@ -152,7 +153,7 @@ class rhelTest extends fossologyTestCase
 
 		$licenseSummary = array(
       'Unique licenses'        => 88,
-      'Licenses found'         => 5528,
+      'Licenses found'         => 5503,
       'Files with no licenses' => 4734,
       'Files'                  => 12532
 		);
@@ -191,10 +192,12 @@ class rhelTest extends fossologyTestCase
 		$licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
 		$licSummary->parseLicenseTbl();
 
+    print "verifying summaries....\n";
 		foreach ($licSummary->hList as $summary)
 		{
 			//print "summary is:\n";print_r($summary) . "\n";
 			$key = $summary['textOrLink'];
+      //print "SUM: key is:$key\n";
 			$this->assertEqual($licenseSummary[$key], $summary['count'],
       "verifyRedHat FAILED! $key does not equal $licenseSummary[$key],
       Expected: {$licenseSummary[$key]},
@@ -220,13 +223,15 @@ class rhelTest extends fossologyTestCase
 		* baseline?
 		*/
 
+    //print "table is:\n";print_r($licHistogram->hList) . "\n";
 		foreach($licHistogram->hList as $licFound)
 		{
 			$key = $licFound['textOrLink'];
-			//print "VDB: key is:$key\n";
+			//print "HDB: key is:$key\n";
 			//print "licFound is:\n";print_r($licFound) . "\n";
 			if(array_key_exists($key,$licBaseLine))
 			{
+        //print "licFound[textOrLink] is:{$licFound['textOrLink']}\n";
 				$this->assertEqual($licBaseLine[$key], $licFound['count'],
           "verifyRedHat FAILED! the baseline count {$licBaseLine[$key]} does" .
           " not equal {$licFound['count']} for license $key,\n" .
