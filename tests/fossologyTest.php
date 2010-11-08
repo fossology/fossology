@@ -365,7 +365,7 @@ class fossologyTest extends WebTestCase
    * @param string $page the page to search
    * @param string $selectName the name of the select
    * @param string $optionText the text of the option statement
-   * @return mixed $select either array (if first two args present) or 
+   * @return mixed $select either array (if first two args present) or
    * int if all three arguments present. NULL on error.
    *
    * Format of the array returned:
@@ -523,10 +523,9 @@ class fossologyTest extends WebTestCase
    */
   public function setAgents($agents = NULL) {
     $agentList = array (
-      'buckets'   => 'Check_agent_bucket', 
+      'buckets'   => 'Check_agent_bucket',
       'copyright' => 'Check_agent_copyright',
       'mimetype' => 'Check_agent_mimetype',
-      'metadata' => 'Check_agent_pkgmetagetta',
       'nomos' => 'Check_agent_nomos',
       'package' => 'Check_agent_pkgagent',
       'specagent' => 'Check_agent_specagent',
@@ -568,19 +567,16 @@ class fossologyTest extends WebTestCase
         	case 3 :
             $checklist[] = $agentList['mimetype'];
             break;
-          case 4 :
-            $checklist[] = $agentList['metadata'];
-            break;
-        	case 5 :
+        	case 4 :
           	$checklist[] = $agentList['nomos'];
             break;
-          case 6 :
+          case 5 :
             $checklist[] = $agentList['package'];
             break;
-          case 7:
+          case 6:
             $checklist[] = $agentList['specagent'];
             break;
-          case 8:
+          case 7:
             $checklist[] = $agentList['license'];
             break;
         }
