@@ -1956,29 +1956,29 @@ msgstr "Einplanung der Analyse ist fehlgeschlagen: "
 #: plugins/agent-pkgagent.php:229 plugins/agent-specagent.php:196
 #: plugins/agent-mimetype.php:167 plugins/agent-nomos.php:194
 msgid "All uploaded files are already analyzed, or scheduled to be analyzed."
-msgstr ""
+msgstr "Alle hochgeladenen Dateien sind bereits analysiert oder zur Analyse angemeldet."
 
 #: plugins/agent-pkgmetagetta.php:198
 msgid "Metadata analysis extracts meta data from RPM and DEB files.<P />\n"
-msgstr ""
+msgstr "Metadaten-Analyse extrahiert die Metadaten aus RPM- und Deb-Paketen.<P />\n"
 
 #: plugins/agent-pkgmetagetta.php:200 plugins/agent-pkgagent.php:236
 #: plugins/agent-specagent.php:204
 msgid "Select an uploaded file for analysis.\n"
-msgstr ""
+msgstr "Wählen Sie eine hochgeladene Datei zur Analyse.\n"
 
 #: plugins/agent-pkgmetagetta.php:201 plugins/agent-license.php:308
 #: plugins/agent-pkgagent.php:237 plugins/agent-specagent.php:205
 #: plugins/agent-mimetype.php:174 plugins/agent-nomos.php:200
 msgid "Only uploads that are not already scheduled can be scheduled.\n"
-msgstr ""
+msgstr "Es können nur noch nicht eingestellte Objekte eingestellt werden.\n"
 
 #: plugins/agent-pkgmetagetta.php:202 plugins/agent-license.php:309
 #: plugins/agent-bucket.php:244 plugins/agent-pkgagent.php:238
 #: plugins/agent-specagent.php:206 plugins/agent-mimetype.php:175
 #: plugins/agent-nomos.php:201
 msgid "Analyze:"
-msgstr ""
+msgstr "Analysieren:"
 
 #: plugins/agent-pkgmetagetta.php:212 plugins/agent-license.php:324
 #: plugins/agent-license-once.php:334
@@ -1987,7 +1987,7 @@ msgstr ""
 #: plugins/agent-add.php:188 plugins/agent-specagent.php:216
 #: plugins/agent-mimetype.php:190 plugins/agent-nomos.php:216
 msgid "Analyze"
-msgstr ""
+msgstr "Analysieren"
 
 #: plugins/ui-licgroup-debug.php:27
 msgid "License Groups Debug"
@@ -1995,78 +1995,78 @@ msgstr ""
 
 #: plugins/ui-licgroup-debug.php:55
 msgid "HEAD"
-msgstr ""
+msgstr "Kopf"
 
 #: plugins/ui-licgroup-debug.php:73
 msgid "Inherited Group"
-msgstr ""
+msgstr "Geerbte Gruppe"
 
 #: plugins/ui-licgroup-debug.php:78
 msgid "Loop"
-msgstr ""
+msgstr "Schleife"
 
 #: plugins/ui-licgroup-debug.php:79
 msgid "to Group"
-msgstr ""
+msgstr "zur Gruppe"
 
 #: plugins/ui-licgroup-debug.php:98
 msgid "Inherited License"
-msgstr ""
+msgstr "Geerbte Lizenz"
 
 #: plugins/ui-licgroup-debug.php:148
 msgid "The current license group tree."
-msgstr ""
+msgstr "Aktueller Lizenz-Gruppenbaum"
 
 #: plugins/ui-licgroup-debug.php:150
 msgid "Inherited groups are expanded and licenses are listed."
-msgstr ""
+msgstr "Geerbte Lizenzen sind ausgeklappt und Lizenzen aufgeführt."
 
 #: plugins/ui-licgroup-debug.php:152
 msgid "Loops in group inheritance are identified."
-msgstr ""
+msgstr "Schleifen in der Gruppenvererbung identifiziert."
 
 #: plugins/admin-folder-delete.php:38
 msgid "Delete Folder"
-msgstr ""
+msgstr "Ordner löschen"
 
 #: plugins/admin-folder-delete.php:69
 msgid "Can Not Delete Root Folder"
-msgstr ""
+msgstr "Oberster Ordner kann nicht gelöscht werden"
 
 #: plugins/admin-folder-delete.php:77 plugins/agent-remove-license.php:77
 #: plugins/admin-upload-delete.php:59 plugins/upload-srv-files.php:120
 msgid "Failed to create job record"
-msgstr ""
+msgstr "Datensatz für Auftrag konnte nicht erstellt werden"
 
 #: plugins/admin-folder-delete.php:84 plugins/agent-remove-license.php:84
 #: plugins/admin-upload-delete.php:66
 msgid "Failed to place delete in job queue"
-msgstr ""
+msgstr "Löschauftrag konnte nicht in die Aufgabenliste aufgenommen werden"
 
 #: plugins/admin-folder-delete.php:113
 msgid "Deletion of folder "
-msgstr ""
+msgstr "Löschung eines Ordners"
 
 #: plugins/admin-folder-delete.php:114
 msgid " added to job queue"
-msgstr ""
+msgstr "in Aufgabenliste aufgenommen"
 
 #: plugins/admin-folder-delete.php:118
 msgid "Deletion of "
-msgstr ""
+msgstr "Löschung von "
 
 #: plugins/admin-folder-delete.php:119
 msgid " failed: "
-msgstr ""
+msgstr " fehlgeschlagen: "
 
 #: plugins/admin-folder-delete.php:125
 msgid "Select the folder to"
-msgstr ""
+msgstr "Wählen Sie den Ordner zum "
 
 #: plugins/admin-folder-delete.php:126 plugins/admin-folder-delete.php:130
 #: plugins/admin-upload-delete.php:115 plugins/admin-upload-delete.php:119
 msgid "delete"
-msgstr ""
+msgstr "Löschen"
 
 #: plugins/admin-folder-delete.php:129 plugins/agent-remove-license.php:159
 #: plugins/admin-upload-delete.php:118
@@ -2080,30 +2080,33 @@ msgstr ""
 
 #: plugins/admin-folder-delete.php:133
 msgid "Be very careful with your selection since you can delete a lot of work!"
-msgstr ""
+msgstr "Wählen Sie mit Bedacht, Ihre Wahl kann große Datenmengen löschen!"
 
 #: plugins/admin-folder-delete.php:135
 msgid ""
 "All analysis only associated with the deleted uploads will also be deleted."
 msgstr ""
+"Alle Analysen, die nur zu dieser hochgeladenen Datei gehören, werden ebenfalls gelöscht."
 
 #: plugins/admin-folder-delete.php:137
 msgid ""
 "THERE IS NO UNDELETE. When you select something to delete, it will be "
 "removed from the database and file repository."
 msgstr ""
+"Eine Löschung kann nicht rückgängig gemacht werden. Gelöschte Dateien"
+"werden aus der Datenbank und dem Repositorium entfernt."
 
 #: plugins/admin-folder-delete.php:140
 msgid "Select the folder to delete:  "
-msgstr ""
+msgstr "Wählen Sie den zu löschenden Ordner: "
 
 #: plugins/admin-folder-delete.php:143
 msgid "select folder"
-msgstr ""
+msgstr "Wählen Sie einen Ordner"
 
 #: plugins/agent-license.php:28
 msgid "bSAM License Analysis (deprecated)"
-msgstr ""
+msgstr "bSAM License Analysis (veraltet)"
 
 #: plugins/agent-license.php:93 plugins/agent-bucket.php:128
 #: plugins/agent-bucket.php:148 plugins/agent-pkgagent.php:93
@@ -2142,7 +2145,7 @@ msgstr "sqlagent konnte nicht in die Aufgabenliste übernommen werden"
 
 #: plugins/agent-license.php:307 plugins/agent-nomos.php:199
 msgid "Select an uploaded file for license analysis.\n"
-msgstr "Wählen Sie eine hochgeladene Datei zur Lizenzanalyse"
+msgstr "Wählen Sie eine hochgeladene Datei zur Lizenzanalyse\n"
 
 #: plugins/ui-buckets.php:27
 msgid "Bucket Browser"
@@ -2210,15 +2213,15 @@ msgstr "Wählen Sie den Ordner, der das hochgeladene Objekt beinhaltet: \n"
 
 #: plugins/admin-upload-edit.php:152
 msgid "Select the upload you wish to edit:  \n"
-msgstr "Wählen Sie das hochgeladene Objekt, das Sie editieren wollen"
+msgstr "Wählen Sie das hochgeladene Objekt, das Sie editieren wollen: \n"
 
 #: plugins/admin-upload-edit.php:168
 msgid "Change upload name:  \n"
-msgstr "Ändere Namen des Objekts"
+msgstr "Ändere Namen des Objekts: \n"
 
 #: plugins/admin-upload-edit.php:171
 msgid "Change upload description:  \n"
-msgstr "Ändere Beschreibung des Objekts"
+msgstr "Ändere Beschreibung des Objekts: \n"
 
 #: plugins/core-debug-flush-cache.php:27
 msgid "Flush Cache"
