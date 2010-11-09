@@ -1,0 +1,41 @@
+1sl.txt - One sentence license notes
+Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+
+  $Version: Newt windowing library v0.51.6 $$Copyright: (C) 1996-2003 Red Hat, Inc. Written by Erik Troan $$License: Lesser GNU Public License. $
+This comes from RHEL4-U2-i386-AS-disc1.iso.dir/isolinux/initrd.img.unpacked.dir/sbin/loader
+
+  Read license files for details.
+This comes from RHEL4-U2-i386-AS-disc1.iso.dir/RedHat/base/hdlist
+
+  This software is provided "AS IS."
+This comes from RHEL4-U2-i386-disc2.iso.dir/RedHat/RPMS/gd-2.0.28-4.i386.rpm.unpacked.dir/usr/share/doc/gd-2.0.28/index.html
+
+  "BusyBox is licensed under the GNU General Public License , which is generally just abbreviated simply as the GPL license, or just the GPL."
+Sourcve: RHEL4-U2-i386-source-disc4.iso.dir/SRPMS/busybox-1.00.rc1-5.src.rpm.unpacked.dir/busybox-1.00.rc1.tar.bz2.unpacked.dir/busybox-1.00.rc1/docs/busybox.net/license.html
+
+  "This program is free software;"
+RHEL4-U2-i386-source-disc4.iso.dir/SRPMS/busybox-1.00.rc1-5.src.rpm.unpacked.di
+r/busybox-1.00.rc1.tar.bz2.unpacked.dir/busybox-1.00.rc1/patches/id_groups_alias
+.patch
+
+General one-sentence license formats:
+[This|noun] [noun2] is <verb> <prep> [determiner] <license>.
+  Verbs: provided distributed released licensed covered adheres
+  Prep: as under by in
+  Determiner: a an the
+  License: a keyword, capitalized, or "free".
+  Noun2: this software, this program, this system
+
+Can I use the general rule:
+  - under 10 words before a conjunction (and/or/but), end of sentence, or
+    separator (comma and semicolon).
+  - word[i] == "is" or "can" or "may"
+    word[i+1] == "*ed"
+    word[i+2] == as|in|by|under
+  - word[i+3] is a keyword, capitalized, or "free".
+  - Does NOT contain a negative before word[i+1].
+    Negatives: no not nor cannot can't isn't.
+
+
+Look for what-strings that contain "license:".
+

@@ -1,0 +1,213 @@
+#!/bin/bash
+# FOSSology data restore script
+# Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+#
+# fo-restore.sh restore the fossology database and repository.
+#
+# Warning Notes: 1.This script restore the entire db cluster, not just the fossology database
+#                2.The Scheduler will stop when this script running, please don't start the scheduler while the script running
+
+# user variables
+BACKUPDIR=/home/fossy/backup               # Directory on the backup server to store backup data
+KEY=/srv/fossology/.ssh/id_dsa             # ssh public key about backup user 'fossy'
+SOURCEDIR=/srv/fossology/                  # Source directory
+PGBACKUPDIR=/srv/fossology/db              # Directory to store database backup data
+BACKUPUSER=fossy@192.168.10.129            # Backup user and hostname/ip
+EXCLUDES=(./backup_include_a ./backup_include_b)     # Exclude files to exclude or include backup directory and files
+TEMPDIR=/tmp
+RESTOREDIR=current                         # sub directory under $BACKUPDIR to restore from
+# path variables
+CP=/bin/cp;
+MK=/bin/mkdir;
+SSH=/usr/bin/ssh;
+DATE=/bin/date;
+RM=/bin/rm;
+GREP=/bin/grep;
+RSYNC=/usr/bin/rsync;
+TOUCH=/bin/touch;
+
+## Options parsing and setup
+# parse options
+OPTS=`getopt -o revh --long fostart,restore,everything,verbose,onlygold,help -n 'fo-restore' -- "$@"`
+
+if [ $? != 0 ]; then
+   echo "ERROR: Bad option specified."
+   OPTS="--help"
+fi
+
+eval set -- "$OPTS"
+
+# if no options or just -v option then do everything
+if [ "$OPTS" = " --" -o "$OPTS" = " -v --" ]; then
+   EVERYTHING=1
+fi
+
+while true; do 
+   case "$1" in
+      --fostart) FOSTART=1; shift;;
+      --onlygold) ONLYGOLD=1;shift;;	
+      -r|--restore) RESTORE=1; shift;;
+      -e|--everything) EVERYTHING=1; shift;;
+      -v|--verbose) VERBOSE=1;shift;;
+      -h|--help)
+	 echo "Usage: fo-retore [options]";
+         echo "  --fostart               : start fossology scheduler when restore is finished successfully"
+         echo "  -r or --restore         : restore fossology database and repository from backup server, don't start scheduler"
+         echo "  -e or --everything      : run complete restore (default)"
+         echo "  -v or --verbose         : verbose"
+	 echo "  -h or --help            : show this help, then exit"
+         exit;;
+      --) shift; break;;
+      *) echo "Error: option $1 not recognised"; exit 1;;
+   esac
+done
+
+#This must run as root.
+if [ `id -u` != "0" ] ; then
+   echo "ERROR: fo-restore must run as root."
+   echo "Aborting."
+   exit 1
+fi
+
+if [ $ONLYGOLD ]; then
+   if [ $VERBOSE ]; then
+      echo "*** Running all only gold file restore steps ***"
+   fi
+   FOSTOP=1
+   DBRESTORE=1
+   REPORESTORE=1
+   FOSTART=1
+fi
+
+if [ $RESTORE ]; then
+   FOSTOP=1
+   DBRESTORE=1
+   REPORESTORE=1
+fi
+
+if [ $EVERYTHING ]; then
+   if [ $VERBOSE ]; then
+      echo "*** Running all restore steps ***"
+   fi
+   FOSTOP=1
+   DBRESTORE=1
+   REPORESTORE=1
+   FOSTART=1
+fi
+# Step1 Stop Scheduler
+if [ $FOSTOP ]; then
+   if [ $VERBOSE ]; then
+      echo "Begin to stop FOSSology scheduler:"
+   fi
+   /etc/init.d/fossology stop
+
+   if [ $? -ne 0 ];then
+      echo "FOSSology scheduler stop failed!"	
+      exit 1
+   fi
+
+   if [ $VERBOSE ]; then
+      echo "FOSSology scheduler stop successful!"
+   fi
+fi
+
+# Step2 Restore database and repository from Remote Server
+if [ $REPORESTORE ]; then
+   if [ $VERBOSE ]; then
+      echo "Begin Restore Repository"
+   fi
+   
+   # Run RSYNC
+   if [ $VERBOSE ]; then
+      $DATE '+%Y-%m'-%d_%H:%M:%S   
+   fi
+   i=0
+   for EXCLUDE in ${EXCLUDES[@]};do
+        su fossy -c "$RSYNC -a --delete --exclude-from=\"$EXCLUDE\" -e \"$SSH -i $KEY\" $BACKUPUSER:/$BACKUPDIR/$RESTOREDIR/ $SOURCEDIR" &
+        pids[i]=$!
+        if [ $VERBOSE ]; then
+           echo "${pids[i]} is Running"            
+        fi
+        let i+=1
+   done
+
+   while true
+   do
+        flag=0
+        for pid in ${pids[@]};do
+                result=`ps -ef|grep -v "grep"|grep $pid|wc -l`
+                if [ $result = "0" ];then
+                        let flag+=1
+                fi
+        done
+        if [ $flag -eq ${#pids[@]} ];then
+                break
+        fi
+        sleep 60
+   done
+
+   if [ $VERBOSE ]; then
+      $DATE '+%Y-%m'-%d_%H:%M:%S
+      echo "Restore Repository successful!"
+   fi
+fi
+# Step3 restore database
+if [ $DBRESTORE ]; then
+   if [ $VERBOSE ]; then
+      echo "Begin restore database"
+   fi
+   if [ ! -d $PGBACKUPDIR ]; then
+      if [ $VERBOSE ]; then
+         echo "Postgres backup directory $PGBACKUPDIR does not exist!Creating..."
+      fi
+      $MK $PGBACKUPDIR
+      if [ $VERBOSE ]; then
+         echo "Create Postgres backup directory $PGBACKUPDIR success!"
+      fi
+   fi
+   if [ ! -w $PGBACKUPDIR ]; then
+      echo "Postgres backup directory $PGBACKUPDIR is not writable!"
+      exit 1
+   fi
+
+   /etc/init.d/postgresql-8.3 restart
+   su postgres -c "dropdb fossology"	
+
+   gunzip -c $PGBACKUPDIR/fo_dbbackup.gz > $TEMPDIR/fo_dbbackup
+   su postgres -c "psql -f $TEMPDIR/fo_dbbackup"
+   rm -rf $TEMPDIR/fo_dbbackup
+
+   if [ $? -ne 0 ];then
+      echo "Database restore failed!"
+      exit 1
+   fi
+   if [ $VERBOSE ]; then
+      echo "Database restore successful!"
+   fi
+fi
+
+if [ $ONLYGOLD ]; then
+   ./fo-restore.php
+   if [ $? -ne 0 ];then
+      echo "Running fo-restore.php script failed!"
+      exit 1
+   fi
+fi
+
+# Step4 Start Scheduler
+if [ $FOSTART ]; then
+   if [ $VERBOSE ]; then
+      echo "Begin to start FOSSology scheduler:"
+   fi
+   /etc/init.d/fossology start
+
+   if [ $? -ne 0 ];then
+      echo "FOSSology scheduler start failed!"
+      exit 1
+   fi
+ 
+   if [ $VERBOSE ]; then
+      echo "FOSSology scheduler start successful!"
+   fi
+fi
+
