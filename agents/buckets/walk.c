@@ -122,13 +122,18 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
       if (childuploadtree.pfile_fk > 0)
         processFile(pgConn, bucketDefArray, &childuploadtree,
                     agent_pk, hasPrules);
+      free(childuploadtree.ufile_name);
       continue;
     }
 
     /* not a leaf so recurse */
     rv = walkTree(pgConn, bucketDefArray, agent_pk, childuploadtree.uploadtree_pk, 
                   1, hasPrules);
-    if (rv) return rv;
+    if (rv) 
+    {
+      free(childuploadtree.ufile_name);
+      return rv;
+    }
 
     /* done processing children, now processes (find buckets) for the container */
     processFile(pgConn, bucketDefArray, &childuploadtree, agent_pk, 
