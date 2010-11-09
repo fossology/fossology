@@ -133,11 +133,10 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
     /* done processing children, now processes (find buckets) for the container */
     processFile(pgConn, bucketDefArray, &childuploadtree, agent_pk, 
                 hasPrules);
+
+    free(childuploadtree.ufile_name);
   } // end of child processing
   
-  /* free all the ufile_names in childuploadtree */
-  for (childIdx = 0; childIdx < numChildren; childIdx++)
-    free(childuploadtree.ufile_name);
 
   PQclear(result);
   PQclear(origresult);
