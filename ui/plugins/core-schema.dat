@@ -1953,6 +1953,8 @@
   $Schema["INDEX"]["attrib"]["attrib_key_fk_idx"] = "CREATE INDEX attrib_key_fk_idx ON attrib USING btree (attrib_key_fk);";
   $Schema["INDEX"]["attrib"]["attrib_pfile_fk_idx"] = "CREATE INDEX attrib_pfile_fk_idx ON attrib USING btree (pfile_fk);";
 
+  $Schema["INDEX"]["bucket_container"]["bucketcontainer_uploadtree"] = "CREATE INDEX bucketcontainer_uploadtree ON bucket_container USING btree (uploadtree_fk);";
+
   $Schema["INDEX"]["bucket_file"]["pfile_idx"] = "CREATE INDEX pfile_idx ON bucket_file USING btree (pfile_fk);";
 
   $Schema["INDEX"]["copyright"]["agent_fk_idx"] = "CREATE INDEX agent_fk_idx ON copyright USING btree (agent_fk);";
