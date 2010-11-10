@@ -31,6 +31,7 @@
 #include <sys/dir.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -339,6 +340,16 @@ static int ExtractCunitRunSummary(const char FileName[1024])
 }
 
 /**
+ * @brief install cunit
+ * @return 1: success, other: failure
+ */
+static int InstallCUnit()
+{
+  int status = system("./installCUnit.sh");
+  return WEXITSTATUS(status);
+}
+
+/**
  * @brief prepare for unit testing, change the dir, execute make test or make coverage
  *
  * @param ProductList
@@ -351,6 +362,14 @@ static int Preparing(char *ProductList)
   getcwd(Dir, LINE);
   char TwoDimensionalArray[LINE][LINE];
   printf("CurrentDir is: %s\n", Dir);
+  int status = InstallCUnit();
+  
+  if (1 != status) 
+  {
+    printf("CUnit fail to install, status is:%d\n", status);
+    exit(-1);
+  }
+  
   chdir("../../");
   system("make clean");
   system("make coverage");
