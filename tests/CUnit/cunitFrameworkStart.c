@@ -511,7 +511,7 @@ static int GetCoverageResult()
  */
 static int CopyFiles()
 {
-  char *Commands = " /bin/cp /usr/local/share/CUnit/CUnit-Run* ./";
+  char *Commands = " /bin/cp /usr/share/CUnit/CUnit-Run* ./";
   CommandExecute(Commands);
   return 0;
 }

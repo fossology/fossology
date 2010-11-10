@@ -16,7 +16,9 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #***********************************************************/
 
-sudo apt-get install libcunit1-dev libcunit1-doc libcunit1
+sudo apt-get -y install lcov
+sudo apt-get -y install autoconf
+sudo apt-get -y install libcunit1-dev libcunit1-doc libcunit1
 OUT=$?
 
 if [ $OUT -eq 0 ]; then
