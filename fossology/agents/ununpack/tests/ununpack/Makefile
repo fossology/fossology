@@ -4,6 +4,7 @@ TOP=../../../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
+include $(DEPS)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS) -I../../ -I../ -lcunit
 EXE=test_ununpack
@@ -13,7 +14,7 @@ TEST_OBJ=testRun.o testUnunpackEntry.o testTraverseStart.o testFindCmd.o testTra
 
 all: $(EXE)
 
-$(EXE): libununpack.a $(TEST_OBJ) utility.o
+$(EXE): libununpack.a $(TEST_OBJ) utility.o $(VARS) $(DB) $(REPO) $(AGENTLIB)
 	$(CC) $(TEST_OBJ) ../utility.o ../../libununpack.a $(CFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ): %.o: %.c 
@@ -25,7 +26,7 @@ utility.o:
 test: all $(EXE)
 	./$(EXE)
 
-coverage: $(TEST_OBJ) libununpack_cov.a  utility.o
+coverage: $(TEST_OBJ) libununpack_cov.a  utility.o $(VARS) $(DB) $(REPO) $(AGENTLIB)
 	$(CC) -o $(EXE) $(TEST_OBJ) ../utility.o ../../libununpack_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory  ../../   --capture --output-file cov.txt; \
