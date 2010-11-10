@@ -12,7 +12,7 @@ TEST_OBJ=testRun.o testExtractISO.o
 
 all: $(EXE)
 
-$(EXE): libununpack.a $(TEST_OBJ) utility.o $(VARS) $(DB) $(REPO)
+$(EXE): libununpack.a $(TEST_OBJ) utility.o
 	$(CC) $(TEST_OBJ) ../utility.o ../../libununpack.a $(CFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ): %.o: %.c 
@@ -24,7 +24,7 @@ utility.o:
 test: all $(EXE)
 	./$(EXE)
 
-coverage: $(TEST_OBJ) libununpack_cov.a  utility.o $(VARS) $(DB) $(REPO)
+coverage: $(TEST_OBJ) libununpack_cov.a  utility.o
 	$(CC) -o $(EXE) $(TEST_OBJ) ../utility.o ../../libununpack_cov.a $(FLAG_COV) $(CFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory  ../../   --capture --output-file cov.txt; \
