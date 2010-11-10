@@ -149,12 +149,10 @@ $text = _("Upload failed for file");
           $GetURL = 'http://';
         }
         /* Display instructions */
-        $V.= _("This option permits uploading a file from your computer to FOSSology.\n");
-        $V.= _("The file to upload should be located on your computer.\n");
-        $V.= _("Many browsers, including Microsoft's Internet Explorer, have trouble uploading ");
-        $V.= _("file larger than 650 Megabytes (a standard-size CD-ROM image).\n");
-        $V.= _("If your file is larger than 650 Megabytes, then choose one of the other upload options.");
-
+        $V.= _("This option permits uploading a single file (which may be iso, tar, rpm, jar, zip, bz2, msi, cab, etc.) from your computer to FOSSology.\n");
+        $V.= _("Your system has imposed a maximum file size of");
+        $V.= " ".  ini_get('post_max_size') . " ";
+        $V.= _("bytes.");
         /* Display the form */
         $V.= "<form enctype='multipart/form-data' method='post'>\n"; // no url = this url
         $V.= "<ol>\n";
