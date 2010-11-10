@@ -161,7 +161,6 @@ $text2 = _("files with these licenses");
                from uploadtree, bucket_file, bucket_def
                where upload_fk=$upload_pk and uploadtree.lft between $lft and $rgt
                  and ((ufile_mode & (1<<28)) = 0)
-                 and ((ufile_mode & (1<<29)) = 0)
                  and uploadtree.pfile_fk=bucket_file.pfile_fk
                  and agent_fk=$bucketagent_pk
                  and bucket_fk=$bucket_pk
@@ -203,6 +202,7 @@ $text = _("File");
     $V .= "<tr><th>$text</th><th>&nbsp";
     $ExclArray = explode(":", $Excl);
     $ItemNumb = 1;
+if ($Count > 0)
     while ($row = pg_fetch_assoc($fileresult, $RowNum))
     {
       // get all the licenses in this subtree (bucket uploadtree_pk)
