@@ -1,4 +1,5 @@
 <?php
+
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
 
@@ -45,7 +46,6 @@ class fossologyTestCase extends fossologyTest
   public $debug;
   public $webProxy;
 
-
   /**
    * addUser
    *
@@ -62,39 +62,40 @@ class fossologyTestCase extends fossologyTest
    *
    * @return null on success, prints error on fail.
    */
-  public function addUser($UserName, $Description=NULL, $Email=NULL, $Access=1,
-  $Folder=1, $Password=NULL, $EmailNotify='y'){
+  public function addUser($UserName, $Description = NULL, $Email = NULL, $Access = 1, $Folder = 1, $Password = NULL, $EmailNotify = 'y')
+  {
 
     global $URL;
 
     // check user name, everything else defaults (not a good idea to use defaults)
-    if(empty($UserName)) {
-      return("No User Name, cannot add user");
+    if (empty ($UserName))
+    {
+      return ("No User Name, cannot add user");
     }
 
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Add');
-    $this->assertTrue($this->myassertText($page, '/Add A User/'),
-          "Did NOT find Title, 'Add A User'");
-    
-    $this->setUserFields($UserName,$Description, $Email, $Access, $Folder,
-    NULL,NULL, $Password, $EmailNotify);
+    $this->assertTrue($this->myassertText($page, '/Add A User/'), "Did NOT find Title, 'Add A User'");
+
+    $this->setUserFields($UserName, $Description, $Email, $Access, $Folder, NULL, NULL, $Password, $EmailNotify);
 
     /* fields set, add the user */
-    $page = $this->mybrowser->clickSubmit('Add!',"Could not select the Add! button");
+    $page = $this->mybrowser->clickSubmit('Add!', "Could not select the Add! button");
     $this->assertTrue($page);
     //print "<pre>page after clicking Add!\n"; print_r($page) . "\n</pre>";
-    if($this->myassertText($page, "/User .*? added/")) {
-      return(NULL);
-    }
-    else if($this->myassertText($page, "/User already exists\.  Not added/")) {
-      return('User already exists.  Not added');
-    }
-    else if($this->myassertText($page, "/ERROR/"))
+    if ($this->myassertText($page, "/User .*? added/"))
     {
-    	return("addUser FAILED! ERROR when adding users, please investigate");
-    }
-    return(NULL);
+      return (NULL);
+    } else
+      if ($this->myassertText($page, "/User already exists\.  Not added/"))
+      {
+        return ('User already exists.  Not added');
+      } else
+        if ($this->myassertText($page, "/ERROR/"))
+        {
+          return ("addUser FAILED! ERROR when adding users, please investigate");
+        }
+    return (NULL);
   } // addUser
 
   /**
@@ -114,17 +115,23 @@ class fossologyTestCase extends fossologyTest
    * - if the user running this test is not the same user as the mail file
    *   being checked, /var/mail/<user-name> is only readable by that user-name.
    */
-  public function checkEmailNotification($number) {
+  public function checkEmailNotification($number)
+  {
 
-    if(empty($number)) {
-      return(array(0,'ERROR! Must supply a number to verify'));
+    if (empty ($number))
+    {
+      return (array (
+        0,
+        'ERROR! Must supply a number to verify'
+      ));
     }
 
     $headers = getMailSubjects();
-    if(empty($headers)){
+    if (empty ($headers))
+    {
       //print "No messages found\n";
       $this->pass();
-      return(NULL);
+      return (NULL);
     }
     //print "Got back from getMailSubjects:\n";print_r($headers) . "\n";
 
@@ -134,25 +141,29 @@ class fossologyTestCase extends fossologyTest
     /**
      * @TODO use exceptions here, so you can indicated the correct item.
      */
-    if(preg_match('/ERROR/',$headers[0],$matches)) {
+    if (preg_match('/ERROR/', $headers[0], $matches))
+    {
       $this->fail("{$headers[0]}\n");
-      return(FALSE);
+      return (FALSE);
     }
     $pattern = 'completed with no errors';
 
-    $failed = array();
-    foreach($headers as $header) {
+    $failed = array ();
+    foreach ($headers as $header)
+    {
       /* Make sure all say completed */
-      $match = preg_match("/$pattern/",$header,$matches);
-      if($match == 0) {
+      $match = preg_match("/$pattern/", $header, $matches);
+      if ($match == 0)
+      {
         $failed[] = $header;
       }
     }
-    if(!empty($failed)) {
+    if (!empty ($failed))
+    {
       $this->fail("Failures! there were jobs that did not report as completed\n");
       //foreach($failed as $fail) {
       //  print "$fail\n";
-      return($failed);
+      return ($failed);
     }
   }
 
@@ -174,16 +185,19 @@ class fossologyTestCase extends fossologyTest
    * Reports: pass or fail.
    *
    */
-  public function createFolder($parent = null, $name, $description = null) {
+  public function createFolder($parent = null, $name, $description = null)
+  {
 
     global $URL;
     $FolderId = 0;
 
     /* Need to check parameters */
-    if (is_null($parent)) {
+    if (is_null($parent))
+    {
       $FolderId = 1; // default is root folder
     }
-    if (is_null($description)) {   // set default if null
+    if (is_null($description))
+    { // set default if null
       $description = "Folder $name created by createFolder as subfolder of $parent";
     }
     $page = $this->mybrowser->get($URL);
@@ -192,7 +206,8 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->clickLink('Create');
     $this->assertTrue($this->myassertText($page, '/Create a new Fossology folder/'));
     /* if $FolderId=0 select the folder to create this folder under */
-    if (!$FolderId) {
+    if (!$FolderId)
+    {
       $FolderId = $this->getFolderId($parent, $page, 'parentid');
     }
     $this->assertTrue($this->mybrowser->setField('parentid', $FolderId));
@@ -200,13 +215,15 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->mybrowser->setField('description', "$description"));
     $page = $this->mybrowser->clickSubmit('Create!');
     $this->assertTrue($page);
-    if($this->myassertText($page, "/Folder $name Created/")) {
-      return(NULL);
+    if ($this->myassertText($page, "/Folder $name Created/"))
+    {
+      return (NULL);
     }
-    if($this->myassertText($page, "/Folder $name Exists/")) {
-      return("Folder $name Exists");
-    }
-    else {
+    if ($this->myassertText($page, "/Folder $name Exists/"))
+    {
+      return ("Folder $name Exists");
+    } else
+    {
       $this->fail("Failure! Unknown Error when creating folder $name\n");
     }
   }
@@ -233,15 +250,14 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->clickLink('Delete Folder');
     $this->assertTrue($this->myassertText($page, '/Select the folder to delete/'));
     $FolderId = $this->getFolderId($folder, $page, 'folder');
-    if(empty($FolderId))    // not in the list of folders
+    if (empty ($FolderId)) // not in the list of folders
     {
-      return(true);
+      return (true);
     }
     $this->assertTrue($this->mybrowser->setField('folder', $FolderId));
     $page = $this->mybrowser->clickSubmit('Delete!');
     $this->assertTrue($page);
-    $this->assertTrue($this->myassertText($page, "/Deletion of folder $folder added to job queue/"),
-     "delete Folder Failed!\nPhrase 'Deletion of folder $folder added to job queue' not found\n");
+    $this->assertTrue($this->myassertText($page, "/Deletion of folder $folder added to job queue/"), "delete Folder Failed!\nPhrase 'Deletion of folder $folder added to job queue' not found\n");
   }
 
   /**
@@ -266,15 +282,14 @@ class fossologyTestCase extends fossologyTest
     $page = $this->mybrowser->clickLink('Delete Uploaded File');
     $this->assertTrue($this->myassertText($page, '/Select the uploaded file to delete/'));
     $UploadId = $this->getUploadId($upload, $page, 'upload');
-    if(empty($UploadId))    // not in the list of uploads on the root page
+    if (empty ($UploadId)) // not in the list of uploads on the root page
     {
-      return(FALSE);
+      return (FALSE);
     }
     $this->assertTrue($this->mybrowser->setField('upload', $UploadId));
     $page = $this->mybrowser->clickSubmit('Delete!');
     $this->assertTrue($page);
-    $this->assertTrue($this->myassertText($page, "/Deletion added to job queue/"),
-     "delete Upload Failed!\nPhrase 'Deletion added to job queue' not found\n");
+    $this->assertTrue($this->myassertText($page, "/Deletion added to job queue/"), "delete Upload Failed!\nPhrase 'Deletion added to job queue' not found\n");
   }
 
   /**
@@ -283,32 +298,35 @@ class fossologyTestCase extends fossologyTest
    * @param string $User, the user name to remove
    *
    */
-  public function deleteUser($User) {
+  public function deleteUser($User)
+  {
 
     global $URL;
 
-    if(empty($User)) {
-      return('No User Specified');
+    if (empty ($User))
+    {
+      return ('No User Specified');
     }
     // Should already be logged in... no need to call this: $this->Login();
     $page = $this->mybrowser->get("$URL?mod=user_del");
     /* Get the user id */
-    $select = $this->parseSelectStmnt($page, 'userid',$User);
-    if(!is_null($select)) {
+    $select = $this->parseSelectStmnt($page, 'userid', $User);
+    if (!is_null($select))
+    {
       $this->assertTrue($this->mybrowser->setField('userid', $select));
       $this->assertTrue($this->mybrowser->setField('confirm', 1));
-      $page = $this->mybrowser->clickSubmit('Delete!',
-        "Could not select the Delete! button");
+      $page = $this->mybrowser->clickSubmit('Delete!', "Could not select the Delete! button");
       $this->assertTrue($page);
-      if($this->myassertText($page, "/User deleted/")) {
+      if ($this->myassertText($page, "/User deleted/"))
+      {
         print "User $User Deleted\n";
         $this->pass();
-      }
-      else {
+      } else
+      {
         $this->fail("Delete User Failed!\nPhrase 'User deleted' not found\n");
       }
     }
-  }  // Delete User
+  } // Delete User
   /**
   * editFolder
   *
@@ -365,29 +383,28 @@ class fossologyTestCase extends fossologyTest
    *
    * @return null on success, prints error on fail.
    */
-  public function editUser($UserName, $Description=NULL, $Email=NULL, $Access=1,
-  $Folder=1, $Block=NULL, $Blank=NULL, $Password=NULL,
-  $EmailNotify='y'){
+  public function editUser($UserName, $Description = NULL, $Email = NULL, $Access = 1, $Folder = 1, $Block = NULL, $Blank = NULL, $Password = NULL, $EmailNotify = 'y')
+  {
 
     global $URL;
 
     // check user name, everything else defaults (not a good idea to use defaults)
-    if(empty($UserName)) {
-      return("No User Name, cannot add user");
+    if (empty ($UserName))
+    {
+      return ("No User Name, cannot add user");
     }
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Edit Users');
-    $this->assertTrue($this->myassertText($page, '/Edit A User/'),
-      "Did NOT find Title, 'Edit A User'");
-    $this->setUserFields($UserName,$Description, $Email, $Access, $Folder,
-    NULL,NULL, $Password, $EmailNotify);
+    $this->assertTrue($this->myassertText($page, '/Edit A User/'), "Did NOT find Title, 'Edit A User'");
+    $this->setUserFields($UserName, $Description, $Email, $Access, $Folder, NULL, NULL, $Password, $EmailNotify);
 
     /* fields set, edit the user */
-    $page = $this->mybrowser->clickSubmit('Edit!',"Could not select the Edit! button");
+    $page = $this->mybrowser->clickSubmit('Edit!', "Could not select the Edit! button");
     $this->assertTrue($page);
     //print "<pre>page after clicking Add!\n"; print_r($page) . "\n</pre>";
-    if($this->myassertText($page, "/User edited/")) {
-      return(NULL);
+    if ($this->myassertText($page, "/User edited/"))
+    {
+      return (NULL);
     }
     return;
   } // addUser
@@ -429,10 +446,10 @@ class fossologyTestCase extends fossologyTest
     $oldFolderId = $this->getFolderId($oldFolder, $page, 'oldfolderid');
     $this->assertTrue($this->mybrowser->setField('oldfolderid', $oldFolderId));
     $uploadId = $this->getUploadId($upload, $page, 'uploadid');
-    if(empty($uploadId))
+    if (empty ($uploadId))
     {
       $this->fail("moveUpload FAILED! could not find upload id for upload" .
-                  "$upload\n is $upload in $oldFolder?\n");
+      "$upload\n is $upload in $oldFolder?\n");
     }
     $this->assertTrue($this->mybrowser->setField('uploadid', $uploadId));
     $destFolderId = $this->getFolderId($destFolder, $page, 'targetfolderid');
@@ -442,9 +459,8 @@ class fossologyTestCase extends fossologyTest
     print "page after move is:\n$page\n";
     $this->assertTrue($this->myassertText($page,
     //"/Moved $upload from folder $oldFolder to folder $destFolder/"),
-       "/Moved $upload from folder /"),
-       "moveUpload Failed!\nPhrase 'Move $upload from folder $oldFolder " .
-       "to folder $destFolder' not found\n");
+    "/Moved $upload from folder /"), "moveUpload Failed!\nPhrase 'Move $upload from folder $oldFolder " .
+    "to folder $destFolder' not found\n");
   }
 
   /**
@@ -480,9 +496,54 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->mybrowser->setField('targetfolderid', $DfolderId));
     $page = $this->mybrowser->clickSubmit('Move!');
     $this->assertTrue($page);
-    $this->assertTrue($this->myassertText($page, "/Moved folder $folder to folder $destination/"),
-        "moveFolder Failed!\nPhrase 'Move folder $folder to folder ....' not found\n");
+    $this->assertTrue($this->myassertText($page, "/Moved folder $folder to folder $destination/"), "moveFolder Failed!\nPhrase 'Move folder $folder to folder ....' not found\n");
   }
+
+  /**
+   * fillGroupForm($groupName, $user)
+   * \breif fill in the manage group fields
+   *
+   * @param string $groupName the name of the group to create
+   * @param string $user the user who will admin the group.
+   *
+   * @return NULL on success, string on error
+   */
+
+  public function fillGroupForm($groupName, $user)
+  {
+    global $URL;
+
+    if (is_NULL($groupName))
+    {
+      $msg = "FATAL! no group name to set\n";
+      $this->fail($msg);
+      return ($msg);
+    }
+    if (is_NULL($user))
+    {
+      $msg = "FATAL! no user name to set\n";
+      $this->fail($msg);
+      return ($msg);
+    }
+    // make sure we are on the page
+    $page = $this->mybrowser->get("$URL?mod=group_manage");
+    $this->assertTrue($this->myassertText($page, '/Manage Group/'), "Did NOT find Title, 'Manage Group'");
+    $this->assertTrue($this->myassertText($page, '/Add a Group/'), "Did NOT find phrase, 'Add a Group'");
+
+    // set the fields
+    $groupNotSet = 'FATAL! Could Not set the groupname field';
+    if (!empty ($groupName))
+    {
+      $this->assertTrue($this->mybrowser->setField('groupname', $groupName), $groupNotSet);
+    }
+    if (!empty ($user))
+    {
+      $userNotSet = 'FATAL! Could Not set the userid field in select';
+      $this->assertTrue($this->mybrowser->setField('userid', $user), $userNotSet);
+      //return($userNotSet);
+    }
+    return (NULL);
+  } //fillGroupForm
 
   /**
    * setUserFields
@@ -499,93 +560,98 @@ class fossologyTestCase extends fossologyTest
    *
    * @return NULL on pass, string on failure (for now only returns NULL)
    */
-  protected function setUserFields($UserName=NULL, $Description=NULL, $Email=NULL,
-  $Access=1, $Folder=1, $Block=NULL, $Blank=NULL,
-  $Password=NULL, $EmailNotify=NULL){
+  protected function setUserFields($UserName = NULL, $Description = NULL, $Email = NULL, $Access = 1, $Folder = 1, $Block = NULL, $Blank = NULL, $Password = NULL, $EmailNotify = NULL)
+  {
 
     $FailStrings = NULL;
 
     global $URL;
 
-    if(strtoupper($UserName) == 'NULL') {
+    if (strtoupper($UserName) == 'NULL')
+    {
       $this->fail("setUserFields, FATAL! no user name to set\n");
     }
-    if(strtoupper($Description) == 'NULL') {
+    if (strtoupper($Description) == 'NULL')
+    {
       $Description = '';
     }
-    if(strtoupper($Email) == 'NULL') {
+    if (strtoupper($Email) == 'NULL')
+    {
       $Email = '';
     }
-    if(strtoupper($Access) == 'NULL') {
+    if (strtoupper($Access) == 'NULL')
+    {
       $Access = 1;
     }
-    if(strtoupper($Folder) == 'NULL') {
+    if (strtoupper($Folder) == 'NULL')
+    {
       $Folder = 1;
     }
-    if(strtoupper($Block) == 'NULL') {
+    if (strtoupper($Block) == 'NULL')
+    {
       $Block = '';
     }
-    if(strtoupper($Blank) == 'NULL') {
+    if (strtoupper($Blank) == 'NULL')
+    {
       $Blank = '';
     }
-    if(strtoupper($Password) == 'NULL') {
+    if (strtoupper($Password) == 'NULL')
+    {
       $Password = '';
     }
-    if(strtoupper($EmailNotify) == 'NULL'|| is_null($EmailNotify)) {
-      unset($EmailNotify);
+    if (strtoupper($EmailNotify) == 'NULL' || is_null($EmailNotify))
+    {
+      unset ($EmailNotify);
     }
 
     $page = $this->mybrowser->get($URL);
     $page = $this->mybrowser->clickLink('Add');
-    $this->assertTrue($this->myassertText($page, '/Add A User/'),
-      "Did NOT find Title, 'Add A User'");
+    $this->assertTrue($this->myassertText($page, '/Add A User/'), "Did NOT find Title, 'Add A User'");
 
-    if(!empty($UserName)) {
-      $this->assertTrue($this->mybrowser->setField('username', $UserName),
-      "Could Not set the username field");
+    if (!empty ($UserName))
+    {
+      $this->assertTrue($this->mybrowser->setField('username', $UserName), "Could Not set the username field");
     }
-    if(!empty($Description)) {
-      $this->assertTrue($this->mybrowser->setField('description', $Description),
-      "Could Not set the description field");
+    if (!empty ($Description))
+    {
+      $this->assertTrue($this->mybrowser->setField('description', $Description), "Could Not set the description field");
     }
-    if(!empty($Email)) {
-      $this->assertTrue($this->mybrowser->setField('email', $Email),
-      "Could Not set the email field");
+    if (!empty ($Email))
+    {
+      $this->assertTrue($this->mybrowser->setField('email', $Email), "Could Not set the email field");
     }
-    if(!empty($Access)) {
-      $this->assertTrue($this->mybrowser->setField('permission', $Access),
-      "Could Not set the permission field");
+    if (!empty ($Access))
+    {
+      $this->assertTrue($this->mybrowser->setField('permission', $Access), "Could Not set the permission field");
+    } else
+    {
+      return ('FATAL: Access/permission is a required field');
     }
-    else {
-      return('FATAL: Access/permission is a required field');
+    if (!empty ($Folder))
+    {
+      $this->assertTrue($this->mybrowser->setField('folder', $Folder), "Could Not set the folder Field");
     }
-    if(!empty($Folder)) {
-      $this->assertTrue($this->mybrowser->setField('folder', $Folder),
-      "Could Not set the folder Field");
+    if (!empty ($Block))
+    {
+      $this->assertTrue($this->mybrowser->setField('block', $Block), "Could Not set the block Field");
     }
-    if(!empty($Block)) {
-      $this->assertTrue($this->mybrowser->setField('block', $Block),
-      "Could Not set the block Field");
+    if (!empty ($Blank))
+    {
+      $this->assertTrue($this->mybrowser->setField('blank', $Blank), "Could Not set the blank Field");
     }
-    if(!empty($Blank)) {
-      $this->assertTrue($this->mybrowser->setField('blank', $Blank),
-      "Could Not set the blank Field");
+    if (!empty ($Password))
+    {
+      $this->assertTrue($this->mybrowser->setField('pass1', $Password), "Could Not set the pass1 field");
+      $this->assertTrue($this->mybrowser->setField('pass2', $Password), "Could Not set the pass2 field");
     }
-    if(!empty($Password)) {
-      $this->assertTrue($this->mybrowser->setField('pass1', $Password),
-      "Could Not set the pass1 field");
-      $this->assertTrue($this->mybrowser->setField('pass2', $Password),
-      "Could Not set the pass2 field");
+    if (isset ($EmailNotify))
+    {
+      $this->assertTrue($this->mybrowser->setField('enote', TRUE), "Could Not set the enote Field to non default value");
+    } else
+    {
+      $this->assertTrue($this->mybrowser->setField('enote', FALSE), "Could Not set the enote Field");
     }
-    if(isset($EmailNotify)) {
-      $this->assertTrue($this->mybrowser->setField('enote', TRUE),
-      "Could Not set the enote Field to non default value");
-    }
-    else {
-      $this->assertTrue($this->mybrowser->setField('enote', FALSE),
-      "Could Not set the enote Field");
-    }
-    return(NULL);
+    return (NULL);
   } // setUserFields
 
   /**
@@ -633,20 +699,16 @@ class fossologyTestCase extends fossologyTest
     $this->assertTrue($this->myassertText($page, '/Upload a New File/'));
     $this->assertTrue($this->myassertText($page, '/Select the file to upload:/'));
     $FolderId = $this->getFolderId($parentFolder, $page, 'folder');
-    $this->assertTrue($this->mybrowser->setField('folder', $FolderId),
-      "uploadFile FAILED! could not set 'folder' field!\n");
-    $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile"),
-      "uploadFile FAILED! could not set 'getfile' field!\n");
-    $this->assertTrue($this->mybrowser->setField('description', "$description"),
-      "uploadFile FAILED! could not set 'description' field!\n");
+    $this->assertTrue($this->mybrowser->setField('folder', $FolderId), "uploadFile FAILED! could not set 'folder' field!\n");
+    $this->assertTrue($this->mybrowser->setField('getfile', "$uploadFile"), "uploadFile FAILED! could not set 'getfile' field!\n");
+    $this->assertTrue($this->mybrowser->setField('description', "$description"), "uploadFile FAILED! could not set 'description' field!\n");
     /*
      * the test will fail if name is set to null, so we special case it
      * rather than just set it.
      */
     if (!(is_null($uploadName)))
     {
-      $this->assertTrue($this->mybrowser->setField('name', "$uploadName"),
-        "uploadFile FAILED! could not set 'name' field!\n");
+      $this->assertTrue($this->mybrowser->setField('name', "$uploadName"), "uploadFile FAILED! could not set 'name' field!\n");
     }
     /*
      * Select agents to run, we just pass on the parameter to setAgents,
@@ -658,8 +720,7 @@ class fossologyTestCase extends fossologyTest
     }
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue($page);
-    $this->assertTrue($this->myassertText($page, '/The file .*? has been uploaded/'),
-      "FAILURE:Did not find the message 'The file .*? has been uploaded'\n");
+    $this->assertTrue($this->myassertText($page, '/The file .*? has been uploaded/'), "FAILURE:Did not find the message 'The file .*? has been uploaded'\n");
   } // uploadFile
   /**
   * uploadServer
@@ -681,8 +742,7 @@ class fossologyTestCase extends fossologyTest
   * @TODO determine if setting alpha folders is worth it.  Right now this routine
   * does not use them.....
   */
-  public function uploadServer($parentFolder = 1, $uploadPath, $description = null,
-  $uploadName = null, $agents = null)
+  public function uploadServer($parentFolder = 1, $uploadPath, $description = null, $uploadName = null, $agents = null)
   {
     global $URL;
     global $PROXY;
@@ -707,27 +767,23 @@ class fossologyTestCase extends fossologyTest
     }
     //print "starting UploadAUrl\n";
     $loggedIn = $this->mybrowser->get($URL);
-    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
-    "uploadURL FAILED! cannot file Upload menu, did we get a fossology page?\n");
+    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'), "uploadURL FAILED! cannot file Upload menu, did we get a fossology page?\n");
     $page = $this->mybrowser->clickLink("From Server");
 
     $this->assertTrue($this->myassertText($page, '/Upload from Server/'));
-    $this->assertTrue($this->myassertText($page,
-      '/Select the directory or file\(s\) on the server to upload/'));
+    $this->assertTrue($this->myassertText($page, '/Select the directory or file\(s\) on the server to upload/'));
     /* only look for the the folder id if it's not the root folder */
     $folderId = $parentFolder;
     if ($parentFolder != 1)
     {
       $folderId = $this->getFolderId($parentFolder, $page, 'folder');
     }
-    $this->assertTrue($this->mybrowser->setField('folder', $folderId),
-      "Count not set folder field\n");
-    $this->assertTrue($this->mybrowser->setField('sourcefiles', $uploadPath),
-      "Count not set sourcefiles field\n");
-    $this->assertTrue($this->mybrowser->setField('description', "$description"),
-    "Count not set description field\n");
+    $this->assertTrue($this->mybrowser->setField('folder', $folderId), "Count not set folder field\n");
+    $this->assertTrue($this->mybrowser->setField('sourcefiles', $uploadPath), "Count not set sourcefiles field\n");
+    $this->assertTrue($this->mybrowser->setField('description', "$description"), "Count not set description field\n");
     /* Set the name field if an upload name was passed in. */
-    if(!is_null($uploadName)) {
+    if (!is_null($uploadName))
+    {
       $this->assertTrue($this->mybrowser->setField('name', $uploadName));
     }
     /* selects agents */
@@ -738,8 +794,7 @@ class fossologyTestCase extends fossologyTest
     }
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue($page);
-    $this->assertTrue($this->myassertText($page, '/The upload for .*? has been scheduled/'),
-      "FAIL! did not see phrase The upload for .*? has been scheduled\n");
+    $this->assertTrue($this->myassertText($page, '/The upload for .*? has been scheduled/'), "FAIL! did not see phrase The upload for .*? has been scheduled\n");
     //print  "************ page after Upload! *************\n$page\n";
   } //uploadServer
 
@@ -787,10 +842,8 @@ class fossologyTestCase extends fossologyTest
     }
     //print "starting UploadAUrl\n";
     $loggedIn = $this->mybrowser->get($URL);
-    $this->assertFalse($this->myassertText($loggedIn, '/Network Error/'),
-    "uploadURL FAILED! there was a Newtwork Error (dns lookup?)\n");
-    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'),
-    "uploadURL FAILED! cannot file Upload menu, did we get a fossology page?\n");
+    $this->assertFalse($this->myassertText($loggedIn, '/Network Error/'), "uploadURL FAILED! there was a Newtwork Error (dns lookup?)\n");
+    $this->assertTrue($this->myassertText($loggedIn, '/Upload/'), "uploadURL FAILED! cannot file Upload menu, did we get a fossology page?\n");
     $this->assertTrue($this->myassertText($loggedIn, '/From URL/'));
     $page = $this->mybrowser->get("$URL?mod=upload_url");
 
@@ -818,8 +871,7 @@ class fossologyTestCase extends fossologyTest
     }
     $page = $this->mybrowser->clickSubmit('Upload!');
     $this->assertTrue($page);
-    $this->assertTrue($this->myassertText($page, '/The upload .*? has been scheduled/'),
-      "FAIL! did find phrase The upload .*? has been scheduled\n");
+    $this->assertTrue($this->myassertText($page, '/The upload .*? has been scheduled/'), "FAIL! did find phrase The upload .*? has been scheduled\n");
     //print  "************ page after Upload! *************\n$page\n";
   } //uploadUrl
 
@@ -840,9 +892,10 @@ class fossologyTestCase extends fossologyTest
    *
    * Created on Jan. 15, 2009
    */
-  public function wait4jobs() {
+  public function wait4jobs()
+  {
 
-    require_once('testClasses/check4jobs.php');
+    require_once ('testClasses/check4jobs.php');
 
     define("FiveMIN", "300");
 
@@ -850,26 +903,30 @@ class fossologyTestCase extends fossologyTest
 
     /* wait at most 2 hours for test jobs to finish */
     $done = FALSE;
-    for($i=1; $i<=24; $i++) {
+    for ($i = 1; $i <= 24; $i++)
+    {
       //print "DB:W4Q: checking Q...\n";
       $number = $Jq->Check();
-      if ($number != 0) {
+      if ($number != 0)
+      {
         //print "sleeping 10 min...\n";
         sleep(FiveMIN);
-      }
-      else {
+      } else
+      {
         //print "$number jobs found in the Queue\n";
         $done = TRUE;
         break;
       }
     }
-    if($done === FALSE) {
+    if ($done === FALSE)
+    {
       print "{$argv[0]} waited for 2 hours and the jobs are still not done\n" .
-        "Please investigate\n";
-      return(FALSE);
+      "Please investigate\n";
+      return (FALSE);
     }
-    if($done === TRUE){
-      return(TRUE);
+    if ($done === TRUE)
+    {
+      return (TRUE);
     }
   } // wait4jobs
 
