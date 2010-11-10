@@ -78,17 +78,17 @@ class verify3filesCopyright extends fossologyTestCase
 
 		// Note the entry: COPYRIGHT ,
 		// should really be:
-		// * $Id$
 		//
+		// '* Copyright (c) 2002-2004 Sam Leffler, Errno Consulting, Atheros' => 1,
 		// Likewise: copyrighted by Affero should be:
 		// copyrighted by 278 Affero, Inc.
 		$copyStd = array(
-    'Copyright (C) 1991, 1999 Free Software Foundation, Inc.' => 1,
-    'Copyright (c) 2002-2004 Sam Leffler, Errno Consulting, Atheros' => 1,
-    'Copyright (C) <year>  <name of author>' => 1,
-    'COPYRIGHT,' => 1,
-    'Copyright 2002' => 1,
-    'copyrighted by Affero' => 1,
+    'copyright (c) 1991, 1999 free software foundation, inc.' => 1,
+    'copyright (c) 1989, 1991 free software foundation, inc. made with' => 1,
+    '* copyright (c) 2002-2004 sam leffler, errno consulting, atheros' => 1,
+    '* $id: copyright,v 1.2 2004/05/15 22:26:24 samleffler exp $' => 1,
+    'copyright (c) <year>  <name of author>' => 1,
+    'copyright    2002 affero inc.' => 1,
 		);
 
 
@@ -124,7 +124,7 @@ class verify3filesCopyright extends fossologyTestCase
 		$url = makeUrl($this->host, $miniMenu['Copyright/Email/URL']);
 		if($url === NULL) {
 			$this->fail("FATAL! verify3files Failed, host is not set or url " .
-									"cannot be made, Stopping this test"); 
+									"cannot be made, Stopping this test");
 			exit(1);
 		}
 
@@ -146,27 +146,20 @@ class verify3filesCopyright extends fossologyTestCase
 			exit(1);
 		}
 
+    //print "entries in the table:\n";print_r($copyR->hList) . "\n";
 		// Verify text and counts are correct
 		$notFound = array();
-		foreach($copyStd as $stdKey => $count)
-		{
-			$tk = trim($stdKey);
-			if(in_array($stdKey, $copyR->hList))
-			{
-				print "Found $tk in copyfound\n";
-			}
 			$found = NULL;
 			foreach ($copyR->hList as $copyFound)
 			{
-				//print "copyFound is:\n";print_r($copyFound) . "\n";
 				$key = $copyFound['textOrLink'];
-				if(in_array($stdKey, $copyFound))
+				if(array_key_exists($key, $copyStd))
 				{
-					print("Pass: found $stdKey in copyFound\n");
-					$this->pass("Pass: found $key\n");
+					$this->pass("Pass: found $key in copyright table\n");
 					$found = 1;
 					// found one, check the count
 					$foundCount= $copyFound['count'];
+          $count = $copyStd[$key];
 					$this->assertEqual($count, $foundCount,
         "verify3files FAILED! the counts are not equal\n
          Expected:$count\nGot:$foundCount\n");
@@ -174,24 +167,12 @@ class verify3filesCopyright extends fossologyTestCase
 				}
 				else
 				{
-					//print "DB: did not find $stdKey in copyFound\n";
-					//print "DB: adding $key to notFound\n";
 					$notFound[] = $key;
 				}
 			} // foreach $copyR->
-			//if(!empty($notFound))
-			//{
-			//$this->fail("verify3files FAILED! the following items did not" .
-			//" match any standard, are any false positives?:\n");
-			//print "DB: notFound is:\n";
-			//foreach($notFound as $falsePos)
-			//{
-			//print "$falsePos\n---------------------\n";
-				//}
-				//}
-		} // foreach $copyStd
-		
-		// this is a hack for now... should be a better way to filter 
+     //} // foreach $copyStd
+
+		// this is a hack for now... should be a better way to filter
 		// Try in_array before insert?
 		$uniqueNF = array();
 		$uniqueNF = array_unique($notFound);
