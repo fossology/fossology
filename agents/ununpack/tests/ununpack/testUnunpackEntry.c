@@ -147,7 +147,7 @@ void testUnunpackEntryUsingDB()
     int code = WEXITSTATUS(status);
     existed = file_dir_existed("../test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
     CU_ASSERT_EQUAL(existed, 0); // not existing
-    CU_ASSERT_EQUAL(code, 23); 
+    CU_ASSERT_EQUAL(code, 21); 
   }
 }
 
