@@ -4,7 +4,6 @@ TOP=../../../..
 VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
-include $(DEPS)
 
 CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq -lmagic $(ALL_CFLAGS) -I../../ -I../ -lcunit
 EXE=test_ununpack_disk
@@ -40,3 +39,4 @@ libununpack.a:
 clean:
 	rm -fr $(EXE) *.o core *.xml *.txt results ../utility.o
 
+include $(DEPS)

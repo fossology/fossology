@@ -111,6 +111,6 @@ CU_TestInfo ExtractDisk_testcases[] =
     {"Testing function ExtractDisk for ext3 image:", testExtractDisk4Ext3},
     {"Testing function ExtractDisk for ext2 image, fs type is unknowed:", testExtractDisk4Ext2FstypeUnknow},
     {"Testing function ExtractDisk for fat image:", testExtractDisk4Fat},
-    {"Testing function ExtractDisk for nfts image:", testExtractDisk4Ntfs},
+//    {"Testing function ExtractDisk for nfts image:", testExtractDisk4Ntfs},
     CU_TEST_INFO_NULL
 };
