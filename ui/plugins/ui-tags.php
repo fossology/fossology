@@ -319,7 +319,7 @@ class ui_tag extends FO_Plugin
         $VE .= "<tr><td align='center'>" . $row['tag_ns_name'] . "</td><td align='center'>" . $row['tag'] . "</td><td align='center'>" . $row['tag_desc'] . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td>";
         $perm = GetTaggingPerms($_SESSION['UserId'],$row['tag_ns_pk']);
         if ($perm > 1){
-          $VE .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Edit</a>|<a href='" . Traceback_uri() . "?mod=tag&action=delete&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Delete</a></td></tr>\n";
+          $VE .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>View/Edit</a>|<a href='" . Traceback_uri() . "?mod=tag&action=delete&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Delete</a></td></tr>\n";
         }else{ 
           $VE .= "<td align='center'></td></tr>\n";
         }
@@ -536,7 +536,7 @@ class ui_tag extends FO_Plugin
     } else {
       $VEd .= "<p><input type='hidden' name='tag_file' value='1'/></p>";
     }
-    $text = _("Edit");
+    $text = _("Save");
     $VEd .= "<input type='hidden' name='action' value='update'/>\n";
     $VEd .= "<input type='hidden' name='tag_pk' value='$tag_pk'/>\n";
     $VEd .= "<input type='hidden' name='tag_file_pk' value='$tag_file_pk'/>\n";
