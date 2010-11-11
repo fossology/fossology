@@ -584,6 +584,64 @@ $text = _("Total package info records");
     return($V);
   } // ShowPackageInfo()
 
+
+  /***********************************************************
+   ShowTagInfo(): Display the tag info data associated with the file.
+   ***********************************************************/
+  function ShowTagInfo()
+  {
+    global $DB;
+    $VT = "";
+    $Upload = GetParm("upload",PARM_INTEGER);
+    $Item = GetParm("item",PARM_INTEGER);
+
+    $text = _("Tag Info");
+    $VT .= "<H2>$text</H2>\n";
+
+    global $PG_CONN;
+    /* Find lft and rgt bounds for this $Uploadtree_pk  */
+    $sql = "SELECT lft,rgt,upload_fk FROM uploadtree WHERE uploadtree_pk = $Item;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) < 1)
+    {
+      pg_free_result($result);
+      $text = _("Invalid URL, nonexistant item");
+      return "<h2>$text $Uploadtree_pk</h2>";
+    }
+    $row = pg_fetch_assoc($result);
+    $lft = $row["lft"];
+    $rgt = $row["rgt"];
+    $upload_pk = $row["upload_fk"];
+    pg_free_result($result);
+
+    $sql = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file,tag,tag_ns WHERE tag_pk = tag_fk AND tag_ns_fk = tag_ns_pk) T ON uploadtree.pfile_fk = T.pfile_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt ORDER BY ufile_name";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    if (pg_num_rows($result) > 0)
+    {
+      $VT .= "<table border=1>\n";
+      $text = _("FileName");
+      $text1 = _("Tag Namespace");
+      $text2 = _("Tag");
+      $VT .= "<tr><th>$text</th><th>$text1</th><th>$text2</th><th></th></tr>\n";
+      while ($row = pg_fetch_assoc($result))
+      {
+        $VT .= "<tr><td align='center'>" . $row['ufile_name'] . "</td><td align='center'>" . $row['tag_ns_name'] . "</td><td align='center'>" . $row['tag'] . "</td>";
+        $perm = GetTaggingPerms($_SESSION['UserId'],$row['tag_ns_fk']);
+        if ($perm > 0){
+          $VT .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=" . $row['uploadtree_pk'] . "&tag_file_pk=" . $row['tag_file_pk'] . "'>View</a></td></tr>\n";
+        }else{
+          $VT .= "<td align='center'></td></tr>\n";
+        }
+      }
+      $VT .= "</table><p>\n";
+    }
+    pg_free_result($result);
+    
+    return $VT;
+  }
+
   /***********************************************************
    Output(): This function is called when user output is
    requested.  This function is responsible for content.
@@ -606,6 +664,7 @@ $text = _("Total package info records");
 	$V .= $this->ShowPackageinfo(1,1);
 	$V .= $this->ShowSightings();
 	$V .= $this->ShowView(0,0);
+        $V .= $this->ShowTagInfo();
 	$V .= $this->ShowMetaView();
 	break;
       case "Text":
