@@ -325,9 +325,12 @@ $text = _("Unique buckets");
     }
     $ChildCount=0;
     $Childbucketcount=0;
+
+/* Countd disabled until we know we need them
     $NumSrcPackages = 0;
     $NumBinPackages = 0;
     $NumBinNoSrcPackages = 0;
+*/
 
     /* get mimetypes for packages */
     $MimetypeArray = GetPkgMimetypes(); 
@@ -338,7 +341,9 @@ $text = _("Unique buckets");
       if (empty($C)) { continue; }
 
       /* update package counts */
+/* This is an expensive count.  Comment out until we know we really need it
       IncrSrcBinCounts($C, $MimetypeArray, $NumSrcPackages, $NumBinPackages, $NumBinNoSrcPackages);
+*/
 
       $IsDir = Isdir($C['ufile_mode']);
       $IsContainer = Iscontainer($C['ufile_mode']);
@@ -445,6 +450,7 @@ $text = _("Unique buckets");
     $V .= $script;
 
     /* Display source, binary, and binary missing source package counts */
+/* Counts disabled above until we know we need these
     $VLic .= "<ul>";
 $text = _("source packages");
     $VLic .= "<li> $NumSrcPackages $text";
@@ -453,6 +459,7 @@ $text = _("binary packages");
 $text = _("binary packages with no source package");
     $VLic .= "<li> $NumBinNoSrcPackages $text";
     $VLic .= "</ul>";
+*/
 
     /* Combine VF and VLic */
     $V .= "<table border=0 width='100%'>\n";
