@@ -363,7 +363,8 @@ $text = _("Unique buckets");
       if (Iscontainer($C['ufile_mode']))
       {
         $uploadtree_pk = DirGetNonArtifact($C['uploadtree_pk']);
-        $LicUri = "$Uri&item=" . $uploadtree_pk;
+        $tmpuri = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","folder","ars"));
+        $LicUri = "$tmpuri&item=" . $uploadtree_pk;
       }
       else
       {
@@ -502,14 +503,16 @@ $text = _("binary packages with no source package");
     }
 
     /* Use Traceback_parm_keep to ensure that all parameters are in order */
-    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder")) . "&show=$Show";
+    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder","ars")) . "&show=$Show";
     if ($this->UpdCache != 0)
     {
       $V = "";
       $Err = ReportCachePurgeByKey($CacheKey);
     }
     else
+    {
       $V = ReportCacheGet($CacheKey);
+    }
 
     if (empty($V) )  // no cache exists
     {
