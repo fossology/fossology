@@ -340,13 +340,20 @@ static int ExtractCunitRunSummary(const char FileName[1024])
 }
 
 /**
- * @brief install cunit
- * @return 1: success, other: failure
+ * @brief if install cunit?
+ * @return 1: installed, other: not installed
  */
-static int InstallCUnit()
+static int InstallCUnitJudge()
 {
-  int status = system("./installCUnit.sh");
-  return WEXITSTATUS(status);
+  FILE * file;
+  if (file = fopen("/usr/lib/libcunit.a", "r"))
+  {
+    fclose(file);
+    return 1;
+  } else 
+  {
+    return 0;
+  }
 }
 
 /**
@@ -362,11 +369,11 @@ static int Preparing(char *ProductList)
   getcwd(Dir, LINE);
   char TwoDimensionalArray[LINE][LINE];
   printf("CurrentDir is: %s\n", Dir);
-  int status = InstallCUnit();
+  int status = InstallCUnitJudge();
   
   if (1 != status) 
   {
-    printf("CUnit fail to install, status is:%d\n", status);
+    printf("CUnit is not installed, please install it first!!\n");
     exit(-1);
   }
   
