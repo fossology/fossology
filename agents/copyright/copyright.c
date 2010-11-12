@@ -299,10 +299,15 @@ function_registry* copy_entry_function_registry()
 }
 
 /**
- * TODO
+ * This function will be called from within libpcre. Every time pcre_exec finds
+ * a match for the regex it will call this function. This function will save
+ * the match to the copyright object and tell the pcre_exec function to
+ * continue searching for new matches.
  *
- * @param info
- * @return
+ * @param info pcre_callout_block created by the pcre_exec function. This function
+ *             will only use the callout_data, subject, start_match, current_possition
+ *             field of the pcre_callout_block structure.
+ * @return integer telling pcre_exec if it should continue searching for matches
  */
 int copyright_callout(pcre_callout_block* info)
 {
@@ -527,10 +532,11 @@ void copyright_analyze(copyright copy, FILE* istr)
 }
 
 /**
- * TODO
+ * function to specifically find emails and urls within a block of text. This
+ * will make two different calls to pcre_exec to do this searching.
  *
- * @param copy
- * @param file
+ * @param copy the copyright to store the results in
+ * @param file the text that will be searched for emails and urls
  */
 void copyright_email_url(copyright copy, char* file)
 {
