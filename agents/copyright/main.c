@@ -105,6 +105,22 @@ int longest_common(char* dst, char* lhs, char* rhs)
   return strlen(dst);
 }
 
+/**
+ * TODO
+ *
+ * @param str
+ * @return
+ */
+unsigned long hash_string(char* str) {
+  unsigned long hash = 0;
+
+  for(; *str; str++) {
+    hash = *str + (hash << 6) + (hash << 16) - hash;
+  }
+
+  return hash;
+}
+
 /* ************************************************************************** */
 /* **** Accuracy Tests ****************************************************** */
 /* ************************************************************************** */
@@ -316,7 +332,8 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   /* locals */
   char sql[1024];               // buffer to hold the sql commands
   char buf[1024];               // buffer to hold string that have been escaped for sql
-  char* file_name;                    // holds the name of the file to open
+  char hash[256];               // holds the hash of the copyright string for entry into database
+  char* file_name;              // holds the name of the file to open
   int error;                    // used to store errors returned by PQ functions
   extern int HBItemsProcessed;  // the number of items processed by this agent
   copyright_iterator finds;     // an iterator to access the copyrights
@@ -386,11 +403,19 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
         /* ensure legal sql */
         PQescapeStringConn(pgConn, buf, copy_entry_text(entry), strlen(copy_entry_text(entry)), &error);
 
+        /* get the hash for the string */
+        sprintf(hash, "0x%lx", hash_string(copy_entry_text(entry)));
+
         /* place the copyright in the table */
         memset(sql, '\0', sizeof(sql));
-        snprintf(sql, sizeof(sql), insert_copyright, agent_pk, *(int*)pair_second(current_file),
-            copy_entry_start(entry), copy_entry_end(entry),
-            copy_entry_text(entry), "", copy_entry_type(entry));
+        snprintf(sql, sizeof(sql), insert_copyright,
+            agent_pk,                           // agent pk
+            *(int*)pair_second(current_file),   // file fk
+            copy_entry_start(entry),            // start byte
+            copy_entry_end(entry),              // end byte
+            buf,                                // text found for copyright
+            hash,                               // Hash TODO figure out how to create this
+            copy_entry_type(entry));            // the type of entry that this is i.e. 'statement', 'email' or 'url
         pgResult = PQexec(pgConn, sql);
 
         if (PQresultStatus(pgResult) != PGRES_COMMAND_OK)
@@ -534,7 +559,7 @@ int setup_database(PGconn* pgConn)
   }
   PQclear(pgResult);
 
-  /* alter pfile_fk ??? TODO */
+  /* alter pfile_fk */
   pgResult = PQexec(pgConn, alter_table_pfile);
   if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
   {
@@ -544,7 +569,7 @@ int setup_database(PGconn* pgConn)
   }
   PQclear(pgResult);
 
-  /* alter agent_fk ??? TODO */
+  /* alter agent_fk */
   pgResult = PQexec(pgConn, alter_table_agent);
   if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
   {
