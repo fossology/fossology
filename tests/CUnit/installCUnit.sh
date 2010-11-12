@@ -15,29 +15,23 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #***********************************************************/
-
-sudo apt-get -y install lcov
-sudo apt-get -y install autoconf
-sudo apt-get -y install libcunit1-dev libcunit1-doc libcunit1
-OUT=$?
-
-if [ $OUT -eq 0 ]; then
-  exit 1
-elif [ ! -f /usr/local/lib/libcunit.a ]; then
-  wget http://sourceforge.net/projects/cunit/files/CUnit/2.1-2/CUnit-2.1-2-src.tar.bz2
-  sudo tar -xvjf CUnit-2.1-2-src.tar.bz2 
-  chmod 755 configure
-  ./configure
-  make
-  imake install
-else
-  exit 1
-fi
-
+# judge os type and install cunit on debian
+cat /proc/version |grep Debian
 OUT=$?
 if [ $OUT -eq 0 ]; then
-  exit 1
+  sudo apt-get -y install lcov
+  sudo apt-get -y install autoconf
+  sudo apt-get -y install libcunit1-dev libcunit1-doc libcunit1
 else
-  exit 0
+  echo "please find the relevant package for cunit to install\n"
 fi
+
+##########################################################################################
+# install cunit through source, please refer to the process below
+# wget http://sourceforge.net/projects/cunit/files/CUnit/2.1-2/CUnit-2.1-2-src.tar.bz2
+#  sudo tar -xvjf CUnit-2.1-2-src.tar.bz2 
+#  chmod 755 configure
+#  ./configure
+#  make
+#  imake install
 
