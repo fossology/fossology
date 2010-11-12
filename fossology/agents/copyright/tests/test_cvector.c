@@ -445,7 +445,6 @@ void test_cvector_capacity()
 
 /* ************************************************************************** */
 /* **** test cvector error checkes ****************************************** */
-/* **** TODO figure out how to test exit() ********************************** */
 /* ************************************************************************** */
 
 void test_cvector_at_error()
@@ -461,6 +460,7 @@ void test_cvector_at_error()
   cvector_push_back(vec, &tester);
 
   /* test the results */;
+
 
   cvector_destroy(vec);
   test_failure();

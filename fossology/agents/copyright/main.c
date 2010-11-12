@@ -106,10 +106,11 @@ int longest_common(char* dst, char* lhs, char* rhs)
 }
 
 /**
- * TODO
+ * Finds the Hash for a particular string. Used when checking found copyrights
+ * in the database
  *
- * @param str
- * @return
+ * @param str the string to find the hash for
+ * @return the hash for the string as an unsigned long
  */
 unsigned long hash_string(char* str) {
   unsigned long hash = 0;
@@ -414,7 +415,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
             copy_entry_start(entry),            // start byte
             copy_entry_end(entry),              // end byte
             buf,                                // text found for copyright
-            hash,                               // Hash TODO figure out how to create this
+            hash,                               // Hash for the txt of the string being entered into the db
             copy_entry_type(entry));            // the type of entry that this is i.e. 'statement', 'email' or 'url
         pgResult = PQexec(pgConn, sql);
 

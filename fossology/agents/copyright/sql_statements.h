@@ -46,8 +46,6 @@ SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilenam
 /**
  * This will enter that no copyright entries were found for the file that was
  * just analyzed
- *
- * TODO determine if this is needed
  */
 char* insert_no_copyright = "\
 INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) \
@@ -56,8 +54,6 @@ INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content
 /**
  * This will enter that a copyright has been found for the file that was just
  * analyzed, it enters the start, end, and text of the entry.
- *
- * TODO determine the purpose of the hash and type and if I need to keep those.
  */
 char* insert_copyright = "\
 INSERT INTO copyright (agent_fk, pfile_fk, copy_startbyte, copy_endbyte, content, hash, type) \
