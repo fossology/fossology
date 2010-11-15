@@ -58,7 +58,7 @@ class agent_copyright_once extends FO_Plugin {
         $V = "";
         $View = & $Plugins[plugin_find_id("view") ];
         $TempFile = $_FILES['licfile']['tmp_name'];
-        $Sys = $AGENTDIR."/copyright/run.py --model ".$DATADIR."/model.dat --analyze-from-command-line $TempFile";
+        $Sys = $AGENTDIR."/copyright -c $TempFile";
         $Fin = popen($Sys, "r");
         $colors = Array();
         $colors['statement'] = 0;
