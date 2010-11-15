@@ -379,7 +379,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   /* if running command line, print file name */
   if(*(int*)pair_second(current_file) < 0)
   {
-    fprintf(cout, "%s\n", (char*)pair_first(current_file));
+    fprintf(cout, "%s ::\n", (char*)pair_first(current_file));
   }
 
   /* loop across the found copyrights */
@@ -428,9 +428,9 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
       }
       else
       {
-        fprintf(cout, "\t[%d:%d] %s",
+        fprintf(cout, "\t[%d:%d:%s] '%s'",
             copy_entry_start(entry), copy_entry_end(entry),
-            copy_entry_text(entry));
+            copy_entry_type(entry), copy_entry_text(entry));
         if(copy_entry_text(entry)[strlen(copy_entry_text(entry)) - 1] != '\n')
         {
           fprintf(cout, "\n");
