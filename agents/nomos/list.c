@@ -815,7 +815,7 @@ void listDump(list_t *l, int verbose) {
 		return;
 	}
 	if (verbose < 0) {
-		printf("** %s (size %d, used %d, ix %d, sort %d desc %d) == %ud\n",
+		printf("** %s (size %d, used %d, ix %d, sort %d desc %d) == %lu\n",
 				l->name, l->size, l->used, l->ix, l->sorted, l->desc,
 						sizeof(item_t));
 		return;
