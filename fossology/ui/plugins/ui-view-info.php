@@ -55,6 +55,7 @@ $text = _("View file information");
 $text = _("View information about this file");
 	menu_insert("View::Info",1,$URI,$text);
 	menu_insert("View-Meta::Info",1,$URI,$text);
+        menu_insert("Browse::Info",-3,$URI,$text);
 	}
     } // RegisterMenus()
 
