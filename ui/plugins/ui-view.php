@@ -120,6 +120,8 @@ $text = _("View as formatted text");
 $text = _("View file contents");
 	menu_insert("View::View",2,$this->Name . $URI,$text);
 	menu_insert("View-Meta::View",2,$this->Name . $URI,$text);
+        menu_insert("Browse::View",-2,$this->Name . $URI,$text);
+        menu_insert("Browse::[BREAK]",-1);
 	}
     } // RegisterMenus()
 
