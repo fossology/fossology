@@ -88,8 +88,9 @@ if [ $BUILDTIME ]; then
             etch|dapper) apt-get install postgresql-server-dev-8.1;;
             lenny|hardy) apt-get install postgresql-server-dev-8.3;;
             sid) apt-get install postgresql-server-dev-8.4;;
-            lucid|isadora) apt-get install postgresql-server-dev-8.4;;
-            *) echo "ERROR: Unknown or Unsupported $DISTRO release"; exit 1;;
+            karmic|lucid|maverick) apt-get install postgresql-server-dev-8.4;;
+            isadora) apt-get install postgresql-server-dev-8.4;;
+            *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
          esac
          ;;
       Fedora)
@@ -145,10 +146,13 @@ if [ $RUNTIME ]; then
             sid)
                [ $AGENT ] || apt-get install postgresql-8.4
                apt-get install libextractor-plugins;;
-            lucid|isadora)
+            karmic|lucid|maverick)
                [ $AGENT ] || apt-get install postgresql-8.4
                apt-get install libextractor-plugins;;
-            *) echo "ERROR: Unknown or Unsupported $DISTRO release"; exit 1;;
+            isadora)
+               [ $AGENT ] || apt-get install postgresql-8.4
+               apt-get install libextractor-plugins;;
+            *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
          esac
          ;;
       Mandriva)
