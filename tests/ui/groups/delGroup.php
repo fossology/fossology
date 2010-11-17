@@ -17,14 +17,11 @@
  ***********************************************************/
 
 /**
- * addGroup
- * \brief add a group using the manage group page
+ * delGroup
+ * \brief del a group using the manage group page
  *
  * @return pass or fail to std out
  *
- * @version "$Id$"
- *
- * Created on Nov. 9, 2010
  */
 
 require_once ('../../../tests/fossologyTestCase.php');
@@ -34,10 +31,11 @@ require_once ('../../../tests/TestEnvironment.php');
 /* Globals for test use, most tests need $URL, only login needs the others */
 global $URL;
 
-class addGroupTest extends fossologyTestCase
+class delGroupTest extends fossologyTestCase
 {
   public $mybrowser;
   public $someOtherVariable;
+  public $host;
 
   /*
    * Every Test needs to login so we use the setUp method for that.
@@ -51,52 +49,36 @@ class addGroupTest extends fossologyTestCase
   {
     global $URL;
     $this->Login();
+    $this->host = getHost($URL);
   }
 
   /*
    * add the group TestGroup1 with fossy as the admin
    */
-  function testAddGroup()
+  function testDelGroup()
   {
     global $URL;
 
-    print "starting testAddGroup\n";
+    print "starting testDelGroup\n";
 
     // go to the page, make sure you are there
     $page = $this->mybrowser->get("$URL?mod=group_manage");
     $this->assertTrue($this->myassertText($page, '/Manage Group/'),
-      "addGroup FAILED! Did NOT find Title, 'Manage Group'");
-    $this->assertTrue($this->myassertText($page, '/Add a Group/'),
-      "addGroup FAILED! Did NOT find phrase 'Add a Group'");
-    // add the group
-    $filled = $this->fillGroupForm('TestGroup1', '2');
-    $page = $this->mybrowser->clickSubmit('Add!');
-    $this->assertTrue($this->myassertText($page, '/Group TestGroup1 added/'),
-       "addGroup FAILED! TestGroup1 was not added as a group, does it exist?\n");
-  }
-
-  /*
-   * add the group TestGroup1 again to check that group already exists 
-   */
-  function testAddGroupExist()
-  {
-    global $URL;
-
-    print "starting testAddGroupExist\n";
-
-    // go to the page, make sure you are there
-    $page = $this->mybrowser->get("$URL?mod=group_manage");
-    $this->assertTrue($this->myassertText($page, '/Manage Group/'),
-      "addGroupExist FAILED! Did NOT find Title, 'Manage Group'");
-    $this->assertTrue($this->myassertText($page, '/Add a Group/'),
-      "addGroupExist FAILED! Did NOT find phrase 'Add a Group'");
-    // add the group
-    $filled = $this->fillGroupForm('TestGroup1', '2');
-    $page = $this->mybrowser->clickSubmit('Add!');
-    //print_r($page);
-    $this->assertTrue($this->myassertText($page, '/Group already exists.  Not added./'),
-       "addGroupExist FAILED! TestGroup1 was added twice\n");
-  }
+      "delGroup FAILED! Did NOT find Title, 'Manage Group'.");
+    $this->assertTrue($this->myassertText($page, '/TestGroup1/'),
+      "delGroup FAILED! Did NOT find 'TestGroup1' to delete.");
   
+    //print_r($page); 
+    $matche = preg_match("/TestGroup1.*?\n.*?\n.*?<a href='(.*)'/", $page, $dellink);
+    //print_r($dellink); 
+    $url = makeUrl($this->host, $dellink[1]);
+    if($url === NULL) {
+      $this->fail("FATAL! delGroup Failed, host is not set or url cannot be made, Stopping this test");
+      exit(1);
+    }
+    $page = $this->mybrowser->get($url);
+    $this->assertTrue($this->myassertText($page, '/Group Delete Successful!/'),
+      "delGroup FAILED! Delete 'TestGroup1' failed.");
+  }  
 }
 ?>
