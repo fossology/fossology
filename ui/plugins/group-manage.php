@@ -218,7 +218,7 @@ class group_manage extends FO_Plugin {
              /* Build HTML form */
              $text = _("Add a Group");
              $V.= "<h4>$text</h4>\n";
-             $V.= "<form name='formy' method='POST'>\n"; // no url = this url
+             $V.= "<form name='formy' method='POST' action=" . Traceback_uri() ."?mod=group_manage>\n"; 
 	     $Val = htmlentities(GetParm('groupname', PARM_TEXT), ENT_QUOTES);
              $text = _("Enter the groupname:");
              $V.= "$text\n";
