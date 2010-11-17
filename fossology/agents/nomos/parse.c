@@ -1,5 +1,5 @@
 /***************************************************************
- Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2006-2010 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,6 +24,11 @@
 #include "util.h"
 #include "nomos_regex.h"
 #include "_autodefs.h"
+
+/* DEBUG 
+#define PROC_TRACE 1
+#define DOCTOR_DEBUG 1
+   DEBUG */
 
 /**
  * \file parse.c
@@ -103,7 +108,9 @@ void showLTCache(char *);
 void checkCornerCases(char *, int, int, int, int, int, int, int);
 void checkFileReferences(char *, int, int, int, int, int);
 void  addRef(char *, int);
-/* static void dumpMatch(char *, char *); */
+#ifdef DOCTOR_DEBUG
+static void dumpMatch(char *, char *);
+#endif /* DOCTOR_DEBUG */
 void locateRegex(char *, item_t *, int, int, int, int);
 void saveRegexLocation(int, int, int, int);
 void saveUnclBufLocation(int);
@@ -6834,7 +6841,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
      * comments and other unwanted punctuation.
      */
 #ifdef  DOCTOR_DEBUG
-    printf("***** Processing %p (%d data bytes)\n", buf, strlen(buf));
+    printf("***** Processing %p (%d data bytes)\n", buf, (int)strlen(buf));
     printf("----- [Dr-BEFORE:] -----\n%s\n[==END==]\n", buf);
 #endif  /* DOCTOR_DEBUG */
     /*
@@ -7093,7 +7100,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
 	    break;
 	default:
 	    if (!isalpha(*cp) && !isdigit(*cp)) {
-		printf("DEBUG: \\0%o @ %d\n",
+		printf("DEBUG: \\0%o @ %ld\n",
 		       *cp & 0xff, cp-buf);
 	    }
 	    break;
@@ -7202,7 +7209,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
     *x = NULL_CHAR;
 #ifdef  DOCTOR_DEBUG
     printf("***** Now buffer %p contains %d bytes (%d clipped)\n", buf,
-           strlen(buf), n);
+           (int)strlen(buf), n);
     printf("+++++ [Dr-AFTER] +++++:\n%s\n[==END==]\n", buf);
 #endif  /* DOCTOR_DEBUG */
     return;
@@ -8131,10 +8138,10 @@ void showLTCache(char *msg)
 }
 #endif  /* LTSR_DEBUG */
 
+#ifdef DOCTOR_DEBUG
 /*
- *
- save this, only used in ifdefs, now, but could be useful for debuggin.
-
+ Debugging
+ */
 void dumpMatch(char *text, char *label)
 {
     char *x = text + cur.regm.rm_so;
@@ -8152,6 +8159,4 @@ void dumpMatch(char *text, char *label)
     printf("]\n");
     return;
 }
-*/
-
-
+#endif  /* DOCTOR_DEBUG  */
