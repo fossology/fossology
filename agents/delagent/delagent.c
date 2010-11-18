@@ -260,6 +260,23 @@ void	DeleteUpload	(long UploadId)
 	   "WHERE pfile_fk = pfile_pk;",TempTable);
   MyDBaccess(DB,SQL);
 
+  /* Delete pfile reference from tag and tag_file table */
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT DISTINCT tag_fk, pfile_fk INTO temp_tag_file FROM tag_file INNER JOIN %s_pfile ON pfile_fk = pfile_pk;",TempTable);
+  MyDBaccess(DB,SQL);
+
+  if (Verbose) { printf("# Deleting tag_file\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM tag_file USING %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
+  MyDBaccess(DB,SQL);
+  if (Verbose) { printf("# Deleting tag\n"); }
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DELETE FROM tag USING temp_tag_file,%s_pfile WHERE tag_fk = tag_pk AND pfile_fk = pfile_pk;",TempTable);
+  MyDBaccess(DB,SQL);
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"DROP TABLE temp_tag_file;");
+  MyDBaccess(DB,SQL);
+
   /***********************************************/
   /*** Everything above is slow, everything below is fast ***/
   /***********************************************/
