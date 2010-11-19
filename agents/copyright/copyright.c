@@ -317,6 +317,8 @@ int copyright_callout(pcre_callout_block* info)
   struct copy_entry_internal new_entry;
   copy_entry prev;
   cvector data = (cvector)info->callout_data;
+  int size = (info->current_position - info->start_match > 1023) ?
+                1023 : info->current_position - info->start_match;
 
   /* initialize memory */
   copy_entry_init(&new_entry);
@@ -324,9 +326,9 @@ int copyright_callout(pcre_callout_block* info)
   /* copy information into the entry */
   strncpy(new_entry.text,
       &(info->subject[info->start_match]),
-      info->current_position - info->start_match);
+      size);
   new_entry.start_byte = info->start_match;
-  new_entry.end_byte = info->current_position;
+  new_entry.end_byte = info->start_match + size;
 
   /* copy the type that was found into the entry */
   switch(info->callout_number)

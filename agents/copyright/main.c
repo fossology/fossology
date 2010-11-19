@@ -331,7 +331,7 @@ void run_test_files(copyright copy)
 void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long agent_pk, FILE* mout)
 {
   /* locals */
-  char sql[1024];               // buffer to hold the sql commands
+  char sql[2048];               // buffer to hold the sql commands
   char buf[1024];               // buffer to hold string that have been escaped for sql
   char hash[256];               // holds the hash of the copyright string for entry into database
   char* file_name;              // holds the name of the file to open
