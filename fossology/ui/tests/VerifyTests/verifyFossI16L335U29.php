@@ -73,45 +73,40 @@ class verifyFossolyTest extends fossologyTestCase
 		global $name;
 		global $safeName;
 
-		// licenseCounts recorded 20100-03-10 for 1.2 release with nomos.
+		// licenseCounts recorded 2010-11-19 for release 1.3
 		$licenseCounts = array(
-											'GPL_v2'     					=> 225,
-    									'(C)HP-Dev' 					=> 41,
-    									'No License Found' 	  => 29,
-    									'GPL' 								=> 24,
-    									'LGPL_v2.1'						=> 17,
-    									'Apache_v2.0' 				=> 2,
-    									'(C)IETF' 						=> 2,
-    									'GFDL' 								=> 2,
-    									'Public-domain-claim' => 2,
-    									'APSL_v2.0' 					=> 1,
-    									'Artistic' 						=> 1,
-    									'Boost' 							=> 1,
-    									'BSD' 								=> 1,
-    									'FSF-possibility'			=> 1,
-    									'GPL_v2.1+' 					=> 1,
-                      'GPL_v3' 							=> 1,
-                      'Indemnity' 					=> 1,
-                      'LGPL_v2.1+' 					=> 1,
-                      'LGPL_v3+' 						=> 1,
-                      'Misc-Copyright' 			=> 1,
-        						  'NPL' 								=> 1,
-                      'OSL_v3.0' 						=> 1,
-                      'PHP-possibility' 		=> 1,
-											'Possible-copyright' 	=> 1,
-                      'Python' 							=> 1,
-                      'See-doc(OTHER)' 			=> 1,
-                      'X11-possibility' 		=> 1,
-                     	'Zope' 								=> 1,
-
-		);
+     'GPL_v2' => 224,
+    'No License Found' => 72,
+    'GPL' => 23,
+    'LGPL_v2.1' => 17,
+    'Apache_v2.0' => 2,
+    'GFDL' => 2,
+    'Public-domain-claim' => 2,
+    'APSL_v2.0' => 1,
+    'Artistic' => 1,
+    'Boost' => 1,
+    'BSD' => 1,
+    'FSF-possibility' => 1,
+    'GPL_v2-possibility' => 1,
+    'Indemnity' => 1,
+    'LGPL_v2.1+' => 1,
+    'LGPL_v3+' => 1,
+    'NPL' => 1,
+    'OSL_v3.0' => 1,
+    'PHP-possibility' => 1,
+    'Python' => 1,
+    'See-doc(OTHER)' => 1,
+    'X11-possibility' => 1,
+    'Zope' => 1,
+);
 
 		$licenseSummary = array(
-    												'Unique licenses' 			 => 28,
-    												'Licenses found'   			 => 334,
-    												'Files with no licenses' => 29,
-    												'Files'									 => 345
+      'Unique licenses'=> 23,
+      'Licenses found'=> 286,
+      'Files with no licenses'=> 72,
+      'Files'=> 345
 		);
+
 		print "starting VerifyFossl16L335 test\n";
 		$page = $this->mybrowser->clickLink('Browse');
 		$this->assertTrue($this->myassertText($page, '/Browse/'),
