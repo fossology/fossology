@@ -63,9 +63,9 @@ struct copy_entry_internal
   char text[1024];            ///< the code that was identified as a copyright
   char name_match[256];       ///< the name that matched the entry identified as a copyright
   char dict_match[256];       ///< the dictionary match that originally identified the entry
-  unsigned int start_byte;    ///< the location in the file that this copyright starts
-  unsigned int end_byte;      ///< the location in the file that this copyright ends
-  char* type;
+  int start_byte;             ///< the location in the file that this copyright starts
+  int end_byte;               ///< the location in the file that this copyright ends
+  char* type;                 ///< the type of entry that was found, i.e. copyright, email, url
 };
 
 /**
@@ -88,6 +88,7 @@ int find_beginning(char* ptext, int idx)
   {
     if (ptext[idx] == '\n') return idx;
   }
+
   return idx;
 }
 
@@ -137,6 +138,8 @@ void strip_empty_entries(copyright copy)
     {
       iter = (copyright_iterator)cvector_remove(copy->entries,
           (cvector_iterator)iter);
+    } else if(copy_entry_start(*iter) < 0) {
+      (*iter)->start_byte = 0;
     }
   }
 }
@@ -691,7 +694,7 @@ char* copy_entry_type(copy_entry entry)
  *
  * @param the entry to get the start byte from
  */
-unsigned int copy_entry_start(copy_entry entry)
+int copy_entry_start(copy_entry entry)
 {
   return entry->start_byte;
 }
@@ -701,7 +704,7 @@ unsigned int copy_entry_start(copy_entry entry)
  *
  * @param the entry to get the end byte from
  */
-unsigned int copy_entry_end(copy_entry entry)
+int copy_entry_end(copy_entry entry)
 {
   return entry->end_byte;
 }
