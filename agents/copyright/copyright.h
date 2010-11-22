@@ -92,7 +92,7 @@ char* copy_entry_text(copy_entry entry);
 char* copy_entry_name(copy_entry entry);
 char* copy_entry_dict(copy_entry entry);
 char* copy_entry_type(copy_entry entry);
-unsigned int copy_entry_start(copy_entry entry);
-unsigned int copy_entry_end(copy_entry entry);
+int copy_entry_start(copy_entry entry);
+int copy_entry_end(copy_entry entry);
 
 #endif /* COPYRIGHT_H_INCLUDE */
