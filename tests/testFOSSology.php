@@ -246,7 +246,8 @@ if (array_key_exists("a", $options)) {
 	if (chdir($EmailTests) === FALSE) {
 		LogAndPrint($LF, "ALL Tests ERROR: can't cd to $EmailTests\n");
 	}
-	$EmailLast = exec("fo-runTests -l \"`ls`\" -n 'Email Tests' >> $logFile 2>&1", $dummy, $ENrtn);
+  $testList = "addUserTest.php dupUserTest.php noEmailUserTest.php userEditAnyTest.php";
+	$EmailLast = exec("fo-runTests -l $testList -n 'Email Tests' >> $logFile 2>&1", $dummy, $ENrtn);
 	LogAndPrint($LF, "\n");
 
 	if (chdir($Home) === FALSE) {
