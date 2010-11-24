@@ -1,0 +1,27 @@
+#
+# $Id$
+#
+# Filter for rpm build
+#
+
+# PBGRP is replaced by the RPM group of apps
+# Cf: http://fedoraproject.org/wiki/RPMGroups
+filter PBGRP = Applications/Engineering
+
+# PBLIC is replaced by the license of the application
+# Cf: http://fedoraproject.org/wiki/Licensing
+filter PBLIC = GPLv2
+
+# PBDEP is replaced by the list of dependencies
+filter PBDEP = libextractor libextractor-plugins cabextract genisoimage upx sleuthkit file-libs postgresql-server >= 8.1.11 smtpdaemon
+
+# PBBUILDDEP is replaced by the list of build dependencies
+filter PBBUILDDEP = libextractor-devel file-libs file-devel perl-Text-Template
+
+# PBSUF is replaced by the package suffix ($pbsuf'} in code)
+filter PBSUF = $pb->{'suf'}
+
+# PBOBS is replaced by the Obsolete line
+#filter PBOBS =
+
+filter PBPHPINI = /etc/php.ini
