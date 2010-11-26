@@ -147,6 +147,28 @@ void	SafeExit	(int rc)
   exit(rc);
 } /* SafeExit() */
 
+/*
+ * @brief get rid of the postfix
+ * for example : test.gz --> test
+ * @parameter Name: input file name
+ * @parameter Count: the size of the name
+ * @return after removing postfix, the size - 1 of name, -1: error
+ */
+int RemovePostfix(char *Name, int Count)
+{
+  if (NULL == Name) return -1; // exception
+  int i = Count - 1;
+  for (; i >= 0; i--)
+  {
+    if ('.' == Name[i]) //find the charecter '.'
+    {
+      Name[i] = '\0';
+      break;
+    }
+  }
+  if (0 == i) return Count - 1; // do not find '.', the name is original
+  return i; // return the name size 
+}
 
 /*************************************************
  InitCmd(): Initialize the metahandler CMD table.
@@ -1522,8 +1544,45 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
   switch(Type)
 	{
 	case CMD_PACK:
+          if (CI->TopContainer){ // the package is top package, not part of other package
+            char *ufile_name;
+            char UfileName[1024];
+            snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
+            MyDBaccess(DB,UfileName); // get the upload file name
+            memset(UfileName,'\0',sizeof(UfileName));
+            ufile_name = DBgetvalue(DB,0,0);
+            if (strchr(ufile_name,'/')) ufile_name = strrchr(ufile_name,'/')+1;
+            strncpy(UfileName,ufile_name,sizeof(UfileName)-1);
+            // set the file name of the file in package, for example, test.gz, after test.gz
+            // is unpacked, the unpacked file name should be test
+            strncpy(CI->PartnameNew,UfileName,sizeof(CI->PartnameNew));
+            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, sizeof(CI->PartnameNew)));
+          } else 
+          // the package is sub package, need get rid of the postfix
+          // two time, test.gz.tar.dir-->test.tar.gz-->test.tar
+          { 
+            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, sizeof(CI->PartnameNew)));
+            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, sizeof(CI->PartnameNew)));
+          }
+
+	  rc=RunCommand(CMD[CI->PI.Cmd].Cmd,CMD[CI->PI.Cmd].CmdPre,CI->Source,
+	     CMD[CI->PI.Cmd].CmdPost,CI->PartnameNew,Queue[Index].ChildRecurse);
+          break;
 	case CMD_RPM:
 	  /* unpack in the current directory */
+          if (CI->TopContainer){ // the package is top package, not part of other package
+            char *ufile_name;
+            char UfileName[1024];
+            snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
+            MyDBaccess(DB,UfileName); // get the upload file name
+            memset(UfileName,'\0',sizeof(UfileName));
+            ufile_name = DBgetvalue(DB,0,0);
+            if (strchr(ufile_name,'/')) ufile_name = strrchr(ufile_name,'/')+1;
+            strncpy(UfileName,ufile_name,sizeof(UfileName)-1);
+            // set the file name of the file in package, for example, test.rpm, after test.rpm
+            // is unpacked, the unpacked file name should be test.rpm
+            strncpy(CI->PartnameNew,UfileName,sizeof(CI->PartnameNew));
+          } 
 	  rc=RunCommand(CMD[CI->PI.Cmd].Cmd,CMD[CI->PI.Cmd].CmdPre,CI->Source,
 	     CMD[CI->PI.Cmd].CmdPost,CI->PartnameNew,CI->Partdir);
 	  break;
@@ -1777,6 +1836,7 @@ int	Traverse	(char *Filename, char *Basename,
 	case CMD_ISO:
 	case CMD_DISK:
 	case CMD_PARTITION:
+	case CMD_PACK:
 	  CI.HasChild=1;
 	  IsContainer=1;
 	  strcat(Queue[Index].ChildRecurse,".dir");
@@ -1795,7 +1855,6 @@ int	Traverse	(char *Filename, char *Basename,
 	  if (CMD[CI.PI.Cmd].Type == CMD_PARTITION)
 		Queue[Index].PI.ChildRecurseArtifact=2;
 	  break;
-	case CMD_PACK:
 	case CMD_DEB:
 	case CMD_RPM:
 	  CI.HasChild=1;
