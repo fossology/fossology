@@ -1544,7 +1544,7 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
   switch(Type)
 	{
 	case CMD_PACK:
-          if (CI->TopContainer){ // the package is top package, not part of other package
+          if (CI->TopContainer && UseRepository){ // the package is top package, not part of other package, use DB
             char *ufile_name;
             char UfileName[1024];
             snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
@@ -1557,32 +1557,20 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
             // is unpacked, the unpacked file name should be test
             strncpy(CI->PartnameNew,UfileName,sizeof(CI->PartnameNew));
             strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, sizeof(CI->PartnameNew)));
-          } else 
+          } else if (!CI->TopContainer || !UseRepository)
           // the package is sub package, need get rid of the postfix
           // two time, test.gz.tar.dir-->test.tar.gz-->test.tar
+          // use DB
           { 
             strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, sizeof(CI->PartnameNew)));
             strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, sizeof(CI->PartnameNew)));
           }
-
+         
 	  rc=RunCommand(CMD[CI->PI.Cmd].Cmd,CMD[CI->PI.Cmd].CmdPre,CI->Source,
 	     CMD[CI->PI.Cmd].CmdPost,CI->PartnameNew,Queue[Index].ChildRecurse);
           break;
 	case CMD_RPM:
 	  /* unpack in the current directory */
-          if (CI->TopContainer){ // the package is top package, not part of other package
-            char *ufile_name;
-            char UfileName[1024];
-            snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
-            MyDBaccess(DB,UfileName); // get the upload file name
-            memset(UfileName,'\0',sizeof(UfileName));
-            ufile_name = DBgetvalue(DB,0,0);
-            if (strchr(ufile_name,'/')) ufile_name = strrchr(ufile_name,'/')+1;
-            strncpy(UfileName,ufile_name,sizeof(UfileName)-1);
-            // set the file name of the file in package, for example, test.rpm, after test.rpm
-            // is unpacked, the unpacked file name should be test.rpm
-            strncpy(CI->PartnameNew,UfileName,sizeof(CI->PartnameNew));
-          } 
 	  rc=RunCommand(CMD[CI->PI.Cmd].Cmd,CMD[CI->PI.Cmd].CmdPre,CI->Source,
 	     CMD[CI->PI.Cmd].CmdPost,CI->PartnameNew,CI->Partdir);
 	  break;
