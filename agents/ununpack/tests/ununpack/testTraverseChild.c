@@ -85,11 +85,11 @@ int  TraverseChildInit()
  */
 void testTraverseChild4IsoFile()
 {
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
   
-  Filename = "../test-data/testdata4unpack/imagefile.iso";
-  MkDirs("../test-result/imagefile.iso.dir/");
+  Filename = "./test-data/testdata4unpack/imagefile.iso";
+  MkDirs("./test-result/imagefile.iso.dir/");
   lstat64(Filename, &Stat);
   ContainerInfo CITemp;
   memset(&CITemp,0,sizeof(ContainerInfo));
@@ -109,7 +109,7 @@ void testTraverseChild4IsoFile()
   CITemp.uploadtree_pk = 0;
   CITemp.pfile_pk = 0;
   CITemp.ufile_mode = 0;
-  strcpy(Queue[0].ChildRecurse, "../test-result/imagefile.iso.dir");
+  strcpy(Queue[0].ChildRecurse, "./test-result/imagefile.iso.dir");
   /* test TraverseChild */
   int Pid;
   Pid = fork();
@@ -119,9 +119,9 @@ void testTraverseChild4IsoFile()
   } else
   {
     ParentWait();
-    existed = file_dir_existed("../test-result/imagefile.iso.dir/test.cpio");
+    existed = file_dir_existed("./test-result/imagefile.iso.dir/test.cpio");
     CU_ASSERT_EQUAL(existed, 1); // existing  
-    existed = file_dir_existed("../test-result/imagefile.iso.dir/test.cpio.dir");
+    existed = file_dir_existed("./test-result/imagefile.iso.dir/test.cpio.dir");
     CU_ASSERT_EQUAL(existed, 0); // not existing
   }
 }
@@ -131,11 +131,11 @@ void testTraverseChild4IsoFile()
  */
 void testTraverseChild4DebianSourceFile()
 {
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
 
-  Filename = "../test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
-  //  MkDirs("../test-result/fcitx_3.6.2-1.dsc.dir/");
+  Filename = "./test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
+  //  MkDirs("./test-result/fcitx_3.6.2-1.dsc.dir/");
   lstat64(Filename, &Stat);
   ContainerInfo CITemp;
   memset(&CITemp,0,sizeof(ContainerInfo));
@@ -163,7 +163,7 @@ void testTraverseChild4DebianSourceFile()
   } else
   {
     ParentWait();
-    existed = file_dir_existed("../test-result/fcitx_3.6.2-1.dsc.dir/debian/README.Debian");
+    existed = file_dir_existed("./test-result/fcitx_3.6.2-1.dsc.dir/debian/README.Debian");
     CU_ASSERT_EQUAL(existed, 1); // existing
   }
 }
@@ -173,12 +173,12 @@ void testTraverseChild4DebianSourceFile()
  */
 void testTraverseChild4PartitionFile()
 {
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
 
-  Filename = "../test-data/testdata4unpack/initrd.img-2.6.26-2-686";
-  MkDirs("../test-result/initrd.img-2.6.26-2-686.dir/");
-  strcpy(Queue[0].ChildRecurse, "../test-result/initrd.img-2.6.26-2-686.dir/");
+  Filename = "./test-data/testdata4unpack/initrd.img-2.6.26-2-686";
+  MkDirs("./test-result/initrd.img-2.6.26-2-686.dir/");
+  strcpy(Queue[0].ChildRecurse, "./test-result/initrd.img-2.6.26-2-686.dir/");
   lstat64(Filename, &Stat);
   ContainerInfo CITemp;
   memset(&CITemp,0,sizeof(ContainerInfo));
@@ -198,7 +198,7 @@ void testTraverseChild4PartitionFile()
   } else
   {
     ParentWait();
-    existed = file_dir_existed("../test-result/initrd.img-2.6.26-2-686.dir/Partition_0000");
+    existed = file_dir_existed("./test-result/initrd.img-2.6.26-2-686.dir/Partition_0000");
     CU_ASSERT_EQUAL(existed, 1); // existing
   }
 }

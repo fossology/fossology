@@ -30,13 +30,13 @@ static int Result = 0;
  */
 void testExtractAR4ArchiveLibraryFile()
 {
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
   CU_ASSERT_EQUAL(existed, 0); // not existing
-  MkDirs("../test-result/libfossagent.a.dir/");
-  Filename = "../test-data/testdata4unpack/libfossagent.a";
-  Result = ExtractAR(Filename, "../test-result/libfossagent.a.dir");
-  existed = file_dir_existed("../test-result/libfossagent.a.dir/libfossagent.o");
+  MkDirs("./test-result/libfossagent.a.dir/");
+  Filename = "./test-data/testdata4unpack/libfossagent.a";
+  Result = ExtractAR(Filename, "./test-result/libfossagent.a.dir");
+  existed = file_dir_existed("./test-result/libfossagent.a.dir/libfossagent.o");
   CU_ASSERT_EQUAL(existed, 1); // existing
   CU_ASSERT_EQUAL(Result, 0); // Extract archieve library successfully
 }
@@ -46,13 +46,13 @@ void testExtractAR4ArchiveLibraryFile()
  */
 void testExtractAR4DebFile()
 {
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
   CU_ASSERT_EQUAL(existed, 0); // not existing
-  MkDirs("../test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir/");
-  Filename = "../test-data/testdata4unpack/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb";
-  Result = ExtractAR(Filename, "../test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir");
-  existed = file_dir_existed("../test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir/data.tar.gz");
+  MkDirs("./test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir/");
+  Filename = "./test-data/testdata4unpack/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb";
+  Result = ExtractAR(Filename, "./test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir");
+  existed = file_dir_existed("./test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir/data.tar.gz");
   CU_ASSERT_EQUAL(existed, 1); // existing
   CU_ASSERT_EQUAL(Result, 0); // Extract archieve library successfully
 }
@@ -62,8 +62,8 @@ void testExtractAR4DebFile()
  */
 void testExtractAR4EmptyParameters()
 {
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
   CU_ASSERT_EQUAL(existed, 0); // not existing
   Result = ExtractAR("", ""); // empty parameters
   CU_ASSERT_EQUAL(Result, 1); // fail to Extract archieve library 

@@ -34,13 +34,13 @@ int     UnunpackEntry(int argc, char *argv[]);
 void testUnunpackEntryNormal()
 {
   int argc = 5;
-  char *argv[] = {"../../ununpack", "-qCR", "../test-data/testdata4unpack.7z", "-d", "../test-result/"};
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ../test-result/ is not existing
+  char *argv[] = {"../ununpack", "-qCR", "./test-data/testdata4unpack.7z", "-d", "./test-result/"};
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
+  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
   UnunpackEntry(argc, argv);
-  existed = file_dir_existed("../test-result/testdata4unpack.7z.dir/testdata4unpack/libfossagent.a.dir/libfossagent.o");
-  CU_ASSERT_EQUAL(existed, 1); // ../test-result/ is existing
+  existed = file_dir_existed("./test-result/testdata4unpack.7z.dir/testdata4unpack/libfossagent.a.dir/libfossagent.o");
+  CU_ASSERT_EQUAL(existed, 1); // ./test-result/ is existing
 }
 #endif
 
@@ -51,13 +51,13 @@ void testUnunpackEntryNormalDeleteResult()
 {
   int argc = 5;
 
-  char *argv[] = {"../../ununpack", "-qCRLx", "../test-data/testdata4unpack.7z", "-d", "../test-result/"};
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ../test-result/ is not existing
+  char *argv[] = {"../ununpack", "-qCRLx", "./test-data/testdata4unpack.7z", "-d", "./test-result/"};
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
+  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
   UnunpackEntry(argc, argv);
-  existed = file_dir_existed("../test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ../test-result/ is not existing
+  existed = file_dir_existed("./test-result/");
+  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
 }
 
 #if 0
@@ -69,12 +69,12 @@ void testUnunpackEntryNormalDeleteResult()
 void testUnunpackEntryNormalMultyProcess1()
 {
   int argc = 7;
-  char *argv[] = {"../../ununpack", "-qCR", "-m", "5", "../test-data/testdata4unpack/ext3test-image", "-d", "../test-result/"};  
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ../test-result/ is not existing
+  char *argv[] = {"../ununpack", "-qCR", "-m", "5", "./test-data/testdata4unpack/ext3test-image", "-d", "./test-result/"};  
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
+  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
   UnunpackEntry(argc, argv);
-  existed = file_dir_existed("../test-result/libfossagent.a.dir/");
+  existed = file_dir_existed("./test-result/libfossagent.a.dir/");
   CU_ASSERT_EQUAL(existed, 1); // existing
   printf("one start\n");
 }
@@ -90,12 +90,12 @@ void testUnunpackEntryNormalMultyProcess1()
 void testUnunpackEntryNormalMultyProcess()
 {
   int argc = 5;
-  char *argv[] = {"../../ununpack", "-qCR", "../test-data/testdata4unpack/rpm.tar", "-d", "../test-result/"}; 
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ../test-result/ is not existing
+  char *argv[] = {"../ununpack", "-qCR", "./test-data/testdata4unpack/rpm.tar", "-d", "./test-result/"}; 
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
+  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
   UnunpackEntry(argc, argv);
-  existed = file_dir_existed("../test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
+  existed = file_dir_existed("./test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
   CU_ASSERT_EQUAL(existed, 1); // existing
 }
 
@@ -105,11 +105,11 @@ void testUnunpackEntryNormalMultyProcess()
 void testUnunpackEntryOptionInvalid()
 {
   int argc = 5;
-  char *argv[] = {"../../ununpack", "-qCRs",
-         "../test-data/testdata4unpack/rpm.tar", "-d", "../test-result/"}; // option H is invalid
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ../test-result/ is not existing
+  char *argv[] = {"../ununpack", "-qCRs",
+         "./test-data/testdata4unpack/rpm.tar", "-d", "./test-result/"}; // option H is invalid
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
+  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
   
   int Pid = fork();
   if (Pid == 0)
@@ -120,7 +120,7 @@ void testUnunpackEntryOptionInvalid()
     int status;
     waitpid(Pid, &status, 0);
     int code = WEXITSTATUS(status);
-    existed = file_dir_existed("../test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
+    existed = file_dir_existed("./test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
     CU_ASSERT_EQUAL(existed, 0); // not existing
     CU_ASSERT_EQUAL(code, 25); 
   }
@@ -132,9 +132,9 @@ void testUnunpackEntryOptionInvalid()
 void testUnunpackEntryUsingDB()
 {
   int argc = 5;
-  char *argv[] = {"../../ununpack", "-qCRQi",
-         "../test-data/testdata4unpack/rpm.tar", "-d", "../test-result/"}; // option H is invalid
-  deleteTmpFiles("../test-result/");
+  char *argv[] = {"../ununpack", "-qCRQi",
+         "./test-data/testdata4unpack/rpm.tar", "-d", "./test-result/"}; // option H is invalid
+  deleteTmpFiles("./test-result/");
 
   int Pid = fork();
   if (Pid == 0)
@@ -145,7 +145,7 @@ void testUnunpackEntryUsingDB()
     int status;
     waitpid(Pid, &status, 0);
     int code = WEXITSTATUS(status);
-    existed = file_dir_existed("../test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
+    existed = file_dir_existed("./test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
     CU_ASSERT_EQUAL(existed, 0); // not existing
     CU_ASSERT_EQUAL(code, 21); 
   }

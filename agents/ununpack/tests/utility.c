@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* global variables. */
 char *Filename = "";
-char *NewDir = "../test-result";
+char *NewDir = "./test-result";
 int Recurse = -1;
 int existed = 0; // default not existed
 magic_t MagicCookie;
