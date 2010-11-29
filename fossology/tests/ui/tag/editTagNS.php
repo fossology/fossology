@@ -17,12 +17,12 @@
  ***********************************************************/
 
 /**
- * manageTagNS
- * \brief test add/edit/delete a tag namespace using the manage tag namespace page
+ * editTagNS
+ * \brief test edit a tag namespace using the manage tag namespace page
  *
  * @return pass or fail to std out
  *
- * @version "$Id: manageTagNS.php 3679 2010-11-17 10:56:59Z madong $"
+ * @version "$Id: editTagNS.php 3679 2010-11-17 10:56:59Z madong $"
  *
  * Created on Nov. 9, 2010
  */
@@ -34,7 +34,7 @@ require_once ('../../../tests/TestEnvironment.php');
 /* Globals for test use, most tests need $URL, only login needs the others */
 global $URL;
 
-class manageTagNSTest extends fossologyTestCase
+class editTagNSTest extends fossologyTestCase
 {
   public $mybrowser;
   public $someOtherVariable;
