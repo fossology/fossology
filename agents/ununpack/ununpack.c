@@ -166,7 +166,7 @@ int RemovePostfix(char *Name, int Count)
       break;
     }
   }
-  if (0 == i) return Count - 1; // do not find '.', the name is original
+  if (-1 == i) return Count; // do not find '.', the name is original
   return i; // return the name size 
 }
 
@@ -1556,16 +1556,16 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
             // set the file name of the file in package, for example, test.gz, after test.gz
             // is unpacked, the unpacked file name should be test
             strncpy(CI->PartnameNew,UfileName,sizeof(CI->PartnameNew));
-            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, sizeof(CI->PartnameNew)));
-          } else if (!CI->TopContainer || !UseRepository)
+            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, strlen(CI->PartnameNew)));
+          } else
           // the package is sub package, need get rid of the postfix
           // two time, test.gz.tar.dir-->test.tar.gz-->test.tar
           // use DB
-          { 
-            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, sizeof(CI->PartnameNew)));
-            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, sizeof(CI->PartnameNew)));
+          {
+            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, strlen(CI->PartnameNew)));
+            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, strlen(CI->PartnameNew)));
           }
-         
+
 	  rc=RunCommand(CMD[CI->PI.Cmd].Cmd,CMD[CI->PI.Cmd].CmdPre,CI->Source,
 	     CMD[CI->PI.Cmd].CmdPost,CI->PartnameNew,Queue[Index].ChildRecurse);
           break;
