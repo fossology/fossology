@@ -30,13 +30,13 @@ static int Result = 0;
  */
 void testExtractISO1()
 {
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
   CU_ASSERT_EQUAL(existed, 0); // not existing
-  Filename = "../test-data/testdata4unpack/imagefile.iso";
-  MkDirs("../test-result/imagefile.iso.dir");
-  Result = ExtractISO(Filename, "../test-result/imagefile.iso.dir");
-  existed = file_dir_existed("../test-result/imagefile.iso.dir/test.cpio");
+  Filename = "./test-data/testdata4unpack/imagefile.iso";
+  MkDirs("./test-result/imagefile.iso.dir");
+  Result = ExtractISO(Filename, "./test-result/imagefile.iso.dir");
+  existed = file_dir_existed("./test-result/imagefile.iso.dir/test.cpio");
   CU_ASSERT_EQUAL(Result, 0); 
   CU_ASSERT_EQUAL(existed, 1); 
 }
@@ -46,16 +46,16 @@ void testExtractISO1()
  */
 void testExtractISO2()
 {
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
   CU_ASSERT_EQUAL(existed, 0); // not existing
-  Filename = "../test-data/testdata4unpack/523.iso";
-  MkDirs("../test-result/523.iso.dir");
-  Result = ExtractISO(Filename, "../test-result/523.iso.dir"); // 
-  existed = file_dir_existed("../test-result/523.iso.dir/523SFP/DOS4GW.EXE");
+  Filename = "./test-data/testdata4unpack/523.iso";
+  MkDirs("./test-result/523.iso.dir");
+  Result = ExtractISO(Filename, "./test-result/523.iso.dir"); // 
+  existed = file_dir_existed("./test-result/523.iso.dir/523SFP/DOS4GW.EXE");
   CU_ASSERT_EQUAL(Result, 0);
   CU_ASSERT_EQUAL(existed, 1); 
-  existed = file_dir_existed("../test-result/523.iso.dir/523SFP/P3P10131.BIN");
+  existed = file_dir_existed("./test-result/523.iso.dir/523SFP/P3P10131.BIN");
 
 }
 
@@ -64,8 +64,8 @@ void testExtractISO2()
  */
 void testExtractISO4EmptyParameters()
 {
-  deleteTmpFiles("../test-result/");
-  existed = file_dir_existed("../test-result/");
+  deleteTmpFiles("./test-result/");
+  existed = file_dir_existed("./test-result/");
   CU_ASSERT_EQUAL(existed, 0); // not existing
   Result = ExtractISO("", ""); // empty parameters
   CU_ASSERT_EQUAL(Result, 1); // fail to Extract  

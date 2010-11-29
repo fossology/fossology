@@ -51,7 +51,7 @@ int FindCmdClean()
  */
 void testFindCmdNormal()
 {
-  char *Filename = "../test-data/testdata4unpack.7z";
+  char *Filename = "./test-data/testdata4unpack.7z";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 14);
@@ -65,7 +65,7 @@ void testFindCmdNormal()
  */
 void testFindCmd4DscFile()
 {
-  char *Filename = "../test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
+  char *Filename = "./test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 26);
@@ -79,7 +79,7 @@ void testFindCmd4DscFile()
  */
 void testFindCmd4CabFile()
 {
-  char *Filename = "../test-data/testdata4unpack/SKU011.CAB";
+  char *Filename = "./test-data/testdata4unpack/SKU011.CAB";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 15);
@@ -94,7 +94,7 @@ void testFindCmd4CabFile()
  */
 void testFindCmd4MsiFile()
 {
-  char *Filename = "../test-data/testdata4unpack/xunzai_Contacts.msi.msi";
+  char *Filename = "./test-data/testdata4unpack/xunzai_Contacts.msi.msi";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 15);
@@ -110,11 +110,11 @@ void testFindCmd4MsiFile()
  */
 void testFindCmd4RpmFile()
 {
-  char *Filename = "../test-data/testdata4unpack/libgnomeui2-2.24.3-1pclos2010.src.rpm";
+  char *Filename = "./test-data/testdata4unpack/libgnomeui2-2.24.3-1pclos2010.src.rpm";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 16);
-  Filename = "../test-data/testdata4unpack/fossology-1.2.0-1.el5.i386.rpm";
+  Filename = "./test-data/testdata4unpack/fossology-1.2.0-1.el5.i386.rpm";
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 16);
 
@@ -129,7 +129,7 @@ void testFindCmd4RpmFile()
  */
 void testFindCmd4IsoFile()
 {
-  char *Filename = "../test-data/testdata4unpack/imagefile.iso";
+  char *Filename = "./test-data/testdata4unpack/imagefile.iso";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 19);
@@ -144,7 +144,7 @@ void testFindCmd4IsoFile()
  */
 void testFindCmd4ZipFile()
 {
-  char *Filename = "../test-data/testdata4unpack/threezip.zip";
+  char *Filename = "./test-data/testdata4unpack/threezip.zip";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 8);
@@ -159,7 +159,7 @@ void testFindCmd4ZipFile()
  */
 void testFindCmd4RarFile()
 {
-  char *Filename = "../test-data/testdata4unpack/winscp376.rar";
+  char *Filename = "./test-data/testdata4unpack/winscp376.rar";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 12);
@@ -174,7 +174,7 @@ void testFindCmd4RarFile()
  */
 void testFindCmd4CpioFile()
 {
-  char *Filename = "../test-data/testdata4unpack/test.cpio";
+  char *Filename = "./test-data/testdata4unpack/test.cpio";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 11);
@@ -190,7 +190,7 @@ void testFindCmd4CpioFile()
  */
 void testFindCmd4DebFile()
 {
-  char *Filename = "../test-data/testdata4unpack/libpango1.0-udeb_1.28.1-1_i386.udeb";
+  char *Filename = "./test-data/testdata4unpack/libpango1.0-udeb_1.28.1-1_i386.udeb";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 18);
@@ -205,7 +205,7 @@ void testFindCmd4DebFile()
  */
 void testFindCmd4ArchiveLibFile()
 {
-  char *Filename = "../test-data/testdata4unpack/libfossagent.a";
+  char *Filename = "./test-data/testdata4unpack/libfossagent.a";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 17);
@@ -221,7 +221,7 @@ void testFindCmd4ArchiveLibFile()
  */
 void testFindCmd4TarFile()
 {
-  char *Filename = "../test-data/testdata4unpack/rpm.tar";
+  char *Filename = "./test-data/testdata4unpack/rpm.tar";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 9);
@@ -237,7 +237,7 @@ void testFindCmd4TarFile()
  */
 void testFindCmd4ZFile()
 {
-  char *Filename = "../test-data/testdata4unpack/FileName.tar.Z";
+  char *Filename = "./test-data/testdata4unpack/FileName.tar.Z";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 2);
@@ -252,7 +252,7 @@ void testFindCmd4ZFile()
  */
 void testFindCmd4ExeFile()
 {
-  char *Filename = "../test-data/testdata4unpack/PUTTY.EXE";
+  char *Filename = "./test-data/testdata4unpack/PUTTY.EXE";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 27);
@@ -267,7 +267,7 @@ void testFindCmd4ExeFile()
  */
 void testFindCmd4Bz2File()
 {
-  char *Filename = "../test-data/testdata4unpack/test.tar.bz2";
+  char *Filename = "./test-data/testdata4unpack/test.tar.bz2";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 3);
@@ -282,7 +282,7 @@ void testFindCmd4Bz2File()
  */
 void testFindCmd4Ext3File()
 {
-  char *Filename = "../test-data/testdata4unpack/ext3test-image";
+  char *Filename = "./test-data/testdata4unpack/ext3test-image";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 24);
@@ -297,7 +297,7 @@ void testFindCmd4Ext3File()
  */
 void testFindCmd4Ext2File()
 {
-  char *Filename = "../test-data/testdata4unpack/ext2test-image";
+  char *Filename = "./test-data/testdata4unpack/ext2test-image";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 23);
@@ -312,7 +312,7 @@ void testFindCmd4Ext2File()
  */
 void testFindCmd4FatFile()
 {
-  char *Filename = "../test-data/testdata4unpack/fattest-image";
+  char *Filename = "./test-data/testdata4unpack/fattest-image";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 21);
@@ -327,7 +327,7 @@ void testFindCmd4FatFile()
  */
 void testFindCmd4NtfsFile()
 {
-  char *Filename = "../test-data/testdata4unpack/ntfstest-image";
+  char *Filename = "./test-data/testdata4unpack/ntfstest-image";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 22);
@@ -342,7 +342,7 @@ void testFindCmd4NtfsFile()
  */
 void testFindCmd4PartitionFile()
 {
-  char *Filename = "../test-data/testdata4unpack/initrd.img-2.6.26-2-686";
+  char *Filename = "./test-data/testdata4unpack/initrd.img-2.6.26-2-686";
   int result = 0;
   result = FindCmd(Filename);
   CU_ASSERT_EQUAL(result, 25);

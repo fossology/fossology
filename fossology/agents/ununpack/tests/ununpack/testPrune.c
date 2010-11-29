@@ -55,9 +55,9 @@ int PruneClean()
  */
 void testPruneFileFileSzieIs0()
 {
-  Fname = "../test-data/testdata4unpack/null_file";
+  Fname = "./test-data/testdata4unpack/null_file";
   deleteTmpFiles(NewDir);
-  strcpy(Dst, "../test-result/nullfile");
+  strcpy(Dst, "./test-result/nullfile");
   stat(Fname, &Stat);
   CopyFile(Fname, Dst);
   Result = Prune(Dst, Stat);
@@ -71,9 +71,9 @@ void testPruneFileFileSzieIs0()
  */
 void testPruneRegFile()
 {
-  Fname = "../test-data/testdata4unpack/libfossagent.a";
+  Fname = "./test-data/testdata4unpack/libfossagent.a";
   deleteTmpFiles(NewDir);
-  strcpy(Dst, "../test-result/libfossagent.a");
+  strcpy(Dst, "./test-result/libfossagent.a");
   stat(Fname, &Stat);
   CopyFile(Fname, Dst);
   Result = Prune(Dst, Stat);
@@ -88,7 +88,7 @@ void testPruneRegFile()
  */
 void testPruneCharFile()
 {
-  Fname = "../test-data/testdata4unpack/cfile";
+  Fname = "./test-data/testdata4unpack/cfile";
   stat(Fname, &Stat);
   Result = Prune(Fname, Stat);
   existed = file_dir_existed(Fname);

@@ -35,16 +35,16 @@ static int Result = 0;
  */
 void testRunCommand4ZcatTesting()
 {
-  deleteTmpFiles("../test-result/");
+  deleteTmpFiles("./test-result/");
   Cmd = "zcat";
   CmdPre = "-q -l";
-  File = "../test-data/testdata4unpack/FileName.tar.Z";
+  File = "./test-data/testdata4unpack/FileName.tar.Z";
   CmdPost = ">/dev/null 2>&1";
   Out = 0x0;
   Where = 0x0;
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  existed = file_dir_existed("../test-result/");
-  CU_ASSERT_EQUAL(existed, 0); // ../test-result/ is not existing
+  existed = file_dir_existed("./test-result/");
+  CU_ASSERT_EQUAL(existed, 0); // ./test-result/ is not existing
   CU_ASSERT_EQUAL(Result, 0); // command could run
 }
 
@@ -53,15 +53,15 @@ void testRunCommand4ZcatTesting()
  */
 void testRunCommand4Zcat()
 {
-  deleteTmpFiles("../test-result/");
+  deleteTmpFiles("./test-result/");
   Cmd = "zcat";
   CmdPre = "";
-  File = "../test-data/testdata4unpack/FileName.tar.Z";
+  File = "./test-data/testdata4unpack/FileName.tar.Z";
   CmdPost = "> '%s' 2>/dev/null";
   Out = "FileName.tar.Z.unpacked";
-  Where = "../test-result";
+  Where = "./test-result";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  existed = file_dir_existed("../test-result/FileName.tar.Z.unpacked");
+  existed = file_dir_existed("./test-result/FileName.tar.Z.unpacked");
   CU_ASSERT_EQUAL(existed, 1); // the file is existing
   CU_ASSERT_EQUAL(Result, 0); // command could run
 }
@@ -71,15 +71,15 @@ void testRunCommand4Zcat()
  */
 void testRunCommand4Pdf()
 {
-  deleteTmpFiles("../test-result/");
+  deleteTmpFiles("./test-result/");
   Cmd = "pdftotext";
   CmdPre = "-htmlmeta";
-  File = "../test-data/testdata4unpack/israel.pdf";
+  File = "./test-data/testdata4unpack/israel.pdf";
   CmdPost = "> '%s' 2>/dev/null";
   Out = "israel.pdf.text";
-  Where = "../test-result";
+  Where = "./test-result";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  existed = file_dir_existed("../test-result/israel.pdf.text");
+  existed = file_dir_existed("./test-result/israel.pdf.text");
   CU_ASSERT_EQUAL(existed, 1); // the file is existing
   CU_ASSERT_EQUAL(Result, 0); // command could run
 }
@@ -89,15 +89,15 @@ void testRunCommand4Pdf()
  */
 void testRunCommand4Rpm1()
 {
-  deleteTmpFiles("../test-result/");
+  deleteTmpFiles("./test-result/");
   Cmd = "rpm2cpio";
   CmdPre = "";
-  File = "../test-data/testdata4unpack/fossology-1.2.0-1.el5.i386.rpm";
+  File = "./test-data/testdata4unpack/fossology-1.2.0-1.el5.i386.rpm";
   CmdPost = "> '%s' 2> /dev/null";
   Out = "fossology-1.2.0-1.el5.i386.rpm.unpacked";
-  Where = "../test-result";
+  Where = "./test-result";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  existed = file_dir_existed("../test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked");
+  existed = file_dir_existed("./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked");
   CU_ASSERT_EQUAL(existed, 1); //  existing
   CU_ASSERT_EQUAL(Result, 0); // command could run
 }
@@ -107,16 +107,16 @@ void testRunCommand4Rpm1()
  */
 void testRunCommand4Rpm2()
 {
-  deleteTmpFiles("../test-result/");
+  deleteTmpFiles("./test-result/");
   testRunCommand4Rpm1();
   Cmd = "cpio";
   CmdPre = "--no-absolute-filenames -i -d <";
-  File = "../test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked";
+  File = "./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked";
   CmdPost = ">/dev/null 2>&1";
   Out = "fossology-1.2.0-1.el5.i386.rpm.unpacked.dir";
-  Where = "../test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked.dir";
+  Where = "./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked.dir";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  existed = file_dir_existed("../test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked.dir/etc/fossology/RepPath.conf");
+  existed = file_dir_existed("./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked.dir/etc/fossology/RepPath.conf");
   CU_ASSERT_EQUAL(existed, 1); //  existing
   CU_ASSERT_EQUAL(Result, 0); // command could run
 }

@@ -56,9 +56,9 @@ int CopyFileClean()
  */
 void testCopyFileNormalFile()
 {
-  Src = "../test-data/testdata4unpack/imagefile.iso";
-  deleteTmpFiles("../test-result/");
-  strcpy(Dst, "../test-result/hello");
+  Src = "./test-data/testdata4unpack/imagefile.iso";
+  deleteTmpFiles("./test-result/");
+  strcpy(Dst, "./test-result/hello");
   stat(Src, &statSrc);
   Result = CopyFile(Src, Dst);
   stat(Dst, &statDst);
@@ -71,11 +71,11 @@ void testCopyFileNormalFile()
  */
 void testCopyFileNormalDir()
 {
-  Src = "../test-data/testdata4unpack/testdir";
-  strcpy(Dst, "../test-result/hello");
-  deleteTmpFiles("../test-result/");
+  Src = "./test-data/testdata4unpack/testdir";
+  strcpy(Dst, "./test-result/hello");
+  deleteTmpFiles("./test-result/");
   Result = CopyFile(Src, Dst);
-  existed = file_dir_existed("../test-result/hello/test.tar");
+  existed = file_dir_existed("./test-result/hello/test.tar");
   CU_ASSERT_EQUAL(existed, 0); // no existing
   CU_ASSERT_EQUAL(Result, 1); // is directory
 }
@@ -86,10 +86,10 @@ void testCopyFileNormalDir()
 void testCopyFileAbnormal()
 {
   Src = "";
-  strcpy(Dst, "../test-result/hello");
-  deleteTmpFiles("../test-result/");
+  strcpy(Dst, "./test-result/hello");
+  deleteTmpFiles("./test-result/");
   Result = CopyFile(Src, Dst);
-  existed = file_dir_existed("../test-result");
+  existed = file_dir_existed("./test-result");
   CU_ASSERT_EQUAL(existed, 0); // no existing
   CU_ASSERT_EQUAL(Result, 1); // failed
 }
