@@ -160,9 +160,9 @@ void run_test_files(copyright copy)
   /* big problem if any of the log files didn't open correctly */
   if(!m_out || !n_out || !p_out)
   {
-    fprintf(cerr, "ERROR: did not successfully open one of the log files\n");
-    fprintf(cerr, "ERROR: the files that needed to be opened were:\n");
-    fprintf(cerr, "ERROR: Matches, False_Positives, False_Negatives\n");
+    fprintf(cerr, "ERROR did not successfully open one of the log files\n");
+    fprintf(cerr, "ERROR the files that needed to be opened were:\n");
+    fprintf(cerr, "ERROR Matches, False_Positives, False_Negatives\n");
     exit(-1);
   }
 
@@ -175,10 +175,10 @@ void run_test_files(copyright copy)
     istr = fopen(file_name, "r");
     if(!istr)
     {
-      fprintf(cerr, "ERROR: Must run testing from correct directory. The\n");
-      fprintf(cerr, "ERROR: correct directory is installation dependent but\n");
-      fprintf(cerr, "ERROR: the working directory should include the folder:\n");
-      fprintf(cerr, "ERROR:   %s\n", test_dir);
+      fprintf(cerr, "ERROR Must run testing from correct directory. The\n");
+      fprintf(cerr, "ERROR correct directory is installation dependent but\n");
+      fprintf(cerr, "ERROR the working directory should include the folder:\n");
+      fprintf(cerr, "ERROR   %s\n", test_dir);
       exit(-1);
     }
 
@@ -201,15 +201,15 @@ void run_test_files(copyright copy)
 
       if(last == NULL)
       {
-        fprintf(cerr, "ERROR: unmatched \"<s>\"\n");
-        fprintf(cerr, "ERROR: in file: \"%s\"\n", file_name);
+        fprintf(cerr, "ERROR unmatched \"<s>\"\n");
+        fprintf(cerr, "ERROR in file: \"%s\"\n", file_name);
         exit(-1);
       }
 
       if(last <= first)
       {
-        fprintf(cerr, "ERROR: unmatched \"</s>\"\n");
-        fprintf(cerr, "ERROR: in file: \"%s\"\n", file_name);
+        fprintf(cerr, "ERROR unmatched \"</s>\"\n");
+        fprintf(cerr, "ERROR in file: \"%s\"\n", file_name);
         exit(-1);
       }
 
@@ -226,9 +226,9 @@ void run_test_files(copyright copy)
     istr = fopen(file_name, "r");
     if(!istr)
     {
-      fprintf(cerr, "ERROR: Unmatched file in the test directory");
-      fprintf(cerr, "ERROR: File with no match: \"%s\"_raw\n", file_name);
-      fprintf(cerr, "ERROR: File that caused error: \"%s\"\n", file_name);
+      fprintf(cerr, "ERROR Unmatched file in the test directory");
+      fprintf(cerr, "ERROR File with no match: \"%s\"_raw\n", file_name);
+      fprintf(cerr, "ERROR File that caused error: \"%s\"\n", file_name);
     }
 
     /* perform the analysis on the current file */
@@ -361,10 +361,11 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   input_fp = fopen(file_name, "rb");
   if(!input_fp)
   {
-    fprintf(cerr, "FATAL: %s.%d Failure to open file %s\n", __FILE__, __LINE__, file_name);
-    fprintf(cerr, "ERROR: %s\n", strerror(errno));
+    fprintf(cerr, "ERROR %s.%d Failure to open file %s\n", __FILE__, __LINE__, file_name);
+    fprintf(cerr, "ERROR %s\n", strerror(errno));
     fflush(cerr);
-    exit(-1);
+    copyright_clear(copy);
+    return;
   }
 
   /* only free temp if running as an agent */
@@ -421,8 +422,9 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
 
         if (PQresultStatus(pgResult) != PGRES_COMMAND_OK)
         {
-          fprintf(cerr, "ERROR: %s.%d: %s\nOn: %s\n",
-              __FILE__, __LINE__, PQresultErrorMessage(pgResult), sql);
+          fprintf(cerr, "ERROR %s.%d: failed to insert copyright\n", __FILE__, __LINE__);
+          fprintf(cerr, "ERROR PQ error message: %s\n", PQresultErrorMessage(pgResult));
+          fprintf(cerr, "ERROR sql statement: %s", sql);
           PQclear(pgResult);
         }
       }
@@ -445,10 +447,10 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
 
     if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
     {
-      fprintf(cerr, "ERROR: %s:%d, %s\nOn: %s\n",
-          __FILE__, __LINE__, PQresultErrorMessage(pgResult), sql);
+      fprintf(cerr, "ERROR %s.%d: failed to insert null copyright\n", __FILE__, __LINE__);
+      fprintf(cerr, "ERROR PQ error message: %s\n", PQresultErrorMessage(pgResult));
+      fprintf(cerr, "ERROR sql statement: %s", sql);
       PQclear(pgResult);
-      exit(-1);
     }
   }
 
@@ -478,14 +480,15 @@ int setup_database(PGconn* pgConn)
   pgResult = NULL;
 
   /* start by creating the copyright sequence */
-  pgResult = PQexec(pgConn, create_database_squence);
+  pgResult = PQexec(pgConn, create_database_sequence);
   if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
   {
     if(strcmp(PQresultErrorMessage(pgResult), "relation \"copyright_ct_pk_seq\" already exists"))
     {
-      fprintf(cerr, "ERROR: %s.%d: Could not create copyright_ct_pk_seq.\n", __FILE__, __LINE__);
-      fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
-      exit(-1);
+      fprintf(cerr, "ERROR %s.%d: Could not create copyright_ct_pk_seq.\n", __FILE__, __LINE__);
+      fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
+      fprintf(cerr, "ERROR sql was: %s\n", create_database_sequence);
+      return -1;
     }
     else
     {
@@ -500,9 +503,10 @@ int setup_database(PGconn* pgConn)
     pgResult = PQexec(pgConn, alter_database_table);
     if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
     {
-      fprintf(cerr, "ERROR: %s.%d: Could not alter copyrght_ct_pk_seq.\n", __FILE__, __LINE__);
-      fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
-      exit(-1);
+      fprintf(cerr, "ERROR %s.%d: Could not alter copyrght_ct_pk_seq.\n", __FILE__, __LINE__);
+      fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
+      fprintf(cerr, "ERROR sql was: %s\n", alter_database_table);
+      return -1;
     }
   }
   PQclear(pgResult);
@@ -513,9 +517,10 @@ int setup_database(PGconn* pgConn)
   {
     if(strcmp(PQresultErrorMessage(pgResult), "relation \"copyright_ct_pk_seq\" already exists"))
     {
-      fprintf(cerr, "ERROR: %s.%d: Could not create table copyright.\n", __FILE__, __LINE__);
-      fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
-      exit(-1);
+      fprintf(cerr, "ERROR %s.%d: Could not create table copyright.\n", __FILE__, __LINE__);
+      fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
+      fprintf(cerr, "ERROR sql was: %s\n", create_database_table);
+      return -1;
     }
   }
   PQclear(pgResult);
@@ -524,8 +529,9 @@ int setup_database(PGconn* pgConn)
   pgResult = PQexec(pgConn, create_pfile_foreign_index);
   if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
   {
-    fprintf(cerr, "ERROR: %s.%d: Could not create copyright pfile_fk.\n", __FILE__, __LINE__);
-    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR %s.%d: Could not create copyright pfile_fk.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR sql was: %s\n", create_pfile_foreign_index);
     return -1;
   }
   PQclear(pgResult);
@@ -534,8 +540,9 @@ int setup_database(PGconn* pgConn)
   pgResult = PQexec(pgConn, create_agent_foreign_index);
   if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
   {
-    fprintf(cerr, "ERROR: %s.%d: Could not create copyright agent_fk.\n", __FILE__, __LINE__);
-    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR %s.%d: Could not create copyright agent_fk.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR sql was: %s\n", create_agent_foreign_index);
     return -1;
   }
   PQclear(pgResult);
@@ -544,18 +551,9 @@ int setup_database(PGconn* pgConn)
   pgResult = PQexec(pgConn, alter_copyright_owner);
   if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
   {
-    fprintf(cerr, "ERROR: %s.%d: Could not change the onwer of the copyright table.\n", __FILE__, __LINE__);
-    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
-    return -1;
-  }
-  PQclear(pgResult);
-
-  /* alter the owner of the copyright table */
-  pgResult = PQexec(pgConn, alter_copyright_owner);
-  if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
-  {
-    fprintf(cerr, "ERROR: %s.%d: Could not change the onwer of the copyright table.\n", __FILE__, __LINE__);
-    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR %s.%d: Could not change the onwer of the copyright table.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR sql was: %s\n", alter_copyright_owner);
     return -1;
   }
   PQclear(pgResult);
@@ -564,8 +562,9 @@ int setup_database(PGconn* pgConn)
   pgResult = PQexec(pgConn, alter_table_pfile);
   if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
   {
-    fprintf(cerr, "ERROR: %s.%d: Could not alter pfile_fk in copyright table.\n", __FILE__, __LINE__);
-    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR %s.%d: Could not alter pfile_fk in copyright table.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR PQ error message: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR sql was: %s\n", alter_table_pfile);
     return -1;
   }
   PQclear(pgResult);
@@ -574,8 +573,9 @@ int setup_database(PGconn* pgConn)
   pgResult = PQexec(pgConn, alter_table_agent);
   if(PQresultStatus(pgResult) != PGRES_COMMAND_OK)
   {
-    fprintf(cerr, "ERROR: %s.%d: Could not alter agent_fk in copyright table.\n", __FILE__, __LINE__);
-    fprintf(cerr, "ERROR: Database said: %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR %s.%d: Could not alter agent_fk in copyright table.\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR PQ error message %s.\n", PQresultErrorMessage(pgResult));
+    fprintf(cerr, "ERROR sql was: %s\n", alter_table_agent);
     return -1;
   }
   PQclear(pgResult);
@@ -613,12 +613,14 @@ int check_copyright_table(PGconn* pgConn)
     str = PQresultErrorMessage(pgResult);
     if(longest_common(buffer, str, "does not exist") == 14)
     {
-      fprintf(cerr, "WARNING: %s.%d: Could not find copyright table.", __FILE__, __LINE__);
+      fprintf(cerr, "WARNING %s.%d: Could not find copyright table.", __FILE__, __LINE__);
       ret = setup_database(pgConn);
     }
     else
     {
-      fprintf(cerr, "ERROR: %s:%d, %s\nOn: %s\n", __FILE__, __LINE__, PQresultErrorMessage(pgResult), check_database_table);
+      fprintf(cerr, "ERROR %s.%d: problem with copyright table\n", __FILE__, __LINE__);
+      fprintf(cerr, "ERROR PQ error message: %s\n", PQresultErrorMessage(pgResult));
+      fprintf(cerr, "ERROR sql was: %s\n", check_database_table);
       ret = 0;
     }
     free(str);
@@ -743,8 +745,8 @@ int main(int argc, char** argv)
 
   /* initialize complex data strcutres */
   if(!copyright_init(&copy)) {
-    fprintf(cerr, "FATAL: %s.%d: copyright initialization failed\n", __FILE__, __LINE__);
-    fprintf(cerr, "ERROR: %s\n", strerror(errno));
+    fprintf(cerr, "FATAL %s.%d: copyright initialization failed\n", __FILE__, __LINE__);
+    fprintf(cerr, "FATAL %s\n", strerror(errno));
     fflush(cerr);
     return -1;
   }
@@ -755,14 +757,16 @@ int main(int argc, char** argv)
     switch(c)
     {
       case 'd': /* debugging */
-        verbose = 1;
         sprintf(mdir, "%s/Matches", DATADIR);
         mout = fopen("Matches", "w");
         if(!mout)
         {
-          fprintf(cerr, "FATAL: could not open Matches for logging\n");
+          fprintf(cerr, "ERROR could not open Matches for logging\n");
           fflush(cerr);
-          exit(-1);
+        }
+        else
+        {
+          verbose = 1;
         }
         break;
       case 'c': /* run from command line */
@@ -782,7 +786,7 @@ int main(int argc, char** argv)
       case 'i': /* initialize database connections */
         DataBase = DBopen();
         if(!DataBase) {
-          fprintf(cerr, "FATAL: Copyright agent unable to connect to database.\n");
+          fprintf(cerr, "FATAL %s.%d: Copyright agent unable to connect to database.\n", __FILE__, __LINE__);
           exit(-1);
         }
         DBclose(DataBase);

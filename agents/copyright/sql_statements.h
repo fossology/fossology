@@ -66,7 +66,7 @@ SELECT ct_pk \
   LIMIT 1";
 
 /** This will create the copyright sequence in the database */
-char* create_database_squence = "\
+char* create_database_sequence = "\
 CREATE SEQUENCE copyright_ct_pk_seq \
   START WITH 1 \
   INCREMENT BY 1 \

@@ -48,8 +48,8 @@ void radix_destroy(radix_tree tree);
 /* *** Modifier Functions *************************************************** */
 /* ************************************************************************** */
 
-void radix_insert(radix_tree tree, const char* string);
-void radix_insert_all(radix_tree tree, char** first, char** last);
+int radix_insert(radix_tree tree, const char* string);
+int radix_insert_all(radix_tree tree, char** first, char** last);
 
 /* ************************************************************************** */
 /* *** Accessor Functions *************************************************** */

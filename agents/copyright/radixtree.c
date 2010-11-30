@@ -176,13 +176,17 @@ void radix_destroy(radix_tree tree)
  * @param tree the tree that the string is to be inserted into
  * @param string the string that will be in the tree
  */
-void radix_insert(radix_tree tree, const char* string)
+int radix_insert(radix_tree tree, const char* string)
 {
   /* base case for recursive insert function */
   if(strlen(string) == 0)
   {
+    if(tree->terminal)
+    {
+      return 0;
+    }
     tree->terminal = 1;
-    return;
+    return 1;
   }
 
   /* if the subtree does not yet exist, create it */
@@ -192,7 +196,7 @@ void radix_insert(radix_tree tree, const char* string)
   }
 
   /* recursively add the next character in the string */
-  radix_insert(tree->children[*string - OFFSET], string+1);
+  return radix_insert(tree->children[*string - OFFSET], string+1);
 }
 
 /*!
@@ -210,13 +214,12 @@ void radix_insert(radix_tree tree, const char* string)
  * @param start the start of the array
  * @param finsih one past the end of the array
  */
-void radix_insert_all(radix_tree tree, char** first, char** last)
+int radix_insert_all(radix_tree tree, char** first, char** last)
 {
   /* make sure that first is less than last */
   if(first > last)
   {
-    fprintf(stderr, "ERROR: first must be less than last");
-    exit(-1);
+    return 0;
   }
 
   /* insert all of the elements into the tree */
@@ -224,6 +227,8 @@ void radix_insert_all(radix_tree tree, char** first, char** last)
   {
     radix_insert(tree, *first);
   }
+
+  return 1;
 }
 
 /* ************************************************************************** */
