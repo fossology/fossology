@@ -227,7 +227,7 @@ int main(int argc, char **argv)
       sprintf(sqlbuf, "select uploadtree_pk, pfile_fk, ufile_name, ufile_mode,lft,rgt from uploadtree \
              where upload_fk='%d' and parent is null limit 1", uploadtree.upload_fk);
       topresult = PQexec(pgConn, sqlbuf);
-      if (checkPQresult(topresult, sqlbuf, agentDesc, __LINE__)) return -1;
+      if (checkPQresult(pgConn, topresult, sqlbuf, agentDesc, __LINE__)) return -1;
       if (PQntuples(topresult) == 0) 
       {
         printf("ERROR: %s.%s missing upload_pk %d.\nsql: %s", 
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
        */
       sprintf(sqlbuf, "select pfile_fk, ufile_name, ufile_mode,lft,rgt, upload_fk from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
       topresult = PQexec(pgConn, sqlbuf);
-      if (checkPQresult(topresult, sqlbuf, agentDesc, __LINE__)) return -1;
+      if (checkPQresult(pgConn, topresult, sqlbuf, agentDesc, __LINE__)) return -1;
       if (PQntuples(topresult) == 0) 
       {
         printf("FATAL: %s.%s missing root uploadtree_pk %d\n", 
@@ -329,7 +329,7 @@ int main(int argc, char **argv)
     /*** Initialize DEB_SOURCE and DEB_BINARY  ***/
     sprintf(sqlbuf, "select mimetype_pk from mimetype where mimetype_name='application/x-debian-package'");
     result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) return -1;
+    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
     if (PQntuples(result) == 0)
     {
       printf("FATAL: (%s.%d) Missing application/x-debian-package mimetype.\n",__FILE__,__LINE__);
@@ -340,7 +340,7 @@ int main(int argc, char **argv)
 
     sprintf(sqlbuf, "select mimetype_pk from mimetype where mimetype_name='application/x-debian-source'");
     result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) return -1;
+    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
     if (PQntuples(result) == 0)
     {
       printf("FATAL: (%s.%d) Missing application/x-debian-source mimetype.\n",__FILE__,__LINE__);
@@ -358,7 +358,7 @@ int main(int argc, char **argv)
       printf("%s(%d): %s\n", __FILE__, __LINE__, sqlbuf);
     
     result = PQexec(pgConn, sqlbuf);
-    if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+    if (checkPQcommand(pgConn, result, sqlbuf, __FILE__ ,__LINE__)) return -1;
     PQclear(result);
 
 
@@ -368,7 +368,7 @@ int main(int argc, char **argv)
             order by ars_starttime desc limit 1",
             agent_pk, uploadtree.upload_fk, "false", nomos_agent_pk, bucketpool_pk);
     result = PQexec(pgConn, sqlbuf);
-    if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) return -1;
+    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
     if (PQntuples(result) == 0)
     {
       printf("FATAL: (%s.%d) Missing bucket_ars record.\n%s\n",__FILE__,__LINE__,sqlbuf);
@@ -410,7 +410,7 @@ int main(int argc, char **argv)
         printf("%s(%d): %s\n", __FILE__, __LINE__, sqlbuf);
       
       result = PQexec(pgConn, sqlbuf);
-      if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+      if (checkPQcommand(pgConn, result, sqlbuf, __FILE__ ,__LINE__)) return -1;
       PQclear(result);
     }
   }  /* end of main processing loop */

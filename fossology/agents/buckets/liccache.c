@@ -209,7 +209,7 @@ FUNCTION int lrcache_init(PGconn *pgConn, cacheroot_t *pcroot)
     snprintf(query, sizeof(query),
             "SELECT rf_pk, rf_shortname FROM license_ref where rf_detector_type=2;");
     result = PQexec(pgConn, query);
-    if (checkPQresult(result, query, "lrcache_init", __LINE__)) return 0;
+    if (checkPQresult(pgConn, result, query, "lrcache_init", __LINE__)) return 0;
 
     numLics = PQntuples(result);
     /* populate the cache  */
@@ -294,7 +294,7 @@ FUNCTION long add2license_ref(PGconn *pgConn, char *licenseName)
     /* verify the license is not already in the table */
     sprintf(query, "SELECT rf_pk FROM license_ref where rf_shortname='%s' and rf_detector_type=2", escLicName);
     result = PQexec(pgConn, query);
-    if (checkPQresult(result, query, "add2license_ref", __LINE__)) return 0;
+    if (checkPQresult(pgConn, result, query, "add2license_ref", __LINE__)) return 0;
     numRows = PQntuples(result);
     if (numRows)
     {
@@ -309,12 +309,12 @@ FUNCTION long add2license_ref(PGconn *pgConn, char *licenseName)
             "insert into license_ref(rf_shortname, rf_text, rf_detector_type) values('%s', '%s', 2)",
             escLicName, specialLicenseText);
     result = PQexec(pgConn, insert);
-    if (checkPQcommand(result, insert, __FILE__, __LINE__)) return 0;
+    if (checkPQcommand(pgConn, result, insert, __FILE__, __LINE__)) return 0;
     PQclear(result);
 
     /* retrieve the new rf_pk */
     result = PQexec(pgConn, query);
-    if (checkPQresult(result, query, "add2license_ref", __LINE__)) return 0;
+    if (checkPQresult(pgConn, result, query, "add2license_ref", __LINE__)) return 0;
     numRows = PQntuples(result);
     if (numRows)
       rf_pk = atol(PQgetvalue(result, 0, 0));

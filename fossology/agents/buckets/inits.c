@@ -45,7 +45,7 @@ FUNCTION int getBucketpool_pk(PGconn *pgConn, char *bucketpool_name)
   sprintf(sqlbuf, "select bucketpool_pk from bucketpool where (bucketpool_name='%s') and (active='Y') order by version desc", 
           bucketpool_name);
   result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return 0;
+  if (checkPQresult(pgConn, result, sqlbuf, fcnName, __LINE__)) return 0;
   if (PQntuples(result) > 0) bucketpool_pk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
   return bucketpool_pk;
@@ -88,7 +88,7 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
   /* get bucket defs from db */
   sprintf(sqlbuf, "select bucket_pk, bucket_type, bucket_regex, bucket_filename, stopon, bucket_name, applies_to from bucket_def where bucketpool_fk=%d order by bucket_evalorder asc", bucketpool_pk);
   result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return 0;
+  if (checkPQresult(pgConn, result, sqlbuf, fcnName, __LINE__)) return 0;
   numRows = PQntuples(result);
   if (numRows == 0) /* no bucket recs for pool?  return error */
   {
@@ -624,7 +624,7 @@ FUNCTION int LatestNomosAgent(PGconn *pgConn, int upload_pk)
                     and agent_enabled=true order by agent_ts desc limit 1",
           upload_pk);
   result = PQexec(pgConn, sql);
-  if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
+  if (checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
   if (PQntuples(result) == 0) return 0;
   nomos_agent_pk = atoi(PQgetvalue(result,0,0));
   PQclear(result);
@@ -660,7 +660,7 @@ FUNCTION int childParent(PGconn *pgConn, int uploadtree_pk)
            "select uploadtree_pk,ufile_mode from uploadtree where parent=%d limit 1", 
            uploadtree_pk);
     result = PQexec(pgConn, sql);
-    if (checkPQresult(result, sql, fcnName, __LINE__)) break;
+    if (checkPQresult(pgConn, result, sql, fcnName, __LINE__)) break;
     if (PQntuples(result) == 0) break;  /* empty container */
 
     /* not an artifact? */
