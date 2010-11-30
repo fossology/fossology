@@ -203,7 +203,7 @@ $text = _("FOSSology database size");
 	$Size = $Results[0]['val']; 
 	$V .= "<td align='right'>  $Size </td></tr>\n";;
 
-	$Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity';");
+	$Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity;");
 	if (!empty($Results[0]['val']))
 	  {
 $text = _("Active database connections");
