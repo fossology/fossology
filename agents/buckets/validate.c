@@ -104,7 +104,7 @@ FUNCTION int validate_pk(PGconn *pgConn, char *sql)
 
   /* Skip file if it has already been processed for buckets. */
   result = PQexec(pgConn, sql);
-  if (checkPQresult(result, sql, fcnName, __LINE__)) return 0;
+  if (checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
   if (PQntuples(result) > 0) pk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
   return pk;
@@ -164,7 +164,7 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int pfile_pk, int uploadtre
             and bucket_fk=bucket_pk limit 1",
     pfile_pk, agent_pk, bucketpool_pk, uploadtree_pk, agent_pk, bucketpool_pk);
   result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) return -1;
+  if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) return -1;
   numRecs = PQntuples(result);
   PQclear(result);
 
@@ -210,7 +210,7 @@ FUNCTION int UploadProcessed(PGconn *pgConn, int bucketagent_pk, int nomosagent_
             and ars_success=true limit 1",
      bucketagent_pk, nomosagent_pk,  upload_pk, bucketpool_pk);
   result = PQexec(pgConn, sqlbuf);
-  if (checkPQresult(result, sqlbuf, fcnName, __LINE__)) return -1;
+  if (checkPQresult(pgConn, result, sqlbuf, fcnName, __LINE__)) return -1;
   numRecs = PQntuples(result);
   PQclear(result);
 

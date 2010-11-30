@@ -56,13 +56,14 @@ FUNCTION int writeBuckets(PGconn *pgConn, int pfile_pk, int uploadtree_pk,
         if (debug) 
           printf("%s(%d): %s\n", __FILE__, __LINE__, sql);
         result = PQexec(pgConn, sql);
+        // ignore duplicate constraint failure (23505), report others
         if ((result==0) || ((PQresultStatus(result) != PGRES_COMMAND_OK) &&
             (strncmp("23505", PQresultErrorField(result, PG_DIAG_SQLSTATE),5))))
-        {
-          // ignore duplicate constraint failure (23505)
-          printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file. %s\n: %s\n",
-                  __FILE__,fcnName, __LINE__, 
-                  PQresultErrorMessage(result), sql);
+        {  
+          printf("ERROR: %s.%s().%d:  Failed to add bucket to bucket_file.\n",
+                  __FILE__,fcnName, __LINE__);
+          checkPQresult(pgConn, result, sql, __FILE__, __LINE__);
+              
           PQclear(result);
           rv = -1;
           break;

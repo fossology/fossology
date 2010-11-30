@@ -39,9 +39,14 @@
 
  NOTE: this function should be moved to a std library
 ****************************************************/
-FUNCTION int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb)
+FUNCTION int checkPQresult(PGconn *pgConn, PGresult *result, char *sql, char *FcnName, int LineNumb)
 {
-   if (!result) return -1;
+   if (!result) 
+   {
+     printf("FATAL: %s:%d, %s\nOn: %s\n", 
+            FcnName, LineNumb, PQerrorMessage(pgConn), sql);
+     return -1;
+   }
 
    /* If no error, return */
    if (PQresultStatus(result) == PGRES_TUPLES_OK) return 0;
@@ -69,12 +74,12 @@ FUNCTION int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineN
 
  NOTE: this function should be moved to a std library
 ****************************************************/
-FUNCTION int checkPQcommand(PGresult *result, char *sql, char *FcnName, int LineNumb)
+FUNCTION int checkPQcommand(PGconn *pgConn, PGresult *result, char *sql, char *FcnName, int LineNumb)
 {
    if (!result)
    {
-     printf("Error: %s:%d - checkPQcommand called with invalid PGresult object.\n",
-             FcnName, LineNumb);
+     printf("FATAL: %s:%d, %s\nOn: %s\n", 
+            FcnName, LineNumb, PQerrorMessage(pgConn), sql);
      return -1;
    }
 
