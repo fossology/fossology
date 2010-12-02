@@ -91,6 +91,9 @@ int TotalDirectories=0;
 int TotalContainers=0;
 int TotalArtifacts=0;
 
+/* store the upload file name */
+char UploadFileName[FILENAME_MAX];
+
 // add by larry, start
 void deleteTmpFiles(char *dir)
 {
@@ -151,23 +154,13 @@ void	SafeExit	(int rc)
  * @brief get rid of the postfix
  * for example : test.gz --> test
  * @parameter Name: input file name
- * @parameter Count: the size of the name
- * @return after removing postfix, the size - 1 of name, -1: error
  */
-int RemovePostfix(char *Name, int Count)
+void RemovePostfix(char *Name)
 {
-  if (NULL == Name) return -1; // exception
-  int i = Count - 1;
-  for (; i >= 0; i--)
-  {
-    if ('.' == Name[i]) //find the charecter '.'
-    {
-      Name[i] = '\0';
-      break;
-    }
-  }
-  if (-1 == i) return Count; // do not find '.', the name is original
-  return i; // return the name size 
+  if (NULL == Name) return; // exception
+  // keep the part before the last dot
+  char *LastDot = strrchr(Name, '.');
+  if (LastDot) *LastDot = 0;
 }
 
 /*************************************************
@@ -1544,30 +1537,45 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
   switch(Type)
 	{
 	case CMD_PACK:
-          if (CI->TopContainer && UseRepository){ // the package is top package, not part of other package, use DB
-            char *ufile_name;
-            char UfileName[1024];
-            snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
-            MyDBaccess(DB,UfileName); // get the upload file name
-            memset(UfileName,'\0',sizeof(UfileName));
-            ufile_name = DBgetvalue(DB,0,0);
-            if (strchr(ufile_name,'/')) ufile_name = strrchr(ufile_name,'/')+1;
-            strncpy(UfileName,ufile_name,sizeof(UfileName)-1);
-            // set the file name of the file in package, for example, test.gz, after test.gz
-            // is unpacked, the unpacked file name should be test
-            strncpy(CI->PartnameNew,UfileName,sizeof(CI->PartnameNew));
-            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, strlen(CI->PartnameNew)));
-          } else
-          // the package is sub package, need get rid of the postfix
-          // two time, test.gz.tar.dir-->test.tar.gz-->test.tar
-          // use DB
+          /* if the package is one top package, in the other word, not part of other package, 
+           * also using repository, need to reset the file name in the upload package,
+           * if do not reset, for the gz Z bz2 packages, the file name in the package is one
+           * string of numbers, that is:
+           * CI->Source isn't the original upload_filename, it's the real name in repository.
+           * For example:
+           * argmatch.c.gz    ---> CI->Source  --->  	
+           * 657db64230b9d647362bfe0ebb82f7bd1d879400.a0f2e4d071ba2e68910132a8da5784a6.2920
+           * CI->PartnameNew ---> 
+           * 657db64230b9d647362bfe0ebb82f7bd1d879400.a0f2e4d071ba2e68910132a8da5784a6
+           * so in order to get the real file name: we need get the upload file name first, then 
+           * get rid of the postfix.
+           * For example:
+           * for the package test.gz, get rid of .gz, get the file name test
+           */
+          if (CI->TopContainer && UseRepository)
           {
-            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, strlen(CI->PartnameNew)));
-            strncpy(CI->PartnameNew,CI->PartnameNew, RemovePostfix(CI->PartnameNew, strlen(CI->PartnameNew)));
+            RemovePostfix(UploadFileName);
+            strncpy(CI->PartnameNew, UploadFileName, sizeof(CI->PartnameNew) - 1);
           }
-
-	  rc=RunCommand(CMD[CI->PI.Cmd].Cmd,CMD[CI->PI.Cmd].CmdPre,CI->Source,
-	     CMD[CI->PI.Cmd].CmdPost,CI->PartnameNew,Queue[Index].ChildRecurse);
+          else
+          /* if the package is one sub package, or not using repository, need get rid of the postfix
+           * two time, for example: 
+           * 1. for test.tar.gz, it is in test.rpm, when test.tar.gz is unpacked,
+           * the name of unpacked file should be test.tar under test.tar.gz.dir, but real is
+           * one string of numbers, so do as below:
+           * test.tar.gz.dir-->test.tar.gz-->test.tar
+           * 2. for metahandle.tab.bz2, it is top package, when metahandle.tab.bz2 is unpacked, 
+           * the name of unpacked file should be metahandle.tab, so
+           * metahandle.tab.bz2.dir-->metahandle.tab.bz2-->metahandle.tab
+           */
+          {
+            RemovePostfix(CI->PartnameNew);
+            RemovePostfix(CI->PartnameNew);
+          }
+          
+          /* unpack in a sub-directory */
+          rc=RunCommand(CMD[CI->PI.Cmd].Cmd,CMD[CI->PI.Cmd].CmdPre,CI->Source,
+                  CMD[CI->PI.Cmd].CmdPost,CI->PartnameNew,Queue[Index].ChildRecurse);
           break;
 	case CMD_RPM:
 	  /* unpack in the current directory */
@@ -1842,6 +1850,29 @@ int	Traverse	(char *Filename, char *Basename,
 	    }
 	  if (CMD[CI.PI.Cmd].Type == CMD_PARTITION)
 		Queue[Index].PI.ChildRecurseArtifact=2;
+
+          /* get the upload file name */
+          /* if the type of the upload file is CMD_PACK, and is top container,
+           * and using repository, then get the upload file name from DB
+           */
+          if (CMD_PACK == CMD[CI.PI.Cmd].Type && CI.TopContainer && UseRepository)
+          {
+            char *UFileName;
+            char SQL[MAXSQL];
+            snprintf(SQL, MAXSQL,"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
+            MyDBaccess(DB, SQL); // get name of the upload file
+            if (rc < 0)
+            {
+              printf("FATAL: Database access error.\n");
+              printf("LOG: Database access error in ununpack: %s\n", SQL);
+              SafeExit(15);
+            }
+            UFileName = DBgetvalue(DB,0,0);
+            if (strchr(UFileName, '/')) UFileName = strrchr(UFileName, '/') + 1;
+            memset(UploadFileName, '\0', FILENAME_MAX);
+            strncpy(UploadFileName, UFileName, FILENAME_MAX - 1);
+          }
+
 	  break;
 	case CMD_DEB:
 	case CMD_RPM:
