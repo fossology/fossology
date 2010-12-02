@@ -32,16 +32,18 @@ class group_manage_self extends FO_Plugin {
   var $Title = TITLE_group_manage_self;
   var $MenuList = "Admin::Groups::Manage Own Group";
   var $Version = "1.3";
+  var $Dependency = array("db");
   var $DBaccess = PLUGIN_DB_NONE;
 
 
   function PostInitialize()
   {
-    global $DB, $PG_CONN;
+    global $DB;
     //$UserId = $_SESSION['UserId'];
     global $Plugins;
 
-    if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    //if (!$PG_CONN) { $dbok = $DB->db_init(); if (!$dbok) echo "NO DB connection"; }
+    if (empty($DB)) { return(1); } /* No DB */
 
     if ($this->State != PLUGIN_STATE_VALID) {
       return(0);
@@ -61,13 +63,10 @@ class group_manage_self extends FO_Plugin {
     if (!empty($_SESSION['UserId'])){
       $UserId = $_SESSION['UserId']; 
       $sql = "SELECT * FROM group_user_member WHERE user_fk = $UserId and group_perm=1;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      if (pg_num_rows($result) < 1){
-        pg_free_result($result);
+      $result = $DB->Action($sql);
+      if (empty($result) || count($result) < 1){
         return(0);
       }
-      pg_free_result($result);
     }
 
     $this->State = PLUGIN_STATE_READY;
