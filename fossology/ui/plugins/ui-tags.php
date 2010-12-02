@@ -31,7 +31,7 @@ class ui_tag extends FO_Plugin
   var $Name       = "tag";
   var $Title      = TITLE_ui_tag;
   var $Version    = "1.0";
-
+  var $Dependency = array("db");
   /***********************************************************
    RegisterMenus(): Customize submenus.
    ***********************************************************/
