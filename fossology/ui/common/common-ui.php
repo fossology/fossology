@@ -112,7 +112,7 @@ function DBCheckResult($result, $sql="", $filenm, $lineno)
   if (!$result)
   {
     echo "<hr>File: $filenm, Line number: $lineno<br>";
-    if ($PG_CONN)
+    if (pg_connection_status($PG_CONN) === PGSQL_CONNECTION_OK)
       echo pg_last_error($PG_CONN);
     else
       echo "FATAL: DB connection lost.";
