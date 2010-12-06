@@ -155,7 +155,7 @@ $text = _("Fatal internal ERROR! Cannot connect to the DataBase");
 			$status = JobListSummary($upload['job_upload_fk']);
 
 			if ($status['total'] == $status['completed']) {
-				array_push(&$CompletedJobs,$upload);
+				array_push($CompletedJobs,$upload);
 				continue;
 			}
 			// build the table entry
