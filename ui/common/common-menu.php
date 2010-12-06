@@ -234,7 +234,7 @@ item, and optional plugin name, insert the menu item.
 function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target = NULL, $HTML = NULL) {
   global $MenuList;
   $FullName = $Path;
-  menu_insert_r(&$MenuList, $Path, $LastOrder, $Target, $URI, $HTML, 0, $FullName, $Title);
+  menu_insert_r($MenuList, $Path, $LastOrder, $Target, $URI, $HTML, 0, $FullName, $Title);
 } // menu_insert()
 /***********************************************
 menu_find(): Given a top-level menu name, return
