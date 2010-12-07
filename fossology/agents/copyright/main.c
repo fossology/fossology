@@ -132,9 +132,8 @@ unsigned long hash_string(char* str) {
  * @param src the source string that needs to be escaped
  * @param esclen the len of the string to escape
  */
-void  escape_string(PGconn* pgConn, char *dst, const char *src, int esclen)
+void  escape_string(PGconn* pgConn, char *dst, const char *src, int len)
 {
-  int len;
   int error;
 
   /*  remove any backslashes from the string as they don't escape properly
@@ -150,16 +149,11 @@ void  escape_string(PGconn* pgConn, char *dst, const char *src, int esclen)
     cp++;
   }
 
-  len = strlen(src);
-  if ( len > esclen/2 )
-  {
-    len = esclen/2 - 1;
-  }
-
   PQescapeStringConn(pgConn, dst, src, len, &error);
   if (error)
   {
-    printf("WARNING %s.%d: Error escaping string with multibype character set?\n",__FILE__, __LINE__ );
+    fprintf(cerr, "WARNING %s.%d: Error escaping string for database entry\n",__FILE__, __LINE__ );
+    fprintf(cerr, "WARNING string was: '%s'\n", src);
   }
 }
 
@@ -373,7 +367,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
 {
   /* locals */
   char sql[2048];               // buffer to hold the sql commands
-  char buf[1024];               // buffer to hold string that have been escaped for sql
+  char buf[2048];               // buffer to hold string that have been escaped for sql
   char hash[256];               // holds the hash of the copyright string for entry into database
   char* file_name;              // holds the name of the file to open
   extern int HBItemsProcessed;  // the number of items processed by this agent
@@ -443,7 +437,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
       if(*(int*)pair_second(current_file) >= 0)
       {
         /* ensure legal sql */
-        escape_string (pgConn, buf, copy_entry_text(entry), strlen(copy_entry_text(entry)));
+        escape_string(pgConn, buf, copy_entry_text(entry), sizeof(buf));
 
         /* get the hash for the string */
         sprintf(hash, "0x%lx", hash_string(copy_entry_text(entry)));
