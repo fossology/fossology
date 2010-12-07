@@ -49,7 +49,7 @@ class driverTest extends PHPUnit_Framework_TestCase
     $sqlMatch = 0;
     $db1Last = 0;
     $dbFileLast = 0;
-    $outList = array (
+    $resultList = array (
       $sqlOut,
       $db1Out,
       $fileOut
@@ -63,8 +63,8 @@ class driverTest extends PHPUnit_Framework_TestCase
     );
     for($i=0; $i<3; $i++)
     {
-      $outLines = implode(' ', $outList[$i]);
-      $this->assertEquals(preg_match("/$errList[$i]/", $outLines), 1);
+      $resultLines = implode(' ', $resultList[$i]);
+      $this->assertEquals(preg_match("/$errList[$i]/", $resultLines), 1);
     }
   }
 }
