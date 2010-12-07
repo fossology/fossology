@@ -97,9 +97,13 @@ void	EscapeString	(const char *sourceString, char *escString, int esclen)
     cp++;
   }
 
-	len = strlen(sourceString);	
-	if ( len > esclen/2 )
-		len = esclen/2 - 1;
+  /* check the size of the destination buffer */
+  if((len = strlen(sourceString)) > esclen/2) {
+    fprintf(cerr, "ERROR %s.%d: length of input string is too large\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR length of string was %d, max length is %d\n", len, esclen/2);
+    return;
+  }
+
 	//printf("TEST:esclen---%d,sourcelen---%d\n",esclen,len);
 	PQescapeStringConn(DB, escString, sourceString, len, &error);
 	if (error)
