@@ -154,6 +154,7 @@ void  escape_string(PGconn* pgConn, char *dst, const char *src, int esclen)
   if((len = strlen(src)) > esclen/2) {
     fprintf(cerr, "ERROR %s.%d: length of input string is too large\n", __FILE__, __LINE__);
     fprintf(cerr, "ERROR length of string was %d, max length is %d\n", len, esclen/2);
+    return;
   }
 
   PQescapeStringConn(pgConn, dst, src, len, &error);
