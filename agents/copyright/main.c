@@ -122,6 +122,47 @@ unsigned long hash_string(char* str) {
   return hash;
 }
 
+/**
+ * the postgresql escape function has a bug when it tries to escape string that
+ * contain a '/'. This function accounts for that bug and then calls the escape
+ * function for postgresql.
+ *
+ * @param pgConn the connection to the database
+ * @param dst the destination of the escaped string
+ * @param src the source string that needs to be escaped
+ * @param esclen the len of the string to escape
+ */
+void  escape_string(PGconn* pgConn, char *dst, const char *src, int esclen)
+{
+  int len;
+  int error;
+
+  /*  remove any backslashes from the string as they don't escape properly
+   *  for example, "don\'t" in the input will cause an insert error
+   */
+  char *cp = (char *)src;
+  while(*cp)
+  {
+    if (*cp == '\\')
+    {
+      *cp = ' ';
+    }
+    cp++;
+  }
+
+  len = strlen(src);
+  if ( len > esclen/2 )
+  {
+    len = esclen/2 - 1;
+  }
+
+  PQescapeStringConn(pgConn, dst, src, len, &error);
+  if (error)
+  {
+    printf("WARNING %s.%d: Error escaping string with multibype character set?\n",__FILE__, __LINE__ );
+  }
+}
+
 /* ************************************************************************** */
 /* **** Accuracy Tests ****************************************************** */
 /* ************************************************************************** */
@@ -335,7 +376,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   char buf[1024];               // buffer to hold string that have been escaped for sql
   char hash[256];               // holds the hash of the copyright string for entry into database
   char* file_name;              // holds the name of the file to open
-  int error;                    // used to store errors returned by PQ functions
   extern int HBItemsProcessed;  // the number of items processed by this agent
   copyright_iterator finds;     // an iterator to access the copyrights
   FILE* input_fp;               // the file that will be analyzed
@@ -403,7 +443,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
       if(*(int*)pair_second(current_file) >= 0)
       {
         /* ensure legal sql */
-        PQescapeStringConn(pgConn, buf, copy_entry_text(entry), strlen(copy_entry_text(entry)), &error);
+        escape_string (pgConn, buf, copy_entry_text(entry), strlen(copy_entry_text(entry)));
 
         /* get the hash for the string */
         sprintf(hash, "0x%lx", hash_string(copy_entry_text(entry)));
