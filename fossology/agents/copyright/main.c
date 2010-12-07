@@ -132,8 +132,9 @@ unsigned long hash_string(char* str) {
  * @param src the source string that needs to be escaped
  * @param esclen the len of the string to escape
  */
-void  escape_string(PGconn* pgConn, char *dst, const char *src, int len)
+void  escape_string(PGconn* pgConn, char *dst, const char *src, int esclen)
 {
+  int len;
   int error;
 
   /*  remove any backslashes from the string as they don't escape properly
@@ -147,6 +148,12 @@ void  escape_string(PGconn* pgConn, char *dst, const char *src, int len)
       *cp = ' ';
     }
     cp++;
+  }
+
+  /* check the size of the destination buffer */
+  if((len = strlen(src)) > esclen/2) {
+    fprintf(cerr, "ERROR %s.%d: length of input string is too large\n", __FILE__, __LINE__);
+    fprintf(cerr, "ERROR length of string was %d, max length is %d\n", len, esclen/2);
   }
 
   PQescapeStringConn(pgConn, dst, src, len, &error);
