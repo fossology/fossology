@@ -23,6 +23,8 @@
  * dbCheckR-sqlf
  * \brief  ensure dbCheckResult produces correct output on sql failure
  *
+ * @version "$Id$"
+ *
  */
 
 global $GlobalReady;
