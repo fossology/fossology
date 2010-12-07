@@ -99,8 +99,8 @@ void	EscapeString	(const char *sourceString, char *escString, int esclen)
 
   /* check the size of the destination buffer */
   if((len = strlen(sourceString)) > esclen/2) {
-    fprintf(cerr, "ERROR %s.%d: length of input string is too large\n", __FILE__, __LINE__);
-    fprintf(cerr, "ERROR length of string was %d, max length is %d\n", len, esclen/2);
+    printf("ERROR %s.%d: length of input string is too large\n", __FILE__, __LINE__);
+    printf("ERROR length of string was %d, max length is %d\n", len, esclen/2);
     return;
   }
 
