@@ -1537,20 +1537,20 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
   switch(Type)
 	{
 	case CMD_PACK:
-          /* if the package is one top package, in the other word, not part of other package, 
-           * also using repository, need to reset the file name in the upload package,
-           * if do not reset, for the gz Z bz2 packages, the file name in the package is one
-           * string of numbers, that is:
-           * CI->Source isn't the original upload_filename, it's the real name in repository.
+          /* If the file processed is one original uploaded file and it is an archive,  
+           * also using repository, need to reset the file name in the archive,
+           * if do not reset, for the gz Z bz2 archives, the file name in the archive is
+           * sha1.md5.size file name, that is:
            * For example:
-           * argmatch.c.gz    ---> CI->Source  --->  	
-           * 657db64230b9d647362bfe0ebb82f7bd1d879400.a0f2e4d071ba2e68910132a8da5784a6.2920
-           * CI->PartnameNew ---> 
+           * argmatch.c.gz    ---> CI->Source  --->
+           * 657db64230b9d647362bfe0ebb82f7bd1d879400.a0f2e4d071ba2e68910132a8da5784a6.292
+           * CI->PartnameNew --->
            * 657db64230b9d647362bfe0ebb82f7bd1d879400.a0f2e4d071ba2e68910132a8da5784a6
-           * so in order to get the real file name: we need get the upload file name first, then 
-           * get rid of the postfix.
+           * so in order to get the original file name(CI->PartnameNew): we need get the
+           * upload archive name first, then get rid of the postfix.
            * For example:
-           * for the package test.gz, get rid of .gz, get the file name test
+           * for test.gz, get rid of .gz, get the original file name 'test',
+           * replace sha1.md5.size file name with 'test'.
            */
           if (CI->TopContainer && UseRepository)
           {
@@ -1558,15 +1558,16 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
             strncpy(CI->PartnameNew, UploadFileName, sizeof(CI->PartnameNew) - 1);
           }
           else
-          /* if the package is one sub package, or not using repository, need get rid of the postfix
+          /* If the file processed is a sub-archive, in the other words, it is part of other archive,
+           * or not using repository, need get rid of the postfix
            * two time, for example: 
            * 1. for test.tar.gz, it is in test.rpm, when test.tar.gz is unpacked,
-           * the name of unpacked file should be test.tar under test.tar.gz.dir, but real is
-           * one string of numbers, so do as below:
-           * test.tar.gz.dir-->test.tar.gz-->test.tar
-           * 2. for metahandle.tab.bz2, it is top package, when metahandle.tab.bz2 is unpacked, 
-           * the name of unpacked file should be metahandle.tab, so
-           * metahandle.tab.bz2.dir-->metahandle.tab.bz2-->metahandle.tab
+           * the name of unpacked file should be test.tar under test.tar.gz.dir, but it is
+           * test.tar.gz.dir, so do as below:
+           * test.tar.gz.dir-->test.tar.gz-->test.tar,
+           * 2. for metahandle.tab.bz2, it is one top archive, when metahandle.tab.bz2 is unpacked, 
+           * the name of unpacked file should be metahandle.tab, so do as below:
+           * metahandle.tab.bz2.dir-->metahandle.tab.bz2-->metahandle.tab,
            */
           {
             RemovePostfix(CI->PartnameNew);
