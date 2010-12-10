@@ -40,26 +40,26 @@ global $URL;
 
 class rhelTest extends fossologyTestCase
 {
-	public $mybrowser;          // must have
-	protected $host;
+  public $mybrowser;          // must have
+  protected $host;
 
-	/*
-	 * Every Test needs to login so we use the setUp method for that.
-	 * setUp is called before any other method by default.
-	 *
-	 */
-	function setUp()
-	{
-		global $URL;
-		$this->Login();
-		$this->host = getHost($URL);
-	}
+  /*
+   * Every Test needs to login so we use the setUp method for that.
+   * setUp is called before any other method by default.
+   *
+   */
+  function setUp()
+  {
+    global $URL;
+    $this->Login();
+    $this->host = getHost($URL);
+  }
 
-	function testRHEL()
-	{
-		global $URL;
+  function testRHEL()
+  {
+    global $URL;
 
-		$licBaseLine = array(
+    $licBaseLine = array(
     'No License Found' => 6906,
     'Apache_v2.0' => 858,
     'ATT' => 812,
@@ -135,99 +135,103 @@ class rhelTest extends fossologyTestCase
     'zlib/libpng' => 1,
     );
 
-		$licenseSummary = array(
+    $licenseSummary = array(
       'Unique licenses'        => 73,
       'Licenses found'         => 3273,
       'Files with no licenses' => 6906,
       'Files'                  => 12532
-		);
+    );
 
 
-		print "starting testRHEL\n";
+    print "starting testRHEL\n";
 
-		$name = 'RedHat.tar.gz';
-		$safeName = escapeDots($name);
-		$page = $this->mybrowser->clickLink('Browse');
-		$page = $this->mybrowser->clickLink('Testing');
-		$this->assertTrue($this->myassertText($page, "/$safeName/"),
+    $name = 'RedHat.tar.gz';
+    $safeName = escapeDots($name);
+    print "safeName is:$safeName\n";
+    $page = $this->mybrowser->clickLink('Browse');
+    $page = $this->mybrowser->clickLink('Testing');
+    $this->assertTrue($this->myassertText($page, "/$safeName/"),
        "verifyRedHat FAILED! did not find $safeName\n");
 
-		/* Select archive */
-		//print "CKZDB: page before call parseBMenu:\n$page\n";
+    /* Select archive */
+    //print "CKZDB: page before call parseBMenu:\n$page\n";
 
-		$page = $this->mybrowser->clickLink($name);
-		$this->assertTrue($this->myassertText($page, "/1 item/"),
+    $page = $this->mybrowser->clickLink($name);
+    $this->assertTrue($this->myassertText($page, "/1 item/"),
        "verifyRedHat FAILED! 1 item not found\n");
-		$page = $this->mybrowser->clickLink('RedHat/');
-		$this->assertTrue($this->myassertText($page, "/65 items/"),
+    $page = $this->mybrowser->clickLink('RedHat.tar');
+    //print "page after clicklink RedHat.tar:\n$page\n";
+    $page = $this->mybrowser->clickLink('RedHat/');
+    //print "page after clicklink RedHat:\n$page\n";
+    $this->assertTrue($this->myassertText($page, "/65 items/"),
        "verifyRedHat FAILED! '65 items' not found\n");
-		$mini = new parseMiniMenu($page);
-		$miniMenu = $mini->parseMiniMenu();
-		//print "miniMenu is:\n";print_r($miniMenu) . "\n";
-		$url = makeUrl($this->host, $miniMenu['Nomos License']);
-		if($url === NULL) { $this->fail("verifyRedHat Failed, host/url is not set"); }
+    $mini = new parseMiniMenu($page);
+    $miniMenu = $mini->parseMiniMenu();
+    //print "miniMenu is:\n";print_r($miniMenu) . "\n";
+    $url = makeUrl($this->host, $miniMenu['Nomos License']);
+     if($url === NULL) { $this->fail("verifyRedHat Failed, host/url is not set"); }
 
-		$page = $this->mybrowser->get($url);
-		//print "page after get of $url is:\n$page\n";
-		$this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
+    $page = $this->mybrowser->get($url);
+    //print "page after get of $url is:\n$page\n";
+    $this->assertTrue($this->myassertText($page, '/Nomos License Browser/'),
           "verifyRedHat FAILED! Nomos License Browser Title not found\n");
 
-		// check that license summarys are correct
-		$licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
-		$licSummary->parseLicenseTbl();
+    // check that license summarys are correct
+    $licSummary = new domParseLicenseTbl($page, 'licsummary', 0);
+    $licSummary->parseLicenseTbl();
 
     print "verifying summaries....\n";
-		foreach ($licSummary->hList as $summary)
-		{
-			//print "summary is:\n";print_r($summary) . "\n";
-			$key = $summary['textOrLink'];
+    foreach ($licSummary->hList as $summary)
+    {
+      //print "summary is:\n";print_r($summary) . "\n";
+      $key = $summary['textOrLink'];
       //print "SUM: key is:$key\n";
-			$this->assertEqual($licenseSummary[$key], $summary['count'],
+      $this->assertEqual($licenseSummary[$key], $summary['count'],
       "verifyRedHat FAILED! $key does not equal $licenseSummary[$key],
       Expected: {$licenseSummary[$key]},
            Got: $summary[count]\n");
-			//print "summary is:\n";print_r($summary) . "\n";
-		}
+      //print "summary is:\n";print_r($summary) . "\n";
+    }
 
-		// get the license names and 'Show' links
-		$licHistogram = new domParseLicenseTbl($page, 'lichistogram',1);
-		$licHistogram->parseLicenseTbl();
+    // get the license names and 'Show' links
+    $licHistogram = new domParseLicenseTbl($page, 'lichistogram',1);
+    $licHistogram->parseLicenseTbl();
 
-		if($licHistogram->noRows === TRUE)
-		{
-			$this->fail("FATAL! no table rows to process, there should be many for"
-			. " this test, Stopping the test");
-			return;
-		}
+    if($licHistogram->noRows === TRUE)
+    {
+      $this->fail("FATAL! no table rows to process, there should be many for"
+      . " this test, Stopping the test");
+      return;
+    }
 
-		// verify every row against the standard by comparing the counts.
-		/*
-		* @todo check the show links, but to do that, need to gather another
-		* standard array to match agains?  or just use the count from the
-		* baseline?
-		*/
+    // verify every row against the standard by comparing the counts.
+    /*
+    * @todo check the show links, but to do that, need to gather another
+    * standard array to match agains?  or just use the count from the
+    * baseline?
+    */
 
     //print "table is:\n";print_r($licHistogram->hList) . "\n";
-		foreach($licHistogram->hList as $licFound)
-		{
-			$key = $licFound['textOrLink'];
-			//print "HDB: key is:$key\n";
-			//print "licFound is:\n";print_r($licFound) . "\n";
-			if(array_key_exists($key,$licBaseLine))
-			{
+    foreach($licHistogram->hList as $licFound)
+    {
+      $key = $licFound['textOrLink'];
+      //print "HDB: key is:$key\n";
+      //print "licFound is:\n";print_r($licFound) . "\n";
+      if(array_key_exists($key,$licBaseLine))
+      {
         //print "licFound[textOrLink] is:{$licFound['textOrLink']}\n";
-				$this->assertEqual($licBaseLine[$key], $licFound['count'],
+        $this->assertEqual($licBaseLine[$key], $licFound['count'],
           "verifyRedHat FAILED! the baseline count {$licBaseLine[$key]} does" .
           " not equal {$licFound['count']} for license $key,\n" .
           "Expected: {$licBaseLine[$key]},\n" .
           "     Got: {$licFound['count']}\n");
-			}
-			else
-			{
-			  $this->fail("verifyRedHat FAILED! A License was found that is " .
-			   "not in the standard:\n$key\n");
-			}
-		}
-	}
+      }
+      else
+      {
+        $this->fail("verifyRedHat FAILED! A License was found that is " .
+         "not in the standard:\n$key\n");
+      }
+    }
+  }
 }
 ?>
