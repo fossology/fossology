@@ -33,6 +33,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MAXBUF 1024*1024  ///< max bytes to scan
 #define LINE_LENGTH 256   ///< the max length of a line in a file
+#define MAX(a,b) ((a>b)?a:b)
+
 
 /** regular expression to find email statements in natural language */
 char* email_regex = "[\\<\\(]?[A-Za-z0-9\\-_\\.\\+]{1,100}@[A-Za-z0-9\\-_\\.\\+]{1,100}\\.[A-Za-z]{1,4}[\\>\\)]?(?C1)";
@@ -53,7 +55,7 @@ struct copyright_internal
   radix_tree name;        ///< the list of names to match
   cvector entries;        ///< the set of copyright found in a particular file
   pcre* email_re;         ///< regex for finding emails
-  pcre* url_re;           ///< the regex for finding emails
+  pcre* url_re;           ///< the regex for finding urls
   const char* reg_error;  ///< for regular expression error messages
   int reg_error_offset;   ///< for regex error offsets
 };
@@ -86,7 +88,7 @@ int find_beginning(char* ptext, int idx)
 
   while (idx-- && (idx > minidx))
   {
-    if (ptext[idx] == '\n') return idx;
+    if (ptext[idx] == '\n') return MAX(0, idx-1);
   }
 
   return idx;
