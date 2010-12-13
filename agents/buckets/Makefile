@@ -9,7 +9,7 @@ CFLAGS_LOCAL=$(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) -lpq $(ALL_CFLAGS)
 CFLAGS_LOCALO=$(CFLAGS_DBO) $(CFLAGS_REPOO) $(CFLAGS_AGENTO) $(ALL_CFLAGS)
 
 EXE=buckets
-OBJS=validate.o inits.o liccache.o dbcommon.o  walk.o leaf.o match.o container.o child.o write.c
+OBJS=validate.o inits.o liccache.o walk.o leaf.o match.o container.o child.o write.c
 HDRS=buckets.h
 DEF=-DDATADIR='"$(DATADIR)"'
 
@@ -44,9 +44,6 @@ inits.o: $(DB) $(REPO) $(VARS) $(HDRS) inits.c
 
 liccache.o: $(DB) $(REPO) $(VARS) $(HDRS) liccache.c
 	$(CC) $(DEF) -c $(CFLAGS_LOCALO) liccache.c
-
-dbcommon.o: $(DB) $(REPO) $(VARS) $(HDRS) dbcommon.c
-	$(CC) $(DEF) -c $(CFLAGS_LOCALO) dbcommon.c
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/$(EXE)
