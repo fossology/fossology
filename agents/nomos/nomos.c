@@ -68,7 +68,6 @@ typedef struct cacheroot cacheroot_t;
 
 #define FUNCTION
 
-int   checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb);
 char *getFieldValue(char *inStr, char *field, int fieldMax, char *value, int valueMax, char separator) ;
 void  parseLicenseList() ;
 void  Usage(char *Name) ;
@@ -88,74 +87,6 @@ long  lrcache_hash(cacheroot_t *pcroot, char *rf_shortname);
 int   lrcache_add(cacheroot_t *pcroot, long rf_pk, char *rf_shortname);
 long  lrcache_lookup(cacheroot_t *pcroot, char *rf_shortname);
  
-
-/**
- checkPQresult
-
- check the result status of a postgres SELECT
- If an error occured, log the error message.
-
- @param PGresult *result
- @param char *sql the sql query
- @param char * FcnName the function name of the caller
- @param int LineNumb the line number of the caller
-
- @return 0 on OK, -1 on failure.
-  On failure, result will be freed.
-  NOTE this should be moved to std library.
- */
-FUNCTION int checkPQresult(PGresult *result, char *sql, char *FcnName, int LineNumb) 
-{
-  if (!result) 
-  {
-    printf("Error: checkPQresult called from %s:%d with invalid parameter",
-      FcnName, LineNumb);
-    return 0;
-  }
-
-  /* If no error, return */
-  if (PQresultStatus(result) == PGRES_TUPLES_OK) return 0;
-
-  printf("ERROR: %s:%d, %s\nOn: %s", FcnName, LineNumb, PQresultErrorMessage(result), sql);
-  PQclear(result);
-  return (-1);
-} /* checkPQresult */
-
-
-/****************************************************
- checkPQcommand
-
-  check the result status of a postgres commands (not select)
-  If an error occured, write the error to stdout
-
-  @param PGresult *result
-  @param char *sql the sql query
-  @param char * FcnName the function name of the caller
-  @param int LineNumb the line number of the caller
-
-  @return 0 on OK, -1 on failure.
-  On failure, result will be freed.
-
-  NOTE: this function should be moved to a std library
-****************************************************/
-FUNCTION int checkPQcommand(PGresult *result, char *sql, char *FcnName, int LineNumb)
-{
-  if (!result)
-  {
-    printf("Error: %s:%d - checkPQcommand called with invalid parameter.\n",
-            FcnName, LineNumb);
-    return 0;
-  }
-
-  /* If no error, return */
-  if (PQresultStatus(result) == PGRES_COMMAND_OK) return 0;
-
-  printf("ERROR: %s:%d, %s\nOn: %s\n",
-          FcnName, LineNumb, PQresultErrorMessage(result), sql);
-  PQclear(result);
-  return (-1);
-} /* checkPQcommand */
-
 
 /**
  add2license_ref
@@ -189,7 +120,7 @@ FUNCTION long add2license_ref(char *licenseName) {
     /* verify the license is not already in the table */
     sprintf(query, "SELECT rf_pk FROM license_ref where rf_shortname='%s' and rf_detector_type=2", escLicName);
     result = PQexec(gl.pgConn, query);
-    if (checkPQresult(result, query, "add2license_ref", __LINE__)) return 0;
+    if (checkPQresult(gl.pgConn, result, query, "add2license_ref", __LINE__)) return 0;
     numRows = PQntuples(result);
     if (numRows)
     {
@@ -214,7 +145,7 @@ FUNCTION long add2license_ref(char *licenseName) {
 
     /* retrieve the new rf_pk */
     result = PQexec(gl.pgConn, query);
-    if (checkPQresult(result, query, "add2license_ref", __LINE__)) return 0;
+    if (checkPQresult(gl.pgConn, result, query, "add2license_ref", __LINE__)) return 0;
     numRows = PQntuples(result);
     if (numRows)
       rf_pk = atol(PQgetvalue(result, 0, 0));
@@ -411,7 +342,7 @@ FUNCTION int initLicRefCache(cacheroot_t *pcroot) {
 
     sprintf(query, "SELECT rf_pk, rf_shortname FROM license_ref where rf_detector_type=2;");
     result = PQexec(gl.pgConn, query);
-    if (checkPQresult(result, query, "initLicRefCache", __LINE__)) return 0;
+    if (checkPQresult(gl.pgConn, result, query, "initLicRefCache", __LINE__)) return 0;
 
     numLics = PQntuples(result);
     /* populate the cache  */
@@ -1004,7 +935,7 @@ int main(int argc, char **argv) {
                     and upload_fk='%d' and agent_fk='%d'",
                    upload_pk, gl.agentPk);
           result = PQexec(gl.pgConn, sqlbuf);
-          if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+          if (checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
           if (PQntuples(result) != 0) 
           {
             printf("LOG: Ignoring requested nomos analysis of upload %d - Results are already in database.\n",
@@ -1020,7 +951,7 @@ int main(int argc, char **argv) {
                   "insert into nomos_ars (agent_fk, upload_fk, ars_success) values(%d,%d,'%s');",
                     gl.agentPk, upload_pk, "false");
           ars_result = PQexec(gl.pgConn, sqlbuf);
-          if (checkPQcommand(ars_result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+          if (checkPQcommand(gl.pgConn, ars_result, sqlbuf, __FILE__ ,__LINE__)) return -1;
 
           /* retrieve the ars_pk of the newly inserted record */
           sprintf(sqlbuf, "select ars_pk from nomos_ars \
@@ -1029,7 +960,7 @@ int main(int argc, char **argv) {
                             order by ars_starttime desc limit 1",
                             gl.agentPk, upload_pk, "false");
           ars_result = PQexec(gl.pgConn, sqlbuf);
-          if (checkPQresult(ars_result, sqlbuf, __FILE__, __LINE__)) return -1;
+          if (checkPQresult(gl.pgConn, ars_result, sqlbuf, __FILE__, __LINE__)) return -1;
           if (PQntuples(ars_result) == 0)
           {
             printf("FATAL: (%s.%d) Missing nomos_ars record.\n%s\n",__FILE__,__LINE__,sqlbuf);
@@ -1043,7 +974,7 @@ int main(int argc, char **argv) {
                    "SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS left outer join license_file on (PF=pfile_fk and agent_fk='%d') inner join pfile on (PF=pfile_pk) WHERE fl_pk IS null",
                    upload_pk, gl.agentPk);
           result = PQexec(gl.pgConn, sqlbuf);
-          if (checkPQresult(result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+          if (checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
           numrows = PQntuples(result);
 
           /* process all files in this upload */
@@ -1082,7 +1013,7 @@ int main(int argc, char **argv) {
                   "update nomos_ars set ars_endtime=now(), ars_success=true where ars_pk='%d'",
                    ars_pk);
           result = PQexec(gl.pgConn, sqlbuf);
-          if (checkPQcommand(result, sqlbuf, __FILE__ ,__LINE__)) return -1;
+          if (checkPQcommand(gl.pgConn, result, sqlbuf, __FILE__ ,__LINE__)) return -1;
           printf("OK\n"); /* tell scheduler ready for more data */
           fflush(stdout);
         }
