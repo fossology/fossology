@@ -213,12 +213,13 @@ $text4 = _("URL");
             /* strip out characters we don't want to see 
                This is a hack until the agent stops writing these chars to the db.
              */
-            $S = strip_tags($row['content']);
-            $S = str_replace(chr(0xc2),"",$S);  // comes from utf-8 copyright symbol
+            $S = $row['content'];
+            $S = htmlspecialchars($S);
+            // 0xc2 comes from utf-8 copyright symbol
+            $S = str_replace(" \n\r\0\x0b\'\"\x0xc2", " ", $S);
             $S = str_replace("&Acirc;","",$S);  // comes from utf-8 copyright symbol
-            $S = str_replace("\r","",$S);
-            $S = str_replace("\n","",$S);
-            $VCopyright .= str_replace("\t","&nbsp;&nbsp;",$S);
+            $S = str_replace("\t","&nbsp;&nbsp;",$S);
+            $VCopyright .= $S;
 
             $VCopyright .= "</td>";
             $VCopyright .= "</tr>\n";
