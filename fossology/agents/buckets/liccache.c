@@ -24,7 +24,7 @@
  */
 
 #include "liccache.h"
-#include "dbcommon.h"
+#include "libfossdb.h"
 
 /**
  lrcache_hash
