@@ -480,8 +480,9 @@ $text = _("Total licenses");
       }
 
       $Cached = false;
-      /*  Cache Report */
-      ReportCachePut($CacheKey, $V);
+      /*  Cache Report if this took longer than 1 seconds */
+      if ($Time > 1) ReportCachePut($CacheKey, $V);
+
     }
     else
       $Cached = true;
