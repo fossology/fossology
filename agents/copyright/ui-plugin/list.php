@@ -108,8 +108,15 @@ $text = _("is missing required parameters");
     $sql = "SELECT content from copyright WHERE hash='$hash' AND type='$type' limit 1";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if ($row = pg_fetch_assoc($result)) {
-        $content = strip_tags($row['content']);
+    if ($row = pg_fetch_assoc($result)) 
+    {
+      $S = $row['content'];
+      $S = htmlspecialchars($S);
+      // 0xc2 comes from utf-8 copyright symbol
+      $S = str_replace(" \n\r\0\x0b\'\"\x0xc2", " ", $S);
+      $S = str_replace("&Acirc;","",$S);  // comes from utf-8 copyright symbol
+      $S = str_replace("\t","&nbsp;&nbsp;",$S);
+      $content = $S;
     } else {
         $content = "";
     }
