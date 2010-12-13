@@ -46,5 +46,12 @@ int	  DBgetcolnum	(void *DB, char *ColName);
 char *DBgetvalue	(void *DB, int Row, int Col);
 #define	DBgetvaluename(DB,Row,Col)	DBgetvalue(DB,Row,DBgetcolnum(DB,Col))
 int	  DBisnull	(void *DB, int Row, int Col);
+
+/*********************************************************************
+ * functions that don't use the DB abstraction
+ ********************************************************************/
+int checkPQcommand(PGconn *pgConn, PGresult *result, char *sql, char *FileID, int LineNumb); 
+int checkPQresult(PGconn *pgConn, PGresult *result, char *sql, char *FileID, int LineNumb);
+
 #endif
 
