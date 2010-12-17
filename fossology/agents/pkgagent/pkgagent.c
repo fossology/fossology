@@ -565,7 +565,7 @@ int	GetMetadataDebBinary	(struct debpkginfo *pi)
 
   /* Get the debian/control file's rep path */
   memset(SQL,0,sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT pfile_fk,ufile_name FROM uploadtree WHERE parent IN (SELECT uploadtree_pk FROM uploadtree WHERE parent IN (SELECT uploadtree_pk FROM uploadtree WHERE parent IN (SELECT uploadtree_pk FROM uploadtree WHERE parent IN (SELECT uploadtree_pk FROM uploadtree WHERE parent IN (SELECT uploadtree_pk FROM uploadtree WHERE pfile_fk = %ld))))) AND ufile_name = 'control') TEMP INNER JOIN pfile ON TEMP.pfile_fk = pfile_pk;", pi->pFileFk);
+  snprintf(SQL,sizeof(SQL),"SELECT pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT pfile_fk,ufile_name FROM uploadtree WHERE upload_fk = (SELECT upload_fk FROM uploadtree WHERE pfile_fk = %ld) AND lft > (SELECT lft FROM uploadtree WHERE pfile_fk = %ld) AND rgt < (SELECT rgt FROM uploadtree WHERE pfile_fk = %ld) AND ufile_name = 'control') TEMP INNER JOIN pfile ON TEMP.pfile_fk = pfile_pk;", pi->pFileFk, pi->pFileFk, pi->pFileFk);
   rc = DBaccess(DB,SQL);
   if (rc < 0)
   {
