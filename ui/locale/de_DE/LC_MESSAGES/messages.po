@@ -2071,12 +2071,13 @@ msgstr "Löschen"
 #: plugins/admin-folder-delete.php:129 plugins/agent-remove-license.php:159
 #: plugins/admin-upload-delete.php:118
 msgid "This will"
-msgstr ""
+msgstr "Dies führt zum"
 
 #: plugins/admin-folder-delete.php:131
 msgid ""
 "the folder, all subfolders, and all uploaded files stored within the folder!"
 msgstr ""
+"des Verzeichnisses, der Unterverzeichnisse und aller Dateien darin!"
 
 #: plugins/admin-folder-delete.php:133
 msgid "Be very careful with your selection since you can delete a lot of work!"
