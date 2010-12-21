@@ -23,16 +23,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
 
-/** Enum to keep track of the state of an agent */
-enum agent_status {
-  AG_FAILED,    //!< AG_FAILED   The agent has failed during execution
-  AG_CREATED,   //!< AG_CREATED  The agent has been allocated but is not running yet
-  AG_SPAWNED,   //!< AG_SPAWNED  The agent has finished allocation but has registered work yet
-  AG_RUNNING,   //!< AG_RUNNING  The agent has chosen a set of files to work on and is running
-  AG_FINISHED   //!< AG_FINISHED The agent has does not have any more work to do and has finished
-};
+#define SAG_NONE 0        ///< There is nothing special about this agent
+#define SAG_EXCLUSIVE 1   ///< This agent must not run at the same time as any other agent
 
-typedef enum agent_status agent_status;
+/** Enum to keep track of the state of an agent */
+typedef enum agent_status {
+  AG_FAILED,      ///< AG_FAILED   The agent has failed during execution
+  AG_CREATED,     ///< AG_CREATED  The agent has been allocated but is not running yet
+  AG_SPAWNED,     ///< AG_SPAWNED  The agent has finished allocation but has registered work yet
+  AG_RUNNING,     ///< AG_RUNNING  The agent has chosen a set of files to work on and is running
+  AG_FINISHED     ///< AG_FINISHED The agent has does not have any more work to do and has finished
+} agent_status;
 
 /**
  * Class to hold all of the information associated with creating a specific
@@ -64,9 +65,12 @@ typedef int agent_pk;
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
-void meta_agent_init(meta_agent* ma);
+/* meta agent */
+meta_agent meta_agent_init();
 void meta_agent_destroy(meta_agent ma);
-void agent_init(agent* a, meta_agent meta_data);
+
+/* agent */
+agent agent_init(meta_agent meta_data, char* host);
 void agent_destroy(agent a);
 
 /* ************************************************************************** */
