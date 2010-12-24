@@ -819,6 +819,13 @@ int	FindCmd	(char *Filename)
 
   /* sometimes Magic is wrong... */
   if (strstr(Type, "application/x-iso")) strcpy(Type, "application/x-iso");
+  /* for xx.deb and xx.udeb package in centos os */
+  if(strstr(Type, " application/x-debian-package"))
+    strcpy(Type,"application/x-debian-package");
+
+  /* for ms file, maybe the Magic contains 'msword', or the Magic contains 'vnd.ms', all unpack via 7z */
+  if(strstr(Type, "msword") || strstr(Type, "vnd.ms"))
+    strcpy(Type, "application/x-7z-w-compressed");
 
   if (strstr(Type, "octet" ))
   {
@@ -846,38 +853,39 @@ int	FindCmd	(char *Filename)
            memset(Static,0,sizeof(Static));
            strcpy(Static,"application/x-7z-compressed");
            Type=Static;
-         } // add by larry, start
-         else  // 7zr failed so try 7z (possibly from 7zip)
-         {
-           rc = RunCommand("7z","l -y",Filename,">/dev/null 2>&1",NULL,NULL);
-           if (rc==0)
+         } 
+         else
+         { 
+           /* .deb and .udeb as application/x-debian-package*/
+  	   if ( pExt != NULL)
            {
-             memset(Static,0,sizeof(Static));
-             strcpy(Static,"application/x-7z-w-compressed");
-             Type=Static;
-           } // add by larry, end
-           else // .deb and .udeb as application/x-debian-package
-           {
-  	     if ( pExt != NULL)
-             {
-    		if ((strcmp(pExt, ".deb")==0) || (strcmp(pExt, ".udeb")==0))
-    		{
-      		  memset(Static,0,sizeof(Static));
-      		  strcpy(Static,"application/x-debian-package");
-      		  Type=Static;
-    		}
-  	     }
-	     else 
-	     {		
-           	// only here to validate other octet file types
-           	if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
-	     }
+             if ((strcmp(pExt, ".deb")==0) || (strcmp(pExt, ".udeb")==0))
+    	     {
+      	       memset(Static,0,sizeof(Static));
+      	       strcpy(Static,"application/x-debian-package");
+      	       Type=Static;
+    	     } 
+             else /* for ms(.msi, .cab) file in debian os */
+             {   
+               rc = RunCommand("7z","l -y",Filename,">/dev/null 2>&1",NULL,NULL);
+               if (rc==0)
+               {
+                 memset(Static,0,sizeof(Static));
+                 strcpy(Static,"application/x-7z-w-compressed");
+                 Type=Static;
+               }
+               else
+               {		
+            	 // only here to validate other octet file types
+           	 if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
+	       }
+             }
            }
          }
        }
     }
   }
- 
+
   if (strstr(Type, "application/x-exe") ||
       strstr(Type, "application/x-shellscript"))
 	{
