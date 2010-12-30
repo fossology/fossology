@@ -63,6 +63,11 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $this->assertEquals($usage, $out[1]); // check if ununpack aready installed
   }
 
+//function testDebug() // test debug start
+//{
+//  return 0;
+//  } //test debug end
+
   /* command is ununpack -qCR xxxxx -d xxxxx, begin */
   /* unpack iso file*/
   function testNormalIso1(){
@@ -216,9 +221,6 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $this->assertFileExists("$TEST_RESULT_PATH/xunzai_Contacts.msi.msi.dir/CONTACTS.CAB.dir/contact");
   }
 
-//function testDebug() // test debug start
-//{
-//  return 0;
 
   /* unpack dsc file */
   function testNormalDsc(){
@@ -407,7 +409,39 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
     $this->assertFileExists("$TEST_RESULT_PATH/testdata4unpack.7z.dir/testdata4unpack/imagefile.iso.dir/TEST.JAR");
   }
 
-//} // test debug end
+  /* supporting DB, command is ununpack -RvQf xxxxx -d xxxxx */ 
+  /* this case must be executed in root */
+  function testNormalDB() {
+    global $TEST_DATA_PATH;
+    global $TEST_RESULT_PATH;
+    $command = "$this->UNUNPACK_PATH/ununpack -RvQf $TEST_DATA_PATH/".
+                "ununpack.c.Z -d $TEST_RESULT_PATH";
+    //print "pupload_pk is:$upload_pk\n";
+    /* set env */
+    putenv('pfile_fk=500');
+    putenv('upload_pk=500');
+    putenv('pfile=DEF532166028490E867514C7817ACA442A0888DD.7D88B8303AC12D01CE75D14842D3985C.29004');
+    $link = pg_Connect("host=localhost dbname=fossology user=fossy password=fossy");
+    $Sql = "select * from upload where upload_pk = 500;";
+    $result = pg_exec($link, $Sql); // judge if already existed
+    $numrows = pg_numrows($result);
+    //print "numrows is:$numrows\n";
+    if ($numrows == 0) { 
+      $Sql = "insert into upload(upload_pk, upload_filename, upload_userid, upload_mode, pfile_fk, upload_origin) values(500, 'ununpack.c.Z', 2, 40, 500, 'ununpack.c.Z');";
+      pg_exec($link, $Sql); // insert one record
+    }
+    pg_close($link);
+    /* copy original file to the directory files */
+    shell_exec("mkdir -p /srv/fossology/repository/localhost/files/de/f5/32/");
+    shell_exec("cp  $TEST_DATA_PATH/ununpack.c.Z  /srv/fossology/repository/localhost/files/de/f5/32/def532166028490e867514c7817aca442a0888dd.7d88b8303ac12d01ce75d14842d3985c.29004"); // copy
+    //print "pupload_pk is:$upload_pk\n";
+    shell_exec($command);
+    //print "command2 is:$command2\n";
+    //print "command is:$command\n";
+    $this->assertFileExists("$TEST_RESULT_PATH/ununpack.c.Z.dir/ununpack.c");
+  }
+
+
 
   /* command is ununpack -qCR -m 10 xxxxx -d xxxxx, end */ 
 
