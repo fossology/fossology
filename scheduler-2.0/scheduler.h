@@ -21,6 +21,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include <errno.h>
 
+#define CHECKOUT_SIZE 100
+
+/* ************************************************************************** */
+/* **** Logging Macros ****************************************************** */
+/* ************************************************************************** */
+
 /* TODO all ERROR maros should be updated to make changes to log files */
 /* TODO for the time being they will simple dump to stderr             */
 /** Macro that is called when a fatal error is generated */
@@ -38,6 +44,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /** Macro that is called when any type of error is generated */
 #define ERROR(error) { \
             fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error); \
-            fprintf(stderr, "ERROR errno is :%s\n", strerrror(errno)); }
+            fprintf(stderr, "ERROR errno is :%s\n", strerror(errno)); }
+
+/* ************************************************************************** */
+/* **** SQL strings ********************************************************* */
+/* ************************************************************************** */
+
+/**
+ *
+ */
+char* check_queue = "\
+SELECT * \
+  FROM getrunnable() \
+  LIMIT 10;";
+
+/**
+ *
+ */
+char* check_extended = "\
+SELECT DISTINCT(jobqueue.*), job.* \
+  FROM jobqueue \
+    LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk \
+    LEFT JOIN jobqueue AS depends ON depends.jq_pk = jobdepends.jdep_jq_depends_fk \
+    LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk WHERE jobqueue.jq_starttime IS NULL AND ( (depends.jq_endtime IS NOT NULL AND depends.jq_end_bits < 2 ) OR jobdepends.jdep_jq_depends_fk IS NULL) ORDER BY job.job_priority DESC,job.job_queued ASC LIMIT 6;";
 
 #endif /* SCHEDULER_H_INCLUDE */

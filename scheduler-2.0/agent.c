@@ -17,30 +17,36 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* local includes */
 #include <agent.h>
+#include <job.h>
+#include <event.h>
 #include <scheduler.h>
 
 /* library includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 /* unix library includes */
 #include <fcntl.h>
-#include <pthread.h>
-#include <unistd.h>
 #include <limits.h>
+#include <pthread.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 /* other library includes */
 #include <glib.h>
 
 /* agent defines */
-#define MAX_ARGS 32     ///< the maximum number arguments passed to children (arbitrary)
-#define MAX_CMD  1023   ///< the maximum length for an agent's start command (arbitrary)
-#define MAX_NAME 155    ///< the maximum length for an agent's name          (arbitrary)
-#define TILL_DEATH 180  ///< how long to wait before agent is dead           (3 minutes)
+#define MAX_ARGS 32       ///< the maximum number arguments passed to children  (arbitrary)
+#define TILL_DEATH 180    ///< how long to wait before agent is dead            (3 minutes)
+#define MAX_GENERATION 5  ///< the most agents that a piece of data can survive (arbitrary)
+#ifndef AGENT_DIR
+#define AGENT_DIR ""   ///< the location of the agent executables for localhost
+#endif
 
-/** The mater list of all of the agents */
-GTree* agents;
+GTree* meta_agents = NULL;   ///< The master list of all meta agents
+GTree* agents      = NULL;   ///< The master list of all of the agents
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
@@ -65,29 +71,84 @@ struct meta_agent_internal
 struct agent_internal
 {
     /* we need all the information on creating the agent */
-    meta_agent meta_data;   ///< the type of agent this is i.e. bucket, copyright...
-    char* host;             ///< the host that this agent will start on, TODO change to host object
+    meta_agent meta_data; ///< the type of agent this is i.e. bucket, copyright...
+    host host_machine;    ///< the host that this agent will start on, TODO change to host object
     /* thread management */
-    agent_status status;    ///< the state of execution the agent is currently in
-    pthread_t thread;       ///< the thread that communicates with this agent
-    time_t check_in;        ///< the time that the agent last generated anything
-    pid_t pid;              ///< the pid of the process this agent is running in
+    agent_status status;  ///< the state of execution the agent is currently in
+    pthread_t thread;     ///< the thread that communicates with this agent
+    time_t check_in;      ///< the time that the agent last generated anything
+    pid_t pid;            ///< the pid of the process this agent is running in
     /* pipes connecting to the child */
-    int from_parent;        ///< file identifier to read from the parent (child stdin)
-    int to_child;           ///< file identifier to print to the child
-    int from_child;         ///< file identifier to read from child
-    int to_parent;          ///< file identifier to print to the parent  (child stdout)
-    FILE* read;             ///< FILE* that abstracts the use of the from_child socket
-    FILE* write;            ///< FILE* that abstracts the use of the to_child socket
+    int from_parent;      ///< file identifier to read from the parent (child stdin)
+    int to_child;         ///< file identifier to print to the child
+    int from_child;       ///< file identifier to read from child
+    int to_parent;        ///< file identifier to print to the parent  (child stdout)
+    FILE* read;           ///< FILE* that abstracts the use of the from_child socket
+    FILE* write;          ///< FILE* that abstracts the use of the to_child socket
     /* data management */
-    int data_start;         ///< the first file in the range that this agent is working on
-    int data_end;           ///< the last file in the range that this agent is working on
-    int num_analyzed;       ///< the number that had been analyzed at the last checkin
+    job owner;            ///< the job that this agent is assigned to
+    char** data;          ///< the data that has been sent to the agent for analysis
+    int generation;       ///< the generation of the data (i.e. how many agents has it survived)
+    int updated;          ///< boolean flag to indicate if the scheduler has updated the data
+    int check_analyzed;   ///< the number that were analyzed at last update
+    int total_analyzed;   ///< the total number that this agent has analyzed
 };
 
 /* ************************************************************************** */
 /* **** Local Functions ***************************************************** */
 /* ************************************************************************** */
+
+/**
+ * This function will be called by g_tree_foreach() which is the reason for its
+ * formatting. This will close all of the agent's pipes
+ *
+ * @param pid_ptr   the key that was used to store this agent (not needed by this function)
+ * @param a         the agent that is being closed
+ * @param excepted  there is one agent that we don't want to close the pipes on, this is it
+ */
+int agent_close(int* pid_ptr, agent a, agent excepted)
+{
+  if(a != excepted)
+  {
+    close(a->from_child);
+    close(a->to_child);
+    fclose(a->read);
+    fclose(a->write);
+  }
+  return 0;
+}
+
+/**
+ * Check the status and check in time of an agent.
+ *   - if we haven't gotten a recent communication, close it
+ *   - if it hasn't been performing tasks, close it
+ *
+ * @param pid_ptr pointer to key in g_tree, is not used in this function
+ * @param a the agent that needs to be updated
+ * @param unused data that is also not used in this function
+ * @return
+ */
+int update(int* pid_ptr, agent a, gpointer unused)
+{
+  if(a->status == AG_SPAWNED || a->status == AG_RUNNING || a->status == AG_PAUSED)
+  {
+    /* check last checkin time */
+    if(time(NULL) - a->check_in > TILL_DEATH)
+    {
+      agent_fail(a);
+      return;
+    }
+
+    /* check items processed */
+    if(a->status != PAUSED && a->check_analyzed == a->total_analyzed)
+    {
+      agent_fail(a);
+      return;
+    }
+
+    a->check_analyzed = a->total_analyzed;
+  }
+}
 
 /**
  * Listens for information from the agent. Starts by waiting for the agent to
@@ -106,36 +167,54 @@ struct agent_internal
 void listen(agent a)
 {
   /* locals */
-  char buffer[1024];          // buffer to store c strings read from agent, size is arbitrary
-  long int items_processed;   // used by the heart beat to log how many items have been processed
-  size_t bytes;               // the number of bytes read or written
+  char buffer[1024];          // buffer to store c strings read from agent, size is arbitraryssed
+  int i;                      // simple indexing variable
+
+  /* send the size of a job to the agent */
+  fprintf(a->write, "%s\n", CHECKOUT_SIZE);
 
   /* initalize memory */
   memset(buffer, '\0', sizeof(buffer));
-  items_processed = 0;
 
-  /* read SPAWNED from the agent, if not then fail the agent */
-  /* TODO currently this limits the number of agents to 256  */
-  bytes = fread(buffer, 2, sizeof(char), a->read);
-  if(buffer[0] != 1 || ((unsigned char)buffer[1]) != a->pid)
+  while(a->status == AG_CREATED || a->status == AG_SPAWNED || a->status == AG_RUNNING)
   {
-    kill(a->pid, SIGKILL);
-    agent_fail(a);
-    return;
-  }
-
-  bytes = fread(buffer, 1, sizeof(char), a->read);
-  switch(buffer[0])
-  {
-    /* should not be recieved */
-    case 1: ERROR("recieved spawning signal from already spawned agent");
-    /* agent is dead, simply close */
-    case 2: case 3: return;
-    /* the agent has sent a heart beat, record the value provided */
-    case 4:
-      bytes = fread(&items_processed, 1, sizeof(items_processed), a->read);
+    /* get message from agent */
+    if(fgets(buffer, sizeof(buffer), a->read) == NULL)
+    {
+      // TODO error message
       break;
-    default:
+    }
+
+    /* check for a message from scheduler */
+    if(strncmp(buffer, "@@@0", 4) == 0 && a->updated)
+    {
+      for(i = 0; i < CHECKOUT_SIZE && a->data[i]; i++) {
+        fprintf(a->write, "%s\n", a->data[i]);
+      }
+      fflush(a->write);
+      a->updated = 0;
+    }
+    /* the agent has indicated that it is ready for data */
+    else if(strncmp(buffer, "OK", 2) == 0)
+    {
+      a->check_in = time(NULL);
+      event_signal(agent_ready_event, a);
+    }
+    /* heart beat received from agent */
+    else if(strncmp(buffer, "HEART", 5) == 0)
+    {
+      a->check_in = time(NULL);
+      // TODO
+    }
+    /* the agent has finished execution, finish this thread */
+    else if( strncmp(buffer, "BYE", 3) == 0 || strncmp(buffer, "@@@1", 4) == 0)
+    {
+      break;
+    }
+    else
+    {
+      // TODO logging
+    }
   }
 }
 
@@ -160,11 +239,9 @@ void listen(agent a)
 void* spawn(void* passed)
 {
   /* locals */
-  agent a = (agent)passed;              // the agent that is being spawned
-  char* args[MAX_ARGS + 1];             // the arguments that will be passed to the child
-  char* curr;                           // a pointer to the current location in the argument array
-  char buffer[MAX_CMD + 1];             // buffer to hold different c strings
-  int num_args = 0;                     // the number of arguments that haved been parsed
+  agent a = (agent)passed;    // the agent that is being spawned
+  char* args[MAX_ARGS + 1];   // the arguments that will be passed to the child
+  char buffer[2048];          // character buffer
 
   /* we are in the child */
   if((a->pid = fork()) == 0)
@@ -175,18 +252,19 @@ void* spawn(void* passed)
     dup2(a->to_parent, fileno(stderr));
 
     /* close all the unnecessary file descriptors */
+    g_tree_foreach(agents, (GTraverseFunc)agent_close, a);
     close(a->from_child);
     close(a->to_child);
-
-    /* close all of the other agent's pipes and files */
-    g_tree_foreach(agents, (GTraverseFunc)agent_close, a);
 
     /* if host is null, the agent will run locally to */
     /* run the agent localy, use the commands that    */
     /* were parsed when the meta_agent was created    */
-    if(a->host == NULL)
+    if(a->host_machine == NULL)
     {
-      execv(a->meta_data->parsed_cmd[0], a->meta_data->parsed_cmd);
+      sprintf(buffer, "%s/%s", AGENT_DIR, a->meta_data->parsed_cmd[0]);
+      memcpy(args, a->meta_data->parsed_cmd, sizeof(a->meta_data->parsed_cmd));
+      args[0] = buffer;
+      execv(args[0], args);
     }
     /* otherwise the agent will be started using ssh   */
     /* if the agent is started using ssh we don't need */
@@ -194,9 +272,10 @@ void* spawn(void* passed)
     /* command as the last argument to the ssh command */
     else
     {
+      sprintf(buffer, "%s/%s", a->host_machine->agent_dir, a->meta_data->raw_cmd);
       args[0] = "/usr/bin/ssh";
-      args[1] = a->host;
-      args[2] = a->meta_data->raw_cmd;
+      args[1] = a->host_machine->address;
+      args[2] = buffer;
       args[3] = 0;
       execv(args[0], args);
     }
@@ -207,8 +286,10 @@ void* spawn(void* passed)
   /* we are in the parent */
   else if(a->pid > 0)
   {
-    close(a->to_parent);
-    close(a->from_parent);
+    // TODO does this introduce a bug?
+    //close(a->to_parent);
+    //close(a->from_parent);
+    event_signal(agent_create_event, a);
     listen(a);
   }
   /* error case */
@@ -216,26 +297,35 @@ void* spawn(void* passed)
   {
     THREAD_FATAL("exec failed");
   }
+
+  return NULL;
 }
 
 /**
- * This function will be called by g_tree_foreach() which is the reason for its
- * formatting. This will close all of the agent's pipes
+ * Utility function that enables the use of the strcmp function with a GTree.
  *
- * @param pid_ptr   the key that was used to store this agent (not needed by this function)
- * @param a         the agent that is being closed
- * @param excepted  there is one agent that we don't want to close the pipes on, this is it
+ * @param a The first string
+ * @param b The second string
+ * @param user_data unused in this function
+ * @return integral value idicating the relatioship between the two strings
  */
-int agent_close(int* pid_ptr, agent a, agent excepted)
+gint string_compare(gconstpointer a, gconstpointer b, gpointer user_data)
 {
-  if(a != excepted)
-  {
-    close(a->from_child);
-    close(a->to_child);
-    fclose(a->read);
-    fclose(a->write);
-  }
-  return 0;
+  return strcmp((char*)a, (char*)b);
+}
+
+/**
+ * Utility function that enable the agents to be stored in a GTree using
+ * the PID of the associated process.
+ *
+ * @param a The pid of the first process
+ * @param b The pid of the second process
+ * @param user_data unused in this function
+ * @return integral value idicating the relationship between the two pids
+ */
+gint pid_compare(gconstpointer a, gconstpointer b, gpointer user_data)
+{
+  return *(int*)a - *(int*)b;
 }
 
 /* ************************************************************************** */
@@ -277,7 +367,7 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc)
   strcpy(ma->raw_cmd, cmd);
   ma->max_run = max;
   ma->special = spc;
-  memset(ma->parsed_cmd, NULL, sizeof(ma->parsed_cmd));
+  memset(ma->parsed_cmd, 0, sizeof(ma->parsed_cmd));
 
   /* parse the command like a normal command line argument */
   loc_1 = cpy;
@@ -308,6 +398,8 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc)
         loc_1 = loc_2 + 1;
     }
   }
+
+  return ma;
 }
 
 /**
@@ -335,7 +427,7 @@ void meta_agent_destroy(meta_agent ma)
  *
  * @param meta_data, the
  */
-agent agent_init(meta_agent meta_data, char* host)
+agent agent_init(char* meta_agent_name, host host_machine, job j)
 {
   /* local variables */
   agent a;
@@ -344,7 +436,7 @@ agent agent_init(meta_agent meta_data, char* host)
 
   /* allocate memory and do trivial assignments */
   a = (agent)calloc(1, sizeof(struct agent_internal));
-  a->meta_data = meta_data;
+  a->meta_data = g_tree_lookup(meta_agents, meta_agent_name);
   a->status = AG_CREATED;
 
   /* create the pipes between the child and the parent */
@@ -360,11 +452,35 @@ agent agent_init(meta_agent meta_data, char* host)
   a->to_parent = child_to_parent[1];
 
   /* initialize other info */
-  a->host = host;
+  a->host_machine = host_machine;
+  a->owner = j;
+
+  /* open the relevant file pointers */
+  if((a->read = fdopen(a->from_child, "r")) == NULL)
+    FATAL("read_from init failed")
+  if((a->write = fdopen(a->to_child, "w")) == NULL)
+    FATAL("write_to init failed")
 
   /* spawn the listen thread */
-  pthread_create(&(*a)->thread, NULL, spawn, *a);
+  pthread_create(&a->thread, NULL, spawn, a);
   return a;
+}
+
+/**
+ * Allocate and spawn a new agent based upon an old agent. This will spawn the new
+ * agent
+ *
+ * @param a
+ * @return
+ */
+agent agent_copy(agent a)
+{
+  if(a->generation == MAX_GENERATION)
+    return NULL;
+
+  agent cpy = agent_init(a->meta_data->name, a->host_machine, a->owner);
+  cpy->data = a->data;
+  cpy->generation = a->generation + 1;
 }
 
 /**
@@ -386,12 +502,38 @@ void agent_destroy(agent a)
   /* close all of the files still open for this agent */
   close(a->from_child);
   close(a->to_child);
+  close(a->from_parent);
+  close(a->to_parent);
   fclose(a->write);
   fclose(a->read);
 
   /* release the child process */
-  waitpid(a->pid, &status, 0);
   free(a);
+}
+
+/* ************************************************************************** */
+/* **** Accessor Functions ************************************************** */
+/* ************************************************************************** */
+
+/**
+ * TODO
+ *
+ * @return
+ */
+int num_agents()
+{
+  return g_tree_nnodes(agents);
+}
+
+/**
+ * TODO
+ *
+ * @param a
+ * @return
+ */
+host agent_host(agent a)
+{
+  return a->host_machine;
 }
 
 /* ************************************************************************** */
@@ -401,11 +543,122 @@ void agent_destroy(agent a)
 /**
  * TODO
  *
+ * @param pids
+ */
+void agent_death_event(void* pids)
+{
+  /* locals */
+  int* curr;      // the current pid being manipulated
+  agent a;        // agent to be accessed
+
+  /* for each agent, check its status and change accordingly */
+  for(curr = (int*)pids; *curr; curr++)
+  {
+    a = g_tree_lookup(agents, curr);
+
+    if(a->status != AG_CLOSING)
+    {
+      write(a->to_parent, "@@@1\n", 5);
+      a->status = AG_FAILED;
+      job_update(a->owner);
+      // TODO logging
+    }
+  }
+
+  /* clean up the passed params */
+  free(pids);
+}
+
+/**
+ * TODO
+ *
+ * @param a
+ */
+void agent_create_event(agent a)
+{
+  g_tree_insert(agents, &a->pid, a);
+  a->status = AG_SPAWNED;
+  job_add_agent(a);
+  // TODO logging
+}
+
+/**
+ * TODO
+ *
+ * @param a
+ */
+void agent_ready_event(agent a)
+{
+  if(a->status == AG_SPAWNED)
+    a->status = AG_RUNNING;
+
+  if(a->generation == 0)
+  {
+    if((a->data = job_next(a->owner)) == NULL)
+    {
+      a->status = PAUSED;
+      job_update(a->owner);
+    }
+    else
+    {
+      a->updated = 1;
+      a->generation = 0;
+      write(a->to_parent, "@@@0\n", 5);
+    }
+  }
+}
+
+/**
+ * TODO
+ *
+ * @param a
+ */
+void agent_close_event(agent a)
+{
+  pthread_join(a->thread, NULL);
+  g_tree_remove(agents, &a->pid);
+  // TODO logging
+}
+
+/**
+ * TODO
+ *
+ * @param unused
+ */
+void agent_update_event(void* unused)
+{
+  g_tree_foreach(agents, (GTraverseFunc)update, NULL);
+}
+
+/**
+ * TODO
+ *
  * @param a
  */
 void agent_fail(agent a)
 {
   a->status = AG_FAILED;
-  // TODO determine if anything else needs to happen here
+  kill(a->pid, SIGKILL);
+  write(a->to_parent, "@@@1\n", 5);
+  job_update(a->owner);
+}
+
+/**
+ * TODO
+ *
+ * @param name
+ * @param cmd
+ * @param max
+ * @param spc
+ */
+void add_meta_agent(char* name, char* cmd, int max, int spc)
+{
+  if(meta_agents == NULL)
+  {
+    meta_agents = g_tree_new_full(string_compare, NULL, NULL, (GDestroyNotify)meta_agent_destroy);
+    agents      = g_tree_new_full(pid_compare   , NULL, NULL, (GDestroyNotify)agent_destroy);
+  }
+
+  g_tree_insert(meta_agents, name, meta_agent_init(name, cmd, max, spc));
 }
 

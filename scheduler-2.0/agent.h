@@ -19,20 +19,29 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef AGENT_H_INCLUDE
 #define AGENT_H_INCLUDE
 
+/* local includes */
+#include <host.h>
+
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
 
-#define SAG_NONE 0        ///< There is nothing special about this agent
-#define SAG_EXCLUSIVE 1   ///< This agent must not run at the same time as any other agent
+#define MAX_CMD  1023   ///< the maximum length for an agent's start command (arbitrary)
+#define MAX_NAME 155    ///< the maximum length for an agent's name          (arbitrary)
+
+#define SAG_NONE 1        ///< There is nothing special about this agent
+#define SAG_EXCLUSIVE 2   ///< This agent must not run at the same time as any other agent
 
 /** Enum to keep track of the state of an agent */
-typedef enum agent_status {
+typedef enum agent_status
+{
   AG_FAILED,      ///< AG_FAILED   The agent has failed during execution
   AG_CREATED,     ///< AG_CREATED  The agent has been allocated but is not running yet
   AG_SPAWNED,     ///< AG_SPAWNED  The agent has finished allocation but has registered work yet
-  AG_RUNNING,     ///< AG_RUNNING  The agent has chosen a set of files to work on and is running
-  AG_FINISHED     ///< AG_FINISHED The agent has does not have any more work to do and has finished
+  AG_RUNNING,     ///< AG_RUNNING  The agent has received a set of files to work on and is running
+  AG_PAUSED,      ///< AG_PAUSED   The agent is waiting either for new data or for processor time
+  AG_CLOSING,     ///< AG_CLOSING  The agent has been told to shut down but is still in the process
+  AG_CLOSED       ///< AG_CLOSED   The agent has shut down, is no longer part of the system and should be destroyed
 } agent_status;
 
 /**
@@ -56,8 +65,7 @@ typedef struct meta_agent_internal* meta_agent;
 typedef struct agent_internal* agent;
 
 /**
- *
- *
+ * TODO
  */
 typedef int agent_pk;
 
@@ -66,23 +74,28 @@ typedef int agent_pk;
 /* ************************************************************************** */
 
 /* meta agent */
-meta_agent meta_agent_init();
+meta_agent meta_agent_init(char* name, char* cmd, int max, int spc);
 void meta_agent_destroy(meta_agent ma);
 
 /* agent */
-agent agent_init(meta_agent meta_data, char* host);
+agent agent_init(char* meta_agent_name, host host_machine, job j);
+agent agent_copy(agent a);
 void agent_destroy(agent a);
 
 /* ************************************************************************** */
-/* **** Accessor Functions ************************************************** */
+/* **** Modifier Functions and events *************************************** */
 /* ************************************************************************** */
 
-// TODO host agent_host(agent a);
-
-/* ************************************************************************** */
-/* **** Modifier Functions ************************************************** */
-/* ************************************************************************** */
+void agent_death_event(void* pids);
+void agent_create_event(agent a);
+void agent_ready_event(agent a);
+void agent_close_event(agent a);
+void agent_update_event(void* unused);
 
 void agent_fail(agent a);
+host agent_host(agent a);
+
+void add_meta_agent(char* name, char* cmd, int max, int spc);
+int num_agents();
 
 #endif /* AGENT_H_INCLUDE */
