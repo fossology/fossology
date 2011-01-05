@@ -13,46 +13,40 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 ************************************************************** */
-#ifndef EVENT_H_INCLUDE
-#define EVENT_H_INCLUDE
+
+#ifndef JOB_H_INCLUDE
+#define JOB_H_INCLUDE
+
+/* local includes */
+#include <agent.h>
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
 
 /**
- * structure used to hold of the information associated with an event. This was
- * created to essentially allow for a functor in C. This will store a function
- * pointer and the argument that will be passed to the function.
+ * TODO
  */
-typedef struct event_internal* event;
-
-/**
- * An event loop that can be waited on. This essentially implements a concurrent
- * queue that a the creation thread will wait on. events can be added to the
- * event loop and will be executed and destroy correctly by the thread waiting
- * on the queue.
- */
-typedef struct event_loop_internal* event_loop;
-
-typedef void(*event_function)(void*);
+typedef struct job_internal* job;
 
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
-event event_init(void(*func)(void*), void* arg);
-void event_destroy(event e);
+job job_init(char* type, char** data, int data_size);
+void job_destroy(job j);
 
 /* ************************************************************************** */
-/* **** EventLoop Functions ************************************************* */
+/* **** Functions and events ************************************************ */
 /* ************************************************************************** */
 
-void event_signal(void* func, void* args);
-void event_loop_reset();
-void event_loop_terminate();
-int event_loop_enter();
+void job_add_agent(job j, agent a);
+void job_set_priority(job j, int pri);
+void job_update(job j);
+void job_pause(job j);
+void job_restart(job j);
+char** job_next(job j);
 
-
-#endif /* EVENT_H_INCLUDE */
+#endif /* JOB_H_INCLUDE */

@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* std libaray includes */
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 /* unix library includes */
 #include <pthread.h>
@@ -29,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
 
-#define EVENT_LOOP_SIZE 101
+#define EVENT_LOOP_SIZE 1024
 
 /** interanl structure for an event */
 struct event_internal {
@@ -49,67 +50,13 @@ struct event_loop_internal {
 };
 
 /* ************************************************************************** */
-/* **** Local(private) Data ************************************************* */
+/* **** Local(private) fields *********************************************** */
 /* ************************************************************************** */
 
 /* the event loop is a singleton, this is the only actual event loop */
 struct event_loop_internal vl_singleton;
 /* flag used to check if the event loop has been created */
 int created = 0;
-
-/**
- *
- * @param vl
- */
-void event_loop_destroy(event_loop vl)
-{
-  int i;
-
-  for(i = 0; i < EVENT_LOOP_SIZE; i++) {
-    if(vl->queue[i] != NULL) {
-      event_destroy(vl->queue[i]);
-    }
-  }
-}
-
-/* ************************************************************************** */
-/* **** Constructor Destructor ********************************************** */
-/* ************************************************************************** */
-
-/**
- * Allocates and initializes a new event. An event consists of a function and
- * the arguments for that function. The arguments for the function should be
- * taken in by the function as a sinlge void* and then parsed inside the
- * function. This interface provides a simple and generic interface for getting
- * a function to be called within the main thread.
- *
- * @param func the function to call when the event is executed
- * @param arg the arguements for the function.
- * @return the new event wrapper for the function and arguments
- */
-event event_init(void(*func)(void*), void* arg)
-{
-  event e = (event)calloc(1, sizeof(struct event_internal));
-
-  e->func = func;
-  e->argument = arg;
-
-  return e;
-}
-
-/**
- * free any memory associated with an event
- *
- * @param e the event to destroy
- */
-void event_destroy(event e)
-{
-  free(e);
-}
-
-/* ************************************************************************** */
-/* **** EventLoop Functions ************************************************* */
-/* ************************************************************************** */
 
 /**
  * There is only one instance of an event loop in any program. This function
@@ -129,80 +76,33 @@ event_loop event_loop_get()
     return &vl_singleton;
   }
 
-  pthread_cond_init( &vl_singleton->wait_t, NULL);
-  pthread_cond_init( &vl_singleton->wait_p, NULL);
-  pthread_mutex_init(&vl_singleton->lock,   NULL);
+  pthread_cond_init( &vl_singleton.wait_t, NULL);
+  pthread_cond_init( &vl_singleton.wait_p, NULL);
+  pthread_mutex_init(&vl_singleton.lock,   NULL);
 
-  memset(vl_singleton->queue, sizeof(vl_singleton->queue), 0);
-  vl_singleton->head = vl_singleton->tail = 0;
-  vl_singleton->terminated = 0;
+  memset(vl_singleton.queue, 0, sizeof(vl_singleton.queue));
+  vl_singleton.head = vl_singleton.tail = 0;
+  vl_singleton.terminated = 0;
   created = 1;
 
   return &vl_singleton;
 }
 
 /**
- * destroys the old event loop singleton. This function should really only be
- * called when the program is about to exit. However, it could be called during
- * program execution as long as it is understood that all instances of
- * event_loop will be invalidated until another call to event_loop_get is made.
- * This function is also not thread safe and should only be called if main is
- * the only thread currently running.
+ * TODO
+ *
+ * @param vl
  */
-void event_loop_reset()
+void event_loop_destroy(event_loop vl)
 {
-  event_loop vl;
   int i;
 
-  if(created)
-  {
-    vl = event_loop_get();
-    for(i = 0; i < EVENT_LOOP_SIZE; i++)
-    {
-      if(vl->queue[i] != NULL)
-      {
-        event_destroy(vl->queue[i]);
-      }
+  for(i = 0; i < EVENT_LOOP_SIZE; i++) {
+    if(vl->queue[i] != NULL) {
+      event_destroy(vl->queue[i]);
     }
-    created = 0;
   }
 }
-
-/**
- * Enters the event loop. This function will not return until another thread
- * chooses to terminate the event loop. Essentially this function should not
- * return until the program is ready to exit. There should also only be one
- * thread working on this part of the event loop.
- *
- * @param vl the event loop to start executing
- * @return this function will return an error code:
- *          0x0:   successful execution
- *          0x01:  attempt to enter a loop that is occupied
- */
-int event_loop_enter(event_loop vl)
-{
-  event e;
-
-  /* start by checking to make sure this is the only thread in this loop */
-  pthread_mutex_lock(&vl->lock);
-  if(vl->occupied)
-  {
-    pthread_mutex_unlock(&vl->lock);
-    return 0x01;
-  }
-  vl->occupied = 1;
-  pthread_mutex_unlock(&vl->lock);
-
-  /* from here on out, this is the only thread in this event loop     */
-  /* the loop to execute events is very simple, grab event, run event */
-  while((e = event_loop_take(vl)) != NULL) {
-    e->func(e->argument);
-    event_destroy(e);
-  }
-
-  return 0x0;
-}
-
 
 /**
  * puts a new item into the event queue. The event queue acts as a circular,
@@ -284,6 +184,120 @@ event event_loop_take(event_loop vl)
   return ret;
 }
 
+/* ************************************************************************** */
+/* **** Constructor Destructor ********************************************** */
+/* ************************************************************************** */
+
+/**
+ * Allocates and initializes a new event. An event consists of a function and
+ * the arguments for that function. The arguments for the function should be
+ * taken in by the function as a sinlge void* and then parsed inside the
+ * function. This interface provides a simple and generic interface for getting
+ * a function to be called within the main thread.
+ *
+ * @param func the function to call when the event is executed
+ * @param arg the arguements for the function.
+ * @return the new event wrapper for the function and arguments
+ */
+event event_init(void(*func)(void*), void* arg)
+{
+  event e = (event)calloc(1, sizeof(struct event_internal));
+
+  e->func = func;
+  e->argument = arg;
+
+  return e;
+}
+
+/**
+ * free any memory associated with an event
+ *
+ * @param e the event to destroy
+ */
+void event_destroy(event e)
+{
+  free(e);
+}
+
+/* ************************************************************************** */
+/* **** EventLoop Functions ************************************************* */
+/* ************************************************************************** */
+
+/**
+ * public interface for creating new events. Simple call this function, with the
+ * first argument being a function pointer ( void(*)(void*) ) and the second
+ * being the arguments for the function.
+ *
+ * @param func
+ * @param args
+ */
+void event_signal(void* func, void* args) {
+  event_loop_put(event_loop_get(), event_init((event_function)func, args));
+}
+
+/**
+ * destroys the old event loop singleton. This function should really only be
+ * called when the program is about to exit. However, it could be called during
+ * program execution as long as it is understood that all instances of
+ * event_loop will be invalidated until another call to event_loop_get is made.
+ * This function is also not thread safe and should only be called if main is
+ * the only thread currently running.
+ */
+void event_loop_reset()
+{
+  event_loop vl;
+  int i;
+
+  if(created)
+  {
+    vl = event_loop_get();
+    for(i = 0; i < EVENT_LOOP_SIZE; i++)
+    {
+      if(vl->queue[i] != NULL)
+      {
+        event_destroy(vl->queue[i]);
+      }
+    }
+    created = 0;
+  }
+}
+
+/**
+ * Enters the event loop. This function will not return until another thread
+ * chooses to terminate the event loop. Essentially this function should not
+ * return until the program is ready to exit. There should also only be one
+ * thread working on this part of the event loop.
+ *
+ * @param vl the event loop to start executing
+ * @return this function will return an error code:
+ *          0x0:   successful execution
+ *          0x01:  attempt to enter a loop that is occupied
+ */
+int event_loop_enter()
+{
+  event e;
+  event_loop vl = event_loop_get();
+
+  /* start by checking to make sure this is the only thread in this loop */
+  pthread_mutex_lock(&vl->lock);
+  if(vl->occupied)
+  {
+    pthread_mutex_unlock(&vl->lock);
+    return 0x01;
+  }
+  vl->occupied = 1;
+  pthread_mutex_unlock(&vl->lock);
+
+  /* from here on out, this is the only thread in this event loop     */
+  /* the loop to execute events is very simple, grab event, run event */
+  while((e = event_loop_take(vl)) != NULL) {
+    e->func(e->argument);
+    event_destroy(e);
+  }
+
+  return 0x0;
+}
+
 /**
  * stops the event loop from executing. This will wake up and threads that are
  * waiting on either a push into the event loop, or are trying to take from
@@ -291,8 +305,9 @@ event event_loop_take(event_loop vl)
  *
  * @param vl the event loop to terminate
  */
-void event_loop_terminate(event_loop vl)
+void event_loop_terminate()
 {
+  event_loop vl = event_loop_get();
   pthread_mutex_lock(&vl->lock);
 
   vl->terminated = 1;
