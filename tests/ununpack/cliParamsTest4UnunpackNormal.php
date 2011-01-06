@@ -314,7 +314,7 @@ class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase {
        now the israel.html is not under destination directory,
        is under source directory
      */ 
-    $this->assertFileExists("$TEST_RESULT_PATH/israel.pdf.dir/israel.html");
+    $this->assertFileExists("$TEST_RESULT_PATH/israel.pdf.dir/israel");
   }
 
   /* unpack upx file, to-do, uncertain how is the unpacked result like */
