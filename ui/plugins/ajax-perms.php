@@ -58,7 +58,7 @@ class ajax_perms extends FO_Plugin
       case "XML":
 	break;
       case "HTML":
-        $text = _("Exist Permission:");
+        $text = _("Existing Permissions:");
         $V .= "<h4>$text</h4>\n";
 	$sql = "SELECT * FROM tag_ns_group,tag_ns,groups WHERE tag_ns_fk=tag_ns_pk AND group_fk = group_pk AND tag_ns_fk = $tag_ns_pk;";
         $result = pg_query($PG_CONN, $sql);
