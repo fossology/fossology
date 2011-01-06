@@ -95,7 +95,7 @@ Magic: "application/x-upx"
   END
 
 # The conversion of PDF to HTML looks like a regular unpack
-Magic: "application/x-pdf"
+Magic: "application/pdf"
   Cmd: "pdftotext"
   CmdPre: "-htmlmeta"
   CmdPost: "'%s' >/dev/null 2>&1"
