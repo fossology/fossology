@@ -1,13 +1,11 @@
-fossology (1.3.0~20101217) unstable; urgency=low
+fossology (1.3.0~20110107) unstable; urgency=low
 
-  [ Build User ]
   * unofficial build version
   * 
-
   [ Mark Donohoe ]
   * 
 
- -- Mark Donohoe <markd@u910.ostt>  Fri, 17 Dec 2010 11:47:25 -0700
+ -- Mark Donohoe <markd@steezy>  Fri, 07 Jan 2011 10:35:08 -0800
 
 fossology (1.2.1~SVNBUILD-1) unstable; urgency=low
 
