@@ -106,6 +106,18 @@ Magic: "application/pdf"
   ModeMaskReg: 0100000
   END
 
+# The conversion of PDF to HTML looks like a regular unpack
+Magic: "application/x-pdf"
+  Cmd: "pdftotext"
+  CmdPre: "-htmlmeta"
+  CmdPost: "'%s' >/dev/null 2>&1"
+  MetaCmd: ""
+  Type: CMD_PACK
+  Status: 1
+  ModeMaskDir: 0100000
+  ModeMaskReg: 0100000
+  END
+
 ###############################################################
 # Archive files -- these extract to multiple files
 ###############################################################
