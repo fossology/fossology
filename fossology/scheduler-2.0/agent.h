@@ -13,7 +13,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
 ************************************************************** */
 
 #ifndef AGENT_H_INCLUDE
@@ -21,13 +20,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* local includes */
 #include <host.h>
+#include <job.h>
+
+/* unix library includes */
+#include <sys/types.h>
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
 /* ************************************************************************** */
 
-#define MAX_CMD  1023   ///< the maximum length for an agent's start command (arbitrary)
-#define MAX_NAME 155    ///< the maximum length for an agent's name          (arbitrary)
+#define MAX_CMD  1023   ///< the maximum length for an agent's start command  (arbitrary)
+#define MAX_NAME 255    ///< the maximum length for an agent's name           (arbitrary)
+#define CHECK_TIME 120  ///< wait time between agent updates                  (arbitrary)
 
 #define SAG_NONE 1        ///< There is nothing special about this agent
 #define SAG_EXCLUSIVE 2   ///< This agent must not run at the same time as any other agent
@@ -35,13 +39,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /** Enum to keep track of the state of an agent */
 typedef enum agent_status
 {
-  AG_FAILED,      ///< AG_FAILED   The agent has failed during execution
-  AG_CREATED,     ///< AG_CREATED  The agent has been allocated but is not running yet
-  AG_SPAWNED,     ///< AG_SPAWNED  The agent has finished allocation but has registered work yet
-  AG_RUNNING,     ///< AG_RUNNING  The agent has received a set of files to work on and is running
-  AG_PAUSED,      ///< AG_PAUSED   The agent is waiting either for new data or for processor time
-  AG_CLOSING,     ///< AG_CLOSING  The agent has been told to shut down but is still in the process
-  AG_CLOSED       ///< AG_CLOSED   The agent has shut down, is no longer part of the system and should be destroyed
+  AG_FAILED = 0,  ///< AG_FAILED   The agent has failed during execution
+  AG_CREATED = 1, ///< AG_CREATED  The agent has been allocated but is not running yet
+  AG_SPAWNED = 2, ///< AG_SPAWNED  The agent has finished allocation but has registered work yet
+  AG_RUNNING = 3, ///< AG_RUNNING  The agent has received a set of files to work on and is running
+  AG_PAUSED = 4,  ///< AG_PAUSED   The agent is waiting either for new data or for processor time
+  AG_CLOSING = 5, ///< AG_CLOSING  The agent has been told to shut down but is still in the process
+  AG_CLOSED = 6   ///< AG_CLOSED   The agent has shut down, is no longer part of the system and should be destroyed
 } agent_status;
 
 /**
@@ -89,13 +93,19 @@ void agent_destroy(agent a);
 void agent_death_event(void* pids);
 void agent_create_event(agent a);
 void agent_ready_event(agent a);
-void agent_close_event(agent a);
 void agent_update_event(void* unused);
 
+void agent_restart(agent a, agent ref);
 void agent_fail(agent a);
+void agent_close(agent a);
 host agent_host(agent a);
+int  aprintf(agent a, const char* fmt, ...);  // TODO determine if I need this
+ssize_t agent_write(agent a, const void* buf, size_t count);
 
-void add_meta_agent(char* name, char* cmd, int max, int spc);
-int num_agents();
+void test_agents();
+void kill_agents();
+void agent_list_clean();
+int  add_meta_agent(char* name, char* cmd, int max, int spc);
+int  num_agents();
 
 #endif /* AGENT_H_INCLUDE */

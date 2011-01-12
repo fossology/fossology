@@ -18,33 +18,28 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SCHEDULER_H_INCLUDE
 #define SCHEDULER_H_INCLUDE
 
+/* std library includes */
 #include <stdio.h>
 #include <errno.h>
 
+/* other library includes */
+#include <glib.h>
+
 #define CHECKOUT_SIZE 100
 
+extern int verbose;
+extern int runtest;
+
 /* ************************************************************************** */
-/* **** Logging Macros ****************************************************** */
+/* **** Utility Functions *************************************************** */
 /* ************************************************************************** */
 
-/* TODO all ERROR maros should be updated to make changes to log files */
-/* TODO for the time being they will simple dump to stderr             */
-/** Macro that is called when a fatal error is generated */
-#define FATAL(error)  { \
-            fprintf(stderr, "FATAL %s.%d: %s\n", __FILE__, __LINE__, error); \
-            fprintf(stderr, "FATAL errno is: %s\n", strerror(errno)); \
-            exit(-1); }
+/* scheduler utility functions */
+void load_config();
 
-/** Macro that is called when a thread generated a fatal error */
-#define THREAD_FATAL(error) { \
-            fprintf(stderr, "THREAD_FATAL %s.%d: %s\n", __FILE__, __LINE__, error); \
-            fprintf(stderr, "THREAD_FATAL errno is: %s\n", strerror(errno)); \
-            pthread_exit(NULL); }
-
-/** Macro that is called when any type of error is generated */
-#define ERROR(error) { \
-            fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error); \
-            fprintf(stderr, "ERROR errno is :%s\n", strerror(errno)); }
+/* glib related functions */
+gint string_compare(gconstpointer a, gconstpointer b, gpointer user_data);
+gint int_compare(gconstpointer a, gconstpointer b, gpointer user_data);
 
 /* ************************************************************************** */
 /* **** SQL strings ********************************************************* */
@@ -53,19 +48,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /**
  *
  */
-char* check_queue = "\
+/*char* check_queue = "\
 SELECT * \
   FROM getrunnable() \
-  LIMIT 10;";
+  LIMIT 10;";*/
 
 /**
  *
  */
-char* check_extended = "\
+/*char* check_extended = "\
 SELECT DISTINCT(jobqueue.*), job.* \
   FROM jobqueue \
     LEFT JOIN jobdepends ON jobqueue.jq_pk = jobdepends.jdep_jq_fk \
     LEFT JOIN jobqueue AS depends ON depends.jq_pk = jobdepends.jdep_jq_depends_fk \
-    LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk WHERE jobqueue.jq_starttime IS NULL AND ( (depends.jq_endtime IS NOT NULL AND depends.jq_end_bits < 2 ) OR jobdepends.jdep_jq_depends_fk IS NULL) ORDER BY job.job_priority DESC,job.job_queued ASC LIMIT 6;";
+    LEFT JOIN job ON jobqueue.jq_job_fk = job.job_pk WHERE jobqueue.jq_starttime IS NULL AND ( (depends.jq_endtime IS NOT NULL AND depends.jq_end_bits < 2 ) OR jobdepends.jdep_jq_depends_fk IS NULL) ORDER BY job.job_priority DESC,job.job_queued ASC LIMIT 6;";*/
 
 #endif /* SCHEDULER_H_INCLUDE */
