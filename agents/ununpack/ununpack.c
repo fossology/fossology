@@ -857,29 +857,29 @@ int	FindCmd	(char *Filename)
          else
          { 
            /* .deb and .udeb as application/x-debian-package*/
-  	   if ( pExt != NULL)
-           {
-             if ((strcmp(pExt, ".deb")==0) || (strcmp(pExt, ".udeb")==0))
-    	     {
-      	       memset(Static,0,sizeof(Static));
-      	       strcpy(Static,"application/x-debian-package");
-      	       Type=Static;
-    	     } 
-             else /* for ms(.msi, .cab) file in debian os */
-             {   
-               rc = RunCommand("7z","l -y",Filename,">/dev/null 2>&1",NULL,NULL);
-               if (rc==0)
-               {
-                 memset(Static,0,sizeof(Static));
-                 strcpy(Static,"application/x-7z-w-compressed");
-                 Type=Static;
-               }
-               else
-               {		
-            	 // only here to validate other octet file types
-           	 if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
-	       }
+           char CMDTemp[FILENAME_MAX];
+           sprintf(CMDTemp, "file %s |grep \'Debian binary package\'", Filename);
+           rc = system(CMDTemp);
+           if (rc==0) // is one debian package
+    	   {
+      	     memset(Static,0,sizeof(Static));
+      	     strcpy(Static,"application/x-debian-package");
+      	     Type=Static;
+    	   } 
+           else /* for ms(.msi, .cab) file in debian os */
+           {   
+             rc = RunCommand("7z","l -y",Filename,">/dev/null 2>&1",NULL,NULL);
+             if (rc==0)
+             {
+               memset(Static,0,sizeof(Static));
+               strcpy(Static,"application/x-7z-w-compressed");
+               Type=Static;
              }
+             else
+             {		
+               // only here to validate other octet file types
+               if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
+	     }
            }
          }
        }
