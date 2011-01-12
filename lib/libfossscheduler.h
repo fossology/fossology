@@ -45,15 +45,15 @@ enum job_status {
 /* **** Agent api *********************************************************** */
 /* ************************************************************************** */
 
-void scheduler_connect();
-void scheduler_disconnect();
-FILE* scheduler_next();
+void  scheduler_heart(int i);
+void  scheduler_connect();
+void  scheduler_disconnect();
+char* scheduler_next();
 
 /* ************************************************************************** */
 /* **** Accessor Functions ************************************************** */
 /* ************************************************************************** */
 
-int scheduler_pfile_pk();
-int scheduler_agent_pk();
+char* scheduler_current();
 
 #endif /* LIBFOSSSCHEDULER_H_INCLUDE */

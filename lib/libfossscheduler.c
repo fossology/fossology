@@ -19,44 +19,55 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossscheduler.h>
 
 /* library includes */
-#include <sys/file.h>
-#include <string.h>
+#include <signal.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/file.h>
+#include <unistd.h>
 
-#define LOCK 1        ///< constant for lock_unlock
-#define UNLOCK 0      ///< constant for lock_unlock
-#define BLOCK_SIZE 10 ///< the number of files in each block
-
-/* local globals */
-struct flock lock_params;         ///< the locking parameters that will be passed to fcntl()
-int agent_byte_offset;            ///< the byte offset for this particular agent
-int files_in_job;                 ///< the total number of files to analyze
-int file_index;                   ///< the index in current_file that was returned last
-int current_file_pk[BLOCK_SIZE];  ///< the primary keys associated with each file
-FILE* job_info;                   ///< the file that contains all of the job information
-FILE* current_file[BLOCK_SIZE];   ///< the file that is currently open for analysis
+#define ALARM_SECS 30
 
 /* ************************************************************************** */
-/* **** Local Functions ***************************************************** */
+/* **** Locals ************************************************************** */
 /* ************************************************************************** */
+
+long int items_processed;   ///< the number of items processed by the agent
+char buffer[2048];          ///< the last thing received from the scheduler
+int valid;                  ///< if the information stored in buffer is valid
+int notifications;          ///< the gap between notifying the scheduler that it has finished
 
 /**
- * Looks or unlocks the job_info file. This function will block until all
- * conflicting locks held by other processes are released. This is to make sure
- * that the information in job_info is consitent.
- *
- * @param direction when the file is being locked or unlcoked
+ * Global verbose flags that agents should use instead of specific verbose
+ * flags. This is used by the scheduler to turn verbose on a particular agent
+ * on during run time. When the verbose flag is turned on by the scheduler
+ * the on_verbose function will be called. If nothing needs to be done when
+ * verbose is turned on, simply pass NULL to scheduler_connect
  */
-void lock_unlock(int direction) {
-  if(direction) lock_params.l_type = F_WRLCK;
-  else lock_params.l_type = F_UNLCK;
-  fcntl(fileno(job_info), F_SETLKW, &lock_params);
+int verbose;
+
+/**
+ * TODO
+ */
+void heartbeat()
+{
+  fprintf(stdout, "HEART: %ld\n", items_processed);
+  fflush(stdout);
+  alarm(ALARM_SECS);
 }
 
 /* ************************************************************************** */
 /* **** Global Functions **************************************************** */
 /* ************************************************************************** */
 
+/**
+ * TODO
+ *
+ * @param i
+ */
+void  scheduler_heart(int i)
+{
+  items_processed += i;
+}
 
 /**
  * Function to establish a connection between an agent and the scheduler.
@@ -64,196 +75,120 @@ void lock_unlock(int direction) {
  * Steps taken by this function:
  *   - initialize memory associated with agent connection
  *   - send "SPAWNED" to the scheduler
- *   - receive job info
- *    - the job information filename
- *    - the offset into the job information file for this agents information
+ *   - receive the number of items between notifications
  *   - check the nfs mounts for the agent
- *   - open job info
  *   - set up the heartbeat()
  *
  * Making a call to this function should be the first thing that an agent does
  * after parsing its command line arguments.
  */
-void scheduler_connect() {
-  /* local variables */
-  char buffer[FILENAME_MAX];
-
+void scheduler_connect()
+{
   /* initialize memory associated with agent connection */
-  job_info = NULL;
-  memset(current_file   , 0, sizeof(current_file));
-  memset(current_file_pk, 0, sizeof(current_file_pk));
-  memset(buffer, '\0' , sizeof(buffer));
+  items_processed = 0;
+  memset(buffer, 0, sizeof(buffer));
+  valid = 0;
+  verbose = 0;
+  notifications = 100;
 
-  lock_params.l_type =    0;                  // this must be set in the function calling fcntl
-  lock_params.l_whence =  SEEK_SET;           // start offset start a beginning of file
-  lock_params.l_start =   0;                  // there is no offset, start at l_whence
-  lock_params.l_len =     0;                  // read from l_whence + l_start to end of file
-  lock_params.l_pid =     getpid();           // this is process that is requesting the lock
+  /* receive the number of items between notifications */
+  if(fgets(buffer, sizeof(buffer), stdin) == NULL)
+  {
+    // TODO fatal error
+    exit(-1);
+  }
+  notifications = atoi(buffer);
 
-  /* send "SPAWNED to the scheduler */
-  fprintf(stdout, "SPAWNED");
-
-  /* receive job info */
-  fscanf(stdin, "%s %d\n", buffer, &agent_byte_offset);
+  /* send "OK" to the scheduler */
+  fprintf(stdout, "OK\n");
+  fflush(stdout);
 
   /* check the nfs mounts for the agent */
-  job_info = fopen(buffer, "r+b");
+  // TODO
 
   /* set up the heartbeat() */
-  // TODO
+  signal(SIGALRM, heartbeat);
+  alarm(ALARM_SECS);
 }
 
 /**
  * Function to cleanup the connection between an agent and the scheduler
  *
  * Steps taken by this function:
- *   - close the job info file
  *   - send "CLOSED" to the scheduler
  *   - return or call exit(0)
- *      TODO determine if this function should return or if the agent is
- *           expected to clean up its memory before calling scheduler_disconnect
  *
  * Making a call to this function should be the last thing that an agent does
  * before exiting
  */
-void scheduler_disconnect() {
-  /* close the job info file */
-  fclose(job_info);
-
+void scheduler_disconnect()
+{
   /* send "CLOSED" to the scheduler */
-  fprintf(stdout, "CLOSED");
+  fprintf(stdout, "BYE\n");
+  fflush(stdout);
 
   /* call exit(0) */
   exit(0);
 }
 
 /**
- * Function to get the next file that an agent should analyze. This will clean
- * up any file opened and any memory allocated by the previous call to this
- * function (i.e. the agent should not close the FILE* returned).
+ * Most important part of the agent API. This function will get the next
+ * part of the job that is being performed. This function will return a
+ * string, it will be the job of the agent to decide how this string is
+ * interpreted.
  *
  * Steps taken by this function:
- *   - check if a new set of files needs to be grabbed
- *    - TRUE
- *     - lock job information (FILE* or shared memory)
- *     - check the jobs status
- *      - die, block, continue
- *     - clean up the previous set of files
- *      - close associated files
- *      - inform scheduler that part of the job is done
- *     - get the next set of files to analyze
- *      - get the filenames and open the files
- *      - inform the scheduler that this agent is working on this part of the job
- *     - call heartbeat()
- *     - release the info lock
- *    - FALSE
- *     - return the next open file pointer
+ *   - get the next line from the scheduler
+ *   - if the line reads "WAIT"
+ *     - pause this agent until the scheduler sends something else
+ *   - check for "CLOSE" from scheduler, return NULL if received
+ *   - check for "VERBOSE" from scheduler
+ *     - if this is received turn the verbose flag to whatever is specified
+ *     - a new line must be received, perform same task (i.e. recursive call)
+ *   - return whatever has been received
  *
- * @return a FILE* to the opened file that should be analyzed
+ * @return char* for the next thing to analyze, NULL if there is nothing
+ *          left in this job, in which case the agent should close
  */
-FILE* scheduler_next() {
-  /* local variables */
-  size_t bytes;                   // the number of bytes read or written to a file
-  char buffer[FILENAME_MAX];      // string buffer used to recieve info from scheduler
-  int status;                     // holds the status of the job read from the file
-  int file_number;                // the file number read from job information file
-  int file_offset;                // the offset that this agent will read at in job_info
-  int number_read;                // the number of files that will be read this interation
-  int i;                          // simple counter variable
+char* scheduler_next()
+{
+  /* used to cound the number of entries processed by the agent */
+  static int called = 0;
 
-  if(current_file[++file_index] && file_index < BLOCK_SIZE)
+  /* make sure that the scheduler has any info that it will need */
+  if(valid)
   {
-    return current_file[file_index];
+    called++;
+    if(called % notifications == 0)
+    {
+      fprintf(stdout, "OK\n");
+    }
+  }
+  fflush(stdout);
+
+  /* get the next line from the scheduler and possibly WAIT */
+  if(fgets(buffer, sizeof(buffer), stdin) == NULL || strncmp(buffer, "CLOSE", 5) == 0)
+  {
+    valid = 0;
+    return NULL;
   }
   else
   {
-    /* lock job information */
-    lock_unlock(LOCK);
-
-    /* check the jobs status */
-    fseek(job_info, 4, SEEK_SET);
-    bytes = fread(&status, sizeof(status), 1, job_info);
-    if(bytes != sizeof(unsigned char))
-    {
-      fprintf(stderr, "FATAL %s.%d: error reading from job information file\n", __FILE__, __LINE__);
-      return NULL;
-    }
-
-    // the scheduler has instructed this agent to die
-    // release the file lock and return a NULL to inform the agent to die
-    if(status == KILLED)
-    {
-      lock_unlock(UNLOCK);
-      return NULL;
-    }
-    // this agent has been premted by a different job
-    // release the lock and wait for instructions from the scheduler
-    else if(status == PAUSED)
-    {
-      lock_unlock(UNLOCK);
-      fgets(buffer, sizeof(buffer), stdin);
-
-      // check if the scheduler wishes for the process to retart
-      if(strcmp(buffer, "RESTART"))
-      {
-        return NULL;
-      }
-
-      // we need to do all the same things for a restart as a normal call to
-      // scheduler_next() therefore, just make a recursive call and return its result
-      return scheduler_next();
-    }
-
-    /* clean up the previous files */
-    for(i = 0; i < BLOCK_SIZE; i++)
-      if(current_file[i])
-        fclose(current_file[i]);
-    memset(current_file   , 0, sizeof(current_file));
-    memset(current_file_pk, 0, sizeof(current_file_pk));
-    memset(buffer, 0, sizeof(buffer));
-    // TODO send finish info to scheduler
-
-    /* get the next set of files to analyze */
-    fseek(job_info, agent_byte_offset, SEEK_SET);
-    bytes = fread(&file_number, sizeof(file_number), 1, job_info);
-    bytes = fread(&file_offset, sizeof(file_offset), 1, job_info);
-    number_read = files_in_job - file_number < BLOCK_SIZE ? files_in_job - file_number : BLOCK_SIZE;
-    fseek(job_info, file_offset, SEEK_SET);
-
-    /* inform the scheduler of the files that will be analyzed */
-    fprintf(stdout, "UPDATE: %d %d", file_number, file_number + file_offset);
-
-    for(i = 0; i < number_read; i++) {
-      bytes = fread(&current_file_pk[i], sizeof(int), 1, job_info);
-      bytes = fread(&status, sizeof(status), 1, job_info);
-      bytes = fread(buffer, sizeof(char), status, job_info);
-      current_file[i] = fopen(buffer, "rb");
-    }
-
-    file_offset = ftell(job_info);
-    file_number += number_read;
-    fseek(job_info, agent_byte_offset, SEEK_SET);
-    bytes = fwrite(&file_number, sizeof(file_number), 1, job_info);
-    bytes = fwrite(&file_offset, sizeof(file_offset), 1, job_info);
-
-    /* call the heartbeat() */
-    // TODO
-
-    /* release the info lock */
-    lock_unlock(UNLOCK);
-    return current_file[file_index];
+    if(strncmp(buffer, "VERBOSE", 7) == 0)
+      verbose = atoi(&buffer[8]);
+    return scheduler_next();
   }
+
+  valid = 1;
+  return buffer;
 }
 
 /**
- * Function to retrieve the pfile_pk associated with the currently opened file.
- * This number will only change when a call to scheduler_next() is made. If this
- * function is called before a call to scheduler_next is made, this will return
- * -1 as a place holder.
+ * TODO
  *
- * @return the pfile_pk associated with the currect file
+ * @return
  */
-int scheduler_pfile_pk() {
-  return current_file_pk[file_index];
+char* scheduler_current()
+{
+  return valid ? buffer : NULL;
 }
-
