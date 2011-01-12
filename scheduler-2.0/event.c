@@ -15,6 +15,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
 
+/* local includes */
+#include <event.h>
+
 /* std libaray includes */
 #include <stdlib.h>
 #include <string.h>
@@ -22,9 +25,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* unix library includes */
 #include <pthread.h>
-
-/* local includes */
-#include <event.h>
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
@@ -56,7 +56,7 @@ struct event_loop_internal {
 /* the event loop is a singleton, this is the only actual event loop */
 struct event_loop_internal vl_singleton;
 /* flag used to check if the event loop has been created */
-int created = 0;
+int el_created = 0;
 
 /**
  * There is only one instance of an event loop in any program. This function
@@ -72,7 +72,7 @@ event_loop event_loop_get()
 {
 
   /* if the event loop has already been created, return it */
-  if(created) {
+  if(el_created) {
     return &vl_singleton;
   }
 
@@ -83,7 +83,7 @@ event_loop event_loop_get()
   memset(vl_singleton.queue, 0, sizeof(vl_singleton.queue));
   vl_singleton.head = vl_singleton.tail = 0;
   vl_singleton.terminated = 0;
-  created = 1;
+  el_created = 1;
 
   return &vl_singleton;
 }
@@ -248,7 +248,7 @@ void event_loop_reset()
   event_loop vl;
   int i;
 
-  if(created)
+  if(el_created)
   {
     vl = event_loop_get();
     for(i = 0; i < EVENT_LOOP_SIZE; i++)
@@ -258,7 +258,7 @@ void event_loop_reset()
         event_destroy(vl->queue[i]);
       }
     }
-    created = 0;
+    el_created = 0;
   }
 }
 
@@ -286,6 +286,7 @@ int event_loop_enter()
     return 0x01;
   }
   vl->occupied = 1;
+  vl->terminated = 0;
   pthread_mutex_unlock(&vl->lock);
 
   /* from here on out, this is the only thread in this event loop     */
@@ -311,6 +312,7 @@ void event_loop_terminate()
   pthread_mutex_lock(&vl->lock);
 
   vl->terminated = 1;
+  vl->occupied = 0;
   pthread_cond_broadcast(&vl->wait_p);
   pthread_cond_broadcast(&vl->wait_t);
 

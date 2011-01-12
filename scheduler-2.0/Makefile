@@ -21,9 +21,11 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 CC = gcc
-CFLAGS_LOCAL = $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpthread
-DEF   = -DAGENT_DIR='"$(DESTDIR)$(AGENTDIR)"'
+GLIBC = `pkg-config --cflags --libs glib-2.0`
+CFLAGS_LOCAL = $(GLIBC) $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpthread
+DEF   = -DAGENT_DIR='"$(DESTDIR)$(AGENTDIR)"' -DLOG_DIR='"$(LOGDIR)"'
 FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' -DPROJECT_GROUP='"$(PROJECTGROUP)"'
+DEPEN = Makefile
 
 EXE = fossology-scheduler
 
@@ -33,11 +35,17 @@ EXE = fossology-scheduler
 
 OBJS = agent.o \
        event.o \
+       job.o \
+       logging.o \
+       interface.o \
 
 HEAD = agent.h \
        event.h \
        scheduler.h \
        host.h \
+       job.h \
+       logging.h \
+       interface.h \
        
 ##########################
 # executable build rules #
@@ -45,29 +53,41 @@ HEAD = agent.h \
 
 all: $(EXE)
 
-$(EXE): scheduler.c libscheduler.a $(VARS) $(HEAD) Makefile
-	$(CC) scheduler.c libscheduler.a $(DEF) $(FODEF) $(CFLAGS_LOCAL) `pkg-config --cflags --libs glib-2.0` -o $@
+$(EXE): scheduler.c $(OBJS) $(VARS) $(HEAD) $(DEPEN)
+	$(CC) scheduler.c $(OBJS) $(DEF) $(FODEF) $(CFLAGS_LOCAL) $(GLIBC) -o $@
 
 #######################
 # library buidl rules #
 #######################
 
-libscheduler.a: $(OBJS) Makefile
+libscheduler.a: $(OBJS) $(DEPEN)
 	ar cvr $@ $(OBJS)
 
 ######################
 # object build rules #
 ######################
 
-agent.o: %.o: %.c %.h scheduler.h Makefile
-	$(CC) -c $(CFLAGS_LOCAL) $(DEF) `pkg-config --cflags glib-2.0` $<
+agent.o: %.o: %.c %.h job.h scheduler.h $(DEPEN)
+	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
-event.o: %.o: %.c %.h Makefile
+job.o: %.o: %.c %.h agent.h scheduler.h $(DEPEN)
+	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+
+interface.o: %.o: %.c %.h $(DEPEN)
+	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+
+event.o: %.o: %.c %.h $(DEPEN)
+	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+
+logging.o: %.o: %.c %.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
 clean:
 	rm -f $(OBJS) *.a
 	rm -f $(EXE)
+
+
+
 
 
 

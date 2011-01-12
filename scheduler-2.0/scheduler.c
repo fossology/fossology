@@ -16,9 +16,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 ************************************************************** */
 
 /* local includes */
-#include <scheduler.h>
 #include <agent.h>
 #include <event.h>
+#include <interface.h>
+#include <logging.h>
+#include <scheduler.h>
 
 /* std library includes */
 #include <stdio.h>
@@ -27,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* unix system includes */
 #include <dirent.h>
+#include <pthread.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -42,6 +45,9 @@ char* process_name = "fossology-scheduler";
 #ifndef PROJECT_GROUP
 #define PROJECT_GROUP "fossyology"
 #endif
+
+int verbose = 0;
+int runtest = 0;
 
 /* ************************************************************************** */
 /* **** signals and events ************************************************** */
@@ -63,12 +69,14 @@ void chld_sig(int signo)
   int status;       // status returned by waitpit()
 
   /* initialize memory */
-  pid_list = (pid_t*)calloc(num_agents(), sizeof(pid_t));
+  pid_list = (pid_t*)calloc(num_agents() + 1, sizeof(pid_t));
   idx = 0;
 
   /* get all of the dead children's pids */
   while((n = waitpid(-1, &status, WNOHANG)) > 0)
   {
+    if(verbose > 1)
+      lprintf("SIGNALS: received sigchld for pid %d\n", n);
     pid_list[idx++] = n;
   }
 
@@ -76,6 +84,7 @@ void chld_sig(int signo)
 }
 
 /**
+ * TODO
  *
  * @param signo
  * @param INFO
@@ -85,8 +94,17 @@ void prnt_sig(int signo)
 {
   switch(signo)
   {
-    case SIGUSR1:
+    case SIGINT:
+      lprintf("SIGNALS: Scheduler killed by interrupt signal, unclean death\n");
+      kill_agents();
+      event_loop_terminate();
+      break;
+    case SIGALRM:
       event_signal(agent_update_event, NULL);
+      alarm(CHECK_TIME);
+      break;
+    case SIGUSR1:
+      pthread_exit(0);
       break;
   }
 }
@@ -138,137 +156,21 @@ void set_usr_grp()
   }
 }
 
-/* ************************************************************************** */
-/* **** main types ********************************************************** */
-/* ************************************************************************** */
-
 /**
- *
- * @param app_name
+ * TODO
  */
-void usage(char* app_name)
+void load_config()
 {
-  fprintf(stderr, "Usage: %s [options] < 'typed command'\n", app_name);
-  fprintf(stderr, "  options:\n");
-  fprintf(stderr, "    -d :: Run as a daemon, causes init to own the process\n");
-  fprintf(stderr, "    -h :: Print the usage for the program and exit\n");
-  fprintf(stderr, "    -i :: Initialize the database and exit\n");
-  fprintf(stderr, "    -I :: Use stdin as well as job-queue to create new jobs\n");
-  fprintf(stderr, "    -L :: Print to this file instead of default log file\n");
-  fprintf(stderr, "    -t :: Test run every type of agent, then quit\n");
-  fprintf(stderr, "    -T :: Test run every type of agent, then run normally\n");
-  fprintf(stderr, "    -v :: set verbose to true, used for debugging\n");
-}
+  DIR* dp;                  // directory pointer used to load meta agents;
+  struct dirent* ep;        // information about directory
+  FILE* istr;               // file pointer to agent.conf
+  char* tmp;                // pointer into a string
+  char buffer[2048];        // TODO
+  char name[MAX_NAME + 1];  // TODO
+  char cmd [MAX_CMD  + 1];  // TODO
+  int max = -1;             // TODO
+  int special = 0;          // TODO
 
-/**
- * @brief start point for the scheduler
- *
- * TODO change this to be more informative
- * Usage: fossology-scheduler [options] < 'typed command
- *   options:\n");
- *     -d :: Run as a daemon, causes init to own the process\n");
- *     -h :: Print the usage for the program and exit\n");
- *     -i :: Initialize the database and exit\n");
- *     -I :: Use stdin as well as job-queue to create new jobs\n");
- *           Only used for debugging the scheduler\n");
- *     -L :: Print to this file instead of default log file\n");
- *     -t :: Test run every type of agent, then quit\n");
- *     -T :: Test run every type of agent, then run normally\n");
- *     -v :: set verbose to true, used for debugging\n");
- *
- * @param argc
- * @param argv
- * @return
- */
-int main(int argc, char** argv)
-{
-  /* locals */
-  int c;              // used for parsing the arguments
-  int run_daemon = 0; // flag to run the scheduler as a daemon
-  int test = 0;       // flag to run the agent tests before starting
-  int use_stdin = 0;  // use stdin as well as job queue for job scheduling
-  int rc;             // destination of return status for system calls
-  DIR* dp;            // directory pointer used to load meta agents;
-  struct dirent* ep;  // information about directory
-  FILE* istr;         // file pointer to agent.conf
-  char buffer[2048];  // character buffer, used multiple times
-  char* tmp;          // pointer into a string
-
-  /* locals used for creation of meta_agents */
-  char name[MAX_NAME + 1];
-  char cmd [MAX_CMD  + 1];
-  int max, special;
-
-  /* initialize memory */
-  memset(name, '\0', sizeof(name));
-  memset(cmd, '\0', sizeof(cmd));
-  memset(buffer, '\0', sizeof(buffer));
-  max = special = -1;
-
-  /* ********************* */
-  /* *** parse options *** */
-  /* ********************* */
-  while((c = getopt(argc, argv, "diIL:tTvh")) != -1)
-  {
-    switch(c)
-    {
-      case 'd':
-        run_daemon = 1;
-        break;
-      case 'i':
-        // TODO initialize database and exit
-        break;
-      case 'I':
-        use_stdin = 1;
-        break;
-      case 'L':
-        // TODO set log file
-        // TODO must write logging code first
-        break;
-      case 't':
-        test = 2;
-        break;
-      case 'T':
-        test = 1;
-        break;
-      case 'v':
-        // TODO once I have verbose done
-        break;
-      case 'h': default:
-        usage(argv[0]);
-        return -1;
-    }
-  }
-
-  if((optind != argc - 1) && (optind != argc))
-  {
-    usage(argv[0]);
-    return -1;
-  }
-
-  /* ********************** */
-  /* *** handle options *** */
-  /* ********************** */
-  set_usr_grp();
-
-  if(run_daemon)
-  {
-    // TODO old scheduler used log file to decide second arg?
-    rc = daemon(0, 1);
-    fclose(stdin);
-  }
-
-
-
-  /* ********************** */
-  /* *** handle signals *** */
-  /* ********************** */
-  signal(SIGCHLD, chld_sig);
-  signal(SIGUSR1, prnt_sig);
-
-  /* ************************ */
-  /* *** load meta agents *** */
-  /* ************************ */
   // TODO set this to location of agent.conf files
   if((dp = opendir("./agents/")) == NULL)
   {
@@ -280,6 +182,14 @@ int main(int argc, char** argv)
     sprintf(buffer, "agents/%s", ep->d_name);
     if(ep->d_name[0] != '.' && (istr = fopen(buffer, "rb")) != NULL)
     {
+      if(verbose > 1)
+        lprintf("CONFIG: loading config file %s\n", buffer);
+
+      /* initialize data */
+      memset(buffer, '\0', sizeof(buffer));
+      memset(name,   '\0', sizeof(name));
+      memset(cmd,    '\0', sizeof(cmd));
+
       /* this is not actually a loop this is used */
       /* so that all error cases still cause the  */
       /* file to close                            */
@@ -314,15 +224,185 @@ int main(int argc, char** argv)
         }
       }
 
-      add_meta_agent(name, cmd, max, special);
+      if(!add_meta_agent(name, cmd, max, special) && verbose > 1)
+        lprintf("CONFIG: could not create meta agent using %s\n", ep->d_name);
+
       fclose(istr);
     }
   }
 
-  agent_init("copyright", NULL);
+  closedir(dp);
+}
+
+/**
+ *
+ * @return
+ */
+int close_scheduler()
+{
+  job_list_clean();
+  agent_list_clean();
+  interface_destroy();
+  return 0;
+}
+
+/**
+ * Utility function that enables the use of the strcmp function with a GTree.
+ *
+ * @param a The first string
+ * @param b The second string
+ * @param user_data unused in this function
+ * @return integral value idicating the relatioship between the two strings
+ */
+gint string_compare(gconstpointer a, gconstpointer b, gpointer user_data)
+{
+  return strcmp((char*)a, (char*)b);
+}
+
+/**
+ * Utility function that enable the agents to be stored in a GTree using
+ * the PID of the associated process.
+ *
+ * @param a The pid of the first process
+ * @param b The pid of the second process
+ * @param user_data unused in this function
+ * @return integral value idicating the relationship between the two pids
+ */
+gint int_compare(gconstpointer a, gconstpointer b, gpointer user_data)
+{
+  return *(int*)a - *(int*)b;
+}
+
+/* ************************************************************************** */
+/* **** main types ********************************************************** */
+/* ************************************************************************** */
+
+/**
+ *
+ * @param app_name
+ */
+void usage(char* app_name)
+{
+  fprintf(stderr, "Usage: %s [options] < 'typed command'\n", app_name);
+  fprintf(stderr, "  options:\n");
+  fprintf(stderr, "    -d :: Run as a daemon, causes init to own the process\n");
+  fprintf(stderr, "    -h :: Print the usage for the program and exit\n");
+  fprintf(stderr, "    -i :: Initialize the database and exit\n");
+  fprintf(stderr, "    -L :: Print to this file instead of default log file\n");
+  fprintf(stderr, "    -t :: Test run every type of agent, then quit\n");
+  fprintf(stderr, "    -T :: Test run every type of agent, then run normally\n");
+  fprintf(stderr, "    -v :: set verbose to true, used for debugging\n");
+}
+
+/**
+ * @brief start point for the scheduler
+ *
+ * TODO change this to be more informative
+ * Usage: fossology-scheduler [options] < 'typed command
+ *   options:\n");
+ *     -d :: Run as a daemon, causes init to own the process
+ *     -h :: Print the usage for the program and exit
+ *     -i :: Initialize the database and exit
+ *     -L :: Print to this file instead of default log file
+ *     -t :: Test run every type of agent, then quit
+ *     -T :: Test run every type of agent, then run normally
+ *     -v :: set verbose to true, used for debugging
+ *
+ * @param argc
+ * @param argv
+ * @return
+ */
+int main(int argc, char** argv)
+{
+  /* locals */
+  int c;              // used for parsing the arguments
+  int run_daemon = 0; // flag to run the scheduler as a daemon
+  int rc;             // destination of return status for system calls
+  char buffer[2048];  // character buffer, used multiple times
+
+  /* initialize memory */
+  memset(buffer, '\0', sizeof(buffer));
+  verbose = 0;
+
+  /* ********************* */
+  /* *** parse options *** */
+  /* ********************* */
+  while((c = getopt(argc, argv, "diL:tTv:h")) != -1)
+  {
+    switch(c)
+    {
+      case 'd':
+        run_daemon = 1;
+        break;
+      case 'i':
+        // TODO initialize database and exit
+        break;
+      case 'L':
+        set_log(optarg);
+        break;
+      case 't':
+        runtest = 2;
+        break;
+      case 'T':
+        runtest = 1;
+        break;
+      case 'v':
+        verbose = atoi(optarg);
+        break;
+      case 'h': default:
+        usage(argv[0]);
+        return -1;
+    }
+  }
+
+  if((optind != argc - 1) && (optind != argc))
+  {
+    usage(argv[0]);
+    return -1;
+  }
+
+  if(verbose)
+  {
+
+  }
+
+  /* ********************** */
+  /* *** handle options *** */
+  /* ********************** */
+  interface_init();
+  set_usr_grp();
+  load_config();
+
+  if(run_daemon)
+  {
+    // TODO old scheduler used log file to decide second arg?
+    rc = daemon(0, 1);
+    fclose(stdin);
+  }
+
+  /* ********************** */
+  /* *** handle signals *** */
+  /* ********************** */
+  signal(SIGCHLD, chld_sig);
+  signal(SIGALRM, prnt_sig);
+  signal(SIGUSR1, prnt_sig);
+  signal(SIGINT,  prnt_sig);
+
+  /* ********************** */
+  /* *** run any tests **** */
+  /* ********************** */
+  if(runtest > 0)
+  {
+    add_job(job_init("all", NULL, 0));
+    test_agents();
+    event_loop_enter();
+    if(runtest > 1)
+      return close_scheduler();
+    runtest = 0;
+  }
+
+  alarm(CHECK_TIME);
   event_loop_enter();
 
-  closedir(dp);
-
-  return 0;
+  return close_scheduler();
 }
