@@ -1,9 +1,3 @@
-fossology (1.3.0.rc2) unstable; urgency=low
-
-  * Non-maintainer upload.
-
- -- Build User <build@cranky.manage>  Tue, 11 Jan 2011 10:40:19 -0800
-
 fossology (1.3.0~20110107) unstable; urgency=low
 
   * unofficial build version
