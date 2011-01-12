@@ -73,7 +73,10 @@ function GetTaggingPerms($user_pk, $tag_ns_pk)
     foreach ($result as $row)
     {
       $group_pk = $row['group_fk'];
-      $sql = "SELECT * FROM tag_ns_group WHERE group_fk=$group_pk;";
+      if (isset($tag_ns_pk))
+        $sql = "SELECT * FROM tag_ns_group WHERE tag_ns_fk=$tag_ns_pk AND group_fk=$group_pk;";
+      else
+        $sql = "SELECT * FROM tag_ns_group WHERE group_fk=$group_pk;";
       $result1 = $DB->Action($sql);
       if (count($result1) > 0)
       {
