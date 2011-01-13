@@ -394,7 +394,7 @@ upload_max_filesize = 700M
  for these reasons we can't provide an automated way of doing this.
 
 ========================================================================
-	Alias /repo/ /usr/local/share/fossology/www/
+	Alias /repo/ /usr/local/share/fossology/www
         <Directory "/usr/local/share/fossology/www">
                 AllowOverride None
                 Options FollowSymLinks MultiViews
