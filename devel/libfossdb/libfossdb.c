@@ -1,7 +1,7 @@
 /**************************************************************
  dbapi: Set of generic functions for communicating with a database.
 
- Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
   
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -467,4 +467,88 @@ int	main	()
     }
 }
 #endif
+
+
+/*********************************************************************
+ * The following functions use libpq and NOT the above db abstraction.
+ * The plan is to eventually replace all the above with direct libpq 
+ * calls and the helper functions below.
+ */
+ 
+/*
+ \file libfossdb.c
+ \brief common libpq database functions
+ */
+
+/****************************************************
+ checkPQresult
+
+ check the result status of a postgres SELECT
+ If an error occured, write the error to stdout
+
+ @param PGresult *result
+ @param char *sql     the sql query
+ @param char * FileID is a file identifier string to write into 
+                      the error message.  Typically the caller
+                      will use __FILE__, but any identifier string
+                      is ok.
+ @param int LineNumb  the line number of the caller (__LINE__)
+
+ @return 0 on OK, -1 on failure.
+ On failure, result will be freed.
+
+ NOTE: this function should be moved to a std library
+****************************************************/
+int checkPQresult(PGconn *pgConn, PGresult *result, char *sql, char *FileID, int LineNumb)
+{
+   if (!result) 
+   {
+     printf("FATAL: %s:%d, %s\nOn: %s\n", 
+            FileID, LineNumb, PQerrorMessage(pgConn), sql);
+     return -1;
+   }
+
+   /* If no error, return */
+   if (PQresultStatus(result) == PGRES_TUPLES_OK) return 0;
+
+   printf("ERROR: %s:%d, %s\nOn: %s\n", 
+          FileID, LineNumb, PQresultErrorMessage(result), sql);
+   PQclear(result);
+   return (-1);
+} /* checkPQresult */
+
+
+/****************************************************
+ checkPQcommand
+
+ check the result status of a postgres commands (not select)
+ If an error occured, write the error to stdout
+
+ @param PGresult *result
+ @param char *sql the sql query
+ @param char * FileID the function name of the caller
+ @param int LineNumb the line number of the caller
+
+ @return 0 on OK, -1 on failure.
+ On failure, result will be freed.
+
+ NOTE: this function should be moved to a std library
+****************************************************/
+int checkPQcommand(PGconn *pgConn, PGresult *result, char *sql, char *FileID, int LineNumb)
+{
+   if (!result)
+   {
+     printf("FATAL: %s:%d, %s\nOn: %s\n", 
+            FileID, LineNumb, PQerrorMessage(pgConn), sql);
+     return -1;
+   }
+
+   /* If no error, return */
+   if (PQresultStatus(result) == PGRES_COMMAND_OK) return 0;
+
+   printf("ERROR: %s:%d, %s\nOn: %s\n", 
+          FileID, LineNumb, PQresultErrorMessage(result), sql);
+   PQclear(result);
+   return (-1);
+} /* checkPQcommand */
 
