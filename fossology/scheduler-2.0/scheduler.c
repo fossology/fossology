@@ -47,7 +47,7 @@ char* process_name = "fossology-scheduler";
 #endif
 
 int verbose = 0;
-int runtest = 0;
+int closing = 0;
 
 /* ************************************************************************** */
 /* **** signals and events ************************************************** */
@@ -235,6 +235,7 @@ void load_config()
 }
 
 /**
+ * TODO
  *
  * @return
  */
@@ -244,6 +245,15 @@ int close_scheduler()
   agent_list_clean();
   interface_destroy();
   return 0;
+}
+
+/**
+ * TODO
+ */
+void update_scheduler()
+{
+  if(closing && num_agents() == 0 && num_jobs() == 0)
+    event_loop_terminate();
 }
 
 /**
@@ -318,6 +328,7 @@ int main(int argc, char** argv)
   int c;              // used for parsing the arguments
   int run_daemon = 0; // flag to run the scheduler as a daemon
   int rc;             // destination of return status for system calls
+  int test = 0;       // flag to run the tests before starting scheduler
   char buffer[2048];  // character buffer, used multiple times
 
   /* initialize memory */
@@ -341,10 +352,10 @@ int main(int argc, char** argv)
         set_log(optarg);
         break;
       case 't':
-        runtest = 2;
+        test = 2;
         break;
       case 'T':
-        runtest = 1;
+        test = 1;
         break;
       case 'v':
         verbose = atoi(optarg);
@@ -391,18 +402,16 @@ int main(int argc, char** argv)
   /* ********************** */
   /* *** run any tests **** */
   /* ********************** */
-  if(runtest > 0)
+  if(test > 0)
   {
     add_job(job_init("all", NULL, 0));
     test_agents();
-    event_loop_enter();
-    if(runtest > 1)
-      return close_scheduler();
-    runtest = 0;
+    if(test > 1)
+      closing = 1;
   }
 
   alarm(CHECK_TIME);
-  event_loop_enter();
+  event_loop_enter(update_scheduler);
 
   return close_scheduler();
 }

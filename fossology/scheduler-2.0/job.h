@@ -60,5 +60,6 @@ char** job_next(job j);
 void job_list_clean();
 void add_job(job j);
 job  get_job(int id);
+int  num_jobs();
 
 #endif /* JOB_H_INCLUDE */

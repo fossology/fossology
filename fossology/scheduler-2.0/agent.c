@@ -236,12 +236,15 @@ void listen(agent a)
   {
     /* get message from agent */
     if(fgets(buffer, sizeof(buffer), a->read) == NULL)
-      THREAD_FATAL("AGENT[%d]: pipe from child process unexpectedly closed", a->pid);
+    {
+      lprintf_c("T_FATAL %s.%d: JOB[%d].AGENT[%d] pipe from shild closed\nT_FATAL errno is: %s\n"
+          __FILE__, __LINE__, job_id(a->owner), a->pid, strerror(errno));
+    }
 
     if(verbose > 2)
     {
       buffer[strlen(buffer) - 1] = '\0';
-      lprintf("JOB[%d].AGENT[%d]: received: \"%s\"\n", job_id(a->owner), a->pid, buffer);
+      lprintf_c("JOB[%d].AGENT[%d]: received: \"%s\"\n", job_id(a->owner), a->pid, buffer);
     }
 
     /* the agent has finished execution, finish this thread */
@@ -273,10 +276,14 @@ void listen(agent a)
     else if(strncmp(buffer, "FATAL", 5))
     {
       // TODO
-      lprintf("");
+      lprintf_c("");
       break;
     }
   }
+
+  if(verbose > 2)
+    lprintf_c("JOB[%d].AGENT[%d]: communication thread closing\n",
+        job_id(a->owner), a->pid);
 }
 
 /**
@@ -305,9 +312,6 @@ void* spawn(void* passed)
   char buffer[2048];          // character buffer
 
   TEST_NULL(a, NULL);
-  if(verbose > 2)
-    lprintf("JOB[%d] agent communication started in new thread\n",
-        job_id(a->owner));
   /* we are in the child */
   if((a->pid = fork()) == 0)
   {
@@ -346,7 +350,8 @@ void* spawn(void* passed)
     }
 
     /* we should never reach here */
-    ERROR("AGENT[%d] exec failed", getpid());
+    lprintf_c("ERROR %s.%d: JOB[%d].AGENT[%d] exec failed\nERROR errno is: %s\n",
+        __FILE__, __LINE__, job_id(a->owner), getpid(), strerror(errno));
   }
   /* we are in the parent */
   else if(a->pid > 0)
@@ -360,7 +365,8 @@ void* spawn(void* passed)
   /* error case */
   else
   {
-    ERROR("JOB[%d.%s] fork failed", job_id(a->owner), a->meta_data->name);
+    lprintf_c("ERROR %s.%d: JOB[%d].AGENT[%d] for failed\nERROR errno is: %s\n",
+        __FILE__, __LINE__, job_id(a->owner), getpid(), strerror(errno));
   }
 
   return NULL;
@@ -555,6 +561,10 @@ agent agent_copy(agent a)
   if(a->generation == MAX_GENERATION)
     return NULL;
 
+  if(verbose > 2)
+    lprintf("JOB[%d].AGENT[%d] creating copy of agent\n",
+        job_id(a->owner), a->pid);
+
   agent cpy = agent_init(a->meta_data->name, a->host_machine, a->owner);
   cpy->data = a->data;
   cpy->generation = a->generation + 1;
@@ -613,7 +623,8 @@ void agent_death_event(void* pids)
 
     if(a->status != AG_CLOSING)
     {
-      ERROR("JOB[%d].AGENT[%d] agent closed unexpectedly",
+      errno = ECONNABORTED;
+      ERROR("JOB[%d].AGENT[%d]: agent closed unexpectedly",
           job_id(a->owner), a->pid);
       agent_fail(a);
     }
@@ -635,6 +646,11 @@ void agent_death_event(void* pids)
 void agent_create_event(agent a)
 {
   TEST_NULV(a);
+
+  if(verbose > 1)
+    lprintf("JOB[%d].AGENT[%d]: agent successfully spawned\n",
+        job_id(a->owner), a->pid);
+
   g_tree_insert(agents, &a->pid, a);
   transition(a, AG_SPAWNED);
   job_add_agent(a->owner, a);
@@ -724,13 +740,13 @@ void agent_fail(agent a)
   kill(a->pid, SIGKILL);
   transition(a, AG_FAILED);
   job_fail_agent(a->owner, a);
-  job_update(a->owner);
   if(write(a->to_parent, "@@@1\n", 5) != 5)
   {
     ERROR("JOB[%d].AGENT[%d]: Failed to kill agent thread cleanly, using fail safe method",
         job_id(a->owner), a->pid)
     pthread_kill(a->thread, SIGUSR1);
   }
+  job_update(a->owner);
 }
 
 /**
@@ -747,16 +763,15 @@ void agent_close(agent a)
   }
   else
   {
+    job_remove_agent(a->owner, a);
+    // TODO change to detach when the scheduler is done
+    pthread_join(a->thread, NULL);
+
     if(verbose > 1)
-      lprintf("JOB[%d].AGENT[%d] successfully removed from the system\n",
+      lprintf("JOB[%d].AGENT[%d]: successfully removed from the system\n",
           job_id(a->owner), a->pid);
 
-    job_remove_agent(a->owner, a);
-    pthread_join(a->thread, NULL);
     g_tree_remove(agents, &a->pid);
-
-    if(runtest && g_tree_nnodes(agents) == 0)
-      event_loop_terminate();
   }
 }
 
@@ -790,7 +805,8 @@ int aprintf(agent a, const char* fmt, ...)
   {
     vsprintf(buf, fmt, args);
     buf[strlen(buf) - 1] = '\0';
-    lprintf("JOB[%d].AGENT[%d]: send to agent \"%s\"\n", job_id(a->owner), a->pid, buf);
+    lprintf_c("JOB[%d].AGENT[%d]: sent to agent \"%s\"\n",
+        job_id(a->owner), a->pid, buf);
   }
   rc = vfprintf(a->write, fmt, args);
   fflush(a->write);

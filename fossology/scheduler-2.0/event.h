@@ -53,7 +53,7 @@ void event_destroy(event e);
 void event_signal(void* func, void* args);
 void event_loop_reset();
 void event_loop_terminate();
-int event_loop_enter();
+int event_loop_enter(void(*)(void));
 
 
 #endif /* EVENT_H_INCLUDE */

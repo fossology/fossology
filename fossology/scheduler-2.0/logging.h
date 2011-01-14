@@ -55,14 +55,14 @@ extern FILE* log_file;
             lprintf("ERROR %s.%d: ", __FILE__, __LINE__); \
             lprintf_t(__VA_ARGS__); \
             lprintf_t("\n"); \
-            lprintf("ERROR errno is :%s\n", strerror(errno)); }
+            lprintf("ERROR errno is: %s\n", strerror(errno)); }
 
 /** Macro that is called when any type of warning is generated */
 #define WARNING(...) { \
             lprintf("WARNING %s.%d: ", __FILE__, __LINE__); \
             lprintf_t(__VA_ARGS__); \
             lprintf_t("\n"); \
-            lprintf("WARNING errno is :%s\n", strerror(errno)); }
+            lprintf("WARNING errno is: %s\n", strerror(errno)); }
 
 /* ************************************************************************** */
 /* **** logging functions *************************************************** */
@@ -72,6 +72,8 @@ const char* lname();
 void set_log(const char* name);
 int  lprintf(const char* fmt, ...);
 int  lprintf_t(const char* fmt, ...);
-int  lprintf_v(const char* fmd, va_list args);
+int  lprintf_v(const char* fmt, va_list args);
+int  lprintf_c(const char* fmt, ...);
+
 
 #endif /* LOGGING_H_INCLUDE */

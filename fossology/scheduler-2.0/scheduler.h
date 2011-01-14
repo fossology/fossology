@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define CHECKOUT_SIZE 100
 
 extern int verbose;
-extern int runtest;
+extern int closing;
 
 /* ************************************************************************** */
 /* **** Utility Functions *************************************************** */

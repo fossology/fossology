@@ -159,8 +159,6 @@ void job_remove_agent(job j, void* a)
   TEST_NULV(j);
   TEST_NULV(a);
   j->finsihed_agents = g_list_remove(j->finsihed_agents, a);
-  if(j->running_agents == NULL && j->finsihed_agents == NULL && j->failed_agents == NULL)
-    g_tree_remove(job_list, &j->id);
 }
 
 /**
@@ -214,6 +212,7 @@ void job_update(job j)
 {
   GList* iter;
   agent a;
+  int restart = 0;
 
   TEST_NULV(j)
   if(!j->paused && j->running_agents == NULL)
@@ -222,28 +221,37 @@ void job_update(job j)
     {
       for(iter = j->finsihed_agents; iter != NULL; iter = iter->next)
         agent_close(iter->data);
-      return;
+    }
+    else
+    {
+      for(iter = j->failed_agents; iter != NULL; iter = iter->next)
+      {
+        /* get a new agent to handle the data from the fail agent */
+        if(g_list_length(j->finsihed_agents) != 0)
+        {
+          a = (agent)g_list_first(j->finsihed_agents);
+          j->finsihed_agents = g_list_remove(j->finsihed_agents, a);
+          j->running_agents  = g_list_append(j->running_agents,  a);
+          agent_restart(a, (agent)iter->data);
+          restart++;
+        }
+        else if(agent_copy((agent)iter->data) != NULL)
+        {
+          restart++;
+        }
+
+        /* get rid of the failed agent */
+        a = iter->data;
+        agent_close(a);
+      }
+
+      g_list_free(j->failed_agents);
+      j->failed_agents = NULL;
     }
 
-    for(iter = j->failed_agents; iter != NULL; iter = iter->next)
+    if(restart == 0)
     {
-      /* get a new agent to handle the data from the fail agent */
-      if(g_list_length(j->finsihed_agents) != 0)
-      {
-        a = (agent)g_list_first(j->finsihed_agents);
-        j->finsihed_agents = g_list_remove(j->finsihed_agents, a);
-        j->running_agents  = g_list_append(j->running_agents,  a);
-        agent_restart(a, (agent)iter->data);
-      }
-      else if((a = agent_copy((agent)iter->data)) != NULL)
-      {
-        j->running_agents = g_list_append(j->running_agents, a);
-      }
-
-      /* get rid of the failed agent */
-      j->failed_agents = g_list_remove(j->failed_agents, a);
-      agent_close(a);
-      agent_death_event(a);
+      g_tree_remove(job_list, &j->id);
     }
   }
 }
@@ -384,7 +392,15 @@ job get_job(int id)
   return g_tree_lookup(job_list, &id);
 }
 
-
+/**
+ * TODO
+ *
+ * @return
+ */
+int num_jobs()
+{
+  return g_tree_nnodes(job_list);
+}
 
 
 
