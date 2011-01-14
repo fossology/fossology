@@ -273,7 +273,7 @@ void event_loop_reset()
  *          0x0:   successful execution
  *          0x01:  attempt to enter a loop that is occupied
  */
-int event_loop_enter()
+int event_loop_enter(void(*update)(void))
 {
   event e;
   event_loop vl = event_loop_get();
@@ -294,6 +294,7 @@ int event_loop_enter()
   while((e = event_loop_take(vl)) != NULL) {
     e->func(e->argument);
     event_destroy(e);
+    update();
   }
 
   return 0x0;

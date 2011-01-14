@@ -16,6 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 ************************************************************** */
 
 /* local includes */
+#include <event.h>
 #include <logging.h>
 
 /* std library includes */
@@ -33,6 +34,10 @@ int   log_name_set = 0;
 #ifndef LOG_DIR
 #define LOG_DIR "/var/log/fossology/fossology.log"
 #endif
+
+/* ************************************************************************** */
+/* **** local functions ***************************************************** */
+/* ************************************************************************** */
 
 /**
  * Utility function that will open the log file using whatever name is stored
@@ -62,6 +67,23 @@ void log_open()
 
   lprintf("log openned\n");
 }
+
+/**
+ * Event used to pass log messages to the main thread for processing instead of
+ * processing them in a side thread. This is used so that prints will happen
+ * in the correct order instead of intermixed.
+ *
+ * @param str the string that will be printed to the log file
+ */
+void log_event(char* str)
+{
+  lprintf("%s", str);
+  free(str);
+}
+
+/* ************************************************************************** */
+/* **** logging functions *************************************************** */
+/* ************************************************************************** */
 
 /**
  * Changes the name of the file that will be logged to. If a log file is
@@ -193,6 +215,29 @@ int lprintf_v(const char* fmt, va_list args)
   fprintf(log_file, "%s scheduler [%d] :: ", time_buffer, getpid());
   rc = vfprintf(log_file, fmt, args);
   fflush(log_file);
+
+  return rc;
+}
+
+/**
+ *
+ * @param fmt
+ * @return
+ */
+int lprintf_c(const char* fmt, ...)
+{
+  va_list args;
+  int rc;
+  char* buf;
+
+  if(!log_file) log_open();
+  if(!fmt) return 0;
+  buf = (char*)calloc(1024, sizeof(char));
+
+  va_start(args, fmt);
+  rc = vsprintf(buf, fmt, args);
+  event_signal(log_event, buf);
+  va_end(args);
 
   return rc;
 }
