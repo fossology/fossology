@@ -32,16 +32,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/stat.h>
 #include <sys/types.h>
 
+/* glib includes */
+#include <glib.h>
+#include <gio/gio.h>
+
 #ifndef FIFO_LOCATION
 #define FIFO_LOCATION "/usr/local/share/fossology/scheduler.fifo"
 #endif
 
 #define FIFO_PERMISSIONS    666  ///< the permissions given to the fifo
 
-int i_created = 0;    ///< flag indicating if the interface already been created
-int i_terminate = 0;  ///< flag indicating if the interface has been killed
-pthread_t thread;     ///< pthread that the interface run within
-FILE* fifo;           ///< named pipe that is used by the scheduler
+int i_created = 0;      ///< flag indicating if the interface already been created
+int i_terminate = 0;    ///< flag indicating if the interface has been killed
+int i_port;             ///< the port that the scheduler is listening on
+GThread* socket_thread; ///< thread that will create new connections
 
 /* ************************************************************************** */
 /* **** Local Functions ***************************************************** */
@@ -50,10 +54,45 @@ FILE* fifo;           ///< named pipe that is used by the scheduler
 /**
  * TODO
  *
+ * @param unused
+ * @return
+ */
+void* listen_thread(void* unused)
+{
+  GSocketListener* server_socket;
+  GSocketConnection* new_connection;
+
+  /* validate new thread */
+  if(i_terminate || !i_created)
+  {
+    ERROR("Could not create server socket thread\n");
+    return NULL;
+  }
+
+  /* create the server socket to listen for connections on */
+  server_socket = g_socket_listener_new();
+  i_port = g_socket_listener_add_any_inet_port(server_socket, NULL, NULL);
+
+  /* wait for new connections */
+  for(;;)
+  {
+    new_connection = g_socket_listener_accept(server_socket, NULL, NULL, NULL);
+
+    if(i_terminate)
+      break;
+
+  }
+
+  return NULL;
+}
+
+/**
+ * TODO
+ *
  * @param
  * @return
  */
-void* interface_thread(void* unused)
+/*void* interface_thread(void* unused)
 {
   char buffer[2048];
 
@@ -63,7 +102,8 @@ void* interface_thread(void* unused)
     if(verbose > 1)
       lprintf("INTERFACE: recieved \"%s\"\n", buffer);
 
-    if(strncmp(buffer, "CLOSE", 5) == 0); // TODO close scheduler event
+    if(strncmp(buffer, "CLOSE", 5) == 0)
+      return NULL;
     else if(strncmp(buffer, "PAUSE", 5) == 0)
       job_pause(get_job(atoi(&buffer[10])));
     else if(strncmp(buffer, "RELOAD", 6) == 0)
@@ -90,7 +130,7 @@ void* interface_thread(void* unused)
   FATAL("interface closed unexpectedly");
 
   return NULL;
-}
+}*/
 
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
@@ -103,23 +143,10 @@ void* interface_thread(void* unused)
  */
 void interface_init()
 {
-  /* locals */
-  struct stat stats;
-
-  /* make sure that we don't already have an interface thread */
   if(!i_created)
   {
     i_created = 1;
-
-    if((stat(FIFO_LOCATION,&stats) != 0) || !S_ISFIFO(stats.st_mode))
-    {
-      remove(FIFO_LOCATION);
-      if(mkfifo(FIFO_LOCATION, FIFO_PERMISSIONS) != 0)
-        FATAL("couldn't create fifo for scheduler interface");
-    }
-    fifo = fopen(FIFO_LOCATION, "w+");
-
-    pthread_create(&thread, NULL, interface_thread, NULL);
+    socket_thread = g_thread_create(listen_thread, NULL, 1, NULL);
   }
 }
 
@@ -128,11 +155,17 @@ void interface_init()
  */
 void interface_destroy()
 {
+  GSocketClient* client;
+
   /* only destroy the interface if it has been created */
   if(i_created)
   {
-    pthread_kill(thread, SIGUSR1);
-    pthread_join(thread, NULL);
-    fclose(fifo);
+    i_terminate = 1;
+    client = g_socket_client_new();
+    g_socket_client_connect_to_host(client, "127.0.0.1", i_port, NULL, NULL);
+    g_thread_join(socket_thread);
   }
 }
+
+
+

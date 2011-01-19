@@ -21,7 +21,7 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 CC = gcc
-GLIBC = `pkg-config --cflags --libs glib-2.0`
+GLIBC = `pkg-config --cflags --libs glib-2.0` -lgthread-2.0 -lgio-2.0
 CFLAGS_LOCAL = $(GLIBC) $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpthread
 DEF   = -DAGENT_DIR='"$(DESTDIR)$(AGENTDIR)"' -DLOG_DIR='"$(LOGDIR)"'
 FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' -DPROJECT_GROUP='"$(PROJECTGROUP)"'
