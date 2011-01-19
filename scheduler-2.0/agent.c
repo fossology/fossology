@@ -32,7 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* unix library includes */
 #include <fcntl.h>
 #include <limits.h>
-#include <pthread.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -85,7 +84,7 @@ struct agent_internal
     host host_machine;    ///< the host that this agent will start on
     /* thread management */
     agent_status status;  ///< the state of execution the agent is currently in
-    pthread_t thread;     ///< the thread that communicates with this agent
+    GThread* thread;      ///< the thread that communicates with this agent
     time_t check_in;      ///< the time that the agent last generated anything
     pid_t pid;            ///< the pid of the process this agent is running in
     /* pipes connecting to the child */
@@ -219,7 +218,7 @@ int agent_test(char* name, meta_agent ma, job j)
  *
  * @param a the agent that will be listened on
  */
-void listen(agent a)
+void agent_listen(agent a)
 {
   /* locals */
   char buffer[1024];          // buffer to store c strings read from agent, size is arbitraryssed
@@ -360,7 +359,7 @@ void* spawn(void* passed)
     //close(a->to_parent);
     //close(a->from_parent);
     event_signal(agent_create_event, a);
-    listen(a);
+    agent_listen(a);
   }
   /* error case */
   else
@@ -544,7 +543,7 @@ agent agent_init(char* meta_agent_name, host host_machine, job j)
   }
 
   /* spawn the listen thread */
-  pthread_create(&a->thread, NULL, spawn, a);
+  a->thread = g_thread_create(spawn, a, 1, NULL);
   return a;
 }
 
@@ -624,8 +623,8 @@ void agent_death_event(void* pids)
     if(a->status != AG_CLOSING)
     {
       errno = ECONNABORTED;
-      ERROR("JOB[%d].AGENT[%d]: agent closed unexpectedly",
-          job_id(a->owner), a->pid);
+      ERROR("JOB[%d].AGENT[%d]: agent closed unexpectedly, agent status was %s",
+          job_id(a->owner), a->pid, status_strings[a->status]);
       agent_fail(a);
     }
     else
@@ -742,9 +741,8 @@ void agent_fail(agent a)
   job_fail_agent(a->owner, a);
   if(write(a->to_parent, "@@@1\n", 5) != 5)
   {
-    ERROR("JOB[%d].AGENT[%d]: Failed to kill agent thread cleanly, using fail safe method",
+    ERROR("JOB[%d].AGENT[%d]: Failed to kill agent thread cleanly",
         job_id(a->owner), a->pid)
-    pthread_kill(a->thread, SIGUSR1);
   }
   job_update(a->owner);
 }
@@ -765,7 +763,7 @@ void agent_close(agent a)
   {
     job_remove_agent(a->owner, a);
     // TODO change to detach when the scheduler is done
-    pthread_join(a->thread, NULL);
+    g_thread_join(a->thread);
 
     if(verbose > 1)
       lprintf("JOB[%d].AGENT[%d]: successfully removed from the system\n",

@@ -23,8 +23,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 #include <stdio.h>
 
-/* unix library includes */
-#include <pthread.h>
+/* glib include */
+#include <glib.h>
 
 /* ************************************************************************** */
 /* **** Data Types ********************************************************** */
@@ -40,9 +40,9 @@ struct event_internal {
 
 /** internal structure for the event loop */
 struct event_loop_internal {
-  pthread_cond_t wait_t;        ///< the wait condition used for threads taking from the queue
-  pthread_cond_t wait_p;        ///< the wait condition used for threads placing into the queue
-  pthread_mutex_t lock;         ///< the mutex that will lockt he concurrent queue
+  GCond* wait_t;                ///< the wait condition used for threads taking from the queue
+  GCond* wait_p;                ///< the wait condition used for threads placing into the queue
+  GMutex* lock;                 ///< the mutex that will lockt he concurrent queue
   event queue[EVENT_LOOP_SIZE]; ///< the circular queue for the event loop
   int head, tail;               ///< the front and back of the queue
   int terminated;               ///< flag that signals the end of the event loop
@@ -76,9 +76,9 @@ event_loop event_loop_get()
     return &vl_singleton;
   }
 
-  pthread_cond_init( &vl_singleton.wait_t, NULL);
-  pthread_cond_init( &vl_singleton.wait_p, NULL);
-  pthread_mutex_init(&vl_singleton.lock,   NULL);
+  vl_singleton.wait_t = g_cond_new();
+  vl_singleton.wait_p = g_cond_new();
+  vl_singleton.lock = g_mutex_new();
 
   memset(vl_singleton.queue, 0, sizeof(vl_singleton.queue));
   vl_singleton.head = vl_singleton.tail = 0;
@@ -102,6 +102,10 @@ void event_loop_destroy(event_loop vl)
       event_destroy(vl->queue[i]);
     }
   }
+
+  g_cond_free(vl->wait_p);
+  g_cond_free(vl->wait_t);
+  g_mutex_free(vl->lock);
 }
 
 /**
@@ -120,15 +124,15 @@ int event_loop_put(event_loop vl, event e)
   {
     return 0;
   }
-  pthread_mutex_lock(&vl->lock);
+  g_mutex_lock(vl->lock);
 
   /* check to see if the queue is full */
   while((vl->tail + 1) % EVENT_LOOP_SIZE == vl->head)
   {
-    pthread_cond_wait(&vl->wait_p, &vl->lock);
+    g_cond_wait(vl->wait_p, vl->lock);
     if(vl->terminated)
     {
-      pthread_mutex_unlock(&vl->lock);
+      g_mutex_unlock(vl->lock);
       return 0;
     }
   }
@@ -138,8 +142,8 @@ int event_loop_put(event_loop vl, event e)
   vl->tail = (vl->tail + 1) % EVENT_LOOP_SIZE;
 
   /* clean up for the end of the function */
-  pthread_cond_signal(&vl->wait_t);
-  pthread_mutex_unlock(&vl->lock);
+  g_cond_signal(vl->wait_t);
+  g_mutex_unlock(vl->lock);
   return 1;
 }
 
@@ -160,15 +164,15 @@ event event_loop_take(event_loop vl)
   {
     return NULL;
   }
-  pthread_mutex_lock(&vl->lock);
+  g_mutex_lock(vl->lock);
 
   /* check if the queue is empty, if so wait for something */
   while(vl->head == vl->tail)
   {
-    pthread_cond_wait(&vl->wait_t, &vl->lock);
+    g_cond_wait(vl->wait_t, vl->lock);
     if(vl->terminated)
     {
-      pthread_mutex_unlock(&vl->lock);
+      g_mutex_unlock(vl->lock);
       return NULL;
     }
   }
@@ -179,8 +183,8 @@ event event_loop_take(event_loop vl)
   vl->head = (vl->head + 1) % EVENT_LOOP_SIZE;
 
   /* clean up for the end of the function */
-  pthread_cond_signal(&vl->wait_p);
-  pthread_mutex_unlock(&vl->lock);
+  g_cond_signal(vl->wait_p);
+  g_mutex_unlock(vl->lock);
   return ret;
 }
 
@@ -279,15 +283,15 @@ int event_loop_enter(void(*update)(void))
   event_loop vl = event_loop_get();
 
   /* start by checking to make sure this is the only thread in this loop */
-  pthread_mutex_lock(&vl->lock);
+  g_mutex_lock(vl->lock);
   if(vl->occupied)
   {
-    pthread_mutex_unlock(&vl->lock);
+    g_mutex_unlock(vl->lock);
     return 0x01;
   }
   vl->occupied = 1;
   vl->terminated = 0;
-  pthread_mutex_unlock(&vl->lock);
+  g_mutex_unlock(vl->lock);
 
   /* from here on out, this is the only thread in this event loop     */
   /* the loop to execute events is very simple, grab event, run event */
@@ -310,14 +314,14 @@ int event_loop_enter(void(*update)(void))
 void event_loop_terminate()
 {
   event_loop vl = event_loop_get();
-  pthread_mutex_lock(&vl->lock);
+  g_mutex_lock(vl->lock);
 
   vl->terminated = 1;
   vl->occupied = 0;
-  pthread_cond_broadcast(&vl->wait_p);
-  pthread_cond_broadcast(&vl->wait_t);
+  g_cond_broadcast(vl->wait_p);
+  g_cond_broadcast(vl->wait_t);
 
-  pthread_mutex_unlock(&vl->lock);
+  g_mutex_unlock(vl->lock);
 }
 
 

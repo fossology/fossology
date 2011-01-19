@@ -37,6 +37,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <pwd.h>
 #include <grp.h>
 
+/* glib includes */
+#include <glib.h>
+#include <gio/gio.h>
+
 char* process_name = "fossology-scheduler";
 
 #ifndef PROJECT_USER
@@ -102,9 +106,6 @@ void prnt_sig(int signo)
     case SIGALRM:
       event_signal(agent_update_event, NULL);
       alarm(CHECK_TIME);
-      break;
-    case SIGUSR1:
-      pthread_exit(0);
       break;
   }
 }
@@ -380,6 +381,8 @@ int main(int argc, char** argv)
   /* ********************** */
   /* *** handle options *** */
   /* ********************** */
+  g_thread_init(NULL);
+  g_type_init();
   interface_init();
   set_usr_grp();
   load_config();
@@ -396,7 +399,6 @@ int main(int argc, char** argv)
   /* ********************** */
   signal(SIGCHLD, chld_sig);
   signal(SIGALRM, prnt_sig);
-  signal(SIGUSR1, prnt_sig);
   signal(SIGINT,  prnt_sig);
 
   /* ********************** */
