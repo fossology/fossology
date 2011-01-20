@@ -98,8 +98,8 @@ pair_cov.o:  pair.c pair.h cvector.h
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(AGENTDIR)/
-	$(INSTALL_PROGRAM) copyright.dic $(DESTDIR)$(DATADIR)/
-	$(INSTALL_PROGRAM) names.dic $(DESTDIR)$(DATADIR)/
+	$(INSTALL_DATA) copyright.dic $(DESTDIR)$(DATADIR)/
+	$(INSTALL_DATA) names.dic $(DESTDIR)$(DATADIR)/
 	make -C ui-plugin install
 
 uninstall:
