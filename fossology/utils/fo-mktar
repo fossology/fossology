@@ -48,7 +48,7 @@ SVN_REV="`svn info | grep '^Revision:' | awk '{print $2}'`"
 
 TARBASE="fossology-$VERSION"
 # Check for command-line for subversion
-if [ "$1" == "-s" ]; then
+if [ "$1" = "-s" ]; then
    TARBASE="fossology-$VERSION-$SVN_REV"
 fi
 
