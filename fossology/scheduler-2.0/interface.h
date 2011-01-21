@@ -18,11 +18,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef INTERFACE_H_INCLUDE
 #define INTERFACE_H_INCLUDE
 
+#include <glib.h>
+
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
 void interface_init();
 void interface_destroy();
+
+/* ************************************************************************** */
+/* **** Access Functions **************************************************** */
+/* ************************************************************************** */
+
+void set_port(int port_n);
 
 #endif /* INTERFACE_H_INCLUDE */
