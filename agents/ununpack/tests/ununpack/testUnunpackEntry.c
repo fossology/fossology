@@ -126,35 +126,9 @@ void testUnunpackEntryOptionInvalid()
   }
 }
 
-/**
- * @brief the option Q, Using database queue system.
- */
-void testUnunpackEntryUsingDB()
-{
-  int argc = 5;
-  char *argv[] = {"../ununpack", "-qCRQi",
-         "./test-data/testdata4unpack/rpm.tar", "-d", "./test-result/"}; // option H is invalid
-  deleteTmpFiles("./test-result/");
-
-  int Pid = fork();
-  if (Pid == 0)
-  {
-    UnunpackEntry(argc, argv);
-  } else
-  {
-    int status;
-    waitpid(Pid, &status, 0);
-    int code = WEXITSTATUS(status);
-    existed = file_dir_existed("./test-result/rpm.tar.dir/yast2-trans-bn.rpm.unpacked.dir/yast2-trans-bn.rpm.dir/usr/share/doc/packages/yast2-trans-bn/status.txt");
-    CU_ASSERT_EQUAL(existed, 0); // not existing
-    CU_ASSERT_EQUAL(code, 21); 
-  }
-}
-
 CU_TestInfo UnunpackEntry_testcases[] =
 {
     {"Testing the function UnunpackEntry, option is invalid:", testUnunpackEntryOptionInvalid},
-    {"Testing the function UnunpackEntry, using database:", testUnunpackEntryUsingDB},
     {"Testing the function UnunpackEntry, multy process :", testUnunpackEntryNormalMultyProcess},
 //    {"Testing testUnunpackEntryNormal:", testUnunpackEntryNormal},
     {"Testing the function UnunpackEntry, delete unpack result:", testUnunpackEntryNormalDeleteResult},

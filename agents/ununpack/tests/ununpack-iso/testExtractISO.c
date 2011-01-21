@@ -36,7 +36,7 @@ void testExtractISO1()
   Filename = "./test-data/testdata4unpack/imagefile.iso";
   MkDirs("./test-result/imagefile.iso.dir");
   Result = ExtractISO(Filename, "./test-result/imagefile.iso.dir");
-  existed = file_dir_existed("./test-result/imagefile.iso.dir/test.cpio");
+  existed = file_dir_existed("./test-result/imagefile.iso.dir/TEST.CPI");
   CU_ASSERT_EQUAL(Result, 0); 
   CU_ASSERT_EQUAL(existed, 1); 
 }
