@@ -294,12 +294,13 @@ gint int_compare(gconstpointer a, gconstpointer b, gpointer user_data)
  */
 void usage(char* app_name)
 {
-  fprintf(stderr, "Usage: %s [options] < 'typed command'\n", app_name);
+  fprintf(stderr, "Usage: %s [options]\n", app_name);
   fprintf(stderr, "  options:\n");
   fprintf(stderr, "    -d :: Run as a daemon, causes init to own the process\n");
   fprintf(stderr, "    -h :: Print the usage for the program and exit\n");
   fprintf(stderr, "    -i :: Initialize the database and exit\n");
   fprintf(stderr, "    -L :: Print to this file instead of default log file\n");
+  fprintf(stderr, "    -p :: set the port that the scheduler should listen on\n");
   fprintf(stderr, "    -t :: Test run every type of agent, then quit\n");
   fprintf(stderr, "    -T :: Test run every type of agent, then run normally\n");
   fprintf(stderr, "    -v :: set verbose to true, used for debugging\n");
@@ -339,7 +340,7 @@ int main(int argc, char** argv)
   /* ********************* */
   /* *** parse options *** */
   /* ********************* */
-  while((c = getopt(argc, argv, "diL:tTv:h")) != -1)
+  while((c = getopt(argc, argv, "diL:ptTv:h")) != -1)
   {
     switch(c)
     {
@@ -351,6 +352,9 @@ int main(int argc, char** argv)
         break;
       case 'L':
         set_log(optarg);
+        break;
+      case 'p':
+        set_port(atoi(optarg));
         break;
       case 't':
         test = 2;
@@ -383,8 +387,8 @@ int main(int argc, char** argv)
   /* ********************** */
   g_thread_init(NULL);
   g_type_init();
-  interface_init();
   set_usr_grp();
+  interface_init();
   load_config();
 
   if(run_daemon)

@@ -279,6 +279,12 @@ void job_restart(job j)
   GList* iter;
 
   TEST_NULV(j);
+  if(j->paused)
+  {
+    ERROR("attempt to restart job %d failed, job wasn't paused", j->id);
+    return;
+  }
+
   j->paused = 0;
   for(iter = j->running_agents; iter != NULL; iter = iter->next)
     agent_write(iter->data, "OK\n", 3);

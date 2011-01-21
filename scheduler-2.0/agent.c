@@ -120,6 +120,31 @@ char* status_strings[] = {
 /* ************************************************************************** */
 
 /**
+ * Simple wrapper function for printing to the log file. This will prepend the job
+ * id, the agent type, and the agent pid to the begging of anything that is printed
+ * to the log file.
+ *
+ * @param a the agent that is printing to the log file
+ * @param fmt the format string that is passed to the lprintf_v function
+ * @return if the write succeeded
+ */
+int agent_printf(agent a, const char* fmt, ...)
+{
+  va_list args;
+  int rc;
+
+  if(!a) return 0;
+  if(!fmt) return 0;
+
+  va_start(args, fmt);
+  lprintf("JOB[%d].%s[%d]: ", job_id(a->owner), a->meta_data->name, a->pid);
+  rc = lprintf_v(fmt, args);
+  va_end(args);
+
+  return rc;
+}
+
+/**
  * This function will be called by g_tree_foreach() which is the reason for its
  * formatting. This will close all of the agent's pipes
  *
@@ -236,14 +261,15 @@ void agent_listen(agent a)
     /* get message from agent */
     if(fgets(buffer, sizeof(buffer), a->read) == NULL)
     {
-      lprintf_c("T_FATAL %s.%d: JOB[%d].AGENT[%d] pipe from shild closed\nT_FATAL errno is: %s\n"
-          __FILE__, __LINE__, job_id(a->owner), a->pid, strerror(errno));
+      lprintf_c("T_FATAL %s.%d: JOB[%d].%s[%d] pipe from child closed\nT_FATAL errno is: %s\n"
+          __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
     }
 
     if(verbose > 2)
     {
       buffer[strlen(buffer) - 1] = '\0';
-      lprintf_c("JOB[%d].AGENT[%d]: received: \"%s\"\n", job_id(a->owner), a->pid, buffer);
+      lprintf_c("JOB[%d].%s[%d]: received: \"%s\"\n",
+          job_id(a->owner), a->meta_data->name, a->pid, buffer);
     }
 
     /* the agent has finished execution, finish this thread */
@@ -251,9 +277,10 @@ void agent_listen(agent a)
     /* check for a message from scheduler */
     else if(strncmp(buffer, "@@@0", 4) == 0 && a->updated)
     {
-      for(i = 0; i < CHECKOUT_SIZE && a->data[i]; i++) {
+      for(i = 0; i < CHECKOUT_SIZE && a->data[i]; i++)
         aprintf(a, "%s\n", a->data[i]);
-      }
+      if(i < CHECKOUT_SIZE)
+        aprintf(a, "END\n");
       fflush(a->write);
       a->updated = 0;
     }
@@ -281,8 +308,8 @@ void agent_listen(agent a)
   }
 
   if(verbose > 2)
-    lprintf_c("JOB[%d].AGENT[%d]: communication thread closing\n",
-        job_id(a->owner), a->pid);
+    lprintf_c("JOB[%d].%s[%d]: communication thread closing\n",
+        job_id(a->owner), a->meta_data->name, a->pid);
 }
 
 /**
@@ -317,7 +344,7 @@ void* spawn(void* passed)
     /* set the child's stdin and stdout to use the pipes */
     dup2(a->from_parent, fileno(stdin));
     dup2(a->to_parent, fileno(stdout));
-    // TODO dup2(a->to_parent, fileno(stderr));
+    dup2(a->to_parent, fileno(stderr));
 
     /* close all the unnecessary file descriptors */
     g_tree_foreach(agents, (GTraverseFunc)agent_close_fd, a);
@@ -371,11 +398,18 @@ void* spawn(void* passed)
   return NULL;
 }
 
+/**
+ * TODO
+ *
+ * @param a
+ * @param new_status
+ */
 void transition(agent a, agent_status new_status)
 {
   if(verbose > 2)
-    lprintf("JOB[%d].AGENT[%d]: agent status changed: %s -> %s\n",
-        job_id(a->owner), a->pid, status_strings[a->status], status_strings[new_status]);
+    lprintf("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
+        job_id(a->owner), a->meta_data->name, a->pid,
+        status_strings[a->status], status_strings[new_status]);
   a->status = new_status;
 }
 
@@ -561,8 +595,7 @@ agent agent_copy(agent a)
     return NULL;
 
   if(verbose > 2)
-    lprintf("JOB[%d].AGENT[%d] creating copy of agent\n",
-        job_id(a->owner), a->pid);
+    agent_printf(a, "creating copy of agent\n");
 
   agent cpy = agent_init(a->meta_data->name, a->host_machine, a->owner);
   cpy->data = a->data;
@@ -623,8 +656,8 @@ void agent_death_event(void* pids)
     if(a->status != AG_CLOSING)
     {
       errno = ECONNABORTED;
-      ERROR("JOB[%d].AGENT[%d]: agent closed unexpectedly, agent status was %s",
-          job_id(a->owner), a->pid, status_strings[a->status]);
+      ERROR("JOB[%d].%s[%d]: agent closed unexpectedly, agent status was %s",
+          job_id(a->owner), a->meta_data->name, a->pid, status_strings[a->status]);
       agent_fail(a);
     }
     else
@@ -647,8 +680,7 @@ void agent_create_event(agent a)
   TEST_NULV(a);
 
   if(verbose > 1)
-    lprintf("JOB[%d].AGENT[%d]: agent successfully spawned\n",
-        job_id(a->owner), a->pid);
+    agent_printf(a, "agent successfully spawned\n");
 
   g_tree_insert(agents, &a->pid, a);
   transition(a, AG_SPAWNED);
@@ -667,8 +699,7 @@ void agent_ready_event(agent a)
   {
     transition(a, AG_RUNNING);
     if(verbose > 1)
-      lprintf("JOB[%d].AGENT[%d]: %s agent successfully created\n",
-          job_id(a->owner), a->pid, a->meta_data->name);
+      agent_printf(a, "agent successfully created\n");
   }
 
   if(a->generation == 0)
@@ -685,8 +716,8 @@ void agent_ready_event(agent a)
       a->generation = 0;
       if(write(a->to_parent, "@@@0\n", 5) != 5)
       {
-        ERROR("JOB[%d].AGENT[%d]: failed sending new data to agent",
-            job_id(a->owner), a->pid);
+        ERROR("JOB[%d].%s[%d]: failed sending new data to agent",
+            job_id(a->owner), a->meta_data->name, a->pid);
         agent_fail(a);
       }
     }
@@ -714,16 +745,16 @@ void agent_restart(agent a, agent ref)
   TEST_NULV(a);
   TEST_NULV(ref);
   if(verbose > 2)
-    lprintf("JOB[%d].AGENT[%d]: restarting agent to finish data from AGENT[%d]\n",
-        job_id(a->owner), a->pid, ref->pid);
+    agent_printf(a, "restarting agent to finish data from %s[%d]\n",
+        ref->meta_data->name, ref->pid);
 
   a->data = ref->data;
   a->updated = 1;
   a->generation = ref->generation + 1;
   if(write(a->to_parent, "@@@0\n", 5) != 5)
   {
-    ERROR("JOB[%d].AGENT[%d]: failed to restart agent with new data",
-        job_id(a->owner), a->pid);
+    ERROR("JOB[%d].%s[%d]: failed to restart agent with new data",
+        job_id(a->owner), a->meta_data->name, a->pid);
     agent_fail(a);
   }
 }
@@ -741,8 +772,8 @@ void agent_fail(agent a)
   job_fail_agent(a->owner, a);
   if(write(a->to_parent, "@@@1\n", 5) != 5)
   {
-    ERROR("JOB[%d].AGENT[%d]: Failed to kill agent thread cleanly",
-        job_id(a->owner), a->pid)
+    ERROR("JOB[%d].%s[%d]: Failed to kill agent thread cleanly",
+        job_id(a->owner), a->meta_data, a->pid);
   }
   job_update(a->owner);
 }
@@ -766,8 +797,7 @@ void agent_close(agent a)
     g_thread_join(a->thread);
 
     if(verbose > 1)
-      lprintf("JOB[%d].AGENT[%d]: successfully removed from the system\n",
-          job_id(a->owner), a->pid);
+      agent_printf(a, "successfully removed from the system\n");
 
     g_tree_remove(agents, &a->pid);
   }
@@ -803,8 +833,8 @@ int aprintf(agent a, const char* fmt, ...)
   {
     vsprintf(buf, fmt, args);
     buf[strlen(buf) - 1] = '\0';
-    lprintf_c("JOB[%d].AGENT[%d]: sent to agent \"%s\"\n",
-        job_id(a->owner), a->pid, buf);
+    lprintf_c("JOB[%d].%s[%d]: sent to agent \"%s\"\n",
+        job_id(a->owner), a->meta_data->name, a->pid, buf);
   }
   rc = vfprintf(a->write, fmt, args);
   fflush(a->write);

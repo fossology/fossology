@@ -21,13 +21,14 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 CC = gcc
-GLIBC = `pkg-config --cflags --libs glib-2.0` -lgthread-2.0 -lgio-2.0
-CFLAGS_LOCAL = $(GLIBC) $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpthread
+GLIB_FLAGS = `pkg-config --cflags --libs glib-2.0` -lgthread-2.0 -lgio-2.0
+CFLAGS_LOCAL = $(GLIB_FLAGS) $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpthread
 DEF   = -DAGENT_DIR='"$(DESTDIR)$(AGENTDIR)"' -DLOG_DIR='"$(LOGDIR)"'
 FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' -DPROJECT_GROUP='"$(PROJECTGROUP)"'
 DEPEN = Makefile
 
 EXE = fossology-scheduler
+CLI = fossology-cli
 
 #######################
 # objects and headers #
@@ -51,10 +52,13 @@ HEAD = agent.h \
 # executable build rules #
 ##########################
 
-all: $(EXE)
+all: $(EXE) $(CLI)
 
 $(EXE): scheduler.c $(OBJS) $(VARS) $(HEAD) $(DEPEN)
-	$(CC) scheduler.c $(OBJS) $(DEF) $(FODEF) $(CFLAGS_LOCAL) $(GLIBC) -o $@
+	$(CC) scheduler.c $(OBJS) $(DEF) $(FODEF) $(CFLAGS_LOCAL) -o $@
+
+$(CLI): schedulerCLI.c $(DEPEN)
+	$(CC) schedulerCLI.c $(CFLAGS_LOCAL) -o $@
 
 #######################
 # library buidl rules #
