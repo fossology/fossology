@@ -60,7 +60,7 @@ class rhelTest extends fossologyTestCase
     global $URL;
 
     $licBaseLine = array(
-    'No License Found' => 6906,
+    'No License Found' => 6913,
     'Apache_v2.0' => 858,
     'ATT' => 812,
     'GPL_v2+' => 289,
@@ -82,7 +82,7 @@ class rhelTest extends fossologyTestCase
     'BSD' => 20,
     'Apache' => 17,
     'GPL' => 14,
-    'GPL_v2' => 12,
+    'GPL_v2' => 13,
     'Indemnity' => 11,
     'GPL-possibility' => 9,
     'Public-domain-claim' => 9,
@@ -103,8 +103,8 @@ class rhelTest extends fossologyTestCase
     'NOT-public-domain' => 3,
     'Apache_v1.1' => 2,
     'CMU-possibility' => 2,
-    'GFDL_v1.1' => 2,
-    'GFDL_v1.2+' => 2,
+    'GFDL_v1.1' => 3,
+    'GFDL_v1.2+' => 3,
     'MIT' => 2,
     'MPL' => 2,
     'Open-Publication_v1.0' => 2,
@@ -125,6 +125,7 @@ class rhelTest extends fossologyTestCase
     'RedHat-EULA' => 1,
     'RedHat(Non-commercial)' => 1,
     'Same-license-as' => 1,
+    'See-file(COPYING)' => 1,
     'Sun' => 1,
     'Sun-BCLA' => 1,
     'Sun-possibility' => 1,
@@ -136,10 +137,10 @@ class rhelTest extends fossologyTestCase
     );
 
     $licenseSummary = array(
-      'Unique licenses'        => 73,
-      'Licenses found'         => 3273,
-      'Files with no licenses' => 6906,
-      'Files'                  => 12532
+      'Unique licenses'        => 74,
+      'Licenses found'         => 3277,
+      'Files with no licenses' => 6913,
+      'Files'                  => 12595
     );
 
 
@@ -147,7 +148,7 @@ class rhelTest extends fossologyTestCase
 
     $name = 'RedHat.tar.gz';
     $safeName = escapeDots($name);
-    print "safeName is:$safeName\n";
+    //print "safeName is:$safeName\n";
     $page = $this->mybrowser->clickLink('Browse');
     $page = $this->mybrowser->clickLink('Testing');
     $this->assertTrue($this->myassertText($page, "/$safeName/"),
