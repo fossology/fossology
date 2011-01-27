@@ -71,7 +71,7 @@ char *Pfile = NULL;
 char *Pfile_Pk = NULL; /* PK for *Pfile */
 char *Upload_Pk = NULL; /* PK for upload table */
 void *DB=NULL;	/* the DB repository */
-void *DBTREE=NULL;	/* second DB repository for uploadtree */
+PGconn *PGconn4DB = NULL; /* PGconn from DB */
 int Agent_pk=-1;	/* agent ID */
 #define MAXSQL	4096
 char SQL[MAXSQL];
@@ -103,15 +103,6 @@ void deleteTmpFiles(char *dir)
   }
 }
 // add by larry, end
-
-/*********************************************************
- MyDBaccess(): MyDBaccess with debugging wrapper.
- *********************************************************/
-int	MyDBaccess	(void *VDB, char *SQL)
-{
-  if (Verbose) fprintf(stderr,"SQL[%s]: %s\n",VDB==DBTREE ? "DBTREE" : "DB",SQL);
-  return(DBaccess(VDB,SQL));
-} /* MyDBaccess() */
 
 /*********************************************************
  AlarmDisplay(): While running, periodically display the
@@ -146,7 +137,6 @@ void	SafeExit	(int rc)
 {
   fflush(stdout);
   if (DB) DBclose(DB);
-  if (DBTREE) DBclose(DBTREE);
   exit(rc);
 } /* SafeExit() */
 
@@ -171,7 +161,7 @@ void RemovePostfix(char *Name)
 void	InitCmd	()
 {
   int i;
-  int rc;
+  PGresult *result;
 
   /* clear existing indexes */
   for(i=0; CMD[i].Magic != NULL; i++)
@@ -179,38 +169,42 @@ void	InitCmd	()
     CMD[i].DBindex = -1; /* invalid value */
     }
 
-  if (!DB) return; /* DB must be open */
+  if (!PGconn4DB) return; /* DB must be open */
 
   /* Load them up! */
   for(i=0; CMD[i].Magic != NULL; i++)
-    {
+  {
     if (CMD[i].Magic[0] == '\0') continue;
 ReGetCmd:
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT mimetype_pk FROM mimetype WHERE mimetype_name = '%s';",CMD[i].Magic);
-    rc = MyDBaccess(DB,SQL); /* SELECT */
-    if (rc < 0)
-	{
-	printf("ERROR: SQL '%s'\n",SQL);
-	SafeExit(4);
-	}
-    else if (DBdatasize(DB) > 0) /* if there is a value */
-	{
-	CMD[i].DBindex = atol(DBgetvalue(DB,0,0));
-	}
-    else /* No value, so add it */
-	{
-	memset(SQL,'\0',MAXSQL);
-	snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('%s');",CMD[i].Magic);
-	rc = MyDBaccess(DB,SQL); /* INSERT INTO mimetype */
-	if (rc < 0)
-	  {
-	  printf("ERROR: SQL '%s'\n",SQL);
-	  SafeExit(5);
-	  }
-	else goto ReGetCmd;
-	}
+    result =  PQexec(PGconn4DB, SQL); /* SELECT */
+    if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__)) 
+    {
+      SafeExit(4);
     }
+    else if (PQntuples(result) > 0) /* if there is a value */
+    {  
+       CMD[i].DBindex = atol(PQgetvalue(result,0,0));
+       PQclear(result);
+    }
+    else /* No value, so add it */
+    {
+      PQclear(result);
+      memset(SQL,'\0',MAXSQL);
+      snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('%s');",CMD[i].Magic);
+      result =  PQexec(PGconn4DB, SQL); /* INSERT INTO mimetype */
+      if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+      {
+        SafeExit(5);
+      }
+      else 
+      {
+        PQclear(result);
+        goto ReGetCmd;
+      }
+    }
+  }
 } /* InitCmd() */
 
 /*************************************************
@@ -1137,7 +1131,7 @@ void	DebugContainerInfo	(ContainerInfo *CI)
  ***************************************************/
 int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 {
-  int rc;
+  PGresult *result;
   char *Val; /* string result from SQL query */
 
   /* idiot checking */
@@ -1147,78 +1141,109 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
 	Fuid,Fuid+41,Fuid+74);
-  rc=MyDBaccess(DB,SQL); /* SELECT */
-
-  if (rc < 0)
-	{
-	printf("FATAL: Database access error.\n");
-	printf("LOG: Database access error in ununpack: %s\n",SQL);
-	SafeExit(14);
-	}
+  result =  PQexec(PGconn4DB, SQL); /* SELECT */
+  if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+  {
+    SafeExit(33);
+  }
 
   /* add it if it was not found */
-  if (DBdatasize(DB) <= 0)
-    {
+  if (PQntuples(result) == 0)
+  {
     /* blindly insert to pfile table in database (don't care about dups) */
     /** If TWO ununpacks are running at the same time, they could both
         create the same pfile at the same time.  Ignore the dup constraint. */
+    PQclear(result);
     memset(SQL,'\0',MAXSQL);
     if (CMD[CI->PI.Cmd].DBindex > 0)
-	{
-	snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size,pfile_mimetypefk) VALUES ('%.40s','%.32s','%s','%ld');",
+    {
+      snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size,pfile_mimetypefk) VALUES ('%.40s','%.32s','%s','%ld');",
 	Fuid,Fuid+41,Fuid+74,CMD[CI->PI.Cmd].DBindex);
-	}
+    }
     else
-	{
-	snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size) VALUES ('%.40s','%.32s','%s');",
+    {
+      snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size) VALUES ('%.40s','%.32s','%s');",
 	Fuid,Fuid+41,Fuid+74);
-	}
-    rc=MyDBaccess(DB,SQL); /* INSERT INTO pfile */
-#if 0
-    if (rc >= 0) TotalItems++;
-#endif
+    }
+    result =  PQexec(PGconn4DB, SQL); /* INSERT INTO pfile */
+    if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+    {
+      SafeExit(34);
+    }
+    PQclear(result);
 
     /* Now find the pfile_pk.  Since it might be a dup, we cannot rely
        on currval(). */
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
 	Fuid,Fuid+41,Fuid+74);
-    rc=MyDBaccess(DB,SQL); /* SELECT */
-    if (rc < 0)
-	{
-	printf("FATAL: Database access error.\n");
-	printf("LOG: Database access error in ununpack: %s\n",SQL);
-	SafeExit(15);
-	}
+    result =  PQexec(PGconn4DB, SQL);  /* SELECT */
+    if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+    {
+      SafeExit(15);
     }
+  }
 
   /* Now *DB contains the pfile_pk information */
-  Val = DBgetvalue(DB,0,0);
+  Val = PQgetvalue(result,0,0);
   if (Val)
-	{
-	CI->pfile_pk = atol(Val);
-	if (Verbose) fprintf(stderr,"pfile_pk = %ld\n",CI->pfile_pk);
-	/* For backwards compatibility... Do we need to update the mimetype? */
-	if ((CMD[CI->PI.Cmd].DBindex > 0) &&
-	    (atol(DBgetvalue(DB,0,1)) != CMD[CI->PI.Cmd].DBindex))
-	    {
-	    MyDBaccess(DB,"BEGIN;");
-	    memset(SQL,'\0',MAXSQL);
-	    snprintf(SQL,MAXSQL,"SELECT * FROM pfile WHERE pfile_pk = '%ld' FOR UPDATE;", CI->pfile_pk);
-	    MyDBaccess(DB,SQL); /* lock pfile */
-	    memset(SQL,'\0',MAXSQL);
-	    snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld' WHERE pfile_pk = '%ld';",
+  {
+    CI->pfile_pk = atol(Val);
+    if (Verbose) fprintf(stderr,"pfile_pk = %ld\n",CI->pfile_pk);
+    /* For backwards compatibility... Do we need to update the mimetype? */
+    if ((CMD[CI->PI.Cmd].DBindex > 0) &&
+	    (atol(PQgetvalue(result,0,1)) != CMD[CI->PI.Cmd].DBindex))
+    {
+      #if 0
+      PQclear(result);
+      memset(SQL,'\0',MAXSQL);
+      snprintf(SQL,MAXSQL,"BEGIN;");
+      result = PQexec(PGconn4DB, SQL);
+      if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+      {
+        SafeExit(45);
+      }
+      PQclear(result);
+      memset(SQL,'\0',MAXSQL);
+      snprintf(SQL,MAXSQL,"SELECT * FROM pfile WHERE pfile_pk = '%ld' FOR UPDATE;", CI->pfile_pk);
+      result =  PQexec(PGconn4DB, SQL); /* lock pfile */
+      if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+      {
+        SafeExit(35);
+      }
+      #endif
+      PQclear(result);
+      memset(SQL,'\0',MAXSQL);
+      snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld' WHERE pfile_pk = '%ld';",
 		CMD[CI->PI.Cmd].DBindex, CI->pfile_pk);
-	    rc=MyDBaccess(DB,SQL); /* UPDATE pfile */
-	    if (rc < 0) fprintf(stderr,"ERROR: SQL '%s'\n",SQL);
-	    MyDBaccess(DB,"COMMIT;");
-	    }
-	}
+      result =  PQexec(PGconn4DB, SQL); /* UPDATE pfile */
+      if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+      {
+        SafeExit(36);
+      }
+      PQclear(result);
+      #if 0
+      memset(SQL,'\0',MAXSQL);
+      snprintf(SQL,MAXSQL,"COMMIT;");
+      result = PQexec(PGconn4DB, SQL);      
+      if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+      {
+        SafeExit(37);
+      }
+      PQclear(result);      
+      #endif
+    }
     else
-	{
-	CI->pfile_pk = -1;
-	return(0);
-	}
+    {
+      PQclear(result);
+    }
+  }
+  else
+  {
+    PQclear(result);
+    CI->pfile_pk = -1;
+    return(0);
+  }
 
   return(1);
 } /* DBInsertPfile() */
@@ -1234,8 +1259,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 {
   char UfileName[1024];
-  int rc;
-
+  
+  PGresult *result;
   if (!Upload_Pk) return(-1); /* should never happen */
   // printf("=========== BEFORE ==========\n"); DebugContainerInfo(CI);
 
@@ -1250,11 +1275,16 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 	{
 	char *ufile_name;
 	snprintf(UfileName,sizeof(UfileName),"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
-	MyDBaccess(DB,UfileName);
+        result =  PQexec(PGconn4DB, UfileName);
+        if (checkPQresult(PGconn4DB, result, UfileName, __FILE__, __LINE__))
+        {
+          SafeExit(38);
+        }
 	memset(UfileName,'\0',sizeof(UfileName));
-	ufile_name = DBgetvalue(DB,0,0);
+	ufile_name = PQgetvalue(result,0,0);
+        PQclear(result);
 	if (strchr(ufile_name,'/')) ufile_name = strrchr(ufile_name,'/')+1;
-	strncpy(UfileName,ufile_name,sizeof(UfileName)-1);
+        strncpy(UfileName,ufile_name,sizeof(UfileName)-1);
 	}
   else if (CI->Artifact)
 	{
@@ -1290,20 +1320,36 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (parent,pfile_fk,ufile_mode,ufile_name,upload_fk) VALUES (%ld,%ld,%ld,E'%s',%s);",
 	CI->PI.uploadtree_pk, CI->pfile_pk, CI->ufile_mode,
 	UfileName, Upload_Pk);
-    rc=MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
+    result =  PQexec(PGconn4DB, SQL); /* INSERT INTO uploadtree */
+    if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+    {
+      SafeExit(39);
+    }
+    PQclear(result);
     }
   else /* No parent!  This is the first upload! */
     {
     snprintf(SQL,MAXSQL,"INSERT INTO uploadtree (upload_fk,pfile_fk,ufile_mode,ufile_name) VALUES (%s,%ld,%ld,'%s');",
 	Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
-    rc=MyDBaccess(DBTREE,SQL); /* INSERT INTO uploadtree */
+    result =  PQexec(PGconn4DB, SQL); /* INSERT INTO uploadtree */
+    if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+    {
+      SafeExit(41);
+    }
+    PQclear(result);
     }
   /* Find the inserted child */
   memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name=E'%s';",
-    Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName);
-  rc=MyDBaccess(DBTREE,"SELECT currval('uploadtree_uploadtree_pk_seq');");
-  CI->uploadtree_pk = atol(DBgetvalue(DBTREE,0,0));
+  /* snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s AND pfile_fk=%ld AND ufile_mode=%ld AND ufile_name=E'%s';",
+    Upload_Pk, CI->pfile_pk, CI->ufile_mode, UfileName); */
+  snprintf(SQL,MAXSQL,"SELECT currval('uploadtree_uploadtree_pk_seq');");
+  result =  PQexec(PGconn4DB, SQL);
+  if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+  {
+    SafeExit(42);
+  }
+  CI->uploadtree_pk = atol(PQgetvalue(result,0,0));
+  PQclear(result);
   //TotalItems++;
   // printf("=========== AFTER ==========\n"); DebugContainerInfo(CI);
   } 
@@ -1341,8 +1387,8 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
     }
 
   /*****************************************/
-  /* populate DB (skip artifacts) */
-  if (!DB) return(1); /* No DB? Quit! (and say it is unique) */
+  /* populate DB connection (skip artifacts) */
+  if (!PGconn4DB) return(1); /* No DB connection ? Quit! (and say it is unique) */
 
   /* PERFORMANCE NOTE:
      I used to use and INSERT and an UPDATE.
@@ -1668,6 +1714,7 @@ int	Traverse	(char *Filename, char *Basename,
 			 int Recurse, ParentInfo *PI)
 {
   int rc;
+  PGresult *result;
   int i;
   ContainerInfo CI,CImeta;
   int IsContainer=0;
@@ -1869,14 +1916,13 @@ int	Traverse	(char *Filename, char *Basename,
             char *UFileName;
             char SQL[MAXSQL];
             snprintf(SQL, MAXSQL,"SELECT upload_filename FROM upload WHERE upload_pk = %s;",Upload_Pk);
-            MyDBaccess(DB, SQL); // get name of the upload file
-            if (rc < 0)
+            result =  PQexec(PGconn4DB, SQL);  // get name of the upload file
+            if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
             {
-              printf("FATAL: Database access error.\n");
-              printf("LOG: Database access error in ununpack: %s\n", SQL);
-              SafeExit(15);
+              SafeExit(32);
             }
-            UFileName = DBgetvalue(DB,0,0);
+            UFileName = PQgetvalue(result,0,0);
+            PQclear(result);
             if (strchr(UFileName, '/')) UFileName = strrchr(UFileName, '/') + 1;
             memset(UploadFileName, '\0', FILENAME_MAX);
             strncpy(UploadFileName, UFileName, FILENAME_MAX - 1);
@@ -2171,6 +2217,7 @@ int	UnunpackEntry	(int argc, char *argv[])
 {
   int Pid;
   int c;
+  PGresult *result;
   char *NewDir=".";
   int Recurse=0;
   char *ListOutName=NULL;
@@ -2224,17 +2271,21 @@ int	UnunpackEntry	(int argc, char *argv[])
 	case 'Q':
 		UseRepository=1;
 		DB=DBopen();
-		DBTREE=DBopen();
-		if (!DB || !DBTREE)
+		if (!DB)
 		  {
 		  fprintf(stderr,"FATAL: Unable to access database\n");
 		  SafeExit(21);
 		  }
-		if (MyDBaccess(DBTREE,"BEGIN;") < 0)
-		  {
-		  printf("ERROR pfile %s Unable to 'BEGIN' database updates.\n",Pfile_Pk);
-		  SafeExit(22);
-		  }
+                /* get PGconn */
+                PGconn4DB = DBgetconn(DB);
+                memset(SQL,'\0',MAXSQL);
+                snprintf(SQL,MAXSQL,"BEGIN;");
+                result =  PQexec(PGconn4DB, SQL);
+                if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+                {
+                  SafeExit(22);
+                }
+                PQclear(result);
 		signal(SIGALRM,AlarmDisplay);
 		alarm(10);
 		Pfile = getenv("ARG_pfile");
@@ -2244,7 +2295,6 @@ int	UnunpackEntry	(int argc, char *argv[])
 		Upload_Pk = getenv("ARG_upload_pk");
 		if (!Upload_Pk) Upload_Pk = getenv("upload_pk");
 		GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
-	
 		/* Check for all necessary parameters */
 		if (Verbose)
 		  {
@@ -2327,21 +2377,21 @@ int	UnunpackEntry	(int argc, char *argv[])
 	}
   //Begin add by vincent
   if (!ReunpackSwitch && UseRepository)
-	{
-	memset(SQL,'\0',MAXSQL);
-  	snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s limit 1;",Upload_Pk);
-  	int result=MyDBaccess(DB,SQL);
-  	if (result < 0)
-        	{
-        	printf("FATAL: Database access error.\n");
-        	printf("LOG: Database access error in ununpack: %s\n",SQL);
-        	SafeExit(14);
-        	}
-  	if(DBdatasize(DB) <= 0)
-  		{
-		ReunpackSwitch=1;
-		}
-	}
+  {
+    memset(SQL,'\0',MAXSQL);
+    snprintf(SQL,MAXSQL,"SELECT uploadtree_pk FROM uploadtree WHERE upload_fk=%s limit 1;",Upload_Pk);
+    result =  PQexec(PGconn4DB, SQL);
+    if (checkPQresult(PGconn4DB, result, SQL, __FILE__, __LINE__))
+    {
+      SafeExit(14);
+    }
+    if (PQntuples(result) == 0)
+    {
+      ReunpackSwitch=1;
+    }
+    PQclear(result);
+  }
+
   //End add by vincent
   /*** process files ***/
   for( ; optind<argc; optind++)
@@ -2495,19 +2545,25 @@ int	UnunpackEntry	(int argc, char *argv[])
 	  {
 	  memset(SQL,'\0',MAXSQL);
 	  snprintf(SQL,MAXSQL,"UPDATE upload SET upload_mode = upload_mode | (1<<5) WHERE upload_pk = '%s';",Upload_Pk);
-	  MyDBaccess(DBTREE,SQL); /* UPDATE upload */
+          result =  PQexec(PGconn4DB, SQL); /* UPDATE upload */
+          if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
+          {
+            SafeExit(44);
+          }
+          PQclear(result);
 	  }
 
-#if 0
-	/* Debugging code */
-	if (DBTREE && (MyDBaccess(DBTREE,"ROLLBACK;") < 0))
-#else
-	if (DBTREE && (MyDBaccess(DBTREE,"COMMIT;") < 0))
-#endif
+	if (DB)
+        {
+	  memset(SQL,'\0',MAXSQL);
+          snprintf(SQL,MAXSQL,"COMMIT;");
+          result =  PQexec(PGconn4DB, SQL);
+          if (checkPQcommand(PGconn4DB, result, SQL, __FILE__ ,__LINE__))
 	  {
-	  printf("ERROR pfile %s Unable to 'COMMIT' database updates.\n",Pfile_Pk);
 	  SafeExit(31);
-	  }
+	  } 
+          PQclear(result);
+        }
 
 	if (DB)
 	  {
@@ -2529,7 +2585,6 @@ int	UnunpackEntry	(int argc, char *argv[])
 	  }
 
 	DBclose(DB); DB=NULL;
-	DBclose(DBTREE); DBTREE=NULL;
 	}
   if (ListOutFile && (ListOutFile != stdout))
 	{
