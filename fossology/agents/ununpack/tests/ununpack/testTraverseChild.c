@@ -98,7 +98,7 @@ void testTraverseChild4IsoFile()
   strcpy(CITemp.Partname, "imagefile.iso");
   strcpy(CITemp.PartnameNew, "imagefile.iso.dir");
   CITemp.Stat = Stat; 
-  CITemp.PI.Cmd = 19;
+  CITemp.PI.Cmd = 20;
   CITemp.PI.StartTime =  1287725739;
   CITemp.PI.EndTime =  1287725739;
   CITemp.PI.ChildRecurseArtifact =  0;
@@ -143,7 +143,7 @@ void testTraverseChild4DebianSourceFile()
   strcpy(CITemp.Partdir, NewDir);
   strcpy(CITemp.Partname, "fcitx_3.6.2-1.dsc");
   strcpy(CITemp.PartnameNew, "fcitx_3.6.2-1.dsc.dir");
-  ParentInfo PITemp = {26, 1287725739, 1287725739, 0};
+  ParentInfo PITemp = {27, 1287725739, 1287725739, 0};
   CITemp.Stat = Stat;
   CITemp.PI = PITemp;
   CITemp.uploadtree_pk = 0;
@@ -186,7 +186,7 @@ void testTraverseChild4PartitionFile()
   strcpy(CITemp.Partdir, NewDir);
   strcpy(CITemp.Partname, "initrd.img-2.6.26-2-686");
   strcpy(CITemp.PartnameNew, "initrd.img-2.6.26-2-686.dir");
-  ParentInfo PITemp = {25, 1287725739, 1287725739, 0};
+  ParentInfo PITemp = {26, 1287725739, 1287725739, 0};
   lstat64(Filename, &Stat);
   CITemp.Stat = Stat;
   CITemp.PI = PITemp;

@@ -54,7 +54,7 @@ void testFindCmdNormal()
   char *Filename = "./test-data/testdata4unpack.7z";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 14);
+  CU_ASSERT_EQUAL(result, 15);
   #ifdef DEBUG
   printf("result is :%d\n", result);
   #endif
@@ -68,7 +68,7 @@ void testFindCmd4DscFile()
   char *Filename = "./test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 26);
+  CU_ASSERT_EQUAL(result, 27);
   #ifdef DEBUG
   printf("result is :%d\n", result);
   #endif  
@@ -82,7 +82,7 @@ void testFindCmd4CabFile()
   char *Filename = "./test-data/testdata4unpack/SKU011.CAB";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 15);
+  CU_ASSERT_EQUAL(result, 16);
 
   #ifdef DEBUG
   printf("result is :%d\n", result);
@@ -97,7 +97,7 @@ void testFindCmd4MsiFile()
   char *Filename = "./test-data/testdata4unpack/xunzai_Contacts.msi.msi";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 15);
+  CU_ASSERT_EQUAL(result, 16);
 
   #ifdef DEBUG
   printf("result is :%d\n", result);
@@ -113,10 +113,10 @@ void testFindCmd4RpmFile()
   char *Filename = "./test-data/testdata4unpack/libgnomeui2-2.24.3-1pclos2010.src.rpm";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 16);
+  CU_ASSERT_EQUAL(result, 17);
   Filename = "./test-data/testdata4unpack/fossology-1.2.0-1.el5.i386.rpm";
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 16);
+  CU_ASSERT_EQUAL(result, 17);
 
   #ifdef DEBUG
   printf("result is :%d\n", result);
@@ -132,7 +132,7 @@ void testFindCmd4IsoFile()
   char *Filename = "./test-data/testdata4unpack/imagefile.iso";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 19);
+  CU_ASSERT_EQUAL(result, 20);
 
   #ifdef DEBUG
   printf("result is :%d\n", result);
@@ -147,7 +147,7 @@ void testFindCmd4ZipFile()
   char *Filename = "./test-data/testdata4unpack/threezip.zip";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 8);
+  CU_ASSERT_EQUAL(result, 9);
 
   #ifdef DEBUG
   printf("result is :%d\n", result);
@@ -162,7 +162,7 @@ void testFindCmd4RarFile()
   char *Filename = "./test-data/testdata4unpack/winscp376.rar";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 12);
+  CU_ASSERT_EQUAL(result, 13);
 
   #ifdef DEBUG
   printf("result is :%d\n", result);
@@ -177,7 +177,7 @@ void testFindCmd4CpioFile()
   char *Filename = "./test-data/testdata4unpack/test.cpio";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 11);
+  CU_ASSERT_EQUAL(result, 12);
 
   #ifdef DEBUG
   printf("result is :%d\n", result);
@@ -193,7 +193,7 @@ void testFindCmd4DebFile()
   char *Filename = "./test-data/testdata4unpack/libpango1.0-udeb_1.28.1-1_i386.udeb";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 18);
+  CU_ASSERT_EQUAL(result, 19);
 
   #ifdef DEBUG
   printf("result is :%d\n", result);
@@ -208,7 +208,7 @@ void testFindCmd4ArchiveLibFile()
   char *Filename = "./test-data/testdata4unpack/libfossagent.a";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 17);
+  CU_ASSERT_EQUAL(result, 18);
 
   #ifdef DEBUG
   printf("result is :%d\n", result);
@@ -224,7 +224,7 @@ void testFindCmd4TarFile()
   char *Filename = "./test-data/testdata4unpack/rpm.tar";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 9);
+  CU_ASSERT_EQUAL(result, 10);
 
   #ifdef DEBUG
   printf("result is :%d\n", result);
@@ -255,7 +255,7 @@ void testFindCmd4ExeFile()
   char *Filename = "./test-data/testdata4unpack/PUTTY.EXE";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 27);
+  CU_ASSERT_EQUAL(result, 28);
 
   #ifdef DEBUG
   printf("result is :%d\n", result);
@@ -285,7 +285,7 @@ void testFindCmd4Ext3File()
   char *Filename = "./test-data/testdata4unpack/ext3test-image";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 24);
+  CU_ASSERT_EQUAL(result, 25);
 
   #ifdef DEBUG
   printf("ext3 result is :%d\n", result);
@@ -300,7 +300,7 @@ void testFindCmd4Ext2File()
   char *Filename = "./test-data/testdata4unpack/ext2test-image";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 23);
+  CU_ASSERT_EQUAL(result, 24);
 
   #ifdef DEBUG
   printf("ext2 result is :%d\n", result);
@@ -315,7 +315,7 @@ void testFindCmd4FatFile()
   char *Filename = "./test-data/testdata4unpack/fattest-image";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 21);
+  CU_ASSERT_EQUAL(result, 22);
 
   #ifdef DEBUG
   printf("fat result is :%d\n", result);
@@ -330,7 +330,7 @@ void testFindCmd4NtfsFile()
   char *Filename = "./test-data/testdata4unpack/ntfstest-image";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 22);
+  CU_ASSERT_EQUAL(result, 23);
 
   #ifdef DEBUG
   printf("ntfs result is :%d\n", result);
@@ -345,7 +345,7 @@ void testFindCmd4PartitionFile()
   char *Filename = "./test-data/testdata4unpack/initrd.img-2.6.26-2-686";
   int result = 0;
   result = FindCmd(Filename);
-  CU_ASSERT_EQUAL(result, 25);
+  CU_ASSERT_EQUAL(result, 26);
 
   #ifdef DEBUG
   printf("partition result is :%d\n", result);
