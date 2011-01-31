@@ -38,7 +38,7 @@ function GetAllTags($Item)
   $List=array();
 
   /* Get list of tags */
-  $SQL = "SELECT tag_pk, tag FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Item;";
+  $SQL = "SELECT tag_pk, tag FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Item UNION SELECT tag_pk, tag FROM tag, tag_uploadtree WHERE tag.tag_pk = tag_uploadtree.tag_fk AND tag_uploadtree.uploadtree_fk = $Item;";
   $Results = $DB->Action($SQL);
   foreach($Results as $R)
     {
