@@ -15,31 +15,66 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
 
-/* std library includes */
-#include <stdlib.h>
-#include <stdio.h>
+/* local includes */
+#include <schedulerCLI.h>
 
-/* unix includes */
-#include <unistd.h>
+/* std library includes */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-/* glib inclused */
-#include <glib.h>
-#include <gio/gio.h>
+/* unix includes */
+#include <ctype.h>
+#include <fcntl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <unistd.h>
+
+int s;        ///< the socket that the CLI will use to communicate
+
+/* ************************************************************************** */
+/* **** utility functions *************************************************** */
+/* ************************************************************************** */
+
+int network_write(void* buf, size_t count)
+{
+  /* locals */
+  network_header header;
+
+  /* send message size */
+  header.bytes_following = count;
+  if(write(s, &header, sizeof(network_header)) == 0)
+  {
+    fprintf(stderr, "ERROR writing to scheduler socket\n");
+    return 0;
+  }
+
+  /* send the actual message */
+  return write(s, buf, count);
+}
+
+/* ************************************************************************** */
+/* **** main types ********************************************************** */
+/* ************************************************************************** */
 
 int main(int argc, char** argv)
 {
-  GSocketConnection* host_conn;
-  GSocketClient*     client;
+  struct sockaddr_in addr;
+  struct hostent* host_info;
+  fd_set fds;
   int port_number = -1;
-  int c;
+  long host_addr;
+  int c, closing;
+  size_t bytes;
   char host[FILENAME_MAX];
+  char buffer[1024];
 
   /* initialize memory */
-  host_conn = NULL;
-  client = NULL;
   memset(host, '\0', sizeof(host));
+  memset(buffer, '\0', sizeof(buffer));
+  closing = 0;
 
   /* parse command line options */
   while((c = getopt(argc, argv, "c:p:h")) != -1)
@@ -65,15 +100,53 @@ int main(int argc, char** argv)
   }
 
   /* open the connection to the scheduler */
-  g_type_init();
-  client = g_socket_client_new();
+  s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
   if(host[0])
-    host_conn = g_socket_client_connect_to_host(client, host, port_number, NULL, NULL);
+    host_info = gethostbyname(host);
   else
-    host_conn = g_socket_client_connect_to_host(client, "127.0.0.1", port_number, NULL, NULL);
+    host_info = gethostbyname("localhost");
+  memcpy(&host_addr, host_info->h_addr, host_info->h_length);
 
-  sleep(1);
+  addr.sin_addr.s_addr = host_addr;
+  addr.sin_port = htons(port_number);
+  addr.sin_family = AF_INET;
+
+  if(connect(s, (struct sockaddr*)&addr, sizeof(addr)) == -1)
+  {
+    fprintf(stderr, "ERROR: could not connect to host\n");
+    return 0;
+  }
+
+  FD_ZERO(&fds);
+  FD_SET(s, &fds);
+  FD_SET(fileno(stdin), &fds);
+
+  while(!closing)
+  {
+    /* prepare for read */
+    memset(buffer, '\0', sizeof(buffer));
+    c = select(s + 1, &fds, NULL, NULL, NULL);
+
+    printf("select returned\n");
+
+    /* read from the ready file descriptor */
+    if(FD_ISSET(s, &fds))
+    {
+      bytes = read(s, buffer, sizeof(buffer));
+
+      if(strncmp(buffer, "CLOSE", 5) == 0)
+        closing = 1;
+      else if(network_write(buffer, strlen(buffer)) != strlen(buffer))
+        fprintf(stderr, "ERROR: failed to send message to scheduler\n");
+    }
+
+    if(FD_ISSET(fileno(stdin), &fds))
+    {
+      bytes = read(fileno(stdin), buffer, sizeof(buffer));
+      bytes = network_write(buffer, strlen(buffer) - 1);
+    }
+  }
 
   //g_io_stream_close((GIOStream)host_conn, NULL, NULL);
   return 0;

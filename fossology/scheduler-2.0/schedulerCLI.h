@@ -15,23 +15,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
 
-#ifndef INTERFACE_H_INCLUDE
-#define INTERFACE_H_INCLUDE
+#ifndef SCHEDULERCLI_H_INCLUDE
+#define SCHEDULERCLI_H_INCLUDE
 
-#include <glib.h>
+typedef struct {
+    int bytes_following;
+} network_header;
 
-/* ************************************************************************** */
-/* **** Constructor Destructor ********************************************** */
-/* ************************************************************************** */
-
-void interface_init();
-void interface_destroy();
-
-/* ************************************************************************** */
-/* **** Access Functions **************************************************** */
-/* ************************************************************************** */
-
-void set_port(int port_n);
-int  is_port_set();
-
-#endif /* INTERFACE_H_INCLUDE */
+#endif /* SCHEDULERCLI_H_INCLUDE */

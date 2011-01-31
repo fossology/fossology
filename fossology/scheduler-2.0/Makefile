@@ -25,7 +25,7 @@ GLIB_FLAGS = `pkg-config --cflags --libs glib-2.0` -lgthread-2.0 -lgio-2.0
 CFLAGS_LOCAL = $(GLIB_FLAGS) $(CFLAGS_DB) $(CFLAGS_REPO) $(CFLAGS_AGENT) $(ALL_CFLAGS) -I. -lpq -lpthread
 DEF   = -DAGENT_DIR='"$(DESTDIR)$(AGENTDIR)"' -DLOG_DIR='"$(LOGDIR)"'
 FODEF = -DPROJECT_USER='"$(PROJECTUSER)"' -DPROJECT_GROUP='"$(PROJECTGROUP)"'
-DEPEN = Makefile
+DEPEN = Makefile logging.h
 
 EXE = fossology-scheduler
 CLI = fossology-cli
@@ -57,7 +57,7 @@ all: $(EXE) $(CLI)
 $(EXE): scheduler.c $(OBJS) $(VARS) $(HEAD) $(DEPEN)
 	$(CC) scheduler.c $(OBJS) $(DEF) $(FODEF) $(CFLAGS_LOCAL) -o $@
 
-$(CLI): schedulerCLI.c $(DEPEN)
+$(CLI): schedulerCLI.c schedulerCLI.h $(DEPEN)
 	$(CC) schedulerCLI.c $(CFLAGS_LOCAL) -o $@
 
 #######################
@@ -77,13 +77,13 @@ agent.o: %.o: %.c %.h job.h scheduler.h $(DEPEN)
 job.o: %.o: %.c %.h agent.h scheduler.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
-interface.o: %.o: %.c %.h $(DEPEN)
+interface.o: %.o: %.c %.h schedulerCLI.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
 event.o: %.o: %.c %.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
-logging.o: %.o: %.c %.h $(DEPEN)
+logging.o: %.o: %.c $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
 clean:
