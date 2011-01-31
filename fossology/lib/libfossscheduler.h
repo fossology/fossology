@@ -41,6 +41,51 @@ enum job_status {
   PAUSED   ///< PAUSED
 };
 
+/**
+ * Common verbose flags for the agents, this is used so that the scheduler can
+ * change the verbose level for a particular agent. All agents should use this
+ * flag for verbose instead of one declared within the agent. This can be set
+ * by the scheduler to enable different levels of verbose.
+ */
+extern int verbose;
+
+/* ************************************************************************** */
+/* **** Error and Verbose Functions ***************************************** */
+/* ************************************************************************** */
+
+#define FATAL(...) { \
+            fprintf(stderr, "FATAL %s.%d: "); \
+            fprintf(stderr, __VA_ARGS__); \
+            fprintf(stderr, "\n"); }
+
+#define ERROR(...) { \
+            fprintf(stderr, "ERROR %s.%d: "); \
+            fprintf(stderr, __VA_ARGS__); \
+            fprintf(stderr, "\n"); }
+
+#define WARNING(...) { \
+            fprintf(stderr, "WARNING %s.%d: "); \
+            fprintf(stderr, __VA_ARGS__); \
+            fprintf(stderr, "\n"); }
+
+#define DEBUG(...) { \
+            fprintf(stderr, "DEBUG %s.%d: "); \
+            fprintf(stderr, __VA_ARGS__); \
+            fprintf(stderr, "\n"); }
+
+/* a set of verbose macros that can be used to tso auto testing on verbose   */
+/* for example, to print "this is a verbose test at line <line>" at verbose */
+/* level 2 simply call:                                                     */
+/*    VERBOSE2("this is a verbose test at line %d", __LINE__);              */
+#define TVERBOSE1 verbose & 1
+#define TVERBOSE2 verbose & 2
+#define TVERBOSE3 verbose & 4
+#define TVERBOSE4 verbose & 8
+#define VERBOSE1(...) if(TVERBOSE1) fprintf(stdout, __VA_ARGS__);
+#define VERBOSE2(...) if(TVERBOSE2) fprintf(stdout, __VA_ARGS__);
+#define VERBOSE3(...) if(TVERBOSE3) fprintf(stdout, __VA_ARGS__);
+#define VERBOSE4(...) if(TVERBOSE4) fprintf(stdout, __VA_ARGS__);
+
 /* ************************************************************************** */
 /* **** Agent api *********************************************************** */
 /* ************************************************************************** */

@@ -152,18 +152,6 @@ void scheduler_disconnect()
  */
 char* scheduler_next()
 {
-  /* used to cound the number of entries processed by the agent */
-  static int called = 0;
-
-  /* make sure that the scheduler has any info that it will need */
-  if(valid)
-  {
-    called++;
-    if(called % notifications == 0)
-    {
-      fprintf(stdout, "OK\n");
-    }
-  }
   fflush(stdout);
 
   /* get the next line from the scheduler and possibly WAIT */
@@ -174,8 +162,16 @@ char* scheduler_next()
   }
   else
   {
-    if(strncmp(buffer, "VERBOSE", 7) == 0)
+    if(strncmp(buffer, "END", 3) == 0)
+    {
+      fprintf(stdout, "OK\n");
+      fflush(stdout);
+    }
+    else if(strncmp(buffer, "VERBOSE", 7) == 0)
+    {
       verbose = atoi(&buffer[8]);
+      valid = 0;
+    }
     return scheduler_next();
   }
 
