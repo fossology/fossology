@@ -164,6 +164,15 @@ class ui_browse extends FO_Plugin {
       if (!Isdir($Row['ufile_mode'])) {
         $V.= menu_to_1list($MenuPfile, $Parm, "<td>", "</td>\n");
       }
+      /* For directories only [Tag] option should be shown */
+      else {
+        foreach($MenuPfile as $key => $value) {
+          if ($value->Name == 'Tag'){
+            $MenuTag = array($MenuPfile[$key]);
+            $V.= menu_to_1list($MenuTag, $Parm, "<td>", "</td>\n");
+	  }
+        }
+      }
       $V.= "</td>";
     } /* foreach($Results as $Row) */
     $V.= "</table>\n";
