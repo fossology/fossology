@@ -227,7 +227,7 @@ void job_update(job j)
       for(iter = j->failed_agents; iter != NULL; iter = iter->next)
       {
         /* get a new agent to handle the data from the fail agent */
-        if(g_list_length(j->finsihed_agents) != 0)
+        if(j->finsihed_agents != NULL)
         {
           a = (agent)g_list_first(j->finsihed_agents);
           j->finsihed_agents = g_list_remove(j->finsihed_agents, a);

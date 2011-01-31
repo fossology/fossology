@@ -27,6 +27,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/types.h>
 #include <unistd.h>
 
+/* glib includes */
+#include <glib.h>
+
 FILE* log_file = NULL;
 char  log_name[FILENAME_MAX];
 int   log_name_set = 0;
@@ -78,7 +81,54 @@ void log_open()
 void log_event(char* str)
 {
   lprintf("%s", str);
-  free(str);
+  g_free(str);
+}
+
+/**
+ * Takes a format string and returns a new string that has all the correct time
+ * stamps inserted into the format string. This will insert a time stamp at the
+ * start of the string and after any new line characters.
+ *
+ * @param fmt the original formating string
+ * @return the new formating string, this string needs to be freed upon completion
+ */
+char* insert_time_stamp(char* fmt)
+{
+  /* locals */
+  char time_buffer[64];
+  char time_stamp[64];
+  char cpy[1024];
+  char* ret = NULL;
+  char* curr;
+  time_t t = time(NULL);
+  int nl_count = 1;
+
+  /* create the time stamp */
+  strftime(time_buffer, sizeof(time_buffer),"%F %T",localtime(&t));
+  sprintf(time_stamp, "%s scheduler [%d] ::", time_buffer, getpid());
+  memset(cpy, '\0', sizeof(cpy));
+  strcpy(cpy, fmt);
+
+  /* count the number of new lines in the string */
+  for(curr = cpy; *curr; curr++)
+  {
+    if(*curr == '\n')
+    {
+      *curr = 0;
+      nl_count++;
+    }
+  }
+
+  /* allocate the new string and put in base time stamp */
+  ret = (char*)calloc(strlen(fmt) + nl_count*strlen(time_stamp) + 1, sizeof(char));
+  sprintf(ret, "%s", time_stamp);
+
+  /* copy over the rest of the string and time stamps */
+  for(curr = cpy; curr - cpy < strlen(fmt); curr++)
+    if(*curr == '\n')
+      sprintf(&ret[strlen(ret)], "%s\n%s", curr, time_stamp);
+
+  return ret;
 }
 
 /* ************************************************************************** */
@@ -150,45 +200,41 @@ const char* lname()
  */
 int lprintf(const char* fmt, ...)
 {
-  char time_buffer[64];
   va_list args;
-  time_t t;
   int rc;
 
-  if(!log_file) log_open();
-  if(!fmt) return 0;
-
-  t = time(NULL);
-  strftime(time_buffer, sizeof(time_buffer),"%F %T",localtime(&t));
-
   va_start(args, fmt);
-  fprintf(log_file, "%s scheduler [%d] :: ", time_buffer, getpid());
-  rc = vfprintf(log_file, fmt, args);
-  fflush(log_file);
+  rc = lprintf_v(fmt, args);
   va_end(args);
 
   return rc;
 }
 
 /**
- * TODO
+ * TODO only if no '/n'
  *
  * @param fmt
- * @param ...
  * @return
  */
-int lprintf_t(const char* fmt, ...)
+int lprintf_n(const char* fmt, ...)
 {
   va_list args;
+  time_t t = time(NULL);
   int rc;
+  char* tmp;
+  char time_buf[64];
 
   if(!log_file) log_open();
   if(!fmt) return 0;
 
+  strftime(time_buf, sizeof(time_buf),"%F %T",localtime(&t));
+
   va_start(args, fmt);
-  rc = vfprintf(log_file, fmt, args);
-  fflush(log_file);
+  tmp = g_strdup_vprintf(fmt, args);
   va_end(args);
+
+  if(strchr(tmp, '\n') != NULL) return 0;
+  rc = fprintf(log_file, "%s scheduler [%d] :: %s", time_buf, getpid(), tmp);
 
   return rc;
 }
@@ -202,24 +248,26 @@ int lprintf_t(const char* fmt, ...)
  */
 int lprintf_v(const char* fmt, va_list args)
 {
-  char time_buffer[64];
-  time_t t;
-  int rc;
+  time_t t = time(NULL);
+  char* tmp, * curr;
+  char time_buf[64];
 
   if(!log_file) log_open();
   if(!fmt) return 0;
 
-  t = time(NULL);
-  strftime(time_buffer, sizeof(time_buffer),"%F %T",localtime(&t));
+  strftime(time_buf, sizeof(time_buf),"%F %T",localtime(&t));
 
-  fprintf(log_file, "%s scheduler [%d] :: ", time_buffer, getpid());
-  rc = vfprintf(log_file, fmt, args);
-  fflush(log_file);
+  tmp = g_strdup_vprintf(fmt, args);
+  for(curr = strtok(tmp, "\n"); curr; curr = strtok(NULL, "\n"))
+    if(fprintf(log_file, "%s scheduler [%d] :: %s\n", time_buf, getpid(), curr) == 0)
+      return 0;
 
-  return rc;
+  g_free(tmp);
+  return 1;
 }
 
 /**
+ * TODO
  *
  * @param fmt
  * @return
@@ -227,19 +275,20 @@ int lprintf_v(const char* fmt, va_list args)
 int lprintf_c(const char* fmt, ...)
 {
   va_list args;
-  int rc;
   char* buf;
 
   if(!log_file) log_open();
   if(!fmt) return 0;
-  buf = (char*)calloc(1024, sizeof(char));
 
   va_start(args, fmt);
-  rc = vsprintf(buf, fmt, args);
-  event_signal(log_event, buf);
+  buf = g_strdup_vprintf(fmt, args);
   va_end(args);
 
-  return rc;
+  if(buf == NULL)
+    return 0;
+
+  event_signal(log_event, buf);
+  return 1;
 }
 
 

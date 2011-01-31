@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <job.h>
 #include <logging.h>
 #include <scheduler.h>
+#include <schedulerCLI.h>
 
 /* std library includes */
 #include <stdio.h>
@@ -78,16 +79,31 @@ typedef struct interface_connection
 void* interface_thread(void* param)
 {
   interface_connection* conn = param;
+  network_header header;
   char buffer[1024];
+  unsigned long size;
 
-  while(g_input_stream_read(conn->istr, buffer, sizeof(buffer), NULL, NULL) != 0)
+  while(g_input_stream_read(conn->istr, &header, sizeof(header), NULL, NULL) != 0)
   {
-    if(verbose > 1)
-      lprintf("INTERFACE: recieved \"%s\"\n", buffer);
+    if(g_input_stream_read_all(conn->istr, buffer, header.bytes_following, &size, NULL, NULL) == 0)
+    {
+      lprintf_c("ERROR: unable to read from interface socket, attempted to read %d bytes", header.bytes_following);
+      g_thread_exit(NULL);
+    }
 
-    // TODO make this thread safe
-    if(strncmp(buffer, "CLOSE", 5) == 0)
+    if(VERBOSE2)
+      lprintf_c("INTERFACE: recieved \"%s\"\n", buffer);
+
+    if(strncmp(buffer, "CLOSE CLI", 9) == 0)
+    {
+      g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
       return NULL;
+    }
+    else if(strncmp(buffer, "CLOSE", 5) == 0)
+    {
+      // TODO
+      return NULL;
+    }
     else if(strncmp(buffer, "PAUSE", 5) == 0)
       job_pause(get_job(atoi(&buffer[10])));
     else if(strncmp(buffer, "RELOAD", 6) == 0)
@@ -111,7 +127,7 @@ void* interface_thread(void* param)
     memset(buffer, '\0', sizeof(buffer));
   }
 
-  lprintf("ERROR: %s.%d: Interface connection closed unexpectantly\n", __FILE__, __LINE__);
+  lprintf_c("ERROR: %s.%d: Interface connection closed unexpectantly\n", __FILE__, __LINE__);
 
   return NULL;
 }
@@ -141,8 +157,8 @@ interface_connection* interface_conn_init(GSocketConnection* conn)
  */
 void interface_conn_destroy(interface_connection* inter)
 {
-  g_io_stream_close((GIOStream*)inter->conn, NULL, NULL);
   g_thread_join(inter->thread);
+  g_io_stream_close((GIOStream*)inter->conn, NULL, NULL);
 }
 
 /**
@@ -171,7 +187,7 @@ void* listen_thread(void* unused)
     FATAL("Could not create interface, invalid port number: %d", i_port);
 
 
-  if(verbose > 1)
+  if(VERBOSE2)
     lprintf("INTERFACE: listenning port is %d\n", i_port);
 
   /* wait for new connections */
@@ -181,7 +197,7 @@ void* listen_thread(void* unused)
 
     if(i_terminate)
       break;
-    if(verbose > 1)
+    if(VERBOSE2)
       lprintf("INTERFACE: new interface connection\n");
 
     client_threads = g_list_append(client_threads,
@@ -237,6 +253,7 @@ void interface_destroy()
 /* ************************************************************************** */
 
 /**
+ * TODO
  *
  * @param port_n
  */
@@ -248,3 +265,10 @@ void set_port(int port_n)
   i_port = port_n;
 }
 
+/**
+ * TODO
+ */
+int is_port_set()
+{
+  return i_port != -1;
+}

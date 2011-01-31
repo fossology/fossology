@@ -79,7 +79,7 @@ void chld_sig(int signo)
   /* get all of the dead children's pids */
   while((n = waitpid(-1, &status, WNOHANG)) > 0)
   {
-    if(verbose > 1)
+    if(VERBOSE2)
       lprintf("SIGNALS: received sigchld for pid %d\n", n);
     pid_list[idx++] = n;
   }
@@ -104,6 +104,7 @@ void prnt_sig(int signo)
       event_loop_terminate();
       break;
     case SIGALRM:
+      lprintf("SIGNALS: Scheduler received alarm signal, checking job states\n");
       event_signal(agent_update_event, NULL);
       alarm(CHECK_TIME);
       break;
@@ -178,12 +179,16 @@ void load_config()
     FATAL("Could not opend agent.conf directory");
   }
 
+  /* clear all previous configurations */
+  agent_list_clean();
+
+  /* load the configureation for the agents */
   while((ep = readdir(dp)) != NULL)
   {
     sprintf(buffer, "agents/%s", ep->d_name);
     if(ep->d_name[0] != '.' && (istr = fopen(buffer, "rb")) != NULL)
     {
-      if(verbose > 1)
+      if(VERBOSE2)
         lprintf("CONFIG: loading config file %s\n", buffer);
 
       /* initialize data */
@@ -225,14 +230,26 @@ void load_config()
         }
       }
 
-      if(!add_meta_agent(name, cmd, max, special) && verbose > 1)
+      if(!add_meta_agent(name, cmd, max, special) && VERBOSE2)
         lprintf("CONFIG: could not create meta agent using %s\n", ep->d_name);
 
       fclose(istr);
     }
   }
-
   closedir(dp);
+
+  /* load the configuration for the hosts */
+  // TODO
+
+  /* load the scheduler configuration */
+  istr = fopen("Scheduler.conf", "r"); //< change file path
+  while(fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
+  {
+    if(buffer[0] == '#');
+    else if(strncmp(buffer, "port=", 5) == 0 && !is_port_set())
+      set_port(atoi(&buffer[5]));
+    else if(strncmp(buffer, "max=", 4) == 0);
+  }
 }
 
 /**
@@ -316,6 +333,7 @@ void usage(char* app_name)
  *     -h :: Print the usage for the program and exit
  *     -i :: Initialize the database and exit
  *     -L :: Print to this file instead of default log file
+ *     -p :: set the port that the scheduler should listen on
  *     -t :: Test run every type of agent, then quit
  *     -T :: Test run every type of agent, then run normally
  *     -v :: set verbose to true, used for debugging
@@ -340,7 +358,7 @@ int main(int argc, char** argv)
   /* ********************* */
   /* *** parse options *** */
   /* ********************* */
-  while((c = getopt(argc, argv, "diL:ptTv:h")) != -1)
+  while((c = getopt(argc, argv, "diL:p:tTv:h")) != -1)
   {
     switch(c)
     {
@@ -377,7 +395,7 @@ int main(int argc, char** argv)
     return -1;
   }
 
-  if(verbose)
+  if(VERBOSE1)
   {
 
   }
@@ -388,8 +406,8 @@ int main(int argc, char** argv)
   g_thread_init(NULL);
   g_type_init();
   set_usr_grp();
-  interface_init();
   load_config();
+  interface_init();
 
   if(run_daemon)
   {
