@@ -79,8 +79,7 @@ void chld_sig(int signo)
   /* get all of the dead children's pids */
   while((n = waitpid(-1, &status, WNOHANG)) > 0)
   {
-    if(VERBOSE2)
-      lprintf("SIGNALS: received sigchld for pid %d\n", n);
+    VERBOSE2("SIGNALS: received sigchld for pid %d\n", n);
     pid_list[idx++] = n;
   }
 
@@ -188,8 +187,7 @@ void load_config()
     sprintf(buffer, "agents/%s", ep->d_name);
     if(ep->d_name[0] != '.' && (istr = fopen(buffer, "rb")) != NULL)
     {
-      if(VERBOSE2)
-        lprintf("CONFIG: loading config file %s\n", buffer);
+      VERBOSE2("CONFIG: loading config file %s\n", buffer);
 
       /* initialize data */
       memset(buffer, '\0', sizeof(buffer));
@@ -230,8 +228,8 @@ void load_config()
         }
       }
 
-      if(!add_meta_agent(name, cmd, max, special) && VERBOSE2)
-        lprintf("CONFIG: could not create meta agent using %s\n", ep->d_name);
+      if(!add_meta_agent(name, cmd, max, special))
+        VERBOSE2("CONFIG: could not create meta agent using %s\n", ep->d_name);
 
       fclose(istr);
     }
@@ -393,11 +391,6 @@ int main(int argc, char** argv)
   {
     usage(argv[0]);
     return -1;
-  }
-
-  if(VERBOSE1)
-  {
-
   }
 
   /* ********************** */

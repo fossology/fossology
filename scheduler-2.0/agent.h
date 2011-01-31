@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MAX_CMD  1023   ///< the maximum length for an agent's start command  (arbitrary)
 #define MAX_NAME 255    ///< the maximum length for an agent's name           (arbitrary)
-#define CHECK_TIME 15   ///< wait time between agent updates                  (arbitrary)
+#define CHECK_TIME 120  ///< wait time between agent updates                  (arbitrary)
 
 #define SAG_NONE 1        ///< There is nothing special about this agent
 #define SAG_EXCLUSIVE 2   ///< This agent must not run at the same time as any other agent

@@ -41,6 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* agent defines */
 #define MAX_ARGS 32       ///< the maximum number arguments passed to children  (arbitrary)
 #define TILL_DEATH 180    ///< how long to wait before agent is dead            (3 minutes)
+#define NUM_UPDATES 5     ///< the number of updates before agent is dead       (arbitrary)
 #define MAX_GENERATION 5  ///< the most agents that a piece of data can survive (arbitrary)
 
 #ifndef AGENT_DIR
@@ -86,6 +87,7 @@ struct agent_internal
     agent_status status;  ///< the state of execution the agent is currently in
     GThread* thread;      ///< the thread that communicates with this agent
     time_t check_in;      ///< the time that the agent last generated anything
+    int n_updates;        ///< keeps track of the number of times the agent has updated
     pid_t pid;            ///< the pid of the process this agent is running in
     /* pipes connecting to the child */
     int from_parent;      ///< file identifier to read from the parent (child stdin)
@@ -164,16 +166,20 @@ int update(int* pid_ptr, agent a, gpointer unused)
     }
 
     /* check items processed */
-    /*if(a->status != AG_PAUSED && a->check_analyzed == a->total_analyzed)
+    if(a->status != AG_PAUSED &&
+       a->check_analyzed == a->total_analyzed)
+    {
+      a->n_updates++;
+    }
+    if(a->n_updates > NUM_UPDATES)
     {
       agent_fail(a);
       return 0;
-    }*/
+    }
 
     a->check_analyzed = a->total_analyzed;
 
-    if(VERBOSE3)
-      lprintf("JOB[%d].%s[%d]: agent updated correctly, processed %d items",
+    VERBOSE3("JOB[%d].%s[%d]: agent updated correctly, processed %d items",
           job_id(a->owner), a->meta_data->name, a->pid, a->check_analyzed);
   }
 
@@ -244,7 +250,7 @@ void agent_listen(agent a)
           __FILE__, __LINE__, job_id(a->owner), a->meta_data->name, a->pid, strerror(errno));
     }
 
-    if(VERBOSE3)
+    if(TVERBOSE3)
     {
       buffer[strlen(buffer) - 1] = '\0';
       lprintf_c("JOB[%d].%s[%d]: received: \"%s\"\n",
@@ -275,17 +281,30 @@ void agent_listen(agent a)
     else if(strncmp(buffer, "HEART", 5) == 0)
     {
       a->check_in = time(NULL);
-      // TODO
+      a->n_updates++;
     }
     else if(strncmp(buffer, "FATAL", 5))
     {
-      // TODO
-      lprintf_c("");
+      lprintf_c("FATAL:JOB[%d].%s[%d]: \"%s\"\n",
+          job_id(a->owner), a->meta_data->name, a->pid, &buffer[5]);
+      // TODO I may need to update the db here
       break;
+    }
+    else if(strncmp(buffer, "ERROR", 5))
+    {
+      lprintf_c("ERROR:JOB[%d].%s[%d]: \"%s\"\n",
+          job_id(a->owner), a->meta_data->name, a->pid, &buffer[5]);
+      // TODO I may need to update the db here
+      break;
+    }
+    else
+    {
+      lprintf_c("JOB[%d].%s[%d]: %s",
+          job_id(a->owner), a->meta_data->name, a->pid);
     }
   }
 
-  if(VERBOSE3)
+  if(TVERBOSE3)
     lprintf_c("JOB[%d].%s[%d]: communication thread closing\n",
         job_id(a->owner), a->meta_data->name, a->pid);
 }
@@ -384,8 +403,7 @@ void* spawn(void* passed)
  */
 void transition(agent a, agent_status new_status)
 {
-  if(VERBOSE3)
-    lprintf("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
+  VERBOSE3("JOB[%d].%s[%d]: agent status changed: %s -> %s\n",
         job_id(a->owner), a->meta_data->name, a->pid,
         status_strings[a->status], status_strings[new_status]);
   a->status = new_status;
@@ -541,6 +559,8 @@ agent agent_init(char* meta_agent_name, host host_machine, job j)
   /* initialize other info */
   a->host_machine = host_machine;
   a->owner = j;
+  a->updated = 0;
+  a->n_updates = 0;
 
   /* open the relevant file pointers */
   if((a->read = fdopen(a->from_child, "r")) == NULL)
@@ -572,8 +592,7 @@ agent agent_copy(agent a)
   if(a->generation == MAX_GENERATION)
     return NULL;
 
-  if(VERBOSE3)
-    lprintf("JOB[%d].%s[%d]: creating copy of agent\n",
+  VERBOSE3("JOB[%d].%s[%d]: creating copy of agent\n",
         job_id(a->owner), a->meta_data->name, a->pid);
 
   agent cpy = agent_init(a->meta_data->name, a->host_machine, a->owner);
@@ -658,9 +677,8 @@ void agent_create_event(agent a)
 {
   TEST_NULV(a);
 
-  if(VERBOSE3)
-    lprintf("JOB[%d].%s[%d]: agent successfully spawned\n",
-        job_id(a->owner), a->meta_data->name, a->pid);
+  VERBOSE3("JOB[%d].%s[%d]: agent successfully spawned\n",
+      job_id(a->owner), a->meta_data->name, a->pid);
 
   g_tree_insert(agents, &a->pid, a);
   transition(a, AG_SPAWNED);
@@ -678,8 +696,7 @@ void agent_ready_event(agent a)
   if(a->status == AG_SPAWNED)
   {
     transition(a, AG_RUNNING);
-    if(VERBOSE2)
-      lprintf("JOB[%d].%s[%d]: agent successfully created\n",
+    VERBOSE2("JOB[%d].%s[%d]: agent successfully created\n",
           job_id(a->owner), a->meta_data->name, a->pid);
   }
 
@@ -725,8 +742,7 @@ void agent_restart(agent a, agent ref)
 {
   TEST_NULV(a);
   TEST_NULV(ref);
-  if(VERBOSE3)
-    lprintf("JOB[%d].%s[%d]: restarting agent to finish data from %s[%d]\n",
+  VERBOSE3("JOB[%d].%s[%d]: restarting agent to finish data from %s[%d]\n",
         job_id(a->owner), a->meta_data->name, a->pid, ref->meta_data->name, ref->pid);
 
   a->data = ref->data;
@@ -777,8 +793,7 @@ void agent_close(agent a)
     // TODO change to detach when the scheduler is done
     g_thread_join(a->thread);
 
-    if(VERBOSE2)
-      lprintf("JOB[%d].%s[%d]: successfully removed from the system\n",
+    VERBOSE2("JOB[%d].%s[%d]: successfully removed from the system\n",
           job_id(a->owner), a->meta_data->name, a->pid);
 
     g_tree_remove(agents, &a->pid);
@@ -811,7 +826,7 @@ int aprintf(agent a, const char* fmt, ...)
   char buf[1024];
 
   va_start(args, fmt);
-  if(VERBOSE3)
+  if(TVERBOSE3)
   {
     vsprintf(buf, fmt, args);
     buf[strlen(buf) - 1] = '\0';

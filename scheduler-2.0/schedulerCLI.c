@@ -33,6 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <unistd.h>
 
 int s;        ///< the socket that the CLI will use to communicate
+int verbose;  ///< the verbose flag for the cli
 
 /* ************************************************************************** */
 /* **** utility functions *************************************************** */
@@ -75,9 +76,10 @@ int main(int argc, char** argv)
   memset(host, '\0', sizeof(host));
   memset(buffer, '\0', sizeof(buffer));
   closing = 0;
+  verbose = 0;
 
   /* parse command line options */
-  while((c = getopt(argc, argv, "c:p:h")) != -1)
+  while((c = getopt(argc, argv, "c:p:vh")) != -1)
   {
     switch(c)
     {
@@ -86,6 +88,9 @@ int main(int argc, char** argv)
         break;
       case 'p':
         port_number = atoi(optarg);
+        break;
+      case 'v':
+        verbose = 1;
         break;
       case 'h': default:
         // TODO usage
@@ -118,17 +123,14 @@ int main(int argc, char** argv)
     return 0;
   }
 
-  FD_ZERO(&fds);
-  FD_SET(s, &fds);
-  FD_SET(fileno(stdin), &fds);
-
   while(!closing)
   {
     /* prepare for read */
+    FD_ZERO(&fds);
+    FD_SET(s, &fds);
+    FD_SET(fileno(stdin), &fds);
     memset(buffer, '\0', sizeof(buffer));
     c = select(s + 1, &fds, NULL, NULL, NULL);
-
-    printf("select returned\n");
 
     /* read from the ready file descriptor */
     if(FD_ISSET(s, &fds))
@@ -145,6 +147,10 @@ int main(int argc, char** argv)
     {
       bytes = read(fileno(stdin), buffer, sizeof(buffer));
       bytes = network_write(buffer, strlen(buffer) - 1);
+    }
+
+    if(verbose) {
+      printf("RECIEVED: %s\n", buffer);
     }
   }
 

@@ -64,11 +64,18 @@ extern FILE* log_file;
             fprintf(log_file, "\n"); \
             lprintf("WARNING errno is: %s\n", strerror(errno)); }
 
-/* verbose macros, if changing from greater than scheme to bit mask, just change these */
-#define VERBOSE1 verbose & 1  ///< level 1
-#define VERBOSE2 verbose & 2  ///< level 2
-#define VERBOSE3 verbose & 4  ///< level 3
-#define VERBOSE4 verbose & 8  ///< level 4
+/* verbose macros, if changing from greater than scheme to bit mask, just */
+/* change these the the TVERBOSE# macro when a test of verbose is needed, */
+/* this happpens when printing from another thread. The other verbose     */
+/* macro makes the syntax better everywhere else                          */
+#define TVERBOSE1 verbose & 1
+#define TVERBOSE2 verbose & 2
+#define TVERBOSE3 verbose & 4
+#define TVERBOSE4 verbose & 8
+#define VERBOSE1(...) if(TVERBOSE1) lprintf(__VA_ARGS__);
+#define VERBOSE2(...) if(TVERBOSE2) lprintf(__VA_ARGS__);
+#define VERBOSE3(...) if(TVERBOSE3) lprintf(__VA_ARGS__);
+#define VERBOSE4(...) if(TVERBOSE4) lprintf(__VA_ARGS__);
 
 /* ************************************************************************** */
 /* **** logging functions *************************************************** */

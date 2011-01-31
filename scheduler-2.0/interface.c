@@ -91,37 +91,37 @@ void* interface_thread(void* param)
       g_thread_exit(NULL);
     }
 
-    if(VERBOSE2)
+    if(TVERBOSE2)
       lprintf_c("INTERFACE: recieved \"%s\"\n", buffer);
 
-    if(strncmp(buffer, "CLOSE CLI", 9) == 0)
+    if(strncmp(buffer, "Exit", 4) == 0)
     {
       g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
       return NULL;
     }
-    else if(strncmp(buffer, "CLOSE", 5) == 0)
+    else if(strncmp(buffer, "Close", 5) == 0)
     {
       // TODO
       return NULL;
     }
-    else if(strncmp(buffer, "PAUSE", 5) == 0)
+    else if(strncmp(buffer, "Pause", 5) == 0)
       job_pause(get_job(atoi(&buffer[10])));
-    else if(strncmp(buffer, "RELOAD", 6) == 0)
+    else if(strncmp(buffer, "Reload", 6) == 0)
       load_config();
-    else if(strncmp(buffer, "STATUS", 6) == 0)
+    else if(strncmp(buffer, "Status", 6) == 0)
     {
 
     }
-    else if(strncmp(buffer, "RESTART", 7) == 0)
+    else if(strncmp(buffer, "Restart", 7) == 0)
       job_restart(get_job(atoi(&buffer[10])));
-    else if(strncmp(buffer, "VERBOSE", 7) == 0)
+    else if(strncmp(buffer, "Verbose", 7) == 0)
     {
       if(buffer[10] == '\0')
         verbose = buffer[8] - '0';
       else
         job_verbose_event(job_verbose(get_job(atoi(&buffer[10])), buffer[8] - '0'));
     }
-    else if(strncmp(buffer, "DATABASE", 8) == 0); // TODO check database event
+    else if(strncmp(buffer, "Database", 8) == 0); // TODO check database event
     else break;
 
     memset(buffer, '\0', sizeof(buffer));
@@ -187,8 +187,8 @@ void* listen_thread(void* unused)
     FATAL("Could not create interface, invalid port number: %d", i_port);
 
 
-  if(VERBOSE2)
-    lprintf("INTERFACE: listenning port is %d\n", i_port);
+  if(TVERBOSE2)
+    lprintf_c("INTERFACE: listenning port is %d\n", i_port);
 
   /* wait for new connections */
   for(;;)
@@ -197,8 +197,8 @@ void* listen_thread(void* unused)
 
     if(i_terminate)
       break;
-    if(VERBOSE2)
-      lprintf("INTERFACE: new interface connection\n");
+    if(TVERBOSE2)
+      lprintf_c("INTERFACE: new interface connection\n");
 
     client_threads = g_list_append(client_threads,
         interface_conn_init(new_connection));
