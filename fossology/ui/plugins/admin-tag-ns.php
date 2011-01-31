@@ -42,7 +42,7 @@ class admin_tag_ns extends FO_Plugin
   {
     global $PG_CONN; 
 
-    $tag_ns_name = GetParm('tag_ns_name', PARM_TEXT);
+    $tag_ns_name = str_replace("'", "''", GetParm('tag_ns_name', PARM_TEXT));
 
     /* See if the tag namespace already exists */
     $sql = "SELECT * FROM tag_ns WHERE tag_ns_name = '$tag_ns_name';";
@@ -52,8 +52,7 @@ class admin_tag_ns extends FO_Plugin
     {
       pg_free_result($result);
 
-      $Val = str_replace("'", "''", $tag_ns_name);
-      $sql = "INSERT INTO tag_ns (tag_ns_name) VALUES ('$Val');";
+      $sql = "INSERT INTO tag_ns (tag_ns_name) VALUES ('$tag_ns_name');";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
@@ -151,7 +150,7 @@ class admin_tag_ns extends FO_Plugin
       $VE .= "<tr><th>$text</th><th></th></tr>\n";
       while ($row = pg_fetch_assoc($result))
       {
-        $VE .= "<tr><td align='center'>" . $row['tag_ns_name'] . "</td><td align='center'><a href='" . Traceback_uri() . "?mod=admin_tag_ns&action=edit&tag_ns_pk=" . $row['tag_ns_pk'] . "&tag_ns_name=" . $row['tag_ns_name'] . "'>Edit</a>|<a href='" . Traceback_uri() . "?mod=admin_tag_ns&action=delete&tag_ns_pk=" . $row['tag_ns_pk'] . "'>Delete</a></td></tr>\n";
+        $VE .= "<tr><td align='center'>" . $row['tag_ns_name'] . "</td><td align='center'><a href=" . Traceback_uri() . "?mod=admin_tag_ns&action=edit&tag_ns_pk=" . $row['tag_ns_pk'] . "&tag_ns_name=" . $row['tag_ns_name'] . ">Edit</a>|<a href='" . Traceback_uri() . "?mod=admin_tag_ns&action=delete&tag_ns_pk=" . $row['tag_ns_pk'] . "'>Delete</a></td></tr>\n";
       }
       $VE .= "</table><p>\n";
     }
