@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -266,6 +266,8 @@ class ui_menu extends FO_Plugin
    ********************************************/
   function Output($Title=NULL)
     {
+    global $SysConf;
+
     if ($this->State != PLUGIN_STATE_READY) { return(0); }
     $V="";
     if (empty($Title)) { $Title = _("Welcome to FOSSology"); }
@@ -274,12 +276,32 @@ class ui_menu extends FO_Plugin
       case "XML":
         break;
       case "HTML":
+    /* Banner Message? */
+    if ($SysConf['BannerMsg'])
+    {
+      $V .= "<h4 style='background-color:#ffbbbb'>$SysConf[BannerMsg]</h4>";
+    }
+
 	if (! $this->_CSSdone) { $V .= $this->OutputCSS(); }
 	$Menu = menu_find("Main",$MenuDepth);
+
 	/** Same height at FOSSology logo **/
 	$V .= "<table border=0 width='100%'>";
 	$V .= "<tr>";
-	$V .= "<td width='150' rowspan='2'><a href='http://fossology.org' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . "images/fossology-logo.gif' border=0></a></td>";
+    /* custom or default logo? */
+    if ($SysConf['LogoImage'] and $SysConf['LogoLink'])
+    {
+      $LogoLink = $SysConf['LogoLink'];
+      $LogoImg = $SysConf['LogoImage'];
+    }
+    else
+    {
+      $LogoLink = 'http://fossology.org';
+      $LogoImg = 'images/fossology-logo.gif';
+    }
+      
+    $V .= "<td width='150' rowspan='2'><a href='$LogoLink' target='_top' style='background:white;'><img alt='FOSSology' title='FOSSology' src='" . "$LogoImg' border=0></a></td>";
+
 	$V .= "<td colspan='2'>";
 	$V .= $this->menu_html($Menu,0);
 	$V .= "</td>";
@@ -297,12 +319,22 @@ class ui_menu extends FO_Plugin
 		{
 $text = _("login");
 		$V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>$text</b></a></small>";
+        $V .= " | ";
+$text = _("HP Support");
+		$V .= "<small><a href='mailto:mary.laser@hp.com?subject=Support Help'>$text</a>";
 		}
 	  else
 		{
 $text = _("User");
 		$V .= "<small>$text:</small> " . @$_SESSION['User'] . "<br>";
 		$V .= "<small><a href='" . Traceback_uri() . "?mod=auth'><b>logout</b></a></small>";
+    
+        /* Use global system SupportEmail variables, if addr and label are set */
+        if ($SysConf['SupportEmailLabel'] and $SysConf['SupportEmailAddr'])
+        {
+          $V .= " | ";
+		  $V .= "<small><a href='mailto:$SysConf[SupportEmailAddr]?subject=$SysConf[SupportEmailSubject]'>$SysConf[SupportEmailLabel]</a>";
+		}
 		}
 	  }
 	$V .= "</td>";
