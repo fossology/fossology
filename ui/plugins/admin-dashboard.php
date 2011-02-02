@@ -33,7 +33,7 @@ class dashboard extends FO_Plugin
   var $Title      = TITLE_dashboard;
   var $MenuList   = "Admin::Dashboard";
   var $Dependency = array("db");
-  var $DBaccess   = PLUGIN_DB_DOWNLOAD;
+  var $DBaccess   = PLUGIN_DB_USERADMIN;
 
   /************************************************
    DiskFree(): Determine amount of free disk space.
@@ -200,7 +200,7 @@ $text1 = _("Total");
     $Results = $DB->Action("SELECT pg_size_pretty(pg_database_size('fossology')) as val");
 $text = _("FOSSology database size");
 	$V .= "<tr><td>$text</td>";
-	$Size = $Results[0]['val']; 
+	$Size = $Results[0]['val'];
 	$V .= "<td align='right'>  $Size </td></tr>\n";;
 
 	$Results = $DB->Action("SELECT count(*) AS val FROM pg_stat_activity;");
