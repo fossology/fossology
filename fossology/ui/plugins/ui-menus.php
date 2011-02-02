@@ -277,7 +277,7 @@ class ui_menu extends FO_Plugin
         break;
       case "HTML":
     /* Banner Message? */
-    if ($SysConf['BannerMsg'])
+    if (@$SysConf['BannerMsg'])
     {
       $V .= "<h4 style='background-color:#ffbbbb'>$SysConf[BannerMsg]</h4>";
     }
@@ -289,7 +289,7 @@ class ui_menu extends FO_Plugin
 	$V .= "<table border=0 width='100%'>";
 	$V .= "<tr>";
     /* custom or default logo? */
-    if ($SysConf['LogoImage'] and $SysConf['LogoLink'])
+    if (@$SysConf['LogoImage'] and @$SysConf['LogoLink'])
     {
       $LogoLink = $SysConf['LogoLink'];
       $LogoImg = $SysConf['LogoImage'];
