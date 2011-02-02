@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,6 +24,7 @@
  action).
  ***************************************************************/
 $GlobalReady=1;
+$SysConf = array();
 
 //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
 require_once(dirname(__FILE__) . '/../php/pathinclude.php');
@@ -39,6 +40,9 @@ if (!isset($Mod)) { $Mod = "Default"; }
 $PluginId = plugin_find_id($Mod);
 if ($PluginId >= 0)
   {
+  /* Initialize global system configuration variables $SysConfig[] */ 
+  InitSysConfig();
+
   /* Found a plugin, so call it! */
   $Plugins[$PluginId]->OutputOpen("HTML",1);
   // error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
@@ -63,4 +67,32 @@ else
   }
 plugin_unload();
 return(0);
+
+/*  Initialize global system configuration variables $SysConfig[] */
+function InitSysConfig()
+{
+  global $SysConf;
+  global $PG_CONN;
+  global $Plugins;
+
+  $PluginId = plugin_find_id("foconfig");
+  if ($PluginId >= 0)
+  {
+    /* make sure config table exists */
+    $Plugins[$PluginId]->Install();
+    $sql = "select variablename, conf_value from sysconfig";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    while($row = pg_fetch_assoc($result))
+    {
+      $SysConf[$row['variablename']] = $row['conf_value'];
+    }
+    pg_free_result($result);
+  }
+  else
+  {
+    /* nothing, plugins will use default variables */
+  }
+}
 ?>
