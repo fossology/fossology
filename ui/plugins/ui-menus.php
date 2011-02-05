@@ -55,7 +55,7 @@ class ui_menu extends FO_Plugin
     menu_insert("Main::Organize",8);
     menu_insert("Main::Jobs",6);
     menu_insert("Main::Admin",4);
-    menu_insert("Main::Help",0);
+    menu_insert("Main::Help",-1);
     menu_insert("Main::Help::Documentation",0,NULL,NULL,NULL,"<a href='http://fossology.org/user_documentation'>Documentation</a>");
 
     // It worked, so mark this plugin as ready.
@@ -108,13 +108,10 @@ class ui_menu extends FO_Plugin
         }
         else
         {
-          $V .= '<a href="#">';
           if (empty($M->SubMenu))
           {
-            $V .= "<font color='#C0C0C0'>";
             if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName . "(" . $M->Order . ")"; }
-            else { $V .= $M->Name; }
-            $V .= "</font>";
+            else { $V .= ''; }
           }
           else
           {
