@@ -102,6 +102,10 @@ class ui_browse extends FO_Plugin {
   function ShowItem($Upload, $Item, $Show, $Folder) 
   {
     global $PG_CONN;
+    $RowStyle1 = "style='background-color:#ecfaff'";  // pale blue
+    $RowStyle2 = "style='background-color:#ffffe3'";  // pale yellow
+    $ColorSpanRows = 3;  // Alternate background color every $ColorSpanRows
+    $RowNum = 0;
 
     $V = "";
     /* Use plugin "view" and "download" if they exist. */
@@ -118,7 +122,10 @@ class ui_browse extends FO_Plugin {
       $ShowSomething = 1;
       $Link = NULL;
       $Name = $Row['ufile_name'];
-      $V.= "<tr>";
+
+      /* Set alternating row background color - repeats every $ColorSpanRows rows */
+      $RowStyle = (($RowNum++ % (2*$ColorSpanRows))<$ColorSpanRows) ? $RowStyle1 : $RowStyle2;
+      $V .= "<tr $RowStyle>";
 
       /* Check for children so we know if the file should by hyperlinked */
       $sql = "select uploadtree_pk from uploadtree 
