@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -35,6 +35,7 @@ if (!isset($GlobalReady)) { exit; }
  FolderGetTop(): Find the top-of-tree folder_pk for the current user.
  TBD: "username" will be added in the future and it may change
  how this function works.
+ DEPRECATED - USE GetUserRootFolder()
  ************************************************************/
 function FolderGetTop()
 {
@@ -49,6 +50,108 @@ function FolderGetTop()
   $Row = $Results[0];
   return($Row['root_folder_fk']);
 } // FolderGetTop()
+
+/************************************************************
+ GetUserRootFolder(): 
+ Return the top-of-tree folder_pk for the current user.
+ Fail if there is no user session.
+ ************************************************************/
+function GetUserRootFolder()
+{
+  global $PG_CONN;
+
+  /* validate inputs */
+  $user_pk = GetArrayVal("UserId", $_SESSION);
+
+  /* everyone has a user_pk, even if not logged in.  But verify. */
+  if (empty($user_pk)) return "__FILE__:__LINE__ GetUserRootFolder(Not logged in)<br>";
+
+  /* Get users root folder */
+  $sql = "select root_folder_fk from users where user_pk=$user_pk";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $UsersRow = pg_fetch_assoc($result);
+  $root_folder_fk = $UsersRow['root_folder_fk'];
+  pg_free_result($result);
+  return $root_folder_fk;
+} // GetUserRootFolder()
+
+
+/************************************************************
+ * Folder2Path(): 
+ *   $folder_pk
+ *  
+ * Return an array of the folder_pk, folder_name
+ * From the users.root_folder_fk to $folder_pk
+ * Array is in top down order.
+ * FolderList = array({'folder_pk'=>folder_pk, 'folder_name'=>folder_name}, ...
+ *
+ * If you need to know the folder_pk of an upload or uploadtree, use GetFolder()
+ ************************************************************/
+function Folder2Path($folder_pk)
+{
+  global $PG_CONN;
+  $FolderList = array();
+
+  /* validate inputs */
+  if (empty($folder_pk)) return __FILE__.":".__LINE__." Folder2Browse(empty)<br>";
+  
+  /* Get users root folder */
+  $root_folder_fk = GetUserRootFolder();   // will fail if no user session
+  
+  while($folder_pk)
+  {
+    $sql = "select folder_pk, folder_name from folder where folder_pk='$folder_pk'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $FolderRow = pg_fetch_assoc($result);
+    pg_free_result($result);
+    array_unshift($FolderList, $FolderRow);
+    
+    // Limit folders to user root.  Limit to an arbitrary 20 folders as a failsafe 
+    // against this loop going infinite.
+    if (($folder_pk == $root_folder_fk) or (count($FolderList)>20)) break;
+    
+    $sql = "select parent_fk from foldercontents where child_id='$folder_pk' and foldercontents_mode=1";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $FolderRow = pg_fetch_assoc($result);
+    pg_free_result($result);
+    $folder_pk = $FolderRow['parent_fk'];
+  } 
+  return($FolderList);
+} // Folder2Path()
+
+
+/************************************************************
+ * GetFolder(): 
+ *   $upload_pk
+ *   $uploadtree_pk
+ * Either $upload_pk OR $uploadtree_pk must be passed in.
+ *  
+ * Return the folder_pk that the upload_pk (or uploadtree_pk) is in:
+ ************************************************************/
+function GetFolder($upload_pk="", $uploadtree_pk="")
+{
+  global $PG_CONN;
+
+  /* validate inputs */
+  if (empty($uploadtree_pk) and empty($upload_pk)) return "__FILE__:__LINE__ GetFolder(empty)<br>";
+  
+  if (empty($upload_pk))
+  {
+    $UTrec = GetSingleRec("uploadtree", "where uploadtree_pk=$uploadtree_pk");
+    $upload_pk = $UTrec['upload_fk'];
+  }
+  
+  $sql = "select parent_fk from foldercontents where child_id='$upload_pk' and foldercontents_mode=2";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  $FolderRow = pg_fetch_assoc($result);
+  pg_free_result($result);
+  return $FolderRow['parent_fk'];
+} // GetFolder()
+
 
 /***********************************************************
  FolderListOption(): Create the tree, using OPTION tags.
@@ -311,6 +414,7 @@ function FolderListDiv($ParentFolder,$Depth,$Highlight=0,$ShowParent=0)
  This is recursive!
  NOTE: If there is a recursive loop in the folder table, then
  this will loop INFINITELY.
+ DEPRECATED!  USE Folder2Path() and GetFolder()
  ***********************************************************/
 $FolderGetFromUpload_1_Prepared=0;
 $FolderGetFromUpload_2_Prepared=0;
