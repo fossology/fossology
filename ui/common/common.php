@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -44,6 +44,8 @@ require_once("common-ui.php");
 require_once("common-buckets.php");
 require_once("common-pkg.php");
 require_once("common-tags.php");
+require_once("common-picker.php");
+require_once("common-db.php");
 
 /* Only include the command-line interface functions if it is required. */
 global $UI_CLI;
