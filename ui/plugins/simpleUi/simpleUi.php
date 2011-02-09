@@ -50,12 +50,7 @@ require($WEBDIR . '/plugins/ajax-perms.php');
 require($WEBDIR . '/plugins/ajax-tags.php');
 require($WEBDIR . '/plugins/ajax-upload-agents.php');
 require($WEBDIR . '/plugins/ajax-uploads.php');
-require($WEBDIR . '/plugins/copyright/agent.php');
-require($WEBDIR . '/plugins/copyright/hist.php');
-require($WEBDIR . '/plugins/copyright/library.php');
-require($WEBDIR . '/plugins/copyright/list.php');
-require($WEBDIR . '/plugins/copyright/oneshot.php');
-require($WEBDIR . '/plugins/copyright/view.php');
+require($WEBDIR . '/plugins/copyright.php');
 require($WEBDIR . '/plugins/core-auth.php');
 require($WEBDIR . '/plugins/core-db.php');
 require($WEBDIR . '/plugins/core-debug-fileloc.php');
@@ -101,6 +96,7 @@ require($WEBDIR . '/plugins/upload-srv-files.php');
 require($WEBDIR . '/plugins/user-add.php');
 require($WEBDIR . '/plugins/user-del.php');
 require($WEBDIR . '/plugins/user-edit-self.php');
+require($WEBDIR . '/plugins/user-edit-any.php');
 
 
 define("TITLE_SimpleUi", _("Simplified UI"));
@@ -159,6 +155,12 @@ class simpleUi extends FO_Plugin
     $newDependencies = array(
       'upload_instructions' => array("upload_file", "upload_url"),
       'upload_file' => array("db", "agent_unpack"),
+    //'myjobs' => array('db'),
+    );
+    $upmenus = array(
+      'upload_instructions' => 'Main::Upload::Instructions',
+      'upload_file' => 'Main::Upload::From File',
+    //'myjobs' => 'Main::Jobs::My Jobs',
     );
 
     foreach($newDependencies as $plugin => $depends)
@@ -169,9 +171,11 @@ class simpleUi extends FO_Plugin
         $pluginRef->Dependency = $depends;
         if($this->setState($pluginRef))
         {
-          // insert into menu if state = READY
-          $md = menu_insert("Main::Upload::From File",$pluginRef->MenuOrder,
-          $pluginRef->Name,$pluginRef->MenuTarget);
+          if($pluginRef->State == PLUGIN_STATE_READY)
+          {
+            $md = menu_insert($upmenus[$pluginRef->Name],$pluginRef->MenuOrder,
+            $pluginRef->Name,$pluginRef->MenuTarget);
+          }
         }
       }
     }
@@ -180,13 +184,42 @@ class simpleUi extends FO_Plugin
   /**
    * \brief disable plugins not needed for simple UI, when users with perms
    * > 5 login, these disabled plugins should get enabled.
+   *
+   * @param mixed $plugins either a scaler or an array
+   *
    */
-  function disablePlugins()
+  function disablePlugins($plugins)
   {
+    if(empty($plugins))
+    {
+      return(0);
+    }
+    if(is_array($plugins))
+    {
+      foreach($plugins as $plugin)
+      {
+        $pluginRef = plugin_find_any($plugin);  // can be null
+        if(!empty($pluginRef))
+        {
+          $pluginRef->Destroy();    // state invalid
+        }
+      }
+    }
+    else
+    {
+      $pluginRef = plugin_find_any($plugins);  // can be null
+      if(!empty($pluginRef))
+      {
+        //echo "<pre>Disabling $pluginRef->Name\n</pre>";
+        $pluginRef->Destroy();    // state invalid
+      }
+
+    }
     $disableList = array(
         'admin_folder_delete',
         'agent_license',
         'agent_nomos_once',
+        'agent_copyright_once',
         'runningjobs',
         'showjobs',
         'jobs_showjobs_upload',
@@ -195,15 +228,7 @@ class simpleUi extends FO_Plugin
         'user_add',
         'user_edit_any',
     );
-    foreach($disableList as $plugin)
-    {
-      $pluginRef = plugin_find_any($plugin);  // can be null
-      if(!empty($pluginRef))
-      {
-        $pluginRef->Destroy();    // kill thyself
-      }
-    }
-  }
+  } //disablePlugins
 
   /**
    * \brief check and set the state of the plugin
@@ -217,15 +242,15 @@ class simpleUi extends FO_Plugin
 
     if($pluginRef->State == PLUGIN_STATE_INVALID)
     {
-      echo "<pre>";
-      echo "Plugin state is $pluginRef->State for $pluginRef->Name\n";
+      //echo "<pre>";
+      //echo "SUI: Plugin state is $pluginRef->State for $pluginRef->Name\n";
       $pluginRef->State = PLUGIN_STATE_VALID;
-      echo "<pre>State after setting is:$pluginRef->State\n";
+      //echo "<pre>SUI: State after setting is:$pluginRef->State\n";
       $pluginRef->PostInitialize();
-      echo "<pre>State after PostInit is:$pluginRef->State\n";
+      //echo "<pre>SUI: State after PostInit is:$pluginRef->State\n";
       if ($pluginRef->State == PLUGIN_STATE_READY) { $pluginRef->RegisterMenus(); }
     }
-    echo "</pre>";
+    //echo "</pre>";
     return(TRUE);
   } // setState($pluginRef)
 
@@ -236,6 +261,7 @@ class simpleUi extends FO_Plugin
     if ($this->State != PLUGIN_STATE_VALID) {
       return(0);
     } // don't run
+
     if (empty($_SESSION['User']) && $this->LoginFlag) {
       //echo "<pre>Didn't pass session/LoginFlag check\n</pre>";
       return(0);
@@ -244,18 +270,19 @@ class simpleUi extends FO_Plugin
     foreach($this->Dependency as $key => $val) {
       $id = plugin_find_id($val);
       if ($id < 0) {
+        echo "<pre>SUI: depdendencies not met! for $this->Name\n</pre>";
         $this->Destroy();
         return(0);
       }
     }
-    // this makes it so anybody above user level 5 gets the full UI
+    // this makes it so anybody above user level 5 gets the full UI ?
     if($_SESSION['UserLevel'] <= 5)
     {
-    $this->adjustPlugins();
-    $this->adjustMenus();
-    $this->disablePlugins();
+      $this->adjustPlugins();
+      $this->adjustMenus();
+      plugin_disable(@$_SESSION['UserLevel']);
+      $this->disablePlugins(array('upload_srv_files','agent_nomos_once','agent_copyright_once'));
     }
-
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
     return($this->State == PLUGIN_STATE_READY);
