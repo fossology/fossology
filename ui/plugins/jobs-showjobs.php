@@ -34,7 +34,7 @@ class jobs_showjobs extends FO_Plugin
   var $MenuList   = "Jobs::Queue::Summary";
   var $MenuOrder  = 5;
   var $Dependency = array("db","browse");
-  var $DBaccess   = PLUGIN_DB_READ;
+  var $DBaccess   = PLUGIN_DB_UPLOAD;
 
   var $Colors=array(
 	"Queued" => "#FFFFCC",	// "white-ish",
@@ -386,7 +386,7 @@ $text = _("required by");
     if ($Upload)
     {
       /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
-      $sql = "select uploadtree_pk from uploadtree 
+      $sql = "select uploadtree_pk from uploadtree
                   where parent is NULL and upload_fk='$Upload' ";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);

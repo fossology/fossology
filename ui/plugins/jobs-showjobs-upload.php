@@ -33,7 +33,7 @@ class jobs_showjobs_upload extends FO_Plugin
   var $MenuList   = "Jobs::Queue::By Upload";
   var $Version    = "1.0";
   var $Dependency = array("db","showjobs");
-  var $DBaccess   = PLUGIN_DB_READ;
+  var $DBaccess   = PLUGIN_DB_UPLOAD;
 
   /***********************************************************
    RegisterMenus(): Register additional menus.
