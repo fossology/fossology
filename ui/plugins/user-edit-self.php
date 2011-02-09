@@ -46,7 +46,7 @@ class user_edit_self extends FO_Plugin {
 		if ($this->State != PLUGIN_STATE_VALID) {
 			return (0);
 		} // don't run
-		if (empty($_SESSION['UserId'])) {
+	    if (empty($_SESSION['User']) && $this->LoginFlag) {
 			/* Only valid if the user is logged in. */
 			$this->State = PLUGIN_STATE_INVALID;
 			return (0);
