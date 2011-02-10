@@ -226,10 +226,10 @@ class user_edit_self extends FO_Plugin
     $_SESSION['timeout_check'] = 1; /* force a recheck */
     return (NULL);
   } // Edit()
-  
+
   /**
-  Output(): Generate the text for this plugin.
-  */
+   Output(): Generate the text for this plugin.
+   */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY)
@@ -313,18 +313,21 @@ class user_edit_self extends FO_Plugin
          * conditions must be checked.
          */
         $AgentList = menu_find("Agents",$Depth);
-        foreach($AgentList as $AgentItem)
+        if(!empty($AgentList))
         {
-          $uri = $AgentItem->URI;
-        }
-        if($uri == "agent_unpack" && count($AgentList) == 1 )
-        {
-          $text = _("You do not have permission to change your default agents");
-          $V .= "<h3>$text</h3>\n";
-        }
-        else
-        {
-          $V.= AgentCheckBoxMake(-1, "agent_unpack");
+          foreach($AgentList as $AgentItem)
+          {
+            $uri = $AgentItem->URI;
+          }
+          if($uri == "agent_unpack" && count($AgentList) == 1 )
+          {
+            $text = _("You do not have permission to change your default agents");
+            $V .= "<h3>$text</h3>\n";
+          }
+          else
+          {
+            $V.= AgentCheckBoxMake(-1, "agent_unpack");
+          }
         }
         $V .= "</td>\n";
         $text = _("Default bucketpool.");
