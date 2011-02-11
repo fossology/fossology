@@ -44,8 +44,8 @@ class ui_menu extends FO_Plugin
     foreach($this->Dependency as $key => $val)
       {
       $id = plugin_find_id($val);
-      if ($id < 0) { Destroy(); return(0); } 
-      } 
+      if ($id < 0) { Destroy(); return(0); }
+      }
    
     // Add default menus (with no actions linked to plugins)
     menu_insert("Main::Home",18,"Default",NULL,"_top");
@@ -55,8 +55,7 @@ class ui_menu extends FO_Plugin
     menu_insert("Main::Organize",8);
     menu_insert("Main::Jobs",6);
     menu_insert("Main::Admin",4);
-    menu_insert("Main::Obsolete",2);
-    menu_insert("Main::Help",0);
+    menu_insert("Main::Help",-1);
     menu_insert("Main::Help::Documentation",0,NULL,NULL,NULL,"<a href='http://fossology.org/user_documentation'>Documentation</a>");
 
     // It worked, so mark this plugin as ready.
