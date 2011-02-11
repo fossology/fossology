@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -65,18 +65,20 @@ function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where="")
 
  Params:
    $KeyValArray   Assoc array.  Use key/val pairs for list
-   $SLName        Select list name (default is "unnamed")
+   $SLName        Select list name (default is "unnamed"),
    $SelectedVal   Initially selected value or key, depends 
                   on $SelElt
    $FirstEmpty    True if the list starts off with an empty choice
                   (default is false)
    $SelElt        True (default) if $SelectedVal is a value
                   False if $SelectedVal is a key
+   $Options       Optional.  Options to add to the select statment.
+                  For example, "id=myid onclick= ..."
  *****************************************/
 function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "", 
-                            $FirstEmpty=false, $SelElt=true)
+                            $FirstEmpty=false, $SelElt=true, $Options="")
 {
-  $str ="\n<select name='$SLName'>\n";
+  $str ="\n<select name='$SLName' $Options>\n";
   if ($FirstEmpty) $str .= "<option value='' > \n";
   foreach ($KeyValArray as $key => $val)
   {

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2009-2010 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -29,8 +29,8 @@
  *   $pfile_pk       (if empty, $uploadtree_pk must be given)
  *   $uploadtree_pk  (used only if $pfile_pk is empty)
  * Returns:
- *   sql result for rf_shortname, rf_fk
- *   FATAL if neither pfile_pk or uploadtree_pk were given
+ *   Array of file licenses   LicArray[rf_pk] = rf_shortname
+ *   FATAL if neither pfile_pk or uploadtree_pk were passed in
  */
 function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk)
 {
@@ -73,24 +73,30 @@ function GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk)
     DBCheckResult($result, $sql, __FILE__, __LINE__);
   }
   else Fatal("Missing function inputs", __FILE__, __LINE__);
-  return $result;
+
+  $LicArray = array();
+  while ($row = pg_fetch_assoc($result))
+  {
+    $LicArray[$row['rf_fk']] = $row["rf_shortname"];
+  }
+  pg_free_result($result);
+  return $LicArray;
 }
 
 // Same as GetFileLicenses() but returns license list as a single string
 function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk)
 {
   $LicStr = "";
-  $LicenseResult = GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk);
+  $LicArray = GetFileLicenses($agent_pk, $pfile_pk, $uploadtree_pk);
   $first = true;
-  while ($row = pg_fetch_assoc($LicenseResult))
+  foreach($LicArray as $Lic)
   {
     if ($first)
       $first = false;
     else 
       $LicStr .= " ,";
-    $LicStr .= $row["rf_shortname"];
+    $LicStr .= $Lic;
   }
-  pg_free_result($LicenseResult);
   
   return $LicStr;
 }

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -214,7 +214,7 @@ function Dir2Path($UploadtreePk)
   global $Plugins;
   global $DB;
 
-  if (empty($DB)) { return; }
+  if (empty($DB) || (empty($UploadtreePk))) { return array(); }
 
   $Rows = $DB->Action("SELECT * from uploadtree2path($UploadtreePk) ORDER BY lft ASC");
 
@@ -473,6 +473,20 @@ $foundChildren = array();
   }
   uasort($foundChildren, '_DirCmp');
   return $foundChildren;
+}
+
+
+/************************************************************
+ Uploadtree2PathStr(): 
+   Return string representation of uploadtree path.
+   Use Dir2Path to get $PathArray.
+ ************************************************************/
+function Uploadtree2PathStr ($PathArray)
+{
+  $Path = "";
+  if (count($PathArray))
+    foreach($PathArray as $PathRow) $Path .= "/" . $PathRow['ufile_name'];
+  return $Path;
 }
 
 ?>
