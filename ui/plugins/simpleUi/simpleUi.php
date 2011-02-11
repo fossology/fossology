@@ -22,82 +22,84 @@ if (!isset($GlobalReady))
   exit;
 }
 
-global $WEBDIR;
+/*
+ global $WEBDIR;
 
-require($WEBDIR . '/plugins/admin-bucket-pool.php');
-require($WEBDIR . '/plugins/admin-check-template.php');
-require($WEBDIR . '/plugins/admin-config.php');
-require($WEBDIR . '/plugins/admin-db.php');
-require($WEBDIR . '/plugins/admin-folder-create.php');
-require($WEBDIR . '/plugins/admin-folder-delete.php');
-require($WEBDIR . '/plugins/admin-folder-edit.php');
-require($WEBDIR . '/plugins/admin-folder-move.php');
-require($WEBDIR . '/plugins/admin-tag-ns-perm.php');
-require($WEBDIR . '/plugins/admin-tag-ns.php');
-require($WEBDIR . '/plugins/admin-upload-edit.php');
-require($WEBDIR . '/plugins/admin-upload-move.php');
-require($WEBDIR . '/plugins/agent-add.php');
-require($WEBDIR . '/plugins/agent-bucket.php');
-require($WEBDIR . '/plugins/agent-license.php');
-require($WEBDIR . '/plugins/agent-mimetype.php');
-require($WEBDIR . '/plugins/agent-nomos-once.php');
-require($WEBDIR . '/plugins/agent-nomos.php');
-require($WEBDIR . '/plugins/agent-pkgagent.php');
-require($WEBDIR . '/plugins/agent-unpack.php');
-require($WEBDIR . '/plugins/ajax-filebucket.php');
-require($WEBDIR . '/plugins/ajax-filelic.php');
-require($WEBDIR . '/plugins/ajax-perms.php');
-require($WEBDIR . '/plugins/ajax-tags.php');
-require($WEBDIR . '/plugins/ajax-upload-agents.php');
-require($WEBDIR . '/plugins/ajax-uploads.php');
-require($WEBDIR . '/plugins/copyright.php');
-require($WEBDIR . '/plugins/core-auth.php');
-require($WEBDIR . '/plugins/core-db.php');
-require($WEBDIR . '/plugins/core-debug-fileloc.php');
-require($WEBDIR . '/plugins/core-debug-flush-cache.php');
-require($WEBDIR . '/plugins/core-debug-menus.php');
-require($WEBDIR . '/plugins/core-debug-plugins.php');
-require($WEBDIR . '/plugins/core-debug-user.php');
-require($WEBDIR . '/plugins/core-init.php');
-require($WEBDIR . '/plugins/core-schema.dat');
-require($WEBDIR . '/plugins/core-schema.php');
-require($WEBDIR . '/plugins/group-manage.php');
-require($WEBDIR . '/plugins/group-manage-self.php');
-require($WEBDIR . '/plugins/jobs-showjobs.php');
-require($WEBDIR . '/plugins/jobs-showjobs-upload.php');
-require($WEBDIR . '/plugins/myjobs.php');
-require($WEBDIR . '/plugins/search-file-advance.php');
-require($WEBDIR . '/plugins/search-file-by-license.php');
-require($WEBDIR . '/plugins/search.php');
-require($WEBDIR . '/plugins/search-repo.php');
-require($WEBDIR . '/plugins/ui-about.php');
-require($WEBDIR . '/plugins/ui-browse.php');
-require($WEBDIR . '/plugins/ui-buckets.php');
-require($WEBDIR . '/plugins/ui-default.php');
-require($WEBDIR . '/plugins/ui-download.php');
-require($WEBDIR . '/plugins/ui-folders.php');
-require($WEBDIR . '/plugins/ui-license.php');
-require($WEBDIR . '/plugins/ui-list-bucket-files.php');
-require($WEBDIR . '/plugins/ui-menus.php');
-require($WEBDIR . '/plugins/ui-nomos-license.php');
-require($WEBDIR . '/plugins/ui-refresh.php');
-require($WEBDIR . '/plugins/ui-reunpack.php');
-require($WEBDIR . '/plugins/ui-tags.php');
-require($WEBDIR . '/plugins/ui-topnav.php');
-require($WEBDIR . '/plugins/ui-treenav.php');
-require($WEBDIR . '/plugins/ui-view-info.php');
-require($WEBDIR . '/plugins/ui-view-license.php');
-require($WEBDIR . '/plugins/ui-view.php');
-require($WEBDIR . '/plugins/ui-welcome.php');
-require($WEBDIR . '/plugins/upload-file.php');
-require($WEBDIR . '/plugins/upload-instructions.php');
-require($WEBDIR . '/plugins/upload-url.php');
-require($WEBDIR . '/plugins/upload-srv-files.php');
-require($WEBDIR . '/plugins/user-add.php');
-require($WEBDIR . '/plugins/user-del.php');
-require($WEBDIR . '/plugins/user-edit-self.php');
-require($WEBDIR . '/plugins/user-edit-any.php');
-
+ require($WEBDIR . '/plugins/admin-bucket-pool.php');
+ require($WEBDIR . '/plugins/admin-check-template.php');
+ require($WEBDIR . '/plugins/admin-config.php');
+ require($WEBDIR . '/plugins/admin-db.php');
+ require($WEBDIR . '/plugins/admin-folder-create.php');
+ require($WEBDIR . '/plugins/admin-folder-delete.php');
+ require($WEBDIR . '/plugins/admin-folder-edit.php');
+ require($WEBDIR . '/plugins/admin-folder-move.php');
+ require($WEBDIR . '/plugins/admin-tag-ns-perm.php');
+ require($WEBDIR . '/plugins/admin-tag-ns.php');
+ require($WEBDIR . '/plugins/admin-upload-edit.php');
+ require($WEBDIR . '/plugins/admin-upload-move.php');
+ require($WEBDIR . '/plugins/admin-upload-delete.php');
+ require($WEBDIR . '/plugins/agent-add.php');
+ require($WEBDIR . '/plugins/agent-bucket.php');
+ require($WEBDIR . '/plugins/agent-mimetype.php');
+ require($WEBDIR . '/plugins/agent-nomos-once.php');
+ require($WEBDIR . '/plugins/agent-nomos.php');
+ require($WEBDIR . '/plugins/agent-pkgagent.php');
+ require($WEBDIR . '/plugins/agent-unpack.php');
+ require($WEBDIR . '/plugins/ajax-filebucket.php');
+ require($WEBDIR . '/plugins/ajax-filelic.php');
+ require($WEBDIR . '/plugins/ajax-perms.php');
+ require($WEBDIR . '/plugins/ajax-tags.php');
+ require($WEBDIR . '/plugins/ajax-upload-agents.php');
+ require($WEBDIR . '/plugins/ajax-uploads.php');
+ require($WEBDIR . '/plugins/copyright.php');
+ require($WEBDIR . '/plugins/core-auth.php');
+ require($WEBDIR . '/plugins/core-db.php');
+ require($WEBDIR . '/plugins/core-debug-fileloc.php');
+ require($WEBDIR . '/plugins/core-debug-flush-cache.php');
+ require($WEBDIR . '/plugins/core-debug-menus.php');
+ require($WEBDIR . '/plugins/core-debug-plugins.php');
+ require($WEBDIR . '/plugins/core-debug-user.php');
+ require($WEBDIR . '/plugins/core-init.php');
+ require($WEBDIR . '/plugins/core-schema.dat');
+ require($WEBDIR . '/plugins/core-schema.php');
+ require($WEBDIR . '/plugins/group-manage.php');
+ require($WEBDIR . '/plugins/group-manage-self.php');
+ require($WEBDIR . '/plugins/jobs-showjobs.php');
+ require($WEBDIR . '/plugins/jobs-showjobs-upload.php');
+ require($WEBDIR . '/plugins/myjobs.php');
+ require($WEBDIR . '/plugins/search-file-advance.php');
+ require($WEBDIR . '/plugins/search-file-by-license.php');
+ require($WEBDIR . '/plugins/search.php');
+ //require($WEBDIR . '/plugins/search-file.php');
+ require($WEBDIR . '/plugins/search-repo.php');
+ require($WEBDIR . '/plugins/ui-about.php');
+ require($WEBDIR . '/plugins/ui-browse.php');
+ require($WEBDIR . '/plugins/ui-buckets.php');
+ require($WEBDIR . '/plugins/ui-default.php');
+ require($WEBDIR . '/plugins/ui-download.php');
+ require($WEBDIR . '/plugins/ui-folders.php');
+ require($WEBDIR . '/plugins/ui-license.php');
+ require($WEBDIR . '/plugins/ui-list-bucket-files.php');
+ require($WEBDIR . '/plugins/ui-menus.php');
+ require($WEBDIR . '/plugins/ui-nomos-license.php');
+ require($WEBDIR . '/plugins/ui-refresh.php');
+ require($WEBDIR . '/plugins/ui-reunpack.php');
+ require($WEBDIR . '/plugins/ui-tags.php');
+ require($WEBDIR . '/plugins/ui-topnav.php');
+ require($WEBDIR . '/plugins/ui-treenav.php');
+ require($WEBDIR . '/plugins/ui-view-info.php');
+ require($WEBDIR . '/plugins/ui-view-license.php');
+ require($WEBDIR . '/plugins/ui-view.php');
+ require($WEBDIR . '/plugins/ui-welcome.php');
+ require($WEBDIR . '/plugins/upload-file.php');
+ require($WEBDIR . '/plugins/upload-instructions.php');
+ require($WEBDIR . '/plugins/upload-url.php');
+ require($WEBDIR . '/plugins/upload-srv-files.php');
+ require($WEBDIR . '/plugins/user-add.php');
+ require($WEBDIR . '/plugins/user-del.php');
+ require($WEBDIR . '/plugins/user-edit-self.php');
+ require($WEBDIR . '/plugins/user-edit-any.php');
+ */
 
 define("TITLE_SimpleUi", _("Simplified UI"));
 
@@ -107,9 +109,10 @@ class simpleUi extends FO_Plugin
   public $Title = TITLE_SimpleUi;
   public $Version = "1.0";
   public $MenuList = "";
+  public $LoginFlag = 1;
   public $Dependency = array();
   public $DBaccess = PLUGIN_DB_READ;
-  public $PluginLevel= 20; /* make this run after level 10 plugins */
+  public $PluginLevel= 20; /* make this run before level 10 plugins */
 
 
   /**
@@ -147,7 +150,7 @@ class simpleUi extends FO_Plugin
    *
    * @return void
    */
-  function adjustPlugins()
+  function adjustDependencies()
   {
     /*
      * List of plugins that need dependencies adjusted
@@ -180,6 +183,37 @@ class simpleUi extends FO_Plugin
       }
     }
   } // adjustPlugins
+
+  /**
+   * \brief change the LoginFlag for selected plugins
+   *
+   */
+  function adjustLoginFlag()
+  {
+    $plist = array(
+      'search',
+      'search_file',
+      'browse'
+      );
+      foreach($plist as $plugin)
+      {
+        $pluginRef = plugin_find_any($plugin);  // can be null
+        if(!empty($pluginRef))
+        {
+          $pluginRef->LoginFlag = 1; // must be logged in to use this plugin
+          //$pluginRef->PostInitialize();
+        }
+      }
+      // hack
+      foreach (array('search_file', 'search') as $plugin)
+      {
+        $pluginRef = plugin_find_any($plugin);  // can be null
+        if(!empty($pluginRef))
+        {
+          $pluginRef->DBaccess = PLUGIN_DB_DELETE;
+        }
+      }
+  }
 
   /**
    * \brief disable plugins not needed for simple UI, when users with perms
@@ -215,19 +249,6 @@ class simpleUi extends FO_Plugin
       }
 
     }
-    $disableList = array(
-        'admin_folder_delete',
-        'agent_license',
-        'agent_nomos_once',
-        'agent_copyright_once',
-        'runningjobs',
-        'showjobs',
-        'jobs_showjobs_upload',
-        'upload_srv_files',
-        'user_del',
-        'user_add',
-        'user_edit_any',
-    );
   } //disablePlugins
 
   /**
@@ -257,20 +278,20 @@ class simpleUi extends FO_Plugin
   function PostInitialize()
   {
     global $Plugins;
-    //echo "<pre>TEMP: State is:$this->State for $this->Name\n</pre>";
+    //echo "<pre>SIMP: State is:$this->State for $this->Name\n</pre>";
     if ($this->State != PLUGIN_STATE_VALID) {
       return(0);
     } // don't run
 
     if (empty($_SESSION['User']) && $this->LoginFlag) {
-      //echo "<pre>Didn't pass session/LoginFlag check\n</pre>";
+      //echo "<pre>SIMP: Didn't pass session/LoginFlag check\n</pre>";
       return(0);
     }
     // Make sure dependencies are met
     foreach($this->Dependency as $key => $val) {
       $id = plugin_find_id($val);
       if ($id < 0) {
-        echo "<pre>SUI: depdendencies not met! for $this->Name\n</pre>";
+        echo "<pre>SIMP: depdendencies not met! for $this->Name\n</pre>";
         $this->Destroy();
         return(0);
       }
@@ -278,10 +299,14 @@ class simpleUi extends FO_Plugin
     // this makes it so anybody above user level 5 gets the full UI ?
     if($_SESSION['UserLevel'] <= 5)
     {
-      $this->adjustPlugins();
+      //$this->adjustDependencies();
       $this->adjustMenus();
+      //echo "<pre>SIMP: adjusting loginflag\n</pre>";
+      $this->adjustLoginFlag();
       plugin_disable(@$_SESSION['UserLevel']);
-      $this->disablePlugins(array('upload_srv_files','agent_nomos_once','agent_copyright_once'));
+      $this->disablePlugins(array
+      ('upload_srv_files','agent_nomos_once','agent_copyright_once',));
+
     }
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
