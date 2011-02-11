@@ -16,90 +16,20 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+/**
+ * \brief simpleUi, create few menus for users with DBacess <= 5.
+ *
+ * This code depends on symlinks existing between the direcotry this code is in
+ * and the plugins directory.
+ *
+ * @version "$Id$"
+ */
+
 global $GlobalReady;
 if (!isset($GlobalReady))
 {
   exit;
 }
-
-/*
- global $WEBDIR;
-
- require($WEBDIR . '/plugins/admin-bucket-pool.php');
- require($WEBDIR . '/plugins/admin-check-template.php');
- require($WEBDIR . '/plugins/admin-config.php');
- require($WEBDIR . '/plugins/admin-db.php');
- require($WEBDIR . '/plugins/admin-folder-create.php');
- require($WEBDIR . '/plugins/admin-folder-delete.php');
- require($WEBDIR . '/plugins/admin-folder-edit.php');
- require($WEBDIR . '/plugins/admin-folder-move.php');
- require($WEBDIR . '/plugins/admin-tag-ns-perm.php');
- require($WEBDIR . '/plugins/admin-tag-ns.php');
- require($WEBDIR . '/plugins/admin-upload-edit.php');
- require($WEBDIR . '/plugins/admin-upload-move.php');
- require($WEBDIR . '/plugins/admin-upload-delete.php');
- require($WEBDIR . '/plugins/agent-add.php');
- require($WEBDIR . '/plugins/agent-bucket.php');
- require($WEBDIR . '/plugins/agent-mimetype.php');
- require($WEBDIR . '/plugins/agent-nomos-once.php');
- require($WEBDIR . '/plugins/agent-nomos.php');
- require($WEBDIR . '/plugins/agent-pkgagent.php');
- require($WEBDIR . '/plugins/agent-unpack.php');
- require($WEBDIR . '/plugins/ajax-filebucket.php');
- require($WEBDIR . '/plugins/ajax-filelic.php');
- require($WEBDIR . '/plugins/ajax-perms.php');
- require($WEBDIR . '/plugins/ajax-tags.php');
- require($WEBDIR . '/plugins/ajax-upload-agents.php');
- require($WEBDIR . '/plugins/ajax-uploads.php');
- require($WEBDIR . '/plugins/copyright.php');
- require($WEBDIR . '/plugins/core-auth.php');
- require($WEBDIR . '/plugins/core-db.php');
- require($WEBDIR . '/plugins/core-debug-fileloc.php');
- require($WEBDIR . '/plugins/core-debug-flush-cache.php');
- require($WEBDIR . '/plugins/core-debug-menus.php');
- require($WEBDIR . '/plugins/core-debug-plugins.php');
- require($WEBDIR . '/plugins/core-debug-user.php');
- require($WEBDIR . '/plugins/core-init.php');
- require($WEBDIR . '/plugins/core-schema.dat');
- require($WEBDIR . '/plugins/core-schema.php');
- require($WEBDIR . '/plugins/group-manage.php');
- require($WEBDIR . '/plugins/group-manage-self.php');
- require($WEBDIR . '/plugins/jobs-showjobs.php');
- require($WEBDIR . '/plugins/jobs-showjobs-upload.php');
- require($WEBDIR . '/plugins/myjobs.php');
- require($WEBDIR . '/plugins/search-file-advance.php');
- require($WEBDIR . '/plugins/search-file-by-license.php');
- require($WEBDIR . '/plugins/search.php');
- //require($WEBDIR . '/plugins/search-file.php');
- require($WEBDIR . '/plugins/search-repo.php');
- require($WEBDIR . '/plugins/ui-about.php');
- require($WEBDIR . '/plugins/ui-browse.php');
- require($WEBDIR . '/plugins/ui-buckets.php');
- require($WEBDIR . '/plugins/ui-default.php');
- require($WEBDIR . '/plugins/ui-download.php');
- require($WEBDIR . '/plugins/ui-folders.php');
- require($WEBDIR . '/plugins/ui-license.php');
- require($WEBDIR . '/plugins/ui-list-bucket-files.php');
- require($WEBDIR . '/plugins/ui-menus.php');
- require($WEBDIR . '/plugins/ui-nomos-license.php');
- require($WEBDIR . '/plugins/ui-refresh.php');
- require($WEBDIR . '/plugins/ui-reunpack.php');
- require($WEBDIR . '/plugins/ui-tags.php');
- require($WEBDIR . '/plugins/ui-topnav.php');
- require($WEBDIR . '/plugins/ui-treenav.php');
- require($WEBDIR . '/plugins/ui-view-info.php');
- require($WEBDIR . '/plugins/ui-view-license.php');
- require($WEBDIR . '/plugins/ui-view.php');
- require($WEBDIR . '/plugins/ui-welcome.php');
- require($WEBDIR . '/plugins/upload-file.php');
- require($WEBDIR . '/plugins/upload-instructions.php');
- require($WEBDIR . '/plugins/upload-url.php');
- require($WEBDIR . '/plugins/upload-srv-files.php');
- require($WEBDIR . '/plugins/user-add.php');
- require($WEBDIR . '/plugins/user-del.php');
- require($WEBDIR . '/plugins/user-edit-self.php');
- require($WEBDIR . '/plugins/user-edit-any.php');
- */
 
 define("TITLE_SimpleUi", _("Simplified UI"));
 
