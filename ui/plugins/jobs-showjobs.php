@@ -34,7 +34,7 @@ class jobs_showjobs extends FO_Plugin
   var $MenuList   = "Jobs::Queue::Summary";
   var $MenuOrder  = 5;
   var $Dependency = array("db","browse");
-  var $DBaccess   = PLUGIN_DB_READ;
+  var $DBaccess   = PLUGIN_DB_UPLOAD;
 
   var $Colors=array(
 	"Queued" => "#FFFFCC",	// "white-ish",
