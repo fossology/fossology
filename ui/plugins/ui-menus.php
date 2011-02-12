@@ -113,7 +113,8 @@ class ui_menu extends FO_Plugin
           {
             $V .= "<font color='#C0C0C0'>";
             if (@$_SESSION['fullmenudebug'] == 1) { $V .= $M->FullName . "(" . $M->Order . ")"; }
-            else { $V .= $M->Name; }
+          //else { $V .= $M->Name; }
+            else { $V .= ''; }
             $V .= "</font>";
           }
           else
