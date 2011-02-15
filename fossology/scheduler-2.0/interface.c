@@ -16,6 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 ************************************************************** */
 
 /* local includes */
+#include <event.h>
 #include <interface.h>
 #include <job.h>
 #include <logging.h>
@@ -81,6 +82,7 @@ void* interface_thread(void* param)
   interface_connection* conn = param;
   network_header header;
   char buffer[1024];
+  char* cmd, * args;
   unsigned long size;
 
   while(g_input_stream_read(conn->istr, &header, sizeof(header), NULL, NULL) != 0)
@@ -91,43 +93,57 @@ void* interface_thread(void* param)
       g_thread_exit(NULL);
     }
 
-    if(TVERBOSE2)
-      lprintf_c("INTERFACE: recieved \"%s\"\n", buffer);
+    if(TVERBOSE2) lprintf_c("INTERFACE: recieved \"%s\"\n", buffer);
+    /* convert all characters before first ' ' to lower case */
+    for(cmd = buffer, args = NULL; *cmd && args == NULL; cmd++)
+    {
+      *cmd = g_ascii_tolower(*cmd);
+      if(*cmd == ' ' && args == NULL)
+      {
+        args = cmd + 1;
+        *cmd = '\0';
+      }
+    }
+    cmd = buffer;
 
-    if(strncmp(buffer, "Exit", 4) == 0)
+    if(g_str_has_prefix("exit", cmd))
     {
       g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
+      if(TVERBOSE2) lprintf_c("INTERFACE: closing connection to user interface\n");
       return NULL;
     }
-    else if(strncmp(buffer, "Close", 5) == 0)
+    else if(g_str_has_prefix("close", cmd))
     {
-      // TODO
+      g_output_stream_write(conn->ostr, "CLOSE", 5, NULL, NULL);
+      if(TVERBOSE2) lprintf_c("INTERFACE: shutting down scheduler\n");
+      event_signal(scheduler_close_event, NULL);
       return NULL;
     }
-    else if(strncmp(buffer, "Pause", 5) == 0)
+    else if(g_str_has_prefix("pause", cmd))
       job_pause(get_job(atoi(&buffer[10])));
-    else if(strncmp(buffer, "Reload", 6) == 0)
+    else if(g_str_has_prefix("reload", cmd))
       load_config();
-    else if(strncmp(buffer, "Status", 6) == 0)
+    else if(g_str_has_prefix("status", cmd))
     {
 
     }
-    else if(strncmp(buffer, "Restart", 7) == 0)
-      job_restart(get_job(atoi(&buffer[10])));
-    else if(strncmp(buffer, "Verbose", 7) == 0)
+    else if(g_str_has_prefix("restart", cmd))
+      job_restart(get_job(atoi(args)));
+    else if(g_str_has_prefix("verbose", cmd))
     {
-      if(buffer[10] == '\0')
-        verbose = buffer[8] - '0';
-      else
-        job_verbose_event(job_verbose(get_job(atoi(&buffer[10])), buffer[8] - '0'));
+      if((cmd = strchr(args, ' ')) == NULL) verbose = atoi(args);
+      else job_verbose_event(job_verbose(get_job(atoi(args)), atoi(cmd+1)));
     }
-    else if(strncmp(buffer, "Database", 8) == 0); // TODO check database event
-    else break;
+    else if(g_str_has_prefix("database", cmd)); // TODO check database event
+    else
+    {
+      lprintf_c("ERROR %s.%d: Interface recieved invalid command: %s\n", cmd);
+    }
 
     memset(buffer, '\0', sizeof(buffer));
   }
 
-  lprintf_c("ERROR: %s.%d: Interface connection closed unexpectantly\n", __FILE__, __LINE__);
+  lprintf_c("ERROR %s.%d: Interface connection closed unexpectantly\n", __FILE__, __LINE__);
 
   return NULL;
 }

@@ -54,14 +54,24 @@ extern int verbose;
 /* ************************************************************************** */
 
 #define FATAL(...) { \
-            fprintf(stderr, "FATAL %s.%d: "); \
+            fprintf(stderr, "FATAL %s.%d: ", __FILE__, __LINE__); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
+
+#define PQ_FATAL(pg_r, ...) { \
+            fprintf(stderr, "FATAL %s.%d: ", __FILE__, __LINE__); \
+            fprintf(stderr, __VA_ARGS__); \
+            fprintf(stderr, "FATAL postgresql error: %s\n", PQresultErrorMessage(pg_r)); }
 
 #define ERROR(...) { \
             fprintf(stderr, "ERROR %s.%d: "); \
             fprintf(stderr, __VA_ARGS__); \
             fprintf(stderr, "\n"); }
+
+#define PQ_ERROR(pg_r, ...) { \
+            fprintf(stderr, "ERROR %s.%d: ", __FILE__, __LINE__); \
+            fprintf(stderr, __VA_ARGS__); \
+            fprintf(stderr, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); }
 
 #define WARNING(...) { \
             fprintf(stderr, "WARNING %s.%d: "); \

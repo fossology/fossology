@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* local includes */
 #include <agent.h>
+#include <database.h>
 #include <event.h>
 #include <logging.h>
 #include <scheduler.h>
@@ -39,20 +40,23 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 struct job_internal
 {
+    /* associated agent information */
     char*  agent_type;      ///< the type of agent used to analyze the data
     GList* running_agents;  ///< the list of agents assigned to this job that are still working
     GList* finsihed_agents; ///< the list of agents that have successfully finish their task
     GList* failed_agents;   ///< the list of agents that failed while working
-    char** data_begin;      ///< the list of data to be analyzed
-    char** data_end;        ///< a pointer to one past the last valid datum
-    char** curr;            ///< the current location in the data block
+    /* information for data manipluation */
+    char* data;             ///< the data associated with this job
+    PGresult* db_result;    ///< results from the sql query (if any)
+    GMutex* lock;           ///< lock to maintain data integrity
+    int idx;                ///< the current index into the sql results
+    /* information about job status */
     int priority;           ///< importance of the job, currently only two types
     int verbose;            ///< the verbose level for all of the agents in this job
     int paused;             ///< if this job has been paused until further notice
     int id;                 ///< the identifier for this job
 };
 
-int job_id_gen = 0;
 GTree* job_list = NULL;
 
 /* ************************************************************************** */
@@ -71,7 +75,7 @@ GTree* job_list = NULL;
  * @param data_size the number of elements in the data array
  * @return the new job
  */
-job job_init(char* type, char** data, int data_size)
+job job_init(char* type, int id)
 {
   job j = (job)calloc(1, sizeof(struct job_internal));
 
@@ -79,13 +83,14 @@ job job_init(char* type, char** data, int data_size)
   j->running_agents =  NULL;
   j->finsihed_agents = NULL;
   j->failed_agents =   NULL;
-  j->data_begin = data;
-  j->data_end = data + data_size;
-  j->curr = data;
+  j->data = NULL;
+  j->db_result = NULL;
+  j->lock = NULL;
+  j->idx = 0;
   j->priority = 0;
   j->verbose = 0;
   j->paused = 0;
-  j->id = job_id_gen++;
+  j->id = id;
 
   return j;
 }
@@ -100,16 +105,18 @@ job job_init(char* type, char** data, int data_size)
 void job_destroy(job j)
 {
   TEST_NULV(j);
-  for(j->curr = j->data_begin; j->curr && *j->curr; j->curr++)
+
+  if(j->db_result != NULL)
   {
-    free(*j->curr);
+    PQclear(j->db_result);
+    g_mutex_free(j->lock);
   }
 
   g_list_free(j->running_agents);
   g_list_free(j->finsihed_agents);
   g_list_free(j->failed_agents);
+  g_free(j->data);
 
-  free(j->data_begin);
   free(j);
 }
 
@@ -148,7 +155,7 @@ void job_add_agent(job j, void* a)
 }
 
 /**
- * Removes an agent from a jobs list of agents, if a job no longer has any agents
+ * Removes an agent fr  om a jobs list of agents, if a job no longer has any agents
  * in any of it lists, this will then remove the job from the system.
  *
  * @param j the job to remove the agent from
@@ -200,6 +207,24 @@ void job_set_priority(job j, int pri)
 {
   TEST_NULV(j);
   j->priority = pri;
+}
+
+/**
+ * TODO
+ *
+ * @param j
+ * @param data
+ * @param sql
+ */
+void job_set_data(job j, char* data, int sql)
+{
+  j->data = g_strdup(data);
+
+  if(sql)
+  {
+    j->db_result = database_exec(j->data);
+    j->lock = g_mutex_new();
+  }
 }
 
 /**
@@ -314,6 +339,42 @@ int job_is_paused(job j)
 }
 
 /**
+ * Tests to see if there is still data available for this job
+ *
+ * @param j the job to test
+ * @return if the job still has data available
+ */
+int job_is_open(job j)
+{
+  /* local */
+  int retval = 0;
+  TEST_NULL(j, 0);
+
+  /* check to see if we even need to worry about sql stuff */
+  if(j->db_result == NULL)
+  {
+    return (!j->idx && j->data != NULL);
+  }
+
+  g_mutex_lock(j->lock);
+  if(j->idx < PQntuples(j->db_result))
+  {
+    retval = 1;
+  }
+  else
+  {
+    PQclear(j->db_result);
+    j->db_result = database_exec(j->data);
+    j->idx = 0;
+
+    retval = PQntuples(j->db_result) != 0;
+  }
+
+  g_mutex_unlock(j->lock);
+  return retval;
+}
+
+/**
  * Changes and returns the verbose level for this job.
  *
  * @param j the job to change the verbose on
@@ -328,25 +389,34 @@ job job_verbose(job j, int level)
 }
 
 /**
- * Gets the next block of data that needs to be analyzed. This function will make sure
- * that the next block is valid and if it isn't return NULL.
+ * Gets the next piece of data that should be analyzed, if there is no more data
+ * to analyze, this will return NULL;
  *
  * @param j the job to get the data for
  * @return a pointer to the next block of data or NULL
  */
-char** job_next(job j)
+char* job_next(job j)
 {
-  char** ret;
+  char* retval = NULL;
 
   TEST_NULL(j, NULL);
-  if(j->curr < j->data_end)
+  if(j->db_result == NULL)
   {
-    ret = j->curr;
-    j->curr += CHECKOUT_SIZE;
-    return ret;
+    if(j->idx == 0)
+    {
+      j->idx = 1;
+      return j->data;
+    }
+    return NULL;
   }
 
-  return NULL;
+  g_mutex_lock(j->lock);
+
+  if(j->idx < PQntuples(j->db_result))
+    retval = PQgetvalue(j->db_result, j->idx++, 0);
+
+  g_mutex_unlock(j->lock);
+  return retval;
 }
 
 /* ************************************************************************** */
@@ -405,6 +475,7 @@ job get_job(int id)
  */
 int num_jobs()
 {
+  check_list();
   return g_tree_nnodes(job_list);
 }
 

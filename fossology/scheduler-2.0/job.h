@@ -31,7 +31,7 @@ typedef struct job_internal* job;
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
-job job_init(char* type, char** data, int data_size);
+job job_init(char* type, int id);
 void job_destroy(job j);
 
 /* ************************************************************************** */
@@ -45,13 +45,15 @@ void job_remove_agent(job j, void* a);
 void job_finish_agent(job j, void* a);
 void job_fail_agent(job j, void* a);
 void job_set_priority(job j, int pri);
+void job_set_data(job j, char* data, int sql);
 void job_update(job j);
 void job_pause(job j);
 void job_restart(job j);
 int  job_id(job j);
 int  job_is_paused(job j);
+int  job_is_open(job j);
 job  job_verbose(job j, int level);
-char** job_next(job j);
+char* job_next(job j);
 
 /* ************************************************************************** */
 /* **** Job list Functions ************************************************** */
