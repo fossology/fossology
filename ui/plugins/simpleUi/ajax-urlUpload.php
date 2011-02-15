@@ -50,7 +50,6 @@ class ajax_urlUpload extends FO_Plugin
       return;
     }
     $V = "";
-    echo "<pre>starting ajax-urlUpload\n</pre>";
     switch ($this->OutputType)
     {
       case "XML":

@@ -105,14 +105,137 @@ class uploads extends FO_Plugin
 
 
   /**
-   * \brief uploadUrl(): Process the upload from URLrequest.
+   * \brief uploadSrv: process the upload from server request, scheduling
+   * agents as needed.
+   */
+
+  /**
+   *
+   * Function: uploadSrv()
+   *
+   * \brief Process the upload from server request.  Call the upload by the
+   * Name passed in or by the filename if no name is supplied.
+   *
+   * @param int $FolderPk folder fk to load into
+   * @param string $SourceFiles files to upload, file, tar, directory, etc...
+   * @param string $GroupNames flag for indicating if group names were requested.
+   *        passed on as -A option to cp2foss.
+   * @param string $Name optional Name for the upload
+   *
+   * @return NULL on success, string on failure.
+   */
+  function uploadSrv($FolderPk, $SourceFiles, $GroupNames, $Name)
+  {
+
+    global $LIBEXECDIR;
+    global $DB;
+    global $Plugins;
+
+    $FolderPath = FolderGetName($FolderPk);
+    $CMD = "";
+    if ($GroupNames == "1")
+    {
+      $CMD.= " -A";
+    }
+    $FolderPath = str_replace('`', '\`', $FolderPath);
+    $FolderPath = str_replace('$', '\$', $FolderPath);
+    $CMD.= " -f \"$FolderPath\"";
+    if (!empty($Name))
+    {
+      $Name = str_replace('`', '\`', $Name);
+      $Name = str_replace('$', '\$', $Name);
+      $CMD.= " -n \"$Name\"";
+    }
+    else
+    {
+      $Name = $SourceFiles;
+    }
+
+    // get the default agents selected by the user, as simple screen does not
+    // have user choices shown.
+    $userName = $_SESSION['User'];
+    $SQL = "SELECT user_name, user_agent_list FROM users WHERE
+            user_name='$userName';";
+    $uList = $DB->Action($SQL);
+
+    // Ulist can be empty if the user does not have the correct permissions
+    // or has not selected any default/preferred agents or sql failed.
+    if(empty($uList))
+    {
+      return;       // nothing to schedule or sql failed....
+
+    }
+    $alist = $uList[0]['user_agent_list'];
+    $agentList = " -q " . $alist;
+    $CMD .= $agentList;
+
+    $SourceFiles = str_replace('`', '\`', $SourceFiles);
+    $SourceFiles = str_replace('$', '\$', $SourceFiles);
+    $SourceFiles = str_replace('|', '\|', $SourceFiles);
+    $SourceFiles = str_replace(' ', '\ ', $SourceFiles);
+    $SourceFiles = str_replace("\t", "\\\t", $SourceFiles);
+    $CMD.= " $SourceFiles";
+    $jq_args = trim($CMD);
+    /* Add the job to the queue */
+    // create the job
+    $ShortName = basename($Name);
+    if (empty($ShortName)) {
+      $ShortName = $Name;
+    }
+    echo "<pre>UPSRV: name is:$Name\nShortName is:$ShortName\n</pre>";
+    // Create an upload record.
+    $jobq = NULL;
+    $Mode = (1 << 3); // code for "it came from web upload"
+    $uploadpk = JobAddUpload($ShortName, $SourceFiles, $Desc, $Mode, $FolderPk);
+    $jobq = JobAddJob($uploadpk, 'fosscp_agent', 0);
+    if (empty($jobq))
+    {
+      $text = _("Failed to create job record");
+      return ($text);
+    }
+
+    /* Check for email notification and adjust jq_args as needed */
+    if (CheckEnotification())
+    {
+      if(empty($_SESSION['UserEmail']))
+      {
+        $Email = 'fossy@localhost';
+      }
+      else
+      {
+        $Email = $_SESSION['UserEmail'];
+      }
+      /*
+       * Put -w webServer -e <addr> in the front as the upload is last
+       * part of jq_args.
+       */
+      $jq_args = " -W {$_SERVER['SERVER_NAME']} -e $Email " . "$jq_args";
+    }
+    // put the job in the jobqueue
+    $jq_type = 'fosscp_agent';
+    $jobqueue_pk = JobQueueAdd($jobq, $jq_type, $jq_args, "no", NULL, NULL, 0);
+
+    if (empty($jobqueue_pk))
+    {
+      $text = _("Failed to place fosscp_agent in job queue");
+      return ($text);
+    }
+    $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
+    $msg = "The upload for $SourceFiles has been scheduled. ";
+    $keep = "It is <a href='$Url'>upload #" . $uploadpk . "</a>.\n";
+    print displayMessage($msg,$keep);
+    return (NULL);
+  } // uploadSrv()
+
+  /**
+   * \brief uploadUrl(): Process the upload from URL request.
    *
    * @return NULL on success, string on failure.
    */
 
   function uploadUrl($Folder, $GetURL, $Desc, $Name)
   {
-    
+
     if (empty($Folder))
     {
       $text = _("Invalid folder");
@@ -169,7 +292,7 @@ class uploads extends FO_Plugin
     global $Plugins;
     $Unpack = & $Plugins[plugin_find_id("agent_unpack") ];
     $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
-    
+
     userDefaultAgents($uploadpk);
 
     $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
@@ -206,8 +329,6 @@ class uploads extends FO_Plugin
             $rc = $this->uploadFile($Folder, @$_FILES['getfile']['tmp_name'], $Name);
             if (empty($rc))
             {
-              $Parm = GetParm("Check_" . $Name,PARM_INTEGER);
-              echo "<pre>CA: GetParm returned:$Parm\n for $Name\n</pre>";
               // reset form fields
               $GetURL = NULL;
               $Desc = NULL;
@@ -243,6 +364,32 @@ class uploads extends FO_Plugin
             }
           }
         }
+        else if($formName == 'srvupload')
+        {
+          /* If this is a POST, then process the request. */
+          $SourceFiles = GetParm('sourcefiles', PARM_STRING);
+          $GroupNames = GetParm('groupnames', PARM_INTEGER);
+          $FolderPk = GetParm('folder', PARM_INTEGER);
+          $Name = GetParm('name', PARM_STRING); // may be null
+          if (!empty($SourceFiles) && !empty($FolderPk))
+          {
+            $rc = $this->uploadSrv($FolderPk, $SourceFiles, $GroupNames, $Name);
+            if (empty($rc))
+            {
+              // clear form fileds
+              $SourceFiles = NULL;
+              $GroupNames  = NULL;
+              $FolderPk    = NULL;
+              $Desc        = NULL;
+              $Name        = NULL;
+            }
+            else
+            {
+              $text = _("Upload failed for");
+              $V.= displayMessage("$text $SourceFiles: $rc");
+            }
+          }
+        }
 
         $Url = Traceback_uri();
         $intro .= _("FOSSology has many options for importing and uploading files for analysis.\n");
@@ -273,7 +420,7 @@ class uploads extends FO_Plugin
         $choice .= "<form name='uploads' enctype='multipart/form-data' method='post'>\n";
         $choice .= "<input type='checkbox' name='Check_upload_file' value='file' onclick='UploadFile_Get(\"" .Traceback_uri() . "?mod=ajax_fileUpload\")' />Upload a File from your computer<br />\n";
         $choice .= "<input type='checkbox' name='Check_upload_url' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />Upload from a URL on the intra or internet<br />\n";
-        $choice .= "<input type='checkbox' name='Check_moreOpts' value='mopts' onclick='UploadMOpts_Get(\"" .Traceback_uri() . "?mod=ajax_optsForm\")' />More Options<br />\n";
+        $choice .= "<input type='checkbox' name='Check_Opts' value='opts' onclick='UploadOpts_Get(\"" .Traceback_uri() . "?mod=ajax_optsForm\")' />More Options<br />\n";
 
         $choice .= "\n<div>\n
                    <hr>
@@ -309,6 +456,52 @@ class uploads extends FO_Plugin
         }
         </script>\n";
         $choice .= $choiceUrl;
+
+        // More Options
+
+        $options .= ActiveHTTPscript("UploadOpts");
+        $options .= "<script language='javascript'>\n
+        function UploadOpts_Reply()
+        {
+          if ((UploadOpts.readyState==4) && (UploadOpts.status==200))
+          {\n
+            /* Remove all options */
+            document.getElementById('fileform').innerHTML = UploadOpts.responseText;\n
+            /* Add new options */
+          }
+        }
+        </script>\n";
+        $choice .= $options;
+
+        // upload from server
+        $uploadSrv .= ActiveHTTPscript("UploadSrv");
+        $uploadSrv .= "<script language='javascript'>\n
+        function UploadSrv_Reply()
+        {
+          if ((UploadSrv.readyState==4) && (UploadSrv.status==200))
+          {\n
+            /* Remove all options */
+            document.getElementById('optsform').innerHTML = UploadSrv.responseText;\n
+            /* Add new options */
+          }
+        }
+        </script>\n";
+        $choice .= $uploadSrv;
+
+        // upload from server
+        $UploadOsN .= ActiveHTTPscript("UploadOsN");
+        $UploadOsN .= "<script language='javascript'>\n
+        function UploadOsN_Reply()
+        {
+          if ((UploadOsN.readyState==4) && (UploadOsN.status==200))
+          {\n
+            /* Remove all options */
+            document.getElementById('optsform').innerHTML = UploadOsN.responseText;\n
+            /* Add new options */
+          }
+        }
+        </script>\n";
+        $choice .= $uploadSrv;
         $choice .= "</form>";
         break;
   case "Text":
@@ -323,7 +516,7 @@ if (!$this->OutputToStdout)
 print ("$choice");
 return;
 
-  }
+}
 };
 $NewPlugin = new uploads;
 
