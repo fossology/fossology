@@ -34,22 +34,15 @@ if (!isset($GlobalReady)) {
 
 define("TITLE_ajax_fileUpload", _("Upload a New File"));
 
-class ajax_fileUpload extends upload_file {
+class ajax_fileUpload extends FO_Plugin {
 
   public $Name = "ajax_fileUpload";
   public $Title = TITLE_ajax_fileUpload;
   public $Version = "1.0";
-  public $Dependency = array("db", "agent_unpack");
+  public $Dependency = array();
   public $DBaccess = PLUGIN_DB_UPLOAD;
   public $NoHTML     = 1; /* This plugin needs no HTML content help */
   public $LoginFlag = 0;
-
-  /** Upload
-   * \brief Process the upload request.
-   *
-   * @return NULL on success, string on failure.
-   */
-
  
   /*
    Output(): Generate the text for this plugin.
@@ -63,29 +56,6 @@ class ajax_fileUpload extends upload_file {
       case "XML":
         break;
       case "HTML":
-        /*
-        // If this is a POST, then process the request.
-        $Folder = GetParm('folder', PARM_INTEGER);
-        //$Desc = GetParm('description', PARM_TEXT); // may be null
-        $Name = GetParm('name', PARM_TEXT); // may be null
-        echo "<pre> AJF: values from form are:name:$Name, folder:$folder\n</pre>";
-        if (file_exists(@$_FILES['getfile']['tmp_name']) && !empty($Folder)) {
-          echo "<pre> AJF: Calling aUpload!\n</pre>";
-          $uf = @$_FILES['getfile']['tmp_name'];
-          echo "<pre> AJF: with F:$Folder N:$Name uf:$uf\n</pre>";
-          $rc = $this->aUpload($Folder, @$_FILES['getfile']['tmp_name'], $Name);
-          if (empty($rc)) {
-            // reset form fields
-            $GetURL = NULL;
-            $Desc = NULL;
-            $Name = NULL;
-          }
-          else {
-            $text = _("Upload failed for file");
-            $V.= displayMessage("$text {$_FILES[getfile][name]}: $rc");
-          }
-        }
-        */
 
         /* Set default values */
         if (empty($GetURL)) {
@@ -99,7 +69,7 @@ class ajax_fileUpload extends upload_file {
         $V.= _("bytes.");
         /* Display the form */
         $V.= "<form name='file' id='file' enctype='multipart/form-data' method='post'>\n"; // no url = this url
-        $V .= "<input type='hidden' name='fileupload' value='fileupload'>\n";
+        $V .= "<input type='hidden' name='uploadform' value='fileupload'>\n";
         $V.= "<ol>\n";
         $text = _("Select the folder for storing the uploaded file:");
         $V.= "<li>$text\n";
@@ -119,7 +89,6 @@ class ajax_fileUpload extends upload_file {
         $V.= "<b>$text</b>$text1<P />\n";
         $V.= "<INPUT type='text' name='name' size=60 value='" . htmlentities($Name) . "'/><br />\n";
         $V.= "</ol>\n";
-        //AgentCheckBoxMake(-1, agent_unpack, FALSE);
         $text = _("It may take time to transmit the file from your computer to this server. Please be patient.");
         $V.= "$text<br>\n";
         $text = _("Upload");

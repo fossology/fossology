@@ -102,7 +102,86 @@ class uploads extends FO_Plugin
     }
     return(NULL);
   } // uploadFile
-  
+
+
+  /**
+   * \brief uploadUrl(): Process the upload from URLrequest.
+   *
+   * @return NULL on success, string on failure.
+   */
+
+  function uploadUrl($Folder, $GetURL, $Desc, $Name)
+  {
+    
+    echo "<pre>IN uploadUrl...\n</pre>";
+    if (empty($Folder))
+    {
+      $text = _("Invalid folder");
+      return ($text);
+    }
+    if (empty($GetURL))
+    {
+      $text = _("Invalid URL");
+      return ($text);
+    }
+    /* See if the URL looks valid */
+    if (preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $GetURL) != 1)
+    {
+      $text = _("Invalid URL");
+      return ("$text: " . htmlentities($GetURL));
+    }
+    if (preg_match("@[[:space:]]@", $GetURL) != 0)
+    {
+      $text = _("Invalid URL (no spaces permitted)");
+      return ("$text: " . htmlentities($GetURL));
+    }
+    if (empty($Name))
+    {
+      $Name = basename($GetURL);
+    }
+    $ShortName = basename($Name);
+    if (empty($ShortName))
+    {
+      $ShortName = $Name;
+    }
+    /* Create an upload record. */
+    $Mode = (1 << 2); // code for "it came from wget"
+    $uploadpk = JobAddUpload($ShortName, $GetURL, $Desc, $Mode, $Folder);
+    if (empty($uploadpk))
+    {
+      $text = _("Failed to insert upload record");
+      return ($text);
+    }
+    /* Prepare the job: job "wget" */
+    $jobpk = JobAddJob($uploadpk, "wget");
+    if (empty($jobpk) || ($jobpk < 0))
+    {
+      $text = _("Failed to insert job record");
+      return ($text);
+    }
+    /* Prepare the job: job "wget" has jobqueue item "wget" */
+    /** 2nd parameter is obsolete **/
+    $jobqueuepk = JobQueueAdd($jobpk, "wget", "$uploadpk - $GetURL", "no", NULL, NULL);
+    if (empty($jobqueuepk))
+    {
+      $text = _("Failed to insert task 'wget' into job queue");
+      return ($text);
+    }
+    global $Plugins;
+    $Unpack = & $Plugins[plugin_find_id("agent_unpack") ];
+    $Unpack->AgentAdd($uploadpk, array($jobqueuepk));
+    
+    userDefaultAgents($uploadpk);
+
+    $Url = Traceback_uri() . "?mod=showjobs&history=1&upload=$uploadpk";
+    $text = _("The upload");
+    $text1 = _("has been scheduled. It is");
+    $msg = "$text $Name $text1 ";
+    $keep =  "<a href='$Url'>upload #" . $uploadpk . "</a>.\n";
+    print displayMessage($msg,$keep);
+    return (NULL);
+  } // uploadUrl()
+
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY)
@@ -115,20 +194,16 @@ class uploads extends FO_Plugin
       case "XML":
         break;
       case "HTML":
-
-        $formName = GetParm('fileupload', PARM_TEXT); // may be null
-        echo "<pre>UP: GetParm returned:$formName\n</pre>";
+        $formName = GetParm('uploadform', PARM_TEXT); // may be null
+        //echo "<pre>formName from get is:$formName\n</pre>";
         if($formName == 'fileupload')
         {
           // If this is a POST, then process the request.
           $Folder = GetParm('folder', PARM_INTEGER);
           $Name = GetParm('name', PARM_TEXT); // may be null
-          //echo "<pre> UF: values from form are:name:$Name, folder:$folder\n</pre>";
           if (file_exists(@$_FILES['getfile']['tmp_name']) && !empty($Folder))
           {
-            echo "<pre> UF: Calling aUpload!\n</pre>";
             $uf = @$_FILES['getfile']['tmp_name'];
-            //echo "<pre> UF: with F:$Folder N:$Name uf:$uf\n</pre>";
             $rc = $this->uploadFile($Folder, @$_FILES['getfile']['tmp_name'], $Name);
             if (empty($rc))
             {
@@ -148,7 +223,26 @@ class uploads extends FO_Plugin
         }
         else if($formName == 'urlupload')
         {
-          
+          /* If this is a POST, then process the request. */
+          $Folder = GetParm('folder', PARM_INTEGER);
+          $GetURL = GetParm('geturl', PARM_TEXT);
+          $Name = GetParm('name', PARM_TEXT); // may be null
+          if (!empty($GetURL) && !empty($Folder))
+          {
+            $rc = $this->uploadUrl($Folder, $GetURL, $Desc, $Name);
+            if (empty($rc))
+            {
+              /* Need to refresh the screen */
+              $GetURL = NULL;
+              $Desc = NULL;
+              $Name = NULL;
+            }
+            else
+            {
+              $text = _("Upload failed for");
+              $V.= displayMessage("$text $GetURL: $rc");
+            }
+          }
         }
 
         $Url = Traceback_uri();
@@ -200,12 +294,13 @@ class uploads extends FO_Plugin
           }
         }
         </script>\n";
-        
+
         // URL's
-        $choice .= ActiveHTTPscript("UploadUrl");
-        $choice .= "<script language='javascript'>\n
+        $choiceUrl .= ActiveHTTPscript("UploadUrl");
+        $choiceUrl .= "<script language='javascript'>\n
         function UploadUrl_Reply()
         {
+          alert('in UploadURL');
           if ((UploadUrl.readyState==4) && (UploadUrl.status==200))
           {\n
             /* Remove all options */
@@ -214,7 +309,9 @@ class uploads extends FO_Plugin
           }
         }
         </script>\n";
+        $choice .= $choiceUrl;
         $choice .= "</form>";
+        echo "<pre>At the end of HTML!\n</pre>";
         break;
   case "Text":
     break;
