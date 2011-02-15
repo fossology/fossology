@@ -113,7 +113,6 @@ class uploads extends FO_Plugin
   function uploadUrl($Folder, $GetURL, $Desc, $Name)
   {
     
-    echo "<pre>IN uploadUrl...\n</pre>";
     if (empty($Folder))
     {
       $text = _("Invalid folder");
@@ -274,6 +273,7 @@ class uploads extends FO_Plugin
         $choice .= "<form name='uploads' enctype='multipart/form-data' method='post'>\n";
         $choice .= "<input type='checkbox' name='Check_upload_file' value='file' onclick='UploadFile_Get(\"" .Traceback_uri() . "?mod=ajax_fileUpload\")' />Upload a File from your computer<br />\n";
         $choice .= "<input type='checkbox' name='Check_upload_url' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />Upload from a URL on the intra or internet<br />\n";
+        $choice .= "<input type='checkbox' name='Check_moreOpts' value='mopts' onclick='UploadMOpts_Get(\"" .Traceback_uri() . "?mod=ajax_optsForm\")' />More Options<br />\n";
 
         $choice .= "\n<div>\n
                    <hr>
@@ -300,7 +300,6 @@ class uploads extends FO_Plugin
         $choiceUrl .= "<script language='javascript'>\n
         function UploadUrl_Reply()
         {
-          alert('in UploadURL');
           if ((UploadUrl.readyState==4) && (UploadUrl.status==200))
           {\n
             /* Remove all options */
@@ -311,7 +310,6 @@ class uploads extends FO_Plugin
         </script>\n";
         $choice .= $choiceUrl;
         $choice .= "</form>";
-        echo "<pre>At the end of HTML!\n</pre>";
         break;
   case "Text":
     break;
