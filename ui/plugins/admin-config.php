@@ -164,7 +164,7 @@ COMMENT ON COLUMN sysconfig.validation_function IS 'Name of function to validate
      {   
        $sql = "insert into sysconfig ({$Columns}) values ($Values);";
        $result = @pg_query($PG_CONN, $sql);
-       if (strpos(pg_last_error(), 'duplicate key') === FALSE)
+       if ($result===false && strpos(pg_last_error($PG_CONN), 'duplicate key') === FALSE)
           DBCheckResult($result, $sql, __FILE__, __LINE__);
      }
    }
