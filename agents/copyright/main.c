@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <ctype.h>
 
 /* other library includes */
+#include <libfossscheduler.h>
 #include <libfossagent.h>
 #include <libfossdb.h>
 #include <libfossrepo.h>
@@ -46,7 +47,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 FILE* cout;                           ///< the file to print information to
 FILE* cerr;                           ///< the file to print errors to
 FILE* cin;                            ///< the file to read from
-int verbose = 0;                      ///< turn on or off dumping to debug files
 int db_connected = 0;                 ///< indicates if the database is connected
 char* test_dir = "testdata/testdata"; ///< the location of the labeled and raw testing data
 
@@ -86,7 +86,7 @@ int longest_common(char* dst, char* lhs, char* rhs)
         {
           max = result[i][j];
           ths = i - result[i][j] + 1;
-          // the current substring is still hte longest found
+          // the current substring is still the longest found
           if(beg == ths)
           {
             strncat(dst, lhs + i, 1);
@@ -318,7 +318,6 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   char buf[1024];               // buffer to hold string that have been escaped for sql
   char* file_name;                    // holds the name of the file to open
   int error;                    // used to store errors returned by PQ functions
-  extern int HBItemsProcessed;  // the number of items processed by this agent
   copyright_iterator finds;     // an iterator to access the copyrights
   FILE* input_fp;               // the file that will be analyzed
   PGresult* pgResult;           // the result of database quiers
@@ -427,7 +426,7 @@ void perform_analysis(PGconn* pgConn, copyright copy, pair current_file, long ag
   }
 
   fclose(input_fp);
-  Heartbeat(++HBItemsProcessed);
+  scheduler_heart(1);
 }
 
 /* ************************************************************************** */
@@ -689,13 +688,12 @@ void copyright_usage(char* arg)
 int main(int argc, char** argv)
 {
   /* primitives */
-  char input[FILENAME_MAX];     // input buffer
+  char* input;                  // input from scheduler
   char sql[512];                // buffer for database access
   int c, i = -1;                // temporary int containers
   int num_files = 0;            // the number of rows in a job
   long upload_pk = 0;           // the upload primary key
   long agent_pk = 0;            // the agents primary key
-  extern int AlarmSecs;         // the number of seconds between heartbeats
 
   /* Database structs */
   void* DataBase = NULL;        // the Database object itself
@@ -771,9 +769,8 @@ int main(int argc, char** argv)
   /* the scheduler, open the database and grab the files to be analyzed      */
   if(num_files == 0)
   {
-    /* create the heartbeat */
-    signal(SIGALRM, ShowHeartbeat);
-    alarm(AlarmSecs);
+    /* connect using the new agent api */
+    scheduler_connect();
 
     /* open the database */
     DataBase = DBopen();
@@ -788,7 +785,6 @@ int main(int argc, char** argv)
     pair_init(&curr, string_function_registry(), int_function_registry());
     db_connected = 1;
     agent_pk = GetAgentKey(DataBase, AGENT_NAME, 0, "", AGENT_DESC);
-    memset(input, '\0', sizeof(input));
 
     /* make sure that we are connected to the database */
     if(!check_copyright_table(pgConn))
@@ -797,8 +793,7 @@ int main(int argc, char** argv)
     }
 
     /* enter the main agent loop */
-    fprintf(cout, "OK\n");
-    while(fgets(input, FILENAME_MAX, cin) != NULL)
+    while((input = scheduler_next()) != NULL)
     {
       upload_pk = atol(input);
 
@@ -815,10 +810,8 @@ int main(int argc, char** argv)
       }
 
       PQclear(pgResult);
-      fprintf(cout, "OK\n");
     }
 
-    fprintf(cout, "BYE");
     pair_destroy(curr);
   }
 
@@ -833,6 +826,7 @@ int main(int argc, char** argv)
   }
 
   copyright_destroy(copy);
+  scheduler_disconnect();
 
   return 0;
 }

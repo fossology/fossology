@@ -211,35 +211,6 @@ int lprintf(const char* fmt, ...)
 }
 
 /**
- * TODO only if no '/n'
- *
- * @param fmt
- * @return
- */
-int lprintf_n(const char* fmt, ...)
-{
-  va_list args;
-  time_t t = time(NULL);
-  int rc;
-  char* tmp;
-  char time_buf[64];
-
-  if(!log_file) log_open();
-  if(!fmt) return 0;
-
-  strftime(time_buf, sizeof(time_buf),"%F %T",localtime(&t));
-
-  va_start(args, fmt);
-  tmp = g_strdup_vprintf(fmt, args);
-  va_end(args);
-
-  if(strchr(tmp, '\n') != NULL) return 0;
-  rc = fprintf(log_file, "%s scheduler [%d] :: %s", time_buf, getpid(), tmp);
-
-  return rc;
-}
-
-/**
  * TODO
  *
  * @param fmt
@@ -248,9 +219,14 @@ int lprintf_n(const char* fmt, ...)
  */
 int lprintf_v(const char* fmt, va_list args)
 {
+  /* static used to determine if a '\n' needs to be printed */
+  static int n_line = 1;
+
+  /* locals */
   time_t t = time(NULL);
   char* tmp, * curr;
   char time_buf[64];
+  int e_line;
 
   if(!log_file) log_open();
   if(!fmt) return 0;
@@ -258,9 +234,29 @@ int lprintf_v(const char* fmt, va_list args)
   strftime(time_buf, sizeof(time_buf),"%F %T",localtime(&t));
 
   tmp = g_strdup_vprintf(fmt, args);
-  for(curr = strtok(tmp, "\n"); curr; curr = strtok(NULL, "\n"))
-    if(fprintf(log_file, "%s scheduler [%d] :: %s\n", time_buf, getpid(), curr) == 0)
+  e_line = tmp[strlen(tmp) - 1] == '\n';
+  curr = strtok(tmp, "\n");
+  while(curr != NULL)
+  {
+    if(n_line)
+      if(fprintf(log_file, "%s scheduler [%d] :: ", time_buf, getpid()) == 0)
+        return 0;
+
+    if(fprintf(log_file, "%s", curr) == 0)
       return 0;
+
+    n_line = ((curr = strtok(NULL, "\n")) != NULL);
+    if(n_line)
+      if(fprintf(log_file, "\n") == 0)
+        return 0;
+  }
+
+  if(e_line)
+  {
+    n_line = 1;
+    if(fprintf(log_file, "\n") == 0)
+      return 0;
+  }
 
   g_free(tmp);
   return 1;

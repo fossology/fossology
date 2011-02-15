@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* local includes */
 #include <agent.h>
+#include <database.h>
 #include <event.h>
 #include <job.h>
 #include <logging.h>
@@ -98,10 +99,10 @@ struct agent_internal
     FILE* write;          ///< FILE* that abstracts the use of the to_child socket
     /* data management */
     job owner;            ///< the job that this agent is assigned to
-    char** data;          ///< the data that has been sent to the agent for analysis
+    char* data;           ///< the data that has been sent to the agent for analysis
     int generation;       ///< the generation of the data (i.e. how many agents has it survived)
     int updated;          ///< boolean flag to indicate if the scheduler has updated the data
-    int check_analyzed;   ///< the number that were analyzed at last update
+    int check_analyzed;   ///< the number that were analyzed between last heartbeats
     int total_analyzed;   ///< the total number that this agent has analyzed
 };
 
@@ -262,8 +263,7 @@ void agent_listen(agent a)
     /* check for a message from scheduler */
     else if(strncmp(buffer, "@@@0", 4) == 0 && a->updated)
     {
-      for(i = 0; i < CHECKOUT_SIZE && a->data[i]; i++)
-        aprintf(a, "%s\n", a->data[i]);
+
       aprintf(a, "END\n");
       fflush(a->write);
       a->updated = 0;
@@ -282,6 +282,9 @@ void agent_listen(agent a)
     {
       a->check_in = time(NULL);
       a->n_updates++;
+      i = atoi(&buffer[7]);
+      a->check_analyzed = i - a->total_analyzed;
+      a->total_analyzed = i;
     }
     else if(strncmp(buffer, "FATAL", 5))
     {
@@ -702,7 +705,7 @@ void agent_ready_event(agent a)
 
   if(a->generation == 0)
   {
-    if((a->data = job_next(a->owner)) == NULL)
+    if(!job_is_open(a->owner))
     {
       transition(a, AG_PAUSED);
       job_finish_agent(a->owner, a);

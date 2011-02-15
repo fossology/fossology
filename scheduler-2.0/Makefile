@@ -35,6 +35,7 @@ CLI = fossology-cli
 #######################
 
 OBJS = agent.o \
+       database.o \
        event.o \
        job.o \
        logging.o \
@@ -71,10 +72,10 @@ libscheduler.a: $(OBJS) $(DEPEN)
 # object build rules #
 ######################
 
-agent.o: %.o: %.c %.h job.h scheduler.h $(DEPEN)
+agent.o: %.o: %.c %.h job.h database.h scheduler.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
-job.o: %.o: %.c %.h agent.h scheduler.h $(DEPEN)
+job.o: %.o: %.c %.h agent.h database.h scheduler.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
 interface.o: %.o: %.c %.h schedulerCLI.h $(DEPEN)
@@ -84,6 +85,9 @@ event.o: %.o: %.c %.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
 logging.o: %.o: %.c $(DEPEN)
+	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
+
+database.o: %.o: %.c %.h $(DEPEN)
 	$(CC) -c $(CFLAGS_LOCAL) $(DEF) $<
 
 clean:

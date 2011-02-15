@@ -229,7 +229,15 @@ void load_config()
       }
 
       if(!add_meta_agent(name, cmd, max, special))
+      {
         VERBOSE2("CONFIG: could not create meta agent using %s\n", ep->d_name);
+      }
+      else if(TVERBOSE2)
+      {
+        lprintf("CONFIG: added new meta agent\n");
+        lprintf("   name    = %s\n   command = %s\n   max     = %d\n   special = %d\n",
+            name, cmd, max, special);
+      }
 
       fclose(istr);
     }
@@ -248,6 +256,16 @@ void load_config()
       set_port(atoi(&buffer[5]));
     else if(strncmp(buffer, "max=", 4) == 0);
   }
+}
+
+/**
+ * TODO
+ *
+ * @param unused
+ */
+void scheduler_close_event(void* unused)
+{
+  closing = 1;
 }
 
 /**
@@ -421,7 +439,7 @@ int main(int argc, char** argv)
   /* ********************** */
   if(test > 0)
   {
-    add_job(job_init("all", NULL, 0));
+    add_job(job_init("all", 0));
     test_agents();
     if(test > 1)
       closing = 1;

@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
 
-long int items_processed;   ///< the number of items processed by the agent
+int items_processed;   ///< the number of items processed by the agent
 char buffer[2048];          ///< the last thing received from the scheduler
 int valid;                  ///< if the information stored in buffer is valid
 int notifications;          ///< the gap between notifying the scheduler that it has finished
@@ -50,7 +50,7 @@ int verbose;
  */
 void heartbeat()
 {
-  fprintf(stdout, "HEART: %ld\n", items_processed);
+  fprintf(stdout, "HEART: %d\n", items_processed);
   fflush(stdout);
   alarm(ALARM_SECS);
 }
@@ -160,18 +160,16 @@ char* scheduler_next()
     valid = 0;
     return NULL;
   }
-  else
+  else if(strncmp(buffer, "END", 3) == 0)
   {
-    if(strncmp(buffer, "END", 3) == 0)
-    {
-      fprintf(stdout, "OK\n");
-      fflush(stdout);
-    }
-    else if(strncmp(buffer, "VERBOSE", 7) == 0)
-    {
-      verbose = atoi(&buffer[8]);
-      valid = 0;
-    }
+    fprintf(stdout, "OK\n");
+    fflush(stdout);
+    return scheduler_next();
+  }
+  else if(strncmp(buffer, "VERBOSE", 7) == 0)
+  {
+    verbose = atoi(&buffer[8]);
+    valid = 0;
     return scheduler_next();
   }
 

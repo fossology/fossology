@@ -36,6 +36,7 @@ extern int closing;
 
 /* scheduler utility functions */
 void load_config();
+void scheduler_close_event(void*);
 
 /* glib related functions */
 gint string_compare(gconstpointer a, gconstpointer b, gpointer user_data);

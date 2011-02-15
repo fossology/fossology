@@ -17,6 +17,9 @@ $(REPO):
 $(AGENTLIB):
 	$(MAKE) -C $(AGENTLIBPATH) libfossagent.a
 
+$(SCHEDLIB):
+	$(MAKE) -C $(SCHEDLIBPATH) libfosscheduler.a
+
 $(PYTHONLIB): $(AGENTLIB)
 	$(MAKE) -C $(PYTHONLIBPATH) libfosspython.so
 
