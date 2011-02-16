@@ -41,10 +41,10 @@ int	main	(int argc, char *argv[])
   struct debpkginfo *glb_debpi;
   int Agent_pk;
 
+  long upload_pk = 0;           // the upload primary key
+  
   glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
-
-  extern long HBItemsProcessed;
 
   DB = DBopen();
   if (!DB)
@@ -55,6 +55,7 @@ int	main	(int argc, char *argv[])
   }
 
   Agent_pk = GetAgentKey(DB, basename(argv[0]), 0, SVN_REV, agent_desc);
+
   /* Process command-line */
   while((c = getopt(argc,argv,"iv")) != -1)
   {
@@ -76,7 +77,6 @@ int	main	(int argc, char *argv[])
   /* If no args, run from scheduler! */
   if (argc == 1)
   {
-    char *repFile;
     signal(SIGALRM,ShowHeartbeat);
     alarm(60);
 
@@ -88,48 +88,13 @@ int	main	(int argc, char *argv[])
       if (Verbose) { printf("PKG: pkgagent read %s\n", Parm);}
       fflush(stdout);
 
-      if (Parm[0] != '\0') 
-      {
-	memset(glb_rpmpi,0,sizeof(struct rpmpkginfo));
-	memset(glb_debpi,0,sizeof(struct debpkginfo));
-	ParseSchedInput(Parm,glb_rpmpi,glb_debpi);
-        if (PKG_RPM) {
-          repFile = RepMkPath("files", glb_rpmpi->pFile);
-	  if (!repFile) {
-	    printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
-                            glb_rpmpi->pFileFk, glb_rpmpi->pFile);
-            fflush(stdout);
-            DBclose(DB);
-            exit(-1);
-	  }
-          if (GetMetadata(repFile,glb_rpmpi)){
-            RecordMetadataRPM(glb_rpmpi);
-	  }
-        } else if (PKG_DEB) {
-	  if (GetMetadataDebBinary(glb_debpi)){
-            RecordMetadataDEB(glb_debpi);
-	  }	
-	} else if (PKG_DEB_SRC) {
-	  repFile = RepMkPath("files", glb_debpi->pFile);
-	  if (!repFile) {
-	    printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
-                            glb_debpi->pFileFk, glb_debpi->pFile);
-            fflush(stdout);
-            DBclose(DB);
-            exit(-1);
-          }
-	  if (GetMetadataDebSource(repFile,glb_debpi)){
-	    RecordMetadataDEB(glb_debpi);
-	  }
-        } else {
-	  /* Deal with the other package*/
-	}
-
-	Heartbeat(++HBItemsProcessed);
-
-        printf("OK\n");
-        fflush(stdout);
-      }
+      upload_pk = atoi(Parm);
+      if (upload_pk ==0) continue;
+     
+      if(!ProcessUpload(upload_pk, glb_rpmpi, glb_debpi)) return -1;
+      sleep(10000);
+      printf("OK\n");
+      fflush(stdout);
     }
   }
   else
@@ -137,7 +102,6 @@ int	main	(int argc, char *argv[])
     /* printf("DEBUG: running in cli mode, processing file(s)\n"); */
     for (; optind < argc; optind++)
     {
-       PKG_RPM=1;
        GetMetadata(argv[optind],glb_rpmpi);
     }
   }

@@ -29,9 +29,7 @@
 #include "pkgagent.h"
 
 void *DB=NULL;
-int PKG_RPM = 0; /* *< Non-zero when it's RPM package */
-int PKG_DEB = 0; /* *< Non-zero when it's DEBINE package */
-int PKG_DEB_SRC = 0; /* *< Non-zero when it's DEBINE source package */
+PGconn *pgConn = NULL; // the connection to Database
 int Verbose = 0;
 
 #ifdef SVN_REV
@@ -190,77 +188,156 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
 
 
 /**
- * ParseSchedInput (char *s , struct rpmpkginfo *pi, struct debpkginfo *dpi)
+ * ProcessUpload (long upload_pk , struct rpmpkginfo *pi, struct debpkginfo *dpi)
  *
- * Expect 3 field from the scheduler, 'pfile_pk' 'pfilename' and 'mimetype'
+ * Get all pfile need to processed use upload_pk
  * Parameters:
- * 	@param char *s   string send from scheduler
+ * 	@param upload_pk   upload_pk send from scheduler
  * 	@param struct rpmpkginfo *pi  rpmpkginfo global pointer
  * 	@param struct debpkginfo *dpi debpkginfo global pointer
  */
-void    ParseSchedInput (char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi)
+int    ProcessUpload (long upload_pk, struct rpmpkginfo *pi, struct debpkginfo *dpi)
 {
-  char field[256];
-  char value[1024];
-  char *origS;
-  long pfilefk = 0;
-  char pfilename[MAXCMD];
-  long uploadpk;
   char mimetype[128];
-  PKG_RPM = 0;
-  PKG_DEB = 0;
-  PKG_DEB_SRC = 0;
+  char sqlbuf[1024];
+  PGresult *result;
+  int mimetypepk = 0;
+  int debmimetypepk = 0;
+  int debsrcmimetypepk = 0; 
+  int numrows;
+  int i;
 
-  if (!s) {
-    return;
-  }
-  origS = s;
+  pgConn = DBgetconn(DB);
 
-  while (s && (s[0] != '\0')) {
-    s = GetFieldValue(s,field,256,value,1024,'=');
-    if (value[0] != '\0') {
-      if (!strcasecmp(field, "pfile_pk")) {
-        pfilefk = atol(value);
-      }
-      else if (!strcasecmp(field, "pfilename")) {
-        strncpy(pfilename, value, sizeof(pfilename));
-      }
-      else if (!strcasecmp(field, "upload_pk")) {
-        uploadpk = atol(value);
-      }
-      else if (!strcasecmp(field, "mimetype")) {
-        strncpy(mimetype, value, sizeof(mimetype));
-      }
-      else {
-        printf("LOG: got other:%s\n", value); /* DEBUG */
-      }
+  /*  "pkgagent" needs to know what? */
+
+  /*  "pkgagent" needs to know the mimetype for 'application/x-rpm' and 'application/x-debian-package' and 'application/x-debian-source'*/
+  snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm' LIMIT 1;");
+  result = PQexec(pgConn, sqlbuf);
+  if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1); 
+  mimetypepk = atoi(PQgetvalue(result, 0, 0));
+  PQclear(result);
+  if ( mimetypepk == 0 )
+  {
+    snprintf(sqlbuf, sizeof(sqlbuf), "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-rpm');");
+    result = PQexec(pgConn, sqlbuf);
+    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm' LIMIT 1;");
+    result = PQexec(pgConn, sqlbuf);
+    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    mimetypepk = atoi(PQgetvalue(result, 0, 0));
+    PQclear(result);
+    if ( mimetypepk == 0 )
+    {
+      printf("ERROR: pkgagent rpm mimetype not installed!\n");
+      return FALSE;
     }
   }
-  if (Verbose) { printf ("mimetype:%s\n",mimetype);}
-  
-  /*  
-   * if mimetype='application/x-rpm' set PKG_RPM=1
-   * if mimetype='application/x-debian-package' set PKG_DEB=1
-   * if mimetype='application/x-debian-source' set PKG_DEB_SRC=1
-   * */  
-  if (!strcasecmp(mimetype,"application/x-rpm")) {
-    pi->pFileFk = pfilefk;
-    strncpy(pi->pFile, pfilename, sizeof(pi->pFile));
-    PKG_RPM = 1;
+  snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;");
+  result = PQexec(pgConn, sqlbuf);
+  if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+  debmimetypepk = atoi(PQgetvalue(result, 0, 0));
+  PQclear(result);
+  if ( debmimetypepk == 0 )
+  {
+    snprintf(sqlbuf, sizeof(sqlbuf), "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-package');");
+    result = PQexec(pgConn, sqlbuf);
+    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;");
+    result = PQexec(pgConn, sqlbuf);
+    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    debmimetypepk = atoi(PQgetvalue(result, 0, 0));
+    PQclear(result);
+    if ( debmimetypepk == 0 )
+    {
+      printf("ERROR: pkgagent deb mimetype not installed!\n");
+      return FALSE;
+    }
   }
-  else if (!strcasecmp(mimetype, "application/x-debian-package")){
-    dpi->pFileFk = pfilefk;
-    strncpy(dpi->pFile, pfilename, sizeof(dpi->pFile));
-    PKG_DEB = 1;
+  snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;");
+  result = PQexec(pgConn, sqlbuf);
+  if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+  debsrcmimetypepk = atoi(PQgetvalue(result, 0, 0));
+  PQclear(result);
+  if ( debsrcmimetypepk == 0 )
+  {
+    snprintf(sqlbuf, sizeof(sqlbuf), "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-source');");
+    result = PQexec(pgConn, sqlbuf);
+    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;");
+    result = PQexec(pgConn, sqlbuf);
+    if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+    debsrcmimetypepk = atoi(PQgetvalue(result, 0, 0));
+    PQclear(result);
+    if ( debsrcmimetypepk == 0 )
+    {
+      printf("ERROR: pkgagent deb source mimetype not installed!\n");
+      return FALSE;
+    }
   }
-  else if (!strcasecmp(mimetype, "application/x-debian-source")){
-    dpi->pFileFk = pfilefk;
-    strncpy(dpi->pFile, pfilename, sizeof(dpi->pFile));
-    PKG_DEB_SRC = 1;	
-  } else {
-    printf("LOG: Not RPM and DEBIAN package!\n");
-  } 
-}/*ParseSchedInput (char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi)*/
+
+  /*  retrieve the records to process */
+  snprintf(sqlbuf, sizeof(sqlbuf),
+           "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name AS mimetype FROM uploadtree INNER JOIN pfile ON upload_fk = '%ld' INNER JOIN mimetype ON (mimetype_pk = '%d' OR mimetype_pk = '%d' OR mimetype_pk = '%d') AND uploadtree.pfile_fk = pfile_pk AND pfile.pfile_mimetypefk = mimetype.mimetype_pk AND pfile_pk NOT IN (SELECT pkg_rpm.pfile_fk FROM pkg_rpm) AND pfile_pk NOT IN (SELECT pkg_deb.pfile_fk FROM pkg_deb);", upload_pk, mimetypepk, debmimetypepk, debsrcmimetypepk);
+  result = PQexec(pgConn, sqlbuf);
+  if (checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) exit(-1);
+ 
+  numrows = PQntuples(result);
+  for (i=0; i<numrows; i++)
+  {
+    char *repFile = NULL;
+
+    memset(pi,0,sizeof(struct rpmpkginfo));
+    memset(dpi,0,sizeof(struct debpkginfo));
+        
+    strcpy(mimetype, PQgetvalue(result, i, 2));
+    /*  
+     * if mimetype='application/x-rpm' process RPM packages
+     * if mimetype='application/x-debian-package' process DEBIAN packages
+     * if mimetype='application/x-debian-source' process DEBIAN source packages
+     * */  
+    if (!strcasecmp(mimetype,"application/x-rpm")) {
+      pi->pFileFk = atoi(PQgetvalue(result, i, 0));
+      strncpy(pi->pFile, PQgetvalue(result, i, 1), sizeof(pi->pFile));
+      repFile = RepMkPath("files", pi->pFile);
+      if (!repFile) {
+        printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
+                          pi->pFileFk, pi->pFile);
+        fflush(stdout);
+        return FALSE;
+      }
+      if (GetMetadata(repFile,pi)){
+          RecordMetadataRPM(pi);
+      }
+    }
+    else if (!strcasecmp(mimetype, "application/x-debian-package")){
+      dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
+      strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
+      if (GetMetadataDebBinary(upload_pk, dpi)){
+          RecordMetadataDEB(dpi);
+      }
+    }
+    else if (!strcasecmp(mimetype, "application/x-debian-source")){
+      dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
+      strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
+      repFile = RepMkPath("files", dpi->pFile);
+      if (!repFile) {
+        printf("FATAL: pfile %ld PkgAgent unable to open file %s\n",
+                          dpi->pFileFk, dpi->pFile);
+        fflush(stdout);
+        return FALSE;
+      }
+      if (GetMetadataDebSource(repFile,dpi)){
+            RecordMetadataDEB(dpi);
+      }
+    } else {
+      printf("LOG: Not RPM and DEBIAN package!\n");
+    }
+    Heartbeat(++HBItemsProcessed);
+  }
+  PQclear(result);
+  return TRUE;
+}/*ProcessUpload (long upload_pk, struct rpmpkginfo *pi, struct debpkginfo *dpi)*/
 
 /**
  * ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
@@ -396,8 +473,8 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
 int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
 {
   //rpmpi.pFileFk = 4234634;
-  if (PKG_RPM)
-  {
+  //if (PKG_RPM)
+  //{
     FD_t fd;
     rpmRC rpmrc;
     Header header;
@@ -442,7 +519,7 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
     ReadHeaderInfo(header, pi);
     rpmFreeMacros(NULL);
     header = headerFree(header);	
-  }
+  //}
   return TRUE;
 } /* GetMetadata(char *pkg, struct rpmpkginfo *pi) */
 
@@ -555,11 +632,11 @@ char * ParseDebFile(char *Sin, char *Field, char *Value)
 } /* ParseDebFile(char *Sin, char *Field, char *Value) */
 
 /**
- * GetMetadataDebBinary(struct debpkginfo *pi)
+ * GetMetadataDebBinary(long upload_pk, struct debpkginfo *pi)
  *
  * get debian binary package info
  */
-int	GetMetadataDebBinary	(struct debpkginfo *pi)
+int	GetMetadataDebBinary	(long upload_pk, struct debpkginfo *pi)
 {
   char *repfile;
   char *filename;
@@ -575,7 +652,7 @@ int	GetMetadataDebBinary	(struct debpkginfo *pi)
 
   /* Get the debian/control file's rep path */
   memset(SQL,0,sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT pfile_fk,ufile_name FROM uploadtree WHERE upload_fk = (SELECT upload_fk FROM uploadtree WHERE pfile_fk = %ld) AND lft > (SELECT lft FROM uploadtree WHERE pfile_fk = %ld) AND rgt < (SELECT rgt FROM uploadtree WHERE pfile_fk = %ld) AND ufile_name = 'control') TEMP INNER JOIN pfile ON TEMP.pfile_fk = pfile_pk;", pi->pFileFk, pi->pFileFk, pi->pFileFk);
+  snprintf(SQL,sizeof(SQL),"SELECT pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename FROM (SELECT pfile_fk,ufile_name FROM uploadtree WHERE upload_fk = %ld AND lft > (SELECT lft FROM uploadtree WHERE pfile_fk = %ld AND upload_fk = %ld) AND rgt < (SELECT rgt FROM uploadtree WHERE pfile_fk = %ld AND upload_fk = %ld) AND ufile_name = 'control') TEMP INNER JOIN pfile ON TEMP.pfile_fk = pfile_pk;", upload_pk, pi->pFileFk, upload_pk, pi->pFileFk, upload_pk);
   rc = DBaccess(DB,SQL);
   if (rc < 0)
   {
