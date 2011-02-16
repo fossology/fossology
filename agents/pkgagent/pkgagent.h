@@ -89,18 +89,16 @@ struct debpkginfo
 };
 
 extern void *DB;
-extern int PKG_RPM; /* *< Non-zero when it's RPM package */
-extern int PKG_DEB; /* *< Non-zero when it's DEBINE package */
-extern int PKG_DEB_SRC; /* *< Non-zero when it's DEBINE source package */
 extern int Verbose;
+extern long HBItemsProcessed;
 
-void ParseSchedInput(char *s, struct rpmpkginfo *pi, struct debpkginfo *dpi);
+int ProcessUpload(long upload_pk, struct rpmpkginfo *pi, struct debpkginfo *dpi);
 
 int GetMetadata(char *pkg, struct rpmpkginfo *pi);
 
 int RecordMetadataRPM(struct rpmpkginfo *pi);
 
-int GetMetadataDebBinary(struct debpkginfo *pi);
+int GetMetadataDebBinary(long upload_pk, struct debpkginfo *pi);
 
 int RecordMetadataDEB(struct debpkginfo *pi);
 

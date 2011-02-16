@@ -103,67 +103,11 @@ $text = _("Unable to find dependent job: unpack");
 $text = _("Failed to insert job record");
 	return($text); }
 
-    /* "pkgagent" needs to know what? */
-    
-    /* "pkgagent" needs to know the mimetype for 'application/x-rpm' and 'application/x-debian-package' and 'application/x-debian-source'*/
-    $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm' LIMIT 1;";
-    $Results = $DB->Action($SQL);
-    $mimetypepk = $Results[0]['mimetype_pk'];
-    if (empty($mimetypepk))
-      {
-      $SQL = "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-rpm');";
-      $Results = $DB->Action($SQL);
-      $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm' LIMIT 1;";
-      $Results = $DB->Action($SQL);
-      $mimetypepk = $Results[0]['mimetype_pk'];
-      }
-    if (empty($mimetypepk)) { 
-$text = _("pkgagent rpm mimetype not installed.");
-	return($text); }
-
-    $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;";
-    $Results = $DB->Action($SQL);
-    $debmimetypepk = $Results[0]['mimetype_pk'];
-    if (empty($debmimetypepk))
-      {
-      $SQL = "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-package');";
-      $Results = $DB->Action($SQL);
-      $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-package' LIMIT 1;";
-      $Results = $DB->Action($SQL);
-      $debmimetypepk = $Results[0]['mimetype_pk'];
-      }
-    if (empty($debmimetypepk)) { 
-$text = _("pkgagent deb mimetype not installed.");
-	return($text); }
-
-    $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;";
-    $Results = $DB->Action($SQL);
-    $debsrcmimetypepk = $Results[0]['mimetype_pk'];
-    if (empty($debsrcmimetypepk))
-      {
-      $SQL = "INSERT INTO mimetype (mimetype_name) VALUES ('application/x-debian-source');";
-      $Results = $DB->Action($SQL);
-      $SQL = "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-debian-source' LIMIT 1;";
-      $Results = $DB->Action($SQL);
-      $debsrcmimetypepk = $Results[0]['mimetype_pk'];
-      }
-    if (empty($debsrcmimetypepk)) { 
-$text = _("pkgagent deb source mimetype not installed.");
-	return($text); }
-
     /** jqargs wants EVERY RPM and DEBIAN pfile in this upload **/
-    $jqargs = "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name AS mimetype
-	FROM uploadtree
-	INNER JOIN pfile ON upload_fk = '$uploadpk'
-	INNER JOIN mimetype ON (mimetype_pk = '$mimetypepk' OR mimetype_pk = '$debmimetypepk' OR mimetype_pk = '$debsrcmimetypepk')
-	AND uploadtree.pfile_fk = pfile_pk
-	AND pfile.pfile_mimetypefk = mimetype.mimetype_pk
-	AND pfile_pk NOT IN (SELECT pkg_rpm.pfile_fk FROM pkg_rpm)
-        AND pfile_pk NOT IN (SELECT pkg_deb.pfile_fk FROM pkg_deb)
-	LIMIT 5000;";
+    $jqargs = $uploadpk;
 
     /* Add job: job "Package Scan" has jobqueue item "pkgagent" */
-    $jobqueuepk = JobQueueAdd($jobpk,"pkgagent",$jqargs,"yes","pfile_pk",$Dep);
+    $jobqueuepk = JobQueueAdd($jobpk,"pkgagent",$jqargs,"no","",$Dep);
     if (empty($jobqueuepk)) { 
 $text = _("Failed to insert pkgagent into job queue");
 	return($text); }
