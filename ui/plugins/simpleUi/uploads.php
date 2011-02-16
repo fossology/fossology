@@ -57,6 +57,124 @@ class uploads extends FO_Plugin
 
   } // AnalyzeFile()
 
+  /**
+   * AnalyzeOne(): Analyze for copyrights, emails and url's in one uploaded file.
+   *
+   */
+  function AnalyzeOne($Highlight)
+  {
+
+    global $Plugins;
+    global $AGENTDIR;
+    global $DATADIR;
+
+    $ModBack = GetParm("modback",PARM_STRING);
+
+    $V = "";
+    $View = & $Plugins[plugin_find_id("view") ];
+    $TempFile = $_FILES['licfile']['tmp_name'];
+    $Sys = $AGENTDIR."/copyright -c $TempFile";
+    $Fin = popen($Sys, "r");
+    $colors = Array();
+    $colors['statement'] = 0;
+    $colors['email'] = 1;
+    $colors['url'] = 2;
+    $stuff = Array();
+    $stuff['statement'] = Array();
+    $stuff['email'] = Array();
+    $stuff['url'] = Array();
+    //$uri = Traceback_uri();
+    //$toUploads = "<a href='$uri?mod=uploads>Back to Uploads</a>\n";
+    //echo $toUploads;
+    while (!feof($Fin))
+    {
+      $Line = fgets($Fin);
+      if (strlen($Line) > 0)
+      {
+        //print $Line;
+        $match = array();
+        preg_match_all("/\t\[(?P<start>\d+)\:(?P<end>\d+)\:(?P<type>[A-Za-z]+)\] \'(?P<content>.+)\'/", $Line, $match);
+        //print_r($match);
+        if (!empty($match['start']))
+        {
+          $stuff[$match['type'][0]][] = $match['content'][0];
+          $View->AddHighlight($match['start'][0], $match['end'][0], $colors[$match['type'][0]], '', $match['content'][0],-1);
+        }
+      }
+    }
+    pclose($Fin);
+    if ($Highlight)
+    {
+      $Fin = fopen($TempFile, "r");
+      if ($Fin)
+      {
+        $View->SortHighlightMenu();
+        $View->ShowView($Fin,$ModBack, 1,1,NULL,True);
+        fclose($Fin);
+      }
+      $uri = Traceback_uri();
+      $toUploads = "<a href='$uri?mod=uploads>Back to Uploads</a>\n";
+      echo $toUploads;
+    }
+    else
+    {
+      $text = _("Copyright Statments");
+      $text1 = _("Emails");
+      $text2 = _("URLs");
+      $text3 = _("Total");
+      print "<table width=100%>\n";
+      print "<tr><td>$text:</td></tr>\n";
+      print "<tr><td><hr></td></tr>\n";
+      if (count($stuff['statement']) > 0)
+      {
+        foreach ($stuff['statement'] as $i)
+        {
+          print "<tr><td>$i</td></tr>\n";
+        }
+        print "<tr><td><hr></td></tr>\n";
+      }
+      print "<tr><td>$text3: ".count($stuff['statement'])."</td></tr>\n";
+      print "</table>\n";
+
+      print "<br><br>\n";
+
+      print "<table width=100%>\n";
+      print "<tr><td>$text1:</td></tr>\n";
+      print "<tr><td><hr></td></tr>\n";
+      if (count($stuff['email']) > 0)
+      {
+        foreach ($stuff['email'] as $i)
+        {
+          print "<tr><td>$i</td></tr>\n";
+        }
+        print "<tr><td><hr></td></tr>\n";
+      }
+      print "<tr><td>$text3: ".count($stuff['email'])."</td></tr>\n";
+      print "</table>\n";
+
+      print "<br><br>\n";
+
+      print "<table width=100%>\n";
+      print "<tr><td>$text2:</td></tr>\n";
+      print "<tr><td><hr></td></tr>\n";
+      if (count($stuff['url']) > 0)
+      {
+        foreach ($stuff['url'] as $i)
+        {
+          print "<tr><td>$i</td></tr>\n";
+        }
+        print "<tr><td><hr></td></tr>\n";
+      }
+      print "<tr><td>$text3: ".count($stuff['url'])."</td></tr>\n";
+      print "</table>\n";
+      echo "<br>\n";
+      $uri = Traceback_uri();
+      $toUploads = "<a href='$uri?mod=uploads>Back to Uploads</a>\n";
+      echo $toUploads;
+    }
+    /* Clean up */
+    return ($V);
+  } // AnalyzeOne()
 
   function uploadFile($Folder, $TempFile, $Name)
   {
@@ -340,7 +458,7 @@ class uploads extends FO_Plugin
         break;
       case "HTML":
         $formName = GetParm('uploadform', PARM_TEXT); // may be null
-       //echo "<pre>formName from get is:$formName\n</pre>";
+        //echo "<pre>formName from get is:$formName\n</pre>";
         if($formName == 'fileupload')
         {
           // If this is a POST, then process the request.
@@ -453,6 +571,30 @@ class uploads extends FO_Plugin
           }
         }
 
+        else if($formName == 'oneShotCopyright')
+        {
+          /* If this is a POST, then process the request. */
+          $Highlight = GetParm('highlight', PARM_INTEGER); // may be null
+          /* You can also specify the file by uploadtree_pk as 'item' */
+          $Item = GetParm('item', PARM_INTEGER); // may be null
+          if (file_exists(@$_FILES['licfile']['tmp_name']))
+          {
+            if ($_FILES['licfile']['size'] <= 1024 * 1024 * 10)
+            {
+              /* Size is not too big.  */
+              print $this->AnalyzeOne($Highlight) . "\n";
+              $uri = Traceback_uri();
+              $toUploads = "<a href='$uri?mod=uploads>Back to Uploads</a>\n";
+            }
+            if (!empty($_FILES['licfile']['unlink_flag']))
+            {
+              unlink($_FILES['licfile']['tmp_name']);
+            }
+            return;
+          }
+        }
+
+
         $Url = Traceback_uri();
         $intro .= _("FOSSology has many options for importing and uploading files for analysis.\n");
         $intro .= _("The options vary based on <i>where</i> the data to upload is located.\n");
@@ -562,6 +704,19 @@ class uploads extends FO_Plugin
         }
         </script>\n";
         $choice .= $uploadOsN;
+
+        // One Shot Copyright
+        $uploadCopy .= ActiveHTTPscript("UploadCopyR");
+        $uploadCopy .= "<script language='javascript'>\n
+        function UploadCopyR_Reply()
+        {
+          if ((UploadCopyR.readyState==4) && (UploadCopyR.status==200))
+          {\n
+            document.getElementById('optsform').innerHTML = UploadCopyR.responseText;\n
+          }
+        }
+        </script>\n";
+        $choice .= $uploadCopy;
 
         $choice .= "</form>";
         break;
