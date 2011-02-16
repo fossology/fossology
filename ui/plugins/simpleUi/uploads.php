@@ -35,6 +35,29 @@ class uploads extends FO_Plugin
   public $Dependency = array("db", "agent_unpack");
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
+  /**
+   * AnalyzFile(): Analyze one uploaded file.
+   *
+   * @param string $FilePath the filepath to the file to analyze.
+   * @return string $V, html to display the results.
+   *
+   */
+  function AnalyzeFile($FilePath) {
+
+    global $Plugins;
+    global $AGENTDIR;
+
+    $licenses = array();
+    $licenseResult = "";
+    /* move the temp file */
+    $licenseResult = exec("$AGENTDIR/nomos $FilePath",$out,$rtn);
+    $licenses = explode(' ',$out[0]);
+    $last = end($licenses);
+    return ($last);
+
+  } // AnalyzeFile()
+
+
   function uploadFile($Folder, $TempFile, $Name)
   {
     //echo "<pre>AUP: in upload\n</pre>";
@@ -310,14 +333,14 @@ class uploads extends FO_Plugin
     {
       return;
     }
-    $Buttons = "";
+    $results = "";
     switch ($this->OutputType)
     {
       case "XML":
         break;
       case "HTML":
         $formName = GetParm('uploadform', PARM_TEXT); // may be null
-        //echo "<pre>formName from get is:$formName\n</pre>";
+       //echo "<pre>formName from get is:$formName\n</pre>";
         if($formName == 'fileupload')
         {
           // If this is a POST, then process the request.
@@ -360,7 +383,7 @@ class uploads extends FO_Plugin
             else
             {
               $text = _("Upload failed for");
-              $V.= displayMessage("$text $GetURL: $rc");
+              $results .= displayMessage("$text $GetURL: $rc");
             }
           }
         }
@@ -386,8 +409,47 @@ class uploads extends FO_Plugin
             else
             {
               $text = _("Upload failed for");
-              $V.= displayMessage("$text $SourceFiles: $rc");
+              $results .= displayMessage("$text $SourceFiles: $rc");
             }
+          }
+        }
+        else if($formName == 'oneShotNomos')
+        {
+          /* Ignore php Notice is array keys don't exist */
+          $errlev = error_reporting(E_ERROR | E_WARNING | E_PARSE);
+
+          $tmp_name = $_FILES['licfile']['tmp_name'];
+          error_reporting($errlev);
+
+          /* For REST API:
+           wget -qO - --post-file=myfile.c http://myserv.com/?mod=agent_nomos_once
+           */
+          if ($this->NoHTML && file_exists($tmp_name))
+          {
+            echo "<pre>ajax-oneShotNomos: in NoHTML\n</pre>";
+            echo $this->AnalyzeFile($tmp_name);
+            echo "\n";
+            unlink($tmp_name);
+            return;
+          }
+
+          if (file_exists($tmp_name))
+          {
+            $text = _("A one shot license analysis shows the following license(s) in file");
+            $keep = "<strong>$text </strong><em>{$_FILES['licfile']['name']}:</em> ";
+            $keep .= "<strong>" . $this->AnalyzeFile($tmp_name) . "</strong><br>";
+            print displayMessage(NULL,$keep);
+            $uri = Traceback_uri();
+            $toUploads = "<a href='$uri?mod=uploads>Back to Uploads</a>\n";
+            $_FILES['licfile'] = NULL;
+            echo $toUploads;
+
+            if (!empty($_FILES['licfile']['unlink_flag']))
+            {
+              echo "<pre>Unlinking file!\n</pre>";
+              unlink($tmp_name);
+            }
+            return;
           }
         }
 
@@ -488,20 +550,19 @@ class uploads extends FO_Plugin
         </script>\n";
         $choice .= $uploadSrv;
 
-        // upload from server
-        $UploadOsN .= ActiveHTTPscript("UploadOsN");
-        $UploadOsN .= "<script language='javascript'>\n
+        // One Shot License
+        $uploadOsN .= ActiveHTTPscript("UploadOsN");
+        $uploadOsN .= "<script language='javascript'>\n
         function UploadOsN_Reply()
         {
           if ((UploadOsN.readyState==4) && (UploadOsN.status==200))
           {\n
-            /* Remove all options */
             document.getElementById('optsform').innerHTML = UploadOsN.responseText;\n
-            /* Add new options */
           }
         }
         </script>\n";
-        $choice .= $uploadSrv;
+        $choice .= $uploadOsN;
+
         $choice .= "</form>";
         break;
   case "Text":
