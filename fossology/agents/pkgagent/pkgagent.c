@@ -188,15 +188,13 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
 
 
 /**
- * ProcessUpload (long upload_pk , struct rpmpkginfo *pi, struct debpkginfo *dpi)
+ * ProcessUpload (long upload_pk)
  *
  * Get all pfile need to processed use upload_pk
  * Parameters:
  * 	@param upload_pk   upload_pk send from scheduler
- * 	@param struct rpmpkginfo *pi  rpmpkginfo global pointer
- * 	@param struct debpkginfo *dpi debpkginfo global pointer
  */
-int    ProcessUpload (long upload_pk, struct rpmpkginfo *pi, struct debpkginfo *dpi)
+int    ProcessUpload (long upload_pk)
 {
   char mimetype[128];
   char sqlbuf[1024];
@@ -207,7 +205,14 @@ int    ProcessUpload (long upload_pk, struct rpmpkginfo *pi, struct debpkginfo *
   int numrows;
   int i;
 
+  struct rpmpkginfo *pi;
+  struct debpkginfo *dpi;
+ 
+  pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+  dpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+            
   pgConn = DBgetconn(DB);
+  rpmReadConfigFiles(NULL, NULL);
 
   /*  "pkgagent" needs to know what? */
 
@@ -336,8 +341,9 @@ int    ProcessUpload (long upload_pk, struct rpmpkginfo *pi, struct debpkginfo *
     Heartbeat(++HBItemsProcessed);
   }
   PQclear(result);
+  rpmFreeMacros(NULL);
   return TRUE;
-}/*ProcessUpload (long upload_pk, struct rpmpkginfo *pi, struct debpkginfo *dpi)*/
+}/*ProcessUpload (long upload_pk)*/
 
 /**
  * ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
@@ -500,7 +506,7 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
     
     rpmtsSetVSFlags(ts, vsflags);
 
-    rpmReadConfigFiles(NULL, NULL);
+    //rpmReadConfigFiles(NULL, NULL);
     rpmrc = rpmReadPackageFile(ts, fd, pkg,&header);
     Fclose(fd);
     ts = (rpmts) rpmtsFree(ts);
@@ -517,7 +523,7 @@ int	GetMetadata	(char *pkg, struct rpmpkginfo *pi)
         return FALSE;
     }
     ReadHeaderInfo(header, pi);
-    rpmFreeMacros(NULL);
+    //rpmFreeMacros(NULL);
     header = headerFree(header);	
   //}
   return TRUE;

@@ -37,14 +37,14 @@ int	main	(int argc, char *argv[])
   char Parm[MAXCMD];
   int c;
   char *agent_desc = "Pulls metadata out of RPM or DEBIAN packages";
-  struct rpmpkginfo *glb_rpmpi;
-  struct debpkginfo *glb_debpi;
+  //struct rpmpkginfo *glb_rpmpi;
+  //struct debpkginfo *glb_debpi;
   int Agent_pk;
 
   long upload_pk = 0;           // the upload primary key
   
-  glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
-  glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+  //glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+  //glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
 
   DB = DBopen();
   if (!DB)
@@ -91,7 +91,7 @@ int	main	(int argc, char *argv[])
       upload_pk = atoi(Parm);
       if (upload_pk ==0) continue;
      
-      if(!ProcessUpload(upload_pk, glb_rpmpi, glb_debpi)) return -1;
+      if(!ProcessUpload(upload_pk)) return -1;
       sleep(10000);
       printf("OK\n");
       fflush(stdout);
@@ -102,7 +102,9 @@ int	main	(int argc, char *argv[])
     /* printf("DEBUG: running in cli mode, processing file(s)\n"); */
     for (; optind < argc; optind++)
     {
-       GetMetadata(argv[optind],glb_rpmpi);
+       struct rpmpkginfo *rpmpi;
+       rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+       GetMetadata(argv[optind],rpmpi);
     }
   }
 
