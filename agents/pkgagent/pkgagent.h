@@ -92,7 +92,7 @@ extern void *DB;
 extern int Verbose;
 extern long HBItemsProcessed;
 
-int ProcessUpload(long upload_pk, struct rpmpkginfo *pi, struct debpkginfo *dpi);
+int ProcessUpload(long upload_pk);
 
 int GetMetadata(char *pkg, struct rpmpkginfo *pi);
 
