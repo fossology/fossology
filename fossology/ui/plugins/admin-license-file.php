@@ -69,13 +69,13 @@ function Inputfm()
   $V.= "<p>";
   $V.= _("Filter: ");
   $V.= "<SELECT name='req_marydone'>\n";
-  $Selected =  ($_REQUEST['req_marydone'] == 'all') ? " SELECTED ": "";
+  $Selected =  (@$_REQUEST['req_marydone'] == 'all') ? " SELECTED ": "";
 $text = _("All");
   $V.= "<option value='all' $Selected> $text </option>";
-  $Selected =  ($_REQUEST['req_marydone'] == 'done') ? " SELECTED ": "";
+  $Selected =  (@$_REQUEST['req_marydone'] == 'done') ? " SELECTED ": "";
 $text = _("Checked");
   $V.= "<option value='done' $Selected> $text </option>";
-  $Selected =  ($_REQUEST['req_marydone'] == 'notdone') ? " SELECTED ": "";
+  $Selected =  (@$_REQUEST['req_marydone'] == 'notdone') ? " SELECTED ": "";
 $text = _("Not Checked");
   $V.= "<option value='notdone' $Selected> $text </option>";
   $V.= "</SELECT>";
@@ -86,7 +86,7 @@ $text = _("Not Checked");
   //$Shortnamearray = DB2KeyValArray("license_ref", "rf_pk", "rf_shortname");
   $Shortnamearray = $this->FamilyNames();
   $Shortnamearray = array("All"=>"All") + $Shortnamearray;
-  $Selected = $_REQUEST['req_shortname'];
+  $Selected = @$_REQUEST['req_shortname'];
   $Pulldown = Array2SingleSelect($Shortnamearray, "req_shortname", $Selected);
   $V.= $Pulldown;
   $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
@@ -451,7 +451,7 @@ function Output()
 //debugprint($_REQUEST, "_REQUEST");
 
       // update the db
-      if ($_POST["updateit"])
+      if (@$_POST["updateit"])
       {
         $V .= $this->Updatedb($_POST);
         $V .= $this->Inputfm();
@@ -460,14 +460,14 @@ function Output()
         break;
       }
     
-      if ($_REQUEST['add'] == 'y')
+      if (@$_REQUEST['add'] == 'y')
       {
         $V .= $this->Updatefm(0);
         break;
       }
 
       // Add new rec to db
-      if ($_POST["addit"])
+      if (@$_POST["addit"])
       {
         $V .= $this->Adddb($_POST);
         $V .= $this->Inputfm();
@@ -477,7 +477,7 @@ function Output()
       }
 
       // bring up the update form
-      $rf_pk = $_REQUEST['rf_pk'];
+      $rf_pk = @$_REQUEST['rf_pk'];
       if ($rf_pk)
       {
         $V .= $this->Updatefm($rf_pk);
@@ -485,7 +485,7 @@ function Output()
       }
 
       $V .= $this->Inputfm();
-      if ($_POST["req_shortname"]) 
+      if (@$_POST["req_shortname"]) 
         $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
 	  break;
     default:
