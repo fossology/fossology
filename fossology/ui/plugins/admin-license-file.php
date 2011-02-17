@@ -192,7 +192,7 @@ $text = _("$marydone");
 
     $ob .= "<td>$row[rf_shortname]</td>";
     $ob .= "<td>$row[rf_fullname]</td>";
-    $vetext = htmlspecialchars($row[rf_text]);
+    $vetext = htmlspecialchars($row['rf_text']);
     $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$vetext</textarea></td> ";
     $ob .= "<td>$row[rf_url]</td>";
     $ob .= "</tr>";
