@@ -30,8 +30,7 @@ class uploads extends FO_Plugin
   public $Name = "uploads";
   public $Title = TITLE_uploads;
   public $version = "1.0";
-  public $MenuList = "Uploads";
-  //public $MenuTarget = "uploadajax";
+  public $MenuList = "Upload";
   public $Dependency = array("db", "agent_unpack");
   public $DBaccess = PLUGIN_DB_UPLOAD;
 
@@ -615,16 +614,16 @@ class uploads extends FO_Plugin
         $text = _("Use the");
         $text1 = _("Upload from URL");
         $text2 = _("option to specify a remote server.");
-        $intro .= "$text <a href='${Uri}?mod=upload_url'>$text1</a> $text2\n";
+        $intro .= "$text <a href='${Uri}?mod=ajax_urlUpload'>$text1</a> $text2\n";
         $intro .= _("This is the most flexible option, but the URL must denote a publicly accessible HTTP, HTTPS, or FTP location.\n");
         $intro .= _("URLs that require authentication or human interactions cannot be downloaded through this automated system.\n");
         $intro .= "<P />\n";
         $choice .= $intro;
         //$choice .= "<br>\n";
         $choice .= "<form name='uploads' enctype='multipart/form-data' method='post'>\n";
-        $choice .= "<input type='checkbox' name='Check_upload_file' value='file' onclick='UploadFile_Get(\"" .Traceback_uri() . "?mod=ajax_fileUpload\")' />Upload a File from your computer<br />\n";
-        $choice .= "<input type='checkbox' name='Check_upload_url' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />Upload from a URL on the intra or internet<br />\n";
-        $choice .= "<input type='checkbox' name='Check_Opts' value='opts' onclick='UploadOpts_Get(\"" .Traceback_uri() . "?mod=ajax_optsForm\")' />More Options<br />\n";
+        $choice .= "<input type='radio' name='uploadfurl' value='file' onclick='UploadFile_Get(\"" .Traceback_uri() . "?mod=ajax_fileUpload\")' />Upload a File from your computer<br />\n";
+        $choice .= "<input type='radio' name='uploadfurl' value='url' onclick='UploadUrl_Get(\"" .Traceback_uri() . "?mod=ajax_urlUpload\")' />Upload from a URL on the intra or internet<br />\n";
+        $choice .= "<input type='radio' name='uploadfurl' value='opts' onclick='UploadOpts_Get(\"" .Traceback_uri() . "?mod=ajax_optsForm\")' />More Options<br />\n";
 
         $choice .= "\n<div>\n
                    <hr>

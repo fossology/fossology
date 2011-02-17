@@ -59,9 +59,9 @@ class ajax_optsForm extends FO_Plugin
         /* Display more options */
         $choice .= "<h3>Additional Upload Options</h3>\n";
         $choice .= "<form name='options' enctype='multipart/form-data' method='post'>\n";
-        $choice .= "<input type='checkbox' name='Check_upload_srv' value='srv' onclick='UploadSrv_Get(\"" .Traceback_uri() . "?mod=ajax_srvUpload\")' />Upload a File from the FOSSology Server<br />\n";
-        $choice .= "<input type='checkbox' name='Check_oneshotnomos' value='osn' onclick='UploadOsN_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotNomos\")' />Analyze a single file for licenses<br />\n";
-        $choice .= "<input type='checkbox' name='Check_oneshotcopy' value='copy' onclick='UploadCopyR_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotCopyright\")' />Analyze a single file for Copyrights, Email and URL's<br />\n";
+        $choice .= "<input type='radio' name='opts' value='srv' onclick='UploadSrv_Get(\"" .Traceback_uri() . "?mod=ajax_srvUpload\")' />Upload a File from the FOSSology Server<br />\n";
+        $choice .= "<input type='radio' name='opts' value='osn' onclick='UploadOsN_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotNomos\")' />Analyze a single file for licenses<br />\n";
+        $choice .= "<input type='radio' name='opts' value='copy' onclick='UploadCopyR_Get(\"" .Traceback_uri() . "?mod=ajax_oneShotCopyright\")' />Analyze a single file for Copyrights, Email and URL's<br />\n";
 
         $choice .= "\n<div>\n
                    <hr>
