@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -33,9 +33,11 @@ class ui_topnav extends FO_Plugin
 
   function Output()
     {
+    global $Plugins;
+    global $SysConf;
+
     if ($this->State != PLUGIN_STATE_READY) { return; }
     $V="";
-    global $Plugins;
     switch($this->OutputType)
       {
       case "XML":
@@ -44,8 +46,21 @@ class ui_topnav extends FO_Plugin
 	$Uri = Traceback_dir();
 	$V .= "<table width='100%' border=0 cellpadding=0>\n";
 	$V .= "  <tr>\n";
+
+    /* custom or default logo? */
+    if (@$SysConf['LogoImage'] and @$SysConf['LogoLink'])
+    {
+      $LogoLink = $SysConf['LogoLink'];
+      $LogoImg = $SysConf['LogoImage'];
+    }
+    else
+    {
+      $LogoLink = 'http://fossology.org';
+      $LogoImg = 'images/fossology-logo.gif';
+    }
+
 	$V .= "    <td width='15%'>";
-	$V .= "<a href='http://fossology.org' target='_top'><img src='images/fossology-logo.gif' align=absmiddle border=0></a>";
+	$V .= "<a href='$LogoLink' target='_top'><img src='$LogoImg' align=absmiddle border=0></a>";
 	$V .= "</td>\n";
 	$V .= "    <td valign='top'>";
 	$Menu = &$Plugins[plugin_find_id("menus")];
