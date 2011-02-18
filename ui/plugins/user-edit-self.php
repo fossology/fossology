@@ -36,6 +36,7 @@ class user_edit_self extends FO_Plugin
   var $Version = "1.0";
   var $Dependency = array("db");
   var $DBaccess = PLUGIN_DB_DOWNLOAD;
+
   /***********************************************************
    PostInitialize(): This function is called before the plugin
    is used and after all plugins have been initialized.
@@ -108,6 +109,7 @@ class user_edit_self extends FO_Plugin
     $Email_notify = GetParm('enote', PARM_TEXT);
     $agentList = userAgents();
     $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
+    $uiChoice = GetParm('whichui', PARM_TEXT);
 
     /* Make sure username looks valid */
     if (empty($_SESSION['UserId']))
@@ -207,6 +209,16 @@ class user_edit_self extends FO_Plugin
       $GotUpdate = 1;
     }
 
+    if ($uiChoice != $R['ui_preference'])
+    {
+      if ($GotUpdate)
+      {
+        $SQL.= ", ";
+      }
+      $SQL.= " ui_preference = '$uiChoice'";
+      $_SESSION['UiPref'] = $uiChoice;
+      $GotUpdate = 1;
+    }
     if (!empty($Pass1) && ($Pass0 != $Pass1) && ($Pass1 == $Pass2)) {
       $Seed = rand() . rand();
       $Hash = sha1($Seed . $Pass1);
@@ -337,6 +349,14 @@ class user_edit_self extends FO_Plugin
         $V.= SelectBucketPool($Val);
         $V.= "</td>";
         $V .= "</tr>\n";
+        $text = _("User Interface Options");
+        $text1 = _("Use the simplified UI (Default)");
+        $text2 = _("Use the original UI");
+        $V .= "$Style<th>11.</th><th>$text</th><td><input type='radio'" .
+                "name='whichui' value='simple' checked='checked'>" .
+                "$text1<br><input type='radio'" .
+                "name='whichui' value='original'>" .
+                "$text2</td>\n";
         $V.= "</table><P />";
         $text = _("Update Account");
         $V.= "<input type='submit' value='$text'>\n";
