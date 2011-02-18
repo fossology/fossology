@@ -63,15 +63,6 @@ class simpleUi extends FO_Plugin
       $md = menu_insert("My Account",$userEditSelf->MenuOrder,
       $userEditSelf->Name,$userEditSelf->MenuTarget);
     }
-    /*
-     $maxdepth = null;
-     $admin = array();
-     $admin = menu_find("Main::Admin", & $maxdepth);
-     echo "<pre>admin menu found is:\n";
-     print_r($admin) . "\n";
-     echo "</pre>";
-     */
-    //return(TRUE);
   }
 
   /**
@@ -112,10 +103,10 @@ class simpleUi extends FO_Plugin
         }
       }
     }
-  } // adjustPlugins
+  } // adjustDependencies
 
   /**
-   * \brief change the LoginFlag for selected plugins
+   * \brief change the LoginFlag for selected plugins to must be logged in.
    *
    */
   function adjustLoginFlag()
@@ -134,8 +125,24 @@ class simpleUi extends FO_Plugin
           //$pluginRef->PostInitialize();
         }
       }
-      // hack
-      foreach (array('search_file', 'search') as $plugin)
+  }
+
+  /**
+   *  \brief Change the DBaccess attribute to PLUGIN_DB_DELETE for selected
+   *  plugins. This makes the plugin only available to user with permissions
+   *  > 5.
+   *
+   *  @$plugin mixed, either a scalar or an array
+   */
+  function changeDBaccess($plugins)
+  {
+    if(empty($plugins))
+    {
+      return(0);
+    }
+    if(is_array($plugins))
+    {
+      foreach($plugins as $plugin)
       {
         $pluginRef = plugin_find_any($plugin);  // can be null
         if(!empty($pluginRef))
@@ -143,13 +150,23 @@ class simpleUi extends FO_Plugin
           $pluginRef->DBaccess = PLUGIN_DB_DELETE;
         }
       }
-  }
+    }
+    else
+    {
+      $pluginRef = plugin_find_any($plugins);  // can be null
+      if(!empty($pluginRef))
+      {
+        $pluginRef->DBaccess = PLUGIN_DB_DELETE;
+      }
+    }
+  } //changeDBaccess
+
 
   /**
    * \brief disable plugins not needed for simple UI, when users with perms
    * > 5 login, these disabled plugins should get enabled.
    *
-   * @param mixed $plugins either a scaler or an array
+   * @param mixed $plugins either a scalar or an array
    *
    */
   function disablePlugins($plugins)
@@ -227,31 +244,22 @@ class simpleUi extends FO_Plugin
       }
     }
     // this makes it so anybody above user level 5 gets the full UI ?
-    if($_SESSION['UserLevel'] <= 5)
+    //echo "<pre>SIMP: uipref is:{$_SESSION['UiPref']}\n</pre>";
+    if($_SESSION['UiPref'] == 'simple')
     {
       //$this->adjustDependencies();
       $this->adjustMenus();
-      //echo "<pre>SIMP: adjusting loginflag\n</pre>";
       $this->adjustLoginFlag();
+      $this->changeDBaccess(array('search','search_file',));
       plugin_disable(@$_SESSION['UserLevel']);
-      $this->disablePlugins(array
-      ('upload_srv_files','agent_nomos_once','agent_copyright_once',));
-
+      $this->disablePlugins(array('search', 'agent_nomos_once',
+        'agent_copyright_once', 'upload_file', 'upload_url', 'upload_srv_files',
+        'upload_instructions',));
     }
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
     return($this->State == PLUGIN_STATE_READY);
   } // PostInitialize()
-
-  /**
-   * \brief Remove a menu item and it's children from the menu list.  Optionally
-   * keep the children. (do they become orphans and not visible?).
-   */
-  function removeMenuItem($item)
-  {
-    return(TRUE);
-  }
-
 };
 $NewPlugin = new simpleUi();
 ?>
