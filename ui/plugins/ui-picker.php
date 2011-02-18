@@ -364,7 +364,7 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
       $Browseuploadtree_pk = $inBrowseuploadtree_pk;
 
     if (empty($infolder_pk)) 
-      $folder_pk = GetFolder("", $Browseuploadtree_pk);
+      $folder_pk = GetFolderFromItem("", $Browseuploadtree_pk);
     else
       $folder_pk = $infolder_pk;
     
@@ -489,7 +489,7 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
      * hardcoded.
      */
     $AppList = array("nomosdiff" => "License Difference", 
-                     "diffbuckets" => "Bucket Difference");
+                     "bucketsdiff" => "Bucket Difference");
 
     $Options = "id=apick";
     $SelectList = Array2SingleSelect($AppList, $SLName, $SelectedVal, 
