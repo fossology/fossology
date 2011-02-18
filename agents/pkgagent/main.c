@@ -42,6 +42,7 @@ int	main	(int argc, char *argv[])
   int Agent_pk;
 
   long upload_pk = 0;           // the upload primary key
+  extern int AlarmSecs;
   
   //glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   //glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
@@ -78,7 +79,7 @@ int	main	(int argc, char *argv[])
   if (argc == 1)
   {
     signal(SIGALRM,ShowHeartbeat);
-    alarm(60);
+    alarm(AlarmSecs);
 
     printf("OK\n"); /* inform scheduler that we are ready */
     fflush(stdout);
@@ -92,7 +93,7 @@ int	main	(int argc, char *argv[])
       if (upload_pk ==0) continue;
      
       if(!ProcessUpload(upload_pk)) return -1;
-      sleep(10000);
+      sleep(15);
       printf("OK\n");
       fflush(stdout);
     }
