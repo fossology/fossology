@@ -871,9 +871,61 @@ int	FindCmd	(char *Filename)
              }
              else
              {		
-               // only here to validate other octet file types
-               if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
-	     }
+               memset(CMDTemp, 0, FILENAME_MAX);
+               /* get the file type */
+               sprintf(CMDTemp, "file %s", Filename);
+               FILE *fp;
+               char Output[FILENAME_MAX];
+               /* Open the command for reading. */
+               fp = popen(CMDTemp, "r");
+               if (fp == NULL) 
+               {
+                 printf("Failed to run command\n" );
+                 SafeExit(50);
+               }
+
+               /* Read the output the first line */
+               fgets(Output, sizeof(Output) - 1, fp);
+
+               /* close */
+               pclose(fp);
+               /* the file type is ext2 */
+               if (strstr(Output, "ext2"))
+               {
+                 memset(Static,0,sizeof(Static));
+                 strcpy(Static,"application/x-ext2");
+                 Type=Static;
+               } 
+               else if (strstr(Output, "ext3")) /* the file type is ext3 */
+               {
+                 memset(Static,0,sizeof(Static));
+                 strcpy(Static,"application/x-ext3");
+                 Type=Static;
+               }
+               else if (strstr(Output, "x86 boot sector, mkdosfs")) /* the file type is FAT */
+               {
+                 memset(Static,0,sizeof(Static));
+                 strcpy(Static,"application/x-fat");
+                 Type=Static;
+               }
+               else if (strstr(Output, "x86 boot sector")) /* the file type is NTFS */
+               {
+                 memset(Static,0,sizeof(Static));
+                 strcpy(Static,"application/x-ntfs");
+                 Type=Static;
+               }
+               else if (strstr(Output, "x86 boot")) /* the file type is boot partition */
+               {
+                 memset(Static,0,sizeof(Static));
+                 strcpy(Static,"application/x-x86_boot");
+                 Type=Static;
+               }
+               else 
+               {
+                 // only here to validate other octet file types
+                 if (Verbose > 0) printf("octet mime type, file: %s\n", Filename);
+	       }  
+             }
            }
          }
        }
