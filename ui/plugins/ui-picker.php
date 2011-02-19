@@ -477,28 +477,6 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
 
 
   /************************************************************
-   * ApplicationPick
-   * Return html to pick the application that will be called after
-   * the items are identified.
-   */
-  function ApplicationPick($SLName, $SelectedVal)
-  {
-    /* select the apps that are registered to accept item1, item2 pairs.
-     * At this time (pre 2.x) we don't know enough about the plugins
-     * to know if they can take a pair.  Till then, the list is
-     * hardcoded.
-     */
-    $AppList = array("nomosdiff" => "License Difference", 
-                     "bucketsdiff" => "Bucket Difference");
-
-    $Options = "id=apick";
-    $SelectList = Array2SingleSelect($AppList, $SLName, $SelectedVal, 
-                                     false, true, $Options);
-    $StrOut = "$SelectList will run after chosing a file.";
-    return $StrOut;
-  }
-
-  /************************************************************
    * HTML output 
    *
    * $RtnMod - module to run after a file is picked
@@ -524,7 +502,6 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     $OutBuf .=  "var rtnmod = rtnmodelt.value;";
     $OutBuf .=  "var uri = '$uri' + '&rtnmod=' + rtnmod + '&item=' + $uploadtree_pk + '&item2=' + val;";
     $OutBuf .=  "window.location.assign(uri);";
-    /*$OutBuf .= "alert('uri: ' + uri);\n"; */
     $OutBuf .= "}";
     $OutBuf .= "</script>\n";
 
@@ -543,8 +520,9 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     $OutBuf .= "</td></tr>";
     $OutBuf .= "</table></center>";
 
-    $OutBuf .= "Choose a second file to compare to.<br>";
-    $OutBuf .= $this->ApplicationPick("PickRtnApp", $RtnMod);
+    $text = _("Choose the program to run after you select the second file.");
+    $OutBuf .= "<b>$text</b><br>";
+    $OutBuf .= ApplicationPick("PickRtnApp", $RtnMod, "will run after chosing a file");
     $OutBuf .= "</div>";
     $OutBuf .= "<br>";
 
@@ -552,7 +530,8 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
     $HistPick = $this->HistoryPick($uploadtree_pk, $rtncount);
     if (!empty($HistPick))
     {
-      $OutBuf .= "<h3>Select from your pick history ($rtncount):</h3>";
+      $text = _("Select from your pick history");
+      $OutBuf .= "<h3>$text ($rtncount):</h3>";
       $OutBuf .= "$HistPick";
     }
 
@@ -563,11 +542,13 @@ function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
      * use the Browse Window.
      */
     $SuggestionsHTML = $this->SuggestionsPick($PathStr, $uploadtree_pk, $rtncount);
-    $OutBuf .= "<hr><h3>Suggestions ($rtncount):</h3>";
+    $text = "Suggestions";
+    $OutBuf .= "<hr><h3>$text ($rtncount):</h3>";
     $OutBuf .= $SuggestionsHTML;
 
     /* Browse window */
-    $OutBuf .= "<hr><h3>Browse:</h3>";
+    $text = _("Browse");
+    $OutBuf .= "<hr><h3>$text:</h3>";
 
     /* Folder/directory bar */
     $OutBuf .= $this->BrowsePick($uploadtree_pk, $Browseuploadtree_pk, $folder_pk, $PathArray);

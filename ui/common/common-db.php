@@ -28,9 +28,10 @@
 global $GlobalReady;
 if (!isset($GlobalReady)) { exit; }
 
+
 /*****************************************
  GetSingleRec
-   Get a single record
+   Retrieve a single database record
 
  Params:
    $Table
@@ -39,17 +40,18 @@ if (!isset($GlobalReady)) { exit; }
 
  Returns:
    Associative array for this record.  
-   May be empty.
+   May be empty if no record found.
  *****************************************/
 function GetSingleRec($Table, $Where="")
 {
   global $PG_CONN;
 
-  $sql = "SELECT * from $Table $Where";
+  $sql = "SELECT * from $Table $Where limit 1";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
   $row = pg_fetch_assoc($result);
+  pg_free_result($result);
   return $row;
 }
 
