@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <agent.h>
 #include <database.h>
 #include <event.h>
+#include <host.h>
 #include <job.h>
 #include <logging.h>
 #include <scheduler.h>
@@ -209,9 +210,10 @@ int agent_kill(char* name, agent a, gpointer unused)
  * @param unused
  * @return
  */
-int agent_test(char* name, meta_agent ma, job j)
+int agent_test(char* name, meta_agent ma)
 {
-  agent_init(ma->name, NULL, j);
+  job j = job_init(ma->name, -1);
+  agent_init(name_host("localhost"), j);
   return 0;
 }
 
@@ -258,34 +260,36 @@ void agent_listen(agent a)
           job_id(a->owner), a->meta_data->name, a->pid, buffer);
     }
 
-    /* the agent has finished execution, finish this thread */
-    if( strncmp(buffer, "BYE", 3) == 0 || strncmp(buffer, "@@@1", 4) == 0) break;
-    /* check for a message from scheduler */
-    else if(strncmp(buffer, "@@@0", 4) == 0 && a->updated)
+    /* check for messages from scheduler or clean agent death */
+    if( strncmp(buffer, "BYE", 3) == 0 || strncmp(buffer, "@@@1", 4) == 0)
+      break;
+    if(strncmp(buffer, "@@@0", 4) == 0 && a->updated)
     {
-
+      aprintf(a, "%s\n", job_next(a->owner));
       aprintf(a, "END\n");
       fflush(a->write);
       a->updated = 0;
+      continue;
     }
+
+    /* if we get here it is an actual message from the agent */
+    a->check_in = time(NULL);
+
     /* the agent has indicated that it is ready for data */
-    else if(strncmp(buffer, "OK", 2) == 0)
+    if(strncmp(buffer, "OK", 2) == 0)
     {
       if(!job_is_paused(a->owner))
-      {
-        a->check_in = time(NULL);
         event_signal(agent_ready_event, a);
-      }
     }
     /* heart beat received from agent */
     else if(strncmp(buffer, "HEART", 5) == 0)
     {
-      a->check_in = time(NULL);
       a->n_updates++;
       i = atoi(&buffer[7]);
       a->check_analyzed = i - a->total_analyzed;
       a->total_analyzed = i;
     }
+    /* agent is failing, log why */
     else if(strncmp(buffer, "FATAL", 5))
     {
       lprintf_c("FATAL:JOB[%d].%s[%d]: \"%s\"\n",
@@ -293,6 +297,7 @@ void agent_listen(agent a)
       // TODO I may need to update the db here
       break;
     }
+    /* the agent has recieved an error, log what */
     else if(strncmp(buffer, "ERROR", 5))
     {
       lprintf_c("ERROR:JOB[%d].%s[%d]: \"%s\"\n",
@@ -300,6 +305,7 @@ void agent_listen(agent a)
       // TODO I may need to update the db here
       break;
     }
+    /* we aren't quite sure what the agent sent, log it */
     else
     {
       lprintf_c("JOB[%d].%s[%d]: %s",
@@ -330,7 +336,7 @@ void agent_listen(agent a)
  *
  * @param passed a pointer to the agent that is being spawned
  */
-void* spawn(void* passed)
+void* agent_spawn(void* passed)
 {
   /* locals */
   agent a = (agent)passed;    // the agent that is being spawned
@@ -354,7 +360,7 @@ void* spawn(void* passed)
     /* if host is null, the agent will run locally to */
     /* run the agent localy, use the commands that    */
     /* were parsed when the meta_agent was created    */
-    if(a->host_machine == NULL)
+    if(strcmp(host_address(a->host_machine), "localhost") == 0)
     {
       sprintf(buffer, "%s/%s", AGENT_DIR, a->meta_data->parsed_cmd[0]);
       memcpy(args, a->meta_data->parsed_cmd, sizeof(a->meta_data->parsed_cmd));
@@ -367,9 +373,9 @@ void* spawn(void* passed)
     /* command as the last argument to the ssh command */
     else
     {
-      sprintf(buffer, "%s/%s", a->host_machine->agent_dir, a->meta_data->raw_cmd);
+      sprintf(buffer, "%s/%s", host_agent_dir(a->host_machine), a->meta_data->raw_cmd);
       args[0] = "/usr/bin/ssh";
-      args[1] = a->host_machine->address;
+      args[1] = host_address(a->host_machine);
       args[2] = buffer;
       args[3] = 0;
       execv(args[0], args);
@@ -382,9 +388,6 @@ void* spawn(void* passed)
   /* we are in the parent */
   else if(a->pid > 0)
   {
-    // TODO does this introduce a bug?
-    //close(a->to_parent);
-    //close(a->from_parent);
     event_signal(agent_create_event, a);
     agent_listen(a);
   }
@@ -521,7 +524,7 @@ void meta_agent_destroy(meta_agent ma)
  *
  * @param meta_data, the
  */
-agent agent_init(char* meta_agent_name, host host_machine, job j)
+agent agent_init(host host_machine, job j)
 {
   /* local variables */
   agent a;
@@ -529,7 +532,7 @@ agent agent_init(char* meta_agent_name, host host_machine, job j)
   int parent_to_child[2];
 
   /* check inputs */
-  if(!j || g_tree_lookup(meta_agents, meta_agent_name) == NULL)
+  if(!j || g_tree_lookup(meta_agents, job_type(j)) == NULL)
   {
     errno = EINVAL;
     ERROR("invalid arguments passed to agent_init");
@@ -538,18 +541,18 @@ agent agent_init(char* meta_agent_name, host host_machine, job j)
 
   /* allocate memory and do trivial assignments */
   a = (agent)calloc(1, sizeof(struct agent_internal));
-  a->meta_data = g_tree_lookup(meta_agents, meta_agent_name);
+  a->meta_data = g_tree_lookup(meta_agents, job_type(j));
   a->status = AG_CREATED;
 
   /* create the pipes between the child and the parent */
   if(pipe(parent_to_child) != 0)
   {
-    ERROR("JOB[%d.%s] failed to create parent to child pipe", job_id(j), meta_agent_name);
+    ERROR("JOB[%d.%s] failed to create parent to child pipe", job_id(j), job_type(j));
     return NULL;
   }
   if(pipe(child_to_parent) != 0)
   {
-    ERROR("JOB[%d.%s] failed to create child to parent pipe", job_id(j), meta_agent_name);
+    ERROR("JOB[%d.%s] failed to create child to parent pipe", job_id(j), job_type(j));
     return NULL;
   }
 
@@ -568,17 +571,17 @@ agent agent_init(char* meta_agent_name, host host_machine, job j)
   /* open the relevant file pointers */
   if((a->read = fdopen(a->from_child, "r")) == NULL)
   {
-    ERROR("JOB[%d.%s] failed to initialize read file", job_id(j), meta_agent_name);
+    ERROR("JOB[%d.%s] failed to initialize read file", job_id(j), job_type(j));
     return NULL;
   }
   if((a->write = fdopen(a->to_child, "w")) == NULL)
   {
-    ERROR("JOB[%d.%s] failed to initialize write file", job_id(j), meta_agent_name);
+    ERROR("JOB[%d.%s] failed to initialize write file", job_id(j), job_type(j));
     return NULL;
   }
 
   /* spawn the listen thread */
-  a->thread = g_thread_create(spawn, a, 1, NULL);
+  a->thread = g_thread_create(agent_spawn, a, 1, NULL);
   return a;
 }
 
@@ -598,7 +601,7 @@ agent agent_copy(agent a)
   VERBOSE3("JOB[%d].%s[%d]: creating copy of agent\n",
         job_id(a->owner), a->meta_data->name, a->pid);
 
-  agent cpy = agent_init(a->meta_data->name, a->host_machine, a->owner);
+  agent cpy = agent_init(a->host_machine, a->owner);
   cpy->data = a->data;
   cpy->generation = a->generation + 1;
 
@@ -645,6 +648,7 @@ void agent_death_event(void* pids)
 {
   /* locals */
   int* curr;      // the current pid being manipulated
+  int  db = 0;    // flag to run a database update
   agent a;        // agent to be accessed
 
   TEST_NULV(pids);
@@ -665,7 +669,12 @@ void agent_death_event(void* pids)
     {
       agent_close(a);
     }
+
+    if(job_id(a->owner) >= 0)
+      db = 1;
   }
+
+  if(db) database_update_event(NULL);
 
   /* clean up the passed params */
   free(pids);
@@ -856,12 +865,16 @@ ssize_t agent_write(agent a, const void* buf, size_t count)
   return write(a->to_parent, buf, count);
 }
 
+/* ************************************************************************** */
+/* **** static functions and meta agents ************************************ */
+/* ************************************************************************** */
+
 /**
  * TODO
  */
 void test_agents()
 {
-  g_tree_foreach(meta_agents, (GTraverseFunc)agent_test, get_job(0));
+  g_tree_foreach(meta_agents, (GTraverseFunc)agent_test, NULL);
 }
 
 /**
@@ -916,6 +929,18 @@ int add_meta_agent(char* name, char* cmd, int max, int spc)
   }
 
   return 0;
+}
+
+/**
+ * Checks to see if a particular agent type is available in the list of
+ * meta agents.
+ *
+ * @param name the type of the agent (it's name)
+ * @return if the type exists in the list of meta agents
+ */
+int is_meta_agent(char* name)
+{
+  return g_tree_lookup(meta_agents, name) != NULL;
 }
 
 /**

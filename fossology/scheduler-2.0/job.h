@@ -27,10 +27,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 typedef struct job_internal* job;
 
+/**
+ * TODO
+ */
+typedef enum {
+  JB_CHECKEDOUT = 0,    ///< JB_CHECKEDOUT
+  JB_STARTED = 1,       ///< JB_STARTED
+  JB_COMPLETE = 2,      ///< JB_COMPLETE
+  JB_RESTART = 3,       ///< JB_RESTART
+  JB_FAILED = 4,        ///< JB_FAILED
+  JB_SCH_PAUSED = 5,    ///< JB_SCH_PAUSED
+  JB_CLI_PAUSED = 6     ///< JB_CLI_PAUSED
+} job_status;
+
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
 
+void job_list_init();
+void job_list_clean();
 job job_init(char* type, int id);
 void job_destroy(job j);
 
@@ -47,21 +62,22 @@ void job_fail_agent(job j, void* a);
 void job_set_priority(job j, int pri);
 void job_set_data(job j, char* data, int sql);
 void job_update(job j);
-void job_pause(job j);
+void job_pause(job j, int cli);
 void job_restart(job j);
 int  job_id(job j);
 int  job_is_paused(job j);
 int  job_is_open(job j);
 job  job_verbose(job j, int level);
+char* job_type(job j);
 char* job_next(job j);
 
 /* ************************************************************************** */
 /* **** Job list Functions ************************************************** */
 /* ************************************************************************** */
 
-void job_list_clean();
-void add_job(job j);
+job  next_job();
 job  get_job(int id);
 int  num_jobs();
+int  active_jobs();
 
 #endif /* JOB_H_INCLUDE */

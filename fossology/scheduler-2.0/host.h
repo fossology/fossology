@@ -1,5 +1,5 @@
 /* **************************************************************
-Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -22,15 +22,34 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* std includes */
 #include <stdio.h>
 
-#define HOSTNAME_MAX 255
+/* ************************************************************************** */
+/* **** Data Types ********************************************************** */
+/* ************************************************************************** */
 
 /**
  * TODO
  */
-typedef struct {
-  char name[HOSTNAME_MAX + 1];      ///< the name of the host, used to store host internally to scheduler
-  char address[HOSTNAME_MAX + 1];   ///< the address of the host, used by ssh when starting a new agent
-  char agent_dir[FILENAME_MAX];     ///< the location on the host machine where the executables are
-}* host;
+typedef struct host_internal* host;
+
+/* ************************************************************************** */
+/* **** Contructor Destructor *********************************************** */
+/* ************************************************************************** */
+
+void host_list_init(int max);
+void host_list_clean();
+
+void host_init(char* name, char* address, char* agent_dir, int max);
+void host_destroy(host h);
+
+/* ************************************************************************** */
+/* **** Functions and events ************************************************ */
+/* ************************************************************************** */
+
+char* host_name(host h);
+char* host_address(host h);
+char* host_agent_dir(host h);
+
+host get_host(int num);
+host name_host(char* name);
 
 #endif /* HOST_H_INCLUDE */

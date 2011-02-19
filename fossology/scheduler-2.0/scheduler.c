@@ -17,7 +17,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* local includes */
 #include <agent.h>
+#include <database.h>
 #include <event.h>
+#include <host.h>
 #include <interface.h>
 #include <logging.h>
 #include <scheduler.h>
@@ -105,6 +107,7 @@ void prnt_sig(int signo)
     case SIGALRM:
       lprintf("SIGNALS: Scheduler received alarm signal, checking job states\n");
       event_signal(agent_update_event, NULL);
+      event_signal(database_update_event, NULL);
       alarm(CHECK_TIME);
       break;
   }
@@ -172,7 +175,7 @@ void load_config()
   int max = -1;             // TODO
   int special = 0;          // TODO
 
-  // TODO set this to location of agent.conf files
+  // TODO set this up with DEFAULT_SETUP instead of this
   if((dp = opendir("./agents/")) == NULL)
   {
     FATAL("Could not opend agent.conf directory");
@@ -251,10 +254,17 @@ void load_config()
   istr = fopen("Scheduler.conf", "r"); //< change file path
   while(fgets(buffer, sizeof(buffer) - 1, istr) != NULL)
   {
+    /* skip comments and blank lines */
     if(buffer[0] == '#');
+    else if(buffer[0] == '\0');
+    /* check the port that the interface wil use */
     else if(strncmp(buffer, "port=", 5) == 0 && !is_port_set())
       set_port(atoi(&buffer[5]));
-    else if(strncmp(buffer, "max=", 4) == 0);
+    /* check for the list of available hosts */
+    else if(strncmp(buffer, "hosts:", 6) == 0)
+    {
+      // TODO
+    }
   }
 }
 
@@ -276,8 +286,10 @@ void scheduler_close_event(void* unused)
 int close_scheduler()
 {
   job_list_clean();
+  host_list_clean();
   agent_list_clean();
   interface_destroy();
+  database_destroy();
   return 0;
 }
 
@@ -286,8 +298,22 @@ int close_scheduler()
  */
 void update_scheduler()
 {
-  if(closing && num_agents() == 0 && num_jobs() == 0)
+  job j;
+  host h;
+
+  if(closing && num_agents() == 0 && active_jobs() == 0)
+  {
     event_loop_terminate();
+    return;
+  }
+
+  while((j = next_job()) != NULL)
+  {
+    if((h = get_host(1)) == NULL)
+      continue;
+
+    agent_init(h, j);
+  }
 }
 
 /**
@@ -417,8 +443,11 @@ int main(int argc, char** argv)
   g_thread_init(NULL);
   g_type_init();
   set_usr_grp();
+  job_list_init();
+  host_list_init(10); // TODO have this set with localhost in conf file
   load_config();
   interface_init();
+  database_init();
 
   if(run_daemon)
   {
@@ -439,7 +468,6 @@ int main(int argc, char** argv)
   /* ********************** */
   if(test > 0)
   {
-    add_job(job_init("all", 0));
     test_agents();
     if(test > 1)
       closing = 1;
