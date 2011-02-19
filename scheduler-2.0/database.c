@@ -13,9 +13,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-************************************************************** */
+ ************************************************************** */
 
 /* local includes */
+#include <agent.h>
 #include <database.h>
 #include <logging.h>
 
@@ -33,13 +34,18 @@ PGconn* db_conn = NULL;
 
 char* basic_checkout = "\
     SELECT * FROM getrunnable()\
-      LIMIT 10;";
+    LIMIT 10;";
 
 /* ************************************************************************** */
 /* **** local functions ***************************************************** */
 /* ************************************************************************** */
 
-void db_init()
+#define PQget(db_result, row, col) PQgetvalue(db_result, row, PQfnumber(db_result, col))
+
+/**
+ *
+ */
+void database_init()
 {
   if(db_struct == NULL)
     db_struct = DBopen();
@@ -48,7 +54,10 @@ void db_init()
     db_conn = DBgetconn(db_struct);
 }
 
-void db_destroy()
+/**
+ *
+ */
+void database_destroy()
 {
   DBclose(db_struct);
   db_struct = NULL;
@@ -68,7 +77,9 @@ void database_update_event(void* unused)
 {
   /* locals */
   PGresult* db_result;
-  int i;
+  int i, job_id;
+  char* value, * type, * pfile;
+  job j;
 
   /* make the database query */
   db_result = PQexec(db_conn, basic_checkout);
@@ -82,13 +93,35 @@ void database_update_event(void* unused)
   VERBOSE2("DB: retrieved %d entries from the job queue\n", PQntuples(db_result));
   for(i = 0; i < PQntuples(db_result); i++)
   {
+    /* start by checking that the job hasn't already been grabed */
+    if(get_job(job_id = atoi(PQget(db_result, i, "jq_pk"))) != NULL)
+      continue;
 
+    /* get relevant values out of the job queue */
+    type   =      PQget(db_result, i, "jq_type");
+    pfile  =      PQget(db_result, i, "jq_runonpfile");
+    value  =      PQget(db_result, i, "jq_args");
 
+    VERBOSE2("DB: JOB[%d] added:\n   type = %s\n   pfile = %d\n   value = %s\n",
+        job_id, type, (pfile != NULL && pfile[0] != '\0'), value);
 
+    /* check if this is a command */
+    if(strcmp(type, "command") == 0)
+    {
+      lprintf("DB: got a command from job queue\n");
+      // TODO handle command
+      continue;
+    }
 
+    /* make sure that we have an agent of that type */
+    if(!is_meta_agent(type))
+    {
+      ERROR("Invalid meta agent: %s", type);
+      continue;
+    }
 
-
-
+    j = job_init(type, job_id);
+    job_set_data(j, value, (pfile && pfile[0] != '\0'));
   }
 }
 
@@ -104,11 +137,3 @@ PGresult* database_exec(char* sql)
 {
   return PQexec(db_conn, sql);
 }
-
-
-
-
-
-
-
-

@@ -66,41 +66,41 @@ int	ReadCmdFD	(int Fin, char *Cmd, int MaxCmd)
      signals */
   if (!rc && (errno == EAGAIN)) return(0); /* no data */
   while((rc != 0) && (Cmd[i]>=0) && (i<MaxCmd))
-    {
+  {
     if (rc < 0)
-	{
-	/* some kind of error */
-	switch(errno)
-	  {
-	  case EAGAIN:
-		/* no data, would have blocked */
-		/* allow it to retry for up to 2 seconds */
-		/* This return only happens when a partial line is read and
+    {
+      /* some kind of error */
+      switch(errno)
+      {
+        case EAGAIN:
+          /* no data, would have blocked */
+          /* allow it to retry for up to 2 seconds */
+          /* This return only happens when a partial line is read and
 		   the entire line could not be read within 1 full second. */
-		if (time(NULL) <= StartTime+2) return(i);
-		break;
-	  case EBADF:
-	  default:
-		perror("Read error from client:");
-		LogPrint("READ ERROR: errno=%d  rc=%d  Bytes=%d '%s'\n",errno,rc,i,Cmd);
-		return(i); /* huh? -- no data */
-	  }
-	}
+          if (time(NULL) <= StartTime+2) return(i);
+          break;
+        case EBADF:
+        default:
+          perror("Read error from client:");
+          LogPrint("READ ERROR: errno=%d  rc=%d  Bytes=%d '%s'\n",errno,rc,i,Cmd);
+          return(i); /* huh? -- no data */
+      }
+    }
     else if (Cmd[i]=='\n')
-	{
-	/* This is the correct place for a normal return */
-	Cmd[i]='\0'; /* remove CR */
-	return(i);
-	/* if it is a blank line, then ignore it. */
-	}
+    {
+      /* This is the correct place for a normal return */
+      Cmd[i]='\0'; /* remove CR */
+      return(i);
+      /* if it is a blank line, then ignore it. */
+    }
     else
-	{
-	i++;
-	}
+    {
+      i++;
+    }
     alarm(10);
     rc=read(Fin,Cmd+i,1);
     alarm(0);
-    }
+  }
   /* This return only happens when a partial line is read. */
   return(i);
 } /* ReadCmdFD() */
@@ -122,19 +122,19 @@ int	ReadCmd	(FILE *Fin, char *Cmd, int MaxCmd)
   C=fgetc(Fin);
   if (C<0) return(-1);
   while(!feof(Fin) && (C>=0) && (i<MaxCmd))
-    {
+  {
     if (C=='\n')
-	{
-	if (i > 0) return(i);
-	/* if it is a blank line, then ignore it. */
-	}
-    else
-	{
-	Cmd[i]=C;
-	i++;
-	}
-    C=fgetc(Fin);
+    {
+      if (i > 0) return(i);
+      /* if it is a blank line, then ignore it. */
     }
+    else
+    {
+      Cmd[i]=C;
+      i++;
+    }
+    C=fgetc(Fin);
+  }
   return(i);
 } /* ReadCmd() */
 
@@ -157,9 +157,9 @@ void	Pause	(char *Message)
   fprintf(stderr,"PAUSED (press enter)\n");
   C='@';
   while(!feof(stdin) && (C!='\n'))
-	{
-	C=fgetc(stdin);
-	}
+  {
+    C=fgetc(stdin);
+  }
 } /* Pause() */
 
 
@@ -196,44 +196,44 @@ int	SelectAnyData	(int HasFin, int Fin)
       Otherwise, all children will look dead. **/
   if (Now - LastTimeCheck < MAXHEARTBEAT) CheckChildren(Now);
   else if (LastTimeCheck != 0)
-	{
-	memset(Ctime,'\0',MAXCTIME);
-	ctime_r(&Now,Ctime);
-	printf("WARNING: scheduler is running slow.  It took %d seconds to check agent status: %s",(int)(Now - LastTimeCheck),Ctime);
-	/* Reset all heardbeats since I cannot tell if any are hung */
-	for(Thread=0; Thread < MaxThread; Thread++)
-	  {
-	  CM[Thread].Heartbeat = Now;
-	  }
-	}
+  {
+    memset(Ctime,'\0',MAXCTIME);
+    ctime_r(&Now,Ctime);
+    printf("WARNING: scheduler is running slow.  It took %d seconds to check agent status: %s",(int)(Now - LastTimeCheck),Ctime);
+    /* Reset all heardbeats since I cannot tell if any are hung */
+    for(Thread=0; Thread < MaxThread; Thread++)
+    {
+      CM[Thread].Heartbeat = Now;
+    }
+  }
   LastTimeCheck = Now;
 
-reselect:
+  reselect:
   FD_ZERO(&FD);
   MaxFD=-1;
   Timeout.tv_sec = 10;
   Timeout.tv_usec = 0;
   if (HasFin)
-    {
+  {
     FD_SET(Fin,&FD); /* check for data on input */
     MaxFD = Fin;
-    }
+  }
 
   for(Thread=0; Thread < MaxThread; Thread++)
-    {
+  {
     if (CM[Thread].Status > ST_FREEING)
-	{
-	FD_SET(CM[Thread].ChildStdout,&FD);
-	if (MaxFD < CM[Thread].ChildStdout) MaxFD=CM[Thread].ChildStdout;
-	}
+    {
+      FD_SET(CM[Thread].ChildStdout,&FD);
+      if (MaxFD < CM[Thread].ChildStdout) MaxFD=CM[Thread].ChildStdout;
+    }
     /* Not really the best place for this, but convenient */
     else if ((CM[Thread].Status == ST_FREEING) &&
         (CM[Thread].StatusTime+MINKILLTIME < Now))
-        {
-        /* if there is a child that won't die, then kill it!!! */
-        if (CM[Thread].ChildPid) kill(CM[Thread].ChildPid,SIGKILL);
-        }
+    {
+      /* if there is a child that won't die, then kill it!!! */
+      if (CM[Thread].ChildPid) kill(CM[Thread].ChildPid,SIGKILL);
     }
+  }
   if (MaxFD < 0) return(0);	/* nobody to look at */
 
   rc = select(MaxFD+1,&FD,NULL,NULL,&Timeout);
@@ -243,10 +243,10 @@ reselect:
 
   /* handle children that have data */
   for(Thread=0; Thread < MaxThread; Thread++)
-    {
+  {
     if ((CM[Thread].Status > ST_FREE) && FD_ISSET(CM[Thread].ChildStdout,&FD))
-	ReadChild(Thread);
-    }
+      ReadChild(Thread);
+  }
 
   if ((rc == 1) && HasFin && FD_ISSET(Fin,&FD)) return(1); /* input only */
   /* else, rc > 1 or rc==1 and not Fin */

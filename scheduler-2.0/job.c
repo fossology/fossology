@@ -25,14 +25,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* std library includes */
 #include <stdlib.h>
 
+/* unix library includes */
+#include <sys/types.h>
+#include <unistd.h>
+
 /* other library includes */
 #include <glib.h>
 
 #define TEST_NULV(j) if(!j) { errno = EINVAL; ERROR("job passed is NULL, cannot proceed"); return; }
 #define TEST_NULL(j, ret) if(!j) { errno = EINVAL; ERROR("job passed is NULL, cannot proceed"); return ret; }
+#define MAX_SQL 512;
 
 /* ************************************************************************** */
-/* **** Data Types ********************************************************** */
+/* **** Locals ************************************************************** */
 /* ************************************************************************** */
 
 /**
@@ -43,9 +48,10 @@ struct job_internal
     /* associated agent information */
     char*  agent_type;      ///< the type of agent used to analyze the data
     GList* running_agents;  ///< the list of agents assigned to this job that are still working
-    GList* finsihed_agents; ///< the list of agents that have successfully finish their task
+    GList* finished_agents; ///< the list of agents that have successfully finish their task
     GList* failed_agents;   ///< the list of agents that failed while working
     /* information for data manipluation */
+    job_status status;      ///< the current status for the job
     char* data;             ///< the data associated with this job
     PGresult* db_result;    ///< results from the sql query (if any)
     GMutex* lock;           ///< lock to maintain data integrity
@@ -57,11 +63,167 @@ struct job_internal
     int id;                 ///< the identifier for this job
 };
 
+/**
+ * TODO
+ */
+char* status_string[] = {
+    "JB_CHECKEDOUT",
+    "JB_STARTED",
+    "JB_COMPLETE",
+    "JB_RESTART",
+    "JB_FAILED",
+    "JB_SCH_PAUSED",
+    "JB_CLI_PAUSED"};
+
+/**
+ * TODO
+ */
 GTree* job_list = NULL;
+GSequence* job_queue = NULL;
+
+/**
+ * Tests if a job is active, if it is, the integer pointed to by counter will be
+ * incremented by 1. This is used when determining if the scheduler can shutdown
+ * and will be called from within a g_tree_foreach().
+ *
+ * @param job_id the id number used as the key in the Gtree
+ * @param j the job that is being tested for activity
+ * @param counter the count of the number of active jobs
+ * @return always returns 0
+ */
+int is_active(int* job_id, job j, int* counter)
+{
+  if((j->running_agents != NULL && j->finished_agents != NULL && j->failed_agents != NULL) || j->id < 0)
+    (*counter)++;
+  return 0;
+}
+
+/**
+ * Changes the status of the job and updates the database with the new job status
+ *
+ * @param j the job to update the status on
+ * @param new_status the new status for the job
+ */
+void job_transition(job j, job_status new_status)
+{
+  /* locals */
+  gchar* sql = NULL;
+  PGresult* db_result;
+
+  TEST_NULV(j);
+  /* check how to update database */
+  switch(new_status)
+  {
+    case JB_CHECKEDOUT: break;
+    case JB_STARTED:
+      sql = g_strdup_printf(" \
+          UPDATE jobqueue \
+            SET jq_starttime = now(), \
+                jq_schedinfo ='%s.%d', \
+                jq_endtext = 'Started' \
+            WHERE jq_pk = '%d';", "localhost", getpid(), j->id);
+      break;
+    case JB_COMPLETE:
+      sql = g_strdup_printf(" \
+          UPDATE jobqueue \
+            SET jq_endtime = now(), \
+                jq_end_bits = jq_end_bits | 1, \
+                jq_schedinfo = null, \
+                jq_endtext = 'Completed' \
+            WHERE jq_pk = '%d';", j->id);
+      break;
+    case JB_RESTART:
+      sql = g_strdup_printf(" \
+          UPDATE jobqueue \
+            SET jq_endtime = now(), \
+                jq_end_bits = jq_end_bits | 2, \
+                jq_schedinfo = null, \
+                jq_endtext = 'Restart' \
+            WHERE jq_pk = '%d';", j->id);
+      break;
+    case JB_FAILED:
+      sql = g_strdup_printf(" \
+          UPDATE jobqueue \
+            SET jq_starttime = null, \
+                jq_endtime = null, \
+                jq_schedinfo = null, \
+                jq_endtext = 'Failed' \
+            WHERE jq_pk = '%d';", j->id);
+      break;
+    case JB_SCH_PAUSED: case JB_CLI_PAUSED:
+      sql = g_strdup_printf(" \
+          UPDATE jobqueue \
+            SET jq_endtext = 'Paused' \
+            WHERE jq_pk = '%d';", j->id);
+      break;
+  }
+
+  // TODO check if this is the correct verbose level
+  VERBOSE2("JOB[%d]: job status changed: %s => %s\n",
+      j->id, status_string[j->status], status_string[new_status]);
+
+  /* change the status */
+  j->status = new_status;
+
+  /* update the database job queue */
+  db_result = database_exec(sql);
+  if(sql != NULL && PQresultStatus(db_result) != PGRES_COMMAND_OK)
+  {
+    lprintf("ERROR %s.%d: failed to update job status in job queue\n", __FILE__, __LINE__);
+    lprintf("ERROR postgresql error: %s\n", PQresultErrorMessage(db_result));
+  }
+  PQclear(db_result);
+  g_free(sql);
+}
+
+/**
+ * Used to compare two different jobs in the priority queue. This simply compares
+ * their priorities so that jobs with a high priority are scheduler before low
+ * priority jobs.
+ *
+ * @param a the first job
+ * @param b the second job
+ * @param user_data unused
+ * @return the comparison of the two jobs
+ */
+gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data)
+{
+  return ((job)a)->priority - ((job)b)->priority;
+}
 
 /* ************************************************************************** */
 /* **** Constructor Destructor ********************************************** */
 /* ************************************************************************** */
+
+/**
+ * TODO
+ */
+void job_list_init()
+{
+  if(job_list == NULL)
+    job_list = g_tree_new_full(int_compare, NULL, NULL, (GDestroyNotify)job_destroy);
+
+  if(job_queue == NULL)
+    job_queue = g_sequence_new(NULL);
+}
+
+/**
+ * TODO
+ */
+void job_list_clean()
+{
+  if(job_list != NULL)
+  {
+    g_tree_destroy(job_list);
+    job_list = NULL;
+  }
+
+  if(job_queue != NULL)
+  {
+    g_sequence_free(job_queue);
+    job_queue = NULL;
+  }
+}
 
 /**
  * Create a new job. Every different task will create a new job and as a result
@@ -81,8 +243,9 @@ job job_init(char* type, int id)
 
   j->agent_type = type;
   j->running_agents =  NULL;
-  j->finsihed_agents = NULL;
+  j->finished_agents = NULL;
   j->failed_agents =   NULL;
+  j->status = JB_CHECKEDOUT;
   j->data = NULL;
   j->db_result = NULL;
   j->lock = NULL;
@@ -92,6 +255,8 @@ job job_init(char* type, int id)
   j->paused = 0;
   j->id = id;
 
+  g_tree_insert(job_list, &j->id, j);
+  if(id >= 0) g_sequence_insert_sorted(job_queue, j, job_compare, NULL);
   return j;
 }
 
@@ -113,7 +278,7 @@ void job_destroy(job j)
   }
 
   g_list_free(j->running_agents);
-  g_list_free(j->finsihed_agents);
+  g_list_free(j->finished_agents);
   g_list_free(j->failed_agents);
   g_free(j->data);
 
@@ -165,7 +330,7 @@ void job_remove_agent(job j, void* a)
 {
   TEST_NULV(j);
   TEST_NULV(a);
-  j->finsihed_agents = g_list_remove(j->finsihed_agents, a);
+  j->finished_agents = g_list_remove(j->finished_agents, a);
 }
 
 /**
@@ -179,7 +344,7 @@ void job_finish_agent(job j, void* a)
   TEST_NULV(j);
   TEST_NULV(a);
   j->running_agents  = g_list_remove(j->running_agents,  a);
-  j->finsihed_agents = g_list_append(j->finsihed_agents, a);
+  j->finished_agents = g_list_append(j->finished_agents, a);
 }
 
 /**
@@ -242,20 +407,23 @@ void job_update(job j)
   TEST_NULV(j)
   if(!j->paused && j->running_agents == NULL)
   {
+    /* this indicates a correctly finished job */
     if(j->failed_agents == NULL)
     {
-      for(iter = j->finsihed_agents; iter != NULL; iter = iter->next)
+      job_transition(j, JB_COMPLETE);
+      for(iter = j->finished_agents; iter != NULL; iter = iter->next)
         agent_close(iter->data);
     }
+    /* this indicates a failed agent, attempt to recover */
     else
     {
       for(iter = j->failed_agents; iter != NULL; iter = iter->next)
       {
         /* get a new agent to handle the data from the fail agent */
-        if(j->finsihed_agents != NULL)
+        if(j->finished_agents != NULL)
         {
-          a = (agent)g_list_first(j->finsihed_agents);
-          j->finsihed_agents = g_list_remove(j->finsihed_agents, a);
+          a = (agent)g_list_first(j->finished_agents);
+          j->finished_agents = g_list_remove(j->finished_agents, a);
           j->running_agents  = g_list_append(j->running_agents,  a);
           agent_restart(a, (agent)iter->data);
           restart++;
@@ -272,12 +440,13 @@ void job_update(job j)
 
       g_list_free(j->failed_agents);
       j->failed_agents = NULL;
+
+      if(restart == 0)
+        job_transition(j, JB_FAILED);
     }
 
     if(restart == 0)
-    {
       g_tree_remove(job_list, &j->id);
-    }
   }
 }
 
@@ -287,10 +456,13 @@ void job_update(job j)
  *
  * @param j the job to pause
  */
-void job_pause(job j)
+void job_pause(job j, int cli)
 {
   TEST_NULV(j);
   j->paused = 1;
+
+  if(cli) job_transition(j, JB_CLI_PAUSED);
+  else job_transition(j, JB_SCH_PAUSED);
 }
 
 /**
@@ -350,11 +522,13 @@ int job_is_open(job j)
   int retval = 0;
   TEST_NULL(j, 0);
 
+  /* check to make sure tha the job status is correct */
+  if(j->status == JB_CHECKEDOUT)
+    job_transition(j, JB_STARTED);
+
   /* check to see if we even need to worry about sql stuff */
   if(j->db_result == NULL)
-  {
     return (!j->idx && j->data != NULL);
-  }
 
   g_mutex_lock(j->lock);
   if(j->idx < PQntuples(j->db_result))
@@ -386,6 +560,18 @@ job job_verbose(job j, int level)
   TEST_NULL(j, NULL);
   j->verbose = level;
   return j;
+}
+
+/**
+ * Gets the type of agent associated with this job. This is used by the constructor
+ * for agent since it must decide what type of agent to create.
+ *
+ * @param j the job to ge the type for
+ * @return the string that is the agent type
+ */
+char* job_type(job j)
+{
+  return j->agent_type;
 }
 
 /**
@@ -424,36 +610,23 @@ char* job_next(job j)
 /* ************************************************************************** */
 
 /**
- * TODO
- */
-void check_list()
-{
-  if(job_list == NULL)
-    job_list = g_tree_new_full(int_compare, NULL, NULL, (GDestroyNotify)job_destroy);
-}
-
-/**
- * TODO
- */
-void job_list_clean()
-{
-  if(job_list != NULL)
-  {
-    g_tree_destroy(job_list);
-    job_list = NULL;
-  }
-}
-
-/**
- * TODO
+ * Gets the next job from the job queue. If there isn't a waiting in the job
+ * queue this will return NULL.
  *
- * @param j
+ * @return the job or NULL
  */
-void add_job(job j)
+job next_job()
 {
-  TEST_NULV(j);
-  check_list();
-  g_tree_insert(job_list, &j->id, j);
+  job retval = NULL;
+  GSequenceIter* beg = g_sequence_get_begin_iter(job_queue);
+
+  if(g_sequence_get_length(job_queue) != 0)
+  {
+    retval = g_sequence_get(beg);
+    g_sequence_remove(beg);
+  }
+
+  return retval;
 }
 
 /**
@@ -464,7 +637,6 @@ void add_job(job j)
  */
 job get_job(int id)
 {
-  check_list();
   return g_tree_lookup(job_list, &id);
 }
 
@@ -475,9 +647,17 @@ job get_job(int id)
  */
 int num_jobs()
 {
-  check_list();
   return g_tree_nnodes(job_list);
 }
 
-
+/**
+ *
+ * @return
+ */
+int active_jobs()
+{
+  int count = 0;
+  g_tree_foreach(job_list, (GTraverseFunc)is_active, &count);
+  return count;
+}
 

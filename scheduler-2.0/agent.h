@@ -37,7 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SAG_EXCLUSIVE 2   ///< This agent must not run at the same time as any other agent
 
 /** Enum to keep track of the state of an agent */
-typedef enum agent_status
+typedef enum
 {
   AG_FAILED = 0,  ///< AG_FAILED   The agent has failed during execution
   AG_CREATED = 1, ///< AG_CREATED  The agent has been allocated but is not running yet
@@ -82,7 +82,7 @@ meta_agent meta_agent_init(char* name, char* cmd, int max, int spc);
 void meta_agent_destroy(meta_agent ma);
 
 /* agent */
-agent agent_init(char* meta_agent_name, host host_machine, job j);
+agent agent_init(host host_machine, job j);
 agent agent_copy(agent a);
 void agent_destroy(agent a);
 
@@ -102,10 +102,15 @@ host agent_host(agent a);
 int  aprintf(agent a, const char* fmt, ...);  // TODO determine if I need this
 ssize_t agent_write(agent a, const void* buf, size_t count);
 
+/* ************************************************************************** */
+/* **** static functions and meta agents ************************************ */
+/* ************************************************************************** */
+
 void test_agents();
 void kill_agents();
 void agent_list_clean();
 int  add_meta_agent(char* name, char* cmd, int max, int spc);
+int  is_meta_agent();
 int  num_agents();
 
 #endif /* AGENT_H_INCLUDE */

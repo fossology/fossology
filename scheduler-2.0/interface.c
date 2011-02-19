@@ -16,6 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 ************************************************************** */
 
 /* local includes */
+#include <database.h>
 #include <event.h>
 #include <interface.h>
 #include <job.h>
@@ -125,7 +126,7 @@ void* interface_thread(void* param)
       load_config();
     else if(g_str_has_prefix("status", cmd))
     {
-
+      // TODO define the format for this output for jobs and scheduler
     }
     else if(g_str_has_prefix("restart", cmd))
       job_restart(get_job(atoi(args)));
@@ -134,7 +135,8 @@ void* interface_thread(void* param)
       if((cmd = strchr(args, ' ')) == NULL) verbose = atoi(args);
       else job_verbose_event(job_verbose(get_job(atoi(args)), atoi(cmd+1)));
     }
-    else if(g_str_has_prefix("database", cmd)); // TODO check database event
+    else if(g_str_has_prefix("database", cmd))
+      event_signal(database_update_event, NULL);
     else
     {
       lprintf_c("ERROR %s.%d: Interface recieved invalid command: %s\n", cmd);

@@ -55,25 +55,25 @@ int	DBstrcatTaint	(char *V, char *S, int MaxS)
   int s,v; /* indexes */
   s=strlen(S);
   for(v=0; (V[v] != '\0') && (s < MaxS); v++)
-    {
+  {
     switch(V[v])
-      {
+    {
       case '\n':
-	S[s++]='\\'; S[s++]='n';
-	break;
+        S[s++]='\\'; S[s++]='n';
+        break;
       case '\r':
-	S[s++]='\\'; S[s++]='r';
-	break;
+        S[s++]='\\'; S[s++]='r';
+        break;
 
       case '"': case '`': case '$': case '\\': case '\'':
-	S[s++]='\\'; S[s++]=V[v];
-	break;
+        S[s++]='\\'; S[s++]=V[v];
+        break;
 
       default:
-	S[s++]=V[v];
-	break;
-      }
+        S[s++]=V[v];
+        break;
     }
+  }
   if (V[v]=='\0') return(1);
   return(0);
 } /* DBstrcatTaint() */
@@ -91,17 +91,17 @@ void	DBMkArgCols	(void *DB, int Row, char *Arg, int MaxArg)
   memset(Arg,'\0',MaxArg);
   Maxc = DBcolsize(DB);
   for(c=0; c<Maxc; c++)
-    {
+  {
     Value = DBgetvalue(DB,Row,c);
     if (Value)
-      {
+    {
       if (Arg[0] != '\0') strcat(Arg," ");
       strcat(Arg,DBgetcolname(DB,c));
       strcat(Arg,"=\"");
       DBstrcatTaint(Value,Arg,MaxArg);
       strcat(Arg,"\"");
-      }
     }
+  }
   strcat(Arg,"\n");	/* add a \n to the line */
 } /* DBMkArgCols() */
 
@@ -187,10 +187,10 @@ void	DBLockReconnect	()
   DBclose(DB);
   DB = DBopen();
   if (!DB)
-    {
+  {
     LogPrint("FATAL: Scheduler unable to reconnect to the database.\n");
     exit(-1);
-    }
+  }
   sigprocmask(SIG_UNBLOCK,&OldMask,NULL);
   return;
 } /* DBLockReconnect() */
@@ -211,58 +211,58 @@ void	DBUpdateJob	(int JobId, int UpdateType, char *Message)
   int Len;
   memset(SQL,'\0',MAXCMD);
   switch(UpdateType)
-    {
+  {
     case 0:	/* mark the DB entry as work in progress */
-	snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_starttime = now(), jq_schedinfo ='%s.%d'",Hostname,getpid());
-	break;
+      snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_starttime = now(), jq_schedinfo ='%s.%d'",Hostname,getpid());
+      break;
     case 1:	/* mark the DB entry as completed */
-	/* If you see endtime without starttime, then this is the culprit */
-	snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_endtime = now(), jq_end_bits = jq_end_bits | 1, jq_schedinfo = null");
-	break;
+      /* If you see endtime without starttime, then this is the culprit */
+      snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_endtime = now(), jq_end_bits = jq_end_bits | 1, jq_schedinfo = null");
+      break;
     case 3:	/* mark the DB entry as ready to fail */
-	snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_endtime = now(), jq_end_bits = jq_end_bits | 2, jq_schedinfo = null");
-	break;
+      snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_endtime = now(), jq_end_bits = jq_end_bits | 2, jq_schedinfo = null");
+      break;
     case 2:	/* mark the DB entry as ready to try again */
     default:
-	snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_starttime = null, jq_endtime = null, jq_schedinfo = null");
-	break;
-    }
+      snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_starttime = null, jq_endtime = null, jq_schedinfo = null");
+      break;
+  }
   Len = strlen(SQL);
   if (Message)
-    {
+  {
     snprintf(SQL+Len,MAXCMD-Len,", jq_endtext = ");
     Len = strlen(SQL);
     switch(UpdateType)
-      {
+    {
       case 0: snprintf(SQL+Len,MAXCMD-Len,"'Started: %s'",Message); break;
       case 1: snprintf(SQL+Len,MAXCMD-Len,"'Completed: %s'",Message); break;
       case 2: snprintf(SQL+Len,MAXCMD-Len,"'Restart: %s'",Message); break;
       case 3: snprintf(SQL+Len,MAXCMD-Len,"'Failed: %s'",Message); break;
       default:
-	snprintf(SQL+Len,MAXCMD-Len,"'%s'",Message);
-	break;
-      }
+        snprintf(SQL+Len,MAXCMD-Len,"'%s'",Message);
+        break;
     }
+  }
   else
-    {
+  {
     snprintf(SQL+Len,MAXCMD-Len,", jq_endtext = ");
     Len = strlen(SQL);
     switch(UpdateType)
-      {
+    {
       case 0: snprintf(SQL+Len,MAXCMD-Len,"'Started'"); break;
       case 1: snprintf(SQL+Len,MAXCMD-Len,"'Completed'"); break;
       case 2: snprintf(SQL+Len,MAXCMD-Len,"'Restart'"); break;
       case 3: snprintf(SQL+Len,MAXCMD-Len,"'Failed'"); break;
       default:
-	break;
-      }
+        break;
     }
+  }
   Len = strlen(SQL);
   snprintf(SQL+Len,MAXCMD-Len," WHERE jq_pk = '%d';",JobId);
   if (Verbose)
-    {
+  {
     LogPrint("SQL Update: '%s'\n",SQL);
-    }
+  }
   rc = DBLockAccess(DB,SQL);
   if (rc >= 0) return;
 
@@ -347,7 +347,7 @@ int	DBCheckSchedulerUnique	()
       {
         rv++;  // add up warnings
         LogPrint("WARNING: Competing scheduler for '%s' detected: %s ",
-        Attr,DBgetvalue(DB,Row,0));
+            Attr,DBgetvalue(DB,Row,0));
         LogPrint("%s\n",DBgetvalue(DB,Row,1));
         DBattrChecked[Row] = 1; /* only report it once */
       }
@@ -372,9 +372,9 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
   char Ctime[MAXCTIME];
 
   if ((Thread >= 0) && (CM[Thread].DBagent < 0))
-    {
+  {
     CM[Thread].DBagent = DBGetAgentIndex(CM[Thread].Attr,1);
-    }
+  }
 
   /* Do an update */
   memset(SQL,'\0',MAXCMD);
@@ -384,87 +384,87 @@ void	DBSaveSchedulerStatus	(int Thread, char *StatusName)
   if (Thread >= 0) ctime_r((&(CM[Thread].StatusTime)),Ctime);
   DBstrcatTaint( (Thread >= 0) ? CM[Thread].Parm : "" , Args,MAXCMD);
   sprintf(SQL,"UPDATE scheduler_status SET agent_status='%s', agent_status_date='%s', record_update=now(), agent_param=E'%s' WHERE unique_scheduler='%s.%d' AND agent_number='%d';",
-	StatusName,
-	(Thread >= 0) ? Ctime : "now()",
-	Args,
-	Hostname,getpid(),Thread);
+      StatusName,
+      (Thread >= 0) ? Ctime : "now()",
+          Args,
+          Hostname,getpid(),Thread);
   rc = DBLockAccess(DB,SQL);
   if (rc < 0)
-    {
+  {
     LogPrint("FATAL: Scheduler failed to update status in DB. SQL was: \"%s\"\n",SQL);
     exit(-1);
-    }
+  }
 
   /* If nothing updated, then do an INSERT instead */
   if (DBrowsaffected(DB) < 1)
-    {
+  {
     memset(SQL,'\0',MAXCMD);
     memset(Ctime,'\0',MAXCTIME);
     Value = NULL;
     if (Thread >= 0)
-	{
-	Value = GetValueFromAttr(CM[Thread].Attr,"agent=");
-	ctime_r((&(CM[Thread].StatusTime)),Ctime);
-	}
+    {
+      Value = GetValueFromAttr(CM[Thread].Attr,"agent=");
+      ctime_r((&(CM[Thread].StatusTime)),Ctime);
+    }
     if (!Value) Value = Empty;
     sprintf(SQL,"INSERT INTO scheduler_status (unique_scheduler,agent_number,agent_attrib,agent_fk,agent_status,agent_status_date,agent_param,agent_host,record_update) VALUES ('%s.%d','%d','%s','%d','%s','%s','%s',",
-	Hostname,getpid(),
-	Thread,
-	(Thread >= 0) ? CM[Thread].Attr : "scheduler",
-	(Thread >= 0) ? CM[Thread].DBagent : -1,
-	StatusName,
-	(Thread >= 0) ? Ctime : "now()",
-	(Thread >= 0) ? CM[Thread].Parm : ""
-	);
+        Hostname,getpid(),
+        Thread,
+        (Thread >= 0) ? CM[Thread].Attr : "scheduler",
+            (Thread >= 0) ? CM[Thread].DBagent : -1,
+                StatusName,
+                (Thread >= 0) ? Ctime : "now()",
+                    (Thread >= 0) ? CM[Thread].Parm : ""
+    );
     if (Thread >= 0) Value = GetValueFromAttr(CM[Thread].Attr,"host=");
     if (!Value) Value = Empty;
     sprintf(SQL+strlen(SQL),"'%s',now());", (Thread >= 0) ? Value : Hostname);
     rc = DBLockAccess(DB,SQL);
     if (rc < 0)
-      {
+    {
       LogPrint("FATAL: Scheduler failed to insert status in DB.\n");
       exit(-1);
-      }
     }
+  }
 
   /* Idiot check */
   if (Thread < 0)
-    {
+  {
     if (DBDead > 3)
-	{
-	LogPrint("FATAL: Scheduler had too many database connection retries.\n");
-	exit(-1);
-	}
+    {
+      LogPrint("FATAL: Scheduler had too many database connection retries.\n");
+      exit(-1);
+    }
 
     /* Make sure the scheduler actually updated its record. */
     memset(SQL,'\0',MAXCMD);
     sprintf(SQL,"SELECT * FROM scheduler_status WHERE agent_number=-1 AND unique_scheduler = '%s.%d';",Hostname,getpid());
     rc = DBLockAccess(DB,SQL);
     if ((rc < 0) || (DBdatasize(DB) <= 0))
-	{
-	time_t Now;
-	Now = time(NULL);
-	memset(Ctime,'\0',MAXCTIME);
-	ctime_r(&Now,Ctime);
-	LogPrint("ERROR: Scheduler lost connection to the database! %s",Ctime);
-	LogPrint("  Dumping debug information.\n");
-	DebugThreads(3);
-	LogPrint("INFO: Scheduler attempting to reconnect to the database.\n");
-	DBclose(DB);
-	DB = DBopen();
-	if (!DB)
-	  {
-	  LogPrint("FATAL: Scheduler unable to reconnect to the database.\n");
-	  exit(-1);
-	  }
-	DBDead++;
-	DBSaveSchedulerStatus(Thread,StatusName); /* retry */
-	}
-    else
-	{
-	DBDead = 0;
-	}
+    {
+      time_t Now;
+      Now = time(NULL);
+      memset(Ctime,'\0',MAXCTIME);
+      ctime_r(&Now,Ctime);
+      LogPrint("ERROR: Scheduler lost connection to the database! %s",Ctime);
+      LogPrint("  Dumping debug information.\n");
+      DebugThreads(3);
+      LogPrint("INFO: Scheduler attempting to reconnect to the database.\n");
+      DBclose(DB);
+      DB = DBopen();
+      if (!DB)
+      {
+        LogPrint("FATAL: Scheduler unable to reconnect to the database.\n");
+        exit(-1);
+      }
+      DBDead++;
+      DBSaveSchedulerStatus(Thread,StatusName); /* retry */
     }
+    else
+    {
+      DBDead = 0;
+    }
+  }
 } /* DBSaveSchedulerStatus() */
 
 /**********************************************
@@ -499,75 +499,75 @@ void	DBSaveJobStatus	(int Thread, int MSQid)
   RealItemsProcessed = 0;  
   Now = time(NULL);
   if (Thread >= 0)
-	{
-  	if (!CM[Thread].IsDB) return;
+  {
+    if (!CM[Thread].IsDB) return;
     JobPk = CM[Thread].DBJobKey;
     CM[Thread].StatusLastDuration = Now - CM[Thread].StatusTime;
     CM[Thread].StatusTime = Now;
     ProcessCount = CM[Thread].ItemsProcessed;
     RealItemsProcessed = 1;  
-  	ProcessTime = CM[Thread].StatusLastDuration;
+    ProcessTime = CM[Thread].StatusLastDuration;
     ElapseTime = ProcessTime;
-	}
+  }
   else if (MSQid >= 0)
-	{
-	JobPk = MSQ[MSQid].JobId;
-	/* Update times for any running processes */
-	for(Thread=0; Thread < MaxThread; Thread++)
-	  {
-	  /* If running job that is working on this MSQ, then update times. */
-	  if ((CM[Thread].Status == ST_RUNNING) && (CM[Thread].DBJobKey == JobPk))
-	    {
-	    CM[Thread].StatusLastDuration = Now - CM[Thread].StatusTime;
-	    CM[Thread].StatusTime = Now;
-	    MSQ[MSQid].ProcessTimeAgent += CM[Thread].StatusLastDuration;
-	    MSQ[MSQid].ProcessCount += CM[Thread].ItemsProcessed;
-	    CM[Thread].ItemsProcessed = 0;
-	    }
-	  }
-	/* Grab times */
-	ProcessTime  = MSQ[MSQid].ProcessTimeAgent;
-	ElapseTime   = Now - MSQ[MSQid].ProcessTimeStart;
-	ProcessCount = MSQ[MSQid].ProcessCount;
-	/* Reset values since some MSQ may be done, but not all. */
-	MSQ[MSQid].ProcessTimeStart = Now;
-	MSQ[MSQid].ProcessTimeAgent = 0;
-	MSQ[MSQid].ProcessCount = 0;
-	}
+  {
+    JobPk = MSQ[MSQid].JobId;
+    /* Update times for any running processes */
+    for(Thread=0; Thread < MaxThread; Thread++)
+    {
+      /* If running job that is working on this MSQ, then update times. */
+      if ((CM[Thread].Status == ST_RUNNING) && (CM[Thread].DBJobKey == JobPk))
+      {
+        CM[Thread].StatusLastDuration = Now - CM[Thread].StatusTime;
+        CM[Thread].StatusTime = Now;
+        MSQ[MSQid].ProcessTimeAgent += CM[Thread].StatusLastDuration;
+        MSQ[MSQid].ProcessCount += CM[Thread].ItemsProcessed;
+        CM[Thread].ItemsProcessed = 0;
+      }
+    }
+    /* Grab times */
+    ProcessTime  = MSQ[MSQid].ProcessTimeAgent;
+    ElapseTime   = Now - MSQ[MSQid].ProcessTimeStart;
+    ProcessCount = MSQ[MSQid].ProcessCount;
+    /* Reset values since some MSQ may be done, but not all. */
+    MSQ[MSQid].ProcessTimeStart = Now;
+    MSQ[MSQid].ProcessTimeAgent = 0;
+    MSQ[MSQid].ProcessCount = 0;
+  }
   else	/* update all jobs */
-	{
-	for(Thread=0; Thread < MaxThread; Thread++)
-	  {
-	  if ((CM[Thread].DBJobKey >= 0) && (CM[Thread].IsDB==1))
-		DBSaveJobStatus(Thread,-1);
-	  }
-	for(MSQid=0; MSQid < MAXMSQ; MSQid++)
-	  {
-	  if (MSQ[MSQid].JobId >= 0) DBSaveJobStatus(-1,MSQid);
-	  }
-	JobPk = -1; /* no job */
-	}
+  {
+    for(Thread=0; Thread < MaxThread; Thread++)
+    {
+      if ((CM[Thread].DBJobKey >= 0) && (CM[Thread].IsDB==1))
+        DBSaveJobStatus(Thread,-1);
+    }
+    for(MSQid=0; MSQid < MAXMSQ; MSQid++)
+    {
+      if (MSQ[MSQid].JobId >= 0) DBSaveJobStatus(-1,MSQid);
+    }
+    JobPk = -1; /* no job */
+  }
 
   if (JobPk != -1)	/* ignore non-jobs */
-    {
+  {
     char SQL[MAXCMD];
     memset(SQL,'\0',MAXCMD);
     if (RealItemsProcessed)
     {
       snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_itemsprocessed=%ld, jq_elapsedtime=jq_elapsedtime+%d, jq_processedtime=jq_processedtime+%d WHERE jq_pk=%d;",
-	            ProcessCount,(int)ElapseTime,(int)ProcessTime,JobPk);
+          ProcessCount,(int)ElapseTime,(int)ProcessTime,JobPk);
     }
     else
     {
       snprintf(SQL,MAXCMD,"UPDATE jobqueue SET jq_itemsprocessed=jq_itemsprocessed+%ld, jq_elapsedtime=jq_elapsedtime+%d, jq_processedtime=jq_processedtime+%d WHERE jq_pk=%d;",
-	            ProcessCount,(int)ElapseTime,(int)ProcessTime,JobPk);
+          ProcessCount,(int)ElapseTime,(int)ProcessTime,JobPk);
     }
     if (DBLockAccess(DB,SQL) < 0)
-	{
-	LogPrint("FATAL: Scheduler failed to update job status in DB.\n");
-	exit(-1);
-	}
+    {
+      LogPrint("FATAL: Scheduler failed to update job status in DB.\n");
+      exit(-1);
     }
+  }
 
   /* Done */
   sigprocmask(SIG_UNBLOCK,&OldMask,NULL);
@@ -584,11 +584,11 @@ void	DebugMSQ	()
 
   LogPrint("==============================================================\n");
   for(m=0; m < MAXMSQ; m++)
-    {
+  {
     LogPrint("Multi-SQL Queue #%d\n",m);
     LogPrint("  Job (jq_pk) = %d\n",MSQ[m].JobId);
     if (MSQ[m].JobId >= 0)
-      {
+    {
       LogPrint("  Is repeat (jq_repeat) = %d\n",MSQ[m].IsRepeat);
       LogPrint("  Is urgent = %d\n",MSQ[m].IsUrgent);
       LogPrint("  Items processed: %d out of %d\n",MSQ[m].ItemsDone,MSQ[m].MaxItems);
@@ -596,12 +596,12 @@ void	DebugMSQ	()
       LogPrint("  Attr='%s'\n",MSQ[m].Attr);
       LogPrint("  Host found by column '%s'\n",MSQ[m].HostCol);
       for(i=0; i<MSQ[m].MaxItems; i++)
-	{
-	DBMkArgCols(MSQ[m].DBQ,i,Arg,MAXCMD);
-	if (Arg[strlen(Arg)-1] == '\n')  Arg[strlen(Arg)-1]='\0';
-	LogPrint("    Item %d: State=%s  '%s'\n",i,StatusName[MSQ[m].Processed[i]],Arg);
-	}
+      {
+        DBMkArgCols(MSQ[m].DBQ,i,Arg,MAXCMD);
+        if (Arg[strlen(Arg)-1] == '\n')  Arg[strlen(Arg)-1]='\0';
+        LogPrint("    Item %d: State=%s  '%s'\n",i,StatusName[MSQ[m].Processed[i]],Arg);
       }
     }
+  }
 } /* DebugMSQ() */
 
